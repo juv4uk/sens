@@ -252,6 +252,27 @@ jobs:
           fi
           test ! -s "$RUNNER_TEMP/sens-binary/forbidden-core4.stdout"
 
+      - name: Replacement D3 reference is genuine physical binary T5
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/sens-binary"
+          source="examples/binary-language/current-cond-reference.sens"
+          target/debug/sens "$source" > "$RUNNER_TEMP/sens-binary/current-cond.sens-exec"
+          target/debug/sens-trit eval "$source" > "$RUNNER_TEMP/sens-binary/current-cond.trit-exec"
+          cmp "$RUNNER_TEMP/sens-binary/current-cond.sens-exec" "$RUNNER_TEMP/sens-binary/current-cond.trit-exec"
+          target/debug/sens-trit open "$source" > "$RUNNER_TEMP/sens-binary/current-cond.words"
+          python3 - "$source" "$RUNNER_TEMP/sens-binary/current-cond.words" <<'PY'
+          import sys
+          from pathlib import Path
+          sys.path.insert(0, "scripts")
+          from sens_t5_codec import encode_projection
+          expected = " ".join(Path("examples/binary-language/current-cond-reference.lisp").read_text(encoding="ascii").split())
+          assert Path(sys.argv[1]).read_bytes() == encode_projection(expected), "noncanonical T5 payload"
+          assert Path(sys.argv[2]).read_text(encoding="ascii") == expected + chr(10), "D3 words changed"
+          print("REPLACEMENT=T5, D3:110=EXACT, PHYSICAL_EXEC=PARITY")
+          PY
+
       - name: Immutable per-commit transport and execution evidence
         if: always()
         shell: bash

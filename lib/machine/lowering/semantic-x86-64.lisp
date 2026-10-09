@@ -282,9 +282,9 @@
             ((x86-admission-exact-integer? right)
              (x86-admission-within-inclusive-integer-range?
                right 0 4294967295))
-            (t (00000001 ()))))
-         (t (00000001 ()))))
-      (t (00000001 ())))))
+            ((00000010 (00000001 ())) (00000001 ()))))
+         ((00000010 (00000001 ())) (00000001 ()))))
+      ((00000010 (00000001 ())) (00000001 ())))))
 
 (00001001 x86-current-d5-difference-u64-safe?
   (00001000 (left right)
@@ -301,12 +301,12 @@
                 ; Exact-Q >= returns D1 1/0. Compare explicitly because 0 is
                 ; itself a value and must never become generic truthiness.
                 (00000111
-                  ((00011110 left right) 1 t)
-                  ((00011110 left right) 0 (00000001 ()))))
-               (t (00000001 ()))))
-            (t (00000001 ()))))
-         (t (00000001 ()))))
-      (t (00000001 ())))))
+                  ((00011110 left right) (00000010 (00000001 ())))
+                  ((00000011 (00011110 left right) (00000010 (00000001 (())))) (00000001 ()))))
+               ((00000010 (00000001 ())) (00000001 ()))))
+            ((00000010 (00000001 ())) (00000001 ()))))
+         ((00000010 (00000001 ())) (00000001 ()))))
+      ((00000010 (00000001 ())) (00000001 ())))))
 
 ; #4068 width-safe machine key helper. Width and packed bits are separate
 ; mechanism scalars derived from Rust DomainIdentity; source leading zeros are never
@@ -316,7 +316,7 @@
     (00000111
       ((00100010 width expected-width)
        (00100010 bits expected-bits))
-      (t (00000001 ())))))
+      ((00000010 (00000001 ())) (00000001 ())))))
 
 (00001001 x86-lower-current-binary-u64-forms
   (00001000 (width bits left right)
@@ -325,18 +325,18 @@
        (00000111
          ((x86-current-d5-u32-inputs? left right)
           (x86-lower-add-u64-forms left right))
-         (t (00000001 exact-d5-fallback-required))))
+         ((00000010 (00000001 ())) (00000001 exact-d5-fallback-required))))
       ((x86-current-domain-key? width bits 5 11)
        (00000111
          ((x86-current-d5-difference-u64-safe? left right)
           (x86-lower-difference-u64-forms left right))
-         (t (00000001 exact-d5-fallback-required))))
+         ((00000010 (00000001 ())) (00000001 exact-d5-fallback-required))))
       ((x86-current-domain-key? width bits 5 22)
        (00000111
          ((x86-current-d5-u32-inputs? left right)
           (x86-lower-times-u64-forms left right))
-         (t (00000001 exact-d5-fallback-required))))
-      (t
+         ((00000010 (00000001 ())) (00000001 exact-d5-fallback-required))))
+      ((00000010 (00000001 ()))
        (00000001 unsupported-current-domain-binary-u64)))))
 
 (00001001 x86-encode-current-binary-u64
@@ -349,7 +349,7 @@
          (00000001 unsupported-current-domain-binary-u64))
         ((00100010 forms (00000001 exact-d5-fallback-required))
          (00000001 exact-d5-fallback-required))
-        (t
+        ((00000010 (00000001 ()))
          (x86-encode-admitted-program forms))))))
 
 ; #4063 exact D6 ADD1/SUB1 bounded fast paths.
@@ -362,7 +362,7 @@
       ((x86-admission-exact-integer? value)
        (x86-admission-within-inclusive-integer-range?
          value 0 18446744073709551614))
-      (t (00000001 ())))))
+      ((00000010 (00000001 ())) (00000001 ())))))
 
 (00001001 x86-current-d6-sub1-u64-safe?
   (00001000 (value)
@@ -370,7 +370,7 @@
       ((x86-admission-exact-integer? value)
        (x86-admission-within-inclusive-integer-range?
          value 1 18446744073709551615))
-      (t (00000001 ())))))
+      ((00000010 (00000001 ())) (00000001 ())))))
 
 (00001001 x86-lower-current-d6-unary-u64-forms
   (00001000 (width bits value)
@@ -379,13 +379,13 @@
        (00000111
          ((x86-current-d6-add1-u64-safe? value)
           (x86-lower-add-u64-forms value 1))
-         (t (00000001 exact-d6-fallback-required))))
+         ((00000010 (00000001 ())) (00000001 exact-d6-fallback-required))))
       ((x86-current-domain-key? width bits 6 15)
        (00000111
          ((x86-current-d6-sub1-u64-safe? value)
           (x86-lower-difference-u64-forms value 1))
-         (t (00000001 exact-d6-fallback-required))))
-      (t
+         ((00000010 (00000001 ())) (00000001 exact-d6-fallback-required))))
+      ((00000010 (00000001 ()))
        (00000001 unsupported-current-domain-d6-unary-u64)))))
 
 (00001001 x86-encode-current-d6-unary-u64
@@ -398,7 +398,7 @@
          (00000001 unsupported-current-domain-d6-unary-u64))
         ((00100010 forms (00000001 exact-d6-fallback-required))
          (00000001 exact-d6-fallback-required))
-        (t
+        ((00000010 (00000001 ()))
          (x86-encode-admitted-program forms))))))
 
 ; #4017 exact D5:10111 QUOTIENT bounded dispatcher.
@@ -418,10 +418,10 @@
                ((x86-admission-within-inclusive-integer-range?
                   right 1 9223372036854775807)
                 (00100010 left right))
-               (t (00000001 ()))))
-            (t (00000001 ()))))
-         (t (00000001 ()))))
-      (t (00000001 ())))))
+               ((00000010 (00000001 ())) (00000001 ()))))
+            ((00000010 (00000001 ())) (00000001 ()))))
+         ((00000010 (00000001 ())) (00000001 ()))))
+      ((00000010 (00000001 ())) (00000001 ())))))
 
 (00001001 x86-lower-current-quotient-i64-forms
   (00001000 (width bits left right)
@@ -430,8 +430,8 @@
        (00000111
          ((x86-current-d5-quotient-i64-equal-safe? left right)
           (x86-lower-quotient-i64-equal-forms left right))
-         (t (00000001 exact-d5-fallback-required))))
-      (t (00000001 unsupported-current-domain-quotient-i64)))))
+         ((00000010 (00000001 ())) (00000001 exact-d5-fallback-required))))
+      ((00000010 (00000001 ())) (00000001 unsupported-current-domain-quotient-i64)))))
 
 (00001001 x86-encode-current-quotient-i64
   (00001000 (width bits left right)
@@ -443,7 +443,7 @@
          (00000001 unsupported-current-domain-quotient-i64))
         ((00100010 forms (00000001 exact-d5-fallback-required))
          (00000001 exact-d5-fallback-required))
-        (t
+        ((00000010 (00000001 ()))
          (x86-encode-admitted-program forms))))))
 
 ; #4018 exact D5 order-predicate machine proof.
@@ -462,9 +462,9 @@
             ((x86-admission-exact-integer? right)
              (x86-admission-within-inclusive-integer-range?
                right 0 9223372036854775807))
-            (t (00000001 ()))))
-         (t (00000001 ()))))
-      (t (00000001 ())))))
+            ((00000010 (00000001 ())) (00000001 ()))))
+         ((00000010 (00000001 ())) (00000001 ()))))
+      ((00000010 (00000001 ())) (00000001 ())))))
 
 (00001001 x86-lower-order-i64-forms
   (00001000 (width bits left right)
@@ -487,9 +487,9 @@
             (00100111 (00000001 setg-r8) (00000001 al))
             (00100111 (00000001 movzx-r64-r8) (00000001 rax) (00000001 al))
             (00100111 (00000001 ret))))
-         (t
+         ((00000010 (00000001 ()))
           (00000001 unsupported-current-domain-order-i64))))
-      (t
+      ((00000010 (00000001 ()))
        (00000001 exact-d5-fallback-required)))))
 
 (00001001 x86-encode-current-order-bit
@@ -500,7 +500,7 @@
          (00000001 unsupported-current-domain-order-i64))
         ((00100010 forms (00000001 exact-d5-fallback-required))
          (00000001 exact-d5-fallback-required))
-        (t
+        ((00000010 (00000001 ()))
          (x86-encode-admitted-program forms))))))
 
 ; #4064/#4068 exact D5:01000 ZEROP bounded machine proof.
@@ -514,7 +514,7 @@
       ((x86-admission-exact-integer? value)
        (x86-admission-within-inclusive-integer-range?
          value 0 18446744073709551615))
-      (t (00000001 ())))))
+      ((00000010 (00000001 ())) (00000001 ())))))
 
 (00001001 x86-lower-zerop-u64-forms
   (00001000 (value)
@@ -533,8 +533,8 @@
        (00000111
          ((x86-current-d5-zerop-u64-safe? value)
           (x86-lower-zerop-u64-forms value))
-         (t (00000001 exact-d5-fallback-required))))
-      (t
+         ((00000010 (00000001 ())) (00000001 exact-d5-fallback-required))))
+      ((00000010 (00000001 ()))
        (00000001 unsupported-current-domain-zerop-u64)))))
 
 (00001001 x86-encode-current-zerop-bit
@@ -546,7 +546,7 @@
          (00000001 unsupported-current-domain-zerop-u64))
         ((00100010 forms (00000001 exact-d5-fallback-required))
          (00000001 exact-d5-fallback-required))
-        (t
+        ((00000010 (00000001 ()))
          (x86-encode-admitted-program forms))))))
 
 ; #3996 exact-domain structural D3 dispatcher.
@@ -561,7 +561,7 @@
        (x86-lower-cons-car-u64-forms left right))
       ((x86-current-domain-key? width bits 3 3)
        (x86-lower-cons-cdr-u64-forms left right))
-      (t
+      ((00000010 (00000001 ()))
        (00000001 unsupported-current-domain-structural-u64)))))
 
 (00001001 x86-encode-current-structural-u64
@@ -572,7 +572,7 @@
       (00000111
         ((00100010 forms (00000001 unsupported-current-domain-structural-u64))
          (00000001 unsupported-current-domain-structural-u64))
-        (t
+        ((00000010 (00000001 ()))
          (x86-encode-admitted-program-or-reject forms))))))
 
 ; #4000 exact-domain bounded composition for current D3 EQ + COND.
@@ -589,9 +589,9 @@
          ((x86-current-domain-key? cond-width cond-bits 3 6)
           (x86-lower-eq-cond-u64-forms
             left right then-value else-value))
-         (t
+         ((00000010 (00000001 ()))
           (00000001 unsupported-current-domain-eq-cond-u64))))
-      (t
+      ((00000010 (00000001 ()))
        (00000001 unsupported-current-domain-eq-cond-u64)))))
 
 (00001001 x86-encode-current-eq-cond-u64
@@ -604,7 +604,7 @@
       (00000111
         ((00100010 forms (00000001 unsupported-current-domain-eq-cond-u64))
          (00000001 unsupported-current-domain-eq-cond-u64))
-        (t
+        ((00000010 (00000001 ()))
          (x86-encode-admitted-program-or-reject forms))))))
 
 
