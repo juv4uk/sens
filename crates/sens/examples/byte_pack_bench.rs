@@ -4,7 +4,7 @@
 //! exact-width words. It does not assign semantic meaning to any bit pattern.
 
 use sens::{
-    append_binary_source_word, Bit1, Bit2, Bit3, Bit4, Bit5, Bit6, Bit7, Bit8,
+    append_binary_source_word, Bit1, Bit2, Bit3, Bit4, Bit5, Bit6, Bit7, Bit8, Bit9,
     BinarySourceWord, BitPacker, PackedBitstream,
 };
 use std::{env, hint::black_box, process::ExitCode};
@@ -24,6 +24,7 @@ fn word(workload: &str, i: usize) -> BinarySourceWord {
         "w6" => BinarySourceWord::W6(Bit6::new((i & 63) as u8).unwrap()),
         "w7" => BinarySourceWord::W7(Bit7::new((i & 127) as u8).unwrap()),
         "w8" => BinarySourceWord::W8(Bit8::new((i & 255) as u8).unwrap()),
+        "w9" => BinarySourceWord::W9(Bit9::new((i & 511) as u16).unwrap()),
         _ => panic!("unknown workload"),
     }
 }
@@ -42,16 +43,17 @@ fn pack(words: &[BinarySourceWord]) -> (PackedBitstream, Vec<usize>) {
     (packer.finish(), offsets)
 }
 
-fn read_dynamic(packed: &PackedBitstream, offset: usize, width: usize) -> u8 {
+fn read_dynamic(packed: &PackedBitstream, offset: usize, width: usize) -> u16 {
     match width {
-        1 => packed.read::<1>(offset).unwrap().packed_bits(),
-        2 => packed.read::<2>(offset).unwrap().packed_bits(),
-        3 => packed.read::<3>(offset).unwrap().packed_bits(),
-        4 => packed.read::<4>(offset).unwrap().packed_bits(),
-        5 => packed.read::<5>(offset).unwrap().packed_bits(),
-        6 => packed.read::<6>(offset).unwrap().packed_bits(),
-        7 => packed.read::<7>(offset).unwrap().packed_bits(),
-        8 => packed.read::<8>(offset).unwrap().packed_bits(),
+        1 => packed.read::<1>(offset).unwrap().packed_bits() as u16,
+        2 => packed.read::<2>(offset).unwrap().packed_bits() as u16,
+        3 => packed.read::<3>(offset).unwrap().packed_bits() as u16,
+        4 => packed.read::<4>(offset).unwrap().packed_bits() as u16,
+        5 => packed.read::<5>(offset).unwrap().packed_bits() as u16,
+        6 => packed.read::<6>(offset).unwrap().packed_bits() as u16,
+        7 => packed.read::<7>(offset).unwrap().packed_bits() as u16,
+        8 => packed.read::<8>(offset).unwrap().packed_bits() as u16,
+        9 => packed.read_w9(offset).unwrap().packed_bits(),
         _ => unreachable!(),
     }
 }
