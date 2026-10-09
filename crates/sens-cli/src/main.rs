@@ -660,8 +660,8 @@ mod core_profile_bootstrap_tests {
 
         let words = parse_program_source("0000001 00 00000001", SourceMode::ExactBinary).unwrap();
         assert_eq!(words.len(), 2);
-        let ExprKind::DomainIdentity(first) = words[0].kind else { panic!("W7 domain"); };
-        let ExprKind::DomainIdentity(second) = words[1].kind else { panic!("W8 domain"); };
+        let ExprKind::DomainIdentity(first) = &words[0].kind else { panic!("W7 domain"); };
+        let ExprKind::DomainIdentity(second) = &words[1].kind else { panic!("W8 domain"); };
         assert_eq!((first.width(), first.packed_bits()), (7, 1));
         assert_eq!((second.width(), second.packed_bits()), (8, 1));
         assert_ne!(first, second);
