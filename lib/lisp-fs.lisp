@@ -105,22 +105,34 @@
 (00001001 fs-package-field
   (00001000 (name package)
     (10011100 ((entry (00101101 name package)))
-      (00000111 ((00000010 entry) () (00000001 ()))
-            ((00000010 entry)  (00000001 ())) (t (00000110 entry))))))
+      (00000111
+        ((00000010 entry) (1) (00000001 ()))
+        ((00000010 entry)
+         (00100010 (00000001 d1-no-left) (00000001 d1-no-right))
+         (00000110 entry))))))
 
 (00001001 fs-object-package-decision
   (00001000 (package)
     (00000111
       ((00000010 package) () (00100111 (00000001 rejected) (00000001 invalid-package)))
-      ((00000010 package)  (00100111 (00000001 rejected) (00000001 invalid-package)))
+      ((00000010 package) (1) (00100111 (00000001 rejected) (00000001 invalid-package)))
       ((00100001 (00000011 (fs-package-field (00000001 format) package) (00000001 wsm-fs-object)))
+       (1)
        (00100111 (00000001 rejected) (00000001 invalid-format)))
       ((00100001 (00100010 (fs-package-field (00000001 version) package) *fs-format-version*))
+       (1)
        (00100111 (00000001 rejected) (00000001 unsupported-version)))
       ((00100001 (00100010 (fs-package-field (00000001 address) package)
                     (knowledge-content-address (fs-package-field (00000001 value) package))))
+       (1)
        (00100111 (00000001 rejected) (00000001 address-mismatch)))
-      (t (00100111 (00000001 accepted) (fs-package-field (00000001 value) package))))))
+      ((00100010
+        (00100001
+          (00100010 (fs-package-field (00000001 address) package)
+                    (knowledge-content-address (fs-package-field (00000001 value) package))))
+        (00100010 (00000001 d1-no-left) (00000001 d1-no-right)))
+       (1)
+       (00100111 (00000001 accepted) (fs-package-field (00000001 value) package))))))
 
 (00001001 fs-serialize-object
   (00001000 (value)
@@ -134,18 +146,29 @@
   (00001000 (package)
     (00000111
       ((00000010 package) () (00100111 (00000001 rejected) (00000001 invalid-package)))
-      ((00000010 package)  (00100111 (00000001 rejected) (00000001 invalid-package)))
+      ((00000010 package) (1) (00100111 (00000001 rejected) (00000001 invalid-package)))
       ((00100001 (00000011 (fs-package-field (00000001 format) package) (00000001 wsm-fs-root)))
+       (1)
        (00100111 (00000001 rejected) (00000001 invalid-format)))
       ((00100001 (00100010 (fs-package-field (00000001 version) package) *fs-format-version*))
+       (1)
        (00100111 (00000001 rejected) (00000001 unsupported-version)))
-      ((00000011 (fs-package-field (00000001 revision) package) (00000001 ()))
-       (00100111 (00000001 rejected) (00000001 invalid-revision)))
+      ((00100001 (00100010 (fs-package-field (00000001 address) package)
+                    (knowledge-content-address (fs-package-field (00000001 value) package))))
+       (1)
+       (00100111 (00000001 rejected) (00000001 address-mismatch)))
       ((00100001 (knowledge-proper-list? (fs-package-field (00000001 bindings) package)))
+       (1)
        (00100111 (00000001 rejected) (00000001 invalid-bindings)))
       ((00100001 (knowledge-proper-list? (fs-package-field (00000001 objects) package)))
+       (1)
        (00100111 (00000001 rejected) (00000001 invalid-objects)))
-      (t (00100111 (00000001 accepted) package)))))
+      ((00100010
+        (00100001
+          (knowledge-proper-list? (fs-package-field (00000001 objects) package)))
+        (00100010 (00000001 d1-no-left) (00000001 d1-no-right)))
+       (1)
+       (00100111 (00000001 accepted) package)))))
 
 (00001001 fs-serialize-root
   (00001000 (fs)
