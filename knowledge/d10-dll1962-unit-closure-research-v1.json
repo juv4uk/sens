@@ -1,0 +1,146 @@
+{
+  "schema": "d10-dll1962-unit-closure-research/v1",
+  "date": "2026-10-09",
+  "status": "RESEARCH-ONLY-UNSELECTED-NOT-RATIFIED",
+  "snapshot": {
+    "d10_selected": 635,
+    "d10_ratified": 0,
+    "d10_inventory_sha": "3db40a04c1094c9ea13b0c8d6099ef1d882cf203"
+  },
+  "sources": [
+    {
+      "kind": "ORIGINAL-1962-PAPER",
+      "title": "A machine program for theorem-proving",
+      "authors": "Martin Davis; George Logemann; Donald W. Loveland",
+      "doi": "10.1145/368273.368557",
+      "url": "https://web.stanford.edu/class/cs357/DPLL62.pdf",
+      "semantic_limit": "Historical proof-programming donor, not identical source code for modern SENS root"
+    },
+    {
+      "kind": "REAL-EXECUTABLE-SAT-DONOR",
+      "tool": "PySAT Glucose3 propagate",
+      "source": "pysathq/pysat@152884a6d1889f56a61049aaa773be23f0a8d8c1:pysat/solvers.py:4330",
+      "source_blob": "696578257966563cfef73a75402250e551609968",
+      "docs": "https://pysathq.github.io/docs/html/api/solvers.html",
+      "distribution": "python-sat==1.8.dev30",
+      "scope": "Real compiled solver unit propagation, not a Python emulator; frozen upstream source commit not asserted byte-identical to PyPI release"
+    }
+  ],
+  "candidate": {
+    "name": "FINITE-CNF-UNIT-FIXPOINT",
+    "uk": "поширити-одиничні-умови",
+    "ukr": "вивести-вимушені-біти-до-стійкості",
+    "input": "Canonical finite sorted CNF, signed nonzero exact integer literals in each clause; clauses sorted unique without both signs of a variable. Empty clause is permitted as explicit immediate contradiction. Assumptions sorted consistent unique literals.",
+    "output": "CONTRADICTION if any clause is falsified during unit propagation, else QUIESCENT with exact sorted forced literals (including assumptions), and all_satisfied flag; QUIESCENT does NOT assert that an undecided CNF has a satisfying assignment.",
+    "law": "Iterate every currently unit clause to least fixed point, adding only logically forced truth assignments; never branch on undecided atoms. Terminate after finitely many new assignments or a falsified clause.",
+    "positive": [
+      {
+        "cnf": [
+          [
+            1
+          ],
+          [
+            -1,
+            2
+          ],
+          [
+            -2,
+            3
+          ]
+        ],
+        "assumptions": [],
+        "forced": [
+          1,
+          2,
+          3
+        ],
+        "status": "QUIESCENT"
+      },
+      {
+        "cnf": [
+          [
+            -1
+          ],
+          [
+            1
+          ]
+        ],
+        "assumptions": [],
+        "status": "CONTRADICTION"
+      },
+      {
+        "cnf": [
+          [
+            -1,
+            2
+          ],
+          [
+            1,
+            3
+          ]
+        ],
+        "assumptions": [
+          1
+        ],
+        "forced": [
+          1,
+          2
+        ],
+        "status": "QUIESCENT"
+      }
+    ],
+    "falsifiers": [
+      "Contradictory unit clauses are not reported",
+      "Unit propagation stops before transitive implications",
+      "Unit-free but globally UNSAT CNF wrongly receives SAT verdict",
+      "Out-of-domain/noncanonical/tautological literals silently coerce",
+      "A D10 operator claims D2 branch or physical FPGA opcode authority"
+    ],
+    "invariants": [
+      "finite termination",
+      "unit-resolution soundness",
+      "confluence for consistent closure",
+      "idempotence",
+      "no full SAT decision"
+    ],
+    "neighbors": [
+      "D9 UNIFY",
+      "D9 PROVE-GOALS",
+      "D9 JTMS",
+      "D10 PROVE-RULE",
+      "PR #4965 abduction",
+      "PR #4989 EUF",
+      "PR #4997 safety certificates"
+    ],
+    "dedup": "PENDING-FULL-D1-D9-AND-D10-BEHAVIOR",
+    "core_vs_library": "HOLD-OWNER-REVIEW",
+    "authority": {
+      "selected": false,
+      "ratified": false,
+      "coordinate": null
+    }
+  },
+  "owner_connections": [
+    "Advice Taker and McCarthy symbolic reasoning",
+    "Prolog/CLIPS and logical consistency",
+    "Panini grammatical feature constraints",
+    "FPGA and SDR Boolean configuration",
+    "astronomy finite observation constraint checking"
+  ],
+  "caveats": [
+    "Research reference only, not admitted SENS binary code",
+    "No full DPLL SAT solver or D2 control",
+    "Quiescence is not proof of satisfiability",
+    "A generic logical fixed point may be derivable library law"
+  ],
+  "tests": {
+    "math": "tests/test_d10_dll1962_unit_closure.py",
+    "real": "tests/oracles/d10_real_pysat_unit.py",
+    "state": "NOT-RUN"
+  },
+  "accounting": {
+    "selected_delta": 0,
+    "ratified_delta": 0,
+    "coordinate_delta": 0
+  }
+}
