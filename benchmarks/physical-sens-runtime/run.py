@@ -169,7 +169,7 @@ def main() -> int:
     lines = [
         "# Physical SENS performance — actual T5 / canonical D2",
         "",
-        f"Commit: \`{environment['commit']}\`. {args.reps} samples per lane, "
+        f"Commit: `{environment['commit']}`. {args.reps} samples per lane, "
         f"{args.warmups} warmups; subprocess startup INCLUDED.",
         "",
         "| Forms | Lane | Median ms | p95 ms | Forms/s | T5 bytes | ASCII bytes |",
