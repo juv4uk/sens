@@ -8,11 +8,12 @@
 //! - `unsupported`: no executable substrate yet
 
 use crate::CoreDomainIdentity;
-use serde::{Deserialize, Serialize};
+// Serde is deliberately test-only in this capability-free core.
 use std::collections::BTreeMap;
 
 /// GPU admission classification for one operation.
-#[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
+#[derive(Clone, Debug, Eq, PartialEq)]
+#[cfg_attr(test, derive(serde::Serialize, serde::Deserialize))]
 pub enum GpuAdmission {
     /// Semantic work MUST execute through CUDA substrate.
     /// CPU execution forbidden in production path.
@@ -132,7 +133,8 @@ impl GpuAdmission {
 }
 
 /// Complete GPU admission inventory (machine-readable).
-#[derive(Clone, Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug)]
+#[cfg_attr(test, derive(serde::Serialize, serde::Deserialize))]
 pub struct GpuAdmissionInventory {
     /// Authority facts.
     pub authority: InventoryAuthority,
@@ -144,7 +146,8 @@ pub struct GpuAdmissionInventory {
     pub statistics: InventoryStatistics,
 }
 
-#[derive(Clone, Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug)]
+#[cfg_attr(test, derive(serde::Serialize, serde::Deserialize))]
 pub struct InventoryAuthority {
     /// Contract version (e.g., "11.6").
     pub contract_version: String,
@@ -159,7 +162,8 @@ pub struct InventoryAuthority {
     pub created_at: String,
 }
 
-#[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
+#[derive(Clone, Debug, Eq, PartialEq)]
+#[cfg_attr(test, derive(serde::Serialize, serde::Deserialize))]
 pub struct InventoryStatistics {
     /// Operations classified as GPU.
     pub gpu_count: u32,
