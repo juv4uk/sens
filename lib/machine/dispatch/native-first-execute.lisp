@@ -81,57 +81,59 @@
       ((native-first-domain-true ())
        (001 distinct)))))
 
+(0011 native-first-execute-native-plan-result
+  (0010 (plan result)
+    (110
+      ((010 result)
+       (native-first-execution-completed (001 native) result))
+      ((101 (100 result) (001 rejected))
+       (native-first-execution-rejected (001 native) result))
+      ((native-first-domain-true ())
+       (native-first-execution-completed (001 native) result)))))
+
 (0011 native-first-execute-native-plan
   (0010 (plan)
-    ((0010 (result)
-       (110
-         ((010 result)
-          (native-first-execution-completed (001 native) result))
-         ((101 (100 result) (001 rejected))
-          (native-first-execution-rejected (001 native) result))
-         ((native-first-domain-true ())
-          (native-first-execution-completed (001 native) result))))
-     (x86-call-admitted-u64
-       (100 (011 plan))
-       (100 (011 (011 plan)))))))
+    (native-first-execute-native-plan-result
+      plan
+      (x86-call-admitted-u64
+        (100 (011 plan))
+        (100 (011 (011 plan)))))))
 
 (0011 native-first-execute-plan
   (0010 (plan)
-    ((0010 (native-state)
+    (110
+      ((101 (native-first-plan-tag-state plan (001 native-plan)) (001 same))
        (110
-         ((101 native-state (001 same))
+         ((native-first-proper-list-length-3? plan)
+          (native-first-execute-native-plan plan))
+         ((native-first-domain-true ())
+          (native-first-execution-rejected
+            (001 native)
+            (native-first-list-2 (001 malformed-native-plan) plan)))))
+      ((101 (native-first-plan-tag-state plan (001 native-plan)) (001 distinct))
+       (110
+         ((101 (native-first-plan-tag-state plan (001 evaluator-fallback)) (001 same))
           (110
-            ((native-first-proper-list-length-3? plan)
-             (native-first-execute-native-plan plan))
+            ((native-first-proper-list-length-2? plan)
+             (native-first-execution-completed
+               (001 evaluator)
+               (01001101 (100 (011 plan))))
             ((native-first-domain-true ())
              (native-first-execution-rejected
-               (001 native)
-               (native-first-list-2 (001 malformed-native-plan) plan)))))
-         ((101 native-state (001 distinct))
-          ((0010 (fallback-state)
-             (110
-               ((101 fallback-state (001 same))
-                (110
-                  ((native-first-proper-list-length-2? plan)
-                   (native-first-execution-completed
-                     (001 evaluator)
-                     (01001101 (100 (011 plan)))))
-                  ((native-first-domain-true ())
-                   (native-first-execution-rejected
-                     (001 evaluator)
-                     (native-first-list-2
-                       (001 malformed-evaluator-fallback)
-                       plan)))))
-               ((101 fallback-state (001 distinct))
-                (native-first-execution-rejected
-                  (001 invalid-plan)
-                  (native-first-list-2
-                    (001 unknown-native-first-plan)
-                    plan)))))
-           (native-first-plan-tag-state
-             plan
-             (001 evaluator-fallback))))))
-     (native-first-plan-tag-state plan (001 native-plan)))))
+               (001 evaluator)
+               (native-first-list-2 (001 malformed-evaluator-fallback) plan)))))
+         ((101 (native-first-plan-tag-state plan (001 evaluator-fallback)) (001 distinct))
+          (native-first-execution-rejected
+            (001 invalid-plan)
+            (native-first-list-2 (001 unknown-native-first-plan) plan))
+         ((native-first-domain-true ())
+          (native-first-execution-rejected
+            (001 invalid-plan)
+            (native-first-list-2 (001 malformed-fallback-tag-state) plan)))))
+      ((native-first-domain-true ())
+       (native-first-execution-rejected
+         (001 invalid-plan)
+         (native-first-list-2 (001 unknown-native-first-plan) plan))))))))
 
 (0011 native-first-execute-expression
   (0010 (expression)
