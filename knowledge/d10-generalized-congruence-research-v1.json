@@ -11,9 +11,11 @@
       "name": "SymPy 1.14.0",
       "function": "sympy.ntheory.modular.solve_congruence",
       "documentation": "https://docs.sympy.org/latest/modules/ntheory.html",
-      "upstream_code": "https://github.com/sympy/sympy/blob/master/sympy/ntheory/modular.py",
+      "upstream_code": "https://github.com/sympy/sympy/blob/16fa855354eb7bcabd3fe10993841e03b1382692/sympy/ntheory/modular.py#L172-L211",
       "implementation_pin": "sympy==1.14.0 (Python package release)",
-      "note": "SymPy explicitly accepts non-coprime moduli and returns None for inconsistent congruences."
+      "note": "SymPy explicitly accepts non-coprime moduli and returns None for inconsistent congruences.",
+      "source_ref": "sympy/sympy@16fa855354eb7bcabd3fe10993841e03b1382692:sympy/ntheory/modular.py:172-211",
+      "file_blob_sha": "628a3d8c5a7fb4b6c51ad337df66d74f90282496"
     },
     {
       "kind": "INDEPENDENT-REFERENCE-STANDARD",
@@ -192,5 +194,17 @@
     "new_selected": 0,
     "new_coordinates": 0,
     "new_ratified": 0
+  },
+  "executed_oracle": {
+    "date": "2026-10-09",
+    "workflow": "https://github.com/juv4uk/sens/actions/runs/37902190908",
+    "job_id": 113727101376,
+    "commit": "a00a7b47ccc00e2830877729c9a3589d5d466af2",
+    "implementation": "SymPy 1.14.0",
+    "cases": 13689,
+    "compatible": 10891,
+    "conflicting": 2798,
+    "unit_tests_passed": 5,
+    "limitations": "Independent historical donor matches proposed exact result-level law, but no SENS/T5 execution and no complete D1–D10 behavioral uniqueness or owner review."
   }
 }
