@@ -1,13 +1,13 @@
 # Pure-binary runnable SENS specimens — D1/D2/D3/D4/D7
 
-The files in this directory are **not human Lisp syntax**. `d7-first-program.lisp`, `d3-cond-program.bits`, `d3-primitives-program.bits` and `d5-label-recursion.bits` contain only exact-width bit words separated by whitespace. Every payload
+The files in this directory are **not human Lisp syntax**. `d7-first-program.lisp`, `d3-cond-program.bits`, `d3-primitives-program.bits` and `d5-label-recursion.bits` and `d5-label-copy.bits` contain only exact-width bit words separated by whitespace. Every payload
 word in that source consists of only `0` and `1`, with ASCII whitespace
 separating **exact-width** domain words. It contains a D4 definition,
 a D2-framed D7 Text7 binding, a D4 lambda, an exact D1 return value, and a
 subsequent invocation of the binding through its D7 frame.
 
 Tests in `crates/sens/tests/binary_program_e2e.rs` execute the complete
-physical transport path for the D3 and D7 specimens. The D3 specimen uses exact `110` COND, a first clause whose ATOM test is D1:0 (must skip), then an ATOM test returning D1:1 (must select). The D5 LABEL specimen defines a recursive closure under a D7 Text7 binder and recurses over a D3 CONS list using only D1 control bits; the physical CLI workflow checks termination and parity between `sens` and `sens-trit`. A negative case proves structural empty is not accepted as a predicate.
+physical transport path for the D3 and D7 specimens. The D3 specimen uses exact `110` COND, a first clause whose ATOM test is D1:0 (must skip), then an ATOM test returning D1:1 (must select). The D5 LABEL specimens define recursive closures under D7 Text7 binders. One proves finite recursion terminates; the other rebuilds a list using D3 ATOM/COND/CAR/CDR/CONS/QUOTE while preserving D1:0, D1:1 and structural empty as distinct values. The physical CLI workflow checks termination, T5 source round-trip and parity between `sens` and `sens-trit`. A negative case proves structural empty is not accepted as a predicate.
 
 For the D7 specimen, the physical transport path is:
 
