@@ -42,13 +42,11 @@
   (00001000 ()
     (00000111
       ((00100010 (native-first-parity-all-pass? native-first-parity-verdicts) t)
-       (1)
        (00100111
          (00000001 native-first-parity-witness)
          (00000001 (status pass))
          (00100111 (00000001 cases) (00101000 native-first-parity-corpus))))
-      ((00100010 (native-first-parity-all-pass? native-first-parity-verdicts) t)
-       (0)
+      ((00100010 (00100010 (native-first-parity-all-pass? native-first-parity-verdicts) t) (00100010 (00000001 d1-no-left) (00000001 d1-no-right)))
        (00100111
          (00000001 native-first-parity-witness)
          (00000001 (status fail))
