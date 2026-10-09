@@ -43,7 +43,7 @@
                   (dimension/1 kilogram 1)
                   (dimension/1 metre 2)
                   (dimension/1 second -2)))))
-          (00000001 (1)))
+          (00100010 (00000001 d1-expected-yes) (00000001 d1-expected-yes)))
         (00100111
           (00000001 speed-times-second-distance-shape)
           (00100010
@@ -52,7 +52,7 @@
               (quantity/1
                 299792458
                 (unit/1 (dimension/1 metre 1)))))
-          (00000001 (1)))
+          (00100010 (00000001 d1-expected-yes) (00000001 d1-expected-yes)))
         (00100111
           (00000001 recovered-speed-shape)
           (00100010
@@ -63,11 +63,11 @@
                 (unit/1
                   (dimension/1 metre 1)
                   (dimension/1 second -1)))))
-          (00000001 (1)))
+          (00100010 (00000001 d1-expected-yes) (00000001 d1-expected-yes)))
         (00100111
           (00000001 quotient-inverse)
           (00100010 recovered speed)
-          (00000001 (1)))
+          (00100010 (00000001 d1-expected-yes) (00000001 d1-expected-yes)))
         (00100111
           (00000001 si-numeric-views-match-authoritative-records)
           (00100111
