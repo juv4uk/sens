@@ -151,7 +151,7 @@ mod value;
 pub use binary_number::{BinaryNumber, BinaryNumberError};
 pub use bit9::Bit9;
 pub use bits::{Bit1, Bit2, Bit3, Bit4, Bit5, Bit6, Bit7, Bit8, Bits};
-pub use canonical_reader::{parse_canonical_binary, parse_canonical_packed_words};
+pub use canonical_reader::{parse_canonical_binary, parse_canonical_packed_words, parse_canonical_word_sequence};
 pub use mixed_source::parse_mixed_exact_domain;
 pub use compiler_role::{compiler_execution_role, CompilerExecutionRole, CompilerLoweringRole};
 pub use compiler_bootstrap::{
