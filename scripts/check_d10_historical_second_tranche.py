@@ -55,6 +55,8 @@ def verify(p,i,s,f,doc):
         assert row["source_class"]==r["source_class"]=="HISTORICAL-PRIMARY-TRANCHE2-20261009"
         assert row["primary_source_url"]==r["primary_url"]
         assert r["proposal_status"]=="pending-owner-ratification"
+        assert r["coordinate"] is None and r["ratified_resident"] is False
+        assert r["decision"]=="SELECT-D10-RESEARCH-CANDIDATE"
         assert row["status"]=="SELECTED-RESEARCH-CANDIDATE"
         assert row["coordinate"] is None and row["coordinate_basis"]=="UNPLACED"
         assert row["ratified_resident"] is False
