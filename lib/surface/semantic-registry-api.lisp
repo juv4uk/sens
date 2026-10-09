@@ -62,9 +62,9 @@
        (00000001 ()))
       ((not? (00000010 surfaces))
        (00000111
-         ((00000011 namespace (00000101 (00000101 surfaces))) (1)
+         ((00000011 namespace (00000101 (00000101 surfaces)))
           (00000101 surfaces))
-         ((00000011 namespace (00000101 (00000101 surfaces))) (0)
+         ((not? (00000011 namespace (00000101 (00000101 surfaces))))
           (semantic-registry-find-surface namespace (00000110 surfaces))))))))
 
 (00001001 semantic-registry-surface-name
