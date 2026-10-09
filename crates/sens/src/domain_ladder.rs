@@ -27,6 +27,23 @@ impl DomainCoordinate {
     pub const fn bits(self) -> u16 {
         self.bits
     }
+
+    /// Pure occupancy projection from owner-ratified domain sources.
+    ///
+    /// Only D3–D7 have entries in the current generated owner-coordinate
+    /// projection. None means "not projected", never "unratified".
+    /// Some(true) grants a resident coordinate, never executable callability
+    /// or an inferred Sound7/Text7/ordinal role.
+    pub fn owner_residency(self) -> Option<bool> {
+        if !(3..=7).contains(&self.width) {
+            return None;
+        }
+        Some(
+            crate::domain_owner_generated::DOMAIN_OWNER_COORDINATES
+                .iter()
+                .any(|row| row.width == self.width && u16::from(row.bits) == self.bits),
+        )
+    }
 }
 
 #[cfg(test)]
@@ -43,6 +60,32 @@ mod tests {
             }
             assert_eq!(DomainCoordinate::new(width, 1u16 << width), None);
         }
+    }
+
+    #[test]
+    fn d7_is_admitted_from_owner_rows_only_and_never_from_width_alone() {
+        let mut admitted = 0usize;
+        for bits in 0..128u16 {
+            let coordinate = DomainCoordinate::new(7, bits).expect("exact W7");
+            let admission = coordinate.owner_residency().expect("D7 has owner rows");
+            assert_eq!(
+                admission,
+                bits != 0b0100001 && bits != 0b0101010,
+                "owner-reserved D7 words must stay unassigned"
+            );
+            admitted += usize::from(admission);
+        }
+        assert_eq!(admitted, 126);
+        // Width or equal payload in another domain must not inherit D7 occupancy.
+        assert_eq!(DomainCoordinate::new(6, 0b0100001), None);
+        assert_eq!(
+            DomainCoordinate::new(8, 0b0100001).unwrap().owner_residency(),
+            None
+        );
+        assert_eq!(
+            DomainCoordinate::new(10, 0b0100001).unwrap().owner_residency(),
+            None
+        );
     }
 
     #[test]
