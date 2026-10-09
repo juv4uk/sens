@@ -97,8 +97,8 @@
 (00001001 fs-object-addresses
   (00001000 (entries)
     (00000111
-      ((00000010 entries) (00000001 ()))
-      ((fs-d1-no? (00000010 entries))
+      ((00000010 entries) 1 (00000001 ()))
+      ((fs-d1-no? (00000010 entries)) 1
        (00000100 (00000101 (00000101 entries))
                  (fs-object-addresses (00000110 entries)))))))
 
