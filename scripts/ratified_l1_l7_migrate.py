@@ -232,22 +232,36 @@ def migrate(source: str, ctx: Context):
 
 
 def run_oracle(executable: Path, source: Path, candidate: Path):
-    """Independent oracle executable must emit two matching semantic digests."""
-    proc = subprocess.run([str(executable), str(source), str(candidate)],
-                          capture_output=True, text=True, timeout=120, check=False)
-    if proc.returncode:
-        raise Block("ORACLE", f"independent oracle rejected candidate (exit {proc.returncode})")
+    """Reuse independent, content-pinned oracle from canonical selected-Lisp admission.
+
+    Matching arbitrary semantic digest strings is not an attestation.
+    The oracle must pin SOURCE Git blob, physical .sens bytes, typed T5 words,
+    and independent historical/current observable behavior.
+    """
+    spec = importlib.util.spec_from_file_location(
+        "_l1_l7_existing_oracle_gate", SCRIPTS / "migrate-selected-lisp.py"
+    )
+    if spec is None or spec.loader is None:
+        raise Block("ORACLE", "existing independent oracle gate unavailable")
+    gate = importlib.util.module_from_spec(spec)
+    sys.modules[spec.name] = gate
+    spec.loader.exec_module(gate)
     try:
-        report = json.loads(proc.stdout)
-        original = report["source_semantic_sha256"]
-        current = report["candidate_semantic_sha256"]
-    except (ValueError, KeyError, TypeError):
-        raise Block("ORACLE", "oracle must provide source_semantic_sha256 and candidate_semantic_sha256")
-    if not (re.fullmatch(r"[a-f0-9]{64}", original)
-            and re.fullmatch(r"[a-f0-9]{64}", current)
-            and original == current):
-        raise Block("ORACLE", "semantic digests differ or are invalid")
-    return original
+        source_bytes = source.read_bytes()
+        candidate_bytes = candidate.read_bytes()
+        checked_words = decode_bytes(candidate_bytes)
+        if encode_projection(" ".join(checked_words) + "\n") != candidate_bytes:
+            raise ValueError("candidate physical bytes fail canonical T5 round-trip")
+        return gate.check_oracle(
+            executable,
+            source,
+            candidate,
+            gate.git_blob(source_bytes),
+            hashlib.sha256(candidate_bytes).hexdigest(),
+            typed_sha256(checked_words),
+        )
+    except (ValueError, UnicodeError, subprocess.TimeoutExpired, OSError) as exc:
+        raise Block("ORACLE", f"independent content-pinned oracle BLOCK: {exc}") from exc
 
 
 def main(argv=None) -> int:
@@ -289,7 +303,7 @@ def main(argv=None) -> int:
                 with tempfile.TemporaryDirectory() as directory:
                     staged = Path(directory) / "candidate.sens"
                     staged.write_bytes(payload)
-                    row["semantic_sha256"] = run_oracle(args.oracle_bin, path, staged)
+                    row["oracle_attestation"] = run_oracle(args.oracle_bin, path, staged)
                 target.parent.mkdir(parents=True, exist_ok=True)
                 # no clobber: exclusive creation, not a copy into an existing file
                 with target.open("xb") as destination:
