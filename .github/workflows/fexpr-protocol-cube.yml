@@ -4,7 +4,9 @@ on:
   pull_request:
     paths:
       - "scripts/research-2522-fexpr-protocol-cube.py"
+      - "scripts/research-2530-fexpr-conformance.py"
       - "docs/research/2522-fexpr-protocol-cube*.md"
+      - "docs/research/2530-fexpr-conformance*.md"
       - "crates/sens/src/eval/closures.rs"
       - "knowledge/repo-tooling-inventory.lisp"
       - ".github/workflows/fexpr-protocol-cube.yml"
@@ -13,7 +15,9 @@ on:
       - main
     paths:
       - "scripts/research-2522-fexpr-protocol-cube.py"
+      - "scripts/research-2530-fexpr-conformance.py"
       - "docs/research/2522-fexpr-protocol-cube*.md"
+      - "docs/research/2530-fexpr-conformance*.md"
       - "crates/sens/src/eval/closures.rs"
       - "knowledge/repo-tooling-inventory.lisp"
       - ".github/workflows/fexpr-protocol-cube.yml"
