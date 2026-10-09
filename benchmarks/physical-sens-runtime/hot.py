@@ -17,7 +17,7 @@ sys.path.insert(0, str(ROOT / "scripts"))
 from sens_t5_codec import decode_bytes, encode_words  # noqa: E402
 
 FORM = ("10", "001", "00", "000", "01")
-PHASES = {"t5_open_d2", "t5_direct_d2", "t5_words_d2", "d2_parse", "packed_width_d2", "eval_from_ast", "eval_lowered"}
+PHASES = {"t5_open_d2", "t5_visible_parse_d2", "t5_direct_d2", "t5_words_d2", "d2_parse", "packed_width_d2", "eval_from_ast", "eval_lowered"}
 
 
 def parse_record(line: str, prefix: str) -> dict[str, str]:
@@ -153,6 +153,24 @@ def main() -> int:
         direct_ns = by_phase["t5_direct_d2"]["median_ns_op"]
         ratio = f"{text_ns / direct_ns:.3f}x" if direct_ns else "undefined"
         lines.append(f"| {count} | {text_ns:,} | {direct_ns:,} | {ratio} |")
+    lines.extend([
+        "",
+        "## Fair T5→D2 AST comparison: text pipeline vs direct typed words", "",
+        "| Форми | T5→текст→AST, p50 ns | T5→words→AST, p50 ns | Text / direct |",
+        "|---:|---:|---:|---:|",
+    ])
+    for count in sizes:
+        by_phase = {row["phase"]: row for row in measures if row["forms"] == count}
+        text_ns = by_phase["t5_visible_parse_d2"]["median_ns_op"]
+        direct_ns = by_phase["t5_words_d2"]["median_ns_op"]
+        ratio = f"{text_ns / direct_ns:.3f}x" if direct_ns else "undefined"
+        lines.append(f"| {count} | {text_ns:,} | {direct_ns:,} | {ratio} |")
+    lines.extend([
+        "",
+        "Обидві дороги починаються з тих самих T5 байтів і закінчуються AST D2. "
+        "Паритет виконання перевіряється до таймінгу. Це виключає виконання AST, "
+        "дискове читання і запуск процесу; порівнюється лише повний reader pipeline.",
+    ])
     lines.extend([
         "",
         "Обидві фази починаються з тих самих фізичних байтів T5. "

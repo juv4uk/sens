@@ -9,7 +9,7 @@ use sens::{
 };
 use std::{env, fs, hint::black_box, time::Instant};
 
-const PHASES: &[&str] = &["t5_open_d2", "t5_direct_d2", "t5_words_d2", "d2_parse", "packed_width_d2", "eval_from_ast", "eval_lowered"];
+const PHASES: &[&str] = &["t5_open_d2", "t5_visible_parse_d2", "t5_direct_d2", "t5_words_d2", "d2_parse", "packed_width_d2", "eval_from_ast", "eval_lowered"];
 
 fn median_ns(mut xs: Vec<u128>) -> (u128, u128, u128) {
     xs.sort_unstable();
@@ -70,6 +70,12 @@ fn main() {
     let word_parsed = parse_canonical_word_sequence(&t5_words)
         .expect("direct typed-word D2 reader");
     assert_eq!(word_parsed.len(), forms, "typed word form count drift");
+    // Fair end-to-end T5->AST comparator: unlike t5_open_d2, this
+    // completes the canonical visible-word parse and returns an actual AST.
+    let text_round_trip = open_ternary_program(&physical).expect("text T5 view");
+    let visible_parsed = parse_canonical_binary(&text_round_trip)
+        .expect("T5 -> text -> D2 AST");
+    assert_eq!(visible_parsed.len(), forms, "visible T5 form count drift");
     let lowered = lower_program(&parsed);
     let mut session = Session::default();
 
@@ -88,6 +94,10 @@ fn main() {
     let word_observable = eval_parsed_expressions(&word_parsed, &mut session)
         .expect("typed T5 source words execution");
     assert_eq!(ast_observable, word_observable, "typed/direct/visible D2 observable mismatch");
+    let visible_observable = eval_parsed_expressions(&visible_parsed, &mut session)
+        .expect("T5 to visible D2 execution");
+    assert_eq!(ast_observable, visible_observable,
+        "T5 visible and binary direct execution must agree");
     let stable = ast_observable.value.to_string();
     black_box(&stable);
 
@@ -95,6 +105,14 @@ fn main() {
         let observations = match phase {
             "t5_open_d2" => measure(
                 || { black_box(open_ternary_program(black_box(&physical)).expect("T5/D2")); },
+                count, samples,
+            ),
+            "t5_visible_parse_d2" => measure(
+                || {
+                    let text = open_ternary_program(black_box(&physical))
+                        .expect("T5 visible view");
+                    black_box(parse_canonical_binary(&text).expect("visible D2 AST"));
+                },
                 count, samples,
             ),
             "t5_direct_d2" => measure(
