@@ -1,0 +1,24 @@
+name: Verify UK file I/O RED
+
+on:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  uk-file-io-1151-1152:
+    if: github.event.pull_request.head.ref == 'work/chatgpt-uk-file-io-1151-1152'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v5
+      - name: Require stable UK and UKR file I/O peers
+        shell: bash
+        run: |
+          set -euo pipefail
+          registry='lib/surface/semantic-registry.lisp'
+          grep -Fq '(1151 (en read-file stable) (uk прочитати-файл stable) (ukr прочитати-файл stable)' "$registry"
+          grep -Fq '(1152 (en write-file stable) (uk записати-файл stable) (ukr записати-файл stable)' "$registry"
+      - name: Validate semantic registry structure
+        run: python3 scripts/check_semantic_registry.py
