@@ -17,7 +17,7 @@ sys.path.insert(0, str(ROOT / "scripts"))
 from sens_t5_codec import decode_bytes, encode_words  # noqa: E402
 
 FORM = ("10", "001", "00", "000", "01")
-PHASES = {"t5_open_d2", "d2_parse", "eval_from_ast", "eval_lowered"}
+PHASES = {"t5_open_d2", "d2_parse", "packed_width_d2", "eval_from_ast", "eval_lowered"}
 
 
 def parse_record(line: str, prefix: str) -> dict[str, str]:
@@ -127,7 +127,7 @@ def main() -> int:
         "work_budget": args.work_budget,
         "sizes": sizes,
         "timing_scope": "single process, warmed, elapsed/iterations; process startup excluded",
-        "caveat": "Same SENS engine for both execution phases; no independent language semantic claim.",
+        "caveat": "Same SENS engine; dense W1-W9 payload has an externally supplied exact-word width schedule, not self-framing T5.",
     }
     (output / "hot-environment.json").write_text(json.dumps(environment, indent=2) + "\n")
     lines = [
@@ -142,7 +142,22 @@ def main() -> int:
         median = row["median_ns_op"]
         forms_per_second = row["forms"] * 1e9 / median if median else 0.0
         lines.append(f"| {row['forms']} | {row['phase']} | {median:,} | {row['p95_ns_op']:,} | {forms_per_second:,.0f} |")
+    # Same already-admitted forms; compare the two isolated D2 reader
+    # mechanisms at each size, never conflate either with end-to-end T5.
+    lines.extend(["", "## Dense payload vs visible 0/1 D2 parser (same forms)", "",
+                  "| Форми | Видимий D2, p50 ns | Щільний D2 + готові межі слів, p50 ns | Visible / packed |",
+                  "|---:|---:|---:|---:|"])
+    for count in sizes:
+        by_phase = {row["phase"]: row for row in measures if row["forms"] == count}
+        ascii_ns = by_phase["d2_parse"]["median_ns_op"]
+        dense_ns = by_phase["packed_width_d2"]["median_ns_op"]
+        ratio = f"{ascii_ns / dense_ns:.3f}x" if dense_ns else "undefined"
+        lines.append(f"| {count} | {ascii_ns:,} | {dense_ns:,} | {ratio} |")
     lines.extend([
+        "",
+        "Це точні payload-біти із зовнішнім відомим розкладом ширин слів. "
+        "packed_width_d2 не є самодостатнім форматом T5 і НЕ включає T5 decode.",
+        "Паритет результатів direct packed/visible/AST/lowered перевіряється ДО вимірювання.",
         "",
         "t5_open_d2 включає перевірку транспортного T5 і структури D2; d2_parse — лише текстовий читач D2.",
         "eval_from_ast включає lowering; eval_lowered вимірює виконання вже знижених форм.",

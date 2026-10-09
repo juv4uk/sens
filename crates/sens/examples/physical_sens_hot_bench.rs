@@ -4,11 +4,12 @@
 
 use sens::{
     eval_lowered_expressions, eval_parsed_expressions, lower_program,
-    open_ternary_program, parse_canonical_binary, Session,
+    open_ternary_program, parse_canonical_binary, parse_canonical_packed_words,
+    parse_binary_source_words, pack_binary_source_tokens, Session,
 };
 use std::{env, fs, hint::black_box, time::Instant};
 
-const PHASES: &[&str] = &["t5_open_d2", "d2_parse", "eval_from_ast", "eval_lowered"];
+const PHASES: &[&str] = &["t5_open_d2", "d2_parse", "packed_width_d2", "eval_from_ast", "eval_lowered"];
 
 fn median_ns(mut xs: Vec<u128>) -> (u128, u128, u128) {
     xs.sort_unstable();
@@ -48,6 +49,15 @@ fn main() {
     let visible = open_ternary_program(&physical).expect("чинний фізичний T5/D2");
     let parsed = parse_canonical_binary(&visible).expect("канонічний D2");
     assert_eq!(parsed.len(), forms, "одна D3 QUOTE форма на один елемент");
+    // Prepare one genuinely dense exact-width payload (not the T5 container).
+    // Word boundaries come from the already-admitted source; deriving them
+    // from bit patterns would silently invent a new semantic framing law.
+    let tokens = parse_binary_source_words(&visible).expect("ratified word lexer");
+    let widths: Vec<usize> = tokens.iter().map(|word| word.word.width()).collect();
+    let dense = pack_binary_source_tokens(&tokens);
+    let packed_parsed = parse_canonical_packed_words(&dense, &widths)
+        .expect("direct dense D2 reader");
+    assert_eq!(packed_parsed.len(), forms);
     let lowered = lower_program(&parsed);
     let mut session = Session::default();
 
@@ -57,6 +67,9 @@ fn main() {
     let lowered_observable = eval_lowered_expressions(&lowered, &mut session)
         .expect("виконання вже зниженого AST");
     assert_eq!(ast_observable, lowered_observable, "AST/lowered observable mismatch");
+    let packed_observable = eval_parsed_expressions(&packed_parsed, &mut session)
+        .expect("direct packed-word D2 execution");
+    assert_eq!(ast_observable, packed_observable, "visible/packed D2 observable mismatch");
     let stable = ast_observable.value.to_string();
     black_box(&stable);
 
@@ -68,6 +81,18 @@ fn main() {
             ),
             "d2_parse" => measure(
                 || { black_box(parse_canonical_binary(black_box(&visible)).expect("D2")); },
+                count, samples,
+            ),
+            "packed_width_d2" => measure(
+                || {
+                    black_box(
+                        parse_canonical_packed_words(
+                            black_box(&dense),
+                            black_box(&widths),
+                        )
+                        .expect("direct dense D2"),
+                    );
+                },
                 count, samples,
             ),
             "eval_from_ast" => measure(
