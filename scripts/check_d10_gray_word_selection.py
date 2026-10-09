@@ -34,22 +34,28 @@ def verify(inv,src,his,state,low,ledger,doc):
     assert src["checks"]["d10_preselection_sha"]=="34efd273000e3de8510441764cb59acbb5ab284b"
     assert src["checks"]["d10_selected_preselection"]==631
     assert src["status"]=="SOURCE-PINNED-RESEARCH-SELECTED-UNRATIFIED"
-    assert blob(inv)==POST
-    assert len(inv["rows"])==inv["accounting"]["selected_semantic_candidates"]==634
+    frozen=copy.deepcopy(inv)
+    frozen["rows"]=frozen["rows"][:634]
+    frozen["sources"]=frozen["sources"][:frozen["sources"].index("knowledge/d10-gray-reflected-binary-research-v1.json")+1]
+    frozen["accounting"]["selected_semantic_candidates"]=634
+    frozen["accounting"]["unplaced_selected_candidates"]=378
+    frozen["accounting"]["remaining_semantic_inventory"]=390
+    assert blob(frozen)==POST
+    assert len(inv["rows"])==inv["accounting"]["selected_semantic_candidates"]
     assert inv["accounting"]["law_forced_coordinates"]==256
-    assert inv["accounting"]["unplaced_selected_candidates"]==378
-    assert inv["accounting"]["remaining_semantic_inventory"]==390
+    assert inv["accounting"]["unplaced_selected_candidates"]==len(inv["rows"])-256
+    assert inv["accounting"]["remaining_semantic_inventory"]==1024-len(inv["rows"])
     assert inv["accounting"]["ratified_d10_residents"]==0
-    assert state["target"]["selected_semantic_candidates"]==634
-    assert state["target"]["unplaced_selected_candidates"]==378
-    assert state["target"]["remaining_semantic_candidates"]==390
+    assert state["target"]["selected_semantic_candidates"]==len(inv["rows"])
+    assert state["target"]["unplaced_selected_candidates"]==len(inv["rows"])-256
+    assert state["target"]["remaining_semantic_candidates"]==1024-len(inv["rows"])
     assert state["target"]["ratified_residents"]==0
-    assert "D10 selected              634/1024" in doc
-    assert "unplaced                  378" in doc
-    assert "remaining                 390" in doc
-    assert [r["semantic_name"] for r in inv["rows"][-2:]]==list(NAMES)
-    assert inv["sources"][-1]=="knowledge/d10-gray-reflected-binary-research-v1.json"
-    original=copy.deepcopy(inv)
+    assert f'D10 selected              {len(inv["rows"])}/1024' in doc
+    assert f'unplaced                  {len(inv["rows"])-256}' in doc
+    assert f'remaining                 {1024-len(inv["rows"])}' in doc
+    assert [r["semantic_name"] for r in inv["rows"][632:634]]==list(NAMES)
+    assert "knowledge/d10-gray-reflected-binary-research-v1.json" in inv["sources"]
+    original=copy.deepcopy(frozen)
     original["rows"]=original["rows"][:-2]
     original["sources"]=original["sources"][:-1]
     original["accounting"]["selected_semantic_candidates"]=632
@@ -57,15 +63,16 @@ def verify(inv,src,his,state,low,ledger,doc):
     original["accounting"]["remaining_semantic_inventory"]=392
     assert blob(original)==PRE, "old 631 rows changed, not append-only"
     records=his["transitions"]
-    assert records[-1]["id"]=="d10.hobby.gray.reflected-word.after-primitive-root.20261009"
-    assert records[-1]["previous_inventory_blob_sha"]==PRE
-    assert records[-1]["resulting_inventory_blob_sha"]==POST
-    assert records[-1]["delta_selected"]==2
-    assert records[-1]["coordinates_added"]==records[-1]["ratified_added"]==0
-    assert records[-1]["added_stable_ids"]==[r["stable_id"] for r in inv["rows"][-2:]]
+    historical_gray=next(x for x in records if x["id"]=="d10.hobby.gray.reflected-word.after-primitive-root.20261009")
+    assert historical_gray["id"]=="d10.hobby.gray.reflected-word.after-primitive-root.20261009"
+    assert historical_gray["previous_inventory_blob_sha"]==PRE
+    assert historical_gray["resulting_inventory_blob_sha"]==POST
+    assert historical_gray["delta_selected"]==2
+    assert historical_gray["coordinates_added"]==historical_gray["ratified_added"]==0
+    assert historical_gray["added_stable_ids"]==[r["stable_id"] for r in inv["rows"][632:634]]
     lower={str(n).upper() for v in low["domains"].values() for n in v["residents"].values()}
     ledgerrows=list(csv.DictReader(io.StringIO(ledger),delimiter="\t"))
-    for idx,(r,s) in enumerate(zip(inv["rows"][-2:],src["rows"])):
+    for idx,(r,s) in enumerate(zip(inv["rows"][632:634],src["rows"])):
         assert r["stable_id"]==s["stable_id"]
         assert r["semantic_name"]==s["semantic_name"]
         assert r["status"]=="SELECTED-RESEARCH-CANDIDATE"
@@ -79,14 +86,14 @@ def verify(inv,src,his,state,low,ledger,doc):
         assert r["positive_witnesses"] == s["positive_witnesses"]
         assert r["falsifiers"] == s["falsifiers"]
         assert r["source_path"]==str(SRC.relative_to(ROOT))
-        l=ledgerrows[-2+idx]
+        l=next(x for x in ledgerrows if x["semantic_name"]==r["semantic_name"])
         assert l["proposal_id"]=="D10P-"+str(9+idx).zfill(4)
         assert l["semantic_name"]==r["semantic_name"]
         assert l["ratified"]=="0" and l["status"]=="pending-review"
         assert l["dedup_check"]==f"D1-D9@09d1d71c39d1484dfd005a5068dbb18b76f0f0d4=NO-MATCH;D10@{PRE}=NO-MATCH"
         assert f"juv4uk/sens@{DONOR}:" in l["donor_provenance"]
-    assert len({r["semantic_name"] for r in inv["rows"]})==634
-    assert len({r["stable_id"] for r in inv["rows"]})==634
+    assert len({r["semantic_name"] for r in inv["rows"]})==len(inv["rows"])
+    assert len({r["stable_id"] for r in inv["rows"]})==len(inv["rows"])
     return True
 
 def models():
