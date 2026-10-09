@@ -78,13 +78,28 @@ class SelectionLedgerTrace(unittest.TestCase):
         inv["rows"][0]["semantic_name"]="SURPRISE-RENAME"
         self.assertTrue(guard.selection_trace_errors(self.content,inv,self.baseline,self.history))
 
-    def test_research_backfill_marker_cannot_be_used_by_unselected_donor(self):
+    def test_proposal_precedes_selection_without_forged_migration_block(self):
         lines=self.content.splitlines()
         fields=lines[-1].split("\t")
         fields[0]="D10P-9999"
+        fields[1]="окремий-донор"
+        fields[2]="незалежний-дослідний-донор"
         fields[3]="UNSELECTED-RANDOM"
-        bad=self.content+"\t".join(fields)+"\n"
-        self.assertTrue(guard.selection_trace_errors(bad,self.inventory,self.baseline,self.history))
+        fields[4]="Research source law not selected until independent review"
+        donor=self.content+"\t".join(fields)+"\n"
+        self.assertEqual([],guard.validate(donor))
+        self.assertEqual([],guard.selection_trace_errors(donor,self.inventory,self.baseline,self.history))
+        # A legitimate proposal changes neither selected inventory nor history.
+        inv=copy.deepcopy(self.inventory)
+        inv["rows"].append({"semantic_name":"UNSELECTED-RANDOM", "stable_id":"forged-unreviewed",
+                            "coordinate":None, "ratified_resident":False})
+        self.assertTrue(guard.selection_trace_errors(donor,inv,self.baseline,self.history))
+        for index,value in ((6,"unknown"),(9,"NOT-REAL-BLOCK"),(10,"selected"),(11,"1")):
+            wrong=fields.copy()
+            wrong[index]=value
+            bad=self.content+"\t".join(wrong)+"\n"
+            with self.subTest(field=index):
+                self.assertTrue(guard.validate(bad), "unverified proposal must be rejected")
 
     def test_migration_block_may_still_provide_true_source(self):
         records=self.content.splitlines()
