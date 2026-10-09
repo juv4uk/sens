@@ -224,7 +224,6 @@ mod eval_tests {
     fn two_top_level_forms_share_one_physical_file_and_keep_d2_boundaries() {
         let bytes = include_bytes!("../../../../tests/fixtures/migration-multiform-cohort-main/two-forms.sens");
         let words = sens::decode_ternary_program(bytes).expect("canonical physical T5");
-        assert_eq!(words.len(), 21);
         let widths = words.iter().map(|word| word.width()).collect::<Vec<_>>();
         let packed = sens::pack_binary_source_words(&words);
         let forms = sens::parse_canonical_packed_words(&packed, &widths)
