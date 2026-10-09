@@ -73,6 +73,10 @@ fn is_table_source(rel: &str) -> bool {
         || rel.starts_with("lib/generated/")
         || rel.ends_with("_generated.rs")
         || rel.starts_with("crates/sens/tests/data/")
+        // Benchmark, archive, and bak directories are not executable source.
+        || rel.starts_with("benchmarks/")
+        || rel.starts_with("archive/")
+        || rel.starts_with("crates/xtask.bak/")
         // Сам цей тест: імена в його перевірках сканера — вхідні дані.
         || rel == "crates/sens/tests/english_names_in_code.rs"
 }
