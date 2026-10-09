@@ -9,8 +9,8 @@ use sens::{
 
 const BINARY_PROGRAM: &str =
     include_str!("../../../examples/binary/d7-first-program.lisp");
-const D3_COND_PROGRAM: &str =
-    include_str!("../../../examples/binary/d3-cond-program.bits");
+const D3_COND_PHYSICAL: &[u8] =
+    include_bytes!("../../../examples/binary/d3-cond-program.sens");
 const D3_PRIMITIVES_PROGRAM: &str =
     include_str!("../../../examples/binary/d3-primitives-program.bits");
 const D5_LABEL_RECURSION_PROGRAM: &str =
@@ -139,13 +139,18 @@ fn d5_label_map_preserves_higher_order_d7_binding_coordinates() {
 
 #[test]
 fn d3_cond_program_preserves_d1_and_d3_widths_in_structural_ast() {
-    assert_bit_projection(D3_COND_PROGRAM);
-    let physical = encode_binary_projection_ternary(D3_COND_PROGRAM)
-        .expect("exact-width COND projection encodes as physical T5");
-    let visible = open_ternary_program(&physical).expect("COND T5 opens");
-    assert_eq!(visible, D3_COND_PROGRAM.split_whitespace().collect::<Vec<_>>().join(" "));
-    let parsed = parse_canonical_binary(&visible).expect("D2 frames binary source");
-    assert_eq!(parsed.len(), 1, "the structural source is one D2 form");
+    let words = decode_ternary_program(D3_COND_PHYSICAL)
+        .expect("ratified physical D3 COND must decode");
+    let visible = open_ternary_program(D3_COND_PHYSICAL)
+        .expect("physical D3 COND T5 opens");
+    assert!(visible.split_whitespace().all(|word|
+        (1..=9).contains(&word.len()) && word.bytes().all(|digit| digit == b'0' || digit == b'1')
+    ));
+    assert_eq!(encode_binary_projection_ternary(&visible).unwrap(), D3_COND_PHYSICAL);
+    assert_eq!(visible, sens::render_ternary_words_spaced(&words));
+    let parsed = sens::parse_canonical_word_sequence(&words)
+        .expect("D2 frames binary source without a text .bits dependency");
+    assert_eq!(parsed.len(), 1, "physical COND is one D2 form");
     assert_exact_domain_ast(&parsed[0]);
 }
 
@@ -202,15 +207,13 @@ fn structural_d2_errors_remain_fail_closed_under_physical_t5() {
 #[test]
 fn committed_physical_d3_cond_file_executes_exact_predicate_without_legacy_names() {
     // Physical bytes, not a text .lisp renamed to .sens.
-    const PHYSICAL: &[u8] = include_bytes!("../../../examples/binary/d3-cond-program.sens");
-    let words = decode_ternary_program(PHYSICAL)
+    let words = decode_ternary_program(D3_COND_PHYSICAL)
         .expect("checked-in T5 must pass physical and exact D2 admission");
-    let expected = encode_binary_projection_ternary(D3_COND_PROGRAM)
-        .expect("existing D3 COND projection must pass exact D2 admission");
-    assert_eq!(PHYSICAL, expected, "committed physical bytes must be canonical");
-    assert_eq!(PHYSICAL.len(), 31, "no one-byte-per-bit pseudo-binary transport");
-    let visible = open_ternary_program(PHYSICAL).unwrap();
-    assert_eq!(visible, D3_COND_PROGRAM.split_whitespace().collect::<Vec<_>>().join(" "));
+    assert_eq!(D3_COND_PHYSICAL.len(), 31, "no one-byte-per-bit pseudo-binary transport");
+    let visible = open_ternary_program(D3_COND_PHYSICAL).unwrap();
+    let expected = encode_binary_projection_ternary(&visible)
+        .expect("canonical D2 roundtrip of physical words");
+    assert_eq!(D3_COND_PHYSICAL, expected, "committed bytes must be canonical");
     let forms = sens::parse_canonical_word_sequence(&words)
         .expect("execute from typed binary words, never legacy Lisp text");
     let result = sens::eval_parsed_expressions(&forms, &mut sens::Session::default())
