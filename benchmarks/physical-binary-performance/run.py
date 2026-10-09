@@ -26,6 +26,9 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
+sys.path.insert(0, str(ROOT / "scripts"))
+from sens_t5_codec import decode_bytes, encode_words, typed_sha256
+
 FIXTURES = (
     "tests/fixtures/migration-quote-cohort-main/quote-legacy.sens",
     "tests/fixtures/migration-multiform-cohort-main/two-forms.sens",
@@ -122,28 +125,38 @@ def main() -> None:
             "sens-trit-eval": [trit, "eval", str(physical)],
             "sens-trit-open": [trit, "open", str(physical)],
         }
-        # One untimed equivalence gate only. A matching CLI output is a
-        # mechanism-parity witness, NOT an independent semantic oracle.
-        baseline = {lane: invoke(cmd)[1] for lane, cmd in commands.items()}
+        # Перед замірами: дві виконавчі доріжки повинні збігатися.
+        # Окремий Python T5-декодер доводить точну транспортну проєкцію,
+        # але сам по собі НЕ встановлює семантичних законів мови.
+        first_invocations = {lane: invoke(cmd) for lane, cmd in commands.items()}
+        baseline = {lane: result for lane, (_, result) in first_invocations.items()}
         if baseline["sens-exec"] != baseline["sens-trit-eval"]:
             raise RuntimeError(f"{fixture}: two execution lanes disagree")
-        visible = baseline["sens-trit-open"].decode("ascii").strip()
-        if not visible or any(word and set(word) - {"0", "1"} for word in visible.split()):
-            raise RuntimeError(f"{fixture}: decoded view is not exact binary")
-        visible_bytes = len(visible.encode("ascii"))
+        words = decode_bytes(payload)
+        if encode_words(words) != payload:
+            raise RuntimeError(f"{fixture}: T5 roundtrip disagrees with physical file")
+        visible = (" ".join(words) + "\n").encode("ascii")
+        if baseline["sens-trit-open"] != visible:
+            raise RuntimeError(f"{fixture}: Rust T5 view differs from independent Python decode")
+        visible_bytes = len(visible)
         dimensions = {
             "fixture": fixture,
             "physical_bytes": len(payload),
             "visible_binary_bytes": visible_bytes,
             "visible_to_physical_ratio": round(visible_bytes / len(payload), 5),
             "physical_sha256": sha256(payload),
+            "exact_word_count": len(words),
+            "typed_words_sha256": typed_sha256(words),
             "execution_stdout_sha256": sha256(baseline["sens-exec"]),
-            "visible_sha256": sha256(baseline["sens-trit-open"]),
+            "visible_sha256": sha256(visible),
             "mechanism_parity": "PASS",
+            "independent_t5_roundtrip": "PASS",
         }
 
         samples: dict[str, list[float]] = {lane: [] for lane in LANES}
-        first_sample: dict[str, float] = {}
+        # Перший вимір — preflight invocation, до всіх прогрівів бенчмарка.
+        # Це НЕ гарантія порожнього OS page cache.
+        first_sample = {lane: elapsed for lane, (elapsed, _) in first_invocations.items()}
         # Rotate order each repetition so one lane cannot always benefit from
         # the same OS cache state. Never label subprocess medians "warm VM".
         for iteration in range(args.reps + args.warmup):
@@ -154,8 +167,6 @@ def main() -> None:
                     raise RuntimeError(
                         f"{fixture}: nondeterministic output in {lane} at {iteration}"
                     )
-                if iteration == 0:
-                    first_sample[lane] = elapsed
                 if iteration >= args.warmup:
                     samples[lane].append(elapsed)
                     raw_rows.append(
@@ -202,10 +213,11 @@ def main() -> None:
         "schema": "sens-physical-binary-performance/v1",
         "commit_sha": commit,
         "utc": datetime.now(timezone.utc).isoformat(),
-        "measurement": "process-per-call wall latency (OS cache warm after warmups)",
+        "measurement": "first preflight invocation and process-per-call wall latency after warmups; OS cache state uncontrolled",
         "in_process_warm_execution_measured": False,
         "cross_machine_relative_rank_admissible": False,
         "semantic_correctness_oracle": "EXTERNAL_NOT_PROVEN_BY_THIS_BENCH",
+        "transport_parity_oracle": "INDEPENDENT_PYTHON_T5_ROUNDTRIP_AND_EXACT_VIEW",
         "platform": platform.platform(),
         "machine": platform.machine(),
         "cpu": cpu_model(),
@@ -223,7 +235,7 @@ def main() -> None:
         "",
         f"Commit: `{commit}`; runner CPU: {cpu_model()}",
         "",
-        "| Програма | Шлях | Медіана, мс | p95, мс | Перший запуск, мс | I refs |",
+        "| Програма | Шлях | Медіана, мс | p95, мс | Перший preflight, мс | I refs |",
         "|---|---|---:|---:|---:|---:|",
     ]
     for row in summaries:
@@ -255,6 +267,9 @@ def main() -> None:
             "Кожна вибірка запускає **новий процес**. p95 — nearest-rank;",
             "міжмашинні порівняння без однакового обладнання невалідні.",
             "Час відлічується навколо subprocess і включає startup, I/O та stdout.",
+            "Перший preflight замір перед прогрівами; холодний OS page cache НЕ доведений.",
+            "Видимі байти рахуються з канонічним кінцевим LF, перевіреним Python T5-кодеком.",
+            "Ширина кожного слова збережена в typed SHA256; це транспортний доказ.",
             "",
         ]
     )
