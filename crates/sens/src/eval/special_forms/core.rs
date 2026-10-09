@@ -108,18 +108,25 @@ pub(crate) fn evaluate_domain_cond(
                 clause.span,
             ));
         };
-        if parts.len() != 2 {
+        // Support both 2-part (test expression) and 3-part (test expected expression) clauses
+        if parts.len() == 2 {
+            let value = evaluate(&parts[0], environment)?;
+            match exact_d3_cond_control(&value, parts[0].span)? {
+                ExactD3CondControl::Select => return evaluate_step(&parts[1], environment),
+                ExactD3CondControl::SkipNo => {}
+            }
+        } else if parts.len() == 3 {
+            let value = evaluate(&parts[0], environment)?;
+            let expected = quoted(&parts[1])?;
+            if value == expected {
+                return evaluate_step(&parts[2], environment);
+            }
+        } else {
             return Err(LanguageError::new(
                 ErrorKind::InvalidForm,
-                "D3:110 COND expects only (test expression) clauses",
+                "D3:110 COND expects (test expression) or (test expected expression) clauses",
                 clause.span,
             ));
-        }
-
-        let value = evaluate(&parts[0], environment)?;
-        match exact_d3_cond_control(&value, parts[0].span)? {
-            ExactD3CondControl::Select => return evaluate_step(&parts[1], environment),
-            ExactD3CondControl::SkipNo => {}
         }
     }
 

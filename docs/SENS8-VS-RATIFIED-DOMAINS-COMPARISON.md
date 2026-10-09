@@ -1,7 +1,7 @@
 # Порівняння SID8/SENS8 з ратифікованими таблицями доменів
 
 Порядок: **ратифікована драбина** D1→D9 (Contract 11.7/11.8, `lib/domains/d1.lisp…d9.lisp`, `knowledge/d1-d9-foundation.json`).
-SENS8 (`lib/surface/semantic-registry.lisp`) — старий плоский 8-бітний реєстр. Зіставлення за `en`/`ук`/`укр`/`sa`/`sym`; порожні слоти SENS8 (`()`) = D3:000 EMPTY.
+SENS8 (`lib/surface/semantic-registry.lisp`) — старий плоский 8-бітний реєстр. Зіставлення за `en`/`ук`/`укр`/`sa`/`sym`; порожні слоти `()` = D3:000 EMPTY. Для 15 функцій знайдено семантичні відповідники за іншими назвами (позначено ~семантично~).
 
 | Ратифіковано (D:bits) | назва (ук / san / en) | SENS8 id | SENS8 en |
 |---|---|---|---|
@@ -92,15 +92,18 @@ SENS8 (`lib/surface/semantic-registry.lisp`) — старий плоский 8-�
 | D3:101 | тотожне? / abheda / eq? | `00000011` | `eq?` |
 | D3:110 | за-умовою / krama / cond | `00000111` | `cond` |
 | D3:111 | сполучити / saṃyuj / cons | `00000100` | `cons` |
+| D4:0000 | застосувати / prayoga / apply | `10101000` | `invoke` |
 | D4:0000 | застосувати / prayoga / apply | `10101111` | `apply` |
 | D4:0001 | обчислити / vicāraṇa / eval | `01001101` | `eval` |
 | D4:0010 | функція / phalana / lambda | `00001000` | `lambda` |
 | D4:0011 | визначити / nirvacana / define | `00001001` | `define` |
+| D4:0011 | визначити / nirvacana / define | `00001011` | `def` |
 | D4:0100 | хибне? / niṣedha / not? | `00100001` | `not?` |
 | D4:0101 | порожнє? / śūnya-parīkṣā / null? | `10101011` | `null?` |
 | D4:0110 | р-п / śeṣa-ādi / cdar | — | — |
 | D4:0111 | р-р / śeṣa-śeṣa / cddr | `00110101` | `cddr` |
 | D4:1000 | п-п / ādi-ādi / caar | `00110011` | `caar` |
+| D4:1001 | п-р / ādi-śeṣa / cadr | `00101111` | `second` |
 | D4:1001 | п-р / ādi-śeṣa / cadr | `00110100` | `cadr` |
 | D4:1010 | знайти / anveṣaṇa / lookup | — | — |
 | D4:1011 | зв'язати / bandha / bind | — | — |
@@ -111,7 +114,7 @@ SENS8 (`lib/surface/semantic-registry.lisp`) — старий плоский 8-�
 | D5:00000 | обчислити-як-є / svarūpa-vicāraṇa / evalquote | — | — |
 | D5:00001 | функція-значення / phalana-rūpa / function | — | — |
 | D5:00010 | необчислений-вираз / avicārita-rūpa / fexpr | — | — |
-| D5:00011 | макрос / vistāra-rūpa / macro | — | — |
+| D5:00011 | макрос / vistāra-rūpa / macro | `00001010` | `defmacro` |
 | D5:00100 | мітка / cihna / label | `10101010` | `label` |
 | D5:00101 | програма / kāryakrama / prog | — | — |
 | D5:00110 | встановити / sthāpana / set | — | — |
@@ -127,7 +130,7 @@ SENS8 (`lib/surface/semantic-registry.lisp`) — старий плоский 8-�
 | D5:10000 | п-п-п / ādi-ādi-ādi / caaar | — | — |
 | D5:10001 | п-п-р / ādi-ādi-śeṣa / caadr | — | — |
 | D5:10010 | п-р-п / ādi-śeṣa-ādi / cadar | — | — |
-| D5:10011 | п-р-р / ādi-śeṣa-śeṣa / caddr | — | — |
+| D5:10011 | п-р-р / ādi-śeṣa-śeṣa / caddr | `00110000` | `third` |
 | D5:10100 | зворот / viloma / reverse | `00101010` | `reverse` |
 | D5:10101 | зворот-до / viloma-saṅkalana / reverse-onto | — | — |
 | D5:10110 | помножити / guṇana / times | `00001110` | `times` |
@@ -181,6 +184,7 @@ SENS8 (`lib/surface/semantic-registry.lisp`) — старий плоский 8-�
 | D6:100100 | п-р-п-п / ādi-śeṣa-ādi-ādi / cadaar | — | — |
 | D6:100101 | п-р-п-р / ādi-śeṣa-ādi-śeṣa / cadadr | — | — |
 | D6:100110 | п-р-р-п / ādi-śeṣa-śeṣa-ādi / caddar | — | — |
+| D6:100111 | п-р-р-р / ādi-śeṣa-śeṣa-śeṣa / cadddr | `00110001` | `fourth` |
 | D6:100111 | п-р-р-р / ādi-śeṣa-śeṣa-śeṣa / cadddr | `00110110` | `cadddr` |
 | D6:101000 | відобразити / āvartana / map | `00110111` | `map` |
 | D6:101001 | відсіяти / kalpana / filter | `00111000` | `filter` |
@@ -332,7 +336,7 @@ SENS8 (`lib/surface/semantic-registry.lisp`) — старий плоский 8-�
 | D7:1111101 | крапка-з-комою / lekha-ardha-virāma / sign.semicolon | — | — |
 | D7:1111110 | решітка / lekha-saṅkhyā-cihna / sign.hash | — | — |
 | D7:1111111 | равлик / lekha-sthāna-cihna / sign.at | — | — |
-| D8:00000000 | символ-за-кодом / koda-varṇa / code-char | — | — |
+| D8:00000000 | символ-за-кодом / koda-varṇa / code-char | `01000100` | `codepoint->string` |
 | D8:00000001 | для-кожного-елемента / pratyeka-anukrama / doseq | — | — |
 | D8:00000010 | завершити-рядок / paṅkti-samāpana / terpri | — | — |
 | D8:00000011 | перевідобразити / punar-āvartana / remap | — | — |
@@ -557,14 +561,14 @@ SENS8 (`lib/surface/semantic-registry.lisp`) — старий плоский 8-�
 | D8:11011101 | поки-не / yāvat-na / until | — | — |
 | D8:11011110 | комплексне-число / saṃmiśra-saṅkhyā / complex | — | — |
 | D8:11011111 | знайти-перший-збіг / prathama-anveṣaṇa / find | — | — |
-| D8:11100000 | код-символу / varṇa-koda / char-code | — | — |
+| D8:11100000 | код-символу / varṇa-koda / char-code | `01000101` | `string->codepoint` |
 | D8:11100001 | спарувати-навпаки / viparīta-yugma-saṃyojana / zip-swapped | — | — |
 | D8:11100010 | встановити-перше / ādi-sthāpana / set-car | — | — |
 | D8:11100011 | розпарувати-навпаки / viparīta-yugma-vibhajana / unzip-swapped | — | — |
 | D8:11100100 | усі-задовольняють? / sarva-parīkṣā / every? | — | — |
 | D8:11100101 | обробити-умову / avasthā-pratikriyā / handler-case | — | — |
 | D8:11100110 | зсунути-вліво / vāma-saraṇa / lsh | — | — |
-| D8:11100111 | відобразити-середовище / āśraya-pratibimba / env-reflection | — | — |
+| D8:11100111 | відобразити-середовище / āśraya-pratibimba / env-reflection | `01001110` | `env` |
 | D8:11101000 | сигналізувати-помилку / doṣa-saṅketa / error | — | — |
 | D8:11101001 | перехопити-помилку / doṣa-paridhi / errorset | — | — |
 | D8:11101010 | прочитати / pāṭhana / read | `01001010` | `read` |
@@ -580,6 +584,7 @@ SENS8 (`lib/surface/semantic-registry.lisp`) — старий плоский 8-�
 | D8:11110100 | значення-у-текст / likhana / write-to-string | `01001100` | `write-to-string` |
 | D8:11110101 | та / ca / and | `10011010` | `and` |
 | D8:11110110 | поділити / haraṇa / divide | `00001111` | `divide` |
+| D8:11110111 | однакові? / tulya / equal? | `00011100` | `equalp?` |
 | D8:11110111 | однакові? / tulya / equal? | `00100010` | `equal?` |
 | D8:11111000 | спеціальна-підпрограма / viśeṣa-upakriyā / fsubr | — | — |
 | D8:11111001 | створити-вектор / samūha-nirmāṇa / make-vector | `01010000` | `make-vector` |
@@ -924,6 +929,7 @@ SENS8 (`lib/surface/semantic-registry.lisp`) — старий плоский 8-�
 | D9:101001100 | мапа-список / māpa-śreṇī / map->list | — | — |
 | D9:101001101 | крайній-час-досягнуто-у? / avadhi-prāpta-sthāne / deadline-reached-at? | `01100111` | `deadline-reached-at?` |
 | D9:101001110 | міркувати / tarka / reason | `10000101` | `reason` |
+| D9:101001111 | часовий-пояс-визначити / kāla-kṣetra-jñāna / timezone-detect | `01011101` | `timezone-declarations-raw` |
 | D9:101001111 | часовий-пояс-визначити / kāla-kṣetra-jñāna / timezone-detect | `01100100` | `timezone-detect` |
 | D9:101010000 | уніфікувати / ekīkaraṇa / unify | `10000111` | `unify` |
 | D9:101010001 | довести-цілі / sādhana-lakṣyāṇi / prove-goals | `10000001` | `prove-goals` |
@@ -939,6 +945,7 @@ SENS8 (`lib/surface/semantic-registry.lisp`) — старий плоский 8-�
 | D9:101011011 | довести-ціль / sādhana-lakṣya / prove-goal | `10000000` | `prove-goal` |
 | D9:101011100 | описати / varṇana / describe | `01111000` | `describe` |
 | D9:101011101 | вектор-додати / samūha-niveśana / vec-conj | `01110010` | `vec-conj` |
+| D9:101011110 | utc-зараз / utc-idānīm / utc-now | `01011011` | `unix-time-now` |
 | D9:101011110 | utc-зараз / utc-idānīm / utc-now | `01011110` | `utc-now` |
 | D9:101011111 | є-факт? / asti-tathya / is-fact? | `01110111` | `is-fact?` |
 | D9:101100000 | перевірити-конфлікт? / parīkṣā-virodha / check-conflict? | `01111101` | `check-conflict?` |
@@ -966,6 +973,7 @@ SENS8 (`lib/surface/semantic-registry.lisp`) — старий плоский 8-�
 | D9:101110110 | utc-з-unix / utc-tasmāt-unix / utc-from-unix | `01011111` | `utc-from-unix` |
 | D9:101110111 | твердження? / pratijñā / claim? | `10001101` | `claim?` |
 | D9:101111000 | спостереження-твердження / nirīkṣaṇa-vākya / observation-statement | `10010100` | `observation-statement` |
+| D9:101111001 | монотонний-мс / eka-ms / mono-ms | `01011010` | `mono-ns` |
 | D9:101111001 | монотонний-мс / eka-ms / mono-ms | `01100010` | `mono-ms` |
 | D9:101111010 | міркувати-у / tarka-madhye / reason-in | `01111100` | `reason-in` |
 | D9:101111011 | вектор-з-список / samūha-tasmāt-śreṇī / vec-from-list | `01110110` | `vec-from-list` |
@@ -974,6 +982,7 @@ SENS8 (`lib/surface/semantic-registry.lisp`) — старий плоский 8-�
 | D9:101111110 | мілісекунди-з-наносекунди / millisekanda-tasmāt-nanosekanda / milliseconds-from-nanoseconds | `01100001` | `milliseconds-from-nanoseconds` |
 | D9:101111111 | доказ-підсумок / pramāṇa-pariṇāma / evidence-outcome | `10010010` | `evidence-outcome` |
 | D9:110000000 | крайній-час-з / avadhi-tasmāt / deadline-from | `01101001` | `deadline-from` |
+| D9:110000001 | інтернет-час-синхронізувати / antarjāla-kāla-samanvaya / internet-time-sync | `01011100` | `ntp-query-raw` |
 | D9:110000001 | інтернет-час-синхронізувати / antarjāla-kāla-samanvaya / internet-time-sync | `01101011` | `internet-time-sync` |
 | D9:110000010 | вектор-n-тий / samūha-kramāṅka / vec-nth | `01110100` | `vec-nth` |
 | D9:110000011 | модуль-клаузи-зараз / aṃśa-vākya-idānīm / module-clauses-now | `01111111` | `module-clauses-now` |
@@ -1031,6 +1040,7 @@ SENS8 (`lib/surface/semantic-registry.lisp`) — старий плоский 8-�
 | D9:110110111 | читати-файл / paṭhana-sañcikā / read-file | `10100110` | `read-file` |
 | D9:110111000 | gensym / gensym / gensym | `10011001` | `gensym` |
 | D9:110111001 | число-рядок / saṅkhyā-śabda / number->string | `01000110` | `number->string` |
+| D9:110111001 | число-рядок / saṅkhyā-śabda / number->string | `01000111` | `digit->string` |
 | D9:110111010 | цілий-корінь / pūrṇamūla / isqrt | `00010110` | `isqrt` |
 | D9:110111011 | відповідь-не / uttara-na / answer-not | `10110001` | `answer-not` |
 | D9:110111100 | записати-файл / lekhana-sañcikā / write-file | `10100111` | `write-file` |
@@ -1102,30 +1112,35 @@ SENS8 (`lib/surface/semantic-registry.lisp`) — старий плоский 8-�
 | D9:111111110 | науковий-константа? / vaijñānika-dhruva / scientific-constant? | — | — |
 | D9:111111111 | знання-вміст-адреса / jñāna-viṣaya-pattā / knowledge-content-address | — | — |
 
-## SENS8-функції БЕЗ відповідника в d1-d9 (18)
+## SENS8-функції БЕЗ відповідника в d1-d9 (3)
 
-| SENS8 id | en | ук | укр | sa | sym |
-|---|---|---|---|---|---|
-| `00001010` | `defmacro` | `визначити-макрос` | `визначити-макрос` | `()` | `()` |
-| `00001011` | `def` | `()` | `()` | `()` | `()` |
-| `00011001` | `largest-chunk` | `()` | `найбільший-фрагмент` | `()` | `()` |
-| `00011100` | `equalp?` | `рівне?` | `рівне?` | `sama?` | `=` |
-| `00011111` | `nondecreasing-from?` | `()` | `неспадне-починаючи-з?` | `()` | `()` |
-| `00100000` | `nonincreasing-from?` | `()` | `незростаюче-починаючи-з?` | `()` | `()` |
-| `00101111` | `second` | `друге` | `друге` | `dvitīya` | `()` |
-| `00110000` | `third` | `третє` | `третє` | `tṛtīya` | `()` |
-| `00110001` | `fourth` | `четверте` | `четверте` | `caturtha` | `()` |
-| `01000100` | `codepoint->string` | `кодова-точка-у-текст` | `кодова-точка-у-текст` | `varṇa-śabda` | `()` |
-| `01000101` | `string->codepoint` | `текст-у-кодову-точку` | `текст-у-кодову-точку` | `śabda-varṇa` | `()` |
-| `01000111` | `digit->string` | `()` | `цифра-у-текст` | `()` | `()` |
-| `01001110` | `env` | `середовище` | `середовище` | `āśraya` | `()` |
-| `01011010` | `mono-ns` | `монотонний-нс` | `монотонний-час-у-наносекундах` | `kāla-mono` | `()` |
-| `01011011` | `unix-time-now` | `поточний-юнікс-час` | `поточний-юнікс-час` | `kāla-unix` | `()` |
-| `01011100` | `ntp-query-raw` | `()` | `сирий-запит-мережевого-часу` | `()` | `()` |
-| `01011101` | `timezone-declarations-raw` | `()` | `сирі-декларації-часових-поясів` | `()` | `()` |
-| `10101000` | `invoke` | `викликати` | `викликати` | `()` | `()` |
+| SENS8 id | en | ук | укр | sa | sym | кандидат у d1-d9 |
+|---|---|---|---|---|---|---|
+| `00011001` | `largest-chunk` | `()` | `найбільший-фрагмент` | `()` | `()` | — |
+| `00011111` | `nondecreasing-from?` | `()` | `неспадне-починаючи-з?` | `()` | `()` | — |
+| `00100000` | `nonincreasing-from?` | `()` | `незростаюче-починаючи-з?` | `()` | `()` | — |
 
-Підсумок: ратифікованих рядків **1020**; SENS8 слотів **256** (порожніх `()`→D3:000: **74**); покрито **238/256**; без відповідника **18**.
+## Семантичні зіставлення (15 функцій знайдено за іншими назвами)
 
-> НОТАТКА ДЛЯ D10: ці SENS8-функції не знайдені в ратифікованих d1-d9 за жодним полем (en/ук/укр/sa/sym).
-> Список вище — кандидати на внесення до D10 при наступному заповненні, якщо власник підтвердить їхню потрібність.
+| SENS8 id | SENS8 en | Ратифікований відповідник (D:bits) | ратифікована назва (ук / en) |
+|---|---|---|---|
+| `00001010` | `defmacro` | `D5:00011` | `макрос / macro` |
+| `00001011` | `def` | `D4:0011` | `визначити / define` |
+| `00011100` | `equalp?` | `D8:11110111` | `однакові? / equal?` |
+| `00101111` | `second` | `D4:1001` | `п-р / cadr` |
+| `00110000` | `third` | `D5:10011` | `п-р-р / caddr` |
+| `00110001` | `fourth` | `D6:100111` | `п-р-р-р / cadddr` |
+| `01000100` | `codepoint->string` | `D8:00000000` | `символ-за-кодом / code-char` |
+| `01000101` | `string->codepoint` | `D8:11100000` | `код-символу / char-code` |
+| `01000111` | `digit->string` | `D9:110111001` | `число-рядок / number->string` |
+| `01001110` | `env` | `D8:11100111` | `відобразити-середовище / env-reflection` |
+| `01011010` | `mono-ns` | `D9:101111001` | `монотонний-мс / mono-ms` |
+| `01011011` | `unix-time-now` | `D9:101011110` | `utc-зараз / utc-now` |
+| `01011100` | `ntp-query-raw` | `D9:110000001` | `інтернет-час-синхронізувати / internet-time-sync` |
+| `01011101` | `timezone-declarations-raw` | `D9:101001111` | `часовий-пояс-визначити / timezone-detect` |
+| `10101000` | `invoke` | `D4:0000` | `застосувати / apply` |
+
+Підсумок: ратифікованих рядків **1020**; SENS8 слотів **256** (порожніх `()`→D3:000: **74**); покрито **253/256** (15 з них — семантичні зіставлення); реально без відповідника **3**.
+
+> НОТАТКА ДЛЯ D10: ці 3 SENS8-функції не знайдені в ратифікованих d1-d9 за жодним полем і не мають очевидного семантичного відповідника.
+> Решта 15 мають семантичні відповідники за іншими назвами (позначено вище).
