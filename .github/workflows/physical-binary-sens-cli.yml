@@ -43,8 +43,8 @@ jobs:
           from sens_t5_codec import decode_bytes
           original = Path(sys.argv[1]).read_bytes()
           visible = Path(sys.argv[2]).read_text(encoding="ascii")
-          assert visible == " ".join(decode_bytes(original)) + "\\n"
-          assert set(visible) <= {"0", "1", " ", "\\n"}
+          assert visible == " ".join(decode_bytes(original)) + chr(10)
+          assert set(visible) <= {"0", "1", " ", chr(10)}
           print("PHYSICAL=T5, TEXT=PROJECTION, PURE_EXEC=PARITY")
           PY
           done
@@ -60,7 +60,7 @@ jobs:
           sys.path.insert(0, "scripts")
           from sens_t5_codec import encode_projection
           root = Path(sys.argv[1])
-          (root / "illegal-base3.sens").write_bytes(b"\\xf3")
+          (root / "illegal-base3.sens").write_bytes(bytes([243]))
           (root / "stray-close.sens").write_bytes(encode_projection("01"))
           PY
           for invalid in illegal-base3 stray-close; do
