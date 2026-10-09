@@ -17,7 +17,7 @@
       (00000111
         ((00000010 entry) () (00000001 ()))
         ((00000010 entry) (1) (00000001 ()))
-        (t (00000110 entry))))))
+        ((00000010 entry) (0) (00000110 entry))))))
 
 (00001001 witness-malformed-result
   (00001000 (reason actual)
@@ -41,6 +41,7 @@
   (00001000 (witness expected-entry)
     (00000111
       ((00000010 expected-entry) () (00000001 ()))
+      ((00000010 expected-entry) (1) (00000001 ()))
       ((00000010 expected-entry) (0)
        (10011100 ((expr (witness-field (00000001 expr) witness)))
          (00000111
@@ -69,14 +70,18 @@
       (10011100 ((superseded (witness-superseded-outcome witness expected-entry)))
         (00000111
           ((00000010 superseded) (0) superseded)
-          ((10011010 expected-entry error-entry)
-           (00100111 (00000001 malformed) (00000001 expected-and-error)))
-          ((10011010 (00100001 (10110001 (00000010 expected-entry))) (00100001 (10110001 (00000010 error-entry))))
-           (00100111 (00000001 malformed) (00000001 missing-outcome)))
-          (expected-entry
-           (00100111 (00000001 value) (00000110 expected-entry)))
-          (t
-           (00100111 (00000001 error) (00000110 error-entry))))))))
+          ((00000010 expected-entry) (0)
+           (00000111
+             ((00000010 error-entry) (0)
+              (00100111 (00000001 malformed) (00000001 expected-and-error)))
+             ((00000010 error-entry) (1)
+              (00100111 (00000001 value) (00000110 expected-entry)))))
+          ((00000010 expected-entry) (1)
+           (00000111
+             ((00000010 error-entry) (0)
+              (00100111 (00000001 error) (00000110 error-entry)))
+             ((00000010 error-entry) (1)
+              (00100111 (00000001 malformed) (00000001 missing-outcome))))))))))
 
 ; The normative comparator. Backends provide ACTUAL only. Expected authority is
 ; read/derived above in Lisp.
