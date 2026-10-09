@@ -140,7 +140,7 @@ def physical_hot_report(path: Path) -> tuple[list[str], dict]:
         "These ratios measure one reader task, not overall language execution "
         "or SENS vs another runtime.",
         "",
-        f"Benchmark commit: \`{environment.get('commit', 'unknown')}\`; "
+        f"Benchmark commit: {environment.get('commit', 'unknown')}; "
         f"samples per phase: {environment.get('samples', 'unknown')}.",
         "",
     ]
