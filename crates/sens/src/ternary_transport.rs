@@ -9,7 +9,7 @@
 //! Жодного D7-пробілу чи нового D10-резидента тут немає.
 //! Number D24+ ще не допускається до цього механічного носія.
 
-use crate::{parse_binary_source_words, parse_canonical_binary, BinarySourceWord};
+use crate::{parse_binary_source_words, BinarySourceWord};
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum TernaryTransportError {
@@ -175,6 +175,20 @@ pub fn open_ternary_program(data: &[u8]) -> Result<String, TernaryTransportError
     Ok(render_ternary_words_spaced(&words))
 }
 
+/// Parse already-decoded domain words via the *same* packed-bit D2 reader
+/// used by the canonical physical binary payload path. Never render text.
+pub(crate) fn parse_t5_domain_words(
+    words: &[BinarySourceWord],
+) -> Result<Vec<crate::Expr>, crate::LanguageError> {
+    let bit_count = words.iter().map(|word| word.width()).sum::<usize>();
+    let mut packer = crate::BitPacker::with_capacity_bits(bit_count);
+    let widths = words.iter().map(|word| word.width()).collect::<Vec<_>>();
+    for word in words.iter().copied() {
+        crate::append_binary_source_word(&mut packer, word);
+    }
+    crate::parse_canonical_packed_words(&packer.finish(), &widths)
+}
+
 /// Поки що адаптер приймає видиму точну двійкову проєкцію D1..D9,
 /// а не довільні історичні чи українські Lisp-імена.
 pub fn encode_binary_projection_ternary(
@@ -185,9 +199,10 @@ pub fn encode_binary_projection_ternary(
     if words.is_empty() {
         return Err(TernaryTransportError::EmptyProgram);
     }
-    parse_canonical_binary(projection)
+    let exact_words = words.iter().map(|token| token.word).collect::<Vec<_>>();
+    parse_t5_domain_words(&exact_words)
         .map_err(|_| TernaryTransportError::InvalidProgramSyntax)?;
-    encode_ternary_words(&words.iter().map(|word| word.word).collect::<Vec<_>>())
+    encode_ternary_words(&exact_words)
 }
 
 /// Формально валідує повноту D2-структури через наявний
@@ -196,8 +211,8 @@ pub fn decode_ternary_program(
     data: &[u8],
 ) -> Result<Vec<BinarySourceWord>, TernaryTransportError> {
     let words = decode_ternary_words(data)?;
-    let projection = render_ternary_words_vertical(&words);
-    parse_canonical_binary(&projection)
+    // The D2 grammar consumes typed binary words, not a rendered text surface.
+    parse_t5_domain_words(&words)
         .map_err(|_| TernaryTransportError::InvalidProgramSyntax)?;
     Ok(words)
 }
