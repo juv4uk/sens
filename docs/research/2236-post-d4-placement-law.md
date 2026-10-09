@@ -89,6 +89,30 @@ This does not replace family-specific stronger laws. Selector descendants keep:
 1 = compose CDR
 ```
 
+## Resolved first consumer — LABEL
+
+#2234 / #2238 resolved the first historical candidate:
+
+```text
+LABEL=DERIVED-D4
+address=none
+```
+
+Current Core1's historical LABEL branch does not install self-binding, but D4
+LAMBDA can derive local recursion through an applicative fixed point. A stronger
+witness returns an escaping recursive closure with lexical capture and an
+alpha-renamed self variable, without LABEL or DEFINE.
+
+Therefore:
+
+```text
+0010  LAMBDA
+00101 <unallocated>
+```
+
+The earlier `00101 LABEL` shape remains only a counterfactual used to test the
+placement law. It is not an active candidate.
+
 ## LABEL hypothesis
 
 Historical shape:

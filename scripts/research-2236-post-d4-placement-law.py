@@ -235,8 +235,21 @@ def main() -> None:
 
     # Current historical ladder remains intentionally unresolved until its
     # executable witnesses run. The script records search order, not outcomes.
+    resolved_label = Candidate(
+        "LABEL",
+        "Lisp-I-1960",
+        True,
+        strongest_parent="0010",
+        same_base_object=True,
+        one_new_delta=True,
+        delta_axes=("local-self-binding",),
+        suffix_1_fit=True,
+        delta="local recursion is derivable through D4 applicative fixed point",
+    )
+    assert classify(resolved_label) is Decision.DERIVED
+    assert generated_word(resolved_label, classify(resolved_label)) is None
+
     ladder = [
-        Candidate("LABEL", "Lisp-I-1960", None, strongest_parent="0010"),
         Candidate("FUNCTION/FUNARG", "Lisp-1.5", None, strongest_parent="0010"),
         Candidate("EVALQUOTE", "Lisp-1.5", None, strongest_parent="0001"),
         Candidate("APPEND", "Lisp-I-1960", None),
@@ -269,6 +282,8 @@ def main() -> None:
     print("LAMBDA-SUFFIX1-COLLISION=LABEL-vs-TRANSFORMER")
     print("COLLISION-RESULT=derive-or-reparent-or-widen")
     print("FIXED-D5-SELECTORS=" + ",".join(sorted(FIXED_D5_SELECTORS)))
+    print("RESOLVED-LABEL=DERIVED-D4")
+    print("RESOLVED-LABEL-ADDRESS=NONE")
     print("UNRESOLVED-LADDER=" + ",".join(c.name for c in ladder))
     print("NON-CONCLUSION: 00101 LABEL is not ratified")
     print("NON-CONCLUSION: no global D5 suffix theorem is claimed")
