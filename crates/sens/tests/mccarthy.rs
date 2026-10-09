@@ -368,7 +368,7 @@ fn reader_supports_unicode_comments_and_quote_sugar() {
 }
 
 #[test]
-fn implements_mccarthys_seven_primitives() {
+fn current_quote_car_cdr_cons_without_legacy_truthiness() {
     assert_eq!(eval("(quote radio)"), Value::Symbol("radio".into()));
     assert_eq!(
         eval("(car (quote (radio antenna)))"),
@@ -600,7 +600,7 @@ fn princ_and_print_render_symbols_and_numbers_identically() {
 /// naiavne yadro vzhe mozhe tse skazaty?"), zastosovanyi do samoho Rust-sharu,
 /// ne lyshe do `.my`-kodu.
 #[test]
-fn list_is_a_sens_function_in_core_my_not_a_rust_builtin() {
+fn list_loaded_from_core_produces_expected_data() {
     let mut session = Session::default();
     eval_program(include_str!("../../../lib/core.lisp"), &mut session).unwrap();
     let result = eval_program("(list 1 2 3)", &mut session).unwrap();
