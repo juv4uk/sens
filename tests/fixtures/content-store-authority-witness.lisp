@@ -10,7 +10,7 @@
 
 (00001001 content-store-no?
   (00001000 (value)
-    (00100010 value (00000010 (00000001 (x))))))
+    (00100010 value (00100010 (00000001 d1-no-left) (00000001 d1-no-right)))))
 
 (00001001 content-store-authority-witness
   (00001000 ()
