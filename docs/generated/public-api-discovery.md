@@ -3,14 +3,11 @@
 > Згенеровано `scripts/public_api_inventory.py`. Цей звіт знаходить
 > top-level визначення, але **не** оголошує їх публічним API.
 
-- проскановано бібліотечних файлів: 50
+- проскановано бібліотечних файлів: 51
 - top-level функцій: 946
 - top-level макросів: 34
 - усього визначень: 980
 - класифікація: `unreviewed`
-
-| джерело | вид | ім'я | класифікація |
-|---|---|---|---|
 | `lib/bridge/prolog-to-datalog.lisp` | function | `prolog-values-to-datalog-facts` | unreviewed |
 | `lib/bridge/prolog-to-datalog.lisp` | function | `prolog-substitutions-to-datalog-facts` | unreviewed |
 | `lib/canon.lisp` | function | `canon-empty-list` | unreviewed |
