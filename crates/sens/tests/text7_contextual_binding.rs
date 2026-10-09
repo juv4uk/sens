@@ -23,11 +23,12 @@ fn ordinary_w7_words_remain_exact_domain_data_in_d2_lists() {
     };
     assert_eq!(items.len(), 2);
     for (item, expected) in items.iter().zip([0b1000001, 0b1000010]) {
-        let ExprKind::DomainIdentity(DomainIdentity::D7(identity)) = &item.kind else {
-            panic!("W7 payload must remain an exact D7 identity");
+        let ExprKind::DomainIdentity(identity) = &item.kind else {
+            panic!("W7 payload must remain an exact domain identity");
         };
         assert_eq!(identity.width(), 7);
         assert_eq!(identity.packed_bits(), expected);
+        assert!(matches!(identity, DomainIdentity::D7(_)));
     }
 }
 
