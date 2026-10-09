@@ -637,47 +637,39 @@
 (00001001 my-cond-has-migration-clause?
   (00001000 (clauses)
     (00000111
-      ((00000010 clauses) () (00000001 ()))
-      ((00000010 clauses) (1) (00000001 ()))
-      ((00000010 (00000101 clauses)) () (my-cond-has-migration-clause? (00000110 clauses)))
-      ((00000010 (00000101 clauses)) (1) (my-cond-has-migration-clause? (00000110 clauses)))
-      ((00000011 (00101000 (00000101 clauses)) 2) (1) t)
-      ((00000011 (00101000 (00000101 clauses)) 2) (0)
-       (my-cond-has-migration-clause? (00000110 clauses))))))
+      ((00000010 clauses)
+       (00000001 ()))
+      (t
+       (00000111
+         ((00000011 (00101000 (00000101 clauses)) 2) (1) t)
+         (t (my-cond-has-migration-clause? (00000110 clauses))))))))
 
 (00001001 my-eval-cond-result-mode
   (00001000 (clauses env-ref migration-compatibility?)
     (00000111
-      ((00000010 clauses) () (00000111
+      ((00000010 clauses)
+       (00000111
          (migration-compatibility? (my-result-ok (00000001 ())))
          (t
           (my-result-fail
-            (my-error (00000001 unsatisfied-conditional) (00000001 cond))))))
-      ((00000010 clauses) (1) (00000111
-         (migration-compatibility? (my-result-ok (00000001 ())))
-         (t
-          (my-result-fail
-            (my-error (00000001 unsatisfied-conditional) (00000001 cond))))))
+            (my-error (00000001 unsatisfied-conditional) (00000001 cond)))))
       (t
        (10011100 ((clause (00000101 clauses)))
          (00000111
-           ; #217 canonical path: evaluate only the query. The expected result
-           ; is already Lisp data in the interpreted program and must never be
-           ; executed as code. Match it structurally, then evaluate the branch.
+           ; Canonical three-part clauses compare actual data structurally.
+           ; EQUAL itself returns exact D1, so test it with a two-part predicate
+           ; clause rather than comparing that D1 to Number/list carriers.
            ((00000011 (00101000 clause) 3) (1)
             (10011100 ((test-result (my-eval-result (00000101 clause) env-ref)))
               (00000111
                 ((my-result-fail? test-result) test-result)
                 ((00100010 (my-result-value test-result) (00101111 clause))
-                 (1)
                  (my-eval-result (00110000 clause) env-ref))
-                ((00100010 (my-result-value test-result) (00101111 clause))
-                 (0)
+                (t
                  (my-eval-cond-result-mode
                    (00000110 clauses) env-ref migration-compatibility?)))))
-           ; Historical two-part clauses remain migration-only, mirroring the
-           ; native evaluator until their callers are moved to explicit result
-           ; matching. This path intentionally retains old truthiness.
+           ; Historical two-part clauses remain migration-only and preserve
+           ; classic Lisp truthiness for their test expression.
            ((00000011 (00101000 clause) 2) (1)
             (10011100 ((test-result (my-eval-result (00000101 clause) env-ref)))
               (00000111
@@ -691,7 +683,7 @@
             (my-result-fail
               (my-error
                 (00000001 invalid-form)
-                (00100111 (00000001 cond-clause) clause))))))))))
+                (00100111 (00000001 cond-clause) clause)))))))))))
 
 (00001001 my-eval-cond-result
   (00001000 (clauses env-ref)
