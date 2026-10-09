@@ -106,6 +106,13 @@ def main() -> int:
             load_current_d7()
             for bits in ("0000001", "0001110"):
                 project(bits, role="local-ordinal")
+            for bits in ("0000000", "0001111", "0100001", "0101010"):
+                try:
+                    project(bits, role="local-ordinal")
+                except D7ProjectionError:
+                    pass
+                else:
+                    raise D7ProjectionError(f"unowned LocalOrdinal admitted: {bits}")
             print("D7-PROJECTION=PASS; owner-residents=126/128; reserved=2; no-Rust-law")
             return 0
         if opts.coordinate is None or opts.role is None:
