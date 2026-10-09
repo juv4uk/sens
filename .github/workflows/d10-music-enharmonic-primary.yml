@@ -1,0 +1,57 @@
+name: D10 music notation primary source research gate
+
+on:
+  pull_request:
+    paths:
+      - 'knowledge/d10-music-enharmonic-primary-review-v1.json'
+      - 'scripts/check_d10_music_enharmonic_primary.py'
+      - 'tests/test_d10_music_enharmonic_primary.py'
+      - 'knowledge/d10-v1-semantic-inventory.json'
+      - '.github/workflows/d10-music-enharmonic-primary.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'knowledge/d10-music-enharmonic-primary-review-v1.json'
+      - 'scripts/check_d10_music_enharmonic_primary.py'
+      - 'tests/test_d10_music_enharmonic_primary.py'
+      - '.github/workflows/d10-music-enharmonic-primary.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  unselected-music-law-research:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: All paired positive, negative and admission-safety witnesses
+        run: python3 -m unittest discover -s tests -p 'test_d10_music_enharmonic_primary.py' -v
+      - name: Independent bounded two-model oracle and current selected dedup gate
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 scripts/check_d10_music_enharmonic_primary.py | tee "$RUNNER_TEMP/d10-music-hold-evidence.json"
+          python3 - "$RUNNER_TEMP/d10-music-hold-evidence.json" <<'PY'
+          import json, sys
+          item=json.load(open(sys.argv[1],encoding="utf-8"))
+          assert item["candidate_count"]==2
+          assert item["two_model_bounded_pairs"]==11025
+          assert item["selected_delta"]==0
+          assert item["coordinates_assigned"]==0
+          assert item["ratified"]==0
+          assert item["external_source_oracle"]=="NOT_EXECUTED"
+          assert item["D1_D9_behavioral_dedup"]=="REVIEW_REQUIRED"
+          assert item["status"]=="RESEARCH-VALIDATED-HOLD-NOT-SELECTED"
+          PY
+      - name: Preserve exact HOLD evidence for peer source review
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: d10-music-enharmonic-two-model-hold-ledger
+          path: ${{ runner.temp }}/d10-music-hold-evidence.json
+          if-no-files-found: warn
