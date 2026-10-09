@@ -102,17 +102,17 @@
 (00001001 reason-in-world
   (00001000 (world module-name goal)
     (00000111
-      ((world-module-known? world module-name) (00100010 (00000001 d1-yes-left) (00000001 d1-yes-left))
+      ((world-module-known? world module-name) (1)
        (10000101 goal (world-clauses world module-name)))
-      ((world-module-known? world module-name) (00100010 (00000001 d1-no-left) (00000001 d1-no-right))
+      ((world-module-known? world module-name) (0)
        (00000001 Module-not-found)))))
 
 (00001001 forward-in-world
   (00001000 (world module-name)
     (00000111
-      ((world-module-known? world module-name) (00100010 (00000001 d1-yes-left) (00000001 d1-yes-left))
+      ((world-module-known? world module-name) (1)
        (run-multi (world-clauses world module-name) (00000001 ())))
-      ((world-module-known? world module-name) (00100010 (00000001 d1-no-left) (00000001 d1-no-right))
+      ((world-module-known? world module-name) (0)
        (00000001 Module-not-found)))))
 
 (00001001 advice-decision-in-world
@@ -326,9 +326,9 @@
     (00000111
       ((00000011 (00100011 module-name) (00000001 ()))
        (00100111 (00000001 rejected) (00100111 (00000001 reason) (00000001 invalid-module)) (00100111 (00000001 input) module-name)))
-      ((world-module-known? world module-name) (00100010 (00000001 d1-no-left) (00000001 d1-no-right))
+      ((world-module-known? world module-name) (0)
        (00100111 (00000001 rejected) (00100111 (00000001 reason) (00000001 Module-not-found)) (00100111 (00000001 input) module-name)))
-      ((world-module-known? world module-name) (00100010 (00000001 d1-yes-left) (00000001 d1-yes-left))
+      ((world-module-known? world module-name) (1)
        (10011100 ((clauses (world-clauses world module-name)))
          (00000111
            ((00000010 clauses) () (00100111 (00000001 rejected) (00100111 (00000001 reason) (00000001 invalid-batch)) (00100111 (00000001 input) clauses)))
