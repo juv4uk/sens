@@ -1,0 +1,36 @@
+name: D10 symbolic AI finite antiunification SWI oracle
+on:
+  pull_request:
+    paths:
+      - 'knowledge/d10-symbolic-ai-antiunify-research-v1.json'
+      - 'docs/research/d10-symbolic-ai-antiunification.uk.md'
+      - 'scripts/check_d10_symbolic_ai_antiunify.py'
+      - 'tests/test_d10_antiunify_finite.py'
+      - 'tests/d10_antiunify_swi.pl'
+      - '.github/workflows/d10-symbolic-ai-antiunification.yml'
+      - 'knowledge/d10-v1-semantic-inventory.json'
+  push:
+    paths:
+      - 'knowledge/d10-symbolic-ai-antiunify-research-v1.json'
+      - 'scripts/check_d10_symbolic_ai_antiunify.py'
+      - 'tests/test_d10_antiunify_finite.py'
+      - 'tests/d10_antiunify_swi.pl'
+      - '.github/workflows/d10-symbolic-ai-antiunification.yml'
+jobs:
+  bounded-first-order-donor:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: D10 research provenance, live exact dedup and 10 adversarial cases
+        run: python3 scripts/check_d10_symbolic_ai_antiunify.py --self-test
+      - name: Python exact finite-term generalization reference
+        run: python3 -m unittest discover -s tests -p test_d10_antiunify_finite.py -v
+      - name: Install independent SWI-Prolog runtime
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y swi-prolog-nox
+      - name: SWI-Prolog real term_subsumer donor oracle
+        run: swipl -q -s tests/d10_antiunify_swi.pl
