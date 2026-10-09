@@ -122,7 +122,7 @@ def check_dossier(data,inventory,foundation):
     assert inventory["accounting"]["ratified_d10_residents"]==0
     assert len(inventory["rows"])==inventory["accounting"]["selected_semantic_candidates"]
     names={row["semantic_name"] for row in inventory["rows"]}
-    assert all(n in names for n in ("JTMS-STATE-SUBST","PROVE-RULE","FINITE-BAYES-UPDATE-EXACT")) is False or "FINITE-BAYES-UPDATE-EXACT" not in names or "PROVE-RULE" in names
+    assert {"JTMS-STATE-SUBST", "PROVE-RULE"} <= names
     assert "PROVE-RULE" in names and NAME not in names
     assert foundation["status"]=="owner-ratified"
     lower={str(n).upper() for d in foundation["domains"].values()
@@ -154,7 +154,7 @@ class DungFiniteTests(unittest.TestCase):
                 expected=characteristic_oracle(nodes,edges)
                 self.assertEqual(got,expected, (nodes,edges))
                 tested+=1
-        self.assertEqual(tested,66066)
+        self.assertEqual(tested,66067)
         print(f"D10 DUNG: {tested} complete directed graphs cross-checked with independent fixed point")
 
     def test_random_six_to_eight_argument_graphs(self):
