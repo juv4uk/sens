@@ -256,6 +256,11 @@ pub(crate) const DOMAIN_OWNER_COORDINATES: &[DomainOwnerCoordinate] = &[
     DomainOwnerCoordinate { width: 7, bits: 0b1111111, source: 3 },
 ];
 
+/// Widths whose *entire* coordinate set is covered by separately owner-ratified
+/// complete maps. Generated from D8 #3960 / D9 #4008 after exhaustive checks.
+/// A full-width residency certificate is never a callable mechanism.
+pub(crate) const DOMAIN_OWNER_FULL_WIDTHS: &[u8] = &[8, 9];
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -284,6 +289,12 @@ mod tests {
                 .any(|row| row.width == 7 && row.bits == word);
             assert_eq!(admitted, word != 0b0100001 && word != 0b0101010);
         }
+    }
+
+    #[test]
+    fn generated_dense_owner_widths_are_source_certified_not_function_tables() {
+        assert_eq!(DOMAIN_OWNER_FULL_WIDTHS, &[8, 9]);
+        assert!(!DOMAIN_OWNER_FULL_WIDTHS.contains(&10));
     }
 
     #[test]
