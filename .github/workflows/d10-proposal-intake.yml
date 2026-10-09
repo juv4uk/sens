@@ -19,8 +19,11 @@ on:
     paths:
       - knowledge/d10-proposal-ledger.tsv
       - knowledge/d10-v1-semantic-inventory.json
+      - knowledge/d10-selection-transition-history.json
+      - knowledge/d10-growth-baseline-v1.json
       - docs/architecture/ARCHIPELAGO-V1.uk.md
       - scripts/check-d10-proposal-ledger.py
+      - tests/test_d10_proposal_ledger_growth.py
       - .github/workflows/d10-proposal-intake.yml
 
 permissions:
