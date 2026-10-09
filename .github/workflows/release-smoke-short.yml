@@ -1,0 +1,22 @@
+name: Release Smoke Short
+
+on:
+  push:
+    branches:
+      - smoke/release-0.40.0-short-tests
+
+jobs:
+  short-release-smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+      - name: translation boundary regression
+        run: cargo test -p my-lisp --test translation_boundary
+      - name: island installer CLI
+        run: cargo test -p my-lisp-cli --test islands_cli
+      - name: release asset contract
+        run: cargo test -p my-lisp-cli --test islands_release_asset
+      - name: focused release clippy
+        run: cargo clippy -p my-lisp -p my-lisp-cli --all-targets -- -D warnings
