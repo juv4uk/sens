@@ -9,37 +9,26 @@
   (00001000 (request)
     (00000111
       ((00000010 request)
-       ()
        (00000001 no))
-      ((00000010 request)
-       (0)
+      ((not? (00000010 request))
        (10011100 ((first-field (00000101 request)))
          (00000111
            ((00000010 first-field)
-            (0)
+            (00000001 no))
+           ((not? (00000010 first-field))
             (00000111
               ((00100010 (00000101 first-field) (00000001 sid))
-               (1)
                (00000001 yes))
-              ((00100010 (00000101 first-field) (00000001 sid))
-               (0)
-               (00000001 no))))
-           ((00000010 first-field)
-            (1)
-            (00000001 no))
-           ((00000010 first-field)
-            ()
-            (00000001 no))))))))
+              ((not? (00100010 (00000101 first-field) (00000001 sid)))
+               (00000001 no)))))))))
 
 (00001001 early-sid-lower
   (00001000 (registry surface arguments contract)
     (10011100 ((sid (semantic-registry-id-in registry surface)))
       (00000111
-        ((00000010 sid)
-         ()
+        ((00100010 sid (00000001 ()))
          (00000001 rejected))
-        ((00000010 sid)
-         (1)
+        ((not? (00100010 sid (00000001 ())))
          (00100111
            (00000100 (00000001 sid) sid)
            (00000100 (00000001 arguments) arguments)
@@ -53,22 +42,16 @@
           (d (semantic-registry-id-in registry surface-d)))
       (00000111
         ((00100010 a b)
-         (1)
          (00000111
            ((00100010 b c)
-            (1)
             (00000111
               ((00100010 c d)
-               (1)
                (00100111 (00000001 same) a))
-              ((00100010 c d)
-               (0)
+              ((not? (00100010 c d))
                (00000001 distinct))))
-           ((00100010 b c)
-            (0)
+           ((not? (00100010 b c))
             (00000001 distinct))))
-        ((00100010 a b)
-         (0)
+        ((not? (00100010 a b))
          (00000001 distinct))))))
 
 (00001001 early-sid-lowering-witness
