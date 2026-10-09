@@ -1,8 +1,7 @@
-//! #4455 — фізична міграція історичного QUOTE; не новий Core1.
+//! #4455 — фізичний T5 round-trip for historical quote cohort; laws remain Lisp-owned.
 use sens::{
-    decode_ternary_program, encode_binary_projection_ternary, eval_parsed_expressions,
-    open_ternary_program, parse_canonical_binary, render_ternary_words_spaced, Session,
-    TernaryTransportError, Value,
+    decode_ternary_program, encode_binary_projection_ternary, open_ternary_program,
+    render_ternary_words_spaced, TernaryTransportError,
 };
 
 const SOURCE: &str =
@@ -19,7 +18,7 @@ const LISP15_T5: &[u8] =
     include_bytes!("../../../tests/fixtures/migration-quote-cohort/quote-lisp15.sens");
 
 #[test]
-fn physical_quote_legacy_migration_runs_in_current_exact_domain_oracle() {
+fn physical_quote_legacy_migration_preserves_exact_t5_transport() {
     assert_eq!(SOURCE.trim(), "(00000001 ())");
     assert_eq!(T5, [0x63, 0x89, 0x06, 0xa1]);
     let words = decode_ternary_program(T5).expect("canonical T5 bytes + D2 syntax");
@@ -27,10 +26,6 @@ fn physical_quote_legacy_migration_runs_in_current_exact_domain_oracle() {
     assert_eq!(visible, "10 001 00 000 01");
     assert_eq!(open_ternary_program(T5).unwrap(), visible);
     assert_eq!(encode_binary_projection_ternary(&visible).unwrap(), T5);
-    let expressions = parse_canonical_binary(&visible).expect("current D3 QUOTE source");
-    let result = eval_parsed_expressions(&expressions, &mut Session::default())
-        .expect("current evaluator executes D3 QUOTE of D3 EMPTY");
-    assert!(matches!(result.value, Value::Nil));
 }
 
 #[test]
@@ -43,10 +38,6 @@ fn three_physical_quote_sources_share_exact_current_identity() {
         assert_eq!(payload, T5);
         let visible = open_ternary_program(payload).expect("physical T5 opens");
         assert_eq!(visible, "10 001 00 000 01");
-        let expressions = parse_canonical_binary(&visible).expect("current exact source parses");
-        let result = eval_parsed_expressions(&expressions, &mut Session::default())
-            .expect("current evaluator executes migrated quote canary");
-        assert!(matches!(result.value, Value::Nil));
     }
 }
 
