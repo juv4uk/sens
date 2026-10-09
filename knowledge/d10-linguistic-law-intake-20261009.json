@@ -36,7 +36,19 @@
         ]
       ],
       "falsifier": "Do not accept combining acute after a consonant or silently lose an out-of-range stress position.",
-      "dedup": "D7 already owns the acute-mark symbol. Full D1-D10 behavioral dedup and native oracle required before selection. Distinct from D7 U+0301 code-point identity; review against generic FINITE-MEALY-RUN and list walks before any selection."
+      "dedup": "D7 already owns the acute-mark symbol. Full D1-D10 behavioral dedup and native oracle required before selection. Distinct from D7 U+0301 code-point identity; review against generic FINITE-MEALY-RUN and list walks before any selection.",
+      "donor_snapshot": {
+        "repo": "juv4uk/nlp_uk",
+        "commit": "4e2db50a40fcd8fc4bf1a88925fe6b71421fde0e",
+        "file": "src/main/groovy/org/nlp_uk/tools/StressText.groovy",
+        "blob": "78798820cf02aba1394cc3b2c926a114a1d0dfb1",
+        "functions": [
+          "getAccentSyllIdxs",
+          "restoreAccent",
+          "applyAccents"
+        ],
+        "note": "Original upstream authorship not asserted. Donor counts lowercase on extraction and both cases on insertion; proposal intentionally strengthens the behavior and requires native oracle."
+      }
     },
     {
       "semantic_name": "CONTEXTUAL-LONGEST-TRANSLITERATE",
@@ -57,7 +69,16 @@
         ]
       ],
       "falsifier": "A shorter key must not consume the prefix of a longer admissible key.",
-      "dedup": "Compare with D10 APPLY-SANDHI and D8 string rewriting; no D2 parser/control semantics is minted. Peer cross-hobby finite-state transducer research in main (knowledge/d10-finite-transducer-cross-hobby-v1.json, #4914) can implement a contextual rewrite; likely a derived/projection family pending expressibility proof, not an independent resident by default."
+      "dedup": "Compare with D10 APPLY-SANDHI and D8 string rewriting; no D2 parser/control semantics is minted. Peer cross-hobby finite-state transducer research in main (knowledge/d10-finite-transducer-cross-hobby-v1.json, #4914) can implement a contextual rewrite; likely a derived/projection family pending expressibility proof, not an independent resident by default.",
+      "donor_snapshot": {
+        "repo": "juv4uk/latynka",
+        "commit": "52166a26220cb5fdd63ec834d0693f4ad49181cd",
+        "file": "src/js/translit.js",
+        "blob": "a706884589a0fa852ab95f0a8932e699cce5e0da",
+        "test_file": "spec/translit.spec.js",
+        "test_blob": "cdb74fdf291d0d01e28d66d2de38742a326c8756",
+        "note": "README attributes project to upstream paiv/latynka. Only limited lowercase semantics are modeled; full source parity and license verification remain open."
+      }
     }
   ],
   "holds": [
@@ -70,5 +91,6 @@
     "peer_pr": 4914,
     "artifact": "knowledge/d10-finite-transducer-cross-hobby-v1.json",
     "conclusion": "Both candidate laws remain HOLD. In particular contextual transliteration may be a parameterization of FINITE-MEALY-RUN rather than a fresh root."
-  }
+  },
+  "audit_scope": "No copy of donor implementations, phonemic tables, or private repository documents. Only source identifiers and research summaries."
 }
