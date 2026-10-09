@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Contract 11.8 W1-W8 carrier/runtime replay; D9 is explicit BLOCKED-CARRIER."""
+"""Contract 11.8 W1-W9 exact-domain carrier microbenchmark, no Rust language laws."""
 
 from __future__ import annotations
 
@@ -14,14 +14,14 @@ import subprocess
 from pathlib import Path
 
 CASES = (
-    "d1", "d2", "d3", "d4", "d5", "d6", "d7", "d8",
-    "mixed", "callable-projection",
+    "d1", "d2", "d3", "d4", "d5", "d6", "d7", "d8", "d9",
+    "mixed", "width-roundtrip",
 )
 CONTRACT_VERSION = "11.8"
 SEMANTIC_GENERATION = "contract-11-8-exact-d1-d9"
-D9_STATUS = "BLOCKED-CARRIER"
-D9_REASON = "BinarySourceWord/DomainIdentity currently materialize W1-W8 only"
-D9_MECHANISM_OWNER = "#4038 / PR #4044"
+D9_STATUS = "MEASURED-CARRIER"
+D9_REASON = "Exact u16 W9 carrier is available; callability and language laws are not inferred"
+D9_MECHANISM_OWNER = "#4008"
 IREF_RE = re.compile(r"I\s+refs:\s*([0-9,]+)")
 
 
@@ -121,11 +121,11 @@ def main() -> int:
         "contract_version": CONTRACT_VERSION,
         "semantic_generation": SEMANTIC_GENERATION,
         "current_foundation": "D1-D9",
-        "measured_carriers": "W1-W8",
+        "measured_carriers": "W1-W9",
         "d9_status": D9_STATUS,
         "d9_reason": D9_REASON,
         "d9_mechanism_owner": D9_MECHANISM_OWNER,
-        "scope": "W1-W8 exact source-word -> DomainIdentity carrier/runtime",
+        "scope": "W1-W9 exact source-word -> DomainIdentity carrier/runtime",
         "semantic_authority": (
             "Contract 11.8 metadata; measured values are mechanical carrier cost only"
         ),
@@ -135,13 +135,13 @@ def main() -> int:
     )
 
     lines = [
-        "# W1-W8 exact-width carrier benchmark — Contract 11.8 / D1-D9 authority",
+        "# W1-W9 exact-width carrier benchmark — Contract 11.8 / D1-D9 authority",
         "",
         f"Cachegrind I refs, paired empty-loop subtraction, median of {args.reps} runs, "
         f"{args.iterations:,} iterations.",
         "",
         "This slice consumes production BinarySourceWord -> DomainIdentity APIs only.",
-        "Current semantic authority is D1-D9; this Rust carrier materializes W1-W8.",
+        "Current semantic authority is D1-D9; this Rust carrier materializes W1-W9.",
         f"D9 status: {D9_STATUS} — {D9_REASON}.",
         f"D9 mechanism owner: {D9_MECHANISM_OWNER}.",
         "It contains no benchmark-local residency table, surface-name lookup, or legacy "
@@ -159,18 +159,15 @@ def main() -> int:
     lines += [
         "",
         "Correctness invariants checked before measurement:",
-        "- D1..D8 exact source words round-trip through DomainIdentity;",
-        "- equal payload=1 at widths 1..8 never collapses;",
-        "- D1/D2/D6/D7/D8 fail the generic callable-Core projection;",
-        "- D3/D4/D5 project through the current generic callable boundary;",
-        "- D6 is current semantic residency but generic callability remains separate;",
-        "- D7 is owner-ratified but remains outside generic callable-Core projection;",
-        "- D8 is owner-ratified current identity and remains distinct from historical Sens8;",
-        f"- D9 is owner-ratified current identity but this carrier reports {D9_STATUS};",
+        "- D1..D9 exact source words round-trip through DomainIdentity;";
+        "- equal payload=1 at widths 1..9 never collapses;";
+        "- D9 high-bit value 0x101 survives u16 source -> domain -> source;",
+        "- names, callable-Core projection and semantic registry are not measured;",
+        "- host u8 payload cannot substitute for exact-width D9 identity;",
         "",
         "Deferred lanes:",
         "- packed/framing accounting follows #3026/#2833;",
-        "- D9/W9 carrier implementation is a separate mechanism task; this replay stays fail-closed;",
+        "- W9 exact carrier has a measured lane; language execution remains separate;",
         "- registry/surface comparisons remain separate from carrier cost;",
         "- domain-law execution benchmarks are separate from carrier cost.",
         "",
