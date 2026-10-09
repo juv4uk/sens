@@ -1,0 +1,90 @@
+{
+  "schema": "d10-proposal-ledger-historical-backfill-audit/v1",
+  "date": "2026-10-09",
+  "kind": "HISTORICAL-MISSING-LEDGER-ENTRIES",
+  "authority": [
+    "#4013",
+    "#4463",
+    "#4867"
+  ],
+  "history_file": "knowledge/d10-selection-transition-history.json",
+  "immutable_base_inventory_blob_sha": "73dd518469f972c55411e004b70b054ba8b3ec86",
+  "verified_current_inventory_blob_sha": "a55f307c27f17091795d75ebfcd7d051547d80bc",
+  "selected_current": 630,
+  "ratified_d10": 0,
+  "ledger_rows_in_main_when_audited": 0,
+  "backfill_policy": "QUEUE ONLY. Do not create TSV rows until authentic pinned donor ref, verified predecessor lower+D10 semantic dedup, Ukrainian surfaces and falsifiers. NO-MIGRATION-BLOCK permitted for pure historical study. Separate backfill review may append ledger without changing 630 canonical selected rows.",
+  "historical_selection_debt_count": 5,
+  "items": [
+    {
+      "semantic_name": "DPB",
+      "stable_id": "d10.hist.primary.dpb.20261009",
+      "selected_transition": "d10.hist.primary.batch1.20261009",
+      "evidence": [
+        "https://github.com/juv4uk/sens/pull/4878",
+        "knowledge/d10-historical-primary-admission-batch1-v1.json"
+      ],
+      "provenance_gate": "Find reproducible primary source and exact line; verify all D1-D9/D10 predecessor semantic differences; original migration BLOCK not known.",
+      "proposal_id": null,
+      "backfill_status": "NEEDS-EVIDENCE-REVIEW",
+      "ratified": false,
+      "coordinate": null
+    },
+    {
+      "semantic_name": "ARRAY-DISPLACEMENT",
+      "stable_id": "d10.hist.primary.array-displacement.20261009",
+      "selected_transition": "d10.hist.primary.batch1.20261009",
+      "evidence": [
+        "https://github.com/juv4uk/sens/pull/4878",
+        "knowledge/d10-historical-primary-admission-batch1-v1.json"
+      ],
+      "provenance_gate": "Pin donor array-displacement source with precise line and CL runtime witness. No fake blocked .lisp.",
+      "proposal_id": null,
+      "backfill_status": "NEEDS-EVIDENCE-REVIEW",
+      "ratified": false,
+      "coordinate": null
+    },
+    {
+      "semantic_name": "SLOT-BOUNDP",
+      "stable_id": "d10.clos.slot-boundp.v1",
+      "selected_transition": "d10.clos.roots.20261009",
+      "evidence": [
+        "https://github.com/juv4uk/sens/pull/4882",
+        "knowledge/d10-clos-slot-state-historical-review-v1.json"
+      ],
+      "provenance_gate": "Distinguish unbound slot from bound NIL/missing slot in real CL runtime, prove D1–D9 current-base dedup.",
+      "proposal_id": null,
+      "backfill_status": "NEEDS-EVIDENCE-REVIEW",
+      "ratified": false,
+      "coordinate": null
+    },
+    {
+      "semantic_name": "SLOT-MAKUNBOUND",
+      "stable_id": "d10.clos.slot-makunbound.v1",
+      "selected_transition": "d10.clos.roots.20261009",
+      "evidence": [
+        "https://github.com/juv4uk/sens/pull/4882",
+        "knowledge/d10-clos-slot-state-historical-review-v1.json"
+      ],
+      "provenance_gate": "Prove identity/other slots preserved, source line pin, precursor semantic dedup.",
+      "proposal_id": null,
+      "backfill_status": "NEEDS-EVIDENCE-REVIEW",
+      "ratified": false,
+      "coordinate": null
+    },
+    {
+      "semantic_name": "REMOVE-METHOD",
+      "stable_id": "d10.clos.remove-method.v1",
+      "selected_transition": "d10.clos.roots.20261009",
+      "evidence": [
+        "https://github.com/juv4uk/sens/pull/4882",
+        "knowledge/d10-historical-clos-interlisp-residual-review-v1.json"
+      ],
+      "provenance_gate": "Prove remove vs method/generic deletion and no-op missing method; source pin and semantic dedup.",
+      "proposal_id": null,
+      "backfill_status": "NEEDS-EVIDENCE-REVIEW",
+      "ratified": false,
+      "coordinate": null
+    }
+  ]
+}
