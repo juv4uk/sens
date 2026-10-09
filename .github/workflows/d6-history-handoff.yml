@@ -1,0 +1,55 @@
+name: D6 historical-unplaced handoff
+
+on:
+  pull_request:
+    paths:
+      - "benchmarks/d6-history-handoff/**"
+      - "benchmarks/d6-unknown-frontier/**"
+      - "benchmarks/d6-pure-unknown-parent-tournament/**"
+      - "benchmarks/d6-pure-unknown-antinumerology/**"
+      - "benchmarks/d6-pure-unknown-domain-firewall/**"
+      - "docs/research/2344-post-d4-historical-ledger.json"
+      - ".github/workflows/d6-history-handoff.yml"
+  push:
+    branches: [main]
+    paths:
+      - "benchmarks/d6-history-handoff/**"
+      - "benchmarks/d6-unknown-frontier/**"
+      - "benchmarks/d6-pure-unknown-parent-tournament/**"
+      - "benchmarks/d6-pure-unknown-antinumerology/**"
+      - "benchmarks/d6-pure-unknown-domain-firewall/**"
+      - "docs/research/2344-post-d4-historical-ledger.json"
+      - ".github/workflows/d6-history-handoff.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  handoff:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Join historical unresolved rows to current D6 evidence
+        run: |
+          python3 benchmarks/d6-history-handoff/run.py \
+            --out /tmp/d6-history-handoff.json \
+            | tee /tmp/d6-history-handoff.log
+          grep -F "D6-HISTORICAL-UNPLACED-HANDOFF=PASS" /tmp/d6-history-handoff.log
+          grep -F "historical-unplaced-tested=7" /tmp/d6-history-handoff.log
+          grep -F "keep-unplaced=7" /tmp/d6-history-handoff.log
+          grep -F "d6-membership-inferred=0" /tmp/d6-history-handoff.log
+          grep -F "pure-unknown-candidates=0" /tmp/d6-history-handoff.log
+          grep -F "occupancy-mutations=0" /tmp/d6-history-handoff.log
+          grep -F "RESULT=KEEP-ALL-HISTORICAL-ROWS-UNPLACED" /tmp/d6-history-handoff.log
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: d6-history-handoff
+          path: |
+            /tmp/d6-history-handoff.json
+            /tmp/d6-history-handoff.log
+          retention-days: 14
