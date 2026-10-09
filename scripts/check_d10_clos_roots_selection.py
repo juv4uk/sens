@@ -92,13 +92,13 @@ def audit(inv, state, foundation, evidence):
 def self_test(inv, state, foundation, evidence):
     audit(inv, state, foundation, evidence)
     mutations = [
-        ("duplicate name", lambda i, s: i["rows"].append(copy.deepcopy(i["rows"][-1]))),
-        ("fake coordinate", lambda i, s: i["rows"][-1].update({"coordinate":"1111111111"})),
-        ("fake ratification", lambda i, s: i["rows"][-1].update({"ratified_resident":True})),
-        ("missing falsifier", lambda i, s: i["rows"][-1].update({"falsifiers":[]})),
+        ("duplicate name", lambda i, s: i["rows"].append(copy.deepcopy(next(r for r in i["rows"] if r["semantic_name"] == "REMOVE-METHOD")))),
+        ("fake coordinate", lambda i, s: next(r for r in i["rows"] if r["semantic_name"] == "REMOVE-METHOD").update({"coordinate":"1111111111"})),
+        ("fake ratification", lambda i, s: next(r for r in i["rows"] if r["semantic_name"] == "REMOVE-METHOD").update({"ratified_resident":True})),
+        ("missing falsifier", lambda i, s: next(r for r in i["rows"] if r["semantic_name"] == "REMOVE-METHOD").update({"falsifiers":[]})),
         ("wrong remaining", lambda i, s: s["target"].update({"remaining_semantic_candidates":-1})),
-        ("forged source", lambda i, s: i["rows"][-1].update({"primary_url":"https://example.invalid"})),
-        ("owner gate bypass", lambda i, s: i["rows"][-1].update({"proposal_status":"ratified"})),
+        ("forged source", lambda i, s: next(r for r in i["rows"] if r["semantic_name"] == "REMOVE-METHOD").update({"primary_url":"https://example.invalid"})),
+        ("owner gate bypass", lambda i, s: next(r for r in i["rows"] if r["semantic_name"] == "REMOVE-METHOD").update({"proposal_status":"ratified"})),
     ]
     for title, change in mutations:
         i, s = copy.deepcopy(inv), copy.deepcopy(state)
