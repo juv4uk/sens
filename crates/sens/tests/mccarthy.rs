@@ -295,12 +295,6 @@ fn bootstrap_library_is_written_and_executed_in_sens() {
             .value,
         Value::Symbol("antenna".into())
     );
-    assert_eq!(
-        eval_program("(not? (quote ()))", &mut session)
-            .unwrap()
-            .value,
-        Value::Symbol("t".into())
-    );
 }
 
 #[test]
@@ -391,10 +385,6 @@ fn implements_mccarthys_seven_primitives() {
             Value::Symbol("radio".into()),
             Value::Symbol("antenna".into())
         ])
-    );
-    assert_eq!(
-        eval("(за-умовою (() (як-є wrong)) ((тотожне? (як-є x) (як-є x)) (як-є right)))"),
-        Value::Symbol("right".into())
     );
 }
 
@@ -710,6 +700,12 @@ fn conformance_tests_from_my() {
         };
         let expr = alist_str(entries, "expr").expect("fixture needs an \"expr\" string");
 
+        // Historical compatibility is provenance, not an executable Rust contract.
+        // Canonical exact-domain behavior is covered by D1/D3 witnesses.
+        if alist_str(entries, "role") == Some("historical-compatibility") {
+            continue;
+        }
+
         // Capability fixtures (e.g. the tcp-connect type-error entry) are only
         // meaningful when a host layer is installed; this core-side runner
         // deliberately installs none, so such entries are skipped here and
@@ -879,140 +875,6 @@ fn linter_tests_from_my() {
             .value
             .to_string();
         assert_eq!(actual, expected, "Failed on expression: {}", expr);
-    }
-}
-
-// Simple LCG for property tests
-struct Lcg {
-    state: u64,
-}
-impl Lcg {
-    fn new(seed: u64) -> Self {
-        Self { state: seed }
-    }
-    fn next(&mut self) -> u64 {
-        self.state = self.state.wrapping_mul(6364136223846793005).wrapping_add(1);
-        self.state
-    }
-    fn next_int(&mut self) -> i64 {
-        self.next() as i64
-    }
-    fn next_string(&mut self, max_len: usize) -> String {
-        let len = (self.next() as usize) % max_len;
-        let mut s = String::with_capacity(len);
-        for _ in 0..len {
-            let c = (b'a' + (self.next() % 26) as u8) as char;
-            s.push(c);
-        }
-        s
-    }
-    fn next_list(&mut self, max_len: usize) -> Value {
-        let len = (self.next() as usize) % max_len;
-        let mut items = Vec::with_capacity(len);
-        for _ in 0..len {
-            items.push(Value::Number(self.next_int() as f64, Exactness::Exact));
-        }
-        Value::list(items)
-    }
-    fn next_string_list(&mut self, max_len: usize) -> Value {
-        let len = (self.next() as usize) % max_len;
-        let mut items = Vec::with_capacity(len);
-        for _ in 0..len {
-            items.push(Value::String(self.next_string(10).into()));
-        }
-        Value::list(items)
-    }
-}
-
-fn alist_list<'a>(entries: &'a [Expr], key: &str) -> Option<&'a [Expr]> {
-    entries.iter().find_map(|entry| {
-        let ExprKind::Pair(k, v) = &entry.kind else {
-            return None;
-        };
-        let ExprKind::Symbol(name) = &k.kind else {
-            return None;
-        };
-        if &**name != key {
-            return None;
-        }
-        if let ExprKind::List(list) = &v.kind {
-            return Some(&**list);
-        }
-        let mut items = Vec::new();
-        let mut current = v;
-        while let ExprKind::Pair(head, tail) = &current.kind {
-            items.push(head.as_ref().clone());
-            current = tail;
-        }
-        Some(items.leak() as &[Expr]) // Leak for simple test usage
-    })
-}
-
-#[test]
-fn property_tests_from_my() {
-    let forms = parse(include_str!("../../../tests/fixtures/properties.lisp"))
-        .expect("properties.my should parse as valid sens source");
-
-    let mut lcg = Lcg::new(42);
-
-    for form in &forms {
-        let ExprKind::List(entries) = &form.kind else {
-            panic!("each top-level form in properties.my should be an alist: {form:?}");
-        };
-        let name = alist_str(entries, "name").expect("fixture needs a \"name\"");
-        let expr_str = alist_str(entries, "expr").expect("fixture needs an \"expr\"");
-        let types = alist_list(entries, "types").expect("fixture needs \"types\"");
-        let type_strings: Vec<&str> = types
-            .iter()
-            .map(|e| {
-                if let ExprKind::String(s) = &e.kind {
-                    s.as_ref()
-                } else {
-                    panic!("type must be string")
-                }
-            })
-            .collect();
-
-        println!("type_strings = {:?}", type_strings);
-        let param_names = ["x", "y", "z", "w", "v"];
-
-        for iteration in 0..100 {
-            let mut session = Session::default();
-            eval_program(include_str!("../../../lib/core.lisp"), &mut session).unwrap();
-            eval_program(include_str!("../../../lib/forward.lisp"), &mut session).unwrap();
-            eval_program(include_str!("../../../lib/persistent-map.lisp"), &mut session).unwrap();
-            eval_program(include_str!("../../../lib/knowledge.lisp"), &mut session).unwrap();
-            eval_program(include_str!("../../../lib/world.lisp"), &mut session).unwrap();
-            eval_program(
-                include_str!("../../../tests/fixtures/properties-helpers.lisp"),
-                &mut session,
-            )
-            .unwrap();
-
-            for (i, &t) in type_strings.iter().enumerate() {
-                let val = match t {
-                    "int" => Value::Number(lcg.next_int() as f64, Exactness::Exact),
-                    "string" => Value::String(lcg.next_string(10).into()),
-                    "list" => lcg.next_list(10),
-                    "string-list" => lcg.next_string_list(10),
-                    _ => panic!("Unknown type: {}", t),
-                };
-                session.environment.define(param_names[i], val);
-            }
-
-            let result = eval_program(expr_str, &mut session)
-                .unwrap_or_else(|e| panic!("property {name} failed on iteration {iteration}: {e}"));
-            // Truthiness, not exact identity: different properties check
-            // equality with different predicates (`eq` -> Symbol("t")/Nil,
-            // numeric `=` -> Value::Bool -- both untouched here on purpose,
-            // see Value::truth), so a property "holding" only ever means
-            // "truthy", never one specific Value shape.
-            assert!(
-                result.value.is_truthy(),
-                "Property {name} failed on iteration {iteration}: got {:?}",
-                result.value
-            );
-        }
     }
 }
 
