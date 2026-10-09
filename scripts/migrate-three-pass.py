@@ -559,6 +559,8 @@ class Resolver:
             )
         # Exact current function words are already migrated.
         if 3<=len(t)<=6 and set(t)<=set("01"):
+            if self.strict_decisions and t == D3_EMPTY:
+                raise MigrationError("L3 BLOCK: structural D3 000 is not callable", tok)
             self.counts["already-exact"]+=1
             return [t],"already-exact"
         # The same eight visible bits can be historical SID8 or CURRENT D8.
@@ -1059,6 +1061,8 @@ def main():
                     help="переклад/перевірка без запису фізичних файлів")
     ap.add_argument("--source-era", choices=("auto","legacy","current"), default="auto",
                     help="auto блокує W8; legacy = сумісний старий SID8 лише з provenance; current = ратифікований D8")
+    ap.add_argument("--decision-table", choices=("legacy", "l1-l7"), default="legacy",
+                    help="strict L1-L7 reader AST normalization; no semantic guesses")
     ap.add_argument("--unpaired-only", action="store_true",
                     help="мігрувати лише .lisp без однойменного наявного .sens")
     args = ap.parse_args()
@@ -1110,7 +1114,8 @@ def main():
         rel = path.resolve().relative_to(base_root)
         dest = sens_destination(rel)
         target = args.out / dest
-        resolver = Resolver(legacy, my, upper, args.source_era, admitted_d8)
+        resolver = Resolver(legacy, my, upper, args.source_era, admitted_d8,
+                            strict_decisions=args.decision_table == "l1-l7")
         try:
             if dest in seen_destinations:
                 raise SensT5Error(f"duplicate destination {dest}")
