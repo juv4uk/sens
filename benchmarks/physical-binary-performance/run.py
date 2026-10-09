@@ -221,7 +221,7 @@ def main() -> None:
     lines = [
         "# Фізична двійкова SENS — вимірювання часу й щільності",
         "",
-        f"Commit: \`{commit}\`; runner CPU: {cpu_model()}",
+        f"Commit: `{commit}`; runner CPU: {cpu_model()}",
         "",
         "| Програма | Шлях | Медіана, мс | p95, мс | Перший запуск, мс | I refs |",
         "|---|---|---:|---:|---:|---:|",
