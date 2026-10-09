@@ -1,0 +1,25 @@
+name: D10 Floyd Hoare finite inductive invariant research
+on:
+  pull_request:
+    paths:
+      - knowledge/d10-floyd-hoare-finite-inductiveness-20261009.json
+      - tests/test_d10_floyd_hoare_inductiveness.py
+      - knowledge/d10-proposal-ledger.tsv
+      - .github/workflows/d10-floyd-hoare-invariant.yml
+  push:
+    branches: [main]
+    paths:
+      - knowledge/d10-floyd-hoare-finite-inductiveness-20261009.json
+      - tests/test_d10_floyd_hoare_inductiveness.py
+permissions:
+  contents: read
+jobs:
+  exact-finite:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check 32768 exact finite transition-system witnesses
+        run: python3 tests/test_d10_floyd_hoare_inductiveness.py
+      - name: Check research proposal ledger remains pending
+        run: python3 scripts/check-d10-proposal-ledger.py
