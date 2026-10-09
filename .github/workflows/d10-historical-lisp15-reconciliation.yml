@@ -7,6 +7,8 @@ on:
       - "knowledge/d10-v1-semantic-inventory.json"
       - "knowledge/d1-d9-foundation.json"
       - "scripts/d10_historical_snapshot_compat.py"
+      - "scripts/check_d10_historical_admission_batch1.py"
+      - "knowledge/d10-growth-baseline-v1.json"
       - "scripts/check_d10_historical_lisp15_reconciliation.py"
       - "tests/test_d10_historical_lisp15_reconciliation.py"
       - ".github/workflows/d10-historical-lisp15-reconciliation.yml"
