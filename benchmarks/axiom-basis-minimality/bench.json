@@ -1,0 +1,19 @@
+{
+  "schema": "sens-benchmark-manifest/v1",
+  "stand": "axiom-basis-minimality",
+  "wing": "Exact mathematical and world-knowledge axiom research",
+  "roles": [
+    "RESEARCH",
+    "FALSIFIER",
+    "CONFORMANCE"
+  ],
+  "question": "Which mathematical seed constants are sufficient under exact D5 arithmetic, and which SI-derived facts explicitly depend on each world defining constant?",
+  "claim": "Bounded rational closure and source dependency discovery only; neither bounded closure nor source-level absence grants any new D5/D10 semantic ratification.",
+  "witness": [
+    "probe.py"
+  ],
+  "status": "RESEARCH-ONLY",
+  "generation": "historical donor PR #3426 replayed Oct 9 2026",
+  "axis": "D5/exact-Q-axiom-basis-and-world-knowledge-dependencies",
+  "reproduce": "python3 benchmarks/axiom-basis-minimality/probe.py"
+}
