@@ -18,11 +18,14 @@ import time
 from pathlib import Path
 
 SCHEMA = "sens-cold-process-bootstrap/v1"
-MODES = ("noop", "session", "d3", "core", "core-d3")
+MODES = ("noop", "bare-session", "session", "bare-d3", "d3", "bare-core", "core", "core-d3")
 EXPECTED = {
     "noop": "NONE",
+    "bare-session": "BARE_SESSION",
     "session": "SESSION",
+    "bare-d3": "BARE_D3_EMPTY",
     "d3": "D3_EMPTY",
+    "bare-core": "BARE_CORE_LOADED",
     "core": "CORE_LOADED",
     "core-d3": "CORE_AND_D3_EMPTY",
 }
@@ -163,6 +166,24 @@ def main() -> int:
             lines.append(
                 f"| `{row['mode']}` | — | — | BLOCKED: {row['reason'].replace('|', '/')} |"
             )
+    if all(rows[mode]["status"] == "MEASURED" for mode in ("bare-session", "session")):
+        raw_default = rows["session"]["median_inner_ns"]
+        raw_bare = rows["bare-session"]["median_inner_ns"]
+        if raw_bare > 0:
+            lines.extend([
+                "",
+                f"Observed per-process **inner phase ratio** default/bare: "
+                f"{raw_default / raw_bare:.2f}× "
+                "(two separately sampled modes, not an OS startup speedup).",
+            ])
+    if all(rows[mode]["status"] == "MEASURED" for mode in ("bare-core", "core")):
+        raw_default = rows["core"]["median_inner_ns"]
+        raw_bare = rows["bare-core"]["median_inner_ns"]
+        if raw_bare > 0:
+            lines.append(
+                f"Observed Core4 bootstrap ratio default-session/bare-session: "
+                f"{raw_default / raw_bare:.2f}× (both load the same Lisp-owned Core4)."
+            )
     lines.extend([
         "",
         "Each process was freshly launched, but **Linux page cache was not cleared**. "
@@ -171,13 +192,17 @@ def main() -> int:
         "claim an exact loader cost.",
         "Core4 cases only report MEASURED when the Lisp-owned bootstrap succeeds; "
         "failures are preserved as BLOCKED, not disguised as a timing of an error.",
-        "Bare Session is not Core4 bootstrap; D3 cases use ratified exact-domain code.",
+        "Bare Session skips Lisp macro bootstrap by explicit opt-in; Session::default "
+        "still loads the language-owned macro library. Both D3 cases execute "
+        "the same exact-domain QUOTE; Core4 loader initializes macros itself.",
         "",
     ])
     summary = "\n".join(lines)
     args.out.with_name("cold-start-summary.md").write_text(summary, encoding="utf-8")
     print(summary)
-    if any(rows[mode]["status"] != "MEASURED" for mode in ("noop", "session", "d3")):
+    if any(rows[mode]["status"] != "MEASURED" for mode in (
+        "noop", "bare-session", "session", "bare-d3", "d3"
+    )):
         print("BLOCKED: even the fundamental no-op/Session/D3 cold path failed", file=sys.stderr)
         return 2
     return 0
