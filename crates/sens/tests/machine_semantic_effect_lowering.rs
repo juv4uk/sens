@@ -103,7 +103,6 @@ fn effect_guard_uses_exact_d1_predicates_at_each_stage() {
         "(machine-effect-exact-integer? 2)",
         "(machine-effect-within-inclusive-integer-range? 2 0 4294967295)",
         "(machine-effect-u32-carrier? 2)",
-        "(machine-effect-bounded-u64-add 2 3)",
     ] {
         let result = eval_program(source, &mut session)
             .unwrap_or_else(|error| panic!("target-neutral effect stage {source}: {error}"));
@@ -113,6 +112,12 @@ fn effect_guard_uses_exact_d1_predicates_at_each_stage() {
             "valid exact integer and bounded carrier checks must answer D1:1"
         );
     }
+    // Constructor is intentionally NOT a D1 predicate: it returns a
+    // target-neutral three-field effect data value after the D1 guards.
+    assert_eq!(
+        eval_value("(machine-effect-bounded-u64-add 2 3)", &mut session),
+        "(bounded-u64-add 2 3)"
+    );
     for source in [
         "(machine-effect-within-inclusive-integer-range? -1 0 10)",
         "(machine-effect-within-inclusive-integer-range? 11 0 10)",
