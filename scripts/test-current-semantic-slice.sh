@@ -22,14 +22,9 @@ cargo test -p sens \
   --test semantic_coordinate_matrix_845
 
 
-# #1096: bare eight-bit tokens are Canon SID spellings. Lisp owns the
-# parity/round-trip meaning; the shell observes only the named envelope.
-bare_sid_status="$(cargo run --quiet -p sens-cli --bin sens -- tests/fixtures/bare-sid-literal-v1.lisp)"
-if [[ "$bare_sid_status" != "(bare-sid-literal-witness (status pass))" ]]; then
-  printf 'bare SID Lisp witness failed: %s\n' "$bare_sid_status" >&2
-  exit 1
-fi
-
+# Historical #1096 bare-SID witness remains preserved as compatibility evidence,
+# but it is intentionally not executed by the current semantic slice. Contract
+# 11.8 assigns W8 to exact D8 identity; Sens8/Sid8 remains migration/provenance only.
 # #291: quantity semantics live in Lisp. The shell observes only the named
 # pass envelope; expected scientific quantities and relations stay in the
 # Lisp witness itself. No replacement Rust observer is introduced.
