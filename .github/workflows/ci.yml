@@ -204,8 +204,8 @@ jobs:
           cat tests/function-table-mechanisms-verdict.lisp
           ./target/debug/sens scripts/enforce-function-table-mechanisms.lisp
 
-      - name: Profile-scoped SENS host admission
-        run: cargo test -p sens --test profile_mechanism_projection_1422 -- --nocapture
+      - name: Domain ladder mechanical guard
+        run: cargo test -p sens --test domain_ladder_only_kernel -- --nocapture
 
       - name: Canon-subordinate island math evidence
         shell: bash
