@@ -1,0 +1,138 @@
+{
+  "schema": "sens-d10-symbolic-ai-antiunification/v1",
+  "date": "2026-10-09",
+  "status": "RESEARCH-OWNER-REVIEW-NOT-SELECTED",
+  "baseline": {
+    "main_selected_at_claim": 634,
+    "main_inventory_git_blob": "65014431ac3e64633cd0be3630cfafc5e7a9aea3",
+    "foundation_git_blob": "09d1d71c39d1484dfd005a5068dbb18b76f0f0d4",
+    "ratified_d10": 0
+  },
+  "motivation": "First-order symbolic pattern induction for Advice Taker, Prolog knowledge bases, proof-rule induction and program ASTs. Reused also for grammatical (Panini) structures, astronomical observation event models and SDR/FPGA event descriptions; no application-specific hardware primitive.",
+  "donor": {
+    "name": "SWI-Prolog term_subsumer/3",
+    "url": "https://www.swi-prolog.org/pldoc/man?section=terms",
+    "historical_context": "Plotkin/Reynolds anti-unification least general generalization of first-order terms; bounded implementation borrows observable finite-term semantics, not cyclic term or attributed-variable SWI extensions.",
+    "parallel_reference": "https://www.swi-prolog.org/pack/list?p=anti_unify",
+    "implementation_executable": "tests/d10_antiunify_swi.pl",
+    "counterpart": "tests/test_d10_antiunify_finite.py",
+    "donor_parity": "Finite acyclic ground Prolog terms only; do not assert exact identity for cyclic graphs, constraint-attributed variables, order of internal fresh variable identifiers or side effects."
+  },
+  "rows": [
+    {
+      "proposal_key": "D10AI-0001",
+      "semantic_name": "FINITE-TERM-ANTI-UNIFY",
+      "surface_uk": "узагальнити-терми",
+      "surface_ukr": "найменше-спільне-узагальнення-термів",
+      "english_donor_surface": "term_subsumer/3",
+      "kind": "PURE-FINITE-FIRST-ORDER-SYMBOLIC-LAW",
+      "argument_shape": "(ground_acyclic_first_order_term A, ground_acyclic_first_order_term B) -> (LGG G, substitutions sigma_A, sigma_B)",
+      "law": "Return a least-general generalization G and witness substitutions, i.e. G[sigma_A]=A and G[sigma_B]=B. Preserve identical atoms and identical same-arity functors recursively. Distinct pairs of disagreeing subterms become fresh variables, but the SAME ordered pair recurring at different positions MUST reuse the SAME variable; thus G preserves sharing/equality constraints. Variable identifiers are normalized to first left-to-right occurrence.",
+      "preconditions": [
+        "Terms are finite, ground and acyclic; represent constants and named functors with bounded finite argument sequences.",
+        "Functor identity includes symbol and exact arity; equality is structural, not source-surface text, pointer identity or host evaluation.",
+        "Fresh variables in the result are pattern metavariables, not executable D2 binders or SENS source variable definitions."
+      ],
+      "witnesses": [
+        {
+          "a": "pair(a,a)",
+          "b": "pair(b,b)",
+          "g": "pair(V0,V0)",
+          "reason": "Repeated ordered mismatch pair (a,b) must re-use one metavariable; pair(V0,V1) is less specific."
+        },
+        {
+          "a": "pair(a,a)",
+          "b": "pair(b,c)",
+          "g": "pair(V0,V1)",
+          "reason": "Distinct disagreement pairs (a,b),(a,c) must remain independent."
+        },
+        {
+          "a": "parent(ann,leo)",
+          "b": "parent(ann,mira)",
+          "g": "parent(ann,V0)",
+          "reason": "Keep exact shared relation and subject."
+        },
+        {
+          "a": "f(g(a),g(a))",
+          "b": "f(g(b),g(b))",
+          "g": "f(g(V0),g(V0))",
+          "reason": "Reused pair beneath matching inner functors."
+        },
+        {
+          "a": "f(a)",
+          "b": "g(a)",
+          "g": "V0",
+          "reason": "Different outer functors cannot share a root."
+        },
+        {
+          "a": "observation(telescope1,clear)",
+          "b": "observation(telescope2,clear)",
+          "g": "observation(V0,clear)",
+          "reason": "Astronomy pattern induction retains predicate and state."
+        }
+      ],
+      "falsifiers": [
+        "Returning the constant 'a' as LGG(a,b) fails to instantiate to b.",
+        "Returning pair(V0,V1) for pair(a,a) vs pair(b,b) is unnecessarily general; shared disagreement variable must be reused.",
+        "Returning pair(V0,V0) for pair(a,a) vs pair(b,c) fails to instantiate to both terms under one substitution.",
+        "Treating functors f/1 and f/2 as identical when arity differs is invalid.",
+        "Binding actual D2 program variables or mutating source terms is not part of this pure mathematical contract.",
+        "Claiming support for cyclic Prolog terms or term attributes from ground finite witnesses is not warranted."
+      ],
+      "neighbors": [
+        "D1–D9 UNIFY",
+        "D1–D9 CLIPS-VAR-TERM",
+        "D10 PROVE-RULE",
+        "D10 KNOWLEDGE-TERM-VALID?",
+        "D10 PROLOG-SUBSTITUTIONS-TO-DATALOG-FACTS"
+      ],
+      "dedup": "Exact-name absent in main 634. Unlike UNIFY, anti-unify seeks G so both terms are instances of G, rather than substitutions making inputs equal. Important owner question: expressible by recursive folds; proof of an independent Core-D10 root vs self-hosted library still pending.",
+      "owner_question": "Should the unique, pair-sharing preserving least-general-generalization law be language-visible D10 research, or should it be a first-class library semantic composed from finite term recursion and map? No numerical coordinate until a separate owner decision.",
+      "selected_in_d10": false,
+      "coordinate": null,
+      "ratified_resident": false,
+      "physical_t5_authorized": false
+    }
+  ],
+  "related_holds": [
+    {
+      "name": "ATMS-ASSUMPTION-LABEL",
+      "status": "PEER-OWNED",
+      "owner": "#4958",
+      "reason": "Truth maintenance and default-reasoning assumptions already claimed by another agent; not an anti-unify operation."
+    },
+    {
+      "name": "MINIMAL-ABDUCTIVE-EXPLANATIONS",
+      "status": "PEER-OWNED",
+      "owner": "#4965",
+      "reason": "Goal explanation with hypothesis sets, not least-general term structure."
+    },
+    {
+      "name": "BAYESIAN-BELIEF-UPDATE",
+      "status": "PEER-OWNED",
+      "owner": "#4963",
+      "reason": "Numeric probabilistic update rather than symbolic structural generalization."
+    },
+    {
+      "name": "RULE-INDUCTION",
+      "status": "HOLD-BEHAVIOR-REVIEW",
+      "owner": "Advice Taker library",
+      "reason": "Requires selecting and scoring patterns across observations; anti-unify is just one combinator."
+    },
+    {
+      "name": "CYCLIC-TERM-ANTI-UNIFY",
+      "status": "HOLD-BOUNDARY",
+      "owner": "future",
+      "reason": "Cyclic rational trees require cycle-aware proof and are outside this finite/ground contract."
+    }
+  ],
+  "admission": {
+    "selected_added": 0,
+    "coordinates_added": 0,
+    "ratified_added": 0,
+    "canonical_inventory_changed": false,
+    "oracle_runtime": "SWI-Prolog in GitHub Actions",
+    "python_model_is_sens_runtime": false,
+    "next": "If independent SWI oracle and source gate are green, owner/core-vs-library semantic review, then serial append with ledger and original prior SHA after latest main; no automatic ratification."
+  }
+}
