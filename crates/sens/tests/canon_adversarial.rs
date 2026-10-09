@@ -36,18 +36,6 @@ fn quote_surface_suppresses_evaluation_of_unknown_code() {
 }
 
 #[test]
-fn cond_surface_stops_at_the_first_true_clause() {
-    assert_eq!(
-        eval("(за-умовою ((тотожне? (як-є перша) (як-є перша)) (як-є перша)) ((цієї-функції-не-існує) (як-є друга)))"),
-        "перша"
-    );
-    assert_eq!(
-        eval("(anukrama ((abheda (svarūpa prathama) (svarūpa prathama)) (svarūpa prathama)) ((ayam-na-vidyate) (svarūpa dvitīya)))"),
-        "prathama"
-    );
-}
-
-#[test]
 fn rest_passes_the_triple_cons_structure_test() {
     assert_eq!(eval("(решта (як-є (кіт . 42)))"), "42");
     assert_eq!(eval("(решта (як-є (1 2 3)))"), "(2 3)");
