@@ -23,14 +23,21 @@
 
 (00001001 science-proper-list?
   (00001000 (x)
-    (00000111
-      ; Pair cells recurse through CDR; never pass a compound value to EQ.
-      ((00000010 x) ()
-       (science-proper-list? (00000110 x)))
-      ; EQ is atom-only. This branch runs only when X itself is an atom.
-      ((00000010 x) (1)
-       (00000011 x (00000001 ())))
-      (t (00000001 ())))))
+    (за-умовою
+      ((порожнє? x) так)
+      ((атом? x) ні)
+      ((science-proper-list? (решта x)) так)
+      ((хибне? (science-proper-list? (решта x))) ні))))
+
+(00001001 science-list-length-is?
+  (00001000 (values count)
+    (за-умовою
+      ((нуль? count) (порожнє? values))
+      ((хибне? (нуль? count))
+       (за-умовою
+         ((атом? values) ні)
+         ((хибне? (атом? values))
+          (science-list-length-is? (решта values) (відняти count 1))))))))
 
 (00001001 science-sixth
   (00001000 (values)
@@ -46,18 +53,13 @@
 
 (00001001 dimension?
   (00001000 (x)
-    (00000111
-      ((00000010 x) () (00000001 ()))
-      ((00000010 x) (1) (00000001 ()))
-      ((00000011 (science-proper-list? x) (00000001 ())) (00000001 ()))
-      ((00000011 (00011100 (00101000 x) 3) (00000001 ())) (00000001 ()))
-      ((00000011 (00000101 x) *dimension-schema*)
-       (00000111
-         ((00000011 (00100011 (00101111 x)) (00000001 ())) (00000001 ()))
-         ((00000010 (00110000 x)) () t)
-         ((00000010 (00110000 x)) (1) t)
-         (t (00000001 ()))))
-      (t (00000001 ())))))
+    (за-умовою
+      ((хибне? (science-proper-list? x)) ні)
+      ((хибне? (science-list-length-is? x 3)) ні)
+      ((хибне? (тотожне? (перше x) *dimension-schema*)) ні)
+      ((хибне? (символ? (dimension-base x))) ні)
+      ((хибне? (атом? (dimension-exponent x))) ні)
+      ((так) так))))
 
 (00001001 dimension-base
   (00001000 (dimension) (00101111 dimension)))
@@ -67,16 +69,12 @@
 
 (00001001 science-dimensions-valid?
   (00001000 (dimensions)
-    (00000111
-      ((00000010 dimensions) () (00000111
-         ((00000011 dimensions (00000001 ())) t)
-         (t (00000001 ()))))
-      ((00000010 dimensions) (1) (00000111
-         ((00000011 dimensions (00000001 ())) t)
-         (t (00000001 ()))))
-      ((dimension? (00000101 dimensions))
-       (science-dimensions-valid? (00000110 dimensions)))
-      (t (00000001 ())))))
+    (за-умовою
+      ((порожнє? dimensions) так)
+      ((атом? dimensions) ні)
+      ((dimension? (перше dimensions))
+       (science-dimensions-valid? (решта dimensions)))
+      ((хибне? (dimension? (перше dimensions))) ні))))
 
 (00001001 make-unit
   (00001000 (dimensions)
@@ -84,13 +82,12 @@
 
 (00001001 unit?
   (00001000 (x)
-    (00000111
-      ((00000010 x) () (00000001 ()))
-      ((00000010 x) (1) (00000001 ()))
-      ((00000011 (science-proper-list? x) (00000001 ())) (00000001 ()))
-      ((00000011 (00000101 x) *unit-schema*)
-       (science-dimensions-valid? (00000110 x)))
-      (t (00000001 ())))))
+    (за-умовою
+      ((хибне? (science-proper-list? x)) ні)
+      ((хибне? (science-list-length-is? x 2)) ні)
+      ((хибне? (тотожне? (перше x) *unit-schema*)) ні)
+      ((хибне? (science-dimensions-valid? (перше (решта x)))) ні)
+      ((так) так))))
 
 (00001001 unit-dimensions
   (00001000 (unit) (00000110 unit)))
@@ -101,14 +98,12 @@
 
 (00001001 quantity?
   (00001000 (x)
-    (00000111
-      ((00000010 x) () (00000001 ()))
-      ((00000010 x) (1) (00000001 ()))
-      ((00000011 (science-proper-list? x) (00000001 ())) (00000001 ()))
-      ((00000011 (00011100 (00101000 x) 3) (00000001 ())) (00000001 ()))
-      ((00000011 (00000101 x) *quantity-schema*)
-       (unit? (00110000 x)))
-      (t (00000001 ())))))
+    (за-умовою
+      ((хибне? (science-proper-list? x)) ні)
+      ((хибне? (science-list-length-is? x 3)) ні)
+      ((хибне? (тотожне? (перше x) *quantity-schema*)) ні)
+      ((хибне? (unit? (перше (решта (решта x))))) ні)
+      ((так) так))))
 
 (00001001 quantity-value
   (00001000 (quantity) (00101111 quantity)))
@@ -121,50 +116,51 @@
 ; my-lisp, а нульовий показник видаляє вимірність з результату.
 (00001001 science-add-dimension
   (00001000 (dimension dimensions)
-    (00000111
-      ((00000010 dimensions) () (00000111
-         ((00011100 (dimension-exponent dimension) 0) 1 (00000001 ()))
-         (t (00100111 dimension))))
-      ((00000010 dimensions) (1) (00000111
-         ((00011100 (dimension-exponent dimension) 0) 1 (00000001 ()))
-         (t (00100111 dimension))))
-      ((00000011 (dimension-base dimension)
-           (dimension-base (00000101 dimensions)))
-       (10011100 ((sum
-               (00001100 (dimension-exponent dimension)
-                  (dimension-exponent (00000101 dimensions)))))
-         (00000111
-           ((00011100 sum 0) 1 (00000110 dimensions))
-           (t
-            (00000100
-              (make-dimension (dimension-base dimension) sum)
-              (00000110 dimensions))))))
-      (t
-       (00000100
-         (00000101 dimensions)
-         (science-add-dimension dimension (00000110 dimensions)))))))
+    (за-умовою
+      ((атом? dimensions)
+       (за-умовою
+         ((нуль? (dimension-exponent dimension)) (як-є ()))
+         ((хибне? (нуль? (dimension-exponent dimension)))
+          (сполучити dimension (як-є ())))))
+      ((тотожне? (dimension-base dimension)
+                 (dimension-base (перше dimensions)))
+       (за-умовою
+         ((нуль? (додати (dimension-exponent dimension)
+                         (dimension-exponent (перше dimensions))))
+          (решта dimensions))
+         ((хибне? (нуль? (додати (dimension-exponent dimension)
+                                 (dimension-exponent (перше dimensions)))))
+          (сполучити
+            (make-dimension
+              (dimension-base dimension)
+              (додати (dimension-exponent dimension)
+                      (dimension-exponent (перше dimensions))))
+            (решта dimensions)))))
+      ((хибне? (тотожне? (dimension-base dimension)
+                         (dimension-base (перше dimensions))))
+       (сполучити
+         (перше dimensions)
+         (science-add-dimension dimension (решта dimensions)))))))
 
 (00001001 science-merge-dimensions
   (00001000 (from into)
-    (00000111
-      ((00000010 from) () into)
-      ((00000010 from) (1) into)
-      (t
+    (за-умовою
+      ((атом? from) into)
+      ((хибне? (атом? from))
        (science-merge-dimensions
-         (00000110 from)
-         (science-add-dimension (00000101 from) into))))))
+         (решта from)
+         (science-add-dimension (перше from) into))))))
 
 (00001001 science-negate-dimensions
   (00001000 (dimensions)
-    (00000111
-      ((00000010 dimensions) () (00000001 ()))
-      ((00000010 dimensions) (1) (00000001 ()))
-      (t
-       (00000100
+    (за-умовою
+      ((атом? dimensions) (як-є ()))
+      ((хибне? (атом? dimensions))
+       (сполучити
          (make-dimension
-           (dimension-base (00000101 dimensions))
-           (00001101 0 (dimension-exponent (00000101 dimensions))))
-         (science-negate-dimensions (00000110 dimensions)))))))
+           (dimension-base (перше dimensions))
+           (відняти 0 (dimension-exponent (перше dimensions))))
+         (science-negate-dimensions (решта dimensions)))))))
 
 (00001001 unit-product
   (00001000 (left right)
@@ -198,35 +194,30 @@
 
 (00001001 science-source?
   (00001000 (x)
-    (00000111
-      ((00000010 x) () (00000001 ()))
-      ((00000010 x) (1) (00000001 ()))
-      ((00000011 (science-proper-list? x) (00000001 ())) (00000001 ()))
-      ((00000011 (00011100 (00101000 x) 3) (00000001 ())) (00000001 ()))
-      ((00000011 (00000101 x) *science-source-schema*)
-       (00000111
-         ((00000011 (00100011 (00101111 x)) (00000001 ())) (00000001 ()))
-         ((00000010 (00110000 x)) () t)
-         ((00000010 (00110000 x)) (1) t)
-         (t (00000001 ()))))
-      (t (00000001 ())))))
+    (за-умовою
+      ((хибне? (science-proper-list? x)) ні)
+      ((хибне? (science-list-length-is? x 3)) ні)
+      ((хибне? (тотожне? (перше x) *science-source-schema*)) ні)
+      ((хибне? (символ? (перше (решта x)))) ні)
+      ((хибне? (атом? (перше (решта (решта x))))) ні)
+      ((так) так))))
 
 (00001001 scientific-constant-status-valid?
   (00001000 (status)
-    (00000111
-      ((00000011 status (00000001 exact-by-definition)) t)
-      ((00000011 status (00000001 exact-derived)) t)
-      ((00000011 status (00000001 measured)) t)
-      (t (00000001 ())))))
+    (за-умовою
+      ((тотожне? status (як-є exact-by-definition)) так)
+      ((тотожне? status (як-є exact-derived)) так)
+      ((тотожне? status (як-є measured)) так)
+      ((так) ні))))
 
 (00001001 scientific-constant-kind-valid?
   (00001000 (kind)
-    (00000111
-      ((00000011 kind (00000001 physical-defining)) t)
-      ((00000011 kind (00000001 physical-derived)) t)
-      ((00000011 kind (00000001 physical-measured)) t)
-      ((00000011 kind (00000001 mathematical)) t)
-      (t (00000001 ())))))
+    (за-умовою
+      ((тотожне? kind (як-є physical-defining)) так)
+      ((тотожне? kind (як-є physical-derived)) так)
+      ((тотожне? kind (як-є physical-measured)) так)
+      ((тотожне? kind (як-є mathematical)) так)
+      ((так) ні))))
 
 (00001001 make-scientific-constant
   (00001000 (name quantity status kind system source)
@@ -241,21 +232,19 @@
 
 (00001001 scientific-constant?
   (00001000 (x)
-    (00000111
-      ((00000010 x) () (00000001 ()))
-      ((00000010 x) (1) (00000001 ()))
-      ((00000011 (science-proper-list? x) (00000001 ())) (00000001 ()))
-      ((00011100 (00101000 x) 7) 0 (00000001 ()))
-      ((00000011 (00000101 x) *scientific-constant-schema*)
-       (00000111
-         ((00000011 (00100011 (00101111 x)) (00000001 ())) (00000001 ()))
-         ((00000011 (quantity? (00110000 x)) (00000001 ())) (00000001 ()))
-         ((00000011 (scientific-constant-status-valid? (00110001 x)) (00000001 ())) (00000001 ()))
-         ((00000011 (scientific-constant-kind-valid? (00110010 x)) (00000001 ())) (00000001 ()))
-         ((00000011 (00100011 (science-sixth x)) (00000001 ())) (00000001 ()))
-         ((00000011 (science-source? (science-seventh x)) (00000001 ())) (00000001 ()))
-         (t t)))
-      (t (00000001 ())))))
+    (за-умовою
+      ((хибне? (science-proper-list? x)) ні)
+      ((хибне? (science-list-length-is? x 7)) ні)
+      ((хибне? (тотожне? (перше x) *scientific-constant-schema*)) ні)
+      ((хибне? (символ? (перше (решта x))) ) ні)
+      ((хибне? (quantity? (перше (решта (решта x))))) ні)
+      ((хибне? (scientific-constant-status-valid?
+                 (перше (решта (решта (решта x)))))) ні)
+      ((хибне? (scientific-constant-kind-valid?
+                 (перше (решта (решта (решта (решта x))))))) ні)
+      ((хибне? (символ? (science-sixth x))) ні)
+      ((хибне? (science-source? (science-seventh x))) ні)
+      ((так) так))))
 
 (00001001 scientific-constant-name
   (00001000 (constant) (00101111 constant)))
@@ -288,10 +277,10 @@
 ; explicit advise-all admission boundary. A malformed constant projects to ().
 (00001001 scientific-constant->clauses
   (00001000 (constant)
-    (00000111
-      ((00000011 (scientific-constant? constant) (00000001 ())) (00000001 ()))
-      (t
-       (10011100 ((name (scientific-constant-name constant)))
+    (за-умовою
+      ((хибне? (scientific-constant? constant)) (як-є ()))
+      ((так)
+       (let ((name (scientific-constant-name constant)))
          (00100111
            (00100111 (00100111 (00000001 scientific-constant) name))
            (00100111
