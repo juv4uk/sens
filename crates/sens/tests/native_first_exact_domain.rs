@@ -38,7 +38,7 @@ fn collect_sid_call_heads(expression: &Expr, out: &mut Vec<Sens8>) {
                     out.push(*identity);
                 }
             }
-            for item in items {
+            for item in items.iter() {
                 collect_sid_call_heads(item, out);
             }
         }
