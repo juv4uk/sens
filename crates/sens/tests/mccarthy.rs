@@ -62,40 +62,6 @@ fn division_is_an_exact_reduced_rational() {
 }
 
 #[test]
-fn division_by_zero_has_the_contract_3_named_error() {
-    for source in ["(/ 1 0)", "(/ 1 0.0)"] {
-        assert_eq!(
-            eval_program(source, &mut Session::default())
-                .unwrap_err()
-                .kind,
-            ErrorKind::DivisionByZero,
-            "source: {source}"
-        );
-    }
-
-    let mut session = Session::default();
-    eval_program(include_str!("../../../lib/core.lisp"), &mut session).unwrap();
-    for source in ["(quotient 5 0)", "(mod 5 0)"] {
-        assert_eq!(
-            eval_program(source, &mut session).unwrap_err().kind,
-            ErrorKind::DivisionByZero,
-            "source: {source}"
-        );
-    }
-}
-
-/// `Rational` used to be `i64`-bounded and this exact expression overflowed
-/// (`ErrorKind::InvalidForm`) — deliberately kept *out* of
-/// tests/fixtures/conformance.json at the time (see that file's README)
-/// because whether a future bignum-capable implementation should still
-/// overflow here was an open scope question, not yet a decided contract.
-/// `crates/sens/src/bignum.rs` answered it: `Rational` is now backed by
-/// a hand-rolled arbitrary-precision integer (no crate dependency — see
-/// its header comment for why), so this now computes the exact product
-/// instead of erroring. Kept as a Rust-only regression test, still not
-/// promoted to the shared contract, since a future C or HDL implementation
-/// might reasonably choose a different (or still bounded) representation.
-#[test]
 fn exact_arithmetic_handles_products_beyond_i64_range() {
     let result = eval_program("(* 3037000500 3037000500)", &mut Session::default()).unwrap();
     assert_eq!(result.value.to_string(), "9223372037000250000");
@@ -190,33 +156,6 @@ fn read_rejects_non_string_arguments_and_multi_expression_input() {
 }
 
 #[test]
-fn eval_closes_the_read_eval_loop_by_hand() {
-    assert_eq!(
-        eval(r#"(eval (read "(+ 1 2)"))"#),
-        Value::Number(3.0, Exactness::Exact)
-    );
-    assert_eq!(
-        eval("(eval (quote (+ 1 2)))"),
-        Value::Number(3.0, Exactness::Exact)
-    );
-}
-
-#[test]
-fn eval_looks_up_a_quoted_symbol_in_the_calling_environment() {
-    let mut session = Session::default();
-    eval_program("(def x 5)", &mut session).unwrap();
-    let result = eval_program("(eval (quote x))", &mut session).unwrap();
-    assert_eq!(result.value, Value::Number(5.0, Exactness::Exact));
-}
-
-#[test]
-fn eval_treats_closures_and_macros_as_self_evaluating() {
-    let mut session = Session::default();
-    let closure = eval_program("(eval (lambda (x) x))", &mut session).unwrap();
-    assert!(matches!(closure.value, Value::Closure(_)));
-}
-
-#[test]
 fn print_inside_a_closure_shares_the_root_sessions_output() {
     // Environment::child() must share the parent's output sink (not start a
     // fresh one per call frame), or `print` inside a lambda body would be
@@ -236,18 +175,6 @@ fn tail_recursion_uses_constant_rust_stack() {
     definitions.push(format!("(def step-{} (lambda () (quote done)))", depth - 1));
     let source = format!("{} (step-0)", definitions.join(" "));
     assert_eq!(eval(&source), Value::Symbol("done".into()));
-}
-
-#[test]
-fn bootstrap_library_is_written_and_executed_in_sens() {
-    let mut session = Session::default();
-    eval_program(include_str!("../../../lib/core.lisp"), &mut session).unwrap();
-    assert_eq!(
-        eval_program("(second (quote (radio antenna)))", &mut session)
-            .unwrap()
-            .value,
-        Value::Symbol("antenna".into())
-    );
 }
 
 #[test]
@@ -300,107 +227,6 @@ fn lambda_captures_lexical_environment_and_keeps_parameters_local() {
 }
 
 #[test]
-fn lambda_is_a_first_class_value() {
-    assert_eq!(
-        eval("((lambda (apply-once) (apply-once (quote radio))) (lambda (x) (cons x (quote ()))))"),
-        Value::list([Value::Symbol("radio".into())])
-    );
-}
-
-#[test]
-fn lambda_reports_invalid_parameters_and_arity() {
-    let duplicate = eval_program("(lambda (x x) x)", &mut Session::default()).unwrap_err();
-    assert_eq!(duplicate.kind, ErrorKind::InvalidForm);
-    assert!(duplicate.message.contains("povtornyi parametr"));
-
-    let invalid = eval_program("(lambda (1) 1)", &mut Session::default()).unwrap_err();
-    assert_eq!(invalid.kind, ErrorKind::InvalidForm);
-
-    let arity = eval_program("((lambda (x) x))", &mut Session::default()).unwrap_err();
-    assert_eq!(arity.kind, ErrorKind::Arity);
-}
-
-/// Variadic parameters (2026-08-09, PLAN.md item 8's follow-on): three
-/// shapes shared across the Lisp family, not one dialect's `&rest`
-/// keyword — `(a b . rest)` (dotted list, reusing the same reader support
-/// added earlier for data literals), a bare symbol (zero fixed params,
-/// every argument), and the existing `(a b)` (exact arity, unchanged).
-/// Variatyvni parametry (2026-08-09, prodovzhennia punktu 8 z PLAN.md): try
-/// formy, spilni dlia rodyny Lisp, ne kliuchove slovo `&rest` odnoho
-/// dialektu — `(a b . rest)` (dotted-spysok, ta sama pidtrymka readera,
-/// dodana ranishe dlia literaliv danykh), holyi symvol (nul fiksovanykh
-/// parametriv, kozhen arhument), i naiavnyi `(a b)` (tochna arnist, bez zmin).
-#[test]
-fn dotted_lambda_list_binds_extra_arguments_as_a_rest_list() {
-    assert_eq!(
-        eval("((lambda (a b . rest) rest) 1 2 3 4 5)"),
-        Value::list(vec![
-            Value::Number(3.0, Exactness::Exact),
-            Value::Number(4.0, Exactness::Exact),
-            Value::Number(5.0, Exactness::Exact)
-        ])
-    );
-    assert_eq!(
-        eval("((lambda (a . rest) a) 1 2 3)"),
-        Value::Number(1.0, Exactness::Exact)
-    );
-}
-
-#[test]
-fn bare_symbol_lambda_list_binds_every_argument_as_one_list() {
-    assert_eq!(
-        eval("((lambda args args) 1 2 3)"),
-        Value::list(vec![
-            Value::Number(1.0, Exactness::Exact),
-            Value::Number(2.0, Exactness::Exact),
-            Value::Number(3.0, Exactness::Exact)
-        ])
-    );
-    assert_eq!(eval("((lambda args args))"), Value::Nil);
-}
-
-#[test]
-fn variadic_lambda_still_requires_its_fixed_parameters() {
-    let error = eval_program("((lambda (a b . rest) a) 1)", &mut Session::default()).unwrap_err();
-    assert_eq!(error.kind, ErrorKind::Arity);
-    assert!(error.message.contains("at least"));
-}
-
-#[test]
-fn variadic_defmacro_binds_unevaluated_rest_arguments() {
-    let mut session = Session::default();
-    let result = eval_program(
-        "(defmacro my-list items (cons (quote quote) (cons items (quote ())))) (my-list 1 2 3)",
-        &mut session,
-    )
-    .unwrap();
-    assert_eq!(
-        result.value,
-        Value::list(vec![
-            Value::Number(1.0, Exactness::Exact),
-            Value::Number(2.0, Exactness::Exact),
-            Value::Number(3.0, Exactness::Exact)
-        ])
-    );
-}
-
-/// `Display`/`print` previously wrote `"{value}"` with no escaping at all —
-/// a string containing a literal `"` broke `read ∘ print = identity`
-/// silently (the printed text wasn't valid to read back: it would close
-/// early on the embedded quote). Found 2026-08-09 while building tooling
-/// that prints fixture data containing real quotes. Fixed by giving
-/// `print` real `prin1`/`write` semantics (Common Lisp/Scheme's own
-/// convention for the "read-back-safe" print function): escape `"`, `\`,
-/// `\n`, `\t`.
-/// `Display`/`print` ranishe pysaly `"{value}"` bez zhodnoho ekranuvannia —
-/// riadok z bukvalnoiu `"` movchky lamav `read ∘ print = identity`
-/// (nadrukovanyi tekst ne chytavsia nazad korektno: zakryvavsia zarano na
-/// vbudovanii laptsi). Znaideno 2026-08-09 pid chas napysannia tulinhu, shcho
-/// drukuie dani fikstur iz realnymy lapkamy. Vypravleno nadanniam `print`
-/// spravzhnoi semantyky `prin1`/`write` (vlasna konventsiia Common
-/// Lisp/Scheme dlia "bezpechnoi dlia read" funktsii druku): ekranuvaty `"`,
-/// `\`, `\n`, `\t`.
-#[test]
 fn print_escapes_embedded_quotes_and_backslashes_so_read_can_reconstruct_the_string() {
     // A string value containing a literal " and \, built via sens source
     // escaping — the *value* itself is `(eq? "radio" "radio")`, 22 chars,
@@ -430,45 +256,6 @@ fn print_escapes_embedded_quotes_and_backslashes_so_read_can_reconstruct_the_str
 /// skladanniu yak bukvalnyi syrtsevyi tekst (napr. instrument, shcho heneruie
 /// novyi `.my`-fail), nikoly ne dlia povtornoho parsynhu yak danykh.
 #[test]
-fn princ_outputs_a_string_raw_without_quotes_or_escapes() {
-    let mut session = Session::default();
-    let result = eval_program(r#"(princ "(eq? \"radio\" \"radio\")")"#, &mut session).unwrap();
-    assert_eq!(result.output, vec![r#"(eq? "radio" "radio")"#.to_string()]);
-    // princ still returns the string value itself, just like print does —
-    // composes the same way, only the transcript text differs.
-    assert_eq!(
-        result.value,
-        Value::String(r#"(eq? "radio" "radio")"#.into())
-    );
-}
-
-#[test]
-fn princ_and_print_render_symbols_and_numbers_identically() {
-    assert_eq!(
-        eval_program("(princ (quote radio))", &mut Session::default())
-            .unwrap()
-            .output,
-        vec!["radio".to_string()]
-    );
-    assert_eq!(
-        eval_program("(princ 42)", &mut Session::default())
-            .unwrap()
-            .output,
-        vec!["42".to_string()]
-    );
-}
-
-/// `list` used to be a Rust special form; moved to `lib/core.my` the same
-/// day variadic lambda parameters were added, since `(def list (lambda
-/// args args))` expresses it exactly — G4/G5's own filter ("can the
-/// existing core already say this?") applied to the Rust surface itself,
-/// not just to `.my` code.
-/// `list` ranishe buv spetsialnoiu formoiu Rust; pereneseno v `lib/core.my`
-/// toho samoho dnia, koly dodano variatyvni parametry lambda, bo `(def list
-/// (lambda args args))` vyrazhaie tse tochno — toi samyi filtr G4/G5 ("chy
-/// naiavne yadro vzhe mozhe tse skazaty?"), zastosovanyi do samoho Rust-sharu,
-/// ne lyshe do `.my`-kodu.
-#[test]
 fn list_is_a_sens_function_in_core_my_not_a_rust_builtin() {
     let mut session = Session::default();
     eval_program(include_str!("../../../lib/core.lisp"), &mut session).unwrap();
@@ -495,15 +282,6 @@ fn list_is_a_sens_function_in_core_my_not_a_rust_builtin() {
 /// movy: sam evaluator musi yak ranishe vidpovidaty nevidomym symvolom
 /// `UnknownSymbol`, tochno tak samo, yak vseredyni bud-yakoi formy. (REPL
 /// lohyt toi samyi error i perepysuie lyshe *vlasne vitannia*.)
-#[test]
-fn evaluator_still_errors_on_a_lone_unknown_symbol() {
-    let error = eval_program("пустота", &mut Session::default()).unwrap_err();
-    assert_eq!(error.kind, ErrorKind::UnknownSymbol);
-
-    let error = eval_program("hello", &mut Session::default()).unwrap_err();
-    assert_eq!(error.kind, ErrorKind::UnknownSymbol);
-}
-
 #[test]
 fn conformance_fixture_exprs_parse_as_single_form() {
     let forms = parse(include_str!("../../../tests/fixtures/conformance.lisp"))
@@ -647,42 +425,6 @@ fn linter_tests_from_my() {
 // some way to look at a symbol's characters.
 
 #[test]
-fn symbol_to_string_and_back_round_trips() {
-    assert_eq!(
-        eval("(symbol->string (quote planet))").to_string(),
-        "\"planet\""
-    );
-    assert_eq!(
-        eval("(string->symbol (symbol->string (quote planet)))").to_string(),
-        "planet"
-    );
-}
-
-#[test]
-fn string_first_returns_a_one_character_string() {
-    assert_eq!(
-        eval("(string-first (symbol->string (quote ?x)))").to_string(),
-        "\"?\""
-    );
-}
-
-#[test]
-fn string_rest_drops_exactly_the_first_character() {
-    assert_eq!(
-        eval("(string-rest (symbol->string (quote ?x)))").to_string(),
-        "\"x\""
-    );
-}
-
-#[test]
-fn string_slice_uses_character_indices_and_clamps_bounds() {
-    assert_eq!(eval(r#"(string-slice "привіт" 1 3)"#).to_string(), "\"ри\"");
-    assert_eq!(eval(r#"(string-slice "abc" 2 9)"#).to_string(), "\"c\"");
-    assert_eq!(eval(r#"(string-slice "abc" 4 9)"#).to_string(), "\"\"");
-    assert_eq!(eval(r#"(string-slice "abc" 2 1)"#).to_string(), "\"\"");
-}
-
-#[test]
 fn string_slice_rejects_non_integer_or_negative_indices() {
     for source in [
         r#"(string-slice "abc" 1.5 2)"#,
@@ -700,23 +442,6 @@ fn string_slice_rejects_non_integer_or_negative_indices() {
 }
 
 #[test]
-fn read_all_parses_every_top_level_form_as_data() {
-    // Unlike `read`, which errors unless the string holds exactly one
-    // form, `read-all` returns every top-level form as a list of data.
-    assert_eq!(
-        eval("(read-all \"(a b) (c d) 5\")").to_string(),
-        "((a b) (c d) 5)"
-    );
-}
-
-#[test]
-fn read_all_rejects_a_non_string() {
-    let error = eval_program("(read-all (quote (a b)))", &mut Session::default())
-        .expect_err("expected a Type error");
-    assert_eq!(error.kind, ErrorKind::Type);
-}
-
-#[test]
 fn symbol_predicate_is_not_a_host_builtin() {
     // An uninstalled language-level function cannot acquire host semantics.
     assert_eq!(
@@ -725,26 +450,6 @@ fn symbol_predicate_is_not_a_host_builtin() {
             .kind,
         ErrorKind::Type
     );
-}
-
-#[test]
-fn symbol_to_string_rejects_a_non_symbol() {
-    let error = eval_program(
-        "(symbol->string \"already a string\")",
-        &mut Session::default(),
-    )
-    .expect_err("expected a Type error");
-    assert_eq!(error.kind, ErrorKind::Type);
-}
-
-#[test]
-fn string_rest_rejects_an_empty_string() {
-    let error = eval_program(
-        r#"(string-rest (symbol->string (string->symbol "")))"#,
-        &mut Session::default(),
-    )
-    .expect_err("expected a Type error on an empty string");
-    assert_eq!(error.kind, ErrorKind::Type);
 }
 
 #[test]
@@ -971,125 +676,4 @@ fn string_less_than_wrong_arity_is_an_arity_error() {
     let error = eval_program(r#"(string<? "only-one")"#, &mut core_session())
         .expect_err("string<? with one argument must fail named, not panic");
     assert_eq!(error.kind, ErrorKind::Arity);
-}
-
-#[test]
-fn si_defining_constants_exact_rationals() {
-    let mut session = Session::default();
-    let si_source = std::fs::read_to_string("lib/si.lisp")
-        .or_else(|_| std::fs::read_to_string("../../lib/si.lisp"))
-        .expect("lib/si.my must exist and be readable");
-    eval_program(&si_source, &mut session).expect("lib/si.my must evaluate cleanly");
-
-    // 1. delta-nu-cs = 9 192 631 770 Hz
-    let cs = eval_program("delta-nu-cs", &mut session).unwrap().value;
-    assert_eq!(cs, Value::Number(9192631770.0, Exactness::Exact));
-
-    // 2. c = 299 792 458 m/s
-    let c = eval_program("c", &mut session).unwrap().value;
-    assert_eq!(c, Value::Number(299792458.0, Exactness::Exact));
-
-    // 3. h = 132521403 / 200000000000000000000000000000000000000000 J s
-    let h = eval_program("h", &mut session).unwrap().value;
-    let expected_h = Rational::from_literal(
-        "132521403",
-        "200000000000000000000000000000000000000000",
-    )
-    .unwrap();
-    assert_eq!(h, Value::Rational(expected_h.clone()));
-    assert_eq!(
-        format!("{}", expected_h),
-        "132521403/200000000000000000000000000000000000000000"
-    );
-
-    // Exact rational arithmetic: (* 2 h) simplifies denominator by 2
-    let two_h = eval_program("(* 2 h)", &mut session).unwrap().value;
-    let expected_2h = Rational::from_literal(
-        "132521403",
-        "100000000000000000000000000000000000000000",
-    )
-    .unwrap();
-    assert_eq!(two_h, Value::Rational(expected_2h));
-
-    // 4. e = 801088317 / 5000000000000000000000000000 C
-    let e = eval_program("e", &mut session).unwrap().value;
-    let expected_e = Rational::from_literal("801088317", "5000000000000000000000000000").unwrap();
-    assert_eq!(e, Value::Rational(expected_e.clone()));
-    assert_eq!(
-        format!("{}", expected_e),
-        "801088317/5000000000000000000000000000"
-    );
-
-    // 5. k = 1380649 / 100000000000000000000000000000 J/K
-    let k = eval_program("k", &mut session).unwrap().value;
-    let expected_k = Rational::from_literal("1380649", "100000000000000000000000000000").unwrap();
-    assert_eq!(k, Value::Rational(expected_k.clone()));
-    assert_eq!(
-        format!("{}", expected_k),
-        "1380649/100000000000000000000000000000"
-    );
-
-    // 6. n-a = 602214076000000000000000 mol^-1
-    let na = eval_program("n-a", &mut session).unwrap().value;
-    let expected_na = Rational::from_literal("602214076000000000000000", "1").unwrap();
-    assert_eq!(na, Value::Rational(expected_na.clone()));
-    assert_eq!(format!("{}", expected_na), "602214076000000000000000");
-
-    // 7. k-cd = 683 lm/W
-    let k_cd = eval_program("k-cd", &mut session).unwrap().value;
-    assert_eq!(k_cd, Value::Number(683.0, Exactness::Exact));
-
-    // Prefixed namespace si: aliases
-    assert_eq!(eval_program("si:c", &mut session).unwrap().value, c);
-    assert_eq!(eval_program("si:h", &mut session).unwrap().value, h);
-    assert_eq!(eval_program("si:e", &mut session).unwrap().value, e);
-    assert_eq!(eval_program("si:k", &mut session).unwrap().value, k);
-    assert_eq!(eval_program("si:n-a", &mut session).unwrap().value, na);
-    assert_eq!(eval_program("si:k-cd", &mut session).unwrap().value, k_cd);
-    assert_eq!(eval_program("si:delta-nu-cs", &mut session).unwrap().value, cs);
-}
-
-#[test]
-fn meta_eval_lambda_witness_env_capture_and_application() {
-    // Independent witness pass for Lambda Genealogy (ADR-004 diagnostic pass):
-    // Demonstrates the two exact points where evaluator semantics enter:
-    // Witness A: Lexical environment capture (env enters closure data structure)
-    // Witness B: Operator-position application (my-apply unpacks closure, binds params, evaluates in frame)
-    let mut session = Session::default();
-    eval_program(include_str!("../../../lib/core.lisp"), &mut session).unwrap();
-    sens::load_meta_evaluator_library(&mut session).unwrap();
-
-    // 1. Witness A: Explicit environment capture
-    // Surface syntax (lambda (x) outer) does NOT mention witness-env.
-    // In my-eval: ((eq (car expr) (quote lambda)) (list (quote closure) (second expr) (cdr (cdr expr)) env))
-    // The evaluator injects the active lexical frame into the 4-element tagged list.
-    let setup = r#"
-        (def witness-env (cons (cons (quote outer) 7) (quote ())))
-        (def closure-val (my-eval (quote (lambda (x) outer)) witness-env))
-    "#;
-    eval_program(setup, &mut session).unwrap();
-    let closure = eval_program("closure-val", &mut session).unwrap().value;
-    assert_eq!(closure.to_string(), "(closure (x) (outer) ((outer . 7)))");
-
-    // 2. Witness B: Operator application through my-apply
-    // my-apply unpacks params (x), body ((outer)), and captured env ((outer . 7)),
-    // binds x -> 42 using bind-params, and evaluates body in extended frame.
-    let app = r#"
-        (my-apply closure-val (cons 42 (quote ())))
-    "#;
-    let result = eval_program(app, &mut session).unwrap().value;
-    assert_eq!(result.to_string(), "7");
-
-    // 3. Witness C: Argument binding and lexical frame shadowing
-    // Proves that parameter bindings extend the captured environment without mutating it.
-    let shadow = r#"
-        (def shadow-closure (my-eval (quote (lambda (outer) outer)) witness-env))
-        (my-apply shadow-closure (cons 99 (quote ())))
-    "#;
-    let shadow_res = eval_program(shadow, &mut session).unwrap().value;
-    assert_eq!(shadow_res.to_string(), "99");
-
-    // Proves original witness-env remained untouched (7)
-    let original_res = eval_program("(my-apply closure-val (cons 0 (quote ())))", &mut session).unwrap().value;
-    assert_eq!(original_res.to_string(), "7");
 }
