@@ -101,6 +101,18 @@ pub mod semantic_registry_export {
         super::semantic_registry::admitted_semantic_id_for_surface(name)
     }
 
+    /// Current ratified Ukrainian CALL-head projection (exact domain width),
+    /// not a historical eight-bit identity. Source editors must preserve
+    /// these forms in authored .lisp; the mixed parser already lowers them to
+    /// exact DomainIdentity only in legitimate executable head positions.
+    ///
+    /// In particular, the legacy sens-to-sens compatibility migrator must
+    /// NEVER rewrite a valid current Ukrainian head into an old SID8 token.
+    pub fn exact_uk_callable_for_source_head(name: &str) -> Option<super::DomainIdentity> {
+        super::semantic_registry::exact_uk_callable_for_source_head(name)
+    }
+
+
     /// Legacy packed-byte export for external projection consumers.
     ///
     /// Runtime/source semantics use opaque `Sens8`; this function deliberately

@@ -234,8 +234,17 @@ fn walk_expr(
         }
 
         let kind = head_kind(sens);
-        if surface.is_some() {
-            push_head_edit(head, sens, analysis);
+        if let Some(spelling) = surface {
+            // Current owner-ratified Ukrainian .lisp source heads ALREADY
+            // lower to exact-width DomainIdentity in the mixed reader.
+            // The historical Sens8 compatibility registry must not convert
+            // that primary source back to old 8-bit tokens. Keep counting
+            // the call as observed; only the legacy rewrite is suppressed.
+            if sens::semantic_registry_export::exact_uk_callable_for_source_head(spelling)
+                .is_none()
+            {
+                push_head_edit(head, sens, analysis);
+            }
         }
 
         match kind {
@@ -532,6 +541,25 @@ mod tests {
         let hosts = no_host();
         let analysis = analyze(source, &hosts).expect("source parses");
         apply_edits(source, &analysis.edits).expect("edits apply")
+    }
+
+    #[test]
+    fn ratified_uk_source_heads_remain_primary_not_old_eight_bit_tokens() {
+        // Source/UI .lisp must stay Ukrainian, while its executable heads
+        // lower to exact D3/D4 identities. Do not regress them into SID8.
+        let source = "(визначити звязок (функція (x) (сполучити (перше x) (решта x))))\n";
+        let host = no_host();
+        let inspected = analyze(&source, &host).expect("canonical Ukrainian source");
+        assert!(inspected.named_calls >= 5, "the legacy auditor still sees the calls");
+        assert_eq!(inspected.edits.len(), 0, "no Ukrainian exact head can be rewritten to SID8");
+        assert_eq!(rewrite(&source), source);
+
+        let mixed = sens::parse_mixed_exact_domain(&source).expect("current exact reader");
+        let ExprKind::List(forms) = &mixed[0].kind else {
+            panic!("canonical DEFINE must remain a list");
+        };
+        assert!(matches!(&forms[0].kind,
+            ExprKind::DomainIdentity(id) if id.width() == 4 && id.packed_bits() == 0b0011));
     }
 
     #[test]
