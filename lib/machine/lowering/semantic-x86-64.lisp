@@ -276,15 +276,13 @@
     (00000111
       ((x86-admission-exact-integer? left)
        (00000111
-         ((x86-admission-within-inclusive-integer-range?
-            left 0 4294967295)
+         ((x86-admission-within-inclusive-integer-range? left 0 4294967295)
           (00000111
             ((x86-admission-exact-integer? right)
-             (x86-admission-within-inclusive-integer-range?
-               right 0 4294967295))
-            (t (00000001 ()))))
-         (t (00000001 ()))))
-      (t (00000001 ())))))
+             (x86-admission-within-inclusive-integer-range? right 0 4294967295))
+            ((00000010 (00000001 ())) (00011010 1 0))))
+         ((00000010 (00000001 ())) (00011010 1 0))))
+      ((00000010 (00000001 ())) (00011010 1 0)))))
 
 (00001001 x86-current-d5-difference-u64-safe?
   (00001000 (left right)
@@ -298,15 +296,13 @@
              (00000111
                ((x86-admission-within-inclusive-integer-range?
                   right 0 18446744073709551615)
-                ; Exact-Q >= returns D1 1/0. Compare explicitly because 0 is
-                ; itself a value and must never become generic truthiness.
                 (00000111
-                  ((00011110 left right) 1 t)
-                  ((00011110 left right) 0 (00000001 ()))))
-               (t (00000001 ()))))
-            (t (00000001 ()))))
-         (t (00000001 ()))))
-      (t (00000001 ())))))
+                  ((00011110 left right) (00000010 (00000001 ())))
+                  ((00000010 (00000001 ())) (00011010 1 0))))
+               ((00000010 (00000001 ())) (00011010 1 0))))
+            ((00000010 (00000001 ())) (00011010 1 0))))
+         ((00000010 (00000001 ())) (00011010 1 0))))
+      ((00000010 (00000001 ())) (00011010 1 0)))))
 
 ; #4068 width-safe machine key helper. Width and packed bits are separate
 ; mechanism scalars derived from Rust DomainIdentity; source leading zeros are never
@@ -315,8 +311,10 @@
   (00001000 (width bits expected-width expected-bits)
     (00000111
       ((00100010 width expected-width)
-       (00100010 bits expected-bits))
-      (t (00000001 ())))))
+       (00000111
+         ((00100010 bits expected-bits) (00000010 (00000001 ())))
+         ((00000010 (00000001 ())) (00011010 1 0))))
+      ((00000010 (00000001 ())) (00011010 1 0)))))
 
 (00001001 x86-lower-current-binary-u64-forms
   (00001000 (width bits left right)
@@ -362,7 +360,7 @@
       ((x86-admission-exact-integer? value)
        (x86-admission-within-inclusive-integer-range?
          value 0 18446744073709551614))
-      (t (00000001 ())))))
+      ((00000010 (00000001 ())) (00011010 1 0)))))
 
 (00001001 x86-current-d6-sub1-u64-safe?
   (00001000 (value)
@@ -370,7 +368,7 @@
       ((x86-admission-exact-integer? value)
        (x86-admission-within-inclusive-integer-range?
          value 1 18446744073709551615))
-      (t (00000001 ())))))
+      ((00000010 (00000001 ())) (00011010 1 0)))))
 
 (00001001 x86-lower-current-d6-unary-u64-forms
   (00001000 (width bits value)
@@ -418,10 +416,10 @@
                ((x86-admission-within-inclusive-integer-range?
                   right 1 9223372036854775807)
                 (00100010 left right))
-               (t (00000001 ()))))
-            (t (00000001 ()))))
-         (t (00000001 ()))))
-      (t (00000001 ())))))
+               ((00000010 (00000001 ())) (00011010 1 0))))
+            ((00000010 (00000001 ())) (00011010 1 0))))
+         ((00000010 (00000001 ())) (00011010 1 0))))
+      ((00000010 (00000001 ())) (00011010 1 0)))))
 
 (00001001 x86-lower-current-quotient-i64-forms
   (00001000 (width bits left right)
@@ -462,9 +460,9 @@
             ((x86-admission-exact-integer? right)
              (x86-admission-within-inclusive-integer-range?
                right 0 9223372036854775807))
-            (t (00000001 ()))))
-         (t (00000001 ()))))
-      (t (00000001 ())))))
+            ((00000010 (00000001 ())) (00011010 1 0))))
+         ((00000010 (00000001 ())) (00011010 1 0))))
+      ((00000010 (00000001 ())) (00011010 1 0)))))
 
 (00001001 x86-lower-order-i64-forms
   (00001000 (width bits left right)
@@ -514,7 +512,7 @@
       ((x86-admission-exact-integer? value)
        (x86-admission-within-inclusive-integer-range?
          value 0 18446744073709551615))
-      (t (00000001 ())))))
+      ((00000010 (00000001 ())) (00011010 1 0)))))
 
 (00001001 x86-lower-zerop-u64-forms
   (00001000 (value)
