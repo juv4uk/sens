@@ -1,5 +1,7 @@
 # D5 post-ingest structural discovery (#2583)
 
+> **Authority note:** this directory preserves a **HISTORICAL-PRE-OD005** structural-discovery snapshot. Its 8 selector-generated + 24 UNKNOWN/free count is not current occupancy authority. Current Core.D5 owner occupancy is **32/32 with current UNKNOWN occupancy = 0** under OD-005; the ratified internal-law doctrine is #3055.
+
 This directory consumes the completed Early-Lisp historical ledger and builds a
 conservative capability-factor hypergraph.
 
@@ -26,7 +28,8 @@ Current bounded corpus status:
 - bounded-independent factor observations: 7;
 - roots promoted by this structural model: 0;
 - new D5 residents: 0;
-- D5 map: 8 selector-generated + 24 UNKNOWN/free.
+- historical pre-OD005 D5 snapshot: 8 selector-generated + 24 UNKNOWN/free;
+- current OD-005 occupancy: 32/32, UNKNOWN=0 (not mutated by this research artifact).
 
 These are structural observations, not placements or automatically promoted roots.
 RETURN's residue-root theorem is tracked separately by #2488/#2504; this model
