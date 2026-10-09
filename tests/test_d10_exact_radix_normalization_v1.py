@@ -59,6 +59,27 @@ class TestExactRadix(unittest.TestCase):
         self.assertEqual(checked, 9450)
         print("D10 exact radix independent rational cases: PASS 9450")
 
+    def test_research_not_ratification(self):
+        # Позитивний свідок математики не надає нового коду чи ратифікації.
+        import json
+        from pathlib import Path
+        root = Path(__file__).resolve().parents[1]
+        file = root / "knowledge/d10-exact-radix-normalization-v1.json"
+        evidence = json.loads(file.read_text(encoding="utf-8"))
+        self.assertEqual(evidence["status"], "SOURCE-MOTIVATED-RESEARCH-NOT-SELECTED")
+        proposal = evidence["proposed_root"]
+        self.assertEqual(proposal["semantic_name"], "RADIX-NORMALIZE-EXACT")
+        self.assertIsNone(proposal["coordinate"])
+        self.assertIs(proposal["ratified"], False)
+        self.assertIs(proposal["selected"], False)
+        self.assertIn("BEHAVIORAL-PROOF-PENDING", proposal["dedup"]["checked"])
+        self.assertEqual(proposal["dedup"]["core_vs_library_decision"],
+                         "HOLD-UNTIL-IRREDUCIBLE-ROOT-REVIEW")
+        self.assertEqual(evidence["accounting"],
+                         {"selected_delta": 0, "ratified_delta": 0, "coordinate_delta": 0})
+        self.assertGreaterEqual(len(proposal["positive_witnesses"]), 2)
+        self.assertGreaterEqual(len(proposal["falsifiers"]), 3)
+
     def test_rejections(self):
         for x, b in ((Fraction(1), 1), (Fraction(1), 0),
                      (Fraction(3, 4), 2.0), (0.75, 2),
