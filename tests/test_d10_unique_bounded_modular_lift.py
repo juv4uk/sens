@@ -84,11 +84,11 @@ class BoundedLift(unittest.TestCase):
         self.assertEqual(x,("AMBIGUOUS",3,2,4098))
         self.assertNotEqual(x,("UNIQUE",2))
         self.assertNotEqual(x,("UNIQUE",4098))
-        # Interval length >= modulus guarantees at least 2 lifts
+        # A window spanning at least two full moduli always has multiple lifts;
         for M in range(2,16):
             for r in range(M):
                 for lo in range(-M,M+1):
-                    self.assertEqual(bounded_lift_math(M,r,lo,lo+M)[0],"AMBIGUOUS")
+                    self.assertEqual(bounded_lift_math(M,r,lo,lo+2*M)[0],"AMBIGUOUS")
 
 if __name__=="__main__":
     unittest.main(verbosity=2)
