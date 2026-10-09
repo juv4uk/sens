@@ -1,0 +1,32 @@
+name: D10 exact rational interval witness
+
+on:
+  pull_request:
+    paths:
+      - 'knowledge/d10-cross-hobby-interval-constraint-20261009.json'
+      - 'scripts/check_d10_interval_conflict.py'
+      - 'tests/oracles/d10_exact_interval_constraint_sbcl.lisp'
+      - 'docs/research/d10-exact-interval-evidence.uk.md'
+      - '.github/workflows/d10-exact-interval-evidence.yml'
+  push:
+    branches:
+      - research/d10-exact-rational-interval-conflict-20261009
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  exact-interval-constraint-proof:
+    runs-on: ubuntu-latest
+    timeout-minutes: 7
+    steps:
+      - uses: actions/checkout@v4
+      - name: Compile the independent exact-rational witness
+        run: python3 -m py_compile scripts/check_d10_interval_conflict.py
+      - name: Check source corpus, exhaustive oracle and mutation controls
+        run: python3 scripts/check_d10_interval_conflict.py --self-test
+      - name: Install independent Common Lisp runtime
+        run: sudo apt-get install -y -qq sbcl
+      - name: Check exact interval laws on real SBCL
+        run: sbcl --noinform --script tests/oracles/d10_exact_interval_constraint_sbcl.lisp
