@@ -203,7 +203,7 @@ pub fn parse_binary_source_words(source: &str) -> Result<Vec<BinarySourceToken>,
                     cursor += 1;
                 }
                 let token = &source[start..cursor];
-                let word = parse_word(token).ok_or_else(|| {
+                let word = parse_binary_source_word(token).ok_or_else(|| {
                     let message = if token.len() > 8
                         && token.bytes().all(|byte| matches!(byte, b'0' | b'1'))
                     {
@@ -228,7 +228,7 @@ pub fn parse_binary_source_words(source: &str) -> Result<Vec<BinarySourceToken>,
     Ok(tokens)
 }
 
-fn parse_word(token: &str) -> Option<BinarySourceWord> {
+pub(crate) fn parse_binary_source_word(token: &str) -> Option<BinarySourceWord> {
     if token.is_empty() || token.len() > 8 {
         return None;
     }
