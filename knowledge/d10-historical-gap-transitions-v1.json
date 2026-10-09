@@ -1,0 +1,44 @@
+{
+  "schema": "d10-historical-gap-transitions/v1",
+  "status": "TRANSITION-OBSERVATION-ALLOWLIST-NOT-SELECTION-AUTHORITY",
+  "purpose": "Keep the original historical coverage audit truthful while allowing only explicitly source-pinned D10 candidate rows to be observed in a later inventory snapshot. This file does not select or ratify candidates.",
+  "historical_snapshot": {
+    "inventory_blob": "73dd518469f972c55411e004b70b054ba8b3ec86",
+    "selected": 625,
+    "ratified": 0
+  },
+  "rules": [
+    "Historical fields exact_name_in_d1_d10=false and selected_in_inventory=false describe the audited 625-row snapshot; do not rewrite them when the live inventory grows.",
+    "A matching live candidate remains research-only: coordinate=null, coordinate_basis=UNPLACED, ratified_resident=false, proposal_status=pending-owner-review, status=SELECTED-RESEARCH-CANDIDATE.",
+    "Only transitions listed with the exact stable_id/source_class/provenance are tolerated. Any other current collision is a hard failure.",
+    "No D1-D9 collision, no duplicate selected name, no executable/T5 admission, no ratification."
+  ],
+  "transitions": [
+    {
+      "review_id": "HIST-GAP-009",
+      "semantic_name": "FIND-METHOD",
+      "stable_id": "d10.historical.clos.find-method.c01",
+      "source_class": "HISTORICAL-CLOS-EXACT-METHOD-LOOKUP",
+      "selection_pr": "#4868",
+      "required_provenance": [
+        "#4842",
+        "#4463",
+        "knowledge/d10-historical-clos-interlisp-residual-review-v1.json:CLOS-01",
+        "https://www.cs.cmu.edu/Groups/AI/html/hyperspec/HyperSpec/Body/stagenfun_find-method.html"
+      ]
+    },
+    {
+      "review_id": "HIST-GAP-011",
+      "semantic_name": "REMOVE-METHOD",
+      "stable_id": "d10.clos.remove-method.v1",
+      "source_class": "HISTORICAL-CLOS-ROOT-REVIEW",
+      "selection_pr": "#4863",
+      "required_provenance": [
+        "#4842",
+        "#4463",
+        "knowledge/d10-historical-clos-interlisp-residual-review-v1.json",
+        "ANSI CLHS REMOVE-METHOD"
+      ]
+    }
+  ]
+}
