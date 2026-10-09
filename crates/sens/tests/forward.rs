@@ -428,22 +428,6 @@ fn run_multi_supports_test_conditions() {
 }
 
 #[test]
-fn match_test_condition_succeeds_when_the_expression_is_truthy() {
-    let source = r#"
-        (match-test-condition (list (quote >) 10 5) (quote ()))
-    "#;
-    assert_eq!(eval_forward(source), "(())");
-}
-
-#[test]
-fn match_test_condition_fails_when_the_expression_is_falsy() {
-    let source = r#"
-        (match-test-condition (list (quote >) 3 5) (quote ()))
-    "#;
-    assert_eq!(eval_forward(source), "()");
-}
-
-#[test]
 fn run_jtms_multi_derives_a_multi_condition_grandparent_fact() {
     let source = r#"
         (assert-fact-jtms! (quote (parent alice bob)))

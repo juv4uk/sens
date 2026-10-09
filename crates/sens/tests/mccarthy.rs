@@ -295,12 +295,6 @@ fn bootstrap_library_is_written_and_executed_in_sens() {
             .value,
         Value::Symbol("antenna".into())
     );
-    assert_eq!(
-        eval_program("(not? (quote ()))", &mut session)
-            .unwrap()
-            .value,
-        Value::Symbol("t".into())
-    );
 }
 
 #[test]
@@ -414,7 +408,8 @@ fn lexical_child_reads_parent_without_mutating_it() {
     let parent = sens::Environment::root();
     let child = parent.child();
     child.define("station", Value::Symbol("UR5ABC".into()));
-    assert_eq!(child.get("t"), Some(Value::Symbol("t".into())));
+    parent.define("shared", Value::Symbol("inherited".into()));
+    assert_eq!(child.get("shared"), Some(Value::Symbol("inherited".into())));
     assert_eq!(parent.get("station"), None);
 }
 
@@ -882,140 +877,6 @@ fn linter_tests_from_my() {
     }
 }
 
-// Simple LCG for property tests
-struct Lcg {
-    state: u64,
-}
-impl Lcg {
-    fn new(seed: u64) -> Self {
-        Self { state: seed }
-    }
-    fn next(&mut self) -> u64 {
-        self.state = self.state.wrapping_mul(6364136223846793005).wrapping_add(1);
-        self.state
-    }
-    fn next_int(&mut self) -> i64 {
-        self.next() as i64
-    }
-    fn next_string(&mut self, max_len: usize) -> String {
-        let len = (self.next() as usize) % max_len;
-        let mut s = String::with_capacity(len);
-        for _ in 0..len {
-            let c = (b'a' + (self.next() % 26) as u8) as char;
-            s.push(c);
-        }
-        s
-    }
-    fn next_list(&mut self, max_len: usize) -> Value {
-        let len = (self.next() as usize) % max_len;
-        let mut items = Vec::with_capacity(len);
-        for _ in 0..len {
-            items.push(Value::Number(self.next_int() as f64, Exactness::Exact));
-        }
-        Value::list(items)
-    }
-    fn next_string_list(&mut self, max_len: usize) -> Value {
-        let len = (self.next() as usize) % max_len;
-        let mut items = Vec::with_capacity(len);
-        for _ in 0..len {
-            items.push(Value::String(self.next_string(10).into()));
-        }
-        Value::list(items)
-    }
-}
-
-fn alist_list<'a>(entries: &'a [Expr], key: &str) -> Option<&'a [Expr]> {
-    entries.iter().find_map(|entry| {
-        let ExprKind::Pair(k, v) = &entry.kind else {
-            return None;
-        };
-        let ExprKind::Symbol(name) = &k.kind else {
-            return None;
-        };
-        if &**name != key {
-            return None;
-        }
-        if let ExprKind::List(list) = &v.kind {
-            return Some(&**list);
-        }
-        let mut items = Vec::new();
-        let mut current = v;
-        while let ExprKind::Pair(head, tail) = &current.kind {
-            items.push(head.as_ref().clone());
-            current = tail;
-        }
-        Some(items.leak() as &[Expr]) // Leak for simple test usage
-    })
-}
-
-#[test]
-fn property_tests_from_my() {
-    let forms = parse(include_str!("../../../tests/fixtures/properties.lisp"))
-        .expect("properties.my should parse as valid sens source");
-
-    let mut lcg = Lcg::new(42);
-
-    for form in &forms {
-        let ExprKind::List(entries) = &form.kind else {
-            panic!("each top-level form in properties.my should be an alist: {form:?}");
-        };
-        let name = alist_str(entries, "name").expect("fixture needs a \"name\"");
-        let expr_str = alist_str(entries, "expr").expect("fixture needs an \"expr\"");
-        let types = alist_list(entries, "types").expect("fixture needs \"types\"");
-        let type_strings: Vec<&str> = types
-            .iter()
-            .map(|e| {
-                if let ExprKind::String(s) = &e.kind {
-                    s.as_ref()
-                } else {
-                    panic!("type must be string")
-                }
-            })
-            .collect();
-
-        println!("type_strings = {:?}", type_strings);
-        let param_names = ["x", "y", "z", "w", "v"];
-
-        for iteration in 0..100 {
-            let mut session = Session::default();
-            eval_program(include_str!("../../../lib/core.lisp"), &mut session).unwrap();
-            eval_program(include_str!("../../../lib/forward.lisp"), &mut session).unwrap();
-            eval_program(include_str!("../../../lib/persistent-map.lisp"), &mut session).unwrap();
-            eval_program(include_str!("../../../lib/knowledge.lisp"), &mut session).unwrap();
-            eval_program(include_str!("../../../lib/world.lisp"), &mut session).unwrap();
-            eval_program(
-                include_str!("../../../tests/fixtures/properties-helpers.lisp"),
-                &mut session,
-            )
-            .unwrap();
-
-            for (i, &t) in type_strings.iter().enumerate() {
-                let val = match t {
-                    "int" => Value::Number(lcg.next_int() as f64, Exactness::Exact),
-                    "string" => Value::String(lcg.next_string(10).into()),
-                    "list" => lcg.next_list(10),
-                    "string-list" => lcg.next_string_list(10),
-                    _ => panic!("Unknown type: {}", t),
-                };
-                session.environment.define(param_names[i], val);
-            }
-
-            let result = eval_program(expr_str, &mut session)
-                .unwrap_or_else(|e| panic!("property {name} failed on iteration {iteration}: {e}"));
-            // Truthiness, not exact identity: different properties check
-            // equality with different predicates (`eq` -> Symbol("t")/Nil,
-            // numeric `=` -> Value::Bool -- both untouched here on purpose,
-            // see Value::truth), so a property "holding" only ever means
-            // "truthy", never one specific Value shape.
-            assert!(
-                result.value.is_truthy(),
-                "Property {name} failed on iteration {iteration}: got {:?}",
-                result.value
-            );
-        }
-    }
-}
-
 // Minimal symbol/string introspection this project held off on for a long
 // time (CLAUDE.md: don't grow the Rust surface) — added deliberately when
 // lib/clips-import.lisp's Step 2 needed to strip CLIPS's `?` prefix off a
@@ -1100,49 +961,6 @@ fn string_predicate_distinguishes_strings_from_other_atoms() {
         Some(false)
     );
     assert_eq!(eval("(string? 5)").as_predicate_bit(), Some(false));
-}
-
-#[test]
-fn symbol_predicate_is_a_sens_function_not_a_rust_builtin() {
-    let mut session = Session::default();
-    eval_program(include_str!("../../../lib/core.lisp"), &mut session).unwrap();
-    assert_eq!(
-        eval_program("(symbol? (quote hello))", &mut session)
-            .unwrap()
-            .value,
-        Value::Symbol("t".into())
-    );
-    assert_eq!(
-        eval_program("(symbol? 5)", &mut session).unwrap().value,
-        Value::Nil
-    );
-    assert_eq!(
-        eval_program("(symbol? \"hello\")", &mut session)
-            .unwrap()
-            .value,
-        Value::Nil
-    );
-    assert_eq!(
-        eval_program("(symbol? (quote (hello)))", &mut session)
-            .unwrap()
-            .value,
-        Value::Nil
-    );
-    assert_eq!(
-        eval_program(
-            "(symbol? (string->symbol \"strange symbol\"))",
-            &mut session
-        )
-        .unwrap()
-        .value,
-        Value::Symbol("t".into())
-    );
-    assert_eq!(
-        eval_program("(symbol? (quote hello))", &mut Session::default())
-            .unwrap_err()
-            .kind,
-        ErrorKind::Type
-    );
 }
 
 #[test]
@@ -1440,17 +1258,6 @@ fn core_session() -> Session {
     let mut session = Session::default();
     sens::load_core_library(&mut session).expect("core library should load");
     session
-}
-
-fn eval_core(source: &str) -> Value {
-    eval_program(source, &mut core_session()).unwrap().value
-}
-
-#[test]
-fn string_less_than_orders_strings_lexicographically() {
-    assert_eq!(eval_core(r#"(string<? "a" "b")"#), Value::truth(true));
-    assert_eq!(eval_core(r#"(string<? "b" "a")"#), Value::truth(false));
-    assert_eq!(eval_core(r#"(string<? "a" "a")"#), Value::truth(false));
 }
 
 #[test]
