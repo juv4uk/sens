@@ -165,6 +165,9 @@ def main():
         action="store_true",
         help="explicitly reproduce the historical pre-#3225 census",
     )
+    ap.add_argument("--corpus",type=Path,default=Path("knowledge/exact-width-admitted-corpus.json"))
+    ap.add_argument("--target-dir",type=Path,default=Path("knowledge"))
+    ap.add_argument("--out",type=Path)
     a=ap.parse_args()
     if not a.historical_pre_cleanroom:
         raise SystemExit(
@@ -172,9 +175,6 @@ def main():
             "the input/model predates bīja3 A and D4 clean-room #3225; "
             "use --historical-pre-cleanroom only for provenance reproduction"
         )
-    ap.add_argument("--corpus",type=Path,default=Path("knowledge/exact-width-admitted-corpus.json"))
-    ap.add_argument("--target-dir",type=Path,default=Path("knowledge"))
-    ap.add_argument("--out",type=Path)
     if a.write: write(a.corpus,a.target_dir)
     else: check(a.corpus,a.target_dir)
     if a.out: write(a.corpus,a.out)
