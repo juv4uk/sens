@@ -29,6 +29,14 @@ jobs:
           python3 scripts/public_api_inventory.py --check
           python3 scripts/sens8-semantic-ratchet.py --self-test
           python3 scripts/sens8-semantic-ratchet.py --summary
+      # D7 semantics belong to owner-ratified Lisp/knowledge evidence, not Rust.
+      # Run this before the evaluator/bootstrap lanes, so D7 stays visible
+      # even when an unrelated legacy COND fixture currently blocks Hosted CI.
+      - name: D7 ratification and role separation are owner-owned
+        run: |
+          python3 scripts/check-d7-current-authority.py
+          python3 scripts/check-domain-tables.py
+          python3 benchmarks/d7-ratification-conformance/validate.py
       - name: One-file canonical T5 migration canary
         shell: bash
         run: |
