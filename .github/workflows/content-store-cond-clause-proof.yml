@@ -1,0 +1,26 @@
+name: Verify content-store D1 clause nesting
+
+on:
+  push:
+    branches:
+      - fix/content-store-cond-clause-grouping-20261009
+  pull_request:
+    paths:
+      - "tests/fixtures/content-store-authority-witness.lisp"
+      - ".github/workflows/content-store-cond-clause-proof.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  semantic:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 18
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Assert original content-store semantic and deterministic history laws
+        run: cargo test -p sens --test content_store_authority -- --nocapture
+      - name: Assert Canon V2 unchanged
+        run: cargo test -p sens --test canon_laws_v2_contract -- --nocapture
