@@ -7,7 +7,7 @@
 
 use crate::{
     parse_binary_source_words, BinarySourceToken, BinarySourceWord, ErrorKind, Expr, LanguageError,
-    Span, Text7,
+    Span,
 };
 use crate::syntax::ExprKind;
 use std::rc::Rc;
@@ -158,22 +158,8 @@ impl<'a> CanonicalReader<'a> {
                             end: token.span.end,
                         };
 
-                        // A D2-framed sequence containing only exact W7 leaves is
-                        // the canonical Text7 identifier/binder/reference frame
-                        // from #3910. D2 still owns only OPEN/SEP/CLOSE; D7 owns
-                        // the exact text cells. The resulting token is an ordinary
-                        // Symbol carrying the canonical Text7 wire identity
-                        // (#t7: + lowercase hex cells), never a human spelling
-                        // and never a callable domain identity.
-                        if let Some(text7) = framed_text7(&items) {
-                            return Ok(Expr {
-                                kind: ExprKind::Symbol(Rc::from(
-                                    text7.to_canonical_wire_token(),
-                                )),
-                                span,
-                            });
-                        }
-
+                        // D2 is structural. No globally implicit W7-to-Text7 Symbol.
+                        // Explicit binder/call contexts may request text7_binding_key.
                         return Ok(Expr {
                             kind: ExprKind::List(Rc::from(items.into_boxed_slice())),
                             span,
@@ -275,25 +261,6 @@ impl<'a> CanonicalReader<'a> {
 
 fn is_d2(word: BinarySourceWord, value: u8) -> bool {
     matches!(word, BinarySourceWord::W2(bits) if bits.packed_bits() == value)
-}
-
-fn framed_text7(items: &[Expr]) -> Option<Text7> {
-    if items.is_empty() {
-        return None;
-    }
-
-    let mut words = Vec::with_capacity(items.len());
-    for item in items {
-        let ExprKind::DomainIdentity(identity) = &item.kind else {
-            return None;
-        };
-        if identity.width() != 7 {
-            return None;
-        }
-        words.push(identity.source_word());
-    }
-
-    Text7::from_source_words(&words).ok()
 }
 
 #[cfg(test)]
@@ -481,21 +448,21 @@ mod tests {
     }
 
     #[test]
-    fn d2_framed_w7_sequence_becomes_one_canonical_text7_symbol() {
-        let expression = only("10 1000001 00 1000010 01");
-        let ExprKind::Symbol(symbol) = expression.kind else {
-            panic!("expected framed Text7 symbol");
-        };
-        assert_eq!(&*symbol, "#t7:4142");
+    fn d2_w7_data_has_explicit_contextual_text_key_only() {
+        let value = only("10 1000001 00 1000010 01");
+        let ExprKind::List(ref items) = value.kind else { panic!("D2 must retain list structure") };
+        assert_eq!(items.len(), 2);
+        assert_eq!(domain(&items[0]).packed_bits(), 65);
+        assert_eq!(domain(&items[1]).packed_bits(), 66);
+        assert_eq!(&*text7_binding_key(&value).unwrap(), "#t7:4142");
     }
 
     #[test]
-    fn one_w7_cell_can_be_explicitly_framed_as_text7() {
-        let expression = only("10 1101010 01");
-        let ExprKind::Symbol(symbol) = expression.kind else {
-            panic!("expected one-cell Text7 symbol");
-        };
-        assert_eq!(&*symbol, "#t7:6a");
+    fn d2_w7_one_cell_stays_structural_even_when_owner_reserved() {
+        let value = only("10 1101010 01");
+        let ExprKind::List(ref items) = value.kind else { panic!("W7 data stays D2 list") };
+        assert_eq!(items.len(), 1);
+        assert_eq!((domain(&items[0]).width(), domain(&items[0]).packed_bits()), (7, 106));
     }
 
     #[test]
@@ -522,12 +489,14 @@ mod tests {
     }
 
     #[test]
-    fn framed_text7_is_symbol_data_not_core_callability() {
-        let expression = only("10 1000001 00 1000010 01");
-        let ExprKind::Symbol(symbol) = expression.kind else {
-            panic!("expected framed Text7 symbol");
-        };
-        assert!(symbol.starts_with("#t7:"));
+    fn text7_context_key_does_not_grant_builtin_callability() {
+        let value = only("10 1000001 00 1000010 01");
+        let ExprKind::List(ref items) = value.kind else { panic!("D2 frame must be a list") };
+        assert!(text7_binding_key(&value).is_some());
+        for item in items.iter() {
+            assert_eq!(domain(item).width(), 7);
+            assert!(domain(item).core_operation().is_none());
+        }
     }
 
     #[test]
