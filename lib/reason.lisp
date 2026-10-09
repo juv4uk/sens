@@ -109,24 +109,28 @@
             (10011100 ((entry (00101101 predicate buckets)))
               (00000111
                 ((00000010 entry) () (00000111
-                   ((00011010 predicate-count *reason-index-max-predicates*) 1
+                   ((00011010 predicate-count *reason-index-max-predicates*)
                     (reason-index-build-scan
                       (00000110 remaining)
                       original
                       (reason-index-add-reversed
                         predicate (00000101 remaining) buckets)
                       (00001100 predicate-count 1)))
-                   ((00011010 predicate-count *reason-index-max-predicates*) 0
+                   ((00100010
+                      (00011010 predicate-count *reason-index-max-predicates*)
+                      (00000010 (00000001 (x))))
                     (reason-index-linear original))))
                 ((00000010 entry) (1) (00000111
-                   ((00011010 predicate-count *reason-index-max-predicates*) 1
+                   ((00011010 predicate-count *reason-index-max-predicates*)
                     (reason-index-build-scan
                       (00000110 remaining)
                       original
                       (reason-index-add-reversed
                         predicate (00000101 remaining) buckets)
                       (00001100 predicate-count 1)))
-                   ((00011010 predicate-count *reason-index-max-predicates*) 0
+                   ((00100010
+                      (00011010 predicate-count *reason-index-max-predicates*)
+                      (00000010 (00000001 (x))))
                     (reason-index-linear original))))
                 (t
                  (reason-index-build-scan
