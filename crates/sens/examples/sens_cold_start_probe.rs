@@ -14,6 +14,22 @@ fn probe(mode: &str) -> Result<(&'static str, u128), String> {
             black_box(Session::default());
             "SESSION"
         }
+        "bare-session" => {
+            black_box(Session::bare());
+            "BARE_SESSION"
+        }
+        "bare-d3" => {
+            let mut session = Session::bare();
+            let forms = parse_canonical_binary("10 001 00 000 01")
+                .map_err(|e| format!("bare D2 parse: {e:?}"))?;
+            let result = eval_parsed_expressions(&forms, &mut session)
+                .map_err(|e| format!("bare D3 execute: {e:?}"))?;
+            if !matches!(result.value, Value::Nil) || !result.output.is_empty() {
+                return Err("bare D3 QUOTE must return structural EMPTY".into());
+            }
+            black_box(result);
+            "BARE_D3_EMPTY"
+        }
         "d3" => {
             let mut session = Session::default();
             let forms = parse_canonical_binary("10 001 00 000 01")
@@ -25,6 +41,13 @@ fn probe(mode: &str) -> Result<(&'static str, u128), String> {
             }
             black_box(result);
             "D3_EMPTY"
+        }
+        "bare-core" => {
+            let mut session = Session::bare();
+            let result = load_core_library(&mut session)
+                .map_err(|e| format!("bare-to-Core4 bootstrap: {e:?}"))?;
+            black_box(result);
+            "BARE_CORE_LOADED"
         }
         "core" => {
             let mut session = Session::default();
@@ -57,7 +80,7 @@ fn main() {
     let mut args = env::args().skip(1);
     let mode = args.next().unwrap_or_default();
     if args.next().is_some() {
-        eprintln!("usage: sens_cold_start_probe <noop|session|d3|core|core-d3>");
+        eprintln!("usage: sens_cold_start_probe <noop|bare-session|session|bare-d3|d3|bare-core|core|core-d3>");
         process::exit(2);
     }
     match probe(&mode) {
