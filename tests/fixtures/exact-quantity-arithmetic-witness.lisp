@@ -12,6 +12,13 @@
 (load "lib/quantity.lisp")
 (load "lib/si.lisp")
 
+; D4:0100 NOT is a Lisp-owned exact-D1 derived law, never a host truth coercion.
+; Install its admitted domain-code mechanism using exact D4 DEFINE/LAMBDA.
+; D3 COND admits only D1 predicate 0/1, with a two-field test/result clause.
+(0011 0100
+  (0010 (predicate)
+    (110 (predicate 0) (1 1))))
+
 (00001001 exact-quantity-arithmetic-rows
   (00001000 ()
     (10011101 ((planck
