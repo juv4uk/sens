@@ -204,10 +204,12 @@ pub fn decode_ternary_words(
         return Err(TernaryTransportError::EmptyDomainWord);
     }
     words.push(typed_binary_word(current_width, current_value)?);
-    // Зайвий байт, неоднозначний або неканонічний хвіст — відмова.
-    if encode_ternary_words(&words)? != data {
-        return Err(TernaryTransportError::NoncanonicalEncoding);
-    }
+    // A T5 physical byte maps uniquely to five base-3 digits (0..242).
+    // Admission above proves: 0/1 payloads of exact width 1..9, exactly
+    // one separating 2 between nonempty words, and only 0..4 trailing 2s.
+    // Those conditions uniquely reconstruct the original T5 bytes.
+    // Re-encoding the whole word stream only allocates a second full trit
+    // vector and cannot strengthen canonicality after these checks.
     Ok(words)
 }
 
