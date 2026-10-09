@@ -561,3 +561,26 @@ mod exact_domain_primitive_tests {
         assert!(!error.message.contains("00000010"));
     }
 }
+
+
+#[cfg(test)]
+mod explicit_core4_domain_binding_tests {
+    use crate::{Bit4, CoreD4, CoreDomainIdentity, Session, Value};
+
+    #[test]
+    fn explicit_core4_bootstrap_binds_ratified_d4_list_as_language_owned_closure() {
+        let mut session = Session::bare();
+        crate::load_core_library(&mut session)
+            .expect("explicit Core4 bootstrap should load its Lisp definitions");
+
+        for bits in [0b1110, 0b1111] {
+            let identity = CoreDomainIdentity::D4(CoreD4::from_word(
+                Bit4::new(bits).expect("ratified D4 coordinate"),
+            ));
+            assert!(
+                matches!(session.environment.domain_code_slot(identity), Some(Value::Closure(_))),
+                "D4:{bits:04b} must be bound by its explicit Lisp Core4 definition, not a Rust fallback"
+            );
+        }
+    }
+}
