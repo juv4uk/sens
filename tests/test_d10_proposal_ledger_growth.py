@@ -80,7 +80,10 @@ class SelectionLedgerTrace(unittest.TestCase):
 
     def test_research_backfill_marker_cannot_be_used_by_unselected_donor(self):
         lines=self.content.splitlines()
-        fields=lines[-1].split("\t")
+        # Mutate a stable historical selected marker, not the final TSV row.
+        # Legitimate pending source proposals append after the initial roots.
+        fields=next(line.split("\t") for line in lines[1:]
+                    if line.split("\t")[3] == "DPB")
         fields[0]="D10P-9999"
         fields[3]="UNSELECTED-RANDOM"
         bad=self.content+"\t".join(fields)+"\n"
