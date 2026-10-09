@@ -35,7 +35,7 @@ fn eq_yes_selects_first_cond_clause_through_exact_d1() {
     assert_eq!(SELECT_T5.len(), 33);
 
     let observed = eval_physical(SELECT_T5);
-    match observed {
+    match &observed {
         Value::Pair(head, tail) => {
             assert!(matches!(&*head, Value::Nil));
             assert!(matches!(&*tail, Value::Nil));
