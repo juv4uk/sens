@@ -283,17 +283,25 @@ fn evaluate_d5_label(
 ) -> Result<EvalStep, LanguageError> {
     special_forms::exact_arity("D5:00100", arguments, 2, span)?;
 
-    let name = match &arguments[0].kind {
-        ExprKind::Symbol(name) => {
-            canon::ensure_bindable(name, arguments[0].span)?;
-            name.clone()
-        }
-        _ => {
-            return Err(LanguageError::new(
-                ErrorKind::Type,
-                "D5:00100 LABEL name must be a literal symbol",
-                arguments[0].span,
-            ));
+    // LABEL accepts a name in the canonical D2/D7 binding context. Keep
+    // the same Text7 wire key used by variable lookup and LAMBDA parameter
+    // binding; do not stringify D7 bits as human names or introduce a SID map.
+    let name = if let Some(name) = text7_binding_key(&arguments[0]) {
+        canon::ensure_bindable(&name, arguments[0].span)?;
+        name
+    } else {
+        match &arguments[0].kind {
+            ExprKind::Symbol(name) => {
+                canon::ensure_bindable(name, arguments[0].span)?;
+                name.clone()
+            }
+            _ => {
+                return Err(LanguageError::new(
+                    ErrorKind::Type,
+                    "D5:00100 LABEL name must be a literal symbol or D2-framed D7 Text7 binder",
+                    arguments[0].span,
+                ));
+            }
         }
     };
 
