@@ -8,6 +8,7 @@ on:
   pull_request:
     paths:
       - "crates/sens/src/gpu_*.rs"
+      - "crates/sens/tests/gpu_oracle_conformance.rs"
       - "crates/sens/src/compiler_role.rs"
       - "contracts/compiler-gpu-execution-packet-v1.lisp"
       - "scripts/gpu-worker-parity.py"
@@ -39,7 +40,7 @@ jobs:
       - uses: actions/checkout@v5
       - uses: dtolnay/rust-toolchain@stable
       - name: Current GPU oracle fixtures match the CPU evaluator
-        run: cargo test -p sens --lib gpu_oracle_conformance::tests::every_fixture_matches_the_cpu_oracle -- --nocapture
+        run: cargo test -p sens --test gpu_oracle_conformance every_fixture_matches_the_cpu_oracle -- --nocapture
 
   gpu-worker-parity:
     # SKIPPED (hardware UNVERIFIED) until a GitHub-hosted GPU runner is provisioned.

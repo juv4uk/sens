@@ -19,7 +19,6 @@ pub mod conformance_oracle;
 pub mod fixpoint_checkpoint;
 pub mod gpu_admission;
 pub mod gpu_oracle;
-pub mod gpu_oracle_conformance;
 pub mod program_compiler;
 mod program_data;
 mod compiler_role;
