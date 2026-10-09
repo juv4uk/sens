@@ -107,6 +107,25 @@ assert [r.bits for r in d2] == ["00", "01", "10", "11"]
 assert [r.bits for r in d3] == [f"{n:03b}" for n in range(8)]
 assert (d1[1].width, d1[1].bits) != (d3[1].width, d3[1].bits)
 
+# Physical .sens execution must stay on the packed-byte path, not a text projection.
+cli_source = (ROOT / "crates/sens-cli/src/main.rs").read_text(encoding="utf-8")
+route_start = cli_source.index("fn eval_physical_t5(")
+route_end = cli_source.index("\\nfn main()", route_start)
+physical_route = cli_source[route_start:route_end]
+assert "sens::decode_ternary_words(bytes)" in physical_route
+assert "sens::pack_binary_source_words(&words)" in physical_route
+assert "sens::parse_canonical_packed_words(&packed, &widths)" in physical_route
+assert "open_ternary_program" not in physical_route
+assert "parse_canonical_binary" not in physical_route
+
+transport_source = (ROOT / "crates/sens/src/ternary_transport.rs").read_text(encoding="utf-8")
+decode_start = transport_source.index("pub fn decode_ternary_words(")
+decode_end = transport_source.index("/// Вертикальний вигляд", decode_start)
+physical_decoder = transport_source[decode_start:decode_end]
+assert "parts.join(" not in physical_decoder
+assert "parse_binary_source_words(&visible)" not in physical_decoder
+
+print("PHYSICAL-T5-DIRECT-PACKED-PATH: PASS")
 print("BINARY-LANGUAGE-NEGATIVE-CONTROLS: PASS")
 print("leading-zero collapse: blocked")
 print("width/domain confusion: blocked")
