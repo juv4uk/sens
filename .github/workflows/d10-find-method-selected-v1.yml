@@ -1,0 +1,28 @@
+name: D10 FIND-METHOD historical selection oracle
+on:
+  pull_request:
+    paths:
+      - 'knowledge/d10-find-method-selection-v1.json'
+      - 'knowledge/d10-v1-semantic-inventory.json'
+      - 'knowledge/d10-fill-v1-state.json'
+      - 'knowledge/d10-historical-clos-interlisp-residual-review-v1.json'
+      - 'knowledge/d1-d9-foundation.json'
+      - 'scripts/check_d10_find_method_selected_v1.py'
+      - 'tests/test_d10_find_method_selected_v1.py'
+      - 'tests/fixtures/d10-find-method-real-cl-oracle.lisp'
+      - '.github/workflows/d10-find-method-selected-v1.yml'
+  workflow_dispatch:
+jobs:
+  semantic-proof:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - name: Fail-closed live-domain provenance and accounting
+        run: python3 scripts/check_d10_find_method_selected_v1.py
+      - name: Negative mutation and exact method-model witnesses
+        run: python3 -m unittest discover -s tests -p 'test_d10_find_method_selected_v1.py' -v
+      - name: Install independent Common Lisp oracle
+        run: sudo apt-get update -qq && sudo apt-get install -y -qq sbcl
+      - name: Historical Common Lisp FIND-METHOD oracle (not SENS runtime)
+        run: sbcl --script tests/fixtures/d10-find-method-real-cl-oracle.lisp
