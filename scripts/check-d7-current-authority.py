@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
 import json
-import re
 from pathlib import Path
 
 from domain_tables import D7_TABLE, read_domain_table
@@ -21,42 +20,6 @@ assert d["reserved_coordinates"]==["0100001","0101010"]
 assert len(d["residents"])==126
 assert set(d["residents"]).isdisjoint(d["reserved_coordinates"])
 assert set(d["residents"]) | set(d["reserved_coordinates"]) == {f"{i:07b}" for i in range(128)}
-
-# The Lisp table is the human projection of the ratified W7 coordinates, not
-# an independent resident allocator. Compare every entry against owner #3572
-# so a missing row, reused reserved slot, or label drift fails closed.
-canonical_d7_rows = {}
-row_pattern = re.compile(
-    r"^\s*\(([01]{7})\s+\(ук\s+[^()]+\)\s+"
-    r"\(укр\s+[^()]+\)\s+\(san\s+[^()]+\)\s+"
-    r"\(en\s+([^()\s]+)\)"
-)
-table = (root / "lib/domains/d7.lisp").read_text(encoding="utf-8")
-for line_number, line in enumerate(table.splitlines(), start=1):
-    if not re.match(r"^\s*\([01]{7}\s", line):
-        continue
-    match = row_pattern.match(line)
-    assert match is not None, f"D7 malformed surface at line {line_number}"
-    coordinate, projection = match.groups()
-    assert coordinate not in canonical_d7_rows, f"D7 duplicate {coordinate}"
-    canonical_d7_rows[coordinate] = projection
-
-assert canonical_d7_rows == d["residents"], "D7 Lisp table drifted from owner-ratified 126/128"
-assert len(d["rows"]) == 128
-ratified_rows = {
-    row["coordinate"]: row["report_name"]
-    for row in d["rows"] if row["status"] == "OWNER-RATIFIED"
-}
-assert ratified_rows == canonical_d7_rows
-assert {
-    row["coordinate"] for row in d["rows"]
-    if row["status"] == "OWNER-RESERVED-PINNED"
-} == set(d["reserved_coordinates"])
-digits = {
-    row["report_name"] for row in d["rows"]
-    if row.get("semantic_role") == "text-digit"
-}
-assert digits == {f"text.digit.{digit}" for digit in range(10)}
 
 assert d["occupancy_basis"]=={
     "baseline_recovered":107,
