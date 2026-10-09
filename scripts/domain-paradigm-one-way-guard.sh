@@ -47,7 +47,7 @@ is_exact_width_file() {
 is_canonical_runtime_path() {
   local path="$1"
   case "$path" in
-    crates/sens/src/eval/*.rs|crates/sens/src/value.rs|crates/sens/src/environment.rs|crates/sens/src/domain_identity.rs|crates/sens/src/syntax.rs)
+    crates/sens/src/eval/*.rs|crates/sens/src/semantic_registry.rs|crates/sens/src/value.rs|crates/sens/src/environment.rs|crates/sens/src/domain_identity.rs|crates/sens/src/syntax.rs)
       return 0
       ;;
     *)
@@ -78,6 +78,7 @@ byte_scatter_pattern='TAG_DOMAIN_IDENTITY|TAG_CALLABLE_DOMAIN|out\.push\([^)]*\.
 name_dispatch_pattern='semantic_id_for_surface|admitted_semantic_id_for_surface|registry_byte_for_surface|legacy_domain_identity_from_registry_byte|routed_sid_for_surface|surface_has_sid'
 exact_domain_projection_pattern='domain_identity_for_surface|domain_identity_for_symbol'
 retired_host_truth_pattern='is_truthy\(|migration_only_cond_truthy|answer_direction\(|Core2LegacyTwoPart|canonical cond: no query matched'
+forbidden_byte_domain_map_pattern='transitional_d5_binding_identity_from_registry_byte|legacy_domain_identity_from_registry_byte'
 
 failed=0
 while IFS= read -r path; do
@@ -94,6 +95,13 @@ while IFS= read -r path; do
     fi
     if printf '%s\n' "$added" | grep -Eq "$byte_scatter_pattern"; then
       echo "PARADIGM-ONE-WAY violation: canonical domain identity is being scattered into byte fields" >&2
+      echo "  file: $path" >&2
+      echo "  line: $added" >&2
+      failed=1
+    fi
+    if is_canonical_runtime_path "$path" \
+      && printf '%s\n' "$added" | grep -Eq "$forbidden_byte_domain_map_pattern"; then
+      echo "PARADIGM-ONE-WAY violation: historical SID byte cannot assign a domain coordinate" >&2
       echo "  file: $path" >&2
       echo "  line: $added" >&2
       failed=1
