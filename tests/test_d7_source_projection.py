@@ -34,17 +34,30 @@ class D7ProjectionTests(unittest.TestCase):
                 with self.assertRaisesRegex(D7ProjectionError, "reserved"):
                     project(bits, role="sound-text")
 
-    def test_local_ordinal_is_explicit_distinct_role_even_on_a_pinned_coordinate(self) -> None:
-        bits = "0101010"
-        ordinal = project(bits, role="local-ordinal")
-        self.assertEqual(ordinal["coordinate"], bits)
-        self.assertEqual(ordinal["role"], "local-ordinal")
-        self.assertEqual(ordinal["status"], "ROLE-TAG-ONLY")
-        self.assertIsNone(ordinal["surface"])
-        self.assertFalse(ordinal["arithmetic_number"])
-        self.assertFalse(ordinal["callable"])
-        with self.assertRaises(D7ProjectionError):
-            project(bits, role="sound-text")
+    def test_local_ordinal_only_for_fourteen_donor_locked_sutras(self) -> None:
+        # LocalOrdinal має власну донорську підставу: W7-ширина не є допуском.
+        for ordinal_number in range(1, 15):
+            bits = f"{ordinal_number:07b}"
+            with self.subTest(bits=bits):
+                ordinal = project(bits, role="local-ordinal")
+                sound = project(bits, role="sound-text")
+                self.assertEqual(ordinal["coordinate"], bits)
+                self.assertEqual(ordinal["role"], "local-ordinal")
+                self.assertEqual(ordinal["status"], "D7-VALID-PROVENANCE")
+                self.assertEqual(ordinal["donor_ref"], f"shiva-sutra:{ordinal_number}")
+                self.assertEqual(ordinal["source_order"], ordinal_number)
+                self.assertIsNone(ordinal["surface"])
+                self.assertFalse(ordinal["arithmetic_number"])
+                self.assertFalse(ordinal["callable"])
+                self.assertEqual(sound["role"], "sound-text")
+                self.assertNotEqual(sound["status"], ordinal["status"])
+
+        # Навіть наявна звукова координата не породжує новий ordinal.
+        # Два зарезервовані Sound/Text слова теж не стають порядковими.
+        for bits in ("0000000", "0001111", "0100001", "0101010"):
+            with self.subTest(unadmitted_ordinal=bits):
+                with self.assertRaisesRegex(D7ProjectionError, "no donor-ratified LocalOrdinal"):
+                    project(bits, role="local-ordinal")
 
     def test_text_digit_has_no_arithmetic_number_or_function_admission(self) -> None:
         one = project("0011111", role="sound-text", namespace="sym")
