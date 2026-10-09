@@ -12,6 +12,7 @@
   (00001000 (value)
     (00100010 value (00100010 (00000001 d1-no-left) (00000001 d1-no-right)))))
 
+; Canonical three-part COND uses structural expected-result data, not truthiness.
 (00001001 content-store-authority-witness
   (00001000 ()
     (10011101 ((value (00000001 (lambda (x) x)))
@@ -36,11 +37,11 @@
                (world-clauses direct (00000001 zoo))
                (world-clauses retold (00000001 zoo)))))
       (00000111
-        (root-relation
+        (root-relation (1)
           (00000111
-            (object-relation
+            (object-relation (1)
               (00000111
-                (projection-relation
+                (projection-relation (1)
                   (00000001
                     (content-store-authority-witness
                       (status pass)
@@ -48,17 +49,17 @@
                         root-image-deterministic
                         object-image-deterministic
                         equal-current-projection))))
-                ((content-store-no? projection-relation)
+                ((content-store-no? projection-relation) (1)
                   (00000001
                     (content-store-authority-witness
                       (status fail)
                       (law equal-current-projection)))))
-            ((content-store-no? object-relation)
+            ((content-store-no? object-relation) (1)
               (00000001
                 (content-store-authority-witness
                   (status fail)
                   (law object-image-deterministic)))))
-        ((content-store-no? root-relation)
+        ((content-store-no? root-relation) (1)
           (00000001
             (content-store-authority-witness
               (status fail)
