@@ -31,3 +31,13 @@
 - `crates/sens/tests/content_store_authority.rs`, вихідний Git blob `0955eb39dbdc54743155f310ae99aa8da5724512`: видалено **лише** `content_store_semantic_relations_are_owned_by_lisp_witness`.
 - Причина: `tests/fixtures/content-store-authority-witness.lisp` містить тричленні клаузи `COND (query expected result)` старого семантичного контракту; власник ратифікував L1: **точний D1 PredicateBit, двочленний COND, вичерпання — структурне `()`**. Rust-вимога, щоб цей retired witness повертав `(content-store-authority-witness (status pass) ...)`, не є чинною гарантією.
 - Збережено `content_store_mechanism_keeps_deterministic_images_and_distinct_history_entries` (серіалізація та кількість записів). Архівну Lisp-фікстуру не переписано й не видалено; її семантичне оновлення можливе лише через reader → L1–L7 → exact-domain emitter → незалежний оракул.
+
+
+## Подальше вилучення історичних Rust-оракулів — 2026-10-09
+
+| Шлях | Початковий Git blob SHA | Вилучений тест | Причина |
+|---|---|---|---|
+| `crates/sens/tests/canon_adversarial.rs` | `6b8ab8f372a5e8c38d32c49d0c1d9f56cb998025` | `cond_surface_stops_at_the_first_true_clause` | Rust-authored outcome через спадкові `totzhne?/abheda` surface-вирази й «першу істинну клаузу»; замість окремого авторитету Rust за актуальний exact D1/D3 відповідає незалежний Lisp-owned oracle; решта binding/quote/fail-closed механізмів у файлі збережена. |
+| `crates/sens/tests/world.rs` | `e60b04f091950f278a580ed7df69796b06af5d73` | `defmodule_after_world_load_keeps_legacy_reason_in_behavior` | Rust-oracle, який закріплював historical `reason-in` proof-shape. Інші тести реального world snapshot, transaction atomicity, history, query та interface механіки залишені. |
+
+Жоден production evaluator чи source library не змінюється. Не прибирати захисні тести `D1:1/0`, `D3:000`, wrong-domain/non-two-part `COND`.
