@@ -448,8 +448,11 @@
 (00001001 pairlis спарувати)
 
 (00001010 let* (bindings body)
+  ; `bindings` is a proper list by this macro's input contract: ATOM yields
+  ; exact D1:1 at the empty-list terminator and D1:0 for a non-empty pair.
+  ; The former third field was the retired ATOM sentinel, not a result value.
   (00000111
-    ((00000010 bindings) () body)
+    ((00000010 bindings) body)
     ((00000010 bindings) 
      ; Build the recursive expansion from the primitive tree substrate only.
      ; This keeps let* semantics in Lisp while allowing generic macro
