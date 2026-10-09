@@ -1,0 +1,116 @@
+{
+  "schema": "sens-d10-hysteretic-state-intake/v1",
+  "date": "2026-10-09",
+  "status": "SELECTED-RESEARCH-NOT-RATIFIED-IF-ADMITTED",
+  "authority": [
+    "#4162",
+    "#4013",
+    "#4301",
+    "#4463",
+    "owner instruction to systematically fill D10"
+  ],
+  "pinned_before": {
+    "d1_d9_foundation_git_blob": "09d1d71c39d1484dfd005a5068dbb18b76f0f0d4",
+    "d10_inventory_git_blob": "7683f1e2bfcf67d3a45d412d3b1790b72ad623ad",
+    "selected": 632,
+    "remaining": 392,
+    "ratified": 0
+  },
+  "primary_sources": [
+    {
+      "source": "Texas Instruments SCEA046 Understanding Schmitt Triggers",
+      "url": "https://www.ti.com/document-viewer/lit/html/scea046",
+      "law": "Two distinct switching thresholds on rising/falling input and output retains state between them; threshold values are hardware-dependent."
+    },
+    {
+      "source": "Texas Instruments SNOA997A Inverting Comparator with Hysteresis",
+      "url": "https://www.ti.com/document-viewer/lit/html/SNOA997A",
+      "law": "Inverting polarity reference. Output high for input below lower threshold; output low above upper threshold. This is the Boolean complement of the chosen non-inverting mathematical law."
+    },
+    {
+      "source": "Analog Devices comparator hysteresis discussion",
+      "url": "https://www.analog.com/en/resources/analog-dialogue/articles/curing-comparator-instability-with-hysteresis.html",
+      "law": "History-dependent switching and positive-feedback mechanism, but resistor/network details are substrate and excluded."
+    }
+  ],
+  "interest_donors": [
+    {
+      "repo": "juv4uk/esp32-pendulum",
+      "git_blob": "811aad8a5946b93515c01a9eb281009176a920df",
+      "path": "README.md",
+      "meaning": "AS5600 and noisy angular measurement motivating hysteresis; pipeline still TODO — NOT executable donor parity."
+    },
+    {
+      "repo": "juv4uk/spanda",
+      "path": "README.md",
+      "meaning": "Analog exact rational/FPGA research motivation, not implemented source oracle."
+    },
+    {
+      "repo": "juv4uk/radio-log",
+      "path": "src/lib/sens-radio/bfsk-rx.ts",
+      "meaning": "Digital radio tone measurement as possible user, not evidence that same threshold law is in donor code."
+    }
+  ],
+  "selection_root": {
+    "stable_id": "d10.crosshobby.hysteretic-boolean-step.20261009",
+    "semantic_name": "HYSTERETIC-BOOLEAN-STEP",
+    "surface_uk": "гістеркрок",
+    "surface_ukr": "оновити-двопороговий-стан",
+    "source_class": "SOURCE-GROUNDED-EXACT-RATIONAL-STATE-LAW",
+    "relation_class": "TWO-THRESHOLD-MEMORY-UPDATE",
+    "status": "SELECTED-RESEARCH-CANDIDATE",
+    "proposal_status": "pending-owner-review",
+    "coordinate": null,
+    "coordinate_basis": "UNPLACED",
+    "ratified_resident": false,
+    "physical_t5_authorized": false,
+    "arity": 4,
+    "argument_shape": "(state:D1 yes/no,low:exact rational,high:exact rational,sample:exact rational) -> D1 yes/no, low<high",
+    "behavior": "Given strict lower threshold low<high and an exact rational sample x, return D1 NO when x<=low, D1 YES when x>=high, and the unmodified previous D1 state when low<x<high; reject non-rational/NaN/inverted-or-equal thresholds. This defines deterministic equality at thresholds as a SENS mathematical tie convention, not a claim about uncertain analog transition voltages.",
+    "positive_witnesses": [
+      "step(NO,0,2,1)=NO; step(YES,0,2,1)=YES (same sample preserves different histories).",
+      "step(NO,0,2,2)=YES; step(YES,0,2,0)=NO.",
+      "step(NO,-1/2,1/2,1/4)=NO; step(YES,-1/2,1/2,1/4)=YES."
+    ],
+    "falsifier_spec": "A single midpoint threshold toggles output inside open hysteresis band; equality at high/low does not switch as specified; equal or inverted bounds are accepted; the previous state affects the saturated region.",
+    "dedup_check": "The pinned D1-D9 and D10 inventory have no exact HYSTERESIS/SCHMITT/THRESHOLD resident by name. Behavioral dedup remains required against COND/ordering, D1 predicate, D8 stop-when-true+return-state and D10 finite-state-transducer research. A compositional implementation is possible: DERIVABLE does not automatically forbid a named D10 semantic root under #4162.",
+    "ownership_test": "UNIVERSAL-BORDER: this describes an observable pure state-update function independent of ADC, transistor polarity, FPGA registers, analog voltages, transport, clock scheduler, branch mechanics, or D2 evaluation.",
+    "independent_oracle_note": "Pure exact-rational Python exhaustive mathematical oracle plus a real Chez Scheme executable independent implementation in CI; neither proves executed analog hardware parity or SENS native binary machine execution.",
+    "examples_scope": "Threshold comparisons over exact rationals, with explicit domains, not floating-point tolerance or analog metastability."
+  },
+  "derived_or_hold": [
+    {
+      "name": "HYSTERETIC-BOOLEAN-SCAN",
+      "decision": "DERIVED-NO-SLOT",
+      "reason": "Fold the selected one-step law over a sample sequence; no distinct root semantics."
+    },
+    {
+      "name": "INVERTING-COMPARATOR-HYSTERESIS",
+      "decision": "DERIVED-POLARITY",
+      "reason": "Complement non-inverting Boolean result and prior-state convention; do not add second code automatically."
+    },
+    {
+      "name": "AS5600-HARDWARE-PEAK-DETECT",
+      "decision": "HOLD-HARDWARE-NATIVE-ORACLE",
+      "reason": "ESP32 pendulum peak detector is TODO; no hardware source-runtime parity."
+    },
+    {
+      "name": "ANALOG-METASTABILITY-TOLERANCE",
+      "decision": "HOLD-PHYSICAL-MEASUREMENT",
+      "reason": "Exact analog threshold uncertainty is a physical model not proven by this rational function."
+    }
+  ],
+  "review_questions": [
+    "Does a typed threshold-memory update provide independent useful semantic law beyond composition of COND, <=, >= and D1 state?",
+    "Are previous-state identity and equality conventions acceptable as D10 versus D6 helper?",
+    "Independent Chez oracle and Git transition evidence are not automatic owner ratification."
+  ],
+  "impacts": {
+    "selected_delta_if_admitted": 1,
+    "ratified_delta": 0,
+    "law_forced_coordinate_delta": 0,
+    "release_contract_change": false,
+    "d2_control_change": false,
+    "t5_physical_change": false
+  }
+}
