@@ -204,6 +204,14 @@ def inspect(root: Path, base: str, reader: Path,
         rows.append(row)
         # All candidate Git outputs must be regular source/target pairs.
         source_file, binary_file = source_and_binary(root, binary)
+        # The proposed COMMIT is the release artifact, not the agent's local
+        # worktree. Manifest and publisher digest checks on working bytes alone
+        # can falsely approve a dirty replacement absent from Git HEAD.
+        head_binary_blob = old_source_blob(root, "HEAD", binary)
+        working_binary_blob = git(root, "hash-object", "--", binary.as_posix()).decode("ascii").strip()
+        if head_binary_blob is None or head_binary_blob != working_binary_blob:
+            row["reason"] = "PHYSICAL_HEAD_DRIFT: committed binary must equal working T5 bytes"
+            continue
         try:
             kind_guard(root, source)
         except Blocked as exc:

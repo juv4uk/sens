@@ -121,6 +121,34 @@ class ProofCarryingOriginalTests(unittest.TestCase):
         self.assertEqual(state["status"], "BLOCKED")
         self.assertIn("SOURCE_CHANGED", state["files"][0]["reason"])
 
+    def test_dirty_physical_bytes_cannot_stand_in_for_committed_original(self):
+        self.add_original_binary()
+        manifest = self.proof()
+        (self.root / self.dst).write_bytes(b"\x01\x23")
+        document = json.loads(manifest.read_text(encoding="utf-8"))
+        document["expected_physical_sha256"] = hashlib.sha256(
+            (self.root / self.dst).read_bytes()
+        ).hexdigest()
+        manifest.write_text(json.dumps(document), encoding="utf-8")
+        def must_not_attest(*args):
+            self.fail("must not run oracle for uncommitted physical replacement")
+        state = gate.inspect(self.root, self.base, self.reader, must_not_attest, self.safe_kind)
+        self.assertEqual(state["status"], "BLOCKED")
+        self.assertIn("PHYSICAL_HEAD_DRIFT", state["files"][0]["reason"])
+
+    def test_dirty_new_cohort_binary_is_not_exempt_from_git_integrity(self):
+        new = Path("tests/fixtures/new-canary/prog.lisp")
+        (self.root / new).parent.mkdir(parents=True)
+        (self.root / new).write_bytes(b"(001 ())\n")
+        binary = self.root / new.with_suffix(".sens")
+        binary.write_bytes(b"\x23")
+        self.commit()
+        binary.write_bytes(b"\x24")
+        state = gate.inspect(self.root, self.base, self.reader, self.approved, self.safe_kind)
+        self.assertEqual(state["status"], "BLOCKED")
+        self.assertIn("PHYSICAL_HEAD_DRIFT", state["files"][0]["reason"])
+        self.assertEqual(state["summary"]["new_cohorts_not_original_credit"], 0)
+
     def test_tampered_physical_digest_blocks_before_oracle(self):
         self.add_original_binary()
         manifest = self.proof()
