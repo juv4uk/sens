@@ -1,17 +1,12 @@
 name: SENS physical binary performance measurements
 
 on:
+  # Controlled replay lane: main scoreboard runs on source changes.
+  # This additional Cachegrind-capable runner runs only for its own changes.
   push:
     branches: [main]
     paths:
       - "benchmarks/physical-binary-performance/**"
-      - "crates/sens/src/ternary_transport.rs"
-      - "crates/sens/src/canonical_reader.rs"
-      - "crates/sens/src/eval/**"
-      - "crates/sens-cli/src/main.rs"
-      - "crates/sens-cli/src/bin/sens-trit.rs"
-      - "tests/fixtures/migration-quote-cohort-main/**"
-      - "tests/fixtures/migration-multiform-cohort-main/**"
       - ".github/workflows/physical-binary-performance.yml"
   pull_request:
     paths:
@@ -32,9 +27,6 @@ on:
         description: "Include actual CPU instruction references via Valgrind"
         type: boolean
         default: false
-  schedule:
-    - cron: "23 3 * * *"
-
 permissions:
   contents: read
 
