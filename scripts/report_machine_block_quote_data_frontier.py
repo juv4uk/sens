@@ -27,7 +27,7 @@ EXPECTED_ATOMS = ("mov", "r1", "r2", "branch", "L1", "ret", "label", "L2", "nop"
 
 
 def git_blob(raw: bytes) -> str:
-    return hashlib.sha1(b"blob " + str(len(raw)).encode("ascii") + b"\\0" + raw).hexdigest()
+    return hashlib.sha1(b"blob " + str(len(raw)).encode("ascii") + b"\0" + raw).hexdigest()
 
 
 def extract_historical_expected(text: str) -> dict:
@@ -79,8 +79,8 @@ def census(original: bytes, oracle: str, projection: str) -> dict:
     uppercase = [x for x in unique if any(c.isascii() and c.isupper() for c in x)]
     if uppercase != ["L1", "L2"]:
         raise ValueError("the uppercase-label witness changed")
-    if re.search(r'\\("L",\\s*Some\\(', projection) or re.search(
-        r'\\("L[12]",\\s*Some\\(', projection
+    if re.search(r'\("L",\s*Some\(', projection) or re.search(
+        r'\("L[12]",\s*Some\(', projection
     ):
         raise ValueError("Text7 uppercase label layout changed; re-review D7 source law")
 
