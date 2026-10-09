@@ -80,7 +80,9 @@ class SelectionLedgerTrace(unittest.TestCase):
 
     def test_proposal_precedes_selection_without_forged_migration_block(self):
         lines=self.content.splitlines()
-        fields=lines[-1].split("\t")
+        # Pin historic selected identity; pending research rows append later.
+        fields=next(x.split("\t") for x in lines[1:]
+                    if x.split("\t")[3] == "DPB")
         fields[0]="D10P-9999"
         fields[1]="окремий-донор"
         fields[2]="незалежний-дослідний-донор"
