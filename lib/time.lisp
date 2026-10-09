@@ -109,12 +109,12 @@
                (00000001 accepted)
                host
                (00001101 ntp-seconds 2208988800)
-               (00010100 (00001110 fraction #d1000000000) 4294967296))))
+               (00010100 (00001110 fraction #d1000000000) 4294967296)))))
          ((00000010 (00000001 ()))
-          (00100111 (00000001 rejected) (00000001 invalid-response))))
+          (00100111 (00000001 rejected) (00000001 invalid-response)))))
       ((00000010 (00000001 ()))
-       (00100111 (00000001 rejected) (00000001 invalid-response)))))
-)))
+       (00100111 (00000001 rejected) (00000001 invalid-response))))))
+
 
 ; Adapter for the raw host boundary. The host returns either:
 ;   (ntp-fields host mode stratum ntp-seconds fraction)
@@ -150,9 +150,9 @@
          (00101111 observation)
          (01011111
            (00110000 observation)
-           (00000101 (00000110 (00000110 (00000110 observation))))))
-      ((00000010 (00000001 ())) observation)))
-))
+           (00000101 (00000110 (00000110 (00000110 observation)))))))
+      ((00000010 (00000001 ())) observation))))
+
 
 ; Nanoseconds are the one monotonic host observation. Milliseconds are only a
 ; coarser language-level view, so derive them instead of requiring a second
@@ -234,10 +234,10 @@
          ((00000010 (00000001 ()))
           (00100111
             (00000001 accepted)
-            (00100111 (00000001 timezone) name offset-seconds))))
+            (00100111 (00000001 timezone) name offset-seconds)))))
       ((00000010 (00000001 ()))
-       (00100111 (00000001 rejected) (00000001 invalid-name)))))
-))
+       (00100111 (00000001 rejected) (00000001 invalid-name))))))
+
 
 (00001001 timezone-name
   (00001000 (config)
