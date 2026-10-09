@@ -57,7 +57,7 @@ jobs:
           retention-days: 30
 
   paired-cpu:
-    name: Paired English vs binary D3 phase measurements
+    name: Paired Ukrainian vs canonical binary D3 phase measurements
     runs-on: ubuntu-24.04
     timeout-minutes: 35
     steps:
@@ -108,17 +108,13 @@ jobs:
               "# CPU benchmark BLOCKED (not zero-speed)\n\n" +
               "Git SHA: " + sha + "\n\n" +
               "Reason: " + reason + "\n\n" +
-              "No elapsed time or English/Binary ratio is admitted.\n"
+              "No elapsed time or Ukrainian/Binary ratio is admitted.\n"
           )
           PY
-            # The old English benchmark still mints historical SID identity.
-            # Record it as BLOCKED, not as a measured slow candidate.
-            # Unexpected failures still fail the job.
-            if grep -qF 'legacy byte identity entered current D1-D8 CPU preflight' \
-                "$RUNNER_TEMP/sens-real-cpu/preflight.log"; then
-              echo "Legacy English lane BLOCKED: no paired speed ratio admitted."
-              exit 0
-            fi
+            # Current Ukrainian surface and canonical binary must both be
+            # executable by the same current-domain reader/evaluator. Any
+            # failure is real and fails closed; it is never promoted to a
+            # successful historical-English "BLOCKED" lane.
             exit "$code"
           fi
           python3 benchmarks/current-en-vs-d1d8/validate.py \
@@ -131,7 +127,7 @@ jobs:
           from pathlib import Path
           dest = Path(sys.argv[1])
           if (dest / "preflight-blocked.json").is_file():
-              print("Historical English candidate BLOCKED; no paired speed measurement emitted")
+              print("Current Ukrainian/canonical pair BLOCKED; no paired speed measurement emitted")
               raise SystemExit(0)
           source = dest / "paired.jsonl"
           if not source.exists():
@@ -152,13 +148,13 @@ jobs:
               "",
               "Git SHA: " + rows[0]["git_sha"] + "; pairs: " + str(len(pairs)),
               "",
-              "| Workload | Phase | English median ns | Binary median ns | English/Binary |",
+              "| Workload | Phase | Ukrainian median ns | Binary median ns | Ukrainian/Binary |",
               "|---|---|---:|---:|---:|",
           ]
           for (case, phase), lanes in sorted(groups.items()):
-              if set(lanes) != {"english-surface", "canonical-d1d8"}:
+              if set(lanes) != {"ukrainian-surface", "canonical-d1d8"}:
                   raise SystemExit("candidate missing")
-              en = statistics.median(lanes["english-surface"])
+              en = statistics.median(lanes["ukrainian-surface"])
               binary = statistics.median(lanes["canonical-d1d8"])
               if binary <= 0:
                   raise SystemExit("invalid timing")
