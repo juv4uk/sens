@@ -8,10 +8,10 @@
   "capacity": 1024,
   "current_foundation": "#4008 / Contract 11.8 / D1-D9",
   "accounting": {
-    "selected_semantic_candidates": 630,
+    "selected_semantic_candidates": 634,
     "law_forced_coordinates": 256,
-    "unplaced_selected_candidates": 374,
-    "remaining_semantic_inventory": 394,
+    "unplaced_selected_candidates": 378,
+    "remaining_semantic_inventory": 390,
     "ratified_d10_residents": 0
   },
   "rules": [
@@ -13362,6 +13362,341 @@
       "coordinate_basis": "UNPLACED",
       "donor_coordinate_authority": "NONE",
       "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.hobby.clock.allan-variance.v1",
+      "semantic_name": "ALLAN-VARIANCE",
+      "surface_uk": "дисперсія-Аллана",
+      "surface_ukr": "дсп-алн",
+      "relation_class": "TIME-FREQUENCY-STATISTICS",
+      "behavior": "Finite classical two-sample (nonoverlapping tau-bin) Allan variance for N>=2 consecutive equally spaced, tau-averaged fractional-frequency values y: sum_{i=1}^{N-1}(y[i]-y[i-1])^2 / (2*(N-1)). Exact rational in/exact rational out. Phase samples, dead time, overlapping estimators and Allan deviation are distinct contracts.",
+      "arity": 1,
+      "argument_shape": "list of N>=2 tau-averaged rational fractional frequencies, equispaced with no dead time",
+      "result_shape": "single nonnegative rational variance",
+      "source_path": "knowledge/d10-clock-radio-math-selection-20261009.json",
+      "source_class": "HOBBY-CLOCK-RADIO-PRIMARY-20261009",
+      "primary_url": "https://nvlpubs.nist.gov/nistpubs/Legacy/SP/nistspecialpublication1065.pdf",
+      "source_section": "NIST SP 1065 (2008), §5.2.2 printed p.14, Eq.(6)",
+      "positive_witnesses": [
+        {
+          "input": [
+            "0",
+            "1"
+          ],
+          "result": "1/2"
+        },
+        {
+          "input": [
+            "0",
+            "1",
+            "0"
+          ],
+          "result": "1/2"
+        },
+        {
+          "input": [
+            "3",
+            "3",
+            "3"
+          ],
+          "result": "0"
+        },
+        {
+          "input": [
+            "1/3",
+            "2/3"
+          ],
+          "result": "1/18"
+        }
+      ],
+      "falsifiers": [
+        "Population sample variance of (0,1,0) is not the adjacent Allan estimate 1/2",
+        "Length 0 or 1 must be rejected, not divided by zero or silently returned 0",
+        "Constant common frequency offset must cancel out"
+      ],
+      "owner_question": "Can be derived via exact differences/reduce; is the named statistical aggregate independently language-visible, or better admitted as standard library?",
+      "nearest_semantics": [
+        "D9/D10 arithmetic and REDUCE projections",
+        "D10 SCIENCE dimensions family",
+        "NIST overlapping Allan variance is a different statistical law"
+      ],
+      "provenance": [
+        "knowledge/d10-clock-radio-math-selection-20261009.json",
+        "#4013",
+        "#4463",
+        "https://nvlpubs.nist.gov/nistpubs/Legacy/SP/nistspecialpublication1065.pdf"
+      ],
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "decision": "SELECT-D10-CANDIDATE",
+      "proposal_status": "pending-owner-review",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "donor_coordinate_authority": "NONE",
+      "ratified_resident": false,
+      "physical_t5_authorized": false
+    },
+    {
+      "stable_id": "d10.hobby.radio.differential-encode.v1",
+      "semantic_name": "DIFFERENTIAL-ENCODE",
+      "surface_uk": "диференційно-кодувати",
+      "surface_ukr": "диф-код",
+      "relation_class": "MODULAR-STATEFUL-SEQUENCE",
+      "behavior": "For integer symbols x[i] in [0,M), M>=2 and explicit prior encoded output y[-1] in [0,M), y[i]=(x[i]+y[i-1]) mod M; return (encoded vector, last y). Empty input leaves state intact. Caller passes last y between chunks, preventing reset at chunk boundaries.",
+      "arity": 3,
+      "argument_shape": "(symbols, modulus integer >=2, previous encoded output)",
+      "result_shape": "(encoded symbols, next previous encoded output)",
+      "source_path": "knowledge/d10-clock-radio-math-selection-20261009.json",
+      "source_class": "HOBBY-CLOCK-RADIO-PRIMARY-20261009",
+      "primary_url": "https://wiki.gnuradio.org/index.php/Differential_Encoder",
+      "source_section": "GNU Radio Differential Encoder, formula y[0]=(x[0]+y[-1]) % M",
+      "positive_witnesses": [
+        {
+          "input": {
+            "symbols": [
+              1,
+              2,
+              3
+            ],
+            "M": 4,
+            "previous": 0
+          },
+          "result": {
+            "symbols": [
+              1,
+              3,
+              2
+            ],
+            "next": 2
+          }
+        },
+        {
+          "input": {
+            "symbols": [
+              1,
+              1
+            ],
+            "M": 4,
+            "previous": 0
+          },
+          "result": {
+            "symbols": [
+              1,
+              2
+            ],
+            "next": 2
+          }
+        },
+        {
+          "input": {
+            "symbols": [],
+            "M": 4,
+            "previous": 3
+          },
+          "result": {
+            "symbols": [],
+            "next": 3
+          }
+        }
+      ],
+      "falsifiers": [
+        "Returning x unchanged ignores accumulated prior output",
+        "Resetting previous to zero between chunks differs from a single stream",
+        "Input out of alphabet [0,M) or invalid M must be rejected"
+      ],
+      "owner_question": "Named modulo-state transformation can be implemented by a fold; universal computational law still needs owner evaluation.",
+      "nearest_semantics": [
+        "D3 arithmetic and D10 sequence accumulation",
+        "D10 phase/stream donor proposals",
+        "GNU Radio block implementation is an execution substrate, not an opcode identity"
+      ],
+      "provenance": [
+        "knowledge/d10-clock-radio-math-selection-20261009.json",
+        "#4013",
+        "#4463",
+        "https://wiki.gnuradio.org/index.php/Differential_Encoder"
+      ],
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "decision": "SELECT-D10-CANDIDATE",
+      "proposal_status": "pending-owner-review",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "donor_coordinate_authority": "NONE",
+      "ratified_resident": false,
+      "physical_t5_authorized": false
+    },
+    {
+      "stable_id": "d10.hobby.radio.differential-decode.v1",
+      "semantic_name": "DIFFERENTIAL-DECODE",
+      "surface_uk": "диференційно-декодувати",
+      "surface_ukr": "диф-дек",
+      "relation_class": "MODULAR-STATEFUL-SEQUENCE",
+      "behavior": "For encoded input y[i] in [0,M), M>=2 and explicit prior encoded INPUT y[-1], decoded x[i]=(y[i]-y[i-1]) mod M. Return (decoded symbols, last encoded input), not last decoded output. Empty input preserves state.",
+      "arity": 3,
+      "argument_shape": "(encoded symbols, modulus integer >=2, previous encoded input)",
+      "result_shape": "(decoded symbols, next previous encoded input)",
+      "source_path": "knowledge/d10-clock-radio-math-selection-20261009.json",
+      "source_class": "HOBBY-CLOCK-RADIO-PRIMARY-20261009",
+      "primary_url": "https://wiki.gnuradio.org/index.php/Differential_Decoder",
+      "source_section": "GNU Radio Differential Decoder, formula y[0]=(x[0]-x[-1]) % M (block's output/input notation)",
+      "positive_witnesses": [
+        {
+          "input": {
+            "symbols": [
+              1,
+              3,
+              2
+            ],
+            "M": 4,
+            "previous": 0
+          },
+          "result": {
+            "symbols": [
+              1,
+              2,
+              3
+            ],
+            "next": 2
+          }
+        },
+        {
+          "input": {
+            "symbols": [
+              1,
+              2
+            ],
+            "M": 4,
+            "previous": 0
+          },
+          "result": {
+            "symbols": [
+              1,
+              1
+            ],
+            "next": 2
+          }
+        },
+        {
+          "input": {
+            "symbols": [],
+            "M": 4,
+            "previous": 3
+          },
+          "result": {
+            "symbols": [],
+            "next": 3
+          }
+        }
+      ],
+      "falsifiers": [
+        "Updating prev with DECODED output rather than prior encoded input gives wrong second symbol",
+        "On each chunk reset prev=0 loses stream-continuity inversion",
+        "Confusing (x-prev) mod M with plain signed subtraction fails wraparound"
+      ],
+      "owner_question": "Mathematically inverse to encoder with state, but different observer/entrypoint contract: owner decide independent root vs derived library.",
+      "nearest_semantics": [
+        "DIFFERENTIAL-ENCODE inverse under matched state",
+        "D10 arithmetic/sequence primitives"
+      ],
+      "provenance": [
+        "knowledge/d10-clock-radio-math-selection-20261009.json",
+        "#4013",
+        "#4463",
+        "https://wiki.gnuradio.org/index.php/Differential_Decoder"
+      ],
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "decision": "SELECT-D10-CANDIDATE",
+      "proposal_status": "pending-owner-review",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "donor_coordinate_authority": "NONE",
+      "ratified_resident": false,
+      "physical_t5_authorized": false
+    },
+    {
+      "stable_id": "d10.hobby.radio.differential-phasor.v1",
+      "semantic_name": "DIFFERENTIAL-PHASOR",
+      "surface_uk": "диференційний-фазор",
+      "surface_ukr": "диф-фаз",
+      "relation_class": "COMPLEX-STATEFUL-SEQUENCE",
+      "behavior": "For complex IQ samples z[i] and explicit previous complex input z[-1], emit z[i]*conjugate(z[i-1]); the next state is last INPUT sample. Do not normalize amplitude. For empty stream return ([],previous). Exact Gaussian rational examples; arbitrary complex magnitudes accepted.",
+      "arity": 2,
+      "argument_shape": "(complex rational samples, previous complex input)",
+      "result_shape": "(complex samples of adjacent phase-difference products, last complex input)",
+      "source_path": "knowledge/d10-clock-radio-math-selection-20261009.json",
+      "source_class": "HOBBY-CLOCK-RADIO-PRIMARY-20261009",
+      "primary_url": "https://wiki.gnuradio.org/index.php/Differential_Phasor",
+      "source_section": "GNU Radio Differential Phasor, out[i]=in[i]*conj(in[i-1])",
+      "positive_witnesses": [
+        {
+          "input": {
+            "samples": [
+              "1+0i",
+              "0+1i",
+              "-1+0i"
+            ],
+            "previous": "1+0i"
+          },
+          "result": {
+            "samples": [
+              "1+0i",
+              "0+1i",
+              "0+1i"
+            ],
+            "next": "-1+0i"
+          }
+        },
+        {
+          "input": {
+            "samples": [
+              "2+0i",
+              "0+3i"
+            ],
+            "previous": "1+0i"
+          },
+          "result": {
+            "samples": [
+              "2+0i",
+              "0+6i"
+            ],
+            "next": "0+3i"
+          }
+        },
+        {
+          "input": {
+            "samples": [],
+            "previous": "1+1i"
+          },
+          "result": {
+            "samples": [],
+            "next": "1+1i"
+          }
+        }
+      ],
+      "falsifiers": [
+        "Without conjugation, -1 multiplied by +i gives -i instead of +i",
+        "Normalizing every complex product to magnitude one violates the documented unnormalized law",
+        "Using last output as state instead of last input changes the recurrence"
+      ],
+      "owner_question": "The pairwise complex product is fold-derivable; observe whether named stateful IQ stream law merits core selected status or library surface.",
+      "nearest_semantics": [
+        "D10 complex numerical multiply/conjugation if present",
+        "Existing PHASE-UNWRAP is a continuous angle lifting law, not pairwise complex difference",
+        "I/Q transport remains DSP execution island"
+      ],
+      "provenance": [
+        "knowledge/d10-clock-radio-math-selection-20261009.json",
+        "#4013",
+        "#4463",
+        "https://wiki.gnuradio.org/index.php/Differential_Phasor"
+      ],
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "decision": "SELECT-D10-CANDIDATE",
+      "proposal_status": "pending-owner-review",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "donor_coordinate_authority": "NONE",
+      "ratified_resident": false,
+      "physical_t5_authorized": false
     }
   ],
   "parent_domain": {
@@ -13397,6 +13732,7 @@
     "knowledge/d10-selfhost-reason-harvest-v1.json",
     "knowledge/d10-historical-primary-admission-batch1-v1.json",
     "knowledge/d10-clos-slot-state-historical-review-v1.json",
-    "knowledge/d10-historical-clos-interlisp-residual-review-v1.json"
+    "knowledge/d10-historical-clos-interlisp-residual-review-v1.json",
+    "knowledge/d10-clock-radio-math-selection-20261009.json"
   ]
 }
