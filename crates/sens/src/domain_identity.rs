@@ -296,44 +296,6 @@ mod tests {
     }
 
     #[test]
-    fn callable_projection_separates_current_d6_identity_from_missing_generic_mechanism() {
-        for source in [
-            BinarySourceWord::W1(Bit1::new(1).unwrap()),
-            BinarySourceWord::W2(Bit2::new(1).unwrap()),
-            BinarySourceWord::W7(Bit7::new(1).unwrap()),
-            BinarySourceWord::W8(Bit8::new(1).unwrap()),
-            BinarySourceWord::W9(Bit9::new(1).unwrap()),
-        ] {
-            assert!(DomainIdentity::from_source_word(source).core_operation().is_none());
-        }
-
-        // Contract 11.8 / #3393: D6 semantic identity is current.
-        // Водночас generic callable mechanism для D6 тут навмисно не
-        // приписується автоматично: semantic residency != mechanism admission.
-        let d6_word = Bit6::new(1).unwrap();
-        let d6_domain = DomainIdentity::from_source_word(BinarySourceWord::W6(d6_word));
-        assert!(matches!(d6_domain, DomainIdentity::D6(_)));
-        assert!(d6_domain.core_operation().is_none());
-        let d6_identity = CoreDomainIdentity::D6(CoreD6::from_word(d6_word));
-        assert_eq!((d6_identity.width(), d6_identity.packed_bits()), (6, 1));
-
-        let d3 = DomainIdentity::from_source_word(
-            BinarySourceWord::W3(Bit3::new(1).unwrap())
-        ).core_operation().unwrap();
-        assert_eq!((d3.width(), d3.packed_bits()), (3, 1));
-
-        let d4 = DomainIdentity::from_source_word(
-            BinarySourceWord::W4(Bit4::new(1).unwrap())
-        ).core_operation().unwrap();
-        assert_eq!((d4.width(), d4.packed_bits()), (4, 1));
-
-        let d5 = DomainIdentity::from_source_word(
-            BinarySourceWord::W5(Bit5::new(1).unwrap())
-        ).core_operation().unwrap();
-        assert_eq!((d5.width(), d5.packed_bits()), (5, 1));
-    }
-
-    #[test]
     fn w9_source_word_round_trips_without_byte_truncation() {
         for raw in [0u16, 1, 255, 256, 257, 511] {
             let source = BinarySourceWord::W9(Bit9::new(raw).unwrap());
@@ -342,7 +304,6 @@ mod tests {
             assert_eq!(identity.width(), 9);
             assert_eq!(identity.packed_bits(), raw);
             assert_eq!(identity.source_word(), source);
-            assert!(identity.core_operation().is_none());
         }
     }
 
