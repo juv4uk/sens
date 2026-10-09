@@ -1,0 +1,81 @@
+name: Current English vs D1-D8 memory preflight
+
+on:
+  pull_request:
+    paths:
+      - "benchmarks/current-en-vs-d1d8/**"
+      - "crates/sens/examples/current_en_vs_d1d8_cpu.rs"
+      - ".github/workflows/current-en-vs-d1d8-memory.yml"
+  push:
+    branches: [main]
+    paths:
+      - "benchmarks/current-en-vs-d1d8/**"
+      - "crates/sens/examples/current_en_vs_d1d8_cpu.rs"
+      - ".github/workflows/current-en-vs-d1d8-memory.yml"
+  workflow_dispatch:
+
+jobs:
+  memory-preflight:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v5
+      - uses: dtolnay/rust-toolchain@stable
+
+      - name: Unit-test memory runner
+        run: python3 -m unittest discover -s benchmarks/current-en-vs-d1d8/tests -p 'test_memory_runner.py'
+
+      - name: Build shared current helper
+        run: cargo build --release -p sens --example current_en_vs_d1d8_cpu
+
+      - name: Run paired D3 memory preflight
+        run: |
+          python3 benchmarks/current-en-vs-d1d8/memory_runner.py \
+            --manifest benchmarks/current-en-vs-d1d8/fixtures/d3-smoke.json \
+            --helper target/release/examples/current_en_vs_d1d8_cpu \
+            --out /tmp/current-en-vs-d1d8.memory.jsonl \
+            --summary-out /tmp/current-en-vs-d1d8.memory-summary.json \
+            --blocked-out /tmp/current-en-vs-d1d8.memory-blocked.json \
+            --reps 3 \
+            --phases session,ingest,lower,execute,full
+
+      - name: Validate shared evidence rows
+        run: |
+          python3 benchmarks/current-en-vs-d1d8/validate.py \
+            /tmp/current-en-vs-d1d8.memory.jsonl
+
+      - name: Publish bounded memory summary
+        if: always()
+        run: |
+          python3 - <<'PY' >> "$GITHUB_STEP_SUMMARY"
+          import json
+          from pathlib import Path
+
+          path = Path("/tmp/current-en-vs-d1d8.memory-summary.json")
+          if not path.exists():
+              raise SystemExit(0)
+          data = json.loads(path.read_text())
+          print("# Current English vs D1-D8 memory preflight")
+          print()
+          print("| candidate | phase | n | median KiB | min | max | spread |")
+          print("|---|---|---:|---:|---:|---:|---:|")
+          for row in data["rows"]:
+              print(
+                  f"| {row['candidate']} | {row['phase']} | {row['samples']} | "
+                  f"{row['peak_rss_kb_median']} | {row['peak_rss_kb_min']} | "
+                  f"{row['peak_rss_kb_max']} | {row['peak_rss_kb_spread']} |"
+              )
+          print()
+          print("Bounded D3 mechanics preflight only; allocation count/bytes remain null.")
+          print("No memory ratio or winner is computed.")
+          PY
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: current-en-vs-d1d8-memory-preflight
+          path: |
+            /tmp/current-en-vs-d1d8.memory.jsonl
+            /tmp/current-en-vs-d1d8.memory-summary.json
+            /tmp/current-en-vs-d1d8.memory-blocked.json
+          retention-days: 14
