@@ -79,7 +79,12 @@ def verify(inv,src,his,state,low,ledger,doc):
         assert r["positive_witnesses"] == s["positive_witnesses"]
         assert r["falsifiers"] == s["falsifiers"]
         assert r["source_path"]==str(SRC.relative_to(ROOT))
-        l=ledgerrows[-2+idx]
+        # Historical Gray proposals retain immutable IDs even after later
+        # pending evidence rows are appended to the shared D10 ledger.
+        candidate_id="D10P-"+str(9+idx).zfill(4)
+        matches=[x for x in ledgerrows if x["proposal_id"]==candidate_id]
+        assert len(matches)==1, "historical Gray proposal missing or duplicated"
+        l=matches[0]
         assert l["proposal_id"]=="D10P-"+str(9+idx).zfill(4)
         assert l["semantic_name"]==r["semantic_name"]
         assert l["ratified"]=="0" and l["status"]=="pending-review"
