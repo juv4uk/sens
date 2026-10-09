@@ -24,7 +24,7 @@
                 ((and (= (mod n p) 0)
                       (string=? w (times (substring w 0 p) (div n p))))
                  (substring w 0 p))
-                (else (loop (+ p 1))))))))
+                (else (loop (+ p 1)))))))))
 (define seen 0)
 (define (must label truth)
   (if truth (set! seen (+ seen 1))
