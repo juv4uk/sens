@@ -50,6 +50,13 @@ program returns exact D1:1. It does **not** claim to replace SI quantity
 calculations or prove historical English-Lisp parity.
 
 The physical performance runner measures this real file via both SENS CLI
-entry points, with output parity and SHA-bound actual medians/p95. Legacy English parity benchmark workflows remain separately blocked pending a
-proven migration; this physical program must not be relabeled as passing
-historical English-domain parity.
+entry points, with output parity and SHA-bound actual medians/p95. The two obsolete automatic Contract 11.8 benchmarks
+(`contract-11-8-phase-decomposition.yml` and
+`contract-11-8-store-air-load.yml`) were deleted because their preflight
+still required a forbidden historical English byte identity. Their
+`benchmarks/current-en-vs-d1d8/` and `benchmarks/store-air-load/` scripts
+and historical findings remain for archaeology and future *independent*
+translation. The new `physical-binary-performance.yml` measures actual
+physical T5 bytes. Its CLI parity is not, and must not be presented as,
+historical English↔SENS semantic parity. All strict D1/D3 production
+evaluation and malformed-binary rejection gates remain enabled.
