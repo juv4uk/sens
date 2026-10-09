@@ -80,7 +80,7 @@ class EqCondCohort(unittest.TestCase):
                 physical = FIXTURES / f"{stem}.sens"
                 self.assertEqual(source.read_text(encoding="utf-8"), row["source"])
 
-                resolver = M.Resolver(self.legacy, self.my, self.upper)
+                resolver = M.Resolver(self.legacy, self.my, self.upper, source_era="legacy")
                 projection = M.migrate_file(row["source"], resolver, self.text7).strip()
                 self.assertEqual(projection, row["projection"])
                 self.assertEqual(resolver.counts["pass1-sens8"], 9)
@@ -110,6 +110,8 @@ class EqCondCohort(unittest.TestCase):
                     for flag, file in FLAGS.items()
                     for item in ("--" + flag, str(ROOT / file))
                 ],
+                "--source-era",
+                "legacy",  # Input fixtures intentionally use provenance-pinned SID8 W8 heads.
                 "--report",
                 str(report),
             ]
@@ -136,7 +138,7 @@ class EqCondCohort(unittest.TestCase):
             self.assertEqual(again.returncode, 2)
 
     def test_unknown_sid_and_corrupt_transport_fail_closed(self):
-        resolver = M.Resolver(self.legacy, self.my, self.upper)
+        resolver = M.Resolver(self.legacy, self.my, self.upper, source_era="legacy")
         with self.assertRaises(M.MigrationError):
             M.migrate_file("(11111111 ())\n", resolver, self.text7)
 
