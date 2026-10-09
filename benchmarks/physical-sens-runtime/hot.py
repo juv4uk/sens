@@ -17,7 +17,7 @@ sys.path.insert(0, str(ROOT / "scripts"))
 from sens_t5_codec import decode_bytes, encode_words  # noqa: E402
 
 FORM = ("10", "001", "00", "000", "01")
-PHASES = {"t5_open_d2", "t5_visible_parse_d2", "t5_direct_d2", "t5_words_d2", "d2_parse", "packed_width_d2", "eval_from_ast", "eval_lowered", "t5_encode_two_pass", "t5_encode_streaming"}
+PHASES = {"t5_render_legacy", "t5_render_one_pass", "t5_open_d2", "t5_visible_parse_d2", "t5_direct_d2", "t5_words_d2", "d2_parse", "packed_width_d2", "eval_from_ast", "eval_lowered", "t5_encode_two_pass", "t5_encode_streaming"}
 
 
 def parse_record(line: str, prefix: str) -> dict[str, str]:
@@ -142,6 +142,26 @@ def main() -> int:
         median = row["median_ns_op"]
         forms_per_second = row["forms"] * 1e9 / median if median else 0.0
         lines.append(f"| {row['forms']} | {row['phase']} | {median:,} | {row['p95_ns_op']:,} | {forms_per_second:,.0f} |")
+    lines.extend([
+        "", "## Відображення семибітових і точних слів: зайві алокації",
+        "",
+        "| Форми | Стара проєкція, p50 нс | Один String, p50 нс | Старе / нове |",
+        "|---:|---:|---:|---:|",
+    ])
+    for forms in sizes:
+        phases = {row["phase"]: row for row in measures if row["forms"] == forms}
+        legacy = phases["t5_render_legacy"]["median_ns_op"]
+        direct = phases["t5_render_one_pass"]["median_ns_op"]
+        ratio = f"{legacy / direct:.3f}x" if direct else "undefined"
+        lines.append(f"| {forms} | {legacy:,} | {direct:,} | {ratio} |")
+    lines.extend([
+        "",
+        "Обидва варіанти приймають ті самі вже декодовані точні T5 слова. "
+        "Рівність байтів перевіряється до замірів; транспорт і парсинг D2 "
+        "до цих двох фаз не входять. Виграш більше 1 означає прискорення "
+        "лише відображення людиночитаного вигляду.",
+        "",
+    ])
     # Same already-admitted forms; compare the two isolated D2 reader
     # mechanisms at each size, never conflate either with end-to-end T5.
     lines.extend(["", "## Full physical T5 to D2: binary words vs visible projection", "",
