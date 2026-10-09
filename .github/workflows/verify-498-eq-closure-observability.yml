@@ -1,0 +1,173 @@
+name: Verify 498 closure observability without EQ
+
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/verify-498-eq-closure-observability.yml'
+      - 'docs/research/498/**'
+
+jobs:
+  closure-observability:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+      - uses: dtolnay/rust-toolchain@stable
+
+      - name: Install temporary closure observability observer
+        shell: bash
+        run: |
+          cat > crates/my-lisp/tests/verify_498_eq_closure_observability.rs <<'RS'
+          use my_lisp::{eval_program, ErrorKind, Session};
+
+          fn target_value(source: &str) -> String {
+              eval_program(source, &mut Session::default())
+                  .expect(source)
+                  .value
+                  .to_string()
+          }
+
+          fn lower_value(source: &str) -> String {
+              assert!(
+                  !source.contains("(eq "),
+                  "lower context must not call EQ directly: {source}"
+              );
+              eval_program(source, &mut Session::default())
+                  .expect(source)
+                  .value
+                  .to_string()
+          }
+
+          fn lower_error(source: &str) -> ErrorKind {
+              assert!(
+                  !source.contains("(eq "),
+                  "lower context must not call EQ directly: {source}"
+              );
+              eval_program(source, &mut Session::default())
+                  .expect_err(source)
+                  .kind
+          }
+
+          const TWO_FRESH_PREFIX: &str =
+              "((lambda (left right) ";
+          const TWO_FRESH_SUFFIX: &str =
+              ") (lambda (x) x) (lambda (x) x))";
+
+          fn two_fresh(body: &str) -> String {
+              format!("{TWO_FRESH_PREFIX}{body}{TWO_FRESH_SUFFIX}")
+          }
+
+          #[test]
+          fn target_eq_distinguishes_reused_from_fresh_closures() {
+              assert_eq!(
+                  target_value("((lambda (f) (eq f f)) (lambda (x) x))"),
+                  "(identity-relation same)"
+              );
+              assert_eq!(
+                  target_value(
+                      "((lambda (left right) (eq left right)) (lambda (x) x) (lambda (x) x))"
+                  ),
+                  "(identity-relation distinct)"
+              );
+          }
+
+          #[test]
+          fn structural_and_application_contexts_do_not_distinguish_fresh_closures() {
+              assert_eq!(
+                  lower_value(&two_fresh(
+                      "(cons (atom left) (cons (atom right) (quote ())))"
+                  )),
+                  "((structural-kind atom) (structural-kind atom))"
+              );
+              assert_eq!(
+                  lower_value(&two_fresh(
+                      "(cons (left (quote radio)) (cons (right (quote radio)) (quote ())))"
+                  )),
+                  "(radio radio)"
+              );
+              assert_eq!(
+                  lower_value(&two_fresh(
+                      "(cons (left (quote ())) (cons (right (quote ())) (quote ())))"
+                  )),
+                  "(() ())"
+              );
+              assert_eq!(
+                  lower_value(&two_fresh(
+                      "(cons (left 42) (cons (right 42) (quote ())))"
+                  )),
+                  "(42 42)"
+              );
+              assert_eq!(
+                  lower_value(&two_fresh(
+                      "(cons (left (quote (radio . antenna))) (cons (right (quote (radio . antenna))) (quote ())))"
+                  )),
+                  "((radio . antenna) (radio . antenna))"
+              );
+          }
+
+          #[test]
+          fn eval_transport_and_pair_transport_do_not_distinguish_fresh_closures() {
+              assert_eq!(
+                  lower_value(&two_fresh(
+                      "(cons ((eval left) (quote radio)) (cons ((eval right) (quote radio)) (quote ())))"
+                  )),
+                  "(radio radio)"
+              );
+              assert_eq!(
+                  lower_value(&two_fresh(
+                      "(cons (write-to-string left) (cons (write-to-string right) (quote ())))"
+                  )),
+                  r#"("<lambda>" "<lambda>")"#
+              );
+              assert_eq!(
+                  lower_value(&two_fresh(
+                      "(cons (write-to-string (car (cons left (quote tail-marker)))) (cons (write-to-string (car (cons right (quote tail-marker)))) (quote ())))"
+                  )),
+                  r#"("<lambda>" "<lambda>")"#
+              );
+              assert_eq!(
+                  lower_value(&two_fresh(
+                      "(cons (cdr (cons left (quote tail-marker))) (cons (cdr (cons right (quote tail-marker))) (quote ())))"
+                  )),
+                  "(tail-marker tail-marker)"
+              );
+          }
+
+          #[test]
+          fn canonical_static_cond_does_not_distinguish_fresh_closures() {
+              let body = r#"
+                  (cons
+                    (cond
+                      (left (lambda (x) x) (quote static-match))
+                      ((quote fallback) fallback (quote no-static-match)))
+                    (cons
+                      (cond
+                        (right (lambda (x) x) (quote static-match))
+                        ((quote fallback) fallback (quote no-static-match)))
+                      (quote ())))
+              "#;
+              assert_eq!(
+                  lower_value(&two_fresh(body)),
+                  "(no-static-match no-static-match)"
+              );
+          }
+
+          #[test]
+          fn pair_projection_error_category_is_the_same_for_each_fresh_closure() {
+              let left = two_fresh("(car left)");
+              let right = two_fresh("(car right)");
+              assert_eq!(lower_error(&left), ErrorKind::Type);
+              assert_eq!(lower_error(&right), ErrorKind::Type);
+          }
+          RS
+
+      - name: Execute bounded closure observability probes
+        run: cargo test -p my-lisp --test verify_498_eq_closure_observability -- --nocapture
+
+      - name: Remove temporary observer
+        run: rm crates/my-lisp/tests/verify_498_eq_closure_observability.rs
+
+      - name: Verification-only diff is whitespace-clean
+        run: git diff --check "origin/${{ github.base_ref }}...HEAD"
