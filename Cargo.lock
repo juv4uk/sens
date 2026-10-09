@@ -366,7 +366,6 @@ name = "sens"
 version = "0.41.0"
 dependencies = [
  "sens-host",
- "serde",
  "serde_json",
 ]
 
