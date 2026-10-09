@@ -549,12 +549,12 @@ mod tests {
         // lower to exact D3/D4 identities. Do not regress them into SID8.
         let source = "(визначити звязок (функція (x) (сполучити (перше x) (решта x))))\n";
         let host = no_host();
-        let inspected = analyze(&source, &host).expect("canonical Ukrainian source");
+        let inspected = analyze(source, &host).expect("canonical Ukrainian source");
         assert!(inspected.named_calls >= 5, "the legacy auditor still sees the calls");
         assert_eq!(inspected.edits.len(), 0, "no Ukrainian exact head can be rewritten to SID8");
-        assert_eq!(rewrite(&source), source);
+        assert_eq!(rewrite(source), source);
 
-        let mixed = sens::parse_mixed_exact_domain(&source).expect("current exact reader");
+        let mixed = sens::parse_mixed_exact_domain(source).expect("current exact reader");
         let ExprKind::List(forms) = &mixed[0].kind else {
             panic!("canonical DEFINE must remain a list");
         };
