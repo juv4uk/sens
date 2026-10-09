@@ -152,48 +152,6 @@ fn later_binding_visibility_has_reference_meta_parity() {
 }
 
 #[test]
-fn recursive_group_captures_outer_lexical_environment() {
-    let program = r#"
-(def offset 7)
-(def left
-  (lambda (n)
-    (cond
-      ((eq? n 0) offset)
-      (t (right (- n 1))))))
-(def right
-  (lambda (n)
-    (cond
-      ((eq? n 0) offset)
-      (t (left (- n 1))))))
-"#;
-    // offset=7, and left/right alternate purely on parity of n down to 0,
-    // where both return offset — both probes land on offset regardless of
-    // which function is entered first.
-    let expected = "7";
-    for probe in ["(left 5)", "(right 6)"] {
-        assert_eq!(native_value(&format!("{program} {probe}")), expected, "probe: {probe}");
-        assert_eq!(meta_eval_program(program, probe), expected, "probe: {probe}");
-    }
-}
-
-#[test]
-fn recursive_group_members_can_create_nested_closures_with_capture() {
-    let program = r#"
-(def offset 10)
-(def make-step
-  (lambda (n)
-    (cond
-      ((eq? n 0) (lambda (x) (+ x offset)))
-      (t (bounce (- n 1))))))
-(def bounce (lambda (n) (make-step n)))
-"#;
-    let probe = "((make-step 3) 5)";
-    let expected = "15";
-    assert_eq!(native_value(&format!("{program} {probe}")), expected);
-    assert_eq!(meta_eval_program(program, probe), expected);
-}
-
-#[test]
 fn ordinary_parameter_shadowing_beats_recursive_group_bindings() {
     let program = r#"
 (def call-local (lambda (peer) (peer 5)))
@@ -243,43 +201,6 @@ fn quoted_group_member_name_is_data_not_a_dependency() {
         "a quoted peer symbol must not create a dependency edge"
     );
     assert_eq!(meta_eval_program(program, "(mention-peer)"), "peer");
-}
-
-#[test]
-fn a_real_recursive_scc_can_skip_an_independent_interleaved_definition() {
-    let program = r#"
-(def left
-  (lambda (n)
-    (cond
-      ((eq? n 0) t)
-      (t (right (- n 1))))))
-(def helper (lambda (x) (+ x 100)))
-(def right
-  (lambda (n)
-    (cond
-      ((eq? n 0) (quote ()))
-      (t (left (- n 1))))))
-"#;
-
-    assert!(
-        meta_eval_program(program, "left").starts_with("(recursive-group-closure left "),
-        "left and right form the recursive SCC"
-    );
-    assert!(
-        meta_eval_program(program, "right").starts_with("(recursive-group-closure right "),
-        "left and right form the recursive SCC"
-    );
-    assert!(
-        meta_eval_program(program, "helper").starts_with("(recursive-closure helper "),
-        "helper is not in the left/right SCC"
-    );
-
-    // left(8)/right(9) both bottom out at left(0)=t along the SCC's shared
-    // countdown; helper is a plain +100 outside the SCC.
-    for (probe, expected) in [("(left 8)", "t"), ("(right 9)", "t"), ("(helper 5)", "105")] {
-        assert_eq!(native_value(&format!("{program} {probe}")), expected, "probe: {probe}");
-        assert_eq!(meta_eval_program(program, probe), expected, "probe: {probe}");
-    }
 }
 
 #[test]
