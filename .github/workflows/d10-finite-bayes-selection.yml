@@ -26,7 +26,7 @@ jobs:
       - name: Verify the immutable 625-based append-only history
         run: python3 scripts/check_d10_selection_transition_history.py --self-test
       - name: Verify Gray historical snapshot remains valid after this append
-        run: python3 scripts/check_d10_gray_word_selection.py --self-test
+        run: python3 scripts/check_d10_gray_word_selection.py
       - name: Verify selected Bayesian row and reject authority leakage
         run: python3 scripts/check_d10_finite_bayes_selection.py --self-test
       - name: Re-run the independent exact-rational Bayes oracle
