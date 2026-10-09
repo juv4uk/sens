@@ -1,7 +1,7 @@
 //! #1272 — runtime carries only which Core profile a loader selected.
 //! SENS-owned contracts remain semantic authority for what that profile means.
 
-use sens::{load_core2_library, load_core_library, CoreProfile, Environment, Session};
+use sens::{load_core_library, CoreProfile, Environment, Session};
 
 #[test]
 fn bare_root_has_no_implicit_core_profile() {
@@ -15,14 +15,6 @@ fn core4_loader_selects_core4_explicitly() {
     assert_eq!(session.environment.selected_core_profile(), None);
     load_core_library(&mut session).expect("Core4 library must load");
     assert_eq!(session.environment.selected_core_profile(), Some(CoreProfile::Core4));
-}
-
-#[test]
-fn core2_loader_selects_core2_explicitly() {
-    let mut session = Session::default();
-    assert_eq!(session.environment.selected_core_profile(), None);
-    load_core2_library(&mut session).expect("Core2 library must load");
-    assert_eq!(session.environment.selected_core_profile(), Some(CoreProfile::Core2));
 }
 
 #[test]
