@@ -15,9 +15,9 @@ use sens::{
 const BINARY_PROGRAM: &str =
     include_str!("../../../examples/binary/d7-first-program.lisp");
 const D3_COND_PROGRAM: &str =
-    include_str!("../../../examples/binary/d3-cond-program.sens");
+    include_str!("../../../examples/binary/d3-cond-program.bits");
 const D3_PRIMITIVES_PROGRAM: &str =
-    include_str!("../../../examples/binary/d3-primitives-program.sens");
+    include_str!("../../../examples/binary/d3-primitives-program.bits");
 
 fn assert_exact_binary_ast(expr: &Expr) {
     match &expr.kind {
