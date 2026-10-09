@@ -253,7 +253,7 @@ pub fn render_ternary_words_spaced(words: &[BinarySourceWord]) -> String {
     // Exact widths and payloads are already carried by BinarySourceWord.
     // The visible string is a projection only: allocate one buffer, not a
     // String per domain word plus a second Vec for joining them.
-    let bits = words.iter().map(BinarySourceWord::width).sum::<usize>();
+    let bits = words.iter().map(|word| word.width()).sum::<usize>();
     let mut visible = String::with_capacity(bits + words.len().saturating_sub(1));
     for (index, word) in words.iter().enumerate() {
         if index != 0 {
