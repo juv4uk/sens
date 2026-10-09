@@ -426,12 +426,20 @@
   ],
   "method": "behavioral exact-name prefilter D1–D9/D10; cross-semantics nearby review and owner gate still pending; bounded Python exact reference tests do not imply SENS or GNURadio native parity",
   "accounting": {
-    "before": 630,
+    "before": 641,
     "added": 4,
-    "after": 634,
-    "unplaced": 378,
-    "remaining": 390,
+    "after": 645,
+    "unplaced": 389,
+    "remaining": 379,
     "forced_coordinates_unchanged": 256,
     "ratified": 0
+  },
+  "current_main_replay": {
+    "main_commit": "f2c15fb7308d9455e2eb4ac3ffe51bbe39bbeb20",
+    "base_inventory_blob_sha": "9b1c4984283d923516a618f9fc99dea247711857",
+    "previous_selected": 641,
+    "resulting_selected": 645,
+    "coordinates_added": 0,
+    "ratified_added": 0
   }
 }
