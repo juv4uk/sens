@@ -1,0 +1,55 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/juv4uk/sens/benchmarks/en-vs-d1d8-cpu/raw-row.schema.json",
+  "title": "SENS #3113 paired CPU benchmark row",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "case",
+    "candidate",
+    "mode",
+    "status",
+    "git_sha",
+    "binary_sha",
+    "corpus_sha"
+  ],
+  "properties": {
+    "case": {"type": "string", "minLength": 1},
+    "candidate": {
+      "enum": ["paired", "english", "canonical-d1d8"]
+    },
+    "mode": {
+      "enum": [
+        "preflight",
+        "startup",
+        "parse-decode",
+        "lower",
+        "execute",
+        "one-shot",
+        "repeat"
+      ]
+    },
+    "status": {
+      "enum": [
+        "PREFLIGHT_OK",
+        "BLOCKED_PARSE",
+        "BLOCKED_LEGACY_PATH",
+        "BLOCKED_TRACE_MISMATCH",
+        "BLOCKED_RUNTIME_READINESS",
+        "MEASURED"
+      ]
+    },
+    "git_sha": {"type": "string", "minLength": 7},
+    "binary_sha": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "corpus_sha": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "english_sha": {"type": ["string", "null"], "pattern": "^[0-9a-f]{64}$"},
+    "canonical_sha": {"type": ["string", "null"], "pattern": "^[0-9a-f]{64}$"},
+    "oracle": {"type": ["string", "null"]},
+    "rep": {"type": ["integer", "null"], "minimum": 1},
+    "i_refs": {"type": ["integer", "null"], "minimum": 0},
+    "wall_s": {"type": ["number", "null"], "minimum": 0},
+    "user_s": {"type": ["number", "null"], "minimum": 0},
+    "sys_s": {"type": ["number", "null"], "minimum": 0},
+    "maxrss_kb": {"type": ["integer", "null"], "minimum": 0}
+  }
+}

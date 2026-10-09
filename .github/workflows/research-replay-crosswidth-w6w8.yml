@@ -1,0 +1,27 @@
+name: Historical research replay W6 W8
+
+on:
+  pull_request:
+    paths:
+      - .github/workflows/research-replay-crosswidth-w6w8.yml
+      - .github/workflows/cross-width-law-atlas.yml
+      - knowledge/cross-width-law-atlas.json
+      - scripts/check-cross-width-law-atlas.py
+      - benchmarks/function-number-product-space/**
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  historical-oracles:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - name: Prove historical cross-width family/coordinate separation
+        run: python3 scripts/check-cross-width-law-atlas.py
+      - name: Independently enumerate W6 and W8 product laws
+        run: python3 benchmarks/function-number-product-space/probe.py > "$RUNNER_TEMP/w6w8-product.json"
+      - name: Verify selector slab as coordinate witness only
+        run: python3 benchmarks/function-number-product-space/selector_slab.py > "$RUNNER_TEMP/d6-selector-slab.json"

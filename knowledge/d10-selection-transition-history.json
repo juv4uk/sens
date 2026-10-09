@@ -235,6 +235,34 @@
         "scripts/check_d10_historical_second_tranche.py",
         "scripts/check_d10_selection_transition_history.py"
       ]
+    },
+    {
+      "id": "d10.interdisciplinary.science.20261009",
+      "authority": "#4013 #4463 user interest research filling",
+      "evidence": [
+        "https://www.nist.gov/publications/guide-expression-uncertainty-measurement",
+        "https://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/req/frames.html",
+        "https://wiki.gnuradio.org/index.php/Rational_Resampler"
+      ],
+      "previous_inventory_blob_sha": "0a675284a7838e5f6e9ba4702655e120ac92f122",
+      "resulting_inventory_blob_sha": "9b1c4984283d923516a618f9fc99dea247711857",
+      "added_stable_ids": [
+        "d10.science.covariance-transport.20261009",
+        "d10.science.frame-state-transform.20261009",
+        "d10.science.rational-resample.20261009"
+      ],
+      "appended_sources": [
+        "knowledge/d10-interdisciplinary-science-proposals-20261009.json"
+      ],
+      "coordinates_added": 0,
+      "ratified_added": 0,
+      "delta_selected": 3,
+      "previous_selected": 638,
+      "resulting_selected": 641,
+      "decision": "research selection with pending owner review; not a primitive ISA allocation or ratification",
+      "tests": [
+        "scripts/check_d10_science_interests_v1.py"
+      ]
     }
   ]
 }

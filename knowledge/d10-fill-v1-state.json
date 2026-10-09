@@ -28,10 +28,10 @@
     "width": 10,
     "capacity": 1024,
     "dense_target": 1024,
-    "selected_semantic_candidates": 638,
-    "remaining_semantic_candidates": 386,
+    "selected_semantic_candidates": 641,
+    "remaining_semantic_candidates": 383,
     "law_forced_coordinates": 256,
-    "unplaced_selected_candidates": 382,
+    "unplaced_selected_candidates": 385,
     "ratified_residents": 0
   },
   "first_tranche": {
@@ -373,5 +373,14 @@
     "coordinate_added": 0,
     "ratified_added": 0,
     "status": "pending-owner-ratification"
+  },
+  "interdisciplinary_science_v1": {
+    "authority": "#4013 #4463 owner-directed user interest research",
+    "artifact": "knowledge/d10-interdisciplinary-science-proposals-20261009.json",
+    "selected": 3,
+    "unplaced": 3,
+    "coordinates_added": 0,
+    "ratification_effect": "NONE",
+    "source_boundary": "NIST/NASA SPICE/GNU Radio mathematical donor oracles, not binary SENS execution"
   }
 }
