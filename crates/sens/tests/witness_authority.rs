@@ -357,6 +357,32 @@ fn meta_verdict(session: &mut Session, row: &WitnessRow) -> String {
 }
 
 #[test]
+fn meta_cond_clause_census_terminates_at_structural_empty_list() {
+    let mut session = init_meta_session();
+    // No invented match: a list of canonical three-part clauses contains no
+    // migration-only two-part clause, and recursion must stop at structural ().
+    for (source, expected) in [
+        ("(my-cond-has-migration-clause? (quote ()))", "()"),
+        (
+            "(my-cond-has-migration-clause? (quote ((0 1 (quote wrong)) (0 0 (quote zero-data)))))",
+            "()",
+        ),
+        (
+            "(my-cond-has-migration-clause? (quote ((t (quote yes)))))",
+            "t",
+        ),
+    ] {
+        let result = eval_program(source, &mut session)
+            .unwrap_or_else(|error| panic!("COND clause census {source}: {error}"));
+        assert_eq!(
+            result.value.to_string(),
+            expected,
+            "COND clause census must preserve the Lisp-owned yes/none distinction for {source}"
+        );
+    }
+}
+
+#[test]
 fn compiler_corpus_native_actuals_are_judged_only_by_lisp_owned_witness_logic() {
     let rows: Vec<_> = witness_rows()
         .into_iter()
