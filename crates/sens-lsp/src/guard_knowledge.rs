@@ -167,21 +167,42 @@ fn as_symbol(expr: &Expr) -> Option<&str> {
     }
 }
 
-/// True when `expr` is the SENS code `sid` or a surface routing to it.
-fn head_is_sid(expr: &Expr, sid: sens::Sens8) -> bool {
+fn is_d3_quote_identity(identity: sens::CoreDomainIdentity) -> bool {
+    matches!(
+        identity,
+        sens::CoreDomainIdentity::D3(word) if word.word().packed_bits() == 0b001
+    )
+}
+
+fn is_d4_define_identity(identity: sens::CoreDomainIdentity) -> bool {
+    matches!(
+        identity,
+        sens::CoreDomainIdentity::D4(word) if word.word().packed_bits() == 0b0011
+    )
+}
+
+fn is_quote_head(expr: &Expr) -> bool {
     match &expr.kind {
-        ExprKind::Sid(code) => *code == sid,
-        ExprKind::Symbol(surface) => sens::surface_has_sid(surface, sid),
+        ExprKind::DomainIdentity(identity) => is_d3_quote_identity(*identity),
+        ExprKind::Sid(code) => *code == sens::sens!(00000001),
+        ExprKind::Symbol(surface) => {
+            sens::semantic_registry_export::domain_identity_for_admitted_surface(surface)
+                .is_some_and(is_d3_quote_identity)
+        }
         _ => false,
     }
 }
 
-/// True when `expr` is a definition head: SENS code 00001001/00001011 or a
-/// surface routing to either.
+/// Canonical DEFINE is Core.D4:0011. Historical exact-eight DEFINE/DEF tokens
+/// remain accepted only as explicit compatibility input.
 fn is_define_head(expr: &Expr) -> bool {
-    head_is_sid(expr, sens::sens!(00001001))
-        || head_is_sid(expr, sens::sens!(00001011))
-        || as_symbol(expr).is_some_and(sens::is_define_surface_name)
+    match &expr.kind {
+        ExprKind::DomainIdentity(identity) => is_d4_define_identity(*identity),
+        ExprKind::Sid(code) => {
+            *code == sens::sens!(00001001) || *code == sens::sens!(00001011)
+        }
+        _ => as_symbol(expr).is_some_and(sens::is_define_surface_name),
+    }
 }
 
 fn as_list(expr: &Expr) -> Option<&[Expr]> {
@@ -228,7 +249,7 @@ fn parse_topics(source: &str) -> HashMap<String, GuardReference> {
         let Some(value_list) = as_list(value) else {
             continue;
         };
-        if !head_is_sid(&value_list[0], sens::sens!(00000001)) {
+        if !is_quote_head(&value_list[0]) {
             continue;
         }
         let Some(data) = value_list.get(1).and_then(as_list) else {

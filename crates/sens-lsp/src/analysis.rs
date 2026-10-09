@@ -121,6 +121,18 @@ pub fn arity_diagnostics_with_items(
     Ok(diagnostics)
 }
 
+fn is_d3_quote_identity(identity: sens::CoreDomainIdentity) -> bool {
+    matches!(
+        identity,
+        sens::CoreDomainIdentity::D3(word) if word.word().packed_bits() == 0b001
+    )
+}
+
+fn surface_is_d3_quote(name: &str) -> bool {
+    sens::semantic_registry_export::domain_identity_for_admitted_surface(name)
+        .is_some_and(is_d3_quote_identity)
+}
+
 fn collect_arity_diagnostics(
     expression: &Expr,
     in_quote: bool,
@@ -156,14 +168,15 @@ fn collect_arity_diagnostics(
                     }
                 }
             }
-            // Same bug class as the symbol-occurrence data-preservation check: routing
-            // must be by exact SID, never by one human surface.
-            let head_is_data_preserving_sid = head_name
-                .is_some_and(|name| sens::surface_has_sid(name, sens::sens!(00000001)));
+            // Data preservation follows canonical D3 QUOTE identity, never one
+            // privileged human spelling. Legacy exact8 is handled only when it
+            // appears explicitly as an old compatibility token.
+            let head_is_data_preserving_identity =
+                head_name.is_some_and(surface_is_d3_quote);
             for (index, element) in elements.iter().enumerate() {
                 collect_arity_diagnostics(
                     element,
-                    head_is_data_preserving_sid && index > 0,
+                    head_is_data_preserving_identity && index > 0,
                     local_defs,
                     items,
                     diagnostics,
@@ -202,23 +215,21 @@ fn walk_symbols(expr: &Expr, in_quote: bool, out: &mut Vec<SymbolOccurrence>) {
             }
         }
         ExprKind::List(items) => {
-            // SID 00000001 preserves its argument as data. Accept either
-            // the SID directly or a source/UI surface that mechanically routes
-            // to it; no named function identity participates.
-            let head_is_data_preserving_sid = items
+            // Canonical QUOTE is Core.D3:001. The old 00000001 token remains
+            // recognized only as an explicit legacy compatibility head.
+            let head_is_data_preserving_identity = items
                 .first()
                 .map(|h| match &h.kind {
+                    ExprKind::DomainIdentity(identity) => is_d3_quote_identity(*identity),
                     ExprKind::Sid(sid) => *sid == sens::sens!(00000001),
-                    ExprKind::Symbol(surface) => {
-                        sens::surface_has_sid(surface, sens::sens!(00000001))
-                    }
+                    ExprKind::Symbol(surface) => surface_is_d3_quote(surface),
                     _ => false,
                 })
                 .unwrap_or(false);
             for (i, item) in items.iter().enumerate() {
                 walk_symbols(
                     item,
-                    in_quote || (head_is_data_preserving_sid && i > 0),
+                    in_quote || (head_is_data_preserving_identity && i > 0),
                     out,
                 );
             }
