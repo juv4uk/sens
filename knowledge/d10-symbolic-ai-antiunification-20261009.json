@@ -1,0 +1,221 @@
+{
+  "schema": "d10-symbolic-ai-antiunification/v1",
+  "date": "2026-10-09",
+  "status": "RESEARCH-HOLD-CORE-VS-LIBRARY-NOT-SELECTED",
+  "authority": [
+    "#4013",
+    "#4463",
+    "#4162",
+    "#4867"
+  ],
+  "live_main_baseline": {
+    "inventory_blob": "65014431ac3e64633cd0be3630cfafc5e7a9aea3",
+    "selected": 634,
+    "ratified": 0,
+    "foundation_blob": "09d1d71c39d1484dfd005a5068dbb18b76f0f0d4"
+  },
+  "candidate": {
+    "stable_id": "d10.symbolic-ai.first-order-lgg.ground.v1",
+    "semantic_name": "ANTI-UNIFY-GROUND-TERMS",
+    "surface_uk": "узагальнити-терми",
+    "surface_ukr": "найточніше-спільне-узагальнення-двох-термів",
+    "relation_class": "FIRST-ORDER-GROUND-TERM-LEAST-GENERAL-GENERALIZATION",
+    "signature": "(two finite acyclic first-order ground terms)->(canonical variable-labeled least general generalization, substitutions to each input)",
+    "law": "Given two finite acyclic ground first-order terms over exact constructor/arity and constant identities, return their least general generalization (lgg) under syntactic substitutions. Identical symbols/constructors retain identity; identical function symbol and arity recurse by argument. A divergent ordered pair of subterms maps to one fresh variable shared in ALL occurrences of the SAME ordered pair; distinct divergent pairs receive distinct variables. Canonical variable labels assigned by first left-to-right preorder encounter, starting V0. Preserve substitutions mapping result to the two inputs. No theory of associativity/commutativity and no lambda binding are admitted.",
+    "profile": "Atom=nonempty string, compound=[functor_string,arg1,...argN], N>=1, no variable input; output diverging variable represented as {'var':nonnegative int}; input dictionaries, cyclic trees, non-ground terms and higher-order functions excluded.",
+    "witnesses": [
+      {
+        "left": [
+          "f",
+          "a",
+          "a"
+        ],
+        "right": [
+          "f",
+          "b",
+          "b"
+        ],
+        "lgg": [
+          "f",
+          {
+            "var": 0
+          },
+          {
+            "var": 0
+          }
+        ],
+        "reason": "repeated disagreement pair must share one variable"
+      },
+      {
+        "left": [
+          "f",
+          "a",
+          "b"
+        ],
+        "right": [
+          "f",
+          "b",
+          "a"
+        ],
+        "lgg": [
+          "f",
+          {
+            "var": 0
+          },
+          {
+            "var": 1
+          }
+        ],
+        "reason": "distinct ordered pairs must NOT be fused"
+      },
+      {
+        "left": [
+          "f",
+          "a",
+          [
+            "g",
+            "a"
+          ]
+        ],
+        "right": [
+          "f",
+          "b",
+          [
+            "g",
+            "b"
+          ]
+        ],
+        "lgg": [
+          "f",
+          {
+            "var": 0
+          },
+          [
+            "g",
+            {
+              "var": 0
+            }
+          ]
+        ],
+        "reason": "nested reuse of same term pair"
+      },
+      {
+        "left": [
+          "f",
+          "a"
+        ],
+        "right": [
+          "g",
+          "a"
+        ],
+        "lgg": {
+          "var": 0
+        },
+        "reason": "functor mismatch replaces the entire subtree"
+      },
+      {
+        "left": [
+          "f",
+          "a"
+        ],
+        "right": [
+          "f",
+          "a"
+        ],
+        "lgg": [
+          "f",
+          "a"
+        ],
+        "reason": "exact equal terms preserve their structure"
+      }
+    ],
+    "falsifiers": [
+      "A single variable for two distinct ordered mismatches may prevent reproducing both inputs.",
+      "Fresh variable per repeated ordered mismatch loses the most-specific substitution-sharing law.",
+      "Ignoring constructor arity or symbol differences invents false common structure.",
+      "Changing child order or treating + as commutative changes the unadmitted syntactic theory."
+    ],
+    "formal_obligations": [
+      "Instance witness: both inputs are exact substitution instances of lgg.",
+      "Leastness: any common syntactic generalization subsumes lgg (up to variable renaming).",
+      "Canonical renaming stable under source swap (same shape, first-occurrence variable numbering).",
+      "Behavioral dedup with ratified D9 UNIFY, EXPLAIN-PROOF and selected D10 RENAME-VARS / PROVE-RULE; inverse relation does NOT prove Core independence."
+    ],
+    "coordinate": null,
+    "selected": false,
+    "ratified": false,
+    "physical_t5_authorized": false
+  },
+  "primary_references": [
+    {
+      "kind": "HISTORIC-AUTHOR",
+      "url": "https://homepages.inf.ed.ac.uk/gdp/publications/",
+      "title": "G. D. Plotkin, A Note on Inductive Generalisation, Machine Intelligence 5 (1970)",
+      "note": "Owner-authored publication index lists the original work; first-order lgg is not an invention of SENS."
+    },
+    {
+      "kind": "EXTERNAL-EXECUTABLE-REFERENCE",
+      "url": "https://www.swi-prolog.org/pldoc/man?predicate=term_subsumer%2F3",
+      "title": "SWI-Prolog term_subsumer/3",
+      "note": "Documents the most specific generalisation of two terms; its cyclic and non-ground extensions exceed this finite-ground research profile."
+    },
+    {
+      "kind": "EXTERNAL-FORMAL-REFERENCE",
+      "url": "https://www.swi-prolog.org/pldoc/man?predicate=subsumes_term%2F2",
+      "title": "SWI-Prolog subsumes_term/2",
+      "note": "Source for the generalization preorder: only generic variables may be instantiated."
+    }
+  ],
+  "owner_sources": [
+    {
+      "repo": "juv4uk/sens",
+      "path": "lib/reason.lisp",
+      "git_blob": "dadc52a2f40f2f30ad77642898afb81980044c08",
+      "reason": "Advice Taker backward chaining, unification and substitutions — semantic motivation, NOT existing anti-unification implementation"
+    },
+    {
+      "repo": "juv4uk/my-lisp-panini",
+      "path": "README.md",
+      "git_blob": "98ec292c280fd14d64fcec65787d547f390b2a21",
+      "reason": "Formal grammars and proof-bearing derivation; interest inspiration, not a claimed direct operational donor"
+    },
+    {
+      "repo": "juv4uk/chess-lisp-zero",
+      "path": "README.md",
+      "git_blob": "8d08cec1b0050ca1217017f5828e110680c7f6d6",
+      "reason": "Abstract state pattern discovery from distinct chess observations, not a chess opcode"
+    }
+  ],
+  "dedup": {
+    "examined_at_main": "634/1024",
+    "exact_names_found": [],
+    "closest_lower_residents": [
+      "D9 UNIFY",
+      "D9 EXPLAIN-PROOF"
+    ],
+    "closest_d10_selected": [
+      "RENAME-VARS",
+      "PROVE-RULE",
+      "PROVE-GOAL-STATE"
+    ],
+    "explicit_pending_question": "Unification finds a common instance; anti-unification finds a most-specific common generalization. Both are expressible over finite terms via other operations. Independently decide whether the law deserves a separate D10 resident or a Core-Math/AI library function.",
+    "status": "PRELIMINARY-NO-EXACT-NAME-NOT-BEHAVIORAL-APPROVAL"
+  },
+  "tests": [
+    "tests/test_d10_symbolic_ai_antiunify.py"
+  ],
+  "machine_execution": false,
+  "anti_promotion": [
+    "No d10-v1-semantic-inventory.json edit",
+    "No proposal-ledger row without source/semantic full dedup",
+    "No 10-bit coordinate or owner-ratification",
+    "No D2/control changes, no physical T5"
+  ],
+  "hold_queue": [
+    "Plotkin least general generalization for nonground terms",
+    "Equational anti-unification modulo commutativity",
+    "Clause / Horn-theory anti-unification",
+    "Pattern anti-unification for lambda terms with binding / capture avoidance",
+    "Inductive hypothesis ranking and pruning under evidence provenance"
+  ]
+}
