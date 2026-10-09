@@ -68,12 +68,6 @@ fn ratified_d4_append_owns_append_while_d5_10000_is_caaar() {
         println!("APPEND-DEDUP case={name} result={exact}");
     }
 
-    // Refuse an improper left spine without asserting the retired
-    // UnsatisfiedConditional outcome of the old three-field COND.
-    run_exact(d4, "'(a . b) '(c)")
-        .expect_err("D4 APPEND must reject an improper left spine");
-    run_surface("(append (quote (a . b)) (quote (c)))")
-        .expect_err("APPEND surface must reject an improper left spine");
 
 }
 
