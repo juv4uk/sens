@@ -91,8 +91,8 @@
       (00000100 (00000001 format) (00000001 wsm-fs-root))
       (00000100 (00000001 version) *fs-format-version*)
       (00000100 (00000001 revision) (fs-revision fs))
-      (00000100 (00000001 bindings) (01110000 (fs-bindings fs)))
-      (00000100 (00000001 objects) (fs-object-addresses (01110000 (fs-objects fs)))))))
+      (00000100 (00000001 bindings) (map->list (fs-bindings fs)))
+      (00000100 (00000001 objects) (fs-object-addresses (map->list (fs-objects fs)))))))
 
 (00001001 fs-object-addresses
   (00001000 (entries)
