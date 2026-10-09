@@ -1,0 +1,178 @@
+{
+  "schema": "d10-historical-neural-ai-exact-perceptron/v1",
+  "date": "2026-10-09",
+  "status": "HOLD-SOURCE-GROUNDED-NONRATIFIED",
+  "links": [
+    "#4013",
+    "#4162",
+    "#4182",
+    "#4463",
+    "#4977"
+  ],
+  "baseline": {
+    "inventory_blob": "3db40a04c1094c9ea13b0c8d6099ef1d882cf203",
+    "selected": 635,
+    "ratified": 0
+  },
+  "source": [
+    {
+      "author": "Frank Rosenblatt",
+      "year": 1958,
+      "title": "The perceptron: a probabilistic model for information storage and organization in the brain",
+      "journal": "Psychological Review 65(6),386-408",
+      "doi": "10.1037/h0042519",
+      "url": "https://pubmed.ncbi.nlm.nih.gov/13602029/",
+      "claim": "Original early perceptron and reinforcement/error-correction learning research; does NOT literally define the modern exact-rational SENS API below."
+    },
+    {
+      "author": "A. Novikoff",
+      "year": 1962,
+      "title": "On convergence proofs for perceptrons",
+      "url": "https://cs.uwaterloo.ca/~y328yu/classics/novikoff.pdf",
+      "claim": "Primary early account of mistake-correction and convergence for homogeneous threshold units subject to linear separability and bounded examples; convergence is NOT claimed for arbitrary samples or finite-precision hardware."
+    }
+  ],
+  "scope": {
+    "selected_delta": 0,
+    "ratified_delta": 0,
+    "coordinate_delta": 0,
+    "d2_delta": 0,
+    "t5_delta": 0,
+    "one_global_d10_stream": true
+  },
+  "candidate": {
+    "name": "EXACT-PERCEPTRON-MISTAKE-STEP",
+    "surface_uk": "помкрок",
+    "surface_ukr": "виправити-ваги-перцептрона",
+    "status": "HOLD-CORE-VERSUS-LIBRARY",
+    "width": 10,
+    "coordinate": null,
+    "ratified": false,
+    "law": "Given nonempty finite equal-length vectors of exact rationals weights w and nonzero feature x, label y in {-1,+1}, and strictly positive exact learning rate η, compute the exact margin m=y * sum_i(w_i*x_i). If m>0 return (w,corrected=NO), otherwise return (w+η*y*x,corrected=YES). A zero margin must trigger correction for either label. This is one pure mathematical update; no assumptions about convergence, SGD, hidden layers, approximate floats or physical sensor uncertainties.",
+    "input": "(weights:nonempty-vector exact-rational, feature:same-length nonzero exact-rational-vector, label:integer ±1, eta:exact-rational>0)",
+    "output": "(updated-weight-vector exact-rational, correction-indicator D1 YES/NO)",
+    "exact_invariant": "When correction occurs: y*(w'·x) - y*(w·x) = eta*sum_i x_i² > 0. When margin>0 both weight vector and identity unchanged.",
+    "positives": [
+      {
+        "w": [
+          "0",
+          "0"
+        ],
+        "x": [
+          "2",
+          "-1"
+        ],
+        "y": 1,
+        "eta": "1",
+        "result": [
+          "2",
+          "-1"
+        ],
+        "corrected": true
+      },
+      {
+        "w": [
+          "2",
+          "-1"
+        ],
+        "x": [
+          "2",
+          "-1"
+        ],
+        "y": 1,
+        "eta": "1",
+        "result": [
+          "2",
+          "-1"
+        ],
+        "corrected": false
+      },
+      {
+        "w": [
+          "2",
+          "-1"
+        ],
+        "x": [
+          "1",
+          "2"
+        ],
+        "y": -1,
+        "eta": "1",
+        "result": [
+          "1",
+          "-3"
+        ],
+        "corrected": true
+      },
+      {
+        "w": [
+          "1/2",
+          "1/3"
+        ],
+        "x": [
+          "3/2",
+          "-1/2"
+        ],
+        "y": -1,
+        "eta": "2/3",
+        "result": [
+          "-1/2",
+          "2/3"
+        ],
+        "corrected": true
+      }
+    ],
+    "falsifiers": [
+      "A margin of exactly zero is incorrectly treated as strictly classified and does not update.",
+      "A nonpositive learning rate, wrong vector shape, float, forbidden label or zero feature vector is accepted.",
+      "The exact margin gain after a correction differs from eta * ||x||².",
+      "The weight vector is changed when the signed margin was strictly positive.",
+      "A claim that all non-linearly separable training samples converge violates the restricted Novikoff theorem."
+    ],
+    "dedup": {
+      "name_scan": "No PERCEPTRON/NEURAL/WEIGHT/GRADIENT selected named root in the pinned 635 D10 inventory.",
+      "neighbors": [
+        "D1 yes/no label",
+        "D8/D9 exact rational and vector fold",
+        "D10 FINITE-BAYES-UPDATE-EXACT",
+        "earlier neural-symbolic FPGA/analog experiments"
+      ],
+      "status": "Behavioral independence remains open; vector + dot product + conditional may already implement all observations as a normal library function."
+    },
+    "conceptual_bridge": [
+      "1958 neural learning, not strictly symbolic theorem proving",
+      "FPGA/ESP32 integer/rational perceptron kernels",
+      "SDR/astronomy classification toy models",
+      "interpretable weights and counterexample-driven updates"
+    ]
+  },
+  "holds": [
+    {
+      "name": "PERCEPTRON-FULL-TRAIN",
+      "decision": "DERIVED/STATEFUL",
+      "reason": "Repeated updates/iteration/schedule from one step; requires explicit dataset ordering, not a new primitive."
+    },
+    {
+      "name": "PERCEPTRON-CONVERGENCE-WITNESS",
+      "decision": "HOLD-PROOF",
+      "reason": "Finite convergence only with appropriate separability, positive margin and norm assumptions; not guaranteed on XOR."
+    },
+    {
+      "name": "NEURAL-NETWORK-BACKPROPAGATION",
+      "decision": "HOLD-DIFFERENT-HISTORY",
+      "reason": "Modern multilayer differentiable learning must not be retroactively attributed to 1958 Rosenblatt."
+    },
+    {
+      "name": "GPU-TRAINING-INSTRUCTION",
+      "decision": "HOLD-SUBSTRATE",
+      "reason": "Mathematical law independent of CUDA/FPGA hardware opcode and exact device throughput."
+    }
+  ],
+  "oracle_plan": {
+    "a": "Exact rational Python decision rule",
+    "b": "Independent signed-margin inequality and invariant from exact dot products",
+    "cases": "exhaustive small rational vectors, labels and eta; negative input/forgery guards",
+    "native_oracle": "Not yet executed on binary SENS interpreter or FPGA."
+  },
+  "owner_decision": "Not selected, coordinate=null, no ratification. Review exact behavior vs generic arithmetic and Core-Math split before ledger."
+}

@@ -1,0 +1,32 @@
+name: D10 R6RS independent hashtable copy/mutability oracle
+on:
+  push:
+    paths:
+      - 'knowledge/d10-r6rs-copy-mutable-oracle-v1.json'
+      - 'tests/d10_r6rs_hashtable_copy_mutable.ss'
+      - 'scripts/check_d10_r6rs_copy_mutable_oracle.py'
+      - '.github/workflows/d10-r6rs-copy-mutable-oracle.yml'
+  pull_request:
+    paths:
+      - 'knowledge/d10-r6rs-copy-mutable-oracle-v1.json'
+      - 'tests/d10_r6rs_hashtable_copy_mutable.ss'
+      - 'scripts/check_d10_r6rs_copy_mutable_oracle.py'
+      - '.github/workflows/d10-r6rs-copy-mutable-oracle.yml'
+      - 'knowledge/d10-v1-semantic-inventory.json'
+jobs:
+  source-and-oracle:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Source provenance, current dedup, negative controls
+        run: python3 scripts/check_d10_r6rs_copy_mutable_oracle.py --self-test
+      - name: Install independent R6RS reference implementation
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y chezscheme
+          command -v scheme
+      - name: Run actual Chez Scheme R6RS donor reference
+        run: scheme --script tests/d10_r6rs_hashtable_copy_mutable.ss

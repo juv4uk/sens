@@ -37,7 +37,13 @@ def check(payload, low, high, verify_pin=True):
     for row in rows:
         name = row["historical_spelling"]
         assert name not in lower, f"already in D1-D9: {name}"
-        assert name not in high_names, f"already selected D10: re-review {name}"
+        if name in high_names:
+            assert name == "HASHTABLE-ENTRIES", f"unexpected promotion {name}"
+            live = next(v for v in high["rows"] if v["semantic_name"] == name)
+            assert live["source_class"] == "HISTORICAL-PRIMARY-TRANCHE2-20261009"
+            assert live["primary_source_url"] == row["primary_url"]
+            assert live["coordinate"] is None and live["ratified_resident"] is False
+            assert live["status"] == "SELECTED-RESEARCH-CANDIDATE"
         assert row["exact_in_D1_D9"] is False
         assert row["exact_in_current_D10_selected"] is False
         assert row["overlaps_other_open_historical_audits"] is False

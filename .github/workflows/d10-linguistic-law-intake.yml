@@ -1,0 +1,26 @@
+name: D10 linguistic mark and rewrite research
+
+on:
+  pull_request:
+    paths:
+      - knowledge/d10-linguistic-law-intake-20261009.json
+      - tests/test_d10_linguistic_laws.py
+      - .github/workflows/d10-linguistic-law-intake.yml
+  push:
+    branches: [main]
+    paths:
+      - knowledge/d10-linguistic-law-intake-20261009.json
+      - tests/test_d10_linguistic_laws.py
+      - .github/workflows/d10-linguistic-law-intake.yml
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - name: Перевірити перенесення наголосів, транслітерацію та негативні тести
+        run: python3 tests/test_d10_linguistic_laws.py

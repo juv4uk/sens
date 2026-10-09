@@ -28,10 +28,10 @@
     "width": 10,
     "capacity": 1024,
     "dense_target": 1024,
-    "selected_semantic_candidates": 636,
-    "remaining_semantic_candidates": 388,
+    "selected_semantic_candidates": 638,
+    "remaining_semantic_candidates": 386,
     "law_forced_coordinates": 256,
-    "unplaced_selected_candidates": 380,
+    "unplaced_selected_candidates": 382,
     "ratified_residents": 0
   },
   "first_tranche": {
@@ -364,5 +364,14 @@
     "now_selected": 634,
     "ratified_added": 0,
     "coordinates_added": 0
+  },
+  "historical_primary_selection_20261009_batch2": {
+    "source": "knowledge/d10-historical-primary-admission-batch2-v1.json",
+    "source_baseline": "main selected 636, commit 461329b1f79995700d10d0bdd7d389ee2e0eaacb",
+    "new_selected": 2,
+    "new_total": 638,
+    "coordinate_added": 0,
+    "ratified_added": 0,
+    "status": "pending-owner-ratification"
   }
 }

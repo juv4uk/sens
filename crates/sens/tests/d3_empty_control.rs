@@ -130,3 +130,22 @@ fn three_part_clause_is_rejected_on_exact_d3_cond() {
     let error = run(cond(vec![bad_clause])).expect_err("D3:110 is two-part only");
     assert_eq!(error.kind, ErrorKind::InvalidForm);
 }
+
+#[test]
+fn malformed_exact_d3_cond_clause_shape_fails_before_test_evaluation() {
+    // A numeric test would fail with Type if evaluated. A malformed clause
+    // must fail with InvalidForm instead; no compatibility evaluation occurs.
+    for elements in [
+        vec![number(1.0)],
+        vec![number(1.0), d1(0), d1(1)],
+        vec![number(1.0), d1(0), d1(1), d1(0)],
+    ] {
+        let bad_clause = Expr {
+            kind: ExprKind::List(Rc::from(elements.into_boxed_slice())),
+            span: span(),
+        };
+        let error = run(cond(vec![bad_clause]))
+            .expect_err("non-two-part clause must fail closed");
+        assert_eq!(error.kind, ErrorKind::InvalidForm);
+    }
+}
