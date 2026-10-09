@@ -1,0 +1,150 @@
+{
+  "schema_version": 1,
+  "batch": "D10-CROSSREPO-KNOWLEDGE-TOOLING-V1",
+  "parent": "#4302",
+  "authority": "#4162",
+  "base_main": "9f20e0c0a29384f2ead1fa584ed215f2fa9e27f3",
+  "d10_state": {
+    "selected": 527,
+    "capacity": 1024,
+    "law_forced_coordinates": 256,
+    "unplaced_selected": 271,
+    "remaining": 497,
+    "ratified": 0,
+    "status": "RESEARCH-UNRATIFIED"
+  },
+  "donor_scope": [
+    "juv4uk/nodum",
+    "juv4uk/Ooogle-it",
+    "juv4uk/Ucuddle-Search-Engine",
+    "juv4uk/vsop2013",
+    "juv4uk/wsm"
+  ],
+  "rows": [
+    {
+      "stable_id": "d10.kt.nodum.ranked-search.v1",
+      "repository": "juv4uk/nodum",
+      "source": [
+        "back/app/services/search_service.py@84ac0b144978a92f03c2baacebb1fcacea25559e"
+      ],
+      "semantic_name": "RANKED-FULLTEXT-SEARCH",
+      "behavior": "Parse a structured text query, apply field/tag/date restrictions, compute text relevance, emit ordered results with snippets and pagination totals.",
+      "decision": "PROJECTION",
+      "duplicate_target": [
+        "SEARCH",
+        "RESULT-COUNT"
+      ],
+      "coordinate": null,
+      "provenance_note": "Adds concrete query parsing and ranking policy to the existing SEARCH family; not enough evidence for an independent D10 semantic."
+    },
+    {
+      "stable_id": "d10.kt.nodum.fuzzy-title-switch.v1",
+      "repository": "juv4uk/nodum",
+      "source": [
+        "back/app/services/search_service.py@84ac0b144978a92f03c2baacebb1fcacea25559e"
+      ],
+      "semantic_name": "FUZZY-TITLE-MATCH",
+      "behavior": "Return title/path/alias candidates ordered by prefix and similarity scores.",
+      "decision": "PROJECTION",
+      "duplicate_target": [
+        "SEARCH"
+      ],
+      "coordinate": null,
+      "provenance_note": "A specialized search projection rather than a new language-visible primitive."
+    },
+    {
+      "stable_id": "d10.kt.nodum.graph-link-search.v1",
+      "repository": "juv4uk/nodum",
+      "source": [
+        "web/src/content/docs/api-search-links.md@84ac0b144978a92f03c2baacebb1fcacea25559e"
+      ],
+      "semantic_name": "GRAPH-LINK-SEARCH",
+      "behavior": "Search/navigation across note links and graph relations.",
+      "decision": "HOLD",
+      "duplicate_target": null,
+      "coordinate": null,
+      "provenance_note": "Need a carrier-independent graph law before admission; current evidence is API/application surface."
+    },
+    {
+      "stable_id": "d10.kt.ooogle.search-wrapper.v1",
+      "repository": "juv4uk/Ooogle-it",
+      "source": [
+        "extension-ui/src/pages/Content/api.js@a299f637725f75e206baac3a49cb56abdbdd9dc2"
+      ],
+      "semantic_name": "SEARCH-API-WRAPPER",
+      "behavior": "Send query text to an HTTP endpoint and return the response.",
+      "decision": "MECHANISM-ONLY",
+      "duplicate_target": null,
+      "coordinate": null,
+      "provenance_note": "HTTP/extension integration, no independent language semantics."
+    },
+    {
+      "stable_id": "d10.kt.ucuddle.search-page.v1",
+      "repository": "juv4uk/Ucuddle-Search-Engine",
+      "source": [
+        "web/app.py@a580cdec1601349a0f1e6760b1f7bf984c0aa387"
+      ],
+      "semantic_name": "SEARCH-WEB-ENDPOINT",
+      "behavior": "Expose a web search page and query handling.",
+      "decision": "MECHANISM-ONLY",
+      "duplicate_target": null,
+      "coordinate": null,
+      "provenance_note": "Web route/UI behavior, explicitly excluded by #4302."
+    },
+    {
+      "stable_id": "d10.kt.vsop.ephemeris-transform.v1",
+      "repository": "juv4uk/vsop2013",
+      "source": [
+        "CelestialObjects.pas@51cbf5135a4b7f6333cb0488ccd94bfdfd496317"
+      ],
+      "semantic_name": "EPHEMERIS-TO-STATE-TRANSFORM",
+      "behavior": "Evaluate planetary ephemeris at a time coordinate and copy the resulting position/velocity into simulation state.",
+      "decision": "HOLD",
+      "duplicate_target": null,
+      "coordinate": null,
+      "provenance_note": "Scientifically meaningful, but currently a domain-specific physics law/application operation; must clear Core-Math boundary before D10 consideration."
+    },
+    {
+      "stable_id": "d10.kt.vsop.leapfrog-update.v1",
+      "repository": "juv4uk/vsop2013",
+      "source": [
+        "CelestialObjects.pas@51cbf5135a4b7f6333cb0488ccd94bfdfd496317"
+      ],
+      "semantic_name": "LEAPFROG-STATE-UPDATE",
+      "behavior": "Advance position and mid-step velocity by a fixed timestep using acceleration, then atomically commit temporary state.",
+      "decision": "HOLD",
+      "duplicate_target": null,
+      "coordinate": null,
+      "provenance_note": "Generic numerical integration law, but math/physics domain boundary is explicit in #4302; no D10 placement without Core-Math ruling."
+    },
+    {
+      "stable_id": "d10.kt.wsm.provenance-chain.v1",
+      "repository": "juv4uk/wsm",
+      "source": [
+        "research/provenance-foundation.md@ed74e0fd033574794c9efc499654750fa8834e28"
+      ],
+      "semantic_name": "PROVENANCE-CHAIN",
+      "behavior": "Represent a claim/result together with the explicit assumption chain on which its validity depends, preserving provenance rather than treating the result as floating authority.",
+      "decision": "PROJECTION",
+      "duplicate_target": [
+        "EVIDENCE-CLAIM-REF",
+        "EVIDENCE-SOURCE-REF",
+        "MAKE-EVIDENCE",
+        "ADVICE-CONFLICT-PROOF"
+      ],
+      "coordinate": null,
+      "provenance_note": "Strong epistemic law but current D10 already carries evidence/provenance families; preserve as corroborating donor evidence, not a new slot."
+    }
+  ],
+  "summary": {
+    "select": 0,
+    "projection": 3,
+    "hold": 3,
+    "mechanism_only": 2,
+    "falsified": 0,
+    "coordinates_assigned": 0,
+    "ratification_effect": "NONE",
+    "inventory_mutation": "NONE"
+  },
+  "negative_result": "This five-repository lane yields no independent D10 SELECT candidate after current-inventory duplicate and Core-Math/mechanism boundaries. It is still a useful donor audit because it closes a tempting source of search/provenance duplicates."
+}
