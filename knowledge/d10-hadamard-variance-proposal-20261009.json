@@ -1,0 +1,115 @@
+{
+  "schema": "d10-proposal-hadamard-variance/v1",
+  "proposal_id": "D10P-0006",
+  "semantic_name": "HADAMARD-VARIANCE",
+  "surface_uk": "дисперсія-адамарова",
+  "surface_ukr": "дисперсія-частотної-стійкості-адамарова",
+  "domain": "D10",
+  "status": "PENDING-OWNER-BEHAVIORAL-DEDUP",
+  "selected": false,
+  "ratified": false,
+  "coordinate": null,
+  "topic": [
+    "horology",
+    "precision clocks",
+    "radio SDR oscillator stability",
+    "astronomy timebase",
+    "FPGA frequency counters"
+  ],
+  "law": "For N zero-dead-time uniformly sampled fractional-frequency observations y, positive integer m and N >= 3m, average each m-point contiguous block: a_i=(1/m)*sum(y[i:i+m]); compute the mean squared second difference of consecutive m-block averages divided by 6, over all i=0..N-3m. Return exact rational variance when inputs are exact rational. Reject invalid m or insufficient data.",
+  "arity": "(fractional_frequency_series, averaging_factor_positive_integer)->variance",
+  "formula": "HVAR(y,m)=sum_{i=0}^{N-3m}(a_i-2*a_{i+m}+a_{i+2m})^2/[6*(N-3m+1)]",
+  "time_contract": "Assumes equal input sample period tau0 with zero dead-time; reported averaging time tau=m*tau0, not wall-clock timezone or UTC.",
+  "primary_source": {
+    "organisation": "NIST",
+    "authors": [
+      "W. J. Riley",
+      "D. A. Howe"
+    ],
+    "title": "Handbook of Frequency Stability Analysis",
+    "year": 2008,
+    "publication": "NIST SP 1065",
+    "web_url": "https://www.nist.gov/publications/handbook-frequency-stability-analysis",
+    "full_spec_url": "https://nvlpubs.nist.gov/nistpubs/Legacy/SP/nistspecialpublication1065.pdf",
+    "section": "5.2.8 Hadamard Variance; 5.2.9 Overlapping Hadamard Variance"
+  },
+  "positive_witnesses": [
+    {
+      "input": [
+        0,
+        0,
+        1
+      ],
+      "m": 1,
+      "expected": "1/6",
+      "explanation": "single second-frequency-difference squared divided by 6"
+    },
+    {
+      "input": [
+        0,
+        0,
+        0,
+        1,
+        0
+      ],
+      "m": 1,
+      "expected": "5/18",
+      "explanation": "three overlapping triplets: squared differences 0,1,4"
+    },
+    {
+      "input": [
+        0,
+        0,
+        1,
+        1,
+        0,
+        0
+      ],
+      "m": 2,
+      "expected": "2/3",
+      "explanation": "block means 0,1,0; m=2 reflects averaging time"
+    },
+    {
+      "input": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6
+      ],
+      "m": 1,
+      "expected": "0",
+      "explanation": "linear frequency drift annihilated by second differences"
+    }
+  ],
+  "falsifiers": [
+    "Use the Allan first-difference estimator instead of the Hadamard second-difference estimator: a linear frequency drift becomes nonzero, violating the contract.",
+    "Normalize by 2 instead of 6, or silently use sample variance N-1; the 3-sample impulse must equal exactly 1/6.",
+    "Allow m=0, negative/non-integer m, N<3*m or silently fill missing samples; valid samples must be uniformly timed with no dead-time.",
+    "Conflate the HVAR finite nonoverlapping/overlapping convention or claim a different confidence estimator (modified or total Hadamard) is the same statistic."
+  ],
+  "dedup": {
+    "exact_lower_d1_d9": false,
+    "exact_selected_d10_630": false,
+    "nearest_pending_peer": "ALLAN-VARIANCE in #4909, not to be reselected or relabeled",
+    "behavioral_difference": "Allan differences y[i+1]-y[i], while Hadamard uses three-frequency second differences y[i]-2*y[i+m]+y[i+2*m], suppressing linear frequency drift.",
+    "core_minimality": "The statistic is an ordinary composite of exact arithmetic, finite sequences and summation; even with distinctive semantics it may belong in a SENS math library instead of occupying D10. Owner review required, not guaranteed irreducible primitive.",
+    "decision": "PROPOSE-NOT-SELECTED",
+    "d2_control_scope": "No syntax, control flow, scheduler, host clock reading, or binary transport."
+  },
+  "executed_donor": {
+    "language": "R6RS Scheme",
+    "implementation": "Chez Scheme (GitHub Actions resolves/records system package version)",
+    "path": "tests/oracles/d10_hadamard_chez.ss",
+    "cases": 15,
+    "claim": "independent executable mathematical donor-model oracle, NOT SENS runtime parity or NIST implementation itself"
+  },
+  "admission": {
+    "ledger_proposal_id": "D10P-0006",
+    "block_source_kind": "NOT-A-MIGRATION-BLOCK",
+    "path_after_revision": "knowledge/d10-hadamard-variance-proposal-20261009.json",
+    "runtime_SENS_tested": false,
+    "owner_ratification_required": true
+  }
+}
