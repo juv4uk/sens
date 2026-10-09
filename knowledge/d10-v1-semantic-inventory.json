@@ -8,10 +8,10 @@
   "capacity": 1024,
   "current_foundation": "#4008 / Contract 11.8 / D1-D9",
   "accounting": {
-    "selected_semantic_candidates": 630,
+    "selected_semantic_candidates": 633,
     "law_forced_coordinates": 256,
-    "unplaced_selected_candidates": 374,
-    "remaining_semantic_inventory": 394,
+    "unplaced_selected_candidates": 377,
+    "remaining_semantic_inventory": 391,
     "ratified_d10_residents": 0
   },
   "rules": [
@@ -13362,6 +13362,126 @@
       "coordinate_basis": "UNPLACED",
       "donor_coordinate_authority": "NONE",
       "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.science.covariance-transport.20261009",
+      "semantic_name": "COVARIANCE-TRANSPORT",
+      "surface_uk": "перенести-коваріацію",
+      "surface_ukr": "перенести-коваріацію",
+      "relation_class": "MEASUREMENT-COVARIANCE-LAW",
+      "behavior": "Given an n×n symmetric covariance matrix Sigma and an m×n Jacobian J at the same linearization point, yield m×m J*Sigma*transpose(J), retaining nonzero cross-covariances; reject inconsistent shapes. This is a first-order linearized covariance law and must not claim exact uncertainty propagation for arbitrary nonlinear distributions.",
+      "arity": "(J[m,n],Sigma[n,n])->Sigma-out[m,m]",
+      "positive_witnesses": [
+        "For Sigma=[[4,2],[2,9]] and J=[[1,1],[1,-1]], result is [[17,-5],[-5,9]]; dropping cross-covariance incorrectly yields [[13,-5],[-5,13]].",
+        "For identity Jacobian I2, result equals the original covariance matrix, including its off-diagonal entries."
+      ],
+      "falsifiers": [
+        "Discarding cross-covariance off-diagonal terms while composing the output covariance.",
+        "Claiming exact covariance for arbitrary nonlinear transforms, or silently accepting incompatible Jacobian and covariance dimensions."
+      ],
+      "minimality": "Exact derived matrix law for joint measurement uncertainty, not merely SCIENCE-DIMENSIONS or scalar arithmetic; independent registered research composite, not irreducible new machine opcode",
+      "unblock_fanout": [
+        "measurement calibration",
+        "astronomical uncertainty",
+        "acoustics uncertainty"
+      ],
+      "source_path": "knowledge/d10-interdisciplinary-science-proposals-20261009.json",
+      "primary_url": "https://www.nist.gov/publications/guide-expression-uncertainty-measurement",
+      "source_section": "NIST GUM correlation and covariance propagation",
+      "provenance": [
+        "#4013",
+        "#4463",
+        "knowledge/d10-interdisciplinary-science-proposals-20261009.json",
+        "https://www.nist.gov/publications/guide-expression-uncertainty-measurement"
+      ],
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "INTERDISCIPLINARY-SCIENTIFIC-LAW",
+      "decision": "SELECT-D10-CANDIDATE",
+      "proposal_status": "pending-owner-review",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "donor_coordinate_authority": "NONE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.science.frame-state-transform.20261009",
+      "semantic_name": "FRAME-STATE-TRANSFORM",
+      "surface_uk": "перетворити-стан-системи-координат",
+      "surface_ukr": "перенести-положення-та-швидкість",
+      "relation_class": "KINEMATIC-FRAME-STATE-LAW",
+      "behavior": "For an epoch-aligned frame rotation R(t), derivative Rdot(t), source position p and source velocity v, yield target p'=R*p and v'=R*v+Rdot*p. A rotation-only position law does not suffice for velocity in a time-varying frame; reject mismatched dimensions and epochs.",
+      "arity": "(R[3,3],Rdot[3,3],(p3,v3))->(p3',v3')",
+      "positive_witnesses": [
+        "R rotates +90 deg about z; angular speed 2 radians/time; p=(1,0,0), v=(0,0,0). Then p'=(0,1,0) and v'=(-2,0,0), not (0,0,0).",
+        "With R=I and Rdot=0, both position and velocity remain identical."
+      ],
+      "falsifiers": [
+        "Return only R*v without derivative term Rdot*p during changing frame.",
+        "Confuse positions with velocities or allow rotation/derivative matrices from different epochs."
+      ],
+      "minimality": "Different from D8 ROTATE because velocity transformation requires time-derivative term Rdot*p when a frame rotates; derived mathematical composite with distinct observable output.",
+      "unblock_fanout": [
+        "astronomy astrometry",
+        "3D space simulation",
+        "FPGA sensor tracking"
+      ],
+      "source_path": "knowledge/d10-interdisciplinary-science-proposals-20261009.json",
+      "primary_url": "https://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/req/frames.html",
+      "source_section": "NASA NAIF SPICE SXFORM versus PXFORM",
+      "provenance": [
+        "#4013",
+        "#4463",
+        "knowledge/d10-interdisciplinary-science-proposals-20261009.json",
+        "https://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/req/frames.html"
+      ],
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "INTERDISCIPLINARY-SCIENTIFIC-LAW",
+      "decision": "SELECT-D10-CANDIDATE",
+      "proposal_status": "pending-owner-review",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "donor_coordinate_authority": "NONE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.science.rational-resample.20261009",
+      "semantic_name": "RATIONAL-RESAMPLE",
+      "surface_uk": "раціонально-передискретизувати",
+      "surface_ukr": "змінити-частоту-відліків",
+      "relation_class": "MULTIRATE-CAUSAL-SIGNAL-LAW",
+      "behavior": "For input signal x sampled at fs, positive integer interpolation L and decimation M, and explicit FIR taps h, zero-insert by L, convolve causally with h, then retain indices divisible by M: output rate fs*L/M. The explicit finite-output convention is output indices n<length(x)*L, with zero prehistory; repeated processing on disjoint chunks must preserve FIR history and global decimation phase.",
+      "arity": "(x,L>0,M>0,FIR taps,history/phase)->(y,updated-history/phase)",
+      "positive_witnesses": [
+        "x=[2,4,6], L=2, M=3, taps=[1/4,1/2,1/4] yields [1/2,2] under declared causal/truncated finite-output convention.",
+        "Processing a signal as one block or two consecutive blocks with retained FIR history and decimation phase yields the same output sequence, and output sampling rate is input_fs*L/M."
+      ],
+      "falsifiers": [
+        "Change the output rate but skip FIR filtering, producing aliasing/images while claiming source-law parity.",
+        "Reset decimation phase at each chunk boundary or silently discard FIR history, yielding a different result from uninterrupted processing."
+      ],
+      "minimality": "Distinct typed stream/sample timing state from mere scalar VECTOR-MAP. This is derivable using existing vectors and arithmetic, and has no automatic claim to primitive instruction identity.",
+      "unblock_fanout": [
+        "radio SDR sampling",
+        "music/audio",
+        "embedded ESP32 and FPGA"
+      ],
+      "source_path": "knowledge/d10-interdisciplinary-science-proposals-20261009.json",
+      "primary_url": "https://wiki.gnuradio.org/index.php/Rational_Resampler",
+      "source_section": "GNU Radio Rational Resampler, interpolation L, decimation M, FIR taps",
+      "provenance": [
+        "#4013",
+        "#4463",
+        "knowledge/d10-interdisciplinary-science-proposals-20261009.json",
+        "https://wiki.gnuradio.org/index.php/Rational_Resampler"
+      ],
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "INTERDISCIPLINARY-SCIENTIFIC-LAW",
+      "decision": "SELECT-D10-CANDIDATE",
+      "proposal_status": "pending-owner-review",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "donor_coordinate_authority": "NONE",
+      "ratified_resident": false
     }
   ],
   "parent_domain": {
@@ -13397,6 +13517,7 @@
     "knowledge/d10-selfhost-reason-harvest-v1.json",
     "knowledge/d10-historical-primary-admission-batch1-v1.json",
     "knowledge/d10-clos-slot-state-historical-review-v1.json",
-    "knowledge/d10-historical-clos-interlisp-residual-review-v1.json"
+    "knowledge/d10-historical-clos-interlisp-residual-review-v1.json",
+    "knowledge/d10-interdisciplinary-science-proposals-20261009.json"
   ]
 }
