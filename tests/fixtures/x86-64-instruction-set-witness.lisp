@@ -815,7 +815,7 @@
           (expected (00110000 row)))
       (10011100 ((actual (01001101 expr)))
         (00000111
-          ((00100010 actual expected) (1)
+          ((00100010 actual expected)
            (00000001 pass))
           (t
            (00100111 (00000001 fail) name expected actual)))))))
