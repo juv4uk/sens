@@ -613,6 +613,11 @@ class Resolver:
         if t in self.my:
             ident=self.my[t]
             if ident is None:
+                if self.strict_decisions:
+                    raise MigrationError(
+                        f"L3 BLOCK + D10-PROPOSAL: registered executable "
+                        f"surface {t!r} lacks admitted domain coordinate", tok
+                    )
                 raise MigrationError(
                     f"legacy-unmapped my-lisp function {t!r}: no current D3-D6 resident",
                     tok,
@@ -624,6 +629,11 @@ class Resolver:
         if t==t.upper() and t in self.upper:
             ident=self.upper[t]
             if ident is None:
+                if self.strict_decisions:
+                    raise MigrationError(
+                        f"L3 BLOCK + D10-PROPOSAL: historical executable "
+                        f"surface {t!r} lacks admitted domain coordinate", tok
+                    )
                 raise MigrationError(
                     f"legacy-unmapped Lisp 1-1.5 function {t}: no current D3-D6 resident",
                     tok,
@@ -1006,6 +1016,14 @@ def normalize_l1_l7(forms, resolver: Resolver):
                 else:
                     proved = False
                 if not proved:
+                    if (isinstance(test, ListNode) and test.items
+                            and isinstance(test.items[0], Atom)
+                            and _decision_identity(test.items[0], resolver) is None):
+                        raise MigrationError(
+                            f"L3 BLOCK + D10-PROPOSAL: predicate call "
+                            f"{test.items[0].tok.text!r} has no admitted "
+                            "exact-domain coordinate", test.items[0].tok,
+                        )
                     tok = test.tok if isinstance(test, (Atom, ListNode)) else node.tok
                     raise MigrationError(
                         "L1 BLOCK: COND test has no static exact-PredicateBit 1/0 proof; "
@@ -1039,10 +1057,14 @@ def normalize_l1_l7(forms, resolver: Resolver):
 
 
 def migrate_file(source: str,resolver,text7):
-
-    stripped=strip_comments(source)
-    tokens=tokenize(stripped)
-    forms=Parser(tokens).parse_program()
+    try:
+        stripped=strip_comments(source)
+        tokens=tokenize(stripped)
+        forms=Parser(tokens).parse_program()
+    except MigrationError as error:
+        if resolver.strict_decisions:
+            raise MigrationError(f"L7 BLOCK: unparseable input: {error}", error.tok) from error
+        raise
     resolver.set_global_bindings(collect_global_bindings(forms), text7)
     if resolver.strict_decisions:
         normalize_l1_l7(forms, resolver)
