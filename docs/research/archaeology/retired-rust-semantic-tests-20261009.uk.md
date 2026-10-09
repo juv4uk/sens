@@ -66,3 +66,14 @@
 - Окремі CI workflows `d5-zero-number-predicates.yml` і `d5-zerop-numberp.yml` видалені, аби CI не вимагав застарілі закони.
 
 Відновлення цих семантичних оракулів у Rust заборонене; закон має бути встановлений у Lisp-owned SENS, із незалежною перевіркою, а не доданий до хостового evaluator.
+
+## Compiler-role та D6 pure-law Rust-оракули — наступний прохід
+
+Rust-межа зберігає механічне виконання/транспорт та типи exact-domain; семантичні ролі компілятора тепер запитуються через `compiler_execution_role_from_sens`, який виконує Lisp-owned law. Публічний adapter `compiler_execution_role` лишено для механічних GPU/host викликів, він сам не декодує D3/D4 ролі. Семантичний диференційний Rust-оракул більше не є незалежною владою.
+
+- `crates/sens/tests/compiler_nucleus_request_diff.rs`: старий Rust-host reference vs SENS compiler law, Git blob `43ad04ac015272d8eed03535a339ac2e15688db1`.
+- `crates/sens/tests/d6_pure_laws.rs`: історичні Rust assertions D6 функціональних законів, Git blob `50d875780a17658e7704d1997f59e038ed60cd90`.
+- `.github/workflows/d6-pure-laws.yml`: CI старого Rust semantic oracle, Git blob `34fee3855d113193a0118619d59a929621e595a2`.
+- `crates/sens/tests/compiler_l1_l5_role.rs`: вилучено окремий `sens_l1_l5_derivation_matches_rust_oracle_for_all_d3_identities`, залишено механічні тести ширини/ізоляції доменів.
+
+Не переносити ці історичні очікування в інші Rust-тести для «зеленого» CI: semantic authority залишається лише у ратифікованих SENS/Lisp джерелах.
