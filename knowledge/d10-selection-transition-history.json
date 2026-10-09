@@ -146,6 +146,29 @@
         "scripts/check-d10-proposal-ledger.py",
         "scripts/check_d10_selection_transition_history.py"
       ]
+    },
+    {
+      "id": "d10.hobby.gf2.minimal-recurrence.20261009",
+      "authority": "#4013 #4463 source-backed D10 cross-hobby research selection",
+      "evidence": [
+        "#4952",
+        "https://doc.sagemath.org/html/en/reference/cryptography/sage/crypto/lfsr.html",
+        "knowledge/d10-gf2-minimal-recurrence-research-v1.json"
+      ],
+      "previous_inventory_blob_sha": "65014431ac3e64633cd0be3630cfafc5e7a9aea3",
+      "resulting_inventory_blob_sha": "b652f14efbbc5fdec30132a66107e81580c8a8c9",
+      "added_stable_ids": [
+        "d10.fpga.gf2.minimum-recurrence.20261009"
+      ],
+      "appended_sources": [
+        "knowledge/d10-gf2-minimal-recurrence-research-v1.json"
+      ],
+      "coordinates_added": 0,
+      "ratified_added": 0,
+      "delta_selected": 1,
+      "previous_selected": 634,
+      "resulting_selected": 635,
+      "decision": "research selected; Core/library owner decision pending, no T5 authorization"
     }
   ]
 }
