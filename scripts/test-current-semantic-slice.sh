@@ -18,12 +18,33 @@ cargo test -p sens \
 # Historical #1096 bare-SID witness remains preserved as compatibility evidence,
 # but it is intentionally not executed by the current semantic slice. Contract
 # 11.8 assigns W8 to exact D8 identity; Sens8/Sid8 remains migration/provenance only.
-# #291: quantity semantics live in Lisp. The shell observes only the named
-# pass envelope; expected scientific quantities and relations stay in the
-# Lisp witness itself. No replacement Rust observer is introduced.
-quantity_status="$(cargo run --quiet -p sens-cli --bin sens -- tests/fixtures/exact-quantity-arithmetic-witness.lisp)"
-if [[ "$quantity_status" != "(exact-quantity-arithmetic-witness (status pass))" ]]; then
-  printf 'exact quantity Lisp witness failed: %s\n' "$quantity_status" >&2
+# The old SI quantity Lisp witness uses retired three-part COND. It is
+# retained at tests/fixtures/exact-quantity-arithmetic-witness.lisp for separate
+# scientific-law migration and authority inventory, but is NOT admissible in
+# the current strict D1/D3 semantic slice.
+#
+# Current executable gate instead runs the sole canonical physical-byte T5
+# program. That proves D3:110 two-field COND with exact D1 control ONLY,
+# not SI quantity equivalence. The existing D2 parser rejects malformed T5.
+python3 - <<'PY'
+from pathlib import Path
+import hashlib
+import sys
+sys.path.insert(0, "scripts")
+from sens_t5_codec import decode_bytes, encode_words
+
+physical = Path("examples/binary/d3-cond-program.sens").read_bytes()
+words = decode_bytes(physical)
+assert len(physical) == 31, "physical T5 size drift"
+assert len(words) == 49 and sum(map(len, words)) == 105, "exact-width D1/D3 workload drift"
+assert encode_words(words) == physical, "noncanonical packed T5"
+assert hashlib.sha256(physical).hexdigest() == (
+    "b93b49223f5c845a4ae86392c463b59699470faeb4c8ac3cf06982bc2cb232df"
+), "ratified physical D3 COND payload changed"
+PY
+binary_status="$(cargo run --quiet -p sens-cli --bin sens-trit -- eval examples/binary/d3-cond-program.sens)"
+if [[ "$binary_status" != "1" ]]; then
+  printf 'exact physical D3 COND expected D1:1; observed %s\n' "$binary_status" >&2
   exit 1
 fi
 
