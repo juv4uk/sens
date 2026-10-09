@@ -1,0 +1,196 @@
+{
+  "schema": "d10-generalized-congruence-research/v1",
+  "date": "2026-10-09",
+  "status": "RESEARCH-ONLY-OWNER-REVIEW",
+  "project": "SENS exact-width domain D10",
+  "source_selection_snapshot": "632/1024 selected, 0 ratified",
+  "ledger_policy": "No canonical proposal row until source-only pending review intake is permitted by #4918, and behavioral review is complete",
+  "donor_sources": [
+    {
+      "kind": "INDEPENDENT-EXECUTABLE-DONOR",
+      "name": "SymPy 1.14.0",
+      "function": "sympy.ntheory.modular.solve_congruence",
+      "documentation": "https://docs.sympy.org/latest/modules/ntheory.html",
+      "upstream_code": "https://github.com/sympy/sympy/blob/master/sympy/ntheory/modular.py",
+      "implementation_pin": "sympy==1.14.0 (Python package release)",
+      "note": "SymPy explicitly accepts non-coprime moduli and returns None for inconsistent congruences."
+    },
+    {
+      "kind": "INDEPENDENT-REFERENCE-STANDARD",
+      "name": "SageMath CRT",
+      "url": "https://doc.sagemath.org/html/en/reference/rings_standard/sage/arith/misc.html",
+      "note": "Sage CRT_list documents both non-coprime compatible and incompatible systems; a different implementation."
+    },
+    {
+      "kind": "OWNER-INTEREST-MOTIVATION-NOT-DONOR-CODE",
+      "name": "spanda",
+      "repository": "juv4uk/spanda",
+      "path": "README.md",
+      "blob_sha": "d339363e03798941280d7394fb6b24a76ff43dd3",
+      "note": "Exact p/q and FPGA/analog oscillator project; there is no claimed CRT function in spanda."
+    }
+  ],
+  "proposed_laws": [
+    {
+      "semantic_name": "GENERALIZED-CONGRUENCE-MERGE",
+      "uk": "звести-остачі",
+      "ukr": "узгодити-періодичні-остачі",
+      "arity": 4,
+      "signature": "(a:int,m:int>0,b:int,n:int>0)->CONSISTENT(r:int,period:int) | CONFLICT(gcd:int,delta:int)",
+      "law": "Normalize residues a mod m and b mod n. Let g=gcd(m,n), L=lcm(m,n). If (b-a)%g != 0 return CONFLICT(g,b-a), a positive gcd certificate of impossibility. Otherwise return unique canonical r in 0..L-1 with r% m=a%m and r%n=b%n and period=L. Signs normalized and arbitrary-width exact integers preserved.",
+      "positive_witnesses": [
+        {
+          "input": [
+            2,
+            3,
+            3,
+            5
+          ],
+          "output": [
+            "CONSISTENT",
+            8,
+            15
+          ]
+        },
+        {
+          "input": [
+            2,
+            4,
+            6,
+            8
+          ],
+          "output": [
+            "CONSISTENT",
+            6,
+            8
+          ]
+        },
+        {
+          "input": [
+            -1,
+            6,
+            5,
+            8
+          ],
+          "output": [
+            "CONSISTENT",
+            5,
+            24
+          ]
+        },
+        {
+          "input": [
+            12,
+            6,
+            0,
+            6
+          ],
+          "output": [
+            "CONSISTENT",
+            0,
+            6
+          ]
+        },
+        {
+          "input": [
+            0,
+            1,
+            3,
+            7
+          ],
+          "output": [
+            "CONSISTENT",
+            3,
+            7
+          ]
+        }
+      ],
+      "falsifiers": [
+        {
+          "input": [
+            1,
+            4,
+            2,
+            6
+          ],
+          "expected": [
+            "CONFLICT",
+            2,
+            1
+          ],
+          "why": "Delta 1 is not divisible by gcd=2; a blind coprime CRT must not invent an answer."
+        },
+        {
+          "input": [
+            1,
+            0,
+            0,
+            3
+          ],
+          "expected": "RAISE invalid modulus"
+        },
+        {
+          "input": [
+            2,
+            4,
+            6,
+            8
+          ],
+          "forbidden": [
+            "CONSISTENT",
+            14,
+            8
+          ],
+          "why": "Noncanonical residue outside [0,L)."
+        },
+        {
+          "input": [
+            2,
+            4,
+            6,
+            8
+          ],
+          "forbidden": [
+            "CONSISTENT",
+            6,
+            32
+          ],
+          "why": "Period must be LCM 8 not product 32."
+        }
+      ],
+      "domain_boundary": "Pure exact integer relation. Not a scheduler, timer, RF codec, phase-locked loop, FPGA ISA or D2 control law.",
+      "uniqueness": "D9 DIVMOD yields quotient/remainder for one division; D10 MODULO yields a residue; neither by itself specifies consistency of two constraints and a canonical merged period. However extended Euclid and arithmetic can derive this function, so Core-vs-library remains unresolved.",
+      "dedup": "EXACT-NAME-ONLY-FOUNDATION-D10; BEHAVIORAL-PROOF-PENDING",
+      "ownership": "HOLD-CORE-VS-DERIVED-MATH",
+      "source_grade": "SYMpy-RELEASE-ORACLE-AND-SAGEMATH-SPEC",
+      "coordinate": null,
+      "ratified": false,
+      "selected": false
+    }
+  ],
+  "inspirations": [
+    "Astronomy: align two hypothetical periodic observing opportunities",
+    "SDR: solve rationally discretized symbol-clock phase constraints",
+    "FPGA: merge digital divider phase residue constraints, without emitting HDL",
+    "Horology: repeated cycle-phase coincidence",
+    "Music/sanskrit prosody: mathematical periodic patterns, not new text syntax"
+  ],
+  "anti_duplicate": [
+    "#4920 Hadamard variance addresses noise statistics, not congruence solvability",
+    "#4932 hysteresis addresses threshold state, not integer periodic coherence",
+    "#4928 normalizes exact rational powers of a base, not merge of residues",
+    "#4922 interval consistency concerns geometric/order intervals, not modular arithmetic"
+  ],
+  "follow_up": [
+    "Run real SymPy 1.14.0 donor on representative and exhaustive grids",
+    "Compare independent extended-Euclid implementation against brute-force canonical proof",
+    "Review behavioral D1–D9/current D10 and decide Core versus mathematical library",
+    "After intake #4918 allows preselection, add evidence-backed pending ledger row only with peer review",
+    "Never assign D10 coordinate or ratification without owner"
+  ],
+  "accounting": {
+    "new_selected": 0,
+    "new_coordinates": 0,
+    "new_ratified": 0
+  }
+}
