@@ -213,7 +213,6 @@ fn surface_index() -> &'static HashMap<&'static str, SemanticId> {
 }
 
 pub(crate) fn admitted_semantic_id_for_surface(name: &str) -> Option<SemanticId> {
-    eprintln!("DEBUG admitted_semantic_id_for_surface: name={:?} -> {:?}", name, surface_index().get(name).copied());
     surface_index().get(name).copied()
 }
 
