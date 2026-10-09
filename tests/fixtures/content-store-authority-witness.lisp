@@ -42,17 +42,17 @@
                         root-image-deterministic
                         object-image-deterministic
                         equal-current-projection))))
-                ((00100001 projection-relation)
+                ((00100010 projection-relation (00100010 (00000001 content-store-yes) (00000001 content-store-no)))
                   (00000001
                     (content-store-authority-witness
                       (status fail)
                       (law equal-current-projection))))))
-            ((00100001 object-relation)
+            ((00100010 object-relation (00100010 (00000001 content-store-yes) (00000001 content-store-no)))
               (00000001
                 (content-store-authority-witness
                   (status fail)
                   (law object-image-deterministic))))))
-        ((00100001 root-relation)
+        ((00100010 root-relation (00100010 (00000001 content-store-yes) (00000001 content-store-no)))
           (00000001
             (content-store-authority-witness
               (status fail)
