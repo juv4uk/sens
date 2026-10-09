@@ -10,6 +10,7 @@ on:
       - "crates/sens/src/syntax.rs"
       - "crates/sens/src/selfhost_lineage.rs"
       - "crates/sens-cli/src/bin/sens-trit.rs"
+      - "crates/sens-cli/src/bin/sens-to-sens.rs"
       - ".github/workflows/exact-compiler-t5-clippy.yml"
   push:
     branches: [main]
@@ -21,6 +22,7 @@ on:
       - "crates/sens/src/syntax.rs"
       - "crates/sens/src/selfhost_lineage.rs"
       - "crates/sens-cli/src/bin/sens-trit.rs"
+      - "crates/sens-cli/src/bin/sens-to-sens.rs"
       - ".github/workflows/exact-compiler-t5-clippy.yml"
   workflow_dispatch:
 
