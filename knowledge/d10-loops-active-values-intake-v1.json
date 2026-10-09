@@ -1,0 +1,146 @@
+{
+  "schema": "d10-loops-active-value-intake/v1",
+  "status": "SELECTED-RESEARCH-PENDING-OWNER-NOT-RATIFIED",
+  "date": "2026-10-09",
+  "coordination_issue": "#4463",
+  "inventory_issue": "#4013",
+  "source": {
+    "title": "The LOOPS Manual",
+    "authors": [
+      "Daniel G. Bobrow",
+      "Mark Stefik"
+    ],
+    "date": "1983-12",
+    "url": "https://www.markstefik.com/wp-content/uploads/2011/04/1983-loops-manual-Bobrow-Stefik-part-1.pdf",
+    "printed_pages": [
+      25,
+      26,
+      28
+    ],
+    "pdf_pages_zero_based": [
+      28,
+      29,
+      31
+    ],
+    "section": "5 Active Values; 5.1 Active Values Notation; 5.2 Nested Active Values; 5.5 User Defined Access Functions"
+  },
+  "baseline": {
+    "inventory_blob_sha": "73dd518469f972c55411e004b70b054ba8b3ec86",
+    "selected_before": 625,
+    "selected_in_research_pr": 2,
+    "selected_after": 627,
+    "unplaced_after": 371,
+    "remaining_after": 397,
+    "ratified_before_and_after": 0
+  },
+  "boundary": {
+    "language_structure": "D2 exclusively",
+    "replayed_source": "Historical English spellings are provenance metadata, NOT executable SENS names",
+    "surface": "Ukrainian semantic surfaces are research proposals, not ratified callable bindings",
+    "physical_t5_authorized": false
+  },
+  "rows": [
+    {
+      "semantic_name": "ACTIVE-VALUE-GET",
+      "historical_source_form": "GetValue / GetLocalState",
+      "surface_uk": "активне-значення-читати",
+      "surface_ukr": "читати-активне-значення",
+      "primary_section": "5.1, 5.2, 5.5",
+      "primary_pdf_pages": [
+        28,
+        29,
+        31
+      ],
+      "arity_note": "one active-value or ordinary stored-value input; contextual object/variable/prop/type metadata follows section 5.5",
+      "observable_law": "Nested getter evaluation first resolves deeper localState (inner→outer) and returns the outermost getFn result; a missing getFn yields the resolved localState.",
+      "positive_witnesses": [
+        "Nested stored 10; inner get adds 2, outer get multiplies by 3 -> 36, trace inner:get,outer:get.",
+        "A plain value is read unchanged, and getFn absent returns child-localState result."
+      ],
+      "falsifiers": [
+        "Executing outer get before inner get returns a different result/trace.",
+        "GetLocalStateOnly must not invoke any nested getFn, and must expose immediate nested value."
+      ],
+      "nearby_existing": [
+        "D10 DEREF",
+        "D10 REF-CELL",
+        "D10 SLOT-VALUE",
+        "D8 RPLACA",
+        "D8 VECTOR-SET!"
+      ],
+      "unresolved_independence": "Could be derived using closures wrapping DEREF with explicitly composed observers.",
+      "decision": "SELECTED-RESEARCH-CANDIDATE",
+      "proposal_status": "pending-owner-review",
+      "coordinate": null,
+      "ratified": false
+    },
+    {
+      "semantic_name": "ACTIVE-VALUE-PUT",
+      "historical_source_form": "PutValue / PutLocalState",
+      "surface_uk": "активне-значення-записати!",
+      "surface_ukr": "записати-активне-значення!",
+      "primary_section": "5.1, 5.2, 5.5",
+      "primary_pdf_pages": [
+        28,
+        29,
+        31
+      ],
+      "arity_note": "active-value, new-value, contextual object/variable/prop/type metadata; an accessor may delegate to its nested local state",
+      "observable_law": "An outer putFn is invoked first and may call PutLocalState, triggering inner putFns outer→inner; if putFn absent, store new value as this node's localState, without mandatory propagation; raw only bypass skips inner effects.",
+      "positive_witnesses": [
+        "Nested state 10; put 19 with outer and inner delegating writes -> trace outer:put,inner:put and terminal state 19.",
+        "An outer handler that does not delegate leaves inner state unchanged; absent putFn replaces its own localState."
+      ],
+      "falsifiers": [
+        "Invoking inner put before outer violates nested ordering.",
+        "A putFn that deliberately does not delegate must not trigger inner put; PutLocalStateOnly must suppress nested handlers."
+      ],
+      "nearby_existing": [
+        "D10 RESET-REF!",
+        "D10 SWAP-REF!",
+        "D10 REF-CELL",
+        "D8 RPLACA",
+        "D8 VECTOR-SET!"
+      ],
+      "unresolved_independence": "Potential closure-based composition; must prove material language-visible difference before ratification.",
+      "decision": "SELECTED-RESEARCH-CANDIDATE",
+      "proposal_status": "pending-owner-review",
+      "coordinate": null,
+      "ratified": false
+    }
+  ],
+  "holds": [
+    {
+      "historical_name": "GetLocalStateOnly / PutLocalStateOnly",
+      "status": "HOLD-DERIVABILITY",
+      "reason": "Observed bypass access may be a projection of raw localState storage; positive/negative witnesses remain in checker and must not be counted twice."
+    },
+    {
+      "historical_name": "ReplaceActiveValue",
+      "status": "HOLD-DERIVABILITY",
+      "reason": "Replacing one nested active value is not yet shown distinct from locating a stored cell plus normal update.",
+      "source_section": "The LOOPS Manual 5.5, printed page 28 (PDF page 32)",
+      "positive_witness": "Replace the innermost active value by identity without destroying its outer wrapper; an absent target must signal a defined error.",
+      "falsifier": "Flattening/destroying all outer wrappers, or silently replacing a different nested node, is not equivalent."
+    },
+    {
+      "historical_name": "COPY-ON-FIRST-PUT-DEFAULT",
+      "status": "HOLD-SEMANTIC-REVIEW",
+      "source_section": "The LOOPS Manual §5.3, printed page 26 (PDF page 30)",
+      "observable_law": "On first PUT to instance variable with active-value class default, clone active-value wrapper for that instance (sharing referenced immutable contents but private localState); #Shared marker permits shared instance of wrapper when user asserts no wrapper-local mutation.",
+      "positive_witness": "Two instances with same class default: first PUT allocates distinct outer wrapper for instance A; unrelated B retains class default. For #Shared, both see identical wrapper object.",
+      "falsifier": "Default instance receives mutated localState of another independent instance, or #Shared unexpectedly creates a distinct wrapper.",
+      "nearby_existing": [
+        "D10 DEFCLASS",
+        "D10 SLOT-VALUE",
+        "D10 ACTIVE-VALUE-PUT"
+      ],
+      "coordinate": null,
+      "selected_in_d10": false,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "why_not_selected": "Derivability of class-default copy-on-first-write from existing DEFCLASS/SLOT-VALUE and explicit copy/alias algebra not yet proved."
+    }
+  ],
+  "evidence_limit": "A bounded executable Python reference model is a consistency witness of this reading of the manual, NOT an independent historical LOOPS implementation oracle. No runtime or T5 execution claim."
+}
