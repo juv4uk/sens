@@ -40,5 +40,7 @@ jobs:
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git commit -m 'test(core): regenerate FASL for verified map-onto candidate'
           git push origin HEAD:refs/heads/fix/canon-let-map-d1-no-20261009
+      - name: Probe lexical LET and map behavior without weakening Canon
+        run: cargo test -p sens --test canon_let_ephemeral_diagnostic -- --nocapture
       - name: Execute full Canon V2 Lisp-owned witness (no skips)
         run: cargo test -p sens --test canon_laws_v2_contract -- --nocapture
