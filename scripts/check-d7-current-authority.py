@@ -33,7 +33,7 @@ row_pattern = re.compile(
 )
 table = (root / "lib/domains/d7.lisp").read_text(encoding="utf-8")
 for line_number, line in enumerate(table.splitlines(), start=1):
-    if not re.match(r"^\\s*\\([01]{7}\\s", line):
+    if not re.match(r"^\s*\([01]{7}\s", line):
         continue
     match = row_pattern.match(line)
     assert match is not None, f"D7 malformed surface at line {line_number}"
