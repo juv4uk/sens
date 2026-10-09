@@ -421,9 +421,10 @@ fn current_core_verified_lowered() -> Option<std::rc::Rc<[Expr]>> {
     })
 }
 
-fn load_core_library_with_fasl(
+fn load_core_library_with_fasl_mode(
     session: &mut Session,
     core_fasl: &[u8],
+    use_verified_cache: bool,
 ) -> Result<EvalResult, LanguageError> {
     session.environment.select_core_profile(CoreProfile::Core4);
     load_macro_library(session)?;
@@ -433,7 +434,7 @@ fn load_core_library_with_fasl(
     // behavior and can never borrow this cached program by matching bytes.
     let exact_embedded = core_fasl.len() == CORE_LIBRARY_FASL.len()
         && std::ptr::eq(core_fasl.as_ptr(), CORE_LIBRARY_FASL.as_ptr());
-    let result = if exact_embedded {
+    let result = if exact_embedded && use_verified_cache {
         match current_core_verified_lowered() {
             Some(lowered) => eval_lowered_expressions(&lowered, session)?,
             None => eval_program(CORE_LIBRARY_SOURCE, session)?,
@@ -451,6 +452,16 @@ fn load_core_library_with_fasl(
 
     bind_missing_stable_surface_peers(&session.environment);
     Ok(result)
+}
+
+/// Production always uses the owner-verified binary decode/lowering cache.
+/// An internal-only switch exists solely to compare identical full Core4
+/// bootstrap paths with and without cached transport on the *same* CPU.
+fn load_core_library_with_fasl(
+    session: &mut Session,
+    core_fasl: &[u8],
+) -> Result<EvalResult, LanguageError> {
+    load_core_library_with_fasl_mode(session, core_fasl, true)
 }
 
 pub fn load_core_library(session: &mut Session) -> Result<EvalResult, LanguageError> {
@@ -624,6 +635,84 @@ pub fn string_slice_text(text: &str, start: usize, end: usize) -> String {
 mod core4_bootstrap_cache_tests {
     use super::*;
 
+
+    /// Measurement, not a language law. Each sample executes the identical
+    /// Lisp-owned macro/Core4 bootstrap in a fresh bare Session; the *only*
+    /// variable is cached vs newly verified decoded/lowered binary transport.
+    /// An ignored benchmark avoids slowing normal CI correctness checks.
+    #[test]
+    #[ignore = "performance: run explicitly with --release on GitHub-hosted CPU"]
+    fn benchmark_core4_cache_vs_fresh() {
+        use std::{hint::black_box, time::Instant};
+
+        fn one_call(use_verified_cache: bool, d3: &[Expr]) {
+            let mut session = Session::bare();
+            let result = load_core_library_with_fasl_mode(
+                &mut session,
+                CORE_LIBRARY_FASL,
+                use_verified_cache,
+            )
+            .expect("independent Lisp-owned Core4 bootstrap");
+            black_box(result);
+            assert_eq!(
+                session.environment.selected_core_profile(),
+                Some(CoreProfile::Core4)
+            );
+            let evaluated = eval_parsed_expressions(d3, &mut session)
+                .expect("D3 QUOTE evaluates after both Core4 bootstrap paths");
+            assert!(matches!(evaluated.value, Value::Nil));
+            assert!(evaluated.output.is_empty());
+            black_box(session);
+        }
+
+        fn median(times: &[f64]) -> f64 {
+            let mut sorted = times.to_vec();
+            sorted.sort_by(f64::total_cmp);
+            sorted[sorted.len() / 2]
+        }
+
+        fn measure<F: FnMut()>(iterations: usize, mut task: F) -> f64 {
+            let start = Instant::now();
+            for _ in 0..iterations {
+                task();
+            }
+            start.elapsed().as_nanos() as f64 / iterations as f64
+        }
+
+        let exact_d3 = parse_canonical_binary("10 001 00 000 01")
+            .expect("ratified D2/D3 quoted empty");
+        assert!(
+            core_library_fasl_is_current(),
+            "only a verified up-to-date Core4 FASL can be benchmarked"
+        );
+        // Prime both paths equally; the cached path must have a hot
+        // decode/lower projection and the fresh path must remain uncached.
+        for _ in 0..3 {
+            one_call(false, &exact_d3);
+            one_call(true, &exact_d3);
+        }
+        let samples = 9;
+        let iterations = 8;
+        let mut cached = Vec::with_capacity(samples);
+        let mut uncached = Vec::with_capacity(samples);
+        for index in 0..samples {
+            if index % 2 == 0 {
+                uncached.push(measure(iterations, || one_call(false, &exact_d3)));
+                cached.push(measure(iterations, || one_call(true, &exact_d3)));
+            } else {
+                cached.push(measure(iterations, || one_call(true, &exact_d3)));
+                uncached.push(measure(iterations, || one_call(false, &exact_d3)));
+            }
+        }
+        let no_cache_ns = median(&uncached);
+        let cache_ns = median(&cached);
+        assert!(no_cache_ns.is_finite() && no_cache_ns > 0.0);
+        assert!(cache_ns.is_finite() && cache_ns > 0.0);
+        println!(
+            "SENS_CORE4_CACHE_AB={{\"schema\":\"sens-core4-cache-ab/v1\",\"samples\":{samples},\"iterations_per_sample\":{iterations},\"fresh_decode_lower_median_ns\":{no_cache_ns:.2},\"cached_decode_lower_median_ns\":{cache_ns:.2},\"ratio_fresh_over_cached\":{:.5},\"fresh_samples_ns\":{:?},\"cached_samples_ns\":{:?},\"oracle\":\"full-Lisp-Core4-and-D3-result-parity\",\"scope\":\"warm-process-fresh-sessions\"}}",
+            no_cache_ns / cache_ns, uncached, cached,
+        );
+    }
 
     #[test]
     fn cached_embedded_core_preserves_independent_sessions_and_domain_result() {
