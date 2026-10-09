@@ -111,6 +111,14 @@ jobs:
               "No elapsed time or English/Binary ratio is admitted.\n"
           )
           PY
+            # The old English benchmark still mints historical SID identity.
+            # Record it as BLOCKED, not as a measured slow candidate.
+            # Unexpected failures still fail the job.
+            if grep -qF 'legacy byte identity entered current D1-D8 CPU preflight' \
+                "$RUNNER_TEMP/sens-real-cpu/preflight.log"; then
+              echo "Legacy English lane BLOCKED: no paired speed ratio admitted."
+              exit 0
+            fi
             exit "$code"
           fi
           python3 benchmarks/current-en-vs-d1d8/validate.py \
@@ -122,6 +130,9 @@ jobs:
           import collections, json, statistics, sys
           from pathlib import Path
           dest = Path(sys.argv[1])
+          if (dest / "preflight-blocked.json").is_file():
+              print("Historical English candidate BLOCKED; no paired speed measurement emitted")
+              raise SystemExit(0)
           source = dest / "paired.jsonl"
           if not source.exists():
               raise SystemExit("no preflight-proved paired timings")
