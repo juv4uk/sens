@@ -9,7 +9,7 @@ use sens::{
 };
 use std::{env, fs, hint::black_box, time::Instant};
 
-const PHASES: &[&str] = &["t5_render_legacy", "t5_render_one_pass", "t5_open_d2", "t5_visible_parse_d2", "t5_direct_d2", "t5_words_d2", "d2_parse", "packed_width_d2", "eval_from_ast", "eval_lowered", "t5_encode_two_pass", "t5_encode_streaming"];
+const PHASES: &[&str] = &["t5_render_legacy", "t5_render_one_pass", "t5_decode_single_pass", "t5_decode_with_reencode", "t5_open_d2", "t5_visible_parse_d2", "t5_direct_d2", "t5_words_d2", "d2_parse", "packed_width_d2", "eval_from_ast", "eval_lowered", "t5_encode_two_pass", "t5_encode_streaming"];
 
 /// Попередній двопрохідний алгоритм тільки для порівняння механіки.
 /// Жодна T5-цифра не є мовним резидентом; виконуваний код не викликає цей
@@ -150,6 +150,24 @@ fn main() {
             "t5_render_one_pass" => measure(
                 || { black_box(render_ternary_words_spaced(black_box(&t5_words))); },
                 count, samples,
+            ),
+            "t5_decode_single_pass" => measure(
+                || {
+                    black_box(decode_ternary_words(black_box(&physical))
+                        .expect("single-pass canonical T5 decode"));
+                }, count, samples,
+            ),
+            "t5_decode_with_reencode" => measure(
+                || {
+                    // Historical transport control only; production decoder
+                    // no longer duplicates its O(n) work. Same input/output.
+                    let words = decode_ternary_words(black_box(&physical))
+                        .expect("canonical T5 decode");
+                    let replay = encode_ternary_words(black_box(&words))
+                        .expect("old re-encode verification");
+                    assert_eq!(replay, physical, "T5 re-encode control differs");
+                    black_box(words);
+                }, count, samples,
             ),
             "t5_open_d2" => measure(
                 || { black_box(open_ternary_program(black_box(&physical)).expect("T5/D2")); },
