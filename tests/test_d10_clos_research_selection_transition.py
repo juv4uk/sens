@@ -40,13 +40,17 @@ class HistoricalSelectionEvolution(unittest.TestCase):
             "coordinate_basis": "UNPLACED",
             "ratified_resident": False,
             "behavior": row["observable_law"],
-            "positive_witnesses": [row["positive_witness"] if "positive_witness" in row else row["positive_witness"]],
+            "positive_witnesses": [row["positive_witness"]],
             "falsifiers": [row["falsifier"]],
         }
-        obj["rows"].append(selected)
-        obj["accounting"]["selected_semantic_candidates"] += 1
-        obj["accounting"]["unplaced_selected_candidates"] += 1
-        obj["accounting"]["remaining_semantic_inventory"] -= 1
+        preexisting = [r for r in obj["rows"] if r["semantic_name"] == name]
+        if preexisting:
+            obj["rows"][obj["rows"].index(preexisting[0])] = selected
+        else:
+            obj["rows"].append(selected)
+            obj["accounting"]["selected_semantic_candidates"] += 1
+            obj["accounting"]["unplaced_selected_candidates"] += 1
+            obj["accounting"]["remaining_semantic_inventory"] -= 1
         return obj, selected
 
     def test_slot_selection_is_traced_not_confused_with_duplicate(self):
@@ -62,7 +66,7 @@ class HistoricalSelectionEvolution(unittest.TestCase):
                     ("proposal_status", "ratified"),
                 ):
                     damaged = copy.deepcopy(inv)
-                    damaged["rows"][-1][key] = bad
+                    next(item for item in damaged["rows"] if item["semantic_name"] == name)[key] = bad
                     with self.subTest(name=name,corruption=key), self.assertRaises(AssertionError):
                         slot_history.verify(self.slots, self.foundation, damaged)
 
@@ -88,7 +92,7 @@ class HistoricalSelectionEvolution(unittest.TestCase):
         for key,bad in (("source_path", "other"), ("primary_url", "https://wrong.example"),
                         ("coordinate", "0000000000"), ("ratified_resident", True),
                         ("proposal_status", "approved")):
-            damaged = copy.deepcopy(inv);damaged["rows"][-1][key] = bad
+            damaged = copy.deepcopy(inv);next(item for item in damaged["rows"] if item["semantic_name"] == "REMOVE-METHOD")[key] = bad
             with self.subTest(key=key), self.assertRaises(ValueError):
                 method_history.verify(self.methods,self.foundation,damaged)
 
