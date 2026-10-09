@@ -16,7 +16,7 @@
 //! evidence only. It must never be relabelled as a fresh Contract 11.6 exact
 //! DomainIdentity.
 
-use serde::{Deserialize, Serialize};
+// Serde is deliberately test-only in this capability-free core.
 use std::collections::BTreeMap;
 
 pub const GPU_ORACLE_VERSION_MAJOR: u32 = 2;
@@ -36,7 +36,8 @@ pub const FORBIDDEN_LEGACY_NUMERIC_BUFFER_MAP: &str = "01011001";
 /// corpus intentionally contains zero such rows. A future row may be added
 /// only after SENS owns a current exact-domain law that semantically defines
 /// the batched workload.
-#[derive(Clone, Debug, Eq, Hash, PartialEq, Serialize, Deserialize)]
+#[derive(Clone, Debug, Eq, Hash, PartialEq)]
+#[cfg_attr(test, derive(serde::Serialize, serde::Deserialize))]
 pub struct GpuOracleObservable {
     pub case_id: String,
     pub contract: String,
@@ -54,7 +55,8 @@ pub struct GpuOracleObservable {
 }
 
 /// Explicit finite boundary of the current oracle evidence.
-#[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
+#[derive(Clone, Debug, Eq, PartialEq)]
+#[cfg_attr(test, derive(serde::Serialize, serde::Deserialize))]
 pub struct GpuOracleBound {
     pub domain_set: String,
     pub generated_positive_cases: u32,
@@ -64,7 +66,8 @@ pub struct GpuOracleBound {
 }
 
 /// Authority facts for the GPU oracle.
-#[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
+#[derive(Clone, Debug, Eq, PartialEq)]
+#[cfg_attr(test, derive(serde::Serialize, serde::Deserialize))]
 pub struct GpuAuthorityInfo {
     pub contract_version: String,
     pub contract_sha256: String,
@@ -76,7 +79,8 @@ pub struct GpuAuthorityInfo {
 }
 
 /// Review of one current semantic-residency domain for the missing batched law.
-#[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
+#[derive(Clone, Debug, Eq, PartialEq)]
+#[cfg_attr(test, derive(serde::Serialize, serde::Deserialize))]
 pub struct GpuCandidateReview {
     pub domain: String,
     pub status: String,
@@ -85,7 +89,8 @@ pub struct GpuCandidateReview {
 }
 
 /// Machine-readable fail-closed reason for the absent positive oracle row.
-#[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
+#[derive(Clone, Debug, Eq, PartialEq)]
+#[cfg_attr(test, derive(serde::Serialize, serde::Deserialize))]
 pub struct GpuOracleBlock {
     pub status: String,
     pub missing_law: String,
@@ -96,7 +101,8 @@ pub struct GpuOracleBlock {
 }
 
 /// Negative control that must remain rejected by the current oracle.
-#[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
+#[derive(Clone, Debug, Eq, PartialEq)]
+#[cfg_attr(test, derive(serde::Serialize, serde::Deserialize))]
 pub struct GpuExclusionControl {
     pub control_name: String,
     pub identity_or_class: String,
@@ -106,7 +112,8 @@ pub struct GpuExclusionControl {
 }
 
 /// Audit statistics. Zero positive rows is a meaningful result, not missing data.
-#[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
+#[derive(Clone, Debug, Eq, PartialEq)]
+#[cfg_attr(test, derive(serde::Serialize, serde::Deserialize))]
 pub struct GpuCorpusStatistics {
     pub gpu_success_count: u32,
     pub blocked_mechanism_count: u32,
@@ -116,7 +123,8 @@ pub struct GpuCorpusStatistics {
 }
 
 /// Canonical current GPU oracle corpus.
-#[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
+#[derive(Clone, Debug, Eq, PartialEq)]
+#[cfg_attr(test, derive(serde::Serialize, serde::Deserialize))]
 pub struct GpuConformanceCorpus {
     pub version: (u32, u32),
     pub status: String,
