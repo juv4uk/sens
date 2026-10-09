@@ -142,3 +142,25 @@ does not add, infer or replace semantics of any domain.
 They are not evidence that standard `Session::default()` was wrong or can
 silently change, nor are they direct evidence of faster *Lisp Core4* execution
 unless the separate Core4 bootstrap mode also measures faster.
+
+## Cached verified Core4 transport — Lisp laws are never cached
+
+For the **exact embedded** current `CORE_LIBRARY_FASL` only, Rust can
+validate its source SHA-256 and decode/lower its AST once *per thread*. Later
+Core4 sessions reuse the immutable, already-lowered `Rc<[Expr]>`, but each
+`load_core_library` call still installs the macro substrate, evaluates the
+Lisp-owned macro library, evaluates the full Core4 program and binds its
+surface projections **in that Session**. No `Value`, `Environment`,
+closure or Lisp evaluation result enters the cache. Arbitrary/stale/test FASL
+inputs follow the preexisting full verification or text-fallback path.
+
+The extra benchmark mode `bare-core-reuse` calls the real Core4 loader
+in **two separate bare Sessions within the same process**. Its
+`inner_ns` covers the *second* load only, after the cache can be hot; its
+`process_wall_ns` covers **both** loads and must never be compared directly
+to single-load startup. All Core4 modes still require successful real
+Lisp-owned execution. Improvements are a measured hypothesis, not an
+automatic claim: macro loading and Core evaluation still dominate.
+
+This cache is per thread (not process-global across non-`Send` AST nodes),
+and therefore does not reduce the first load after an OS process start.
