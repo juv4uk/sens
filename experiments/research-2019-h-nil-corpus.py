@@ -20,6 +20,7 @@ fresh classification.
 from __future__ import annotations
 
 from dataclasses import dataclass
+import json
 from pathlib import Path
 import re
 import sys
@@ -31,6 +32,8 @@ METADATA_LISP = {
     Path("lib/generated/function-table.lisp"),
     Path("lib/surface/semantic-registry.lisp"),
     Path("lib/surface/semantic-registry-experiment.lisp"),
+    # Ратифікована D8-таблиця: координати не є викликами у програмі.
+    Path("lib/domains/d8.lisp"),
 }
 
 ZERO8 = "00000000"
@@ -161,6 +164,23 @@ def contract_has_ground_separation(contract: str) -> bool:
     )
 
 
+def foundation_has_ground_separation(foundation: dict) -> bool:
+    """Строга доменна перевірка без надання D8:00000000 права виклику."""
+    try:
+        domains = foundation["domains"]
+        d3 = domains["D3"]
+        d8 = domains["D8"]
+        return (
+            foundation["status"] == "owner-ratified"
+            and d3["width"] == 3
+            and d3["residents"]["000"] == "EMPTY"
+            and d8["width"] == 8
+            and d8["residents"]["00000000"] == "CODE-CHAR"
+        )
+    except (KeyError, TypeError):
+        return False
+
+
 def route_evidence() -> tuple[bool, bool]:
     """Inspect the historical metadata and the language-owned separation law.
 
@@ -176,7 +196,13 @@ def route_evidence() -> tuple[bool, bool]:
         token.text == ZERO8 for token in call_heads(mechanism_tokens)
     )
 
-    contract_separates_ground = contract_has_ground_separation(contract)
+    foundation = json.loads(
+        (ROOT / "knowledge/d1-d9-foundation.json").read_text(encoding="utf-8")
+    )
+    contract_separates_ground = (
+        contract_has_ground_separation(contract)
+        and foundation_has_ground_separation(foundation)
+    )
 
     return zero_in_mechanism_rows, contract_separates_ground
 
@@ -200,7 +226,7 @@ def main() -> int:
     print(f"zero8_call_heads_nonmetadata\t{len(zero_heads)}\t{format_sites(zero_heads)}")
     print(f"zero8_tokens_nonmetadata\t{len(zero_tokens)}\t{format_sites(zero_tokens)}")
     print(f"zero8_in_mechanism_rows\t{int(zero_mechanism)}\tcurrent function mechanism metadata")
-    print(f"contract_ground_separated\t{int(separated)}\t() data is distinct from Function8 zero")
+    print(f"contract_ground_separated\t{int(separated)}\tD3 EMPTY differs from D1 zero and D8 CODE-CHAR")
 
     failures: list[str] = []
     if nil_heads:
@@ -210,7 +236,7 @@ def main() -> int:
             "current zero Function8 has mechanism metadata; H-NIL snapshot needs semantic reclassification"
         )
     if not separated:
-        failures.append("Contract 11.8 must explicitly separate D3:000 from D1:0 and historical Function8 zero")
+        failures.append("Contract 11.8 and ratified D1–D9 must separate D3:000, D1:0, D8:00000000")
 
     if failures:
         for failure in failures:
