@@ -13,7 +13,7 @@ fn each_supported_domain_width_roundtrips_as_a_distinct_identity() {
             panic!("canonical binary word must remain a domain identity");
         };
         assert_eq!(identity.width(), width);
-        assert_eq!(identity.packed_bits(), payload);
+        assert_eq!(usize::from(identity.packed_bits()), payload);
     }
 }
 

@@ -63,8 +63,7 @@ fn median(values: &[f64]) -> f64 {
 }
 
 fn benchmark(case: &str, form: &str, forms: usize, samples: usize) -> Result<(), String> {
-    let visible = std::iter::repeat(form)
-        .take(forms)
+    let visible = std::iter::repeat_n(form, forms)
         .collect::<Vec<_>>()
         .join("\n");
     let tokens = parse_binary_source_words(&visible)
@@ -100,7 +99,7 @@ fn benchmark(case: &str, form: &str, forms: usize, samples: usize) -> Result<(),
     let mut visible_ns = Vec::with_capacity(samples);
     let mut packed_ns = Vec::with_capacity(samples);
     for sample in 0..samples {
-        if sample % 2 == 0 {
+        if sample.is_multiple_of(2) {
             visible_ns.push(elapsed_per_program(iterations, &mut visible_read));
             packed_ns.push(elapsed_per_program(iterations, &mut packed_read));
         } else {
@@ -136,7 +135,7 @@ fn main() {
         eprintln!("usage: packed_vs_visible_bench [--samples 3..99]");
         std::process::exit(2);
     }
-    if !(3..=99).contains(&samples) || samples % 2 == 0 {
+    if !(3..=99).contains(&samples) || samples.is_multiple_of(2) {
         eprintln!("samples must be odd, between 3 and 99");
         std::process::exit(2);
     }
