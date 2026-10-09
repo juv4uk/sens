@@ -101,7 +101,7 @@
              ((00100010 error-entry (00000001 ()))
               (00100111 (00000001 value) expected-entry))
              ((witness-d1-no? (00100010 error-entry (00000001 ())))
-              (witness-malformed-result (00000001 expected-and-error) witness))))))))))(00001001 witness-verdict
+              (witness-malformed-result (00000001 expected-and-error) witness))))))))(00001001 witness-verdict
   (00001000 (witness actual)
     (10011100 ((expected (witness-expected-outcome witness)))
       (00000111
