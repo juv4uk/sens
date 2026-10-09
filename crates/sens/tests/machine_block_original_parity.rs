@@ -225,7 +225,18 @@ fn physical_t5_generated_from_original_block_executes_with_nine_case_parity() {
     ).expect("valid observer probe report");
     assert_eq!(probe_manifest["summary"]["files_written"], 1);
     assert_eq!(probe_manifest["summary"]["files_blocked"], 0);
-    assert_eq!(probe_manifest["files"][0]["source_blob_sha"], sens::git_blob(&probe_bytes));
+    let probe_source_path = probe_input.join(ORIGINAL);
+    let probe_blob = Command::new("git")
+        .args(["hash-object", "--"])
+        .arg(&probe_source_path)
+        .current_dir(&repo)
+        .output()
+        .expect("read actual Git blob identity for ephemeral probe source");
+    assert!(probe_blob.status.success(), "git hash-object must accept probe source");
+    assert_eq!(
+        probe_manifest["files"][0]["source_blob_sha"],
+        String::from_utf8_lossy(&probe_blob.stdout).trim()
+    );
 
     let probe_physical_path = probe_output.join(Path::new(ORIGINAL).with_extension("sens"));
     let probe_physical = fs::read(&probe_physical_path)
