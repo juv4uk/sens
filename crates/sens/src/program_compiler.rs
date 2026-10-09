@@ -113,21 +113,23 @@ fn program_digest_deterministic(exprs: &[Expr]) -> String {
 /// This is deliberately coordinate-only: it does not reconstruct a human role
 /// name and it does not widen callability.
 fn admitted_mechanism_identity(width: usize, packed_bits: u16) -> Option<String> {
-    let admitted = match (width, packed_bits) {
-        (3, 0b001..=0b111) => true,
-        (4, 0b0010 | 0b0011) => true,
-        _ => false,
-    };
+    let admitted = matches!(
+        (width, packed_bits),
+        (3, 0b001..=0b111) | (4, 0b0010 | 0b0011)
+    );
     admitted.then(|| format!("D{width}:{packed_bits:0width$b}"))
 }
 
+/// Deterministic domain usage and mechanism list for one compiled program.
+/// A named shape satisfies strict type-complexity lint without changing any
+/// domain admission, ABI, data, or semantic ownership.
+type ProgramOperationUsage = (
+    std::collections::BTreeMap<String, Vec<String>>,
+    Vec<crate::compilation_artifact::MechanismRequirement>,
+);
+
 /// Traverse program and collect exact-domain identities and required mechanisms.
-fn traverse_program_operations(
-    exprs: &[Expr],
-) -> Result<
-    (std::collections::BTreeMap<String, Vec<String>>, Vec<crate::compilation_artifact::MechanismRequirement>),
-    String,
-> {
+fn traverse_program_operations(exprs: &[Expr]) -> Result<ProgramOperationUsage, String> {
     let mut domains = std::collections::BTreeMap::new();
     let mut mechanisms = Vec::new();
 
@@ -143,7 +145,7 @@ fn traverse_program_operations(
                 let bits = format!("{:0width$b}", id.packed_bits(), width = id.width());
 
                 // Track domain usage
-                domains.entry(domain.clone()).or_insert_with(Vec::new).push(bits.clone());
+                domains.entry(domain.clone()).or_default().push(bits.clone());
 
                 // Infer the required mechanism from exact-domain identity only.
                 // Human surface names are presentation data and must not become
