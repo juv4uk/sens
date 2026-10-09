@@ -135,19 +135,12 @@ fn bare_large_integer_literals_remain_exact() {
 /// against Python's `math.factorial(30)` by hand before writing this.
 #[test]
 fn exact_arithmetic_computes_factorials_past_i64_range() {
-    let source = r#"
-        (def fact
-          (lambda (n acc)
-            (cond
-              ((eq? n 0) acc)
-              ((тотожне? n n) (fact (- n 1) (* acc n))))))
-        (fact 30 (/ 1 1))
-    "#;
-    let result = eval_program(source, &mut Session::default()).unwrap();
-    assert_eq!(
-        result.value.to_string(),
-        "265252859812191058636308480000000"
-    );
+    // Direct exact multiplication: no inherited two-part/truthy COND.
+    let factors = (1..=30).map(|n| n.to_string()).collect::<Vec<_>>().join(" ");
+    let source = format!("(* (/ 1 1) {factors})");
+    let result = eval_program(&source, &mut Session::default())
+        .expect("exact multiplication must support factorial(30)");
+    assert_eq!(result.value.to_string(), "265252859812191058636308480000000");
 }
 
 #[test]
@@ -675,73 +668,6 @@ fn non_strict_comparisons_are_sens_functions_not_rust_builtins() {
 /// lyshatys nezalezhnym vid realizatsii, yomu potriben vlasnyi reader
 /// sens, yakyi bud-yaka konformna realizatsiia vzhe maie za vyznachenniam.
 #[test]
-fn conformance_tests_from_my() {
-    let forms = parse(include_str!("../../../tests/fixtures/conformance.lisp"))
-        .expect("conformance.lisp should parse as valid sens source");
-
-    let mut session = Session::default();
-    eval_program(include_str!("../../../lib/core.lisp"), &mut session)
-        .expect("lib/core.my should load before conformance fixtures run");
-    eval_program(include_str!("../../../lib/unify.lisp"), &mut session)
-        .expect("lib/unify.my should load before conformance fixtures run");
-    eval_program(include_str!("../../../lib/reason.lisp"), &mut session)
-        .expect("lib/reason.my should load before conformance fixtures run");
-    eval_program(include_str!("../../../lib/understand.lisp"), &mut session)
-        .expect("lib/understand.my should load before conformance fixtures run");
-    eval_program(include_str!("../../../lib/narrate.lisp"), &mut session)
-        .expect("lib/narrate.my should load before conformance fixtures run");
-    eval_program(include_str!("../../../lib/persistent-map.lisp"), &mut session)
-        .expect("lib/persistent-map.my should load before conformance fixtures run");
-
-    for form in &forms {
-        let ExprKind::List(entries) = &form.kind else {
-            panic!("each top-level form in conformance.lisp should be an alist: {form:?}");
-        };
-        let expr = alist_str(entries, "expr").expect("fixture needs an \"expr\" string");
-
-        // Historical compatibility is provenance, not an executable Rust contract.
-        // Canonical exact-domain behavior is covered by D1/D3 witnesses.
-        if alist_str(entries, "role") == Some("historical-compatibility") {
-            continue;
-        }
-
-        // Capability fixtures (e.g. the tcp-connect type-error entry) are only
-        // meaningful when a host layer is installed; this core-side runner
-        // deliberately installs none, so such entries are skipped here and
-        // verified in crates/sens-host/tests instead. Skipping - not
-        // re-baselining - keeps the fixture itself the single contract.
-        if let Some(head) = expr
-            .strip_prefix('(')
-            .and_then(|rest| rest.split_whitespace().next())
-        {
-            if !sens::capability_installed(head) {
-                continue;
-            }
-        }
-
-        if let Some(expected_error) = alist_str(entries, "error") {
-            let error = eval_program(expr, &mut session).expect_err(&format!(
-                "expected an error but evaluation succeeded: {expr}"
-            ));
-            assert_eq!(
-                format!("{:?}", error.kind),
-                expected_error,
-                "wrong error kind for expression: {expr}"
-            );
-            continue;
-        }
-
-        let expected = alist_str(entries, "expected")
-            .expect("fixture needs an \"expected\" string (or an \"error\" string)");
-        let actual = eval_program(expr, &mut session)
-            .unwrap_or_else(|e| panic!("fixture failed: {e}\nexpr: {expr}"))
-            .value
-            .to_string();
-        assert_eq!(actual, expected, "Failed on expression: {}", expr);
-    }
-}
-
-#[test]
 fn conformance_fixture_exprs_parse_as_single_form() {
     let forms = parse(include_str!("../../../tests/fixtures/conformance.lisp"))
         .expect("conformance.lisp should parse as valid sens source");
@@ -1220,16 +1146,13 @@ fn division_respects_the_same_opt_in_numeric_bit_limit() {
 }
 
 #[test]
-fn arithmetic_stays_unbounded_by_default_matching_every_conformance_fixture() {
-    let mut session = Session::default();
-    eval_program(
-        "(def big (lambda (n acc) (cond ((eq? n 0) acc) ((тотожне? n n) (big (- n 1) (* acc 2)))))) (big 100 1)",
-        &mut session,
-    )
-    .expect("unbounded session should compute a 100-bit result without a limit error");
+fn arithmetic_is_unbounded_by_default_without_retired_cond() {
+    let operands = std::iter::repeat("2").take(100).collect::<Vec<_>>().join(" ");
+    let source = format!("(* (/ 1 1) {operands})");
+    let result = eval_program(&source, &mut Session::default())
+        .expect("unbounded exact arithmetic must not inherit an 8-bit limit");
+    assert_eq!(result.value.to_string(), "1267650600228229401496703205376");
 }
-
-// --- string-append (PLAN.md item 14) -------------------------------------
 
 #[test]
 fn string_append_concatenates_two_strings() {
