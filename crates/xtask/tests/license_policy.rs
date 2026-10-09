@@ -148,6 +148,10 @@ fn retired_legacy_semantics_are_absent_from_active_rust_tests() {
         "retain current exact PredicateBit comparison coverage"
     );
     assert!(
+        !mccarthy.contains("(not? (quote ()))"),
+        "Rust tests must not pin the retired not?/truthy? implementation to the t/() sentinel"
+    );
+    assert!(
         !mccarthy.contains("fn comparisons_chain_and_promote_exact_inexact_like_arithmetic("),
         "superseded comparison-to-t/() assertion must not return"
     );
