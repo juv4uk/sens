@@ -76,7 +76,7 @@ class TestAntiunify(unittest.TestCase):
         a=fun("p",atom("a"),atom("a"))
         b=fun("p",atom("b"),atom("b"))
         self.assertEqual(lgg(a,b)["generalization"],fun("p",var(0),var(0)))
-        self.assertFalse(matches(fun("p",var(0),var(0)),fun("p",atom("a"),atom("b")))
+        self.assertFalse(matches(fun("p",var(0),var(0)),fun("p",atom("a"),atom("b"))))
 
     def test_invalid_input_is_explicitly_rejected(self):
         illegal=[{"var":0},{"atom":""},{"atom":"$x"},{"fun":"f","args":[]},
