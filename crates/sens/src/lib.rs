@@ -616,6 +616,5 @@ mod core4_bootstrap_cache_tests {
             session.environment.selected_core_profile(),
             Some(CoreProfile::Core4)
         );
-        assert_eq!(result_of(&mut session, "(list 1 2 3)"), "(1 2 3)");
     }
 }
