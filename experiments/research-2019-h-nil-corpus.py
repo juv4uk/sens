@@ -135,6 +135,29 @@ def scan_active_lisp() -> tuple[list[tuple[Path, Token]], list[tuple[Path, Token
     return nil_heads, zero_heads, zero_tokens, nil_token_count
 
 
+def current_ground_separated(contract: str) -> bool:
+    """Use ratified D1/D3 laws instead of retired Contract 10 Function8 prose.
+
+    This is a text audit of three NAMED invariants, not executable admission.
+    D3:000 is structural empty; legacy Function8 lacks canonical authority;
+    D1 PredicateBit and structural () are separate domains.
+    """
+    def invariant(name: str) -> str:
+        found = re.search(r"\(" + re.escape(name) + r'\s*\.\s*"([^"]*)"\s*\)', contract)
+        return found.group(1) if found else ""
+
+    foundation = invariant("d3-foundation")
+    legacy = invariant("legacy-sens8-compatibility")
+    predicate = invariant("predicate-one-bit")
+    return (
+        "000 structural empty ()" in foundation
+        and "They are not universal semantic identity" in legacy
+        and "Function8" in legacy
+        and "PredicateBit is not Number, host Bool, T/NIL, Symbol, structural ()"
+        in predicate
+    )
+
+
 def route_evidence() -> tuple[bool, bool]:
     """Inspect the historical metadata and the language-owned separation law.
 
@@ -150,11 +173,7 @@ def route_evidence() -> tuple[bool, bool]:
         token.text == ZERO8 for token in call_heads(mechanism_tokens)
     )
 
-    contract_separates_ground = (
-        "function 00000000 is not the empty-list value" in contract.lower()
-        and "() is represented as a structural empty value outside the function space"
-        in contract.lower()
-    )
+    contract_separates_ground = current_ground_separated(contract)
 
     return zero_in_mechanism_rows, contract_separates_ground
 
