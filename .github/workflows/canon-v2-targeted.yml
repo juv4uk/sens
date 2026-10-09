@@ -6,6 +6,9 @@ on:
       - 'tests/fixtures/witness-runner.lisp'
       - 'tests/fixtures/canon-laws-v2-witness.lisp'
       - 'lib/canon.lisp'
+      - 'lib/core4.lisp'
+      - 'lib/core4.lisp.fasl'
+      - 'lib/core.lisp'
       - '.github/workflows/canon-v2-targeted.yml'
   workflow_dispatch:
 jobs:
