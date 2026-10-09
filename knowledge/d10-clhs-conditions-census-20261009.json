@@ -14,9 +14,9 @@
     "d10_inventory_blob": "3db40a04c1094c9ea13b0c8d6099ef1d882cf203",
     "selected_d10": 635,
     "lower_foundation_blob": "09d1d71c39d1484dfd005a5068dbb18b76f0f0d4",
-    "snapshot_note": "Compared with main selected 635; source row map retains original 51 CLHS dictionary entries.",
+    "snapshot_note": "Frozen Conditions §9.2 census selected-D10 comparison at historical 635 rows; no future selected growth can rewrite past classification.",
     "immutable_historical_census": true,
-    "growth_semantics": "Evaluate exact-name classification against original first 630 selected rows; permit append-only later D10 growth without changing the 2026-10-09 census"
+    "growth_semantics": "Evaluate original exact-name flags against the frozen first 635 selected rows (Git blob 3db40a04c1094c9ea13b0c8d6099ef1d882cf203), while allowing append-only growth to 636 and beyond; the independent transition guard enforces historical integrity."
   },
   "rule": "Every §9.2 dictionary name/kind gets an evidence-safe decision DUPLICATE/DERIVED/HOLD/PROPOSE. Exact-name collisions are NOT sufficient for DUPLICATE; unsupported names remain HOLD. One COMPUTE-RESTARTS PROPOSE remains unselected pending owner and D2 boundary review; no coordinate or ratification.",
   "note": "All 51 entries have a primary URL pointing to the individual CLHS entry if verified or otherwise explicitly tagged SECTION-INDEX (not falsely claimed to be a symbol-level donor). Core-vs-library owner decision collected in #4896.",
@@ -36,9 +36,9 @@
     "ratified_added": 0,
     "selected_added": 0,
     "by_decision": {
-      "DERIVED": 17,
-      "DUPLICATE": 9,
-      "HOLD": 24,
+      "DUPLICATE": 0,
+      "DERIVED": 0,
+      "HOLD": 50,
       "PROPOSE": 1
     },
     "donor_primary_url_complete": 51,
