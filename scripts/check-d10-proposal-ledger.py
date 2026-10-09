@@ -57,9 +57,10 @@ def validate(content: str) -> list[str]:
                 errors.append(f"{lineno}: surface_uk/ukr має містити кирилицю")
         if row["width"] != "D10":
             errors.append(f"{lineno}: дозволено тільки width=D10")
-        for key in ("donor_provenance", "blocked_source"):
-            if not PROVENANCE.fullmatch(row[key]):
-                errors.append(f"{lineno}: {key} потребує owner/repo@SHA:path:line")
+        if not PROVENANCE.fullmatch(row["donor_provenance"]):
+            errors.append(f"{lineno}: donor_provenance потребує owner/repo@COMMIT:path:line")
+        if row["blocked_source"] != "NOT-A-MIGRATION-BLOCK" and not PROVENANCE.fullmatch(row["blocked_source"]):
+            errors.append(f"{lineno}: blocked_source потребує owner/repo@COMMIT:path:line або точний маркер NOT-A-MIGRATION-BLOCK")
         if not DEDUP.fullmatch(row["dedup_check"]):
             errors.append(f"{lineno}: dedup_check потребує окремих D1-D9 та D10 SHA")
         if not row["ownership_test"].startswith("UNIVERSAL-BORDER: ") or len(row["ownership_test"]) < 32:
@@ -69,6 +70,73 @@ def validate(content: str) -> list[str]:
         for key in FIELDS:
             if "\n" in row[key] or "\r" in row[key]:
                 errors.append(f"{lineno}: переноси рядка всередині поля заборонені")
+    return errors
+
+
+
+
+def selection_trace_errors(content: str, inventory: dict, baseline: dict, history: dict) -> list[str]:
+    """Кожен append після історичного 625 має бути в журналі та в SHA-ланцюгу."""
+    errors: list[str] = []
+    rows = inventory.get("rows", [])
+    initial = baseline.get("frozen_count")
+    if initial != 625 or len(rows) < initial or len(baseline.get("rows", [])) != initial:
+        return ["некоректна або неповна історична 625-основа"]
+    protected = baseline.get("protected_fields", [])
+    for index in range(initial):
+        for field in protected:
+            if rows[index].get(field) != baseline["rows"][index].get(field):
+                errors.append(f"історична ідентичність змінена: {index}:{field}")
+                break
+
+    ledger = list(csv.DictReader(io.StringIO(content), delimiter="\t"))
+    ledger_by_name = {r["semantic_name"].strip().upper(): r for r in ledger}
+    if len(ledger_by_name) != len(ledger):
+        errors.append("неунікальні імена в журналі")
+    transitions = history.get("transitions", [])
+    prior = initial
+    selected_now: set[str] = set()
+    for t in transitions:
+        next_count = t.get("resulting_selected", -1)
+        if t.get("previous_selected") != prior or not isinstance(next_count, int) or next_count <= prior or next_count > len(rows):
+            errors.append("перерваний або недопустимий ланцюг append D10")
+            return errors
+        added = rows[prior:next_count]
+        if [r.get("stable_id") for r in added] != t.get("added_stable_ids"):
+            errors.append("новий зріз інвентарю не збігається з append-ID транзакції")
+        if t.get("delta_selected") != len(added) or t.get("coordinates_added") != 0 or t.get("ratified_added") != 0:
+            errors.append("неявний ріст, координата або ратифікація у research-переході")
+        for row in added:
+            name = row.get("semantic_name", "").upper()
+            selected_now.add(name)
+            ent = ledger_by_name.get(name)
+            if not ent:
+                errors.append(f"{name}: SELECTED без запису в proposal-ledger")
+                continue
+            if ent.get("status") != "pending-review" or ent.get("ratified") != "0":
+                errors.append(f"{name}: журнал не може ратифікувати запис")
+            if ent.get("blocked_source") != "NOT-A-MIGRATION-BLOCK":
+                # Якщо цей відбір походить від реального BLOCK, збережіть
+                # його source pointer, а не вигадуйте міграційний блок.
+                if not PROVENANCE.fullmatch(ent.get("blocked_source", "")):
+                    errors.append(f"{name}: invalid migration BLOCK source")
+            if ent.get("surface_uk") != row.get("surface_uk") or ent.get("surface_ukr") != row.get("surface_ukr"):
+                errors.append(f"{name}: українські поверхні не збігаються з відбором")
+            prior_d10 = t.get("previous_inventory_blob_sha")
+            match = DEDUP.fullmatch(ent.get("dedup_check", ""))
+            if not match or f"D10@{prior_d10}=NO-MATCH" not in ent.get("dedup_check", ""):
+                errors.append(f"{name}: D10 dedup має посилатися на стан ПЕРЕД цим append")
+            if row.get("coordinate") is not None or row.get("ratified_resident") is not False:
+                errors.append(f"{name}: proposal не надає координат або ратифікації")
+            if row.get("status") != "SELECTED-RESEARCH-CANDIDATE":
+                errors.append(f"{name}: D10 append має research-only статус")
+        prior = next_count
+    if prior != len(rows):
+        errors.append(f"виявлено {len(rows)-prior} неврахованих selection-рядків у D10")
+    for ent in ledger:
+        name = ent["semantic_name"].strip().upper()
+        if ent["blocked_source"] == "NOT-A-MIGRATION-BLOCK" and name not in selected_now:
+            errors.append(f"{name}: маркер без реального selection-запису; pending donor мусить мати source")
     return errors
 
 
@@ -133,6 +201,10 @@ def self_test() -> None:
     row = "\t".join(valid) + "\n"
     assert not validate(header), "порожній канонічний журнал має бути чинним"
     assert not validate(header + row), "правильний синтетичний запис має пройти"
+    research = valid.copy()
+    research[9] = "NOT-A-MIGRATION-BLOCK"
+    assert not validate(header + "\t".join(research) + "\n"), "source research marker requires later selection trace"
+
     tests = (
         (11, "1"),
         (10, "admitted"),
@@ -191,6 +263,17 @@ def main() -> int:
         projection = architecture_path.read_text(encoding="utf-8")
     except (OSError, ValueError) as exc:
         print(f"D10-PROPOSAL-LEDGER: BLOCK cannot read D10 machine inventory/projection: {exc}")
+        return 1
+    try:
+        baseline = json.loads((ROOT / "knowledge/d10-growth-baseline-v1.json").read_text(encoding="utf-8"))
+        history = json.loads((ROOT / "knowledge/d10-selection-transition-history.json").read_text(encoding="utf-8"))
+    except (OSError, ValueError) as exc:
+        print(f"D10-PROPOSAL-LEDGER: BLOCK missing immutable growth history: {exc}")
+        return 1
+    trace_errors = selection_trace_errors(args.ledger.read_text(encoding="utf-8"), inventory, baseline, history)
+    if trace_errors:
+        for error in trace_errors:
+            print(f"D10-PROPOSAL-LEDGER: BLOCK {error}")
         return 1
     projection_errors = inventory_projection_errors(inventory, projection)
     if projection_errors:
