@@ -32,3 +32,18 @@ Four allowed verdicts: `MERGED-IN` = already ancestor/current content; `OBSOLETE
 - [ ] Only individually accepted ALIVE changes; all conflicts resolved by one responsible agent per record
 - [ ] Required current-head GitHub-hosted CI SUCCESS; SKIPPED is not hardware parity
 - [ ] Independent review; single-writer merge by expected HEAD SHA, no forced merges
+
+## Snapshot #2 — eight further historical research branches
+
+| Branch | Source head SHA | Ahead / behind | Verdict | Proof / disposition |
+|---|---|---:|---|---|
+| `research/d10-astrophoto-pinhole-exact-rays-20261009` | `a75f8fcd8ddf71bf46399c0d025c5db12959ff14` | 0 / 3697 | MERGED-IN | Strict main ancestor |
+| `research/d10-floyd-hoare-inductive-safety-witness-20261009` | `ce648690ebfac27dfadf84dfc84464353037660a` | 0 / 3368 | MERGED-IN | Strict main ancestor |
+| `research/d10-brzozowski-1964-symbolic-ai-derivative` | `1f26b6e5c306274eb11ed9bdcb21fbb8bca7e0cc` | 0 / 3679 | MERGED-IN | Strict main ancestor |
+| `research/d10-ebg-operational-horn-proof-20261009` | `212af51d151cf8c374de728e61f8ad54384b0109` | 0 / 3682 | MERGED-IN | Strict main ancestor |
+| `research/d10-clhs-streams-census-20261009` | `2aff2dc905306be892f70e929fa3cb8720e3c8b7` | 0 / 3709 | MERGED-IN | Strict main ancestor |
+| `research/d10-clhs-pathnames-dictionary-20261009` | `086c31c2a059f7cc02fda20b2f2bb115de4f5082` | 0 / 3714 | MERGED-IN | Strict main ancestor |
+| `research/d8-d9-overflow-provenance-archive-20261009` | `dde89211bd3df03c8062d65a0018e4116061b5ea` | 4 / 3730 | CONFLICT | 3/4 blobs already equal main, checker differs; preserve newer checker |
+| `research/d10-dung-grounded-argumentation-20261009` | `3277cc4ce8b6953523f2110033b0862d2963a19e` | 9 / 3119 | CONFLICT | 5/5 research files match main, but historical D10 proposal ledger/test edits cannot override present ledger |
+
+**Cumulative snapshots #1 + #2:** 21 branches checked: **15 MERGED-IN**, **6 CONFLICT**, **0 ALIVE** admitted, 0 OBSOLETE proven. This remains a small, evidence-pinned subset of all historical branches. It is NOT permission to merge the sweep.
