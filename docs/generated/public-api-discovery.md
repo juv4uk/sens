@@ -8,6 +8,9 @@
 - top-level макросів: 34
 - усього визначень: 980
 - класифікація: `unreviewed`
+
+| джерело | вид | ім'я | класифікація |
+|---|---|---|---|
 | `lib/bridge/prolog-to-datalog.lisp` | function | `prolog-values-to-datalog-facts` | unreviewed |
 | `lib/bridge/prolog-to-datalog.lisp` | function | `prolog-substitutions-to-datalog-facts` | unreviewed |
 | `lib/canon.lisp` | function | `canon-empty-list` | unreviewed |
