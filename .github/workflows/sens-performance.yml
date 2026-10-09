@@ -1,0 +1,159 @@
+name: SENS performance scoreboard
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    paths:
+      - ".github/workflows/sens-performance.yml"
+      - "benchmarks/sens-performance/**"
+      - "benchmarks/byte-pack/**"
+      - "benchmarks/domain12345678/**"
+      - "benchmarks/current-en-vs-d1d8/**"
+      - "crates/sens/examples/byte_pack_bench.rs"
+      - "crates/sens/examples/domain12345678_bench.rs"
+      - "crates/sens/examples/current_en_vs_d1d8_cpu.rs"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+# Рій часто оновлює main. Не множимо дорогі виміри на старих SHA:
+# залишаємо останній коміт + ручний стабільний replay.
+concurrency:
+  group: sens-performance-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  t5-reference:
+    name: T5 physical size and reference codec throughput
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Measure physical T5 versus exact ASCII bit view
+        run: |
+          python3 benchmarks/sens-performance/t5_reference.py \
+            --out "$RUNNER_TEMP/sens-t5-performance" \
+            --sizes 128,2048 --samples 9 --loops 3
+      - name: Keep measured data and environment
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: sens-t5-reference-${{ github.sha }}
+          path: ${{ runner.temp }}/sens-t5-performance/
+          if-no-files-found: warn
+          retention-days: 14
+
+  domain-carrier:
+    name: Exact W1-W8 carrier cost (Cachegrind I refs)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v5
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+      - name: Install deterministic instruction-counter tool
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y valgrind
+      - name: Build production API benchmark in release mode
+        run: cargo build --locked --release -p sens --example domain12345678_bench
+      - name: Measure domain-coordinate carrier with paired empty-loop baseline
+        run: |
+          python3 benchmarks/domain12345678/run.py \
+            --binary "$(pwd)/target/release/examples/domain12345678_bench" \
+            --out-dir "$RUNNER_TEMP/sens-domain-carrier" \
+            --iterations 100000 --reps 3
+      - name: Keep raw I refs, report and toolchain provenance
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: sens-domain-carrier-${{ github.sha }}
+          path: ${{ runner.temp }}/sens-domain-carrier/
+          if-no-files-found: warn
+          retention-days: 14
+
+  bit-pack:
+    name: Bit packing cost versus byte density (Cachegrind)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v5
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+      - name: Install instruction-counter tool
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y valgrind
+      - name: Build exact-width packing benchmark
+        run: cargo build --locked --release -p sens --example byte_pack_bench
+      - name: Measure real packed bytes and pack/decode instruction costs
+        run: |
+          python3 benchmarks/byte-pack/run.py \
+            --binary "$(pwd)/target/release/examples/byte_pack_bench" \
+            --out "$RUNNER_TEMP/sens-bitpack" \
+            --sizes 256 --reps 8 --workloads d1,d3,w7,mixed
+      - name: Publish measurement, never inferred semantic speed
+        if: always()
+        shell: bash
+        run: |
+          if test -s "$RUNNER_TEMP/sens-bitpack/results.tsv"; then
+            {
+              echo "## Measured packing cost / payload density"
+              echo
+              echo "Raw Cachegrind I refs (not wall-clock or interpreter speed)."
+              echo
+              echo '~~~text'
+              cat "$RUNNER_TEMP/sens-bitpack/results.tsv"
+              echo '~~~'
+            } >> "$GITHUB_STEP_SUMMARY"
+          fi
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: sens-bitpack-${{ github.sha }}
+          path: ${{ runner.temp }}/sens-bitpack/
+          if-no-files-found: warn
+          retention-days: 14
+
+  paired-d3:
+    name: D3 paired English vs binary CPU phases (parity-gated)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v5
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+      - name: Build single shared CPU benchmark helper
+        run: cargo build --locked --release -p sens --example current_en_vs_d1d8_cpu
+      - name: Measure only independently preflight-admitted D3 fixture
+        run: |
+          mkdir -p "$RUNNER_TEMP/sens-d3-cpu"
+          python3 benchmarks/current-en-vs-d1d8/cpu_runner.py \
+            --manifest benchmarks/current-en-vs-d1d8/fixtures/d3-smoke.json \
+            --helper "$(pwd)/target/release/examples/current_en_vs_d1d8_cpu" \
+            --out "$RUNNER_TEMP/sens-d3-cpu/phases.jsonl" \
+            --reps 5 --repeat-n 100
+          python3 benchmarks/current-en-vs-d1d8/validate.py \
+            "$RUNNER_TEMP/sens-d3-cpu/phases.jsonl"
+      - name: Explain limits and record artifact
+        if: always()
+        run: |
+          {
+            echo "## Paired current D3 CPU phases"
+            echo
+            echo "Fixture scope: only parity-admitted D3 smoke, not a whole-language score."
+            echo "If native execution or expected answers fail, timing is BLOCKED, not estimated."
+            echo "Each JSONL row includes source/binary hashes, CPU provenance and per-phase timing."
+          } >> "$GITHUB_STEP_SUMMARY"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: sens-paired-d3-${{ github.sha }}
+          path: ${{ runner.temp }}/sens-d3-cpu/
+          if-no-files-found: warn
+          retention-days: 14
