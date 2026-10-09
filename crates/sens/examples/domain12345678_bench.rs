@@ -1,32 +1,32 @@
-//! #3001 W1-W8 exact-width carrier benchmark.
+//! Contract 11.8 W1-W9 exact-width mechanical carrier benchmark.
 //!
-//! Measures the source-word -> width-qualified DomainIdentity carrier path only.
-//! Contract 11.6: D1-D7 are the current semantic foundation; D8 remains
-//! research. Carrier measurement is wider than semantic callability.
-//! No registry, surface spelling, legacy Sens8/Function8, or benchmark-local
-//! semantic table participates.
+//! Measures source-word -> width-qualified DomainIdentity, not language execution.
+//! W9 uses u16; the top bit must survive. No registry, semantic callable projection,
+//! spelling, historical 8-bit authority or benchmark-local domain-law table.
 
 use sens::{
-    BinarySourceWord, Bit1, Bit2, Bit3, Bit4, Bit5, Bit6, Bit7, Bit8, DomainIdentity,
+    BinarySourceWord, Bit1, Bit2, Bit3, Bit4, Bit5, Bit6, Bit7, Bit8, Bit9, DomainIdentity,
 };
 use std::{env, hint::black_box, process::ExitCode};
 
-fn source_word(width: u8, raw: u8) -> BinarySourceWord {
+fn source_word(width: u8, raw: u16) -> BinarySourceWord {
+    let low = raw as u8;
     match width {
-        1 => BinarySourceWord::W1(Bit1::new(raw & 0b1).unwrap()),
-        2 => BinarySourceWord::W2(Bit2::new(raw & 0b11).unwrap()),
-        3 => BinarySourceWord::W3(Bit3::new(raw & 0b111).unwrap()),
-        4 => BinarySourceWord::W4(Bit4::new(raw & 0b1111).unwrap()),
-        5 => BinarySourceWord::W5(Bit5::new(raw & 0b1_1111).unwrap()),
-        6 => BinarySourceWord::W6(Bit6::new(raw & 0b11_1111).unwrap()),
-        7 => BinarySourceWord::W7(Bit7::new(raw & 0b111_1111).unwrap()),
-        8 => BinarySourceWord::W8(Bit8::new(raw).unwrap()),
+        1 => BinarySourceWord::W1(Bit1::new(low & 0b1).unwrap()),
+        2 => BinarySourceWord::W2(Bit2::new(low & 0b11).unwrap()),
+        3 => BinarySourceWord::W3(Bit3::new(low & 0b111).unwrap()),
+        4 => BinarySourceWord::W4(Bit4::new(low & 0b1111).unwrap()),
+        5 => BinarySourceWord::W5(Bit5::new(low & 0b1_1111).unwrap()),
+        6 => BinarySourceWord::W6(Bit6::new(low & 0b11_1111).unwrap()),
+        7 => BinarySourceWord::W7(Bit7::new(low & 0b111_1111).unwrap()),
+        8 => BinarySourceWord::W8(Bit8::new(low).unwrap()),
+        9 => BinarySourceWord::W9(Bit9::new(raw & 0x01ff).unwrap()),
         _ => unreachable!(),
     }
 }
 
 fn verify_invariants() {
-    for width in 1..=8 {
+    for width in 1..=9 {
         let source = source_word(width, 1);
         let identity = source.domain_identity();
         assert_eq!(identity.width(), width as usize);
@@ -43,6 +43,7 @@ fn verify_invariants() {
         source_word(6, 1).domain_identity(),
         source_word(7, 1).domain_identity(),
         source_word(8, 1).domain_identity(),
+        source_word(9, 1).domain_identity(),
     ];
     for left in 0..same_payload.len() {
         for right in left + 1..same_payload.len() {
@@ -50,14 +51,13 @@ fn verify_invariants() {
         }
     }
 
-    assert!(same_payload[0].core_operation().is_none());
-    assert!(same_payload[1].core_operation().is_none());
-    assert!(same_payload[5].core_operation().is_none());
-    assert!(same_payload[6].core_operation().is_none());
-    assert!(same_payload[7].core_operation().is_none());
-    assert!(same_payload[2].core_operation().is_some());
-    assert!(same_payload[3].core_operation().is_some());
-    assert!(same_payload[4].core_operation().is_some());
+    // High W9 payload bit must not truncate to historical u8.
+    let high = source_word(9, 0x101);
+    let identity = DomainIdentity::from_source_word(high);
+    assert_eq!(identity.width(), 9);
+    assert_eq!(identity.packed_bits(), 0x101);
+    assert_eq!(identity.source_word(), high);
+    assert_ne!(identity, source_word(8, 1).domain_identity());
 }
 
 #[inline(never)]
@@ -73,7 +73,7 @@ fn run_empty(iterations: u64) -> u64 {
 fn run_domain(width: u8, iterations: u64) -> u64 {
     let mut acc = 0u64;
     for i in 0..iterations {
-        let raw = black_box(i as u8);
+        let raw = black_box((i as u16) ^ ((i as u16) >> 1));
         let source = source_word(width, raw);
         let identity = DomainIdentity::from_source_word(source);
         acc = acc
@@ -87,8 +87,8 @@ fn run_domain(width: u8, iterations: u64) -> u64 {
 fn run_mixed(iterations: u64) -> u64 {
     let mut acc = 0u64;
     for i in 0..iterations {
-        let width = ((black_box(i) & 7) + 1) as u8;
-        let source = source_word(width, i as u8);
+        let width = ((black_box(i) % 9) + 1) as u8;
+        let source = source_word(width, (i as u16) ^ ((i as u16) >> 1));
         let identity = source.domain_identity();
         acc = acc
             .wrapping_add(identity.packed_bits() as u64)
@@ -98,19 +98,16 @@ fn run_mixed(iterations: u64) -> u64 {
 }
 
 #[inline(never)]
-fn run_callable_projection(iterations: u64) -> u64 {
+fn run_width_roundtrip(iterations: u64) -> u64 {
     let mut acc = 0u64;
     for i in 0..iterations {
-        let width = ((black_box(i) & 7) + 1) as u8;
-        let identity = source_word(width, i as u8).domain_identity();
-        match identity.core_operation() {
-            Some(core) => {
-                acc = acc
-                    .wrapping_add(core.packed_bits() as u64)
-                    .wrapping_add(core.width() as u64);
-            }
-            None => acc = acc.wrapping_add(identity.width() as u64),
-        }
+        let width = ((black_box(i) % 9) + 1) as u8;
+        let source = source_word(width, (i as u16) ^ ((i as u16) >> 1));
+        let identity = DomainIdentity::from_source_word(source);
+        let restored = identity.source_word();
+        acc = acc
+            .wrapping_add(restored.packed_bits() as u64)
+            .wrapping_add(restored.width() as u64);
     }
     black_box(acc)
 }
@@ -126,8 +123,9 @@ fn run_case(case: &str, iterations: u64) -> Option<u64> {
         "d6" => run_domain(6, iterations),
         "d7" => run_domain(7, iterations),
         "d8" => run_domain(8, iterations),
+        "d9" => run_domain(9, iterations),
         "mixed" => run_mixed(iterations),
-        "callable-projection" => run_callable_projection(iterations),
+        "width-roundtrip" => run_width_roundtrip(iterations),
         _ => return None,
     })
 }
