@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 import json
+import re
 from pathlib import Path
 
 from domain_tables import D7_TABLE, read_domain_table
@@ -127,5 +128,27 @@ for bits,body in surface_rows:
     assert "(LISP ())" in body, f"D7:{bits} invented Lisp callable name"
 
 print("D7-SURFACE-ROWS: PASS residents=126 reserved=2 no-Rust-law")
+
+# The Lisp-owned human surface table must be an exact projection of the
+# ratified coordinate registry, not an independent allocation authority.
+surface=(root/"lib/domains/d7.lisp").read_text(encoding="utf-8")
+surface_rows=re.findall(r"^\\s*\\(([01]{7})\\s+(.+)\\)\\s*$",surface,re.MULTILINE)
+surface_coordinates=[bits for bits,_ in surface_rows]
+assert len(surface_rows)==d["occupancy"], "D7 surface row count differs from owner-ratified occupancy"
+assert len(set(surface_coordinates))==len(surface_coordinates), "duplicate D7 surface coordinate"
+assert set(surface_coordinates)==set(d["residents"]), "D7 surface allocation differs from ratified registry"
+assert surface_coordinates==sorted(surface_coordinates), "D7 rows must remain ordered by binary coordinate"
+
+for bits,body in surface_rows:
+    fields=re.findall(r"\\((ук|укр|san|en|LISP|sym)\\s+(\\(\\)|[^()]+)\\)",body)
+    assert [name for name,_ in fields]==["ук","укр","san","en","LISP","sym"], f"D7:{bits} has invalid surface columns"
+    row=dict(fields)
+    for name in ("ук","укр","san","en"):
+        assert row[name].strip() not in ("","()"), f"D7:{bits} missing {name}"
+    assert row["en"]==d["residents"][bits], f"D7:{bits} diverges from the ratified resident name"
+    assert row["LISP"]=="()", f"D7:{bits} must not invent a callable Lisp function"
+
+assert not set(surface_coordinates).intersection(d["reserved_coordinates"]), "D7 owner-reserved pin was allocated"
+
 print("D7-CURRENT-AUTHORITY: PASS")
 print("occupancy=126/128 baseline=107 shiva-overlays=19 reserved-pinned=2 candidate-D=NOT-RATIFIED")
