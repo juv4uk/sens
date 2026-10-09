@@ -1,4 +1,4 @@
-use sens::{eval_parsed_expressions, parse, Environment, Session, Value};
+use sens::{eval_parsed_expressions, parse, parse_canonical_binary, Environment, Session, Value};
 use std::env;
 use std::fs;
 use std::io::Read;
@@ -105,6 +105,57 @@ fn extract_cli_core(args: Vec<String>) -> Result<(Vec<String>, CliCore), String>
     Ok((output, core))
 }
 
+
+/// The canonical executable source is an exact-width D1–D9 binary word
+/// stream. Human source remains an explicit migration compatibility path.
+/// These flags select the parser; they do not confer any domain semantics.
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+enum SourceMode {
+    HumanCompatibility,
+    ExactBinary,
+    CheckBinary,
+}
+
+fn extract_source_mode(args: Vec<String>) -> Result<(Vec<String>, SourceMode), String> {
+    let mut retained = Vec::with_capacity(args.len());
+    let mut mode = SourceMode::HumanCompatibility;
+    for arg in args {
+        let requested = match arg.as_str() {
+            "--binary" => Some(SourceMode::ExactBinary),
+            "--binary-check" => Some(SourceMode::CheckBinary),
+            _ => None,
+        };
+        if let Some(requested) = requested {
+            if mode != SourceMode::HumanCompatibility {
+                return Err("--binary and --binary-check cannot be repeated or combined".into());
+            }
+            mode = requested;
+        } else {
+            retained.push(arg);
+        }
+    }
+    Ok((retained, mode))
+}
+
+fn parse_program_source(source: &str, mode: SourceMode) -> Result<Vec<sens::Expr>, sens::LanguageError> {
+    match mode {
+        SourceMode::HumanCompatibility => parse(source),
+        SourceMode::ExactBinary | SourceMode::CheckBinary => parse_canonical_binary(source),
+    }
+}
+
+fn read_binary_check_source(path: &str) -> Result<String, String> {
+    if path == "-" {
+        let mut source = String::new();
+        std::io::stdin()
+            .read_to_string(&mut source)
+            .map_err(|err| format!("cannot read binary stdin: {err}"))?;
+        Ok(source)
+    } else {
+        fs::read_to_string(path).map_err(|err| format!("cannot read binary source {path}: {err}"))
+    }
+}
+
 fn bootstrap_core(
     session: &mut Session,
     core: CliCore,
@@ -143,6 +194,43 @@ fn main() {
             process::exit(2);
         }
     };
+    let (args, source_mode) = match extract_source_mode(args) {
+        Ok(parsed) => parsed,
+        Err(error) => {
+            eprintln!("sens: {error}");
+            process::exit(2);
+        }
+    };
+    if source_mode == SourceMode::CheckBinary {
+        if args.len() != 2 {
+            eprintln!("sens: --binary-check requires exactly one <file|->");
+            process::exit(2);
+        }
+        let source = match read_binary_check_source(&args[1]) {
+            Ok(source) => source,
+            Err(error) => {
+                eprintln!("sens: {error}");
+                process::exit(2);
+            }
+        };
+        match parse_program_source(&source, source_mode) {
+            Ok(expressions) => {
+                // This reports parser acceptance, NOT semantic equivalence.
+                println!("BINARY-SOURCE-PASS forms={}", expressions.len());
+                return;
+            }
+            Err(error) => {
+                eprintln!("BINARY-SOURCE-BLOCK {}", error.render(&source));
+                process::exit(1);
+            }
+        }
+    }
+    if source_mode == SourceMode::ExactBinary
+        && (args.len() < 2 || args[1].starts_with("--"))
+    {
+        eprintln!("sens: --binary requires an executable binary source file");
+        process::exit(2);
+    }
     let allowed_for_tcp = allowed.clone();
     // Plain `f64`s, not a `Value` — `run_tcp_repl_sexpr` spawns one thread
     // per connection, and `Value`'s `Rc`-based sharing isn't `Send`; each
@@ -298,6 +386,8 @@ fn main() {
             println!("  -h, --help                  Print help information");
             println!("  --surface=uk|en|sa|core      Start the interactive REPL with this programming surface");
             println!("  --core=3|4                    Explicitly select Core3 laboratory or default Core4 before evaluation");
+            println!("  --binary <file>               Execute only exact-width binary source, without human-parser fallback");
+            println!("  --binary-check <file|->       Check exact binary source before any Lisp bootstrap (no execution)");
             println!(
                 "  --allow-process=a,b,c        TCP/oracle only: allow exactly these process names"
             );
@@ -498,7 +588,7 @@ fn main() {
         session.environment.define("*argv*", argv);
 
         match fs::read_to_string(filename) {
-            Ok(source) => match parse(&source) {
+            Ok(source) => match parse_program_source(&source, source_mode) {
                 Ok(ast) => match eval_parsed_expressions(&ast, &mut session) {
                     Ok(result) => {
                         for out in result.output {
@@ -536,6 +626,55 @@ fn main() {
 #[cfg(test)]
 mod core_profile_bootstrap_tests {
     use super::*;
+
+
+    #[test]
+    fn binary_cli_flags_are_explicit_mutually_exclusive() {
+        let (args, mode) = extract_source_mode(vec![
+            "sens".into(), "--binary".into(), "program.lisp".into(),
+        ]).unwrap();
+        assert_eq!(mode, SourceMode::ExactBinary);
+        assert_eq!(args, vec!["sens", "program.lisp"]);
+
+        let (args, mode) = extract_source_mode(vec![
+            "sens".into(), "program.lisp".into(), "--binary-check".into(),
+        ]).unwrap();
+        assert_eq!(mode, SourceMode::CheckBinary);
+        assert_eq!(args, vec!["sens", "program.lisp"]);
+
+        for flags in [
+            vec!["sens", "--binary", "--binary-check", "program.lisp"],
+            vec!["sens", "--binary", "--binary", "program.lisp"],
+        ] {
+            assert!(extract_source_mode(flags.into_iter().map(str::to_string).collect()).is_err());
+        }
+    }
+
+    #[test]
+    fn binary_cli_never_falls_back_to_human_identifiers_or_drops_width() {
+        use sens::ExprKind;
+        // D2 OPEN / D3 QUOTE / D2 SEPARATOR / D3 EMPTY / D2 CLOSE.
+        let forms = parse_program_source("10 001 00 000 01", SourceMode::ExactBinary).unwrap();
+        assert_eq!(forms.len(), 1);
+        assert!(matches!(&forms[0].kind, ExprKind::List(items) if items.len() == 2));
+
+        let words = parse_program_source("0000001 00 00000001", SourceMode::ExactBinary).unwrap();
+        assert_eq!(words.len(), 2);
+        let ExprKind::DomainIdentity(first) = words[0].kind else { panic!("W7 domain"); };
+        let ExprKind::DomainIdentity(second) = words[1].kind else { panic!("W8 domain"); };
+        assert_eq!((first.width(), first.packed_bits()), (7, 1));
+        assert_eq!((second.width(), second.packed_bits()), (8, 1));
+        assert_ne!(first, second);
+
+        for forbidden in ["(QUOTE ())", "(визначити x 1)", "(CONS x y)",
+                          "1111111111", "10 001 00 000", "0100000 foo"] {
+            assert!(
+                parse_program_source(forbidden, SourceMode::ExactBinary).is_err(),
+                "{forbidden} must not be accepted as canonical binary"
+            );
+        }
+        assert!(parse_program_source("(quote ())", SourceMode::HumanCompatibility).is_ok());
+    }
 
     #[test]
     fn cli_core_selector_defaults_to_core4_and_accepts_only_3_or_4() {
