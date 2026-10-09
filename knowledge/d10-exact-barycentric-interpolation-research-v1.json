@@ -1,0 +1,147 @@
+{
+  "schema": "d10-exact-barycentric-interpolation-research/v1",
+  "date": "2026-10-09",
+  "status": "HOLD-CORE-VS-DERIVED-LIBRARY-PENDING-OWNER-REVIEW",
+  "name": "EXACT-BARYCENTRIC-INTERPOLATE",
+  "uk": "точно-інтерполювати",
+  "ukr": "обчислити-поліном-за-вузлами",
+  "domain": "D10",
+  "selected": false,
+  "coordinate": null,
+  "ratified": false,
+  "physical_t5_authorized": false,
+  "claim": "#4013 6077018039; #4463 6077018762",
+  "primary_sources": [
+    {
+      "authority": "NIST Digital Library of Mathematical Functions",
+      "url": "https://dlmf.nist.gov/3.3",
+      "section": "3.3(i) Lagrange interpolation and barycentric form",
+      "scope": "unique interpolation polynomial through pairwise distinct nodes"
+    },
+    {
+      "authority": "SciPy interpolation reference",
+      "url": "https://docs.scipy.org/doc/scipy/reference/generated/scipy.interpolate.BarycentricInterpolator.html",
+      "scope": "barycentric interpolation representation and distinct-node algorithm"
+    }
+  ],
+  "law": "Given 1..n pairwise-distinct exact rational node abscissas x_i and exact rational ordinates y_i, and exact rational query x, return the unique exact rational value of polynomial degree at most n−1 interpolating all nodes (x_i,y_i). Evaluate at x_i exactly y_i, reject duplicate x_i, empty set and inexact values; permutation of nodes must not alter result. Evaluate by barycentric rational weights, not floating coefficients.",
+  "formula": "If x=x_i return y_i. Otherwise w_i=1/product_{j≠i}(x_i−x_j) and p(x)=(sum_i w_i*y_i/(x−x_i))/(sum_i w_i/(x−x_i)).",
+  "signature": "(nonempty list (exact-rational-x,exact-rational-y), exact-rational-query)->exact-rational",
+  "examples": [
+    {
+      "nodes": [
+        [
+          0,
+          0
+        ],
+        [
+          1,
+          1
+        ],
+        [
+          2,
+          4
+        ]
+      ],
+      "query": "1/2",
+      "expected": "1/4",
+      "why": "quadratic x² exact rational"
+    },
+    {
+      "nodes": [
+        [
+          0,
+          0
+        ],
+        [
+          1,
+          1
+        ],
+        [
+          2,
+          4
+        ]
+      ],
+      "query": "3",
+      "expected": "9",
+      "why": "polynomial extrapolation, not physical prediction"
+    },
+    {
+      "nodes": [
+        [
+          -1,
+          1
+        ],
+        [
+          1,
+          5
+        ]
+      ],
+      "query": "0",
+      "expected": "3",
+      "why": "2*x+3"
+    },
+    {
+      "nodes": [
+        [
+          1,
+          7
+        ]
+      ],
+      "query": "5/2",
+      "expected": "7",
+      "why": "unique constant polynomial"
+    },
+    {
+      "nodes": [
+        [
+          0,
+          5
+        ],
+        [
+          1,
+          5
+        ],
+        [
+          2,
+          5
+        ]
+      ],
+      "query": "3/2",
+      "expected": "5",
+      "why": "constant samples stay constant"
+    }
+  ],
+  "falsifiers": [
+    "Return a rounded float 0.25 rather than exact rational 1/4 on exact nodes/query.",
+    "Silently accept repeated x_i with inconsistent y_i, giving division by zero or arbitrary output.",
+    "Return interpolated coefficients rather than evaluated exact p(x), violating the declared result type.",
+    "Change result when reversing the node list, or produce a value other than y_i at an interpolation node.",
+    "Conflate polynomial interpolation with band-limited SDR reconstruction, sensor uncertainty propagation, hardware timing, or physical ephemeris accuracy."
+  ],
+  "dedup": {
+    "ratified_D1_D9_exact_name": false,
+    "selected_D10_exact_name_at_census": false,
+    "closest_existing": [
+      "D8 exact rational arithmetic",
+      "D10 BOUNDED-RATIONAL-APPROX",
+      "D10 SDR and generic sequence constructors"
+    ],
+    "semantic_difference": "Interpolation through multiple exact samples is not constrained-denominator approximation of one rational. Despite distinct observable behavior, it is derivable from arithmetic and finite folds.",
+    "core_classification": "HOLD pending owner choice: mathematical/library composite vs new 10-bit D10 named semantic resident; cannot allocate bit address automatically."
+  },
+  "user_hobbies": [
+    "astronomy time-series and telescope calibration",
+    "SDR radio signal sample fitting (not ideal reconstruction)",
+    "ESP32/FPGA ADC calibration curves",
+    "acoustic and musical control-envelope interpolation",
+    "analog computing and exact rational Lisp core",
+    "astronomical ephemerides as mathematical data rather than unproved prediction"
+  ],
+  "independent_oracles": {
+    "python": "tests/test_d10_exact_barycentric_interpolation.py, Fraction-based Lagrange vs barycentric",
+    "chez": "tests/oracles/d10_exact_barycentric_chez.ss, real R6RS implementation, 13 witness checks"
+  },
+  "gate": "scripts/check_d10_exact_barycentric_interpolation.py",
+  "owner_approval_required_before_selection": true
+}
