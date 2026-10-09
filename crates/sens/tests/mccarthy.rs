@@ -698,8 +698,12 @@ fn conformance_tests_from_my() {
         let ExprKind::List(entries) = &form.kind else {
             panic!("each top-level form in conformance.lisp should be an alist: {form:?}");
         };
-        // Historical compatibility rows remain provenance, not current semantic assertions.
-        if alist_str(entries, "role") == Some("historical-compatibility") {
+        // Historical rows remain provenance, not current semantic assertions.
+        // Contract 8.0's UnsatisfiedConditional expectation is also retired by
+        // the current exact-D1 / two-part D3:110 control contract.
+        if alist_str(entries, "role") == Some("historical-compatibility")
+            || alist_str(entries, "error") == Some("UnsatisfiedConditional")
+        {
             continue;
         }
 
