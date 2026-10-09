@@ -851,13 +851,13 @@ mod wire_tests {
             span: crate::Span { start: 0, end: 9 },
         };
 
-        let wire = encode_program(&[expr.clone()]);
+        let wire = encode_program(std::slice::from_ref(&expr));
         let decoded_wire = decode_program(&wire).expect("wire decodes W9 identity");
         assert_eq!(decoded_wire[0].kind, expr.kind);
         assert_eq!(encode_program(&decoded_wire), wire);
 
         let hash = [9u8; 32];
-        let fasl_bytes = fasl::encode_program(&[expr.clone()], &hash);
+        let fasl_bytes = fasl::encode_program(std::slice::from_ref(&expr), &hash);
         let (decoded_fasl, decoded_hash) =
             fasl::decode_program(&fasl_bytes).expect("fasl decodes W9 identity");
         assert_eq!(decoded_hash, hash);
