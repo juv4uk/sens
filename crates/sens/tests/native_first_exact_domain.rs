@@ -63,8 +63,8 @@ fn standalone_d2_close_is_a_word_but_not_an_executable_program() {
     let err = parse_canonical_binary("01").expect_err("unmatched D2 CLOSE must fail");
     assert_eq!(err.kind, ErrorKind::Parse);
     assert_eq!(
-        parse_canonical_binary("10 01")
-            .expect("paired D2 OPEN/CLOSE is a complete program")
+        parse_canonical_binary("10 000 01")
+            .expect("D2 frames explicit D3 structural-empty data")
             .len(),
         1
     );
