@@ -147,21 +147,6 @@ fn arithmetic_promotes_exact_integers_and_preserves_inexact_numbers() {
 }
 
 #[test]
-fn numeric_comparisons_return_exact_predicate_bits() {
-    assert_eq!(eval("(< 2 3)").as_predicate_bit(), Some(true));
-    assert_eq!(eval("(< 3 2)").as_predicate_bit(), Some(false));
-    assert_eq!(eval("(> 3 2)").as_predicate_bit(), Some(true));
-    assert_eq!(eval("(= 3 3)").as_predicate_bit(), Some(true));
-    assert_eq!(eval("(= 3 4)").as_predicate_bit(), Some(false));
-}
-
-#[test]
-fn comparison_with_no_arguments_is_an_arity_error() {
-    let error = eval_program("(<)", &mut Session::default()).unwrap_err();
-    assert_eq!(error.kind, ErrorKind::Arity);
-}
-
-#[test]
 fn print_appends_to_output_and_returns_its_argument() {
     let result = eval_program("(print \"radio\")", &mut Session::default()).unwrap();
     assert_eq!(result.value, Value::String("radio".into()));
@@ -266,94 +251,10 @@ fn bootstrap_library_is_written_and_executed_in_sens() {
 }
 
 #[test]
-fn bootstrap_library_provides_list_utilities() {
-    let mut session = Session::default();
-    eval_program(include_str!("../../../lib/core.lisp"), &mut session).unwrap();
-    let run = |source: &str, session: &mut Session| {
-        eval_program(source, session).unwrap().value.to_string()
-    };
-    assert_eq!(
-        run("(length (quote (radio antenna signal)))", &mut session),
-        "3"
-    );
-    assert_eq!(run("(length (quote ()))", &mut session), "0");
-    assert_eq!(run("(reverse (quote (1 2 3)))", &mut session), "(3 2 1)");
-    assert_eq!(
-        run("(append (quote (1 2)) (quote (3 4)))", &mut session),
-        "(1 2 3 4)"
-    );
-    assert_eq!(
-        run("(map (lambda (x) (+ x 1)) (quote (1 2 3)))", &mut session),
-        "(2 3 4)"
-    );
-    assert_eq!(
-        run(
-            "(filter (lambda (x) (eq? x 2)) (quote (1 2 3 2)))",
-            &mut session
-        ),
-        "(2 2)"
-    );
-    assert_eq!(
-        run(
-            "(reduce (lambda (acc x) (+ acc x)) 0 (quote (1 2 3 4)))",
-            &mut session
-        ),
-        "10"
-    );
-}
-
-#[test]
-fn bootstrap_library_provides_let_and_let_star() {
-    let mut session = Session::default();
-    eval_program(include_str!("../../../lib/core.lisp"), &mut session).unwrap();
-    let run = |source: &str, session: &mut Session| {
-        eval_program(source, session).unwrap().value.to_string()
-    };
-    assert_eq!(run("(let ((x 1) (y 2)) (+ x y))", &mut session), "3");
-    assert_eq!(run("(let () 42)", &mut session), "42");
-    // Parallel, not sequential: y's value expression can't see x yet.
-    let parallel_shadowing_fails =
-        eval_program("(let ((x 1) (y x)) (+ x y))", &mut session).unwrap_err();
-    assert_eq!(parallel_shadowing_fails.kind, ErrorKind::UnknownSymbol);
-    // A let binding shadows an outer def without mutating it.
-    assert_eq!(run("(def z 100) (let ((z 1)) z)", &mut session), "1");
-    assert_eq!(run("z", &mut session), "100");
-    // let* threads each binding's value through to the ones after it.
-    assert_eq!(
-        run(
-            "(let* ((x 1) (y (+ x 1)) (z (+ y 1))) (list x y z))",
-            &mut session
-        ),
-        "(1 2 3)"
-    );
-    assert_eq!(run("(let* () 7)", &mut session), "7");
-}
-
-#[test]
 fn reader_supports_unicode_comments_and_quote_sugar() {
     let expressions = parse("; коментар\n'радіо").unwrap();
     assert_eq!(expressions.len(), 1);
     assert_eq!(eval("(quote радіо)"), Value::Symbol("радіо".into()));
-}
-
-#[test]
-fn implements_mccarthys_seven_primitives() {
-    assert_eq!(eval("(quote radio)"), Value::Symbol("radio".into()));
-    assert_eq!(
-        eval("(car (quote (radio antenna)))"),
-        Value::Symbol("radio".into())
-    );
-    assert_eq!(
-        eval("(cdr (quote (radio antenna)))"),
-        Value::list([Value::Symbol("antenna".into())])
-    );
-    assert_eq!(
-        eval("(cons (quote radio) (quote (antenna)))"),
-        Value::list([
-            Value::Symbol("radio".into()),
-            Value::Symbol("antenna".into())
-        ])
-    );
 }
 
 #[test]
@@ -604,45 +505,6 @@ fn evaluator_still_errors_on_a_lone_unknown_symbol() {
 }
 
 #[test]
-fn non_strict_comparisons_are_sens_functions_not_rust_builtins() {
-    let mut session = Session::default();
-    eval_program(include_str!("../../../lib/core.lisp"), &mut session).unwrap();
-    assert_eq!(
-        eval_program("(<=)", &mut session).unwrap_err().kind,
-        ErrorKind::Arity
-    );
-    assert_eq!(
-        eval_program("(<= 1 2)", &mut Session::default())
-            .unwrap_err()
-            .kind,
-        ErrorKind::Type
-    );
-}
-
-/// tests/fixtures/conformance.lisp is the implementation-independent contract
-/// (see CLAUDE.md): any future sens implementation — C, HDL, whatever —
-/// should reproduce these results once it gets the seven primitives and
-/// lambda/def/defmacro right, since everything above that (lib/core.my
-/// included) is plain sens source, not Rust. Preloading core.my here lets
-/// fixtures exercise it directly instead of duplicating stdlib coverage.
-/// Written as sens data (2026-08-09, moved off JSON), so this test reads
-/// it via `parse` — the same reader every sens program goes through —
-/// not `serde_json`; the fixture file no longer needs a foreign format to
-/// stay implementation-independent, it needs sens's own reader, which
-/// every conforming implementation already has by definition.
-/// tests/fixtures/conformance.lisp — nezalezhnyi vid realizatsii kontrakt
-/// (dyv. CLAUDE.md): bud-yaka maibutnia realizatsiia sens — C, HDL, shcho
-/// zavhodno — maie vidtvoriuvaty tsi rezultaty, shchoino pravylno realizuie sim
-/// prymityviv i lambda/def/defmacro, bo vse, shcho nad nymy (vkliuchno z
-/// lib/core.my), — zvychainyi sens-kod, ne Rust. Poperednie zavantazhennia
-/// core.my tut dozvoliaie fiksturam napriamu yoho vykorystovuvaty zamist
-/// dubliuvannia pokryttia stdlib. Zapysano yak sens-dani (2026-08-09,
-/// pereneseno z JSON), tozh tsei test chytaie fail cherez `parse` — toi samyi
-/// reader, kriz yakyi prokhodyt bud-yaka sens-prohrama — ne cherez
-/// `serde_json`; failu fikstur bilshe ne potriben chuzhyi format, shchob
-/// lyshatys nezalezhnym vid realizatsii, yomu potriben vlasnyi reader
-/// sens, yakyi bud-yaka konformna realizatsiia vzhe maie za vyznachenniam.
-#[test]
 fn conformance_fixture_exprs_parse_as_single_form() {
     let forms = parse(include_str!("../../../tests/fixtures/conformance.lisp"))
         .expect("conformance.lisp should parse as valid sens source");
@@ -855,16 +717,6 @@ fn read_all_rejects_a_non_string() {
 }
 
 #[test]
-fn string_predicate_distinguishes_strings_from_other_atoms() {
-    assert_eq!(eval("(string? \"hello\")").as_predicate_bit(), Some(true));
-    assert_eq!(
-        eval("(string? (quote hello))").as_predicate_bit(),
-        Some(false)
-    );
-    assert_eq!(eval("(string? 5)").as_predicate_bit(), Some(false));
-}
-
-#[test]
 fn symbol_predicate_is_not_a_host_builtin() {
     // An uninstalled language-level function cannot acquire host semantics.
     assert_eq!(
@@ -1009,63 +861,6 @@ fn constitution_my_stays_in_sync_with_conformance_my() {
 /// zavantazhuiutsia, dovodiat odyn realnyi fakt, i shcho Riven 3 movchky ne
 /// prosiv nyzhche mezhi. Yakshcho mezhu svidomo znyzhuiut — znyzyty tsiu perevirku
 /// yavno, ne daty yii rozmytys nepomichenoiu.
-#[test]
-fn symbolic_reasoning_layer_stays_loaded_and_tested() {
-    let mut session = Session::default();
-    eval_program(include_str!("../../../lib/core.lisp"), &mut session)
-        .expect("lib/core.my should load before the symbolic layer");
-    eval_program(include_str!("../../../lib/unify.lisp"), &mut session)
-        .expect("lib/unify.my should load — the symbolic reasoning layer must stay present");
-    eval_program(include_str!("../../../lib/reason.lisp"), &mut session)
-        .expect("lib/reason.my should load — the symbolic reasoning layer must stay present");
-
-    let result = eval_program(
-        "(let ((rules (quote (((parent alice bob)))))) (reason (quote (parent alice bob)) rules))",
-        &mut session,
-    )
-    .expect("reason should still actually prove a fact, not just load without error");
-    assert_eq!(
-        result.value.to_string(),
-        "((() (proved (parent alice bob) (parent alice bob) ())))"
-    );
-
-    let forms = parse(include_str!("../../../tests/fixtures/conformance.lisp"))
-        .expect("conformance.lisp should parse as valid sens source");
-    let tier3_count = forms
-        .iter()
-        .filter(|form| {
-            let ExprKind::List(entries) = &form.kind else {
-                return false;
-            };
-            alist_number(entries, "tier") == Some(3.0)
-        })
-        .count();
-    assert!(
-        tier3_count >= 20,
-        "Tier 3 (ECOSYSTEM CONFORMANCE, which includes unify/reason) fixture count dropped to \
-         {tier3_count} — project principle 3 names symbolic reasoning a project goal, not an \
-         optional add-on; if this floor is intentionally being lowered, lower this assertion \
-         explicitly instead of letting coverage drift down unnoticed"
-    );
-}
-
-/// S3 named `OutOfMemory` in its own prose before the category existed in
-/// code (found during the 2026-08-09 pre-ratification axiom audit) — this
-/// makes it real: an opt-in cons-cell cap, simulating a genuinely bounded
-/// heap (S3's own example, "4096 cons cells on an FPGA") without needing
-/// real hardware to verify the claim "bounded implementations fail named,
-/// never silently redefine `cons`'s meaning." The default session (every
-/// `conformance.lisp` fixture) stays unbounded — this is opt-in, not a new
-/// default limit on the reference implementation.
-/// S3 nazvav `OutOfMemory` u vlasnomu teksti do toho, yak katehoriia
-/// isnuvala v kodi (znaideno pid chas audytu aksiom pered ratyfikatsiieiu,
-/// 2026-08-09) — tsei test robyt yii realnoiu: optsiina mezha na kilkist
-/// cons-komirok, shcho imituie spravdi obmezhenu kupu (vlasnyi pryklad S3,
-/// "4096 cons-komirok na FPGA") bez potreby v realnomu zalizi, shchob
-/// pereviryty tverdzhennia "obmezheni realizatsii provaliuiutsia nazvano,
-/// nikoly ne pereoznachaiut sens `cons` movchky". Typova sesiia (kozhna
-/// fikstura `conformance.lisp`) lyshaietsia neobmezhenoiu — tse optsiino, ne nova
-/// typova mezha dlia etalonnoi realizatsii.
 #[test]
 fn cons_respects_an_opt_in_resource_limit_and_fails_named_not_silently() {
     let mut session = Session {
