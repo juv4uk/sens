@@ -148,7 +148,7 @@ def main() -> int:
     lines = [
         "## SENS: cold process / Session / Core4 startup measurements",
         "",
-        f"Hosted CPU: \`{report['cpu']}\`; {args.samples} new processes per mode.",
+        f"Hosted CPU: `{report['cpu']}`; {args.samples} new processes per mode.",
         "",
         "| Mode | Process wall median (µs) | Inner Rust phase median (µs) | Status |",
         "|---|---:|---:|---|",
@@ -156,12 +156,12 @@ def main() -> int:
     for row in report["rows"]:
         if row["status"] == "MEASURED":
             lines.append(
-                f"| \`{row['mode']}\` | {row['median_process_wall_ns']/1000:.2f} "
+                f"| `{row['mode']}` | {row['median_process_wall_ns']/1000:.2f} "
                 f"| {row['median_inner_ns']/1000:.2f} | MEASURED |"
             )
         else:
             lines.append(
-                f"| \`{row['mode']}\` | — | — | BLOCKED: {row['reason'].replace('|', '/')} |"
+                f"| `{row['mode']}` | — | — | BLOCKED: {row['reason'].replace('|', '/')} |"
             )
     lines.extend([
         "",
