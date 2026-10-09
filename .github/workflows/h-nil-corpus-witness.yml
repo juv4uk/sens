@@ -5,6 +5,7 @@ on:
     paths:
       - "lib/**"
       - "language-contract.lisp"
+      - "knowledge/d1-d9-foundation.json"
       - "crates/sens/src/eval/canon.rs"
       - "experiments/research-2019-h-nil-corpus.py"
       - "tests/test_h_nil_current_contract.py"
@@ -16,6 +17,7 @@ on:
     paths:
       - "lib/**"
       - "language-contract.lisp"
+      - "knowledge/d1-d9-foundation.json"
       - "crates/sens/src/eval/canon.rs"
       - "experiments/research-2019-h-nil-corpus.py"
       - "tests/test_h_nil_current_contract.py"
