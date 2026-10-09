@@ -1,0 +1,174 @@
+{
+  "schema": "d10-cross-hobby-pinhole-geometric-law/v1",
+  "date": "2026-10-09",
+  "status": "HOLD-RESEARCH-UNRATIFIED",
+  "authority": [
+    "#4013",
+    "#4162",
+    "#4182",
+    "#4301",
+    "#4463"
+  ],
+  "snapshot": {
+    "selected": 634,
+    "remaining": 390,
+    "d10_git_blob": "65014431ac3e64633cd0be3630cfafc5e7a9aea3",
+    "d1_d9_git_blob": "09d1d71c39d1484dfd005a5068dbb18b76f0f0d4",
+    "ratified": 0
+  },
+  "source": {
+    "kind": "official reference mathematical model",
+    "publisher": "OpenCV",
+    "url": "https://docs.opencv.org/5.0/main_modules/calib.html",
+    "anchor": "Camera Calibration, pinhole intrinsics camera matrix",
+    "law": "u=fx * Xc/Zc + cx, v=fy * Yc/Zc + cy, Zc != 0; inverse normalized ray x=(u-cx)/fx, y=(v-cy)/fy",
+    "exclusions": "lens radial/tangential distortion, extrinsic pose, sensor physical pitch, zoom calibration and actual hardware measurements"
+  },
+  "provenance": {
+    "interest_donors": [
+      "astrophotography using a real camera/zoom lens",
+      "astronomy and sky coordinates",
+      "3D space simulation",
+      "FPGA exact rational geometry"
+    ],
+    "provenance_type": "user research motivation only, not a claim of implemented author-owned camera calibration code"
+  },
+  "policy": {
+    "selected_delta": 0,
+    "ratified_delta": 0,
+    "coordinate_delta": 0,
+    "one_d10_stream": true,
+    "physical_t5_admission": false,
+    "interpretation": "research candidates for language-visible mathematical laws, NOT source-implemented SENS semantics; require D1-D9 exact and behavioral dedup, Core-vs-library justification, independent oracle before selection"
+  },
+  "candidates": [
+    {
+      "semantic_name": "PINHOLE-IMAGE-PROJECT",
+      "surface_uk": "перспективо-проєкція",
+      "surface_ukr": "проєктувати-тривимірну-точку-на-площину",
+      "status": "HOLD-EXACT-MATH-DERIVABILITY",
+      "width": 10,
+      "coordinate": null,
+      "ratified": false,
+      "arity": 8,
+      "arguments": "(Xc,Yc,Zc,fx,fy,cx,cy) all exact rationals, Zc != 0",
+      "behavior": "Return exact (u,v)=(fx*Xc/Zc+cx,fy*Yc/Zc+cy). Mathematically defined for negative Z too; a separate physical visibility predicate may require Z>0. Do not silently apply lens distortion or infer extrinsics.",
+      "positives": [
+        {
+          "args": [
+            "2",
+            "3",
+            "4",
+            "10",
+            "20",
+            "3",
+            "4"
+          ],
+          "expected": [
+            "8",
+            "19"
+          ]
+        },
+        {
+          "args": [
+            "1",
+            "-1",
+            "2",
+            "3",
+            "5",
+            "0",
+            "0"
+          ],
+          "expected": [
+            "3/2",
+            "-5/2"
+          ]
+        }
+      ],
+      "falsifiers": [
+        "Zc=0 is an explicit invalid projection, not infinity, a float, or a dropped point.",
+        "Scaling (Xc,Yc,Zc) by any nonzero rational must not change the pixel projection.",
+        "Optical distortion/pose and sensor pitch cannot be introduced implicitly."
+      ],
+      "dedup": "Exact name absent among 634 D10 and D1-D9; this may be a projection of exact division/multiplication and matrix algebra. Status HOLD until behavioral dedup and Core root minimality."
+    },
+    {
+      "semantic_name": "PIXEL-TO-CAMERA-RAY",
+      "surface_uk": "піксель-промінь",
+      "surface_ukr": "відновити-напрям-променя-з-пікселя",
+      "status": "HOLD-EXACT-MATH-DERIVABILITY",
+      "width": 10,
+      "coordinate": null,
+      "ratified": false,
+      "arity": 6,
+      "arguments": "(u,v,fx,fy,cx,cy) all exact rationals, fx != 0, fy != 0",
+      "behavior": "Return canonical unnormalized direction ((u-cx)/fx,(v-cy)/fy,1) in camera coordinates. This is a RAY, not a reconstructed 3D point/depth. For a distortion-free pinhole, projecting any nonzero exact multiple of the direction returns the original pixel.",
+      "positives": [
+        {
+          "args": [
+            "8",
+            "19",
+            "10",
+            "20",
+            "3",
+            "4"
+          ],
+          "expected": [
+            "1/2",
+            "3/4",
+            "1"
+          ]
+        },
+        {
+          "args": [
+            "0",
+            "0",
+            "2",
+            "3",
+            "0",
+            "0"
+          ],
+          "expected": [
+            "0",
+            "0",
+            "1"
+          ]
+        }
+      ],
+      "falsifiers": [
+        "fx=0 or fy=0 must not be accepted.",
+        "Recovered ray may not falsely claim unique object distance.",
+        "Composing ray and projection must reproduce the input pixel exactly."
+      ],
+      "dedup": "Exact name absent in selected D10 and D1-D9; projection from exact arithmetic and matrix inverse may make this a derived library function."
+    }
+  ],
+  "derived_and_hold": [
+    {
+      "name": "PINHOLE-RAY-PIXEL-COMPOSITION",
+      "status": "DERIVED",
+      "reason": "Forward project of canonical inverse ray is identity; theorem, not a third operation."
+    },
+    {
+      "name": "CAMERA-DEPTH-FROM-PIXEL",
+      "status": "FALSIFIED",
+      "reason": "One pinhole image coordinate cannot recover an absolute 3D depth without additional information."
+    },
+    {
+      "name": "REAL-LENS-DISTORTION-CALIBRATION",
+      "status": "HOLD",
+      "reason": "Would require measured radial/tangential coefficients and device calibration, not inferred from user's camera model."
+    },
+    {
+      "name": "CAMERA-EXTRINSIC-POSE",
+      "status": "HOLD",
+      "reason": "Full world-to-camera rigid transform is an independent data/model contract; outside this proposal."
+    }
+  ],
+  "required_oracles": [
+    "Independent Python Fraction exact algebra test over at least 10^4 bounded points",
+    "OpenCV primary equation verified with scale-invariance countermodels",
+    "Native SENS exact rational implementation equality oracle prior to SELECTED"
+  ],
+  "owner_decision": "No ratification implied; mathematical equivalence to existing D6/D8/D9 arithmetic may keep both as normal self-hosted library projections."
+}
