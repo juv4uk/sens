@@ -23,12 +23,17 @@ mod domain_surface_generated {
     include!("domain_surface_registry_generated.rs");
 }
 
+mod d7_display_generated {
+    include!("d7_display_registry_generated.rs");
+}
+
 mod d5_definition_bindings_generated {
     include!("d5_definition_bindings_generated.rs");
 }
 
 use d5_definition_bindings_generated::D5_DEFINITION_BINDINGS;
 use domain_surface_generated::DOMAIN_SURFACE_ROWS;
+use d7_display_generated::D7_DISPLAY_ROWS;
 use generated::{SemanticRow, SEMANTIC_ROWS};
 
 pub(crate) type SemanticId = Sens8;
@@ -139,6 +144,19 @@ pub(crate) fn surface_for_domain_identity(
     identity: DomainIdentity,
     namespace: &str,
 ) -> Option<&'static str> {
+    // D7 is a sound/text *display* projection only. Its exact W7 coordinate
+    // is already known; no reverse name lookup or callable status is inferred.
+    if matches!(identity, DomainIdentity::D7(_)) {
+        let row = D7_DISPLAY_ROWS.iter().find(|row|
+            u16::from(row.bits) == identity.packed_bits()
+        )?;
+        return match namespace {
+            "uk" => Some(row.uk),
+            "sa" => Some(row.sa),
+            _ => None,
+        };
+    }
+
     DOMAIN_SURFACE_ROWS
         .iter()
         .find(|row| {
