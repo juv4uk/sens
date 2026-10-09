@@ -44,6 +44,24 @@ fn verify_companion(source: &str, binary: &[u8]) -> Result<(), String> {
     Ok(())
 }
 
+/// Expand a rejected *structural* physical T5 stream into the exact existing
+/// canonical D2 parser diagnostic. This is diagnostic-only: never substitute
+/// the parser result for open_ternary_program admission. Invalid transport
+/// stays invalid transport, without guessing a source width or era.
+fn explain_d2_rejection(bytes: &[u8], error: sens::TernaryTransportError) -> String {
+    let mut message = format!("{error:?}");
+    if matches!(error, sens::TernaryTransportError::InvalidProgramSyntax) {
+        if let Ok(words) = sens::decode_ternary_words(bytes) {
+            let visible = sens::render_ternary_words_spaced(&words);
+            if let Err(detail) = sens::parse_canonical_binary(&visible) {
+                message.push_str("; canonical D2: ");
+                message.push_str(&detail.render(&visible));
+            }
+        }
+    }
+    message
+}
+
 /// Run the explicitly requested SENS program on the current capability-free
 /// evaluator. Transport identity, D2 structural parsing, then semantic eval
 /// are independent gates; success does not prove that an old Lisp source
@@ -60,7 +78,7 @@ fn eval_t5_bytes_core4(
     bootstrap_core: bool,
 ) -> Result<sens::EvalResult, String> {
     let visible = sens::open_ternary_program(bytes)
-        .map_err(|e| format!("physical T5/D2 decode rejected: {e:?}"))?;
+        .map_err(|e| format!("physical T5/D2 decode rejected: {}", explain_d2_rejection(bytes, e)))?;
     let forms = sens::parse_canonical_binary(&visible)
         .map_err(|e| format!("canonical SENS parser rejected: {}", e.render(&visible)))?;
     let mut session = sens::Session::default();
@@ -117,7 +135,7 @@ fn execute() -> Result<(), String> {
         "open" | "view" => {
             let bytes = read_sens(path)?;
             let human = sens::open_ternary_program(&bytes)
-                .map_err(|e| format!("open .sens: {e:?}"))?;
+                .map_err(|e| format!("open .sens: {}", explain_d2_rejection(&bytes, e)))?;
             // ЄДИНИЙ видимий роздільник — ASCII space; 2 / EOS / pad сховані.
             println!("{human}");
             Ok(())
@@ -265,6 +283,33 @@ mod eval_tests {
                 .into_iter().map(|word| word.word).collect::<Vec<_>>()
         ).unwrap();
         assert!(explain_t5_bytes(&bad_d2).unwrap_err().contains("D2 grammar rejected"));
+    }
+
+    #[test]
+    fn invalid_d2_close_has_exact_parser_diagnostic_but_remains_blocked() {
+        let bad = sens::encode_ternary_words(&[
+            sens::parse_binary_source_words("01").unwrap()[0].word,
+        ]).expect("valid T5 transport can contain invalid D2 grammar");
+        let open_error = sens::open_ternary_program(&bad).unwrap_err();
+        let diagnostic = explain_d2_rejection(&bad, open_error);
+        assert!(diagnostic.contains("InvalidProgramSyntax"));
+        assert!(diagnostic.contains("unexpected D2 close word 01"), "{diagnostic}");
+        assert!(eval_t5_bytes(&bad).is_err(), "explanation cannot grant execution");
+    }
+
+    #[test]
+    fn invalid_d2_dot_has_parser_reason_and_bad_transport_keeps_transport_error() {
+        let bad = sens::encode_ternary_words(&[
+            sens::parse_binary_source_words("11").unwrap()[0].word,
+        ]).unwrap();
+        let diagnostic = explain_d2_rejection(&bad, sens::open_ternary_program(&bad).unwrap_err());
+        assert!(diagnostic.contains("misplaced D2 dot word 11"), "{diagnostic}");
+
+        let corrupt = [0xf3u8];
+        let error = sens::open_ternary_program(&corrupt).unwrap_err();
+        let transport_diagnostic = explain_d2_rejection(&corrupt, error);
+        assert!(!transport_diagnostic.contains("canonical D2:"));
+        assert!(eval_t5_bytes(&corrupt).is_err());
     }
 
     #[test]
