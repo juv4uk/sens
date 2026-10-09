@@ -20,7 +20,7 @@ permissions:
 
 jobs:
   verify:
-    runs-on: [self-hosted, Linux, X64, gpu, gtx-1050-ti, cuda-12.6]
+    runs-on: ubuntu-24.04  # CPU-only Python + Rust witnesses; no local or CUDA runner
     timeout-minutes: 15
     steps:
       - uses: actions/checkout@v5
