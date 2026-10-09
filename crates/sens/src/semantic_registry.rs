@@ -157,12 +157,6 @@ fn live_rows() -> &'static [SemanticRow] {
     SEMANTIC_ROWS
 }
 
-fn registry_byte_for_surface(name: &str) -> Option<u8> {
-    live_rows()
-        .iter()
-        .find(|row| row.surfaces.iter().any(|surface| surface.name == name))
-        .map(|row| row.semantic_id)
-}
 
 
 pub(crate) fn admitted_semantic_ids() -> Vec<SemanticId> {
