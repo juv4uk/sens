@@ -1,0 +1,169 @@
+name: Verify 507 compiled encoder current
+
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/verify-507-compiled-encoder-current.yml'
+
+jobs:
+  compiled-encoder:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - name: Checkout my-lisp
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      - name: Checkout pinned CML after top-level Def fix
+        uses: actions/checkout@v5
+        with:
+          repository: juv4uk/cml
+          ref: cd06c21a9851d123504b66bbe640472661210d56
+          path: _cml
+          submodules: recursive
+
+      - uses: dtolnay/rust-toolchain@stable
+
+      - name: Move CML outside my-lisp workspace
+        shell: bash
+        run: |
+          rm -rf /tmp/cml-pinned
+          cp -a _cml /tmp/cml-pinned
+
+      - name: Extract Lisp-owned encoder bootstrap definitions
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+
+          source = Path("lib/core.lisp").read_text(encoding="utf-8")
+          wanted = ["list", "largest-chunk", "quotient", "mod"]
+          forms = []
+
+          def extract_form(name: str) -> str:
+              needle = f"(def {name}"
+              starts = []
+              pos = 0
+              while True:
+                  pos = source.find(needle, pos)
+                  if pos < 0:
+                      break
+                  starts.append(pos)
+                  pos += len(needle)
+              if len(starts) != 1:
+                  raise SystemExit(f"expected exactly one {needle!r}, found {len(starts)}")
+
+              start = starts[0]
+              depth = 0
+              in_string = False
+              escaped = False
+              in_comment = False
+              for i in range(start, len(source)):
+                  ch = source[i]
+                  if in_comment:
+                      if ch == "\n":
+                          in_comment = False
+                      continue
+                  if in_string:
+                      if escaped:
+                          escaped = False
+                      elif ch == "\\":
+                          escaped = True
+                      elif ch == '"':
+                          in_string = False
+                      continue
+                  if ch == ";":
+                      in_comment = True
+                  elif ch == '"':
+                      in_string = True
+                  elif ch == "(":
+                      depth += 1
+                  elif ch == ")":
+                      depth -= 1
+                      if depth == 0:
+                          return source[start:i + 1]
+              raise SystemExit(f"unterminated form for {name}")
+
+          for name in wanted:
+              forms.append(extract_form(name))
+
+          Path("/tmp/encoder-bootstrap.lisp").write_text(
+              "\n\n".join(forms) + "\n",
+              encoding="utf-8",
+          )
+          print("EXTRACTED_ENCODER_BOOTSTRAP=" + ",".join(wanted))
+          PY
+
+          grep -F '(def list' /tmp/encoder-bootstrap.lisp
+          grep -F '(def largest-chunk' /tmp/encoder-bootstrap.lisp
+          grep -F '(def quotient' /tmp/encoder-bootstrap.lisp
+          grep -F '(def mod' /tmp/encoder-bootstrap.lisp
+
+      - name: Prove compiled RET parity
+        shell: bash
+        run: |
+          cat > /tmp/ret-interpreted.lisp <<'LISP'
+          (load "lib/core.lisp")
+          (load "lib/machine/encoding/x86-64.lisp")
+          (x86-encode-ret)
+          LISP
+
+          interpreted="$(cargo run --quiet -p my-lisp-cli --bin my-lisp -- /tmp/ret-interpreted.lisp)"
+          printf 'INTERPRETED_ENCODER_RET=%s\n' "$interpreted"
+
+          cat /tmp/encoder-bootstrap.lisp > /tmp/ret-compiled.lisp
+          cat lib/machine/encoding/x86-64.lisp >> /tmp/ret-compiled.lisp
+          printf '\n(x86-encode-ret)\n' >> /tmp/ret-compiled.lisp
+
+          (cd /tmp/cml-pinned && cargo run --quiet --bin cml -- build /tmp/ret-compiled.lisp -o /tmp/ret-host)
+          compiled="$(/tmp/ret-host)"
+          printf 'COMPILED_ENCODER_RET=%s\n' "$compiled"
+
+          test "$interpreted" = "(195)"
+          test "$compiled" = "$interpreted"
+
+      - name: Prove compiled MOV byte parity and CPU result parity
+        shell: bash
+        run: |
+          cat > /tmp/mov-interpreted.lisp <<'LISP'
+          (load "lib/core.lisp")
+          (load "lib/machine/encoding/x86-64.lisp")
+          (x86-encode-mov-r64-imm64 (quote rax) 42)
+          LISP
+
+          interpreted_mov="$(cargo run --quiet -p my-lisp-cli --bin my-lisp -- /tmp/mov-interpreted.lisp)"
+          printf 'INTERPRETED_ENCODER_MOV=%s\n' "$interpreted_mov"
+
+          cat /tmp/encoder-bootstrap.lisp > /tmp/mov-compiled.lisp
+          cat lib/machine/encoding/x86-64.lisp >> /tmp/mov-compiled.lisp
+          printf '\n(x86-encode-mov-r64-imm64 (quote rax) 42)\n' >> /tmp/mov-compiled.lisp
+
+          (cd /tmp/cml-pinned && cargo run --quiet --bin cml -- build /tmp/mov-compiled.lisp -o /tmp/mov-host)
+          compiled_mov="$(/tmp/mov-host)"
+          printf 'COMPILED_ENCODER_MOV=%s\n' "$compiled_mov"
+
+          expected_mov='(72 184 42 0 0 0 0 0 0 0)'
+          test "$interpreted_mov" = "$expected_mov"
+          test "$compiled_mov" = "$expected_mov"
+
+          interpreted_program="$(printf '%s\n' "$interpreted_mov" | sed 's/)$/ 195)/')"
+          compiled_program="$(printf '%s\n' "$compiled_mov" | sed 's/)$/ 195)/')"
+          expected_program='(72 184 42 0 0 0 0 0 0 0 195)'
+
+          test "$interpreted_program" = "$expected_program"
+          test "$compiled_program" = "$expected_program"
+
+          printf '(native-call-u64-raw (quote %s))\n' "$interpreted_program" > /tmp/run-interpreted-bytes.lisp
+          printf '(native-call-u64-raw (quote %s))\n' "$compiled_program" > /tmp/run-compiled-bytes.lisp
+
+          result_a="$(cargo run --quiet -p my-lisp-cli --bin my-lisp -- /tmp/run-interpreted-bytes.lisp)"
+          result_b="$(cargo run --quiet -p my-lisp-cli --bin my-lisp -- /tmp/run-compiled-bytes.lisp)"
+          printf 'CPU_FROM_INTERPRETED_BYTES=%s\n' "$result_a"
+          printf 'CPU_FROM_COMPILED_BYTES=%s\n' "$result_b"
+
+          test "$result_a" = "42"
+          test "$result_b" = "42"
+
+      - name: Diff hygiene
+        run: git diff --check HEAD^ HEAD
