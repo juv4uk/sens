@@ -22,7 +22,6 @@
              atom-sid
              (00000001 evaluator)
              (00000001 atom-primitive)))
-         (1)
          (00000111
            ((00100010
               plus-prolog
@@ -31,7 +30,6 @@
                 plus-sid
                 (00000001 prolog)
                 (00000001 bounded-exact-add)))
-            (1)
             (00000111
               ((00100010
                  missing
@@ -39,7 +37,6 @@
                    (00000001 mechanism-unavailable)
                    atom-sid
                    (00000001 prolog)))
-               (1)
                (00000111
                  ((00100010
                     no-route
@@ -47,7 +44,6 @@
                       (00000001 mechanism-unavailable)
                       11111111
                       (00000001 evaluator)))
-                  (1)
                   (00000111
                     ((00100010
                        quoted-shadow
@@ -55,7 +51,6 @@
                          (00000001 mechanism-selection-failure)
                          (00000001 sid-not-in-function-table)
                          "00001100"))
-                     (1)
                      (00000001 (mechanism-selector-1047 (status pass))))
                     (t (00000101 (00000001 ())))))
                  (t (00000101 (00000001 ())))))
