@@ -1,0 +1,23 @@
+name: D10 Interlisp DWIM safe correction research
+on:
+  pull_request:
+    paths:
+      - 'knowledge/d10-interlisp-dwim-safe-suggestion-v1.json'
+      - 'scripts/check_d10_interlisp_dwim_safe_suggestion.py'
+      - 'tests/test_d10_interlisp_dwim_safe_suggestion.py'
+      - 'docs/research/d10-interlisp-dwim-safe-suggestion.uk.md'
+      - '.github/workflows/d10-interlisp-dwim-safe-suggestion.yml'
+      - 'knowledge/d1-d9-foundation.json'
+      - 'knowledge/d10-v1-semantic-inventory.json'
+  workflow_dispatch:
+
+jobs:
+  fail-closed-dwim-research:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - name: Hard domain and no-ratification gate
+        run: python3 -B scripts/check_d10_interlisp_dwim_safe_suggestion.py --verify-repo
+      - name: Reference witness + adversarial tests
+        run: python3 -m unittest discover -s tests -p 'test_d10_interlisp_dwim_safe_suggestion.py' -v
