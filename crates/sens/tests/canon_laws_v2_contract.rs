@@ -97,6 +97,20 @@ fn executable_canon_speaks_layered_answer_semantics() {
             "(witness-status (witness-verdict (quote {}) (quote {})))",
             row.source, actual
         );
+        if row.expr == "canon-empty-list" {
+            eprintln!("#229 diagnostic actual envelope: {actual}");
+            for (label, probe) in [
+                ("FIELD", format!("(witness-field (quote expected) (quote {}))", row.source)),
+                ("SUPERSEDED", format!("(witness-superseded-outcome (quote {}) (witness-field (quote expected) (quote {})))", row.source, row.source)),
+                ("EXPECTED", format!("(witness-expected-outcome (quote {}))", row.source)),
+                ("VERDICT", format!("(witness-verdict (quote {}) (quote {}))", row.source, actual)),
+            ] {
+                match eval_program(&probe, &mut session) {
+                    Ok(value) => eprintln!("#229 diagnostic {label}: {}", value.value),
+                    Err(error) => eprintln!("#229 diagnostic {label}: ERROR {error}"),
+                }
+            }
+        }
         let status = eval_program(&program, &mut session)
             .unwrap_or_else(|error| panic!("#229 witness verdict failed for {}: {error}", row.expr))
             .value
