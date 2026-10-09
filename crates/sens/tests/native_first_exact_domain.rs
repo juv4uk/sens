@@ -28,7 +28,9 @@ fn d2_delimiters_remain_structural_and_a_lone_close_fails_closed() {
     assert_eq!(program.len(), 1);
     assert!(matches!(&program[0].kind, ExprKind::List(items) if items.is_empty()));
     // The other D2 control words also cannot masquerade as values.
-    assert!(parse_canonical_binary("00").is_err());
+    // Separator is allowed *between* expressions (including an empty
+    // program), but it never becomes a payload/domain identity.
+    assert!(parse_canonical_binary("00").expect("D2 separator is skippable").is_empty());
     assert!(parse_canonical_binary("11").is_err());
 }
 
