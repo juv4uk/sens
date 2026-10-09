@@ -1,0 +1,45 @@
+name: D10 symbolic AI CLP support witnesses
+
+on:
+  pull_request:
+    paths:
+      - knowledge/d10-symbolic-ai-arc-support-20261009.json
+      - knowledge/d10-symbolic-ai-clp-oracle-evidence-v1.json
+      - docs/research/D10-SYMBOLIC-AI-BINARY-SUPPORT.uk.md
+      - tests/test_d10_ai_arc_support.py
+      - tests/oracles/d10_clpfd_arc_support.pl
+      - .github/workflows/d10-symbolic-ai-arc-support.yml
+  push:
+    branches:
+      - main
+    paths:
+      - knowledge/d10-symbolic-ai-arc-support-20261009.json
+      - knowledge/d10-symbolic-ai-clp-oracle-evidence-v1.json
+      - tests/test_d10_ai_arc_support.py
+      - tests/oracles/d10_clpfd_arc_support.pl
+      - .github/workflows/d10-symbolic-ai-arc-support.yml
+
+permissions:
+  contents: read
+
+jobs:
+  genuine-clp-donor:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - name: Mathematical 32768 finite-relationship cases and research-only status
+        run: python3 -m unittest discover -s tests -p test_d10_ai_arc_support.py -v
+      - name: Install real SWI-Prolog CLP(FD)
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq swi-prolog-nox
+          swipl --version
+      - name: Generate deterministic independent language oracle cases
+        run: python3 tests/test_d10_ai_arc_support.py --emit /tmp/d10-arc-cases.json
+      - name: Run real tuples_in/2 and labeling/2 donor
+        run: |
+          swipl -q -s tests/oracles/d10_clpfd_arc_support.pl -- /tmp/d10-arc-cases.json /tmp/d10-arc-observed.json
+      - name: Verify exact Python vs Prolog outcomes on the same 768 cases
+        run: |
+          python3 tests/test_d10_ai_arc_support.py --check /tmp/d10-arc-observed.json /tmp/d10-arc-cases.json

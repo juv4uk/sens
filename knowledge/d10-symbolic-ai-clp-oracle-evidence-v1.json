@@ -1,0 +1,53 @@
+{
+  "schema": "d10-symbolic-ai-clp-oracle-evidence/v1",
+  "date": "2026-10-09",
+  "status": "DONOR-OBSERVED-RESEARCH-NOT-SENS-EXECUTION",
+  "source_programs": [
+    "tests/test_d10_ai_arc_support.py",
+    "tests/oracles/d10_clpfd_arc_support.pl"
+  ],
+  "historical_mackworth_doi": "10.1016/0004-3702(77)90007-8",
+  "pinned_upstream_source": "SWI-Prolog/swipl-devel@6333852cd94c69a120f03f270e0d6c9e2eca72a3:library/clp/clpfd.pl:4074-4145",
+  "pinned_source_note": "Historical upstream source snapshot for tuples_in/2; the hosted apt runtime version is SWI-Prolog 9.0.4 and not claimed byte-for-byte identical to this source commit.",
+  "observed_runtime": "SWI-Prolog 9.0.4 for x86_64-linux",
+  "observed_source_ref": "https://github.com/juv4uk/sens/actions/runs/37907331442",
+  "observed_job_id": 113743847004,
+  "observed_commit_sha": "ad9c49e07661db4c8f45daa7f49fedb757f839f4",
+  "mathematical_python": {
+    "cases": 32768,
+    "supported": 19759,
+    "conflicts": 13009,
+    "groups_passed": 5
+  },
+  "real_swi_prolog": {
+    "shared_cases": 768,
+    "matched": 768,
+    "predicate": "clpfd:tuples_in/2",
+    "enumeration": "clpfd:labeling/2"
+  },
+  "observed_log_lines": [
+    "Ran 5 tests in 0.583s",
+    "D10-SYMBOLIC-CLP: exhaustive PASS 32768 supported=19759 conflicts=13009",
+    "SWI-Prolog version 9.0.4 for x86_64-linux",
+    "D10-SYMBOLIC-CLP: SWI-Prolog real tuples_in/2 executed 768 cases",
+    "D10-SYMBOLIC-CLP: REAL-SWIPL-PARITY PASS 768/768"
+  ],
+  "constraints_unproven": [
+    "Full semantic non-duplication from owner-ratified D1–D9",
+    "Full semantic non-duplication against live D10 selected",
+    "Whether binary support projection belongs in D10 Core rather than derived CLP library",
+    "SENS runtime, native FPGA/CUDA or actual .sens physical execution",
+    "Owner ratification or bit coordinate"
+  ],
+  "authority": {
+    "new_selected": 0,
+    "new_ratified": 0,
+    "new_coordinates": 0
+  },
+  "hosted_ci": {
+    "status": "FAILED-UNRELATED-CRATE-WITNESS",
+    "run": "https://github.com/juv4uk/sens/actions/runs/37907331330",
+    "failing_test": "crates/sens/tests/canon_laws_v2_contract.rs:101 executable_canon_speaks_layered_answer_semantics, #229 canon-empty-list no query matched expected result",
+    "note": "The research PR modifies no Rust tests or D1–D9 semantics; this independent Hosted CI issue is under coordination, not asserted definitively to be a pre-existing main failure."
+  }
+}
