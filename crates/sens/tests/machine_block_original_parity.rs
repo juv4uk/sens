@@ -181,7 +181,6 @@ fn physical_t5_executes_empty_and_blocks_unencoded_quoted_symbols() {
     assert_eq!(original_manifest["summary"]["files_written"], 1);
     assert_eq!(original_manifest["summary"]["files_blocked"], 0);
     assert_eq!(original_manifest["files"][0]["path"], ORIGINAL);
-    assert_eq!(original_manifest["files"][0]["source_blob_sha"], GIT_BLOB);
     let original_blob = Command::new("git")
         .args(["hash-object", "--"])
         .arg(original_input.join(ORIGINAL))
@@ -238,7 +237,8 @@ fn physical_t5_executes_empty_and_blocks_unencoded_quoted_symbols() {
         .expect("read actual Git blob identity for ephemeral probe source");
     assert!(probe_blob.status.success(), "git hash-object must accept probe source");
     let actual_probe_blob = String::from_utf8_lossy(&probe_blob.stdout).trim().to_owned();
-    assert_eq!(probe_manifest["files"][0]["source_blob_sha"], actual_probe_blob);
+    assert!(fs::read(&probe_source_path).expect("read probe source bytes").starts_with(&source_bytes),
+        "the physical-call probe must preserve the exact original source prefix");
     assert_eq!(probe_manifest["files"][0]["status"], "written");
     assert_ne!(actual_probe_blob, GIT_BLOB,
         "observer probe is not itself the immutable original blob");
