@@ -1,4 +1,4 @@
-name: Exact-width function status census
+name: Historical pre-cleanroom exact-width function census
 
 on:
   pull_request:
@@ -21,15 +21,16 @@ on:
   workflow_dispatch:
 
 jobs:
-  census:
+  historical-census:
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
       - uses: actions/checkout@v5
-      - name: Check exact-width census
+      - name: Reproduce historical pre-cleanroom census
         run: |
           rm -rf /tmp/function-status-census
           python3 scripts/research-2351-exact-width-function-census.py \
+            --historical-pre-cleanroom \
             --check \
             --out /tmp/function-status-census
       - name: Publish summary
@@ -39,7 +40,7 @@ jobs:
           import json
           from pathlib import Path
           p=Path("/tmp/function-status-census/function-status-census-summary.json")
-          print("## Exact-width function census — #2351")
+          print("## Historical pre-cleanroom exact-width function census — #2351")
           print()
           if not p.exists():
               print("summary missing")
@@ -53,11 +54,12 @@ jobs:
               print(f"- bounded residue: {c['residue']}")
               print(f"- generated lower bound: {s['generated_fraction_of_active_rows']:.1%}")
               print()
+              print("HISTORICAL ONLY: these counts predate bīja3 A / D4 clean-room #3225 and are not current semantic census authority.")
               print("UNKNOWN is not an independent-root claim.")
           PY
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: exact-width-function-census
+          name: historical-pre-cleanroom-exact-width-function-census
           path: /tmp/function-status-census/
           retention-days: 14
