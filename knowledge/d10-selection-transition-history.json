@@ -116,6 +116,36 @@
         "tests/test_d10_primitive_binary_word_root.py",
         "tests/d10_primitive_binary_root_chez.ss"
       ]
+    },
+    {
+      "id": "d10.hobby.gray.reflected-word.after-primitive-root.20261009",
+      "authority": "#4013 #4463 owner FPGA-SDR-electronics-horology domain growth",
+      "evidence": [
+        "Frank Gray US2632058A 1953",
+        "IBM Johnsson/Ho 1995 binary reflected code",
+        "juv4uk/sens@0cf23c95660aa7ae199e6f683bc76f14eabbf958:knowledge/d10-gray-reflected-binary-research-v1.json:36-76"
+      ],
+      "previous_inventory_blob_sha": "7683f1e2bfcf67d3a45d412d3b1790b72ad623ad",
+      "resulting_inventory_blob_sha": "65014431ac3e64633cd0be3630cfafc5e7a9aea3",
+      "added_stable_ids": [
+        "d10.fpga.gray.encode-word.20261009",
+        "d10.fpga.gray.decode-word.20261009"
+      ],
+      "appended_sources": [
+        "knowledge/d10-gray-reflected-binary-research-v1.json"
+      ],
+      "coordinates_added": 0,
+      "ratified_added": 0,
+      "delta_selected": 2,
+      "previous_selected": 632,
+      "resulting_selected": 634,
+      "decision": "RESEARCH SELECTED / owner ratification and Core-library minimality pending",
+      "tests": [
+        "scripts/check_d10_gray_word_selection.py",
+        "tests/d10_gray_word_r6rs.ss",
+        "scripts/check-d10-proposal-ledger.py",
+        "scripts/check_d10_selection_transition_history.py"
+      ]
     }
   ]
 }

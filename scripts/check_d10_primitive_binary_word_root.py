@@ -40,21 +40,21 @@ def check(dossier,inv,lower,history):
     assert len(target["positive_witnesses"]) >= 5 and len(target["falsifiers"]) >= 2
     assert "minimal_period" in target["falsifiers"][0]
     assert target["primary_url"].startswith("https://doc.sagemath.org/")
-    assert len(inv["rows"]) == inv["accounting"]["selected_semantic_candidates"] == 632
-    assert inv["accounting"]["remaining_semantic_inventory"] == 392
-    assert inv["accounting"]["unplaced_selected_candidates"] == 376
+    assert len(inv["rows"]) == inv["accounting"]["selected_semantic_candidates"] >= 632
+    assert inv["accounting"]["remaining_semantic_inventory"] == 1024-len(inv["rows"])
+    assert inv["accounting"]["unplaced_selected_candidates"] == len(inv["rows"])-256
     assert inv["accounting"]["law_forced_coordinates"] == 256
     assert inv["accounting"]["ratified_d10_residents"] == 0
-    assert inv["rows"][-1] == target, "selected row not identical to source-law dossier"
-    assert inv["rows"][-1]["coordinate"] is None
-    prev=[r["semantic_name"].upper() for r in inv["rows"][:-1]]
+    assert inv["rows"][631] == target, "selected row not identical to source-law dossier"
+    assert inv["rows"][631]["coordinate"] is None
+    prev=[r["semantic_name"].upper() for r in inv["rows"][:631]]
     assert NAME not in prev
     original={str(name).upper() for domain in lower["domains"].values()
                  for name in domain["residents"].values()}
     assert NAME not in original
     assert any("D8 ROTATE" in n for n in target["semantic_neighbors"])
     assert len(history["transitions"]) >= 3
-    t=history["transitions"][-1]
+    t=next(x for x in history["transitions"] if x["id"] == "d10.word-primitive-full-repeat.20261009")
     assert t["id"] == "d10.word-primitive-full-repeat.20261009"
     assert t["previous_inventory_blob_sha"] == PREVIOUS_SHA
     assert t["previous_selected"] == 631 and t["resulting_selected"] == 632
@@ -74,11 +74,11 @@ def negative_controls(dossier,inv,lower,history):
       ("dossier forced coordinate",lambda d,i,h: d["selection"][0].__setitem__("coordinate","0000000000")),
       ("dossier false ratified",lambda d,i,h: d["selection"][0].__setitem__("ratified_resident",True)),
       ("dossier changed behavior",lambda d,i,h: d["selection"][0].__setitem__("behavior","")),
-      ("new row changed",lambda d,i,h: i["rows"][-1].__setitem__("behavior","invalid")),
-      ("false count",lambda d,i,h: i["accounting"].__setitem__("selected_semantic_candidates",633)),
+      ("new row changed",lambda d,i,h: i["rows"][631].__setitem__("behavior","invalid")),
+      ("false count",lambda d,i,h: i["accounting"].__setitem__("selected_semantic_candidates",631)),
       ("fake provenance",lambda d,i,h: d["selection"][0].__setitem__("primary_url","https://example.com")),
-      ("transition incorrect",lambda d,i,h: h["transitions"][-1].__setitem__("previous_selected",629)),
-      ("transition hidden coordinate",lambda d,i,h: h["transitions"][-1].__setitem__("coordinates_added",1)),
+      ("transition incorrect",lambda d,i,h: next(x for x in h["transitions"] if x["id"] == "d10.word-primitive-full-repeat.20261009").__setitem__("previous_selected",629)),
+      ("transition hidden coordinate",lambda d,i,h: next(x for x in h["transitions"] if x["id"] == "d10.word-primitive-full-repeat.20261009").__setitem__("coordinates_added",1)),
       ("missing selection",lambda d,i,h: i["rows"].pop()),
       ("replaced SID",lambda d,i,h: d["selection"][0].__setitem__("stable_id","other"))
     ]
@@ -94,5 +94,5 @@ def main():
     d,i,l,h=map(read,(DOSSIER,INVENTORY,FOUNDATION,HISTORY))
     check(d,i,l,h)
     if "--self-test" in sys.argv:negative_controls(d,i,l,h)
-    print("D10 PRIMITIVE WORD research selected PASS: 632/1024; 0 coordinates; 0 ratified")
+    print("D10 PRIMITIVE WORD research selected PASS: >=632; original index631 preserved; 0 coordinates; 0 ratified")
 if __name__ == "__main__":main()
