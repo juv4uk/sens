@@ -12,12 +12,14 @@
 (load "lib/quantity.lisp")
 (load "lib/si.lisp")
 
-; D4:0100 NOT is a Lisp-owned exact-D1 derived law, never a host truth coercion.
-; Install its admitted domain-code mechanism using exact D4 DEFINE/LAMBDA.
-; D3 COND admits only D1 predicate 0/1, with a two-field test/result clause.
-(0011 0100
-  (0010 (predicate)
-    (110 (predicate 0) (1 1))))
+; D4:0100 NOT is a Lisp-owned exact-D1 derived law, not host truth coercion.
+; Current mixed-Lisp DEFINE/LAMBDA bind the ratified D4 identity by Ukrainian
+; target surface. The executable COND uses only D1 predicates and 2-field clauses.
+(00001001 хибне?
+  (00001000 (біт)
+    (за-умовою
+      (біт ні)
+      (так так))))
 
 (00001001 exact-quantity-arithmetic-rows
   (00001000 ()
