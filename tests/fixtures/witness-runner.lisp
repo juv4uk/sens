@@ -85,35 +85,43 @@
 (00001001 witness-expected-outcome
   (00001000 (witness)
     (10011100 ((expected-entry (witness-field (00000001 expected) witness))
-          (error-entry (witness-field (00000001 error) witness)))
+               (error-entry (witness-field (00000001 error) witness)))
       (10011100 ((superseded (witness-superseded-outcome witness expected-entry)))
         (00000111
           ((witness-d1-no? (00100010 superseded (00000001 ())))
+           (00000001 (1))
            superseded)
           ((00100010 expected-entry (00000001 ()))
+           (00000001 (1))
            (00000111
              ((00100010 error-entry (00000001 ()))
+              (00000001 (1))
               (witness-malformed-result (00000001 missing-outcome) witness))
              ((witness-d1-no? (00100010 error-entry (00000001 ())))
-              (00100111 (00000001 witness-result)
-                    (00100111 (00000001 status) (00000001 error))
-                    (00100111 (00000001 actual) error-entry))))
+              (00000001 (1))
+              (00100111 (00000001 error) error-entry))))
           ((witness-d1-no? (00100010 expected-entry (00000001 ())))
+           (00000001 (1))
            (00000111
              ((00100010 error-entry (00000001 ()))
-              (00100111 (00000001 witness-result)
-                    (00100111 (00000001 status) (00000001 value))
-                    (00100111 (00000001 actual) expected-entry)))
+              (00000001 (1))
+              (00100111 (00000001 value) expected-entry))
              ((witness-d1-no? (00100010 error-entry (00000001 ())))
-              (witness-malformed-result (00000001 expected-and-error) witness))))))))))(00001001 witness-verdict
+              (00000001 (1))
+              (witness-malformed-result (00000001 expected-and-error) witness))))))))
+
+(00001001 witness-verdict
   (00001000 (witness actual)
     (10011100 ((expected (witness-expected-outcome witness)))
       (00000111
-        ((00000011 (00000101 expected) (00000001 malformed))
-         (witness-malformed-result (00101111 expected) actual))
+        ((00100010 (witness-field (00000001 status) expected) (00000001 malformed))
+         (00000001 (1))
+         (witness-malformed-result (witness-field (00000001 reason) expected) actual))
         ((00100010 expected actual)
+         (00000001 (1))
          (witness-result-record (00000001 pass) expected actual))
-        (t
+        ((00100010 expected actual)
+         (00000001 (0))
          (witness-result-record (00000001 fail) expected actual))))))
 
 ; #218/#220 transition: host observers consume an explicit status datum instead
