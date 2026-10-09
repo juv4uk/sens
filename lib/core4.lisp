@@ -336,28 +336,19 @@
 (00001001 equal?
   (00001000 (a b)
     (00000111
-      ; ATOM already returns exact PredicateBit. If both values are atoms,
-      ; EQ owns the identity decision directly.
       ((00000010 a)
        (00000111
          ((00000010 b)
           (00000011 a b))
-         ; b is a pair: atom vs pair is structurally unequal.
-         ((00000010 (00000001 ()))
-          (00000010 (00000001 (00000000))))))
-      ; a is a pair. The explicit YES test below is a constant predicate
-      ; producer used only as the exhaustive second COND branch.
+         ((00000010 (00000001 ())) (00000010 (00000001 (00000000))))))
       ((00000010 (00000001 ()))
        (00000111
-         ((00000010 b)
-          (00000010 (00000001 (00000000))))
+         ((00000010 b) (00000010 (00000001 (00000000))))
          ((00000010 (00000001 ()))
           (00000111
-            ; Deep equality short-circuits on the heads, then compares tails.
-            ((00100010 (00000101 a) (00000101 b))
-             (00100010 (00000110 a) (00000110 b)))
-            ((00000010 (00000001 ()))
-             (00000010 (00000001 (00000000)))))))))))
+            ((equal? (00000101 a) (00000101 b))
+             (equal? (00000110 a) (00000110 b)))
+            ((00000010 (00000001 ())) (00000010 (00000001 (00000000))))))))))
 
 ; Exact-Q uses 1 for YES and 0 for NO.  Structural and identity relations
 ; retain their own result domains, so predicate consumers normalize them here.
