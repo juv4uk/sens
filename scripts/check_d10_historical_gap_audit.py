@@ -308,14 +308,31 @@ def self_test(ledger, inv, foundation, dialect, baseline, manifest):
     else:
         raise AssertionError("false exhausted history not blocked")
 
-    # A transition for an unlisted spelling must not allow unrelated growth.
+    # An unlisted current candidate colliding with a historical HOLD must block.
     fake_ledger = copy.deepcopy(ledger)
     fake_record = copy.deepcopy(fake_ledger["exact_name_absent_research"][0])
     fake_record["historical_spelling"] = "UNLISTED-RESEARCH-NAME"
     fake_record["review_id"] = "HIST-GAP-FAKE"
     fake_ledger["exact_name_absent_research"].append(fake_record)
+    fake_inv = copy.deepcopy(inv)
+    fake_inv["rows"].append({
+        "stable_id": "test.unlisted.transition",
+        "semantic_name": "UNLISTED-RESEARCH-NAME",
+        "source_class": "UNVERIFIED",
+        "relation_class": "TEST-ONLY",
+        "behavior": "test only",
+        "coordinate": None,
+        "coordinate_basis": "UNPLACED",
+        "ratified_resident": False,
+        "proposal_status": "pending-owner-review",
+        "status": "SELECTED-RESEARCH-CANDIDATE",
+        "provenance": ["test-only"],
+    })
+    fake_inv["accounting"]["selected_semantic_candidates"] += 1
+    fake_inv["accounting"]["unplaced_selected_candidates"] += 1
+    fake_inv["accounting"]["remaining_semantic_inventory"] -= 1
     try:
-        verify(fake_ledger, inv, foundation, dialect, baseline, manifest)
+        verify(fake_ledger, fake_inv, foundation, dialect, baseline, manifest)
     except AssertionError:
         pass
     else:
