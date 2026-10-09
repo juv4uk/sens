@@ -20,7 +20,7 @@
     (10011101
       ((value
           (00000001
-            (lambda x x)
+            (lambda (x) x)
           )
         )
         (written
