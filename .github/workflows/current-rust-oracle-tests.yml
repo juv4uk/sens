@@ -1,0 +1,26 @@
+name: Current Rust world/forward/COND witnesses
+
+on:
+  pull_request:
+    paths:
+      - "crates/sens/tests/world.rs"
+      - "crates/sens/tests/mccarthy.rs"
+      - "crates/sens/tests/forward.rs"
+      - "crates/sens/tests/d3_empty_control.rs"
+      - ".github/workflows/current-rust-oracle-tests.yml"
+  push:
+    branches: [cleanup/retire-old-rust-semantic-oracles-20261009]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  current-rust-exact-domain-tests:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Rust test targets retaining modern functionality and exact D1/D3 guard
+        run: cargo test -p sens --no-fail-fast --test world --test mccarthy --test forward --test d3_empty_control
