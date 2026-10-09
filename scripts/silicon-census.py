@@ -223,6 +223,9 @@ def self_test() -> None:
     assert canonical_pair is not None
     assert canonical_pair.groups() == ("X86-BASE", "AAA")
     assert PAIR_RE.match('(pair X86-BASE "AAA")') is None
+    actual_pairs = load_pairs()
+    assert len(actual_pairs) == 1176
+    assert ("X86-BASE", "AAA") in actual_pairs
 
     evidence = [("X86-BASE", "ADD"), ("X86-BASE", "CALL_NEAR"), ("AVX", "VADDPS")]
     admitted = {
