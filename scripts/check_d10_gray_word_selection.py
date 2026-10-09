@@ -92,11 +92,12 @@ def models():
         return n^(n>>1)
     def decode(w,g):
         assert isinstance(w,int) and w>=0 and 0<=g<1<<w
-        r=0
+        rank=0
+        prefix=0
         for i in range(w-1,-1,-1):
-            r ^= (g>>i)&1
-            if i:r <<= 1
-        return r
+            prefix ^= (g>>i)&1
+            rank |= prefix << i
+        return rank
     assert encode(4,7)==4 and encode(4,11)==14
     assert decode(4,4)==7 and decode(4,14)==11
     assert encode(0,0)==decode(0,0)==0
