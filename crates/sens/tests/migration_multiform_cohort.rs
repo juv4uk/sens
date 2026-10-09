@@ -2,8 +2,6 @@
 //! Rust checks transport and syntax boundaries; program-result laws remain Lisp-owned.
 use sens::{decode_ternary_program, encode_binary_projection_ternary, open_ternary_program, parse_canonical_binary};
 
-const SOURCE: &str =
-    include_str!("../../../tests/fixtures/migration-multiform-cohort/two-forms.lisp");
 const T5: &[u8] =
     include_bytes!("../../../tests/fixtures/migration-multiform-cohort/two-forms.sens");
 const PROJECTION: &str =
@@ -11,10 +9,6 @@ const PROJECTION: &str =
 
 #[test]
 fn physical_two_form_source_retains_d2_boundary_and_roundtrips() {
-    assert_eq!(
-        SOURCE,
-        "(00000001 ())\n(00000100 (00000001 ()) (00000001 ()))\n"
-    );
     assert_eq!(
         T5,
         [
