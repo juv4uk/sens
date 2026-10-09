@@ -1202,11 +1202,16 @@
 (00001001 x86-encode-program
   (00001000 (instructions)
     (00000111
-      ; Stop precisely on empty structure. ATOM would also match any
-      ; non-list datum and is not a valid instruction-stream terminator.
-      ((equal? instructions (00000001 ()))
-       (00000001 ()))
-      ((00000010 (00000001 ()))
+      ; ATOM is the exact D1 predicate. Within the atom branch, EQ is safe
+      ; and distinguishes the empty-list terminator from any invalid atom.
+      ; Invalid non-NIL atoms fail closed through CAR; admitted pairs recurse.
+      ((00000010 instructions)
+       (00000111
+         ((00000011 instructions (00000001 ()))
+          (00000001 ()))
+         ((00000011 0 0)
+          (00000101 instructions))))
+      ((00000011 0 0)
        (00101001
          (00000101 instructions)
          (x86-encode-program (00000110 instructions)))))))
