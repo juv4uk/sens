@@ -60,7 +60,7 @@ jobs:
           sys.path.insert(0, "scripts")
           from sens_t5_codec import encode_projection
 
-          source_path = Path("examples/binary/d3-primitives-program.sens")
+          source_path = Path("examples/binary/d3-primitives-program.bits")
           source = " ".join(source_path.read_text(encoding="ascii").split())
           assert source and set(source) <= {"0", "1", " "}
           Path(sys.argv[1]).write_bytes(encode_projection(source))
@@ -77,7 +77,7 @@ jobs:
           import sys
           from pathlib import Path
 
-          source = " ".join(Path("examples/binary/d3-primitives-program.sens").read_text(encoding="ascii").split())
+          source = " ".join(Path("examples/binary/d3-primitives-program.bits").read_text(encoding="ascii").split())
           visible = Path(sys.argv[1]).read_text(encoding="ascii")
           assert visible == source + chr(10), "T5 physical bytes changed exact-width D3 words"
           assert set(visible) <= {"0", "1", " ", chr(10)}
@@ -157,8 +157,8 @@ jobs:
             crates/sens/src/canonical_reader.rs \
             tests/fixtures/migration-quote-cohort-main/quote-legacy.sens \
             tests/fixtures/migration-multiform-cohort-main/two-forms.sens \
-            examples/binary/d3-primitives-program.sens \
-            examples/binary/d3-cond-program.sens \
+            examples/binary/d3-primitives-program.bits \
+            examples/binary/d3-cond-program.bits \
             > "$RUNNER_TEMP/sens-binary/sources.sha256"
           find "$RUNNER_TEMP/sens-binary" -maxdepth 1 -name '*.words' -o -name '*.sens-exec' -o -name '*.trit-exec' \
             | sort | xargs -r sha256sum > "$RUNNER_TEMP/sens-binary/observations.sha256"
