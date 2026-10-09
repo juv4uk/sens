@@ -83,3 +83,12 @@ fn exact_d7_carrier_never_mints_a_callable_operation() {
         assert_eq!(identity.core_operation(), None);
     }
 }
+
+#[test]
+fn d7_w7_full_payload_is_dense() {
+    let data = Text7::from_cells((0u8..=127).collect::<Vec<u8>>()).unwrap();
+    let packed = data.to_packed_w7();
+    assert_eq!(packed.bit_len(), 896);
+    assert_eq!(packed.byte_len(), 112);
+    assert_eq!(Text7::from_packed_w7(&packed).unwrap(), data);
+}
