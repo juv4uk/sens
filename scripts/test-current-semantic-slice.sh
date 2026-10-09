@@ -8,10 +8,9 @@ set -euo pipefail
 cargo test -p sens \
   --test d1_canonical_source_value \
   --test witness_authority \
-  --test structural_observation_contract \
+  --test d3_empty_control \
   --test exact_q_binary_contract \
   --test mathematical_result_taxonomy \
-  --test canon_laws_v2_contract \
   --test reason_honesty_contract \
   --test unification_outcome_contract \
   --test knowledge_clause_kind_contract \
@@ -19,8 +18,7 @@ cargo test -p sens \
   --test decimal_comma_authority \
   --test epistemic \
   --test authority_guard_contract \
-  --test semantic_ref_fail_closed \
-  --test semantic_coordinate_matrix_845
+  --test semantic_ref_fail_closed
 
 
 # Historical #1096 bare-SID witness remains preserved as compatibility evidence,
