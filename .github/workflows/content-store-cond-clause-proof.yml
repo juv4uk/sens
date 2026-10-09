@@ -3,7 +3,7 @@ name: Verify content-store D1 clause nesting
 on:
   push:
     branches:
-      - fix/content-store-cond-clause-grouping-20261009
+      - fix/content-store-cond-grouping-after-io-20261009
   pull_request:
     paths:
       - "tests/fixtures/content-store-authority-witness.lisp"
