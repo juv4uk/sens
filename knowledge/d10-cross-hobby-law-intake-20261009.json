@@ -1,0 +1,296 @@
+{
+  "schema": "d10-cross-hobby-intake/v1",
+  "date": "2026-10-09",
+  "status": "RESEARCH-PENDING-OWNER-REVIEW",
+  "authority": [
+    "#4013",
+    "#4162",
+    "#4182",
+    "#4463"
+  ],
+  "snapshot": {
+    "repository": "juv4uk/sens",
+    "path": "knowledge/d10-v1-semantic-inventory.json",
+    "blob_sha": "a55f307c27f17091795d75ebfcd7d051547d80bc",
+    "selected": 630,
+    "capacity": 1024,
+    "remaining": 394,
+    "ratified": 0,
+    "note": "Snapshot, not a claimed current count after concurrent branches; this file is an intake outside the semantic inventory."
+  },
+  "rules": [
+    "One D10 10-bit stream, no hidden hobby-specific namespaces.",
+    "No new D1-D9 semantics or D2 control.",
+    "No coordinate; physical .sens disallowed until authorized.",
+    "Name-absence is not semantic dedup proof; owner must review behavior and expressibility.",
+    "All candidates are NOT SELECTED until merged into canonical inventory via separate review."
+  ],
+  "candidates": [
+    {
+      "id": "hobby-astro-cartesian-spherical3",
+      "semantic_name": "CARTESIAN-TO-LAT-LON-RADIUS-3D",
+      "surface_uk": "дксф3",
+      "surface_ukr": "декартові-у-широту-довготу-радіус",
+      "width": 10,
+      "coordinate": null,
+      "ratified": false,
+      "status": "pending-review",
+      "selection": "NOT-SELECTED",
+      "source_class": "ASTRONOMY-GEOMETRY",
+      "donor_provenance": {
+        "repository": "juv4uk/vsop2013",
+        "commit": "51cbf5135a4b7f6333cb0488ccd94bfdfd496317",
+        "path": "doubleVector3D.pas",
+        "blob_sha": "bbf7ef3837c6d2ca95a108f859ece023cbe7b827",
+        "lines": "94-105",
+        "function": "TVector3D_D.getLatLonRadius",
+        "url": "https://github.com/juv4uk/vsop2013/blob/51cbf5135a4b7f6333cb0488ccd94bfdfd496317/doubleVector3D.pas#L94-L105",
+        "donor_note": "Source code attributes original 3D support externally; treat as reference behavior, not proof of user authorship."
+      },
+      "behavioral_law": "For a real triple (x,y,z), r=sqrt(x²+y²+z²). If r>0 return latitude=asin(z/r) deg, longitude=atan2(y,x) deg, radius=r. At the origin, signal absent direction; no invented angles. Pole azimuth and exact numeric tolerance require owner-defined convention before admission.",
+      "arguments": "(x:real,y:real,z:real)",
+      "result": "either (latitude_degrees, longitude_degrees, radius) or NO-DIRECTION",
+      "positives": [
+        {
+          "input": [
+            1,
+            0,
+            0
+          ],
+          "expected": [
+            0,
+            0,
+            1
+          ]
+        },
+        {
+          "input": [
+            0,
+            1,
+            0
+          ],
+          "expected": [
+            0,
+            90,
+            1
+          ]
+        }
+      ],
+      "falsifier": {
+        "input": [
+          0,
+          0,
+          0
+        ],
+        "forbidden": "ordinary valid spherical angles at zero radius"
+      },
+      "dedup_check": {
+        "D1_D9": "no exact named resident CARTESIAN-TO-LAT-LON-RADIUS-3D in foundation 09d1d71c39d1484dfd005a5068dbb18b76f0f0d4; semantic overlap pending review",
+        "D10": "no exact same-name selected row in 630-row inventory blob a55f307c27f17091795d75ebfcd7d051547d80bc; compare with existing SCIENCE-* and numeric functions semantically"
+      },
+      "ownership_test": "pure mathematical mapping; no telescope/backend/units/ABI authority; pole and numeric law still open",
+      "unblock_fanout": [
+        "3D geometry",
+        "astronomy ephemeris",
+        "orientation/simulation"
+      ],
+      "expressibility_gap": "defined singular-result law and spherical-coordinate convention need explicit value-level observable contract",
+      "blocked_source": null
+    },
+    {
+      "id": "hobby-radio-discrete-tone-energy",
+      "semantic_name": "DISCRETE-TONE-ENERGY",
+      "surface_uk": "етон",
+      "surface_ukr": "енергія-дискретного-тону",
+      "width": 10,
+      "coordinate": null,
+      "ratified": false,
+      "status": "pending-review",
+      "selection": "NOT-SELECTED",
+      "source_class": "RADIO-ACOUSTICS-MATH",
+      "donor_provenance": {
+        "repository": "juv4uk/radio-log",
+        "commit": "e355ee4b0cef8ba6818e868cfbb55009be1d01b5",
+        "path": "src/lib/sens-radio/bfsk-rx.ts",
+        "blob_sha": "a842735dea89659a28a5286fa853e9f152564da5",
+        "lines": "32-42",
+        "function": "toneEnergy",
+        "url": "https://github.com/juv4uk/radio-log/blob/e355ee4b0cef8ba6818e868cfbb55009be1d01b5/src/lib/sens-radio/bfsk-rx.ts#L32-L42"
+      },
+      "behavioral_law": "On a finite ordered vector s[0..N-1], sample rate Fs>0 and target frequency f, compute C=Σs[n]cos(2πfn/Fs), S=−Σs[n]sin(2πfn/Fs), return C²+S² (unnormalized single-frequency squared magnitude). No framing, modulation, codec, T5, GPU or hardware mechanics; numerical precision/error contract unproven.",
+      "arguments": "(samples:finite-real-vector, sample_rate:positive-real, tone_frequency:real)",
+      "result": "nonnegative-real energy",
+      "positives": [
+        {
+          "input": {
+            "samples": [
+              1,
+              0,
+              -1,
+              0
+            ],
+            "sample_rate": 4,
+            "tone_frequency": 1
+          },
+          "expected": 4
+        },
+        {
+          "input": {
+            "samples": [
+              0,
+              0,
+              0,
+              0
+            ],
+            "sample_rate": 4,
+            "tone_frequency": 1
+          },
+          "expected": 0
+        }
+      ],
+      "falsifier": {
+        "input": {
+          "samples": [
+            2,
+            0,
+            -2,
+            0
+          ],
+          "sample_rate": 4,
+          "tone_frequency": 1
+        },
+        "expected": 16,
+        "forbidden": 8,
+        "law": "doubling amplitude multiplies energy by four"
+      },
+      "dedup_check": {
+        "D1_D9": "no exact named resident DISCRETE-TONE-ENERGY in foundation 09d1d71c39d1484dfd005a5068dbb18b76f0f0d4; math composition must be assessed",
+        "D10": "no exact same-name row in 630-row inventory blob a55f307c27f17091795d75ebfcd7d051547d80bc; semantics compared with numeric/vector families only preliminarily"
+      },
+      "ownership_test": "conditional: pure deterministic DSP transformation is language-visible; BFSK receive and sample I/O are transport and must be excluded",
+      "unblock_fanout": [
+        "radio spectral analysis",
+        "acoustic pitch energy",
+        "oscillator analysis"
+      ],
+      "expressibility_gap": "un-normalized output, empty vector, exact-frequency/precision model not yet established as irreducible root",
+      "blocked_source": null
+    },
+    {
+      "id": "hobby-astronomy-julian-day",
+      "semantic_name": "GREGORIAN-UT-TO-JULIAN-DAY",
+      "surface_uk": "грдю",
+      "surface_ukr": "григоріанська-дата-до-юліанського-дня",
+      "width": 10,
+      "coordinate": null,
+      "ratified": false,
+      "status": "pending-review",
+      "selection": "NOT-SELECTED",
+      "source_class": "ASTRONOMY-TIME",
+      "donor_provenance": {
+        "repository": "juv4uk/vsop2013",
+        "commit": "51cbf5135a4b7f6333cb0488ccd94bfdfd496317",
+        "path": "Om.AstronomicalAlgorithms.pas",
+        "blob_sha": "4aba70283add05608fe672dc4b630fbb3675b041",
+        "lines": "158-170",
+        "function": "JD",
+        "url": "https://github.com/juv4uk/vsop2013/blob/51cbf5135a4b7f6333cb0488ccd94bfdfd496317/Om.AstronomicalAlgorithms.pas#L158-L170",
+        "donor_note": "Meeus-style proleptic Gregorian formula; source implementer is externally attributed; source is evidence only"
+      },
+      "behavioral_law": "Given valid Gregorian civil Y,M,D and UT hour in [0,24), use Gregorian calendar correction B=2−floor(Y'/100)+floor(floor(Y'/100)/4), Y'=Y−1/M'=M+12 when M<=2; JD=floor(365.25(Y'+4716))+floor(30.6001(M'+1))+D+B−1524.5+UT/24. No local timezone, leap-second, clock I/O or device time.",
+      "arguments": "(year:int, month:1..12, day:valid-gregorian-day, hour_UT:real-in-[0,24))",
+      "result": "Julian day real",
+      "positives": [
+        {
+          "input": [
+            2000,
+            1,
+            1,
+            12
+          ],
+          "expected": 2451545
+        },
+        {
+          "input": [
+            2000,
+            1,
+            1,
+            0
+          ],
+          "expected": 2451544.5
+        }
+      ],
+      "falsifier": {
+        "input": [
+          2000,
+          1,
+          1,
+          0
+        ],
+        "forbidden": 2451545,
+        "reason": "Noon-vs-midnight half-day offset"
+      },
+      "dedup_check": {
+        "D1_D9": "no exact named resident GREGORIAN-UT-TO-JULIAN-DAY in foundation blob 09d1d71c39d1484dfd005a5068dbb18b76f0f0d4; time equivalence still needs review",
+        "D10": "no exact same-name in 630-row inventory blob a55f307c27f17091795d75ebfcd7d051547d80bc; compare UTC-FROM-UNIX and existing time-law review"
+      },
+      "ownership_test": "conditional pure calendrical law, distinct from timezone conversion and I/O; explicitly test Gregorian reform/proleptic choice and invalid dates",
+      "unblock_fanout": [
+        "ephemeris",
+        "astronomy",
+        "horology"
+      ],
+      "expressibility_gap": "civic-calendar validity, negative-year convention, precision and UTC/UT1 time-scale remain unresolved",
+      "blocked_source": null
+    }
+  ],
+  "holds": [
+    {
+      "source": "juv4uk/my-lisp-panini@4c5128b804f3f805f9a714c049a93b641970e6ad:panini/machine/sandhi.lisp:59",
+      "topic": "Pāṇinian sandhi",
+      "decision": "EXACT-NAME-DUPLICATE",
+      "existing_D10": [
+        "SANDHI-IKO-YAN-ACI",
+        "SANDHI-MANUSVARA",
+        "SANDHI-KHARI-SAVARNE"
+      ],
+      "reason": "Already selected in current inventory; do not mint another resident."
+    },
+    {
+      "source": "juv4uk/my-lisp-panini@4c5128b804f3f805f9a714c049a93b641970e6ad:panini/machine/pratyahara_matrix.lisp:7",
+      "topic": "Pratyahara",
+      "decision": "EXACT-NAME-DUPLICATE",
+      "existing_D10": [
+        "RESOLVE-PRATYAHARA",
+        "PRATYAHARA-MEMBER?"
+      ],
+      "reason": "Already selected; phonemic table generation is implementation/data evidence."
+    },
+    {
+      "source": "juv4uk/esp32-pendulum@6d051abf45a74edec05c8f8c641e8108b188ca6c:components/physics/unwrap.c:3-10",
+      "topic": "bidirectional modular phase unwrap",
+      "decision": "HOLD-NO-EXECUTABLE-DONOR",
+      "reason": "Source explicitly TODO and prior bug; use +4096/-4096 crossover sequences and test hysteresis/alias ambiguity before proposing distinct language-visible law."
+    },
+    {
+      "source": "juv4uk/esp32-pendulum@6d051abf45a74edec05c8f8c641e8108b188ca6c:components/physics/quality_factor.c:3-16",
+      "topic": "pendulum quality factor / logarithmic decrement",
+      "decision": "HOLD-UNDECIDED-MODEL",
+      "reason": "No implemented rational approximation or measurement uncertainty law yet; do not smuggle floating log or sensor mechanism into D10."
+    },
+    {
+      "source": "juv4uk/radio-log@e355ee4b0cef8ba6818e868cfbb55009be1d01b5:src/lib/sens-radio/black-sky.ts:84-122",
+      "topic": "BFSK waveform/framing/CRC/T5",
+      "decision": "MECHANISM-ONLY",
+      "reason": "Wire transport is not D10 semantic identity; only pure DSP tone-energy root is under review."
+    },
+    {
+      "source": "user research interests",
+      "topic": "music temperament, analog computing, FPGA/GPU/SDR, clock mechanics, astrophysics and acoustic resonance",
+      "decision": "HOLD-NO-EXACT-PIN",
+      "reason": "Useful donor search queues; no manufactured resident without repo+SHA+file+law+witness."
+    }
+  ],
+  "reviewed_by": "assistant technical intake only, not owner ratification",
+  "oracle_notes": "Three symbolic witness pairs and falsifiers sanity-checked by a standalone mathematical reimplementation on 2026-10-09; not independent execution of pinned donor binaries, not oracle admissibility."
+}
