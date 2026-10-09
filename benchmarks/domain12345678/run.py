@@ -159,8 +159,8 @@ def main() -> int:
     lines += [
         "",
         "Correctness invariants checked before measurement:",
-        "- D1..D9 exact source words round-trip through DomainIdentity;";
-        "- equal payload=1 at widths 1..9 never collapses;";
+        "- D1..D9 exact source words round-trip through DomainIdentity;",
+        "- equal payload=1 at widths 1..9 never collapses;",
         "- D9 high-bit value 0x101 survives u16 source -> domain -> source;",
         "- names, callable-Core projection and semantic registry are not measured;",
         "- host u8 payload cannot substitute for exact-width D9 identity;",
