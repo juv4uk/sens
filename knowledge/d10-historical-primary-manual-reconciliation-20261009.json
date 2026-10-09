@@ -203,7 +203,9 @@
       "exact_in_d10_selected": false,
       "coordinate": null,
       "ratified": false,
-      "selected_d10": false
+      "selected_d10": false,
+      "primary_name_attested": true,
+      "evidence_grade": "PRIMARY-MANUAL-SPEC-READ"
     },
     {
       "review_id": "HIST-20261009-02",
@@ -227,7 +229,9 @@
       "exact_in_d10_selected": false,
       "coordinate": null,
       "ratified": false,
-      "selected_d10": false
+      "selected_d10": false,
+      "primary_name_attested": true,
+      "evidence_grade": "PRIMARY-MANUAL-SPEC-READ"
     },
     {
       "review_id": "HIST-20261009-03",
@@ -251,7 +255,9 @@
       "exact_in_d10_selected": false,
       "coordinate": null,
       "ratified": false,
-      "selected_d10": false
+      "selected_d10": false,
+      "primary_name_attested": true,
+      "evidence_grade": "PRIMARY-MANUAL-SPEC-READ"
     },
     {
       "review_id": "HIST-20261009-04",
@@ -276,7 +282,9 @@
       "exact_in_d10_selected": false,
       "coordinate": null,
       "ratified": false,
-      "selected_d10": false
+      "selected_d10": false,
+      "primary_name_attested": true,
+      "evidence_grade": "PRIMARY-MANUAL-SPEC-READ"
     },
     {
       "review_id": "HIST-20261009-05",
@@ -300,7 +308,9 @@
       "exact_in_d10_selected": false,
       "coordinate": null,
       "ratified": false,
-      "selected_d10": false
+      "selected_d10": false,
+      "primary_name_attested": true,
+      "evidence_grade": "PRIMARY-MANUAL-SPEC-READ"
     },
     {
       "review_id": "HIST-20261009-06",
@@ -323,7 +333,9 @@
       "exact_in_d10_selected": false,
       "coordinate": null,
       "ratified": false,
-      "selected_d10": false
+      "selected_d10": false,
+      "primary_name_attested": true,
+      "evidence_grade": "PRIMARY-MANUAL-SPEC-READ"
     },
     {
       "review_id": "HIST-20261009-07",
@@ -346,7 +358,9 @@
       "exact_in_d10_selected": false,
       "coordinate": null,
       "ratified": false,
-      "selected_d10": false
+      "selected_d10": false,
+      "primary_name_attested": true,
+      "evidence_grade": "PRIMARY-MANUAL-SPEC-READ"
     },
     {
       "review_id": "HIST-20261009-08",
@@ -370,14 +384,16 @@
       "exact_in_d10_selected": false,
       "coordinate": null,
       "ratified": false,
-      "selected_d10": false
+      "selected_d10": false,
+      "primary_name_attested": true,
+      "evidence_grade": "PRIMARY-MANUAL-SPEC-READ"
     },
     {
       "review_id": "HIST-20261009-09",
       "historical_name": "COUNT-LEADING-ZEROS",
       "source_era": "D8 historical research; Lisp Machine related numeric chapter",
       "source_url": "https://tumbleweed.nu/r/lm-3/uv/chinual.html",
-      "source_section": "7.8 Logical Operations; INTEGER-LENGTH is attested, exact old function name requires primary verification",
+      "source_section": "UNVERIFIED HISTORICAL SPELLING — 7.8 Logical Operations; INTEGER-LENGTH is attested, exact old function name requires primary verification",
       "priority": "P2",
       "triage": "HOLD-D8-DERIVABILITY",
       "observable_claim": "for a nonnegative fixed-width W-bit word x, CLZ(x) = W - integer-length(x), with CLZ(0)=W; must specify width W",
@@ -393,14 +409,16 @@
       "exact_in_d10_selected": false,
       "coordinate": null,
       "ratified": false,
-      "selected_d10": false
+      "selected_d10": false,
+      "primary_name_attested": false,
+      "evidence_grade": "OLD-BRANCH-LEAD-NEEDS-PRIMARY-MANUAL"
     },
     {
       "review_id": "HIST-20261009-10",
       "historical_name": "TABLESPACE",
       "source_era": "old D8/D9 #2934 claim MacLisp",
-      "source_url": "https://softwarepreservation.computerhistory.org/LISP/MIT/MACLISP_Reference_Manual-Dec_17_1975.pdf",
-      "source_section": "no TABLESPACE occurrence verified in retrieved 1975 manual",
+      "source_url": "https://github.com/juv4uk/sens/blob/main/knowledge/d9-overflow-review-v1.json",
+      "source_section": "Unverified source claim from D9 overflow ledger; primary manual page not located",
       "priority": "P3",
       "triage": "HOLD-UNVERIFIED-SOURCE",
       "observable_claim": "claimed allocated hash table capacity distinct from number of stored entries; standard/portable behavior unproven",
@@ -415,14 +433,16 @@
       "exact_in_d10_selected": false,
       "coordinate": null,
       "ratified": false,
-      "selected_d10": false
+      "selected_d10": false,
+      "primary_name_attested": false,
+      "evidence_grade": "OLD-BRANCH-LEAD-NEEDS-PRIMARY-MANUAL"
     },
     {
       "review_id": "HIST-20261009-11",
       "historical_name": "GENERATE-EXPANSION",
       "source_era": "old D8/D9 #2934 claim Common Lisp",
-      "source_url": "https://www.cs.cmu.edu/Groups/AI/util/html/hyperspec/HyperSpec/Body/speope_the.html",
-      "source_section": "no independently verified authoritative definition of this historical exact name",
+      "source_url": "https://github.com/juv4uk/sens/blob/main/knowledge/d9-overflow-review-v1.json",
+      "source_section": "Unverified source claim from D9 overflow ledger; primary manual page not located",
       "priority": "P3",
       "triage": "HOLD-UNVERIFIED-SOURCE",
       "observable_claim": "claimed macro's own expansion function; lacks primary definition and stage-specific behavior",
@@ -438,14 +458,16 @@
       "exact_in_d10_selected": false,
       "coordinate": null,
       "ratified": false,
-      "selected_d10": false
+      "selected_d10": false,
+      "primary_name_attested": false,
+      "evidence_grade": "OLD-BRANCH-LEAD-NEEDS-PRIMARY-MANUAL"
     },
     {
       "review_id": "HIST-20261009-12",
       "historical_name": "BACKQUANTIZE",
       "source_era": "old D8/D9 #2934 claimed Common Lisp",
-      "source_url": "https://www.softwarepreservation.org/projects/LISP/lisp15_family.html",
-      "source_section": "exact name not verified in primary manual; possible mistaken historical label",
+      "source_url": "https://github.com/juv4uk/sens/blob/main/knowledge/d9-overflow-review-v1.json",
+      "source_section": "Unverified source claim from D9 overflow ledger; primary manual page not located",
       "priority": "P3",
       "triage": "HOLD-UNVERIFIED-SOURCE",
       "observable_claim": "claimed splicing macro behavior; not source-attested by this audit",
@@ -460,14 +482,16 @@
       "exact_in_d10_selected": false,
       "coordinate": null,
       "ratified": false,
-      "selected_d10": false
+      "selected_d10": false,
+      "primary_name_attested": false,
+      "evidence_grade": "OLD-BRANCH-LEAD-NEEDS-PRIMARY-MANUAL"
     },
     {
       "review_id": "HIST-20261009-13",
       "historical_name": "COLLECTION",
       "source_era": "old D8/D9 #2934 claimed Common Lisp",
-      "source_url": "https://www.softwarepreservation.org/projects/LISP/lisp15_family.html",
-      "source_section": "no specific primary manual function and behavior verified",
+      "source_url": "https://github.com/juv4uk/sens/blob/main/knowledge/d9-overflow-review-v1.json",
+      "source_section": "Unverified source claim from D9 overflow ledger; primary manual page not located",
       "priority": "P3",
       "triage": "HOLD-UNVERIFIED-SOURCE",
       "observable_claim": "generic 'collect elements' lacks operation/ordering/multiplicity contract",
@@ -484,7 +508,9 @@
       "exact_in_d10_selected": false,
       "coordinate": null,
       "ratified": false,
-      "selected_d10": false
+      "selected_d10": false,
+      "primary_name_attested": false,
+      "evidence_grade": "OLD-BRANCH-LEAD-NEEDS-PRIMARY-MANUAL"
     }
   ],
   "accounting": {
@@ -494,7 +520,9 @@
     "proposals": 13,
     "auto_selected_d10": 0,
     "auto_ratified": 0,
-    "auto_coordinates": 0
+    "auto_coordinates": 0,
+    "primary_name_attested": 8,
+    "unverified_historical_labels": 5
   },
   "warnings": [
     "Exact spelling absence never proves novel semantic behavior",
