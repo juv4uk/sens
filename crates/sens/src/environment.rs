@@ -470,6 +470,22 @@ pub struct Session {
     pub environment: Environment,
 }
 
+impl Session {
+    /// Construct only the mechanical root environment for programs made from
+    /// already-admitted exact domain words. No Lisp macro definitions or Core4
+    /// library are installed. Opt-in: `Session::default()` retains its
+    /// historical macro-loaded embedding contract.
+    ///
+    /// Use `load_macro_library(&mut session)` before any program requiring
+    /// macros, or `load_core_library(&mut session)` for the full Lisp-owned
+    /// core bootstrap. This constructor does not invent any domain semantics.
+    pub fn bare() -> Self {
+        Self {
+            environment: Environment::root(),
+        }
+    }
+}
+
 impl Default for Session {
     fn default() -> Self {
         let mut session = Self {
@@ -485,6 +501,38 @@ impl Default for Session {
 mod tests {
     use super::*;
     use crate::Exactness;
+
+    #[test]
+    fn bare_session_keeps_lisp_macro_bootstrap_explicit() {
+        let bare = Session::bare();
+        let default = Session::default();
+        assert!(
+            bare.environment.get("defmacro").is_none(),
+            "bare domain carrier must not silently load the Lisp macro library"
+        );
+        assert!(
+            default.environment.get("defmacro").is_some(),
+            "default Session must continue bootstrapping macro law"
+        );
+    }
+
+    #[test]
+    fn bare_session_evaluates_the_same_exact_d1_and_d3_results() {
+        for (source, expected_bit) in [
+            ("1", Some(true)),
+            ("0", Some(false)),
+            ("10 001 00 000 01", None),
+        ] {
+            let program = crate::parse_canonical_binary(source).unwrap();
+            let mut bare = Session::bare();
+            let mut default = Session::default();
+            let left = crate::eval_parsed_expressions(&program, &mut bare).unwrap();
+            let right = crate::eval_parsed_expressions(&program, &mut default).unwrap();
+            assert_eq!(left.value, right.value);
+            assert_eq!(left.value.as_predicate_bit(), expected_bit);
+            assert_eq!(left.output, right.output);
+        }
+    }
 
     #[test]
     fn domain_code_slots_keep_equal_payloads_distinct() {
