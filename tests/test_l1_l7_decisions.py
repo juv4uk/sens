@@ -63,10 +63,16 @@ class CanonicalL1L7Tests(unittest.TestCase):
                     self.convert(source)
 
     def test_l3_unknown_call_requires_d10_proposal_not_passthrough(self):
-        with self.assertRaisesRegex(migrate.MigrationError, "L3 BLOCK \+ D10-PROPOSAL"):
+        with self.assertRaisesRegex(migrate.MigrationError, r"L3 BLOCK \+ D10-PROPOSAL"):
             self.convert("(unknown-op 000)")
         with self.assertRaisesRegex(migrate.MigrationError, "L3 BLOCK"):
             self.convert("(000 000)")  # D3 structural empty is not callable
+
+    def test_l4_helpers_without_verifiable_d8_block(self):
+        for helper in ("equal?", "null"):
+            with self.subTest(helper=helper):
+                with self.assertRaisesRegex(migrate.MigrationError, "L4 BLOCK"):
+                    self.convert(f"({helper} 000)")
 
     def test_l5_retired_executable_forms_block(self):
         for source in ("(structural-kind 000)", "(identity-relation 000)"):
