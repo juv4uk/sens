@@ -29,7 +29,8 @@ jobs:
           mkdir -p "$RUNNER_TEMP/sens-binary"
           for file in \
             tests/fixtures/migration-quote-cohort-main/quote-legacy.sens \
-            tests/fixtures/migration-multiform-cohort-main/two-forms.sens; do
+            tests/fixtures/migration-multiform-cohort-main/two-forms.sens \
+            examples/binary/d3-cond-program.sens; do
             stem="${file##*/}"
             target/debug/sens "$file" > "$RUNNER_TEMP/sens-binary/${stem}.sens-exec"
             target/debug/sens-trit eval "$file" > "$RUNNER_TEMP/sens-binary/${stem}.trit-exec"
@@ -267,6 +268,7 @@ jobs:
             tests/fixtures/migration-multiform-cohort-main/two-forms.sens \
             examples/binary/d3-primitives-program.bits \
             examples/binary/d3-cond-program.bits \
+            examples/binary/d3-cond-program.sens \
             examples/binary/d5-label-recursion.bits \
             examples/binary/d5-label-copy.bits \
             examples/binary/d5-label-map.bits \

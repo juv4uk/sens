@@ -7,6 +7,8 @@ use sens::{
 
 const QUOTE_T5: &[u8] =
     include_bytes!("../../../tests/fixtures/migration-quote-cohort-main/quote-legacy.sens");
+const COND_T5: &[u8] =
+    include_bytes!("../../../examples/binary/d3-cond-program.sens");
 const MULTIFORM_T5: &[u8] =
     include_bytes!("../../../tests/fixtures/migration-multiform-cohort-main/two-forms.sens");
 
@@ -51,6 +53,21 @@ fn physical_domain_words_share_exact_d2_grammar_with_visible_reference() {
             "physical and visible views must preserve identical exact domain identities"
         );
     }
+}
+
+
+#[test]
+fn physical_d3_cond_uses_exact_two_field_clauses_without_text_execution() {
+    let source = include_str!("../../../examples/binary/d3-cond-program.bits");
+    let expected_words = source.split_whitespace().collect::<Vec<_>>().join(" ");
+    let words = decode_ternary_program(COND_T5).expect("committed physical D3 COND T5");
+    assert_eq!(sens::render_ternary_words_spaced(&words), expected_words,
+        "physical bytes must preserve exact binary word widths");
+    let result = eval_t5_program(COND_T5, &mut Session::default())
+        .expect("exact D1-predicate COND must execute from physical bytes");
+    assert!(matches!(result.value, Value::Nil),
+        "all selected structural-empty outcomes remain structural empty");
+    assert!(result.output.is_empty());
 }
 
 #[test]
