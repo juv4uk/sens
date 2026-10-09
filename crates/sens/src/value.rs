@@ -734,10 +734,6 @@ impl Value {
         !matches!(self, Value::Pair(_, _))
     }
 
-    pub fn is_truthy(&self) -> bool {
-        !matches!(self, Value::Nil | Value::Bool(false))
-    }
-
     /// Classic-Lisp truth value for a core-language predicate result:
     /// the symbol `t` (bound to itself, self-evaluating -- see
     /// `Environment::root`) for true, `Nil` for false. `eq`/`atom` use
