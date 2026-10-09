@@ -18,7 +18,7 @@
 
 ### Інші інтереси, які враховано без вигадування нових кодів
 
-Досьє knowledge/d10-hobby-exact-measurement-intake-v1.json містить 10 review rows із астрономії, VSOP2013 та орбіт, SDR/радіо, ESP32-маятника, музики/акустики, WSM-24 годинників, граматики Паніні, Prolog/Advice Taker, а також FPGA. Там явно відрізняються ALREADY-SELECTED, PEER-CLAIM, MECHANISM-ONLY, CORE-MATH та HOLD. Це виключає простий метод «кожне хобі = одна функція». FINITE-CONVOLUTION та PHASE-UNWRAP уже забрав інший агент за #4013; дубль не створюється.
+Досьє knowledge/d10-hobby-exact-measurement-intake-v1.json містить 15 source-pinned review rows із астрономії, VSOP2013 та орбіт, SDR/радіо, ESP32-маятника, музики/акустики, WSM-24 годинників, граматики Паніні, Prolog/Advice Taker, FPGA, шахів/пошуку, живої Lisp IDE, епістемічних джерел і bare-metal Lisp-машини. Там явно відрізняються ALREADY-SELECTED, PEER-CLAIM, MECHANISM-ONLY, CORE-MATH та HOLD. Це виключає простий метод «кожне хобі = одна функція». FINITE-CONVOLUTION та PHASE-UNWRAP уже забрав інший агент за #4013; дубль не створюється.
 
 ### Тести й обмеження
 
