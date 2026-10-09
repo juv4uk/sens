@@ -12,7 +12,7 @@
 use std::{env, fs, fs::OpenOptions, io::Write, path::Path, process};
 
 const USAGE: &str =
-    "usage: sens-trit (encode path.lisp | open path.sens | view path.sens | decode path.sens | explain path.sens | eval path.sens | verify path.lisp)\n       sens-trit path.sens  # open only; never execute implicitly";
+    "usage: sens-trit (encode path.lisp | open path.sens | view path.sens | decode path.sens | explain path.sens | eval path.sens | eval-core4 path.sens | verify path.lisp)\n       sens-trit path.sens  # open only; never execute implicitly";
 
 fn sibling_sens(path: &Path) -> Result<std::path::PathBuf, String> {
     if path.extension().and_then(|ext| ext.to_str()) != Some("lisp") {
@@ -49,11 +49,26 @@ fn verify_companion(source: &str, binary: &[u8]) -> Result<(), String> {
 /// are independent gates; success does not prove that an old Lisp source
 /// has the same behavior or that a D24+/host effect is admitted.
 fn eval_t5_bytes(bytes: &[u8]) -> Result<sens::EvalResult, String> {
+    eval_t5_bytes_core4(bytes, false)
+}
+
+/// An EXPLICIT opt-in Core4 bootstrap for programs that need language-owned
+/// D4/D5 closures such as LIST/APPEND. Bare eval remains capability-free and
+/// unchanged; loading a library is mechanism availability, NOT a new resident.
+fn eval_t5_bytes_core4(
+    bytes: &[u8],
+    bootstrap_core: bool,
+) -> Result<sens::EvalResult, String> {
     let visible = sens::open_ternary_program(bytes)
         .map_err(|e| format!("physical T5/D2 decode rejected: {e:?}"))?;
     let forms = sens::parse_canonical_binary(&visible)
         .map_err(|e| format!("canonical SENS parser rejected: {}", e.render(&visible)))?;
-    sens::eval_parsed_expressions(&forms, &mut sens::Session::default())
+    let mut session = sens::Session::default();
+    if bootstrap_core {
+        sens::load_core_library(&mut session)
+            .map_err(|e| format!("explicit Core4 bootstrap rejected: {e:?}"))?;
+    }
+    sens::eval_parsed_expressions(&forms, &mut session)
         .map_err(|e| format!("current SENS oracle rejected: {}", e.render(&visible)))
 }
 
@@ -123,12 +138,16 @@ fn execute() -> Result<(), String> {
             println!("{}", explain_t5_bytes(&bytes)?);
             Ok(())
         }
-        "eval" => {
-            // Explicit opt-in. Merely opening, viewing or decoding a .sens
-            // NEVER invokes the evaluator, and Session::default provides
-            // no host capabilities or permission to execute OS commands.
+        "eval" | "eval-core" => {
+            // Both require explicit execution. Only eval-core additionally
+            // loads the existing language-owned Core4 module on request.
+            // Neither open nor bare eval may silently acquire mechanisms.
             let bytes = read_sens(path)?;
-            let result = eval_t5_bytes(&bytes)?;
+            let result = if command == "eval-core4" {
+                eval_t5_bytes_core4(&bytes, true)?
+            } else {
+                eval_t5_bytes(&bytes)?
+            };
             for output in result.output {
                 println!("{output}");
             }
@@ -176,6 +195,32 @@ mod eval_tests {
                 if matches!(head.as_ref(), sens::Value::Nil)
                 && matches!(tail.as_ref(), sens::Value::Nil)
         ));
+    }
+
+    #[test]
+    fn explicit_core4_bootstrap_enables_d4_list_without_weakening_bare_eval() {
+        // (D4 LIST (D3 QUOTE D3 EMPTY)): genuine exact words, physically
+        // packed through the production T5 codec. No user-defined Text7.
+        let words = sens::parse_binary_source_words(
+            "10 1110 00 10 001 00 000 01 01"
+        ).expect("ratified canonical D2/D3/D4 words");
+        let packed = sens::encode_ternary_words(
+            &words.into_iter().map(|word| word.word).collect::<Vec<_>>()
+        ).expect("T5 physical bytes");
+
+        let unbootstrapped = eval_t5_bytes(&packed)
+            .expect_err("bare evaluator has no D4 LIST mechanism");
+        assert!(
+            unbootstrapped.contains("no admitted value-call mechanism")
+                && unbootstrapped.contains("1110"),
+            "unexpected missing-bootstrap error: {unbootstrapped}"
+        );
+
+        let core = eval_t5_bytes_core4(&packed, true)
+            .expect("explicit Core4 must supply language-owned D4 LIST");
+        assert_eq!(core.value.to_string(), "(())");
+        assert_eq!(sens::open_ternary_program(&packed).unwrap(),
+                   "10 1110 00 10 001 00 000 01 01");
     }
 
     #[test]
