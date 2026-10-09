@@ -1,0 +1,26 @@
+name: COND modernizer safety
+
+on:
+  pull_request:
+    paths:
+      - 'scripts/cond-modernize.py'
+      - 'scripts/test_cond_modernize.py'
+      - '.github/workflows/cond-modernize-safety.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'scripts/cond-modernize.py'
+      - 'scripts/test_cond_modernize.py'
+      - '.github/workflows/cond-modernize-safety.yml'
+  workflow_dispatch:
+
+jobs:
+  safety:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - name: Test polarity, source preservation and fail-closed staging
+        run: python3 scripts/test_cond_modernize.py
+      - name: Parse only (never overwrite active library source)
+        run: python3 scripts/cond-modernize.py --scan lib --json > "$RUNNER_TEMP/cond-report.json"
