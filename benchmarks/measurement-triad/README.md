@@ -9,9 +9,10 @@
 
 ```sh
 sudo apt-get install valgrind
+export SENS_ROOT="$(pwd)"
 cargo install --locked --version 0.16.1 iai-callgrind-runner
-cargo bench --manifest-path benchmarks/measurement-triad/Cargo.toml \
-  --bench instruction_lane
+( cd /tmp && cargo bench --manifest-path "$SENS_ROOT/benchmarks/measurement-triad/Cargo.toml" \\
+  --bench instruction_lane )
 ```
 
 Інструкційний gate — **тільки** при однаковому SHA-відомому workload,
@@ -24,8 +25,8 @@ Iai порівнює Callgrind інструкції, тоді як наявні 
 ## 2. Час (Criterion)
 
 ```sh
-cargo bench --manifest-path benchmarks/measurement-triad/Cargo.toml \
-  --bench wall_time_lane
+( cd /tmp && cargo bench --manifest-path "$SENS_ROOT/benchmarks/measurement-triad/Cargo.toml" \\
+  --bench wall_time_lane )
 ```
 
 Criterion виконує прогрів та збирає семпли. Це wall-time для конкретного
@@ -91,3 +92,7 @@ SHA baseline, host provenance та обмеження. Стенд виходит
 Не запускати CPU-only статистичні гейти на GPU-only локальному ранері.
 Цей пакет ізольований від production workspace; core SENS не отримує
 ніяких нових runtime dependencies.
+
+У SENS кореневий `.cargo/config.toml` фіксує офлайновий `vendor/`. Для цього
+ізольованого стенду запускайте Cargo **з `/tmp` і абсолютним `--manifest-path`**,
+щоб Cargo не успадкував цей vendor-override. Production Cargo конфіг не змінюємо.
