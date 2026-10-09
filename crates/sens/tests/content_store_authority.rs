@@ -43,21 +43,27 @@ fn content_store_semantic_relations_are_owned_by_lisp_witness() {
         ("object-relation", r#"(00100010
             (fs-serialize-object (quote (lambda (x) x)))
             (fs-serialize-object (quote (lambda (x) x))))"#),
-        ("projection-relations", r#"(10011101
-          ((direct (world-tell (empty-world) (00000001 zoo) (00000001 ((has-fur cat)))))
-           (retold (world-tell
-             (world-retract
-               (world-tell (empty-world) (00000001 zoo) (00000001 ((has-fur cat))))
-               (00000001 zoo) (00000001 ((has-fur cat))))
-             (00000001 zoo) (00000001 ((has-fur cat)))))
-          (00100111
-            (world-clauses direct (00000001 zoo))
-            (world-clauses retold (00000001 zoo))
-            (00100010 (world-clauses direct (00000001 zoo))
-                      (world-clauses retold (00000001 zoo)))
-            (content-store-no?
-              (00100010 (world-clauses direct (00000001 zoo))
-                        (world-clauses retold (00000001 zoo)))))))"#)
+        ("world-clauses-direct", r#"(world-clauses
+          (world-tell (empty-world) (00000001 zoo) (00000001 ((has-fur cat))))
+          (00000001 zoo))"#),
+        ("world-clauses-retold", r#"(world-clauses
+          (world-tell
+            (world-retract
+              (world-tell (empty-world) (00000001 zoo) (00000001 ((has-fur cat))))
+              (00000001 zoo) (00000001 ((has-fur cat))))
+            (00000001 zoo) (00000001 ((has-fur cat))))
+          (00000001 zoo))"#),
+        ("projection-relations", r#"(00100010
+          (world-clauses
+            (world-tell (empty-world) (00000001 zoo) (00000001 ((has-fur cat))))
+            (00000001 zoo))
+          (world-clauses
+            (world-tell
+              (world-retract
+                (world-tell (empty-world) (00000001 zoo) (00000001 ((has-fur cat))))
+                (00000001 zoo) (00000001 ((has-fur cat))))
+              (00000001 zoo) (00000001 ((has-fur cat))))
+            (00000001 zoo)))"#)
     ];
     for (label, probe) in probes {
         let result = eval_program(probe, &mut session)
