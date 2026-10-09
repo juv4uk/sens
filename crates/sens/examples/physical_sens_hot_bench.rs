@@ -25,10 +25,10 @@ fn two_pass_t5_allocation_control(words: &[sens::BinarySourceWord]) -> Vec<u8> {
             trits.push(((payload >> shift) & 1) as u8);
         }
     }
-    while trits.len() % 5 != 0 {
+    while !trits.len().is_multiple_of(5) {
         trits.push(2);
     }
-    trits.chunks_exact(5).map(|five| {
+    trits.as_chunks::<5>().0.iter().map(|five| {
         five.iter().fold(0u16, |acc, &digit| acc * 3 + u16::from(digit)) as u8
     }).collect()
 }
@@ -64,7 +64,7 @@ fn main() {
     let samples = args[4].parse::<usize>().expect("samples");
     assert!((1..=2048).contains(&forms));
     assert!((4..=100_000_000).contains(&work_budget));
-    assert!((3..=101).contains(&samples) && samples % 2 == 1);
+    assert!((3..=101).contains(&samples) && !samples.is_multiple_of(2));
     let count = (work_budget / forms).max(4);
 
     let physical = fs::read(&args[1]).expect("фізичний T5");
