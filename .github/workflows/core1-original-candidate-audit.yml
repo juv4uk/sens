@@ -1,0 +1,58 @@
+name: Core1 historical original physical frontier (read-only)
+
+on:
+  pull_request:
+    paths:
+      - 'lib/core1-compiler-sid-resolver.lisp'
+      - 'scripts/audit_core1_original_candidate.py'
+      - 'tests/test_audit_core1_original_candidate.py'
+      - '.github/workflows/core1-original-candidate-audit.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'lib/core1-compiler-sid-resolver.lisp'
+      - 'scripts/audit_core1_original_candidate.py'
+      - 'tests/test_audit_core1_original_candidate.py'
+      - '.github/workflows/core1-original-candidate-audit.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  exact-original-no-publication:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v5
+      - name: Pin real original Git blob and do canonical AUTO and provenance-backed legacy dry-runs
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m unittest discover -s tests -p 'test_audit_core1_original_candidate.py' -v
+          python3 scripts/audit_core1_original_candidate.py > "$RUNNER_TEMP/core1-original-frontier.json"
+          python3 - "$RUNNER_TEMP/core1-original-frontier.json" <<'PY'
+          import json,sys
+          r=json.load(open(sys.argv[1],encoding="utf-8"))
+          assert r["status"]=="RESEARCH_FRONTIER_NOT_SEMANTIC_ADMISSION",r
+          assert r["historical_original_git_blob_sha1"]=="b3f976ef456cc6033ef34984c6d5b557101811d4"
+          assert [p["source_era"] for p in r["canonical_no_write_probes"]]==["auto","legacy"]
+          assert all(p["published_physical_bytes"]==0 for p in r["canonical_no_write_probes"])
+          assert r["new_physical_sens_files"]==0
+          assert r["new_historically_certified_executables"]==0
+          assert r["historical_oracle"]["expected_observations"]==11
+          assert r["historical_oracle"]["replayed_here"] is False
+          print("ORIGINAL_CORE1_11_CASE_HISTORICAL",r["historical_oracle"])
+          for p in r["canonical_no_write_probes"]:
+              print("FRONTIER",p["source_era"],p["classification"],p["first_token"],p["first_blocker"])
+          PY
+          test ! -e lib/core1-compiler-sid-resolver.sens
+          test ! -e lib/core1-compiler-sid-resolver
+          git diff --exit-code -- lib/core1-compiler-sid-resolver.lisp
+      - name: Retain exact verified original-source blocker evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: core1-original-11-case-frontier-not-admitted
+          path: ${{ runner.temp }}/core1-original-frontier.json
+          if-no-files-found: warn
