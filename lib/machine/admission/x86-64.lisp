@@ -784,7 +784,7 @@
          (00101111 form) (00110000 form) (00110001 form) (00110010 form)))
       ; Unreachable after admission. Keep fail-closed data instead of inventing
       ; a fallback encoder.
-      (t (00000001 ())))))
+      ((00000010 (00000001 ())) (00000001 ())))))
 
 (00001001 x86-encode-admitted-program
   (00001000 (forms)
@@ -798,7 +798,7 @@
     (00000111
       ((x86-admitted-program? forms)
        (x86-encode-admitted-program forms))
-      (t
+      ((00000010 (00000001 ()))
        (00100111 (00000001 rejected)
              (00000001 unadmitted-machine-form)
              (x86-first-unadmitted-form forms))))))
@@ -810,9 +810,9 @@
        (00000111
          ((00000011 arena-bytes 0)
           (native-call-u64-raw (x86-encode-admitted-program forms)))
-         (t
+         ((00000010 (00000001 ()))
           (native-call-u64-raw (x86-encode-admitted-program forms) arena-bytes))))
-      (t
+      ((00000010 (00000001 ()))
        (00100111 (00000001 rejected)
              (00000001 unadmitted-machine-form)
              (x86-first-unadmitted-form forms))))))
