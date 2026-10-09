@@ -12,13 +12,13 @@
 
 (00001001 content-store-authority-witness
   (00001000 ()
-    (10011100
+    (let
       ((value (00000001 (lambda (x) x))))
-      (10011100
+      (let
         ((written (fs-write (fs-empty) "code" value)))
-        (10011100
+        (let
           ((fs (00000101 written)))
-          (10011100
+          (let
             ((root-a (fs-serialize-root fs))
              (root-b (fs-serialize-root fs))
              (object-a (fs-serialize-object value))
@@ -39,7 +39,7 @@
                    (00000001 ((has-fur cat))))
                  (00000001 zoo)
                  (00000001 ((has-fur cat)))))
-            (10011100
+            (let
               ((root-relation (00100010 root-a root-b))
                (object-relation (00100010 object-a object-b))
                (projection-relation
