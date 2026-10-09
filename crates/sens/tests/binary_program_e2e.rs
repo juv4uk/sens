@@ -16,6 +16,8 @@ const BINARY_PROGRAM: &str =
     include_str!("../../../examples/binary/d7-first-program.lisp");
 const D3_COND_PROGRAM: &str =
     include_str!("../../../examples/binary/d3-cond-program.sens");
+const D3_PRIMITIVES_PROGRAM: &str =
+    include_str!("../../../examples/binary/d3-primitives-program.sens");
 
 fn assert_exact_binary_ast(expr: &Expr) {
     match &expr.kind {
@@ -79,6 +81,54 @@ fn real_packed_t5_runs_binary_d4_d7_definition_and_d1_result() {
         )),
         "current source-level result must retain exact D1:1, not host T"
     );
+}
+
+
+
+#[test]
+fn physical_t5_executes_d3_primitive_basis_without_core4() {
+    assert!(
+        D3_PRIMITIVES_PROGRAM
+            .bytes()
+            .all(|b| b == b'0' || b == b'1' || b.is_ascii_whitespace()),
+        "the D3 primitive source must contain only bits and whitespace"
+    );
+    let physical = encode_binary_projection_ternary(D3_PRIMITIVES_PROGRAM)
+        .expect("D3 primitive program must encode to physical T5");
+    let visible = open_ternary_program(&physical)
+        .expect("physical T5 must decode to exact-width D3 source");
+    let normalized = D3_PRIMITIVES_PROGRAM
+        .split_whitespace()
+        .collect::<Vec<_>>()
+        .join(" ");
+    assert_eq!(visible, normalized);
+    let decoded = decode_ternary_program(&physical).expect("T5 words must decode");
+    assert_eq!(visible, sens::render_ternary_words_spaced(&decoded));
+
+    let parsed = parse_canonical_binary(&visible)
+        .expect("the exact-width D2 reader must parse all six D3 forms");
+    assert_eq!(parsed.len(), 6);
+    for expression in &parsed {
+        assert_exact_binary_ast(expression);
+    }
+
+    // Name-free end-to-end mechanism witnesses: QUOTE, ATOM(empty),
+    // ATOM(CONS 1 0), EQ(CAR(CONS 1 0), 1), EQ(CDR(CONS 1 0), 0),
+    // and EQ(1, 0). Meaning authority remains the ratified D3/D1 law.
+    let expected_bits = [1u8, 1, 0, 1, 1, 0];
+    let mut session = Session::default();
+    for (expression, expected) in parsed.iter().zip(expected_bits) {
+        let value = eval_parsed_expressions(std::slice::from_ref(expression), &mut session)
+            .expect("ratified exact D3 primitive should execute without Core4")
+            .value;
+        assert_eq!(
+            value,
+            Value::DomainIdentity(DomainIdentity::D1(
+                sens::PredicateBit::from_word(sens::Bit1::new(expected).unwrap())
+            )),
+            "binary D3 primitive sequence produced a non-exact D1 result"
+        );
+    }
 }
 
 
