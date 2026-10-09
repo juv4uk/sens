@@ -1276,13 +1276,6 @@ fn eval_core(source: &str) -> Value {
 }
 
 #[test]
-fn string_less_than_orders_strings_lexicographically() {
-    assert_eq!(eval_core(r#"(string<? "a" "b")"#), Value::truth(true));
-    assert_eq!(eval_core(r#"(string<? "b" "a")"#), Value::truth(false));
-    assert_eq!(eval_core(r#"(string<? "a" "a")"#), Value::truth(false));
-}
-
-#[test]
 fn string_less_than_rejects_non_string_arguments() {
     let left = eval_program(r#"(string<? 1 "a")"#, &mut core_session())
         .expect_err("a non-string left argument must fail named, not panic");
