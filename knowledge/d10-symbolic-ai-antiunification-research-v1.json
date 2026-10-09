@@ -49,6 +49,15 @@
       "citation": "Anti-unification and Generalization: A Survey (2023)",
       "url": "https://arxiv.org/abs/2302.00277",
       "law": "distinguish first-order syntactic LGG from equational and binder variants"
+    },
+    {
+      "kind": "INDEPENDENT-EXECUTABLE-REFERENCE",
+      "citation": "SWI-Prolog library(terms):term_subsumer/3, most specific generalization of two terms",
+      "url": "https://www.swi-prolog.org/pldoc/man?predicate=term_subsumer%2F3",
+      "law": "For the restricted finite ground first-order profile, canonical LGG has same functor/arity retention and repeated-disagreement pair sharing. SWI donor itself admits cyclic terms, which are OUT OF SCOPE of our D10 research contract.",
+      "runtime_witness": "tests/d10_symbolic_anti_unify_donor.pl",
+      "workflow": ".github/workflows/d10-symbolic-ai-antiunification.yml",
+      "provenance_note": "Source manual live; actual runtime version printed by dedicated GitHub Actions. 14 plunit cases are cross-runtime witnesses, not a SENS execution claim."
     }
   ],
   "dedup": {
@@ -94,7 +103,9 @@
       "repeated disagreement variable sharing",
       "exhaustive finite depth-one leastness vs all bounded competing patterns",
       "reject malformed nonground or excessive inputs"
-    ]
+    ],
+    "real_swi_prolog_oracle": "SWI-Prolog library(terms):term_subsumer/3; tests/d10_symbolic_anti_unify_donor.pl (14 direct runtime plunit assertions)",
+    "oracle_convergence": "Original Plotkin recursive/iterative Python tests remain authoritative in #4971; SWI runtime adds a THIRD, independent implementation. No second LGG identity or selected resident is created."
   },
   "forbidden_effects": [
     "D10 10-bit code placement",
