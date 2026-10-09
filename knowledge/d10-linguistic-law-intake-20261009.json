@@ -36,7 +36,7 @@
         ]
       ],
       "falsifier": "Do not accept combining acute after a consonant or silently lose an out-of-range stress position.",
-      "dedup": "D7 already owns the acute-mark symbol. Full D1-D10 behavioral dedup and native oracle required before selection."
+      "dedup": "D7 already owns the acute-mark symbol. Full D1-D10 behavioral dedup and native oracle required before selection. Distinct from D7 U+0301 code-point identity; review against generic FINITE-MEALY-RUN and list walks before any selection."
     },
     {
       "semantic_name": "CONTEXTUAL-LONGEST-TRANSLITERATE",
@@ -57,7 +57,7 @@
         ]
       ],
       "falsifier": "A shorter key must not consume the prefix of a longer admissible key.",
-      "dedup": "Compare with D10 APPLY-SANDHI and D8 string rewriting; no D2 parser/control semantics is minted."
+      "dedup": "Compare with D10 APPLY-SANDHI and D8 string rewriting; no D2 parser/control semantics is minted. Peer cross-hobby finite-state transducer research in main (knowledge/d10-finite-transducer-cross-hobby-v1.json, #4914) can implement a contextual rewrite; likely a derived/projection family pending expressibility proof, not an independent resident by default."
     }
   ],
   "holds": [
@@ -65,5 +65,10 @@
     "General case/Unicode behavior of third-party transliteration remains outside this scoped law."
   ],
   "selection_delta": 0,
-  "ratified_delta": 0
+  "ratified_delta": 0,
+  "related_research": {
+    "peer_pr": 4914,
+    "artifact": "knowledge/d10-finite-transducer-cross-hobby-v1.json",
+    "conclusion": "Both candidate laws remain HOLD. In particular contextual transliteration may be a parameterization of FINITE-MEALY-RUN rather than a fresh root."
+  }
 }
