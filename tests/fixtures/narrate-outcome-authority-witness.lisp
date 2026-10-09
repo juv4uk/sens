@@ -54,7 +54,9 @@
          (00000111
            ((00100010 (00101111 row) (00110000 row))
             (narrate-outcome-authority-check-rows (00000110 rows)))
-           ((00100010 (00100010 (00101111 row) (00110000 row)) (00100010 (00000001 d1-no-left) (00000001 d1-no-right)))
+           ((00100010
+              (00100010 (00101111 row) (00110000 row))
+              (00100010 (00000001 d1-no-left) (00000001 d1-no-right)))
             (00100111
               (00000001 narrate-outcome-authority-witness)
               (00000001 (status fail))
