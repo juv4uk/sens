@@ -1,0 +1,38 @@
+name: Historical Ukrainian Markdown reference exactness
+
+on:
+  pull_request:
+    paths:
+      - 'docs/ukrainian-api.md'
+      - 'lib/surface/semantic-registry.lisp'
+      - 'lib/surface/uk-docs.lisp'
+      - 'tests/test_ukrainian_api_compat_coverage.py'
+      - '.github/workflows/uk-api-compat-coverage.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'docs/ukrainian-api.md'
+      - 'lib/surface/semantic-registry.lisp'
+      - 'lib/surface/uk-docs.lisp'
+      - 'tests/test_ukrainian_api_compat_coverage.py'
+      - '.github/workflows/uk-api-compat-coverage.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  stable-uk-compatibility-documentation:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v5
+      - name: Exact legacy source ↔ Markdown names, never change current domain meaning
+        run: python3 -m unittest discover -s tests -p 'test_ukrainian_api_compat_coverage.py' -v
+      - name: Verify no source, docs or domain data changed during checking
+        shell: bash
+        run: |
+          test -z "$(git status --porcelain --untracked-files=all)" || {
+            git status --short
+            exit 1
+          }

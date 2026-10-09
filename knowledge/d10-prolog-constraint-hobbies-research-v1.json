@@ -1,0 +1,237 @@
+{
+  "schema": "d10-prolog-constraint-hobby-research/v1",
+  "status": "SOURCE_GROUNDED_RESEARCH_HOLD",
+  "intake": {
+    "date": "2026-10-09",
+    "main_commit": "71de8e18f7c8e4eab016fa56d377633cafc97751",
+    "inventory_path": "knowledge/d10-v1-semantic-inventory.json",
+    "inventory_blob_sha": "a55f307c27f17091795d75ebfcd7d051547d80bc",
+    "selected_at_intake": 630,
+    "capacity": 1024,
+    "ratified_at_intake": 0,
+    "selected_delta": 0,
+    "coordinate_delta": 0
+  },
+  "authority_issues": [
+    "#4013",
+    "#4463",
+    "#4896",
+    "#4899"
+  ],
+  "proof_conditions": {
+    "source_documented_behavior": true,
+    "donor_runtime": "SWI-Prolog real compiled executable in CI",
+    "donor_independent_of_python_model": true,
+    "portable_ISO_scope": "only unify_with_occurs_check/2 is marked ISO by the donor documentation",
+    "self_hosted_sens_runtime_executed": false,
+    "d1_d9_behavioral_dedup": "PENDING",
+    "d10_behavioral_dedup": "PENDING; exact-name check only",
+    "owner_core_vs_library": "PENDING",
+    "proposal_ledger": "PENDING #4902; do not bypass",
+    "blocked_original_source": null,
+    "blocked_original_reason": "NO_PROVEN_MIGRATION_BLOCK; do not fabricate source",
+    "ratified": false
+  },
+  "hobby_coverage": [
+    {
+      "interest": "ISO Prolog, Advice Taker, knowledge logic",
+      "decision": "RESEARCH_3_DISTINCT_LAWS",
+      "why": "observable binding, suspended disequality and residual-constraint copy"
+    },
+    {
+      "interest": "Sanskrit/Panini morphology, Shiva sutras",
+      "decision": "CONSUMER_ONLY",
+      "why": "grammar constraints can consume logic laws; 23 previously selected Panini laws must not be repeated"
+    },
+    {
+      "interest": "astronomy and coordinate metrology",
+      "decision": "PEER_OWNED",
+      "why": "frame-state transformation and covariance transport already proposed in #4890"
+    },
+    {
+      "interest": "SDR, radio, electronics, FPGA",
+      "decision": "PEER_OWNED_OR_SUBSTRATE",
+      "why": "convolution/phase #4888 and resampling #4890; device registers, DMA and timing remain substrate"
+    },
+    {
+      "interest": "music theory, acoustics, horology",
+      "decision": "PEER_OWNED",
+      "why": "phase unwrapping, bounded fractions, Allan variance and pacing research already claimed"
+    },
+    {
+      "interest": "analog computing and exact rational numbers",
+      "decision": "PEER_OWNED",
+      "why": "bounded-rational root #4891/#4892, correlation-safe affine uncertainty other lane"
+    },
+    {
+      "interest": "chess and graph/search",
+      "decision": "DONOR_QUEUE",
+      "why": "52 owner-repo candidate census exists in #4013; no invented alpha-beta primitive"
+    },
+    {
+      "interest": "Ukrainian linguistics/Text7",
+      "decision": "EXISTING_DOMAIN_OR_DONOR",
+      "why": "D7 and NLP donor queue; never use ASCII as normative programming surface"
+    },
+    {
+      "interest": "WSM-OS-Lisp, CML, GPU and CUDA",
+      "decision": "MECHANISM_OR_EXISTING_LANE",
+      "why": "runtime, scheduler, driver and ABI details are not independent pure D10 semantic law"
+    },
+    {
+      "interest": "camera, ESP32 and astronomical observations",
+      "decision": "DEVICE_SUBSTRATE",
+      "why": "sensor acquisition is hardware/IO, not automatic D10 meaning"
+    }
+  ],
+  "proposals": [
+    {
+      "id": "D10P-PROLOG-OCCURS-CHECK-20261009",
+      "semantic_name": "UNIFY-WITH-OCCURS-CHECK",
+      "surfaces": {
+        "uk": "узц",
+        "укр": "узгодь-без-циклу",
+        "sa": null,
+        "en": "unify-with-occurs-check",
+        "LISP": "unify_with_occurs_check/2",
+        "sym": null
+      },
+      "width": 10,
+      "coordinate": null,
+      "ratified": false,
+      "selected": false,
+      "status": "RESEARCH_HOLD_BEHAVIORAL_DEDUP",
+      "donor": {
+        "system": "SWI-Prolog",
+        "manual": "https://www.swi-prolog.org/pldoc/man?predicate=unify_with_occurs_check%2F2",
+        "section": "Comparison and Unification of Terms, ISO",
+        "revision": "online manual verified 2026-10-09; runner swipl --version recorded by CI",
+        "git_sha": null,
+        "reason_no_sha": "Primary online manual, not a Git source; owner-side immutable revision evidence remains pending"
+      },
+      "semantic_law": "For finite acyclic first-order terms, unify two terms while refusing any new binding V:=T when V occurs inside T; observable success/failure plus induced substitution. SWI special case with ALREADY cyclic inputs is non-portable and excluded.",
+      "arity": 2,
+      "result_cardinality": "success with bindings or failure",
+      "positive_cases": [
+        "occurs-ground-injective",
+        "occurs-sharing-preserved"
+      ],
+      "falsifiers": [
+        "occurs-rejects-new-cycle",
+        "occurs-rejects-functor-mismatch"
+      ],
+      "exact_name_d10_snapshot_duplicate": false,
+      "behavioral_neighbor": "Current D10 PROLOG-SUBSTITUTIONS-TO-DATALOG-FACTS is a projection of prior substitutions, not the sound unification relation; shared behavior needs exhaustive review",
+      "derivable": "Pure finite-term unification can be implemented in self-hosted Lisp; selection as a Core primitive is not yet justified.",
+      "mechanism_only": false,
+      "owner_review": "core vs selfhost library; occurs check outside D2 control",
+      "migration_block": null
+    },
+    {
+      "id": "D10P-PROLOG-DELAYED-DISEQUALITY-20261009",
+      "semantic_name": "DELAYED-TERM-DISEQUALITY",
+      "surfaces": {
+        "uk": "внр",
+        "укр": "відкладена-нерівність",
+        "sa": null,
+        "en": "delayed-term-disequality",
+        "LISP": "dif/2",
+        "sym": null
+      },
+      "width": 10,
+      "coordinate": null,
+      "ratified": false,
+      "selected": false,
+      "status": "RESEARCH_HOLD_BEHAVIORAL_DEDUP",
+      "donor": {
+        "system": "SWI-Prolog library(dif)",
+        "manual": "https://www.swi-prolog.org/pldoc/man?predicate=dif%2F2",
+        "section": "Constraint Logic Programming / Coroutining",
+        "revision": "online manual verified 2026-10-09; runner swipl --version recorded by CI",
+        "git_sha": null,
+        "reason_no_sha": "Live donor manual and runtime in CI; immutable Git source pin pending"
+      },
+      "semantic_law": "Monotonic disequality constraint on two terms: immediate success if terms cannot unify, failure if equal, otherwise residual delayed constraint preventing future bindings that make them identical. Distinct from immediate syntactic non-equality or D1 1-bit boolean comparison.",
+      "arity": 2,
+      "result_cardinality": "success with residual state or failure",
+      "positive_cases": [
+        "dif-ground-distinct",
+        "dif-delayed-survives-unbound",
+        "dif-accepts-safe-binding"
+      ],
+      "falsifiers": [
+        "dif-rejects-ground-equal",
+        "dif-prevents-delayed-equality"
+      ],
+      "exact_name_d10_snapshot_duplicate": false,
+      "behavioral_neighbor": "D10 forward-rule matcher tests facts after substitution; dif/2 imposes a persistent future constraint on a logical variable, not mere matching.",
+      "derivable": "Attributed-variable store and fair wakeup implementation maybe self-hosted library; dependency and root irreducibility not proven.",
+      "mechanism_only": false,
+      "owner_review": "Does monotonic constraint state belong language-visible value or runtime-owned solver? Hold",
+      "migration_block": null
+    },
+    {
+      "id": "D10P-PROLOG-RESIDUAL-CONSTRAINT-COPY-20261009",
+      "semantic_name": "COPY-RESIDUAL-CONSTRAINTS",
+      "surfaces": {
+        "uk": "коб",
+        "укр": "копія-з-обмеженнями",
+        "sa": null,
+        "en": "copy-residual-constraints",
+        "LISP": "copy_term/3",
+        "sym": null
+      },
+      "width": 10,
+      "coordinate": null,
+      "ratified": false,
+      "selected": false,
+      "status": "RESEARCH_HOLD_BEHAVIORAL_DEDUP",
+      "donor": {
+        "system": "SWI-Prolog attributed variables",
+        "manual": "https://www.swi-prolog.org/pldoc/man?predicate=copy_term%2F3",
+        "section": "Attributed Variables / Operations on Terms",
+        "revision": "online manual verified 2026-10-09; runner swipl --version recorded by CI",
+        "git_sha": null,
+        "reason_no_sha": "Implementation-specific constraint-goal representation; immutable repo pin and portable standard witness pending"
+      },
+      "semantic_law": "Copy a term with fresh variables while extracting pending attribute constraints as explicit residual goals G. Replaying G restores the constraints onto the copy; copying alone DOES NOT implicitly preserve them for copy_term/3.",
+      "arity": 3,
+      "result_cardinality": "copied term and ordered/list residual-goal representation",
+      "positive_cases": [
+        "copy-fresh-sharing",
+        "copy-restores-one-constraint",
+        "copy-restores-two-constraints"
+      ],
+      "falsifiers": [
+        "copy-without-residual-replay-allows-forbidden-value"
+      ],
+      "exact_name_d10_snapshot_duplicate": false,
+      "behavioral_neighbor": "Existing Prolog-to-Datalog fact projection is not explicit reconstruction of attributed variable constraints; behavior dedup must inspect D9 graph/dataset laws.",
+      "derivable": "Likely higher-level transformation using constraint store; HOLD for a library rather than consume a primitive slot.",
+      "mechanism_only": false,
+      "owner_review": "D10 universal relation vs library combination, later independent SWI/non-SWI comparison",
+      "migration_block": null
+    }
+  ],
+  "oracle": {
+    "file": "tests/d10_prolog_constraint_oracle.pl",
+    "runner": "swipl -q -s tests/d10_prolog_constraint_oracle.pl -g main -t halt",
+    "expected_tag_count": 13,
+    "expected_tags": [
+      "occurs-ground-injective",
+      "occurs-sharing-preserved",
+      "occurs-rejects-new-cycle",
+      "occurs-rejects-functor-mismatch",
+      "dif-ground-distinct",
+      "dif-delayed-survives-unbound",
+      "dif-accepts-safe-binding",
+      "dif-rejects-ground-equal",
+      "dif-prevents-delayed-equality",
+      "copy-fresh-sharing",
+      "copy-restores-one-constraint",
+      "copy-restores-two-constraints",
+      "copy-without-residual-replay-allows-forbidden-value"
+    ],
+    "independence_caveat": "Real SWI donor oracle is external runtime witness, NOT independent second implementation; SENS native interpreter not exercised"
+  }
+}

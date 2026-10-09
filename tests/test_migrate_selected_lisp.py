@@ -141,6 +141,42 @@ class SelectedOriginalT5(unittest.TestCase):
         self.assertFalse(list(self.output.rglob("*.sens")))
         self.assertEqual((ROOT / SOURCE).read_bytes(), self.orig)
 
+    def test_one_file_resolver_uses_owner_audited_w8_and_explicit_era(self):
+        # No oracle is bypassed here: this inspects only canonical head mapping,
+        # never publishes an original executable SENS artifact.
+        migration = app.load_migrator()
+        foundation = migration.load_foundation(ROOT / "knowledge/d1-d9-foundation.json")
+        legacy, my, upper = migration.build_three_pass_maps(
+            foundation,
+            ROOT / "crates/sens/src/domain_surface_registry_generated.rs",
+            ROOT / "crates/sens/src/semantic_registry_generated.rs",
+            ROOT / "crates/sens/src/semantic_registry.rs",
+            ROOT / "crates/sens/src/eval/necessary_forms_generated.rs",
+            ROOT / "contracts/core1-historical-sid-map.lisp",
+            ROOT / "knowledge/sens8-current-coverage-v1.json",
+        )
+        self.assertEqual(legacy["01001000"][:2], ("11011011", "D8"))
+        self.assertNotIn("00001010", migration.parse_audited_legacy_successors(
+            ROOT / "knowledge/sens8-current-coverage-v1.json", foundation))
+        admitted_d8 = foundation["domains"]["D8"]["residents"]
+        text7 = migration.build_text7(
+            foundation, ROOT / "crates/sens/src/text7_projection_generated.rs")
+        original = "(01001000 000)\n"
+        old = migration.Resolver(
+            legacy, my, upper, source_era="legacy", admitted_d8=admitted_d8)
+        now = migration.Resolver(
+            legacy, my, upper, source_era="current", admitted_d8=admitted_d8)
+        self.assertTrue(migration.migrate_file(original, old, text7).startswith(
+            "10 11011011 00 "))
+        self.assertEqual(old.counts["pass1-sens8"], 1)
+        self.assertTrue(migration.migrate_file(original, now, text7).startswith(
+            "10 01001000 00 "))
+        self.assertEqual(now.counts["already-exact"], 1)
+        automatic = migration.Resolver(
+            legacy, my, upper, source_era="auto", admitted_d8=admitted_d8)
+        with self.assertRaisesRegex(migration.MigrationError, "ambiguous W8"):
+            migration.migrate_file(original, automatic, text7)
+
     def test_real_unpaired_original_files_are_audited_not_converted(self):
         # These are tracked old files, not fabricated canaries or newly authored
         # snapshots. They include local binding, Text7 and machine-data issues.

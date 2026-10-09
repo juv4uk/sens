@@ -93,12 +93,12 @@ class SensCodeMigrationTests(unittest.TestCase):
 
     def test_all_three_historical_function_notations_resolve_before_text7(self):
         cases = {
-            "(00000101 x)\n": ("100", "CAR"),
-            "(car x)\n": ("100", "CAR"),
-            "(CAR x)\n": ("100", "CAR"),
-            "(00001100 a b)\n": ("01010", "PLUS"),
-            "(+ a b)\n": ("01010", "PLUS"),
-            "(PLUS a b)\n": ("01010", "PLUS"),
+            "(00000101 ())\n": ("100", "CAR"),
+            "(car ())\n": ("100", "CAR"),
+            "(CAR ())\n": ("100", "CAR"),
+            "(00001100 () ())\n": ("01010", "PLUS"),
+            "(+ () ())\n": ("01010", "PLUS"),
+            "(PLUS () ())\n": ("01010", "PLUS"),
         }
         for source, (bits, label) in cases.items():
             converted, hits, _ = self.binary(source)
@@ -112,23 +112,41 @@ class SensCodeMigrationTests(unittest.TestCase):
             ("aṇu", "010"),
             ("додати", "01010"),
         ]:
-            converted, hits, _ = self.binary(f"({surface} x)\n")
+            converted, hits, _ = self.binary(f"({surface} ())\n")
             self.assertTrue(converted.startswith(f"10 {bits} 00 "), (surface, converted))
             self.assertTrue(hits, surface)
 
+    def test_unframed_lexical_binder_blocks_old_false_binary_success(self):
+        source = "(00001001 machine-block (00001000 (forms) forms))\n"
+        with self.assertRaisesRegex(mod.BinaryMigrationError, "UNFRAMED_TEXT7_ATOM"):
+            self.binary(source)
+        # A true original lib source, not a synthetic canary, must not be
+        # advertised as an executable packed SENS until a D7 binder term law.
+        original = (ROOT / "lib/machine/block.lisp").read_text(encoding="utf-8")
+        with self.assertRaisesRegex(
+            mod.BinaryMigrationError, r"UNFRAMED_TEXT7_ATOM 'machine-block'"
+        ):
+            self.binary(original)
+
+    def test_single_cell_text7_atom_is_not_a_bare_d7_codepoint(self):
+        # A bare one-cell W7 value is D7 data, not a Lisp identifier.
+        # No D2 Text7 atom/binder framing law has been ratified yet.
+        with self.assertRaisesRegex(mod.BinaryMigrationError, "UNFRAMED_TEXT7_ATOM"):
+            self.binary("(CONS a ())\n")
+
     def test_binary_source_uses_d2_structure_and_exact_function_words(self):
-        converted, hits, shadowed = self.binary("(CONS (CAR x) (CDR y))\n")
-        # x = SLP1 0x50, y = SLP1 0x26.
+        converted, hits, shadowed = self.binary("(CONS (CAR ()) (CDR ()))\n")
+        # Only D3 EMPTY is admitted as an operand here.
         self.assertEqual(
             converted,
-            "10 111 00 10 100 00 1010000 01 00 "
-            "10 011 00 0100110 01 01\n",
+            "10 111 00 10 100 00 000 01 00 "
+            "10 011 00 000 01 01\n",
         )
         self.assertEqual([hit.label for hit in hits], ["CONS", "CAR", "CDR"])
         self.assertFalse(shadowed)
 
     def test_registry_only_old_sid_map_reaches_current_d6_map(self):
-        converted, hits, _ = self.binary("(00110111 f xs)\n")
+        converted, hits, _ = self.binary("(00110111 () ())\n")
         self.assertTrue(converted.startswith("10 101000 00 "), converted)
         self.assertEqual((hits[0].label, hits[0].domain), ("MAP", "D6"))
 
@@ -143,7 +161,7 @@ class SensCodeMigrationTests(unittest.TestCase):
             self.binary("(print x)\n")
 
     def test_current_exact_width_head_is_preserved(self):
-        converted, hits, _ = self.binary("(100 x)\n")
+        converted, hits, _ = self.binary("(100 ())\n")
         self.assertTrue(converted.startswith("10 100 00 "))
         self.assertEqual(hits[0].label, "CAR")
 
@@ -170,43 +188,55 @@ class SensCodeMigrationTests(unittest.TestCase):
         commented = """; outside
 (CAR ; inline
   #| outer #| nested |# block |#
-  x)
+  ())
 """
-        plain = "(CAR x)\n"
+        plain = "(CAR ())\n"
         a, _, _ = self.binary(commented)
         b, _, _ = self.binary(plain)
         self.assertEqual(a, b)
         self.assertNotIn(";", a)
         self.assertNotIn("#", a)
 
-    def test_comment_markers_inside_string_are_data_not_comments(self):
+    def test_comment_markers_inside_string_remain_data_but_need_atom_framing(self):
         source = '(LIST ";not-comment" "#|not-comment|#")\n'
-        converted, hits, _ = self.binary(source)
-        self.assertTrue(converted.startswith("10 1110 "))
-        self.assertEqual([hit.label for hit in hits], ["LIST"])
-        self.assertRegex(converted, r"^[01\s]+$")
+        cleaned = mod.strip_comments(source)
+        self.assertIn('";not-comment"', cleaned)
+        self.assertIn('"#|not-comment|#"', cleaned)
+        with self.assertRaisesRegex(mod.BinaryMigrationError, "UNFRAMED_TEXT7_ATOM"):
+            self.binary(source)
 
-    def test_quoted_function_name_is_data_not_callable_identity(self):
-        converted, hits, _ = self.binary("'(CAR x)\n")
-        self.assertFalse(hits)
-        words = converted.split()
-        self.assertNotEqual(words[words.index("10") + 1], "100")
-        self.assertRegex(converted, r"^[01\s]+$")
+    def test_quoted_multicell_function_name_cannot_impersonate_one_atom(self):
+        # No current atom framing law means quoted CAR is three D7 cells,
+        # NOT a canonical standalone Lisp atom or executable head.
+        with self.assertRaisesRegex(mod.BinaryMigrationError, "UNFRAMED_TEXT7_ATOM"):
+            self.binary("'(CAR x)\n")
 
-    def test_standalone_dot_is_d2_dot_but_dot_inside_data_symbol_is_text7(self):
-        dotted, _, _ = self.binary("(LIST a . b)\n")
+    def test_dot_is_d2_only_when_standalone_multi_cell_symbol_blocks(self):
+        dotted, _, _ = self.binary("(LIST () . ())\n")
         self.assertIn(" 11 ", dotted)
-        symbol, _, _ = self.binary("(LIST a.b)\n")
-        self.assertIn("1111010", symbol)  # Text7 sign.dot
+        with self.assertRaisesRegex(mod.BinaryMigrationError, "UNFRAMED_TEXT7_ATOM"):
+            self.binary("(LIST a.b)\n")
 
     def test_unencodable_data_character_fails_closed(self):
         with self.assertRaises(mod.BinaryMigrationError):
             self.binary("(LIST 🙂)\n")
 
     def test_binary_output_is_ascii_bits_only(self):
-        converted, _, _ = self.binary('(CONS "привіт" test-name)\n')
+        converted, _, _ = self.binary("(CONS (CAR ()) (CDR ()))\n")
         self.assertRegex(converted, r"^[01\s]+$")
         converted.encode("ascii")
+
+    def test_multi_cell_ukrainian_and_english_strings_require_ratified_term(self):
+        for source in (
+            '(CONS "привіт" x)\n',
+            '(CONS test-name x)\n',
+            '(CONS ім’я x)\n',
+        ):
+            with self.subTest(source=source):
+                with self.assertRaisesRegex(
+                    mod.BinaryMigrationError, "UNFRAMED_TEXT7_ATOM"
+                ):
+                    self.binary(source)
 
     def test_new_sens_mirror_is_actual_physical_file_and_no_extensionless(self):
         with tempfile.TemporaryDirectory() as td:

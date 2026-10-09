@@ -1,0 +1,349 @@
+{
+  "schema": "d10-historical-coverage-gap-audit/v1",
+  "date": "2026-10-09",
+  "authority": "#4013 / #4182 / #4463",
+  "status": "RESEARCH-COVERAGE-GAPS-ONLY",
+  "purpose": "Proof against false EXHAUSTED-history claims; distinguish SOURCE-WAS-SCANNED, SECTION-REVIEWED, SELECTED, and EXHAUSTIVE semantic review.",
+  "snapshot": {
+    "selected": 625,
+    "remaining": 399,
+    "law_forced": 256,
+    "unplaced": 369,
+    "ratified": 0,
+    "inventory_blob": "73dd518469f972c55411e004b70b054ba8b3ec86",
+    "foundation_blob": "09d1d71c39d1484dfd005a5068dbb18b76f0f0d4"
+  },
+  "historic_family_coverage": [
+    {
+      "family": "LISP-1.5 / original McCarthy Lisp",
+      "status": "SLICE-ONLY",
+      "in_repo": "knowledge/d10-crossrepo-early-lisp-v1.json",
+      "evidence": "four owner repos reviewed for bounded slice; primary complete Lisp 1.5 manual-function census not attested",
+      "historical_source": "https://www.softwarepreservation.org/projects/LISP/book/LISP%201.5%20Programmers%20Manual.pdf"
+    },
+    {
+      "family": "MacLisp 1975",
+      "status": "PARTIAL-PRIMARY-MANUAL",
+      "in_repo": "knowledge/d10-historical-maclisp-v1.json + knowledge/d10-historical-maclisp-v2.json",
+      "evidence": "21+12 selected from two tranches; neither asserts index-wide function/section exhaustiveness",
+      "historical_source": "https://www.softwarepreservation.org/projects/LISP/MIT/MACLISP_Reference_Manual-Dec_17_1975.pdf"
+    },
+    {
+      "family": "Interlisp / Medley Interlisp-D",
+      "status": "PARTIAL-TIMELINE-NOT-MANUAL",
+      "in_repo": "knowledge/d10-interlisp-psl-history-harvest-v1.json",
+      "evidence": "UNDO/history and PSL definition-cell harvest do not cover language+environment manuals: pattern matching, generators/coroutines, Masterscope, structure editor, advising and history dependency laws",
+      "historical_source": "https://interlisp.org/documentation/IRM.pdf"
+    },
+    {
+      "family": "Portable Standard Lisp (PSL)",
+      "status": "PARTIAL-SECTIONS",
+      "in_repo": "knowledge/d10-interlisp-psl-history-harvest-v1.json",
+      "evidence": "PSL manual sections 8.2.1/8.2.2/8.2.6/8.3.1/8.3.2 specifically; not a complete PSL language dictionary",
+      "historical_source": "https://manuals.plus/m/000ffa02fa9f17a7abece89bb6a08bd2e3330bef1b4947c7bfdb2bee1670c42b"
+    },
+    {
+      "family": "Scheme R4RS / R5RS / R6RS / R7RS",
+      "status": "NOT-EXHAUSTIVELY-HARVESTED",
+      "in_repo": "docs/DIALECT-COMPARISON.md",
+      "evidence": "selected CALL/CC and CALL-WITH-VALUES do not establish coverage of dynamic-wind, parameterize, hygienic syntax-rules/syntax-case",
+      "historical_source": "https://people.csail.mit.edu/jaffer/r5rs/Control-features.html"
+    },
+    {
+      "family": "CLOS and Common Lisp Metaobject Protocol",
+      "status": "PARTIAL-OBJECT-LAWS",
+      "in_repo": "knowledge/d10-crossrepo-lisp-koans-v1.json + knowledge/d10-flavors-restarts-research-v1.json",
+      "evidence": "DEFCLASS/DEFMETHOD/DEFGENERIC present and eight Flavors/restart proposals; CHANGЕ-CLASS, FIND-METHOD and method mutation not audited as separate behavior",
+      "historical_source": "https://www.cs.cmu.edu/Groups/AI/html/cltl/clm/node311.html"
+    },
+    {
+      "family": "Lisp Machine ZetaLisp / Flavors",
+      "status": "PARTIAL-8-RESEARCH-ONLY",
+      "in_repo": "knowledge/d10-flavors-restarts-research-v1.json",
+      "evidence": "eight proposals, zero ratified/selected; historical wrappers/whoppers and effective method combination variants outside complete audit",
+      "historical_source": "https://manuals.plus/m/15ff2561cd4183c1377f8c5613f66c568a38d5fb213b76c4b54974ac1c65e1ac"
+    },
+    {
+      "family": "Franz Lisp; NIL; Spice Lisp; S-1 Lisp",
+      "status": "NOT-AUDITED-AS-FULL-DONOR",
+      "in_repo": "docs/DIALECT-COMPARISON.md",
+      "evidence": "dialect appendix lists names but supplies no manual-index coverage certificate or source-to-semantic census",
+      "historical_source": "https://www.softwarepreservation.org/projects/LISP/"
+    },
+    {
+      "family": "Le-Lisp; T; EuLisp; AutoLisp",
+      "status": "NOT-AUDITED-AS-FULL-DONOR",
+      "in_repo": "docs/DIALECT-COMPARISON.md",
+      "evidence": "listed in appendix only; no complete primary semantic donor register",
+      "historical_source": "https://www.softwarepreservation.org/projects/LISP/"
+    },
+    {
+      "family": "ISLISP (ISO/IEC 13816)",
+      "status": "NOT-AUDITED-AS-FULL-DONOR",
+      "in_repo": "docs/DIALECT-COMPARISON.md",
+      "evidence": "named in historical appendix, ISO reference exists; not equivalent to a complete source-to-law matrix",
+      "historical_source": "https://www.iso.org/standard/44338.html"
+    }
+  ],
+  "exact_name_absent_research": [
+    {
+      "review_id": "HIST-GAP-001",
+      "historical_spelling": "DYNAMIC-WIND",
+      "donor": "Scheme R5RS",
+      "status": "HOLD-D2-CONTROL",
+      "observable_question": "before/after must run on each dynamic-extent reentry or exit via captured continuations; not only on ordinary call/return",
+      "primary_url": "https://people.csail.mit.edu/jaffer/r5rs/Control-features.html",
+      "exact_name_in_d1_d10": false,
+      "semantically_novel": null,
+      "coordinate": null,
+      "ratified": false,
+      "selected_in_inventory": false,
+      "physical_t5_authorized": false
+    },
+    {
+      "review_id": "HIST-GAP-002",
+      "historical_spelling": "PARAMETERIZE",
+      "donor": "Scheme/R7RS",
+      "status": "HOLD-D2-CONTROL",
+      "observable_question": "dynamic parameter is restored on exit; compare existing D8 PROGV but do not assume semantic equivalence",
+      "primary_url": "https://www.gnu.org/software/mit-scheme/documentation/stable/mit-scheme-ref/Dynamic-Binding.html",
+      "exact_name_in_d1_d10": false,
+      "semantically_novel": null,
+      "coordinate": null,
+      "ratified": false,
+      "selected_in_inventory": false,
+      "physical_t5_authorized": false
+    },
+    {
+      "review_id": "HIST-GAP-003",
+      "historical_spelling": "MAKE-PARAMETER",
+      "donor": "Scheme/R7RS",
+      "status": "HOLD-DERIVABILITY",
+      "observable_question": "first-class parameter object with optional conversion procedure; check behavior rather than name alone",
+      "primary_url": "https://www.gnu.org/software/mit-scheme/documentation/stable/mit-scheme-ref/Dynamic-Binding.html",
+      "exact_name_in_d1_d10": false,
+      "semantically_novel": null,
+      "coordinate": null,
+      "ratified": false,
+      "selected_in_inventory": false,
+      "physical_t5_authorized": false
+    },
+    {
+      "review_id": "HIST-GAP-004",
+      "historical_spelling": "SYNTAX-RULES",
+      "donor": "Scheme R4RS",
+      "status": "HOLD-D2-SYNTAX",
+      "observable_question": "pattern-based hygienic rewrite must avoid variable capture and preserve lexical identity",
+      "primary_url": "https://docs.scheme.org/guide/macros/",
+      "exact_name_in_d1_d10": false,
+      "semantically_novel": null,
+      "coordinate": null,
+      "ratified": false,
+      "selected_in_inventory": false,
+      "physical_t5_authorized": false
+    },
+    {
+      "review_id": "HIST-GAP-005",
+      "historical_spelling": "SYNTAX-CASE",
+      "donor": "Scheme R6RS",
+      "status": "HOLD-D2-SYNTAX",
+      "observable_question": "general-purpose hygienic syntax transformer; do not confuse with raw textual macro substitution",
+      "primary_url": "https://www.scheme.com/syntax-case/",
+      "exact_name_in_d1_d10": false,
+      "semantically_novel": null,
+      "coordinate": null,
+      "ratified": false,
+      "selected_in_inventory": false,
+      "physical_t5_authorized": false
+    },
+    {
+      "review_id": "HIST-GAP-006",
+      "historical_spelling": "DEFINE-SYNTAX",
+      "donor": "Scheme R4RS",
+      "status": "HOLD-D2-SYNTAX",
+      "observable_question": "bind lexical syntax transformer and preserve macro identifier scopes; earlier lower-donor explicit projection is not an exact law witness",
+      "primary_url": "https://docs.scheme.org/guide/macros/",
+      "exact_name_in_d1_d10": false,
+      "semantically_novel": null,
+      "coordinate": null,
+      "ratified": false,
+      "selected_in_inventory": false,
+      "physical_t5_authorized": false
+    },
+    {
+      "review_id": "HIST-GAP-007",
+      "historical_spelling": "CHANGE-CLASS",
+      "donor": "CLOS 1988",
+      "status": "HOLD-D10-SEMANTIC-DEDUP",
+      "observable_question": "instance preserves identity while class changes; common slot state retained and new slots initialized",
+      "primary_url": "https://www.cs.cmu.edu/Groups/AI/html/cltl/clm/node311.html",
+      "exact_name_in_d1_d10": false,
+      "semantically_novel": null,
+      "coordinate": null,
+      "ratified": false,
+      "selected_in_inventory": false,
+      "physical_t5_authorized": false
+    },
+    {
+      "review_id": "HIST-GAP-008",
+      "historical_spelling": "UPDATE-INSTANCE-FOR-DIFFERENT-CLASS",
+      "donor": "CLOS 1988",
+      "status": "HOLD-D10-SEMANTIC-DEDUP",
+      "observable_question": "customize updating slots across class transition; compare with CHANGE-CLASS semantic boundary",
+      "primary_url": "https://www.cs.cmu.edu/Groups/AI/html/cltl/clm/node311.html",
+      "exact_name_in_d1_d10": false,
+      "semantically_novel": null,
+      "coordinate": null,
+      "ratified": false,
+      "selected_in_inventory": false,
+      "physical_t5_authorized": false
+    },
+    {
+      "review_id": "HIST-GAP-009",
+      "historical_spelling": "FIND-METHOD",
+      "donor": "CLOS",
+      "status": "HOLD-D10-SEMANTIC-DEDUP",
+      "observable_question": "retrieve exact method by qualifiers and specializers or report absence; not the set of applicable methods",
+      "primary_url": "https://lispcookbook.github.io/cl-cookbook/clos.html",
+      "exact_name_in_d1_d10": false,
+      "semantically_novel": null,
+      "coordinate": null,
+      "ratified": false,
+      "selected_in_inventory": false,
+      "physical_t5_authorized": false
+    },
+    {
+      "review_id": "HIST-GAP-010",
+      "historical_spelling": "ADD-METHOD",
+      "donor": "CLOS",
+      "status": "HOLD-D10-SEMANTIC-DEDUP",
+      "observable_question": "mutate effective method set of generic function; semantic distinction from defining a specialized method must be proven",
+      "primary_url": "https://www.cs.cmu.edu/Groups/AI/html/cltl/clm/node311.html",
+      "exact_name_in_d1_d10": false,
+      "semantically_novel": null,
+      "coordinate": null,
+      "ratified": false,
+      "selected_in_inventory": false,
+      "physical_t5_authorized": false
+    },
+    {
+      "review_id": "HIST-GAP-011",
+      "historical_spelling": "REMOVE-METHOD",
+      "donor": "CLOS",
+      "status": "HOLD-D10-SEMANTIC-DEDUP",
+      "observable_question": "remove specified method from generic function without equating it with removing the entire function definition",
+      "primary_url": "https://www.cs.cmu.edu/Groups/AI/html/cltl/clm/node311.html",
+      "exact_name_in_d1_d10": false,
+      "semantically_novel": null,
+      "coordinate": null,
+      "ratified": false,
+      "selected_in_inventory": false,
+      "physical_t5_authorized": false
+    },
+    {
+      "review_id": "HIST-GAP-012",
+      "historical_spelling": "COMPUTE-APPLICABLE-METHODS",
+      "donor": "CLOS",
+      "status": "HOLD-DUPLICATE-4800",
+      "observable_question": "already pending as APPLICABLE-METHODS research in #4800; analyze class/specializer ordering only once",
+      "primary_url": "https://lisp-docs.github.io/docs/tutorial/advanced_topics/mop",
+      "exact_name_in_d1_d10": false,
+      "semantically_novel": null,
+      "coordinate": null,
+      "ratified": false,
+      "selected_in_inventory": false,
+      "physical_t5_authorized": false
+    },
+    {
+      "review_id": "HIST-GAP-013",
+      "historical_spelling": "MASTERSCOPE",
+      "donor": "Interlisp-D",
+      "status": "HOLD-ENVIRONMENT-PACKAGE",
+      "observable_question": "program-level call graph/relation query plus structure editor integration; tool subsystem not single D10 function",
+      "primary_url": "https://interlisp.org/documentation/IRM.pdf",
+      "exact_name_in_d1_d10": false,
+      "semantically_novel": null,
+      "coordinate": null,
+      "ratified": false,
+      "selected_in_inventory": false,
+      "physical_t5_authorized": false
+    },
+    {
+      "review_id": "HIST-GAP-014",
+      "historical_spelling": "DWIM",
+      "donor": "Interlisp-D",
+      "status": "HOLD-HEURISTIC",
+      "observable_question": "historical correction facility already explicitly rejected in Interlisp/PSL harvest until deterministic approval semantics",
+      "primary_url": "https://interlisp.org/documentation/IRM.pdf",
+      "exact_name_in_d1_d10": false,
+      "semantically_novel": null,
+      "coordinate": null,
+      "ratified": false,
+      "selected_in_inventory": false,
+      "physical_t5_authorized": false
+    },
+    {
+      "review_id": "HIST-GAP-015",
+      "historical_spelling": "WHOPPER",
+      "donor": "Lisp Machine/Flavors",
+      "status": "HOLD-D2-CONTROL",
+      "observable_question": "wrapper around combined method must not mint new control form outside D2; compare #4800 STANDARD-METHOD-COMBINATION",
+      "primary_url": "https://manuals.plus/m/15ff2561cd4183c1377f8c5613f66c568a38d5fb213b76c4b54974ac1c65e1ac",
+      "exact_name_in_d1_d10": false,
+      "semantically_novel": null,
+      "coordinate": null,
+      "ratified": false,
+      "selected_in_inventory": false,
+      "physical_t5_authorized": false
+    }
+  ],
+  "known_not_missing": [
+    {
+      "name": "CALL/CC",
+      "classification": "D10 SELECTED"
+    },
+    {
+      "name": "CATCH",
+      "classification": "D10 SELECTED"
+    },
+    {
+      "name": "UNDO",
+      "classification": "D10 SELECTED"
+    },
+    {
+      "name": "INTERLISP-HISTORY-REPLAY",
+      "classification": "D10 SELECTED"
+    },
+    {
+      "name": "READTABLE",
+      "classification": "D10 SELECTED"
+    },
+    {
+      "name": "DEFCLASS",
+      "classification": "D10 SELECTED"
+    },
+    {
+      "name": "DEFMETHOD",
+      "classification": "D10 SELECTED"
+    },
+    {
+      "name": "DEFGENERIC",
+      "classification": "D10 SELECTED"
+    },
+    {
+      "name": "PROGV",
+      "classification": "D8 RATIFIED"
+    },
+    {
+      "name": "UNWIND-PROTECT",
+      "classification": "D8 RATIFIED"
+    }
+  ],
+  "historical_warning": "Absence of an English spelling from the registry is never a proof that the semantic law is absent, and none of these names can be promoted automatically.",
+  "next_actions": [
+    "Build primary-manual section/function census per historical family with exact printed page/section provenance.",
+    "Separate D2 syntax/control, package/environment behavior, existing D1-D9/D10 equivalents, and genuinely language-visible new laws.",
+    "Add oracle-positive and adversarial falsifiers before admitting proposals via #4463.",
+    "Do not expand D10 selected count, invent coordinates or touch physical T5 based on this dossier."
+  ]
+}

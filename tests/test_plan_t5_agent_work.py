@@ -5,6 +5,7 @@ from __future__ import annotations
 import importlib.util
 import json
 from pathlib import Path
+import subprocess
 import tempfile
 import unittest
 
@@ -65,6 +66,7 @@ class PlanT5AgentWorkTests(unittest.TestCase):
         self.assertEqual(r["summary"]["original_unpaired"], 4)
         self.assertEqual(r["summary"]["blocked"], 3)
         self.assertEqual(r["summary"]["mechanical_pending_oracle"], 1)
+        self.assertEqual(r["summary"]["archived_mechanical_nonprogram_originals"], 0)
         self.assertEqual(r["summary"]["claimed"], 0)
         self.assertEqual(r["summary"]["admitted"], 0)
         shards = r["shards"]
@@ -211,6 +213,11 @@ class PlanT5AgentWorkTests(unittest.TestCase):
         a["summary"]["unpaired_candidates_needing_original_oracle"] = 0
         result = mod.build_plan(a, 2)
         self.assertEqual(result["summary"]["mechanical_pending_oracle"], 0)
+        self.assertEqual(result["summary"]["archived_mechanical_nonprogram_originals"], 1)
+        self.assertEqual(result["summary"]["original_unpaired"], (
+            result["summary"]["blocked"]
+            + result["summary"]["mechanical_pending_oracle"]
+            + result["summary"]["archived_mechanical_nonprogram_originals"]))
         self.assertFalse(any(x["family"] == "oracle-pending" for x in result["shards"]))
         self.assertEqual(result["summary"]["archived_benchmark_nonprogram_originals"], 1)
         self.assertTrue(any(shard["family"] == "archived-benchmark-data"
@@ -291,22 +298,96 @@ class PlanT5AgentWorkTests(unittest.TestCase):
             with self.subTest(case=case), self.assertRaises(mod.PlanError):
                 mod.build_plan(state, 2)
 
+    def test_git_head_source_identity_is_not_forgeable_by_consistent_report(self):
+        with tempfile.TemporaryDirectory() as td:
+            root = Path(td)
+            subprocess.run(["git", "init", "-q"], cwd=root, check=True)
+            subprocess.run(["git", "config", "user.email", "test@example.invalid"],
+                           cwd=root, check=True)
+            subprocess.run(["git", "config", "user.name", "Test Runner"],
+                           cwd=root, check=True)
+            state = fixture()
+            paths = state["blocked_sources"] + state["mechanical_candidates"]
+            for row in paths:
+                source = root / row["path"]
+                source.parent.mkdir(parents=True, exist_ok=True)
+                source.write_text("(001 ())\n", encoding="utf-8")
+                row["source_git_blob_sha"] = git_blob = mod.hashlib.sha1(
+                    b"blob 9\0(001 ())\n").hexdigest()
+                for cohort in state["blocker_cohorts"]:
+                    for member in cohort["original_sources"]:
+                        if member["path"] == row["path"]:
+                            member["source_git_blob_sha"] = git_blob
+            subprocess.run(["git", "add", "-A"], cwd=root, check=True)
+            subprocess.run(["git", "commit", "-qm", "source originals"], cwd=root,
+                           check=True)
+            self.assertIsNone(mod.assert_original_git_head_parity(root, state))
+
+            # Both report sections forged together: previous JSON-only planner
+            # accepted the claim. The Git-backed CLI MUST reject it.
+            forged = json.loads(json.dumps(state))
+            forged["blocked_sources"][0]["source_git_blob_sha"] = "f"*40
+            forged["blocker_cohorts"][0]["original_sources"][0]["source_git_blob_sha"] = "f"*40
+            mod.build_plan(forged, 2)
+            with self.assertRaisesRegex(mod.PlanError, "HEAD/index blob"):
+                mod.assert_original_git_head_parity(root, forged)
+
+            # Dirty worktree with unchanged original Git HEAD and index.
+            dirty = root / state["blocked_sources"][0]["path"]
+            dirty.write_text("(111 ())\n", encoding="utf-8")
+            with self.assertRaisesRegex(mod.PlanError, "worktree drift"):
+                mod.assert_original_git_head_parity(root, state)
+            subprocess.run(["git", "checkout", "--", str(dirty.relative_to(root))],
+                           cwd=root, check=True, capture_output=True)
+
+            # Staging a source change still cannot forge the old source.
+            dirty.write_text("(111 ())\n", encoding="utf-8")
+            subprocess.run(["git", "add", str(dirty.relative_to(root))], cwd=root,
+                           check=True)
+            with self.assertRaisesRegex(mod.PlanError, "HEAD/index blob"):
+                mod.assert_original_git_head_parity(root, state)
+
     def test_cli_write_once_is_read_only_input_and_rejects_overwrite(self):
         with tempfile.TemporaryDirectory() as td:
             root = Path(td)
             source = root / "candidates.json"
             output = root / "agent-shards.json"
             source.write_text(json.dumps(fixture()), encoding="utf-8")
+            # CLI requires an exact Git HEAD source inventory. Build a
+            # committed fixture checkout rather than weakening that default.
+            subprocess.run(["git", "init", "-q"], cwd=root, check=True)
+            subprocess.run(["git", "config", "user.email", "test@example.invalid"],
+                           cwd=root, check=True)
+            subprocess.run(["git", "config", "user.name", "Test Runner"],
+                           cwd=root, check=True)
+            state = fixture()
+            for row in state["blocked_sources"] + state["mechanical_candidates"]:
+                file = root / row["path"]
+                file.parent.mkdir(parents=True, exist_ok=True)
+                payload = b"(001 ())\n"
+                file.write_bytes(payload)
+                pin = mod.hashlib.sha1(b"blob " + str(len(payload)).encode() +
+                                      b"\0" + payload).hexdigest()
+                row["source_git_blob_sha"] = pin
+                for group in state["blocker_cohorts"]:
+                    for member in group["original_sources"]:
+                        if member["path"] == row["path"]:
+                            member["source_git_blob_sha"] = pin
+            source.write_text(json.dumps(state), encoding="utf-8")
+            subprocess.run(["git", "add", "-A"], cwd=root, check=True)
+            subprocess.run(["git", "commit", "-qm", "test originals"], cwd=root,
+                           check=True)
             pinned = source.read_bytes()
             self.assertEqual(mod.main(["--candidates", str(source),
+                                       "--repo-root", str(root),
                                        "--out", str(output), "--max-files", "2"]), 0)
             self.assertTrue(output.is_file())
             self.assertEqual(source.read_bytes(), pinned)
             state = json.loads(output.read_text(encoding="utf-8"))
             self.assertEqual(state["summary"]["shards"], 3)
-            self.assertEqual(mod.main(["--candidates", str(source), "--out", str(output)]), 2)
+            self.assertEqual(mod.main(["--candidates", str(source), "--repo-root", str(root), "--out", str(output)]), 2)
             self.assertEqual(source.read_bytes(), pinned)
-            self.assertEqual(mod.main(["--candidates", str(source), "--out", str(source)]), 2)
+            self.assertEqual(mod.main(["--candidates", str(source), "--repo-root", str(root), "--out", str(source)]), 2)
 
     def test_zero_candidates_all_blocked_still_creates_work_queue(self):
         a = fixture()

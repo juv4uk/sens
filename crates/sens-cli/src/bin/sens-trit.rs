@@ -12,7 +12,7 @@
 use std::{env, fs, fs::OpenOptions, io::Write, path::Path, process};
 
 const USAGE: &str =
-    "usage: sens-trit (encode path.lisp | open path.sens | view path.sens | decode path.sens | eval path.sens | verify path.lisp)\n       sens-trit path.sens  # open only; never execute implicitly";
+    "usage: sens-trit (encode path.lisp | open path.sens | view path.sens | decode path.sens | explain path.sens | eval path.sens | verify path.lisp)\n       sens-trit path.sens  # open only; never execute implicitly";
 
 fn sibling_sens(path: &Path) -> Result<std::path::PathBuf, String> {
     if path.extension().and_then(|ext| ext.to_str()) != Some("lisp") {
@@ -57,6 +57,25 @@ fn eval_t5_bytes(bytes: &[u8]) -> Result<sens::EvalResult, String> {
         .map_err(|e| format!("current SENS oracle rejected: {}", e.render(&visible)))
 }
 
+/// Diagnose why a physical packed T5 file fails the existing canonical D2
+/// parser. No second grammar and no implicit program execution: each exact
+/// binary word becomes a line so the existing error renderer's line is the
+/// failed word coordinate in the physical SENS stream.
+fn explain_t5_bytes(bytes: &[u8]) -> Result<String, String> {
+    let words = sens::decode_ternary_words(bytes)
+        .map_err(|e| format!("physical T5 transport rejected: {e:?}"))?;
+    let projection = sens::render_ternary_words_vertical(&words);
+    sens::parse_canonical_binary(&projection)
+        .map_err(|e| format!(
+            "D2 grammar rejected (one exact typed word per line): {}",
+            e.render(&projection)
+        ))?;
+    Ok(format!(
+        "D2 syntax PASS; {} typed words; current/historical semantic oracle NOT_VERIFIED",
+        words.len()
+    ))
+}
+
 fn execute() -> Result<(), String> {
     let args = env::args().skip(1).collect::<Vec<_>>();
     // У разі передавання одного файла .sens читаємо його як людина,
@@ -96,6 +115,14 @@ fn execute() -> Result<(), String> {
             print!("{}", sens::render_ternary_words_vertical(&words));
             Ok(())
         }
+        "explain" => {
+            // Independent physical T5, then the SAME canonical D2 parser.
+            // Unlike open, print a word-coordinate error on invalid grammar;
+            // unlike eval, never run any expression or grant capabilities.
+            let bytes = read_sens(path)?;
+            println!("{}", explain_t5_bytes(&bytes)?);
+            Ok(())
+        }
         "eval" => {
             // Explicit opt-in. Merely opening, viewing or decoding a .sens
             // NEVER invokes the evaluator, and Session::default provides
@@ -115,6 +142,13 @@ fn execute() -> Result<(), String> {
             verify_companion(&projection, &bytes)
         }
         _ => Err(USAGE.into()),
+    }
+}
+
+fn main() {
+    if let Err(message) = execute() {
+        eprintln!("sens-trit: {message}");
+        process::exit(1);
     }
 }
 
@@ -156,6 +190,39 @@ mod eval_tests {
     }
 
     #[test]
+    fn explain_shows_canonical_d2_failure_with_original_word_coordinate() {
+        let words = sens::parse_binary_source_words("10 001")
+            .expect("physical words allowed");
+        let trits = sens::encode_ternary_words(
+            &words.into_iter().map(|token| token.word).collect::<Vec<_>>()
+        ).expect("physically packed bytes");
+        let err = explain_t5_bytes(&trits).expect_err("unbalanced D2 syntax");
+        assert!(err.contains("D2 grammar rejected"), "{err}");
+        assert!(err.contains("one exact typed word per line"), "{err}");
+        // The canonical parser error renderer, not a new D2 parser, owns
+        // the failure position. Never imply syntax PASS from valid bytes.
+        assert!(!err.contains("D2 syntax PASS"), "{err}");
+    }
+
+    #[test]
+    fn explain_is_read_only_and_never_semantic_oracle_admission() {
+        let bytes = include_bytes!(
+            "../../../../tests/fixtures/migration-quote-cohort-main/quote-legacy.sens"
+        );
+        let receipt = explain_t5_bytes(bytes).expect("known current D2 syntax");
+        assert!(receipt.contains("D2 syntax PASS"), "{receipt}");
+        assert!(receipt.contains("semantic oracle NOT_VERIFIED"), "{receipt}");
+        assert!(explain_t5_bytes(&[0xf3])
+            .expect_err("invalid base3 byte")
+            .contains("physical T5 transport rejected"));
+        let bad_d2 = sens::encode_ternary_words(
+            &sens::parse_binary_source_words("01").unwrap()
+                .into_iter().map(|word| word.word).collect::<Vec<_>>()
+        ).unwrap();
+        assert!(explain_t5_bytes(&bad_d2).unwrap_err().contains("D2 grammar rejected"));
+    }
+
+    #[test]
     fn open_and_eval_are_distinct_public_operations() {
         let bytes = include_bytes!("../../../../tests/fixtures/migration-quote-cohort-main/quote-legacy.sens");
         assert_eq!(sens::open_ternary_program(bytes).unwrap(),
@@ -164,9 +231,3 @@ mod eval_tests {
     }
 }
 
-fn main() {
-    if let Err(message) = execute() {
-        eprintln!("sens-trit: {message}");
-        process::exit(1);
-    }
-}

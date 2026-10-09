@@ -8,7 +8,7 @@
 use sens::syntax::{Expr, ExprKind, Span};
 use sens::{
     compiler_execution_role, domain_identity_shape_mechanism, eval_parsed_expressions,
-    eval_program, load_core_library, Bija3, Bit3, Bit4, CompilerExecutionRole, CoreD4,
+    load_core_library, parse_mixed_exact_domain, Bija3, Bit3, Bit4, CompilerExecutionRole, CoreD4,
     DomainIdentity, Exactness, Session, Value,
 };
 use std::rc::Rc;
@@ -148,7 +148,8 @@ fn session() -> Session {
         .environment
         .define(MECHANISM_NAME, domain_identity_shape_mechanism());
     session.environment.define(LAW_NAME, law_value());
-    eval_program(NUCLEUS, &mut session).expect("compiler nucleus loads");
+    let expressions = parse_mixed_exact_domain(NUCLEUS).expect("compiler nucleus parses");
+    eval_parsed_expressions(&expressions, &mut session).expect("compiler nucleus loads");
     session
 }
 

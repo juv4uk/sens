@@ -17,7 +17,8 @@ mod=importlib.util.module_from_spec(SPEC)
 sys.modules[SPEC.name]=mod
 SPEC.loader.exec_module(mod)
 
-FOUNDATION=ROOT/"knowledge"/"d1-d7-foundation.json"
+FOUNDATION=ROOT/"knowledge"/"d1-d9-foundation.json"
+COVERAGE=ROOT/"knowledge"/"sens8-current-coverage-v1.json"
 DOMAIN_SURFACES=ROOT/"crates"/"sens"/"src"/"domain_surface_registry_generated.rs"
 SEMANTIC_GENERATED=ROOT/"crates"/"sens"/"src"/"semantic_registry_generated.rs"
 SEMANTIC_REGISTRY=ROOT/"crates"/"sens"/"src"/"semantic_registry.rs"
@@ -30,7 +31,8 @@ class ThreePassMigrationTests(unittest.TestCase):
     def setUpClass(cls):
         data=mod.load_foundation(FOUNDATION)
         cls.legacy,cls.my,cls.upper=mod.build_three_pass_maps(
-            data,DOMAIN_SURFACES,SEMANTIC_GENERATED,SEMANTIC_REGISTRY,NECESSARY,HISTORICAL
+            data,DOMAIN_SURFACES,SEMANTIC_GENERATED,SEMANTIC_REGISTRY,NECESSARY,HISTORICAL,
+            COVERAGE
         )
         cls.text7=mod.build_text7(data,TEXT7)
 
@@ -93,17 +95,38 @@ class ThreePassMigrationTests(unittest.TestCase):
         with self.assertRaisesRegex(mod.MigrationError,"legacy-unmapped SID8/Sens8"):
             self.migrate("(11111111 x)\n")
 
-    def test_old_print_sid8_without_current_resident_blocks(self):
-        with self.assertRaisesRegex(mod.MigrationError,"legacy-unmapped SID8/Sens8"):
-            self.migrate("(01001000 x)\n")
+    def test_proven_old_print_sid8_and_surface_project_to_current_d8(self):
+        for form,passname in (("(01001000 x)\n","pass1-sens8"),
+                               ("(print x)\n","pass2-my-lisp")):
+            out,resolver=self.migrate(form)
+            self.assertTrue(out.startswith("10 11011011 00 "),form)
+            self.assertEqual(resolver.counts[passname],1)
 
-    def test_old_my_lisp_print_without_current_resident_blocks(self):
-        with self.assertRaisesRegex(mod.MigrationError,"legacy-unmapped my-lisp function"):
-            self.migrate("(print x)\n")
+    def test_proven_lisp15_equal_is_current_exact_d8(self):
+        out,resolver=self.migrate("(EQUAL a b)\n")
+        self.assertTrue(out.startswith("10 11110111 00 "),out)
+        self.assertEqual(resolver.counts["pass3-lisp15"],1)
 
-    def test_old_lisp15_equal_without_current_resident_blocks(self):
-        with self.assertRaisesRegex(mod.MigrationError,"legacy-unmapped Lisp 1-1.5 function"):
-            self.migrate("(EQUAL a b)\n")
+    def test_one_exact_identity_d4_d8_d9_from_audited_legacy(self):
+        for code,bits in (("00100010","11110111"),
+                          ("00101111","1001"),
+                          ("00111010","110011110"),
+                          ("01001011","110101001")):
+            with self.subTest(code=code):
+                out,resolver=self.migrate(f"({code} x)\n")
+                self.assertTrue(out.startswith(f"10 {bits} "),out)
+                self.assertEqual(resolver.counts["pass1-sens8"],1)
+
+    def test_ambiguous_or_compound_audited_successors_fail_closed(self):
+        data=mod.load_foundation(FOUNDATION)
+        approved=mod.parse_audited_legacy_successors(COVERAGE,data)
+        self.assertNotIn("00001010",approved)  # MACRO + DEFINE, not one identity
+        self.assertNotIn("00110111",approved)  # current D6 MAP or D8 MAP ambiguous
+        self.assertNotIn("11111111",approved)  # historical unallocated
+        self.assertEqual(approved["01001000"][:2],("11011011","D8"))
+        # A historical identity cannot be silently passed off as current D8.
+        with self.assertRaisesRegex(mod.MigrationError,"ambiguous"):
+            self.migrate("(01001000 x)\n",source_era="auto")
 
     def test_old_functions_with_current_successors_move_by_semantic_role(self):
         cases=[

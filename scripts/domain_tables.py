@@ -47,9 +47,9 @@ class DomainTableRow:
         return "surface"
 
 
-def decode(token: str) -> str | None:
+def decode(token: str, *, literal_empty: bool = False) -> str | None:
     if token == "()":
-        return None
+        return "()" if literal_empty else None
     if token.startswith('"') and token.endswith('"'):
         return token[1:-1]
     return token
@@ -68,6 +68,8 @@ def read_domain_table(path: Path) -> list[DomainTableRow]:
                 continue
             raise ValueError(f"{path}:{line_number}: malformed canonical domain-table row")
         bits, uk, ukr, san, en, lisp, sym = match.groups()
+        # D3:000 is a literal structural value, not a missing projection.
+        literal_empty = expected_width == 3 and bits == "000"
         if len(bits) != expected_width:
             raise ValueError(
                 f"{path}:{line_number}: key width {len(bits)} != file domain width {expected_width}"
@@ -77,12 +79,12 @@ def read_domain_table(path: Path) -> list[DomainTableRow]:
                 domain=f"D{expected_width}",
                 width=expected_width,
                 bits=bits,
-                uk=decode(uk),
-                ukr=decode(ukr),
-                san=decode(san),
-                en=decode(en),
-                lisp=decode(lisp),
-                sym=decode(sym),
+                uk=decode(uk, literal_empty=literal_empty),
+                ukr=decode(ukr, literal_empty=literal_empty),
+                san=decode(san, literal_empty=literal_empty),
+                en=decode(en, literal_empty=literal_empty),
+                lisp=decode(lisp, literal_empty=literal_empty),
+                sym=decode(sym, literal_empty=literal_empty),
             )
         )
     expected = 126 if expected_width == 7 else 1 << expected_width

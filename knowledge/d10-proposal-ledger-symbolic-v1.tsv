@@ -1,0 +1,2 @@
+proposal_id	surface_uk	surface_ukr	semantic_name	semantic_law	width	donor_provenance	dedup_check	ownership_test	blocked_source	status	ratified
+# WITHDRAWN 2026-10-09 — all 30 rows are D10 duplicates; see #4463 comment. reason.lisp was already harvested (d10-reason-alternate-define-donor-v1.json).

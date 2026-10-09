@@ -97,7 +97,7 @@ fn extract_domain_usage(exprs: &[Expr]) -> BTreeMap<String, Vec<String>> {
             ExprKind::DomainIdentity(id) => {
                 let domain = format!("D{}", id.width());
                 let bits = format!("{:0width$b}", id.packed_bits(), width = id.width());
-                usage.entry(domain).or_insert_with(Vec::new).push(bits);
+                usage.entry(domain).or_default().push(bits);
             }
             ExprKind::List(items) => {
                 for item in items.iter() {

@@ -1,0 +1,31 @@
+name: Original machine-block quoted-data frontier
+on:
+  pull_request:
+    paths:
+      - "lib/machine/block.lisp"
+      - "tests/test_machine_block_historical_oracle.py"
+      - "crates/sens/src/text7_projection_generated.rs"
+      - "scripts/report_machine_block_quote_data_frontier.py"
+      - "tests/test_machine_block_quote_data_frontier.py"
+      - ".github/workflows/machine-block-quote-data-frontier.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  exact-source-blocker-proof:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - name: Exact immutable original and quoted symbol frontier
+        run: python3 scripts/report_machine_block_quote_data_frontier.py
+      - name: Six adversarial original/source/D7/no-admission tests
+        run: python3 -m unittest discover -s tests -p 'test_machine_block_quote_data_frontier.py' -v
+      - name: Original independent historical nine-case semantic oracle
+        run: python3 -m unittest discover -s tests -p 'test_machine_block_historical_oracle.py' -v
+      - name: Neither original source nor physical admission artifacts changed
+        run: |
+          git diff --exit-code
+          test ! -e lib/machine/block.sens

@@ -287,15 +287,17 @@ class OriginalCandidateTests(unittest.TestCase):
 
 
     def test_reviewed_source_manifests_are_sha_pinned_nonexecutables(self):
-        # All 25 ISA + 21 schema + 8 evidence + 13 fixture envelopes
-        # were individually reviewed and landed on main; they are data.
         entries = mod.load_nonprogram_classification(ROOT)
-        self.assertEqual(len(entries), 67)
-        self.assertEqual(
-            {name: sum(e["cohort"] == name for e in entries.values())
-             for name in ("isa", "schema", "evidence", "expr-record")},
-            {"isa": 25, "schema": 21, "evidence": 8, "expr-record": 13},
-        )
+        approved = {
+            cohort: count for cohort, manifest, count in mod.NONPROGRAM_MANIFESTS
+            if (ROOT / manifest).is_file()
+        }
+        self.assertEqual(len(entries), sum(approved.values()))
+        self.assertEqual({
+            cohort: sum(e["cohort"] == cohort for e in entries.values())
+            for cohort in approved
+        }, approved)
+        self.assertEqual(approved.get("knowledge-record"), 14)
         self.assertTrue(all(not e["automatic_sens_companion"]
                             and not e["semantic_oracle_admitted"]
                             for e in entries.values()))
@@ -337,6 +339,77 @@ class OriginalCandidateTests(unittest.TestCase):
         }), encoding="utf-8")
         with self.assertRaisesRegex(ValueError, "mis-scoped ISA catalogue"):
             mod.load_nonprogram_classification(self.root)
+
+
+    def test_exact_comment_only_loader_sources_are_data_not_executable(self):
+        entries = mod.load_nonprogram_classification(ROOT)
+        expected = {
+            "lib/core2.lisp": "9a39a1d341dde7faf3a1899b52f78a7b1e931783",
+            "lib/surface/ukr.lisp": "f5577917e72f2661cb64b277afc85122276d13c7",
+        }
+        for path, digest in expected.items():
+            self.assertIn(path, entries)
+            self.assertEqual(entries[path]["source_git_blob_sha"], digest)
+            self.assertEqual(entries[path]["source_class"], "NONPROGRAM_DATA_REVIEWED")
+            self.assertEqual(entries[path]["cohort"], "comment-only-loader")
+            self.assertFalse(entries[path]["semantic_oracle_admitted"])
+            self.assertFalse(entries[path]["automatic_sens_companion"])
+            content = (ROOT / path).read_text(encoding="utf-8")
+            self.assertTrue(all(
+                not row.strip() or row.lstrip().startswith(";")
+                for row in content.splitlines()
+            ), f"comment-only loader must not have executable forms: {path}")
+            self.assertFalse((ROOT / path).with_suffix(".sens").exists())
+
+    def test_comment_only_classification_rejects_forged_executable_even_pinned(self):
+        paths = ("lib/core2.lisp", "lib/surface/ukr.lisp")
+        entries = []
+        for path in paths:
+            current = ROOT / path
+            source = self.root / path
+            source.parent.mkdir(parents=True, exist_ok=True)
+            source.write_bytes(current.read_bytes())
+            entries.append({"path": path, "git_blob_sha1": mod.git_blob_sha(source)})
+        manifest = self.root / "knowledge/migration-nonprogram-comment-only-loaders-2026-10-08.json"
+        manifest.parent.mkdir(parents=True)
+        payload = {
+            "schema": "sens-migration-nonprogram-manifest/1",
+            "issue": 4460,
+            "automatic_sens_companion": False,
+            "entries": entries,
+        }
+        manifest.write_text(json.dumps(payload), encoding="utf-8")
+        self.assertEqual(len(mod.load_nonprogram_classification(self.root)), 2)
+        source = self.root / paths[0]
+        source.write_text(source.read_text(encoding="utf-8") + "(00001001 new-fn 00001000)\n", encoding="utf-8")
+        # Adversary updates manifest SHA to match a newly injected executable.
+        # The *lexical content guard*, not just the SHA pin, must still refuse.
+        payload["entries"][0]["git_blob_sha1"] = mod.git_blob_sha(source)
+        manifest.write_text(json.dumps(payload), encoding="utf-8")
+        with self.assertRaisesRegex(ValueError, "executable forms"):
+            mod.load_nonprogram_classification(self.root)
+        payload["entries"][0]["path"] = "lib/core1.lisp"
+        manifest.write_text(json.dumps(payload), encoding="utf-8")
+        p = self.root / "lib/core1.lisp"
+        p.write_text("; fake empty file\n", encoding="utf-8")
+        payload["entries"][0]["git_blob_sha1"] = mod.git_blob_sha(p)
+        manifest.write_text(json.dumps(payload), encoding="utf-8")
+        with self.assertRaisesRegex(ValueError, "unreviewed comment-only loader path"):
+            mod.load_nonprogram_classification(self.root)
+
+    def test_ratified_domain_tables_are_data_not_executable_migration(self):
+        classified = mod.load_nonprogram_classification(ROOT)
+        rows = [v for v in classified.values() if v["cohort"] == "domain-table"]
+        self.assertEqual(len(rows), 9)
+        self.assertEqual(
+            sorted(r["path"] for r in rows),
+            sorted(f"lib/domains/d{i}.lisp" for i in range(1, 10)),
+        )
+        self.assertTrue(all(r["source_class"] == "NONPROGRAM_DATA_REVIEWED"
+                            and r["semantic_oracle_admitted"] is False
+                            and r["automatic_sens_companion"] is False for r in rows))
+        self.assertNotIn("lib/domains/d10.lisp", classified)
+        self.assertNotIn("lib/core1.lisp", classified)
 
 
 if __name__ == "__main__":

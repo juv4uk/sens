@@ -255,6 +255,20 @@ def load_foundation(path: Path):
         raise MigrationError("foundation is not owner-ratified")
     return data
 
+def load_d1_uk_surfaces(path: Path = REPO_ROOT / "lib/domains/d1.lisp") -> dict[str, str]:
+    """Project ratified D1's Ukrainian literals; do not invent host truthiness."""
+    source = path.read_text(encoding="utf-8")
+    rows = re.findall(r"(?m)^\s*\(([01])\s+\(ук\s+([^\s()]+)\)", source)
+    if len(rows) != 2 or {bits for bits, _ in rows} != {"0", "1"}:
+        raise MigrationError("D1 Ukrainian surface table lacks exactly two canonical values")
+    if len({name for _, name in rows}) != 2:
+        raise MigrationError("D1 Ukrainian surface names must be unique")
+    return {name: bits for bits, name in rows}
+
+
+D1_UK_SURFACES = load_d1_uk_surfaces()
+
+
 def current_residents(data):
     labels={}
     for domain in ("D3","D4","D5","D6"):
@@ -310,6 +324,46 @@ def parse_legacy_successors(semantic_registry: Path, necessary_forms: Path):
         out[byte]=(bits,"D4","necessary-form-successor")
     return out
 
+def parse_audited_legacy_successors(path: Path, foundation: dict):
+    """Consume owner-audited SENS8 history; never treat old W8 as current D8.
+
+    Only DIRECT / single-identity DERIVED rows can become old-era successors.
+    Historical code coordinates never grant their own current placement.
+    """
+    data=json.loads(path.read_text(encoding="utf-8"))
+    if data.get("status") != "AUDIT-COMPLETE" or not isinstance(data.get("rows"),list):
+        raise MigrationError("legacy successor coverage is missing audit authority")
+    domains=foundation.get("domains",{})
+    exact=re.compile(r"\b(D[1-9]):([01]{1,9})\b")
+    allowed={"DIRECT-CURRENT-IDENTITY","CURRENT-PROJECTION-DERIVED"}
+    result={}
+    for row in data["rows"]:
+        if not isinstance(row,dict):
+            raise MigrationError("malformed owner-audited legacy successor")
+        if row.get("classification") not in allowed:
+            continue
+        sid=row.get("legacy_code")
+        if not isinstance(sid,str) or re.fullmatch(r"[01]{8}",sid) is None:
+            raise MigrationError("audited historical code is not exactly eight bits")
+        targets=set(exact.findall(row.get("current_target") or ""))
+        # A compound D4+D5, a D6/D8 ambiguity, or no admitted identity
+        # cannot be flattened to a guessed single callable.
+        if len(targets) != 1:
+            continue
+        domain,bits=next(iter(targets))
+        descriptor=domains.get(domain)
+        if descriptor is None:
+            continue
+        if len(bits)!=int(descriptor["width"]):
+            raise MigrationError(f"audited {domain}:{bits} has inconsistent exact width")
+        if bits not in descriptor.get("residents",{}):
+            raise MigrationError(f"audited {domain}:{bits} is not an owner-ratified resident")
+        value=(bits,domain,"audited-sens8-current-coverage")
+        if sid in result and result[sid][:2]!=value[:2]:
+            raise MigrationError(f"conflicting audited historical successor {sid}")
+        result[sid]=value
+    return result
+
 def parse_semantic_rows(path: Path):
     text=path.read_text(encoding="utf-8")
     rows={}
@@ -327,10 +381,17 @@ def parse_semantic_rows(path: Path):
 
 def build_three_pass_maps(data, domain_surface_generated: Path, semantic_generated: Path,
                           semantic_registry: Path, necessary_forms: Path,
-                          historical_map: Path|None=None):
+                          historical_map: Path|None=None,
+                          legacy_coverage: Path|None=None):
     residents=current_residents(data)
     current=parse_current_surface_rows(domain_surface_generated)
     proven_legacy=parse_legacy_successors(semantic_registry,necessary_forms)
+    if legacy_coverage is not None:
+        for byte,ident in parse_audited_legacy_successors(legacy_coverage,data).items():
+            existing=proven_legacy.get(byte)
+            if existing is not None and existing[:2]!=ident[:2]:
+                raise MigrationError(f'conflicting successor for {byte}: {existing} vs {ident}')
+            proven_legacy.setdefault(byte,ident)
     sem_rows=parse_semantic_rows(semantic_generated)
 
     # A historical byte may gain a successor through semantic-name
@@ -369,7 +430,7 @@ def build_three_pass_maps(data, domain_surface_generated: Path, semantic_generat
 
     # Preserve knowledge that an old function existed even when it has no
     # current D3-D6 resident. None means LEGACY-UNMAPPED, never passthrough.
-    legacy={byte:proven_legacy.get(byte) for byte in sem_rows}
+    legacy={byte:proven_legacy.get(byte) for byte in sorted(set(sem_rows)|set(proven_legacy))}
 
     my=dict(current)
     for byte,surfaces in sem_rows.items():
@@ -556,6 +617,11 @@ def encode_atom_data(node: Atom,text7):
             f"D2 word {t} is structural control only; it cannot be ordinary data",
             node.tok,
         )
+    # Canonical .lisp human source is Ukrainian, while physical .sens keeps
+    # exact D1 bits. Resolve only explicitly ratified D1 literals; never use
+    # Lisp/NIL, host truthiness or an inferred width.
+    if t in D1_UK_SURFACES:
+        return [D1_UK_SURFACES[t]]
     # Fail-soft migration: other unresolved atoms remain visible until their
     # own semantic/number/text law is admitted.
     return [t]
@@ -705,6 +771,7 @@ def main():
     ap.add_argument("--semantic-registry", type=Path, default=REPO_ROOT / "crates/sens/src/semantic_registry.rs")
     ap.add_argument("--necessary-forms", type=Path, default=REPO_ROOT / "crates/sens/src/eval/necessary_forms_generated.rs")
     ap.add_argument("--historical-map", type=Path, default=REPO_ROOT / "contracts/core1-historical-sid-map.lisp")
+    ap.add_argument("--legacy-coverage", type=Path, default=REPO_ROOT / "knowledge/sens8-current-coverage-v1.json")
     ap.add_argument("--text7", type=Path, default=REPO_ROOT / "crates/sens/src/text7_projection_generated.rs")
     ap.add_argument("--report", type=Path, default=None)
     ap.add_argument("--dry-run", action="store_true",
@@ -723,7 +790,8 @@ def main():
     admitted_d8 = data["domains"].get("D8",{}).get("residents",{})
     legacy, my, upper = build_three_pass_maps(
         data, args.domain_surfaces, args.semantic_generated,
-        args.semantic_registry, args.necessary_forms, args.historical_map
+        args.semantic_registry, args.necessary_forms, args.historical_map,
+        args.legacy_coverage
     )
     text7 = build_text7(data, args.text7)
     rows = []

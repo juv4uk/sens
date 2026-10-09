@@ -1,0 +1,115 @@
+{
+  "schema": "sens-d10-finite-temporal-constraint-closure-research/v1",
+  "date": "2026-10-09",
+  "issue": "https://github.com/juv4uk/sens/issues/5000",
+  "authority": {
+    "selected_inventory_file": "knowledge/d10-v1-semantic-inventory.json",
+    "selected_inventory_blob_sha1": "3db40a04c1094c9ea13b0c8d6099ef1d882cf203",
+    "selected_inventory_at_claim": 635,
+    "capacity": 1024,
+    "foundation": "Ratified D1-D9 / Contract 11.8",
+    "status": "HOLD-CORE-VS-LIBRARY",
+    "selected": false,
+    "ratified": false,
+    "coordinate": null,
+    "selected_delta": 0,
+    "law_forced": false,
+    "physical_sens_published": false,
+    "release_admitted": false
+  },
+  "candidate": {
+    "semantic_name": "FINITE-SIMPLE-TEMPORAL-CLOSURE",
+    "surface_uk": "зімкнути-часові-межі",
+    "surface_ukr": "замчас",
+    "function_domain": "Finite named integer event-difference constraints",
+    "input": "n (1..5), list of triples [i,j,w] with 0<=i,j<n; arbitrary time_i in mathematical Z; each edge means t_j - t_i <= w",
+    "output_consistent": "All-pairs tightest IMPLIED upper bounds d[i][j] in mathematical Z or null=UNBOUNDED (not ZERO), including d[i][i]=0",
+    "output_inconsistent": "Distinct INCONSISTENT_NEGATIVE_CYCLE; canonical shortest-length then lex simple directed negative cycle, with actual edge weights and strict sum<0; no fabricated bounds",
+    "literal_witness": "0→1 <=4, 1→2 <=3, 0→2 <=15 gives tight 0→2 <=7, other direction is UNBOUNDED; cycle 0→1 <=2,1→2 <=1,2→0 <=-4 impossible",
+    "invariants": [
+      "translation-invariance: adding common clock origin changes no difference",
+      "parallel edges exact min",
+      "no hidden scheduling or executable effects",
+      "not bounded ADC tick register",
+      "finite nodes and bounded input size only; time assignments unbounded in integer domain",
+      "zero diagonal is meaningful; unbounded is not zero"
+    ]
+  },
+  "historical_sources": [
+    {
+      "author": "Richard Bellman",
+      "year": 1958,
+      "title": "On a routing problem",
+      "doi": "10.1090/qam/102435",
+      "url": "https://doi.org/10.1090/qam/102435",
+      "scope": "Foundational shortest-path optimization, NOT a temporal solver"
+    },
+    {
+      "author": "Robert W. Floyd",
+      "year": 1962,
+      "title": "Algorithm 97: Shortest path",
+      "doi": "10.1145/367766.368168",
+      "url": "https://doi.org/10.1145/367766.368168",
+      "scope": "Min-plus closure across all pairs; NOT yet STP formulation"
+    },
+    {
+      "author": "Rina Dechter, Itay Meiri, Judea Pearl",
+      "year": 1991,
+      "title": "Temporal constraint networks",
+      "doi": "10.1016/0004-3702(91)90006-6",
+      "url": "https://doi.org/10.1016/0004-3702(91)90006-6",
+      "scope": "Metric simple temporal problems and temporal constraint networks; DO NOT attribute to 1958 algorithm"
+    }
+  ],
+  "local_donors": [
+    {
+      "repo": "juv4uk/sens",
+      "path": "PLAN.md",
+      "blob_sha1": "b6ff161f2beac63f8bd0c7ab008b480ba498800e",
+      "why": "Owner long-running McCarthy Advice Taker reasoning target"
+    },
+    {
+      "repo": "juv4uk/radio-log",
+      "path": "README.md",
+      "blob_sha1": "17a6e774e17269c7f472859ac52e9c354509adc8",
+      "why": "Personal radio/SDR timing evidence and observations; domain donor only, NOT implementation authority"
+    },
+    {
+      "repo": "juv4uk/sens",
+      "path": "knowledge/d10-v1-semantic-inventory.json",
+      "blob_sha1": "3db40a04c1094c9ea13b0c8d6099ef1d882cf203",
+      "why": "Cross-check no named exact STP law at claim time; behavioral duplicate still unresolved"
+    }
+  ],
+  "hobby_examples": [
+    "Астрономія: обмеження початку й завершення експозицій/спостережень",
+    "SDR/FPGA: дельти між часовими мітками, без MMIO чи DMA семантики",
+    "Електроніка: обмеження затримок у скінченній схемі",
+    "Музика/ритм: відстань у тактах між подіями",
+    "Логічний ШІ: часові передумови дій без нового графа викликів",
+    "Паніні: чисті залежності послідовності правил, але не кодування санскритських фонем"
+  ],
+  "behavioral_dedup_pending": [
+    "Ratified D9 temporal/graph support and shortest path primitives: check all current forms for exact behavior",
+    "Selected D10/ledger symbolic CONSTRAINT-PROPAGATION or SHORTEST-PATH: avoid semantic replacement by new name",
+    "Allen 1983 13 qualitative interval relations #4958: distinct from integer exact metric differences",
+    "Mackworth 1977 AC-3 fixed point #4991: finite enumerated discrete value SUPPORT vs unbounded integer metrics",
+    "Bellman/Floyd graph shortest path: strong DERIVED-LIBRARY possibility, unless owner demonstrates independent language-visible necessity"
+  ],
+  "tests": {
+    "pure_graph_reference": "Independent Floyd pivot vs per-source Bellman-Ford repeated relaxation; 384 deterministic test networks and structural negative witness falsifiers",
+    "external_oracle": "Real independently installed Z3 integer SMT solver; SAT/UNSAT plus pairwise Optimize to detect finite tightest bound or unbounded oo, 76 reproducible graphs",
+    "false_examples": [
+      "Treat disconnected/unbounded as zero",
+      "Treat constraint as reverse directed",
+      "Forget parallel tighter edge",
+      "Missing implied two-hop bound",
+      "Wrong positive cycle as conflict",
+      "Empty constraints reported UNSAT",
+      "Forge negative cycle with nonnegative sum",
+      "Accept finite-domain-only clock saturation"
+    ]
+  },
+  "owner_decision_required": "Before selection: source-grade behavioral dedup vs ALL ratified D1-D9 and selected 635+ D10; classify Core root vs self-hosted composition; owner review. Never assign 10-bit coordinate or change canonical inventory without approved gate.",
+  "migration_note": "Does not migrate any original .lisp; zero physical .sens files produced; unrelated historic execution release blockers remain open."
+}

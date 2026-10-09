@@ -1,0 +1,671 @@
+{
+  "schema": "d10-time-law-review-v2/v1",
+  "status": "RESEARCH-REVIEW-ONLY-NOT-SELECTED",
+  "date": "2026-10-09",
+  "repository": "juv4uk/sens",
+  "source_file": "lib/time.lisp",
+  "source_git_blob_sha": "74013e20c0c5abb9a68c62334f40095c29294a53",
+  "scope": "Proposals audited by source name vs main D1-D9 and D10 identities (625 selected). Source exact lines verified via GitHub; behavior requires oracle review before D10 selection.",
+  "authority": "D1-D9 owner-ratified, D10 research unratified, structure/control exclusively D2",
+  "source_url": "https://github.com/juv4uk/sens/blob/main/lib/time.lisp",
+  "accounting": {
+    "selected_main_at_review": 625,
+    "previous_pending_unmerged": 9,
+    "reviewed_new_names": 9,
+    "recommended_semantic_candidates": 5,
+    "hold": 4,
+    "counted_in_main": 0,
+    "coordinates_assigned": 0,
+    "ratified": 0
+  },
+  "dedup": {
+    "exact_names_checked_against_D1_D9": true,
+    "exact_names_checked_against_D10_625": true,
+    "semantic_equivalence_proven": false
+  },
+  "rows": [
+    {
+      "proposal_id": "D10-TIME-8a671d2d07b90765",
+      "semantic_name": "CIVIL-FROM-DAYS",
+      "source_file": "lib/time.lisp",
+      "source_line": 9,
+      "source_git_blob_sha": "74013e20c0c5abb9a68c62334f40095c29294a53",
+      "source_definition_form": "00001001",
+      "surface_uk": "перетворити-дні-на-дату",
+      "surface_ukr": "грегоріанська-дата-з-числа-днів",
+      "observable_law": "Given a nonnegative integer count of UTC days since 1970-01-01, return the Gregorian [year, month, day] tuple without clock I/O.",
+      "falsifier": "Epoch day 0 must map to 1970-01-01; 2000-02-29 must be represented as leap day; negative epochs are outside donor contract.",
+      "relation_class": "CALENDAR-TRANSFORM",
+      "triage_status": "SEMANTIC-CANDIDATE",
+      "review_needed": "Derived from numeric domain laws; may already be expressible using UTC-FROM-UNIX; owner must decide if reusable standalone operation is independent.",
+      "coordinate": null,
+      "ratified_resident": false,
+      "selected_in_canonical_inventory": false,
+      "origin": "source-grounded implementation, with secondary behavioral review pending",
+      "witnesses": [
+        {
+          "input": {
+            "days": 0
+          },
+          "expect": [
+            1970,
+            1,
+            1
+          ],
+          "type": "POSITIVE"
+        },
+        {
+          "input": {
+            "days": 11016
+          },
+          "expect": [
+            2000,
+            2,
+            29
+          ],
+          "type": "LEAP-YEAR"
+        },
+        {
+          "input": {
+            "days": 19783
+          },
+          "expect": [
+            2024,
+            3,
+            1
+          ],
+          "type": "LEAP-YEAR-CROSSING"
+        },
+        {
+          "input": {
+            "days": 47541
+          },
+          "expect": [
+            2100,
+            3,
+            1
+          ],
+          "type": "CENTURY-NON-LEAP"
+        }
+      ],
+      "unblock_fanout": null,
+      "expressibility_gap": null,
+      "independent_language_oracle": "PENDING",
+      "behavior_equivalence_proven": false,
+      "owner_decision": "PENDING-REVIEW",
+      "effect_boundary": "pure supplied data; no clock/network/timezone host mutation"
+    },
+    {
+      "proposal_id": "D10-TIME-bb8fbd43d7d1b8bf",
+      "semantic_name": "INTERNET-TIME-MODE-VALID?",
+      "source_file": "lib/time.lisp",
+      "source_line": 73,
+      "source_git_blob_sha": "74013e20c0c5abb9a68c62334f40095c29294a53",
+      "source_definition_form": "00001001",
+      "surface_uk": "режим-ntp-допустимий?",
+      "surface_ukr": "перевірити-режим-відповіді-часу?",
+      "observable_law": "Return exact predicate 1 only for NTP modes 4 and 5, otherwise 0.",
+      "falsifier": "Modes 4 and 5 pass; 3, 0, and 6 fail; Boolean 0 must not be evaluated as truthy Lisp.",
+      "relation_class": "NTP-VALIDATION",
+      "triage_status": "HOLD-PROTOCOL-DETAIL",
+      "review_needed": "Likely helper of NTP observation interpretation; check whether standalone protocol policy is universal language meaning.",
+      "coordinate": null,
+      "ratified_resident": false,
+      "selected_in_canonical_inventory": false,
+      "origin": "source-grounded implementation, with secondary behavioral review pending",
+      "witnesses": [
+        {
+          "input": {
+            "mode": 4
+          },
+          "expect": 1
+        },
+        {
+          "input": {
+            "mode": 5
+          },
+          "expect": 1
+        },
+        {
+          "input": {
+            "mode": 3
+          },
+          "expect": 0
+        },
+        {
+          "input": {
+            "mode": 6
+          },
+          "expect": 0
+        }
+      ],
+      "unblock_fanout": null,
+      "expressibility_gap": null,
+      "independent_language_oracle": "PENDING",
+      "behavior_equivalence_proven": false,
+      "owner_decision": "PENDING-REVIEW",
+      "effect_boundary": "pure supplied data; no clock/network/timezone host mutation"
+    },
+    {
+      "proposal_id": "D10-TIME-e8bd37230dcf5405",
+      "semantic_name": "INTERNET-TIME-STRATUM-VALID?",
+      "source_file": "lib/time.lisp",
+      "source_line": 82,
+      "source_git_blob_sha": "74013e20c0c5abb9a68c62334f40095c29294a53",
+      "source_definition_form": "00001001",
+      "surface_uk": "рівень-ntp-допустимий?",
+      "surface_ukr": "перевірити-рівень-синхронізації-часу?",
+      "observable_law": "Return exact predicate 1 only for allowable NTP stratum range 1..15 inclusive, otherwise 0.",
+      "falsifier": "0 and 16 reject, 1 and 15 accept; exact 1/0 used under D2 control.",
+      "relation_class": "NTP-VALIDATION",
+      "triage_status": "HOLD-PROTOCOL-DETAIL",
+      "review_needed": "Likely subordinate rule of NTP-fields observation; not automatically a separate D10 resident.",
+      "coordinate": null,
+      "ratified_resident": false,
+      "selected_in_canonical_inventory": false,
+      "origin": "source-grounded implementation, with secondary behavioral review pending",
+      "witnesses": [
+        {
+          "input": {
+            "stratum": 0
+          },
+          "expect": 0
+        },
+        {
+          "input": {
+            "stratum": 1
+          },
+          "expect": 1
+        },
+        {
+          "input": {
+            "stratum": 15
+          },
+          "expect": 1
+        },
+        {
+          "input": {
+            "stratum": 16
+          },
+          "expect": 0
+        }
+      ],
+      "unblock_fanout": null,
+      "expressibility_gap": null,
+      "independent_language_oracle": "PENDING",
+      "behavior_equivalence_proven": false,
+      "owner_decision": "PENDING-REVIEW",
+      "effect_boundary": "pure supplied data; no clock/network/timezone host mutation"
+    },
+    {
+      "proposal_id": "D10-TIME-f92898a4ee641c52",
+      "semantic_name": "INTERNET-TIME-FIELDS->OBSERVATION",
+      "source_file": "lib/time.lisp",
+      "source_line": 91,
+      "source_git_blob_sha": "74013e20c0c5abb9a68c62334f40095c29294a53",
+      "source_definition_form": "00001001",
+      "surface_uk": "поля-часу-у-спостереження",
+      "surface_ukr": "тлумачити-поля-відповіді-часу",
+      "observable_law": "For explicitly supplied host, mode, stratum, NTP seconds and fraction, emit accepted(host, unix-second, nanosecond) or a typed rejected record; no transport or clock I/O.",
+      "falsifier": "Mode not 4/5 and stratum outside 1..15 reject; epoch before 2208988800 rejects; zero fraction maps to zero nanos.",
+      "relation_class": "TIME-OBSERVATION",
+      "triage_status": "SEMANTIC-CANDIDATE",
+      "review_needed": "Transport-independent supplied-field interpretation, but NTP-specific epoch/policy; owner must decide universal vs library semantics.",
+      "coordinate": null,
+      "ratified_resident": false,
+      "selected_in_canonical_inventory": false,
+      "origin": "source-grounded implementation, with secondary behavioral review pending",
+      "witnesses": [
+        {
+          "input": {
+            "host": "time.example",
+            "mode": 4,
+            "stratum": 1,
+            "ntp_seconds": 2208988800,
+            "fraction": 0
+          },
+          "expect": [
+            "accepted",
+            "time.example",
+            0,
+            0
+          ]
+        },
+        {
+          "input": {
+            "host": "time.example",
+            "mode": 5,
+            "stratum": 15,
+            "ntp_seconds": 2208988801,
+            "fraction": 2147483648
+          },
+          "expect": [
+            "accepted",
+            "time.example",
+            1,
+            500000000
+          ]
+        },
+        {
+          "input": {
+            "host": "time.example",
+            "mode": 3,
+            "stratum": 1,
+            "ntp_seconds": 2208988800,
+            "fraction": 0
+          },
+          "expect": [
+            "rejected",
+            "invalid-response"
+          ]
+        },
+        {
+          "input": {
+            "host": "time.example",
+            "mode": 4,
+            "stratum": 0,
+            "ntp_seconds": 2208988800,
+            "fraction": 0
+          },
+          "expect": [
+            "rejected",
+            "invalid-response"
+          ]
+        },
+        {
+          "input": {
+            "host": "time.example",
+            "mode": 4,
+            "stratum": 1,
+            "ntp_seconds": 2208988799,
+            "fraction": 0
+          },
+          "expect": [
+            "rejected",
+            "invalid-epoch"
+          ]
+        },
+        {
+          "input": {
+            "host": "time.example",
+            "mode": 4,
+            "stratum": 1,
+            "ntp_seconds": 2208988800,
+            "fraction": 4294967295
+          },
+          "expect": [
+            "accepted",
+            "time.example",
+            0,
+            999999999
+          ],
+          "type": "FRACTION-BOUNDARY"
+        }
+      ],
+      "unblock_fanout": null,
+      "expressibility_gap": null,
+      "independent_language_oracle": "PENDING",
+      "behavior_equivalence_proven": false,
+      "owner_decision": "PENDING-REVIEW",
+      "effect_boundary": "pure supplied data; no clock/network/timezone host mutation"
+    },
+    {
+      "proposal_id": "D10-TIME-f1def0b6311506f7",
+      "semantic_name": "INTERNET-TIME-RAW->OBSERVATION",
+      "source_file": "lib/time.lisp",
+      "source_line": 114,
+      "source_git_blob_sha": "74013e20c0c5abb9a68c62334f40095c29294a53",
+      "source_definition_form": "00001001",
+      "surface_uk": "сирий-час-у-спостереження",
+      "surface_ukr": "декодувати-обгортку-полів-часу",
+      "observable_law": "If input tag is ntp-fields, project the fields into the NTP interpretation rule, else preserve the input observation unchanged.",
+      "falsifier": "Unexpected tag passes through unchanged; recognized tag takes the five relevant fields in original order.",
+      "relation_class": "OBSERVATION-ADAPTER",
+      "triage_status": "HOLD-REPRESENTATION",
+      "review_needed": "Wrapper primarily dispatching by payload tag, may be exactly derived without a new semantic identity.",
+      "coordinate": null,
+      "ratified_resident": false,
+      "selected_in_canonical_inventory": false,
+      "origin": "source-grounded implementation, with secondary behavioral review pending",
+      "witnesses": [
+        {
+          "input": {
+            "raw": [
+              "rejected",
+              "receive-failed"
+            ]
+          },
+          "expect": [
+            "rejected",
+            "receive-failed"
+          ]
+        },
+        {
+          "input": {
+            "raw": [
+              "ntp-fields",
+              "time.example",
+              4,
+              1,
+              2208988800,
+              0
+            ]
+          },
+          "expect": [
+            "accepted",
+            "time.example",
+            0,
+            0
+          ]
+        }
+      ],
+      "unblock_fanout": null,
+      "expressibility_gap": null,
+      "independent_language_oracle": "PENDING",
+      "behavior_equivalence_proven": false,
+      "owner_decision": "PENDING-REVIEW",
+      "effect_boundary": "boundary adapter only; semantics conditional on donor public contract"
+    },
+    {
+      "proposal_id": "D10-TIME-6ded9cef7d22e285",
+      "semantic_name": "INTERNET-TIME-OBSERVATION->UTC",
+      "source_file": "lib/time.lisp",
+      "source_line": 134,
+      "source_git_blob_sha": "74013e20c0c5abb9a68c62334f40095c29294a53",
+      "source_definition_form": "00001001",
+      "surface_uk": "спостереження-часу-до-utc",
+      "surface_ukr": "дати-календарне-значення-схваленому-часу",
+      "observable_law": "For accepted Internet-time observation preserve host and accepted status while converting Unix second+nanos to UTC calendar; otherwise return input unchanged.",
+      "falsifier": "Rejected input must remain rejected, and accepted epoch 1970-01-01 should convert deterministically; must not observe a clock.",
+      "relation_class": "CALENDAR-OBSERVATION",
+      "triage_status": "SEMANTIC-CANDIDATE",
+      "review_needed": "Likely composition of existing UTC-FROM-UNIX and projection; derivability alone does not automatically exclude, but audit exact observational equivalence.",
+      "coordinate": null,
+      "ratified_resident": false,
+      "selected_in_canonical_inventory": false,
+      "origin": "source-grounded implementation, with secondary behavioral review pending",
+      "witnesses": [
+        {
+          "input": {
+            "observation": [
+              "rejected",
+              "invalid-response"
+            ]
+          },
+          "expect": [
+            "rejected",
+            "invalid-response"
+          ]
+        },
+        {
+          "input": {
+            "observation": [
+              "accepted",
+              "time.example",
+              0,
+              0
+            ]
+          },
+          "expect": [
+            "accepted",
+            "time.example",
+            [
+              "utc",
+              1970,
+              1,
+              1,
+              0,
+              0,
+              0,
+              0
+            ]
+          ]
+        }
+      ],
+      "unblock_fanout": null,
+      "expressibility_gap": null,
+      "independent_language_oracle": "PENDING",
+      "behavior_equivalence_proven": false,
+      "owner_decision": "PENDING-REVIEW",
+      "effect_boundary": "pure supplied data; no clock/network/timezone host mutation"
+    },
+    {
+      "proposal_id": "D10-TIME-bf77a4e5ca6d8e15",
+      "semantic_name": "TIMEZONE-DECLARATIONS->OBSERVATION",
+      "source_file": "lib/time.lisp",
+      "source_line": 185,
+      "source_git_blob_sha": "74013e20c0c5abb9a68c62334f40095c29294a53",
+      "source_definition_form": "00001001",
+      "surface_uk": "оголошення-поясу-у-спостереження",
+      "surface_ukr": "обрати-достовірне-джерело-часового-поясу",
+      "observable_law": "Given two explicit timezone declarations, select the nonempty TZ value before the nonempty /etc/timezone value, else an unknown tagged result, without host I/O.",
+      "falsifier": "When both are nonempty, TZ wins; when neither is valid, unknown; no implicit OS mutation or offset inference.",
+      "relation_class": "EXPLICIT-SOURCE-PRECEDENCE",
+      "triage_status": "SEMANTIC-CANDIDATE",
+      "review_needed": "Observe if the precedence relation is a generic first-trusted-source law or merely timezone application policy.",
+      "coordinate": null,
+      "ratified_resident": false,
+      "selected_in_canonical_inventory": false,
+      "origin": "source-grounded implementation, with secondary behavioral review pending",
+      "witnesses": [
+        {
+          "input": {
+            "tz": "Europe/Kyiv",
+            "etc_timezone": "UTC"
+          },
+          "expect": [
+            "detected",
+            "Europe/Kyiv",
+            "TZ"
+          ]
+        },
+        {
+          "input": {
+            "tz": null,
+            "etc_timezone": "UTC"
+          },
+          "expect": [
+            "detected",
+            "UTC",
+            "etc-timezone"
+          ]
+        },
+        {
+          "input": {
+            "tz": null,
+            "etc_timezone": null
+          },
+          "expect": [
+            "unknown",
+            "host-declaration-unavailable"
+          ]
+        },
+        {
+          "input": {
+            "tz": "",
+            "etc_timezone": "UTC"
+          },
+          "expect": [
+            "detected",
+            "UTC",
+            "etc-timezone"
+          ],
+          "type": "EMPTY-TZ-FALLBACK"
+        }
+      ],
+      "unblock_fanout": null,
+      "expressibility_gap": null,
+      "independent_language_oracle": "PENDING",
+      "behavior_equivalence_proven": false,
+      "owner_decision": "PENDING-REVIEW",
+      "effect_boundary": "pure supplied data; no clock/network/timezone host mutation"
+    },
+    {
+      "proposal_id": "D10-TIME-98cdb7e3808a9bab",
+      "semantic_name": "TIMEZONE-RAW->OBSERVATION",
+      "source_file": "lib/time.lisp",
+      "source_line": 198,
+      "source_git_blob_sha": "74013e20c0c5abb9a68c62334f40095c29294a53",
+      "source_definition_form": "00001001",
+      "surface_uk": "сирий-пояс-у-спостереження",
+      "surface_ukr": "перевірити-структуру-сирого-часового-поясу",
+      "observable_law": "If raw input is tagged timezone-declarations, interpret two fields; otherwise construct rejected invalid-timezone-observation.",
+      "falsifier": "Wrong tag must reject; both absent declarations produce unknown; no host file reading.",
+      "relation_class": "OBSERVATION-ADAPTER",
+      "triage_status": "HOLD-REPRESENTATION",
+      "review_needed": "Tag adapter over the declaration law; likely no independent D10 semantic identity.",
+      "coordinate": null,
+      "ratified_resident": false,
+      "selected_in_canonical_inventory": false,
+      "origin": "source-grounded implementation, with secondary behavioral review pending",
+      "witnesses": [
+        {
+          "input": {
+            "raw": [
+              "timezone-declarations",
+              "Europe/Kyiv",
+              "UTC"
+            ]
+          },
+          "expect": [
+            "detected",
+            "Europe/Kyiv",
+            "TZ"
+          ]
+        },
+        {
+          "input": {
+            "raw": [
+              "unexpected",
+              "Europe/Kyiv",
+              "UTC"
+            ]
+          },
+          "expect": [
+            "rejected",
+            "invalid-timezone-observation"
+          ]
+        }
+      ],
+      "unblock_fanout": null,
+      "expressibility_gap": null,
+      "independent_language_oracle": "PENDING",
+      "behavior_equivalence_proven": false,
+      "owner_decision": "PENDING-REVIEW",
+      "effect_boundary": "boundary adapter only; semantics conditional on donor public contract"
+    },
+    {
+      "proposal_id": "D10-TIME-7b4a978e8c4d10a9",
+      "semantic_name": "TIMEZONE-CONFIG",
+      "source_file": "lib/time.lisp",
+      "source_line": 213,
+      "source_git_blob_sha": "74013e20c0c5abb9a68c62334f40095c29294a53",
+      "source_definition_form": "00001001",
+      "surface_uk": "налаштування-часового-поясу",
+      "surface_ukr": "створити-перевірене-значення-поясу",
+      "observable_law": "Construct an accepted tagged timezone(name, offset-seconds) only for a string name and offset within inclusive [-86400,86400], else an explicit rejected reason.",
+      "falsifier": "Non-string name rejects; offsets -86401 and 86401 reject; -86400 and 86400 admissible; no host timezone changes.",
+      "relation_class": "VALIDATED-VALUE-CONSTRUCTOR",
+      "triage_status": "SEMANTIC-CANDIDATE",
+      "review_needed": "Compare with existing structured validators/constructors in D1–D9 and D10; possible application-specific value law.",
+      "coordinate": null,
+      "ratified_resident": false,
+      "selected_in_canonical_inventory": false,
+      "origin": "source-grounded implementation, with secondary behavioral review pending",
+      "witnesses": [
+        {
+          "input": {
+            "name": "Europe/Kyiv",
+            "offset_seconds": 7200
+          },
+          "expect": [
+            "accepted",
+            [
+              "timezone",
+              "Europe/Kyiv",
+              7200
+            ]
+          ]
+        },
+        {
+          "input": {
+            "name": false,
+            "offset_seconds": 7200
+          },
+          "expect": [
+            "rejected",
+            "invalid-name"
+          ]
+        },
+        {
+          "input": {
+            "name": "UTC",
+            "offset_seconds": -86400
+          },
+          "expect": [
+            "accepted",
+            [
+              "timezone",
+              "UTC",
+              -86400
+            ]
+          ]
+        },
+        {
+          "input": {
+            "name": "UTC",
+            "offset_seconds": 86400
+          },
+          "expect": [
+            "accepted",
+            [
+              "timezone",
+              "UTC",
+              86400
+            ]
+          ]
+        },
+        {
+          "input": {
+            "name": "UTC",
+            "offset_seconds": 86401
+          },
+          "expect": [
+            "rejected",
+            "invalid-offset"
+          ]
+        },
+        {
+          "input": {
+            "name": "UTC",
+            "offset_seconds": -86401
+          },
+          "expect": [
+            "rejected",
+            "invalid-offset"
+          ]
+        }
+      ],
+      "unblock_fanout": null,
+      "expressibility_gap": null,
+      "independent_language_oracle": "PENDING",
+      "behavior_equivalence_proven": false,
+      "owner_decision": "PENDING-REVIEW",
+      "effect_boundary": "pure supplied data; no clock/network/timezone host mutation"
+    }
+  ],
+  "audit": {
+    "baseline_main_inventory_rows": 625,
+    "baseline_main_inventory_blob": "73dd518469f972c55411e004b70b054ba8b3ec86",
+    "baseline_foundation_blob": "09d1d71c39d1484dfd005a5068dbb18b76f0f0d4",
+    "cross_domain_names_checked": true,
+    "source_declaration_lines_checked_against_github": true,
+    "source_blob_checked_against_github": true,
+    "behavioral_tests_kind": "independent reference-model witnesses, NOT execution of Lisp implementation",
+    "proposed_selection_effect": 0,
+    "proposed_ratification_effect": 0,
+    "original_executable_migrations_certified": 0,
+    "pending_other_branch": "research/d10-unification-lexical-harvest-20261009 (+9, not in main)",
+    "witness_count": 34
+  }
+}

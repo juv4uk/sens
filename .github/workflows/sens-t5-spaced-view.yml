@@ -1,0 +1,65 @@
+name: SENS T5 exact spaced view
+on:
+  pull_request:
+    paths:
+      - "scripts/sens_t5_spaced_view.py"
+      - "tests/test_sens_t5_spaced_view.py"
+      - "scripts/sens_t5_codec.py"
+      - "tests/fixtures/migration-d1-cond-cohort/**"
+      - ".github/workflows/sens-t5-spaced-view.yml"
+  push:
+    branches: [main]
+    paths:
+      - "scripts/sens_t5_spaced_view.py"
+      - "tests/test_sens_t5_spaced_view.py"
+      - "scripts/sens_t5_codec.py"
+      - "tests/fixtures/migration-d1-cond-cohort/**"
+      - ".github/workflows/sens-t5-spaced-view.yml"
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  physical-view-only:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v5
+      - name: Strict T5 codec/view parity and malicious input/no-clobber tests
+        run: python3 -m unittest discover -s tests -p 'test_sens_t5_spaced_view.py' -v
+      - name: Verify committed Ukrainian Lisp / physical T5 / ASCII exact view
+        run: |
+          python3 scripts/sens_t5_spaced_view.py verify \
+            tests/fixtures/migration-d1-cond-cohort/branch.sens \
+            --report /tmp/sens-spaced-view-receipt.json
+          python3 - <<'PY'
+          import json
+          d=json.load(open("/tmp/sens-spaced-view-receipt.json"))
+          assert d["summary"]["passed"] == 1
+          assert d["summary"]["blocked"] == 0
+          assert d["summary"]["semantic_oracle_passed"] == 0
+          row=d["files"][0]
+          assert row["status"] == "PASS_VIEW_ONLY"
+          assert row["physical_bytes"] == 12
+          assert row["uk_source_bidirectional_oracle"] == "NOT_VERIFIED"
+          for key in ("source_sha256","physical_sha256","typed_word_sha256","view_sha256"):
+              assert len(row[key]) == 64
+          print("T5/VIEW ROUNDTRIP PASS; Ukrainian bidirectional oracle NOT_VERIFIED")
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: canonical-exact-view-digests
+          path: /tmp/sens-spaced-view-receipt.json
+  independent-rust-d2:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v5
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Current Rust D2 reader must produce identical exact ASCII view
+        run: |
+          cargo build -q -p sens-cli --bin sens-trit
+          target/debug/sens-trit open tests/fixtures/migration-d1-cond-cohort/branch.sens \
+            > /tmp/sens-branch-rust-view
+          cmp tests/fixtures/migration-d1-cond-cohort/branch /tmp/sens-branch-rust-view
+      - name: Independent current D1 COND execution oracle
+        run: cargo test -p sens --test migration_d1_cond_cohort -- --nocapture

@@ -36,6 +36,7 @@ mod error;
 pub(crate) mod eval;
 mod language_items;
 mod parser;
+mod mixed_source;
 mod presentation;
 mod semantic_registry;
 mod source_words;
@@ -100,6 +101,18 @@ pub mod semantic_registry_export {
         super::semantic_registry::admitted_semantic_id_for_surface(name)
     }
 
+    /// Current ratified Ukrainian CALL-head projection (exact domain width),
+    /// not a historical eight-bit identity. Source editors must preserve
+    /// these forms in authored .lisp; the mixed parser already lowers them to
+    /// exact DomainIdentity only in legitimate executable head positions.
+    ///
+    /// In particular, the legacy sens-to-sens compatibility migrator must
+    /// NEVER rewrite a valid current Ukrainian head into an old SID8 token.
+    pub fn exact_uk_callable_for_source_head(name: &str) -> Option<super::DomainIdentity> {
+        super::semantic_registry::exact_uk_callable_for_source_head(name)
+    }
+
+
     /// Legacy packed-byte export for external projection consumers.
     ///
     /// Runtime/source semantics use opaque `Sens8`; this function deliberately
@@ -143,6 +156,7 @@ pub use binary_number::{BinaryNumber, BinaryNumberError};
 pub use bit9::Bit9;
 pub use bits::{Bit1, Bit2, Bit3, Bit4, Bit5, Bit6, Bit7, Bit8, Bits};
 pub use canonical_reader::parse_canonical_binary;
+pub use mixed_source::parse_mixed_exact_domain;
 pub use compiler_role::{compiler_execution_role, CompilerExecutionRole, CompilerLoweringRole};
 pub use compiler_bootstrap::{
     canonical_value_sha256_mechanism, compiler_evidence_canonical_bytes,

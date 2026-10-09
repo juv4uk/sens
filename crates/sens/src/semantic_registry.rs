@@ -12,7 +12,7 @@
 
 use std::{collections::HashMap, sync::OnceLock};
 
-use crate::{Bija3, Bit3, Bit4, Bit5, CoreD4, CoreD5, CoreDomainIdentity, DomainIdentity};
+use crate::{Bija3, Bit3, Bit4, Bit5, Bit8, CoreD4, CoreD5, CoreD8, CoreDomainIdentity, DomainIdentity};
 use crate::Sens8;
 
 mod generated {
@@ -53,12 +53,32 @@ fn direct_domain_identity_for_surface(name: &str) -> Option<CoreDomainIdentity> 
             && row
                 .surfaces
                 .iter()
-                .any(|surface| matches!(surface.namespace, "uk" | "sa") && surface.name == name);
+                .any(|surface| matches!(surface.namespace, "uk" | "sa" | "en") && surface.name == name);
         matches_human_surface
             .then(|| exact_domain_identity_from_projection(row.width, row.bits))
             .flatten()
     })
 }
+ 
+/// Canonical Ukrainian *source-head* projection, before evaluation.
+///
+/// Only owner-ratified source-routable uk rows are eligible. This is NOT the
+/// legacy SID compatibility index: no en alias, old W8, D2 structure, or
+/// unratified D7 binder can become a callable head via this API.
+/// The mixed reader applies it only to executable HEAD positions.
+pub(crate) fn exact_uk_callable_for_source_head(name: &str) -> Option<crate::DomainIdentity> {
+    DOMAIN_SURFACE_ROWS.iter().find_map(|row| {
+        if !row.source_routable
+            || !row.surfaces.iter().any(|surface|
+                surface.namespace == "uk" && surface.name == name)
+        {
+            return None;
+        }
+        exact_domain_identity_from_projection(row.width, row.bits)
+            .map(crate::DomainIdentity::from)
+    })
+}
+
 
 pub(crate) fn legacy_domain_identity_from_registry_byte(byte: u8) -> Option<CoreDomainIdentity> {
     let d3 = |raw| CoreDomainIdentity::D3(Bija3::from_word(Bit3::new(raw).unwrap()));
@@ -73,12 +93,14 @@ pub(crate) fn legacy_domain_identity_from_registry_byte(byte: u8) -> Option<Core
         0b0000_0011 => Some(d3(0b101)), // EQ
         0b0000_1000 => Some(d4(0b0010)), // LAMBDA
         0b0000_1001 => Some(d4(0b0011)), // DEFINE
+        0b1010_1011 => Some(d4(0b0101)), // NULL
         0b0010_1001 => Some(d4(0b1111)), // APPEND
         // Existing selector surfaces project explicitly to their ratified D4
         // identities. This is semantic-role mapping, never byte truncation.
         0b0011_0011 => Some(d4(0b1000)), // CAAR
         0b0011_0100 => Some(d4(0b1001)), // CADR
         0b0011_0101 => Some(d4(0b0111)), // CDDR
+        0b0010_0010 => Some(CoreDomainIdentity::D8(CoreD8::from_word(Bit8::new(0b11110111).unwrap()))), // EQUAL (equal?)
         _ => None,
     }
 }
@@ -305,6 +327,20 @@ mod tests {
         }
     }
     #[test]
+    fn historical_d4_successor_materializes_exact_slot() {
+        let identity = legacy_domain_identity_from_registry_byte(0b1010_1011)
+            .expect("historical registry row must have an exact-domain successor");
+        assert_eq!((identity.width(), identity.packed_bits()), (4, 0b0101));
+
+        let mut session = crate::Session::default();
+        crate::load_core_library(&mut session).expect("Core bootstrap must materialize the exact slot");
+        assert!(
+            session.environment.domain_code_slot(identity).is_some(),
+            "Core bootstrap must bind the language-owned closure into its exact D4 slot"
+        );
+    }
+
+    #[test]
     fn append_surface_projects_only_to_ratified_d4() {
         let identity = domain_identity_for_surface("приєднати")
             .expect("D4:1111 surface must project to ratified D4");
@@ -399,13 +435,14 @@ mod tests {
         assert_eq!(surface_for_domain_identity(yes, "uk"), Some("так"));
         assert_eq!(surface_for_domain_identity(yes, "sa"), Some("ām"));
         assert_eq!(surface_for_domain_identity(open, "uk"), Some("відкрити"));
-        assert_eq!(surface_for_domain_identity(empty, "sa"), Some("śūnya"));
+        assert_eq!(surface_for_domain_identity(empty, "sa"), Some("()"));
         assert_eq!(surface_for_domain_identity(lambda, "uk"), Some("функція"));
         assert_eq!(surface_for_domain_identity(lambda, "sa"), Some("phalana"));
 
         assert_eq!(direct_domain_identity_for_surface("так"), None);
         assert_eq!(direct_domain_identity_for_surface("відкрити"), None);
         assert_eq!(direct_domain_identity_for_surface("порожнє"), None);
+        assert_eq!(exact_uk_callable_for_source_head("()"), None);
     }
 
     #[test]

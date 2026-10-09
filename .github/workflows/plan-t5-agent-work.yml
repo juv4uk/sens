@@ -71,7 +71,17 @@ jobs:
           count=reviewed_count+archived_count
           assert plan["summary"]["executable_or_unclassified_originals"] + count == len(paths)
           assert plan["summary"]["claimed"]==0 and plan["summary"]["admitted"]==0
-          assert len(paths)==plan["summary"]["blocked"]+plan["summary"]["mechanical_pending_oracle"]
+          archived_mechanical = plan["summary"]["archived_mechanical_nonprogram_originals"]
+          archived_paths = {r["path"] for shard in archived for r in shard["sources"]}
+          observed_archive = {row["path"] for row in candidates["mechanical_candidates"]
+                              if row.get("source_scope") == "ARCHIVED_BENCHMARK_NONPROGRAM"}
+          assert observed_archive <= archived_paths
+          assert archived_mechanical == len(observed_archive)
+          assert len(candidates["mechanical_candidates"]) == (
+              plan["summary"]["mechanical_pending_oracle"] + archived_mechanical)
+          assert len(paths) == (plan["summary"]["blocked"]
+                               + plan["summary"]["mechanical_pending_oracle"]
+                               + archived_mechanical)
           print("DISJOINT_T5_AGENT_SHARDS_CONFIRMED",len(paths),"sources",len(plan["shards"]),
                 "shards",reviewed_count,"reviewed data plus",archived_count,"archived data-only")
           import os

@@ -1,0 +1,31 @@
+name: D10 CLIPS library harvest v1
+
+on:
+  pull_request:
+    paths:
+      - "lib/clips-import.lisp"
+      - "knowledge/d10-clips-library-harvest-v1.json"
+      - "knowledge/d10-v1-semantic-inventory.json"
+      - "knowledge/d10-fill-v1-state.json"
+      - "scripts/check-d10-clips-library-harvest-v1.py"
+      - ".github/workflows/d10-clips-library-harvest-v1.yml"
+  push:
+    branches: [main]
+    paths:
+      - "lib/clips-import.lisp"
+      - "knowledge/d10-clips-library-harvest-v1.json"
+      - "knowledge/d10-v1-semantic-inventory.json"
+      - "knowledge/d10-fill-v1-state.json"
+      - "scripts/check-d10-clips-library-harvest-v1.py"
+      - ".github/workflows/d10-clips-library-harvest-v1.yml"
+  workflow_dispatch:
+
+jobs:
+  library:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v5
+      - run: python3 scripts/check-d10-clips-library-harvest-v1.py
+      - run: python3 scripts/check-d10-yantra-library-harvest-v1.py
+      - run: python3 scripts/check-d10-fill-v1-seed.py

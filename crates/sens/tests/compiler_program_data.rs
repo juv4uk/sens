@@ -1,7 +1,7 @@
 //! sens#3838 — ratchet the existing SW\x01 wire as C1 program-data transport.
 
 use sens::{
-    lower_program, parse, wire_decode_program, wire_encode_program, Bija3, Bit3, Bit4, Bit8,
+    lower_program, parse_mixed_exact_domain, wire_decode_program, wire_encode_program, Bija3, Bit3, Bit4, Bit8,
     CoreD4, CoreD8, CoreDomainIdentity, DomainIdentity, Expr, ExprKind, Span,
 };
 use std::rc::Rc;
@@ -79,7 +79,7 @@ fn domain_call_transport_is_exact_domain_head_plus_ordered_children() {
 
 #[test]
 fn current_nucleus_lowered_program_wire_is_deterministic() {
-    let parsed = parse(NUCLEUS).expect("current compiler nucleus parses");
+    let parsed = parse_mixed_exact_domain(NUCLEUS).expect("current compiler nucleus parses");
     let lowered = lower_program(&parsed);
     let first = wire_encode_program(&lowered);
     let decoded = wire_decode_program(&first).expect("current nucleus wire decodes");

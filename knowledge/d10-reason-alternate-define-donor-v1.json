@@ -1,0 +1,441 @@
+{
+  "schema": "d10-reason-alternate-define-donor-v1/v1",
+  "authority": "#4013",
+  "scope": "RESEARCH-ONLY-NO-SEMANTIC-PROMOTION",
+  "source": {
+    "path": "lib/reason.lisp",
+    "git_blob_sha1": "dadc52a2f40f2f30ad77642898afb81980044c08"
+  },
+  "historical_define_head": "00001011",
+  "semantic_contract": "A source syntactic definition record is not a distinct D10 semantic law. Do not route the old four/eight-bit head as a current domain identity; preserve original source-era classification.",
+  "notes": [
+    "Parallel donor census, not part of canonical 39 selected library semantic laws or existing 102 raw donor symbols",
+    "Every row is pinned to unchanged Git blob SHA and exact line; read-only",
+    "No selection, D10 bit assignment, Core/reader/runtimes/T5 code, or physical .sens created",
+    "Name equality with D10 is a necessary collision signal, not proof of semantic equivalence"
+  ],
+  "proposed_routing": {
+    "selected_d10_delta": 0,
+    "ratified_d10_delta": 0,
+    "assigned_coordinates": 0,
+    "original_executable_t5_migrations": 0
+  },
+  "counts": {
+    "total": 37,
+    "by_classification": {
+      "SCHEMA_OR_CONSTANT": 2,
+      "ACCESSOR_ALIAS_BINDING": 3,
+      "RESEARCH_UNREVIEWED": 26,
+      "ALREADY_SELECTED_NAME": 6
+    }
+  },
+  "rows": [
+    {
+      "path": "lib/reason.lisp",
+      "line": 12,
+      "head": "00001011",
+      "name": "*reason-index-schema*",
+      "source_git_blob_sha1": "dadc52a2f40f2f30ad77642898afb81980044c08",
+      "classification": "SCHEMA_OR_CONSTANT",
+      "coordinate": null,
+      "ratified": false,
+      "semantic_law_verified": false
+    },
+    {
+      "path": "lib/reason.lisp",
+      "line": 13,
+      "head": "00001011",
+      "name": "*reason-index-max-predicates*",
+      "source_git_blob_sha1": "dadc52a2f40f2f30ad77642898afb81980044c08",
+      "classification": "SCHEMA_OR_CONSTANT",
+      "coordinate": null,
+      "ratified": false,
+      "semantic_law_verified": false
+    },
+    {
+      "path": "lib/reason.lisp",
+      "line": 17,
+      "head": "00001011",
+      "name": "reason-index-mode",
+      "source_git_blob_sha1": "dadc52a2f40f2f30ad77642898afb81980044c08",
+      "classification": "ACCESSOR_ALIAS_BINDING",
+      "coordinate": null,
+      "ratified": false,
+      "semantic_law_verified": false
+    },
+    {
+      "path": "lib/reason.lisp",
+      "line": 18,
+      "head": "00001011",
+      "name": "reason-index-rules",
+      "source_git_blob_sha1": "dadc52a2f40f2f30ad77642898afb81980044c08",
+      "classification": "ACCESSOR_ALIAS_BINDING",
+      "coordinate": null,
+      "ratified": false,
+      "semantic_law_verified": false
+    },
+    {
+      "path": "lib/reason.lisp",
+      "line": 19,
+      "head": "00001011",
+      "name": "reason-index-buckets",
+      "source_git_blob_sha1": "dadc52a2f40f2f30ad77642898afb81980044c08",
+      "classification": "ACCESSOR_ALIAS_BINDING",
+      "coordinate": null,
+      "ratified": false,
+      "semantic_law_verified": false
+    },
+    {
+      "path": "lib/reason.lisp",
+      "line": 21,
+      "head": "00001011",
+      "name": "reason-index?",
+      "source_git_blob_sha1": "dadc52a2f40f2f30ad77642898afb81980044c08",
+      "classification": "RESEARCH_UNREVIEWED",
+      "coordinate": null,
+      "ratified": false,
+      "semantic_law_verified": false
+    },
+    {
+      "path": "lib/reason.lisp",
+      "line": 34,
+      "head": "00001011",
+      "name": "reason-index-linear",
+      "source_git_blob_sha1": "dadc52a2f40f2f30ad77642898afb81980044c08",
+      "classification": "RESEARCH_UNREVIEWED",
+      "coordinate": null,
+      "ratified": false,
+      "semantic_law_verified": false
+    },
+    {
+      "path": "lib/reason.lisp",
+      "line": 41,
+      "head": "00001011",
+      "name": "reason-term-predicate",
+      "source_git_blob_sha1": "dadc52a2f40f2f30ad77642898afb81980044c08",
+      "classification": "RESEARCH_UNREVIEWED",
+      "coordinate": null,
+      "ratified": false,
+      "semantic_law_verified": false
+    },
+    {
+      "path": "lib/reason.lisp",
+      "line": 55,
+      "head": "00001011",
+      "name": "reason-rule-predicate",
+      "source_git_blob_sha1": "dadc52a2f40f2f30ad77642898afb81980044c08",
+      "classification": "RESEARCH_UNREVIEWED",
+      "coordinate": null,
+      "ratified": false,
+      "semantic_law_verified": false
+    },
+    {
+      "path": "lib/reason.lisp",
+      "line": 65,
+      "head": "00001011",
+      "name": "reason-index-add-reversed",
+      "source_git_blob_sha1": "dadc52a2f40f2f30ad77642898afb81980044c08",
+      "classification": "RESEARCH_UNREVIEWED",
+      "coordinate": null,
+      "ratified": false,
+      "semantic_law_verified": false
+    },
+    {
+      "path": "lib/reason.lisp",
+      "line": 79,
+      "head": "00001011",
+      "name": "reason-index-normalize-buckets",
+      "source_git_blob_sha1": "dadc52a2f40f2f30ad77642898afb81980044c08",
+      "classification": "RESEARCH_UNREVIEWED",
+      "coordinate": null,
+      "ratified": false,
+      "semantic_law_verified": false
+    },
+    {
+      "path": "lib/reason.lisp",
+      "line": 89,
+      "head": "00001011",
+      "name": "reason-index-build-scan",
+      "source_git_blob_sha1": "dadc52a2f40f2f30ad77642898afb81980044c08",
+      "classification": "RESEARCH_UNREVIEWED",
+      "coordinate": null,
+      "ratified": false,
+      "semantic_law_verified": false
+    },
+    {
+      "path": "lib/reason.lisp",
+      "line": 139,
+      "head": "00001011",
+      "name": "reason-make-index",
+      "source_git_blob_sha1": "dadc52a2f40f2f30ad77642898afb81980044c08",
+      "classification": "RESEARCH_UNREVIEWED",
+      "coordinate": null,
+      "ratified": false,
+      "semantic_law_verified": false
+    },
+    {
+      "path": "lib/reason.lisp",
+      "line": 143,
+      "head": "00001011",
+      "name": "reason-ensure-index",
+      "source_git_blob_sha1": "dadc52a2f40f2f30ad77642898afb81980044c08",
+      "classification": "RESEARCH_UNREVIEWED",
+      "coordinate": null,
+      "ratified": false,
+      "semantic_law_verified": false
+    },
+    {
+      "path": "lib/reason.lisp",
+      "line": 152,
+      "head": "00001011",
+      "name": "reason-index-candidates",
+      "source_git_blob_sha1": "dadc52a2f40f2f30ad77642898afb81980044c08",
+      "classification": "RESEARCH_UNREVIEWED",
+      "coordinate": null,
+      "ratified": false,
+      "semantic_law_verified": false
+    },
+    {
+      "path": "lib/reason.lisp",
+      "line": 174,
+      "head": "00001011",
+      "name": "reason",
+      "source_git_blob_sha1": "dadc52a2f40f2f30ad77642898afb81980044c08",
+      "classification": "RESEARCH_UNREVIEWED",
+      "coordinate": null,
+      "ratified": false,
+      "semantic_law_verified": false
+    },
+    {
+      "path": "lib/reason.lisp",
+      "line": 187,
+      "head": "00001011",
+      "name": "prove-goal-accumulate",
+      "source_git_blob_sha1": "dadc52a2f40f2f30ad77642898afb81980044c08",
+      "classification": "RESEARCH_UNREVIEWED",
+      "coordinate": null,
+      "ratified": false,
+      "semantic_law_verified": false
+    },
+    {
+      "path": "lib/reason.lisp",
+      "line": 199,
+      "head": "00001011",
+      "name": "prove-goal",
+      "source_git_blob_sha1": "dadc52a2f40f2f30ad77642898afb81980044c08",
+      "classification": "RESEARCH_UNREVIEWED",
+      "coordinate": null,
+      "ratified": false,
+      "semantic_law_verified": false
+    },
+    {
+      "path": "lib/reason.lisp",
+      "line": 209,
+      "head": "00001011",
+      "name": "prove-goal-scan",
+      "source_git_blob_sha1": "dadc52a2f40f2f30ad77642898afb81980044c08",
+      "classification": "RESEARCH_UNREVIEWED",
+      "coordinate": null,
+      "ratified": false,
+      "semantic_law_verified": false
+    },
+    {
+      "path": "lib/reason.lisp",
+      "line": 226,
+      "head": "00001011",
+      "name": "rename-vars",
+      "source_git_blob_sha1": "dadc52a2f40f2f30ad77642898afb81980044c08",
+      "classification": "ALREADY_SELECTED_NAME",
+      "coordinate": null,
+      "ratified": false,
+      "semantic_law_verified": false
+    },
+    {
+      "path": "lib/reason.lisp",
+      "line": 235,
+      "head": "00001011",
+      "name": "map-proofs",
+      "source_git_blob_sha1": "dadc52a2f40f2f30ad77642898afb81980044c08",
+      "classification": "RESEARCH_UNREVIEWED",
+      "coordinate": null,
+      "ratified": false,
+      "semantic_law_verified": false
+    },
+    {
+      "path": "lib/reason.lisp",
+      "line": 243,
+      "head": "00001011",
+      "name": "prove-rule",
+      "source_git_blob_sha1": "dadc52a2f40f2f30ad77642898afb81980044c08",
+      "classification": "ALREADY_SELECTED_NAME",
+      "coordinate": null,
+      "ratified": false,
+      "semantic_law_verified": false
+    },
+    {
+      "path": "lib/reason.lisp",
+      "line": 269,
+      "head": "00001011",
+      "name": "prove-goals",
+      "source_git_blob_sha1": "dadc52a2f40f2f30ad77642898afb81980044c08",
+      "classification": "RESEARCH_UNREVIEWED",
+      "coordinate": null,
+      "ratified": false,
+      "semantic_law_verified": false
+    },
+    {
+      "path": "lib/reason.lisp",
+      "line": 281,
+      "head": "00001011",
+      "name": "prove-goal-state",
+      "source_git_blob_sha1": "dadc52a2f40f2f30ad77642898afb81980044c08",
+      "classification": "ALREADY_SELECTED_NAME",
+      "coordinate": null,
+      "ratified": false,
+      "semantic_law_verified": false
+    },
+    {
+      "path": "lib/reason.lisp",
+      "line": 295,
+      "head": "00001011",
+      "name": "map-goal-results",
+      "source_git_blob_sha1": "dadc52a2f40f2f30ad77642898afb81980044c08",
+      "classification": "ALREADY_SELECTED_NAME",
+      "coordinate": null,
+      "ratified": false,
+      "semantic_law_verified": false
+    },
+    {
+      "path": "lib/reason.lisp",
+      "line": 307,
+      "head": "00001011",
+      "name": "explain-proof",
+      "source_git_blob_sha1": "dadc52a2f40f2f30ad77642898afb81980044c08",
+      "classification": "RESEARCH_UNREVIEWED",
+      "coordinate": null,
+      "ratified": false,
+      "semantic_law_verified": false
+    },
+    {
+      "path": "lib/reason.lisp",
+      "line": 311,
+      "head": "00001011",
+      "name": "explain-proof-node",
+      "source_git_blob_sha1": "dadc52a2f40f2f30ad77642898afb81980044c08",
+      "classification": "RESEARCH_UNREVIEWED",
+      "coordinate": null,
+      "ratified": false,
+      "semantic_law_verified": false
+    },
+    {
+      "path": "lib/reason.lisp",
+      "line": 330,
+      "head": "00001011",
+      "name": "explain-proof-list",
+      "source_git_blob_sha1": "dadc52a2f40f2f30ad77642898afb81980044c08",
+      "classification": "RESEARCH_UNREVIEWED",
+      "coordinate": null,
+      "ratified": false,
+      "semantic_law_verified": false
+    },
+    {
+      "path": "lib/reason.lisp",
+      "line": 341,
+      "head": "00001011",
+      "name": "print-indent",
+      "source_git_blob_sha1": "dadc52a2f40f2f30ad77642898afb81980044c08",
+      "classification": "RESEARCH_UNREVIEWED",
+      "coordinate": null,
+      "ratified": false,
+      "semantic_law_verified": false
+    },
+    {
+      "path": "lib/reason.lisp",
+      "line": 351,
+      "head": "00001011",
+      "name": "reason-explain",
+      "source_git_blob_sha1": "dadc52a2f40f2f30ad77642898afb81980044c08",
+      "classification": "RESEARCH_UNREVIEWED",
+      "coordinate": null,
+      "ratified": false,
+      "semantic_law_verified": false
+    },
+    {
+      "path": "lib/reason.lisp",
+      "line": 365,
+      "head": "00001011",
+      "name": "add-usage",
+      "source_git_blob_sha1": "dadc52a2f40f2f30ad77642898afb81980044c08",
+      "classification": "RESEARCH_UNREVIEWED",
+      "coordinate": null,
+      "ratified": false,
+      "semantic_law_verified": false
+    },
+    {
+      "path": "lib/reason.lisp",
+      "line": 378,
+      "head": "00001011",
+      "name": "merge-usage",
+      "source_git_blob_sha1": "dadc52a2f40f2f30ad77642898afb81980044c08",
+      "classification": "ALREADY_SELECTED_NAME",
+      "coordinate": null,
+      "ratified": false,
+      "semantic_law_verified": false
+    },
+    {
+      "path": "lib/reason.lisp",
+      "line": 385,
+      "head": "00001011",
+      "name": "count-usage",
+      "source_git_blob_sha1": "dadc52a2f40f2f30ad77642898afb81980044c08",
+      "classification": "ALREADY_SELECTED_NAME",
+      "coordinate": null,
+      "ratified": false,
+      "semantic_law_verified": false
+    },
+    {
+      "path": "lib/reason.lisp",
+      "line": 394,
+      "head": "00001011",
+      "name": "count-usage-list",
+      "source_git_blob_sha1": "dadc52a2f40f2f30ad77642898afb81980044c08",
+      "classification": "RESEARCH_UNREVIEWED",
+      "coordinate": null,
+      "ratified": false,
+      "semantic_law_verified": false
+    },
+    {
+      "path": "lib/reason.lisp",
+      "line": 404,
+      "head": "00001011",
+      "name": "source-of",
+      "source_git_blob_sha1": "dadc52a2f40f2f30ad77642898afb81980044c08",
+      "classification": "RESEARCH_UNREVIEWED",
+      "coordinate": null,
+      "ratified": false,
+      "semantic_law_verified": false
+    },
+    {
+      "path": "lib/reason.lisp",
+      "line": 411,
+      "head": "00001011",
+      "name": "provenance",
+      "source_git_blob_sha1": "dadc52a2f40f2f30ad77642898afb81980044c08",
+      "classification": "RESEARCH_UNREVIEWED",
+      "coordinate": null,
+      "ratified": false,
+      "semantic_law_verified": false
+    },
+    {
+      "path": "lib/reason.lisp",
+      "line": 429,
+      "head": "00001011",
+      "name": "provenance-list",
+      "source_git_blob_sha1": "dadc52a2f40f2f30ad77642898afb81980044c08",
+      "classification": "RESEARCH_UNREVIEWED",
+      "coordinate": null,
+      "ratified": false,
+      "semantic_law_verified": false
+    }
+  ]
+}

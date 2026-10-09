@@ -6,7 +6,7 @@
 ; Empty/missing: ()
 
 (domain-table/1
-  (000 (ук порожнє) (укр порожнє) (san śūnya) (en empty) (LISP NIL) (sym ()))
+  (000 (ук ()) (укр ()) (san ()) (en ()) (LISP ()) (sym ()))
   (001 (ук як-є) (укр як-є) (san svarūpa) (en quote) (LISP QUOTE) (sym "'"))
   (010 (ук атом?) (укр атом?) (san aṇu) (en atom?) (LISP ATOM) (sym .?))
   (011 (ук решта) (укр решта) (san śeṣa) (en cdr) (LISP CDR) (sym :р))

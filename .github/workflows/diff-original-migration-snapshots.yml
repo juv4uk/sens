@@ -1,0 +1,30 @@
+name: original-migration-snapshot-delta
+
+on:
+  pull_request:
+    paths:
+      - "scripts/diff_original_migration_snapshots.py"
+      - "tests/test_diff_original_migration_snapshots.py"
+      - "docs/MIGRATION-SNAPSHOT-DELTA.uk.md"
+      - ".github/workflows/diff-original-migration-snapshots.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  original-census-delta:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Reject fake migration progress and missing source provenance
+        run: |
+          set -euo pipefail
+          python3 -m unittest discover -s tests -p 'test_diff_original_migration_snapshots.py' -v
+      - name: Byte-compile the new diff-only instrument
+        run: |
+          python3 -m py_compile scripts/diff_original_migration_snapshots.py

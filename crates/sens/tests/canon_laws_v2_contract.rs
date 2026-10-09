@@ -98,7 +98,34 @@ fn executable_canon_speaks_layered_answer_semantics() {
             row.source, actual
         );
         let status = eval_program(&program, &mut session)
-            .unwrap_or_else(|error| panic!("#229 witness verdict failed for {}: {error}", row.expr))
+            .unwrap_or_else(|error| {
+                // Temporary failing-path diagnostics for the mainline #229 Canon regression.
+                let data = "(00000001 ((a . 1) (b . 2)))";
+                let caar = format!("(00000101 (00000101 {data}))");
+                let eq_miss = format!("(00100010 (00000001 b) {caar})");
+                let eq_hit = format!("(00100010 (00000001 a) {caar})");
+                let cond_probe = format!("(00000111 ({eq_miss} 0 (00000001 miss)) ({eq_hit} 1 (00000001 hit)))");
+                for (label, probe) in [
+                    ("atom/nonempty", format!("(00000010 {data})")),
+                    ("atom/empty", "(00000010 (00000001 ()))".to_string()),
+                    ("car/nonempty", format!("(00000101 {data})")),
+                    ("caar/nonempty", caar),
+                    ("eq/miss-on-head", eq_miss),
+                    ("eq/hit-on-head", eq_hit),
+                    ("cond/exact-eq", cond_probe),
+                    ("assoc/simple", "(00101101 (00000001 b) (00000001 ((a . 1) (b . 2))))".to_string()),
+                    ("assoc/witness", format!("(00101101 (00000001 expected) (quote {}))", row.source)),
+                    ("witness-field/expected", format!("(witness-field (00000001 expected) (quote {}))", row.source)),
+                ] {
+                    eprintln!(
+                        "#229 probe {label}: {:?}",
+                        eval_program(&probe, &mut session)
+                            .map(|value| format!("value={:?}, display={}", value.value, value.value))
+                            .map_err(|e| format!("{:?}: {}", e.kind, e))
+                    );
+                }
+                panic!("#229 witness verdict failed for {}: {error}", row.expr)
+            })
             .value
             .to_string();
         assert_eq!(

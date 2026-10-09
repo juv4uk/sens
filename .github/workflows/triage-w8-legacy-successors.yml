@@ -52,16 +52,34 @@ jobs:
           assert sum(g['count'] for g in r['next_barrier_cohorts']) == len(r['sources'])
           assert all(not item['current_source_era_permission'] for item in r['sources'])
           assert all(item['current_semantic_oracle']=='NOT_VERIFIED' for item in r['sources'])
+          assert (s['data_only_next_barrier_originals'] +
+                  s['executable_or_unclassified_next_barrier_originals']) == s['chronology_proven_same_blob']
+          assert sum(g['count'] for g in r['source_scope_next_barrier_cohorts']) == len(r['sources'])
+          assert all(not item['release_admitted'] for item in r['sources'])
+          assert all(item['source_scope'] in (
+              'UNCLASSIFIED_NEEDS_SOURCE_PROOF', 'NONPROGRAM_DATA_REVIEWED',
+              'ARCHIVED_BENCHMARK_NONPROGRAM') for item in r['sources'])
+          assert all(item['work_lane']=='DATA_CONTRACT_NO_EXECUTABLE_T5' for item in r['sources']
+              if item['source_scope']!='UNCLASSIFIED_NEEDS_SOURCE_PROOF')
+
           with Path(os.environ['GITHUB_STEP_SUMMARY']).open('a',encoding='utf-8') as f:
               f.write('## W8 chronological provenance → hypothetical NEXT law blockers\n\n')
               f.write(f"- Historical-blob-identical originals: **{s['chronology_proven_same_blob']}**\n")
               f.write(f"- Still blocked by exact next law: **{s['hypothetical_second_blocked']}**\n")
               f.write(f"- Hypothetical mechanical candidates only: **{s['hypothetical_mechanical_candidates_only']}**\n")
+              f.write(f"- **DATA / archive — not executable:** {s['data_only_next_barrier_originals']}\n")
+              f.write(f"- **Executable-or-unclassified, needs proof:** {s['executable_or_unclassified_next_barrier_originals']}\n")
               f.write("- Semantically oracle-admitted: **0**; physical .sens created: **0**\n\n")
               f.write('### Top next law blockers by exact token / position\n\n')
               for cohort in r['next_barrier_cohorts'][:12]:
                   examples=', '.join(cohort['example_paths'][:2])
                   f.write(f"- {cohort['count']} × {cohort['family']} {cohort['coordinate']}: {examples}\n")
+              f.write('\n### Agent priority: executable-or-UNKNOWN sources only\n\n')
+              for cohort in (g for g in r['source_scope_next_barrier_cohorts']
+                             if g['work_lane']=='EXECUTABLE_OR_UNCLASSIFIED_NEEDS_ORACLE'):
+                  examples=', '.join(x['path'] for x in cohort['original_sources'][:2])
+                  f.write(f"- {cohort['count']} × {cohort['family']} {cohort['coordinate']}: {examples}\n")
+              f.write('\nDATA/archive blockers are tracked separately and must never mint executable .sens.\n')
               f.write('\nThis is a source-SHA-linked dry-run diagnosis, not permission to migrate legacy or release.\n')
           PY
       - name: Upload per-source next barrier proof

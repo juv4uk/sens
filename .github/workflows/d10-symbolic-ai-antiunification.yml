@@ -1,0 +1,40 @@
+name: D10 symbolic AI antiunification research
+on:
+  pull_request:
+    paths:
+      - 'knowledge/d10-symbolic-ai-antiunification-research-v1.json'
+      - 'scripts/d10_antiunify_oracle.py'
+      - 'tests/test_d10_symbolic_ai_antiunification.py'
+      - 'tests/test_d10_symbolic_ai_crossruntime.py'
+      - 'tests/d10_symbolic_anti_unify_donor.pl'
+      - '.github/workflows/d10-symbolic-ai-antiunification.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'knowledge/d10-symbolic-ai-antiunification-research-v1.json'
+      - 'scripts/d10_antiunify_oracle.py'
+      - 'tests/test_d10_symbolic_ai_antiunification.py'
+      - 'tests/test_d10_symbolic_ai_crossruntime.py'
+      - 'tests/d10_symbolic_anti_unify_donor.pl'
+      - '.github/workflows/d10-symbolic-ai-antiunification.yml'
+permissions:
+  contents: read
+jobs:
+  source-only-oracle:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v5
+      - name: Verify independent recursive/iterative oracles and exhaustive minimality
+        run: python3 -m unittest discover -s tests -p 'test_d10_symbolic_ai_antiunification.py' -v
+      - name: Install actual SWI-Prolog donor runtime
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y swi-prolog-nox
+          swipl --version
+      - name: Verify SWI-Prolog term_subsumer ground LGG law (14 plunit cases)
+        run: swipl -q -s tests/d10_symbolic_anti_unify_donor.pl -g "run_tests,halt(0)" -t "halt(1)"
+      - name: Differential 576 ground-pair canonical LGG vs native SWI builtin
+        env:
+          D10_REQUIRE_SWIPL: '1'
+        run: python3 -m unittest discover -s tests -p 'test_d10_symbolic_ai_crossruntime.py' -v

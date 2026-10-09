@@ -1,0 +1,19 @@
+name: D10 archived donor evidence guard
+on:
+  pull_request:
+    paths:
+      - 'knowledge/d10-crossrepo-linguistic-v1.json'
+      - 'knowledge/d10-crossrepo-domain-v1.json'
+      - 'knowledge/d10-crossrepo-knowledge-tooling-v1.json'
+      - 'knowledge/d10-v1-semantic-inventory.json'
+      - 'scripts/check-d10-archived-donors.py'
+      - '.github/workflows/d10-archived-donors.yml'
+  workflow_dispatch:
+jobs:
+  archived-donors:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - name: Read only, source pin, no resident promotion
+        run: python3 scripts/check-d10-archived-donors.py --self-test

@@ -159,7 +159,7 @@ fn runtime_non_sens() -> BTreeMap<String, String> {
     let mut out = BTreeMap::new();
     for (code, namespace, name) in registry() {
         let kind = match eval_program(&name, &mut session) {
-            Ok(result) => match result.value {
+            Ok(result) => match &result.value {
                 Value::Sid(sid) if sid.to_string() == code => continue,
                 Value::Sid(sid) => format!("інша функція СЕНС {sid}"),
                 Value::Builtin(_) => "Rust-функція за іменем (builtin)".to_owned(),

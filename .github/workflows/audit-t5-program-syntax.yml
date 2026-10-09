@@ -18,6 +18,7 @@ on:
       - 'crates/sens-cli/**'
       - 'crates/sens/src/parser.rs'
       - 'crates/sens/src/syntax.rs'
+      - 'crates/sens/src/semantic_registry.rs'
       - 'tests/test_audit_t5_program_syntax.py'
       - 'docs/T5-PROGRAM-SYNTAX-AUDIT-2026-10-08.uk.md'
       - '.github/workflows/audit-t5-program-syntax.yml'
@@ -37,6 +38,12 @@ jobs:
       - uses: dtolnay/rust-toolchain@stable
       - name: Build the ACTUAL SENS binary reader
         run: cargo build -q -p sens-cli --bin sens-trit
+      - name: Show canonical D2 word-coordinate failures without executing SENS
+        run: |
+          set -euo pipefail
+          cargo test -q -p sens-cli --bin sens-trit explain_
+          target/debug/sens-trit explain tests/fixtures/migration-quote-cohort-main/quote-legacy.sens \
+            | grep 'D2 syntax PASS; .*semantic oracle NOT_VERIFIED'
       - name: Test physically valid but structurally invalid .sens
         env:
           SENS_TRIT_BIN: ${{ github.workspace }}/target/debug/sens-trit
@@ -62,6 +69,16 @@ jobs:
           for row in report['files']:
               if row['syntax_status'] != 'PASS_D2_SYNTAX':
                   print('D2_BLOCKED',row['sens'],row.get('syntax_reason','unknown'),flush=True)
+                  hint=row.get('d2_structure_balance_hint')
+                  if hint:
+                      print('D2_EXACT_WORD_HINT',row['sens'],json.dumps({
+                          'typed_word_count':hint['typed_word_count'],
+                          'first_unclosed_open_word':hint['first_unclosed_open_word'],
+                          'last_unclosed_open_word':hint['last_unclosed_open_word'],
+                          'unclosed_open_count':hint['unclosed_open_count'],
+                          'first_unmatched_close_word':hint['first_unmatched_close_word'],
+                          'unclosed_open_contexts':hint['unclosed_open_contexts'],
+                      },sort_keys=True),flush=True)
           if (report['schema']!='sens-t5-d2-program-syntax-audit/v1'
                   or report['status']!='SYNTAX_ONLY'
                   or int(sys.argv[2])!=0

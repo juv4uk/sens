@@ -44,6 +44,54 @@ class CanonicalMigrateEntrypointTests(unittest.TestCase):
                 ["preview", "benchmarks/lists.lisp", "--mirror", "/tmp/mirror",
                  "--report", "/tmp/preview.json", "--write"])
 
+
+    def test_view_can_only_delegate_to_canonical_packed_t5_view(self):
+        p = migrate.parser()
+        source = "tests/fixtures/migration-d4-selector-cohort/caar.sens"
+        verify = migrate.command(p.parse_args(["view", "--sens", source, "--verify"]))
+        self.assertEqual(Path(verify[1]).name, "sens_spaced_view.py")
+        self.assertEqual(verify[-3:], ["--sens", source, "--verify"])
+        self.assertNotIn("--write", verify)
+        stage = migrate.command(p.parse_args([
+            "view", "--sens", source, "--stage", "/tmp/sens-review-stage"]))
+        self.assertEqual(stage[-2:], ["--stage", "/tmp/sens-review-stage"])
+        self.assertNotIn("--write", stage)
+        with contextlib.redirect_stderr(io.StringIO()):
+            for bad in (["view", "--sens", source],
+                        ["view", "--sens", source, "--verify", "--stage", "/tmp/mirror"],
+                        ["view", "--sens", source, "--verify", "--write"]):
+                with self.assertRaises(SystemExit):
+                    p.parse_args(bad)
+
+    def test_view_verifies_real_d1_and_ukrainian_d4_triplets(self):
+        for stem in (
+            "tests/fixtures/migration-d1-cond-cohort/branch",
+            "tests/fixtures/migration-d4-selector-cohort/caar",
+        ):
+            with self.subTest(stem=stem):
+                self.assertEqual(
+                    migrate.main(["view", "--sens", stem + ".sens", "--verify"]), 0
+                )
+
+    def test_view_staging_byte_exact_no_clobber_no_source_edits(self):
+        source = "tests/fixtures/migration-d4-selector-cohort/caar.sens"
+        expected = ROOT / "tests/fixtures/migration-d4-selector-cohort/caar"
+        source_binary = ROOT / source
+        prior_binary = source_binary.read_bytes()
+        prior_lisp = source_binary.with_suffix(".lisp").read_bytes()
+        with tempfile.TemporaryDirectory(prefix="sens-migrate-view-") as d:
+            stage = Path(d)
+            command = ["view", "--sens", source, "--stage", str(stage)]
+            self.assertEqual(migrate.main(command), 0)
+            generated = stage / "tests/fixtures/migration-d4-selector-cohort/caar"
+            self.assertEqual(generated.read_bytes(), expected.read_bytes())
+            self.assertEqual(migrate.main(command), 2, "no-clobber must block existing view")
+            self.assertEqual(source_binary.read_bytes(), prior_binary)
+            self.assertEqual(source_binary.with_suffix(".lisp").read_bytes(), prior_lisp)
+        self.assertEqual(
+            migrate.main(["view", "--sens", "../escape.sens", "--verify"]), 2
+        )
+
     def test_admit_requires_all_independent_evidence_and_write_is_explicit(self):
         p = migrate.parser()
         with self.assertRaises(SystemExit):

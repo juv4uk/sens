@@ -1,0 +1,21 @@
+name: D10 PSL Interlisp Lisp Machine historical research
+on:
+  pull_request:
+    paths:
+      - 'knowledge/d10-psl-interlisp-lispm-unmerged-residual-v1.json'
+      - 'knowledge/d1-d9-foundation.json'
+      - 'knowledge/d10-v1-semantic-inventory.json'
+      - 'docs/research/d10-psl-interlisp-lispm-residual-20261009.uk.md'
+      - 'scripts/check_d10_psl_interlisp_lispm_residual.py'
+      - '.github/workflows/d10-psl-interlisp-lispm-residual.yml'
+  workflow_dispatch:
+jobs:
+  historical-safe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Fail-closed historical names and 12 negative cases
+        run: python3 scripts/check_d10_psl_interlisp_lispm_residual.py --self-test
+      - name: Historical verifier read-only
+        run: git diff --exit-code

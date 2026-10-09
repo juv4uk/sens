@@ -1,0 +1,136 @@
+{
+  "schema": "d10-personal-interests-cross-domain-triage/v1",
+  "date": "2026-10-09",
+  "status": "RESEARCH-MAP-NO-ADMISSION",
+  "purpose": "Тематичний каталог універсальних законів зі старих розмов і фактичних авторських репозиторіїв; назви не рівні окремим резидентам.",
+  "categories": [
+    {
+      "interest": "Музична теорія, акустика, ритми",
+      "candidate": "LOWER-MECHANICAL-WORD",
+      "target": "D10-RESEARCH-OWNER-REVIEW",
+      "evidence": "Sage LowerMechanicalWord; this PR #4907",
+      "rule": "Рівномірні k бітів у n позиціях, із фазою rho; незалежність від апаратного таймера",
+      "action": "Actual live Chez source oracle; after owner review selection via proposal ledger"
+    },
+    {
+      "interest": "FPGA, ESP32, Teensy, AS5600 і дробові тактові генератори",
+      "candidate": "LOWER-MECHANICAL-WORD",
+      "target": "REUSE-SAME-LAW-NO-SECOND-SLOT",
+      "evidence": "juv4uk/spanda README exact rational FPGA/analog goal",
+      "rule": "Той самий точний mechanical word дає математичний clock-enable; регістри, IRQ і таймінг є субстрат",
+      "action": "Use same semantic identity, do not mint device-specific D10 names"
+    },
+    {
+      "interest": "SDR, RTL-SDR, радіозв'язок SENS",
+      "candidate": "RATIONAL-RESAMPLE",
+      "target": "PEER-OWNED-PR-4890",
+      "evidence": "juv4uk/radio-log/src/lib/sens-radio/channel-lab.ts",
+      "rule": "Причина дрейфу частоти дискретизації й фазово-неперервна обробка",
+      "action": "Do not duplicate #4890; distinguish mathematical sample cadence from actual radio transport"
+    },
+    {
+      "interest": "Астрономія й астрофізика; космічна гра",
+      "candidate": "FRAME-STATE-TRANSFORM",
+      "target": "PEER-OWNED-PR-4890",
+      "evidence": "NASA SPICE moving-reference-frame research noted in #4890",
+      "rule": "Положення плюс швидкість рухомої системи відліку",
+      "action": "Do not duplicate frame-transform root; ephemeris constants in physics package"
+    },
+    {
+      "interest": "Метрологія, помилки вимірювань, фізика",
+      "candidate": "COVARIANCE-TRANSPORT",
+      "target": "PEER-OWNED-PR-4890",
+      "evidence": "NIST guide cited in #4890",
+      "rule": "Матричне перенесення J Sigma J^T зі збереженням кореляцій",
+      "action": "No new exact duplicate or untyped float primitive"
+    },
+    {
+      "interest": "Аналогові обчислення, Spanda, синхронні осцилятори",
+      "candidate": "BOUNDED-RATIONAL-APPROX",
+      "target": "PEER-OWNED-PR-4891",
+      "evidence": "juv4uk/spanda README exact p/q design",
+      "rule": "Оптимальний p/q під обмеженням знаменника з точним залишком",
+      "action": "Do not duplicate #4891 and #4892, prove Core-vs-library separately"
+    },
+    {
+      "interest": "Акустичні цифрові фільтри, астрофотографія Canon EOS",
+      "candidate": "FINITE-CONVOLUTION",
+      "target": "PEER-OWNED-PR-4888",
+      "evidence": "Reference polynomial/FIR source laws in #4888",
+      "rule": "Чистий згортковий закон; FFT і CUDA є реалізаціями",
+      "action": "Reuse existing #4888 instead of new IMAGE-FILTER opcode"
+    },
+    {
+      "interest": "Синтезаторні фази, кути обертання, годинникові цикли",
+      "candidate": "PHASE-UNWRAP",
+      "target": "PEER-OWNED-PR-4888",
+      "evidence": "Exact rational cyclic phase research in #4888",
+      "rule": "Локальна неперервність modulo період із детермінованою tie-політикою",
+      "action": "No duplicate phase accumulator alias"
+    },
+    {
+      "interest": "Історичні годинники, календарі, астрономічні дати",
+      "candidate": "GREGORIAN-UT-TO-JULIAN-DAY",
+      "target": "PEER-OWNED-PR-4887",
+      "evidence": "Julian-day source dossier #4887",
+      "rule": "Відобразити календарний момент із чітко названою шкалою часу",
+      "action": "Hold UTC/UT1 reform and leap-seconds ambiguity, no OS clock opacity"
+    },
+    {
+      "interest": "Санскрит, панініанська граматика, Шива-сутри",
+      "candidate": "RESOLVE-PRATYAHARA",
+      "target": "EXISTING-PANINI-DONOR-NO-DUPLICATE",
+      "evidence": "juv4uk/my-lisp-panini/panini/machine/siva-sutras.lisp",
+      "rule": "Відновлення звукового класу за adi й it-маркером",
+      "action": "Do not duplicate any existing Panini research names"
+    },
+    {
+      "interest": "Prolog, Advice Taker, обчислення доказів",
+      "candidate": "UNIFY",
+      "target": "RATIFIED-LOWER-DOMAIN-EXACT-DUPLICATE-BLOCK",
+      "evidence": "knowledge/d1-d9-foundation.json, UNIFY",
+      "rule": "Уніфікація термів уже має ідентичність у нижньому домені",
+      "action": "Seek distinct observable proof transition only, no unification copy"
+    },
+    {
+      "interest": "Сама бінарна SENS мова, компілятор Lisp-машини",
+      "candidate": "DPB",
+      "target": "CURRENT-D10-SELECTED",
+      "evidence": "knowledge/d10-v1-semantic-inventory.json",
+      "rule": "Бітове поле даних не означає ISA опкод чи первинну мову",
+      "action": "Reuse selected research DPB; no stale Sens8 or 8-bit flat table"
+    },
+    {
+      "interest": "WSM-OS-LISP і задачі реального часу",
+      "candidate": "CLOCK-ENABLE-HANDOFF",
+      "target": "SUBSTRATE-SCHEDULER-HOLD",
+      "evidence": "Binary word timing pattern is distinct from interrupts/scheduler guarantees",
+      "rule": "Механічне слово є чистими даними; переривання, DMA та scheduling мають системний контракт",
+      "action": "No D10 control opcode; D2 controls language structure"
+    },
+    {
+      "interest": "Теорія музики, дискретні кола, періоди",
+      "candidate": "CANONICAL-CYCLIC-ROTATION",
+      "target": "FUTURE-RESEARCH-NOT-SELECTED",
+      "evidence": "Mechanical word rotation equivalence under fixed n,k",
+      "rule": "Лексикографічний представник класу циклічних зсувів для довільного скінченного двійкового слова",
+      "action": "Compare against current vectors, rotation and min; derived-library first"
+    },
+    {
+      "interest": "Астрономічні серії, музичні метри, двійкові пакети",
+      "candidate": "PRIMITIVE-BINARY-PERIOD",
+      "target": "FUTURE-RESEARCH-NOT-SELECTED",
+      "evidence": "Finite word factorization and periodicity",
+      "rule": "Мінімальний додатний p що ділить n і породжує повний бітовий ряд повторенням",
+      "action": "Research independent observation versus generic prefix comparison"
+    }
+  ],
+  "limits": {
+    "source_only_no_new_selected": true,
+    "ratified_d10": 0,
+    "coordinates_assigned": 0,
+    "source_names_not_semantic_roots": true,
+    "only_D2_controls_syntax": true,
+    "do_not_auto_place_on_D10": "Requires owner source oracle and behavioral dedup"
+  }
+}

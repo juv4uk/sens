@@ -70,17 +70,19 @@ for row in rows:
     assert got["coordinate_basis"]=="UNPLACED"
     assert got["ratified_resident"] is False
 
+# 527 is the historical Panini checkpoint, not the D10 inventory ceiling.
+selected_now=state["target"]["selected_semantic_candidates"]
+assert selected_now>=527
 assert inventory["accounting"]=={
-    "selected_semantic_candidates":527,
+    "selected_semantic_candidates":selected_now,
     "law_forced_coordinates":256,
-    "unplaced_selected_candidates":271,
-    "remaining_semantic_inventory":497,
+    "unplaced_selected_candidates":selected_now-256,
+    "remaining_semantic_inventory":1024-selected_now,
     "ratified_d10_residents":0,
 }
-assert state["target"]["selected_semantic_candidates"]==527
 assert state["target"]["law_forced_coordinates"]==256
-assert state["target"]["unplaced_selected_candidates"]==271
-assert state["target"]["remaining_semantic_candidates"]==497
+assert state["target"]["unplaced_selected_candidates"]==selected_now-256
+assert state["target"]["remaining_semantic_candidates"]==1024-selected_now
 assert state["target"]["ratified_residents"]==0
 assert state["crossrepo_panini_v1"]=={
     "authority":"#4182 / juv4uk/my-lisp-panini#52",
@@ -91,4 +93,4 @@ assert state["crossrepo_panini_v1"]=={
 }
 
 print("D10-CROSSREPO-PANINI-V1=PASS")
-print("selected=23 inventory=527/1024 placed=256 unplaced=271 remaining=497 ratified=0")
+print(f"selected=23 inventory={selected_now}/1024 placed=256 unplaced={selected_now-256} remaining={1024-selected_now} ratified=0")

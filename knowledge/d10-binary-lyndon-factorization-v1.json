@@ -1,0 +1,173 @@
+{
+  "schema": "d10-lyndon-binary-word-donor/v1",
+  "date": "2026-10-09",
+  "status": "RESEARCH-HOLD-CORE-VS-LIBRARY-OWNER-REVIEW",
+  "baseline": {
+    "inventory_git_blob": "7683f1e2bfcf67d3a45d412d3b1790b72ad623ad",
+    "selected_at_audit": 632,
+    "ratified_d10": 0,
+    "foundation_git_blob": "09d1d71c39d1484dfd005a5068dbb18b76f0f0d4"
+  },
+  "sources": [
+    {
+      "name": "SageMath finite word lyndon_factorization",
+      "url": "https://doc.sagemath.org/html/en/reference/combinat/sage/combinat/words/finite_word.html",
+      "contract": "Every finite word has a unique non-increasing factorization into Lyndon words, citing Duval 1983; examples 010010010001000"
+    },
+    {
+      "name": "Chen–Fox–Lyndon theorem formal research",
+      "url": "https://doi.org/10.1016/j.jalgebra.2026.01.026",
+      "contract": "Unique ordered factorization over total-order alphabet, not a hardware or Unicode byte encoding"
+    },
+    {
+      "name": "First-party binary root selection",
+      "repo": "juv4uk/sens",
+      "path": "knowledge/d10-v1-semantic-inventory.json",
+      "semantic_name": "PRIMITIVE-BINARY-WORD-ROOT",
+      "contract": "Shortest full repeated prefix; distinct from Lyndon non-increasing factorization"
+    },
+    {
+      "name": "First-party radio timing context",
+      "repo": "juv4uk/radio-log",
+      "path": "src/lib/sens-radio/channel-lab.ts",
+      "git_blob_sha": "7d8c70691dc19f0c3d7121d8945529dd2b2335e7",
+      "contract": "Bitword timing context, not evidence of a new language opcode"
+    },
+    {
+      "name": "First-party exact oscillator context",
+      "repo": "juv4uk/spanda",
+      "path": "README.md",
+      "git_blob_sha": "d339363e03798941280d7394fb6b24a76ff43dd3",
+      "contract": "Exact rhythmic/oscillator ratios are application context only"
+    }
+  ],
+  "candidate": {
+    "id": "d10.words.binary-lyndon-factorization.review.v1",
+    "semantic_name": "BINARY-LYNDON-FACTORIZATION",
+    "surface_uk": "розкласти-двійкове-слово",
+    "surface_ukr": "чин-розкладу-Ліндона",
+    "arity": "1 finite D1 bitword",
+    "input": "finite sequence D1 bits in {0,1} with explicit total order 0<1",
+    "output": "ordered finite list of nonempty finite D1 words; empty source -> empty factor list",
+    "law": "Return the unique finite factor list (l1,...,lk) such that concat(li)=w; all li are Lyndon (strictly lexicographically smaller than every proper nonempty suffix); and l1 >= l2 >= ... >= lk under explicit lexicographic 0<1. For empty source return []. No dependence on physical packing, phoneme ordering or hardware transport.",
+    "witnesses": [
+      {
+        "input": "",
+        "factors": []
+      },
+      {
+        "input": "0",
+        "factors": [
+          "0"
+        ]
+      },
+      {
+        "input": "1111",
+        "factors": [
+          "1",
+          "1",
+          "1",
+          "1"
+        ]
+      },
+      {
+        "input": "01010",
+        "factors": [
+          "01",
+          "01",
+          "0"
+        ]
+      },
+      {
+        "input": "010010010001000",
+        "factors": [
+          "01",
+          "001",
+          "001",
+          "0001",
+          "0",
+          "0",
+          "0"
+        ]
+      },
+      {
+        "input": "001001",
+        "factors": [
+          "001",
+          "001"
+        ]
+      },
+      {
+        "input": "101",
+        "factors": [
+          "1",
+          "01"
+        ]
+      }
+    ],
+    "falsifiers": [
+      "Returning a shortest repeated primitive root (e.g. 01010 -> 01010) instead of the ordered factor list is wrong.",
+      "Allowing increasing factors l_i<l_(i+1) violates the theorem's canonical ordering.",
+      "Factoring by a hidden phoneme collation rather than explicit D1 order 0<1 changes identity.",
+      "Treating nonempty '00' as a Lyndon component is invalid: it equals a proper suffix only lexically larger, and is not primitive."
+    ],
+    "distinct_neighbors": [
+      "D10 PRIMITIVE-BINARY-WORD-ROOT",
+      "D8 ROTATE",
+      "D8 CANONICALIZE",
+      "D1 YES/NO",
+      "D10 optional LOWER-MECHANICAL-WORD held research"
+    ],
+    "derivability": "Implementable using lexicographic compare and finite-list splitting. Named mathematical law is well-defined, but owner must determine Core versus self-hosted library.",
+    "applications": [
+      "SENS binary finite-word normalization",
+      "SDR repeated bit patterns (data only)",
+      "acoustic/music word rhythm grouping",
+      "Sanskrit/Panini phonemic surface composition subject to explicit alternative alphabet order",
+      "FPGA finite pulse-pattern analysis (not ISR)",
+      "astronomy observation cadence period-word analysis",
+      "symbolic Lisp/Prolog term encodings"
+    ],
+    "research_only": true,
+    "selected_in_canonical_d10": false,
+    "coordinate": null,
+    "ratified": false,
+    "physical_t5_authorized": false,
+    "owner_question": "Does this distinct universally canonical mathematical factorization merit D10 selected research identity or remain a self-hosted library? No automatic ratification."
+  },
+  "hold_not_root": [
+    {
+      "alias": "IS-LYNDON",
+      "reason": "Predicate derived from the same factorization and suffix comparison; no new root."
+    },
+    {
+      "alias": "LYNDON-COUNT",
+      "reason": "Derived length of factor list."
+    },
+    {
+      "alias": "LYNDON-CONCAT",
+      "reason": "Existing list concatenation; not distinct."
+    },
+    {
+      "alias": "NECKLACE-CANONICAL",
+      "reason": "Cyclic rotation canonicalization intersects D8 ROTATE/CANONICALIZE: behavioral guard required."
+    }
+  ],
+  "admission": {
+    "selected_delta": 0,
+    "coordinates_delta": 0,
+    "ratified_delta": 0,
+    "must_keep_d2_unchanged": true,
+    "required_before_selected": [
+      "Live D1-D9 and D10 semantic dedup, not only exact name",
+      "Real independent donor oracle and bounded exhaustive proof",
+      "Owner Core-vs-library review",
+      "Append-only selected transition with fresh main Git SHA and proposal ledger row"
+    ]
+  },
+  "coordination": {
+    "issue": "#4013",
+    "owner_review_issue": "#4463",
+    "related": "PR #4923 primitive bit root; #4924 mechanical word, #4934 Gray code (nonoverlapping); no shared canonical inventory edits"
+  }
+}

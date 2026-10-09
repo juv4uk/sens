@@ -52,6 +52,7 @@ pub fn compiler_execution_role(
         }
         Some(crate::eval::canon::DomainPrimitiveKind::AtomPredicate)
         | Some(crate::eval::canon::DomainPrimitiveKind::AtomEquality)
+        | Some(crate::eval::canon::DomainPrimitiveKind::Equal)
         | None => None,
     }
 }

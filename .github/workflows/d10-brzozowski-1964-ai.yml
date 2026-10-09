@@ -1,0 +1,37 @@
+name: D10 early symbolic AI Brzozowski derivative oracle
+on:
+  pull_request:
+    paths:
+      - 'knowledge/d10-brzozowski-1964-ai-donor-v1.json'
+      - 'scripts/check_d10_brzozowski_ai_source.py'
+      - 'tests/test_d10_brzozowski_language_derivative.py'
+      - 'tests/d10_brzozowski_1964_chez.ss'
+      - 'docs/research/d10-brzozowski-1964-symbolic-ai.uk.md'
+      - '.github/workflows/d10-brzozowski-1964-ai.yml'
+      - 'knowledge/d10-v1-semantic-inventory.json'
+  push:
+    paths:
+      - 'knowledge/d10-brzozowski-1964-ai-donor-v1.json'
+      - 'scripts/check_d10_brzozowski_ai_source.py'
+      - 'tests/test_d10_brzozowski_language_derivative.py'
+      - 'tests/d10_brzozowski_1964_chez.ss'
+      - 'docs/research/d10-brzozowski-1964-symbolic-ai.uk.md'
+      - '.github/workflows/d10-brzozowski-1964-ai.yml'
+jobs:
+  early-ai-source-and-oracles:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Primary source and negative research guard
+        run: python3 scripts/check_d10_brzozowski_ai_source.py --self-test
+      - name: Python exact direct-language versus derivative differential
+        run: python3 -m unittest discover -s tests -p test_d10_brzozowski_language_derivative.py -v
+      - name: Install independent Chez Scheme R6RS interpreter
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y chezscheme
+      - name: Run actual R6RS direct-matcher proof
+        run: scheme --script tests/d10_brzozowski_1964_chez.ss

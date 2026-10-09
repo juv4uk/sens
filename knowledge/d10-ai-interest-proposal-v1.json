@@ -1,0 +1,112 @@
+{
+ "schema": "d10-ai-interest-proposal/v1",
+ "status": "RESEARCH-UNRATIFIED",
+ "authority": "#4013/#4463",
+ "basis": "owner interests in symbolic AI / AI, evidenced by owner repositories and in-tree lib/reason.lisp",
+ "rule": "#4463 — candidates only, donor provenance, no positions, owner ratifies",
+ "families": {
+  "symbolic-reasoning": {
+   "donor_repos": [
+    "paip-lisp",
+    "mccarthy-eval",
+    "cl-tursas"
+   ],
+   "source_note": "lib/reason.lisp (backward-chaining Advice Taker)",
+   "candidate_functions": [
+    "unify",
+    "substitute-binding",
+    "prove-goal",
+    "backward-chain",
+    "rule-index",
+    "apply-rule",
+    "proof-tree",
+    "occurs-check",
+    "rename-variables",
+    "ask-query"
+   ],
+   "count": 10
+  },
+  "knowledge-graph": {
+   "donor_repos": [
+    "knowledge-graph-basalt",
+    "graph-heavy-basalt",
+    "vault-semantic-mcp"
+   ],
+   "source_note": "",
+   "candidate_functions": [
+    "assert-triple",
+    "query-triple",
+    "infer-transitive",
+    "entity-merge",
+    "confidence-of",
+    "provenance-of"
+   ],
+   "count": 6
+  },
+  "agents": {
+   "donor_repos": [
+    "OpenManus",
+    "12-factor-agents"
+   ],
+   "source_note": "",
+   "candidate_functions": [
+    "plan-steps",
+    "act-tool-call",
+    "observe-result",
+    "reflexion-retry",
+    "tool-schema",
+    "memory-recall"
+   ],
+   "count": 6
+  },
+  "nlp-embedding": {
+   "donor_repos": [
+    "cl-nlp",
+    "word2vec",
+    "word2vec-on-wikipedia",
+    "nlp_uk"
+   ],
+   "source_note": "",
+   "candidate_functions": [
+    "tokenize",
+    "embed-vector",
+    "cosine-similarity",
+    "nearest-neighbors",
+    "train-skipgram"
+   ],
+   "count": 5
+  },
+  "search-rl": {
+   "donor_repos": [
+    "alpha-zero-general",
+    "lc0"
+   ],
+   "source_note": "",
+   "candidate_functions": [
+    "mcts-select",
+    "mcts-expand",
+    "mcts-backpropagate",
+    "policy-value-eval",
+    "self-play-step"
+   ],
+   "count": 5
+  },
+  "logic-programming": {
+   "donor_repos": [
+    "clips",
+    "prolog-kernels (in-tree)"
+   ],
+   "source_note": "",
+   "candidate_functions": [
+    "assert-fact",
+    "retract-fact",
+    "cut",
+    "fail",
+    "backtrack",
+    "clause-head"
+   ],
+   "count": 6
+  }
+ },
+ "total_candidates": 38
+}

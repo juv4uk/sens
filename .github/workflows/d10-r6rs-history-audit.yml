@@ -1,0 +1,20 @@
+name: R6RS D10 historical research guard
+on:
+  pull_request:
+    paths:
+      - 'knowledge/d10-r6rs-hashtable-hygiene-audit-v1.json'
+      - 'knowledge/d1-d9-foundation.json'
+      - 'knowledge/d10-v1-semantic-inventory.json'
+      - 'scripts/check_d10_r6rs_history_audit.py'
+      - '.github/workflows/d10-r6rs-history-audit.yml'
+  workflow_dispatch:
+jobs:
+  research-gate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - name: Reject D1-D9 duplicates and false D10 admissions
+        run: python3 scripts/check_d10_r6rs_history_audit.py --self-test
+      - name: Checker does not write source data
+        run: git diff --exit-code

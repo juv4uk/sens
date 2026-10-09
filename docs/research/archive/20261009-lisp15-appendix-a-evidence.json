@@ -1,0 +1,646 @@
+{
+  "schema": "historical-lisp15-appendix-a-archive/v1",
+  "status": "ARCHIVED_NONNORMATIVE_SUPERSEDED_BY_RATIFIED_D1_D9",
+  "date": "2026-10-09",
+  "original_branch": "research/d8-lisp15-appendix-ledger",
+  "original_git_blob": "912bc99c41f6552aaa4d9a67b8698344b3815264",
+  "current_boundary": "D1-D9 owner ratified, D10 research 625/1024 selected 0 ratified, no coordinates from archive",
+  "original_research": {
+    "schema": "d8-lisp15-appendix-a-recovery/v1",
+    "status": "research-family-ledger-not-semantic-authority",
+    "authority": [
+      "#3920",
+      "#3934"
+    ],
+    "source_boundary": {
+      "primary": "LISP 1.5 Programmer's Manual, August 17 1962",
+      "chronology": "LISP 1.5 family archive / early MIT memoranda",
+      "rule": "attested_by is a conservative evidence bound unless a first-attestation memo is explicitly named"
+    },
+    "invariants": [
+      "Historical presence is preserved even when no D8 slot is earned.",
+      "One surface name does not imply one resident.",
+      "Derived, host, tooling, machine and foreign-domain rows consume zero D8 slots.",
+      "Provisional coordinates may move until owner ratification.",
+      "Current D8 ratified residents remain zero."
+    ],
+    "accounting": {
+      "families": 30,
+      "d8_candidate_families": 12,
+      "unresolved_families": 2,
+      "no_slot_or_foreign_families": 16
+    },
+    "rows": [
+      {
+        "family": "mutable-cons",
+        "names": [
+          "RPLACA",
+          "RPLACD"
+        ],
+        "attested_by": "LISP 1.5 Programmer's Manual, 1962, §7.4",
+        "behavior": "mutate CAR/CDR field of an existing pair; aliases observe mutation",
+        "current_relation": "absent from D1-D7; current Pair is persistent",
+        "necessity": "foundational",
+        "law": "same-pair identity + one field mutation; CAR/CDR sibling axis",
+        "classification": "D8-RECOVERY-CANDIDATE",
+        "coordinates": [
+          "00000000",
+          "00000001"
+        ],
+        "evidence": [
+          "#3943",
+          "#3944"
+        ]
+      },
+      {
+        "family": "destructive-list-derived",
+        "names": [
+          "CONC",
+          "NCONC",
+          "EFFACE",
+          "MAPCON"
+        ],
+        "attested_by": "LISP 1.5 Programmer's Manual, 1962, list-structure functions",
+        "behavior": "destructive concatenation/deletion/mapping over mutable list structure",
+        "current_relation": "requires mutable-cons roots; algorithms otherwise recursive/list-level",
+        "necessity": "useful",
+        "law": "derive from RPLACA/RPLACD + traversal/recursion",
+        "classification": "DERIVATION-REVIEW-NO-SLOT",
+        "coordinate": null,
+        "evidence": [
+          "#3934",
+          "#3943"
+        ]
+      },
+      {
+        "family": "local-error-boundary",
+        "names": [
+          "ERRORSET"
+        ],
+        "attested_by": "Memo 26 Errorset; LISP 1.5 Programmer's Manual §6.4",
+        "behavior": "convert evaluation failure into recoverable NIL while wrapping successful value in singleton list",
+        "current_relation": "no D1-D7 local error boundary",
+        "necessity": "foundational",
+        "law": "success -> LIST(value); error -> EMPTY",
+        "classification": "D8-RECOVERY-CANDIDATE",
+        "coordinates": [
+          "00000010"
+        ],
+        "evidence": [
+          "#3929",
+          "#3930"
+        ]
+      },
+      {
+        "family": "explicit-error-signal",
+        "names": [
+          "ERROR"
+        ],
+        "attested_by": "LISP 1.5 Programmer's Manual, 1961/1962 lineage",
+        "behavior": "intentional language failure with diagnostic/payload",
+        "current_relation": "runtime errors exist but no language operation intentionally signals one",
+        "necessity": "foundational",
+        "law": "explicit signal is distinct from accidental partial-operation failure",
+        "classification": "D8-RECOVERY-CANDIDATE",
+        "coordinates": [
+          "00000011"
+        ],
+        "evidence": [
+          "#3931",
+          "#3932"
+        ]
+      },
+      {
+        "family": "reader-error-marker",
+        "names": [
+          "ERROR1"
+        ],
+        "attested_by": "LISP 1.5 Programmer's Manual Appendix F, 1962",
+        "behavior": "marks/prints character-reader error position",
+        "current_relation": "reader/debug mechanism, not general failure signal",
+        "necessity": "tooling",
+        "law": "reader-local diagnostic effect",
+        "classification": "TOOLING/DEBUGGING",
+        "coordinate": null,
+        "evidence": [
+          "#3934"
+        ]
+      },
+      {
+        "family": "environment-carrier",
+        "names": [
+          "A-LIST",
+          "association list"
+        ],
+        "attested_by": "McCarthy evaluator lineage 1960; LISP 1.5 manual",
+        "behavior": "binding environment representation/context",
+        "current_relation": "already internal to EVAL/closures and ASSOC/PAIRLIS family",
+        "necessity": "foundational",
+        "law": "lookup/binding carrier, not reflection by itself",
+        "classification": "LOWER-DOMAIN-COVERED-NO-SLOT",
+        "coordinate": null,
+        "evidence": [
+          "D4 LOOKUP/BIND",
+          "D5 ASSOC/PAIRLIS",
+          "#3924"
+        ]
+      },
+      {
+        "family": "environment-reflection",
+        "names": [
+          "ENV",
+          "ENV-REFLECTION"
+        ],
+        "attested_by": "current SENS capability; historical environment concept is older but reflection spelling is not backdated",
+        "behavior": "enumerate visible lexical bindings with shadow resolution",
+        "current_relation": "live runtime builtin, absent D1-D7 residency",
+        "necessity": "foundational",
+        "law": "snapshot visible bindings; innermost shadow wins; deterministic ordering",
+        "classification": "D8-RECOVERY-CANDIDATE",
+        "coordinates": [
+          "00000100"
+        ],
+        "evidence": [
+          "#3924",
+          "#3926"
+        ]
+      },
+      {
+        "family": "structure-to-text-reader",
+        "names": [
+          "READ"
+        ],
+        "attested_by": "early LISP read lineage; LISP 1.5 manual 1962",
+        "behavior": "one-argument current SENS path parses one textual form to structural datum without evaluating it",
+        "current_relation": "not derivable from structural D1-D7 operations",
+        "necessity": "foundational",
+        "law": "READ(WRITE(x)) = x on admitted readable carrier",
+        "classification": "D8-RECOVERY-CANDIDATE",
+        "coordinates": [
+          "00000101"
+        ],
+        "evidence": [
+          "#3937",
+          "#3938"
+        ]
+      },
+      {
+        "family": "text-to-structure-writer",
+        "names": [
+          "WRITE-TO-STRING"
+        ],
+        "attested_by": "current SENS canonical serializer; historical print/read lineage",
+        "behavior": "canonical structural serialization to text",
+        "current_relation": "not derivable from D1-D7 without text bridge",
+        "necessity": "foundational",
+        "law": "WRITE(READ(t)) = canonicalize(t)",
+        "classification": "D8-RECOVERY-CANDIDATE",
+        "coordinates": [
+          "00000110"
+        ],
+        "evidence": [
+          "#3937",
+          "#3938"
+        ],
+        "blocker": "D7/Text7 bridge"
+      },
+      {
+        "family": "symbol-name-out",
+        "names": [
+          "SYMBOL->STRING",
+          "PNAME-view"
+        ],
+        "attested_by": "historical PNAME lineage; current SENS surface is modern",
+        "behavior": "observe exact symbol name as text",
+        "current_relation": "distinct from general serialization",
+        "necessity": "useful",
+        "law": "SYMBOL->STRING(STRING->SYMBOL(s)) = s",
+        "classification": "D8-RECOVERY-CANDIDATE",
+        "coordinates": [
+          "00000111"
+        ],
+        "evidence": [
+          "#3939",
+          "#3940"
+        ],
+        "blocker": "D7/Text7 bridge"
+      },
+      {
+        "family": "symbol-name-in",
+        "names": [
+          "STRING->SYMBOL"
+        ],
+        "attested_by": "historical PNAME/INTERN lineage; current SENS surface is modern",
+        "behavior": "materialize a symbol carrying exact supplied name",
+        "current_relation": "not equivalent to READ tokenization; not asserted identical to historical INTERN",
+        "necessity": "useful",
+        "law": "STRING->SYMBOL(SYMBOL->STRING(sym)) = sym",
+        "classification": "D8-RECOVERY-CANDIDATE",
+        "coordinates": [
+          "00001000"
+        ],
+        "evidence": [
+          "#3939",
+          "#3940"
+        ],
+        "blocker": "D7/Text7 bridge"
+      },
+      {
+        "family": "indexed-aggregate-construct",
+        "names": [
+          "ARRAY",
+          "VECTOR"
+        ],
+        "attested_by": "LISP 1.5 ARRAY; current SENS VECTOR",
+        "behavior": "construct finite indexed aggregate",
+        "current_relation": "opaque indexed carrier not represented by pair structure",
+        "necessity": "useful",
+        "law": "VECTOR(x0..xn) establishes ordered indexed cells",
+        "classification": "D8-RECOVERY-CANDIDATE",
+        "coordinates": [
+          "00001001"
+        ],
+        "evidence": [
+          "#3933",
+          "#3942"
+        ]
+      },
+      {
+        "family": "indexed-aggregate-observe",
+        "names": [
+          "VECTOR-REF"
+        ],
+        "attested_by": "historical ARRAY indexed access; current SENS surface",
+        "behavior": "observe cell by numeric index",
+        "current_relation": "CAR/CDR do not observe vector cells",
+        "necessity": "useful",
+        "law": "REF(VECTOR(xs),i)=xs[i]",
+        "classification": "D8-RECOVERY-CANDIDATE",
+        "coordinates": [
+          "00001010"
+        ],
+        "evidence": [
+          "#3933",
+          "#3942"
+        ]
+      },
+      {
+        "family": "indexed-aggregate-update",
+        "names": [
+          "VECTOR-SET!"
+        ],
+        "attested_by": "historical mutable ARRAY; current SENS surface",
+        "behavior": "alias-visible in-place indexed update",
+        "current_relation": "not locally derivable by persistent list rewrite",
+        "necessity": "useful",
+        "law": "all aliases observe changed selected cell; other cells preserved",
+        "classification": "D8-RECOVERY-CANDIDATE",
+        "coordinates": [
+          "00001011"
+        ],
+        "evidence": [
+          "#3933",
+          "#3942"
+        ]
+      },
+      {
+        "family": "indexed-aggregate-convenience",
+        "names": [
+          "MAKE-VECTOR",
+          "VECTOR-LENGTH"
+        ],
+        "attested_by": "current SENS vector API",
+        "behavior": "size constructor and extent observation",
+        "current_relation": "reducible to minimal vector basis; length conditional derivation uses ERRORSET + REF failure boundary",
+        "necessity": "convenience",
+        "law": "no independent root established",
+        "classification": "DERIVED-NO-SLOT",
+        "coordinate": null,
+        "evidence": [
+          "#3933",
+          "#3942"
+        ]
+      },
+      {
+        "family": "structural-equality",
+        "names": [
+          "EQUAL"
+        ],
+        "attested_by": "Memo 24 / LISP 1.5 lineage",
+        "behavior": "recursive structural equality",
+        "current_relation": "derivable from lower pair/equality basis",
+        "necessity": "useful",
+        "law": "recursive ATOM/EQ/CAR/CDR equality",
+        "classification": "DERIVED-NO-SLOT",
+        "coordinate": null,
+        "evidence": [
+          "#3923",
+          "lib/core.lisp"
+        ]
+      },
+      {
+        "family": "list-convenience",
+        "names": [
+          "PAIR",
+          "AND",
+          "OR",
+          "ONEP",
+          "MINUSP",
+          "PROG2",
+          "SELECT"
+        ],
+        "attested_by": "LISP I / LISP 1.5 manual lineage",
+        "behavior": "historical list/logical/numeric/control conveniences",
+        "current_relation": "simple compositions over admitted lower operations",
+        "necessity": "convenience",
+        "law": "PAIR=list2; AND/OR=COND macros; ONEP=ZEROP(DIFFERENCE(x,1)); MINUSP=LESSP(x,0); PROG2=eager two-arg second; SELECT=ordered equality/COND selection",
+        "classification": "DERIVED-NO-SLOT",
+        "coordinate": null,
+        "evidence": [
+          "#3927",
+          "#3934"
+        ]
+      },
+      {
+        "family": "special-call-implementation",
+        "names": [
+          "FSUBR"
+        ],
+        "attested_by": "LISP 1.5",
+        "behavior": "compiled/subroutine implementation of special-call protocol",
+        "current_relation": "raw-operands + caller-env protocol already captured by FEXPR family evidence",
+        "necessity": "mechanism",
+        "law": "implementation class does not create new user-visible identity",
+        "classification": "HISTORICAL-PROVENANCE-ONLY",
+        "coordinate": null,
+        "evidence": [
+          "#3923",
+          "#3927"
+        ]
+      },
+      {
+        "family": "macro-transformer-protocol",
+        "names": [
+          "TRANSFORMER",
+          "Hart MACRO"
+        ],
+        "attested_by": "Hart AIM-057, October 1963",
+        "behavior": "source-form transformation with re-evaluation protocol",
+        "current_relation": "protocol axes preserved; D5 MACRO owns current family",
+        "necessity": "foundational",
+        "law": "historical protocol evidence, no duplicate slot",
+        "classification": "LOWER-DOMAIN-COVERED-NO-SLOT",
+        "coordinate": null,
+        "evidence": [
+          "#2567",
+          "#2588",
+          "#2591",
+          "#3927"
+        ]
+      },
+      {
+        "family": "machine-numeric-carrier",
+        "names": [
+          "FIXP",
+          "FLOATP",
+          "LOGAND",
+          "LOGOR",
+          "LOGXOR",
+          "LEFTSHIFT"
+        ],
+        "attested_by": "Memo 24, 1961; LISP 1.5 manual",
+        "behavior": "fixed/floating and logical-word observations tied to machine carrier",
+        "current_relation": "exact-Q Core must not inherit IBM 704 carrier ontology automatically",
+        "necessity": "math/mechanism",
+        "law": "typed bitvector/word laws require separate carrier theorem",
+        "classification": "CORE-MATH-CANDIDATE",
+        "coordinate": null,
+        "evidence": [
+          "#3928"
+        ]
+      },
+      {
+        "family": "fresh-symbol",
+        "names": [
+          "GENSYM"
+        ],
+        "attested_by": "LISP 1.5 manual 1962",
+        "behavior": "fresh distinct symbol generation",
+        "current_relation": "current SENS defines gensym in language over existing mono counter + text/symbol bridge",
+        "necessity": "useful",
+        "law": "freshness derived from existing counter mechanism + construction",
+        "classification": "DERIVED-NO-SLOT",
+        "coordinate": null,
+        "evidence": [
+          "lib/core.lisp",
+          "#3934"
+        ]
+      },
+      {
+        "family": "symbol-intern-table",
+        "names": [
+          "INTERN",
+          "OBLIST",
+          "REMOB"
+        ],
+        "attested_by": "LISP 1.5 manual 1962",
+        "behavior": "find/create interned atom by print name; enumerate/remove global object-list membership",
+        "current_relation": "current Symbol equality is name-based and no historical OBLIST identity contract is admitted",
+        "necessity": "mechanism/useful",
+        "law": "global symbol registry state is separate from simple STRING->SYMBOL name bridge",
+        "classification": "UNRESOLVED",
+        "coordinate": null,
+        "evidence": [
+          "#3934"
+        ]
+      },
+      {
+        "family": "symbol-metadata-store",
+        "names": [
+          "APVAL",
+          "CSET",
+          "CSETQ",
+          "ATTRIB",
+          "PROP",
+          "GET",
+          "REMPROP",
+          "FLAG",
+          "REMFLAG",
+          "PRINTPROP",
+          "DEFLIST"
+        ],
+        "attested_by": "LISP 1.5 manual 1962 property-list system",
+        "behavior": "implicit mutable metadata attached to atomic symbols",
+        "current_relation": "not current SET; explicit-list algorithms are derivable, hidden symbol-attached state is separate",
+        "necessity": "useful",
+        "law": "CSETQ is quoted-target surface over CSET; reduce whole family to minimal GET/PUT/REMOVE or data-domain root",
+        "classification": "UNRESOLVED",
+        "coordinate": null,
+        "evidence": [
+          "#3941",
+          "#3934"
+        ]
+      },
+      {
+        "family": "dynamic-special-binding",
+        "names": [
+          "SPECIAL",
+          "UNSPECIAL",
+          "SPECIAL-BINDING"
+        ],
+        "attested_by": "LISP 1.5 compiler/manual 1962",
+        "behavior": "fixed SPECIAL cell used for dynamically visible free-variable communication; bind saves/restores prior value",
+        "current_relation": "current SENS lexical closure semantics do not provide this local observable",
+        "necessity": "useful/foundational",
+        "law": "dynamic bind/save -> free refs read current special cell -> scope exit restores previous value",
+        "classification": "D8-RECOVERY-CANDIDATE",
+        "coordinate": null,
+        "evidence": [
+          "#3945",
+          "LISP 1.5 Programmer's Manual compiler appendix",
+          "current lexical-capture tests/docs"
+        ],
+        "coordinates": [
+          "00001100"
+        ]
+      },
+      {
+        "family": "compiled-common-binding",
+        "names": [
+          "COMMON",
+          "UNCOMMON"
+        ],
+        "attested_by": "LISP 1.5 compiler/manual 1962",
+        "behavior": "a-list based communication between compiled and interpreted functions",
+        "current_relation": "historical compiled↔interpreted a-list bridge; no independent source semantic root beyond context communication established",
+        "necessity": "mechanism/useful",
+        "law": "compiler/interpreter communication via explicit a-list",
+        "classification": "HISTORICAL-COMPILER-BRIDGE-NO-SLOT",
+        "coordinate": null,
+        "evidence": [
+          "#3934"
+        ]
+      },
+      {
+        "family": "host-input-output",
+        "names": [
+          "PRINT",
+          "PRIN1",
+          "PRINC",
+          "TERPRI",
+          "PUNCH",
+          "PUNCHDEF",
+          "PUNCHLAP",
+          "READLAP"
+        ],
+        "attested_by": "LISP 1.5 manual 1962",
+        "behavior": "console/card/punch/assembly I/O and transcript effects",
+        "current_relation": "host/transcript boundary; not same as pure READ(string)/WRITE-TO-STRING(value)",
+        "necessity": "host capability",
+        "law": "external effect",
+        "classification": "HOST-CAPABILITY",
+        "coordinate": null,
+        "evidence": [
+          "#3934",
+          "contracts/primitive-budget-audit-734.lisp"
+        ]
+      },
+      {
+        "family": "character-reader-mechanism",
+        "names": [
+          "READCH",
+          "STARTREAD",
+          "ADVANCE",
+          "ENDREAD",
+          "CLEARBUFF",
+          "CURCHAR",
+          "OPCHAR",
+          "PACK",
+          "UNPACK",
+          "MKNAM",
+          "NUMOB",
+          "CHARCOUNT"
+        ],
+        "attested_by": "character handling / LISP 1.5 Appendix F",
+        "behavior": "character-level reader/buffer/print-name machinery",
+        "current_relation": "part reader mechanism and part D7 text bridge; no independent Core roots established",
+        "necessity": "mechanism",
+        "law": "must be projected onto D7 before any Core claim",
+        "classification": "D7-BRIDGE-REVIEW",
+        "coordinate": null,
+        "evidence": [
+          "#3934"
+        ]
+      },
+      {
+        "family": "debug-trace",
+        "names": [
+          "TRACE",
+          "UNTRACE",
+          "TRACESET",
+          "UNTRACESET",
+          "COUNT",
+          "UNCOUNT",
+          "SPEAK"
+        ],
+        "attested_by": "LISP 1.5 system/manual",
+        "behavior": "debugging/tracing/counting output and system observation",
+        "current_relation": "tooling observer, not ordinary program semantics",
+        "necessity": "tooling",
+        "law": "debug observation only unless later exposed as data",
+        "classification": "TOOLING/DEBUGGING",
+        "coordinate": null,
+        "evidence": [
+          "#3934"
+        ]
+      },
+      {
+        "family": "system-memory-control",
+        "names": [
+          "DUMP",
+          "EXCISE",
+          "RECLAIM",
+          "TEMPUS-FUGIT",
+          "LOAD",
+          "LAP",
+          "COMPILE",
+          "OPDEFINE"
+        ],
+        "attested_by": "LISP 1.5 system/manual",
+        "behavior": "machine/system/compiler/storage control",
+        "current_relation": "substrate/host mechanism",
+        "necessity": "mechanism",
+        "law": "not Core semantic identity",
+        "classification": "MACHINE-MECHANISM",
+        "coordinate": null,
+        "evidence": [
+          "#3934"
+        ]
+      },
+      {
+        "family": "copy-search-algorithms",
+        "names": [
+          "COPY",
+          "SASSOC",
+          "SEARCH",
+          "REVERSE",
+          "MEMBER",
+          "LENGTH",
+          "MAP",
+          "MAPLIST"
+        ],
+        "attested_by": "LISP 1.5 manual",
+        "behavior": "recursive algorithms over list/function basis",
+        "current_relation": "already present or derivable in D4-D6/library",
+        "necessity": "useful",
+        "law": "ordinary recursion/composition",
+        "classification": "LOWER-DOMAIN-COVERED-NO-SLOT",
+        "coordinate": null,
+        "evidence": [
+          "D4-D6",
+          "#3934"
+        ]
+      }
+    ]
+  }
+}

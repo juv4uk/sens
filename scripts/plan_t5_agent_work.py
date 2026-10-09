@@ -12,6 +12,7 @@ import argparse
 import hashlib
 import json
 from pathlib import Path, PurePosixPath
+import subprocess
 import sys
 
 SCRIPTS = str(Path(__file__).resolve().parent)
@@ -59,6 +60,99 @@ def checked_source(row: object, *, status: str) -> dict:
         raise PlanError(f"blocked source missing blocker: {path}")
     return {"path": path, "source_git_blob_sha": sha,
             **({"reason": row["reason"]} if status == "BLOCKED" else {})}
+
+
+def _git_bytes(root: Path, *args: str) -> bytes:
+    try:
+        p = subprocess.run(
+            ["git", *args], cwd=root, capture_output=True, check=False,
+            timeout=30,
+        )
+    except (OSError, subprocess.TimeoutExpired) as exc:
+        raise PlanError("Git HEAD provenance unavailable") from exc
+    if p.returncode:
+        raise PlanError("Git HEAD provenance unavailable: " +
+                        p.stderr.decode("utf-8", "replace")[-250:])
+    return p.stdout
+
+
+def _git_source_index(root: Path, *, staged: bool) -> dict[str, tuple[str, str]]:
+    args = ("ls-files", "--stage", "-z") if staged else (
+        "ls-tree", "-r", "-z", "--full-tree", "HEAD"
+    )
+    result: dict[str, tuple[str, str]] = {}
+    for record in _git_bytes(root, *args).split(b"\0"):
+        if not record:
+            continue
+        try:
+            meta, path_bytes = record.split(b"\t", 1)
+            fields = meta.decode("ascii").split()
+            path = path_bytes.decode("utf-8")
+            if staged:
+                mode, sha, stage = fields
+                if stage != "0":
+                    raise PlanError("unmerged Git index entry: " + path)
+            else:
+                mode, kind, sha = fields
+                if kind != "blob":
+                    continue
+        except (UnicodeDecodeError, ValueError) as exc:
+            raise PlanError("invalid Git tree/index entry") from exc
+        if not path.endswith(".lisp"):
+            continue
+        if path in result:
+            raise PlanError("duplicate Git original source: " + path)
+        result[path] = (mode, sha)
+    return result
+
+
+def assert_original_git_head_parity(root: Path, report: dict) -> None:
+    """Check the entire candidate claim against HEAD, stage-0, and real bytes.
+
+    An attacker may forge BOTH cohort and canonical JSON SHA fields consistently;
+    their equality is not evidence that those bytes are in the Git commit.
+    No .sens output, source writes, network or semantic admission occurs here.
+    """
+    root = root.resolve(strict=True)
+    top = _git_bytes(root, "rev-parse", "--show-toplevel").decode("utf-8").strip()
+    if Path(top).resolve() != root:
+        raise PlanError("repository root must be the checked Git worktree root")
+    head = _git_source_index(root, staged=False)
+    index = _git_source_index(root, staged=True)
+    rows = report.get("blocked_sources", []) + report.get("mechanical_candidates", [])
+    if not isinstance(rows, list):
+        raise PlanError("source report original lists must be arrays")
+    if len(rows) != report.get("summary", {}).get("scanned"):
+        raise PlanError("Git validation needs exhaustive original source inventory")
+    seen: set[str] = set()
+    for row in rows:
+        item = checked_source(row, status=("BLOCKED" if row.get("status") == "BLOCKED"
+                                          else "CANDIDATE"))
+        name, pin = item["path"], item["source_git_blob_sha"]
+        if name in seen:
+            raise PlanError(f"duplicate original source Git claim: {name}")
+        seen.add(name)
+        original = head.get(name)
+        staged_row = index.get(name)
+        if original is None or staged_row is None:
+            raise PlanError(f"source absent from Git HEAD or index: {name}")
+        if original[0] not in ("100644", "100755") or staged_row[0] != original[0]:
+            raise PlanError(f"source type/mode changed in Git index: {name}")
+        if original[1] != pin or staged_row[1] != pin:
+            raise PlanError(f"source Git HEAD/index blob SHA mismatch: {name}")
+        local = root
+        for component in PurePosixPath(name).parts:
+            local = local / component
+            if local.is_symlink():
+                raise PlanError(f"symlinked original Git source: {name}")
+        if not local.is_file():
+            raise PlanError(f"source missing from working tree: {name}")
+        data = local.read_bytes()
+        actual = hashlib.sha1(
+            b"blob " + str(len(data)).encode("ascii") + b"\0" + data
+        ).hexdigest()
+        if actual != pin:
+            raise PlanError(f"source worktree drift from Git HEAD: {name}")
 
 
 def build_plan(report: dict, max_files: int = 25) -> dict:
@@ -237,6 +331,11 @@ def build_plan(report: dict, max_files: int = 25) -> dict:
             len(seen) != summary.get("original_unpaired_sources_scanned") or
             len(seen) != summary.get("scanned")):
         raise PlanError("exhaustive source/candidate counts disagree")
+    # Three disjoint census classes; archived mechanical DATA is neither
+    # blocked-source status nor executable candidate awaiting an oracle.
+    # Never erase it just to make the headline blocked+pending sum match.
+    if len(seen) != sum_blocked + len(pending) + len(archived_candidates):
+        raise PlanError("archived mechanical candidate lost in source partition")
     if summary.get("unpaired_candidates_needing_original_oracle") != len(pending):
         raise PlanError("unpaired oracle candidate total does not match")
     if summary.get("already_paired_candidates") != 0:
@@ -273,6 +372,7 @@ def build_plan(report: dict, max_files: int = 25) -> dict:
             "original_unpaired": len(seen),
             "blocked": sum_blocked,
             "mechanical_pending_oracle": len(pending),
+            "archived_mechanical_nonprogram_originals": len(archived_candidates),
             "reviewed_nonprogram_originals": len(reviewed),
             "archived_benchmark_nonprogram_originals": len(archives),
             "executable_or_unclassified_originals": len(seen) - len(reviewed) - len(archives),
@@ -292,13 +392,16 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--out", type=Path, required=True,
                     help="deterministic exclusive work-shard plan, never .sens bytes")
     ap.add_argument("--max-files", type=int, default=25)
+    ap.add_argument("--repo-root", type=Path, default=Path(__file__).resolve().parents[1],
+                    help="exact Git checkout whose HEAD, index and bytes must match every source")
     args = ap.parse_args(argv)
     if args.candidates.resolve() == args.out.resolve():
         print("BLOCKED: never overwrite original candidate report", file=sys.stderr)
         return 2
     try:
-        plan = build_plan(json.loads(args.candidates.read_text(encoding="utf-8")),
-                          args.max_files)
+        candidates = json.loads(args.candidates.read_text(encoding="utf-8"))
+        plan = build_plan(candidates, args.max_files)
+        assert_original_git_head_parity(args.repo_root, candidates)
     except (OSError, ValueError, UnicodeError) as exc:
         print(f"BLOCKED: cannot make safe migration agent work shards: {exc}", file=sys.stderr)
         return 2

@@ -1,0 +1,268 @@
+{
+ "schema": "sens-declarative-path-manifest/v2",
+ "law": "#4460 — declarative name/N schema tables are NOT executable; auto T5-encode forbidden without a separate contract",
+ "correction": "v1 (#4784) mislabeled 4 executable modules as DATA because a name/N token appeared INSIDE definitions. v2 requires the file to have ZERO 8-bit executable heads.",
+ "counts": {
+  "data_files": 33,
+  "executable_exceptions": 2,
+  "data_by_head": {
+   "isa-catalogue/1": 21,
+   "domain-table/1": 6,
+   "uk-surface-audit/2": 1,
+   "machine-authority-boundary/1": 1,
+   "cpu-profile/1": 1,
+   "machine-effect-boundary/1": 1,
+   "xed-machine-evidence/1": 1,
+   "xed-provenance/1": 1
+  }
+ },
+ "data": [
+  {
+   "path": "lib/domains/d1.lisp",
+   "head": "domain-table/1",
+   "bytes": 431,
+   "sha256": "de3cadf6f10e4cbb45bfb2f01e5a93838e4e108406f60091a556cf4a8081e93d",
+   "executable_8bit_heads": 0
+  },
+  {
+   "path": "lib/domains/d3.lisp",
+   "head": "domain-table/1",
+   "bytes": 1017,
+   "sha256": "2039ccc8e81d5949d00df2c9772eae0a45e8794047fbe568c8f63e50b594ba7e",
+   "executable_8bit_heads": 0
+  },
+  {
+   "path": "lib/domains/d4.lisp",
+   "head": "domain-table/1",
+   "bytes": 2109,
+   "sha256": "65807b0eb2097e96ee92e56cf07c71204477b15c8eaae42c8c7efb393aab44db",
+   "executable_8bit_heads": 0
+  },
+  {
+   "path": "lib/domains/d5.lisp",
+   "head": "domain-table/1",
+   "bytes": 4243,
+   "sha256": "e97df9d1021fe4eac436ed8a7b20ed16ce0575b37b80c9b37a05311ad58fb2c3",
+   "executable_8bit_heads": 0
+  },
+  {
+   "path": "lib/domains/d6.lisp",
+   "head": "domain-table/1",
+   "bytes": 9289,
+   "sha256": "7bc292a74bfbd1e17d8d97b3f1df698ee063ba95e42261aa9f37132e1a669f39",
+   "executable_8bit_heads": 0
+  },
+  {
+   "path": "lib/domains/d9.lisp",
+   "head": "domain-table/1",
+   "bytes": 102503,
+   "sha256": "528a758a85751d720896c82f00b2ec28edc357344feb9174048f52f0e840b757",
+   "executable_8bit_heads": 0
+  },
+  {
+   "path": "lib/generated/uk-surface-audit.lisp",
+   "head": "uk-surface-audit/2",
+   "bytes": 78933,
+   "sha256": "d20f89aa2a6b5c13c30a757d62783dd7bb6873005aa141d3142d2d04fb56a1ad",
+   "executable_8bit_heads": 0
+  },
+  {
+   "path": "lib/machine/authority-boundary.lisp",
+   "head": "machine-authority-boundary/1",
+   "bytes": 1469,
+   "sha256": "95f34782a17406dc2412efcaed288f0dc98cd1995ad0e0877c75733f07d8cca4",
+   "executable_8bit_heads": 0
+  },
+  {
+   "path": "lib/machine/cpu/intel-core-i5-6400.lisp",
+   "head": "cpu-profile/1",
+   "bytes": 2528,
+   "sha256": "3f0fde381e219c0426bb60ac7120b3022bbc704170bc73280b3f983b90610732",
+   "executable_8bit_heads": 0
+  },
+  {
+   "path": "lib/machine/effect-boundary.lisp",
+   "head": "machine-effect-boundary/1",
+   "bytes": 2466,
+   "sha256": "0d1eda3951ef0aa6037c6255642df63fa6f9fdebf8c33e6f70fc317f3abef4d0",
+   "executable_8bit_heads": 0
+  },
+  {
+   "path": "lib/machine/isa/adx.lisp",
+   "head": "isa-catalogue/1",
+   "bytes": 396,
+   "sha256": "d32c2fba557f8ed903d3bcdd7f544decd95a16b667675dbd7b1394f4ad4c4a06",
+   "executable_8bit_heads": 0
+  },
+  {
+   "path": "lib/machine/isa/aes-ni.lisp",
+   "head": "isa-catalogue/1",
+   "bytes": 588,
+   "sha256": "4a6e5161bdf701b1e1da438f168d243557bceae9663ea83cd07594d091429f55",
+   "executable_8bit_heads": 0
+  },
+  {
+   "path": "lib/machine/isa/avx.lisp",
+   "head": "isa-catalogue/1",
+   "bytes": 883,
+   "sha256": "ed2cfde0e486c6de11aa94c1b104c69bae011adda6fc9aed0e08c34b4ab9af53",
+   "executable_8bit_heads": 0
+  },
+  {
+   "path": "lib/machine/isa/avx2.lisp",
+   "head": "isa-catalogue/1",
+   "bytes": 953,
+   "sha256": "6ba5562d79362b69f605df9d0242dca71217bb01be844186f79abd34aae2335b",
+   "executable_8bit_heads": 0
+  },
+  {
+   "path": "lib/machine/isa/bmi1.lisp",
+   "head": "isa-catalogue/1",
+   "bytes": 1258,
+   "sha256": "332932393c06243d38299ced16fa4dd59a6977909a41bc61bcb2e6bb2e4da5e5",
+   "executable_8bit_heads": 0
+  },
+  {
+   "path": "lib/machine/isa/bmi2.lisp",
+   "head": "isa-catalogue/1",
+   "bytes": 1094,
+   "sha256": "d0aa5fc206f689d3163662dd8d8cf5f7bc56d79a32fd82b7ecfed719889f8fb6",
+   "executable_8bit_heads": 0
+  },
+  {
+   "path": "lib/machine/isa/clflushopt.lisp",
+   "head": "isa-catalogue/1",
+   "bytes": 338,
+   "sha256": "e29d4a1004120c4d20742121ed68b03f49ac996c8434a419f137ff3ad96fe8c9",
+   "executable_8bit_heads": 0
+  },
+  {
+   "path": "lib/machine/isa/f16c.lisp",
+   "head": "isa-catalogue/1",
+   "bytes": 448,
+   "sha256": "a160a3fc372e75276d6cf653081b7761eded285a48725e439bed86d67851b5f3",
+   "executable_8bit_heads": 0
+  },
+  {
+   "path": "lib/machine/isa/fma3.lisp",
+   "head": "isa-catalogue/1",
+   "bytes": 634,
+   "sha256": "59b025f01eb59fc8210017bbb6890c5f680cb95c733018268f4372855f7e78d1",
+   "executable_8bit_heads": 0
+  },
+  {
+   "path": "lib/machine/isa/mmx.lisp",
+   "head": "isa-catalogue/1",
+   "bytes": 515,
+   "sha256": "4839ccefc0c1adbba5baa9adcfc417cc4e63ecbde36556535b192e8bd03e2e9e",
+   "executable_8bit_heads": 0
+  },
+  {
+   "path": "lib/machine/isa/mpx.lisp",
+   "head": "isa-catalogue/1",
+   "bytes": 679,
+   "sha256": "ca5bd96ab6e00c0f0c6a411269d3ace9c3cf6cd4bf25ee38e5ccab5125d2eb46",
+   "executable_8bit_heads": 0
+  },
+  {
+   "path": "lib/machine/isa/pclmulqdq.lisp",
+   "head": "isa-catalogue/1",
+   "bytes": 336,
+   "sha256": "a8ad0dd750734418afb7c42bdedcb4e4177fed5d8259988bc5735e7a09f42385",
+   "executable_8bit_heads": 0
+  },
+  {
+   "path": "lib/machine/isa/rdrand.lisp",
+   "head": "isa-catalogue/1",
+   "bytes": 483,
+   "sha256": "e18b2ae8cd42364ed4ff03b1acc9fe2e7db44de78193bba3cb45524b5d32baad",
+   "executable_8bit_heads": 0
+  },
+  {
+   "path": "lib/machine/isa/rdseed.lisp",
+   "head": "isa-catalogue/1",
+   "bytes": 299,
+   "sha256": "0483e3efd4dc2fcb1362c7e88e987cf03689921b4aa2dee16facbd40d527f83e",
+   "executable_8bit_heads": 0
+  },
+  {
+   "path": "lib/machine/isa/sgx.lisp",
+   "head": "isa-catalogue/1",
+   "bytes": 511,
+   "sha256": "af54d3b3a7beb5c1a50c4c9064c6f3588af9ff9f7cb53f487efb4afa6fbb147e",
+   "executable_8bit_heads": 0
+  },
+  {
+   "path": "lib/machine/isa/sse3.lisp",
+   "head": "isa-catalogue/1",
+   "bytes": 763,
+   "sha256": "bc0798fcfc184303ac101054c9d71fea7ad1ea656153b42c75434c99de41393e",
+   "executable_8bit_heads": 0
+  },
+  {
+   "path": "lib/machine/isa/sse4.1.lisp",
+   "head": "isa-catalogue/1",
+   "bytes": 816,
+   "sha256": "2232c198f166a2b0c56182869fd2c18ff04771d7071c7f429cfbe235ceb1cdc9",
+   "executable_8bit_heads": 0
+  },
+  {
+   "path": "lib/machine/isa/sse4.2.lisp",
+   "head": "isa-catalogue/1",
+   "bytes": 1126,
+   "sha256": "63d803733ce1e9320f26f463d9b63b78e41aa642a9740d1f1521a8e3de2feb8f",
+   "executable_8bit_heads": 0
+  },
+  {
+   "path": "lib/machine/isa/x86-64.lisp",
+   "head": "isa-catalogue/1",
+   "bytes": 791,
+   "sha256": "e5325ea22cf19eb563e2fb4ef964609fe6a8d92c3b6f2594777f2fdc4989ed6c",
+   "executable_8bit_heads": 0
+  },
+  {
+   "path": "lib/machine/isa/x87.lisp",
+   "head": "isa-catalogue/1",
+   "bytes": 467,
+   "sha256": "8e80b842ca986341768d3693992a4c36944a1783f39d6b32153992744468cf60",
+   "executable_8bit_heads": 0
+  },
+  {
+   "path": "lib/machine/isa/xsave.lisp",
+   "head": "isa-catalogue/1",
+   "bytes": 489,
+   "sha256": "956ed6ea35d0c9fb9419f3fdf2035d25a9f38d9e8195b039fef22f5936dc0c18",
+   "executable_8bit_heads": 0
+  },
+  {
+   "path": "lib/machine/xed/generated/machine-evidence.lisp",
+   "head": "xed-machine-evidence/1",
+   "bytes": 300770,
+   "sha256": "0ce98b1226153c069bf35605a05260b6c9f8f9f5770b4b6f3d34b62f8a781e86",
+   "executable_8bit_heads": 0
+  },
+  {
+   "path": "lib/machine/xed/provenance.lisp",
+   "head": "xed-provenance/1",
+   "bytes": 5188,
+   "sha256": "54090aa0635196d7ddb3ab93ed5bcfca2360d63331319a9e2027b6a558320f88",
+   "executable_8bit_heads": 0
+  }
+ ],
+ "executable_exceptions": [
+  {
+   "path": "lib/machine/cpu/intel-core-i5-6400-inventory.lisp",
+   "head": "skylake-client-inventory/1",
+   "bytes": 2689,
+   "sha256": "75847d9710192743d395ccbe4ff854e26d8d4d1c65bebc2ad25cc00596285b51",
+   "executable_8bit_heads": 3
+  },
+  {
+   "path": "lib/machine/intel-core-i5-6400.lisp",
+   "head": "machine-profile/1",
+   "bytes": 3767,
+   "sha256": "c9b3f23d02a5ad9047b070f36d9a4440f1d345f0fecd34dd3a36a017c8bed24e",
+   "executable_8bit_heads": 62
+  }
+ ]
+}

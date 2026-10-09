@@ -23,7 +23,7 @@ pub(super) const DOMAIN_SURFACE_ROWS: &[DomainSurfaceRow] = &[
     DomainSurfaceRow { width: 2, bits: 0b01, source_routable: false, surfaces: &[DomainSurfaceName { namespace: "uk", name: "закрити" }, DomainSurfaceName { namespace: "sa", name: "samāpana" }] },
     DomainSurfaceRow { width: 2, bits: 0b10, source_routable: false, surfaces: &[DomainSurfaceName { namespace: "uk", name: "відкрити" }, DomainSurfaceName { namespace: "sa", name: "udghāṭana" }] },
     DomainSurfaceRow { width: 2, bits: 0b11, source_routable: false, surfaces: &[DomainSurfaceName { namespace: "uk", name: "крапка" }, DomainSurfaceName { namespace: "sa", name: "bindu" }] },
-    DomainSurfaceRow { width: 3, bits: 0b000, source_routable: false, surfaces: &[DomainSurfaceName { namespace: "uk", name: "порожнє" }, DomainSurfaceName { namespace: "sa", name: "śūnya" }] },
+    DomainSurfaceRow { width: 3, bits: 0b000, source_routable: false, surfaces: &[DomainSurfaceName { namespace: "uk", name: "()" }, DomainSurfaceName { namespace: "sa", name: "()" }] },
     DomainSurfaceRow { width: 3, bits: 0b001, source_routable: true, surfaces: &[DomainSurfaceName { namespace: "uk", name: "як-є" }, DomainSurfaceName { namespace: "sa", name: "svarūpa" }] },
     DomainSurfaceRow { width: 3, bits: 0b010, source_routable: true, surfaces: &[DomainSurfaceName { namespace: "uk", name: "атом?" }, DomainSurfaceName { namespace: "sa", name: "aṇu" }] },
     DomainSurfaceRow { width: 3, bits: 0b011, source_routable: true, surfaces: &[DomainSurfaceName { namespace: "uk", name: "решта" }, DomainSurfaceName { namespace: "sa", name: "śeṣa" }] },

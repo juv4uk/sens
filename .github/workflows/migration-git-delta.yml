@@ -1,0 +1,65 @@
+name: Exact source migration Git delta
+
+on:
+  pull_request:
+    paths:
+      - "scripts/report_migration_git_delta.py"
+      - "tests/test_report_migration_git_delta.py"
+      - ".github/workflows/migration-git-delta.yml"
+      - "docs/MIGRATION-GIT-DELTA.uk.md"
+  push:
+    branches: [main]
+    paths:
+      - "scripts/report_migration_git_delta.py"
+      - "tests/test_report_migration_git_delta.py"
+      - ".github/workflows/migration-git-delta.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  original-pair-delta:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+      - name: Verify migration delta accounting
+        run: python3 -m unittest discover -s tests -p test_report_migration_git_delta.py -v
+      - name: Report REAL new Git file triples and reject noncanonical T5/view
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [[ "${{ github.event_name }}" == "pull_request" ]]; then
+            base="$(git merge-base HEAD origin/main)"
+          else
+            base="$(git rev-parse HEAD^ 2>/dev/null || git rev-parse HEAD)"
+          fi
+          head="$(git rev-parse HEAD)"
+          python3 scripts/report_migration_git_delta.py \
+            --root . --base "$base" --head "$head" --strict > migration-delta.json
+          python3 - <<'PY'
+          import json
+          r=json.load(open('migration-delta.json'))
+          print('HEAD',r['head'])
+          print('TOTAL_LISP',r['head_census']['lisp_count'])
+          print('EXISTING_TRIPLES',r['head_census']['valid_triples'])
+          print('UNPAIRED',r['head_census']['unpaired_count'])
+          print('NEW_PAIRS',r['new_pairs'])
+          print('NEW_VERIFIED_TRIPLES',r['new_triples'])
+          print('REPAIRED_EXISTING_TRIPLES',len(r['repaired_existing_triples']))
+          print('NEW_NONFIXTURE',r['new_non_fixture_triples'])
+          print('NEW_FIXTURES',r['new_fixture_triples'])
+          print('MECHANICAL_ONLY_NO_ORACLE',r['oracle_certified_original_executables'])
+          PY
+      - name: Save source-level evidence without claiming oracle admission
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: migration-git-delta
+          path: migration-delta.json
+          if-no-files-found: warn

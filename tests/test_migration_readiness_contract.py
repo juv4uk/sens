@@ -70,7 +70,17 @@ def fake_migrator_call(*, newly_eligible=0, per_era_candidates=None, archived_au
     return observed, run
 
 
+# Real authoritative decoder used for the integration test, even while the
+# bounded mock report tests suppress the unrelated 67 true original records.
+REAL_REVIEWED_LOADER = census.load_nonprogram_classification
+
+
 class ReadinessContractTests(unittest.TestCase):
+    def setUp(self):
+        mock = patch.object(census, "load_nonprogram_classification", return_value={})
+        mock.start()
+        self.addCleanup(mock.stop)
+
     def test_uses_owner_ratified_d1_d9_not_stale_d1_d7(self):
         assert (ROOT / "knowledge" / "d1-d9-foundation.json").is_file()
         self.assertIn("--foundation", census.ARTIFACT_ARGS)
@@ -162,6 +172,98 @@ class ReadinessContractTests(unittest.TestCase):
         self.assertIn("research-only", report["authority"])
         self.assertIn("BLOCKED", report["gate"]["rule"])
         self.assertNotIn("oracle_passed", report)
+
+
+    def test_real_pinned_data_registry_covers_all_reviewed_cohorts(self):
+        from report_original_migration_candidates import NONPROGRAM_MANIFESTS
+        rows = REAL_REVIEWED_LOADER(ROOT)
+        # Manifest SHAs/allowed cohorts are authority; do not freeze the
+        # research inventory at 76/78 when additional DATA is proven.
+        expected = {
+            name: count for name, manifest, count in NONPROGRAM_MANIFESTS
+            if (ROOT / manifest).is_file()
+        }
+        self.assertEqual(len(rows), sum(expected.values()))
+        cohort_counts = {
+            name: sum(item["cohort"] == name for item in rows.values())
+            for name in expected
+        }
+        self.assertEqual(cohort_counts, expected)
+        self.assertEqual(expected["comment-only-loader"], 2)
+        self.assertEqual(expected["knowledge-record"], 14)
+        self.assertNotIn("lib/machine/block.lisp", rows)
+        self.assertEqual({p for p, item in rows.items() if item["cohort"] == "comment-only-loader"},
+                         {"lib/core2.lisp", "lib/surface/ukr.lisp"})
+        for path in ("lib/core2.lisp", "lib/surface/ukr.lisp"):
+            self.assertFalse((ROOT / path).with_suffix(".sens").exists(),
+                             "comment-only profile marker must not receive executable .sens")
+        self.assertTrue(all(
+            item["source_class"] == "NONPROGRAM_DATA_REVIEWED"
+            and not item["semantic_oracle_admitted"]
+            and not item["automatic_sens_companion"]
+            for item in rows.values()
+        ))
+
+    def test_three_era_data_partition_never_reduces_raw_migration_blocks(self):
+        observed, fn = fake_migrator_call()
+        path = "tests/fixtures/migration-d1-cond-cohort/branch.lisp"
+        verified = {
+            path: {
+                "path": path,
+                "source_git_blob_sha": census.git_blob_sha(ROOT / path),
+                "source_class": "NONPROGRAM_DATA_REVIEWED",
+                "cohort": "expr-record",
+                "semantic_oracle_admitted": False,
+                "automatic_sens_companion": False,
+            }
+        }
+        with patch.object(census.subprocess, "run", side_effect=fn), patch.object(
+            census, "load_nonprogram_classification", return_value=verified
+        ):
+            report = census.build_report()
+        self.assertTrue(report["gate"]["pass"])
+        self.assertEqual(report["migrator_summary"]["files_blocked"], 2)
+        self.assertEqual(report["source_scope"]["reviewed_nonprogram_originals"], 1)
+        self.assertEqual(report["source_scope"]["active_or_unknown_originals"], 1)
+        self.assertEqual(sum(report["actionable_executable_unknown_queues"].values()), 1)
+        self.assertEqual(report["physical_outputs_created"], [])
+        self.assertEqual(next(r for r in report["candidate_rows"]
+                              if r["path"] == path)["source_scope"],
+                         "NONPROGRAM_DATA_REVIEWED")
+        self.assertFalse(report["candidate_rows"][0]["semantic_oracle_admitted"])
+
+    def test_nonprogram_manifest_mismatch_does_not_hide_any_failed_source(self):
+        _, fn = fake_migrator_call()
+        missing = {
+            "fake.lisp": {
+                "path": "fake.lisp", "source_git_blob_sha": "a"*40,
+                "source_class": "NONPROGRAM_DATA_REVIEWED",
+                "cohort": "isa", "semantic_oracle_admitted": False,
+                "automatic_sens_companion": False
+            }
+        }
+        with patch.object(census.subprocess, "run", side_effect=fn), patch.object(
+            census, "load_nonprogram_classification", return_value=missing
+        ):
+            with self.assertRaisesRegex(RuntimeError, "missing from unpaired"):
+                census.build_report()
+
+    def test_nonprogram_drift_rejected_after_manifest_load(self):
+        _, fn = fake_migrator_call()
+        source = "tests/fixtures/migration-d1-cond-cohort/branch.lisp"
+        stale = {
+            source: {
+                "path": source, "source_git_blob_sha": "a"*40,
+                "source_class": "NONPROGRAM_DATA_REVIEWED",
+                "cohort": "expr-record", "semantic_oracle_admitted": False,
+                "automatic_sens_companion": False
+            }
+        }
+        with patch.object(census.subprocess, "run", side_effect=fn), patch.object(
+            census, "load_nonprogram_classification", return_value=stale
+        ):
+            with self.assertRaisesRegex(RuntimeError, "SHA mismatch"):
+                census.build_report()
 
 
 if __name__ == "__main__":

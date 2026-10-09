@@ -19,6 +19,9 @@ import sys
 import tempfile
 
 ROOT = Path(__file__).resolve().parents[1]
+SCRIPTS = str(ROOT / "scripts")
+if SCRIPTS not in sys.path:
+    sys.path.insert(0, SCRIPTS)
 SCHEMA = "sens-w8-provenance-next-barrier/v1"
 
 spec = importlib.util.spec_from_file_location(
@@ -169,6 +172,161 @@ def join_provenance_and_legacy(proof: dict, replay: dict, root: Path) -> dict:
     }
 
 
+
+SOURCE_KINDS = frozenset({
+    "UNCLASSIFIED_NEEDS_SOURCE_PROOF",
+    "NONPROGRAM_DATA_REVIEWED",
+    "ARCHIVED_BENCHMARK_NONPROGRAM",
+})
+NONPROGRAM_KINDS = frozenset({
+    "NONPROGRAM_DATA_REVIEWED", "ARCHIVED_BENCHMARK_NONPROGRAM",
+})
+
+
+def add_owner_reviewed_source_scope(next_report: dict, census: dict) -> dict:
+    """Separate real original-source DATA work from still-unproved programs.
+
+    This is a second, SHA-concordant JOIN with the existing canonical read-only
+    corpus. No source-kind inference from filenames, error text or opcode width.
+    Existing raw hypothetical legacy cohorts remain intact for audit.
+    """
+    summary = census.get("summary")
+    blocked = census.get("blocked_sources")
+    mechanical = census.get("mechanical_candidates")
+    if (not isinstance(summary, dict) or not isinstance(blocked, list)
+            or not isinstance(mechanical, list)):
+        raise TriageError("canonical source-scope original ledger unavailable")
+    if (len(blocked) != summary.get("blocked")
+            or len(mechanical) != summary.get("mechanical_candidates")
+            or len(blocked) + len(mechanical) != summary.get("scanned")
+            or summary.get("original_unpaired_sources_scanned") != summary.get("scanned")):
+        raise TriageError("canonical source-scope original count disagreement")
+    if census.get("source_era") != "auto" or (
+        summary.get("physical_outputs_created") != 0
+        or summary.get("original_unpaired_executables_migrated_by_this_tool") != 0
+    ):
+        raise TriageError("source-kind authority must be no-write source-era auto")
+    # An immutable archived file can become *mechanically* representable
+    # after a newly audited historical successor is linked. It remains DATA,
+    # never an executable admission. Do not lose it merely because its first
+    # status moved from BLOCKED to CANDIDATE_NOT_ADMITTED.
+    by_path: dict[str, dict] = {}
+    for expected_status, rows in (
+            ("BLOCKED", blocked), ("CANDIDATE_NOT_ADMITTED", mechanical)):
+        for row in rows:
+            if not isinstance(row, dict):
+                raise TriageError("canonical source row is malformed")
+            path = row.get("path")
+            sha = row.get("source_git_blob_sha")
+            scope = row.get("source_scope")
+            if not isinstance(path, str) or path in by_path:
+                raise TriageError("duplicate/malformed canonical source scope")
+            if (row.get("status") != expected_status
+                    or row.get("same_stem_sens_already_exists") is not False
+                    or row.get("independent_semantic_oracle_passed") is not False
+                    or row.get("source_is_executable_proven") is not False
+                    or not isinstance(sha, str)
+                    or not re.fullmatch(r"[0-9a-f]{40}", sha)
+                    or scope not in SOURCE_KINDS):
+                raise TriageError("unapproved original SHA, semantic admission or source scope")
+            by_path[path] = row
+    # Reviewed DATA entries must have independent source-specific owner
+    # records in the canonical manifest overlay, not just a forged row label.
+    reviewed = census.get("reviewed_nonprogram_sources")
+    if not isinstance(reviewed, list):
+        raise TriageError("missing owner-reviewed original DATA ledger")
+    reviewed_by_path: dict[str, str] = {}
+    for row in reviewed:
+        if not isinstance(row, dict) or not isinstance(row.get("path"), str):
+            raise TriageError("malformed owner-reviewed DATA record")
+        path = row["path"]
+        if path in reviewed_by_path:
+            raise TriageError("duplicate owner-reviewed DATA source")
+        if (row.get("source_class") != "NONPROGRAM_DATA_REVIEWED"
+                or row.get("automatic_sens_companion") is not False
+                or row.get("semantic_oracle_admitted") is not False):
+            raise TriageError("unapproved executable semantics in DATA manifest")
+        reviewed_by_path[path] = row.get("source_git_blob_sha")
+    if len(reviewed_by_path) != summary.get("classified_nonprogram"):
+        raise TriageError("reviewed DATA manifest total changed")
+    for path, sha in reviewed_by_path.items():
+        canonical = by_path.get(path)
+        if canonical is None or canonical["source_git_blob_sha"] != sha or (
+                canonical["source_scope"] != "NONPROGRAM_DATA_REVIEWED"):
+            raise TriageError("DATA classification Git SHA differs from canonical original")
+    for path, row in by_path.items():
+        if row["source_scope"] == "NONPROGRAM_DATA_REVIEWED" and path not in reviewed_by_path:
+            raise TriageError("DATA source lacks an owner-reviewed SHA-pinned manifest")
+    # Do not guess ARCHIVED from a generic benchmarks/ prefix. Only the
+    # canonical scope law can classify one exact historical snapshot path.
+    from migration_source_scope import archived_benchmark_source
+    archived_count = 0
+    for path, row in by_path.items():
+        law = archived_benchmark_source(path)
+        if law != (row["source_scope"] == "ARCHIVED_BENCHMARK_NONPROGRAM"):
+            raise TriageError("archive source-scope contradicts canonical path law")
+        archived_count += int(law)
+    if archived_count != summary.get("archived_benchmark_data_sources"):
+        raise TriageError("archived source-scope total changed")
+
+    source_rows = next_report.get("sources")
+    if not isinstance(source_rows, list) or len(source_rows) != next_report.get(
+            "summary", {}).get("chronology_proven_same_blob"):
+        raise TriageError("missing next-barrier historical source rows")
+    mapped = []
+    seen: set[str] = set()
+    cohorts: dict[tuple[str, str, str], list[dict]] = defaultdict(list)
+    for record in source_rows:
+        path = record.get("path")
+        if not isinstance(path, str) or path in seen:
+            raise TriageError("duplicate/malformed historical source row")
+        seen.add(path)
+        canonical = by_path.get(path)
+        if (canonical is None
+                or canonical["source_git_blob_sha"] != record.get("source_git_blob_sha")):
+            raise TriageError("historical next-barrier Git SHA differs from canonical source")
+        kind = canonical["source_scope"]
+        lane = ("DATA_CONTRACT_NO_EXECUTABLE_T5" if kind in NONPROGRAM_KINDS
+                else "EXECUTABLE_OR_UNCLASSIFIED_NEEDS_ORACLE")
+        member = {**record, "source_scope": kind, "work_lane": lane,
+                  "release_admitted": False}
+        mapped.append(member)
+        cohorts[(lane, member["next_family"], member["next_coordinate"])].append(member)
+    grouped = [
+        {
+            "work_lane": lane, "family": family, "coordinate": coordinate,
+            "count": len(members),
+            "original_sources": [
+                {"path": r["path"], "source_git_blob_sha": r["source_git_blob_sha"]}
+                for r in sorted(members, key=lambda r: r["path"])
+            ],
+            "status": "REVIEW_QUEUE_NO_SEMANTIC_ADMISSION",
+        }
+        for (lane, family, coordinate), members in sorted(
+            cohorts.items(), key=lambda z: (-len(z[1]), z[0][0], z[0][1], z[0][2])
+        )
+    ]
+    data_only = sum(x["work_lane"] == "DATA_CONTRACT_NO_EXECUTABLE_T5" for x in mapped)
+    executable_unknown = len(mapped) - data_only
+    if sum(x["count"] for x in grouped) != len(mapped):
+        raise TriageError("source-kind partition lost a historical original")
+    updated = dict(next_report)
+    updated["sources"] = mapped
+    updated["source_scope_next_barrier_cohorts"] = grouped
+    updated["summary"] = {
+        **next_report["summary"],
+        "data_only_next_barrier_originals": data_only,
+        "executable_or_unclassified_next_barrier_originals": executable_unknown,
+        "source_scoped_next_barrier_cohorts": len(grouped),
+    }
+    updated["source_scope_policy"] = (
+        "Existing owner-reviewed SHA-pinned DATA and archived BENCHMARK "
+        "sources are DATA ONLY; remaining sources are UNCLASSIFIED, not "
+        "certified executable. No automatic source-era or T5 publication."
+    )
+    return updated
+
+
 def canonical_legacy_replay(repo: Path, td: Path) -> dict:
     report = td / "legacy-report.json"
     target = td / "no-binaries"
@@ -206,6 +364,7 @@ def main() -> int:
             proof = origin.report(repo, census, old, origin.current_tracked_blobs(repo))
             replay = canonical_legacy_replay(repo, Path(tmp))
             result = join_provenance_and_legacy(proof, replay, repo)
+            result = add_owner_reviewed_source_scope(result, census)
         out.parent.mkdir(parents=True, exist_ok=True)
         if out.exists():
             raise TriageError("will not overwrite existing report")

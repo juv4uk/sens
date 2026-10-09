@@ -1,0 +1,150 @@
+name: Canonical Ukrainian–T5–view bounded triplet
+
+on:
+  pull_request:
+    paths:
+      - "scripts/verify_uk_t5_triplet.py"
+      - "scripts/publish_verified_uk_triplets.py"
+      - "tests/test_publish_verified_uk_triplets.py"
+      - "tests/test_verify_uk_t5_triplet.py"
+      - ".github/workflows/verify-uk-t5-triplet.yml"
+      - ".github/workflows/release-preflight.yml"
+      - ".github/workflows/release.yml"
+      - "docs/uk-t5-triplet-bounded.uk.md"
+      - "tests/fixtures/migration-d1-cond-cohort/**"
+      - "tests/fixtures/migration-pair-cohort-main/**"
+      - "tests/fixtures/migration-d4-selector-cohort/**"
+      - "lib/domains/d1.lisp"
+      - "lib/domains/d3.lisp"
+      - "lib/domains/d4.lisp"
+      - "scripts/migrate-three-pass.py"
+      - "scripts/sens_t5_codec.py"
+  push:
+    branches: [main]
+    paths:
+      - "scripts/verify_uk_t5_triplet.py"
+      - "scripts/publish_verified_uk_triplets.py"
+      - "tests/test_publish_verified_uk_triplets.py"
+      - "tests/test_verify_uk_t5_triplet.py"
+      - ".github/workflows/verify-uk-t5-triplet.yml"
+      - ".github/workflows/release-preflight.yml"
+      - ".github/workflows/release.yml"
+      - "docs/uk-t5-triplet-bounded.uk.md"
+      - "tests/fixtures/migration-d1-cond-cohort/**"
+      - "tests/fixtures/migration-pair-cohort-main/**"
+      - "tests/fixtures/migration-d4-selector-cohort/**"
+      - "lib/domains/d1.lisp"
+      - "lib/domains/d3.lisp"
+      - "lib/domains/d4.lisp"
+      - "scripts/migrate-three-pass.py"
+      - "scripts/sens_t5_codec.py"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  bounded-uk-triple-source-parity:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 18
+    steps:
+      - uses: actions/checkout@v5
+      - uses: dtolnay/rust-toolchain@stable
+      - name: No-clobber atomic exporter of verified Ukrainian T5 triplets
+        run: python3 -m unittest discover -s tests -p 'test_publish_verified_uk_triplets.py' -v
+      - name: Reproduce two known canonical uk → T5 → spaced-view canaries
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/uk-triplet-export"
+          python3 scripts/publish_verified_uk_triplets.py \
+            tests/fixtures/migration-d1-cond-cohort/branch.lisp \
+            tests/fixtures/migration-d4-selector-cohort/caar.lisp \
+            --mirror "$RUNNER_TEMP/uk-triplet-export" \
+            --report "$RUNNER_TEMP/uk-triplet-export-report.json" --write
+          cmp tests/fixtures/migration-d1-cond-cohort/branch.sens "$RUNNER_TEMP/uk-triplet-export/tests/fixtures/migration-d1-cond-cohort/branch.sens"
+          cmp tests/fixtures/migration-d1-cond-cohort/branch "$RUNNER_TEMP/uk-triplet-export/tests/fixtures/migration-d1-cond-cohort/branch"
+          cmp tests/fixtures/migration-d4-selector-cohort/caar.sens "$RUNNER_TEMP/uk-triplet-export/tests/fixtures/migration-d4-selector-cohort/caar.sens"
+          cmp tests/fixtures/migration-d4-selector-cohort/caar "$RUNNER_TEMP/uk-triplet-export/tests/fixtures/migration-d4-selector-cohort/caar"
+      - name: Current Ukrainian canonical-source and malicious triple negatives
+        run: python3 -m unittest discover -s tests -p 'test_verify_uk_t5_triplet.py' -v
+      - name: Read-only exact real existing triple, emit source/physical/view SHA
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 scripts/verify_uk_t5_triplet.py \
+            --lisp tests/fixtures/migration-d1-cond-cohort/branch.lisp \
+            --sens tests/fixtures/migration-d1-cond-cohort/branch.sens \
+            --view tests/fixtures/migration-d1-cond-cohort/branch \
+            > "$RUNNER_TEMP/uk-triple-bounded.json"
+          python3 - "$RUNNER_TEMP/uk-triple-bounded.json" <<'PY'
+          import json, os, sys
+          from pathlib import Path
+          result=json.loads(Path(sys.argv[1]).read_text(encoding="utf-8"))
+          assert result["schema"]=="sens-uk-t5-view-bounded-proof/v1"
+          assert result["physical_bytes"]==12
+          assert result["canonical_uk_roundtrip"] and result["canonical_view_roundtrip"]
+          assert result["physical_T5_roundtrip"]
+          assert not result["runtime_oracle_admitted_by_this_audit"]
+          assert result["old_originals_migrated_by_this_audit"]==0
+          with Path(os.environ["GITHUB_STEP_SUMMARY"]).open("a",encoding="utf-8") as out:
+              out.write("## Ukrainian/T5/ASCII triple — bounded D1/D3 source proof\n\n")
+              for k in ("source_sha256","physical_sha256","view_sha256",
+                        "typed_word_sha256"):
+                  out.write(f"- {k}: \x60{result[k]}\x60\n")
+              out.write("- Scope: D1 literals, bounded D3 call syntax/atomic QUOTE/EMPTY, D2; not all D1–D9 or semantic release proof\n")
+              out.write("- Independent current-Rust oracle remains a separate stage\n")
+              out.write("- Release admission: **NOT PROVEN**; original migration count: **0**\n")
+          PY
+      - name: Read-only current D3 CONS Ukrainian T5/view triple
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 scripts/verify_uk_t5_triplet.py \
+            --lisp tests/fixtures/migration-pair-cohort-main/pair-cons.lisp \
+            --sens tests/fixtures/migration-pair-cohort-main/pair-cons.sens \
+            --view tests/fixtures/migration-pair-cohort-main/pair-cons \
+            > "$RUNNER_TEMP/uk-d3-cons-triple.json"
+          python3 - "$RUNNER_TEMP/uk-d3-cons-triple.json" <<'PY'
+          import json, sys
+          from pathlib import Path
+          record=json.loads(Path(sys.argv[1]).read_text(encoding="utf-8"))
+          assert record["physical_bytes"] == 10, record
+          assert record["canonical_uk_roundtrip"] and record["canonical_view_roundtrip"], record
+          assert not record["runtime_oracle_admitted_by_this_audit"], record
+          assert record["old_originals_migrated_by_this_audit"] == 0, record
+          PY
+      - name: Current Rust interpreter independently executes committed T5
+        run: cargo test -q -p sens --test migration_d1_cond_cohort -- --nocapture
+      - name: Independently run current Rust D3 CAR CDR CONS oracle
+        run: cargo test -q -p sens --test migration_pair_car_cdr_cons_main -- --nocapture
+      - name: Read-only verified Ukrainian D4 CAAR source / T5 / ASCII view
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 scripts/verify_uk_t5_triplet.py \
+            --lisp tests/fixtures/migration-d4-selector-cohort/caar.lisp \
+            --sens tests/fixtures/migration-d4-selector-cohort/caar.sens \
+            --view tests/fixtures/migration-d4-selector-cohort/caar \
+            > "$RUNNER_TEMP/d4-caar-uk-proof.json"
+          python3 - "$RUNNER_TEMP/d4-caar-uk-proof.json" <<'PY'
+          import json,sys
+          from pathlib import Path
+          rec=json.loads(Path(sys.argv[1]).read_text(encoding="utf-8"))
+          assert rec["physical_bytes"] == 20
+          assert rec["canonical_uk_roundtrip"] and rec["canonical_view_roundtrip"]
+          assert rec["physical_T5_roundtrip"] is True
+          assert rec["runtime_oracle_admitted_by_this_audit"] is False
+          assert rec["old_originals_migrated_by_this_audit"] == 0
+          print("Proven source/T5/view; independent D4 evaluator is next step")
+          PY
+      - name: Independently execute current Rust D4 CAAR T5
+        run: cargo test -q -p sens --test migration_d4_selector_cohort -- --nocapture
+
+      - name: Prove verification produced no writes
+        shell: bash
+        run: |
+          test -z "$(git status --porcelain --untracked-files=all)" || {
+            git status --short
+            exit 1
+          }

@@ -1,0 +1,51 @@
+name: Ukrainian acceptance physical T5 spaced-view integrity
+on:
+  pull_request:
+    paths:
+      - "lib/surface/ukr-acceptance"
+      - "lib/surface/ukr-acceptance.lisp"
+      - "lib/surface/ukr-acceptance.sens"
+      - "tests/test_ukr_acceptance_spaced_view.py"
+      - ".github/workflows/ukr-acceptance-spaced-view.yml"
+      - "scripts/sens_spaced_view.py"
+      - "scripts/sens_t5_codec.py"
+  push:
+    branches: [main]
+    paths:
+      - "lib/surface/ukr-acceptance"
+      - "lib/surface/ukr-acceptance.lisp"
+      - "lib/surface/ukr-acceptance.sens"
+      - "tests/test_ukr_acceptance_spaced_view.py"
+      - ".github/workflows/ukr-acceptance-spaced-view.yml"
+      - "scripts/sens_spaced_view.py"
+      - "scripts/sens_t5_codec.py"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  exact-physical-view:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Generate canonical view using EXISTING T5 tool to external stage
+        run: |
+          mkdir -p "$RUNNER_TEMP/sens-ukr-view"
+          python3 scripts/sens_spaced_view.py \
+            --root "$PWD" \
+            --sens lib/surface/ukr-acceptance.sens \
+            --stage "$RUNNER_TEMP/sens-ukr-view"
+          python3 - <<'PY'
+          import os
+          from pathlib import Path
+          target = Path(os.environ["RUNNER_TEMP"]) / "sens-ukr-view/lib/surface/ukr-acceptance"
+          view = target.read_bytes()
+          print("UKR_ACCEPTANCE_CANONICAL_VIEW_BEGIN")
+          print(view.decode("ascii"), end="")
+          print("UKR_ACCEPTANCE_CANONICAL_VIEW_END")
+          print("staged_view_bytes=", len(view))
+          PY
+      - name: Verify tracked extensionless bit view and negative-control semantics
+        run: python3 -m unittest discover -s tests -p test_ukr_acceptance_spaced_view.py -v

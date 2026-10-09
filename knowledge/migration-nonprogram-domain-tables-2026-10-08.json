@@ -1,0 +1,77 @@
+{
+  "schema": "sens-migration-nonprogram-manifest/1",
+  "generated_from_main": "67c1b0c8302f72d044aab68f31cd7dba8481928b",
+  "issue": 4460,
+  "classification": "lisp-data-nonprogram",
+  "cohort": "ratified D1-D9 human-readable domain definition TABLES",
+  "reason": "domain-table/1 entries declare authoritative function identities and surfaces; they are DATA, not executable SENS call heads",
+  "automatic_sens_companion": false,
+  "not_executable_programs": true,
+  "not_physical_migration_credit": true,
+  "total_rows": 1020,
+  "entries": [
+    {
+      "path": "lib/domains/d1.lisp",
+      "git_blob_sha1": "6700f6680046e1d610f2ff269407d440ca44c2e3",
+      "domain": "D1",
+      "bit_width": 1,
+      "expected_rows": 2
+    },
+    {
+      "path": "lib/domains/d2.lisp",
+      "git_blob_sha1": "484451cf3c73047158a7886e0874335a9bf8d7f9",
+      "domain": "D2",
+      "bit_width": 2,
+      "expected_rows": 4
+    },
+    {
+      "path": "lib/domains/d3.lisp",
+      "git_blob_sha1": "55b837d05a5772a65c89c6c0d5a8305d2db34256",
+      "domain": "D3",
+      "bit_width": 3,
+      "expected_rows": 8
+    },
+    {
+      "path": "lib/domains/d4.lisp",
+      "git_blob_sha1": "03bca09faf5a5299384a5413b0a16ba42eb0a741",
+      "domain": "D4",
+      "bit_width": 4,
+      "expected_rows": 16
+    },
+    {
+      "path": "lib/domains/d5.lisp",
+      "git_blob_sha1": "c186b589e10cafce7817f7bec5eb5adada6a9c09",
+      "domain": "D5",
+      "bit_width": 5,
+      "expected_rows": 32
+    },
+    {
+      "path": "lib/domains/d6.lisp",
+      "git_blob_sha1": "b7882a5c06625d1818d69a21d507e41f801332eb",
+      "domain": "D6",
+      "bit_width": 6,
+      "expected_rows": 64
+    },
+    {
+      "path": "lib/domains/d7.lisp",
+      "git_blob_sha1": "a618f27aeb75c1c2ef1bb6dbdf33c9a10aefb726",
+      "domain": "D7",
+      "bit_width": 7,
+      "expected_rows": 126
+    },
+    {
+      "path": "lib/domains/d8.lisp",
+      "git_blob_sha1": "97cdd8e8509214468f340492aff71f19da8720b7",
+      "domain": "D8",
+      "bit_width": 8,
+      "expected_rows": 256
+    },
+    {
+      "path": "lib/domains/d9.lisp",
+      "git_blob_sha1": "b013ad78384ebb0174e0c73205e4b6c85dc344db",
+      "domain": "D9",
+      "bit_width": 9,
+      "expected_rows": 512
+    }
+  ]
+}

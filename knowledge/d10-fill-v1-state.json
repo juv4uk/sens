@@ -28,10 +28,10 @@
     "width": 10,
     "capacity": 1024,
     "dense_target": 1024,
-    "selected_semantic_candidates": 527,
-    "remaining_semantic_candidates": 497,
+    "selected_semantic_candidates": 638,
+    "remaining_semantic_candidates": 386,
     "law_forced_coordinates": 256,
-    "unplaced_selected_candidates": 271,
+    "unplaced_selected_candidates": 382,
     "ratified_residents": 0
   },
   "first_tranche": {
@@ -80,6 +80,24 @@
       "mechanism_hold": 1,
       "donor_exhausted": true,
       "new_d10_candidates_added_by_this_audit": 0
+    },
+    "finite_bayes_update_v1": {
+      "authority": "#4013 #4463 #4956",
+      "artifact": "knowledge/d10-finite-bayes-update-research-v1.json",
+      "selected": 1,
+      "coordinates_assigned": 0,
+      "ratification_effect": "NONE",
+      "derivability": "PENDING-OWNER-REVIEW",
+      "oracle": "exact rational update vs independent common-denominator integer-weight enumeration"
+    },
+    "gf2_minimal_recurrence_v1": {
+      "authority": "#4013 #4463 #4950 #4952",
+      "artifact": "knowledge/d10-gf2-minimal-recurrence-research-v1.json",
+      "selected": 1,
+      "coordinates_assigned": 0,
+      "ratification_effect": "NONE",
+      "derivability": "PENDING-OWNER-REVIEW",
+      "dedup": "GF2-LINEAR-COMPLEXITY is only the L projection; no duplicate scalar row is added."
     }
   },
   "recovery_v2": {
@@ -278,5 +296,82 @@
     "selected": 23,
     "coordinates_assigned": 0,
     "ratification_effect": "NONE"
+  },
+  "yantra_library_harvest_v1": {
+    "authority": "#4013 / #4162 / #4463",
+    "artifact": "knowledge/d10-yantra-library-harvest-v1.json",
+    "donor": "lib/yantra.lisp",
+    "selected": 19,
+    "coordinates_assigned": 0,
+    "ratification_effect": "NONE"
+  },
+  "clips_library_harvest_v1": {
+    "authority": "#4013 / #4162 / #4463",
+    "artifact": "knowledge/d10-clips-library-harvest-v1.json",
+    "selected": 12,
+    "coordinates_assigned": 0,
+    "ratification_effect": "NONE"
+  },
+  "lisp_machine_evaluator_harvest_v1": {
+    "authority": "#4013 / #4162 / #4463",
+    "artifact": "knowledge/d10-lisp-machine-evaluator-harvest-v1.json",
+    "donors": [
+      "lib/meta-eval.lisp",
+      "lib/persistent-map.lisp"
+    ],
+    "selected": 31,
+    "coordinates_assigned": 0,
+    "ratification_effect": "NONE"
+  },
+  "interlisp_psl_history_harvest_v1": {
+    "authority": "#4013 / #4162 / #4463",
+    "artifact": "knowledge/d10-interlisp-psl-history-harvest-v1.json",
+    "selected": 13,
+    "coordinates_assigned": 0,
+    "ratification_effect": "NONE"
+  },
+  "selfhost_reason_harvest_v1": {
+    "authority": "#4013 / #4162 / #4463",
+    "artifact": "knowledge/d10-selfhost-reason-harvest-v1.json",
+    "selected": 23,
+    "coordinates_assigned": 0,
+    "ratification_effect": "NONE"
+  },
+  "historical_primary_admission_batch1": {
+    "artifact": "knowledge/d10-historical-primary-admission-batch1-v1.json",
+    "selected": 2,
+    "names": [
+      "DPB",
+      "ARRAY-DISPLACEMENT"
+    ],
+    "coordinates_added": 0,
+    "ratified_added": 0
+  },
+  "primitive_word_root_v1": {
+    "artifact": "knowledge/d10-primitive-binary-word-root-v1.json",
+    "selected": 1,
+    "semantic_name": "PRIMITIVE-BINARY-WORD-ROOT",
+    "coordinates_added": 0,
+    "ratified_added": 0,
+    "oracle": "Chez Scheme R6RS + exhaustive divisor/KMP reference",
+    "proposal_id": "D10P-0007"
+  },
+  "gray_binary_word_intake": {
+    "source": "knowledge/d10-gray-reflected-binary-research-v1.json",
+    "source_sha": "0cf23c95660aa7ae199e6f683bc76f14eabbf958",
+    "base_selected": 632,
+    "added": 2,
+    "now_selected": 634,
+    "ratified_added": 0,
+    "coordinates_added": 0
+  },
+  "historical_primary_selection_20261009_batch2": {
+    "source": "knowledge/d10-historical-primary-admission-batch2-v1.json",
+    "source_baseline": "main selected 636, commit 461329b1f79995700d10d0bdd7d389ee2e0eaacb",
+    "new_selected": 2,
+    "new_total": 638,
+    "coordinate_added": 0,
+    "ratified_added": 0,
+    "status": "pending-owner-ratification"
   }
 }

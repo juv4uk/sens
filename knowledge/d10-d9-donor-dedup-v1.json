@@ -1,0 +1,33 @@
+{
+  "schema": "sens-d10-d9-donor-dedup-v1",
+  "status": "RESEARCH-HOLD-NO-INVENTORY-MUTATION",
+  "source_of_authority": "juv4uk/sens main; D1-D9 foundation and D10 inventory",
+  "selected_main_snapshot": 625,
+  "ratified_d10_snapshot": 0,
+  "donors": [
+    {"path": "lib/persistent-vector.lisp", "git_blob_sha": "80d071b32e4e51ccf354226fabd95c6e4b253e22"},
+    {"path": "lib/unify.lisp", "git_blob_sha": "8dad35ae22e6a40189b03fe801eae8e7af148261"}
+  ],
+  "d9_existing": [
+    {"semantic_name":"VEC-EMPTY", "coordinate":"101101101", "donor":"lib/persistent-vector.lisp", "line":51, "source_name":"vec-empty", "conclusion":"EXISTING-D9", "law":"Empty persistent vector value, represented as count 0 and empty tree"},
+    {"semantic_name":"VEC-COUNT", "coordinate":"101010111", "donor":"lib/persistent-vector.lisp", "line":52, "source_name":"vec-count", "conclusion":"EXISTING-D9", "law":"Return current vector length"},
+    {"semantic_name":"VEC-NTH", "coordinate":"110000010", "donor":"lib/persistent-vector.lisp", "line":148, "source_name":"vec-nth", "conclusion":"EXISTING-D9", "law":"Return tagged maybe: () if no index, (value) if present, including (()) for stored empty datum"},
+    {"semantic_name":"VEC-CONJ", "coordinate":"101011101", "donor":"lib/persistent-vector.lisp", "line":154, "source_name":"vec-conj", "conclusion":"EXISTING-D9", "law":"Produce a new vector with one appended value, preserving prior vector"},
+    {"semantic_name":"VEC->LIST", "coordinate":"101011000", "donor":"lib/persistent-vector.lisp", "line":172, "source_name":"vec->list", "conclusion":"EXISTING-D9", "law":"List projection in original vector order"},
+    {"semantic_name":"VEC-FROM-LIST", "coordinate":"101111011", "donor":"lib/persistent-vector.lisp", "line":190, "source_name":"vec-from-list", "conclusion":"EXISTING-D9", "law":"Create persistent vector from proper list, preserving duplicates and order"},
+    {"semantic_name":"UNIFY", "coordinate":"101010000", "donor":"lib/unify.lisp", "line":134, "source_name":"unify", "conclusion":"EXISTING-D9", "law":"First-order recursive unification with explicit failure; invokes occurs-check through unify-var"}
+  ],
+  "false_promotions": [
+    {"proposed_name":"VECTOR-CONJ", "candidate_source":"#4463/#4182", "verdict":"HOLD-D9-EQUIVALENCE", "existing":"VEC-CONJ", "falsifier":"Old vector changes, new length not +1, appended item at wrong index; distinguish D9 implementation from a new law"},
+    {"proposed_name":"VECTOR-NTH?", "candidate_source":"#4463/#4182", "verdict":"HOLD-D9-EQUIVALENCE", "existing":"VEC-NTH", "falsifier":"Absent index is (), present empty datum is (()); D1 NO is not D3 EMPTY"},
+    {"proposed_name":"VECTOR-EMPTY", "candidate_source":"#4463/#4182", "verdict":"HOLD-D9-EQUIVALENCE", "existing":"VEC-EMPTY", "falsifier":"Zero count and empty tree differ from bare Lisp nil"},
+    {"proposed_name":"VECTOR-FROM-LIST", "candidate_source":"#4463/#4182", "verdict":"HOLD-D9-EQUIVALENCE", "existing":"VEC-FROM-LIST", "falsifier":"Reversed order or dropped duplicates"},
+    {"proposed_name":"UNIFY-TERMS-WITH-OCCURS-CHECK", "candidate_source":"#4013", "verdict":"HOLD-D9-EQUIVALENCE", "existing":"UNIFY", "falsifier":"Binding x to (f x) must fail; returned substitution must make two terms structurally equal"}
+  ],
+  "separate_review": [
+    {"name":"APPLICABLE-METHODS", "source":"knowledge/d10-flavors-restarts-research-v1.json", "status":"PENDING-OWNER-REVIEW", "coordinate":null, "falsifier":"Incomparable equal-specificity signatures must not silently select a method"},
+    {"name":"STANDARD-METHOD-COMBINATION", "source":"knowledge/d10-flavors-restarts-research-v1.json", "status":"PENDING-OWNER-REVIEW", "coordinate":null, "falsifier":"Changing registration order when precedence is fixed cannot alter effective plan"},
+    {"name":"FIND-RESTART", "source":"knowledge/d10-flavors-restarts-research-v1.json", "status":"PENDING-OWNER-REVIEW", "coordinate":null, "falsifier":"Out-of-scope restart lookup fails without invocation"}
+  ],
+  "exclusions": ["D2 exclusively owns language control", "AVL balancing/rotations are substrate mechanisms, not new language laws", "The already-selected D10 SEARCH is not new", "No new 10-bit coordinates", "No ratification", "No physical T5 admission"]
+}

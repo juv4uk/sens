@@ -1,0 +1,16 @@
+name: D10 finite update research
+on:
+  pull_request:
+    paths:
+      - 'scripts/check_d10_finite_bayes_update.py'
+      - 'tests/test_d10_finite_bayes_update.py'
+      - 'knowledge/d10-finite-bayes-update-research-v1.json'
+      - '.github/workflows/d10-finite-bayes-update.yml'
+permissions:
+  contents: read
+jobs:
+  donor-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: python3 -m unittest discover -s tests -p test_d10_finite_bayes_update.py -v

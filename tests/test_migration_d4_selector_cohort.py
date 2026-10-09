@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""#4455: real Lisp I D4:1000 CAAR -> exact D2/D3/D4 physical .sens T5."""
+"""#4455/#4430: Ukrainian D4:1000 CAAR projection with unchanged T5 + exact view."""
 from __future__ import annotations
 
 import importlib.util
@@ -13,7 +13,8 @@ import unittest
 ROOT = Path(__file__).resolve().parents[1]
 SCRIPT = ROOT / "scripts/migrate-three-pass.py"
 FIXTURES = ROOT / "tests/fixtures/migration-d4-selector-cohort"
-SOURCE = "(CAAR (CONS (CONS (QUOTE ()) (QUOTE ())) (QUOTE ())))\n"
+SOURCE = "(п-п (сполучити (сполучити (як-є ()) (як-є ())) (як-є ())))\n"
+HISTORICAL_SOURCE = "(CAAR (CONS (CONS (QUOTE ()) (QUOTE ())) (QUOTE ())))\n"
 PROJECTION = "10 1000 00 10 111 00 10 111 00 10 001 00 000 01 00 10 001 00 000 01 01 00 10 001 00 000 01 01 01\n"
 PHYSICAL = bytes.fromhex("6612c47ec47ec32da42dc32da42ea937a813b1a1")
 FOUNDATION = ROOT / "knowledge/d1-d9-foundation.json"
@@ -54,18 +55,38 @@ class D4CaarT5Canary(unittest.TestCase):
         self.assertEqual(self.upper["QUOTE"], ("001", "D3"))
         self.assertNotEqual("1000", "100")  # D4:1000 is NOT the D3:100 CAR identity.
 
-    def test_real_pass3_and_committed_physical_bytes(self):
+    def test_ratified_ukrainian_source_and_committed_physical_bytes(self):
         self.assertEqual((FIXTURES / "caar.lisp").read_text(encoding="utf-8"), SOURCE)
         resolver = migration.Resolver(self.legacy, self.my, self.upper)
         projection = migration.migrate_file(SOURCE, resolver, self.text7)
         self.assertEqual(projection, PROJECTION)
-        self.assertEqual(resolver.counts["pass3-lisp15"], 6)
+        self.assertEqual(resolver.counts["pass2-my-lisp"], 6)
+        self.assertEqual(resolver.counts["pass3-lisp15"], 0)
         self.assertEqual(sum(resolver.counts.values()), 6)
         self.assertEqual(migration.encode_projection(projection), PHYSICAL)
         self.assertEqual(migration.decode_bytes(PHYSICAL), PROJECTION.split())
         self.assertEqual((FIXTURES / "caar.sens").read_bytes(), PHYSICAL)
         self.assertNotEqual(PHYSICAL, SOURCE.encode("utf-8"))
-        self.assertFalse((FIXTURES / "caar").exists())
+        view = (FIXTURES / "caar").read_bytes()
+        self.assertEqual(view, PROJECTION.encode("ascii"))
+        self.assertEqual(migration.parse_words(view.decode("ascii")), PROJECTION.split())
+        self.assertEqual(migration.encode_projection(view.decode("ascii")), PHYSICAL)
+        self.assertEqual(migration.decode_bytes(PHYSICAL), PROJECTION.split())
+        self.assertEqual(view.count(b"\n"), 1)
+        self.assertNotIn(b"2", view)
+        self.assertNotIn(b"(", view)
+        self.assertNotIn(b"  ", view)
+
+    def test_historical_and_ukrainian_heads_have_the_same_exact_words(self):
+        canonical_resolver = migration.Resolver(self.legacy, self.my, self.upper)
+        historic_resolver = migration.Resolver(self.legacy, self.my, self.upper)
+        self.assertEqual(
+            migration.migrate_file(SOURCE, canonical_resolver, self.text7),
+            migration.migrate_file(HISTORICAL_SOURCE, historic_resolver, self.text7)
+        )
+        self.assertEqual(historic_resolver.counts["pass3-lisp15"], 6)
+        self.assertEqual(canonical_resolver.counts["pass2-my-lisp"], 6)
+        self.assertEqual(migration.encode_projection(PROJECTION), PHYSICAL)
 
     def test_real_migrator_cli_no_clobber_and_report(self):
         with tempfile.TemporaryDirectory(prefix="sens-d4-caar-") as name:

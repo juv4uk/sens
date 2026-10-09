@@ -1,0 +1,1294 @@
+{
+ "schema": "sens8-domain-bridge-audit/v1",
+ "authority": "research/unratified",
+ "sources": {
+  "sens8_names": "lib/surface/semantic-registry.lisp",
+  "bridge": "crates/sens/src/semantic_registry.rs",
+  "domains": "lib/domains/d3..d6.lisp"
+ },
+ "counts": {
+  "named": 182,
+  "bridged": 19,
+  "unbridged": 163,
+  "verdicts": {
+   "match": 19,
+   "no-bridge": 163
+  }
+ },
+ "rows": [
+  {
+   "sid8": "00000001",
+   "sens8_name": "quote",
+   "bridge": "D3:001",
+   "d_name": "quote",
+   "verdict": "match"
+  },
+  {
+   "sid8": "00000010",
+   "sens8_name": "atom?",
+   "bridge": "D3:010",
+   "d_name": "atom?",
+   "verdict": "match"
+  },
+  {
+   "sid8": "00000011",
+   "sens8_name": "eq?",
+   "bridge": "D3:101",
+   "d_name": "eq?",
+   "verdict": "match"
+  },
+  {
+   "sid8": "00000100",
+   "sens8_name": "cons",
+   "bridge": "D3:111",
+   "d_name": "cons",
+   "verdict": "match"
+  },
+  {
+   "sid8": "00000101",
+   "sens8_name": "car",
+   "bridge": "D3:100",
+   "d_name": "car",
+   "verdict": "match"
+  },
+  {
+   "sid8": "00000110",
+   "sens8_name": "cdr",
+   "bridge": "D3:011",
+   "d_name": "cdr",
+   "verdict": "match"
+  },
+  {
+   "sid8": "00000111",
+   "sens8_name": "cond",
+   "bridge": "D3:110",
+   "d_name": "cond",
+   "verdict": "match"
+  },
+  {
+   "sid8": "00001000",
+   "sens8_name": "lambda",
+   "bridge": "D4:0010",
+   "d_name": "lambda",
+   "verdict": "match"
+  },
+  {
+   "sid8": "00001001",
+   "sens8_name": "define",
+   "bridge": "D4:0011",
+   "d_name": "define",
+   "verdict": "match"
+  },
+  {
+   "sid8": "00001010",
+   "sens8_name": "defmacro",
+   "bridge": null,
+   "d_name": null,
+   "verdict": "no-bridge"
+  },
+  {
+   "sid8": "00001011",
+   "sens8_name": "def",
+   "bridge": null,
+   "d_name": null,
+   "verdict": "no-bridge"
+  },
+  {
+   "sid8": "00001100",
+   "sens8_name": "plus",
+   "bridge": null,
+   "d_name": null,
+   "verdict": "no-bridge"
+  },
+  {
+   "sid8": "00001101",
+   "sens8_name": "difference",
+   "bridge": null,
+   "d_name": null,
+   "verdict": "no-bridge"
+  },
+  {
+   "sid8": "00001110",
+   "sens8_name": "times",
+   "bridge": null,
+   "d_name": null,
+   "verdict": "no-bridge"
+  },
+  {
+   "sid8": "00001111",
+   "sens8_name": "divide",
+   "bridge": null,
+   "d_name": null,
+   "verdict": "no-bridge"
+  },
+  {
+   "sid8": "00010000",
+   "sens8_name": "abs",
+   "bridge": null,
+   "d_name": null,
+   "verdict": "no-bridge"
+  },
+  {
+   "sid8": "00010001",
+   "sens8_name": "min",
+   "bridge": null,
+   "d_name": null,
+   "verdict": "no-bridge"
+  },
+  {
+   "sid8": "00010010",
+   "sens8_name": "max",
+   "bridge": null,
+   "d_name": null,
+   "verdict": "no-bridge"
+  },
+  {
+   "sid8": "00010011",
+   "sens8_name": "mod",
+   "bridge": null,
+   "d_name": null,
+   "verdict": "no-bridge"
+  },
+  {
+   "sid8": "00010100",
+   "sens8_name": "quotient",
+   "bridge": "D5:10111",
+   "d_name": "quotient",
+   "verdict": "match"
+  },
+  {
+   "sid8": "00010101",
+   "sens8_name": "sqrt",
+   "bridge": null,
+   "d_name": null,
+   "verdict": "no-bridge"
+  },
+  {
+   "sid8": "00010110",
+   "sens8_name": "isqrt",
+   "bridge": null,
+   "d_name": null,
+   "verdict": "no-bridge"
+  },
+  {
+   "sid8": "00010111",
+   "sens8_name": "min-list",
+   "bridge": null,
+   "d_name": null,
+   "verdict": "no-bridge"
+  },
+  {
+   "sid8": "00011000",
+   "sens8_name": "max-list",
+   "bridge": null,
+   "d_name": null,
+   "verdict": "no-bridge"
+  },
+  {
+   "sid8": "00011001",
+   "sens8_name": "largest-chunk",
+   "bridge": null,
+   "d_name": null,
+   "verdict": "no-bridge"
+  },
+  {
+   "sid8": "00011010",
+   "sens8_name": "lessp?",
+   "bridge": null,
+   "d_name": null,
+   "verdict": "no-bridge"
+  },
+  {
+   "sid8": "00011011",
+   "sens8_name": "greaterp?",
+   "bridge": null,
+   "d_name": null,
+   "verdict": "no-bridge"
+  },
+  {
+   "sid8": "00011100",
+   "sens8_name": "equalp?",
+   "bridge": null,
+   "d_name": null,
+   "verdict": "no-bridge"
+  },
+  {
+   "sid8": "00011101",
+   "sens8_name": "not-greaterp?",
+   "bridge": null,
+   "d_name": null,
+   "verdict": "no-bridge"
+  },
+  {
+   "sid8": "00011110",
+   "sens8_name": "not-lessp?",
+   "bridge": null,
+   "d_name": null,
+   "verdict": "no-bridge"
+  },
+  {
+   "sid8": "00011111",
+   "sens8_name": "nondecreasing-from?",
+   "bridge": null,
+   "d_name": null,
+   "verdict": "no-bridge"
+  },
+  {
+   "sid8": "00100000",
+   "sens8_name": "nonincreasing-from?",
+   "bridge": null,
+   "d_name": null,
+   "verdict": "no-bridge"
+  },
+  {
+   "sid8": "00100001",
+   "sens8_name": "not?",
+   "bridge": null,
+   "d_name": null,
+   "verdict": "no-bridge"
+  },
+  {
+   "sid8": "00100010",
+   "sens8_name": "equal?",
+   "bridge": null,
+   "d_name": null,
+   "verdict": "no-bridge"
+  },
+  {
+   "sid8": "00100011",
+   "sens8_name": "symbol?",
+   "bridge": null,
+   "d_name": null,
+   "verdict": "no-bridge"
+  },
+  {
+   "sid8": "00100100",
+   "sens8_name": "string?",
+   "bridge": null,
+   "d_name": null,
+   "verdict": "no-bridge"
+  },
+  {
+   "sid8": "00100101",
+   "sens8_name": "string<?",
+   "bridge": null,
+   "d_name": null,
+   "verdict": "no-bridge"
+  },
+  {
+   "sid8": "00100110",
+   "sens8_name": "numeric-buffer?",
+   "bridge": null,
+   "d_name": null,
+   "verdict": "no-bridge"
+  },
+  {
+   "sid8": "00100111",
+   "sens8_name": "list",
+   "bridge": null,
+   "d_name": null,
+   "verdict": "no-bridge"
+  },
+  {
+   "sid8": "00101000",
+   "sens8_name": "length",
+   "bridge": null,
+   "d_name": null,
+   "verdict": "no-bridge"
+  },
+  {
+   "sid8": "00101001",
+   "sens8_name": "append",
+   "bridge": "D4:1111",
+   "d_name": "append",
+   "verdict": "match"
+  },
+  {
+   "sid8": "00101010",
+   "sens8_name": "reverse",
+   "bridge": "D5:10100",
+   "d_name": "reverse",
+   "verdict": "match"
+  },
+  {
+   "sid8": "00101011",
+   "sens8_name": "nth",
+   "bridge": null,
+   "d_name": null,
+   "verdict": "no-bridge"
+  },
+  {
+   "sid8": "00101100",
+   "sens8_name": "member?",
+   "bridge": "D5:11101",
+   "d_name": "member?",
+   "verdict": "match"
+  },
+  {
+   "sid8": "00101101",
+   "sens8_name": "assoc",
+   "bridge": "D5:11100",
+   "d_name": "assoc",
+   "verdict": "match"
+  },
+  {
+   "sid8": "00101110",
+   "sens8_name": "pair",
+   "bridge": null,
+   "d_name": null,
+   "verdict": "no-bridge"
+  },
+  {
+   "sid8": "00101111",
+   "sens8_name": "second",
+   "bridge": null,
+   "d_name": null,
+   "verdict": "no-bridge"
+  },
+  {
+   "sid8": "00110000",
+   "sens8_name": "third",
+   "bridge": null,
+   "d_name": null,
+   "verdict": "no-bridge"
+  },
+  {
+   "sid8": "00110001",
+   "sens8_name": "fourth",
+   "bridge": null,
+   "d_name": null,
+   "verdict": "no-bridge"
+  },
+  {
+   "sid8": "00110010",
+   "sens8_name": "fifth",
+   "bridge": null,
+   "d_name": null,
+   "verdict": "no-bridge"
+  },
+  {
+   "sid8": "00110011",
+   "sens8_name": "caar",
+   "bridge": "D4:1000",
+   "d_name": "caar",
+   "verdict": "match"
+  },
+  {
+   "sid8": "00110100",
+   "sens8_name": "cadr",
+   "bridge": "D4:1001",
+   "d_name": "cadr",
+   "verdict": "match"
+  },
+  {
+   "sid8": "00110101",
+   "sens8_name": "cddr",
+   "bridge": "D4:0111",
+   "d_name": "cddr",
+   "verdict": "match"
+  },
+  {
+   "sid8": "00110110",
+   "sens8_name": "cadddr",
+   "bridge": null,
+   "d_name": null,
+   "verdict": "no-bridge"
+  },
+  {
+   "sid8": "00110111",
+   "sens8_name": "map",
+   "bridge": null,
+   "d_name": null,
+   "verdict": "no-bridge"
+  },
+  {
+   "sid8": "00111000",
+   "sens8_name": "filter",
+   "bridge": null,
+   "d_name": null,
+   "verdict": "no-bridge"
+  },
+  {
+   "sid8": "00111001",
+   "sens8_name": "reduce",
+   "bridge": null,
+   "d_name": null,
+   "verdict": "no-bridge"
+  },
+  {
+   "sid8": "00111010",
+   "sens8_name": "string-append",
+   "bridge": null,
+   "d_name": null,
+   "verdict": "no-bridge"
+  },
+  {
+   "sid8": "00111011",
+   "sens8_name": "string-length",
+   "bridge": null,
+   "d_name": null,
+   "verdict": "no-bridge"
+  },
+  {
+   "sid8": "00111100",
+   "sens8_name": "string-empty?",
+   "bridge": null,
+   "d_name": null,
+   "verdict": "no-bridge"
+  },
+  {
+   "sid8": "00111101",
+   "sens8_name": "string-prefix?",
+   "bridge": null,
+   "d_name": null,
+   "verdict": "no-bridge"
+  },
+  {
+   "sid8": "00111110",
+   "sens8_name": "string-contains?",
+   "bridge": null,
+   "d_name": null,
+   "verdict": "no-bridge"
+  },
+  {
+   "sid8": "00111111",
+   "sens8_name": "string-first",
+   "bridge": null,
+   "d_name": null,
+   "verdict": "no-bridge"
+  },
+  {
+   "sid8": "01000000",
+   "sens8_name": "string-rest",
+   "bridge": null,
+   "d_name": null,
+   "verdict": "no-bridge"
+  },
+  {
+   "sid8": "01000001",
+   "sens8_name": "string-slice",
+   "bridge": null,
+   "d_name": null,
+   "verdict": "no-bridge"
+  },
+  {
+   "sid8": "01000010",
+   "sens8_name": "symbol->string",
+   "bridge": null,
+   "d_name": null,
+   "verdict": "no-bridge"
+  },
+  {
+   "sid8": "01000011",
+   "sens8_name": "string->symbol",
+   "bridge": null,
+   "d_name": null,
+   "verdict": "no-bridge"
+  },
+  {
+   "sid8": "01000100",
+   "sens8_name": "codepoint->string",
+   "bridge": null,
+   "d_name": null,
+   "verdict": "no-bridge"
+  },
+  {
+   "sid8": "01000101",
+   "sens8_name": "string->codepoint",
+   "bridge": null,
+   "d_name": null,
+   "verdict": "no-bridge"
+  },
+  {
+   "sid8": "01000110",
+   "sens8_name": "number->string",
+   "bridge": null,
+   "d_name": null,
+   "verdict": "no-bridge"
+  },
+  {
+   "sid8": "01000111",
+   "sens8_name": "digit->string",
+   "bridge": null,
+   "d_name": null,
+   "verdict": "no-bridge"
+  },
+  {
+   "sid8": "01001000",
+   "sens8_name": "print",
+   "bridge": null,
+   "d_name": null,
+   "verdict": "no-bridge"
+  },
+  {
+   "sid8": "01001001",
+   "sens8_name": "princ",
+   "bridge": null,
+   "d_name": null,
+   "verdict": "no-bridge"
+  },
+  {
+   "sid8": "01001010",
+   "sens8_name": "read",
+   "bridge": null,
+   "d_name": null,
+   "verdict": "no-bridge"
+  },
+  {
+   "sid8": "01001011",
+   "sens8_name": "read-all",
+   "bridge": null,
+   "d_name": null,
+   "verdict": "no-bridge"
+  },
+  {
+   "sid8": "01001100",
+   "sens8_name": "write-to-string",
+   "bridge": null,
+   "d_name": null,
+   "verdict": "no-bridge"
+  },
+  {
+   "sid8": "01001101",
+   "sens8_name": "eval",
+   "bridge": null,
+   "d_name": null,
+   "verdict": "no-bridge"
+  },
+  {
+   "sid8": "01001110",
+   "sens8_name": "env",
+   "bridge": null,
+   "d_name": null,
+   "verdict": "no-bridge"
+  },
+  {
+   "sid8": "01001111",
+   "sens8_name": "vector",
+   "bridge": null,
+   "d_name": null,
+   "verdict": "no-bridge"
+  },
+  {
+   "sid8": "01010000",
+   "sens8_name": "make-vector",
+   "bridge": null,
+   "d_name": null,
+   "verdict": "no-bridge"
+  },
+  {
+   "sid8": "01010001",
+   "sens8_name": "vector-length",
+   "bridge": null,
+   "d_name": null,
+   "verdict": "no-bridge"
+  },
+  {
+   "sid8": "01010010",
+   "sens8_name": "vector-ref",
+   "bridge": null,
+   "d_name": null,
+   "verdict": "no-bridge"
+  },
+  {
+   "sid8": "01010011",
+   "sens8_name": "vector-set!",
+   "bridge": null,
+   "d_name": null,
+   "verdict": "no-bridge"
+  },
+  {
+   "sid8": "01010100",
+   "sens8_name": "i32-buffer",
+   "bridge": null,
+   "d_name": null,
+   "verdict": "no-bridge"
+  },
+  {
+   "sid8": "01010101",
+   "sens8_name": "f32-buffer",
+   "bridge": null,
+   "d_name": null,
+   "verdict": "no-bridge"
+  },
+  {
+   "sid8": "01010110",
+   "sens8_name": "numeric-buffer-type",
+   "bridge": null,
+   "d_name": null,
+   "verdict": "no-bridge"
+  },
+  {
+   "sid8": "01010111",
+   "sens8_name": "numeric-buffer-length",
+   "bridge": null,
+   "d_name": null,
+   "verdict": "no-bridge"
+  },
+  {
+   "sid8": "01011000",
+   "sens8_name": "numeric-buffer-ref",
+   "bridge": null,
+   "d_name": null,
+   "verdict": "no-bridge"
+  },
+  {
+   "sid8": "01011001",
+   "sens8_name": "numeric-buffer-map",
+   "bridge": null,
+   "d_name": null,
+   "verdict": "no-bridge"
+  },
+  {
+   "sid8": "01011010",
+   "sens8_name": "mono-ns",
+   "bridge": null,
+   "d_name": null,
+   "verdict": "no-bridge"
+  },
+  {
+   "sid8": "01011011",
+   "sens8_name": "unix-time-now",
+   "bridge": null,
+   "d_name": null,
+   "verdict": "no-bridge"
+  },
+  {
+   "sid8": "01011100",
+   "sens8_name": "ntp-query-raw",
+   "bridge": null,
+   "d_name": null,
+   "verdict": "no-bridge"
+  },
+  {
+   "sid8": "01011101",
+   "sens8_name": "timezone-declarations-raw",
+   "bridge": null,
+   "d_name": null,
+   "verdict": "no-bridge"
+  },
+  {
+   "sid8": "01011110",
+   "sens8_name": "utc-now",
+   "bridge": null,
+   "d_name": null,
+   "verdict": "no-bridge"
+  },
+  {
+   "sid8": "01011111",
+   "sens8_name": "utc-from-unix",
+   "bridge": null,
+   "d_name": null,
+   "verdict": "no-bridge"
+  },
+  {
+   "sid8": "01100000",
+   "sens8_name": "unix-time-observation->utc",
+   "bridge": null,
+   "d_name": null,
+   "verdict": "no-bridge"
+  },
+  {
+   "sid8": "01100001",
+   "sens8_name": "milliseconds-from-nanoseconds",
+   "bridge": null,
+   "d_name": null,
+   "verdict": "no-bridge"
+  },
+  {
+   "sid8": "01100010",
+   "sens8_name": "mono-ms",
+   "bridge": null,
+   "d_name": null,
+   "verdict": "no-bridge"
+  },
+  {
+   "sid8": "01100011",
+   "sens8_name": "timezone-name",
+   "bridge": null,
+   "d_name": null,
+   "verdict": "no-bridge"
+  },
+  {
+   "sid8": "01100100",
+   "sens8_name": "timezone-detect",
+   "bridge": null,
+   "d_name": null,
+   "verdict": "no-bridge"
+  },
+  {
+   "sid8": "01100101",
+   "sens8_name": "timezone-offset-seconds",
+   "bridge": null,
+   "d_name": null,
+   "verdict": "no-bridge"
+  },
+  {
+   "sid8": "01100110",
+   "sens8_name": "deadline-reached?",
+   "bridge": null,
+   "d_name": null,
+   "verdict": "no-bridge"
+  },
+  {
+   "sid8": "01100111",
+   "sens8_name": "deadline-reached-at?",
+   "bridge": null,
+   "d_name": null,
+   "verdict": "no-bridge"
+  },
+  {
+   "sid8": "01101000",
+   "sens8_name": "elapsed-ns",
+   "bridge": null,
+   "d_name": null,
+   "verdict": "no-bridge"
+  },
+  {
+   "sid8": "01101001",
+   "sens8_name": "deadline-from",
+   "bridge": null,
+   "d_name": null,
+   "verdict": "no-bridge"
+  },
+  {
+   "sid8": "01101010",
+   "sens8_name": "deadline-after-ns",
+   "bridge": null,
+   "d_name": null,
+   "verdict": "no-bridge"
+  },
+  {
+   "sid8": "01101011",
+   "sens8_name": "internet-time-sync",
+   "bridge": null,
+   "d_name": null,
+   "verdict": "no-bridge"
+  },
+  {
+   "sid8": "01101100",
+   "sens8_name": "map-empty",
+   "bridge": null,
+   "d_name": null,
+   "verdict": "no-bridge"
+  },
+  {
+   "sid8": "01101101",
+   "sens8_name": "map-get",
+   "bridge": null,
+   "d_name": null,
+   "verdict": "no-bridge"
+  },
+  {
+   "sid8": "01101110",
+   "sens8_name": "map-insert",
+   "bridge": null,
+   "d_name": null,
+   "verdict": "no-bridge"
+  },
+  {
+   "sid8": "01101111",
+   "sens8_name": "map-contains?",
+   "bridge": null,
+   "d_name": null,
+   "verdict": "no-bridge"
+  },
+  {
+   "sid8": "01110000",
+   "sens8_name": "map->list",
+   "bridge": null,
+   "d_name": null,
+   "verdict": "no-bridge"
+  },
+  {
+   "sid8": "01110001",
+   "sens8_name": "vec-empty",
+   "bridge": null,
+   "d_name": null,
+   "verdict": "no-bridge"
+  },
+  {
+   "sid8": "01110010",
+   "sens8_name": "vec-conj",
+   "bridge": null,
+   "d_name": null,
+   "verdict": "no-bridge"
+  },
+  {
+   "sid8": "01110011",
+   "sens8_name": "vec-count",
+   "bridge": null,
+   "d_name": null,
+   "verdict": "no-bridge"
+  },
+  {
+   "sid8": "01110100",
+   "sens8_name": "vec-nth",
+   "bridge": null,
+   "d_name": null,
+   "verdict": "no-bridge"
+  },
+  {
+   "sid8": "01110101",
+   "sens8_name": "vec->list",
+   "bridge": null,
+   "d_name": null,
+   "verdict": "no-bridge"
+  },
+  {
+   "sid8": "01110110",
+   "sens8_name": "vec-from-list",
+   "bridge": null,
+   "d_name": null,
+   "verdict": "no-bridge"
+  },
+  {
+   "sid8": "01110111",
+   "sens8_name": "is-fact?",
+   "bridge": null,
+   "d_name": null,
+   "verdict": "no-bridge"
+  },
+  {
+   "sid8": "01111000",
+   "sens8_name": "describe",
+   "bridge": null,
+   "d_name": null,
+   "verdict": "no-bridge"
+  },
+  {
+   "sid8": "01111001",
+   "sens8_name": "collect-facts-about",
+   "bridge": null,
+   "d_name": null,
+   "verdict": "no-bridge"
+  },
+  {
+   "sid8": "01111010",
+   "sens8_name": "contains-atom?",
+   "bridge": null,
+   "d_name": null,
+   "verdict": "no-bridge"
+  },
+  {
+   "sid8": "01111011",
+   "sens8_name": "forward-in",
+   "bridge": null,
+   "d_name": null,
+   "verdict": "no-bridge"
+  },
+  {
+   "sid8": "01111100",
+   "sens8_name": "reason-in",
+   "bridge": null,
+   "d_name": null,
+   "verdict": "no-bridge"
+  },
+  {
+   "sid8": "01111101",
+   "sens8_name": "check-conflict?",
+   "bridge": null,
+   "d_name": null,
+   "verdict": "no-bridge"
+  },
+  {
+   "sid8": "01111110",
+   "sens8_name": "module-known?",
+   "bridge": null,
+   "d_name": null,
+   "verdict": "no-bridge"
+  },
+  {
+   "sid8": "01111111",
+   "sens8_name": "module-clauses-now",
+   "bridge": null,
+   "d_name": null,
+   "verdict": "no-bridge"
+  },
+  {
+   "sid8": "10000000",
+   "sens8_name": "prove-goal",
+   "bridge": null,
+   "d_name": null,
+   "verdict": "no-bridge"
+  },
+  {
+   "sid8": "10000001",
+   "sens8_name": "prove-goals",
+   "bridge": null,
+   "d_name": null,
+   "verdict": "no-bridge"
+  },
+  {
+   "sid8": "10000010",
+   "sens8_name": "explain-proof",
+   "bridge": null,
+   "d_name": null,
+   "verdict": "no-bridge"
+  },
+  {
+   "sid8": "10000011",
+   "sens8_name": "source-of",
+   "bridge": null,
+   "d_name": null,
+   "verdict": "no-bridge"
+  },
+  {
+   "sid8": "10000100",
+   "sens8_name": "provenance",
+   "bridge": null,
+   "d_name": null,
+   "verdict": "no-bridge"
+  },
+  {
+   "sid8": "10000101",
+   "sens8_name": "reason",
+   "bridge": null,
+   "d_name": null,
+   "verdict": "no-bridge"
+  },
+  {
+   "sid8": "10000110",
+   "sens8_name": "reason-explain",
+   "bridge": null,
+   "d_name": null,
+   "verdict": "no-bridge"
+  },
+  {
+   "sid8": "10000111",
+   "sens8_name": "unify",
+   "bridge": null,
+   "d_name": null,
+   "verdict": "no-bridge"
+  },
+  {
+   "sid8": "10001000",
+   "sens8_name": "logic-var",
+   "bridge": null,
+   "d_name": null,
+   "verdict": "no-bridge"
+  },
+  {
+   "sid8": "10001001",
+   "sens8_name": "var?",
+   "bridge": null,
+   "d_name": null,
+   "verdict": "no-bridge"
+  },
+  {
+   "sid8": "10001010",
+   "sens8_name": "apply-subst",
+   "bridge": null,
+   "d_name": null,
+   "verdict": "no-bridge"
+  },
+  {
+   "sid8": "10001011",
+   "sens8_name": "walk",
+   "bridge": null,
+   "d_name": null,
+   "verdict": "no-bridge"
+  },
+  {
+   "sid8": "10001100",
+   "sens8_name": "occurs-check?",
+   "bridge": null,
+   "d_name": null,
+   "verdict": "no-bridge"
+  },
+  {
+   "sid8": "10001101",
+   "sens8_name": "claim?",
+   "bridge": null,
+   "d_name": null,
+   "verdict": "no-bridge"
+  },
+  {
+   "sid8": "10001110",
+   "sens8_name": "claim-statement",
+   "bridge": null,
+   "d_name": null,
+   "verdict": "no-bridge"
+  },
+  {
+   "sid8": "10001111",
+   "sens8_name": "claim-review",
+   "bridge": null,
+   "d_name": null,
+   "verdict": "no-bridge"
+  },
+  {
+   "sid8": "10010000",
+   "sens8_name": "evidence?",
+   "bridge": null,
+   "d_name": null,
+   "verdict": "no-bridge"
+  },
+  {
+   "sid8": "10010001",
+   "sens8_name": "evidence-method",
+   "bridge": null,
+   "d_name": null,
+   "verdict": "no-bridge"
+  },
+  {
+   "sid8": "10010010",
+   "sens8_name": "evidence-outcome",
+   "bridge": null,
+   "d_name": null,
+   "verdict": "no-bridge"
+  },
+  {
+   "sid8": "10010011",
+   "sens8_name": "observation?",
+   "bridge": null,
+   "d_name": null,
+   "verdict": "no-bridge"
+  },
+  {
+   "sid8": "10010100",
+   "sens8_name": "observation-statement",
+   "bridge": null,
+   "d_name": null,
+   "verdict": "no-bridge"
+  },
+  {
+   "sid8": "10010101",
+   "sens8_name": "intent?",
+   "bridge": null,
+   "d_name": null,
+   "verdict": "no-bridge"
+  },
+  {
+   "sid8": "10010110",
+   "sens8_name": "intent-goal",
+   "bridge": null,
+   "d_name": null,
+   "verdict": "no-bridge"
+  },
+  {
+   "sid8": "10010111",
+   "sens8_name": "supporting-evidence",
+   "bridge": null,
+   "d_name": null,
+   "verdict": "no-bridge"
+  },
+  {
+   "sid8": "10011000",
+   "sens8_name": "identity",
+   "bridge": null,
+   "d_name": null,
+   "verdict": "no-bridge"
+  },
+  {
+   "sid8": "10011001",
+   "sens8_name": "gensym",
+   "bridge": null,
+   "d_name": null,
+   "verdict": "no-bridge"
+  },
+  {
+   "sid8": "10011010",
+   "sens8_name": "and",
+   "bridge": null,
+   "d_name": null,
+   "verdict": "no-bridge"
+  },
+  {
+   "sid8": "10011011",
+   "sens8_name": "or",
+   "bridge": null,
+   "d_name": null,
+   "verdict": "no-bridge"
+  },
+  {
+   "sid8": "10011100",
+   "sens8_name": "let",
+   "bridge": null,
+   "d_name": null,
+   "verdict": "no-bridge"
+  },
+  {
+   "sid8": "10011101",
+   "sens8_name": "let*",
+   "bridge": null,
+   "d_name": null,
+   "verdict": "no-bridge"
+  },
+  {
+   "sid8": "10011110",
+   "sens8_name": "thread-first",
+   "bridge": null,
+   "d_name": null,
+   "verdict": "no-bridge"
+  },
+  {
+   "sid8": "10011111",
+   "sens8_name": "thread-last",
+   "bridge": null,
+   "d_name": null,
+   "verdict": "no-bridge"
+  },
+  {
+   "sid8": "10100000",
+   "sens8_name": "json-parse",
+   "bridge": null,
+   "d_name": null,
+   "verdict": "no-bridge"
+  },
+  {
+   "sid8": "10100001",
+   "sens8_name": "sha256-hex",
+   "bridge": null,
+   "d_name": null,
+   "verdict": "no-bridge"
+  },
+  {
+   "sid8": "10100010",
+   "sens8_name": "process-run",
+   "bridge": null,
+   "d_name": null,
+   "verdict": "no-bridge"
+  },
+  {
+   "sid8": "10100011",
+   "sens8_name": "tcp-read",
+   "bridge": null,
+   "d_name": null,
+   "verdict": "no-bridge"
+  },
+  {
+   "sid8": "10100100",
+   "sens8_name": "tcp-write",
+   "bridge": null,
+   "d_name": null,
+   "verdict": "no-bridge"
+  },
+  {
+   "sid8": "10100101",
+   "sens8_name": "tcp-listen",
+   "bridge": null,
+   "d_name": null,
+   "verdict": "no-bridge"
+  },
+  {
+   "sid8": "10100110",
+   "sens8_name": "read-file",
+   "bridge": null,
+   "d_name": null,
+   "verdict": "no-bridge"
+  },
+  {
+   "sid8": "10100111",
+   "sens8_name": "write-file",
+   "bridge": null,
+   "d_name": null,
+   "verdict": "no-bridge"
+  },
+  {
+   "sid8": "10101000",
+   "sens8_name": "invoke",
+   "bridge": null,
+   "d_name": null,
+   "verdict": "no-bridge"
+  },
+  {
+   "sid8": "10101001",
+   "sens8_name": "binary",
+   "bridge": null,
+   "d_name": null,
+   "verdict": "no-bridge"
+  },
+  {
+   "sid8": "10101010",
+   "sens8_name": "label",
+   "bridge": null,
+   "d_name": null,
+   "verdict": "no-bridge"
+  },
+  {
+   "sid8": "10101011",
+   "sens8_name": "null?",
+   "bridge": "D4:0101",
+   "d_name": "null?",
+   "verdict": "match"
+  },
+  {
+   "sid8": "10101100",
+   "sens8_name": "subst",
+   "bridge": "D5:11111",
+   "d_name": "subst",
+   "verdict": "match"
+  },
+  {
+   "sid8": "10101101",
+   "sens8_name": "sublis",
+   "bridge": null,
+   "d_name": null,
+   "verdict": "no-bridge"
+  },
+  {
+   "sid8": "10101110",
+   "sens8_name": "maplist",
+   "bridge": null,
+   "d_name": null,
+   "verdict": "no-bridge"
+  },
+  {
+   "sid8": "10101111",
+   "sens8_name": "apply",
+   "bridge": null,
+   "d_name": null,
+   "verdict": "no-bridge"
+  },
+  {
+   "sid8": "10110000",
+   "sens8_name": "divmod",
+   "bridge": null,
+   "d_name": null,
+   "verdict": "no-bridge"
+  },
+  {
+   "sid8": "10110001",
+   "sens8_name": "answer-not",
+   "bridge": null,
+   "d_name": null,
+   "verdict": "no-bridge"
+  },
+  {
+   "sid8": "10110010",
+   "sens8_name": "answer-and",
+   "bridge": null,
+   "d_name": null,
+   "verdict": "no-bridge"
+  },
+  {
+   "sid8": "10110011",
+   "sens8_name": "answer-or",
+   "bridge": null,
+   "d_name": null,
+   "verdict": "no-bridge"
+  },
+  {
+   "sid8": "10110100",
+   "sens8_name": "answer-weaken",
+   "bridge": null,
+   "d_name": null,
+   "verdict": "no-bridge"
+  },
+  {
+   "sid8": "10110101",
+   "sens8_name": "answer-atom",
+   "bridge": null,
+   "d_name": null,
+   "verdict": "no-bridge"
+  },
+  {
+   "sid8": "10110110",
+   "sens8_name": "answer-eq",
+   "bridge": null,
+   "d_name": null,
+   "verdict": "no-bridge"
+  }
+ ]
+}

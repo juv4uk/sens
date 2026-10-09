@@ -1,0 +1,32 @@
+name: D10 time-law evidence research gate
+on:
+  pull_request:
+    paths:
+      - "knowledge/d10-time-law-review-v2.json"
+      - "knowledge/d10-v1-semantic-inventory.json"
+      - "knowledge/d1-d9-foundation.json"
+      - "lib/time.lisp"
+      - "scripts/check_d10_time_law_review_v2.py"
+      - "tests/test_d10_time_law_review_v2.py"
+      - ".github/workflows/d10-time-review-v2.yml"
+  push:
+    branches: [main]
+    paths:
+      - "knowledge/d10-time-law-review-v2.json"
+      - "knowledge/d10-v1-semantic-inventory.json"
+      - "knowledge/d1-d9-foundation.json"
+      - "lib/time.lisp"
+      - "scripts/check_d10_time_law_review_v2.py"
+      - "tests/test_d10_time_law_review_v2.py"
+      - ".github/workflows/d10-time-review-v2.yml"
+  workflow_dispatch:
+jobs:
+  pinned-sources-dedup-and-falsifiers:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Require exact source Git blob, definitions and full registries
+        run: python3 scripts/check_d10_time_law_review_v2.py --require-checkout
+      - name: Independent reference models and negative guards
+        run: python3 -m unittest discover -s tests -p 'test_d10_time_law_review_v2.py' -v

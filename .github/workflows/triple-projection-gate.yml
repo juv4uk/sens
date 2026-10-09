@@ -1,0 +1,73 @@
+name: Triple projection gate
+
+# Every new executable admission requires an exact Ukrainian .lisp,
+# physical .sens and extensionless one-line spaced 0/1 view.
+# Historical/unsupported backlogs are NEVER silently admitted to release.
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  triple:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      # One existing source-domain-bounded positive contract, NOT a claim
+      # that D4 or historical no-view programs are already source-admitted.
+      - name: Require committed Ukrainian D1 source / physical T5 / bit-view
+        run: |
+          bash scripts/check-triple-projection.sh \
+            --fixture tests/fixtures/migration-d1-cond-cohort/branch.lisp
+
+      # The default full-corpus checker is INTENTIONALLY fail-closed while
+      # historical legacy programs lack a view or a ratified UK translator.
+      # Record that as outstanding migration debt, not as a regression in
+      # an unrelated PR. Unexpected statuses and false-green are guarded
+      # by the independent adversarial safety test suite.
+      - name: Show full historical triple debt without declaring admission
+        shell: bash
+        run: |
+          set -euo pipefail
+          set +e
+          bash scripts/check-triple-projection.sh > "$RUNNER_TEMP/triple-debt.log" 2>&1
+          result=$?
+          set -e
+          cat "$RUNNER_TEMP/triple-debt.log"
+          case "$result" in
+            0)
+              echo 'Historical bounded default is now complete; independent release oracle still required.' >> "$GITHUB_STEP_SUMMARY"
+              ;;
+            2)
+              grep -q 'result=BLOCKED' "$RUNNER_TEMP/triple-debt.log"
+              echo 'BLOCKED historical/unsupported triples remain. This is NOT release admission.' >> "$GITHUB_STEP_SUMMARY"
+              ;;
+            *)
+              echo "Unexpected triple checker exit=$result" >&2
+              exit 1
+              ;;
+          esac
+
+      - name: Preserve fail-closed tamper and no-overwrite regressions
+        run: python3 -m unittest discover -s tests -p test_triple_projection_script_safety.py -v
+
+      - name: Inventory all real Lisp / physical T5 / view states
+        if: always()
+        run: python3 scripts/sens_inventory.py lib tests/fixtures --json /tmp/inventory.json
+
+      - name: Upload true inventory
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: triple-inventory
+          path: /tmp/inventory.json
+          if-no-files-found: warn

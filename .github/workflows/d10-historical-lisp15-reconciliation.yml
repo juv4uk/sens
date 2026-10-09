@@ -1,0 +1,23 @@
+name: D10 historical Lisp 1.5 reconciliation
+on:
+  pull_request:
+    paths:
+      - "knowledge/d10-historical-lisp15-reconciliation-20261009.json"
+      - "knowledge/d1-d9-foundation.json"
+      - "knowledge/d10-v1-semantic-inventory.json"
+      - "scripts/check_d10_historical_lisp15_reconciliation.py"
+      - "tests/test_d10_historical_lisp15_reconciliation.py"
+      - ".github/workflows/d10-historical-lisp15-reconciliation.yml"
+  workflow_dispatch:
+jobs:
+  research-only:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - name: Reconcile against canonical D1-D9 and full selected D10
+        run: python3 scripts/check_d10_historical_lisp15_reconciliation.py
+      - name: Reject authority leakage
+        run: python3 -m unittest discover -s tests -p 'test_d10_historical_lisp15_reconciliation.py' -v
+      - name: No generated changes
+        run: git diff --exit-code

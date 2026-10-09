@@ -1,0 +1,34 @@
+name: Ukrainian compiler legacy completion gate
+
+on:
+  pull_request:
+    paths:
+      - "crates/sens-cli/tests/active_lib_sens_completion.rs"
+      - "lib/compiler-nucleus.lisp"
+      - "crates/sens/src/mixed_source.rs"
+      - "crates/sens/src/semantic_registry.rs"
+      - ".github/workflows/active-uk-compiler-completion.yml"
+  push:
+    branches: [main]
+    paths:
+      - "crates/sens-cli/tests/active_lib_sens_completion.rs"
+      - ".github/workflows/active-uk-compiler-completion.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  completion-proof:
+    runs-on: ubuntu-latest
+    timeout-minutes: 22
+    env:
+      CARGO_BUILD_JOBS: "1"
+      RUST_TEST_THREADS: "1"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Active lib completion — exact Ukrainian compiler source, strict old-source gate elsewhere
+        run: cargo test -p sens-cli --test cli active_lib_sens_completion -- --nocapture
+      - name: Compiler exact D4 identities and preservation of readable Ukrainian source
+        run: cargo test -p sens --test compiler_uk_projection -- --nocapture

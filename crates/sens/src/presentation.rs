@@ -374,7 +374,9 @@ mod tests {
         assert_eq!(render_value_for_presentation(&yes, PresentationLanguage::Ukrainian), "так");
         assert_eq!(render_value_for_presentation(&yes, PresentationLanguage::Sanskrit), "ām");
         assert_eq!(render_value_for_presentation(&open, PresentationLanguage::Ukrainian), "відкрити");
-        assert_eq!(render_value_for_presentation(&empty, PresentationLanguage::Sanskrit), "śūnya");
+        // D3:000 is the same literal structural () in every human view.
+        assert_eq!(render_value_for_presentation(&empty, PresentationLanguage::Ukrainian), "()");
+        assert_eq!(render_value_for_presentation(&empty, PresentationLanguage::Sanskrit), "()");
         assert_eq!(render_value_for_presentation(&lambda, PresentationLanguage::Ukrainian), "функція");
         assert_eq!(render_value_for_presentation(&lambda, PresentationLanguage::Sanskrit), "phalana");
 

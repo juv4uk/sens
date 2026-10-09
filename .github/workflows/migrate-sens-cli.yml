@@ -4,6 +4,10 @@ on:
   pull_request:
     paths:
       - "scripts/migrate-sens.py"
+      - "knowledge/migration-nonprogram-domain-tables-2026-10-08.json"
+      - "knowledge/migration-nonprogram-comment-only-loaders-2026-10-08.json"
+      - "knowledge/migration-nonprogram-knowledge-records-2026-10-08.json"
+      - "scripts/report_original_migration_candidates.py"
       - "knowledge/migration-nonprogram-isa-manifest-2026-10-08.json"
       - "knowledge/migration-nonprogram-schema-manifest-2026-10-08.json"
       - "knowledge/migration-nonprogram-evidence-manifest-2026-10-08.json"
@@ -18,6 +22,10 @@ on:
     branches: [main]
     paths:
       - "scripts/migrate-sens.py"
+      - "knowledge/migration-nonprogram-domain-tables-2026-10-08.json"
+      - "knowledge/migration-nonprogram-comment-only-loaders-2026-10-08.json"
+      - "knowledge/migration-nonprogram-knowledge-records-2026-10-08.json"
+      - "scripts/report_original_migration_candidates.py"
       - "knowledge/migration-nonprogram-isa-manifest-2026-10-08.json"
       - "knowledge/migration-nonprogram-schema-manifest-2026-10-08.json"
       - "knowledge/migration-nonprogram-evidence-manifest-2026-10-08.json"

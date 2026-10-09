@@ -1,0 +1,3 @@
+fib	N=16
+loop	N=5000
+mapfold	N=200,R=5

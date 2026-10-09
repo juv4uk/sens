@@ -1,0 +1,464 @@
+[
+ {
+  "file": "lib/bridge/prolog-to-datalog.lisp",
+  "tokens": 11,
+  "mapped": 9,
+  "unmapped": 2
+ },
+ {
+  "file": "lib/canon.lisp",
+  "tokens": 9,
+  "mapped": 9,
+  "unmapped": 0
+ },
+ {
+  "file": "lib/clips-import.lisp",
+  "tokens": 25,
+  "mapped": 13,
+  "unmapped": 12
+ },
+ {
+  "file": "lib/content-store.lisp",
+  "tokens": 7,
+  "mapped": 2,
+  "unmapped": 5
+ },
+ {
+  "file": "lib/core.lisp",
+  "tokens": 56,
+  "mapped": 15,
+  "unmapped": 41
+ },
+ {
+  "file": "lib/core1-compiler-prelude.lisp",
+  "tokens": 5,
+  "mapped": 3,
+  "unmapped": 2
+ },
+ {
+  "file": "lib/core1-compiler-sid-resolver.lisp",
+  "tokens": 2,
+  "mapped": 2,
+  "unmapped": 0
+ },
+ {
+  "file": "lib/core1-sid8-bootstrap-overlay.lisp",
+  "tokens": 7,
+  "mapped": 5,
+  "unmapped": 2
+ },
+ {
+  "file": "lib/core1.lisp",
+  "tokens": 15,
+  "mapped": 9,
+  "unmapped": 6
+ },
+ {
+  "file": "lib/core3.lisp",
+  "tokens": 4,
+  "mapped": 2,
+  "unmapped": 2
+ },
+ {
+  "file": "lib/core4.lisp",
+  "tokens": 56,
+  "mapped": 15,
+  "unmapped": 41
+ },
+ {
+  "file": "lib/domains/d8.lisp",
+  "tokens": 256,
+  "mapped": 19,
+  "unmapped": 237
+ },
+ {
+  "file": "lib/epistemic.lisp",
+  "tokens": 19,
+  "mapped": 12,
+  "unmapped": 7
+ },
+ {
+  "file": "lib/forward.lisp",
+  "tokens": 21,
+  "mapped": 11,
+  "unmapped": 10
+ },
+ {
+  "file": "lib/fs.lisp",
+  "tokens": 10,
+  "mapped": 7,
+  "unmapped": 3
+ },
+ {
+  "file": "lib/function-table-mechanisms.lisp",
+  "tokens": 13,
+  "mapped": 9,
+  "unmapped": 4
+ },
+ {
+  "file": "lib/generated/function-table.lisp",
+  "tokens": 256,
+  "mapped": 19,
+  "unmapped": 237
+ },
+ {
+  "file": "lib/generated/meta-semantic-registry.lisp",
+  "tokens": 182,
+  "mapped": 19,
+  "unmapped": 163
+ },
+ {
+  "file": "lib/generated/uk-surface-audit.lisp",
+  "tokens": 182,
+  "mapped": 19,
+  "unmapped": 163
+ },
+ {
+  "file": "lib/guard.lisp",
+  "tokens": 13,
+  "mapped": 7,
+  "unmapped": 6
+ },
+ {
+  "file": "lib/island-lowering.lisp",
+  "tokens": 12,
+  "mapped": 7,
+  "unmapped": 5
+ },
+ {
+  "file": "lib/island-math-evidence.lisp",
+  "tokens": 1,
+  "mapped": 0,
+  "unmapped": 1
+ },
+ {
+  "file": "lib/knowledge.lisp",
+  "tokens": 40,
+  "mapped": 12,
+  "unmapped": 28
+ },
+ {
+  "file": "lib/life-1-scheduler.lisp",
+  "tokens": 14,
+  "mapped": 9,
+  "unmapped": 5
+ },
+ {
+  "file": "lib/linter.lisp",
+  "tokens": 29,
+  "mapped": 10,
+  "unmapped": 19
+ },
+ {
+  "file": "lib/lisp-fs.lisp",
+  "tokens": 26,
+  "mapped": 11,
+  "unmapped": 15
+ },
+ {
+  "file": "lib/machine/admission/x86-64.lisp",
+  "tokens": 24,
+  "mapped": 8,
+  "unmapped": 16
+ },
+ {
+  "file": "lib/machine/atoms/x86-64.lisp",
+  "tokens": 6,
+  "mapped": 4,
+  "unmapped": 2
+ },
+ {
+  "file": "lib/machine/block.lisp",
+  "tokens": 5,
+  "mapped": 4,
+  "unmapped": 1
+ },
+ {
+  "file": "lib/machine/capability-axis.lisp",
+  "tokens": 9,
+  "mapped": 7,
+  "unmapped": 2
+ },
+ {
+  "file": "lib/machine/cpu/intel-core-i5-6400-inventory.lisp",
+  "tokens": 1,
+  "mapped": 0,
+  "unmapped": 1
+ },
+ {
+  "file": "lib/machine/dispatch/native-first-coverage.lisp",
+  "tokens": 2,
+  "mapped": 2,
+  "unmapped": 0
+ },
+ {
+  "file": "lib/machine/dispatch/native-first-execute.lisp",
+  "tokens": 17,
+  "mapped": 9,
+  "unmapped": 8
+ },
+ {
+  "file": "lib/machine/dispatch/native-first-parity.lisp",
+  "tokens": 16,
+  "mapped": 8,
+  "unmapped": 8
+ },
+ {
+  "file": "lib/machine/dispatch/native-first.lisp",
+  "tokens": 11,
+  "mapped": 9,
+  "unmapped": 2
+ },
+ {
+  "file": "lib/machine/effects/u64.lisp",
+  "tokens": 18,
+  "mapped": 7,
+  "unmapped": 11
+ },
+ {
+  "file": "lib/machine/encoding/admission-iclass-projection.lisp",
+  "tokens": 1,
+  "mapped": 0,
+  "unmapped": 1
+ },
+ {
+  "file": "lib/machine/encoding/admitted-iclass-index.lisp",
+  "tokens": 1,
+  "mapped": 0,
+  "unmapped": 1
+ },
+ {
+  "file": "lib/machine/encoding/x86-64.lisp",
+  "tokens": 20,
+  "mapped": 11,
+  "unmapped": 9
+ },
+ {
+  "file": "lib/machine/intel-core-i5-6400.lisp",
+  "tokens": 62,
+  "mapped": 10,
+  "unmapped": 52
+ },
+ {
+  "file": "lib/machine/layout/pair-x86-64.lisp",
+  "tokens": 2,
+  "mapped": 2,
+  "unmapped": 0
+ },
+ {
+  "file": "lib/machine/lowering/semantic-effects.lisp",
+  "tokens": 5,
+  "mapped": 4,
+  "unmapped": 1
+ },
+ {
+  "file": "lib/machine/lowering/semantic-x86-64.lisp",
+  "tokens": 69,
+  "mapped": 14,
+  "unmapped": 55
+ },
+ {
+  "file": "lib/machine/operands/x86-64.lisp",
+  "tokens": 24,
+  "mapped": 9,
+  "unmapped": 15
+ },
+ {
+  "file": "lib/machine/profile/minimal-runtime-x86-64.lisp",
+  "tokens": 12,
+  "mapped": 10,
+  "unmapped": 2
+ },
+ {
+  "file": "lib/machine/projection/x86-64.lisp",
+  "tokens": 9,
+  "mapped": 7,
+  "unmapped": 2
+ },
+ {
+  "file": "lib/macro.lisp",
+  "tokens": 12,
+  "mapped": 8,
+  "unmapped": 4
+ },
+ {
+  "file": "lib/mechanism-selector.lisp",
+  "tokens": 14,
+  "mapped": 8,
+  "unmapped": 6
+ },
+ {
+  "file": "lib/meta-eval-first-class.lisp",
+  "tokens": 18,
+  "mapped": 9,
+  "unmapped": 9
+ },
+ {
+  "file": "lib/meta-eval-mutual.lisp",
+  "tokens": 13,
+  "mapped": 9,
+  "unmapped": 4
+ },
+ {
+  "file": "lib/meta-eval.lisp",
+  "tokens": 26,
+  "mapped": 9,
+  "unmapped": 17
+ },
+ {
+  "file": "lib/narrate.lisp",
+  "tokens": 21,
+  "mapped": 10,
+  "unmapped": 11
+ },
+ {
+  "file": "lib/persistent-map.lisp",
+  "tokens": 24,
+  "mapped": 9,
+  "unmapped": 15
+ },
+ {
+  "file": "lib/persistent-vector.lisp",
+  "tokens": 22,
+  "mapped": 10,
+  "unmapped": 12
+ },
+ {
+  "file": "lib/process.lisp",
+  "tokens": 12,
+  "mapped": 7,
+  "unmapped": 5
+ },
+ {
+  "file": "lib/quantity.lisp",
+  "tokens": 22,
+  "mapped": 9,
+  "unmapped": 13
+ },
+ {
+  "file": "lib/reason.lisp",
+  "tokens": 33,
+  "mapped": 12,
+  "unmapped": 21
+ },
+ {
+  "file": "lib/result-status.lisp",
+  "tokens": 20,
+  "mapped": 8,
+  "unmapped": 12
+ },
+ {
+  "file": "lib/si-derived.lisp",
+  "tokens": 3,
+  "mapped": 1,
+  "unmapped": 2
+ },
+ {
+  "file": "lib/si.lisp",
+  "tokens": 5,
+  "mapped": 5,
+  "unmapped": 0
+ },
+ {
+  "file": "lib/surface/function-signatures.lisp",
+  "tokens": 57,
+  "mapped": 9,
+  "unmapped": 48
+ },
+ {
+  "file": "lib/surface/sa.lisp",
+  "tokens": 1,
+  "mapped": 1,
+  "unmapped": 0
+ },
+ {
+  "file": "lib/surface/semantic-registry-api.lisp",
+  "tokens": 16,
+  "mapped": 9,
+  "unmapped": 7
+ },
+ {
+  "file": "lib/surface/semantic-registry-experiment.lisp",
+  "tokens": 168,
+  "mapped": 17,
+  "unmapped": 151
+ },
+ {
+  "file": "lib/surface/semantic-registry.lisp",
+  "tokens": 256,
+  "mapped": 19,
+  "unmapped": 237
+ },
+ {
+  "file": "lib/surface/uk-docs.lisp",
+  "tokens": 140,
+  "mapped": 14,
+  "unmapped": 126
+ },
+ {
+  "file": "lib/surface/uk.lisp",
+  "tokens": 44,
+  "mapped": 3,
+  "unmapped": 41
+ },
+ {
+  "file": "lib/surface/український-профіль-джерела.lisp",
+  "tokens": 182,
+  "mapped": 19,
+  "unmapped": 163
+ },
+ {
+  "file": "lib/tcp.lisp",
+  "tokens": 8,
+  "mapped": 6,
+  "unmapped": 2
+ },
+ {
+  "file": "lib/time.lisp",
+  "tokens": 30,
+  "mapped": 8,
+  "unmapped": 22
+ },
+ {
+  "file": "lib/translation.lisp",
+  "tokens": 18,
+  "mapped": 9,
+  "unmapped": 9
+ },
+ {
+  "file": "lib/understand.lisp",
+  "tokens": 14,
+  "mapped": 8,
+  "unmapped": 6
+ },
+ {
+  "file": "lib/unify-observe.lisp",
+  "tokens": 9,
+  "mapped": 6,
+  "unmapped": 3
+ },
+ {
+  "file": "lib/unify.lisp",
+  "tokens": 19,
+  "mapped": 9,
+  "unmapped": 10
+ },
+ {
+  "file": "lib/utf8.lisp",
+  "tokens": 27,
+  "mapped": 11,
+  "unmapped": 16
+ },
+ {
+  "file": "lib/world.lisp",
+  "tokens": 27,
+  "mapped": 11,
+  "unmapped": 16
+ },
+ {
+  "file": "lib/yantra.lisp",
+  "tokens": 33,
+  "mapped": 12,
+  "unmapped": 21
+ }
+]

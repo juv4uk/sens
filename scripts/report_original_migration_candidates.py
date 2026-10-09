@@ -182,10 +182,13 @@ def git_blob_sha(path: Path) -> str:
 # manifests (#4460). This overlays the RESEARCH work queue only; it does
 # NOT modify SENS semantics or suppress the raw canonical migration scan.
 NONPROGRAM_MANIFESTS = (
+    ("domain-table", "knowledge/migration-nonprogram-domain-tables-2026-10-08.json", 9),
+    ("comment-only-loader", "knowledge/migration-nonprogram-comment-only-loaders-2026-10-08.json", 2),
     ("isa", "knowledge/migration-nonprogram-isa-manifest-2026-10-08.json", 25),
     ("schema", "knowledge/migration-nonprogram-schema-manifest-2026-10-08.json", 21),
     ("evidence", "knowledge/migration-nonprogram-evidence-manifest-2026-10-08.json", 8),
     ("expr-record", "knowledge/migration-nonprogram-expr-records-2026-10-08.json", 13),
+    ("knowledge-record", "knowledge/migration-nonprogram-knowledge-records-2026-10-08.json", 14),
 )
 
 
@@ -237,6 +240,19 @@ def load_nonprogram_classification(root: Path) -> dict[str, dict]:
                 raise ValueError(f"duplicate nonprogram source path: {path}")
             # A fixed reviewed cohort is not permission to designate arbitrary
             # executable source as DATA.
+            # These are old Lisp *load markers* containing comments only,
+            # NOT zero-argument programs to encode as physical T5.
+            # Exact path and SHA are both required; a crafted manifest cannot
+            # exempt any other active library file from executable migration.
+            if cohort == "comment-only-loader":
+                if path not in {"lib/core2.lisp", "lib/surface/ukr.lisp"}:
+                    raise ValueError(f"unreviewed comment-only loader path: {path}")
+                lines = (root / path).read_text(encoding="utf-8").splitlines()
+                if any(line.strip() and not line.lstrip().startswith(";") for line in lines):
+                    raise ValueError(f"comment-only loader contains executable forms: {path}")
+            if cohort == "domain-table" and path not in {
+                    f"lib/domains/d{n}.lisp" for n in range(1, 10)}:
+                raise ValueError(f"mis-scoped domain-table source: {path}")
             if cohort == "isa" and not path.startswith("lib/machine/isa/"):
                 raise ValueError(f"mis-scoped ISA catalogue: {path}")
             if cohort == "schema" and not path.startswith(
@@ -247,6 +263,8 @@ def load_nonprogram_classification(root: Path) -> dict[str, dict]:
                 raise ValueError(f"mis-scoped evidence data: {path}")
             if cohort == "expr-record" and not path.startswith("tests/fixtures/"):
                 raise ValueError(f"mis-scoped test-record envelope: {path}")
+            if cohort == "knowledge-record" and (not path.startswith("knowledge/") or path.count("/") != 1):
+                raise ValueError(f"mis-scoped knowledge data record: {path}")
             row["cohort"] = cohort
             rows[path] = row
     return rows
