@@ -637,7 +637,10 @@
 (00001001 my-cond-has-migration-clause?
   (00001000 (clauses)
     (00000111
-      ((00000010 clauses)
+      ; Core4 ATOM(()) yields structural (), not an affirmative D1 bit.
+      ; Match this exact result as data: two-part truthiness would miss it,
+      ; recurse into (), and try CAR/CDR on an empty clause list.
+      ((00000010 clauses) ()
        (00000001 ()))
       (t
        (00000111
@@ -648,12 +651,14 @@
 (00001001 my-eval-cond-result-mode
   (00001000 (clauses env-ref migration-compatibility?)
     (00000111
-      ((00000010 clauses)
+      ; Terminate on the exact structural empty result from Core4 ATOM.
+      ; Never use host truthiness or an invented D1:1 for ().
+      ((00000010 clauses) ()
        (00000111
          (migration-compatibility? (my-result-ok (00000001 ())))
          (t
           (my-result-fail
-            (my-error (00000001 unsatisfied-conditional) (00000001 cond)))))
+            (my-error (00000001 unsatisfied-conditional) (00000001 cond))))))
       (t
        (10011100 ((clause (00000101 clauses)))
          (00000111
@@ -683,7 +688,7 @@
             (my-result-fail
               (my-error
                 (00000001 invalid-form)
-                (00100111 (00000001 cond-clause) clause)))))))))))
+                (00100111 (00000001 cond-clause) clause))))))))))
 
 (00001001 my-eval-cond-result
   (00001000 (clauses env-ref)
