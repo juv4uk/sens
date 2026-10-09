@@ -42,7 +42,31 @@ def main():
 
     sizes=[int(x) for x in args.sizes.split(",") if x]
     workloads=[x for x in args.workloads.split(",") if x]
+    if (not sizes or any(n <= 0 for n in sizes) or len(sizes) != len(set(sizes))
+            or args.reps <= 0):
+        ap.error("sizes must be distinct positive integers; reps must be positive")
+    if (not workloads or len(workloads) != len(set(workloads))
+            or any(name not in WORKLOADS for name in workloads)):
+        ap.error("workloads must be distinct known names")
     args.out.mkdir(parents=True,exist_ok=True)
+
+    # A timed loop is eligible only when it performs its declared work and
+    # preserves the exact-width payload. Merely returning exit code zero is
+    # not proof: the compiler could otherwise benchmark an empty hot path.
+    mask=(1 << 64)-1
+
+    def check_fields(row, *, workload, n, reps, mode, bits, packed):
+        expected={
+            "mode":mode, "workload":workload, "n":str(n),
+            "reps":str(reps), "semantic_bits":str(bits),
+            "physical_bytes":str(packed),
+        }
+        for name,value in expected.items():
+            if row.get(name) != value:
+                raise RuntimeError(
+                    f"benchmark contract drift {workload}/{mode}/{name}: "
+                    f"expected {value!r}, got {row.get(name)!r}"
+                )
 
     rows=[]
     for workload in workloads:
@@ -51,13 +75,47 @@ def main():
             baseline=parse_result(verify.stdout)
             semantic_bits=int(baseline["semantic_bits"])
             physical_bytes=int(baseline["physical_bytes"])
+            check_fields(baseline,workload=workload,n=n,reps=1,
+                         mode="verify",bits=semantic_bits,packed=physical_bytes)
+            if physical_bytes != (semantic_bits+7)//8 or semantic_bits < n:
+                raise RuntimeError(f"{workload}/{n}: invalid exact-width density")
+            expected_scan=(int(baseline["checksum"])*args.reps)&mask
+
+            # The pack lane sums every packed-word bit offset and then the
+            # final bit/byte lengths. This differs deliberately from the
+            # decoded-value checksum used by unpacked and decode lanes.
+            if workload == "mixed":
+                widths=[1,2,3]
+            else:
+                widths=[semantic_bits//n]
+            cursor=0
+            offset_sum=0
+            for i in range(n):
+                offset_sum=(offset_sum+cursor)&mask
+                cursor+=widths[i%len(widths)]
+            if cursor != semantic_bits:
+                raise RuntimeError(f"{workload}/{n}: inconsistent width schedule")
+            expected_pack=((offset_sum+semantic_bits+physical_bytes)*args.reps)&mask
+
             unpacked_bytes=n
-            utilization=semantic_bits/(physical_bytes*8) if physical_bytes else 1.0
-            density=physical_bytes/unpacked_bytes if unpacked_bytes else 0.0
+            utilization=semantic_bits/(physical_bytes*8)
+            density=physical_bytes/unpacked_bytes
 
             base_irefs,base_result=cachegrind(args.binary,"base",workload,n,args.reps)
+            check_fields(base_result,workload=workload,n=n,reps=args.reps,
+                         mode="base",bits=semantic_bits,packed=physical_bytes)
+            if int(base_result["checksum"]) != n:
+                raise RuntimeError(f"{workload}/{n}: empty-loop baseline was not executed")
             for mode in MODES:
                 irefs,result=cachegrind(args.binary,mode,workload,n,args.reps)
+                check_fields(result,workload=workload,n=n,reps=args.reps,
+                             mode=mode,bits=semantic_bits,packed=physical_bytes)
+                expected=expected_pack if mode=="pack" else expected_scan
+                if int(result["checksum"]) != expected:
+                    raise RuntimeError(
+                        f"{workload}/{n}/{mode}: checksum mismatch "
+                        f"expected={expected} actual={result['checksum']}"
+                    )
                 ops=n*args.reps
                 net_irefs=irefs-base_irefs
                 if net_irefs < 0:
