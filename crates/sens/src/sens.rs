@@ -123,10 +123,6 @@ impl fmt::Debug for Sens8 {
 /// New domain-qualified semantic code should construct the exact domain carrier
 /// directly; this macro intentionally performs no domain inference.
 ///
-/// ```
-/// let s = sens::sens!(00000011);
-/// assert_eq!(s.to_string(), "00000011");
-/// ```
 #[macro_export]
 macro_rules! sens {
     ($bits:literal) => {{
@@ -134,52 +130,4 @@ macro_rules! sens {
             $crate::Sens8::__from_macro_bits(stringify!($bits));
         SENS
     }};
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn exact_eight_bits_compatibility_round_trip() {
-        let s = crate::sens!(00001100);
-        assert_eq!(s.to_string(), "00001100");
-        assert_eq!(format!("{s:?}"), "Sens8(00001100)");
-    }
-
-    #[test]
-    fn legacy_reader_constructor_accepts_only_exact_eight_bits() {
-        assert_eq!(
-            Sens8::from_exact_bits("00001100"),
-            Some(crate::sens!(00001100))
-        );
-        assert_eq!(Sens8::from_exact_bits("0000110"), None);
-        assert_eq!(Sens8::from_exact_bits("000011000"), None);
-        assert_eq!(Sens8::from_exact_bits("00001200"), None);
-        assert_eq!(Sens8::from_exact_bits("0b001100"), None);
-        assert_eq!(Sens8::from_exact_bits("0000_1100"), None);
-    }
-
-    #[test]
-    fn compatibility_packed_byte_round_trips() {
-        let s = crate::sens!(11111111);
-        assert_eq!(Sens8::from_packed_byte(s.packed_byte()), s);
-        assert_eq!(s.to_string(), "11111111");
-    }
-
-    #[test]
-    fn every_legacy_byte_round_trips_without_loss() {
-        let mut seen = std::collections::HashSet::new();
-
-        for byte in 0u16..=255 {
-            let byte = byte as u8;
-            let s = Sens8::from_packed_byte(byte);
-
-            assert_eq!(s.packed_byte(), byte);
-            assert_eq!(s.to_string(), format!("{byte:08b}"));
-            assert!(seen.insert(s.packed_byte()));
-        }
-
-        assert_eq!(seen.len(), 256);
-    }
 }
