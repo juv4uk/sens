@@ -107,7 +107,7 @@ assert [r.bits for r in d2] == ["00", "01", "10", "11"]
 assert [r.bits for r in d3] == [f"{n:03b}" for n in range(8)]
 assert (d1[1].width, d1[1].bits) != (d3[1].width, d3[1].bits)
 
-# Physical .sens execution must stay on the packed-byte path, not a text projection.
+# Physical .sens execution must stay on decoded typed binary words, not a text projection.
 cli_source = (ROOT / "crates/sens-cli/src/main.rs").read_text(encoding="utf-8")
 route_start = cli_source.index("fn eval_physical_t5(")
 route_end = cli_source.index("\nfn main()", route_start)
@@ -126,7 +126,7 @@ physical_decoder = transport_source[decode_start:decode_end]
 assert "parts.join(" not in physical_decoder
 assert "parse_binary_source_words(&visible)" not in physical_decoder
 
-# The alternate sens-trit entrypoint must obey the same direct packed path.
+# The alternate sens-trit entrypoint must obey the same direct typed-word path.
 trit_source = (ROOT / "crates/sens-cli/src/bin/sens-trit.rs").read_text(encoding="utf-8")
 trit_start = trit_source.index("fn eval_t5_bytes_core4(")
 trit_end = trit_source.index("\n}\n", trit_start) + 3
@@ -142,7 +142,7 @@ assert "sens::parse_canonical_binary(&visible)" not in trit_route
 # Transport validation itself must keep D2 grammar on the same direct typed words,
 # rather than serialize and immediately decode a second packed payload.
 transport_start = transport_source.index("pub(crate) fn parse_t5_domain_words(")
-transport_end = transport_source.index("\\n}", transport_start)
+transport_end = transport_source.index("\n}", transport_start)
 transport_route = transport_source[transport_start:transport_end]
 assert "crate::parse_canonical_word_sequence(words)" in transport_route
 assert "pack_binary_source_words" not in transport_route
