@@ -120,7 +120,12 @@
       ((00100001 (00100010 (fs-package-field (00000001 address) package)
                     (knowledge-content-address (fs-package-field (00000001 value) package))))
        (00100111 (00000001 rejected) (00000001 address-mismatch)))
-      (t (00100111 (00000001 accepted) (fs-package-field (00000001 value) package))))))
+      ((00100010
+        (00100001
+          (00100010 (fs-package-field (00000001 address) package)
+                    (knowledge-content-address (fs-package-field (00000001 value) package))))
+        (00100010 (00000001 d1-no-left) (00000001 d1-no-right)))
+       (00100111 (00000001 accepted) (fs-package-field (00000001 value) package))))))
 
 (00001001 fs-serialize-object
   (00001000 (value)
@@ -145,7 +150,11 @@
        (00100111 (00000001 rejected) (00000001 invalid-bindings)))
       ((00100001 (knowledge-proper-list? (fs-package-field (00000001 objects) package)))
        (00100111 (00000001 rejected) (00000001 invalid-objects)))
-      (t (00100111 (00000001 accepted) package)))))
+      ((00100010
+        (00100001
+          (knowledge-proper-list? (fs-package-field (00000001 objects) package)))
+        (00100010 (00000001 d1-no-left) (00000001 d1-no-right)))
+       (00100111 (00000001 accepted) package)))))
 
 (00001001 fs-serialize-root
   (00001000 (fs)
