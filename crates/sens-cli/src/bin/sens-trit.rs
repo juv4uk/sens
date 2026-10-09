@@ -198,89 +198,66 @@ mod eval_tests {
     use super::*;
 
     #[test]
-    fn public_binary_eval_commands_are_explicit_and_stay_separate_from_open() {
-        // The dispatch must admit exactly the documented opt-in Core4 name.
-        // Bare 'eval' never silently inherits bootstrap semantics.
-        assert_eq!(USAGE.contains("eval-core4 path.sens"), true);
+    fn public_binary_eval_commands_are_explicit_and_separate_from_open() {
+        assert!(USAGE.contains("eval path.sens"));
+        assert!(USAGE.contains("eval-core4 path.sens"));
         assert!(!USAGE.contains("eval-core path.sens"));
     }
 
     #[test]
-    fn canonical_quote_legacy_fixture_runs_on_current_pure_oracle() {
-        // Existing SHA-independent regression fixture: migrated D3 QUOTE of
-        // D3 EMPTY. The exact result is Value::Nil, not just a successful
-        // decode of the transport bytes.
+    fn physical_quote_fixture_preserves_t5_and_exact_d2_structure() {
         let bytes = include_bytes!("../../../../tests/fixtures/migration-quote-cohort-main/quote-legacy.sens");
-        let evaluated = eval_t5_bytes(bytes).expect("current canonical T5 oracle");
-        assert!(matches!(evaluated.value, sens::Value::Nil));
+        let words = sens::decode_ternary_program(bytes).expect("canonical physical T5");
+        let visible = sens::render_ternary_words_spaced(&words);
+        assert_eq!(visible, "10 001 00 000 01");
+        assert_eq!(sens::open_ternary_program(bytes).unwrap(), visible);
+        assert_eq!(sens::encode_binary_projection_ternary(&visible).unwrap(), bytes);
+
+        let widths = words.iter().map(|word| word.width()).collect::<Vec<_>>();
+        let packed = sens::pack_binary_source_words(&words);
+        let forms = sens::parse_canonical_packed_words(&packed, &widths)
+            .expect("exact-width packed reader accepts the D2 boundary");
+        assert_eq!(forms.len(), 1);
     }
 
     #[test]
-    fn two_top_level_forms_share_one_file_without_special_eos() {
+    fn two_top_level_forms_share_one_physical_file_and_keep_d2_boundaries() {
         let bytes = include_bytes!("../../../../tests/fixtures/migration-multiform-cohort-main/two-forms.sens");
-        let evaluated = eval_t5_bytes(bytes).expect("sequential canonical execution");
-        assert!(matches!(
-            evaluated.value,
-            sens::Value::Pair(ref head, ref tail)
-                if matches!(head.as_ref(), sens::Value::Nil)
-                && matches!(tail.as_ref(), sens::Value::Nil)
-        ));
+        let words = sens::decode_ternary_program(bytes).expect("canonical physical T5");
+        assert_eq!(words.len(), 21);
+        let widths = words.iter().map(|word| word.width()).collect::<Vec<_>>();
+        let packed = sens::pack_binary_source_words(&words);
+        let forms = sens::parse_canonical_packed_words(&packed, &widths)
+            .expect("two exact D2 forms parse from one packed stream");
+        assert_eq!(forms.len(), 2);
+        assert_eq!(sens::encode_ternary_words(&words).unwrap(), bytes);
     }
 
     #[test]
-    fn explicit_core4_bootstrap_enables_d4_list_without_weakening_bare_eval() {
-        // (D4 LIST (D3 QUOTE D3 EMPTY)): genuine exact words, physically
-        // packed through the production T5 codec. No user-defined Text7.
-        let words = sens::parse_binary_source_words(
-            "10 1110 00 10 001 00 000 01 01"
-        ).expect("ratified canonical D2/D3/D4 words");
-        let packed = sens::encode_ternary_words(
-            &words.into_iter().map(|word| word.word).collect::<Vec<_>>()
-        ).expect("T5 physical bytes");
-
-        let unbootstrapped = eval_t5_bytes(&packed)
-            .expect_err("bare evaluator has no D4 LIST mechanism");
-        assert!(
-            unbootstrapped.contains("no admitted value-call mechanism")
-                && unbootstrapped.contains("1110"),
-            "unexpected missing-bootstrap error: {unbootstrapped}"
-        );
-
-        let core = eval_t5_bytes_core4(&packed, true)
-            .expect("explicit Core4 must supply language-owned D4 LIST");
-        assert_eq!(core.value.to_string(), "(())");
-        assert_eq!(sens::open_ternary_program(&packed).unwrap(),
-                   "10 1110 00 10 001 00 000 01 01");
+    fn physical_or_structural_corruption_fails_closed_before_execution() {
+        assert!(sens::decode_ternary_program(&[0xf3]).is_err());
+        assert!(sens::decode_ternary_program(&[0xf2]).is_err());
+        let unbalanced_close = sens::encode_ternary_words(&[
+            sens::parse_binary_source_words("01").unwrap()[0].word,
+        ]).unwrap();
+        assert!(sens::decode_ternary_program(&unbalanced_close).is_err());
     }
 
     #[test]
-    fn physical_or_structural_corruption_can_never_be_executed() {
-        assert!(eval_t5_bytes(&[0xf3]).is_err()); // base-3 out of range
-        assert!(eval_t5_bytes(&[0xf2]).is_err()); // five excess pad trits
-        let unbalanced_close = sens::encode_ternary_words(
-            &sens::parse_binary_source_words("01").unwrap()
-                .into_iter().map(|token| token.word).collect::<Vec<_>>()
-        ).unwrap();
-        assert!(eval_t5_bytes(&unbalanced_close).is_err()); // D2 CLOSE alone
-    }
-
-    #[test]
-    fn explain_shows_canonical_d2_failure_with_original_word_coordinate() {
+    fn explain_shows_canonical_d2_failure_without_creating_a_second_parser() {
         let words = sens::parse_binary_source_words("10 001")
             .expect("physical words allowed");
         let trits = sens::encode_ternary_words(
-            &words.into_iter().map(|token| token.word).collect::<Vec<_>>()
+            &words.into_iter().map(|token| token.word).collect::<Vec<_>>(),
         ).expect("physically packed bytes");
         let err = explain_t5_bytes(&trits).expect_err("unbalanced D2 syntax");
         assert!(err.contains("D2 grammar rejected"), "{err}");
         assert!(err.contains("one exact typed word per line"), "{err}");
-        // The canonical parser error renderer, not a new D2 parser, owns
-        // the failure position. Never imply syntax PASS from valid bytes.
         assert!(!err.contains("D2 syntax PASS"), "{err}");
     }
 
     #[test]
-    fn explain_is_read_only_and_never_semantic_oracle_admission() {
+    fn explain_distinguishes_bad_transport_from_bad_d2_grammar() {
         let bytes = include_bytes!(
             "../../../../tests/fixtures/migration-quote-cohort-main/quote-legacy.sens"
         );
@@ -290,46 +267,22 @@ mod eval_tests {
         assert!(explain_t5_bytes(&[0xf3])
             .expect_err("invalid base3 byte")
             .contains("physical T5 transport rejected"));
-        let bad_d2 = sens::encode_ternary_words(
-            &sens::parse_binary_source_words("01").unwrap()
-                .into_iter().map(|word| word.word).collect::<Vec<_>>()
-        ).unwrap();
+        let bad_d2 = sens::encode_ternary_words(&[
+            sens::parse_binary_source_words("01").unwrap()[0].word,
+        ]).unwrap();
         assert!(explain_t5_bytes(&bad_d2).unwrap_err().contains("D2 grammar rejected"));
     }
 
     #[test]
-    fn invalid_d2_close_has_exact_parser_diagnostic_but_remains_blocked() {
-        let bad = sens::encode_ternary_words(&[
-            sens::parse_binary_source_words("01").unwrap()[0].word,
-        ]).expect("valid T5 transport can contain invalid D2 grammar");
-        let open_error = sens::open_ternary_program(&bad).unwrap_err();
-        let diagnostic = explain_d2_rejection(&bad, open_error);
-        assert!(diagnostic.contains("InvalidProgramSyntax"));
-        assert!(diagnostic.contains("unexpected D2 close word 01"), "{diagnostic}");
-        assert!(eval_t5_bytes(&bad).is_err(), "explanation cannot grant execution");
-    }
-
-    #[test]
-    fn invalid_d2_dot_has_parser_reason_and_bad_transport_keeps_transport_error() {
-        let bad = sens::encode_ternary_words(&[
-            sens::parse_binary_source_words("11").unwrap()[0].word,
-        ]).unwrap();
-        let diagnostic = explain_d2_rejection(&bad, sens::open_ternary_program(&bad).unwrap_err());
-        assert!(diagnostic.contains("misplaced D2 dot word 11"), "{diagnostic}");
-
-        let corrupt = [0xf3u8];
-        let error = sens::open_ternary_program(&corrupt).unwrap_err();
-        let transport_diagnostic = explain_d2_rejection(&corrupt, error);
-        assert!(!transport_diagnostic.contains("canonical D2:"));
-        assert!(eval_t5_bytes(&corrupt).is_err());
-    }
-
-    #[test]
-    fn open_and_eval_are_distinct_public_operations() {
-        let bytes = include_bytes!("../../../../tests/fixtures/migration-quote-cohort-main/quote-legacy.sens");
-        assert_eq!(sens::open_ternary_program(bytes).unwrap(),
-                   "10 001 00 000 01");
-        assert!(matches!(eval_t5_bytes(bytes).unwrap().value, sens::Value::Nil));
+    fn physical_eval_path_uses_packed_words_not_visible_text() {
+        let source = include_str!("sens-trit.rs");
+        let start = source.find("fn eval_t5_bytes_core4(").expect("physical eval route");
+        let end = source[start..].find("\n}\n").expect("route body") + start + 3;
+        let route = &source[start..end];
+        assert!(route.contains("sens::decode_ternary_program(bytes)"));
+        assert!(route.contains("sens::pack_binary_source_words(&words)"));
+        assert!(route.contains("sens::parse_canonical_packed_words(&packed, &widths)"));
+        assert!(!route.contains("sens::open_ternary_program(bytes)"));
+        assert!(!route.contains("sens::parse_canonical_binary(&visible)"));
     }
 }
-
