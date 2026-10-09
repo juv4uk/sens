@@ -301,6 +301,90 @@ mod tests {
             .into_iter().map(|token| token.word).collect()
     }
 
+    // Mechanical reference only: full-trit materialization/re-encode from the
+    // previous T5 implementation, NOT historical language/SID semantics.
+    // Exhaustive short-stream comparison proves rejection codes and all
+    // admitted typed words are unchanged by the optimized byte reader.
+    fn reference_decode(data: &[u8]) -> Result<Vec<BinarySourceWord>, TernaryTransportError> {
+        if data.is_empty() {
+            return Err(TernaryTransportError::EmptyProgram);
+        }
+        if data.len() > MAX_FILE_BYTES {
+            return Err(TernaryTransportError::TransportTooLarge);
+        }
+        let mut trits = Vec::with_capacity(data.len() * TRITS_PER_BYTE);
+        for byte in data.iter().copied() {
+            if byte >= 243 {
+                return Err(TernaryTransportError::InvalidPhysicalByte);
+            }
+            let mut value = byte;
+            let mut digits = [0u8; TRITS_PER_BYTE];
+            for digit in digits.iter_mut().rev() {
+                *digit = value % 3;
+                value /= 3;
+            }
+            trits.extend_from_slice(&digits);
+        }
+        let tail = trits.iter().rev().take_while(|digit| **digit == 2).count();
+        if tail >= TRITS_PER_BYTE {
+            return Err(TernaryTransportError::InvalidTail);
+        }
+        trits.truncate(trits.len() - tail);
+        if trits.is_empty() {
+            return Err(TernaryTransportError::EmptyDomainWord);
+        }
+        let mut words = Vec::new();
+        let (mut width, mut bits) = (0usize, 0u16);
+        for digit in trits {
+            match digit {
+                0 | 1 => {
+                    bits = (bits << 1) | u16::from(digit);
+                    width += 1;
+                    if width > 9 {
+                        return Err(TernaryTransportError::UnsupportedDomainWidth);
+                    }
+                }
+                2 => {
+                    if width == 0 {
+                        return Err(TernaryTransportError::EmptyDomainWord);
+                    }
+                    words.push(typed_binary_word(width, bits)?);
+                    width = 0;
+                    bits = 0;
+                }
+                _ => unreachable!(),
+            }
+        }
+        if width == 0 {
+            return Err(TernaryTransportError::EmptyDomainWord);
+        }
+        words.push(typed_binary_word(width, bits)?);
+        if encode_ternary_words(&words)? != data {
+            return Err(TernaryTransportError::NoncanonicalEncoding);
+        }
+        Ok(words)
+    }
+
+    #[test]
+    fn optimized_t5_matches_independent_full_trit_oracle_on_all_one_and_two_byte_files() {
+        assert_eq!(decode_ternary_words(&[]), reference_decode(&[]));
+        for first in u8::MIN..=u8::MAX {
+            assert_eq!(
+                decode_ternary_words(&[first]),
+                reference_decode(&[first]),
+                "single byte {first:02x}"
+            );
+            for second in u8::MIN..=u8::MAX {
+                let file = [first, second];
+                assert_eq!(
+                    decode_ternary_words(&file),
+                    reference_decode(&file),
+                    "two physical bytes {first:02x} {second:02x}"
+                );
+            }
+        }
+    }
+
     #[test]
     fn five_binary_words_survive_without_file_whitespace() {
         let source = "10 001 00 000 01";
