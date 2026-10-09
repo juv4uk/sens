@@ -335,7 +335,7 @@ fn meta_verdict(session: &mut Session, row: &WitnessRow) -> String {
         ),
         session,
     )
-    .expect("meta step");
+    .unwrap_or_else(|error| panic!("meta step for {:?}: {error}", row.expr));
     eval_program(
         "(def --witness-meta-env-- (car --witness-meta-step--))",
         session,
