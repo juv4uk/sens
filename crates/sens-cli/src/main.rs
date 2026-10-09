@@ -153,18 +153,11 @@ fn main() {
     // silently interpreting its bytes as textual Lisp.
     let raw_args: Vec<String> = env::args().collect();
     if let Some(request) = physical_t5_request(&raw_args) {
-        let result = request
-            .and_then(|filename| {
-                fs::read(filename)
-                    .map_err(|err| format!("read physical .sens: {err}"))
-                    .map_err(|message| {
-                        eprintln!("sens: {message}");
-                        message
-                    })
-            });
-        let result = match result {
-            Ok(bytes) => eval_physical_t5(&bytes),
-            Err(err) => Err(err.to_string()),
+        let result = match request {
+            Ok(filename) => fs::read(filename)
+                .map_err(|err| format!("read physical .sens: {err}"))
+                .and_then(|bytes| eval_physical_t5(&bytes)),
+            Err(message) => Err(message.to_owned()),
         };
         match result {
             Ok(result) => {
