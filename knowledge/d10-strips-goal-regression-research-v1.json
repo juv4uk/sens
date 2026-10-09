@@ -1,0 +1,121 @@
+{
+  "schema": "d10-historical-symbolic-ai-strips-regression/v1",
+  "date": "2026-10-09",
+  "coordination": [
+    "#4013",
+    "#4463"
+  ],
+  "status": "RESEARCH-ONLY-HOLD-CORE-VS-LIBRARY",
+  "historical_sources": [
+    {
+      "year": 1959,
+      "person": "John McCarthy",
+      "work": "Programs with Common Sense",
+      "url": "https://logic.stanford.edu/logicprogramming/readings/mccarthy.pdf",
+      "role": "Historic Advice Taker motivation for explicit world knowledge and action consequence; NOT the source of STRIPS regression formula."
+    },
+    {
+      "year": 1971,
+      "people": [
+        "Richard E. Fikes",
+        "Nils J. Nilsson"
+      ],
+      "work": "STRIPS: A New Approach to the Application of Theorem Proving to Problem Solving",
+      "doi": "10.1016/0004-3702(71)90010-5",
+      "url": "https://www.sciencedirect.com/science/article/pii/0004370271900105",
+      "role": "Original STRIPS operator action model, world states and means-ends planning."
+    },
+    {
+      "year": 2017,
+      "people": [
+        "David Poole",
+        "Alan Mackworth"
+      ],
+      "work": "Artificial Intelligence: Foundations of Computational Agents, 2nd ed., Regression Planning",
+      "url": "https://artint.info/2e/html2e/ArtInt2e.Ch6.S3.html",
+      "role": "Modern precise goal-regression mathematical contract, not falsely attributed verbatim to 1971."
+    }
+  ],
+  "as_of_main_selected": 634,
+  "prior_d10_inventory_blob": "65014431ac3e64633cd0be3630cfafc5e7a9aea3",
+  "domain": "D10",
+  "width": 10,
+  "selected_additions": 0,
+  "ratified_additions": 0,
+  "coordinates_added": 0,
+  "semantic_candidate": {
+    "stable_id": "d10.symbolic-ai.strips-ground-positive-regress.v1",
+    "semantic_name": "STRIPS-GOAL-REGRESSION",
+    "surface_uk": "відкотити-ціль-дією",
+    "surface_ukr": "умова-до-дії-для-цілі",
+    "status": "REVIEW-HOLD-NOT-SELECTED",
+    "selected": false,
+    "ratified": false,
+    "coordinate": null,
+    "relation_class": "FINITE-GROUND-PLANNING-WEAKEST-PRECONDITION",
+    "type_signature": "(goal: set<ground-positive-atom>, operator: (pre, add, delete) sets<ground-positive-atom>)-> either impossible or set<ground-positive-atom>",
+    "scope": "Closed finite propositional ground STRIPS, positive preconditions and positive conjunctive goals, ADD and DEL disjoint; atomic symbols only, no free variables, quantifiers, negation, conditional effects or implicit source-world knowledge.",
+    "law": "Given action a=(Pre,Add,Del) and desired G, after-action state is (S\\Del)∪Add iff Pre⊆S. Regression is undefined/impossible if (G\\Add)∩Del≠∅, otherwise Reg(G,a)=Pre∪(G\\Add). For ALL ground states S: (Pre⊆S and G⊆Result(S,a)) iff Reg exists and Reg⊆S. Distinguish search usefulness Add∩G≠∅ from logical regression: usefulness is NOT required for the equivalence.",
+    "positive_witnesses": [
+      "Pre={charged}, Add={observed}, Del={old}, Goal={observed,safe}: Reg={charged,safe}; starting at {charged,old,safe} ends {charged,observed,safe}.",
+      "Goal={observed}, same action: Reg={charged}, as observed is supplied by ADD.",
+      "Goal={safe}, same action: Reg={charged,safe}; action need not add any goal to be logically safe.",
+      "Goal={at_c}, action at_b→at_c regresses to {at_b}; predecessor action at_a→at_b regresses to {at_a}."
+    ],
+    "falsifiers": [
+      "Ignore DEL list: if goal={safe} but DEL={safe} and no ADD safe, regression MUST be impossible.",
+      "Test action relevance as if necessary for logical weakest precondition: would reject a sound unchanged-goal action.",
+      "Ignore Pre in regression: a goal satisfied after an inapplicable action is not justified.",
+      "Allow non-ground atoms or negative/disjunctive goals and claim the exact same positive-only formula is a complete general planner."
+    ],
+    "behavioral_dedup": {
+      "nearest_selected": [
+        "D9 ADVICE-DECISION-IN-WORLD",
+        "D10 ADVICE-DECISION",
+        "D10 ADVICE-CONFLICT-PROOF",
+        "D10 PROVE-GOAL-STATE",
+        "D10 MAP-GOAL-RESULTS"
+      ],
+      "semantic_difference": "A universal inverse transformer for positive goal sets under explicit finite ground action add/delete semantics, not a theorem prover, policy decision, plan searcher or environment introspection.",
+      "uncertainties": [
+        "These existing operations may derive the result by sets/arithmetic; independence from current D10 selected semantics NOT fully proved.",
+        "Core vs library ownership and D2 control scope require explicit review before any selected D10 or ledger row."
+      ],
+      "core_minimality": "Derivable from SET-DIFFERENCE/UNION/SUBSET operations; therefore do not assign a 10-bit function code merely because of its historical name.",
+      "interpretive_limit": "Not a general theorem of first-order Fikes/Nilsson world model; formal scope restricted to classic grounded positive STRIPS."
+    },
+    "source_primary_url": "https://www.sciencedirect.com/science/article/pii/0004370271900105",
+    "source_semantics_url": "https://artint.info/2e/html2e/ArtInt2e.Ch6.S3.html",
+    "native_SENS_parity": false,
+    "prolog_oracle": {
+      "path": "tests/oracles/d10_strips_regression_swi.pl",
+      "engine": "SWI-Prolog installed in hosted GitHub Actions",
+      "individual_observations": 24,
+      "exhaustive_ground_models": 13824,
+      "method": "Forward world-state transition versus backward regression equivalence across every triple-atom state, positive goal, precondition and valid disjoint add/delete action."
+    }
+  },
+  "research_holds": [
+    {
+      "semantic_name": "STRIPS-FRAME-PERSISTENCE",
+      "status": "HOLD-DERIVED-SET-DELTA",
+      "reason": "Frame persistence follows from unchanged facts in (S\\Del)∪Add; not independent core law without richer world semantics."
+    },
+    {
+      "semantic_name": "STRIPS-OPERATOR-RELEVANCE",
+      "status": "HOLD-SEARCH-HEURISTIC",
+      "reason": "Add∩G nonempty is a search pruning heuristic, not necessary for logical regression equivalence."
+    },
+    {
+      "semantic_name": "ADVICE-ACTION-TRIGGER",
+      "status": "HOLD-ADVICE-TAKER-D2-BORDER",
+      "reason": "Consequence-as-imperative activation would be an effect/control law and risks D2 control ownership, not an automatic D10 function."
+    },
+    {
+      "semantic_name": "GPS-MEANS-ENDS-DIFFERENCE",
+      "status": "HOLD-COMPLETE-CANDIDATE-DEFINITION",
+      "reason": "Generic GPS mismatch heuristic is not unique without a representation, priority ordering and proven progress."
+    }
+  ],
+  "next_review": "Check all D1-D9/D10 semantic equivalents including D9 advice, D10 proof engines. If genuinely independent, append to single canonical proposal ledger with current git SHA and owner review; never fabricate migration BLOCK, code, coordinates, or ratification."
+}
