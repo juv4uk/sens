@@ -5,11 +5,13 @@ on:
     paths:
       - 'knowledge/d10-symbolic-ai-antiunification-20261009.json'
       - 'tests/test_d10_symbolic_ai_antiunify.py'
+      - 'tests/d10_symbolic_ai_antiunify_swi.pl'
       - '.github/workflows/d10-symbolic-ai-antiunification.yml'
   pull_request:
     paths:
       - 'knowledge/d10-symbolic-ai-antiunification-20261009.json'
       - 'tests/test_d10_symbolic_ai_antiunify.py'
+      - 'tests/d10_symbolic_ai_antiunify_swi.pl'
       - '.github/workflows/d10-symbolic-ai-antiunification.yml'
   workflow_dispatch:
 
@@ -24,3 +26,15 @@ jobs:
       - uses: actions/checkout@v4
       - name: Перевірити свідки і найточніше узагальнення символьних термів
         run: python3 -m unittest discover -s tests -p 'test_d10_symbolic_ai_antiunify.py' -v
+
+  independent-swi-donor:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - name: Встановити незалежний SWI-Prolog-оракул
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq swi-prolog-nox
+      - name: Перевірити найточніше узагальнення і sharing змінних
+        run: swipl -q -s tests/d10_symbolic_ai_antiunify_swi.pl
