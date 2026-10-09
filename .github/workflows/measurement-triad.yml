@@ -1,0 +1,83 @@
+name: SENS benchmark methodology triad
+on:
+  pull_request:
+    paths:
+      - ".github/workflows/measurement-triad.yml"
+      - "benchmarks/measurement-triad/**"
+      - "benchmarks/README.md"
+      - "crates/sens/src/domain_ladder.rs"
+      - "crates/sens/src/domain_owner_generated.rs"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: sens-measurement-triad-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  verdict:
+    name: Paired evidence schema and fail-closed statistical verdict
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+      - name: Verify benchmark manifest and generated registry
+        run: python3 scripts/benchmark_registry.py --check
+      - name: Reject synthetic false positives and invalid parity
+        run: python3 -m unittest discover -v -s benchmarks/measurement-triad -p 'test_*.py'
+
+  rust-adapters:
+    name: Compile the independent instruction and wall-time Rust adapters
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v5
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: benchmarks/measurement-triad
+      - name: Test the actual D3 owner projection mechanism
+        run: cargo test --manifest-path benchmarks/measurement-triad/Cargo.toml
+      - name: Compile both benchmarking harnesses without claiming speed
+        run: cargo bench --manifest-path benchmarks/measurement-triad/Cargo.toml --benches --no-run
+
+  instruction-probe:
+    name: Explicit Callgrind capture (manual, no noisy default regression gate)
+    if: github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v5
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Install pinned Valgrind measurement tool and matched runner
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y valgrind
+          cargo install --locked --version 0.16.1 iai-callgrind-runner
+      - name: Capture deterministic Callgrind lane
+        shell: bash
+        run: |
+          set -euo pipefail
+          cargo test --manifest-path benchmarks/measurement-triad/Cargo.toml
+          cargo bench --manifest-path benchmarks/measurement-triad/Cargo.toml --bench instruction_lane | tee "$RUNNER_TEMP/sens-iai-callgrind.log"
+          {
+            echo "SHA=$GITHUB_SHA"
+            rustc --version
+            valgrind --version
+            grep -m1 'model name' /proc/cpuinfo || true
+          } > "$RUNNER_TEMP/sens-iai-environment.txt"
+      - name: Preserve instruction raw evidence
+        if: always()
+        uses: actions/upload-artifact@v6
+        with:
+          name: sens-measurement-triad-instruction-${{ github.sha }}
+          path: |
+            ${{ runner.temp }}/sens-iai-callgrind.log
+            ${{ runner.temp }}/sens-iai-environment.txt
+          if-no-files-found: warn
+          retention-days: 14
