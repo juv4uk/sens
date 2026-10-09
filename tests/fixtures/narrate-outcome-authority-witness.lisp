@@ -59,7 +59,9 @@
               (00000001 narrate-outcome-authority-witness)
               (00100111 (00000001 law) (00000101 row))
               (00100111 (00000001 expected) (00110000 row))
-              (00100111 (00000001 actual) (00101111 row)))))))))))(00001001 narrate-outcome-authority-check
+              (00100111 (00000001 actual) (00101111 row))))))))))
+
+(00001001 narrate-outcome-authority-check
   (00001000 ()
     (narrate-outcome-authority-check-rows
       (narrate-outcome-authority-rows))))
