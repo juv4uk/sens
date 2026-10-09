@@ -59,9 +59,9 @@
 (00001001 witness-superseded-outcome
   (00001000 (witness expected-entry)
     (00000111
-      ((00000010 expected-entry)
+      ((00100010 expected-entry (00000001 ()))
        (00000001 ()))
-      ((witness-d1-no? (00000010 expected-entry))
+      ((witness-d1-no? (00100010 expected-entry (00000001 ())))
        (10011100 ((expr (witness-field (00000001 expr) witness)))
          (00000111
            ((00100010 expr "(00000010 (quote radio))")
