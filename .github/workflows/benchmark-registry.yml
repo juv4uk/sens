@@ -7,11 +7,14 @@ on:
       - "benchmarks/**"
       - "scripts/benchmark_registry.py"
       - "scripts/benchmark_sweep.py"
+      - "scripts/test_benchmark_sweep.py"
       - ".github/workflows/benchmark-registry.yml"
   pull_request:
     paths:
       - "benchmarks/**"
       - "scripts/benchmark_registry.py"
+      - "scripts/benchmark_sweep.py"
+      - "scripts/test_benchmark_sweep.py"
       - ".github/workflows/benchmark-registry.yml"
   workflow_dispatch:
 
@@ -116,6 +119,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
+          python3 scripts/test_benchmark_sweep.py
           python3 scripts/benchmark_registry.py --check
           git rev-parse HEAD
           python3 --version
