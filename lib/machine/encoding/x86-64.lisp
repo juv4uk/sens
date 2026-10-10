@@ -144,15 +144,15 @@
   (00001000 (значення масштаб кратність)
     (110
       ((менше? значення масштаб)
-       (100 0 значення))
+       (101 0 значення))
       ((010 ())
        ((00001000 (пара)
           (110
-            ((менше? (111 пара) масштаб) пара)
+            ((менше? (011 пара) масштаб) пара)
             ((010 ())
-             (100
-               (додати (101 пара) кратність)
-               (відняти (111 пара) масштаб)))))
+             (101
+               (додати (100 пара) кратність)
+               (відняти (011 пара) масштаб)))))
         (x86-ціла-частка-залишок
           значення
           (додати масштаб масштаб)
@@ -166,10 +166,10 @@
       ((менше? кількість 1) (00000001 ()))
       ((010 ())
        ((00001000 (пара)
-          (100
-            (111 пара)
+          (101
+            (011 пара)
             (x86-байти-без-знака
-              (101 пара)
+              (100 пара)
               (відняти кількість 1))))
         (x86-ціла-частка-залишок значення 256 1))))))
 
@@ -183,14 +183,14 @@
 
 (00001001 x86-encode-mov-eax-imm32
   (00001000 (immediate)
-    (100 184 (x86-u32-bytes immediate))))
+    (101 184 (x86-u32-bytes immediate))))
 
 (00001001 x86-encode-mov-r64-imm64
   (00001000 (register immediate)
     ((00001000 (code)
-       (100
+       (101
          (x86-encode-rex 1 0 0 (x86-high1 code))
-         (100
+         (101
            (00001100 184 (x86-low3 code))
            (x86-u64-bytes immediate))))
      (x86-reg-code register))))
@@ -221,7 +221,7 @@
         (let ((rex (x86-encode-rex 1 (x86-high1 dst) 0 (x86-high1 base-code))))
           (let ((modrm (x86-encode-modrm 1 (x86-low3 dst) (x86-low3 base-code))))
             (110
-              ((011 (x86-low3 base-code) 4)
+              ((101 (x86-low3 base-code) 4)
                 (00100111
                   rex
                   139
@@ -239,7 +239,7 @@
         (let ((rex (x86-encode-rex 1 (x86-high1 src) 0 (x86-high1 base-code))))
           (let ((modrm (x86-encode-modrm 1 (x86-low3 src) (x86-low3 base-code))))
             (110
-              ((011 (x86-low3 base-code) 4)
+              ((101 (x86-low3 base-code) 4)
                 (00100111
                   rex
                   137
@@ -266,7 +266,7 @@
         (let ((rex (x86-encode-rex 1 (x86-high1 dst) 0 (x86-high1 base-code))))
           (let ((modrm (x86-encode-modrm 1 (x86-low3 dst) (x86-low3 base-code))))
             (110
-              ((011 (x86-low3 base-code) 4)
+              ((101 (x86-low3 base-code) 4)
                 (00100111
                   rex
                   141
@@ -349,11 +349,11 @@
 (00001001 x86-encode-alu-r64-imm32
   (00001000 (opcode-extension destination immediate)
     (let ((dst (x86-reg-code destination)))
-      (100
+      (101
         (x86-encode-rex 1 0 0 (x86-high1 dst))
-        (100
+        (101
           129
-          (100
+          (101
             (x86-encode-modrm 3 opcode-extension (x86-low3 dst))
             (x86-imm32-bytes immediate)))))))
 
@@ -399,7 +399,7 @@
   (00001000 (register)
     (let ((code (x86-reg-code register)))
       (110
-        ((011 (x86-high1 code) 1)
+        ((101 (x86-high1 code) 1)
           (00100111 (x86-encode-rex 0 0 0 1) (00001100 80 (x86-low3 code))))
         ((010 ())
           (00100111 (00001100 80 (x86-low3 code))))))))
@@ -408,7 +408,7 @@
   (00001000 (register)
     (let ((code (x86-reg-code register)))
       (110
-        ((011 (x86-high1 code) 1)
+        ((101 (x86-high1 code) 1)
           (00100111 (x86-encode-rex 0 0 0 1) (00001100 88 (x86-low3 code))))
         ((010 ())
           (00100111 (00001100 88 (x86-low3 code))))))))
@@ -551,7 +551,7 @@
 ; already established for the Windows/Linux execution adapters.
 (00001001 x86-encode-call-rel32
   (00001000 (displacement)
-    (100 232 (x86-rel32-bytes displacement))))
+    (101 232 (x86-rel32-bytes displacement))))
 
 ; Jcc rel32: opcode 0x0F, then 0x80+cc, then a signed 32-bit relative
 ; displacement -- the conditional counterpart to JMP rel32, needed for the
@@ -566,9 +566,9 @@
 ; with a 2-byte opcode and a 4-byte displacement instead of 1+1.
 (00001001 x86-encode-jcc-rel32
   (00001000 (condition-code displacement)
-    (100
+    (101
       15
-      (100
+      (101
         (00001100 128 condition-code)
         (x86-rel32-bytes displacement)))))
 
@@ -596,7 +596,7 @@
 ; displacement width differ.
 (00001001 x86-encode-jmp-rel32
   (00001000 (displacement)
-    (100 233 (x86-rel32-bytes displacement))))
+    (101 233 (x86-rel32-bytes displacement))))
 
 ; CALL r64 / JMP r64 (indirect through a register): group-5 opcode 0xFF,
 ; /reg extension selects the operation -- CALL is /2, JMP is /4 -- per
@@ -615,7 +615,7 @@
   (00001000 (opcode-extension register)
     (let ((code (x86-reg-code register)))
       (110
-        ((011 (x86-high1 code) 1)
+        ((101 (x86-high1 code) 1)
           (00100111
             (x86-encode-rex 0 0 0 1)
             255
@@ -975,7 +975,7 @@
     (let ((dst-code (x86-xmm-reg-code dst))
           (src-code (x86-xmm-reg-code src)))
       (110
-        ((10011010 (011 (x86-high1 dst-code) 0) (011 (x86-high1 src-code) 0))
+        ((10011010 (101 (x86-high1 dst-code) 0) (101 (x86-high1 src-code) 0))
          (00100111 242 15 opcode-byte (x86-encode-modrm 3 (x86-low3 dst-code) (x86-low3 src-code))))
         ((010 ())
          (00100111 242 (x86-encode-rex 0 (x86-high1 dst-code) 0 (x86-high1 src-code))
@@ -986,7 +986,7 @@
     (let ((dst-code (x86-xmm-reg-code dst))
           (src-code (x86-xmm-reg-code src)))
       (110
-        ((10011010 (011 (x86-high1 dst-code) 0) (011 (x86-high1 src-code) 0))
+        ((10011010 (101 (x86-high1 dst-code) 0) (101 (x86-high1 src-code) 0))
          (00100111 102 15 opcode-byte (x86-encode-modrm 3 (x86-low3 dst-code) (x86-low3 src-code))))
         ((010 ())
          (00100111 102 (x86-encode-rex 0 (x86-high1 dst-code) 0 (x86-high1 src-code))
@@ -1001,7 +1001,7 @@
     (let ((dst-code (x86-xmm-reg-code dst))
           (src-code (x86-xmm-reg-code src)))
       (110
-        ((10011010 (011 (x86-high1 dst-code) 0) (011 (x86-high1 src-code) 0))
+        ((10011010 (101 (x86-high1 dst-code) 0) (101 (x86-high1 src-code) 0))
          (00100111
            102
            15
@@ -1066,14 +1066,14 @@
             (disp-byte (x86-disp8-byte displacement)))
         (let ((address-tail
                 (110
-                  ((011 (x86-low3 base-code) 4)
+                  ((101 (x86-low3 base-code) 4)
                    (00100111 modrm (x86-encode-sib 0 4 4) disp-byte))
                   ((010 ())
                    (00100111 modrm disp-byte)))))
           (110
             ((10011010
-               (011 (x86-high1 dst-code) 0)
-               (011 (x86-high1 base-code) 0))
+               (101 (x86-high1 dst-code) 0)
+               (101 (x86-high1 base-code) 0))
              (00101001
                (00100111 102 15 map-byte opcode-byte)
                address-tail))
