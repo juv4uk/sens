@@ -26,8 +26,13 @@ fn complete_from_depth(words: &[&str]) -> Vec<String> {
 
 #[test]
 fn ratified_d1_through_d9_roundtrip_through_real_reader() {
+    let mut examined = 0usize;
     for width in [1usize, 3, 4, 5, 6, 7, 8, 9] {
-        for value in [0usize, 1, (1 << width) - 1] {
+        for value in 0usize..(1 << width) {
+            if width == 7 && [0b0100001, 0b0101010].contains(&value) {
+                continue; // дві зарезервовані координати D7
+            }
+            examined += 1;
             let payload = format!("{value:0width$b}");
             for words in [
                 vec!["10", payload.as_str(), "01"],
@@ -52,6 +57,9 @@ fn ratified_d1_through_d9_roundtrip_through_real_reader() {
             }
         }
     }
+}
+
+    assert_eq!(examined, 1016); // точна місткість ратифікованих payload-доменів
 }
 
 #[test]
