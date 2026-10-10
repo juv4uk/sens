@@ -1,0 +1,46 @@
+name: TEMP Core4 defmacro peer replay
+on:
+  push:
+    branches:
+      - fix/core4-defmacro-peer-materialization-20261010
+    paths:
+      - ".github/workflows/tmp-core4-defmacro-peer-replay.yml"
+      - "lib/core4.lisp"
+      - "crates/sens/tests/current_binary_preflight.rs"
+
+permissions:
+  contents: write
+
+jobs:
+  exact-source-replay:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: ${{ github.ref }}
+          fetch-depth: 0
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Verify exact Core4 source
+        shell: bash
+        run: |
+          set -euo pipefail
+          actual="$(git hash-object lib/core4.lisp)"
+          test "$actual" = "27a23e9248b1b065648fd4a5889481c079e5f427"
+          echo "CORE4_SOURCE_BLOB=$actual"
+      - name: Regenerate and validate FASL plus time/process peer replay
+        shell: bash
+        run: |
+          set -euo pipefail
+          cargo run --locked --release -p sens-cli --bin gen-fasl -- lib/core4.lisp lib/core4.lisp.fasl
+          cargo test --locked -p sens --test core_fasl_freshness -- --nocapture
+          cargo test --locked -p sens --test current_binary_preflight current_core4_peer_materialization_uses_current_macro_law -- --exact --nocapture
+          git diff --exit-code -- . ':!lib/core4.lisp.fasl'
+          git add lib/core4.lisp.fasl
+          if git diff --cached --quiet; then
+            echo "FASL already matches the pinned source"
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -m "оновити FASL після ремонту peer macro"
+          git push origin "HEAD:${GITHUB_REF_NAME}"
