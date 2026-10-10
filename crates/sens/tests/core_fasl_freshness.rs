@@ -7,12 +7,21 @@
 #[test]
 fn committed_core_fasl_matches_current_core_source() {
     let fasl = include_bytes!("../../../lib/core4.lisp.fasl");
-    let (_, embedded_hash) = sens::fasl_decode_program(fasl)
+    let (snapshot_expressions, embedded_hash) = sens::fasl_decode_program(fasl)
         .expect("committed lib/core4.lisp.fasl must decode");
-    let current_hash = sens::sha256_source(sens::CORE_LIBRARY_SOURCE.as_bytes());
+    let current_source = sens::CORE_LIBRARY_SOURCE;
+    let current_hash = sens::sha256_source(current_source.as_bytes());
 
     assert_eq!(
         embedded_hash, current_hash,
         "lib/core4.lisp.fasl is stale; regenerate it from the current lib/core4.lisp"
+    );
+
+    let current_expressions =
+        sens::parse_mixed_exact_domain_core_source("lib/core4.lisp", current_source)
+            .expect("Core4 source must parse through the path-bound exact-domain reader");
+    assert_eq!(
+        snapshot_expressions, current_expressions,
+        "Core4 FASL must preserve exact-domain parser output, not an ordinary-parse AST; regenerate with gen-fasl"
     );
 }
