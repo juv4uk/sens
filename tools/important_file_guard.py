@@ -10,7 +10,8 @@ from __future__ import annotations
 import re
 import subprocess
 import sys
-from pathlib import PurePosixPath
+import tempfile
+from pathlib import Path, PurePosixPath
 
 IMPORTANT = ("lib/", "knowledge/", "witnesses/")
 NATIVE_EXTENSIONS = (".lisp", ".sens")
@@ -326,6 +327,39 @@ def self_test() -> None:
         if not catches(lambda invalid=invalid: parse_tree_mode(invalid, path)):
             fail("SELF_TEST_FAIL malformed_git_tree_accepted")
 
+    # Реальний тимчасовий Git-індекс: однаковий суфікс, різний тип об'єкта.
+    with tempfile.TemporaryDirectory(prefix="sens-file-guard-") as temporary:
+        root = Path(temporary)
+        subprocess.run(
+            ["git", "init", "-q", str(root)],
+            check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+        )
+        (root / "lib").mkdir()
+        (root / "lib" / "regular.sens").write_bytes(b"\x00")
+        (root / "lib" / "symlink.sens").symlink_to("regular.sens")
+        subprocess.run(
+            ["git", "-C", str(root), "add", "--", "lib/regular.sens", "lib/symlink.sens"],
+            check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+        )
+        tree = subprocess.run(
+            ["git", "-C", str(root), "write-tree"],
+            check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+        ).stdout.decode("ascii", "strict").strip()
+        for source_path, expected in (
+            ("lib/regular.sens", []),
+            ("lib/symlink.sens",
+             ["NON_REGULAR_NEW_SOURCE: lib/symlink.sens: 120000:blob"]),
+        ):
+            record = subprocess.run(
+                ["git", "-C", str(root), "ls-tree", "-z", "--full-tree",
+                 tree, "--", source_path],
+                check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+            ).stdout
+            verify_case(
+                "real_git_tree_" + source_path,
+                source_mode_error(source_path, parse_tree_mode(record, source_path)),
+                expected,
+            )
     verify_case("empty_nul_stream", nul_paths(b""), [])
     verify_case("valid_nul_stream", nul_paths(b"tools/a.py\x00"), ["tools/a.py"])
     if not catches(lambda: nul_paths(b"tools/a.py")):
