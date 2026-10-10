@@ -1238,11 +1238,13 @@
 (00001001 x86-encode-program
   (00001000 (instructions)
     (00000111
-      ; Stop precisely on empty structure. ATOM would also match any
-      ; non-list datum and is not a valid instruction-stream terminator.
-      ((00000011 instructions (00000001 ()))
-       (00000001 ()))
-      ((00000010 (00000001 ()))
+      ; Розрізняємо порожній список та довільний атом, а не порівнюємо
+      ; непорожню пару через EQ, що визначений лише для атомів.
+      ((010 instructions)
+       (00000111
+         ((eq? instructions (00000001 ())) (00000001 ()))
+         ((010 ()) (car instructions))))
+      ((010 ())
        (00101001
          (00000101 instructions)
          (x86-encode-program (00000110 instructions)))))))
