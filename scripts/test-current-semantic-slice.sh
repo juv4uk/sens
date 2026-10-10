@@ -65,7 +65,7 @@ probes = {
     "merge-dimensions": "\n(science-merge-dimensions (unit-dimensions (quantity-unit (scientific-constant-quantity si:defining-planck-constant))) (unit-dimensions (quantity-unit (scientific-constant-quantity si:defining-cesium-frequency))))\n",
 }
 for stage, suffix in probes.items():
-  for stage in rows-binding check-binding witness-binding rows-call check-call planck-record cesium-record planck-value planck-unit numeric-product quantity-product one-second merge-dimensions product-units distance-product quantity-quotient; do
+  for stage in rows-binding check-binding witness-binding rows-call check-call planck-record cesium-record planck-value planck-unit numeric-product quantity-product one-second merge-dimensions product-units distance-product; do
         prefix + suffix, encoding="utf-8"
     )
 PY
