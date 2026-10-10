@@ -377,6 +377,36 @@ fn core4_probe_cons_car_lowering() {
 }
 
 #[test]
+fn core4_probe_register_lookup() {
+    let _serial = test_lock();
+    let mut session = core4_machine_probe_session();
+    eval_program("(x86-reg-code rax)", &mut session)
+        .unwrap_or_else(|error| panic!("register lookup failed: {error}"));
+}
+
+#[test]
+fn core4_probe_instruction_pattern_match() {
+    let _serial = test_lock();
+    let mut session = core4_machine_probe_session();
+    eval_program(
+        "(x86-admission-pattern-match? (як-є (mov-r64-imm64 register immediate)) (як-є (mov-r64-imm64 rax 2)))",
+        &mut session,
+    )
+    .unwrap_or_else(|error| panic!("single instruction pattern match failed: {error}"));
+}
+
+#[test]
+fn core4_probe_instruction_against_pattern_table() {
+    let _serial = test_lock();
+    let mut session = core4_machine_probe_session();
+    eval_program(
+        "(x86-admitted-instruction-against? x86-admitted-instruction-patterns (як-є (mov-r64-imm64 rax 2)))",
+        &mut session,
+    )
+    .unwrap_or_else(|error| panic!("instruction-against-pattern-table failed: {error}"));
+}
+
+#[test]
 fn core4_probe_admitted_program_predicate() {
     let _serial = test_lock();
     let mut session = core4_machine_probe_session();
