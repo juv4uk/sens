@@ -1,0 +1,205 @@
+name: Дослідне парне порівняння T5 F3 F4 та адаптивного носія
+on:
+  pull_request:
+    paths:
+      - ".github/workflows/encoder-same-input-bench.yml"
+      - "research/framed3/**"
+      - "scripts/sens_t5_codec.py"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  same-input:
+    name: Однакові слова, повні байти, точна оборотність, p50/p95
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+      - name: Незалежний позитивний і негативний корпус дослідних кодерів
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m unittest discover -s research/framed3 -p 'test_*.py' -v
+      - name: Парні вимірювання тільки після byte parity
+        shell: bash
+        env:
+          OUT: ${{ runner.temp }}/encoder-same-input.json
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import hashlib
+          import json
+          import math
+          import os
+          import platform
+          import statistics
+          import sys
+          import time
+          from pathlib import Path
+
+          sys.path.insert(0, "research/framed3")
+          sys.path.insert(0, "scripts")
+          import adaptive_encoder as adapter
+          import research_codec as frame
+          import tb33_tail_research as tail
+          import sens_t5_codec as oracle
+
+          fixtures = {
+              "порожня-структура": ("10", "01"),
+              "цитата": ("10", "001", "00", "000", "01"),
+              "вкладена": tuple("10 100 00 10 111 00 1 00 0 01 01".split()),
+              "дві-верхні-форми": ("10", "01", "10", "01"),
+              "слово-девʼять-бітів": ("10", "000000000", "01"),
+              "довгий-потік": ("10",) + ("00010101",) * 48 + ("01",),
+          }
+          def require(condition, reason):
+              if not condition:
+                  raise SystemExit("НОСІЙ-БЕНЧ: BLOCKED — " + reason)
+
+          def pct(samples, p):
+              ordered = sorted(samples)
+              return ordered[max(0, math.ceil(len(ordered) * p) - 1)]
+
+          def encode(profile, words):
+              if profile == "T5":
+                  return oracle.encode_words(list(words))
+              if profile == "F3":
+                  return bytes([0xF3]) + frame.encode(words)
+              if profile == "F4":
+                  return bytes([0xF4]) + tail.encode(adapter.трити(words))
+              if profile == "адаптивний":
+                  return adapter.найменший_носій(words).дані
+              raise ValueError("непідтримуваний профіль")
+
+          def decode(profile, raw, words):
+              if profile == "T5":
+                  return tuple(oracle.decode_bytes(raw))
+              if profile == "F3":
+                  require(raw[:1] == b"\xf3", "F3 втратив мітку")
+                  return frame.decode(raw[1:])
+              if profile == "F4":
+                  require(raw[:1] == b"\xf4", "F4 втратив мітку")
+                  trits = tail.decode(raw[1:])
+                  return tuple("".join(str(x) for x in trits).split("2"))
+              if profile == "адаптивний":
+                  carrier = adapter.найменший_носій(words)
+                  require(carrier.дані == raw, "недетермінований адаптивний вибір")
+                  return adapter.прочитати_носій(carrier)
+              raise ValueError("непідтримуваний профіль")
+
+          # Контролі працюють і під Python -O: жодних assert.
+          require(tuple(oracle.decode_bytes(oracle.encode_words(["0", "00", "000"]))) == ("0", "00", "000"),
+                  "втрачено ширини початкових нулів")
+          for bad in (b"\xf3\x00", b"\xf4\x00", b"\xff"):
+              try:
+                  oracle.decode_bytes(bad)
+              except oracle.SensT5Error:
+                  pass
+              else:
+                  require(False, "дослідна мітка пройшла як T5")
+          try:
+              frame.encode(("10", "01", "10", "01"))
+          except frame.FrameError:
+              pass
+          else:
+              require(False, "рамка прийняла дві верхні форми")
+          try:
+              tail.decode(b"\x00")
+          except tail.TailError:
+              pass
+          else:
+              require(False, "Tb-33 прийняв обрізаний блок")
+          try:
+              adapter.прочитати_носій(adapter.Носій("рамка3", b"\xf3\x00", ".sens"))
+          except adapter.ПомилкаНосія:
+              pass
+          else:
+              require(False, "формат .senc пройшов під .sens")
+
+          rows = []
+          profiles = ("T5", "F3", "F4", "адаптивний")
+          for name, words in fixtures.items():
+              require(1 <= len(words) and all(set(w) <= {"0", "1"} and 1 <= len(w) <= 9 for w in words),
+                      "неправильний корпус слів")
+              reference = oracle.encode_words(list(words))
+              require(tuple(oracle.decode_bytes(reference)) == words, "канонічне T5 не відтворює слова")
+              for profile in profiles:
+                  try:
+                      original = encode(profile, words)
+                  except (frame.FrameError, tail.TailError) as exc:
+                      require(profile in ("F3", "F4"), "адаптивний режим не має права відмовити")
+                      rows.append({"fixture": name, "profile": profile, "status": "BLOCKED", "reason": str(exc)})
+                      continue
+                  require(len(original) > 0, "порожній фізичний код")
+                  require(decode(profile, original, words) == words, "втрачено точні двійкові слова")
+                  require(encode(profile, words) == original, "повторне кодування змінило байти")
+                  if profile == "F3":
+                      require(original[0] == 0xF3 and frame.reference_t5(words) == reference,
+                              "пошкоджено F3 або незалежний T5 parity")
+                  if profile == "F4":
+                      require(original[0] == 0xF4, "пошкоджено F4")
+                  encode_times, decode_times = [], []
+                  for _ in range(25):
+                      start = time.perf_counter_ns()
+                      candidate = encode(profile, words)
+                      encode_times.append(time.perf_counter_ns() - start)
+                      require(candidate == original, "часове вимірювання змінило код")
+                      start = time.perf_counter_ns()
+                      result = decode(profile, original, words)
+                      decode_times.append(time.perf_counter_ns() - start)
+                      require(result == words, "часове декодування змінило слова")
+                  rows.append({
+                      "fixture": name, "profile": profile, "status": "MEASURED",
+                      "word_sha256": oracle.typed_sha256(list(words)),
+                      "physical_sha256": hashlib.sha256(original).hexdigest(),
+                      "bytes_including_header": len(original),
+                      "encoded_hex": original.hex(),
+                      "encode_ns_samples": encode_times, "decode_ns_samples": decode_times,
+                      "encode_p50_ns": statistics.median(encode_times),
+                      "encode_p95_ns": pct(encode_times, 0.95),
+                      "decode_p50_ns": statistics.median(decode_times),
+                      "decode_p95_ns": pct(decode_times, 0.95),
+                  })
+              elected = adapter.найменший_носій(words)
+              accepted = [row for row in rows if row["fixture"] == name and row["status"] == "MEASURED"]
+              require(len(elected.дані) == min(row["bytes_including_header"] for row in accepted),
+                      "адаптивний кодек не обрав найменший ДОКУМЕНТОВАНИЙ носій")
+              require(adapter.прочитати_носій(elected) == words, "адаптивний кодек зламав семантичну проєкцію")
+
+          result = {
+              "schema": "sens-physical-carrier-same-input-research/v1",
+              "mainline_sens": "T5_UNCHANGED",
+              "experimental_container": ".senc; F3 or F4 header included",
+              "semantics": "exact domain words D1–D9, not speedup proof",
+              "time_boundary": "CPython in-process encode/decode calls; not Rust, CPU eval, I/O, or cold load",
+              "sha": os.environ.get("GITHUB_SHA", "LOCAL_UNVERIFIED"),
+              "host": platform.platform(),
+              "cpu": platform.processor(),
+              "python": platform.python_version(),
+              "repetitions_per_lane": 25,
+              "rows": rows,
+          }
+          out = Path(os.environ["OUT"])
+          out.write_text(json.dumps(result, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+          require(out.stat().st_size > 100, "відсутні сирі заміри")
+          for row in rows:
+              if row["status"] == "MEASURED":
+                  print(f'{row["fixture"]}: {row["profile"]} {row["bytes_including_header"]} B; '
+                        f'enc p50={row["encode_p50_ns"]} ns; dec p50={row["decode_p50_ns"]} ns')
+              else:
+                  print(f'{row["fixture"]}: {row["profile"]} BLOCKED: {row["reason"]}')
+          print("НОСІЙ-БЕНЧ: PASS — всі прийняті профілі відтворюють оригінальні слова; T5 незмінний")
+          PY
+      - name: Зберегти сирі однаково-машинні результати
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: carrier-same-input-${{ github.sha }}
+          path: ${{ runner.temp }}/encoder-same-input.json
+          if-no-files-found: warn
+          retention-days: 14
