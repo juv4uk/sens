@@ -368,7 +368,7 @@
 (00001001 x86-encode-admitted-instruction
   (00001000 (form)
     (00000111
-      ((00100010 form (00000001 (ret)))
+      ((x86-admission-pattern-match? (00000001 (ret)) form)
        (x86-encode-ret))
       ((x86-admission-pattern-match? (00000001 (mov-r64-imm64 register immediate)) form)
        (x86-encode-mov-r64-imm64 (00101111 form) (00110000 form)))
