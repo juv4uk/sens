@@ -335,8 +335,8 @@
 ; structurally. `equal?` is the structural/deep-equality counterpart, built
 ; on top of `eq` and `atom` rather than replacing them. Its answer is the
 ; Core4 15-state scale (#1391): `(1)` — the same structure, `(0)` — different.
-; Canonical three-part `cond` consumes the answer explicitly; a two-part
-; clause selects only on a «yes» answer.
+; Former three-field exact-answer clauses are lowered to strict two-field
+; COND using an explicit Lisp-owned equality test and a D1 decision guard.
 (00001001 equal?
   (00001000 (a b)
     (00000111
@@ -648,8 +648,8 @@
 ; `<=` and `>=` stay Lisp-derived, but #216 now requires the derived
 ; operators to preserve the same exact-Q answer algebra as `<`, `>` and `=`:
 ; exact YES -> 1/1, exact NO -> 0/1, and any inexact operand -> Canon 0 `()`.
-; Canonical three-part `cond` distinguishes exact NO (0) from no-answer `()`
-; without routing either through generic truthiness.
+; The strict two-field clauses below distinguish exact NO (0) from no-answer
+; `()` without routing either through generic truthiness.
 (00001001 nondecreasing-from?
   (00001000 (current remaining)
     (00000111
