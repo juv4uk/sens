@@ -1014,7 +1014,7 @@ mod tests {
                     source[start.min(source.len())..end.min(source.len())].replace('\n', " ")
                 ));
             }
-            for child in items {
+            for child in items.iter() {
                 walk(source, child, hits);
             }
         }
