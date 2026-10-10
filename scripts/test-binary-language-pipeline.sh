@@ -28,6 +28,20 @@ run python3 scripts/generate-bija3-l1-l5-structure.py --check
 run python3 scripts/check-domain-tables.py
 
 # Binary-domain task governance: schema, witness, falsifier and status discipline.
+# Негативний свідок: автономний валідатор не може обійти self-test.
+run python3 - <<'PY'
+import subprocess
+import sys
+result = subprocess.run(
+    [sys.executable, "-O", "scripts/check-binary-domain-format.py", "--self-test"],
+    capture_output=True, text=True, check=False,
+)
+if result.returncode == 0 or "BINARY-DOMAIN-FORMAT: BLOCKED" not in result.stderr:
+    raise SystemExit("BINARY-DOMAIN-FORMAT: FAILED — optimized Python bypassed evidence")
+if "binary-domain-selftest-ok" in result.stdout:
+    raise SystemExit("BINARY-DOMAIN-FORMAT: FAILED — false optimized PASS")
+print("BINARY-DOMAIN-FORMAT: optimized Python named rejection PASS")
+PY
 run python3 scripts/check-binary-domain-format.py --self-test
 
 # One-way valve: host u8/Sid8 must not become semantic identity again.

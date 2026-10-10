@@ -23,6 +23,10 @@ import sys
 
 from task_schema_record import parse_record
 
+# Python -O removes assert: an unchecked self-test is not proof.
+if not __debug__:
+    raise SystemExit("BINARY-DOMAIN-FORMAT: BLOCKED — Python -O вимикає перевірки")
+
 BLOCK = re.compile(r"BINARY-DOMAIN\s+FORMAT", re.I)
 
 
