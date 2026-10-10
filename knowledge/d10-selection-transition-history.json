@@ -379,6 +379,65 @@
         "scripts/check_d10_selection_transition_history.py",
         "scripts/check-d10-proposal-ledger.py"
       ]
+    },
+    {
+      "id": "d10.replay.existing-studies-19.20261011",
+      "authority": "#4013 #4463: owner-directed D10 research inventory growth from already documented sources",
+      "evidence": [
+        "knowledge/d10-existing-research-batch-replay-20261011.json",
+        "knowledge/d10-abductive-minimal-explanations-v1.json",
+        "knowledge/d10-affine-correlated-uncertainty-v1.json",
+        "knowledge/d10-allen-atms-research-20261009.json",
+        "knowledge/d10-astrophoto-exact-pinhole-research-20261009.json",
+        "knowledge/d10-binary-lyndon-factorization-v1.json",
+        "knowledge/d10-critical-pairs-confluence-20261009.json",
+        "knowledge/d10-debruijn-binary-cycle-research-v1.json",
+        "knowledge/d10-exact-barycentric-interpolation-research-v1.json",
+        "knowledge/d10-finite-temporal-constraint-closure-v1.json",
+        "knowledge/d10-first-order-lgg-research-v1.json",
+        "knowledge/d10-rosenblatt-novikoff-exact-step-20261009.json",
+        "knowledge/d10-quine-prime-implicants-20261009.json",
+        "knowledge/d10-lower-mechanical-word-research-v1.json",
+        "knowledge/d10-affine-quantity-point-delta-20261009.json",
+        "knowledge/d10-ground-congruence-closure-research-20261009.json",
+        "knowledge/d10-cyclic-word-canon-20261009.json"
+      ],
+      "previous_inventory_blob_sha": "aef34c9c6d31f172059f3cf5d70136c77ffde0fc",
+      "resulting_inventory_blob_sha": "a76c1927296780cad064d5ec67c806a3c25d5075",
+      "added_stable_ids": [
+        "d10.replay.20261011.minimal-abductive-explanations",
+        "d10.replay.20261011.correlated-affine-combination",
+        "d10.replay.20261011.sound-affine-product-enclosure",
+        "d10.replay.20261011.allen-interval-relation",
+        "d10.replay.20261011.atms-consistent-label-join",
+        "d10.replay.20261011.pinhole-image-project",
+        "d10.replay.20261011.pixel-to-camera-ray",
+        "d10.replay.20261011.binary-lyndon-factorization",
+        "d10.replay.20261011.finite-string-critical-pair-confluence",
+        "d10.replay.20261011.de-bruijn-binary-cycle-",
+        "d10.replay.20261011.exact-barycentric-interpolate",
+        "d10.replay.20261011.finite-simple-temporal-closure",
+        "d10.replay.20261011.first-order-least-general-generalization",
+        "d10.replay.20261011.exact-perceptron-mistake-step",
+        "d10.replay.20261011.exact-boolean-prime-implicants",
+        "d10.replay.20261011.lower-mechanical-word",
+        "d10.replay.20261011.affine-quantity-transport",
+        "d10.replay.20261011.ground-congruence-closure-partition",
+        "d10.replay.20261011.cyclic-binary-word-canon"
+      ],
+      "appended_sources": [
+        "knowledge/d10-existing-research-batch-replay-20261011.json"
+      ],
+      "coordinates_added": 0,
+      "ratified_added": 0,
+      "delta_selected": 19,
+      "previous_selected": 648,
+      "resulting_selected": 667,
+      "decision": "Research selection only, original source HOLD remains documented, core versus derived library pending owner review; no T5/D2/coordinate authority",
+      "tests": [
+        "scripts/check_d10_selection_transition_history.py",
+        "scripts/check-d10-proposal-ledger.py"
+      ]
     }
   ]
 }
