@@ -3,14 +3,11 @@
 name: T5 migration inventory (М0)
 
 on:
+  # census класифікує за вмістом, а не тільки за розширенням:
+  # будь-який новий файл може стати producer/consumer T5.
+  push:
+    branches: [main]
   pull_request:
-    paths:
-      - "scripts/report_t5_migration_inventory.py"
-      - "scripts/test-t5-migration-inventory.py"
-      - "data/t5-migration-inventory.jsonl"
-      - ".github/workflows/t5-migration-inventory.yml"
-      - "**/*.sens"
-      - "**/*.senc"
   workflow_dispatch:
 
 permissions:

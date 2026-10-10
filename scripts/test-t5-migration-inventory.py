@@ -112,6 +112,34 @@ class TestT5MigrationInventory(unittest.TestCase):
             self.assertTrue(GEN.is_candidate("scripts/fresh_link.py", root),
                             "new .sens-referencing link was not discovered")
 
+    def test_inventory_gate_cannot_filter_out_new_source_consumers(self):
+        """Гвардія має запускатися і для нового .rs/.py producer без зміни *.sens."""
+        workflow = (ROOT / ".github" / "workflows" / "t5-migration-inventory.yml")
+        lines = workflow.read_text(encoding="utf-8").splitlines()
+        start = lines.index("on:") + 1
+
+        def sibling_block(name: str) -> list[str]:
+            key = f"  {name}:"
+            index = lines.index(key, start)
+            block = []
+            for line in lines[index + 1:]:
+                if line.startswith("  ") and not line.startswith("   ") and line.rstrip().endswith(":"):
+                    break
+                block.append(line)
+            return block
+
+        pull_request_block = sibling_block("pull_request")
+        self.assertFalse(
+            any(line.lstrip().startswith("paths:") for line in pull_request_block),
+            "inventory pull_request trigger must not use a path allowlist",
+        )
+        push_block = sibling_block("push")
+        self.assertTrue(
+            any(line.strip() == "branches: [main]" for line in push_block),
+            "inventory gate must also run for every push to main",
+        )
+
+
 
 if __name__ == "__main__":
     unittest.main(verbosity=2)
