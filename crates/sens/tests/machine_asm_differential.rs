@@ -355,3 +355,31 @@ fn x86_direct_add_byte_parity_with_gas_nasm() {
     }
     fs::remove_dir_all(&temp).expect("очистити фізичне свідчення");
 }
+
+
+// Перевірка етапу складання фізичних байтів — незалежно від admission.
+// Порожній, один та два блоки: точний порядок без англійських macro-підмін.
+#[test]
+#[ignore = "штатний профіль x86 на GitHub-hosted runner"]
+fn x86_byte_program_stitches_without_legacy_callable() {
+    let mut session = machine_session();
+    let cases = [
+        ("порожня", "(x86-encode-program (quote ()))", "()"),
+        ("одна", "(x86-encode-program (quote ((72 1 200))))", "(72 1 200)"),
+        (
+            "дві",
+            "(x86-encode-program (quote ((72 1 200) (195))))",
+            "(72 1 200 195)",
+        ),
+    ];
+    for (name, source, expected) in cases {
+        let observed = eval_program(source, &mut session)
+            .unwrap_or_else(|error| panic!("X86_СКЛАДАННЯ_БЛОКУВАННЯ stage={name}: {error}"));
+        assert_eq!(
+            observed.value.to_string(),
+            expected,
+            "X86_СКЛАДАННЯ_НЕСПІВПАДІННЯ stage={name}"
+        );
+        eprintln!("X86_СКЛАДАННЯ_УСПІХ stage={name} bytes={expected}");
+    }
+}
