@@ -972,7 +972,7 @@
     (let ((dst-code (x86-xmm-reg-code dst))
           (src-code (x86-xmm-reg-code src)))
       (110
-        ((10011010 (101 (x86-high1 dst-code) 0) (101 (x86-high1 src-code) 0))
+        ((менше? (додати (x86-high1 dst-code) (x86-high1 src-code)) 1)
          (00100111 242 15 opcode-byte (x86-encode-modrm 3 (x86-low3 dst-code) (x86-low3 src-code))))
         ((010 ())
          (00100111 242 (x86-encode-rex 0 (x86-high1 dst-code) 0 (x86-high1 src-code))
@@ -983,7 +983,7 @@
     (let ((dst-code (x86-xmm-reg-code dst))
           (src-code (x86-xmm-reg-code src)))
       (110
-        ((10011010 (101 (x86-high1 dst-code) 0) (101 (x86-high1 src-code) 0))
+        ((менше? (додати (x86-high1 dst-code) (x86-high1 src-code)) 1)
          (00100111 102 15 opcode-byte (x86-encode-modrm 3 (x86-low3 dst-code) (x86-low3 src-code))))
         ((010 ())
          (00100111 102 (x86-encode-rex 0 (x86-high1 dst-code) 0 (x86-high1 src-code))
@@ -998,7 +998,7 @@
     (let ((dst-code (x86-xmm-reg-code dst))
           (src-code (x86-xmm-reg-code src)))
       (110
-        ((10011010 (101 (x86-high1 dst-code) 0) (101 (x86-high1 src-code) 0))
+        ((менше? (додати (x86-high1 dst-code) (x86-high1 src-code)) 1)
          (00100111
            102
            15
@@ -1068,9 +1068,7 @@
                   ((010 ())
                    (00100111 modrm disp-byte)))))
           (110
-            ((10011010
-               (101 (x86-high1 dst-code) 0)
-               (101 (x86-high1 base-code) 0))
+            ((менше? (додати (x86-high1 dst-code) (x86-high1 base-code)) 1)
              (00101001
                (00100111 102 15 map-byte opcode-byte)
                address-tail))
