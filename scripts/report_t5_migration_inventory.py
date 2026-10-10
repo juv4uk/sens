@@ -24,7 +24,9 @@ from pathlib import Path
 
 SCHEMA = "sens-t5-migration-inventory/v1"
 
-EXT = {".rs", ".py", ".sh", ".yml", ".yaml", ".toml"}
+# Важливі читачі/видавці SENS пишуться також рідною .lisp.
+# Новий tracked .lisp із посиланням на .sens/.senc не можна втратити в M0.
+EXT = {".rs", ".py", ".sh", ".yml", ".yaml", ".toml", ".lisp"}
 EXCLUDE_PREFIXES = (
     "vendor/", "target/", "archive/", "docs/",
     "knowledge/", "memory/", "дослідження/", "public/",
