@@ -303,16 +303,20 @@
       (t (quote allowed)))))
 
 (def fg-check-added
-  (lambda (paths policy rows)
+  (lambda (paths policy rows modes)
     (cond
       ((atom paths) (structural-kind empty-list) 1)
       ((atom paths) (structural-kind pair)
         (let ((path (car paths)))
-          (let ((verdict (fg-classify path policy rows)))
-            (cond
-              ((equal? verdict (quote allowed))
-                (fg-check-added (cdr paths) policy rows))
-              (t (fg-block (quote path) (list path verdict)))))))
+          (cond
+            ((and (fg-mode-required? path) (fg-not (fg-mode-allowed? path modes)))
+              (fg-block (quote git-mode) (list path (fg-find-mode path modes))))
+            (t
+              (let ((verdict (fg-classify path policy rows)))
+                (cond
+                  ((equal? verdict (quote allowed))
+                    (fg-check-added (cdr paths) policy rows modes))
+                  (t (fg-block (quote path) (list path verdict)))))))))
       ((atom paths) (structural-kind atom)
         (fg-block (quote input) "added-paths is not a proper list")))))
 
@@ -392,6 +396,7 @@
       ((equal? kind (quote input-path)) (sens_file_authority_fail_input_path_5397 subject))
       ((equal? kind (quote tracked-tools-path)) (sens_file_authority_fail_tracked_tools_path_5397 subject))
       ((equal? kind (quote path)) (sens_file_authority_fail_path_5397 subject))
+      ((equal? kind (quote git-mode)) (sens_file_authority_fail_git_mode_5405 subject))
       (t (sens_file_authority_fail_unknown_5397 subject)))))
 
 (def fg-require
@@ -407,6 +412,12 @@
               (and
                 (equal? (fg-field (quote schema) input) (quote file-authority-input/1))
                 (fg-path-list? (fg-field (quote added-paths) input))
+                (fg-mode-rows-valid?
+                  (fg-field (quote added-modes) input)
+                  (fg-field (quote added-paths) input))
+                (fg-paths-have-mode?
+                  (fg-field (quote added-paths) input)
+                  (fg-field (quote added-modes) input))
                 (fg-path-list? (fg-field (quote tracked-tools-paths) input))
                 (fg-tools-path-list? (fg-field (quote tracked-tools-paths) input)))
               (quote input) "Git path transport")))
@@ -428,7 +439,8 @@
                     (fg-check-added
                       (fg-field (quote added-paths) input)
                       *file-authority-policy*
-                      (fg-field (quote new-foreign-tools) *foreign-tools-census*))))
+                      (fg-field (quote new-foreign-tools) *foreign-tools-census*)
+                      (fg-field (quote added-modes) input))))
               (let ((tracked-ok
                       (fg-check-tracked
                         (fg-field (quote tracked-tools-paths) input)
