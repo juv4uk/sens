@@ -377,6 +377,18 @@ def self_test() -> None:
                 tree_sha, "--", "tools/"))
             expect("head-tools-not-index", exact_tools, ["tools/unlisted.py"])
             expect("cleared-index", nul_paths(git("ls-files", "-z", "--", "tools/")), [])
+            expect("head-regular-mode",
+                   git_path_mode(tree_sha, census_path), "100644:blob")
+            expect("head-symlink-mode",
+                   git_path_mode(tree_sha, "knowledge/symlink.lisp"), "120000:blob")
+            quoted = input_form(
+                ["knowledge/symlink.lisp"], [],
+                [("knowledge/symlink.lisp", "120000:blob")],
+            )
+            if '(added-modes . (("knowledge/symlink.lisp" . "120000:blob")))' not in quoted:
+                fail("TRANSPORT_SELF_TEST_MISSING_GIT_MODE_INPUT")
+            if not catches(lambda: git_path_mode(tree_sha, "knowledge/missing.lisp")):
+                fail("TRANSPORT_SELF_TEST_ACCEPTED_MISSING_GIT_MODE")
             expect("missing-exact-source",
                    read_head_source(tree_sha, "knowledge/missing.lisp"), None)
             if not catches(lambda: read_head_source(tree_sha, "knowledge/symlink.lisp")):
