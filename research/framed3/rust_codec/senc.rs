@@ -280,15 +280,21 @@ fn t5_decode(data: &[u8]) -> Result<Vec<String>, SencError> {
 // Профіль «Рамка-3» (F3): одна зовнішня D2-рамка `10 … 01`, без сусідніх `22`.
 // ---------------------------------------------------------------------------
 
-const OPEN_TABLE: [u8; 3] = [1, 0, 2];
-const CLOSE_TABLE: [u8; 3] = [2, 0, 1];
-
+// Перше слово (`10`) приклеєне до відкриваючої дужки, останнє (`01`) — до
+// закриваючої; тому трит-домен фіксує лише `10` на початку та `01` у кінці,
+// а роздільник `2` стоїть виключно між внутрішніми словами.
 fn frame_allowed(n: usize, position: usize) -> Vec<u8> {
-    if position < 3 {
-        return vec![OPEN_TABLE[position]];
+    if position == 0 {
+        return vec![1];
     }
-    if position >= n - 3 {
-        return vec![CLOSE_TABLE[position - (n - 3)]];
+    if position == 1 {
+        return vec![0];
+    }
+    if position == n - 2 {
+        return vec![0];
+    }
+    if position == n - 1 {
+        return vec![1];
     }
     vec![0, 1, 2]
 }
@@ -329,24 +335,14 @@ fn frame_ways_table(n: usize) -> Vec<[BigUint; 4]> {
 
 /// Верхня межа кількості транспортних послідовностей довжини `n`.
 fn frame_capacity(n: usize) -> BigUint {
-    if n == 5 {
-        return BigUint::one();
-    }
-    if n < 7 || n > FRAME_MAX_TRITS {
+    if n < 4 || n > FRAME_MAX_TRITS {
         return BigUint::zero();
     }
     frame_ways_table(n)[0][0].clone()
 }
 
 fn frame_rank(n: usize, trits: &[u8]) -> Result<BigUint, SencError> {
-    if n == 5 {
-        return if trits == [1, 0, 2, 0, 1] {
-            Ok(BigUint::zero())
-        } else {
-            Err(SencError::FrameShape)
-        };
-    }
-    if !(7..=FRAME_MAX_TRITS).contains(&n) {
+    if !(4..=FRAME_MAX_TRITS).contains(&n) {
         return Err(SencError::FrameRange);
     }
     let table = frame_ways_table(n);
@@ -374,9 +370,6 @@ fn frame_rank(n: usize, trits: &[u8]) -> Result<BigUint, SencError> {
 fn frame_unrank(n: usize, index: &BigUint) -> Result<Vec<u8>, SencError> {
     if index.cmp_big(&frame_capacity(n)) != Ordering::Less {
         return Err(SencError::FrameRange);
-    }
-    if n == 5 {
-        return Ok(vec![1, 0, 2, 0, 1]);
     }
     let table = frame_ways_table(n);
     let mut remaining = index.clone();
@@ -410,7 +403,7 @@ fn frame_buckets() -> &'static Vec<(usize, usize, usize)> {
     static BUCKETS: OnceLock<Vec<(usize, usize, usize)>> = OnceLock::new();
     BUCKETS.get_or_init(|| {
         let mut result = Vec::new();
-        let mut n = 5usize;
+        let mut n = 4usize;
         let mut byte_count = 1usize;
         while n <= FRAME_MAX_TRITS {
             let start = n;
@@ -429,6 +422,55 @@ fn frame_buckets() -> &'static Vec<(usize, usize, usize)> {
         }
         result
     })
+}
+
+/// Рамкові транспортні трити за правилом злиття: `words[0]` приклеєне до
+/// відкриваючої дужки, `words[-1]` — до закриваючої; `2` лише між внутрішніми.
+fn frame_transport_trits(words: &[String]) -> Vec<u8> {
+    let mut trits = Vec::new();
+    let last = words.len().saturating_sub(1);
+    for (position, word) in words.iter().enumerate() {
+        if position >= 2 && position < last {
+            trits.push(2);
+        }
+        for byte in word.bytes() {
+            trits.push(byte - b'0');
+        }
+    }
+    trits
+}
+
+/// Розібрати рамкові трити назад у слова з урахуванням злитих країв:
+/// зовнішні `10`/`01` фіксовані, решта ділиться за роздільником `2`.
+fn frame_split_trits(trits: &[u8]) -> Vec<String> {
+    let mut parts: Vec<String> = Vec::new();
+    let mut current = String::new();
+    for &trit in trits {
+        if trit == 2 {
+            parts.push(std::mem::take(&mut current));
+        } else {
+            current.push((b'0' + trit) as char);
+        }
+    }
+    parts.push(current);
+    if parts.len() == 1 {
+        let only = std::mem::take(&mut parts[0]);
+        let mid = &only[2..only.len() - 2];
+        return if mid.is_empty() {
+            vec!["10".to_string(), "01".to_string()]
+        } else {
+            vec!["10".to_string(), mid.to_string(), "01".to_string()]
+        };
+    }
+    let first = parts.remove(0);
+    let last = parts.pop().unwrap();
+    let mut words = Vec::with_capacity(parts.len() + 2);
+    words.push(first[..2].to_string());
+    words.push(first[2..].to_string());
+    words.extend(parts);
+    words.push(last[..last.len() - 2].to_string());
+    words.push(last[last.len() - 2..].to_string());
+    words
 }
 
 /// Перевірити зовнішню рамку `10 … 01` і повернути транспортні трити.
@@ -453,7 +495,7 @@ fn frame_transport(words: &[String]) -> Result<Vec<u8>, SencError> {
     if nesting != 0 {
         return Err(SencError::FrameShape);
     }
-    let trits = transport_trits(words);
+    let trits = frame_transport_trits(words);
     if trits.len() > FRAME_MAX_TRITS {
         return Err(SencError::FrameRange);
     }
@@ -485,7 +527,7 @@ fn frame_decode(data: &[u8]) -> Result<Vec<String>, SencError> {
                 let count = frame_capacity(length);
                 if code.cmp_big(&count) == Ordering::Less {
                     let trits = frame_unrank(length, &code)?;
-                    let words = split_trits(&trits);
+                    let words = frame_split_trits(&trits);
                     if frame_transport(&words)? != trits || frame_encode(&words)? != data {
                         return Err(SencError::FrameCanonical);
                     }
@@ -848,11 +890,11 @@ mod tests {
     fn known_t5_and_frame_examples() {
         let cases = [
             (words(&["10", "01"]), "64", "00"),
-            (words(&["10", "001", "00", "000", "01"]), "638906a1", "23d0"),
+            (words(&["10", "001", "00", "000", "01"]), "638906a1", "4060"),
             (
                 words(&["10", "100", "00", "10", "111", "00", "1", "00", "0", "01", "01"]),
                 "66386789893b35",
-                "2109895eb5",
+                "365f1bd0c9",
             ),
         ];
         for (case, t5_hex, frame_hex) in cases {
@@ -869,7 +911,7 @@ mod tests {
     #[test]
     fn buckets_first_three() {
         let buckets = frame_buckets();
-        assert_eq!(&buckets[..3], &[(1, 5, 11), (2, 12, 17), (3, 18, 22)]);
+        assert_eq!(&buckets[..3], &[(1, 4, 8), (2, 9, 14), (3, 15, 20)]);
     }
 
     #[test]
@@ -930,7 +972,7 @@ mod tests {
             while index.cmp_big(&capacity) == Ordering::Less {
                 let trits = frame_unrank(n, &index).unwrap();
                 assert_eq!(frame_rank(n, &trits).unwrap(), index);
-                let words = split_trits(&trits);
+                let words = frame_split_trits(&trits);
                 if let Ok(encoded) = frame_encode(&words) {
                     assert_eq!(frame_decode(&encoded).unwrap(), words);
                     canonical += 1;
@@ -944,7 +986,7 @@ mod tests {
     #[test]
     fn unused_physical_code_rejected() {
         let mut used = BigUint::zero();
-        for length in 5..=11 {
+        for length in 4..=8 {
             used = used.add(&frame_capacity(length));
         }
         assert!(used.cmp_big(&BigUint::one_shl(8)) == Ordering::Less);
