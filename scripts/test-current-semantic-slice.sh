@@ -21,6 +21,21 @@ cargo test -p sens \
 # #291: quantity semantics live in Lisp. The shell observes only the named
 # pass envelope; expected scientific quantities and relations stay in the
 # Lisp witness itself. No replacement Rust observer is introduced.
+# #5408: насамперед випробувати саму послідовну лексичну область D6.
+# Повний закон величин перевіряється лише після проходження цього SENS-свідка.
+binding_witness="witnesses/quantity-sequential-binding.lisp"
+if binding_status="$(cargo run --quiet -p sens-cli --bin sens -- "$binding_witness" 2>&1)"; then
+  if [[ "$binding_status" != "7" ]]; then
+    printf 'QUANTITY-BINDING-BLOCKED: очікувано SENS 7, одержано: %s\n' "$binding_status" >&2
+    exit 1
+  fi
+  printf 'QUANTITY-BINDING-PASS: D6 нехай* => 7\n'
+else
+  binding_rc=$?
+  printf 'QUANTITY-BINDING-BLOCKED: SENS-свідок завершився %s: %s\n' "$binding_rc" "$binding_status" >&2
+  exit 1
+fi
+
 quantity_witness="tests/fixtures/exact-quantity-arithmetic-witness.lisp"
 if quantity_status="$(cargo run --quiet -p sens-cli --bin sens -- "$quantity_witness" 2>&1)"; then
   if [[ "$quantity_status" != "(exact-quantity-arithmetic-witness (status pass))" ]]; then
