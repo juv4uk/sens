@@ -15,7 +15,7 @@
 (00001001 mechanism-selector-find-section
   (00001000 (name sections)
     (00000111
-      ((00000010 sections) () (00000001 ()))
+      
       ((00000010 sections) 
        (00000111
          ((00000011 (00000101 (00000101 sections)) name) 
@@ -31,7 +31,7 @@
 (00001001 mechanism-selector-registry-has-sid?
   (00001000 (sid rows)
     (00000111
-      ((00000010 rows) () (00000001 no))
+      ((0100 (00000010 rows)) (00000001 no))
       ((00000010 rows) 
        (00000111
          ((00000011 sid (00000101 (00000101 rows)))  (00000001 yes))
@@ -41,13 +41,13 @@
 (00001001 mechanism-selector-find-route
   (00001000 (sid executor rows)
     (00000111
-      ((00000010 rows) () (00000001 ()))
+      
       ((00000010 rows) 
        (10011100 ((row (00000101 rows)))
          (00000111
            ((00000011 sid (00000101 row)) 
             (00000111
-              ((00000011 executor (00101111 row)) (1) row)
+              ((00000011 executor (00101111 row))  row)
               ((00000011 executor (00101111 row)) 
                (mechanism-selector-find-route sid executor (00000110 rows)))))
            ((00000011 sid (00000101 row)) 
@@ -70,7 +70,7 @@
                (mechanism-selector-find-route
                  sid executor mechanism-selector-routes)))
          (00000111
-           ((00000010 route) ()
+           ((0100 (00000010 route))
             (00100111 (00000001 mechanism-unavailable) sid executor))
            ((00000010 route) 
             (00100111
