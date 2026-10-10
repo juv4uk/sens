@@ -124,23 +124,31 @@
 
 ; Structural equality for this witness, expressed using only callable D1-D4 laws.
 ; EQ is reached only after both values are proven to be atoms.
+(00001001 exact-quantity-empty?
+  (00001000 (x)
+    (за-умовою
+      ((атом? x)
+       (за-умовою
+         ((тотожне? x (як-є ())) так)
+         ((атом? (як-є ())) ні)))
+      ((атом? (як-є ())) ні))))
 (00001001 exact-quantity-value-equal?
   (00001000 (left right)
     (за-умовою
-      ((порожнє? left) (порожнє? right))
-      ((порожнє? right) ні)
+      ((exact-quantity-empty? left) (exact-quantity-empty? right))
+      ((exact-quantity-empty? right) ні)
       ((атом? left)
        (за-умовою
          ((атом? right) (тотожне? left right))
-         ((хибне? (атом? right)) ні)))
+         ((атом? (як-є ())) ні)))
       ((атом? right) ні)
       ((exact-quantity-value-equal? (перше left) (перше right))
        (exact-quantity-value-equal? (решта left) (решта right)))
-      ((хибне? (exact-quantity-value-equal? (перше left) (перше right))) ні))))
+      ((атом? (як-є ())) ні))))
 (00001001 exact-quantity-arithmetic-check
   (00001000 (rows)
     (за-умовою
-      ((порожнє? rows)
+      ((exact-quantity-empty? rows)
        (00000001 (exact-quantity-arithmetic-witness (status pass))))
       ((атом? rows)
        (00100111
@@ -148,13 +156,12 @@
          (00100111 (00000001 status) (00000001 fail))
          (00100111 (00000001 case) (00000001 malformed-row-tail))
          (00100111 (00000001 actual) rows)))
-      ((хибне? (атом? rows))
+      ((атом? (як-є ()))
        (за-умовою
          ((exact-quantity-value-equal? (перше (решта (перше rows)))
-                     (перше (решта (решта (перше rows)))))
+                                       (перше (решта (решта (перше rows)))))
           (exact-quantity-arithmetic-check (решта rows)))
-         ((хибне? (exact-quantity-value-equal? (перше (решта (перше rows)))
-                             (перше (решта (решта (перше rows))))))
+         ((атом? (як-є ()))
           (00100111
             (00000001 exact-quantity-arithmetic-witness)
             (00100111 (00000001 status) (00000001 fail))
