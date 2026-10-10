@@ -112,9 +112,9 @@ class SlotTapeTests(unittest.TestCase):
         with self.assertRaisesRegex(Blocked, "exact D1"):
             run(compile_t5(physical(call("110", call(Q, "1")))))
         with self.assertRaisesRegex(Blocked, "only atoms"):
-            run(compile_t5(physical(call("101", PAIR, Q)))
+            run(compile_t5(physical(call("101", PAIR, Q))))
         with self.assertRaisesRegex(Blocked, "expects a pair"):
-            run(compile_t5(physical(call("100", "000")))
+            run(compile_t5(physical(call("100", "000"))))
 
     def test_no_legacy_functions_or_d4_and_no_illegal_d2(self):
         for invalid in [
