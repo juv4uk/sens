@@ -30,7 +30,7 @@ REQUIRED = (
     "[дослідний PR #5429]",
     "агент/напрям; issue→батько; repo+точний main SHA",
     "незалежний негативний контроль",
-    "одного прямого запису в `main`",
+    "жодного прямого запису в `main`",
     "[#5041](https://github.com/juv4uk/sens/issues/5041)",
     "[#5224](https://github.com/juv4uk/sens/issues/5224)",
     "SEE_LOCAL_FIX_",
