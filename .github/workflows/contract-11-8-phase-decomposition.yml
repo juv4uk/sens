@@ -82,6 +82,10 @@ jobs:
           import json
           from pathlib import Path
 
+          # Жодна вимога атестації не може послаблюватися оптимізацією Python.
+          if not __debug__:
+              raise SystemExit("PHASE-DECOMPOSITION: BLOCKED — Python -O заборонено для доказового CI")
+
           def require(condition, label):
               # `assert` зникає під python -O; свідчення повинно відмовляти завжди.
               if not condition:
