@@ -1,0 +1,63 @@
+name: Core4 exact-domain FASL candidate
+
+on:
+  push:
+    branches:
+      - fix/core4-exact-domain-fasl-reader-20261010
+    paths:
+      - crates/sens/src/mixed_source.rs
+      - crates/sens/src/lib.rs
+      - crates/sens-cli/src/bin/gen-fasl.rs
+      - crates/sens/tests/core_fasl_freshness.rs
+      - lib/core4.lisp
+      - .github/workflows/core4-exact-domain-fasl-candidate.yml
+  pull_request:
+    branches:
+      - main
+    paths:
+      - crates/sens/src/mixed_source.rs
+      - crates/sens/src/lib.rs
+      - crates/sens-cli/src/bin/gen-fasl.rs
+      - crates/sens/tests/core_fasl_freshness.rs
+      - lib/core4.lisp
+      - .github/workflows/core4-exact-domain-fasl-candidate.yml
+
+permissions:
+  contents: read
+
+jobs:
+  regenerate-and-prove:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Prove scoped Core4 reader and preserve quoted/number data
+        run: |
+          cargo test --locked -p sens --lib mixed_source::tests::core4_reader_lifts_d4_not_inside_w8_cond_but_keeps_quoted_data -- --exact --nocapture
+          cargo test --locked -p sens --lib mixed_source::tests::core4_source_has_no_numeric_0100_in_executable_call_head_positions -- --exact --nocapture
+      - name: Generate Core4 FASL from the path-bound exact-domain AST
+        run: |
+          cargo run --locked --release -p sens-cli --bin gen-fasl -- lib/core4.lisp /tmp/core4.lisp.fasl
+          cp /tmp/core4.lisp.fasl lib/core4.lisp.fasl
+      - name: Verify source hash and AST snapshot parity
+        run: cargo test --locked -p sens --test core_fasl_freshness -- --nocapture
+      - name: Publish binary snapshot for exact-tree commit
+        uses: actions/upload-artifact@v4
+        with:
+          name: core4-exact-domain-fasl
+          path: lib/core4.lisp.fasl
+          if-no-files-found: error
+          retention-days: 1
+      - name: Exact-domain x86 CPU witness
+        run: cargo test --locked -p sens --test machine_exact_domain_cpu -- --nocapture
+      - name: Exact-D1 register and instruction admission
+        run: cargo test --locked -p sens --test machine_admission_adversarial -- --nocapture
+      - name: Bounded D5 effect projection
+        run: cargo test --locked -p sens --test machine_effect_d5_arithmetic_projection -- --nocapture
+      - name: Native physical CAR/CDR and reject-before-host
+        run: cargo test --locked -p sens-host --test native_lisp_bytes -- --nocapture
+      - name: Native D3 COND / EQ execution
+        run: cargo test --locked -p sens-host --test native_cond_profile -- --nocapture
