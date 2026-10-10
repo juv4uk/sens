@@ -737,6 +737,26 @@ fn decode_mov_r64_imm64(bytes: &[u8]) -> Option<(u8, u64)> {
     Some((register, value))
 }
 
+#[test]
+fn x86_mov_imm64_component_stage_probe() {
+    let mut session = encoder_session();
+    // Відокремлюємо точну причину MOV imm64 до фізичного пакування.
+    // Не змінюємо семантику та не маскуємо відмову решти регістрів.
+    for (source, expected) in [
+        ("(x86-reg-code (quote rax))", "0"),
+        ("(x86-low3 0)", "0"),
+        ("(x86-high1 0)", "0"),
+        ("(x86-encode-rex 1 0 0 0)", "72"),
+        ("(x86-u64-bytes 0)", "(0 0 0 0 0 0 0 0)"),
+    ] {
+        assert_eq!(
+            eval_bytes(source, &mut session),
+            expected,
+            "етап фізичного MOV imm64: {source}"
+        );
+    }
+}
+
 /// #176 continued: generalizes MOV r64,imm64 admission from the previous
 /// rax/rcx-only pair to all 16 GPRs. The encoder (`x86-encode-mov-r64-imm64`)
 /// was already fully general -- REX.B for r8-r15 via the same x86-high1/
