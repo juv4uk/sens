@@ -83,41 +83,24 @@ fn x86_pattern_mismatches_are_exact_d1_no_not_empty() {
     load_lisp_file("lib/machine/encoding/x86-64.lisp", &mut session);
     load_lisp_file("lib/machine/admission/x86-64.lisp", &mut session);
 
-    // Структура не є D1:0. Невідповідна інструкція має повертати
-    // саме негативний предикат, який можна передати у суворий D3 COND.
-    for source in [
-        "(x86-admission-pattern-match? (00000001 (ret)) (00000001 (ud2)))",
-        "(x86-admission-pattern-match? (00000001 (ret)) (00000001 ret))",
-        "(x86-admission-pattern-match? (00000001 (ret)) (00000001 (ret extra)))",
-    ] {
-        let result = eval_program(source, &mut session)
-            .unwrap_or_else(|error| panic!("{source}: {error}"));
-        assert_eq!(
-            result.value.as_predicate_bit(),
-            Some(false),
-            "незбіг шаблону не може повертати структурне () або Number: {source}"
-        );
-    }
-
-    let allowed = "(x86-admission-pattern-match? (00000001 (ret)) (00000001 (ret)))";
-    let result = eval_program(allowed, &mut session)
-        .unwrap_or_else(|error| panic!("{allowed}: {error}"));
-    assert_eq!(
-        result.value.as_predicate_bit(),
-        Some(true),
-        "точний збіг має повертати D1:1, а не історичне t"
-    );
-}
-
-
-#[test]
-fn x86_register_wildcards_use_exact_d1_and_reject_unknown_names() {
-    let mut session = Session::default();
-    load_core_library(&mut session).expect("ратифіковане ядро");
-    load_lisp_file("lib/machine/encoding/x86-64.lisp", &mut session);
-    load_lisp_file("lib/machine/admission/x86-64.lisp", &mut session);
-
+    // Every match/no-match is a D1 PredicateBit, including typed operand slots.
     let cases = [
+        (
+            "(x86-admission-pattern-match? (00000001 (ret)) (00000001 (ud2)))",
+            false,
+        ),
+        (
+            "(x86-admission-pattern-match? (00000001 (ret)) (00000001 ret))",
+            false,
+        ),
+        (
+            "(x86-admission-pattern-match? (00000001 (ret)) (00000001 (ret extra)))",
+            false,
+        ),
+        (
+            "(x86-admission-pattern-match? (00000001 (ret)) (00000001 (ret)))",
+            true,
+        ),
         (
             "(x86-admission-pattern-match? (00000001 (mov-r64-imm64 register immediate)) (00000001 (mov-r64-imm64 rax 7)))",
             true,
@@ -142,7 +125,7 @@ fn x86_register_wildcards_use_exact_d1_and_reject_unknown_names() {
         assert_eq!(
             result.value.as_predicate_bit(),
             Some(expected),
-            "register wildcard must return exact D1, never host truthiness or structural empty: {source}"
+            "pattern matching must return exact D1, never host truthiness, structural empty, or Number: {source}"
         );
     }
 }
