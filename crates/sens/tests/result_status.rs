@@ -102,10 +102,10 @@ fn result_payload_extracts_everything_after_the_tag() {
 
 #[test]
 fn an_ordinary_value_is_not_a_tagged_result() {
-    assert_eq!(eval_result_status(r#"(result-tagged? 42)"#), "()");
+    assert_eq!(eval_result_status(r#"(result-tagged? 42)"#), "0");
     assert_eq!(
         eval_result_status(r#"(result-tagged? (quote (a b c)))"#),
-        "()"
+        "0"
     );
 }
 
