@@ -3,14 +3,11 @@
 name: T5 migration inventory (М0)
 
 on:
+  # Реєстр визначає ланки за вмістом, не лише за розширенням. Будь-який файл
+  # може почати читати/писати .sens, тому paths-фільтр створив би сліпу зону.
+  push:
+    branches: [main]
   pull_request:
-    paths:
-      - "scripts/report_t5_migration_inventory.py"
-      - "scripts/test-t5-migration-inventory.py"
-      - "data/t5-migration-inventory.jsonl"
-      - ".github/workflows/t5-migration-inventory.yml"
-      - "**/*.sens"
-      - "**/*.senc"
   workflow_dispatch:
 
 permissions:
