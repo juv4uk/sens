@@ -150,10 +150,14 @@ def route_evidence() -> tuple[bool, bool]:
         token.text == ZERO8 for token in call_heads(mechanism_tokens)
     )
 
+    contract_lower = contract.lower()
     contract_separates_ground = (
-        "function 00000000 is not the empty-list value" in contract.lower()
-        and "() is represented as a structural empty value outside the function space"
-        in contract.lower()
+        "core.d3 bīja3 is the owner-ratified exact three-bit foundation" in contract_lower
+        and "000 structural empty ()" in contract_lower
+        and "historical exact-eight-bit forms are role-aware compatibility projections only"
+        in contract_lower
+        and "never compare equal to a domain-qualified object solely from packed bits"
+        in contract_lower
     )
 
     return zero_in_mechanism_rows, contract_separates_ground
@@ -188,7 +192,9 @@ def main() -> int:
             "current zero Function8 has mechanism metadata; H-NIL snapshot needs semantic reclassification"
         )
     if not separated:
-        failures.append("Contract 10 no longer explicitly separates () from Function8 zero")
+        failures.append(
+            "Contract 11.8 no longer explicitly separates structural D3 empty from legacy Function8 identity"
+        )
 
     if failures:
         for failure in failures:
