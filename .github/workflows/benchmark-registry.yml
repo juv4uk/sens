@@ -30,6 +30,9 @@ jobs:
       - name: Validate manifests and generated index
         run: python3 scripts/benchmark_registry.py --check
 
+      - name: Validate research-only paired statistics and fail-closed witnesses
+        run: python3 -m unittest discover -s benchmarks/bench-methodology -p 'test_paired_effect.py' -v
+
       - name: Reject newly created unmanifested stands
         if: github.event_name == 'pull_request'
         env:
