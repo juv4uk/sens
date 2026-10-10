@@ -800,7 +800,7 @@ fn x86_u64_bytes_equal_independent_little_endian_for_boundaries() {
             .collect();
         assert_eq!(
             bytes,
-            value.to_le_bytes(),
+            value.to_le_bytes().to_vec(),
             "x86: точні вісім little-endian байтів для {value}: {form}"
         );
     }
