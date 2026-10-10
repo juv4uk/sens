@@ -1,0 +1,27 @@
+name: "Дослід рамкового стискання: оборотність і місткість"
+on:
+  push:
+    paths:
+      - 'research/framed3/**'
+      - '.github/workflows/framed3-research.yml'
+  pull_request:
+    paths:
+      - 'research/framed3/**'
+      - '.github/workflows/framed3-research.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  standalone-research:
+    name: Незалежна перевірка дослідного кодера
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Перевірка пакування та місткості рамки
+        run: python3 research/framed3/research_codec.py
+      - name: Перевірка відновлення слів, помилкових рамок і байтів T5
+        run: python3 -m unittest discover -s research/framed3 -p 'test_*.py' -v

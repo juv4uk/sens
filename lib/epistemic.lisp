@@ -75,7 +75,7 @@
       ((00000011 (00000101 value) (00000001 proof)) t)
       ((00000011 (00000101 value) (00000001 test)) t)
       ((00000011 (00000101 value) (00000001 observation)) t)
-      (t (00000001 ())))))
+      (1 (00000001 ())))))
 
 ; claim-ref shape check — no claim-ref? predicate is spec-mandated (and
 ; none is added as a public export), but supporting-evidence below needs
@@ -91,7 +91,7 @@
       
       ((00000010 (00000110 value))  (00000001 ()))
       ((00000011 (00000101 value) (00000001 claim-ref)) t)
-      (t (00000001 ())))))
+      (1 (00000001 ())))))
 
 ; observation? must NOT be tag-only: the `observation` tag is reused both
 ; for the full top-level record here and as one of source-ref's four
@@ -121,7 +121,7 @@
       ((00000010 (00000101 (00110101 value)))  (00000001 ()))
       ((00100001 (00000011 (00000101 (00000101 (00110101 value))) (00000001 statement))) (00000001 ()))
       ((10110001 (00000010 (00000110 (00110101 value)))) (00000001 ()))
-      (t t))))
+      (1 t))))
 
 ; claim? — also validates `review` strictly against its finite enum
 ; {proposed, reviewed, rejected} via member?, unlike source-ref?'s
@@ -152,7 +152,7 @@
       ((00100001 (00000011 (00000101 (00000101 (00000110 (00110101 value)))) (00000001 review))) (00000001 ()))
       ((00100001 (00101100 (00110100 (00000101 (00000110 (00110101 value)))) (00000001 (proposed reviewed rejected)))) (00000001 ()))
       ((10110001 (00000010 (00000110 (00000110 (00110101 value))))) (00000001 ()))
-      (t t))))
+      (1 t))))
 
 ; evidence? — same reasoning as claim? for the finite outcome enum
 ; {supports, contradicts, inconclusive}.
@@ -184,7 +184,7 @@
       ((00000010 (00000101 (00000110 (00000110 (00110101 value)))))  (00000001 ()))
       ((00100001 (00000011 (00000101 (00000101 (00000110 (00000110 (00110101 value))))) (00000001 source-ref))) (00000001 ()))
       ((10110001 (00000010 (00000110 (00000110 (00000110 (00110101 value)))))) (00000001 ()))
-      (t t))))
+      (1 t))))
 
 (00001001 intent?
   (00001000 (value)
@@ -213,7 +213,7 @@
       ((00000010 (00000101 (00000110 (00000110 (00110101 value)))))  (00000001 ()))
       ((00100001 (00000011 (00000101 (00000101 (00000110 (00000110 (00110101 value))))) (00000001 produces))) (00000001 ()))
       ((10110001 (00000010 (00000110 (00000110 (00000110 (00110101 value)))))) (00000001 ()))
-      (t t))))
+      (1 t))))
 
 ; --- Accessors ------------------------------------------------------------
 ; lib/core.lisp's assoc (line 311) returns the whole matched (field value)
@@ -271,7 +271,7 @@
       ((00100001 (epistemic--claim-ref? claim-ref)) (00000001 ()))
       ((00100001 (00000011 (10010010 evidence) (00000001 supports))) (00000001 ()))
       ((00100001 (00100010 (evidence-claim-ref evidence) claim-ref)) (00000001 ()))
-      (t evidence))))
+      (1 evidence))))
 
 ; local helper for intent-capabilities-satisfied? — no every?/all? helper
 ; exists in lib/core.lisp (confirmed directly, not assumed), so this small
@@ -282,7 +282,7 @@
       
       ((00000010 requirements)  t)
       ((00100001 (00101100 (00000101 requirements) effective-capabilities)) (00000001 ()))
-      (t (epistemic--all-required-present? (00000110 requirements) effective-capabilities)))))
+      (1 (epistemic--all-required-present? (00000110 requirements) effective-capabilities)))))
 
 ; intent-capabilities-satisfied? checks ONLY the requires-subset
 ; membership relation: every symbol in the intent's `requires` list must
@@ -303,4 +303,4 @@
   (00001000 (intent effective-capabilities)
     (00000111
       ((00100001 (10010101 intent)) (00000001 ()))
-      (t (epistemic--all-required-present? (intent-requires intent) effective-capabilities)))))
+      (1 (epistemic--all-required-present? (intent-requires intent) effective-capabilities)))))

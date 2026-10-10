@@ -65,7 +65,7 @@
          (00000001 mechanism-selection-failure)
          (00000001 sid-not-in-function-table)
          sid))
-      (t
+      (1
        (10011100 ((route
                (mechanism-selector-find-route
                  sid executor mechanism-selector-routes)))

@@ -77,18 +77,21 @@ fn eval_t5_bytes_core4(
     bytes: &[u8],
     bootstrap_core: bool,
 ) -> Result<sens::EvalResult, String> {
-    // Physical execution stays on typed words and the packed reader.
-    // The visible 0/1 view is reserved for explicit open/explain operations.
-    let words = sens::decode_ternary_words(bytes)
-        .map_err(|e| format!("physical T5 decode rejected: {e:?}"))?;
-    let forms = sens::parse_canonical_word_sequence(&words)
-        .map_err(|e| format!("canonical packed SENS parser rejected: {e}"))?;
+    // Decode physical T5 exactly ONCE through the current D2 reader,
+    // before any optional Core4 bootstrap. There is no text rendering,
+    // duplicate grammar, or intermediate packed-bit representation here.
+    let program = sens::PhysicalT5Program::decode(bytes).map_err(|e| match e {
+        sens::T5ExecutionError::Transport(error) =>
+            format!("physical T5 decode rejected: {error:?}"),
+        sens::T5ExecutionError::Language(error) =>
+            format!("canonical packed SENS parser rejected: {error}"),
+    })?;
     let mut session = sens::Session::default();
     if bootstrap_core {
         sens::load_core_library(&mut session)
             .map_err(|e| format!("explicit Core4 bootstrap rejected: {e:?}"))?;
     }
-    sens::eval_parsed_expressions(&forms, &mut session)
+    program.execute(&mut session)
         .map_err(|e| format!("current SENS evaluator rejected: {e}"))
 }
 
@@ -276,9 +279,10 @@ mod eval_tests {
         let start = source.find("fn eval_t5_bytes_core4(").expect("physical eval route");
         let end = source[start..].find("\n}\n").expect("route body") + start + 3;
         let route = &source[start..end];
-        assert!(route.contains("sens::decode_ternary_program(bytes)"));
-        assert!(route.contains("sens::pack_binary_source_words(&words)"));
-        assert!(route.contains("sens::parse_canonical_packed_words(&packed, &widths)"));
+        assert!(route.contains("sens::PhysicalT5Program::decode(bytes)"));
+        assert!(route.contains("program.execute(&mut session)"));
+        assert!(!route.contains("sens::pack_binary_source_words("));
+        assert!(!route.contains("sens::parse_canonical_packed_words("));
         assert!(!route.contains("sens::open_ternary_program(bytes)"));
         assert!(!route.contains("sens::parse_canonical_binary(&visible)"));
     }

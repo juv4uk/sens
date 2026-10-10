@@ -28,28 +28,28 @@
       
       ((00000010 env)  name)
       ((00000011 (00000101 (00000101 env)) name) (00000110 (00000101 env)))
-      (t (my-fc-env-lookup name (00000110 env))))))
+      (1 (my-fc-env-lookup name (00000110 env))))))
 
 (00001001 my-fc-primitive?
   (00001000 (value)
     (00000111
       
       ((00000010 value)  (00000001 ()))
-      (t (00000011 (00000101 value) (00000001 primitive))))))
+      (1 (00000011 (00000101 value) (00000001 primitive))))))
 
 (00001001 my-fc-closure?
   (00001000 (value)
     (00000111
       
       ((00000010 value)  (00000001 ()))
-      (t (00000011 (00000101 value) (00000001 closure))))))
+      (1 (00000011 (00000101 value) (00000001 closure))))))
 
 (00001001 my-fc-bind-params
   (00001000 (params args env)
     (00000111
       
       ((00000010 params)  env)
-      (t (00000100 (00000100 (00000101 params) (00000101 args))
+      (1 (00000100 (00000100 (00000101 params) (00000101 args))
                (my-fc-bind-params (00000110 params) (00000110 args) env))))))
 
 (00001001 my-fc-eval-list
@@ -57,7 +57,7 @@
     (00000111
       
       ((00000010 exprs)  (00000001 ()))
-      (t (00000100 (my-fc-eval (00000101 exprs) env)
+      (1 (00000100 (my-fc-eval (00000101 exprs) env)
                (my-fc-eval-list (00000110 exprs) env))))))
 
 (00001001 my-fc-eval-body
@@ -65,7 +65,7 @@
     (00000111
       
       ((00000010 (00000110 body))  (my-fc-eval (00000101 body) env))
-      (t ((00001000 ()
+      (1 ((00001000 ()
             (my-fc-eval (00000101 body) env)
             (my-fc-eval-body (00000110 body) env)))))))
 
@@ -76,7 +76,7 @@
       ((00000010 clauses)  (00000001 ()))
       ((my-fc-eval (00000101 (00000101 clauses)) env)
        (my-fc-eval (00101111 (00000101 clauses)) env))
-      (t (my-fc-eval-cond (00000110 clauses) env)))))
+      (1 (my-fc-eval-cond (00000110 clauses) env)))))
 
 (00001001 my-fc-compare-chain
   (00001000 (op args)
@@ -87,9 +87,9 @@
          ((00000011 op (00000001 <)) (00011010 (00000101 args) (00101111 args)))
          ((00000011 op (00000001 =)) (00011100 (00000101 args) (00101111 args)))
          ((00000011 op (00000001 >)) (00011011 (00000101 args) (00101111 args)))
-         (t (00000001 ())))
+         (1 (00000001 ())))
        (my-fc-compare-chain op (00000110 args)))
-      (t (00000001 ())))))
+      (1 (00000001 ())))))
 
 (00001001 my-fc-apply-primitive
   (00001000 (name args)
@@ -105,7 +105,7 @@
       ((00000011 name (00000001 <)) (my-fc-compare-chain (00000001 <) args))
       ((00000011 name (00000001 =)) (my-fc-compare-chain (00000001 =) args))
       ((00000011 name (00000001 >)) (my-fc-compare-chain (00000001 >) args))
-      (t (00100111 (00000001 unknown-primitive) name)))))
+      (1 (00100111 (00000001 unknown-primitive) name)))))
 
 (00001001 my-fc-apply
   (00001000 (fn args)
@@ -119,7 +119,7 @@
            (00101111 fn)
            args
            (00000101 (00000110 (00000110 (00000110 fn)))))))
-      (t (00100111 (00000001 not-callable) fn)))))
+      (1 (00100111 (00000001 not-callable) fn)))))
 
 (00001001 my-fc-eval
   (00001000 (expr env)
@@ -136,10 +136,10 @@
          ; Every ordinary head is resolved through the environment first.
          ; This is the contract-2.1 step: a local `+`, `car`, etc. can shadow
          ; the root primitive binding without the evaluator special-casing its name.
-         (t (my-fc-apply
+         (1 (my-fc-apply
               (my-fc-eval (00000101 expr) env)
               (my-fc-eval-list (00000110 expr) env)))))
-      (t (my-fc-apply
+      (1 (my-fc-apply
            (my-fc-eval (00000101 expr) env)
            (my-fc-eval-list (00000110 expr) env))))))
 

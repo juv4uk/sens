@@ -34,7 +34,7 @@
            (00100111 (00000001 mov-r64-imm64) (00000001 rcx) right)
            (00100111 (00000001 imul-r64-r64) (00000001 rax) (00000001 rcx))
            (00100111 (00000001 ret)))))
-      (t (00000001 x86-projection-rejected)))))
+      (1 (00000001 x86-projection-rejected)))))
 
 (00001001 x86-encode-machine-effect
   (00001000 (effect)
@@ -42,5 +42,5 @@
       (00000111
         ((00000010 forms)
          (00000001 x86-projection-rejected))
-        (t
+        (1
          (x86-encode-admitted-program forms))))))

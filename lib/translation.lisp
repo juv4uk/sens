@@ -56,7 +56,7 @@
       ((00000011 status (00000001 candidate)) t)
       ((00000011 status (00000001 ambiguous)) t)
       ((00000011 status (00000001 rejected)) t)
-      (t (00000001 ())))))
+      (1 (00000001 ())))))
 
 (00001001 translation-kind-valid?
   (00001000 (kind)
@@ -65,7 +65,7 @@
       ((00000011 kind (00000001 clause)) t)
       ((00000011 kind (00000001 batch)) t)
       ((00000011 kind (00000001 query)) t)
-      (t (00000001 ())))))
+      (1 (00000001 ())))))
 
 ; Envelope validation owns only the protocol shell. Payload meaning is checked
 ; separately so a well-shaped translator message containing malformed semantic
@@ -88,8 +88,8 @@
          ((string-membership-helper (translation-source proposal))
           
           (00000001 ()))
-         (t t)))
-      (t (00000001 ())))))
+         (1 t)))
+      (1 (00000001 ())))))
 
 (00001001 translation-batch-valid?
   (00001000 (payload)
@@ -97,7 +97,7 @@
       
       ((00000010 payload)  (00000001 ()))
       ((00000011 (knowledge-proper-list? payload) (00000001 ())) (00000001 ()))
-      (t (knowledge-clauses-valid? payload)))))
+      (1 (knowledge-clauses-valid? payload)))))
 
 (00001001 translation-candidate-payload-valid?
   (00001000 (kind payload)
@@ -105,7 +105,7 @@
       ((00000011 kind (00000001 clause)) (knowledge-clause-valid? payload))
       ((00000011 kind (00000001 batch)) (translation-batch-valid? payload))
       ((00000011 kind (00000001 query)) (knowledge-goal-valid? payload))
-      (t (00000001 ())))))
+      (1 (00000001 ())))))
 
 (00001001 translation-alternatives-valid?
   (00001000 (kind alternatives)
@@ -116,8 +116,8 @@
        (00000111
          
          ((00000010 (00000110 alternatives))  t)
-         (t (translation-alternatives-valid? kind (00000110 alternatives)))))
-      (t (00000001 ())))))
+         (1 (translation-alternatives-valid? kind (00000110 alternatives)))))
+      (1 (00000001 ())))))
 
 ; Ambiguity is evidence only when the translator exposes at least two valid
 ; alternatives. One alternative is just a candidate; zero is not ambiguity.
@@ -125,11 +125,11 @@
   (00001000 (kind payload)
     (00000111
       
-      (t (00000001 ()))
+      (1 (00000001 ()))
       ((00000011 (knowledge-proper-list? payload) (00000001 ())) (00000001 ()))
       
       ((00000010 (00000110 payload))  (00000001 ()))
-      (t (translation-alternatives-valid? kind payload)))))
+      (1 (translation-alternatives-valid? kind payload)))))
 
 (00001001 make-translation-review
   (00001000 (status code proposal detail)
@@ -154,7 +154,7 @@
       ((00000011 status (00000001 accepted)) t)
       ((00000011 status (00000001 rejected)) t)
       ((00000011 status (00000001 ambiguous)) t)
-      (t (00000001 ())))))
+      (1 (00000001 ())))))
 
 (00001001 translation-review-valid?
   (00001000 (review)
@@ -170,8 +170,8 @@
           (00000001 ()))
          ((00000011 (00100011 (translation-review-code review)) (00000001 ()))
           (00000001 ()))
-         (t t)))
-      (t (00000001 ())))))
+         (1 t)))
+      (1 (00000001 ())))))
 
 (00001001 translation-review-advice-decision
   (00001000 (proposal decision)
@@ -191,7 +191,7 @@
       ((00000011 (00000101 decision) (00000001 rejected))
        (make-translation-review
          (00000001 rejected) (00000001 knowledge-rejected) proposal decision))
-      (t
+      (1
        (make-translation-review
          (00000001 rejected) (00000001 malformed-advice-decision) proposal decision)))))
 
@@ -212,7 +212,7 @@
         ((00000011 kind (00000001 batch))
          (translation-review-advice-decision
            proposal (advice-all-decision module-name payload)))
-        (t
+        (1
          (make-translation-review
            (00000001 rejected) (00000001 invalid-kind) proposal kind))))))
 
@@ -237,7 +237,7 @@
           (make-translation-review
             (00000001 ambiguous) (00000001 translator-ambiguous)
             proposal (translation-payload proposal)))
-         (t
+         (1
           (make-translation-review
             (00000001 rejected) (00000001 invalid-ambiguity)
             proposal (translation-payload proposal)))))
@@ -247,11 +247,11 @@
           (make-translation-review
             (00000001 rejected) (00000001 translator-rejected)
             proposal (translation-payload proposal)))
-         (t
+         (1
           (make-translation-review
             (00000001 rejected) (00000001 invalid-rejection)
             proposal (translation-payload proposal)))))
-      (t
+      (1
        (make-translation-review
          (00000001 rejected) (00000001 invalid-translation) proposal proposal)))))
 
@@ -270,16 +270,16 @@
             (00000111
               ((00000011 (translation-kind proposal) (00000001 clause)) t)
               ((00000011 (translation-kind proposal) (00000001 batch)) t)
-              (t (00000001 ()))))
-           (t (00000001 ())))))
-      (t (00000001 ())))))
+              (1 (00000001 ()))))
+           (1 (00000001 ())))))
+      (1 (00000001 ())))))
 
 (00001001 translation-admission-payload
   (00001000 (review)
     (00000111
       ((translation-admittable? review)
        (translation-payload (translation-review-proposal review)))
-      (t (00000001 ())))))
+      (1 (00000001 ())))))
 
 ; Rejected and ambiguous translations are observations, not knowledge. The
 ; evidence path is also pure: callers decide where/when to persist the returned
@@ -290,7 +290,7 @@
       ((00000011 (translation-review-valid? review) (00000001 ())) (00000001 ()))
       ((00000011 (translation-review-status review) (00000001 rejected)) t)
       ((00000011 (translation-review-status review) (00000001 ambiguous)) t)
-      (t (00000001 ())))))
+      (1 (00000001 ())))))
 
 (00001001 translation-evidence-entry
   (00001000 (review)
@@ -301,7 +301,7 @@
     (00000111
       ((translation-evidence-worthy? review)
        (00000100 (translation-evidence-entry review) journal))
-      (t journal))))
+      (1 journal))))
 
 (00001001 translation-review-with-evidence
   (00001000 (module-name proposal journal)
