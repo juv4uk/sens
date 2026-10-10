@@ -188,7 +188,7 @@ def _encode_block(words: tuple[str, ...], block: Блок) -> bytes:
 def _make(words: tuple[str, ...]) -> tuple[bytes, План]:
     blocks = _plan_segments(words)
     body = b"".join(_encode_block(words, b) for b in blocks)
-    segmented = МАГІЯ + _varint(len(words)) + _varint(len(blocks)) + body
+    segmented = МАГІЯ + _varint(len(words)) + len(blocks).to_bytes(2, "big") + body
     raw_blocks = tuple(
         Блок(i, min(i + МАКС_БЛОК, len(words)), РЕЖИМ_СИРИЙ, (),
              _cost(min(МАКС_БЛОК, len(words) - i),
@@ -196,13 +196,13 @@ def _make(words: tuple[str, ...]) -> tuple[bytes, План]:
         for i in range(0, len(words), МАКС_БЛОК)
     )
     raw_body = b"".join(_encode_block(words, b) for b in raw_blocks)
-    baseline = len(МАГІЯ + _varint(len(words)) + _varint(len(raw_blocks)) + raw_body)
+    baseline = len(МАГІЯ + _varint(len(words)) + len(raw_blocks).to_bytes(2, "big") + raw_body)
     try:
         original_frame = рамка.encode(words)
     except рамка.FrameError:
         original_frame = None
     if original_frame is not None:
-        framed = (МАГІЯ + _varint(len(words)) + _varint(1)
+        framed = (МАГІЯ + _varint(len(words)) + bytes((0, 1))
                   + bytes((РЕЖИМ_РАМКА3,)) + _varint(len(words))
                   + _varint(len(original_frame)) + original_frame)
         if len(framed) < len(segmented):
@@ -229,7 +229,10 @@ def декодувати(data: bytes) -> tuple[str, ...]:
         raise ПомилкаПакування("невідома рамка/версія або надмірна довжина")
     off = len(МАГІЯ)
     words_total, off = _read_varint(data, off)
-    segments, off = _read_varint(data, off)
+    if off + 2 > len(data):
+        raise ПомилкаПакування("обірвана кількість блоків")
+    segments = int.from_bytes(data[off:off + 2], "big")
+    off += 2
     if words_total > МАКС_СЛІВ or segments > words_total or (segments == 0) != (words_total == 0):
         raise ПомилкаПакування("некоректна кількість слів/блоків")
     out: list[str] = []
