@@ -301,8 +301,8 @@
                 ; Exact-Q >= returns D1 1/0. Compare explicitly because 0 is
                 ; itself a value and must never become generic truthiness.
                 (00000111
-                  ((00011110 left right) 1 t)
-                  ((00011110 left right) 0 (00000001 ()))))
+                  ((00011110 left right)  t)
+                  (t (00000001 ()))))
                (t (00000001 ()))))
             (t (00000001 ()))))
          (t (00000001 ()))))
