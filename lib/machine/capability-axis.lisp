@@ -125,10 +125,10 @@
        (00000111
          ((00100010 bits (00000101 (00000110 (00000101 rows))))
           (00000101 rows))
-         ((00000010 ())
+         ((010 ())
           (machine-capability-find-domain-row
             width bits (00000110 rows)))))
-      ((00000010 ())
+      ((010 ())
        (machine-capability-find-domain-row
          width bits (00000110 rows))))))
 
@@ -142,7 +142,7 @@
       (00000111
         
         ((00000010 row)  ())
-        ((00000010 ())
+        ((010 ())
          (00000101 (00000110 (00000110 row))))))))
 
 (00001001 machine-capability-find-row
@@ -151,7 +151,7 @@
       
       ((00000010 rows)  ())
       ((00100010 key (00000101 (00000101 rows))) (00000101 rows))
-      ((00000010 ()) (machine-capability-find-row key (00000110 rows))))))
+      ((010 ()) (machine-capability-find-row key (00000110 rows))))))
 
 (00001001 machine-target-witness-status
   (00001000 (target)
@@ -159,4 +159,4 @@
       (00000111
         
         ((00000010 row)  (00000001 absent))
-        ((00000010 ()) (00000101 (00000110 row)))))))
+        ((010 ()) (00000101 (00000110 row)))))))
