@@ -173,6 +173,13 @@ def classify(path: str, root: Path) -> dict:
         status = "T5_REQUIRED"
         authority = T5_AUTHORITY[path]
         reason = "канонічна межа T5 (authority)"
+    elif path.endswith(".lisp"):
+        # Розпізнавання фізичного слова у Lisp-файлі — лише кандидат.
+        # Частина donor-оракулів прямо ЗАПЕРЕЧУЄ владу T5 в коментарі;
+        # автоматично присвоювати T5_REQUIRED або MIGRATION_CANDIDATE не можна.
+        status = "BLOCKED"
+        authority = "UNKNOWN"
+        reason = "Lisp-ланка потребує незалежного доказу producer/consumer T5"
     elif is_senc:
         status = "SENC_RESEARCH"
         authority = "research/framed3 (не canonic)"
