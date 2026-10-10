@@ -1,0 +1,79 @@
+{
+  "schema": "sens.domain-research-archive/v1",
+  "date": "2026-10-11",
+  "owner_intent": "Integrate all existing domain research evidence in main without dropping source and oracles",
+  "status": "RESEARCH-ARCHIVE-NOT-RATIFIED",
+  "baseline_ledger": "main source-of-truth: knowledge/d10-proposal-ledger.tsv",
+  "baseline_inventory": "main source-of-truth: knowledge/d10-v1-semantic-inventory.json",
+  "extraction": "Git original blob SHAs from PRs; archived copies are bit-identical research evidence, no fresh alias/opcode/coordinate inferred",
+  "groups": [
+    {
+      "pr": 5534,
+      "files": [
+        "docs/research/d10-change-class-selection-v1.uk.md",
+        "knowledge/d10-change-class-selection-v1.json",
+        "tests/fixtures/d10-change-class-real-cl-oracle.lisp",
+        "scripts/check_d10_change_class_selected_v1.py"
+      ]
+    },
+    {
+      "pr": 5531,
+      "files": [
+        "docs/research/d10-prefix-free-kraft-certificate.uk.md",
+        "knowledge/d10-existing-research-batch-replay-20261011.json",
+        "knowledge/d10-prefix-free-kraft-certificate-20261011.json",
+        "scripts/check_d10_prefix_free_kraft_certificate.py",
+        "scripts/check_d10_existing_research_batch.py"
+      ]
+    },
+    {
+      "pr": 5529,
+      "files": [
+        "knowledge/d10-cnf-unit-fixpoint-selection-20261011.json",
+        "knowledge/d10-existing-evidence-harvest-20261011-a.json",
+        "knowledge/d10-existing-evidence-harvest-20261011-b.json"
+      ]
+    },
+    {
+      "pr": 4868,
+      "files": [
+        "docs/research/d10-find-method-selection-v1.uk.md",
+        "knowledge/d10-find-method-selection-v1.json",
+        "tests/fixtures/d10-find-method-real-cl-oracle.lisp",
+        "scripts/check_d10_find_method_selected_v1.py"
+      ]
+    },
+    {
+      "pr": 5537,
+      "files": [
+        "knowledge/d10-archive-admission-20261011.uk.md"
+      ]
+    },
+    {
+      "pr": 4948,
+      "files": [
+        "tests/oracles/d10_hysteresis_chez.ss"
+      ]
+    },
+    {
+      "pr": 5310,
+      "files": [
+        "tests/test_d10_yantra_dual_provenance.py"
+      ]
+    },
+    {
+      "pr": 5003,
+      "files": [
+        "scripts/check_d10_babbage_reiter_selection.py"
+      ]
+    }
+  ],
+  "reactivation_condition": "reconcile each source HOLD vs selected; independent exact-oracle proof; D1-D9/D10 dedup; recompute SHA chain; single-writer merge; never bypass fail-closed tests",
+  "excluded_by_design": [
+    "source PR copies of knowledge/d10-v1-semantic-inventory.json",
+    "source PR copies of knowledge/d10-proposal-ledger.tsv",
+    "source PR copies of knowledge/d10-selection-transition-history.json",
+    "source PR copies of docs/architecture/ARCHIPELAGO-V1.uk.md"
+  ],
+  "warning": "Research archive records historical assertions (some SELECTED at old SHA) but does not claim they hold on current main."
+}
