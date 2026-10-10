@@ -404,6 +404,11 @@ fn native_pair_car_cdr_match_the_interpreter_reference_witness() {
         ("reg-high1-rdi", "(x86-high1 (x86-reg-code (quote rdi)))"),
         ("rex-rdi", "(x86-encode-rex 1 0 0 (x86-high1 (x86-reg-code (quote rdi))))"),
         ("modrm-store", "(x86-encode-modrm 1 (x86-low3 (x86-reg-code (quote rax))) (x86-low3 (x86-reg-code (quote rdi))))"),
+        ("sib-store", "(x86-encode-sib 0 4 4)"),
+        ("disp8-zero", "(x86-disp8-byte 0)"),
+        ("disp8-eight", "(x86-disp8-byte 8)"),
+        ("plus-disp8-zero", "(00001100 0 256)"),
+        ("mod-disp8-zero", "(00010011 (00001100 0 256) 256)"),
         ("store-direct", "(x86-encode-mov-mem-disp8-r64 (quote rdi) 0 (quote rax))"),
         ("lowered-car-encoding", "(x86-encode-admitted-program (x86-lower-cons-car-u64-forms 2 3))"),
     ] {
