@@ -148,6 +148,8 @@ def fixture(ntrits: int, seed: int = 20261010) -> str:
 
 
 def verify() -> int:
+    if not __debug__:
+        raise RuntimeError('Python -O вимикає assert: перевірку заблоковано')
     checks = 0
     rng = random.Random(22)
     assert F[21] == 1_579_869_184 and F[22] == 4_316_282_880
@@ -166,6 +168,21 @@ def verify() -> int:
         else:
             if length != 22:
                 raise AssertionError('декодер приймає порожній код')
+    # Недопустимі довжини, обрізаний escape, зайва п’ята октета та незайнятий ранг.
+    for payload, width in (
+        (F[21].to_bytes(4, 'big'), 21),
+        (F[33].to_bytes(6, 'big'), 33),
+        (DIRECT.to_bytes(4, 'big'), 22),
+        ((DIRECT - 1).to_bytes(4, 'big') + bytes([0]), 22),
+        (bytes([255]) * 5, 22),
+        (DIRECT.to_bytes(4, 'big') + bytes([0]), 21),
+    ):
+        try:
+            decode_block(payload, width)
+        except ValueError:
+            checks += 1
+        else:
+            raise AssertionError('неправильний код декодовано')
     # Кожна межа escape-регіону, у тому числі найбільший допустимий ранг.
     for v in (DIRECT - 1, DIRECT, DIRECT + 1, LIMIT - 1, LIMIT, F[22] - 1):
         assert decode_block(encode_block(unrank(22, v)), 22) == unrank(22, v)
@@ -182,13 +199,14 @@ def verify() -> int:
             else:
                 raise AssertionError('обрізання/надлишок не відхилено')
         checks += 3
-    cross = '0' * 20 + '2' + '2' + '0' * 20
-    try:
-        encode_stream(cross, 21)
-    except ValueError:
-        checks += 1
-    else:
-        raise AssertionError('межа блоків допускає 22')
+    for width in (21, 22, 33):
+        cross = '0' * (width - 1) + '2' + '2' + '0' * (width - 1)
+        try:
+            encode_stream(cross, width)
+        except ValueError:
+            checks += 1
+        else:
+            raise AssertionError('межа блоків допускає 22')
     print(json.dumps({'стан':'PASS','перевірок':checks,'f21':F[21],'f22':F[22],
                       'f33':F[33],'префіксів_розширення':ESCAPES}, ensure_ascii=False))
     return checks
