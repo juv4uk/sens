@@ -126,7 +126,10 @@ def декодувати(data: bytes) -> tuple[str, ...]:
         raise ПомилкаСкорочення("немає режиму")
     mode = data[pos]
     pos += 1
-    length, pos = байти._читати_число(data, pos)
+    try:
+        length, pos = байти._читати_число(data, pos)
+    except байти.ПомилкаБайтовоїРамки as exc:
+        raise ПомилкаСкорочення("неканонічна довжина фізичного payload") from exc
     if length == 0 or pos + 4 + length != len(data):
         raise ПомилкаСкорочення("недопустима фізична довжина чи trailing bytes")
     check = int.from_bytes(data[pos:pos + 4], "big")
