@@ -66,3 +66,19 @@ jobs:
           done
       - name: Verify D1-D9 foundation
         run: python3 scripts/check-d1-d5-foundation.py
+      - name: Оптимізований Python не минає фундамент D1–D9
+        shell: bash
+        run: |
+          set -euo pipefail
+          for level in 1 2; do
+            log="$RUNNER_TEMP/d1-d9-foundation-opt-$level.log"
+            if PYTHONOPTIMIZE="$level" python3 scripts/check-d1-d5-foundation.py >"$log" 2>&1; then
+              echo "::error::Фундамент D1–D9 хибно пройшов PYTHONOPTIMIZE=$level"
+              exit 1
+            fi
+            if ! grep -Fq "D1-D9-FOUNDATION: BLOCKED" "$log"; then
+              cat "$log"
+              echo "::error::Немає іменованої відмови фундаменту D1–D9"
+              exit 1
+            fi
+          done
