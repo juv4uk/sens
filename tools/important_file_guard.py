@@ -8,9 +8,11 @@ SENS law as source so CI can encode it to physical T5 and run the .sens file.
 from __future__ import annotations
 
 import argparse
+import os
 import re
 import subprocess
 import sys
+import tempfile
 from pathlib import Path
 
 SHA1 = re.compile(r"^[0-9a-f]{40}$")
@@ -211,6 +213,44 @@ def self_test() -> None:
     expect("Lisp-escaping", lisp_string('a"b\\c'), '"a\\"b\\\\c"')
     if not catches(lambda: lisp_string("unsafe\x01path")):
         fail("TRANSPORT_SELF_TEST_ACCEPTED_CONTROL_CHARACTER")
+    # Один точний Git tree, зіпсовані index і worktree: SENS отримує лише HEAD-факти.
+    with tempfile.TemporaryDirectory(prefix="sens-head-ingress-") as temporary:
+        root = Path(temporary)
+        subprocess.run(["git", "init", "-q", str(root)], check=True,
+                       stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        (root / "knowledge").mkdir()
+        (root / "tools").mkdir()
+        census_path = "knowledge/foreign-tools-census.lisp"
+        (root / census_path).write_text("census-з-HEAD", encoding="utf-8")
+        (root / "tools" / "unlisted.py").write_text("foreign", encoding="utf-8")
+        (root / "knowledge" / "symlink.lisp").symlink_to("foreign-tools-census.lisp")
+        subprocess.run(
+            ["git", "-C", str(root), "add", "--", census_path,
+             "knowledge/symlink.lisp", "tools/unlisted.py"],
+            check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        tree_sha = subprocess.run(
+            ["git", "-C", str(root), "write-tree"],
+            check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+        ).stdout.decode("ascii", "strict").strip()
+        (root / census_path).write_text("підроблений робочий census", encoding="utf-8")
+        subprocess.run(["git", "-C", str(root), "read-tree", "--empty"],
+                       check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        previous_cwd = Path.cwd()
+        try:
+            os.chdir(root)
+            expect("head-source-not-worktree",
+                   read_head_source(tree_sha, census_path), "census-з-HEAD")
+            exact_tools = nul_paths(git(
+                "ls-tree", "-r", "-z", "--name-only", "--full-tree",
+                tree_sha, "--", "tools/"))
+            expect("head-tools-not-index", exact_tools, ["tools/unlisted.py"])
+            expect("cleared-index", nul_paths(git("ls-files", "-z", "--", "tools/")), [])
+            expect("missing-exact-source",
+                   read_head_source(tree_sha, "knowledge/missing.lisp"), None)
+            if not catches(lambda: read_head_source(tree_sha, "knowledge/symlink.lisp")):
+                fail("TRANSPORT_SELF_TEST_ACCEPTED_SYMLINK_SOURCE")
+        finally:
+            os.chdir(previous_cwd)
     print("GIT_PATH_TRANSPORT_SELF_TEST_PASS: 9 mechanical checks; no policy verdict")
 
 
