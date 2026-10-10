@@ -58,9 +58,14 @@ probes = {
     "one-second": "\n(make-quantity 1 (make-unit (00100111 (make-dimension (00000001 second) 1))))\n",
     "distance-product": "\n(quantity-product (scientific-constant-quantity si:defining-speed-of-light) (make-quantity 1 (make-unit (00100111 (make-dimension (00000001 second) 1)))))\n",
     "quantity-quotient": "\n(quantity-quotient (quantity-product (scientific-constant-quantity si:defining-speed-of-light) (make-quantity 1 (make-unit (00100111 (make-dimension (00000001 second) 1))))) (make-quantity 1 (make-unit (00100111 (make-dimension (00000001 second) 1))))\n",
+    "planck-value": "\n(quantity-value (scientific-constant-quantity si:defining-planck-constant))\n",
+    "planck-unit": "\n(quantity-unit (scientific-constant-quantity si:defining-planck-constant))\n",
+    "numeric-product": "\n(00001110 (quantity-value (scientific-constant-quantity si:defining-planck-constant)) (quantity-value (scientific-constant-quantity si:defining-cesium-frequency)))\n",
+    "product-units": "\n(unit-product (quantity-unit (scientific-constant-quantity si:defining-planck-constant)) (quantity-unit (scientific-constant-quantity si:defining-cesium-frequency)))\n",
+    "merge-dimensions": "\n(science-merge-dimensions (unit-dimensions (quantity-unit (scientific-constant-quantity si:defining-planck-constant))) (unit-dimensions (quantity-unit (scientific-constant-quantity si:defining-cesium-frequency))))\n",
 }
 for stage, suffix in probes.items():
-    (root / f"exact-quantity-{stage}-probe.lisp").write_text(
+  for stage in rows-binding check-binding witness-binding rows-call check-call planck-record cesium-record planck-value planck-unit numeric-product quantity-product one-second merge-dimensions product-units distance-product quantity-quotient; do
         prefix + suffix, encoding="utf-8"
     )
 PY
