@@ -42,23 +42,21 @@
                (00100111 (00000001 value) expected))))
       (00000111
         ((00100010 evaluator-value expected)
-         (1)
+         
          (00000111
            ((00100010 native-outcome expected-native-outcome)
-            (1)
+            
             (native-first-parity-pass
               name
               effect-class
               error-class))
-           ((00100010 native-outcome expected-native-outcome)
-            (0)
+           ((0100 (00100010 native-outcome expected-native-outcome))
             (native-first-parity-fail
               name
               (00000001 native-or-route-mismatch)
               expected-native-outcome
               native-outcome))))
-        ((00100010 evaluator-value expected)
-         (0)
+        ((0100 (00100010 evaluator-value expected))
          (native-first-parity-fail
            name
            (00000001 evaluator-evidence-mismatch)
@@ -68,15 +66,15 @@
 (00001001 native-first-parity-run
   (00001000 (rows)
     (00000111
-      ((00000010 rows) () (00000001 ()))
-      ((00000010 rows) (1)
+      
+      ((00000010 rows) 
        (00100111
          (native-first-parity-fail
            (00000001 malformed-corpus)
            (00000001 malformed-tail)
            (00000001 ())
            rows)))
-      ((00000010 rows) (0)
+      ((0100 (00000010 rows))
        (00000100
          (native-first-parity-case (00000101 rows))
          (native-first-parity-run (00000110 rows)))))))
@@ -84,28 +82,24 @@
 (00001001 native-first-parity-verdict-pass?
   (00001000 (verdict)
     (00000111
-      ((00000010 verdict) (0)
+      ((0100 (00000010 verdict))
        (00000111
          ((00100010 (00110000 verdict) (00000001 pass))
-          (1)
+          
           t)
-         ((00100010 (00110000 verdict) (00000001 pass))
-          (0)
-          (00000001 ()))))
+         (t (00000001 ()))))
       ((00000001 native-first-parity-verdict-fallback)
-       native-first-parity-verdict-fallback
+       
        (00000001 ())))))
 
 (00001001 native-first-parity-all-pass?
   (00001000 (verdicts)
     (00000111
-      ((00000010 verdicts) () t)
-      ((00000010 verdicts) (1) (00000001 ()))
-      ((00000010 verdicts) (0)
+      ((0100 (00000010 verdicts)) t)
+      ((00000010 verdicts)  (00000001 ()))
+      ((0100 (00000010 verdicts))
        (00000111
          ((00100010 (native-first-parity-verdict-pass? (00000101 verdicts)) t)
-          (1)
+          
           (native-first-parity-all-pass? (00000110 verdicts)))
-         ((00100010 (native-first-parity-verdict-pass? (00000101 verdicts)) t)
-          (0)
-          (00000001 ())))))))
+         (t (00000001 ())))))))
