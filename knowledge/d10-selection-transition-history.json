@@ -362,7 +362,7 @@
         "https://pysathq.github.io/docs/html/api/solvers.html"
       ],
       "previous_inventory_blob_sha": "7e13e929338baeef9b16c2139d24b78e23ea1e03",
-      "resulting_inventory_blob_sha": "3fd5c8bee97ff03fd0793f10b94f7ea3860c61a8",
+      "resulting_inventory_blob_sha": "92bfe63031eb89ca1d67fb073c599dbb9177ccea",
       "added_stable_ids": [
         "d10.symbolic-ai.cnf-unit-fixpoint.20261011"
       ],

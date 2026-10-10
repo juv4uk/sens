@@ -14434,7 +14434,7 @@
       "arity": 2,
       "argument_shape": "(canonical finite CNF of signed exact nonzero integer literals, canonical sorted consistent assumptions)",
       "result_shape": "CONTRADICTION(forced) or QUIESCENT(forced,all_satisfied); QUIESCENT never means SAT",
-      "behavior": "For a finite canonical CNF, repeatedly add literals forced by clauses with exactly one not-yet-false literal until no new literal is forced or a clause is falsified. The resulting exact forced literals and explicit contradiction/quiescent status are order-independent for nonconflicting assumptions. Reject malformed/tautological/noncanonical clauses. Do not branch or claim SAT on an undecided fixed point.",
+      "behavior": "For a finite canonical CNF, repeatedly add literals forced by clauses with exactly one not-yet-false literal until no new literal is forced or a clause is falsified. With no conflict, the set of forced literals is the unique least fixed point regardless of clause scheduling. A CONTRADICTION status does not certify any particular partial forced-literal set. Reject malformed/tautological/noncanonical clauses. Do not branch or claim SAT on an undecided fixed point.",
       "positive_witnesses": [
         "CNF [[1],[-1,2],[-2,3]] with no assumptions -> QUIESCENT forced [1,2,3], all_satisfied=true",
         "CNF [[-1],[1]] -> CONTRADICTION; never QUIESCENT/SAT",
