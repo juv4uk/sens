@@ -381,6 +381,60 @@
         "scripts/check-d10-v1-semantic-inventory.py",
         "tests/test_d10_dll1962_unit_closure.py"
       ]
+    },
+    {
+      "id": "d10.existing.research.harvest-a.20261011",
+      "authority": "#4013 #4463 user-directed existing evidence selection",
+      "evidence": [
+        "knowledge/d10-binary-lyndon-factorization-v1.json",
+        "knowledge/d10-debruijn-binary-cycle-research-v1.json",
+        "knowledge/d10-finite-state-distinguishing-suffix-research-v1.json",
+        "knowledge/d10-quine-prime-implicants-20261009.json",
+        "knowledge/d10-unique-decipherability-historical-20261009.json",
+        "knowledge/d10-stern-brocot-run-path-20261009.json",
+        "knowledge/d10-symbolic-ai-arc-support-20261009.json",
+        "knowledge/d10-critical-pairs-confluence-20261009.json",
+        "knowledge/d10-rosenblatt-novikoff-exact-step-20261009.json",
+        "knowledge/d10-unique-bounded-modular-lift-20261009.json"
+      ],
+      "previous_inventory_blob_sha": "92bfe63031eb89ca1d67fb073c599dbb9177ccea",
+      "resulting_inventory_blob_sha": "404ac2a9cfdc817ed676d8137522981cd837ce3e",
+      "added_stable_ids": [
+        "d10.harvest.existing.binary-lyndon-factorization.20261011",
+        "d10.harvest.existing.de-bruijn-binary-cycle-.20261011",
+        "d10.harvest.existing.finite-state-shortest-distinguisher.20261011",
+        "d10.logic.prime-implicants.quine.20261009",
+        "d10.harvest.existing.finite-code-unique-decipherability.20261011",
+        "d10.harvest.existing.stern-brocot-run-path.20261011",
+        "d10.harvest.existing.binary-constraint-support-projection.20261011",
+        "d10.rewrite.binary-length-decreasing-confluence.20261009",
+        "d10.harvest.existing.exact-perceptron-mistake-step.20261011",
+        "d10.harvest.existing.unique-bounded-modular-lift.20261011"
+      ],
+      "appended_sources": [
+        "knowledge/d10-binary-lyndon-factorization-v1.json",
+        "knowledge/d10-debruijn-binary-cycle-research-v1.json",
+        "knowledge/d10-finite-state-distinguishing-suffix-research-v1.json",
+        "knowledge/d10-quine-prime-implicants-20261009.json",
+        "knowledge/d10-unique-decipherability-historical-20261009.json",
+        "knowledge/d10-stern-brocot-run-path-20261009.json",
+        "knowledge/d10-symbolic-ai-arc-support-20261009.json",
+        "knowledge/d10-critical-pairs-confluence-20261009.json",
+        "knowledge/d10-rosenblatt-novikoff-exact-step-20261009.json",
+        "knowledge/d10-unique-bounded-modular-lift-20261009.json",
+        "knowledge/d10-existing-evidence-harvest-20261011-a.json"
+      ],
+      "coordinates_added": 0,
+      "ratified_added": 0,
+      "delta_selected": 10,
+      "previous_selected": 648,
+      "resulting_selected": 658,
+      "decision": "Research selection only; derived-vs-primitive decision pending, ratified=0, coordinates=0",
+      "tests": [
+        "scripts/check_d10_selection_transition_history.py",
+        "scripts/check-d10-proposal-ledger.py",
+        "scripts/check-d10-v1-semantic-inventory.py"
+      ]
     }
   ]
 }

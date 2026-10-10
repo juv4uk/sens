@@ -8,10 +8,10 @@
   "capacity": 1024,
   "current_foundation": "#4008 / Contract 11.8 / D1-D9",
   "accounting": {
-    "selected_semantic_candidates": 648,
+    "selected_semantic_candidates": 658,
     "law_forced_coordinates": 256,
-    "unplaced_selected_candidates": 392,
-    "remaining_semantic_inventory": 376,
+    "unplaced_selected_candidates": 402,
+    "remaining_semantic_inventory": 366,
     "ratified_d10_residents": 0
   },
   "rules": [
@@ -14474,6 +14474,1195 @@
         "behavioral_claim": "No inspected current D1–D9 and D10 row exposes the same CNF forced-literal least fixed-point with explicit QUIESCENT-not-SAT distinction; derivability and ratification pending"
       },
       "decision": "SELECT-D10-RESEARCH-CANDIDATE"
+    },
+    {
+      "stable_id": "d10.harvest.existing.binary-lyndon-factorization.20261011",
+      "semantic_name": "BINARY-LYNDON-FACTORIZATION",
+      "surface_uk": "розкласти-двійкове-слово",
+      "surface_ukr": "чин-розкладу-Ліндона",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "proposal_status": "pending-owner-review",
+      "source_class": "EXISTING-PRIMARY-D10-RESEARCH-HARVEST-20261011",
+      "relation_class": "FINITE-EXACT-OBSERVABLE-LAW",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "ratified_resident": false,
+      "physical_t5_authorized": false,
+      "arity": "1 finite D1 bitword",
+      "argument_shape": "finite sequence D1 bits in {0,1} with explicit total order 0<1",
+      "result_shape": "ordered finite list of nonempty finite D1 words; empty source -> empty factor list",
+      "behavior": "Return the unique finite factor list (l1,...,lk) such that concat(li)=w; all li are Lyndon (strictly lexicographically smaller than every proper nonempty suffix); and l1 >= l2 >= ... >= lk under explicit lexicographic 0<1. For empty source return []. No dependence on physical packing, phoneme ordering or hardware transport.",
+      "positive_witnesses": [
+        {
+          "input": "",
+          "factors": []
+        },
+        {
+          "input": "0",
+          "factors": [
+            "0"
+          ]
+        },
+        {
+          "input": "1111",
+          "factors": [
+            "1",
+            "1",
+            "1",
+            "1"
+          ]
+        },
+        {
+          "input": "01010",
+          "factors": [
+            "01",
+            "01",
+            "0"
+          ]
+        },
+        {
+          "input": "010010010001000",
+          "factors": [
+            "01",
+            "001",
+            "001",
+            "0001",
+            "0",
+            "0",
+            "0"
+          ]
+        },
+        {
+          "input": "001001",
+          "factors": [
+            "001",
+            "001"
+          ]
+        },
+        {
+          "input": "101",
+          "factors": [
+            "1",
+            "01"
+          ]
+        }
+      ],
+      "falsifiers": [
+        "Returning a shortest repeated primitive root (e.g. 01010 -> 01010) instead of the ordered factor list is wrong.",
+        "Allowing increasing factors l_i<l_(i+1) violates the theorem's canonical ordering.",
+        "Factoring by a hidden phoneme collation rather than explicit D1 order 0<1 changes identity.",
+        "Treating nonempty '00' as a Lyndon component is invalid: it equals a proper suffix only lexically larger, and is not primitive."
+      ],
+      "source_path": "knowledge/d10-binary-lyndon-factorization-v1.json",
+      "source_git_blob": "7c7633e2e1041075bf589937e0b4f6ce72be0dcd",
+      "provenance": [
+        "#4013",
+        "#4463",
+        "#4896",
+        "knowledge/d10-binary-lyndon-factorization-v1.json"
+      ],
+      "dedup": {
+        "d1_d9_foundation_sha": "09d1d71c39d1484dfd005a5068dbb18b76f0f0d4",
+        "prior_d10_sha": "92bfe63031eb89ca1d67fb073c599dbb9177ccea",
+        "exact_name": "NO-MATCH",
+        "behavioral_root": "Typed input-output candidate; primitive minimality still subject to review"
+      },
+      "derivability": "PENDING-OWNER-REVIEW; expressible with lower-level constructions; not an asserted primitive"
+    },
+    {
+      "stable_id": "d10.harvest.existing.de-bruijn-binary-cycle-.20261011",
+      "semantic_name": "DE-BRUIJN-BINARY-CYCLE?",
+      "surface_uk": "повний-двійковий-цикл?",
+      "surface_ukr": "чи-усі-н-бітові-вікна-рівно-раз?",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "proposal_status": "pending-owner-review",
+      "source_class": "EXISTING-PRIMARY-D10-RESEARCH-HARVEST-20261011",
+      "relation_class": "FINITE-EXACT-OBSERVABLE-LAW",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "ratified_resident": false,
+      "physical_t5_authorized": false,
+      "arity": 2,
+      "argument_shape": "(finite_D1_bit_word, exact_positive_integer_window_width_n)->D1_bool(1/0)",
+      "result_shape": "See source dossier",
+      "behavior": "For n>=1, return D1 TRUE=1 iff length(word)=2^n AND the cyclic windows word[i],...,word[(i+n-1) mod 2^n] over all starts i∈[0,2^n) are pairwise distinct (equivalently cover all 2^n possible n-bit strings exactly once). Return D1 FALSE=0 for any well-typed word failing length or uniqueness. Invalid non-D1 data or n<=0 is a domain error, never a sneaky TRUE.",
+      "positive_witnesses": [
+        {
+          "word": "01",
+          "n": 1,
+          "value": 1,
+          "why": "both 1-bit patterns exactly once"
+        },
+        {
+          "word": "10",
+          "n": 1,
+          "value": 1,
+          "why": "cyclic rotation preserves coverage"
+        },
+        {
+          "word": "0011",
+          "n": 2,
+          "value": 1,
+          "why": "00, 01, 11, 10 each once"
+        },
+        {
+          "word": "00010111",
+          "n": 3,
+          "value": 1,
+          "why": "SageMath example order three"
+        },
+        {
+          "word": "00101110",
+          "n": 3,
+          "value": 1,
+          "why": "rotation of valid SageMath cycle"
+        },
+        {
+          "word": "00010110",
+          "n": 3,
+          "value": 0,
+          "why": "changed bit creates duplicate cyclic n-window"
+        },
+        {
+          "word": "00000000",
+          "n": 3,
+          "value": 0,
+          "why": "repeated zero windows"
+        },
+        {
+          "word": "000101110",
+          "n": 3,
+          "value": 0,
+          "why": "extra delimiter/bit changes required exact length"
+        },
+        {
+          "word": "",
+          "n": 1,
+          "value": 0,
+          "why": "empty word never has required length"
+        },
+        {
+          "word": "0101",
+          "n": 2,
+          "value": 0,
+          "why": "primitive 01 repetition does not cover all 2-bit patterns"
+        }
+      ],
+      "falsifiers": [
+        "Counting only linear substrings without wrap-around rejects valid 0011 at n=2",
+        "Accepting length 2^n with duplicate n-bit windows mistakes length for universal coverage",
+        "Treating a repeated primitive block as sufficient wrongly accepts 0101 at n=2",
+        "Treating word rotations as semantically different wrongly rejects 10001011 at n=3",
+        "Using an LFSR period alone without the all-zero state can miss one n-bit window"
+      ],
+      "source_path": "knowledge/d10-debruijn-binary-cycle-research-v1.json",
+      "source_git_blob": "9c989ef46a7fc2798a21267a92a7d8690ecaad84",
+      "provenance": [
+        "#4013",
+        "#4463",
+        "#4896",
+        "knowledge/d10-debruijn-binary-cycle-research-v1.json"
+      ],
+      "dedup": {
+        "d1_d9_foundation_sha": "09d1d71c39d1484dfd005a5068dbb18b76f0f0d4",
+        "prior_d10_sha": "92bfe63031eb89ca1d67fb073c599dbb9177ccea",
+        "exact_name": "NO-MATCH",
+        "behavioral_root": "Typed input-output candidate; primitive minimality still subject to review"
+      },
+      "derivability": "PENDING-OWNER-REVIEW; expressible with lower-level constructions; not an asserted primitive"
+    },
+    {
+      "stable_id": "d10.harvest.existing.finite-state-shortest-distinguisher.20261011",
+      "semantic_name": "FINITE-STATE-SHORTEST-DISTINGUISHER",
+      "surface_uk": "різне-продовження",
+      "surface_ukr": "найкоротший-бітовий-свідок-розрізнення-станів",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "proposal_status": "pending-owner-review",
+      "source_class": "EXISTING-PRIMARY-D10-RESEARCH-HARVEST-20261011",
+      "relation_class": "FINITE-EXACT-OBSERVABLE-LAW",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "ratified_resident": false,
+      "physical_t5_authorized": false,
+      "arity": null,
+      "argument_shape": "See source dossier",
+      "result_shape": "See source dossier",
+      "behavior": "Shortest, then 0-first lexicographically least suffix distinguishing acceptance of p and q in a total deterministic D1-binary automaton; empty witness differs from no witness",
+      "positive_witnesses": [
+        {
+          "transitions": [
+            [
+              0,
+              0
+            ],
+            [
+              1,
+              1
+            ]
+          ],
+          "accepting": [
+            0,
+            1
+          ],
+          "p": 0,
+          "q": 1,
+          "expected": {
+            "status": "DISTINGUISHED",
+            "word": ""
+          }
+        },
+        {
+          "transitions": [
+            [
+              0,
+              1
+            ],
+            [
+              1,
+              1
+            ]
+          ],
+          "accepting": [
+            0,
+            1
+          ],
+          "p": 0,
+          "q": 0,
+          "expected": {
+            "status": "EQUIVALENT",
+            "word": null
+          }
+        },
+        {
+          "transitions": [
+            [
+              0,
+              1
+            ],
+            [
+              1,
+              0
+            ]
+          ],
+          "accepting": [
+            0,
+            0
+          ],
+          "p": 0,
+          "q": 1,
+          "expected": {
+            "status": "EQUIVALENT",
+            "word": null
+          }
+        },
+        {
+          "transitions": [
+            [
+              2,
+              3
+            ],
+            [
+              3,
+              2
+            ],
+            [
+              2,
+              2
+            ],
+            [
+              3,
+              3
+            ]
+          ],
+          "accepting": [
+            0,
+            0,
+            1,
+            0
+          ],
+          "p": 0,
+          "q": 1,
+          "expected": {
+            "status": "DISTINGUISHED",
+            "word": "0"
+          }
+        },
+        {
+          "transitions": [
+            [
+              0,
+              2
+            ],
+            [
+              1,
+              1
+            ],
+            [
+              2,
+              2
+            ]
+          ],
+          "accepting": [
+            0,
+            0,
+            1
+          ],
+          "p": 0,
+          "q": 1,
+          "expected": {
+            "status": "DISTINGUISHED",
+            "word": "1"
+          }
+        },
+        {
+          "transitions": [
+            [
+              2,
+              3
+            ],
+            [
+              3,
+              2
+            ],
+            [
+              2,
+              4
+            ],
+            [
+              3,
+              3
+            ],
+            [
+              4,
+              4
+            ]
+          ],
+          "accepting": [
+            0,
+            0,
+            0,
+            0,
+            1
+          ],
+          "p": 0,
+          "q": 1,
+          "expected": {
+            "status": "DISTINGUISHED",
+            "word": "01"
+          }
+        }
+      ],
+      "falsifiers": [
+        "epsilon is not no witness",
+        "shortest 0 must win tie against 1",
+        "different state ids can accept identical future language",
+        "invalid or missing branch is not silently filled",
+        "longer suffix cannot replace shorter valid one"
+      ],
+      "source_path": "knowledge/d10-finite-state-distinguishing-suffix-research-v1.json",
+      "source_git_blob": "42c79041e72ec956cca34c783f28ea54b772802f",
+      "provenance": [
+        "#4013",
+        "#4463",
+        "#4896",
+        "knowledge/d10-finite-state-distinguishing-suffix-research-v1.json"
+      ],
+      "dedup": {
+        "d1_d9_foundation_sha": "09d1d71c39d1484dfd005a5068dbb18b76f0f0d4",
+        "prior_d10_sha": "92bfe63031eb89ca1d67fb073c599dbb9177ccea",
+        "exact_name": "NO-MATCH",
+        "behavioral_root": "Typed input-output candidate; primitive minimality still subject to review"
+      },
+      "derivability": "PENDING-OWNER-REVIEW; expressible with lower-level constructions; not an asserted primitive"
+    },
+    {
+      "stable_id": "d10.logic.prime-implicants.quine.20261009",
+      "semantic_name": "EXACT-BOOLEAN-PRIME-IMPLICANTS",
+      "surface_uk": "прості-імпліканти",
+      "surface_ukr": "усі-максимальні-куби-булевої-функції",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "proposal_status": "pending-owner-review",
+      "source_class": "EXISTING-PRIMARY-D10-RESEARCH-HARVEST-20261011",
+      "relation_class": "FINITE-BOOLEAN-ON-DC-PRIME-CUBE-FAMILY",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "ratified_resident": false,
+      "physical_t5_authorized": false,
+      "arity": null,
+      "argument_shape": "(width:natural n, ON:set of n-bit ranks, DC:set of n-bit ranks disjoint ON)->ordered list of n-literal ternary cubes",
+      "result_shape": "See source dossier",
+      "behavior": "Let U={0,...,2^n-1}, ON∩DC=∅ and OFF=U\\(ON∪DC). A cube is an n-character pattern in {0,1,-}, where '-' is free. Return EVERY and ONLY cube c whose coverage intersects ON, whose coverage has empty intersection with OFF, and for which no strictly less constrained cube c' (covering strictly more assignments) also avoids OFF. Sort cubes by canonical lexicographic order '-'<'0'<'1'. The output is the complete prime implicant family, NOT a chosen minimum cover and not an individual Boolean gate.",
+      "positive_witnesses": [
+        {
+          "width": 2,
+          "on": [
+            1,
+            3
+          ],
+          "dc": [],
+          "result": [
+            "-1"
+          ]
+        },
+        {
+          "width": 2,
+          "on": [
+            1,
+            2
+          ],
+          "dc": [],
+          "result": [
+            "01",
+            "10"
+          ]
+        },
+        {
+          "width": 3,
+          "on": [
+            1,
+            3,
+            5,
+            7
+          ],
+          "dc": [],
+          "result": [
+            "--1"
+          ]
+        },
+        {
+          "width": 2,
+          "on": [
+            0
+          ],
+          "dc": [
+            1
+          ],
+          "result": [
+            "0-"
+          ]
+        },
+        {
+          "width": 2,
+          "on": [
+            0,
+            1,
+            2,
+            3
+          ],
+          "dc": [],
+          "result": [
+            "--"
+          ]
+        },
+        {
+          "width": 2,
+          "on": [],
+          "dc": [
+            1,
+            2
+          ],
+          "result": []
+        },
+        {
+          "width": 0,
+          "on": [
+            0
+          ],
+          "dc": [],
+          "result": [
+            ""
+          ]
+        }
+      ],
+      "falsifiers": [
+        "Any returned cube intersects OFF.",
+        "A reported prime cube can free another constrained bit without touching OFF.",
+        "ON coverage is lost or cubes covering only DC are reported.",
+        "Returns one minimized sum-of-products cover rather than all primes.",
+        "Treats a don't-care as mandatory output-1 or silently allows overlapping ON/DC."
+      ],
+      "source_path": "knowledge/d10-quine-prime-implicants-20261009.json",
+      "source_git_blob": "e57850674310d92dcb0b2ce2db7f13987b61b562",
+      "provenance": [
+        "#4013",
+        "#4463",
+        "#4896",
+        "knowledge/d10-quine-prime-implicants-20261009.json"
+      ],
+      "dedup": {
+        "d1_d9_foundation_sha": "09d1d71c39d1484dfd005a5068dbb18b76f0f0d4",
+        "prior_d10_sha": "92bfe63031eb89ca1d67fb073c599dbb9177ccea",
+        "exact_name": "NO-MATCH",
+        "behavioral_root": "Typed input-output candidate; primitive minimality still subject to review"
+      },
+      "derivability": "PENDING-OWNER-REVIEW; expressible with lower-level constructions; not an asserted primitive"
+    },
+    {
+      "stable_id": "d10.harvest.existing.finite-code-unique-decipherability.20261011",
+      "semantic_name": "FINITE-CODE-UNIQUE-DECIPHERABILITY",
+      "surface_uk": "одкод?",
+      "surface_ukr": "однозначно-декодується?",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "proposal_status": "pending-owner-review",
+      "source_class": "EXISTING-PRIMARY-D10-RESEARCH-HARVEST-20261011",
+      "relation_class": "FINITE-EXACT-OBSERVABLE-LAW",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "ratified_resident": false,
+      "physical_t5_authorized": false,
+      "arity": 1,
+      "argument_shape": "finite ordered sequence of (distinct nonempty symbol id, nonempty binary word), no duplicate ids",
+      "result_shape": "existing D1:YES or D1:NO; invalid input BLOCK through existing typed failure",
+      "behavior": "Decide if any two different nonempty finite sequences of identities concatenate to the same bitstream; unlike PREFIX-FREE, a nonprefix-free code may still be uniquely decipherable. Empty codebook YES. Finite fixed-point suffix construction always terminates.",
+      "positive_witnesses": [
+        "[(a,0),(b,11)] -> YES (prefix-free)",
+        "[(a,0),(b,01)] -> YES though 0 prefixes 01",
+        "[(a,0),(b,01),(c,10)] -> NO because a,c and b,a both encode 010"
+      ],
+      "falsifiers": [
+        "prefix-free-only implementation incorrectly rejects [(a,0),(b,01)]",
+        "greedy decoder incorrectly accepts ambiguous 010",
+        "codebook [(a,0),(b,1),(c,000000)] must reject: c vs six a identities",
+        "duplicate binary encodings for different identities must reject",
+        "empty word, nonbinary character, duplicate identity must BLOCK"
+      ],
+      "source_path": "knowledge/d10-unique-decipherability-historical-20261009.json",
+      "source_git_blob": "ba024956e114eb7622dd5aa48b71d5910abdadf9",
+      "provenance": [
+        "#4013",
+        "#4463",
+        "#4896",
+        "knowledge/d10-unique-decipherability-historical-20261009.json"
+      ],
+      "dedup": {
+        "d1_d9_foundation_sha": "09d1d71c39d1484dfd005a5068dbb18b76f0f0d4",
+        "prior_d10_sha": "92bfe63031eb89ca1d67fb073c599dbb9177ccea",
+        "exact_name": "NO-MATCH",
+        "behavioral_root": "Typed input-output candidate; primitive minimality still subject to review"
+      },
+      "derivability": "PENDING-OWNER-REVIEW; expressible with lower-level constructions; not an asserted primitive"
+    },
+    {
+      "stable_id": "d10.harvest.existing.stern-brocot-run-path.20261011",
+      "semantic_name": "STERN-BROCOT-RUN-PATH",
+      "surface_uk": "шлдр",
+      "surface_ukr": "стиснений-шлях-дробу",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "proposal_status": "pending-owner-review",
+      "source_class": "EXISTING-PRIMARY-D10-RESEARCH-HARVEST-20261011",
+      "relation_class": "FINITE-EXACT-OBSERVABLE-LAW",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "ratified_resident": false,
+      "physical_t5_authorized": false,
+      "arity": null,
+      "argument_shape": "See source dossier",
+      "result_shape": "canonical alternating sequence of (D1 predicate bit, positive integer count) where bit 0=LEFT below current Stern–Brocot node and bit 1=RIGHT above current node; 1/1 maps to empty run sequence",
+      "behavior": "Generate exact L/R path from root 1/1 by repeated numerator/denominator comparison and subtractive Euclid; compress maximal same-bit runs using quotient floor((a-1)/b) or floor((b-1)/a), preserving final equality stop without one extra step. Reject nonpositive and imprecise source inputs; reverse accepts ONLY alternating positive-length bit runs. Two-direction round trips are identity and representation is unique for every positive rational.",
+      "positive_witnesses": [
+        {
+          "rational": "1/1",
+          "runs": [],
+          "note": "root needs zero directions"
+        },
+        {
+          "rational": "1/2",
+          "runs": [
+            [
+              0,
+              1
+            ]
+          ],
+          "note": "one left branch"
+        },
+        {
+          "rational": "2/1",
+          "runs": [
+            [
+              1,
+              1
+            ]
+          ],
+          "note": "one right branch"
+        },
+        {
+          "rational": "2/3",
+          "runs": [
+            [
+              0,
+              1
+            ],
+            [
+              1,
+              1
+            ]
+          ],
+          "note": "left then right"
+        },
+        {
+          "rational": "3/2",
+          "runs": [
+            [
+              1,
+              1
+            ],
+            [
+              0,
+              1
+            ]
+          ],
+          "note": "right then left"
+        },
+        {
+          "rational": "5/2",
+          "runs": [
+            [
+              1,
+              2
+            ],
+            [
+              0,
+              1
+            ]
+          ],
+          "note": "two rights one left"
+        },
+        {
+          "rational": "13/9",
+          "runs": [
+            [
+              1,
+              1
+            ],
+            [
+              0,
+              2
+            ],
+            [
+              1,
+              3
+            ]
+          ],
+          "note": "exact run compression from Euclid, final right run of 3"
+        },
+        {
+          "rational": "1/1000000001",
+          "runs": [
+            [
+              0,
+              1000000000
+            ]
+          ],
+          "note": "billion path steps represented by one positive run"
+        },
+        {
+          "rational": "1000000001/1",
+          "runs": [
+            [
+              1,
+              1000000000
+            ]
+          ],
+          "note": "unbounded integer width, no bit expansion"
+        }
+      ],
+      "falsifiers": [
+        "For 3/1, returning right-run count 3 rather than 2 introduces an extra branch past the exact rational.",
+        "For 1/1, returning any left or right step is not the root path.",
+        "For 5/2, reversing R² L into L R² reaches a different fraction.",
+        "Consecutive same-direction run records must reject rather than silently admit a noncanonical alternative code.",
+        "Zero/negative run counts, boolean bits, floats and nonpositive input rationals must reject.",
+        "A billion left steps must remain a run count, not allocate a billion-element bit sequence.",
+        "Turning the path into the nearest denominator-bounded fraction instead of exactly reversible p/q changes the mathematical meaning."
+      ],
+      "source_path": "knowledge/d10-stern-brocot-run-path-20261009.json",
+      "source_git_blob": "37cd7d1e77881d0818641d04c8d8b2ac4a605892",
+      "provenance": [
+        "#4013",
+        "#4463",
+        "#4896",
+        "knowledge/d10-stern-brocot-run-path-20261009.json"
+      ],
+      "dedup": {
+        "d1_d9_foundation_sha": "09d1d71c39d1484dfd005a5068dbb18b76f0f0d4",
+        "prior_d10_sha": "92bfe63031eb89ca1d67fb073c599dbb9177ccea",
+        "exact_name": "NO-MATCH",
+        "behavioral_root": "Typed input-output candidate; primitive minimality still subject to review"
+      },
+      "derivability": "PENDING-OWNER-REVIEW; expressible with lower-level constructions; not an asserted primitive"
+    },
+    {
+      "stable_id": "d10.harvest.existing.binary-constraint-support-projection.20261011",
+      "semantic_name": "BINARY-CONSTRAINT-SUPPORT-PROJECTION",
+      "surface_uk": "відсіяти-без-опори",
+      "surface_ukr": "звузити-два-домени-за-відношенням",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "proposal_status": "pending-owner-review",
+      "source_class": "EXISTING-PRIMARY-D10-RESEARCH-HARVEST-20261011",
+      "relation_class": "FINITE-EXACT-OBSERVABLE-LAW",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "ratified_resident": false,
+      "physical_t5_authorized": false,
+      "arity": 3,
+      "argument_shape": "(Dx, Dy, R) each finite canonical sorted unique lists of exact integers; R is finite lexicographically sorted unique list of [x,y] exact-int pairs. Dx,Dy may be empty and R may be empty. Input violation produces ERROR, never silently reorders or coerces.",
+      "result_shape": "Let M={ (x,y) in R : x in Dx and y in Dy }. When M is empty return NO-SUPPORT (not a set of newly invented values). Otherwise return SUPPORTED(sorted unique projection_x(M), sorted unique projection_y(M)). No pair outside R is certified, and supported value in each output has an existential compatible value in the other output. Returns no witness to a globally satisfiable larger constraint network.",
+      "behavior": "Let M={ (x,y) in R : x in Dx and y in Dy }. When M is empty return NO-SUPPORT (not a set of newly invented values). Otherwise return SUPPORTED(sorted unique projection_x(M), sorted unique projection_y(M)). No pair outside R is certified, and supported value in each output has an existential compatible value in the other output. Returns no witness to a globally satisfiable larger constraint network.",
+      "positive_witnesses": [
+        {
+          "dx": [
+            1,
+            2,
+            3
+          ],
+          "dy": [
+            4,
+            5
+          ],
+          "allowed": [
+            [
+              1,
+              4
+            ],
+            [
+              2,
+              6
+            ],
+            [
+              3,
+              5
+            ]
+          ],
+          "out": {
+            "status": "SUPPORTED",
+            "left": [
+              1,
+              3
+            ],
+            "right": [
+              4,
+              5
+            ]
+          }
+        },
+        {
+          "dx": [
+            1,
+            2
+          ],
+          "dy": [
+            3,
+            4
+          ],
+          "allowed": [
+            [
+              1,
+              3
+            ],
+            [
+              2,
+              4
+            ]
+          ],
+          "out": {
+            "status": "SUPPORTED",
+            "left": [
+              1,
+              2
+            ],
+            "right": [
+              3,
+              4
+            ]
+          }
+        },
+        {
+          "dx": [
+            1,
+            2
+          ],
+          "dy": [
+            3
+          ],
+          "allowed": [
+            [
+              1,
+              4
+            ],
+            [
+              2,
+              5
+            ]
+          ],
+          "out": {
+            "status": "NO-SUPPORT",
+            "left": [],
+            "right": []
+          }
+        },
+        {
+          "dx": [
+            2
+          ],
+          "dy": [
+            3
+          ],
+          "allowed": [
+            [
+              2,
+              3
+            ]
+          ],
+          "out": {
+            "status": "SUPPORTED",
+            "left": [
+              2
+            ],
+            "right": [
+              3
+            ]
+          }
+        },
+        {
+          "dx": [],
+          "dy": [
+            1
+          ],
+          "allowed": [
+            [
+              0,
+              1
+            ]
+          ],
+          "out": {
+            "status": "NO-SUPPORT",
+            "left": [],
+            "right": []
+          }
+        }
+      ],
+      "falsifiers": [
+        "A value x with no R-related y in the current Dy must be removed; keeping x violates sound support pruning.",
+        "Arbitrary Cartesian product of output domains is NOT guaranteed to be contained in R; do not claim universal pair compatibility or global CSP solution.",
+        "When all allowed pairs are removed, return named NO-SUPPORT rather than SUCCESS(empty,empty), avoiding contradictory proof status.",
+        "Monotonicity: reducing either input domain cannot invent any supported output; repeated projection must be idempotent.",
+        "Reject unsorted/duplicate finite lists, float/boolean values, non-pair relation members: no silent coercion into semantic identity."
+      ],
+      "source_path": "knowledge/d10-symbolic-ai-arc-support-20261009.json",
+      "source_git_blob": "94766a413363e46705de8ad3e61d0c8995e52727",
+      "provenance": [
+        "#4013",
+        "#4463",
+        "#4896",
+        "knowledge/d10-symbolic-ai-arc-support-20261009.json"
+      ],
+      "dedup": {
+        "d1_d9_foundation_sha": "09d1d71c39d1484dfd005a5068dbb18b76f0f0d4",
+        "prior_d10_sha": "92bfe63031eb89ca1d67fb073c599dbb9177ccea",
+        "exact_name": "NO-MATCH",
+        "behavioral_root": "Typed input-output candidate; primitive minimality still subject to review"
+      },
+      "derivability": "PENDING-OWNER-REVIEW; expressible with lower-level constructions; not an asserted primitive"
+    },
+    {
+      "stable_id": "d10.rewrite.binary-length-decreasing-confluence.20261009",
+      "semantic_name": "FINITE-STRING-CRITICAL-PAIR-CONFLUENCE",
+      "surface_uk": "узгодженість-переписувань",
+      "surface_ukr": "свідок-конфлікту-критичних-пар-двійкових-правил",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "proposal_status": "pending-owner-review",
+      "source_class": "EXISTING-PRIMARY-D10-RESEARCH-HARVEST-20261011",
+      "relation_class": "LENGTH-DECREASING-GROUND-STRING-REWRITING-CRITICAL-PAIR-CONFLUENCE",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "ratified_resident": false,
+      "physical_t5_authorized": false,
+      "arity": null,
+      "argument_shape": "(ordered finite list of (nonempty-binary-lhs, strictly-shorter-binary-rhs))->CONFLUENT or NONCONFLUENT(witness)",
+      "result_shape": "See source dossier",
+      "behavior": "Compute all same-source one-step peaks arising from overlapping (including nested) occurrences of any pair of left sides. Each critical pair is joinable iff its two descendants share at least one reachable normal form under the same rules. Because every rule strictly shortens finite words, termination is proved by exact length. Then all critical pairs joinable is equivalent to confluence of the entire finite string rewrite relation (critical pair criterion + Newman's lemma). Return CONFLUENT or a concrete NONCONFLUENT witness: source, two branches, and separately reachable normal-form sets with empty intersection. Wording does not imply that a nonconfluent ruleset lacks individual common normal forms for other starting words.",
+      "positive_witnesses": [
+        {
+          "rules": [
+            [
+              "00",
+              "0"
+            ]
+          ],
+          "verdict": "CONFLUENT",
+          "reason": "00→0 is length-decreasing; overlapping runs of zeros converge"
+        },
+        {
+          "rules": [
+            [
+              "01",
+              "0"
+            ],
+            [
+              "10",
+              "0"
+            ]
+          ],
+          "verdict": "CONFLUENT",
+          "reason": "critical peak 010 reduces to 00 by either branch"
+        },
+        {
+          "rules": [
+            [
+              "01",
+              "0"
+            ],
+            [
+              "10",
+              "1"
+            ]
+          ],
+          "verdict": "NONCONFLUENT",
+          "reason": "010 can yield 00 or 01 and subsequently 0; direct normal-form witness may vary, compute oracle, don't assert exact branches blindly"
+        },
+        {
+          "rules": [
+            [
+              "00",
+              "0"
+            ],
+            [
+              "00",
+              "1"
+            ]
+          ],
+          "verdict": "NONCONFLUENT",
+          "reason": "00 rewrites to both irreducible 0 and 1"
+        },
+        {
+          "rules": [],
+          "verdict": "CONFLUENT",
+          "reason": "no redex, reflexive closure is confluent"
+        }
+      ],
+      "falsifiers": [
+        "Never count disjoint non-overlapping redex occurrences as unjoinable critical conflicts; the two orders commute.",
+        "Two peaks may differ immediately yet be joinable later; comparing only first descendants is unsound.",
+        "Identical left sides with distinct right sides yield a critical peak; omitting containment or same-position overlaps misses a real conflict.",
+        "Do not invoke termination/Newman's lemma for length-preserving, length-growing, cyclic or unrestricted higher-order rewrite systems.",
+        "Do not return a nonconfluence witness without two reachable branches whose normal-form sets are disjoint."
+      ],
+      "source_path": "knowledge/d10-critical-pairs-confluence-20261009.json",
+      "source_git_blob": "6530444a1f4417dbebfa93c93f74c4dca5e5aefb",
+      "provenance": [
+        "#4013",
+        "#4463",
+        "#4896",
+        "knowledge/d10-critical-pairs-confluence-20261009.json"
+      ],
+      "dedup": {
+        "d1_d9_foundation_sha": "09d1d71c39d1484dfd005a5068dbb18b76f0f0d4",
+        "prior_d10_sha": "92bfe63031eb89ca1d67fb073c599dbb9177ccea",
+        "exact_name": "NO-MATCH",
+        "behavioral_root": "Typed input-output candidate; primitive minimality still subject to review"
+      },
+      "derivability": "PENDING-OWNER-REVIEW; expressible with lower-level constructions; not an asserted primitive"
+    },
+    {
+      "stable_id": "d10.harvest.existing.exact-perceptron-mistake-step.20261011",
+      "semantic_name": "EXACT-PERCEPTRON-MISTAKE-STEP",
+      "surface_uk": "помкрок",
+      "surface_ukr": "виправити-ваги-перцептрона",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "proposal_status": "pending-owner-review",
+      "source_class": "EXISTING-PRIMARY-D10-RESEARCH-HARVEST-20261011",
+      "relation_class": "FINITE-EXACT-OBSERVABLE-LAW",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "ratified_resident": false,
+      "physical_t5_authorized": false,
+      "arity": null,
+      "argument_shape": "(weights:nonempty-vector exact-rational, feature:same-length nonzero exact-rational-vector, label:integer ±1, eta:exact-rational>0)",
+      "result_shape": "(updated-weight-vector exact-rational, correction-indicator D1 YES/NO)",
+      "behavior": "Given nonempty finite equal-length vectors of exact rationals weights w and nonzero feature x, label y in {-1,+1}, and strictly positive exact learning rate η, compute the exact margin m=y * sum_i(w_i*x_i). If m>0 return (w,corrected=NO), otherwise return (w+η*y*x,corrected=YES). A zero margin must trigger correction for either label. This is one pure mathematical update; no assumptions about convergence, SGD, hidden layers, approximate floats or physical sensor uncertainties.",
+      "positive_witnesses": [
+        {
+          "w": [
+            "0",
+            "0"
+          ],
+          "x": [
+            "2",
+            "-1"
+          ],
+          "y": 1,
+          "eta": "1",
+          "result": [
+            "2",
+            "-1"
+          ],
+          "corrected": true
+        },
+        {
+          "w": [
+            "2",
+            "-1"
+          ],
+          "x": [
+            "2",
+            "-1"
+          ],
+          "y": 1,
+          "eta": "1",
+          "result": [
+            "2",
+            "-1"
+          ],
+          "corrected": false
+        },
+        {
+          "w": [
+            "2",
+            "-1"
+          ],
+          "x": [
+            "1",
+            "2"
+          ],
+          "y": -1,
+          "eta": "1",
+          "result": [
+            "1",
+            "-3"
+          ],
+          "corrected": true
+        },
+        {
+          "w": [
+            "1/2",
+            "1/3"
+          ],
+          "x": [
+            "3/2",
+            "-1/2"
+          ],
+          "y": -1,
+          "eta": "2/3",
+          "result": [
+            "-1/2",
+            "2/3"
+          ],
+          "corrected": true
+        }
+      ],
+      "falsifiers": [
+        "A margin of exactly zero is incorrectly treated as strictly classified and does not update.",
+        "A nonpositive learning rate, wrong vector shape, float, forbidden label or zero feature vector is accepted.",
+        "The exact margin gain after a correction differs from eta * ||x||².",
+        "The weight vector is changed when the signed margin was strictly positive.",
+        "A claim that all non-linearly separable training samples converge violates the restricted Novikoff theorem."
+      ],
+      "source_path": "knowledge/d10-rosenblatt-novikoff-exact-step-20261009.json",
+      "source_git_blob": "98ae2ca35cc259ebc9c6d929d9531ec6b54a2bf3",
+      "provenance": [
+        "#4013",
+        "#4463",
+        "#4896",
+        "knowledge/d10-rosenblatt-novikoff-exact-step-20261009.json"
+      ],
+      "dedup": {
+        "d1_d9_foundation_sha": "09d1d71c39d1484dfd005a5068dbb18b76f0f0d4",
+        "prior_d10_sha": "92bfe63031eb89ca1d67fb073c599dbb9177ccea",
+        "exact_name": "NO-MATCH",
+        "behavioral_root": "Typed input-output candidate; primitive minimality still subject to review"
+      },
+      "derivability": "PENDING-OWNER-REVIEW; expressible with lower-level constructions; not an asserted primitive"
+    },
+    {
+      "stable_id": "d10.harvest.existing.unique-bounded-modular-lift.20261011",
+      "semantic_name": "UNIQUE-BOUNDED-MODULAR-LIFT",
+      "surface_uk": "єдине-підняття-остачі",
+      "surface_ukr": "відновити-єдине-ціле-за-циклічним-відліком",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "proposal_status": "pending-owner-review",
+      "source_class": "EXISTING-PRIMARY-D10-RESEARCH-HARVEST-20261011",
+      "relation_class": "FINITE-EXACT-OBSERVABLE-LAW",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "ratified_resident": false,
+      "physical_t5_authorized": false,
+      "arity": 4,
+      "argument_shape": "See source dossier",
+      "result_shape": "See source dossier",
+      "behavior": "Find all integers z with lo<=z<=hi and z mod M=r. Return NONE with count 0 if there are none; return UNIQUE with the exact only z if count 1; return AMBIGUOUS with exact count>=2 and first two solutions in increasing order if there are at least two. All integer arithmetic; invalid domains are reported as ERROR, never guessed or clamped.",
+      "positive_witnesses": [
+        {
+          "M": 4096,
+          "r": 2,
+          "lo": 4090,
+          "hi": 4100,
+          "result": "UNIQUE 4098"
+        },
+        {
+          "M": 4096,
+          "r": 2,
+          "lo": 3,
+          "hi": 4097,
+          "result": "NONE count=0"
+        },
+        {
+          "M": 4096,
+          "r": 2,
+          "lo": 0,
+          "hi": 8194,
+          "result": "AMBIGUOUS count=3 first=2 second=4098"
+        },
+        {
+          "M": 7,
+          "r": 6,
+          "lo": -10,
+          "hi": -1,
+          "result": "AMBIGUOUS count=2 first=-8 second=-1"
+        },
+        {
+          "M": 5,
+          "r": 2,
+          "lo": -3,
+          "hi": -3,
+          "result": "UNIQUE -3"
+        },
+        {
+          "M": 7,
+          "r": 0,
+          "lo": 1,
+          "hi": 6,
+          "result": "NONE count=0"
+        },
+        {
+          "M": 7,
+          "r": 0,
+          "lo": 0,
+          "hi": 7,
+          "result": "AMBIGUOUS count=2 first=0 second=7"
+        }
+      ],
+      "falsifiers": [
+        "Return nearest unwrapped branch even when both 2 and 4098 are inside allowed interval [0,8194]: an explicit ambiguous result is required.",
+        "Treat residues from a circular sector CONTAINS predicate as unique absolute position; membership alone does not specify turn count.",
+        "Return 0 where lo=1,hi=6,M=7,r=0, or omit negative lifts, or exclude a matching inclusive endpoint.",
+        "Claim a fixed 4096 period for all counters: the modulus is a caller-supplied integer and generic law is exact.",
+        "Claim data from a wrapped register alone reveals number of full turns, velocity, direction or phase under aliasing: without admissible interval no such information is justified."
+      ],
+      "source_path": "knowledge/d10-unique-bounded-modular-lift-20261009.json",
+      "source_git_blob": "4ec2aaef1bfb1a7cf2c2ebd9755eca1563cacfbe",
+      "provenance": [
+        "#4013",
+        "#4463",
+        "#4896",
+        "knowledge/d10-unique-bounded-modular-lift-20261009.json"
+      ],
+      "dedup": {
+        "d1_d9_foundation_sha": "09d1d71c39d1484dfd005a5068dbb18b76f0f0d4",
+        "prior_d10_sha": "92bfe63031eb89ca1d67fb073c599dbb9177ccea",
+        "exact_name": "NO-MATCH",
+        "behavioral_root": "Typed input-output candidate; primitive minimality still subject to review"
+      },
+      "derivability": "PENDING-OWNER-REVIEW; expressible with lower-level constructions; not an asserted primitive"
     }
   ],
   "parent_domain": {
@@ -14520,6 +15709,17 @@
     "knowledge/d10-clock-radio-math-selection-20261009.json",
     "knowledge/d10-babbage-reiter-hobby-selected-20261009.json",
     "knowledge/d10-hysteretic-boolean-source-law-20261009.json",
-    "knowledge/d10-cnf-unit-fixpoint-selection-20261011.json"
+    "knowledge/d10-cnf-unit-fixpoint-selection-20261011.json",
+    "knowledge/d10-binary-lyndon-factorization-v1.json",
+    "knowledge/d10-debruijn-binary-cycle-research-v1.json",
+    "knowledge/d10-finite-state-distinguishing-suffix-research-v1.json",
+    "knowledge/d10-quine-prime-implicants-20261009.json",
+    "knowledge/d10-unique-decipherability-historical-20261009.json",
+    "knowledge/d10-stern-brocot-run-path-20261009.json",
+    "knowledge/d10-symbolic-ai-arc-support-20261009.json",
+    "knowledge/d10-critical-pairs-confluence-20261009.json",
+    "knowledge/d10-rosenblatt-novikoff-exact-step-20261009.json",
+    "knowledge/d10-unique-bounded-modular-lift-20261009.json",
+    "knowledge/d10-existing-evidence-harvest-20261011-a.json"
   ]
 }
