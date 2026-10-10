@@ -366,29 +366,6 @@
             ((not? (00100010 (00000101 a) (00000101 b)))
              (00000001 (0))))))))))
 
-; Exact-Q uses 1 for YES and 0 for NO.  Structural and identity relations
-; retain their own result domains, so predicate consumers normalize them here.
-(00001001 truthy?
-  (00001000 (value)
-    (00000111
-      ((00000010 value)
-       (00000111
-         ((00000011 value 0) 0)
-         ((00000001 t) 1)))
-      ((00000010 value)
-       (00000111
-         ((00100010 value (00000001 (0))) 0)
-         ((00100010 value (00000001 (0))) 0)
-         ((00100010 value (00000001 (0))) 0)
-         (1 1))))))
-
-(00001001 not?
-  (00001000 (value)
-    (00000111
-      ((truthy? value) 0)
-      ((00000001 t) 1))))
-
-
 ; nth/member?/assoc (G5 test: already expressible via existing means?)
 ; — yes, same recursive-list-walk shape as length/reverse above.
 ; Surfaced from the fpga-lisp session's assembler.lisp (2026-08-10), which
