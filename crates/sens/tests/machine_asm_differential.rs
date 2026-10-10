@@ -288,3 +288,33 @@ fn x86_encoder_callability_stage_probe() {
         "Не доведено виклики x86-кодувальника на етапах: {failed:?}"
     );
 }
+
+
+// Незалежна атестація всіх 16 механічних номерів регістрів.
+// Перевіряємо точний результат, а не тільки відсутність помилки виклику.
+// #d потрібен, щоб числа 10/11 не стали двійковими словами.
+#[test]
+#[ignore = "разом з GAS/NASM на GitHub-hosted runner"]
+fn x86_register_fields_have_exact_values_for_all_16_codes() {
+    let mut session = machine_session();
+    for code in 0u32..16 {
+        let low_source = format!("(x86-low3 #d{code})");
+        let high_source = format!("(x86-high1 #d{code})");
+        let low = eval_program(&low_source, &mut session)
+            .unwrap_or_else(|error| panic!("Невикличний low3 для {code}: {error}"));
+        let high = eval_program(&high_source, &mut session)
+            .unwrap_or_else(|error| panic!("Невикличний high1 для {code}: {error}"));
+        assert_eq!(
+            low.value.to_string(),
+            (code % 8).to_string(),
+            "Невірні молодші три біти регістра {code}"
+        );
+        assert_eq!(
+            high.value.to_string(),
+            (code / 8).to_string(),
+            "Невірний старший біт регістра {code}"
+        );
+        eprintln!("X86_ПОЛЯ_РЕГІСТРА_УСПІХ code={code} low3={} high1={}",
+                  low.value, high.value);
+    }
+}
