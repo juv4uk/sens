@@ -306,3 +306,25 @@ fn bounded_effect_negative_form_predicates_return_exact_d1_no() {
         );
     }
 }
+
+#[test]
+fn bounded_effect_integer_range_answer_is_exact_d1() {
+    // #5361: негативний вихід за будь-яку межу має бути D1:0, а не ().
+    let mut session = Session::default();
+    load_core_library(&mut session).expect("ядро");
+    load_lisp_file("lib/machine/effects/u64.lisp", &mut session);
+    for (source, expected) in [
+        ("(machine-effect-within-inclusive-integer-range? 5 0 10)", true),
+        ("(machine-effect-within-inclusive-integer-range? -1 0 10)", false),
+        ("(machine-effect-within-inclusive-integer-range? 11 0 10)", false),
+    ] {
+        let actual = eval_program(source, &mut session)
+            .unwrap_or_else(|error| panic!("{source}: {error}"))
+            .value;
+        assert_eq!(
+            actual.as_predicate_bit(),
+            Some(expected),
+            "{source}: результат має належати точному домену D1"
+        );
+    }
+}
