@@ -352,7 +352,7 @@
     (110
       ((101 width expected-width)
        (101 bits expected-bits))
-      ((010 ()) (00000001 ())))))
+      ((0101 (00000001 ())) (00000001 ())))))
 
 (00001001 x86-lower-current-binary-u64-forms
   (00001000 (width bits left right)
@@ -361,18 +361,18 @@
        (110
          ((x86-current-d5-u32-inputs? left right)
           (x86-lower-add-u64-forms left right))
-         ((010 ()) (00000001 exact-d5-fallback-required))))
+         ((0101 (00000001 ())) (00000001 exact-d5-fallback-required))))
       ((x86-current-domain-key? width bits 5 11)
        (110
          ((x86-current-d5-difference-u64-safe? left right)
           (x86-lower-difference-u64-forms left right))
-         ((010 ()) (00000001 exact-d5-fallback-required))))
+         ((0101 (00000001 ())) (00000001 exact-d5-fallback-required))))
       ((x86-current-domain-key? width bits 5 22)
        (110
          ((x86-current-d5-u32-inputs? left right)
           (x86-lower-times-u64-forms left right))
-         ((010 ()) (00000001 exact-d5-fallback-required))))
-      ((010 ())
+         ((0101 (00000001 ())) (00000001 exact-d5-fallback-required))))
+      ((0101 (00000001 ()))
        (00000001 unsupported-current-domain-binary-u64)))))
 
 (00001001 x86-encode-current-binary-u64
@@ -385,9 +385,9 @@
             (00000001 unsupported-current-domain-binary-u64))
            ((101 forms (00000001 exact-d5-fallback-required))
             (00000001 exact-d5-fallback-required))
-           ((010 ())
+           ((0101 (00000001 ()))
             (00000001 unsupported-current-domain-binary-u64))))
-        ((010 ())
+        ((0101 (00000001 ()))
          (x86-encode-admitted-program forms))))
       (x86-lower-current-binary-u64-forms
                     width bits left right))))
