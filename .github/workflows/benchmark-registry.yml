@@ -30,6 +30,16 @@ jobs:
       - name: Validate manifests and generated index
         run: python3 scripts/benchmark_registry.py --check
 
+      - name: Verify and measure the T21/T22/T33 research stand when present
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [[ -f "benchmarks/byte-pack/носій22.py" ]]; then
+            python3 benchmarks/byte-pack/носій22.py --verify
+            python3 benchmarks/byte-pack/носій22.py --bench --ntrits 4620 --reps 15 --out "$RUNNER_TEMP/t22-results.json"
+            test -s "$RUNNER_TEMP/t22-results.json"
+          fi
+
       - name: Reject newly created unmanifested stands
         if: github.event_name == 'pull_request'
         env:
