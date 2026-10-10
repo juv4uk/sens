@@ -125,5 +125,38 @@ class PhysicalT5IntegrityTests(unittest.TestCase):
             self.verify(data)
 
 
+import sens_t5_codec as physical_t5
+
+
+class PhysicalT5CrossTransportTests(unittest.TestCase):
+    """М3: не приймати чужий носій за фізичний файл SENS."""
+
+    def test_frozen_physical_t5_control(self):
+        self.assertEqual(physical_t5.decode_bytes(bytes([17])), ["001"])
+        self.assertEqual(physical_t5.encode_words(["001"]), bytes([17]))
+
+    def test_fpga_uart_magic_is_not_t5(self):
+        with self.assertRaises(physical_t5.SensT5Error):
+            physical_t5.decode_bytes(b"CMLJ")
+
+    def test_gpu_csv_header_is_not_t5(self):
+        with self.assertRaises(physical_t5.SensT5Error):
+            physical_t5.decode_bytes(b"domain,width,bits,exact_text\n")
+
+    def test_graalvm_textual_declaration_is_not_t5(self):
+        with self.assertRaises(physical_t5.SensT5Error):
+            physical_t5.decode_bytes(b"(binary 8)")
+
+    def test_reserved_physical_markers_are_not_t5(self):
+        for marker in (243, 244):
+            with self.subTest(marker=marker):
+                with self.assertRaises(physical_t5.SensT5Error):
+                    physical_t5.decode_bytes(bytes([marker]))
+
+    def test_noncanonical_padding_does_not_mean_empty_program(self):
+        with self.assertRaises(physical_t5.SensT5Error):
+            physical_t5.decode_bytes(bytes([242]))
+
+
 if __name__ == "__main__":
     unittest.main()
