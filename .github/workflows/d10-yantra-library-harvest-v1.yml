@@ -8,6 +8,7 @@ on:
       - "knowledge/d10-v1-semantic-inventory.json"
       - "knowledge/d10-fill-v1-state.json"
       - "scripts/check-d10-yantra-library-harvest-v1.py"
+      - "tests/test_d10_yantra_donor_provenance.py"
       - "knowledge/archive/d10-yantra-donor-76460b72.lisp"
       - "scripts/check-d10-crossrepo-panini-v1.py"
       - ".github/workflows/d10-yantra-library-harvest-v1.yml"
@@ -19,6 +20,7 @@ on:
       - "knowledge/d10-v1-semantic-inventory.json"
       - "knowledge/d10-fill-v1-state.json"
       - "scripts/check-d10-yantra-library-harvest-v1.py"
+      - "tests/test_d10_yantra_donor_provenance.py"
       - "knowledge/archive/d10-yantra-donor-76460b72.lisp"
       - ".github/workflows/d10-yantra-library-harvest-v1.yml"
   workflow_dispatch:
@@ -29,6 +31,8 @@ jobs:
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@v5
+      - name: Негативні свідки цілісності та рухомих рядків
+        run: python3 tests/test_d10_yantra_donor_provenance.py
       - name: Перевірити історичний SHA, рядки донора й чинні визначення
         run: python3 scripts/check-d10-yantra-library-harvest-v1.py
       - name: Перевірити розширення історичного добору D10 Panini
