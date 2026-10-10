@@ -16,9 +16,15 @@ fn read(path: &str) -> String {
 }
 
 fn load_lisp_file(path: &str, session: &mut Session) {
+    assert!(
+        path.starts_with("lib/machine/"),
+        "machine-source reader is restricted to lib/machine/** fixtures: {path}"
+    );
     let source = read(path);
-    eval_program(&source, session)
-        .unwrap_or_else(|error| panic!("{path} must load as ordinary sens: {error}"));
+    let expressions = sens::parse_mixed_exact_domain_machine_source(&source)
+        .unwrap_or_else(|error| panic!("{path} must parse as exact-domain machine source: {error}"));
+    sens::eval_parsed_expressions(&expressions, session)
+        .unwrap_or_else(|error| panic!("{path} must load through the machine-source reader: {error}"));
 }
 
 fn eval_value(source: &str, session: &mut Session) -> String {
