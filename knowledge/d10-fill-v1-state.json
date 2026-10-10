@@ -28,10 +28,10 @@
     "width": 10,
     "capacity": 1024,
     "dense_target": 1024,
-    "selected_semantic_candidates": 648,
-    "remaining_semantic_candidates": 376,
+    "selected_semantic_candidates": 667,
+    "remaining_semantic_candidates": 357,
     "law_forced_coordinates": 256,
-    "unplaced_selected_candidates": 392,
+    "unplaced_selected_candidates": 411,
     "ratified_residents": 0
   },
   "first_tranche": {
@@ -432,5 +432,16 @@
     "ratified_added": 0,
     "derivability": "PENDING-OWNER-REVIEW: possible self-hosted library composite",
     "independent_oracles": "3616 bounded ordered-codebook cases: pairwise exact Fractions vs integer dyadic intervals"
+  },
+  "existing_research_donor_replay_20261011": {
+    "source": "knowledge/d10-existing-research-batch-replay-20261011.json",
+    "count": 19,
+    "before": 648,
+    "after": 667,
+    "inventory_before_sha": "aef34c9c6d31f172059f3cf5d70136c77ffde0fc",
+    "inventory_after_sha": "a76c1927296780cad064d5ec67c806a3c25d5075",
+    "ratified_added": 0,
+    "coordinates_added": 0,
+    "core_vs_library": "PENDING"
   }
 }
