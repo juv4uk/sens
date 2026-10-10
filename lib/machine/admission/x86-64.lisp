@@ -216,21 +216,25 @@
 ; must never consume as PredicateBit controls.
 (00001001 x86-admission-wire-denominator-one?
   (00001000 (text)
+    ; W8 compatibility string predicates return legacy pair booleans (0)/(1).
+    ; Normalize each boolean to scalar D1 before it can control strict D3 COND.
     (110
-      ((110011100 text) (010 (00000001 (00000000))))
-      ((101 (110101011 text) "/")
+      ((101 (100 (00111100 text)) 1)
+       (010 (00000001 (00000000))))
+      ((101 (00111111 text) "/")
        ((00001000 (rest)
          (110
-           ((110011100 rest) (010 (00000001 (00000000))))
-           ((101 (110101011 rest) "1")
+           ((101 (100 (00111100 rest)) 1)
+            (010 (00000001 (00000000))))
+           ((101 (00111111 rest) "1")
             (110
-              ((110011100 (110011101 rest)) (010 (00000001 ())))
+              ((101 (100 (00111100 (01000000 rest))) 1)
+               (010 (00000001 ())))
               ((101 0 0) (010 (00000001 (00000000))))))
            ((101 0 0) (010 (00000001 (00000000))))))
-        (110011101 text)))
+        (01000000 text)))
       ((101 0 0)
-       (x86-admission-wire-denominator-one? (110011101 text))))))
-
+       (x86-admission-wire-denominator-one? (01000000 text))))))
 (00001001 x86-admission-exact-integer?
   (00001000 (value)
     ((00001000 (wire)
