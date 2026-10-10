@@ -1,0 +1,47 @@
+name: TEMP current Core4 local-binding replay
+on:
+  push:
+    branches:
+      - fix/core4-current-let-binding-heads-20261010
+    paths:
+      - ".github/workflows/tmp-core4-current-let-replay.yml"
+      - "lib/core.lisp"
+      - "lib/core4.lisp"
+      - "crates/sens/tests/current_binary_preflight.rs"
+
+permissions:
+  contents: write
+
+jobs:
+  exact-source-replay:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: ${{ github.ref }}
+          fetch-depth: 0
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Pin exact Core4 source
+        shell: bash
+        run: |
+          set -euo pipefail
+          actual="$(git hash-object lib/core4.lisp)"
+          test "$actual" = "d0b975702e998c7377e77dbdf064b48d416e8b80"
+          echo "CORE4_SOURCE_BLOB=$actual"
+      - name: Regenerate FASL and validate current Core local binding
+        shell: bash
+        run: |
+          set -euo pipefail
+          cargo run --locked --release -p sens-cli --bin gen-fasl -- lib/core4.lisp lib/core4.lisp.fasl
+          cargo test --locked -p sens --test core_fasl_freshness -- --nocapture
+          cargo test --locked -p sens --test current_binary_preflight core4_local_binding_heads_are_current_and_postcore_libraries_load -- --exact --nocapture
+          git diff --exit-code -- . ':!lib/core4.lisp.fasl'
+          git add lib/core4.lisp.fasl
+          if git diff --cached --quiet; then
+            echo "FASL already matches exact Core4 source"
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -m "refresh Core4 FASL for current local binding"
+          git push origin "HEAD:${GITHUB_REF_NAME}"
