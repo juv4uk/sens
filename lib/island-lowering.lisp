@@ -21,50 +21,50 @@
     (10011100 ((l (01001100 left))
           (r (01001100 right)))
       (00000111
-        ((00000011 executor (00000001 common-lisp)) (1)
+        ((00000011 executor (00000001 common-lisp)) 
          (island-lowering-append4 "" l " " r))
-        ((00000011 executor (00000001 prolog)) (1)
+        ((00000011 executor (00000001 prolog)) 
          (island-lowering-append4 "" l " " r))
-        ((00000011 executor (00000001 datalog)) (1)
+        ((00000011 executor (00000001 datalog)) 
          (island-lowering-append4 "" l " " r))
-        ((00000011 executor (00000001 clips)) (1)
+        ((00000011 executor (00000001 clips)) 
          (island-lowering-append4 "" l " " r))
-        ((00000001 island-lowering-fallback) island-lowering-fallback
+        ((00000001 island-lowering-fallback) 
          (00000001 ()))))))
 
 (00001001 island-lower-binary
   (00001000 (sid executor left right)
     (10011100 ((selection (mechanism-select sid executor)))
       (00000111
-        ((00000010 selection) (0)
+        ((0100 (00000010 selection))
          (00000111
            ((00000011 (00000101 selection) (00000001 mechanism-selected))
-            (1)
+            
             (10011100 ((mechanism (00110001 selection)))
               (00000111
                 ((00000011 mechanism (00000001 bounded-exact-add))
-                 (1)
+                 
                  (10011100 ((payload
                          (island-lowering-add-payload executor left right)))
                    (00000111
-                     ((00000010 payload) ()
+                     ((0100 (00000010 payload))
                       (00100111
                         (00000001 island-lowering-failure)
                         (00000001 unsupported-executor)
                         sid executor mechanism))
-                     ((00000010 payload) (1)
+                     ((00000010 payload) 
                       (00100111
                         (00000001 island-lowering-result)
                         sid executor mechanism payload)))))
-                ((00000001 island-lowering-other-mechanism) island-lowering-other-mechanism
+                ((00000001 island-lowering-other-mechanism) 
                  (00100111
                    (00000001 island-lowering-failure)
                    (00000001 unsupported-selected-mechanism)
                    sid executor mechanism)))))
            ((00000001 island-lowering-selection-not-selected)
-            island-lowering-selection-not-selected
+            
             selection)))
-        ((00000001 island-lowering-malformed) island-lowering-malformed
+        ((00000001 island-lowering-malformed) 
          (00100111
            (00000001 island-lowering-failure)
            (00000001 malformed-selection)
