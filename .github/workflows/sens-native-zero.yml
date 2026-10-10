@@ -4,6 +4,9 @@ on:
   pull_request:
     paths:
       - "crates/sens/examples/sens_native_zero_bench.rs"
+      - "crates/sens/examples/sens_native_zero_prepared_bench.rs"
+      - "crates/sens/tests/physical_t5_execution.rs"
+      - "crates/sens/src/lib.rs"
       - "crates/sens/src/binary_execution.rs"
       - "crates/sens/src/ternary_transport.rs"
       - "tests/fixtures/migration-quote-cohort-main/quote-legacy.sens"
@@ -37,7 +40,9 @@ jobs:
       - uses: dtolnay/rust-toolchain@stable
       - uses: Swatinem/rust-cache@v2
       - name: Compile release Native Zero executable
-        run: cargo build --locked --release -p sens --example sens_native_zero_bench
+        run: cargo build --locked --release -p sens --example sens_native_zero_bench --example sens_native_zero_prepared_bench
+      - name: Strict prepared T5 replay and fail-closed fixture regression
+        run: cargo test --locked -p sens --test physical_t5_execution -- --nocapture
       - name: Record runner and binary provenance
         run: |
           mkdir -p artifacts/native-zero
@@ -58,6 +63,18 @@ jobs:
             --input artifacts/native-zero/native-zero.jsonl \
             --summary artifacts/native-zero/summary.md
           cat artifacts/native-zero/summary.md >> "$GITHUB_STEP_SUMMARY"
+      - name: Compare single-validated T5 with repeated physical decoding
+        shell: bash
+        run: |
+          set -euo pipefail
+          target/release/examples/sens_native_zero_prepared_bench --samples 9 --iterations 128 |
+            tee artifacts/native-zero/native-zero-prepared.jsonl
+      - name: Validate prepared and direct physical timing evidence
+        run: |
+          python3 benchmarks/native-zero/verify_prepared_report.py \
+            --input artifacts/native-zero/native-zero-prepared.jsonl \
+            --summary artifacts/native-zero/prepared-summary.md
+          cat artifacts/native-zero/prepared-summary.md >> "$GITHUB_STEP_SUMMARY"
       - name: Preserve raw measurements and hardware metadata even on failure
         if: always()
         uses: actions/upload-artifact@v4
