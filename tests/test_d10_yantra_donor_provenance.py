@@ -65,6 +65,17 @@ class YantraProvenanceWitnesses(unittest.TestCase):
         self.assertEqual(result.returncode, 0, result.stderr)
         self.assertIn("D10-YANTRA-LIBRARY-HARVEST: PASS", result.stdout)
 
+    def test_optimized_python_cannot_bypass_donor_evidence(self):
+        result = subprocess.run(
+            [sys.executable, "-O", CHECKER],
+            cwd=self.root,
+            capture_output=True,
+            text=True,
+            check=False,
+        )
+        self.assertNotEqual(result.returncode, 0, result.stdout)
+        self.assertIn("D10-YANTRA-DONOR: BLOCKED", result.stderr)
+
     def test_historical_bytes_changed_fail_closed(self):
         path = self.file(DONOR)
         path.write_bytes(path.read_bytes() + b"\n; tamper\n")
