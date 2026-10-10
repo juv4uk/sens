@@ -397,6 +397,7 @@ def self_test() -> None:
             quoted = input_form(
                 ["knowledge/symlink.lisp"], [],
                 [("knowledge/symlink.lisp", "120000:blob")],
+                [], [],
             )
             if '(added-modes . (("knowledge/symlink.lisp" . "120000:blob")))' not in quoted:
                 fail("TRANSPORT_SELF_TEST_MISSING_GIT_MODE_INPUT")
