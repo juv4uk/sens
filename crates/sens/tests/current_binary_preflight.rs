@@ -150,19 +150,19 @@ fn core4_probe_nested_let_macro() {
 
 #[test]
 fn core4_probe_current_car_head() {
-    sens::eval_program("(00000101 (001 (1079 utc-now)))", &mut core4_probe_session())
+    sens::eval_program("(100 (001 (1079 utc-now)))", &mut core4_probe_session())
         .expect("current D3 CAR can select a quoted list head");
 }
 
 #[test]
 fn core4_probe_current_cdr_tail() {
-    sens::eval_program("(00000110 (001 (1079 utc-now)))", &mut core4_probe_session())
+    sens::eval_program("(011 (001 (1079 utc-now)))", &mut core4_probe_session())
         .expect("current D3 CDR can select a quoted list tail");
 }
 
 #[test]
 fn core4_probe_current_car_of_cdr() {
-    sens::eval_program("(00000101 (00000110 (001 (1079 utc-now))))", &mut core4_probe_session())
+    sens::eval_program("(100 (011 (001 (1079 utc-now))))", &mut core4_probe_session())
         .expect("current D3 CAR(CDR(...)) extracts the second argument");
 }
 
