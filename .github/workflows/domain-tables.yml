@@ -8,6 +8,7 @@ on:
       - "knowledge/d5-ratified.json"
       - "knowledge/d7-ratified.json"
       - "scripts/check-d7-runtime-projection.py"
+      - "scripts/check-d9-current-authority.py"
       - "crates/sens/src/d7_display_registry_generated.rs"
       - "crates/sens/tests/d7_runtime_presentation.rs"
       - "knowledge/d8-ratified.json"
@@ -43,6 +44,7 @@ on:
       - "knowledge/d5-ratified.json"
       - "knowledge/d7-ratified.json"
       - "scripts/check-d7-runtime-projection.py"
+      - "scripts/check-d9-current-authority.py"
       - "crates/sens/src/d7_display_registry_generated.rs"
       - "crates/sens/tests/d7_runtime_presentation.rs"
       - "knowledge/d8-ratified.json"
@@ -94,6 +96,22 @@ jobs:
         run: python3 scripts/translate-domain-program.py --self-test
       - name: Check D9 ratified authority
         run: python3 scripts/check-d9-current-authority.py
+      - name: Оптимізований Python не минає доказ D9
+        shell: bash
+        run: |
+          set -euo pipefail
+          for level in 1 2; do
+            log="$RUNNER_TEMP/d9-optimized-$level.log"
+            if PYTHONOPTIMIZE="$level" python3 scripts/check-d9-current-authority.py >"$log" 2>&1; then
+              echo "::error::D9 validator passed with PYTHONOPTIMIZE=$level"
+              exit 1
+            fi
+            if ! grep -Fq "D9-CURRENT-AUTHORITY: BLOCKED" "$log"; then
+              cat "$log"
+              echo "::error::D9 validator failed without named fail-closed result"
+              exit 1
+            fi
+          done
       - name: Prove exact-width substrate preserves domain address
         run: |
           cargo test -p sens source_words::tests::same_numeric_payload_at_different_widths_never_collapses
