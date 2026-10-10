@@ -29,6 +29,8 @@ CORPUS = {
     "цитування": ("10", "001", "00", "000", "01"),
     "вкладення": tuple("10 100 00 10 111 00 1 00 0 01 01".split()),
     "довга-форма": ("10",) + ("00010101",) * 48 + ("01",),
+    "дві-верхні-форми": ("10", "01", "10", "01"),
+    "точне-девʼятибітне": ("10", "000000000", "01"),
 }
 
 
@@ -72,7 +74,7 @@ def choices(words: tuple[str, ...]):
     return result
 
 
-def timed(fn, expected: bytes, repeat: int) -> list[int]:
+def timed(fn, expected: object, repeat: int) -> list[int]:
     for _ in range(2):
         require(fn() == expected, "warm-up byte drift")
     samples = []
@@ -83,6 +85,18 @@ def timed(fn, expected: bytes, repeat: int) -> list[int]:
         require(actual == expected, "measured byte drift")
         samples.append(elapsed)
     return samples
+
+
+def decode_profile(name: str, physical: bytes) -> tuple[str, ...]:
+    """Декодувати фактичні байти, НЕ запускаючи енкодер вдруге."""
+    modes = {
+        "T5": ("т5", ".sens"),
+        "F3": ("рамка3", ".senc"),
+        "F4": ("тб33", ".senc"),
+    }
+    require(name in modes, "невідомий фізичний профіль")
+    profile, extension = modes[name]
+    return codec.прочитати_носій(codec.Носій(profile, physical, extension))
 
 
 def main() -> int:
@@ -98,7 +112,7 @@ def main() -> int:
         "git_sha": commit,
         "platform": platform.platform(),
         "python": platform.python_version(),
-        "metric": "Python in-process encode wall-clock ns; NOT VM execution",
+        "metric": "Python in-process encode and decode wall-clock ns; NOT VM execution/cold I/O",
         "winner_rule": "smallest complete physical byte count including F3/F4 marker; tie T5",
         "corpus": [],
     }
@@ -117,11 +131,17 @@ def main() -> int:
         for index in order:
             name, data, fn = candidates[index]
             samples = timed(fn, data, args.reps)
+            # Декодувати той самий раніше закодований payload.
+            # Вимірюваний декодер не виконує повторного адаптивного вибору.
+            decode_samples = timed(lambda: decode_profile(name, data), words, args.reps)
             rows.append({
                 "profile": name,
                 "total_physical_bytes": len(data),
                 "physical_sha256": sha(data),
                 "encode_ns_samples": samples,
+                "decode_ns_samples": decode_samples,
+                "decode_ns_p50": statistics.median(decode_samples),
+                "decode_ns_p95_nearest_rank": sorted(decode_samples)[(95 * len(decode_samples) + 99) // 100 - 1],
                 "encode_ns_p50": statistics.median(samples),
                 "encode_ns_p95_nearest_rank": sorted(samples)[(95 * len(samples) + 99) // 100 - 1],
             })
