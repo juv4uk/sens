@@ -392,7 +392,7 @@
 
 (00001001 x86-encode-current-d6-unary-u64
   (00001000 (width bits value)
-    (10011100 ((forms
+    (let ((forms
                   (x86-lower-current-d6-unary-u64-forms
                     width bits value)))
       (00000111
@@ -437,7 +437,7 @@
 
 (00001001 x86-encode-current-quotient-i64
   (00001000 (width bits left right)
-    (10011100 ((forms
+    (let ((forms
                   (x86-lower-current-quotient-i64-forms
                     width bits left right)))
       (00000111
@@ -496,7 +496,7 @@
 
 (00001001 x86-encode-current-order-bit
   (00001000 (width bits left right)
-    (10011100 ((forms (x86-lower-order-i64-forms width bits left right)))
+    (let ((forms (x86-lower-order-i64-forms width bits left right)))
       (00000111
         ((00100010 forms (00000001 unsupported-current-domain-order-i64))
          (00000001 unsupported-current-domain-order-i64))
@@ -568,7 +568,7 @@
 
 (00001001 x86-encode-current-structural-u64
   (00001000 (width bits left right)
-    (10011100 ((forms
+    (let ((forms
                   (x86-lower-current-structural-u64-forms
                     width bits left right)))
       (00000111
@@ -599,7 +599,7 @@
 (00001001 x86-encode-current-eq-cond-u64
   (00001000
     (eq-width eq-bits cond-width cond-bits left right then-value else-value)
-    (10011100 ((forms
+    (let ((forms
             (x86-lower-current-eq-cond-u64-forms
               eq-width eq-bits cond-width cond-bits
               left right then-value else-value)))
