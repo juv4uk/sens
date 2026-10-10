@@ -56,8 +56,8 @@ class PairCohort(unittest.TestCase):
         )
         cls.text7 = module.build_text7(table, ARGS["text7"])
 
-    def project(self, source: str):
-        resolver = module.Resolver(self.legacy, self.my, self.upper)
+    def project(self, source: str, *, source_era: str = "auto"):
+        resolver = module.Resolver(self.legacy, self.my, self.upper, source_era=source_era)
         return module.migrate_file(source, resolver, self.text7), resolver.counts
 
     def test_pinned_legacy_car_cdr_cons_successors_are_proven(self):
@@ -66,13 +66,27 @@ class PairCohort(unittest.TestCase):
         self.assertEqual(self.legacy["00000110"][:2], ("011", "D3"))
         self.assertEqual(self.legacy["00000001"][:2], ("001", "D3"))
 
+    def test_ambiguous_eight_bit_head_fails_closed_without_provenance(self):
+        for case in CASES.values():
+            with self.subTest(source=case["source"]):
+                with self.assertRaises(module.MigrationError):
+                    self.project(case["source"])
+
     def test_actual_three_pass_projection_and_physical_bytes(self):
         for stem, case in CASES.items():
             with self.subTest(stem=stem):
                 source = (FIXTURES / f"{stem}.lisp").read_text(encoding="utf-8")
-                projection, counts = self.project(source)
+                self.assertEqual(source, case["source"])
+                projection, counts = self.project(source, source_era="legacy")
                 self.assertEqual(projection, case["words"])
                 self.assertEqual(counts["pass1-sens8"], 3)
+                # View is read-only exact words derived from physical packed T5.
+                physical = (FIXTURES / f"{stem}.sens").read_bytes()
+                view = (FIXTURES / stem).read_bytes()
+                self.assertEqual(physical, case["t5"])
+                self.assertEqual(view, case["words"].encode("ascii"))
+                self.assertEqual(view, (" ".join(module.decode_bytes(physical)) + "\n").encode("ascii"))
+                self.assertEqual(module.encode_projection(view.decode("ascii")), physical)
                 with tempfile.TemporaryDirectory() as directory:
                     out = Path(directory) / "out"
                     report = Path(directory) / "report.json"
@@ -80,6 +94,7 @@ class PairCohort(unittest.TestCase):
                         sys.executable, str(SCRIPT), str(FIXTURES), "--out", str(out),
                         *[item for key, path in ARGS.items() for item in ("--" + key.replace("_", "-"), str(path))],
                         "--report", str(report),
+                        "--source-era", "legacy",  # Pinned historical cohort: never relax auto.
                     ]
                     result = subprocess.run(command, capture_output=True, text=True)
                     self.assertEqual(result.returncode, 0, result.stderr + result.stdout)
