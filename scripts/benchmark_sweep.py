@@ -77,7 +77,7 @@ def host() -> dict:
 def classify_status(returncode: int, output: str) -> str:
     """Preserve explicit benchmark BLOCKED outcomes instead of calling them FAIL."""
     markers = (
-        r"(?im)^(?:ERROR:\s*)?[A-Z0-9][A-Z0-9_.:/-]*:\s*BLOCKED\\b",
+        r"(?im)^(?:ERROR:\s*)?[A-Z0-9][A-Z0-9_.:/-]*:\s*BLOCKED\b",
         r"(?im)^SENS_BENCHMARK_STATUS=BLOCKED\s*$",
     )
     if any(re.search(marker, output) for marker in markers):
