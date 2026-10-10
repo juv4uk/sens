@@ -195,21 +195,18 @@
            (x86-u64-bytes immediate))))
      (x86-reg-code register))))
 
-; Two's-complement byte for a disp8 value already known to be in [-128,127].
-; `mod` in this Lisp does not wrap negative operands (`(mod -1 256)` is -1,
-; not 255), so a plain `(mod displacement 256)` silently produced an
-; out-of-range byte for any negative displacement -- caught fail-closed at
-; the host boundary (`native-call-u64-raw` rejects non-0..255 bytes), but it
-; meant negative disp8 could never actually be encoded despite the encoder
-; otherwise already supporting arbitrary GPR bases/destinations, SIB for
-; rsp/r12, REX.B for an extended base (r8-r15), and REX.R for an extended
-; load-destination/store-source register. Adding 256 before reducing mod
-; 256 is exact for the whole disp8 domain (verified by round-trip below,
-; independently cross-checked against objdump across the full 16x16 base x
-; data-register matrix).
+; Project a signed disp8 to its canonical byte after adding 256.
+; The biased input is in [128,383], so the existing Lisp-owned binary
+; long-division routine can return the exact remainder without borrowing the
+; historical D8:00010011 coordinate (currently MAPLIST-right, not MOD).
+; D3 CDR selects the remainder from the returned (quotient . remainder) pair.
 (00001001 x86-disp8-byte
   (00001000 (displacement)
-    (00010011 (00001100 displacement 256) 256)))
+    (011
+      (x86-ціла-частка-залишок
+        (00001100 displacement 256)
+        256
+        1))))
 
 ; MOV r64, [base + disp8], opcode 8B /r.
 ; ModR/M mode 01 always carries one displacement byte. RSP/R12 bases use the
