@@ -107,6 +107,21 @@ fn x86_pattern_mismatches_are_exact_d1_no_not_empty() {
         Some(true),
         "точний збіг має повертати D1:1, а не історичне t"
     );
+
+    // Reproduce the next failing path in the real D5 ADD witness:
+    // recursive structural matching of a register and a numeric immediate.
+    for source in [
+        "(x86-admission-pattern-match? (00000001 (mov-r64-imm64 register immediate)) (00000001 (mov-r64-imm64 rax 2)))",
+        "(x86-admission-pattern-match? (00000001 (mov-r64-imm64 register immediate)) (00000001 (mov-r64-imm64 rax 100)))",
+    ] {
+        let result = eval_program(source, &mut session)
+            .unwrap_or_else(|error| panic!("wildcard admission {source}: {error}"));
+        assert_eq!(
+            result.value.as_predicate_bit(),
+            Some(true),
+            "valid register+immediate wildcard must match with exact D1:1: {source}"
+        );
+    }
 }
 
 
