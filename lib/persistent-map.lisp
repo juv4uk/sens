@@ -117,17 +117,17 @@
 (00001001 balance
   (00001000 (n)
     (00000111
-      ((00000010 n) () n)
-      ((00000010 n) (1) n)
-      ((00011011 (balance-factor n) 1) 1
+      
+      ((00000010 n)  n)
+      ((00011011 (balance-factor n) 1) 
        (00000111
-         ((00011010 (balance-factor (node-left n)) 0) 1
+         ((00011010 (balance-factor (node-left n)) 0) 
           (rotate-right (make-balanced-node (node-key n) (node-value n)
                           (rotate-left (node-left n)) (node-right n))))
          (t (rotate-right n))))
-      ((00011010 (balance-factor n) -1) 1
+      ((00011010 (balance-factor n) -1) 
        (00000111
-         ((00011011 (balance-factor (node-right n)) 0) 1
+         ((00011011 (balance-factor (node-right n)) 0) 
           (rotate-left (make-balanced-node (node-key n) (node-value n)
                          (node-left n) (rotate-right (node-right n)))))
          (t (rotate-left n))))
@@ -142,8 +142,8 @@
 (00001001 map-insert
   (00001000 (key value tree)
     (00000111
-      ((00000010 tree) () (make-balanced-node key value (00000001 ()) (00000001 ())))
-      ((00000010 tree) (1) (make-balanced-node key value (00000001 ()) (00000001 ())))
+      
+      ((00000010 tree)  (make-balanced-node key value (00000001 ()) (00000001 ())))
       ((00000011 key (node-key tree))
        (make-balanced-node key value (node-left tree) (node-right tree)))
       ((00100101 key (node-key tree))
@@ -167,8 +167,8 @@
 (00001001 map-get
   (00001000 (key tree)
     (00000111
-      ((00000010 tree) () (00000001 ()))
-      ((00000010 tree) (1) (00000001 ()))
+      
+      ((00000010 tree)  (00000001 ()))
       ((00000011 key (node-key tree)) (00100111 (node-value tree)))
       ((00100101 key (node-key tree)) (01101101 key (node-left tree)))
       (t (01101101 key (node-right tree))))))
@@ -183,8 +183,8 @@
 (00001001 map->list
   (00001000 (tree)
     (00000111
-      ((00000010 tree) () (00000001 ()))
-      ((00000010 tree) (1) (00000001 ()))
+      
+      ((00000010 tree)  (00000001 ()))
       (t (00101001 (01110000 (node-left tree))
                  (00000100 (00000100 (node-key tree) (node-value tree))
                        (01110000 (node-right tree))))))))
