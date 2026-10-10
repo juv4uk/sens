@@ -107,6 +107,22 @@ fn x86_pattern_mismatches_are_exact_d1_no_not_empty() {
         Some(true),
         "точний збіг має повертати D1:1, а не історичне t"
     );
+
+    // Narrowly test the register/immediate wildcard path used by the D5 ADD
+    // admission route. Keep both small and three-digit immediates to expose
+    // accidental execution of numeric payloads as callable heads.
+    for source in [
+        "(x86-admission-pattern-match? (00000001 (mov-r64-imm64 register immediate)) (00000001 (mov-r64-imm64 rax 2)))",
+        "(x86-admission-pattern-match? (00000001 (mov-r64-imm64 register immediate)) (00000001 (mov-r64-imm64 rax 100)))",
+    ] {
+        let result = eval_program(source, &mut session)
+            .unwrap_or_else(|error| panic!("register/immediate wildcard {source}: {error}"));
+        assert_eq!(
+            result.value.as_predicate_bit(),
+            Some(true),
+            "valid register/immediate wildcard must return exact D1:1: {source}"
+        );
+    }
 }
 
 
