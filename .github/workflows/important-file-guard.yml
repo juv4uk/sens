@@ -143,27 +143,74 @@ jobs:
           fi
           echo "SENS_FILE_AUTHORITY_NEGATIVE_CONTROL_PASS: textual call/string rejected; no .sens emitted"
 
-      - name: Encode the complete oracle into physical T5
+      - name: Lower guarded Lisp through the bounded migration authority
         shell: bash
         run: |
           set -euo pipefail
-          log="$RUNNER_TEMP/file-authority-encode.log"
-          if target/debug/sens-trit encode "$RUNNER_TEMP/file-authority.lisp" >"$log" 2>&1; then
+          source="$RUNNER_TEMP/file-authority.lisp"
+          out_dir="$RUNNER_TEMP/file-authority-migrated"
+          report="$RUNNER_TEMP/file-authority-migration-report.json"
+          candidate="$out_dir/file-authority.sens"
+          log="$RUNNER_TEMP/file-authority-migrate.log"
+
+          test -s "$source"
+          test ! -e "$candidate"
+          rm -rf -- "$out_dir"
+          mkdir -p -- "$out_dir"
+
+          if python3 scripts/migrate-three-pass.py "$source" \
+            --out "$out_dir" --report "$report" --source-era auto >"$log" 2>&1; then
             cat "$log"
-            test -s "$RUNNER_TEMP/file-authority.sens"
           else
             cat "$log" >&2
-            if grep -Fq 'InvalidBinaryProjection' "$log"; then
-              echo "SENS_FILE_AUTHORITY_BLOCKED: assembled Lisp source is not an admitted canonical binary projection; no text fallback is permitted" >&2
-            else
-              echo "SENS_FILE_AUTHORITY_BLOCKED: physical encoding failed; inspect the encoder diagnostic above" >&2
-            fi
-            if test -e "$RUNNER_TEMP/file-authority.sens"; then
-              echo "SENS_FILE_AUTHORITY_BLOCKED: encoder left an output file after failure" >&2
-              exit 3
-            fi
+            echo "SENS_FILE_AUTHORITY_BLOCKED: bounded Lisp-to-word lowering rejected the complete guarded source" >&2
+            test ! -e "$candidate"
             exit 2
           fi
+          test -s "$report"
+          test -s "$candidate"
+          python3 - "$report" <<'PY'
+          import json
+          import sys
+          report = json.load(open(sys.argv[1], encoding="utf-8"))
+          summary = report.get("summary", {})
+          files = report.get("files", [])
+          if summary.get("files_seen") != 1 or summary.get("files_written") != 1:
+              raise SystemExit(f"SENS_FILE_AUTHORITY_BLOCKED: unexpected migration summary: {summary}")
+          if summary.get("files_blocked") != 0 or len(files) != 1 or files[0].get("status") != "written":
+              raise SystemExit(f"SENS_FILE_AUTHORITY_BLOCKED: incomplete migration report: {summary}")
+          if files[0].get("output") != "file-authority.sens":
+              raise SystemExit(f"SENS_FILE_AUTHORITY_BLOCKED: unexpected output identity: {files[0].get('output')!r}")
+          PY
+
+          # The bounded source migrator proposes D1..D9 words/bytes. Rust remains
+          # the final physical codec: open the candidate, re-encode its exact
+          # visible words with Rust, and require byte-for-byte parity.
+          words="$RUNNER_TEMP/file-authority-words.txt"
+          words_source="$RUNNER_TEMP/file-authority-words.lisp"
+          rust_candidate="$RUNNER_TEMP/file-authority-words.sens"
+          if target/debug/sens-trit open "$candidate" >"$words"; then
+            test -s "$words"
+          else
+            echo "SENS_FILE_AUTHORITY_BLOCKED: migrator candidate is not admitted physical T5" >&2
+            exit 2
+          fi
+          cp -- "$words" "$words_source"
+          if target/debug/sens-trit encode "$words_source"; then
+            test -s "$rust_candidate"
+          else
+            echo "SENS_FILE_AUTHORITY_BLOCKED: Rust rejected migrated canonical word projection" >&2
+            test ! -e "$rust_candidate"
+            exit 2
+          fi
+          if ! cmp -s -- "$candidate" "$rust_candidate"; then
+            echo "SENS_FILE_AUTHORITY_BLOCKED: Python migration bytes differ from Rust T5 codec" >&2
+            exit 2
+          fi
+          test ! -e "$RUNNER_TEMP/file-authority.sens"
+          mv -- "$rust_candidate" "$RUNNER_TEMP/file-authority.sens"
+          test -s "$RUNNER_TEMP/file-authority.sens"
+          echo "SENS_FILE_AUTHORITY_SOURCE_LOWERING_PASS: bounded source -> exact words -> Rust T5 byte parity"
 
       - name: Execute and attest the physical SENS authority verdict
         shell: bash
