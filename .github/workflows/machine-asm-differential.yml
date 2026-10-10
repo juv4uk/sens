@@ -1,7 +1,7 @@
 name: machine-asm-differential
 
 concurrency:
-  group: machine-asm-differential-${{ github.event.pull_request.number || github.ref }}
+  group: machine-asm-differential-${{ github.sha }}
   cancel-in-progress: true
 
 on:
