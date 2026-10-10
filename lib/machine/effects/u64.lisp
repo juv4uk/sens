@@ -54,7 +54,8 @@
       ((machine-effect-exact-integer? value)
        (machine-effect-within-inclusive-integer-range?
          value 0 4294967295))
-      )))
+      ((00000010 (00000001 ()))
+       (00000010 (00000001 (00000000)))))))
 
 (00001001 machine-effect-bounded-u64-add-form?
   (00001000 (effect)
@@ -90,7 +91,8 @@
       ((machine-effect-exact-integer? value)
        (machine-effect-within-inclusive-integer-range?
          value 0 18446744073709551615))
-      )))
+      ((00000010 (00000001 ()))
+       (00000010 (00000001 (00000000)))))))
 
 (00001001 machine-effect-bounded-u64-sub-form?
   (00001000 (effect)
