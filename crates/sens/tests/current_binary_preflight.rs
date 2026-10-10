@@ -134,3 +134,26 @@ fn current_cond_reference_is_valid_binary_and_executes_without_legacy_sid() {
     assert!(matches!(result.value, Value::Nil));
     assert!(result.output.is_empty());
 }
+
+
+/// Stability diagnostic and regression for the exact D1/D3 time-load frontier.
+/// The ordinary bootstrap must not regain old three-field COND compatibility.
+/// Per-form evaluation gives a precise source boundary if a post-core macro
+/// expands into a forbidden historical COND.
+#[test]
+fn postcore_time_bootstrap_exact_cond() {
+    let mut session = Session::default();
+    sens::load_core_library(&mut session)
+        .expect("ordinary Core4 bootstrap is the shared substrate");
+    let source = include_str!("../../../lib/time.lisp");
+    let parsed = sens::parse(source).expect("time library syntax");
+    for (index, expr) in parsed.iter().enumerate() {
+        eval_parsed_expressions(std::slice::from_ref(expr), &mut session)
+            .unwrap_or_else(|err| panic!(
+                "postcore time top-level form {} at source byte {} violates exact-D1 bootstrap: {}",
+                index + 1,
+                expr.span.start,
+                err
+            ));
+    }
+}
