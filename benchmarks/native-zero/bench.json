@@ -7,10 +7,13 @@
     "CONFORMANCE",
     "FALSIFIER"
   ],
-  "question": "How fast does the existing bare SENS executor run real physical T5 versus exact visible binary D2 for equal D1/D3 programs on the same CPU?",
-  "claim": "Measures exact-domain result parity and real paired warm/fresh bare-Session execution on GitHub CPU for bounded D1/D3 corpus; stores raw timings and hardware evidence. Does not establish native AOT, cold startup, GPU/FPGA, memory footprint, or cross-language speedup.",
+  "question": "How does real physically validated T5 execute on a bare SENS runtime, and what repeated-work cost is avoided by one-time preparation?",
+  "claim": "Measures same-code exact D1/D3 parity for physical and visible D2 execution plus a separate one-time-validated immutable T5 program reused across sessions. Raw paired samples and prepare-once cost are reported. Reuse is not equal-work decoder speedup; no Core4 bootstrap, AOT, GPU/FPGA or cross-language claim.",
   "witness": [
     "../../crates/sens/examples/sens_native_zero_bench.rs",
+    "../../crates/sens/examples/sens_native_zero_prepared_bench.rs",
+    "../../crates/sens/src/binary_execution.rs",
+    "verify_prepared_report.py",
     "verify_report.py",
     "README.md",
     "../../.github/workflows/sens-native-zero.yml"
