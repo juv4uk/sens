@@ -9,6 +9,7 @@ on:
     paths:
       - "lib/machine/**"
       - "crates/sens/tests/machine_exact_domain_cpu.rs"
+      - "crates/sens/tests/machine_admission_adversarial.rs"
       - "crates/sens/tests/machine_effect_add_projection.rs"
       - "crates/sens/tests/machine_effect_d5_arithmetic_projection.rs"
       - "crates/sens/tests/machine_effect_explicit_outputs.rs"
@@ -44,6 +45,7 @@ on:
     paths:
       - "lib/machine/**"
       - "crates/sens/tests/machine_exact_domain_cpu.rs"
+      - "crates/sens/tests/machine_admission_adversarial.rs"
       - "crates/sens/tests/machine_effect_add_projection.rs"
       - "crates/sens/tests/machine_effect_d5_arithmetic_projection.rs"
       - "crates/sens/tests/machine_effect_explicit_outputs.rs"
@@ -85,6 +87,16 @@ jobs:
       - uses: dtolnay/rust-toolchain@stable
       - name: Compile without executing owner-silicon witness
         run: cargo test -p sens-host --test real_silicon_sweep --no-run
+
+  exact-d1-admission-pattern:
+    name: "Точний D1 для x86 шаблонів"
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v5
+      - uses: dtolnay/rust-toolchain@stable
+      - name: "Незалежно перевірити D1:0/D1:1 без структурного ()"
+        run: cargo test --locked -p sens --test machine_admission_adversarial x86_pattern_mismatches_are_exact_d1_no_not_empty -- --exact --nocapture
 
   exact-domain-x86:
     name: Exact-domain x86 portable witness
