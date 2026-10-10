@@ -2,8 +2,9 @@
 
 
 use sens::{
-    eval_parsed_expressions, eval_program, load_core_library, parse_mixed_exact_domain_machine_source,
-    register_capability, Environment, Exactness, Expr, LanguageError, Session, Span, Value,
+    eval_parsed_expressions, eval_program, load_core_library, parse_mixed_exact_domain,
+    parse_mixed_exact_domain_machine_source, register_capability, Environment, Exactness, Expr,
+    LanguageError, Session, Span, Value,
 };
 use sens_host::install;
 use std::fs;
@@ -44,6 +45,13 @@ fn load_lisp_file(path: &str, session: &mut Session) {
         .unwrap_or_else(|error| panic!("{path} must parse as exact-domain machine source: {error}"));
     eval_parsed_expressions(&expressions, session)
         .unwrap_or_else(|error| panic!("{path} must load through the machine-source reader: {error}"));
+}
+
+fn eval_uk_program(source: &str, session: &mut Session) -> sens::EvalResult {
+    let expressions = parse_mixed_exact_domain(source)
+        .unwrap_or_else(|error| panic!("Ukrainian exact-domain witness must parse: {error}"));
+    eval_parsed_expressions(&expressions, session)
+        .unwrap_or_else(|error| panic!("Ukrainian exact-domain witness must evaluate: {error}"))
 }
 
 fn spy_executor(
@@ -143,10 +151,8 @@ fn semantic_lowering_must_produce_structured_forms_before_admission_and_executio
     .expect("admitted semantic ADD forms must execute through the canonical gateway");
     assert_eq!(add.value.to_string(), "5");
 
-    let interpreter_car = eval_program("(перше (сполучити 2 3))", &mut session)
-        .expect("interpreter CAR reference witness must remain valid");
-    let interpreter_cdr = eval_program("(решта (сполучити 2 3))", &mut session)
-        .expect("interpreter CDR reference witness must remain valid");
+    let interpreter_car = eval_uk_program("(перше (сполучити 2 3))", &mut session);
+    let interpreter_cdr = eval_uk_program("(решта (сполучити 2 3))", &mut session);
 
     let native_car = eval_program(
         "(x86-call-admitted-u64 (x86-lower-cons-car-u64-forms 2 3) x86-pair-cell-bytes)",
@@ -226,10 +232,8 @@ fn interpreter_pair_reference_witnesses_remain_two_and_three() {
     let mut session = Session::default();
     load_core_library(&mut session).expect("core must bootstrap before pair reference witness");
 
-    let car = eval_program("(перше (сполучити 2 3))", &mut session)
-        .expect("interpreter CAR witness must remain valid");
-    let cdr = eval_program("(решта (сполучити 2 3))", &mut session)
-        .expect("interpreter CDR witness must remain valid");
+    let car = eval_uk_program("(перше (сполучити 2 3))", &mut session);
+    let cdr = eval_uk_program("(решта (сполучити 2 3))", &mut session);
 
     assert_eq!(car.value.to_string(), "2");
     assert_eq!(cdr.value.to_string(), "3");
@@ -356,10 +360,8 @@ fn native_pair_car_cdr_match_the_interpreter_reference_witness() {
     load_lisp_file("lib/machine/admission/x86-64.lisp", &mut session);
     load_lisp_file("lib/machine/lowering/semantic-x86-64.lisp", &mut session);
 
-    let interpreter_car = eval_program("(перше (сполучити 2 3))", &mut session)
-        .expect("interpreter CAR reference witness must remain valid");
-    let interpreter_cdr = eval_program("(решта (сполучити 2 3))", &mut session)
-        .expect("interpreter CDR reference witness must remain valid");
+    let interpreter_car = eval_uk_program("(перше (сполучити 2 3))", &mut session);
+    let interpreter_cdr = eval_uk_program("(решта (сполучити 2 3))", &mut session);
 
     let native_car = eval_program(
         "(native-call-u64-raw (x86-encode-admitted-program (x86-lower-cons-car-u64-forms 2 3)) x86-pair-cell-bytes)",
