@@ -1,0 +1,22 @@
+name: "Дослід: оборотність рамки-3"
+on:
+  push:
+    paths:
+      - 'дослідження/рамка3/**'
+      - '.github/workflows/ramka3-doslid.yml'
+  pull_request:
+    paths:
+      - 'дослідження/рамка3/**'
+      - '.github/workflows/ramka3-doslid.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  ramka:
+    name: "Позитивні, негативні та граничні свідки"
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: "Перевірити оборотність і відмови"
+        run: python3 дослідження/рамка3/перевірка_носія.py -v
