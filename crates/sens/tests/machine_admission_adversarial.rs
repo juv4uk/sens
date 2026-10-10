@@ -29,6 +29,29 @@ fn spy_executor(
     Ok(Value::Number(999.0, Exactness::Exact))
 }
 
+
+#[test]
+fn exhausted_instruction_patterns_return_exact_d1_no_not_structural_empty() {
+    let mut session = Session::default();
+    load_core_library(&mut session).expect("ратифіковане ядро");
+    load_lisp_file("lib/machine/encoding/x86-64.lisp", &mut session);
+    load_lisp_file("lib/machine/admission/x86-64.lisp", &mut session);
+
+    // Порожній перелік шаблонів — це предикат D1:0, а не структурне D3:000.
+    for source in [
+        "(x86-admitted-instruction-against? (00000001 ()) (00000001 ud2))",
+        "(x86-admitted-instruction-against? (00000001 ()) (00000001 ()))",
+    ] {
+        let result = eval_program(source, &mut session)
+            .unwrap_or_else(|error| panic!("{source}: {error}"));
+        assert_eq!(
+            result.value.as_predicate_bit(),
+            Some(false),
+            "неприпустима інструкція не може повертати структурне ()"
+        );
+    }
+}
+
 #[test]
 fn canonical_machine_gateway_rejects_raw_bytes_register_bypass_and_truncation_before_host() {
     let mut session = Session::default();
