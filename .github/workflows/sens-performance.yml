@@ -301,7 +301,7 @@ jobs:
         with:
           name: sens-adaptive-carriers-${{ github.sha }}
           path: ${{ runner.temp }}/sens-adaptive/
-          if-no-files-found: warn
+          if-no-files-found: error
           retention-days: 21
 
   physical-binary-paired:
@@ -344,7 +344,7 @@ jobs:
         with:
           name: sens-physical-paired-${{ github.sha }}
           path: ${{ runner.temp }}/sens-physical-paired/
-          if-no-files-found: warn
+          if-no-files-found: error
           retention-days: 21
 
   rust-wire-vs-json:
@@ -379,5 +379,5 @@ jobs:
         with:
           name: sens-rust-wire-json-${{ github.sha }}
           path: ${{ runner.temp }}/sens-rust-wire-json/
-          if-no-files-found: warn
+          if-no-files-found: error
           retention-days: 21
