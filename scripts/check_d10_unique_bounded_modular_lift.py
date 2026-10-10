@@ -61,7 +61,22 @@ def guard(d,inv,foundation,shell):
     assert inv["accounting"]["ratified_d10_residents"]==0
     assert len({r["stable_id"] for r in rows})==len(rows)
     assert len({r["semantic_name"] for r in rows})==len(rows)
-    assert NAME not in {r["semantic_name"] for r in rows}, "separate owner approval needed for selection"
+    selected=[r for r in rows if r["semantic_name"]==NAME]
+    if selected:
+        assert len(selected)==1, "duplicate modular lift identity"
+        actual=selected[0]
+        assert actual["stable_id"]=="d10.math.unique-bounded-modular-lift.20261011"
+        assert actual["status"]=="SELECTED-RESEARCH-CANDIDATE"
+        assert actual["coordinate"] is None and actual["coordinate_basis"]=="UNPLACED"
+        assert actual["ratified_resident"] is False and actual["physical_t5_authorized"] is False
+        assert actual["source_path"]=="knowledge/d10-unique-bounded-modular-lift-20261009.json"
+        history=read(ROOT/"knowledge/d10-selection-transition-history.json")
+        assert any(t["added_stable_ids"]==["d10.math.unique-bounded-modular-lift.20261011"]
+                   and t["coordinates_added"]==0 and t["ratified_added"]==0
+                   and t["previous_selected"]==647 and t["resulting_selected"]==648
+                   for t in history["transitions"]), "missing source-pinned selection"
+    else:
+        assert NAME not in {r["semantic_name"] for r in rows}, "separate owner approval needed for selection"
     assert re.findall(r'\(check\s+"([A-Z0-9_]+)"',shell)==list(IDS)
     assert "NOT binary SENS runtime" in shell
     return len(rows)
@@ -114,7 +129,7 @@ def main():
     d,inv,f,s=read(DOSSIER),read(INVENTORY),read(FOUNDATION),SCHEME.read_text(encoding="utf-8")
     count=guard(d,inv,f,s)
     negative_controls(d,inv,f,s)
-    print(f"D10 cyclic bounded lift research HOLD PASS; selected main={count}; delta=0")
+    print(f"D10 cyclic bounded lift research dossier PASS; selected main={count}; current research selection tracked separately")
     if args.real_chez:real_chez(args.scheme,s)
 
 if __name__=="__main__":main()
