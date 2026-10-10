@@ -902,9 +902,18 @@ mod tests {
         }
 
         let files = [
+            ("lib/machine/effects/u64.lisp", include_str!("../../../lib/machine/effects/u64.lisp")),
+            ("lib/machine/lowering/semantic-effects.lisp", include_str!("../../../lib/machine/lowering/semantic-effects.lisp")),
             ("lib/machine/encoding/x86-64.lisp", include_str!("../../../lib/machine/encoding/x86-64.lisp")),
+            ("lib/machine/operands/x86-64.lisp", include_str!("../../../lib/machine/operands/x86-64.lisp")),
             ("lib/machine/admission/x86-64.lisp", include_str!("../../../lib/machine/admission/x86-64.lisp")),
+            ("lib/machine/atoms/x86-64.lisp", include_str!("../../../lib/machine/atoms/x86-64.lisp")),
+            ("lib/machine/projection/x86-64.lisp", include_str!("../../../lib/machine/projection/x86-64.lisp")),
+            ("lib/machine/layout/pair-x86-64.lisp", include_str!("../../../lib/machine/layout/pair-x86-64.lisp")),
             ("lib/machine/lowering/semantic-x86-64.lisp", include_str!("../../../lib/machine/lowering/semantic-x86-64.lisp")),
+            ("lib/machine/capability-axis.lisp", include_str!("../../../lib/machine/capability-axis.lisp")),
+            ("lib/machine/profile/current-domain-x86-64.lisp", include_str!("../../../lib/machine/profile/current-domain-x86-64.lisp")),
+            ("lib/machine/authority-boundary.lisp", include_str!("../../../lib/machine/authority-boundary.lisp")),
         ];
 
         let mut hits = Vec::new();
