@@ -16,6 +16,10 @@ It deliberately contains no historical D3/D4 coordinate constants.
 
 from __future__ import annotations
 
+# Поточне джерельне походження не можна засвідчити з вимкненими assert.
+if not __debug__:
+    raise SystemExit("CURRENT-AUTHORITY: BLOCKED — Python -O вимикає assert")
+
 from dataclasses import dataclass
 from pathlib import Path
 import re
