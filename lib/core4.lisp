@@ -1025,15 +1025,18 @@
          (my-postcore-build-definitions source (00000110 peers)))))))
 
 (00001010 my-postcore-materialize-stable-peers args
-  (10011101 ((semantic-id (00000101 args))
-             (source (00101111 args))
-             (group (my-postcore-peer-group
-                       semantic-id my-postcore-stable-peer-projection)))
-    (00000111
-      ((00000010 group) source)
-      ((00000010 (00000001 ()))
-       (my-postcore-build-definitions source
-         (my-postcore-missing-peers source (00000110 group) (01001110)))))))
+  ; Use the already-ratified Lisp-owned LET macro, nested to preserve the
+  ; dependency order. The old W8 LET* head was no longer callable after the
+  ; exact-domain cutover and made every post-core peer materialization fail.
+  (let ((semantic-id (00000101 args)))
+    (let ((source (00101111 args)))
+      (let ((group (my-postcore-peer-group
+                     semantic-id my-postcore-stable-peer-projection)))
+        (00000111
+          ((00000010 group) source)
+          ((00000010 (00000001 ()))
+           (my-postcore-build-definitions source
+             (my-postcore-missing-peers source (00000110 group) (01001110)))))))))
 
 ; Ділення з остачою (Lisp 1.5 DIVIDE): повертає список (частка остача).
 (00001001 divmod
