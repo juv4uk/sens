@@ -8,10 +8,10 @@
   "capacity": 1024,
   "current_foundation": "#4008 / Contract 11.8 / D1-D9",
   "accounting": {
-    "selected_semantic_candidates": 647,
+    "selected_semantic_candidates": 648,
     "law_forced_coordinates": 256,
-    "unplaced_selected_candidates": 391,
-    "remaining_semantic_inventory": 377,
+    "unplaced_selected_candidates": 392,
+    "remaining_semantic_inventory": 376,
     "ratified_d10_residents": 0
   },
   "rules": [
@@ -14417,6 +14417,55 @@
         ],
         "derivability": "PENDING-OWNER-REVIEW; comparison+COND+prior state suffice as derived implementation"
       }
+    },
+    {
+      "stable_id": "d10.historical.clos.change-class.c03",
+      "semantic_name": "CHANGE-CLASS",
+      "source_name": "change-class",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "HISTORICAL-CLOS-INSTANCE-REFORMATION",
+      "relation_class": "OBJECT-CLASS-TRANSITION",
+      "behavior": "Change the class of an existing instance while retaining the same object identity; preserve values of same-name common slots, and keep common slots that were unbound before the transition unbound. Class-specific lifecycle hooks remain outside this candidate's standalone law.",
+      "surface_uk": "змінити-клас-об’єкта",
+      "surface_ukr": "перевести-екземпляр-у-клас",
+      "arity": 2,
+      "argument_shape": "(existing instance, target class designator)",
+      "result_shape": "the same instance after its class transition",
+      "source_path": "knowledge/d10-change-class-selection-v1.json",
+      "historical_source": "https://www.cs.cmu.edu/Groups/AI/util/html/hyperspec/HyperSpec/Body/stagenfun_change-class.html",
+      "source_section": "ANSI Common Lisp HyperSpec — CHANGE-CLASS; dossier CLOS-03",
+      "provenance": [
+        "#4013",
+        "#4463",
+        "#4842",
+        "knowledge/d10-historical-clos-interlisp-residual-review-v1.json:CLOS-03",
+        "https://www.cs.cmu.edu/Groups/AI/util/html/hyperspec/HyperSpec/Body/stagenfun_change-class.html"
+      ],
+      "positive_witnesses": [
+        "Change an instance of class A with shared slot value 7 to class B; EQ identity remains the same, CLASS-OF becomes B, and the shared slot still reads 7.",
+        "If a common slot is unbound before transition, SLOT-BOUNDP remains false after transition unless an explicit initialization law changes it."
+      ],
+      "falsifiers": [
+        "Returning a fresh object rather than preserving instance identity.",
+        "Dropping a value in a same-name common slot.",
+        "Silently binding a common slot that was unbound before the class transition.",
+        "Treating UPDATE-INSTANCE-FOR-DIFFERENT-CLASS hook details as a separate D10 resident in this candidate."
+      ],
+      "semantic_neighbors": [
+        "D10 DEFCLASS",
+        "D10 MAKE-INSTANCE",
+        "D10 SLOT-VALUE",
+        "CLOS-03 CHANGE-CLASS primary-source dossier"
+      ],
+      "dedup_check": "D1-D9@09d1d71c39d1484dfd005a5068dbb18b76f0f0d4=NO-MATCH;D10@7e13e929338baeef9b16c2139d24b78e23ea1e03=NO-MATCH",
+      "ownership_test": "UNIVERSAL-BORDER: instance identity and common-slot preservation are language-observable object semantics independent of object layout, garbage collector, method-dispatch tables, or host memory representation; Core minimality remains pending owner review.",
+      "decision": "SELECT-D10-RESEARCH-CANDIDATE",
+      "proposal_status": "pending-owner-review",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "donor_coordinate_authority": "NONE",
+      "ratified_resident": false,
+      "physical_t5_authorized": false
     }
   ],
   "parent_domain": {
@@ -14462,6 +14511,7 @@
     "knowledge/d10-interdisciplinary-science-proposals-20261009.json",
     "knowledge/d10-clock-radio-math-selection-20261009.json",
     "knowledge/d10-babbage-reiter-hobby-selected-20261009.json",
-    "knowledge/d10-hysteretic-boolean-source-law-20261009.json"
+    "knowledge/d10-hysteretic-boolean-source-law-20261009.json",
+    "knowledge/d10-change-class-selection-v1.json"
   ]
 }
