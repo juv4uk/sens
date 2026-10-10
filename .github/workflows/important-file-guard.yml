@@ -29,6 +29,13 @@ jobs:
           fetch-depth: 0
           persist-credentials: false
 
+      - name: Перевірка протоколу рою та негативних змін T5
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 scripts/check-encoder-swarm-contract.py --self-test
+          python3 -O scripts/check-encoder-swarm-contract.py --self-test
+
       - uses: actions/setup-python@v6
         with:
           python-version: '3.x'
