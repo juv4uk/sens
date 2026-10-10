@@ -211,29 +211,41 @@
 ; never from human decimal presentation.  A reduced exact number is an
 ; integer exactly when its canonical denominator is 1.  Non-number values
 ; have no #q2: prefix and therefore fail closed before numeric comparisons.
+(00001001 x86-admission-wire-denominator-one-rest?
+  (00001000 (rest)
+    (00000111
+      ((00111100 rest)
+       (00000010 (00000001 (00000000))))
+      ((00000011 (00111111 rest) "1")
+       (00000111
+         ((00111100 (01000000 rest))
+          (00000010 (00000001 ())))
+         ((00000011 0 0)
+          (00000010 (00000001 (00000000))))))
+      ((00000011 0 0)
+       (00000010 (00000001 (00000000)))))))
+
 (00001001 x86-admission-wire-denominator-one?
   (00001000 (text)
     (00000111
-      ((00111100 text) (00000010 (00000001 (00000000))))
+      ((00111100 text)
+       (00000010 (00000001 (00000000))))
       ((00000011 (00111111 text) "/")
-       (let ((rest (01000000 text)))
-         (00000111
-           ((00111100 rest) (00000010 (00000001 (00000000))))
-           ((00000011 (00111111 rest) "1")
-            (00000111
-              ((00111100 (01000000 rest)) (00000010 (00000001 ())))
-              ((00000011 0 0) (00000010 (00000001 (00000000))))))
-           ((00000011 0 0) (00000010 (00000001 (00000000)))))))
+       (x86-admission-wire-denominator-one-rest? (01000000 text)))
       ((00000011 0 0)
        (x86-admission-wire-denominator-one? (01000000 text))))))
 
+(00001001 x86-admission-exact-integer-wire?
+  (00001000 (wire)
+    (00000111
+      ((00111101 "#q2:" wire)
+       (x86-admission-wire-denominator-one? wire))
+      ((00000011 0 0)
+       (00000010 (00000001 (00000000)))))))
+
 (00001001 x86-admission-exact-integer?
   (00001000 (value)
-    (let ((wire (01001100 value)))
-      (00000111
-        ((00111101 "#q2:" wire)
-         (x86-admission-wire-denominator-one? wire))
-        ((00000011 0 0) (00000010 (00000001 (00000000))))))))
+    (x86-admission-exact-integer-wire? (01001100 value))))
 
 (00001001 x86-admission-within-inclusive-integer-range?
   (00001000 (value lower upper)
