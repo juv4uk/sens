@@ -1,4 +1,5 @@
 name: TEMP regenerate public API discovery report
+# Temporary branch-only generation; remove after the one-file report commit.
 
 on:
   push:
