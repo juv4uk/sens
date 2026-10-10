@@ -165,6 +165,17 @@ fn core4_local_binding_heads_are_current_and_postcore_libraries_load() {
 fn current_defmacro_bootstrap_executes_let_and_let_star() {
     let mut session = Session::default();
     load_core_library(&mut session).expect("current macro + Core4 bootstrap");
+    for probe in [
+        "(list 1 2)",
+        "(car (list 1 2))",
+        "(cdr (list 1 2))",
+        "(map (lambda (binding) (car binding)) (list (list (quote x) 7)))",
+    ] {
+        match eval_program(probe, &mut session) {
+            Ok(value) => println!("MACRO-PROBE {probe} => {}", value.value),
+            Err(error) => println!("MACRO-PROBE {probe} => ERROR {error}"),
+        }
+    }
     for name in ["make-macro", "defmacro", "let", "let*"] {
         println!("MACRO-BINDING {name}={}", session.environment.get(name)
             .map(|value| value.to_string())
