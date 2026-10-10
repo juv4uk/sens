@@ -14,7 +14,7 @@
 
 (00001001 exact-quantity-arithmetic-rows
   (00001000 ()
-    (10011101 ((planck
+    (нехай* ((planck
              (scientific-constant-quantity si:defining-planck-constant))
            (cesium
              (scientific-constant-quantity si:defining-cesium-frequency))
