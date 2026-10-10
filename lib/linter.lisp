@@ -149,7 +149,7 @@
             ((00101100 (01000010 ast) bound-vars) (00000001 ()))
             ((00101100 (01000010 ast) (00000001 ("t" "def" "defmacro" "lambda" "let" "let*" "letrec" "cond" "quote" "list" "car" "cdr" "cons" "eq" "atom" "+" "-" "*" "/" "<" ">" "=" "<=" ">=" "print" "read" "eval"))) (00000001 ()))
             (1 (00100111 ast))))
-         (1 (00000001 ()))))
+         ))
       ((00100010 (lint-form-head ast) (00000001 quote)) (00000001 ()))
       ((00100010 (lint-form-head ast) (00000001 def))
        (collect-free-vars (00000101 (00000110 (00000110 ast))) bound-vars))
@@ -226,15 +226,15 @@
             (globals (00101111 (00110010 metrics))))
         (00101001
           (00000111 ((00011011 size (get-threshold (00000001 max-size) thresholds 99999)) 
-                 (00100111 (00100111 (00000001 size-exceeded) size))) (1 (00000001 ())))
+                 (00100111 (00100111 (00000001 size-exceeded) size))) )
           (00101001
             (00000111 ((00011011 nesting (get-threshold (00000001 max-nesting) thresholds 99999)) 
-                   (00100111 (00100111 (00000001 nesting-exceeded) nesting))) (1 (00000001 ())))
+                   (00100111 (00100111 (00000001 nesting-exceeded) nesting))) )
             (00101001
               (00000111 ((00011011 complexity (get-threshold (00000001 max-complexity) thresholds 99999)) 
-                     (00100111 (00100111 (00000001 complexity-exceeded) complexity))) (1 (00000001 ())))
+                     (00100111 (00100111 (00000001 complexity-exceeded) complexity))) )
               (00101001
                 (00000111 ((00011011 (00101000 globals) (get-threshold (00000001 max-globals) thresholds 99999)) 
-                       (00100111 (00100111 (00000001 globals-exceeded) globals))) (1 (00000001 ())))
+                       (00100111 (00100111 (00000001 globals-exceeded) globals))) )
                 (00000111 ((00011011 (00101000 effects) (get-threshold (00000001 max-effects) thresholds 99999)) 
-                       (00100111 (00100111 (00000001 effects-exceeded) effects))) (1 (00000001 ())))))))))))
+                       (00100111 (00100111 (00000001 effects-exceeded) effects))) )))))))))
