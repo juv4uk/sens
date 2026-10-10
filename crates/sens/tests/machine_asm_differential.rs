@@ -382,4 +382,14 @@ fn x86_byte_program_stitches_without_legacy_callable() {
         );
         eprintln!("X86_СКЛАДАННЯ_УСПІХ stage={name} bytes={expected}");
     }
+    // Довільний атом не є ознакою EOF; він повинен відхилятися, а не
+    // матеріалізуватися у порожній машинний потік.
+    let malformed = eval_program(
+        "(x86-encode-program (quote не-список))",
+        &mut session,
+    );
+    assert!(
+        malformed.is_err(),
+        "Неспискова структура не може завершувати x86 програму"
+    );
 }
