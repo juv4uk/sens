@@ -12,6 +12,7 @@ import json
 import os
 from pathlib import Path
 import platform
+import random
 import statistics
 import subprocess
 import sys
@@ -48,6 +49,37 @@ def p95(values: list[int]) -> int:
 
 def median(values: list[int]) -> int:
     return int(statistics.median(values))
+
+
+def paired_ratio_interval(numerator: list[int], denominator: list[int],
+                          *, draws: int = 4096, seed: int = 20261010) -> dict:
+    """Парний процентильний bootstrap раундів; пілот, НЕ повна модель K–J."""
+    if len(numerator) != len(denominator) or len(numerator) < 7:
+        raise ValueError("Потрібно щонайменше 7 парних раундів")
+    if any(value <= 0 for value in numerator + denominator):
+        raise ValueError("Нульовий час забороняє порівняння")
+    rng = random.Random(seed)
+    n = len(numerator)
+    draws_ratio = []
+    for _ in range(draws):
+        picks = [rng.randrange(n) for _ in range(n)]
+        draws_ratio.append(
+            sum(numerator[i] for i in picks) /
+            sum(denominator[i] for i in picks)
+        )
+    draws_ratio.sort()
+    return {
+        "ratio_of_means": sum(numerator) / sum(denominator),
+        "bootstrap_percentile_ci95": [draws_ratio[int(0.025 * draws)],
+                                      draws_ratio[int(0.975 * draws) - 1]],
+        "paired_rounds": n, "bootstrap_draws": draws,
+        "seed": seed,
+        "scope": (
+            "EXPLORATORY: same-process paired phase timings; "
+            "not an end-to-end SENS language speedup, not a "
+            "hierarchical multi-build/multi-host confidence interval"
+        ),
+    }
 
 
 def cpu() -> str:
@@ -101,8 +133,17 @@ def bench(physical: bytes, *, samples: int, loops: int, warmup: int) -> dict:
                 "p50": median(values), "p95": p95(values),
                 "min": min(values), "max": max(values),
                 "samples": len(values),
+                "raw_ns_per_operation": values,
             }
             for name, values in observations.items()
+        },
+        "paired_phase_ratio": {
+            "numerator": "physical_compile_execute",
+            "denominator": "compiled_slot_replay",
+            **paired_ratio_interval(
+                observations["physical_compile_execute"],
+                observations["compiled_slot_replay"],
+            ),
         },
     }
 
@@ -132,10 +173,18 @@ def main(argv: list[str] | None = None) -> int:
         "cpu": cpu(),
         "platform": platform.platform(),
         "python": platform.python_version(),
+        "python_full": sys.version,
+        "github_run_id": os.getenv("GITHUB_RUN_ID", ""),
+        "github_runner_name": os.getenv("RUNNER_NAME", ""),
         "samples": args.samples,
         "loops": args.loops,
         "warmup": args.warmup,
-        "methodology": "in-process CPython perf_counter_ns, rotating method order, p50/p95; exact same T5 per case",
+        "methodology": (
+            "in-process CPython perf_counter_ns, rotating method order, "
+            "p50/p95 and raw per-round data; same T5 per case; "
+            "exploratory paired percentile-bootstrap CI for full-phase/replay "
+            "ratio (fixed 4096 resamples); not hierarchical Kalibera-Jones"
+        ),
         "claim_boundary": (
             "Research microCPU restricted to D1-D3; no D4+, no arbitrary .sens. "
             "Warmed slot replay EXCLUDES physical T5 decoding and compilation; "

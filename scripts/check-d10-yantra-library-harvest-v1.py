@@ -4,6 +4,10 @@ import subprocess
 import json
 from pathlib import Path
 
+# У режимі -O Python прибирає assert: provenance перевіряти небезпечно.
+if not __debug__:
+    raise SystemExit("D10-YANTRA-DONOR: BLOCKED — Python -O вимикає перевірки")
+
 root = Path(__file__).resolve().parents[1]
 read = lambda path: json.loads((root / path).read_text(encoding="utf-8"))
 harvest = read("knowledge/d10-yantra-library-harvest-v1.json")
