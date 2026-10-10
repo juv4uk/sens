@@ -291,7 +291,8 @@
 ; es gibt also kein variadisches/Rest-Body, auf das man sich stützen
 ; könnte. Für eine Folge von Ausdrücken genauso einpacken, wie es der
 ; Rest dieses Codes bereits tut — `(let (...) ((lambda () ausdruck1 ausdruck2)))`.
-(00001010 let (bindings body)
+; Поточний макровхід задає bootstrapped defmacro. Бітовий шаблон 00001010 у D8 тепер означає REPEAT, а не визначення макросу.
+(defmacro let (bindings body)
   (00000100 (00100111 (00000001 00001000) (00110111 (00001000 (binding) (00000101 binding)) bindings) body)
         (00110111 (00001000 (binding) (00101111 binding)) bindings)))
 
@@ -447,7 +448,7 @@
 
 (00001001 pairlis спарувати)
 
-(00001010 let* (bindings body)
+(defmacro let* (bindings body)
   (00000111
     ((0100 (00000010 bindings)) body)
     ((00000010 bindings) 
@@ -1024,8 +1025,8 @@
          (00000101 peers)
          (my-postcore-build-definitions source (00000110 peers)))))))
 
-(00001010 my-postcore-materialize-stable-peers args
-  (10011101 ((semantic-id (00000101 args))
+(defmacro my-postcore-materialize-stable-peers args
+  (let* ((semantic-id (00000101 args))
              (source (00101111 args))
              (group (my-postcore-peer-group
                        semantic-id my-postcore-stable-peer-projection)))
