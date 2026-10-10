@@ -49,7 +49,8 @@
         "#4463",
         "lib/yantra.lisp:50",
         "blob:76460b72cccad6bc44b39e87372f37613735d7a1"
-      ]
+      ],
+      "current_source_line": 50
     },
     {
       "stable_id": "d10.yantra.2419b9bd686760dd",
@@ -75,7 +76,8 @@
         "#4463",
         "lib/yantra.lisp:67",
         "blob:76460b72cccad6bc44b39e87372f37613735d7a1"
-      ]
+      ],
+      "current_source_line": 67
     },
     {
       "stable_id": "d10.yantra.9841aa039ca01a02",
@@ -101,7 +103,8 @@
         "#4463",
         "lib/yantra.lisp:84",
         "blob:76460b72cccad6bc44b39e87372f37613735d7a1"
-      ]
+      ],
+      "current_source_line": 84
     },
     {
       "stable_id": "d10.yantra.9b0f7ae48dcda39a",
@@ -127,7 +130,8 @@
         "#4463",
         "lib/yantra.lisp:99",
         "blob:76460b72cccad6bc44b39e87372f37613735d7a1"
-      ]
+      ],
+      "current_source_line": 99
     },
     {
       "stable_id": "d10.yantra.4398051a217172ec",
@@ -153,7 +157,8 @@
         "#4463",
         "lib/yantra.lisp:110",
         "blob:76460b72cccad6bc44b39e87372f37613735d7a1"
-      ]
+      ],
+      "current_source_line": 110
     },
     {
       "stable_id": "d10.yantra.4eb9326e697ef6f4",
@@ -179,7 +184,8 @@
         "#4463",
         "lib/yantra.lisp:145",
         "blob:76460b72cccad6bc44b39e87372f37613735d7a1"
-      ]
+      ],
+      "current_source_line": 139
     },
     {
       "stable_id": "d10.yantra.0d2fe63e3714a814",
@@ -205,7 +211,8 @@
         "#4463",
         "lib/yantra.lisp:161",
         "blob:76460b72cccad6bc44b39e87372f37613735d7a1"
-      ]
+      ],
+      "current_source_line": 155
     },
     {
       "stable_id": "d10.yantra.0bd6f96192e78781",
@@ -231,7 +238,8 @@
         "#4463",
         "lib/yantra.lisp:191",
         "blob:76460b72cccad6bc44b39e87372f37613735d7a1"
-      ]
+      ],
+      "current_source_line": 185
     },
     {
       "stable_id": "d10.yantra.0969ab6cb0349857",
@@ -257,7 +265,8 @@
         "#4463",
         "lib/yantra.lisp:198",
         "blob:76460b72cccad6bc44b39e87372f37613735d7a1"
-      ]
+      ],
+      "current_source_line": 192
     },
     {
       "stable_id": "d10.yantra.71e11ed738c864a5",
@@ -283,7 +292,8 @@
         "#4463",
         "lib/yantra.lisp:205",
         "blob:76460b72cccad6bc44b39e87372f37613735d7a1"
-      ]
+      ],
+      "current_source_line": 199
     },
     {
       "stable_id": "d10.yantra.6d2cdb1436748719",
@@ -309,7 +319,8 @@
         "#4463",
         "lib/yantra.lisp:214",
         "blob:76460b72cccad6bc44b39e87372f37613735d7a1"
-      ]
+      ],
+      "current_source_line": 208
     },
     {
       "stable_id": "d10.yantra.8e0f089b42a7103f",
@@ -335,7 +346,8 @@
         "#4463",
         "lib/yantra.lisp:224",
         "blob:76460b72cccad6bc44b39e87372f37613735d7a1"
-      ]
+      ],
+      "current_source_line": 218
     },
     {
       "stable_id": "d10.yantra.26cb9104ba0d041d",
@@ -361,7 +373,8 @@
         "#4463",
         "lib/yantra.lisp:231",
         "blob:76460b72cccad6bc44b39e87372f37613735d7a1"
-      ]
+      ],
+      "current_source_line": 225
     },
     {
       "stable_id": "d10.yantra.d9f88c2c47f50972",
@@ -387,7 +400,8 @@
         "#4463",
         "lib/yantra.lisp:257",
         "blob:76460b72cccad6bc44b39e87372f37613735d7a1"
-      ]
+      ],
+      "current_source_line": 251
     },
     {
       "stable_id": "d10.yantra.56009c37c02644bc",
@@ -413,7 +427,8 @@
         "#4463",
         "lib/yantra.lisp:363",
         "blob:76460b72cccad6bc44b39e87372f37613735d7a1"
-      ]
+      ],
+      "current_source_line": 357
     },
     {
       "stable_id": "d10.yantra.07ec7a79a6c04cc7",
@@ -439,7 +454,8 @@
         "#4463",
         "lib/yantra.lisp:370",
         "blob:76460b72cccad6bc44b39e87372f37613735d7a1"
-      ]
+      ],
+      "current_source_line": 364
     },
     {
       "stable_id": "d10.yantra.38ca9000c2005bd4",
@@ -465,7 +481,8 @@
         "#4463",
         "lib/yantra.lisp:404",
         "blob:76460b72cccad6bc44b39e87372f37613735d7a1"
-      ]
+      ],
+      "current_source_line": 398
     },
     {
       "stable_id": "d10.yantra.6e8665deafad71e1",
@@ -491,7 +508,8 @@
         "#4463",
         "lib/yantra.lisp:416",
         "blob:76460b72cccad6bc44b39e87372f37613735d7a1"
-      ]
+      ],
+      "current_source_line": 410
     },
     {
       "stable_id": "d10.yantra.97858538390157a9",
@@ -517,7 +535,8 @@
         "#4463",
         "lib/yantra.lisp:446",
         "blob:76460b72cccad6bc44b39e87372f37613735d7a1"
-      ]
+      ],
+      "current_source_line": 440
     }
   ],
   "excluded": {
@@ -546,5 +565,12 @@
       "max-turns",
       "bash-tool-schema"
     ]
+  },
+  "current_observation": {
+    "git_commit": "b4bb39145267fb76e92339ca5d5170d558af3c1d",
+    "source_sha": "3c54de49e0bd1abdbb0997bb36db2ca20de58e78",
+    "historical_donor_sha": "76460b72cccad6bc44b39e87372f37613735d7a1",
+    "evidence": "Exact original Git blob preserves historical line pins; current file has independently re-located named definitions. This attests identity and source position only, NOT body equivalence or D10 ratification.",
+    "review_status": "SOURCE_POSITION_ONLY_BEHAVIOR_UNPROVEN"
   }
 }
