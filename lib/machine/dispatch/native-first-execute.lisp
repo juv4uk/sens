@@ -113,15 +113,7 @@
       ((101 (native-first-plan-tag-state plan (001 native-plan)) (001 distinct))
        (110
          ((101 (native-first-plan-tag-state plan (001 evaluator-fallback)) (001 same))
-          (110
-            ((native-first-proper-list-length-2? plan)
-             (native-first-execution-completed
-               (001 evaluator)
-               (01001101 (100 (011 plan))))
-            ((native-first-domain-true ())
-             (native-first-execution-rejected
-               (001 evaluator)
-               (native-first-list-2 (001 malformed-evaluator-fallback) plan)))))
+          
          ((101 (native-first-plan-tag-state plan (001 evaluator-fallback)) (001 distinct))
           (native-first-execution-rejected
             (001 invalid-plan)
