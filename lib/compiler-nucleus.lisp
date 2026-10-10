@@ -301,7 +301,7 @@
 (00001001 compiler-request-from-role
   (00001000 (seed ідентичність role proof-ref походження)
     (00000111
-      ((00000010 role) () ())
+      
       ((compiler-true seed)
        (00000100
          ідентичність
@@ -406,7 +406,7 @@
       ((00000010 arguments) (compiler-false ()))
       ((00000010 (00000110 arguments))
        (00000111
-         ((00000010 (00000110 arguments)) () (compiler-true ()))
+         ((0100 (00000010 (00000110 arguments))) (compiler-true ()))
          ((compiler-true ()) (compiler-false ()))))
       ((compiler-true ()) (compiler-false ())))))
 
@@ -417,7 +417,7 @@
       ((00000010 (00000110 arguments)) (compiler-false ()))
       ((00000010 (00000110 (00000110 arguments)))
        (00000111
-         ((00000010 (00000110 (00000110 arguments))) () (compiler-true ()))
+         ((0100 (00000010 (00000110 (00000110 arguments)))) (compiler-true ()))
          ((compiler-true ()) (compiler-false ()))))
       ((compiler-true ()) (compiler-false ())))))
 
