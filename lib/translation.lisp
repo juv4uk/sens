@@ -56,7 +56,7 @@
       ((00000011 status (00000001 candidate)) t)
       ((00000011 status (00000001 ambiguous)) t)
       ((00000011 status (00000001 rejected)) t)
-      (1 (00000001 ())))))
+      )))
 
 (00001001 translation-kind-valid?
   (00001000 (kind)
@@ -65,7 +65,7 @@
       ((00000011 kind (00000001 clause)) t)
       ((00000011 kind (00000001 batch)) t)
       ((00000011 kind (00000001 query)) t)
-      (1 (00000001 ())))))
+      )))
 
 ; Envelope validation owns only the protocol shell. Payload meaning is checked
 ; separately so a well-shaped translator message containing malformed semantic
@@ -89,7 +89,7 @@
           
           (00000001 ()))
          (1 t)))
-      (1 (00000001 ())))))
+      )))
 
 (00001001 translation-batch-valid?
   (00001000 (payload)
@@ -105,7 +105,7 @@
       ((00000011 kind (00000001 clause)) (knowledge-clause-valid? payload))
       ((00000011 kind (00000001 batch)) (translation-batch-valid? payload))
       ((00000011 kind (00000001 query)) (knowledge-goal-valid? payload))
-      (1 (00000001 ())))))
+      )))
 
 (00001001 translation-alternatives-valid?
   (00001000 (kind alternatives)
@@ -117,7 +117,7 @@
          
          ((00000010 (00000110 alternatives))  t)
          (1 (translation-alternatives-valid? kind (00000110 alternatives)))))
-      (1 (00000001 ())))))
+      )))
 
 ; Ambiguity is evidence only when the translator exposes at least two valid
 ; alternatives. One alternative is just a candidate; zero is not ambiguity.
@@ -154,7 +154,7 @@
       ((00000011 status (00000001 accepted)) t)
       ((00000011 status (00000001 rejected)) t)
       ((00000011 status (00000001 ambiguous)) t)
-      (1 (00000001 ())))))
+      )))
 
 (00001001 translation-review-valid?
   (00001000 (review)
@@ -171,7 +171,7 @@
          ((00000011 (00100011 (translation-review-code review)) (00000001 ()))
           (00000001 ()))
          (1 t)))
-      (1 (00000001 ())))))
+      )))
 
 (00001001 translation-review-advice-decision
   (00001000 (proposal decision)
@@ -270,16 +270,16 @@
             (00000111
               ((00000011 (translation-kind proposal) (00000001 clause)) t)
               ((00000011 (translation-kind proposal) (00000001 batch)) t)
-              (1 (00000001 ()))))
-           (1 (00000001 ())))))
-      (1 (00000001 ())))))
+              ))
+           )))
+      )))
 
 (00001001 translation-admission-payload
   (00001000 (review)
     (00000111
       ((translation-admittable? review)
        (translation-payload (translation-review-proposal review)))
-      (1 (00000001 ())))))
+      )))
 
 ; Rejected and ambiguous translations are observations, not knowledge. The
 ; evidence path is also pure: callers decide where/when to persist the returned
@@ -290,7 +290,7 @@
       ((00000011 (translation-review-valid? review) (00000001 ())) (00000001 ()))
       ((00000011 (translation-review-status review) (00000001 rejected)) t)
       ((00000011 (translation-review-status review) (00000001 ambiguous)) t)
-      (1 (00000001 ())))))
+      )))
 
 (00001001 translation-evidence-entry
   (00001000 (review)
