@@ -29,7 +29,7 @@ fn records(bytes: &[u8]) -> Result<Vec<&[u8]>, String> {
 fn decode_one(form: &str, bytes: &[u8]) -> Result<(), String> {
     match form {
         "wire" => {
-            let expr = wire_decode_program(bytes).map_err(|e| format!("invalid SENS wire: {e}"))?;
+            let expr = wire_decode_program(bytes).map_err(|_| "invalid SENS wire".to_string())?;
             std::hint::black_box(expr);
         }
         "json" => {
