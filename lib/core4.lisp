@@ -291,176 +291,32 @@
 ; es gibt also kein variadisches/Rest-Body, auf das man sich stützen
 ; könnte. Für eine Folge von Ausdrücken genauso einpacken, wie es der
 ; Rest dieses Codes bereits tut — `(let (...) ((lambda () ausdruck1 ausdruck2)))`.
+(define my-let-binding-parts
+  (lambda (bindings)
+    (cond
+      ((atom? bindings) (cons (quote ()) (quote ())))
+      ((atom? (quote ()))
+       ((lambda (tail-parts)
+          (cons
+            (cons (car (car bindings)) (car tail-parts))
+            (cons (car (cdr (car bindings))) (cdr tail-parts))))
+        (my-let-binding-parts (cdr bindings))))))
+
 (defmacro let (bindings body)
-  (00000100 (00100111 (00000001 00001000) (00110111 (00001000 (binding) (00000101 binding)) bindings) body)
-        (00110111 (00001000 (binding) (00101111 binding)) bindings)))
-
-; `let*` is `let` with sequential (not parallel) dependency: each binding's
-; value expression can see every binding before it. Expands recursively —
-; `(let* ((x 1) (y (+ x 1))) body)` becomes
-; `(let ((x 1)) (let* ((y (+ x 1))) body))`, peeling one binding into its
-; own nested `let` at a time until none are left, at which point `body`
-; evaluates directly. Each expansion step is itself new code handed back to
-; the evaluator, the same macro-expansion mechanism `unless` and `let`
-; already use — `let*` calling `let*` is ordinary recursion, not a special
-; case the evaluator needs to know about.
-; `let*` — це `let` з послідовною (не паралельною) залежністю: вираз
-; значення кожного binding бачить усі попередні. Розгортається
-; рекурсивно — `(let* ((x 1) (y (+ x 1))) тіло)` стає
-; `(let ((x 1)) (let* ((y (+ x 1))) тіло))`, знімаючи по одному binding у
-; власний вкладений `let`, поки жодного не лишиться, і тоді `тіло`
-; обчислюється напряму. Кожен крок розгортання сам є новим кодом,
-; переданим назад evaluator'у, тим самим механізмом розгортання макросів,
-; що вже використовують `unless` і `let` — виклик `let*` із `let*` —
-; звичайна рекурсія, не особливий випадок, про який має знати evaluator.
-; `let*` ist `let` mit sequenzieller (nicht paralleler) Abhängigkeit: der
-; Wertausdruck jedes Bindings sieht alle vorherigen. Entfaltet sich
-; rekursiv — `(let* ((x 1) (y (+ x 1))) rumpf)` wird zu
-; `(let ((x 1)) (let* ((y (+ x 1))) rumpf))`, wobei jeweils ein Binding in
-; ein eigenes verschachteltes `let` geschält wird, bis keines mehr übrig
-; ist, woraufhin `rumpf` direkt ausgewertet wird. Jeder Entfaltungsschritt
-; ist selbst neuer Code, der an den Evaluator zurückgegeben wird, derselbe
-; Makro-Expansionsmechanismus, den `unless` und `let` bereits nutzen —
-; `let*`, das `let*` aufruft, ist gewöhnliche Rekursion, kein Sonderfall,
-; von dem der Evaluator wissen müsste.
-; `eq` is deliberately atom-only per McCarthy's original primitive (see
-; docs/language-core.md) — `(eq '(1 2) '(1 2))` errors rather than comparing
-; structurally. `equal?` is the structural/deep-equality counterpart, built
-; on top of `eq` and `atom` rather than replacing them. Its answer is the
-; Core4 15-state scale (#1391): `(1)` — the same structure, `(0)` — different.
-; Canonical three-part `cond` consumes the answer explicitly; a two-part
-; clause selects only on a «yes» answer.
-(00001001 equal?
-  (00001000 (a b)
-    (00000111
-      ((0100 (00000010 a))
-       (00000111
-         ((0100 (00000010 b))
-          (00000001 (1)))
-         ((00000010 b) 
-          (00000001 (0)))
-         ((00000010 b) 
-          (00000001 (0)))))
-      ((00000010 a) 
-       (00000111
-         ((0100 (00000010 b))
-          (00000001 (0)))
-         ((00000010 b) 
-          (00000111
-            ((00000011 a b) 
-             (00000001 (1)))
-            ((00000011 a b) 
-             (00000001 (0)))))
-         ((00000010 b) 
-          (00000001 (0)))))
-      ((00000010 a) 
-       (00000111
-         ((0100 (00000010 b))
-          (00000001 (0)))
-         ((00000010 b) 
-          (00000001 (0)))
-         ((00000010 b) 
-          (00000111
-            ((00100010 (00000101 a) (00000101 b)) 
-             (00100010 (00000110 a) (00000110 b)))
-            ((0100 (00100010 (00000101 a) (00000101 b)))
-             (00000001 (0))))))))))
-
-; Exact-Q uses 1 for YES and 0 for NO.  Structural and identity relations
-; retain their own result domains, so predicate consumers normalize them here.
-(00001001 truthy?
-  (00001000 (value)
-    (00000111
-      
-      ((00000010 value) 
-       (00000111
-         ((00000011 value 0)  (00000001 ()))
-         ((0100 (00000011 value 0)) t)))
-      ((00000010 value) 
-       (00000111
-         ((00100010 value (00000001 (0)))  (00000001 ()))
-         ((00100010 value (00000001 (0)))  (00000001 ()))
-         ((00100010 value (00000001 (0)))  (00000001 ()))
-         (1  t))))))
-
-(00001001 not?
-  (00001000 (value)
-    (00000111
-      ((truthy? value)  (00000001 ()))
-      ((0100 (truthy? value)) t))))
-
-
-; nth/member?/assoc (G5 test: already expressible via existing means?)
-; — yes, same recursive-list-walk shape as length/reverse above.
-; Surfaced from the fpga-lisp session's assembler.lisp (2026-08-10), which
-; had independently reimplemented all three locally (as nth, contains?/
-; any-eq?, and assoc-str) because lib/core.lisp didn't have them — real,
-; evidenced duplication, not a speculative gap. A generalized assoc here
-; also matches the shape lib/meta-eval.lisp's own env-lookup already hand-
-; rolls for its specific (symbol . value) alist case.
-; nth/member?/assoc (G5-тест: уже виразне через наявне?) — так, та сама
-; форма рекурсивного обходу списку, що й length/reverse вище. Знахідка
-; з сесії fpga-lisp, assembler.lisp (2026-08-10), яка незалежно
-; перевинайшла всі три локально (як nth, contains?/any-eq? і assoc-str),
-; бо lib/core.lisp їх не мав — реальне, доказове дублювання, не
-; спекулятивна прогалина. Узагальнений assoc тут також збігається з
-; формою, яку lib/meta-eval.lisp's власний env-lookup уже вручну пише для
-; свого специфічного випадку asoc-списку (symbol . value).
-(00001001 nth
-  (00001000 (i lst)
-    (00000111
-      ((00000011 i 0)  (00000101 lst))
-      ((00000011 i 0) 
-       (00101011 (00001101 i 1) (00000110 lst))))))
-
-(00001001 member?
-  (00001000 (item lst)
-    (00000111
-      
-      ((00000010 lst) 
-       (00000111
-         ((00100010 item (00000101 lst))  t)
-         ((0100 (00100010 item (00000101 lst)))
-          (00101100 item (00000110 lst))))))))
-
-(00001001 assoc
-  (00001000 (key alist)
-    (00000111
-      
-      ((00000010 alist) 
-       (00000111
-         ((00100010 key (00000101 (00000101 alist)))  (00000101 alist))
-         ((0100 (00100010 key (00000101 (00000101 alist))))
-          (00101101 key (00000110 alist))))))))
-
-
-; D5:11110 PAIRLIS: Lisp-owned structural law. Canonical Ukrainian surface
-; owns the exact-domain binding; English spelling is compatibility-only.
-(00001001 спарувати
-  (00001000 (keys values tail)
-    (00000111
-      ((0100 (00000010 keys)) tail)
-      ((00000010 keys) 
-       (00000100
-         (00000100 (00000101 keys) (00000101 values))
-         (спарувати (00000110 keys) (00000110 values) tail))))))
-
-(00001001 pairlis спарувати)
+  ((lambda (parts)
+     (cons (list (quote lambda) (car parts) body) (cdr parts)))
+   (my-let-binding-parts bindings)))
 
 (defmacro let* (bindings body)
-  (00000111
-    ((0100 (00000010 bindings)) body)
-    ((00000010 bindings) 
-     ; Build the recursive expansion from the primitive tree substrate only.
-     ; This keeps let* semantics in Lisp while allowing generic macro
-     ; frontends to execute the law without importing the higher-level list
-     ; helper as host/compiler semantic authority.
-     (00000100 (00000001 let)
-           (00000100 (00000100 (00000101 bindings) (00000001 ()))
-                 (00000100 (00000100 (00000001 let*)
-                             (00000100 (00000110 bindings)
-                                   (00000100 body (00000001 ()))))
-                       (00000001 ())))))))
+  (cond
+    ((atom? bindings) body)
+    ((atom? (cdr bindings))
+     (list (quote let) bindings body))
+    ((atom? (quote ()))
+     (list
+       (quote let)
+       (list (car bindings))
+       (list (quote let*) (cdr bindings) body))))
 
 ; string-length/string-empty?/string-prefix?/string-contains? (PLAN.md
 ; item 14, item 20's G5 audit test applied live) — none of these need a
