@@ -363,6 +363,24 @@ fn native_pair_car_cdr_match_the_interpreter_reference_witness() {
     let interpreter_car = eval_uk_program("(перше (сполучити 2 3))", &mut session);
     let interpreter_cdr = eval_uk_program("(решта (сполучити 2 3))", &mut session);
 
+
+    // Failure-only stage inventory for Contract 11.8 callability diagnosis.
+    // These probes report but never turn a failed stage into a passing test.
+    for (name, source) in [
+        ("wire-denominator-zero", "(x86-admission-wire-denominator-one? \"0/1\")"),
+        ("exact-integer-zero", "(x86-admission-exact-integer? 0)"),
+        ("disp8-zero", "(x86-admission-disp8? 0)"),
+        ("disp8-eight", "(x86-admission-disp8? 8)"),
+        ("pattern-store", "(x86-admission-pattern-match? (quote (mov-mem-disp8-r64 register disp8 register)) (quote (mov-mem-disp8-r64 rdi 0 rax)))"),
+        ("instruction-store", "(x86-admitted-instruction? (quote (mov-mem-disp8-r64 rdi 0 rax)))"),
+        ("whole-admission", "(x86-admitted-program? (quote ((mov-r64-imm64 rax 2) (mov-mem-disp8-r64 rdi 0 rax) (mov-r64-imm64 rax 3) (mov-mem-disp8-r64 rdi 8 rax) (mov-r64-mem-disp8 rax rdi 0) (ret))))"),
+    ] {
+        let result = eval_program(source, &mut session)
+            .map(|value| format!("{:?}", value.value))
+            .unwrap_or_else(|error| format!("ERROR: {error}"));
+        eprintln!("MACHINE-ADMISSION-STAGE {name}: {result}");
+    }
+
     let native_car = eval_program(
         "(native-call-u64-raw (x86-encode-admitted-program (x86-lower-cons-car-u64-forms 2 3)) x86-pair-cell-bytes)",
         &mut session,
