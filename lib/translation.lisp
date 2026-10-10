@@ -74,8 +74,8 @@
 (00001001 translation-envelope-valid?
   (00001000 (proposal)
     (00000111
-      ((00000010 proposal) () (00000001 ()))
-      ((00000010 proposal) (1) (00000001 ()))
+      
+      ((00000010 proposal)  (00000001 ()))
       ((00000011 (knowledge-proper-list? proposal) (00000001 ())) (00000001 ()))
       ((00000011 (00011100 (00101000 proposal) 5) (00000001 ())) (00000001 ()))
       ((00000011 (00100011 (00000101 proposal)) (00000001 ())) (00000001 ()))
@@ -86,7 +86,7 @@
          ((00000011 (translation-kind-valid? (translation-kind proposal)) (00000001 ()))
           (00000001 ()))
          ((string-membership-helper (translation-source proposal))
-          (class-membership string nonmember)
+          
           (00000001 ()))
          (t t)))
       (t (00000001 ())))))
@@ -94,8 +94,8 @@
 (00001001 translation-batch-valid?
   (00001000 (payload)
     (00000111
-      ((00000010 payload) () (00000001 ()))
-      ((00000010 payload) (1) (00000001 ()))
+      
+      ((00000010 payload)  (00000001 ()))
       ((00000011 (knowledge-proper-list? payload) (00000001 ())) (00000001 ()))
       (t (knowledge-clauses-valid? payload)))))
 
@@ -110,12 +110,12 @@
 (00001001 translation-alternatives-valid?
   (00001000 (kind alternatives)
     (00000111
-      ((00000010 alternatives) () (00000001 ()))
-      ((00000010 alternatives) (1) (00000001 ()))
+      
+      ((00000010 alternatives)  (00000001 ()))
       ((translation-candidate-payload-valid? kind (00000101 alternatives))
        (00000111
-         ((00000010 (00000110 alternatives)) () t)
-         ((00000010 (00000110 alternatives)) (1) t)
+         
+         ((00000010 (00000110 alternatives))  t)
          (t (translation-alternatives-valid? kind (00000110 alternatives)))))
       (t (00000001 ())))))
 
@@ -124,11 +124,11 @@
 (00001001 translation-ambiguity-valid?
   (00001000 (kind payload)
     (00000111
-      ((00000010 payload) () (00000001 ()))
-      ((00000010 payload) (1) (00000001 ()))
+      
+      (t (00000001 ()))
       ((00000011 (knowledge-proper-list? payload) (00000001 ())) (00000001 ()))
-      ((00000010 (00000110 payload)) () (00000001 ()))
-      ((00000010 (00000110 payload)) (1) (00000001 ()))
+      
+      ((00000010 (00000110 payload))  (00000001 ()))
       (t (translation-alternatives-valid? kind payload)))))
 
 (00001001 make-translation-review
@@ -159,8 +159,8 @@
 (00001001 translation-review-valid?
   (00001000 (review)
     (00000111
-      ((00000010 review) () (00000001 ()))
-      ((00000010 review) (1) (00000001 ()))
+      
+      ((00000010 review)  (00000001 ()))
       ((00000011 (knowledge-proper-list? review) (00000001 ())) (00000001 ()))
       ((00000011 (00011100 (00101000 review) 5) (00000001 ())) (00000001 ()))
       ((00000011 (00100011 (00000101 review)) (00000001 ())) (00000001 ()))
@@ -176,9 +176,8 @@
 (00001001 translation-review-advice-decision
   (00001000 (proposal decision)
     (00000111
-      ((00000010 decision) () (make-translation-review
-         (00000001 rejected) (00000001 malformed-advice-decision) proposal decision))
-      ((00000010 decision) (1) (make-translation-review
+      
+      ((00000010 decision)  (make-translation-review
          (00000001 rejected) (00000001 malformed-advice-decision) proposal decision))
       ((00000011 (00100011 (00000101 decision)) (00000001 ()))
        (make-translation-review
