@@ -763,12 +763,9 @@ mod core4_bootstrap_cache_tests {
     #[test]
     fn let_star_surface_alias_and_unicode_bindings_are_separable() {
         // #5408 diagnostic: run the production embedded Core4/FASL path first.
-        // This matrix separates alias dispatch from Unicode lexical-key behavior
-        // without changing the source-owned Core4 macro or quantity expectations.
-        let mut session = Session::default();
-        load_core_library(&mut session)
-            .expect("current embedded Core4 library must load for the diagnostic");
-
+        // Each case gets a fresh session, and failures are collected rather than
+        // stopping at the first one, so routing and Unicode behavior can be
+        // distinguished from one hosted report without state contamination.
         let cases = [
             ("English let* with ASCII bindings", "(let* ((x 7) (y x)) y)"),
             ("Ukrainian alias with ASCII bindings", "(нехай* ((x 7) (y x)) y)"),
@@ -782,21 +779,53 @@ mod core4_bootstrap_cache_tests {
             ),
         ];
 
+        let mut failures: Vec<String> = Vec::new();
         for (label, source) in cases {
-            let result = eval_program(source, &mut session)
-                .unwrap_or_else(|error| panic!("{label}: {error}"));
-            assert_eq!(
-                result.value.to_string(),
-                "7",
-                "{label}: source={source}"
-            );
+            let mut session = Session::default();
+            if let Err(error) = load_core_library(&mut session) {
+                let failure = format!("{label}: Core4 bootstrap failed: {error}");
+                eprintln!("LETSTAR_MATRIX case={label:?} outcome=BOOTSTRAP_FAIL error={error}");
+                failures.push(failure);
+                continue;
+            }
+
+            match eval_program(source, &mut session) {
+                Ok(result) if result.value.to_string() == "7" => {
+                    eprintln!("LETSTAR_MATRIX case={label:?} outcome=PASS value=7");
+                }
+                Ok(result) => {
+                    let value = result.value.to_string();
+                    eprintln!(
+                        "LETSTAR_MATRIX case={label:?} outcome=FAIL expected=7 actual={value}"
+                    );
+                    failures.push(format!("{label}: expected 7, got {value}; source={source}"));
+                }
+                Err(error) => {
+                    eprintln!("LETSTAR_MATRIX case={label:?} outcome=FAIL error={error}");
+                    failures.push(format!("{label}: {error}; source={source}"));
+                }
+            }
         }
 
-        // Independent negative control: an actually unbound identifier stays
-        // rejected; passing the positive matrix must not install global names.
+        // Independent negative control: a genuinely unbound identifier stays
+        // rejected. Use a fresh session so failed positives cannot contaminate it.
+        let mut negative_session = Session::default();
+        load_core_library(&mut negative_session)
+            .expect("current embedded Core4 library must load for negative control");
+        let unbound_rejected = eval_program(
+            "(нехай* ((основа 7)) наслідок)",
+            &mut negative_session,
+        )
+        .is_err();
+        eprintln!("LETSTAR_MATRIX unbound_negative={unbound_rejected}");
         assert!(
-            eval_program("(нехай* ((основа 7)) наслідок)", &mut session).is_err(),
+            unbound_rejected,
             "an unbound Ukrainian identifier must not be accepted as a lexical binding"
+        );
+        assert!(
+            failures.is_empty(),
+            "Core4 let* diagnostic matrix found failures:\\n{}",
+            failures.join("\\n")
         );
     }
 
