@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Перевірка бібліотечного добору Yantra для неретифікованого D10."""
 import json
+import subprocess
 from pathlib import Path
 
 root = Path(__file__).resolve().parents[1]
@@ -9,7 +10,16 @@ harvest = read("knowledge/d10-yantra-library-harvest-v1.json")
 inv = read("knowledge/d10-v1-semantic-inventory.json")
 state = read("knowledge/d10-fill-v1-state.json")
 foundation = read("knowledge/d1-d9-foundation.json")
-source = (root / "lib/yantra.lisp").read_text(encoding="utf-8").splitlines()
+source_path = root / "lib/yantra.lisp"
+source = source_path.read_text(encoding="utf-8").splitlines()
+# Перевіряємо чинний Git blob окремо від незмінного історичного донора.
+actual_source_sha = subprocess.check_output(
+    ["git", "hash-object", "--", str(source_path)], cwd=root, text=True
+).strip()
+observed = harvest["current_observation"]
+assert observed["source_sha"] == actual_source_sha
+assert observed["historical_donor_sha"] == harvest["donor"]["source_sha"]
+assert observed["review_status"] == "SOURCE_POSITION_ONLY_BEHAVIOR_UNPROVEN"
 rows = harvest["rows"]
 assert harvest["schema"] == "d10-yantra-library-harvest-v1/v1"
 assert harvest["status"] == "RESEARCH-UNRATIFIED"
@@ -27,8 +37,19 @@ for row in rows:
     assert row["coordinate"] is None and row["coordinate_basis"] == "UNPLACED"
     assert row["ratified_resident"] is False
     assert row["source_sha"] == harvest["donor"]["source_sha"]
+    # Історичний номер рядка та Git blob не змінюємо: він залишається
+    # доказом походження, а не видається за поточний стан.
+    assert row["source_line"] >= 1
+    assert f'{row["source_file"]}:{row["source_line"]}' in row["provenance"]
+    assert f'blob:{row["source_sha"]}' in row["provenance"]
     definition = "(00001001 " + row["source_name"]
-    assert source[row["source_line"] - 1] == definition or source[row["source_line"] - 1].startswith(definition + " ")
+    # Кожне чинне визначення має бути присутнє рівно один раз і саме
+    # у спостереженому рядку; будь-який зсув знову блокує перевірку.
+    positions = [
+        i for i, line in enumerate(source, 1)
+        if line == definition or line.startswith(definition + " ")
+    ]
+    assert positions == [row["current_source_line"]], (row["source_name"], positions)
 selected = state["target"]["selected_semantic_candidates"]
 assert len(inv["rows"]) == selected
 assert len({r["semantic_name"] for r in inv["rows"]}) == selected
