@@ -76,6 +76,27 @@ class YantraProvenanceWitnesses(unittest.TestCase):
         self.assertNotEqual(result.returncode, 0, result.stdout)
         self.assertIn("D10-YANTRA-DONOR: BLOCKED", result.stderr)
 
+    def test_optimized_d10_sibling_checks_fail_closed(self):
+        # Обидва сусідні D10-процеси зобов'язані відмовити до PASS під -O.
+        scripts = (
+            ("scripts/check-d10-fill-v1-seed.py", "D10-FILL-V1-SEED: BLOCKED"),
+            ("scripts/check-d10-crossrepo-panini-v1.py", "D10-CROSSREPO-PANINI-V1: BLOCKED"),
+        )
+        for script, diagnostic in scripts:
+            with self.subTest(script=script):
+                regular = subprocess.run(
+                    [sys.executable, script], cwd=ROOT,
+                    capture_output=True, text=True, check=False,
+                )
+                self.assertEqual(regular.returncode, 0, regular.stderr)
+                optimized = subprocess.run(
+                    [sys.executable, "-O", script], cwd=ROOT,
+                    capture_output=True, text=True, check=False,
+                )
+                self.assertNotEqual(optimized.returncode, 0, optimized.stdout)
+                self.assertIn(diagnostic, optimized.stderr)
+                self.assertNotIn("PASS", optimized.stdout)
+
     def test_historical_bytes_changed_fail_closed(self):
         path = self.file(DONOR)
         path.write_bytes(path.read_bytes() + b"\n; tamper\n")

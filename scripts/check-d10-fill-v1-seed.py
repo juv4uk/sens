@@ -2,6 +2,10 @@
 import json
 from pathlib import Path
 
+# Python -O вимикає assert — у цьому режимі доказів D10 немає.
+if not __debug__:
+    raise SystemExit("D10-FILL-V1-SEED: BLOCKED — Python -O вимикає перевірки")
+
 root=Path(__file__).resolve().parents[1]
 d9=json.loads((root/"knowledge/d9-ratified.json").read_text(encoding="utf-8"))
 seed=json.loads((root/"knowledge/d10-selector-seed.json").read_text(encoding="utf-8"))

@@ -2,6 +2,10 @@
 import json
 from pathlib import Path
 
+# Python -O вимикає assert — у цьому режимі доказів D10 немає.
+if not __debug__:
+    raise SystemExit("D10-CROSSREPO-PANINI-V1: BLOCKED — Python -O вимикає перевірки")
+
 root=Path(__file__).resolve().parents[1]
 harvest=json.loads((root/"knowledge/d10-crossrepo-panini-v1.json").read_text(encoding="utf-8"))
 inventory=json.loads((root/"knowledge/d10-v1-semantic-inventory.json").read_text(encoding="utf-8"))
