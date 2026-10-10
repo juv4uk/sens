@@ -159,3 +159,35 @@ jobs:
           path: benchmark-sweep-results/${{ matrix.stand }}/
           if-no-files-found: warn
           retention-days: 30
+  summarize-sweep:
+    name: Audit all registered benchmark results
+    needs: [discover-sweep, run-sweep]
+    if: always()
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+      - name: Download per-stand results from this exact SHA
+        if: always()
+        uses: actions/download-artifact@v4
+        with:
+          pattern: "benchmark-sweep-*-${{ github.sha }}"
+          path: ${{ runner.temp }}/benchmark-sweep-download
+      - name: Require one result for every registered stand on this SHA
+        if: always()
+        env:
+          EXPECTED_SHA: ${{ github.sha }}
+        run: |
+          python3 scripts/summarize_benchmark_sweep.py \
+            --results-dir "${{ runner.temp }}/benchmark-sweep-download" \
+            --out-dir "${{ runner.temp }}/benchmark-sweep-summary"
+      - name: Upload exact-SHA sweep audit, including failures
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: benchmark-sweep-audit-${{ github.sha }}
+          path: ${{ runner.temp }}/benchmark-sweep-summary/
+          if-no-files-found: warn
+          retention-days: 30
