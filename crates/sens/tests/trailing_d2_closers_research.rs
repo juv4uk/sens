@@ -101,3 +101,81 @@ fn bare_eof_after_an_unclosed_list_is_not_admitted_by_canonical_reader() {
         vec!["10", "10", "01", "01"]
     );
 }
+
+
+/// Лише справжні структурні слова D2, не довільні 10 усередині D3–D9.
+fn all_leading_opens(words: &[&str]) -> usize {
+    words.iter().take_while(|&&w| w == "10").count()
+}
+
+fn trim_all_ends<'a>(words: &'a [&'a str]) -> (usize, Vec<&'a str>) {
+    let k = all_leading_opens(words);
+    let mut end = words.len();
+    while end > k && words[end - 1] == "01" {
+        end -= 1;
+    }
+    (k, words[k..end].to_vec())
+}
+
+/// Відновити повний D2 з явно збереженої кількості початкових OPEN.
+fn restore_all_ends(short: &[&str], k: usize) -> Vec<String> {
+    let mut restored = vec!["10".to_string(); k];
+    restored.extend(short.iter().map(|s| s.to_string()));
+    let mut depth = 0i64;
+    for w in &restored {
+        match w.as_str() {
+            "10" => depth += 1,
+            "01" => depth -= 1,
+            _ => {}
+        }
+        assert!(depth >= 0, "неправильний структурний D2");
+    }
+    restored.extend(std::iter::repeat("01".to_string()).take(depth as usize));
+    restored
+}
+
+#[test]
+fn all_initial_opens_and_all_terminal_closes_are_reversible_with_explicit_count() {
+    // Той самий справжній ратифікований читач, що й в інших D2-тестах.
+    for depth in [1usize, 2, 3, 8, 16, 32, 64] {
+        for payload in ["0", "000", "000000000"] {
+            let mut program = vec!["10"; depth];
+            program.push(payload);
+            program.extend(std::iter::repeat("01").take(depth));
+            assert!(parse_canonical_binary(&program.join(" ")).is_ok());
+            let (count, short) = trim_all_ends(&program);
+            assert_eq!(count, depth);
+            assert_eq!(short, [payload]);
+            let recovered = restore_all_ends(&short, count);
+            assert_eq!(recovered.iter().map(String::as_str).collect::<Vec<_>>(), program);
+            assert!(parse_canonical_binary(&recovered.join(" ")).is_ok());
+        }
+    }
+    for words in [
+        vec!["10", "01", "10", "01"], // два корені, префікс видаляємо із лічильником
+        vec!["10", "10", "000", "01", "01", "10", "1", "01"],
+        vec!["10", "0", "11", "1", "01"], // крапкова пара
+        vec!["000", "10", "0", "01"], // атом спочатку: count=0
+        vec!["10", "01", "00"], // кінцевий D2 пропуск
+    ] {
+        assert!(parse_canonical_binary(&words.join(" ")).is_ok(), "{words:?}");
+        let (k, short) = trim_all_ends(&words);
+        let recovered = restore_all_ends(&short, k);
+        assert_eq!(recovered.iter().map(String::as_str).collect::<Vec<_>>(), words);
+        assert!(parse_canonical_binary(&recovered.join(" ")).is_ok());
+    }
+}
+
+#[test]
+fn without_initial_open_count_two_distinct_programs_collapse_to_the_same_body() {
+    let left = ["10", "0", "01"];
+    let right = ["10", "10", "0", "01", "01"];
+    assert!(parse_canonical_binary(&left.join(" ")).is_ok());
+    assert!(parse_canonical_binary(&right.join(" ")).is_ok());
+    let (k_left, stripped_left) = trim_all_ends(&left);
+    let (k_right, stripped_right) = trim_all_ends(&right);
+    assert_eq!(stripped_left, stripped_right);
+    assert_ne!(k_left, k_right);
+    assert_eq!(restore_all_ends(&stripped_left, k_left), left);
+    assert_eq!(restore_all_ends(&stripped_right, k_right), right);
+}
