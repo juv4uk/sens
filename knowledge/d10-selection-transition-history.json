@@ -368,7 +368,7 @@
         "juv4uk/sens@c67db6cdd820dea8d3a110caed359507c0a2d7a4:knowledge/d10-unique-bounded-modular-lift-20261009.json:1"
       ],
       "previous_inventory_blob_sha": "7e13e929338baeef9b16c2139d24b78e23ea1e03",
-      "resulting_inventory_blob_sha": "d571ccffc0c7e25f3441d330c4e39cc8169ba4f4",
+      "resulting_inventory_blob_sha": "5fcb5e3e7dafd6ed5d309c7d408229e7e3e355e3",
       "added_stable_ids": [
         "d10.evidence.admission.hadamard-variance.20261011",
         "d10.evidence.admission.finite-symbolic-differentiation.20261011",

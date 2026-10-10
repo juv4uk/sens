@@ -15157,10 +15157,243 @@
         "scripts/research_d10_finite_arc_consistency.py",
         "#4013",
         "#4463",
-        "#5304"
+        "#5304",
+        "tests/test_d10_finite_arc_consistency.py",
+        "#4991",
+        "https://doi.org/10.1016/0004-3702(77)90007-8"
       ],
-      "positive_witnesses": [],
-      "falsifiers": [],
+      "positive_witnesses": [
+        {
+          "domains": {
+            "a": [
+              0,
+              1
+            ],
+            "b": [
+              0,
+              1
+            ]
+          },
+          "arcs": [
+            {
+              "from": "a",
+              "to": "b",
+              "allowed": [
+                [
+                  0,
+                  1
+                ]
+              ]
+            }
+          ],
+          "expected": {
+            "domains": {
+              "a": [
+                0
+              ],
+              "b": [
+                0,
+                1
+              ]
+            },
+            "status": "ARC-CONSISTENT"
+          }
+        },
+        {
+          "domains": {
+            "x": [
+              0,
+              1
+            ],
+            "y": [
+              0,
+              1
+            ],
+            "z": [
+              1
+            ]
+          },
+          "arcs": [
+            {
+              "from": "x",
+              "to": "y",
+              "allowed": [
+                [
+                  0,
+                  0
+                ],
+                [
+                  1,
+                  1
+                ]
+              ]
+            },
+            {
+              "from": "y",
+              "to": "z",
+              "allowed": [
+                [
+                  1,
+                  1
+                ]
+              ]
+            }
+          ],
+          "expected": {
+            "domains": {
+              "x": [
+                1
+              ],
+              "y": [
+                1
+              ],
+              "z": [
+                1
+              ]
+            },
+            "status": "ARC-CONSISTENT"
+          }
+        },
+        {
+          "domains": {
+            "a": [
+              0
+            ],
+            "b": [
+              1
+            ]
+          },
+          "arcs": [
+            {
+              "from": "a",
+              "to": "b",
+              "allowed": [
+                [
+                  0,
+                  0
+                ]
+              ]
+            }
+          ],
+          "expected": {
+            "domains": {
+              "a": [],
+              "b": [
+                1
+              ]
+            },
+            "status": "EMPTY-DOMAIN-CONTRADICTION"
+          }
+        },
+        {
+          "domains": {
+            "a": [
+              0,
+              1
+            ],
+            "b": [
+              0,
+              1
+            ],
+            "c": [
+              0,
+              1
+            ]
+          },
+          "arcs": [
+            {
+              "from": "a",
+              "to": "b",
+              "allowed": [
+                [
+                  0,
+                  1
+                ],
+                [
+                  1,
+                  0
+                ]
+              ]
+            },
+            {
+              "from": "b",
+              "to": "c",
+              "allowed": [
+                [
+                  0,
+                  1
+                ],
+                [
+                  1,
+                  0
+                ]
+              ]
+            },
+            {
+              "from": "c",
+              "to": "a",
+              "allowed": [
+                [
+                  0,
+                  1
+                ],
+                [
+                  1,
+                  0
+                ]
+              ]
+            }
+          ],
+          "expected": {
+            "domains": {
+              "a": [
+                0,
+                1
+              ],
+              "b": [
+                0,
+                1
+              ],
+              "c": [
+                0,
+                1
+              ]
+            },
+            "status": "ARC-CONSISTENT"
+          },
+          "note": "Odd-cycle nonempty local support is NOT global SAT"
+        },
+        {
+          "domains": {
+            "a": [
+              0
+            ],
+            "b": [
+              1
+            ]
+          },
+          "arcs": [],
+          "expected": {
+            "domains": {
+              "a": [
+                0
+              ],
+              "b": [
+                1
+              ]
+            },
+            "status": "ARC-CONSISTENT"
+          }
+        }
+      ],
+      "falsifiers": [
+        "An asymmetric directed arc must prune only the declared source; inventing reverse constraints changes the result.",
+        "After reducing Y, all incoming dependent arcs X→Y must be reconsidered until a true fixed point.",
+        "Locally consistent 3-variable odd-cycle 2-coloring is globally unsatisfiable; never infer SAT from nonempty domains.",
+        "Any empty domain returns EMPTY-DOMAIN-CONTRADICTION, never ARC-CONSISTENT.",
+        "Malformed directed edges, out-of-domain names, booleans posing as integers, duplicate conflicting arcs and unbounded inputs must fail closed.",
+        "Reduction may never invent domain values or compatible ordered pairs absent from the source relation."
+      ],
       "independent_checks": [
         "tests/test_d10_finite_arc_consistency.py",
         "tests/oracles/d10_finite_arc_consistency.pl"
@@ -15172,7 +15405,8 @@
       "coordinate_basis": "UNPLACED",
       "donor_coordinate_authority": "NONE",
       "ratified_resident": false,
-      "physical_t5_authorized": false
+      "physical_t5_authorized": false,
+      "primary_url": "https://doi.org/10.1016/0004-3702(77)90007-8"
     },
     {
       "stable_id": "d10.evidence.admission.ground-congruence-closure-partition.20261011",
