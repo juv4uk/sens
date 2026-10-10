@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Run every registered SENS benchmark reproduction command, without fail-fast.
 
-Each stand is isolated in its own CI matrix job by .github/workflows/benchmark-sweep.yml.
+Each stand is isolated in its own CI matrix job by .github/workflows/benchmark-registry.yml.
 Manifest commands are executed verbatim from the repository root and logged as artifacts.
 """
 from __future__ import annotations
@@ -172,7 +172,7 @@ def main() -> int:
     if args.list_json:
         matrix = {
             "include": [
-                {"stand": item["stand"], "reproduce": item["reproduce"]}
+                {"stand": item["stand"]}
                 for item in manifests
             ]
         }
