@@ -285,6 +285,7 @@ class TestT5MigrationInventory(unittest.TestCase):
             self.assertEqual(row["authority"], "research/framed3 (не canonic)", path)
             self.assertEqual(row["dependency"], "#5429,#5439", path)
         self.assertEqual(rows["research/framed3/adaptive_encoder.py"]["codec"], "T5+SENC")
+        self.assertEqual(rows["research/framed3/test_research_codec.py"]["codec"], "T5+SENC")
         self.assertEqual(rows["research/framed3/test_adaptive_encoder.py"]["codec"], "T5")
         self.assertEqual(rows["research/framed3/test_tb33_capacity.py"]["codec"], "T5")
 
