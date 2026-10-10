@@ -398,7 +398,7 @@
       ((00000011 stage (00000001 objects)) t)
       ((00000011 stage (00000001 journal)) t)
       ((00000011 stage (00000001 root-pointer)) t)
-      (1 (00000001 ())))))
+      )))
 
 (00001001 fs-recover-commit
   (00001000 (old-fs new-fs completed-stage)
