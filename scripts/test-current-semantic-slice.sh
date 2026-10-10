@@ -95,6 +95,11 @@ probes = {
     "list-two-probe": "\n(00100111 (00000001 a) (00000001 b))\n",
     "list-seven-probe": "\n(00100111 (00000001 a) (00000001 b) (00000001 c) (00000001 d) (00000001 e) (00000001 f) (00000001 g))\n",
     "rows-planck-cesium-prefix": "\n((функція (planck) ((функція (cesium) (00100111 planck cesium)) (scientific-constant-quantity si:defining-cesium-frequency))) (scientific-constant-quantity si:defining-planck-constant))\n",
+    "rows-energy-prefix": "\n((функція (planck) ((функція (cesium) ((функція (energy) energy) (quantity-product planck cesium))) (scientific-constant-quantity si:defining-cesium-frequency))) (scientific-constant-quantity si:defining-planck-constant))\n",
+    "rows-one-second-prefix": "\n((функція (one-second) one-second) (make-quantity 1 (make-unit (00100111 (make-dimension (00000001 second) 1)))))\n",
+    "rows-speed-prefix": "\n((функція (speed) speed) (scientific-constant-quantity si:defining-speed-of-light))\n",
+    "rows-distance-prefix": "\n((функція (speed) ((функція (one-second) (quantity-product speed one-second)) (make-quantity 1 (make-unit (00100111 (make-dimension (00000001 second) 1))))) (scientific-constant-quantity si:defining-speed-of-light))\n",
+    "rows-recovered-prefix": "\n((функція (speed) ((функція (one-second) ((функція (distance) ((функція (recovered) recovered) (quantity-quotient distance one-second)) (quantity-product speed one-second))) (make-quantity 1 (make-unit (00100111 (make-dimension (00000001 second) 1))))) (scientific-constant-quantity si:defining-speed-of-light))\n",
     "planck-value": "\n(quantity-value (scientific-constant-quantity si:defining-planck-constant))\n",
     "planck-unit": "\n(quantity-unit (scientific-constant-quantity si:defining-planck-constant))\n",
     "numeric-product": "\n(00001110 (quantity-value (scientific-constant-quantity si:defining-planck-constant)) (quantity-value (scientific-constant-quantity si:defining-cesium-frequency)))\n",
@@ -107,7 +112,7 @@ for stage, suffix in probes.items():
     )
 PY
 
-  for stage in rows-binding check-binding witness-binding rows-call check-call planck-record cesium-record planck-value planck-unit numeric-product quantity-product one-second merge-dimensions product-units speed-proper-list speed-constant-valid speed-source-valid speed-constant-clauses distance-product speed-quotient lambda-identity-probe lambda-nested-probe list-two-probe list-seven-probe rows-planck-cesium-prefix; do
+  for stage in rows-binding check-binding witness-binding rows-call check-call planck-record cesium-record planck-value planck-unit numeric-product quantity-product one-second merge-dimensions product-units speed-proper-list speed-constant-valid speed-source-valid speed-constant-clauses distance-product speed-quotient lambda-identity-probe lambda-nested-probe list-two-probe list-seven-probe rows-planck-cesium-prefix rows-energy-prefix rows-one-second-prefix rows-speed-prefix rows-distance-prefix rows-recovered-prefix; do
     probe="$quantity_diag_dir/exact-quantity-$stage-probe.lisp"
     log="$quantity_diag_dir/exact-quantity-$stage-probe.log"
     if cargo run --quiet -p sens-cli --bin sens -- "$probe" >"$log" 2>&1; then
