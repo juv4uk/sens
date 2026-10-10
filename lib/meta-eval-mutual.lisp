@@ -33,7 +33,7 @@
       ((00000010 form)  (00000001 ()))
       ((00000011 (00000101 form) (00000001 def))
        (my-lambda-form? (00110000 form)))
-      (1 (00000001 ())))))
+      )))
 
 (00001001 my-take-lambda-def-group
   (00001000 (forms)
@@ -43,7 +43,7 @@
       ((my-lambda-def-form? (00000101 forms))
        (00000100 (00000101 forms)
              (my-take-lambda-def-group (00000110 forms))))
-      (1 (00000001 ())))))
+      )))
 
 (00001001 my-drop-lambda-def-group
   (00001000 (forms)
