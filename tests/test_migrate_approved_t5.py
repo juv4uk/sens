@@ -23,6 +23,7 @@ class ApprovedT5MigrationTests(unittest.TestCase):
             "--manifest", str(manifest),
             "--out", str(out),
             "--report", str(report),
+            "--reader", str(ROOT / "target" / "debug" / "sens-trit"),
         ]
         if dry_run:
             args.append("--dry-run")
