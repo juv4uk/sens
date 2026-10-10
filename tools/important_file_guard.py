@@ -113,16 +113,6 @@ def typechanged_paths(data: bytes) -> list[str]:
     return found
 
 
-REGULAR_BLOB_MODES = frozenset(("100644:blob", "100755:blob"))
-
-
-def require_regular_typechange_modes(rows: list[tuple[str, str]]) -> None:
-    """Refuse to hand a symlink/gitlink type change to the source oracle."""
-    for path, mode in rows:
-        if mode not in REGULAR_BLOB_MODES:
-            fail(f"GIT_TYPECHANGE_NON_REGULAR_OBJECT: {path}: {mode}")
-
-
 def lisp_string(value: str) -> str:
     # Git permits newlines/control characters in paths; the SENS source carrier
     # intentionally refuses them instead of emitting ambiguous Lisp source.
@@ -183,19 +173,29 @@ def path_status(name: str, value: str | None) -> str:
 
 
 def input_form(
-    added: list[str], tracked_tools: list[str], modes: list[tuple[str, str]]
+    added: list[str],
+    tracked_tools: list[str],
+    modes: list[tuple[str, str]],
+    typechanged: list[str],
+    typechanged_modes: list[tuple[str, str]],
 ) -> str:
     mode_rows = "(" + " ".join(
         "(" + lisp_string(path) + " . " + lisp_string(mode) + ")"
         for path, mode in modes
     ) + ")"
+    typechanged_mode_rows = "(" + " ".join(
+        "(" + lisp_string(path) + " . " + lisp_string(mode) + ")"
+        for path, mode in typechanged_modes
+    ) + ")"
     return (
-        "(00001001 *file-authority-input*\n"
-        "  (00000001\n"
-        "    ((schema . file-authority-input/1)\n"
-        f"     (added-paths . {lisp_list(added)})\n"
-        f"     (added-modes . {mode_rows})\n"
-        f"     (tracked-tools-paths . {lisp_list(tracked_tools)}))))\n"
+        "(00001001 *file-authority-input*\\n"
+        "  (00000001\\n"
+        "    ((schema . file-authority-input/1)\\n"
+        f"     (added-paths . {lisp_list(added)})\\n"
+        f"     (added-modes . {mode_rows})\\n"
+        f"     (typechanged-paths . {lisp_list(typechanged)})\\n"
+        f"     (typechanged-modes . {typechanged_mode_rows})\\n"
+        f"     (tracked-tools-paths . {lisp_list(tracked_tools)}))))\\n"
     )
 
 
@@ -219,7 +219,14 @@ def fail_program(reason: str) -> str:
     return f"(sens_file_authority_source_missing_5397_{reason})\n"
 
 
-def build_bundle(added: list[str], tracked_tools: list[str], modes: list[tuple[str, str]], head: str) -> str:
+def build_bundle(
+    added: list[str],
+    tracked_tools: list[str],
+    modes: list[tuple[str, str]],
+    typechanged: list[str],
+    typechanged_modes: list[tuple[str, str]],
+    head: str,
+) -> str:
     core = read_head_source(head, "lib/core.lisp")
     policy = read_head_source(head, "knowledge/file-authority-policy.lisp")
     census = read_head_source(head, "knowledge/foreign-tools-census.lisp")
@@ -236,7 +243,7 @@ def build_bundle(added: list[str], tracked_tools: list[str], modes: list[tuple[s
     if census is not None:
         parts.append(census)
     parts.append(status_form(policy, census, guard))
-    parts.append(input_form(added, tracked_tools, modes))
+    parts.append(input_form(added, tracked_tools, modes, typechanged, typechanged_modes))
     parts.append(guard)
     return "\n\n".join(parts) + "\n"
 
@@ -280,13 +287,13 @@ def self_test() -> None:
     ):
         if not catches(lambda malformed=malformed: typechanged_paths(malformed)):
             fail("TRANSPORT_SELF_TEST_ACCEPTED_MALFORMED_TYPE_CHANGE")
-    expect(
-        "regular-typechange-mode",
-        require_regular_typechange_modes([("lib/sample.sens", "100644:blob")]),
-        None,
+    encoded_typechange_input = input_form(
+        [], [], [], ["lib/sample.sens"], [("lib/sample.sens", "120000:blob")]
     )
-    if not catches(lambda: require_regular_typechange_modes([("lib/sample.sens", "120000:blob")])):
-        fail("TRANSPORT_SELF_TEST_ACCEPTED_SYMLINK_TYPE_CHANGE")
+    expect("type-change-path-is-transported-separately",
+           "typechanged-paths" in encoded_typechange_input, True)
+    expect("type-change-mode-is-transported-separately",
+           "120000:blob" in encoded_typechange_input, True)
     expect("UTF8-path", nul_paths("knowledge/дані.sens".encode("utf-8") + b"\x00"),
            ["knowledge/дані.sens"])
     if not catches(lambda: nul_paths(b"unterminated")):
@@ -342,8 +349,14 @@ def self_test() -> None:
         fields = tree_record[:-1].split(bytes([9]), 1)[0].split(b" ")
         mode = fields[0].decode("ascii") + ":" + fields[1].decode("ascii")
         expect("real-Git-symlink-mode", mode, "120000:blob")
-        if not catches(lambda: require_regular_typechange_modes([("lib/sample.sens", mode)])):
-            fail("TRANSPORT_SELF_TEST_ACCEPTED_REAL_GIT_SYMLINK_TYPE_CHANGE")
+        regular_record = subprocess.run(
+            ["git", "-C", str(root), "ls-tree", "-z", "--full-tree",
+             base_tree, "--", "lib/sample.sens"],
+            check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+        ).stdout
+        regular_fields = regular_record[:-1].split(bytes([9]), 1)[0].split(b" ")
+        regular_mode = regular_fields[0].decode("ascii") + ":" + regular_fields[1].decode("ascii")
+        expect("real-Git-original-regular-mode", regular_mode, "100644:blob")
 
     # Один точний Git tree, зіпсовані index і worktree: SENS отримує лише HEAD-факти.
     with tempfile.TemporaryDirectory(prefix="sens-head-ingress-") as temporary:
@@ -429,11 +442,10 @@ def main() -> int:
     type_changes = git("diff", "--name-status", "-z", "--diff-filter=T", args.base, head)
     typechanged = typechanged_paths(type_changes)
     typechanged_modes = [(path, git_path_mode(head, path)) for path in typechanged]
-    require_regular_typechange_modes(typechanged_modes)
 
     tracked_tools = nul_paths(git("ls-tree", "-r", "-z", "--name-only", "--full-tree", head, "--", "tools/"))
     modes = [(path, git_path_mode(head, path)) for path in added]
-    bundle = build_bundle(added, tracked_tools, modes, head)
+    bundle = build_bundle(added, tracked_tools, modes, typechanged, typechanged_modes, head)
 
     args.output.parent.mkdir(parents=True, exist_ok=True)
     args.output.write_bytes(bundle.encode("utf-8", "strict"))
