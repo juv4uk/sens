@@ -86,7 +86,7 @@
         ((00100010 semantic-id 00000101) (00000001 car))
         ((00100010 semantic-id 00000110) (00000001 cdr))
         ((00100010 semantic-id 00000111) (00000001 cond))
-        (1 (00000001 ()))))))
+        ))))
 
 (00001001 my-lambda-name?
   (00001000 (name)
@@ -109,13 +109,13 @@
     (00000111
       ((my-define-name? name) t)
       ((my-def-compat-name? name) t)
-      (1 (00000001 ())))))
+      )))
 
 (00001001 my-canon-name?
   (00001000 (name)
     (00000111
       ((my-canon-identity name) t)
-      (1 (00000001 ())))))
+      )))
 
 (00001001 my-canon-callable-identity?
   (00001000 (identity-ref)
@@ -125,7 +125,7 @@
       ((00000011 identity-ref (00000001 cons)) t)
       ((00000011 identity-ref (00000001 car)) t)
       ((00000011 identity-ref (00000001 cdr)) t)
-      (1 (00000001 ())))))
+      )))
 
 (00001001 my-canon-quote-name?
   (00001000 (name)
@@ -314,7 +314,7 @@
          ((env-bound? name env-ref) (00000001 ()))
          ((my-primitive? (my-default-binding name)) (00000001 ()))
          (1 t)))
-      (1 (00000001 ())))))
+      )))
 
 (00001001 my-macro?
   (00001000 (value)
@@ -363,7 +363,7 @@
       ((00000010 form)  (00000001 ()))
       ((0100 (00000010 (00000101 form))) (my-lambda-name? (00000101 form)))
       ((00000010 (00000101 form))  (my-lambda-name? (00000101 form)))
-      (1 (00000001 ())))))
+      )))
 
 (00001001 my-lambda-def-form?
   (00001000 (form)
@@ -374,7 +374,7 @@
        (00000111
          ((my-canon-name? (00101111 form)) (00000001 ()))
          (1 (my-lambda-form? (00110000 form)))))
-      (1 (00000001 ())))))
+      )))
 
 (00001001 my-fourth
   (00001000 (values)
@@ -394,7 +394,7 @@
       ((00000011 operator 00011010) (00011010 left right))
       ((00000011 operator 00011100) (00011100 left right))
       ((00000011 operator 00011011) (00011011 left right))
-      (1 (00000001 ())))))
+      )))
 
 ; Chained comparison semantics are Lisp-owned: values arrive already
 ; evaluated, adjacent pairs are compared left-to-right, and evaluation stops
@@ -409,7 +409,7 @@
       ((00000010 (00000110 values))  t)
       ((00000011 (my-compare-two operator (00000101 values) (00101111 values)) 1)
        (my-compare-chain operator (00000110 values)))
-      (1 (00000001 ())))))
+      )))
 
 ; Primitive *identity* is a Lisp value. This function is the narrow bridge
 ; from that identity to the admitted native operation mechanism.
@@ -468,7 +468,7 @@
         (1
          (00000111
            ((00011100 received fixed)  t)
-           (1 (00000001 ()))))))))
+           ))))))
 
 (00001001 my-arity-detail
   (00001000 (params args)
@@ -507,7 +507,7 @@
              (00100111 (00000001 canonical-parameter) params))
             ((my-symbol-member? params seen)
              (00100111 (00000001 duplicate-parameter) params))
-            (1 (00000001 ()))))
+            ))
          (1 (00100111 (00000001 invalid-rest) params))))
       ((00000010 params)  (00000111
          ((00000011 params (00000001 ())) (00000001 ()))
@@ -517,7 +517,7 @@
              (00100111 (00000001 canonical-parameter) params))
             ((my-symbol-member? params seen)
              (00100111 (00000001 duplicate-parameter) params))
-            (1 (00000001 ()))))
+            ))
          (1 (00100111 (00000001 invalid-rest) params))))
       ((00100011 (00000101 params))
        (00000111
@@ -540,7 +540,7 @@
           (00000111
             ((my-canon-name? params)
              (00100111 (00000001 canonical-parameter) params))
-            (1 (00000001 ()))))
+            ))
          (1 (00100111 (00000001 invalid-parameters) params))))
       ((00000010 params)  (00000111
          ((00000011 params (00000001 ())) (00000001 ()))
@@ -548,7 +548,7 @@
           (00000111
             ((my-canon-name? params)
              (00100111 (00000001 canonical-parameter) params))
-            (1 (00000001 ()))))
+            ))
          (1 (00100111 (00000001 invalid-parameters) params))))
       (1 (my-lambda-list-error-pairs params (00000001 ()))))))
 
@@ -709,7 +709,7 @@
       ((my-lambda-def-form? (00000101 forms))
        (00000100 (00000101 forms)
              (my-take-lambda-def-group (00000110 forms))))
-      (1 (00000001 ())))))
+      )))
 
 (00001001 my-drop-lambda-def-group
   (00001000 (forms)
@@ -1035,11 +1035,11 @@
       ((0100 (00000010 params)) (00000111
          ((00000011 params (00000001 ())) (00000001 ()))
          ((00000011 params name) t)
-         (1 (00000001 ()))))
+         ))
       ((00000010 params)  (00000111
          ((00000011 params (00000001 ())) (00000001 ()))
          ((00000011 params name) t)
-         (1 (00000001 ()))))
+         ))
       ((00000011 (00000101 params) name) t)
       (1 (my-params-bind-name? name (00000110 params))))))
 
@@ -1056,10 +1056,10 @@
     (00000111
       ((0100 (00000010 form)) (00000111
          ((00100011 form) (00000011 form name))
-         (1 (00000001 ()))))
+         ))
       ((00000010 form)  (00000111
          ((00100011 form) (00000011 form name))
-         (1 (00000001 ()))))
+         ))
       ((0100 (00000010 (00000101 form))) (00000111
          ; Quoted data is not a lexical dependency.
          ((my-canon-quote-name? (00000101 form)) (00000001 ()))
