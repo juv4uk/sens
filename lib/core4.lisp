@@ -221,12 +221,14 @@
   (00001000 (left right)
     (зворот-до (00101010 left) right)))
 
+; MAP is Lisp-owned and follows strict D1: ATOM(()) selects the base case;
+; a Pair produces D1:0 and reaches the recursive fallback. Never compare
+; PredicateBit to a quoted numeric list or emit historical 3-part COND.
 (00001001 map-onto
   (00001000 (f values acc)
     (00000111
-      ((00000010 values) () (00101010 acc))
-      ((00000010 values)  (00000001 ()))
-      ((00100010 (00000010 values) (00000001 (0)))
+      ((00000010 values) (00101010 acc))
+      ((00000010 (00000001 ()))
        (map-onto f (00000110 values) (00000100 (f (00000101 values)) acc))))))
 
 (00001001 map
