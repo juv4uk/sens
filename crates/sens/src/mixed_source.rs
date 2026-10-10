@@ -20,6 +20,27 @@ use std::rc::Rc;
 ///
 /// This is a migration bridge, not a new canonical wire syntax.
 pub fn parse_mixed_exact_domain(source: &str) -> Result<Vec<Expr>, LanguageError> {
+    parse_mixed_source(source, false)
+}
+
+/// Parse a trusted `lib/machine/**` Lisp source file whose outer definition
+/// and lambda wrappers still use historical 8-bit syntax, but whose executable
+/// bodies contain current exact-width D3-D6 call heads.
+///
+/// This is deliberately separate from `parse_mixed_exact_domain`: ordinary
+/// mixed source keeps legacy W8 forms opaque. Callers must restrict this mode
+/// to the approved machine-source loader boundary; it is not a global reader
+/// mode and does not reinterpret numbers, quoted data, or W8 heads as D8 laws.
+pub fn parse_mixed_exact_domain_machine_source(
+    source: &str,
+) -> Result<Vec<Expr>, LanguageError> {
+    parse_mixed_source(source, true)
+}
+
+fn parse_mixed_source(
+    source: &str,
+    descend_legacy_machine_wrappers: bool,
+) -> Result<Vec<Expr>, LanguageError> {
     let expressions = crate::parser::parse(source)?;
     // Call-head source spellings are NOT authoritative domain identities
     // when this very source declares the spelling as a DEFINE or LAMBDA
@@ -28,11 +49,24 @@ pub fn parse_mixed_exact_domain(source: &str) -> Result<Vec<Expr>, LanguageError
     // declining a projection is safer than silently calling a builtin.
     let mut bound_names = HashSet::new();
     for expression in &expressions {
-        collect_source_bindings(source, expression, &mut bound_names);
+        collect_source_bindings(
+            source,
+            expression,
+            &mut bound_names,
+            descend_legacy_machine_wrappers,
+        );
     }
     expressions
         .into_iter()
-        .map(|expression| lift_expression(source, expression, 0, &bound_names))
+        .map(|expression| {
+            lift_expression(
+                source,
+                expression,
+                0,
+                &bound_names,
+                descend_legacy_machine_wrappers,
+            )
+        })
         .collect()
 }
 
@@ -59,10 +93,48 @@ fn is_source_quote(source: &str, head: &Expr) -> bool {
 
 /// Source-language binder inventory, not an inference of runtime identity.
 /// Ignore quoted records and ambiguous old exact-eight forms entirely.
-fn collect_source_bindings(source: &str, expression: &Expr, names: &mut HashSet<String>) {
+fn collect_source_bindings(
+    source: &str,
+    expression: &Expr,
+    names: &mut HashSet<String>,
+    descend_legacy_machine_wrappers: bool,
+) {
     let ExprKind::List(items) = &expression.kind else { return };
     let Some(head) = items.first() else { return };
-    if is_source_quote(source, head) || is_opaque_legacy_w8_head(source, head) {
+    if is_source_quote(source, head)
+        || (is_opaque_legacy_w8_head(source, head)
+            && (!descend_legacy_machine_wrappers || is_legacy_w8_quote_head(source, head)))
+    {
+        return;
+    }
+    if descend_legacy_machine_wrappers && is_legacy_w8_define_head(source, head) {
+        if let Some(target) = items.get(1) {
+            if matches!(&target.kind, ExprKind::Symbol(_)) {
+                if let Some(name) = source_spelling(source, target) {
+                    names.insert(name.to_owned());
+                }
+            }
+        }
+        for child in items.iter().skip(2) {
+            collect_source_bindings(
+                source,
+                child,
+                names,
+                descend_legacy_machine_wrappers,
+            );
+        }
+        return;
+    }
+    if descend_legacy_machine_wrappers && is_legacy_w8_lambda_head(source, head) {
+        // W8 lambda parameter lists are binding data, not call-head positions.
+        for child in items.iter().skip(2) {
+            collect_source_bindings(
+                source,
+                child,
+                names,
+                descend_legacy_machine_wrappers,
+            );
+        }
         return;
     }
     let binding = binding_form(source, head);
@@ -89,13 +161,13 @@ fn collect_source_bindings(source: &str, expression: &Expr, names: &mut HashSet<
     // executable callable head. Its test expression may itself introduce
     // a nested binder; do not lose it merely because the parent is a list.
     if matches!(&head.kind, ExprKind::List(_)) {
-        collect_source_bindings(source, head, names);
+        collect_source_bindings(source, head, names, descend_legacy_machine_wrappers);
     }
     for (index, child) in items.iter().enumerate().skip(1) {
         if binding.is_some() && index == 1 {
             continue;
         }
-        collect_source_bindings(source, child, names);
+        collect_source_bindings(source, child, names, descend_legacy_machine_wrappers);
     }
 }
 
@@ -104,6 +176,7 @@ fn lift_expression(
     expression: Expr,
     depth: u32,
     bound_names: &HashSet<String>,
+    descend_legacy_machine_wrappers: bool,
 ) -> Result<Expr, LanguageError> {
     if depth > MAX_STRUCTURE_DEPTH {
         return Err(LanguageError::new(
@@ -117,15 +190,58 @@ fn lift_expression(
     match kind {
         ExprKind::List(items) if !items.is_empty() => {
             let mut lifted = items.to_vec();
+
+            // In the explicitly approved machine-source mode, keep the
+            // historical W8 DEFINE/LAMBDA wrappers as syntax containers, but
+            // descend only into their executable bodies. Their target names
+            // and parameter lists remain data and are never width-lifted.
+            // W8 QUOTE remains opaque in every mode so quoted (100 ...) data
+            // is never projected to a callable D3 identity.
+            if descend_legacy_machine_wrappers && is_legacy_w8_quote_head(source, &lifted[0]) {
+                return Ok(Expr {
+                    kind: ExprKind::List(Rc::from(lifted.into_boxed_slice())),
+                    span,
+                });
+            }
+            if descend_legacy_machine_wrappers && is_legacy_w8_define_head(source, &lifted[0]) {
+                for item in lifted.iter_mut().skip(2) {
+                    *item = lift_expression(
+                        source,
+                        item.clone(),
+                        depth + 1,
+                        bound_names,
+                        descend_legacy_machine_wrappers,
+                    )?;
+                }
+                return Ok(Expr {
+                    kind: ExprKind::List(Rc::from(lifted.into_boxed_slice())),
+                    span,
+                });
+            }
+            if descend_legacy_machine_wrappers && is_legacy_w8_lambda_head(source, &lifted[0]) {
+                for item in lifted.iter_mut().skip(2) {
+                    *item = lift_expression(
+                        source,
+                        item.clone(),
+                        depth + 1,
+                        bound_names,
+                        descend_legacy_machine_wrappers,
+                    )?;
+                }
+                return Ok(Expr {
+                    kind: ExprKind::List(Rc::from(lifted.into_boxed_slice())),
+                    span,
+                });
+            }
+
             lifted[0] = lift_head(source, lifted[0].clone(), bound_names)?;
 
-            // Legacy exact-eight heads belong to the ordinary compatibility
-            // parser. They are OPAQUE while their historical source-era and
-            // owner-ratified current successor remain unproved. In particular
-            // old W8 QUOTE must never convert a quoted (100 ...) data list
-            // into a current D3 CAR call merely because that nested head is
-            // three bits wide. Do not infer current D8 from spelling.
-            if is_opaque_legacy_w8_head(source, &lifted[0]) {
+            // Legacy W8 heads remain opaque in ordinary mixed source. The
+            // machine-source mode descends only through non-QUOTE wrappers
+            // under its explicit caller contract; it never infers current D8.
+            if is_opaque_legacy_w8_head(source, &lifted[0])
+                && !descend_legacy_machine_wrappers
+            {
                 return Ok(Expr {
                     kind: ExprKind::List(Rc::from(lifted.into_boxed_slice())),
                     span,
@@ -140,7 +256,7 @@ fn lift_expression(
             if !quote_data {
                 if is_exact_cond(&lifted[0]) {
                     for clause in lifted.iter_mut().skip(1) {
-                        *clause = lift_cond_clause(source, clause.clone(), depth + 1, bound_names)?;
+                        *clause = lift_cond_clause(source, clause.clone(), depth + 1, bound_names, descend_legacy_machine_wrappers)?;
                     }
                 } else {
                     // D4 LAMBDA parameter declarations and D4 DEFINE binding
@@ -152,7 +268,7 @@ fn lift_expression(
                         if binding_head && index == 1 {
                             continue;
                         }
-                        *item = lift_expression(source, item.clone(), depth + 1, bound_names)?;
+                        *item = lift_expression(source, item.clone(), depth + 1, bound_names, descend_legacy_machine_wrappers)?;
                     }
                 }
             }
@@ -224,13 +340,14 @@ fn lift_cond_clause(
     clause: Expr,
     depth: u32,
     bound_names: &HashSet<String>,
+    descend_legacy_machine_wrappers: bool,
 ) -> Result<Expr, LanguageError> {
     let Expr { kind, span } = clause;
     match kind {
         ExprKind::List(items) => {
             let mut lifted = items.to_vec();
             for item in &mut lifted {
-                *item = lift_expression(source, item.clone(), depth + 1, bound_names)?;
+                *item = lift_expression(source, item.clone(), depth + 1, bound_names, descend_legacy_machine_wrappers)?;
             }
             Ok(Expr {
                 kind: ExprKind::List(Rc::from(lifted.into_boxed_slice())),
@@ -243,6 +360,18 @@ fn lift_cond_clause(
 
 fn source_spelling<'a>(source: &'a str, expression: &Expr) -> Option<&'a str> {
     source.get(expression.span.start..expression.span.end)
+}
+
+fn is_legacy_w8_quote_head(source: &str, head: &Expr) -> bool {
+    source_spelling(source, head) == Some("00000001")
+}
+
+fn is_legacy_w8_define_head(source: &str, head: &Expr) -> bool {
+    source_spelling(source, head) == Some("00001001")
+}
+
+fn is_legacy_w8_lambda_head(source: &str, head: &Expr) -> bool {
+    source_spelling(source, head) == Some("00001000")
 }
 
 /// Opaque W8 compatibility syntax is not an admission of current D8.
