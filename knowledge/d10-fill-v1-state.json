@@ -28,10 +28,10 @@
     "width": 10,
     "capacity": 1024,
     "dense_target": 1024,
-    "selected_semantic_candidates": 647,
-    "remaining_semantic_candidates": 377,
+    "selected_semantic_candidates": 648,
+    "remaining_semantic_candidates": 376,
     "law_forced_coordinates": 256,
-    "unplaced_selected_candidates": 391,
+    "unplaced_selected_candidates": 392,
     "ratified_residents": 0
   },
   "first_tranche": {
@@ -418,5 +418,18 @@
     "ratified_added": 0,
     "derivability": "PENDING-OWNER-REVIEW",
     "independent_evidence": "TI SCEA046 dual hysteresis thresholds + existing research witnesses; comparator polarity is an explicit modeling convention"
+  },
+  "change_class_historical_v1": {
+    "authority": "#4013 #4463 #4842",
+    "artifact": "knowledge/d10-change-class-selection-v1.json",
+    "selected": 1,
+    "previous_selected": 647,
+    "resulting_selected": 648,
+    "base_inventory_blob_sha": "7e13e929338baeef9b16c2139d24b78e23ea1e03",
+    "resulting_inventory_blob_sha": "ceb4b834020e9f91da632e3fcff2adbe95d86ab7",
+    "coordinates_added": 0,
+    "ratified_added": 0,
+    "source": "CLOS-03 / ANSI CLHS CHANGE-CLASS",
+    "status": "SELECTED-RESEARCH-CANDIDATE; PENDING OWNER REVIEW; no D10 coordinate"
   }
 }
