@@ -20,6 +20,14 @@
      (scope . added-paths-in-Git-tree)
      (rename-or-copy . treat-new-path-as-added)
      (failure . fail-closed)
+     ; Контракт межі Git — лише транспорт назв, не семантичний оракул.
+     (git-path-intake .
+       ((format . nul-terminated-utf8)
+        (empty-complete-list . allowed)
+        (missing-final-nul . blocked)
+        (empty-record . blocked)
+        (invalid-utf8 . blocked)
+        (policy-verdict-owner . SENS)))
      (human-surface . ukrainian)
      (semantic-admission-from-extension . ())
      (semantic-admission-from-host-guard . ())
