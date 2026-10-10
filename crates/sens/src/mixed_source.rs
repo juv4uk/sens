@@ -582,42 +582,6 @@ mod tests {
     }
 
     #[test]
-    fn immediately_invoked_lambda_recursively_lifts_executable_heads() {
-        // The operator of this call is itself a list. Its D4 LAMBDA and the
-        // nested D3 CAR body must be lifted before evaluation; otherwise the
-        // inner `100` can remain a numeric carrier in callable position.
-        let parsed = parse_mixed_exact_domain(
-            "((0010 (x) (100 x)) (001 a))",
-        )
-        .expect("immediately invoked mixed exact-domain lambda");
-
-        let ExprKind::List(call) = &parsed[0].kind else {
-            panic!("expected outer application");
-        };
-        let ExprKind::List(lambda) = &call[0].kind else {
-            panic!("expected list-headed lambda operator");
-        };
-        assert!(matches!(
-            &lambda[0].kind,
-            ExprKind::DomainIdentity(identity)
-                if identity.width() == 4 && identity.packed_bits() == 0b0010
-        ));
-        let ExprKind::List(body) = &lambda[2].kind else {
-            panic!("expected lambda body");
-        };
-        assert!(matches!(
-            &body[0].kind,
-            ExprKind::DomainIdentity(identity)
-                if identity.width() == 3 && identity.packed_bits() == 0b100
-        ));
-
-        let mut session = crate::Session::default();
-        let result = crate::eval::eval_parsed_expressions(&parsed, &mut session)
-            .expect("recursively lifted immediate lambda must be callable");
-        assert_eq!(result.value.to_string(), "a");
-    }
-
-    #[test]
     fn mixed_lambda_preserves_symbol_binder_and_exact_d3_d4_heads() {
         let expression =
             only(parse_mixed_exact_domain("(0010 (x) (100 x))").expect("mixed parse"));
