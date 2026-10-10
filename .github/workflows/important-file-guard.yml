@@ -59,6 +59,12 @@ jobs:
             echo "NAMED_FAIL: SENS_FILE_POLICY_BASE_MISSING" >&2
             exit 2
           }
+          # Активація постанови має належати історії саме цього HEAD.
+          # Існуючий, але сторонній SHA не може визначати обсяг доказу.
+          git merge-base --is-ancestor "$policy_base" "$HEAD_SHA" || {
+            echo "NAMED_FAIL: SENS_FILE_POLICY_BASE_NOT_ANCESTOR" >&2
+            exit 2
+          }
           if [[ "$GITHUB_EVENT_NAME" == "workflow_dispatch" ]]; then
             [[ "$GITHUB_REF" == "refs/heads/main" ]] || {
               echo "NAMED_FAIL: DISPATCH_REQUIRES_MAIN" >&2
