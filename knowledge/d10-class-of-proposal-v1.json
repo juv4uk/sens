@@ -26,7 +26,9 @@
     "donor_lines": "38-43",
     "type_of_context_url": "https://www.cs.cmu.edu/Groups/AI/html/hyperspec/HyperSpec/Body/sec_4-1.html",
     "type_of_detail_url": "https://www.lispworks.com/documentation/HyperSpec/Body/f_type_of.htm",
-    "oracle_commit": "e09294dad8a200cdb710fcfe8424ceefdeab071b"
+    "oracle_commit": "e09294dad8a200cdb710fcfe8424ceefdeab071b",
+    "oracle_lisp_blob_sha": "e4a47c2d06e3c6ae0c661b211fbb31d4a9e7358f",
+    "observation_artifact_blob_sha": "b290b8896722bd003cba46f651d9ff20d1e03dab"
   },
   "law": {
     "signature": "CLASS-OF(object) -> class-object",
