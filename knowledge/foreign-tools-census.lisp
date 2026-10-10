@@ -12,6 +12,7 @@
         (migration-plan . "міграція: інвентаризувати старі scripts/, tests/, benchmarks/, research/ та knowledge/; перенести перевірювані закони у виконувані SENS .lisp/.sens за незалежним oracle parity; не вилучати ратифікаційні JSON або Core4 FASL без замінного доказу")))
      (new-foreign-tools .
        (((path . "tools/file-authority-guard.sh") (independence_status . foreign) (migration_plan . "міграція: переписати механічний Git-сканер у SENS, залишивши мінімальний host-виклик лише для отримання Git-дерева; після доведення рівності відмов вилучити shell"))
+        ((path . "tools/check_source_policy.py") (independence_status . foreign) (migration_plan . "міграція: замінити інвентаризацію Git-дерева та негативні перевірки виконуваним SENS T5-оракулом; залишити недовірені назви файлів лише зовнішнім транспортом; вилучити Python після parity"))
         ((path . "tools/file_guard.py") (independence_status . foreign) (migration_plan . "міграція: перенести рішення щодо нових файлів у виконувану фізичну програму SENS; залишити Git лише транспортом назв; підтвердити негативні свідки й тоді вилучити Python"))
         ((path . "tools/important_file_guard.py") (independence_status . foreign) (migration_plan . "міграція: переписати обробку статусів Git та файловий допуск як фізичний SENS-доказ; звірити незалежні негативні випадки; видалити Python після доказу паритету"))))
      (new-python-without-entry . blocked)
