@@ -16,5 +16,5 @@
   "status": "ACTIVE",
   "generation": "unknown",
   "axis": "execution-ladder/structural-transmission-cost",
-  "reproduce": "python3 benchmarks/execution-ladder-objective/run.py benchmarks/execution-ladder-conformance/artifacts/bounded-d1-d3.jsonl --out /tmp/execution-ladder-objective.json"
+  "reproduce": "set -euo pipefail; helper=target/release/examples/execution_ladder_bounded_probe; artifact=\"$(mktemp /tmp/sens-bounded-d1-d3-XXXXXX.jsonl)\"; trap 'rm -f \"$artifact\"' EXIT; cargo build --locked --release -p sens --example execution_ladder_bounded_probe; sha=\"$(git rev-parse HEAD)\"; python3 benchmarks/execution-ladder-conformance/generate_bounded.py --helper \"$helper\" --upstream-sha \"$sha\" --out \"$artifact\"; python3 benchmarks/execution-ladder-conformance/validate.py \"$artifact\"; python3 benchmarks/execution-ladder-objective/run.py \"$artifact\" --out /tmp/execution-ladder-objective.json"
 }
