@@ -8,6 +8,8 @@
 ; LIVE MACHINE KEY:
 ;   (domain-width, packed-bits)
 ;
+; Atomic mechanism keys are compared by D3 EQ -> exact D1 PredicateBit;
+; historical structural EQUAL is not used to compare width/packed-bit scalars.
 ; Width is explicit mechanism data derived from Rust DomainIdentity::width().
 ; Packed bits are derived from DomainIdentity::packed_bits(). This remains
 ; width-safe even while ordinary Lisp source cannot preserve W1-W7 leading
@@ -123,9 +125,9 @@
   (00001000 (width bits rows)
     (00000111
       ((00000010 rows) (00000001 ()))
-      ((00100010 width (00000101 (00000101 rows)))
+      ((00000011 width (00000101 (00000101 rows)))
        (00000111
-         ((00100010 bits (00000101 (00000110 (00000101 rows))))
+         ((00000011 bits (00000101 (00000110 (00000101 rows))))
           (00000101 rows))
          ((00000010 (00000001 ()))
           (machine-capability-find-domain-row
@@ -150,7 +152,7 @@
   (00001000 (key rows)
     (00000111
       ((00000010 rows) (00000001 ()))
-      ((00100010 key (00000101 (00000101 rows))) (00000101 rows))
+      ((00000011 key (00000101 (00000101 rows))) (00000101 rows))
       ((00000010 (00000001 ())) (machine-capability-find-row key (00000110 rows))))))
 
 (00001001 machine-target-witness-status
