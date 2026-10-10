@@ -89,6 +89,7 @@ class EqCondCohort(unittest.TestCase):
                 self.assertEqual(physical.read_bytes(), expected)
                 self.assertEqual(M.encode_projection(projection), expected)
                 self.assertEqual(M.decode_bytes(expected), projection.split())
+                self.assertEqual((FIXTURES / stem).read_text(encoding="ascii"), projection + "\n")
                 self.assertEqual(
                     M.typed_sha256(M.decode_bytes(expected)),
                     M.typed_sha256(projection.split()),

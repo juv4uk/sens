@@ -57,7 +57,7 @@ class PairCohort(unittest.TestCase):
         cls.text7 = module.build_text7(table, ARGS["text7"])
 
     def project(self, source: str):
-        resolver = module.Resolver(self.legacy, self.my, self.upper)
+        resolver = module.Resolver(self.legacy, self.my, self.upper, source_era="legacy")
         return module.migrate_file(source, resolver, self.text7), resolver.counts
 
     def test_pinned_legacy_car_cdr_cons_successors_are_proven(self):
@@ -72,6 +72,8 @@ class PairCohort(unittest.TestCase):
                 source = (FIXTURES / f"{stem}.lisp").read_text(encoding="utf-8")
                 projection, counts = self.project(source)
                 self.assertEqual(projection, case["words"])
+                self.assertEqual((FIXTURES / stem).read_text(encoding="ascii"), case["words"])
+                self.assertEqual((FIXTURES / f"{stem}.sens").read_bytes(), case["t5"])
                 self.assertEqual(counts["pass1-sens8"], 3)
                 with tempfile.TemporaryDirectory() as directory:
                     out = Path(directory) / "out"
@@ -79,6 +81,7 @@ class PairCohort(unittest.TestCase):
                     command = [
                         sys.executable, str(SCRIPT), str(FIXTURES), "--out", str(out),
                         *[item for key, path in ARGS.items() for item in ("--" + key.replace("_", "-"), str(path))],
+                        "--source-era", "legacy",  # Explicit historical W8 provenance.
                         "--report", str(report),
                     ]
                     result = subprocess.run(command, capture_output=True, text=True)
@@ -86,6 +89,11 @@ class PairCohort(unittest.TestCase):
                     emitted = out / f"{stem}.sens"
                     self.assertEqual(emitted.read_bytes(), case["t5"])
                     self.assertEqual(module.decode_bytes(case["t5"]), case["words"].split())
+
+    def test_ambiguous_historical_w8_does_not_migrate_in_auto_mode(self):
+        resolver = module.Resolver(self.legacy, self.my, self.upper, source_era="auto")
+        with self.assertRaises(module.MigrationError):
+            module.migrate_file(CASES["pair-cons"]["source"], resolver, self.text7)
 
     def test_existing_lisp_provenance_is_preserved_and_corruption_fails_closed(self):
         for stem, case in CASES.items():

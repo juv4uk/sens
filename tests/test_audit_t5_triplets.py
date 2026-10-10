@@ -138,6 +138,17 @@ class T5TripletInventoryTests(unittest.TestCase):
         self.assertEqual(mod.main([str(self.root), "--include-untracked",
                                    "--require-all-views"]), 2)
 
+    def test_tracked_corpus_has_complete_physical_view_pairs_without_oracle_claim(self):
+        report = mod.inspect(ROOT)
+        summary = report["summary"]
+        self.assertGreaterEqual(summary["tracked_physical_pairs"], 23)
+        self.assertEqual(summary["views_missing"], 0)
+        self.assertEqual(summary["views_invalid"], 0)
+        self.assertEqual(summary["physical_pairs_blocked"], 0)
+        self.assertEqual(summary["views_verified"], summary["tracked_physical_pairs"])
+        self.assertEqual(summary["uk_semantic_oracles_certified_by_this_audit"], 0)
+        self.assertEqual(summary["original_executables_migrated_by_this_audit"], 0)
+
     def test_real_existing_ukrainian_cond_triple_is_one_mechanical_witness(self):
         stem = ROOT / "tests/fixtures/migration-d1-cond-cohort/branch"
         if not all(p.is_file() for p in (stem, stem.with_suffix(".lisp"),
