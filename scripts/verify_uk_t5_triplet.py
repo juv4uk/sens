@@ -2,7 +2,8 @@
 """#4430 — conservative Ukrainian <-> typed words <-> physical T5 triplet proof.
 
 Deliberately bounded: ratified D1 predicates, exact D3 call-head syntax
-QUOTE/ATOM/CDR/CAR/EQ/COND/CONS and literal D3 EMPTY, plus D2 grammar.
+QUOTE/ATOM/CDR/CAR/EQ/COND/CONS and literal D3 EMPTY, bounded D4
+CAAR and CADR on shape-proved CONS trees, plus D2 grammar.
 QUOTE accepts only proven atomic D1 or literal-empty data, never unproven
 quoted list/Text7/Number/binder payloads. This read-only canonical source
 proof does NOT establish evaluation semantics or release admission.
@@ -88,7 +89,7 @@ class WordParser:
             return ("empty",)
         if token in ("0", "1"):
             return ("predicate", token)
-        if token in ("001", "010", "011", "100", "101", "110", "111", "1000"):
+        if token in ("001", "010", "011", "100", "101", "110", "111", "1000", "1001"):
             return ("head", token)
         raise ProjectionBlocked(f"outside bounded D1/D3 callable or data law: {token!r}")
 
@@ -105,7 +106,8 @@ def proved_nil_pair_tree(node) -> bool:
     """Bounded shape proof: QUOTE(EMPTY) or recursively nested D3 CONS.
 
     Not a general typed pair theorem and not approval of D7/number/lexical
-    quotation. CAAR needs a CONS whose CAR is itself a proved CONS pair.
+    quotation. CAAR needs a CONS whose CAR is itself a proved CONS pair; CADR needs
+    a CONS whose CDR is itself a proved CONS pair.
     """
     if node[0] != "list":
         return False
@@ -126,6 +128,22 @@ def proved_caar_input(node) -> bool:
             and proved_nil_pair_tree(car) and proved_nil_pair_tree(cdr))
 
 
+def proved_cadr_input(node) -> bool:
+    """Admit CADR only on a proved two-cell D3 CONS chain.
+
+    The right child must itself be a CONS pair, so CAR(CDR(x)) has a
+    structural witness. No generic list quotation or D7 data is admitted.
+    """
+    if node[0] != "list" or len(node[1]) != 3:
+        return False
+    head, car, cdr = node[1]
+    return (head == ("head", "111") and
+            proved_nil_pair_tree(car) and
+            cdr[0] == "list" and len(cdr[1]) == 3 and
+            cdr[1][0] == ("head", "111") and
+            proved_nil_pair_tree(cdr))
+
+
 def render_uk(node, d1: dict[str, str], d3: dict[str, str],
               d4: dict[str, str]) -> str:
     kind = node[0]
@@ -142,6 +160,10 @@ def render_uk(node, d1: dict[str, str], d3: dict[str, str],
     if opcode == "1000":
         if len(items) != 2 or not proved_caar_input(items[1]):
             raise ProjectionBlocked("D4 CAAR requires a proved nested CONS pair")
+        return "(" + d4[opcode] + " " + render_uk(items[1], d1, d3, d4) + ")"
+    if opcode == "1001":
+        if len(items) != 2 or not proved_cadr_input(items[1]):
+            raise ProjectionBlocked("D4 CADR requires a proved two-cell CONS chain")
         return "(" + d4[opcode] + " " + render_uk(items[1], d1, d3, d4) + ")"
     # Each admitted spelling comes from the owner's D3 domain table. A
     # callable D3 slot is not permission to invent unproved datum grammar.
@@ -242,7 +264,7 @@ def verify(lisp: Path, sens: Path, view: Path) -> dict:
     return {
         "schema": SCHEMA,
         "status": "BOUNDED_TRIPLE_PARITY_ONLY_NOT_RELEASE_ADMISSION",
-        "scope": "D1 predicates / D3 exact-call syntax / D4 CAAR of proved nested nil CONS / D2",
+        "scope": "D1 predicates / D3 exact-call syntax / D4 CAAR and CADR of proved nil CONS trees / D2",
         "source": str(lisp),
         "sens": str(sens),
         "view": str(view),

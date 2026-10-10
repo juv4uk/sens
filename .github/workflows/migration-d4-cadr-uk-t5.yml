@@ -1,0 +1,66 @@
+name: D4 CADR Ukrainian physical T5 migration
+
+on:
+  pull_request:
+    paths:
+      - "tests/fixtures/migration-d4-cadr-cohort/**"
+      - "scripts/verify_uk_t5_triplet.py"
+      - "tests/test_verify_uk_t5_triplet.py"
+      - "crates/sens/tests/migration_d4_cadr_cohort.rs"
+      - ".github/workflows/migration-d4-cadr-uk-t5.yml"
+  push:
+    branches: [main]
+    paths:
+      - "tests/fixtures/migration-d4-cadr-cohort/**"
+      - "scripts/verify_uk_t5_triplet.py"
+      - "tests/test_verify_uk_t5_triplet.py"
+      - "crates/sens/tests/migration_d4_cadr_cohort.rs"
+      - ".github/workflows/migration-d4-cadr-uk-t5.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  d4-cadr-canonical-migration:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v5
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Canonical Ukrainian parser / exact-width D2-D4 transport negatives
+        run: python3 -m unittest discover -s tests -p 'test_verify_uk_t5_triplet.py' -v
+      - name: Independent current Ukrainian-to-T5-to-view receipt
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 scripts/verify_uk_t5_triplet.py \
+            --lisp tests/fixtures/migration-d4-cadr-cohort/cadr.lisp \
+            --sens tests/fixtures/migration-d4-cadr-cohort/cadr.sens \
+            --view tests/fixtures/migration-d4-cadr-cohort/cadr \
+            > "$RUNNER_TEMP/d4-cadr-triplet.json"
+          python3 - "$RUNNER_TEMP/d4-cadr-triplet.json" <<'PY'
+          import json, sys, hashlib
+          from pathlib import Path
+          data=json.loads(Path(sys.argv[1]).read_text(encoding="utf-8"))
+          assert data["canonical_uk_roundtrip"] and data["canonical_view_roundtrip"]
+          assert data["physical_T5_roundtrip"] and data["typed_word_count"] == 29
+          assert data["physical_bytes"] == 20
+          assert data["runtime_oracle_admitted_by_this_audit"] is False
+          raw=Path("tests/fixtures/migration-d4-cadr-cohort/cadr.sens").read_bytes()
+          assert hashlib.sha256(raw).hexdigest() == "2564a8daf38884f165e978b02ad5014f42b5f0bf93c0bd42752c438af08a30bb"
+          print("CANONICAL_UK_D4_CADR_TRANSPORT_PASS_NOT_RELEASE")
+          PY
+      - name: Rust exact-width D4 CADR T5 parser and hostile-tail rejection
+        run: cargo test --locked -q -p sens --test migration_d4_cadr_cohort
+      - name: Execute physical D4 CADR with both SENS CLI paths
+        shell: bash
+        run: |
+          set -euo pipefail
+          cargo build --locked -q -p sens-cli --bin sens --bin sens-trit
+          src=tests/fixtures/migration-d4-cadr-cohort/cadr.sens
+          test "$(target/debug/sens "$src")" = "()"
+          test "$(target/debug/sens-trit eval "$src")" = "()"
+          target/debug/sens-trit open "$src" > "$RUNNER_TEMP/cadr-view"
+          cmp tests/fixtures/migration-d4-cadr-cohort/cadr "$RUNNER_TEMP/cadr-view"
+      - name: Read-only verification leaves repository unchanged
+        run: test -z "$(git status --porcelain --untracked-files=all)"

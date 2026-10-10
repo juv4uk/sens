@@ -258,6 +258,34 @@ class BoundedUkTripletTests(unittest.TestCase):
                 with self.assertRaises(mod.ProjectionBlocked):
                     mod.canonical_uk_from_words(invalid)
 
+    def test_bounded_d4_cadr_two_cell_chain_and_negative_shapes(self):
+        # D4:1001 is CADR, not a D3:100 CAR or D4:1000 CAAR alias.
+        from sens_t5_codec import decode_bytes, encode_words
+        fixture = ROOT / "tests/fixtures/migration-d4-cadr-cohort"
+        source = (fixture / "cadr.lisp").read_text(encoding="utf-8")
+        binary = (fixture / "cadr.sens").read_bytes()
+        visible = (fixture / "cadr").read_text(encoding="ascii")
+        self.assertEqual(mod.uk_surface(4)["1001"], "п-р")
+        self.assertEqual(source, "(п-р (сполучити (як-є ()) (сполучити (як-є ()) (як-є ()))))\\n".replace("\\\\n", "\\n"))
+        self.assertEqual(len(binary), 20)
+        self.assertEqual(binary.hex(), "662dc47ec32da42dc47ec32da42dc32da42eb1a1")
+        self.assertEqual(decode_bytes(binary), visible.split())
+        self.assertEqual(encode_words(visible.split()), binary)
+        self.assertEqual(mod.canonical_uk_from_words(visible.split()), source)
+        self.assertEqual(mod.project_current_uk(source), visible.split())
+        attestation = mod.verify(fixture / "cadr.lisp", fixture / "cadr.sens", fixture / "cadr")
+        self.assertTrue(attestation["canonical_uk_roundtrip"])
+        self.assertFalse(attestation["runtime_oracle_admitted_by_this_audit"])
+        for invalid in (
+            "10 1001 00 000 01", # no pair to take CDR
+            "10 1001 00 10 001 00 000 01 01", # quoted empty is not two cells
+            "10 1001 00 10 111 00 10 001 00 000 01 00 10 001 00 000 01 01 01", # CDR is not CONS
+            "10 1001 00 10 111 00 10 001 00 1 01 00 10 111 00 10 001 00 000 01 00 10 001 00 000 01 01 01 01", # unproved quoted D1
+        ):
+            with self.subTest(invalid=invalid):
+                with self.assertRaises(mod.ProjectionBlocked):
+                    mod.canonical_uk_from_words(invalid.split())
+
     def test_cli_read_only_current_canary(self):
         cmd = [sys.executable, str(SOURCE), "--lisp", str(self.lisp),
                "--sens", str(self.sens), "--view", str(self.view)]
