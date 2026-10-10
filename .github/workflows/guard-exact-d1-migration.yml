@@ -25,5 +25,7 @@ jobs:
     steps:
       - uses: actions/checkout@v5
       - uses: dtolnay/rust-toolchain@stable
-      - name: Verify exact D1 predicate outcomes and existing Guard policies
+      - name: Migrated classifiers return exact D1 YES and NO
+        run: cargo test --locked -p wsm-guard-core migrated_guard_classifiers_return_only_exact_d1_predicate_bits -- --nocapture
+      - name: Existing Guard policy integration must also pass
         run: cargo test --locked -p wsm-guard-core -- --nocapture
