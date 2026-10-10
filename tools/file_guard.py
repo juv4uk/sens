@@ -119,7 +119,7 @@ def self_test() -> None:
          ["tools/check.py"], []),
         (["lib/new.json"], ["tools/check.py"], ["lib/new.json"]),
         (["knowledge/new.tsv"], ["tools/check.py"], ["knowledge/new.tsv"]),
-        (["witnesses/new.py"], ["tools/check.py"], ["witnesses/new.py"]),
+        (["witnesses/new.py"], ["tools/check.py"], ["нове важливе джерело", "новий Python"]),
         (["scripts/new.py"], ["tools/check.py"], ["scripts/new.py"]),
         (["tools/unknown.py"], ["tools/check.py"], ["tools/unknown.py"]),
         ([], ["tools/check.py", "tools/unknown.py"], ["tools/unknown.py"]),
