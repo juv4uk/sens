@@ -761,6 +761,46 @@ mod core4_bootstrap_cache_tests {
     }
 
     #[test]
+    fn let_star_surface_alias_and_unicode_bindings_are_separable() {
+        // #5408 diagnostic: run the production embedded Core4/FASL path first.
+        // This matrix separates alias dispatch from Unicode lexical-key behavior
+        // without changing the source-owned Core4 macro or quantity expectations.
+        let mut session = Session::default();
+        load_core_library(&mut session)
+            .expect("current embedded Core4 library must load for the diagnostic");
+
+        let cases = [
+            ("English let* with ASCII bindings", "(let* ((x 7) (y x)) y)"),
+            ("Ukrainian alias with ASCII bindings", "(нехай* ((x 7) (y x)) y)"),
+            (
+                "English let* with Ukrainian bindings",
+                "(let* ((основа 7) (наслідок основа)) наслідок)",
+            ),
+            (
+                "Ukrainian alias with Ukrainian bindings",
+                "(нехай* ((основа 7) (наслідок основа)) наслідок)",
+            ),
+        ];
+
+        for (label, source) in cases {
+            let result = eval_program(source, &mut session)
+                .unwrap_or_else(|error| panic!("{label}: {error}"));
+            assert_eq!(
+                result.value.to_string(),
+                "7",
+                "{label}: source={source}"
+            );
+        }
+
+        // Independent negative control: an actually unbound identifier stays
+        // rejected; passing the positive matrix must not install global names.
+        assert!(
+            eval_program("(нехай* ((основа 7)) наслідок)", &mut session).is_err(),
+            "an unbound Ukrainian identifier must not be accepted as a lexical binding"
+        );
+    }
+
+    #[test]
     fn stale_or_invalid_fasl_falls_back_to_exact_domain_core4_source() {
         let mut session = Session::default();
 
