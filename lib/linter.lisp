@@ -10,35 +10,35 @@
       ((00000010 (00000110 ast)) 
        (00000111
          ((00000010 (00000110 (00000110 ast)))  (lint-head (00000101 ast)))
-         (t t (lint-short-head (00000101 ast)))))
-      (t t (00000101 ast)))))
+         (t  (lint-short-head (00000101 ast)))))
+      (t  (00000101 ast)))))
 
 (00001001 lint-short-head
   (00001000 (head)
     (00000111
-      ((00100010 head 00000001) (1) (00000001 quote))
-      ((00100010 head 00000111) (1) (00000001 cond))
-      (t t head))))
+      ((00100010 head 00000001)  (00000001 quote))
+      ((00100010 head 00000111)  (00000001 cond))
+      (t  head))))
 
 ;; Голова форми: код СЕНС -> та сама форма, що й за назвою. Лінтер
 ;; розпізнає def/lambda/cond/... і тоді, коли код записано кодами СЕНС.
 (00001001 lint-head
   (00001000 (head)
     (00000111
-      ((00100010 head 00001001) (1) (00000001 def))
-      ((00100010 head 00001011) (1) (00000001 def))
-      ((00100010 head 00001000) (1) (00000001 lambda))
-      ((00100010 head 00000111) (1) (00000001 cond))
-      ((00100010 head 00000001) (1) (00000001 quote))
-      ((00100010 head 00001010) (1) (00000001 defmacro))
-      ((00100010 head 10011100) (1) (00000001 let))
-      ((00100010 head 10011101) (1) (00000001 let*))
-      (t t head))))
+      ((00100010 head 00001001)  (00000001 def))
+      ((00100010 head 00001011)  (00000001 def))
+      ((00100010 head 00001000)  (00000001 lambda))
+      ((00100010 head 00000111)  (00000001 cond))
+      ((00100010 head 00000001)  (00000001 quote))
+      ((00100010 head 00001010)  (00000001 defmacro))
+      ((00100010 head 10011100)  (00000001 let))
+      ((00100010 head 10011101)  (00000001 let*))
+      (t  head))))
 
 (00001001 lint-max2
   (00001000 (a b)
     (00000111
-      ((00011011 a b) 1 a)
+      ((00011011 a b)  a)
       (t b))))
 
 
@@ -46,16 +46,16 @@
 (00001001 lint-size
   (00001000 (ast)
     (00000111
-      ((00000010 ast) () 1)
-      ((00000010 ast) (1) 1)
+      
+      ((00000010 ast)  1)
       (t (00001100 1 (00001100 (lint-size (00000101 ast)) (lint-size (00000110 ast))))))))
 
 ; 2. Nesting: Maximum depth of pairs
 (00001001 lint-nesting
   (00001000 (ast)
     (00000111
-      ((00000010 ast) () 0)
-      ((00000010 ast) (1) 0)
+      
+      ((00000010 ast)  0)
       (t (lint-max2 (00001100 1 (lint-nesting (00000101 ast)))
               (lint-nesting (00000110 ast)))))))
 
@@ -63,8 +63,8 @@
 (00001001 lint-complexity
   (00001000 (ast)
     (00000111
-      ((00000010 ast) () 0)
-      ((00000010 ast) (1) 0)
+      
+      ((00000010 ast)  0)
       ((00100010 (lint-form-head ast) (00000001 cond))
        (00111001 (00001000 (acc clause) (00001100 acc (lint-complexity clause)))
                (00101000 (00000110 ast))
@@ -78,7 +78,7 @@
 (00001001 lint-effects
   (00001000 (ast)
     (00000111
-      ((00000010 ast) () (00000001 ()))
+      
       ((00000010 ast)  (00000001 ()))
       ((00100011 (00000101 ast))
        (00000111
@@ -93,11 +93,11 @@
 (00001001 collect-free-vars-let*
   (00001000 (ast bound-vars)
     (00000111
-      ((00000010 (00000110 ast)) () (00101001 (collect-free-vars (00000101 ast) bound-vars)
+      ((0100 (00000010 (00000110 ast))) (00101001 (collect-free-vars (00000101 ast) bound-vars)
                (collect-free-vars (00000110 ast) bound-vars)))
       ((00000010 (00000110 ast))  (00101001 (collect-free-vars (00000101 ast) bound-vars)
                (collect-free-vars (00000110 ast) bound-vars)))
-      ((00000010 (00000110 (00000110 ast))) () (00101001 (collect-free-vars (00000101 ast) bound-vars)
+      ((0100 (00000010 (00000110 (00000110 ast)))) (00101001 (collect-free-vars (00000101 ast) bound-vars)
                (collect-free-vars (00000110 ast) bound-vars)))
       ((00000010 (00000110 (00000110 ast)))  (00101001 (collect-free-vars (00000101 ast) bound-vars)
                (collect-free-vars (00000110 ast) bound-vars)))
@@ -119,11 +119,11 @@
 (00001001 collect-free-vars-letrec
   (00001000 (ast bound-vars)
     (00000111
-      ((00000010 (00000110 ast)) () (00101001 (collect-free-vars (00000101 ast) bound-vars)
+      ((0100 (00000010 (00000110 ast))) (00101001 (collect-free-vars (00000101 ast) bound-vars)
                (collect-free-vars (00000110 ast) bound-vars)))
       ((00000010 (00000110 ast))  (00101001 (collect-free-vars (00000101 ast) bound-vars)
                (collect-free-vars (00000110 ast) bound-vars)))
-      ((00000010 (00000110 (00000110 ast))) () (00101001 (collect-free-vars (00000101 ast) bound-vars)
+      ((0100 (00000010 (00000110 (00000110 ast)))) (00101001 (collect-free-vars (00000101 ast) bound-vars)
                (collect-free-vars (00000110 ast) bound-vars)))
       ((00000010 (00000110 (00000110 ast)))  (00101001 (collect-free-vars (00000101 ast) bound-vars)
                (collect-free-vars (00000110 ast) bound-vars)))
@@ -143,7 +143,7 @@
 (00001001 collect-free-vars
   (00001000 (ast bound-vars)
     (00000111
-      ((00100001 (10110001 (00000010 ast))) t (00000111
+      ((00100001 (10110001 (00000010 ast)))  (00000111
          ((00100011 ast)
           (00000111
             ((00101100 (01000010 ast) bound-vars) (00000001 ()))
@@ -167,7 +167,7 @@
            (collect-free-vars body (00101001 param-names bound-vars)))))
       ((00100010 (lint-form-head ast) (00000001 let))
        (00000111
-         ((00100001 (10110001 (00000010 (00000110 ast)))) t (00101001 (collect-free-vars (00000101 ast) bound-vars)
+         ((00100001 (10110001 (00000010 (00000110 ast))))  (00101001 (collect-free-vars (00000101 ast) bound-vars)
                   (collect-free-vars (00000110 ast) bound-vars)))
          ((00100011 (00000101 (00000110 ast)))
           ; Named let
@@ -225,16 +225,16 @@
             (effects (00101111 (00110001 metrics)))
             (globals (00101111 (00110010 metrics))))
         (00101001
-          (00000111 ((00011011 size (get-threshold (00000001 max-size) thresholds 99999)) 1
+          (00000111 ((00011011 size (get-threshold (00000001 max-size) thresholds 99999)) 
                  (00100111 (00100111 (00000001 size-exceeded) size))) (t (00000001 ())))
           (00101001
-            (00000111 ((00011011 nesting (get-threshold (00000001 max-nesting) thresholds 99999)) 1
+            (00000111 ((00011011 nesting (get-threshold (00000001 max-nesting) thresholds 99999)) 
                    (00100111 (00100111 (00000001 nesting-exceeded) nesting))) (t (00000001 ())))
             (00101001
-              (00000111 ((00011011 complexity (get-threshold (00000001 max-complexity) thresholds 99999)) 1
+              (00000111 ((00011011 complexity (get-threshold (00000001 max-complexity) thresholds 99999)) 
                      (00100111 (00100111 (00000001 complexity-exceeded) complexity))) (t (00000001 ())))
               (00101001
-                (00000111 ((00011011 (00101000 globals) (get-threshold (00000001 max-globals) thresholds 99999)) 1
+                (00000111 ((00011011 (00101000 globals) (get-threshold (00000001 max-globals) thresholds 99999)) 
                        (00100111 (00100111 (00000001 globals-exceeded) globals))) (t (00000001 ())))
-                (00000111 ((00011011 (00101000 effects) (get-threshold (00000001 max-effects) thresholds 99999)) 1
+                (00000111 ((00011011 (00101000 effects) (get-threshold (00000001 max-effects) thresholds 99999)) 
                        (00100111 (00100111 (00000001 effects-exceeded) effects))) (t (00000001 ())))))))))))
