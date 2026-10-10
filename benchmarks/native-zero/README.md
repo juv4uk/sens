@@ -52,3 +52,34 @@ GitHub workflow `.github/workflows/sens-native-zero.yml` створює
 `native-zero.jsonl`, `summary.md` і `hardware.txt` та зберігає їх як
 артефакт. Тільки фактичні дані конкретного запуску можуть потрапити в
 підсумкову таблицю. Старі CI-блокери **не вимикаються**.
+
+## Native Zero v2: once-validated reusable physical programs
+
+The optional `prepare_t5_program(physical_bytes)` performs the SAME
+canonical T5 transport validation, ratified exact-width D2 parse and existing
+lowering ONCE. It returns an immutable `PreparedT5Program`. Its
+`execute(&mut Session::bare())` invokes the existing evaluator. Execution
+never caches semantic results, environment state or truth values, and does
+not bypass wrong-domain exact D1 controls. Program preparation is required
+before first execution; raw invalid bytes never enter this API.
+
+```bash
+cargo test --locked -p sens --test physical_t5_execution -- --nocapture
+cargo build --locked --release -p sens --example sens_native_zero_prepared_bench
+target/release/examples/sens_native_zero_prepared_bench --samples 9 --iterations 128 \
+  > /tmp/native-zero-prepared.jsonl
+python3 benchmarks/native-zero/verify_prepared_report.py \
+  --input /tmp/native-zero-prepared.jsonl --summary /tmp/native-zero-prepared.md
+```
+
+The second benchmark contrasts **different workloads**: the direct physical
+path decodes, parses and lowers on EVERY call, whereas prepared reuse pays
+those costs ONCE, outside the timed repeat phase. The one-time preparation
+duration is reported alongside the repeated costs. A large amortization ratio
+is not evidence that one T5 decode became faster. This is a measured
+predecode mechanism, **not** native x86 AOT, an interpreter replacement,
+or a justification to skip still-failing integration gates.
+
+User-controlled sessions remain fresh or warm as labeled. D3 QUOTE (committed
+physical bytes), exact D1:YES and D3 ATOM produce matched exact semantic
+results under both modes and reject malformed transport at preparation.
