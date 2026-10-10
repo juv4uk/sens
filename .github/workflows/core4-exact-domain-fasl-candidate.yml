@@ -10,6 +10,7 @@ on:
       - crates/sens-cli/src/bin/gen-fasl.rs
       - crates/sens/tests/core_fasl_freshness.rs
       - lib/core4.lisp
+      - lib/machine/encoding/x86-64.lisp
       - .github/workflows/core4-exact-domain-fasl-candidate.yml
   pull_request:
     branches:
@@ -20,6 +21,7 @@ on:
       - crates/sens-cli/src/bin/gen-fasl.rs
       - crates/sens/tests/core_fasl_freshness.rs
       - lib/core4.lisp
+      - lib/machine/encoding/x86-64.lisp
       - .github/workflows/core4-exact-domain-fasl-candidate.yml
 
 permissions:
@@ -51,6 +53,8 @@ jobs:
           path: lib/core4.lisp.fasl
           if-no-files-found: error
           retention-days: 1
+      - name: Pin exact x86 encoder source
+        run: test "$(git hash-object lib/machine/encoding/x86-64.lisp)" = "d48fb32def0933eaf5c62bff5c16f396fcc55431"
       - name: Exact-domain x86 CPU witness
         run: cargo test --locked -p sens --test machine_exact_domain_cpu -- --nocapture
       - name: Exact-D1 register and instruction admission
