@@ -4,9 +4,9 @@
 > top-level визначення, але **не** оголошує їх публічним API.
 
 - проскановано бібліотечних файлів: 51
-- top-level функцій: 946
+- top-level функцій: 944
 - top-level макросів: 34
-- усього визначень: 980
+- усього визначень: 978
 - класифікація: `unreviewed`
 
 | джерело | вид | ім'я | класифікація |
@@ -72,8 +72,6 @@
 | `lib/clips-import.lisp` | function | `clips-import-forms` | unreviewed |
 | `lib/clips-import.lisp` | function | `clips-import` | unreviewed |
 | `lib/clips-import.lisp` | function | `clips-import-file` | unreviewed |
-| `lib/compiler-nucleus.lisp` | function | `compiler-authority-find` | unreviewed |
-| `lib/compiler-nucleus.lisp` | function | `compiler-nucleus` | unreviewed |
 | `lib/compiler-nucleus.lisp` | function | `compiler-domain-shape` | unreviewed |
 | `lib/compiler-nucleus.lisp` | function | `compiler-true` | unreviewed |
 | `lib/compiler-nucleus.lisp` | function | `compiler-false` | unreviewed |
