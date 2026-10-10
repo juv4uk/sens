@@ -38,6 +38,7 @@ class EvidenceError(ValueError):
 
 
 def check(csv_path: Path, root: Path) -> dict[str, float]:
+    """Validate benchmark rows against authentic committed T5 fixtures."""
     if not csv_path.is_file():
         raise EvidenceError(f"відсутній CSV: {csv_path}")
     with csv_path.open("r", encoding="utf-8", newline="") as handle:
@@ -82,6 +83,7 @@ def check(csv_path: Path, root: Path) -> dict[str, float]:
 
 
 def main() -> int:
+    """Validate one timing CSV and return a fail-closed process status."""
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("csv_path", type=Path)
     parser.add_argument("--root", type=Path, default=Path("."))
