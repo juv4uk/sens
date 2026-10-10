@@ -40,9 +40,11 @@ jobs:
           actual="$(git hash-object crates/sens/src/mixed_source.rs)"
           test "$actual" = "d731f26871daadc43360faf29440612fd8b8580f"
           echo "MIXED_SOURCE_BLOB=$actual"
-          test "$(git hash-object lib/machine/encoding/x86-64.lisp)" = "59b45a4a0c81ebae035011bbbc7231b3451d5e1b"
-          test "$(git hash-object lib/machine/lowering/semantic-x86-64.lisp)" = "22c873ed13cae6cd803c9dfad5f3c5bae08cbf55"
+          test "$(git hash-object lib/machine/encoding/x86-64.lisp)" = "f82c28131e141e7fac3efc3839aeb6fca289a09c"
+          test "$(git hash-object lib/machine/lowering/semantic-x86-64.lisp)" = "81e70c05dfa25da81b0bd001bb66eed1e6ec08bc"
           test "$(git hash-object lib/machine/operands/x86-64.lisp)" = "a14c57d81b5ba30885b3ec39fd78d47e85850de9"
+          test "$(git hash-object lib/machine/encoding/x86-64.lisp)" = "f82c28131e141e7fac3efc3839aeb6fca289a09c"
+          test "$(git hash-object lib/machine/lowering/semantic-x86-64.lisp)" = "81e70c05dfa25da81b0bd001bb66eed1e6ec08bc"
       - name: Run exact-domain reader unit suite
         run: cargo test --locked -p sens --lib mixed_source::tests -- --nocapture
       - name: Preserve Core4 physical artifact freshness
