@@ -1,131 +1,234 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""sens8-to-ladder.py — двопрохідний замінник sens8-голів на драбину доменів.
+"""Fail-closed review staging of legacy eight-bit CALL HEADS to D3-D6 words.
 
-ЗАКОН (не порушувати):
-  * нічого не вигадувати: беремо ЛИШЕ ратифікований міст
-    `crates/sens/src/semantic_registry.rs` (SID8 -> D3..D6);
-  * джерело ніколи не переписуємо на місці — пишемо в OUT;
-  * fail-closed: якщо у файлі лишається хоч один 8-бітовий токен без моста,
-    файл НЕ виводиться (щоб не зробити напів-заміну).
+Issue #5029. This is NOT a semantic-admission publisher and never emits .sens.
+The only successor authority is the existing owner-ratified three-pass
+migration resolver. No second parser or 8-bit name/meaning table is created:
+reuse cond-modernize.py's quotation-aware AST with source offsets.
 
-ДВА ПРОХОДИ:
-  ПРОХІД 1 (replace)  — замінює кожен SID8, що має міст, на точні біти драбини.
-  ПРОХІД 2 (verify)   — звіряє результат:
-        (a) усі 8-бітові токени зникли;
-        (b) кожна заміна оборотна: драбина -> SID8 дає оригінал;
-        (c) жоден НЕ-головий байт (дані) не змінився поза заміненими токенами;
-        (d) підсумок: tokens_in / replaced / unmapped / ok?
+Pass 1: replace proved executable old call heads; HOLD unknown, ambiguous or
+historical COND (its clause semantics need separate Contract 11.8 proof).
+Pass 2: reconstruct only the original AST-approved spans, and prove that every
+other character (including quoted data, binders, strings and comments) is
+identical. Output is a staged .lisp for REVIEW, not execution certification.
 
-Використання:
-    python3 scripts/sens8-to-ladder.py <file.lisp> [--out DIR] [--verify-only]
-    python3 scripts/sens8-to-ladder.py --scan lib/          # карта по дереву
+--scan lib/                read-only, per-file inventory
+lib/file.lisp              read-only verdict; no output
+lib/file.lisp --apply --out /tmp/review
+--verify-only STAGED.lisp --original ORIGINAL.lisp
 """
-import sys, re, pathlib, argparse
+from __future__ import annotations
 
-TOKEN = re.compile(r'(?<![01])[01]{8}(?![01])')
+import argparse
+import importlib.util
+import json
+from pathlib import Path
+import re
+import sys
 
-def load_bridge(root: pathlib.Path):
-    """SID8 -> ladder bits, ЛИШЕ з ратифікованого реєстру."""
-    rs = (root / "crates/sens/src/semantic_registry.rs").read_text(encoding="utf-8")
-    return {sid.replace("_", ""): bits
-            for sid, dom, bits in re.findall(
-                r'0b([01_]+)\s*=>\s*Some\(d(\d)\(0b([01]+)\)\)', rs)}
+ROOT = Path(__file__).resolve().parents[1]
+SCRIPTS = ROOT / "scripts"
+SID = re.compile(r"[01]{8}\\Z")
+# The old expected-result field of COND is not equivalent to strict two-field
+# D3. Operator replacement alone would silently change the program.
+LEGACY_COND = "00000111"
+QUOTE_HEADS = {"00000001", "001", "quote", "QUOTE"}
+LAMBDA_HEADS = {"00001000", "0010", "lambda", "LAMBDA"}
+DEFINE_HEADS = {"00001001", "0011", "define", "DEFINE"}
 
-def pass1_replace(text: str, bridge: dict):
-    """ПРОХІД 1: замінити кожен відображений SID8 на біти драбини."""
-    replaced, unmapped = [], set()
-    def sub(m):
-        w = m.group(0)
-        if w in bridge:
-            replaced.append((w, bridge[w])); return bridge[w]
-        unmapped.add(w); return w
-    return TOKEN.sub(sub, text), replaced, unmapped
 
-def pass2_verify(orig: str, out: str, bridge: dict):
-    """ПРОХІД 2: звірити, що заміна повна й оборотна."""
-    problems = []
-    left = set(TOKEN.findall(out))
-    if left:
-        problems.append(f"лишились 8-бітові токени без моста: {sorted(left)}")
-    # оборотність: кожне ladder-значення має відповідний SID8
-    rev = {v: k for k, v in bridge.items()}
-    for tok in set(re.findall(r'(?<![01])[01]{1,8}(?![01])', out)):
-        if tok in rev and tok not in bridge:      # це ladder-біти -> мали SID8
-            pass
-    # дані не змінені: прибираємо І 8-бітові токени (orig), І біти драбини (out),
-    # тоді решта мусить бути ідентичною.
-    ladder = "|".join(sorted((re.escape(v) for v in bridge.values()), key=len, reverse=True))
-    ladder_re = re.compile(rf'(?<![01])(?:{ladder})(?![01])') if ladder else None
-    def strip(s, also_ladder):
-        s2 = TOKEN.sub("\x00", s)
-        if also_ladder and ladder_re:
-            s2 = ladder_re.sub("\x00", s2)
-        return s2
-    if strip(orig, False) != strip(out, True):
-        problems.append("змінились не-токенові фрагменти (дані/структура)")
-    return problems
+class Blocked(ValueError):
+    pass
 
-def scan(root: pathlib.Path, bridge: dict):
-    rows = []
-    for p in sorted((root / "lib").rglob("*.lisp")):
-        toks = set(TOKEN.findall(p.read_text(encoding="utf-8", errors="replace")))
-        if not toks: continue
-        unm = toks - set(bridge)
-        rows.append((str(p.relative_to(root)), len(toks), len(toks & set(bridge)), len(unm),
-                     sorted(unm)[:4]))
-    return rows
 
-def main():
-    ap = argparse.ArgumentParser()
-    ap.add_argument("target", nargs="?", default=".")
-    ap.add_argument("--out", default=None)
-    ap.add_argument("--verify-only", action="store_true")
+def import_tool(filename: str, module_name: str):
+    path = SCRIPTS / filename
+    spec = importlib.util.spec_from_file_location(module_name, path)
+    if spec is None or spec.loader is None:
+        raise Blocked("canonical tool unavailable: " + filename)
+    module = importlib.util.module_from_spec(spec)
+    sys.modules[spec.name] = module
+    spec.loader.exec_module(module)
+    return module
+
+
+def canonical_parser():
+    return import_tool("cond-modernize.py", "sens_cond_migration_ast")
+
+
+def load_bridge(root: Path = ROOT) -> dict[str, str]:
+    """Use current proved historical -> domain successors, never old Rust regex."""
+    migration = import_tool("migrate-three-pass.py", "sens_canonical_three_pass")
+    data = migration.load_foundation(root / "knowledge/d1-d9-foundation.json")
+    legacy, _, _ = migration.build_three_pass_maps(
+        data,
+        root / "crates/sens/src/domain_surface_registry_generated.rs",
+        root / "crates/sens/src/semantic_registry_generated.rs",
+        root / "crates/sens/src/semantic_registry.rs",
+        root / "crates/sens/src/eval/necessary_forms_generated.rs",
+        root / "contracts/core1-historical-sid-map.lisp",
+        root / "knowledge/sens8-current-coverage-v1.json",
+    )
+    result: dict[str, str] = {}
+    for sid, identity in legacy.items():
+        if identity is None:
+            continue
+        bits, domain = identity[:2]
+        descriptor = data["domains"].get(domain)
+        if domain not in {"D3", "D4", "D5", "D6"} or not descriptor:
+            continue
+        if len(bits) != int(descriptor["width"]) or bits not in descriptor["residents"]:
+            raise Blocked("out-of-ratification successor for " + sid)
+        result[sid] = bits
+    if not result:
+        raise Blocked("no current owner-proved successor map; refuse a false OK")
+    return result
+
+
+def approved_head_patches(source: str, bridge: dict[str, str]):
+    parser = canonical_parser()
+    try:
+        forms = parser.parse(source)
+    except parser.Blocked as exc:
+        raise Blocked("canonical AST parse: " + str(exc)) from exc
+    patches = []
+    blockers = []
+
+    def visit(form, executable: bool = True):
+        if form.opaque or not form.children:
+            return
+        first = form.children[0]
+        head = first.atom or ""
+        if not executable:
+            return
+        if SID.fullmatch(head):
+            if head == LEGACY_COND:
+                blockers.append(f"line {form.line}: historical COND needs approved polarity/oracle")
+            elif head not in bridge:
+                blockers.append(f"line {form.line}: no proved successor for {head}")
+            else:
+                patches.append((first.start, first.end, head, bridge[head]))
+        # Do not traverse quoted forms, even when the QUOTE head itself migrates.
+        if head in QUOTE_HEADS:
+            return
+        # Binder and definition-name positions are DATA, not executable calls.
+        # Only the lambda body or definition value can contain executable heads.
+        if head in LAMBDA_HEADS or (SID.fullmatch(head) and bridge.get(head) == "0010"):
+            children = form.children[2:]
+        elif head in DEFINE_HEADS or (SID.fullmatch(head) and bridge.get(head) == "0011"):
+            children = form.children[2:]
+        else:
+            children = form.children[1:] if first.atom else form.children
+        for child in children:
+            visit(child)
+    for form in forms:
+        visit(form)
+    return patches, blockers
+
+
+def stage(source: str, bridge: dict[str, str]):
+    """Verify all edits against the original source and reparse candidate."""
+    patches, blockers = approved_head_patches(source, bridge)
+    if blockers:
+        raise Blocked("; ".join(blockers[:6]) + (f"; +{len(blockers)-6} more" if len(blockers)>6 else ""))
+    if not patches:
+        raise Blocked("no proved legacy executable head to migrate")
+    new = source
+    for start, end, before, after in sorted(patches, key=lambda p: p[0], reverse=True):
+        if source[start:end] != before:
+            raise Blocked("AST span drift")
+        new = new[:start] + after + new[end:]
+    # Reconstruct EVERY non-edited character, not just token counts; collisions
+    # in the successor map cannot falsify this exact projection check.
+    pos = 0
+    sections = []
+    for start, end, before, after in sorted(patches):
+        sections.append(source[pos:start])
+        sections.append(after)
+        pos = end
+    sections.append(source[pos:])
+    if new != "".join(sections):
+        raise Blocked("pass 2: non-executable bytes changed")
+    parser = canonical_parser()
+    try:
+        parser.parse(new)
+    except parser.Blocked as exc:
+        raise Blocked("pass 2: candidate AST invalid: " + str(exc)) from exc
+    again, remaining = approved_head_patches(new, bridge)
+    if remaining or again:
+        raise Blocked("pass 2: old or unmapped executable call remains")
+    return new, patches
+
+
+def review(path: Path, bridge: dict[str, str]) -> dict:
+    source = path.read_text(encoding="utf-8")
+    changes, blockers = approved_head_patches(source, bridge)
+    return {
+        "path": str(path), "mapped_heads": len(changes),
+        "blocked": len(blockers), "reasons": blockers[:12],
+        "status": "BLOCK" if blockers else "READY_FOR_REVIEW" if changes else "NO_CHANGES",
+        "semantic_parity": "NOT_VERIFIED", "physical_T5": "NOT_PUBLISHED",
+    }
+
+
+def main(argv: list[str] | None = None) -> int:
+    ap = argparse.ArgumentParser(description=__doc__)
+    ap.add_argument("target", nargs="?", default="lib")
     ap.add_argument("--scan", action="store_true")
-    a = ap.parse_args()
-    root = pathlib.Path(".").resolve()
-    bridge = load_bridge(root)
-    print(f"# міст завантажено: {len(bridge)} ратифікованих SID8")
+    ap.add_argument("--apply", action="store_true")
+    ap.add_argument("--out", type=Path)
+    ap.add_argument("--verify-only", action="store_true")
+    ap.add_argument("--original", type=Path)
+    args = ap.parse_args(argv)
+    if args.scan and (args.apply or args.verify_only):
+        ap.error("--scan is inventory only")
+    if args.apply and (args.out is None or args.verify_only):
+        ap.error("--apply requires --out DIR and cannot combine with --verify-only")
+    if args.verify_only and (args.original is None or args.apply or args.out):
+        ap.error("--verify-only needs --original ORIGINAL.lisp; a lone output proves nothing")
+    if args.out and not args.apply:
+        ap.error("--out is only permitted with --apply")
 
-    if a.scan:
-        rows = scan(root, bridge)
-        full = sum(1 for r in rows if r[3] == 0)
-        near = sum(1 for r in rows if 0 < r[3] <= 2)
-        hard = sum(1 for r in rows if r[3] > 2)
-        print(f"# файлів: {len(rows)} | повністю замінні: {full} | майже: {near} | важкі: {hard}")
-        for r in rows:
-            if r[3] <= 2:
-                print(f"  {r[3]} unmapped {r[4]}  <- {r[0]}")
-        return
+    try:
+        bridge = load_bridge(ROOT)
+        target = Path(args.target)
+        if args.verify_only:
+            original = args.original.read_text(encoding="utf-8")
+            expected, _ = stage(original, bridge)
+            actual = target.read_text(encoding="utf-8")
+            if actual != expected:
+                raise Blocked("review output differs from the exact approved head-only patch")
+            print("SOURCE_DELTA_EXACT; runtime/oracle NOT_VERIFIED")
+            return 0
+        if args.scan:
+            target = target if target.is_dir() else target.parent
+            paths = sorted(target.rglob("*.lisp"))
+        else:
+            if not target.is_file():
+                raise Blocked("single .lisp path required")
+            paths = [target]
+        rows = [review(path, bridge) for path in paths]
+        for row in rows:
+            print(json.dumps(row, ensure_ascii=False, sort_keys=True))
+        if args.apply:
+            row = rows[0]
+            if row["status"] != "READY_FOR_REVIEW":
+                raise Blocked("nothing safe to stage: " + row["status"])
+            candidate, _ = stage(paths[0].read_text(encoding="utf-8"), bridge)
+            output = args.out / paths[0].name
+            if output.resolve() == paths[0].resolve():
+                raise Blocked("refuse overwrite original")
+            output.parent.mkdir(parents=True, exist_ok=True)
+            # Atomic no-overwrite create. No in-place source edits and no .sens.
+            with output.open("x", encoding="utf-8") as stream:
+                stream.write(candidate)
+            print("STAGED_FOR_REVIEW " + str(output))
+        return 2 if any(row["status"] == "BLOCK" for row in rows) else 0
+    except (Blocked, ValueError, OSError, UnicodeError) as exc:
+        print("BLOCK: " + str(exc), file=sys.stderr)
+        return 2
 
-    p = pathlib.Path(a.target)
-    text = p.read_text(encoding="utf-8")
-    if a.verify_only:
-        # звірка вже заміненого файлу: жодного 8-бітового токена не лишилось,
-        # і кожен токен, що є бітами драбини, має відповідний SID8.
-        left = set(TOKEN.findall(text))
-        rev = set(bridge.values())
-        stray = {t for t in re.findall(r'(?<![01])[01]{1,8}(?![01])', text)
-                 if len(t) in (3, 4, 5) and t not in rev}
-        print("ПРОХІД 2 (verify-only):",
-              "OK (0 legacy 8-bit)" if not left else f"BLOCK: лишились {sorted(left)}")
-        return
-
-    out_text, replaced, unmapped = pass1_replace(text, bridge)
-    print(f"ПРОХІД 1: tokens={len(set(TOKEN.findall(text)))} replaced={len(replaced)} "
-          f"unmapped={len(unmapped)} {sorted(unmapped)}")
-    if unmapped:
-        print("BLOCK: лишились токени без моста -> файл НЕ виводимо (fail-closed)")
-        sys.exit(2)
-    probs = pass2_verify(text, out_text, bridge)
-    print("ПРОХІД 2:", "OK" if not probs else probs)
-    if probs:
-        sys.exit(3)
-    outdir = pathlib.Path(a.out) if a.out else p.parent
-    outdir.mkdir(parents=True, exist_ok=True)
-    dst = outdir / p.name
-    dst.write_text(out_text, encoding="utf-8")
-    print(f"OK -> {dst}")
 
 if __name__ == "__main__":
-    main()
+    raise SystemExit(main())
