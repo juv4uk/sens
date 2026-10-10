@@ -2,6 +2,10 @@
 import json
 from pathlib import Path
 
+# Python -O прибирає assert, тому запуск без перевірок має завершуватися відмовою.
+if not __debug__:
+    raise SystemExit("D6-CURRENT-AUTHORITY: BLOCKED — Python -O вимикає перевірки")
+
 root=Path(__file__).resolve().parents[1]
 d=json.loads((root/"knowledge/d6-ratified.json").read_text(encoding="utf-8"))
 source=json.loads((root/"knowledge/d6-v2-gauge-fixed-candidate.json").read_text(encoding="utf-8"))
