@@ -778,5 +778,17 @@ mod core4_bootstrap_cache_tests {
         let result = eval_program("(let ((x 7)) x)", &mut session)
             .expect("stale-FASL Core4 fallback must execute its language-owned LET");
         assert_eq!(result.value.to_string(), "7");
+
+        // The original callability failure surfaces through let* while the
+        // quantity witness builds successive local bindings. Cover both its
+        // empty base case and dependent non-empty expansion on the same
+        // path-bound exact-domain fallback, without editing quantity laws.
+        let empty_let_star = eval_program("(let* () 11)", &mut session)
+            .expect("empty let* must return its body on Core4 source fallback");
+        assert_eq!(empty_let_star.value.to_string(), "11");
+
+        let dependent_let_star = eval_program("(let* ((x 7) (y x)) y)", &mut session)
+            .expect("let* must evaluate bindings sequentially on Core4 source fallback");
+        assert_eq!(dependent_let_star.value.to_string(), "7");
     }
 }
