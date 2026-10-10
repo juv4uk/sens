@@ -136,27 +136,13 @@ fn current_cond_reference_is_valid_binary_and_executes_without_legacy_sid() {
 }
 
 
-/// Regression for the current-main time bootstrap failure at registry-driven
-/// peer materialization. Every form must load with the current defmacro surface;
-/// a retired W8 macro-definition word must not masquerade as current authority.
+/// Regression for the current Core4 peer-macro law. Load every top-level
+/// form of time and process after Core4, including stable IDs outside D8 and
+/// legacy IDs that require numeric identity comparison.
 #[test]
 fn current_core4_peer_materialization_uses_current_macro_law() {
     let mut session = Session::default();
     load_core_library(&mut session).expect("Core4 bootstrap");
-    println!("POSTCORE-BINDING peer-group => {:?}", session.environment.get("my-postcore-peer-group"));
-    println!("POSTCORE-BINDING peer-table => {:?}", session.environment.get("my-postcore-stable-peer-projection"));
-
-    for probe in [
-        "my-postcore-stable-peer-projection",
-        "(my-postcore-peer-group 1079 my-postcore-stable-peer-projection)",
-        "(my-postcore-peer-group 1092 my-postcore-stable-peer-projection)",
-        "(my-postcore-peer-group 162 my-postcore-stable-peer-projection)",
-    ] {
-        match sens::eval_program(probe, &mut session) {
-            Ok(result) => println!("POSTCORE-BEFORE-TIME {probe} => {}", result.value),
-            Err(error) => println!("POSTCORE-BEFORE-TIME {probe} => ERROR {error}"),
-        }
-    }
 
     for (library, source) in [
         ("time", include_str!("../../../lib/time.lisp")),
@@ -164,17 +150,6 @@ fn current_core4_peer_materialization_uses_current_macro_law() {
     ] {
         let parsed = parse(source).unwrap_or_else(|error| panic!("{library} library syntax: {error}"));
         for (index, expression) in parsed.iter().enumerate() {
-            if library == "process" && index + 1 == parsed.len() {
-                for probe in [
-                    "(my-postcore-peer-group 162 my-postcore-stable-peer-projection)",
-                    "(my-postcore-missing-peers process-run (my-postcore-peer-group 162 my-postcore-stable-peer-projection) (01001110))",
-                ] {
-                    match sens::eval_program(probe, &mut session) {
-                        Ok(result) => println!("POSTCORE-PROBE {probe} => {}", result.value),
-                        Err(error) => println!("POSTCORE-PROBE {probe} => ERROR {error}"),
-                    }
-                }
-            }
             eval_parsed_expressions(std::slice::from_ref(expression), &mut session)
                 .unwrap_or_else(|error| panic!(
                     "{library} form {} at source byte {} failed after Core4 bootstrap: {}",
