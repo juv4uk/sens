@@ -1,0 +1,55 @@
+name: SENS native microCPU D1-D3 physical T5
+
+on:
+  pull_request:
+    paths:
+      - 'crates/sens/examples/microcpu_native.rs'
+      - '.github/workflows/microcpu-native.yml'
+  push:
+    branches:
+      - research/microcpu-native-d1-d3-20261010
+    paths:
+      - 'crates/sens/examples/microcpu_native.rs'
+      - '.github/workflows/microcpu-native.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  native-bounded-slot-tape:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v5
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Compile and enforce fail-closed native D1-D3 slot mechanics
+        run: cargo test --locked -p sens --example microcpu_native -- --nocapture
+      - name: Native release CPU measurements with exact Rust oracle parity
+        run: |
+          set -euo pipefail
+          cargo run --locked --release -p sens --example microcpu_native -- \
+            --samples 11 --loops 600 | tee "$RUNNER_TEMP/microcpu-native.tsv"
+          test "$(wc -l < "$RUNNER_TEMP/microcpu-native.tsv")" -ge 10
+      - name: Preserve source SHA, host and native raw measurement
+        if: always()
+        shell: bash
+        run: |
+          {
+            echo "sha=$GITHUB_SHA"
+            echo "arch=$(uname -m)"
+            echo "kernel=$(uname -sr)"
+            grep -m1 'model name' /proc/cpuinfo || true
+            rustc -V
+            cargo -V
+          } > "$RUNNER_TEMP/microcpu-native-host.txt"
+      - name: Upload immutable bounded native research evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: microcpu-native-${{ github.sha }}
+          path: |
+            ${{ runner.temp }}/microcpu-native.tsv
+            ${{ runner.temp }}/microcpu-native-host.txt
+          if-no-files-found: warn
+          retention-days: 14
