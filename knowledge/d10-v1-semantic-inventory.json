@@ -8,10 +8,10 @@
   "capacity": 1024,
   "current_foundation": "#4008 / Contract 11.8 / D1-D9",
   "accounting": {
-    "selected_semantic_candidates": 647,
+    "selected_semantic_candidates": 651,
     "law_forced_coordinates": 256,
-    "unplaced_selected_candidates": 391,
-    "remaining_semantic_inventory": 377,
+    "unplaced_selected_candidates": 395,
+    "remaining_semantic_inventory": 373,
     "ratified_d10_residents": 0
   },
   "rules": [
@@ -14417,6 +14417,428 @@
         ],
         "derivability": "PENDING-OWNER-REVIEW; comparison+COND+prior state suffice as derived implementation"
       }
+    },
+    {
+      "stable_id": "d10.math.exact-barycentric-interpolate.20261011",
+      "semantic_name": "EXACT-BARYCENTRIC-INTERPOLATE",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "MATHEMATICS-ORACLE-ARCHIVE",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "EXACT-RATIONAL-INTERPOLATION",
+      "behavior": "Given 1..n pairwise-distinct exact rational node abscissas x_i and exact rational ordinates y_i, and exact rational query x, return the unique exact rational value of polynomial degree at most n−1 interpolating all nodes (x_i,y_i). Evaluate at x_i exactly y_i, reject duplicate x_i, empty set and inexact values; permutation of nodes must not alter result. Evaluate by barycentric rational weights, not floating coefficients.",
+      "provenance": [
+        "#4013",
+        "#4463",
+        "knowledge/d10-exact-barycentric-interpolation-research-v1.json",
+        "https://dlmf.nist.gov/3.3"
+      ],
+      "ratified_resident": false,
+      "source_path": "knowledge/d10-exact-barycentric-interpolation-research-v1.json",
+      "primary_url": "https://dlmf.nist.gov/3.3",
+      "proposal_status": "pending-owner-review",
+      "surface_uk": "точно-інтерполювати",
+      "surface_ukr": "обчислити-поліном-за-вузлами",
+      "positive_witnesses": [
+        {
+          "nodes": [
+            [
+              0,
+              0
+            ],
+            [
+              1,
+              1
+            ],
+            [
+              2,
+              4
+            ]
+          ],
+          "query": "1/2",
+          "expected": "1/4",
+          "why": "quadratic x² exact rational"
+        },
+        {
+          "nodes": [
+            [
+              0,
+              0
+            ],
+            [
+              1,
+              1
+            ],
+            [
+              2,
+              4
+            ]
+          ],
+          "query": "3",
+          "expected": "9",
+          "why": "polynomial extrapolation, not physical prediction"
+        },
+        {
+          "nodes": [
+            [
+              -1,
+              1
+            ],
+            [
+              1,
+              5
+            ]
+          ],
+          "query": "0",
+          "expected": "3",
+          "why": "2*x+3"
+        },
+        {
+          "nodes": [
+            [
+              1,
+              7
+            ]
+          ],
+          "query": "5/2",
+          "expected": "7",
+          "why": "unique constant polynomial"
+        },
+        {
+          "nodes": [
+            [
+              0,
+              5
+            ],
+            [
+              1,
+              5
+            ],
+            [
+              2,
+              5
+            ]
+          ],
+          "query": "3/2",
+          "expected": "5",
+          "why": "constant samples stay constant"
+        }
+      ],
+      "falsifiers": [
+        "Return a rounded float 0.25 rather than exact rational 1/4 on exact nodes/query.",
+        "Silently accept repeated x_i with inconsistent y_i, giving division by zero or arbitrary output.",
+        "Return interpolated coefficients rather than evaluated exact p(x), violating the declared result type.",
+        "Change result when reversing the node list, or produce a value other than y_i at an interpolation node.",
+        "Conflate polynomial interpolation with band-limited SDR reconstruction, sensor uncertainty propagation, hardware timing, or physical ephemeris accuracy."
+      ]
+    },
+    {
+      "stable_id": "d10.ai.finite-simple-temporal-closure.20261011",
+      "semantic_name": "FINITE-SIMPLE-TEMPORAL-CLOSURE",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "SYMBOLIC-AI-ORACLE-ARCHIVE",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "FINITE-EXACT-TEMPORAL-CLOSURE",
+      "behavior": "Для скінченних подій та цілих обмежень різниць повертає точні найтісніші наслідкові межі між усіма парами або явний від'ємний цикл суперечності; необмежені межі відмінні від нульових.",
+      "provenance": [
+        "#4013",
+        "#4463",
+        "knowledge/d10-finite-temporal-constraint-closure-v1.json",
+        "https://doi.org/10.1016/0004-3702(91)90006-6"
+      ],
+      "ratified_resident": false,
+      "source_path": "knowledge/d10-finite-temporal-constraint-closure-v1.json",
+      "primary_url": "https://doi.org/10.1016/0004-3702(91)90006-6",
+      "proposal_status": "pending-owner-review",
+      "surface_uk": "зімкнути-часові-межі",
+      "surface_ukr": "замчас",
+      "positive_witnesses": [
+        "0→1 <=4, 1→2 <=3, 0→2 <=15 gives tight 0→2 <=7, other direction is UNBOUNDED; cycle 0→1 <=2,1→2 <=1,2→0 <=-4 impossible"
+      ],
+      "falsifiers": [
+        "Treat disconnected/unbounded as zero",
+        "Treat constraint as reverse directed",
+        "Forget parallel tighter edge",
+        "Missing implied two-hop bound",
+        "Wrong positive cycle as conflict",
+        "Empty constraints reported UNSAT",
+        "Forge negative cycle with nonnegative sum",
+        "Accept finite-domain-only clock saturation"
+      ]
+    },
+    {
+      "stable_id": "d10.logic.exact-boolean-prime-implicants.20261011",
+      "semantic_name": "EXACT-BOOLEAN-PRIME-IMPLICANTS",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "HISTORICAL-LOGIC-ORACLE-ARCHIVE",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "BOOLEAN-PRIME-CUBE-FAMILY",
+      "behavior": "Let U={0,...,2^n-1}, ON∩DC=∅ and OFF=U\\(ON∪DC). A cube is an n-character pattern in {0,1,-}, where '-' is free. Return EVERY and ONLY cube c whose coverage intersects ON, whose coverage has empty intersection with OFF, and for which no strictly less constrained cube c' (covering strictly more assignments) also avoids OFF. Sort cubes by canonical lexicographic order '-'<'0'<'1'. The output is the complete prime implicant family, NOT a chosen minimum cover and not an individual Boolean gate.",
+      "provenance": [
+        "#4013",
+        "#4463",
+        "knowledge/d10-quine-prime-implicants-20261009.json",
+        "https://doi.org/10.2307/2262498"
+      ],
+      "ratified_resident": false,
+      "source_path": "knowledge/d10-quine-prime-implicants-20261009.json",
+      "primary_url": "https://doi.org/10.1080/00029890.1952.11988183",
+      "proposal_status": "pending-owner-review",
+      "surface_uk": "прості-імпліканти",
+      "surface_ukr": "усі-максимальні-куби-булевої-функції",
+      "positive_witnesses": [
+        {
+          "width": 2,
+          "on": [
+            1,
+            3
+          ],
+          "dc": [],
+          "result": [
+            "-1"
+          ]
+        },
+        {
+          "width": 2,
+          "on": [
+            1,
+            2
+          ],
+          "dc": [],
+          "result": [
+            "01",
+            "10"
+          ]
+        },
+        {
+          "width": 3,
+          "on": [
+            1,
+            3,
+            5,
+            7
+          ],
+          "dc": [],
+          "result": [
+            "--1"
+          ]
+        },
+        {
+          "width": 2,
+          "on": [
+            0
+          ],
+          "dc": [
+            1
+          ],
+          "result": [
+            "0-"
+          ]
+        },
+        {
+          "width": 2,
+          "on": [
+            0,
+            1,
+            2,
+            3
+          ],
+          "dc": [],
+          "result": [
+            "--"
+          ]
+        },
+        {
+          "width": 2,
+          "on": [],
+          "dc": [
+            1,
+            2
+          ],
+          "result": []
+        },
+        {
+          "width": 0,
+          "on": [
+            0
+          ],
+          "dc": [],
+          "result": [
+            ""
+          ]
+        }
+      ],
+      "falsifiers": [
+        "Any returned cube intersects OFF.",
+        "A reported prime cube can free another constrained bit without touching OFF.",
+        "ON coverage is lost or cubes covering only DC are reported.",
+        "Returns one minimized sum-of-products cover rather than all primes.",
+        "Treats a don't-care as mandatory output-1 or silently allows overlapping ON/DC."
+      ]
+    },
+    {
+      "stable_id": "d10.ai.binary-constraint-support-projection.20261011",
+      "semantic_name": "BINARY-CONSTRAINT-SUPPORT-PROJECTION",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "SYMBOLIC-AI-EXTERNAL-ORACLE-ARCHIVE",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "FINITE-BINARY-RELATION-SUPPORT",
+      "behavior": "Для скінченних подій та цілих обмежень різниць повертає точні найтісніші наслідкові межі між усіма парами або явний від'ємний цикл суперечності; необмежені межі відмінні від нульових.",
+      "provenance": [
+        "#4013",
+        "#4463",
+        "knowledge/d10-symbolic-ai-arc-support-20261009.json",
+        "https://doi.org/10.1016/0004-3702(77)90007-8"
+      ],
+      "ratified_resident": false,
+      "source_path": "knowledge/d10-symbolic-ai-arc-support-20261009.json",
+      "primary_url": "https://doi.org/10.1016/0004-3702(77)90007-8",
+      "proposal_status": "pending-owner-review",
+      "surface_uk": "відсіяти-без-опори",
+      "surface_ukr": "звузити-два-домени-за-відношенням",
+      "positive_witnesses": [
+        {
+          "dx": [
+            1,
+            2,
+            3
+          ],
+          "dy": [
+            4,
+            5
+          ],
+          "allowed": [
+            [
+              1,
+              4
+            ],
+            [
+              2,
+              6
+            ],
+            [
+              3,
+              5
+            ]
+          ],
+          "out": {
+            "status": "SUPPORTED",
+            "left": [
+              1,
+              3
+            ],
+            "right": [
+              4,
+              5
+            ]
+          }
+        },
+        {
+          "dx": [
+            1,
+            2
+          ],
+          "dy": [
+            3,
+            4
+          ],
+          "allowed": [
+            [
+              1,
+              3
+            ],
+            [
+              2,
+              4
+            ]
+          ],
+          "out": {
+            "status": "SUPPORTED",
+            "left": [
+              1,
+              2
+            ],
+            "right": [
+              3,
+              4
+            ]
+          }
+        },
+        {
+          "dx": [
+            1,
+            2
+          ],
+          "dy": [
+            3
+          ],
+          "allowed": [
+            [
+              1,
+              4
+            ],
+            [
+              2,
+              5
+            ]
+          ],
+          "out": {
+            "status": "NO-SUPPORT",
+            "left": [],
+            "right": []
+          }
+        },
+        {
+          "dx": [
+            2
+          ],
+          "dy": [
+            3
+          ],
+          "allowed": [
+            [
+              2,
+              3
+            ]
+          ],
+          "out": {
+            "status": "SUPPORTED",
+            "left": [
+              2
+            ],
+            "right": [
+              3
+            ]
+          }
+        },
+        {
+          "dx": [],
+          "dy": [
+            1
+          ],
+          "allowed": [
+            [
+              0,
+              1
+            ]
+          ],
+          "out": {
+            "status": "NO-SUPPORT",
+            "left": [],
+            "right": []
+          }
+        }
+      ],
+      "falsifiers": [
+        "A value x with no R-related y in the current Dy must be removed; keeping x violates sound support pruning.",
+        "Arbitrary Cartesian product of output domains is NOT guaranteed to be contained in R; do not claim universal pair compatibility or global CSP solution.",
+        "When all allowed pairs are removed, return named NO-SUPPORT rather than SUCCESS(empty,empty), avoiding contradictory proof status.",
+        "Monotonicity: reducing either input domain cannot invent any supported output; repeated projection must be idempotent.",
+        "Reject unsorted/duplicate finite lists, float/boolean values, non-pair relation members: no silent coercion into semantic identity."
+      ]
     }
   ],
   "parent_domain": {
@@ -14462,6 +14884,7 @@
     "knowledge/d10-interdisciplinary-science-proposals-20261009.json",
     "knowledge/d10-clock-radio-math-selection-20261009.json",
     "knowledge/d10-babbage-reiter-hobby-selected-20261009.json",
-    "knowledge/d10-hysteretic-boolean-source-law-20261009.json"
+    "knowledge/d10-hysteretic-boolean-source-law-20261009.json",
+    "knowledge/d10-archive-admission-20261011.uk.md"
   ]
 }
