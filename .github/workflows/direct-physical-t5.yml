@@ -8,6 +8,8 @@ on:
       - "crates/sens-cli/src/bin/sens-trit.rs"
       - "crates/sens/tests/direct_t5_pipeline.rs"
       - "crates/sens/examples/bench_direct_t5.rs"
+      - "scripts/check_direct_t5_timing.py"
+      - "tests/test_direct_t5_timing_guard.py"
       - ".github/workflows/direct-physical-t5.yml"
   push:
     branches: [main]
@@ -17,6 +19,8 @@ on:
       - "crates/sens-cli/src/bin/sens-trit.rs"
       - "crates/sens/tests/direct_t5_pipeline.rs"
       - "crates/sens/examples/bench_direct_t5.rs"
+      - "scripts/check_direct_t5_timing.py"
+      - "tests/test_direct_t5_timing_guard.py"
       - ".github/workflows/direct-physical-t5.yml"
 
 permissions:
@@ -33,24 +37,19 @@ jobs:
         run: cargo test --locked -q -p sens --test direct_t5_pipeline
       - name: Original SENS CLI evaluation and diagnostic regression
         run: cargo test --locked -q -p sens-cli --bin sens-trit
+      - name: Негативні свідки коректності T5-вимірювань за Python і Python -O
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m unittest discover -s tests -p 'test_direct_t5_timing_guard.py' -v
+          python3 -O -m unittest discover -s tests -p 'test_direct_t5_timing_guard.py' -v
       - name: Physical decode vs visible parser vs cached AST, measurement-only
         shell: bash
         run: |
           set -euo pipefail
           cargo run --locked --release --quiet -p sens --example bench_direct_t5 -- 2000 \
             | tee "$RUNNER_TEMP/t5-direct-timing.csv"
-          python3 - "$RUNNER_TEMP/t5-direct-timing.csv" <<'PY'
-          import csv,sys
-          with open(sys.argv[1], newline="") as src:
-              rows=list(csv.DictReader(src))
-          assert len(rows)==3, rows
-          assert {r["fixture"] for r in rows}=={"quote","atom","cond"}
-          assert all(int(r["bytes"])>0 and int(r["forms"])>0 for r in rows)
-          for r in rows:
-              for key in ("t5_decode_parse_lower_ns","visible_parse_lower_ns","cached_lowered_eval_ns"):
-                  assert 0<float(r[key])<1e12, r
-          print("MEASURED_NOT_SPEEDUP_CLAIMED")
-          PY
+          python3 scripts/check_direct_t5_timing.py "$RUNNER_TEMP/t5-direct-timing.csv"
       - uses: actions/upload-artifact@v4
         with:
           name: t5-direct-timing
