@@ -7,9 +7,10 @@ No assert, shell pipeline, silent fallback, or third-party dependency.
 from __future__ import annotations
 
 import re
+import tempfile
 import subprocess
 import sys
-from pathlib import PurePosixPath
+from pathlib import Path, PurePosixPath
 
 IMPORTANT = ("lib/", "knowledge/", "witnesses/")
 NATIVE = (".lisp", ".sens")
@@ -107,7 +108,7 @@ def parse_tree_mode(raw: bytes, expected_path: str) -> str:
     return mode.decode("ascii", "strict") + ":" + kind.decode("ascii", "strict")
 
 
-def new_source_mode_failures(paths: list[str], head: str) -> list[str]:
+def new_source_mode_failures(paths: list[str], head: str, cwd: str | None = None) -> list[str]:
     """A suffix cannot admit Git symlink 120000 or submodule/gitlink 160000."""
     errors: list[str] = []
     for path in paths:
@@ -115,7 +116,7 @@ def new_source_mode_failures(paths: list[str], head: str) -> list[str]:
             continue
         record = subprocess.run(
             ["git", "ls-tree", "-z", "--full-tree", head, "--", path],
-            check=False, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+            check=False, stdout=subprocess.PIPE, stderr=subprocess.PIPE, cwd=cwd,
         )
         if record.returncode != 0:
             raise ValueError(f"GIT_TREE_LOOKUP_FAILED: {path}: " +
@@ -172,6 +173,28 @@ def self_test() -> None:
         except ValueError:
             continue
         raise RuntimeError("GUARD_SELFTEST_FAIL: invalid Git tree evidence admitted")
+    # End-to-end mode witness: Git itself must report a real symlink,
+    # not only a handcrafted ls-tree row. No mutation of the user's repo.
+    with tempfile.TemporaryDirectory(prefix="sens-file-guard-") as scratch:
+        repo_root = Path(scratch)
+        (repo_root / "lib").mkdir()
+        (repo_root / "lib" / "good.sens").write_bytes(b"\x00")
+        (repo_root / "lib" / "shadow.sens").symlink_to("good.sens")
+        for arguments in (
+            ["git", "init", "-q", scratch],
+            ["git", "-C", scratch, "add", "lib/good.sens", "lib/shadow.sens"],
+        ):
+            subprocess.run(arguments, check=True, capture_output=True)
+        tree = subprocess.run(
+            ["git", "-C", scratch, "write-tree"],
+            check=True, capture_output=True, text=True,
+        ).stdout.strip()
+        verify_case("git_regular_allowed",
+                    new_source_mode_failures(["lib/good.sens"], tree, cwd=scratch), [])
+        verify_case("git_symlink_rejected",
+                    new_source_mode_failures(["lib/shadow.sens"], tree, cwd=scratch),
+                    ["NON_REGULAR_NEW_SOURCE: lib/shadow.sens: Git mode=120000:blob"])
+    print("FILE_GUARD_SELFTEST_OK: actual Git tree regular/symlink parity")
     print("FILE_GUARD_SELFTEST_OK: regular/symlink/gitlink/truncated/path-substitution")
     print("FILE_GUARD_SELFTEST_OK: 9 existing mechanical checks")
 
