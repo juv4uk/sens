@@ -7,11 +7,13 @@ on:
       - "benchmarks/**"
       - "scripts/benchmark_registry.py"
       - ".github/workflows/benchmark-registry.yml"
+      - "scripts/benchmark_sweep.py"
   pull_request:
     paths:
       - "benchmarks/**"
       - "scripts/benchmark_registry.py"
       - ".github/workflows/benchmark-registry.yml"
+      - "scripts/benchmark_sweep.py"
   workflow_dispatch:
 
 permissions:
@@ -97,3 +99,81 @@ jobs:
           BASE_SHA: ${{ github.event.pull_request.base.sha }}
           HEAD_SHA: ${{ github.event.pull_request.head.sha }}
         run: python3 scripts/benchmark_registry.py --check-new "$BASE_SHA" "$HEAD_SHA"
+
+  sweep:
+    name: "Усі стенди, частина ${{ matrix.shard }}"
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [0, 1, 2, 3, 4, 5, 6, 7]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Облік стендів і точного коміту
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 scripts/benchmark_registry.py --check
+          git rev-parse HEAD
+          python3 --version
+          rustc --version
+      - name: Інструменти для інструкційного профілю
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo apt-get update -qq
+          sudo apt-get install -y valgrind
+          valgrind --version
+      - name: Виконати частину всіх bench.json
+        shell: bash
+        env:
+          SHARD: ${{ matrix.shard }}
+        run: |
+          set -euo pipefail
+          python3 scripts/benchmark_sweep.py \
+            --shard "$SHARD" --shards 8 --timeout 180 \
+            --out "$RUNNER_TEMP/benchmark-sweep-$SHARD"
+      - name: Зберегти сирі результати, навіть коли стенд червоний
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: benchmark-sweep-${{ github.run_id }}-${{ matrix.shard }}
+          path: ${{ runner.temp }}/benchmark-sweep-${{ matrix.shard }}/
+          retention-days: 21
+          if-no-files-found: error
+
+  audit:
+    name: Підсумувати кожен стенд та виявити відсутні докази
+    needs: [sweep]
+    if: always()
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v5
+      - name: Зібрати всі часткові артефакти
+        uses: actions/download-artifact@v4
+        with:
+          pattern: benchmark-sweep-${{ github.run_id }}-*
+          path: ${{ runner.temp }}/benchmark-sweep-collected
+          merge-multiple: true
+      - name: Перевірити повноту реєстру й результати без приховування відмов
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 scripts/benchmark_sweep.py --summarize "$RUNNER_TEMP/benchmark-sweep-collected" \
+            | tee "$RUNNER_TEMP/benchmark-sweep-summary.txt"
+          cat "$RUNNER_TEMP/benchmark-sweep-summary.txt" >> "$GITHUB_STEP_SUMMARY"
+      - name: Зберегти аудит повноти
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: benchmark-sweep-summary-${{ github.run_id }}
+          path: |
+            ${{ runner.temp }}/benchmark-sweep-collected/summary.json
+            ${{ runner.temp }}/benchmark-sweep-summary.txt
+          retention-days: 21
+          if-no-files-found: warn
