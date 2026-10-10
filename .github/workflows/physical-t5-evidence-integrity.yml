@@ -8,6 +8,7 @@ on:
       - "scripts/sens_t5_codec.py"
       - "scripts/sens_t5_spaced_view.py"
       - "tests/test_physical_t5_evidence_integrity.py"
+      - "tests/test_m3_cross_transport_rejection.py"
       - "tests/fixtures/migration-quote-cohort-main/**"
       - "tests/fixtures/migration-multiform-cohort-main/**"
       - "tests/fixtures/migration-d1-cond-cohort/**"
@@ -20,6 +21,7 @@ on:
       - "scripts/sens_t5_codec.py"
       - "scripts/sens_t5_spaced_view.py"
       - "tests/test_physical_t5_evidence_integrity.py"
+      - "tests/test_m3_cross_transport_rejection.py"
       - "tests/fixtures/migration-quote-cohort-main/**"
       - "tests/fixtures/migration-multiform-cohort-main/**"
       - "tests/fixtures/migration-d1-cond-cohort/**"
@@ -37,6 +39,14 @@ jobs:
       - uses: actions/checkout@v5
       - name: Negative-control tests on real physical fixture
         run: python3 -m unittest discover -s tests -p test_physical_t5_evidence_integrity.py -v
+      - name: М3 — відмова фізичного T5 на чужих форматах (звичайний Python та -O)
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -f tests/test_m3_cross_transport_rejection.py
+          test -f scripts/sens_t5_codec.py
+          python3 -m unittest discover -s tests -p test_m3_cross_transport_rejection.py -v
+          python3 -O -m unittest discover -s tests -p test_m3_cross_transport_rejection.py -v
       - name: Measure real tracked T5 and spaced-bit transport
         run: |
           python3 scripts/benchmark-sens-physical.py \
