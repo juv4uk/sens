@@ -100,6 +100,10 @@ probes = {
     "rows-speed-prefix": "\n((функція (speed) speed) (scientific-constant-quantity si:defining-speed-of-light))\n",
     "rows-distance-prefix": "\n((функція (speed) ((функція (one-second) (quantity-product speed one-second)) (make-quantity 1 (make-unit (00100111 (make-dimension (00000001 second) 1)))))) (scientific-constant-quantity si:defining-speed-of-light))\n",
     "rows-recovered-prefix": "\n((функція (speed) ((функція (one-second) ((функція (distance) ((функція (recovered) recovered) (quantity-quotient distance one-second))) (quantity-product speed one-second))) (make-quantity 1 (make-unit (00100111 (make-dimension (00000001 second) 1)))))) (scientific-constant-quantity si:defining-speed-of-light))\n",
+    "malformed-short-constant-valid": "\n(scientific-constant? (00000001 (scientific-constant/1 broken)))\n",
+    "malformed-short-constant-clauses": "\n(scientific-constant->clauses (00000001 (scientific-constant/1 broken)))\n",
+    "invalid-string-name-constant-valid": "\n(scientific-constant? (00000001 (scientific-constant/1 \"not-a-symbol\" (quantity/1 299792458 (unit/1 (dimension/1 metre 1) (dimension/1 second -1))) exact-by-definition physical-defining si (science-source/1 bipm-si-brochure-9 2019))))\n",
+    "invalid-string-name-constant-clauses": "\n(scientific-constant->clauses (00000001 (scientific-constant/1 \"not-a-symbol\" (quantity/1 299792458 (unit/1 (dimension/1 metre 1) (dimension/1 second -1))) exact-by-definition physical-defining si (science-source/1 bipm-si-brochure-9 2019))))\n",
     "planck-value": "\n(quantity-value (scientific-constant-quantity si:defining-planck-constant))\n",
     "planck-unit": "\n(quantity-unit (scientific-constant-quantity si:defining-planck-constant))\n",
     "numeric-product": "\n(00001110 (quantity-value (scientific-constant-quantity si:defining-planck-constant)) (quantity-value (scientific-constant-quantity si:defining-cesium-frequency)))\n",
@@ -112,7 +116,7 @@ for stage, suffix in probes.items():
     )
 PY
 
-  for stage in rows-binding check-binding witness-binding rows-call check-call planck-record cesium-record planck-value planck-unit numeric-product quantity-product one-second merge-dimensions product-units speed-proper-list speed-constant-valid speed-source-valid speed-constant-clauses distance-product speed-quotient lambda-identity-probe lambda-nested-probe list-two-probe list-seven-probe rows-planck-cesium-prefix rows-energy-prefix rows-one-second-prefix rows-speed-prefix rows-distance-prefix rows-recovered-prefix; do
+  for stage in rows-binding check-binding witness-binding rows-call check-call planck-record cesium-record planck-value planck-unit numeric-product quantity-product one-second merge-dimensions product-units speed-proper-list speed-constant-valid speed-source-valid speed-constant-clauses distance-product speed-quotient lambda-identity-probe lambda-nested-probe list-two-probe list-seven-probe rows-planck-cesium-prefix rows-energy-prefix rows-one-second-prefix rows-speed-prefix rows-distance-prefix rows-recovered-prefix malformed-short-constant-valid malformed-short-constant-clauses invalid-string-name-constant-valid invalid-string-name-constant-clauses; do
     probe="$quantity_diag_dir/exact-quantity-$stage-probe.lisp"
     log="$quantity_diag_dir/exact-quantity-$stage-probe.log"
     if cargo run --quiet -p sens-cli --bin sens -- "$probe" >"$log" 2>&1; then
