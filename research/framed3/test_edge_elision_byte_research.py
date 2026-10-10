@@ -41,6 +41,75 @@ class КраїРамки(unittest.TestCase):
         # Це фактичні ФІЗИЧНІ байти з 4B CRC, режимом і довжиною,
         # а не механічно відняті 2/3/4 біти з ранжованого F3.
 
+    def test_всі_перші_відкриття_відновлюються_без_втрат(self):
+        for depth in (2, 3, 4, 8, 16, 17, 32):
+            full = ("10",) * depth + ("000000000",) + ("01",) * depth
+            shortened = d2.trim(full)
+            self.assertEqual(shortened, ("10",) * depth + ("000000000",))
+            mode = edge._режим_за_кількістю(depth)
+            options = dict(edge._скорочення(full))
+            self.assertIn(mode, options)
+            self.assertEqual(options[mode], ("000000000",))
+            self.assertEqual(edge._відновити(mode, options[mode]), full)
+            report = self.roundtrip(full)
+            self.assertLessEqual(report.байтів_після, report.байтів_без_скорочення)
+
+    def test_префікси_різної_глибини_не_зливаються_в_один_код(self):
+        # Без лічильника початкових OPEN обидва випадки дають ("0",).
+        a = ("10", "0", "01")
+        b = ("10", "10", "0", "01", "01")
+        self.assertEqual(d2.trim(a)[1:], d2.trim(b)[2:])
+        self.assertEqual(d2.trim(a)[1:], ("0",))
+        self.assertNotEqual(edge._режим_за_кількістю(1),
+                            edge._режим_за_кількістю(2))
+        self.assertNotEqual(edge.кодувати(a), edge.кодувати(b))
+        self.assertEqual(edge.декодувати(edge.кодувати(a)), a)
+        self.assertEqual(edge.декодувати(edge.кодувати(b)), b)
+
+    def test_саме_найменша_кількість_фізичних_байтів_серед_префіксів(self):
+        for depth in range(1, 8):
+            full = ("10",) * depth + ("0",) + ("01",) * depth
+            candidates = [
+                (len(edge._загорнути(mode, reduced, full)), mode)
+                for mode, reduced in edge._скорочення(full)
+            ]
+            # Незалежний вибір мінімуму за повною фізичною довжиною.
+            self.assertEqual(edge.планувати(full).байтів_після,
+                             min(v for v, _ in candidates))
+            self.roundtrip(full)
+
+    def test_багатокоренева_програма_після_префікса_теж_оборотна(self):
+        full = ("10", "10", "000", "01", "01", "10", "1", "01")
+        d2.validate(full)
+        shortened = d2.trim(full)
+        self.assertEqual(edge._відновити(edge._режим_за_кількістю(2),
+                                         shortened[2:]), full)
+        self.roundtrip(full)
+        # Скасування початкових OPEN у багатокореневій програмі
+        # можливе тільки з явним K у фізичному tag.
+
+    def test_великі_префікси_мають_однозначне_розширення(self):
+        self.assertEqual(edge._режим_за_кількістю(252), 254)
+        self.assertEqual(edge._режим_за_кількістю(253), 255)
+        prefix = ("10",) * 253
+        full = prefix + ("0",) + ("01",) * 253
+        self.assertEqual(edge._відновити(255, ("0",), 253), full)
+        for missing_count in (None, 0, 252, 513):
+            with self.subTest(missing_count=missing_count):
+                with self.assertRaises(edge.ПомилкаСкорочення):
+                    edge._відновити(255, ("0",), missing_count)
+
+    def test_псевдоканонічна_мітка_відхиляється(self):
+        full = ("10", "10", "0", "01", "01")
+        raw = edge.кодувати(full)
+        for wrong in (3, 4, 255):
+            corrupt = raw[:3] + bytes((wrong,)) + raw[4:]
+            if corrupt == raw:
+                continue
+            with self.subTest(tag=wrong):
+                with self.assertRaises(edge.ПомилкаСкорочення):
+                    edge.декодувати(corrupt)
+
     def test_багато_коренів_не_видаляти_перший_open(self):
         for words in (
             ("10", "01", "10", "01"),
