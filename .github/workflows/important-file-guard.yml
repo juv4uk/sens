@@ -158,16 +158,34 @@ jobs:
 
       - name: Execute and attest the physical SENS authority verdict
         shell: bash
+        env:
+          EXPECTED_ADDED_PATHS: ${{ steps.transport.outputs.added_paths }}
+          EXPECTED_TRACKED_TOOLS_PATHS: ${{ steps.transport.outputs.tracked_tools_paths }}
         run: |
           set -euo pipefail
           verdict_pattern='^\(SENS_FILE_AUTHORITY_PASS new-paths [0-9]+ tracked-tool-paths [0-9]+\)$'
 
+          if [[ ! "$EXPECTED_ADDED_PATHS" =~ ^[0-9]+$ ||
+                ! "$EXPECTED_TRACKED_TOOLS_PATHS" =~ ^[0-9]+$ ]]; then
+            echo "SENS_FILE_AUTHORITY_BLOCKED: missing numeric Git inventory evidence" >&2
+            exit 2
+          fi
+          check_inventory_verdict() {
+            local candidate="$1" count_added="$2" count_tools="$3"
+            [[ "$candidate" =~ $verdict_pattern ]] &&
+              [[ "$candidate" == "(SENS_FILE_AUTHORITY_PASS new-paths $count_added tracked-tool-paths $count_tools)" ]]
+          }
+          
           # Незалежні фальсифікатори: чужий текст/порожній вивід — не рішення SENS.
           valid='(SENS_FILE_AUTHORITY_PASS new-paths 0 tracked-tool-paths 1)'
-          [[ "$valid" =~ $verdict_pattern ]] || {
-            echo "SENS_FILE_AUTHORITY_BLOCKED: validator rejected a canonical witness" >&2
+          if ! check_inventory_verdict "$valid" 0 1; then
+            echo "SENS_FILE_AUTHORITY_BLOCKED: validator rejected canonical inventory" >&2
             exit 2
-          }
+          fi
+          if check_inventory_verdict "$valid" 1 1 || check_inventory_verdict "$valid" 0 2; then
+            echo "SENS_FILE_AUTHORITY_BLOCKED: wrong inventory counts were accepted" >&2
+            exit 2
+          fi
           for invalid in '' 'SENS_FILE_AUTHORITY_PASS' \
             '(SENS_FILE_AUTHORITY_PASS new-paths 0 tracked-tool-paths 1) junk' \
             '(SENS_FILE_AUTHORITY_PASS new-paths unknown tracked-tool-paths 1)' \
@@ -190,8 +208,8 @@ jobs:
           # CLI друкує EvalResult.output, потім EvalResult.value: остаточне
           # значення мусить бути повним, типізованим рішенням SENS, не substring.
           verdict="$(tail -n 1 "$log")"
-          if [[ ! "$verdict" =~ $verdict_pattern ]]; then
-            echo "SENS_FILE_AUTHORITY_BLOCKED: physical execution had no final SENS verdict" >&2
+          if ! check_inventory_verdict "$verdict" "$EXPECTED_ADDED_PATHS" "$EXPECTED_TRACKED_TOOLS_PATHS"; then
+            echo "SENS_FILE_AUTHORITY_BLOCKED: final SENS verdict mismatches Git inventory" >&2
             exit 2
           fi
 
