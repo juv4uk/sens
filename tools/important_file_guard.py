@@ -118,7 +118,7 @@ def lisp_string(value: str) -> str:
     # intentionally refuses them instead of emitting ambiguous Lisp source.
     for character in value:
         codepoint = ord(character)
-        if codepoint < 32 or codepoint == 127:
+        if codepoint < 32 or codepoint in (127, 0x85, 0x2028, 0x2029):
             fail(f"UNREPRESENTABLE_CONTROL_CHARACTER_IN_GIT_PATH: U+{codepoint:04X}")
     escaped = value.replace("\\", "\\\\").replace('"', '\\"')
     return '"' + escaped + '"'
@@ -303,6 +303,9 @@ def self_test() -> None:
     expect("Lisp-escaping", lisp_string('a"b\\c'), '"a\\"b\\\\c"')
     if not catches(lambda: lisp_string("unsafe\x01path")):
         fail("TRANSPORT_SELF_TEST_ACCEPTED_CONTROL_CHARACTER")
+    for separator in ("\u0085", "\u2028", "\u2029"):
+        if not catches(lambda separator=separator: lisp_string("tools/" + separator + "name.py")):
+            fail("TRANSPORT_SELF_TEST_ACCEPTED_UNICODE_LINE_SEPARATOR")
     # Real Git regression: --diff-filter=ACR misses T; --diff-filter=T finds symlink swap.
     with tempfile.TemporaryDirectory(prefix="sens-typechange-") as temporary:
         root = Path(temporary)
