@@ -144,6 +144,29 @@ class TestT5MigrationInventory(unittest.TestCase):
             self.assertIn(path, rows, f"authority boundary missing: {path}")
             self.assertEqual(rows[path]["migration_status"], "T5_REQUIRED", path)
 
+    def test_physical_transport_authority_is_not_d2_or_source_packing(self):
+        rows = {r["path"]: r for r in read_manifest()}
+        transport = rows["crates/sens/src/ternary_transport.rs"]
+        execution = rows["crates/sens/src/binary_execution.rs"]
+        grammar = rows["crates/sens/src/canonical_reader.rs"]
+        packing = rows["crates/sens/src/source_packing.rs"]
+        self.assertEqual(transport["migration_status"], "T5_REQUIRED")
+        self.assertEqual(transport["authority"], "crates/sens/src/ternary_transport.rs")
+        self.assertEqual(execution["role"], "consumer")
+        self.assertEqual(execution["authority"], "crates/sens/src/ternary_transport.rs")
+        self.assertEqual(grammar["role"], "consumer")
+        self.assertEqual(grammar["codec"], "D2")
+        self.assertEqual(grammar["canonical_path"], "n/a")
+        self.assertIn("D2 grammar", grammar["authority"])
+        self.assertEqual(packing["role"], "consumer")
+        self.assertEqual(packing["codec"], "NONE")
+        self.assertEqual(packing["canonical_path"], "n/a")
+        self.assertEqual(packing["migration_status"], "BLOCKED")
+        self.assertEqual(packing["authority"], "UNKNOWN")
+        self.assertFalse(any(r["role"] == "producer" for r in read_manifest()
+                             if r["path"].startswith(".github/workflows/")),
+                         "workflow orchestration must not be classified as a physical-byte producer")
+
     def test_live_registry_matches_manifest(self):
         proc = subprocess.run(
             [sys.executable, str(HERE / "report_t5_migration_inventory.py"),
@@ -180,6 +203,53 @@ class TestT5MigrationInventory(unittest.TestCase):
                                encoding="utf-8")
             self.assertTrue(GEN.is_candidate("scripts/fresh_link.py", root),
                             "new .sens-referencing link was not discovered")
+
+    def test_new_tracked_lisp_t5_consumer_cannot_disappear(self):
+        """Навіть новий .lisp із .sens має потрапити до M0 як BLOCKED."""
+        with tempfile.TemporaryDirectory() as d:
+            root = Path(d)
+            source = root / "lib" / "новий-фізичний-читач.lisp"
+            source.parent.mkdir(parents=True)
+            source.write_text(
+                '(00001001 читати-фізичне (шлях) ; читач "*.sens"\n'
+                '  (00000001 шлях))\n',
+                encoding="utf-8",
+            )
+            subprocess.run(["git", "-C", str(root), "init", "-q"],
+                           check=True, capture_output=True)
+            subprocess.run(["git", "-C", str(root), "add",
+                            "lib/новий-фізичний-читач.lisp"],
+                           check=True, capture_output=True)
+            rows = GEN.build(root, "0" * 40)
+            self.assertEqual(len(rows), 1, rows)
+            self.assertEqual(rows[0]["path"],
+                             "lib/новий-фізичний-читач.lisp")
+            self.assertEqual(rows[0]["migration_status"], "BLOCKED",
+                             "без доведеного власника новий Lisp має бути BLOCKED")
+            self.assertEqual(rows[0]["dependency"], "#5444")
+
+    def test_lisp_donor_comment_does_not_claim_t5_authority(self):
+        """Історичний Lisp-оракул зі словом T5 не є чинним T5-декодером."""
+        with tempfile.TemporaryDirectory() as d:
+            root = Path(d)
+            source = root / "tests" / "oracles" / "donor.lisp"
+            source.parent.mkdir(parents=True)
+            source.write_text("; donor only, never executable .sens or T5 source\n",
+                              encoding="utf-8")
+            self.assertTrue(GEN.is_candidate("tests/oracles/donor.lisp", root))
+            row = GEN.classify("tests/oracles/donor.lisp", root)
+            self.assertEqual(row["migration_status"], "BLOCKED")
+            self.assertEqual(row["authority"], "UNKNOWN")
+            self.assertEqual(row["dependency"], "#5444")
+
+    def test_lisp_without_physical_t5_reference_is_not_a_new_inventory_link(self):
+        """Власне розширення .lisp не означає участі у фізичному T5."""
+        with tempfile.TemporaryDirectory() as d:
+            root = Path(d)
+            source = root / "lib" / "звичайне-ядро.lisp"
+            source.parent.mkdir(parents=True)
+            source.write_text("(00001001 обчислити (x) x)\n", encoding="utf-8")
+            self.assertFalse(GEN.is_candidate("lib/звичайне-ядро.lisp", root))
 
     def test_inventory_gate_cannot_filter_out_new_source_consumers(self):
         """Гвардія має запускатися і для нового .rs/.py producer без зміни *.sens."""

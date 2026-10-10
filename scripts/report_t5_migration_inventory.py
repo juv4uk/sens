@@ -26,7 +26,7 @@ SCHEMA = "sens-t5-migration-inventory/v1"
 # Незмінна база цього зрізу; перегляд/re-pin потребує окремого PR і рев'ю.
 PINNED_BASE_SHA = "33bd5a32877f63de78eee28b0f97ea629e83a4fa"
 
-EXT = {".rs", ".py", ".sh", ".yml", ".yaml", ".toml"}
+EXT = {".rs", ".py", ".sh", ".yml", ".yaml", ".toml", ".lisp"}
 EXCLUDE_PREFIXES = (
     "vendor/", "target/", "archive/", "docs/",
     "knowledge/", "memory/", "дослідження/", "public/",
@@ -42,9 +42,8 @@ DISCOVERY = re.compile(
 
 # Канонічний T5-оракул / межі authority (те, що НЕ переробляється на .senc).
 T5_AUTHORITY = {
-    "crates/sens/src/canonical_reader.rs": "crates/sens/src/canonical_reader.rs",
-    "crates/sens/src/binary_execution.rs": "crates/sens/src/canonical_reader.rs",
-    "crates/sens/src/source_packing.rs": "crates/sens/src/source_packing.rs",
+    "crates/sens/src/ternary_transport.rs": "crates/sens/src/ternary_transport.rs",
+    "crates/sens/src/binary_execution.rs": "crates/sens/src/ternary_transport.rs",
     "crates/sens-cli/src/bin/sens-trit.rs": "crates/sens/src/binary_execution.rs",
     "scripts/sens_t5_codec.py": "scripts/sens_t5_codec.py",
     "scripts/audit_t5_file_pairs.py": "scripts/sens_t5_codec.py",
@@ -122,6 +121,17 @@ def is_candidate(path: str, root: Path) -> bool:
 
 
 def classify_role(path: str) -> tuple[str, str]:
+    if path.startswith(".github/workflows/") and re.search(
+            r"migrate|encode|publish|mirror|admit|guarded_sens", path, re.IGNORECASE):
+        return "validator", "CI workflow validator"
+    if path == "crates/sens/src/ternary_transport.rs":
+        return "producer", "фізичний T5 byte codec: 5 тритів на байт"
+    if path == "crates/sens/src/binary_execution.rs":
+        return "consumer", "виконання після декодування фізичного T5"
+    if path == "crates/sens/src/canonical_reader.rs":
+        return "consumer", "типований D2/source reader, не фізичний T5 codec"
+    if path == "crates/sens/src/source_packing.rs":
+        return "consumer", "packed source-word представлення; фізичний T5 call-site не доведено"
     for pat, role, reason in ROLE_RULES:
         if pat.search(path):
             return role, reason
@@ -129,6 +139,10 @@ def classify_role(path: str) -> tuple[str, str]:
 
 
 def codec_of(path: str, root: Path) -> str:
+    if path == "crates/sens/src/canonical_reader.rs":
+        return "D2"
+    if path == "crates/sens/src/source_packing.rs":
+        return "NONE"
     try:
         text = (root / path).read_text(encoding="utf-8", errors="replace")
     except OSError:
@@ -169,7 +183,19 @@ def classify(path: str, root: Path) -> dict:
     is_senc = (path.startswith("research/")
                or bool(re.search(r"framed3|tb33|adaptive|senc", path, re.IGNORECASE)))
 
-    if path in T5_AUTHORITY:
+    if path == "crates/sens/src/canonical_reader.rs":
+        status = "T5_REQUIRED"
+        authority = "D2 grammar (not physical T5 byte authority)"
+        reason = "типований D2/source reader; фізичні байти декодує ternary_transport.rs"
+    elif path == "crates/sens/src/source_packing.rs":
+        status = "BLOCKED"
+        authority = "UNKNOWN"
+        reason = "packed source-word представлення; фізичний .sens call-site не доведено"
+    elif path.endswith(".lisp"):
+        status = "BLOCKED"
+        authority = "UNKNOWN"
+        reason = "Lisp-ланка потребує незалежного доказу producer/consumer T5"
+    elif path in T5_AUTHORITY:
         status = "T5_REQUIRED"
         authority = T5_AUTHORITY[path]
         reason = "канонічна межа T5 (authority)"
@@ -195,7 +221,7 @@ def classify(path: str, root: Path) -> dict:
         authority = "UNKNOWN"
         reason = "немає достатнього доказу → BLOCKED"
 
-    canonical = "*.sens" if "T5" in codec else ("*.senc" if "SENC" in codec else "n/a")
+    canonical = "n/a" if status == "BLOCKED" else ("*.sens" if "T5" in codec else ("*.senc" if "SENC" in codec else "n/a"))
     return {
         "schema": SCHEMA,
         "repository": "juv4uk/sens",
@@ -205,7 +231,7 @@ def classify(path: str, root: Path) -> dict:
         "extension": Path(path).suffix.lower(),
         "codec": codec,
         "authority": authority,
-        "dependency": status_dep(status),
+        "dependency": "#5444" if path.endswith(".lisp") and status == "BLOCKED" else status_dep(status),
         "base_sha": None,  # заповнюється у build()
         "owner_lane": lane,
         "migration_status": status,
