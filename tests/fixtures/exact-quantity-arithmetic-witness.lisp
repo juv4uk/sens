@@ -29,6 +29,14 @@
       ((атом? значення) (тотожне? значення (00000001 ())))
       ((атом? (00000001 ())) (атом? (00000001 (())))))))
 
+; Current D5:01000 ZEROP is owner-ratified, but has no host shortcut.
+; This witness supplies a Lisp-defined mechanism for its numeric inputs.
+; D3 EQ compares atomic numeric values and returns exact D1, not a host bool.
+; Non-atoms remain an EQ type failure; they are not coerced to zero.
+(00001001 нуль?
+  (00001000 (значення)
+    (тотожне? значення 0)))
+
 (00001001 exact-quantity-arithmetic-rows
   (00001000 ()
     (10011101 ((planck
