@@ -8,6 +8,7 @@ on:
       - "knowledge/d10-v1-semantic-inventory.json"
       - "knowledge/d10-fill-v1-state.json"
       - "scripts/check-d10-yantra-library-harvest-v1.py"
+      - "tests/test_d10_yantra_dual_provenance.py"
       - "scripts/check-d10-crossrepo-panini-v1.py"
       - ".github/workflows/d10-yantra-library-harvest-v1.yml"
   push:
@@ -18,6 +19,7 @@ on:
       - "knowledge/d10-v1-semantic-inventory.json"
       - "knowledge/d10-fill-v1-state.json"
       - "scripts/check-d10-yantra-library-harvest-v1.py"
+      - "tests/test_d10_yantra_dual_provenance.py"
       - ".github/workflows/d10-yantra-library-harvest-v1.yml"
   workflow_dispatch:
 
@@ -27,6 +29,8 @@ jobs:
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@v5
+      - name: Перевірка негативних свідків Yantra
+        run: python3 tests/test_d10_yantra_dual_provenance.py
       - name: Verify current D10 Yantra candidate definitions and dedup
         run: python3 scripts/check-d10-yantra-library-harvest-v1.py
       - name: Verify previous D10 Panini harvest can grow
