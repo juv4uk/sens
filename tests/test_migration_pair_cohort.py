@@ -72,6 +72,8 @@ class PairCohort(unittest.TestCase):
                 source = (FIXTURES / f"{stem}.lisp").read_text(encoding="utf-8")
                 projection, counts = self.project(source)
                 self.assertEqual(projection, case["words"])
+                self.assertEqual((FIXTURES / stem).read_text(encoding="ascii"), case["words"])
+                self.assertEqual((FIXTURES / f"{stem}.sens").read_bytes(), case["t5"])
                 self.assertEqual(counts["pass1-sens8"], 3)
                 with tempfile.TemporaryDirectory() as directory:
                     out = Path(directory) / "out"
