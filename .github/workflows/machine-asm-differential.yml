@@ -11,6 +11,11 @@ on:
       - "crates/sens/tests/x86_64_lisp_encoder.rs"
       - "lib/machine/encoding/x86-64.lisp"
       - "lib/machine/admission/x86-64.lisp"
+      - "crates/sens/src/mixed_source.rs"
+      - "crates/sens/src/lib.rs"
+      - "crates/sens/src/eval/d5_arithmetic.rs"
+      - "crates/sens/src/eval/d6_arithmetic.rs"
+      - "crates/sens/src/eval/arithmetic.rs"
       - ".github/workflows/machine-asm-differential.yml"
   push:
     branches: [main]
@@ -19,6 +24,11 @@ on:
       - "crates/sens/tests/x86_64_lisp_encoder.rs"
       - "lib/machine/encoding/x86-64.lisp"
       - "lib/machine/admission/x86-64.lisp"
+      - "crates/sens/src/mixed_source.rs"
+      - "crates/sens/src/lib.rs"
+      - "crates/sens/src/eval/d5_arithmetic.rs"
+      - "crates/sens/src/eval/d6_arithmetic.rs"
+      - "crates/sens/src/eval/arithmetic.rs"
       - ".github/workflows/machine-asm-differential.yml"
   workflow_dispatch:
 
