@@ -39,9 +39,9 @@
 (00001001 machine-effect-within-inclusive-integer-range?
   (00001000 (value lower upper)
     (00000111
-      ((00011110 value lower)
+      ((не-менше? value lower)
        (00000111
-         ((00011101 value upper)
+         ((не-більше? value upper)
           (00000010 (00000001 ())))
          ((00000010 (00000001 ()))
           (00000010 (00000001 (00000000))))))
