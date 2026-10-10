@@ -53,3 +53,47 @@ fn time_library_builds_public_meanings_over_raw_host_observations() {
         assert!(is_raw_primitive(name), "{name} must stay the underlying raw host mechanism");
     }
 }
+
+
+#[test]
+fn time_stable_peers_reuse_the_same_lisp_closures() {
+    use std::rc::Rc;
+
+    let mut session = Session::default();
+    load_core_library(&mut session).expect("основа для часових значень");
+    load_time_library(&mut session).expect("часові функції визначає Lisp");
+
+    // Перевірка проєкції без повторного макросу, окремої онтології чи дубля коду.
+    for (source, peer) in [
+        ("utc-now", "поточний-всч"),
+        ("utc-from-unix", "всч-із-юнікс"),
+        ("unix-time-observation->utc", "юнікс-спостереження-у-всч"),
+        ("milliseconds-from-nanoseconds", "мілісекунди-із-наносекунд"),
+        ("mono-ms", "монотонний-мс"),
+        ("timezone-name", "назва-часового-поясу"),
+        ("timezone-detect", "визначити-часовий-пояс"),
+        ("timezone-offset-seconds", "зміщення-часового-поясу-в-секундах"),
+        ("deadline-reached?", "дедлайн-досягнуто?"),
+        ("deadline-reached-at?", "дедлайн-досягнуто-на-момент?"),
+        ("elapsed-ns", "минуло-нс"),
+        ("deadline-from", "дедлайн-від"),
+        ("deadline-after-ns", "дедлайн-через-нс"),
+        ("internet-time-sync", "запитати-інтернет-час"),
+    ] {
+        let original = session.environment.get(source);
+        let localized = session.environment.get(peer);
+        match (original, localized) {
+            (Some(Value::Closure(left)), Some(Value::Closure(right))) => {
+                assert!(
+                    Rc::ptr_eq(&left, &right),
+                    "{peer} має бути тим самим Lisp-замиканням, що й {source}"
+                );
+            }
+            (left, right) => {
+                panic!(
+                    "Втрата стабільної часової проєкції {source}/{peer}: {left:?} та {right:?}"
+                );
+            }
+        }
+    }
+}
