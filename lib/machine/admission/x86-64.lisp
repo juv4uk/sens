@@ -332,7 +332,7 @@
   (00001000 (patterns form)
     (00000111
       
-      ((00000010 patterns)  (00000001 ()))
+      ((00000010 patterns)  (00000010 (00000001 (00000000))))
       ((x86-admission-pattern-match? (00000101 patterns) form) (00000010 (00000001 ())))
       ((00000010 ()) (x86-admitted-instruction-against? (00000110 patterns) form)))))
 
