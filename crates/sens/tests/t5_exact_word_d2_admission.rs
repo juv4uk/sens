@@ -2,7 +2,8 @@
 //!
 //! Канонічний .sens лишається T5. Перевіряється структура та точні ширини,
 //! а НЕ ратифікація всіх D9-резидентів чи семантика дослідного .senc.
-//! На відміну від codec-unit exhaustive roundtrip тут є другий D2 oracle.
+//! Це паритет двох входів до СПІЛЬНОГО CanonicalReader; незалежний
+//! зовнішній D2-оракул лишається окремою задачею #5313.
 
 use sens::{
     decode_ternary_program, decode_ternary_words, encode_ternary_words,
