@@ -241,6 +241,25 @@ fn lift_expression(
                     span,
                 });
             }
+            if descend_legacy_machine_wrappers && is_legacy_w8_cond_head(source, &lifted[0]) {
+                // W8 COND's clauses are DATA-shaped lists whose first element
+                // is itself an executable test form. Treat that slot as code,
+                // just like current D3 COND clauses, while preserving W8 COND
+                // as the compatibility control form and preserving quote data.
+                for clause in lifted.iter_mut().skip(1) {
+                    *clause = lift_cond_clause(
+                        source,
+                        clause.clone(),
+                        depth + 1,
+                        bound_names,
+                        descend_legacy_machine_wrappers,
+                    )?;
+                }
+                return Ok(Expr {
+                    kind: ExprKind::List(Rc::from(lifted.into_boxed_slice())),
+                    span,
+                });
+            }
 
             lifted[0] = lift_head(source, lifted[0].clone(), bound_names)?;
 
@@ -380,6 +399,10 @@ fn is_legacy_w8_define_head(source: &str, head: &Expr) -> bool {
 
 fn is_legacy_w8_lambda_head(source: &str, head: &Expr) -> bool {
     source_spelling(source, head) == Some("00001000")
+}
+
+fn is_legacy_w8_cond_head(source: &str, head: &Expr) -> bool {
+    source_spelling(source, head) == Some("00000111")
 }
 
 /// Opaque W8 compatibility syntax is not an admission of current D8.
@@ -844,6 +867,42 @@ mod tests {
                 if identity.width() == 5 && identity.packed_bits() == 0
         ));
     }
+    #[test]
+    fn machine_source_mode_lifts_executable_forms_inside_w8_cond_clause_tests() {
+        let source =
+            "(00001001 probe (00001000 (x) (00000111 ((100 x) 0) (((00000001 (100 x)) 0))))";
+
+        let ordinary = only(parse_mixed_exact_domain(source).expect("ordinary mixed source"));
+        let ExprKind::List(ordinary_def) = &ordinary.kind else { panic!("definition"); };
+        let ExprKind::List(ordinary_lambda) = &ordinary_def[2].kind else { panic!("lambda"); };
+        let ExprKind::List(ordinary_cond) = &ordinary_lambda[2].kind else { panic!("COND"); };
+        let ExprKind::List(ordinary_clause) = &ordinary_cond[1].kind else { panic!("clause"); };
+        let ExprKind::List(ordinary_test) = &ordinary_clause[0].kind else { panic!("test"); };
+        assert!(matches!(&ordinary_test[0].kind, ExprKind::Number(value, _) if *value == 100.0),
+            "the ordinary mixed reader leaves legacy wrappers opaque");
+
+        let machine = only(
+            parse_mixed_exact_domain_machine_source("lib/machine/probe.lisp", source)
+                .expect("machine-only mixed source"),
+        );
+        let ExprKind::List(def) = &machine.kind else { panic!("definition"); };
+        let ExprKind::List(lambda) = &def[2].kind else { panic!("lambda"); };
+        let ExprKind::List(cond) = &lambda[2].kind else { panic!("COND"); };
+        let ExprKind::List(clause) = &cond[1].kind else { panic!("clause"); };
+        let ExprKind::List(test) = &clause[0].kind else { panic!("test"); };
+        assert!(matches!(&test[0].kind, ExprKind::DomainIdentity(id)
+            if id.width() == 3 && id.packed_bits() == 0b100),
+            "W8 COND's first clause item is executable code and must be exact D3 CAR");
+
+        let ExprKind::List(quoted_clause) = &cond[2].kind else { panic!("quoted clause"); };
+        let ExprKind::List(quoted_test) = &quoted_clause[0].kind else { panic!("quoted test"); };
+        assert!(matches!(&quoted_test[0].kind, ExprKind::Sid(_)),
+            "historical quote stays a quote form");
+        let ExprKind::List(quoted_data) = &quoted_test[1].kind else { panic!("quoted data"); };
+        assert!(matches!(&quoted_data[0].kind, ExprKind::Number(value, _) if *value == 100.0),
+            "quoted data must not be lifted as executable code");
+    }
+
     #[test]
     fn machine_source_mode_descends_w8_function_bodies_but_preserves_quote_and_number_data() {
         fn definition_body(expression: &Expr) -> &Expr {
