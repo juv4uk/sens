@@ -90,6 +90,45 @@ fn exact_d2_projection_reaches_physical_t5_and_current_sens() {
 }
 
 #[test]
+fn ratified_uk_d1_cond_triplet_is_physical_without_text_fallback() {
+    // Вузький уже перевірений український D1/D3 свідок, не довільний компілятор.
+    const SOURCE: &str =
+        include_str!("../../../tests/fixtures/migration-d1-cond-cohort/branch.lisp");
+    const PHYSICAL: &[u8] =
+        include_bytes!("../../../tests/fixtures/migration-d1-cond-cohort/branch.sens");
+    const VIEW: &str =
+        include_str!("../../../tests/fixtures/migration-d1-cond-cohort/branch");
+
+    assert!(SOURCE.contains("за-умовою"));
+    assert!(SOURCE.contains("перше"));
+    let exact_words = VIEW.trim_end_matches('\n');
+    assert_eq!(
+        sens::open_ternary_program(PHYSICAL).expect("канонічний фізичний T5"),
+        exact_words
+    );
+    assert_eq!(
+        sens::encode_binary_projection_ternary(exact_words).unwrap(),
+        PHYSICAL
+    );
+
+    let physical_file = TemporaryPair::new(SOURCE);
+    fs::write(&physical_file.physical, PHYSICAL).expect("тимчасові фізичні байти");
+    let bare = Command::new(env!("CARGO_BIN_EXE_sens"))
+        .arg(&physical_file.physical)
+        .output()
+        .expect("фізичний SENS");
+    let explicit = physical_file.trit("eval");
+    assert!(bare.status.success(), "physical SENS stderr={:?}", bare.stderr);
+    assert!(explicit.status.success(), "physical eval stderr={:?}", explicit.stderr);
+    assert_eq!(bare.stdout, explicit.stdout, "незалежні публічні CLI бачать той самий T5");
+    assert!(!bare.stdout.is_empty(), "фізичне виконання має видимий результат");
+
+    // Людська українська проєкція авторизована ТІЛЬКИ через доказану трійку.
+    // Низькорівневий encode не є компілятором і не може її мовчки прийняти.
+    rejected_without_physical_file(SOURCE);
+}
+
+#[test]
 fn human_named_file_authority_input_never_becomes_physical_t5() {
     rejected_without_physical_file(
         "(00001001 *file-authority-input*\n  (00000001 ((schema . file-authority-input/1))))\n",
