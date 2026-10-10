@@ -152,9 +152,14 @@ fn current_core4_peer_materialization_uses_current_macro_law() {
         for (index, expression) in parsed.iter().enumerate() {
             if library == "process" && index + 1 == 9 {
                 for probe in [
+                    "(00011100 1079 1079)",
+                    "(101 1079 1079)",
+                    "(equalp? 1079 1079)",
+                    "(eq? 1079 1079)",
+                    "(00000010 my-postcore-stable-peer-projection)",
+                    "(010 my-postcore-stable-peer-projection)",
                     "(my-postcore-peer-group 1079 my-postcore-stable-peer-projection)",
                     "(my-postcore-peer-group 162 my-postcore-stable-peer-projection)",
-                    "(my-postcore-missing-peers process-run (my-postcore-peer-group 162 my-postcore-stable-peer-projection) (01001110))",
                 ] {
                     match sens::eval_program(probe, &mut session) {
                         Ok(result) => println!("PEER-DIAG {probe} => {}", result.value),
