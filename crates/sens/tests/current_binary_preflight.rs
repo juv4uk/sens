@@ -2,7 +2,7 @@
 //! binary width and payload, never a human spelling or historical SID8.
 //! Ratified language laws remain in lib/domains/*.lisp and their oracles.
 
-use sens::{eval_parsed_expressions, load_core_library, parse, parse_canonical_binary, wire_decode_program, wire_encode_program, Expr, ExprKind, Session, Value};
+use sens::{eval_parsed_expressions, eval_program, load_core_library, parse, parse_canonical_binary, wire_decode_program, wire_encode_program, Expr, ExprKind, Session, Value};
 
 fn binary_trace(expression: &Expr) -> String {
     match &expression.kind {
@@ -156,4 +156,46 @@ fn core4_local_binding_heads_are_current_and_postcore_libraries_load() {
                 ));
         }
     }
+}
+
+
+/// Current macro law must be installed by the canonical bootstrap. Historical
+/// SID8 00001010 is D8:REPEAT and cannot stand in for defmacro/LET anymore.
+#[test]
+fn current_defmacro_bootstrap_executes_let_and_let_star() {
+    let mut session = Session::default();
+    load_core_library(&mut session).expect("current macro + Core4 bootstrap");
+
+    let parallel = eval_program("(let ((probe 7)) probe)", &mut session)
+        .expect("current defmacro must install lexical let");
+    assert_eq!(parallel.value.to_string(), "7");
+
+    let sequential = eval_program("(let* ((first 7) (second first)) second)", &mut session)
+        .expect("current defmacro must install sequential let*");
+    assert_eq!(sequential.value.to_string(), "7");
+}
+
+/// Loading a post-Core library must execute registry-driven materialization,
+/// not merely evaluate an obsolete SID8 header to an unrelated scalar.
+#[test]
+fn postcore_peer_materializer_installs_the_stable_ukrainian_time_surface() {
+    let mut session = Session::default();
+    load_core_library(&mut session).expect("current macro + Core4 bootstrap");
+    for (library, source) in [
+        ("time", include_str!("../../../lib/time.lisp")),
+        ("process", include_str!("../../../lib/process.lisp")),
+    ] {
+        let forms = parse(source).unwrap_or_else(|error| panic!("{library} parse: {error}"));
+        for (index, form) in forms.iter().enumerate() {
+            eval_parsed_expressions(std::slice::from_ref(form), &mut session)
+                .unwrap_or_else(|error| panic!(
+                    "{library} form {} byte {} failed: {}",
+                    index + 1, form.span.start, error
+                ));
+        }
+    }
+    assert!(
+        session.environment.get("поточний-всч").is_some(),
+        "stable ID 1079 must materialize its registry-admitted Ukrainian surface"
+    );
 }
