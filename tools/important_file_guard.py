@@ -419,7 +419,7 @@ def main(argv: list[str]) -> int:
             "--find-renames", "--find-copies", "--find-copies-harder", base, head,
         )
         new_paths = introduced_paths(changes)
-        tracked_tools = nul_paths(command("ls-files", "-z", "--", "tools/"))
+        tracked_tools = nul_paths(command("ls-tree", "-r", "-z", "--name-only", "--full-tree", head, "--", "tools/"))
         errors = violations(new_paths, entries)
         errors.extend(new_source_mode_failures(new_paths, head))
         errors.extend(census_coverage(tracked_tools, entries))
