@@ -83,3 +83,19 @@ or a justification to skip still-failing integration gates.
 User-controlled sessions remain fresh or warm as labeled. D3 QUOTE (committed
 physical bytes), exact D1:YES and D3 ATOM produce matched exact semantic
 results under both modes and reject malformed transport at preparation.
+
+## Окремий запуск фізичного файлу (без Core4)
+
+```bash
+cargo build --locked --release -p sens --example sens_native_zero_file
+target/release/examples/sens_native_zero_file \
+  tests/fixtures/migration-quote-cohort-main/quote-legacy.sens
+```
+
+Очікуваний структурний результат: `VALUE=()`, `KIND=NON-D1`.
+Це явний запуск **справжнього файла .sens**, а не переведення текстового
+імені та не автоматичне виконання при відкритті. Спочатку файл проходить
+фізичну T5 / D2 admission, після чого виконується на `Session::bare()`.
+Виконання не завантажує Core4 і не надає I/O / GPU / host capabilities.
+Невалідний T5, незакрита D2-структура або файл без розширення `.sens`
+не запускаються.
