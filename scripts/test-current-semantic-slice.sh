@@ -23,6 +23,19 @@ cargo test -p sens \
 # Lisp witness itself. No replacement Rust observer is introduced.
 # #5408: насамперед випробувати саму послідовну лексичну область D6.
 # Повний закон величин перевіряється лише після проходження цього SENS-свідка.
+lambda_witness="witnesses/quantity-lambda-binding.lisp"
+if lambda_status="$(cargo run --quiet -p sens-cli --bin sens -- "$lambda_witness" 2>&1)"; then
+  if [[ "$lambda_status" != "7" ]]; then
+    printf 'QUANTITY-LAMBDA-BLOCKED: очікувано точне SENS 7, одержано: %s\n' "$lambda_status" >&2
+    exit 1
+  fi
+  printf 'QUANTITY-LAMBDA-PASS: D5 LAMBDA => 7\n'
+else
+  lambda_rc=$?
+  printf 'QUANTITY-LAMBDA-BLOCKED: виконання D5 LAMBDA завершилося %s: %s\n' "$lambda_rc" "$lambda_status" >&2
+  exit 1
+fi
+
 binding_witness="witnesses/quantity-sequential-binding.lisp"
 if binding_status="$(cargo run --quiet -p sens-cli --bin sens -- "$binding_witness" 2>&1)"; then
   if [[ "$binding_status" != "7" ]]; then
