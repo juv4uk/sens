@@ -160,6 +160,35 @@ fn ratified_uk_d1_cond_triplet_is_physical_without_text_fallback() {
 }
 
 #[test]
+fn sens_trit_does_not_auto_open_experimental_senc_files_as_t5() {
+    // Файлова межа не має виводити профіль з байтів або непідтвердженого розширення.
+    for (marker_name, bytes) in [
+        ("f3", &[0xf3, 0x00][..]),
+        ("f4", &[0xf4, 0x00][..]),
+    ] {
+        let path = std::env::temp_dir().join(format!(
+            "sens-no-senc-autodetect-{}-{marker_name}.senc",
+            std::process::id()
+        ));
+        fs::write(&path, bytes).expect("записати тимчасовий дослідний контейнер");
+        let opened = Command::new(env!("CARGO_BIN_EXE_sens-trit"))
+            .arg("open")
+            .arg(&path)
+            .output()
+            .expect("запустити справжній sens-trit");
+        let _ = fs::remove_file(&path);
+
+        assert!(!opened.status.success(), "{marker_name}: .senc не має відкриватися як T5");
+        assert!(opened.stdout.is_empty(), "{marker_name}: відмова не повинна друкувати програму");
+        assert!(
+            String::from_utf8_lossy(&opened.stderr).contains("expected a physical .sens file"),
+            "{marker_name}: має спрацювати явна межа розширення, stderr={:?}",
+            opened.stderr
+        );
+    }
+}
+
+#[test]
 fn human_named_file_authority_input_never_becomes_physical_t5() {
     rejected_without_physical_file(
         "(00001001 *file-authority-input*\n  (00000001 ((schema . file-authority-input/1))))\n",
