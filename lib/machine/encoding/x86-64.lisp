@@ -1289,11 +1289,13 @@
 (00001001 x86-encode-program
   (00001000 (instructions)
     (110
-      ((101 instructions (00000001 ())) (00000001 ()))
+      ((0101 instructions) (00000001 ()))
       ((0100 (010 instructions))
        (x86-сполучити-байти
          (100 instructions)
-         (x86-encode-program (011 instructions)))))))
+         (x86-encode-program (011 instructions))))
+      ((010 instructions)
+       (x86-machine-operand-rejection (00000001 instruction-list) instructions)))))
 
 ; #2372 reusable VEX3 XMM register law.
 ; byte1 = C4; byte2 = ~R ~X ~B m-mmmm; byte3 = W ~vvvv L pp.
