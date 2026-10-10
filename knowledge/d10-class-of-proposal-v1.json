@@ -1,0 +1,83 @@
+{
+  "schema": "d10-class-of-proposal/v1",
+  "status": "PENDING-OWNER-REVIEW",
+  "selected_d10_candidate": false,
+  "ratified": false,
+  "coordinate": null,
+  "coordinate_basis": "UNPLACED",
+  "semantic_name": "CLASS-OF",
+  "surface_uk": "безпосередній-клас",
+  "surface_ukr": "клас-прямого-екземпляра",
+  "source": {
+    "title": "ANSI Common Lisp HyperSpec — CLASS-OF",
+    "url": "https://www.lispworks.com/documentation/HyperSpec/Body/f_clas_1.htm",
+    "donor_oracle_pr": 4862,
+    "oracle_path": "tests/oracles/d10_clos_slot_states.lisp",
+    "oracle_artifact": "knowledge/d10-clos-slot-observation-v1.json",
+    "observed_cases": [
+      "CLASS_OF_EXACT_CLASS_OBJECT",
+      "CLASS_OF_NOT_CLASS_SYMBOL",
+      "CLASS_OF_CHILD_NOT_PARENT"
+    ],
+    "runtime": "SBCL, external Common Lisp donor; not SENS runtime",
+    "recorded_result": "17/17 historical CLOS slot/object observations passed in #4862",
+    "donor_commit": "c67db6cdd820dea8d3a110caed359507c0a2d7a4",
+    "donor_path": "knowledge/d10-clos-slot-observation-v1.json",
+    "donor_lines": "38-43",
+    "type_of_context_url": "https://www.cs.cmu.edu/Groups/AI/html/hyperspec/HyperSpec/Body/sec_4-1.html",
+    "type_of_detail_url": "https://www.lispworks.com/documentation/HyperSpec/Body/f_type_of.htm",
+    "oracle_commit": "e09294dad8a200cdb710fcfe8424ceefdeab071b",
+    "oracle_lisp_blob_sha": "e4a47c2d06e3c6ae0c661b211fbb31d4a9e7358f",
+    "observation_artifact_blob_sha": "b290b8896722bd003cba46f651d9ff20d1e03dab"
+  },
+  "law": {
+    "signature": "CLASS-OF(object) -> class-object",
+    "statement": "Return the direct class metaobject of an object; do not confuse the class object with a type specifier/name or the superclass.",
+    "positive_witnesses": [
+      "For a named standard class C and instance x, CLASS-OF(x) is EQ to (FIND-CLASS 'C).",
+      "For an instance of child class CHILD inheriting PARENT, CLASS-OF(x) is the CHILD class object, not the PARENT class object.",
+      "CLASS-OF(x) is a class metaobject, not the class-name symbol returned by TYPE-OF for a named standard-class instance."
+    ],
+    "falsifiers": [
+      "Return the symbol C rather than the class metaobject.",
+      "Return a superclass rather than the direct class.",
+      "Return a newly fabricated/non-identical class object instead of the class object for the direct class."
+    ]
+  },
+  "dedup": {
+    "d1_d9_exact_name_match": false,
+    "current_d10_exact_name_match": false,
+    "adjacent_existing": [
+      "TYPE-OF",
+      "TYPEP",
+      "CLASS-NAME",
+      "FIND-CLASS"
+    ],
+    "note": "Exact-name absence is only a routing clue. Behavioral distinction from TYPE-OF has an SBCL witness; derivability from TYPEP/CLASS-NAME/FIND-CLASS and the selected D10 vocabulary remains for owner review.",
+    "review_status": "PENDING-BEHAVIORAL-DEDUP",
+    "dedup_check": "D1-D9@09d1d71c39d1484dfd005a5068dbb18b76f0f0d4=PENDING;D10@7e13e929338baeef9b16c2139d24b78e23ea1e03=PENDING"
+  },
+  "ownership": {
+    "test": "Observable class-object identity is language-visible; do not include printer addresses, memory handles, or host ABI identity.",
+    "blocked_source": "#4013; #4463; oracle evidence #4862",
+    "decision_required": "Owner must decide whether the class-object observation is an independent Core law or derivable from selected introspection vocabulary."
+  },
+  "owner_decision": {
+    "proposed_action": "REVIEW-SELECT-D10-CANDIDATE",
+    "status": "pending-review",
+    "ratified": 0,
+    "coordinate": null,
+    "physical_t5_authorized": false
+  },
+  "source_snapshot": {
+    "checked_against_commit": "c67db6cdd820dea8d3a110caed359507c0a2d7a4",
+    "d1_d9_foundation_blob_sha": "09d1d71c39d1484dfd005a5068dbb18b76f0f0d4",
+    "d10_inventory_blob_sha": "7e13e929338baeef9b16c2139d24b78e23ea1e03",
+    "selected_d10_candidates": 647,
+    "exact_name_matches": {
+      "d1_d9": false,
+      "d10": false
+    }
+  },
+  "physical_t5_authorized": false
+}

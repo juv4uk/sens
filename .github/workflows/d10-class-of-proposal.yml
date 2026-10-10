@@ -1,0 +1,67 @@
+name: D10 CLASS-OF proposal gate
+
+on:
+  push:
+    branches:
+      - 'research/**'
+    paths:
+      - 'knowledge/d10-class-of-proposal-v1.json'
+      - 'knowledge/d10-proposal-ledger.tsv'
+      - 'knowledge/d10-v1-semantic-inventory.json'
+      - 'knowledge/d1-d9-foundation.json'
+      - 'knowledge/d10-clos-slot-observation-v1.json'
+      - 'tests/oracles/d10_clos_slot_states.lisp'
+      - 'scripts/check_d10_class_of_proposal.py'
+      - 'tests/test_d10_proposal_ledger_growth.py'
+      - '.github/workflows/d10-class-of-proposal.yml'
+  pull_request:
+    paths:
+      - 'knowledge/d10-class-of-proposal-v1.json'
+      - 'knowledge/d10-proposal-ledger.tsv'
+      - 'knowledge/d10-v1-semantic-inventory.json'
+      - 'knowledge/d1-d9-foundation.json'
+      - 'knowledge/d10-clos-slot-observation-v1.json'
+      - 'tests/oracles/d10_clos_slot_states.lisp'
+      - 'scripts/check_d10_class_of_proposal.py'
+      - '.github/workflows/d10-class-of-proposal.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  proposal-only:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+      - name: Verify provenance, live SHA dedup and no-admission controls
+        run: python3 scripts/check_d10_class_of_proposal.py --self-test
+      - name: Reject optimized self-test
+        shell: bash
+        run: |
+          set -euo pipefail
+          log="$RUNNER_TEMP/class-of-python-opt.log"
+          if python3 -O scripts/check_d10_class_of_proposal.py --self-test >"$log" 2>&1; then
+            echo "::error::CLASS-OF proposal self-test incorrectly passed under python -O"
+            exit 1
+          fi
+          grep -F 'CLASS-OF-PROPOSAL: BLOCKED' "$log"
+      - name: Execute the independent Common Lisp donor, not a Python reimplementation
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq sbcl
+          log="$RUNNER_TEMP/class-of-sbcl.log"
+          sbcl --script tests/oracles/d10_clos_slot_states.lisp | tee "$log"
+          grep -Eq '^SUMMARY[[:space:]]D10-CLOS-SLOT-ORACLE-V1[[:space:]]17$' "$log"
+      - name: Prove canonical D1-D9 and D10 inventories remain untouched
+        if: github.event_name == 'pull_request'
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+        run: |
+          set -euo pipefail
+          git diff --exit-code "$BASE_SHA" -- knowledge/d1-d9-foundation.json knowledge/d10-v1-semantic-inventory.json
