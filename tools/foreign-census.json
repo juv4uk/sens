@@ -1,0 +1,12 @@
+{
+  "schema": "sens-foreign-tool-census/1",
+  "tools": [
+    {
+      "path": "tools/file_guard.py",
+      "independence_status": "foreign",
+      "purpose": "Перехідна механічна гвардія нових шляхів Git; не тлумачить і не затверджує закони D1–D9 або фізичний T5.",
+      "migration_plan": "Замінити перевірку норм SENS доказовою програмою .lisp/.sens під оракулом; зіставити незалежні негативні та позитивні свідки, exact bytes, named fail і незмінність висновків; Git/CI-метадані залишити явно зовнішнім транспортом, а цей Python вилучити після атестації.",
+      "owner_issue": "#5396"
+    }
+  ]
+}
