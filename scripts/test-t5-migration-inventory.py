@@ -69,6 +69,50 @@ class TestT5MigrationInventory(unittest.TestCase):
             self.assertEqual(len(r["base_sha"]), 40, r["path"])
             int(r["base_sha"], 16)  # підніме ValueError якщо не hex
 
+    def _run_mutated_sha(self, rows: list[dict]) -> subprocess.CompletedProcess[str]:
+        with tempfile.TemporaryDirectory() as directory:
+            candidate = Path(directory) / "змінений-реєстр.jsonl"
+            candidate.write_text(
+                "".join(json.dumps(row, ensure_ascii=False, sort_keys=True) + "\\n"
+                        for row in rows),
+                encoding="utf-8",
+            )
+            return subprocess.run(
+                [sys.executable, str(HERE / "report_t5_migration_inventory.py"),
+                 "--check", str(candidate)],
+                cwd=str(ROOT), capture_output=True, text=True,
+            )
+
+    def test_pinned_base_is_real_ancestor(self):
+        """Контроль реального Git commit, а не лише його формату SHA-1."""
+        rows = read_manifest()
+        self.assertEqual(
+            {row["base_sha"] for row in rows},
+            {GEN.PINNED_BASE_SHA},
+        )
+        self.assertEqual(
+            GEN.verify_manifest_provenance(
+                ROOT, MANIFEST.read_text(encoding="utf-8")),
+            [],
+        )
+
+    def test_fake_sha_in_every_row_is_rejected(self):
+        """Негатив: повна підміна на коректний за формою 40-hex SHA."""
+        rows = read_manifest()
+        for row in rows:
+            row["base_sha"] = "0" * 40
+        result = self._run_mutated_sha(rows)
+        self.assertNotEqual(result.returncode, 0, result.stdout)
+        self.assertIn("BASE_SHA_MISMATCH", result.stderr)
+
+    def test_fake_sha_in_one_row_is_rejected(self):
+        """Негатив: один рядок не може вийти з-під pinned бази."""
+        rows = read_manifest()
+        rows[0]["base_sha"] = "f" * 40
+        result = self._run_mutated_sha(rows)
+        self.assertNotEqual(result.returncode, 0, result.stdout)
+        self.assertIn("BASE_SHA_MISMATCH", result.stderr)
+
     def test_authority_boundaries_present(self):
         rows = {r["path"]: r for r in read_manifest()}
         for path in GEN.T5_AUTHORITY:
