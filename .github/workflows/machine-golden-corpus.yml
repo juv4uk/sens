@@ -1,0 +1,36 @@
+name: machine-golden-corpus
+
+# Pinned golden corpus for the Lisp-owned x86-64 encoder.
+# The reference bytes are produced by two independent external assemblers
+# (GNU as, nasm). The fixture committed at
+# crates/sens/tests/fixtures/machine-asm-corpus.json carries a SHA-256 the
+# hosted job re-derives, so the corpus cannot silently drift.
+
+on:
+  push:
+    paths:
+      - "lib/machine/encoding/x86-64.lisp"
+      - "scripts/gen-machine-asm-fixtures.py"
+      - "scripts/test-machine-asm-corpus.py"
+      - "crates/sens/tests/fixtures/machine-asm-corpus.json"
+      - ".github/workflows/machine-golden-corpus.yml"
+  pull_request:
+    paths:
+      - "lib/machine/encoding/x86-64.lisp"
+      - "scripts/gen-machine-asm-fixtures.py"
+      - "scripts/test-machine-asm-corpus.py"
+      - "crates/sens/tests/fixtures/machine-asm-corpus.json"
+      - ".github/workflows/machine-golden-corpus.yml"
+  workflow_dispatch:
+
+jobs:
+  corpus:
+    name: Golden encoder corpus (GAS + NASM pinned)
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v5
+      - name: Install external assemblers
+        run: sudo apt-get update && sudo apt-get install -y binutils nasm
+      - name: Verify pinned fixture and re-derive from both assemblers
+        run: python3 scripts/test-machine-asm-corpus.py
