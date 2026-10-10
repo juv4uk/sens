@@ -226,7 +226,7 @@ def main() -> int:
         args.base, head,
     )
     added = introduced_paths(changes)
-    tracked_tools = nul_paths(git("ls-files", "-z", "--", "tools/"))
+    tracked_tools = nul_paths(git("ls-tree", "-r", "-z", "--name-only", "--full-tree", head, "--", "tools/"))
     bundle = build_bundle(added, tracked_tools)
 
     args.output.parent.mkdir(parents=True, exist_ok=True)
