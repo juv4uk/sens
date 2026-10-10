@@ -81,7 +81,7 @@ class Tb33TailWitness(unittest.TestCase):
         with self.assertRaises(TailError):
             decode(b"")
         with self.assertRaises(TailError):
-            decode(b"\\x00")
+            decode(bytes((0,)))
         with self.assertRaises(TailError):
             decode(TAIL_CAPACITY.to_bytes(6, "big"))
         with self.assertRaises(TailError):
