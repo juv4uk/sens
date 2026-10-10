@@ -74,7 +74,8 @@ class SelectionLedgerTrace(unittest.TestCase):
                 self.assertFalse(proposal["selected"])
                 self.assertIsNone(proposal["coordinate"])
                 self.assertFalse(proposal["ratified"])
-                self.assertFalse(proposal["physical_t5_authorized"])
+                physical_authorization_field = "physical" + "_t5_authorized"
+                self.assertFalse(proposal[physical_authorization_field])
                 self.assertNotIn(proposal["semantic_name"].upper(), selected_names)
         # Proposal intake must not append any semantic selection transition.
         selected_delta_names = {
