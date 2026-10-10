@@ -17,7 +17,9 @@ fn load_lisp_file(path: &str, session: &mut Session) {
         path.starts_with("lib/machine/"),
         "mixed exact-domain reader is reserved for machine-source fixtures: {path}"
     );
-    let source = read(path);
+    let file_path = repo_root().join(path);
+    let source = fs::read_to_string(&file_path)
+        .unwrap_or_else(|error| panic!("{} must exist: {error}", file_path.display()));
     let expressions = parse_mixed_exact_domain(&source)
         .unwrap_or_else(|error| panic!("{path} must parse as mixed exact-domain machine source: {error}"));
     eval_parsed_expressions(&expressions, session)
