@@ -59,14 +59,14 @@
 (00001001 vnode-right 00110010)
 
 (00001001 vheight-of
-  (00001000 (n) (00000111 ((00000010 n) () 0)
-                    ((00000010 n) (1) 0) (t (vnode-height n)))))
+  (00001000 (n) (00000111 
+                    ((00000010 n)  0) (t (vnode-height n)))))
 
 (00001001 vmax2
   (00001000 (a b)
     (00000111
-      ((00011010 a b) 1 b)
-      ((00011010 a b) 0 a))))
+      ((00011010 a b)  b)
+      ((0100 (00011010 a b)) a))))
 
 (00001001 vmake-balanced-node
   (00001000 (index value left right)
@@ -92,17 +92,17 @@
 (00001001 vbalance
   (00001000 (n)
     (00000111
-      ((00000010 n) () n)
-      ((00000010 n) (1) n)
-      ((00011011 (vbalance-factor n) 1) 1
+      
+      ((00000010 n)  n)
+      ((00011011 (vbalance-factor n) 1) 
        (00000111
-         ((00011010 (vbalance-factor (vnode-left n)) 0) 1
+         ((00011010 (vbalance-factor (vnode-left n)) 0) 
           (vrotate-right (vmake-balanced-node (vnode-index n) (vnode-value n)
                            (vrotate-left (vnode-left n)) (vnode-right n))))
          (t (vrotate-right n))))
-      ((00011010 (vbalance-factor n) -1) 1
+      ((00011010 (vbalance-factor n) -1) 
        (00000111
-         ((00011011 (vbalance-factor (vnode-right n)) 0) 1
+         ((00011011 (vbalance-factor (vnode-right n)) 0) 
           (vrotate-left (vmake-balanced-node (vnode-index n) (vnode-value n)
                           (vnode-left n) (vrotate-right (vnode-right n)))))
 
@@ -114,11 +114,11 @@
 (00001001 vtree-insert
   (00001000 (index value tree)
     (00000111
-      ((00000010 tree) () (vmake-balanced-node index value (00000001 ()) (00000001 ())))
-      ((00000010 tree) (1) (vmake-balanced-node index value (00000001 ()) (00000001 ())))
+      
+      ((00000010 tree)  (vmake-balanced-node index value (00000001 ()) (00000001 ())))
       ((00000011 index (vnode-index tree))
        (vmake-balanced-node index value (vnode-left tree) (vnode-right tree)))
-      ((00011010 index (vnode-index tree)) 1
+      ((00011010 index (vnode-index tree)) 
        (vbalance (vmake-balanced-node (vnode-index tree) (vnode-value tree)
                    (vtree-insert index value (vnode-left tree))
                    (vnode-right tree))))
@@ -132,10 +132,10 @@
 (00001001 vtree-get
   (00001000 (index tree)
     (00000111
-      ((00000010 tree) () (00000001 ()))
-      ((00000010 tree) (1) (00000001 ()))
+      
+      ((00000010 tree)  (00000001 ()))
       ((00000011 index (vnode-index tree)) (00100111 (vnode-value tree)))
-      ((00011010 index (vnode-index tree)) 1 (vtree-get index (vnode-left tree)))
+      ((00011010 index (vnode-index tree))  (vtree-get index (vnode-left tree)))
       (t (vtree-get index (vnode-right tree))))))
 
 ; `vec-nth` returns the classic "maybe" shape ('() or (value)), the same
@@ -163,8 +163,8 @@
 (00001001 vtree->list
   (00001000 (tree)
     (00000111
-      ((00000010 tree) () (00000001 ()))
-      ((00000010 tree) (1) (00000001 ()))
+      
+      ((00000010 tree)  (00000001 ()))
       (t (00101001 (vtree->list (vnode-left tree))
                  (00000100 (vnode-value tree)
                        (vtree->list (vnode-right tree))))))))
@@ -183,8 +183,8 @@
 (00001001 vec-from-list-onto
   (00001000 (lst acc)
     (00000111
-      ((00000010 lst) () acc)
-      ((00000010 lst) (1) acc)
+      
+      ((00000010 lst)  acc)
       (t (vec-from-list-onto (00000110 lst) (01110010 (00000101 lst) acc))))))
 
 (00001001 vec-from-list
