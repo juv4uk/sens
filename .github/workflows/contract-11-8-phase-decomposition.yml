@@ -29,7 +29,7 @@ permissions:
 
 concurrency:
   group: contract-11-8-phase-decomposition-${{ github.sha }}
-  cancel-in-progress: true
+  cancel-in-progress: false
 
 jobs:
   phases:
