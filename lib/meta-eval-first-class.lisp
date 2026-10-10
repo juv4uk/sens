@@ -25,46 +25,46 @@
 (00001001 my-fc-env-lookup
   (00001000 (name env)
     (00000111
-      ((00000010 env) () name)
-      ((00000010 env) (1) name)
+      
+      ((00000010 env)  name)
       ((00000011 (00000101 (00000101 env)) name) (00000110 (00000101 env)))
       (t (my-fc-env-lookup name (00000110 env))))))
 
 (00001001 my-fc-primitive?
   (00001000 (value)
     (00000111
-      ((00000010 value) () (00000001 ()))
-      ((00000010 value) (1) (00000001 ()))
+      
+      ((00000010 value)  (00000001 ()))
       (t (00000011 (00000101 value) (00000001 primitive))))))
 
 (00001001 my-fc-closure?
   (00001000 (value)
     (00000111
-      ((00000010 value) () (00000001 ()))
-      ((00000010 value) (1) (00000001 ()))
+      
+      ((00000010 value)  (00000001 ()))
       (t (00000011 (00000101 value) (00000001 closure))))))
 
 (00001001 my-fc-bind-params
   (00001000 (params args env)
     (00000111
-      ((00000010 params) () env)
-      ((00000010 params) (1) env)
+      
+      ((00000010 params)  env)
       (t (00000100 (00000100 (00000101 params) (00000101 args))
                (my-fc-bind-params (00000110 params) (00000110 args) env))))))
 
 (00001001 my-fc-eval-list
   (00001000 (exprs env)
     (00000111
-      ((00000010 exprs) () (00000001 ()))
-      ((00000010 exprs) (1) (00000001 ()))
+      
+      ((00000010 exprs)  (00000001 ()))
       (t (00000100 (my-fc-eval (00000101 exprs) env)
                (my-fc-eval-list (00000110 exprs) env))))))
 
 (00001001 my-fc-eval-body
   (00001000 (body env)
     (00000111
-      ((00000010 (00000110 body)) () (my-fc-eval (00000101 body) env))
-      ((00000010 (00000110 body)) (1) (my-fc-eval (00000101 body) env))
+      
+      ((00000010 (00000110 body))  (my-fc-eval (00000101 body) env))
       (t ((00001000 ()
             (my-fc-eval (00000101 body) env)
             (my-fc-eval-body (00000110 body) env)))))))
@@ -72,8 +72,8 @@
 (00001001 my-fc-eval-cond
   (00001000 (clauses env)
     (00000111
-      ((00000010 clauses) () (00000001 ()))
-      ((00000010 clauses) (1) (00000001 ()))
+      
+      ((00000010 clauses)  (00000001 ()))
       ((my-fc-eval (00000101 (00000101 clauses)) env)
        (my-fc-eval (00101111 (00000101 clauses)) env))
       (t (my-fc-eval-cond (00000110 clauses) env)))))
@@ -81,8 +81,8 @@
 (00001001 my-fc-compare-chain
   (00001000 (op args)
     (00000111
-      ((00000010 (00000110 args)) () t)
-      ((00000010 (00000110 args)) (1) t)
+      
+      ((00000010 (00000110 args))  t)
       ((00000111
          ((00000011 op (00000001 <)) (00011010 (00000101 args) (00101111 args)))
          ((00000011 op (00000001 =)) (00011100 (00000101 args) (00101111 args)))
@@ -124,21 +124,10 @@
 (00001001 my-fc-eval
   (00001000 (expr env)
     (00000111
-      ((00000010 expr) () (my-fc-env-lookup expr env))
-      ((00000010 expr) (1) (my-fc-env-lookup expr env))
-      ((00000010 (00000101 expr)) () (00000111
-         ; Syntax-only forms remain syntax. They are intentionally not values.
-         ((00000011 (00000101 expr) (00000001 quote)) (00101111 expr))
-         ((00000011 (00000101 expr) (00000001 cond)) (my-fc-eval-cond (00000110 expr) env))
-         ((00000011 (00000101 expr) (00000001 lambda))
-          (00100111 (00000001 closure) (00101111 expr) (00000110 (00000110 expr)) env))
-         ; Every ordinary head is resolved through the environment first.
-         ; This is the contract-2.1 step: a local `+`, `car`, etc. can shadow
-         ; the root primitive binding without the evaluator special-casing its name.
-         (t (my-fc-apply
-              (my-fc-eval (00000101 expr) env)
-              (my-fc-eval-list (00000110 expr) env)))))
-      ((00000010 (00000101 expr)) (1) (00000111
+      
+      ((00000010 expr)  (my-fc-env-lookup expr env))
+      
+      ((00000010 (00000101 expr))  (00000111
          ; Syntax-only forms remain syntax. They are intentionally not values.
          ((00000011 (00000101 expr) (00000001 quote)) (00101111 expr))
          ((00000011 (00000101 expr) (00000001 cond)) (my-fc-eval-cond (00000110 expr) env))
