@@ -24,10 +24,10 @@
 (00001001 science-proper-list?
   (00001000 (x)
     (за-умовою
-      ((порожнє? x) так)
-      ((атом? x) ні)
-      ((science-proper-list? (решта x)) так)
-      ((хибне? (science-proper-list? (решта x))) ні))))
+      ((порожнє? x) (атом? (00000001 ())))
+      ((атом? x) (атом? (00000001 (()))))
+      ((science-proper-list? (решта x)) (атом? (00000001 ())))
+      ((хибне? (science-proper-list? (решта x))) (атом? (00000001 (())))))))
 
 (00001001 science-list-length-is?
   (00001000 (values count)
@@ -35,7 +35,7 @@
       ((нуль? count) (порожнє? values))
       ((хибне? (нуль? count))
        (за-умовою
-         ((атом? values) ні)
+         ((атом? values) (атом? (00000001 (()))))
          ((хибне? (атом? values))
           (science-list-length-is? (решта values) (відняти count 1))))))))
 
@@ -54,12 +54,12 @@
 (00001001 dimension?
   (00001000 (x)
     (за-умовою
-      ((хибне? (science-proper-list? x)) ні)
-      ((хибне? (science-list-length-is? x 3)) ні)
-      ((хибне? (тотожне? (перше x) *dimension-schema*)) ні)
-      ((хибне? (символ? (dimension-base x))) ні)
-      ((хибне? (атом? (dimension-exponent x))) ні)
-      ((так) так))))
+      ((хибне? (science-proper-list? x)) (атом? (00000001 (()))))
+      ((хибне? (science-list-length-is? x 3)) (атом? (00000001 (()))))
+      ((хибне? (тотожне? (перше x) *dimension-schema*)) (атом? (00000001 (()))))
+      ((хибне? (символ? (dimension-base x))) (атом? (00000001 (()))))
+      ((хибне? (атом? (dimension-exponent x))) (атом? (00000001 (()))))
+      ((атом? (00000001 ())) (атом? (00000001 ()))))))
 
 (00001001 dimension-base
   (00001000 (dimension) (00101111 dimension)))
@@ -70,11 +70,11 @@
 (00001001 science-dimensions-valid?
   (00001000 (dimensions)
     (за-умовою
-      ((порожнє? dimensions) так)
-      ((атом? dimensions) ні)
+      ((порожнє? dimensions) (атом? (00000001 ())))
+      ((атом? dimensions) (атом? (00000001 (()))))
       ((dimension? (перше dimensions))
        (science-dimensions-valid? (решта dimensions)))
-      ((хибне? (dimension? (перше dimensions))) ні))))
+      ((хибне? (dimension? (перше dimensions))) (атом? (00000001 (())))))))
 
 (00001001 make-unit
   (00001000 (dimensions)
@@ -83,11 +83,11 @@
 (00001001 unit?
   (00001000 (x)
     (за-умовою
-      ((хибне? (science-proper-list? x)) ні)
-      ((хибне? (science-list-length-is? x 2)) ні)
-      ((хибне? (тотожне? (перше x) *unit-schema*)) ні)
-      ((хибне? (science-dimensions-valid? (перше (решта x)))) ні)
-      ((так) так))))
+      ((хибне? (science-proper-list? x)) (атом? (00000001 (()))))
+      ((хибне? (science-list-length-is? x 2)) (атом? (00000001 (()))))
+      ((хибне? (тотожне? (перше x) *unit-schema*)) (атом? (00000001 (()))))
+      ((хибне? (science-dimensions-valid? (перше (решта x)))) (атом? (00000001 (()))))
+      ((атом? (00000001 ())) (атом? (00000001 ()))))))
 
 (00001001 unit-dimensions
   (00001000 (unit) (00000110 unit)))
@@ -99,11 +99,11 @@
 (00001001 quantity?
   (00001000 (x)
     (за-умовою
-      ((хибне? (science-proper-list? x)) ні)
-      ((хибне? (science-list-length-is? x 3)) ні)
-      ((хибне? (тотожне? (перше x) *quantity-schema*)) ні)
-      ((хибне? (unit? (перше (решта (решта x))))) ні)
-      ((так) так))))
+      ((хибне? (science-proper-list? x)) (атом? (00000001 (()))))
+      ((хибне? (science-list-length-is? x 3)) (атом? (00000001 (()))))
+      ((хибне? (тотожне? (перше x) *quantity-schema*)) (атом? (00000001 (()))))
+      ((хибне? (unit? (перше (решта (решта x))))) (атом? (00000001 (()))))
+      ((атом? (00000001 ())) (атом? (00000001 ()))))))
 
 (00001001 quantity-value
   (00001000 (quantity) (00101111 quantity)))
@@ -195,29 +195,29 @@
 (00001001 science-source?
   (00001000 (x)
     (за-умовою
-      ((хибне? (science-proper-list? x)) ні)
-      ((хибне? (science-list-length-is? x 3)) ні)
-      ((хибне? (тотожне? (перше x) *science-source-schema*)) ні)
-      ((хибне? (символ? (перше (решта x)))) ні)
-      ((хибне? (атом? (перше (решта (решта x))))) ні)
-      ((так) так))))
+      ((хибне? (science-proper-list? x)) (атом? (00000001 (()))))
+      ((хибне? (science-list-length-is? x 3)) (атом? (00000001 (()))))
+      ((хибне? (тотожне? (перше x) *science-source-schema*)) (атом? (00000001 (()))))
+      ((хибне? (символ? (перше (решта x)))) (атом? (00000001 (()))))
+      ((хибне? (атом? (перше (решта (решта x))))) (атом? (00000001 (()))))
+      ((атом? (00000001 ())) (атом? (00000001 ()))))))
 
 (00001001 scientific-constant-status-valid?
   (00001000 (status)
     (за-умовою
-      ((тотожне? status (як-є exact-by-definition)) так)
-      ((тотожне? status (як-є exact-derived)) так)
-      ((тотожне? status (як-є measured)) так)
-      ((так) ні))))
+      ((тотожне? status (як-є exact-by-definition)) (атом? (00000001 ())))
+      ((тотожне? status (як-є exact-derived)) (атом? (00000001 ())))
+      ((тотожне? status (як-є measured)) (атом? (00000001 ())))
+      ((атом? (00000001 ())) (атом? (00000001 (())))))))
 
 (00001001 scientific-constant-kind-valid?
   (00001000 (kind)
     (за-умовою
-      ((тотожне? kind (як-є physical-defining)) так)
-      ((тотожне? kind (як-є physical-derived)) так)
-      ((тотожне? kind (як-є physical-measured)) так)
-      ((тотожне? kind (як-є mathematical)) так)
-      ((так) ні))))
+      ((тотожне? kind (як-є physical-defining)) (атом? (00000001 ())))
+      ((тотожне? kind (як-є physical-derived)) (атом? (00000001 ())))
+      ((тотожне? kind (як-є physical-measured)) (атом? (00000001 ())))
+      ((тотожне? kind (як-є mathematical)) (атом? (00000001 ())))
+      ((атом? (00000001 ())) (атом? (00000001 (())))))))
 
 (00001001 make-scientific-constant
   (00001000 (name quantity status kind system source)
@@ -233,18 +233,18 @@
 (00001001 scientific-constant?
   (00001000 (x)
     (за-умовою
-      ((хибне? (science-proper-list? x)) ні)
-      ((хибне? (science-list-length-is? x 7)) ні)
-      ((хибне? (тотожне? (перше x) *scientific-constant-schema*)) ні)
-      ((хибне? (символ? (перше (решта x))) ) ні)
-      ((хибне? (quantity? (перше (решта (решта x))))) ні)
+      ((хибне? (science-proper-list? x)) (атом? (00000001 (()))))
+      ((хибне? (science-list-length-is? x 7)) (атом? (00000001 (()))))
+      ((хибне? (тотожне? (перше x) *scientific-constant-schema*)) (атом? (00000001 (()))))
+      ((хибне? (символ? (перше (решта x))) ) (атом? (00000001 (()))))
+      ((хибне? (quantity? (перше (решта (решта x))))) (атом? (00000001 (()))))
       ((хибне? (scientific-constant-status-valid?
-                 (перше (решта (решта (решта x)))))) ні)
+                 (перше (решта (решта (решта x)))))) (атом? (00000001 (()))))
       ((хибне? (scientific-constant-kind-valid?
-                 (перше (решта (решта (решта (решта x))))))) ні)
-      ((хибне? (символ? (science-sixth x))) ні)
-      ((хибне? (science-source? (science-seventh x))) ні)
-      ((так) так))))
+                 (перше (решта (решта (решта (решта x))))))) (атом? (00000001 (()))))
+      ((хибне? (символ? (science-sixth x))) (атом? (00000001 (()))))
+      ((хибне? (science-source? (science-seventh x))) (атом? (00000001 (()))))
+      ((атом? (00000001 ())) (атом? (00000001 ()))))))
 
 (00001001 scientific-constant-name
   (00001000 (constant) (00101111 constant)))
@@ -279,7 +279,7 @@
   (00001000 (constant)
     (за-умовою
       ((хибне? (scientific-constant? constant)) (як-є ()))
-      ((так)
+      ((атом? (00000001 ()))
        (let ((name (scientific-constant-name constant)))
          (00100111
            (00100111 (00100111 (00000001 scientific-constant) name))
