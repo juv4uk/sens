@@ -38,7 +38,7 @@ class SelectionLedgerTrace(unittest.TestCase):
         dossier = read("knowledge/d10-next-tranche-20261011.json")
         inventory = self.inventory
         ledger_rows = list(csv.DictReader(
-            self.content.splitlines(), delimiter="\\t"))
+            self.content.splitlines(), delimiter="\t"))
         by_id = {row["proposal_id"]: row for row in ledger_rows}
         proposals = dossier["proposals"]
 
@@ -60,6 +60,11 @@ class SelectionLedgerTrace(unittest.TestCase):
                 self.assertEqual(proposal["semantic_name"], row["semantic_name"])
                 self.assertEqual(proposal["surface_uk"], row["surface_uk"])
                 self.assertEqual(proposal["surface_ukr"], row["surface_ukr"])
+                self.assertEqual(proposal["donor_provenance"], row["donor_provenance"])
+                expected_dedup = (
+                    f"D1-D9@{proposal['dedup']['d1_d9']['snapshot_sha']}=PENDING;"
+                    f"D10@{proposal['dedup']['d10']['snapshot_blob_sha']}=PENDING")
+                self.assertEqual(expected_dedup, row["dedup_check"])
                 self.assertEqual("D10", row["width"])
                 self.assertEqual("pending-review", row["status"])
                 self.assertEqual("0", row["ratified"])
