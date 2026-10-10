@@ -32,7 +32,7 @@
   },
   "law": {
     "signature": "CLASS-OF(object) -> class-object",
-    "statement": "Return the class object of which object is a direct instance.",
+    "statement": "Return the direct class metaobject of an object; do not confuse the class object with a type specifier/name or the superclass.",
     "positive_witnesses": [
       "For a named standard class C and instance x, CLASS-OF(x) is EQ to (FIND-CLASS 'C).",
       "For an instance of child class CHILD inheriting PARENT, CLASS-OF(x) is the CHILD class object, not the PARENT class object.",
