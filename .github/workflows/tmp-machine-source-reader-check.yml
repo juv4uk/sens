@@ -1,0 +1,54 @@
+name: TEMP validate bounded machine source reader
+on:
+  push:
+    branches:
+      - fix/machine-source-exact-domain-reader-current-20261010
+    paths:
+      - ".github/workflows/tmp-machine-source-reader-check.yml"
+      - "crates/sens/src/mixed_source.rs"
+      - "crates/sens/src/lib.rs"
+      - "crates/sens-host/tests/native_lisp_bytes.rs"
+      - "crates/sens-host/tests/native_cond_profile.rs"
+      - "crates/sens/tests/machine_asm_differential.rs"
+      - "crates/sens/tests/machine_exact_domain_cpu.rs"
+      - "crates/sens/tests/machine_admission_adversarial.rs"
+      - "crates/sens/tests/machine_effect_d5_arithmetic_projection.rs"
+
+permissions:
+  contents: read
+
+jobs:
+  bounded-reader-witnesses:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: ${{ github.ref }}
+          fetch-depth: 0
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Install independent assembler oracle
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends nasm binutils
+      - name: Pin reader source
+        shell: bash
+        run: |
+          set -euo pipefail
+          actual="$(git hash-object crates/sens/src/mixed_source.rs)"
+          test "$actual" = "d731f26871daadc43360faf29440612fd8b8580f"
+          echo "MIXED_SOURCE_BLOB=$actual"
+      - name: Run exact-domain reader unit suite
+        run: cargo test --locked -p sens --lib mixed_source::tests -- --nocapture
+      - name: Preserve Core4 physical artifact freshness
+        run: cargo test --locked -p sens --test core_fasl_freshness -- --nocapture
+      - name: Run native and exact-domain machine witnesses
+        shell: bash
+        run: |
+          set -euo pipefail
+          cargo test --locked -p sens --test machine_exact_domain_cpu -- --nocapture
+          cargo test --locked -p sens --test machine_admission_adversarial -- --nocapture
+          cargo test --locked -p sens --test machine_effect_d5_arithmetic_projection exact_ukrainian_quotient_and_remainder_stage_probe -- --exact --nocapture
+          cargo test --locked -p sens-host --test native_lisp_bytes native_pair_car_cdr_match_the_interpreter_reference_witness -- --exact --nocapture
+          cargo test --locked -p sens-host --test native_lisp_bytes unadmitted_ud2_form_is_rejected_before_host_executor -- --exact --nocapture
+          cargo test --locked -p sens --test machine_asm_differential x86_encoder_callability_stage_probe -- --exact --nocapture
+          cargo test --locked -p sens --test machine_asm_differential gas_and_nasm_match_lisp_owned_encoder_for_admitted_corpus -- --exact --nocapture
