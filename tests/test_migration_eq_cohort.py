@@ -69,7 +69,7 @@ class EqualityMigrationCanary(unittest.TestCase):
                 self.assertEqual(migration.encode_projection(projection), committed)
                 self.assertEqual(migration.decode_bytes(committed), WORDS.split())
                 self.assertNotEqual(committed, source.encode("utf-8"))
-                self.assertFalse((FIXTURES / stem).exists())
+                self.assertEqual((FIXTURES / stem).read_text(encoding="ascii"), WORDS)
 
     def test_actual_cli_mirror_ledger_and_no_clobber(self):
         with tempfile.TemporaryDirectory() as tmp:
