@@ -15,6 +15,8 @@ jobs:
     steps:
       - uses: actions/checkout@v5
       - uses: dtolnay/rust-toolchain@stable
+      - name: Verify benchmark evidence cannot invent speedups
+        run: python3 -m unittest discover -s benchmarks/native-machine-1 -p 'test_*.py'
       - name: Compile release native benchmark
         run: cargo build --locked --release -p sens-host --example native_machine_bench
       - name: Execute real hardware and physical T5, record raw samples

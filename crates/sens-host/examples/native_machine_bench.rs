@@ -114,11 +114,32 @@ fn benchmark_pair(reps: usize, warmups: usize) -> Result<(), String> {
     Ok(())
 }
 fn benchmark_t5(reps: usize, warmups: usize) -> Result<(), String> {
-    let cases = [
+    // Real packed T5 generated with the existing canonical codec. These
+    // experimental in-memory inputs are NOT published/claimed as admitted
+    // source-era .sens triplets; measured separately from immutable fixtures.
+    let exact = [
+        ("t5-generated-d3-atom",
+         "10 010 00 10 001 00 000 01 01", "1"),
+        ("t5-generated-d3-cons",
+         "10 111 00 10 001 00 000 01 00 10 001 00 000 01 01", "(())"),
+    ];
+    let mut generated = Vec::new();
+    for (name, source, expected) in exact {
+        let words = sens::parse_binary_source_words(source)
+            .map_err(|e| format!("{name}: canonical D2/D3 parse: {e:?}"))?
+            .into_iter().map(|word| word.word).collect::<Vec<_>>();
+        let bytes = sens::encode_ternary_words(&words)
+            .map_err(|e| format!("{name}: physical T5 encode: {e:?}"))?;
+        generated.push((name, bytes, expected));
+    }
+    let mut cases: Vec<(&str, &[u8], &str)> = vec![
         ("t5-car-cdr-quote", PAIR, "()"),
         ("t5-eq-cond-select", SELECT, "(())"),
         ("t5-eq-cond-skip", SKIP, "()"),
     ];
+    for (name, data, expected) in &generated {
+        cases.push((name, data.as_slice(), expected));
+    }
     for (name, bytes, expected) in cases {
         let mut s = Session::default();
         match measured_t5(&mut s, bytes) {
