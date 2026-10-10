@@ -1240,11 +1240,11 @@
     (00000111
       ; Розрізняємо порожній список та довільний атом, а не порівнюємо
       ; непорожню пару через EQ, що визначений лише для атомів.
-      ((010 instructions)
+      ((atom? instructions)
        (00000111
          ((eq? instructions (00000001 ())) (00000001 ()))
-         ((010 ()) (car instructions))))
-      ((010 ())
+         ((atom? ()) (car instructions))))
+      ((atom? ())
        (00101001
          (00000101 instructions)
          (x86-encode-program (00000110 instructions)))))))
