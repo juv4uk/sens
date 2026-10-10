@@ -1,8 +1,8 @@
 #![cfg(all(any(target_os = "linux", target_os = "windows"), target_arch = "x86_64"))]
 
 use sens::{
-    eval_program, load_core_library, register_capability, Environment, Exactness, Expr,
-    LanguageError, Session, Span, Value,
+    eval_parsed_expressions, eval_program, load_core_library, parse_mixed_exact_domain_machine_source,
+    register_capability, Environment, Exactness, Expr, LanguageError, Session, Span, Value,
 };
 use sens_host::install;
 use std::fs;
@@ -32,11 +32,17 @@ fn repo_root() -> PathBuf {
 }
 
 fn load_lisp_file(path: &str, session: &mut Session) {
-    let path = repo_root().join(path);
-    let source = fs::read_to_string(&path)
-        .unwrap_or_else(|error| panic!("{} must exist: {error}", path.display()));
-    eval_program(&source, session)
-        .unwrap_or_else(|error| panic!("{} must load as ordinary sens: {error}", path.display()));
+    assert!(
+        path.starts_with("lib/machine/"),
+        "machine-source reader is restricted to lib/machine/** fixtures: {path}"
+    );
+    let file_path = repo_root().join(path);
+    let source = fs::read_to_string(&file_path)
+        .unwrap_or_else(|error| panic!("{} must exist: {error}", file_path.display()));
+    let expressions = parse_mixed_exact_domain_machine_source(&source)
+        .unwrap_or_else(|error| panic!("{path} must parse as exact-domain machine source: {error}"));
+    eval_parsed_expressions(&expressions, session)
+        .unwrap_or_else(|error| panic!("{path} must load through the machine-source reader: {error}"));
 }
 
 fn spy_executor(
