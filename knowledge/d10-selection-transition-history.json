@@ -362,7 +362,7 @@
         "knowledge/d10-symbolic-ai-arc-support-20261009.json"
       ],
       "previous_inventory_blob_sha": "7e13e929338baeef9b16c2139d24b78e23ea1e03",
-      "resulting_inventory_blob_sha": "f5462f122dd682727f27a55e1424bee0f3f1effd",
+      "resulting_inventory_blob_sha": "9e053a51b3b49741e3245ef02e3e366d16acb261",
       "added_stable_ids": [
         "d10.math.exact-barycentric-interpolate.20261011",
         "d10.ai.finite-simple-temporal-closure.20261011",
