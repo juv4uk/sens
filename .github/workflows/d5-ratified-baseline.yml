@@ -21,7 +21,6 @@ on:
       - "CURRENT.md"
       - "docs/language-core.md"
       - "crates/sens/src/domain_identity.rs"
-      - "crates/sens/src/source_words.rs"
       - "scripts/check-d5-current-authority.py"
       - ".github/workflows/d5-ratified-baseline.yml"
 
