@@ -392,6 +392,12 @@ fn native_pair_car_cdr_match_the_interpreter_reference_witness() {
     for (name, source) in [
         ("lowered-car-forms", "(x86-lower-cons-car-u64-forms 2 3)"),
         ("lowered-car-admission", "(x86-admitted-program? (x86-lower-cons-car-u64-forms 2 3))"),
+        ("encode-mov-imm-left", "(x86-encode-admitted-instruction (quote (mov-r64-imm64 rax 2)))"),
+        ("encode-store-car", "(x86-encode-admitted-instruction (quote (mov-mem-disp8-r64 rdi 0 rax)))"),
+        ("encode-mov-imm-right", "(x86-encode-admitted-instruction (quote (mov-r64-imm64 rax 3)))"),
+        ("encode-store-cdr", "(x86-encode-admitted-instruction (quote (mov-mem-disp8-r64 rdi 8 rax)))"),
+        ("encode-load-car", "(x86-encode-admitted-instruction (quote (mov-r64-mem-disp8 rax rdi 0)))"),
+        ("encode-ret", "(x86-encode-admitted-instruction (quote (ret)))"),
         ("lowered-car-encoding", "(x86-encode-admitted-program (x86-lower-cons-car-u64-forms 2 3))"),
     ] {
         let result = eval_program(source, &mut session)
