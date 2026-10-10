@@ -1,6 +1,6 @@
 ; Постанова власника SENS: файлова влада, 2026-10-10.
-; Політика допускає НОВІ шляхи, а не надає семантичну владу розширенням.
-; Історичні формати збережено як debt до окремої міграції з oracle parity.
+; Це політика допуску НОВИХ шляхів, не ратифікація значення за розширенням.
+; Старі формати тримаються як явно названий борг до окремої міграції.
 (00001001 *file-authority-policy*
   (00000001
     ((schema . file-authority-policy/1)
@@ -17,16 +17,23 @@
      (baseline-existing-paths . grandfathered-migration-debt)
      (baseline-important-noncanonical-count . 261)
      (baseline-python-count . 741)
-     (scope . changed-paths-plus-complete-tools-python-census)
-     (rename-or-copy . inspect-destination-as-new)
+     (scope . added-paths-in-Git-tree)
+     (rename-or-copy . treat-new-path-as-added)
      (failure . fail-closed)
+     ; Контракт межі Git — лише транспорт назв, не семантичний оракул.
+     (git-path-intake .
+       ((format . nul-terminated-utf8)
+        (empty-complete-list . allowed)
+        (missing-final-nul . blocked)
+        (empty-record . blocked)
+        (invalid-utf8 . blocked)
+        (policy-verdict-owner . SENS)))
      (human-surface . ukrainian)
      (semantic-admission-from-extension . ())
      (semantic-admission-from-host-guard . ())
-     (migration .
+     (migration . 
        ((old-json-tsv-fasl-xed . staged-oracle-parity-before-retirement)
         (old-python-outside-tools . move-or-reimplement-after-proof)
         (new-foreign-tool . census-plus-explicit-SENS-cutover-plan)
         (independent-ci . GitHub-hosted-negative-witnesses)
-        (temporary-host-role . untrusted-Git-path-transport-only)
         (final-authority . SENS-Lisp-or-physical-T5-oracle))))))
