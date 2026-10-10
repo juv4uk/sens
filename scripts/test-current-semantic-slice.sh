@@ -31,13 +31,11 @@ else
   quantity_rc=$?
   printf 'exact quantity Lisp witness failed (exit %s):\n%s\n' "$quantity_rc" "$quantity_status" >&2
 
-  # Diagnostic-only replay: split the same Lisp-owned witness at its public
-  # rows/check boundary. Do not edit the source or expected quantities, do not
-  # convert the law to a Rust oracle, and never turn either failure green.
+  # Diagnostic-only replay of the existing definitions. Read bindings and
+  # calls separately so a non-callable value cannot masquerade as a law failure.
+  # The source, expected quantities and failing gate stay unchanged.
   quantity_diag_dir="${RUNNER_TEMP:-$(mktemp -d)}"
-  quantity_rows_probe="$quantity_diag_dir/exact-quantity-rows-probe.lisp"
-  quantity_check_probe="$quantity_diag_dir/exact-quantity-check-probe.lisp"
-  python3 - "$quantity_witness" "$quantity_rows_probe" "$quantity_check_probe" <<'PY'
+  python3 - "$quantity_witness" "$quantity_diag_dir" <<'PY'
 from pathlib import Path
 import sys
 
@@ -47,28 +45,31 @@ base = source.rstrip()
 if not base.endswith(tail):
     raise SystemExit("QUANTITY-DIAGNOSTIC-BLOCKED: unexpected fixture terminator; refusing to rewrite")
 prefix = base[:-len(tail)].rstrip()
-Path(sys.argv[2]).write_text(
-    prefix + "\n\n(exact-quantity-arithmetic-rows)\n", encoding="utf-8"
-)
-Path(sys.argv[3]).write_text(
-    prefix + "\n\n(exact-quantity-arithmetic-check (exact-quantity-arithmetic-rows))\n",
-    encoding="utf-8",
-)
+root = Path(sys.argv[2])
+probes = {
+    "rows-binding": "\nexact-quantity-arithmetic-rows\n",
+    "check-binding": "\nexact-quantity-arithmetic-check\n",
+    "witness-binding": "\nexact-quantity-arithmetic-witness\n",
+    "rows-call": "\n(exact-quantity-arithmetic-rows)\n",
+    "check-call": "\n(exact-quantity-arithmetic-check (exact-quantity-arithmetic-rows))\n",
+}
+for stage, suffix in probes.items():
+    (root / f"exact-quantity-{stage}-probe.lisp").write_text(
+        prefix + suffix, encoding="utf-8"
+    )
 PY
 
-  for stage in rows check; do
-    case "$stage" in
-      rows) probe="$quantity_rows_probe" ;;
-      check) probe="$quantity_check_probe" ;;
-    esac
-    log="$RUNNER_TEMP/exact-quantity-$stage-probe.log"
+  quantity_diag_dir="${RUNNER_TEMP:-$(mktemp -d)}"
+  for stage in rows-binding check-binding witness-binding rows-call check-call; do
+    probe="$quantity_diag_dir/exact-quantity-$stage-probe.lisp"
+    log="$quantity_diag_dir/exact-quantity-$stage-probe.log"
     if cargo run --quiet -p sens-cli --bin sens -- "$probe" >"$log" 2>&1; then
       printf 'QUANTITY-DIAGNOSTIC %s=PASS\n' "$stage"
+      cat "$log"
     else
       probe_rc=$?
       printf 'QUANTITY-DIAGNOSTIC %s=FAIL exit=%s\n' "$stage" "$probe_rc" >&2
       cat "$log" >&2
-      break
     fi
   done
   exit 1
