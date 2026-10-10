@@ -815,9 +815,20 @@
       ; a fallback encoder.
       ((010 ()) (00000001 ())))))
 
+; Keep instruction mapping inside the current D3 value algebra. The shared
+; Core4 map-onto body still uses compatibility predicates as COND control.
+(00001001 x86-encode-instruction-list
+  (00001000 (forms)
+    (110
+      ((010 forms) (00000001 ()))
+      ((0100 (010 forms))
+       (111
+         (x86-encode-admitted-instruction (100 forms))
+         (x86-encode-instruction-list (011 forms)))))))
+
 (00001001 x86-encode-admitted-program
   (00001000 (forms)
-    (x86-encode-program (00110111 x86-encode-admitted-instruction forms))))
+    (x86-encode-program (x86-encode-instruction-list forms))))
 
 ; #177 safe composition seam. Unlike x86-encode-admitted-program, this entry
 ; point is safe for callers holding arbitrary structured machine data: it must
