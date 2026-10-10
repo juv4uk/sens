@@ -211,28 +211,28 @@
 ; never from human decimal presentation.  A reduced exact number is an
 ; integer exactly when its canonical denominator is 1.  Non-number values
 ; have no #q2: prefix and therefore fail closed before numeric comparisons.
+; Avoid the deferred Core4 LET/MAP-ONTO path in this tiny wire parser:
+; inline the one-character tails, and return exact D1 only.
 (00001001 x86-admission-wire-denominator-one?
   (00001000 (text)
     (00000111
       ((00111100 text) (00000010 (00000001 (00000000))))
       ((00011100 (01000101 (00111111 text)) 47)
-       (10011100 ((rest (01000000 text)))
-         (00000111
-           ((00111100 rest) (00000010 (00000001 (00000000))))
-           ((00011100 (01000101 (00111111 rest)) 49)
-            (00000111
-              ((00111100 (01000000 rest)) (00000010 (00000001 ())))
-              ((00000010 (00000001 ())) (00000010 (00000001 (00000000))))))
-           ((00000010 (00000001 ())) (00000010 (00000001 (00000000)))))))
+       (00000111
+         ((00111100 (01000000 text)) (00000010 (00000001 (00000000))))
+         ((00011100 (01000101 (00111111 (01000000 text))) 49)
+          (00000111
+            ((00111100 (01000000 (01000000 text))) (00000010 (00000001 ())))
+            ((00000010 (00000001 ())) (00000010 (00000001 (00000000)))))
+         ((00000010 (00000001 ())) (00000010 (00000001 (00000000))))))
       ((00000010 (00000001 ())) (x86-admission-wire-denominator-one? (01000000 text))))))
 
 (00001001 x86-admission-exact-integer?
   (00001000 (value)
-    (10011100 ((wire (01001100 value)))
-      (00000111
-        ((00111101 "#q2:" wire)
-         (x86-admission-wire-denominator-one? wire))
-        ((00000010 (00000001 ())) (00000010 (00000001 (00000000))))))))
+    (00000111
+      ((00111101 "#q2:" (01001100 value))
+       (x86-admission-wire-denominator-one? (01001100 value)))
+      ((00000010 (00000001 ())) (00000010 (00000001 (00000000)))))))
 
 ; Inclusive integer comparisons must not route through Core4 <=/>=:
 ; those compatibility helpers currently recurse through an unavailable legacy
