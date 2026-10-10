@@ -9,6 +9,7 @@ on:
       - crates/sens/src/lib.rs
       - crates/sens-cli/src/bin/gen-fasl.rs
       - crates/sens/tests/core_fasl_freshness.rs
+      - crates/sens/tests/machine_asm_differential.rs
       - lib/core4.lisp
       - lib/machine/encoding/x86-64.lisp
       - .github/workflows/core4-exact-domain-fasl-candidate.yml
@@ -20,6 +21,7 @@ on:
       - crates/sens/src/lib.rs
       - crates/sens-cli/src/bin/gen-fasl.rs
       - crates/sens/tests/core_fasl_freshness.rs
+      - crates/sens/tests/machine_asm_differential.rs
       - lib/core4.lisp
       - lib/machine/encoding/x86-64.lisp
       - .github/workflows/core4-exact-domain-fasl-candidate.yml
