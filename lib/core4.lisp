@@ -300,7 +300,7 @@
           (cons
             (cons (car (car bindings)) (car tail-parts))
             (cons (car (cdr (car bindings))) (cdr tail-parts))))
-        (my-let-binding-parts (cdr bindings))))))
+        (my-let-binding-parts (cdr bindings)))))))
 
 (defmacro let (bindings body)
   ((lambda (parts)
@@ -316,7 +316,7 @@
      (list
        (quote let)
        (list (car bindings))
-       (list (quote let*) (cdr bindings) body))))
+       (list (quote let*) (cdr bindings) body)))))
 
 ; string-length/string-empty?/string-prefix?/string-contains? (PLAN.md
 ; item 14, item 20's G5 audit test applied live) — none of these need a
