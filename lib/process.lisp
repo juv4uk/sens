@@ -81,5 +81,7 @@
 ; Candidate spellings remain unavailable until explicitly ratified stable.
 (00000001 (postcore-materialization-debug skipped))
 
-; #771: materialize the registry-authoritative Ukrainian peer after process-run exists.
-(my-postcore-materialize-stable-peers 162 process-run)
+; Stable surface peers are projected once by load_process_library after
+; process-run and TCP closures exist. Do not invoke the retired per-file
+; my-postcore materializer here: it depends on pre-Contract-11.8 call heads.
+
