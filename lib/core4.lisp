@@ -366,6 +366,16 @@
             ((not? (00100010 (00000101 a) (00000101 b)))
              (00000001 (0))))))))))
 
+; D4:0100 NOT: strict D1-to-D1 negation expressed by Core4 itself.
+; No Number 0/1, host T/NIL, or structural EMPTY is used as a predicate.
+(00001001 not?
+  (00001000 (value)
+    (00000111
+      (value
+       (00000010 (00000111 (00000001 ()) (00000001 ()))))
+      ((00000010 (00000001 ()))
+       (00000010 (00000001 ()))))))
+
 ; nth/member?/assoc (G5 test: already expressible via existing means?)
 ; — yes, same recursive-list-walk shape as length/reverse above.
 ; Surfaced from the fpga-lisp session's assembler.lisp (2026-08-10), which
