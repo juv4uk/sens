@@ -10,7 +10,6 @@ files=(
   crates/sens/src/eval/necessary_forms.rs
   crates/sens/src/eval/mod.rs
   crates/sens/src/eval/closures.rs
-  crates/sens/src/ir.rs
   crates/sens/src/language_items.rs
   crates/sens/src/lib.rs
   crates/sens/src/parser.rs
@@ -19,6 +18,14 @@ files=(
   crates/sens/src/syntax.rs
   crates/sens/src/value.rs
 )
+
+# Keep this guard fail-closed if its active-source inventory drifts.
+for current_file in "${files[@]}"; do
+  if [[ ! -f "$current_file" ]]; then
+    printf 'SID-BINARY-IDENTITY guard: missing active source %s\n' "$current_file" >&2
+    exit 1
+  fi
+done
 
 fail=0
 
