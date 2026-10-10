@@ -1,0 +1,40 @@
+name: Temporary regenerate Native Machine benchmark registry
+on:
+  push:
+    branches: [bench/native-machine-1-real-route-20261010]
+    paths:
+      - benchmarks/native-machine-1/bench.json
+      - .github/workflows/repair-native-machine-bench-registry.yml
+permissions:
+  contents: write
+jobs:
+  regenerate:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: bench/native-machine-1-real-route-20261010
+          persist-credentials: true
+      - name: Use the repository-owned benchmark registry generator
+        run: python3 scripts/benchmark_registry.py
+      - name: Check benchmark manifest and exact projection
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 scripts/benchmark_registry.py --check
+          python3 -m unittest discover -s benchmarks/native-machine-1 -p 'test_*.py'
+      - name: Commit generated discovery index only
+        shell: bash
+        run: |
+          set -euo pipefail
+          git add benchmarks/README.md
+          if git diff --cached --quiet; then
+            echo 'Benchmark registry already current'
+            exit 0
+          fi
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git commit -m 'chore(bench): project Native Machine 1 through canonical registry'
+          git push origin HEAD:refs/heads/bench/native-machine-1-real-route-20261010
