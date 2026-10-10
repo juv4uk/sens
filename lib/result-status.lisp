@@ -47,19 +47,19 @@
       ((00000011 (00000101 result) (00000001 blocked)) t)
       ((00000011 (00000101 result) (00000001 disputed)) t)
       ((00000011 (00000101 result) (00000001 invalid)) t)
-      (1 (00000001 ())))))
+      )))
 
 (00001001 result-status
   (00001000 (result)
     (00000111
       ((result-tagged? result) (00000101 result))
-      (1 (00000001 ())))))
+      )))
 
 (00001001 result-payload
   (00001000 (result)
     (00000111
       ((result-tagged? result) (00000110 result))
-      (1 (00000001 ())))))
+      )))
 
 ; Proper-list validation follows the same atom-first shape as
 ; knowledge-proper-list?: `eq` is an atom operation, so a pair must never be
@@ -70,7 +70,7 @@
       
       ((00000010 value)  (00000111
          ((00000011 value (00000001 ())) t)
-         (1 (00000001 ()))))
+         ))
       (1 (result-proper-list? (00000110 value))))))
 
 ; The reserved negation head: `not?` (predicate spelling since #1444) or the
@@ -80,7 +80,7 @@
     (00000111
       ((00000011 head (00000001 not?)) t)
       ((00000011 head (00000001 not)) t)
-      (1 (00000001 ())))))
+      )))
 
 ; Minimal standalone goal validation for the observation adapter. Ordinary
 ; predicate goals require a symbol head and a proper list. The one reserved
@@ -97,7 +97,7 @@
       ((result-not-head? (00000101 goal))
        (00000111
          ((00011100 (00101000 goal) 2)  (result-goal? (00101111 goal)))
-         (1 (00000001 ()))))
+         ))
       (1 t))))
 
 ; `(not? goal)` is the explicit logical opposite used by the knowledge layer.
@@ -108,7 +108,7 @@
     (00000111
       ((00100001 (result-goal? goal)) (00000001 ()))
       ((result-not-head? (00000101 goal)) t)
-      (1 (00000001 ())))))
+      )))
 
 (00001001 result-opposite-goal
   (00001000 (goal)
@@ -162,7 +162,7 @@
             (make-proved goal positive-results))
            ((10110001 (00000010 opposite-results))
             (make-proved opposite opposite-results))
-           (1 (00000001 ()))))))))
+           ))))))
 
 ; Knowledge-module adapter. Validation precedes lookup: malformed input is an
 ; `invalid` observation even when the named module does not exist. If a
