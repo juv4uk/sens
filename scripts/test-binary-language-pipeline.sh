@@ -131,13 +131,30 @@ trit_source = (ROOT / "crates/sens-cli/src/bin/sens-trit.rs").read_text(encoding
 trit_start = trit_source.index("fn eval_t5_bytes_core4(")
 trit_end = trit_source.index("\n}\n", trit_start) + 3
 trit_route = trit_source[trit_start:trit_end]
-assert "sens::decode_ternary_words(bytes)" in trit_route
-assert "sens::parse_canonical_word_sequence(&words)" in trit_route
-assert "sens::decode_ternary_program(bytes)" not in trit_route
-assert "sens::pack_binary_source_words" not in trit_route
-assert "sens::parse_canonical_packed_words" not in trit_route
-assert "sens::open_ternary_program(bytes)" not in trit_route
-assert "sens::parse_canonical_binary(&visible)" not in trit_route
+# Current sens-trit uses the shared byte-to-typed-word execution adapter.
+# Verify both call site and implementation; name-only API checks would pass
+# even if the adapter secretly switched to text or repacked source.
+assert "sens::PhysicalT5Program::decode(bytes)" in trit_route
+assert "program.execute(&mut session)" in trit_route
+binary_execution = (ROOT / "crates/sens/src/binary_execution.rs").read_text(encoding="utf-8")
+decoder_start = binary_execution.index("    pub fn decode(physical: &[u8])")
+decoder_end = binary_execution.index("    pub fn form_count(", decoder_start)
+typed_decoder = binary_execution[decoder_start:decoder_end]
+assert "decode_ternary_words(physical)" in typed_decoder
+assert "parse_t5_domain_words(&words)" in typed_decoder
+assert "lower_program(&parsed)" in typed_decoder
+
+for forbidden in (
+    "decode_ternary_program(",
+    "open_ternary_program(",
+    "parse_binary_source_words(",
+    "parse_canonical_binary(",
+    "pack_binary_source_words(",
+    "parse_canonical_packed_words(",
+    "render_ternary_words_spaced(",
+):
+    assert forbidden not in typed_decoder, ("noncanonical physical decoder", forbidden)
+    assert forbidden not in trit_route, ("noncanonical trit caller", forbidden)
 
 # Transport validation itself must keep D2 grammar on the same direct typed words,
 # rather than serialize and immediately decode a second packed payload.
