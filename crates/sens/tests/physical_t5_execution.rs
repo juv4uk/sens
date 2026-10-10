@@ -78,6 +78,34 @@ fn malformed_transport_and_invalid_d2_are_distinct_fail_closed_errors() {
 }
 
 #[test]
+fn experimental_senc_f3_f4_markers_are_never_accepted_as_t5() {
+    // F3/F4 належать лише дослідному .senc; у фізичному T5 це неможливі байти.
+    // Перевіряємо і самотній (обрізаний) заголовок, і заголовок із payload:
+    // жодна довжина не повинна вмикати евристичне автоворожіння формату.
+    for (label, bytes) in [
+        ("F3 marker only: truncated .senc", &[0xf3][..]),
+        ("F3 marker with payload", &[0xf3, 0x00, 0x01, 0x02][..]),
+        ("F4 marker only: truncated .senc", &[0xf4][..]),
+        ("F4 marker with payload", &[0xf4, 0x00, 0x01, 0x02][..]),
+    ] {
+        assert!(
+            matches!(
+                decode_ternary_program(bytes),
+                Err(TernaryTransportError::InvalidPhysicalByte)
+            ),
+            "{label}: експериментальний маркер не можна приймати як T5"
+        );
+        assert!(
+            matches!(
+                eval_t5_program(bytes, &mut Session::default()),
+                Err(T5ExecutionError::Transport(TernaryTransportError::InvalidPhysicalByte))
+            ),
+            "{label}: виконання має fail-closed відхилити транспорт до семантики"
+        );
+    }
+}
+
+#[test]
 fn named_lisp_cannot_enter_canonical_binary_reader() {
     let err = parse_canonical_binary("(quote ())")
         .expect_err("human Lisp names are not physical source");
