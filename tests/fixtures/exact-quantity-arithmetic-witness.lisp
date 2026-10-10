@@ -123,21 +123,24 @@
 
 (00001001 exact-quantity-arithmetic-check
   (00001000 (rows)
+    ; D3 COND має рівно двопольові гілки; D1 1/0 — не третє поле.
     (00000111
-      ((00000010 rows) ()
-       (00000001 (exact-quantity-arithmetic-witness (status pass))))
-      ((00000010 rows) (1)
-       (00100111
-         (00000001 exact-quantity-arithmetic-witness)
-         (00100111 (00000001 status) (00000001 fail))
-         (00100111 (00000001 case) (00000001 malformed-row-tail))
-         (00100111 (00000001 actual) rows)))
-      ((00000010 rows) (0)
+      ((00000010 rows)
+       (00000111
+         ((00000011 rows (00000001 ()))
+          (00000001 (exact-quantity-arithmetic-witness (status pass))))
+         (1
+          (00100111
+            (00000001 exact-quantity-arithmetic-witness)
+            (00100111 (00000001 status) (00000001 fail))
+            (00100111 (00000001 case) (00000001 malformed-row-tail))
+            (00100111 (00000001 actual) rows)))))
+      (1
        (нехай ((row (00000101 rows)))
          (00000111
-           ((00100010 (00101111 row) (00110000 row)) (1)
+           ((00100010 (00101111 row) (00110000 row))
             (exact-quantity-arithmetic-check (00000110 rows)))
-           ((00100010 (00101111 row) (00110000 row)) (0)
+           (1
             (00100111
               (00000001 exact-quantity-arithmetic-witness)
               (00100111 (00000001 status) (00000001 fail))
