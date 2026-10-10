@@ -1,0 +1,29 @@
+name: Guard exact D1 migration
+
+on:
+  pull_request:
+    paths:
+      - "lib/guard.lisp"
+      - "crates/wsm-guard-core/src/lib.rs"
+      - ".github/workflows/guard-exact-d1-migration.yml"
+  push:
+    branches: [main]
+    paths:
+      - "lib/guard.lisp"
+      - "crates/wsm-guard-core/src/lib.rs"
+      - ".github/workflows/guard-exact-d1-migration.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  exact-d1-guard:
+    name: Lisp-owned Guard exact D1 controls
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v5
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Verify exact D1 predicate outcomes and existing Guard policies
+        run: cargo test --locked -p wsm-guard-core -- --nocapture
