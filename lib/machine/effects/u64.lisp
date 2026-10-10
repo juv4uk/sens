@@ -22,7 +22,7 @@
            ((00111100 rest) (00000001 ()))
            ((00000011 (00111111 rest) "1")
             (00000111
-              ((00111100 (01000000 rest)) t)
+              ((00111100 (01000000 rest)) (00000010 (00000001 ())))
               ((00000011 0 0) (00000001 ()))))
            ((00000011 0 0) (00000001 ())))))
       ((00000011 0 0)
@@ -41,7 +41,7 @@
     (00000111
       ((00011110 value lower) 
        (00000111
-         ((00011101 value upper)  t)
+         ((00011101 value upper)  (00000010 (00000001 ())))
          ))
       )))
 
@@ -68,8 +68,8 @@
        (00000111
          ((machine-effect-u32-carrier? right)
           (00100111 (00000001 bounded-u64-add) left right))
-         (1 (00000001 machine-effect-rejected))))
-      (1 (00000001 machine-effect-rejected)))))
+         ((00000010 (00000001 ())) (00000001 machine-effect-rejected))))
+      ((00000010 (00000001 ())) (00000001 machine-effect-rejected)))))
 
 ; #4358 replay — target-neutral bounded DIFFERENCE/TIMES mechanism requests.
 ;
@@ -115,8 +115,8 @@
              (00100111 (00000001 bounded-u64-sub) left right))
             ((0100 (00011110 left right))
              (00000001 machine-effect-rejected))))
-         (1 (00000001 machine-effect-rejected))))
-      (1 (00000001 machine-effect-rejected)))))
+         ((00000010 (00000001 ())) (00000001 machine-effect-rejected))))
+      ((00000010 (00000001 ())) (00000001 machine-effect-rejected)))))
 
 (00001001 machine-effect-bounded-u64-mul
   (00001000 (left right)
@@ -125,6 +125,6 @@
        (00000111
          ((machine-effect-u32-carrier? right)
           (00100111 (00000001 bounded-u64-mul) left right))
-         (1 (00000001 machine-effect-rejected))))
-      (1 (00000001 machine-effect-rejected)))))
+         ((00000010 (00000001 ())) (00000001 machine-effect-rejected))))
+      ((00000010 (00000001 ())) (00000001 machine-effect-rejected)))))
 
