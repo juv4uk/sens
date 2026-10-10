@@ -662,6 +662,40 @@ mod tests {
     }
 
     #[test]
+    fn d4_append_requires_exact_mixed_head_not_decimal_number() {
+        let source = "(1111 (001 (a)) (001 (b)))";
+        let ordinary = crate::parser::parse(source).expect("звичайне читання");
+        let ExprKind::List(ordinary_items) = &ordinary[0].kind else {
+            panic!("очікується структура виклику");
+        };
+        assert!(matches!(
+            &ordinary_items[0].kind,
+            ExprKind::Number(_, _) | ExprKind::Rational(_)
+        ), "звичайний Lisp-читач не надає числу D4-ідентичності");
+
+        let mixed = parse_mixed_exact_domain(source).expect("точний змішаний читач");
+        let ExprKind::List(mixed_items) = &mixed[0].kind else {
+            panic!("очікується структура D4-виклику");
+        };
+        assert!(matches!(
+            &mixed_items[0].kind,
+            ExprKind::DomainIdentity(id)
+                if id.width() == 4 && id.packed_bits() == 0b1111
+        ), "тільки типізований D4:1111 є власником APPEND");
+
+        let mut session = crate::Session::default();
+        let result = crate::eval::eval_parsed_expressions(&mixed, &mut session)
+            .expect("ратифікований APPEND має об'єднати правильні списки");
+        assert_eq!(result.value.to_string(), "(a b)");
+
+        let invalid = parse_mixed_exact_domain("(1111 42)")
+            .expect("структурно допустиме джерело");
+        let error = crate::eval::eval_parsed_expressions(&invalid, &mut session)
+            .expect_err("APPEND не приймає числовий аргумент як список");
+        assert!(error.message.contains("D4:1111 APPEND requires proper lists"));
+    }
+
+    #[test]
     fn d5_current_head_is_preserved_as_exact_domain_identity() {
         let expression = only(parse_mixed_exact_domain("(00000 x)").expect("mixed parse"));
         let ExprKind::List(items) = expression.kind else {
