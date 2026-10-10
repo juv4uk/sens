@@ -1,0 +1,34 @@
+name: Guard exact-D1 COND migration
+
+on:
+  pull_request:
+    paths:
+      - "lib/guard.lisp"
+      - "tests/test_guard_d1_cond_migration.py"
+      - "scripts/cond-modernize.py"
+      - "language-contract.lisp"
+      - ".github/workflows/guard-d1-migration.yml"
+  push:
+    branches: [main]
+    paths:
+      - "lib/guard.lisp"
+      - "tests/test_guard_d1_cond_migration.py"
+      - "scripts/cond-modernize.py"
+      - "language-contract.lisp"
+      - ".github/workflows/guard-d1-migration.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  guard-d1-structural:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v5
+      - name: Guard D1/D3 exact-clause regressions
+        run: python3 -m unittest discover -s tests -p 'test_guard_d1_cond_migration.py' -v
+      - name: Read-only migration inventory for Guard
+        run: python3 scripts/cond-modernize.py lib/guard.lisp --scan
+# Structural and predicate-shape gate only; never claims runtime-oracle parity.
