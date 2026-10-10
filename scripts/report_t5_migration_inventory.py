@@ -293,6 +293,20 @@ def main(argv: list[str] | None = None) -> int:
                 print("  + " + p, file=sys.stderr)
             for p in sorted(committed_paths - live):
                 print("  - " + p, file=sys.stderr)
+            # Виявляти і тихий дрейф ПОЛІВ для вже зареєстрованого шляху.
+            # base_sha не є класифікацією: голови комітів можуть відрізнятися.
+            old = {json.loads(line)["path"]: json.loads(line)
+                   for line in committed.splitlines() if line.strip()}
+            now = {row["path"]: row for row in rows}
+            for p in sorted(live & committed_paths):
+                old_row = {k: v for k, v in old[p].items() if k != "base_sha"}
+                new_row = {k: v for k, v in now[p].items() if k != "base_sha"}
+                for field in sorted(old_row.keys() | new_row.keys()):
+                    if old_row.get(field) != new_row.get(field):
+                        print(f"  ~ {p} :: {field}: "
+                              f"manifest={old_row.get(field)!r} "
+                              f"live={new_row.get(field)!r}",
+                              file=sys.stderr)
             return 1
         print("OK: manifest == live registry "
               f"({len(rows)} rows, base_sha={sha})", file=sys.stderr)
