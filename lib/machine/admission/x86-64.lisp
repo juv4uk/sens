@@ -215,17 +215,17 @@
   (00001000 (text)
     (110
       ((00111100 text) (010 (00000001 (00000000))))
-      ((011 (00111111 text) "/")
+      ((101 (00111111 text) "/")
        ((00001000 (rest)
          (110
            ((00111100 rest) (010 (00000001 (00000000))))
-           ((011 (00111111 rest) "1")
+           ((101 (00111111 rest) "1")
             (110
               ((00111100 (01000000 rest)) (010 (00000001 ())))
-              ((011 0 0) (010 (00000001 (00000000))))))
-           ((011 0 0) (010 (00000001 (00000000))))))
+              ((101 0 0) (010 (00000001 (00000000))))))
+           ((101 0 0) (010 (00000001 (00000000))))))
         (01000000 text)))
-      ((011 0 0)
+      ((101 0 0)
        (x86-admission-wire-denominator-one? (01000000 text))))))
 
 (00001001 x86-admission-exact-integer?
@@ -234,7 +234,7 @@
          (110
         ((00111101 "#q2:" wire)
          (x86-admission-wire-denominator-one? wire))
-        ((011 0 0) (010 (00000001 (00000000))))))
+        ((101 0 0) (010 (00000001 (00000000))))))
         (01001100 value))))
 
 (00001001 x86-admission-within-inclusive-integer-range?
@@ -285,13 +285,14 @@
 ; match, the same way an out-of-range immediate would fail the encoder
 ; later. The selected Lisp encoder still validates whether the operand can
 ; be represented before the raw host capability is reachable.
+; Current D3 call heads: EQ=101, CAR=100, CDR=011. Do not reintroduce legacy head aliases.
 (00001001 x86-admission-pattern-match?
   (00001000 (pattern form)
     (110
       
       ((010 pattern)  (110
-         ((011 pattern (00000001 immediate)) (010 (00000001 ())))
-         ((011 pattern (00000001 register))
+         ((101 pattern (00000001 immediate)) (010 (00000001 ())))
+         ((101 pattern (00000001 register))
           (110
             ((010 form)
              (110
@@ -301,7 +302,7 @@
                 (010 ()))
                ((010 ()) (010 (00000001 (00000000))))))
             ((010 ()) (010 (00000001 (00000000))))))
-         ((011 pattern (00000001 xmm-register))
+         ((101 pattern (00000001 xmm-register))
           (110
             ((010 form)
              (110
@@ -311,33 +312,33 @@
                 (010 ()))
                ((010 ()) (010 (00000001 (00000000))))))
             ((010 ()) (010 (00000001 (00000000))))))
-         ((011 pattern (00000001 disp8))
+         ((101 pattern (00000001 disp8))
           (110
             
             ((010 form)  (x86-admission-disp8? form))
             ((010 ()) (010 (00000001 (00000000))))))
-         ((011 pattern (00000001 imm32))
+         ((101 pattern (00000001 imm32))
           (110
             
             ((010 form)  (x86-admission-imm32? form))
             ((010 ()) (010 (00000001 (00000000))))))
-         ((011 pattern (00000001 uimm8))
+         ((101 pattern (00000001 uimm8))
           (110
             
             ((010 form)  (x86-admission-uimm8? form))
             ((010 ()) (010 (00000001 (00000000))))))
-         ((011 pattern (00000001 rel32))
+         ((101 pattern (00000001 rel32))
           (110
             
             ((010 form)  (x86-admission-rel32? form))
             ((010 ()) (010 (00000001 (00000000))))))
          
-         ((010 form)  (011 pattern form))
+         ((010 form)  (101 pattern form))
          ((010 ()) (010 (00000001 (00000000))))))
       
       ((010 form)  (010 (00000001 (00000000))))
-      ((x86-admission-pattern-match? (101 pattern) (101 form))
-       (x86-admission-pattern-match? (111 pattern) (111 form)))
+      ((x86-admission-pattern-match? (100 pattern) (100 form))
+       (x86-admission-pattern-match? (011 pattern) (011 form)))
       ((010 ()) (010 (00000001 (00000000)))))))
 
 (00001001 x86-admitted-instruction-against?
@@ -345,8 +346,8 @@
     (110
       
       ((010 patterns)  (010 (00000001 (00000000))))
-      ((x86-admission-pattern-match? (101 patterns) form) (010 (00000001 ())))
-      ((010 ()) (x86-admitted-instruction-against? (111 patterns) form)))))
+      ((x86-admission-pattern-match? (100 patterns) form) (010 (00000001 ())))
+      ((010 ()) (x86-admitted-instruction-against? (011 patterns) form)))))
 
 (00001001 x86-admitted-instruction?
   (00001000 (form)
@@ -357,19 +358,19 @@
     (110
       
       ((010 forms)  (110
-         ((011 forms (00000001 ())) (00000001 ()))
+         ((101 forms (00000001 ())) (00000001 ()))
          ((010 ()) forms)))
-      ((x86-admitted-instruction? (101 forms))
-       (x86-first-unadmitted-form (111 forms)))
-      ((010 ()) (101 forms)))))
+      ((x86-admitted-instruction? (100 forms))
+       (x86-first-unadmitted-form (011 forms)))
+      ((010 ()) (100 forms)))))
 
 (00001001 x86-admitted-program?
   (00001000 (forms)
     (110
       
-      ((010 forms)  (011 forms (00000001 ())))
-      ((x86-admitted-instruction? (101 forms))
-       (x86-admitted-program? (111 forms)))
+      ((010 forms)  (101 forms (00000001 ())))
+      ((x86-admitted-instruction? (100 forms))
+       (x86-admitted-program? (011 forms)))
       ((010 ()) (010 (00000001 (00000000)))))))
 
 (00001001 x86-encode-admitted-instruction
@@ -829,7 +830,7 @@
     (110
       ((x86-admitted-program? forms)
        (110
-         ((011 arena-bytes 0)
+         ((101 arena-bytes 0)
           (native-call-u64-raw (x86-encode-admitted-program forms)))
          ((010 ())
           (native-call-u64-raw (x86-encode-admitted-program forms) arena-bytes))))
