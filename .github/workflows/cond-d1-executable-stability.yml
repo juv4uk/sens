@@ -1,0 +1,79 @@
+name: Exact D1 COND executable regression
+
+# No concurrency cancellation: retain an immutable result per checked commit.
+on:
+  pull_request:
+    paths:
+      - "scripts/check_d1_cond_binary_stability.py"
+      - ".github/workflows/cond-d1-executable-stability.yml"
+      - "scripts/sens_t5_codec.py"
+      - "crates/sens/src/eval/special_forms/core.rs"
+      - "crates/sens/src/canonical_reader.rs"
+      - "crates/sens/src/ternary_transport.rs"
+      - "crates/sens-cli/src/**"
+      - "lib/time.lisp"
+      - "lib/machine/**"
+  push:
+    branches: [main]
+    paths:
+      - "scripts/check_d1_cond_binary_stability.py"
+      - ".github/workflows/cond-d1-executable-stability.yml"
+      - "scripts/sens_t5_codec.py"
+      - "crates/sens/src/eval/special_forms/core.rs"
+      - "crates/sens/src/canonical_reader.rs"
+      - "crates/sens/src/ternary_transport.rs"
+      - "crates/sens-cli/src/**"
+      - "lib/time.lisp"
+      - "lib/machine/**"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  exact-d1-cond-regression:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v5
+      - uses: dtolnay/rust-toolchain@stable
+
+      - name: Build both actual physical T5 executors
+        run: cargo build --locked -p sens-cli --bin sens --bin sens-trit
+
+      - name: Prove both PredicateBits select and obsolete controls fail closed
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 scripts/check_d1_cond_binary_stability.py \
+            --sens target/debug/sens \
+            --sens-trit target/debug/sens-trit \
+            | tee "$RUNNER_TEMP/cond-d1-executable-evidence.json"
+
+      - name: Pin source and executable identity even on failure
+        if: always()
+        shell: bash
+        run: |
+          mkdir -p "$RUNNER_TEMP/cond-d1-evidence"
+          printf '%s\n' "$GITHUB_SHA" > "$RUNNER_TEMP/cond-d1-evidence/commit.sha"
+          sha256sum \
+            scripts/check_d1_cond_binary_stability.py \
+            scripts/sens_t5_codec.py \
+            crates/sens/src/eval/special_forms/core.rs \
+            > "$RUNNER_TEMP/cond-d1-evidence/inputs.sha256"
+          if test -f target/debug/sens && test -f target/debug/sens-trit; then
+            sha256sum target/debug/sens target/debug/sens-trit \
+              > "$RUNNER_TEMP/cond-d1-evidence/executables.sha256"
+          fi
+          if test -f "$RUNNER_TEMP/cond-d1-executable-evidence.json"; then
+            cp "$RUNNER_TEMP/cond-d1-executable-evidence.json" \
+              "$RUNNER_TEMP/cond-d1-evidence/result.json"
+          fi
+
+      - name: Archive exact-head evidence on red and green
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: cond-d1-regression-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/cond-d1-evidence/
+          if-no-files-found: error
