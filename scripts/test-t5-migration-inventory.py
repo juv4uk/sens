@@ -135,6 +135,19 @@ class TestT5MigrationInventory(unittest.TestCase):
             self.assertEqual(rows[0]["migration_status"], "BLOCKED",
                              "без доведеного власника новий Lisp має бути BLOCKED")
 
+    def test_lisp_donor_comment_does_not_claim_t5_authority(self):
+        """Історичний Lisp-оракул зі словом T5 не є чинним T5-декодером."""
+        with tempfile.TemporaryDirectory() as d:
+            root = Path(d)
+            source = root / "tests" / "oracles" / "donor.lisp"
+            source.parent.mkdir(parents=True)
+            source.write_text("; donor only, never executable .sens or T5 source\n",
+                              encoding="utf-8")
+            self.assertTrue(GEN.is_candidate("tests/oracles/donor.lisp", root))
+            row = GEN.classify("tests/oracles/donor.lisp", root)
+            self.assertEqual(row["migration_status"], "BLOCKED")
+            self.assertEqual(row["authority"], "UNKNOWN")
+
     def test_lisp_without_physical_t5_reference_is_not_a_new_inventory_link(self):
         """Власне розширення .lisp не означає участі у фізичному T5."""
         with tempfile.TemporaryDirectory() as d:
