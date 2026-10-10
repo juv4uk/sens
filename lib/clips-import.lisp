@@ -125,7 +125,7 @@
       ((00000010 form)  (00000001 ()))
       ((0100 (00000010 (00000101 form))) (00000011 (00000101 form) (00000001 deftemplate)))
       ((00000010 (00000101 form))  (00000011 (00000101 form) (00000001 deftemplate)))
-      (1 (00000001 ())))))
+      )))
 
 ; Real CLIPS files namespace their deftemplate/deffacts names with a
 ; `defmodule` prefix, e.g. `QUESTIONS::question`. `wine-external.clp`
@@ -163,7 +163,7 @@
       ((clips-string-empty? s) (00000001 ()))
       ((clips-string-empty? (01000000 s)) (00000001 ()))
       ((00000011 (00111111 s) ":") (00000011 (00111111 (01000000 s)) ":"))
-      (1 (00000001 ())))))
+      )))
 
 (00001001 clips-string-after-last-double-colon
   (00001000 (s)
@@ -446,11 +446,11 @@
     (00000111
       ((0100 (00000010 term)) (00000111
          ((00100011 term) (clips-symbol-starts-with-? term))
-         (1 (00000001 ()))))
+         ))
       ((00000010 term)  (00000111
          ((00100011 term) (clips-symbol-starts-with-? term))
-         (1 (00000001 ()))))
-      (1 (00000001 ())))))
+         ))
+      )))
 
 (00001001 clips-symbol-starts-with-?
   (00001000 (symbol)
@@ -533,7 +533,7 @@
       ((00000010 form)  (00000001 ()))
       ((0100 (00000010 (00000101 form))) (00000011 (00000101 form) (00000001 assert)))
       ((00000010 (00000101 form))  (00000011 (00000101 form) (00000001 assert)))
-      (1 (00000001 ())))))
+      )))
 
 ; Step 9: `printout` alongside `assert` no longer disqualifies a whole
 ; rule. Verified before writing this (not guessed): a rule shaped
@@ -601,7 +601,7 @@
       ((00000010 form)  (00000001 ()))
       ((0100 (00000010 (00000101 form))) (00000011 (00000101 form) (00000001 printout)))
       ((00000010 (00000101 form))  (00000011 (00000101 form) (00000001 printout)))
-      (1 (00000001 ())))))
+      )))
 
 (00001001 clips-drop-printouts
   (00001000 (forms)
@@ -617,7 +617,7 @@
       
       ((00000010 forms)  t)
       ((clips-assert-form? (00000101 forms)) (clips-all-asserts? (00000110 forms)))
-      (1 (00000001 ())))))
+      )))
 
 ; Step 15: real CLIPS `assert` accepts *multiple* facts in one call —
 ; `(assert (number 0) (number 1) (number 2) ...)`, not just one. Verified
@@ -775,7 +775,7 @@
       ((00000010 form)  (00000001 ()))
       ((0100 (00000010 (00000101 form))) (00000011 (00000101 form) (00000001 declare)))
       ((00000010 (00000101 form))  (00000011 (00000101 form) (00000001 declare)))
-      (1 (00000001 ())))))
+      )))
 
 (00001001 clips-strip-rule-preamble
   (00001000 (body)
@@ -822,7 +822,7 @@
            (clips-clauses-for-conclusions
              (clips-convert-template-list (clips-assert-conclusions relevant) templates)
              conditions))
-          (1 (00000001 ())))))))
+          )))))
 
 ; Dispatches on one top-level CLIPS form's leading symbol. Unknown or
 ; not-yet-supported forms produce no clauses rather than erroring — a
@@ -834,7 +834,7 @@
     (00000111
       ((00000011 (00000101 form) (00000001 deffacts)) (clips-deffacts->clauses form templates))
       ((00000011 (00000101 form) (00000001 defrule)) (clips-defrule->clauses form templates))
-      (1 (00000001 ())))))
+      )))
 
 ; Same non-tail-call problem as `clips-facts->clauses` above, one level up:
 ; `(append (clips-form->clauses ...) (clips-import-forms ...))` nests one
