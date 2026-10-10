@@ -12,6 +12,10 @@ Purpose:
 
 from __future__ import annotations
 
+# Доказ біджа3 не може друкувати PASS, коли Python прибрав assert.
+if not __debug__:
+    raise SystemExit("BIJA3-KERNEL: BLOCKED — Python -O вимикає assert")
+
 import csv
 from pathlib import Path
 
