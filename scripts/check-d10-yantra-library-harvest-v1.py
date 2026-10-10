@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """Перевірка бібліотечного добору Yantra для неретифікованого D10."""
-import hashlib
+import subprocess
 import json
 from pathlib import Path
 
@@ -13,9 +13,14 @@ foundation = read("knowledge/d1-d9-foundation.json")
 # Історичні рядки належать незмінному Git blob, а не поточній версії бібліотеки.
 donor_path = root / "knowledge/archive/d10-yantra-donor-76460b72.lisp"
 donor_bytes = donor_path.read_bytes()
-donor_git_sha = hashlib.sha1(
-    b"blob " + str(len(donor_bytes)).encode("ascii") + bytes([0]) + donor_bytes
-).hexdigest()
+# git hash-object рахує точний SHA фізичного Git blob без зміни репозиторію.
+donor_git_sha = subprocess.run(
+    ["git", "hash-object", "--stdin"],
+    cwd=root,
+    input=donor_bytes,
+    capture_output=True,
+    check=True,
+).stdout.decode("ascii").strip()
 assert donor_git_sha == harvest["donor"]["source_sha"], "Змінений історичний донор"
 donor_source = donor_bytes.decode("utf-8").splitlines()
 current_source = (root / "lib/yantra.lisp").read_text(encoding="utf-8").splitlines()
