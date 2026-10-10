@@ -12,7 +12,7 @@
         (migration-plan . "Не видаляти історичні JSON/TSV/FASL/XED або скрипти. Переносити конкретні закони й proof/intake інструменти до виконуваних SENS .lisp/.sens після незалежного parity з наявними свідками.")))
      (new-foreign-tools .
        (
-        ((path . "tools/important_file_guard.py") (independence_status . foreign) (owner-issue . "#5397") (migration_plan . "Replace mechanical Git path decisions with executable physical SENS T5 proof; retain Git paths only as untrusted transport, prove hosted positive and negative parity, then remove Python." ))
+        ((path . "tools/important_file_guard.py") (independence_status . foreign) (owner-issue . "#5397") (migration_plan . "Replace mechanical Git path decisions with executable physical SENS T5 proof; retain Git paths only as untrusted transport, prove hosted positive and negative parity, then remove Python."))
        ))
      (new-python-without-entry . blocked)
      (new-python-outside-tools . blocked)
