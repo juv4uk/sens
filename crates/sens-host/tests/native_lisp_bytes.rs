@@ -381,6 +381,20 @@ fn native_pair_car_cdr_match_the_interpreter_reference_witness() {
         eprintln!("MACHINE-ADMISSION-STAGE {name}: {result}");
     }
 
+    // Split the post-admission path so an encoder/arithmetic error cannot
+    // be misattributed to the raw CPU bridge. Failure-only observations never
+    // alter the critical assertion below.
+    for (name, source) in [
+        ("lowered-car-forms", "(x86-lower-cons-car-u64-forms 2 3)"),
+        ("lowered-car-admission", "(x86-admitted-program? (x86-lower-cons-car-u64-forms 2 3))"),
+        ("lowered-car-encoding", "(x86-encode-admitted-program (x86-lower-cons-car-u64-forms 2 3))"),
+    ] {
+        let result = eval_program(source, &mut session)
+            .map(|value| format!("{:?}", value.value))
+            .unwrap_or_else(|error| format!("ERROR: {error}"));
+        eprintln!("MACHINE-CAR-STAGE {name}: {result}");
+    }
+
     let native_car = eval_program(
         "(native-call-u64-raw (x86-encode-admitted-program (x86-lower-cons-car-u64-forms 2 3)) x86-pair-cell-bytes)",
         &mut session,
