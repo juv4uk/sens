@@ -83,30 +83,51 @@ fn x86_pattern_mismatches_are_exact_d1_no_not_empty() {
     load_lisp_file("lib/machine/encoding/x86-64.lisp", &mut session);
     load_lisp_file("lib/machine/admission/x86-64.lisp", &mut session);
 
-    // Структура не є D1:0. Невідповідна інструкція має повертати
-    // саме негативний предикат, який можна передати у суворий D3 COND.
-    for source in [
-        "(x86-admission-pattern-match? (00000001 (ret)) (00000001 (ud2)))",
-        "(x86-admission-pattern-match? (00000001 (ret)) (00000001 ret))",
-        "(x86-admission-pattern-match? (00000001 (ret)) (00000001 (ret extra)))",
+    let cases = [
+        ("(x86-admission-pattern-match? (00000001 (ret)) (00000001 (ud2)))", false),
+        ("(x86-admission-pattern-match? (00000001 (ret)) (00000001 ret))", false),
+        ("(x86-admission-pattern-match? (00000001 (ret)) (00000001 (ret extra)))", false),
+        ("(x86-admission-pattern-match? (00000001 (ret)) (00000001 (ret)))", true),
+        ("(x86-admission-pattern-match? (00000001 (mov-r64-imm64 register immediate)) (00000001 (mov-r64-imm64 rax 7)))", true),
+        ("(x86-admission-pattern-match? (00000001 (mov-r64-imm64 register immediate)) (00000001 (mov-r64-imm64 notareg 7)))", false),
+        ("(x86-admission-pattern-match? (00000001 (vaddps-xmm-xmm-xmm xmm-register xmm-register xmm-register)) (00000001 (vaddps-xmm-xmm-xmm xmm0 xmm1 xmm2)))", true),
+        ("(x86-admission-pattern-match? (00000001 (vaddps-xmm-xmm-xmm xmm-register xmm-register xmm-register)) (00000001 (vaddps-xmm-xmm-xmm xmm0 notaxmm xmm2)))", false),
+    ];
+
+    for (source, expected) in cases {
+        let result = eval_program(source, &mut session)
+            .unwrap_or_else(|error| panic!("{source}: {error}"));
+        assert_eq!(
+            result.value.as_predicate_bit(),
+            Some(expected),
+            "pattern matching must return exact D1, never host truthiness, structural empty, or Number: {source}"
+        );
+    }
+}
+
+
+
+#[test]
+fn x86_xmm_name_predicate_returns_exact_d1_for_known_and_unknown_names() {
+    let mut session = Session::default();
+    load_core_library(&mut session).expect("ратифіковане ядро");
+    load_lisp_file("lib/machine/encoding/x86-64.lisp", &mut session);
+    load_lisp_file("lib/machine/operands/x86-64.lisp", &mut session);
+
+    for (source, expected) in [
+        ("(x86-xmm-name? xmm0)", true),
+        ("(x86-xmm-name? xmm15)", true),
+        ("(x86-xmm-name? notaxmm)", false),
+        ("(x86-xmm-name? 42)", false),
     ] {
         let result = eval_program(source, &mut session)
             .unwrap_or_else(|error| panic!("{source}: {error}"));
         assert_eq!(
             result.value.as_predicate_bit(),
-            Some(false),
-            "незбіг шаблону не може повертати структурне () або Number: {source}"
+            Some(expected),
+            "XMM name predicate must return exact D1: {source}"
         );
     }
-
-    let allowed = "(x86-admission-pattern-match? (00000001 (ret)) (00000001 (ret)))";
-    let result = eval_program(allowed, &mut session)
-        .unwrap_or_else(|error| panic!("{allowed}: {error}"));
-    assert_eq!(
-        result.value.as_predicate_bit(),
-        Some(true),
-        "точний збіг має повертати D1:1, а не історичне t"
-    );
 }
 
 
