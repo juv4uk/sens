@@ -7,7 +7,7 @@
 
 Bootstrap rule: existing unregistered stands remain explicit backfill debt tracked by #4172. Any newly created benchmark stand must carry `bench.json`; #4171 guards that ratchet.
 
-**Registered stands:** 37
+**Registered stands:** 38
 
 | Stand | Wing | Role | Question | Claim boundary | Witness | Status | Generation | Axis | Reproduce |
 |---|---|---|---|---|---|---|---|---|---|
