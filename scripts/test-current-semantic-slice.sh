@@ -18,16 +18,13 @@ cargo test -p sens \
 # Historical #1096 bare-SID witness remains preserved as compatibility evidence,
 # but is intentionally not executed by the current semantic slice.
 #
-# #291 legacy quantity witness: KEEP its original Lisp and mathematical records as
-# provenance, but do not execute it in the exact-domain lane yet. Its named-call
-# path still requires retired 8-bit/function-name dispatch and fails closed at
-# D4:0100 (no admitted value-call mechanism). Do not weaken that law to keep an
-# old fixture green. Quantity arithmetic remains BLOCKED pending a real canonical
-# Ukrainian->physical-T5 migration and independent quantity oracle parity.
-#
-# Replace only this invalid current-lane dependency with an admitted physical
-# T5 D1/D3 control witness. This is a binary execution/round-trip smoke, NOT a
-# claim that the quantity arithmetic witness passed.
+# #291 exact quantity arithmetic is Lisp-owned, not a Rust oracle.
+# Its earlier witness failed because historical truth tokens/helpers were not
+# admitted in the exact-domain source path. The witness now derives хибне?,
+# порожнє? and нуль? in Lisp from admitted D1/D3 operations; lib/quantity.lisp
+# returns exact D1 values instead of unbound так/ні literals or host truth.
+# Keep the physical T5 smoke below as separate codec/runtime evidence: it does
+# not, by itself, certify the quantity witness or canonical source migration.
 cond_sens="tests/fixtures/migration-d1-cond-cohort/branch.sens"
 cond_view="tests/fixtures/migration-d1-cond-cohort/branch"
 actual_cond_view="$(cargo run --quiet -p sens-cli --bin sens-trit -- open "$cond_sens")"
@@ -55,6 +52,14 @@ fi
 empty_binary_status="$(cargo run --quiet -p sens-cli --bin sens -- "$empty_sens")"
 if [[ "$empty_binary_status" != "()" ]]; then
   printf 'physical D3 EMPTY T5 result mismatch: %s\\n' "$empty_binary_status" >&2
+  exit 1
+fi
+
+# Exact quantity laws are re-enabled on the current Lisp path. This must emit
+# its own named pass envelope; physical smoke alone is not accepted as parity.
+quantity_status="$(cargo run --quiet -p sens-cli --bin sens -- tests/fixtures/exact-quantity-arithmetic-witness.lisp)"
+if [[ "$quantity_status" != "(exact-quantity-arithmetic-witness (status pass))" ]]; then
+  printf 'exact quantity Lisp witness failed: %s\\n' "$quantity_status" >&2
   exit 1
 fi
 
