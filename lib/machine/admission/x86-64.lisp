@@ -358,7 +358,7 @@
       ((00000010 forms)  (00000011 forms (00000001 ())))
       ((x86-admitted-instruction? (00000101 forms))
        (x86-admitted-program? (00000110 forms)))
-      ((00000010 ()) (00000001 ())))))
+      ((00000010 ()) (00000010 (00000001 (00000000)))))))
 
 (00001001 x86-encode-admitted-instruction
   (00001000 (form)
