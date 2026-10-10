@@ -1268,14 +1268,15 @@
 ; Byte-list traversal must feed exact PredicateBit values to D3 COND.
 ; Legacy surface aliases atom?/eq?/car/cdr/append retain answer/compatibility
 ; domains; the machine path uses the canonical 3-bit heads directly.
+; Byte-list traversal drives exact D3 COND using only exact PredicateBit
+; operations. ATOM distinguishes empty-list from pair; D4 NOT complements that
+; bit for the recursive branch. Avoid D3 EQ here: compatibility EQ answers are
+; graded lists and are intentionally invalid as D3 COND controls.
 (00001001 x86-сполучити-байти
   (00001000 (ліво право)
     (110
-      ((010 ліво)
-       (110
-         ((101 ліво (00000001 ())) право)
-         ((010 ()) (100 ліво))))
-      ((010 ())
+      ((010 ліво) право)
+      ((0100 (010 ліво))
        (111
          (100 ліво)
          (x86-сполучити-байти (011 ліво) право))))))
@@ -1283,14 +1284,10 @@
 (00001001 x86-encode-program
   (00001000 (instructions)
     (110
-      ; EOF is checked through exact D3 atom/equality bits before projections.
-      ((010 instructions)
-       (110
-         ((101 instructions (00000001 ())) (00000001 ()))
-         ((010 ()) (100 instructions))))
-      ((010 ())
+      ((010 instructions) (00000001 ()))
+      ((0100 (010 instructions))
        (x86-сполучити-байти
-         (100 instructions)
+         (x86-encode-admitted-instruction (100 instructions))
          (x86-encode-program (011 instructions)))))))
 
 ; #2372 reusable VEX3 XMM register law.
