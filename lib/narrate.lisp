@@ -144,7 +144,7 @@
       ((00100001 (result-proper-list? outcome)) (00000001 ()))
       ((00011100 (00101000 outcome) expected)  t)
 
-      (1 (00000001 ())))))
+      )))
 
 (00001001 narrate-outcome
   (00001000 (outcome)
