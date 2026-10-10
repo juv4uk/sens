@@ -28,6 +28,25 @@ jobs:
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@v5
+      - name: Довести заборону хибного PASS під Python -O
+        shell: bash
+        run: |
+          set -euo pipefail
+          for mode in -O -OO; do
+            log="$(mktemp)"
+            if python3 "$mode" scripts/check-d10-selfhost-reason-harvest-v1.py >"$log" 2>&1; then
+              cat "$log" >&2
+              echo "D10-SELFHOST-REASON-HARVEST_BLOCKED: optimized execution falsely passed" >&2
+              exit 1
+            fi
+            if ! grep -Fq 'D10-SELFHOST-REASON-HARVEST_BLOCKED: Python -O disables assertions' "$log"; then
+              cat "$log" >&2
+              echo "D10-SELFHOST-REASON-HARVEST_BLOCKED: unexpected optimized exit" >&2
+              exit 2
+            fi
+            rm -f "$log"
+          done
+          echo "D10-SELFHOST-REASON-HARVEST_OPTIMIZATION_NEGATIVE_PASS"
       - run: python3 scripts/check-d10-selfhost-reason-harvest-v1.py
       - run: python3 scripts/check-d10-v1-semantic-inventory.py
       - run: python3 scripts/check-d10-fill-v1-seed.py
