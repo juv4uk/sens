@@ -31,7 +31,7 @@ fn full_scan_256_rules_is_stack_safe_on_default_thread() {
     );
 
     let mut session = loaded_session();
-    let result = eval_program(&source, &mut session)
+    let _result = eval_program(&source, &mut session)
         .unwrap_or_else(|error| panic!("full scan must not fail: {error}"));
 }
 
@@ -49,6 +49,6 @@ fn tail_scan_preserves_rule_result_order() {
     "#;
 
     let mut session = loaded_session();
-    let result = eval_program(source, &mut session)
+    let _result = eval_program(source, &mut session)
         .unwrap_or_else(|error| panic!("ordered scan must not fail: {error}"));
 }
