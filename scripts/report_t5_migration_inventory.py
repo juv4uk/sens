@@ -23,6 +23,9 @@ import sys
 from pathlib import Path
 
 SCHEMA = "sens-t5-migration-inventory/v1"
+# Перевірена історична база інвентаризації після інтеграції #5448.
+# Її зміна — окремий review/repin, а не наслідок чергового CI merge commit.
+PINNED_BASE_SHA = "42e3945c5e8f27902ade6fedf52f54786c56f914"
 
 EXT = {".rs", ".py", ".sh", ".yml", ".yaml", ".toml"}
 EXCLUDE_PREFIXES = (
@@ -256,6 +259,38 @@ def summarize(rows: list[dict]) -> str:
     return "\n".join(lines)
 
 
+def verify_manifest_provenance(root: Path, payload: str) -> list[str]:
+    """Не дозволяти підміняти pinned Git commit в жодному рядку JSONL."""
+    import json
+
+    try:
+        records = [json.loads(line) for line in payload.splitlines() if line.strip()]
+    except (ValueError, TypeError) as exc:
+        return [f"некоректний JSONL manifest: {exc}"]
+    if not records:
+        return ["порожній manifest"]
+    bases = {row.get("base_sha") for row in records if isinstance(row, dict)}
+    if bases != {PINNED_BASE_SHA}:
+        return [f"BASE_SHA_MISMATCH: очікується {PINNED_BASE_SHA}, знайдено {sorted(map(str, bases))}"]
+
+    # Форма SHA сама по собі не доводить існування чи приналежність до історії.
+    verified = subprocess.run(
+        ["git", "-C", str(root), "rev-parse", "--verify",
+         f"{PINNED_BASE_SHA}^{{commit}}"],
+        capture_output=True, text=True, check=False,
+    )
+    if verified.returncode != 0 or verified.stdout.strip() != PINNED_BASE_SHA:
+        return ["BASE_SHA_INVALID: Git commit для pinned бази відсутній"]
+    ancestor = subprocess.run(
+        ["git", "-C", str(root), "merge-base", "--is-ancestor",
+         PINNED_BASE_SHA, "HEAD"],
+        capture_output=True, text=True, check=False,
+    )
+    if ancestor.returncode != 0:
+        return ["BASE_SHA_NOT_ANCESTOR: pinned база не є предком HEAD або Git недоступний"]
+    return []
+
+
 def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--root", default=".")
@@ -272,6 +307,11 @@ def main(argv: list[str] | None = None) -> int:
 
     if args.check:
         committed = Path(args.check).read_text(encoding="utf-8")
+        provenance_errors = verify_manifest_provenance(root, committed)
+        if provenance_errors:
+            for error in provenance_errors:
+                print(f"BLOCKED: {error}", file=sys.stderr)
+            return 2
         # base_sha у закоміченому manifest не мусить дорівнювати живому HEAD —
         # це різні коміти; порівнюємо склад шляхів і класифікацію.
         def strip_sha(s: str) -> str:
