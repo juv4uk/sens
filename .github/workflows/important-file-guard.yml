@@ -49,7 +49,7 @@ jobs:
               exit 2
             }
             # Ручний аудит — від початку чинності SENS-постанови, не HEAD^.
-            base="$(sed -nE 's/^[[:space:]]*\\(activation-git-commit[[:space:]]*\\.[[:space:]]*"([0-9a-f]{40})"\\)[[:space:]]*$/\\1/p' "$policy")"
+            base="$(sed -nE 's/^[[:space:]]*\(activation-git-commit[[:space:]]*\.[[:space:]]*"([0-9a-f]{40})"\)[[:space:]]*$/\1/p' "$policy")"
             [[ "$base" =~ ^[0-9a-f]{40}$ ]] || {
               echo "NAMED_FAIL: SENS_FILE_POLICY_BASE_INVALID" >&2
               exit 2
