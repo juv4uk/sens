@@ -1,0 +1,35 @@
+name: Temporary Core4 FASL artifact regeneration
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/core4-fasl-artifact.yml'
+      - 'lib/core4.lisp'
+      - 'crates/sens/src/mixed_source.rs'
+      - 'crates/sens-cli/src/bin/gen-fasl.rs'
+      - 'lib/surface/function-signatures.lisp'
+
+permissions:
+  contents: read
+
+jobs:
+  build-fasl:
+    name: Generate exact-domain Core4 FASL
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          persist-credentials: false
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Generate source-matched exact-domain snapshot
+        run: cargo run --locked -p sens-cli --bin gen-fasl -- lib/core4.lisp "$RUNNER_TEMP/core4.lisp.fasl"
+      - name: Verify non-empty binary
+        run: test -s "$RUNNER_TEMP/core4.lisp.fasl"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: core4-fasl-${{ github.sha }}
+          path: ${{ runner.temp }}/core4.lisp.fasl
+          if-no-files-found: error
+          retention-days: 1
