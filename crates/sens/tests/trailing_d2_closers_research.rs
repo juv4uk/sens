@@ -57,8 +57,6 @@ fn ratified_d1_through_d9_roundtrip_through_real_reader() {
             }
         }
     }
-}
-
     assert_eq!(examined, 1016); // точна місткість ратифікованих payload-доменів
 }
 
