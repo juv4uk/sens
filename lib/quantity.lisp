@@ -234,11 +234,22 @@
       system
       source)))
 
+; Exact shape validation before schema-field selectors; result is typed D1.
+(00001001 science-list-length-equals?
+  (00001000 (items remaining)
+    (00000111
+      ((атом? items) (тотожне? remaining 0))
+      ((тотожне? remaining 0) (тотожне? 1 0))
+      ((science-list-length-equals? (решта items) (00001101 remaining 1))))))
+
 (00001001 scientific-constant?
   (00001000 (x)
     (00000111
       ((атом? x) (00000001 ()))
       ((тотожне? (science-proper-list? x) (тотожне? 1 0)) (00000001 ()))
+      ; Validate the complete seven-cell record before any positional selector.
+      ((тотожне? (science-list-length-equals? x 7) (тотожне? 1 0))
+       (00000001 ()))
       ((тотожне? (перше x) *scientific-constant-schema*)
        (00000111
          ((00000011 (00100011 (00101111 x)) (00000001 ())) (00000001 ()))
