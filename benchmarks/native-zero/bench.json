@@ -1,0 +1,22 @@
+{
+  "schema": "sens-benchmark-manifest/v1",
+  "stand": "native-zero",
+  "wing": "Binary-first SENS / Core4-free physical T5 execution",
+  "roles": [
+    "MEASUREMENT",
+    "CONFORMANCE",
+    "FALSIFIER"
+  ],
+  "question": "How fast does the existing bare SENS executor run real physical T5 versus exact visible binary D2 for equal D1/D3 programs on the same CPU?",
+  "claim": "Measures exact-domain result parity and real paired warm/fresh bare-Session execution on GitHub CPU for bounded D1/D3 corpus; stores raw timings and hardware evidence. Does not establish native AOT, cold startup, GPU/FPGA, memory footprint, or cross-language speedup.",
+  "witness": [
+    "../../crates/sens/examples/sens_native_zero_bench.rs",
+    "verify_report.py",
+    "README.md",
+    "../../.github/workflows/sens-native-zero.yml"
+  ],
+  "status": "ACTIVE-MEASUREMENT",
+  "generation": "contract-11-8-exact-domain; 2026-10-10",
+  "axis": "binary-first/physical-t5/bare-native-zero-execution",
+  "reproduce": "cargo run --locked --release -p sens --example sens_native_zero_bench -- --samples 9 --iterations 128"
+}
