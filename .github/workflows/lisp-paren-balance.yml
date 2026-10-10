@@ -26,4 +26,4 @@ jobs:
     steps:
       - uses: actions/checkout@v5
       - name: Lisp paren balance (lib/)
-        run: python3 scripts/check-lisp-paren-balance.py --paths lib
+        run: python3 scripts/check-lisp-paren-balance.py --paths lib --self-test
