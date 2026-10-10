@@ -12,6 +12,6 @@ Install stable Rust and Valgrind/Cachegrind, then run:
 bash benchmarks/rust-json-vs-sens-wire/run.sh /tmp/rust-json-vs-sens-wire
 ```
 
-Defaults: 1,000 messages, seed 1, 20 Cachegrind rounds, and 200 wall-clock rounds. Override with `N_MESSAGES`, `CACHEGRIND_ROUNDS`, and `WALL_CLOCK_ROUNDS` for controlled local experiments.
+Defaults: 1,000 messages, seed 1, 20 Cachegrind rounds, and seven alternating ABBA/BAAB cycles of 200 wall-clock rounds per sample. The raw CSV and results JSON include every sample, median and p95, corpus SHA-256, and toolchain/host provenance. Cachegrind I refs count the whole process (including input setup and warm-up), so they are reported as context, not isolated decoder instruction counts. Override with N_MESSAGES, CACHEGRIND_ROUNDS, WALL_CLOCK_ROUNDS, and WALL_CLOCK_REPS for controlled experiments.
 
 The evidence applies only to these Rust decoders and this corpus. It does not establish general SENS-vs-JSON superiority or measure execution of whole programs.
