@@ -300,7 +300,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: sens-adaptive-carriers-${{ github.sha }}
-          path: /tmp/sens-adaptive/
+          path: ${{ runner.temp }}/sens-adaptive/
           if-no-files-found: warn
           retention-days: 21
 
@@ -343,7 +343,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: sens-physical-paired-${{ github.sha }}
-          path: /tmp/sens-physical-paired/
+          path: ${{ runner.temp }}/sens-physical-paired/
           if-no-files-found: warn
           retention-days: 21
 
@@ -378,6 +378,6 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: sens-rust-wire-json-${{ github.sha }}
-          path: /tmp/sens-rust-wire-json/
+          path: ${{ runner.temp }}/sens-rust-wire-json/
           if-no-files-found: warn
           retention-days: 21
