@@ -23,10 +23,9 @@
     (10011100 ((decoded (utf8-decode-string bytes)))
       (00000111
         ((00000011 (00000101 decoded) (00000001 decoded))
-         (1)
+         
          (00101111 decoded))
-        ((00000011 (00000101 decoded) (00000001 decoded))
-         (0)
+        ((0100 (00000011 (00000101 decoded) (00000001 decoded)))
          decoded)))))
 
 (00001001 tcp-read
