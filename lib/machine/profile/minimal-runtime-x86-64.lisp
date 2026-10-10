@@ -80,16 +80,16 @@
 (00001001 x86-minimal-family-member?
   (00001000 (family families)
     (00000111
-      ((00000010 families) () ())
-      ((00000010 families) (1) ())
+      
+      ((00000010 families)  ())
       ((00000011 family (00000101 families)) t)
       (t (x86-minimal-family-member? family (00000110 families))))))
 
 (00001001 x86-minimal-unique-form-families
   (00001000 (forms seen)
     (00000111
-      ((00000010 forms) () seen)
-      ((00000010 forms) (1) seen)
+      
+      ((00000010 forms)  seen)
       (t
        (10011100 ((family (00000101 (00000101 forms))))
          (00000111
@@ -111,8 +111,8 @@
 (00001001 x86-minimal-map-row-second
   (00001000 (rows)
     (00000111
-      ((00000010 rows) () (00000001 ()))
-      ((00000010 rows) (1) (00000001 ()))
+      
+      ((00000010 rows)  (00000001 ()))
       (t
        (00000100
          (x86-minimal-row-second (00000101 rows))
@@ -121,8 +121,8 @@
 (00001001 x86-minimal-map-row-third
   (00001000 (rows)
     (00000111
-      ((00000010 rows) () (00000001 ()))
-      ((00000010 rows) (1) (00000001 ()))
+      
+      ((00000010 rows)  (00000001 ()))
       (t
        (00000100
          (x86-minimal-row-third (00000101 rows))
