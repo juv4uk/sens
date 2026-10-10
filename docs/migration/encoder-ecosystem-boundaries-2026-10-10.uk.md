@@ -57,3 +57,18 @@ Git-дерева каталогів `src`, `scripts`, `host`, `fpga`, `futhark`,
 ## Оглядова методика і залишкові ризики
 
 Джерело переліку — GitHub Git Trees із SHA, потім GitHub file reads з blob SHA. Вибірка каталогів не доводить відсутність невиявлених викликів, generated files, git submodule content або runtime-loaded paths. На оглянутих точках немає підтвердженого end-to-end F3/F4 hardware/runtime; це *негативний висновок про наявні докази*, а не про неможливість реалізації. Жоден бенчмарк чи CI тут не запускалися. Повний М0 з негативним тестом «невідомий `.sens` не зникає» — відповідальність окремого виконавця #5444.
+
+## Виконаний незалежний негативний свідок М3
+
+Додано файл tests/test_m3_cross_transport_rejection.py. Він використовує тільки чинний scripts/sens_t5_codec.py, не створює другого T5-кодека. Заморожений позитивний контроль: байт 0x11 дорівнює точному слову D3:001. Негативи: CMLJ, заголовок CSV GPU, текстове (binary 8), F3, F4 і неконічний F2.
+
+Відтворення з кореня репозиторію:
+
+    python3 -m unittest discover -s tests -p test_m3_cross_transport_rejection.py -v
+    python3 -O -m unittest discover -s tests -p test_m3_cross_transport_rejection.py -v
+
+Результат локального ізольованого Linux виконання 10.10.2026: 6/6 PASS у двох режимах. Перевірена точна Git blob SHA-1 відповідність виконаних файлів:
+- scripts/sens_t5_codec.py — 44a17fc3df78ac13c2223eda2752742122745d4b (main 42e3945c5e8f27902ade6fedf52f54786c56f914).
+- tests/test_m3_cross_transport_rejection.py — 55d711c92f5bd6cd59e6c526cac7231e304537ed (цей PR).
+
+Доказ обмежений конкретними зразками, а не усіма UART, CSV, GPU L1 або D2 програмами. Незалежне Rust/D2/eval підтвердження залишається у #5439/#5313. GitHub-hosted CI для цього PR потрібно перевіряти окремо: локальні 6/6 не є загальним GREEN. Канонічний .sens не змінено.
