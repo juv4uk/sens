@@ -1,4 +1,4 @@
-//! Незалежний Rust-оракул на ратифікованому читачі; без зміни production.
+//! Незалежний Rust-оракул T5 на ратифікованому читачі; без зміни production.
 use sens::parse_canonical_binary;
 
 fn remove_terminal_close(words: &[&str]) -> Vec<&str> {
