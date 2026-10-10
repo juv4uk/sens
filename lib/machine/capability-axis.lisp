@@ -116,19 +116,21 @@
      (risc-v absent)
      (fpga absent))))
 
+; Migration: canonical D3 ATOM produces only D1 1/0. Empty rows return
+; structural (), not PredicateBit 0. Every default COND test is exact D1:1
+; from ATOM(QUOTE ()), never host T, data equality, or implicit truthiness.
 (00001001 machine-capability-find-domain-row
   (00001000 (width bits rows)
     (00000111
-      ((00000010 rows) () ())
-      ((00000010 rows) (1) ())
+      ((00000010 rows) (00000001 ()))
       ((00100010 width (00000101 (00000101 rows)))
        (00000111
          ((00100010 bits (00000101 (00000110 (00000101 rows))))
           (00000101 rows))
-         (t
+         ((00000010 (00000001 ()))
           (machine-capability-find-domain-row
             width bits (00000110 rows)))))
-      (t
+      ((00000010 (00000001 ()))
        (machine-capability-find-domain-row
          width bits (00000110 rows))))))
 
@@ -140,23 +142,20 @@
          (machine-capability-find-domain-row
            width bits machine-capability-axis-v3)))
       (00000111
-        ((00000010 row) () ())
-        ((00000010 row) (1) ())
-        (t
+        ((00000010 row) (00000001 ()))
+        ((00000010 (00000001 ()))
          (00000101 (00000110 (00000110 row))))))))
 
 (00001001 machine-capability-find-row
   (00001000 (key rows)
     (00000111
-      ((00000010 rows) () ())
-      ((00000010 rows) (1) ())
+      ((00000010 rows) (00000001 ()))
       ((00100010 key (00000101 (00000101 rows))) (00000101 rows))
-      (t (machine-capability-find-row key (00000110 rows))))))
+      ((00000010 (00000001 ())) (machine-capability-find-row key (00000110 rows))))))
 
 (00001001 machine-target-witness-status
   (00001000 (target)
     (10011100 ((row (machine-capability-find-row target machine-target-witness-status-v1)))
       (00000111
-        ((00000010 row) () (00000001 absent))
-        ((00000010 row) (1) (00000001 absent))
-        (t (00000101 (00000110 row)))))))
+        ((00000010 row) (00000001 absent))
+        ((00000010 (00000001 ())) (00000101 (00000110 row)))))))
