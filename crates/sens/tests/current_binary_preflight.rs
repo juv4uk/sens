@@ -113,6 +113,29 @@ fn human_names_and_nonbinary_tokens_never_enter_canonical_source() {
     }
 }
 
+
+/// Regression for Contract 11.8's post-core bootstrap frontier.
+///
+/// Every top-level form in the public time library must execute after Core4
+/// loads. In particular, the first registry-driven peer-materialization form
+/// must not invoke the retired W8 LET* head.
+#[test]
+fn postcore_time_bootstrap_uses_current_lisp_macros() {
+    let mut session = Session::default();
+    sens::load_core_library(&mut session).expect("Core4 bootstrap");
+    let source = include_str!("../../../lib/time.lisp");
+    let parsed = sens::parse(source).expect("time library syntax");
+    for (index, expression) in parsed.iter().enumerate() {
+        eval_parsed_expressions(std::slice::from_ref(expression), &mut session)
+            .unwrap_or_else(|error| panic!(
+                "time top-level form {} at source byte {} failed after Core4 bootstrap: {}",
+                index + 1,
+                expression.span.start,
+                error
+            ));
+    }
+}
+
 #[test]
 fn current_cond_reference_is_valid_binary_and_executes_without_legacy_sid() {
     let source = include_str!("../../../examples/binary-language/current-cond-reference.lisp");
