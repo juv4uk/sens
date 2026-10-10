@@ -81,7 +81,7 @@ def main() -> int:
             ("немає single-writer", text.replace(
                 "**один призначений мерджер, один PR за раз, свіжий HEAD, обов'язкові зелені перевірки**", "", 1)),
             ("немає батьківської задачі", text.replace(
-                "https://github.com/juv4uk/sens/issues/5440", "", 1)),
+                "https://github.com/juv4uk/sens/issues/5440", "https://github.com/juv4uk/sens/issues/ЗЛАМАНО")),
         )
         for label, mutant in mutations:
             if not violations(mutant):
