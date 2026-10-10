@@ -317,7 +317,7 @@
        (list
          (quote let)
          (list (car bindings))
-         (my-letstar-expand (cdr bindings) body)))))
+         (my-letstar-expand (cdr bindings) body))))))
 
 (defmacro let* (bindings body)
   (my-letstar-expand bindings body))
