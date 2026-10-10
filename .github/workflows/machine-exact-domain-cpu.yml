@@ -1,7 +1,7 @@
 name: machine-exact-domain-cpu
 
 concurrency:
-  group: machine-exact-domain-cpu-${{ github.event.pull_request.number || github.ref }}
+  group: machine-exact-domain-cpu-${{ github.sha }}
   cancel-in-progress: true
 
 on:
