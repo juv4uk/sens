@@ -45,6 +45,18 @@ on:
       - "crates/sens/tests/compiler_role_cutover.rs"
       - "crates/sens/tests/compiler_nucleus_diff.rs"
       - "crates/sens/tests/compiler_l1_l5_role.rs"
+      - "crates/sens/tests/compiler_domain_shape.rs"
+      - "crates/sens/tests/compiler_nucleus_sens.rs"
+      - "crates/sens/tests/compiler_selfhost_role_closure.rs"
+      - "crates/sens/tests/compiler_selfhost_lowering_coverage.rs"
+      - "contracts/compiler-program-data-v1.lisp"
+      - "crates/sens/tests/compiler_program_data.rs"
+      - "crates/sens/src/lib.rs"
+      - "crates/sens/Cargo.toml"
+      - "crates/xtask/src/compiler_export.rs"
+      - "crates/xtask/src/main.rs"
+      - "crates/xtask/tests/compiler_export_cli.rs"
+      - ".github/workflows/compiler-role-cutover.yml"
 
 concurrency:
   group: compiler-role-cutover-${{ github.event.pull_request.number || github.ref }}
