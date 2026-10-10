@@ -870,7 +870,7 @@ mod tests {
     #[test]
     fn machine_source_mode_lifts_executable_forms_inside_w8_cond_clause_tests() {
         let source =
-            "(00001001 probe (00001000 (x) (00000111 ((100 x) 0) (((00000001 (100 x)) 0))))";
+            "(00001001 probe (00001000 (x) (00000111 ((100 x) 0) (((00000001 (100 x)) 0)))))";
 
         let ordinary = only(parse_mixed_exact_domain(source).expect("ordinary mixed source"));
         let ExprKind::List(ordinary_def) = &ordinary.kind else { panic!("definition"); };
