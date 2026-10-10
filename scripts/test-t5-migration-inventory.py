@@ -144,6 +144,42 @@ class TestT5MigrationInventory(unittest.TestCase):
             self.assertIn(path, rows, f"authority boundary missing: {path}")
             self.assertEqual(rows[path]["migration_status"], "T5_REQUIRED", path)
 
+    def test_physical_t5_d2_execution_roles_are_not_conflated(self):
+        rows = {r["path"]: r for r in read_manifest()}
+        expected = {
+            "crates/sens/src/ternary_transport.rs": (
+                "producer", "crates/sens/src/ternary_transport.rs",
+            ),
+            "crates/sens/src/canonical_reader.rs": (
+                "validator",
+                "crates/sens/src/canonical_reader.rs (D2 grammar; not physical codec)",
+            ),
+            "crates/sens/src/binary_execution.rs": (
+                "consumer", "crates/sens/src/ternary_transport.rs",
+            ),
+            "crates/sens-cli/src/bin/sens-trit.rs": (
+                "producer", "crates/sens/src/ternary_transport.rs",
+            ),
+        }
+        for path, (role, authority) in expected.items():
+            self.assertIn(path, rows, f"required route missing: {path}")
+            self.assertEqual(rows[path]["role"], role, path)
+            self.assertEqual(rows[path]["authority"], authority, path)
+            self.assertEqual(rows[path]["migration_status"], "T5_REQUIRED", path)
+
+    def test_dense_source_packer_is_not_mislabeled_as_physical_t5(self):
+        rows = {r["path"]: r for r in read_manifest()}
+        path = "crates/sens/src/source_packing.rs"
+        self.assertIn(path, rows, "related dense-payload helper must remain visible")
+        self.assertEqual(rows[path]["codec"], "NONE", path)
+        self.assertEqual(rows[path]["role"], "consumer", path)
+        self.assertEqual(rows[path]["migration_status"], "BLOCKED", path)
+        self.assertEqual(
+            rows[path]["authority"],
+            "NONE (dense source-payload packer; no T5 framing)",
+            path,
+        )
+
     def test_live_registry_matches_manifest(self):
         proc = subprocess.run(
             [sys.executable, str(HERE / "report_t5_migration_inventory.py"),
