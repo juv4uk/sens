@@ -43,9 +43,18 @@ CONTRACT_RE = re.compile(
 
 
 def run_text(command: list[str], *, cwd: Path | None = None) -> str:
-    return subprocess.check_output(
-        command, cwd=cwd, text=True, stderr=subprocess.STDOUT
-    ).strip()
+    try:
+        return subprocess.check_output(
+            command, cwd=cwd, text=True, stderr=subprocess.STDOUT
+        ).strip()
+    except subprocess.CalledProcessError as error:
+        # Зберегти реальне повідомлення помилки helper-а, а не лише exit 2.
+        # Це не змінює FAIL на PASS і не публікує недоведені показники.
+        message = (error.output or "").strip()
+        raise RuntimeError(
+            f"STORE-AIR-LOAD: BLOCKED; exit={error.returncode}; "
+            f"command={command!r}; output={message!r}"
+        ) from error
 
 
 def sha256_bytes(data: bytes) -> str:
