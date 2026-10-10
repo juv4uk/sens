@@ -6,6 +6,9 @@
 ; Guard is not another reasoner: it packages observed state, the active
 ; contract, their difference, impact, guidance, and evidence as one stable
 ; WSM value. Rust adapters observe mechanisms; WSM owns interpretation.
+; Contract 11.8: decision/status predicates yield exact D1 1/0, never T/NIL.
+; ATOM(QUOTE EMPTY) is a D1 yes witness; ATOM(CONS(QUOTE EMPTY, QUOTE
+; EMPTY)) is a D1 no witness. Every COND clause has exactly two fields.
 
 (00001011 guard-decision?
   (00001000 (decision)
@@ -14,7 +17,7 @@
       ((00000011 decision (00000001 warn)) (00000010 (00000001 ())))
       ((00000011 decision (00000001 reject)) (00000010 (00000001 ())))
       ((00000011 decision (00000001 unknown)) (00000010 (00000001 ())))
-      ((00000010 (00000001 ())) (00000001 ())))))
+      ((00000010 (00000001 ())) (00000010 (00000100 (00000001 ()) (00000001 ())))))))
 
 (00001011 guard-evidence-status?
   (00001000 (status)
@@ -23,7 +26,7 @@
       ((00000011 status (00000001 partial)) (00000010 (00000001 ())))
       ((00000011 status (00000001 unresolved)) (00000010 (00000001 ())))
       ((00000011 status (00000001 broken)) (00000010 (00000001 ())))
-      ((00000010 (00000001 ())) (00000001 ())))))
+      ((00000010 (00000001 ())) (00000010 (00000100 (00000001 ()) (00000001 ())))))))
 
 ; UNKNOWN is a routing state, not a dead end. These routes distinguish
 ; distributed local knowledge, owner authority, and external research.
