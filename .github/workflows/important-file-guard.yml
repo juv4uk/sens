@@ -163,6 +163,22 @@ jobs:
             cat "$log"
           else
             cat "$log" >&2
+            if test -s "$report"; then
+              python3 - "$report" <<'PY'
+          import json
+          import sys
+          report = json.load(open(sys.argv[1], encoding="utf-8"))
+          for row in report.get("files", []):
+              if row.get("status") == "blocked":
+                  print(
+                      "SENS_FILE_AUTHORITY_MIGRATION_DIAGNOSTIC: "
+                      f"path={row.get('path')!r} reason={row.get('reason')!r} "
+                      f"token={row.get('token')!r} line={row.get('line')!r} "
+                      f"column={row.get('column')!r}",
+                      file=sys.stderr,
+                  )
+          PY
+            fi
             echo "SENS_FILE_AUTHORITY_BLOCKED: bounded Lisp-to-word lowering rejected the complete guarded source" >&2
             test ! -e "$candidate"
             exit 2
