@@ -343,16 +343,16 @@
 
 (00001001 x86-encode-current-binary-u64
   (00001000 (width bits left right)
-    (10011100 ((forms
-                  (x86-lower-current-binary-u64-forms
-                    width bits left right)))
-      (00000111
+    ((00001000 (forms)
+       (00000111
         ((00100010 forms (00000001 unsupported-current-domain-binary-u64))
          (00000001 unsupported-current-domain-binary-u64))
         ((00100010 forms (00000001 exact-d5-fallback-required))
          (00000001 exact-d5-fallback-required))
         ((00000010 ())
-         (x86-encode-admitted-program forms))))))
+         (x86-encode-admitted-program forms))))
+      (x86-lower-current-binary-u64-forms
+                    width bits left right))))
 
 ; #4063 exact D6 ADD1/SUB1 bounded fast paths.
 ; Language meaning is already admitted as LOWER_DOMAIN_COMPOSITION over exact
