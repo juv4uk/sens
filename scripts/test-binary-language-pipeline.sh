@@ -34,6 +34,59 @@ run python3 scripts/check-binary-domain-format.py --self-test
 run bash scripts/sid-binary-identity-guard.sh
 
 
+# Від'ємні свідки охорони: відсутнє джерело, помилка grep та заборонений SID.
+# Жоден свідок не змінює репозиторій або середовище наступних CI-кроків.
+guard_probe="$(mktemp -d)"
+trap 'rm -rf -- "$guard_probe"' EXIT
+
+if ( cd "$guard_probe" && bash "$ROOT/scripts/sid-binary-identity-guard.sh" ) \
+    >"$guard_probe/missing.log" 2>&1; then
+  printf 'SID-NEGATIVE: відсутні джерела помилково допущено\n' >&2
+  exit 1
+fi
+if ! grep -Fq 'missing active source' "$guard_probe/missing.log"; then
+  cat "$guard_probe/missing.log" >&2
+  printf 'SID-NEGATIVE: немає названої причини відмови для відсутнього джерела\n' >&2
+  exit 1
+fi
+
+cat >"$guard_probe/grep" <<'SH'
+#!/bin/sh
+exit 2
+SH
+chmod +x "$guard_probe/grep"
+if PATH="$guard_probe:$PATH" bash scripts/sid-binary-identity-guard.sh \
+    >"$guard_probe/grep-error.log" 2>&1; then
+  printf 'SID-NEGATIVE: grep exit=2 помилково допущено\n' >&2
+  exit 1
+fi
+if ! grep -Fq 'grep завершився з помилкою 2' "$guard_probe/grep-error.log"; then
+  cat "$guard_probe/grep-error.log" >&2
+  printf 'SID-NEGATIVE: немає названої причини помилки grep\n' >&2
+  exit 1
+fi
+
+cat >"$guard_probe/grep" <<'SH'
+#!/bin/sh
+printf 'crates/sens/src/eval/lower.rs:1:type Sid = u8\n'
+exit 0
+SH
+if PATH="$guard_probe:$PATH" bash scripts/sid-binary-identity-guard.sh \
+    >"$guard_probe/forbidden.log" 2>&1; then
+  printf 'SID-NEGATIVE: заборонений Sid=u8 помилково допущено\n' >&2
+  exit 1
+fi
+if ! grep -Fq 'SID-BINARY-IDENTITY violation' "$guard_probe/forbidden.log"; then
+  cat "$guard_probe/forbidden.log" >&2
+  printf 'SID-NEGATIVE: немає названої забороненої конструкції\n' >&2
+  exit 1
+fi
+rm -rf -- "$guard_probe"
+trap - EXIT
+printf 'SID-BINARY-IDENTITY: NEGATIVE CONTROLS PASS\n'
+
+
+
 # Explicit negative controls required by #4268.
 run python3 - <<'PY'
 import importlib.util
