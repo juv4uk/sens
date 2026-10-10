@@ -836,4 +836,61 @@ mod tests {
                 if identity.width() == 5 && identity.packed_bits() == 0
         ));
     }
+    #[test]
+    fn machine_source_mode_descends_w8_function_bodies_but_preserves_quote_and_number_data() {
+        fn definition_body(expression: &Expr) -> &Expr {
+            let ExprKind::List(definition) = &expression.kind else { panic!("definition"); };
+            let ExprKind::List(lambda) = &definition[2].kind else { panic!("legacy lambda wrapper"); };
+            &lambda[2]
+        }
+
+        let executable = "(00001001 probe (00001000 (x) (100 x)))";
+        let ordinary = only(parse_mixed_exact_domain(executable).expect("ordinary mixed parse"));
+        let ExprKind::List(ordinary_call) = &definition_body(&ordinary).kind else {
+            panic!("ordinary executable body");
+        };
+        assert!(matches!(&ordinary_call[0].kind, ExprKind::Number(value, _) if *value == 100.0),
+            "ordinary bridge keeps legacy W8 containers opaque");
+
+        let machine = only(
+            parse_mixed_exact_domain_machine_source(executable)
+                .expect("approved machine-source mixed parse"),
+        );
+        let ExprKind::List(machine_call) = &definition_body(&machine).kind else {
+            panic!("machine executable body");
+        };
+        assert!(matches!(
+            &machine_call[0].kind,
+            ExprKind::DomainIdentity(identity)
+                if identity.width() == 3 && identity.packed_bits() == 0b100
+        ), "only an executable 3-bit head inside the approved wrapper is lifted");
+
+        let quoted_source =
+            "(00001001 probe (00001000 (x) (00000001 (100 x))))";
+        let quoted = only(
+            parse_mixed_exact_domain_machine_source(quoted_source)
+                .expect("machine source with historical quote"),
+        );
+        let ExprKind::List(quote_form) = &definition_body(&quoted).kind else {
+            panic!("quote form");
+        };
+        assert!(matches!(&quote_form[0].kind, ExprKind::Sid(_)),
+            "W8 QUOTE keeps its compatibility identity and payload opaque");
+        let ExprKind::List(payload) = &quote_form[1].kind else { panic!("quote payload"); };
+        assert!(matches!(&payload[0].kind, ExprKind::Number(value, _) if *value == 100.0),
+            "quoted 100 remains a number, never a callable D3 head");
+
+        let number_data_source =
+            "(00001001 probe (00001000 (x) (ordinary-list 100 x)))";
+        let number_data = only(
+            parse_mixed_exact_domain_machine_source(number_data_source)
+                .expect("machine source numeric data"),
+        );
+        let ExprKind::List(data_call) = &definition_body(&number_data).kind else {
+            panic!("data call");
+        };
+        assert!(matches!(&data_call[1].kind, ExprKind::Number(value, _) if *value == 100.0),
+            "non-head decimal data remains unchanged");
+    }
+
 }
