@@ -300,9 +300,9 @@
           (110
             ((010 form)
              (110
-               ((101 (x86-reg-code form) (00000001 ()))
+               ((010 (x86-reg-code form)) (structural-kind empty-list)
                 (010 (00000001 (00000000))))
-               ((010 (x86-reg-code form))
+               ((010 (x86-reg-code form)) (structural-kind atom)
                 (010 ()))
                ((010 ()) (010 (00000001 (00000000))))))
             ((010 ()) (010 (00000001 (00000000))))))
@@ -310,9 +310,9 @@
           (110
             ((010 form)
              (110
-               ((101 (x86-xmm-reg-code form) (00000001 ()))
+               ((010 (x86-xmm-reg-code form)) (structural-kind empty-list)
                 (010 (00000001 (00000000))))
-               ((010 (x86-xmm-reg-code form))
+               ((010 (x86-xmm-reg-code form)) (structural-kind atom)
                 (010 ()))
                ((010 ()) (010 (00000001 (00000000))))))
             ((010 ()) (010 (00000001 (00000000))))))
