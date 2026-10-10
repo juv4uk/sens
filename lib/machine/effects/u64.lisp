@@ -121,7 +121,7 @@
        (00000111
          ((machine-effect-u64-carrier? right)
           (00000111
-            ((не-менше? left right) 
+            ((тотожне? (не-менше? left right) 1) 
              (00100111 (00000001 bounded-u64-sub) left right))
             ((тотожне? (менше? left right) 1)
              (00000001 machine-effect-rejected))))
