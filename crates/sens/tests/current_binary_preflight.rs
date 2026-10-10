@@ -172,45 +172,34 @@ fn time_library_top_level_replay_reports_first_noncallable_form() {
 /// if batch evaluation fails, but does not turn the finding into fake success
 /// or suppress any runtime error in the loader itself.
 #[test]
-fn time_library_batch_evaluation_reports_enclosing_form() {
+fn time_library_loader_reports_first_failing_form() {
     let source = include_str!("../../../lib/time.lisp");
     let parsed = sens::parse(source).expect("time library syntax");
     let mut session = Session::default();
     sens::load_core_library(&mut session).expect("Core4 bootstrap");
 
-    match sens::eval_program(source, &mut session) {
-        Ok(_) => println!(
-            "TIME-BATCH-DIAGNOSTIC: batch_eval=PASS top_level_forms={}",
-            parsed.len()
-        ),
-        Err(error) => {
-            let start = (error.span.start as usize).min(source.len());
-            let end = (error.span.end as usize).min(source.len()).max(start);
-            let form = parsed.iter().enumerate().find(|(_, expression)| {
-                let form_start = expression.span.start as usize;
-                let form_end = expression.span.end as usize;
-                form_start <= start && end <= form_end
-            });
-            let form_label = form
-                .map(|(index, expression)| {
-                    format!(
-                        "{}:{}..{}",
-                        index + 1,
-                        expression.span.start,
-                        expression.span.end
-                    )
-                })
-                .unwrap_or_else(|| "unmapped".to_owned());
-            let preview_end = end.min(start.saturating_add(180));
-            let snippet = String::from_utf8_lossy(&source.as_bytes()[start..preview_end]);
-            println!(
-                "TIME-BATCH-DIAGNOSTIC: batch_eval=FAIL error_span={}..{} enclosing_form={} source={:?} error={:?}",
-                start,
-                end,
-                form_label,
-                snippet.replace('\n', " "),
-                error
-            );
-        }
-    }
+    sens::load_time_library(&mut session).unwrap_or_else(|error| {
+        let start = (error.span.start as usize).min(source.len());
+        let end = (error.span.end as usize).min(source.len()).max(start);
+        let form = parsed.iter().enumerate().find(|(_, expression)| {
+            let form_start = expression.span.start as usize;
+            let form_end = expression.span.end as usize;
+            form_start <= start && end <= form_end
+        });
+        let (form_label, snippet) = form
+            .map(|(index, expression)| {
+                let form_start = (expression.span.start as usize).min(source.len());
+                let form_end = (expression.span.end as usize).min(source.len()).max(form_start);
+                let preview_end = form_end.min(form_start.saturating_add(180));
+                (
+                    format!("{}:{}..{}", index + 1, expression.span.start, expression.span.end),
+                    String::from_utf8_lossy(&source.as_bytes()[form_start..preview_end]).replace('\n', " "),
+                )
+            })
+            .unwrap_or_else(|| ("unmapped".to_owned(), "<no containing top-level form>".to_owned()));
+        panic!(
+            "TIME-LOADER-REGRESSION: error_span={}..{} enclosing_form={} source={:?} error={:?}",
+            start, end, form_label, snippet, error
+        );
+    });
 }
