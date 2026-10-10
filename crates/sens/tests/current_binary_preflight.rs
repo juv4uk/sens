@@ -143,6 +143,8 @@ fn current_cond_reference_is_valid_binary_and_executes_without_legacy_sid() {
 fn current_core4_peer_materialization_uses_current_macro_law() {
     let mut session = Session::default();
     load_core_library(&mut session).expect("Core4 bootstrap");
+    println!("POSTCORE-BINDING peer-group => {:?}", session.environment.get("my-postcore-peer-group"));
+    println!("POSTCORE-BINDING peer-table => {:?}", session.environment.get("my-postcore-stable-peer-projection"));
 
     for probe in [
         "my-postcore-stable-peer-projection",
