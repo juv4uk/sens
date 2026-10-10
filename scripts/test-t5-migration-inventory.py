@@ -100,6 +100,36 @@ class TestT5MigrationInventory(unittest.TestCase):
         finally:
             Path(tmp).unlink()
 
+    def test_other_valid_ancestor_sha_is_not_silently_accepted(self):
+        """Негатив: інший справжній Git-предок не є дозволеним re-pin."""
+        alternative = "42e3945c5e8f27902ade6fedf52f54786c56f914"
+        self.assertNotEqual(alternative, GEN.PINNED_BASE_SHA)
+        valid = subprocess.run(
+            ["git", "-C", str(ROOT), "merge-base", "--is-ancestor",
+             alternative, "HEAD"],
+            capture_output=True, text=True, check=False,
+        )
+        self.assertEqual(valid.returncode, 0, "expected real Git ancestor")
+
+        rows = read_manifest()
+        for row in rows:
+            row["base_sha"] = alternative
+        with tempfile.TemporaryDirectory() as directory:
+            mutated = Path(directory) / "інший-реальний-предок.jsonl"
+            mutated.write_text(
+                "".join(json.dumps(row, ensure_ascii=False, sort_keys=True) + "\n"
+                        for row in rows),
+                encoding="utf-8",
+            )
+            proc = subprocess.run(
+                [sys.executable, str(HERE / "report_t5_migration_inventory.py"),
+                 "--check", str(mutated)],
+                cwd=str(ROOT), capture_output=True, text=True,
+            )
+            self.assertNotEqual(proc.returncode, 0,
+                                "valid-but-wrong ancestor bypassed snapshot pin")
+            self.assertIn("unexpected provenance pin", proc.stderr)
+
     def test_unknown_role_or_owner_lane_is_blocked(self):
         for row in read_manifest():
             if row["path"] in GEN.T5_AUTHORITY:
