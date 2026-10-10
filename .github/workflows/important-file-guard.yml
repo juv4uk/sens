@@ -65,13 +65,27 @@ jobs:
             echo "NAMED_FAIL: SENS_FILE_POLICY_BASE_NOT_ANCESTOR" >&2
             exit 2
           }
+          # Та сама перевірка обслуговує реальний ручний запуск і негативний свідок.
+          manual_base_is_pinned() {
+            [[ "$1" == "$policy_base" ]] || {
+              echo "NAMED_FAIL: DISPATCH_BASE_MUST_MATCH_SENS_ACTIVATION" >&2
+              return 2
+            }
+          }
+          # Порожня різниця HEAD→HEAD не може підмінити аудит від активації.
+          if manual_base_is_pinned "$HEAD_SHA" 2>/dev/null; then
+            echo "::error::HEAD помилково допущено як ручну базу SENS"
+            exit 1
+          fi
+          manual_base_is_pinned "$policy_base" || exit 2
           if [[ "$GITHUB_EVENT_NAME" == "workflow_dispatch" ]]; then
             [[ "$GITHUB_REF" == "refs/heads/main" ]] || {
               echo "NAMED_FAIL: DISPATCH_REQUIRES_MAIN" >&2
               exit 2
             }
-            # Ручний аудит використовує задану оператором точну базу.
-            base="${DISPATCH_BASE_SHA:-}"
+            # Введений оператором SHA допускається лише як точний SENS activation pin.
+            manual_base_is_pinned "${DISPATCH_BASE_SHA:-}" || exit 2
+            base="$policy_base"
           fi
           [[ "$base" =~ ^[0-9a-f]{40}$ && "$base" != "0000000000000000000000000000000000000000" ]] || {
             echo "NAMED_FAIL: EVENT_BASE_UNAVAILABLE" >&2
