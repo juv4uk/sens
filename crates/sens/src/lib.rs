@@ -203,7 +203,7 @@ pub use text7_projection::{
     TEXT7_TABLE_SHA256, TEXT7_UPSTREAM_REVISION,
 };
 
-pub use binary_execution::{eval_t5_program, T5ExecutionError};
+pub use binary_execution::{eval_t5_program, prepare_t5_program, PreparedT5Program, T5ExecutionError};
 
 pub use eval::exact_arity;
 pub use eval::parse_json;
