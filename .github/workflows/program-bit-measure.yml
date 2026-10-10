@@ -10,6 +10,7 @@ on:
       - "crates/sens-cli/src/bin/sens-trit.rs"
       - "crates/sens-cli/Cargo.toml"
       - "crates/sens/src/lib.rs"
+      - "crates/sens/tests/time_host_surface.rs"
       - ".github/workflows/program-bit-measure.yml"
   push:
     branches: [main]
@@ -21,6 +22,7 @@ on:
       - "crates/sens-cli/src/bin/sens-trit.rs"
       - "crates/sens-cli/Cargo.toml"
       - "crates/sens/src/lib.rs"
+      - "crates/sens/tests/time_host_surface.rs"
       - ".github/workflows/program-bit-measure.yml"
 
 jobs:
