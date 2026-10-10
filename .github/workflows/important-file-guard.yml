@@ -67,14 +67,39 @@ jobs:
           printf 'sha=%s\n' "$base" >> "$GITHUB_OUTPUT"
 
       - name: Transport Git paths and package SENS source only
+        id: transport
         shell: bash
         env:
           BASE_SHA: ${{ steps.base.outputs.sha }}
         run: |
           set -euo pipefail
-          python3 tools/important_file_guard.py \
+          log="$RUNNER_TEMP/file-authority-transport.log"
+          if python3 tools/important_file_guard.py \
             --base "$BASE_SHA" \
-            --output "$RUNNER_TEMP/file-authority.lisp"
+            --output "$RUNNER_TEMP/file-authority.lisp" >"$log" 2>&1; then
+            cat "$log"
+          else
+            cat "$log" >&2
+            echo "SENS_FILE_AUTHORITY_BLOCKED: Git transport failed" >&2
+            exit 2
+          fi
+          proof="$(tail -n 1 "$log")"
+          pattern='^GIT_PATH_TRANSPORT_READY base=([0-9a-f]{40}) head=([0-9a-f]{40}) added_paths=([0-9]+) tracked_tools_paths=([0-9]+)$'
+          if [[ ! "$proof" =~ $pattern ]]; then
+            echo "SENS_FILE_AUTHORITY_BLOCKED: missing exact Git transport inventory" >&2
+            exit 2
+          fi
+          proof_base="${BASH_REMATCH[1]}"
+          proof_head="${BASH_REMATCH[2]}"
+          added_count="${BASH_REMATCH[3]}"
+          tools_count="${BASH_REMATCH[4]}"
+          current_head="$(git rev-parse --verify 'HEAD^{commit}')"
+          if [[ "$proof_base" != "$BASE_SHA" || "$proof_head" != "$current_head" ]]; then
+            echo "SENS_FILE_AUTHORITY_BLOCKED: inventory SHA mismatch" >&2
+            exit 2
+          fi
+          printf 'added_paths=%s\ntracked_tools_paths=%s\n' \
+            "$added_count" "$tools_count" >>"$GITHUB_OUTPUT"
 
       - name: Prove canonical binary projection encoding remains admitted
         shell: bash
