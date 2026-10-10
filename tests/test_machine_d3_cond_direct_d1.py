@@ -10,6 +10,7 @@ import unittest
 ROOT = Path(__file__).resolve().parents[1]
 SCRIPT = ROOT / "scripts/cond-modernize.py"
 SOURCE = ROOT / "lib/machine/lowering/semantic-x86-64.lisp"
+CAPABILITY = ROOT / "lib/machine/capability-axis.lisp"
 spec = importlib.util.spec_from_file_location("machine_d3_cond_inventory", SCRIPT)
 assert spec and spec.loader
 mod = importlib.util.module_from_spec(spec)
@@ -63,6 +64,37 @@ class ExactD1MachineDifferenceGuard(unittest.TestCase):
             found, [],
             f"unmigrated three-part COND: {[(x.line, x.reason) for x in found]}",
         )
+
+    def test_domain_machine_capability_lookup_uses_only_d1_two_field_cond(self):
+        text = CAPABILITY.read_text(encoding="utf-8")
+        findings, forms = mod.inspect(text)
+        self.assertEqual(findings, [], "machine capability axis must contain no old three-field COND")
+        names = {
+            "machine-capability-find-domain-row",
+            "machine-capabilities-for-domain",
+            "machine-capability-find-row",
+            "machine-target-witness-status",
+        }
+        definitions = [
+            root for root in forms
+            if mod.head(root) == "00001001"
+            and len(root.children) > 1 and root.children[1].atom in names
+        ]
+        self.assertEqual(len(definitions), 4)
+        number_of_clauses = 0
+        for definition in definitions:
+            for form in descend(definition):
+                if mod.head(form) != "00000111":
+                    continue
+                for clause in form.children[1:]:
+                    self.assertEqual(len(clause.children), 2, f"three-field at {clause.line}")
+                    test = clause.children[0]
+                    self.assertNotEqual(test.atom, "t", "host truthiness must not select branches")
+                    number_of_clauses += 1
+        self.assertGreaterEqual(number_of_clauses, 10)
+        # Preserve the no-row result as structural empty, not D1:0.
+        self.assertIn("((00000010 rows) (00000001 ()))", text)
+        self.assertIn("((00000010 row) (00000001 ()))", text)
 
     def test_legacy_three_part_comparison_is_still_detected_not_accepted(self):
         historical = (
