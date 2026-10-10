@@ -246,3 +246,138 @@ jobs:
           path: ${{ runner.temp }}/sens-d3-cpu/
           if-no-files-found: warn
           retention-days: 14
+
+  adaptive-carriers:
+    name: "Адаптивні T5/F3/F4 та T21/T22/T33: байти й Python wall-time"
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Довести Rust↔Python і відмови експериментальних носіїв
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/sens-adaptive"
+          git rev-parse HEAD > "$RUNNER_TEMP/sens-adaptive/source.sha"
+          python3 --version > "$RUNNER_TEMP/sens-adaptive/environment.txt"
+          rustc -Vv >> "$RUNNER_TEMP/sens-adaptive/environment.txt"
+          python3 -m unittest discover -s research/framed3 -p 'test_*.py' -v \
+            > "$RUNNER_TEMP/sens-adaptive/python-parity.log" 2>&1 || {
+              cat "$RUNNER_TEMP/sens-adaptive/python-parity.log" >&2
+              exit 1
+            }
+          bash research/framed3/rust_codec/run_parity.sh \
+            > "$RUNNER_TEMP/sens-adaptive/rust-parity.log" 2>&1 || {
+              cat "$RUNNER_TEMP/sens-adaptive/rust-parity.log" >&2
+              exit 1
+            }
+          cat "$RUNNER_TEMP/sens-adaptive/rust-parity.log"
+      - name: Поміряти мінімальний повний носій, включно з F3/F4-маркером
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 benchmarks/sens-performance/adaptive_carrier_bench.py \
+            --reps 11 --out "$RUNNER_TEMP/sens-adaptive/adaptive.json"
+          python3 -O benchmarks/sens-performance/adaptive_carrier_bench.py \
+            --reps 5 --out "$RUNNER_TEMP/sens-adaptive/adaptive-optimized.json"
+          test -s "$RUNNER_TEMP/sens-adaptive/adaptive.json"
+      - name: Перевірити й заміряти фіксовані T21/T22/T33
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 benchmarks/byte-pack/носій22.py --verify \
+            > "$RUNNER_TEMP/sens-adaptive/t21-t22-t33-checks.log"
+          python3 benchmarks/byte-pack/носій22.py \
+            --bench --ntrits 4620 --reps 15 \
+            --out "$RUNNER_TEMP/sens-adaptive/t21-t22-t33.json"
+          test -s "$RUNNER_TEMP/sens-adaptive/t21-t22-t33.json"
+      - name: Зберегти сирі результати та іменовані блокери
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: sens-adaptive-carriers-${{ github.sha }}
+          path: /tmp/sens-adaptive/
+          if-no-files-found: warn
+          retention-days: 21
+
+  physical-binary-paired:
+    name: "Фізичний T5: 8 програм, p50/p95 і парний A/A-контроль"
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v5
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+      - name: Побудувати лише чинні фізичні CLI
+        shell: bash
+        run: |
+          set -euo pipefail
+          cargo build --locked --release -p sens-cli --bin sens --bin sens-trit
+      - name: Виміряти фізичне виконання після незалежного byte parity
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/sens-physical-paired"
+          python3 benchmarks/physical-binary-performance/run.py \
+            --sens target/release/sens --sens-trit target/release/sens-trit \
+            --reps 11 --warmup 4 --out "$RUNNER_TEMP/sens-physical-paired/physical"
+      - name: Негативний A/A-контроль шуму парних вимірювань
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m unittest discover \
+            -s benchmarks/methodology/tests -p 'test_*.py' -v
+          python3 benchmarks/methodology/paired_wall.py \
+            --a-json '["target/release/sens","tests/fixtures/migration-quote-cohort-main/quote-legacy.sens"]' \
+            --b-json '["target/release/sens","tests/fixtures/migration-quote-cohort-main/quote-legacy.sens"]' \
+            --payload tests/fixtures/migration-quote-cohort-main/quote-legacy.sens \
+            --sessions 5 --pairs-per-session 7 --warmups 2 \
+            --seed 20261010 --bootstrap 2000 \
+            --out "$RUNNER_TEMP/sens-physical-paired/aa-control"
+      - name: Зберегти raw wall-time і паритет
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: sens-physical-paired-${{ github.sha }}
+          path: /tmp/sens-physical-paired/
+          if-no-files-found: warn
+          retention-days: 21
+
+  rust-wire-vs-json:
+    name: "Rust: SENS wire проти serde_json, Cachegrind Ir та парний час"
+    runs-on: ubuntu-24.04
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v5
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+      - name: Встановити незалежний лічильник інструкцій CPU
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo apt-get update
+          sudo apt-get install -y valgrind
+          valgrind --version
+      - name: Виконати на тому самому корпусі й одному CPU
+        shell: bash
+        env:
+          N_MESSAGES: "1000"
+          WALL_CLOCK_REPS: "7"
+        run: |
+          set -euo pipefail
+          bash benchmarks/rust-json-vs-sens-wire/run.sh \
+            "$RUNNER_TEMP/sens-rust-wire-json"
+          test -s "$RUNNER_TEMP/sens-rust-wire-json/summary.md"
+          cat "$RUNNER_TEMP/sens-rust-wire-json/summary.md" >> "$GITHUB_STEP_SUMMARY"
+      - name: Зберегти сирий Cachegrind та ns окремо
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: sens-rust-wire-json-${{ github.sha }}
+          path: /tmp/sens-rust-wire-json/
+          if-no-files-found: warn
+          retention-days: 21
