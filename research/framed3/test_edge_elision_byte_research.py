@@ -31,6 +31,16 @@ class КраїРамки(unittest.TestCase):
                 self.assertEqual(edge._відновити(2, d2.trim(words)[1:]), words)
                 self.roundtrip(words)
 
+    def test_реальна_економія_байтів_на_порожньому_зовнішньому_корені(self):
+        words = ("10", "01")
+        plan = self.roundtrip(words)
+        self.assertEqual(plan.режим, edge.БЕЗ_КРАЇВ)
+        self.assertEqual(plan.вилучено_відкривальних, 1)
+        self.assertEqual(plan.вилучено_закривальних, 1)
+        self.assertLess(plan.байтів_після, plan.байтів_без_скорочення)
+        # Це фактичні ФІЗИЧНІ байти з 4B CRC, режимом і довжиною,
+        # а не механічно відняті 2/3/4 біти з ранжованого F3.
+
     def test_багато_коренів_не_видаляти_перший_open(self):
         for words in (
             ("10", "01", "10", "01"),
