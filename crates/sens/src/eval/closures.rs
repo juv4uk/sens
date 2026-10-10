@@ -613,7 +613,7 @@ pub(super) fn apply(
         _ => Err(LanguageError::new(
             ErrorKind::Type,
             format!(
-                "expression is not callable · vyraz ne mozhna vyklykaty · Ausdruck ist nicht aufrufbar (носій: {})",
+                "expression is not callable · vyraz ne mozhna vyklykaty · Ausdruck ist nicht aufrufbar (носій: {}{})",
                 match function {
                     Value::Nil => "порожня структура",
                     Value::Bool(_) => "історичний булевий носій",
@@ -624,6 +624,12 @@ pub(super) fn apply(
                     Value::Macro(_) => "макрос",
                     Value::String(_) | Value::Text7(_) => "текст",
                     _ => "інший невикликний носій",
+                },
+                match function {
+                    Value::Number(_, _) | Value::Rational(_) | Value::BinaryNumber(_) => {
+                        format!("; значення: {}", function.to_canonical_wire_string())
+                    }
+                    _ => String::new(),
                 },
             ),
             span,
