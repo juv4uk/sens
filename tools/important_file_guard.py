@@ -83,6 +83,48 @@ def violations(paths: list[str], entries: dict[str, str]) -> list[str]:
     return errors
 
 
+
+
+def parse_tree_mode(raw: bytes, expected_path: str) -> str:
+    """Validate one exact Git tree entry, never a guessed path or truncated record."""
+    if raw.count(b"\0") != 1 or not raw.endswith(b"\0"):
+        raise ValueError(f"INVALID_GIT_TREE_RECORD: {expected_path}")
+    line = raw[:-1]
+    if line.count(b"\t") != 1:
+        raise ValueError(f"INVALID_GIT_TREE_FIELDS: {expected_path}")
+    metadata, encoded_path = line.split(b"\t", 1)
+    fields = metadata.split(b" ")
+    if len(fields) != 3:
+        raise ValueError(f"INVALID_GIT_TREE_METADATA: {expected_path}")
+    mode, kind, oid = fields
+    actual_path = encoded_path.decode("utf-8", "strict")
+    if actual_path != expected_path:
+        raise ValueError(f"GIT_TREE_PATH_MISMATCH: expected={expected_path} actual={actual_path}")
+    if not re.fullmatch(rb"[0-9a-f]{40,64}", oid):
+        raise ValueError(f"INVALID_GIT_OBJECT_ID: {expected_path}")
+    if kind not in (b"blob", b"commit", b"tree"):
+        raise ValueError(f"INVALID_GIT_OBJECT_TYPE: {expected_path}")
+    return mode.decode("ascii", "strict") + ":" + kind.decode("ascii", "strict")
+
+
+def new_source_mode_failures(paths: list[str], head: str) -> list[str]:
+    """A suffix cannot admit Git symlink 120000 or submodule/gitlink 160000."""
+    errors: list[str] = []
+    for path in paths:
+        if not (path.startswith(IMPORTANT) or (path.startswith("tools/") and path.endswith(".py"))):
+            continue
+        record = subprocess.run(
+            ["git", "ls-tree", "-z", "--full-tree", head, "--", path],
+            check=False, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+        )
+        if record.returncode != 0:
+            raise ValueError(f"GIT_TREE_LOOKUP_FAILED: {path}: " +
+                             record.stderr.decode("utf-8", "replace"))
+        mode = parse_tree_mode(record.stdout, path)
+        if mode not in ("100644:blob", "100755:blob"):
+            errors.append(f"NON_REGULAR_NEW_SOURCE: {path}: Git mode={mode}")
+    return errors
+
 def verify_case(label: str, actual: object, expected: object) -> None:
     if actual != expected:
         raise RuntimeError(f"GUARD_SELFTEST_FAIL {label}: actual={actual!r} expected={expected!r}")
@@ -114,7 +156,24 @@ def self_test() -> None:
         pass
     else:
         raise RuntimeError("GUARD_SELFTEST_FAIL missing migration plan must be rejected")
-    print("FILE_GUARD_SELFTEST_OK: 9 positive/negative mechanical checks")
+    object_id = b"a" * 40
+    verify_case("regular_blob", parse_tree_mode(
+        b"100644 blob " + object_id + b"\tlib/example.sens\0", "lib/example.sens"), "100644:blob")
+    verify_case("symlink_must_not_be_source", parse_tree_mode(
+        b"120000 blob " + object_id + b"\tlib/example.sens\0", "lib/example.sens"), "120000:blob")
+    verify_case("gitlink_must_not_be_source", parse_tree_mode(
+        b"160000 commit " + object_id + b"\tlib/example.sens\0", "lib/example.sens"), "160000:commit")
+    for invalid in (
+        b"120000 blob " + object_id + b"\tlib/example.sens",
+        b"100644 blob " + object_id + b"\tlib/different.sens\0",
+    ):
+        try:
+            parse_tree_mode(invalid, "lib/example.sens")
+        except ValueError:
+            continue
+        raise RuntimeError("GUARD_SELFTEST_FAIL: invalid Git tree evidence admitted")
+    print("FILE_GUARD_SELFTEST_OK: regular/symlink/gitlink/truncated/path-substitution")
+    print("FILE_GUARD_SELFTEST_OK: 9 existing mechanical checks")
 
 
 def main(argv: list[str]) -> int:
@@ -139,6 +198,7 @@ def main(argv: list[str]) -> int:
         return 2
     new_paths = introduced_paths(completed.stdout)
     failures = violations(new_paths, entries)
+    failures.extend(new_source_mode_failures(new_paths, head))
     print(f"FILE_GUARD_AUDIT introduced={len(new_paths)} foreign_census={len(entries)}")
     for failure in failures:
         print("NAMED_FAIL: " + failure, file=sys.stderr)
