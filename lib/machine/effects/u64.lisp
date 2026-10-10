@@ -116,10 +116,10 @@
        (00000111
          ((machine-effect-u64-carrier? right)
           (00000111
-            ((00011110 left right) 
-             (00100111 (00000001 bounded-u64-sub) left right))
-            ((00011010 left right)
-             (00000001 machine-effect-rejected))))
+            ((менше? left right)
+             (00000001 machine-effect-rejected))
+            ((атом? ())
+             (00100111 (00000001 bounded-u64-sub) left right))))
          ((00000010 (00000001 ())) (00000001 machine-effect-rejected))))
       ((00000010 (00000001 ())) (00000001 machine-effect-rejected)))))
 
