@@ -436,6 +436,26 @@ fn native_pair_car_cdr_match_the_interpreter_reference_witness() {
         }
     }
 
+    // Non-asserting probes localize legacy arithmetic used by disp8 encoding.
+    for (stage, probe) in [
+        ("legacy-add", "(00001100 0 256)"),
+        ("legacy-quotient", "(00010100 256 256)"),
+        ("legacy-mod", "(00010011 256 256)"),
+        ("integer-remainder", "(x86-ціла-частка-залишок 256 256 1)"),
+        ("unsigned-byte-list", "(x86-байти-без-знака 0 1)"),
+        ("disp8-byte", "(x86-disp8-byte 0)"),
+        ("modrm-store", "(x86-encode-modrm 1 0 7)"),
+        ("sib", "(x86-encode-sib 0 4 4)"),
+        ("rex", "(x86-encode-rex 1 0 0 0)"),
+        ("mov-imm", "(x86-encode-mov-r64-imm64 (00000001 rax) 2)"),
+        ("store", "(x86-encode-mov-mem-disp8-r64 (00000001 rdi) 0 (00000001 rax))"),
+    ] {
+        match eval_program(probe, &mut session) {
+            Ok(output) => println!("MACHINE-ENCODE-PROBE {stage}: OK {:?}", output.value),
+            Err(error) => println!("MACHINE-ENCODE-PROBE {stage}: ERROR {error:?}"),
+        }
+    }
+
     let native_car = eval_program(
         "(native-call-u64-raw (x86-encode-admitted-program (x86-lower-cons-car-u64-forms 2 3)) x86-pair-cell-bytes)",
         &mut session,
