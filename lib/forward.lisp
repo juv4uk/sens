@@ -107,11 +107,11 @@
 (00001001 fire-rule-on-facts
   (00001000 (rule facts)
     (00000111
-      ((00000010 facts) () (00000001 ()))
+      
       ((00000010 facts)  (00000001 ()))
       (t (10011100 ((result (fire-rule rule (00000101 facts))))
            (00000111
-             ((00000010 result) () (00000111
+             ((0100 (00000010 result)) (00000111
                 ((00000011 result (00000001 no-match)) (fire-rule-on-facts rule (00000110 facts)))
                 (t (00000100 result (fire-rule-on-facts rule (00000110 facts))))))
              ((00000010 result)  (00000111
@@ -146,7 +146,7 @@
 (00001001 fire-rules-on-facts
   (00001000 (rules facts)
     (00000111
-      ((00000010 rules) () (00000001 ()))
+      
       ((00000010 rules)  (00000001 ()))
       (t (00101001 (fire-rule-on-facts (00000101 rules) facts)
                   (fire-rules-on-facts (00000110 rules) facts))))))
@@ -198,8 +198,8 @@
 (00001001 append-new
   (00001000 (facts wm)
     (00000111
-      ((00000010 facts) () wm)
-      ((00000010 facts) (1) wm)
+      
+      ((00000010 facts)  wm)
       ((00101100 (00000101 facts) wm) (append-new (00000110 facts) wm))
       (t (append-new (00000110 facts) (00000100 (00000101 facts) wm))))))
 
@@ -207,7 +207,7 @@
   (00001000 (rules facts)
     (10011100 ((merged (append-new (fire-rules-on-facts rules facts) facts)))
       (00000111
-        ((00011100 (00101000 merged) (00101000 facts)) 1 facts)
+        ((00011100 (00101000 merged) (00101000 facts))  facts)
         (t (run rules merged))))))
 
 (00001010 assert-facts! (facts)
@@ -246,7 +246,7 @@
 (00001001 retract-fact
   (00001000 (fact facts)
     (00000111
-      ((00000010 facts) () (00000001 ()))
+      
       ((00000010 facts)  (00000001 ()))
       ((00100010 fact (00000101 facts)) (00000110 facts))
       (t (00000100 (00000101 facts) (retract-fact fact (00000110 facts)))))))
@@ -324,7 +324,7 @@
 (00001001 map-fact-of
   (00001000 (entries)
     (00000111
-      ((00000010 entries) () (00000001 ()))
+      
       ((00000010 entries)  (00000001 ()))
       (t (00000100 (fact-of (00000101 entries)) (map-fact-of (00000110 entries)))))))
 
@@ -334,7 +334,7 @@
   (00001000 (rule fact)
     (10011100 ((result (fire-rule rule fact)))
       (00000111
-        ((00000010 result) () (00000111
+        ((0100 (00000010 result)) (00000111
            ((00000011 result (00000001 no-match)) (00000001 no-match))
            (t (make-justified result (00100111 fact)))))
         ((00000010 result)  (00000111
@@ -345,18 +345,18 @@
 (00001001 fire-rule-on-facts-tms
   (00001000 (rule facts)
     (00000111
-      ((00000010 facts) () (00000001 ()))
+      
       ((00000010 facts)  (00000001 ()))
       (t (10011100 ((result (fire-rule-tms rule (00000101 facts))))
            (00000111
-             ((00000010 result) () (fire-rule-on-facts-tms rule (00000110 facts)))
+             ((0100 (00000010 result)) (fire-rule-on-facts-tms rule (00000110 facts)))
              ((00000010 result)  (fire-rule-on-facts-tms rule (00000110 facts)))
              (t (00000100 result (fire-rule-on-facts-tms rule (00000110 facts))))))))))
 
 (00001001 fire-rules-on-facts-tms
   (00001000 (rules facts)
     (00000111
-      ((00000010 rules) () (00000001 ()))
+      
       ((00000010 rules)  (00000001 ()))
       (t (00101001 (fire-rule-on-facts-tms (00000101 rules) facts)
                   (fire-rules-on-facts-tms (00000110 rules) facts))))))
@@ -364,7 +364,7 @@
 (00001001 justified-member?
   (00001000 (fact entries)
     (00000111
-      ((00000010 entries) () (00000001 ()))
+      
       ((00000010 entries)  (00000001 ()))
       ((00100010 fact (fact-of (00000101 entries))) t)
       (t (justified-member? fact (00000110 entries))))))
@@ -372,8 +372,8 @@
 (00001001 add-new-justified
   (00001000 (new-entries entries)
     (00000111
-      ((00000010 new-entries) () entries)
-      ((00000010 new-entries) (1) entries)
+      
+      ((00000010 new-entries)  entries)
       ((justified-member? (fact-of (00000101 new-entries)) entries)
        (add-new-justified (00000110 new-entries) entries))
       (t (add-new-justified (00000110 new-entries) (00000100 (00000101 new-entries) entries))))))
@@ -384,7 +384,7 @@
     (10011100 ((new-entries (fire-rules-on-facts-tms rules (map-fact-of entries))))
       (10011100 ((merged (add-new-justified new-entries entries)))
         (00000111
-          ((00011100 (00101000 merged) (00101000 entries)) 1 entries)
+          ((00011100 (00101000 merged) (00101000 entries))  entries)
           (t (run-tms rules merged)))))))
 
 (00001001 *justified-memory* (00000001 ()))
@@ -398,7 +398,7 @@
 (00001001 remove-justified
   (00001000 (fact entries)
     (00000111
-      ((00000010 entries) () (00000001 ()))
+      
       ((00000010 entries)  (00000001 ()))
       ((00100010 fact (fact-of (00000101 entries))) (remove-justified fact (00000110 entries)))
       (t (00000100 (00000101 entries) (remove-justified fact (00000110 entries)))))))
@@ -406,7 +406,7 @@
 (00001001 dependents-of
   (00001000 (fact entries)
     (00000111
-      ((00000010 entries) () (00000001 ()))
+      
       ((00000010 entries)  (00000001 ()))
       ((00101100 fact (supports-of (00000101 entries)))
        (00000100 (fact-of (00000101 entries)) (dependents-of fact (00000110 entries))))
@@ -421,8 +421,8 @@
 (00001001 retract-facts-tms
   (00001000 (facts entries)
     (00000111
-      ((00000010 facts) () entries)
-      ((00000010 facts) (1) entries)
+      
+      ((00000010 facts)  entries)
       (t (retract-facts-tms (00000110 facts) (retract-fact-tms (00000101 facts) entries))))))
 
 (00001010 retract-fact-tms! (fact)
@@ -482,7 +482,7 @@
   (00001000 (rule fact)
     (10011100 ((result (fire-rule rule fact)))
       (00000111
-        ((00000010 result) () (00000111
+        ((0100 (00000010 result)) (00000111
            ((00000011 result (00000001 no-match)) (00000001 no-match))
            (t (00100111 result (00100111 fact)))))
         ((00000010 result)  (00000111
@@ -493,18 +493,18 @@
 (00001001 fire-rule-on-facts-jtms
   (00001000 (rule facts)
     (00000111
-      ((00000010 facts) () (00000001 ()))
+      
       ((00000010 facts)  (00000001 ()))
       (t (10011100 ((result (fire-rule-jtms rule (00000101 facts))))
            (00000111
-             ((00000010 result) () (fire-rule-on-facts-jtms rule (00000110 facts)))
+             ((0100 (00000010 result)) (fire-rule-on-facts-jtms rule (00000110 facts)))
              ((00000010 result)  (fire-rule-on-facts-jtms rule (00000110 facts)))
              (t (00000100 result (fire-rule-on-facts-jtms rule (00000110 facts))))))))))
 
 (00001001 fire-rules-on-facts-jtms
   (00001000 (rules facts)
     (00000111
-      ((00000010 rules) () (00000001 ()))
+      
       ((00000010 rules)  (00000001 ()))
       (t (00101001 (fire-rule-on-facts-jtms (00000101 rules) facts)
                   (fire-rules-on-facts-jtms (00000110 rules) facts))))))
@@ -512,7 +512,7 @@
 (00001001 find-entry
   (00001000 (fact entries)
     (00000111
-      ((00000010 entries) () (00000001 ()))
+      
       ((00000010 entries)  (00000001 ()))
       ((00100010 fact (fact-of (00000101 entries))) (00000101 entries))
       (t (find-entry fact (00000110 entries))))))
@@ -520,7 +520,7 @@
 (00001001 remove-entry-jtms
   (00001000 (fact entries)
     (00000111
-      ((00000010 entries) () (00000001 ()))
+      
       ((00000010 entries)  (00000001 ()))
       ((00100010 fact (fact-of (00000101 entries))) (remove-entry-jtms fact (00000110 entries)))
       (t (00000100 (00000101 entries) (remove-entry-jtms fact (00000110 entries)))))))
@@ -533,7 +533,7 @@
   (00001000 (fact justification entries)
     (10011100 ((existing (find-entry fact entries)))
       (00000111
-        ((00000010 existing) () (00000100 (00100111 fact justification) entries))
+        ((0100 (00000010 existing)) (00000100 (00100111 fact justification) entries))
         ((00000010 existing)  (00000100 (00100111 fact justification) entries))
         ((00101100 justification (justifications-of existing)) entries)
         (t (00000100 (00000100 fact (00000100 justification (justifications-of existing)))
@@ -542,8 +542,8 @@
 (00001001 add-new-entries-jtms
   (00001000 (new-entries entries)
     (00000111
-      ((00000010 new-entries) () entries)
-      ((00000010 new-entries) (1) entries)
+      
+      ((00000010 new-entries)  entries)
       (t (add-new-entries-jtms
            (00000110 new-entries)
            (add-justification (fact-of (00000101 new-entries)) (00101111 (00000101 new-entries)) entries))))))
@@ -650,7 +650,7 @@
 (00001001 match-plain-condition-jtms
   (00001000 (condition facts state)
     (00000111
-      ((00000010 facts) () (00000001 ()))
+      
       ((00000010 facts)  (00000001 ()))
       (t (10011100 ((s (10000111 condition (00000101 facts) (jtms-state-subst state))))
            (00000111
@@ -661,7 +661,7 @@
 (00001001 match-or-condition-jtms
   (00001000 (alternatives facts state)
     (00000111
-      ((00000010 alternatives) () (00000001 ()))
+      
       ((00000010 alternatives)  (00000001 ()))
       (t (00101001 (match-one-condition-jtms (00000101 alternatives) facts state)
                   (match-or-condition-jtms (00000110 alternatives) facts state))))))
@@ -671,7 +671,7 @@
     (00000111
       ((condition-is-not? condition)
        (00000111
-         ((00000010 (match-condition-against-facts (00101111 condition) facts (jtms-state-subst state))) () (00100111 state))
+         ((0100 (00000010 (match-condition-against-facts (00101111 condition) facts (jtms-state-subst state)))) (00100111 state))
          ((00000010 (match-condition-against-facts (00101111 condition) facts (jtms-state-subst state)))  (00100111 state))
          (t (00000001 ()))))
       ((condition-is-or? condition) (match-or-condition-jtms (00000110 condition) facts state))
@@ -690,7 +690,7 @@
 (00001001 map-apply-head-jtms
   (00001000 (head states)
     (00000111
-      ((00000010 states) () (00000001 ()))
+      
       ((00000010 states)  (00000001 ()))
       (t (00000100 (00100111 (10001010 head (jtms-state-subst (00000101 states))) (jtms-state-used (00000101 states)))
                 (map-apply-head-jtms head (00000110 states)))))))
@@ -702,7 +702,7 @@
 (00001001 fire-rules-jtms-multi
   (00001000 (rules facts)
     (00000111
-      ((00000010 rules) () (00000001 ()))
+      
       ((00000010 rules)  (00000001 ()))
       (t (00101001 (fire-rule-jtms-multi (00000101 rules) facts)
                   (fire-rules-jtms-multi (00000110 rules) facts))))))
@@ -720,7 +720,7 @@
 (00001001 prune-justifications
   (00001000 (fact justifications)
     (00000111
-      ((00000010 justifications) () (00000001 ()))
+      
       ((00000010 justifications)  (00000001 ()))
       ((00101100 fact (00000101 justifications)) (prune-justifications fact (00000110 justifications)))
       (t (00000100 (00000101 justifications) (prune-justifications fact (00000110 justifications)))))))
@@ -732,25 +732,25 @@
 (00001001 prune-all-entries
   (00001000 (fact entries)
     (00000111
-      ((00000010 entries) () (00000001 ()))
+      
       ((00000010 entries)  (00000001 ()))
       (t (00000100 (prune-entry fact (00000101 entries)) (prune-all-entries fact (00000110 entries)))))))
 
 (00001001 unsupported-facts
   (00001000 (entries)
     (00000111
-      ((00000010 entries) () (00000001 ()))
+      
       ((00000010 entries)  (00000001 ()))
-      ((00000010 (justifications-of (00000101 entries))) () (00000100 (fact-of (00000101 entries)) (unsupported-facts (00000110 entries))))
+      ((0100 (00000010 (justifications-of (00000101 entries)))) (00000100 (fact-of (00000101 entries)) (unsupported-facts (00000110 entries))))
       ((00000010 (justifications-of (00000101 entries)))  (00000100 (fact-of (00000101 entries)) (unsupported-facts (00000110 entries))))
       (t (unsupported-facts (00000110 entries))))))
 
 (00001001 drop-unsupported
   (00001000 (entries)
     (00000111
-      ((00000010 entries) () (00000001 ()))
+      
       ((00000010 entries)  (00000001 ()))
-      ((00000010 (justifications-of (00000101 entries))) () (drop-unsupported (00000110 entries)))
+      ((0100 (00000010 (justifications-of (00000101 entries)))) (drop-unsupported (00000110 entries)))
       ((00000010 (justifications-of (00000101 entries)))  (drop-unsupported (00000110 entries)))
       (t (00000100 (00000101 entries) (drop-unsupported (00000110 entries)))))))
 
@@ -765,15 +765,15 @@
       (10011100 ((newly-unsupported (unsupported-facts pruned))
             (remaining (drop-unsupported pruned)))
         (00000111
-          ((00000010 newly-unsupported) () remaining)
-          ((00000010 newly-unsupported) (1) remaining)
+          
+          ((00000010 newly-unsupported)  remaining)
           (t (retract-facts-jtms newly-unsupported remaining)))))))
 
 (00001001 retract-facts-jtms
   (00001000 (facts entries)
     (00000111
-      ((00000010 facts) () entries)
-      ((00000010 facts) (1) entries)
+      
+      ((00000010 facts)  entries)
       (t (retract-facts-jtms (00000110 facts) (retract-fact-jtms (00000101 facts) entries))))))
 
 (00001010 retract-fact-jtms! (fact)
@@ -858,7 +858,7 @@
 (00001001 match-condition-against-facts
   (00001000 (condition facts bindings)
     (00000111
-      ((00000010 facts) () (00000001 ()))
+      
       ((00000010 facts)  (00000001 ()))
       (t (10011100 ((s (10000111 condition (00000101 facts) bindings)))
            (00000111
@@ -895,9 +895,9 @@
 (00001001 condition-is-not?
   (00001000 (condition)
     (00000111
-      ((00000010 condition) () (00000001 ()))
+      
       ((00000010 condition)  (00000001 ()))
-      ((00000010 (00000101 condition)) () (00000111
+      ((0100 (00000010 (00000101 condition))) (00000111
          ((00000011 (00000101 condition) (00000001 not?)) (00000001 (1)))
          (t (00000011 (00000101 condition) (00000001 not)))))
       ((00000010 (00000101 condition))  (00000111
@@ -908,7 +908,7 @@
 (00001001 match-negated-condition
   (00001000 (inner-pattern facts bindings)
     (00000111
-      ((00000010 (match-condition-against-facts inner-pattern facts bindings)) () (00100111 bindings))
+      ((0100 (00000010 (match-condition-against-facts inner-pattern facts bindings))) (00100111 bindings))
       ((00000010 (match-condition-against-facts inner-pattern facts bindings))  (00100111 bindings))
       (t (00000001 ())))))
 
@@ -948,16 +948,16 @@
 (00001001 condition-is-or?
   (00001000 (condition)
     (00000111
-      ((00000010 condition) () (00000001 ()))
+      
       ((00000010 condition)  (00000001 ()))
-      ((00000010 (00000101 condition)) () (00000011 (00000101 condition) (00000001 or)))
+      ((0100 (00000010 (00000101 condition))) (00000011 (00000101 condition) (00000001 or)))
       ((00000010 (00000101 condition))  (00000011 (00000101 condition) (00000001 or)))
       (t (00000001 ())))))
 
 (00001001 match-or-condition
   (00001000 (alternatives facts bindings)
     (00000111
-      ((00000010 alternatives) () (00000001 ()))
+      
       ((00000010 alternatives)  (00000001 ()))
       (t (00101001 (match-one-condition (00000101 alternatives) facts bindings)
                   (match-or-condition (00000110 alternatives) facts bindings))))))
@@ -1003,9 +1003,9 @@
 (00001001 condition-is-and?
   (00001000 (condition)
     (00000111
-      ((00000010 condition) () (00000001 ()))
+      
       ((00000010 condition)  (00000001 ()))
-      ((00000010 (00000101 condition)) () (00000011 (00000101 condition) (00000001 and)))
+      ((0100 (00000010 (00000101 condition))) (00000011 (00000101 condition) (00000001 and)))
       ((00000010 (00000101 condition))  (00000011 (00000101 condition) (00000001 and)))
       (t (00000001 ())))))
 
@@ -1059,9 +1059,9 @@
 (00001001 condition-is-test?
   (00001000 (condition)
     (00000111
-      ((00000010 condition) () (00000001 ()))
+      
       ((00000010 condition)  (00000001 ()))
-      ((00000010 (00000101 condition)) () (00000011 (00000101 condition) (00000001 test)))
+      ((0100 (00000010 (00000101 condition))) (00000011 (00000101 condition) (00000001 test)))
       ((00000010 (00000101 condition))  (00000011 (00000101 condition) (00000001 test)))
       (t (00000001 ())))))
 
@@ -1076,13 +1076,13 @@
       ; relation same/distinct)) without feeding comparison results to cond
       ; as numeric clauses.
       (00000111
-        ((00100010 result (00000001 ())) (1)
+        ((00100010 result (00000001 ())) 
          (00000001 ()))
-        ((00100010 result (00000001 ())) (0)
+        ((0100 (00100010 result (00000001 ())))
          (00000111
-           ((00100010 result 0) (1)
+           ((00100010 result 0) 
             (00000001 ()))
-           ((00100010 result 0) (0)
+           ((0100 (00100010 result 0))
             (00100111 bindings))))))))
 
 ; Step 15: `(exists <CE>+)`/`(forall <first-CE> <CE>+)` — the same class of
@@ -1180,34 +1180,34 @@
 (00001001 condition-is-exists?
   (00001000 (condition)
     (00000111
-      ((00000010 condition) () (00000001 ()))
+      
       ((00000010 condition)  (00000001 ()))
-      ((00000010 (00000101 condition)) () (00000011 (00000101 condition) (00000001 exists)))
+      ((0100 (00000010 (00000101 condition))) (00000011 (00000101 condition) (00000001 exists)))
       ((00000010 (00000101 condition))  (00000011 (00000101 condition) (00000001 exists)))
       (t (00000001 ())))))
 
 (00001001 match-exists-condition
   (00001000 (sub-conditions facts bindings)
     (00000111
-      ((00000010 (match-conditions sub-conditions facts bindings)) () (00000001 ()))
+      
       ((00000010 (match-conditions sub-conditions facts bindings))  (00000001 ()))
       (t (00100111 bindings)))))
 
 (00001001 condition-is-forall?
   (00001000 (condition)
     (00000111
-      ((00000010 condition) () (00000001 ()))
+      
       ((00000010 condition)  (00000001 ()))
-      ((00000010 (00000101 condition)) () (00000011 (00000101 condition) (00000001 forall)))
+      ((0100 (00000010 (00000101 condition))) (00000011 (00000101 condition) (00000001 forall)))
       ((00000010 (00000101 condition))  (00000011 (00000101 condition) (00000001 forall)))
       (t (00000001 ())))))
 
 (00001001 forall-every-candidate-satisfies?
   (00001000 (candidates rest-conditions facts)
     (00000111
-      ((00000010 candidates) () t)
-      ((00000010 candidates) (1) t)
-      ((00000010 (match-conditions rest-conditions facts (00000101 candidates))) () (00000001 ()))
+      
+      ((00000010 candidates)  t)
+      
       ((00000010 (match-conditions rest-conditions facts (00000101 candidates)))  (00000001 ()))
       (t (forall-every-candidate-satisfies? (00000110 candidates) rest-conditions facts)))))
 
@@ -1245,7 +1245,7 @@
 (00001001 map-apply-head
   (00001000 (head substs)
     (00000111
-      ((00000010 substs) () (00000001 ()))
+      
       ((00000010 substs)  (00000001 ()))
       (t (00000100 (10001010 head (00000101 substs)) (map-apply-head head (00000110 substs)))))))
 
@@ -1274,6 +1274,6 @@
   (00001000 (rules facts)
     (10011100 ((merged (append-new (fire-rules-multi rules facts) facts)))
       (00000111
-        ((00011100 (00101000 merged) (00101000 facts)) 1 facts)
+        ((00011100 (00101000 merged) (00101000 facts))  facts)
         (t (run-multi rules merged))))))
 
