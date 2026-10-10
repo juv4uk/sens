@@ -21,8 +21,8 @@
 (00001001 prolog-values-to-datalog-facts
   (00001000 (role values)
     (00000111
-      ((00000010 values) () (00000001 ()))
-      ((00000010 values) (0)
+      
+      ((0100 (00000010 values))
        (00000100 (00100111 role (00000101 values))
              (prolog-values-to-datalog-facts role (00000110 values)))))))
 
@@ -32,23 +32,23 @@
           (variable-row (00101101 (00000001 variable) (00000110 observation)))
           (values-row (00101101 (00000001 values) (00000110 observation))))
       (00000111
-        ((00000010 source-ref-row) ()
+        ((0100 (00000010 source-ref-row))
          (00100111 (00000001 projection-failure) (00000001 missing-source-ref)))
-        ((00000010 source-ref-row) (1)
+        ((00000010 source-ref-row) 
          (00100111 (00000001 projection-failure) (00000001 malformed-source-ref)))
-        ((00000010 source-ref-row) (0)
+        ((0100 (00000010 source-ref-row))
          (00000111
-           ((00000010 variable-row) ()
+           ((0100 (00000010 variable-row))
             (00100111 (00000001 projection-failure) (00000001 missing-variable-role)))
-           ((00000010 variable-row) (1)
+           ((00000010 variable-row) 
             (00100111 (00000001 projection-failure) (00000001 malformed-variable-role)))
-           ((00000010 variable-row) (0)
+           ((0100 (00000010 variable-row))
             (00000111
-              ((00000010 values-row) ()
+              ((0100 (00000010 values-row))
                (00100111 (00000001 projection-failure) (00000001 missing-values)))
-              ((00000010 values-row) (1)
+              ((00000010 values-row) 
                (00100111 (00000001 projection-failure) (00000001 malformed-values)))
-              ((00000010 values-row) (0)
+              ((0100 (00000010 values-row))
                (00100111
                  (00000001 projection-result)
                  (00100111 (00000001 projection)
