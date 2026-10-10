@@ -1,0 +1,42 @@
+name: PR 2320 regenerate exact string-membership Core4 FASL
+
+on:
+  push:
+    branches: [migration/core-string-membership-exact-d1-20261010]
+    paths:
+      - lib/core4.lisp
+      - .github/workflows/repair-core4-fasl-string-2320.yml
+
+permissions:
+  contents: write
+
+jobs:
+  regenerate:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: migration/core-string-membership-exact-d1-20261010
+          persist-credentials: true
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Regenerate authentic Core4 binary cache
+        run: cargo run --locked --quiet -p sens-cli --bin gen-fasl -- lib/core4.lisp lib/core4.lisp.fasl
+      - name: Verify physical cache source hash
+        run: cargo test --locked -p sens --test core_fasl_freshness -- --nocapture
+      - name: Verify strict-D1 string classifier positive and negative oracles
+        run: cargo test --locked -p sens --test core_string_membership_cond2_migration -- --nocapture
+      - name: Commit verified cache on this PR branch only
+        shell: bash
+        run: |
+          set -euo pipefail
+          git add -- lib/core4.lisp.fasl
+          if git diff --cached --quiet; then
+            echo "Physical Core4 cache is already source-exact"
+            exit 0
+          fi
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git commit -m 'chore(core): regenerate exact D1 string membership FASL'
+          git push origin HEAD:refs/heads/migration/core-string-membership-exact-d1-20261010
