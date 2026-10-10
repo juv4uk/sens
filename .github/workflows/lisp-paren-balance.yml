@@ -10,11 +10,13 @@ on:
     paths:
       - "lib/**/*.lisp"
       - "scripts/check-lisp-paren-balance.py"
+      - "scripts/test-machine-source-integrity.py"
       - ".github/workflows/lisp-paren-balance.yml"
   pull_request:
     paths:
       - "lib/**/*.lisp"
       - "scripts/check-lisp-paren-balance.py"
+      - "scripts/test-machine-source-integrity.py"
       - ".github/workflows/lisp-paren-balance.yml"
   workflow_dispatch:
 
@@ -27,3 +29,5 @@ jobs:
       - uses: actions/checkout@v5
       - name: Lisp paren balance (lib/)
         run: python3 scripts/check-lisp-paren-balance.py --paths lib
+      - name: Негативні свідки відсутніх і обрублених machine-файлів
+        run: python3 scripts/test-machine-source-integrity.py
