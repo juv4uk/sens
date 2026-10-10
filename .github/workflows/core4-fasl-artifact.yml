@@ -49,6 +49,16 @@ jobs:
               echo "FASL commit could not rebase cleanly; refusing to overwrite concurrent changes" >&2
               exit 1
             fi
+            # A concurrent main update may have changed the source after the
+            # first generation. Rebuild from the rebased tree and prove source
+            # hash freshness again before allowing this commit to reach main.
+            cargo run --locked -p sens-cli --bin gen-fasl -- lib/core4.lisp "$RUNNER_TEMP/core4.lisp.fasl"
+            cp "$RUNNER_TEMP/core4.lisp.fasl" lib/core4.lisp.fasl
+            test -s lib/core4.lisp.fasl
+            cargo test --locked -p sens --test core_fasl_freshness
+            git diff --check
+            git add lib/core4.lisp.fasl
+            git commit --amend --no-edit
             if git push origin HEAD:main; then
               exit 0
             fi
