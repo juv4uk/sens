@@ -85,6 +85,28 @@ fn x86_pattern_mismatches_are_exact_d1_no_not_empty() {
     );
 }
 
+
+#[test]
+fn x86_admitted_program_rejects_ud2_with_typed_d1_no() {
+    let mut session = Session::default();
+    load_core_library(&mut session).expect("ратифіковане ядро");
+    load_lisp_file("lib/machine/encoding/x86-64.lisp", &mut session);
+    load_lisp_file("lib/machine/admission/x86-64.lisp", &mut session);
+
+    for program in [
+        "(x86-admitted-program? (00000001 ((ud2))))",
+        "(x86-admitted-program? (00000001 ((mov-r64-imm64 notareg 1))))",
+    ] {
+        let result = eval_program(program, &mut session)
+            .unwrap_or_else(|error| panic!("{program}: {error}"));
+        assert_eq!(
+            result.value.as_predicate_bit(),
+            Some(false),
+            "відмова допуску зобов'язана мати D1:0, а не D3:000"
+        );
+    }
+}
+
 #[test]
 fn canonical_machine_gateway_rejects_raw_bytes_register_bypass_and_truncation_before_host() {
     let mut session = Session::default();
