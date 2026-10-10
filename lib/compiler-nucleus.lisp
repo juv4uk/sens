@@ -29,8 +29,8 @@
       ((тотожне? ідентичність (перше (перше rows))) (перше rows))
       ((атом? ()) (compiler-authority-find ідентичність (решта rows))))))
 
-(00001001 compiler-nucleus
-  (00001000 (ідентичність authority)
+(визначити compiler-nucleus
+  (функція (ідентичність authority)
     (compiler-authority-find ідентичність authority)))
 
 
