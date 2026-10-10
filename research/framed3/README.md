@@ -1,58 +1,56 @@
-# SENS Framed-3 — bounded research witness (NOT .sens)
+# SENS: рамка-3 — дослідне стиснення однієї структури D2
 
-**2026-10-10. Status: experimental, not ratified.** The first D2 word
-'10' opens the program; the last D2 word '01' closes it. This profile
-applies ONLY to a single outer list: SENS otherwise permits atomic and
-multi-form top-level programs. No runtime or canonical .sens T5 is changed.
+**10 жовтня 2026. Стан: дослідження; не ратифіковано.**
 
-## Bits, trits, bytes, and EOF
+Перше двобітне слово D2 `10` відкриває програму, останнє `01` її закриває. Це працює **лише для однієї зовнішньої структури**: чинний SENS також дозволяє атомарні вирази та кілька верхньорівневих форм. Виконавець і канонічний фізичний `.sens` не змінені.
 
-- D2 10 and 01 are exact two-bit words. Between binary source words,
-  T5 inserts one ternary *transport* separator 2 (not before the first
-  word or after the last).
-- T5 may end with 0..4 padding 2 trits, because five trits fill a byte.
-  EOF supplies physical byte length, not a semantic end-of-program token.
-- Framed-3 enumerates strings anchored 10 2 ... 2 01 without adjacent 22.
-  It ranks each length class into a minimal *byte-count bucket*.
-  The physical byte count identifies exact trit count with no padding.
-- Nested D2 10 and 01 words stay intact. An internal 01 only closes one
-  nested level. Complete D2 syntax is owned by the canonical SENS reader,
-  **not** by this conservative Python transport proof.
-- This is one WHOLE 128-trit-bounded frame, NOT restartable 3-byte streaming
-  blocks. Network/FPGA requires a separately proved end-of-frame protocol.
+## Біти, трити, байти та кінець файла
 
-## Capacity upper bound
+- `10` і `01` — точні двобітні слова D2. Між словами є одна транспортна трійкова цифра `2`, якої немає до першого слова та після останнього.
+- У T5 від нуля до чотирьох кінцевих `2` заповнюють останній байт. Файловий EOF визначає кількість фізичних байтів, **але не є словом SENS**.
+- Рамка-3 ранжує послідовності `10 2 … 2 01` без сусідніх `22` і розміщує номери в групи фізичних байтів; кількість байтів дозволяє відновити точну довжину без доповнення `2`.
+- Вкладені структури D2 залишаються незмінними. Внутрішнє `01` закриває тільки вкладений рівень. Повний синтаксис визначає **канонічний читач SENS**, не дослідний код на Python.
+- Наявна реалізація оперує **цілим кадром до 128 тритів**, а не потоковими трибайтовими блоками. Мережі, послідовному порту та FPGA потрібен окремий доказ межі повідомлення.
 
-| Bytes | Trit lengths | Count of possible framed strings | 2^(8*bytes) |
+## Верхня межа місткості
+
+| Фізичні байти | Довжини, трити | Допустимі транспортні послідовності | Усі двійкові коди |
 |---:|:---|---:|---:|
 | 1 | 5–11 | 139 | 256 |
-| 2 | 12–17 | 57,504 | 65,536 |
-| 3 | 18–22 | 8,716,160 | 16,777,216 |
-| 4 | 23–28 | 3,639,777,792 | 4,294,967,296 |
-| 5 | 29–33 | 551,698,345,984 | 1,099,511,627,776 |
+| 2 | 12–17 | 57 504 | 65 536 |
+| 3 | 18–22 | 8 716 160 | 16 777 216 |
+| 4 | 23–28 | 3 639 777 792 | 4 294 967 296 |
+| 5 | 29–33 | 551 698 345 984 | 1 099 511 627 776 |
 
-The ranking count is an intentionally conservative SUPERSET of actual
-D2 syntax and D1–D9 word constraints. Encoder/decoder reject invalid
-words, excess nesting closure, and unused codepoints.
+Підрахунок охоплює й деякі **синтаксично неправильні** слова шириною понад дев’ять бітів. Отже, це консервативна верхня межа, а не точна кількість виконуваних програм. Кодувальник і декодувальник відхиляють неправильні рамки, слова й незайняті фізичні коди.
 
-## Reproduce from repo root
+## Відтворення
 
-    python3 research/framed3/research_codec.py
-    python3 -m unittest discover -s research/framed3 -p 'test_*.py' -v
+Запустити з кореня репозиторію:
 
-| Exact D2 word sequence | T5 | Framed-3 | Experimental bytes |
+```sh
+python3 research/framed3/research_codec.py
+python3 -m unittest discover -s research/framed3 -p 'test_*.py' -v
+```
+
+| Точні слова D2 | T5 | Рамка-3 | Дослідні фізичні байти |
 |---|---:|---:|---|
-| 10 01 | 1 B | 1 B | 00 |
-| 10 001 00 000 01 | 4 B | 2 B | 23 d0 |
-| 10 100 00 10 111 00 1 00 0 01 01 | 7 B | 5 B | 21 09 89 5e b5 |
+| `10 01` | 1 Б | 1 Б | `00` |
+| `10 001 00 000 01` | 4 Б | 2 Б | `23 d0` |
+| `10 100 00 10 111 00 1 00 0 01 01` | 7 Б | 5 Б | `21 09 89 5e b5` |
 
-These bytes ARE NOT standard .sens T5 bytes and may coincide with bytes
-meaning something else under T5. Never silently switch the existing loader.
-Roundtrips and size wins do NOT prove canonical Rust reader parity,
-runtime speed, corruption detection, or arbitrary-length streamability.
-Checksum/error framing is independent follow-up research.
+**Ці байти не є канонічними байтами `.sens` T5.** Один фізичний набір байтів може мати інше значення під декодером T5. Заборонено непомітно змінювати завантажувач або змішувати формати.
 
-Issues: #5293 (Rust parity), #5294 (release benchmarks), #5295
-(streams/EOF), #5296 (information theory), and existing #4445 (codec race).
-Integrate the research stand only; changing canonical wire requires separate
-ratification and CI evidence.
+Точний зворотний перехід і менший файл **не доводять** відповідність канонічному читачу Rust, швидкість виконання, виявлення кожної помилки передачі або потокову придатність. Зокрема, самостійне визначення кінця FPGA-кадру та контроль пошкодження — окремі дослідження.
+
+## Робота та мовна політика
+
+- [#5293](https://github.com/juv4uk/sens/issues/5293) — незалежна перевірка правильності й точних доменних слів.
+- [#5294](https://github.com/juv4uk/sens/issues/5294) — чесні вимірювання швидкодії та розміру.
+- [#5295](https://github.com/juv4uk/sens/issues/5295) — довгі потоки, багатоформні програми й фізичне завершення.
+- [#5296](https://github.com/juv4uk/sens/issues/5296) — точні інформаційні межі структурного стискання.
+- [#5300](https://github.com/juv4uk/sens/issues/5300) — захист від пошкодження й змішування з T5.
+- [#5298](https://github.com/juv4uk/sens/issues/5298) — Core4 FASL відкладено; не вважати цей тест пройденим.
+- [#5299](https://github.com/juv4uk/sens/issues/5299) — українська мовна політика поширюється на GitHub-задачі, PR, повідомлення комітів і перевірки.
+
+Немає автоматичної ратифікації фізичного формату. Злиття цих дослідів не змінює двійкові закони D1–D9 і не підміняє T5.

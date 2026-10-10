@@ -1,4 +1,4 @@
-"""Research-only framing tests; no semantic authority."""
+"""Дослідні перевірки рамки; не джерело семантичних законів."""
 import importlib.util
 import random
 import unittest
@@ -56,7 +56,7 @@ class CodecTests(unittest.TestCase):
             try:
                 data = framed.encode(words)
             except framed.FrameError as err:
-                if 'long frame' in str(err):
+                if 'довга рамка' in str(err):
                     continue
                 raise
             self.assertEqual(framed.decode(data), words)
