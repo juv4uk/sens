@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 """Перевірка бібліотечного добору Yantra для неретифікованого D10."""
+import subprocess
 import json
 from pathlib import Path
 
@@ -9,7 +10,30 @@ harvest = read("knowledge/d10-yantra-library-harvest-v1.json")
 inv = read("knowledge/d10-v1-semantic-inventory.json")
 state = read("knowledge/d10-fill-v1-state.json")
 foundation = read("knowledge/d1-d9-foundation.json")
-source = (root / "lib/yantra.lisp").read_text(encoding="utf-8").splitlines()
+# Історичні рядки належать незмінному Git blob, а не поточній версії бібліотеки.
+donor_path = root / "knowledge/archive/d10-yantra-donor-76460b72.lisp"
+donor_bytes = donor_path.read_bytes()
+# git hash-object рахує точний SHA фізичного Git blob без зміни репозиторію.
+donor_git_sha = subprocess.run(
+    ["git", "hash-object", "--stdin"],
+    cwd=root,
+    input=donor_bytes,
+    capture_output=True,
+    check=True,
+).stdout.decode("ascii").strip()
+assert donor_git_sha == harvest["donor"]["source_sha"], "Змінений історичний донор"
+donor_source = donor_bytes.decode("utf-8").splitlines()
+current_source = (root / "lib/yantra.lisp").read_text(encoding="utf-8").splitlines()
+
+def definition_sites(lines, name):
+    """Точно відокремлюємо ім'я визначення від його можливого префікса."""
+    header = "(00001001 " + name
+    return [
+        line_number
+        for line_number, line in enumerate(lines, 1)
+        if line == header or line.startswith(header + " ")
+    ]
+
 rows = harvest["rows"]
 assert harvest["schema"] == "d10-yantra-library-harvest-v1/v1"
 assert harvest["status"] == "RESEARCH-UNRATIFIED"
@@ -27,8 +51,13 @@ for row in rows:
     assert row["coordinate"] is None and row["coordinate_basis"] == "UNPLACED"
     assert row["ratified_resident"] is False
     assert row["source_sha"] == harvest["donor"]["source_sha"]
-    definition = "(00001001 " + row["source_name"]
-    assert source[row["source_line"] - 1] == definition or source[row["source_line"] - 1].startswith(definition + " ")
+    assert definition_sites(donor_source, row["source_name"]) == [row["source_line"]], (
+        "Невірний рядок або повтор визначення в історичному донорі", row["stable_id"]
+    )
+    current_sites = definition_sites(current_source, row["source_name"])
+    assert len(current_sites) == 1, (
+        "Поточне визначення втрачено або дубльовано", row["source_name"], current_sites
+    )
 selected = state["target"]["selected_semantic_candidates"]
 assert len(inv["rows"]) == selected
 assert len({r["semantic_name"] for r in inv["rows"]}) == selected
