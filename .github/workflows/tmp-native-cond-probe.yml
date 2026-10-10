@@ -12,4 +12,17 @@ jobs:
     steps:
       - uses: actions/checkout@v5
       - uses: dtolnay/rust-toolchain@stable
-      - run: cargo run --release --locked -p sens-host --example native_cond_probe
+      - name: Run stage-by-stage probe and preserve its verdict
+        shell: bash
+        run: |
+          set -euo pipefail
+          probe_log="$RUNNER_TEMP/native-cond-probe.log"
+          cargo run --release --locked -p sens-host --example native_cond_probe 2>&1 | tee "$probe_log"
+          if grep -q 'BLOCKED' "$probe_log"; then
+            echo "::error::native stage probe reported BLOCKED; see per-stage output above"
+            exit 1
+          fi
+          if ! grep -q '^STAGE PASS native-call =' "$probe_log"; then
+            echo "::error::native stage probe did not prove the final native-call stage"
+            exit 1
+          fi
