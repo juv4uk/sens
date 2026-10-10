@@ -351,6 +351,36 @@
         "scripts/check-d10-proposal-ledger.py",
         "tests/test_d10_proposal_ledger_growth.py"
       ]
+    },
+    {
+      "id": "d10.symbolic-ai.cnf-unit-fixpoint.selection.20261011",
+      "authority": "#4013 #4463 user-directed research D10 filling",
+      "evidence": [
+        "#5008",
+        "knowledge/d10-cnf-unit-fixpoint-selection-20261011.json",
+        "knowledge/d10-dll1962-glucose3-oracle-evidence-v1.json",
+        "https://pysathq.github.io/docs/html/api/solvers.html"
+      ],
+      "previous_inventory_blob_sha": "7e13e929338baeef9b16c2139d24b78e23ea1e03",
+      "resulting_inventory_blob_sha": "3fd5c8bee97ff03fd0793f10b94f7ea3860c61a8",
+      "added_stable_ids": [
+        "d10.symbolic-ai.cnf-unit-fixpoint.20261011"
+      ],
+      "appended_sources": [
+        "knowledge/d10-cnf-unit-fixpoint-selection-20261011.json"
+      ],
+      "coordinates_added": 0,
+      "ratified_added": 0,
+      "delta_selected": 1,
+      "previous_selected": 647,
+      "resulting_selected": 648,
+      "decision": "RESEARCH SELECTED ONLY; core-vs-derived owner review pending; no executable coordinate or physical SENS",
+      "tests": [
+        "scripts/check_d10_selection_transition_history.py",
+        "scripts/check-d10-proposal-ledger.py",
+        "scripts/check-d10-v1-semantic-inventory.py",
+        "tests/test_d10_dll1962_unit_closure.py"
+      ]
     }
   ]
 }
