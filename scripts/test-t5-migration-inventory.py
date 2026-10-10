@@ -73,7 +73,7 @@ class TestT5MigrationInventory(unittest.TestCase):
         with tempfile.TemporaryDirectory() as directory:
             candidate = Path(directory) / "змінений-реєстр.jsonl"
             candidate.write_text(
-                "".join(json.dumps(row, ensure_ascii=False, sort_keys=True) + "\\n"
+                "".join(json.dumps(row, ensure_ascii=False, sort_keys=True) + "\n"
                         for row in rows),
                 encoding="utf-8",
             )
