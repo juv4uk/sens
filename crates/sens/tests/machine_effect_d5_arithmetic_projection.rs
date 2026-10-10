@@ -265,7 +265,7 @@ fn sub_mul_effect_bounds_fail_closed_before_target_projection() {
 
 #[test]
 fn bounded_effect_source_keeps_exact_d1_controls() {
-    // #5360: A stale bulk rewrite must not restore numeric 1 or legacy t in D3 COND.
+    // #5360: застаріла масова міграція не має повертати числове 1 чи історичне t у D3 COND.
     let text = read("lib/machine/effects/u64.lisp");
     for (number, line) in text.lines().enumerate() {
         let active = line.split(';').next().unwrap_or("").trim_start();
