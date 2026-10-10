@@ -100,6 +100,24 @@ def lisp_list(values: list[str]) -> str:
     return "(" + " ".join(lisp_string(value) for value in values) + ")"
 
 
+def git_path_mode(head: str, path: str) -> str:
+    """An exact Git mode/type fact; SENS, not this adapter, decides admission."""
+    record = git("ls-tree", "-z", "--full-tree", head, "--", path)
+    if record.count(b"\x00") != 1 or not record.endswith(b"\x00"):
+        fail("GIT_MODE_RECORD_MISSING_OR_TRUNCATED: " + path)
+    row = record[:-1]
+    if row.count(b"\t") != 1:
+        fail("GIT_MODE_RECORD_MALFORMED: " + path)
+    meta, encoded_path = row.split(b"\t", 1)
+    fields = meta.split(b" ")
+    if len(fields) != 3 or encoded_path.decode("utf-8", "strict") != path:
+        fail("GIT_MODE_PATH_MISMATCH: " + path)
+    mode, kind, oid = fields
+    if len(oid) not in (40, 64) or not re.fullmatch(rb"[0-9a-f]+", oid):
+        fail("GIT_MODE_OBJECT_ID_INVALID: " + path)
+    return mode.decode("ascii", "strict") + ":" + kind.decode("ascii", "strict")
+
+
 def read_head_source(head: str, path: str) -> str | None:
     """Read a single exact regular source blob from the audited commit, not checkout."""
     record = git("ls-tree", "-z", "--full-tree", head, "--", path)
@@ -126,12 +144,19 @@ def path_status(name: str, value: str | None) -> str:
     return f"({name} . {'present' if value is not None else 'missing'})"
 
 
-def input_form(added: list[str], tracked_tools: list[str]) -> str:
+def input_form(
+    added: list[str], tracked_tools: list[str], modes: list[tuple[str, str]]
+) -> str:
+    mode_rows = "(" + " ".join(
+        "(" + lisp_string(path) + " . " + lisp_string(mode) + ")"
+        for path, mode in modes
+    ) + ")"
     return (
         "(00001001 *file-authority-input*\n"
         "  (00000001\n"
         "    ((schema . file-authority-input/1)\n"
         f"     (added-paths . {lisp_list(added)})\n"
+        f"     (added-modes . {mode_rows})\n"
         f"     (tracked-tools-paths . {lisp_list(tracked_tools)}))))\n"
     )
 
@@ -156,7 +181,7 @@ def fail_program(reason: str) -> str:
     return f"(sens_file_authority_source_missing_5397_{reason})\n"
 
 
-def build_bundle(added: list[str], tracked_tools: list[str], head: str) -> str:
+def build_bundle(added: list[str], tracked_tools: list[str], modes: list[tuple[str, str]], head: str) -> str:
     core = read_head_source(head, "lib/core.lisp")
     policy = read_head_source(head, "knowledge/file-authority-policy.lisp")
     census = read_head_source(head, "knowledge/foreign-tools-census.lisp")
@@ -173,7 +198,7 @@ def build_bundle(added: list[str], tracked_tools: list[str], head: str) -> str:
     if census is not None:
         parts.append(census)
     parts.append(status_form(policy, census, guard))
-    parts.append(input_form(added, tracked_tools))
+    parts.append(input_form(added, tracked_tools, modes))
     parts.append(guard)
     return "\n\n".join(parts) + "\n"
 
@@ -282,7 +307,8 @@ def main() -> int:
     )
     added = introduced_paths(changes)
     tracked_tools = nul_paths(git("ls-tree", "-r", "-z", "--name-only", "--full-tree", head, "--", "tools/"))
-    bundle = build_bundle(added, tracked_tools, head)
+    modes = [(path, git_path_mode(head, path)) for path in added]
+    bundle = build_bundle(added, tracked_tools, modes, head)
 
     args.output.parent.mkdir(parents=True, exist_ok=True)
     args.output.write_bytes(bundle.encode("utf-8", "strict"))
