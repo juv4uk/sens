@@ -131,11 +131,46 @@ jobs:
             exit 2
           fi
 
-      - name: Execute the physical SENS authority oracle
+      - name: Execute and attest the physical SENS authority verdict
         shell: bash
         run: |
           set -euo pipefail
-          target/debug/sens "$RUNNER_TEMP/file-authority.sens"
+          verdict_pattern='^\(SENS_FILE_AUTHORITY_PASS new-paths [0-9]+ tracked-tool-paths [0-9]+\)
+      - name: Diff hygiene
+        run: git diff --check
+
+          # Незалежні фальсифікатори: чужий текст/порожній вивід — не рішення SENS.
+          valid='(SENS_FILE_AUTHORITY_PASS new-paths 0 tracked-tool-paths 1)'
+          [[ "$valid" =~ $verdict_pattern ]] || {
+            echo "SENS_FILE_AUTHORITY_BLOCKED: validator rejected a canonical witness" >&2
+            exit 2
+          }
+          for invalid in '' 'SENS_FILE_AUTHORITY_PASS' \
+            '(SENS_FILE_AUTHORITY_PASS new-paths 0 tracked-tool-paths 1) junk' \
+            '(SENS_FILE_AUTHORITY_PASS new-paths unknown tracked-tool-paths 1)' \
+            '(FOREIGN_PASS new-paths 0 tracked-tool-paths 1)'; do
+            if [[ "$invalid" =~ $verdict_pattern ]]; then
+              echo "SENS_FILE_AUTHORITY_BLOCKED: fake or incomplete verdict was admitted" >&2
+              exit 2
+            fi
+          done
+
+          log="$RUNNER_TEMP/file-authority-execution.log"
+          if target/debug/sens "$RUNNER_TEMP/file-authority.sens" >"$log" 2>&1; then
+            cat "$log"
+          else
+            cat "$log" >&2
+            echo "SENS_FILE_AUTHORITY_BLOCKED: physical SENS execution failed" >&2
+            exit 1
+          fi
+
+          # CLI друкує EvalResult.output, потім EvalResult.value: остаточне
+          # значення мусить бути повним, типізованим рішенням SENS, не substring.
+          verdict="$(tail -n 1 "$log")"
+          if [[ ! "$verdict" =~ $verdict_pattern ]]; then
+            echo "SENS_FILE_AUTHORITY_BLOCKED: physical execution had no final SENS verdict" >&2
+            exit 2
+          fi
 
       - name: Diff hygiene
         run: git diff --check
