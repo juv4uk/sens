@@ -5,6 +5,11 @@ on:
   push:
     branches: [main]
   workflow_dispatch:
+    inputs:
+      base_sha:
+        description: 'Точний Git SHA бази (40 hex); потрібен для ручної перевірки'
+        required: true
+        type: string
 
 permissions:
   contents: read
@@ -32,7 +37,7 @@ jobs:
           PYTHONOPTIMIZE=2 python3 tools/file_guard.py --self-test
       - name: Нові важливі файли — тільки .lisp/.sens
         env:
-          BASE_SHA: ${{ github.event_name == 'pull_request' && github.event.pull_request.base.sha || github.event.before }}
+          BASE_SHA: ${{ github.event_name == 'workflow_dispatch' && inputs.base_sha || github.event_name == 'pull_request' && github.event.pull_request.base.sha || github.event.before }}
         run: |
           set -euo pipefail
           python3 tools/file_guard.py --base "$BASE_SHA"
