@@ -398,11 +398,13 @@ fn x86_byte_program_stitches_without_legacy_callable() {
     // Довільний атом не є ознакою EOF; він повинен відхилятися, а не
     // матеріалізуватися у порожній машинний потік.
     let malformed = eval_program(
-        "(x86-encode-program (quote не-список))",
+        "(x86-machine-rejected? (x86-encode-program (quote не-список)))",
         &mut session,
-    );
-    assert!(
-        malformed.is_err(),
+    )
+    .expect("non-list instruction input must return the explicit SENS rejection envelope");
+    assert_eq!(
+        malformed.value.to_string(),
+        "t",
         "Неспискова структура не може завершувати x86 програму"
     );
 }
