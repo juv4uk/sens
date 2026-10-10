@@ -25,8 +25,6 @@ jobs:
     timeout-minutes: 5
     steps:
       - uses: actions/checkout@v5
-      - name: Перевірити Lisp та незмінність Git HEAD блобів
-        run: python3 scripts/check-lisp-paren-balance.py --paths lib --verify-git-head
       - name: Негативні свідки обрубків і відсутніх файлів
         shell: bash
         run: |
@@ -53,3 +51,5 @@ jobs:
             exit 1
           fi
           rm -rf "$temp"
+      - name: Перевірити Lisp та незмінність Git HEAD блобів
+        run: python3 scripts/check-lisp-paren-balance.py --paths lib --verify-git-head
