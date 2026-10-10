@@ -42,14 +42,49 @@ DISCOVERY = re.compile(
 
 # Канонічний T5-оракул / межі authority (те, що НЕ переробляється на .senc).
 T5_AUTHORITY = {
-    "crates/sens/src/canonical_reader.rs": "crates/sens/src/canonical_reader.rs",
-    "crates/sens/src/binary_execution.rs": "crates/sens/src/canonical_reader.rs",
-    "crates/sens/src/source_packing.rs": "crates/sens/src/source_packing.rs",
-    "crates/sens-cli/src/bin/sens-trit.rs": "crates/sens/src/binary_execution.rs",
+    # Physical-byte codec owns T5 framing and byte validity.
+    "crates/sens/src/ternary_transport.rs": "crates/sens/src/ternary_transport.rs",
+    # This parser owns D2 grammar, not physical byte transport.
+    "crates/sens/src/canonical_reader.rs":
+        "crates/sens/src/canonical_reader.rs (D2 grammar; not physical codec)",
+    # Execution consumes the physical transport; it does not define framing.
+    "crates/sens/src/binary_execution.rs": "crates/sens/src/ternary_transport.rs",
+    "crates/sens-cli/src/bin/sens-trit.rs": "crates/sens/src/ternary_transport.rs",
     "scripts/sens_t5_codec.py": "scripts/sens_t5_codec.py",
     "scripts/audit_t5_file_pairs.py": "scripts/sens_t5_codec.py",
     "scripts/report_t5_triplet_inventory.py": "scripts/audit_t5_file_pairs.py",
     "scripts/check-triple-projection.sh": "scripts/sens_t5_codec.py",
+}
+
+# Related to exact source words, but deliberately NOT physical T5 authority:
+# no separators, transport framing, or T5 byte validation is defined here.
+NON_T5_COMPONENTS = {
+    "crates/sens/src/source_packing.rs":
+        "NONE (dense source-payload packer; no T5 framing)",
+}
+
+ROLE_OVERRIDES = {
+    "crates/sens/src/ternary_transport.rs":
+        ("producer", "physical T5 encode/decode and byte-validity authority"),
+    "crates/sens/src/canonical_reader.rs":
+        ("validator", "canonical D2 grammar over already bounded source words"),
+    "crates/sens/src/binary_execution.rs":
+        ("consumer", "physical T5 consumer/execution adapter"),
+    "crates/sens/src/source_packing.rs":
+        ("consumer", "dense exact-width source-payload packing; no T5 framing"),
+    "crates/sens-cli/src/bin/sens-trit.rs":
+        ("producer", "CLI delegates byte encoding/decoding to physical T5 codec"),
+}
+
+T5_AUTHORITY_REASONS = {
+    "crates/sens/src/ternary_transport.rs":
+        "канонічний фізичний T5: кодування/декодування байтів і межа фізичної валідності",
+    "crates/sens/src/canonical_reader.rs":
+        "граматика D2 для точних слів; не власник фізичного байтового кодування",
+    "crates/sens/src/binary_execution.rs":
+        "споживач фізичного T5: decode → D2 → execute",
+    "crates/sens-cli/src/bin/sens-trit.rs":
+        "CLI producer/consumer делегує фізичні байти T5 спільному codec",
 }
 
 ROLE_RULES = [
@@ -112,7 +147,7 @@ def is_candidate(path: str, root: Path) -> bool:
         return False
     if Path(path).suffix.lower() not in EXT:
         return False
-    if path in T5_AUTHORITY:
+    if path in T5_AUTHORITY or path in NON_T5_COMPONENTS:
         return True
     try:
         text = (root / path).read_text(encoding="utf-8", errors="replace")
@@ -122,6 +157,8 @@ def is_candidate(path: str, root: Path) -> bool:
 
 
 def classify_role(path: str) -> tuple[str, str]:
+    if path in ROLE_OVERRIDES:
+        return ROLE_OVERRIDES[path]
     for pat, role, reason in ROLE_RULES:
         if pat.search(path):
             return role, reason
@@ -172,7 +209,12 @@ def classify(path: str, root: Path) -> dict:
     if path in T5_AUTHORITY:
         status = "T5_REQUIRED"
         authority = T5_AUTHORITY[path]
-        reason = "канонічна межа T5 (authority)"
+        reason = T5_AUTHORITY_REASONS.get(
+            path, "канонічна межа T5 (authority)")
+    elif path in NON_T5_COMPONENTS:
+        status = "BLOCKED"
+        authority = NON_T5_COMPONENTS[path]
+        reason = "пов'язане щільне пакування payload без T5 framing; не фізичний T5 codec"
     elif role == "unknown" or lane == "UNKNOWN":
         # Не оголошуємо шлях дослідним/міграційним, доки немає ролі й owner lane.
         status = "BLOCKED"
