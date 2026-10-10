@@ -1,0 +1,56 @@
+name: Pure physical T5 bare-session parity and performance
+
+on:
+  pull_request:
+    paths:
+      - 'crates/sens-cli/src/main.rs'
+      - 'crates/sens-cli/tests/physical_bare_session_cli.rs'
+      - '.github/workflows/physical-bare-session.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'crates/sens-cli/src/main.rs'
+      - 'crates/sens-cli/tests/physical_bare_session_cli.rs'
+      - '.github/workflows/physical-bare-session.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  pure-physical-no-macro:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v5
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Exact binary vs macro-bootstrapped CLI parity and negative fences
+        run: cargo test --locked -p sens-cli --test physical_bare_session_cli -- --nocapture
+      - name: Build both unchanged-format production CLIs with optimizations
+        run: cargo build --locked --release -p sens-cli --bin sens --bin sens-trit
+      - name: Physical T5 paired process benchmark with output parity
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 benchmarks/byte-pack/physical_t5.py \
+            --sens target/release/sens \
+            --trit target/release/sens-trit \
+            --out "$RUNNER_TEMP/physical-bare-session" \
+            --warmup 4 --reps 25
+      - name: Publish actual measurements or explicit blocker
+        if: always()
+        shell: bash
+        run: |
+          if test -s "$RUNNER_TEMP/physical-bare-session/report.md"; then
+            cat "$RUNNER_TEMP/physical-bare-session/report.md" >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "NO PERFORMANCE CLAIM: parity, compilation or execution blocked." >> "$GITHUB_STEP_SUMMARY"
+          fi
+      - name: Preserve raw samples with executable and physical SHA
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: physical-bare-session-${{ github.sha }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/physical-bare-session/
+          retention-days: 14
+          if-no-files-found: warn
