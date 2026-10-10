@@ -87,9 +87,9 @@ def introduced_paths(data: bytes) -> list[str]:
 
 def typechanged_paths(data: bytes) -> list[str]:
     """Decode Git T-status records; a type change is not a newly added path."""
-    if data and not data.endswith(b"\\x00"):
+    if data and not data.endswith(b"\x00"):
         fail("UNTERMINATED_GIT_TYPE_CHANGE")
-    fields = data[:-1].split(b"\\x00") if data else []
+    fields = data[:-1].split(b"\x00") if data else []
     found: list[str] = []
     offset = 0
     while offset < len(fields):
