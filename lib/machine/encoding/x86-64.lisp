@@ -1053,9 +1053,9 @@
 ; Межа imm8 перевіряється admission-шаром до матеріалізації байтів.
 (00001001 x86-encode-aeskeygenassist-xmm-xmm-imm8
   (00001000 (dst src immediate)
-    (00101001
+    (1111
       (x86-encode-sse-66-map-xmm-xmm 58 223 dst src)
-      (00100111 immediate))))
+      (1110 immediate))))
 
 ; AES-NI memory-source bounded base+disp8 використовує ту саму x86
 ; адресацію, що вже доведена для MOV/LEA: ModR/M mode=01, SIB для rsp/r12,
@@ -1123,10 +1123,10 @@
 
 (00001001 x86-encode-aeskeygenassist-xmm-mem-disp8-imm8
   (00001000 (dst base displacement immediate)
-    (00101001
+    (1111
       (x86-encode-sse-66-map-xmm-mem-disp8
         58 223 dst base displacement)
-      (00100111 immediate))))
+      (1110 immediate))))
 
 ; PCLMULQDQ xmm, xmm, imm8: 66 0F 3A 44 /r ib.
 ; Pinned #175 XED evidence exposes exactly register-source and memory-source
@@ -1134,18 +1134,18 @@
 ; not redefined here -- this layer only materializes the admitted bytes.
 (00001001 x86-encode-pclmulqdq-xmm-xmm-imm8
   (00001000 (dst src immediate)
-    (00101001
+    (1111
       (x86-encode-sse-66-map-xmm-xmm #d58 #d68 dst src)
-      (00100111 immediate))))
+      (1110 immediate))))
 
 ; Bounded memory projection: base+disp8 reuses the already witnessed
 ; ModR/M/SIB/REX mechanism. This is not a claim of general x86 addressing.
 (00001001 x86-encode-pclmulqdq-xmm-mem-disp8-imm8
   (00001000 (dst base displacement immediate)
-    (00101001
+    (1111
       (x86-encode-sse-66-map-xmm-mem-disp8
         #d58 #d68 dst base displacement)
-      (00100111 immediate))))
+      (1110 immediate))))
 
 ; MOVSD xmm, xmm: opcode 0xF2 0x0F 0x10 /r
 (00001001 x86-encode-movsd-xmm-xmm
