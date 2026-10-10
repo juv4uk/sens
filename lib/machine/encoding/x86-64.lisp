@@ -220,12 +220,13 @@
 ; All six share one shape; only the opcode byte differs.
 (00001001 x86-encode-alu-r64-r64
   (00001000 (opcode destination source)
-    (10011100 ((dst (x86-reg-code destination)))
-      (10011100 ((src (x86-reg-code source)))
-        (00100111
-          (x86-encode-rex 1 (x86-high1 src) 0 (x86-high1 dst))
-          opcode
-          (x86-encode-modrm 3 (x86-low3 src) (x86-low3 dst)))))))
+    ((00001000 (dst src)
+       (00100111
+         (x86-encode-rex 1 (x86-high1 src) 0 (x86-high1 dst))
+         opcode
+         (x86-encode-modrm 3 (x86-low3 src) (x86-low3 dst))))
+     (x86-reg-code destination)
+     (x86-reg-code source))))
 
 (00001001 x86-encode-add-r64-r64
   (00001000 (destination source)
