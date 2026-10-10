@@ -307,7 +307,7 @@
       ((атом? (як-є ()))
        (сполучити
          (перше (решта (перше bindings)))
-         (let-binding-values (решта bindings))))))
+         (let-binding-values (решта bindings)))))))
 
 (00001010 let (bindings body)
   ; Build ((lambda names body) values...) with current Lisp-owned D3 CONS.
