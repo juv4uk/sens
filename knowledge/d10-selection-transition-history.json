@@ -351,6 +351,35 @@
         "scripts/check-d10-proposal-ledger.py",
         "tests/test_d10_proposal_ledger_growth.py"
       ]
+    },
+    {
+      "id": "d10.historical.clos.change-class.c03.current-main.20261011",
+      "authority": "#4013 #4463 #4842; historical CLOS dossier CLOS-03",
+      "evidence": [
+        "knowledge/d10-historical-clos-interlisp-residual-review-v1.json:CLOS-03",
+        "https://www.cs.cmu.edu/Groups/AI/util/html/hyperspec/HyperSpec/Body/stagenfun_change-class.html"
+      ],
+      "previous_inventory_blob_sha": "7e13e929338baeef9b16c2139d24b78e23ea1e03",
+      "resulting_inventory_blob_sha": "ceb4b834020e9f91da632e3fcff2adbe95d86ab7",
+      "added_stable_ids": [
+        "d10.historical.clos.change-class.c03"
+      ],
+      "appended_sources": [
+        "knowledge/d10-change-class-selection-v1.json"
+      ],
+      "coordinates_added": 0,
+      "ratified_added": 0,
+      "delta_selected": 1,
+      "previous_selected": 647,
+      "resulting_selected": 648,
+      "decision": "SELECTED RESEARCH ONLY; same-instance/class-transition witness; owner review pending; no coordinate, no ratification, no D2 or physical format changes",
+      "tests": [
+        "scripts/check_d10_change_class_selected_v1.py",
+        "tests/test_d10_change_class_selected_v1.py",
+        "scripts/check_d10_selection_transition_history.py",
+        "scripts/check-d10-proposal-ledger.py",
+        "tests/test_d10_proposal_ledger_growth.py"
+      ]
     }
   ]
 }
