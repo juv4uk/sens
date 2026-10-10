@@ -26,7 +26,8 @@ jobs:
         run: |
           set -euo pipefail
           actual="$(git hash-object lib/core4.lisp)"
-          test "$actual" = "7d33812285a53d961fc75017e11952b61672a241"
+          test "$actual" = "e8578f40a30997f061b57115d211245068a5e5ba"
+          test "$(git hash-object lib/core.lisp)" = "4bc89983271b4ddb44b729b5772dbc4ed1d1f855"
           echo "CORE4_SOURCE_BLOB=$actual"
       - name: Regenerate physical FASL and execute macro-law witnesses
         shell: bash
