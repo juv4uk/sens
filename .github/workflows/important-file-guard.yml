@@ -76,11 +76,36 @@ jobs:
             --base "$BASE_SHA" \
             --output "$RUNNER_TEMP/file-authority.lisp"
 
+      - name: Prove canonical binary projection encoding remains admitted
+        shell: bash
+        run: |
+          set -euo pipefail
+          printf '%s\n' '10 001 00 000 01' > "$RUNNER_TEMP/canonical-projection.lisp"
+          target/debug/sens-trit encode "$RUNNER_TEMP/canonical-projection.lisp"
+          target/debug/sens-trit open "$RUNNER_TEMP/canonical-projection.sens" > "$RUNNER_TEMP/canonical-projection.words"
+          test "$(cat "$RUNNER_TEMP/canonical-projection.words")" = "10 001 00 000 01"
+
       - name: Encode the complete oracle into physical T5
         shell: bash
         run: |
           set -euo pipefail
-          target/debug/sens-trit encode "$RUNNER_TEMP/file-authority.lisp"
+          log="$RUNNER_TEMP/file-authority-encode.log"
+          if target/debug/sens-trit encode "$RUNNER_TEMP/file-authority.lisp" >"$log" 2>&1; then
+            cat "$log"
+            test -s "$RUNNER_TEMP/file-authority.sens"
+          else
+            cat "$log" >&2
+            if grep -Fq 'InvalidBinaryProjection' "$log"; then
+              echo "SENS_FILE_AUTHORITY_BLOCKED: assembled Lisp source is not an admitted canonical binary projection; no text fallback is permitted" >&2
+            else
+              echo "SENS_FILE_AUTHORITY_BLOCKED: physical encoding failed; inspect the encoder diagnostic above" >&2
+            fi
+            if test -e "$RUNNER_TEMP/file-authority.sens"; then
+              echo "SENS_FILE_AUTHORITY_BLOCKED: encoder left an output file after failure" >&2
+              exit 3
+            fi
+            exit 2
+          fi
 
       - name: Execute the physical SENS authority oracle
         shell: bash
