@@ -50,8 +50,8 @@ class QuoteCohort(unittest.TestCase):
         )
         cls.text7 = module.build_text7(table, ARGS["text7"])
 
-    def project(self, source):
-        resolver = module.Resolver(self.legacy, self.my, self.upper)
+    def project(self, source, *, source_era="auto"):
+        resolver = module.Resolver(self.legacy, self.my, self.upper, source_era=source_era)
         result = module.migrate_file(source, resolver, self.text7)
         return result, resolver.counts
 
@@ -61,9 +61,13 @@ class QuoteCohort(unittest.TestCase):
         self.assertEqual(mapped[:2], ("001", "D3"))
         self.assertNotEqual(self.legacy["00000010"][:2], mapped[:2])
 
+    def test_ambiguous_eight_bit_source_without_provenance_is_blocked(self):
+        with self.assertRaises(module.MigrationError):
+            self.project(LEGACY_SOURCE.read_text(encoding="utf-8"))
+
     def test_one_real_lisp_source_has_one_physical_same_stem_companion(self):
         self.assertEqual(LEGACY_SOURCE.read_text(encoding="utf-8"), "(00000001 ())\n")
-        projection, counts = self.project(LEGACY_SOURCE.read_text(encoding="utf-8"))
+        projection, counts = self.project(LEGACY_SOURCE.read_text(encoding="utf-8"), source_era="legacy")
         self.assertEqual(projection, EXPECTED)
         self.assertEqual(counts["pass1-sens8"], 1)
         payload = PHYSICAL.read_bytes()
@@ -77,7 +81,7 @@ class QuoteCohort(unittest.TestCase):
     def test_three_historical_source_spellings_project_identically(self):
         for _, _, source, phase in COHORT:
             with self.subTest(source=source):
-                projection, counts = self.project(source)
+                projection, counts = self.project(source, source_era="legacy" if phase == "pass1-sens8" else "auto")
                 self.assertEqual(projection, EXPECTED)
                 self.assertEqual(counts[phase], 1)
                 self.assertEqual(module.encode_projection(projection), PHYSICAL.read_bytes())
@@ -88,12 +92,16 @@ class QuoteCohort(unittest.TestCase):
                 source = FIXTURES / source_name
                 physical = FIXTURES / binary_name
                 self.assertEqual(source.read_text(encoding="utf-8"), source_text)
-                projection, counts = self.project(source_text)
+                projection, counts = self.project(source_text, source_era="legacy" if phase == "pass1-sens8" else "auto")
                 self.assertEqual(projection, EXPECTED)
                 self.assertEqual(counts[phase], 1)
                 self.assertEqual(physical.read_bytes(), bytes.fromhex("638906a1"))
                 self.assertEqual(module.encode_projection(projection), physical.read_bytes())
                 self.assertEqual(module.decode_bytes(physical.read_bytes()), EXPECTED.split())
+                # The extensionless file is GENERATED exact-width data, not executable input.
+                view = source.with_suffix("")
+                self.assertEqual(view.read_bytes(), EXPECTED.encode("ascii"))
+                self.assertEqual(module.encode_projection(view.read_text(encoding="ascii")), physical.read_bytes())
 
     def test_actual_migrator_creates_physical_artifact_and_manifest(self):
         with tempfile.TemporaryDirectory() as directory:
@@ -104,6 +112,7 @@ class QuoteCohort(unittest.TestCase):
                 sys.executable, str(SCRIPT), str(FIXTURES), "--out", str(out),
                 *[item for key, path in ARGS.items() for item in ("--" + key.replace("_", "-"), str(path))],
                 "--report", str(report),
+                "--source-era", "legacy",  # Explicit historical cohort provenance, never implicit auto.
             ]
             result = subprocess.run(command, capture_output=True, text=True)
             self.assertEqual(result.returncode, 0, result.stderr + result.stdout)
