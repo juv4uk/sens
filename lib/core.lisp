@@ -307,16 +307,21 @@
      (cons (list (quote lambda) (car parts) body) (cdr parts)))
    (my-let-binding-parts bindings)))
 
+(00001001 my-letstar-expand
+  (00001000 (bindings body)
+    (cond
+      ((atom? bindings) body)
+      ((atom? (cdr bindings))
+       (list (quote let) bindings body))
+      ((atom? (quote ()))
+       (list
+         (quote let)
+         (list (car bindings))
+         (my-letstar-expand (cdr bindings) body)))))
+
 (defmacro let* (bindings body)
-  (cond
-    ((atom? bindings) body)
-    ((atom? (cdr bindings))
-     (list (quote let) bindings body))
-    ((atom? (quote ()))
-     (list
-       (quote let)
-       (list (car bindings))
-       (list (quote let*) (cdr bindings) body)))))
+  (my-letstar-expand bindings body))
+
 
 ; string-length/string-empty?/string-prefix?/string-contains? (PLAN.md
 ; item 14, item 20's G5 audit test applied live) — none of these need a
