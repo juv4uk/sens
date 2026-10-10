@@ -165,6 +165,11 @@ fn core4_local_binding_heads_are_current_and_postcore_libraries_load() {
 fn current_defmacro_bootstrap_executes_let_and_let_star() {
     let mut session = Session::default();
     load_core_library(&mut session).expect("current macro + Core4 bootstrap");
+    for name in ["make-macro", "defmacro", "let", "let*"] {
+        println!("MACRO-BINDING {name}={}", session.environment.get(name)
+            .map(|value| value.to_string())
+            .unwrap_or_else(|| "<missing>".to_string()));
+    }
 
     let parallel = eval_program("(let ((probe 7)) probe)", &mut session)
         .expect("current defmacro must install lexical let");
