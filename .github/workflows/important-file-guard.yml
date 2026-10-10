@@ -158,8 +158,11 @@ jobs:
           rm -rf -- "$out_dir"
           mkdir -p -- "$out_dir"
 
+          # The bundle is assembled from exact Git-HEAD Lisp sources whose
+          # executable heads include historical 8-bit compatibility projections.
+          # Choose legacy explicitly; auto must block an ambiguous W8 head.
           if python3 scripts/migrate-three-pass.py "$source" \
-            --out "$out_dir" --report "$report" --source-era auto >"$log" 2>&1; then
+            --out "$out_dir" --report "$report" --source-era legacy >"$log" 2>&1; then
             cat "$log"
           else
             cat "$log" >&2
