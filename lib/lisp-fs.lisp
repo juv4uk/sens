@@ -48,7 +48,7 @@
   (00001000 (fs name)
     (10011100 ((binding (01101101 name (fs-bindings fs))))
       (00000111
-        ((00000010 binding) () (00100111 (00000001 not-found) name))
+        ((0100 (00000010 binding)) (00100111 (00000001 not-found) name))
         ((00000010 binding)  (00100111 (00000001 not-found) name))
         (t
           (10011100 ((address (00000101 binding)))
@@ -176,7 +176,7 @@
 (00001001 fs-build-object-store
   (00001000 (packages store)
     (00000111
-      ((00000010 packages) () (00100111 (00000001 accepted) store))
+      ((0100 (00000010 packages)) (00100111 (00000001 accepted) store))
       ((00000010 packages)  (00100111 (00000001 accepted) store))
       (t
         (10011100 ((decision (fs-object-package-decision (00000101 packages))))
@@ -189,16 +189,16 @@
 (00001001 fs-all-addresses-present?
   (00001000 (addresses store)
     (00000111
-      ((00000010 addresses) () t)
-      ((00000010 addresses) (1) t)
+      
+      ((00000010 addresses)  t)
       ((00100001 (content-store-contains? store (00000101 addresses))) (00000001 ()))
       (t (fs-all-addresses-present? (00000110 addresses) store)))))
 
 (00001001 fs-binding-addresses-present?
   (00001000 (entries store)
     (00000111
-      ((00000010 entries) () t)
-      ((00000010 entries) (1) t)
+      
+      ((00000010 entries)  t)
       ((00100001 (content-store-contains? store (00000110 (00000101 entries)))) (00000001 ()))
       (t (fs-binding-addresses-present? (00000110 entries) store)))))
 
@@ -232,8 +232,8 @@
 (00001001 fs-bindings-from-list
   (00001000 (entries bindings)
     (00000111
-      ((00000010 entries) () bindings)
-      ((00000010 entries) (1) bindings)
+      
+      ((00000010 entries)  bindings)
       (t (fs-bindings-from-list
            (00000110 entries)
            (01101110 (00000101 (00000101 entries)) (00000110 (00000101 entries)) bindings))))))
@@ -283,7 +283,7 @@
 (00001001 fs-journal-event-decision
   (00001000 (event)
     (00000111
-      ((00000010 event) () (00100111 (00000001 rejected) (00000001 invalid-event)))
+      ((0100 (00000010 event)) (00100111 (00000001 rejected) (00000001 invalid-event)))
       ((00000010 event)  (00100111 (00000001 rejected) (00000001 invalid-event)))
       ((00100001 (00000011 (fs-package-field (00000001 format) event) (00000001 wsm-fs-event)))
        (00100111 (00000001 rejected) (00000001 invalid-format)))
@@ -310,8 +310,8 @@
 (00001001 fs-bindings-without
   (00001000 (entries name result)
     (00000111
-      ((00000010 entries) () result)
-      ((00000010 entries) (1) result)
+      
+      ((00000010 entries)  result)
       ((00100010 (00000101 (00000101 entries)) name)
        (fs-bindings-without (00000110 entries) name result))
       (t
@@ -368,7 +368,7 @@
 (00001001 fs-journal-replay-onto
   (00001000 (journal fs)
     (00000111
-      ((00000010 journal) () (00100111 (00000001 accepted) fs))
+      ((0100 (00000010 journal)) (00100111 (00000001 accepted) fs))
       ((00000010 journal)  (00100111 (00000001 accepted) fs))
       (t
         (10011100 ((decision (fs-journal-replay-event fs (00000101 journal))))
