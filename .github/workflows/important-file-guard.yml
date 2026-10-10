@@ -85,7 +85,30 @@ jobs:
           target/debug/sens-trit open "$RUNNER_TEMP/canonical-projection.sens" > "$RUNNER_TEMP/canonical-projection.words"
           test "$(cat "$RUNNER_TEMP/canonical-projection.words")" = "10 001 00 000 01"
 
-      - name: Encode the complete oracle into physical T5
+      - name: Prove noncanonical text is rejected without emitting physical SENS
+        shell: bash
+        run: |
+          set -euo pipefail
+          source="$RUNNER_TEMP/noncanonical-source.lisp"
+          output="$RUNNER_TEMP/noncanonical-source.sens"
+          log="$RUNNER_TEMP/noncanonical-source-encode.log"
+          printf '%s\\n' '(ordinary-name "text data")' > "$source"
+          if target/debug/sens-trit encode "$source" >"$log" 2>&1; then
+            cat "$log"
+            echo "SENS_FILE_AUTHORITY_BLOCKED: noncanonical textual source was accepted" >&2
+            exit 1
+          fi
+          cat "$log" >&2
+          if ! grep -Fq 'InvalidBinaryProjection' "$log"; then
+            echo "SENS_FILE_AUTHORITY_BLOCKED: negative control failed for an unexpected reason" >&2
+            exit 2
+          fi
+          if test -e "$output"; then
+            echo "SENS_FILE_AUTHORITY_BLOCKED: encoder emitted .sens despite rejecting input" >&2
+            exit 3
+          fi
+          echo "SENS_FILE_AUTHORITY_NEGATIVE_CONTROL_PASS: textual call/string rejected; no .sens emitted"
+
         shell: bash
         run: |
           set -euo pipefail
