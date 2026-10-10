@@ -29,7 +29,7 @@ import sys
 
 ROOT = Path(__file__).resolve().parents[1]
 SCRIPTS = ROOT / "scripts"
-SID = re.compile(r"[01]{8}\\Z")
+SID = re.compile(r"[01]{8}$")
 # The old expected-result field of COND is not equivalent to strict two-field
 # D3. Operator replacement alone would silently change the program.
 LEGACY_COND = "00000111"
