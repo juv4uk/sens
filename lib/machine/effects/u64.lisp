@@ -39,9 +39,9 @@
 (00001001 machine-effect-within-inclusive-integer-range?
   (00001000 (value lower upper)
     (00000111
-      ((тотожне? (не-менше? value lower) 1)
+      ((00011110 value lower)
        (00000111
-         ((тотожне? (не-більше? value upper) 1)
+         ((00011101 value upper)
           (00000010 (00000001 ())))
          ((00000010 (00000001 ()))
           (00000010 (00000001 (00000000))))))
@@ -121,9 +121,9 @@
        (00000111
          ((machine-effect-u64-carrier? right)
           (00000111
-            ((тотожне? (не-менше? left right) 1) 
+            ((00011110 left right) 
              (00100111 (00000001 bounded-u64-sub) left right))
-            ((тотожне? (менше? left right) 1)
+            ((00011010 left right)
              (00000001 machine-effect-rejected))))
          ((00000010 (00000001 ())) (00000001 machine-effect-rejected))))
       ((00000010 (00000001 ())) (00000001 machine-effect-rejected)))))
