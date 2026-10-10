@@ -24,6 +24,9 @@ jobs:
         with:
           python-version: "3.11"
       - name: Незалежний негативний свідок
-        run: python3 scripts/test-t5-migration-inventory.py
+        run: |
+          set -euo pipefail
+          python3 scripts/test-t5-migration-inventory.py
+          python3 -O scripts/test-t5-migration-inventory.py
       - name: Live-реєстр == закомічений manifest (fail-closed)
         run: python3 scripts/report_t5_migration_inventory.py --check data/t5-migration-inventory.jsonl
