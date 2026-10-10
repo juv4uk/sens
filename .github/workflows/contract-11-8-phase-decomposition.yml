@@ -28,7 +28,7 @@ permissions:
   contents: read
 
 concurrency:
-  group: contract-11-8-phase-decomposition-${{ github.ref }}
+  group: contract-11-8-phase-decomposition-${{ github.sha }}
   cancel-in-progress: true
 
 jobs:
