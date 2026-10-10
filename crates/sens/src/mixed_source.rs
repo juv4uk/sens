@@ -283,23 +283,7 @@ fn lift_expression(
                 });
             }
 
-            // An immediately-invoked lambda or other executable form may be
-            // itself a list in operator position.  Its nested W8 wrapper and
-            // exact D3-D6 body heads must be lifted before the outer call is
-            // evaluated; treating this list as opaque leaves numeric `100`,
-            // `101`, ... in callable position and later reports them as
-            // non-callable numbers.
-            lifted[0] = if matches!(&lifted[0].kind, ExprKind::List(_)) {
-                lift_expression(
-                    source,
-                    lifted[0].clone(),
-                    depth + 1,
-                    bound_names,
-                    descend_legacy_machine_wrappers,
-                )?
-            } else {
-                lift_head(source, lifted[0].clone(), bound_names)?
-            };
+            lifted[0] = lift_head(source, lifted[0].clone(), bound_names)?;
 
             // Legacy W8 heads remain opaque in ordinary mixed source. The
             // machine-source mode descends only through non-QUOTE wrappers
