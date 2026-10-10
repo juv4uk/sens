@@ -1,0 +1,38 @@
+name: T5 codec boundary (default .sens)
+
+# М1 #5445 — заморожування межі «T5 за замовчуванням»: канонічний фізичний
+# носій — .sens; дослідний .senc (F3/F4) не протікає в канонічні крейти й не
+# підміняє типовий маршрут. Негативний, fail-closed свідок.
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  boundary-static:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v5
+      - name: Статична межа — немає дослідного .senc у канонічних крейтах
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 scripts/check-t5-default-boundary.py --self-test
+          python3 scripts/check-t5-default-boundary.py
+
+  boundary-cli:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v5
+      - uses: dtolnay/rust-toolchain@stable
+      - name: CLI-межа T5 за замовчуванням (негативні свідки)
+        shell: bash
+        run: |
+          set -euo pipefail
+          cargo test -p sens-cli --test codec_boundary_t5_default -- --nocapture

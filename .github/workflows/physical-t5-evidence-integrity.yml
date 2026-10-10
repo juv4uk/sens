@@ -37,6 +37,8 @@ jobs:
       - uses: actions/checkout@v5
       - name: Negative-control tests on real physical fixture
         run: python3 -m unittest discover -s tests -p test_physical_t5_evidence_integrity.py -v
+      - name: Незмінність фізичних T5-контролів і відмов М3 під Python -O
+        run: python3 -O -m unittest discover -s tests -p test_physical_t5_evidence_integrity.py -v
       - name: Measure real tracked T5 and spaced-bit transport
         run: |
           python3 scripts/benchmark-sens-physical.py \

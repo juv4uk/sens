@@ -268,6 +268,32 @@ class TestT5MigrationInventory(unittest.TestCase):
             source.write_text("(00001001 обчислити (x) x)\n", encoding="utf-8")
             self.assertFalse(GEN.is_candidate("lib/звичайне-ядро.lisp", root))
 
+    def test_senc_research_paths_are_opt_in_not_canonical_sens(self):
+        rows = {r["path"]: r for r in read_manifest()}
+        expected_roles = {
+            "research/framed3/adaptive_encoder.py": "producer",
+            "research/framed3/test_adaptive_encoder.py": "validator",
+            "research/framed3/test_research_codec.py": "validator",
+            "research/framed3/test_tb33_capacity.py": "validator",
+        }
+        for path, role in expected_roles.items():
+            self.assertIn(path, rows, f"research path missing: {path}")
+            row = rows[path]
+            self.assertEqual(row["role"], role, path)
+            self.assertEqual(row["migration_status"], "SENC_RESEARCH", path)
+            self.assertEqual(row["canonical_path"], "*.senc", path)
+            self.assertEqual(row["authority"], "research/framed3 (не canonic)", path)
+            self.assertEqual(row["dependency"], "#5429,#5439", path)
+        self.assertEqual(rows["research/framed3/adaptive_encoder.py"]["codec"], "T5+SENC")
+        self.assertEqual(rows["research/framed3/test_adaptive_encoder.py"]["codec"], "T5")
+        self.assertEqual(rows["research/framed3/test_tb33_capacity.py"]["codec"], "T5")
+
+    def test_blocked_rows_never_claim_a_canonical_path(self):
+        for row in read_manifest():
+            if row["migration_status"] == "BLOCKED":
+                self.assertEqual(row["canonical_path"], "n/a", row["path"])
+                self.assertEqual(row["authority"], "UNKNOWN", row["path"])
+
     def test_workflow_orchestration_is_not_physical_producer(self):
         rows = read_manifest()
         self.assertFalse(any(r["role"] == "producer" for r in rows

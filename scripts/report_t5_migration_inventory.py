@@ -90,6 +90,14 @@ ROLE_OVERRIDES = {
         ("validator", "CI workflow orchestration; not a physical-byte producer"),
     ".github/workflows/publish-binary-master.yml":
         ("validator", "CI workflow orchestration; not a physical-byte producer"),
+    "research/framed3/adaptive_encoder.py":
+        ("producer", "експериментальний адаптивний .senc/F3/F4 енкодер; не canonical .sens"),
+    "research/framed3/test_adaptive_encoder.py":
+        ("validator", "тестові свідки дослідного адаптивного .senc/F3/F4 енкодера"),
+    "research/framed3/test_research_codec.py":
+        ("validator", "тестові свідки дослідного F3-кодека; не фізичний T5 producer"),
+    "research/framed3/test_tb33_capacity.py":
+        ("validator", "комбінаторні тести Tb-33; не файловий кодер SENS"),
 }
 
 T5_AUTHORITY_REASONS = {
@@ -245,7 +253,7 @@ def classify(path: str, root: Path) -> dict:
     elif is_senc:
         status = "SENC_RESEARCH"
         authority = "research/framed3 (не canonic)"
-        reason = "дослідний .senc/F3/F4-носій"
+        reason = reason if path in ROLE_OVERRIDES else "дослідний .senc/F3/F4-носій"
     elif role in ("producer", "consumer") and codec in ("T5", "T5+SENC"):
         status = "MIGRATION_CANDIDATE"
         authority = "T5 oracle (crates/sens)"
@@ -259,7 +267,10 @@ def classify(path: str, root: Path) -> dict:
         authority = "UNKNOWN"
         reason = "немає достатнього доказу → BLOCKED"
 
-    canonical = "n/a" if path.endswith(".lisp") else ("*.sens" if "T5" in codec else ("*.senc" if "SENC" in codec else "n/a"))
+    canonical = ("n/a" if status == "BLOCKED" else
+                  ("*.senc" if status == "SENC_RESEARCH" else
+                   ("n/a" if path.endswith(".lisp") else
+                    ("*.sens" if "T5" in codec else ("*.senc" if "SENC" in codec else "n/a")))))
     return {
         "schema": SCHEMA,
         "repository": "juv4uk/sens",
