@@ -26,7 +26,7 @@ fail=0
 # якщо файл зник замість того, щоб grep повідомив лише stderr.
 for current_file in "${files[@]}"; do
   if [[ ! -f "$current_file" ]]; then
-    printf 'SID-BINARY-IDENTITY guard: missing active source %s\\n' "$current_file" >&2
+    printf 'SID-BINARY-IDENTITY guard: missing active source %s\n' "$current_file" >&2
     exit 1
   fi
 done
