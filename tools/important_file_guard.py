@@ -98,11 +98,26 @@ def lisp_list(values: list[str]) -> str:
     return "(" + " ".join(lisp_string(value) for value in values) + ")"
 
 
-def read_optional(path: str) -> str | None:
-    try:
-        return Path(path).read_bytes().decode("utf-8", "strict")
-    except FileNotFoundError:
+def read_head_source(head: str, path: str) -> str | None:
+    """Read a single exact regular source blob from the audited commit, not checkout."""
+    record = git("ls-tree", "-z", "--full-tree", head, "--", path)
+    if not record:
         return None
+    if record.count(b"\x00") != 1 or not record.endswith(b"\x00"):
+        fail("INVALID_GIT_SOURCE_TREE_RECORD: " + path)
+    row = record[:-1]
+    if row.count(b"\t") != 1:
+        fail("INVALID_GIT_SOURCE_TREE_FIELDS: " + path)
+    metadata, recorded_path = row.split(b"\t", 1)
+    parts = metadata.split(b" ")
+    if len(parts) != 3 or recorded_path.decode("utf-8", "strict") != path:
+        fail("GIT_SOURCE_PATH_OR_METADATA_MISMATCH: " + path)
+    mode, kind, oid = parts
+    if len(oid) not in (40, 64) or not re.fullmatch(rb"[0-9a-f]+", oid):
+        fail("INVALID_GIT_SOURCE_OBJECT_ID: " + path)
+    if mode not in (b"100644", b"100755") or kind != b"blob":
+        fail("NON_REGULAR_GIT_SOURCE: " + path)
+    return git("show", f"{head}:{path}").decode("utf-8", "strict")
 
 
 def path_status(name: str, value: str | None) -> str:
@@ -139,11 +154,11 @@ def fail_program(reason: str) -> str:
     return f"(sens_file_authority_source_missing_5397_{reason})\n"
 
 
-def build_bundle(added: list[str], tracked_tools: list[str]) -> str:
-    core = read_optional("lib/core.lisp")
-    policy = read_optional("knowledge/file-authority-policy.lisp")
-    census = read_optional("knowledge/foreign-tools-census.lisp")
-    guard = read_optional("knowledge/file-authority-guard.lisp")
+def build_bundle(added: list[str], tracked_tools: list[str], head: str) -> str:
+    core = read_head_source(head, "lib/core.lisp")
+    policy = read_head_source(head, "knowledge/file-authority-policy.lisp")
+    census = read_head_source(head, "knowledge/foreign-tools-census.lisp")
+    guard = read_head_source(head, "knowledge/file-authority-guard.lisp")
 
     if core is None:
         return fail_program("core")
@@ -227,7 +242,7 @@ def main() -> int:
     )
     added = introduced_paths(changes)
     tracked_tools = nul_paths(git("ls-tree", "-r", "-z", "--name-only", "--full-tree", head, "--", "tools/"))
-    bundle = build_bundle(added, tracked_tools)
+    bundle = build_bundle(added, tracked_tools, head)
 
     args.output.parent.mkdir(parents=True, exist_ok=True)
     args.output.write_bytes(bundle.encode("utf-8", "strict"))
