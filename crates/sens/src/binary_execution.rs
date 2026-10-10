@@ -5,7 +5,7 @@
 //! machine-code claim is constructed by this adapter.
 
 use crate::{
-    decode_ternary_words, eval_parsed_expressions,
+    decode_ternary_words, eval_lowered_expressions, lower_program,
     ternary_transport::parse_t5_domain_words, EvalResult, Expr,
     LanguageError, Session, TernaryTransportError,
 };
@@ -17,9 +17,10 @@ pub enum T5ExecutionError {
     Language(LanguageError),
 }
 
-/// Canonically validated physical T5 program, stored as the current D2 AST.
+/// Canonically validated physical T5 program, stored as the current lowered AST.
 ///
-/// Decode+parse happens once. Repeated evaluation reuses this exact AST,
+/// Decode+parse+the existing interpreter lowering happens once. Repeated
+/// evaluation reuses those exact immutable lowered forms,
 /// but every evaluation still consults the current interpreter/Session.
 /// This is NOT compiled machine code and grants no additional capabilities.
 pub struct PhysicalT5Program {
@@ -31,7 +32,8 @@ impl PhysicalT5Program {
     /// creating any text or parsing human identifier surfaces.
     pub fn decode(physical: &[u8]) -> Result<Self, T5ExecutionError> {
         let words = decode_ternary_words(physical).map_err(T5ExecutionError::Transport)?;
-        let forms = parse_t5_domain_words(&words).map_err(T5ExecutionError::Language)?;
+        let parsed = parse_t5_domain_words(&words).map_err(T5ExecutionError::Language)?;
+        let forms = lower_program(&parsed);
         Ok(Self { forms })
     }
 
@@ -45,7 +47,7 @@ impl PhysicalT5Program {
     /// The program does not retain a mutable runtime between calls. Bootstrap,
     /// host capabilities, and session reuse remain the caller's decision.
     pub fn execute(&self, session: &mut Session) -> Result<EvalResult, LanguageError> {
-        eval_parsed_expressions(&self.forms, session)
+        eval_lowered_expressions(&self.forms, session)
     }
 }
 

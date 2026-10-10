@@ -3,7 +3,7 @@
 //! Reports observations, never asserts a synthetic speedup or a native ISA.
 use std::{hint::black_box, time::Instant};
 use sens::{
-    eval_parsed_expressions, open_ternary_program, parse_canonical_binary,
+    eval_parsed_expressions, lower_program, open_ternary_program, parse_canonical_binary,
     PhysicalT5Program, Session,
 };
 const QUOTE: &[u8] = include_bytes!("../../../tests/fixtures/migration-quote-cohort-main/quote-legacy.sens");
@@ -24,7 +24,7 @@ fn main() {
         .unwrap_or(2_000);
     assert!((1..=1_000_000).contains(&iterations));
     eprintln!("measurement only; ns/op includes allocations and host overhead; iterations={iterations}");
-    println!("fixture,bytes,forms,decode_parse_ns,visible_parse_ns,eval_cached_ns");
+    println!("fixture,bytes,forms,t5_decode_parse_lower_ns,visible_parse_lower_ns,cached_lowered_eval_ns");
     for (label, bytes) in [("quote", QUOTE), ("atom", ATOM), ("cond", COND)] {
         let program = PhysicalT5Program::decode(bytes).unwrap();
         let visible = open_ternary_program(bytes).unwrap();
@@ -36,14 +36,14 @@ fn main() {
         // Untimed warmups. No reliance on timing to establish semantics.
         for _ in 0..100 {
             black_box(PhysicalT5Program::decode(black_box(bytes)).unwrap());
-            black_box(parse_canonical_binary(black_box(&visible)).unwrap());
+            black_box(lower_program(&parse_canonical_binary(black_box(&visible)).unwrap()));
             black_box(program.execute(&mut Session::default()).unwrap());
         }
         let direct_ns = measure(|| {
             black_box(PhysicalT5Program::decode(black_box(bytes)).unwrap());
         }, iterations);
         let visible_ns = measure(|| {
-            black_box(parse_canonical_binary(black_box(&visible)).unwrap());
+            black_box(lower_program(&parse_canonical_binary(black_box(&visible)).unwrap()));
         }, iterations);
         // Warm cached AST with a persistent session. In particular, do NOT
         // include construction/bootstrap of the runtime in this lane.

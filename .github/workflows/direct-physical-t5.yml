@@ -47,7 +47,7 @@ jobs:
           assert {r["fixture"] for r in rows}=={"quote","atom","cond"}
           assert all(int(r["bytes"])>0 and int(r["forms"])>0 for r in rows)
           for r in rows:
-              for key in ("decode_parse_ns","visible_parse_ns","eval_cached_ns"):
+              for key in ("t5_decode_parse_lower_ns","visible_parse_lower_ns","cached_lowered_eval_ns"):
                   assert 0<float(r[key])<1e12, r
           print("MEASURED_NOT_SPEEDUP_CLAIMED")
           PY
