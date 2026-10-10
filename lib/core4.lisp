@@ -1025,11 +1025,9 @@
          (00000101 peers)
          (my-postcore-build-definitions source (00000110 peers)))))))
 
-(defmacro my-postcore-materialize-stable-peers args
-  (let* ((semantic-id (00000101 args))
-             (source (00101111 args))
-             (group (my-postcore-peer-group
-                       semantic-id my-postcore-stable-peer-projection)))
+(defmacro my-postcore-materialize-stable-peers (semantic-id source)
+  (let* ((group (my-postcore-peer-group
+                  semantic-id my-postcore-stable-peer-projection)))
     (00000111
       ((00000010 group) source)
       ((00000010 (00000001 ()))
