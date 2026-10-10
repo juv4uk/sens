@@ -11,6 +11,10 @@ run() {
   "$@"
 }
 
+# Перевірки нижче користуються assert: оптимізований Python їх прибирає.
+# Fail-closed до запуску будь-якого доказового кроку.
+run python3 -c 'import sys; sys.exit("BINARY-LANGUAGE-PIPELINE: BLOCKED — Python -O/PYTHONOPTIMIZE вимикає assert") if not __debug__ else None'
+
 # F−1/F0: нейтральний binary carrier та exact bounded word identity.
 run python3 scripts/research-2106-binary-substrate.py
 run python3 scripts/research-2077-binary-word-law.py
@@ -35,6 +39,9 @@ run python3 - <<'PY'
 import importlib.util
 import sys
 from pathlib import Path
+
+if not __debug__:
+    raise SystemExit("BINARY-LANGUAGE-NEGATIVE-CONTROLS: BLOCKED — Python -O вимикає assert")
 
 ROOT = Path.cwd()
 SCRIPTS = ROOT / "scripts"
