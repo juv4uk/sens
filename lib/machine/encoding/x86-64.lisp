@@ -1295,7 +1295,7 @@
          (100 instructions)
          (x86-encode-program (011 instructions))))
       ((010 instructions)
-       (x86-machine-operand-rejection (00000001 instruction-list) instructions)))))
+       (1110 (001 rejected) (001 machine-operand) (001 instruction-list) instructions)))))
 
 ; #2372 reusable VEX3 XMM register law.
 ; byte1 = C4; byte2 = ~R ~X ~B m-mmmm; byte3 = W ~vvvv L pp.
