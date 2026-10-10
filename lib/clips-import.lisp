@@ -121,9 +121,9 @@
 (00001001 clips-deftemplate-form?
   (00001000 (form)
     (00000111
-      ((00000010 form) () (00000001 ()))
+      
       ((00000010 form)  (00000001 ()))
-      ((00000010 (00000101 form)) () (00000011 (00000101 form) (00000001 deftemplate)))
+      ((0100 (00000010 (00000101 form))) (00000011 (00000101 form) (00000001 deftemplate)))
       ((00000010 (00000101 form))  (00000011 (00000101 form) (00000001 deftemplate)))
       (t (00000001 ())))))
 
@@ -193,7 +193,7 @@
 (00001001 clips-slot-names
   (00001000 (slot-forms)
     (00000111
-      ((00000010 slot-forms) () (00000001 ()))
+      
       ((00000010 slot-forms)  (00000001 ()))
       (t (00000100 (clips-slot-name (00000101 slot-forms)) (clips-slot-names (00000110 slot-forms)))))))
 
@@ -204,7 +204,7 @@
 (00001001 clips-templates-from-forms
   (00001000 (forms)
     (00000111
-      ((00000010 forms) () (00000001 ()))
+      
       ((00000010 forms)  (00000001 ()))
       ((clips-deftemplate-form? (00000101 forms))
        (00000100 (00000100 (clips-deftemplate-name (00000101 forms)) (clips-deftemplate-slots (00000101 forms)))
@@ -215,7 +215,7 @@
   (00001000 (name templates)
     (10011100 ((entry (00101101 name templates)))
       (00000111
-        ((00000010 entry) () (00000001 ()))
+        
         ((00000010 entry)  (00000001 ()))
         (t (00000110 entry))))))
 
@@ -248,7 +248,7 @@
 (00001001 clips-slot-value-of
   (00001000 (slot-form)
     (00000111
-      ((00000010 (00000110 slot-form)) () (00000001 ()))
+      
       ((00000010 (00000110 slot-form))  (00000001 ()))
       (t (00101111 slot-form)))))
 
@@ -262,9 +262,9 @@
 (00001001 clips-lookup-slot-value
   (00001000 (slot-name slot-forms)
     (00000111
-      ((00000010 slot-forms) () (00000001 ()))
+      
       ((00000010 slot-forms)  (00000001 ()))
-      ((00000010 (00000101 slot-forms)) () (clips-lookup-slot-value slot-name (00000110 slot-forms)))
+      ((0100 (00000010 (00000101 slot-forms))) (clips-lookup-slot-value slot-name (00000110 slot-forms)))
       ((00000010 (00000101 slot-forms))  (clips-lookup-slot-value slot-name (00000110 slot-forms)))
       ((00100010 slot-name (00000101 (00000101 slot-forms))) (clips-slot-value-of (00000101 slot-forms)))
       (t (clips-lookup-slot-value slot-name (00000110 slot-forms))))))
@@ -272,7 +272,7 @@
 (00001001 clips-positional-args
   (00001000 (slot-order slot-forms)
     (00000111
-      ((00000010 slot-order) () (00000001 ()))
+      
       ((00000010 slot-order)  (00000001 ()))
       (t (00000100 (clips-lookup-slot-value (00000101 slot-order) slot-forms)
                 (clips-positional-args (00000110 slot-order) slot-forms))))))
@@ -314,9 +314,9 @@
 (00001001 clips-convert-template
   (00001000 (term templates)
     (00000111
-      ((00000010 term) () term)
-      ((00000010 term) (1) term)
-      ((00000010 (00000101 term)) () (00000111
+      
+      ((00000010 term)  term)
+      ((0100 (00000010 (00000101 term))) (00000111
          ((00000011 (00000101 term) (00000001 not)) (00100111 (00000001 not?) (clips-convert-template (00101111 term) templates)))
          ((00000011 (00000101 term) (00000001 or)) (00000100 (00000001 or) (clips-convert-template-list (00000110 term) templates)))
          ((00000011 (00000101 term) (00000001 and)) (00000100 (00000001 and) (clips-convert-template-list (00000110 term) templates)))
@@ -324,8 +324,8 @@
          ((00000011 (00000101 term) (00000001 forall)) (00000100 (00000001 forall) (clips-convert-template-list (00000110 term) templates)))
          (t (10011100 ((slot-order (clips-template-slot-order (clips-strip-module-prefix (00000101 term)) templates)))
               (00000111
-                ((00000010 slot-order) () term)
-                ((00000010 slot-order) (1) term)
+                
+                ((00000010 slot-order)  term)
                 (t (00000100 (00000101 term) (clips-positional-args slot-order (00000110 term)))))))))
       ((00000010 (00000101 term))  (00000111
          ((00000011 (00000101 term) (00000001 not)) (00100111 (00000001 not?) (clips-convert-template (00101111 term) templates)))
@@ -335,15 +335,15 @@
          ((00000011 (00000101 term) (00000001 forall)) (00000100 (00000001 forall) (clips-convert-template-list (00000110 term) templates)))
          (t (10011100 ((slot-order (clips-template-slot-order (clips-strip-module-prefix (00000101 term)) templates)))
               (00000111
-                ((00000010 slot-order) () term)
-                ((00000010 slot-order) (1) term)
+                
+                ((00000010 slot-order)  term)
                 (t (00000100 (00000101 term) (clips-positional-args slot-order (00000110 term)))))))))
       (t term))))
 
 (00001001 clips-convert-template-list
   (00001000 (terms templates)
     (00000111
-      ((00000010 terms) () (00000001 ()))
+      
       ((00000010 terms)  (00000001 ()))
       (t (00000100 (clips-convert-template (00000101 terms) templates)
                 (clips-convert-template-list (00000110 terms) templates))))))
@@ -372,7 +372,7 @@
 (00001001 clips-facts->clauses-onto
   (00001000 (facts templates acc)
     (00000111
-      ((00000010 facts) () (00101010 acc))
+      ((0100 (00000010 facts)) (00101010 acc))
       ((00000010 facts)  (00101010 acc))
       (t (clips-facts->clauses-onto
            (00000110 facts) templates
@@ -444,7 +444,7 @@
 (00001001 clips-var?
   (00001000 (term)
     (00000111
-      ((00000010 term) () (00000111
+      ((0100 (00000010 term)) (00000111
          ((00100011 term) (clips-symbol-starts-with-? term))
          (t (00000001 ()))))
       ((00000010 term)  (00000111
@@ -466,8 +466,8 @@
   (00001000 (term)
     (00000111
       ((clips-var? term) (clips-var-term term))
-      ((00000010 term) () term)
-      ((00000010 term) (1) term)
+      
+      ((00000010 term)  term)
       (t (00000100 (clips-convert-vars (00000101 term)) (clips-convert-vars (00000110 term)))))))
 
 ; Splits a defrule's body at `=>` into (conditions . conclusion-forms).
@@ -477,9 +477,9 @@
 (00001001 clips-split-at-arrow
   (00001000 (body)
     (00000111
-      ((00000010 body) () (00100111 (00000001 ()) (00000001 ())))
+      ((0100 (00000010 body)) (00100111 (00000001 ()) (00000001 ())))
       ((00000010 body)  (00100111 (00000001 ()) (00000001 ())))
-      ((00000010 (00000101 body)) () (00000111
+      ((0100 (00000010 (00000101 body))) (00000111
          ((00000011 (00000101 body) (00000001 =>)) (00100111 (00000001 ()) (00000110 body)))
          (t (10011100 ((rest (clips-split-at-arrow (00000110 body))))
               (00100111 (00000100 (00000101 body) (00000101 rest)) (00101111 rest))))))
@@ -529,9 +529,9 @@
 (00001001 clips-assert-form?
   (00001000 (form)
     (00000111
-      ((00000010 form) () (00000001 ()))
+      
       ((00000010 form)  (00000001 ()))
-      ((00000010 (00000101 form)) () (00000011 (00000101 form) (00000001 assert)))
+      ((0100 (00000010 (00000101 form))) (00000011 (00000101 form) (00000001 assert)))
       ((00000010 (00000101 form))  (00000011 (00000101 form) (00000001 assert)))
       (t (00000001 ())))))
 
@@ -597,16 +597,16 @@
 (00001001 clips-printout-form?
   (00001000 (form)
     (00000111
-      ((00000010 form) () (00000001 ()))
+      
       ((00000010 form)  (00000001 ()))
-      ((00000010 (00000101 form)) () (00000011 (00000101 form) (00000001 printout)))
+      ((0100 (00000010 (00000101 form))) (00000011 (00000101 form) (00000001 printout)))
       ((00000010 (00000101 form))  (00000011 (00000101 form) (00000001 printout)))
       (t (00000001 ())))))
 
 (00001001 clips-drop-printouts
   (00001000 (forms)
     (00000111
-      ((00000010 forms) () (00000001 ()))
+      
       ((00000010 forms)  (00000001 ()))
       ((clips-printout-form? (00000101 forms)) (clips-drop-printouts (00000110 forms)))
       (t (00000100 (00000101 forms) (clips-drop-printouts (00000110 forms)))))))
@@ -614,8 +614,8 @@
 (00001001 clips-all-asserts?
   (00001000 (forms)
     (00000111
-      ((00000010 forms) () t)
-      ((00000010 forms) (1) t)
+      
+      ((00000010 forms)  t)
       ((clips-assert-form? (00000101 forms)) (clips-all-asserts? (00000110 forms)))
       (t (00000001 ())))))
 
@@ -661,14 +661,14 @@
 (00001001 clips-assert-conclusions
   (00001000 (forms)
     (00000111
-      ((00000010 forms) () (00000001 ()))
+      
       ((00000010 forms)  (00000001 ()))
       (t (00101001 (00000110 (00000101 forms)) (clips-assert-conclusions (00000110 forms)))))))
 
 (00001001 clips-clauses-for-conclusions
   (00001000 (conclusions conditions)
     (00000111
-      ((00000010 conclusions) () (00000001 ()))
+      
       ((00000010 conclusions)  (00000001 ()))
       (t (00000100 (00000100 (clips-convert-vars (00000101 conclusions)) conditions)
                 (clips-clauses-for-conclusions (00000110 conclusions) conditions))))))
@@ -771,17 +771,17 @@
   (00001000 (form)
     (00000111
       ((00100100 form) t)
-      ((00000010 form) () (00000001 ()))
+      
       ((00000010 form)  (00000001 ()))
-      ((00000010 (00000101 form)) () (00000011 (00000101 form) (00000001 declare)))
+      ((0100 (00000010 (00000101 form))) (00000011 (00000101 form) (00000001 declare)))
       ((00000010 (00000101 form))  (00000011 (00000101 form) (00000001 declare)))
       (t (00000001 ())))))
 
 (00001001 clips-strip-rule-preamble
   (00001000 (body)
     (00000111
-      ((00000010 body) () body)
-      ((00000010 body) (1) body)
+      
+      ((00000010 body)  body)
       ((clips-rule-preamble-form? (00000101 body)) (clips-strip-rule-preamble (00000110 body)))
       (t body))))
 
@@ -871,14 +871,14 @@
 (00001001 clips-cons-each-onto
   (00001000 (items acc)
     (00000111
-      ((00000010 items) () acc)
-      ((00000010 items) (1) acc)
+      
+      ((00000010 items)  acc)
       (t (clips-cons-each-onto (00000110 items) (00000100 (00000101 items) acc))))))
 
 (00001001 clips-import-forms-onto
   (00001000 (forms templates acc)
     (00000111
-      ((00000010 forms) () (00101010 acc))
+      ((0100 (00000010 forms)) (00101010 acc))
       ((00000010 forms)  (00101010 acc))
       (t (clips-import-forms-onto
            (00000110 forms) templates
