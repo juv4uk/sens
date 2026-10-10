@@ -134,3 +134,34 @@ fn current_cond_reference_is_valid_binary_and_executes_without_legacy_sid() {
     assert!(matches!(result.value, Value::Nil));
     assert!(result.output.is_empty());
 }
+
+
+/// Diagnose the first non-callable top-level time form after Core4 bootstrap.
+/// This test intentionally preserves strict runtime behavior: it reports the
+/// exact top-level index and source bytes instead of replacing the failed form.
+#[test]
+fn time_library_top_level_replay_reports_first_noncallable_form() {
+    let mut session = Session::default();
+    sens::load_core_library(&mut session).expect("Core4 bootstrap");
+    let source = include_str!("../../../lib/time.lisp");
+    let parsed = sens::parse(source).expect("time library syntax");
+
+    for (index, expression) in parsed.iter().enumerate() {
+        if let Err(error) =
+            eval_parsed_expressions(std::slice::from_ref(expression), &mut session)
+        {
+            let start = (expression.span.start as usize).min(source.len());
+            let end = (expression.span.end as usize).min(source.len()).max(start);
+            let preview_end = end.min(start.saturating_add(180));
+            let snippet = String::from_utf8_lossy(&source.as_bytes()[start..preview_end]);
+            panic!(
+                "TIME-DIAGNOSTIC: top_level_index={} source_span={}..{} source={:?} error={:?}",
+                index + 1,
+                start,
+                end,
+                snippet.replace('\n', " "),
+                error
+            );
+        }
+    }
+}
