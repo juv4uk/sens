@@ -20,7 +20,7 @@ fn load_lisp_file(path: &str, session: &mut Session) {
     let file_path = repo_root().join(path);
     let source = fs::read_to_string(&file_path)
         .unwrap_or_else(|error| panic!("{} must exist: {error}", file_path.display()));
-    let expressions = parse_mixed_exact_domain_machine_source(&source)
+    let expressions = parse_mixed_exact_domain_machine_source(path, &source)
         .unwrap_or_else(|error| panic!("{path} must parse as exact-domain machine source: {error}"));
     eval_parsed_expressions(&expressions, session)
         .unwrap_or_else(|error| panic!("{path} must load through the machine-source reader: {error}"));
