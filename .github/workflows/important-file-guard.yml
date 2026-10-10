@@ -48,6 +48,9 @@ jobs:
         run: |
           set -euo pipefail
           cargo test --locked -p sens-cli --test file_authority_t5_boundary_cli -- --nocapture
+          # Канонічна обмежена ук-трійка має власний незалежний read-only доказ.
+          bash scripts/check-triple-projection.sh \
+            --fixture tests/fixtures/migration-d1-cond-cohort/branch.lisp
 
       - name: Select and validate the exact Git comparison base
         id: base
