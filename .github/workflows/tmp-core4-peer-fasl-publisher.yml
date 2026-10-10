@@ -1,4 +1,5 @@
 name: TEMP Core4 source-matched FASL publisher
+# One-shot repair lane; this file is deleted before final integration.
 
 on:
   push:
