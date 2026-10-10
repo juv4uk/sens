@@ -66,6 +66,23 @@
       "files": [
         "scripts/check_d10_babbage_reiter_selection.py"
       ]
+    },
+    {
+      "pr": 5536,
+      "files": [
+        "scripts/check_d10_debruijn_binary_cycle.py",
+        "scripts/check_d10_dung_grounded.py",
+        "scripts/check_d10_maling_symbolic_differentiation.py",
+        "scripts/check_d10_reiter_minimal_diagnoses.py",
+        "scripts/check_d10_unique_bounded_modular_lift.py"
+      ]
+    },
+    {
+      "pr": 5532,
+      "files": [
+        "scripts/check_d10_unique_bounded_modular_lift.py",
+        "docs/research/d10-bounded-modular-lift-20261009.uk.md"
+      ]
     }
   ],
   "reactivation_condition": "reconcile each source HOLD vs selected; independent exact-oracle proof; D1-D9/D10 dedup; recompute SHA chain; single-writer merge; never bypass fail-closed tests",
@@ -75,5 +92,15 @@
     "source PR copies of knowledge/d10-selection-transition-history.json",
     "source PR copies of docs/architecture/ARCHIPELAGO-V1.uk.md"
   ],
-  "warning": "Research archive records historical assertions (some SELECTED at old SHA) but does not claim they hold on current main."
+  "warning": "Research archive records historical assertions (some SELECTED at old SHA) but does not claim they hold on current main.",
+  "archived_source_file_count": 27,
+  "main_pending_proposals_replayed": 32,
+  "outdated_selection_prs_closed_without_merge": [
+    5529,
+    5531,
+    5536,
+    5537
+  ],
+  "replay_commit": "7a35c9fc1a3feb6e5681c896a99e8f08b96ba7d4",
+  "ledger_CI": "https://github.com/juv4uk/sens/actions/runs/38096596935"
 }
