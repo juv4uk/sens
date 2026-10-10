@@ -90,6 +90,11 @@ probes = {
     "speed-constant-clauses": "\n(scientific-constant->clauses si:defining-speed-of-light)\n",
     "distance-product": "\n(quantity-product (scientific-constant-quantity si:defining-speed-of-light) (make-quantity 1 (make-unit (00100111 (make-dimension (00000001 second) 1)))))\n",
     "speed-quotient": "\n(quantity-quotient (quantity-product (scientific-constant-quantity si:defining-speed-of-light) (make-quantity 1 (make-unit (00100111 (make-dimension (00000001 second) 1))))) (make-quantity 1 (make-unit (00100111 (make-dimension (00000001 second) 1)))))\n",
+    "lambda-identity-probe": "\n((функція (x) x) 7)\n",
+    "lambda-nested-probe": "\n((функція (x) ((функція (y) x) 8)) 7)\n",
+    "list-two-probe": "\n(00100111 (00000001 a) (00000001 b))\n",
+    "list-seven-probe": "\n(00100111 (00000001 a) (00000001 b) (00000001 c) (00000001 d) (00000001 e) (00000001 f) (00000001 g))\n",
+    "rows-planck-cesium-prefix": "\n((функція (planck) ((функція (cesium) (00100111 planck cesium)) (scientific-constant-quantity si:defining-cesium-frequency))) (scientific-constant-quantity si:defining-planck-constant))\n",
     "planck-value": "\n(quantity-value (scientific-constant-quantity si:defining-planck-constant))\n",
     "planck-unit": "\n(quantity-unit (scientific-constant-quantity si:defining-planck-constant))\n",
     "numeric-product": "\n(00001110 (quantity-value (scientific-constant-quantity si:defining-planck-constant)) (quantity-value (scientific-constant-quantity si:defining-cesium-frequency)))\n",
@@ -102,7 +107,7 @@ for stage, suffix in probes.items():
     )
 PY
 
-  for stage in rows-binding check-binding witness-binding rows-call check-call planck-record cesium-record planck-value planck-unit numeric-product quantity-product one-second merge-dimensions product-units speed-proper-list speed-constant-valid speed-source-valid speed-constant-clauses distance-product speed-quotient; do
+  for stage in rows-binding check-binding witness-binding rows-call check-call planck-record cesium-record planck-value planck-unit numeric-product quantity-product one-second merge-dimensions product-units speed-proper-list speed-constant-valid speed-source-valid speed-constant-clauses distance-product speed-quotient lambda-identity-probe lambda-nested-probe list-two-probe list-seven-probe rows-planck-cesium-prefix; do
     probe="$quantity_diag_dir/exact-quantity-$stage-probe.lisp"
     log="$quantity_diag_dir/exact-quantity-$stage-probe.log"
     if cargo run --quiet -p sens-cli --bin sens -- "$probe" >"$log" 2>&1; then
