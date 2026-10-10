@@ -1,7 +1,5 @@
 name: Core4 exact-domain FASL candidate
 
-# This workflow builds a candidate snapshot and exports it as an artifact;
-# it never commits or promotes binary output by itself.
 on:
   push:
     branches:
