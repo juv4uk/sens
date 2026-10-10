@@ -63,8 +63,10 @@ jobs:
           bytes_exit=$?
           cargo test --locked -p sens --test x86_64_lisp_encoder lisp_encodes_mov_r64_imm64_for_every_gpr_with_independent_decode -- --exact --nocapture
           registers_exit=$?
+          cargo test --locked -p sens --test x86_64_lisp_encoder x86_u64_bytes_equal_independent_little_endian_for_boundaries -- --exact --nocapture
+          boundaries_exit=$?
           cargo test --locked -p sens --test x86_64_lisp_encoder exact_ukrainian_quotient_and_remainder_stage_probe -- --exact --nocapture
           arithmetic_exit=$?
-          if [ "$bytes_exit" -ne 0 ] || [ "$registers_exit" -ne 0 ] || [ "$arithmetic_exit" -ne 0 ]; then
+          if [ "$bytes_exit" -ne 0 ] || [ "$registers_exit" -ne 0 ] || [ "$boundaries_exit" -ne 0 ] || [ "$arithmetic_exit" -ne 0 ]; then
             exit 1
           fi
