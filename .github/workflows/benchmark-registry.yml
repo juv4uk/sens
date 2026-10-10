@@ -30,8 +30,20 @@ jobs:
       - name: Validate manifests and generated index
         run: python3 scripts/benchmark_registry.py --check
 
-      - name: Verify bounded T21/T22/T33 research candidate
-        run: python3 benchmarks/byte-pack/носій22.py --verify
+      - name: Verify and measure bounded T21/T22/T33 research candidate
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 benchmarks/byte-pack/носій22.py --verify
+          python3 benchmarks/byte-pack/носій22.py --bench --ntrits 4620 --reps 15 --out "$RUNNER_TEMP/t22-results.json"
+          test -s "$RUNNER_TEMP/t22-results.json"
+
+      - name: Publish raw T22 timing evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: t22-carrier-benchmark-${{ github.sha }}
+          path: ${{ runner.temp }}/t22-results.json
+          if-no-files-found: error
 
       - name: Reject newly created unmanifested stands
         if: github.event_name == 'pull_request'
