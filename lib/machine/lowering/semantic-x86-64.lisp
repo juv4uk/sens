@@ -235,29 +235,54 @@
       ((010 values) tail)
       ((010 ()) (111 (100 values) (x86-machine-append-forms (011 values) tail))))))
 
+; The bounded native pair witness has a fixed six-instruction shape. Build it
+; directly rather than routing through generic append/reverse: those Core4 list
+; traversals currently consume graded relation answers as COND control and must
+; keep failing closed until their predicate adapter is migrated. This narrow
+; witness should not depend on an unfinished generic traversal path.
 (00001001 x86-lower-cons-car-u64-forms
   (00001000 (left right)
-    (x86-machine-append-forms
-      (x86-lower-bounded-pair-store-u64-forms left right)
+    (00100111
+      (00100111 (00000001 mov-r64-imm64) (00000001 rax) left)
       (00100111
-        (00100111
-          (00000001 mov-r64-mem-disp8)
-          (00000001 rax)
-          (00000001 rdi)
-          x86-pair-car-offset)
-        (00100111 (00000001 ret))))))
+        (00000001 mov-mem-disp8-r64)
+        (00000001 rdi)
+        x86-pair-car-offset
+        (00000001 rax))
+      (00100111 (00000001 mov-r64-imm64) (00000001 rax) right)
+      (00100111
+        (00000001 mov-mem-disp8-r64)
+        (00000001 rdi)
+        x86-pair-cdr-offset
+        (00000001 rax))
+      (00100111
+        (00000001 mov-r64-mem-disp8)
+        (00000001 rax)
+        (00000001 rdi)
+        x86-pair-car-offset)
+      (00100111 (00000001 ret)))))
 
 (00001001 x86-lower-cons-cdr-u64-forms
   (00001000 (left right)
-    (x86-machine-append-forms
-      (x86-lower-bounded-pair-store-u64-forms left right)
+    (00100111
+      (00100111 (00000001 mov-r64-imm64) (00000001 rax) left)
       (00100111
-        (00100111
-          (00000001 mov-r64-mem-disp8)
-          (00000001 rax)
-          (00000001 rdi)
-          x86-pair-cdr-offset)
-        (00100111 (00000001 ret))))))
+        (00000001 mov-mem-disp8-r64)
+        (00000001 rdi)
+        x86-pair-car-offset
+        (00000001 rax))
+      (00100111 (00000001 mov-r64-imm64) (00000001 rax) right)
+      (00100111
+        (00000001 mov-mem-disp8-r64)
+        (00000001 rdi)
+        x86-pair-cdr-offset
+        (00000001 rax))
+      (00100111
+        (00000001 mov-r64-mem-disp8)
+        (00000001 rax)
+        (00000001 rdi)
+        x86-pair-cdr-offset)
+      (00100111 (00000001 ret)))))
 
 ; Bounded semantic entry for the Vertical Day CAR witness.
 ; Canonical CAR/CDR own pair validity and therefore fail with the language's
