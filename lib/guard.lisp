@@ -7,23 +7,26 @@
 ; contract, their difference, impact, guidance, and evidence as one stable
 ; WSM value. Rust adapters observe mechanisms; WSM owns interpretation.
 
+; Both classifiers are exact D1 predicates. D3 EQ owns the test bit;
+; D3 EQ on 0/0 and 0/1 supplies canonical YES and NO values respectively.
+; No legacy T/NIL return and no Number truthiness at the D3 COND boundary.
 (00001011 guard-decision?
   (00001000 (decision)
     (00000111
-      ((00000011 decision (00000001 allow)) t)
-      ((00000011 decision (00000001 warn)) t)
-      ((00000011 decision (00000001 reject)) t)
-      ((00000011 decision (00000001 unknown)) t)
-      (t (00000001 ())))))
+      ((00000011 decision (00000001 allow)) (00000011 0 0))
+      ((00000011 decision (00000001 warn)) (00000011 0 0))
+      ((00000011 decision (00000001 reject)) (00000011 0 0))
+      ((00000011 decision (00000001 unknown)) (00000011 0 0))
+      ((00000011 0 0) (00000011 0 1)))))
 
 (00001011 guard-evidence-status?
   (00001000 (status)
     (00000111
-      ((00000011 status (00000001 confirmed)) t)
-      ((00000011 status (00000001 partial)) t)
-      ((00000011 status (00000001 unresolved)) t)
-      ((00000011 status (00000001 broken)) t)
-      (t (00000001 ())))))
+      ((00000011 status (00000001 confirmed)) (00000011 0 0))
+      ((00000011 status (00000001 partial)) (00000011 0 0))
+      ((00000011 status (00000001 unresolved)) (00000011 0 0))
+      ((00000011 status (00000001 broken)) (00000011 0 0))
+      ((00000011 0 0) (00000011 0 1)))))
 
 ; UNKNOWN is a routing state, not a dead end. These routes distinguish
 ; distributed local knowledge, owner authority, and external research.
