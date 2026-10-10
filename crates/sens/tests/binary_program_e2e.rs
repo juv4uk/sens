@@ -113,6 +113,70 @@ fn migrated_d3_eq_subforms_are_committed_physical_t5_from_original_source() {
 
 
 #[test]
+fn migrated_d3_quote_and_atom_forms_preserve_original_words_or_prove_empty_normalization() {
+    let original = D3_PRIMITIVES_PROGRAM.split_whitespace().collect::<Vec<_>>();
+    assert_eq!(original.len(), 63, "original D3 primitive corpus drifted");
+
+    let cases: [(&[u8], &str, usize, usize, bool); 3] = [
+        (
+            include_bytes!("../../../examples/binary/d3-primitive-quote-one.sens"),
+            include_str!("../../../examples/binary/d3-primitive-quote-one"),
+            0, 5, false,
+        ),
+        (
+            include_bytes!("../../../examples/binary/d3-primitive-atom-empty.sens"),
+            include_str!("../../../examples/binary/d3-primitive-atom-empty"),
+            5, 11, true,
+        ),
+        (
+            include_bytes!("../../../examples/binary/d3-primitive-atom-cons.sens"),
+            include_str!("../../../examples/binary/d3-primitive-atom-cons"),
+            11, 22, false,
+        ),
+    ];
+    for (physical, visible, start, end, normalized_empty) in cases {
+        let old = original[start..end].join(" ");
+        let canonical = if normalized_empty {
+            // Original D2 "10 01" and ratified D3:000 BOTH parse to a
+            // structural zero-element list. Do NOT call the words identical.
+            assert_eq!(old, "10 010 00 10 01 01");
+            "10 010 00 000 01".to_string()
+        } else {
+            old.clone()
+        };
+        assert_eq!(visible, canonical.clone() + "\n");
+        assert_bit_projection(visible);
+        assert_eq!(
+            encode_binary_projection_ternary(visible).unwrap().as_slice(),
+            physical,
+            "committed T5 must equal exact canonical width-qualified words"
+        );
+        assert_eq!(open_ternary_program(physical).unwrap(), canonical);
+        let words = decode_ternary_program(physical).unwrap();
+        assert_eq!(sens::render_ternary_words_spaced(&words), canonical);
+        let parsed = parse_canonical_binary(visible).unwrap();
+        assert_eq!(parsed.len(), 1);
+        assert_exact_domain_ast(&parsed[0]);
+
+        if normalized_empty {
+            let legacy_parsed = parse_canonical_binary(&old).unwrap();
+            assert_eq!(legacy_parsed.len(), 1);
+            let ExprKind::List(legacy_outer) = &legacy_parsed[0].kind else {
+                panic!("old D2 ATOM frame must be structural");
+            };
+            let ExprKind::List(canonical_outer) = &parsed[0].kind else {
+                panic!("new D3 ATOM frame must be structural");
+            };
+            assert_eq!(legacy_outer.len(), 2);
+            assert_eq!(canonical_outer.len(), 2);
+            assert!(matches!(&legacy_outer[1].kind, ExprKind::List(items) if items.is_empty()));
+            assert!(matches!(&canonical_outer[1].kind, ExprKind::List(items) if items.is_empty()));
+        }
+    }
+}
+
+
+#[test]
 fn d5_label_recursion_keeps_d5_and_d7_coordinates_in_binary_ast() {
     assert_bit_projection(D5_LABEL_RECURSION_PROGRAM);
     let physical = encode_binary_projection_ternary(D5_LABEL_RECURSION_PROGRAM)
