@@ -86,6 +86,67 @@
           (fg-count needle (cdr values))))
       ((atom values) (structural-kind atom) 0))))
 
+(def fg-mode-count
+  (lambda (path modes)
+    (cond
+      ((atom modes) (structural-kind empty-list) 0)
+      ((atom modes) (structural-kind pair)
+        (+
+          (cond ((equal? path (car (car modes))) 1) (t 0))
+          (fg-mode-count path (cdr modes))))
+      ((atom modes) (structural-kind atom) 0))))
+
+(def fg-find-mode
+  (lambda (path modes)
+    (cond
+      ((atom modes) (structural-kind empty-list) ())
+      ((atom modes) (structural-kind pair)
+        (cond
+          ((equal? path (car (car modes))) (cdr (car modes)))
+          (t (fg-find-mode path (cdr modes)))))
+      ((atom modes) (structural-kind atom) ()))))
+
+(def fg-mode-rows-valid?
+  (lambda (modes paths)
+    (cond
+      ((atom modes) (structural-kind empty-list) 1)
+      ((atom modes) (structural-kind pair)
+        (and
+          (string? (car (car modes)))
+          (string? (cdr (car modes)))
+          (equal? (fg-count (car (car modes)) paths) 1)
+          (equal? (fg-mode-count (car (car modes)) modes) 1)
+          (fg-mode-rows-valid? (cdr modes) paths)))
+      ((atom modes) (structural-kind atom) 0))))
+
+(def fg-paths-have-mode?
+  (lambda (paths modes)
+    (cond
+      ((atom paths) (structural-kind empty-list) 1)
+      ((atom paths) (structural-kind pair)
+        (and
+          (equal? (fg-mode-count (car paths) modes) 1)
+          (fg-paths-have-mode? (cdr paths) modes)))
+      ((atom paths) (structural-kind atom) 0))))
+
+(def fg-mode-required?
+  (lambda (path)
+    (or
+      (string-prefix? "lib/" path)
+      (string-prefix? "knowledge/" path)
+      (string-prefix? "witnesses/" path)
+      (and
+        (string-prefix? "tools/" path)
+        (fg-suffix? path ".py")))))
+
+(def fg-mode-allowed?
+  (lambda (path modes)
+    (and
+      (equal? (fg-mode-count path modes) 1)
+      (or
+        (equal? (fg-find-mode path modes) "100644:blob")
+        (equal? (fg-find-mode path modes) "100755:blob")))))
+
 (def fg-row-path
   (lambda (row)
     (fg-field (quote path) row)))
@@ -305,6 +366,14 @@
       (fg-test-equal "duplicate census row is blocked"
         (fg-classify "tools/fixture.py" *file-authority-policy* (append fg-fixture-good fg-fixture-good))
         (quote blocked-foreign-census))
+      (fg-test-equal "regular Git blob is admitted"
+        (fg-mode-allowed? "lib/example.sens" (quote (("lib/example.sens" . "100644:blob")))) 1)
+      (fg-test-equal "symlink disguised as SENS is blocked"
+        (fg-mode-allowed? "lib/example.sens" (quote (("lib/example.sens" . "120000:blob")))) 0)
+      (fg-test-equal "gitlink disguised as SENS is blocked"
+        (fg-mode-allowed? "lib/example.sens" (quote (("lib/example.sens" . "160000:commit")))) 0)
+      (fg-test-equal "missing Git mode is blocked"
+        (fg-mode-allowed? "lib/example.sens" (quote ())) 0)
       (fg-test-equal "new shell tooling is blocked" (fg-classify "tools/new.sh" *file-authority-policy* real-rows) (quote blocked-new-shell-tool))
       (fg-test-equal "ordinary docs data is outside this policy" (fg-classify "docs/research.json" *file-authority-policy* real-rows) (quote allowed))
       (fg-test-equal "missing policy is invalid" (fg-policy-valid? (quote ())) 0)
