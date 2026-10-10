@@ -15,7 +15,7 @@ foundation = read("knowledge/d1-d9-foundation.json")
 source_bytes = (root / "lib/yantra.lisp").read_bytes()
 source = source_bytes.decode("utf-8").splitlines()
 source_sha = hashlib.sha1(
-    b"blob " + str(len(source_bytes)).encode("ascii") + b"\\0" + source_bytes
+    b"blob " + str(len(source_bytes)).encode("ascii") + b"\0" + source_bytes
 ).hexdigest()
 rows = harvest["rows"]
 # This v1 harvest is an immutable historical selection, not a claim that
@@ -25,7 +25,7 @@ assert harvest["donor"]["source_sha"] == "76460b72cccad6bc44b39e87372f37613735d7
 # occurrences cannot satisfy the current-source identity witness.
 current_locations = {}
 for line_number, line in enumerate(source, start=1):
-    found = re.match(r"^\\(00001001[ \\t]+([^\\s()]+)(?=\\s|\\))", line)
+    found = re.match(r"^\(00001001[ \t]+([^\s()]+)(?=\s|\))", line)
     if found:
         current_locations.setdefault(found.group(1), []).append(line_number)
 assert harvest["schema"] == "d10-yantra-library-harvest-v1/v1"
