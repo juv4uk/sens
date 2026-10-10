@@ -129,13 +129,12 @@
   (00001000 (scale index base)
     (00001100 (00001110 scale 64) (00001100 (00001110 index 8) base))))
 
+; Reuse the already proved exact Lisp long-division byte extractor.
+; Four iterations are the imm32 wire shape; historical W8 quotient/remainder
+; heads are not executable machine authority under strict D1 COND.
 (00001001 x86-u32-bytes
   (00001000 (value)
-    (00100111
-      (00010011 value 256)
-      (00010011 (00010100 value 256) 256)
-      (00010011 (00010100 value 65536) 256)
-      (00010011 (00010100 value 16777216) 256))))
+    (x86-байти-без-знака value 4)))
 
 ; Точне двійкове ділення з цілою часткою і залишком.
 ; Механізм x86, не новий закон D5/D6: лише вже ратифіковані
