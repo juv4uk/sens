@@ -35,7 +35,7 @@ jobs:
           set -euo pipefail
           cargo run --locked --release -p sens-cli --bin gen-fasl -- lib/core4.lisp lib/core4.lisp.fasl
           cargo test --locked -p sens --test core_fasl_freshness -- --nocapture
-          cargo test --locked -p sens --test current_binary_preflight current_defmacro_bootstrap_executes_let_and_let_star -- --exact --nocapture
+          cargo test --locked -p sens --test current_binary_preflight current_defmacro_bootstrap_executes_let -- --exact --nocapture
           cargo test --locked -p sens --test current_binary_preflight postcore_peer_materializer_installs_the_stable_ukrainian_time_surface -- --exact --nocapture
           git diff --exit-code -- . ':!lib/core4.lisp.fasl'
           git add lib/core4.lisp.fasl
