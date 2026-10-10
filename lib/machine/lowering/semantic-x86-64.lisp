@@ -226,9 +226,18 @@
   (00001000 (left right)
     (x86-lower-bounded-pair-store-u64-forms left right)))
 
+; Append only the finite structured machine-form lists using current D3
+; primitives. Do not route this boundary through Core4's deferred legacy
+; reverse-onto/COND implementation: tests and authority remain language-owned.
+(00001001 x86-machine-append-forms
+  (00001000 (values tail)
+    (110
+      ((010 values) tail)
+      ((010 ()) (111 (100 values) (x86-machine-append-forms (011 values) tail))))))
+
 (00001001 x86-lower-cons-car-u64-forms
   (00001000 (left right)
-    (приєднати
+    (x86-machine-append-forms
       (x86-lower-bounded-pair-store-u64-forms left right)
       (00100111
         (00100111
@@ -240,7 +249,7 @@
 
 (00001001 x86-lower-cons-cdr-u64-forms
   (00001000 (left right)
-    (приєднати
+    (x86-machine-append-forms
       (x86-lower-bounded-pair-store-u64-forms left right)
       (00100111
         (00100111
