@@ -7,23 +7,26 @@
 ; contract, their difference, impact, guidance, and evidence as one stable
 ; WSM value. Rust adapters observe mechanisms; WSM owns interpretation.
 
+; Both classifiers are exact D1 predicates. D3 EQ owns the test bit;
+; D3 EQ on 0/0 and 0/1 supplies canonical YES and NO values respectively.
+; No legacy T/NIL return and no Number truthiness at the D3 COND boundary.
 (00001011 guard-decision?
   (00001000 (decision)
-    (00000111
-      ((00000011 decision (00000001 allow)) t)
-      ((00000011 decision (00000001 warn)) t)
-      ((00000011 decision (00000001 reject)) t)
-      ((00000011 decision (00000001 unknown)) t)
-      (t (00000001 ())))))
+    (110
+      ((00000011 decision (00000001 allow)) (00000011 0 0))
+      ((00000011 decision (00000001 warn)) (00000011 0 0))
+      ((00000011 decision (00000001 reject)) (00000011 0 0))
+      ((00000011 decision (00000001 unknown)) (00000011 0 0))
+      ((00000011 0 0) (00000011 0 1)))))
 
 (00001011 guard-evidence-status?
   (00001000 (status)
-    (00000111
-      ((00000011 status (00000001 confirmed)) t)
-      ((00000011 status (00000001 partial)) t)
-      ((00000011 status (00000001 unresolved)) t)
-      ((00000011 status (00000001 broken)) t)
-      (t (00000001 ())))))
+    (110
+      ((00000011 status (00000001 confirmed)) (00000011 0 0))
+      ((00000011 status (00000001 partial)) (00000011 0 0))
+      ((00000011 status (00000001 unresolved)) (00000011 0 0))
+      ((00000011 status (00000001 broken)) (00000011 0 0))
+      ((00000011 0 0) (00000011 0 1)))))
 
 ; UNKNOWN is a routing state, not a dead end. These routes distinguish
 ; distributed local knowledge, owner authority, and external research.
@@ -47,12 +50,12 @@
 
 (00001011 make-guard-finding
   (00001000 (decision evidence-status subject state contract delta impact guidance evidence)
-    (00000111
-      ((00100001 (guard-decision? decision))
+    (110
+      ((00000011 (guard-decision? decision) (00000011 0 1))
        (00100111 (00000001 invalid-guard-decision) decision))
-      ((00100001 (guard-evidence-status? evidence-status))
+      ((00000011 (guard-evidence-status? evidence-status) (00000011 0 1))
        (00100111 (00000001 invalid-evidence-status) evidence-status))
-      (t
+      ((00000011 0 0)
        (00100111
          (00000001 guard-finding)
          (00100111 (00000001 schema) (00000001 guard/1))
@@ -67,9 +70,9 @@
          (00100111 (00000001 evidence) evidence)
          (00100111
            (00000001 unknown-routes)
-           (00000111
+           (110
              ((00000011 decision (00000001 unknown)) (guard-unknown-routes))
-             (t (00000001 ())))))))))
+             ((00000011 0 0) (00000001 ())))))))))
 
 ; A missing fact is UNKNOWN, never an implicit rejection.
 ; Відсутній факт означає UNKNOWN, а не неявну заборону.
@@ -113,8 +116,8 @@
 ; а не прихований Git lock.
 (00001011 guard-sync-window
   (00001000 (commit-state sync-state drift-state evidence)
-    (00000111
-      ((00100001 (00000011 commit-state (00000001 frozen)))
+    (110
+      ((00000011 (00000011 commit-state (00000001 frozen)) (00000011 0 1))
        (make-guard-finding
          (00000001 reject) (00000001 confirmed) (00000001 ecosystem-sync)
          commit-state (00000001 commits-frozen-before-sync)
@@ -122,7 +125,7 @@
          (00000001 concurrent-commits-can-create-unrecorded-drift)
          (00000001 freeze-commits-before-synchronization)
          evidence))
-      ((00100001 (00000011 sync-state (00000001 completed)))
+      ((00000011 (00000011 sync-state (00000001 completed)) (00000011 0 1))
        (make-guard-finding
          (00000001 warn) (00000001 unresolved) (00000001 ecosystem-sync)
          sync-state (00000001 synchronization-completed)
@@ -130,7 +133,7 @@
          (00000001 drift-cannot-yet-be-classified)
          (00000001 complete-sync-and-preserve-logs)
          evidence))
-      ((00100001 (00000011 drift-state (00000001 recorded)))
+      ((00000011 (00000011 drift-state (00000001 recorded)) (00000011 0 1))
        (make-guard-finding
          (00000001 warn) (00000001 unresolved) (00000001 ecosystem-sync)
          drift-state (00000001 drift-recorded)
@@ -138,7 +141,7 @@
          (00000001 synchronization-result-has-no-drift-record)
          (00000001 record-drift-before-unfreezing-commits)
          evidence))
-      (t
+      ((00000011 0 0)
        (make-guard-finding
          (00000001 allow) (00000001 confirmed) (00000001 ecosystem-sync)
          (00100111 commit-state sync-state drift-state)
@@ -155,7 +158,6 @@
 (00001011 guard-reference-field
   (00001000 (field reference)
     (10011100 ((entry (00101101 field (00000110 reference))))
-      (00000111
-        ((00000010 entry) () (00000001 ()))
-        ((00000010 entry)  (00000001 ()))
-        (t (00101111 entry))))))
+      (110
+        ((00000010 entry) (00000001 ()))
+        ((00000011 0 0) (00101111 entry))))))
