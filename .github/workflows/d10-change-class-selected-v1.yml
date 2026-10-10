@@ -1,0 +1,41 @@
+name: D10 CHANGE-CLASS historical selection proof
+on:
+  pull_request:
+    paths:
+      - 'knowledge/d10-change-class-selection-v1.json'
+      - 'knowledge/d10-v1-semantic-inventory.json'
+      - 'knowledge/d10-fill-v1-state.json'
+      - 'knowledge/d10-historical-clos-interlisp-residual-review-v1.json'
+      - 'knowledge/d10-selection-transition-history.json'
+      - 'knowledge/d10-proposal-ledger.tsv'
+      - 'knowledge/d10-growth-baseline-v1.json'
+      - 'knowledge/d1-d9-foundation.json'
+      - 'docs/architecture/ARCHIPELAGO-V1.uk.md'
+      - 'scripts/check_d10_change_class_selected_v1.py'
+      - 'scripts/check_d10_selection_transition_history.py'
+      - 'scripts/check-d10-proposal-ledger.py'
+      - 'tests/test_d10_change_class_selected_v1.py'
+      - 'tests/test_d10_proposal_ledger_growth.py'
+      - 'tests/fixtures/d10-change-class-real-cl-oracle.lisp'
+      - '.github/workflows/d10-change-class-selected-v1.yml'
+  workflow_dispatch:
+jobs:
+  source-law-proof:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - name: Pinned CLOS source, dedup, and accounting gate
+        run: python3 scripts/check_d10_change_class_selected_v1.py
+      - name: CHANGE-CLASS adversarial mutation tests
+        run: python3 -m unittest discover -s tests -p 'test_d10_change_class_selected_v1.py' -v
+      - name: Append-only inventory history
+        run: python3 scripts/check_d10_selection_transition_history.py --self-test
+      - name: Proposal ledger and machine-to-human count projection
+        run: python3 scripts/check-d10-proposal-ledger.py --self-test
+      - name: Existing proposal growth regression
+        run: python3 -m unittest discover -s tests -p 'test_d10_proposal_ledger_growth.py' -v
+      - name: Install independent ANSI Common Lisp reference
+        run: sudo apt-get update -qq && sudo apt-get install -y -qq sbcl
+      - name: Historical CLOS oracle (not SENS runtime)
+        run: sbcl --script tests/fixtures/d10-change-class-real-cl-oracle.lisp
