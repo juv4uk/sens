@@ -134,3 +134,35 @@ fn current_cond_reference_is_valid_binary_and_executes_without_legacy_sid() {
     assert!(matches!(result.value, Value::Nil));
     assert!(result.output.is_empty());
 }
+
+
+/// Temporary fail-first probe for the current time-library callability blocker.
+/// Keep this test narrow: one top-level form per evaluation, with the original
+/// byte span and source excerpt attached to the first failure. This must not
+/// normalize predicates or add host-language truthiness.
+#[test]
+fn current_time_library_reports_first_unexecutable_top_level_form() {
+    let mut session = Session::default();
+    sens::load_core_library(&mut session).expect("Core4 bootstrap before time library");
+    let source = include_str!("../../../lib/time.lisp");
+    let expressions = sens::parse(source).expect("time.lisp source syntax");
+
+    for (index, expression) in expressions.iter().enumerate() {
+        if let Err(error) = eval_parsed_expressions(std::slice::from_ref(expression), &mut session) {
+            let excerpt = source
+                .get(expression.span.start..expression.span.end)
+                .unwrap_or("<invalid source span>")
+                .split_whitespace()
+                .collect::<Vec<_>>()
+                .join(" ");
+            panic!(
+                "time.lisp top-level form {} bytes {}..{} failed: {}; source: {}",
+                index + 1,
+                expression.span.start,
+                expression.span.end,
+                error,
+                excerpt.chars().take(240).collect::<String>()
+            );
+        }
+    }
+}
