@@ -22,7 +22,7 @@
            ((00111100 rest) (00000001 ()))
            ((00000011 (00111111 rest) "1")
             (00000111
-              ((00111100 (01000000 rest)) t)
+              ((00111100 (01000000 rest)) (00000010 (00000001 ())))
               ((00000011 0 0) (00000001 ()))))
            ((00000011 0 0) (00000001 ())))))
       ((00000011 0 0)
@@ -41,9 +41,9 @@
     (00000111
       ((00011110 value lower) 
        (00000111
-         ((00011101 value upper)  t)
-         (1 (00000001 ()))))
-      (1 (00000001 ())))))
+         ((00011101 value upper)  (00000010 (00000001 ())))
+         ((00000010 (00000001 ())) (00000001 ()))))
+      ((00000010 (00000001 ())) (00000001 ())))))
 
 (00001001 machine-effect-u32-carrier?
   (00001000 (value)
@@ -51,7 +51,7 @@
       ((machine-effect-exact-integer? value)
        (machine-effect-within-inclusive-integer-range?
          value 0 4294967295))
-      (1 (00000001 ())))))
+      ((00000010 (00000001 ())) (00000001 ())))))
 
 (00001001 machine-effect-bounded-u64-add-form?
   (00001000 (effect)
@@ -59,7 +59,7 @@
       ((00000010 effect) (00000001 ()))
       ((00100010 (00101000 effect) 3)
        (00000011 (00000101 effect) (00000001 bounded-u64-add)))
-      (1 (00000001 ())))))
+      ((00000010 (00000001 ())) (00000001 ())))))
 
 (00001001 machine-effect-bounded-u64-add
   (00001000 (left right)
@@ -68,8 +68,8 @@
        (00000111
          ((machine-effect-u32-carrier? right)
           (00100111 (00000001 bounded-u64-add) left right))
-         (1 (00000001 machine-effect-rejected))))
-      (1 (00000001 machine-effect-rejected)))))
+         ((00000010 (00000001 ())) (00000001 machine-effect-rejected))))
+      ((00000010 (00000001 ())) (00000001 machine-effect-rejected)))))
 
 ; #4358 replay — target-neutral bounded DIFFERENCE/TIMES mechanism requests.
 ;
@@ -86,7 +86,7 @@
       ((machine-effect-exact-integer? value)
        (machine-effect-within-inclusive-integer-range?
          value 0 18446744073709551615))
-      (1 (00000001 ())))))
+      ((00000010 (00000001 ())) (00000001 ())))))
 
 (00001001 machine-effect-bounded-u64-sub-form?
   (00001000 (effect)
@@ -94,7 +94,7 @@
       ((00000010 effect) (00000001 ()))
       ((00100010 (00101000 effect) 3)
        (00000011 (00000101 effect) (00000001 bounded-u64-sub)))
-      (1 (00000001 ())))))
+      ((00000010 (00000001 ())) (00000001 ())))))
 
 (00001001 machine-effect-bounded-u64-mul-form?
   (00001000 (effect)
@@ -102,7 +102,7 @@
       ((00000010 effect) (00000001 ()))
       ((00100010 (00101000 effect) 3)
        (00000011 (00000101 effect) (00000001 bounded-u64-mul)))
-      (1 (00000001 ())))))
+      ((00000010 (00000001 ())) (00000001 ())))))
 
 (00001001 machine-effect-bounded-u64-sub
   (00001000 (left right)
@@ -115,8 +115,8 @@
              (00100111 (00000001 bounded-u64-sub) left right))
             ((0100 (00011110 left right))
              (00000001 machine-effect-rejected))))
-         (1 (00000001 machine-effect-rejected))))
-      (1 (00000001 machine-effect-rejected)))))
+         ((00000010 (00000001 ())) (00000001 machine-effect-rejected))))
+      ((00000010 (00000001 ())) (00000001 machine-effect-rejected)))))
 
 (00001001 machine-effect-bounded-u64-mul
   (00001000 (left right)
@@ -125,6 +125,6 @@
        (00000111
          ((machine-effect-u32-carrier? right)
           (00100111 (00000001 bounded-u64-mul) left right))
-         (1 (00000001 machine-effect-rejected))))
-      (1 (00000001 machine-effect-rejected)))))
+         ((00000010 (00000001 ())) (00000001 machine-effect-rejected))))
+      ((00000010 (00000001 ())) (00000001 machine-effect-rejected)))))
 
