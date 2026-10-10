@@ -147,6 +147,21 @@
         (equal? (fg-find-mode path modes) "100644:blob")
         (equal? (fg-find-mode path modes) "100755:blob")))))
 
+; Existing paths with Git T status are not new paths.  Keep them out of
+; extension admission and apply only the existing regular-blob invariant.
+(def fg-check-typechanged
+  (lambda (paths modes)
+    (cond
+      ((atom paths) (structural-kind empty-list) 1)
+      ((atom paths) (structural-kind pair)
+        (let ((path (car paths)))
+          (cond
+            ((and (fg-mode-required? path) (fg-not (fg-mode-allowed? path modes)))
+              (fg-block (quote git-mode) (list path (fg-find-mode path modes))))
+            (t (fg-check-typechanged (cdr paths) modes)))))
+      ((atom paths) (structural-kind atom)
+        (fg-block (quote input) "typechanged-paths is not a proper list")))))
+
 (def fg-row-path
   (lambda (row)
     (fg-field (quote path) row)))
@@ -418,6 +433,13 @@
                 (fg-paths-have-mode?
                   (fg-field (quote added-paths) input)
                   (fg-field (quote added-modes) input))
+                (fg-path-list? (fg-field (quote typechanged-paths) input))
+                (fg-mode-rows-valid?
+                  (fg-field (quote typechanged-modes) input)
+                  (fg-field (quote typechanged-paths) input))
+                (fg-paths-have-mode?
+                  (fg-field (quote typechanged-paths) input)
+                  (fg-field (quote typechanged-modes) input))
                 (fg-path-list? (fg-field (quote tracked-tools-paths) input))
                 (fg-tools-path-list? (fg-field (quote tracked-tools-paths) input)))
               (quote input) "Git path transport")))
@@ -441,17 +463,21 @@
                       *file-authority-policy*
                       (fg-field (quote new-foreign-tools) *foreign-tools-census*)
                       (fg-field (quote added-modes) input))))
-              (let ((tracked-ok
-                      (fg-check-tracked
-                        (fg-field (quote tracked-tools-paths) input)
-                        (fg-field (quote new-foreign-tools) *foreign-tools-census*))))
-                (print
+              (let ((typechanged-ok
+                      (fg-check-typechanged
+                        (fg-field (quote typechanged-paths) input)
+                        (fg-field (quote typechanged-modes) input))))
+                (let ((tracked-ok
+                        (fg-check-tracked
+                          (fg-field (quote tracked-tools-paths) input)
+                          (fg-field (quote new-foreign-tools) *foreign-tools-census*))))
+                  (print
                   (list
                     (quote SENS_FILE_AUTHORITY_PASS)
                     (quote new-paths)
                     (length (fg-field (quote added-paths) input))
                     (quote tracked-tool-paths)
-                    (length (fg-field (quote tracked-tools-paths) input))))))))))))
+                    (length (fg-field (quote tracked-tools-paths) input)))))))))))))
 
 (cond
   ((equal? (fg-field (quote policy) *file-authority-source-status*) (quote missing))
