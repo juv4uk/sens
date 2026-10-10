@@ -1,4 +1,5 @@
 name: TEMP exact Core4 reverse-onto native witness
+# Temporary branch-only witness; delete before the final PR diff.
 
 on:
   push:
