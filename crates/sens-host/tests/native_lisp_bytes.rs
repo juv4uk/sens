@@ -416,7 +416,7 @@ fn core4_probe_encode_one_instruction() {
     let _serial = test_lock();
     let mut session = core4_machine_probe_session();
     eval_program(
-        "(x86-encode-admitted-instruction (перше (x86-lower-cons-car-u64-forms 2 3))",
+        "(x86-encode-admitted-instruction (перше (x86-lower-cons-car-u64-forms 2 3)))",
         &mut session,
     )
     .unwrap_or_else(|error| panic!("single admitted instruction encoding failed: {error}"));
