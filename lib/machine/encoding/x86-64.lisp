@@ -144,13 +144,13 @@
   (00001000 (значення масштаб кратність)
     (110
       ((менше? значення масштаб)
-       (101 0 значення))
+       (111 0 значення))
       ((010 ())
        ((00001000 (пара)
           (110
             ((менше? (011 пара) масштаб) пара)
             ((010 ())
-             (101
+             (111
                (додати (100 пара) кратність)
                (відняти (011 пара) масштаб)))))
         (x86-ціла-частка-залишок
@@ -166,7 +166,7 @@
       ((менше? кількість 1) (00000001 ()))
       ((010 ())
        ((00001000 (пара)
-          (101
+          (111
             (011 пара)
             (x86-байти-без-знака
               (100 пара)
@@ -183,14 +183,14 @@
 
 (00001001 x86-encode-mov-eax-imm32
   (00001000 (immediate)
-    (101 184 (x86-u32-bytes immediate))))
+    (111 184 (x86-u32-bytes immediate))))
 
 (00001001 x86-encode-mov-r64-imm64
   (00001000 (register immediate)
     ((00001000 (code)
-       (101
+       (111
          (x86-encode-rex 1 0 0 (x86-high1 code))
-         (101
+         (111
            (00001100 184 (x86-low3 code))
            (x86-u64-bytes immediate))))
      (x86-reg-code register))))
@@ -349,11 +349,11 @@
 (00001001 x86-encode-alu-r64-imm32
   (00001000 (opcode-extension destination immediate)
     (let ((dst (x86-reg-code destination)))
-      (101
+      (111
         (x86-encode-rex 1 0 0 (x86-high1 dst))
-        (101
+        (111
           129
-          (101
+          (111
             (x86-encode-modrm 3 opcode-extension (x86-low3 dst))
             (x86-imm32-bytes immediate)))))))
 
@@ -551,7 +551,7 @@
 ; already established for the Windows/Linux execution adapters.
 (00001001 x86-encode-call-rel32
   (00001000 (displacement)
-    (101 232 (x86-rel32-bytes displacement))))
+    (111 232 (x86-rel32-bytes displacement))))
 
 ; Jcc rel32: opcode 0x0F, then 0x80+cc, then a signed 32-bit relative
 ; displacement -- the conditional counterpart to JMP rel32, needed for the
@@ -566,9 +566,9 @@
 ; with a 2-byte opcode and a 4-byte displacement instead of 1+1.
 (00001001 x86-encode-jcc-rel32
   (00001000 (condition-code displacement)
-    (101
+    (111
       15
-      (101
+      (111
         (00001100 128 condition-code)
         (x86-rel32-bytes displacement)))))
 
@@ -596,7 +596,7 @@
 ; displacement width differ.
 (00001001 x86-encode-jmp-rel32
   (00001000 (displacement)
-    (101 233 (x86-rel32-bytes displacement))))
+    (111 233 (x86-rel32-bytes displacement))))
 
 ; CALL r64 / JMP r64 (indirect through a register): group-5 opcode 0xFF,
 ; /reg extension selects the operation -- CALL is /2, JMP is /4 -- per
