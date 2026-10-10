@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
-"""Fail-closed evidence guard for the existing direct-T5 timing CSV.
+"""Безумовний контроль CSV-вимірювань чинного прямого виконання T5.
 
-This guards measurements, not SENS language semantics or physical codec authority.
-All checks survive python -O; a missing fixture is never accepted by default.
+Це перевірка вимірювань, а не семантики SENS чи фізичного кодека.
+Перевірки діють і під Python -O; відсутня фікстура завжди означає відмову.
 """
 from __future__ import annotations
 
@@ -25,7 +25,7 @@ TIMINGS = COLUMNS[3:]
 
 
 class EvidenceError(ValueError):
-    """Benchmark CSV cannot be certified as a complete measurement."""
+    """CSV бенчмарка не можна атестувати як повне вимірювання."""
 
 
 def check(csv_path: Path, root: Path) -> dict[str, float]:
