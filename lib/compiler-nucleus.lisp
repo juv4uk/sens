@@ -38,8 +38,8 @@
 ; DECOMPOSE is an explicitly supplied first-class mechanism.  The language
 ; chooses when to invoke it; the host function may reveal only exact width/bits
 ; and has no identity->meaning authority.
-(00001001 compiler-domain-shape
-  (00001000 (decompose ідентичність)
+(визначити compiler-domain-shape
+  (функція (decompose ідентичність)
     (decompose ідентичність)))
 
 
