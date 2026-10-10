@@ -219,10 +219,12 @@
         x86-pair-cdr-offset
         (00000001 rax)))))
 
-; Historical internal name retained only as a form-level alias so existing
-; Lisp callers do not regain a byte-level bypass.
+; Historical internal name retained as an explicit forwarding closure.
+; Do not place the bare function designator in value position: the strict
+; source path must make callability explicit and preserve structured forms.
 (00001001 x86-lower-bounded-pair-store-u64-instructions
-  x86-lower-bounded-pair-store-u64-forms)
+  (00001000 (left right)
+    (x86-lower-bounded-pair-store-u64-forms left right)))
 
 (00001001 x86-lower-cons-car-u64-forms
   (00001000 (left right)
