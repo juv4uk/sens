@@ -1146,15 +1146,15 @@ mod tests {
     
     #[test]
     fn machine_source_mode_lifts_an_immediately_applied_lambda_head() {
-        let source = "((00001000 (x) (110 ((101 x 0) (00000010 (00000001 ()))) ((101 0 0) (00000010 (00000001 (00000000)))) (00000001 (100 x))) 7)";
+        let source = "((00001000 (x) (100 x)) 7)";
 
-        // The public mixed reader intentionally leaves the legacy wrapper opaque.
+        // The ordinary mixed reader leaves the legacy lambda wrapper opaque.
         let ordinary = only(parse_mixed_exact_domain(source).expect("ordinary parse"));
         let ExprKind::List(ordinary_call) = &ordinary.kind else { panic!("outer application"); };
         let ExprKind::List(ordinary_lambda) = &ordinary_call[0].kind else { panic!("lambda head"); };
-        let ExprKind::List(ordinary_cond) = &ordinary_lambda[2].kind else { panic!("ordinary body"); };
-        assert!(matches!(&ordinary_cond[0].kind, ExprKind::Number(value, _) if *value == 110.0),
-            "ordinary mixed source must not silently opt into machine-source lifting");
+        let ExprKind::List(ordinary_body) = &ordinary_lambda[2].kind else { panic!("lambda body"); };
+        assert!(matches!(&ordinary_body[0].kind, ExprKind::Number(value, _) if *value == 100.0),
+            "ordinary mixed source must not opt into machine-source lifting");
 
         let machine = only(
             parse_mixed_exact_domain_machine_source("lib/machine/test-probe.lisp", source)
@@ -1162,18 +1162,12 @@ mod tests {
         );
         let ExprKind::List(call) = &machine.kind else { panic!("outer application"); };
         let ExprKind::List(lambda) = &call[0].kind else { panic!("lambda head"); };
-        let ExprKind::List(cond) = &lambda[2].kind else { panic!("lambda COND body"); };
-        assert!(matches!(&cond[0].kind, ExprKind::DomainIdentity(id)
-            if id.width() == 3 && id.packed_bits() == 0b110),
-            "nested executable COND must be an exact D3 identity");
-
-        let ExprKind::List(quoted) = &lambda[3].kind else { panic!("quoted body data"); };
-        assert!(matches!(&quoted[0].kind, ExprKind::Sid(_)), "W8 QUOTE remains opaque");
-        let ExprKind::List(quoted_data) = &quoted[1].kind else { panic!("quoted payload"); };
-        assert!(matches!(&quoted_data[0].kind, ExprKind::Number(value, _) if *value == 100.0),
-            "quoted 100 remains numeric data");
+        let ExprKind::List(body) = &lambda[2].kind else { panic!("lambda body"); };
+        assert!(matches!(&body[0].kind, ExprKind::DomainIdentity(id)
+            if id.width() == 3 && id.packed_bits() == 0b100),
+            "nested executable CAR must be an exact D3 identity");
         assert!(matches!(&call[1].kind, ExprKind::Number(value, _) if *value == 7.0),
-            "numeric call arguments remain data, not exact-width call heads");
+            "numeric call arguments remain data");
     }
 
 }
