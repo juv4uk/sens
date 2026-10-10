@@ -22,7 +22,17 @@ fn main() {
     }
     let checks = [
         ("reference", "(перше (сполучити 2 3))"),
+        // Isolate the exact expression that fails in native CAR/CDR. The
+        // first failing row now distinguishes lowerer binding from admission.
+        ("pair-store", "(x86-lower-bounded-pair-store-u64-forms 2 3)"),
+        ("pair-store-alias", "(x86-lower-bounded-pair-store-u64-instructions 2 3)"),
         ("forms", "(x86-lower-cons-car-u64-forms 2 3)"),
+        // Exercise the uimm8 wildcard path directly; the original MOV-only
+        // pattern check did not traverse this predicate path.
+        ("uimm8-predicate", "(x86-admission-uimm8? 4)"),
+        ("uimm8-pattern", "(x86-admission-pattern-match? (00000001 (shl-r64-imm8 register uimm8)) (00000001 (shl-r64-imm8 rax 4)))"),
+        ("uimm8-admission", "(x86-admitted-instruction? (00000001 (shl-r64-imm8 rax 4)))"),
+        ("uimm8-encode", "(x86-encode-admitted-instruction (00000001 (shl-r64-imm8 rax 4)))"),
         ("pattern-direct", "(x86-admission-pattern-match? (00000001 (mov-r64-imm64 register immediate)) (00000001 (mov-r64-imm64 rax 2)))"),
         ("admit-one", "(x86-admitted-instruction? (00000001 (mov-r64-imm64 rax 2)))"),
         ("admit-ret", "(x86-admitted-instruction? (00000001 (ret)))"),
