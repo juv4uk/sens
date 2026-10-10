@@ -182,13 +182,13 @@
 ; general recursive expression lowering is claimed here.
 (00001001 x86-lower-eq-cond-car-cons-u64-forms
   (00001000 (left right then-car then-cdr else-car else-cdr)
-    (приєднати
+    (00101001
       (00100111
         (00100111 (00000001 mov-r64-imm64) (00000001 rax) left)
         (00100111 (00000001 mov-r64-imm64) (00000001 rcx) right)
         (00100111 (00000001 cmp-r64-r64) (00000001 rax) (00000001 rcx))
         (00100111 (00000001 jnz-rel8) 33))
-      (приєднати
+      (00101001
         (x86-lower-bounded-car-cons-u64-arm-forms
           then-car then-cdr (00000001 r8) (00000001 r9))
         (x86-lower-bounded-car-cons-u64-arm-forms
@@ -228,7 +228,7 @@
 
 (00001001 x86-lower-cons-car-u64-forms
   (00001000 (left right)
-    (приєднати
+    (00101001
       (x86-lower-bounded-pair-store-u64-forms left right)
       (00100111
         (00100111
@@ -240,7 +240,7 @@
 
 (00001001 x86-lower-cons-cdr-u64-forms
   (00001000 (left right)
-    (приєднати
+    (00101001
       (x86-lower-bounded-pair-store-u64-forms left right)
       (00100111
         (00100111
@@ -343,16 +343,16 @@
 
 (00001001 x86-encode-current-binary-u64
   (00001000 (width bits left right)
-    ((00001000 (forms)
-       (00000111
+    (10011100 ((forms
+                  (x86-lower-current-binary-u64-forms
+                    width bits left right)))
+      (00000111
         ((00100010 forms (00000001 unsupported-current-domain-binary-u64))
          (00000001 unsupported-current-domain-binary-u64))
         ((00100010 forms (00000001 exact-d5-fallback-required))
          (00000001 exact-d5-fallback-required))
         ((00000010 ())
-         (x86-encode-admitted-program forms))))
-      (x86-lower-current-binary-u64-forms
-                    width bits left right))))
+         (x86-encode-admitted-program forms))))))
 
 ; #4063 exact D6 ADD1/SUB1 bounded fast paths.
 ; Language meaning is already admitted as LOWER_DOMAIN_COMPOSITION over exact
