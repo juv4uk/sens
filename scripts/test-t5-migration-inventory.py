@@ -166,6 +166,10 @@ class TestT5MigrationInventory(unittest.TestCase):
             self.assertEqual(rows[path]["role"], role, path)
             self.assertEqual(rows[path]["authority"], authority, path)
             self.assertEqual(rows[path]["migration_status"], "T5_REQUIRED", path)
+        # The grammar reader consumes bounded source words, not physical .sens bytes.
+        grammar = rows["crates/sens/src/canonical_reader.rs"]
+        self.assertEqual(grammar["codec"], "D2")
+        self.assertEqual(grammar["canonical_path"], "n/a")
 
     def test_dense_source_packer_is_not_mislabeled_as_physical_t5(self):
         rows = {r["path"]: r for r in read_manifest()}

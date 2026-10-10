@@ -182,6 +182,8 @@ def classify_role(path: str) -> tuple[str, str]:
 
 
 def codec_of(path: str, root: Path) -> str:
+    if path == "crates/sens/src/canonical_reader.rs":
+        return "D2"
     try:
         text = (root / path).read_text(encoding="utf-8", errors="replace")
     except OSError:
