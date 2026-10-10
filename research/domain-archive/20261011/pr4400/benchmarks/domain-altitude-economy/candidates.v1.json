@@ -1,0 +1,434 @@
+{
+  "schema": "sens-domain-altitude-economy-candidates/v1",
+  "purpose": "provenance-bound candidate selection for #4394; not executable evidence and not semantic authority",
+  "selection_rule": {
+    "source": "knowledge/d8-v2-semantic-inventory.json",
+    "source_class": "SELECTOR-LAW",
+    "lower_domain_comparison": "generated continuation of admitted CAR/CDR selector law",
+    "order": "stable_id ascending",
+    "take": 20
+  },
+  "next_requirement": "For each candidate, produce resident-form and executable D3 expansion programs, then obtain equal execution-result digests before any Pareto/dividend row is admitted.",
+  "candidates": [
+    {
+      "resident_id": "d8.sel.01100000",
+      "domain": "D8",
+      "coordinate": "01100000",
+      "semantic_name": "CDAAAAAR",
+      "behavior": "cdr(car(car(car(car(car(x))))))",
+      "source_class": "SELECTOR-LAW",
+      "relation_class": "SEMANTIC-GENERATOR",
+      "derivability": "GENERATED",
+      "lower_domain_comparison": "generated continuation of admitted CAR/CDR selector law",
+      "source_provenance": [
+        "Lisp 1.5 (§4.3)",
+        "#3646",
+        "#3673"
+      ],
+      "authority_paths": [
+        "knowledge/d8-v2-semantic-inventory.json",
+        "contracts/d8-ratification.lisp",
+        "lib/domains/d8.lisp"
+      ]
+    },
+    {
+      "resident_id": "d8.sel.01100001",
+      "domain": "D8",
+      "coordinate": "01100001",
+      "semantic_name": "CDAAAADR",
+      "behavior": "cdr(car(car(car(car(cdr(x))))))",
+      "source_class": "SELECTOR-LAW",
+      "relation_class": "SEMANTIC-GENERATOR",
+      "derivability": "GENERATED",
+      "lower_domain_comparison": "generated continuation of admitted CAR/CDR selector law",
+      "source_provenance": [
+        "Lisp 1.5 (§4.3)",
+        "#3646",
+        "#3673"
+      ],
+      "authority_paths": [
+        "knowledge/d8-v2-semantic-inventory.json",
+        "contracts/d8-ratification.lisp",
+        "lib/domains/d8.lisp"
+      ]
+    },
+    {
+      "resident_id": "d8.sel.01100010",
+      "domain": "D8",
+      "coordinate": "01100010",
+      "semantic_name": "CDAAADAR",
+      "behavior": "cdr(car(car(car(cdr(car(x))))))",
+      "source_class": "SELECTOR-LAW",
+      "relation_class": "SEMANTIC-GENERATOR",
+      "derivability": "GENERATED",
+      "lower_domain_comparison": "generated continuation of admitted CAR/CDR selector law",
+      "source_provenance": [
+        "Lisp 1.5 (§4.3)",
+        "#3646",
+        "#3673"
+      ],
+      "authority_paths": [
+        "knowledge/d8-v2-semantic-inventory.json",
+        "contracts/d8-ratification.lisp",
+        "lib/domains/d8.lisp"
+      ]
+    },
+    {
+      "resident_id": "d8.sel.01100011",
+      "domain": "D8",
+      "coordinate": "01100011",
+      "semantic_name": "CDAAADDR",
+      "behavior": "cdr(car(car(car(cdr(cdr(x))))))",
+      "source_class": "SELECTOR-LAW",
+      "relation_class": "SEMANTIC-GENERATOR",
+      "derivability": "GENERATED",
+      "lower_domain_comparison": "generated continuation of admitted CAR/CDR selector law",
+      "source_provenance": [
+        "Lisp 1.5 (§4.3)",
+        "#3646",
+        "#3673"
+      ],
+      "authority_paths": [
+        "knowledge/d8-v2-semantic-inventory.json",
+        "contracts/d8-ratification.lisp",
+        "lib/domains/d8.lisp"
+      ]
+    },
+    {
+      "resident_id": "d8.sel.01100100",
+      "domain": "D8",
+      "coordinate": "01100100",
+      "semantic_name": "CDAADAAR",
+      "behavior": "cdr(car(car(cdr(car(car(x))))))",
+      "source_class": "SELECTOR-LAW",
+      "relation_class": "SEMANTIC-GENERATOR",
+      "derivability": "GENERATED",
+      "lower_domain_comparison": "generated continuation of admitted CAR/CDR selector law",
+      "source_provenance": [
+        "Lisp 1.5 (§4.3)",
+        "#3646",
+        "#3673"
+      ],
+      "authority_paths": [
+        "knowledge/d8-v2-semantic-inventory.json",
+        "contracts/d8-ratification.lisp",
+        "lib/domains/d8.lisp"
+      ]
+    },
+    {
+      "resident_id": "d8.sel.01100101",
+      "domain": "D8",
+      "coordinate": "01100101",
+      "semantic_name": "CDAADADR",
+      "behavior": "cdr(car(car(cdr(car(cdr(x))))))",
+      "source_class": "SELECTOR-LAW",
+      "relation_class": "SEMANTIC-GENERATOR",
+      "derivability": "GENERATED",
+      "lower_domain_comparison": "generated continuation of admitted CAR/CDR selector law",
+      "source_provenance": [
+        "Lisp 1.5 (§4.3)",
+        "#3646",
+        "#3673"
+      ],
+      "authority_paths": [
+        "knowledge/d8-v2-semantic-inventory.json",
+        "contracts/d8-ratification.lisp",
+        "lib/domains/d8.lisp"
+      ]
+    },
+    {
+      "resident_id": "d8.sel.01100110",
+      "domain": "D8",
+      "coordinate": "01100110",
+      "semantic_name": "CDAADDAR",
+      "behavior": "cdr(car(car(cdr(cdr(car(x))))))",
+      "source_class": "SELECTOR-LAW",
+      "relation_class": "SEMANTIC-GENERATOR",
+      "derivability": "GENERATED",
+      "lower_domain_comparison": "generated continuation of admitted CAR/CDR selector law",
+      "source_provenance": [
+        "Lisp 1.5 (§4.3)",
+        "#3646",
+        "#3673"
+      ],
+      "authority_paths": [
+        "knowledge/d8-v2-semantic-inventory.json",
+        "contracts/d8-ratification.lisp",
+        "lib/domains/d8.lisp"
+      ]
+    },
+    {
+      "resident_id": "d8.sel.01100111",
+      "domain": "D8",
+      "coordinate": "01100111",
+      "semantic_name": "CDAADDDR",
+      "behavior": "cdr(car(car(cdr(cdr(cdr(x))))))",
+      "source_class": "SELECTOR-LAW",
+      "relation_class": "SEMANTIC-GENERATOR",
+      "derivability": "GENERATED",
+      "lower_domain_comparison": "generated continuation of admitted CAR/CDR selector law",
+      "source_provenance": [
+        "Lisp 1.5 (§4.3)",
+        "#3646",
+        "#3673"
+      ],
+      "authority_paths": [
+        "knowledge/d8-v2-semantic-inventory.json",
+        "contracts/d8-ratification.lisp",
+        "lib/domains/d8.lisp"
+      ]
+    },
+    {
+      "resident_id": "d8.sel.01101000",
+      "domain": "D8",
+      "coordinate": "01101000",
+      "semantic_name": "CDADAAAR",
+      "behavior": "cdr(car(cdr(car(car(car(x))))))",
+      "source_class": "SELECTOR-LAW",
+      "relation_class": "SEMANTIC-GENERATOR",
+      "derivability": "GENERATED",
+      "lower_domain_comparison": "generated continuation of admitted CAR/CDR selector law",
+      "source_provenance": [
+        "Lisp 1.5 (§4.3)",
+        "#3646",
+        "#3673"
+      ],
+      "authority_paths": [
+        "knowledge/d8-v2-semantic-inventory.json",
+        "contracts/d8-ratification.lisp",
+        "lib/domains/d8.lisp"
+      ]
+    },
+    {
+      "resident_id": "d8.sel.01101001",
+      "domain": "D8",
+      "coordinate": "01101001",
+      "semantic_name": "CDADAADR",
+      "behavior": "cdr(car(cdr(car(car(cdr(x))))))",
+      "source_class": "SELECTOR-LAW",
+      "relation_class": "SEMANTIC-GENERATOR",
+      "derivability": "GENERATED",
+      "lower_domain_comparison": "generated continuation of admitted CAR/CDR selector law",
+      "source_provenance": [
+        "Lisp 1.5 (§4.3)",
+        "#3646",
+        "#3673"
+      ],
+      "authority_paths": [
+        "knowledge/d8-v2-semantic-inventory.json",
+        "contracts/d8-ratification.lisp",
+        "lib/domains/d8.lisp"
+      ]
+    },
+    {
+      "resident_id": "d8.sel.01101010",
+      "domain": "D8",
+      "coordinate": "01101010",
+      "semantic_name": "CDADADAR",
+      "behavior": "cdr(car(cdr(car(cdr(car(x))))))",
+      "source_class": "SELECTOR-LAW",
+      "relation_class": "SEMANTIC-GENERATOR",
+      "derivability": "GENERATED",
+      "lower_domain_comparison": "generated continuation of admitted CAR/CDR selector law",
+      "source_provenance": [
+        "Lisp 1.5 (§4.3)",
+        "#3646",
+        "#3673"
+      ],
+      "authority_paths": [
+        "knowledge/d8-v2-semantic-inventory.json",
+        "contracts/d8-ratification.lisp",
+        "lib/domains/d8.lisp"
+      ]
+    },
+    {
+      "resident_id": "d8.sel.01101011",
+      "domain": "D8",
+      "coordinate": "01101011",
+      "semantic_name": "CDADADDR",
+      "behavior": "cdr(car(cdr(car(cdr(cdr(x))))))",
+      "source_class": "SELECTOR-LAW",
+      "relation_class": "SEMANTIC-GENERATOR",
+      "derivability": "GENERATED",
+      "lower_domain_comparison": "generated continuation of admitted CAR/CDR selector law",
+      "source_provenance": [
+        "Lisp 1.5 (§4.3)",
+        "#3646",
+        "#3673"
+      ],
+      "authority_paths": [
+        "knowledge/d8-v2-semantic-inventory.json",
+        "contracts/d8-ratification.lisp",
+        "lib/domains/d8.lisp"
+      ]
+    },
+    {
+      "resident_id": "d8.sel.01101100",
+      "domain": "D8",
+      "coordinate": "01101100",
+      "semantic_name": "CDADDAAR",
+      "behavior": "cdr(car(cdr(cdr(car(car(x))))))",
+      "source_class": "SELECTOR-LAW",
+      "relation_class": "SEMANTIC-GENERATOR",
+      "derivability": "GENERATED",
+      "lower_domain_comparison": "generated continuation of admitted CAR/CDR selector law",
+      "source_provenance": [
+        "Lisp 1.5 (§4.3)",
+        "#3646",
+        "#3673"
+      ],
+      "authority_paths": [
+        "knowledge/d8-v2-semantic-inventory.json",
+        "contracts/d8-ratification.lisp",
+        "lib/domains/d8.lisp"
+      ]
+    },
+    {
+      "resident_id": "d8.sel.01101101",
+      "domain": "D8",
+      "coordinate": "01101101",
+      "semantic_name": "CDADDADR",
+      "behavior": "cdr(car(cdr(cdr(car(cdr(x))))))",
+      "source_class": "SELECTOR-LAW",
+      "relation_class": "SEMANTIC-GENERATOR",
+      "derivability": "GENERATED",
+      "lower_domain_comparison": "generated continuation of admitted CAR/CDR selector law",
+      "source_provenance": [
+        "Lisp 1.5 (§4.3)",
+        "#3646",
+        "#3673"
+      ],
+      "authority_paths": [
+        "knowledge/d8-v2-semantic-inventory.json",
+        "contracts/d8-ratification.lisp",
+        "lib/domains/d8.lisp"
+      ]
+    },
+    {
+      "resident_id": "d8.sel.01101110",
+      "domain": "D8",
+      "coordinate": "01101110",
+      "semantic_name": "CDADDDAR",
+      "behavior": "cdr(car(cdr(cdr(cdr(car(x))))))",
+      "source_class": "SELECTOR-LAW",
+      "relation_class": "SEMANTIC-GENERATOR",
+      "derivability": "GENERATED",
+      "lower_domain_comparison": "generated continuation of admitted CAR/CDR selector law",
+      "source_provenance": [
+        "Lisp 1.5 (§4.3)",
+        "#3646",
+        "#3673"
+      ],
+      "authority_paths": [
+        "knowledge/d8-v2-semantic-inventory.json",
+        "contracts/d8-ratification.lisp",
+        "lib/domains/d8.lisp"
+      ]
+    },
+    {
+      "resident_id": "d8.sel.01101111",
+      "domain": "D8",
+      "coordinate": "01101111",
+      "semantic_name": "CDADDDDR",
+      "behavior": "cdr(car(cdr(cdr(cdr(cdr(x))))))",
+      "source_class": "SELECTOR-LAW",
+      "relation_class": "SEMANTIC-GENERATOR",
+      "derivability": "GENERATED",
+      "lower_domain_comparison": "generated continuation of admitted CAR/CDR selector law",
+      "source_provenance": [
+        "Lisp 1.5 (§4.3)",
+        "#3646",
+        "#3673"
+      ],
+      "authority_paths": [
+        "knowledge/d8-v2-semantic-inventory.json",
+        "contracts/d8-ratification.lisp",
+        "lib/domains/d8.lisp"
+      ]
+    },
+    {
+      "resident_id": "d8.sel.01110000",
+      "domain": "D8",
+      "coordinate": "01110000",
+      "semantic_name": "CDDAAAAR",
+      "behavior": "cdr(cdr(car(car(car(car(x))))))",
+      "source_class": "SELECTOR-LAW",
+      "relation_class": "SEMANTIC-GENERATOR",
+      "derivability": "GENERATED",
+      "lower_domain_comparison": "generated continuation of admitted CAR/CDR selector law",
+      "source_provenance": [
+        "Lisp 1.5 (§4.3)",
+        "#3646",
+        "#3673"
+      ],
+      "authority_paths": [
+        "knowledge/d8-v2-semantic-inventory.json",
+        "contracts/d8-ratification.lisp",
+        "lib/domains/d8.lisp"
+      ]
+    },
+    {
+      "resident_id": "d8.sel.01110001",
+      "domain": "D8",
+      "coordinate": "01110001",
+      "semantic_name": "CDDAAADR",
+      "behavior": "cdr(cdr(car(car(car(cdr(x))))))",
+      "source_class": "SELECTOR-LAW",
+      "relation_class": "SEMANTIC-GENERATOR",
+      "derivability": "GENERATED",
+      "lower_domain_comparison": "generated continuation of admitted CAR/CDR selector law",
+      "source_provenance": [
+        "Lisp 1.5 (§4.3)",
+        "#3646",
+        "#3673"
+      ],
+      "authority_paths": [
+        "knowledge/d8-v2-semantic-inventory.json",
+        "contracts/d8-ratification.lisp",
+        "lib/domains/d8.lisp"
+      ]
+    },
+    {
+      "resident_id": "d8.sel.01110010",
+      "domain": "D8",
+      "coordinate": "01110010",
+      "semantic_name": "CDDAADAR",
+      "behavior": "cdr(cdr(car(car(cdr(car(x))))))",
+      "source_class": "SELECTOR-LAW",
+      "relation_class": "SEMANTIC-GENERATOR",
+      "derivability": "GENERATED",
+      "lower_domain_comparison": "generated continuation of admitted CAR/CDR selector law",
+      "source_provenance": [
+        "Lisp 1.5 (§4.3)",
+        "#3646",
+        "#3673"
+      ],
+      "authority_paths": [
+        "knowledge/d8-v2-semantic-inventory.json",
+        "contracts/d8-ratification.lisp",
+        "lib/domains/d8.lisp"
+      ]
+    },
+    {
+      "resident_id": "d8.sel.01110011",
+      "domain": "D8",
+      "coordinate": "01110011",
+      "semantic_name": "CDDAADDR",
+      "behavior": "cdr(cdr(car(car(cdr(cdr(x))))))",
+      "source_class": "SELECTOR-LAW",
+      "relation_class": "SEMANTIC-GENERATOR",
+      "derivability": "GENERATED",
+      "lower_domain_comparison": "generated continuation of admitted CAR/CDR selector law",
+      "source_provenance": [
+        "Lisp 1.5 (§4.3)",
+        "#3646",
+        "#3673"
+      ],
+      "authority_paths": [
+        "knowledge/d8-v2-semantic-inventory.json",
+        "contracts/d8-ratification.lisp",
+        "lib/domains/d8.lisp"
+      ]
+    }
+  ]
+}
