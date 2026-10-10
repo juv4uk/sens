@@ -25,7 +25,7 @@
   (00001000 (x)
     (00000111
       ; Pair cells recurse through CDR; never pass a compound value to EQ.
-      ((0100 (00000010 x))
+      ((тотожне? (00000010 x) ні)
        (science-proper-list? (00000110 x)))
       ; EQ is atom-only. This branch runs only when X itself is an atom.
       ((00000010 x) 
