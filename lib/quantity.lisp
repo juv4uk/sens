@@ -25,7 +25,10 @@
   (00001000 (x)
     (00000111
       ; Pair cells recurse through CDR; never pass a compound value to EQ.
-      ((тотожне? (00000010 x) ні)
+      ; Перевірка D1:0 є атомною: ATOM від CONS двох порожніх значень.
+      ; Не читати неозначений surface `ні` і не прирівнювати його до NIL.
+      ((00000011 (00000010 x)
+                 (00000010 (00000100 (00000001 ()) (00000001 ()))))
        (science-proper-list? (00000110 x)))
       ; EQ is atom-only. This branch runs only when X itself is an atom.
       ((00000010 x) 
