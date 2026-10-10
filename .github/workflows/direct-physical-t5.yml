@@ -1,0 +1,58 @@
+name: Direct physical T5 interpreter parity and isolated timing
+
+on:
+  pull_request:
+    paths:
+      - "crates/sens/src/binary_execution.rs"
+      - "crates/sens/src/lib.rs"
+      - "crates/sens-cli/src/bin/sens-trit.rs"
+      - "crates/sens/tests/direct_t5_pipeline.rs"
+      - "crates/sens/examples/bench_direct_t5.rs"
+      - ".github/workflows/direct-physical-t5.yml"
+  push:
+    branches: [main]
+    paths:
+      - "crates/sens/src/binary_execution.rs"
+      - "crates/sens/src/lib.rs"
+      - "crates/sens-cli/src/bin/sens-trit.rs"
+      - "crates/sens/tests/direct_t5_pipeline.rs"
+      - "crates/sens/examples/bench_direct_t5.rs"
+      - ".github/workflows/direct-physical-t5.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  physical-source-free-evaluation:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v5
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Physical input / visible reference semantic parity
+        run: cargo test --locked -q -p sens --test direct_t5_pipeline
+      - name: Original SENS CLI evaluation and diagnostic regression
+        run: cargo test --locked -q -p sens-cli --bin sens-trit
+      - name: Physical decode vs visible parser vs cached AST, measurement-only
+        shell: bash
+        run: |
+          set -euo pipefail
+          cargo run --locked --release --quiet -p sens --example bench_direct_t5 -- 2000 \
+            | tee "$RUNNER_TEMP/t5-direct-timing.csv"
+          python3 - "$RUNNER_TEMP/t5-direct-timing.csv" <<'PY'
+          import csv,sys
+          with open(sys.argv[1], newline="") as src:
+              rows=list(csv.DictReader(src))
+          assert len(rows)==3, rows
+          assert {r["fixture"] for r in rows}=={"quote","atom","cond"}
+          assert all(int(r["bytes"])>0 and int(r["forms"])>0 for r in rows)
+          for r in rows:
+              for key in ("decode_parse_ns","visible_parse_ns","eval_cached_ns"):
+                  assert 0<float(r[key])<1e12, r
+          print("MEASURED_NOT_SPEEDUP_CLAIMED")
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: t5-direct-timing
+          path: ${{ runner.temp }}/t5-direct-timing.csv
+          retention-days: 14
