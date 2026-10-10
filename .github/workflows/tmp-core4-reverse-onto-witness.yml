@@ -29,6 +29,8 @@ jobs:
           set -euo pipefail
           cargo run --locked --release -p sens-cli --bin gen-fasl -- lib/core4.lisp lib/core4.lisp.fasl
           cargo test --locked -p sens --test core_fasl_freshness -- --nocapture
+      - name: Isolate list, lowering, and admission callability stages
+        run: cargo test --locked -p sens-host --test native_lisp_bytes core4_probe_ -- --nocapture
       - name: Native CAR/CDR must match interpreter reference
         run: cargo test --locked -p sens-host --test native_lisp_bytes native_pair_car_cdr_match_the_interpreter_reference_witness -- --exact --nocapture
       - name: Invalid UD2 must still be rejected before host execution
