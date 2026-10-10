@@ -1,0 +1,90 @@
+name: Paired wall evidence methodology (A/A negative control)
+
+# This does not gate latency, and does not interfere with critical smoke lanes.
+on:
+  pull_request:
+    paths:
+      - "benchmarks/methodology/**"
+      - ".github/workflows/paired-wall-methodology.yml"
+  push:
+    branches: [main]
+    paths:
+      - "benchmarks/methodology/**"
+      - ".github/workflows/paired-wall-methodology.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  parity-first-paired-wall:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v5
+      - uses: dtolnay/rust-toolchain@stable
+
+      - name: Test randomized protocol, bootstrap, and fail-closed parity
+        run: python3 -m unittest discover -s benchmarks/methodology/tests -p 'test_*.py' -v
+
+      - name: Build real physical SENS binary, without adding Cargo dependencies
+        run: cargo build --locked --release -p sens-cli --bin sens
+
+      - name: A/A negative control on a committed physical .sens file
+        shell: bash
+        run: |
+          set -euo pipefail
+          argv='["target/release/sens","tests/fixtures/migration-quote-cohort-main/quote-legacy.sens"]'
+          python3 benchmarks/methodology/paired_wall.py \
+            --a-json "$argv" --b-json "$argv" \
+            --payload tests/fixtures/migration-quote-cohort-main/quote-legacy.sens \
+            --sessions 5 --pairs-per-session 7 --warmups 2 \
+            --bootstrap 2000 --seed 20261009 --pin-first-allowed-core \
+            --out "$RUNNER_TEMP/sens-paired-methodology" \
+            | tee "$RUNNER_TEMP/paired-methodology-summary.txt"
+          python3 - <<'PY'
+          import json
+          import os
+          from pathlib import Path
+
+          evidence = Path(os.environ["RUNNER_TEMP"]) / "sens-paired-methodology"
+          data = json.loads((evidence / "results.json").read_text())
+          assert data["result"] == "PARITY_PASS_EXPLORATORY_TIMING_ONLY"
+          assert data["statistics"]["publishable_kalibera_jones_verdict"] == \
+              "BLOCKED_SINGLE_BUILD_SINGLE_HOST"
+          assert data["instruction_refs_measured"] is False
+          assert data["independent_Lisp_oracle"] is False
+          assert len((evidence / "raw.tsv").read_text().splitlines()) == 36
+          print("A/A controls PASS, noise measured but no speedup certified.")
+          PY
+
+      - name: SHA manifest and evidence, even if red
+        if: always()
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/sens-paired-methodology"
+          git rev-parse HEAD > "$RUNNER_TEMP/sens-paired-methodology/commit.sha"
+          sha256sum \
+            benchmarks/methodology/paired_wall.py \
+            benchmarks/methodology/tests/test_paired_wall.py \
+            benchmarks/methodology/bench.json \
+            tests/fixtures/migration-quote-cohort-main/quote-legacy.sens \
+            > "$RUNNER_TEMP/sens-paired-methodology/inputs.sha256"
+          if test -f target/release/sens; then
+            sha256sum target/release/sens \
+              > "$RUNNER_TEMP/sens-paired-methodology/executable.sha256"
+          fi
+          if test -f "$RUNNER_TEMP/paired-methodology-summary.txt"; then
+            cp "$RUNNER_TEMP/paired-methodology-summary.txt" \
+               "$RUNNER_TEMP/sens-paired-methodology/summary.txt"
+          fi
+
+      - name: Retain A/A raw pairs and statistical provenance
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: paired-methodology-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/sens-paired-methodology/
+          retention-days: 21
+          if-no-files-found: error
