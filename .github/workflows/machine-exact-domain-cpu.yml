@@ -95,8 +95,10 @@ jobs:
     steps:
       - uses: actions/checkout@v5
       - uses: dtolnay/rust-toolchain@stable
-      - name: "Незалежно перевірити D1:0/D1:1 без структурного ()"
-        run: cargo test --locked -p sens --test machine_admission_adversarial x86_pattern_mismatches_are_exact_d1_no_not_empty -- --exact --nocapture
+      - name: "Незалежно перевірити D1:0/D1:1 для шаблонів і чисел"
+        run: |
+          cargo test --locked -p sens --test machine_admission_adversarial x86_pattern_mismatches_are_exact_d1_no_not_empty -- --exact --nocapture
+          cargo test --locked -p sens --test machine_admission_adversarial x86_exact_integer_wire_checks_return_typed_d1 -- --exact --nocapture
 
   exact-domain-x86:
     name: Exact-domain x86 portable witness
