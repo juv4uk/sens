@@ -68,9 +68,11 @@ jobs:
           import json, os
           from pathlib import Path
           row=json.loads((Path(os.environ["RUNNER_TEMP"])/"migration-one/report.json").read_text())
-          assert row["status"] == "written", row
-          assert row["bytes"] == 14, row
-          assert row["semantic_parity"] == "NOT_VERIFIED", row
+          # Жодних assert: python -O не повинен вимикати перевірку свідчення.
+          expected = ("written", 14, "NOT_VERIFIED")
+          observed = (row.get("status"), row.get("bytes"), row.get("semantic_parity"))
+          if observed != expected:
+              raise SystemExit(f"Канонічне T5-свідчення невірне: {observed!r} != {expected!r}")
           print("CANONICAL T5 MATCH; independent semantic admission is a separate gate")
           PY
       - name: Publish one-file migration evidence
