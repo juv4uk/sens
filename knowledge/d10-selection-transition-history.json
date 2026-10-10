@@ -351,6 +351,34 @@
         "scripts/check-d10-proposal-ledger.py",
         "tests/test_d10_proposal_ledger_growth.py"
       ]
+    },
+    {
+      "id": "d10.math.prefix-free-kraft-certificate.current-main.20261011",
+      "authority": "#4013 #4463; user-directed D10 filling; new codebook semantic certificate proven with two independent finite mathematical algorithms",
+      "evidence": [
+        "knowledge/d10-prefix-free-kraft-certificate-20261011.json",
+        "docs/research/d10-prefix-free-kraft-certificate.uk.md",
+        "https://www.mit.edu/~6.450/handouts/6.450book.pdf"
+      ],
+      "previous_inventory_blob_sha": "7e13e929338baeef9b16c2139d24b78e23ea1e03",
+      "resulting_inventory_blob_sha": "aef34c9c6d31f172059f3cf5d70136c77ffde0fc",
+      "added_stable_ids": [
+        "d10.math.prefix-free-kraft-certificate.20261011"
+      ],
+      "appended_sources": [
+        "knowledge/d10-prefix-free-kraft-certificate-20261011.json"
+      ],
+      "coordinates_added": 0,
+      "ratified_added": 0,
+      "delta_selected": 1,
+      "previous_selected": 647,
+      "resulting_selected": 648,
+      "decision": "RESEARCH SELECTED only; no D10 coordinate/ratification; actual codeword prefix collision and exact Kraft sum, no T5 or Framed3 authority",
+      "tests": [
+        "scripts/check_d10_prefix_free_kraft_certificate.py",
+        "scripts/check_d10_selection_transition_history.py",
+        "scripts/check-d10-proposal-ledger.py"
+      ]
     }
   ]
 }

@@ -28,10 +28,10 @@
     "width": 10,
     "capacity": 1024,
     "dense_target": 1024,
-    "selected_semantic_candidates": 647,
-    "remaining_semantic_candidates": 377,
+    "selected_semantic_candidates": 648,
+    "remaining_semantic_candidates": 376,
     "law_forced_coordinates": 256,
-    "unplaced_selected_candidates": 391,
+    "unplaced_selected_candidates": 392,
     "ratified_residents": 0
   },
   "first_tranche": {
@@ -418,5 +418,19 @@
     "ratified_added": 0,
     "derivability": "PENDING-OWNER-REVIEW",
     "independent_evidence": "TI SCEA046 dual hysteresis thresholds + existing research witnesses; comparator polarity is an explicit modeling convention"
+  },
+  "prefix_free_kraft_certificate_research_replay": {
+    "source": "knowledge/d10-prefix-free-kraft-certificate-20261011.json",
+    "source_commit": "81c805e22b1ed528869e49e7dc5e02a744ee8751",
+    "semantic_name": "PREFIX-FREE-KRAFT-CERTIFICATE",
+    "selected": 1,
+    "previous_selected": 647,
+    "resulting_selected": 648,
+    "base_inventory_blob_sha": "7e13e929338baeef9b16c2139d24b78e23ea1e03",
+    "resulting_inventory_blob_sha": "aef34c9c6d31f172059f3cf5d70136c77ffde0fc",
+    "coordinates_added": 0,
+    "ratified_added": 0,
+    "derivability": "PENDING-OWNER-REVIEW: possible self-hosted library composite",
+    "independent_oracles": "3616 bounded ordered-codebook cases: pairwise exact Fractions vs integer dyadic intervals"
   }
 }
