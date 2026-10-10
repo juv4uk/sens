@@ -11,25 +11,54 @@ on:
       - 'lib/surface/function-signatures.lisp'
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   build-fasl:
-    name: Generate exact-domain Core4 FASL
+    name: Generate, verify, and commit exact-domain Core4 FASL
     runs-on: ubuntu-24.04
-    timeout-minutes: 20
+    timeout-minutes: 25
     steps:
       - uses: actions/checkout@v5
         with:
-          persist-credentials: false
+          fetch-depth: 0
+          persist-credentials: true
       - uses: dtolnay/rust-toolchain@stable
       - name: Generate source-matched exact-domain snapshot
         run: cargo run --locked -p sens-cli --bin gen-fasl -- lib/core4.lisp "$RUNNER_TEMP/core4.lisp.fasl"
-      - name: Verify non-empty binary
-        run: test -s "$RUNNER_TEMP/core4.lisp.fasl"
+      - name: Replace generated FASL and prove freshness
+        shell: bash
+        run: |
+          set -euo pipefail
+          cp "$RUNNER_TEMP/core4.lisp.fasl" lib/core4.lisp.fasl
+          test -s lib/core4.lisp.fasl
+          cargo test --locked -p sens --test core_fasl_freshness
+          git diff --check
+      - name: Commit binary snapshot with race-safe fast-forward
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add lib/core4.lisp.fasl
+          git commit -m "fix(fasl): regenerate Core4 exact-domain snapshot"
+          for attempt in 1 2 3 4 5; do
+            git fetch origin main
+            if ! git rebase origin/main; then
+              git rebase --abort
+              echo "FASL commit could not rebase cleanly; refusing to overwrite concurrent changes" >&2
+              exit 1
+            fi
+            if git push origin HEAD:main; then
+              exit 0
+            fi
+          done
+          echo "FASL snapshot push failed after five fast-forward attempts" >&2
+          exit 1
       - uses: actions/upload-artifact@v4
+        if: always()
         with:
-          name: core4-fasl-${{ github.sha }}
-          path: ${{ runner.temp }}/core4.lisp.fasl
+          name: core4-fasl-verified-${{ github.sha }}
+          path: lib/core4.lisp.fasl
           if-no-files-found: error
           retention-days: 1
