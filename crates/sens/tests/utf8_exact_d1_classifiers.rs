@@ -80,6 +80,24 @@ fn three_and_four_byte_second_positions_obey_unicode_exclusions() {
 }
 
 #[test]
+fn locate_leaf_comparison_and_integer_carrier_mismatch() {
+    let mut state = session();
+    for source in [
+        "(00011010 127 128)",
+        "(utf8-in-range? 127 128 191)",
+        "(utf8-continuation-byte? 127)",
+        "(utf8-continuation-byte? 128)",
+        "(utf8-two-continuations? 127 191)",
+        "(00000010 (00000001 (())))",
+        "(00010011 0 1)",
+        "(00011100 (00010011 0 1) 0)",
+    ] {
+        let result = eval_program(source, &mut state);
+        eprintln!("UTF8_MIGRATION_DIAG {source} => {result:?}");
+    }
+}
+
+#[test]
 fn old_three_field_cond_is_still_rejected_not_reenabled() {
     let mut state = session();
     let historical = "(00000111 ((00000010 (00000001 ())) (00000001 ()) (00000001 ())))";
