@@ -240,7 +240,7 @@
         ((00111101 "#q2:" wire)
          (x86-admission-wire-denominator-one? wire))
         ((101 0 0) (010 (00000001 (00000000))))))
-      (01001100 value))))
+      (01000110 value))))
 (00001001 x86-admission-within-inclusive-integer-range?
   (00001000 (value lower upper)
     ; Contract 11.8: current D6 >=/<= producers answer exact D1 control.
