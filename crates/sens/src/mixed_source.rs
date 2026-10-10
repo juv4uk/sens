@@ -868,6 +868,62 @@ mod tests {
         ));
     }
     #[test]
+    fn machine_source_mode_has_no_unquoted_numeric_d3_car_heads_in_x86_libraries() {
+        fn walk(
+            source: &str,
+            expression: &Expr,
+            quoted: bool,
+            path: &str,
+            hits: &mut Vec<String>,
+        ) {
+            let ExprKind::List(items) = &expression.kind else { return; };
+            if items.is_empty() { return; }
+
+            let head_spelling = source_spelling(source, &items[0]);
+            let quote_head = matches!(head_spelling, Some("00000001" | "001" | "як-є"));
+            if quoted || quote_head { return; }
+
+            if matches!(&items[0].kind, ExprKind::Number(value, _) if *value == 100.0) {
+                let start = expression.span.start as usize;
+                let end = expression.span.end as usize;
+                let line = source[..start.min(source.len())].matches('\n').count() + 1;
+                let snippet_end = end.min(start.saturating_add(100)).min(source.len());
+                hits.push(format!(
+                    "{path}:line={line}:span={start}..{end}:{}",
+                    source[start.min(source.len())..snippet_end].replace('\n', " ")
+                ));
+            }
+
+            // A list used as a clause's first item is itself executable; walk
+            // it as well. Quoted subtrees were returned above and stay data.
+            for child in items.iter() {
+                walk(source, child, false, path, hits);
+            }
+        }
+
+        let files = [
+            ("lib/machine/encoding/x86-64.lisp", include_str!("../../../lib/machine/encoding/x86-64.lisp")),
+            ("lib/machine/admission/x86-64.lisp", include_str!("../../../lib/machine/admission/x86-64.lisp")),
+            ("lib/machine/lowering/semantic-x86-64.lisp", include_str!("../../../lib/machine/lowering/semantic-x86-64.lisp")),
+        ];
+
+        let mut hits = Vec::new();
+        for (path, source) in files {
+            let expressions = parse_mixed_exact_domain_machine_source(path, source)
+                .expect("approved machine source parses");
+            for expression in &expressions {
+                walk(source, expression, false, path, &mut hits);
+            }
+        }
+
+        assert!(
+            hits.is_empty(),
+            "numeric 100 remains in executable head position after machine-source lifting:\n{}",
+            hits.iter().take(30).cloned().collect::<Vec<_>>().join("\n")
+        );
+    }
+
+    #[test]
     fn machine_source_mode_lifts_executable_forms_inside_w8_cond_clause_tests() {
         let source =
             "(00001001 probe (00001000 (x) (00000111 ((100 x) 0) (((00000001 (100 x)) 0)))))";
