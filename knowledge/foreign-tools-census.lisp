@@ -13,6 +13,7 @@
      (new-foreign-tools .
        (
         ((path . "tools/important_file_guard.py") (independence_status . foreign) (owner-issue . "#5397") (migration_plan . "Git/NUL path transport only; all file-admission decisions belong to knowledge/file-authority-guard.lisp executed as physical SENS T5. Remaining debt: replace this Python carrier only after a native transport preserves exact paths and fail-closed status handling."))
+        ((path . "tools/d10_hysteresis_chez.ss") (independence_status . foreign) (owner-issue . "#4013") (migration_plan . "Незалежний Chez Scheme oracle для точної D10 двопорогової семантики; не є мовною владою SENS; виконувані фізичні SENS свідки повинні окремо пройти паритет"))
        ))
      (new-python-without-entry . blocked)
      (new-python-outside-tools . blocked)
