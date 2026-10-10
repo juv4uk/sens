@@ -350,3 +350,28 @@ fn bounded_effect_carriers_reject_out_of_range_with_exact_d1_no() {
         );
     }
 }
+
+#[test]
+fn bounded_effect_structural_forms_return_exact_d1_for_matching_and_mismatched_kinds() {
+    // #5354: позитивні і чужі ефекти мають давати типізований D1, а не Lisp truthiness.
+    let mut session = Session::default();
+    load_core_library(&mut session).expect("ядро");
+    load_lisp_file("lib/machine/effects/u64.lisp", &mut session);
+    for (source, expected) in [
+        ("(machine-effect-bounded-u64-add-form? (quote (bounded-u64-add 2 3)))", true),
+        ("(machine-effect-bounded-u64-sub-form? (quote (bounded-u64-sub 5 3)))", true),
+        ("(machine-effect-bounded-u64-mul-form? (quote (bounded-u64-mul 2 3)))", true),
+        ("(machine-effect-bounded-u64-add-form? (quote (bounded-u64-sub 5 3)))", false),
+        ("(machine-effect-bounded-u64-sub-form? (quote (bounded-u64-mul 2 3)))", false),
+        ("(machine-effect-bounded-u64-mul-form? (quote (bounded-u64-add 2 3)))", false),
+    ] {
+        let actual = eval_program(source, &mut session)
+            .unwrap_or_else(|error| panic!("{source}: {error}"))
+            .value;
+        assert_eq!(
+            actual.as_predicate_bit(),
+            Some(expected),
+            "{source}: відповідь мусить бути точним D1-предикатом"
+        );
+    }
+}
