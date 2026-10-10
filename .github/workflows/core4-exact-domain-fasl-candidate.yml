@@ -11,6 +11,9 @@ on:
       - crates/sens/tests/core_fasl_freshness.rs
       - crates/sens/tests/machine_asm_differential.rs
       - crates/sens/tests/x86_64_lisp_encoder.rs
+      - crates/sens-host/tests/native_cond_profile.rs
+      - lib/machine/lowering/semantic-x86-64.lisp
+      - lib/machine/operands/x86-64.lisp
       - lib/core4.lisp
       - lib/machine/encoding/x86-64.lisp
       - .github/workflows/core4-exact-domain-fasl-candidate.yml
@@ -24,6 +27,9 @@ on:
       - crates/sens/tests/core_fasl_freshness.rs
       - crates/sens/tests/machine_asm_differential.rs
       - crates/sens/tests/x86_64_lisp_encoder.rs
+      - crates/sens-host/tests/native_cond_profile.rs
+      - lib/machine/lowering/semantic-x86-64.lisp
+      - lib/machine/operands/x86-64.lisp
       - lib/core4.lisp
       - lib/machine/encoding/x86-64.lisp
       - .github/workflows/core4-exact-domain-fasl-candidate.yml
@@ -58,7 +64,12 @@ jobs:
           if-no-files-found: error
           retention-days: 1
       - name: Pin exact x86 encoder source
-        run: test "$(git hash-object lib/machine/encoding/x86-64.lisp)" = "0b3f0989cf23df21edbcf5697b9f8548ff410e24"
+        run: |
+          test "$(git hash-object lib/machine/encoding/x86-64.lisp)" = "999a77a435453589faea4ee08aa4a015bd200337"
+          test "$(git hash-object lib/machine/lowering/semantic-x86-64.lisp)" = "22c873ed13cae6cd803c9dfad5f3c5bae08cbf55"
+          test "$(git hash-object lib/machine/operands/x86-64.lisp)" = "b7960ef87669372f06cc7247f33af1c795615634"
+          test "$(git hash-object crates/sens/tests/x86_64_lisp_encoder.rs)" = "8ebd29ff3996c065383d49f2d49d618b809c0512"
+          test "$(git hash-object crates/sens-host/tests/native_cond_profile.rs)" = "a5964dbfdec8b4abcf8102d1dce214b7bd8770e9"
       - name: Exact imm32 byte projection through Lisp encoder
         run: |
           test "$(git hash-object crates/sens/tests/x86_64_lisp_encoder.rs)" = "8ebd29ff3996c065383d49f2d49d618b809c0512"
