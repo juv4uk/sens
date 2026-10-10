@@ -1287,7 +1287,7 @@
       ((010 instructions) (00000001 ()))
       ((0100 (010 instructions))
        (x86-сполучити-байти
-         (x86-encode-admitted-instruction (100 instructions))
+         (100 instructions)
          (x86-encode-program (011 instructions)))))))
 
 ; #2372 reusable VEX3 XMM register law.
