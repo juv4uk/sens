@@ -118,18 +118,17 @@
 
 (00001001 machine-capability-find-domain-row
   (00001000 (width bits rows)
-    (за-умовою
-      ((атом? rows) ())
-      ((тотожне? width (перше (перше rows)))
-       (за-умовою
-         ((тотожне? bits (перше (решта (перше rows))))
-          (перше rows))
-         ((атом? ())
+    (cond
+      ((atom? rows) ())
+      ((eq? width (car (car rows)))
+       (cond
+         ((eq? bits (car (cdr (car rows)))) (car rows))
+         ((atom? ())
           (machine-capability-find-domain-row
-            width bits (решта rows)))))
-      ((атом? ())
+            width bits (cdr rows)))))
+      ((atom? ())
        (machine-capability-find-domain-row
-         width bits (решта rows))))))
+         width bits (cdr rows))))))
 
 ; Current lookup: explicit width + packed-bits mechanism key only.
 (00001001 machine-capabilities-for-domain
@@ -138,23 +137,23 @@
       ((row
          (machine-capability-find-domain-row
            width bits machine-capability-axis-v3)))
-      (за-умовою
-        ((атом? row) ())
-        ((атом? ())
-         (перше (решта (решта row))))))))
+      (cond
+        ((atom? row) ())
+        ((atom? ())
+         (car (cdr (cdr row))))))))
 
 (00001001 machine-capability-find-row
   (00001000 (key rows)
-    (за-умовою
-      ((атом? rows) ())
-      ((тотожне? key (перше (перше rows))) (перше rows))
-      ((атом? ())
-       (machine-capability-find-row key (решта rows))))))
+    (cond
+      ((atom? rows) ())
+      ((eq? key (car (car rows))) (car rows))
+      ((atom? ())
+       (machine-capability-find-row key (cdr rows))))))
 
 (00001001 machine-target-witness-status
   (00001000 (target)
     (10011100
       ((row (machine-capability-find-row target machine-target-witness-status-v1)))
-      (за-умовою
-        ((атом? row) (як-є absent))
-        ((атом? ()) (перше (решта row)))))))
+      (cond
+        ((atom? row) (quote absent))
+        ((atom? ()) (car (cdr row)))))))
