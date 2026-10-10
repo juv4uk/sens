@@ -40,4 +40,17 @@ jobs:
           BASE_SHA: ${{ github.event_name == 'workflow_dispatch' && inputs.base_sha || github.event_name == 'pull_request' && github.event.pull_request.base.sha || github.event.before }}
         run: |
           set -euo pipefail
+          # За ручного запуску користувач не може вибрати HEAD як «базу»
+          # і тим обійти перевірку нових шляхів. База визначена SENS-постановою.
+          if [[ "$GITHUB_EVENT_NAME" == "workflow_dispatch" ]]; then
+            if [[ "$GITHUB_REF" != "refs/heads/main" ]]; then
+              echo "SENS-FILE-GUARD: BLOCKED — ручна атестація дозволена лише з main" >&2
+              exit 1
+            fi
+            if [[ ! "$BASE_SHA" =~ ^[0-9a-f]{40}$ ]] ||
+               ! grep -Fq "(activation-git-commit . \"$BASE_SHA\")" knowledge/file-authority-policy.lisp; then
+              echo "SENS-FILE-GUARD: BLOCKED — ручна база має збігатися з SENS activation-git-commit" >&2
+              exit 1
+            fi
+          fi
           python3 tools/file_guard.py --base "$BASE_SHA"
