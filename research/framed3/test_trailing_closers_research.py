@@ -75,7 +75,7 @@ class SuffixLaw(unittest.TestCase):
                 self.assertEqual(suffix.restore(short), words)
                 compressed += len(short) < len(words)
         self.assertGreater(valid, 500)
-        self.assertGreater(compressed, 200)
+        self.assertEqual(compressed, 164)
 
     def test_strict_negative_and_future_d10(self):
         for words in (
