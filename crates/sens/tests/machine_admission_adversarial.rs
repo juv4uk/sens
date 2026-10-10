@@ -1,6 +1,6 @@
-use sens::{eval_parsed_expressions, parse_mixed_exact_domain_machine_source, 
-    eval_program, load_core_library, register_capability, Environment, Exactness, Expr,
-    LanguageError, Session, Span, Value,
+use sens::{
+    eval_parsed_expressions, eval_program, load_core_library, parse_mixed_exact_domain_machine_source,
+    register_capability, Environment, Exactness, Expr, LanguageError, Session, Span, Value,
 };
 use std::fs;
 use std::path::PathBuf;
