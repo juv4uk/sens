@@ -16,7 +16,7 @@
   "donors": [
     {
       "path": "lib/quantity.lisp",
-      "git_blob_sha1": "30c8e5fd403eb0103165083b0f535ac94f68fbb1",
+      "git_blob_sha1": "7bc20bc2092f2a78ce4e2a1bf42e7e430d40bb15",
       "role": "Lisp-owned finite quantity and dimension algebra"
     },
     {
