@@ -73,6 +73,13 @@ class EqCondCohort(unittest.TestCase):
         for atom in ("0", "1"):
             self.assertEqual(M.encode_atom_data(M.Atom(M.Tok("ATOM", atom, 0)), self.text7), [atom])
 
+    def test_ambiguous_legacy_w8_without_source_era_is_blocked(self):
+        for row in ROWS.values():
+            with self.subTest(source=row["source"][:32]):
+                auto = M.Resolver(self.legacy, self.my, self.upper, source_era="auto")
+                with self.assertRaises(M.MigrationError):
+                    M.migrate_file(row["source"], auto, self.text7)
+
     def test_sources_project_to_exact_words_and_physical_t5(self):
         for stem, row in ROWS.items():
             with self.subTest(stem=stem):
@@ -94,6 +101,11 @@ class EqCondCohort(unittest.TestCase):
                     M.typed_sha256(projection.split()),
                 )
                 self.assertNotEqual(expected, projection.encode("ascii"))
+                # Derived read-only exact-width D2/D3 view, never runnable .sens.
+                view = (FIXTURES / stem).read_bytes()
+                self.assertEqual(view, (row["projection"] + "\n").encode("ascii"))
+                self.assertEqual(view, (" ".join(M.decode_bytes(expected)) + "\n").encode("ascii"))
+                self.assertEqual(M.encode_projection(view.decode("ascii")), expected)
 
     def test_actual_three_pass_migrator_emits_same_stem_binary_only(self):
         with tempfile.TemporaryDirectory() as directory:
