@@ -291,9 +291,30 @@
 ; es gibt also kein variadisches/Rest-Body, auf das man sich stützen
 ; könnte. Für eine Folge von Ausdrücken genauso einpacken, wie es der
 ; Rest dieses Codes bereits tut — `(let (...) ((lambda () ausdruck1 ausdruck2)))`.
+(00001001 let-binding-names
+  (00001000 (bindings)
+    (за-умовою
+      ((атом? bindings) (як-є ()))
+      ((атом? (як-є ()))
+       (сполучити
+         (перше (перше bindings))
+         (let-binding-names (решта bindings)))))))
+
+(00001001 let-binding-values
+  (00001000 (bindings)
+    (за-умовою
+      ((атом? bindings) (як-є ()))
+      ((атом? (як-є ()))
+       (сполучити
+         (перше (решта (перше bindings)))
+         (let-binding-values (решта bindings))))))
+
 (00001010 let (bindings body)
-  (00000100 (00100111 (00000001 00001000) (00110111 (00001000 (binding) (00000101 binding)) bindings) body)
-        (00110111 (00001000 (binding) (00101111 binding)) bindings)))
+  ; Build ((lambda names body) values...) with current Lisp-owned D3 CONS.
+  ; Do not route current macro construction through retired W8 CONS/MAP ids.
+  (сполучити
+    (список (як-є 00001000) (let-binding-names bindings) body)
+    (let-binding-values bindings)))
 
 ; `let*` is `let` with sequential (not parallel) dependency: each binding's
 ; value expression can see every binding before it. Expands recursively —
