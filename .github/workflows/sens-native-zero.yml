@@ -1,0 +1,68 @@
+name: SENS Native Zero — physical T5 execution performance
+
+on:
+  pull_request:
+    paths:
+      - "crates/sens/examples/sens_native_zero_bench.rs"
+      - "crates/sens/src/binary_execution.rs"
+      - "crates/sens/src/ternary_transport.rs"
+      - "tests/fixtures/migration-quote-cohort-main/quote-legacy.sens"
+      - "benchmarks/native-zero/**"
+      - ".github/workflows/sens-native-zero.yml"
+  push:
+    branches: [main]
+    paths:
+      - "crates/sens/examples/sens_native_zero_bench.rs"
+      - "crates/sens/src/binary_execution.rs"
+      - "crates/sens/src/ternary_transport.rs"
+      - "tests/fixtures/migration-quote-cohort-main/quote-legacy.sens"
+      - "benchmarks/native-zero/**"
+      - ".github/workflows/sens-native-zero.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: native-zero-${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  physical-t5-bare:
+    name: Exact D1/D3 physical T5 on bare SENS — measured
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v5
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+      - name: Compile release Native Zero executable
+        run: cargo build --locked --release -p sens --example sens_native_zero_bench
+      - name: Record runner and binary provenance
+        run: |
+          mkdir -p artifacts/native-zero
+          printf 'commit=%s\n' "$GITHUB_SHA" > artifacts/native-zero/hardware.txt
+          rustc --version >> artifacts/native-zero/hardware.txt
+          uname -a >> artifacts/native-zero/hardware.txt
+          lscpu >> artifacts/native-zero/hardware.txt
+          sha256sum target/release/examples/sens_native_zero_bench >> artifacts/native-zero/hardware.txt
+      - name: Measure real physical bytes and bare-session D1/D3 execution
+        shell: bash
+        run: |
+          set -euo pipefail
+          target/release/examples/sens_native_zero_bench --samples 9 --iterations 128 |
+            tee artifacts/native-zero/native-zero.jsonl
+      - name: Validate actual samples, representation sizes and preflight oracle
+        run: |
+          python3 benchmarks/native-zero/verify_report.py \
+            --input artifacts/native-zero/native-zero.jsonl \
+            --summary artifacts/native-zero/summary.md
+          cat artifacts/native-zero/summary.md >> "$GITHUB_STEP_SUMMARY"
+      - name: Preserve raw measurements and hardware metadata even on failure
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: sens-native-zero-${{ github.sha }}
+          path: artifacts/native-zero/
+          if-no-files-found: warn
+          retention-days: 30
