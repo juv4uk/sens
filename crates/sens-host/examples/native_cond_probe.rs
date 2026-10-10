@@ -26,6 +26,15 @@ fn main() {
         // first failing row now distinguishes lowerer binding from admission.
         ("pair-store", "(x86-lower-bounded-pair-store-u64-forms 2 3)"),
         ("pair-store-alias", "(x86-lower-bounded-pair-store-u64-instructions 2 3)"),
+        // Ізолюємо композицію списків від машинного admission.
+        ("зворот-списку", "(00101010 (00000001 (a b)))"),
+        ("приєднання-списків", "(00101001 (00000001 (a b)) (00000001 (c d)))"),
+        ("доповнення-предиката", "(0100 (00000010 (00000001 (a b))))"),
+        // Розбиваємо допуск uimm8 на перевірку джерельних числових носіїв.
+        ("числовий-дріт", "(01001100 4)"),
+        ("знаменник-одиниця", "(x86-admission-wire-denominator-one? \"#q2:4/1\")"),
+        ("цілочисельність", "(x86-admission-exact-integer? 4)"),
+        ("число-в-межах", "(x86-admission-within-inclusive-integer-range? 4 0 255)"),
         ("forms", "(x86-lower-cons-car-u64-forms 2 3)"),
         // Exercise the uimm8 wildcard path directly; the original MOV-only
         // pattern check did not traverse this predicate path.
