@@ -188,14 +188,14 @@ def input_form(
         for path, mode in typechanged_modes
     ) + ")"
     return (
-        "(00001001 *file-authority-input*\\n"
-        "  (00000001\\n"
-        "    ((schema . file-authority-input/1)\\n"
-        f"     (added-paths . {lisp_list(added)})\\n"
-        f"     (added-modes . {mode_rows})\\n"
-        f"     (typechanged-paths . {lisp_list(typechanged)})\\n"
-        f"     (typechanged-modes . {typechanged_mode_rows})\\n"
-        f"     (tracked-tools-paths . {lisp_list(tracked_tools)}))))\\n"
+        "(00001001 *file-authority-input*\n"
+        "  (00000001\n"
+        "    ((schema . file-authority-input/1)\n"
+        f"     (added-paths . {lisp_list(added)})\n"
+        f"     (added-modes . {mode_rows})\n"
+        f"     (typechanged-paths . {lisp_list(typechanged)})\n"
+        f"     (typechanged-modes . {typechanged_mode_rows})\n"
+        f"     (tracked-tools-paths . {lisp_list(tracked_tools)}))))\n"
     )
 
 
