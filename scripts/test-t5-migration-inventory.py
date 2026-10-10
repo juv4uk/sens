@@ -292,7 +292,23 @@ class TestT5MigrationInventory(unittest.TestCase):
         for row in read_manifest():
             if row["migration_status"] == "BLOCKED":
                 self.assertEqual(row["canonical_path"], "n/a", row["path"])
-                self.assertEqual(row["authority"], "UNKNOWN", row["path"])
+
+    def test_t5_default_boundary_files_are_inventory_validators(self):
+        rows = {r["path"]: r for r in read_manifest()}
+        for path in (
+            ".github/workflows/t5-codec-boundary.yml",
+            "crates/sens-cli/tests/codec_boundary_t5_default.rs",
+            "scripts/check-t5-default-boundary.py",
+        ):
+            self.assertIn(path, rows, f"new T5-boundary link missing from M0: {path}")
+            self.assertEqual(rows[path]["role"], "validator", path)
+            self.assertEqual(rows[path]["migration_status"], "T5_REQUIRED", path)
+            self.assertEqual(rows[path]["canonical_path"], "*.sens", path)
+            self.assertEqual(rows[path]["dependency"], "#5439,#5442", path)
+        self.assertEqual(
+            rows[".github/workflows/t5-codec-boundary.yml"]["reason"],
+            "CI gate for T5-default policy; not a physical-byte producer",
+        )
 
     def test_workflow_orchestration_is_not_physical_producer(self):
         rows = read_manifest()

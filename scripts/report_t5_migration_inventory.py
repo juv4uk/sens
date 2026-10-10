@@ -98,6 +98,8 @@ ROLE_OVERRIDES = {
         ("validator", "тестові свідки дослідного F3-кодека; не фізичний T5 producer"),
     "research/framed3/test_tb33_capacity.py":
         ("validator", "комбінаторні тести Tb-33; не файловий кодер SENS"),
+    ".github/workflows/t5-codec-boundary.yml":
+        ("validator", "CI gate for T5-default policy; not a physical-byte producer"),
 }
 
 T5_AUTHORITY_REASONS = {
