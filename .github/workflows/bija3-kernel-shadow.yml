@@ -24,6 +24,25 @@ jobs:
       - uses: actions/checkout@v5
       - name: Run seed-kernel checker
         run: python3 scripts/research-2071-bija3-kernel.py
+      - name: Перевірити відмову біджа3 за Python -O
+        run: |
+          set -euo pipefail
+          for mode in -O -OO; do
+            if python3 "$mode" scripts/research-2071-bija3-kernel.py > /tmp/bija3-opt.log 2>&1; then
+              echo 'Оптимізований Python хибно пройшов біджа3' >&2
+              exit 1
+            fi
+            grep -q 'BIJA3-KERNEL: BLOCKED' /tmp/bija3-opt.log
+            ! grep -q 'PASS' /tmp/bija3-opt.log
+          done
+          for level in 1 2; do
+            if PYTHONOPTIMIZE="$level" python3 scripts/research-2071-bija3-kernel.py > /tmp/bija3-opt.log 2>&1; then
+              echo 'PYTHONOPTIMIZE хибно пройшов біджа3' >&2
+              exit 1
+            fi
+            grep -q 'BIJA3-KERNEL: BLOCKED' /tmp/bija3-opt.log
+            ! grep -q 'PASS' /tmp/bija3-opt.log
+          done
       - name: Publish summary
         run: |
           {
