@@ -71,6 +71,20 @@ class ThreePassMigrationTests(unittest.TestCase):
         self.assertTrue(out.startswith("10 0011 00 "))
         self.assertGreaterEqual(resolver.counts["pass2-my-lisp"],2)
 
+    def test_bare_symbol_lambda_binds_variadic_arguments_in_one_text7_frame(self):
+        out,_=self.migrate("(lambda args args)\\n")
+        frame=mod.encode_text7_identifier(
+            "args", self.text7, mod.Tok("ATOM", "args", 0)
+        )
+        expected=["10", "0010", "00", *frame, "00", *frame, "01"]
+        self.assertEqual(out, " ".join(expected)+"\\n")
+
+    def test_dotted_lambda_parameter_list_remains_blocked(self):
+        with self.assertRaisesRegex(
+            mod.MigrationError, "dotted lambda parameter list has no admitted Text7 binding law"
+        ):
+            self.migrate("(lambda (head . tail) tail)\\n")
+
     def test_pass3_lisp15_car(self):
         out,resolver=self.migrate("(CAR x)\n")
         self.assertTrue(out.startswith("10 100 00 "))
