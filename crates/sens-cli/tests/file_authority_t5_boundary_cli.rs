@@ -67,6 +67,27 @@ fn rejected_without_physical_file(source: &str) {
 }
 
 #[test]
+fn exact_width_words_without_complete_d2_never_create_physical_t5() {
+    // Це вже точні двійкові слова; помилка СТРУКТУРИ, не людської поверхні.
+    // Незакрита форма і зайве закриття відхиляються до запису байтів.
+    for source in ["10 001", "01"] {
+        let pair = TemporaryPair::new(&format!("{source}\n"));
+        let output = pair.trit("encode");
+        assert!(!output.status.success(), "неповний D2 пройшов: {source}");
+        assert!(output.stdout.is_empty(), "помилковий D2 надрукував PASS");
+        assert!(
+            String::from_utf8_lossy(&output.stderr).contains("InvalidProgramSyntax"),
+            "очікувана D2-відмова, вхід {source}: {:?}",
+            output.stderr
+        );
+        assert!(
+            !pair.physical.exists(),
+            "некоректний D2 створив фізичний файл: {source}"
+        );
+    }
+}
+
+#[test]
 fn exact_d2_projection_reaches_physical_t5_and_current_sens() {
     // D3 QUOTE(D3 EMPTY): один канонічний D2-вираз, без текстових імен.
     const WORDS: &str = "10 001 00 000 01";
