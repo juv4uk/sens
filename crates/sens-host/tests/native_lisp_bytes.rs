@@ -349,6 +349,22 @@ fn core4_machine_probe_session() -> Session {
 }
 
 #[test]
+fn core4_probe_not_returns_exact_d1_values() {
+    let _serial = test_lock();
+    let mut session = Session::default();
+    load_core_library(&mut session).expect("Core4 must load");
+    let not_zero = eval_program("(not? 0)", &mut session)
+        .expect("not? must evaluate numeric zero");
+    assert_eq!(not_zero.value.to_string(), "1", "not? 0 must be exact D1 YES");
+    let not_one = eval_program("(not? 1)", &mut session)
+        .expect("not? must evaluate numeric one");
+    assert_eq!(not_one.value.to_string(), "0", "not? 1 must be exact D1 NO");
+    let mismatch = eval_program("(equal? (як-є ret) (як-є mov-r64-imm64))", &mut session)
+        .expect("structural mismatch must not invoke a numeric operator");
+    assert!(mismatch.value.to_string().contains("0"), "mismatched atoms must return NO: {}", mismatch.value);
+}
+
+#[test]
 fn core4_probe_append_before_native_lowering() {
     let _serial = test_lock();
     let mut session = Session::default();
