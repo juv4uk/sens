@@ -50,6 +50,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Build the independent Rust reader required by physical T5 publication tests
+        run: cargo build --locked -p sens-cli --bin sens-trit
       - name: Test manifest-driven migration and three-pass classifier
         run: |
           set +e
