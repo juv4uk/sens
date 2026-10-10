@@ -1,0 +1,32 @@
+name: Result-status D1 migration witness
+
+on:
+  pull_request:
+    paths:
+      - 'lib/result-status.lisp'
+      - 'crates/sens/tests/result_tagged_migration_d1.rs'
+      - 'crates/sens/tests/result_status.rs'
+      - '.github/workflows/result-tagged-exact-d1-migration.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'lib/result-status.lisp'
+      - 'crates/sens/tests/result_tagged_migration_d1.rs'
+      - 'crates/sens/tests/result_status.rs'
+      - '.github/workflows/result-tagged-exact-d1-migration.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  execute-current-d1-only:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v5
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Prove current D1 YES/NO and strict two-field D3 in real interpreter
+        run: cargo test -p sens --test result_tagged_migration_d1 -- --nocapture
+      - name: Source remains unmodified by verification
+        run: git diff --exit-code -- lib/result-status.lisp crates/sens/tests/result_tagged_migration_d1.rs
