@@ -42,7 +42,7 @@ class SelectionLedgerTrace(unittest.TestCase):
         self.assertIn("CLASS-OF proposal guard PASS", result.stdout)
         self.assertIn("4 no-admission negative controls PASS", result.stdout)
         with (ROOT / "knowledge/d10-proposal-ledger.tsv").open(encoding="utf-8", newline="") as stream:
-            rows = {row["semantic_name"]: row for row in csv.DictReader(stream, delimiter="\\t")}
+            rows = {row["semantic_name"]: row for row in csv.DictReader(stream, delimiter="\t")}
         for name in ("CLASS-OF", "FIND-METHOD", "CHANGE-CLASS"):
             with self.subTest(name=name):
                 self.assertEqual(rows[name]["status"], "pending-review")
