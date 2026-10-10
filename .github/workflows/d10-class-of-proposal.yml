@@ -1,6 +1,19 @@
 name: D10 CLASS-OF proposal gate
 
 on:
+  push:
+    branches:
+      - 'research/**'
+    paths:
+      - 'knowledge/d10-class-of-proposal-v1.json'
+      - 'knowledge/d10-proposal-ledger.tsv'
+      - 'knowledge/d10-v1-semantic-inventory.json'
+      - 'knowledge/d1-d9-foundation.json'
+      - 'knowledge/d10-clos-slot-observation-v1.json'
+      - 'tests/oracles/d10_clos_slot_states.lisp'
+      - 'scripts/check_d10_class_of_proposal.py'
+      - 'tests/test_d10_proposal_ledger_growth.py'
+      - '.github/workflows/d10-class-of-proposal.yml'
   pull_request:
     paths:
       - 'knowledge/d10-class-of-proposal-v1.json'
