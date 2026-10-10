@@ -266,7 +266,7 @@ class BoundedUkTripletTests(unittest.TestCase):
         binary = (fixture / "cadr.sens").read_bytes()
         visible = (fixture / "cadr").read_text(encoding="ascii")
         self.assertEqual(mod.uk_surface(4)["1001"], "п-р")
-        self.assertEqual(source, "(п-р (сполучити (як-є ()) (сполучити (як-є ()) (як-є ()))))\\n".replace("\\\\n", "\\n"))
+        self.assertEqual(source, "(п-р (сполучити (як-є ()) (сполучити (як-є ()) (як-є ()))))\n")
         self.assertEqual(len(binary), 20)
         self.assertEqual(binary.hex(), "662dc47ec32da42dc47ec32da42dc32da42eb1a1")
         self.assertEqual(decode_bytes(binary), visible.split())
