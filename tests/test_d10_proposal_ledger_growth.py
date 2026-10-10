@@ -49,6 +49,11 @@ class SelectionLedgerTrace(unittest.TestCase):
                 self.assertEqual(rows[name]["ratified"], "0")
                 self.assertEqual(rows[name]["width"], "D10")
                 self.assertIn("=PENDING;", rows[name]["dedup_check"])
+        inventory = read("knowledge/d10-v1-semantic-inventory.json")
+        selected_names = {row["semantic_name"] for row in inventory["rows"]}
+        for name in ("CLASS-OF", "FIND-METHOD", "CHANGE-CLASS"):
+            with self.subTest(name=name, inventory="unselected"):
+                self.assertNotIn(name, selected_names)
 
     def test_current_five_pinned_research_roots(self):
         self.assertEqual(self.inventory["rows"][625:][0]["semantic_name"], "DPB")
