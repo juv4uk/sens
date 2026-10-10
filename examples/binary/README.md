@@ -37,3 +37,29 @@ digest alone is not proof of meaning.
 CI: `.github/workflows/binary-program-e2e.yml` checks structural/T5 transport. `.github/workflows/physical-binary-sens-cli.yml` executes the D3 and D5 specimens through both physical CLIs. The workflow runs on every
 `main` push, on relevant PRs, and on manual dispatch, using **GitHub-hosted
 Ubuntu**. It does not cancel itself when other agents advance `main`.
+
+## D3 primitive migration — six physical T5 programs
+
+The six `d3-primitive-*` same-stem triples (`.lisp` Ukrainian surface,
+extensionless exact-bit view, and **packed binary** `.sens`) migrate the
+six independent forms in `d3-primitives-program.bits`. The original is
+unchanged, and GitHub CI executes the committed physical files directly.
+The three EQ programs preserve original word sequences at 22:39, 39:56,
+56:63, yielding exact D1:1, D1:1 and D1:0. QUOTE and ATOM(CONS) preserve
+their original words at 0:5 and 11:22, yielding D1:1 and D1:0.
+
+**Explicit exception, not a byte-identity claim:** original ATOM(empty) at
+5:11 uses `10 010 00 10 01 01` (a D2 open/close empty structure). The
+current normalized physical file contains `10 010 00 000 01` (D3:000
+structural empty). The canonical D2 reader represents **both** the empty
+D2 frame and D3:000 as an empty list. Rust checks their empty-list AST
+shapes; the physical CLI checks actual output D1:1 under both encodings,
+including the original six-word sequence materialized only in temporary
+CI storage. No old source is deleted, and their transport bytes are
+intentionally different. The bounded Ukrainian triplet verifier accepts
+only the D3:000 canonical form, not the historical D2 empty form.
+
+The same-stem triplet, T5 diff ratchet, source-slice matching and the
+physical `sens` / `sens-trit` CLI gates are transport/source and
+bounded runtime witnesses. They are **not** an independent historic
+semantic oracle nor authorization to migrate unrelated Lisp files.
