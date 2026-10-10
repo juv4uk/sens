@@ -30,7 +30,7 @@
       
       ((00000010 value)  (00000001 ()))
       ((00000011 (00000101 value) (00000001 world)) t)
-      (1 (00000001 ())))))
+      )))
 
 (00001001 world-parent (00001000 (world) (00101111 world)))
 (00001001 world-journal (00001000 (world) (00110000 world)))
@@ -128,7 +128,7 @@
          (10011100 ((proofs (00000111
                          ((world-module-known? world module-name)
                           (reason-in-world world module-name opposite))
-                         (1 (00000001 ())))))
+                         )))
            (00000111
              
              ((00000010 proofs)  (00100111 (00000001 accepted)
@@ -170,7 +170,7 @@
        (10011100 ((existing (00000111
                          ((world-module-known? world module-name)
                           (world-clauses world module-name))
-                         (1 (00000001 ())))))
+                         )))
          (10011100 ((conflict (advice-batch-conflict
                            clauses clauses (00101001 clauses existing))))
            (00000111
@@ -439,7 +439,7 @@
     (00000111
       
       ((00000010 value)  (00000011 value (00000001 World-not-ancestor)))
-      (1 (00000001 ())))))
+      )))
 
 (00001001 world-diff
   (00001000 (from to)
@@ -510,7 +510,7 @@
     (00000111
       
       ((00000010 value)  (00000011 value (00000001 World-no-common-ancestor)))
-      (1 (00000001 ())))))
+      )))
 
 (00001001 world-branch-diff
   (00001000 (left right)
