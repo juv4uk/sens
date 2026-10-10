@@ -21,7 +21,7 @@ jobs:
         run: |
           set -euo pipefail
           actual="$(git hash-object lib/core4.lisp)"
-          test "$actual" = "13cd3518f5d9fe4401b15c01fe3c90a91df53921"
+          test "$actual" = "0348e2a006087f25de076d7096709f5489fdda7c"
           echo "CORE4_SOURCE_BLOB=$actual"
       - name: Regenerate FASL and run unchanged freshness gate
         run: |
