@@ -2,7 +2,7 @@
 //! binary width and payload, never a human spelling or historical SID8.
 //! Ratified language laws remain in lib/domains/*.lisp and their oracles.
 
-use sens::{eval_parsed_expressions, parse_canonical_binary, wire_decode_program, wire_encode_program, Expr, ExprKind, Session, Value};
+use sens::{eval_parsed_expressions, load_core_library, parse, parse_canonical_binary, wire_decode_program, wire_encode_program, Expr, ExprKind, Session, Value};
 
 fn binary_trace(expression: &Expr) -> String {
     match &expression.kind {
@@ -133,4 +133,26 @@ fn current_cond_reference_is_valid_binary_and_executes_without_legacy_sid() {
         .expect("two-field COND must execute with exact D1 predicate results");
     assert!(matches!(result.value, Value::Nil));
     assert!(result.output.is_empty());
+}
+
+
+/// Regression for the current-main time bootstrap failure at registry-driven
+/// peer materialization. Every form must load with the current defmacro surface;
+/// a retired W8 macro-definition word must not masquerade as current authority.
+#[test]
+fn current_core4_peer_materialization_uses_current_macro_law() {
+    let mut session = Session::default();
+    load_core_library(&mut session).expect("Core4 bootstrap");
+
+    let source = include_str!("../../../lib/time.lisp");
+    let parsed = parse(source).expect("time library syntax");
+    for (index, expression) in parsed.iter().enumerate() {
+        eval_parsed_expressions(std::slice::from_ref(expression), &mut session)
+            .unwrap_or_else(|error| panic!(
+                "time form {} at source byte {} failed after Core4 bootstrap: {}",
+                index + 1,
+                expression.span.start,
+                error
+            ));
+    }
 }
