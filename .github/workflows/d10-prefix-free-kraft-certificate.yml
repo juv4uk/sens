@@ -1,0 +1,24 @@
+name: D10 prefix-free Kraft certificate oracle
+on:
+  pull_request:
+    paths:
+      - 'knowledge/d10-prefix-free-kraft-certificate-20261011.json'
+      - 'scripts/check_d10_prefix_free_kraft_certificate.py'
+      - '.github/workflows/d10-prefix-free-kraft-certificate.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'knowledge/d10-prefix-free-kraft-certificate-20261011.json'
+      - 'scripts/check_d10_prefix_free_kraft_certificate.py'
+      - '.github/workflows/d10-prefix-free-kraft-certificate.yml'
+jobs:
+  exact-oracles:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python3 scripts/check_d10_prefix_free_kraft_certificate.py
+      - run: python3 -O scripts/check_d10_prefix_free_kraft_certificate.py
