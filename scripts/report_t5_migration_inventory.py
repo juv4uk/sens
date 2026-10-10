@@ -171,14 +171,15 @@ def classify(path: str, root: Path) -> dict:
         status = "T5_REQUIRED"
         authority = T5_AUTHORITY[path]
         reason = "канонічна межа T5 (authority)"
+    elif role == "unknown" or lane == "UNKNOWN":
+        # Не оголошуємо шлях дослідним/міграційним, доки немає ролі й owner lane.
+        status = "BLOCKED"
+        authority = "UNKNOWN"
+        reason = "роль або owner_lane не визначено → BLOCKED"
     elif is_senc:
         status = "SENC_RESEARCH"
         authority = "research/framed3 (не canonic)"
         reason = "дослідний .senc/F3/F4-носій"
-    elif role == "unknown":
-        status = "BLOCKED"
-        authority = "UNKNOWN"
-        reason = reason + "; роль не визначено → BLOCKED"
     elif role in ("producer", "consumer") and codec in ("T5", "T5+SENC"):
         status = "MIGRATION_CANDIDATE"
         authority = "T5 oracle (crates/sens)"
@@ -236,6 +237,39 @@ def to_jsonl(rows: list[dict]) -> str:
                    for r in rows)
 
 
+def validate_manifest_provenance(
+    manifest_text: str, root: Path, head_sha: str
+) -> tuple[bool, str]:
+    """Validate the manifest's shared base pin against real Git history."""
+    import json
+
+    try:
+        rows = [json.loads(line) for line in manifest_text.splitlines() if line.strip()]
+    except json.JSONDecodeError as exc:
+        return False, f"invalid JSONL: {exc}"
+    if not rows:
+        return False, "empty manifest"
+    pins = {row.get("base_sha") for row in rows}
+    if len(pins) != 1:
+        return False, f"expected one shared base_sha, found {len(pins)}"
+    pin = next(iter(pins))
+    if not isinstance(pin, str) or not re.fullmatch(r"[0-9a-f]{40}", pin):
+        return False, "base_sha must be one full lowercase 40-hex Git commit"
+    exists = subprocess.run(
+        ["git", "-C", str(root), "cat-file", "-e", f"{pin}^{{commit}}"],
+        capture_output=True, text=True, check=False,
+    )
+    if exists.returncode:
+        return False, f"base_sha is not an available Git commit: {pin}"
+    ancestor = subprocess.run(
+        ["git", "-C", str(root), "merge-base", "--is-ancestor", pin, head_sha],
+        capture_output=True, text=True, check=False,
+    )
+    if ancestor.returncode:
+        return False, f"base_sha is not an ancestor of checked HEAD: {pin}"
+    return True, pin
+
+
 def summarize(rows: list[dict]) -> str:
     from collections import Counter
     roles = Counter(r["role"] for r in rows)
@@ -272,8 +306,15 @@ def main(argv: list[str] | None = None) -> int:
 
     if args.check:
         committed = Path(args.check).read_text(encoding="utf-8")
-        # base_sha у закоміченому manifest не мусить дорівнювати живому HEAD —
-        # це різні коміти; порівнюємо склад шляхів і класифікацію.
+        # base_sha є provenance pin: не мусить дорівнювати живому HEAD,
+        # але має бути єдиним, реальним commit та предком checked HEAD.
+        provenance_ok, provenance = validate_manifest_provenance(
+            committed, root, base_sha(root, None))
+        if not provenance_ok:
+            print(f"FAIL: manifest provenance: {provenance}", file=sys.stderr)
+            return 1
+
+        # Порівнюємо склад шляхів/класифікацію, а base_sha перевірено окремо.
         def strip_sha(s: str) -> str:
             import json
             out = []
