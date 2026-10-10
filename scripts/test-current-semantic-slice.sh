@@ -59,13 +59,13 @@ probes = {
     "distance-product": "\n(quantity-product (scientific-constant-quantity si:defining-speed-of-light) (make-quantity 1 (make-unit (00100111 (make-dimension (00000001 second) 1)))))\n",
     "quantity-quotient": "\n(quantity-quotient (quantity-product (scientific-constant-quantity si:defining-speed-of-light) (make-quantity 1 (make-unit (00100111 (make-dimension (00000001 second) 1))))) (make-quantity 1 (make-unit (00100111 (make-dimension (00000001 second) 1))))\n",
 }
-  for stage in rows-binding check-binding witness-binding rows-call check-call planck-record cesium-record quantity-product one-second distance-product quantity-quotient; do
+for stage, suffix in probes.items():
     (root / f"exact-quantity-{stage}-probe.lisp").write_text(
         prefix + suffix, encoding="utf-8"
     )
 PY
 
-  for stage in rows-binding check-binding witness-binding rows-call check-call; do
+  for stage in rows-binding check-binding witness-binding rows-call check-call planck-record cesium-record quantity-product one-second distance-product quantity-quotient; do
     probe="$quantity_diag_dir/exact-quantity-$stage-probe.lisp"
     log="$quantity_diag_dir/exact-quantity-$stage-probe.log"
     if cargo run --quiet -p sens-cli --bin sens -- "$probe" >"$log" 2>&1; then
