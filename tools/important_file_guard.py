@@ -85,6 +85,44 @@ def introduced_paths(data: bytes) -> list[str]:
     return found
 
 
+def typechanged_paths(data: bytes) -> list[str]:
+    """Decode Git T-status records; a type change is not a newly added path."""
+    if data and not data.endswith(b"\\x00"):
+        fail("UNTERMINATED_GIT_TYPE_CHANGE")
+    fields = data[:-1].split(b"\\x00") if data else []
+    found: list[str] = []
+    offset = 0
+    while offset < len(fields):
+        try:
+            status = fields[offset].decode("ascii", "strict")
+        except UnicodeDecodeError as error:
+            fail(f"GIT_TYPE_CHANGE_STATUS_ENCODING_INVALID: {error}")
+        offset += 1
+        if status != "T":
+            fail(f"GIT_TYPE_CHANGE_UNEXPECTED_STATUS: {status}")
+        if offset >= len(fields):
+            fail("GIT_TYPE_CHANGE_TRUNCATED_PATH")
+        try:
+            path = fields[offset].decode("utf-8", "strict")
+        except UnicodeDecodeError as error:
+            fail(f"GIT_PATH_ENCODING_INVALID: {error}")
+        if not path:
+            fail("GIT_TYPE_CHANGE_EMPTY_PATH")
+        found.append(path)
+        offset += 1
+    return found
+
+
+REGULAR_BLOB_MODES = frozenset(("100644:blob", "100755:blob"))
+
+
+def require_regular_typechange_modes(rows: list[tuple[str, str]]) -> None:
+    """Refuse to hand a symlink/gitlink type change to the source oracle."""
+    for path, mode in rows:
+        if mode not in REGULAR_BLOB_MODES:
+            fail(f"GIT_TYPECHANGE_NON_REGULAR_OBJECT: {path}: {mode}")
+
+
 def lisp_string(value: str) -> str:
     # Git permits newlines/control characters in paths; the SENS source carrier
     # intentionally refuses them instead of emitting ambiguous Lisp source.
@@ -229,6 +267,26 @@ def self_test() -> None:
         introduced_paths(b"C100\x00tools/old.py\x00tools/new.py\x00"),
         ["tools/new.py"],
     )
+    expect(
+        "type-change-is-separate-from-addition",
+        typechanged_paths(bytes.fromhex("54006c69622f73616d706c652e73656e7300")),
+        ["lib/sample.sens"],
+    )
+    for malformed in (
+        bytes.fromhex("54006c69622f73616d706c652e73656e73"),
+        bytes.fromhex("5400"),
+        bytes.fromhex("4d006c69622f73616d706c652e73656e7300"),
+        bytes.fromhex("54006c69622f73616d706c652e73656e730054"),
+    ):
+        if not catches(lambda malformed=malformed: typechanged_paths(malformed)):
+            fail("TRANSPORT_SELF_TEST_ACCEPTED_MALFORMED_TYPE_CHANGE")
+    expect(
+        "regular-typechange-mode",
+        require_regular_typechange_modes([("lib/sample.sens", "100644:blob")]),
+        None,
+    )
+    if not catches(lambda: require_regular_typechange_modes([("lib/sample.sens", "120000:blob")])):
+        fail("TRANSPORT_SELF_TEST_ACCEPTED_SYMLINK_TYPE_CHANGE")
     expect("UTF8-path", nul_paths("knowledge/дані.sens".encode("utf-8") + b"\x00"),
            ["knowledge/дані.sens"])
     if not catches(lambda: nul_paths(b"unterminated")):
@@ -238,6 +296,55 @@ def self_test() -> None:
     expect("Lisp-escaping", lisp_string('a"b\\c'), '"a\\"b\\\\c"')
     if not catches(lambda: lisp_string("unsafe\x01path")):
         fail("TRANSPORT_SELF_TEST_ACCEPTED_CONTROL_CHARACTER")
+    # Real Git regression: --diff-filter=ACR misses T; --diff-filter=T finds symlink swap.
+    with tempfile.TemporaryDirectory(prefix="sens-typechange-") as temporary:
+        root = Path(temporary)
+        subprocess.run(["git", "init", "-q", str(root)], check=True,
+                       stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        (root / "lib").mkdir()
+        sample = root / "lib" / "sample.sens"
+        target = root / "lib" / "target.bin"
+        sample.write_bytes(b"physical-source")
+        target.write_bytes(b"symlink-target")
+        subprocess.run(
+            ["git", "-C", str(root), "add", "--", "lib/sample.sens", "lib/target.bin"],
+            check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        base_tree = subprocess.run(
+            ["git", "-C", str(root), "write-tree"], check=True,
+            stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+        ).stdout.decode("ascii", "strict").strip()
+        sample.unlink()
+        sample.symlink_to("target.bin")
+        subprocess.run(["git", "-C", str(root), "add", "-A", "--", "lib/sample.sens"],
+                       check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        head_tree = subprocess.run(
+            ["git", "-C", str(root), "write-tree"], check=True,
+            stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+        ).stdout.decode("ascii", "strict").strip()
+        acr_result = subprocess.run(
+            ["git", "-C", str(root), "diff", "--name-status", "-z",
+             "--diff-filter=ACR", base_tree, head_tree],
+            check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+        ).stdout
+        type_result = subprocess.run(
+            ["git", "-C", str(root), "diff", "--name-status", "-z",
+             "--diff-filter=T", base_tree, head_tree],
+            check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+        ).stdout
+        expect("real-Git-ACR-filter-misses-T", acr_result, b"")
+        expect("real-Git-T-filter-finds-symlink-change",
+               typechanged_paths(type_result), ["lib/sample.sens"])
+        tree_record = subprocess.run(
+            ["git", "-C", str(root), "ls-tree", "-z", "--full-tree",
+             head_tree, "--", "lib/sample.sens"],
+            check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+        ).stdout
+        fields = tree_record[:-1].split(bytes([9]), 1)[0].split(b" ")
+        mode = fields[0].decode("ascii") + ":" + fields[1].decode("ascii")
+        expect("real-Git-symlink-mode", mode, "120000:blob")
+        if not catches(lambda: require_regular_typechange_modes([("lib/sample.sens", mode)])):
+            fail("TRANSPORT_SELF_TEST_ACCEPTED_REAL_GIT_SYMLINK_TYPE_CHANGE")
+
     # Один точний Git tree, зіпсовані index і worktree: SENS отримує лише HEAD-факти.
     with tempfile.TemporaryDirectory(prefix="sens-head-ingress-") as temporary:
         root = Path(temporary)
@@ -306,6 +413,12 @@ def main() -> int:
         args.base, head,
     )
     added = introduced_paths(changes)
+    # T is separate from A/C/R: it must not enter the new-path extension policy.
+    type_changes = git("diff", "--name-status", "-z", "--diff-filter=T", args.base, head)
+    typechanged = typechanged_paths(type_changes)
+    typechanged_modes = [(path, git_path_mode(head, path)) for path in typechanged]
+    require_regular_typechange_modes(typechanged_modes)
+
     tracked_tools = nul_paths(git("ls-tree", "-r", "-z", "--name-only", "--full-tree", head, "--", "tools/"))
     modes = [(path, git_path_mode(head, path)) for path in added]
     bundle = build_bundle(added, tracked_tools, modes, head)
