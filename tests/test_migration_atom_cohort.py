@@ -1,12 +1,16 @@
 #!/usr/bin/env python3
 """Bounded current exact-domain ATOM to physical-T5 canary."""
 from pathlib import Path
+import sys
 import unittest
 
 ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(ROOT / "scripts"))
+from sens_t5_codec import decode_bytes, encode_words
 FIXTURE = ROOT / "tests" / "fixtures" / "migration-atom-cohort"
 SOURCE = FIXTURE / "atom-empty.lisp"
 PHYSICAL = FIXTURE / "atom-empty.sens"
+VIEW = FIXTURE / "atom-empty"
 EXPECTED = "10 010 00 000 01\n"
 EXPECTED_BYTES = bytes.fromhex("643806a1")
 EXPECTED_TRITS = [1,0,2,0,1,0,2,0,0,2,0,0,0,2,0,1,2,2,2,2]
@@ -17,7 +21,11 @@ class AtomT5Cohort(unittest.TestCase):
         payload = PHYSICAL.read_bytes()
         self.assertEqual(payload, EXPECTED_BYTES)
         self.assertNotEqual(payload, EXPECTED.encode("ascii"))
-        self.assertFalse((FIXTURE / "atom-empty").exists())
+        # Ratified companion is a generated, non-executable exact-width view.
+        self.assertEqual(VIEW.read_bytes(), EXPECTED.encode("ascii"))
+        self.assertEqual(decode_bytes(payload), EXPECTED.split())
+        self.assertEqual(encode_words(decode_bytes(payload)), payload)
+        self.assertEqual((" ".join(decode_bytes(payload)) + "\n").encode("ascii"), VIEW.read_bytes())
 
     def test_t5_bytes_are_canonical_and_typed_shape_is_preserved(self):
         trits = []
