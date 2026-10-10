@@ -40,7 +40,7 @@ jobs:
               if not sep or not body.startswith("          import sys\n"):
                   raise SystemExit(f"PHYSICAL-T5-WITNESS: BLOCKED — неповний код свідка {index}")
               lines = body.splitlines()
-              if any(not line.startswith("          ") for line in lines):
+              if any(line and not line.startswith("          ") for line in lines):
                   raise SystemExit(f"PHYSICAL-T5-WITNESS: BLOCKED — непевний відступ свідка {index}")
               code = "\n".join(line[10:] for line in lines) + "\n"
               compile(code, f"<фізичний-свідок-{index}>", "exec")
