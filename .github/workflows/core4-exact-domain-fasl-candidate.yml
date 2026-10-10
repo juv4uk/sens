@@ -10,6 +10,7 @@ on:
       - crates/sens-cli/src/bin/gen-fasl.rs
       - crates/sens/tests/core_fasl_freshness.rs
       - crates/sens/tests/machine_asm_differential.rs
+      - crates/sens/tests/x86_64_lisp_encoder.rs
       - lib/core4.lisp
       - lib/machine/encoding/x86-64.lisp
       - .github/workflows/core4-exact-domain-fasl-candidate.yml
@@ -22,6 +23,7 @@ on:
       - crates/sens-cli/src/bin/gen-fasl.rs
       - crates/sens/tests/core_fasl_freshness.rs
       - crates/sens/tests/machine_asm_differential.rs
+      - crates/sens/tests/x86_64_lisp_encoder.rs
       - lib/core4.lisp
       - lib/machine/encoding/x86-64.lisp
       - .github/workflows/core4-exact-domain-fasl-candidate.yml
@@ -57,6 +59,10 @@ jobs:
           retention-days: 1
       - name: Pin exact x86 encoder source
         run: test "$(git hash-object lib/machine/encoding/x86-64.lisp)" = "0b3f0989cf23df21edbcf5697b9f8548ff410e24"
+      - name: Exact imm32 byte projection through Lisp encoder
+        run: |
+          test "$(git hash-object crates/sens/tests/x86_64_lisp_encoder.rs)" = "8ebd29ff3996c065383d49f2d49d618b809c0512"
+          cargo test --locked -p sens --test x86_64_lisp_encoder lisp_encodes_mov_eax_imm32_little_endian -- --exact --nocapture
       - name: Diagnose x86 encoder callability stages
         shell: bash
         run: |
