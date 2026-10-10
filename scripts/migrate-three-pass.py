@@ -643,7 +643,13 @@ def collect_global_bindings(forms):
     return bindings
 
 
-def lambda_parameter_names(node: ListNode) -> tuple[str, ...]:
+def lambda_parameter_names(node: ListNode | Atom) -> tuple[str, ...]:
+    # Core4 explicitly admits a bare symbol parameter list as the variadic
+    # binder: (lambda args args) binds every argument as one list value.
+    # This is distinct from a dotted parameter list, which remains blocked
+    # until its own source/decoder law is ratified.
+    if isinstance(node, Atom):
+        return (node.tok.text,)
     if node.tail is not None:
         raise MigrationError(
             "dotted lambda parameter list has no admitted Text7 binding law",
@@ -660,7 +666,11 @@ def lambda_parameter_names(node: ListNode) -> tuple[str, ...]:
     return tuple(names)
 
 
-def encode_lambda_params(node: ListNode,text7):
+def encode_lambda_params(node: ListNode | Atom,text7):
+    if isinstance(node, Atom):
+        # Bare symbol parameters are encoded as one Text7 binding frame, not
+        # as a parenthesized fixed-arity parameter list.
+        return encode_text7_identifier(node.tok.text,text7,node.tok)
     names=lambda_parameter_names(node)
     words=[D2_OPEN]
     for index,name in enumerate(names):
@@ -757,10 +767,10 @@ def encode(node,resolver,text7,quoted=False,lexical_env=()):
             # D4 LAMBDA: parameter declarations are one contextual Text7 frame
             # per identifier; its body executes under the newly introduced scope.
             if not quoted and head_bits=="0010" and idx==1:
-                if not isinstance(item,ListNode):
+                if not isinstance(item,(ListNode,Atom)):
                     raise MigrationError(
-                        "lambda parameters must be a proper list",
-                        item.tok if isinstance(item,Atom) else None,
+                        "lambda parameters must be a list or one variadic identifier",
+                        item.tok if isinstance(item,(Atom,String)) else None,
                     )
                 lambda_names=lambda_parameter_names(item)
                 words.extend(encode_lambda_params(item,text7))
