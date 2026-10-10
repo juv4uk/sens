@@ -129,7 +129,20 @@ pub(crate) fn invoke_value(
         Value::Closure(closure) => closures::apply_values(closure.clone(), arguments, span),
         _ => Err(LanguageError::new(
             ErrorKind::Type,
-            "expression is not callable · vyraz ne mozhna vyklykaty · Ausdruck ist nicht aufrufbar",
+            format!(
+                "expression is not callable · vyraz ne mozhna vyklykaty · Ausdruck ist nicht aufrufbar (носій: {})",
+                match function {
+                    Value::Nil => "порожня структура",
+                    Value::Bool(_) => "історичний булевий носій",
+                    Value::Number(_, _) | Value::Rational(_) => "число",
+                    Value::BinaryNumber(_) => "двійкове число",
+                    Value::Symbol(_) => "символ",
+                    Value::Pair(_, _) => "пара",
+                    Value::Macro(_) => "макрос",
+                    Value::String(_) | Value::Text7(_) => "текст",
+                    _ => "інший невикликний носій",
+                },
+            ),
             span,
         )),
     }
