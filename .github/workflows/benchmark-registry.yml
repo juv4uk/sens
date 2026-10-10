@@ -31,6 +31,7 @@ jobs:
         run: python3 scripts/benchmark_registry.py --check
 
       - name: Verify and measure the T21/T22/T33 research stand when present
+        id: t22
         shell: bash
         run: |
           set -euo pipefail
@@ -38,7 +39,16 @@ jobs:
             python3 benchmarks/byte-pack/носій22.py --verify
             python3 benchmarks/byte-pack/носій22.py --bench --ntrits 4620 --reps 15 --out "$RUNNER_TEMP/t22-results.json"
             test -s "$RUNNER_TEMP/t22-results.json"
+            echo "available=true" >> "$GITHUB_OUTPUT"
           fi
+
+      - name: Publish raw T22 benchmark evidence
+        if: steps.t22.outputs.available == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: t22-carrier-benchmark-${{ github.sha }}
+          path: ${{ runner.temp }}/t22-results.json
+          if-no-files-found: error
 
       - name: Reject newly created unmanifested stands
         if: github.event_name == 'pull_request'
