@@ -70,6 +70,49 @@ fn d3_primitive_program_is_only_width_qualified_binary_source() {
 
 
 #[test]
+fn migrated_d3_eq_subforms_are_committed_physical_t5_from_original_source() {
+    // These are three unchanged, independent D2 forms from the original
+    // d3-primitives-program.bits corpus. Preserve word widths and order.
+    let original = D3_PRIMITIVES_PROGRAM.split_whitespace().collect::<Vec<_>>();
+    assert_eq!(original.len(), 63, "historical D3 source drifted");
+
+    let cases: [(&[u8], &str, usize, usize); 3] = [
+        (
+            include_bytes!("../../../examples/binary/d3-primitive-eq-car.sens"),
+            include_str!("../../../examples/binary/d3-primitive-eq-car"),
+            22, 39,
+        ),
+        (
+            include_bytes!("../../../examples/binary/d3-primitive-eq-cdr.sens"),
+            include_str!("../../../examples/binary/d3-primitive-eq-cdr"),
+            39, 56,
+        ),
+        (
+            include_bytes!("../../../examples/binary/d3-primitive-eq-distinct.sens"),
+            include_str!("../../../examples/binary/d3-primitive-eq-distinct"),
+            56, 63,
+        ),
+    ];
+    for (physical, visible, start, end) in cases {
+        let historical_form = original[start..end].join(" ") + "\n";
+        assert_eq!(visible, historical_form, "source D3 word widths drifted");
+        assert_bit_projection(visible);
+        assert_eq!(
+            encode_binary_projection_ternary(visible).unwrap().as_slice(),
+            physical,
+            "committed physical T5 differs from the source's original exact words"
+        );
+        assert_eq!(open_ternary_program(physical).unwrap() + "\n", visible);
+        let words = decode_ternary_program(physical).unwrap();
+        assert_eq!(sens::render_ternary_words_spaced(&words) + "\n", visible);
+        let forms = parse_canonical_binary(visible).unwrap();
+        assert_eq!(forms.len(), 1, "each migrated specimen is one D2 form");
+        assert_exact_domain_ast(&forms[0]);
+    }
+}
+
+
+#[test]
 fn d5_label_recursion_keeps_d5_and_d7_coordinates_in_binary_ast() {
     assert_bit_projection(D5_LABEL_RECURSION_PROGRAM);
     let physical = encode_binary_projection_ternary(D5_LABEL_RECURSION_PROGRAM)
