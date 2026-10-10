@@ -1,47 +1,89 @@
-//! Owner #4449: compiler .lisp stays human-readable Ukrainian, while
-//! execution heads become exact D3/D4 AST identities during loading.
-//! Never count this as a physical .sens or historic-oracle admission.
+//! Розділяємо ратифіковану українську проєкцію і історичний восьмибітний носій.
+//! Старий W8 не можна підвищувати до сучасного D4 за схожістю написання.
 use sens::{parse_mixed_exact_domain, ExprKind};
 
-const UK_SOURCE: &str = include_str!("../../../lib/compiler-nucleus.lisp");
+const ДЖЕРЕЛО: &str = include_str!("../../../lib/compiler-nucleus.lisp");
 
 #[test]
-fn real_compiler_preserves_uk_source_and_lowers_all_definitions_to_exact_heads() {
-    // Six definitions wrap the Ukrainian name onto the following line;
-    // a line-start-only counter would silently ignore valid D4 DEFINE forms.
-    let source_definitions = UK_SOURCE.matches("(визначити").count();
-    assert_eq!(source_definitions, 51, "compiler has 51 original callable definitions");
-    assert_eq!(UK_SOURCE.matches("(функція").count(), 51);
-    assert!(!UK_SOURCE.contains("(0011 "), "the .lisp human projection must not become raw D4");
-    assert!(!UK_SOURCE.contains("(0010 "), "the .lisp human projection must not become raw D4");
+fn історичні_51_визначення_не_стають_неявним_d4() {
+    // Компільований носій був мігрований із українських поверхонь у 8-бітні
+    // історичні голови. Зберігаємо доказ кількості й заборони W8 → D4.
+    let кількість = ДЖЕРЕЛО.matches("(00001001").count();
+    assert_eq!(кількість, 51, "потрібно зберегти всі 51 визначення");
+    assert_eq!(ДЖЕРЕЛО.matches("(00001000").count(), кількість);
 
-    let forms = parse_mixed_exact_domain(UK_SOURCE)
-        .expect("ratified Ukrainian compiler source must resolve at parse time");
-    assert_eq!(forms.len(), source_definitions);
-    for (index, expr) in forms.iter().enumerate() {
-        let ExprKind::List(definition) = &expr.kind else {
-            panic!("definition {index} must remain a D2 list");
+    let форми = parse_mixed_exact_domain(ДЖЕРЕЛО)
+        .expect("історичний носій компілятора мусить розбиратися без переозначення");
+    assert_eq!(форми.len(), кількість);
+
+    for (номер, форма) in форми.iter().enumerate() {
+        let ExprKind::List(визначення) = &форма.kind else {
+            panic!("верхня форма {номер} не є списком");
         };
-        assert_eq!(definition.len(), 3, "definition {index} arity");
-        assert!(matches!(&definition[0].kind, ExprKind::DomainIdentity(identity)
-            if identity.width() == 4 && identity.packed_bits() == 0b0011),
-            "definition {index} must be exact D4 DEFINE");
-        let ExprKind::List(lambda) = &definition[2].kind else {
-            panic!("definition {index} must contain a lambda");
+        assert_eq!(визначення.len(), 3, "арність визначення {номер}");
+        assert_eq!(
+            ДЖЕРЕЛО.get(визначення[0].span.start..визначення[0].span.end),
+            Some("00001001"),
+            "потрібно зберегти точну восьмибітну голову визначення {номер}"
+        );
+        assert!(
+            !matches!(&визначення[0].kind, ExprKind::DomainIdentity(_)),
+            "W8 визначення {номер} не може без доказу перетворитися на D4"
+        );
+        assert!(
+            !matches!(&визначення[1].kind, ExprKind::DomainIdentity(_)),
+            "ім'я визначення {номер} — дані зв'язування"
+        );
+
+        let ExprKind::List(лямбда) = &визначення[2].kind else {
+            panic!("значення визначення {номер} має бути лямбдою");
         };
-        assert!(matches!(&lambda[0].kind, ExprKind::DomainIdentity(identity)
-            if identity.width() == 4 && identity.packed_bits() == 0b0010),
-            "definition {index} must use exact D4 LAMBDA");
-        assert!(!matches!(&definition[1].kind, ExprKind::DomainIdentity(_)),
-            "definition {index} name is human binding metadata, not a core resident");
+        assert!(лямбда.len() >= 3, "лямбда {номер} потребує тіла");
+        assert_eq!(
+            ДЖЕРЕЛО.get(лямбда[0].span.start..лямбда[0].span.end),
+            Some("00001000"),
+            "точна восьмибітна голова лямбди {номер}"
+        );
+        assert!(
+            !matches!(&лямбда[0].kind, ExprKind::DomainIdentity(_)),
+            "історичний W8 LAMBDA не є ратифікованим D4"
+        );
     }
 }
 
 #[test]
-fn source_projection_is_not_a_physical_migration_claim() {
-    // D4 function identity is proven *inside the AST*. Without a ratified
-    // binder carrier and an independently observed execution oracle there is
-    // no authority to claim this source as byte-packed original .sens.
-    assert!(UK_SOURCE.contains("(за-умовою"));
-    assert!(UK_SOURCE.contains("(сполучити"));
+fn український_приклад_піднімає_лише_ратифіковані_голови() {
+    // Це тільки читання української поверхні, НЕ доказ фізичного .sens.
+    // Уникнення W8-підміни вище не повинне ламати справжні D3/D4 поверхні.
+    let джерело = "(визначити хід (функція (x) (за-умовою ((атом? x) (сполучити x (як-є ()))))))";
+    let форми = parse_mixed_exact_domain(джерело).expect("чинна українська проєкція");
+    assert_eq!(форми.len(), 1);
+
+    let ExprKind::List(визначення) = &форми[0].kind else { panic!("визначення"); };
+    assert!(matches!(&визначення[0].kind, ExprKind::DomainIdentity(id)
+        if id.width() == 4 && id.packed_bits() == 0b0011));
+    assert!(!matches!(&визначення[1].kind, ExprKind::DomainIdentity(_)),
+        "ім'я має лишитися даними");
+
+    let ExprKind::List(лямбда) = &визначення[2].kind else { panic!("лямбда"); };
+    assert!(matches!(&лямбда[0].kind, ExprKind::DomainIdentity(id)
+        if id.width() == 4 && id.packed_bits() == 0b0010));
+
+    let ExprKind::List(умова) = &лямбда[2].kind else { panic!("умова"); };
+    assert!(matches!(&умова[0].kind, ExprKind::DomainIdentity(id)
+        if id.width() == 3 && id.packed_bits() == 0b110));
+
+    let ExprKind::List(гілка) = &умова[1].kind else { panic!("гілка"); };
+    assert_eq!(гілка.len(), 2, "COND завжди має точні двопольові гілки");
+    let ExprKind::List(перевірка) = &гілка[0].kind else { panic!("предикат"); };
+    assert!(matches!(&перевірка[0].kind, ExprKind::DomainIdentity(id)
+        if id.width() == 3 && id.packed_bits() == 0b010));
+
+    let ExprKind::List(пара) = &гілка[1].kind else { panic!("CONS"); };
+    assert!(matches!(&пара[0].kind, ExprKind::DomainIdentity(id)
+        if id.width() == 3 && id.packed_bits() == 0b111));
+
+    let ExprKind::List(цитата) = &пара[2].kind else { panic!("QUOTE"); };
+    assert!(matches!(&цитата[0].kind, ExprKind::DomainIdentity(id)
+        if id.width() == 3 && id.packed_bits() == 0b001));
 }

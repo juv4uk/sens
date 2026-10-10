@@ -159,12 +159,13 @@
 
 (00001001 x86-encode-mov-r64-imm64
   (00001000 (register immediate)
-    (10011100 ((code (x86-reg-code register)))
-      (00000100
-        (x86-encode-rex 1 0 0 (x86-high1 code))
-        (00000100
-          (00001100 184 (x86-low3 code))
-          (x86-u64-bytes immediate))))))
+    ((00001000 (code)
+       (00000100
+         (x86-encode-rex 1 0 0 (x86-high1 code))
+         (00000100
+           (00001100 184 (x86-low3 code))
+           (x86-u64-bytes immediate))))
+     (x86-reg-code register))))
 
 ; Two's-complement byte for a disp8 value already known to be in [-128,127].
 ; `mod` in this Lisp does not wrap negative operands (`(mod -1 256)` is -1,
@@ -1237,11 +1238,13 @@
 (00001001 x86-encode-program
   (00001000 (instructions)
     (00000111
-      ; Stop precisely on empty structure. ATOM would also match any
-      ; non-list datum and is not a valid instruction-stream terminator.
-      ((00000011 instructions (00000001 ()))
-       (00000001 ()))
-      ((00000010 (00000001 ()))
+      ; Розрізняємо порожній список та довільний атом, а не порівнюємо
+      ; непорожню пару через EQ, що визначений лише для атомів.
+      ((010 instructions)
+       (00000111
+         ((eq? instructions (00000001 ())) (00000001 ()))
+         ((010 ()) (car instructions))))
+      ((010 ())
        (00101001
          (00000101 instructions)
          (x86-encode-program (00000110 instructions)))))))

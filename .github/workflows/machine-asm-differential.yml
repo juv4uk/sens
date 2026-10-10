@@ -8,6 +8,7 @@ on:
   pull_request:
     paths:
       - "crates/sens/tests/machine_asm_differential.rs"
+      - "crates/sens/tests/x86_64_lisp_encoder.rs"
       - "lib/machine/encoding/x86-64.lisp"
       - "lib/machine/admission/x86-64.lisp"
       - ".github/workflows/machine-asm-differential.yml"
@@ -15,6 +16,7 @@ on:
     branches: [main]
     paths:
       - "crates/sens/tests/machine_asm_differential.rs"
+      - "crates/sens/tests/x86_64_lisp_encoder.rs"
       - "lib/machine/encoding/x86-64.lisp"
       - "lib/machine/admission/x86-64.lisp"
       - ".github/workflows/machine-asm-differential.yml"
@@ -34,3 +36,13 @@ jobs:
           sudo apt-get install -y binutils nasm
       - name: Compare external assembler bytes with Lisp-owned encoder
         run: cargo test --locked -p sens --test machine_asm_differential -- --ignored --nocapture
+
+  mov-imm64-closed-domain:
+    name: "MOV imm64: усі 16 регістрів, незалежний декодер"
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v5
+      - uses: dtolnay/rust-toolchain@stable
+      - name: "Порівняти фізичні MOV imm64 на всіх 16 регістрах"
+        run: cargo test --locked -p sens --test x86_64_lisp_encoder lisp_encodes_mov_r64_imm64_for_every_gpr_with_independent_decode -- --exact --nocapture
