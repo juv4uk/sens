@@ -19,6 +19,46 @@ jobs:
       - uses: actions/checkout@v5
       - uses: dtolnay/rust-toolchain@stable
 
+      - name: Негативно довести відмову всіх Python-свідків під -O
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'GUARD'
+          import os
+          import subprocess
+          import sys
+          from pathlib import Path
+
+          marker = "PHYSICAL-T5-WITNESS: BLOCKED — Python -O вимикає перевірки"
+          source = Path(".github/workflows/physical-binary-sens-cli.yml").read_text(encoding="utf-8")
+          pieces = source.split("<<'PY'\n")[1:]
+          if len(pieces) != 10:
+              raise SystemExit(f"PHYSICAL-T5-WITNESS: BLOCKED — очікувано 10 свідків, знайдено {len(pieces)}")
+
+          for index, piece in enumerate(pieces, 1):
+              body, sep, _ = piece.partition("\n          PY")
+              if not sep or not body.startswith("          import sys\n"):
+                  raise SystemExit(f"PHYSICAL-T5-WITNESS: BLOCKED — неповний код свідка {index}")
+              lines = body.splitlines()
+              if any(not line.startswith("          ") for line in lines):
+                  raise SystemExit(f"PHYSICAL-T5-WITNESS: BLOCKED — непевний відступ свідка {index}")
+              code = "\n".join(line[10:] for line in lines) + "\n"
+              compile(code, f"<фізичний-свідок-{index}>", "exec")
+              for mode in ("-O", "PYTHONOPTIMIZE=2"):
+                  env = dict(os.environ)
+                  env.pop("PYTHONOPTIMIZE", None)
+                  if mode == "PYTHONOPTIMIZE=2":
+                      env["PYTHONOPTIMIZE"] = "2"
+                  args = [sys.executable, *(["-O"] if mode == "-O" else []), "-"]
+                  result = subprocess.run(args, input=code, text=True, capture_output=True, env=env, check=False)
+                  if result.returncode != 1 or result.stderr.strip() != marker or result.stdout:
+                      raise SystemExit(
+                          f"PHYSICAL-T5-WITNESS: BLOCKED — свідок {index} режим {mode} "
+                          f"повернув exit={result.returncode}; stderr={result.stderr!r}; stdout={result.stdout!r}"
+                      )
+          print("PHYSICAL-T5-WITNESS: NEGATIVE OPTIMIZATION CONTROLS PASS (10 × 2)")
+          GUARD
+
       - name: Build exact binary execution and transport tools
         run: cargo build --locked -p sens-cli --bin sens --bin sens-trit
 
