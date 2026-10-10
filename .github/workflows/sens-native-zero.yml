@@ -5,6 +5,7 @@ on:
     paths:
       - "crates/sens/examples/sens_native_zero_bench.rs"
       - "crates/sens/examples/sens_native_zero_prepared_bench.rs"
+      - "crates/sens/examples/sens_native_zero_file.rs"
       - "crates/sens/tests/physical_t5_execution.rs"
       - "crates/sens/src/lib.rs"
       - "crates/sens/src/binary_execution.rs"
@@ -40,9 +41,24 @@ jobs:
       - uses: dtolnay/rust-toolchain@stable
       - uses: Swatinem/rust-cache@v2
       - name: Compile release Native Zero executable
-        run: cargo build --locked --release -p sens --example sens_native_zero_bench --example sens_native_zero_prepared_bench
+        run: cargo build --locked --release -p sens --example sens_native_zero_bench --example sens_native_zero_prepared_bench --example sens_native_zero_file
       - name: Strict prepared T5 replay and fail-closed fixture regression
         run: cargo test --locked -p sens --test physical_t5_execution -- --nocapture
+      - name: Run real physical QUOTE file with independent bare exact domains
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p artifacts/native-zero
+          target/release/examples/sens_native_zero_file \
+            tests/fixtures/migration-quote-cohort-main/quote-legacy.sens \
+            | tee artifacts/native-zero/file-runner.txt
+          grep -Fx 'VALUE=()' artifacts/native-zero/file-runner.txt
+          grep -Fx 'KIND=NON-D1' artifacts/native-zero/file-runner.txt
+          if target/release/examples/sens_native_zero_file \
+            tests/fixtures/migration-quote-cohort-main/quote-legacy.lisp; then
+            echo 'ERROR: human Lisp file incorrectly accepted as physical .sens'
+            exit 1
+          fi
       - name: Record runner and binary provenance
         run: |
           mkdir -p artifacts/native-zero
