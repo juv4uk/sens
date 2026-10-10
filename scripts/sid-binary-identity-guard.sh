@@ -43,9 +43,9 @@ report_forbidden() {
   if output="$(grep -En "$pattern" "$@")"; then
     :
   else
-    local код=$?
-    if (( код != 1 )); then
-      printf 'ДВІЙКОВА ОХОРОНА: grep завершився з помилкою %s (%s)\n' "$код" "$description" >&2
+    local grep_status=$?
+    if (( grep_status != 1 )); then
+      printf 'ДВІЙКОВА ОХОРОНА: grep завершився з помилкою %s (%s)\n' "$grep_status" "$description" >&2
       fail=1
       return
     fi
@@ -75,9 +75,9 @@ if direct_sid8="$(grep -REn '(Sid8|Sens8)\((0b[01_]+|[0-9]+|"[^"]*")\)' crates/s
   --exclude=sid.rs --exclude=sens.rs)"; then
   :
 else
-  код=$?
-  if (( код != 1 )); then
-    printf 'ДВІЙКОВА ОХОРОНА: рекурсивний grep завершився з помилкою %s\n' "$код" >&2
+  grep_status=$?
+  if (( grep_status != 1 )); then
+    printf 'ДВІЙКОВА ОХОРОНА: рекурсивний grep завершився з помилкою %s\n' "$grep_status" >&2
     fail=1
   fi
 fi
