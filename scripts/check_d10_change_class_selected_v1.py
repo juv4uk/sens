@@ -74,7 +74,7 @@ def audit(manifest, inventory, state, foundation, donor, ledger_text, history, i
     sr = state.get("change_class_historical_v1", {})
     require(sr.get("previous_selected") == 647 and sr.get("resulting_selected") == 648, "state transition record missing")
 
-    ledger = list(csv.DictReader(io.StringIO(ledger_text), delimiter="\\t"))
+    ledger = list(csv.DictReader(io.StringIO(ledger_text), delimiter="\t"))
     matches = [r for r in ledger if r.get("semantic_name", "").strip().upper() == "CHANGE-CLASS"]
     require(len(matches) == 1, "proposal ledger row missing/duplicated")
     ent = matches[0]
