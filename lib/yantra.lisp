@@ -73,8 +73,8 @@
 (00001001 strcat-onto
   (00001000 (items acc)
     (00000111
-      ((00000010 items) () acc)
-      ((00000010 items) (1) acc)
+      
+      ((00000010 items)  acc)
       (t (strcat-onto (00000110 items) (00111010 acc (00000101 items)))))))
 
 (00001001 strcat
@@ -99,29 +99,23 @@
 (00001001 json-object?
   (00001000 (v)
     (00000111
-      ((00000010 v) () (00000001 ()))
-      ((00000010 v) (1) (00000001 ()))
-      ((00000010 (00000101 v)) () (00000001 ()))
-      ((00000010 (00000101 v)) (1) (00000001 ()))
-      ((00000010 (00000101 (00000101 v))) () t)
-      ((00000010 (00000101 (00000101 v))) (1) t)
+      
+      (t (00000001 ()))
+      
+      ((00000010 (00000101 v))  (00000001 ()))
+      
+      ((00000010 (00000101 (00000101 v)))  t)
       (t (00000001 ())))))
 
 (00001001 json-encode-value
   (00001000 (v)
     (00000111
-      ((00000010 v) () (00000111
+      
+      ((00000010 v)  (00000111
          ((00000011 v t) "true")
          ((00000011 v (00000001 ())) "null")
          ((string-membership-helper v)
-          (class-membership string member)
-          (json-encode-string v))
-         (t (01001100 v))))
-      ((00000010 v) (1) (00000111
-         ((00000011 v t) "true")
-         ((00000011 v (00000001 ())) "null")
-         ((string-membership-helper v)
-          (class-membership string member)
+          
           (json-encode-string v))
          (t (01001100 v))))
       ((json-object? v) (json-encode-object v))
@@ -130,8 +124,8 @@
 (00001001 json-encode-object-entries
   (00001000 (entries acc)
     (00000111
-      ((00000010 entries) () acc)
-      ((00000010 entries) (1) acc)
+      
+      ((00000010 entries)  acc)
       (t (10011100 ((entry (00000101 entries)))
            (json-encode-object-entries
             (00000110 entries)
@@ -149,8 +143,8 @@
 (00001001 json-encode-array-items
   (00001000 (items acc)
     (00000111
-      ((00000010 items) () acc)
-      ((00000010 items) (1) acc)
+      
+      ((00000010 items)  acc)
       (t (json-encode-array-items
           (00000110 items)
           (strcat acc
@@ -336,8 +330,8 @@
 (00001001 append-tool-results
   (00001000 (tcs acc)
     (00000111
-      ((00000010 tcs) () acc)
-      ((00000010 tcs) (1) acc)
+      
+      ((00000010 tcs)  acc)
       (t (append-tool-results
           (00000110 tcs)
           (00101001 acc
@@ -355,8 +349,8 @@
 (00001001 markers-contained?
   (00001000 (markers text)
     (00000111
-      ((00000010 markers) () (00000001 ()))
-      ((00000010 markers) (1) (00000001 ()))
+      
+      ((00000010 markers)  (00000001 ()))
       ((00111110 (00000101 markers) text) t)
       (t (markers-contained? (00000110 markers) text)))))
 
@@ -370,8 +364,8 @@
 (00001001 has-tool-result?
   (00001000 (messages)
     (00000111
-      ((00000010 messages) () (00000001 ()))
-      ((00000010 messages) (1) (00000001 ()))
+      
+      ((00000010 messages)  (00000001 ()))
       ((00100010 (msg-role (00000101 messages)) "tool") t)
       (t (has-tool-result? (00000110 messages))))))
 
@@ -396,16 +390,16 @@
 (00001001 id-in-list?
   (00001000 (id ids)
     (00000111
-      ((00000010 ids) () (00000001 ()))
-      ((00000010 ids) (1) (00000001 ()))
+      
+      ((00000010 ids)  (00000001 ()))
       ((00100010 id (00000101 ids)) t)
       (t (id-in-list? id (00000110 ids))))))
 
 (00001001 all-covered?
   (00001000 (ids candidates)
     (00000111
-      ((00000010 ids) () t)
-      ((00000010 ids) (1) t)
+      
+      ((00000010 ids)  t)
       ((id-in-list? (00000101 ids) candidates) (all-covered? (00000110 ids) candidates))
       (t (00000001 ())))))
 
@@ -416,8 +410,8 @@
 (00001001 ends-with-owned-tool-results?
   (00001000 (messages)
     (00000111
-      ((00000010 messages) () (00000001 ()))
-      ((00000010 messages) (1) (00000001 ()))
+      
+      ((00000010 messages)  (00000001 ()))
       (t (collect-trailing-tools
           (00000110 (00101010 messages))
           (00000001 ()))))))
@@ -427,8 +421,8 @@
 (00001001 collect-trailing-tools
   (00001000 (reversed collected)
     (00000111
-      ((00000010 reversed) () (00000001 ()))
-      ((00000010 reversed) (1) (00000001 ()))
+      
+      ((00000010 reversed)  (00000001 ()))
       ((00100010 (msg-role (00000101 reversed)) "tool")
        (collect-trailing-tools (00000110 reversed)
                                (00000100 (msg-tool-call-id (00000101 reversed)) collected)))
@@ -436,8 +430,8 @@
        (10011100 ((issuer (00000101 reversed)))
          (00000111
            ((00100001 (00100010 (msg-role issuer) "assistant")) (00000001 ()))
-           ((00000010 (msg-tool-calls issuer)) () (00000001 ()))
-           ((00000010 (msg-tool-calls issuer)) (1) (00000001 ()))
+           
+           ((00000010 (msg-tool-calls issuer))  (00000001 ()))
            (t (all-covered? collected (msg-call-ids issuer)))))))))
 
 ; A turn may finish only if its text claims no execution - or if its
@@ -464,8 +458,8 @@
 (00001001 count-with-role
   (00001000 (role messages)
     (00000111
-      ((00000010 messages) () 0)
-      ((00000010 messages) (1) 0)
+      
+      ((00000010 messages)  0)
       ((00100010 (msg-role (00000101 messages)) role) (00001100 1 (count-with-role role (00000110 messages))))
       (t (count-with-role role (00000110 messages))))))
 
@@ -481,17 +475,8 @@
               (with-reply (00101001 messages (00100111 assistant-msg)))
               (tcs (msg-tool-calls assistant-msg)))
          (00000111
-           ((00000010 tcs) () (00000111
-              ((valid-final? assistant-msg with-reply)
-               (00100111 (00000100 (00000001 status) (00000001 completed))
-                     (00000100 (00000001 epistemic-status) (00000001 hypothesis))
-                     (00000100 (00000001 answer) (msg-content assistant-msg))
-                     (00000100 (00000001 turn) turn)
-                     (00000100 (00000001 messages) with-reply)))
-              (t (agent-loop complete
-                             (00101001 with-reply (00100111 invalid-completion-nudge))
-                             (00001100 turn 1)))))
-           ((00000010 tcs) (1) (00000111
+           
+           ((00000010 tcs)  (00000111
               ((valid-final? assistant-msg with-reply)
                (00100111 (00000100 (00000001 status) (00000001 completed))
                      (00000100 (00000001 epistemic-status) (00000001 hypothesis))
@@ -532,11 +517,11 @@
   (00001000 (messages)
     (10011100 ((r (http-post-json ollama-url
                              (build-request-body ollama-model messages))))
-      (00000111 ((00011100 (http-transport-exit r) 0) 1
+      (00000111 ((00011100 (http-transport-exit r) 0) 
              (json->message
               (extract-assistant-message
                (10100000 (http-transport-body r)))))
-            ((00011100 (http-transport-exit r) 0) 0
+            ((0100 (00011100 (http-transport-exit r) 0))
             ; Non-zero curl exit: a BLOCKED result (result-status.lisp
             ;; convention) carrying the evidence — never an empty body
             ;; fed to json-parse.
