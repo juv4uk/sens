@@ -1,4 +1,4 @@
-name: SENS file authority guard
+name: SENS file authority guard — physical T5 oracle
 
 on:
   pull_request:
@@ -15,80 +15,78 @@ permissions:
   contents: read
 
 concurrency:
-  group: sens-file-authority-${{ github.sha }}
+  group: sens-file-authority-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: false
 
 jobs:
   file-authority:
-    name: Fail-closed file census
+    name: Physical SENS T5 file-admission oracle
     runs-on: ubuntu-24.04
-    timeout-minutes: 10
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v5
         with:
           fetch-depth: 0
           persist-credentials: false
+
       - uses: actions/setup-python@v6
         with:
           python-version: '3.x'
-      - name: Positive and negative witnesses, including optimized Python
+
+      - name: Build exact physical SENS entrypoints
+        run: cargo build --locked -p sens-cli --bin sens --bin sens-trit
+
+      - name: Test transport in ordinary and optimized Python
+        shell: bash
         run: |
           set -euo pipefail
           python3 tools/important_file_guard.py --self-test
           python3 -O tools/important_file_guard.py --self-test
-      - name: Current Git delta and complete tools Python census
+
+      - name: Select and validate the exact Git comparison base
+        id: base
+        shell: bash
         env:
-          EVENT_BASE_SHA: ${{ github.event_name == 'pull_request' && github.event.pull_request.base.sha || github.event.before || '' }}
-          DISPATCH_BASE_SHA: ${{ inputs.base_sha || '' }}
-          HEAD_SHA: ${{ github.sha }}
+          PR_BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          PUSH_BEFORE_SHA: ${{ github.event.before }}
+          MANUAL_BASE_SHA: ${{ inputs.base_sha }}
         run: |
           set -euo pipefail
-          base="${EVENT_BASE_SHA:-}"
-          policy="knowledge/file-authority-policy.lisp"
-          [[ -f "$policy" ]] || {
-            echo "NAMED_FAIL: SENS_FILE_POLICY_MISSING" >&2
-            exit 2
-          }
-          # Навіть автоматичний CI перевіряє синтаксис SENS-пінованої бази.
-          policy_base="$(sed -nE 's/^[[:space:]]*\(activation-git-commit[[:space:]]*\.[[:space:]]*"([0-9a-f]{40})"\)[[:space:]]*$/\1/p' "$policy")"
-          [[ "$policy_base" =~ ^[0-9a-f]{40}$ ]] || {
-            echo "NAMED_FAIL: SENS_FILE_POLICY_BASE_INVALID" >&2
-            exit 2
-          }
-          git cat-file -e "$policy_base^{commit}" || {
-            echo "NAMED_FAIL: SENS_FILE_POLICY_BASE_MISSING" >&2
-            exit 2
-          }
-          # Активація постанови має належати історії саме цього HEAD.
-          # Існуючий, але сторонній SHA не може визначати обсяг доказу.
-          git merge-base --is-ancestor "$policy_base" "$HEAD_SHA" || {
-            echo "NAMED_FAIL: SENS_FILE_POLICY_BASE_NOT_ANCESTOR" >&2
-            exit 2
-          }
-          # Та сама перевірка обслуговує реальний ручний запуск і негативний свідок.
-          manual_base_is_pinned() {
-            [[ "$1" == "$policy_base" ]] || {
-              echo "NAMED_FAIL: DISPATCH_BASE_MUST_MATCH_SENS_ACTIVATION" >&2
-              return 2
-            }
-          }
-          # Порожня різниця HEAD→HEAD не може підмінити аудит від активації.
-          if manual_base_is_pinned "$HEAD_SHA" 2>/dev/null; then
-            echo "::error::HEAD помилково допущено як ручну базу SENS"
-            exit 1
-          fi
-          manual_base_is_pinned "$policy_base" || exit 2
-          if [[ "$GITHUB_EVENT_NAME" == "workflow_dispatch" ]]; then
-            [[ "$GITHUB_REF" == "refs/heads/main" ]] || {
-              echo "NAMED_FAIL: DISPATCH_REQUIRES_MAIN" >&2
-              exit 2
-            }
-            # Введений оператором SHA допускається лише як точний SENS activation pin.
-            manual_base_is_pinned "${DISPATCH_BASE_SHA:-}" || exit 2
-            base="$policy_base"
-          fi
+          case "$GITHUB_EVENT_NAME" in
+            pull_request) base="$PR_BASE_SHA" ;;
+            push) base="$PUSH_BEFORE_SHA" ;;
+            workflow_dispatch) base="$MANUAL_BASE_SHA" ;;
+            *) echo "SENS_FILE_AUTHORITY_BLOCKED: unsupported event" >&2; exit 2 ;;
+          esac
           [[ "$base" =~ ^[0-9a-f]{40}$ && "$base" != "0000000000000000000000000000000000000000" ]] || {
-            echo "NAMED_FAIL: EVENT_BASE_UNAVAILABLE" >&2
+            echo "SENS_FILE_AUTHORITY_BLOCKED: missing or invalid base SHA" >&2
             exit 2
           }
-          python3 -O tools/important_file_guard.py "$base" "$HEAD_SHA"
+          git cat-file -e "$base^{commit}"
+          git merge-base --is-ancestor "$base" HEAD
+          printf 'sha=%s\n' "$base" >> "$GITHUB_OUTPUT"
+
+      - name: Transport Git paths and package SENS source only
+        shell: bash
+        env:
+          BASE_SHA: ${{ steps.base.outputs.sha }}
+        run: |
+          set -euo pipefail
+          python3 tools/important_file_guard.py \
+            --base "$BASE_SHA" \
+            --output "$RUNNER_TEMP/file-authority.lisp"
+
+      - name: Encode the complete oracle into physical T5
+        shell: bash
+        run: |
+          set -euo pipefail
+          target/debug/sens-trit encode "$RUNNER_TEMP/file-authority.lisp"
+
+      - name: Execute the physical SENS authority oracle
+        shell: bash
+        run: |
+          set -euo pipefail
+          target/debug/sens "$RUNNER_TEMP/file-authority.sens"
+
+      - name: Diff hygiene
+        run: git diff --check

@@ -1,40 +1,30 @@
 #!/usr/bin/env python3
-"""Temporary foreign Git-delta adapter for the SENS-owned file policy.
+"""Mechanical Git-path transport for the SENS-owned file-authority oracle.
 
-No assert, no shell pipeline, no silent fallback. Git provides untrusted path
-metadata only; SENS owns the policy and must replace this adapter after the
-physical-T5 positive/negative witness has independent hosted parity.
+No admission policy, census parsing, violation classification, asserts, or shell
+commands live here. It supplies exact Git path facts and packages the executable
+SENS law as source so CI can encode it to physical T5 and run the .sens file.
 """
 from __future__ import annotations
 
+import argparse
 import re
 import subprocess
 import sys
-import tempfile
-from pathlib import Path, PurePosixPath
+from pathlib import Path
 
-IMPORTANT = ("lib/", "knowledge/", "witnesses/")
-NATIVE_EXTENSIONS = (".lisp", ".sens")
-CENSUS_PATH = "knowledge/foreign-tools-census.lisp"
-CENSUS_SCHEMA = "(schema . foreign-tools-census/1)"
-ENTRY = re.compile(
-    r'^\(\(path\s+\.\s*"([^"\\]+)"\)\s*'
-    r'\(independence_status\s+\.\s*foreign\)\s*'
-    r'\(owner-issue\s+\.\s*"#([0-9]+)"\)\s*'
-    r'\(migration_plan\s+\.\s*"([^"\\]+)"\)\s*\)$'
-)
-PATH_FIELD = re.compile(r'\(path\s+\.\s*"([^"\\]+)"\)')
+SHA1 = re.compile(r"^[0-9a-f]{40}$")
 
 
-class PolicyError(ValueError):
-    """A named, fail-closed input or evidence error."""
+class TransportError(ValueError):
+    """Named fail-closed error at the untrusted Git transport boundary."""
 
 
 def fail(message: str) -> None:
-    raise PolicyError(message)
+    raise TransportError(message)
 
 
-def command(*args: str) -> bytes:
+def git(*args: str) -> bytes:
     result = subprocess.run(
         ["git", *args],
         stdout=subprocess.PIPE,
@@ -43,455 +33,215 @@ def command(*args: str) -> bytes:
     )
     if result.returncode != 0:
         detail = result.stderr.decode("utf-8", "replace").strip()
-        fail("GIT_COMMAND_FAILED: " + " ".join(args) + ": " + detail)
+        fail(f"GIT_COMMAND_FAILED returncode={result.returncode} args={args!r} stderr={detail}")
     return result.stdout
 
 
 def nul_paths(data: bytes) -> list[str]:
-    """Decode a Git -z stream strictly; an incomplete stream is never PASS."""
     if not data:
         return []
     if not data.endswith(b"\x00"):
         fail("UNTERMINATED_GIT_NUL_STREAM")
-    parts = data[:-1].split(b"\x00")
-    if any(not part for part in parts):
+    pieces = data[:-1].split(b"\x00")
+    if any(not piece for piece in pieces):
         fail("EMPTY_FIELD_IN_GIT_NUL_STREAM")
     try:
-        return [part.decode("utf-8", "strict") for part in parts]
+        return [piece.decode("utf-8", "strict") for piece in pieces]
     except UnicodeDecodeError as error:
-        fail("GIT_PATH_ENCODING_INVALID: " + str(error))
+        fail(f"GIT_PATH_ENCODING_INVALID: {error}")
 
 
-def census_entries(source: str) -> dict[str, str]:
-    if CENSUS_SCHEMA not in source:
-        fail("CENSUS_SCHEMA_MISSING: " + CENSUS_PATH)
-    start = source.find("(new-foreign-tools .")
-    end = source.find("(new-python-without-entry . blocked)", start)
-    if start < 0 or end < 0 or end <= start:
-        fail("CENSUS_FOREIGN_TOOL_SECTION_MISSING: " + CENSUS_PATH)
-
-    section = source[start:end]
-    rows = [
-        line.strip()
-        for line in section.splitlines()
-        if "(path ." in line
-    ]
-    if not rows:
-        fail("CENSUS_HAS_NO_FOREIGN_TOOL_ROWS: " + CENSUS_PATH)
-
-    entries: dict[str, str] = {}
-    for line_number, row in enumerate(rows, start=1):
-        match = ENTRY.fullmatch(row)
-        if match is None:
-            fail(f"CENSUS_ENTRY_INVALID: {CENSUS_PATH}:row={line_number}")
-        path, issue_number, plan = match.groups()
-        if path in entries:
-            fail("CENSUS_DUPLICATE_PATH: " + path)
-        if not path.startswith("tools/") or not path.endswith(".py"):
-            fail("CENSUS_PATH_NOT_ALLOWED: " + path)
-        if not issue_number.isdigit():
-            fail("CENSUS_OWNER_ISSUE_MISSING: " + path)
-        plan = plan.strip()
-        if len(plan) < 60 or not any(term in plan.lower() for term in ("sens", "t5")):
-            fail("CENSUS_MIGRATION_PLAN_MISSING_OR_VAGUE: " + path)
-        entries[path] = plan
-
-    declared_rows = PATH_FIELD.findall(section)
-    if len(declared_rows) != len(entries):
-        fail("CENSUS_DUPLICATE_OR_MALFORMED_ROW: " + CENSUS_PATH)
-    return entries
-
-
-def introduced_paths(status_stream: bytes) -> list[str]:
-    """Parse --name-status -z and inspect add/rename/copy destinations."""
-    if status_stream and not status_stream.endswith(b"\x00"):
+def introduced_paths(data: bytes) -> list[str]:
+    """Return add/rename/copy destinations from Git's NUL name-status stream."""
+    if data and not data.endswith(b"\x00"):
         fail("UNTERMINATED_GIT_NAME_STATUS")
-    parts = status_stream[:-1].split(b"\x00") if status_stream else []
-    paths: list[str] = []
-    index = 0
-    while index < len(parts):
+    fields = data[:-1].split(b"\x00") if data else []
+    found: list[str] = []
+    offset = 0
+    while offset < len(fields):
         try:
-            status = parts[index].decode("ascii", "strict")
+            status = fields[offset].decode("ascii", "strict")
         except UnicodeDecodeError as error:
-            fail("GIT_STATUS_ENCODING_INVALID: " + str(error))
-        index += 1
+            fail(f"GIT_STATUS_ENCODING_INVALID: {error}")
+        offset += 1
         if status == "A":
-            if index >= len(parts):
+            if offset >= len(fields):
                 fail("GIT_STATUS_TRUNCATED_ADDITION")
-            destination = parts[index]
-            index += 1
+            destination = fields[offset]
+            offset += 1
         elif status.startswith(("R", "C")) and status[1:].isdigit():
-            if index + 1 >= len(parts):
+            if offset + 1 >= len(fields):
                 fail("GIT_STATUS_TRUNCATED_RENAME_OR_COPY")
-            destination = parts[index + 1]
-            index += 2
+            destination = fields[offset + 1]
+            offset += 2
         else:
-            fail("GIT_STATUS_UNEXPECTED_CHANGE: " + status)
+            fail(f"GIT_STATUS_UNEXPECTED_CHANGE: {status}")
         try:
-            paths.append(destination.decode("utf-8", "strict"))
+            found.append(destination.decode("utf-8", "strict"))
         except UnicodeDecodeError as error:
-            fail("GIT_PATH_ENCODING_INVALID: " + str(error))
-    return paths
+            fail(f"GIT_PATH_ENCODING_INVALID: {error}")
+    return found
 
 
-def path_is_canonical(path: str) -> bool:
-    parts = path.split("/")
+def lisp_string(value: str) -> str:
+    # Git permits newlines/control characters in paths; the SENS source carrier
+    # intentionally refuses them instead of emitting ambiguous Lisp source.
+    for character in value:
+        codepoint = ord(character)
+        if codepoint < 32 or codepoint == 127:
+            fail(f"UNREPRESENTABLE_CONTROL_CHARACTER_IN_GIT_PATH: U+{codepoint:04X}")
+    escaped = value.replace("\\", "\\\\").replace('"', '\\"')
+    return '"' + escaped + '"'
+
+
+def lisp_list(values: list[str]) -> str:
+    return "(" + " ".join(lisp_string(value) for value in values) + ")"
+
+
+def read_optional(path: str) -> str | None:
+    try:
+        return Path(path).read_bytes().decode("utf-8", "strict")
+    except FileNotFoundError:
+        return None
+
+
+def path_status(name: str, value: str | None) -> str:
+    return f"({name} . {'present' if value is not None else 'missing'})"
+
+
+def input_form(added: list[str], tracked_tools: list[str]) -> str:
     return (
-        bool(path)
-        and not path.startswith("/")
-        and "\\" not in path
-        and all(part not in ("", ".", "..") for part in parts)
+        "(00001001 *file-authority-input*\n"
+        "  (00000001\n"
+        "    ((schema . file-authority-input/1)\n"
+        f"     (added-paths . {lisp_list(added)})\n"
+        f"     (tracked-tools-paths . {lisp_list(tracked_tools)}))))\n"
     )
 
 
-def violations(paths: list[str], entries: dict[str, str]) -> list[str]:
-    errors: list[str] = []
-    for path in paths:
-        if not path_is_canonical(path):
-            errors.append("BAD_GIT_PATH: " + repr(path))
-            continue
-        if path.startswith(IMPORTANT) and not path.endswith(NATIVE_EXTENSIONS):
-            errors.append("IMPORTANT_FILE_MUST_BE_LISP_OR_SENS: " + path)
-        if path.endswith(".py"):
-            if not path.startswith("tools/"):
-                errors.append("NEW_PYTHON_OUTSIDE_TOOLS: " + path)
-            elif path not in entries:
-                errors.append("FOREIGN_PYTHON_WITHOUT_CENSUS_AND_PLAN: " + path)
-    return errors
+def status_form(policy: str | None, census: str | None, guard: str | None) -> str:
+    return (
+        "(00001001 *file-authority-source-status*\n"
+        "  (00000001\n"
+        "    (("
+        + path_status("policy", policy)
+        + " "
+        + path_status("census", census)
+        + " "
+        + path_status("guard", guard)
+        + "))))\n"
+    )
 
 
-
-def parse_tree_mode(raw: bytes, expected_path: str) -> str:
-    """One NUL-complete exact path from git ls-tree; mode is evidence, not a suffix."""
-    if raw.count(b"\x00") != 1 or not raw.endswith(b"\x00"):
-        fail("GIT_TREE_RECORD_INCOMPLETE: " + expected_path)
-    record = raw[:-1]
-    if record.count(b"\t") != 1:
-        fail("GIT_TREE_FIELDS_INVALID: " + expected_path)
-    metadata, encoded_path = record.split(b"\t", 1)
-    fields = metadata.split(b" ")
-    if len(fields) != 3:
-        fail("GIT_TREE_METADATA_INVALID: " + expected_path)
-    mode, kind, oid = fields
-    # SHA-1 і SHA-256 мають рівно 40 або 64 hex цифри.
-    # Ширина 41..63 не є допустимим Git object ID.
-    if not (len(oid) in (40, 64) and re.fullmatch(rb"[0-9a-f]+", oid)):
-        fail("GIT_TREE_OBJECT_ID_INVALID: " + expected_path)
-    try:
-        found_path = encoded_path.decode("utf-8", "strict")
-        mode_text = mode.decode("ascii", "strict")
-        kind_text = kind.decode("ascii", "strict")
-    except UnicodeDecodeError as error:
-        fail("GIT_TREE_RECORD_ENCODING_INVALID: " + str(error))
-    if found_path != expected_path:
-        fail("GIT_TREE_PATH_MISMATCH: " + expected_path)
-    if kind_text not in ("blob", "commit", "tree"):
-        fail("GIT_TREE_KIND_INVALID: " + expected_path)
-    return mode_text + ":" + kind_text
+def fail_program(reason: str) -> str:
+    # This is itself SENS code. The missing source is reported as an unresolved
+    # named SENS call, so the physical evaluator exits non-zero without fallback.
+    return f"(sens_file_authority_source_missing_5397_{reason})\n"
 
 
-def source_mode_error(path: str, mode: str) -> list[str]:
-    if mode in ("100644:blob", "100755:blob"):
-        return []
-    return ["NON_REGULAR_NEW_SOURCE: " + path + ": " + mode]
+def build_bundle(added: list[str], tracked_tools: list[str]) -> str:
+    core = read_optional("lib/core.lisp")
+    policy = read_optional("knowledge/file-authority-policy.lisp")
+    census = read_optional("knowledge/foreign-tools-census.lisp")
+    guard = read_optional("knowledge/file-authority-guard.lisp")
+
+    if core is None:
+        return fail_program("core")
+    if guard is None:
+        return fail_program("guard")
+
+    parts = [core]
+    if policy is not None:
+        parts.append(policy)
+    if census is not None:
+        parts.append(census)
+    parts.append(status_form(policy, census, guard))
+    parts.append(input_form(added, tracked_tools))
+    parts.append(guard)
+    return "\n\n".join(parts) + "\n"
 
 
-def new_source_mode_failures(paths: list[str], head: str) -> list[str]:
-    """A symlink or gitlink carrying .lisp/.sens is never a SENS source."""
-    errors: list[str] = []
-    for path in paths:
-        if not (path.startswith(IMPORTANT) or
-                (path.startswith("tools/") and path.endswith(".py"))):
-            continue
-        if not path_is_canonical(path):
-            fail("GIT_TREE_BAD_PATH: " + repr(path))
-        record = command("ls-tree", "-z", "--full-tree", head, "--", path)
-        mode = parse_tree_mode(record, path)
-        errors.extend(source_mode_error(path, mode))
-    return errors
-
-
-def census_coverage(tracked_tools: list[str], entries: dict[str, str]) -> list[str]:
-    errors: list[str] = []
-    tracked_python: set[str] = set()
-    for path in tracked_tools:
-        if not path_is_canonical(path) or not path.startswith("tools/"):
-            errors.append("BAD_TRACKED_TOOLS_PATH: " + repr(path))
-        elif path.endswith(".py"):
-            tracked_python.add(path)
-    for path in sorted(tracked_python - entries.keys()):
-        errors.append("TRACKED_TOOLS_PYTHON_WITHOUT_CENSUS: " + path)
-    for path in sorted(entries.keys() - tracked_python):
-        errors.append("CENSUS_PATH_NOT_TRACKED: " + path)
-    return errors
-
-
-def verify_case(label: str, actual: object, expected: object) -> None:
+def expect(label: str, actual: object, expected: object) -> None:
     if actual != expected:
-        fail(f"SELF_TEST_FAIL {label}: actual={actual!r} expected={expected!r}")
+        fail(f"TRANSPORT_SELF_TEST_FAILED {label}: actual={actual!r} expected={expected!r}")
 
 
 def catches(callback) -> bool:
     try:
         callback()
-    except PolicyError:
+    except (TransportError, UnicodeError):
         return True
     return False
 
 
-def sample_census(plan: str | None = None) -> str:
-    migration = plan or (
-        "Replace mechanical Git path decisions with an executable physical SENS T5 "
-        "witness, keep Git only as untrusted transport, prove hosted positive and "
-        "negative parity, and remove Python only after that proof."
-    )
-    return "\n".join((
-        "(00001001 *foreign-tools-census*",
-        "  (00000001",
-        "    ((schema . foreign-tools-census/1)",
-        "     (new-foreign-tools .",
-        "       (",
-        '        ((path . "tools/guard.py") (independence_status . foreign) '
-        '(owner-issue . "#5397") (migration_plan . "' + migration + '"))',
-        "       ))",
-        "     (new-python-without-entry . blocked)))",
-    ))
-
-
 def self_test() -> None:
-    entries = census_entries(sample_census())
-    verify_case(
-        "native_extensions",
-        violations(
-            ["lib/a.lisp", "lib/a.sens", "knowledge/правило.lisp", "witnesses/proof.sens"],
-            entries,
-        ),
-        [],
-    )
-    verify_case(
-        "new_knowledge_json",
-        violations(["knowledge/new.json"], entries),
-        ["IMPORTANT_FILE_MUST_BE_LISP_OR_SENS: knowledge/new.json"],
-    )
-    verify_case(
-        "new_lisp_fasl_is_not_native_source",
-        violations(["lib/new.lisp.fasl"], entries),
-        ["IMPORTANT_FILE_MUST_BE_LISP_OR_SENS: lib/new.lisp.fasl"],
-    )
-    verify_case(
-        "python_outside_tools",
-        violations(["scripts/new.py"], entries),
-        ["NEW_PYTHON_OUTSIDE_TOOLS: scripts/new.py"],
-    )
-    verify_case(
-        "uncensused_python_in_tools",
-        violations(["tools/uncensused.py"], entries),
-        ["FOREIGN_PYTHON_WITHOUT_CENSUS_AND_PLAN: tools/uncensused.py"],
-    )
-    verify_case(
-        "tracked_python_must_be_censused",
-        census_coverage(["tools/guard.py", "tools/uncensused.py"], entries),
-        ["TRACKED_TOOLS_PYTHON_WITHOUT_CENSUS: tools/uncensused.py"],
-    )
-    verify_case(
-        "census_must_match_tracked_tools",
-        census_coverage([], entries),
-        ["CENSUS_PATH_NOT_TRACKED: tools/guard.py"],
-    )
-    verify_case(
-        "rename_destination",
+    expect("empty-NUL-stream", nul_paths(b""), [])
+    expect("valid-NUL-stream", nul_paths(b"tools/a.py\x00"), ["tools/a.py"])
+    expect(
+        "rename-destination",
         introduced_paths(b"R100\x00docs/old.json\x00knowledge/new.json\x00"),
         ["knowledge/new.json"],
     )
-    verify_case(
-        "copy_destination",
+    expect(
+        "copy-destination",
         introduced_paths(b"C100\x00tools/old.py\x00tools/new.py\x00"),
         ["tools/new.py"],
     )
-    object_id = b"a" * 40
-    path = "lib/example.sens"
-    for mode, kind, expected in (
-        ("100644", "blob", []),
-        ("100755", "blob", []),
-        ("120000", "blob", ["NON_REGULAR_NEW_SOURCE: lib/example.sens: 120000:blob"]),
-        ("160000", "commit", ["NON_REGULAR_NEW_SOURCE: lib/example.sens: 160000:commit"]),
-    ):
-        record = (mode + " " + kind + " ").encode("ascii") + object_id + b"\tlib/example.sens\x00"
-        verify_case("git_tree_" + mode,
-                    source_mode_error(path, parse_tree_mode(record, path)), expected)
-    for invalid in (
-        b"",
-        b"100644 blob " + object_id + b"\tlib/example.sens",
-        b"100644 blob " + object_id + b"\tlib/example.sens\x00\x00",
-        b"100644 blob " + object_id + b"\tlib/other.sens\x00",
-        b"100644 blob " + object_id + b"a\tlib/example.sens\x00",  # 41 цифра
-        b"100644 blob " + object_id + b"a" * 23 + b"\tlib/example.sens\x00",  # 63 цифри
-        b"100644 blob " + object_id + b"a" * 25 + b"\tlib/example.sens\x00",  # 65 цифр
-        b"100644 blob " + object_id + b"\tlib/example.sens\x00junk",
-    ):
-        if not catches(lambda invalid=invalid: parse_tree_mode(invalid, path)):
-            fail("SELF_TEST_FAIL malformed_git_tree_accepted")
-
-    # Реальний тимчасовий Git-індекс: однаковий суфікс, різний тип об'єкта.
-    with tempfile.TemporaryDirectory(prefix="sens-file-guard-") as temporary:
-        root = Path(temporary)
-        subprocess.run(
-            ["git", "init", "-q", str(root)],
-            check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
-        )
-        (root / "lib").mkdir()
-        (root / "lib" / "regular.sens").write_bytes(b"\x00")
-        (root / "lib" / "symlink.sens").symlink_to("regular.sens")
-        subprocess.run(
-            ["git", "-C", str(root), "add", "--", "lib/regular.sens", "lib/symlink.sens"],
-            check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
-        )
-        tree = subprocess.run(
-            ["git", "-C", str(root), "write-tree"],
-            check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
-        ).stdout.decode("ascii", "strict").strip()
-        for source_path, expected in (
-            ("lib/regular.sens", []),
-            ("lib/symlink.sens",
-             ["NON_REGULAR_NEW_SOURCE: lib/symlink.sens: 120000:blob"]),
-        ):
-            record = subprocess.run(
-                ["git", "-C", str(root), "ls-tree", "-z", "--full-tree",
-                 tree, "--", source_path],
-                check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
-            ).stdout
-            verify_case(
-                "real_git_tree_" + source_path,
-                source_mode_error(source_path, parse_tree_mode(record, source_path)),
-                expected,
-            )
-    # Незалежний Git-доказ: індекс і робочий файл не є деревом head.
-    with tempfile.TemporaryDirectory(prefix="sens-head-tree-") as temporary:
-        root = Path(temporary)
-        subprocess.run(
-            ["git", "init", "-q", str(root)],
-            check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
-        )
-        (root / "tools").mkdir()
-        (root / "knowledge").mkdir()
-        (root / "tools" / "uncensused.py").write_bytes(b"foreign")
-        original_census = sample_census()
-        (root / CENSUS_PATH).write_text(original_census, encoding="utf-8")
-        subprocess.run(
-            ["git", "-C", str(root), "add", "--",
-             "tools/uncensused.py", CENSUS_PATH],
-            check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
-        )
-        tree_sha = subprocess.run(
-            ["git", "-C", str(root), "write-tree"],
-            check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
-        ).stdout.decode("ascii", "strict").strip()
-        (root / CENSUS_PATH).write_text("зіпсований census", encoding="utf-8")
-        subprocess.run(
-            ["git", "-C", str(root), "read-tree", "--empty"],
-            check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
-        )
-        index_paths = subprocess.run(
-            ["git", "-C", str(root), "ls-files", "-z", "--", "tools/"],
-            check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
-        ).stdout
-        tree_paths = subprocess.run(
-            ["git", "-C", str(root), "ls-tree", "-r", "-z",
-             "--name-only", "--full-tree", tree_sha, "--", "tools/"],
-            check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
-        ).stdout
-        census_blob = subprocess.run(
-            ["git", "-C", str(root), "show", f"{tree_sha}:{CENSUS_PATH}"],
-            check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
-        ).stdout.decode("utf-8", "strict")
-        verify_case("stale_index_not_proof", nul_paths(index_paths), [])
-        verify_case(
-            "exact_head_tools_tree", nul_paths(tree_paths), ["tools/uncensused.py"]
-        )
-        verify_case("exact_head_census_blob", census_blob, original_census)
-        verify_case(
-            "head_census_must_reject_uncensused",
-            census_coverage(nul_paths(tree_paths), census_entries(census_blob)),
-            [
-                "TRACKED_TOOLS_PYTHON_WITHOUT_CENSUS: tools/uncensused.py",
-                "CENSUS_PATH_NOT_TRACKED: tools/guard.py",
-            ],
-        )
-    verify_case("empty_nul_stream", nul_paths(b""), [])
-    verify_case("valid_nul_stream", nul_paths(b"tools/a.py\x00"), ["tools/a.py"])
-    if not catches(lambda: nul_paths(b"tools/a.py")):
-        fail("SELF_TEST_FAIL unterminated_nul_stream_admitted")
-
-    duplicate = sample_census()
-    duplicate_row = (
-        '        ((path . "tools/guard.py") (independence_status . foreign) '
-        '(owner-issue . "#5397") (migration_plan . "Replace mechanical Git path '
-        'decisions with executable physical SENS T5 proof; retain Git paths only as '
-        'untrusted transport, prove hosted positive and negative parity, then remove Python."))'
-    )
-    close_rows = "       ))"
-    if close_rows not in duplicate:
-        fail("SELF_TEST_FAIL duplicate_census_test_setup")
-    duplicate = duplicate.replace(close_rows, duplicate_row + chr(10) + close_rows, 1)
-
-    invalid_census_samples = (
-        "wrong schema",
-        "(schema . foreign-tools-census/1) (new-python-without-entry . blocked)",
-        sample_census("short plan"),
-        sample_census().replace('(independence_status . foreign)', '(independence_status . local)'),
-        sample_census().replace('(owner-issue . "#5397")', '(owner-issue . "unknown")'),
-        duplicate,
-    )
-    for invalid in invalid_census_samples:
-        if not catches(lambda invalid=invalid: census_entries(invalid)):
-            fail("SELF_TEST_FAIL malformed_census_admitted")
-    print("FILE_GUARD_SELFTEST_OK: 13 positive/negative mechanical checks")
+    expect("UTF8-path", nul_paths("knowledge/дані.sens".encode("utf-8") + b"\x00"),
+           ["knowledge/дані.sens"])
+    if not catches(lambda: nul_paths(b"unterminated")):
+        fail("TRANSPORT_SELF_TEST_ACCEPTED_UNTERMINATED_NUL_STREAM")
+    if not catches(lambda: nul_paths(b"\xff\x00")):
+        fail("TRANSPORT_SELF_TEST_ACCEPTED_NON_UTF8_PATH")
+    expect("Lisp-escaping", lisp_string('a"b\\c'), '"a\\"b\\\\c"')
+    if not catches(lambda: lisp_string("unsafe\x01path")):
+        fail("TRANSPORT_SELF_TEST_ACCEPTED_CONTROL_CHARACTER")
+    print("GIT_PATH_TRANSPORT_SELF_TEST_PASS: 9 mechanical checks; no policy verdict")
 
 
-def main(argv: list[str]) -> int:
-    if argv == ["--self-test"]:
+def main() -> int:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--base", help="exact PR-base or push-before commit SHA")
+    parser.add_argument("--output", type=Path, help="temporary SENS source bundle")
+    parser.add_argument("--self-test", action="store_true",
+                        help="test only Git NUL framing and SENS string transport")
+    args = parser.parse_args()
+    if args.self_test:
         self_test()
         return 0
-    if len(argv) != 2:
-        print("NAMED_FAIL: EXPECTED_BASE_AND_HEAD_SHA", file=sys.stderr)
-        return 2
-    base, head = argv
-    for label, sha in (("BASE", base), ("HEAD", head)):
-        if not re.fullmatch(r"[0-9a-f]{40}", sha) or set(sha) == {"0"}:
-            print("NAMED_FAIL: INVALID_" + label + "_SHA", file=sys.stderr)
-            return 2
-    try:
-        command("cat-file", "-e", f"{base}^{{commit}}")
-        command("cat-file", "-e", f"{head}^{{commit}}")
-        command("merge-base", "--is-ancestor", base, head)
-        census_mode = parse_tree_mode(
-            command("ls-tree", "-z", "--full-tree", head, "--", CENSUS_PATH),
-            CENSUS_PATH,
-        )
-        if census_mode not in ("100644:blob", "100755:blob"):
-            fail("CENSUS_NOT_REGULAR_GIT_BLOB: " + census_mode)
-        census_source = command("show", f"{head}:{CENSUS_PATH}").decode("utf-8", "strict")
-        entries = census_entries(census_source)
-        changes = command(
-            "diff", "--name-status", "-z", "--diff-filter=ACR",
-            "--find-renames", "--find-copies", "--find-copies-harder", base, head,
-        )
-        new_paths = introduced_paths(changes)
-        tracked_tools = nul_paths(command("ls-tree", "-r", "-z", "--name-only", "--full-tree", head, "--", "tools/"))
-        errors = violations(new_paths, entries)
-        errors.extend(new_source_mode_failures(new_paths, head))
-        errors.extend(census_coverage(tracked_tools, entries))
-        print(f"FILE_GUARD_AUDIT introduced={len(new_paths)} foreign_census={len(entries)}")
-        if errors:
-            for error in errors:
-                print("NAMED_FAIL: " + error, file=sys.stderr)
-            return 1
-        print("FILE_GUARD_PASS: new important paths are .lisp/.sens; foreign Python is registered")
-        return 0
-    except (OSError, PolicyError, UnicodeError) as error:
-        print("NAMED_FAIL: " + str(error), file=sys.stderr)
-        return 2
+    if args.base is None or args.output is None:
+        fail("MISSING_BASE_OR_OUTPUT")
+    if not SHA1.fullmatch(args.base) or set(args.base) == {"0"}:
+        fail("INVALID_OR_MISSING_BASE_SHA")
+
+    git("cat-file", "-e", f"{args.base}^{{commit}}")
+    head = git("rev-parse", "--verify", "HEAD^{commit}").decode("ascii", "strict").strip()
+    if not SHA1.fullmatch(head):
+        fail("INVALID_HEAD_SHA")
+    git("merge-base", "--is-ancestor", args.base, head)
+
+    changes = git(
+        "diff", "--name-status", "-z", "--diff-filter=ACR",
+        "--find-renames", "--find-copies", "--find-copies-harder",
+        args.base, head,
+    )
+    added = introduced_paths(changes)
+    tracked_tools = nul_paths(git("ls-files", "-z", "--", "tools/"))
+    bundle = build_bundle(added, tracked_tools)
+
+    args.output.parent.mkdir(parents=True, exist_ok=True)
+    args.output.write_bytes(bundle.encode("utf-8", "strict"))
+    print(
+        "GIT_PATH_TRANSPORT_READY "
+        f"base={args.base} head={head} added_paths={len(added)} "
+        f"tracked_tools_paths={len(tracked_tools)}"
+    )
+    return 0
 
 
 if __name__ == "__main__":
-    raise SystemExit(main(sys.argv[1:]))
+    try:
+        raise SystemExit(main())
+    except (OSError, TransportError, UnicodeError) as error:
+        print(f"GIT_PATH_TRANSPORT_BLOCKED: {error}", file=sys.stderr)
+        raise SystemExit(2)
