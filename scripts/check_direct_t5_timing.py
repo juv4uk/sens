@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import argparse
 import csv
+import hashlib
 import math
 from pathlib import Path
 import sys
@@ -20,6 +21,14 @@ FIXTURES = {
     "quote": "tests/fixtures/migration-quote-cohort-main/quote-legacy.sens",
     "atom": "tests/fixtures/migration-atom-cohort/atom-empty.sens",
     "cond": "tests/fixtures/migration-d1-cond-cohort/branch.sens",
+}
+# Закріплені SHA-256 реальних канонічних T5-файлів. Без цього підміна
+# фізичного свідка іншими байтами тієї ж довжини була б невидимою.
+# Контракт порівняння вимірювань змінюється лише окремим доказовим PR.
+FIXTURE_SHA256 = {
+    "quote": "90b993c83b34932d65b1001547f8833987eac2e44b238155a983cb8e5f68c978",
+    "atom": "4270498d024be1e03a69800223d3dac8e04d9b05deb6fc18c6986b0329e211f0",
+    "cond": "6568d9888039c0e33ace2378a39f0201f7d4ed67c71f23a6bb61605353976904",
 }
 TIMINGS = COLUMNS[3:]
 
@@ -57,6 +66,8 @@ def check(csv_path: Path, root: Path) -> dict[str, float]:
             raise EvidenceError(f"нецілі обсяги/форми: {name}") from exc
         if raw_bytes <= 0 or raw_bytes != fixture.stat().st_size or forms != 1:
             raise EvidenceError(f"неправильний розмір або число форм: {name}")
+        if hashlib.sha256(fixture.read_bytes()).hexdigest() != FIXTURE_SHA256[name]:
+            raise EvidenceError(f"змінилася фізична T5-фікстура: {name}")
         for key in TIMINGS:
             try:
                 elapsed = float(row[key])
