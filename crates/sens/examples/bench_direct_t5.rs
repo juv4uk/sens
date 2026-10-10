@@ -45,8 +45,11 @@ fn main() {
         let visible_ns = measure(|| {
             black_box(parse_canonical_binary(black_box(&visible)).unwrap());
         }, iterations);
+        // Warm cached AST with a persistent session. In particular, do NOT
+        // include construction/bootstrap of the runtime in this lane.
+        let mut warmed_session = Session::default();
         let cached_ns = measure(|| {
-            black_box(program.execute(&mut Session::default()).unwrap());
+            black_box(program.execute(black_box(&mut warmed_session)).unwrap());
         }, iterations);
         println!("{label},{},{},{direct_ns:.2},{visible_ns:.2},{cached_ns:.2}",
             bytes.len(), program.form_count());
