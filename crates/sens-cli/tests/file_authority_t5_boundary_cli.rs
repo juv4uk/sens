@@ -61,6 +61,11 @@ fn rejected_without_physical_file(source: &str) {
         rejected.stderr
     );
     assert!(
+        String::from_utf8_lossy(&rejected.stderr).contains("line/riadok/Zeile"),
+        "не показано точного місця неконічного токена: {:?}",
+        rejected.stderr
+    );
+    assert!(
         !pair.physical.exists(),
         "після відмови кодера не можна залишати фізичний .sens"
     );
@@ -83,6 +88,11 @@ fn exact_width_words_without_complete_d2_never_create_physical_t5() {
         assert!(
             !pair.physical.exists(),
             "некоректний D2 створив фізичний файл: {source}"
+        );
+        assert!(
+            String::from_utf8_lossy(&output.stderr).contains("line/riadok/Zeile"),
+            "не показано місця структурної D2-відмови: {:?}",
+            output.stderr
         );
     }
 }
