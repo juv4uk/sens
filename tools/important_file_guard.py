@@ -365,6 +365,58 @@ def self_test() -> None:
                 source_mode_error(source_path, parse_tree_mode(record, source_path)),
                 expected,
             )
+    # Незалежний Git-доказ: індекс і робочий файл не є деревом head.
+    with tempfile.TemporaryDirectory(prefix="sens-head-tree-") as temporary:
+        root = Path(temporary)
+        subprocess.run(
+            ["git", "init", "-q", str(root)],
+            check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+        )
+        (root / "tools").mkdir()
+        (root / "knowledge").mkdir()
+        (root / "tools" / "uncensused.py").write_bytes(b"foreign")
+        original_census = sample_census()
+        (root / CENSUS_PATH).write_text(original_census, encoding="utf-8")
+        subprocess.run(
+            ["git", "-C", str(root), "add", "--",
+             "tools/uncensused.py", CENSUS_PATH],
+            check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+        )
+        tree_sha = subprocess.run(
+            ["git", "-C", str(root), "write-tree"],
+            check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+        ).stdout.decode("ascii", "strict").strip()
+        (root / CENSUS_PATH).write_text("зіпсований census", encoding="utf-8")
+        subprocess.run(
+            ["git", "-C", str(root), "read-tree", "--empty"],
+            check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+        )
+        index_paths = subprocess.run(
+            ["git", "-C", str(root), "ls-files", "-z", "--", "tools/"],
+            check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+        ).stdout
+        tree_paths = subprocess.run(
+            ["git", "-C", str(root), "ls-tree", "-r", "-z",
+             "--name-only", "--full-tree", tree_sha, "--", "tools/"],
+            check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+        ).stdout
+        census_blob = subprocess.run(
+            ["git", "-C", str(root), "show", f"{tree_sha}:{CENSUS_PATH}"],
+            check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+        ).stdout.decode("utf-8", "strict")
+        verify_case("stale_index_not_proof", nul_paths(index_paths), [])
+        verify_case(
+            "exact_head_tools_tree", nul_paths(tree_paths), ["tools/uncensused.py"]
+        )
+        verify_case("exact_head_census_blob", census_blob, original_census)
+        verify_case(
+            "head_census_must_reject_uncensused",
+            census_coverage(nul_paths(tree_paths), census_entries(census_blob)),
+            [
+                "TRACKED_TOOLS_PYTHON_WITHOUT_CENSUS: tools/uncensused.py",
+                "CENSUS_PATH_NOT_TRACKED: tools/guard.py",
+            ],
+        )
     verify_case("empty_nul_stream", nul_paths(b""), [])
     verify_case("valid_nul_stream", nul_paths(b"tools/a.py\x00"), ["tools/a.py"])
     if not catches(lambda: nul_paths(b"tools/a.py")):
