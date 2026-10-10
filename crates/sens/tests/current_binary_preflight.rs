@@ -150,6 +150,17 @@ fn current_core4_peer_materialization_uses_current_macro_law() {
     ] {
         let parsed = parse(source).unwrap_or_else(|error| panic!("{library} library syntax: {error}"));
         for (index, expression) in parsed.iter().enumerate() {
+            if library == "process" && index + 1 == parsed.len() {
+                for probe in [
+                    "(my-postcore-peer-group 162 my-postcore-stable-peer-projection)",
+                    "(my-postcore-missing-peers process-run (my-postcore-peer-group 162 my-postcore-stable-peer-projection) (01001110))",
+                ] {
+                    match sens::eval_program(probe, &mut session) {
+                        Ok(result) => println!("POSTCORE-PROBE {probe} => {}", result.value),
+                        Err(error) => println!("POSTCORE-PROBE {probe} => ERROR {error}"),
+                    }
+                }
+            }
             eval_parsed_expressions(std::slice::from_ref(expression), &mut session)
                 .unwrap_or_else(|error| panic!(
                     "{library} form {} at source byte {} failed after Core4 bootstrap: {}",
