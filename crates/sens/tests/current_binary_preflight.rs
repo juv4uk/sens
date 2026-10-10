@@ -126,22 +126,6 @@ fn postcore_time_bootstrap_uses_current_lisp_macros() {
     let source = include_str!("../../../lib/time.lisp");
     let parsed = sens::parse(source).expect("time library syntax");
     for (index, expression) in parsed.iter().enumerate() {
-        if index + 1 == 24 {
-            // Isolate each executable dependency of the registry-driven peer macro
-            // before replaying the actual failing top-level call.
-            for (stage, probe) in [
-                ("nested-let", "(let ((peer-probe 7)) peer-probe)"),
-                ("CAR", "(00000101 (00000001 (1079 utc-now)))"),
-                ("CDR", "(00000110 (00000001 (1079 utc-now)))"),
-                ("CAR-of-CDR", "(00000101 (00000110 (00000001 (1079 utc-now))))"),
-                ("peer-group", "(my-postcore-peer-group 1079 my-postcore-stable-peer-projection)"),
-                ("environment-bindings", "(01001110)"),
-            ] {
-                sens::eval_program(probe, &mut session).unwrap_or_else(|error| panic!(
-                    "time peer-materialization dependency stage {stage} failed for {probe}: {error}"
-                ));
-            }
-        }
         eval_parsed_expressions(std::slice::from_ref(expression), &mut session)
             .unwrap_or_else(|error| panic!(
                 "time top-level form {} at source byte {} failed after Core4 bootstrap: {}",
@@ -150,6 +134,48 @@ fn postcore_time_bootstrap_uses_current_lisp_macros() {
                 error
             ));
     }
+}
+
+fn core4_probe_session() -> Session {
+    let mut session = Session::default();
+    sens::load_core_library(&mut session).expect("Core4 bootstrap");
+    session
+}
+
+#[test]
+fn core4_probe_nested_let_macro() {
+    sens::eval_program("(let ((peer-probe 7)) peer-probe)", &mut core4_probe_session())
+        .expect("the existing Lisp-owned let macro must expand a one-binding form");
+}
+
+#[test]
+fn core4_probe_current_car_head() {
+    sens::eval_program("(00000101 (001 (1079 utc-now)))", &mut core4_probe_session())
+        .expect("current D3 CAR can select a quoted list head");
+}
+
+#[test]
+fn core4_probe_current_cdr_tail() {
+    sens::eval_program("(00000110 (001 (1079 utc-now)))", &mut core4_probe_session())
+        .expect("current D3 CDR can select a quoted list tail");
+}
+
+#[test]
+fn core4_probe_current_car_of_cdr() {
+    sens::eval_program("(00000101 (00000110 (001 (1079 utc-now))))", &mut core4_probe_session())
+        .expect("current D3 CAR(CDR(...)) extracts the second argument");
+}
+
+#[test]
+fn core4_probe_peer_group_lookup() {
+    sens::eval_program("(my-postcore-peer-group 1079 my-postcore-stable-peer-projection)", &mut core4_probe_session())
+        .expect("peer-group lookup resolves the current stable identity row");
+}
+
+#[test]
+fn core4_probe_environment_bindings() {
+    sens::eval_program("(01001110)", &mut core4_probe_session())
+        .expect("current environment binding witness is callable");
 }
 
 #[test]
