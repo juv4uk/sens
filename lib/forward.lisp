@@ -673,13 +673,13 @@
        (00000111
          ((0100 (00000010 (match-condition-against-facts (00101111 condition) facts (jtms-state-subst state)))) (00100111 state))
          ((00000010 (match-condition-against-facts (00101111 condition) facts (jtms-state-subst state)))  (00100111 state))
-         (1 (00000001 ()))))
+         ))
       ((condition-is-or? condition) (match-or-condition-jtms (00000110 condition) facts state))
       ((condition-is-and? condition) (match-conditions-jtms (00000110 condition) facts state))
       ((condition-is-test? condition)
        (00000111
          ((01001101 (10001010 (00101111 condition) (jtms-state-subst state))) (00100111 state))
-         (1 (00000001 ()))))
+         ))
       (1 (match-plain-condition-jtms condition facts state)))))
 
 (00001001 match-conditions-jtms
@@ -903,14 +903,14 @@
       ((00000010 (00000101 condition))  (00000111
          ((00000011 (00000101 condition) (00000001 not?)) (00000001 (1)))
          (1 (00000011 (00000101 condition) (00000001 not)))))
-      (1 (00000001 ())))))
+      )))
 
 (00001001 match-negated-condition
   (00001000 (inner-pattern facts bindings)
     (00000111
       ((0100 (00000010 (match-condition-against-facts inner-pattern facts bindings))) (00100111 bindings))
       ((00000010 (match-condition-against-facts inner-pattern facts bindings))  (00100111 bindings))
-      (1 (00000001 ())))))
+      )))
 
 ; Step 10: `(or (pattern1) (pattern2) ...)` conditions — verified missing
 ; before fixing (not guessed), the same way Step 7's `not` gap was found:
@@ -952,7 +952,7 @@
       ((00000010 condition)  (00000001 ()))
       ((0100 (00000010 (00000101 condition))) (00000011 (00000101 condition) (00000001 or)))
       ((00000010 (00000101 condition))  (00000011 (00000101 condition) (00000001 or)))
-      (1 (00000001 ())))))
+      )))
 
 (00001001 match-or-condition
   (00001000 (alternatives facts bindings)
@@ -1007,7 +1007,7 @@
       ((00000010 condition)  (00000001 ()))
       ((0100 (00000010 (00000101 condition))) (00000011 (00000101 condition) (00000001 and)))
       ((00000010 (00000101 condition))  (00000011 (00000101 condition) (00000001 and)))
-      (1 (00000001 ())))))
+      )))
 
 (00001001 match-and-condition
   (00001000 (sub-conditions facts bindings)
@@ -1063,7 +1063,7 @@
       ((00000010 condition)  (00000001 ()))
       ((0100 (00000010 (00000101 condition))) (00000011 (00000101 condition) (00000001 test)))
       ((00000010 (00000101 condition))  (00000011 (00000101 condition) (00000001 test)))
-      (1 (00000001 ())))))
+      )))
 
 (00001001 match-test-condition
   (00001000 (expression bindings)
@@ -1184,7 +1184,7 @@
       ((00000010 condition)  (00000001 ()))
       ((0100 (00000010 (00000101 condition))) (00000011 (00000101 condition) (00000001 exists)))
       ((00000010 (00000101 condition))  (00000011 (00000101 condition) (00000001 exists)))
-      (1 (00000001 ())))))
+      )))
 
 (00001001 match-exists-condition
   (00001000 (sub-conditions facts bindings)
@@ -1200,7 +1200,7 @@
       ((00000010 condition)  (00000001 ()))
       ((0100 (00000010 (00000101 condition))) (00000011 (00000101 condition) (00000001 forall)))
       ((00000010 (00000101 condition))  (00000011 (00000101 condition) (00000001 forall)))
-      (1 (00000001 ())))))
+      )))
 
 (00001001 forall-every-candidate-satisfies?
   (00001000 (candidates rest-conditions facts)
@@ -1217,7 +1217,7 @@
       ((forall-every-candidate-satisfies?
          (match-one-condition first-condition facts bindings) rest-conditions facts)
        (00100111 bindings))
-      (1 (00000001 ())))))
+      )))
 
 (00001001 match-one-condition
   (00001000 (condition facts bindings)
