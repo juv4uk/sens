@@ -1,0 +1,26 @@
+name: Framed-3 bounded research witness
+on:
+  push:
+    paths:
+      - 'research/framed3/**'
+      - '.github/workflows/framed3-research.yml'
+  pull_request:
+    paths:
+      - 'research/framed3/**'
+      - '.github/workflows/framed3-research.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  standalone-research:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Research encoding/capacity witnesses
+        run: python3 research/framed3/research_codec.py
+      - name: Exact-word roundtrip, invalid frames and canonical T5 bytes
+        run: python3 -m unittest discover -s research/framed3 -p 'test_*.py' -v
