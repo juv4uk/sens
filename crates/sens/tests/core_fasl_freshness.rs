@@ -34,3 +34,66 @@ fn committed_core_fasl_matches_current_core_source() {
         "Core4 FASL must preserve exact-domain parser output, not an ordinary-parse AST; regenerate with gen-fasl"
     );
 }
+
+
+/// #5408: порожня, одна й дві послідовні прив'язки мають працювати з
+/// поточного Lisp-макросу, незалежно від людської поверхні імен.
+#[test]
+fn poslidovni_pryviazky_d6_vykonuiutsia_i_ne_prykhovuiut_nevidome_imia() {
+    for source in [
+        "(let* () 7)",
+        "(let* ((x 7)) x)",
+        "(let* ((x 7) (y x)) y)",
+        "(нехай* ((основа 7) (наслідок основа)) наслідок)",
+        "(let* ((основа 7) (наслідок основа)) наслідок)",
+        "(нехай* ((x 7) (y x)) y)",
+    ] {
+        let mut session = sens::Session::default();
+        sens::load_core_library(&mut session)
+            .expect("чинний Core4 мусить завантажитися");
+        let expressions = sens::parse(source).expect("допущена форма D6");
+        let outcome = sens::eval_parsed_expressions(&expressions, &mut session)
+            .unwrap_or_else(|err| panic!("нехай* не створило лексичну рамку для {source}: {err}"));
+        assert_eq!(outcome.value.to_string(), "7", "неправильне значення для {source}");
+    }
+
+    let mut session = sens::Session::default();
+    sens::load_core_library(&mut session).expect("поточний Core4");
+    let unknown = sens::parse("(нехай* ((основа 7)) наслідок)")
+        .expect("допущений негативний свідок");
+    assert!(
+        sens::eval_parsed_expressions(&unknown, &mut session).is_err(),
+        "невідомий символ повинен завершуватися помилкою, а не прихованим допуском"
+    );
+}
+
+
+/// #5408: a symbol predicate must return the typed D1 carrier, not an
+/// unbound host-language truth symbol or a legacy graded answer list.
+#[test]
+fn symbol_question_returns_exact_predicate_bit_after_core4_bootstrap() {
+    for (source, expected) in [
+        ("(symbol? (quote sens-name))", true),
+        ("(symbol? 7)", false),
+        ("(symbol? \"not-a-symbol\")", false),
+        ("(symbol? ())", false),
+        ("(symbol? (quote (sens-name sens-other)))", false),
+    ] {
+        let mut session = sens::Session::default();
+        sens::load_core_library(&mut session).expect("current Core4");
+        let expressions = sens::parse(source).expect("well-formed symbol? probe");
+        let outcome = sens::eval_parsed_expressions(&expressions, &mut session)
+            .unwrap_or_else(|err| panic!("symbol? failed for {source}: {err}"));
+        assert_eq!(
+            outcome.value.as_predicate_bit(),
+            Some(expected),
+            "symbol? must return exact D1 PredicateBit for {source}"
+        );
+        assert_eq!(
+            outcome.value.to_string(),
+            if expected { "1" } else { "0" },
+            "symbol? visible projection must stay binary for {source}"
+        );
+    }
+}
+

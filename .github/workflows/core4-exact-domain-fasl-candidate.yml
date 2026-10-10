@@ -65,7 +65,28 @@ jobs:
           path: lib/core4.lisp.fasl
           if-no-files-found: error
           retention-days: 1
-      - name: Pin exact x86 encoder source
+      - name: Keep machine-authority inputs unchanged in a Core4 pull request
+        if: github.event_name == 'pull_request'
+        env:
+          CORE_BASE_SHA: ${{ github.event.pull_request.base.sha }}
+        run: |
+          set -euo pipefail
+          test -n "$CORE_BASE_SHA"
+          for path in \
+            lib/machine/encoding/x86-64.lisp \
+            lib/machine/lowering/semantic-x86-64.lisp \
+            lib/machine/operands/x86-64.lisp \
+            lib/machine/admission/x86-64.lisp \
+            crates/sens/tests/x86_64_lisp_encoder.rs \
+            crates/sens-host/tests/native_cond_profile.rs; do
+            if ! git diff --quiet "$CORE_BASE_SHA" HEAD -- "$path"; then
+              echo "FAIL: Core4 candidate changed machine-authority input: $path" >&2
+              git diff --stat "$CORE_BASE_SHA" HEAD -- "$path" >&2
+              exit 1
+            fi
+          done
+      - name: Pin exact x86 encoder source on the dedicated mainline branch
+        if: github.event_name == 'push'
         run: |
           test "$(git hash-object lib/machine/encoding/x86-64.lisp)" = "4f4f7b4035395fac6b785f5fdb489104c1c89064"
           test "$(git hash-object lib/machine/lowering/semantic-x86-64.lisp)" = "6a9dbd838f407f93e1ecd09f88edf512a64218be"
