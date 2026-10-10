@@ -75,7 +75,7 @@
       ((00000011 (00000101 value) (00000001 proof)) t)
       ((00000011 (00000101 value) (00000001 test)) t)
       ((00000011 (00000101 value) (00000001 observation)) t)
-      (1 (00000001 ())))))
+      )))
 
 ; claim-ref shape check — no claim-ref? predicate is spec-mandated (and
 ; none is added as a public export), but supporting-evidence below needs
@@ -91,7 +91,7 @@
       
       ((00000010 (00000110 value))  (00000001 ()))
       ((00000011 (00000101 value) (00000001 claim-ref)) t)
-      (1 (00000001 ())))))
+      )))
 
 ; observation? must NOT be tag-only: the `observation` tag is reused both
 ; for the full top-level record here and as one of source-ref's four
