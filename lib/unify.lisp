@@ -81,10 +81,10 @@
 (00001011 var?
   (00001000 (term)
     (00000111
-      ((00000010 term) () (00000001 ()))
-      ((00000010 term) (1) (00000001 ()))
-      ((00000010 (00000101 term)) () (00000011 (00000101 term) (00000001 var)))
-      ((00000010 (00000101 term)) (1) (00000011 (00000101 term) (00000001 var)))
+      
+      ((00000010 term)  (00000001 ()))
+      
+      ((00000010 (00000101 term))  (00000011 (00000101 term) (00000001 var)))
       (t (00000001 ())))))
 
 ; subst is an alist of (name . term) pairs, keyed by the variable's
@@ -93,8 +93,8 @@
 (00001011 lookup-subst
   (00001000 (variable bindings)
     (00000111
-      ((00000010 bindings) () variable)
-      ((00000010 bindings) (1) variable)
+      
+      ((00000010 bindings)  variable)
       ((00100010 (00000101 (00000101 bindings)) (00101111 variable)) (00000110 (00000101 bindings)))
       (t (lookup-subst variable (00000110 bindings))))))
 
@@ -140,8 +140,8 @@
 (00001011 failed-subst?
   (00001000 (bindings)
     (00000111
-      ((00000010 bindings) () (00000011 bindings (00000001 fail)))
-      ((00000010 bindings) (1) (00000011 bindings (00000001 fail)))
+      
+      ((00000010 bindings)  (00000011 bindings (00000001 fail)))
       (t (00000001 ())))))
 
 (00001011 unify-walked
@@ -149,12 +149,11 @@
     (00000111
       ((10001001 a) (unify-var a b bindings))
       ((10001001 b) (unify-var b a bindings))
-      ((00000010 a) () (00000111 ((00000010 b) () (00000111 ((00000011 a b) bindings) (t (00000001 fail))))
-                                 ((00000010 b) (1) (00000111 ((00000011 a b) bindings) (t (00000001 fail)))) (t (00000001 fail))))
-      ((00000010 a) (1) (00000111 ((00000010 b) () (00000111 ((00000011 a b) bindings) (t (00000001 fail))))
-                                  ((00000010 b) (1) (00000111 ((00000011 a b) bindings) (t (00000001 fail)))) (t (00000001 fail))))
-      ((00000010 b) () (00000001 fail))
-      ((00000010 b) (1) (00000001 fail))
+      
+      ((00000010 a)  (00000111 
+                                  ((00000010 b)  (00000111 ((00000011 a b) bindings) (t (00000001 fail)))) (t (00000001 fail))))
+      
+      ((00000010 b)  (00000001 fail))
       (t (10000111 (00000110 a) (00000110 b) (10000111 (00000101 a) (00000101 b) bindings))))))
 
 (00001011 occurs-check?
@@ -162,8 +161,8 @@
     (10011100 ((resolved (10001011 term bindings)))
       (00000111
         ((10001001 resolved) (00100010 (00101111 variable) (00101111 resolved)))
-        ((00000010 resolved) () (00000001 ()))
-        ((00000010 resolved) (1) (00000001 ()))
+        
+        ((00000010 resolved)  (00000001 ()))
         (t (00000111
              ((10001100 variable (00000101 resolved) bindings) t)
              (t (10001100 variable (00000110 resolved) bindings))))))))
@@ -191,8 +190,8 @@
 (00001011 apply-subst-walked
   (00001000 (term bindings)
     (00000111
-      ((00000010 term) () term)
-      ((00000010 term) (1) term)
+      
+      ((00000010 term)  term)
       (t (00000100 (10001010 (00000101 term) bindings) (10001010 (00000110 term) bindings))))))
 
 ; The shared kernel behind proving/matching a *conjunction* of conditions:
@@ -249,14 +248,14 @@
 (00001011 thread-conjunction
   (00001000 (conditions state try-one)
     (00000111
-      ((00000010 conditions) () (00100111 state))
-      ((00000010 conditions) (1) (00100111 state))
+      
+      ((00000010 conditions)  (00100111 state))
       (t (thread-conjunction-branches (00000110 conditions) try-one (try-one (00000101 conditions) state))))))
 
 (00001011 thread-conjunction-branches
   (00001000 (remaining try-one states)
     (00000111
-      ((00000010 states) () (00000001 ()))
-      ((00000010 states) (1) (00000001 ()))
+      
+      ((00000010 states)  (00000001 ()))
       (t (00101001 (thread-conjunction remaining (00000101 states) try-one)
                  (thread-conjunction-branches remaining try-one (00000110 states)))))))
