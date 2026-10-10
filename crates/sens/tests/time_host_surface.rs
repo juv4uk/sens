@@ -82,7 +82,7 @@ fn time_stable_peers_reuse_the_same_lisp_closures() {
     ] {
         let original = session.environment.get(source);
         let localized = session.environment.get(peer);
-        match (original, localized) {
+        match (&original, &localized) {
             (Some(Value::Closure(left)), Some(Value::Closure(right))) => {
                 assert!(
                     Rc::ptr_eq(&left, &right),
