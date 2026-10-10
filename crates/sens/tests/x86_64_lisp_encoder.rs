@@ -774,6 +774,39 @@ fn exact_ukrainian_quotient_and_remainder_stage_probe() {
 }
 
 #[test]
+fn x86_u64_bytes_equal_independent_little_endian_for_boundaries() {
+    // Незалежний байтовий оракул: стандартне Rust u64::to_le_bytes.
+    // Не повторюємо алгоритм довгого ділення чи його межі.
+    let mut session = encoder_session();
+    for value in [
+        0u64,
+        1,
+        255,
+        256,
+        257,
+        65_535,
+        4_294_967_295,
+        4_294_967_296,
+        9_007_199_254_740_991,
+        u64::MAX,
+    ] {
+        let form = format!("(x86-u64-bytes {value})");
+        let rendered = eval_bytes(&form, &mut session);
+        let bytes: Vec<u8> = rendered
+            .trim_start_matches('(')
+            .trim_end_matches(')')
+            .split_whitespace()
+            .map(|item| item.parse::<u8>().expect("лише фізичний байт 0..255"))
+            .collect();
+        assert_eq!(
+            bytes,
+            value.to_le_bytes(),
+            "x86: точні вісім little-endian байтів для {value}: {form}"
+        );
+    }
+}
+
+#[test]
 fn x86_mov_imm64_component_stage_probe() {
     let mut session = encoder_session();
     // Відокремлюємо точну причину MOV imm64 до фізичного пакування.
