@@ -94,6 +94,7 @@ class QuoteCohort(unittest.TestCase):
                 self.assertEqual(physical.read_bytes(), bytes.fromhex("638906a1"))
                 self.assertEqual(module.encode_projection(projection), physical.read_bytes())
                 self.assertEqual(module.decode_bytes(physical.read_bytes()), EXPECTED.split())
+                self.assertEqual((FIXTURES / source_name).with_suffix("").read_text(encoding="ascii"), EXPECTED)
 
     def test_actual_migrator_creates_physical_artifact_and_manifest(self):
         with tempfile.TemporaryDirectory() as directory:
