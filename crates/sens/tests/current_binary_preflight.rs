@@ -144,15 +144,19 @@ fn current_core4_peer_materialization_uses_current_macro_law() {
     let mut session = Session::default();
     load_core_library(&mut session).expect("Core4 bootstrap");
 
-    let source = include_str!("../../../lib/time.lisp");
-    let parsed = parse(source).expect("time library syntax");
-    for (index, expression) in parsed.iter().enumerate() {
-        eval_parsed_expressions(std::slice::from_ref(expression), &mut session)
-            .unwrap_or_else(|error| panic!(
-                "time form {} at source byte {} failed after Core4 bootstrap: {}",
-                index + 1,
-                expression.span.start,
-                error
-            ));
+    for (library, source) in [
+        ("time", include_str!("../../../lib/time.lisp")),
+        ("process", include_str!("../../../lib/process.lisp")),
+    ] {
+        let parsed = parse(source).unwrap_or_else(|error| panic!("{library} library syntax: {error}"));
+        for (index, expression) in parsed.iter().enumerate() {
+            eval_parsed_expressions(std::slice::from_ref(expression), &mut session)
+                .unwrap_or_else(|error| panic!(
+                    "{library} form {} at source byte {} failed after Core4 bootstrap: {}",
+                    index + 1,
+                    expression.span.start,
+                    error
+                ));
+        }
     }
 }
