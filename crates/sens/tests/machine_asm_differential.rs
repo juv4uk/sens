@@ -318,3 +318,40 @@ fn x86_register_fields_have_exact_values_for_all_16_codes() {
                   low.value, high.value);
     }
 }
+
+
+// Атестуємо саме генератор ADD, окремо від ще заблокованого admission.
+// Кожне байтове очікування порівнюється також із двома незалежними асемблерами.
+#[test]
+#[ignore = "зовнішні GAS/NASM на GitHub-hosted runner"]
+fn x86_direct_add_byte_parity_with_gas_nasm() {
+    assert!(tool_version("as", &["--version"]).ends_with(" 2.42"));
+    assert_eq!(tool_version("nasm", &["-v"]), "NASM version 2.16.01");
+    assert!(tool_version("objcopy", &["--version"]).ends_with(" 2.42"));
+
+    let mut session = machine_session();
+    let temp = std::env::temp_dir().join(format!("sens-asm-direct-add-{}", std::process::id()));
+    if temp.exists() {
+        fs::remove_dir_all(&temp).expect("прибрати попередній артефакт");
+    }
+    fs::create_dir_all(&temp).expect("створити каталог незалежного свідка");
+    let cases: [(&str, &str, &str, &str, &[u8]); 2] = [
+        ("rax_rcx", "rax", "rcx", "add rax, rcx", &[72, 1, 200]),
+        ("r8_r9", "r8", "r9", "add r8, r9", &[77, 1, 200]),
+    ];
+    for (name, destination, source, instruction, expected) in cases {
+        let expression = format!(
+            "(x86-encode-add-r64-r64 (quote {destination}) (quote {source}))"
+        );
+        let observed = eval_program(&expression, &mut session)
+            .unwrap_or_else(|error| panic!("Недоступний прямий ADD {name}: {error}"));
+        let bytes = parse_byte_list(&observed.value.to_string());
+        assert_eq!(bytes, expected, "{name}: невірні незалежні байтові очікування");
+        let gas = gas_bytes(&temp, name, instruction);
+        let nasm = nasm_bytes(&temp, name, instruction);
+        assert_eq!(bytes, gas, "{name}: різниця з GAS");
+        assert_eq!(bytes, nasm, "{name}: різниця з NASM");
+        eprintln!("X86_ПРЯМИЙ_ADD_ПАРИТЕТ_УСПІХ name={name} bytes={bytes:?}");
+    }
+    fs::remove_dir_all(&temp).expect("очистити фізичне свідчення");
+}
