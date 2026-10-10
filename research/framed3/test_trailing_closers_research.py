@@ -13,8 +13,12 @@ import trailing_closers_research as suffix
 
 class SuffixLaw(unittest.TestCase):
     def test_all_ratified_payload_widths(self):
+        checked = 0
         for width in (1, 3, 4, 5, 6, 7, 8, 9):
-            for value in set((0, 1, (1 << width) - 2, (1 << width) - 1)):
+            for value in range(1 << width):
+                if width == 7 and value in (0b0100001, 0b0101010):
+                    continue  # зарезервовані D7 слоти не отримують семантики
+                checked += 1
                 word = format(value, f"0{width}b")
                 for words in (
                     ("10", word, "01"),
@@ -26,6 +30,8 @@ class SuffixLaw(unittest.TestCase):
                     with self.subTest(width=width, word=word, words=words):
                         short = suffix.trim(words)
                         self.assertEqual(suffix.restore(short), words)
+
+        self.assertEqual(checked, 1016)  # усі ратифіковані payload-координати
 
     def test_exact_d2_separator_and_dot_not_transport_trit(self):
         for words in (
