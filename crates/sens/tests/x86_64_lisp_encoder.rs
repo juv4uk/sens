@@ -738,6 +738,29 @@ fn decode_mov_r64_imm64(bytes: &[u8]) -> Option<(u8, u64)> {
 }
 
 #[test]
+fn exact_ukrainian_quotient_and_remainder_stage_probe() {
+    // Окремий допуск для #5383: координати доменів не стають
+    // викличними числовими головами у текстовому Lisp автоматично.
+    // Тут перевіряємо наявні людські поверхні після bootstrap, ДО
+    // втручання в фізичне пакування MOV imm64.
+    let mut session = encoder_session();
+    for (source, expected) in [
+        ("(частка 0 256)", "0"),
+        ("(остача 0 256)", "0"),
+        ("(частка 257 256)", "1"),
+        ("(остача 257 256)", "1"),
+        ("(частка 65535 256)", "255"),
+        ("(остача 65535 256)", "255"),
+    ] {
+        assert_eq!(
+            eval_bytes(source, &mut session),
+            expected,
+            "потрібна виконувана точна арифметична поверхня: {source}"
+        );
+    }
+}
+
+#[test]
 fn x86_mov_imm64_component_stage_probe() {
     let mut session = encoder_session();
     // Відокремлюємо точну причину MOV imm64 до фізичного пакування.
