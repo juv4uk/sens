@@ -1,4 +1,4 @@
-use sens::{eval_program, load_core_library, Session};
+use sens::{eval_parsed_expressions, eval_program, load_core_library, parse_mixed_exact_domain_machine_source, Session};
 use std::fs;
 use std::path::{Path, PathBuf};
 use std::process::{Command, Output};
@@ -8,11 +8,17 @@ fn repo_root() -> PathBuf {
 }
 
 fn load_lisp_file(path: &str, session: &mut Session) {
-    let path = repo_root().join(path);
-    let source = fs::read_to_string(&path)
-        .unwrap_or_else(|error| panic!("{} must exist: {error}", path.display()));
-    eval_program(&source, session)
-        .unwrap_or_else(|error| panic!("{} must load as ordinary sens: {error}", path.display()));
+    assert!(
+        path.starts_with("lib/machine/"),
+        "machine-source reader is restricted to lib/machine/** fixtures: {path}"
+    );
+    let file_path = repo_root().join(path);
+    let source = fs::read_to_string(&file_path)
+        .unwrap_or_else(|error| panic!("{} must exist: {error}", file_path.display()));
+    let expressions = parse_mixed_exact_domain_machine_source(path, &source)
+        .unwrap_or_else(|error| panic!("{path} must parse as exact-domain machine source: {error}"));
+    eval_parsed_expressions(&expressions, session)
+        .unwrap_or_else(|error| panic!("{path} must load through exact-domain reader: {error}"));
 }
 
 fn machine_session() -> Session {

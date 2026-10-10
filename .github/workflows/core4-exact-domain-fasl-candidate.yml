@@ -3,13 +3,20 @@ name: Core4 exact-domain FASL candidate
 on:
   push:
     branches:
-      - fix/core4-exact-domain-fasl-reader-20261010
+      - fix/core4-exact-domain-fasl-mainline-20261010
     paths:
       - crates/sens/src/mixed_source.rs
       - crates/sens/src/lib.rs
       - crates/sens-cli/src/bin/gen-fasl.rs
       - crates/sens/tests/core_fasl_freshness.rs
+      - crates/sens/tests/machine_asm_differential.rs
+      - crates/sens/tests/x86_64_lisp_encoder.rs
+      - crates/sens-host/tests/native_cond_profile.rs
+      - lib/machine/lowering/semantic-x86-64.lisp
+      - lib/machine/operands/x86-64.lisp
+      - lib/machine/admission/x86-64.lisp
       - lib/core4.lisp
+      - lib/machine/encoding/x86-64.lisp
       - .github/workflows/core4-exact-domain-fasl-candidate.yml
   pull_request:
     branches:
@@ -19,7 +26,14 @@ on:
       - crates/sens/src/lib.rs
       - crates/sens-cli/src/bin/gen-fasl.rs
       - crates/sens/tests/core_fasl_freshness.rs
+      - crates/sens/tests/machine_asm_differential.rs
+      - crates/sens/tests/x86_64_lisp_encoder.rs
+      - crates/sens-host/tests/native_cond_profile.rs
+      - lib/machine/lowering/semantic-x86-64.lisp
+      - lib/machine/operands/x86-64.lisp
+      - lib/machine/admission/x86-64.lisp
       - lib/core4.lisp
+      - lib/machine/encoding/x86-64.lisp
       - .github/workflows/core4-exact-domain-fasl-candidate.yml
 
 permissions:
@@ -51,6 +65,27 @@ jobs:
           path: lib/core4.lisp.fasl
           if-no-files-found: error
           retention-days: 1
+      - name: Pin exact x86 encoder source
+        run: |
+          test "$(git hash-object lib/machine/encoding/x86-64.lisp)" = "4f4f7b4035395fac6b785f5fdb489104c1c89064"
+          test "$(git hash-object lib/machine/lowering/semantic-x86-64.lisp)" = "6a9dbd838f407f93e1ecd09f88edf512a64218be"
+          test "$(git hash-object lib/machine/operands/x86-64.lisp)" = "07a3a2726472c248e5879a9da4b6ba61c2988636"
+          test "$(git hash-object lib/machine/admission/x86-64.lisp)" = "d16a59491d149e2b4384d779cdfa553e0936a61b"
+          test "$(git hash-object crates/sens/tests/x86_64_lisp_encoder.rs)" = "8ebd29ff3996c065383d49f2d49d618b809c0512"
+          test "$(git hash-object crates/sens-host/tests/native_cond_profile.rs)" = "a5964dbfdec8b4abcf8102d1dce214b7bd8770e9"
+      - name: Exact imm32 byte projection through Lisp encoder
+        run: |
+          test "$(git hash-object crates/sens/tests/x86_64_lisp_encoder.rs)" = "8ebd29ff3996c065383d49f2d49d618b809c0512"
+          cargo test --locked -p sens --test x86_64_lisp_encoder lisp_encodes_mov_eax_imm32_little_endian -- --exact --nocapture
+      - name: Diagnose x86 encoder callability stages
+        shell: bash
+        run: |
+          set +e
+          set -uo pipefail
+          cargo test --locked -p sens --test machine_asm_differential x86_encoder_callability_stage_probe -- --exact --ignored --nocapture
+          status=$?
+          echo "X86_STAGE_PROBE_EXIT=$status"
+          exit 0
       - name: Exact-domain x86 CPU witness
         run: cargo test --locked -p sens --test machine_exact_domain_cpu -- --nocapture
       - name: Exact-D1 register and instruction admission

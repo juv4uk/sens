@@ -1,102 +1,102 @@
 (00001001 x86-reg-code
   (00001000 (register)
-    (00000111
-      ((eq? register (00000001 rax)) 0)
-      ((eq? register (00000001 al)) 0)
-      ((eq? register (00000001 rcx)) 1)
-      ((eq? register (00000001 cl)) 1)
-      ((eq? register (00000001 rdx)) 2)
-      ((eq? register (00000001 dl)) 2)
-      ((eq? register (00000001 rbx)) 3)
-      ((eq? register (00000001 bl)) 3)
-      ((eq? register (00000001 rsp)) 4)
-      ((eq? register (00000001 spl)) 4)
-      ((eq? register (00000001 rbp)) 5)
-      ((eq? register (00000001 bpl)) 5)
-      ((eq? register (00000001 rsi)) 6)
-      ((eq? register (00000001 sil)) 6)
-      ((eq? register (00000001 rdi)) 7)
-      ((eq? register (00000001 dil)) 7)
-      ((eq? register (00000001 r8)) 8)
-      ((eq? register (00000001 r8b)) 8)
-      ((eq? register (00000001 r9)) 9)
-      ((eq? register (00000001 r9b)) 9)
-      ((eq? register (00000001 r10)) #d10)
-      ((eq? register (00000001 r10b)) #d10)
-      ((eq? register (00000001 r11)) #d11)
-      ((eq? register (00000001 r11b)) #d11)
-      ((eq? register (00000001 r12)) 12)
-      ((eq? register (00000001 r12b)) 12)
-      ((eq? register (00000001 r13)) 13)
-      ((eq? register (00000001 r13b)) 13)
-      ((eq? register (00000001 r14)) 14)
-      ((eq? register (00000001 r14b)) 14)
-      ((eq? register (00000001 r15)) 15)
-      ((eq? register (00000001 r15b)) 15)
-      ((00000010 (00000001 ())) (00000001 ())))))
+    (110
+      ((101 register (00000001 rax)) 0)
+      ((101 register (00000001 al)) 0)
+      ((101 register (00000001 rcx)) 1)
+      ((101 register (00000001 cl)) 1)
+      ((101 register (00000001 rdx)) 2)
+      ((101 register (00000001 dl)) 2)
+      ((101 register (00000001 rbx)) 3)
+      ((101 register (00000001 bl)) 3)
+      ((101 register (00000001 rsp)) 4)
+      ((101 register (00000001 spl)) 4)
+      ((101 register (00000001 rbp)) 5)
+      ((101 register (00000001 bpl)) 5)
+      ((101 register (00000001 rsi)) 6)
+      ((101 register (00000001 sil)) 6)
+      ((101 register (00000001 rdi)) 7)
+      ((101 register (00000001 dil)) 7)
+      ((101 register (00000001 r8)) 8)
+      ((101 register (00000001 r8b)) 8)
+      ((101 register (00000001 r9)) 9)
+      ((101 register (00000001 r9b)) 9)
+      ((101 register (00000001 r10)) #d10)
+      ((101 register (00000001 r10b)) #d10)
+      ((101 register (00000001 r11)) #d11)
+      ((101 register (00000001 r11b)) #d11)
+      ((101 register (00000001 r12)) 12)
+      ((101 register (00000001 r12b)) 12)
+      ((101 register (00000001 r13)) 13)
+      ((101 register (00000001 r13b)) 13)
+      ((101 register (00000001 r14)) 14)
+      ((101 register (00000001 r14b)) 14)
+      ((101 register (00000001 r15)) 15)
+      ((101 register (00000001 r15b)) 15)
+      ((010 (00000001 ())) (00000001 ())))))
 
 (00001001 x86-xmm-reg-code
   (00001000 (register)
-    (00000111
-      ((eq? register (00000001 xmm0)) 0)
-      ((eq? register (00000001 xmm1)) 1)
-      ((eq? register (00000001 xmm2)) 2)
-      ((eq? register (00000001 xmm3)) 3)
-      ((eq? register (00000001 xmm4)) 4)
-      ((eq? register (00000001 xmm5)) 5)
-      ((eq? register (00000001 xmm6)) 6)
-      ((eq? register (00000001 xmm7)) 7)
-      ((eq? register (00000001 xmm8)) 8)
-      ((eq? register (00000001 xmm9)) 9)
-      ((eq? register (00000001 xmm10)) #d10)
-      ((eq? register (00000001 xmm11)) #d11)
-      ((eq? register (00000001 xmm12)) 12)
-      ((eq? register (00000001 xmm13)) 13)
-      ((eq? register (00000001 xmm14)) 14)
-      ((eq? register (00000001 xmm15)) 15)
-      ((00000010 (00000001 ())) (00000001 ())))))
+    (110
+      ((101 register (00000001 xmm0)) 0)
+      ((101 register (00000001 xmm1)) 1)
+      ((101 register (00000001 xmm2)) 2)
+      ((101 register (00000001 xmm3)) 3)
+      ((101 register (00000001 xmm4)) 4)
+      ((101 register (00000001 xmm5)) 5)
+      ((101 register (00000001 xmm6)) 6)
+      ((101 register (00000001 xmm7)) 7)
+      ((101 register (00000001 xmm8)) 8)
+      ((101 register (00000001 xmm9)) 9)
+      ((101 register (00000001 xmm10)) #d10)
+      ((101 register (00000001 xmm11)) #d11)
+      ((101 register (00000001 xmm12)) 12)
+      ((101 register (00000001 xmm13)) 13)
+      ((101 register (00000001 xmm14)) 14)
+      ((101 register (00000001 xmm15)) 15)
+      ((010 (00000001 ())) (00000001 ())))))
 
 (00001001 x86-low3
   (00001000 (code)
-    (00000111
-      ((eq? code 0) 0)
-      ((eq? code 1) 1)
-      ((eq? code 2) 2)
-      ((eq? code 3) 3)
-      ((eq? code 4) 4)
-      ((eq? code 5) 5)
-      ((eq? code 6) 6)
-      ((eq? code 7) 7)
-      ((eq? code 8) 0)
-      ((eq? code 9) 1)
-      ((eq? code #d10) 2)
-      ((eq? code #d11) 3)
-      ((eq? code 12) 4)
-      ((eq? code 13) 5)
-      ((eq? code 14) 6)
-      ((eq? code 15) 7)
-      ((00000010 (00000001 ())) (00000001 ())))))
+    (110
+      ((101 code 0) 0)
+      ((101 code 1) 1)
+      ((101 code 2) 2)
+      ((101 code 3) 3)
+      ((101 code 4) 4)
+      ((101 code 5) 5)
+      ((101 code 6) 6)
+      ((101 code 7) 7)
+      ((101 code 8) 0)
+      ((101 code 9) 1)
+      ((101 code #d10) 2)
+      ((101 code #d11) 3)
+      ((101 code 12) 4)
+      ((101 code 13) 5)
+      ((101 code 14) 6)
+      ((101 code 15) 7)
+      ((010 (00000001 ())) (00000001 ())))))
 
 (00001001 x86-high1
   (00001000 (code)
-    (00000111
-      ((eq? code 0) 0)
-      ((eq? code 1) 0)
-      ((eq? code 2) 0)
-      ((eq? code 3) 0)
-      ((eq? code 4) 0)
-      ((eq? code 5) 0)
-      ((eq? code 6) 0)
-      ((eq? code 7) 0)
-      ((eq? code 8) 1)
-      ((eq? code 9) 1)
-      ((eq? code #d10) 1)
-      ((eq? code #d11) 1)
-      ((eq? code 12) 1)
-      ((eq? code 13) 1)
-      ((eq? code 14) 1)
-      ((eq? code 15) 1)
-      ((00000010 (00000001 ())) (00000001 ())))))
+    (110
+      ((101 code 0) 0)
+      ((101 code 1) 0)
+      ((101 code 2) 0)
+      ((101 code 3) 0)
+      ((101 code 4) 0)
+      ((101 code 5) 0)
+      ((101 code 6) 0)
+      ((101 code 7) 0)
+      ((101 code 8) 1)
+      ((101 code 9) 1)
+      ((101 code #d10) 1)
+      ((101 code #d11) 1)
+      ((101 code 12) 1)
+      ((101 code 13) 1)
+      ((101 code 14) 1)
+      ((101 code 15) 1)
+      ((010 (00000001 ())) (00000001 ())))))
 
 (00001001 x86-encode-rex
   (00001000 (w r x b)
@@ -113,7 +113,7 @@
 ; BinaryNumber -> legacy Number coercion.
 (00001001 x86-project-bin3-to-mechanism-u3
   (00001000 (value)
-    (00000111
+    (110
       ((00011010 value #b1)    #d0)
       ((00011010 value #b10)   #d1)
       ((00011010 value #b11)   #d2)
@@ -122,20 +122,19 @@
       ((00011010 value #b110)  #d5)
       ((00011010 value #b111)  #d6)
       ((00011010 value #b1000) #d7)
-      ((00000010 ()) (00000001 ())))))
+      ((010 ()) (00000001 ())))))
 
 
 (00001001 x86-encode-sib
   (00001000 (scale index base)
     (00001100 (00001110 scale 64) (00001100 (00001110 index 8) base))))
 
+; Reuse the already proved exact Lisp long-division byte extractor.
+; Four iterations are the imm32 wire shape; historical W8 quotient/remainder
+; heads are not executable machine authority under strict D1 COND.
 (00001001 x86-u32-bytes
   (00001000 (value)
-    (00100111
-      (00010011 value 256)
-      (00010011 (00010100 value 256) 256)
-      (00010011 (00010100 value 65536) 256)
-      (00010011 (00010100 value 16777216) 256))))
+    (x86-байти-без-знака value 4)))
 
 ; Точне двійкове ділення з цілою часткою і залишком.
 ; Механізм x86, не новий закон D5/D6: лише вже ратифіковані
@@ -143,17 +142,17 @@
 ; Кожна рекурсія подвоює масштаб; жодного лінійного віднімання 256.
 (00001001 x86-ціла-частка-залишок
   (00001000 (значення масштаб кратність)
-    (00000111
+    (110
       ((менше? значення масштаб)
-       (00000100 0 значення))
-      ((00000010 ())
+       (100 0 значення))
+      ((010 ())
        ((00001000 (пара)
-          (00000111
-            ((менше? (00000110 пара) масштаб) пара)
-            ((00000010 ())
-             (00000100
-               (додати (00000101 пара) кратність)
-               (відняти (00000110 пара) масштаб)))))
+          (110
+            ((менше? (111 пара) масштаб) пара)
+            ((010 ())
+             (100
+               (додати (101 пара) кратність)
+               (відняти (111 пара) масштаб)))))
         (x86-ціла-частка-залишок
           значення
           (додати масштаб масштаб)
@@ -163,14 +162,14 @@
 ; Довжина визначена механізмом x86; нічого не змінює в T5.
 (00001001 x86-байти-без-знака
   (00001000 (значення кількість)
-    (00000111
+    (110
       ((менше? кількість 1) (00000001 ()))
-      ((00000010 ())
+      ((010 ())
        ((00001000 (пара)
-          (00000100
-            (00000110 пара)
+          (100
+            (111 пара)
             (x86-байти-без-знака
-              (00000101 пара)
+              (101 пара)
               (відняти кількість 1))))
         (x86-ціла-частка-залишок значення 256 1))))))
 
@@ -184,14 +183,14 @@
 
 (00001001 x86-encode-mov-eax-imm32
   (00001000 (immediate)
-    (00000100 184 (x86-u32-bytes immediate))))
+    (100 184 (x86-u32-bytes immediate))))
 
 (00001001 x86-encode-mov-r64-imm64
   (00001000 (register immediate)
     ((00001000 (code)
-       (00000100
+       (100
          (x86-encode-rex 1 0 0 (x86-high1 code))
-         (00000100
+         (100
            (00001100 184 (x86-low3 code))
            (x86-u64-bytes immediate))))
      (x86-reg-code register))))
@@ -217,37 +216,37 @@
 ; required no-index SIB byte instead of silently emitting an invalid address.
 (00001001 x86-encode-mov-r64-mem-disp8
   (00001000 (destination base displacement)
-    (10011100 ((dst (x86-reg-code destination)))
-      (10011100 ((base-code (x86-reg-code base)))
-        (10011100 ((rex (x86-encode-rex 1 (x86-high1 dst) 0 (x86-high1 base-code))))
-          (10011100 ((modrm (x86-encode-modrm 1 (x86-low3 dst) (x86-low3 base-code))))
-            (00000111
-              ((00000011 (x86-low3 base-code) 4)
+    (let ((dst (x86-reg-code destination)))
+      (let ((base-code (x86-reg-code base)))
+        (let ((rex (x86-encode-rex 1 (x86-high1 dst) 0 (x86-high1 base-code))))
+          (let ((modrm (x86-encode-modrm 1 (x86-low3 dst) (x86-low3 base-code))))
+            (110
+              ((011 (x86-low3 base-code) 4)
                 (00100111
                   rex
                   139
                   modrm
                   (x86-encode-sib 0 4 4)
                   (x86-disp8-byte displacement)))
-              ((00000010 ())
+              ((010 ())
                 (00100111 rex 139 modrm (x86-disp8-byte displacement))))))))))
 
 ; MOV [base + disp8], r64, opcode 89 /r.
 (00001001 x86-encode-mov-mem-disp8-r64
   (00001000 (base displacement source)
-    (10011100 ((base-code (x86-reg-code base)))
-      (10011100 ((src (x86-reg-code source)))
-        (10011100 ((rex (x86-encode-rex 1 (x86-high1 src) 0 (x86-high1 base-code))))
-          (10011100 ((modrm (x86-encode-modrm 1 (x86-low3 src) (x86-low3 base-code))))
-            (00000111
-              ((00000011 (x86-low3 base-code) 4)
+    (let ((base-code (x86-reg-code base)))
+      (let ((src (x86-reg-code source)))
+        (let ((rex (x86-encode-rex 1 (x86-high1 src) 0 (x86-high1 base-code))))
+          (let ((modrm (x86-encode-modrm 1 (x86-low3 src) (x86-low3 base-code))))
+            (110
+              ((011 (x86-low3 base-code) 4)
                 (00100111
                   rex
                   137
                   modrm
                   (x86-encode-sib 0 4 4)
                   (x86-disp8-byte displacement)))
-              ((00000010 ())
+              ((010 ())
                 (00100111 rex 137 modrm (x86-disp8-byte displacement))))))))))
 
 ; LEA r64, [base + disp8], opcode 0x8D /r -- per #175's pinned XED evidence
@@ -262,19 +261,19 @@
 ; disturb a CMP result still pending in a nearby branch.
 (00001001 x86-encode-lea-r64-mem-disp8
   (00001000 (destination base displacement)
-    (10011100 ((dst (x86-reg-code destination)))
-      (10011100 ((base-code (x86-reg-code base)))
-        (10011100 ((rex (x86-encode-rex 1 (x86-high1 dst) 0 (x86-high1 base-code))))
-          (10011100 ((modrm (x86-encode-modrm 1 (x86-low3 dst) (x86-low3 base-code))))
-            (00000111
-              ((00000011 (x86-low3 base-code) 4)
+    (let ((dst (x86-reg-code destination)))
+      (let ((base-code (x86-reg-code base)))
+        (let ((rex (x86-encode-rex 1 (x86-high1 dst) 0 (x86-high1 base-code))))
+          (let ((modrm (x86-encode-modrm 1 (x86-low3 dst) (x86-low3 base-code))))
+            (110
+              ((011 (x86-low3 base-code) 4)
                 (00100111
                   rex
                   141
                   modrm
                   (x86-encode-sib 0 4 4)
                   (x86-disp8-byte displacement)))
-              ((00000010 ())
+              ((010 ())
                 (00100111 rex 141 modrm (x86-disp8-byte displacement))))))))))
 
 ; Group-1 ALU r/m64, r64 (mod=3 register/register), opcode base+1: ADD 0x01,
@@ -349,12 +348,12 @@
 ; the constant into a scratch register first.
 (00001001 x86-encode-alu-r64-imm32
   (00001000 (opcode-extension destination immediate)
-    (10011100 ((dst (x86-reg-code destination)))
-      (00000100
+    (let ((dst (x86-reg-code destination)))
+      (100
         (x86-encode-rex 1 0 0 (x86-high1 dst))
-        (00000100
+        (100
           129
-          (00000100
+          (100
             (x86-encode-modrm 3 opcode-extension (x86-low3 dst))
             (x86-imm32-bytes immediate)))))))
 
@@ -398,20 +397,20 @@
 ; for r8-r15.
 (00001001 x86-encode-push-r64
   (00001000 (register)
-    (10011100 ((code (x86-reg-code register)))
-      (00000111
-        ((00000011 (x86-high1 code) 1)
+    (let ((code (x86-reg-code register)))
+      (110
+        ((011 (x86-high1 code) 1)
           (00100111 (x86-encode-rex 0 0 0 1) (00001100 80 (x86-low3 code))))
-        ((00000010 ())
+        ((010 ())
           (00100111 (00001100 80 (x86-low3 code))))))))
 
 (00001001 x86-encode-pop-r64
   (00001000 (register)
-    (10011100 ((code (x86-reg-code register)))
-      (00000111
-        ((00000011 (x86-high1 code) 1)
+    (let ((code (x86-reg-code register)))
+      (110
+        ((011 (x86-high1 code) 1)
           (00100111 (x86-encode-rex 0 0 0 1) (00001100 88 (x86-low3 code))))
-        ((00000010 ())
+        ((010 ())
           (00100111 (00001100 88 (x86-low3 code))))))))
 
 ; INC r64 / DEC r64: group-5 opcode 0xFF, /reg extension (not a register
@@ -424,7 +423,7 @@
 ; ModRM group-5 path, never the legacy one.
 (00001001 x86-encode-inc-r64
   (00001000 (register)
-    (10011100 ((code (x86-reg-code register)))
+    (let ((code (x86-reg-code register)))
       (00100111
         (x86-encode-rex 1 0 0 (x86-high1 code))
         255
@@ -432,7 +431,7 @@
 
 (00001001 x86-encode-dec-r64
   (00001000 (register)
-    (10011100 ((code (x86-reg-code register)))
+    (let ((code (x86-reg-code register)))
       (00100111
         (x86-encode-rex 1 0 0 (x86-high1 code))
         255
@@ -445,7 +444,7 @@
 ; REX.B only for r8-r15.
 (00001001 x86-encode-not-r64
   (00001000 (register)
-    (10011100 ((code (x86-reg-code register)))
+    (let ((code (x86-reg-code register)))
       (00100111
         (x86-encode-rex 1 0 0 (x86-high1 code))
         247
@@ -453,7 +452,7 @@
 
 (00001001 x86-encode-neg-r64
   (00001000 (register)
-    (10011100 ((code (x86-reg-code register)))
+    (let ((code (x86-reg-code register)))
       (00100111
         (x86-encode-rex 1 0 0 (x86-high1 code))
         247
@@ -469,7 +468,7 @@
 ; becomes the raw trailing byte directly.
 (00001001 x86-encode-shift-r64-imm8
   (00001000 (opcode-extension register count)
-    (10011100 ((code (x86-reg-code register)))
+    (let ((code (x86-reg-code register)))
       (00100111
         (x86-encode-rex 1 0 0 (x86-high1 code))
         193
@@ -552,7 +551,7 @@
 ; already established for the Windows/Linux execution adapters.
 (00001001 x86-encode-call-rel32
   (00001000 (displacement)
-    (00000100 232 (x86-rel32-bytes displacement))))
+    (100 232 (x86-rel32-bytes displacement))))
 
 ; Jcc rel32: opcode 0x0F, then 0x80+cc, then a signed 32-bit relative
 ; displacement -- the conditional counterpart to JMP rel32, needed for the
@@ -567,9 +566,9 @@
 ; with a 2-byte opcode and a 4-byte displacement instead of 1+1.
 (00001001 x86-encode-jcc-rel32
   (00001000 (condition-code displacement)
-    (00000100
+    (100
       15
-      (00000100
+      (100
         (00001100 128 condition-code)
         (x86-rel32-bytes displacement)))))
 
@@ -597,7 +596,7 @@
 ; displacement width differ.
 (00001001 x86-encode-jmp-rel32
   (00001000 (displacement)
-    (00000100 233 (x86-rel32-bytes displacement))))
+    (100 233 (x86-rel32-bytes displacement))))
 
 ; CALL r64 / JMP r64 (indirect through a register): group-5 opcode 0xFF,
 ; /reg extension selects the operation -- CALL is /2, JMP is /4 -- per
@@ -614,14 +613,14 @@
 ; genuinely a runtime value, not something knowable from the bytes alone.
 (00001001 x86-encode-group5-indirect-r64
   (00001000 (opcode-extension register)
-    (10011100 ((code (x86-reg-code register)))
-      (00000111
-        ((00000011 (x86-high1 code) 1)
+    (let ((code (x86-reg-code register)))
+      (110
+        ((011 (x86-high1 code) 1)
           (00100111
             (x86-encode-rex 0 0 0 1)
             255
             (x86-encode-modrm 3 opcode-extension (x86-low3 code))))
-        ((00000010 ())
+        ((010 ())
           (00100111
             255
             (x86-encode-modrm 3 opcode-extension (x86-low3 code))))))))
@@ -642,17 +641,17 @@
 ; - codes 8..15 (r8b..r15b) require REX.B=1 prefix (0x41).
 (00001001 x86-encode-setcc-r8
   (00001000 (condition-code register)
-    (10011100 ((code (x86-reg-code register)))
+    (let ((code (x86-reg-code register)))
       ; Exact-D1 predicate selects REX; structural default is the
       ; explicit D1 true witness, never legacy (query expected result).
-      (00000111
+      (110
         ((00011011 code 3)
          (00100111
            (x86-encode-rex 0 0 0 (x86-high1 code))
            15
            (00001100 144 condition-code)
            (x86-encode-modrm 3 0 (x86-low3 code))))
-        ((00000010 (00000001 ()))
+        ((010 (00000001 ()))
          (00100111
            15
            (00001100 144 condition-code)
@@ -692,7 +691,7 @@
 ; REX.W=1 extends the 8-bit source into the full 64-bit destination register.
 (00001001 x86-encode-movzx-r64-r8
   (00001000 (destination source)
-    (10011100 ((dest-code (x86-reg-code destination))
+    (let ((dest-code (x86-reg-code destination))
           (src-code (x86-reg-code source)))
       (00100111
         (x86-encode-rex 1 (x86-high1 dest-code) 0 (x86-high1 src-code))
@@ -704,7 +703,7 @@
 ; Destination receives the low 64 bits of the signed product.
 (00001001 x86-encode-imul-r64-r64
   (00001000 (destination source)
-    (10011100 ((dest-code (x86-reg-code destination))
+    (let ((dest-code (x86-reg-code destination))
           (src-code (x86-reg-code source)))
       (00100111
         (x86-encode-rex 1 (x86-high1 dest-code) 0 (x86-high1 src-code))
@@ -723,7 +722,7 @@
 ; Quotient is stored in RAX, remainder in RDX.
 (00001001 x86-encode-idiv-r64
   (00001000 (source)
-    (10011100 ((src-code (x86-reg-code source)))
+    (let ((src-code (x86-reg-code source)))
       (00100111
         (x86-encode-rex 1 0 0 (x86-high1 src-code))
         247
@@ -733,7 +732,7 @@
 ; Moves source to destination if condition code is satisfied.
 (00001001 x86-encode-cmovcc-r64-r64
   (00001000 (condition-code destination source)
-    (10011100 ((dest-code (x86-reg-code destination))
+    (let ((dest-code (x86-reg-code destination))
           (src-code (x86-reg-code source)))
       (00100111
         (x86-encode-rex 1 (x86-high1 dest-code) 0 (x86-high1 src-code))
@@ -779,7 +778,7 @@
 ; TEST r/m64, imm32: Group 3 opcode 0xF7 /0 id, ModRM mod=3, reg=0, rm=dest.
 (00001001 x86-encode-test-r64-imm32
   (00001000 (destination immediate)
-    (10011100 ((code (x86-reg-code destination)))
+    (let ((code (x86-reg-code destination)))
       (00101001
         (00100111
           (x86-encode-rex 1 0 0 (x86-high1 code))
@@ -791,7 +790,7 @@
 ; Sets Carry Flag (CF) to the value of the bit at the given index.
 (00001001 x86-encode-bt-r64-r64
   (00001000 (base index)
-    (10011100 ((base-code (x86-reg-code base))
+    (let ((base-code (x86-reg-code base))
           (index-code (x86-reg-code index)))
       (00100111
         (x86-encode-rex 1 (x86-high1 index-code) 0 (x86-high1 base-code))
@@ -802,7 +801,7 @@
 ; Group 8 bit operations with imm8: opcode 0x0F 0xBA /reg ib.
 (00001001 x86-encode-group8-r64-imm8
   (00001000 (opcode-extension register bit-index)
-    (10011100 ((code (x86-reg-code register)))
+    (let ((code (x86-reg-code register)))
       (00100111
         (x86-encode-rex 1 0 0 (x86-high1 code))
         15
@@ -829,7 +828,7 @@
 ; MOVSX r64, r/m8: opcode 0x0F 0xBE /r. Sign-extend 8-bit to 64-bit.
 (00001001 x86-encode-movsx-r64-r8
   (00001000 (destination source)
-    (10011100 ((dest-code (x86-reg-code destination))
+    (let ((dest-code (x86-reg-code destination))
           (src-code (x86-reg-code source)))
       (00100111
         (x86-encode-rex 1 (x86-high1 dest-code) 0 (x86-high1 src-code))
@@ -840,7 +839,7 @@
 ; MOVSXD r64, r/m32: opcode 0x63 /r. Sign-extend 32-bit to 64-bit.
 (00001001 x86-encode-movsxd-r64-r32
   (00001000 (destination source)
-    (10011100 ((dest-code (x86-reg-code destination))
+    (let ((dest-code (x86-reg-code destination))
           (src-code (x86-reg-code source)))
       (00100111
         (x86-encode-rex 1 (x86-high1 dest-code) 0 (x86-high1 src-code))
@@ -850,7 +849,7 @@
 ; POPCNT r64, r/m64: opcode 0xF3 0x0F 0xB8 /r. Count set bits (population count).
 (00001001 x86-encode-popcnt-r64-r64
   (00001000 (destination source)
-    (10011100 ((dest-code (x86-reg-code destination))
+    (let ((dest-code (x86-reg-code destination))
           (src-code (x86-reg-code source)))
       (00100111
         243
@@ -862,7 +861,7 @@
 ; TZCNT r64, r/m64: opcode 0xF3 0x0F 0xBC /r. Count trailing zeros.
 (00001001 x86-encode-tzcnt-r64-r64
   (00001000 (destination source)
-    (10011100 ((dest-code (x86-reg-code destination))
+    (let ((dest-code (x86-reg-code destination))
           (src-code (x86-reg-code source)))
       (00100111
         243
@@ -874,7 +873,7 @@
 ; BSF r64, r/m64: opcode 0x0F 0xBC /r. Bit Scan Forward (first set bit).
 (00001001 x86-encode-bsf-r64-r64
   (00001000 (destination source)
-    (10011100 ((dest-code (x86-reg-code destination))
+    (let ((dest-code (x86-reg-code destination))
           (src-code (x86-reg-code source)))
       (00100111
         (x86-encode-rex 1 (x86-high1 dest-code) 0 (x86-high1 src-code))
@@ -885,7 +884,7 @@
 ; BSR r64, r/m64: opcode 0x0F 0xBD /r. Bit Scan Reverse (last set bit).
 (00001001 x86-encode-bsr-r64-r64
   (00001000 (destination source)
-    (10011100 ((dest-code (x86-reg-code destination))
+    (let ((dest-code (x86-reg-code destination))
           (src-code (x86-reg-code source)))
       (00100111
         (x86-encode-rex 1 (x86-high1 dest-code) 0 (x86-high1 src-code))
@@ -896,7 +895,7 @@
 ; BSWAP r64: opcode 0x0F (0xC8 + rd). Byte Swap (reverse byte order).
 (00001001 x86-encode-bswap-r64
   (00001000 (register)
-    (10011100 ((code (x86-reg-code register)))
+    (let ((code (x86-reg-code register)))
       (00100111
         (x86-encode-rex 1 0 0 (x86-high1 code))
         15
@@ -914,7 +913,7 @@
 ; XCHG r64, r64: opcode 0x87 /r. Exchange register values.
 (00001001 x86-encode-xchg-r64-r64
   (00001000 (dst src)
-    (10011100 ((dst-code (x86-reg-code dst))
+    (let ((dst-code (x86-reg-code dst))
           (src-code (x86-reg-code src)))
       (00100111
         (x86-encode-rex 1 (x86-high1 dst-code) 0 (x86-high1 src-code))
@@ -973,23 +972,23 @@
 
 (00001001 x86-encode-sse2-f2-xmm-xmm
   (00001000 (opcode-byte dst src)
-    (10011100 ((dst-code (x86-xmm-reg-code dst))
+    (let ((dst-code (x86-xmm-reg-code dst))
           (src-code (x86-xmm-reg-code src)))
-      (00000111
-        ((10011010 (00000011 (x86-high1 dst-code) 0) (00000011 (x86-high1 src-code) 0))
+      (110
+        ((10011010 (011 (x86-high1 dst-code) 0) (011 (x86-high1 src-code) 0))
          (00100111 242 15 opcode-byte (x86-encode-modrm 3 (x86-low3 dst-code) (x86-low3 src-code))))
-        ((00000010 ())
+        ((010 ())
          (00100111 242 (x86-encode-rex 0 (x86-high1 dst-code) 0 (x86-high1 src-code))
                15 opcode-byte (x86-encode-modrm 3 (x86-low3 dst-code) (x86-low3 src-code))))))))
 
 (00001001 x86-encode-sse2-66-xmm-xmm
   (00001000 (opcode-byte dst src)
-    (10011100 ((dst-code (x86-xmm-reg-code dst))
+    (let ((dst-code (x86-xmm-reg-code dst))
           (src-code (x86-xmm-reg-code src)))
-      (00000111
-        ((10011010 (00000011 (x86-high1 dst-code) 0) (00000011 (x86-high1 src-code) 0))
+      (110
+        ((10011010 (011 (x86-high1 dst-code) 0) (011 (x86-high1 src-code) 0))
          (00100111 102 15 opcode-byte (x86-encode-modrm 3 (x86-low3 dst-code) (x86-low3 src-code))))
-        ((00000010 ())
+        ((010 ())
          (00100111 102 (x86-encode-rex 0 (x86-high1 dst-code) 0 (x86-high1 src-code))
                15 opcode-byte (x86-encode-modrm 3 (x86-low3 dst-code) (x86-low3 src-code))))))))
 
@@ -999,17 +998,17 @@
 ; машинне кодування; значення AES-операцій тут не визначається.
 (00001001 x86-encode-sse-66-map-xmm-xmm
   (00001000 (map-byte opcode-byte dst src)
-    (10011100 ((dst-code (x86-xmm-reg-code dst))
+    (let ((dst-code (x86-xmm-reg-code dst))
           (src-code (x86-xmm-reg-code src)))
-      (00000111
-        ((10011010 (00000011 (x86-high1 dst-code) 0) (00000011 (x86-high1 src-code) 0))
+      (110
+        ((10011010 (011 (x86-high1 dst-code) 0) (011 (x86-high1 src-code) 0))
          (00100111
            102
            15
            map-byte
            opcode-byte
            (x86-encode-modrm 3 (x86-low3 dst-code) (x86-low3 src-code))))
-        ((00000010 ())
+        ((010 ())
          (00100111
            102
            (x86-encode-rex 0 (x86-high1 dst-code) 0 (x86-high1 src-code))
@@ -1057,28 +1056,28 @@
 ; інструкція AES, тому цей helper не створює окремої семантики пам'яті.
 (00001001 x86-encode-sse-66-map-xmm-mem-disp8
   (00001000 (map-byte opcode-byte dst base displacement)
-    (10011100 ((dst-code (x86-xmm-reg-code dst))
+    (let ((dst-code (x86-xmm-reg-code dst))
           (base-code (x86-reg-code base)))
-      (10011100 ((modrm
+      (let ((modrm
               (x86-encode-modrm
                 1
                 (x86-low3 dst-code)
                 (x86-low3 base-code)))
             (disp-byte (x86-disp8-byte displacement)))
-        (10011100 ((address-tail
-                (00000111
-                  ((00000011 (x86-low3 base-code) 4)
+        (let ((address-tail
+                (110
+                  ((011 (x86-low3 base-code) 4)
                    (00100111 modrm (x86-encode-sib 0 4 4) disp-byte))
-                  ((00000010 ())
+                  ((010 ())
                    (00100111 modrm disp-byte)))))
-          (00000111
+          (110
             ((10011010
-               (00000011 (x86-high1 dst-code) 0)
-               (00000011 (x86-high1 base-code) 0))
+               (011 (x86-high1 dst-code) 0)
+               (011 (x86-high1 base-code) 0))
              (00101001
                (00100111 102 15 map-byte opcode-byte)
                address-tail))
-            ((00000010 ())
+            ((010 ())
              (00101001
                (00100111
                  102
@@ -1196,7 +1195,7 @@
 ; CVTSI2SD xmm, r64: opcode 0xF2 REX.W 0x0F 0x2A /r
 (00001001 x86-encode-cvtsi2sd-xmm-r64
   (00001000 (dst src)
-    (10011100 ((dst-code (x86-xmm-reg-code dst))
+    (let ((dst-code (x86-xmm-reg-code dst))
           (src-code (x86-reg-code src)))
       (00100111 242 (x86-encode-rex 1 (x86-high1 dst-code) 0 (x86-high1 src-code))
             15 42 (x86-encode-modrm 3 (x86-low3 dst-code) (x86-low3 src-code))))))
@@ -1204,7 +1203,7 @@
 ; CVTTSD2SI r64, xmm: opcode 0xF2 REX.W 0x0F 0x2C /r
 (00001001 x86-encode-cvttsd2si-r64-xmm
   (00001000 (dst src)
-    (10011100 ((dst-code (x86-reg-code dst))
+    (let ((dst-code (x86-reg-code dst))
           (src-code (x86-xmm-reg-code src)))
       (00100111 242 (x86-encode-rex 1 (x86-high1 dst-code) 0 (x86-high1 src-code))
             15 44 (x86-encode-modrm 3 (x86-low3 dst-code) (x86-low3 src-code))))))
@@ -1212,7 +1211,7 @@
 ; MOVQ xmm, r64: opcode 0x66 REX.W 0x0F 0x6E /r
 (00001001 x86-encode-movq-xmm-r64
   (00001000 (dst src)
-    (10011100 ((dst-code (x86-xmm-reg-code dst))
+    (let ((dst-code (x86-xmm-reg-code dst))
           (src-code (x86-reg-code src)))
       (00100111 102 (x86-encode-rex 1 (x86-high1 dst-code) 0 (x86-high1 src-code))
             15 #d110 (x86-encode-modrm 3 (x86-low3 dst-code) (x86-low3 src-code))))))
@@ -1220,7 +1219,7 @@
 ; MOVQ r64, xmm: opcode 0x66 REX.W 0x0F 0x7E /r
 (00001001 x86-encode-movq-r64-xmm
   (00001000 (dst src)
-    (10011100 ((dst-code (x86-reg-code dst))
+    (let ((dst-code (x86-reg-code dst))
           (src-code (x86-xmm-reg-code src)))
       (00100111 102 (x86-encode-rex 1 (x86-high1 src-code) 0 (x86-high1 dst-code))
             15 126 (x86-encode-modrm 3 (x86-low3 src-code) (x86-low3 dst-code))))))
@@ -1230,7 +1229,7 @@
 ; The shared helper is the encoding law; mnemonic wrappers are derived projections.
 (00001001 x86-encode-0f-c7-group-r64
   (00001000 (opcode-extension register)
-    (10011100 ((code (x86-reg-code register))
+    (let ((code (x86-reg-code register))
           (mechanism-extension
             (x86-project-bin3-to-mechanism-u3 opcode-extension)))
       ; Emitted instruction bytes are the legacy/mechanical byte carrier.
@@ -1259,7 +1258,7 @@
 ; CMPXCHG r64, r64: opcode REX.W 0x0F 0xB1 /r
 (00001001 x86-encode-cmpxchg-r64-r64
   (00001000 (dst src)
-    (10011100 ((dst-code (x86-reg-code dst))
+    (let ((dst-code (x86-reg-code dst))
           (src-code (x86-reg-code src)))
       (00100111 (x86-encode-rex 1 (x86-high1 src-code) 0 (x86-high1 dst-code))
             15 177 (x86-encode-modrm 3 (x86-low3 src-code) (x86-low3 dst-code))))))
@@ -1268,9 +1267,9 @@
 ; Жодна історична W8 APPEND-голова не отримує права виклику.
 (00001001 x86-сполучити-байти
   (00001000 (ліво право)
-    (00000111
+    (110
       ((атом? ліво)
-       (00000111
+       (110
          ((тотожне? ліво (00000001 ())) право)
          ((атом? ()) (перше ліво))))
       ((атом? ())
@@ -1280,10 +1279,10 @@
 
 (00001001 x86-encode-program
   (00001000 (instructions)
-    (00000111
+    (110
       ; Перевіряємо EOF лише після структурного розпізнавання атома.
       ((атом? instructions)
-       (00000111
+       (110
          ((тотожне? instructions (00000001 ())) (00000001 ()))
          ((атом? ()) (перше instructions))))
       ((атом? ())

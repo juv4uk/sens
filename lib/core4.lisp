@@ -291,9 +291,35 @@
 ; es gibt also kein variadisches/Rest-Body, auf das man sich stützen
 ; könnte. Für eine Folge von Ausdrücken genauso einpacken, wie es der
 ; Rest dieses Codes bereits tut — `(let (...) ((lambda () ausdruck1 ausdruck2)))`.
+; Build the parallel LET expansion from current D3 list and predicate laws.
+; Do not depend on legacy list/map helpers whose predicates may return (1)/(0)
+; while executing under strict D3:110 COND.
+(00001001 core4-let-parameters
+  (00001000 (bindings)
+    (110
+      ((010 bindings) (001 ()))
+      ((010 (001 ()))
+       (111
+         (100 (100 bindings))
+         (core4-let-parameters (011 bindings)))))))
+
+(00001001 core4-let-values
+  (00001000 (bindings)
+    (110
+      ((010 bindings) (001 ()))
+      ((010 (001 ()))
+       (111
+         (100 (011 (100 bindings)))
+         (core4-let-values (011 bindings)))))))
+
 (00001010 let (bindings body)
-  (00000100 (00100111 (00000001 00001000) (00110111 (00001000 (binding) (00000101 binding)) bindings) body)
-        (00110111 (00001000 (binding) (00101111 binding)) bindings)))
+  (111
+    (111
+      (001 00001000)
+      (111
+        (core4-let-parameters bindings)
+        (111 body (001 ()))))
+    (core4-let-values bindings)))
 
 ; `let*` is `let` with sequential (not parallel) dependency: each binding's
 ; value expression can see every binding before it. Expands recursively —
