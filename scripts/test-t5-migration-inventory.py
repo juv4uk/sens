@@ -64,10 +64,49 @@ class TestT5MigrationInventory(unittest.TestCase):
             self.assertNotIn(r["path"], seen, f"duplicate path {r['path']}")
             seen.add(r["path"])
 
-    def test_base_sha_is_full_hex(self):
-        for r in read_manifest():
-            self.assertEqual(len(r["base_sha"]), 40, r["path"])
-            int(r["base_sha"], 16)  # підніме ValueError якщо не hex
+    def test_base_sha_is_one_real_ancestor_commit(self):
+        rows = read_manifest()
+        pins = {r["base_sha"] for r in rows}
+        self.assertEqual(len(pins), 1, "manifest must share one provenance pin")
+        pin = next(iter(pins))
+        self.assertRegex(pin, r"^[0-9a-f]{40}$")
+        exists = subprocess.run(
+            ["git", "-C", str(ROOT), "cat-file", "-e", f"{pin}^{{commit}}"],
+            capture_output=True, text=True)
+        self.assertEqual(exists.returncode, 0, f"base_sha is not a Git commit: {pin}")
+        ancestor = subprocess.run(
+            ["git", "-C", str(ROOT), "merge-base", "--is-ancestor", pin, "HEAD"],
+            capture_output=True, text=True)
+        self.assertEqual(ancestor.returncode, 0,
+                         f"base_sha is not an ancestor of HEAD: {pin}")
+
+    def test_invalid_base_sha_provenance_fails(self):
+        rows = read_manifest()
+        for row in rows:
+            row["base_sha"] = "0" * 40
+        with tempfile.NamedTemporaryFile("w", suffix=".jsonl", delete=False,
+                                         encoding="utf-8") as fh:
+            for row in rows:
+                fh.write(json.dumps(row, ensure_ascii=False, sort_keys=True) + "\\n")
+            tmp = fh.name
+        try:
+            proc = subprocess.run(
+                [sys.executable, str(HERE / "report_t5_migration_inventory.py"),
+                 "--check", tmp],
+                cwd=str(ROOT), capture_output=True, text=True)
+            self.assertNotEqual(proc.returncode, 0,
+                                "nonexistent base_sha provenance was NOT detected")
+            self.assertIn("manifest provenance", proc.stderr)
+        finally:
+            Path(tmp).unlink()
+
+    def test_unknown_role_or_owner_lane_is_blocked(self):
+        for row in read_manifest():
+            if row["path"] in GEN.T5_AUTHORITY:
+                continue
+            if row["role"] == "unknown" or row["owner_lane"] == "UNKNOWN":
+                self.assertEqual(row["migration_status"], "BLOCKED", row["path"])
+                self.assertEqual(row["authority"], "UNKNOWN", row["path"])
 
     def test_authority_boundaries_present(self):
         rows = {r["path"]: r for r in read_manifest()}
