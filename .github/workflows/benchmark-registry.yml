@@ -21,7 +21,7 @@ jobs:
   registry:
     name: benchmark discovery registry
     runs-on: ubuntu-24.04
-    timeout-minutes: 5
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v5
         with:
@@ -44,6 +44,52 @@ jobs:
           name: t22-carrier-benchmark-${{ github.sha }}
           path: ${{ runner.temp }}/t22-results.json
           if-no-files-found: error
+
+      - name: Decide whether Rust wire-vs-JSON evidence is relevant
+        id: rust_wire_json
+        shell: bash
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          BASE_SHA: ${{ github.event.pull_request.base.sha || github.event.before }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: |
+          set -euo pipefail
+          run_bench=false
+          if [[ "$EVENT_NAME" == "workflow_dispatch" ]]; then
+            run_bench=true
+          elif [[ -n "$BASE_SHA" && -n "$HEAD_SHA" ]] && git diff --name-only "$BASE_SHA" "$HEAD_SHA" | grep -Eq '^(benchmarks/rust-json-vs-sens-wire/|crates/sens/examples/transport_decode_bench\.rs$|crates/sens/Cargo\.toml$|Cargo\.lock$|benchmarks/agent-messages/run\.py$)'; then
+            run_bench=true
+          fi
+          echo "run=$run_bench" >> "$GITHUB_OUTPUT"
+
+      - name: Install stable Rust for decode-only comparison
+        if: steps.rust_wire_json.outputs.run == 'true'
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Install Cachegrind
+        if: steps.rust_wire_json.outputs.run == 'true'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y valgrind
+          rustc --version
+          valgrind --version
+
+      - name: Benchmark Rust serde_json against SENS wire
+        if: steps.rust_wire_json.outputs.run == 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
+          bash benchmarks/rust-json-vs-sens-wire/run.sh "$RUNNER_TEMP/rust-json-vs-sens-wire"
+          cat "$RUNNER_TEMP/rust-json-vs-sens-wire/summary.md" >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Publish raw Rust wire-vs-JSON evidence
+        if: always() && steps.rust_wire_json.outputs.run == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: rust-json-vs-sens-wire-${{ github.sha }}
+          path: ${{ runner.temp }}/rust-json-vs-sens-wire/
+          if-no-files-found: warn
+          retention-days: 14
 
       - name: Reject newly created unmanifested stands
         if: github.event_name == 'pull_request'
