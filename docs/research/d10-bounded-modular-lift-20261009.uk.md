@@ -24,3 +24,14 @@
 Артефакти: JSON досьє `knowledge/d10-unique-bounded-modular-lift-20261009.json`, Python повний перебір проти ceil/floor `tests/test_d10_unique_bounded_modular_lift.py`, 16 реальних Chez Scheme спостережень `tests/oracles/d10_unique_bounded_modular_lift_chez.ss`, 9 негативних метаданих `scripts/check_d10_unique_bounded_modular_lift.py`.
 
 **Статус:** source research/HOLD; 0 нових selected D10, `coordinate=null`, `ratified=false`. Жодних `.sens`, D2 контролю, FPGA драйвера чи T5 семантик не змінено. Після незалежного поведінкового дедупу і власникового перегляду допуск має відбутися через канонічний TSV-леджер та append-only SHA історію.
+
+## 2026-10-11 — дослідний відбір 647 → 648
+
+Вищий текст зафіксував **HOLD станом на 09.10.2026** і лишається історичним доказом. На нову директиву власника «наповнюй D10» цей уже вивчений закон обрано як **SELECTED-RESEARCH-CANDIDATE**, а не як ратифікований примітив. Канонічне машинне джерело: `knowledge/d10-v1-semantic-inventory.json`; append-only SHA-ланцюг: `knowledge/d10-selection-transition-history.json`; заявка: `D10P-10110`.
+
+- Новий баланс: **648/1024**, із них **256** теоремно розміщених і **392** відібраних без координати; **376** ще не відібраних; **0** ратифікованих D10.
+- Математичний свідок: `M=4096, r=2, lo=4090, hi=4100 → UNIQUE(4098)`; `[3,4097] → NONE`; `[0,8194] → AMBIGUOUS(3,2,4098)`.
+- **Незалежні оракули**: `tests/test_d10_unique_bounded_modular_lift.py` — повний малий перебір; `tests/oracles/d10_unique_bounded_modular_lift_chez.ss` — 16 випадків Chez Scheme. Потрібно підтвердити їх проходження у свіжому CI; архівні свідки самі собою не є новим запуском.
+- Дедуп: на попередній дослідній основі (Git blob `7e13e929338baeef9b16c2139d24b78e23ea1e03`) немає того самого `NONE/UNIQUE/AMBIGUOUS` сертифіката. `DIVMOD`, об'єднання конгруенцій і `unwrap` — суміжні, але не цей тип відповіді; похідність алгоритму з цілих `ceil/floor` визнається.
+
+Офіційна документація NumPy https://numpy.org/doc/stable/reference/generated/numpy.unwrap.html описує локальне розгортання фази, але не сертифікує абсолютну кількість обертів. Даташит AS5600 посвідчує циклічний датчик, не новий SENS opcode. **Core-vs-library, ратифікація, координата, callable, .sens і T5** лишаються без змін.
