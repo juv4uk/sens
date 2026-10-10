@@ -260,8 +260,8 @@
   (00001000 (pair-value)
     (x86-call-admitted-u64
       (x86-lower-cons-car-u64-forms
-        (101 pair-value)
-        (111 pair-value))
+        (100 pair-value)
+        (011 pair-value))
       x86-pair-cell-bytes)))
 
 

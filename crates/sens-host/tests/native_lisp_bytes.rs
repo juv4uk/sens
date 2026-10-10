@@ -374,6 +374,15 @@ fn native_pair_car_cdr_match_the_interpreter_reference_witness() {
     )
     .expect("Lisp-owned CONS+CDR forms must materialize through admission before raw host execution");
 
+    let native_semantic_car = eval_uk_program(
+        "(x86-call-semantic-car-u64 (сполучити 2 3))",
+        &mut session,
+    );
+    assert_eq!(
+        native_semantic_car.value,
+        interpreter_car.value,
+        "the Lisp-owned semantic CAR route must use exact CAR/CDR decomposition before native execution"
+    );
     assert_eq!(native_car.value, interpreter_car.value);
     assert_eq!(native_cdr.value, interpreter_cdr.value);
 }
