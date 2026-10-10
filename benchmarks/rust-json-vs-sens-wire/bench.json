@@ -1,0 +1,20 @@
+{
+  "schema": "sens-benchmark-manifest/v1",
+  "stand": "rust-json-vs-sens-wire",
+  "wing": "Rust transport decode controls",
+  "roles": [
+    "MEASUREMENT",
+    "CONFORMANCE",
+    "FALSIFIER"
+  ],
+  "question": "Does direct serde_json decode differ from SENS wire decode for the same deterministic semantic corpus when file I/O and process startup are outside the timed loop?",
+  "claim": "Decode-only comparison over one shared corpus; not a claim that SENS is generally faster than JSON or that this measures whole-language execution.",
+  "witness": [
+    "transport_decode_bench.rs",
+    "run.sh"
+  ],
+  "status": "RESEARCH-ONLY; current-main hosted replay",
+  "generation": "2026-10-10; N=1000, seed=1; 20 Cachegrind rounds and 200 wall-clock rounds",
+  "axis": "decode-only / Cachegrind I refs / ns per message / messages per second",
+  "reproduce": "bash benchmarks/rust-json-vs-sens-wire/run.sh /tmp/rust-json-vs-sens-wire"
+}
