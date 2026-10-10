@@ -6,11 +6,19 @@ on:
     paths:
       - "benchmarks/**"
       - "scripts/benchmark_registry.py"
+      - "scripts/benchmark_sweep.py"
+      - "Cargo.toml"
+      - "Cargo.lock"
+      - "crates/**"
       - ".github/workflows/benchmark-registry.yml"
   pull_request:
     paths:
       - "benchmarks/**"
       - "scripts/benchmark_registry.py"
+      - "scripts/benchmark_sweep.py"
+      - "Cargo.toml"
+      - "Cargo.lock"
+      - "crates/**"
       - ".github/workflows/benchmark-registry.yml"
   workflow_dispatch:
 
@@ -97,3 +105,57 @@ jobs:
           BASE_SHA: ${{ github.event.pull_request.base.sha }}
           HEAD_SHA: ${{ github.event.pull_request.head.sha }}
         run: python3 scripts/benchmark_registry.py --check-new "$BASE_SHA" "$HEAD_SHA"
+
+  discover-sweep:
+    name: Discover all registered benchmark stands
+    runs-on: ubuntu-24.04
+    outputs:
+      matrix: ${{ steps.build.outputs.matrix }}
+    steps:
+      - uses: actions/checkout@v5
+      - name: Build matrix from authoritative bench.json manifests
+        id: build
+        shell: bash
+        run: |
+          set -euo pipefail
+          matrix="$(python3 scripts/benchmark_sweep.py --list-json)"
+          echo "matrix=$matrix" >> "$GITHUB_OUTPUT"
+          echo "Discovered $(python3 -c 'import json,sys; print(len(json.load(sys.stdin)[\"include\"]))' <<< "$matrix") registered benchmark stands."
+
+  run-sweep:
+    name: "Reproduce ${{ matrix.stand }}"
+    needs: discover-sweep
+    runs-on: ubuntu-24.04
+    timeout-minutes: 50
+    strategy:
+      fail-fast: false
+      max-parallel: 8
+      matrix: ${{ fromJSON(needs.discover-sweep.outputs.matrix) }}
+    steps:
+      - uses: actions/checkout@v5
+      - name: Install Python 3.13
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+      - name: Install stable Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+      - name: Install Cachegrind for the Rust wire-vs-JSON benchmark
+        if: matrix.stand == 'rust-json-vs-sens-wire' || matrix.stand == 'unbounded-width'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y valgrind
+          rustc --version
+          valgrind --version
+      - name: Run the manifest's exact reproduction command
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 scripts/benchmark_sweep.py --stand "${{ matrix.stand }}" --timeout-seconds 2700
+      - name: Publish logs and machine-readable result
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: benchmark-sweep-${{ matrix.stand }}-${{ github.sha }}
+          path: benchmark-sweep-results/${{ matrix.stand }}/
+          if-no-files-found: warn
+          retention-days: 30
