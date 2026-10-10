@@ -56,6 +56,13 @@ jobs:
             --fixture tests/fixtures/migration-d1-cond-cohort/branch.lisp \
             --fixture tests/fixtures/migration-d4-selector-cohort/caar.lisp
 
+      # Temporary stage-by-stage diagnosis for the exact native CAR/CDR blocker.
+      # This observes the Lisp-owned path; it neither changes semantics nor
+      # replaces the required real CPU witnesses below.
+      - name: Temporary native COND/admission stage probe
+        if: always()
+        run: cargo run --locked -p sens-host --example native_cond_probe
+
       - name: Native CPU vertical mechanism witnesses
         if: always()
         run: cargo test --locked -p sens-host --test native_lisp_bytes --test native_cond_profile
