@@ -1265,30 +1265,33 @@
 
 ; Механічне, замкнене складання двох списків байтів із D3 CONS/CAR/CDR.
 ; Жодна історична W8 APPEND-голова не отримує права виклику.
+; Byte-list traversal must feed exact PredicateBit values to D3 COND.
+; Legacy surface aliases atom?/eq?/car/cdr/append retain answer/compatibility
+; domains; the machine path uses the canonical 3-bit heads directly.
 (00001001 x86-сполучити-байти
   (00001000 (ліво право)
     (110
-      ((атом? ліво)
+      ((010 ліво)
        (110
-         ((тотожне? ліво (00000001 ())) право)
-         ((атом? ()) (перше ліво))))
-      ((атом? ())
-       (сполучити
-         (перше ліво)
-         (x86-сполучити-байти (решта ліво) право))))))
+         ((101 ліво (00000001 ())) право)
+         ((010 ()) (100 ліво))))
+      ((010 ())
+       (111
+         (100 ліво)
+         (x86-сполучити-байти (011 ліво) право))))))
 
 (00001001 x86-encode-program
   (00001000 (instructions)
     (110
-      ; Перевіряємо EOF лише після структурного розпізнавання атома.
-      ((атом? instructions)
+      ; EOF is checked through exact D3 atom/equality bits before projections.
+      ((010 instructions)
        (110
-         ((тотожне? instructions (00000001 ())) (00000001 ()))
-         ((атом? ()) (перше instructions))))
-      ((атом? ())
+         ((101 instructions (00000001 ())) (00000001 ()))
+         ((010 ()) (100 instructions))))
+      ((010 ())
        (x86-сполучити-байти
-         (перше instructions)
-         (x86-encode-program (решта instructions)))))))
+         (100 instructions)
+         (x86-encode-program (011 instructions)))))))
 
 ; #2372 reusable VEX3 XMM register law.
 ; byte1 = C4; byte2 = ~R ~X ~B m-mmmm; byte3 = W ~vvvv L pp.
