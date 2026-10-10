@@ -1,4 +1,5 @@
 name: TEMP refresh current-main Core4 FASL
+# Scoped runner for the exact source blob pinned in this job.
 
 on:
   push:
