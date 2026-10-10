@@ -1,0 +1,132 @@
+name: SENS — файлове розміщення нових важливих джерел
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: tooling-file-placement-${{ github.event_name == 'workflow_dispatch' && github.run_id || github.sha }}
+  cancel-in-progress: false
+
+jobs:
+  new-file-placement:
+    name: Нові SENS-джерела та foreign census
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Перевірити політику нового файла та census (тимчасова host-межа)
+        shell: bash
+        env:
+          PR_BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          PUSH_BEFORE_SHA: ${{ github.event.before }}
+        run: |
+          set -euo pipefail
+
+          # Контракт і census належать SENS; це лише тимчасовий CI-адаптер #5397.
+          policy=knowledge/tooling-file-policy.lisp
+          census=knowledge/foreign-tool-census.lisp
+          [[ -s "$policy" && -s "$census" ]] || {
+            echo "::error::Відсутній SENS-контракт або foreign census" >&2
+            exit 1
+          }
+          grep -Fq '(schema . tooling-file-placement/1)' "$policy" || exit 1
+          grep -Fq '(schema . foreign-tool-census/1)' "$census" || exit 1
+
+          classify_new() {
+            local path="$1" record_file="$2"
+            case "$path" in
+              lib/*|knowledge/*|witnesses/*)
+                case "$path" in
+                  *.lisp|*.sens) ;;
+                  *) echo "::error::Заборонене нове важливе джерело: $path" >&2; return 1 ;;
+                esac
+                ;;
+            esac
+
+            case "$path" in
+              *.py)
+                case "$path" in
+                  tools/*) ;;
+                  *) echo "::error::Новий Python поза tools/: $path" >&2; return 1 ;;
+                esac
+                [[ -s "$record_file" ]] || {
+                  echo "::error::Немає foreign census для $path" >&2
+                  return 1
+                }
+                # Тимчасовий механічний читач ОДНОГО запису; власником
+                # подальшого семантичного verdict має бути SENS (#5397).
+                awk -v target="$path" '
+                  {
+                    line=$0
+                    sub(/^[[:space:]]+/, "", line)
+                    sub(/[[:space:]]+$/, "", line)
+                    if (line ~ /^\(foreign-tool "[^"]+" foreign "#[0-9]+" "[^"]+"\)$/) {
+                      n=split(line, field, "\"")
+                      if (n==7 && field[2]==target && length(field[6])>=20 &&
+                          field[6] !~ /^(TODO|PENDING|unknown|невідомо)$/) count++
+                    }
+                  }
+                  END { if (count != 1) exit 1 }
+                ' "$record_file" || {
+                  echo "::error::Новий $path вимагає одного foreign-запису з #задачею і планом міграції" >&2
+                  return 1
+                }
+                ;;
+            esac
+            return 0
+          }
+
+          # Незалежні негативні та позитивні фальсифікатори політики.
+          mock="$RUNNER_TEMP/foreign-tool-census-fixture.lisp"
+          printf '%s\n' '  (foreign-tool "tools/verified-fixture.py" foreign "#5397" "Мігрувати рішення до SENS-оракула")' > "$mock"
+          for allowed in lib/нова.lisp knowledge/новий.sens witnesses/доказ.lisp; do
+            classify_new "$allowed" "$mock" || exit 1
+          done
+          classify_new tools/verified-fixture.py "$mock" || exit 1
+          for blocked in lib/нова.py knowledge/новий.json witnesses/доказ.rs scripts/нова.py tools/неврахований.py; do
+            if classify_new "$blocked" "$mock"; then
+              echo "::error::Негативний файловий свідок хибно пройшов: $blocked" >&2
+              exit 1
+            fi
+          done
+          if classify_new tools/verified-fixture.py "$RUNNER_TEMP/немає-census.lisp"; then
+            echo "::error::Відсутній census хибно пройшов" >&2
+            exit 1
+          fi
+
+          case "$GITHUB_EVENT_NAME" in
+            pull_request) base="$PR_BASE_SHA" ;;
+            push) base="$PUSH_BEFORE_SHA" ;;
+            workflow_dispatch)
+              # Ручний запуск перевіряє останній commit, а не довільну історію.
+              base="$(git rev-parse HEAD^)" || exit 1
+              ;;
+            *) echo "::error::Неприпустимий тип події" >&2; exit 1 ;;
+          esac
+          [[ "$base" =~ ^[0-9a-f]{40}$ && "$base" != "0000000000000000000000000000000000000000" ]] || {
+            echo "::error::Немає достовірного базового SHA для перевірки нових файлів" >&2
+            exit 1
+          }
+          git cat-file -e "$base^{commit}" || {
+            echo "::error::Базовий Git-коміт недоступний" >&2
+            exit 1
+          }
+
+          # NUL-роздільник обов'язковий. Git-помилка не маскується pipe/tee.
+          added="$RUNNER_TEMP/sens-new-paths.zlist"
+          git diff -M -C --name-only --diff-filter=ACR -z "$base" HEAD > "$added"
+          count=0
+          while IFS= read -r -d '' path; do
+            classify_new "$path" "$census" || exit 1
+            count=$((count + 1))
+          done < "$added"
+          echo "SENS file placement: $count нових/переміщених шляхів перевірено"
