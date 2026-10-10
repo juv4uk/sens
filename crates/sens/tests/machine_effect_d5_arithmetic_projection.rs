@@ -262,3 +262,24 @@ fn sub_mul_effect_bounds_fail_closed_before_target_projection() {
         "valid DIFFERENCE identity with unsafe bounded carrier must reject as an effect"
     );
 }
+
+#[test]
+fn bounded_effect_source_keeps_exact_d1_controls() {
+    // #5360: A stale bulk rewrite must not restore numeric 1 or legacy t in D3 COND.
+    let text = read("lib/machine/effects/u64.lisp");
+    for (number, line) in text.lines().enumerate() {
+        let active = line.split(';').next().unwrap_or("").trim_start();
+        assert!(
+            !active.starts_with("(1 ")
+                && !active.starts_with("(1\t")
+                && !active.contains(" t)"),
+            "Джерело D5 повернуло неточний D1 у рядку {}: {}",
+            number + 1,
+            line
+        );
+    }
+    assert!(
+        text.matches("(00000010 (00000001 ()))").count() >= 8,
+        "Вісім доведених предикатних відповідей D1:YES мають залишатися в джерелі"
+    );
+}
