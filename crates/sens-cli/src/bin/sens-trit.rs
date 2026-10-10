@@ -95,6 +95,24 @@ fn eval_t5_bytes_core4(
         .map_err(|e| format!("current SENS evaluator rejected: {e}"))
 }
 
+/// Пояснити негативний результат без іншого парсера чи текстового fallback.
+/// Первинним рішенням назавжди лишається encode_binary_projection_ternary.
+fn explain_encode_failure(source: &str, error: sens::TernaryTransportError) -> String {
+    let mut message = format!("encode .lisp projection: {error:?}");
+    let source_error = match &error {
+        sens::TernaryTransportError::InvalidBinaryProjection =>
+            sens::parse_binary_source_words(source).map(|_| ()),
+        sens::TernaryTransportError::InvalidProgramSyntax =>
+            sens::parse_canonical_binary(source).map(|_| ()),
+        _ => return message,
+    };
+    if let Err(detail) = source_error {
+        message.push_str("; ");
+        message.push_str(&detail.render(source));
+    }
+    message
+}
+
 /// Diagnose why a physical packed T5 file fails the existing canonical D2
 /// parser. No second grammar and no implicit program execution: each exact
 /// binary word becomes a line so the existing error renderer's line is the
@@ -130,7 +148,7 @@ fn execute() -> Result<(), String> {
             let sens_path = sibling_sens(path)?;
             let projection = fs::read_to_string(path).map_err(|e| format!("read .lisp: {e}"))?;
             let bytes = sens::encode_binary_projection_ternary(&projection)
-                .map_err(|e| format!("encode .lisp projection: {e:?}"))?;
+                .map_err(|e| explain_encode_failure(&projection, e))?;
             // Ніколи не перезаписувати наявний файл.
             let mut output = OpenOptions::new().create_new(true).write(true)
                 .open(&sens_path).map_err(|e| format!("create .sens: {e}"))?;
