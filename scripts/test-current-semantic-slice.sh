@@ -18,10 +18,9 @@ cargo test -p sens \
 # Historical #1096 bare-SID witness remains preserved as compatibility evidence,
 # but it is intentionally not executed by the current semantic slice. Contract
 # 11.8 assigns W8 to exact D8 identity; Sens8/Sid8 remains migration/provenance only.
-# #291: preserve the original SI/quantity source witness, but do not execute
-# it in this strict D1/D3 slice until its historical three-field COND has been
-# migrated and independently checked. A binary canary is NOT SI arithmetic proof.
-# This lane verifies one real canonical physical T5 program with strict D3 COND.
+# #291: retain the original SI/quantity source witness for a separate strict-CON D
+# migration and independent oracle. This binary canary is NOT SI arithmetic proof.
+# Here we test only a canonical physical T5 program exercising strict two-field D3 COND.
 python3 - <<'PY'
 from pathlib import Path
 import hashlib
@@ -41,7 +40,7 @@ assert hashlib.sha256(physical).hexdigest() == (
 PY
 binary_cond_status="$(cargo run --quiet -p sens-cli --bin sens-trit -- eval examples/binary/d3-cond-current-t5/cond.sens)"
 if [[ "$binary_cond_status" != "1" ]]; then
-  printf 'physical binary D3 COND expected exact D1:1, got: %s\n' "$binary_cond_status" >&2
+  printf 'physical binary D3 COND witness expected exact D1:1, got: %s\n' "$binary_cond_status" >&2
   exit 1
 fi
 

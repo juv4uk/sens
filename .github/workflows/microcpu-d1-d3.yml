@@ -1,0 +1,56 @@
+name: SENS microCPU physical D1-D3 slot research
+
+on:
+  pull_request:
+    paths:
+      - 'benchmarks/microcpu/**'
+      - 'tests/test_microcpu_slots.py'
+      - 'scripts/sens_t5_codec.py'
+      - 'tests/fixtures/migration-quote-cohort-main/**'
+      - 'tests/fixtures/migration-pair-cohort-main/**'
+      - '.github/workflows/microcpu-d1-d3.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'benchmarks/microcpu/**'
+      - 'tests/test_microcpu_slots.py'
+      - '.github/workflows/microcpu-d1-d3.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  bounded-slot-microcpu:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v5
+      - name: Strict physical D1-D3 slot mechanics and negative witnesses
+        run: python3 -m unittest discover -s tests -p 'test_microcpu_slots.py' -v
+      - name: Collect stage-separated CPU benchmarks on one host
+        run: |
+          python3 benchmarks/microcpu/bench.py \
+            --samples 11 --loops 80 --warmup 3 \
+            --out "$RUNNER_TEMP/microcpu-d1-d3.json"
+      - name: Preserve immutable measurements
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: microcpu-d1-d3-${{ github.sha }}
+          path: ${{ runner.temp }}/microcpu-d1-d3.json
+          if-no-files-found: warn
+          retention-days: 14
+
+  rust-semantic-oracle:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v5
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Build SENS exact physical interpreter reference
+        run: cargo build --locked -p sens-cli --bin sens
+      - name: Differential result parity on IDENTICAL physical bytes
+        env:
+          SENS_CLI_PATH: ${{ github.workspace }}/target/debug/sens
+        run: python3 -m unittest discover -s tests -p 'test_microcpu_slots.py' -v

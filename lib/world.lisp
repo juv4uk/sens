@@ -30,7 +30,7 @@
       
       ((00000010 value)  (00000001 ()))
       ((00000011 (00000101 value) (00000001 world)) t)
-      (t (00000001 ())))))
+      (1 (00000001 ())))))
 
 (00001001 world-parent (00001000 (world) (00101111 world)))
 (00001001 world-journal (00001000 (world) (00110000 world)))
@@ -123,18 +123,18 @@
        (00100111 (00000001 rejected) (00100111 (00000001 reason) (00000001 invalid-module)) (00100111 (00000001 input) clause)))
       ((00000011 (knowledge-clause-valid? clause) (00000001 ()))
        (00100111 (00000001 rejected) (00100111 (00000001 reason) (00000001 invalid-clause)) (00100111 (00000001 input) clause)))
-      (t
+      (1
        (10011100 ((opposite (opposite-knowledge-head (00000101 clause))))
          (10011100 ((proofs (00000111
                          ((world-module-known? world module-name)
                           (reason-in-world world module-name opposite))
-                         (t (00000001 ())))))
+                         (1 (00000001 ())))))
            (00000111
              
              ((00000010 proofs)  (00100111 (00000001 accepted)
                     (00100111 (00000001 module) module-name)
                     (00100111 (00000001 knowledge) clause)))
-             (t
+             (1
               (00100111 (00000001 conflict)
                     (00100111 (00000001 new) clause)
                     (00100111 (00000001 existing) opposite)
@@ -146,7 +146,7 @@
       (00000111
         ((00000011 (00000101 decision) (00000001 accepted))
          (00100111 decision (world-tell world module-name clause)))
-        (t (00100111 decision world))))))
+        (1 (00100111 decision world))))))
 
 ;; The batch form creates exactly one child world after the whole proposed
 ;; knowledge set validates and proves conflict-free. Proposed rules can support
@@ -166,11 +166,11 @@
        (00100111 (00000001 rejected) (00100111 (00000001 reason) (00000001 invalid-batch)) (00100111 (00000001 input) clauses)))
       ((00000011 (knowledge-clauses-valid? clauses) (00000001 ()))
        (00100111 (00000001 rejected) (00100111 (00000001 reason) (00000001 invalid-clause)) (00100111 (00000001 input) clauses)))
-      (t
+      (1
        (10011100 ((existing (00000111
                          ((world-module-known? world module-name)
                           (world-clauses world module-name))
-                         (t (00000001 ())))))
+                         (1 (00000001 ())))))
          (10011100 ((conflict (advice-batch-conflict
                            clauses clauses (00101001 clauses existing))))
            (00000111
@@ -178,7 +178,7 @@
              ((00000010 conflict)  (00100111 (00000001 accepted)
                     (00100111 (00000001 module) module-name)
                     (00100111 (00000001 knowledge) clauses)))
-             (t
+             (1
               (00100111 (00000001 conflict)
                     (00100111 (00000001 new) (00000101 conflict))
                     (00100111 (00000001 existing) (00101111 conflict))
@@ -261,7 +261,7 @@
       (00000111
         ((00000011 (00000101 decision) (00000001 accepted))
          (00100111 decision (world-tell-all world module-name clauses)))
-        (t (00100111 decision world))))))
+        (1 (00100111 decision world))))))
 
 ;; A guarded compatibility transition must be evaluated exactly once. `let`
 ;; cannot hold it because `def` would then update a disposable lambda frame, so
@@ -330,7 +330,7 @@
          (00000111
            
            ((00000010 clauses)  (00100111 (00000001 rejected) (00100111 (00000001 reason) (00000001 invalid-batch)) (00100111 (00000001 input) clauses)))
-           (t (make-knowledge-package module-name clauses))))))))
+           (1 (make-knowledge-package module-name clauses))))))))
 
 (00001001 import-knowledge-package-world
   (00001000 (world package)
@@ -357,13 +357,13 @@
           (advise-all-world world
                             (knowledge-package-field (00000001 module) package)
                             (knowledge-package-field (00000001 clauses) package)))
-         (t
+         (1
           (00100111 (00100111 (00000001 rejected)
                       (00100111 (00000001 reason) (00000001 unsupported-version))
                       (00100111 (00000001 version)
                             (knowledge-package-field (00000001 version) package)))
                 world))))
-      (t
+      (1
        (00100111 (00100111 (00000001 rejected)
                    (00100111 (00000001 reason) (00000001 invalid-package))
                    (00100111 (00000001 input) package))
@@ -403,16 +403,16 @@
     (00000111
       
       ((00000010 (world-parent world))  0)
-      (t (00001100 1 (world-depth (world-parent world)))))))
+      (1 (00001100 1 (world-depth (world-parent world)))))))
 
 (00001001 world-at-depth-from
   (00001000 (world current-depth target-depth)
     (00000111
       ((00011100 current-depth target-depth)  world)
-      (t (00000001 World-not-found))
+      (1 (00000001 World-not-found))
       
       ((00000010 (world-parent world))  (00000001 World-not-found))
-      (t (world-at-depth-from (world-parent world)
+      (1 (world-at-depth-from (world-parent world)
                               (00001101 current-depth 1)
                               target-depth)))))
 
@@ -420,7 +420,7 @@
   (00001000 (world target-depth)
     (00000111
       ((00011010 target-depth 0)  (00000001 World-not-found))
-      (t (world-at-depth-from world (world-depth world) target-depth)))))
+      (1 (world-at-depth-from world (world-depth world) target-depth)))))
 
 (00001001 world-journal-prefix
   (00001000 (journal old-journal)
@@ -428,18 +428,18 @@
       ((00100010 journal old-journal) (00000001 ()))
       
       ((00000010 journal)  (00000001 World-not-ancestor))
-      (t
+      (1
        (10011100 ((rest (world-journal-prefix (00000110 journal) old-journal)))
          (00000111
            ((world-not-ancestor? rest) rest)
-           (t (00000100 (00000101 journal) rest))))))))
+           (1 (00000100 (00000101 journal) rest))))))))
 
 (00001001 world-not-ancestor?
   (00001000 (value)
     (00000111
       
       ((00000010 value)  (00000011 value (00000001 World-not-ancestor)))
-      (t (00000001 ())))))
+      (1 (00000001 ())))))
 
 (00001001 world-diff
   (00001000 (from to)
@@ -447,18 +447,18 @@
       ((00100010 from to) (00000001 ()))
       
       ((00000010 (world-parent to))  (00000001 World-not-ancestor))
-      (t
+      (1
        (10011100 ((earlier (world-diff from (world-parent to))))
          (00000111
            ((world-not-ancestor? earlier) earlier)
-           (t
+           (1
             (10011100 ((transition
                     (world-journal-prefix
                       (world-journal to)
                       (world-journal (world-parent to)))))
               (00000111
                 ((world-not-ancestor? transition) transition)
-                (t (00101001 earlier transition)))))))))))
+                (1 (00101001 earlier transition)))))))))))
 
 ;; Branch comparison stops before merge policy. First align both histories to
 ;; the same absolute depth, then walk parents together until their values are
@@ -479,7 +479,7 @@
   (00001000 (world current-depth target-depth)
     (00000111
       ((00011100 current-depth target-depth)  world)
-      (t (world-climb-to-depth (world-parent world)
+      (1 (world-climb-to-depth (world-parent world)
                                (00001101 current-depth 1)
                                target-depth)))))
 
@@ -488,10 +488,10 @@
     (00000111
       ((00100010 left right) left)
       
-      (t (00000001 World-no-common-ancestor))
+      (1 (00000001 World-no-common-ancestor))
       
       ((00000010 (world-parent right))  (00000001 World-no-common-ancestor))
-      (t (world-common-ancestor-aligned (world-parent left)
+      (1 (world-common-ancestor-aligned (world-parent left)
                                         (world-parent right))))))
 
 (00001001 world-common-ancestor
@@ -500,7 +500,7 @@
           (right-depth (world-depth right)))
       (10011100 ((target-depth (00000111
                             ((00011010 left-depth right-depth)  left-depth)
-                            (t right-depth))))
+                            (1 right-depth))))
         (world-common-ancestor-aligned
           (world-climb-to-depth left left-depth target-depth)
           (world-climb-to-depth right right-depth target-depth))))))
@@ -510,14 +510,14 @@
     (00000111
       
       ((00000010 value)  (00000011 value (00000001 World-no-common-ancestor)))
-      (t (00000001 ())))))
+      (1 (00000001 ())))))
 
 (00001001 world-branch-diff
   (00001000 (left right)
     (10011100 ((base (world-common-ancestor left right)))
       (00000111
         ((world-no-common-ancestor? base) base)
-        (t
+        (1
          (00100111 (00100111 (00000001 base) base)
                (00100111 (00000001 left) (world-diff base left))
                (00100111 (00000001 right) (world-diff base right))))))))

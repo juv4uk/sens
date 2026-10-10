@@ -16,7 +16,7 @@
       
       ((00000010 value)  (00000001 ()))
       ((00000011 (00000101 value) (00000001 rejected)) t)
-      (t (00000001 ())))))
+      (1 (00000001 ())))))
 
 (00001001 x86-gpr8-name?
   (00001000 (name)
@@ -27,7 +27,7 @@
          (00000001
            (al cl dl bl spl bpl sil dil
                r8b r9b r10b r11b r12b r13b r14b r15b))))
-      (t (00000001 ())))))
+      (1 (00000001 ())))))
 
 (00001001 x86-gpr64-name?
   (00001000 (name)
@@ -36,7 +36,7 @@
        (10011010
          (00100001 (00000011 (x86-reg-code name) (00000001 ())))
          (00100001 (x86-gpr8-name? name))))
-      (t (00000001 ())))))
+      (1 (00000001 ())))))
 
 (00001001 x86-gpr8?
   (00001000 (operand)
@@ -49,21 +49,21 @@
          ((00000010 (00000110 operand))  (00000001 ()))
          ((00100010 (00000110 (00000110 operand)) (00000001 ()))
           (x86-gpr8-name? (00101111 operand)))
-         (t (00000001 ()))))
-      (t (00000001 ())))))
+         (1 (00000001 ()))))
+      (1 (00000001 ())))))
 
 (00001001 x86-gpr8
   (00001000 (name)
     (00000111
       ((x86-gpr8-name? name) (00100111 (00000001 gpr8) name))
-      (t (x86-machine-operand-rejection (00000001 gpr8) name)))))
+      (1 (x86-machine-operand-rejection (00000001 gpr8) name)))))
 
 (00001001 x86-as-gpr8
   (00001000 (operand)
     (00000111
       ((x86-machine-rejected? operand) operand)
       ((x86-gpr8? operand) operand)
-      (t (x86-gpr8 operand)))))
+      (1 (x86-gpr8 operand)))))
 
 (00001001 x86-gpr8-value
   (00001000 (operand)
@@ -80,21 +80,21 @@
          ((00000010 (00000110 operand))  (00000001 ()))
          ((00100010 (00000110 (00000110 operand)) (00000001 ()))
           (x86-gpr64-name? (00101111 operand)))
-         (t (00000001 ()))))
-      (t (00000001 ())))))
+         (1 (00000001 ()))))
+      (1 (00000001 ())))))
 
 (00001001 x86-gpr64
   (00001000 (name)
     (00000111
       ((x86-gpr64-name? name) (00100111 (00000001 gpr64) name))
-      (t (x86-machine-operand-rejection (00000001 gpr64) name)))))
+      (1 (x86-machine-operand-rejection (00000001 gpr64) name)))))
 
 (00001001 x86-as-gpr64
   (00001000 (operand)
     (00000111
       ((x86-machine-rejected? operand) operand)
       ((x86-gpr64? operand) operand)
-      (t (x86-gpr64 operand)))))
+      (1 (x86-gpr64 operand)))))
 
 (00001001 x86-gpr64-value
   (00001000 (operand)
@@ -120,21 +120,21 @@
          ((00000010 (00000110 operand))  (00000001 ()))
          ((00100010 (00000110 (00000110 operand)) (00000001 ()))
           (x86-gpr32-name? (00101111 operand)))
-         (t (00000001 ()))))
-      (t (00000001 ())))))
+         (1 (00000001 ()))))
+      (1 (00000001 ())))))
 
 (00001001 x86-gpr32
   (00001000 (name)
     (00000111
       ((x86-gpr32-name? name) (00100111 (00000001 gpr32) name))
-      (t (x86-machine-operand-rejection (00000001 gpr32) name)))))
+      (1 (x86-machine-operand-rejection (00000001 gpr32) name)))))
 
 (00001001 x86-as-gpr32
   (00001000 (operand)
     (00000111
       ((x86-machine-rejected? operand) operand)
       ((x86-gpr32? operand) operand)
-      (t (x86-gpr32 operand)))))
+      (1 (x86-gpr32 operand)))))
 
 (00001001 x86-gpr32-value
   (00001000 (operand)
@@ -153,7 +153,7 @@
           (00000001 ()))
          ((0100 (00100010 (x86-xmm-reg-code name) (00000001 ())))
           t)))
-      (t (00000001 ())))))
+      (1 (00000001 ())))))
 
 (00001001 x86-xmm?
   (00001000 (operand)
@@ -166,21 +166,21 @@
          ((00000010 (00000110 operand))  (00000001 ()))
          ((00100010 (00000110 (00000110 operand)) (00000001 ()))
           (x86-xmm-name? (00101111 operand)))
-         (t (00000001 ()))))
-      (t (00000001 ())))))
+         (1 (00000001 ()))))
+      (1 (00000001 ())))))
 
 (00001001 x86-xmm
   (00001000 (name)
     (00000111
       ((x86-xmm-name? name) (00100111 (00000001 xmm) name))
-      (t (x86-machine-operand-rejection (00000001 xmm) name)))))
+      (1 (x86-machine-operand-rejection (00000001 xmm) name)))))
 
 (00001001 x86-as-xmm
   (00001000 (operand)
     (00000111
       ((x86-machine-rejected? operand) operand)
       ((x86-xmm? operand) operand)
-      (t (x86-xmm operand)))))
+      (1 (x86-xmm operand)))))
 
 (00001001 x86-xmm-value
   (00001000 (operand)
@@ -222,8 +222,8 @@
       ((00011110 value lower) 
         (00000111
           ((00011101 value upper)  t)
-          (t (00000001 ()))))
-      (t (00000001 ())))))
+          (1 (00000001 ()))))
+      (1 (00000001 ())))))
 
 (00001001 x86-u64-imm?
   (00001000 (operand)
@@ -239,9 +239,9 @@
             (00000111
               ((x86-exact-integer? value)
                (x86-operand-in-inclusive-range? value 0 18446744073709551615))
-              (t (00000001 ())))))
-         (t (00000001 ()))))
-      (t (00000001 ())))))
+              (1 (00000001 ())))))
+         (1 (00000001 ()))))
+      (1 (00000001 ())))))
 
 (00001001 x86-u64-imm
   (00001000 (value)
@@ -250,15 +250,15 @@
        (00000111
          ((x86-operand-in-inclusive-range? value 0 18446744073709551615)
           (00100111 (00000001 u64-imm) value))
-         (t (x86-machine-operand-rejection (00000001 u64-imm) value))))
-      (t (x86-machine-operand-rejection (00000001 u64-imm) value)))))
+         (1 (x86-machine-operand-rejection (00000001 u64-imm) value))))
+      (1 (x86-machine-operand-rejection (00000001 u64-imm) value)))))
 
 (00001001 x86-as-u64-imm
   (00001000 (operand)
     (00000111
       ((x86-machine-rejected? operand) operand)
       ((x86-u64-imm? operand) operand)
-      (t (x86-u64-imm operand)))))
+      (1 (x86-u64-imm operand)))))
 
 (00001001 x86-u64-imm-value
   (00001000 (operand)
@@ -278,9 +278,9 @@
             (00000111
               ((x86-exact-integer? value)
                (x86-operand-in-inclusive-range? value -128 127))
-              (t (00000001 ())))))
-         (t (00000001 ()))))
-      (t (00000001 ())))))
+              (1 (00000001 ())))))
+         (1 (00000001 ()))))
+      (1 (00000001 ())))))
 
 (00001001 x86-disp8
   (00001000 (value)
@@ -289,15 +289,15 @@
        (00000111
          ((x86-operand-in-inclusive-range? value -128 127)
           (00100111 (00000001 disp8) value))
-         (t (x86-machine-operand-rejection (00000001 disp8) value))))
-      (t (x86-machine-operand-rejection (00000001 disp8) value)))))
+         (1 (x86-machine-operand-rejection (00000001 disp8) value))))
+      (1 (x86-machine-operand-rejection (00000001 disp8) value)))))
 
 (00001001 x86-as-disp8
   (00001000 (operand)
     (00000111
       ((x86-machine-rejected? operand) operand)
       ((x86-disp8? operand) operand)
-      (t (x86-disp8 operand)))))
+      (1 (x86-disp8 operand)))))
 
 (00001001 x86-disp8-value
   (00001000 (operand)
@@ -311,25 +311,25 @@
       ((00000011 (00000101 operand) (00000001 mem64-disp8))
        (00000111
          
-         (t (00000001 ()))
+         (1 (00000001 ()))
          
          ((00000010 (00000110 (00000110 operand)))  (00000001 ()))
          ((00100010 (00000110 (00000110 (00000110 operand))) (00000001 ()))
           (10011010 (x86-gpr64? (00101111 operand))
                (x86-disp8? (00110000 operand))))
-         (t (00000001 ()))))
-      (t (00000001 ())))))
+         (1 (00000001 ()))))
+      (1 (00000001 ())))))
 
 (00001001 x86-mem64-disp8
   (00001000 (base displacement)
     (10011100 ((typed-base (x86-as-gpr64 base)))
       (00000111
         ((x86-machine-rejected? typed-base) typed-base)
-        (t
+        (1
          (10011100 ((typed-displacement (x86-as-disp8 displacement)))
            (00000111
              ((x86-machine-rejected? typed-displacement) typed-displacement)
-             (t
+             (1
               (00100111 (00000001 mem64-disp8)
                     typed-base
                     typed-displacement)))))))))
@@ -339,7 +339,7 @@
     (00000111
       ((x86-machine-rejected? operand) operand)
       ((x86-mem64-disp8? operand) operand)
-      (t (x86-machine-operand-rejection (00000001 mem64-disp8) operand)))))
+      (1 (x86-machine-operand-rejection (00000001 mem64-disp8) operand)))))
 
 (00001001 x86-mem64-disp8-base
   (00001000 (operand)

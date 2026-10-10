@@ -9,7 +9,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "scripts"))
-from audit_t5_file_pairs import inspect, main, require_changed_views
+from audit_t5_file_pairs import inspect, main, require_changed_views, split_nul_delimited_paths
 from sens_t5_codec import encode_words
 
 
@@ -20,6 +20,19 @@ class AuditT5PairsTests(unittest.TestCase):
 
     def tearDown(self):
         self.tmp.cleanup()
+
+    def test_git_z_path_parser_splits_actual_nul_delimiters(self):
+        self.assertEqual(split_nul_delimited_paths(b""), [])
+        self.assertEqual(
+            split_nul_delimited_paths(b"examples/a.sens" + bytes([0]) + b"nested/b.sens" + bytes([0])),
+            ["examples/a.sens", "nested/b.sens"],
+        )
+
+    def test_git_z_path_parser_fails_closed_on_malformed_framing(self):
+        with self.assertRaisesRegex(ValueError, "NUL"):
+            split_nul_delimited_paths(b"examples/a.sens")
+        with self.assertRaisesRegex(ValueError, "NUL"):
+            split_nul_delimited_paths(b"examples/a.sens" + bytes([0, 0]))
 
     def pair(self, stem, source: str, words: list[str]):
         source_path = self.root / f"{stem}.lisp"

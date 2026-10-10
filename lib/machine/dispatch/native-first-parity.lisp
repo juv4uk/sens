@@ -87,7 +87,7 @@
          ((00100010 (00110000 verdict) (00000001 pass))
           
           t)
-         (t (00000001 ()))))
+         (1 (00000001 ()))))
       ((00000001 native-first-parity-verdict-fallback)
        
        (00000001 ())))))
@@ -102,4 +102,4 @@
          ((00100010 (native-first-parity-verdict-pass? (00000101 verdicts)) t)
           
           (native-first-parity-all-pass? (00000110 verdicts)))
-         (t (00000001 ())))))))
+         (1 (00000001 ())))))))
