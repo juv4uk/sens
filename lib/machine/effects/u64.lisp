@@ -39,11 +39,11 @@
 (00001001 machine-effect-within-inclusive-integer-range?
   (00001000 (value lower upper)
     (00000111
-      ((00011110 value lower) 1
+      ((00011110 value lower) 
        (00000111
-         ((00011101 value upper) 1 t)
-         ((00011101 value upper) 0 (00000001 ()))))
-      ((00011110 value lower) 0 (00000001 ())))))
+         ((00011101 value upper)  t)
+         (t (00000001 ()))))
+      (t (00000001 ())))))
 
 (00001001 machine-effect-u32-carrier?
   (00001000 (value)
@@ -111,9 +111,9 @@
        (00000111
          ((machine-effect-u64-carrier? right)
           (00000111
-            ((00011110 left right) 1
+            ((00011110 left right) 
              (00100111 (00000001 bounded-u64-sub) left right))
-            ((00011110 left right) 0
+            ((0100 (00011110 left right))
              (00000001 machine-effect-rejected))))
          (t (00000001 machine-effect-rejected))))
       (t (00000001 machine-effect-rejected)))))
