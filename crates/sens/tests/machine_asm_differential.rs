@@ -252,6 +252,14 @@ fn x86_encoder_callability_stage_probe() {
     let stages = [
         ("код_rax", "(x86-reg-code (quote rax))"),
         ("код_rcx", "(x86-reg-code (quote rcx))"),
+        ("залишок_3", "(x86-low3 1)"),
+        ("верхній_1", "(x86-high1 1)"),
+        ("префікс_REX", "(x86-encode-rex 1 0 0 0)"),
+        ("поле_ModRM", "(x86-encode-modrm 3 1 0)"),
+        ("старий_LIST", "(00100111 72 1 200)"),
+        ("чинний_LIST", "(list 72 1 200)"),
+        ("старий_LET", "(10011100 ((n 1)) n)"),
+        ("чинний_LET", "(let ((n 1)) n)"),
         ("байти_add", "(x86-encode-add-r64-r64 (quote rax) (quote rcx))"),
         (
             "одна_інструкція",
