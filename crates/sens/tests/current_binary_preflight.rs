@@ -134,3 +134,35 @@ fn current_cond_reference_is_valid_binary_and_executes_without_legacy_sid() {
     assert!(matches!(result.value, Value::Nil));
     assert!(result.output.is_empty());
 }
+
+/// Stability diagnostic and regression for the exact D1/D3 time-load frontier.
+/// The ordinary bootstrap must not regain old three-field COND compatibility.
+/// Per-form evaluation gives a precise source boundary if a post-core macro
+/// expands into a forbidden historical COND.
+#[test]
+fn postcore_time_bootstrap_exact_cond() {
+    let mut session = Session::default();
+    sens::load_core_library(&mut session)
+        .expect("ordinary Core4 bootstrap is the shared substrate");
+    // Diagnose the language-owned dependencies before attributing an error to
+    // the time library itself. These are ordinary, non-host Core4 operations.
+    for (label, expression) in [
+        ("map-on-nonempty-list", "(map (00001000 (x) x) (00000001 (1 2)))"),
+        ("let-parallel-bind", "(let ((x 1)) x)"),
+        ("postcore-peer-group", "(my-postcore-peer-group 1079 my-postcore-stable-peer-projection)"),
+    ] {
+        sens::eval_program(expression, &mut session)
+            .unwrap_or_else(|err| panic!("Core4 boundary {label}: {err}"));
+    }
+    let source = include_str!("../../../lib/time.lisp");
+    let parsed = sens::parse(source).expect("time library syntax");
+    for (index, expr) in parsed.iter().enumerate() {
+        eval_parsed_expressions(std::slice::from_ref(expr), &mut session)
+            .unwrap_or_else(|err| panic!(
+                "postcore time top-level form {} at source byte {} violates exact-D1 bootstrap: {}",
+                index + 1,
+                expr.span.start,
+                err
+            ));
+    }
+}
