@@ -1289,7 +1289,7 @@
 (00001001 x86-encode-program
   (00001000 (instructions)
     (110
-      ((010 instructions) (00000001 ()))
+      ((101 instructions (00000001 ())) (00000001 ()))
       ((0100 (010 instructions))
        (x86-сполучити-байти
          (100 instructions)
