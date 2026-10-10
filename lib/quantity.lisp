@@ -122,7 +122,7 @@
       
       ((00000010 dimensions)  (00000111
          ((00011100 (dimension-exponent dimension) 0)  (00000001 ()))
-         ((00000010 ()) (00100111 dimension))))
+         ((атом? ()) (00100111 dimension))))
       ((00000011 (dimension-base dimension)
            (dimension-base (00000101 dimensions)))
        (10011100 ((sum
@@ -130,11 +130,11 @@
                   (dimension-exponent (00000101 dimensions)))))
          (00000111
            ((00011100 sum 0)  (00000110 dimensions))
-           ((00000010 ())
+           ((атом? ())
             (00000100
               (make-dimension (dimension-base dimension) sum)
               (00000110 dimensions))))))
-      ((00000010 ())
+      ((атом? ())
        (00000100
          (00000101 dimensions)
          (science-add-dimension dimension (00000110 dimensions)))))))
@@ -144,7 +144,7 @@
     (00000111
       
       ((00000010 from)  into)
-      ((00000010 ())
+      ((атом? ())
        (science-merge-dimensions
          (00000110 from)
          (science-add-dimension (00000101 from) into))))))
@@ -154,7 +154,7 @@
     (00000111
       
       ((00000010 dimensions)  (00000001 ()))
-      ((00000010 ())
+      ((атом? ())
        (00000100
          (make-dimension
            (dimension-base (00000101 dimensions))
@@ -247,7 +247,7 @@
          ((00000011 (scientific-constant-kind-valid? (00110010 x)) (00000001 ())) (00000001 ()))
          ((00000011 (00100011 (science-sixth x)) (00000001 ())) (00000001 ()))
          ((00000011 (science-source? (science-seventh x)) (00000001 ())) (00000001 ()))
-         ((00000010 ()) (тотожне? 1 1))))
+         ((атом? ()) (тотожне? 1 1))))
       )))
 
 (00001001 scientific-constant-name
@@ -283,7 +283,7 @@
   (00001000 (constant)
     (00000111
       ((00000011 (scientific-constant? constant) (00000001 ())) (00000001 ()))
-      ((00000010 ())
+      ((атом? ())
        (10011100 ((name (scientific-constant-name constant)))
          (00100111
            (00100111 (00100111 (00000001 scientific-constant) name))
