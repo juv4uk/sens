@@ -4,7 +4,8 @@
 use sens::{
     decode_ternary_program, encode_binary_projection_ternary, encode_ternary_words,
     eval_lowered_expressions, eval_parsed_expressions, eval_t5_program, lower_program,
-    parse_canonical_binary, render_ternary_words_spaced, Session, Value,
+    parse_canonical_binary, parse_canonical_word_sequence, render_ternary_words_spaced,
+    Session, Value,
 };
 use std::{hint::black_box, time::Instant};
 
@@ -161,7 +162,11 @@ fn benchmark(case: &Case, samples: usize, iterations: usize) -> Result<(), Strin
         iterations,
     );
     let decode_ns = median(&decode_samples);
-    let lowered = lower_program(&ast);
+    // Prepared execution is built from *decoded physical domain words*, not
+    // from the human-visible reference. Only this preparation is out of timer.
+    let physical_ast = parse_canonical_word_sequence(&words)
+        .map_err(|e| format!("{}: typed physical D2: {e:?}", case.name))?;
+    let lowered = lower_program(&physical_ast);
     let mut eval_session = Session::bare();
     let prepared_samples = measured(
         || {
