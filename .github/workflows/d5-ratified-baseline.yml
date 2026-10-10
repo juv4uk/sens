@@ -22,6 +22,7 @@ on:
       - "docs/language-core.md"
       - "crates/sens/src/domain_identity.rs"
       - "scripts/check-d5-current-authority.py"
+      - ".github/workflows/d5-ratified-baseline.yml"
 
 permissions:
   contents: read
