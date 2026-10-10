@@ -1,0 +1,34 @@
+name: Result-status bounded D1 migration
+
+on:
+  pull_request:
+    paths:
+      - "lib/result-status.lisp"
+      - "tests/test_result_status_d1_migration.py"
+      - "scripts/cond-modernize.py"
+      - "language-contract.lisp"
+      - ".github/workflows/result-status-d1-migration.yml"
+  push:
+    branches: [main]
+    paths:
+      - "lib/result-status.lisp"
+      - "tests/test_result_status_d1_migration.py"
+      - "scripts/cond-modernize.py"
+      - "language-contract.lisp"
+      - ".github/workflows/result-status-d1-migration.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  exact-d1-slice:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 6
+    steps:
+      - uses: actions/checkout@v5
+      - name: Execute bounded D3/D1 behavioral oracle
+        run: python3 -m unittest discover -s tests -p 'test_result_status_d1_migration.py' -v
+      - name: Read-only source migration inventory
+        run: python3 scripts/cond-modernize.py lib/result-status.lisp --scan
+# Remaining clauses in the file are intentionally outside this bounded proof.
