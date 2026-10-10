@@ -379,10 +379,14 @@
   (00001000 (width bits left right)
     ((00001000 (forms)
        (110
-        ((101 forms (00000001 unsupported-current-domain-binary-u64))
-         (00000001 unsupported-current-domain-binary-u64))
-        ((101 forms (00000001 exact-d5-fallback-required))
-         (00000001 exact-d5-fallback-required))
+        ((010 forms)
+         (110
+           ((101 forms (00000001 unsupported-current-domain-binary-u64))
+            (00000001 unsupported-current-domain-binary-u64))
+           ((101 forms (00000001 exact-d5-fallback-required))
+            (00000001 exact-d5-fallback-required))
+           ((010 ())
+            (00000001 unsupported-current-domain-binary-u64))))
         ((010 ())
          (x86-encode-admitted-program forms))))
       (x86-lower-current-binary-u64-forms
