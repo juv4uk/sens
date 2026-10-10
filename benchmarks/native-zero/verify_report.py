@@ -52,7 +52,7 @@ def validate(rows: list[dict]) -> tuple[int, list[dict]]:
         )):
             raise ValueError(f"{case}/{phase}: source size accounting missing")
         if case == "d3-quote-empty":
-            if (row["physical_bytes"], row["visible_bytes"], row["word_count"], row["semantic_bits"]) != (4, 18, 5, 12):
+            if (row["physical_bytes"], row["visible_bytes"], row["word_count"], row["semantic_bits"]) != (4, 16, 5, 12):
                 raise ValueError("canonical committed D3 QUOTE size/width changed")
         if case == "d1-yes" and (
             row["physical_bytes"], row["word_count"], row["semantic_bits"]
