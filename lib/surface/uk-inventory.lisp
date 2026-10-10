@@ -47,7 +47,7 @@
         number->string-onto sqrt-iter isqrt-step truthy?
         string-membership-helper string-order-helper nonempty-string-membership-helper
         sublis-pair apply-quote-args
-        my-postcore-stable-peer-projection my-postcore-peer-group
+        my-let-binding-parts my-letstar-expand my-postcore-stable-peer-projection my-postcore-peer-group
         my-postcore-binding-status my-postcore-missing-peers
         my-postcore-build-definitions my-postcore-materialize-stable-peers))))
   ; Every future Ukrainian spelling for these public predicates ends in ?.
