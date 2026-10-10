@@ -11,6 +11,16 @@ on:
       - crates/sens/tests/core_fasl_freshness.rs
       - lib/core4.lisp
       - .github/workflows/core4-exact-domain-fasl-candidate.yml
+  pull_request:
+    branches:
+      - main
+    paths:
+      - crates/sens/src/mixed_source.rs
+      - crates/sens/src/lib.rs
+      - crates/sens-cli/src/bin/gen-fasl.rs
+      - crates/sens/tests/core_fasl_freshness.rs
+      - lib/core4.lisp
+      - .github/workflows/core4-exact-domain-fasl-candidate.yml
 
 permissions:
   contents: read
