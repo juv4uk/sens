@@ -5,12 +5,16 @@ on:
     paths:
       - "lib/guard.lisp"
       - "crates/wsm-guard-core/src/lib.rs"
+      - "tests/test_guard_exact_d1_ast.py"
+      - "scripts/cond-modernize.py"
       - ".github/workflows/guard-exact-d1-migration.yml"
   push:
     branches: [main]
     paths:
       - "lib/guard.lisp"
       - "crates/wsm-guard-core/src/lib.rs"
+      - "tests/test_guard_exact_d1_ast.py"
+      - "scripts/cond-modernize.py"
       - ".github/workflows/guard-exact-d1-migration.yml"
   workflow_dispatch:
 
@@ -25,6 +29,8 @@ jobs:
     steps:
       - uses: actions/checkout@v5
       - uses: dtolnay/rust-toolchain@stable
+      - name: AST proof of ratified D3 control and D3 EQ arity
+        run: python3 -m unittest discover -s tests -p 'test_guard_exact_d1_ast.py' -v
       - name: Migrated classifiers return exact D1 YES and NO
         run: cargo test --locked -p wsm-guard-core migrated_guard_classifiers_return_only_exact_d1_predicate_bits -- --nocapture
       - name: Existing Guard policy integration must also pass
