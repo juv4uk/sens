@@ -283,3 +283,26 @@ fn bounded_effect_source_keeps_exact_d1_controls() {
         "Вісім доведених предикатних відповідей D1:YES мають залишатися в джерелі"
     );
 }
+
+#[test]
+fn bounded_effect_negative_form_predicates_return_exact_d1_no() {
+    // #5361: D1:0 не є порожнім списком; у COND дозволений лише точний PredicateBit.
+    let mut session = Session::default();
+    load_core_library(&mut session).expect("ядро");
+    load_lisp_file("lib/machine/effects/u64.lisp", &mut session);
+
+    for source in [
+        "(machine-effect-bounded-u64-add-form? (00000001 ()))",
+        "(machine-effect-bounded-u64-sub-form? (00000001 ()))",
+        "(machine-effect-bounded-u64-mul-form? (00000001 ()))",
+    ] {
+        let actual = eval_program(source, &mut session)
+            .unwrap_or_else(|error| panic!("{source}: {error}"))
+            .value;
+        assert_eq!(
+            actual.as_predicate_bit(),
+            Some(false),
+            "{source} має повернути точний D1:0, а не () чи числовий нуль"
+        );
+    }
+}
