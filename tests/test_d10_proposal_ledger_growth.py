@@ -72,9 +72,12 @@ class SelectionLedgerTrace(unittest.TestCase):
 
         self.assertEqual(8, len(proposals))
         self.assertEqual(647, dossier["snapshot"]["selected_semantic_candidates"])
-        self.assertEqual(
-            dossier["snapshot"]["selected_semantic_candidates"],
-            inventory["accounting"]["selected_semantic_candidates"])
+        # The dossier is an immutable proposal snapshot at 647. Later
+        # append-only selected research may grow the live inventory without
+        # making these eight independently pending proposals selected.
+        self.assertGreaterEqual(
+            inventory["accounting"]["selected_semantic_candidates"],
+            dossier["snapshot"]["selected_semantic_candidates"])
         self.assertEqual(0, dossier["snapshot"]["ratified_d10_residents"])
         self.assertEqual(0, dossier["accounting"]["selected_added"])
         self.assertEqual(0, dossier["accounting"]["coordinates_added"])
