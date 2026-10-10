@@ -1,7 +1,7 @@
 //! Незалежний Rust-оракул T5 на ратифікованому читачі; без зміни production.
 use sens::parse_canonical_binary;
 
-fn remove_terminal_close(words: &[&str]) -> Vec<&str> {
+fn remove_terminal_close<'a>(words: &'a [&'a str]) -> Vec<&'a str> {
     let mut end = words.len();
     while end > 0 && words[end - 1] == "01" {
         end -= 1;
