@@ -1029,7 +1029,7 @@
   ; dependency order. The old W8 LET* head was no longer callable after the
   ; exact-domain cutover and made every post-core peer materialization fail.
   (let ((semantic-id (00000101 args)))
-    (let ((source (00101111 args)))
+    (let ((source (00000101 (00000110 args))))
       (let ((group (my-postcore-peer-group
                      semantic-id my-postcore-stable-peer-projection)))
         (00000111
