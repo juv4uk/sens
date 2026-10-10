@@ -1,0 +1,487 @@
+{
+  "schema": "d10-next-tranche/v1",
+  "status": "RESEARCH-PENDING-REVIEW-NOT-SELECTED",
+  "authority": [
+    "SENS #4012",
+    "#4182",
+    "#4463",
+    "Contract 11.8 / #4008"
+  ],
+  "snapshot": {
+    "based_on_main_sha": "c67db6cdd820dea8d3a110caed359507c0a2d7a4",
+    "foundation": "Contract 11.8 / D1-D9",
+    "inventory_path": "knowledge/d10-v1-semantic-inventory.json",
+    "inventory_git_blob_sha": "7e13e929338baeae9f16c2139d24b78e23ea1e03",
+    "selected_semantic_candidates": 647,
+    "capacity": 1024,
+    "law_forced_coordinates": 256,
+    "unplaced_selected_candidates": 391,
+    "remaining_semantic_candidates": 377,
+    "ratified_d10_residents": 0
+  },
+  "rule": "This artifact is candidate intake only. It creates no selected inventory rows, no D10 selection-transition append, no coordinates, no runtime identity, no .sens/T5 authority and no ratification. All exact D1-D9/D10 behavioral dedup is pending peer/owner review.",
+  "accounting": {
+    "proposals": 8,
+    "selected_added": 0,
+    "coordinates_added": 0,
+    "ratified_added": 0
+  },
+  "proposals": [
+    {
+      "proposal_id": "D10P-503110",
+      "semantic_name": "ADJUST-ARRAY",
+      "surface_uk": "підлаштувати-масив",
+      "surface_ukr": "підлаштування-масиву",
+      "width": "D10",
+      "donor_provenance": "juv4uk/sens@c67db6cdd820dea8d3a110caed359507c0a2d7a4:knowledge/d10-adjust-array-rearray-differential-v1.json:19",
+      "donor_sources": [
+        {
+          "kind": "primary-standard",
+          "title": "ANSI Common Lisp HyperSpec — ADJUST-ARRAY",
+          "url": "https://www.cs.cmu.edu/Groups/AI/util/html/hyperspec/HyperSpec/Body/fun_adjust-array.html"
+        },
+        {
+          "kind": "primary-historical",
+          "title": "MacLisp Reference Manual, 17 Dec 1975, §2-8 *REARRAY",
+          "url": "https://softwarepreservation.computerhistory.org/LISP/MIT/MACLISP_Reference_Manual-Dec_17_1975.pdf",
+          "printed_pages": "2-86..2-89"
+        }
+      ],
+      "observable_law": "Змінити розміри або подання масиву за контрактом ADJUST-ARRAY: для змінного масиву повертається той самий об'єкт; якщо повернуто інший об'єкт, аргумент лишається незміненим. Окремо визначаються fill-pointer та спільне сховище displaced view; ланцюг A→B→C не можна сплющувати так, щоб A перестав посилатися на B.",
+      "positive_witnesses": [
+        {
+          "input": "adjust adjustable A to new dimensions",
+          "expected": "result is EQ to A"
+        },
+        {
+          "input": "adjust non-adjustable A and implementation returns a distinct result",
+          "expected": "A remains unchanged"
+        },
+        {
+          "input": "A is displaced to B; B is adjusted",
+          "expected": "A remains displaced to B"
+        }
+      ],
+      "falsifiers": [
+        "Implementation always allocates a new array for adjustable A.",
+        "Adjusting a non-adjustable array mutates A even though a distinct result is returned.",
+        "Displacement chain A→B→C is flattened so A no longer refers to B."
+      ],
+      "root_review_status": "HOLD-DIFFERENTIAL-REVIEW",
+      "owner_question": "Prove an irreducible behavior beyond the selected D10 REARRAY/MAKE-ARRAY, element access/update, COPY-ARRAY, and ARRAY-DISPLACEMENT laws; otherwise retain as derived library law.",
+      "dedup": {
+        "d1_d9": {
+          "snapshot_sha": "09d1d71c39d1484dfd005a5068dbb18b76f0f0d4",
+          "status": "PENDING"
+        },
+        "d10": {
+          "snapshot_blob_sha": "7e13e929338baeae9f16c2139d24b78e23ea1e03",
+          "status": "PENDING"
+        }
+      },
+      "ownership_border": "UNIVERSAL-BORDER: independent of execution substrate in principle; exact derivability and minimal-root status remain unproven.",
+      "blocked_source": "NOT-A-MIGRATION-BLOCK",
+      "status": "pending-review",
+      "selected": false,
+      "coordinate": null,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "ratification_effect": "NONE"
+    },
+    {
+      "proposal_id": "D10P-503111",
+      "semantic_name": "WRAP",
+      "surface_uk": "обгорнути-функцію",
+      "surface_ukr": "встановити-обгортку",
+      "width": "D10",
+      "donor_provenance": "juv4uk/sens@c67db6cdd820dea8d3a110caed359507c0a2d7a4:knowledge/d10-psl-interlisp-lispm-unmerged-residual-v1.json:54",
+      "donor_sources": [
+        {
+          "kind": "historical-primary-manual",
+          "title": "The PSL Users Manual (1997 version), §8.2.2",
+          "url": "https://reduce-algebra.sourceforge.io/lisp-docs/allman1.pdf",
+          "version_caveat": "The cited manual proves PSL 1997 behavior; do not silently attribute it to the earlier 1984 PSL."
+        }
+      ],
+      "observable_law": "Установити wrapper перед викликом функції, делегувати базовій функції й зберігати відмінність базової функції та ланцюга обгорток; вкладені обгортки мають зберігати визначений порядок виконання.",
+      "positive_witnesses": [
+        {
+          "input": "base f(x)=x+1; wrap f with w(x)=2*f(x)",
+          "expected": "wrapped f(3)=8 while base f(3)=4"
+        },
+        {
+          "input": "wrap a function with types A then B",
+          "expected": "wrapper order and base function remain observable"
+        }
+      ],
+      "falsifiers": [
+        "Installing a wrapper replaces and loses the base definition.",
+        "Nested wrapper order is changed.",
+        "A wrapper calls itself recursively in place of delegating to the prior function."
+      ],
+      "root_review_status": "HOLD-CONTROL-AND-TOOLING",
+      "owner_question": "Determine whether this is a universal language-owned callable transformation or merely tracing/advice/tooling derivable through current function values and D2 control.",
+      "dedup": {
+        "d1_d9": {
+          "snapshot_sha": "09d1d71c39d1484dfd005a5068dbb18b76f0f0d4",
+          "status": "PENDING"
+        },
+        "d10": {
+          "snapshot_blob_sha": "7e13e929338baeae9f16c2139d24b78e23ea1e03",
+          "status": "PENDING"
+        }
+      },
+      "ownership_border": "UNIVERSAL-BORDER: independent of execution substrate in principle; exact derivability and minimal-root status remain unproven.",
+      "blocked_source": "NOT-A-MIGRATION-BLOCK",
+      "status": "pending-review",
+      "selected": false,
+      "coordinate": null,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "ratification_effect": "NONE"
+    },
+    {
+      "proposal_id": "D10P-503112",
+      "semantic_name": "REMOVE-WRAPPER",
+      "surface_uk": "зняти-обгортку",
+      "surface_ukr": "вилучити-тип-обгортки",
+      "width": "D10",
+      "donor_provenance": "juv4uk/sens@c67db6cdd820dea8d3a110caed359507c0a2d7a4:knowledge/d10-psl-interlisp-lispm-unmerged-residual-v1.json:81",
+      "donor_sources": [
+        {
+          "kind": "historical-primary-manual",
+          "title": "The PSL Users Manual (1997 version), §8.2.2",
+          "url": "https://reduce-algebra.sourceforge.io/lisp-docs/allman1.pdf",
+          "version_caveat": "This tranche's historical claim is restricted to the 1997 manual."
+        }
+      ],
+      "observable_law": "Вилучити обгортки заданого типу, не знімаючи обгорток інших типів і не втрачаючи базову функцію; результат зберігає порядок решти wrapper chain.",
+      "positive_witnesses": [
+        {
+          "input": "base f; wrap type A then type B; remove type A",
+          "expected": "type B remains and delegates to base f"
+        },
+        {
+          "input": "remove a type not present",
+          "expected": "unrelated wrappers and base f remain unchanged"
+        }
+      ],
+      "falsifiers": [
+        "Removing type A removes all wrapper types.",
+        "Removal loses or mutates the base function.",
+        "Removal changes order among remaining wrappers."
+      ],
+      "root_review_status": "HOLD-COMPOSABLE-TOOLING",
+      "owner_question": "Review only after WRAP's root status; removal may be a derived update over wrapper metadata rather than a distinct D10 root.",
+      "dedup": {
+        "d1_d9": {
+          "snapshot_sha": "09d1d71c39d1484dfd005a5068dbb18b76f0f0d4",
+          "status": "PENDING"
+        },
+        "d10": {
+          "snapshot_blob_sha": "7e13e929338baeae9f16c2139d24b78e23ea1e03",
+          "status": "PENDING"
+        }
+      },
+      "ownership_border": "UNIVERSAL-BORDER: independent of execution substrate in principle; exact derivability and minimal-root status remain unproven.",
+      "blocked_source": "NOT-A-MIGRATION-BLOCK",
+      "status": "pending-review",
+      "selected": false,
+      "coordinate": null,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "ratification_effect": "NONE"
+    },
+    {
+      "proposal_id": "D10P-503113",
+      "semantic_name": "FINITE-CODE-UNIQUE-DECIPHERABILITY",
+      "surface_uk": "однозначність-декодування?",
+      "surface_ukr": "код-однозначно-декодується?",
+      "width": "D10",
+      "donor_provenance": "juv4uk/sens@c67db6cdd820dea8d3a110caed359507c0a2d7a4:knowledge/d10-unique-decipherability-historical-20261009.json:22",
+      "donor_sources": [
+        {
+          "kind": "primary-paper",
+          "title": "Sardinas & Patterson, A simple proof of the decipherability criterion (1963)",
+          "url": "https://doi.org/10.1016/S0019-9958(63)80011-X"
+        },
+        {
+          "kind": "primary-paper",
+          "title": "The Sardinas/Patterson and Levenshtein theorems (1967)",
+          "url": "https://doi.org/10.1016/S0019-9958(67)80002-0"
+        }
+      ],
+      "observable_law": "Для скінченного впорядкованого набору різних ідентичностей із непорожніми двійковими кодовими словами визначити, чи будь-які дві різні непорожні послідовності ідентичностей можуть давати той самий конкатенований бітовий потік. Префіксність не є необхідною умовою; порожній кодбук має результат YES.",
+      "positive_witnesses": [
+        {
+          "input": "[(a,0),(b,11)]",
+          "expected": "YES"
+        },
+        {
+          "input": "[(a,0),(b,01)]",
+          "expected": "YES although 0 is a prefix of 01"
+        },
+        {
+          "input": "[(a,0),(b,01),(c,10)]",
+          "expected": "NO: [a,c] and [b,a] both encode 010"
+        },
+        {
+          "input": "empty codebook",
+          "expected": "YES"
+        }
+      ],
+      "falsifiers": [
+        "A prefix-free-only implementation incorrectly rejects [(a,0),(b,01)].",
+        "A greedy decoder incorrectly accepts the ambiguous codebook producing 010.",
+        "Duplicate encodings for different identities are accepted.",
+        "Empty word, non-binary symbol or duplicate identity is silently accepted."
+      ],
+      "root_review_status": "HOLD-PENDING-BEHAVIORAL-DERIVABILITY",
+      "owner_question": "Check relation to existing D2 structural read authority, binary parsing, D9/D10 finite-word operations and Core-Math. Do not turn this into a transport-format or T5 rule.",
+      "dedup": {
+        "d1_d9": {
+          "snapshot_sha": "09d1d71c39d1484dfd005a5068dbb18b76f0f0d4",
+          "status": "PENDING"
+        },
+        "d10": {
+          "snapshot_blob_sha": "7e13e929338baeae9f16c2139d24b78e23ea1e03",
+          "status": "PENDING"
+        }
+      },
+      "ownership_border": "UNIVERSAL-BORDER: independent of execution substrate in principle; exact derivability and minimal-root status remain unproven.",
+      "blocked_source": "NOT-A-MIGRATION-BLOCK",
+      "status": "pending-review",
+      "selected": false,
+      "coordinate": null,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "ratification_effect": "NONE"
+    },
+    {
+      "proposal_id": "D10P-503114",
+      "semantic_name": "ALLEN-INTERVAL-RELATION",
+      "surface_uk": "відношення-інтервалів",
+      "surface_ukr": "визначити-зв'язок-інтервалів",
+      "width": "D10",
+      "donor_provenance": "juv4uk/sens@c67db6cdd820dea8d3a110caed359507c0a2d7a4:knowledge/d10-allen-atms-research-20261009.json:21",
+      "donor_sources": [
+        {
+          "kind": "primary-paper",
+          "title": "James F. Allen, Maintaining Knowledge about Temporal Intervals (CACM, 1983)",
+          "url": "https://doi.org/10.1145/182.358434",
+          "open_copy": "https://cse.unl.edu/~choueiry/Documents/Allen-CACM1983.pdf"
+        }
+      ],
+      "observable_law": "Для двох непорожніх строгих інтервалів [start,end) із start<end повернути рівно одне з 13 відношень Аллена: BEFORE, MEETS, OVERLAPS, STARTS, DURING, FINISHES, EQUALS та їхні обернені відношення. MEETS означає спільну межу, а не позитивний часовий проміжок; перестановка аргументів повертає задане обернене відношення.",
+      "positive_witnesses": [
+        {
+          "input": "[0,1) and [2,3)",
+          "expected": "BEFORE"
+        },
+        {
+          "input": "[0,1) and [1,2)",
+          "expected": "MEETS"
+        },
+        {
+          "input": "[0,3) and [1,2)",
+          "expected": "CONTAINS (inverse of DURING)"
+        },
+        {
+          "input": "[0,2) and [0,2)",
+          "expected": "EQUALS"
+        }
+      ],
+      "falsifiers": [
+        "BEFORE is returned where the first endpoint equals the second interval's start (that case is MEETS).",
+        "Two different base relations are returned for the same valid pair.",
+        "Swapping the arguments does not return the specified inverse relation."
+      ],
+      "root_review_status": "HOLD-CORE-DERIVABILITY",
+      "owner_question": "Can comparisons, Boolean conjunction and exact D1 output already express a reusable interval classifier law? Keep this as a pending proposal until minimal-root evidence is independently reviewed.",
+      "dedup": {
+        "d1_d9": {
+          "snapshot_sha": "09d1d71c39d1484dfd005a5068dbb18b76f0f0d4",
+          "status": "PENDING"
+        },
+        "d10": {
+          "snapshot_blob_sha": "7e13e929338baeae9f16c2139d24b78e23ea1e03",
+          "status": "PENDING"
+        }
+      },
+      "ownership_border": "UNIVERSAL-BORDER: independent of execution substrate in principle; exact derivability and minimal-root status remain unproven.",
+      "blocked_source": "NOT-A-MIGRATION-BLOCK",
+      "status": "pending-review",
+      "selected": false,
+      "coordinate": null,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "ratification_effect": "NONE"
+    },
+    {
+      "proposal_id": "D10P-503115",
+      "semantic_name": "ATMS-CONSISTENT-LABEL-JOIN",
+      "surface_uk": "об'єднати-мітки-підтримки",
+      "surface_ukr": "мінімізувати-набори-підтримки",
+      "width": "D10",
+      "donor_provenance": "juv4uk/sens@c67db6cdd820dea8d3a110caed359507c0a2d7a4:knowledge/d10-allen-atms-research-20261009.json:63",
+      "donor_sources": [
+        {
+          "kind": "primary-paper",
+          "title": "Jon Doyle, A Truth Maintenance System (AI, 1979)",
+          "url": "https://doi.org/10.1016/0004-3702(79)90008-0"
+        },
+        {
+          "kind": "primary-paper",
+          "title": "J. de Kleer, Problem solving with the ATMS (AI, 1986)",
+          "url": "https://doi.org/10.1016/0004-3702(86)90082-2"
+        }
+      ],
+      "observable_law": "Для двох скінченних наборів support-environment і набору nogood утворити всі об'єднання по одному середовищу з кожного боку; відкинути об'єднання, що містять відомий nogood як підмножину; вилучити строгі надмножини інших результатів; повернути антинанцюг у порядку зростання кардинальності, потім лексикографічно. Порожнє середовище () відрізняється від відсутності альтернатив ().",
+      "positive_witnesses": [
+        {
+          "input": "left=[[],[a]], right=[[b]], nogood=[[a,b]]",
+          "expected": "[[b]]"
+        },
+        {
+          "input": "left=[[a],[b]], right=[[c]], nogood=[]",
+          "expected": "[[a,c],[b,c]] in canonical order"
+        }
+      ],
+      "falsifiers": [
+        "A candidate whose support contains an inconsistent nogood is retained.",
+        "A strict superset of another consistent support is retained.",
+        "Empty support environment is conflated with no alternatives."
+      ],
+      "root_review_status": "HOLD-D9-LOGIC-DERIVABILITY",
+      "owner_question": "Review derivability through current D9 JTMS, D6 set union/subset, and admitted reasoning laws. Do not import ATMS as an execution-island identity.",
+      "dedup": {
+        "d1_d9": {
+          "snapshot_sha": "09d1d71c39d1484dfd005a5068dbb18b76f0f0d4",
+          "status": "PENDING"
+        },
+        "d10": {
+          "snapshot_blob_sha": "7e13e929338baeae9f16c2139d24b78e23ea1e03",
+          "status": "PENDING"
+        }
+      },
+      "ownership_border": "UNIVERSAL-BORDER: independent of execution substrate in principle; exact derivability and minimal-root status remain unproven.",
+      "blocked_source": "NOT-A-MIGRATION-BLOCK",
+      "status": "pending-review",
+      "selected": false,
+      "coordinate": null,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "ratification_effect": "NONE"
+    },
+    {
+      "proposal_id": "D10P-503116",
+      "semantic_name": "FINITE-CONVOLUTION",
+      "surface_uk": "скінченна-згортка",
+      "surface_ukr": "згорнути-послідовності",
+      "width": "D10",
+      "donor_provenance": "juv4uk/sens@c67db6cdd820dea8d3a110caed359507c0a2d7a4:knowledge/d10-crossdomain-math-signal-research-v1.json:23",
+      "donor_sources": [
+        {
+          "kind": "mathematical-reference",
+          "title": "NumPy convolution reference (terminology/check examples only)",
+          "url": "https://numpy.org/doc/stable/reference/generated/numpy.convolve.html"
+        }
+      ],
+      "observable_law": "Для двох скінченних послідовностей над точним комутативним кільцем довжини n та m повернути коефіцієнти c[k]=Σᵢ a[i]·b[k−i], поза межами вхідних послідовностей вважати значення нулем. Якщо обидві послідовності непорожні, довжина результату n+m−1; якщо будь-яка порожня — результат порожній. Циклічне згортання не допускається.",
+      "positive_witnesses": [
+        {
+          "input": "[1,2,3] * [1,1]",
+          "expected": "[1,3,5,3]"
+        },
+        {
+          "input": "[0,1] * [1,-1]",
+          "expected": "[0,1,-1]"
+        },
+        {
+          "input": "[] * [1,2]",
+          "expected": "[]"
+        }
+      ],
+      "falsifiers": [
+        "Cyclic convolution wraps the final coefficient into the first position.",
+        "Output length is not n+m-1 for two nonempty input sequences.",
+        "Floating rounding is silently made part of the canonical exact law."
+      ],
+      "root_review_status": "HOLD-CORE-MATH-DERIVABILITY",
+      "owner_question": "The coefficient law is universal, but likely expressible as D8 MAP/REDUCE plus exact arithmetic. Prefer a stable library theorem unless the owner proves an irreducible root.",
+      "dedup": {
+        "d1_d9": {
+          "snapshot_sha": "09d1d71c39d1484dfd005a5068dbb18b76f0f0d4",
+          "status": "PENDING"
+        },
+        "d10": {
+          "snapshot_blob_sha": "7e13e929338baeae9f16c2139d24b78e23ea1e03",
+          "status": "PENDING"
+        }
+      },
+      "ownership_border": "UNIVERSAL-BORDER: independent of execution substrate in principle; exact derivability and minimal-root status remain unproven.",
+      "blocked_source": "NOT-A-MIGRATION-BLOCK",
+      "status": "pending-review",
+      "selected": false,
+      "coordinate": null,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "ratification_effect": "NONE"
+    },
+    {
+      "proposal_id": "D10P-503117",
+      "semantic_name": "PHASE-UNWRAP",
+      "surface_uk": "розгорнути-фазу",
+      "surface_ukr": "відновити-неперервну-фазу",
+      "width": "D10",
+      "donor_provenance": "juv4uk/sens@c67db6cdd820dea8d3a110caed359507c0a2d7a4:knowledge/d10-crossdomain-math-signal-research-v1.json:112",
+      "donor_sources": [
+        {
+          "kind": "mathematical-reference",
+          "title": "NumPy phase unwrapping reference (behavioral cross-check only)",
+          "url": "https://numpy.org/doc/stable/reference/generated/numpy.unwrap.html"
+        }
+      ],
+      "observable_law": "Для скінченної послідовності точних раціональних фаз і додатного раціонального періоду залишити перше значення, далі для кожної сусідньої різниці вибрати конгруентну різницю мінімального абсолютного значення та накопичити її. За точного напівперіодного нічиєго випадку зберігати знак початкової різниці; порожній вхід повертає порожній результат. Це локальне правило найменшого стрибка, не твердження про фізичну траєкторію фази.",
+      "positive_witnesses": [
+        {
+          "input": "values=[0,1,2,-1,0], period=4",
+          "expected": "[0,1,2,3,4]"
+        },
+        {
+          "input": "values=[0,2,0], period=4",
+          "expected": "[0,2,0]"
+        },
+        {
+          "input": "empty sequence, period=4",
+          "expected": "[]"
+        }
+      ],
+      "falsifiers": [
+        "Reducing each phase independently modulo the period loses accumulated turns.",
+        "An exact half-period tie is resolved nondeterministically.",
+        "Physical phase continuity is claimed from the samples alone."
+      ],
+      "root_review_status": "HOLD-CORE-MATH-DERIVABILITY",
+      "owner_question": "Check if a library fold over exact differences and MODULO suffices; do not make floating-point rounding or a particular radio device part of semantic identity.",
+      "dedup": {
+        "d1_d9": {
+          "snapshot_sha": "09d1d71c39d1484dfd005a5068dbb18b76f0f0d4",
+          "status": "PENDING"
+        },
+        "d10": {
+          "snapshot_blob_sha": "7e13e929338baeae9f16c2139d24b78e23ea1e03",
+          "status": "PENDING"
+        }
+      },
+      "ownership_border": "UNIVERSAL-BORDER: independent of execution substrate in principle; exact derivability and minimal-root status remain unproven.",
+      "blocked_source": "NOT-A-MIGRATION-BLOCK",
+      "status": "pending-review",
+      "selected": false,
+      "coordinate": null,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "ratification_effect": "NONE"
+    }
+  ]
+}
