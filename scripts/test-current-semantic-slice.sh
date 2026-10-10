@@ -52,8 +52,14 @@ probes = {
     "witness-binding": "\nexact-quantity-arithmetic-witness\n",
     "rows-call": "\n(exact-quantity-arithmetic-rows)\n",
     "check-call": "\n(exact-quantity-arithmetic-check (exact-quantity-arithmetic-rows))\n",
+    "planck-record": "\n(scientific-constant-quantity si:defining-planck-constant)\n",
+    "cesium-record": "\n(scientific-constant-quantity si:defining-cesium-frequency)\n",
+    "quantity-product": "\n(quantity-product (scientific-constant-quantity si:defining-planck-constant) (scientific-constant-quantity si:defining-cesium-frequency))\n",
+    "one-second": "\n(make-quantity 1 (make-unit (make-dimension second 1)))\n",
+    "distance-product": "\n(quantity-product (scientific-constant-quantity si:defining-speed-of-light) (make-quantity 1 (make-unit (make-dimension second 1))))\n",
+    "quantity-quotient": "\n(quantity-quotient (quantity-product (scientific-constant-quantity si:defining-speed-of-light) (make-quantity 1 (make-unit (make-dimension second 1)))) (make-quantity 1 (make-unit (make-dimension second 1)))\n",
 }
-for stage, suffix in probes.items():
+  for stage in rows-binding check-binding witness-binding rows-call check-call planck-record cesium-record quantity-product one-second distance-product quantity-quotient; do
     (root / f"exact-quantity-{stage}-probe.lisp").write_text(
         prefix + suffix, encoding="utf-8"
     )
