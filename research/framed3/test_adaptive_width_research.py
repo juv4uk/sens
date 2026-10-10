@@ -81,5 +81,36 @@ class ТестиАдаптивногоПланувальника(unittest.TestCa
             кодек.декодувати(wire[:-1] + bytes((wire[-1] | 1,)))
 
 
+    def test_незалежний_повний_перебір_мінімального_плану(self):
+        # 1093 незалежних маленьких задач (довжини 0..6, ширини 1/2/3).
+        # Оракул сам перебирає всі розбиття, а не викликає DP кодека.
+        from functools import lru_cache
+        for count in range(7):
+            for widths in itertools.product((1, 2, 3), repeat=count):
+                @lru_cache(None)
+                def мінімум(i):
+                    if i == count:
+                        return 0
+                    best = 10 ** 30
+                    for j in range(i + 1, count + 1):
+                        segment = widths[i:j]
+                        n, payload = len(segment), (sum(segment) + 7) // 8
+                        costs = [2 + (n + 1) // 2 + payload]
+                        if len(set(segment)) == 1:
+                            costs.append(2 + payload)
+                        for period in range(2, 9):
+                            if (n >= 2 * period
+                                    and all(segment[t] == segment[t % period]
+                                            for t in range(n))):
+                                costs.append(2 + (period + 1) // 2 + payload)
+                        best = min(best, min(costs) + мінімум(j))
+                    return best
+
+                words = tuple("0" * width for width in widths)
+                plan = кодек.планувати(words)
+                # magic 3B + ULEB count 1B + u16 block count 2B
+                self.assertEqual(plan.усього_байтів, 6 + мінімум(0),
+                                 (widths, plan))
+
 if __name__ == "__main__":
     unittest.main()
