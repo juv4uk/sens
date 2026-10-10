@@ -57,6 +57,33 @@ jobs:
             --example current_en_vs_d1d8_cpu \
             --example startup_bench
 
+      - name: Verify phase attestation negative controls
+        run: |
+          python3 - <<'PY'
+          import os
+          from pathlib import Path
+          import subprocess
+          import sys
+
+          # Виконуємо саме чинний код атестації, а не окрему підроблену умову.
+          workflow = Path('.github/workflows/contract-11-8-phase-decomposition.yml').read_text()
+          guard = workflow.split('      - name: Verify generation and parity guards\n', 1)[1]
+          source = guard.split("          python3 - <<'PY'\n", 1)[1].split('\n          PY', 1)[0]
+          code = '\n'.join(line[10:] for line in source.splitlines()) + '\n'
+          environment = os.environ.copy()
+          environment.pop('PYTHONOPTIMIZE', None)
+
+          for label, command, env, expected in [
+              ('python -O', [sys.executable, '-O', '-c', code], environment, 'PHASE-DECOMPOSITION: BLOCKED'),
+              ('PYTHONOPTIMIZE=2', [sys.executable, '-c', code], {**environment, 'PYTHONOPTIMIZE': '2'}, 'PHASE-DECOMPOSITION: BLOCKED'),
+              ('відсутній JSON', [sys.executable, '-c', code], environment, 'відсутній JSON-результат'),
+          ]:
+              result = subprocess.run(command, env=env, text=True, capture_output=True, check=False)
+              if result.returncode == 0 or expected not in result.stderr:
+                  raise SystemExit(f'Негативний свідок {label} не відмовив як належить: код={result.returncode}; stderr={result.stderr!r}')
+              print(f'Негативний свідок {label}: підтверджена відмова')
+          PY
+
       - name: Replay current admitted phases
         shell: bash
         run: |
