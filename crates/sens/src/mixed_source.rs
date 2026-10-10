@@ -283,7 +283,24 @@ fn lift_expression(
                 });
             }
 
-            lifted[0] = lift_head(source, lifted[0].clone(), bound_names)?;
+            // In machine/Core4 exact-source mode, a computed callable may itself
+            // be a list (most notably an immediately-applied legacy W8 lambda).
+            // Its executable body must be lifted before the outer call is walked;
+            // otherwise nested D3 heads survive as Numbers and strict COND fails.
+            // Ordinary mixed-source mode stays byte-for-byte compatible.
+            if descend_legacy_machine_wrappers
+                && matches!(&lifted[0].kind, ExprKind::List(_))
+            {
+                lifted[0] = lift_expression(
+                    source,
+                    lifted[0].clone(),
+                    depth + 1,
+                    bound_names,
+                    descend_legacy_machine_wrappers,
+                )?;
+            } else {
+                lifted[0] = lift_head(source, lifted[0].clone(), bound_names)?;
+            }
 
             // Legacy W8 heads remain opaque in ordinary mixed source. The
             // machine-source mode descends only through non-QUOTE wrappers
@@ -1124,6 +1141,39 @@ mod tests {
         };
         assert!(matches!(&data_call[1].kind, ExprKind::Number(value, _) if *value == 100.0),
             "non-head decimal data remains unchanged");
+    }
+
+    
+    #[test]
+    fn machine_source_mode_lifts_an_immediately_applied_lambda_head() {
+        let source = "((00001000 (x) (110 ((101 x 0) (00000010 (00000001 ()))) ((101 0 0) (00000010 (00000001 (00000000)))) (00000001 (100 x))) 7)";
+
+        // The public mixed reader intentionally leaves the legacy wrapper opaque.
+        let ordinary = only(parse_mixed_exact_domain(source).expect("ordinary parse"));
+        let ExprKind::List(ordinary_call) = &ordinary.kind else { panic!("outer application"); };
+        let ExprKind::List(ordinary_lambda) = &ordinary_call[0].kind else { panic!("lambda head"); };
+        let ExprKind::List(ordinary_cond) = &ordinary_lambda[2].kind else { panic!("ordinary body"); };
+        assert!(matches!(&ordinary_cond[0].kind, ExprKind::Number(value, _) if *value == 110.0),
+            "ordinary mixed source must not silently opt into machine-source lifting");
+
+        let machine = only(
+            parse_mixed_exact_domain_machine_source("lib/machine/test-probe.lisp", source)
+                .expect("approved machine-source parse"),
+        );
+        let ExprKind::List(call) = &machine.kind else { panic!("outer application"); };
+        let ExprKind::List(lambda) = &call[0].kind else { panic!("lambda head"); };
+        let ExprKind::List(cond) = &lambda[2].kind else { panic!("lambda COND body"); };
+        assert!(matches!(&cond[0].kind, ExprKind::DomainIdentity(id)
+            if id.width() == 3 && id.packed_bits() == 0b110),
+            "nested executable COND must be an exact D3 identity");
+
+        let ExprKind::List(quoted) = &lambda[3].kind else { panic!("quoted body data"); };
+        assert!(matches!(&quoted[0].kind, ExprKind::Sid(_)), "W8 QUOTE remains opaque");
+        let ExprKind::List(quoted_data) = &quoted[1].kind else { panic!("quoted payload"); };
+        assert!(matches!(&quoted_data[0].kind, ExprKind::Number(value, _) if *value == 100.0),
+            "quoted 100 remains numeric data");
+        assert!(matches!(&call[1].kind, ExprKind::Number(value, _) if *value == 7.0),
+            "numeric call arguments remain data, not exact-width call heads");
     }
 
 }
