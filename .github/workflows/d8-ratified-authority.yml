@@ -22,6 +22,7 @@ on:
     branches: [main]
     paths:
       - "knowledge/d8-ratified.json"
+      - "knowledge/d8-v2-gauge-fixed-candidate.json"
       - "knowledge/d1-d8-foundation.json"
       - "knowledge/d1-d9-foundation.json"
       - "knowledge/d9-ratified.json"
@@ -30,7 +31,9 @@ on:
       - "contracts/d1-d9-foundation-ratification.lisp"
       - "language-contract.lisp"
       - "CURRENT.md"
+      - "docs/language-core.md"
       - "crates/sens/src/domain_identity.rs"
+      - "crates/sens/src/source_words.rs"
       - "scripts/check-d8-current-authority.py"
       - ".github/workflows/d8-ratified-authority.yml"
   workflow_dispatch:
