@@ -226,9 +226,23 @@
   (00001000 (left right)
     (x86-lower-bounded-pair-store-u64-forms left right)))
 
+; Private machine-form splice. This concatenates *instruction data* only; it
+; is deliberately not a second public Lisp APPEND implementation. The native
+; lowering path avoids calling Core4 APPEND while that library's independent
+; bootstrap/FASL repair remains deferred. Control is exact D1: ATOM(()) selects
+; the empty left-list case; no number/t/structural-empty coercion is used.
+(00001001 x86-concat-machine-form-lists
+  (00001000 (left right)
+    (00000111
+      ((00000010 left) right)
+      ((00000010 (00000001 ()))
+       (00000100
+         (00000101 left)
+         (x86-concat-machine-form-lists (00000110 left) right))))))
+
 (00001001 x86-lower-cons-car-u64-forms
   (00001000 (left right)
-    (00101001
+    (x86-concat-machine-form-lists
       (x86-lower-bounded-pair-store-u64-forms left right)
       (00100111
         (00100111
@@ -240,7 +254,7 @@
 
 (00001001 x86-lower-cons-cdr-u64-forms
   (00001000 (left right)
-    (00101001
+    (x86-concat-machine-form-lists
       (x86-lower-bounded-pair-store-u64-forms left right)
       (00100111
         (00100111
