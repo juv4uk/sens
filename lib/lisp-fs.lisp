@@ -50,12 +50,12 @@
       (00000111
         ((0100 (00000010 binding)) (00100111 (00000001 not-found) name))
         ((00000010 binding)  (00100111 (00000001 not-found) name))
-        (t
+        (1
           (10011100 ((address (00000101 binding)))
             (00000111
               ((00100001 (content-store-contains? (fs-objects fs) address))
                (00100111 (00000001 not-found) name))
-              (t
+              (1
                 ; map-get is a maybe-list, so unwrap exactly once. This
                 ; preserves a legitimately stored nil value.
                 ; map-get повертає maybe-список, тому знімаємо рівно одну
@@ -178,11 +178,11 @@
     (00000111
       ((0100 (00000010 packages)) (00100111 (00000001 accepted) store))
       ((00000010 packages)  (00100111 (00000001 accepted) store))
-      (t
+      (1
         (10011100 ((decision (fs-object-package-decision (00000101 packages))))
           (00000111
             ((00100001 (00000011 (00000101 decision) (00000001 accepted))) decision)
-            (t (fs-build-object-store
+            (1 (fs-build-object-store
                  (00000110 packages)
                  (content-store-put store (00101111 decision))))))))))
 
@@ -192,7 +192,7 @@
       
       ((00000010 addresses)  t)
       ((00100001 (content-store-contains? store (00000101 addresses))) (00000001 ()))
-      (t (fs-all-addresses-present? (00000110 addresses) store)))))
+      (1 (fs-all-addresses-present? (00000110 addresses) store)))))
 
 (00001001 fs-binding-addresses-present?
   (00001000 (entries store)
@@ -200,14 +200,14 @@
       
       ((00000010 entries)  t)
       ((00100001 (content-store-contains? store (00000110 (00000101 entries)))) (00000001 ()))
-      (t (fs-binding-addresses-present? (00000110 entries) store)))))
+      (1 (fs-binding-addresses-present? (00000110 entries) store)))))
 
 (00001001 fs-reconstruct-root
   (00001000 (root-package object-packages)
     (10011100 ((root-decision (fs-root-package-decision root-package)))
       (00000111
         ((00100001 (00000011 (00000101 root-decision) (00000001 accepted))) root-decision)
-        (t
+        (1
           (10011100 ((objects-decision
                   (fs-build-object-store object-packages (empty-content-store))))
             (00000111
@@ -220,7 +220,7 @@
                       (fs-package-field (00000001 bindings) root-package)
                       (00101111 objects-decision)))
                (00100111 (00000001 rejected) (00000001 missing-object)))
-              (t
+              (1
                 (00100111
                   (00000001 accepted)
                   (00100111
@@ -234,7 +234,7 @@
     (00000111
       
       ((00000010 entries)  bindings)
-      (t (fs-bindings-from-list
+      (1 (fs-bindings-from-list
            (00000110 entries)
            (01101110 (00000101 (00000101 entries)) (00000110 (00000101 entries)) bindings))))))
 
@@ -305,7 +305,7 @@
       ((10011010 (00000011 (fs-package-field (00000001 op) event) (00000001 root-commit))
             (00100001 (10110001 (00000010 (00101101 (00000001 root) event)))))
        (00100111 (00000001 rejected) (00000001 incomplete-root-commit)))
-      (t (00100111 (00000001 accepted) event)))))
+      (1 (00100111 (00000001 accepted) event)))))
 
 (00001001 fs-bindings-without
   (00001000 (entries name result)
@@ -314,7 +314,7 @@
       ((00000010 entries)  result)
       ((00100010 (00000101 (00000101 entries)) name)
        (fs-bindings-without (00000110 entries) name result))
-      (t
+      (1
         (fs-bindings-without
           (00000110 entries)
           name
@@ -332,7 +332,7 @@
     (10011100 ((decision (fs-journal-event-decision event)))
       (00000111
         ((00100001 (00000011 (00000101 decision) (00000001 accepted))) decision)
-        (t
+        (1
           (10011100 ((op (fs-package-field (00000001 op) event)))
             (00000111
               ((00000011 op (00000001 write))
@@ -345,7 +345,7 @@
                  (00000111
                    ((00100001 (content-store-contains? (fs-objects fs) address))
                     (00100111 (00000001 rejected) (00000001 missing-object)))
-                   (t
+                   (1
                      (00100111
                        (00000001 accepted)
                        (00100111
@@ -362,19 +362,19 @@
                  ((00100010 (fs-root-package fs)
                           (fs-package-field (00000001 root) event))
                   (00100111 (00000001 accepted) fs))
-                 (t (00100111 (00000001 rejected) (00000001 root-mismatch)))))
-              (t (00100111 (00000001 rejected) (00000001 unknown-event))))))))))
+                 (1 (00100111 (00000001 rejected) (00000001 root-mismatch)))))
+              (1 (00100111 (00000001 rejected) (00000001 unknown-event))))))))))
 
 (00001001 fs-journal-replay-onto
   (00001000 (journal fs)
     (00000111
       ((0100 (00000010 journal)) (00100111 (00000001 accepted) fs))
       ((00000010 journal)  (00100111 (00000001 accepted) fs))
-      (t
+      (1
         (10011100 ((decision (fs-journal-replay-event fs (00000101 journal))))
           (00000111
             ((00100001 (00000011 (00000101 decision) (00000001 accepted))) decision)
-            (t (fs-journal-replay-onto (00000110 journal) (00101111 decision)))))))))
+            (1 (fs-journal-replay-onto (00000110 journal) (00101111 decision)))))))))
 
 (00001001 fs-journal-replay
   (00001000 (journal)
@@ -398,7 +398,7 @@
       ((00000011 stage (00000001 objects)) t)
       ((00000011 stage (00000001 journal)) t)
       ((00000011 stage (00000001 root-pointer)) t)
-      (t (00000001 ())))))
+      (1 (00000001 ())))))
 
 (00001001 fs-recover-commit
   (00001000 (old-fs new-fs completed-stage)
@@ -407,16 +407,16 @@
        (00100111 (00000001 rejected) (00000001 unknown-commit-stage)))
       ((00000011 completed-stage (00000001 root-pointer))
        (00100111 (00000001 recovered) new-fs))
-      (t (00100111 (00000001 recovered) old-fs)))))
+      (1 (00100111 (00000001 recovered) old-fs)))))
 
 (00001001 fs-recover-root-package
   (00001000 (old-package candidate-package completed-stage)
     (00000111
       ((00100001 (00000011 completed-stage (00000001 root-pointer)))
        (00100111 (00000001 recovered) old-package))
-      (t
+      (1
         (10011100 ((decision (fs-root-package-decision candidate-package)))
           (00000111
             ((00000011 (00000101 decision) (00000001 accepted))
              (00100111 (00000001 recovered) candidate-package))
-            (t (00100111 (00000001 recovered) old-package (00000001 rejected-candidate)))))))))
+            (1 (00100111 (00000001 recovered) old-package (00000001 rejected-candidate)))))))))
