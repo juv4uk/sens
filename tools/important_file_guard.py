@@ -412,8 +412,14 @@ def main(argv: list[str]) -> int:
         command("cat-file", "-e", f"{base}^{{commit}}")
         command("cat-file", "-e", f"{head}^{{commit}}")
         command("merge-base", "--is-ancestor", base, head)
-        with open(CENSUS_PATH, encoding="utf-8") as census_file:
-            entries = census_entries(census_file.read())
+        census_mode = parse_tree_mode(
+            command("ls-tree", "-z", "--full-tree", head, "--", CENSUS_PATH),
+            CENSUS_PATH,
+        )
+        if census_mode not in ("100644:blob", "100755:blob"):
+            fail("CENSUS_NOT_REGULAR_GIT_BLOB: " + census_mode)
+        census_source = command("show", f"{head}:{CENSUS_PATH}").decode("utf-8", "strict")
+        entries = census_entries(census_source)
         changes = command(
             "diff", "--name-status", "-z", "--diff-filter=ACR",
             "--find-renames", "--find-copies", "--find-copies-harder", base, head,
