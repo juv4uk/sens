@@ -1,4 +1,4 @@
-use sens::{eval_program, load_core_library, lower_program, parse, ExprKind, Session};
+use sens::{eval_parsed_expressions, parse_mixed_exact_domain, eval_program, load_core_library, lower_program, parse, ExprKind, Session};
 use std::fs;
 use std::path::PathBuf;
 
@@ -7,11 +7,15 @@ fn repo_root() -> PathBuf {
 }
 
 fn load_lisp_file(path: &str, session: &mut Session) {
-    let path = repo_root().join(path);
-    let source = fs::read_to_string(&path)
-        .unwrap_or_else(|error| panic!("{} must exist: {error}", path.display()));
-    eval_program(&source, session)
-        .unwrap_or_else(|error| panic!("{} must load as ordinary sens: {error}", path.display()));
+    assert!(
+        path.starts_with("lib/machine/"),
+        "mixed exact-domain reader is reserved for machine-source fixtures: {path}"
+    );
+    let source = read(path);
+    let expressions = parse_mixed_exact_domain(&source)
+        .unwrap_or_else(|error| panic!("{path} must parse as mixed exact-domain machine source: {error}"));
+    eval_parsed_expressions(&expressions, session)
+        .unwrap_or_else(|error| panic!("{path} must load through the mixed exact-domain machine reader: {error}"));
 }
 
 #[test]
