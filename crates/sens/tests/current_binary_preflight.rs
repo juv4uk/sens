@@ -126,6 +126,22 @@ fn postcore_time_bootstrap_uses_current_lisp_macros() {
     let source = include_str!("../../../lib/time.lisp");
     let parsed = sens::parse(source).expect("time library syntax");
     for (index, expression) in parsed.iter().enumerate() {
+        if index + 1 == 24 {
+            // Isolate each executable dependency of the registry-driven peer macro
+            // before replaying the actual failing top-level call.
+            for (stage, probe) in [
+                ("nested-let", "(let ((peer-probe 7)) peer-probe)"),
+                ("CAR", "(00000101 (00000001 (1079 utc-now)))"),
+                ("CDR", "(00000110 (00000001 (1079 utc-now)))"),
+                ("CAR-of-CDR", "(00000101 (00000110 (00000001 (1079 utc-now))))"),
+                ("peer-group", "(my-postcore-peer-group 1079 my-postcore-stable-peer-projection)"),
+                ("environment-bindings", "(01001110)"),
+            ] {
+                sens::eval_program(probe, &mut session).unwrap_or_else(|error| panic!(
+                    "time peer-materialization dependency stage {stage} failed for {probe}: {error}"
+                ));
+            }
+        }
         eval_parsed_expressions(std::slice::from_ref(expression), &mut session)
             .unwrap_or_else(|error| panic!(
                 "time top-level form {} at source byte {} failed after Core4 bootstrap: {}",
