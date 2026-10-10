@@ -28,18 +28,26 @@
 (00001001 utf8-byte?
   (00001000 (b)
     (00000111
-      ((utf8-in-range? b 0 255)
-       (00011100 (00010011 b 1) 0))
-      ((00000010 (00000001 ())) (00000010 (00000001 ()))))))
+      ((utf8-in-range? b 0 255) 1
+       (00000111
+         ((00011100 (00010011 b 1) 0) 1 1)
+         ((00011100 (00010011 b 1) 0) 0 0)))
+      ((utf8-in-range? b 0 255) 0 0))))
 
 (00001001 utf8-all-bytes?
   (00001000 (bytes)
     (00000111
       ((00000010 bytes)
-       (00000011 bytes (00000001 ())))
-      ((utf8-byte? (00000101 bytes))
-       (utf8-all-bytes? (00000110 bytes)))
-      ((00000010 (00000001 ())) (00000010 (00000001 ()))))))
+       ()
+       (00000111
+         ((00000011 bytes (00000001 ())) (1) 1)
+         ((00000011 bytes (00000001 ())) (0) 0)))
+      ((00000010 bytes)
+       (0)
+       (00000111
+         ((utf8-byte? (00000101 bytes)) 1
+          (utf8-all-bytes? (00000110 bytes)))
+         ((utf8-byte? (00000101 bytes)) 0 0))))))
 
 (00001001 utf8-three-byte-second-ok?
   (00001000 (b1 b2)
@@ -58,8 +66,11 @@
 (00001001 utf8-two-continuations?
   (00001000 (b3 b4)
     (00000111
-      ((utf8-continuation-byte? b3) (utf8-continuation-byte? b4))
-      ((00000010 (00000001 ())) (00000010 (00000001 ()))))))
+      ((utf8-continuation-byte? b3) 1
+       (00000111
+         ((utf8-continuation-byte? b4) 1 1)
+         ((utf8-continuation-byte? b4) 0 0)))
+      ((utf8-continuation-byte? b3) 0 0))))
 
 (00001001 utf8-decode-onto
   (00001000 (bytes out)
