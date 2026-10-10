@@ -25,3 +25,15 @@ jobs:
         run: python3 research/framed3/research_codec.py
       - name: Перевірка відновлення слів, помилкових рамок і байтів T5
         run: python3 -m unittest discover -s research/framed3 -p 'test_*.py' -v
+      - name: Негативні свідки EOF без Python assert-оптимізації
+        run: python3 -O -m unittest discover -s research/framed3 -p 'test_trailing_closers_research.py' -v
+
+  domain-ladder-rust:
+    name: Ратифікований Rust D1–D9 reader проти відновлених закриттів
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Точний семантичний оракул Rust D2; не міняти T5
+        run: cargo test --manifest-path crates/sens/Cargo.toml --test trailing_d2_closers_research -- --nocapture
