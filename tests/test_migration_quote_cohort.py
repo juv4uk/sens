@@ -51,7 +51,7 @@ class QuoteCohort(unittest.TestCase):
         cls.text7 = module.build_text7(table, ARGS["text7"])
 
     def project(self, source):
-        resolver = module.Resolver(self.legacy, self.my, self.upper)
+        resolver = module.Resolver(self.legacy, self.my, self.upper, source_era="legacy")
         result = module.migrate_file(source, resolver, self.text7)
         return result, resolver.counts
 
@@ -104,6 +104,7 @@ class QuoteCohort(unittest.TestCase):
             command = [
                 sys.executable, str(SCRIPT), str(FIXTURES), "--out", str(out),
                 *[item for key, path in ARGS.items() for item in ("--" + key.replace("_", "-"), str(path))],
+                "--source-era", "legacy",  # Explicit historical W8 provenance.
                 "--report", str(report),
             ]
             result = subprocess.run(command, capture_output=True, text=True)
@@ -124,6 +125,11 @@ class QuoteCohort(unittest.TestCase):
             again = subprocess.run(command, capture_output=True, text=True)
             self.assertEqual(again.returncode, 2)
             self.assertEqual(emitted.read_bytes(), PHYSICAL.read_bytes())
+
+    def test_auto_mode_rejects_ambiguous_historical_w8_head(self):
+        resolver = module.Resolver(self.legacy, self.my, self.upper, source_era="auto")
+        with self.assertRaises(module.MigrationError):
+            module.migrate_file("(00000001 ())", resolver, self.text7)
 
     def test_corrupt_transport_never_becomes_an_executable_program(self):
         with self.assertRaises(module.SensT5Error):
