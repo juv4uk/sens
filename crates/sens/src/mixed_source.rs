@@ -10,7 +10,7 @@
 //! This gives active Core migration a mixed symbol + exact-domain path without
 //! teaching the compatibility parser to infer domains from historical bytes.
 
-use crate::syntax::{Expr, ExprKind, MAX_STRUCTURE_DEPTH};
+use crate::syntax::{Expr, ExprKind, Span, MAX_STRUCTURE_DEPTH};
 use crate::{parse_binary_source_words, DomainIdentity, ErrorKind, LanguageError};
 use std::collections::HashSet;
 use std::rc::Rc;
@@ -32,8 +32,16 @@ pub fn parse_mixed_exact_domain(source: &str) -> Result<Vec<Expr>, LanguageError
 /// to the approved machine-source loader boundary; it is not a global reader
 /// mode and does not reinterpret numbers, quoted data, or W8 heads as D8 laws.
 pub fn parse_mixed_exact_domain_machine_source(
+    path: &str,
     source: &str,
 ) -> Result<Vec<Expr>, LanguageError> {
+    if !path.starts_with("lib/machine/") || !path.ends_with(".lisp") {
+        return Err(LanguageError::new(
+            ErrorKind::Parse,
+            "machine-source exact-domain reader is restricted to lib/machine/**/*.lisp",
+            Span::default(),
+        ));
+    }
     parse_mixed_source(source, true)
 }
 
@@ -853,7 +861,7 @@ mod tests {
             "ordinary bridge keeps legacy W8 containers opaque");
 
         let machine = only(
-            parse_mixed_exact_domain_machine_source(executable)
+            parse_mixed_exact_domain_machine_source("lib/machine/test-probe.lisp", executable)
                 .expect("approved machine-source mixed parse"),
         );
         let ExprKind::List(machine_call) = &definition_body(&machine).kind else {
@@ -868,7 +876,7 @@ mod tests {
         let quoted_source =
             "(00001001 probe (00001000 (x) (00000001 (100 x))))";
         let quoted = only(
-            parse_mixed_exact_domain_machine_source(quoted_source)
+            parse_mixed_exact_domain_machine_source("lib/machine/test-probe.lisp", quoted_source)
                 .expect("machine source with historical quote"),
         );
         let ExprKind::List(quote_form) = &definition_body(&quoted).kind else {
@@ -883,7 +891,7 @@ mod tests {
         let number_data_source =
             "(00001001 probe (00001000 (x) (ordinary-list 100 x)))";
         let number_data = only(
-            parse_mixed_exact_domain_machine_source(number_data_source)
+            parse_mixed_exact_domain_machine_source("lib/machine/test-probe.lisp", number_data_source)
                 .expect("machine source numeric data"),
         );
         let ExprKind::List(data_call) = &definition_body(&number_data).kind else {
