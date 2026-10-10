@@ -234,16 +234,28 @@
          (x86-admission-wire-denominator-one? wire))
         ((00000010 (00000001 ())) (00000010 (00000001 (00000000))))))))
 
+; Inclusive integer comparisons must not route through Core4 <=/>=:
+; those compatibility helpers currently recurse through an unavailable legacy
+; list predicate. Compose exact numeric EQ, greater-than and less-than instead.
+(00001001 x86-admission-at-least?
+  (00001000 (value lower)
+    (00000111
+      ((00011100 value lower) (00000010 (00000001 ())))
+      ((00011011 value lower) (00000010 (00000001 ())))
+      ((00000010 (00000001 ())) (00000010 (00000001 (00000000)))))))
+
+(00001001 x86-admission-at-most?
+  (00001000 (value upper)
+    (00000111
+      ((00011100 value upper) (00000010 (00000001 ())))
+      ((00011010 value upper) (00000010 (00000001 ())))
+      ((00000010 (00000001 ())) (00000010 (00000001 (00000000)))))))
+
 (00001001 x86-admission-within-inclusive-integer-range?
   (00001000 (value lower upper)
-    ; Exact D1 comparisons are control; false is ATOM of a quoted non-empty list.
     (00000111
-      ((00011110 value lower)
-       (00000111
-         ((00011101 value upper)
-          (00000010 (00000001 ())))
-         ((00000010 (00000001 ()))
-          (00000010 (00000001 (00000000))))))
+      ((x86-admission-at-least? value lower)
+       (x86-admission-at-most? value upper))
       ((00000010 (00000001 ()))
        (00000010 (00000001 (00000000)))))))
 
