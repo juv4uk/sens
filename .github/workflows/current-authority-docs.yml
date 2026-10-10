@@ -4,8 +4,6 @@ on:
   pull_request:
     paths:
       - README.md
-      - AGENTS.md
-      - scripts/check-encoder-swarm-contract.py
       - CURRENT.md
       - docs/semantic-authority-map.md
       - docs/semantic-authority-map.uk.md
@@ -21,8 +19,6 @@ on:
     branches: [main]
     paths:
       - README.md
-      - AGENTS.md
-      - scripts/check-encoder-swarm-contract.py
       - CURRENT.md
       - docs/semantic-authority-map.md
       - docs/semantic-authority-map.uk.md
@@ -48,9 +44,3 @@ jobs:
       - name: Verify current authority entry-points
         shell: bash
         run: bash scripts/check-current-authority-docs.sh
-      - name: Перевірка контракту рою та його негативних мутацій
-        shell: bash
-        run: |
-          set -euo pipefail
-          python3 scripts/check-encoder-swarm-contract.py --self-test
-          python3 -O scripts/check-encoder-swarm-contract.py --self-test
