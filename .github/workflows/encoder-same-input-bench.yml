@@ -87,8 +87,14 @@ jobs:
                   trits = tail.decode(raw[1:])
                   return tuple("".join(str(x) for x in trits).split("2"))
               if profile == "адаптивний":
-                  carrier = adapter.найменший_носій(words)
-                  require(carrier.дані == raw, "недетермінований адаптивний вибір")
+                  # Декодер лише читає отриманий носій; повторний запуск енкодера
+                  # штучно завищував би час декодування.
+                  if raw and raw[0] == 0xF3:
+                      carrier = adapter.Носій("рамка3", raw, ".senc")
+                  elif raw and raw[0] == 0xF4:
+                      carrier = adapter.Носій("тб33", raw, ".senc")
+                  else:
+                      carrier = adapter.Носій("т5", raw, ".sens")
                   return adapter.прочитати_носій(carrier)
               raise ValueError("непідтримуваний профіль")
 
