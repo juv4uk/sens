@@ -47,11 +47,11 @@ def check(p,i,s,f,h,doc):
     assert p["schema"]=="d10-clock-radio-math-intake/v1"
     assert p["status"]=="SELECTED-RESEARCH-ONLY-UNRATIFIED"
     count=i["accounting"]["selected_semantic_candidates"]
-    assert count==645
-    assert p["accounting"]=={"before":count-4,"added":4,"after":count,"unplaced":count-256,"remaining":1024-count,"forced_coordinates_unchanged":256,"ratified":0}
+    assert count>=645
+    assert p["accounting"]=={"before":641,"added":4,"after":645,"unplaced":389,"remaining":379,"forced_coordinates_unchanged":256,"ratified":0}
     assert len(i["rows"])==count and len(i["sources"])>=1
     assert [r["semantic_name"] for r in p["selected_rows"]]==list(NAMES)
-    assert [r["semantic_name"] for r in i["rows"][-4:]]==list(NAMES)
+    assert [r["semantic_name"] for r in i["rows"][641:645]]==list(NAMES)
     assert len({r["stable_id"] for r in i["rows"]})==count
     assert len({r["semantic_name"] for r in i["rows"]})==count
     assert i["accounting"]=={"selected_semantic_candidates":count,"law_forced_coordinates":256,"unplaced_selected_candidates":count-256,"remaining_semantic_inventory":1024-count,"ratified_d10_residents":0}
@@ -62,7 +62,7 @@ def check(p,i,s,f,h,doc):
     assert f"D10 selected              {count}/1024" in doc
     assert f"unplaced                  {count-256}" in doc
     assert f"remaining                 {1024-count}" in doc
-    assert i["sources"][-1]=="knowledge/d10-clock-radio-math-selection-20261009.json"
+    assert "knowledge/d10-clock-radio-math-selection-20261009.json" in i["sources"]
     assert len(h["transitions"])>=3
     transition=next(t for t in h["transitions"] if t.get("id")=="d10.hobby.clock-radio.20261009")
     assert transition["added_stable_ids"]==[r["stable_id"] for r in p["selected_rows"]]
@@ -70,12 +70,12 @@ def check(p,i,s,f,h,doc):
     lower={str(x).upper() for z in f["domains"].values() for x in z["residents"].values()}
     assert not lower.intersection(NAMES)
     assert sum(r["coordinate"] is not None for r in i["rows"])==256
-    for proposal,row in zip(p["selected_rows"],i["rows"][-4:]):
+    for proposal,row in zip(p["selected_rows"],i["rows"][641:645]):
         assert proposal["semantic_name"]==row["semantic_name"] and proposal["stable_id"]==row["stable_id"]
         assert row["source_class"]=="HOBBY-CLOCK-RADIO-PRIMARY-20261009" and row["status"]=="SELECTED-RESEARCH-CANDIDATE"
         assert proposal["decision"]=="SELECT-D10-CANDIDATE"
         assert proposal["source_class"]==row["source_class"]
-        assert proposal["primary_url"]==row["primary_url"] and row["source_path"]==i["sources"][-1]
+        assert proposal["primary_url"]==row["primary_url"] and row["source_path"]=="knowledge/d10-clock-radio-math-selection-20261009.json"
         assert row["coordinate"] is None and row["coordinate_basis"]=="UNPLACED"
         assert row["ratified_resident"] is False and proposal["ratified_resident"] is False
         assert row["physical_t5_authorized"] is False and proposal["physical_t5_authorized"] is False
@@ -129,11 +129,11 @@ def adverse(p,i,s,f,h,doc):
         try:check(pp,ii,ss,f,hh,doc)
         except (AssertionError, ValueError, TransitionFailure):return
         raise AssertionError("adversarial metadata mutation not rejected")
-    reject(lambda p,i,s,h:i["rows"][-1].__setitem__("coordinate","1111111111"))
-    reject(lambda p,i,s,h:i["rows"][-1].__setitem__("ratified_resident",True))
+    reject(lambda p,i,s,h:i["rows"][644].__setitem__("coordinate","1111111111"))
+    reject(lambda p,i,s,h:i["rows"][644].__setitem__("ratified_resident",True))
     reject(lambda p,i,s,h:p["selected_rows"][-1].__setitem__("ratified_resident",True))
     reject(lambda p,i,s,h:i["rows"][4].__setitem__("behavior","FORGED"))
-    reject(lambda p,i,s,h:i["rows"][-1].__setitem__("semantic_name","DPB"))
+    reject(lambda p,i,s,h:i["rows"][644].__setitem__("semantic_name","DPB"))
     reject(lambda p,i,s,h:p["selected_rows"][0].__setitem__("primary_url","https://wrong.example"))
     reject(lambda p,i,s,h:i["sources"].pop())
     reject(lambda p,i,s,h:s["target"].__setitem__("selected_semantic_candidates",630))

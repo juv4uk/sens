@@ -28,10 +28,10 @@
     "width": 10,
     "capacity": 1024,
     "dense_target": 1024,
-    "selected_semantic_candidates": 645,
-    "remaining_semantic_candidates": 379,
+    "selected_semantic_candidates": 646,
+    "remaining_semantic_candidates": 378,
     "law_forced_coordinates": 256,
-    "unplaced_selected_candidates": 389,
+    "unplaced_selected_candidates": 390,
     "ratified_residents": 0
   },
   "first_tranche": {
@@ -392,5 +392,18 @@
     "ratified_added": 0,
     "base_inventory_blob_sha": "9b1c4984283d923516a618f9fc99dea247711857",
     "resulting_inventory_blob_sha": "259382f69460c6d5a5ba8b2b171fe13815d6916f"
+  },
+  "babbage_finite_difference_research_replay": {
+    "source": "knowledge/d10-babbage-reiter-hobby-selected-20261009.json",
+    "source_blob_sha": "4cf8359f34924015f2efca3ddba2df567b5b43db",
+    "selected": 1,
+    "previous_selected": 645,
+    "resulting_selected": 646,
+    "base_inventory_blob_sha": "259382f69460c6d5a5ba8b2b171fe13815d6916f",
+    "resulting_inventory_blob_sha": "ad2200c1d4e153d8efb0f390cc8680f0fb656b5b",
+    "coordinates_added": 0,
+    "ratified_added": 0,
+    "derivability": "PENDING-OWNER-REVIEW",
+    "duplicate_reiter_diagnosis": "NOT-SELECTED; pending ledger FINITE-MINIMAL-DIAGNOSES already covers minimal hitting-set semantics"
   }
 }

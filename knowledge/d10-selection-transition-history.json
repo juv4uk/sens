@@ -293,6 +293,35 @@
         "scripts/check_d10_hobby_clock_radio_selection.py",
         "scripts/check_d10_selection_transition_history.py"
       ]
+    },
+    {
+      "id": "d10.hobby.babbage.finite-difference-certificate.current-main.20261010",
+      "authority": "#4013 #4463; user-directed D10 research filling on current main",
+      "evidence": [
+        "#5003",
+        "knowledge/d10-babbage-reiter-hobby-selected-20261009.json",
+        "Babbage 1822 astronomical tables",
+        "https://en.wikisource.org/wiki/Page:Memoirs_of_Royal_Astronomical_Society_Volume_01.djvu/332"
+      ],
+      "previous_inventory_blob_sha": "259382f69460c6d5a5ba8b2b171fe13815d6916f",
+      "resulting_inventory_blob_sha": "ad2200c1d4e153d8efb0f390cc8680f0fb656b5b",
+      "added_stable_ids": [
+        "d10.hobby.babbage.exact-finite-difference-certificate.v1"
+      ],
+      "appended_sources": [
+        "knowledge/d10-babbage-reiter-hobby-selected-20261009.json"
+      ],
+      "coordinates_added": 0,
+      "ratified_added": 0,
+      "delta_selected": 1,
+      "previous_selected": 645,
+      "resulting_selected": 646,
+      "decision": "RESEARCH SELECTED only; no D10 physical T5 admission or coordinate; Core-Math derivability and owner ratification pending; no duplicate Reiter diagnosis",
+      "tests": [
+        "scripts/check_d10_selection_transition_history.py",
+        "scripts/check_d10_hobby_clock_radio_selection.py",
+        "scripts/check-d10-proposal-ledger.py"
+      ]
     }
   ]
 }
