@@ -47,6 +47,27 @@ jobs:
       - name: Run current-authority D1-D9 witness
         run: python3 scripts/research-4261-current-binary-authority.py
 
+      - name: Перевірити Foundation-0 і чинні D1–D9 за Python -O
+        run: |
+          set -euo pipefail
+          for script in scripts/research-2077-binary-word-law.py scripts/research-4261-current-binary-authority.py; do
+            for mode in -O -OO; do
+              if python3 "$mode" "$script" > /tmp/foundation-opt.log 2>&1; then
+                echo "Хибний PASS оптимізованого Python: $script" >&2
+                exit 1
+              fi
+              grep -q 'BLOCKED' /tmp/foundation-opt.log
+              ! grep -q 'PASS' /tmp/foundation-opt.log
+            done
+            for level in 1 2; do
+              if PYTHONOPTIMIZE="$level" python3 "$script" > /tmp/foundation-opt.log 2>&1; then
+                echo "Хибний PASS PYTHONOPTIMIZE: $script" >&2
+                exit 1
+              fi
+              grep -q 'BLOCKED' /tmp/foundation-opt.log
+              ! grep -q 'PASS' /tmp/foundation-opt.log
+            done
+          done
       - name: Publish invariant summary
         run: |
           {
