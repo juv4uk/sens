@@ -25,7 +25,7 @@ jobs:
         run: |
           set -euo pipefail
           actual="$(git hash-object lib/core4.lisp)"
-          test "$actual" = "27a23e9248b1b065648fd4a5889481c079e5f427"
+          test "$actual" = "23fef3b68b290a0e1fd0a53020e1d9ec1b1feddd"
           echo "CORE4_SOURCE_BLOB=$actual"
       - name: Regenerate and validate FASL plus time/process peer replay
         shell: bash
