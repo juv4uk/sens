@@ -36,30 +36,35 @@
   (00001000 (reason payload)
     (00100111 (00000001 invalid) reason payload)))
 
+; Contract 11.8 incremental migration (#5029): the shape/classifier layer below
+; returns exact D1 PredicateBit for predicates (1 YES, 0 NO); a bare () is
+; structural data, never a predicate or truthiness fallback. D3 ATOM/CONS/EQ
+; are used as exact-D1 producers at the historical mechanism boundary.
+; Remaining higher-level reasoning clauses are held for independent migration.
+
 (00001001 result-tagged?
   (00001000 (result)
     (00000111
-      ((00000010 result) () (00000001 ()))
-      ((00000010 result) (1) (00000001 ()))
-      ((00000011 (00000101 result) (00000001 proved)) t)
-      ((00000011 (00000101 result) (00000001 unknown)) t)
-      ((00000011 (00000101 result) (00000001 partial)) t)
-      ((00000011 (00000101 result) (00000001 blocked)) t)
-      ((00000011 (00000101 result) (00000001 disputed)) t)
-      ((00000011 (00000101 result) (00000001 invalid)) t)
-      (t (00000001 ())))))
+      ((00000010 result) (00000010 (00000100 (00000001 ()) (00000001 ()))))
+      ((00000011 (00000101 result) (00000001 proved)) (00000010 (00000001 ())))
+      ((00000011 (00000101 result) (00000001 unknown)) (00000010 (00000001 ())))
+      ((00000011 (00000101 result) (00000001 partial)) (00000010 (00000001 ())))
+      ((00000011 (00000101 result) (00000001 blocked)) (00000010 (00000001 ())))
+      ((00000011 (00000101 result) (00000001 disputed)) (00000010 (00000001 ())))
+      ((00000011 (00000101 result) (00000001 invalid)) (00000010 (00000001 ())))
+      ((00000010 (00000001 ())) (00000010 (00000100 (00000001 ()) (00000001 ())))))))
 
 (00001001 result-status
   (00001000 (result)
     (00000111
       ((result-tagged? result) (00000101 result))
-      (t (00000001 ())))))
+      ((00000010 (00000001 ())) (00000001 ())))))
 
 (00001001 result-payload
   (00001000 (result)
     (00000111
       ((result-tagged? result) (00000110 result))
-      (t (00000001 ())))))
+      ((00000010 (00000001 ())) (00000001 ())))))
 
 ; Proper-list validation follows the same atom-first shape as
 ; knowledge-proper-list?: `eq` is an atom operation, so a pair must never be
@@ -67,22 +72,17 @@
 (00001001 result-proper-list?
   (00001000 (value)
     (00000111
-      ((00000010 value) () (00000111
-         ((00000011 value (00000001 ())) t)
-         (t (00000001 ()))))
-      ((00000010 value) (1) (00000111
-         ((00000011 value (00000001 ())) t)
-         (t (00000001 ()))))
-      (t (result-proper-list? (00000110 value))))))
+      ((00000010 value) (00000011 value (00000001 ())))
+      ((00000010 (00000001 ())) (result-proper-list? (00000110 value))))))
 
 ; The reserved negation head: `not?` (predicate spelling since #1444) or the
 ; historical `not`.
 (00001001 result-not-head?
   (00001000 (head)
     (00000111
-      ((00000011 head (00000001 not?)) t)
-      ((00000011 head (00000001 not)) t)
-      (t (00000001 ())))))
+      ((00000011 head (00000001 not?)) (00000010 (00000001 ())))
+      ((00000011 head (00000001 not)) (00000010 (00000001 ())))
+      ((00000010 (00000001 ())) (00000010 (00000100 (00000001 ()) (00000001 ())))))))
 
 ; Minimal standalone goal validation for the observation adapter. Ordinary
 ; predicate goals require a symbol head and a proper list. The one reserved
