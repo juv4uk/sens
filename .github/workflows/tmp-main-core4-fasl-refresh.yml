@@ -1,0 +1,44 @@
+name: TEMP refresh current-main Core4 FASL
+
+on:
+  push:
+    branches:
+      - fix/main-core4-fasl-refresh-20261010-r4
+
+permissions:
+  contents: write
+
+jobs:
+  refresh:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: ${{ github.ref }}
+          fetch-depth: 0
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Verify exact current-main Core4 source blob
+        run: |
+          set -euo pipefail
+          actual="$(git hash-object lib/core4.lisp)"
+          test "$actual" = "21b106f9fcf748b5861d06c3f626a4762eefcdb9"
+          echo "CORE4_SOURCE_BLOB=$actual"
+      - name: Regenerate and verify the committed FASL
+        run: |
+          set -euo pipefail
+          cargo run --locked --release -p sens-cli --bin gen-fasl -- lib/core4.lisp lib/core4.lisp.fasl
+          cargo test --locked -p sens --test core_fasl_freshness -- --nocapture
+      - name: Commit only the generated FASL
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add lib/core4.lisp.fasl
+          if git diff --cached --quiet; then
+            echo "FASL already matches current Core4 source"
+            exit 0
+          fi
+          git commit -m "fix(fasl): refresh current-main Core4 binary"
+          git push origin "HEAD:${GITHUB_REF_NAME}"
