@@ -36,7 +36,7 @@ class D10RawNotResidents(unittest.TestCase):
         result = mod.validate(*evidence())
         donor = result["historical_alternate_head_donor"]
         self.assertEqual(donor["path"], "lib/reason.lisp")
-        self.assertEqual(donor["blob_sha"], "dadc52a2f40f2f30ad77642898afb81980044c08")
+        self.assertEqual(donor["blob_sha"], "906f4513d4e06289aa22bd8fe1273ebd050f53c6")
         self.assertEqual(donor["source_head"], "00001011")
         self.assertEqual(donor["top_level_definitions_observed"], 37)
         self.assertEqual(donor["semantic_meanings_selected_from_history"], 0)
