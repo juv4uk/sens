@@ -211,22 +211,25 @@
 ; never from human decimal presentation.  A reduced exact number is an
 ; integer exactly when its canonical denominator is 1.  Non-number values
 ; have no #q2: prefix and therefore fail closed before numeric comparisons.
+; Use ratified D9 string identities here. The old W8 compatibility
+; string predicates produce pair-shaped (0)/(1) answers, which strict D3 COND
+; must never consume as PredicateBit controls.
 (00001001 x86-admission-wire-denominator-one?
   (00001000 (text)
     (110
-      ((00111100 text) (010 (00000001 (00000000))))
-      ((101 (00111111 text) "/")
+      ((110011100 text) (010 (00000001 (00000000))))
+      ((101 (110101011 text) "/")
        ((00001000 (rest)
          (110
-           ((00111100 rest) (010 (00000001 (00000000))))
-           ((101 (00111111 rest) "1")
+           ((110011100 rest) (010 (00000001 (00000000))))
+           ((101 (110101011 rest) "1")
             (110
-              ((00111100 (01000000 rest)) (010 (00000001 ())))
+              ((110011100 (110011101 rest)) (010 (00000001 ())))
               ((101 0 0) (010 (00000001 (00000000))))))
            ((101 0 0) (010 (00000001 (00000000))))))
-        (01000000 text)))
+        (110011101 text)))
       ((101 0 0)
-       (x86-admission-wire-denominator-one? (01000000 text))))))
+       (x86-admission-wire-denominator-one? (110011101 text))))))
 
 (00001001 x86-admission-exact-integer?
   (00001000 (value)
