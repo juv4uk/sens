@@ -16,5 +16,5 @@
   "status": "ACTIVE",
   "generation": "unknown",
   "axis": "execution-ladder/structural-transmission-cost",
-  "reproduce": "python3 benchmarks/execution-ladder-objective/run.py benchmarks/execution-ladder-conformance/artifacts/bounded-d1-d3.jsonl --out /tmp/execution-ladder-objective.json"
+  "reproduce": "cargo build --locked --release -p sens --example execution_ladder_bounded_probe && python3 benchmarks/execution-ladder-conformance/generate_bounded.py --helper target/release/examples/execution_ladder_bounded_probe --upstream-sha "$(git rev-parse HEAD)" --out /tmp/bounded-d1-d3-current.jsonl && python3 benchmarks/execution-ladder-conformance/validate.py /tmp/bounded-d1-d3-current.jsonl && python3 benchmarks/execution-ladder-objective/run.py /tmp/bounded-d1-d3-current.jsonl --out /tmp/execution-ladder-objective.json"
 }
