@@ -1,4 +1,4 @@
-use sens::{eval_program, load_core_library, Session};
+use sens::{eval_parsed_expressions, eval_program, load_core_library, parse_mixed_exact_domain_machine_source, Session};
 use std::fs;
 use std::path::PathBuf;
 
@@ -13,7 +13,10 @@ fn encoder_session() -> Session {
 
     let mut session = Session::default();
     load_core_library(&mut session).expect("core must bootstrap before machine encoder");
-    eval_program(&source, &mut session).expect("x86-64 encoder must load as ordinary sens");
+    let expressions = parse_mixed_exact_domain_machine_source("lib/machine/encoding/x86-64.lisp", &source)
+        .expect("x86-64 encoder must parse through the exact-domain machine-source reader");
+    eval_parsed_expressions(&expressions, &mut session)
+        .expect("x86-64 encoder must load through the exact-domain machine-source reader");
     session
 }
 
@@ -29,7 +32,10 @@ fn admitted_encoder_session() -> Session {
     let path = repo_root().join("lib/machine/admission/x86-64.lisp");
     let source = fs::read_to_string(&path)
         .unwrap_or_else(|error| panic!("{} must exist: {error}", path.display()));
-    eval_program(&source, &mut session).expect("x86-64 admission must load over encoder");
+    let expressions = parse_mixed_exact_domain_machine_source("lib/machine/admission/x86-64.lisp", &source)
+        .expect("x86-64 admission must parse through the exact-domain machine-source reader");
+    eval_parsed_expressions(&expressions, &mut session)
+        .expect("x86-64 admission must load through the exact-domain machine-source reader");
     session
 }
 
@@ -154,10 +160,14 @@ fn lisp_encodes_ret_to_exact_machine_byte() {
 #[test]
 fn lisp_encodes_mov_eax_imm32_little_endian() {
     let mut session = encoder_session();
-    assert_eq!(
-        eval_bytes("(x86-encode-mov-eax-imm32 42)", &mut session),
-        "(184 42 0 0 0)"
-    );
+    for (source, expected) in [
+        ("(x86-encode-mov-eax-imm32 0)", "(184 0 0 0 0)"),
+        ("(x86-encode-mov-eax-imm32 42)", "(184 42 0 0 0)"),
+        ("(x86-encode-mov-eax-imm32 305419896)", "(184 120 86 52 18)"),
+        ("(x86-encode-mov-eax-imm32 4294967295)", "(184 255 255 255 255)"),
+    ] {
+        assert_eq!(eval_bytes(source, &mut session), expected, "source: {source}");
+    }
 }
 
 #[test]
