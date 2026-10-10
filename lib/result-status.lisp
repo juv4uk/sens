@@ -47,19 +47,19 @@
       ((00000011 (00000101 result) (00000001 blocked)) t)
       ((00000011 (00000101 result) (00000001 disputed)) t)
       ((00000011 (00000101 result) (00000001 invalid)) t)
-      (t (00000001 ())))))
+      (1 (00000001 ())))))
 
 (00001001 result-status
   (00001000 (result)
     (00000111
       ((result-tagged? result) (00000101 result))
-      (t (00000001 ())))))
+      (1 (00000001 ())))))
 
 (00001001 result-payload
   (00001000 (result)
     (00000111
       ((result-tagged? result) (00000110 result))
-      (t (00000001 ())))))
+      (1 (00000001 ())))))
 
 ; Proper-list validation follows the same atom-first shape as
 ; knowledge-proper-list?: `eq` is an atom operation, so a pair must never be
@@ -70,8 +70,8 @@
       
       ((00000010 value)  (00000111
          ((00000011 value (00000001 ())) t)
-         (t (00000001 ()))))
-      (t (result-proper-list? (00000110 value))))))
+         (1 (00000001 ()))))
+      (1 (result-proper-list? (00000110 value))))))
 
 ; The reserved negation head: `not?` (predicate spelling since #1444) or the
 ; historical `not`.
@@ -80,7 +80,7 @@
     (00000111
       ((00000011 head (00000001 not?)) t)
       ((00000011 head (00000001 not)) t)
-      (t (00000001 ())))))
+      (1 (00000001 ())))))
 
 ; Minimal standalone goal validation for the observation adapter. Ordinary
 ; predicate goals require a symbol head and a proper list. The one reserved
@@ -97,8 +97,8 @@
       ((result-not-head? (00000101 goal))
        (00000111
          ((00011100 (00101000 goal) 2)  (result-goal? (00101111 goal)))
-         (t (00000001 ()))))
-      (t t))))
+         (1 (00000001 ()))))
+      (1 t))))
 
 ; `(not? goal)` is the explicit logical opposite used by the knowledge layer.
 ; A well-shaped top-level negative query asks about its positive counterpart;
@@ -108,13 +108,13 @@
     (00000111
       ((00100001 (result-goal? goal)) (00000001 ()))
       ((result-not-head? (00000101 goal)) t)
-      (t (00000001 ())))))
+      (1 (00000001 ())))))
 
 (00001001 result-opposite-goal
   (00001000 (goal)
     (00000111
       ((result-negated-goal? goal) (00101111 goal))
-      (t (00100111 (00000001 not?) goal)))))
+      (1 (00100111 (00000001 not?) goal)))))
 
 ; Observe one reasoning question without information collapse.
 ; - positive proof(s) => proved(goal, all-results)
@@ -134,7 +134,7 @@
     (00000111
       ((00100001 (result-goal? goal))
        (make-invalid (00000001 invalid-goal) goal))
-      (t
+      (1
        (10011101 ((opposite (result-opposite-goal goal))
               (index (reason-ensure-index rules-or-index))
               (positive-results
@@ -162,7 +162,7 @@
             (make-proved goal positive-results))
            ((10110001 (00000010 opposite-results))
             (make-proved opposite opposite-results))
-           (t (00000001 ()))))))))
+           (1 (00000001 ()))))))))
 
 ; Knowledge-module adapter. Validation precedes lookup: malformed input is an
 ; `invalid` observation even when the named module does not exist. If a
@@ -178,6 +178,6 @@
        (make-invalid (00000001 invalid-goal) goal))
       ((01111110 module-name)
        (reason-observe goal (01111111 module-name)))
-      (t
+      (1
        (make-blocked
          (00100111 (00000001 module-not-found) module-name))))))
