@@ -351,6 +351,36 @@
         "scripts/check-d10-proposal-ledger.py",
         "tests/test_d10_proposal_ledger_growth.py"
       ]
+    },
+    {
+      "id": "d10.math.unique-bounded-modular-lift.current-main.20261011",
+      "authority": "#4013 #4463; owner-directed D10 research fill",
+      "evidence": [
+        "knowledge/d10-unique-bounded-modular-lift-20261009.json",
+        "tests/oracles/d10_unique_bounded_modular_lift_chez.ss",
+        "tests/test_d10_unique_bounded_modular_lift.py",
+        "https://numpy.org/doc/stable/reference/generated/numpy.unwrap.html"
+      ],
+      "previous_inventory_blob_sha": "7e13e929338baeef9b16c2139d24b78e23ea1e03",
+      "resulting_inventory_blob_sha": "642af08366c4c09e5986c7648b3bba86806ac168",
+      "added_stable_ids": [
+        "d10.math.unique-bounded-modular-lift.20261011"
+      ],
+      "appended_sources": [
+        "knowledge/d10-unique-bounded-modular-lift-20261009.json"
+      ],
+      "coordinates_added": 0,
+      "ratified_added": 0,
+      "delta_selected": 1,
+      "previous_selected": 647,
+      "resulting_selected": 648,
+      "decision": "RESEARCH selection only, pending owner: no bit coordinate or D10 ratification; exact arithmetic derivability/Core-vs-library remains review",
+      "tests": [
+        "python3 scripts/check_d10_selection_transition_history.py --self-test",
+        "python3 scripts/check-d10-proposal-ledger.py --self-test",
+        "python3 scripts/check_d10_unique_bounded_modular_lift.py",
+        "python3 -m unittest tests/test_d10_unique_bounded_modular_lift.py"
+      ]
     }
   ]
 }
