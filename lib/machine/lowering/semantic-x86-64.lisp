@@ -541,7 +541,7 @@
 
 (00001001 x86-encode-current-zerop-bit
   (00001000 (width bits value)
-    (10011100
+    (let
       ((forms (x86-lower-current-zerop-u64-forms width bits value)))
       (00000111
         ((00100010 forms (00000001 unsupported-current-domain-zerop-u64))
