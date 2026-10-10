@@ -23,6 +23,8 @@ import sys
 from pathlib import Path
 
 SCHEMA = "sens-t5-migration-inventory/v1"
+# Незмінна база цього зрізу; перегляд/re-pin потребує окремого PR і рев'ю.
+PINNED_BASE_SHA = "33bd5a32877f63de78eee28b0f97ea629e83a4fa"
 
 EXT = {".rs", ".py", ".sh", ".yml", ".yaml", ".toml"}
 EXCLUDE_PREFIXES = (
@@ -255,6 +257,8 @@ def validate_manifest_provenance(
     pin = next(iter(pins))
     if not isinstance(pin, str) or not re.fullmatch(r"[0-9a-f]{40}", pin):
         return False, "base_sha must be one full lowercase 40-hex Git commit"
+    if pin != PINNED_BASE_SHA:
+        return False, f"unexpected provenance pin: {pin}; expected {PINNED_BASE_SHA}"
     exists = subprocess.run(
         ["git", "-C", str(root), "cat-file", "-e", f"{pin}^{{commit}}"],
         capture_output=True, text=True, check=False,
