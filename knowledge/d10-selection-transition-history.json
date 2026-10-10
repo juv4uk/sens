@@ -435,6 +435,55 @@
         "scripts/check-d10-proposal-ledger.py",
         "scripts/check-d10-v1-semantic-inventory.py"
       ]
+    },
+    {
+      "id": "d10.existing.crossdiscipline.harvest-b.20261011",
+      "authority": "#4013 #4463 direct request to fill D10 from existing research",
+      "evidence": [
+        "knowledge/d10-forth-circular-arc-v1.json",
+        "knowledge/d10-ground-congruence-closure-research-20261009.json",
+        "knowledge/d10-astrophoto-exact-pinhole-research-20261009.json",
+        "knowledge/d10-crossrepo-chess-law-proposals-20261009.json",
+        "knowledge/d10-linguistic-law-intake-20261009.json",
+        "knowledge/d10-music-enharmonic-primary-review-v1.json",
+        "knowledge/d10-interlisp-dwim-safe-suggestion-v1.json"
+      ],
+      "previous_inventory_blob_sha": "404ac2a9cfdc817ed676d8137522981cd837ce3e",
+      "resulting_inventory_blob_sha": "04a2e7c016f84b185ea74a5dcfa0b22c181f1c0e",
+      "added_stable_ids": [
+        "d10.harvest.existing.circular-half-open-contains.20261011",
+        "d10.harvest.existing.ground-congruence-closure-partition.20261011",
+        "d10.harvest.existing.pinhole-image-project.20261011",
+        "d10.harvest.existing.pixel-to-camera-ray.20261011",
+        "d10.harvest.existing.alternating-zero-sum-backup.20261011",
+        "d10.harvest.existing.chess-castling-rights-transition.20261011",
+        "d10.harvest.existing.stress-syllable-transfer.20261011",
+        "d10.harvest.existing.contextual-longest-transliterate.20261011",
+        "d10.hobby.music.enharmonic-spelling-distinct.v1",
+        "d10.hobby.music.notated-chromatic-interval.v1",
+        "d10.harvest.existing.unique-surface-correction-suggestion.20261011"
+      ],
+      "appended_sources": [
+        "knowledge/d10-forth-circular-arc-v1.json",
+        "knowledge/d10-ground-congruence-closure-research-20261009.json",
+        "knowledge/d10-astrophoto-exact-pinhole-research-20261009.json",
+        "knowledge/d10-crossrepo-chess-law-proposals-20261009.json",
+        "knowledge/d10-linguistic-law-intake-20261009.json",
+        "knowledge/d10-music-enharmonic-primary-review-v1.json",
+        "knowledge/d10-interlisp-dwim-safe-suggestion-v1.json",
+        "knowledge/d10-existing-evidence-harvest-20261011-b.json"
+      ],
+      "coordinates_added": 0,
+      "ratified_added": 0,
+      "delta_selected": 11,
+      "previous_selected": 658,
+      "resulting_selected": 669,
+      "decision": "Research selection only; owner review on derivability; ratified=0 and new coordinate count=0",
+      "tests": [
+        "scripts/check_d10_selection_transition_history.py",
+        "scripts/check-d10-proposal-ledger.py",
+        "scripts/check-d10-v1-semantic-inventory.py"
+      ]
     }
   ]
 }

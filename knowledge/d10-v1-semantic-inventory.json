@@ -8,10 +8,10 @@
   "capacity": 1024,
   "current_foundation": "#4008 / Contract 11.8 / D1-D9",
   "accounting": {
-    "selected_semantic_candidates": 658,
+    "selected_semantic_candidates": 669,
     "law_forced_coordinates": 256,
-    "unplaced_selected_candidates": 402,
-    "remaining_semantic_inventory": 366,
+    "unplaced_selected_candidates": 413,
+    "remaining_semantic_inventory": 355,
     "ratified_d10_residents": 0
   },
   "rules": [
@@ -15663,6 +15663,1269 @@
         "behavioral_root": "Typed input-output candidate; primitive minimality still subject to review"
       },
       "derivability": "PENDING-OWNER-REVIEW; expressible with lower-level constructions; not an asserted primitive"
+    },
+    {
+      "stable_id": "d10.harvest.existing.circular-half-open-contains.20261011",
+      "semantic_name": "CIRCULAR-HALF-OPEN-CONTAINS",
+      "surface_uk": "в-циклічній-дузі?",
+      "surface_ukr": "належить-напіввідкритій-дузі?",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "proposal_status": "pending-owner-review",
+      "source_class": "EXISTING-D10-CROSSDISCIPLINE-HARVEST-20261011",
+      "relation_class": "TYPED-OBSERVABLE-EXACT-LAW",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "ratified_resident": false,
+      "physical_t5_authorized": false,
+      "arity": null,
+      "argument_shape": "(test:int, start:int, end:int, modulus:int>=2) -> 1-bit yes/no",
+      "result_shape": "See pinned donor dossier",
+      "behavior": "If start<end, return start<=test<end. If start>end, return test>=start OR test<end. If start==end, return NO, not whole ring. This is explicit-modulus, exact rational-free generalization of Forth WITHIN for canonical residues. It must not wrap invalid out-of-domain inputs silently.",
+      "positive_witnesses": [
+        {
+          "input": [
+            250,
+            240,
+            16,
+            256
+          ],
+          "result": 1,
+          "reason": "wraps 255→0; high segment"
+        },
+        {
+          "input": [
+            10,
+            240,
+            16,
+            256
+          ],
+          "result": 1,
+          "reason": "wraps 255→0; low segment"
+        },
+        {
+          "input": [
+            5,
+            0,
+            10,
+            256
+          ],
+          "result": 1,
+          "reason": "nonwrap half-open interval"
+        },
+        {
+          "input": [
+            4095,
+            4088,
+            8,
+            4096
+          ],
+          "result": 1,
+          "reason": "AS5600-like wrap source motivation, not device inference"
+        }
+      ],
+      "falsifiers": [
+        {
+          "input": [
+            16,
+            240,
+            16,
+            256
+          ],
+          "result": 0,
+          "why": "End exclusive"
+        },
+        {
+          "input": [
+            100,
+            240,
+            16,
+            256
+          ],
+          "result": 0,
+          "why": "Middle gap must be excluded"
+        },
+        {
+          "input": [
+            7,
+            7,
+            7,
+            256
+          ],
+          "result": 0,
+          "why": "Equal bounds are empty, not whole ring"
+        },
+        {
+          "input": [
+            10,
+            0,
+            10,
+            256
+          ],
+          "result": 0,
+          "why": "Upper boundary excluded"
+        },
+        {
+          "input": [
+            256,
+            240,
+            16,
+            256
+          ],
+          "result": "ERROR",
+          "why": "Out-of-domain input rejected rather than silently masked"
+        },
+        {
+          "input": [
+            0,
+            0,
+            1,
+            1
+          ],
+          "result": "ERROR",
+          "why": "Modulus too small"
+        }
+      ],
+      "source_path": "knowledge/d10-forth-circular-arc-v1.json",
+      "source_git_blob": "04c4b30672c4bfefc096c28933b3469b0832fd9b",
+      "provenance": [
+        "#4013",
+        "#4463",
+        "#4896",
+        "knowledge/d10-forth-circular-arc-v1.json"
+      ],
+      "dedup": {
+        "d1_d9_foundation_sha": "09d1d71c39d1484dfd005a5068dbb18b76f0f0d4",
+        "prior_d10_sha": "404ac2a9cfdc817ed676d8137522981cd837ce3e",
+        "exact_name": "NO-MATCH",
+        "scope": "Typed law checked for distinct observable contract; primitive-vs-derived status unresolved"
+      },
+      "derivability": "PENDING-OWNER-REVIEW; no claim this law requires a primitive ISA resident"
+    },
+    {
+      "stable_id": "d10.harvest.existing.ground-congruence-closure-partition.20261011",
+      "semantic_name": "GROUND-CONGRUENCE-CLOSURE-PARTITION",
+      "surface_uk": "зімкнути-рівності-термів",
+      "surface_ukr": "найменше-конгруентне-замикання-основних-термів",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "proposal_status": "pending-owner-review",
+      "source_class": "EXISTING-D10-CROSSDISCIPLINE-HARVEST-20261011",
+      "relation_class": "TYPED-OBSERVABLE-EXACT-LAW",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "ratified_resident": false,
+      "physical_t5_authorized": false,
+      "arity": null,
+      "argument_shape": "nodes topological DAG ids, single fixed symbol arity, equality pairs and queries; no variables, quantifiers, rewriting, host effects, numeric semantics, structural D2 or device state",
+      "result_shape": "lexicographically stable partition classes plus ordered entailed booleans",
+      "behavior": "Given finite acyclic ground term nodes with uninterpreted symbols, equations, and equality queries: return least equivalence relation containing the equations and closed under functions with equal symbols and pointwise equal arguments; booleans represent logical entailment, NOT proof of disequality.",
+      "positive_witnesses": [
+        {
+          "name": "same-symbol congruence and unlike-symbol negative",
+          "input": {
+            "nodes": [
+              {
+                "id": "a",
+                "symbol": "A",
+                "args": []
+              },
+              {
+                "id": "b",
+                "symbol": "B",
+                "args": []
+              },
+              {
+                "id": "fa",
+                "symbol": "F",
+                "args": [
+                  "a"
+                ]
+              },
+              {
+                "id": "fb",
+                "symbol": "F",
+                "args": [
+                  "b"
+                ]
+              },
+              {
+                "id": "ga",
+                "symbol": "G",
+                "args": [
+                  "a"
+                ]
+              }
+            ],
+            "equalities": [
+              [
+                "a",
+                "b"
+              ]
+            ],
+            "queries": [
+              [
+                "fa",
+                "fb"
+              ],
+              [
+                "fa",
+                "ga"
+              ],
+              [
+                "a",
+                "b"
+              ]
+            ]
+          },
+          "output": {
+            "classes": [
+              [
+                "a",
+                "b"
+              ],
+              [
+                "fa",
+                "fb"
+              ],
+              [
+                "ga"
+              ]
+            ],
+            "entailed": [
+              true,
+              false,
+              true
+            ]
+          }
+        },
+        {
+          "name": "absence of axioms",
+          "input": {
+            "nodes": [
+              {
+                "id": "a",
+                "symbol": "A",
+                "args": []
+              },
+              {
+                "id": "b",
+                "symbol": "B",
+                "args": []
+              },
+              {
+                "id": "fa",
+                "symbol": "F",
+                "args": [
+                  "a"
+                ]
+              },
+              {
+                "id": "fb",
+                "symbol": "F",
+                "args": [
+                  "b"
+                ]
+              },
+              {
+                "id": "ga",
+                "symbol": "G",
+                "args": [
+                  "a"
+                ]
+              }
+            ],
+            "equalities": [],
+            "queries": [
+              [
+                "fa",
+                "fb"
+              ],
+              [
+                "fa",
+                "ga"
+              ],
+              [
+                "a",
+                "b"
+              ]
+            ]
+          },
+          "output": {
+            "classes": [
+              [
+                "a"
+              ],
+              [
+                "b"
+              ],
+              [
+                "fa"
+              ],
+              [
+                "fb"
+              ],
+              [
+                "ga"
+              ]
+            ],
+            "entailed": [
+              false,
+              false,
+              false
+            ]
+          }
+        },
+        {
+          "name": "direct unrelated function equation without equality of leaves",
+          "input": {
+            "nodes": [
+              {
+                "id": "a",
+                "symbol": "A",
+                "args": []
+              },
+              {
+                "id": "b",
+                "symbol": "B",
+                "args": []
+              },
+              {
+                "id": "fa",
+                "symbol": "F",
+                "args": [
+                  "a"
+                ]
+              },
+              {
+                "id": "fb",
+                "symbol": "F",
+                "args": [
+                  "b"
+                ]
+              },
+              {
+                "id": "ga",
+                "symbol": "G",
+                "args": [
+                  "a"
+                ]
+              }
+            ],
+            "equalities": [
+              [
+                "fa",
+                "ga"
+              ]
+            ],
+            "queries": [
+              [
+                "fa",
+                "fb"
+              ],
+              [
+                "fa",
+                "ga"
+              ],
+              [
+                "a",
+                "b"
+              ]
+            ]
+          },
+          "output": {
+            "classes": [
+              [
+                "a"
+              ],
+              [
+                "b"
+              ],
+              [
+                "fa",
+                "ga"
+              ],
+              [
+                "fb"
+              ]
+            ],
+            "entailed": [
+              false,
+              true,
+              false
+            ]
+          }
+        },
+        {
+          "name": "transitive ground axioms",
+          "input": {
+            "nodes": [
+              {
+                "id": "a",
+                "symbol": "A",
+                "args": []
+              },
+              {
+                "id": "b",
+                "symbol": "B",
+                "args": []
+              },
+              {
+                "id": "c",
+                "symbol": "C",
+                "args": []
+              },
+              {
+                "id": "fa",
+                "symbol": "F",
+                "args": [
+                  "a"
+                ]
+              },
+              {
+                "id": "fc",
+                "symbol": "F",
+                "args": [
+                  "c"
+                ]
+              }
+            ],
+            "equalities": [
+              [
+                "a",
+                "b"
+              ],
+              [
+                "b",
+                "c"
+              ]
+            ],
+            "queries": [
+              [
+                "fa",
+                "fc"
+              ],
+              [
+                "a",
+                "c"
+              ]
+            ]
+          },
+          "output": {
+            "classes": [
+              [
+                "a",
+                "b",
+                "c"
+              ],
+              [
+                "fa",
+                "fc"
+              ]
+            ],
+            "entailed": [
+              true,
+              true
+            ]
+          }
+        },
+        {
+          "name": "identical syntax with two DAG node IDs",
+          "input": {
+            "nodes": [
+              {
+                "id": "a",
+                "symbol": "A",
+                "args": []
+              },
+              {
+                "id": "fa1",
+                "symbol": "F",
+                "args": [
+                  "a"
+                ]
+              },
+              {
+                "id": "fa2",
+                "symbol": "F",
+                "args": [
+                  "a"
+                ]
+              }
+            ],
+            "equalities": [],
+            "queries": [
+              [
+                "fa1",
+                "fa2"
+              ]
+            ]
+          },
+          "output": {
+            "classes": [
+              [
+                "a"
+              ],
+              [
+                "fa1",
+                "fa2"
+              ]
+            ],
+            "entailed": [
+              true
+            ]
+          }
+        }
+      ],
+      "falsifiers": [
+        "given a=b infer F(a)=F(b), not F(a)=G(b)",
+        "same-symbol same-argument terms equal even when no equations",
+        "no stated equations never entail equality of two distinct constants",
+        "entailed=false is not explicit disequality",
+        "unknown node, forward/cyclic reference, inconsistent function arity BLOCK",
+        "no rewriting or symbolic variable substitution is smuggled into congruence"
+      ],
+      "source_path": "knowledge/d10-ground-congruence-closure-research-20261009.json",
+      "source_git_blob": "8144d5cd76d8b2e6099bba074fe96e910ca53156",
+      "provenance": [
+        "#4013",
+        "#4463",
+        "#4896",
+        "knowledge/d10-ground-congruence-closure-research-20261009.json"
+      ],
+      "dedup": {
+        "d1_d9_foundation_sha": "09d1d71c39d1484dfd005a5068dbb18b76f0f0d4",
+        "prior_d10_sha": "404ac2a9cfdc817ed676d8137522981cd837ce3e",
+        "exact_name": "NO-MATCH",
+        "scope": "Typed law checked for distinct observable contract; primitive-vs-derived status unresolved"
+      },
+      "derivability": "PENDING-OWNER-REVIEW; no claim this law requires a primitive ISA resident"
+    },
+    {
+      "stable_id": "d10.harvest.existing.pinhole-image-project.20261011",
+      "semantic_name": "PINHOLE-IMAGE-PROJECT",
+      "surface_uk": "перспективо-проєкція",
+      "surface_ukr": "проєктувати-тривимірну-точку-на-площину",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "proposal_status": "pending-owner-review",
+      "source_class": "EXISTING-D10-CROSSDISCIPLINE-HARVEST-20261011",
+      "relation_class": "TYPED-OBSERVABLE-EXACT-LAW",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "ratified_resident": false,
+      "physical_t5_authorized": false,
+      "arity": 8,
+      "argument_shape": "(Xc,Yc,Zc,fx,fy,cx,cy) all exact rationals, Zc != 0",
+      "result_shape": "See pinned donor dossier",
+      "behavior": "Return exact (u,v)=(fx*Xc/Zc+cx,fy*Yc/Zc+cy). Mathematically defined for negative Z too; a separate physical visibility predicate may require Z>0. Do not silently apply lens distortion or infer extrinsics.",
+      "positive_witnesses": [
+        {
+          "args": [
+            "2",
+            "3",
+            "4",
+            "10",
+            "20",
+            "3",
+            "4"
+          ],
+          "expected": [
+            "8",
+            "19"
+          ]
+        },
+        {
+          "args": [
+            "1",
+            "-1",
+            "2",
+            "3",
+            "5",
+            "0",
+            "0"
+          ],
+          "expected": [
+            "3/2",
+            "-5/2"
+          ]
+        }
+      ],
+      "falsifiers": [
+        "Zc=0 is an explicit invalid projection, not infinity, a float, or a dropped point.",
+        "Scaling (Xc,Yc,Zc) by any nonzero rational must not change the pixel projection.",
+        "Optical distortion/pose and sensor pitch cannot be introduced implicitly."
+      ],
+      "source_path": "knowledge/d10-astrophoto-exact-pinhole-research-20261009.json",
+      "source_git_blob": "cb5f6eb6a9d481c7801d0b71e75cd44ebda1a0de",
+      "provenance": [
+        "#4013",
+        "#4463",
+        "#4896",
+        "knowledge/d10-astrophoto-exact-pinhole-research-20261009.json"
+      ],
+      "dedup": {
+        "d1_d9_foundation_sha": "09d1d71c39d1484dfd005a5068dbb18b76f0f0d4",
+        "prior_d10_sha": "404ac2a9cfdc817ed676d8137522981cd837ce3e",
+        "exact_name": "NO-MATCH",
+        "scope": "Typed law checked for distinct observable contract; primitive-vs-derived status unresolved"
+      },
+      "derivability": "PENDING-OWNER-REVIEW; no claim this law requires a primitive ISA resident"
+    },
+    {
+      "stable_id": "d10.harvest.existing.pixel-to-camera-ray.20261011",
+      "semantic_name": "PIXEL-TO-CAMERA-RAY",
+      "surface_uk": "піксель-промінь",
+      "surface_ukr": "відновити-напрям-променя-з-пікселя",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "proposal_status": "pending-owner-review",
+      "source_class": "EXISTING-D10-CROSSDISCIPLINE-HARVEST-20261011",
+      "relation_class": "TYPED-OBSERVABLE-EXACT-LAW",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "ratified_resident": false,
+      "physical_t5_authorized": false,
+      "arity": 6,
+      "argument_shape": "(u,v,fx,fy,cx,cy) all exact rationals, fx != 0, fy != 0",
+      "result_shape": "See pinned donor dossier",
+      "behavior": "Return canonical unnormalized direction ((u-cx)/fx,(v-cy)/fy,1) in camera coordinates. This is a RAY, not a reconstructed 3D point/depth. For a distortion-free pinhole, projecting any nonzero exact multiple of the direction returns the original pixel.",
+      "positive_witnesses": [
+        {
+          "args": [
+            "8",
+            "19",
+            "10",
+            "20",
+            "3",
+            "4"
+          ],
+          "expected": [
+            "1/2",
+            "3/4",
+            "1"
+          ]
+        },
+        {
+          "args": [
+            "0",
+            "0",
+            "2",
+            "3",
+            "0",
+            "0"
+          ],
+          "expected": [
+            "0",
+            "0",
+            "1"
+          ]
+        }
+      ],
+      "falsifiers": [
+        "fx=0 or fy=0 must not be accepted.",
+        "Recovered ray may not falsely claim unique object distance.",
+        "Composing ray and projection must reproduce the input pixel exactly."
+      ],
+      "source_path": "knowledge/d10-astrophoto-exact-pinhole-research-20261009.json",
+      "source_git_blob": "cb5f6eb6a9d481c7801d0b71e75cd44ebda1a0de",
+      "provenance": [
+        "#4013",
+        "#4463",
+        "#4896",
+        "knowledge/d10-astrophoto-exact-pinhole-research-20261009.json"
+      ],
+      "dedup": {
+        "d1_d9_foundation_sha": "09d1d71c39d1484dfd005a5068dbb18b76f0f0d4",
+        "prior_d10_sha": "404ac2a9cfdc817ed676d8137522981cd837ce3e",
+        "exact_name": "NO-MATCH",
+        "scope": "Typed law checked for distinct observable contract; primitive-vs-derived status unresolved"
+      },
+      "derivability": "PENDING-OWNER-REVIEW; no claim this law requires a primitive ISA resident"
+    },
+    {
+      "stable_id": "d10.harvest.existing.alternating-zero-sum-backup.20261011",
+      "semantic_name": "ALTERNATING-ZERO-SUM-BACKUP",
+      "surface_uk": "чергувати-зворотну-оцінку",
+      "surface_ukr": "згортати-оцінку-шляхом-із-чергуванням-знака",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "proposal_status": "pending-owner-review",
+      "source_class": "EXISTING-D10-CROSSDISCIPLINE-HARVEST-20261011",
+      "relation_class": "TYPED-OBSERVABLE-EXACT-LAW",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "ratified_resident": false,
+      "physical_t5_authorized": false,
+      "arity": null,
+      "argument_shape": "(finite_acyclic_leaf_to_root_chain, exact_rational_value)",
+      "result_shape": "same chain identities with updated (visits:int,value_sum:exact-rational) states",
+      "behavior": "Given a finite chain from leaf to root, current per-node (visit_count,value_sum) and a leaf-side exact score v, visit_count increases exactly once at every chain node, value_sum at node depth k from leaf increases (-1)^k*v, and no off-path node changes. The sign changes because each node's score is from its own side-to-move perspective.",
+      "positive_witnesses": [
+        {
+          "input": {
+            "chain": [
+              {
+                "visits": 0,
+                "sum": "0"
+              },
+              {
+                "visits": 3,
+                "sum": "1/4"
+              },
+              {
+                "visits": 9,
+                "sum": "-2"
+              }
+            ],
+            "value": "1/2"
+          },
+          "expected": [
+            {
+              "visits": 1,
+              "sum": "1/2"
+            },
+            {
+              "visits": 4,
+              "sum": "-1/4"
+            },
+            {
+              "visits": 10,
+              "sum": "-3/2"
+            }
+          ]
+        },
+        {
+          "input": {
+            "chain": [
+              {
+                "visits": 5,
+                "sum": "1"
+              }
+            ],
+            "value": "-3/4"
+          },
+          "expected": [
+            {
+              "visits": 6,
+              "sum": "1/4"
+            }
+          ]
+        }
+      ],
+      "falsifiers": [
+        "Updating a grandparent by -v instead of +v.",
+        "Incrementing ancestor visits twice or modifying a sibling.",
+        "Treating 0 as a terminal stop before root."
+      ],
+      "source_path": "knowledge/d10-crossrepo-chess-law-proposals-20261009.json",
+      "source_git_blob": "c61a467f9265a9342b0729b8c1d725f45f445394",
+      "provenance": [
+        "#4013",
+        "#4463",
+        "#4896",
+        "knowledge/d10-crossrepo-chess-law-proposals-20261009.json"
+      ],
+      "dedup": {
+        "d1_d9_foundation_sha": "09d1d71c39d1484dfd005a5068dbb18b76f0f0d4",
+        "prior_d10_sha": "404ac2a9cfdc817ed676d8137522981cd837ce3e",
+        "exact_name": "NO-MATCH",
+        "scope": "Typed law checked for distinct observable contract; primitive-vs-derived status unresolved"
+      },
+      "derivability": "PENDING-OWNER-REVIEW; no claim this law requires a primitive ISA resident"
+    },
+    {
+      "stable_id": "d10.harvest.existing.chess-castling-rights-transition.20261011",
+      "semantic_name": "CHESS-CASTLING-RIGHTS-TRANSITION",
+      "surface_uk": "оновити-права-рокіровки",
+      "surface_ukr": "права-рокіровки-після-ходу",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "proposal_status": "pending-owner-review",
+      "source_class": "EXISTING-D10-CROSSDISCIPLINE-HARVEST-20261011",
+      "relation_class": "TYPED-OBSERVABLE-EXACT-LAW",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "ratified_resident": false,
+      "physical_t5_authorized": false,
+      "arity": null,
+      "argument_shape": "(rights:subset{K,Q,k,q},moved_piece,from_square:int,captured_piece,to_square:int)",
+      "result_shape": "new_rights:subset{K,Q,k,q}",
+      "behavior": "Given the exact subset of K,Q,k,q before a legal move: moving a white/black king erases both own rights; moving a rook from its home corner erases that right; capturing a rook on its home corner erases that captured side's right; all unrelated rights are preserved. Rights never reappear. This operation updates rights only; it does not itself establish legal move, king safety or FEN validity.",
+      "positive_witnesses": [
+        {
+          "input": {
+            "rights": [
+              "K",
+              "Q",
+              "k",
+              "q"
+            ],
+            "moved": "wk",
+            "from": 4,
+            "captured": "",
+            "to": 5
+          },
+          "expected": [
+            "k",
+            "q"
+          ]
+        },
+        {
+          "input": {
+            "rights": [
+              "K",
+              "Q",
+              "k",
+              "q"
+            ],
+            "moved": "wr",
+            "from": 7,
+            "captured": "br",
+            "to": 56
+          },
+          "expected": [
+            "Q",
+            "k"
+          ]
+        }
+      ],
+      "falsifiers": [
+        "A rook moving from h1 removes white Q as well as K.",
+        "A rook captured on a8 leaves black q available.",
+        "A rook moving back to h1 re-creates lost K right.",
+        "An unrelated pawn move erases some right."
+      ],
+      "source_path": "knowledge/d10-crossrepo-chess-law-proposals-20261009.json",
+      "source_git_blob": "c61a467f9265a9342b0729b8c1d725f45f445394",
+      "provenance": [
+        "#4013",
+        "#4463",
+        "#4896",
+        "knowledge/d10-crossrepo-chess-law-proposals-20261009.json"
+      ],
+      "dedup": {
+        "d1_d9_foundation_sha": "09d1d71c39d1484dfd005a5068dbb18b76f0f0d4",
+        "prior_d10_sha": "404ac2a9cfdc817ed676d8137522981cd837ce3e",
+        "exact_name": "NO-MATCH",
+        "scope": "Typed law checked for distinct observable contract; primitive-vs-derived status unresolved"
+      },
+      "derivability": "PENDING-OWNER-REVIEW; no claim this law requires a primitive ISA resident"
+    },
+    {
+      "stable_id": "d10.harvest.existing.stress-syllable-transfer.20261011",
+      "semantic_name": "STRESS-SYLLABLE-TRANSFER",
+      "surface_uk": "перенести-наголос",
+      "surface_ukr": "перенести-наголоси-за-складами",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "proposal_status": "pending-owner-review",
+      "source_class": "EXISTING-D10-CROSSDISCIPLINE-HARVEST-20261011",
+      "relation_class": "TYPED-OBSERVABLE-EXACT-LAW",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "ratified_resident": false,
+      "physical_t5_authorized": false,
+      "arity": null,
+      "argument_shape": "See pinned donor dossier",
+      "result_shape": "See pinned donor dossier",
+      "behavior": "Transfer 1-based positions of U+0301 stress from source vowel nuclei to corresponding target vowel nuclei, recognizing upper/lower case equally; reject invalid or out-of-range marks and a pre-accented target. No rewriting of other characters.",
+      "positive_witnesses": [
+        [
+          "сло́во",
+          "СЛОВО",
+          "СЛО́ВО"
+        ],
+        [
+          "мо́ва́",
+          "МОВА",
+          "МО́ВА́"
+        ]
+      ],
+      "falsifiers": [
+        "Do not accept combining acute after a consonant or silently lose an out-of-range stress position."
+      ],
+      "source_path": "knowledge/d10-linguistic-law-intake-20261009.json",
+      "source_git_blob": "b484ad4dc4dfa1089b0fcf1acfd6d70d724eda85",
+      "provenance": [
+        "#4013",
+        "#4463",
+        "#4896",
+        "knowledge/d10-linguistic-law-intake-20261009.json"
+      ],
+      "dedup": {
+        "d1_d9_foundation_sha": "09d1d71c39d1484dfd005a5068dbb18b76f0f0d4",
+        "prior_d10_sha": "404ac2a9cfdc817ed676d8137522981cd837ce3e",
+        "exact_name": "NO-MATCH",
+        "scope": "Typed law checked for distinct observable contract; primitive-vs-derived status unresolved"
+      },
+      "derivability": "PENDING-OWNER-REVIEW; no claim this law requires a primitive ISA resident"
+    },
+    {
+      "stable_id": "d10.harvest.existing.contextual-longest-transliterate.20261011",
+      "semantic_name": "CONTEXTUAL-LONGEST-TRANSLITERATE",
+      "surface_uk": "контекстна-транслітерація",
+      "surface_ukr": "транслітерувати-за-контекстом-й-довжиною",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "proposal_status": "pending-owner-review",
+      "source_class": "EXISTING-D10-CROSSDISCIPLINE-HARVEST-20261011",
+      "relation_class": "TYPED-OBSERVABLE-EXACT-LAW",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "ratified_resident": false,
+      "physical_t5_authorized": false,
+      "arity": null,
+      "argument_shape": "See pinned donor dossier",
+      "result_shape": "See pinned donor dossier",
+      "behavior": "An explicit finite rule table selects word-start replacement before default; otherwise longest matching multigraph before shorter graph, then a specified after-consonant rule; preserve unmatched characters and apostrophe word continuity.",
+      "positive_witnesses": [
+        [
+          "ї кї",
+          "yi kji"
+        ],
+        [
+          "єїк єї",
+          "zzz xxx"
+        ]
+      ],
+      "falsifiers": [
+        "A shorter key must not consume the prefix of a longer admissible key."
+      ],
+      "source_path": "knowledge/d10-linguistic-law-intake-20261009.json",
+      "source_git_blob": "b484ad4dc4dfa1089b0fcf1acfd6d70d724eda85",
+      "provenance": [
+        "#4013",
+        "#4463",
+        "#4896",
+        "knowledge/d10-linguistic-law-intake-20261009.json"
+      ],
+      "dedup": {
+        "d1_d9_foundation_sha": "09d1d71c39d1484dfd005a5068dbb18b76f0f0d4",
+        "prior_d10_sha": "404ac2a9cfdc817ed676d8137522981cd837ce3e",
+        "exact_name": "NO-MATCH",
+        "scope": "Typed law checked for distinct observable contract; primitive-vs-derived status unresolved"
+      },
+      "derivability": "PENDING-OWNER-REVIEW; no claim this law requires a primitive ISA resident"
+    },
+    {
+      "stable_id": "d10.hobby.music.enharmonic-spelling-distinct.v1",
+      "semantic_name": "ENHARMONIC-SPELLING-DISTINCT?",
+      "surface_uk": "енгармонічно-інші?",
+      "surface_ukr": "та-сама-висота-інший-запис?",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "proposal_status": "pending-owner-review",
+      "source_class": "EXISTING-D10-CROSSDISCIPLINE-HARVEST-20261011",
+      "relation_class": "TYPED-OBSERVABLE-EXACT-LAW",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "ratified_resident": false,
+      "physical_t5_authorized": false,
+      "arity": 2,
+      "argument_shape": "See pinned donor dossier",
+      "result_shape": "one 1-bit predicate",
+      "behavior": "Given two valid 12-TET MusicXML-like pitches (step, integer alter, octave), return 1 iff their exact sounding semitone index matches AND their notation triple differs; otherwise 0. An equal note written identically is not an enharmonic respelling.",
+      "positive_witnesses": [
+        {
+          "a": [
+            "C",
+            1,
+            4
+          ],
+          "b": [
+            "D",
+            -1,
+            4
+          ],
+          "expected": 1,
+          "explanation": "C-sharp and D-flat agree in sounding semitones"
+        },
+        {
+          "a": [
+            "B",
+            1,
+            3
+          ],
+          "b": [
+            "C",
+            0,
+            4
+          ],
+          "expected": 1,
+          "explanation": "cross-octave B-sharp and C agree"
+        },
+        {
+          "a": [
+            "C",
+            0,
+            4
+          ],
+          "b": [
+            "D",
+            -2,
+            4
+          ],
+          "expected": 1,
+          "explanation": "double flat is distinct notation with same sound"
+        }
+      ],
+      "falsifiers": [
+        {
+          "a": [
+            "C",
+            0,
+            4
+          ],
+          "b": [
+            "C",
+            0,
+            4
+          ],
+          "expected": 0,
+          "explanation": "identical spelling is not different"
+        },
+        {
+          "a": [
+            "C",
+            0,
+            4
+          ],
+          "b": [
+            "C",
+            0,
+            5
+          ],
+          "expected": 0,
+          "explanation": "octave is audible; pitch class alone insufficient"
+        },
+        {
+          "a": [
+            "C",
+            1,
+            4
+          ],
+          "b": [
+            "D",
+            -1,
+            5
+          ],
+          "expected": 0,
+          "explanation": "different octave despite pitch class"
+        },
+        {
+          "a": [
+            "C",
+            0,
+            4
+          ],
+          "b": [
+            "B",
+            0,
+            3
+          ],
+          "expected": 0,
+          "explanation": "distinct sounding semitone"
+        }
+      ],
+      "source_path": "knowledge/d10-music-enharmonic-primary-review-v1.json",
+      "source_git_blob": "9c9a29355f8d7ef8449cd080ed80636b48200230",
+      "provenance": [
+        "#4013",
+        "#4463",
+        "#4896",
+        "knowledge/d10-music-enharmonic-primary-review-v1.json"
+      ],
+      "dedup": {
+        "d1_d9_foundation_sha": "09d1d71c39d1484dfd005a5068dbb18b76f0f0d4",
+        "prior_d10_sha": "404ac2a9cfdc817ed676d8137522981cd837ce3e",
+        "exact_name": "NO-MATCH",
+        "scope": "Typed law checked for distinct observable contract; primitive-vs-derived status unresolved"
+      },
+      "derivability": "PENDING-OWNER-REVIEW; no claim this law requires a primitive ISA resident"
+    },
+    {
+      "stable_id": "d10.hobby.music.notated-chromatic-interval.v1",
+      "semantic_name": "NOTATED-CHROMATIC-INTERVAL",
+      "surface_uk": "нотний-хроматичний-інтервал",
+      "surface_ukr": "кроки-й-півтони-між-нотами",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "proposal_status": "pending-owner-review",
+      "source_class": "EXISTING-D10-CROSSDISCIPLINE-HARVEST-20261011",
+      "relation_class": "TYPED-OBSERVABLE-EXACT-LAW",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "ratified_resident": false,
+      "physical_t5_authorized": false,
+      "arity": 2,
+      "argument_shape": "See pinned donor dossier",
+      "result_shape": "two exact signed integers (diatonic steps, chromatic semitones)",
+      "behavior": "Given two valid pitches, return ordered signed pair (target octave*7+step ordinal minus source octave*7+step ordinal, target exact 12-TET semitone number minus source semitone number); neither component may be silently discarded.",
+      "positive_witnesses": [
+        {
+          "a": [
+            "C",
+            0,
+            4
+          ],
+          "b": [
+            "E",
+            0,
+            4
+          ],
+          "expected": [
+            2,
+            4
+          ],
+          "explanation": "major third, two notated diatonic steps"
+        },
+        {
+          "a": [
+            "C",
+            0,
+            4
+          ],
+          "b": [
+            "F",
+            -1,
+            4
+          ],
+          "expected": [
+            3,
+            4
+          ],
+          "explanation": "F-flat and E natural have same sounding semitone distance but DIFFERENT diatonic interval"
+        },
+        {
+          "a": [
+            "C",
+            0,
+            4
+          ],
+          "b": [
+            "D",
+            -2,
+            4
+          ],
+          "expected": [
+            1,
+            0
+          ],
+          "explanation": "the sounding note is same yet one written step apart"
+        }
+      ],
+      "falsifiers": [
+        {
+          "a": [
+            "C",
+            0,
+            4
+          ],
+          "b": [
+            "E",
+            0,
+            4
+          ],
+          "forbid": [
+            4,
+            4
+          ],
+          "explanation": "diatonic steps are not semitone count"
+        },
+        {
+          "a": [
+            "C",
+            0,
+            4
+          ],
+          "b": [
+            "F",
+            -1,
+            4
+          ],
+          "forbid": [
+            2,
+            4
+          ],
+          "explanation": "do not erase spelling via MIDI pitch projection"
+        },
+        {
+          "a": [
+            "B",
+            1,
+            3
+          ],
+          "b": [
+            "C",
+            0,
+            4
+          ],
+          "expected": [
+            1,
+            0
+          ],
+          "forbid": [
+            0,
+            0
+          ],
+          "explanation": "enharmonic change still one diatonic step"
+        }
+      ],
+      "source_path": "knowledge/d10-music-enharmonic-primary-review-v1.json",
+      "source_git_blob": "9c9a29355f8d7ef8449cd080ed80636b48200230",
+      "provenance": [
+        "#4013",
+        "#4463",
+        "#4896",
+        "knowledge/d10-music-enharmonic-primary-review-v1.json"
+      ],
+      "dedup": {
+        "d1_d9_foundation_sha": "09d1d71c39d1484dfd005a5068dbb18b76f0f0d4",
+        "prior_d10_sha": "404ac2a9cfdc817ed676d8137522981cd837ce3e",
+        "exact_name": "NO-MATCH",
+        "scope": "Typed law checked for distinct observable contract; primitive-vs-derived status unresolved"
+      },
+      "derivability": "PENDING-OWNER-REVIEW; no claim this law requires a primitive ISA resident"
+    },
+    {
+      "stable_id": "d10.harvest.existing.unique-surface-correction-suggestion.20261011",
+      "semantic_name": "UNIQUE-SURFACE-CORRECTION-SUGGESTION",
+      "surface_uk": "спрв?",
+      "surface_ukr": "запропонувати-однозначне-виправлення-назви",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "proposal_status": "pending-owner-review",
+      "source_class": "EXISTING-D10-CROSSDISCIPLINE-HARVEST-20261011",
+      "relation_class": "TYPED-OBSERVABLE-EXACT-LAW",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "ratified_resident": false,
+      "physical_t5_authorized": false,
+      "arity": 3,
+      "argument_shape": "See pinned donor dossier",
+      "result_shape": "EXACT/SUGGEST with [surface, exact-identity], AMBIGUOUS with ordered alternatives, ABSENT, or BLOCKED-SURFACE; no execution side effect",
+      "behavior": "Return the unique lowest-distance candidate within an explicit maximum adjacent-transposition edit bound. Exact binary identity is never guessed; equal-score distinct identities produce AMBIGUOUS; bit words or D2 syntax are blocked. Never rewrite or evaluate source.",
+      "positive_witnesses": [
+        "CONNS => CONS if context contains exactly CONS and OSA distance=1",
+        "CNOS => CONS by one adjacent transposition",
+        "CONX => COND only when the explicitly supplied context lacks another tied candidate such as CONS",
+        "Unicode Cyrillic non-binary surface may receive data-only suggestion; no Text7 identity mutation",
+        "An exact present label returns EXACT with its pinned bit-identity"
+      ],
+      "falsifiers": [
+        "CONX with tied COND and CONS at distance=1 is AMBIGUOUS, never arbitrary winner",
+        "equal surface with two DIFFERENT bit-identities must be AMBIGUOUS even at distance=0",
+        "binary input 01011 must be BLOCKED-SURFACE, never corrected to 01010",
+        "source control tokens (., brackets, quotes, spaces) BLOCKED-SURFACE",
+        "out-of-bound candidate must be ABSENT, never rewritten or executed",
+        "same identity repeated must not spuriously be two alternatives",
+        "non-integer limit/negative/unbounded distance rejected"
+      ],
+      "source_path": "knowledge/d10-interlisp-dwim-safe-suggestion-v1.json",
+      "source_git_blob": "4e6b872ba9f8cd88c352d7ba567692c5381a70f2",
+      "provenance": [
+        "#4013",
+        "#4463",
+        "#4896",
+        "knowledge/d10-interlisp-dwim-safe-suggestion-v1.json"
+      ],
+      "dedup": {
+        "d1_d9_foundation_sha": "09d1d71c39d1484dfd005a5068dbb18b76f0f0d4",
+        "prior_d10_sha": "404ac2a9cfdc817ed676d8137522981cd837ce3e",
+        "exact_name": "NO-MATCH",
+        "scope": "Typed law checked for distinct observable contract; primitive-vs-derived status unresolved"
+      },
+      "derivability": "PENDING-OWNER-REVIEW; no claim this law requires a primitive ISA resident"
     }
   ],
   "parent_domain": {
@@ -15720,6 +16983,14 @@
     "knowledge/d10-critical-pairs-confluence-20261009.json",
     "knowledge/d10-rosenblatt-novikoff-exact-step-20261009.json",
     "knowledge/d10-unique-bounded-modular-lift-20261009.json",
-    "knowledge/d10-existing-evidence-harvest-20261011-a.json"
+    "knowledge/d10-existing-evidence-harvest-20261011-a.json",
+    "knowledge/d10-forth-circular-arc-v1.json",
+    "knowledge/d10-ground-congruence-closure-research-20261009.json",
+    "knowledge/d10-astrophoto-exact-pinhole-research-20261009.json",
+    "knowledge/d10-crossrepo-chess-law-proposals-20261009.json",
+    "knowledge/d10-linguistic-law-intake-20261009.json",
+    "knowledge/d10-music-enharmonic-primary-review-v1.json",
+    "knowledge/d10-interlisp-dwim-safe-suggestion-v1.json",
+    "knowledge/d10-existing-evidence-harvest-20261011-b.json"
   ]
 }
