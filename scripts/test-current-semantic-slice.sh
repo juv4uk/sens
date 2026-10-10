@@ -34,8 +34,9 @@ else
   # Diagnostic-only replay: split the same Lisp-owned witness at its public
   # rows/check boundary. Do not edit the source or expected quantities, do not
   # convert the law to a Rust oracle, and never turn either failure green.
-  quantity_rows_probe="$RUNNER_TEMP/exact-quantity-rows-probe.lisp"
-  quantity_check_probe="$RUNNER_TEMP/exact-quantity-check-probe.lisp"
+  quantity_diag_dir="${RUNNER_TEMP:-$(mktemp -d)}"
+  quantity_rows_probe="$quantity_diag_dir/exact-quantity-rows-probe.lisp"
+  quantity_check_probe="$quantity_diag_dir/exact-quantity-check-probe.lisp"
   python3 - "$quantity_witness" "$quantity_rows_probe" "$quantity_check_probe" <<'PY'
 from pathlib import Path
 import sys
