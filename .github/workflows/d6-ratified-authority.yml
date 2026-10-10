@@ -19,6 +19,7 @@ on:
       - "language-contract.lisp"
       - "CURRENT.md"
       - "scripts/check-d6-current-authority.py"
+      - ".github/workflows/d6-ratified-authority.yml"
 
 jobs:
   authority:
