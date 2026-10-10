@@ -111,6 +111,44 @@ fn x86_pattern_mismatches_are_exact_d1_no_not_empty() {
 
 
 #[test]
+fn x86_register_wildcards_use_exact_d1_and_reject_unknown_names() {
+    let mut session = Session::default();
+    load_core_library(&mut session).expect("ратифіковане ядро");
+    load_lisp_file("lib/machine/encoding/x86-64.lisp", &mut session);
+    load_lisp_file("lib/machine/admission/x86-64.lisp", &mut session);
+
+    let cases = [
+        (
+            "(x86-admission-pattern-match? (00000001 (mov-r64-imm64 register immediate)) (00000001 (mov-r64-imm64 rax 7)))",
+            true,
+        ),
+        (
+            "(x86-admission-pattern-match? (00000001 (mov-r64-imm64 register immediate)) (00000001 (mov-r64-imm64 notareg 7)))",
+            false,
+        ),
+        (
+            "(x86-admission-pattern-match? (00000001 (vaddps-xmm-xmm-xmm xmm-register xmm-register xmm-register)) (00000001 (vaddps-xmm-xmm-xmm xmm0 xmm1 xmm2)))",
+            true,
+        ),
+        (
+            "(x86-admission-pattern-match? (00000001 (vaddps-xmm-xmm-xmm xmm-register xmm-register xmm-register)) (00000001 (vaddps-xmm-xmm-xmm xmm0 notaxmm xmm2)))",
+            false,
+        ),
+    ];
+
+    for (source, expected) in cases {
+        let result = eval_program(source, &mut session)
+            .unwrap_or_else(|error| panic!("{source}: {error}"));
+        assert_eq!(
+            result.value.as_predicate_bit(),
+            Some(expected),
+            "register wildcard must return exact D1, never host truthiness or structural empty: {source}"
+        );
+    }
+}
+
+
+#[test]
 fn x86_admitted_program_rejects_ud2_with_typed_d1_no() {
     let mut session = Session::default();
     load_core_library(&mut session).expect("ратифіковане ядро");
