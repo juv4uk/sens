@@ -25,5 +25,31 @@ jobs:
     timeout-minutes: 5
     steps:
       - uses: actions/checkout@v5
-      - name: Lisp paren balance (lib/)
-        run: python3 scripts/check-lisp-paren-balance.py --paths lib
+      - name: Негативні свідки обрубків і відсутніх файлів
+        shell: bash
+        run: |
+          set -euo pipefail
+          for rel in \
+            lib/machine/encoding/x86-64.lisp \
+            lib/machine/admission/x86-64.lisp \
+            lib/machine/lowering/semantic-x86-64.lisp; do
+            temp="$(mktemp -d)"
+            mkdir -p "$temp/$(dirname "$rel")"
+            for marker in 'SEE_LOCAL_FIX_B4j' '; see next'; do
+              printf '%s\n' "$marker" > "$temp/$rel"
+              if python3 scripts/check-lisp-paren-balance.py --root "$temp" --paths "$rel"; then
+                echo "FAIL: accepted truncated placeholder $rel"
+                exit 1
+              fi
+            done
+            rm -rf "$temp"
+          done
+          temp="$(mktemp -d)"
+          mkdir -p "$temp/lib"
+          if python3 scripts/check-lisp-paren-balance.py --root "$temp" --paths lib; then
+            echo 'FAIL: missing machine sources accepted'
+            exit 1
+          fi
+          rm -rf "$temp"
+      - name: Перевірити Lisp та незмінність Git HEAD блобів
+        run: python3 scripts/check-lisp-paren-balance.py --paths lib --verify-git-head
