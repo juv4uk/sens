@@ -85,7 +85,7 @@
       ((00000010 term)  (00000001 ()))
       
       ((00000010 (00000101 term))  (00000011 (00000101 term) (00000001 var)))
-      (1 (00000001 ())))))
+      )))
 
 ; subst is an alist of (name . term) pairs, keyed by the variable's
 ; name — never by the `(var name)` pair itself. We use `equal?` instead
@@ -142,7 +142,7 @@
     (00000111
       
       ((00000010 bindings)  (00000011 bindings (00000001 fail)))
-      (1 (00000001 ())))))
+      )))
 
 (00001011 unify-walked
   (00001000 (a b bindings)
