@@ -182,13 +182,13 @@
 ; general recursive expression lowering is claimed here.
 (00001001 x86-lower-eq-cond-car-cons-u64-forms
   (00001000 (left right then-car then-cdr else-car else-cdr)
-    (00101001
+    (приєднати
       (00100111
         (00100111 (00000001 mov-r64-imm64) (00000001 rax) left)
         (00100111 (00000001 mov-r64-imm64) (00000001 rcx) right)
         (00100111 (00000001 cmp-r64-r64) (00000001 rax) (00000001 rcx))
         (00100111 (00000001 jnz-rel8) 33))
-      (00101001
+      (приєднати
         (x86-lower-bounded-car-cons-u64-arm-forms
           then-car then-cdr (00000001 r8) (00000001 r9))
         (x86-lower-bounded-car-cons-u64-arm-forms
@@ -228,7 +228,7 @@
 
 (00001001 x86-lower-cons-car-u64-forms
   (00001000 (left right)
-    (00101001
+    (приєднати
       (x86-lower-bounded-pair-store-u64-forms left right)
       (00100111
         (00100111
@@ -240,7 +240,7 @@
 
 (00001001 x86-lower-cons-cdr-u64-forms
   (00001000 (left right)
-    (00101001
+    (приєднати
       (x86-lower-bounded-pair-store-u64-forms left right)
       (00100111
         (00100111

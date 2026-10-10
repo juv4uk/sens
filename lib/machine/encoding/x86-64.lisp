@@ -58,11 +58,45 @@
 
 (00001001 x86-low3
   (00001000 (code)
-    (010100 code 8)))
+    (00000111
+      ((eq? code 0) 0)
+      ((eq? code 1) 1)
+      ((eq? code 2) 2)
+      ((eq? code 3) 3)
+      ((eq? code 4) 4)
+      ((eq? code 5) 5)
+      ((eq? code 6) 6)
+      ((eq? code 7) 7)
+      ((eq? code 8) 0)
+      ((eq? code 9) 1)
+      ((eq? code #d10) 2)
+      ((eq? code #d11) 3)
+      ((eq? code 12) 4)
+      ((eq? code 13) 5)
+      ((eq? code 14) 6)
+      ((eq? code 15) 7)
+      ((010 ()) (00000001 ())))))
 
 (00001001 x86-high1
   (00001000 (code)
-    (10111 code 8)))
+    (00000111
+      ((eq? code 0) 0)
+      ((eq? code 1) 0)
+      ((eq? code 2) 0)
+      ((eq? code 3) 0)
+      ((eq? code 4) 0)
+      ((eq? code 5) 0)
+      ((eq? code 6) 0)
+      ((eq? code 7) 0)
+      ((eq? code 8) 1)
+      ((eq? code 9) 1)
+      ((eq? code #d10) 1)
+      ((eq? code #d11) 1)
+      ((eq? code 12) 1)
+      ((eq? code 13) 1)
+      ((eq? code 14) 1)
+      ((eq? code 15) 1)
+      ((010 ()) (00000001 ())))))
 
 (00001001 x86-encode-rex
   (00001000 (w r x b)

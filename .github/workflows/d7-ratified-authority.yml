@@ -17,6 +17,22 @@ jobs:
       - uses: actions/checkout@v5
       - name: Check 126/128 ratified D7 residents, reserved coordinates and Lisp surface
         run: python3 scripts/check-d7-current-authority.py
+      - name: Оптимізований Python не минає доказ D7
+        shell: bash
+        run: |
+          set -euo pipefail
+          for level in 1 2; do
+            log="$RUNNER_TEMP/d7-optimized-$level.log"
+            if PYTHONOPTIMIZE="$level" python3 scripts/check-d7-current-authority.py >"$log" 2>&1; then
+              echo "::error::D7 validator reported success with PYTHONOPTIMIZE=$level"
+              exit 1
+            fi
+            if ! grep -Fq "D7-CURRENT-AUTHORITY: BLOCKED" "$log"; then
+              cat "$log"
+              echo "::error::D7 validator did not report named fail-closed outcome"
+              exit 1
+            fi
+          done
       - name: Check D7 Sound/Text versus LocalOrdinal and arithmetic boundary
         run: python3 benchmarks/d7-ratification-conformance/validate.py
       - name: Admit only owner-ratified D7 projection and distinguish W7 roles

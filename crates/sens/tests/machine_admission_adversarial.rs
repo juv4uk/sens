@@ -53,6 +53,30 @@ fn exhausted_instruction_patterns_return_exact_d1_no_not_structural_empty() {
 }
 
 #[test]
+fn x86_exact_integer_wire_checks_return_typed_d1() {
+    let mut session = Session::default();
+    load_core_library(&mut session).expect("ратифіковане ядро");
+    load_lisp_file("lib/machine/encoding/x86-64.lisp", &mut session);
+    load_lisp_file("lib/machine/admission/x86-64.lisp", &mut session);
+
+    // Перевірка справді проходить крізь лексичні прив'язки wire/rest.
+    // Недопустимі числа не можна заміняти структурним () чи Number 0.
+    for (source, expected) in [
+        ("(x86-admission-exact-integer? 7)", true),
+        ("(x86-admission-exact-integer? -7)", true),
+        ("(x86-admission-exact-integer? (00000001 not-an-integer))", false),
+    ] {
+        let result = eval_program(source, &mut session)
+            .unwrap_or_else(|error| panic!("{source}: {error}"));
+        assert_eq!(
+            result.value.as_predicate_bit(),
+            Some(expected),
+            "канонічне ціле число має відповідати лише точним D1:1/D1:0: {source}"
+        );
+    }
+}
+
+#[test]
 fn x86_pattern_mismatches_are_exact_d1_no_not_empty() {
     let mut session = Session::default();
     load_core_library(&mut session).expect("ратифіковане ядро");
@@ -83,6 +107,28 @@ fn x86_pattern_mismatches_are_exact_d1_no_not_empty() {
         Some(true),
         "точний збіг має повертати D1:1, а не історичне t"
     );
+}
+
+
+#[test]
+fn x86_admitted_program_rejects_ud2_with_typed_d1_no() {
+    let mut session = Session::default();
+    load_core_library(&mut session).expect("ратифіковане ядро");
+    load_lisp_file("lib/machine/encoding/x86-64.lisp", &mut session);
+    load_lisp_file("lib/machine/admission/x86-64.lisp", &mut session);
+
+    for program in [
+        "(x86-admitted-program? (00000001 ((ud2))))",
+        "(x86-admitted-program? (00000001 ((mov-r64-imm64 notareg 1))))",
+    ] {
+        let result = eval_program(program, &mut session)
+            .unwrap_or_else(|error| panic!("{program}: {error}"));
+        assert_eq!(
+            result.value.as_predicate_bit(),
+            Some(false),
+            "відмова допуску зобов'язана мати D1:0, а не D3:000"
+        );
+    }
 }
 
 #[test]

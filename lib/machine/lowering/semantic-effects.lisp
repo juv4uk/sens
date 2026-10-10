@@ -13,9 +13,10 @@
 (00001001 machine-effect-current-domain-key?
   (00001000 (width bits expected-width expected-bits)
     (00000111
-      ((00100010 width expected-width)
-       (00100010 bits expected-bits))
-      )))
+      ((тотожне? width expected-width)
+       (тотожне? bits expected-bits))
+      ((00000010 (00000001 ()))
+       (00000010 (00000001 (00000000)))))))
 
 ; Current bounded arithmetic mappings. Exact D5 identity remains upstream
 ; semantic authority; this seam only selects already-defined target-neutral
@@ -29,5 +30,5 @@
        (machine-effect-bounded-u64-sub left right))
       ((machine-effect-current-domain-key? width bits 5 22)
        (machine-effect-bounded-u64-mul left right))
-      (1
+      ((00000010 (00000001 ()))
        (00000001 machine-effect-not-applicable)))))

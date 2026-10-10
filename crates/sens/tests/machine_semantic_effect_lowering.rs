@@ -204,3 +204,25 @@ fn semantic_to_effect_layer_contains_no_target_or_surface_authority() {
         "generic effect-definition module must not own semantic coordinate routing"
     );
 }
+
+#[test]
+fn current_machine_effect_key_has_exact_d1_predicate_results() {
+    // #5354: однаковий packed payload у різних доменах не змінює біт D1.
+    let mut session = Session::default();
+    load_core_library(&mut session).expect("ядро");
+    load_lisp_file("lib/machine/lowering/semantic-effects.lisp", &mut session);
+    for (source, expected) in [
+        ("(machine-effect-current-domain-key? 5 10 5 10)", true),
+        ("(machine-effect-current-domain-key? 4 10 5 10)", false),
+        ("(machine-effect-current-domain-key? 5 11 5 10)", false),
+    ] {
+        let actual = eval_program(source, &mut session)
+            .unwrap_or_else(|error| panic!("{source}: {error}"))
+            .value;
+        assert_eq!(
+            actual.as_predicate_bit(),
+            Some(expected),
+            "{source} має повернути точний D1-предикат, а не число чи порожню структуру"
+        );
+    }
+}
