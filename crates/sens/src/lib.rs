@@ -421,6 +421,16 @@ fn current_core_verified_lowered() -> Option<std::rc::Rc<[Expr]>> {
     })
 }
 
+/// Core4's source fallback must use the same path-bound exact-domain reader as
+/// the canonical FASL generator. The general parser intentionally keeps short
+/// bit spellings such as `100` numeric outside this exact source context;
+/// parsing Core4 that way leaves executable CAR heads as Numbers whenever the
+/// checked-in FASL is stale. Other libraries retain their ordinary reader.
+fn eval_core4_source_fallback(session: &mut Session) -> Result<EvalResult, LanguageError> {
+    let expressions = parse_mixed_exact_domain_core_source("lib/core4.lisp", CORE_LIBRARY_SOURCE)?;
+    eval_parsed_expressions(&expressions, session)
+}
+
 fn load_core_library_with_fasl_mode(
     session: &mut Session,
     core_fasl: &[u8],
@@ -437,7 +447,7 @@ fn load_core_library_with_fasl_mode(
     let result = if exact_embedded && use_verified_cache {
         match current_core_verified_lowered() {
             Some(lowered) => eval_lowered_expressions(&lowered, session)?,
-            None => eval_program(CORE_LIBRARY_SOURCE, session)?,
+            None => eval_core4_source_fallback(session)?,
         }
     } else {
         match fasl_decode_program(core_fasl) {
@@ -446,7 +456,7 @@ fn load_core_library_with_fasl_mode(
             {
                 eval_parsed_expressions(&expressions, session)?
             }
-            _ => eval_program(CORE_LIBRARY_SOURCE, session)?,
+            _ => eval_core4_source_fallback(session)?,
         }
     };
 
@@ -751,15 +761,22 @@ mod core4_bootstrap_cache_tests {
     }
 
     #[test]
-    fn stale_or_invalid_fasl_falls_back_to_text_and_still_selects_core4() {
+    fn stale_or_invalid_fasl_falls_back_to_exact_domain_core4_source() {
         let mut session = Session::default();
 
         load_core_library_with_fasl(&mut session, b"not-a-current-fasl")
-            .expect("text fallback Core4 bootstrap");
+            .expect("exact-domain source fallback Core4 bootstrap");
 
         assert_eq!(
             session.environment.selected_core_profile(),
             Some(CoreProfile::Core4)
         );
+        // Core4's source has executable exact D3/D4 heads inside the legacy
+        // W8 DEFINE/LAMBDA wrappers. A fallback through the ordinary parser
+        // leaves numeric 100 in a callable slot; the path-bound reader keeps
+        // this established library form executable without regenerating FASL.
+        let result = eval_program("(let ((x 7)) x)", &mut session)
+            .expect("stale-FASL Core4 fallback must execute its language-owned LET");
+        assert_eq!(result.value.to_string(), "7");
     }
 }
