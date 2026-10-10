@@ -25,3 +25,19 @@ jobs:
     steps:
       - uses: actions/checkout@v5
       - run: python3 scripts/check-bija3-current-authority.py
+      - name: Оптимізований Python не минає доказ D3
+        shell: bash
+        run: |
+          set -euo pipefail
+          for level in 1 2; do
+            log="$RUNNER_TEMP/bija3-opt-$level.log"
+            if PYTHONOPTIMIZE="$level" python3 scripts/check-bija3-current-authority.py >"$log" 2>&1; then
+              echo "::error::D3 guard reported success with PYTHONOPTIMIZE=$level"
+              exit 1
+            fi
+            if ! grep -Fq "BIJA3-CURRENT-AUTHORITY: BLOCKED" "$log"; then
+              cat "$log"
+              echo "::error::D3 guard did not report named fail-closed outcome"
+              exit 1
+            fi
+          done
