@@ -10,20 +10,20 @@
 (00001011 guard-decision?
   (00001000 (decision)
     (00000111
-      ((00000011 decision (00000001 allow)) t)
-      ((00000011 decision (00000001 warn)) t)
-      ((00000011 decision (00000001 reject)) t)
-      ((00000011 decision (00000001 unknown)) t)
-      (t (00000001 ())))))
+      ((00000011 decision (00000001 allow)) (00000010 (00000001 ())))
+      ((00000011 decision (00000001 warn)) (00000010 (00000001 ())))
+      ((00000011 decision (00000001 reject)) (00000010 (00000001 ())))
+      ((00000011 decision (00000001 unknown)) (00000010 (00000001 ())))
+      ((00000010 (00000001 ())) (00000001 ())))))
 
 (00001011 guard-evidence-status?
   (00001000 (status)
     (00000111
-      ((00000011 status (00000001 confirmed)) t)
-      ((00000011 status (00000001 partial)) t)
-      ((00000011 status (00000001 unresolved)) t)
-      ((00000011 status (00000001 broken)) t)
-      (t (00000001 ())))))
+      ((00000011 status (00000001 confirmed)) (00000010 (00000001 ())))
+      ((00000011 status (00000001 partial)) (00000010 (00000001 ())))
+      ((00000011 status (00000001 unresolved)) (00000010 (00000001 ())))
+      ((00000011 status (00000001 broken)) (00000010 (00000001 ())))
+      ((00000010 (00000001 ())) (00000001 ())))))
 
 ; UNKNOWN is a routing state, not a dead end. These routes distinguish
 ; distributed local knowledge, owner authority, and external research.
@@ -52,7 +52,7 @@
        (00100111 (00000001 invalid-guard-decision) decision))
       ((00100001 (guard-evidence-status? evidence-status))
        (00100111 (00000001 invalid-evidence-status) evidence-status))
-      (t
+      ((00000010 (00000001 ()))
        (00100111
          (00000001 guard-finding)
          (00100111 (00000001 schema) (00000001 guard/1))
@@ -69,7 +69,7 @@
            (00000001 unknown-routes)
            (00000111
              ((00000011 decision (00000001 unknown)) (guard-unknown-routes))
-             (t (00000001 ())))))))))
+             ((00000010 (00000001 ())) (00000001 ())))))))))
 
 ; A missing fact is UNKNOWN, never an implicit rejection.
 ; Відсутній факт означає UNKNOWN, а не неявну заборону.
@@ -97,7 +97,7 @@
        (make-guard-finding
          (00000001 allow) (00000001 confirmed) subject observed expected
          (00000001 ()) (00000001 invariant-preserved) (00000001 no-action) evidence))
-      (t
+      ((00000010 (00000001 ()))
        (make-guard-finding
          (00000001 warn) (00000001 confirmed) subject observed expected
          (00100111 (00000001 expected) expected (00000001 observed) observed)
@@ -138,7 +138,7 @@
          (00000001 synchronization-result-has-no-drift-record)
          (00000001 record-drift-before-unfreezing-commits)
          evidence))
-      (t
+      ((00000010 (00000001 ()))
        (make-guard-finding
          (00000001 allow) (00000001 confirmed) (00000001 ecosystem-sync)
          (00100111 commit-state sync-state drift-state)
@@ -156,6 +156,5 @@
   (00001000 (field reference)
     (10011100 ((entry (00101101 field (00000110 reference))))
       (00000111
-        ((00000010 entry) () (00000001 ()))
-        ((00000010 entry)  (00000001 ()))
-        (t (00101111 entry))))))
+        ((00000010 entry) (00000001 ()))
+        ((00000010 (00000001 ())) (00101111 entry))))))
