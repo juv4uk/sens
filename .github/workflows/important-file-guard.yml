@@ -92,7 +92,7 @@ jobs:
           source="$RUNNER_TEMP/noncanonical-source.lisp"
           output="$RUNNER_TEMP/noncanonical-source.sens"
           log="$RUNNER_TEMP/noncanonical-source-encode.log"
-          printf '%s\\n' '(ordinary-name "text data")' > "$source"
+          printf '%s\n' '(ordinary-name "text data")' > "$source"
           if target/debug/sens-trit encode "$source" >"$log" 2>&1; then
             cat "$log"
             echo "SENS_FILE_AUTHORITY_BLOCKED: noncanonical textual source was accepted" >&2
