@@ -101,7 +101,7 @@ for stage, suffix in probes.items():
     )
 PY
 
-  for stage in rows-binding check-binding witness-binding rows-call check-call planck-record cesium-record planck-value planck-unit numeric-product quantity-product one-second merge-dimensions product-units distance-product; do
+  for stage in rows-binding check-binding witness-binding rows-call check-call planck-record cesium-record planck-value planck-unit numeric-product quantity-product one-second merge-dimensions product-units speed-proper-list speed-constant-valid speed-source-valid speed-constant-clauses distance-product; do
     probe="$quantity_diag_dir/exact-quantity-$stage-probe.lisp"
     log="$quantity_diag_dir/exact-quantity-$stage-probe.log"
     if cargo run --quiet -p sens-cli --bin sens -- "$probe" >"$log" 2>&1; then
