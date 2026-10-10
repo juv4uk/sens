@@ -25,7 +25,11 @@ jobs:
       - uses: dtolnay/rust-toolchain@stable
 
       - name: Test randomized protocol, bootstrap, and fail-closed parity
-        run: python3 -m unittest discover -s benchmarks/methodology/tests -p 'test_*.py' -v
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m unittest discover -s benchmarks/methodology/tests -p 'test_*.py' -v
+          python3 -O -m unittest discover -s benchmarks/methodology/tests -p 'test_*.py' -v
 
       - name: Build real physical SENS binary, without adding Cargo dependencies
         run: cargo build --locked --release -p sens-cli --bin sens
