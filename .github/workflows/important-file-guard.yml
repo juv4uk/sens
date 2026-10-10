@@ -5,6 +5,11 @@ on:
   push:
     branches: [main]
   workflow_dispatch:
+    inputs:
+      base_sha:
+        description: "Exact Git commit SHA to use as the audit base"
+        required: true
+        type: string
 
 permissions:
   contents: read
@@ -34,6 +39,7 @@ jobs:
       - name: Current Git delta and complete tools Python census
         env:
           EVENT_BASE_SHA: ${{ github.event_name == 'pull_request' && github.event.pull_request.base.sha || github.event.before || '' }}
+          DISPATCH_BASE_SHA: ${{ inputs.base_sha || '' }}
           HEAD_SHA: ${{ github.sha }}
         run: |
           set -euo pipefail
@@ -58,8 +64,8 @@ jobs:
               echo "NAMED_FAIL: DISPATCH_REQUIRES_MAIN" >&2
               exit 2
             }
-            # Повний аудит від активації постанови, не порожній HEAD^→HEAD.
-            base="$policy_base"
+            # Ручний аудит використовує задану оператором точну базу.
+            base="${DISPATCH_BASE_SHA:-}"
           fi
           [[ "$base" =~ ^[0-9a-f]{40}$ && "$base" != "0000000000000000000000000000000000000000" ]] || {
             echo "NAMED_FAIL: EVENT_BASE_UNAVAILABLE" >&2
