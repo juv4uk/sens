@@ -54,6 +54,15 @@ class КраїРамки(unittest.TestCase):
             report = self.roundtrip(full)
             self.assertLessEqual(report.байтів_після, report.байтів_без_скорочення)
 
+    def test_планувальник_сам_вибирає_весь_початковий_ланцюг(self):
+        depth = 32
+        full = ("10",) * depth + ("0",) + ("01",) * depth
+        result = self.roundtrip(full)
+        self.assertEqual(result.вилучено_відкривальних, depth)
+        self.assertEqual(result.вилучено_закривальних, depth)
+        self.assertEqual(result.режим, edge._режим_за_кількістю(depth))
+        self.assertLess(result.байтів_після, result.байтів_без_скорочення)
+
     def test_префікси_різної_глибини_не_зливаються_в_один_код(self):
         # Без лічильника початкових OPEN обидва випадки дають ("0",).
         a = ("10", "0", "01")
