@@ -173,7 +173,9 @@ def parse_tree_mode(raw: bytes, expected_path: str) -> str:
     if len(fields) != 3:
         fail("GIT_TREE_METADATA_INVALID: " + expected_path)
     mode, kind, oid = fields
-    if not re.fullmatch(rb"[0-9a-f]{40,64}", oid):
+    # SHA-1 і SHA-256 мають рівно 40 або 64 hex цифри.
+    # Ширина 41..63 не є допустимим Git object ID.
+    if not (len(oid) in (40, 64) and re.fullmatch(rb"[0-9a-f]+", oid)):
         fail("GIT_TREE_OBJECT_ID_INVALID: " + expected_path)
     try:
         found_path = encoded_path.decode("utf-8", "strict")
@@ -322,6 +324,9 @@ def self_test() -> None:
         b"100644 blob " + object_id + b"\tlib/example.sens",
         b"100644 blob " + object_id + b"\tlib/example.sens\x00\x00",
         b"100644 blob " + object_id + b"\tlib/other.sens\x00",
+        b"100644 blob " + object_id + b"a\tlib/example.sens\x00",  # 41 цифра
+        b"100644 blob " + object_id + b"a" * 23 + b"\tlib/example.sens\x00",  # 63 цифри
+        b"100644 blob " + object_id + b"a" * 25 + b"\tlib/example.sens\x00",  # 65 цифр
         b"100644 blob " + object_id + b"\tlib/example.sens\x00junk",
     ):
         if not catches(lambda invalid=invalid: parse_tree_mode(invalid, path)):
