@@ -31,6 +31,14 @@ jobs:
           from pathlib import Path
           x=json.loads(Path('knowledge/d10-v1-semantic-inventory.json').read_text())
           assert x['accounting']['ratified_d10_residents'] == 0
-          assert 'FINITE-BINARY-ARC-CONSISTENCY-FIXPOINT' not in {r['semantic_name'] for r in x['rows']}
-          print('D10 ARC-CONSISTENCY = research HOLD; selected+0; ratified+0; no coordinates')
+          selected = [r for r in x['rows'] if r['semantic_name'] == 'FINITE-BINARY-ARC-CONSISTENCY-FIXPOINT']
+          assert len(selected) == 1
+          r = selected[0]
+          assert r['source_path'] == 'scripts/research_d10_finite_arc_consistency.py'
+          assert r['proposal_id'] == 'D10P-6102'
+          assert r['status'] == 'SELECTED-RESEARCH-CANDIDATE'
+          assert r['proposal_status'] == 'pending-owner-review'
+          assert r['coordinate'] is None and r['ratified_resident'] is False
+          assert r['physical_t5_authorized'] is False
+          print('D10 ARC-CONSISTENCY = selected research, ratified+0; no coordinates')
           PY

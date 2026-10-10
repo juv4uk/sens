@@ -52,7 +52,16 @@ def check(d, inventory, foundation):
     selected={x["semantic_name"].upper() for x in inventory["rows"]}
     lower={str(s).upper() for domain in foundation["domains"].values()
             for s in domain["residents"].values()}
-    assert c["semantic_name"] not in (selected | lower), "A real resident now exists: review before proceeding"
+    assert c["semantic_name"] not in lower
+    admitted=[r for r in inventory["rows"] if r["semantic_name"]==c["semantic_name"]]
+    assert len(admitted)==1, "one historical-law research selection must exist"
+    row=admitted[0]
+    assert row["source_path"]=="knowledge/d10-debruijn-binary-cycle-research-v1.json"
+    assert row["proposal_id"]=="D10P-6105"
+    assert row["status"]=="SELECTED-RESEARCH-CANDIDATE"
+    assert row["proposal_status"]=="pending-owner-review"
+    assert row["coordinate"] is None and row["ratified_resident"] is False
+    assert row["physical_t5_authorized"] is False
     assert PY_ORACLE.exists() and R6RS_ORACLE.exists()
     return {"research":1,"added":0,"main_selected":len(selected),"ratified":0}
 

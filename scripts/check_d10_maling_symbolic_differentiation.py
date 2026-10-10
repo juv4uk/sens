@@ -226,8 +226,18 @@ def check_dossier_data(
     require(dossier.get("reviewer_state") == "PENDING-OWNER-AND-PEER-REVIEW",
             "owner/peer review must remain pending")
 
-    selected_names = {str(r.get("semantic_name", "")).upper() for r in inventory.get("rows", [])}
-    require(CANDIDATE not in selected_names, "candidate already exists in the live D10 inventory")
+    matches_selected = [r for r in inventory.get("rows", [])
+                        if str(r.get("semantic_name", "")).upper() == CANDIDATE]
+    require(len(matches_selected) == 1, "exactly one selected research row required")
+    admitted = matches_selected[0]
+    require(admitted.get("source_path") == "knowledge/d10-maling-symbolic-differentiation-1959-v1.json"
+            and admitted.get("proposal_id") == "D10P-0070"
+            and admitted.get("status") == "SELECTED-RESEARCH-CANDIDATE"
+            and admitted.get("proposal_status") == "pending-owner-review"
+            and admitted.get("coordinate") is None
+            and admitted.get("ratified_resident") is False
+            and admitted.get("physical_t5_authorized") is False,
+            "selected research must preserve exact source, unplaced identity and no runtime authority")
     lower_names = {
         str(name).upper()
         for domain in foundation.get("domains", {}).values()

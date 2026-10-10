@@ -139,7 +139,15 @@ def validate_dossier(doc,inv,foundation):
     assert inv["accounting"]["ratified_d10_residents"]==0
     assert inv["accounting"]["selected_semantic_candidates"]>=doc["snapshot"]["selected"]
     assert len(inv["rows"])==inv["accounting"]["selected_semantic_candidates"]
-    assert SEMANTIC not in {r["semantic_name"] for r in inv["rows"]}
+    selected=[r for r in inv["rows"] if r["semantic_name"]==SEMANTIC]
+    assert len(selected)==1
+    admitted=selected[0]
+    assert admitted["source_path"]=="knowledge/d10-reiter-minimal-diagnoses-20261009.json"
+    assert admitted["proposal_id"]=="D10P-5007"
+    assert admitted["status"]=="SELECTED-RESEARCH-CANDIDATE"
+    assert admitted["proposal_status"]=="pending-owner-review"
+    assert admitted["coordinate"] is None and admitted["ratified_resident"] is False
+    assert admitted["physical_t5_authorized"] is False
     assert doc["snapshot"]["inventory_sha"]=="3db40a04c1094c9ea13b0c8d6099ef1d882cf203"
     assert foundation["status"]=="owner-ratified"
     assert SEMANTIC not in {str(v).upper()

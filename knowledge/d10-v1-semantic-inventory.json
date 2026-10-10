@@ -15690,7 +15690,8 @@
       "coordinate_basis": "UNPLACED",
       "donor_coordinate_authority": "NONE",
       "ratified_resident": false,
-      "physical_t5_authorized": false
+      "physical_t5_authorized": false,
+      "primary_url": "https://dlmf.nist.gov/3.3"
     },
     {
       "stable_id": "d10.evidence.admission.de-bruijn-binary-cycle-.20261011",

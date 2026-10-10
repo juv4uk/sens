@@ -61,7 +61,15 @@ def guard(d,inv,foundation,shell):
     assert inv["accounting"]["ratified_d10_residents"]==0
     assert len({r["stable_id"] for r in rows})==len(rows)
     assert len({r["semantic_name"] for r in rows})==len(rows)
-    assert NAME not in {r["semantic_name"] for r in rows}, "separate owner approval needed for selection"
+    admitted=[r for r in rows if r["semantic_name"]==NAME]
+    assert len(admitted)==1, "research selection must be unique"
+    row=admitted[0]
+    assert row["source_path"]=="knowledge/d10-unique-bounded-modular-lift-20261009.json"
+    assert row["proposal_id"]=="D10P-6106"
+    assert row["status"]=="SELECTED-RESEARCH-CANDIDATE"
+    assert row["proposal_status"]=="pending-owner-review"
+    assert row["coordinate"] is None and row["ratified_resident"] is False
+    assert row["physical_t5_authorized"] is False
     assert re.findall(r'\(check\s+"([A-Z0-9_]+)"',shell)==list(IDS)
     assert "NOT binary SENS runtime" in shell
     return len(rows)

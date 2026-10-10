@@ -123,7 +123,16 @@ def check_dossier(data,inventory,foundation):
     assert len(inventory["rows"])==inventory["accounting"]["selected_semantic_candidates"]
     names={row["semantic_name"] for row in inventory["rows"]}
     assert {"JTMS-STATE-SUBST", "PROVE-RULE"} <= names
-    assert "PROVE-RULE" in names and NAME not in names
+    assert "PROVE-RULE" in names
+    selected=[r for r in inventory["rows"] if r["semantic_name"]==NAME]
+    assert len(selected)==1
+    admitted=selected[0]
+    assert admitted["source_path"]=="knowledge/d10-dung-grounded-argumentation-20261009.json"
+    assert admitted["proposal_id"]=="D10P-4971"
+    assert admitted["status"]=="SELECTED-RESEARCH-CANDIDATE"
+    assert admitted["proposal_status"]=="pending-owner-review"
+    assert admitted["coordinate"] is None and admitted["ratified_resident"] is False
+    assert admitted["physical_t5_authorized"] is False
     assert foundation["status"]=="owner-ratified"
     lower={str(n).upper() for d in foundation["domains"].values()
            for n in d["residents"].values()}
