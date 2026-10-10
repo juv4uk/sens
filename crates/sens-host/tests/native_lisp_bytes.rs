@@ -368,6 +368,11 @@ fn native_pair_car_cdr_match_the_interpreter_reference_witness() {
     // These probes report but never turn a failed stage into a passing test.
     for (name, source) in [
         ("wire-denominator-zero", "(x86-admission-wire-denominator-one? \"0/1\")"),
+        ("ge-lower-zero", "(не-менше? 0 -128)"),
+        ("ge-normalize-zero", "(тотожне? (не-менше? 0 -128) 1)"),
+        ("le-upper-zero", "(не-більше? 0 127)"),
+        ("le-normalize-zero", "(тотожне? (не-більше? 0 127) 1)"),
+        ("eq-number-control", "(тотожне? 1 1)"),
         ("exact-integer-zero", "(x86-admission-exact-integer? 0)"),
         ("disp8-zero", "(x86-admission-disp8? 0)"),
         ("disp8-eight", "(x86-admission-disp8? 8)"),
