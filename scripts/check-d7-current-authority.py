@@ -2,6 +2,10 @@
 import json
 from pathlib import Path
 
+# Python -O прибирає assert: забороняємо удаваний PASS D7.
+if not __debug__:
+    raise SystemExit("D7-CURRENT-AUTHORITY: BLOCKED — Python -O вимикає перевірки")
+
 from domain_tables import D7_TABLE, read_domain_table
 
 root=Path(__file__).resolve().parents[1]
