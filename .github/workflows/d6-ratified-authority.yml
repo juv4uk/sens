@@ -26,3 +26,26 @@ jobs:
     steps:
       - uses: actions/checkout@v5
       - run: python3 scripts/check-d6-current-authority.py
+      - name: Д6 — відхилити оптимізований Python
+        shell: bash
+        run: |
+          set -euo pipefail
+          for mode in cli env; do
+            log="$RUNNER_TEMP/d6-optimized-$mode.log"
+            if [[ "$mode" == cli ]]; then
+              if python3 -O scripts/check-d6-current-authority.py >"$log" 2>&1; then
+                echo "::error::D6 помилково пройшов із Python -O"
+                exit 1
+              fi
+            else
+              if PYTHONOPTIMIZE=2 python3 scripts/check-d6-current-authority.py >"$log" 2>&1; then
+                echo "::error::D6 помилково пройшов із PYTHONOPTIMIZE=2"
+                exit 1
+              fi
+            fi
+            if ! grep -Fq "D6-CURRENT-AUTHORITY: BLOCKED" "$log"; then
+              cat "$log"
+              echo "::error::D6 не повідомив контрольовану відмову"
+              exit 1
+            fi
+          done
