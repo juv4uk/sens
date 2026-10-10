@@ -105,7 +105,7 @@
       ((00000010 (00000101 v))  (00000001 ()))
       
       ((00000010 (00000101 (00000101 v)))  t)
-      (1 (00000001 ())))))
+      )))
 
 (00001001 json-encode-value
   (00001000 (v)
@@ -170,7 +170,7 @@
   (00001000 (key alist)
     (00000111
       ((00101101 key alist) (00000110 (00101101 key alist)))
-      (1 (00000001 ())))))
+      )))
 
 (00001001 msg-role (00001000 (m) (alist-ref (00000001 role) m)))
 (00001001 msg-content (00001000 (m) (alist-ref (00000001 content) m)))
@@ -203,7 +203,7 @@
                     (00000100 (00000001 content) (json-message-content jm)))
               (00000111
                 (tcs (00100111 (00000100 (00000001 tool-calls) (00110111 json->tool-call tcs))))
-                (1 (00000001 ())))))))
+                )))))
 
 (00001001 extract-assistant-message
   (00001000 (response-json)
@@ -233,7 +233,7 @@
            (00101001 (00100111 (00000100 "role" (msg-role m))
                          (00000100 "content" (msg-content m)))
                    (00000111 (tcs (00100111 (00000100 "tool_calls" (00110111 encode-tool-call tcs))))
-                         (1 (00000001 ())))))))))
+                         )))))))
 
 (00001001 bash-tool-schema
   (00001000 ()
@@ -401,7 +401,7 @@
       
       ((00000010 ids)  t)
       ((id-in-list? (00000101 ids) candidates) (all-covered? (00000110 ids) candidates))
-      (1 (00000001 ())))))
+      )))
 
 ; t iff everything BEFORE the final reply ends with
 ; [... assistant(tool-calls) tool* ] where every trailing tool result's
