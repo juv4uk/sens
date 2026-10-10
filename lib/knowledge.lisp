@@ -91,7 +91,7 @@
 (00001001 module-journal-events-onto
   (00001000 (module-name journal acc)
     (00000111
-      ((00000010 journal) () (00101010 acc))
+      ((0100 (00000010 journal)) (00101010 acc))
       ((00000010 journal)  (00101010 acc))
       ((00100010 (00101111 (00000101 journal)) module-name)
        (module-journal-events-onto
@@ -114,7 +114,7 @@
 (00001001 module-journal-has-module?
   (00001000 (module-name journal)
     (00000111
-      ((00000010 journal) () (00000001 ()))
+      
       ((00000010 journal)  (00000001 ()))
       ((00100010 (00101111 (00000101 journal)) module-name) t)
       (t (module-journal-has-module? module-name (00000110 journal))))))
@@ -217,7 +217,7 @@
        (10011100 ((head (00000101 (00000101 rules))))
          (10011100 ((proofs (01111100 module-name (opposite-knowledge-head head))))
            (00000111
-             ((00000010 proofs) () (00000001 ()))
+             
              ((00000010 proofs)  (00000001 ()))
              (t t)))))
       (t (00000001 ())))))
@@ -268,14 +268,14 @@
 (00001011 knowledge-proper-list?
   (00001000 (value)
     (00000111
-      ((00000010 value) () (00000111 ((00000011 value (00000001 ())) t) (t (00000001 ()))))
+      ((0100 (00000010 value)) (00000111 ((00000011 value (00000001 ())) t) (t (00000001 ()))))
       ((00000010 value)  (00000111 ((00000011 value (00000001 ())) t) (t (00000001 ()))))
       (t (knowledge-proper-list? (00000110 value))))))
 
 (00001011 knowledge-terms-valid?
   (00001000 (terms)
     (00000111
-      ((00000010 terms) () (00000111 ((00000011 terms (00000001 ())) t) (t (00000001 ()))))
+      ((0100 (00000010 terms)) (00000111 ((00000011 terms (00000001 ())) t) (t (00000001 ()))))
       ((00000010 terms)  (00000111 ((00000011 terms (00000001 ())) t) (t (00000001 ()))))
       ((knowledge-term-valid? (00000101 terms))
        (knowledge-terms-valid? (00000110 terms)))
@@ -284,20 +284,20 @@
 (00001011 knowledge-term-valid?
   (00001000 (term)
     (00000111
-      ((00000010 term) () t)
-      ((00000010 term) (1) t)
-      ((00000010 (00000101 term)) () (00000111
+      
+      ((00000010 term)  t)
+      ((0100 (00000010 (00000101 term))) (00000111
          ((00000011 (00000101 term) (00000001 var))
           (00000111
-            ((00011100 (00101000 term) 2) 1 (00100011 (00101111 term)))
-            ((00011100 (00101000 term) 2) 0 (00000001 ()))))
+            ((00011100 (00101000 term) 2)  (00100011 (00101111 term)))
+            (t (00000001 ()))))
          ((knowledge-proper-list? term) (knowledge-terms-valid? term))
          (t (00000001 ()))))
       ((00000010 (00000101 term))  (00000111
          ((00000011 (00000101 term) (00000001 var))
           (00000111
-            ((00011100 (00101000 term) 2) 1 (00100011 (00101111 term)))
-            ((00011100 (00101000 term) 2) 0 (00000001 ()))))
+            ((00011100 (00101000 term) 2)  (00100011 (00101111 term)))
+            (t (00000001 ()))))
          ((knowledge-proper-list? term) (knowledge-terms-valid? term))
          (t (00000001 ()))))
       (t (00000001 ())))))
@@ -314,24 +314,24 @@
 (00001011 knowledge-goal-valid?
   (00001000 (goal)
     (00000111
-      ((00000010 goal) () (00000001 ()))
+      
       ((00000010 goal)  (00000001 ()))
       ((00000011 (knowledge-proper-list? goal) (00000001 ())) (00000001 ()))
       ((00000011 (00100011 (00000101 goal)) (00000001 ())) (00000001 ()))
       ((00000011 (00000101 goal) (00000001 not))
        (00000111
-         ((00011100 (00101000 goal) 2) 1 (knowledge-goal-valid? (00101111 goal)))
-         ((00011100 (00101000 goal) 2) 0 (00000001 ()))))
+         ((00011100 (00101000 goal) 2)  (knowledge-goal-valid? (00101111 goal)))
+         (t (00000001 ()))))
       ((00000011 (00000101 goal) (00000001 not?))
        (00000111
-         ((00011100 (00101000 goal) 2) 1 (knowledge-goal-valid? (00101111 goal)))
-         ((00011100 (00101000 goal) 2) 0 (00000001 ()))))
+         ((00011100 (00101000 goal) 2)  (knowledge-goal-valid? (00101111 goal)))
+         (t (00000001 ()))))
       (t (knowledge-terms-valid? (00000110 goal))))))
 
 (00001011 knowledge-goals-valid?
   (00001000 (goals)
     (00000111
-      ((00000010 goals) () (00000111 ((00000011 goals (00000001 ())) t) (t (00000001 ()))))
+      ((0100 (00000010 goals)) (00000111 ((00000011 goals (00000001 ())) t) (t (00000001 ()))))
       ((00000010 goals)  (00000111 ((00000011 goals (00000001 ())) t) (t (00000001 ()))))
       ((knowledge-goal-valid? (00000101 goals))
        (knowledge-goals-valid? (00000110 goals)))
@@ -340,7 +340,7 @@
 (00001011 knowledge-clause-valid?
   (00001000 (clause)
     (00000111
-      ((00000010 clause) () (00000001 ()))
+      
       ((00000010 clause)  (00000001 ()))
       ((00000011 (knowledge-proper-list? clause) (00000001 ())) (00000001 ()))
       ((00000011 (knowledge-goal-valid? (00000101 clause)) (00000001 ())) (00000001 ()))
@@ -364,7 +364,7 @@
       ((01111110 module-name)
        (10011100 ((proofs (01111100 module-name (opposite-knowledge-head (00000101 clause)))))
          (00000111
-           ((00000010 proofs) () (00000111
+           ((0100 (00000010 proofs)) (00000111
               ((00000011 (00000101 (00000101 clause)) (00000001 not)) (00000001 ()))
               ((00000011 (00000101 (00000101 clause)) (00000001 not?)) (00000001 ()))
               (t (01111100 module-name (00100111 (00000001 not?) (00000101 clause))))))
@@ -386,7 +386,7 @@
        (10011100 ((opposite (opposite-knowledge-head (00000101 clause)))
              (proofs (advice-conflict-proof module-name clause)))
          (00000111
-           ((00000010 proofs) () (00100111 (00000001 accepted) (00100111 (00000001 module) module-name) (00100111 (00000001 knowledge) clause)))
+           ((0100 (00000010 proofs)) (00100111 (00000001 accepted) (00100111 (00000001 module) module-name) (00100111 (00000001 knowledge) clause)))
            ((00000010 proofs)  (00100111 (00000001 accepted) (00100111 (00000001 module) module-name) (00100111 (00000001 knowledge) clause)))
            (t
             (00100111 (00000001 conflict)
@@ -446,7 +446,7 @@
 (00001001 knowledge-clauses-valid?
   (00001000 (clauses)
     (00000111
-      ((00000010 clauses) () t)
+      ((0100 (00000010 clauses)) t)
       ((00000010 clauses)  (00000001 ()))
       ((00000010 clauses) 
        (00000111
@@ -457,7 +457,7 @@
 (00001001 advice-negative-head-conflict
   (00001000 (rules all-rules)
     (00000111
-      ((00000010 rules) () (00000001 ()))
+      
       ((00000010 rules)  (00000001 ()))
       (t
        (10011100 ((head (00000101 (00000101 rules))))
@@ -466,7 +466,7 @@
             (10011100 ((positive (00101111 head)))
               (10011100 ((proofs (10000101 positive all-rules)))
                 (00000111
-                  ((00000010 proofs) () (advice-negative-head-conflict (00000110 rules) all-rules))
+                  ((0100 (00000010 proofs)) (advice-negative-head-conflict (00000110 rules) all-rules))
                   ((00000010 proofs)  (advice-negative-head-conflict (00000110 rules) all-rules))
                   (t (00100111 head positive (00000101 proofs)))))))
            (t (advice-negative-head-conflict (00000110 rules) all-rules))))))))
@@ -474,21 +474,21 @@
 (00001001 advice-batch-conflict
   (00001000 (clauses remaining all-rules)
     (00000111
-      ((00000010 remaining) () (10011100 ((global (advice-negative-head-conflict all-rules all-rules)))
+      ((0100 (00000010 remaining)) (10011100 ((global (advice-negative-head-conflict all-rules all-rules)))
          (00000111
-           ((00000010 global) () (00000001 ()))
+           
            ((00000010 global)  (00000001 ()))
            (t (00100111 (00000101 clauses) (00000101 global) (00110000 global))))))
       ((00000010 remaining)  (10011100 ((global (advice-negative-head-conflict all-rules all-rules)))
          (00000111
-           ((00000010 global) () (00000001 ()))
+           
            ((00000010 global)  (00000001 ()))
            (t (00100111 (00000101 clauses) (00000101 global) (00110000 global))))))
       (t
        (10011100 ((opposite (opposite-knowledge-head (00000101 (00000101 remaining)))))
          (10011100 ((proofs (10000101 opposite all-rules)))
            (00000111
-             ((00000010 proofs) () (advice-batch-conflict clauses (00000110 remaining) all-rules))
+             ((0100 (00000010 proofs)) (advice-batch-conflict clauses (00000110 remaining) all-rules))
              ((00000010 proofs)  (advice-batch-conflict clauses (00000110 remaining) all-rules))
              (t (00100111 (00000101 remaining) opposite (00000101 proofs))))))))))
 
@@ -497,7 +497,7 @@
     (00000111
       ((00000011 (00100011 module-name) (00000001 ()))
        (00100111 (00000001 rejected) (00100111 (00000001 reason) (00000001 invalid-module)) (00100111 (00000001 input) clauses)))
-      ((00000010 clauses) () (00100111 (00000001 rejected) (00100111 (00000001 reason) (00000001 invalid-batch)) (00100111 (00000001 input) clauses)))
+      ((0100 (00000010 clauses)) (00100111 (00000001 rejected) (00100111 (00000001 reason) (00000001 invalid-batch)) (00100111 (00000001 input) clauses)))
       ((00000010 clauses)  (00100111 (00000001 rejected) (00100111 (00000001 reason) (00000001 invalid-batch)) (00100111 (00000001 input) clauses)))
       ((00000011 (knowledge-proper-list? clauses) (00000001 ()))
        (00100111 (00000001 rejected) (00100111 (00000001 reason) (00000001 invalid-batch)) (00100111 (00000001 input) clauses)))
@@ -511,7 +511,7 @@
          (10011100 ((conflict (advice-batch-conflict clauses clauses
                                                 (00101001 clauses existing))))
            (00000111
-             ((00000010 conflict) () (00100111 (00000001 accepted)
+             ((0100 (00000010 conflict)) (00100111 (00000001 accepted)
                     (00100111 (00000001 module) module-name)
                     (00100111 (00000001 knowledge) clauses)))
              ((00000010 conflict)  (00100111 (00000001 accepted)
@@ -576,11 +576,11 @@
 (00001001 knowledge-package-entries-valid?
   (00001000 (entries)
     (00000111
-      ((00000010 entries) () t)
+      ((0100 (00000010 entries)) t)
       ((00000010 entries)  (00000001 ()))
       ((00000010 entries) 
        (00000111
-         ((00000010 (00000101 entries)) () (00000001 ()))
+         
          ((00000010 (00000101 entries))  (00000001 ()))
          ((00100011 (00000101 (00000101 entries)))
           (knowledge-package-entries-valid? (00000110 entries)))
@@ -589,7 +589,7 @@
 (00001001 knowledge-package-field
   (00001000 (name package)
     (10011100 ((entry (00101101 name package)))
-      (00000111 ((00000010 entry) () (00000001 ()))
+      (00000111 
             ((00000010 entry)  (00000001 ())) (t (00000110 entry))))))
 
 (00001001 make-knowledge-package
@@ -602,7 +602,7 @@
 (00001001 knowledge-package-decision
   (00001000 (package)
     (00000111
-      ((00000010 package) () (00100111 (00000001 rejected) (00100111 (00000001 reason) (00000001 invalid-package)) (00100111 (00000001 input) package)))
+      ((0100 (00000010 package)) (00100111 (00000001 rejected) (00100111 (00000001 reason) (00000001 invalid-package)) (00100111 (00000001 input) package)))
       ((00000010 package)  (00100111 (00000001 rejected) (00100111 (00000001 reason) (00000001 invalid-package)) (00100111 (00000001 input) package)))
       ((00000011 (knowledge-proper-list? package) (00000001 ()))
        (00100111 (00000001 rejected) (00100111 (00000001 reason) (00000001 invalid-package)) (00100111 (00000001 input) package)))
@@ -661,7 +661,7 @@
     (00000111
       ((00000011 (00100011 module-name) (00000001 ()))
        (00100111 (00000001 rejected) (00100111 (00000001 reason) (00000001 invalid-module)) (00100111 (00000001 input) module-name)))
-      ((00000010 clauses) () (00100111 (00000001 rejected) (00100111 (00000001 reason) (00000001 invalid-batch)) (00100111 (00000001 input) clauses)))
+      ((0100 (00000010 clauses)) (00100111 (00000001 rejected) (00100111 (00000001 reason) (00000001 invalid-batch)) (00100111 (00000001 input) clauses)))
       ((00000010 clauses)  (00100111 (00000001 rejected) (00100111 (00000001 reason) (00000001 invalid-batch)) (00100111 (00000001 input) clauses)))
       ((00000011 (knowledge-proper-list? clauses) (00000001 ()))
        (00100111 (00000001 rejected) (00100111 (00000001 reason) (00000001 invalid-batch)) (00100111 (00000001 input) clauses)))
@@ -690,7 +690,7 @@
     (00000111
       ((00000011 (00100011 module-name) (00000001 ()))
        (00100111 (00000001 rejected) (00100111 (00000001 reason) (00000001 invalid-module)) (00100111 (00000001 input) module-name)))
-      ((00000010 clauses) () (00100111 (00000001 rejected) (00100111 (00000001 reason) (00000001 invalid-batch)) (00100111 (00000001 input) clauses)))
+      ((0100 (00000010 clauses)) (00100111 (00000001 rejected) (00100111 (00000001 reason) (00000001 invalid-batch)) (00100111 (00000001 input) clauses)))
       ((00000010 clauses)  (00100111 (00000001 rejected) (00100111 (00000001 reason) (00000001 invalid-batch)) (00100111 (00000001 input) clauses)))
       ((00000011 (knowledge-proper-list? clauses) (00000001 ()))
        (00100111 (00000001 rejected) (00100111 (00000001 reason) (00000001 invalid-batch)) (00100111 (00000001 input) clauses)))
@@ -734,7 +734,7 @@
          (10011100 ((line (string-through-line
                        (00111010 accumulated chunk) "")))
            (00000111
-             ((00000010 line) () (tcp-read-frame connection (00111010 accumulated chunk)))
+             ((0100 (00000010 line)) (tcp-read-frame connection (00111010 accumulated chunk)))
              ((00000010 line)  (tcp-read-frame connection (00111010 accumulated chunk)))
              (t (00000101 line)))))))))
 
@@ -743,7 +743,7 @@
     (00000111
       ((00000011 (00100011 module-name) (00000001 ()))
        (00100111 (00000001 rejected) (00100111 (00000001 reason) (00000001 invalid-module)) (00100111 (00000001 input) module-name)))
-      ((00000010 clauses) () (00100111 (00000001 rejected) (00100111 (00000001 reason) (00000001 invalid-batch)) (00100111 (00000001 input) clauses)))
+      ((0100 (00000010 clauses)) (00100111 (00000001 rejected) (00100111 (00000001 reason) (00000001 invalid-batch)) (00100111 (00000001 input) clauses)))
       ((00000010 clauses)  (00100111 (00000001 rejected) (00100111 (00000001 reason) (00000001 invalid-batch)) (00100111 (00000001 input) clauses)))
       ((00000011 (knowledge-proper-list? clauses) (00000001 ()))
        (00100111 (00000001 rejected) (00100111 (00000001 reason) (00000001 invalid-batch)) (00100111 (00000001 input) clauses)))
@@ -795,9 +795,9 @@
 (00001001 contains-atom?
   (00001000 (item lst)
     (00000111
-      ((00000010 lst) () (00000001 ()))
+      
       ((00000010 lst)  (00000001 ()))
-      ((00000010 (00000101 lst)) () (00000111
+      ((0100 (00000010 (00000101 lst))) (00000111
          ((00000011 (00000101 lst) item) t)
          (t (01111010 item (00000110 lst)))))
       ((00000010 (00000101 lst))  (00000111
@@ -812,7 +812,7 @@
 (00001001 is-fact?
   (00001000 (clause)
     (00000111
-      ((00000010 (00000110 clause)) ()
+      ((0100 (00000010 (00000110 clause)))
        (00100111 (00000001 clause-kind) (00000001 fact)))
       ((00000010 (00000110 clause)) 
        (00100111 (00000001 clause-kind) (00000001 rule))))))
@@ -824,15 +824,15 @@
 (00001001 collect-facts-about
   (00001000 (item clauses)
     (00000111
-      ((00000010 clauses) () (00000001 ()))
+      
       ((00000010 clauses)  (00000001 ()))
       ((00000010 clauses) 
        (10011100 ((clause (00000101 clauses)))
          (10011100 ((head (00000101 clause)))
            (00000111
-             ((01110111 clause) (clause-kind rule)
+             ((01110111 clause) 
               (01111001 item (00000110 clauses)))
-             ((01110111 clause) (clause-kind fact)
+             ((01110111 clause) 
               (10011100 ((contains (01111010 item head)))
                 (00000111
                   ((00000011 contains (00000001 ())) 
@@ -887,6 +887,6 @@
   (00001000 (rule-head)
     (10011100 ((entry (00101101 rule-head *usage-counts*)))
       (00000111
-        ((00000010 entry) () 0)
-        ((00000010 entry) (1) 0)
+        
+        ((00000010 entry)  0)
         (t (00000110 entry))))))
