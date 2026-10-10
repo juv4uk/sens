@@ -1,0 +1,94 @@
+name: Ukrainian D3 ATOM physical T5 migration
+
+on:
+  pull_request:
+    paths:
+      - "tests/fixtures/migration-atom-uk-cohort/**"
+      - ".github/workflows/migration-atom-uk-t5.yml"
+      - "scripts/verify_uk_t5_triplet.py"
+      - "scripts/sens_t5_codec.py"
+      - "lib/domains/d3.lisp"
+  push:
+    branches: [main]
+    paths:
+      - "tests/fixtures/migration-atom-uk-cohort/**"
+      - ".github/workflows/migration-atom-uk-t5.yml"
+      - "scripts/verify_uk_t5_triplet.py"
+      - "scripts/sens_t5_codec.py"
+      - "lib/domains/d3.lisp"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  physical-and-uk-oracle:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v5
+      - uses: dtolnay/rust-toolchain@stable
+
+      - name: Verify current canonical Ukrainian source, physical bytes and exact view
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 scripts/verify_uk_t5_triplet.py \
+            --lisp tests/fixtures/migration-atom-uk-cohort/atom-empty.lisp \
+            --sens tests/fixtures/migration-atom-uk-cohort/atom-empty.sens \
+            --view tests/fixtures/migration-atom-uk-cohort/atom-empty \
+            > "$RUNNER_TEMP/atom-uk-triplet.json"
+          python3 - "$RUNNER_TEMP/atom-uk-triplet.json" <<'PY'
+          from pathlib import Path
+          import hashlib
+          import json
+          import subprocess
+          import sys
+          sys.path.insert(0, "scripts")
+          from sens_t5_codec import decode_bytes, encode_words
+          original = Path("tests/fixtures/migration-atom-cohort")
+          migrated = Path("tests/fixtures/migration-atom-uk-cohort")
+          receipt = json.loads(Path(sys.argv[1]).read_text(encoding="utf-8"))
+          assert receipt["canonical_uk_roundtrip"] is True
+          assert receipt["canonical_view_roundtrip"] is True
+          assert receipt["physical_T5_roundtrip"] is True
+          assert receipt["runtime_oracle_admitted_by_this_audit"] is False
+          assert receipt["physical_bytes"] == 4 and receipt["typed_word_count"] == 5
+          assert original.joinpath("atom-empty.lisp").read_bytes() == migrated.joinpath("atom-empty").read_bytes()
+          original_blob = subprocess.check_output(["git","hash-object",str(original / "atom-empty.lisp")],text=True).strip()
+          assert original_blob == "11c79323a22f4ba8829b0e4798a06ae6b1ec5178"
+          source_blob = subprocess.check_output(["git","hash-object",str(original / "atom-empty.sens")],text=True).strip()
+          assert source_blob == "0453a5ce1e291dedccaa51ec9593d71bc0205dc3"
+          physical = migrated.joinpath("atom-empty.sens").read_bytes()
+          assert physical == original.joinpath("atom-empty.sens").read_bytes()
+          assert physical == bytes.fromhex("643806a1")
+          assert decode_bytes(physical) == ["10","010","00","000","01"]
+          assert encode_words(decode_bytes(physical)) == physical
+          assert hashlib.sha256(physical).hexdigest() == "4270498d024be1e03a69800223d3dac8e04d9b05deb6fc18c6986b0329e211f0"
+          print("ORIGINAL_BLOB_AND_CURRENT_UK_T5_VIEW_PASS; release NOT certified by this script")
+          PY
+
+      - name: Original Rust T5 oracle stays green
+        run: cargo test --locked -q -p sens --test migration_atom_cohort
+
+      - name: Execute both actual SENS CLI entrypoints on migrated physical bytes
+        shell: bash
+        run: |
+          set -euo pipefail
+          cargo build --locked -q -p sens-cli --bin sens --bin sens-trit
+          migrated=tests/fixtures/migration-atom-uk-cohort/atom-empty.sens
+          original=tests/fixtures/migration-atom-cohort/atom-empty.sens
+          cmp "$original" "$migrated"
+          target/debug/sens "$original" > "$RUNNER_TEMP/old-atom.out"
+          target/debug/sens "$migrated" > "$RUNNER_TEMP/new-atom.out"
+          target/debug/sens-trit eval "$migrated" > "$RUNNER_TEMP/atom-trit.out"
+          target/debug/sens-trit open "$migrated" > "$RUNNER_TEMP/atom-view.out"
+          cmp "$RUNNER_TEMP/old-atom.out" "$RUNNER_TEMP/new-atom.out"
+          cmp "$RUNNER_TEMP/new-atom.out" "$RUNNER_TEMP/atom-trit.out"
+          cmp tests/fixtures/migration-atom-uk-cohort/atom-empty "$RUNNER_TEMP/atom-view.out"
+          test "$(cat "$RUNNER_TEMP/new-atom.out")" = "1"
+
+      - name: Verify no source corpus mutation
+        shell: bash
+        run: |
+          test -z "$(git status --porcelain --untracked-files=all)"
