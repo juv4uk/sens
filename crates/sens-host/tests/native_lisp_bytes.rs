@@ -338,6 +338,123 @@ fn lisp_owned_pair_memory_addressing_has_exact_rdi_disp8_bytes() {
     assert_eq!(car_store.value.to_string(), "(72 137 71 0)");
 }
 
+fn core4_machine_probe_session() -> Session {
+    let mut session = Session::default();
+    load_core_library(&mut session).expect("Core4 must load for focused machine probes");
+    load_lisp_file("lib/machine/layout/pair-x86-64.lisp", &mut session);
+    load_lisp_file("lib/machine/encoding/x86-64.lisp", &mut session);
+    load_lisp_file("lib/machine/admission/x86-64.lisp", &mut session);
+    load_lisp_file("lib/machine/lowering/semantic-x86-64.lisp", &mut session);
+    session
+}
+
+#[test]
+fn core4_probe_append_before_native_lowering() {
+    let _serial = test_lock();
+    let mut session = Session::default();
+    load_core_library(&mut session).expect("Core4 must load");
+    eval_program("(приєднати (як-є (2 3)) (як-є (4 5)))", &mut session)
+        .unwrap_or_else(|error| panic!("Core4 append probe failed before machine lowering: {error}"));
+}
+
+#[test]
+fn core4_probe_bounded_pair_store_lowering() {
+    let _serial = test_lock();
+    let mut session = core4_machine_probe_session();
+    eval_program("(x86-lower-bounded-pair-store-u64-forms 2 3)", &mut session)
+        .unwrap_or_else(|error| panic!("bounded pair store lowering failed: {error}"));
+}
+
+#[test]
+fn core4_probe_cons_car_lowering() {
+    let _serial = test_lock();
+    let mut session = core4_machine_probe_session();
+    eval_program("(x86-lower-cons-car-u64-forms 2 3)", &mut session)
+        .unwrap_or_else(|error| panic!("CONS+CAR lowering failed: {error}"));
+}
+
+#[test]
+fn core4_probe_register_lookup() {
+    let _serial = test_lock();
+    let mut session = core4_machine_probe_session();
+    eval_program("(x86-reg-code (як-є rax))", &mut session)
+        .unwrap_or_else(|error| panic!("register lookup failed: {error}"));
+}
+
+#[test]
+fn core4_probe_instruction_pattern_match() {
+    let _serial = test_lock();
+    let mut session = core4_machine_probe_session();
+    eval_program(
+        "(x86-admission-pattern-match? (як-є (mov-r64-imm64 register immediate)) (як-є (mov-r64-imm64 rax 2)))",
+        &mut session,
+    )
+    .unwrap_or_else(|error| panic!("single instruction pattern match failed: {error}"));
+}
+
+#[test]
+fn core4_probe_instruction_against_pattern_table() {
+    let _serial = test_lock();
+    let mut session = core4_machine_probe_session();
+    eval_program(
+        "(x86-admitted-instruction-against? x86-admitted-instruction-patterns (як-є (mov-r64-imm64 rax 2)))",
+        &mut session,
+    )
+    .unwrap_or_else(|error| panic!("instruction-against-pattern-table failed: {error}"));
+}
+
+#[test]
+fn core4_probe_admitted_program_predicate() {
+    let _serial = test_lock();
+    let mut session = core4_machine_probe_session();
+    eval_program("(x86-admitted-program? (x86-lower-cons-car-u64-forms 2 3))", &mut session)
+        .unwrap_or_else(|error| panic!("admitted-program predicate failed: {error}"));
+}
+
+#[test]
+fn core4_probe_encode_one_instruction() {
+    let _serial = test_lock();
+    let mut session = core4_machine_probe_session();
+    eval_program(
+        "(x86-encode-admitted-instruction (перше (x86-lower-cons-car-u64-forms 2 3))",
+        &mut session,
+    )
+    .unwrap_or_else(|error| panic!("single admitted instruction encoding failed: {error}"));
+}
+
+#[test]
+fn core4_probe_map_instruction_encodings() {
+    let _serial = test_lock();
+    let mut session = core4_machine_probe_session();
+    eval_program(
+        "(map x86-encode-admitted-instruction (x86-lower-cons-car-u64-forms 2 3))",
+        &mut session,
+    )
+    .unwrap_or_else(|error| panic!("map of admitted instruction encodings failed: {error}"));
+}
+
+#[test]
+fn core4_probe_flatten_instruction_encodings() {
+    let _serial = test_lock();
+    let mut session = core4_machine_probe_session();
+    eval_program(
+        "(x86-encode-program (map x86-encode-admitted-instruction (x86-lower-cons-car-u64-forms 2 3)))",
+        &mut session,
+    )
+    .unwrap_or_else(|error| panic!("program encoding/flattening failed: {error}"));
+}
+
+#[test]
+fn core4_probe_admitted_program_encoding() {
+    let _serial = test_lock();
+    let mut session = core4_machine_probe_session();
+    eval_program(
+        "(x86-encode-admitted-program (x86-lower-cons-car-u64-forms 2 3))",
+        &mut session,
+    )
+    .unwrap_or_else(|error| panic!("admitted program encoding failed: {error}"));
+}
+
 #[test]
 fn native_pair_car_cdr_match_the_interpreter_reference_witness() {
     let _serial = test_lock();
