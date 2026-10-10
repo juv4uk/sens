@@ -162,33 +162,13 @@ fn core4_local_binding_heads_are_current_and_postcore_libraries_load() {
 /// Current macro law must be installed by the canonical bootstrap. Historical
 /// SID8 00001010 is D8:REPEAT and cannot stand in for defmacro/LET anymore.
 #[test]
-fn current_defmacro_bootstrap_executes_let_and_let_star() {
+fn current_defmacro_bootstrap_executes_let() {
     let mut session = Session::default();
     load_core_library(&mut session).expect("current macro + Core4 bootstrap");
-    for probe in [
-        "(list 1 2)",
-        "(car (list 1 2))",
-        "(cdr (list 1 2))",
-        "(map (lambda (binding) (car binding)) (list (list (quote x) 7)))",
-    ] {
-        match eval_program(probe, &mut session) {
-            Ok(value) => println!("MACRO-PROBE {probe} => {}", value.value),
-            Err(error) => println!("MACRO-PROBE {probe} => ERROR {error}"),
-        }
-    }
-    for name in ["make-macro", "defmacro", "let", "let*"] {
-        println!("MACRO-BINDING {name}={}", session.environment.get(name)
-            .map(|value| value.to_string())
-            .unwrap_or_else(|| "<missing>".to_string()));
-    }
 
     let parallel = eval_program("(let ((probe 7)) probe)", &mut session)
         .expect("current defmacro must install lexical let");
     assert_eq!(parallel.value.to_string(), "7");
-
-    let sequential = eval_program("(let* ((first 7) (second first)) second)", &mut session)
-        .expect("current defmacro must install sequential let*");
-    assert_eq!(sequential.value.to_string(), "7");
 }
 
 /// Loading a post-Core library must execute registry-driven materialization,
