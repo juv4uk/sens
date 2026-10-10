@@ -16,6 +16,21 @@ permissions:
   contents: read
 
 jobs:
+  source-file-guard:
+    name: "SENS: гвардія нових важливих файлів"
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+      - name: "Негативні свідки без assert і Python -O"
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -O tools/check_source_policy.py --self-test
+          python3 -O tools/check_source_policy.py
+
   critical:
     name: portable critical gates
     runs-on: ubuntu-24.04
