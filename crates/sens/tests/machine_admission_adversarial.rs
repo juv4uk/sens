@@ -116,6 +116,7 @@ fn x86_xmm_name_predicate_returns_exact_d1_for_known_and_unknown_names() {
 
     for (source, expected) in [
         ("(x86-xmm-name? xmm0)", true),
+        ("(x86-xmm-name? xmm10)", true),
         ("(x86-xmm-name? xmm15)", true),
         ("(x86-xmm-name? notaxmm)", false),
         ("(x86-xmm-name? 42)", false),
