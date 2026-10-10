@@ -55,6 +55,14 @@ jobs:
           retention-days: 1
       - name: Pin exact x86 encoder source
         run: test "$(git hash-object lib/machine/encoding/x86-64.lisp)" = "d48fb32def0933eaf5c62bff5c16f396fcc55431"
+      - name: Diagnose x86 encoder callability stages
+        shell: bash
+        run: |
+          set -uo pipefail
+          cargo test --locked -p sens --test machine_asm_differential x86_encoder_callability_stage_probe -- --exact --ignored --nocapture
+          status=$?
+          echo "X86_STAGE_PROBE_EXIT=$status"
+          exit 0
       - name: Exact-domain x86 CPU witness
         run: cargo test --locked -p sens --test machine_exact_domain_cpu -- --nocapture
       - name: Exact-D1 register and instruction admission
