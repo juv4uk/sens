@@ -1317,7 +1317,7 @@
 
 (00001001 x86-encode-vex3-xmm-xmm-xmm
   (00001000 (mmmmm w l pp opcode dst src1 src2)
-    (10011100
+    (let
       ((dst-code (x86-xmm-reg-code dst))
        (src1-code (x86-xmm-reg-code src1))
        (src2-code (x86-xmm-reg-code src2)))
