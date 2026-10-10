@@ -197,6 +197,36 @@ mod tests {
     }
 
     #[test]
+    fn migrated_guard_classifiers_return_only_exact_d1_predicate_bits() {
+        let mut session = load_session().expect("load Lisp-owned guard classifiers");
+        for (name, admitted) in [
+            ("guard-decision?", &["allow", "warn", "reject", "unknown"][..]),
+            ("guard-evidence-status?", &["confirmed", "partial", "unresolved", "broken"][..]),
+        ] {
+            for symbol in admitted {
+                let source = format!("({name} (quote {symbol}))");
+                let result = eval_program(&source, &mut session)
+                    .unwrap_or_else(|error| panic!("{source}: {error:?}"));
+                assert_eq!(
+                    result.value.as_predicate_bit(),
+                    Some(true),
+                    "{source} must return exact D1:YES, not historical t"
+                );
+            }
+            for symbol in ["unexpected-value", "allow-invalid", "absent"] {
+                let source = format!("({name} (quote {symbol}))");
+                let result = eval_program(&source, &mut session)
+                    .unwrap_or_else(|error| panic!("{source}: {error:?}"));
+                assert_eq!(
+                    result.value.as_predicate_bit(),
+                    Some(false),
+                    "{source} must return exact D1:NO, not structural ()"
+                );
+            }
+        }
+    }
+
+    #[test]
     fn load_session_alone_leaves_guard_wsm_functions_ready_to_call() {
         let mut session = load_session().unwrap();
         let result = eval_program("(guard-decision? (quote allow))", &mut session);
