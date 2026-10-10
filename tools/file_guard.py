@@ -36,8 +36,16 @@ def command(*args: str) -> bytes:
 
 
 def paths_nul(raw: bytes) -> list[str]:
+    # Порожній Git diff допустимий; кожний непорожній запис з -z завершується NUL.
+    if not raw:
+        return []
+    if not raw.endswith(b"\x00"):
+        fail("Обірваний Git NUL-перелік: немає кінцевого NUL")
+    parts = raw[:-1].split(b"\x00")
+    if any(not part for part in parts):
+        fail("Порожнє поле у Git NUL-переліку")
     try:
-        return [value.decode("utf-8") for value in raw.split(b"\x00") if value]
+        return [value.decode("utf-8") for value in parts]
     except UnicodeDecodeError as exc:
         fail(f"Некоректний UTF-8 у Git-шляху: {exc}")
 
@@ -106,6 +114,24 @@ def violations(added: list[str], tracked_python: list[str],
 
 
 def self_test() -> None:
+    # Іспит NUL-транспорту: жодне обрізання чи порожнє поле не є PASS.
+    if paths_nul(b"") != []:
+        fail("Порожній Git NUL-перелік спотворено")
+    valid_path = "witnesses/доказ.lisp"
+    if paths_nul(valid_path.encode("utf-8") + b"\x00") != [valid_path]:
+        fail("Коректний UTF-8 Git NUL-шлях відхилено")
+    for malformed in (
+        b"knowledge/broken.json",
+        b"lib/ok.lisp\x00\x00",
+        b"\x00",
+        b"lib/ok.lisp\x00\x00tools/uncensused.py\x00",
+        b"\xff\x00",
+    ):
+        try:
+            paths_nul(malformed)
+        except ValueError:
+            continue
+        fail(f"Пошкоджений Git NUL-перелік допущено: {malformed!r}")
     entry = {
         "path": "tools/check.py", "independence_status": "foreign",
         "purpose": "Тимчасова незалежна від семантики гвардія Git",
