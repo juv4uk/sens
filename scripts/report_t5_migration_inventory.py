@@ -26,7 +26,7 @@ SCHEMA = "sens-t5-migration-inventory/v1"
 # Незмінна база цього зрізу; перегляд/re-pin потребує окремого PR і рев'ю.
 PINNED_BASE_SHA = "33bd5a32877f63de78eee28b0f97ea629e83a4fa"
 
-EXT = {".rs", ".py", ".sh", ".yml", ".yaml", ".toml"}
+EXT = {".rs", ".py", ".sh", ".yml", ".yaml", ".toml", ".lisp"}
 EXCLUDE_PREFIXES = (
     "vendor/", "target/", "archive/", "docs/",
     "knowledge/", "memory/", "дослідження/", "public/",
@@ -74,6 +74,22 @@ ROLE_OVERRIDES = {
         ("consumer", "dense exact-width source-payload packing; no T5 framing"),
     "crates/sens-cli/src/bin/sens-trit.rs":
         ("producer", "CLI delegates byte encoding/decoding to physical T5 codec"),
+    ".github/workflows/admit-t5-migration.yml":
+        ("validator", "CI workflow orchestration; not a physical-byte producer"),
+    ".github/workflows/guarded-t5-mirror-transaction.yml":
+        ("validator", "CI workflow orchestration; not a physical-byte producer"),
+    ".github/workflows/migrate-entrypoint.yml":
+        ("validator", "CI workflow orchestration; not a physical-byte producer"),
+    ".github/workflows/migrate-one-to-sens.yml":
+        ("validator", "CI workflow orchestration; not a physical-byte producer"),
+    ".github/workflows/migrate-selected-lisp.yml":
+        ("validator", "CI workflow orchestration; not a physical-byte producer"),
+    ".github/workflows/migrate-sens-cli.yml":
+        ("validator", "CI workflow orchestration; not a physical-byte producer"),
+    ".github/workflows/migrate-t5-batch.yml":
+        ("validator", "CI workflow orchestration; not a physical-byte producer"),
+    ".github/workflows/publish-binary-master.yml":
+        ("validator", "CI workflow orchestration; not a physical-byte producer"),
 }
 
 T5_AUTHORITY_REASONS = {
@@ -215,6 +231,10 @@ def classify(path: str, root: Path) -> dict:
         status = "BLOCKED"
         authority = NON_T5_COMPONENTS[path]
         reason = "пов'язане щільне пакування payload без T5 framing; не фізичний T5 codec"
+    elif path.endswith(".lisp"):
+        status = "BLOCKED"
+        authority = "UNKNOWN"
+        reason = "Lisp-ланка потребує незалежного доказу producer/consumer T5"
     elif role == "unknown" or lane == "UNKNOWN":
         # Не оголошуємо шлях дослідним/міграційним, доки немає ролі й owner lane.
         status = "BLOCKED"
@@ -237,7 +257,7 @@ def classify(path: str, root: Path) -> dict:
         authority = "UNKNOWN"
         reason = "немає достатнього доказу → BLOCKED"
 
-    canonical = "*.sens" if "T5" in codec else ("*.senc" if "SENC" in codec else "n/a")
+    canonical = "n/a" if path.endswith(".lisp") else ("*.sens" if "T5" in codec else ("*.senc" if "SENC" in codec else "n/a"))
     return {
         "schema": SCHEMA,
         "repository": "juv4uk/sens",
@@ -247,7 +267,7 @@ def classify(path: str, root: Path) -> dict:
         "extension": Path(path).suffix.lower(),
         "codec": codec,
         "authority": authority,
-        "dependency": status_dep(status),
+        "dependency": "#5444" if path.endswith(".lisp") and status == "BLOCKED" else status_dep(status),
         "base_sha": None,  # заповнюється у build()
         "owner_lane": lane,
         "migration_status": status,
