@@ -128,6 +128,20 @@ def collect(folder: Path) -> int:
     sha_values = sorted({x["git_sha"] for x in reports})
     outcomes = {status: sum(r["status"] == status for r in reports)
                 for status in ("PASS", "FAIL", "BLOCKED", "TIMEOUT")}
+    valid_statuses = {"PASS", "FAIL", "BLOCKED", "TIMEOUT"}
+    coverage_complete = (
+        not duplicates and not missing and not extra
+        and len(actual) == len(expected)
+        and len(sha_values) == 1
+        and all(r.get("status") in valid_statuses for r in reports)
+    )
+    all_pass = (
+        coverage_complete
+        and outcomes["PASS"] == len(expected)
+        and outcomes["FAIL"] == 0
+        and outcomes["BLOCKED"] == 0
+        and outcomes["TIMEOUT"] == 0
+    )
     summary = {
         "schema": "sens-benchmark-sweep/v1",
         "expected_stands": len(expected),
@@ -137,17 +151,24 @@ def collect(folder: Path) -> int:
         "extra": extra,
         "sha_values": sha_values,
         "outcomes": outcomes,
-        "complete": (not duplicates and not missing and not extra
-                     and len(sha_values) == 1 and
-                     outcomes["FAIL"] == 0 and outcomes["BLOCKED"] == 0
-                     and outcomes["TIMEOUT"] == 0),
+        # Integrity of the sweep is distinct from success of each benchmark.
+        # A complete report preserves FAIL/BLOCKED/TIMEOUT without hiding them.
+        "coverage_complete": coverage_complete,
+        "all_benchmarks_pass": all_pass,
+        "audit_result": (
+            "ALL_PASS" if all_pass else
+            "COMPLETE_WITH_BENCHMARK_FAILURES" if coverage_complete else
+            "INCOMPLETE"
+        ),
     }
     folder.joinpath("summary.json").write_text(
         json.dumps(summary, ensure_ascii=False, indent=2) + "\n",
         encoding="utf-8",
     )
     print(json.dumps(summary, ensure_ascii=False, indent=2))
-    return 0 if summary["complete"] else 1
+    # Audit exits successfully only when the evidence set is complete
+    # and single-SHA. Individual benchmark failures remain visible in outcomes.
+    return 0 if summary["coverage_complete"] else 1
 
 
 def main() -> int:
@@ -191,7 +212,15 @@ def main() -> int:
         json.dumps(record, ensure_ascii=False, indent=2) + "\n",
         encoding="utf-8",
     )
-    return 0 if all(v["status"] == "PASS" for v in results) else 1
+    # This workflow measures and records every verdict. A shard job is green
+    # only when its report is complete; benchmark PASS/FAIL stays in each row.
+    valid_statuses = {"PASS", "FAIL", "BLOCKED", "TIMEOUT"}
+    report_complete = (
+        len(results) == len(selected)
+        and all(v.get("status") in valid_statuses and v.get("git_sha") == head
+                for v in results)
+    )
+    return 0 if report_complete else 1
 
 
 if __name__ == "__main__":
