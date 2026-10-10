@@ -15,6 +15,7 @@ ART = ROOT / "knowledge/d10-class-of-proposal-v1.json"
 LEDGER = ROOT / "knowledge/d10-proposal-ledger.tsv"
 FOUND = ROOT / "knowledge/d1-d9-foundation.json"
 INV = ROOT / "knowledge/d10-v1-semantic-inventory.json"
+HISTORY = ROOT / "knowledge/d10-selection-transition-history.json"
 ORACLE = ROOT / "knowledge/d10-clos-slot-observation-v1.json"
 ORACLE_LISP = ROOT / "tests/oracles/d10_clos_slot_states.lisp"
 PROPOSAL_ID = "D10P-4870"
@@ -53,6 +54,7 @@ def check(
     ledger: list[dict[str, str]],
     foundation: dict[str, Any],
     inventory: dict[str, Any],
+    history: dict[str, Any],
     oracle: dict[str, Any],
     *,
     foundation_sha: str,
@@ -90,7 +92,8 @@ def check(
             "width": "D10",
             "donor_provenance": DONOR_PROVENANCE,
             "dedup_check": (
-                f"D1-D9@{foundation_sha}=PENDING;D10@{inventory_sha}=PENDING"
+                f"D1-D9@{foundation_sha}=PENDING;D10@"
+                f"{data.get('source_snapshot', {}).get('d10_inventory_blob_sha', '')}=PENDING"
             ),
             "blocked_source": "NOT-A-MIGRATION-BLOCK",
             "status": "pending-review",
@@ -141,13 +144,28 @@ def check(
     expected_snapshot = {
         "checked_against_commit": DONOR_COMMIT,
         "d1_d9_foundation_blob_sha": foundation_sha,
-        "d10_inventory_blob_sha": inventory_sha,
-        "selected_d10_candidates": inventory.get("accounting", {}).get("selected_semantic_candidates"),
+        "d10_inventory_blob_sha": data.get("source_snapshot", {}).get("d10_inventory_blob_sha"),
+        "selected_d10_candidates": data.get("source_snapshot", {}).get("selected_d10_candidates"),
         "exact_name_matches": {"d1_d9": False, "d10": False},
     }
     for key, value in expected_snapshot.items():
         if snapshot.get(key) != value:
             errors.append(f"source snapshot drift: {key}")
+    # A proposal references the inventory at its historically checked donor
+    # commit. That Git blob must remain in the append-only selection chain,
+    # rather than being rewritten each time an unrelated D10 law is selected.
+    source_sha = snapshot.get("d10_inventory_blob_sha")
+    archival = [transition for transition in history.get("transitions", [])
+                if transition.get("resulting_inventory_blob_sha") == source_sha]
+    if len(archival) != 1:
+        errors.append("historical inventory snapshot missing from selection chain")
+    elif archival[0].get("resulting_selected") != snapshot.get("selected_d10_candidates"):
+        errors.append("historical snapshot candidate count mismatch")
+    transitions = history.get("transitions", [])
+    if not transitions or transitions[-1].get("resulting_inventory_blob_sha") != inventory_sha:
+        errors.append("current inventory not anchored by terminal selection SHA")
+    elif transitions[-1].get("resulting_selected") != inventory.get("accounting", {}).get("selected_semantic_candidates"):
+        errors.append("current inventory count not anchored by terminal selection history")
     if data.get("source", {}).get("donor_commit") != DONOR_COMMIT:
         errors.append("donor source commit drift")
     if data.get("source", {}).get("observation_artifact_blob_sha") != oracle_sha:
@@ -170,6 +188,7 @@ def main() -> int:
     foundation = load(FOUND)
     inventory = load(INV)
     oracle = load(ORACLE)
+    history = load(HISTORY)
     pins = {
         "foundation_sha": git_blob_sha(FOUND),
         "inventory_sha": git_blob_sha(INV),
@@ -177,7 +196,7 @@ def main() -> int:
         "oracle_lisp_sha": git_blob_sha(ORACLE_LISP),
         "oracle_lisp": ORACLE_LISP.read_text(encoding="utf-8"),
     }
-    errors = check(data, ledger, foundation, inventory, oracle, **pins)
+    errors = check(data, ledger, foundation, inventory, history, oracle, **pins)
     if errors:
         for error in errors:
             print(f"CLASS-OF-PROPOSAL: BLOCK {error}", file=sys.stderr)
@@ -192,7 +211,7 @@ def main() -> int:
         bad = copy.deepcopy(data); bad["physical_t5_authorized"] = True; mutants.append(("T5 authorization", bad))
         missed = [
             name for name, mutant in mutants
-            if not check(mutant, ledger, foundation, inventory, oracle, **pins)
+            if not check(mutant, ledger, foundation, inventory, history, oracle, **pins)
         ]
         if missed:
             print(
