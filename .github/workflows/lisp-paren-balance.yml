@@ -10,11 +10,13 @@ on:
     paths:
       - "lib/**/*.lisp"
       - "scripts/check-lisp-paren-balance.py"
+      - "scripts/test-critical-lisp-source-guard.py"
       - ".github/workflows/lisp-paren-balance.yml"
   pull_request:
     paths:
       - "lib/**/*.lisp"
       - "scripts/check-lisp-paren-balance.py"
+      - "scripts/test-critical-lisp-source-guard.py"
       - ".github/workflows/lisp-paren-balance.yml"
   workflow_dispatch:
 
@@ -25,5 +27,7 @@ jobs:
     timeout-minutes: 5
     steps:
       - uses: actions/checkout@v5
+      - name: Critical source guard mutation self-test
+        run: python3 scripts/test-critical-lisp-source-guard.py
       - name: Lisp paren balance (lib/)
         run: python3 scripts/check-lisp-paren-balance.py --paths lib
