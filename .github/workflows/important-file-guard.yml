@@ -1,30 +1,51 @@
-name: SENS important file guard
+name: SENS file authority guard
 
 on:
   pull_request:
   push:
     branches: [main]
+  workflow_dispatch:
 
 permissions:
   contents: read
 
+concurrency:
+  group: sens-file-authority-${{ github.sha }}
+  cancel-in-progress: false
+
 jobs:
-  important-file-guard:
-    runs-on: ubuntu-latest
+  file-authority:
+    name: Fail-closed file census
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v5
         with:
           fetch-depth: 0
           persist-credentials: false
-      - name: Fail-closed guard self-test (also under python -O)
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.x'
+      - name: Positive and negative witnesses, including optimized Python
         run: |
           set -euo pipefail
-          python3 -O tools/important_file_guard.py --self-test
           python3 tools/important_file_guard.py --self-test
-      - name: Reject new foreign important files and unregistered Python
+          python3 -O tools/important_file_guard.py --self-test
+      - name: Current Git delta and complete tools Python census
         env:
-          BASE_SHA: ${{ github.event.pull_request.base.sha || github.event.before }}
-          HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+          EVENT_BASE_SHA: ${{ github.event_name == 'pull_request' && github.event.pull_request.base.sha || github.event.before || '' }}
+          HEAD_SHA: ${{ github.sha }}
         run: |
           set -euo pipefail
-          python3 -O tools/important_file_guard.py "$BASE_SHA" "$HEAD_SHA"
+          base="${EVENT_BASE_SHA:-}"
+          if [[ "$GITHUB_EVENT_NAME" == "workflow_dispatch" ]]; then
+            base="$(git rev-parse HEAD^)" || {
+              echo "NAMED_FAIL: DISPATCH_BASE_UNAVAILABLE" >&2
+              exit 2
+            }
+          fi
+          [[ "$base" =~ ^[0-9a-f]{40}$ && "$base" != "0000000000000000000000000000000000000000" ]] || {
+            echo "NAMED_FAIL: EVENT_BASE_UNAVAILABLE" >&2
+            exit 2
+          }
+          python3 -O tools/important_file_guard.py "$base" "$HEAD_SHA"

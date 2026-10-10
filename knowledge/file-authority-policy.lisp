@@ -13,7 +13,7 @@
      (new-python-root . "tools/")
      (new-python-independence-status . foreign)
      (foreign-census . "knowledge/foreign-tools-census.lisp")
-     (file-guard . "tools/file-authority-guard.sh")
+     (file-guard . "tools/important_file_guard.py")
      (baseline-existing-paths . grandfathered-migration-debt)
      (baseline-important-noncanonical-count . 261)
      (baseline-python-count . 741)
