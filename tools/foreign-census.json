@@ -2,13 +2,6 @@
   "schema": "sens-foreign-tool-census/1",
   "tools": [
     {
-      "path": "tools/check_source_policy.py",
-      "independence_status": "foreign",
-      "purpose": "Тимчасова пофайлова перевірка стану Git проти замороженого baseline та реєстру чужомовних механізмів.",
-      "migration_plan": "Перенести повне сканування Git-дерева, перевірку обліку foreign-файлів і відмови на відсутній census до SENS .lisp/.sens з незалежним hosted parity; замінити Python лише після атестації фізичного T5 виконання.",
-      "owner_issue": "#5398"
-    },
-    {
       "path": "tools/file_guard.py",
       "independence_status": "foreign",
       "purpose": "Перехідна механічна гвардія нових шляхів Git; не тлумачить і не затверджує закони D1–D9 або фізичний T5.",
