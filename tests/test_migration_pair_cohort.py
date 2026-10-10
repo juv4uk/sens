@@ -56,8 +56,8 @@ class PairCohort(unittest.TestCase):
         )
         cls.text7 = module.build_text7(table, ARGS["text7"])
 
-    def project(self, source: str):
-        resolver = module.Resolver(self.legacy, self.my, self.upper)
+    def project(self, source: str, *, source_era: str = "auto"):
+        resolver = module.Resolver(self.legacy, self.my, self.upper, source_era=source_era)
         return module.migrate_file(source, resolver, self.text7), resolver.counts
 
     def test_pinned_legacy_car_cdr_cons_successors_are_proven(self):
@@ -66,11 +66,16 @@ class PairCohort(unittest.TestCase):
         self.assertEqual(self.legacy["00000110"][:2], ("011", "D3"))
         self.assertEqual(self.legacy["00000001"][:2], ("001", "D3"))
 
+    def test_ambiguous_historical_eight_bit_heads_fail_without_provenance(self):
+        for stem in CASES:
+            with self.subTest(stem=stem), self.assertRaises(module.MigrationError):
+                self.project((FIXTURES / f"{stem}.lisp").read_text(encoding="utf-8"))
+
     def test_actual_three_pass_projection_and_physical_bytes(self):
         for stem, case in CASES.items():
             with self.subTest(stem=stem):
                 source = (FIXTURES / f"{stem}.lisp").read_text(encoding="utf-8")
-                projection, counts = self.project(source)
+                projection, counts = self.project(source, source_era="legacy")
                 self.assertEqual(projection, case["words"])
                 self.assertEqual(counts["pass1-sens8"], 3)
                 with tempfile.TemporaryDirectory() as directory:
@@ -80,12 +85,18 @@ class PairCohort(unittest.TestCase):
                         sys.executable, str(SCRIPT), str(FIXTURES), "--out", str(out),
                         *[item for key, path in ARGS.items() for item in ("--" + key.replace("_", "-"), str(path))],
                         "--report", str(report),
+                        "--source-era", "legacy",  # Proven historical cohort, not global compatibility.
                     ]
                     result = subprocess.run(command, capture_output=True, text=True)
                     self.assertEqual(result.returncode, 0, result.stderr + result.stdout)
                     emitted = out / f"{stem}.sens"
                     self.assertEqual(emitted.read_bytes(), case["t5"])
                     self.assertEqual(module.decode_bytes(case["t5"]), case["words"].split())
+                    # No change to source/executable authority: bit view is generated data.
+                    view = FIXTURES / stem
+                    self.assertEqual(view.read_bytes(), case["words"].encode("ascii"))
+                    self.assertEqual(module.encode_projection(view.read_text(encoding="ascii")), case["t5"])
+                    self.assertEqual((FIXTURES / f"{stem}.sens").read_bytes(), case["t5"])
 
     def test_existing_lisp_provenance_is_preserved_and_corruption_fails_closed(self):
         for stem, case in CASES.items():
