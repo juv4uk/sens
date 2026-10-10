@@ -392,14 +392,43 @@ def main(argv: list[str] | None = None) -> int:
         if strip_sha(text) != strip_sha(committed):
             print("FAIL: живий реєстр ≠ закомічений manifest "
                   "(нова/зникла ланка або зміна класифікації)", file=sys.stderr)
-            live = {r["path"] for r in rows}
+            live_by_path = {r["path"]: r for r in rows}
             import json
-            committed_paths = {json.loads(l)["path"]
-                               for l in committed.splitlines() if l.strip()}
-            for p in sorted(live - committed_paths):
+            committed_rows = [
+                json.loads(line) for line in committed.splitlines() if line.strip()
+            ]
+            committed_by_path = {r["path"]: r for r in committed_rows}
+            live_paths = set(live_by_path)
+            committed_paths = set(committed_by_path)
+            for p in sorted(live_paths - committed_paths):
                 print("  + " + p, file=sys.stderr)
-            for p in sorted(committed_paths - live):
+            for p in sorted(committed_paths - live_paths):
                 print("  - " + p, file=sys.stderr)
+            # Path sets can match while authority, role, codec, owner, or status
+            # silently drifts. Show a bounded per-path field diff so CI points
+            # to the exact repair instead of emitting a content-free FAIL.
+            shown = 0
+            fields = sorted(
+                (set(live_by_path[next(iter(live_by_path))]) |
+                 set(committed_by_path[next(iter(committed_by_path))]))
+                - {"base_sha", "path"}
+            ) if live_by_path and committed_by_path else []
+            for p in sorted(live_paths & committed_paths):
+                actual = live_by_path[p]
+                expected = committed_by_path[p]
+                for field in fields:
+                    if actual.get(field) != expected.get(field):
+                        print(
+                            f"  ~ {p} [{field}]: manifest={expected.get(field)!r}; "
+                            f"live={actual.get(field)!r}",
+                            file=sys.stderr,
+                        )
+                        shown += 1
+                        if shown >= 80:
+                            print("  ... additional field differences omitted", file=sys.stderr)
+                            break
+                if shown >= 80:
+                    break
             return 1
         print("OK: manifest == live registry "
               f"({len(rows)} rows, base_sha={sha})", file=sys.stderr)
