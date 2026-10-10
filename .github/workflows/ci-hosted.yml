@@ -91,8 +91,23 @@ jobs:
           python3 scripts/d7_source_projection.py --check
           python3 -m unittest discover -s tests -p 'test_d7_source_projection.py' -v
           cargo test --locked -p sens --test d7_w7_pack --test text7_canonical_wire
+      - name: Regenerate current Core4 FASL candidate
+        run: cargo run --release -p sens-cli --bin gen-fasl -- lib/core4.lisp lib/core4.lisp.fasl
+      - name: Upload regenerated Core4 FASL candidate
+        if: always()
+        uses: actions/upload-artifact@v4
+        continue-on-error: true
+        with:
+          name: active-core4-fasl-3658
+          path: lib/core4.lisp.fasl
+          if-no-files-found: error
+          retention-days: 1
       - name: Current Core4 FASL freshness
-        run: cargo test -p sens --test core_fasl_freshness -- --nocapture
+        run: |
+          set -euo pipefail
+          cargo test -p sens --test core_fasl_freshness -- --nocapture
+          git diff --check
+          git diff --exit-code -- lib/core4.lisp.fasl
       - name: Current semantic slice
         run: bash scripts/test-current-semantic-slice.sh
       - name: Critical machine and surface witnesses
