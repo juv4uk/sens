@@ -1,0 +1,20 @@
+{
+  "schema": "sens-benchmark-manifest/v1",
+  "stand": "evidence-integrity",
+  "wing": "Physical SENS T5 transport evidence verification",
+  "roles": [
+    "MEASUREMENT",
+    "FALSIFIER"
+  ],
+  "question": "Do independently read physical T5 bytes, exact bit-views, SHA-256 identities and raw timing samples substantiate the reported CPython transport measurements?",
+  "claim": "Measures CPython T5 decode+encode versus exact-bit view with AB/BA repeats and rejects inconsistent hashes, typed widths, medians and fabricated claims. It does not measure SENS runtime, native speedup, or semantic-oracle parity.",
+  "witness": [
+    "README.md",
+    "verify_physical_t5.py",
+    "../../tests/test_physical_t5_evidence_integrity.py"
+  ],
+  "status": "ACTIVE-TRANSPORT-MECHANISM-ONLY",
+  "generation": "2026-10-10",
+  "axis": "sens/t5-physical-transport-evidence-integrity",
+  "reproduce": "python3 -m unittest discover -s tests -p test_physical_t5_evidence_integrity.py -v && python3 scripts/benchmark-sens-physical.py --out-dir /tmp/sens-t5-evidence --reps 9 --iterations 300 && python3 benchmarks/evidence-integrity/verify_physical_t5.py --report /tmp/sens-t5-evidence/physical-t5.json --expected-sha $(git rev-parse HEAD)"
+}
