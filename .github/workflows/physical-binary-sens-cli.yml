@@ -128,6 +128,78 @@ jobs:
             echo "PASS: ${stem} original=exact, T5=physical, CLI=D1:${expected}"
           done
 
+      - name: Execute migrated D3 QUOTE/ATOM T5 and prove normalized empty against old D2
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          import sys
+
+          sys.path.insert(0, "scripts")
+          from sens_t5_codec import decode_bytes, encode_projection
+          original = Path("examples/binary/d3-primitives-program.bits").read_text(encoding="ascii").split()
+          assert len(original) == 63, "original source drifted"
+          for stem, start, end, canonical in (
+              ("d3-primitive-quote-one", 0, 5, original[0:5]),
+              ("d3-primitive-atom-empty", 5, 11, "10 010 00 000 01".split()),
+              ("d3-primitive-atom-cons", 11, 22, original[11:22]),
+          ):
+              base = Path("examples/binary") / stem
+              physical = base.with_suffix(".sens").read_bytes()
+              words = decode_bytes(physical)
+              assert words == canonical, f"{stem}: exact-width words drifted"
+              assert encode_projection(" ".join(words)) == physical
+              assert base.read_bytes() == (" ".join(words) + "\n").encode("ascii")
+              if stem != "d3-primitive-atom-empty":
+                  assert words == original[start:end], f"{stem}: original changed"
+              else:
+                  assert original[start:end] == "10 010 00 10 01 01".split(), (
+                      "original historical D2 empty changed"
+                  )
+          PY
+
+          for stem in d3-primitive-quote-one d3-primitive-atom-empty d3-primitive-atom-cons; do
+            case "$stem" in
+              d3-primitive-atom-cons) expected=0 ;;
+              *) expected=1 ;;
+            esac
+            path="examples/binary/$stem"
+            python3 scripts/verify_uk_t5_triplet.py \
+              --lisp "$path.lisp" --sens "$path.sens" --view "$path"
+            sens_out="$(target/debug/sens "$path.sens")"
+            trit_out="$(target/debug/sens-trit eval "$path.sens")"
+            if [[ "$sens_out" != "$expected" || "$trit_out" != "$expected" ]]; then
+              echo "BLOCK: $stem expected exact D1:$expected, sens=$sens_out, trit=$trit_out" >&2
+              exit 1
+            fi
+            echo "PASS: $stem physical T5 result D1:$expected"
+          done
+
+          python3 - "$RUNNER_TEMP/sens-binary/d3-atom-empty-historical.sens" <<'PY'
+          import sys
+          from pathlib import Path
+          sys.path.insert(0, "scripts")
+          from sens_t5_codec import encode_projection
+          words = Path("examples/binary/d3-primitives-program.bits").read_text(encoding="ascii").split()
+          assert words[5:11] == "10 010 00 10 01 01".split()
+          Path(sys.argv[1]).write_bytes(encode_projection(" ".join(words[5:11])))
+          PY
+          historical="$RUNNER_TEMP/sens-binary/d3-atom-empty-historical.sens"
+          canonical="examples/binary/d3-primitive-atom-empty.sens"
+          for executable in "target/debug/sens" "target/debug/sens-trit"; do
+            if [[ "$executable" == "target/debug/sens" ]]; then
+              legacy_result="$("$executable" "$historical")"
+              canonical_result="$("$executable" "$canonical")"
+            else
+              legacy_result="$("$executable" eval "$historical")"
+              canonical_result="$("$executable" eval "$canonical")"
+            fi
+            test "$legacy_result" = "1"
+            test "$canonical_result" = "1"
+            echo "PASS: D2 old empty and D3:000 agree in $executable (not same bits)"
+          done
+
       - name: Execute D5 LABEL recursion from D7 bit names
         shell: bash
         run: |
