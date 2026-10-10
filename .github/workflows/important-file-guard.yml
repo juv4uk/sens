@@ -109,6 +109,7 @@ jobs:
           fi
           echo "SENS_FILE_AUTHORITY_NEGATIVE_CONTROL_PASS: textual call/string rejected; no .sens emitted"
 
+      - name: Encode the complete oracle into physical T5
         shell: bash
         run: |
           set -euo pipefail
