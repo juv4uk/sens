@@ -27,8 +27,8 @@
 (00001001 world?
   (00001000 (value)
     (00000111
-      ((00000010 value) () (00000001 ()))
-      ((00000010 value) (1) (00000001 ()))
+      
+      ((00000010 value)  (00000001 ()))
       ((00000011 (00000101 value) (00000001 world)) t)
       (t (00000001 ())))))
 
@@ -62,8 +62,8 @@
 (00001001 world-remove-first
   (00001000 (value values)
     (00000111
-      ((00000010 values) () (00000001 ()))
-      ((00000010 values) (1) (00000001 ()))
+      
+      ((00000010 values)  (00000001 ()))
       ((00100010 value (00000101 values)) (00000110 values))
       ((00100010
         (00100010 value (00000101 values))
@@ -130,10 +130,8 @@
                           (reason-in-world world module-name opposite))
                          (t (00000001 ())))))
            (00000111
-             ((00000010 proofs) () (00100111 (00000001 accepted)
-                    (00100111 (00000001 module) module-name)
-                    (00100111 (00000001 knowledge) clause)))
-             ((00000010 proofs) (1) (00100111 (00000001 accepted)
+             
+             ((00000010 proofs)  (00100111 (00000001 accepted)
                     (00100111 (00000001 module) module-name)
                     (00100111 (00000001 knowledge) clause)))
              (t
@@ -162,8 +160,8 @@
     (00000111
       ((00000011 (00100011 module-name) (00000001 ()))
        (00100111 (00000001 rejected) (00100111 (00000001 reason) (00000001 invalid-module)) (00100111 (00000001 input) clauses)))
-      ((00000010 clauses) () (00100111 (00000001 rejected) (00100111 (00000001 reason) (00000001 invalid-batch)) (00100111 (00000001 input) clauses)))
-      ((00000010 clauses) (1) (00100111 (00000001 rejected) (00100111 (00000001 reason) (00000001 invalid-batch)) (00100111 (00000001 input) clauses)))
+      
+      ((00000010 clauses)  (00100111 (00000001 rejected) (00100111 (00000001 reason) (00000001 invalid-batch)) (00100111 (00000001 input) clauses)))
       ((00000011 (knowledge-proper-list? clauses) (00000001 ()))
        (00100111 (00000001 rejected) (00100111 (00000001 reason) (00000001 invalid-batch)) (00100111 (00000001 input) clauses)))
       ((00000011 (knowledge-clauses-valid? clauses) (00000001 ()))
@@ -176,10 +174,8 @@
          (10011100 ((conflict (advice-batch-conflict
                            clauses clauses (00101001 clauses existing))))
            (00000111
-             ((00000010 conflict) () (00100111 (00000001 accepted)
-                    (00100111 (00000001 module) module-name)
-                    (00100111 (00000001 knowledge) clauses)))
-             ((00000010 conflict) (1) (00100111 (00000001 accepted)
+             
+             ((00000010 conflict)  (00100111 (00000001 accepted)
                     (00100111 (00000001 module) module-name)
                     (00100111 (00000001 knowledge) clauses)))
              (t
@@ -332,18 +328,15 @@
       ((world-module-known? world module-name)
        (10011100 ((clauses (world-clauses world module-name)))
          (00000111
-           ((00000010 clauses) () (00100111 (00000001 rejected) (00100111 (00000001 reason) (00000001 invalid-batch)) (00100111 (00000001 input) clauses)))
-           ((00000010 clauses) (1) (00100111 (00000001 rejected) (00100111 (00000001 reason) (00000001 invalid-batch)) (00100111 (00000001 input) clauses)))
+           
+           ((00000010 clauses)  (00100111 (00000001 rejected) (00100111 (00000001 reason) (00000001 invalid-batch)) (00100111 (00000001 input) clauses)))
            (t (make-knowledge-package module-name clauses))))))))
 
 (00001001 import-knowledge-package-world
   (00001000 (world package)
     (00000111
-      ((00000010 package) () (00100111 (00100111 (00000001 rejected)
-                   (00100111 (00000001 reason) (00000001 invalid-package))
-                   (00100111 (00000001 input) package))
-             world))
-      ((00000010 package) (1) (00100111 (00100111 (00000001 rejected)
+      
+      ((00000010 package)  (00100111 (00100111 (00000001 rejected)
                    (00100111 (00000001 reason) (00000001 invalid-package))
                    (00100111 (00000001 input) package))
              world))
@@ -408,17 +401,17 @@
 (00001001 world-depth
   (00001000 (world)
     (00000111
-      ((00000010 (world-parent world)) () 0)
-      ((00000010 (world-parent world)) (1) 0)
+      
+      ((00000010 (world-parent world))  0)
       (t (00001100 1 (world-depth (world-parent world)))))))
 
 (00001001 world-at-depth-from
   (00001000 (world current-depth target-depth)
     (00000111
-      ((00011100 current-depth target-depth) 1 world)
-      ((00011010 current-depth target-depth) 1 (00000001 World-not-found))
-      ((00000010 (world-parent world)) () (00000001 World-not-found))
-      ((00000010 (world-parent world)) (1) (00000001 World-not-found))
+      ((00011100 current-depth target-depth)  world)
+      (t (00000001 World-not-found))
+      
+      ((00000010 (world-parent world))  (00000001 World-not-found))
       (t (world-at-depth-from (world-parent world)
                               (00001101 current-depth 1)
                               target-depth)))))
@@ -426,15 +419,15 @@
 (00001001 world-at-depth
   (00001000 (world target-depth)
     (00000111
-      ((00011010 target-depth 0) 1 (00000001 World-not-found))
+      ((00011010 target-depth 0)  (00000001 World-not-found))
       (t (world-at-depth-from world (world-depth world) target-depth)))))
 
 (00001001 world-journal-prefix
   (00001000 (journal old-journal)
     (00000111
       ((00100010 journal old-journal) (00000001 ()))
-      ((00000010 journal) () (00000001 World-not-ancestor))
-      ((00000010 journal) (1) (00000001 World-not-ancestor))
+      
+      ((00000010 journal)  (00000001 World-not-ancestor))
       (t
        (10011100 ((rest (world-journal-prefix (00000110 journal) old-journal)))
          (00000111
@@ -444,16 +437,16 @@
 (00001001 world-not-ancestor?
   (00001000 (value)
     (00000111
-      ((00000010 value) () (00000011 value (00000001 World-not-ancestor)))
-      ((00000010 value) (1) (00000011 value (00000001 World-not-ancestor)))
+      
+      ((00000010 value)  (00000011 value (00000001 World-not-ancestor)))
       (t (00000001 ())))))
 
 (00001001 world-diff
   (00001000 (from to)
     (00000111
       ((00100010 from to) (00000001 ()))
-      ((00000010 (world-parent to)) () (00000001 World-not-ancestor))
-      ((00000010 (world-parent to)) (1) (00000001 World-not-ancestor))
+      
+      ((00000010 (world-parent to))  (00000001 World-not-ancestor))
       (t
        (10011100 ((earlier (world-diff from (world-parent to))))
          (00000111
@@ -485,7 +478,7 @@
 (00001001 world-climb-to-depth
   (00001000 (world current-depth target-depth)
     (00000111
-      ((00011100 current-depth target-depth) 1 world)
+      ((00011100 current-depth target-depth)  world)
       (t (world-climb-to-depth (world-parent world)
                                (00001101 current-depth 1)
                                target-depth)))))
@@ -494,10 +487,10 @@
   (00001000 (left right)
     (00000111
       ((00100010 left right) left)
-      ((00000010 (world-parent left)) () (00000001 World-no-common-ancestor))
-      ((00000010 (world-parent left)) (1) (00000001 World-no-common-ancestor))
-      ((00000010 (world-parent right)) () (00000001 World-no-common-ancestor))
-      ((00000010 (world-parent right)) (1) (00000001 World-no-common-ancestor))
+      
+      (t (00000001 World-no-common-ancestor))
+      
+      ((00000010 (world-parent right))  (00000001 World-no-common-ancestor))
       (t (world-common-ancestor-aligned (world-parent left)
                                         (world-parent right))))))
 
@@ -506,7 +499,7 @@
     (10011100 ((left-depth (world-depth left))
           (right-depth (world-depth right)))
       (10011100 ((target-depth (00000111
-                            ((00011010 left-depth right-depth) 1 left-depth)
+                            ((00011010 left-depth right-depth)  left-depth)
                             (t right-depth))))
         (world-common-ancestor-aligned
           (world-climb-to-depth left left-depth target-depth)
@@ -515,8 +508,8 @@
 (00001001 world-no-common-ancestor?
   (00001000 (value)
     (00000111
-      ((00000010 value) () (00000011 value (00000001 World-no-common-ancestor)))
-      ((00000010 value) (1) (00000011 value (00000001 World-no-common-ancestor)))
+      
+      ((00000010 value)  (00000011 value (00000001 World-no-common-ancestor)))
       (t (00000001 ())))))
 
 (00001001 world-branch-diff
