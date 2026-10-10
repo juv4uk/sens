@@ -54,12 +54,20 @@ class EqualityMigrationCanary(unittest.TestCase):
         self.assertEqual(self.upper["EQ"], ("101", "D3"))
         self.assertIn("(row 00000011 eq? EQ ", ARGS["historical_map"].read_text())
 
+    def test_ambiguous_w8_head_requires_explicit_source_era(self):
+        resolver = migration.Resolver(self.legacy, self.my, self.upper, source_era="auto")
+        with self.assertRaises(migration.MigrationError):
+            migration.migrate_file(CASES["eq-legacy-sid"][0], resolver, self.text7)
+
     def test_both_real_three_pass_paths_and_byte_identity(self):
         for stem, (source, pass_name) in CASES.items():
             with self.subTest(stem=stem):
                 original = (FIXTURES / (stem + ".lisp")).read_text(encoding="utf-8")
                 self.assertEqual(original, source)
-                resolver = migration.Resolver(self.legacy, self.my, self.upper)
+                resolver = migration.Resolver(
+                    self.legacy, self.my, self.upper,
+                    source_era="legacy" if stem == "eq-legacy-sid" else "auto",
+                )
                 projection = migration.migrate_file(original, resolver, self.text7)
                 self.assertEqual(projection, WORDS)
                 self.assertEqual(resolver.counts[pass_name], 1)
@@ -69,7 +77,11 @@ class EqualityMigrationCanary(unittest.TestCase):
                 self.assertEqual(migration.encode_projection(projection), committed)
                 self.assertEqual(migration.decode_bytes(committed), WORDS.split())
                 self.assertNotEqual(committed, source.encode("utf-8"))
-                self.assertFalse((FIXTURES / stem).exists())
+                # Generated extensionless view is ASCII 0/1 only, never an executable.
+                view = (FIXTURES / stem).read_bytes()
+                self.assertEqual(view, WORDS.encode("ascii"))
+                self.assertEqual(view, (" ".join(migration.decode_bytes(committed)) + "\n").encode("ascii"))
+                self.assertEqual(migration.encode_projection(view.decode("ascii")), committed)
 
     def test_actual_cli_mirror_ledger_and_no_clobber(self):
         with tempfile.TemporaryDirectory() as tmp:
@@ -79,6 +91,7 @@ class EqualityMigrationCanary(unittest.TestCase):
                 *[arg for key, path in ARGS.items() for arg in
                   ("--" + key.replace("_", "-"), str(path))],
                 "--report", str(manifest),
+                "--source-era", "legacy",  # File cohort provenance is explicit.
             ]
             proc = subprocess.run(command, text=True, capture_output=True)
             self.assertEqual(proc.returncode, 0, proc.stdout + proc.stderr)
