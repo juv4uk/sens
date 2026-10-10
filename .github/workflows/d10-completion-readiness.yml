@@ -28,6 +28,7 @@ jobs:
           print("D10 SOURCES",x["source_queue"]["distinct_source_names_unselected"])
           print("D11 GATE","READY" if x["ready_to_start_d11"] else "BLOCKED")
           print("D10 ERRORS",x["blocking_errors"])
+          print("D10 QUEUE", ",".join(y["semantic_name"] for y in x["source_queue"]["queue"]))
           PY
       - uses: actions/upload-artifact@v4
         with:
