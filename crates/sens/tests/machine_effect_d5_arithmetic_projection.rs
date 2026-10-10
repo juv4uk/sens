@@ -390,3 +390,54 @@ fn bounded_effect_structural_forms_return_exact_d1_for_matching_and_mismatched_k
         );
     }
 }
+
+
+/// Окремий falsifier: ратифіковані D5/D6 порівняння повинні
+/// відрізняти арифметичний носій від точного предиката D1.
+/// Усі кейси виконуються до фінальної відмови, щоб first-fail не приховав решту.
+#[test]
+fn d5_d6_comparison_truth_table_is_exact_d1() {
+    let mut session = Session::default();
+    load_core_library(&mut session).expect("канонічне ядро");
+    let witnesses = [
+        ("(не-менше? -1 0)", false),
+        ("(не-менше? 0 0)", true),
+        ("(не-менше? 1 0)", true),
+        ("(не-менше? 0 1)", false),
+        ("(не-більше? -1 0)", true),
+        ("(не-більше? 0 0)", true),
+        ("(не-більше? 1 0)", false),
+        ("(не-більше? 0 1)", true),
+        ("(менше? 2 3)", true),
+        ("(менше? 3 2)", false),
+        ("(не-більше? 4294967296 4294967295)", false),
+        ("(не-менше? 4294967296 0)", true),
+    ];
+    let mut violations = Vec::new();
+    for (source, expected) in witnesses {
+        match eval_program(source, &mut session) {
+            Ok(answer) => {
+                let actual = answer.value.as_predicate_bit();
+                eprintln!(
+                    "D6_ТОЧНИЙ_СВІДОК expression={source} rendered={} d1={actual:?} expected={expected}",
+                    answer.value
+                );
+                if actual != Some(expected) {
+                    violations.push(format!(
+                        "{source}: d1={actual:?}, value={}, expected={expected}",
+                        answer.value
+                    ));
+                }
+            }
+            Err(error) => {
+                eprintln!("D6_НЕВИКЛИЧНИЙ_СВІДОК expression={source} error={error}");
+                violations.push(format!("{source}: {error}"));
+            }
+        }
+    }
+    assert!(
+        violations.is_empty(),
+        "Порушено точні D1/D6 межі (негативи не можна вважати PASS): {}",
+        violations.join("; ")
+    );
+}
