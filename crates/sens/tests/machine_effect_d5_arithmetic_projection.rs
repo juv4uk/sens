@@ -1,4 +1,4 @@
-use sens::{eval_program, load_core_library, lower_program, parse, ExprKind, Session};
+use sens::{eval_parsed_expressions, parse_mixed_exact_domain, eval_program, load_core_library, lower_program, parse, ExprKind, Session};
 use serde_json::Value;
 use std::fs;
 use std::path::PathBuf;
@@ -16,9 +16,15 @@ fn read(path: &str) -> String {
 }
 
 fn load_lisp_file(path: &str, session: &mut Session) {
+    assert!(
+        path.starts_with("lib/machine/"),
+        "mixed exact-domain reader is reserved for machine-source fixtures: {path}"
+    );
     let source = read(path);
-    eval_program(&source, session)
-        .unwrap_or_else(|error| panic!("{path} must load as ordinary sens: {error}"));
+    let expressions = parse_mixed_exact_domain(&source)
+        .unwrap_or_else(|error| panic!("{path} must parse as mixed exact-domain machine source: {error}"));
+    eval_parsed_expressions(&expressions, session)
+        .unwrap_or_else(|error| panic!("{path} must load through the mixed exact-domain machine reader: {error}"));
 }
 
 fn eval_value(source: &str, session: &mut Session) -> String {
