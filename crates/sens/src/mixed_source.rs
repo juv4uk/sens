@@ -45,6 +45,28 @@ pub fn parse_mixed_exact_domain_machine_source(
     parse_mixed_source(source, true)
 }
 
+/// Parse the one owner-approved Core4 source file using the mixed exact-width
+/// reader. Core4's historical W8 DEFINE/LAMBDA/COND wrappers remain compatible
+/// syntax, but executable D3-D6 heads inside their bodies are lifted to typed
+/// DomainIdentity nodes before the FASL snapshot is generated.
+///
+/// This mode is deliberately path-bound to `lib/core4.lisp`. Ordinary Lisp
+/// parsing and the public mixed-source bridge do not change; W8 QUOTE remains
+/// opaque and numeric arguments remain Number values.
+pub fn parse_mixed_exact_domain_core_source(
+    path: &str,
+    source: &str,
+) -> Result<Vec<Expr>, LanguageError> {
+    if path != "lib/core4.lisp" {
+        return Err(LanguageError::new(
+            ErrorKind::Parse,
+            "Core4 exact-domain reader is restricted to lib/core4.lisp",
+            Span::default(),
+        ));
+    }
+    parse_mixed_source(source, true)
+}
+
 fn parse_mixed_source(
     source: &str,
     descend_legacy_machine_wrappers: bool,
@@ -929,6 +951,85 @@ mod tests {
             hits.is_empty(),
             "numeric 100 remains in executable head position after machine-source lifting:\n{}",
             hits.iter().take(30).cloned().collect::<Vec<_>>().join("\n")
+        );
+    }
+
+    #[test]
+    fn core4_reader_lifts_d4_not_inside_w8_cond_but_keeps_quoted_data() {
+        let source =
+            "(00001001 probe (00001000 (x) (00000111 ((0100 x) 0) ((00000001 (0100 x)) 0))))";
+
+        let ordinary = only(parse_mixed_exact_domain(source).expect("ordinary mixed source"));
+        let ExprKind::List(ordinary_def) = &ordinary.kind else { panic!("definition"); };
+        let ExprKind::List(ordinary_lambda) = &ordinary_def[2].kind else { panic!("lambda"); };
+        let ExprKind::List(ordinary_cond) = &ordinary_lambda[2].kind else { panic!("COND"); };
+        let ExprKind::List(ordinary_clause) = &ordinary_cond[1].kind else { panic!("clause"); };
+        let ExprKind::List(ordinary_test) = &ordinary_clause[0].kind else { panic!("test"); };
+        assert!(matches!(&ordinary_test[0].kind, ExprKind::Number(value, _) if *value == 100.0),
+            "ordinary reader remains backward-compatible and keeps 0100 numeric inside opaque W8 wrappers");
+
+        let mixed = only(
+            parse_mixed_exact_domain_core_source("lib/core4.lisp", source)
+                .expect("approved Core4 reader"),
+        );
+        let ExprKind::List(def) = &mixed.kind else { panic!("definition"); };
+        let ExprKind::List(lambda) = &def[2].kind else { panic!("lambda"); };
+        let ExprKind::List(cond) = &lambda[2].kind else { panic!("COND"); };
+        let ExprKind::List(clause) = &cond[1].kind else { panic!("clause"); };
+        let ExprKind::List(test) = &clause[0].kind else { panic!("test"); };
+        assert!(matches!(&test[0].kind, ExprKind::DomainIdentity(id)
+            if id.width() == 4 && id.packed_bits() == 0b0100),
+            "Core4's executable 0100 head is typed D4:0100 NOT, not Number(100)");
+
+        let ExprKind::List(quoted_clause) = &cond[2].kind else { panic!("quoted clause"); };
+        let ExprKind::List(quote_form) = &quoted_clause[0].kind else { panic!("quote form"); };
+        assert!(matches!(&quote_form[0].kind, ExprKind::Sid(_)),
+            "historical W8 quote remains a quote form");
+        let ExprKind::List(quoted_data) = &quote_form[1].kind else { panic!("quoted data"); };
+        assert!(matches!(&quoted_data[0].kind, ExprKind::Number(value, _) if *value == 100.0),
+            "0100 under W8 QUOTE is data and is not promoted to a callable identity");
+
+        let wrong_path = parse_mixed_exact_domain_core_source("lib/core.lisp", source)
+            .expect_err("Core4 exact-width lifting must not apply to another source file");
+        assert_eq!(wrong_path.kind, ErrorKind::Parse);
+    }
+
+    #[test]
+    fn core4_source_has_no_numeric_0100_in_executable_call_head_positions() {
+        fn walk(source: &str, expression: &Expr, hits: &mut Vec<String>) {
+            let ExprKind::List(items) = &expression.kind else { return; };
+            let Some(head) = items.first() else { return; };
+            let spelling = source_spelling(source, head);
+            if spelling == Some("00000001") {
+                return; // W8 QUOTE owns its entire payload as data.
+            }
+            if spelling == Some("0100")
+                && matches!(&head.kind, ExprKind::Number(value, _) if *value == 100.0)
+            {
+                let start = expression.span.start as usize;
+                let end = expression.span.end as usize;
+                let line = source[..start.min(source.len())].matches('\n').count() + 1;
+                hits.push(format!(
+                    "line={line} span={start}..{end} form={:?}",
+                    source[start.min(source.len())..end.min(source.len())].replace('\n', " ")
+                ));
+            }
+            for child in items {
+                walk(source, child, hits);
+            }
+        }
+
+        let source = include_str!("../../../lib/core4.lisp");
+        let expressions = parse_mixed_exact_domain_core_source("lib/core4.lisp", source)
+            .expect("owner-approved Core4 source parses in exact-domain mode");
+        let mut hits = Vec::new();
+        for expression in &expressions {
+            walk(source, expression, &mut hits);
+        }
+        assert!(
+            hits.is_empty(),
+            "Core4 still has an unlifted numeric 0100 call head:\\n{}",
+            hits.iter().take(30).cloned().collect::<Vec<_>>().join("\\n")
         );
     }
 
