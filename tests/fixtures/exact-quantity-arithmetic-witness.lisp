@@ -12,6 +12,31 @@
 (load "lib/quantity.lisp")
 (load "lib/si.lisp")
 
+; D4:0100 NOT is a Lisp-owned exact-D1 derived law, not host truth coercion.
+; Current mixed-Lisp DEFINE/LAMBDA bind the ratified D4 identity by Ukrainian
+; target surface. The executable COND uses only D1 predicates and 2-field clauses.
+(00001001 хибне?
+  (00001000 (біт)
+    (за-умовою
+      (біт (атом? (00000001 (()))))
+      ((атом? (00000001 ())) (атом? (00000001 ()))))))
+
+; D4:0101 NULL is derived from D3 ATOM/EQ, never host truthiness.
+; Only atoms reach EQ; every non-atom returns exact D1:NO.
+(00001001 порожнє?
+  (00001000 (значення)
+    (за-умовою
+      ((атом? значення) (тотожне? значення (00000001 ())))
+      ((атом? (00000001 ())) (атом? (00000001 (())))))))
+
+; Current D5:01000 ZEROP is owner-ratified, but has no host shortcut.
+; This witness supplies a Lisp-defined mechanism for its numeric inputs.
+; D3 EQ compares atomic numeric values and returns exact D1, not a host bool.
+; Non-atoms remain an EQ type failure; they are not coerced to zero.
+(00001001 нуль?
+  (00001000 (значення)
+    (тотожне? значення 0)))
+
 (00001001 exact-quantity-arithmetic-rows
   (00001000 ()
     (10011101 ((planck
