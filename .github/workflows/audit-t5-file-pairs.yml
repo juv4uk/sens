@@ -83,7 +83,7 @@ jobs:
                    base,head,"--",":(glob)**/*.sens"],
                   stdout=subprocess.PIPE,stderr=subprocess.PIPE,check=True,
               )
-              changed=[os.fsdecode(p) for p in diff.stdout.split(b"\\0") if p]
+              changed=[os.fsdecode(p) for p in diff.stdout.split(b"\0") if p]
               require_changed_views(report,changed)
               print(f"NEW_OR_MODIFIED_T5_TRIPLES_PASS: {len(changed)}")
           PY
