@@ -211,7 +211,7 @@ def classify(path: str, root: Path) -> dict:
         "extension": Path(path).suffix.lower(),
         "codec": codec,
         "authority": authority,
-        "dependency": status_dep(status),
+        "dependency": "#5444" if path.endswith(".lisp") and status == "BLOCKED" else status_dep(status),
         "base_sha": None,  # заповнюється у build()
         "owner_lane": lane,
         "migration_status": status,
