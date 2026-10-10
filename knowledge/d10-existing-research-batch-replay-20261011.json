@@ -1,0 +1,499 @@
+{
+  "schema": "d10-existing-research-batch-replay/v1",
+  "date": "2026-10-11",
+  "status": "RESEARCH-ONLY-STAGING-NO-CANONICAL-AUTHORITY",
+  "main_source_sha": "c67db6cdd820dea8d3a110caed359507c0a2d7a4",
+  "owner_directive": "Fill D10 from existing archived research instead of inventing new research",
+  "review_note": "Record source-backed selected-research candidates only; owner Core-vs-library adjudication and ratification remain pending.",
+  "entries": [
+    {
+      "semantic_name": "MINIMAL-ABDUCTIVE-EXPLANATIONS",
+      "surface_uk": "пояснити-припущеннями",
+      "surface_ukr": "знайти-мінімальні-пояснення",
+      "semantic_law": "For a finite ground propositional Horn theory T, designated abducibles A, observation g and finite integrity constraints IC, return the canonical antichain of inclusion-minimal Δ ⊆ A such that g belongs to the least fixed-point closure of T ∪ Δ and no integrity constraint is fully satisfied by that closure.",
+      "positive_witnesses": "wet_shoes follows from either rain or sprinkler, so the complete minimal explanation family is [[rain],[sprinkler]].",
+      "falsifiers": [
+        "Returning both rain and sprinkler as one required set is wrong when either alone proves wet_shoes.",
+        "Returning a superset such as [rain,sprinkler] is wrong when a proper subset already explains the observation.",
+        "Hypothesizing an atom outside the designated abducible set is forbidden.",
+        "A forbidden conjunction reached through derived facts must reject that candidate even when the forbidden atom was not explicitly hypothesized.",
+        "A mutually recursive Horn cycle without a seed must not prove itself.",
+        "A successful empty explanation [[]] must remain distinct from no explanations []."
+      ],
+      "relation_class": "SOURCE-GROUNDED-RESEARCH-CERTIFICATE",
+      "argument_shape": "See source research dossier",
+      "result_shape": "See source research dossier",
+      "source_path": "knowledge/d10-abductive-minimal-explanations-v1.json",
+      "donor_blob_sha": "5e7dc4fc9f31c7a702233f92398ea9d0e643dac1",
+      "donor_git_commit": "c67db6cdd820dea8d3a110caed359507c0a2d7a4",
+      "original_donor_status": "HOLD-CORE-VS-LIBRARY-REVIEW",
+      "source_url": "https://academic.oup.com/logcom/article-abstract/2/6/719/942121",
+      "existing_review_summary": "PENDING: current inventory exact-name and lower-domain check are automated; a human must still evaluate derivability via existing proof enumeration, integrity checks, and finite set algebra.",
+      "owner_core_library_review": "PENDING; source HOLD is not automatically ratified or assigned a coordinate"
+    },
+    {
+      "semantic_name": "CORRELATED-AFFINE-COMBINATION",
+      "surface_uk": "кор-аф",
+      "surface_ukr": "поєднати-корельовані-афінні-форми",
+      "semantic_law": "Combine affine forms coefficientwise by exact shared-noise identity; the exact same x minus x is zero, different noise IDs are not equated.",
+      "positive_witnesses": [
+        "x=10+a => x-x = [0,0]",
+        "x=10+a, y=10+b => x-y = [-2,2]",
+        "(3+2a+b)-(2+2a-b)=1+2b"
+      ],
+      "falsifiers": [
+        "Standard intervals give [-2,2] for x-x: incorrect for repeated same observation",
+        "Merging a and b due to equal magnitudes gives false cancellation"
+      ],
+      "relation_class": "SOURCE-GROUNDED-RESEARCH-CERTIFICATE",
+      "argument_shape": "(op:{ADD,SUB}, x:Affine<Q,noise-id>, y:Affine<Q,noise-id>) -> Affine<Q,noise-id>",
+      "result_shape": "See source research dossier",
+      "source_path": "knowledge/d10-affine-correlated-uncertainty-v1.json",
+      "donor_blob_sha": "bda21a562e114da055d91321eb96fcddabc92f8b",
+      "donor_git_commit": "c67db6cdd820dea8d3a110caed359507c0a2d7a4",
+      "original_donor_status": "HOLD-CORE-MATH-DERIVABILITY",
+      "source_url": null,
+      "existing_review_summary": "Requires owner semantic-minimality review",
+      "owner_core_library_review": "PENDING; source HOLD is not automatically ratified or assigned a coordinate"
+    },
+    {
+      "semantic_name": "SOUND-AFFINE-PRODUCT-ENCLOSURE",
+      "surface_uk": "аф-пох",
+      "surface_ukr": "обмежити-добуток-афінних-форм",
+      "semantic_law": "Compute linearized product with exact coefficients x0*yi+y0*xi; residual is conservatively enclosed by an explicit fresh noise coefficient (Σ|xi|)(Σ|yi|). Does not assert probabilistic independence or optimal tightness.",
+      "positive_witnesses": [
+        "(1+a)*(1-a): actual [0,1], safe [0,2]",
+        "2*(3+4a)=6+8a with no fresh error",
+        "a*a: actual [0,1], safe [-1,1]"
+      ],
+      "falsifiers": [
+        "Reused fresh ID collides with existing IDs and must BLOCK",
+        "Any exact product outside claimed range refutes soundness"
+      ],
+      "relation_class": "SOURCE-GROUNDED-RESEARCH-CERTIFICATE",
+      "argument_shape": "(x:Affine<Q,noise-id>, y:Affine<Q,noise-id>, fresh-id:Symbol) -> Affine<Q,noise-id> or BLOCK",
+      "result_shape": "See source research dossier",
+      "source_path": "knowledge/d10-affine-correlated-uncertainty-v1.json",
+      "donor_blob_sha": "bda21a562e114da055d91321eb96fcddabc92f8b",
+      "donor_git_commit": "c67db6cdd820dea8d3a110caed359507c0a2d7a4",
+      "original_donor_status": "HOLD-CORE-MATH-DERIVABILITY",
+      "source_url": null,
+      "existing_review_summary": "Requires owner semantic-minimality review",
+      "owner_core_library_review": "PENDING; source HOLD is not automatically ratified or assigned a coordinate"
+    },
+    {
+      "semantic_name": "ALLEN-INTERVAL-RELATION",
+      "surface_uk": "відношення-часових-відрізків",
+      "surface_ukr": "яке-відношення-між-інтервалами",
+      "semantic_law": "Exactly one of BEFORE, MEETS, OVERLAPS, STARTS, DURING, FINISHES, EQUALS and their six distinct converse relations for two nonempty intervals; MEETS differs from a positive temporal gap; swapping operands yields the specified inverse.",
+      "positive_witnesses": [
+        "[0,1] BEFORE [2,3]",
+        "[0,1] MEETS [1,2]",
+        "[0,2] OVERLAPS [1,3]",
+        "[0,3] CONTAINS [1,2]",
+        "[0,2] EQUALS [0,2]"
+      ],
+      "falsifiers": [
+        "Coincident endpoints MEETS must never be BEFORE",
+        "All 13 mutually exclusive relations appear on small exhaustive ordered endpoint samples",
+        "Swapping intervals returns exact converse; EQUALS is self-converse",
+        "Empty/reversed interval must raise an explicit invalid-input outcome, not a fabricated relation"
+      ],
+      "relation_class": "QUALITATIVE-TEMPORAL-ALGEBRA",
+      "argument_shape": "((a_start,a_end),(b_start,b_end)) -> one of 13 tagged Allen relations, exact rational endpoints a_start<a_end and b_start<b_end",
+      "result_shape": "See source research dossier",
+      "source_path": "knowledge/d10-allen-atms-research-20261009.json",
+      "donor_blob_sha": "0ae083a67c1c22d5b0cb47ade37ed20c16fa6523",
+      "donor_git_commit": "c67db6cdd820dea8d3a110caed359507c0a2d7a4",
+      "original_donor_status": "HOLD-CORE-DERIVABILITY",
+      "source_url": "https://doi.org/10.1145/182.358434",
+      "existing_review_summary": "Exact-name absent from D1-D9 and 634 canonical D10 candidates. Strong expressibility concern: 13-way predicate derivable from exact rational ordering + conditional control; D2 retains control ownership. Core-vs-library review mandatory.",
+      "owner_core_library_review": "PENDING; source HOLD is not automatically ratified or assigned a coordinate"
+    },
+    {
+      "semantic_name": "ATMS-CONSISTENT-LABEL-JOIN",
+      "surface_uk": "з'єднати-сумісні-припущення",
+      "surface_ukr": "об'єднати-мінімальні-несуперечливі-підтримки",
+      "semantic_law": "Form all unions of one left support and one right support. Discard any union that contains a known inconsistent nogood as a subset. Remove strict supersets of surviving support environments. Return the antichain sorted first by support cardinality then lexicographically. Empty environment () denotes unconditional support and differs from no support alternatives ().",
+      "positive_witnesses": [
+        "left {{0},{1}}, right {{2}}, nogoods {{0,2}} -> {{1,2}}",
+        "left {{}}, right {{4}}, no nogood -> {{4}}",
+        "left {{0},{0,1}}, right {{}}, no nogoods -> {{0}}",
+        "empty nogood {} invalidates every candidate"
+      ],
+      "falsifiers": [
+        "No returned support can contain any nogood subset",
+        "No two returned environments may be strict subsets of one another",
+        "Order/duplicate of input supports may not change canonical result",
+        "An empty family of alternatives is not the same as one empty support",
+        "Inputs remain unchanged"
+      ],
+      "relation_class": "ASSUMPTION-SUPPORT-ALGEBRA",
+      "argument_shape": "(left_label,right_label,nogoods) -> ordered minimal consistent finite assumption environments; each assumption is an exact nonnegative integer ID",
+      "result_shape": "See source research dossier",
+      "source_path": "knowledge/d10-allen-atms-research-20261009.json",
+      "donor_blob_sha": "0ae083a67c1c22d5b0cb47ade37ed20c16fa6523",
+      "donor_git_commit": "c67db6cdd820dea8d3a110caed359507c0a2d7a4",
+      "original_donor_status": "HOLD-D9-LOGIC-DERIVABILITY",
+      "source_url": "https://doi.org/10.1016/0004-3702(86)90080-9",
+      "existing_review_summary": "Exact-name absent from D1-D9 and 634 canonical D10 candidates; possible composition using D6 UNION, subset predicate, proof provenance and ordinary filtering. Must prove an irreducible language-level observer rather than an application ATMS library function.",
+      "owner_core_library_review": "PENDING; source HOLD is not automatically ratified or assigned a coordinate"
+    },
+    {
+      "semantic_name": "PINHOLE-IMAGE-PROJECT",
+      "surface_uk": "перспективо-проєкція",
+      "surface_ukr": "проєктувати-тривимірну-точку-на-площину",
+      "semantic_law": "Return exact (u,v)=(fx*Xc/Zc+cx,fy*Yc/Zc+cy). Mathematically defined for negative Z too; a separate physical visibility predicate may require Z>0. Do not silently apply lens distortion or infer extrinsics.",
+      "positive_witnesses": [
+        {
+          "args": [
+            "2",
+            "3",
+            "4",
+            "10",
+            "20",
+            "3",
+            "4"
+          ],
+          "expected": [
+            "8",
+            "19"
+          ]
+        },
+        {
+          "args": [
+            "1",
+            "-1",
+            "2",
+            "3",
+            "5",
+            "0",
+            "0"
+          ],
+          "expected": [
+            "3/2",
+            "-5/2"
+          ]
+        }
+      ],
+      "falsifiers": [
+        "Zc=0 is an explicit invalid projection, not infinity, a float, or a dropped point.",
+        "Scaling (Xc,Yc,Zc) by any nonzero rational must not change the pixel projection.",
+        "Optical distortion/pose and sensor pitch cannot be introduced implicitly."
+      ],
+      "relation_class": "SOURCE-GROUNDED-RESEARCH-CERTIFICATE",
+      "argument_shape": "(Xc,Yc,Zc,fx,fy,cx,cy) all exact rationals, Zc != 0",
+      "result_shape": "See source research dossier",
+      "source_path": "knowledge/d10-astrophoto-exact-pinhole-research-20261009.json",
+      "donor_blob_sha": "cb5f6eb6a9d481c7801d0b71e75cd44ebda1a0de",
+      "donor_git_commit": "c67db6cdd820dea8d3a110caed359507c0a2d7a4",
+      "original_donor_status": "HOLD-EXACT-MATH-DERIVABILITY",
+      "source_url": "https://docs.opencv.org/5.0/main_modules/calib.html",
+      "existing_review_summary": "Exact name absent among 634 D10 and D1-D9; this may be a projection of exact division/multiplication and matrix algebra. Status HOLD until behavioral dedup and Core root minimality.",
+      "owner_core_library_review": "PENDING; source HOLD is not automatically ratified or assigned a coordinate"
+    },
+    {
+      "semantic_name": "PIXEL-TO-CAMERA-RAY",
+      "surface_uk": "піксель-промінь",
+      "surface_ukr": "відновити-напрям-променя-з-пікселя",
+      "semantic_law": "Return canonical unnormalized direction ((u-cx)/fx,(v-cy)/fy,1) in camera coordinates. This is a RAY, not a reconstructed 3D point/depth. For a distortion-free pinhole, projecting any nonzero exact multiple of the direction returns the original pixel.",
+      "positive_witnesses": [
+        {
+          "args": [
+            "8",
+            "19",
+            "10",
+            "20",
+            "3",
+            "4"
+          ],
+          "expected": [
+            "1/2",
+            "3/4",
+            "1"
+          ]
+        },
+        {
+          "args": [
+            "0",
+            "0",
+            "2",
+            "3",
+            "0",
+            "0"
+          ],
+          "expected": [
+            "0",
+            "0",
+            "1"
+          ]
+        }
+      ],
+      "falsifiers": [
+        "fx=0 or fy=0 must not be accepted.",
+        "Recovered ray may not falsely claim unique object distance.",
+        "Composing ray and projection must reproduce the input pixel exactly."
+      ],
+      "relation_class": "SOURCE-GROUNDED-RESEARCH-CERTIFICATE",
+      "argument_shape": "(u,v,fx,fy,cx,cy) all exact rationals, fx != 0, fy != 0",
+      "result_shape": "See source research dossier",
+      "source_path": "knowledge/d10-astrophoto-exact-pinhole-research-20261009.json",
+      "donor_blob_sha": "cb5f6eb6a9d481c7801d0b71e75cd44ebda1a0de",
+      "donor_git_commit": "c67db6cdd820dea8d3a110caed359507c0a2d7a4",
+      "original_donor_status": "HOLD-EXACT-MATH-DERIVABILITY",
+      "source_url": "https://docs.opencv.org/5.0/main_modules/calib.html",
+      "existing_review_summary": "Exact name absent in selected D10 and D1-D9; projection from exact arithmetic and matrix inverse may make this a derived library function.",
+      "owner_core_library_review": "PENDING; source HOLD is not automatically ratified or assigned a coordinate"
+    },
+    {
+      "semantic_name": "BINARY-LYNDON-FACTORIZATION",
+      "surface_uk": "розкласти-двійкове-слово",
+      "surface_ukr": "чин-розкладу-Ліндона",
+      "semantic_law": "Return the unique finite factor list (l1,...,lk) such that concat(li)=w; all li are Lyndon (strictly lexicographically smaller than every proper nonempty suffix); and l1 >= l2 >= ... >= lk under explicit lexicographic 0<1. For empty source return []. No dependence on physical packing, phoneme ordering or hardware transport.",
+      "positive_witnesses": [
+        {
+          "input": "",
+          "factors": []
+        },
+        {
+          "input": "0",
+          "factors": [
+            "0"
+          ]
+        },
+        {
+          "input": "1111",
+          "factors": [
+            "1",
+            "1",
+            "1",
+            "1"
+          ]
+        },
+        {
+          "input": "01010",
+          "factors": [
+            "01",
+            "01",
+            "0"
+          ]
+        },
+        {
+          "input": "010010010001000",
+          "factors": [
+            "01",
+            "001",
+            "001",
+            "0001",
+            "0",
+            "0",
+            "0"
+          ]
+        },
+        {
+          "input": "001001",
+          "factors": [
+            "001",
+            "001"
+          ]
+        },
+        {
+          "input": "101",
+          "factors": [
+            "1",
+            "01"
+          ]
+        }
+      ],
+      "falsifiers": [
+        "Returning a shortest repeated primitive root (e.g. 01010 -> 01010) instead of the ordered factor list is wrong.",
+        "Allowing increasing factors l_i<l_(i+1) violates the theorem's canonical ordering.",
+        "Factoring by a hidden phoneme collation rather than explicit D1 order 0<1 changes identity.",
+        "Treating nonempty '00' as a Lyndon component is invalid: it equals a proper suffix only lexically larger, and is not primitive."
+      ],
+      "relation_class": "SOURCE-GROUNDED-RESEARCH-CERTIFICATE",
+      "argument_shape": "finite sequence D1 bits in {0,1} with explicit total order 0<1",
+      "result_shape": "ordered finite list of nonempty finite D1 words; empty source -> empty factor list",
+      "source_path": "knowledge/d10-binary-lyndon-factorization-v1.json",
+      "donor_blob_sha": "7c7633e2e1041075bf589937e0b4f6ce72be0dcd",
+      "donor_git_commit": "c67db6cdd820dea8d3a110caed359507c0a2d7a4",
+      "original_donor_status": "RESEARCH-HOLD-CORE-VS-LIBRARY-OWNER-REVIEW",
+      "source_url": "https://doc.sagemath.org/html/en/reference/combinat/sage/combinat/words/finite_word.html",
+      "existing_review_summary": [
+        "D10 PRIMITIVE-BINARY-WORD-ROOT",
+        "D8 ROTATE",
+        "D8 CANONICALIZE",
+        "D1 YES/NO",
+        "D10 optional LOWER-MECHANICAL-WORD held research"
+      ],
+      "owner_core_library_review": "PENDING; source HOLD is not automatically ratified or assigned a coordinate"
+    },
+    {
+      "semantic_name": "FINITE-STRING-CRITICAL-PAIR-CONFLUENCE",
+      "surface_uk": "узгодженість-переписувань",
+      "surface_ukr": "свідок-конфлікту-критичних-пар-двійкових-правил",
+      "semantic_law": "Compute all same-source one-step peaks arising from overlapping (including nested) occurrences of any pair of left sides. Each critical pair is joinable iff its two descendants share at least one reachable normal form under the same rules. Because every rule strictly shortens finite words, termination is proved by exact length. Then all critical pairs joinable is equivalent to confluence of the entire finite string rewrite relation (critical pair criterion + Newman's lemma). Return CONFLUENT or a concrete NONCONFLUENT witness: source, two branches, and separately reachable normal-form sets with empty intersection. Wording does not imply that a nonconfluent ruleset lacks individual common normal forms for other starting words.",
+      "positive_witnesses": [
+        {
+          "rules": [
+            [
+              "00",
+              "0"
+            ]
+          ],
+          "verdict": "CONFLUENT",
+          "reason": "00→0 is length-decreasing; overlapping runs of zeros converge"
+        },
+        {
+          "rules": [
+            [
+              "01",
+              "0"
+            ],
+            [
+              "10",
+              "0"
+            ]
+          ],
+          "verdict": "CONFLUENT",
+          "reason": "critical peak 010 reduces to 00 by either branch"
+        },
+        {
+          "rules": [
+            [
+              "01",
+              "0"
+            ],
+            [
+              "10",
+              "1"
+            ]
+          ],
+          "verdict": "NONCONFLUENT",
+          "reason": "010 can yield 00 or 01 and subsequently 0; direct normal-form witness may vary, compute oracle, don't assert exact branches blindly"
+        },
+        {
+          "rules": [
+            [
+              "00",
+              "0"
+            ],
+            [
+              "00",
+              "1"
+            ]
+          ],
+          "verdict": "NONCONFLUENT",
+          "reason": "00 rewrites to both irreducible 0 and 1"
+        },
+        {
+          "rules": [],
+          "verdict": "CONFLUENT",
+          "reason": "no redex, reflexive closure is confluent"
+        }
+      ],
+      "falsifiers": [
+        "Never count disjoint non-overlapping redex occurrences as unjoinable critical conflicts; the two orders commute.",
+        "Two peaks may differ immediately yet be joinable later; comparing only first descendants is unsound.",
+        "Identical left sides with distinct right sides yield a critical peak; omitting containment or same-position overlaps misses a real conflict.",
+        "Do not invoke termination/Newman's lemma for length-preserving, length-growing, cyclic or unrestricted higher-order rewrite systems.",
+        "Do not return a nonconfluence witness without two reachable branches whose normal-form sets are disjoint."
+      ],
+      "relation_class": "LENGTH-DECREASING-GROUND-STRING-REWRITING-CRITICAL-PAIR-CONFLUENCE",
+      "argument_shape": "(ordered finite list of (nonempty-binary-lhs, strictly-shorter-binary-rhs))->CONFLUENT or NONCONFLUENT(witness)",
+      "result_shape": "See source research dossier",
+      "source_path": "knowledge/d10-critical-pairs-confluence-20261009.json",
+      "donor_blob_sha": "6530444a1f4417dbebfa93c93f74c4dca5e5aefb",
+      "donor_git_commit": "c67db6cdd820dea8d3a110caed359507c0a2d7a4",
+      "original_donor_status": "RESEARCH-HOLD-CORE-VS-LIBRARY-NOT-SELECTED",
+      "source_url": null,
+      "existing_review_summary": "Requires owner semantic-minimality review",
+      "owner_core_library_review": "PENDING; source HOLD is not automatically ratified or assigned a coordinate"
+    },
+    {
+      "semantic_name": "DE-BRUIJN-BINARY-CYCLE?",
+      "surface_uk": "повний-двійковий-цикл?",
+      "surface_ukr": "чи-усі-н-бітові-вікна-рівно-раз?",
+      "semantic_law": "For n>=1, return D1 TRUE=1 iff length(word)=2^n AND the cyclic windows word[i],...,word[(i+n-1) mod 2^n] over all starts i∈[0,2^n) are pairwise distinct (equivalently cover all 2^n possible n-bit strings exactly once). Return D1 FALSE=0 for any well-typed word failing length or uniqueness. Invalid non-D1 data or n<=0 is a domain error, never a sneaky TRUE.",
+      "positive_witnesses": [
+        {
+          "word": "01",
+          "n": 1,
+          "value": 1,
+          "why": "both 1-bit patterns exactly once"
+        },
+        {
+          "word": "10",
+          "n": 1,
+          "value": 1,
+          "why": "cyclic rotation preserves coverage"
+        },
+        {
+          "word": "0011",
+          "n": 2,
+          "value": 1,
+          "why": "00, 01, 11, 10 each once"
+        },
+        {
+          "word": "00010111",
+          "n": 3,
+          "value": 1,
+          "why": "SageMath example order three"
+        },
+        {
+          "word": "00101110",
+          "n": 3,
+          "value": 1,
+          "why": "rotation of valid SageMath cycle"
+        },
+        {
+          "word": "00010110",
+          "n": 3,
+          "value": 0,
+          "why": "changed bit creates duplicate cyclic n-window"
+        },
+        {
+          "word": "00000000",
+          "n": 3,
+          "value": 0,
+          "why": "repeated zero windows"
+        },
+        {
+          "word": "000101110",
+          "n": 3,
+          "value": 0,
+          "why": "extra delimiter/bit changes required exact length"
+        },
+        {
+          "word": "",
+          "n": 1,
+          "value": 0,
+          "why": "empty word never has required length"
+        },
+        {
+          "word": "0101",
+          "n": 2,
+          "value": 0,
+          "why": "primitive 01 repetition does not cover all 2-bit patterns"
+        }
+      ],
+      "falsifiers": [
+        "Counting only linear substrings without wrap-around rejects valid 0011 at n=2",
+        "Accepting length 2^n with duplicate n-bit windows mistakes length for universal coverage",
+        "Treating a repeated primitive block as sufficient wrongly accepts 0101 at n=2",
+        "Treating word rotations as semantically different wrongly rejects 10001011 at n=3",
+        "Using an LFSR period alone without the all-zero state can miss one n-bit window"
+      ],
+      "relation_class": "SOURCE-GROUNDED-RESEARCH-CERTIFICATE",
+      "argument_shape": "(finite_D1_bit_word, exact_positive_integer_window_width_n)->D1_bool(1/0)",
+      "result_shape": "See source research dossier",
+      "source_path": "knowledge/d10-debruijn-binary-cycle-research-v1.json",
+      "donor_blob_sha": "9c989ef46a7fc2798a21267a92a7d8690ecaad84",
+      "donor_git_commit": "c67db6cdd820dea8d3a110caed359507c0a2d7a4",
+      "original_donor_status": "HOLD-OWNER-CORE-VS-LIBRARY-REVIEW-NOT-SELECTED",
+      "source_url": null,
+      "existing_review_summary": "Requires owner semantic-minimality review",
+      "owner_core_library_review": "PENDING; source HOLD is not automatically ratified or assigned a coordinate"
+    }
+  ]
+}
