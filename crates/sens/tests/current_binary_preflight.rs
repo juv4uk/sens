@@ -2,7 +2,7 @@
 //! binary width and payload, never a human spelling or historical SID8.
 //! Ratified language laws remain in lib/domains/*.lisp and their oracles.
 
-use sens::{eval_parsed_expressions, parse_canonical_binary, wire_decode_program, wire_encode_program, Expr, ExprKind, Session, Value};
+use sens::{eval_parsed_expressions, load_core_library, parse, parse_canonical_binary, wire_decode_program, wire_encode_program, Expr, ExprKind, Session, Value};
 
 fn binary_trace(expression: &Expr) -> String {
     match &expression.kind {
@@ -133,4 +133,27 @@ fn current_cond_reference_is_valid_binary_and_executes_without_legacy_sid() {
         .expect("two-field COND must execute with exact D1 predicate results");
     assert!(matches!(result.value, Value::Nil));
     assert!(result.output.is_empty());
+}
+
+
+/// Regression for obsolete numeric local-binding heads in mirrored Core files.
+/// The lexical `let` macro is Lisp-owned; 10011100 is not its current identity.
+#[test]
+fn core4_local_binding_heads_are_current_and_postcore_libraries_load() {
+    let mut session = Session::default();
+    load_core_library(&mut session).expect("Core4 bootstrap");
+
+    for (library, source) in [
+        ("time", include_str!("../../../lib/time.lisp")),
+        ("process", include_str!("../../../lib/process.lisp")),
+    ] {
+        let forms = parse(source).unwrap_or_else(|error| panic!("{library} parse: {error}"));
+        for (index, form) in forms.iter().enumerate() {
+            eval_parsed_expressions(std::slice::from_ref(form), &mut session)
+                .unwrap_or_else(|error| panic!(
+                    "{library} form {} byte {} failed: {}",
+                    index + 1, form.span.start, error
+                ));
+        }
+    }
 }
