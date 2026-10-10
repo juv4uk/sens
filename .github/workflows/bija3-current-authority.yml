@@ -16,6 +16,8 @@ on:
       - "CURRENT.md"
       - "docs/language-core.md"
       - "contracts/bija3-l1-l5-ratification.lisp"
+      - "scripts/check-bija3-current-authority.py"
+      - ".github/workflows/bija3-current-authority.yml"
 
 jobs:
   authority:
