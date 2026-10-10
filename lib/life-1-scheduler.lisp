@@ -21,27 +21,24 @@
 (00001001 life-scheduler-field
   (00001000 (entry field)
     (00000111
-      ((00000010 entry) () (00000001 ()))
-      ((00000010 entry) (0)
+      
+      ((0100 (00000010 entry))
        (10011100 ((rows (00000110 entry)))
          (00000111
-           ((00000010 rows) () (00000001 ()))
-           ((00000010 rows) (0)
+           
+           ((0100 (00000010 rows))
             (10011100 ((row (00000101 rows)))
               (00000111
-                ((00000010 row) ()
+                
+                ((00000010 row) 
                  (life-scheduler-field
                    (00000100 (00000101 entry) (00000110 rows))
                    field))
-                ((00000010 row) (1)
-                 (life-scheduler-field
-                   (00000100 (00000101 entry) (00000110 rows))
-                   field))
-                ((00000010 row) (0)
+                ((0100 (00000010 row))
                  (00000111
-                   ((00100010 field (00000101 row)) (1)
+                   ((00100010 field (00000101 row)) 
                     (00000101 (00000110 row)))
-                   ((00100010 field (00000101 row)) (0)
+                   ((0100 (00100010 field (00000101 row)))
                     (life-scheduler-field
                       (00000100 (00000101 entry) (00000110 rows))
                       field)))))))))))))
@@ -57,26 +54,26 @@
 (00001001 life-scheduler-key-present?
   (00001000 (key keys)
     (00000111
-      ((00000010 keys) () (00000001 absent))
-      ((00000010 keys) (0)
+      ((0100 (00000010 keys)) (00000001 absent))
+      ((0100 (00000010 keys))
        (00000111
-         ((00100010 key (00000101 keys)) (1) (00000001 present))
-         ((00100010 key (00000101 keys)) (0)
+         ((00100010 key (00000101 keys))  (00000001 present))
+         ((0100 (00100010 key (00000101 keys)))
           (life-scheduler-key-present? key (00000110 keys))))))))
 
 (00001001 life-scheduler-dedup-pending
   (00001000 (pending seen-keys)
     (00000111
-      ((00000010 pending) () (00000001 ()))
-      ((00000010 pending) (0)
+      
+      ((0100 (00000010 pending))
        (10011101 ((invocation (00000101 pending))
               (key (life-scheduler-invocation-key invocation)))
          (00000111
            ((00000011 (life-scheduler-key-present? key seen-keys) (00000001 present))
-            (1)
+            
             (life-scheduler-dedup-pending (00000110 pending) seen-keys))
            ((00000011 (life-scheduler-key-present? key seen-keys) (00000001 absent))
-            (1)
+            
             (00000100 invocation
                   (life-scheduler-dedup-pending
                     (00000110 pending)
@@ -89,15 +86,14 @@
 (00001001 life-scheduler-projection-match?
   (00001000 (expected projections)
     (00000111
-      ((00000010 projections) () (00000001 absent))
-      ((00000010 projections) (0)
+      ((0100 (00000010 projections)) (00000001 absent))
+      ((0100 (00000010 projections))
        (10011100 ((projection (00000101 projections)))
          (00000111
            ((00100010 expected projection)
-            (1)
+            
             (00000001 present))
-           ((00100010 expected projection)
-            (0)
+           ((0100 (00100010 expected projection))
             (life-scheduler-projection-match? expected (00000110 projections)))))))))
 
 (00001001 life-scheduler-projection-ready?
@@ -105,18 +101,16 @@
     (10011101 ((trigger (life-scheduler-field invocation (00000001 trigger)))
            (provenance-ref-value (life-scheduler-field invocation (00000001 provenance-ref))))
       (00000111
-        ((00000010 trigger) ()
+        
+        ((00000010 trigger) 
          (00000001 absent))
-        ((00000010 trigger) (1)
-         (00000001 absent))
-        ((00000010 trigger) (0)
+        ((0100 (00000010 trigger))
          (10011100 ((tail (00000110 trigger)))
            (00000111
-             ((00000010 tail) ()
+             
+             ((00000010 tail) 
               (00000001 absent))
-             ((00000010 tail) (1)
-              (00000001 absent))
-             ((00000010 tail) (0)
+             ((0100 (00000010 tail))
               (life-scheduler-projection-match?
                 (00100111
                   (00000001 projection-ready)
@@ -127,14 +121,14 @@
 (00001001 life-scheduler-select-ready
   (00001000 (pending projections)
     (00000111
-      ((00000010 pending) ()
+      ((0100 (00000010 pending))
        (00000001 (scheduler-selection none)))
-      ((00000010 pending) (0)
+      ((0100 (00000010 pending))
        (10011100 ((invocation (00000101 pending)))
          (00000111
            ((00000011 (life-scheduler-projection-ready? invocation projections)
                 (00000001 present))
-            (1)
+            
             (00100111
               (00000001 scheduler-selection)
               (00000001 ready)
@@ -142,29 +136,28 @@
               (00000110 pending)))
            ((00000011 (life-scheduler-projection-ready? invocation projections)
                 (00000001 absent))
-            (1)
+            
             (life-scheduler-select-ready (00000110 pending) projections))))))))
 
 (00001001 life-scheduler-quiescence-state
   (00001000 (projections lifecycle-state)
     (00000111
-      ((00000010 projections) ()
+      ((0100 (00000010 projections))
        (00000111
          ((00000011 lifecycle-state (00000001 no-transition-required))
-          (1)
+          
           (00000001 (quiescence-state quiescent)))
-         ((00000011 lifecycle-state (00000001 no-transition-required))
-          (0)
+         ((0100 (00000011 lifecycle-state (00000001 no-transition-required)))
           (00000001 (quiescence-state active)))))
-      ((00000010 projections) (0)
+      ((0100 (00000010 projections))
        (00000001 (quiescence-state active))))))
 
 (00001001 life-scheduler-quiescence
   (00001000 (pending projections lifecycle-state)
     (00000111
-      ((00000010 pending) ()
+      ((0100 (00000010 pending))
        (life-scheduler-quiescence-state projections lifecycle-state))
-      ((00000010 pending) (0)
+      ((0100 (00000010 pending))
        (00000001 (quiescence-state active))))))
 (00001001 life-scheduler-state
   (00001000 (pending projections lifecycle-state)
