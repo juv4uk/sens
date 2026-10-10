@@ -28,10 +28,10 @@
     "width": 10,
     "capacity": 1024,
     "dense_target": 1024,
-    "selected_semantic_candidates": 646,
-    "remaining_semantic_candidates": 378,
+    "selected_semantic_candidates": 647,
+    "remaining_semantic_candidates": 377,
     "law_forced_coordinates": 256,
-    "unplaced_selected_candidates": 390,
+    "unplaced_selected_candidates": 391,
     "ratified_residents": 0
   },
   "first_tranche": {
@@ -405,5 +405,18 @@
     "ratified_added": 0,
     "derivability": "PENDING-OWNER-REVIEW",
     "duplicate_reiter_diagnosis": "NOT-SELECTED; pending ledger FINITE-MINIMAL-DIAGNOSES already covers minimal hitting-set semantics"
+  },
+  "hysteretic_boolean_research_replay": {
+    "source": "knowledge/d10-hysteretic-boolean-source-law-20261009.json",
+    "source_blob_sha": "2cd823d1744153bc985bcb8ddd46ffb55d30fafd",
+    "selected": 1,
+    "previous_selected": 646,
+    "resulting_selected": 647,
+    "base_inventory_blob_sha": "ad2200c1d4e153d8efb0f390cc8680f0fb656b5b",
+    "resulting_inventory_blob_sha": "7e13e929338baeef9b16c2139d24b78e23ea1e03",
+    "coordinates_added": 0,
+    "ratified_added": 0,
+    "derivability": "PENDING-OWNER-REVIEW",
+    "independent_evidence": "TI SCEA046 dual hysteresis thresholds + existing research witnesses; comparator polarity is an explicit modeling convention"
   }
 }
