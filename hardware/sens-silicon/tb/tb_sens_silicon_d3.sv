@@ -21,7 +21,11 @@ module tb_sens_silicon_d3;
     reg [7:0] rom [0:37];
     integer cycles;
     integer k;
-    integer failure_count = 0;
+    integer simulation_clocks = 0;
+    always @(posedge clk) begin
+        if (rst) simulation_clocks <= 0;
+        else simulation_clocks <= simulation_clocks + 1;
+    end
 
     task restart;
         begin
@@ -69,14 +73,14 @@ module tb_sens_silicon_d3;
             if (!done) $fatal(1, "case %0d: no completion", id);
             if (should_reject) begin
                 if (!error || valid) $fatal(1, "case %0d: unsafe program accepted", id);
-                $display("SILICON_REJECT case=%0d clocks=%0d", id, guard);
+                $display("SILICON_REJECT case=%0d total_sim_clocks=%0d", id, simulation_clocks);
             end else begin
                 if (error || !valid || !result_is_predicate || result_bit !== expected) begin
                     $display("FAILED case=%0d done=%b valid=%b error=%b is_d1=%b bit=%b expected=%b",
                               id, done, valid, error, result_is_predicate, result_bit, expected);
                     $fatal(1, "silicon runtime mismatch");
                 end
-                $display("SILICON_PASS case=%0d D1=%0d clocks_after_last_byte=%0d", id, result_bit, guard);
+                $display("SILICON_PASS case=%0d D1=%0d total_sim_clocks=%0d", id, result_bit, simulation_clocks);
             end
         end
     endtask
@@ -111,7 +115,23 @@ module tb_sens_silicon_d3;
         restart();
         send_byte(8'hf2, 1); // Five padding trits; empty program blocked.
         finish_expect(7, 0, 1);
-        $display("SILICON_SUITE_PASS six executable D3 T5 witnesses plus 2 negative transports");
+        // D1:0 is a predicate value, while D3:000 is a structural EMPTY.
+        // Same numeric bits may not erase domain identity at EQ.
+        restart();
+        send_byte(8'h66, 0);
+        send_byte(8'h89, 0);
+        send_byte(8'h38, 0);
+        send_byte(8'h06, 0);
+        send_byte(8'ha1, 1);
+        finish_expect(8, 0, 0);
+
+        // D3:110 COND must not be silently reinterpreted as legacy truthiness.
+        restart();
+        send_byte(8'h67, 0);
+        send_byte(8'h38, 0);
+        send_byte(8'h8c, 1);
+        finish_expect(9, 0, 1);
+        $display("SILICON_SUITE_PASS six source cases, one D1/D3 identity case, three fail-closed cases");
         $finish;
     end
 endmodule

@@ -52,8 +52,11 @@ check rebuilds all six byte slices from the original
 normalized `ATOM(())` D2 empty frame → D3 `000`. Five original slices keep
 identical physical bits; one is canonically normalized. The testbench streams
 all 38 exact bytes into the RTL and checks outcomes `1, 1, 0, 1, 1, 0`.
-Two malformed transports must fail closed. Cycles printed by the bench are
-**simulation clocks**, not nanoseconds, wall time, FPGA frequency or throughput.
+Two malformed transports must fail closed. An additional physical EQ witness
+proves D1:0 and D3:000 are distinct, and a D3:110 COND specimen must be
+rejected until that law is admitted. The bench prints **total simulation clock
+counts per reset+stream run** (including byte ingress), not nanoseconds,
+wall time, FPGA frequency or throughput.
 
 ## Next research gate
 

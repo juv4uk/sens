@@ -45,8 +45,8 @@ jobs:
             hardware/sens-silicon/rtl/sens_silicon_d3.sv \
             hardware/sens-silicon/tb/tb_sens_silicon_d3.sv
           vvp "$RUNNER_TEMP/sens-silicon.vvp" | tee "$RUNNER_TEMP/sens-silicon-cycles.log"
-          test "$(grep -c '^SILICON_PASS case=' "$RUNNER_TEMP/sens-silicon-cycles.log")" -eq 6
-          test "$(grep -c '^SILICON_REJECT case=' "$RUNNER_TEMP/sens-silicon-cycles.log")" -eq 2
+          test "$(grep -c '^SILICON_PASS case=' "$RUNNER_TEMP/sens-silicon-cycles.log")" -eq 7
+          test "$(grep -c '^SILICON_REJECT case=' "$RUNNER_TEMP/sens-silicon-cycles.log")" -eq 3
           grep -q '^SILICON_SUITE_PASS' "$RUNNER_TEMP/sens-silicon-cycles.log"
       - name: Preserve per-program simulation cycle evidence
         if: always()
