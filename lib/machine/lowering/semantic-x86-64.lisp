@@ -228,7 +228,7 @@
 
 (00001001 x86-lower-cons-car-u64-forms
   (00001000 (left right)
-    (приєднати
+    (1111
       (x86-lower-bounded-pair-store-u64-forms left right)
       (00100111
         (00100111
