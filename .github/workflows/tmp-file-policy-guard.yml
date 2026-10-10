@@ -1,21 +1,22 @@
-name: SENS file policy guard
+name: TEMP verify canonical SENS file policy guard
 
 on:
-  pull_request:
   push:
-    branches: [main]
-  workflow_dispatch:
+    branches:
+      - fix/file-guard-policy-consolidation-20261010
+    paths:
+      - ".github/workflows/tmp-file-policy-guard.yml"
+      - ".github/workflows/important-file-guard.yml"
+      - "tools/check_source_policy.py"
+      - "tools/foreign-census.tsv"
+      - "knowledge/file-authority-policy.lisp"
+      - "knowledge/foreign-tools-census.lisp"
 
 permissions:
   contents: read
 
-concurrency:
-  group: sens-file-policy-${{ github.sha }}
-  cancel-in-progress: false
-
 jobs:
-  file-policy:
-    name: Fail-closed file census
+  guard:
     runs-on: ubuntu-24.04
     timeout-minutes: 10
     steps:
@@ -26,12 +27,9 @@ jobs:
       - uses: actions/setup-python@v6
         with:
           python-version: '3.x'
-      - name: Positive and negative witnesses with and without optimization
+      - name: Verify file policy in standard and optimized Python
         run: |
           set -euo pipefail
           python3 tools/check_source_policy.py --self-test
           python3 -O tools/check_source_policy.py --self-test
-      - name: Audit complete tree against pinned baseline and per-file census
-        run: |
-          set -euo pipefail
           python3 -O tools/check_source_policy.py
