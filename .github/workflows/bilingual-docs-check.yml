@@ -5,10 +5,12 @@ on:
     paths:
       - "**/*.md"
       - "scripts/check-bilingual-docs"
+      - "scripts/check_encoder_swarm_contract.py"
   pull_request:
     paths:
       - "**/*.md"
       - "scripts/check-bilingual-docs"
+      - "scripts/check_encoder_swarm_contract.py"
 
 jobs:
   check:
@@ -17,6 +19,9 @@ jobs:
       - uses: actions/checkout@v5
         with:
           fetch-depth: 50
+
+      - name: Перевірити спільну політику агентів і негативні свідки
+        run: python3 scripts/check_encoder_swarm_contract.py --self-test
 
       - name: Determine changed markdown files
         id: changed
@@ -52,3 +57,4 @@ jobs:
           # markdown file as a program. Passing the value through env and
           # splitting with xargs handles any number of files safely.
           printf '%s\n' "$CHANGED_FILES" | xargs -d '\n' -r ./scripts/check-bilingual-docs
+\n
