@@ -165,3 +165,52 @@ fn time_library_top_level_replay_reports_first_noncallable_form() {
         }
     }
 }
+
+
+/// Compare the actual whole-file loader route with the successful formwise
+/// replay above. This diagnostic prints the first enclosing top-level form
+/// if batch evaluation fails, but does not turn the finding into fake success
+/// or suppress any runtime error in the loader itself.
+#[test]
+fn time_library_batch_evaluation_reports_enclosing_form() {
+    let source = include_str!("../../../lib/time.lisp");
+    let parsed = sens::parse(source).expect("time library syntax");
+    let mut session = Session::default();
+    sens::load_core_library(&mut session).expect("Core4 bootstrap");
+
+    match sens::eval_program(source, &mut session) {
+        Ok(_) => println!(
+            "TIME-BATCH-DIAGNOSTIC: batch_eval=PASS top_level_forms={}",
+            parsed.len()
+        ),
+        Err(error) => {
+            let start = (error.span.start as usize).min(source.len());
+            let end = (error.span.end as usize).min(source.len()).max(start);
+            let form = parsed.iter().enumerate().find(|(_, expression)| {
+                let form_start = expression.span.start as usize;
+                let form_end = expression.span.end as usize;
+                form_start <= start && end <= form_end
+            });
+            let form_label = form
+                .map(|(index, expression)| {
+                    format!(
+                        "{}:{}..{}",
+                        index + 1,
+                        expression.span.start,
+                        expression.span.end
+                    )
+                })
+                .unwrap_or_else(|| "unmapped".to_owned());
+            let preview_end = end.min(start.saturating_add(180));
+            let snippet = String::from_utf8_lossy(&source.as_bytes()[start..preview_end]);
+            println!(
+                "TIME-BATCH-DIAGNOSTIC: batch_eval=FAIL error_span={}..{} enclosing_form={} source={:?} error={:?}",
+                start,
+                end,
+                form_label,
+                snippet.replace('\n', " "),
+                error
+            );
+        }
+    }
+}
