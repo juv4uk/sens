@@ -83,3 +83,65 @@ fn named_lisp_cannot_enter_canonical_binary_reader() {
         .expect_err("human Lisp names are not physical source");
     assert_eq!(err.kind, ErrorKind::Parse);
 }
+
+
+/// SENS Zero: a pinned, genuinely physical five-byte program is the oracle.
+/// This is (D3:110 COND ((D1:1 D1:1))), not the ASCII text "0"/"1".
+#[test]
+fn sens_zero_physical_cond_uses_only_exact_d1() {
+    let program = "10 110 00 10 1 00 1 01 01";
+    const PHYSICAL_T5: &[u8] = &[0x67, 0x38, 0x68, 0x17, 0x2e];
+    let words = sens::parse_binary_source_words(program)
+        .expect("exact-width binary oracle")
+        .into_iter()
+        .map(|token| token.word)
+        .collect::<Vec<_>>();
+    assert_eq!(decode_ternary_program(PHYSICAL_T5).unwrap(), words);
+    assert_eq!(encode_ternary_words(&words).unwrap().as_slice(), PHYSICAL_T5);
+
+    let selected = eval_t5_program(PHYSICAL_T5, &mut Session::default())
+        .expect("D1:1 must select the two-field physical COND clause");
+    assert_eq!(selected.value.as_predicate_bit(), Some(true));
+    assert!(selected.output.is_empty());
+
+    // D1:0 skips the first clause; D1:1 selects a result of D1:0.
+    let no_after_skip = "10 110 00 10 0 00 1 01 00 10 1 00 0 01 01";
+    let no_words = sens::parse_binary_source_words(no_after_skip)
+        .unwrap().into_iter().map(|token| token.word).collect::<Vec<_>>();
+    let no_bytes = encode_ternary_words(&no_words).unwrap();
+    let result = eval_t5_program(&no_bytes, &mut Session::default())
+        .expect("the selected result remains exact D1:0");
+    assert_eq!(result.value.as_predicate_bit(), Some(false));
+    assert!(result.output.is_empty());
+
+    // Exhaustion is structural (), never an implicit D1:0 predicate.
+    let exhausted = "10 110 00 10 0 00 1 01 01";
+    let empty_words = sens::parse_binary_source_words(exhausted)
+        .unwrap().into_iter().map(|token| token.word).collect::<Vec<_>>();
+    let empty_bytes = encode_ternary_words(&empty_words).unwrap();
+    let result = eval_t5_program(&empty_bytes, &mut Session::default())
+        .expect("no matching exact D1 clause returns structural empty");
+    assert!(matches!(result.value, Value::Nil));
+    assert_eq!(result.value.as_predicate_bit(), None);
+}
+
+/// Strict negative oracles on actual T5 bytes; failures must come from the
+/// SENS language mechanism, not from malformed transport or old truthiness.
+#[test]
+fn sens_zero_physical_cond_rejects_wrong_domain_and_three_field_clause() {
+    for (source, expected_kind) in [
+        ("10 110 00 10 000 00 1 01 01", ErrorKind::Type),
+        ("10 110 00 10 1 00 0 00 1 01 01", ErrorKind::InvalidForm),
+    ] {
+        let words = sens::parse_binary_source_words(source)
+            .expect("negative witness must be well-formed binary words")
+            .into_iter().map(|token| token.word).collect::<Vec<_>>();
+        let physical = encode_ternary_words(&words)
+            .expect("negative witness must be valid T5 transport");
+        assert_eq!(decode_ternary_program(&physical).unwrap(), words);
+        assert!(matches!(
+            eval_t5_program(&physical, &mut Session::default()),
+            Err(T5ExecutionError::Language(err)) if err.kind == expected_kind
+        ), "exact D1/COND rejected with wrong error category: {source}");
+    }
+}
