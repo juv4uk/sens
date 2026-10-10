@@ -350,8 +350,8 @@
 (00001001 x86-current-domain-key?
   (00001000 (width bits expected-width expected-bits)
     (110
-      ((00100010 width expected-width)
-       (00100010 bits expected-bits))
+      ((101 width expected-width)
+       (101 bits expected-bits))
       ((010 ()) (00000001 ())))))
 
 (00001001 x86-lower-current-binary-u64-forms
@@ -379,9 +379,9 @@
   (00001000 (width bits left right)
     ((00001000 (forms)
        (110
-        ((00100010 forms (00000001 unsupported-current-domain-binary-u64))
+        ((101 forms (00000001 unsupported-current-domain-binary-u64))
          (00000001 unsupported-current-domain-binary-u64))
-        ((00100010 forms (00000001 exact-d5-fallback-required))
+        ((101 forms (00000001 exact-d5-fallback-required))
          (00000001 exact-d5-fallback-required))
         ((010 ())
          (x86-encode-admitted-program forms))))
@@ -430,9 +430,9 @@
                   (x86-lower-current-d6-unary-u64-forms
                     width bits value)))
       (110
-        ((00100010 forms (00000001 unsupported-current-domain-d6-unary-u64))
+        ((101 forms (00000001 unsupported-current-domain-d6-unary-u64))
          (00000001 unsupported-current-domain-d6-unary-u64))
-        ((00100010 forms (00000001 exact-d6-fallback-required))
+        ((101 forms (00000001 exact-d6-fallback-required))
          (00000001 exact-d6-fallback-required))
         ((010 ())
          (x86-encode-admitted-program forms))))))
@@ -453,7 +453,7 @@
              (110
                ((x86-admission-within-inclusive-integer-range?
                   right 1 9223372036854775807)
-                (00100010 left right))
+                (101 left right))
                ((010 ()) (00000001 ()))))
             ((010 ()) (00000001 ()))))
          ((010 ()) (00000001 ()))))
@@ -475,9 +475,9 @@
                   (x86-lower-current-quotient-i64-forms
                     width bits left right)))
       (110
-        ((00100010 forms (00000001 unsupported-current-domain-quotient-i64))
+        ((101 forms (00000001 unsupported-current-domain-quotient-i64))
          (00000001 unsupported-current-domain-quotient-i64))
-        ((00100010 forms (00000001 exact-d5-fallback-required))
+        ((101 forms (00000001 exact-d5-fallback-required))
          (00000001 exact-d5-fallback-required))
         ((010 ())
          (x86-encode-admitted-program forms))))))
@@ -532,9 +532,9 @@
   (00001000 (width bits left right)
     (let ((forms (x86-lower-order-i64-forms width bits left right)))
       (110
-        ((00100010 forms (00000001 unsupported-current-domain-order-i64))
+        ((101 forms (00000001 unsupported-current-domain-order-i64))
          (00000001 unsupported-current-domain-order-i64))
-        ((00100010 forms (00000001 exact-d5-fallback-required))
+        ((101 forms (00000001 exact-d5-fallback-required))
          (00000001 exact-d5-fallback-required))
         ((010 ())
          (x86-encode-admitted-program forms))))))
@@ -578,9 +578,9 @@
     (10011100
       ((forms (x86-lower-current-zerop-u64-forms width bits value)))
       (110
-        ((00100010 forms (00000001 unsupported-current-domain-zerop-u64))
+        ((101 forms (00000001 unsupported-current-domain-zerop-u64))
          (00000001 unsupported-current-domain-zerop-u64))
-        ((00100010 forms (00000001 exact-d5-fallback-required))
+        ((101 forms (00000001 exact-d5-fallback-required))
          (00000001 exact-d5-fallback-required))
         ((010 ())
          (x86-encode-admitted-program forms))))))
@@ -606,7 +606,7 @@
                   (x86-lower-current-structural-u64-forms
                     width bits left right)))
       (110
-        ((00100010 forms (00000001 unsupported-current-domain-structural-u64))
+        ((101 forms (00000001 unsupported-current-domain-structural-u64))
          (00000001 unsupported-current-domain-structural-u64))
         ((010 ())
          (x86-encode-admitted-program-or-reject forms))))))
@@ -638,7 +638,7 @@
               eq-width eq-bits cond-width cond-bits
               left right then-value else-value)))
       (110
-        ((00100010 forms (00000001 unsupported-current-domain-eq-cond-u64))
+        ((101 forms (00000001 unsupported-current-domain-eq-cond-u64))
          (00000001 unsupported-current-domain-eq-cond-u64))
         ((010 ())
          (x86-encode-admitted-program-or-reject forms))))))
