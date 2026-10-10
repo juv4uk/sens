@@ -266,7 +266,14 @@ def self_test() -> None:
         sample_census("short plan"),
         sample_census().replace('(independence_status . foreign)', '(independence_status . local)'),
         sample_census().replace('(owner-issue . "#5397")', '(owner-issue . "unknown")'),
-        sample_census() + "\n" + sample_census().splitlines()[5],
+        sample_census().replace(
+            '     (new-python-without-entry . blocked)))',
+            '        ((path . "tools/guard.py") (independence_status . foreign) '
+            '(owner-issue . "#5397") (migration_plan . "Replace mechanical Git path '
+            'decisions with executable physical SENS T5 proof; retain Git paths only as '
+            'untrusted transport, prove hosted positive and negative parity, then remove Python."))\\n'
+            '     (new-python-without-entry . blocked)))',
+        ),
     ):
         if not catches(lambda invalid=invalid: census_entries(invalid)):
             fail("SELF_TEST_FAIL malformed_census_admitted")
