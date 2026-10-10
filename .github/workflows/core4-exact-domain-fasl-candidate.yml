@@ -56,10 +56,11 @@ jobs:
           if-no-files-found: error
           retention-days: 1
       - name: Pin exact x86 encoder source
-        run: test "$(git hash-object lib/machine/encoding/x86-64.lisp)" = "d48fb32def0933eaf5c62bff5c16f396fcc55431"
+        run: test "$(git hash-object lib/machine/encoding/x86-64.lisp)" = "0b3f0989cf23df21edbcf5697b9f8548ff410e24"
       - name: Diagnose x86 encoder callability stages
         shell: bash
         run: |
+          set +e
           set -uo pipefail
           cargo test --locked -p sens --test machine_asm_differential x86_encoder_callability_stage_probe -- --exact --ignored --nocapture
           status=$?
