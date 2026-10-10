@@ -159,6 +159,55 @@ def violations(paths: list[str], entries: dict[str, str]) -> list[str]:
     return errors
 
 
+
+def parse_tree_mode(raw: bytes, expected_path: str) -> str:
+    """One NUL-complete exact path from git ls-tree; mode is evidence, not a suffix."""
+    if raw.count(b"\x00") != 1 or not raw.endswith(b"\x00"):
+        fail("GIT_TREE_RECORD_INCOMPLETE: " + expected_path)
+    record = raw[:-1]
+    if record.count(b"\t") != 1:
+        fail("GIT_TREE_FIELDS_INVALID: " + expected_path)
+    metadata, encoded_path = record.split(b"\t", 1)
+    fields = metadata.split(b" ")
+    if len(fields) != 3:
+        fail("GIT_TREE_METADATA_INVALID: " + expected_path)
+    mode, kind, oid = fields
+    if not re.fullmatch(rb"[0-9a-f]{40,64}", oid):
+        fail("GIT_TREE_OBJECT_ID_INVALID: " + expected_path)
+    try:
+        found_path = encoded_path.decode("utf-8", "strict")
+        mode_text = mode.decode("ascii", "strict")
+        kind_text = kind.decode("ascii", "strict")
+    except UnicodeDecodeError as error:
+        fail("GIT_TREE_RECORD_ENCODING_INVALID: " + str(error))
+    if found_path != expected_path:
+        fail("GIT_TREE_PATH_MISMATCH: " + expected_path)
+    if kind_text not in ("blob", "commit", "tree"):
+        fail("GIT_TREE_KIND_INVALID: " + expected_path)
+    return mode_text + ":" + kind_text
+
+
+def source_mode_error(path: str, mode: str) -> list[str]:
+    if mode in ("100644:blob", "100755:blob"):
+        return []
+    return ["NON_REGULAR_NEW_SOURCE: " + path + ": " + mode]
+
+
+def new_source_mode_failures(paths: list[str], head: str) -> list[str]:
+    """A symlink or gitlink carrying .lisp/.sens is never a SENS source."""
+    errors: list[str] = []
+    for path in paths:
+        if not (path.startswith(IMPORTANT) or
+                (path.startswith("tools/") and path.endswith(".py"))):
+            continue
+        if not path_is_canonical(path):
+            fail("GIT_TREE_BAD_PATH: " + repr(path))
+        record = command("ls-tree", "-z", "--full-tree", head, "--", path)
+        mode = parse_tree_mode(record, path)
+        errors.extend(source_mode_error(path, mode))
+    return errors
+
+
 def census_coverage(tracked_tools: list[str], entries: dict[str, str]) -> list[str]:
     errors: list[str] = []
     tracked_python: set[str] = set()
@@ -256,6 +305,27 @@ def self_test() -> None:
         introduced_paths(b"C100\x00tools/old.py\x00tools/new.py\x00"),
         ["tools/new.py"],
     )
+    object_id = b"a" * 40
+    path = "lib/example.sens"
+    for mode, kind, expected in (
+        ("100644", "blob", []),
+        ("100755", "blob", []),
+        ("120000", "blob", ["NON_REGULAR_NEW_SOURCE: lib/example.sens: 120000:blob"]),
+        ("160000", "commit", ["NON_REGULAR_NEW_SOURCE: lib/example.sens: 160000:commit"]),
+    ):
+        record = (mode + " " + kind + " ").encode("ascii") + object_id + b"\tlib/example.sens\x00"
+        verify_case("git_tree_" + mode,
+                    source_mode_error(path, parse_tree_mode(record, path)), expected)
+    for invalid in (
+        b"",
+        b"100644 blob " + object_id + b"\tlib/example.sens",
+        b"100644 blob " + object_id + b"\tlib/example.sens\x00\x00",
+        b"100644 blob " + object_id + b"\tlib/other.sens\x00",
+        b"100644 blob " + object_id + b"\tlib/example.sens\x00junk",
+    ):
+        if not catches(lambda invalid=invalid: parse_tree_mode(invalid, path)):
+            fail("SELF_TEST_FAIL malformed_git_tree_accepted")
+
     verify_case("empty_nul_stream", nul_paths(b""), [])
     verify_case("valid_nul_stream", nul_paths(b"tools/a.py\x00"), ["tools/a.py"])
     if not catches(lambda: nul_paths(b"tools/a.py")):
@@ -312,6 +382,7 @@ def main(argv: list[str]) -> int:
         new_paths = introduced_paths(changes)
         tracked_tools = nul_paths(command("ls-files", "-z", "--", "tools/"))
         errors = violations(new_paths, entries)
+        errors.extend(new_source_mode_failures(new_paths, head))
         errors.extend(census_coverage(tracked_tools, entries))
         print(f"FILE_GUARD_AUDIT introduced={len(new_paths)} foreign_census={len(entries)}")
         if errors:
