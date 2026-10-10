@@ -16,7 +16,9 @@ spec.loader.exec_module(module)
 
 
 class DirectT5TimingGuard(unittest.TestCase):
+    """Exercise valid evidence and adversarial timing/fixture mutations."""
     def setUp(self):
+        """Create isolated CSV and fixture inputs for each test."""
         self.temp = tempfile.TemporaryDirectory()
         self.addCleanup(self.temp.cleanup)
         self.root = Path(self.temp.name)
@@ -39,12 +41,14 @@ class DirectT5TimingGuard(unittest.TestCase):
         self.write_rows(self.rows)
 
     def write_rows(self, rows, columns=None):
+        """Rewrite the temporary evidence with the requested columns."""
         with self.csv_path.open("w", encoding="utf-8", newline="") as handle:
             writer = csv.DictWriter(handle, fieldnames=columns or module.COLUMNS)
             writer.writeheader()
             writer.writerows(rows)
 
     def run_guard(self, *, optimized=False):
+        """Run the validator in standard Python or optimized mode."""
         return subprocess.run(
             [sys.executable, *(["-O"] if optimized else []), str(GUARD),
              str(self.csv_path), "--root", str(self.root)],
@@ -52,11 +56,13 @@ class DirectT5TimingGuard(unittest.TestCase):
         )
 
     def test_valid_csv_passes_in_both_python_modes(self):
+        """The same valid evidence passes normally and under ``-O``."""
         for optimized in (False, True):
             with self.subTest(optimized=optimized):
                 self.assertEqual(self.run_guard(optimized=optimized).returncode, 0)
 
     def test_corrupt_or_partial_data_fails_even_with_optimization(self):
+        """Truncated, duplicate, mistyped, or missing evidence is rejected."""
         mutations = (
             lambda rows: rows.pop(),
             lambda rows: rows.__setitem__(1, dict(rows[0])),
@@ -77,6 +83,7 @@ class DirectT5TimingGuard(unittest.TestCase):
         self.assertEqual(self.run_guard(optimized=True).returncode, 2)
 
     def test_replaced_fixture_same_length_is_rejected_with_optimization(self):
+        """A byte mutation cannot pass merely because the file size matches."""
         path = self.root / module.FIXTURES["quote"]
         original = path.read_bytes()
         corrupted = bytes((original[0] ^ 1,)) + original[1:]
@@ -89,6 +96,7 @@ class DirectT5TimingGuard(unittest.TestCase):
         self.assertEqual(self.run_guard(optimized=True).returncode, 0)
 
     def test_unexpected_csv_columns_fail_closed(self):
+        """Unexpected CSV order is rejected under optimized Python."""
         self.write_rows(self.rows, columns=list(reversed(module.COLUMNS)))
         self.assertEqual(self.run_guard(optimized=True).returncode, 2)
 
