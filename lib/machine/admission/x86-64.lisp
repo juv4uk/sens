@@ -215,11 +215,11 @@
   (00001000 (text)
     (00000111
       ((00111100 text) (00000010 (00000001 (00000000))))
-      ((101 (00111111 text) "/")
+      ((тотожне? (00111111 text) "/")
        (10011100 ((rest (01000000 text)))
          (00000111
            ((00111100 rest) (00000010 (00000001 (00000000))))
-           ((101 (00111111 rest) "1")
+           ((тотожне? (00111111 rest) "1")
             (00000111
               ((00111100 (01000000 rest)) (00000010 (00000001 ())))
               ((00000010 (00000001 ())) (00000010 (00000001 (00000000))))))
@@ -281,38 +281,39 @@
 ; match, the same way an out-of-range immediate would fail the encoder
 ; later. The selected Lisp encoder still validates whether the operand can
 ; be represented before the raw host capability is reachable.
-; Atomic value/tag equality must use current D3:101 EQ. The two
-; x86-reg-code-vs-() sentinels below are deliberately separate: structural
-; EMPTY is not an EQ-compatible PredicateBit or atom.
+; Atomic value/tag equality routes through the canonical Ukrainian surface
+; `тотожне?` (current D3:101 EQ); marker values use `як-є`, not Function8.
+; The x86-reg-code-vs-() sentinels below are separate: structural EMPTY is
+; not an EQ-compatible PredicateBit or ordinary atom.
 (00001001 x86-admission-pattern-match?
   (00001000 (pattern form)
     (00000111
       ((00000010 pattern)
        (00000111
-         ((101 pattern (001 immediate)) (00000010 (00000001 ())))
-         ((101 pattern (001 register))
+         ((тотожне? pattern (як-є immediate)) (00000010 (00000001 ())))
+         ((тотожне? pattern (як-є register))
           (00000111
             ((00000010 form)
              (00000111
                ((00000011 (x86-reg-code form) (00000001 ())) (00000010 (00000001 (00000000))))
                ((00000010 (00000001 ())) (00000010 (00000001 ())))))
             ((00000010 (00000001 ())) (00000010 (00000001 (00000000))))))
-         ((101 pattern (001 xmm-register))
+         ((тотожне? pattern (як-є xmm-register))
           (00000111
             ((00000010 form)
              (00000111
                ((00000011 (x86-xmm-reg-code form) (00000001 ())) (00000010 (00000001 (00000000))))
                ((00000010 (00000001 ())) (00000010 (00000001 ())))))
             ((00000010 (00000001 ())) (00000010 (00000001 (00000000))))))
-         ((101 pattern (001 disp8))
+         ((тотожне? pattern (як-є disp8))
           (x86-admission-disp8? form))
-         ((101 pattern (001 imm32))
+         ((тотожне? pattern (як-є imm32))
           (x86-admission-imm32? form))
-         ((101 pattern (001 uimm8))
+         ((тотожне? pattern (як-є uimm8))
           (x86-admission-uimm8? form))
-         ((101 pattern (001 rel32))
+         ((тотожне? pattern (як-є rel32))
           (x86-admission-rel32? form))
-         ((101 pattern form) (00000010 (00000001 ())))
+         ((тотожне? pattern form) (00000010 (00000001 ())))
          ((00000010 (00000001 ())) (00000010 (00000001 (00000000))))))
       ((00000010 form) (00000010 (00000001 (00000000))))
       ((x86-admission-pattern-match? (00000101 pattern) (00000101 form))
