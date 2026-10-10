@@ -59,12 +59,14 @@ class LegacyHeadMigrationSafety(unittest.TestCase):
         self.assertEqual(out, "(0010 (00000011 x) (100 x))\n")
 
     def test_unmapped_head_and_legacy_cond_fail_closed(self):
-        for source in [
-            "(11111111 x)\n",
-            "(00000111 ((00000010 x) (1) x))\n",
+        for source, reason in [
+            ("(11111111 x)\n", "no proved successor"),
+            ("(00000111 ((00000010 x) (1) x))\n", "historical COND"),
         ]:
-            with self.subTest(source=source), self.assertRaises(M.Blocked):
-                M.stage(source, self.bridge)
+            with self.subTest(source=source):
+                with self.assertRaises(M.Blocked) as caught:
+                    M.stage(source, self.bridge)
+                self.assertIn(reason, str(caught.exception))
 
     def test_no_executable_legacy_head_cannot_claim_migration(self):
         with self.assertRaises(M.Blocked):
