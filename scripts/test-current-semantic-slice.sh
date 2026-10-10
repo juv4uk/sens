@@ -16,14 +16,50 @@ cargo test -p sens \
 
 
 # Historical #1096 bare-SID witness remains preserved as compatibility evidence,
-# but it is intentionally not executed by the current semantic slice. Contract
-# 11.8 assigns W8 to exact D8 identity; Sens8/Sid8 remains migration/provenance only.
-# #291: quantity semantics live in Lisp. The shell observes only the named
-# pass envelope; expected scientific quantities and relations stay in the
-# Lisp witness itself. No replacement Rust observer is introduced.
+# but is intentionally not executed by the current semantic slice.
+#
+# #291 exact quantity arithmetic is Lisp-owned, not a Rust oracle.
+# Its earlier witness failed because historical truth tokens/helpers were not
+# admitted in the exact-domain source path. The witness now derives хибне?,
+# порожнє? and нуль? in Lisp from admitted D1/D3 operations; lib/quantity.lisp
+# returns exact D1 values instead of unbound так/ні literals or host truth.
+# Keep the physical T5 smoke below as separate codec/runtime evidence: it does
+# not, by itself, certify the quantity witness or canonical source migration.
+cond_sens="tests/fixtures/migration-d1-cond-cohort/branch.sens"
+cond_view="tests/fixtures/migration-d1-cond-cohort/branch"
+actual_cond_view="$(cargo run --quiet -p sens-cli --bin sens-trit -- open "$cond_sens")"
+expected_cond_view="$(cat "$cond_view")"
+if [[ "$actual_cond_view" != "$expected_cond_view" ]]; then
+  printf 'physical D1/D3 T5 view mismatch: %s\\n' "$actual_cond_view" >&2
+  exit 1
+fi
+binary_cond_status="$(cargo run --quiet -p sens-cli --bin sens -- "$cond_sens")"
+if [[ -z "$binary_cond_status" ]]; then
+  printf 'physical D1/D3 T5 program returned an empty process result\\n' >&2
+  exit 1
+fi
+
+# The smallest physical binary fixture is one exact D3 EMPTY word: 000.
+# T5 trits are 00022 (two canonical pad trits), packed into one byte 0x08.
+empty_sens="tests/fixtures/current-d3-empty-smoke.sens"
+empty_view="tests/fixtures/current-d3-empty-smoke"
+actual_empty_view="$(cargo run --quiet -p sens-cli --bin sens-trit -- open "$empty_sens")"
+expected_empty_view="$(cat "$empty_view")"
+if [[ "$actual_empty_view" != "$expected_empty_view" ]]; then
+  printf 'physical D3 EMPTY T5 view mismatch: %s\\n' "$actual_empty_view" >&2
+  exit 1
+fi
+empty_binary_status="$(cargo run --quiet -p sens-cli --bin sens -- "$empty_sens")"
+if [[ "$empty_binary_status" != "()" ]]; then
+  printf 'physical D3 EMPTY T5 result mismatch: %s\\n' "$empty_binary_status" >&2
+  exit 1
+fi
+
+# Exact quantity laws are re-enabled on the current Lisp path. This must emit
+# its own named pass envelope; physical smoke alone is not accepted as parity.
 quantity_status="$(cargo run --quiet -p sens-cli --bin sens -- tests/fixtures/exact-quantity-arithmetic-witness.lisp)"
 if [[ "$quantity_status" != "(exact-quantity-arithmetic-witness (status pass))" ]]; then
-  printf 'exact quantity Lisp witness failed: %s\n' "$quantity_status" >&2
+  printf 'exact quantity Lisp witness failed: %s\\n' "$quantity_status" >&2
   exit 1
 fi
 
