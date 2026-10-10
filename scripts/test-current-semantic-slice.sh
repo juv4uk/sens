@@ -21,9 +21,55 @@ cargo test -p sens \
 # #291: quantity semantics live in Lisp. The shell observes only the named
 # pass envelope; expected scientific quantities and relations stay in the
 # Lisp witness itself. No replacement Rust observer is introduced.
-quantity_status="$(cargo run --quiet -p sens-cli --bin sens -- tests/fixtures/exact-quantity-arithmetic-witness.lisp)"
-if [[ "$quantity_status" != "(exact-quantity-arithmetic-witness (status pass))" ]]; then
-  printf 'exact quantity Lisp witness failed: %s\n' "$quantity_status" >&2
+quantity_witness="tests/fixtures/exact-quantity-arithmetic-witness.lisp"
+if quantity_status="$(cargo run --quiet -p sens-cli --bin sens -- "$quantity_witness" 2>&1)"; then
+  if [[ "$quantity_status" != "(exact-quantity-arithmetic-witness (status pass))" ]]; then
+    printf 'exact quantity Lisp witness returned a non-pass result: %s\n' "$quantity_status" >&2
+    exit 1
+  fi
+else
+  quantity_rc=$?
+  printf 'exact quantity Lisp witness failed (exit %s):\n%s\n' "$quantity_rc" "$quantity_status" >&2
+
+  # Diagnostic-only replay: split the same Lisp-owned witness at its public
+  # rows/check boundary. Do not edit the source or expected quantities, do not
+  # convert the law to a Rust oracle, and never turn either failure green.
+  quantity_rows_probe="$RUNNER_TEMP/exact-quantity-rows-probe.lisp"
+  quantity_check_probe="$RUNNER_TEMP/exact-quantity-check-probe.lisp"
+  python3 - "$quantity_witness" "$quantity_rows_probe" "$quantity_check_probe" <<'PY'
+from pathlib import Path
+import sys
+
+source = Path(sys.argv[1]).read_text(encoding="utf-8")
+tail = "\n(exact-quantity-arithmetic-witness)"
+base = source.rstrip()
+if not base.endswith(tail):
+    raise SystemExit("QUANTITY-DIAGNOSTIC-BLOCKED: unexpected fixture terminator; refusing to rewrite")
+prefix = base[:-len(tail)].rstrip()
+Path(sys.argv[2]).write_text(
+    prefix + "\n\n(exact-quantity-arithmetic-rows)\n", encoding="utf-8"
+)
+Path(sys.argv[3]).write_text(
+    prefix + "\n\n(exact-quantity-arithmetic-check (exact-quantity-arithmetic-rows))\n",
+    encoding="utf-8",
+)
+PY
+
+  for stage in rows check; do
+    case "$stage" in
+      rows) probe="$quantity_rows_probe" ;;
+      check) probe="$quantity_check_probe" ;;
+    esac
+    log="$RUNNER_TEMP/exact-quantity-$stage-probe.log"
+    if cargo run --quiet -p sens-cli --bin sens -- "$probe" >"$log" 2>&1; then
+      printf 'QUANTITY-DIAGNOSTIC %s=PASS\n' "$stage"
+    else
+      probe_rc=$?
+      printf 'QUANTITY-DIAGNOSTIC %s=FAIL exit=%s\n' "$stage" "$probe_rc" >&2
+      cat "$log" >&2
+      break
+    fi
+  done
   exit 1
 fi
 
