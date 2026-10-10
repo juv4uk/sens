@@ -60,8 +60,8 @@
 (00001001 narrate-fact
   (00001000 (fact)
     (00000111
-      ((00011100 (00101000 fact) 2) 1 (00100111 (00101111 fact) (00000001 is) (00000001 a) (00000101 fact)))
-      ((00011100 (00101000 fact) 3) 1 (00100111 (00101111 fact) (00000101 fact) (00110000 fact)))
+      ((00011100 (00101000 fact) 2)  (00100111 (00101111 fact) (00000001 is) (00000001 a) (00000101 fact)))
+      ((00011100 (00101000 fact) 3)  (00100111 (00101111 fact) (00000101 fact) (00110000 fact)))
       (t fact))))
 
 
@@ -73,10 +73,10 @@
 (00001001 narrate-derivation
   (00001000 (derivations)
     (00000111
-      ((00000010 derivations) () (00000001 ()))
-      ((00000010 derivations) (1) (00000001 ()))
-      ((00000010 (00000110 derivations)) () (narrate-provenance (00000101 derivations)))
-      ((00000010 (00000110 derivations)) (1) (narrate-provenance (00000101 derivations)))
+      
+      ((00000010 derivations)  (00000001 ()))
+      
+      ((00000010 (00000110 derivations))  (narrate-provenance (00000101 derivations)))
       (t (00101001 (narrate-provenance (00000101 derivations))
                   (00000100 (00000001 and) (narrate-derivation (00000110 derivations))))))))
 
@@ -108,8 +108,8 @@
   (00001000 (goal proof)
     (10011100 ((derivations (provenance-derived-from (10000100 proof))))
       (00000111
-        ((00000010 derivations) () (narrate-fact goal))
-        ((00000010 derivations) (1) (narrate-fact goal))
+        
+        ((00000010 derivations)  (narrate-fact goal))
         (t (00101001 (narrate-fact goal)
                    (00000100 (00000001 because) (narrate-derivation derivations))))))))
 
@@ -127,8 +127,8 @@
     (10011100 ((statement (00101111 outcome))
           (results (00110000 outcome)))
       (00000111
-        ((00000010 results) () (00100111 (00000001 proved) statement (00000001 without-proof-result)))
-        ((00000010 results) (1) (00100111 (00000001 proved) statement (00000001 without-proof-result)))
+        
+        ((00000010 results)  (00100111 (00000001 proved) statement (00000001 without-proof-result)))
         (t
          (00101001
            (00100111 (00000001 proved))
@@ -142,22 +142,22 @@
   (00001000 (outcome expected)
     (00000111
       ((00100001 (result-proper-list? outcome)) (00000001 ()))
-      ((00011100 (00101000 outcome) expected) 1 t)
+      ((00011100 (00101000 outcome) expected)  t)
 
       (t (00000001 ())))))
 
 (00001001 narrate-outcome
   (00001000 (outcome)
     (00000111
-      ((00000010 outcome) () (narrate-invalid-outcome-shape outcome))
-      ((00000010 outcome) (1) (narrate-invalid-outcome-shape outcome))
+      
+      ((00000010 outcome)  (narrate-invalid-outcome-shape outcome))
       ((00100001 (result-proper-list? outcome))
        (narrate-invalid-outcome-shape outcome))
-      ((00000010 (00000101 outcome)) (0)
+      ((0100 (00000010 (00000101 outcome)))
        (00100111 (00000001 invalid) (00000001 outcome-tag) (00000101 outcome)))
-      ((00000010 (00000101 outcome)) ()
+      ((0100 (00000010 (00000101 outcome)))
        (00100111 (00000001 invalid) (00000001 outcome-tag) (00000101 outcome)))
-      ((00100011 (00000101 outcome)) (class-membership symbol nonmember)
+      ((00100011 (00000101 outcome)) 
        (00100111 (00000001 invalid) (00000001 outcome-tag) (00000101 outcome)))
       ((00000011 (00000101 outcome) (00000001 proved))
        (00000111
