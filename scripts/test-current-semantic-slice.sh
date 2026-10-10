@@ -59,7 +59,6 @@ for stage, suffix in probes.items():
     )
 PY
 
-  quantity_diag_dir="${RUNNER_TEMP:-$(mktemp -d)}"
   for stage in rows-binding check-binding witness-binding rows-call check-call; do
     probe="$quantity_diag_dir/exact-quantity-$stage-probe.lisp"
     log="$quantity_diag_dir/exact-quantity-$stage-probe.log"
