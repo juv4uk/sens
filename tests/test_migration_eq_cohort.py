@@ -59,7 +59,7 @@ class EqualityMigrationCanary(unittest.TestCase):
             with self.subTest(stem=stem):
                 original = (FIXTURES / (stem + ".lisp")).read_text(encoding="utf-8")
                 self.assertEqual(original, source)
-                resolver = migration.Resolver(self.legacy, self.my, self.upper)
+                resolver = migration.Resolver(self.legacy, self.my, self.upper, source_era="legacy")
                 projection = migration.migrate_file(original, resolver, self.text7)
                 self.assertEqual(projection, WORDS)
                 self.assertEqual(resolver.counts[pass_name], 1)
@@ -78,6 +78,7 @@ class EqualityMigrationCanary(unittest.TestCase):
                 sys.executable, str(SCRIPT), str(FIXTURES), "--out", str(dest),
                 *[arg for key, path in ARGS.items() for arg in
                   ("--" + key.replace("_", "-"), str(path))],
+                "--source-era", "legacy",  # Explicit provenance for ambiguous historical W8 heads.
                 "--report", str(manifest),
             ]
             proc = subprocess.run(command, text=True, capture_output=True)
@@ -94,6 +95,11 @@ class EqualityMigrationCanary(unittest.TestCase):
             self.assertEqual(second["summary"]["files_blocked"], 2)
             for stem in CASES:
                 self.assertEqual((dest / (stem + ".sens")).read_bytes(), BYTES)
+
+    def test_unpinned_historical_w8_is_rejected_in_auto_mode(self):
+        resolver = migration.Resolver(self.legacy, self.my, self.upper, source_era="auto")
+        with self.assertRaises(migration.MigrationError):
+            migration.migrate_file("(00000011 () ())", resolver, self.text7)
 
     def test_t5_corruption_and_unratified_source_fail_closed(self):
         with self.assertRaises(migration.SensT5Error):
