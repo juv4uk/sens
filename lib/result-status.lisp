@@ -38,17 +38,17 @@
 
 (00001001 result-tagged?
   (00001000 (result)
+    ; Contract 11.8: D3:110 accepts a predicate bit, never t or () as a test.
+    ; An atom cannot be a tagged result. Only inspect CAR after ATOM says NO.
     (00000111
-      ((00000010 result) () (00000001 ()))
-      ((00000010 result) (1) (00000001 ()))
-      ((00000011 (00000101 result) (00000001 proved)) t)
-      ((00000011 (00000101 result) (00000001 unknown)) t)
-      ((00000011 (00000101 result) (00000001 partial)) t)
-      ((00000011 (00000101 result) (00000001 blocked)) t)
-      ((00000011 (00000101 result) (00000001 disputed)) t)
-      ((00000011 (00000101 result) (00000001 invalid)) t)
-      (t (00000001 ())))))
-
+      ((00000010 result) (00000011 0 1))
+      ((00000011 (00000101 result) (00000001 proved)) (00000011 0 0))
+      ((00000011 (00000101 result) (00000001 unknown)) (00000011 0 0))
+      ((00000011 (00000101 result) (00000001 partial)) (00000011 0 0))
+      ((00000011 (00000101 result) (00000001 blocked)) (00000011 0 0))
+      ((00000011 (00000101 result) (00000001 disputed)) (00000011 0 0))
+      ((00000011 (00000101 result) (00000001 invalid)) (00000011 0 0))
+      ((00000010 (00000001 ())) (00000011 0 1)))))
 (00001001 result-status
   (00001000 (result)
     (00000111
