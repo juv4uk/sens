@@ -123,13 +123,13 @@ def status_form(policy: str | None, census: str | None, guard: str | None) -> st
     return (
         "(00001001 *file-authority-source-status*\n"
         "  (00000001\n"
-        "    (("
+        "    ("
         + path_status("policy", policy)
         + " "
         + path_status("census", census)
         + " "
         + path_status("guard", guard)
-        + "))))\n"
+        + ")))\n"
     )
 
 
