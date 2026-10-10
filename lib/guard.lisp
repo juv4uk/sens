@@ -72,7 +72,7 @@
            (00000001 unknown-routes)
            (110
              ((00000011 decision (00000001 unknown)) (guard-unknown-routes))
-             (t (00000001 ())))))))))
+             ((00000011 0 0) (00000001 ())))))))))
 
 ; A missing fact is UNKNOWN, never an implicit rejection.
 ; Відсутній факт означає UNKNOWN, а не неявну заборону.
@@ -117,7 +117,7 @@
 (00001011 guard-sync-window
   (00001000 (commit-state sync-state drift-state evidence)
     (110
-      ((00000011 (00000011 commit-state (00000001 frozen) (00000011 0 1)))
+      ((00000011 (00000011 commit-state (00000001 frozen)) (00000011 0 1))
        (make-guard-finding
          (00000001 reject) (00000001 confirmed) (00000001 ecosystem-sync)
          commit-state (00000001 commits-frozen-before-sync)
@@ -125,7 +125,7 @@
          (00000001 concurrent-commits-can-create-unrecorded-drift)
          (00000001 freeze-commits-before-synchronization)
          evidence))
-      ((00000011 (00000011 sync-state (00000001 completed) (00000011 0 1)))
+      ((00000011 (00000011 sync-state (00000001 completed)) (00000011 0 1))
        (make-guard-finding
          (00000001 warn) (00000001 unresolved) (00000001 ecosystem-sync)
          sync-state (00000001 synchronization-completed)
@@ -133,7 +133,7 @@
          (00000001 drift-cannot-yet-be-classified)
          (00000001 complete-sync-and-preserve-logs)
          evidence))
-      ((00000011 (00000011 drift-state (00000001 recorded) (00000011 0 1)))
+      ((00000011 (00000011 drift-state (00000001 recorded)) (00000011 0 1))
        (make-guard-finding
          (00000001 warn) (00000001 unresolved) (00000001 ecosystem-sync)
          drift-state (00000001 drift-recorded)
