@@ -150,6 +150,19 @@ assert "lower_program(&parsed)" in physical_decode_route
 assert "parse_binary_source_words" not in physical_decode_route
 assert "parse_canonical_binary" not in physical_decode_route
 
+# Pin the whole physical route against every retired text/repack escape hatch.
+for forbidden in (
+    "decode_ternary_program(",
+    "open_ternary_program(",
+    "parse_binary_source_words(",
+    "parse_canonical_binary(",
+    "pack_binary_source_words(",
+    "parse_canonical_packed_words(",
+    "render_ternary_words_spaced(",
+):
+    assert forbidden not in physical_decode_route, ("noncanonical physical decoder", forbidden)
+    assert forbidden not in trit_route, ("noncanonical trit caller", forbidden)
+
 # Transport validation itself must keep D2 grammar on the same direct typed words,
 # rather than serialize and immediately decode a second packed payload.
 transport_start = transport_source.index("pub(crate) fn parse_t5_domain_words(")
