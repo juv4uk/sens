@@ -62,6 +62,9 @@ jobs:
       - name: Build exact binary execution and transport tools
         run: cargo build --locked -p sens-cli --bin sens --bin sens-trit
 
+      - name: Довести Rust T5 exact-width і D2-паритет 1022 слів
+        run: cargo test --locked -p sens --test t5_exact_word_d2_admission
+
       - name: Physical source words and pure execution agree across both entrypoints
         shell: bash
         run: |
