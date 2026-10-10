@@ -30,7 +30,7 @@
       ; EQ is atom-only. This branch runs only when X itself is an atom.
       ((00000010 x) 
        (00000011 x (00000001 ())))
-      (t (00000001 ())))))
+      (1 (00000001 ())))))
 
 (00001001 science-sixth
   (00001000 (values)
@@ -56,8 +56,8 @@
          ((00000011 (00100011 (00101111 x)) (00000001 ())) (00000001 ()))
          
          ((00000010 (00110000 x))  t)
-         (t (00000001 ()))))
-      (t (00000001 ())))))
+         (1 (00000001 ()))))
+      (1 (00000001 ())))))
 
 (00001001 dimension-base
   (00001000 (dimension) (00101111 dimension)))
@@ -71,10 +71,10 @@
       
       ((00000010 dimensions)  (00000111
          ((00000011 dimensions (00000001 ())) t)
-         (t (00000001 ()))))
+         (1 (00000001 ()))))
       ((dimension? (00000101 dimensions))
        (science-dimensions-valid? (00000110 dimensions)))
-      (t (00000001 ())))))
+      (1 (00000001 ())))))
 
 (00001001 make-unit
   (00001000 (dimensions)
@@ -88,7 +88,7 @@
       ((00000011 (science-proper-list? x) (00000001 ())) (00000001 ()))
       ((00000011 (00000101 x) *unit-schema*)
        (science-dimensions-valid? (00000110 x)))
-      (t (00000001 ())))))
+      (1 (00000001 ())))))
 
 (00001001 unit-dimensions
   (00001000 (unit) (00000110 unit)))
@@ -106,7 +106,7 @@
       ((00000011 (00011100 (00101000 x) 3) (00000001 ())) (00000001 ()))
       ((00000011 (00000101 x) *quantity-schema*)
        (unit? (00110000 x)))
-      (t (00000001 ())))))
+      (1 (00000001 ())))))
 
 (00001001 quantity-value
   (00001000 (quantity) (00101111 quantity)))
@@ -123,7 +123,7 @@
       
       ((00000010 dimensions)  (00000111
          ((00011100 (dimension-exponent dimension) 0)  (00000001 ()))
-         (t (00100111 dimension))))
+         (1 (00100111 dimension))))
       ((00000011 (dimension-base dimension)
            (dimension-base (00000101 dimensions)))
        (10011100 ((sum
@@ -131,11 +131,11 @@
                   (dimension-exponent (00000101 dimensions)))))
          (00000111
            ((00011100 sum 0)  (00000110 dimensions))
-           (t
+           (1
             (00000100
               (make-dimension (dimension-base dimension) sum)
               (00000110 dimensions))))))
-      (t
+      (1
        (00000100
          (00000101 dimensions)
          (science-add-dimension dimension (00000110 dimensions)))))))
@@ -145,7 +145,7 @@
     (00000111
       
       ((00000010 from)  into)
-      (t
+      (1
        (science-merge-dimensions
          (00000110 from)
          (science-add-dimension (00000101 from) into))))))
@@ -155,7 +155,7 @@
     (00000111
       
       ((00000010 dimensions)  (00000001 ()))
-      (t
+      (1
        (00000100
          (make-dimension
            (dimension-base (00000101 dimensions))
@@ -204,8 +204,8 @@
          ((00000011 (00100011 (00101111 x)) (00000001 ())) (00000001 ()))
          
          ((00000010 (00110000 x))  t)
-         (t (00000001 ()))))
-      (t (00000001 ())))))
+         (1 (00000001 ()))))
+      (1 (00000001 ())))))
 
 (00001001 scientific-constant-status-valid?
   (00001000 (status)
@@ -213,7 +213,7 @@
       ((00000011 status (00000001 exact-by-definition)) t)
       ((00000011 status (00000001 exact-derived)) t)
       ((00000011 status (00000001 measured)) t)
-      (t (00000001 ())))))
+      (1 (00000001 ())))))
 
 (00001001 scientific-constant-kind-valid?
   (00001000 (kind)
@@ -222,7 +222,7 @@
       ((00000011 kind (00000001 physical-derived)) t)
       ((00000011 kind (00000001 physical-measured)) t)
       ((00000011 kind (00000001 mathematical)) t)
-      (t (00000001 ())))))
+      (1 (00000001 ())))))
 
 (00001001 make-scientific-constant
   (00001000 (name quantity status kind system source)
@@ -239,7 +239,7 @@
   (00001000 (x)
     (00000111
       
-      (t (00000001 ()))
+      (1 (00000001 ()))
       ((00000011 (science-proper-list? x) (00000001 ())) (00000001 ()))
       
       ((00000011 (00000101 x) *scientific-constant-schema*)
@@ -250,8 +250,8 @@
          ((00000011 (scientific-constant-kind-valid? (00110010 x)) (00000001 ())) (00000001 ()))
          ((00000011 (00100011 (science-sixth x)) (00000001 ())) (00000001 ()))
          ((00000011 (science-source? (science-seventh x)) (00000001 ())) (00000001 ()))
-         (t t)))
-      (t (00000001 ())))))
+         (1 t)))
+      (1 (00000001 ())))))
 
 (00001001 scientific-constant-name
   (00001000 (constant) (00101111 constant)))
@@ -286,7 +286,7 @@
   (00001000 (constant)
     (00000111
       ((00000011 (scientific-constant? constant) (00000001 ())) (00000001 ()))
-      (t
+      (1
        (10011100 ((name (scientific-constant-name constant)))
          (00100111
            (00100111 (00100111 (00000001 scientific-constant) name))
