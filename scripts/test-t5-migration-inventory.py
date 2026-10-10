@@ -87,7 +87,7 @@ class TestT5MigrationInventory(unittest.TestCase):
         with tempfile.NamedTemporaryFile("w", suffix=".jsonl", delete=False,
                                          encoding="utf-8") as fh:
             for row in rows:
-                fh.write(json.dumps(row, ensure_ascii=False, sort_keys=True) + "\\n")
+                fh.write(json.dumps(row, ensure_ascii=False, sort_keys=True) + "\n")
             tmp = fh.name
         try:
             proc = subprocess.run(
