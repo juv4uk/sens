@@ -322,6 +322,35 @@
         "scripts/check_d10_hobby_clock_radio_selection.py",
         "scripts/check-d10-proposal-ledger.py"
       ]
+    },
+    {
+      "id": "d10.crosshobby.hysteretic-boolean-step.current-main.20261010",
+      "authority": "#4013 #4463; user-directed D10 growth, historical research PR #4948",
+      "evidence": [
+        "#4948",
+        "knowledge/d10-hysteretic-boolean-source-law-20261009.json",
+        "https://www.ti.com/document-viewer/lit/html/scea046",
+        "https://www.ti.com/document-viewer/lit/html/SNOA997A"
+      ],
+      "previous_inventory_blob_sha": "ad2200c1d4e153d8efb0f390cc8680f0fb656b5b",
+      "resulting_inventory_blob_sha": "7e13e929338baeef9b16c2139d24b78e23ea1e03",
+      "added_stable_ids": [
+        "d10.crosshobby.hysteretic-boolean-step.20261009"
+      ],
+      "appended_sources": [
+        "knowledge/d10-hysteretic-boolean-source-law-20261009.json"
+      ],
+      "coordinates_added": 0,
+      "ratified_added": 0,
+      "delta_selected": 1,
+      "previous_selected": 646,
+      "resulting_selected": 647,
+      "decision": "RESEARCH ONLY; exact D1 state retained between rational thresholds; no bit coordinate, no physical T5 admission, no hardware claims; Core-vs-library owner review pending",
+      "tests": [
+        "scripts/check_d10_selection_transition_history.py",
+        "scripts/check-d10-proposal-ledger.py",
+        "tests/test_d10_proposal_ledger_growth.py"
+      ]
     }
   ]
 }
