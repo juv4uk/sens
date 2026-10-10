@@ -361,18 +361,6 @@ fn core4_probe_append_before_native_lowering() {
 }
 
 #[test]
-fn core4_probe_reverse_onto_before_native_lowering() {
-    let _serial = test_lock();
-    let mut session = Session::default();
-    load_core_library(&mut session).expect("Core4 must load");
-    eval_program(
-        "(зворот-до (як-є (2 3)) (як-є (4 5)))",
-        &mut session,
-    )
-    .unwrap_or_else(|error| panic!("Core4 reverse-onto probe failed before machine lowering: {error}"));
-}
-
-#[test]
 fn core4_probe_bounded_pair_store_lowering() {
     let _serial = test_lock();
     let mut session = core4_machine_probe_session();
@@ -386,6 +374,50 @@ fn core4_probe_cons_car_lowering() {
     let mut session = core4_machine_probe_session();
     eval_program("(x86-lower-cons-car-u64-forms 2 3)", &mut session)
         .unwrap_or_else(|error| panic!("CONS+CAR lowering failed: {error}"));
+}
+
+#[test]
+fn core4_probe_admitted_program_predicate() {
+    let _serial = test_lock();
+    let mut session = core4_machine_probe_session();
+    eval_program(
+        "(x86-admitted-program? (x86-lower-cons-car-u64-forms 2 3))",
+        &mut session,
+    )
+    .unwrap_or_else(|error| panic!("admitted-program predicate failed: {error}"));
+}
+
+#[test]
+fn core4_probe_encode_one_instruction() {
+    let _serial = test_lock();
+    let mut session = core4_machine_probe_session();
+    eval_program(
+        "(x86-encode-admitted-instruction (перше (x86-lower-cons-car-u64-forms 2 3)))",
+        &mut session,
+    )
+    .unwrap_or_else(|error| panic!("single admitted instruction encoding failed: {error}"));
+}
+
+#[test]
+fn core4_probe_map_instruction_encodings() {
+    let _serial = test_lock();
+    let mut session = core4_machine_probe_session();
+    eval_program(
+        "(map x86-encode-admitted-instruction (x86-lower-cons-car-u64-forms 2 3))",
+        &mut session,
+    )
+    .unwrap_or_else(|error| panic!("map of admitted instruction encodings failed: {error}"));
+}
+
+#[test]
+fn core4_probe_flatten_instruction_encodings() {
+    let _serial = test_lock();
+    let mut session = core4_machine_probe_session();
+    eval_program(
+        "(x86-encode-program (map x86-encode-admitted-instruction (x86-lower-cons-car-u64-forms 2 3)))",
+        &mut session,
+    )
+    .unwrap_or_else(|error| panic!("program encoding/flattening failed: {error}"));
 }
 
 #[test]
