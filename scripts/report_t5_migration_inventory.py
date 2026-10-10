@@ -251,7 +251,7 @@ def classify(path: str, root: Path) -> dict:
     elif role in ("validator", "projection", "benchmark"):
         status = "T5_REQUIRED"
         authority = "T5 oracle (crates/sens)"
-        reason = "перевіряє/проєктує канонічний T5"
+        reason = reason if path in ROLE_OVERRIDES else "перевіряє/проєктує канонічний T5"
     else:
         status = "BLOCKED"
         authority = "UNKNOWN"
