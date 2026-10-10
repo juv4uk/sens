@@ -118,19 +118,18 @@
 
 (00001001 machine-capability-find-domain-row
   (00001000 (width bits rows)
-    (00000111
-      
-      ((00000010 rows)  ())
-      ((00100010 width (00000101 (00000101 rows)))
-       (00000111
-         ((00100010 bits (00000101 (00000110 (00000101 rows))))
-          (00000101 rows))
-         ((010 ())
+    (за-умовою
+      ((атом? rows) ())
+      ((тотожне? width (перше (перше rows)))
+       (за-умовою
+         ((тотожне? bits (перше (решта (перше rows))))
+          (перше rows))
+         ((атом? ())
           (machine-capability-find-domain-row
-            width bits (00000110 rows)))))
-      ((010 ())
+            width bits (решта rows)))))
+      ((атом? ())
        (machine-capability-find-domain-row
-         width bits (00000110 rows))))))
+         width bits (решта rows))))))
 
 ; Current lookup: explicit width + packed-bits mechanism key only.
 (00001001 machine-capabilities-for-domain
@@ -139,24 +138,23 @@
       ((row
          (machine-capability-find-domain-row
            width bits machine-capability-axis-v3)))
-      (00000111
-        
-        ((00000010 row)  ())
-        ((010 ())
-         (00000101 (00000110 (00000110 row))))))))
+      (за-умовою
+        ((атом? row) ())
+        ((атом? ())
+         (перше (решта (решта row))))))))
 
 (00001001 machine-capability-find-row
   (00001000 (key rows)
-    (00000111
-      
-      ((00000010 rows)  ())
-      ((00100010 key (00000101 (00000101 rows))) (00000101 rows))
-      ((010 ()) (machine-capability-find-row key (00000110 rows))))))
+    (за-умовою
+      ((атом? rows) ())
+      ((тотожне? key (перше (перше rows))) (перше rows))
+      ((атом? ())
+       (machine-capability-find-row key (решта rows))))))
 
 (00001001 machine-target-witness-status
   (00001000 (target)
-    (10011100 ((row (machine-capability-find-row target machine-target-witness-status-v1)))
-      (00000111
-        
-        ((00000010 row)  (00000001 absent))
-        ((010 ()) (00000101 (00000110 row)))))))
+    (10011100
+      ((row (machine-capability-find-row target machine-target-witness-status-v1)))
+      (за-умовою
+        ((атом? row) (як-є absent))
+        ((атом? ()) (перше (решта row)))))))
