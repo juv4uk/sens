@@ -1,0 +1,21 @@
+{
+  "schema": "sens-benchmark-manifest/v1",
+  "stand": "byte-pack",
+  "wing": "Physical carrier research",
+  "roles": [
+    "RESEARCH",
+    "MEASUREMENT",
+    "CONFORMANCE",
+    "FALSIFIER"
+  ],
+  "question": "Can rank/unrank no-22 ternary strings in T21/T22/T33 carriers and compare packed bytes under a fixed corpus?",
+  "claim": "Research-only capacity and timing evidence; not a replacement for canonical T5 .sens, not a semantic ratification, and no Rust/GPU/FPGA speedup claim.",
+  "witness": [
+    "носій22.py",
+    "T22-EXPERIMENT.uk.md"
+  ],
+  "status": "RESEARCH-ONLY; not ratified",
+  "generation": "2026-10-10",
+  "axis": "physical-bytes / rank-unrank / encode-decode-time",
+  "reproduce": "python3 benchmarks/byte-pack/носій22.py --verify && python3 benchmarks/byte-pack/носій22.py --bench --ntrits 4620 --reps 15 --out /tmp/t22-results.json"
+}
