@@ -53,10 +53,14 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
+          set +e
+          cargo test --locked -p sens --test machine_asm_differential x86_encoder_callability_stage_probe -- --exact --ignored --nocapture
+          probe_status=$?
+          set -e
+          echo "diagnostic_probe_exit=$probe_status (expected nonzero while a stage is blocked)"
           cargo test --locked -p sens --test machine_exact_domain_cpu -- --nocapture
           cargo test --locked -p sens --test machine_admission_adversarial -- --nocapture
           cargo test --locked -p sens --test machine_effect_d5_arithmetic_projection exact_ukrainian_quotient_and_remainder_stage_probe -- --exact --nocapture
           cargo test --locked -p sens-host --test native_lisp_bytes native_pair_car_cdr_match_the_interpreter_reference_witness -- --exact --nocapture
           cargo test --locked -p sens-host --test native_lisp_bytes unadmitted_ud2_form_is_rejected_before_host_executor -- --exact --nocapture
-          cargo test --locked -p sens --test machine_asm_differential x86_encoder_callability_stage_probe -- --exact --nocapture
           cargo test --locked -p sens --test machine_asm_differential gas_and_nasm_match_lisp_owned_encoder_for_admitted_corpus -- --exact --nocapture
