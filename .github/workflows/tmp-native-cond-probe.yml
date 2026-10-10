@@ -1,0 +1,15 @@
+name: Temporary native exact-D1 admission stage investigation
+on:
+  push:
+    branches: [fix/native-20261010-exact-d1-admission]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  probe:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v5
+      - uses: dtolnay/rust-toolchain@stable
+      - run: cargo run --release --locked -p sens-host --example native_cond_probe
