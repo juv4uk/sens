@@ -159,12 +159,13 @@
 
 (00001001 x86-encode-mov-r64-imm64
   (00001000 (register immediate)
-    (10011100 ((code (x86-reg-code register)))
-      (00000100
-        (x86-encode-rex 1 0 0 (x86-high1 code))
-        (00000100
-          (00001100 184 (x86-low3 code))
-          (x86-u64-bytes immediate))))))
+    ((00001000 (code)
+       (00000100
+         (x86-encode-rex 1 0 0 (x86-high1 code))
+         (00000100
+           (00001100 184 (x86-low3 code))
+           (x86-u64-bytes immediate))))
+     (x86-reg-code register))))
 
 ; Two's-complement byte for a disp8 value already known to be in [-128,127].
 ; `mod` in this Lisp does not wrap negative operands (`(mod -1 256)` is -1,
