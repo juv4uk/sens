@@ -841,7 +841,10 @@ mod core4_bootstrap_cache_tests {
         ];
         let programs = [
             ("LET", "(let ((x 7)) x)"),
-            ("LET*", "(let* ((x 7) (y x)) y)"),
+            ("LET* empty bindings", "(let* () 7)"),
+            ("LET* one binding", "(let* ((x 7)) x)"),
+            ("LET* two sequential bindings", "(let* ((x 7) (y x)) y)"),
+            ("nested lambda control", "((lambda (x) x) 7)"),
         ];
         let mut failures = Vec::new();
 
