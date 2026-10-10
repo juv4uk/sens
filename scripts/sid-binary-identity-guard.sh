@@ -10,6 +10,7 @@ files=(
   crates/sens/src/eval/necessary_forms.rs
   crates/sens/src/eval/mod.rs
   crates/sens/src/eval/closures.rs
+  crates/sens/src/eval/lower.rs
   crates/sens/src/language_items.rs
   crates/sens/src/lib.rs
   crates/sens/src/parser.rs
