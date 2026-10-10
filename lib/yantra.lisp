@@ -131,7 +131,7 @@
             (00000110 entries)
             (strcat acc
                     (00000111 ((00111100 acc) "")
-                          (1 ","))
+                          ((00000010 ()) ","))
                     (json-encode-key (00000101 entry))
                     ":"
                     (json-encode-value (00000110 entry)))))))))
@@ -149,7 +149,7 @@
           (00000110 items)
           (strcat acc
                   (00000111 ((00111100 acc) "")
-                        (1 ","))
+                        ((00000010 ()) ","))
                   (json-encode-value (00000101 items))))))))
 
 (00001001 json-encode-array
