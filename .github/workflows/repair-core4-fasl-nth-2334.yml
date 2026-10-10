@@ -25,6 +25,8 @@ jobs:
         run: cargo run --locked --quiet -p sens-cli --bin gen-fasl -- lib/core4.lisp lib/core4.lisp.fasl
       - name: Verify exact source digest in generated cache
         run: cargo test --locked -p sens --test core_fasl_freshness -- --nocapture
+      - name: Verify migrated NTH selectors against independent D3 CAR/CDR
+        run: cargo test --locked -p sens --test core_nth_cond2_migration -- --nocapture
       - name: Commit verified cache to feature branch only
         shell: bash
         run: |
