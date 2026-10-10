@@ -2,6 +2,10 @@
 """Current authority guard for owner-ratified D3/bīja3 A (#3202)."""
 from pathlib import Path
 
+# Оптимізований Python усуває assert; свідчення D3 мають лишатися обов'язковими.
+if not __debug__:
+    raise SystemExit("BIJA3-CURRENT-AUTHORITY: BLOCKED — Python -O вимикає перевірки")
+
 ROOT = Path(__file__).resolve().parents[1]
 
 EXPECTED = [
