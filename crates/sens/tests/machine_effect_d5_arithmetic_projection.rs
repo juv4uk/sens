@@ -328,3 +328,25 @@ fn bounded_effect_integer_range_answer_is_exact_d1() {
         );
     }
 }
+
+#[test]
+fn bounded_effect_carriers_reject_out_of_range_with_exact_d1_no() {
+    // #5361: структурне () не може керувати строгим D3 COND.
+    let mut session = Session::default();
+    load_core_library(&mut session).expect("ядро");
+    load_lisp_file("lib/machine/effects/u64.lisp", &mut session);
+    for source in [
+        "(machine-effect-u32-carrier? 4294967296)",
+        "(machine-effect-u64-carrier? -1)",
+        "(machine-effect-u64-carrier? 18446744073709551616)",
+    ] {
+        let actual = eval_program(source, &mut session)
+            .unwrap_or_else(|error| panic!("{source}: {error}"))
+            .value;
+        assert_eq!(
+            actual.as_predicate_bit(),
+            Some(false),
+            "{source}: позадоменний носій мусить повернути точний D1:0"
+        );
+    }
+}
