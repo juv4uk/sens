@@ -142,7 +142,7 @@ jobs:
         uses: dtolnay/rust-toolchain@stable
 
       - name: Install Cachegrind for the Rust wire-vs-JSON benchmark
-        if: matrix.stand == 'rust-json-vs-sens-wire'
+        if: matrix.stand == 'rust-json-vs-sens-wire' || matrix.stand == 'unbounded-width'
         run: |
           sudo apt-get update
           sudo apt-get install -y valgrind
