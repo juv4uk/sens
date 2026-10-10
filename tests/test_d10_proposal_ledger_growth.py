@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import copy
+import csv
 import importlib.util
 import json
 import subprocess
@@ -40,6 +41,14 @@ class SelectionLedgerTrace(unittest.TestCase):
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
         self.assertIn("CLASS-OF proposal guard PASS", result.stdout)
         self.assertIn("4 no-admission negative controls PASS", result.stdout)
+        with (ROOT / "knowledge/d10-proposal-ledger.tsv").open(encoding="utf-8", newline="") as stream:
+            rows = {row["semantic_name"]: row for row in csv.DictReader(stream, delimiter="\\t")}
+        for name in ("CLASS-OF", "FIND-METHOD", "CHANGE-CLASS"):
+            with self.subTest(name=name):
+                self.assertEqual(rows[name]["status"], "pending-review")
+                self.assertEqual(rows[name]["ratified"], "0")
+                self.assertEqual(rows[name]["width"], "D10")
+                self.assertIn("=PENDING;", rows[name]["dedup_check"])
 
     def test_current_five_pinned_research_roots(self):
         self.assertEqual(self.inventory["rows"][625:][0]["semantic_name"], "DPB")
