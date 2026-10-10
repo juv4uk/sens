@@ -266,6 +266,8 @@ fn x86_encoder_callability_stage_probe() {
         ("чинний_LIST", "(list 72 1 200)"),
         ("старий_LET", "(10011100 ((n 1)) n)"),
         ("чинний_LET", "(let ((n 1)) n)"),
+        ("український_LET", "(нехай ((n 1)) n)"),
+        ("український_let_з_двома_параметрами", "(нехай ((n 1) (m 2)) n)"),
         ("байти_add", "(x86-encode-add-r64-r64 (quote rax) (quote rcx))"),
         (
             "одна_інструкція",
@@ -277,6 +279,12 @@ fn x86_encoder_callability_stage_probe() {
         ),
     ];
     let mut failed = Vec::new();
+    let mixed_let = sens::parse_mixed_exact_domain_machine_source("(let ((n 1)) n)")
+        .expect("machine-source reader must parse current let probe");
+    match sens::eval_parsed_expressions(&mixed_let, &mut session) {
+        Ok(observation) => eprintln!("X86_ЕТАП_УСПІХ stage=reader_LET value={}", observation.value),
+        Err(error) => { eprintln!("X86_ЕТАП_БЛОКУВАННЯ stage=reader_LET error={error}"); failed.push("reader_LET"); }
+    }
     for (stage, source) in stages {
         match eval_program(source, &mut session) {
             Ok(observation) => eprintln!(
