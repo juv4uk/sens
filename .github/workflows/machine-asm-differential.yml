@@ -60,11 +60,11 @@ jobs:
           # залишає job червоним. Стара остача не блокує діагностику MOV.
           set +e
           cargo test --locked -p sens --test x86_64_lisp_encoder x86_mov_imm64_component_stage_probe -- --exact --nocapture
-          статус_байтів=$?
+          bytes_exit=$?
           cargo test --locked -p sens --test x86_64_lisp_encoder lisp_encodes_mov_r64_imm64_for_every_gpr_with_independent_decode -- --exact --nocapture
-          статус_регістрів=$?
+          registers_exit=$?
           cargo test --locked -p sens --test x86_64_lisp_encoder exact_ukrainian_quotient_and_remainder_stage_probe -- --exact --nocapture
-          статус_арифметики=$?
-          if [ "$статус_байтів" -ne 0 ] || [ "$статус_регістрів" -ne 0 ] || [ "$статус_арифметики" -ne 0 ]; then
+          arithmetic_exit=$?
+          if [ "$bytes_exit" -ne 0 ] || [ "$registers_exit" -ne 0 ] || [ "$arithmetic_exit" -ne 0 ]; then
             exit 1
           fi
