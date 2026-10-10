@@ -37,5 +37,28 @@ jobs:
       - uses: actions/checkout@v4
       - name: Перевірити D10 intake та негативні контролі
         run: python3 scripts/check-d10-proposal-ledger.py --self-test
+      - name: Негативні свідки оптимізованого Python для D10
+        shell: bash
+        run: |
+          set -euo pipefail
+          for mode in cli env; do
+            log="$RUNNER_TEMP/d10-intake-optimized-$mode.log"
+            if [[ "$mode" == cli ]]; then
+              if python3 -O scripts/check-d10-proposal-ledger.py --self-test >"$log" 2>&1; then
+                echo "::error::D10 intake помилково прийняв Python -O"
+                exit 1
+              fi
+            else
+              if PYTHONOPTIMIZE=2 python3 scripts/check-d10-proposal-ledger.py --self-test >"$log" 2>&1; then
+                echo "::error::D10 intake помилково прийняв PYTHONOPTIMIZE=2"
+                exit 1
+              fi
+            fi
+            if ! grep -Fq "D10-PROPOSAL-LEDGER: BLOCKED" "$log"; then
+              cat "$log"
+              echo "::error::D10 intake відмовив без названої причини"
+              exit 1
+            fi
+          done
       - name: Перевірити контракти зростання й 10 негативних випадків
         run: python3 -m unittest discover -s tests -p test_d10_proposal_ledger_growth.py -v
