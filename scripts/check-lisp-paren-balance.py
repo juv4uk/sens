@@ -87,6 +87,22 @@ def main() -> int:
         "(00001001 x86-encode-current-eq-cond-u64",
     )
     lowering_relative_path = pathlib.Path("lib/machine/lowering/semantic-x86-64.lisp")
+    encoder_relative_path = pathlib.Path("lib/machine/encoding/x86-64.lisp")
+    required_encoder_forms = (
+        "(00001001 x86-reg-code",
+        "(00001001 x86-disp8-byte",
+        "(00001001 x86-imm32-bytes",
+        "(00001001 x86-rel32-bytes",
+        "(00001001 x86-encode-mov-mem-disp8-r64",
+        "(00001001 x86-encode-program",
+    )
+    forbidden_source_markers = (
+        "PLACEHOLDER",
+        "RESTORED_FULL_FILE",
+        "LOAD_FROM_FILE:",
+        "/tmp/sem_join.lisp",
+        "see next",
+    )
     for f in files:
         try:
             text = f.read_text(encoding="utf-8")
@@ -115,6 +131,17 @@ def main() -> int:
                     integrity_errors.append((f, f"missing required lowering entry point {form}"))
             if "00100010" in text:
                 integrity_errors.append((f, "legacy W8 EQ head remains in the current exact-D3 lowering projection"))
+
+        if rel == encoder_relative_path.as_posix():
+            byte_length = len(text.encode("utf-8"))
+            if byte_length < 50_000:
+                integrity_errors.append((f, f"critical encoder source unexpectedly short ({byte_length} bytes)"))
+            for marker in forbidden_source_markers:
+                if marker in text:
+                    integrity_errors.append((f, f"forbidden intermediate marker {marker!r}"))
+            for form in required_encoder_forms:
+                if form not in text:
+                    integrity_errors.append((f, f"missing required encoder entry point {form}"))
 
     print(f"lisp-paren-balance: scanned {len(files)} file(s) under {args.paths}")
     for f, why, depth, neg in bad:
