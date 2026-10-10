@@ -13,6 +13,7 @@ import json
 import os
 from pathlib import Path
 import platform
+import re
 import shutil
 import subprocess
 import sys
@@ -72,6 +73,18 @@ def host() -> dict:
     }
 
 
+
+def classify_status(returncode: int, output: str) -> str:
+    """Preserve explicit benchmark BLOCKED outcomes instead of calling them FAIL."""
+    markers = (
+        r"(?im)^(?:ERROR:\\s*)?[A-Z0-9][A-Z0-9_.:/-]*:\\s*BLOCKED\\b",
+        r"(?im)^SENS_BENCHMARK_STATUS=BLOCKED\\s*$",
+    )
+    if any(re.search(marker, output) for marker in markers):
+        return "BLOCKED"
+    return "PASS" if returncode == 0 else "FAIL"
+
+
 def run_one(m: dict, *, timeout: int, out: Path, head: str, system: dict) -> dict:
     start = time.perf_counter_ns()
     record = {
@@ -92,8 +105,11 @@ def run_one(m: dict, *, timeout: int, out: Path, head: str, system: dict) -> dic
             "STDOUT\n" + result.stdout + "\nSTDERR\n" + result.stderr,
             encoding="utf-8",
         )
-        record["status"] = "PASS" if result.returncode == 0 else "FAIL"
-        record["reason"] = f"process exit={result.returncode}"
+        record["status"] = classify_status(
+            result.returncode, result.stdout + "\\n" + result.stderr
+        )
+        marker_note = "explicit BLOCKED marker; " if record["status"] == "BLOCKED" else ""
+        record["reason"] = f"{marker_note}process exit={result.returncode}"
         record["returncode"] = result.returncode
     except subprocess.TimeoutExpired as exc:
         record["status"] = "TIMEOUT"
