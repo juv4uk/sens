@@ -14,7 +14,7 @@
       ((00000011 decision (00000001 warn)) t)
       ((00000011 decision (00000001 reject)) t)
       ((00000011 decision (00000001 unknown)) t)
-      (1 (00000001 ())))))
+      )))
 
 (00001011 guard-evidence-status?
   (00001000 (status)
@@ -23,7 +23,7 @@
       ((00000011 status (00000001 partial)) t)
       ((00000011 status (00000001 unresolved)) t)
       ((00000011 status (00000001 broken)) t)
-      (1 (00000001 ())))))
+      )))
 
 ; UNKNOWN is a routing state, not a dead end. These routes distinguish
 ; distributed local knowledge, owner authority, and external research.
@@ -69,7 +69,7 @@
            (00000001 unknown-routes)
            (00000111
              ((00000011 decision (00000001 unknown)) (guard-unknown-routes))
-             (1 (00000001 ())))))))))
+             )))))))
 
 ; A missing fact is UNKNOWN, never an implicit rejection.
 ; Відсутній факт означає UNKNOWN, а не неявну заборону.
