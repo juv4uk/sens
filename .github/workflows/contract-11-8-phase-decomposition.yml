@@ -59,6 +59,7 @@ jobs:
 
       - name: Replay current admitted phases
         run: |
+          set -euo pipefail
           python3 benchmarks/current-en-vs-d1d8/phase_replay.py \
             --helper target/release/examples/current_en_vs_d1d8_cpu \
             --startup-helper target/release/examples/startup_bench \
