@@ -1,0 +1,38 @@
+name: TEMP regenerate public API discovery report
+on:
+  push:
+    branches:
+      - fix/generated-public-api-discovery-current-20261010
+    paths:
+      - ".github/workflows/tmp-public-api-report.yml"
+      - "scripts/public_api_inventory.py"
+      - "lib/**"
+      - "docs/generated/public-api-discovery.md"
+
+permissions:
+  contents: write
+
+jobs:
+  regenerate-and-check:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: ${{ github.ref }}
+          fetch-depth: 0
+      - name: Regenerate canonical generated report
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 scripts/public_api_inventory.py --write-report
+          python3 scripts/public_api_inventory.py --check
+          git diff --exit-code -- . ':!docs/generated/public-api-discovery.md'
+          git add docs/generated/public-api-discovery.md
+          if git diff --cached --quiet; then
+            echo "Generated report already current"
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -m "docs: refresh generated public API discovery report"
+          git push origin "HEAD:${GITHUB_REF_NAME}"
