@@ -494,6 +494,1116 @@
       "source_url": null,
       "existing_review_summary": "Requires owner semantic-minimality review",
       "owner_core_library_review": "PENDING; source HOLD is not automatically ratified or assigned a coordinate"
+    },
+    {
+      "semantic_name": "EXACT-BARYCENTRIC-INTERPOLATE",
+      "surface_uk": "точно-інтерполювати",
+      "surface_ukr": "обчислити-поліном-за-вузлами",
+      "semantic_law": "Given 1..n pairwise-distinct exact rational node abscissas x_i and exact rational ordinates y_i, and exact rational query x, return the unique exact rational value of polynomial degree at most n−1 interpolating all nodes (x_i,y_i). Evaluate at x_i exactly y_i, reject duplicate x_i, empty set and inexact values; permutation of nodes must not alter result. Evaluate by barycentric rational weights, not floating coefficients.",
+      "positive_witnesses": [
+        {
+          "nodes": [
+            [
+              0,
+              0
+            ],
+            [
+              1,
+              1
+            ],
+            [
+              2,
+              4
+            ]
+          ],
+          "query": "1/2",
+          "expected": "1/4",
+          "why": "quadratic x² exact rational"
+        },
+        {
+          "nodes": [
+            [
+              0,
+              0
+            ],
+            [
+              1,
+              1
+            ],
+            [
+              2,
+              4
+            ]
+          ],
+          "query": "3",
+          "expected": "9",
+          "why": "polynomial extrapolation, not physical prediction"
+        },
+        {
+          "nodes": [
+            [
+              -1,
+              1
+            ],
+            [
+              1,
+              5
+            ]
+          ],
+          "query": "0",
+          "expected": "3",
+          "why": "2*x+3"
+        },
+        {
+          "nodes": [
+            [
+              1,
+              7
+            ]
+          ],
+          "query": "5/2",
+          "expected": "7",
+          "why": "unique constant polynomial"
+        },
+        {
+          "nodes": [
+            [
+              0,
+              5
+            ],
+            [
+              1,
+              5
+            ],
+            [
+              2,
+              5
+            ]
+          ],
+          "query": "3/2",
+          "expected": "5",
+          "why": "constant samples stay constant"
+        }
+      ],
+      "falsifiers": [
+        "Return a rounded float 0.25 rather than exact rational 1/4 on exact nodes/query.",
+        "Silently accept repeated x_i with inconsistent y_i, giving division by zero or arbitrary output.",
+        "Return interpolated coefficients rather than evaluated exact p(x), violating the declared result type.",
+        "Change result when reversing the node list, or produce a value other than y_i at an interpolation node.",
+        "Conflate polynomial interpolation with band-limited SDR reconstruction, sensor uncertainty propagation, hardware timing, or physical ephemeris accuracy."
+      ],
+      "relation_class": "SOURCE-GROUNDED-EXACT-SEMANTIC-LAW",
+      "argument_shape": "(nonempty list (exact-rational-x,exact-rational-y), exact-rational-query)->exact-rational",
+      "result_shape": "See source research dossier",
+      "source_path": "knowledge/d10-exact-barycentric-interpolation-research-v1.json",
+      "donor_blob_sha": "5ed74274cd7191c42308c9f7010e756d8af5cd3a",
+      "donor_git_commit": "c67db6cdd820dea8d3a110caed359507c0a2d7a4",
+      "original_donor_status": "HOLD-CORE-VS-DERIVED-LIBRARY-PENDING-OWNER-REVIEW",
+      "source_url": "https://dlmf.nist.gov/3.3",
+      "existing_review_summary": {
+        "ratified_D1_D9_exact_name": false,
+        "selected_D10_exact_name_at_census": false,
+        "closest_existing": [
+          "D8 exact rational arithmetic",
+          "D10 BOUNDED-RATIONAL-APPROX",
+          "D10 SDR and generic sequence constructors"
+        ],
+        "semantic_difference": "Interpolation through multiple exact samples is not constrained-denominator approximation of one rational. Despite distinct observable behavior, it is derivable from arithmetic and finite folds.",
+        "core_classification": "HOLD pending owner choice: mathematical/library composite vs new 10-bit D10 named semantic resident; cannot allocate bit address automatically."
+      },
+      "owner_core_library_review": "PENDING; source HOLD is not automatically ratified or assigned a coordinate"
+    },
+    {
+      "semantic_name": "FINITE-SIMPLE-TEMPORAL-CLOSURE",
+      "surface_uk": "зімкнути-часові-межі",
+      "surface_ukr": "замчас",
+      "semantic_law": "{\"input\":\"n (1..5), list of triples [i,j,w] with 0<=i,j<n; arbitrary time_i in mathematical Z; each edge means t_j - t_i <= w\",\"consistent\":\"All-pairs tightest IMPLIED upper bounds d[i][j] in mathematical Z or null=UNBOUNDED (not ZERO), including d[i][i]=0\",\"inconsistent\":\"Distinct INCONSISTENT_NEGATIVE_CYCLE; canonical shortest-length then lex simple directed negative cycle, with actual edge weights and strict sum<0; no fabricated bounds\",\"invariants\":[\"translation-invariance: adding common clock origin changes no difference\",\"parallel edges exact min\",\"no hidden scheduling or executable effects\",\"not bounded ADC tick register\",\"finite nodes and bounded input size only; time assignments unbounded in integer domain\",\"zero diagonal is meaningful; unbounded is not zero\"]}",
+      "positive_witnesses": "0→1 <=4, 1→2 <=3, 0→2 <=15 gives tight 0→2 <=7, other direction is UNBOUNDED; cycle 0→1 <=2,1→2 <=1,2→0 <=-4 impossible",
+      "falsifiers": [
+        "Treat disconnected/unbounded as zero",
+        "Treat constraint as reverse directed",
+        "Forget parallel tighter edge",
+        "Missing implied two-hop bound",
+        "Wrong positive cycle as conflict",
+        "Empty constraints reported UNSAT",
+        "Forge negative cycle with nonnegative sum",
+        "Accept finite-domain-only clock saturation"
+      ],
+      "relation_class": "SOURCE-GROUNDED-EXACT-SEMANTIC-LAW",
+      "argument_shape": "n (1..5), list of triples [i,j,w] with 0<=i,j<n; arbitrary time_i in mathematical Z; each edge means t_j - t_i <= w",
+      "result_shape": "See source research dossier",
+      "source_path": "knowledge/d10-finite-temporal-constraint-closure-v1.json",
+      "donor_blob_sha": "1e8264f0b2b48f30709fede211533fe5d70ba1ff",
+      "donor_git_commit": "c67db6cdd820dea8d3a110caed359507c0a2d7a4",
+      "source_url": null,
+      "existing_review_summary": "Requires owner semantic-minimality review",
+      "owner_core_library_review": "PENDING; source HOLD is not automatically ratified or assigned a coordinate"
+    },
+    {
+      "semantic_name": "FIRST-ORDER-LEAST-GENERAL-GENERALIZATION",
+      "surface_uk": "найточніше-спільне-узагальнення",
+      "surface_ukr": "спільний-шаблон-термів",
+      "semantic_law": "For TWO finite ground, ordered, free first-order constructor terms (not D2 executable expressions), return their least general generalization modulo alpha-renaming and two substitutions which reconstruct each term EXACTLY. Identical atoms and equal-name/equal-arity constructors are retained. Every incompatible ordered pair of subterms becomes one fresh hole; equal ordered disagreement pairs reuse the SAME hole, even in disjoint branches. A different arity or constructor is a disagreement. Fresh holes are numbered by first depth-first left-to-right appearance. A non-ground input, binder, improper term or unbounded depth is BLOCKED. This operation is not unification and never claims a physical .sens semantics.",
+      "positive_witnesses": [
+        {
+          "left": {
+            "f": "pair",
+            "args": [
+              {
+                "a": "a"
+              },
+              {
+                "a": "a"
+              }
+            ]
+          },
+          "right": {
+            "f": "pair",
+            "args": [
+              {
+                "a": "b"
+              },
+              {
+                "a": "b"
+              }
+            ]
+          },
+          "expected_generalizer": {
+            "f": "pair",
+            "args": [
+              {
+                "hole": "V0"
+              },
+              {
+                "hole": "V0"
+              }
+            ]
+          },
+          "meaning": "Repeated ordered disagreement uses exactly one hole, not two independent variables"
+        },
+        {
+          "left": {
+            "f": "pair",
+            "args": [
+              {
+                "a": "a"
+              },
+              {
+                "a": "b"
+              }
+            ]
+          },
+          "right": {
+            "f": "pair",
+            "args": [
+              {
+                "a": "b"
+              },
+              {
+                "a": "a"
+              }
+            ]
+          },
+          "expected_generalizer": {
+            "f": "pair",
+            "args": [
+              {
+                "hole": "V0"
+              },
+              {
+                "hole": "V1"
+              }
+            ]
+          },
+          "meaning": "Swapped difference pairs are not the same ordered pair"
+        },
+        {
+          "left": {
+            "f": "observation",
+            "args": [
+              {
+                "a": "star"
+              },
+              {
+                "f": "band",
+                "args": [
+                  {
+                    "a": "radio"
+                  }
+                ]
+              }
+            ]
+          },
+          "right": {
+            "f": "observation",
+            "args": [
+              {
+                "a": "star"
+              },
+              {
+                "f": "band",
+                "args": [
+                  {
+                    "a": "optical"
+                  }
+                ]
+              }
+            ]
+          },
+          "expected_generalizer": {
+            "f": "observation",
+            "args": [
+              {
+                "a": "star"
+              },
+              {
+                "f": "band",
+                "args": [
+                  {
+                    "hole": "V0"
+                  }
+                ]
+              }
+            ]
+          },
+          "meaning": "Astronomy schema retains shared star and band constructor"
+        }
+      ],
+      "falsifiers": [
+        "A procedure that assigns two holes to identical ordered disagreement pairs is too general",
+        "A procedure that shares a variable between (a,b) and (b,a) loses ordered relationships",
+        "A procedure that discards shared constructors is not least-general",
+        "A procedure that reconstructs only one source or drops the second substitution is insufficient",
+        "A procedure that treats differing constructor arities as equal is unsound",
+        "A procedure that interprets Lisp binders or Text7 frames as freely substitutable constructors violates the bounded contract"
+      ],
+      "relation_class": "SOURCE-GROUNDED-EXACT-SEMANTIC-LAW",
+      "argument_shape": "See source research dossier",
+      "result_shape": "See source research dossier",
+      "source_path": "knowledge/d10-first-order-lgg-research-v1.json",
+      "donor_blob_sha": "7a80d91597bae89e130da5081576b449b3228526",
+      "donor_git_commit": "c67db6cdd820dea8d3a110caed359507c0a2d7a4",
+      "original_donor_status": "HOLD-CORE-VS-LIBRARY-REVIEW",
+      "source_url": null,
+      "existing_review_summary": "Requires owner semantic-minimality review",
+      "owner_core_library_review": "PENDING; source HOLD is not automatically ratified or assigned a coordinate"
+    },
+    {
+      "semantic_name": "EXACT-PERCEPTRON-MISTAKE-STEP",
+      "surface_uk": "помкрок",
+      "surface_ukr": "виправити-ваги-перцептрона",
+      "semantic_law": "Given nonempty finite equal-length vectors of exact rationals weights w and nonzero feature x, label y in {-1,+1}, and strictly positive exact learning rate η, compute the exact margin m=y * sum_i(w_i*x_i). If m>0 return (w,corrected=NO), otherwise return (w+η*y*x,corrected=YES). A zero margin must trigger correction for either label. This is one pure mathematical update; no assumptions about convergence, SGD, hidden layers, approximate floats or physical sensor uncertainties.",
+      "positive_witnesses": [
+        {
+          "w": [
+            "0",
+            "0"
+          ],
+          "x": [
+            "2",
+            "-1"
+          ],
+          "y": 1,
+          "eta": "1",
+          "result": [
+            "2",
+            "-1"
+          ],
+          "corrected": true
+        },
+        {
+          "w": [
+            "2",
+            "-1"
+          ],
+          "x": [
+            "2",
+            "-1"
+          ],
+          "y": 1,
+          "eta": "1",
+          "result": [
+            "2",
+            "-1"
+          ],
+          "corrected": false
+        },
+        {
+          "w": [
+            "2",
+            "-1"
+          ],
+          "x": [
+            "1",
+            "2"
+          ],
+          "y": -1,
+          "eta": "1",
+          "result": [
+            "1",
+            "-3"
+          ],
+          "corrected": true
+        },
+        {
+          "w": [
+            "1/2",
+            "1/3"
+          ],
+          "x": [
+            "3/2",
+            "-1/2"
+          ],
+          "y": -1,
+          "eta": "2/3",
+          "result": [
+            "-1/2",
+            "2/3"
+          ],
+          "corrected": true
+        }
+      ],
+      "falsifiers": [
+        "A margin of exactly zero is incorrectly treated as strictly classified and does not update.",
+        "A nonpositive learning rate, wrong vector shape, float, forbidden label or zero feature vector is accepted.",
+        "The exact margin gain after a correction differs from eta * ||x||².",
+        "The weight vector is changed when the signed margin was strictly positive.",
+        "A claim that all non-linearly separable training samples converge violates the restricted Novikoff theorem."
+      ],
+      "relation_class": "SOURCE-GROUNDED-EXACT-SEMANTIC-LAW",
+      "argument_shape": "(weights:nonempty-vector exact-rational, feature:same-length nonzero exact-rational-vector, label:integer ±1, eta:exact-rational>0)",
+      "result_shape": "(updated-weight-vector exact-rational, correction-indicator D1 YES/NO)",
+      "source_path": "knowledge/d10-rosenblatt-novikoff-exact-step-20261009.json",
+      "donor_blob_sha": "98ae2ca35cc259ebc9c6d929d9531ec6b54a2bf3",
+      "donor_git_commit": "c67db6cdd820dea8d3a110caed359507c0a2d7a4",
+      "original_donor_status": "HOLD-CORE-VERSUS-LIBRARY",
+      "source_url": null,
+      "existing_review_summary": {
+        "name_scan": "No PERCEPTRON/NEURAL/WEIGHT/GRADIENT selected named root in the pinned 635 D10 inventory.",
+        "neighbors": [
+          "D1 yes/no label",
+          "D8/D9 exact rational and vector fold",
+          "D10 FINITE-BAYES-UPDATE-EXACT",
+          "earlier neural-symbolic FPGA/analog experiments"
+        ],
+        "status": "Behavioral independence remains open; vector + dot product + conditional may already implement all observations as a normal library function."
+      },
+      "owner_core_library_review": "PENDING; source HOLD is not automatically ratified or assigned a coordinate"
+    },
+    {
+      "semantic_name": "EXACT-BOOLEAN-PRIME-IMPLICANTS",
+      "surface_uk": "прості-імпліканти",
+      "surface_ukr": "усі-максимальні-куби-булевої-функції",
+      "semantic_law": "Let U={0,...,2^n-1}, ON∩DC=∅ and OFF=U\\(ON∪DC). A cube is an n-character pattern in {0,1,-}, where '-' is free. Return EVERY and ONLY cube c whose coverage intersects ON, whose coverage has empty intersection with OFF, and for which no strictly less constrained cube c' (covering strictly more assignments) also avoids OFF. Sort cubes by canonical lexicographic order '-'<'0'<'1'. The output is the complete prime implicant family, NOT a chosen minimum cover and not an individual Boolean gate.",
+      "positive_witnesses": [
+        {
+          "width": 2,
+          "on": [
+            1,
+            3
+          ],
+          "dc": [],
+          "result": [
+            "-1"
+          ]
+        },
+        {
+          "width": 2,
+          "on": [
+            1,
+            2
+          ],
+          "dc": [],
+          "result": [
+            "01",
+            "10"
+          ]
+        },
+        {
+          "width": 3,
+          "on": [
+            1,
+            3,
+            5,
+            7
+          ],
+          "dc": [],
+          "result": [
+            "--1"
+          ]
+        },
+        {
+          "width": 2,
+          "on": [
+            0
+          ],
+          "dc": [
+            1
+          ],
+          "result": [
+            "0-"
+          ]
+        },
+        {
+          "width": 2,
+          "on": [
+            0,
+            1,
+            2,
+            3
+          ],
+          "dc": [],
+          "result": [
+            "--"
+          ]
+        },
+        {
+          "width": 2,
+          "on": [],
+          "dc": [
+            1,
+            2
+          ],
+          "result": []
+        },
+        {
+          "width": 0,
+          "on": [
+            0
+          ],
+          "dc": [],
+          "result": [
+            ""
+          ]
+        }
+      ],
+      "falsifiers": [
+        "Any returned cube intersects OFF.",
+        "A reported prime cube can free another constrained bit without touching OFF.",
+        "ON coverage is lost or cubes covering only DC are reported.",
+        "Returns one minimized sum-of-products cover rather than all primes.",
+        "Treats a don't-care as mandatory output-1 or silently allows overlapping ON/DC."
+      ],
+      "relation_class": "FINITE-BOOLEAN-ON-DC-PRIME-CUBE-FAMILY",
+      "argument_shape": "(width:natural n, ON:set of n-bit ranks, DC:set of n-bit ranks disjoint ON)->ordered list of n-literal ternary cubes",
+      "result_shape": "See source research dossier",
+      "source_path": "knowledge/d10-quine-prime-implicants-20261009.json",
+      "donor_blob_sha": "e57850674310d92dcb0b2ce2db7f13987b61b562",
+      "donor_git_commit": "c67db6cdd820dea8d3a110caed359507c0a2d7a4",
+      "original_donor_status": "RESEARCH-UNSELECTED",
+      "source_url": null,
+      "existing_review_summary": {
+        "foundation_d1_d9": "No exact named prime-implicant family found in pinned D1-D9 tables; behavioral review still required.",
+        "d10_at_snapshot": "No exact named prime-implicant family found among 634 selected; neighboring D10 Prove/Boolean and historical logic proposals must be inspected before any selection.",
+        "distinguish_from": [
+          "D1 predicates: evaluate truth, not enumerate maximal valid cubes",
+          "D8 Boolean algebra: can derive result with finite enumeration, but that does not imply exact semantic identity",
+          "D9 EXPLAIN-PROOF: explains inferred rules, not maximal Boolean cubes",
+          "Other symbolic-AI proposals (#4963 #4965 #4970): probability, abduction and term LGG are different laws"
+        ],
+        "owner_decision": "Independent review whether to admit into D10 semantic Core or retain as Core-Math/FPGA/AI library law. Mathematically derivable via ordinary finite operations, so not claim irreducibility.",
+        "dedup_state": "PRELIMINARY-NOT-ADMITTED"
+      },
+      "owner_core_library_review": "PENDING; source HOLD is not automatically ratified or assigned a coordinate"
+    },
+    {
+      "semantic_name": "LOWER-MECHANICAL-WORD",
+      "surface_uk": "рівномірне-двійкове-слово",
+      "surface_ukr": "згенерувати-нижнє-механічне-слово",
+      "semantic_law": "For i=0..n−1 output D1 bit floor((i+1)*k/n + rho)-floor(i*k/n + rho). No floating-point approximation, no implicit hardware clock, and no two-valued T5 code.",
+      "positive_witnesses": [
+        {
+          "input": {
+            "n": 8,
+            "k": 3,
+            "rho": "0"
+          },
+          "bits": "00100101"
+        },
+        {
+          "input": {
+            "n": 8,
+            "k": 3,
+            "rho": "1/2"
+          },
+          "bits": "01010010"
+        },
+        {
+          "input": {
+            "n": 8,
+            "k": 5,
+            "rho": "0"
+          },
+          "bits": "01011011"
+        },
+        {
+          "input": {
+            "n": 12,
+            "k": 4,
+            "rho": "0"
+          },
+          "bits": "001001001001"
+        },
+        {
+          "input": {
+            "n": 5,
+            "k": 2,
+            "rho": "1/3"
+          },
+          "bits": "01001"
+        },
+        {
+          "input": {
+            "n": 4,
+            "k": 4,
+            "rho": "0"
+          },
+          "bits": "1111"
+        },
+        {
+          "input": {
+            "n": 3,
+            "k": 0,
+            "rho": "0"
+          },
+          "bits": "000"
+        }
+      ],
+      "falsifiers": [
+        "An 8-step, 3-event output with adjacent long clumps (e.g. 11100000) breaks balanced prefix behavior",
+        "An off-by-one period that returns k−1 or k+1 events is incorrect",
+        "A floating accumulator whose rounding changes the binary word at exact rational ties violates identity",
+        "A rotation of a word may be a useful musical variant but does not in general satisfy the same rho=0 identity"
+      ],
+      "relation_class": "SOURCE-GROUNDED-EXACT-SEMANTIC-LAW",
+      "argument_shape": "(positive_integer_period_n, event_count_k_in_[0,n], rational_phase_rho_in_[0,1)) -> finite D1 bit sequence length n",
+      "result_shape": "See source research dossier",
+      "source_path": "knowledge/d10-lower-mechanical-word-research-v1.json",
+      "donor_blob_sha": "73ab26108a890264fba353d450d46d424c6f6895",
+      "donor_git_commit": "c67db6cdd820dea8d3a110caed359507c0a2d7a4",
+      "original_donor_status": "SOURCE-PROVED-OWNER-REVIEW",
+      "source_url": null,
+      "existing_review_summary": "Requires owner semantic-minimality review",
+      "owner_core_library_review": "PENDING; source HOLD is not automatically ratified or assigned a coordinate"
+    },
+    {
+      "semantic_name": "AFFINE-QUANTITY-TRANSPORT",
+      "surface_uk": "афпв",
+      "surface_ukr": "афінно-перевести-величину",
+      "semantic_law": "Reject unless seven dimension exponents match exactly and source/target scale are >0. For POINT, coordinate source base = source_scale*x+source_origin, target result=(source_base-target_origin)/target_scale. For DELTA, source_base=source_scale*x, target result=source_base/target_scale; both origins ignored. Preserve kind, exact rational, and compositional inverse. Errors for invalid kind/dimensions/scale/float, not coercions.",
+      "positive_witnesses": [
+        {
+          "kind": "POINT",
+          "input": "0 Celsius",
+          "result": "27315/100 K",
+          "explanation": "temperature origin offset is exact"
+        },
+        {
+          "kind": "DELTA",
+          "input": "5 Celsius-difference",
+          "result": "5 K-difference",
+          "explanation": "offset never applied"
+        },
+        {
+          "kind": "POINT",
+          "input": "32 Fahrenheit",
+          "result": "27315/100 K",
+          "explanation": "exact scale 5/9 and Fahrenheit origin 45967/180 K"
+        },
+        {
+          "kind": "DELTA",
+          "input": "9 Fahrenheit-difference",
+          "result": "5 K-difference",
+          "explanation": "5/9 times 9"
+        },
+        {
+          "kind": "POINT",
+          "input": "27315/100 Kelvin",
+          "result": "0 Celsius",
+          "explanation": "invertibility"
+        },
+        {
+          "kind": "POINT",
+          "input": "4 source calibrated volts, source origin -1/10 baseV, target origin 1/10 baseV",
+          "result": "19/5 target volts",
+          "explanation": "calibration offsets compose in exact rational arithmetic"
+        }
+      ],
+      "falsifiers": [
+        "A 5 °C DELTA converted to 278.15 K confuses a difference with a point.",
+        "A 0 °C POINT converted to 0 K loses the exact origin translation.",
+        "Converting seconds to metres when seven base dimensions mismatch must reject.",
+        "Applying an origin offset to a DELTA violates composition under instrument zero calibration.",
+        "Treating floats as exact or allowing zero/negative scale silently invalidates the pure law.",
+        "Converting a POINT roundtrip through arbitrary intermediate affine unit must be identity."
+      ],
+      "relation_class": "SOURCE-GROUNDED-EXACT-SEMANTIC-LAW",
+      "argument_shape": "See source research dossier",
+      "result_shape": "(exact_fraction_value_in_target, same_kind), never host floats",
+      "source_path": "knowledge/d10-affine-quantity-point-delta-20261009.json",
+      "donor_blob_sha": "d9802b683e775e24973db960a283fb923478f03f",
+      "donor_git_commit": "c67db6cdd820dea8d3a110caed359507c0a2d7a4",
+      "original_donor_status": "RESEARCH-PENDING-OWNER-REVIEW",
+      "source_url": "https://www.nist.gov/pml/special-publication-811/nist-guide-si-chapter-8",
+      "existing_review_summary": "Requires owner semantic-minimality review",
+      "owner_core_library_review": "PENDING; source HOLD is not automatically ratified or assigned a coordinate"
+    },
+    {
+      "semantic_name": "GROUND-CONGRUENCE-CLOSURE-PARTITION",
+      "surface_uk": "зімкнути-рівності-термів",
+      "surface_ukr": "найменше-конгруентне-замикання-основних-термів",
+      "semantic_law": "Given finite acyclic ground term nodes with uninterpreted symbols, equations, and equality queries: return least equivalence relation containing the equations and closed under functions with equal symbols and pointwise equal arguments; booleans represent logical entailment, NOT proof of disequality.",
+      "positive_witnesses": [
+        {
+          "name": "same-symbol congruence and unlike-symbol negative",
+          "input": {
+            "nodes": [
+              {
+                "id": "a",
+                "symbol": "A",
+                "args": []
+              },
+              {
+                "id": "b",
+                "symbol": "B",
+                "args": []
+              },
+              {
+                "id": "fa",
+                "symbol": "F",
+                "args": [
+                  "a"
+                ]
+              },
+              {
+                "id": "fb",
+                "symbol": "F",
+                "args": [
+                  "b"
+                ]
+              },
+              {
+                "id": "ga",
+                "symbol": "G",
+                "args": [
+                  "a"
+                ]
+              }
+            ],
+            "equalities": [
+              [
+                "a",
+                "b"
+              ]
+            ],
+            "queries": [
+              [
+                "fa",
+                "fb"
+              ],
+              [
+                "fa",
+                "ga"
+              ],
+              [
+                "a",
+                "b"
+              ]
+            ]
+          },
+          "output": {
+            "classes": [
+              [
+                "a",
+                "b"
+              ],
+              [
+                "fa",
+                "fb"
+              ],
+              [
+                "ga"
+              ]
+            ],
+            "entailed": [
+              true,
+              false,
+              true
+            ]
+          }
+        },
+        {
+          "name": "absence of axioms",
+          "input": {
+            "nodes": [
+              {
+                "id": "a",
+                "symbol": "A",
+                "args": []
+              },
+              {
+                "id": "b",
+                "symbol": "B",
+                "args": []
+              },
+              {
+                "id": "fa",
+                "symbol": "F",
+                "args": [
+                  "a"
+                ]
+              },
+              {
+                "id": "fb",
+                "symbol": "F",
+                "args": [
+                  "b"
+                ]
+              },
+              {
+                "id": "ga",
+                "symbol": "G",
+                "args": [
+                  "a"
+                ]
+              }
+            ],
+            "equalities": [],
+            "queries": [
+              [
+                "fa",
+                "fb"
+              ],
+              [
+                "fa",
+                "ga"
+              ],
+              [
+                "a",
+                "b"
+              ]
+            ]
+          },
+          "output": {
+            "classes": [
+              [
+                "a"
+              ],
+              [
+                "b"
+              ],
+              [
+                "fa"
+              ],
+              [
+                "fb"
+              ],
+              [
+                "ga"
+              ]
+            ],
+            "entailed": [
+              false,
+              false,
+              false
+            ]
+          }
+        },
+        {
+          "name": "direct unrelated function equation without equality of leaves",
+          "input": {
+            "nodes": [
+              {
+                "id": "a",
+                "symbol": "A",
+                "args": []
+              },
+              {
+                "id": "b",
+                "symbol": "B",
+                "args": []
+              },
+              {
+                "id": "fa",
+                "symbol": "F",
+                "args": [
+                  "a"
+                ]
+              },
+              {
+                "id": "fb",
+                "symbol": "F",
+                "args": [
+                  "b"
+                ]
+              },
+              {
+                "id": "ga",
+                "symbol": "G",
+                "args": [
+                  "a"
+                ]
+              }
+            ],
+            "equalities": [
+              [
+                "fa",
+                "ga"
+              ]
+            ],
+            "queries": [
+              [
+                "fa",
+                "fb"
+              ],
+              [
+                "fa",
+                "ga"
+              ],
+              [
+                "a",
+                "b"
+              ]
+            ]
+          },
+          "output": {
+            "classes": [
+              [
+                "a"
+              ],
+              [
+                "b"
+              ],
+              [
+                "fa",
+                "ga"
+              ],
+              [
+                "fb"
+              ]
+            ],
+            "entailed": [
+              false,
+              true,
+              false
+            ]
+          }
+        },
+        {
+          "name": "transitive ground axioms",
+          "input": {
+            "nodes": [
+              {
+                "id": "a",
+                "symbol": "A",
+                "args": []
+              },
+              {
+                "id": "b",
+                "symbol": "B",
+                "args": []
+              },
+              {
+                "id": "c",
+                "symbol": "C",
+                "args": []
+              },
+              {
+                "id": "fa",
+                "symbol": "F",
+                "args": [
+                  "a"
+                ]
+              },
+              {
+                "id": "fc",
+                "symbol": "F",
+                "args": [
+                  "c"
+                ]
+              }
+            ],
+            "equalities": [
+              [
+                "a",
+                "b"
+              ],
+              [
+                "b",
+                "c"
+              ]
+            ],
+            "queries": [
+              [
+                "fa",
+                "fc"
+              ],
+              [
+                "a",
+                "c"
+              ]
+            ]
+          },
+          "output": {
+            "classes": [
+              [
+                "a",
+                "b",
+                "c"
+              ],
+              [
+                "fa",
+                "fc"
+              ]
+            ],
+            "entailed": [
+              true,
+              true
+            ]
+          }
+        },
+        {
+          "name": "identical syntax with two DAG node IDs",
+          "input": {
+            "nodes": [
+              {
+                "id": "a",
+                "symbol": "A",
+                "args": []
+              },
+              {
+                "id": "fa1",
+                "symbol": "F",
+                "args": [
+                  "a"
+                ]
+              },
+              {
+                "id": "fa2",
+                "symbol": "F",
+                "args": [
+                  "a"
+                ]
+              }
+            ],
+            "equalities": [],
+            "queries": [
+              [
+                "fa1",
+                "fa2"
+              ]
+            ]
+          },
+          "output": {
+            "classes": [
+              [
+                "a"
+              ],
+              [
+                "fa1",
+                "fa2"
+              ]
+            ],
+            "entailed": [
+              true
+            ]
+          }
+        }
+      ],
+      "falsifiers": [
+        "given a=b infer F(a)=F(b), not F(a)=G(b)",
+        "same-symbol same-argument terms equal even when no equations",
+        "no stated equations never entail equality of two distinct constants",
+        "entailed=false is not explicit disequality",
+        "unknown node, forward/cyclic reference, inconsistent function arity BLOCK",
+        "no rewriting or symbolic variable substitution is smuggled into congruence"
+      ],
+      "relation_class": "SOURCE-GROUNDED-EXACT-SEMANTIC-LAW",
+      "argument_shape": "nodes topological DAG ids, single fixed symbol arity, equality pairs and queries; no variables, quantifiers, rewriting, host effects, numeric semantics, structural D2 or device state",
+      "result_shape": "lexicographically stable partition classes plus ordered entailed booleans",
+      "source_path": "knowledge/d10-ground-congruence-closure-research-20261009.json",
+      "donor_blob_sha": "8144d5cd76d8b2e6099bba074fe96e910ca53156",
+      "donor_git_commit": "c67db6cdd820dea8d3a110caed359507c0a2d7a4",
+      "original_donor_status": "HOLD-CORE-VS-LIBRARY",
+      "source_url": "https://doi.org/10.1145/322186.322198",
+      "existing_review_summary": "POTENTIALLY DERIVABLE using union-find and D9 fixed-point/list operations: no independent Core root proved; owner decides whether D10 or library",
+      "owner_core_library_review": "PENDING; source HOLD is not automatically ratified or assigned a coordinate"
+    },
+    {
+      "semantic_name": "CYCLIC-BINARY-WORD-CANON",
+      "surface_uk": "циклім",
+      "surface_ukr": "канонічний-цикл-двійкового-слова",
+      "semantic_law": "For finite nonempty w of length N, define rotate(w,k)[i]=w[(i+k) mod N]. Choose c=min_lex {rotate(w,k) | 0<=k<N}. Return (c, min {k | rotate(w,k)=c}). No reversal, sorting, primitive-root contraction, incomplete-period padding, byte alignment, or physical carrier framing.",
+      "positive_witnesses": [
+        {
+          "word": "1100",
+          "canonical": "0011",
+          "least_left_shift": 2,
+          "why": "cross-boundary least rotation"
+        },
+        {
+          "word": "1001",
+          "canonical": "0011",
+          "least_left_shift": 1,
+          "why": "same circle with different original phase"
+        },
+        {
+          "word": "1010",
+          "canonical": "0101",
+          "least_left_shift": 1,
+          "why": "two identical least rotations, choose earlier k=1 rather than 3"
+        },
+        {
+          "word": "010010",
+          "canonical": "001001",
+          "least_left_shift": 2,
+          "why": "repeated cyclic minimum at k=2 and k=5; stable source index 2"
+        },
+        {
+          "word": "1111",
+          "canonical": "1111",
+          "least_left_shift": 0,
+          "why": "all rotations identical; earliest shift 0"
+        },
+        {
+          "word": "01010",
+          "canonical": "00101",
+          "least_left_shift": 4,
+          "why": "aperiodic word with prefix period 2, root algorithm is inapplicable"
+        },
+        {
+          "word": "0110",
+          "canonical": "0011",
+          "least_left_shift": 3,
+          "why": "left circular shift, not bit reversal"
+        },
+        {
+          "word": "0",
+          "canonical": "0",
+          "least_left_shift": 0,
+          "why": "one-bit nonempty identity"
+        }
+      ],
+      "falsifiers": [
+        "Returning 0101 shift 3 instead of shift 1 for 1010 violates smallest-offset witness.",
+        "Returning 01 (shortest repeated root) instead of the full 4-bit 0101 for 1010 changes the semantic object length.",
+        "Returning 01010 for 01010 because its prefix period appears to be 2 misses least full cyclic shift 00101.",
+        "Returning reversed 0011 from 1100 without proving a circular shift (or any reverse operation) must reject.",
+        "Returning empty word as a valid canonical cyclic phase erases the precondition N>0.",
+        "Treating Python True as exact bit 1 silently conflates bool with bit identity in the typed oracle.",
+        "Treating physical T5 padding/separators as elements of the cyclic mathematical word is a carrier/semantics violation."
+      ],
+      "relation_class": "SOURCE-GROUNDED-EXACT-SEMANTIC-LAW",
+      "argument_shape": "See source research dossier",
+      "result_shape": "See source research dossier",
+      "source_path": "knowledge/d10-cyclic-word-canon-20261009.json",
+      "donor_blob_sha": "4bd679f2bbcf7875d6d5bd5d7a32a80a79926435",
+      "donor_git_commit": "c67db6cdd820dea8d3a110caed359507c0a2d7a4",
+      "original_donor_status": "RESEARCH-PENDING-OWNER-REVIEW",
+      "source_url": "https://doc.sagemath.org/html/en/reference/combinat/sage/combinat/words/finite_word.html",
+      "existing_review_summary": "Requires owner semantic-minimality review",
+      "owner_core_library_review": "PENDING; source HOLD is not automatically ratified or assigned a coordinate"
     }
-  ]
+  ],
+  "verified_entry_count": 19
 }
