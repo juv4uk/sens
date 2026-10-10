@@ -43,6 +43,12 @@ jobs:
           python3 tools/important_file_guard.py --self-test
           python3 -O tools/important_file_guard.py --self-test
 
+      - name: Prove D2 to physical T5 and reject mixed textual calls
+        shell: bash
+        run: |
+          set -euo pipefail
+          cargo test --locked -p sens-cli --test file_authority_t5_boundary_cli -- --nocapture
+
       - name: Select and validate the exact Git comparison base
         id: base
         shell: bash
