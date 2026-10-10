@@ -4,12 +4,22 @@ on:
     paths:
       - 'knowledge/d10-prefix-free-kraft-certificate-20261011.json'
       - 'scripts/check_d10_prefix_free_kraft_certificate.py'
+      - 'scripts/check_d10_existing_research_batch.py'
+      - 'knowledge/d10-existing-research-batch-replay-20261011.json'
+      - 'knowledge/d10-v1-semantic-inventory.json'
+      - 'knowledge/d10-selection-transition-history.json'
+      - 'knowledge/d10-proposal-ledger.tsv'
       - '.github/workflows/d10-prefix-free-kraft-certificate.yml'
   push:
     branches: [main]
     paths:
       - 'knowledge/d10-prefix-free-kraft-certificate-20261011.json'
       - 'scripts/check_d10_prefix_free_kraft_certificate.py'
+      - 'scripts/check_d10_existing_research_batch.py'
+      - 'knowledge/d10-existing-research-batch-replay-20261011.json'
+      - 'knowledge/d10-v1-semantic-inventory.json'
+      - 'knowledge/d10-selection-transition-history.json'
+      - 'knowledge/d10-proposal-ledger.tsv'
       - '.github/workflows/d10-prefix-free-kraft-certificate.yml'
 jobs:
   exact-oracles:
@@ -22,3 +32,7 @@ jobs:
           python-version: '3.12'
       - run: python3 scripts/check_d10_prefix_free_kraft_certificate.py
       - run: python3 -O scripts/check_d10_prefix_free_kraft_certificate.py
+      - run: python3 scripts/check_d10_existing_research_batch.py
+      - run: python3 -O scripts/check_d10_existing_research_batch.py
+      - run: python3 scripts/check_d10_selection_transition_history.py --self-test
+      - run: python3 scripts/check-d10-proposal-ledger.py --self-test
