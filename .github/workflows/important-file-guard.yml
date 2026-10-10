@@ -38,22 +38,28 @@ jobs:
         run: |
           set -euo pipefail
           base="${EVENT_BASE_SHA:-}"
+          policy="knowledge/file-authority-policy.lisp"
+          [[ -f "$policy" ]] || {
+            echo "NAMED_FAIL: SENS_FILE_POLICY_MISSING" >&2
+            exit 2
+          }
+          # Навіть автоматичний CI перевіряє синтаксис SENS-пінованої бази.
+          policy_base="$(sed -nE 's/^[[:space:]]*\(activation-git-commit[[:space:]]*\.[[:space:]]*"([0-9a-f]{40})"\)[[:space:]]*$/\1/p' "$policy")"
+          [[ "$policy_base" =~ ^[0-9a-f]{40}$ ]] || {
+            echo "NAMED_FAIL: SENS_FILE_POLICY_BASE_INVALID" >&2
+            exit 2
+          }
+          git cat-file -e "$policy_base^{commit}" || {
+            echo "NAMED_FAIL: SENS_FILE_POLICY_BASE_MISSING" >&2
+            exit 2
+          }
           if [[ "$GITHUB_EVENT_NAME" == "workflow_dispatch" ]]; then
             [[ "$GITHUB_REF" == "refs/heads/main" ]] || {
               echo "NAMED_FAIL: DISPATCH_REQUIRES_MAIN" >&2
               exit 2
             }
-            policy="knowledge/file-authority-policy.lisp"
-            [[ -f "$policy" ]] || {
-              echo "NAMED_FAIL: SENS_FILE_POLICY_MISSING" >&2
-              exit 2
-            }
-            # Ручний аудит — від початку чинності SENS-постанови, не HEAD^.
-            base="$(sed -nE 's/^[[:space:]]*\(activation-git-commit[[:space:]]*\.[[:space:]]*"([0-9a-f]{40})"\)[[:space:]]*$/\1/p' "$policy")"
-            [[ "$base" =~ ^[0-9a-f]{40}$ ]] || {
-              echo "NAMED_FAIL: SENS_FILE_POLICY_BASE_INVALID" >&2
-              exit 2
-            }
+            # Повний аудит від активації постанови, не порожній HEAD^→HEAD.
+            base="$policy_base"
           fi
           [[ "$base" =~ ^[0-9a-f]{40}$ && "$base" != "0000000000000000000000000000000000000000" ]] || {
             echo "NAMED_FAIL: EVENT_BASE_UNAVAILABLE" >&2
