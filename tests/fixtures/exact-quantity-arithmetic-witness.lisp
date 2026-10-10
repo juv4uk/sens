@@ -133,7 +133,7 @@
          (00100111 (00000001 case) (00000001 malformed-row-tail))
          (00100111 (00000001 actual) rows)))
       ((00000010 rows) (0)
-       (10011100 ((row (00000101 rows)))
+       (нехай ((row (00000101 rows)))
          (00000111
            ((00100010 (00101111 row) (00110000 row)) (1)
             (exact-quantity-arithmetic-check (00000110 rows)))
