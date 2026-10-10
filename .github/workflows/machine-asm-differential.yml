@@ -56,5 +56,6 @@ jobs:
       - uses: dtolnay/rust-toolchain@stable
       - name: "Порівняти фізичні MOV imm64 на всіх 16 регістрах"
         run: |
+          cargo test --locked -p sens --test x86_64_lisp_encoder exact_ukrainian_quotient_and_remainder_stage_probe -- --exact --nocapture
           cargo test --locked -p sens --test x86_64_lisp_encoder x86_mov_imm64_component_stage_probe -- --exact --nocapture
           cargo test --locked -p sens --test x86_64_lisp_encoder lisp_encodes_mov_r64_imm64_for_every_gpr_with_independent_decode -- --exact --nocapture
