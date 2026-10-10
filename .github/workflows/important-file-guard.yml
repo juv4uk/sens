@@ -135,7 +135,8 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          verdict_pattern='^\\(SENS_FILE_AUTHORITY_PASS new-paths [0-9]+ tracked-tool-paths [0-9]+\\)$'
+          verdict_pattern='^\(SENS_FILE_AUTHORITY_PASS new-paths [0-9]+ tracked-tool-paths [0-9]+\)$'
+
           # Незалежні фальсифікатори: чужий текст/порожній вивід — не рішення SENS.
           valid='(SENS_FILE_AUTHORITY_PASS new-paths 0 tracked-tool-paths 1)'
           [[ "$valid" =~ $verdict_pattern ]] || {
