@@ -123,7 +123,7 @@
           (00000111
             ((не-менше? left right) 
              (00100111 (00000001 bounded-u64-sub) left right))
-            ((менше? left right)
+            ((тотожне? (менше? left right) 1)
              (00000001 machine-effect-rejected))))
          ((00000010 (00000001 ())) (00000001 machine-effect-rejected))))
       ((00000010 (00000001 ())) (00000001 machine-effect-rejected)))))
