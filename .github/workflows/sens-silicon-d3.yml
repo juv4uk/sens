@@ -1,0 +1,57 @@
+name: SENS Silicon D1-D3 physical T5 RTL
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'hardware/sens-silicon/**'
+      - 'scripts/sens_t5_codec.py'
+      - 'examples/binary/d3-primitives-program.bits'
+      - '.github/workflows/sens-silicon-d3.yml'
+  pull_request:
+    paths:
+      - 'hardware/sens-silicon/**'
+      - 'scripts/sens_t5_codec.py'
+      - 'examples/binary/d3-primitives-program.bits'
+      - '.github/workflows/sens-silicon-d3.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  rtl-physical-t5-witness:
+    name: physical T5 stream to bounded D1-D3 hardware
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v5
+      - name: Verify the FPGA ROM bytes against original SENS source
+        run: python3 hardware/sens-silicon/tests/check_silicon_d3_vectors.py
+      - name: Install Icarus HDL simulator when absent
+        run: |
+          if ! command -v iverilog >/dev/null 2>&1; then
+            sudo apt-get update -qq
+            sudo apt-get install -y --no-install-recommends iverilog
+          fi
+          iverilog -V | head -n 2
+      - name: Simulate committed physical T5 bytes through hardware
+        shell: bash
+        run: |
+          set -euo pipefail
+          iverilog -g2012 -s tb_sens_silicon_d3 -o "$RUNNER_TEMP/sens-silicon.vvp" \
+            hardware/sens-silicon/rtl/sens_t5_decoder.sv \
+            hardware/sens-silicon/rtl/sens_d3_microcore.sv \
+            hardware/sens-silicon/rtl/sens_silicon_d3.sv \
+            hardware/sens-silicon/tb/tb_sens_silicon_d3.sv
+          vvp "$RUNNER_TEMP/sens-silicon.vvp" | tee "$RUNNER_TEMP/sens-silicon-cycles.log"
+          test "$(grep -c '^SILICON_PASS case=' "$RUNNER_TEMP/sens-silicon-cycles.log")" -eq 6
+          test "$(grep -c '^SILICON_REJECT case=' "$RUNNER_TEMP/sens-silicon-cycles.log")" -eq 2
+          grep -q '^SILICON_SUITE_PASS' "$RUNNER_TEMP/sens-silicon-cycles.log"
+      - name: Preserve per-program simulation cycle evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: sens-silicon-d3-sim-clocks
+          path: ${{ runner.temp }}/sens-silicon-cycles.log
+          if-no-files-found: warn
