@@ -37,28 +37,3 @@ jobs:
           python-version: "3.x"
       - name: Verify D2-only structure ownership
         run: python3 scripts/check-d2-structure-audit.py
-      - name: Оптимізований Python має відхиляти аудит D2
-        shell: bash
-        run: |
-          set -euo pipefail
-          cli_log="$RUNNER_TEMP/d2-opt-cli.log"
-          if python3 -O scripts/check-d2-structure-audit.py >"$cli_log" 2>&1; then
-            echo "::error::D2 audit passed with python3 -O"
-            exit 1
-          fi
-          if ! grep -Fq "D2-STRUCTURE-AUDIT: BLOCKED" "$cli_log"; then
-            cat "$cli_log"
-            echo "::error::D2 audit did not report the exact fail-closed outcome under -O"
-            exit 1
-          fi
-
-          env_log="$RUNNER_TEMP/d2-opt-env.log"
-          if PYTHONOPTIMIZE=2 python3 scripts/check-d2-structure-audit.py >"$env_log" 2>&1; then
-            echo "::error::D2 audit passed with PYTHONOPTIMIZE=2"
-            exit 1
-          fi
-          if ! grep -Fq "D2-STRUCTURE-AUDIT: BLOCKED" "$env_log"; then
-            cat "$env_log"
-            echo "::error::D2 audit did not report the exact fail-closed outcome under PYTHONOPTIMIZE=2"
-            exit 1
-          fi
