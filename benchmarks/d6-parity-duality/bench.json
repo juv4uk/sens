@@ -15,5 +15,5 @@
   "status": "RESEARCH-ONLY",
   "generation": "unknown",
   "axis": "d6/parity-duality",
-  "reproduce": "python3 benchmarks/d6-parity-duality/run.py --out /tmp/d6-parity-duality"
+  "reproduce": "tmp=\"$(mktemp -d /tmp/sens-d6-parity-XXXXXX)\"; trap 'rm -rf \"$tmp\"' EXIT; git fetch --no-tags --depth=1 origin 86d49ef4477345082e60452800bae6c2d184390c; git show 86d49ef4477345082e60452800bae6c2d184390c:knowledge/d3-d8-stable-residents.json > \"$tmp/d3-d8-stable-residents.json\"; git show 86d49ef4477345082e60452800bae6c2d184390c:scripts/check-3051-stable-resident-corpus.py > \"$tmp/check-3051-stable-resident-corpus.py\"; python3 \"$tmp/check-3051-stable-resident-corpus.py\" --corpus \"$tmp/d3-d8-stable-residents.json\" --out \"$tmp/stable-resident-audit\"; python3 benchmarks/d6-parity-duality/run.py --corpus \"$tmp/d3-d8-stable-residents.json\" --out \"$tmp/d6-parity-duality\""
 }
