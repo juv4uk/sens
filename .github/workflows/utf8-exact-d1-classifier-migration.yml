@@ -1,0 +1,28 @@
+name: UTF8 exact D1 classifier migration
+
+on:
+  pull_request:
+    paths:
+      - lib/utf8.lisp
+      - crates/sens/tests/utf8_exact_d1_classifiers.rs
+      - .github/workflows/utf8-exact-d1-classifier-migration.yml
+  push:
+    branches:
+      - migration/utf8-exact-d1-classifiers-20261010
+    paths:
+      - lib/utf8.lisp
+      - crates/sens/tests/utf8_exact_d1_classifiers.rs
+      - .github/workflows/utf8-exact-d1-classifier-migration.yml
+
+permissions:
+  contents: read
+
+jobs:
+  exact-d1-utf8-leaves:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v5
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Run strict-D1 UTF8 byte and scalar-leaf witnesses
+        run: cargo test --locked -p sens --test utf8_exact_d1_classifiers -- --nocapture
