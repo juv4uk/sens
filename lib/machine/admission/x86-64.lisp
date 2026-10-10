@@ -246,9 +246,9 @@
     ; Contract 11.8: current D6 >=/<= producers answer exact D1 control.
     ; Never compare PredicateBit with a Number or route via host truthiness.
     (110
-      ((не-менше? value lower)
+      ((тотожне? (не-менше? value lower) 1)
        (110
-         ((не-більше? value upper)
+         ((тотожне? (не-більше? value upper) 1)
           (010 (00000001 ())))
          ((010 (00000001 ()))
           (010 (00000001 (00000000))))))
