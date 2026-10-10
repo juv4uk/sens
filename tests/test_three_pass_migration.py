@@ -169,6 +169,14 @@ class ThreePassMigrationTests(unittest.TestCase):
             self.assertTrue(out.startswith(f"10 {bits} "),source)
             self.assertEqual(resolver.counts["pass2-my-lisp"],1,source)
 
+    def test_compound_legacy_sid8_00001010_stays_fail_closed(self):
+        # This old head denotes a compound macro+definition, not one admitted
+        # current D3-D6 identity. Do not guess a successor from the bit pattern.
+        with self.assertRaisesRegex(
+            mod.MigrationError, "legacy-unmapped SID8/Sens8 00001010"
+        ):
+            self.migrate("(00001010 x)\n", source_era="legacy")
+
     def test_d1_head_may_pass_but_d2_head_is_reserved_for_structure(self):
         out1,resolver1=self.migrate("(1 x)\n")
         self.assertEqual(out1,"10 1 00 x 01\n")
@@ -449,7 +457,7 @@ class ThreePassMigrationTests(unittest.TestCase):
 
 
     def test_global_text7_call_head_uses_same_frame_as_define_target(self):
-        source="""\\
+        source="""\
 (00001001 foo
   (00001000 ()
     1))
@@ -513,7 +521,7 @@ class ThreePassMigrationTests(unittest.TestCase):
 
 
     def test_machine_block_local_callable_shadows_builtin_surface(self):
-        source="""\\
+        source="""\
 (00001001 first
   (00001000 (first)
     (first)))
