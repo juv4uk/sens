@@ -64,7 +64,7 @@ fn only_proven_utf8_leaf_helpers_are_migrated_and_others_stay_unchanged() {
     // prove the legacy integer MOD and b3/b4 continuation mechanism separately.
     for helper in ["utf8-in-range?", "utf8-continuation-byte?",
                    "utf8-three-byte-second-ok?", "utf8-four-byte-second-ok?"] {
-        let start = format!("(00001001 {helper}\\n");
+        let start = format!("(00001001 {helper}");
         assert_eq!(SOURCE.matches(&start).count(), 1, "{helper} must be defined once");
     }
     assert!(SOURCE.contains("((00011010 value low) (00000010"),
