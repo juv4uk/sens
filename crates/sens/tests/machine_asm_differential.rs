@@ -288,3 +288,98 @@ fn x86_encoder_callability_stage_probe() {
         "Не доведено виклики x86-кодувальника на етапах: {failed:?}"
     );
 }
+
+
+// Незалежна атестація всіх 16 механічних номерів регістрів.
+// Перевіряємо точний результат, а не тільки відсутність помилки виклику.
+// #d потрібен, щоб числа 10/11 не стали двійковими словами.
+#[test]
+#[ignore = "разом з GAS/NASM на GitHub-hosted runner"]
+fn x86_register_fields_have_exact_values_for_all_16_codes() {
+    let mut session = machine_session();
+    for code in 0u32..16 {
+        let low_source = format!("(x86-low3 #d{code})");
+        let high_source = format!("(x86-high1 #d{code})");
+        let low = eval_program(&low_source, &mut session)
+            .unwrap_or_else(|error| panic!("Невикличний low3 для {code}: {error}"));
+        let high = eval_program(&high_source, &mut session)
+            .unwrap_or_else(|error| panic!("Невикличний high1 для {code}: {error}"));
+        assert_eq!(
+            low.value.to_string(),
+            (code % 8).to_string(),
+            "Невірні молодші три біти регістра {code}"
+        );
+        assert_eq!(
+            high.value.to_string(),
+            (code / 8).to_string(),
+            "Невірний старший біт регістра {code}"
+        );
+        eprintln!("X86_ПОЛЯ_РЕГІСТРА_УСПІХ code={code} low3={} high1={}",
+                  low.value, high.value);
+    }
+}
+
+
+// Атестуємо саме генератор ADD, окремо від ще заблокованого admission.
+// Кожне байтове очікування порівнюється також із двома незалежними асемблерами.
+#[test]
+#[ignore = "зовнішні GAS/NASM на GitHub-hosted runner"]
+fn x86_direct_add_byte_parity_with_gas_nasm() {
+    assert!(tool_version("as", &["--version"]).ends_with(" 2.42"));
+    assert_eq!(tool_version("nasm", &["-v"]), "NASM version 2.16.01");
+    assert!(tool_version("objcopy", &["--version"]).ends_with(" 2.42"));
+
+    let mut session = machine_session();
+    let temp = std::env::temp_dir().join(format!("sens-asm-direct-add-{}", std::process::id()));
+    if temp.exists() {
+        fs::remove_dir_all(&temp).expect("прибрати попередній артефакт");
+    }
+    fs::create_dir_all(&temp).expect("створити каталог незалежного свідка");
+    let cases: [(&str, &str, &str, &str, &[u8]); 2] = [
+        ("rax_rcx", "rax", "rcx", "add rax, rcx", &[72, 1, 200]),
+        ("r8_r9", "r8", "r9", "add r8, r9", &[77, 1, 200]),
+    ];
+    for (name, destination, source, instruction, expected) in cases {
+        let expression = format!(
+            "(x86-encode-add-r64-r64 (quote {destination}) (quote {source}))"
+        );
+        let observed = eval_program(&expression, &mut session)
+            .unwrap_or_else(|error| panic!("Недоступний прямий ADD {name}: {error}"));
+        let bytes = parse_byte_list(&observed.value.to_string());
+        assert_eq!(bytes, expected, "{name}: невірні незалежні байтові очікування");
+        let gas = gas_bytes(&temp, name, instruction);
+        let nasm = nasm_bytes(&temp, name, instruction);
+        assert_eq!(bytes, gas, "{name}: різниця з GAS");
+        assert_eq!(bytes, nasm, "{name}: різниця з NASM");
+        eprintln!("X86_ПРЯМИЙ_ADD_ПАРИТЕТ_УСПІХ name={name} bytes={bytes:?}");
+    }
+    fs::remove_dir_all(&temp).expect("очистити фізичне свідчення");
+}
+
+
+// Перевірка етапу складання фізичних байтів — незалежно від admission.
+// Порожній, один та два блоки: точний порядок без англійських macro-підмін.
+#[test]
+#[ignore = "штатний профіль x86 на GitHub-hosted runner"]
+fn x86_byte_program_stitches_without_legacy_callable() {
+    let mut session = machine_session();
+    let cases = [
+        ("порожня", "(x86-encode-program (quote ()))", "()"),
+        ("одна", "(x86-encode-program (quote ((72 1 200))))", "(72 1 200)"),
+        (
+            "дві",
+            "(x86-encode-program (quote ((72 1 200) (195))))",
+            "(72 1 200 195)",
+        ),
+    ];
+    for (name, source, expected) in cases {
+        let observed = eval_program(source, &mut session)
+            .unwrap_or_else(|error| panic!("X86_СКЛАДАННЯ_БЛОКУВАННЯ stage={name}: {error}"));
+        assert_eq!(
+            observed.value.to_string(),
+            expected,
+            "X86_СКЛАДАННЯ_НЕСПІВПАДІННЯ stage={name}"
+        );
+        eprintln!("X86_СКЛАДАННЯ_УСПІХ stage={name} bytes={expected}");
+    }
+}

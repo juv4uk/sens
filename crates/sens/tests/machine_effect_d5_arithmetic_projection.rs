@@ -265,7 +265,7 @@ fn sub_mul_effect_bounds_fail_closed_before_target_projection() {
 
 #[test]
 fn bounded_effect_source_keeps_exact_d1_controls() {
-    // #5360: A stale bulk rewrite must not restore numeric 1 or legacy t in D3 COND.
+    // #5360: застаріла масова міграція не має повертати числове 1 чи історичне t у D3 COND.
     let text = read("lib/machine/effects/u64.lisp");
     for (number, line) in text.lines().enumerate() {
         let active = line.split(';').next().unwrap_or("").trim_start();
@@ -282,4 +282,49 @@ fn bounded_effect_source_keeps_exact_d1_controls() {
         text.matches("(00000010 (00000001 ()))").count() >= 8,
         "Вісім доведених предикатних відповідей D1:YES мають залишатися в джерелі"
     );
+}
+
+#[test]
+fn bounded_effect_negative_form_predicates_return_exact_d1_no() {
+    // #5361: D1:0 не є порожнім списком; у COND дозволений лише точний PredicateBit.
+    let mut session = Session::default();
+    load_core_library(&mut session).expect("ядро");
+    load_lisp_file("lib/machine/effects/u64.lisp", &mut session);
+
+    for source in [
+        "(machine-effect-bounded-u64-add-form? (00000001 ()))",
+        "(machine-effect-bounded-u64-sub-form? (00000001 ()))",
+        "(machine-effect-bounded-u64-mul-form? (00000001 ()))",
+    ] {
+        let actual = eval_program(source, &mut session)
+            .unwrap_or_else(|error| panic!("{source}: {error}"))
+            .value;
+        assert_eq!(
+            actual.as_predicate_bit(),
+            Some(false),
+            "{source} має повернути точний D1:0, а не () чи числовий нуль"
+        );
+    }
+}
+
+#[test]
+fn bounded_effect_integer_range_answer_is_exact_d1() {
+    // #5361: негативний вихід за будь-яку межу має бути D1:0, а не ().
+    let mut session = Session::default();
+    load_core_library(&mut session).expect("ядро");
+    load_lisp_file("lib/machine/effects/u64.lisp", &mut session);
+    for (source, expected) in [
+        ("(machine-effect-within-inclusive-integer-range? 5 0 10)", true),
+        ("(machine-effect-within-inclusive-integer-range? -1 0 10)", false),
+        ("(machine-effect-within-inclusive-integer-range? 11 0 10)", false),
+    ] {
+        let actual = eval_program(source, &mut session)
+            .unwrap_or_else(|error| panic!("{source}: {error}"))
+            .value;
+        assert_eq!(
+            actual.as_predicate_bit(),
+            Some(expected),
+            "{source}: результат має належати точному домену D1"
+        );
+    }
 }
