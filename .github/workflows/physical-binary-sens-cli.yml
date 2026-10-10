@@ -84,6 +84,50 @@ jobs:
           print("PHYSICAL=T5, D3_PRIMITIVES=PURE_EXEC_PARITY")
           PY
 
+      - name: Migrate original D3 EQ forms to immutable physical T5 with D1 1/0 results
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          import sys
+
+          sys.path.insert(0, "scripts")
+          from sens_t5_codec import decode_bytes, encode_projection
+          original = Path("examples/binary/d3-primitives-program.bits").read_text(encoding="ascii").split()
+          assert len(original) == 63, "original D3 source drifted"
+          for stem, start, end in (
+              ("d3-primitive-eq-car", 22, 39),
+              ("d3-primitive-eq-cdr", 39, 56),
+              ("d3-primitive-eq-distinct", 56, 63),
+          ):
+              base = Path("examples/binary") / stem
+              physical = base.with_suffix(".sens").read_bytes()
+              expected = original[start:end]
+              assert decode_bytes(physical) == expected, f"{stem}: original bit-word identities drifted"
+              assert encode_projection(" ".join(expected)) == physical, f"{stem}: noncanonical T5"
+              assert base.read_bytes() == (" ".join(expected) + "\n").encode("ascii"), f"{stem}: stale view"
+          PY
+
+          for witness in "d3-primitive-eq-car:1" "d3-primitive-eq-cdr:1" "d3-primitive-eq-distinct:0"; do
+            stem="${witness%:*}"
+            expected="${witness#*:}"
+            prefix="examples/binary/${stem}"
+
+            # The canonical bounded translator (not an ad hoc dictionary)
+            # must agree on Ukrainian D1/D3 names, exact D2 and physical bytes.
+            python3 scripts/verify_uk_t5_triplet.py \
+              --lisp "${prefix}.lisp" --sens "${prefix}.sens" --view "${prefix}"
+
+            source_result="$(target/debug/sens "${prefix}.sens")"
+            trit_result="$(target/debug/sens-trit eval "${prefix}.sens")"
+            if [[ "$source_result" != "$expected" || "$trit_result" != "$expected" ]]; then
+              echo "BLOCK: ${stem} expected D1:${expected}; sens=${source_result}; sens-trit=${trit_result}" >&2
+              exit 1
+            fi
+            echo "PASS: ${stem} original=exact, T5=physical, CLI=D1:${expected}"
+          done
+
       - name: Execute D5 LABEL recursion from D7 bit names
         shell: bash
         run: |
