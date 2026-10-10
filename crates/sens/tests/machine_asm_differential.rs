@@ -241,3 +241,42 @@ fn gas_and_nasm_match_lisp_owned_encoder_for_admitted_corpus() {
 
     fs::remove_dir_all(&temp).expect("clean witness temp directory");
 }
+
+
+// Окремий від зовнішніх асемблерів етапний свідок виклику.
+// Якщо реальна збірка ще заблокована, звіт показує перший несправний вузол.
+#[test]
+#[ignore = "машинний GitHub-hosted маршрут; той самий профіль, що GAS/NASM"]
+fn x86_encoder_callability_stage_probe() {
+    let mut session = machine_session();
+    let stages = [
+        ("код_rax", "(x86-reg-code (quote rax))"),
+        ("код_rcx", "(x86-reg-code (quote rcx))"),
+        ("байти_add", "(x86-encode-add-r64-r64 (quote rax) (quote rcx))"),
+        (
+            "одна_інструкція",
+            "(x86-encode-admitted-instruction (quote (add-r64-r64 rax rcx)))",
+        ),
+        (
+            "повна_програма",
+            "(x86-encode-admitted-program (quote ((add-r64-r64 rax rcx))))",
+        ),
+    ];
+    let mut failed = Vec::new();
+    for (stage, source) in stages {
+        match eval_program(source, &mut session) {
+            Ok(observation) => eprintln!(
+                "X86_ЕТАП_УСПІХ stage={stage} value={}",
+                observation.value
+            ),
+            Err(error) => {
+                eprintln!("X86_ЕТАП_БЛОКУВАННЯ stage={stage} error={error}");
+                failed.push(stage);
+            }
+        }
+    }
+    assert!(
+        failed.is_empty(),
+        "Не доведено виклики x86-кодувальника на етапах: {failed:?}"
+    );
+}
