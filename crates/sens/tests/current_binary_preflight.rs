@@ -144,12 +144,16 @@ fn current_core4_peer_materialization_uses_current_macro_law() {
     let mut session = Session::default();
     load_core_library(&mut session).expect("Core4 bootstrap");
 
-    match sens::eval_program(
+    for probe in [
+        "my-postcore-stable-peer-projection",
+        "(my-postcore-peer-group 1079 my-postcore-stable-peer-projection)",
+        "(my-postcore-peer-group 1092 my-postcore-stable-peer-projection)",
         "(my-postcore-peer-group 162 my-postcore-stable-peer-projection)",
-        &mut session
-    ) {
-        Ok(result) => println!("POSTCORE-BEFORE-TIME => {}", result.value),
-        Err(error) => println!("POSTCORE-BEFORE-TIME => ERROR {error}"),
+    ] {
+        match sens::eval_program(probe, &mut session) {
+            Ok(result) => println!("POSTCORE-BEFORE-TIME {probe} => {}", result.value),
+            Err(error) => println!("POSTCORE-BEFORE-TIME {probe} => ERROR {error}"),
+        }
     }
 
     for (library, source) in [
