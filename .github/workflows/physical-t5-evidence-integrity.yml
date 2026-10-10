@@ -1,0 +1,70 @@
+name: Physical T5 evidence integrity
+
+on:
+  pull_request:
+    paths:
+      - "benchmarks/evidence-integrity/**"
+      - "scripts/benchmark-sens-physical.py"
+      - "scripts/sens_t5_codec.py"
+      - "scripts/sens_t5_spaced_view.py"
+      - "tests/test_physical_t5_evidence_integrity.py"
+      - "tests/fixtures/migration-quote-cohort-main/**"
+      - "tests/fixtures/migration-multiform-cohort-main/**"
+      - "tests/fixtures/migration-d1-cond-cohort/**"
+      - ".github/workflows/physical-t5-evidence-integrity.yml"
+  push:
+    branches: [main]
+    paths:
+      - "benchmarks/evidence-integrity/**"
+      - "scripts/benchmark-sens-physical.py"
+      - "scripts/sens_t5_codec.py"
+      - "scripts/sens_t5_spaced_view.py"
+      - "tests/test_physical_t5_evidence_integrity.py"
+      - "tests/fixtures/migration-quote-cohort-main/**"
+      - "tests/fixtures/migration-multiform-cohort-main/**"
+      - "tests/fixtures/migration-d1-cond-cohort/**"
+      - ".github/workflows/physical-t5-evidence-integrity.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  independent-report-verdict:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v5
+      - name: Negative-control tests on real physical fixture
+        run: python3 -m unittest discover -s tests -p test_physical_t5_evidence_integrity.py -v
+      - name: Measure real tracked T5 and spaced-bit transport
+        run: |
+          python3 scripts/benchmark-sens-physical.py \
+            --out-dir "$RUNNER_TEMP/sens-physical-evidence" \
+            --reps 9 --iterations 300
+      - name: Independently verify hashes, sizes, medians, and label integrity
+        run: |
+          python3 benchmarks/evidence-integrity/verify_physical_t5.py \
+            --root . \
+            --report "$RUNNER_TEMP/sens-physical-evidence/physical-t5.json" \
+            --expected-sha "$GITHUB_SHA" \
+            > "$RUNNER_TEMP/sens-physical-evidence/verification.json"
+          cat "$RUNNER_TEMP/sens-physical-evidence/verification.json"
+      - name: Record physical input hashes and measured code revision
+        run: |
+          git rev-parse HEAD > "$RUNNER_TEMP/sens-physical-evidence/git-head.txt"
+          sha256sum scripts/benchmark-sens-physical.py \
+            benchmarks/evidence-integrity/verify_physical_t5.py \
+            tests/fixtures/migration-quote-cohort-main/quote-legacy.sens \
+            tests/fixtures/migration-multiform-cohort-main/two-forms.sens \
+            tests/fixtures/migration-d1-cond-cohort/branch.sens \
+            > "$RUNNER_TEMP/sens-physical-evidence/sha256-manifest.txt"
+      - name: Preserve raw timing samples, verification and SHA manifest
+        uses: actions/upload-artifact@v4
+        with:
+          name: physical-t5-transport-evidence-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/sens-physical-evidence/
+          retention-days: 30
+          if-no-files-found: error
+# This job measures CPython T5 transport only. It never proves semantic parity
+# or native CPU/GPU/FPGA execution/speedups.

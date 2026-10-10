@@ -1,4 +1,4 @@
-name: D10 Yantra library harvest v1
+name: Дослідження D10 — перевірка бібліотечного донора Yantra
 
 on:
   pull_request:
@@ -8,6 +8,8 @@ on:
       - "knowledge/d10-v1-semantic-inventory.json"
       - "knowledge/d10-fill-v1-state.json"
       - "scripts/check-d10-yantra-library-harvest-v1.py"
+      - "tests/test_d10_yantra_donor_provenance.py"
+      - "knowledge/archive/d10-yantra-donor-76460b72.lisp"
       - "scripts/check-d10-crossrepo-panini-v1.py"
       - ".github/workflows/d10-yantra-library-harvest-v1.yml"
   push:
@@ -18,6 +20,8 @@ on:
       - "knowledge/d10-v1-semantic-inventory.json"
       - "knowledge/d10-fill-v1-state.json"
       - "scripts/check-d10-yantra-library-harvest-v1.py"
+      - "tests/test_d10_yantra_donor_provenance.py"
+      - "knowledge/archive/d10-yantra-donor-76460b72.lisp"
       - ".github/workflows/d10-yantra-library-harvest-v1.yml"
   workflow_dispatch:
 
@@ -27,9 +31,11 @@ jobs:
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@v5
-      - name: Verify current D10 Yantra candidate definitions and dedup
+      - name: Негативні свідки цілісності та рухомих рядків
+        run: python3 tests/test_d10_yantra_donor_provenance.py
+      - name: Перевірити історичний SHA, рядки донора й чинні визначення
         run: python3 scripts/check-d10-yantra-library-harvest-v1.py
-      - name: Verify previous D10 Panini harvest can grow
+      - name: Перевірити розширення історичного добору D10 Panini
         run: python3 scripts/check-d10-crossrepo-panini-v1.py
-      - name: Verify D10 seed authority and accounting
+      - name: Перевірити повноваження й облік D10
         run: python3 scripts/check-d10-fill-v1-seed.py
