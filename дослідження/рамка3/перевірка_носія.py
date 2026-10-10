@@ -155,6 +155,8 @@ class ПеревіркаРамки(unittest.TestCase):
         }
         self.assertEqual(рядки, очікування["рядки"])
         self.assertEqual(підсумок, очікування["підсумок"])
+        self.assertEqual(підпис.hexdigest(),
+                         очікування["sha256_допущених_фізичних_пар"])
         print("ДОКАЗ-12 " + json.dumps({
             "підсумок": підсумок,
             "sha256_фізичних_пар": підпис.hexdigest(),
