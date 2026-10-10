@@ -1,0 +1,37 @@
+name: Legacy call-head migration safety
+
+on:
+  pull_request:
+    paths:
+      - 'scripts/sens8-to-ladder.py'
+      - 'scripts/migrate-three-pass.py'
+      - 'scripts/cond-modernize.py'
+      - 'tests/test_legacy_head_migration_safety.py'
+      - '.github/workflows/legacy-head-migration-safety.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'scripts/sens8-to-ladder.py'
+      - 'scripts/migrate-three-pass.py'
+      - 'scripts/cond-modernize.py'
+      - 'tests/test_legacy_head_migration_safety.py'
+      - '.github/workflows/legacy-head-migration-safety.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  no-unreviewed-head-rewrites:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v5
+      - name: Prove stage safety against real ratified bridge and SI specimen
+        run: python3 -m unittest discover -s tests -p 'test_legacy_head_migration_safety.py' -v
+      - name: Read-only candidate report; no .sens admission
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 scripts/sens8-to-ladder.py lib/si.lisp
+          git diff --exit-code -- scripts/sens8-to-ladder.py lib/si.lisp
