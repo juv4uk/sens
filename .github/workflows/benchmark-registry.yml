@@ -120,7 +120,7 @@ jobs:
           set -euo pipefail
           matrix="$(python3 scripts/benchmark_sweep.py --list-json)"
           echo "matrix=$matrix" >> "$GITHUB_OUTPUT"
-          echo "Discovered $(python3 -c 'import json,sys; print(len(json.load(sys.stdin)[\"include\"]))' <<< "$matrix") registered benchmark stands."
+          echo "Discovered $(python3 -c 'import json,sys; print(len(json.load(sys.stdin)["include"]))' <<< "$matrix") registered benchmark stands."
 
   run-sweep:
     name: "Reproduce ${{ matrix.stand }}"
