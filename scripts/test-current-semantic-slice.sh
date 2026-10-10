@@ -18,12 +18,30 @@ cargo test -p sens \
 # Historical #1096 bare-SID witness remains preserved as compatibility evidence,
 # but it is intentionally not executed by the current semantic slice. Contract
 # 11.8 assigns W8 to exact D8 identity; Sens8/Sid8 remains migration/provenance only.
-# #291: quantity semantics live in Lisp. The shell observes only the named
-# pass envelope; expected scientific quantities and relations stay in the
-# Lisp witness itself. No replacement Rust observer is introduced.
-quantity_status="$(cargo run --quiet -p sens-cli --bin sens -- tests/fixtures/exact-quantity-arithmetic-witness.lisp)"
-if [[ "$quantity_status" != "(exact-quantity-arithmetic-witness (status pass))" ]]; then
-  printf 'exact quantity Lisp witness failed: %s\n' "$quantity_status" >&2
+# #291: preserve the original SI/quantity source witness, but do not execute
+# it in this strict D1/D3 slice until its historical three-field COND has been
+# migrated and independently checked. A binary canary is NOT SI arithmetic proof.
+# This lane verifies one real canonical physical T5 program with strict D3 COND.
+python3 - <<'PY'
+from pathlib import Path
+import hashlib
+import sys
+sys.path.insert(0, "scripts")
+from sens_t5_codec import decode_bytes, encode_words
+
+stem = Path("examples/binary/d3-cond-current-t5/cond")
+physical = stem.with_suffix(".sens").read_bytes()
+words = stem.read_text(encoding="ascii").split()
+assert len(words) == 43 and sum(map(len, words)) == 99, "typed D3 COND workload drift"
+assert decode_bytes(physical) == words, "physical T5 differs from exact-width projection"
+assert encode_words(words) == physical, "physical T5 encoding is not canonical"
+assert hashlib.sha256(physical).hexdigest() == (
+    "4b22702f12809eeb1b05c1dd7cf122d9c405dff194c133557f619cfb8d0abf24"
+), "pinned physical D3 COND payload changed"
+PY
+binary_cond_status="$(cargo run --quiet -p sens-cli --bin sens-trit -- eval examples/binary/d3-cond-current-t5/cond.sens)"
+if [[ "$binary_cond_status" != "1" ]]; then
+  printf 'physical binary D3 COND expected exact D1:1, got: %s\n' "$binary_cond_status" >&2
   exit 1
 fi
 
