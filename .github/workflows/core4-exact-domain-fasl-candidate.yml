@@ -3,7 +3,7 @@ name: Core4 exact-domain FASL candidate
 on:
   push:
     branches:
-      - fix/core4-exact-domain-fasl-reader-20261010
+      - fix/core4-exact-domain-fasl-mainline-20261010
     paths:
       - crates/sens/src/mixed_source.rs
       - crates/sens/src/lib.rs
