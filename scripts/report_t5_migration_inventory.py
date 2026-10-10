@@ -52,15 +52,19 @@ T5_AUTHORITY = {
 
 ROLE_RULES = [
     (re.compile(r"^benchmarks/"), "benchmark", "шлях під benchmarks/"),
-    (re.compile(r"projection|project|text7|_view|view\.|bits|python3 -m|d7_|d10"), "projection",
+    (re.compile(r"^packaging/"), "consumer", "інсталятор/пакувальник островів"),
+    (re.compile(r"projection|project|text7|_view|view\.|bits|python3 -m|d7_|d10|render|sens_uk"), "projection",
      "назва вказує на проєкцію/читабельний view"),
-    (re.compile(r"migrate|encode|publish|mirror|admit|guarded_sens"), "producer",
-     "назва вказує на видавця/мігратора фізичних байтів"),
+    (re.compile(r"migrate|encode|publish|mirror|admit|guarded_sens|"
+                r"canonical_reader|source_packing|binary_execution|ternary_transport|"
+                r"sens-trit|sens_t5_codec"), "producer",
+     "назва вказує на видавця/читача фізичних байтів T5"),
     (re.compile(r"bench|performance|latency|throughput"), "benchmark",
      "назва вказує на вимірювання"),
     (re.compile(r"(^|/)tests?/|tests?\b|audit|guard|check|verify|report|"
-                r"inventory|parity|roundtrip|delta|census"), "validator",
-     "назва вказує на аудит/ґейт/свідка"),
+                r"inventory|parity|roundtrip|delta|census|migration|classify|"
+                r"scope|triage|plan|prove|diff|snapshot|ledger"), "validator",
+     "назва вказує на аудит/ґейт/аналіз/свідка"),
     (re.compile(r"codec"), "producer", "файловий codec (кодує/декодує носій)"),
     (re.compile(r"reader|execution|trit|repl|\brun\b|eval|load|decode"),
      "consumer", "назва вказує на читача/виконавця"),
