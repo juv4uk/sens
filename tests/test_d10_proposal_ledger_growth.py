@@ -5,6 +5,8 @@ from __future__ import annotations
 import copy
 import importlib.util
 import json
+import subprocess
+import sys
 from pathlib import Path
 import unittest
 
@@ -25,6 +27,19 @@ class SelectionLedgerTrace(unittest.TestCase):
         cls.inventory = read("knowledge/d10-v1-semantic-inventory.json")
         cls.baseline = read("knowledge/d10-growth-baseline-v1.json")
         cls.history = read("knowledge/d10-selection-transition-history.json")
+
+    def test_class_of_pending_proposal_runs_its_live_sha_gate(self):
+        checker = ROOT / "scripts" / "check_d10_class_of_proposal.py"
+        result = subprocess.run(
+            [sys.executable, str(checker), "--self-test"],
+            cwd=ROOT,
+            capture_output=True,
+            text=True,
+            check=False,
+        )
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        self.assertIn("CLASS-OF proposal guard PASS", result.stdout)
+        self.assertIn("4 no-admission negative controls PASS", result.stdout)
 
     def test_current_five_pinned_research_roots(self):
         self.assertEqual(self.inventory["rows"][625:][0]["semantic_name"], "DPB")
