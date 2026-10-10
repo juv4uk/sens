@@ -47,6 +47,8 @@ jobs:
     steps:
       - uses: actions/checkout@v5
       - uses: dtolnay/rust-toolchain@stable
+      - name: Diagnose D6 let* alias and Unicode lexical binding parity
+        run: cargo test --locked -p sens --lib let_star_surface_alias_and_unicode_bindings_are_separable -- --nocapture
       - name: Binary .sens transport, exact D2 admission and pure evaluator
         run: cargo test --locked -p sens-cli --bin sens-trit -- --nocapture
       - name: Public physical .sens CLI explicit Core4 with fail-closed admission
