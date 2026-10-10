@@ -8,10 +8,10 @@
   "capacity": 1024,
   "current_foundation": "#4008 / Contract 11.8 / D1-D9",
   "accounting": {
-    "selected_semantic_candidates": 647,
+    "selected_semantic_candidates": 657,
     "law_forced_coordinates": 256,
-    "unplaced_selected_candidates": 391,
-    "remaining_semantic_inventory": 377,
+    "unplaced_selected_candidates": 401,
+    "remaining_semantic_inventory": 367,
     "ratified_d10_residents": 0
   },
   "rules": [
@@ -14417,6 +14417,1468 @@
         ],
         "derivability": "PENDING-OWNER-REVIEW; comparison+COND+prior state suffice as derived implementation"
       }
+    },
+    {
+      "stable_id": "d10.evidence.admission.hadamard-variance.20261011",
+      "semantic_name": "HADAMARD-VARIANCE",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "proposal_status": "pending-owner-review",
+      "decision": "SELECT-D10-CANDIDATE",
+      "surface_uk": "дисперсія-адамарова",
+      "surface_ukr": "дисперсія-частотної-стійкості-адамарова",
+      "source_class": "EXISTING-D10-SOURCE-ADMISSION-20261011",
+      "relation_class": "EXACT-SIGNAL-VARIANCE",
+      "behavior": "For N zero-dead-time uniformly sampled fractional-frequency observations y, positive integer m and N >= 3m, average each m-point contiguous block: a_i=(1/m)*sum(y[i:i+m]); compute the mean squared second difference of consecutive m-block averages divided by 6, over all i=0..N-3m. Return exact rational variance when inputs are exact rational. Reject invalid m or insufficient data.",
+      "source_path": "knowledge/d10-hadamard-variance-proposal-20261009.json",
+      "provenance": [
+        "knowledge/d10-hadamard-variance-proposal-20261009.json",
+        "#4013",
+        "#4463",
+        "#5304"
+      ],
+      "positive_witnesses": [
+        {
+          "input": [
+            0,
+            0,
+            1
+          ],
+          "m": 1,
+          "expected": "1/6",
+          "explanation": "single second-frequency-difference squared divided by 6"
+        },
+        {
+          "input": [
+            0,
+            0,
+            0,
+            1,
+            0
+          ],
+          "m": 1,
+          "expected": "5/18",
+          "explanation": "three overlapping triplets: squared differences 0,1,4"
+        },
+        {
+          "input": [
+            0,
+            0,
+            1,
+            1,
+            0,
+            0
+          ],
+          "m": 2,
+          "expected": "2/3",
+          "explanation": "block means 0,1,0; m=2 reflects averaging time"
+        },
+        {
+          "input": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ],
+          "m": 1,
+          "expected": "0",
+          "explanation": "linear frequency drift annihilated by second differences"
+        }
+      ],
+      "falsifiers": [
+        "Use the Allan first-difference estimator instead of the Hadamard second-difference estimator: a linear frequency drift becomes nonzero, violating the contract.",
+        "Normalize by 2 instead of 6, or silently use sample variance N-1; the 3-sample impulse must equal exactly 1/6.",
+        "Allow m=0, negative/non-integer m, N<3*m or silently fill missing samples; valid samples must be uniformly timed with no dead-time.",
+        "Conflate the HVAR finite nonoverlapping/overlapping convention or claim a different confidence estimator (modified or total Hadamard) is the same statistic."
+      ],
+      "independent_checks": [
+        "scripts/check_d10_hadamard_proposal_v1.py",
+        "tests/oracles/d10_hadamard_chez.ss"
+      ],
+      "behavioral_dedup": "PENDING-REVIEW; exact English name absent in 647 selected; check full D1-D9 and D10 semantic-equivalence before ratification",
+      "ownership_review": "CORE-VS-DERIVED-LIBRARY-PENDING; selection of research candidate only, no primitive promise",
+      "proposal_id": "D10P-0008",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "donor_coordinate_authority": "NONE",
+      "ratified_resident": false,
+      "physical_t5_authorized": false
+    },
+    {
+      "stable_id": "d10.evidence.admission.finite-symbolic-differentiation.20261011",
+      "semantic_name": "FINITE-SYMBOLIC-DIFFERENTIATION",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "proposal_status": "pending-owner-review",
+      "decision": "SELECT-D10-CANDIDATE",
+      "surface_uk": "симв-диф",
+      "surface_ukr": "символьно-диференціювати",
+      "source_class": "EXISTING-D10-SOURCE-ADMISSION-20261011",
+      "relation_class": "BOUNDED-SYMBOLIC-POLYNOMIAL-DIFFERENTIATION",
+      "behavior": "Для скінченного ациклічного AST Const(integer)|Var(name)|Add(expr,expr)|Mul(expr,expr) і заданої змінної повертає дерево формальної похідної за правилами константи, змінної, суми й добутку; вивід точний і навмисно не спрощується, вхід не мутується. Обмежений сучасний контракт, натхнений Maling MIT AI Memo 10 (1959), а не твердження про дослівну транскрипцію мемо; Core-vs-library мінімальність лишається на власниковому перегляді.",
+      "source_path": "knowledge/d10-maling-symbolic-differentiation-1959-v1.json",
+      "provenance": [
+        "knowledge/d10-maling-symbolic-differentiation-1959-v1.json",
+        "#4013",
+        "#4463",
+        "#5304"
+      ],
+      "positive_witnesses": [
+        {
+          "input": "D(Const(7), x)",
+          "expected": "Const(0)",
+          "purpose": "constant derivative"
+        },
+        {
+          "input": "D(Var(x), x)",
+          "expected": "Const(1)",
+          "purpose": "same variable"
+        },
+        {
+          "input": "D(Var(y), x)",
+          "expected": "Const(0)",
+          "purpose": "distinct variable"
+        },
+        {
+          "input": "D(Add(Var(x), Var(y)), x)",
+          "expected": "Add(Const(1), Const(0))",
+          "purpose": "sum rule"
+        },
+        {
+          "input": "D(Mul(Var(x), Var(x)), x)",
+          "expected": "Add(Mul(Const(1), Var(x)), Mul(Var(x), Const(1)))",
+          "purpose": "repeated variable/product rule"
+        }
+      ],
+      "falsifiers": [
+        "A numerical evaluator that returns only a derivative value at one point does not satisfy symbolic-expression output.",
+        "Treating Var(y) as derivative 1 when differentiating with respect to x is false.",
+        "Returning Mul(D(a),D(b)) for a product violates the product rule.",
+        "Silently simplifying output or reordering Add children violates this dossier's intentionally unsimplified output-shape contract.",
+        "Treating a finite-difference table as the same object as a formal derivative is a category error."
+      ],
+      "independent_checks": [
+        "docs/research/d10-maling-symbolic-differentiation-1959.uk.md"
+      ],
+      "behavioral_dedup": "PENDING-REVIEW; exact English name absent in 647 selected; check full D1-D9 and D10 semantic-equivalence before ratification",
+      "ownership_review": "CORE-VS-DERIVED-LIBRARY-PENDING; selection of research candidate only, no primitive promise",
+      "proposal_id": "D10P-0070",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "donor_coordinate_authority": "NONE",
+      "ratified_resident": false,
+      "physical_t5_authorized": false
+    },
+    {
+      "stable_id": "d10.evidence.admission.grounded-argument-labeling.20261011",
+      "semantic_name": "GROUNDED-ARGUMENT-LABELING",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "proposal_status": "pending-owner-review",
+      "decision": "SELECT-D10-CANDIDATE",
+      "surface_uk": "опраб",
+      "surface_ukr": "обґрунтовано-розмітити-аргументи",
+      "source_class": "EXISTING-D10-SOURCE-ADMISSION-20261011",
+      "relation_class": "FINITE-ARGUMENT-ATTACK-GROUNDED-FIXPOINT",
+      "behavior": "Grounded Dung characteristic F(S) = {a | every attacker b of a is attacked by some c in S}. Iterate from empty S to least fixed point G. IN=G, OUT={b | exists a in G with attack(a,b)}, UNDEC=A\\(IN∪OUT). Edges are directed. A self-attacking or unbroken mutual attack remains UNDEC in the absence of externally grounded attackers. Empty A returns three empty lists.",
+      "source_path": "knowledge/d10-dung-grounded-argumentation-20261009.json",
+      "provenance": [
+        "knowledge/d10-dung-grounded-argumentation-20261009.json",
+        "#4013",
+        "#4463",
+        "#5304"
+      ],
+      "positive_witnesses": [
+        {
+          "nodes": [
+            "a"
+          ],
+          "attacks": [],
+          "result": {
+            "IN": [
+              "a"
+            ],
+            "OUT": [],
+            "UNDEC": []
+          },
+          "why": "unattacked argument is grounded"
+        },
+        {
+          "nodes": [
+            "a",
+            "b"
+          ],
+          "attacks": [
+            [
+              "a",
+              "b"
+            ]
+          ],
+          "result": {
+            "IN": [
+              "a"
+            ],
+            "OUT": [
+              "b"
+            ],
+            "UNDEC": []
+          },
+          "why": "root defeats one target"
+        },
+        {
+          "nodes": [
+            "a",
+            "b",
+            "c"
+          ],
+          "attacks": [
+            [
+              "a",
+              "b"
+            ],
+            [
+              "b",
+              "c"
+            ]
+          ],
+          "result": {
+            "IN": [
+              "a",
+              "c"
+            ],
+            "OUT": [
+              "b"
+            ],
+            "UNDEC": []
+          },
+          "why": "defence reinstates c"
+        },
+        {
+          "nodes": [
+            "a",
+            "b"
+          ],
+          "attacks": [
+            [
+              "a",
+              "b"
+            ],
+            [
+              "b",
+              "a"
+            ]
+          ],
+          "result": {
+            "IN": [],
+            "OUT": [],
+            "UNDEC": [
+              "a",
+              "b"
+            ]
+          },
+          "why": "unbroken two-cycle stays undecided"
+        },
+        {
+          "nodes": [
+            "a"
+          ],
+          "attacks": [
+            [
+              "a",
+              "a"
+            ]
+          ],
+          "result": {
+            "IN": [],
+            "OUT": [],
+            "UNDEC": [
+              "a"
+            ]
+          },
+          "why": "self-attack is undecided"
+        },
+        {
+          "nodes": [
+            "a",
+            "b",
+            "c"
+          ],
+          "attacks": [
+            [
+              "a",
+              "b"
+            ],
+            [
+              "b",
+              "c"
+            ],
+            [
+              "c",
+              "a"
+            ]
+          ],
+          "result": {
+            "IN": [],
+            "OUT": [],
+            "UNDEC": [
+              "a",
+              "b",
+              "c"
+            ]
+          },
+          "why": "odd pure cycle remains undecided"
+        },
+        {
+          "nodes": [
+            "a",
+            "b",
+            "c",
+            "d"
+          ],
+          "attacks": [
+            [
+              "a",
+              "b"
+            ],
+            [
+              "b",
+              "c"
+            ],
+            [
+              "c",
+              "a"
+            ],
+            [
+              "d",
+              "a"
+            ]
+          ],
+          "result": {
+            "IN": [
+              "b",
+              "d"
+            ],
+            "OUT": [
+              "a",
+              "c"
+            ],
+            "UNDEC": []
+          },
+          "why": "external grounded d defeats a; then b reinstated"
+        },
+        {
+          "nodes": [
+            "x",
+            "a",
+            "b"
+          ],
+          "attacks": [
+            [
+              "a",
+              "b"
+            ],
+            [
+              "b",
+              "a"
+            ]
+          ],
+          "result": {
+            "IN": [
+              "x"
+            ],
+            "OUT": [],
+            "UNDEC": [
+              "a",
+              "b"
+            ]
+          },
+          "why": "unrelated accepted argument cannot resolve mutual attack"
+        },
+        {
+          "nodes": [],
+          "attacks": [],
+          "result": {
+            "IN": [],
+            "OUT": [],
+            "UNDEC": []
+          },
+          "why": "finite empty domain has empty fixed point"
+        }
+      ],
+      "falsifiers": [
+        "A↔B with no outside attackers cannot arbitrarily accept A or B; both UNDEC.",
+        "Under a→b→c, returning c=UNDEC instead of IN violates defended iteration.",
+        "Treating edges as undirected reverses attack/defence and violates the witness for one-way chains.",
+        "IN/OUT/UNDEC overlap or omit an argument violates total-partition invariant.",
+        "Returning every proposition not proved true as OUT violates grounded undecidability.",
+        "Using a third truth bit or changing D1 YES/NO or D2 source structure violates binary-language architecture.",
+        "Duplicated node identities, unknown attack endpoints and malformed edges must reject instead of silently inventing nodes.",
+        "Calling model output a truthful fact about the world without validated attack/evidence sources violates observation boundary."
+      ],
+      "independent_checks": [
+        "docs/research/d10-dung-grounded-ai.uk.md"
+      ],
+      "behavioral_dedup": "PENDING-REVIEW; exact English name absent in 647 selected; check full D1-D9 and D10 semantic-equivalence before ratification",
+      "ownership_review": "CORE-VS-DERIVED-LIBRARY-PENDING; selection of research candidate only, no primitive promise",
+      "proposal_id": "D10P-4971",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "donor_coordinate_authority": "NONE",
+      "ratified_resident": false,
+      "physical_t5_authorized": false
+    },
+    {
+      "stable_id": "d10.evidence.admission.finite-minimal-diagnoses.20261011",
+      "semantic_name": "FINITE-MINIMAL-DIAGNOSES",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "proposal_status": "pending-owner-review",
+      "decision": "SELECT-D10-CANDIDATE",
+      "surface_uk": "міндіаг",
+      "surface_ukr": "мінімальні-діагнози-за-конфліктами",
+      "source_class": "EXISTING-D10-SOURCE-ADMISSION-20261011",
+      "relation_class": "EXACT-MINIMAL-HITTING-SETS-CERTIFICATES",
+      "behavior": "H subset U hits every conflict C_i when H ∩ C_i != ∅. H is inclusion-minimal iff each h∈H has a private original conflict C_i with H ∩ C_i={h}. Do NOT substitute smallest cardinality, probability rankings or one arbitrary diagnosis. No conflicts => exactly one empty diagnosis. Any empty conflict => NO-DIAGNOSIS even for nonempty U. Superset/repeated conflicts preserve semantic result and original witness indices.",
+      "source_path": "knowledge/d10-reiter-minimal-diagnoses-20261009.json",
+      "provenance": [
+        "knowledge/d10-reiter-minimal-diagnoses-20261009.json",
+        "#4013",
+        "#4463",
+        "#5304"
+      ],
+      "positive_witnesses": [
+        {
+          "universe": [
+            "a",
+            "b",
+            "c"
+          ],
+          "conflicts": [
+            [
+              "a",
+              "b"
+            ],
+            [
+              "b",
+              "c"
+            ]
+          ],
+          "diagnoses": [
+            [
+              "a",
+              "c"
+            ],
+            [
+              "b"
+            ]
+          ],
+          "explanation": "{b} and {a,c} both inclusion-minimal; a single cardinality-optimal {b} is insufficient"
+        },
+        {
+          "universe": [
+            "a",
+            "b"
+          ],
+          "conflicts": [],
+          "diagnoses": [
+            []
+          ],
+          "explanation": "no conflict: empty hitting set is unique subset-minimal diagnosis"
+        },
+        {
+          "universe": [
+            "a",
+            "b"
+          ],
+          "conflicts": [
+            []
+          ],
+          "result": "NO-DIAGNOSIS, conflict index 0",
+          "explanation": "empty conflict cannot be hit"
+        },
+        {
+          "universe": [
+            "a",
+            "b",
+            "c"
+          ],
+          "conflicts": [
+            [
+              "a",
+              "b"
+            ],
+            [
+              "a",
+              "b",
+              "c"
+            ],
+            [
+              "b",
+              "c"
+            ]
+          ],
+          "diagnoses": [
+            [
+              "a",
+              "c"
+            ],
+            [
+              "b"
+            ]
+          ],
+          "explanation": "redundant superset conflict doesn't add diagnoses"
+        },
+        {
+          "universe": [
+            "a",
+            "b"
+          ],
+          "conflicts": [
+            [
+              "a"
+            ],
+            [
+              "b"
+            ]
+          ],
+          "diagnoses": [
+            [
+              "a",
+              "b"
+            ]
+          ],
+          "explanation": "both components are independently required"
+        }
+      ],
+      "falsifiers": [
+        "Returning only {b} for conflicts {a,b},{b,c} misses valid subset-minimal {a,c}.",
+        "Returning {a,b} when {b} hits all conflicts is not subset-minimal.",
+        "Returning NO-DIAGNOSES for zero conflicts is wrong: exactly one empty diagnosis exists.",
+        "Ignoring a single empty conflict and returning diagnoses is unsound.",
+        "A certificate citing a conflict also hit by another selected component is not a private-conflict proof.",
+        "Using diagnosis cardinality as the tie criterion instead of inclusion-minimality drops incomparable diagnoses.",
+        "Hard-wiring English component names rather than using ordered opaque input IDs would violate binary-first identity.",
+        "Accepting conflict components outside universe or repeated universe identifiers without error invents assumptions."
+      ],
+      "independent_checks": [
+        "knowledge/d10-reiter-minimal-diagnoses-20261009.json"
+      ],
+      "behavioral_dedup": "PENDING-REVIEW; exact English name absent in 647 selected; check full D1-D9 and D10 semantic-equivalence before ratification",
+      "ownership_review": "CORE-VS-DERIVED-LIBRARY-PENDING; selection of research candidate only, no primitive promise",
+      "proposal_id": "D10P-5007",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "donor_coordinate_authority": "NONE",
+      "ratified_resident": false,
+      "physical_t5_authorized": false
+    },
+    {
+      "stable_id": "d10.evidence.admission.binary-constraint-support-projection.20261011",
+      "semantic_name": "BINARY-CONSTRAINT-SUPPORT-PROJECTION",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "proposal_status": "pending-owner-review",
+      "decision": "SELECT-D10-CANDIDATE",
+      "surface_uk": "відсіяти-без-опори",
+      "surface_ukr": "звузити-два-домени-за-відношенням",
+      "source_class": "EXISTING-D10-SOURCE-ADMISSION-20261011",
+      "relation_class": "FINITE-CONSTRAINT-BINARY-RELATION-SUPPORT",
+      "behavior": "Let M={ (x,y) in R : x in Dx and y in Dy }. When M is empty return NO-SUPPORT (not a set of newly invented values). Otherwise return SUPPORTED(sorted unique projection_x(M), sorted unique projection_y(M)). No pair outside R is certified, and supported value in each output has an existential compatible value in the other output. Returns no witness to a globally satisfiable larger constraint network.",
+      "source_path": "knowledge/d10-symbolic-ai-arc-support-20261009.json",
+      "provenance": [
+        "knowledge/d10-symbolic-ai-arc-support-20261009.json",
+        "#4013",
+        "#4463",
+        "#5304"
+      ],
+      "positive_witnesses": [
+        {
+          "dx": [
+            1,
+            2,
+            3
+          ],
+          "dy": [
+            4,
+            5
+          ],
+          "allowed": [
+            [
+              1,
+              4
+            ],
+            [
+              2,
+              6
+            ],
+            [
+              3,
+              5
+            ]
+          ],
+          "out": {
+            "status": "SUPPORTED",
+            "left": [
+              1,
+              3
+            ],
+            "right": [
+              4,
+              5
+            ]
+          }
+        },
+        {
+          "dx": [
+            1,
+            2
+          ],
+          "dy": [
+            3,
+            4
+          ],
+          "allowed": [
+            [
+              1,
+              3
+            ],
+            [
+              2,
+              4
+            ]
+          ],
+          "out": {
+            "status": "SUPPORTED",
+            "left": [
+              1,
+              2
+            ],
+            "right": [
+              3,
+              4
+            ]
+          }
+        },
+        {
+          "dx": [
+            1,
+            2
+          ],
+          "dy": [
+            3
+          ],
+          "allowed": [
+            [
+              1,
+              4
+            ],
+            [
+              2,
+              5
+            ]
+          ],
+          "out": {
+            "status": "NO-SUPPORT",
+            "left": [],
+            "right": []
+          }
+        },
+        {
+          "dx": [
+            2
+          ],
+          "dy": [
+            3
+          ],
+          "allowed": [
+            [
+              2,
+              3
+            ]
+          ],
+          "out": {
+            "status": "SUPPORTED",
+            "left": [
+              2
+            ],
+            "right": [
+              3
+            ]
+          }
+        },
+        {
+          "dx": [],
+          "dy": [
+            1
+          ],
+          "allowed": [
+            [
+              0,
+              1
+            ]
+          ],
+          "out": {
+            "status": "NO-SUPPORT",
+            "left": [],
+            "right": []
+          }
+        }
+      ],
+      "falsifiers": [
+        "A value x with no R-related y in the current Dy must be removed; keeping x violates sound support pruning.",
+        "Arbitrary Cartesian product of output domains is NOT guaranteed to be contained in R; do not claim universal pair compatibility or global CSP solution.",
+        "When all allowed pairs are removed, return named NO-SUPPORT rather than SUCCESS(empty,empty), avoiding contradictory proof status.",
+        "Monotonicity: reducing either input domain cannot invent any supported output; repeated projection must be idempotent.",
+        "Reject unsorted/duplicate finite lists, float/boolean values, non-pair relation members: no silent coercion into semantic identity."
+      ],
+      "independent_checks": [
+        "tests/test_d10_ai_arc_support.py",
+        "tests/oracles/d10_clpfd_arc_support.pl"
+      ],
+      "behavioral_dedup": "PENDING-REVIEW; exact English name absent in 647 selected; check full D1-D9 and D10 semantic-equivalence before ratification",
+      "ownership_review": "CORE-VS-DERIVED-LIBRARY-PENDING; selection of research candidate only, no primitive promise",
+      "proposal_id": "D10P-6101",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "donor_coordinate_authority": "NONE",
+      "ratified_resident": false,
+      "physical_t5_authorized": false
+    },
+    {
+      "stable_id": "d10.evidence.admission.finite-binary-arc-consistency-fixpoint.20261011",
+      "semantic_name": "FINITE-BINARY-ARC-CONSISTENCY-FIXPOINT",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "proposal_status": "pending-owner-review",
+      "decision": "SELECT-D10-CANDIDATE",
+      "surface_uk": "узгодити-дуги-обмежень",
+      "surface_ukr": "найбільші-дугово-узгоджені-домени",
+      "source_class": "EXISTING-D10-SOURCE-ADMISSION-20261011",
+      "relation_class": "FINITE-DIRECTED-CSP-ARC-CLOSURE",
+      "behavior": "Given named finite domains and directed binary compatibility relations, iteratively eliminate unsupported source values to the greatest arc-consistent fixed point, independent of work-list order; return exact reduced domains and a separate EMPTY-DOMAIN-CONTRADICTION status when any domain is empty. Nonempty closure does not imply global satisfiability.",
+      "source_path": "scripts/research_d10_finite_arc_consistency.py",
+      "provenance": [
+        "scripts/research_d10_finite_arc_consistency.py",
+        "#4013",
+        "#4463",
+        "#5304"
+      ],
+      "positive_witnesses": [],
+      "falsifiers": [],
+      "independent_checks": [
+        "tests/test_d10_finite_arc_consistency.py",
+        "tests/oracles/d10_finite_arc_consistency.pl"
+      ],
+      "behavioral_dedup": "PENDING-REVIEW; exact English name absent in 647 selected; check full D1-D9 and D10 semantic-equivalence before ratification",
+      "ownership_review": "CORE-VS-DERIVED-LIBRARY-PENDING; selection of research candidate only, no primitive promise",
+      "proposal_id": "D10P-6102",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "donor_coordinate_authority": "NONE",
+      "ratified_resident": false,
+      "physical_t5_authorized": false
+    },
+    {
+      "stable_id": "d10.evidence.admission.ground-congruence-closure-partition.20261011",
+      "semantic_name": "GROUND-CONGRUENCE-CLOSURE-PARTITION",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "proposal_status": "pending-owner-review",
+      "decision": "SELECT-D10-CANDIDATE",
+      "surface_uk": "зімкнути-рівності-термів",
+      "surface_ukr": "найменше-конгруентне-замикання-основних-термів",
+      "source_class": "EXISTING-D10-SOURCE-ADMISSION-20261011",
+      "relation_class": "FINITE-UNINTERPRETED-TERMS-CONGRUENCE-FIXPOINT",
+      "behavior": "Given finite acyclic ground term nodes with uninterpreted symbols, equations, and equality queries: return least equivalence relation containing the equations and closed under functions with equal symbols and pointwise equal arguments; booleans represent logical entailment, NOT proof of disequality.",
+      "source_path": "knowledge/d10-ground-congruence-closure-research-20261009.json",
+      "provenance": [
+        "knowledge/d10-ground-congruence-closure-research-20261009.json",
+        "#4013",
+        "#4463",
+        "#5304"
+      ],
+      "positive_witnesses": [
+        {
+          "name": "same-symbol congruence and unlike-symbol negative",
+          "input": {
+            "nodes": [
+              {
+                "id": "a",
+                "symbol": "A",
+                "args": []
+              },
+              {
+                "id": "b",
+                "symbol": "B",
+                "args": []
+              },
+              {
+                "id": "fa",
+                "symbol": "F",
+                "args": [
+                  "a"
+                ]
+              },
+              {
+                "id": "fb",
+                "symbol": "F",
+                "args": [
+                  "b"
+                ]
+              },
+              {
+                "id": "ga",
+                "symbol": "G",
+                "args": [
+                  "a"
+                ]
+              }
+            ],
+            "equalities": [
+              [
+                "a",
+                "b"
+              ]
+            ],
+            "queries": [
+              [
+                "fa",
+                "fb"
+              ],
+              [
+                "fa",
+                "ga"
+              ],
+              [
+                "a",
+                "b"
+              ]
+            ]
+          },
+          "output": {
+            "classes": [
+              [
+                "a",
+                "b"
+              ],
+              [
+                "fa",
+                "fb"
+              ],
+              [
+                "ga"
+              ]
+            ],
+            "entailed": [
+              true,
+              false,
+              true
+            ]
+          }
+        },
+        {
+          "name": "absence of axioms",
+          "input": {
+            "nodes": [
+              {
+                "id": "a",
+                "symbol": "A",
+                "args": []
+              },
+              {
+                "id": "b",
+                "symbol": "B",
+                "args": []
+              },
+              {
+                "id": "fa",
+                "symbol": "F",
+                "args": [
+                  "a"
+                ]
+              },
+              {
+                "id": "fb",
+                "symbol": "F",
+                "args": [
+                  "b"
+                ]
+              },
+              {
+                "id": "ga",
+                "symbol": "G",
+                "args": [
+                  "a"
+                ]
+              }
+            ],
+            "equalities": [],
+            "queries": [
+              [
+                "fa",
+                "fb"
+              ],
+              [
+                "fa",
+                "ga"
+              ],
+              [
+                "a",
+                "b"
+              ]
+            ]
+          },
+          "output": {
+            "classes": [
+              [
+                "a"
+              ],
+              [
+                "b"
+              ],
+              [
+                "fa"
+              ],
+              [
+                "fb"
+              ],
+              [
+                "ga"
+              ]
+            ],
+            "entailed": [
+              false,
+              false,
+              false
+            ]
+          }
+        },
+        {
+          "name": "direct unrelated function equation without equality of leaves",
+          "input": {
+            "nodes": [
+              {
+                "id": "a",
+                "symbol": "A",
+                "args": []
+              },
+              {
+                "id": "b",
+                "symbol": "B",
+                "args": []
+              },
+              {
+                "id": "fa",
+                "symbol": "F",
+                "args": [
+                  "a"
+                ]
+              },
+              {
+                "id": "fb",
+                "symbol": "F",
+                "args": [
+                  "b"
+                ]
+              },
+              {
+                "id": "ga",
+                "symbol": "G",
+                "args": [
+                  "a"
+                ]
+              }
+            ],
+            "equalities": [
+              [
+                "fa",
+                "ga"
+              ]
+            ],
+            "queries": [
+              [
+                "fa",
+                "fb"
+              ],
+              [
+                "fa",
+                "ga"
+              ],
+              [
+                "a",
+                "b"
+              ]
+            ]
+          },
+          "output": {
+            "classes": [
+              [
+                "a"
+              ],
+              [
+                "b"
+              ],
+              [
+                "fa",
+                "ga"
+              ],
+              [
+                "fb"
+              ]
+            ],
+            "entailed": [
+              false,
+              true,
+              false
+            ]
+          }
+        },
+        {
+          "name": "transitive ground axioms",
+          "input": {
+            "nodes": [
+              {
+                "id": "a",
+                "symbol": "A",
+                "args": []
+              },
+              {
+                "id": "b",
+                "symbol": "B",
+                "args": []
+              },
+              {
+                "id": "c",
+                "symbol": "C",
+                "args": []
+              },
+              {
+                "id": "fa",
+                "symbol": "F",
+                "args": [
+                  "a"
+                ]
+              },
+              {
+                "id": "fc",
+                "symbol": "F",
+                "args": [
+                  "c"
+                ]
+              }
+            ],
+            "equalities": [
+              [
+                "a",
+                "b"
+              ],
+              [
+                "b",
+                "c"
+              ]
+            ],
+            "queries": [
+              [
+                "fa",
+                "fc"
+              ],
+              [
+                "a",
+                "c"
+              ]
+            ]
+          },
+          "output": {
+            "classes": [
+              [
+                "a",
+                "b",
+                "c"
+              ],
+              [
+                "fa",
+                "fc"
+              ]
+            ],
+            "entailed": [
+              true,
+              true
+            ]
+          }
+        },
+        {
+          "name": "identical syntax with two DAG node IDs",
+          "input": {
+            "nodes": [
+              {
+                "id": "a",
+                "symbol": "A",
+                "args": []
+              },
+              {
+                "id": "fa1",
+                "symbol": "F",
+                "args": [
+                  "a"
+                ]
+              },
+              {
+                "id": "fa2",
+                "symbol": "F",
+                "args": [
+                  "a"
+                ]
+              }
+            ],
+            "equalities": [],
+            "queries": [
+              [
+                "fa1",
+                "fa2"
+              ]
+            ]
+          },
+          "output": {
+            "classes": [
+              [
+                "a"
+              ],
+              [
+                "fa1",
+                "fa2"
+              ]
+            ],
+            "entailed": [
+              true
+            ]
+          }
+        }
+      ],
+      "falsifiers": [
+        "given a=b infer F(a)=F(b), not F(a)=G(b)",
+        "same-symbol same-argument terms equal even when no equations",
+        "no stated equations never entail equality of two distinct constants",
+        "entailed=false is not explicit disequality",
+        "unknown node, forward/cyclic reference, inconsistent function arity BLOCK",
+        "no rewriting or symbolic variable substitution is smuggled into congruence"
+      ],
+      "independent_checks": [
+        "tests/test_d10_ground_congruence_research.py"
+      ],
+      "behavioral_dedup": "PENDING-REVIEW; exact English name absent in 647 selected; check full D1-D9 and D10 semantic-equivalence before ratification",
+      "ownership_review": "CORE-VS-DERIVED-LIBRARY-PENDING; selection of research candidate only, no primitive promise",
+      "proposal_id": "D10P-6103",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "donor_coordinate_authority": "NONE",
+      "ratified_resident": false,
+      "physical_t5_authorized": false
+    },
+    {
+      "stable_id": "d10.evidence.admission.exact-barycentric-interpolate.20261011",
+      "semantic_name": "EXACT-BARYCENTRIC-INTERPOLATE",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "proposal_status": "pending-owner-review",
+      "decision": "SELECT-D10-CANDIDATE",
+      "surface_uk": "точно-інтерполювати",
+      "surface_ukr": "обчислити-поліном-за-вузлами",
+      "source_class": "EXISTING-D10-SOURCE-ADMISSION-20261011",
+      "relation_class": "EXACT-RATIONAL-POLYNOMIAL-INTERPOLATION",
+      "behavior": "Given 1..n pairwise-distinct exact rational node abscissas x_i and exact rational ordinates y_i, and exact rational query x, return the unique exact rational value of polynomial degree at most n−1 interpolating all nodes (x_i,y_i). Evaluate at x_i exactly y_i, reject duplicate x_i, empty set and inexact values; permutation of nodes must not alter result. Evaluate by barycentric rational weights, not floating coefficients.",
+      "source_path": "knowledge/d10-exact-barycentric-interpolation-research-v1.json",
+      "provenance": [
+        "knowledge/d10-exact-barycentric-interpolation-research-v1.json",
+        "#4013",
+        "#4463",
+        "#5304"
+      ],
+      "positive_witnesses": [
+        {
+          "nodes": [
+            [
+              0,
+              0
+            ],
+            [
+              1,
+              1
+            ],
+            [
+              2,
+              4
+            ]
+          ],
+          "query": "1/2",
+          "expected": "1/4",
+          "why": "quadratic x² exact rational"
+        },
+        {
+          "nodes": [
+            [
+              0,
+              0
+            ],
+            [
+              1,
+              1
+            ],
+            [
+              2,
+              4
+            ]
+          ],
+          "query": "3",
+          "expected": "9",
+          "why": "polynomial extrapolation, not physical prediction"
+        },
+        {
+          "nodes": [
+            [
+              -1,
+              1
+            ],
+            [
+              1,
+              5
+            ]
+          ],
+          "query": "0",
+          "expected": "3",
+          "why": "2*x+3"
+        },
+        {
+          "nodes": [
+            [
+              1,
+              7
+            ]
+          ],
+          "query": "5/2",
+          "expected": "7",
+          "why": "unique constant polynomial"
+        },
+        {
+          "nodes": [
+            [
+              0,
+              5
+            ],
+            [
+              1,
+              5
+            ],
+            [
+              2,
+              5
+            ]
+          ],
+          "query": "3/2",
+          "expected": "5",
+          "why": "constant samples stay constant"
+        }
+      ],
+      "falsifiers": [
+        "Return a rounded float 0.25 rather than exact rational 1/4 on exact nodes/query.",
+        "Silently accept repeated x_i with inconsistent y_i, giving division by zero or arbitrary output.",
+        "Return interpolated coefficients rather than evaluated exact p(x), violating the declared result type.",
+        "Change result when reversing the node list, or produce a value other than y_i at an interpolation node.",
+        "Conflate polynomial interpolation with band-limited SDR reconstruction, sensor uncertainty propagation, hardware timing, or physical ephemeris accuracy."
+      ],
+      "independent_checks": [
+        "tests/test_d10_exact_barycentric_interpolation.py",
+        "tests/oracles/d10_exact_barycentric_chez.ss"
+      ],
+      "behavioral_dedup": "PENDING-REVIEW; exact English name absent in 647 selected; check full D1-D9 and D10 semantic-equivalence before ratification",
+      "ownership_review": "CORE-VS-DERIVED-LIBRARY-PENDING; selection of research candidate only, no primitive promise",
+      "proposal_id": "D10P-6104",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "donor_coordinate_authority": "NONE",
+      "ratified_resident": false,
+      "physical_t5_authorized": false
+    },
+    {
+      "stable_id": "d10.evidence.admission.de-bruijn-binary-cycle-.20261011",
+      "semantic_name": "DE-BRUIJN-BINARY-CYCLE?",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "proposal_status": "pending-owner-review",
+      "decision": "SELECT-D10-CANDIDATE",
+      "surface_uk": "повний-двійковий-цикл?",
+      "surface_ukr": "чи-усі-н-бітові-вікна-рівно-раз?",
+      "source_class": "EXISTING-D10-SOURCE-ADMISSION-20261011",
+      "relation_class": "FINITE-BINARY-CYCLIC-WINDOW-BIJECTION",
+      "behavior": "For n>=1, return D1 TRUE=1 iff length(word)=2^n AND the cyclic windows word[i],...,word[(i+n-1) mod 2^n] over all starts i∈[0,2^n) are pairwise distinct (equivalently cover all 2^n possible n-bit strings exactly once). Return D1 FALSE=0 for any well-typed word failing length or uniqueness. Invalid non-D1 data or n<=0 is a domain error, never a sneaky TRUE.",
+      "source_path": "knowledge/d10-debruijn-binary-cycle-research-v1.json",
+      "provenance": [
+        "knowledge/d10-debruijn-binary-cycle-research-v1.json",
+        "#4013",
+        "#4463",
+        "#5304"
+      ],
+      "positive_witnesses": [
+        {
+          "word": "01",
+          "n": 1,
+          "value": 1,
+          "why": "both 1-bit patterns exactly once"
+        },
+        {
+          "word": "10",
+          "n": 1,
+          "value": 1,
+          "why": "cyclic rotation preserves coverage"
+        },
+        {
+          "word": "0011",
+          "n": 2,
+          "value": 1,
+          "why": "00, 01, 11, 10 each once"
+        },
+        {
+          "word": "00010111",
+          "n": 3,
+          "value": 1,
+          "why": "SageMath example order three"
+        },
+        {
+          "word": "00101110",
+          "n": 3,
+          "value": 1,
+          "why": "rotation of valid SageMath cycle"
+        },
+        {
+          "word": "00010110",
+          "n": 3,
+          "value": 0,
+          "why": "changed bit creates duplicate cyclic n-window"
+        },
+        {
+          "word": "00000000",
+          "n": 3,
+          "value": 0,
+          "why": "repeated zero windows"
+        },
+        {
+          "word": "000101110",
+          "n": 3,
+          "value": 0,
+          "why": "extra delimiter/bit changes required exact length"
+        },
+        {
+          "word": "",
+          "n": 1,
+          "value": 0,
+          "why": "empty word never has required length"
+        },
+        {
+          "word": "0101",
+          "n": 2,
+          "value": 0,
+          "why": "primitive 01 repetition does not cover all 2-bit patterns"
+        }
+      ],
+      "falsifiers": [
+        "Counting only linear substrings without wrap-around rejects valid 0011 at n=2",
+        "Accepting length 2^n with duplicate n-bit windows mistakes length for universal coverage",
+        "Treating a repeated primitive block as sufficient wrongly accepts 0101 at n=2",
+        "Treating word rotations as semantically different wrongly rejects 10001011 at n=3",
+        "Using an LFSR period alone without the all-zero state can miss one n-bit window"
+      ],
+      "independent_checks": [
+        "scripts/check_d10_debruijn_binary_cycle.py"
+      ],
+      "behavioral_dedup": "PENDING-REVIEW; exact English name absent in 647 selected; check full D1-D9 and D10 semantic-equivalence before ratification",
+      "ownership_review": "CORE-VS-DERIVED-LIBRARY-PENDING; selection of research candidate only, no primitive promise",
+      "proposal_id": "D10P-6105",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "donor_coordinate_authority": "NONE",
+      "ratified_resident": false,
+      "physical_t5_authorized": false
+    },
+    {
+      "stable_id": "d10.evidence.admission.unique-bounded-modular-lift.20261011",
+      "semantic_name": "UNIQUE-BOUNDED-MODULAR-LIFT",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "proposal_status": "pending-owner-review",
+      "decision": "SELECT-D10-CANDIDATE",
+      "surface_uk": "єдине-підняття-остачі",
+      "surface_ukr": "відновити-єдине-ціле-за-циклічним-відліком",
+      "source_class": "EXISTING-D10-SOURCE-ADMISSION-20261011",
+      "relation_class": "EXACT-BOUNDED-INTEGER-CONGRUENCE-LIFT",
+      "behavior": "Find all integers z with lo<=z<=hi and z mod M=r. Return NONE with count 0 if there are none; return UNIQUE with the exact only z if count 1; return AMBIGUOUS with exact count>=2 and first two solutions in increasing order if there are at least two. All integer arithmetic; invalid domains are reported as ERROR, never guessed or clamped.",
+      "source_path": "knowledge/d10-unique-bounded-modular-lift-20261009.json",
+      "provenance": [
+        "knowledge/d10-unique-bounded-modular-lift-20261009.json",
+        "#4013",
+        "#4463",
+        "#5304"
+      ],
+      "positive_witnesses": [
+        {
+          "M": 4096,
+          "r": 2,
+          "lo": 4090,
+          "hi": 4100,
+          "result": "UNIQUE 4098"
+        },
+        {
+          "M": 4096,
+          "r": 2,
+          "lo": 3,
+          "hi": 4097,
+          "result": "NONE count=0"
+        },
+        {
+          "M": 4096,
+          "r": 2,
+          "lo": 0,
+          "hi": 8194,
+          "result": "AMBIGUOUS count=3 first=2 second=4098"
+        },
+        {
+          "M": 7,
+          "r": 6,
+          "lo": -10,
+          "hi": -1,
+          "result": "AMBIGUOUS count=2 first=-8 second=-1"
+        },
+        {
+          "M": 5,
+          "r": 2,
+          "lo": -3,
+          "hi": -3,
+          "result": "UNIQUE -3"
+        },
+        {
+          "M": 7,
+          "r": 0,
+          "lo": 1,
+          "hi": 6,
+          "result": "NONE count=0"
+        },
+        {
+          "M": 7,
+          "r": 0,
+          "lo": 0,
+          "hi": 7,
+          "result": "AMBIGUOUS count=2 first=0 second=7"
+        }
+      ],
+      "falsifiers": [
+        "Return nearest unwrapped branch even when both 2 and 4098 are inside allowed interval [0,8194]: an explicit ambiguous result is required.",
+        "Treat residues from a circular sector CONTAINS predicate as unique absolute position; membership alone does not specify turn count.",
+        "Return 0 where lo=1,hi=6,M=7,r=0, or omit negative lifts, or exclude a matching inclusive endpoint.",
+        "Claim a fixed 4096 period for all counters: the modulus is a caller-supplied integer and generic law is exact.",
+        "Claim data from a wrapped register alone reveals number of full turns, velocity, direction or phase under aliasing: without admissible interval no such information is justified."
+      ],
+      "independent_checks": [
+        "scripts/check_d10_unique_bounded_modular_lift.py",
+        "tests/oracles/d10_unique_bounded_modular_lift_chez.ss"
+      ],
+      "behavioral_dedup": "PENDING-REVIEW; exact English name absent in 647 selected; check full D1-D9 and D10 semantic-equivalence before ratification",
+      "ownership_review": "CORE-VS-DERIVED-LIBRARY-PENDING; selection of research candidate only, no primitive promise",
+      "proposal_id": "D10P-6106",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "donor_coordinate_authority": "NONE",
+      "ratified_resident": false,
+      "physical_t5_authorized": false
     }
   ],
   "parent_domain": {
@@ -14462,6 +15924,16 @@
     "knowledge/d10-interdisciplinary-science-proposals-20261009.json",
     "knowledge/d10-clock-radio-math-selection-20261009.json",
     "knowledge/d10-babbage-reiter-hobby-selected-20261009.json",
-    "knowledge/d10-hysteretic-boolean-source-law-20261009.json"
+    "knowledge/d10-hysteretic-boolean-source-law-20261009.json",
+    "knowledge/d10-hadamard-variance-proposal-20261009.json",
+    "knowledge/d10-maling-symbolic-differentiation-1959-v1.json",
+    "knowledge/d10-dung-grounded-argumentation-20261009.json",
+    "knowledge/d10-reiter-minimal-diagnoses-20261009.json",
+    "knowledge/d10-symbolic-ai-arc-support-20261009.json",
+    "scripts/research_d10_finite_arc_consistency.py",
+    "knowledge/d10-ground-congruence-closure-research-20261009.json",
+    "knowledge/d10-exact-barycentric-interpolation-research-v1.json",
+    "knowledge/d10-debruijn-binary-cycle-research-v1.json",
+    "knowledge/d10-unique-bounded-modular-lift-20261009.json"
   ]
 }

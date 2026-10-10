@@ -351,6 +351,59 @@
         "scripts/check-d10-proposal-ledger.py",
         "tests/test_d10_proposal_ledger_growth.py"
       ]
+    },
+    {
+      "id": "d10.preexisting-evidence.batch.20261011",
+      "authority": "#4013 #4463 #5304 user-directed fill from existing research; single-writer #5041",
+      "evidence": [
+        "juv4uk/sens@c67db6cdd820dea8d3a110caed359507c0a2d7a4:knowledge/d10-hadamard-variance-proposal-20261009.json:1",
+        "juv4uk/sens@c67db6cdd820dea8d3a110caed359507c0a2d7a4:knowledge/d10-maling-symbolic-differentiation-1959-v1.json:1",
+        "juv4uk/sens@c67db6cdd820dea8d3a110caed359507c0a2d7a4:knowledge/d10-dung-grounded-argumentation-20261009.json:1",
+        "juv4uk/sens@c67db6cdd820dea8d3a110caed359507c0a2d7a4:knowledge/d10-reiter-minimal-diagnoses-20261009.json:1",
+        "juv4uk/sens@c67db6cdd820dea8d3a110caed359507c0a2d7a4:knowledge/d10-symbolic-ai-arc-support-20261009.json:1",
+        "juv4uk/sens@c67db6cdd820dea8d3a110caed359507c0a2d7a4:scripts/research_d10_finite_arc_consistency.py:1",
+        "juv4uk/sens@c67db6cdd820dea8d3a110caed359507c0a2d7a4:knowledge/d10-ground-congruence-closure-research-20261009.json:1",
+        "juv4uk/sens@c67db6cdd820dea8d3a110caed359507c0a2d7a4:knowledge/d10-exact-barycentric-interpolation-research-v1.json:1",
+        "juv4uk/sens@c67db6cdd820dea8d3a110caed359507c0a2d7a4:knowledge/d10-debruijn-binary-cycle-research-v1.json:1",
+        "juv4uk/sens@c67db6cdd820dea8d3a110caed359507c0a2d7a4:knowledge/d10-unique-bounded-modular-lift-20261009.json:1"
+      ],
+      "previous_inventory_blob_sha": "7e13e929338baeef9b16c2139d24b78e23ea1e03",
+      "resulting_inventory_blob_sha": "4a3924200608117fc79129792d3ee65a0f48a711",
+      "added_stable_ids": [
+        "d10.evidence.admission.hadamard-variance.20261011",
+        "d10.evidence.admission.finite-symbolic-differentiation.20261011",
+        "d10.evidence.admission.grounded-argument-labeling.20261011",
+        "d10.evidence.admission.finite-minimal-diagnoses.20261011",
+        "d10.evidence.admission.binary-constraint-support-projection.20261011",
+        "d10.evidence.admission.finite-binary-arc-consistency-fixpoint.20261011",
+        "d10.evidence.admission.ground-congruence-closure-partition.20261011",
+        "d10.evidence.admission.exact-barycentric-interpolate.20261011",
+        "d10.evidence.admission.de-bruijn-binary-cycle-.20261011",
+        "d10.evidence.admission.unique-bounded-modular-lift.20261011"
+      ],
+      "appended_sources": [
+        "knowledge/d10-hadamard-variance-proposal-20261009.json",
+        "knowledge/d10-maling-symbolic-differentiation-1959-v1.json",
+        "knowledge/d10-dung-grounded-argumentation-20261009.json",
+        "knowledge/d10-reiter-minimal-diagnoses-20261009.json",
+        "knowledge/d10-symbolic-ai-arc-support-20261009.json",
+        "scripts/research_d10_finite_arc_consistency.py",
+        "knowledge/d10-ground-congruence-closure-research-20261009.json",
+        "knowledge/d10-exact-barycentric-interpolation-research-v1.json",
+        "knowledge/d10-debruijn-binary-cycle-research-v1.json",
+        "knowledge/d10-unique-bounded-modular-lift-20261009.json"
+      ],
+      "coordinates_added": 0,
+      "ratified_added": 0,
+      "delta_selected": 10,
+      "previous_selected": 647,
+      "resulting_selected": 657,
+      "decision": "10 EXISTING researched laws SELECTED-RESEARCH only; behavior, Core-vs-library and owner review pending; no executable bit admission",
+      "tests": [
+        "scripts/check_d10_selection_transition_history.py",
+        "scripts/check-d10-proposal-ledger.py",
+        "tests/test_d10_proposal_ledger_growth.py"
+      ]
     }
   ]
 }
