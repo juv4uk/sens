@@ -24,13 +24,12 @@
 (00001001 science-proper-list?
   (00001000 (x)
     (00000111
-      ; Pair cells recurse through CDR; never pass a compound value to EQ.
-      ((тотожне? (00000010 x) ні)
-       (science-proper-list? (00000110 x)))
-      ; EQ is atom-only. This branch runs only when X itself is an atom.
-      ((00000010 x) 
-       (00000011 x (00000001 ())))
-      )))
+      ; A pair is a proper prefix iff its CDR is proper; exact D1 controls only.
+      ((тотожне? (атом? x) (тотожне? 1 0))
+       (science-proper-list? (решта x)))
+      ; An atom terminates a proper list only when it is the empty list.
+      ((атом? x)
+       (тотожне? x (00000001 ()))))))
 
 (00001001 science-sixth
   (00001000 (values)
@@ -55,7 +54,7 @@
        (00000111
          ((00000011 (00100011 (00101111 x)) (00000001 ())) (00000001 ()))
          
-         ((00000010 (00110000 x))  t)
+         ((00000010 (00110000 x))  (тотожне? 1 1))
          ))
       )))
 
@@ -70,7 +69,7 @@
     (00000111
       
       ((00000010 dimensions)  (00000111
-         ((00000011 dimensions (00000001 ())) t)
+         ((00000011 dimensions (00000001 ())) (тотожне? 1 1))
          ))
       ((dimension? (00000101 dimensions))
        (science-dimensions-valid? (00000110 dimensions)))
@@ -203,25 +202,25 @@
        (00000111
          ((00000011 (00100011 (00101111 x)) (00000001 ())) (00000001 ()))
          
-         ((00000010 (00110000 x))  t)
+         ((00000010 (00110000 x))  (тотожне? 1 1))
          ))
       )))
 
 (00001001 scientific-constant-status-valid?
   (00001000 (status)
     (00000111
-      ((00000011 status (00000001 exact-by-definition)) t)
-      ((00000011 status (00000001 exact-derived)) t)
-      ((00000011 status (00000001 measured)) t)
+      ((00000011 status (00000001 exact-by-definition)) (тотожне? 1 1))
+      ((00000011 status (00000001 exact-derived)) (тотожне? 1 1))
+      ((00000011 status (00000001 measured)) (тотожне? 1 1))
       )))
 
 (00001001 scientific-constant-kind-valid?
   (00001000 (kind)
     (00000111
-      ((00000011 kind (00000001 physical-defining)) t)
-      ((00000011 kind (00000001 physical-derived)) t)
-      ((00000011 kind (00000001 physical-measured)) t)
-      ((00000011 kind (00000001 mathematical)) t)
+      ((00000011 kind (00000001 physical-defining)) (тотожне? 1 1))
+      ((00000011 kind (00000001 physical-derived)) (тотожне? 1 1))
+      ((00000011 kind (00000001 physical-measured)) (тотожне? 1 1))
+      ((00000011 kind (00000001 mathematical)) (тотожне? 1 1))
       )))
 
 (00001001 make-scientific-constant
@@ -238,11 +237,9 @@
 (00001001 scientific-constant?
   (00001000 (x)
     (00000111
-      
-      ((00000010 ()) (00000001 ()))
-      ((00000011 (science-proper-list? x) (00000001 ())) (00000001 ()))
-      
-      ((00000011 (00000101 x) *scientific-constant-schema*)
+      ((атом? x) (00000001 ()))
+      ((тотожне? (science-proper-list? x) (тотожне? 1 0)) (00000001 ()))
+      ((тотожне? (перше x) *scientific-constant-schema*)
        (00000111
          ((00000011 (00100011 (00101111 x)) (00000001 ())) (00000001 ()))
          ((00000011 (quantity? (00110000 x)) (00000001 ())) (00000001 ()))
@@ -250,7 +247,7 @@
          ((00000011 (scientific-constant-kind-valid? (00110010 x)) (00000001 ())) (00000001 ()))
          ((00000011 (00100011 (science-sixth x)) (00000001 ())) (00000001 ()))
          ((00000011 (science-source? (science-seventh x)) (00000001 ())) (00000001 ()))
-         ((00000010 ()) t)))
+         ((00000010 ()) (тотожне? 1 1))))
       )))
 
 (00001001 scientific-constant-name
