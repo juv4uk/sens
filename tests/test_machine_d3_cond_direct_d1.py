@@ -81,6 +81,18 @@ class ExactD1MachineDifferenceGuard(unittest.TestCase):
             and len(root.children) > 1 and root.children[1].atom in names
         ]
         self.assertEqual(len(definitions), 4)
+        # Width, bit payload and symbolic target keys are atom-only D3 EQ.
+        # Deep EQUAL is not an admitted comparison authority here.
+        eq_heads = [
+            form for definition in definitions for form in descend(definition)
+            if mod.head(form) == "00000011"
+        ]
+        old_equal = [
+            form for definition in definitions for form in descend(definition)
+            if mod.head(form) == "00100010"
+        ]
+        self.assertEqual(len(eq_heads), 3)
+        self.assertEqual(old_equal, [])
         number_of_clauses = 0
         for definition in definitions:
             for form in descend(definition):
