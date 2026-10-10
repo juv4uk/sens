@@ -88,13 +88,12 @@
   (00001000 (words)
     (00000111
       ((00000011 (00000101 words) (00000001 a))
-       (1)
+       
        (00000110 words))
       ((00000011 (00000101 words) (00000001 an))
-       (1)
+       
        (00000110 words))
-      ((00000011 (00000101 words) (00000001 an))
-       (0)
+      ((0100 (00000011 (00000101 words) (00000001 an)))
        words))))
 
 (00001001 understand-is
@@ -118,13 +117,12 @@
   (00001000 (words)
     (00000111
       ((00000011 (00000101 words) (00000001 all))
-       (1)
+       
        (understand-universal words))
       ((00000011 (00101111 words) (00000001 is))
-       (1)
+       
        (understand-is words))
-      ((00000011 (00101111 words) (00000001 is))
-       (0)
+      ((0100 (00000011 (00101111 words) (00000001 is)))
        (understand-relation words)))))
 
 ; `understand-query` is the goal-shaped complement of `understand`: it turns
@@ -163,11 +161,9 @@
   (00001000 (words)
     (00000111
       ((00000011 (00000101 words) (00000001 is))
-       (1)
+       
        (understand-query-is words))
       ((00000011 (00000101 words) (00000001 does))
-       (1)
+       
        (understand-query-relation words))
-      ((00000011 (00000101 words) (00000001 does))
-       (0)
-       (00000001 ())))))
+      (t (00000001 ())))))
