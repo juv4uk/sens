@@ -193,8 +193,8 @@
 (00001001 зворот-до
   (00001000 (values acc)
     (00000111
-      ((0100 (00000010 values)) acc)
-      ((00100010 (00000010 values) (00000001 (0)))
+      ((00000010 values) acc)
+      ((00000010 (00000001 ()))
        (зворот-до (00000110 values) (00000100 (00000101 values) acc))))))
 
 (00001001 reverse-onto зворот-до)
@@ -221,12 +221,13 @@
   (00001000 (left right)
     (зворот-до (00101010 left) right)))
 
+; D1 control belongs to D3: ATOM(()) selects the empty-list case.
+; Never compare PredicateBit to quoted numeric (0) or revive 3-part COND.
 (00001001 map-onto
   (00001000 (f values acc)
     (00000111
-      ((0100 (00000010 values)) (00101010 acc))
-      ((00000010 values)  (00000001 ()))
-      ((00100010 (00000010 values) (00000001 (0)))
+      ((00000010 values) (00101010 acc))
+      ((00000010 (00000001 ()))
        (map-onto f (00000110 values) (00000100 (f (00000101 values)) acc))))))
 
 (00001001 map
