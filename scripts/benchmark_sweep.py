@@ -77,8 +77,8 @@ def host() -> dict:
 def classify_status(returncode: int, output: str) -> str:
     """Preserve explicit benchmark BLOCKED outcomes instead of calling them FAIL."""
     markers = (
-        r"(?im)^(?:ERROR:\\s*)?[A-Z0-9][A-Z0-9_.:/-]*:\\s*BLOCKED\\b",
-        r"(?im)^SENS_BENCHMARK_STATUS=BLOCKED\\s*$",
+        r"(?im)^(?:ERROR:\s*)?[A-Z0-9][A-Z0-9_.:/-]*:\s*BLOCKED\\b",
+        r"(?im)^SENS_BENCHMARK_STATUS=BLOCKED\s*$",
     )
     if any(re.search(marker, output) for marker in markers):
         return "BLOCKED"
@@ -106,7 +106,7 @@ def run_one(m: dict, *, timeout: int, out: Path, head: str, system: dict) -> dic
             encoding="utf-8",
         )
         record["status"] = classify_status(
-            result.returncode, result.stdout + "\\n" + result.stderr
+            result.returncode, result.stdout + "\n" + result.stderr
         )
         marker_note = "explicit BLOCKED marker; " if record["status"] == "BLOCKED" else ""
         record["reason"] = f"{marker_note}process exit={result.returncode}"
