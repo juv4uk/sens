@@ -381,7 +381,7 @@
          ((00100010 value (00000001 (0)))  (00000001 ()))
          ((00100010 value (00000001 (0)))  (00000001 ()))
          ((00100010 value (00000001 (0)))  (00000001 ()))
-         (1  t))))))
+         ((00000010 ())  t))))))
 
 (00001001 not?
   (00001000 (value)
@@ -850,8 +850,8 @@
        (let ((r (00010110 x)))
          (00000111
            ((00011100 (00001110 r r) x)  r)
-           (1  (sqrt-iter (00001111 x 2) x 8)))))
-      (1  (sqrt-iter (00001111 x 2.0) x 5)))))
+           ((00000010 ())  (sqrt-iter (00001111 x 2) x 8)))))
+      ((00000010 ())  (sqrt-iter (00001111 x 2.0) x 5)))))
 
 ; abs/min/max/min-list/max-list — migrated from Rust builtins.rs to
 ; lib/core.lisp (owner directive 2026-09-11: "Lisp owns meaning, Rust owns

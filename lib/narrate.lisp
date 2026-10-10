@@ -62,7 +62,7 @@
     (00000111
       ((00011100 (00101000 fact) 2)  (00100111 (00101111 fact) (00000001 is) (00000001 a) (00000101 fact)))
       ((00011100 (00101000 fact) 3)  (00100111 (00101111 fact) (00000101 fact) (00110000 fact)))
-      (1 fact))))
+      ((00000010 ()) fact))))
 
 
 (00001001 provenance-goal (00001000 (prov) (00101111 prov)))
@@ -77,14 +77,14 @@
       ((00000010 derivations)  (00000001 ()))
       
       ((00000010 (00000110 derivations))  (narrate-provenance (00000101 derivations)))
-      (1 (00101001 (narrate-provenance (00000101 derivations))
+      ((00000010 ()) (00101001 (narrate-provenance (00000101 derivations))
                   (00000100 (00000001 and) (narrate-derivation (00000110 derivations))))))))
 
 (00001001 narrate-provenance
   (00001000 (prov)
     (00000111
       ((00000011 (provenance-source prov) (00000001 fact)) (narrate-fact (provenance-rule prov)))
-      (1 (00101001 (narrate-fact (provenance-rule prov))
+      ((00000010 ()) (00101001 (narrate-fact (provenance-rule prov))
                   (00000100 (00000001 because) (narrate-derivation (provenance-derived-from prov))))))))
 
 ; `narrate-answer` grounds the conclusion with the caller's actual query while
@@ -110,7 +110,7 @@
       (00000111
         
         ((00000010 derivations)  (narrate-fact goal))
-        (1 (00101001 (narrate-fact goal)
+        ((00000010 ()) (00101001 (narrate-fact goal)
                    (00000100 (00000001 because) (narrate-derivation derivations))))))))
 
 ; ----------------------------------------------------------------------
@@ -129,7 +129,7 @@
       (00000111
         
         ((00000010 results)  (00100111 (00000001 proved) statement (00000001 without-proof-result)))
-        (1
+        ((00000010 ())
          (00101001
            (00100111 (00000001 proved))
            (narrate-answer statement (00101111 (00000101 results)))))))))
@@ -162,7 +162,7 @@
       ((00000011 (00000101 outcome) (00000001 proved))
        (00000111
          ((narrate-outcome-arity? outcome 3) (narrate-proved-outcome outcome))
-         (1 (narrate-invalid-outcome-shape outcome))))
+         ((00000010 ()) (narrate-invalid-outcome-shape outcome))))
       ((00000011 (00000101 outcome) (00000001 unknown))
        (00000111
          ((narrate-outcome-arity? outcome 2)
@@ -171,7 +171,7 @@
             (00000001 because)
             (00000001 no-proof-found-for)
             (00101111 outcome)))
-         (1 (narrate-invalid-outcome-shape outcome))))
+         ((00000010 ()) (narrate-invalid-outcome-shape outcome))))
       ((00000011 (00000101 outcome) (00000001 partial))
        (00000111
          ((narrate-outcome-arity? outcome 3)
@@ -181,7 +181,7 @@
             (00101111 outcome)
             (00000001 bound)
             (00110000 outcome)))
-         (1 (narrate-invalid-outcome-shape outcome))))
+         ((00000010 ()) (narrate-invalid-outcome-shape outcome))))
       ((00000011 (00000101 outcome) (00000001 blocked))
        (00000111
          ((narrate-outcome-arity? outcome 2)
@@ -189,7 +189,7 @@
             (00000001 blocked)
             (00000001 because)
             (00101111 outcome)))
-         (1 (narrate-invalid-outcome-shape outcome))))
+         ((00000010 ()) (narrate-invalid-outcome-shape outcome))))
       ((00000011 (00000101 outcome) (00000001 disputed))
        (00000111
          ((narrate-outcome-arity? outcome 2)
@@ -198,7 +198,7 @@
             (00000001 because)
             (00000001 both-sides-have-evidence)
             (00101111 outcome)))
-         (1 (narrate-invalid-outcome-shape outcome))))
+         ((00000010 ()) (narrate-invalid-outcome-shape outcome))))
       ((00000011 (00000101 outcome) (00000001 invalid))
        (00000111
          ((narrate-outcome-arity? outcome 3)
@@ -208,6 +208,6 @@
             (00101111 outcome)
             (00000001 payload)
             (00110000 outcome)))
-         (1 (narrate-invalid-outcome-shape outcome))))
-      (1
+         ((00000010 ()) (narrate-invalid-outcome-shape outcome))))
+      ((00000010 ())
        (00100111 (00000001 invalid) (00000001 outcome-tag) (00000101 outcome))))))

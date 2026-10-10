@@ -52,7 +52,7 @@
        (00100111 (00000001 invalid-guard-decision) decision))
       ((00100001 (guard-evidence-status? evidence-status))
        (00100111 (00000001 invalid-evidence-status) evidence-status))
-      (1
+      ((00000010 ())
        (00100111
          (00000001 guard-finding)
          (00100111 (00000001 schema) (00000001 guard/1))
@@ -97,7 +97,7 @@
        (make-guard-finding
          (00000001 allow) (00000001 confirmed) subject observed expected
          (00000001 ()) (00000001 invariant-preserved) (00000001 no-action) evidence))
-      (1
+      ((00000010 ())
        (make-guard-finding
          (00000001 warn) (00000001 confirmed) subject observed expected
          (00100111 (00000001 expected) expected (00000001 observed) observed)
@@ -138,7 +138,7 @@
          (00000001 synchronization-result-has-no-drift-record)
          (00000001 record-drift-before-unfreezing-commits)
          evidence))
-      (1
+      ((00000010 ())
        (make-guard-finding
          (00000001 allow) (00000001 confirmed) (00000001 ecosystem-sync)
          (00100111 commit-state sync-state drift-state)
@@ -158,4 +158,4 @@
       (00000111
         
         ((00000010 entry)  (00000001 ()))
-        (1 (00101111 entry))))))
+        ((00000010 ()) (00101111 entry))))))

@@ -10,15 +10,15 @@
       ((00000010 (00000110 ast)) 
        (00000111
          ((00000010 (00000110 (00000110 ast)))  (lint-head (00000101 ast)))
-         (1  (lint-short-head (00000101 ast)))))
-      (1  (00000101 ast)))))
+         ((00000010 ())  (lint-short-head (00000101 ast)))))
+      ((00000010 ())  (00000101 ast)))))
 
 (00001001 lint-short-head
   (00001000 (head)
     (00000111
       ((00100010 head 00000001)  (00000001 quote))
       ((00100010 head 00000111)  (00000001 cond))
-      (1  head))))
+      ((00000010 ())  head))))
 
 ;; Голова форми: код СЕНС -> та сама форма, що й за назвою. Лінтер
 ;; розпізнає def/lambda/cond/... і тоді, коли код записано кодами СЕНС.
@@ -33,13 +33,13 @@
       ((00100010 head 00001010)  (00000001 defmacro))
       ((00100010 head 10011100)  (00000001 let))
       ((00100010 head 10011101)  (00000001 let*))
-      (1  head))))
+      ((00000010 ())  head))))
 
 (00001001 lint-max2
   (00001000 (a b)
     (00000111
       ((00011011 a b)  a)
-      (1 b))))
+      ((00000010 ()) b))))
 
 
 ; 1. Size: Total number of nodes (atoms + pairs)
@@ -48,7 +48,7 @@
     (00000111
       
       ((00000010 ast)  1)
-      (1 (00001100 1 (00001100 (lint-size (00000101 ast)) (lint-size (00000110 ast))))))))
+      ((00000010 ()) (00001100 1 (00001100 (lint-size (00000101 ast)) (lint-size (00000110 ast))))))))
 
 ; 2. Nesting: Maximum depth of pairs
 (00001001 lint-nesting
@@ -56,7 +56,7 @@
     (00000111
       
       ((00000010 ast)  0)
-      (1 (lint-max2 (00001100 1 (lint-nesting (00000101 ast)))
+      ((00000010 ()) (lint-max2 (00001100 1 (lint-nesting (00000101 ast)))
               (lint-nesting (00000110 ast)))))))
 
 ; 3. Complexity: Number of branching paths (cond clauses)
@@ -69,7 +69,7 @@
        (00111001 (00001000 (acc clause) (00001100 acc (lint-complexity clause)))
                (00101000 (00000110 ast))
                (00000110 ast)))
-      (1 (00001100 (lint-complexity (00000101 ast))
+      ((00000010 ()) (00001100 (lint-complexity (00000101 ast))
             (lint-complexity (00000110 ast)))))))
 
 ; 4. Effects: Detect calls to side-effecting functions
@@ -84,8 +84,8 @@
        (00000111
          ((00101100 (01000010 (00000101 ast)) effectful-primitives)
           (00000100 ast (lint-effects (00000110 ast))))
-         (1 (00101001 (lint-effects (00000101 ast)) (lint-effects (00000110 ast))))))
-      (1 (00101001 (lint-effects (00000101 ast)) (lint-effects (00000110 ast)))))))
+         ((00000010 ()) (00101001 (lint-effects (00000101 ast)) (lint-effects (00000110 ast))))))
+      ((00000010 ()) (00101001 (lint-effects (00000101 ast)) (lint-effects (00000110 ast)))))))
 
 ; 5. Hidden globals: Identify free variables that are not explicitly passed as arguments
 ; (simplified: just collect all symbols used as variables that aren't in standard core)
@@ -101,13 +101,13 @@
                (collect-free-vars (00000110 ast) bound-vars)))
       ((00000010 (00000110 (00000110 ast)))  (00101001 (collect-free-vars (00000101 ast) bound-vars)
                (collect-free-vars (00000110 ast) bound-vars)))
-      (1
+      ((00000010 ())
        (10011100 ((bindings (00000101 (00000110 ast)))
              (body (00000101 (00000110 (00000110 ast)))))
          (00000111
            ((00100010 bindings (00000001 ()))
             (collect-free-vars body bound-vars))
-           (1
+           ((00000010 ())
             (10011100 ((binding (00000101 bindings)))
               (00101001
                 (collect-free-vars (00101111 binding) bound-vars)
@@ -127,7 +127,7 @@
                (collect-free-vars (00000110 ast) bound-vars)))
       ((00000010 (00000110 (00000110 ast)))  (00101001 (collect-free-vars (00000101 ast) bound-vars)
                (collect-free-vars (00000110 ast) bound-vars)))
-      (1
+      ((00000010 ())
        (10011100 ((bindings (00000101 (00000110 ast)))
              (body (00000101 (00000110 (00000110 ast)))))
          (10011100 ((all-names
@@ -148,7 +148,7 @@
           (00000111
             ((00101100 (01000010 ast) bound-vars) (00000001 ()))
             ((00101100 (01000010 ast) (00000001 ("t" "def" "defmacro" "lambda" "let" "let*" "letrec" "cond" "quote" "list" "car" "cdr" "cons" "eq" "atom" "+" "-" "*" "/" "<" ">" "=" "<=" ">=" "print" "read" "eval"))) (00000001 ()))
-            (1 (00100111 ast))))
+            ((00000010 ()) (00100111 ast))))
          ))
       ((00100010 (lint-form-head ast) (00000001 quote)) (00000001 ()))
       ((00100010 (lint-form-head ast) (00000001 def))
@@ -157,13 +157,13 @@
        (10011100 ((params (00000101 (00000110 ast)))
              (body (00000101 (00000110 (00000110 ast)))))
          (10011100 ((param-names (00000111 ((00100011 params) (00100111 (01000010 params)))
-                                  (1 (00110111 (00001000 (p) (01000010 p)) params)))))
+                                  ((00000010 ()) (00110111 (00001000 (p) (01000010 p)) params)))))
            (collect-free-vars body (00101001 param-names bound-vars)))))
       ((00100010 (lint-form-head ast) (00000001 defmacro))
        (10011100 ((params (00000101 (00000110 (00000110 ast))))
              (body (00000101 (00000110 (00000110 (00000110 ast))))))
          (10011100 ((param-names (00000111 ((00100011 params) (00100111 (01000010 params)))
-                                  (1 (00110111 (00001000 (p) (01000010 p)) params)))))
+                                  ((00000010 ()) (00110111 (00001000 (p) (01000010 p)) params)))))
            (collect-free-vars body (00101001 param-names bound-vars)))))
       ((00100010 (lint-form-head ast) (00000001 let))
        (00000111
@@ -177,7 +177,7 @@
             (10011100 ((new-bound (00000100 name (00101001 (00110111 (00001000 (b) (01000010 (00000101 b))) bindings) bound-vars))))
               (00101001 (00111001 append (00000001 ()) (00110111 (00001000 (b) (collect-free-vars (00101111 b) bound-vars)) bindings))
                       (collect-free-vars body new-bound)))))
-         (1
+         ((00000010 ())
           ; Basic let
           (10011100 ((bindings (00000101 (00000110 ast)))
                 (body (00000101 (00000110 (00000110 ast)))))
@@ -188,7 +188,7 @@
        (collect-free-vars-let* ast bound-vars))
       ((00100010 (lint-form-head ast) (00000001 letrec))
        (collect-free-vars-letrec ast bound-vars))
-      (1 (00101001 (collect-free-vars (00000101 ast) bound-vars)
+      ((00000010 ()) (00101001 (collect-free-vars (00000101 ast) bound-vars)
                  (collect-free-vars (00000110 ast) bound-vars))))))
 
 (00001001 lint-globals
@@ -197,7 +197,7 @@
       (00001000 (unique item)
         (00000111
           ((00101100 item unique) unique)
-          (1 (00000100 item unique))))
+          ((00000010 ()) (00000100 item unique))))
       (00000001 ())
       (collect-free-vars ast (00000001 ())))))
 
@@ -214,7 +214,7 @@
     (00000111
       ((00100010 thresholds (00000001 ())) default)
       ((00100010 (00000101 (00000101 thresholds)) key) (00000110 (00000101 thresholds)))
-      (1 (get-threshold key (00000110 thresholds) default)))))
+      ((00000010 ()) (get-threshold key (00000110 thresholds) default)))))
 
 (00001001 lint-check
   (00001000 (ast thresholds)

@@ -60,7 +60,7 @@
 
 (00001001 vheight-of
   (00001000 (n) (00000111 
-                    ((00000010 n)  0) (1 (vnode-height n)))))
+                    ((00000010 n)  0) ((00000010 ()) (vnode-height n)))))
 
 (00001001 vmax2
   (00001000 (a b)
@@ -99,15 +99,15 @@
          ((00011010 (vbalance-factor (vnode-left n)) 0) 
           (vrotate-right (vmake-balanced-node (vnode-index n) (vnode-value n)
                            (vrotate-left (vnode-left n)) (vnode-right n))))
-         (1 (vrotate-right n))))
+         ((00000010 ()) (vrotate-right n))))
       ((00011010 (vbalance-factor n) -1) 
        (00000111
          ((00011011 (vbalance-factor (vnode-right n)) 0) 
           (vrotate-left (vmake-balanced-node (vnode-index n) (vnode-value n)
                           (vnode-left n) (vrotate-right (vnode-right n)))))
 
-         (1 (vrotate-left n))))
-      (1 n))))
+         ((00000010 ()) (vrotate-left n))))
+      ((00000010 ()) n))))
 
 ; Returns a new tree with `index`/`value` inserted (or `value` replacing
 ; an existing entry at `index`) -- the original tree is untouched.
@@ -122,7 +122,7 @@
        (vbalance (vmake-balanced-node (vnode-index tree) (vnode-value tree)
                    (vtree-insert index value (vnode-left tree))
                    (vnode-right tree))))
-      (1
+      ((00000010 ())
        (vbalance (vmake-balanced-node (vnode-index tree) (vnode-value tree)
                    (vnode-left tree)
                    (vtree-insert index value (vnode-right tree))))))))
@@ -136,7 +136,7 @@
       ((00000010 tree)  (00000001 ()))
       ((00000011 index (vnode-index tree)) (00100111 (vnode-value tree)))
       ((00011010 index (vnode-index tree))  (vtree-get index (vnode-left tree)))
-      (1 (vtree-get index (vnode-right tree))))))
+      ((00000010 ()) (vtree-get index (vnode-right tree))))))
 
 ; `vec-nth` returns the classic "maybe" shape ('() or (value)), the same
 ; idiom lib/persistent-map.lisp's map-get already uses -- deliberately NOT
@@ -165,7 +165,7 @@
     (00000111
       
       ((00000010 tree)  (00000001 ()))
-      (1 (00101001 (vtree->list (vnode-left tree))
+      ((00000010 ()) (00101001 (vtree->list (vnode-left tree))
                  (00000100 (vnode-value tree)
                        (vtree->list (vnode-right tree))))))))
 
@@ -185,7 +185,7 @@
     (00000111
       
       ((00000010 lst)  acc)
-      (1 (vec-from-list-onto (00000110 lst) (01110010 (00000101 lst) acc))))))
+      ((00000010 ()) (vec-from-list-onto (00000110 lst) (01110010 (00000101 lst) acc))))))
 
 (00001001 vec-from-list
   (00001000 (lst) (vec-from-list-onto lst vec-empty)))

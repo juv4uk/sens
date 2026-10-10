@@ -83,19 +83,19 @@
       
       ((00000010 families)  ())
       ((00000011 family (00000101 families)) t)
-      (1 (x86-minimal-family-member? family (00000110 families))))))
+      ((00000010 ()) (x86-minimal-family-member? family (00000110 families))))))
 
 (00001001 x86-minimal-unique-form-families
   (00001000 (forms seen)
     (00000111
       
       ((00000010 forms)  seen)
-      (1
+      ((00000010 ())
        (10011100 ((family (00000101 (00000101 forms))))
          (00000111
            ((x86-minimal-family-member? family seen)
             (x86-minimal-unique-form-families (00000110 forms) seen))
-           (1
+           ((00000010 ())
             (x86-minimal-unique-form-families
               (00000110 forms)
               (00101001 seen (00100111 family))))))))))
@@ -113,7 +113,7 @@
     (00000111
       
       ((00000010 rows)  (00000001 ()))
-      (1
+      ((00000010 ())
        (00000100
          (x86-minimal-row-second (00000101 rows))
          (x86-minimal-map-row-second (00000110 rows)))))))
@@ -123,7 +123,7 @@
     (00000111
       
       ((00000010 rows)  (00000001 ()))
-      (1
+      ((00000010 ())
        (00000100
          (x86-minimal-row-third (00000101 rows))
          (x86-minimal-map-row-third (00000110 rows)))))))

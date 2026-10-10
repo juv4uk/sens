@@ -71,7 +71,7 @@
       ((00000010 value)  (00000111
          ((00000011 value (00000001 ())) t)
          ))
-      (1 (result-proper-list? (00000110 value))))))
+      ((00000010 ()) (result-proper-list? (00000110 value))))))
 
 ; The reserved negation head: `not?` (predicate spelling since #1444) or the
 ; historical `not`.
@@ -98,7 +98,7 @@
        (00000111
          ((00011100 (00101000 goal) 2)  (result-goal? (00101111 goal)))
          ))
-      (1 t))))
+      ((00000010 ()) t))))
 
 ; `(not? goal)` is the explicit logical opposite used by the knowledge layer.
 ; A well-shaped top-level negative query asks about its positive counterpart;
@@ -114,7 +114,7 @@
   (00001000 (goal)
     (00000111
       ((result-negated-goal? goal) (00101111 goal))
-      (1 (00100111 (00000001 not?) goal)))))
+      ((00000010 ()) (00100111 (00000001 not?) goal)))))
 
 ; Observe one reasoning question without information collapse.
 ; - positive proof(s) => proved(goal, all-results)
@@ -134,7 +134,7 @@
     (00000111
       ((00100001 (result-goal? goal))
        (make-invalid (00000001 invalid-goal) goal))
-      (1
+      ((00000010 ())
        (10011101 ((opposite (result-opposite-goal goal))
               (index (reason-ensure-index rules-or-index))
               (positive-results
@@ -178,6 +178,6 @@
        (make-invalid (00000001 invalid-goal) goal))
       ((01111110 module-name)
        (reason-observe goal (01111111 module-name)))
-      (1
+      ((00000010 ())
        (make-blocked
          (00100111 (00000001 module-not-found) module-name))))))

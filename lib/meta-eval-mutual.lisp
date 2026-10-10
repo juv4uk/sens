@@ -20,7 +20,7 @@
     (00000111
       
       ((00000010 value)  (00000001 ()))
-      (1 (00000011 (00000101 value) (00000001 recursive-group-closure))))))
+      ((00000010 ()) (00000011 (00000101 value) (00000001 recursive-group-closure))))))
 
 (00001001 my-sixth
   (00001000 (values)
@@ -52,7 +52,7 @@
       ((00000010 forms)  (00000001 ()))
       ((my-lambda-def-form? (00000101 forms))
        (my-drop-lambda-def-group (00000110 forms)))
-      (1 forms))))
+      ((00000010 ()) forms))))
 
 (00001001 my-group-closure-from-def
   (00001000 (form group captured-env)
@@ -71,7 +71,7 @@
     (00000111
       
       ((00000010 forms)  out)
-      (1
+      ((00000010 ())
        (10011100 ((form (00000101 forms)))
          (my-build-group-env-onto
            (00000110 forms)
@@ -103,7 +103,7 @@
   (00001000 (fn args)
     (00000111
       ((my-group-closure? fn) (my-apply-group-closure fn args))
-      (1 (my-apply fn args)))))
+      ((00000010 ()) (my-apply fn args)))))
 
 ; Evaluator wrapper mirrors my-eval, changing only the apply hook so nested
 ; calls between members of a recursive group can invoke group closures.
@@ -112,7 +112,7 @@
     (00000111
       
       ((00000010 exprs)  (00000001 ()))
-      (1 (00000100 (my-group-eval (00000101 exprs) env)
+      ((00000010 ()) (00000100 (my-group-eval (00000101 exprs) env)
                (my-group-eval-list (00000110 exprs) env))))))
 
 (00001001 my-group-eval-body
@@ -120,7 +120,7 @@
     (00000111
       
       ((00000010 (00000110 body))  (my-group-eval (00000101 body) env))
-      (1 ((00001000 ()
+      ((00000010 ()) ((00001000 ()
             (my-group-eval (00000101 body) env)
             (my-group-eval-body (00000110 body) env)))))))
 
@@ -131,7 +131,7 @@
       ((00000010 clauses)  (00000001 ()))
       ((my-group-eval (00000101 (00000101 clauses)) env)
        (my-group-eval (00101111 (00000101 clauses)) env))
-      (1 (my-group-eval-cond (00000110 clauses) env)))))
+      ((00000010 ()) (my-group-eval-cond (00000110 clauses) env)))))
 
 (00001001 my-group-apply-owned
   (00001000 (fn args)
@@ -142,7 +142,7 @@
          (my-group-eval-body
            (my-fourth fn)
            (bind-params (00110000 fn) args group-env))))
-      (1 (my-apply fn args)))))
+      ((00000010 ()) (my-apply fn args)))))
 
 (00001001 my-group-eval
   (00001000 (expr env)
@@ -156,16 +156,16 @@
           (my-group-eval-cond (00000110 expr) env))
          ((00000011 (00000101 expr) (00000001 lambda))
           (00100111 (00000001 closure) (00101111 expr) (00000110 (00000110 expr)) env))
-         (1
+         ((00000010 ())
           (10011100 ((fn (my-group-eval (00000101 expr) env)))
             (00000111
               ((my-macro? fn)
                (my-group-eval (my-apply fn (00000110 expr)) env))
-              (1
+              ((00000010 ())
                (my-group-apply-owned
                  fn
                  (my-group-eval-list (00000110 expr) env))))))))
-      (1
+      ((00000010 ())
        (my-group-apply-owned
          (my-group-eval (00000101 expr) env)
          (my-group-eval-list (00000110 expr) env))))))
@@ -180,7 +180,7 @@
          (00000100 (00000100 (00000100 (00101111 form) value) env) value)))
       ((00000011 (00000101 form) (00000001 defmacro))
        (my-eval-top-form form env))
-      (1 (00000100 env (my-group-eval form env))))))
+      ((00000010 ()) (00000100 env (my-group-eval form env))))))
 
 (00001001 my-eval-program-with-groups
   (00001000 (forms env)
@@ -192,12 +192,12 @@
              (00000111
                
                ((00000010 rest)  (00000100 group-env (00000110 (00000101 group-env))))
-               (1 (my-eval-program-with-groups rest group-env)))))))
-      (1
+               ((00000010 ()) (my-eval-program-with-groups rest group-env)))))))
+      ((00000010 ())
        (10011100 ((result (my-group-eval-top-form (00000101 forms) env)))
          (00000111
            
            ((00000010 (00000110 forms))  result)
-           (1 (my-eval-program-with-groups
+           ((00000010 ()) (my-eval-program-with-groups
                 (00000110 forms)
                 (00000101 result)))))))))

@@ -88,7 +88,7 @@
          ((string-membership-helper (translation-source proposal))
           
           (00000001 ()))
-         (1 t)))
+         ((00000010 ()) t)))
       )))
 
 (00001001 translation-batch-valid?
@@ -97,7 +97,7 @@
       
       ((00000010 payload)  (00000001 ()))
       ((00000011 (knowledge-proper-list? payload) (00000001 ())) (00000001 ()))
-      (1 (knowledge-clauses-valid? payload)))))
+      ((00000010 ()) (knowledge-clauses-valid? payload)))))
 
 (00001001 translation-candidate-payload-valid?
   (00001000 (kind payload)
@@ -116,7 +116,7 @@
        (00000111
          
          ((00000010 (00000110 alternatives))  t)
-         (1 (translation-alternatives-valid? kind (00000110 alternatives)))))
+         ((00000010 ()) (translation-alternatives-valid? kind (00000110 alternatives)))))
       )))
 
 ; Ambiguity is evidence only when the translator exposes at least two valid
@@ -125,11 +125,11 @@
   (00001000 (kind payload)
     (00000111
       
-      (1 (00000001 ()))
+      ((00000010 ()) (00000001 ()))
       ((00000011 (knowledge-proper-list? payload) (00000001 ())) (00000001 ()))
       
       ((00000010 (00000110 payload))  (00000001 ()))
-      (1 (translation-alternatives-valid? kind payload)))))
+      ((00000010 ()) (translation-alternatives-valid? kind payload)))))
 
 (00001001 make-translation-review
   (00001000 (status code proposal detail)
@@ -170,7 +170,7 @@
           (00000001 ()))
          ((00000011 (00100011 (translation-review-code review)) (00000001 ()))
           (00000001 ()))
-         (1 t)))
+         ((00000010 ()) t)))
       )))
 
 (00001001 translation-review-advice-decision
@@ -191,7 +191,7 @@
       ((00000011 (00000101 decision) (00000001 rejected))
        (make-translation-review
          (00000001 rejected) (00000001 knowledge-rejected) proposal decision))
-      (1
+      ((00000010 ())
        (make-translation-review
          (00000001 rejected) (00000001 malformed-advice-decision) proposal decision)))))
 
@@ -212,7 +212,7 @@
         ((00000011 kind (00000001 batch))
          (translation-review-advice-decision
            proposal (advice-all-decision module-name payload)))
-        (1
+        ((00000010 ())
          (make-translation-review
            (00000001 rejected) (00000001 invalid-kind) proposal kind))))))
 
@@ -237,7 +237,7 @@
           (make-translation-review
             (00000001 ambiguous) (00000001 translator-ambiguous)
             proposal (translation-payload proposal)))
-         (1
+         ((00000010 ())
           (make-translation-review
             (00000001 rejected) (00000001 invalid-ambiguity)
             proposal (translation-payload proposal)))))
@@ -247,11 +247,11 @@
           (make-translation-review
             (00000001 rejected) (00000001 translator-rejected)
             proposal (translation-payload proposal)))
-         (1
+         ((00000010 ())
           (make-translation-review
             (00000001 rejected) (00000001 invalid-rejection)
             proposal (translation-payload proposal)))))
-      (1
+      ((00000010 ())
        (make-translation-review
          (00000001 rejected) (00000001 invalid-translation) proposal proposal)))))
 
@@ -301,7 +301,7 @@
     (00000111
       ((translation-evidence-worthy? review)
        (00000100 (translation-evidence-entry review) journal))
-      (1 journal))))
+      ((00000010 ()) journal))))
 
 (00001001 translation-review-with-evidence
   (00001000 (module-name proposal journal)

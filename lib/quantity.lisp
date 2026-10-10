@@ -123,7 +123,7 @@
       
       ((00000010 dimensions)  (00000111
          ((00011100 (dimension-exponent dimension) 0)  (00000001 ()))
-         (1 (00100111 dimension))))
+         ((00000010 ()) (00100111 dimension))))
       ((00000011 (dimension-base dimension)
            (dimension-base (00000101 dimensions)))
        (10011100 ((sum
@@ -131,11 +131,11 @@
                   (dimension-exponent (00000101 dimensions)))))
          (00000111
            ((00011100 sum 0)  (00000110 dimensions))
-           (1
+           ((00000010 ())
             (00000100
               (make-dimension (dimension-base dimension) sum)
               (00000110 dimensions))))))
-      (1
+      ((00000010 ())
        (00000100
          (00000101 dimensions)
          (science-add-dimension dimension (00000110 dimensions)))))))
@@ -145,7 +145,7 @@
     (00000111
       
       ((00000010 from)  into)
-      (1
+      ((00000010 ())
        (science-merge-dimensions
          (00000110 from)
          (science-add-dimension (00000101 from) into))))))
@@ -155,7 +155,7 @@
     (00000111
       
       ((00000010 dimensions)  (00000001 ()))
-      (1
+      ((00000010 ())
        (00000100
          (make-dimension
            (dimension-base (00000101 dimensions))
@@ -239,7 +239,7 @@
   (00001000 (x)
     (00000111
       
-      (1 (00000001 ()))
+      ((00000010 ()) (00000001 ()))
       ((00000011 (science-proper-list? x) (00000001 ())) (00000001 ()))
       
       ((00000011 (00000101 x) *scientific-constant-schema*)
@@ -250,7 +250,7 @@
          ((00000011 (scientific-constant-kind-valid? (00110010 x)) (00000001 ())) (00000001 ()))
          ((00000011 (00100011 (science-sixth x)) (00000001 ())) (00000001 ()))
          ((00000011 (science-source? (science-seventh x)) (00000001 ())) (00000001 ()))
-         (1 t)))
+         ((00000010 ()) t)))
       )))
 
 (00001001 scientific-constant-name
@@ -286,7 +286,7 @@
   (00001000 (constant)
     (00000111
       ((00000011 (scientific-constant? constant) (00000001 ())) (00000001 ()))
-      (1
+      ((00000010 ())
        (10011100 ((name (scientific-constant-name constant)))
          (00100111
            (00100111 (00100111 (00000001 scientific-constant) name))
