@@ -29,12 +29,27 @@ done
 
 fail=0
 
+if [[ ! -f contracts/primitive-budget-audit-734.lisp ]]; then
+  printf 'ДВІЙКОВА ОХОРОНА: відсутній контракт для сканування\n' >&2
+  exit 1
+fi
+
 report_forbidden() {
   local description="$1"
   local pattern="$2"
   shift 2
   local output
-  output="$(grep -En "$pattern" "$@" || true)"
+  # grep=1 означає лише відсутність збігів; усі інші збої — FAIL.
+  if output="$(grep -En "$pattern" "$@")"; then
+    :
+  else
+    local код=$?
+    if (( код != 1 )); then
+      printf 'ДВІЙКОВА ОХОРОНА: grep завершився з помилкою %s (%s)\n' "$код" "$description" >&2
+      fail=1
+      return
+    fi
+  fi
   if [[ -n "$output" ]]; then
     printf 'SID-BINARY-IDENTITY violation: %s\n%s\n' "$description" "$output" >&2
     fail=1
@@ -56,8 +71,16 @@ report_forbidden \
   '(Value|ExprKind)::Sid\((0b[01_]+|[0-9]+|"[^"]*")\)' \
   "${files[@]}"
 
-direct_sid8="$(grep -REn '(Sid8|Sens8)\((0b[01_]+|[0-9]+|"[^"]*")\)' crates/sens/src \
-  --exclude=sid.rs --exclude=sens.rs || true)"
+if direct_sid8="$(grep -REn '(Sid8|Sens8)\((0b[01_]+|[0-9]+|"[^"]*")\)' crates/sens/src \
+  --exclude=sid.rs --exclude=sens.rs)"; then
+  :
+else
+  код=$?
+  if (( код != 1 )); then
+    printf 'ДВІЙКОВА ОХОРОНА: рекурсивний grep завершився з помилкою %s\n' "$код" >&2
+    fail=1
+  fi
+fi
 if [[ -n "$direct_sid8" ]]; then
   printf 'SID-BINARY-IDENTITY violation: direct Sid8/Sens8 constructor outside sid.rs/sens.rs\n%s\n' \
     "$direct_sid8" >&2
