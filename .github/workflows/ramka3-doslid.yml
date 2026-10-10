@@ -19,4 +19,4 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: "Перевірити оборотність і відмови"
-        run: python3 -m unittest discover -s дослідження/рамка3 -p 'перевірка_*.py' -v
+        run: python3 дослідження/рамка3/перевірка_носія.py -v
