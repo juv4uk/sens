@@ -1,0 +1,35 @@
+name: D10 evidence supply and 1024 readiness
+on:
+  pull_request:
+    paths:
+      - 'scripts/check_d10_completion_readiness.py'
+      - 'tests/test_d10_completion_readiness.py'
+      - 'knowledge/d10-*.json'
+      - 'knowledge/d10-proposal-ledger.tsv'
+      - '.github/workflows/d10-completion-readiness.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  evidence-supply:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - name: Перевірити негативні контрприклади й дедуп
+        run: python3 -m unittest discover -s tests -p test_d10_completion_readiness.py -v
+      - name: Порахувати реальний запас D10
+        run: |
+          python3 scripts/check_d10_completion_readiness.py >"$RUNNER_TEMP/d10-readiness.json"
+          python3 - "$RUNNER_TEMP/d10-readiness.json" <<'PY'
+          import json,sys
+          x=json.load(open(sys.argv[1],encoding='utf-8'))
+          print("D10 READINESS",x["selected"],"/",x["capacity"],"remaining",x["remaining"])
+          print("D10 SOURCES",x["source_queue"]["distinct_source_names_unselected"])
+          print("D11 GATE","READY" if x["ready_to_start_d11"] else "BLOCKED")
+          print("D10 ERRORS",x["blocking_errors"])
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: d10-unselected-source-evidence
+          path: ${{ runner.temp }}/d10-readiness.json
