@@ -8,6 +8,7 @@ on:
   pull_request:
     paths:
       - "lib/machine/**"
+      - "tests/test_machine_d3_cond_direct_d1.py"
       - "crates/sens/tests/machine_exact_domain_cpu.rs"
       - "crates/sens/tests/machine_effect_add_projection.rs"
       - "crates/sens/tests/machine_effect_d5_arithmetic_projection.rs"
@@ -43,6 +44,7 @@ on:
     branches: [main]
     paths:
       - "lib/machine/**"
+      - "tests/test_machine_d3_cond_direct_d1.py"
       - "crates/sens/tests/machine_exact_domain_cpu.rs"
       - "crates/sens/tests/machine_effect_add_projection.rs"
       - "crates/sens/tests/machine_effect_d5_arithmetic_projection.rs"
@@ -76,6 +78,15 @@ on:
       - ".github/workflows/machine-exact-domain-cpu.yml"
 
 jobs:
+  x86-d5-cond-migration-guard:
+    name: D5 exact D1 COND source migration
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v5
+      - name: Reject historical three-field COND and verify direct D1 passthrough
+        run: python3 -m unittest discover -s tests -p 'test_machine_d3_cond_direct_d1.py' -v
+
   real-silicon-harness-build:
     name: Compile real-silicon harness only
     runs-on: ubuntu-latest

@@ -298,11 +298,10 @@
              (00000111
                ((x86-admission-within-inclusive-integer-range?
                   right 0 18446744073709551615)
-                ; Exact-Q >= returns D1 1/0. Compare explicitly because 0 is
-                ; itself a value and must never become generic truthiness.
-                (00000111
-                  ((00011110 left right) 1 t)
-                  ((00011110 left right) 0 (00000001 ()))))
+                ; Exact-Q >= already returns exact D1:1 / D1:0.
+                ; Preserve the predicate identity instead of matching
+                ; against historical T/() via three-part COND.
+                (00011110 left right))
                (t (00000001 ()))))
             (t (00000001 ()))))
          (t (00000001 ()))))
