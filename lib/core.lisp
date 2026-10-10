@@ -1,5 +1,5 @@
 ; Legacy three-field exact-answer clauses are lowered to strict two-field COND.
-; The inline Lisp guard normalizes atomic and pair-shaped equal? results without changing D3.
+; The local Lisp guard normalizes atomic and pair-shaped equal? answers; bare legacy true answers become D1 1.
 
 ; my-lisp bootstrap library: derived behavior belongs in the language itself.
 ; Bootstrap-бібліотека my-lisp: похідна поведінка належить самій мові.
@@ -387,7 +387,7 @@
       (00000111
         ((00000010 answer) (00000011 answer 1))
         ((00000010 (00000001 ())) (00000011 (00000101 answer) 1))))
-      (equal? (00000011 value 0) (00000001 (0) ))) t)))
+      (equal? (00000011 value 0) (00000001 (0) ))) 1)))
       ((00000010 value) 
        (00000111
          (((00001000 (answer)
@@ -409,7 +409,7 @@
       (00000111
         ((00000010 answer) (00000011 answer 1))
         ((00000010 (00000001 ())) (00000011 (00000101 answer) 1))))
-      (equal? t (00000001 t ))) t))))))
+      (equal? 1 (00000001 1 ))) 1))))))
 
 (00001001 not?
   (00001000 (value)
@@ -457,7 +457,7 @@
       (00000111
         ((00000010 answer) (00000011 answer 1))
         ((00000010 (00000001 ())) (00000011 (00000101 answer) 1))))
-      (equal? (00100010 item (00000101 lst)) (00000001 (1) ))) t)
+      (equal? (00100010 item (00000101 lst)) (00000001 (1) ))) 1)
          (((00001000 (answer)
       (00000111
         ((00000010 answer) (00000011 answer 1))
@@ -662,14 +662,14 @@
       (00000111
         ((00000010 answer) (00000011 answer 1))
         ((00000010 (00000001 ())) (00000011 (00000101 answer) 1))))
-      (equal? (00011010 (01000101 (00111111 a)) (01000101 (00111111 b))) (00000001 1 ))) t)
+      (equal? (00011010 (01000101 (00111111 a)) (01000101 (00111111 b))) (00000001 1 ))) 1)
       ((00000011 (00111111 a) (00111111 b)) 
        (00100101 (01000000 a) (01000000 b)))
       (((00001000 (answer)
       (00000111
         ((00000010 answer) (00000011 answer 1))
         ((00000010 (00000001 ())) (00000011 (00000101 answer) 1))))
-      (equal? t (00000001 t ))) (00000001 ())))))
+      (equal? 1 (00000001 1 ))) (00000001 ())))))
 
 
 
@@ -697,12 +697,12 @@
         ((00000010 answer) (00000011 answer 1))
         ((00000010 (00000001 ())) (00000011 (00000101 answer) 1))))
       (equal? (00000011 value (01000011 (01001100 value)))
-          (00000001 (1) ))) t)
+          (00000001 (1) ))) 1)
          (((00001000 (answer)
       (00000111
         ((00000010 answer) (00000011 answer 1))
         ((00000010 (00000001 ())) (00000011 (00000101 answer) 1))))
-      (equal? t (00000001 t ))) (00000001 ()))))
+      (equal? 1 (00000001 1 ))) (00000001 ()))))
       ((00000010 value)  (00000001 ())))))
 
 
@@ -1061,17 +1061,17 @@
       (00000111
         ((00000010 answer) (00000011 answer 1))
         ((00000010 (00000001 ())) (00000011 (00000101 answer) 1))))
-      (equal? (00011100 (00001110 r r) x) (00000001 t ))) r)
+      (equal? (00011100 (00001110 r r) x) (00000001 1 ))) r)
            (((00001000 (answer)
       (00000111
         ((00000010 answer) (00000011 answer 1))
         ((00000010 (00000001 ())) (00000011 (00000101 answer) 1))))
-      (equal? t (00000001 t ))) (sqrt-iter (00001111 x 2) x 8)))))
+      (equal? 1 (00000001 1 ))) (sqrt-iter (00001111 x 2) x 8)))))
       (((00001000 (answer)
       (00000111
         ((00000010 answer) (00000011 answer 1))
         ((00000010 (00000001 ())) (00000011 (00000101 answer) 1))))
-      (equal? t (00000001 t ))) (sqrt-iter (00001111 x 2.0) x 5)))))
+      (equal? 1 (00000001 1 ))) (sqrt-iter (00001111 x 2.0) x 5)))))
 
 ; abs/min/max/min-list/max-list — migrated from Rust builtins.rs to
 ; lib/core.lisp (owner directive 2026-09-11: "Lisp owns meaning, Rust owns
