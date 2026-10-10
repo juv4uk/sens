@@ -1,0 +1,24 @@
+name: Temporary capability lookup first-call probe
+
+on:
+  push:
+    branches:
+      - diag/capability-lookup-first-call-20261010
+  pull_request:
+    branches: [main]
+    paths:
+      - "crates/sens/tests/capability_lookup_probe.rs"
+      - ".github/workflows/tmp-capability-lookup-probe.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  probe:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v5
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Report the first non-callable primitive and lookup stage
+        run: cargo test --locked -p sens --test capability_lookup_probe -- --nocapture
