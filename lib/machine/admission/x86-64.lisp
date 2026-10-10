@@ -237,16 +237,17 @@
 
 (00001001 x86-admission-within-inclusive-integer-range?
   (00001000 (value lower upper)
-    ; Exact-Q comparisons answer 1 (так) / 0 (ні), and 0 is truthy -- so a
-    ; bare `and` over comparison results (the pre-exact-Q idiom) admitted
-    ; every operand, overflowing disp8/imm slots. E1 (#216): explicit
-    ; expected-result domains.
+    ; Contract 11.8: current D6 >=/<= producers answer exact D1 control.
+    ; Never compare PredicateBit with a Number or route via host truthiness.
     (00000111
-      ((00011110 value lower) 
-        (00000111
-          ((00011101 value upper)  t)
-          (1 (00000001 ()))))
-      (1 (00000001 ())))))
+      ((не-менше? value lower)
+       (00000111
+         ((не-більше? value upper)
+          (00000010 (00000001 ())))
+         ((00000010 (00000001 ()))
+          (00000010 (00000001 (00000000))))))
+      ((00000010 (00000001 ()))
+       (00000010 (00000001 (00000000)))))))
 
 (00001001 x86-admission-disp8?
   (00001000 (value)
