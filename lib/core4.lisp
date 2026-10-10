@@ -977,7 +977,7 @@
       ((00000010 (00000001 ()))
        (10011100 ((group (00000101 groups)))
          (00000111
-           ((00000011 semantic-id (00000101 group)) group)
+           ((00011100 semantic-id (00000101 group)) group)
            ((00000010 (00000001 ()))
             (my-postcore-peer-group semantic-id (00000110 groups)))))))))
 
