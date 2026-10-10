@@ -14,7 +14,7 @@ foundation = read("knowledge/d1-d9-foundation.json")
 donor_path = root / "knowledge/archive/d10-yantra-donor-76460b72.lisp"
 donor_bytes = donor_path.read_bytes()
 donor_git_sha = hashlib.sha1(
-    b"blob " + str(len(donor_bytes)).encode("ascii") + b"\\0" + donor_bytes
+    b"blob " + str(len(donor_bytes)).encode("ascii") + bytes([0]) + donor_bytes
 ).hexdigest()
 assert donor_git_sha == harvest["donor"]["source_sha"], "Змінений історичний донор"
 donor_source = donor_bytes.decode("utf-8").splitlines()
