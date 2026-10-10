@@ -216,20 +216,18 @@
 ; must never consume as PredicateBit controls.
 (00001001 x86-admission-wire-denominator-one?
   (00001000 (text)
-    ; W8 compatibility string predicates return legacy pair booleans (0)/(1).
-    ; Normalize each boolean to scalar D1 before it can control strict D3 COND.
+    ; The admitted W8 string predicates return the current scalar D1 answer
+    ; on valid strings. Keep these calls within the machine-source compatibility
+    ; boundary; do not lift them to D9 without expanding the reader's scope.
     (110
-      ((101 (100 (00111100 text)) 1)
-       (010 (00000001 (00000000))))
+      ((00111100 text) (010 (00000001 (00000000))))
       ((101 (00111111 text) "/")
        ((00001000 (rest)
          (110
-           ((101 (100 (00111100 rest)) 1)
-            (010 (00000001 (00000000))))
+           ((00111100 rest) (010 (00000001 (00000000))))
            ((101 (00111111 rest) "1")
             (110
-              ((101 (100 (00111100 (01000000 rest))) 1)
-               (010 (00000001 ())))
+              ((00111100 (01000000 rest)) (010 (00000001 ())))
               ((101 0 0) (010 (00000001 (00000000))))))
            ((101 0 0) (010 (00000001 (00000000))))))
         (01000000 text)))
@@ -238,12 +236,11 @@
 (00001001 x86-admission-exact-integer?
   (00001000 (value)
     ((00001000 (wire)
-         (110
-        ((101 (100 (00111101 "#q2:" wire)) 1)
+      (110
+        ((00111101 "#q2:" wire)
          (x86-admission-wire-denominator-one? wire))
         ((101 0 0) (010 (00000001 (00000000))))))
-        (01001100 value))))
-
+      (01001100 value))))
 (00001001 x86-admission-within-inclusive-integer-range?
   (00001000 (value lower upper)
     ; Contract 11.8: current D6 >=/<= producers answer exact D1 control.
