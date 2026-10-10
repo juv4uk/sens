@@ -21,6 +21,15 @@
      (rename-or-copy . treat-new-path-as-added)
      (failure . fail-closed)
      ; Контракт межі Git — лише транспорт назв, не семантичний оракул.
+     ; Суфікс не доводить фізичне джерело: Git mode/type мають бути regular blob.
+     (git-new-source-object .
+       ((allowed . ("100644:blob" "100755:blob"))
+        (symlink-120000 . blocked)
+        (gitlink-160000 . blocked)
+        (missing-tree-record . blocked)
+        (truncated-tree-record . blocked)
+        (path-mismatch . blocked)
+        (policy-verdict-owner . SENS)))
      (git-path-intake .
        ((format . nul-terminated-utf8)
         (empty-complete-list . allowed)
