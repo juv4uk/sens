@@ -1,0 +1,46 @@
+name: TEMP Core4 peer-bootstrap focused witness
+
+on:
+  push:
+    branches:
+      - fix/core4-peer-materialize-no-letstar-20261010
+
+permissions:
+  contents: write
+
+jobs:
+  focused-witness:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: ${{ github.ref }}
+          fetch-depth: 0
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Verify exact edited source
+        run: |
+          set -euo pipefail
+          actual="$(git hash-object lib/core4.lisp)"
+          test "$actual" = "14c6e96ffbcb22267fe3b9da94fd1e3c72ade6c0"
+          echo "CORE4_SOURCE_BLOB=$actual"
+      - name: Regenerate and verify source-matched FASL
+        run: |
+          set -euo pipefail
+          cargo run --locked --release -p sens-cli --bin gen-fasl -- lib/core4.lisp lib/core4.lisp.fasl
+          cargo test --locked -p sens --test core_fasl_freshness -- --nocapture
+      - name: Execute the exact post-core time bootstrap regression
+        run: cargo test --locked -p sens --test current_binary_preflight postcore_time_bootstrap_uses_current_lisp_macros -- --exact --nocapture
+      - name: Commit generated binary only when necessary
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add lib/core4.lisp.fasl
+          if git diff --cached --quiet; then
+            echo "FASL already matches the exact source"
+            exit 0
+          fi
+          git commit -m "fix(fasl): regenerate snapshot for peer-bootstrap source"
+          git push origin "HEAD:${GITHUB_REF_NAME}"
