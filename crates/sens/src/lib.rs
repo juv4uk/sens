@@ -830,6 +830,69 @@ mod core4_bootstrap_cache_tests {
     }
 
     #[test]
+    fn let_star_loader_routes_compare_embedded_fasl_cache_and_source_fallback() {
+        // #5408: compare three real boot paths against identical lexical tests.
+        // This distinguishes the verified lowering cache from decoded FASL and
+        // the already-established path-bound source fallback.
+        let routes: [(&str, Option<bool>); 3] = [
+            ("production embedded FASL cache", Some(true)),
+            ("uncached embedded FASL decode", Some(false)),
+            ("path-bound Core4 source fallback", None),
+        ];
+        let programs = [
+            ("LET", "(let ((x 7)) x)"),
+            ("LET*", "(let* ((x 7) (y x)) y)"),
+        ];
+        let mut failures = Vec::new();
+
+        for (route, cache_mode) in routes {
+            for (label, source) in programs {
+                let mut session = Session::default();
+                let bootstrap = match cache_mode {
+                    Some(true) => load_core_library(&mut session),
+                    Some(false) => load_core_library_with_fasl_mode(
+                        &mut session,
+                        CORE_LIBRARY_FASL,
+                        false,
+                    ),
+                    None => load_core_library_with_fasl(
+                        &mut session,
+                        b"diagnostic-forces-source-fallback",
+                    ),
+                };
+
+                if let Err(error) = bootstrap {
+                    let detail = format!("{route}/{label}: bootstrap failed: {error}");
+                    eprintln!("LETSTAR_ROUTE route={route:?} form={label} outcome=BOOTSTRAP_FAIL error={error}");
+                    failures.push(detail);
+                    continue;
+                }
+
+                match eval_program(source, &mut session) {
+                    Ok(result) if result.value.to_string() == "7" => {
+                        eprintln!("LETSTAR_ROUTE route={route:?} form={label} outcome=PASS value=7");
+                    }
+                    Ok(result) => {
+                        let value = result.value.to_string();
+                        eprintln!("LETSTAR_ROUTE route={route:?} form={label} outcome=FAIL actual={value}");
+                        failures.push(format!("{route}/{label}: expected 7, got {value}; source={source}"));
+                    }
+                    Err(error) => {
+                        eprintln!("LETSTAR_ROUTE route={route:?} form={label} outcome=FAIL error={error}");
+                        failures.push(format!("{route}/{label}: {error}; source={source}"));
+                    }
+                }
+            }
+        }
+
+        assert!(
+            failures.is_empty(),
+            "Core4 loader-route comparison found failures:\n{}",
+            failures.join("\n")
+        );
+    }
+
+    #[test]
     fn stale_or_invalid_fasl_falls_back_to_exact_domain_core4_source() {
         let mut session = Session::default();
 
