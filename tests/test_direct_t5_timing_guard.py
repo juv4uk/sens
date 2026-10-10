@@ -20,13 +20,19 @@ class DirectT5TimingGuard(unittest.TestCase):
         self.temp = tempfile.TemporaryDirectory()
         self.addCleanup(self.temp.cleanup)
         self.root = Path(self.temp.name)
-        for rel in module.FIXTURES.values():
+        authentic = {
+            "quote": bytes.fromhex("638906a1"),
+            "atom": bytes.fromhex("643806a1"),
+            "cond": bytes.fromhex("67386515bf123b2dc4a9b1a1"),
+        }
+        for name, rel in module.FIXTURES.items():
             path = self.root / rel
             path.parent.mkdir(parents=True, exist_ok=True)
-            path.write_bytes(bytes((0x63, 0x89, 0x06, 0xA1)))
+            raw = authentic[name]
+            path.write_bytes(raw)
         self.csv_path = self.root / "timing.csv"
         self.rows = [
-            {"fixture": name, "bytes": "4", "forms": "1",
+            {"fixture": name, "bytes": str(len(authentic[name])), "forms": "1",
              **{key: "124.50" for key in module.TIMINGS}}
             for name in module.FIXTURES
         ]
@@ -69,6 +75,18 @@ class DirectT5TimingGuard(unittest.TestCase):
         self.write_rows(self.rows)
         (self.root / module.FIXTURES["atom"]).unlink()
         self.assertEqual(self.run_guard(optimized=True).returncode, 2)
+
+    def test_replaced_fixture_same_length_is_rejected_with_optimization(self):
+        path = self.root / module.FIXTURES["quote"]
+        original = path.read_bytes()
+        corrupted = bytes((original[0] ^ 1,)) + original[1:]
+        self.assertEqual(len(corrupted), len(original))
+        path.write_bytes(corrupted)
+        witness = self.run_guard(optimized=True)
+        self.assertEqual(witness.returncode, 2)
+        self.assertIn("змінилася фізична T5-фікстура", witness.stderr)
+        path.write_bytes(original)
+        self.assertEqual(self.run_guard(optimized=True).returncode, 0)
 
     def test_unexpected_csv_columns_fail_closed(self):
         self.write_rows(self.rows, columns=list(reversed(module.COLUMNS)))
