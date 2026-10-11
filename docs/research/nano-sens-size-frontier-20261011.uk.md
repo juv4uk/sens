@@ -86,22 +86,36 @@ cargo xtask compiler-compile --input /path/to/program.sw1 --out /path/to/new-art
 
 ### Під’єднання наявної трифайлової проєкції
 
-Для вже підготовленої трійки тепер передбачено окремий явний режим:
+Для цього шляху вже є **один канонічний генератор усіх трьох файлів** — `scripts/publish_verified_uk_triplets.py`. Він приймає лише явні шляхи до джерел з ратифікованої української підмножини, записує у зовнішнє дзеркало `.lisp`, фізичний `.sens` і файл без розширення та публікує SHA-звіт. Публікація транзакційна: колізія або помилка перевірки відкочує створені файли; вихідне джерело не переписується.
+
+Приклад повного шляху від конвертера до SENS-компілятора:
+
+```sh
+python3 scripts/publish_verified_uk_triplets.py \
+  --mirror /tmp/sens-triplet-mirror \
+  --report /tmp/sens-triplet-report.json \
+  --write examples/migrated/smoke-quote.lisp
+
+cargo xtask compiler-compile \
+  --triplet /tmp/sens-triplet-mirror/examples/migrated/smoke-quote.sens \
+  --out /tmp/smoke-quote-compiler-artifact.bin
+```
+
+Генератор трійки залишається обмеженим конвертером проєкцій, **не semantic-oracle admission**: його звіт прямо залишає `original_executables_oracle_certified = 0`. `scripts/verify_uk_t5_triplet.py` доводить лише обмежений roundtrip українського джерела, типованих слів і T5/view у підтриманому D1/D2/D3/D4 корпусі. `scripts/stage-two-projections.py` — окремий двухфайловий етап; для нового повного потоку вище він не потрібен.
+
+Новий явний вхід компілятора:
 
 ```sh
 cargo xtask compiler-compile --triplet /path/to/program.sens --out /path/to/new-artifact.bin
 ```
 
-Шлях `/path/to/program.sens` має мати двох однойменних сусідів: `program.lisp` та файл без розширення `program`. Контракт наявних інструментів:
-- `scripts/stage-two-projections.py` готує тільки український `.lisp` і читабельний exact-width файл `program`; сам він фізичний `.sens` не створює.
-- `scripts/sens_view.py parse /path/to/program` використовує існуючий T5 codec, щоб отримати `program.sens`. Це не перейменування тексту.
-- `scripts/verify_uk_t5_triplet.py` — read-only перевірка трійки у своєму обмеженому D1/D2/D3/D4 корпусі; його статус не є доказом runtime-семантики або release admission.
+Шлях `program.sens` має мати двох однойменних сусідів: `program.lisp` та файл без розширення `program`. Режим `--triplet` читає саме фізичний T5, отримує слова через чинний SENS-рідер, перевіряє байтову тотожність розгорнутого view з канонічними словами та одним кінцевим LF, а також повторного T5-кодування. Потім він незалежно парсить/опускає джерело та бітовий view і вимагає однакового exact-domain результату. Далі викликається той самий компіляторний корпус у `lib/compiler-nucleus.lisp`.
 
-Режим `--triplet` читає саме фізичний T5, отримує слова через чинний SENS-рідер, перевіряє байтову тотожність розгорнутого view і повторного T5-кодування, після чого незалежно парсить/опускає джерело та бітовий view і вимагає однакового exact-domain результату. Далі викликається той самий компіляторний корпус у `lib/compiler-nucleus.lisp`. Артефакт зберігає SHA-256 канонічного SW1-кодування exact-domain програми, як вимагає поле `program_wire_sha256`; фізичний `.sens` проходить окрему байт-до-байта перевірку T5, але його SHA не підставляється в поле SW1 provenance. Symlink/non-regular inputs і наявний output відхиляються.
+Артефакт зберігає SHA-256 канонічного SW1-кодування exact-domain програми, як вимагає поле `program_wire_sha256`; фізичний `.sens` має власну окрему байт-до-байта перевірку T5. Symlink/non-regular inputs і наявний output відхиляються. `--input` та `--triplet` взаємовиключні; формат не визначається автоматично за вмістом.
 
-`--input` і `--triplet` взаємовиключні та не визначають формат за вмістом: перший залишається SW1 bootstrap-входом, другий — фізичною T5 трійкою. Це з’єднує готові кодеки з компілятором, але не означає, що увесь `lib/compiler-nucleus.lisp` вже пройшов міграцію в обмежений корпус трифайлового конвертера.
+CI тепер має end-to-end інтеграційні тести, які запускають саме `publish_verified_uk_triplets.py`, а потім передають створену трійку через публічний `cargo xtask compiler-compile --triplet`. Вони перевіряють позитивний шлях, змінений view, відсутній LF, змінене джерело й неоднозначний вибір вхідного режиму. Ці тести додані, але їхній реальний Hosted CI результат треба підтвердити; локальний `cargo` у поточному середовищі відсутній.
 
-Це executable front-end до наявного SENS-written компілятора, але ще не машинний backend та не повний C1 → C2 self-host proof.
+Це executable front-end до наявного SENS-written компілятора, але ще не машинний backend і не повний C1 → C2 self-host proof.
 
 ## Acceptance gates
 
