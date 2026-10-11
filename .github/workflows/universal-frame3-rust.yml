@@ -5,6 +5,7 @@ on:
       - 'crates/sens/src/universal_frame3.rs'
       - 'crates/sens/src/frame3_v2.rs'
       - 'crates/sens/examples/frame3_v2_bench.rs'
+      - 'crates/sens/examples/frame3_v2_paired_bench.rs'
       - 'crates/sens/src/lib.rs'
       - 'crates/sens/src/frame3_grammar.rs'
       - 'crates/sens/src/frame3_semantic.rs'
@@ -17,6 +18,7 @@ on:
       - 'crates/sens/src/universal_frame3.rs'
       - 'crates/sens/src/frame3_v2.rs'
       - 'crates/sens/examples/frame3_v2_bench.rs'
+      - 'crates/sens/examples/frame3_v2_paired_bench.rs'
       - 'crates/sens/src/lib.rs'
       - 'crates/sens/src/frame3_grammar.rs'
       - 'crates/sens/src/frame3_semantic.rs'
@@ -58,6 +60,28 @@ jobs:
         with:
           name: frame3-v2-physical-${{ github.sha }}
           path: ${{ runner.temp }}/frame3-v2-physical.tsv
+          if-no-files-found: error
+          retention-days: 21
+      - name: Paired randomized full-file T5 / S3v1 / S3v2 benchmark
+        shell: bash
+        env:
+          FRAME3_BENCH_RAW: ${{ runner.temp }}/frame3-v2-paired-raw.tsv
+        run: |
+          set -euo pipefail
+          {
+            echo "# SHA: ${GITHUB_SHA}"
+            echo "# runner OS: $(uname -srm)"
+            echo "# rustc: $(rustc --version)"
+            echo "# CPU: $(grep -m1 'model name' /proc/cpuinfo || true)"
+            cargo run --locked --release -p sens --example frame3_v2_paired_bench --quiet
+          } | tee "$RUNNER_TEMP/frame3-v2-paired-summary.tsv"
+      - name: Upload all paired samples plus full-byte summary
+        uses: actions/upload-artifact@v4
+        with:
+          name: frame3-v2-paired-${{ github.sha }}
+          path: |
+            ${{ runner.temp }}/frame3-v2-paired-raw.tsv
+            ${{ runner.temp }}/frame3-v2-paired-summary.tsv
           if-no-files-found: error
           retention-days: 21
       - name: Prove no coordinates for impossible D3 calls, keep QUOTE data
