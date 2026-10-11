@@ -440,6 +440,35 @@
         "scripts/check_d10_selection_transition_history.py --self-test",
         "scripts/check-d10-proposal-ledger.py --self-test"
       ]
+    },
+    {
+      "id": "d10.math.finite-code-unique-decipherability.after-653.20261011",
+      "authority": "#4013 #4463 #5041; research-only selection",
+      "evidence": [
+        "knowledge/d10-unique-decipherability-selected-20261011.json",
+        "knowledge/d10-unique-decipherability-historical-20261009.json",
+        "scripts/check_d10_unique_decipherability.py"
+      ],
+      "previous_inventory_blob_sha": "3c02b877815506ebe6a4c8db5dfa1c2a9fbadd3b",
+      "resulting_inventory_blob_sha": "184063ce850bafcb13d585336e1c6ee5f58c5f28",
+      "added_stable_ids": [
+        "d10.math.finite-code-unique-decipherability.20261011"
+      ],
+      "appended_sources": [
+        "knowledge/d10-unique-decipherability-selected-20261011.json"
+      ],
+      "coordinates_added": 0,
+      "ratified_added": 0,
+      "delta_selected": 1,
+      "previous_selected": 653,
+      "resulting_selected": 654,
+      "decision": "selected research only; explicit owner ratification, coordinate and Core-vs-derived review pending",
+      "tests": [
+        "python3 scripts/check_d10_unique_decipherability.py",
+        "python3 -O scripts/check_d10_unique_decipherability.py",
+        "python3 scripts/check_d10_selection_transition_history.py --self-test",
+        "python3 scripts/check-d10-proposal-ledger.py"
+      ]
     }
   ]
 }
