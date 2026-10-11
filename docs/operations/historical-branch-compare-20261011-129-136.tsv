@@ -1,0 +1,11 @@
+# Exact compare pin main SHA: 6a21e0f98abea3a46fb8f81144702ba8cc59b057
+# Distinct heads only; 1131-four-core-profile-contract and 1132-core1-bootstrap point at the same SHA.
+branch	source_sha	compare_status	ahead_by	behind_by	reported_file_entries	classification
+agent/1061-projection-provenance	69e36652f121fcb6670877fd83b05960fe14739b	diverged	4	8250	4	HISTORY_ATTACHED_CONTENT_REVIEW_REQUIRED
+agent/1076-blackbox-witness	4af8f2785642f89e549e1d0f7decfccf0f1308a6	diverged	8	8250	4	HISTORY_ATTACHED_CONTENT_REVIEW_REQUIRED
+agent/1076-repl-canon-names	d4a1a59390c634676d1c40349ded7b7e91ffdd15	diverged	14	8247	5	HISTORY_ATTACHED_CONTENT_REVIEW_REQUIRED
+agent/1091-authority-guard-fast-reject	4228798e1dee1ae61360da339a5238101ed39657	diverged	1	8247	1	HISTORY_ATTACHED_CONTENT_REVIEW_REQUIRED
+agent/1117-kernel-abi-scope-guard	382b2e88971721119ca26441df9f33dacf4f455a	diverged	6	7817	4	HISTORY_ATTACHED_CONTENT_REVIEW_REQUIRED
+agent/1131-four-core-authority-v2	c79dc751dbceb1ee2145cd5a80deb2b2fc51a329	behind	0	8008	0	ALREADY_IN_MAIN_ANCESTRY
+agent/1131-four-core-profile-contract	5a99136bf7a2e9ab5792bdc945ad53c3774802cd	behind	0	8054	0	ALREADY_IN_MAIN_ANCESTRY
+agent/1132-core1-bootstrap	5a99136bf7a2e9ab5792bdc945ad53c3774802cd	behind	0	8054	0	SAME_HEAD_AS_1131_PROFILE
