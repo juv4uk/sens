@@ -1,0 +1,11 @@
+# Exact compare pin main SHA: 411c04d80bd75d79e000d857fa7d2728f85703a6
+# NO_UNMERGED_COMMITS is ancestry-only, not semantic approval; NEEDS_CONTENT_REVIEW not verified unique content.
+branch	source_sha	compare_status	ahead_by	behind_by	classification
+agent/canon-naming-1011	df7923dcfc165439b136a052539242f4b641f1fc	diverged	1	7586	NEEDS_CONTENT_REVIEW
+agent/chatgpt/archive-generation-pareto-benchmarks-20261011	b9f1915fe16a7006c7ea12044b29da736147d56c	diverged	2	133	NEEDS_CONTENT_REVIEW
+agent/chatgpt/archive-original-bench-sources-20261011	d3c9f4b0cd64e9a667a76c8e1b9d850a0b28db69	diverged	1	137	NEEDS_CONTENT_REVIEW
+agent/chatgpt/core4-fasl-refresh-current-main-20261010	78e0f4bbc9a48f1baa47ebb91ab6a6785274d431	diverged	7	620	NEEDS_CONTENT_REVIEW
+agent/chatgpt/core4-fasl-refresh-current-main-r2-20261010	025a96d449780d97b37ed0e8ba5d9f7e8cc12d52	diverged	3	595	NEEDS_CONTENT_REVIEW
+agent/chatgpt/core4-fasl-refresh-main-20261010	6e000dd86c008cdd9fa0742d3a4deea82985ee19	diverged	7	672	NEEDS_CONTENT_REVIEW
+agent/chatgpt/d2-python-opt-witness-20261010	9590187ea9b6859180714013071a2b07f72bc3d3	diverged	5	619	NEEDS_CONTENT_REVIEW
+agent/chatgpt/d5-push-path-parity-20261010	b6b604d03a0dcefa17c712b6a2147c2c75c3fa5d	diverged	5	619	NEEDS_CONTENT_REVIEW
