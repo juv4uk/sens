@@ -1,12 +1,12 @@
 {
   "schema": "d10-current-inventory-pointer/v1",
-  "status": "OWNER-DIRECTED-RESEARCH-SELECTION-721-UNRATIFIED",
+  "status": "OWNER-DIRECTED-RESEARCH-SELECTION-725-UNRATIFIED",
   "canonical_current": {
-    "path": "knowledge/d10-v7-semantic-inventory.json",
-    "git_blob": "6a45275241717dafa6a6c9ccafae1e9ad819b306",
-    "selected": 721,
+    "path": "knowledge/d10-v8-semantic-inventory.json",
+    "git_blob": "f3d3aefd19e163a085ba6ce4f8e2ca2bef02028f",
+    "selected": 725,
     "placed": 719,
-    "unplaced": 2,
+    "unplaced": 6,
     "ratified": 0
   },
   "historical_selection": {
@@ -20,10 +20,10 @@
     "role": "PINNED-GAUGE-ASSIGNMENT"
   },
   "policy": {
-    "description": "Canonical D10 v7 preserves v1-v6 archives and appends two unplaced historical Common Lisp stream laws; earlier CLOS research tranches remain unchanged.",
-    "selected_only": "721 selected research candidates; 719 placed, 2 unplaced pending semantic dedup/Core-vs-library review; 303 positions remain; 0 ratified.",
+    "description": "Canonical D10 v8 preserves v1-v7 immutable histories and appends four source-reviewed MOP database laws without changing old placements.",
+    "selected_only": "725 research-selected candidates; 719 placed, 6 unplaced; 299 semantic gaps remain; 0 ratified.",
     "ratification": "No D10 meaning has been ratified. D10 10-bit execution and physical T5 encoding are not authorized.",
-    "next_step": "Complete D1-D9 semantic derivability and Core-vs-library review; run donor fixtures and SENS conformance tests before ratification."
+    "next_step": "Replay witnesses and semantic dedup on the four MOP records and remaining database candidates; confirm D2 and derived ownership before coordinates or ratification."
   },
   "branch_policy": "MAIN-ONLY; NO-NEW-BRANCHES",
   "historical_v2_coordinate_inventory": {
@@ -191,5 +191,21 @@
       "GET-OUTPUT-STREAM-STRING",
       "MAKE-CONCATENATED-STREAM"
     ]
+  },
+  "current_v8_mop_database_selection": {
+    "previous_inventory": "knowledge/d10-v7-semantic-inventory.json",
+    "source_database": {
+      "path": "knowledge/d10-candidate-database-v1.json",
+      "git_blob": "4abcd63ca23b4386bdc7e0bdcd1c4539e22fa94f"
+    },
+    "manifest": {
+      "path": "knowledge/d10-mop-database-v8-selection-20261011.json",
+      "git_blob": "e63bf27d8dd9d608461d246ffdf2c973f85f996f"
+    },
+    "selected_added": 4,
+    "coordinates_added": 0,
+    "ratified_added": 0,
+    "oracle_parity": "PENDING",
+    "dedup": "PENDING"
   }
 }
