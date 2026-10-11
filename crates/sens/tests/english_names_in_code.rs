@@ -133,6 +133,7 @@ fn is_historical_research_evidence(rel: &str) -> bool {
         "docs/research/432/eq-pair-red.lisp",
         "docs/research/432/fresh-atom-fixed-point.lisp",
         "docs/research/432/lower-basis-runtime-witness.lisp",
+        "tests/fixtures/exact-quantity-round-trip-witness.lisp",
         "docs/research/canon-sculpt-probes/quote-ordinary-function-red.lisp",
         "docs/research/canon-sculpt-probes/selective-evaluation-ordinary-function-red.lisp",
         "docs/research/canon-sculpt-probes/verify-432-run-contract.lisp",
