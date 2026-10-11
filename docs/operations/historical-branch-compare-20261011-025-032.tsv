@@ -1,0 +1,11 @@
+# Exact compare pin main SHA: a3736c2357e2e86c3f2efa33a93847aa8b1290f2
+# This is commit-ancestry triage; do not claim semantic merge or adopt obsolete behavior.
+branch	source_sha	compare_status	ahead_by	behind_by	classification
+agent/chatgpt/2372-vex3-replay	c18005b53312fbbd5390c7d7e391dea6a23f6994	diverged	9	5496	NEEDS_CONTENT_REVIEW
+agent/chatgpt/4342-machine-effect-seam	510c4b618dcd877d6e38529f8bfefe82508140b5	diverged	10	5501	NEEDS_CONTENT_REVIEW
+agent/chatgpt/4343-roundtrip-clean	424e9741d0756dfd9fefb614a3e2fb7652a9ff9c	behind	0	5494	NO_UNMERGED_COMMITS
+agent/chatgpt/4343-roundtrip-gate	b2c29aaee802971920a68b7eadb104774e96f1d2	diverged	3	5500	NEEDS_CONTENT_REVIEW
+agent/chatgpt/4344-asm-differential	f07f4b627464dd0501576583c97d571ff9dcd07d	diverged	6	5499	NEEDS_CONTENT_REVIEW
+agent/chatgpt/4347-machine-effect-add	3880d6cb3b18b9d0116caee08dea4dccf949dc02	diverged	11	5501	NEEDS_CONTENT_REVIEW
+agent/chatgpt/4347-machine-effect-add-v2	92fb7c28320837b7036e70d3b7d23a581c43ab8f	diverged	14	5501	NEEDS_CONTENT_REVIEW
+agent/chatgpt/4347-machine-effect-add-v3	0db400f86b880e251bd79efa33b5401fc5ac9a9a	diverged	4	5500	NEEDS_CONTENT_REVIEW
