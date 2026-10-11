@@ -17,6 +17,16 @@ class Readiness(unittest.TestCase):
         self.assertEqual(1024, r["selected"]+r["remaining"])
         self.assertFalse(r["ready_to_start_d11"])
 
+    def test_current_v2_has_every_selected_coordinate(self):
+        report = gate.audit(ROOT)
+        self.assertEqual(675, report["selected"])
+        self.assertEqual(675, report["placed"])
+        self.assertEqual(0, report["unplaced"])
+        self.assertEqual(419, report["research_gauge_allocated"])
+        self.assertTrue(report["current_map_is_canonical_research"])
+        self.assertEqual(0, report["ratified"])
+        self.assertFalse(report["blocking_errors"])
+
     def test_same_donor_twice_is_one_candidate(self):
         with tempfile.TemporaryDirectory() as td:
             k=Path(td)
