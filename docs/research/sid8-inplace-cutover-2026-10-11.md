@@ -12,9 +12,16 @@ This is an execution and blocker ledger, not a claim that the repository is full
 - Hosted CI diagnostic [#38176359616](https://github.com/juv4uk/sens/actions/runs/38176359616) shows **1,439 D3 source findings across 144 live Lisp files** (0 parse errors), a failing island-math COND regression, 22/24 content-store integration tests failing, and a failing timezone raw-declaration test. These are independent blockers requiring individual semantics/runtime proofs; no broad blind head replacement is an authorized repair. The active blocker queue is given verbatim in the census artifact/log, including legacy DEFMACRO's compound D4/D5 successor, D10 observation cells, historical control semantics, and nonsemantic helper cells.
 - No new branches or .sens files were created by this effort; all historical source blobs remain recoverable, and the blocked files are restored to their pre-experiment bytes.
 
+## 2026-10-12: separate executable parity from mechanical source replacement
+
+- **161 exact source-token replacements in two additional original Lisp service programs**, main commit [45b01f6](https://github.com/juv4uk/sens/commit/45b01f648606df5052f074e36ecb8bf96e1c9f80): `scripts/generate-functions-md.lisp` (138) and `scripts/benchmark-semantic-registry-read.lisp` (23). The internal helper `01000111` and unratified D10 observation `01011010` remain unchanged. Exact Git-blob replay tests: `tests/test_sid8_two_script_source_delta.py`; [GitHub Actions PASS #38178462618](https://github.com/juv4uk/sens/actions/runs/38178462618). This proves byte-for-byte **source substitution only**, not old/current executable oracle parity.
+- **Rejected large conversion**: 1,902 mechanically rewritten call heads in `lib/forward.lisp`, `lib/knowledge.lisp`, `lib/world.lisp` (commit `17a289f`) failed the independent Rust differential tests `reasoning_world_d3_migration` and `reasoning_forward_knowledge_d3_migration`, including `(world-metadata (empty-world))` and `(fire-rule (quote ((fact a) (derived a))) (quote (fact a)))`. Exact three source blobs restored in [commit 012507d](https://github.com/juv4uk/sens/commit/012507d10c24a858a0a9a159878404de0a1e8b9a). These **1,902 are not migration credits**.
+- The D3 COND / ATOM / EQ executable heads in those three modules had already been migrated before the rejected large conversion. No new D3 replacements were falsely counted when a D3-only replay found no remaining old D3 call heads.
+- Broader `Hosted CI` still has independent failures in filesystem, D3 legacy logic, and timezone witnesses; green parentheses/source-codec checks do not override independent semantic failures. Keep macro/D10/nonresident and historical 3-field COND sources fail-closed.
+
 ## Exact completed changes
 
-- **15,898 audited SID8 occurrences replaced** in **86 existing `.lisp` files** in the earlier audited cohorts; three additional local MAP replacements are recorded under blocker 2 below. (library, executable experiments, benchmarks and service programs), on **main**.
+- **16,059 audited SID8 occurrences replaced** in **88 existing `.lisp` files** in the earlier audited cohorts; three additional local MAP replacements are recorded under blocker 2 below. (library, executable experiments, benchmarks and service programs), on **main**.
 - No new Git branches and no `.sens` creation.
 - Baseline legacy correspondence: `knowledge/sens8-current-coverage-v1.json` (256 historic cells).
 - Only the 171 unambiguous, ratified current targets were used automatically.
@@ -46,7 +53,8 @@ This is an execution and blocker ledger, not a claim that the repository is full
 | Seven additional scripts / executable experiment (23 source-proven single-list MAP calls) | 1868 |
 | Five machine dispatcher, u64 effect, capability and lowering sources | 590 |
 | Six x86-64 admission, atoms, encoding, operand, profile and projection sources | 2084 |
-| **Total** | **15898** |
+| Two additional source-audited Lisp scripts: generate-functions-md (138), benchmark-semantic-registry-read (23) | 161 |
+| **Total** | **16059** |
 
 ## Known fail-closed blockers
 
