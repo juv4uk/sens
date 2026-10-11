@@ -1,0 +1,87 @@
+name: SENS two-codec explicit tiny F3 CLI, T5 remains default
+on:
+  push:
+    paths:
+      - "crates/sens/src/frame3_small.rs"
+      - "crates/sens/src/lib.rs"
+      - "crates/sens-cli/src/bin/sens-trit.rs"
+      - "research/framed3/rust_codec/senc.rs"
+      - ".github/workflows/two-codec-explicit-cli.yml"
+  pull_request:
+    paths:
+      - "crates/sens/src/frame3_small.rs"
+      - "crates/sens/src/lib.rs"
+      - "crates/sens-cli/src/bin/sens-trit.rs"
+      - "research/framed3/rust_codec/senc.rs"
+      - ".github/workflows/two-codec-explicit-cli.yml"
+permissions:
+  contents: read
+jobs:
+  explicit-cli:
+    name: F3 opt-in CLI, exact T5 reader parity, fail closed
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Original F3 is bounded, decoded and executed through T5 core
+        shell: bash
+        run: |
+          set -euo pipefail
+          cargo test --locked -p sens frame3_small::tests -- --nocapture
+          cargo test --locked -p sens-cli --bin sens-trit original_tiny_f3 -- --nocapture
+      - name: Build real binary and verify exact T5/F3 program bytes and output
+        shell: bash
+        run: |
+          set -euo pipefail
+          cargo build --locked --release -p sens-cli --bin sens-trit
+          python3 - "$RUNNER_TEMP" <<'PY'
+          from pathlib import Path
+          import sys
+          root=Path(sys.argv[1])
+          (root/"small.senc").write_bytes(bytes.fromhex("f34060"))
+          (root/"wrong-marker.senc").write_bytes(bytes.fromhex("f44060"))
+          (root/"truncated.senc").write_bytes(bytes([0xf3]))
+          (root/"empty-structure.senc").write_bytes(bytes.fromhex("f300"))
+          (root/"oversize.senc").write_bytes(bytes([0xf3])*16)
+          PY
+          bin=target/release/sens-trit
+          canonical=tests/fixtures/migration-quote-cohort-main/quote-legacy.sens
+          "$bin" open-f3 "$RUNNER_TEMP/small.senc" | tee "$RUNNER_TEMP/f3-human.txt"
+          printf '10 001 00 000 01\n' | cmp - "$RUNNER_TEMP/f3-human.txt"
+          "$bin" decode-f3 "$RUNNER_TEMP/small.senc" > "$RUNNER_TEMP/f3-words.txt"
+          "$bin" decode "$canonical" > "$RUNNER_TEMP/t5-words.txt"
+          cmp "$RUNNER_TEMP/f3-words.txt" "$RUNNER_TEMP/t5-words.txt"
+          "$bin" eval-f3 "$RUNNER_TEMP/small.senc" > "$RUNNER_TEMP/f3-eval.txt"
+          "$bin" eval "$canonical" > "$RUNNER_TEMP/t5-eval.txt"
+          cmp "$RUNNER_TEMP/f3-eval.txt" "$RUNNER_TEMP/t5-eval.txt"
+          "$bin" open "$canonical" > "$RUNNER_TEMP/t5-open.txt"
+          cmp "$RUNNER_TEMP/t5-open.txt" "$RUNNER_TEMP/f3-human.txt"
+      - name: The wrong extension and malformed frame MUST fail with no fallback
+        shell: bash
+        run: |
+          set -euo pipefail
+          bin=target/release/sens-trit
+          canon=tests/fixtures/migration-quote-cohort-main/quote-legacy.sens
+          if "$bin" open "$RUNNER_TEMP/small.senc" >/dev/null 2>&1; then exit 1; fi
+          if "$bin" "$RUNNER_TEMP/small.senc" >/dev/null 2>&1; then exit 1; fi
+          if "$bin" open-f3 "$canon" >/dev/null 2>&1; then exit 1; fi
+          if "$bin" open-f3 "$RUNNER_TEMP/wrong-marker.senc" >/dev/null 2>&1; then exit 1; fi
+          if "$bin" eval-f3 "$RUNNER_TEMP/truncated.senc" >/dev/null 2>&1; then exit 1; fi
+          if "$bin" eval-f3 "$RUNNER_TEMP/empty-structure.senc" >/dev/null 2>&1; then exit 1; fi
+          if "$bin" open-f3 "$RUNNER_TEMP/oversize.senc" >/dev/null 2>&1; then exit 1; fi
+          echo TWO_CODEC_EXPLICIT_CLI_PASS
+      - name: Preserve exact physical proof and program outputs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: sens-f3-opt-in-cli-${{ github.sha }}
+          path: |
+            ${{ runner.temp }}/small.senc
+            ${{ runner.temp }}/f3-human.txt
+            ${{ runner.temp }}/f3-words.txt
+            ${{ runner.temp }}/t5-words.txt
+            ${{ runner.temp }}/f3-eval.txt
+            ${{ runner.temp }}/t5-eval.txt
+          if-no-files-found: error
+          retention-days: 30
