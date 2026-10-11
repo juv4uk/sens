@@ -400,7 +400,7 @@ fn decode_numeric_composition(
     };
     let canonical = domain_numeric::canonical_parts(negative, &numerator, &denominator)
         .ok_or(BinaryFrameError::InvalidNumber {index: frame_start})?;
-    match canonical {
+    match &canonical {
         Value::NumericComposition(c) => {
             if c.domain_width() != width
                 || c.as_parts().2.is_some() != ratio
@@ -409,7 +409,7 @@ fn decode_numeric_composition(
             {
                 return Err(BinaryFrameError::NonCanonicalNumber {index: frame_start});
             }
-            Ok(BinaryFrame::NumericComposition(c))
+            Ok(BinaryFrame::NumericComposition(c.clone()))
         },
         _ => Err(BinaryFrameError::NonCanonicalNumber {index: frame_start}),
     }
