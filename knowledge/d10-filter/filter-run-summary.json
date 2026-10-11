@@ -42,7 +42,7 @@
     "source_union_candidate_ids": 1809
   },
   "input_index": "knowledge/d10-filter/all-candidates.tsv",
-  "input_index_sha256": "7d0f31fb5dad728e4f214bd7335a1764c2ebc0aec1f081d19eb47ab160938204",
+  "input_index_sha256": "e872d7e58f2c8b7f35a64ef2d0ebbe4888261b8fb8ba53d5d9e793f9658a338b",
   "mechanical_partition": {
     "accepted": 0,
     "escalated": 0,
@@ -60,5 +60,5 @@
   },
   "physical_t5_authorized": false,
   "schema": "d10-unified-filter-run/v1",
-  "source_commit": "c9b3e4844dc7bb7d46eb9c3e266e144241b78a28"
+  "source_commit": "d2350dd4ad24e2c2c2af3434a566d69ffcc97c47"
 }
