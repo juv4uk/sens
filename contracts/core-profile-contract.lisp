@@ -16,7 +16,10 @@
    (profile-may-mint-domain-resident . forbidden)
    (profile-may-renumber-domain-resident . forbidden)
    (profile-may-override-foundation . forbidden)
-   (backend-may-own-language-meaning . forbidden))
+   (backend-may-own-language-meaning . forbidden)
+   (mathematics-shared-across-all-profiles . required)
+   (kernel-may-redefine-number-or-arithmetic . forbidden)
+   (unsupported-mathematical-operation . explicit-failure-not-new-semantics))
 
   ((identity . shared-foundation)
    (predicate-result . exact-one-bit)

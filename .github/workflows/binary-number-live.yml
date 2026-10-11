@@ -10,6 +10,10 @@ on:
       - "crates/sens/src/binary_framing.rs"
       - "crates/sens/src/eval/**"
       - "crates/sens/tests/binary_number_live.rs"
+      - "language-contract.lisp"
+      - "contracts/core-profile-contract.lisp"
+      - "knowledge/number-width-ratified.json"
+      - "tests/test_math_all_kernels_scope.py"
       - ".github/workflows/binary-number-live.yml"
   push:
     branches: [main]
@@ -39,6 +43,8 @@ jobs:
         with:
           workspaces: |
             crates/sens -> target
+      - name: Shared mathematical law / all-kernel scope guard
+        run: python3 -m unittest discover -s tests -p 'test_math_all_kernels_scope.py'
       - name: Canonical BinaryNumber unit
         run: cargo test -p sens --lib binary_number::tests
       - name: Live source runtime transport path
