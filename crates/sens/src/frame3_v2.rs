@@ -478,7 +478,7 @@ mod tests {
 
     #[test]
     fn no_grammar_candidate_is_exactly_the_v1_optimum_with_new_magic() {
-        for sample in ["0", "000000001", "10 111111111 01"] {
+        for sample in ["0", "000000001", "10 111111111 111111111 111111111 111111111 111111111 01"] {
             let source = words(sample);
             assert!(!any_possible_grammar_block(&source));
             let v1 = super::super::encode(&source).unwrap();
