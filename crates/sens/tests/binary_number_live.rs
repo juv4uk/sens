@@ -236,3 +236,69 @@ fn signed_rational_and_division_by_zero_remain_fail_closed() {
         .expect_err("no implicit legacy number bridge");
     assert_eq!(err.kind, sens::ErrorKind::Type);
 }
+
+#[test]
+fn numeric_d24_d48_domain_values_survive_actual_fasl_and_wire() {
+    // No numeric source literals are used to construct these values.
+    let first = BinaryNumber::from_numeric_domain_bits(24, &vec![0; 24])
+        .expect("D24 exact zero");
+    let second = BinaryNumber::from_numeric_domain_bits(48, &vec![0; 48])
+        .expect("D48 exact zero");
+    assert_ne!(first, second);
+    let forms = [first.clone(), second.clone()]
+        .into_iter()
+        .map(|number| Expr {
+            kind: ExprKind::BinaryNumber(number),
+            span: Span::default(),
+        })
+        .collect::<Vec<_>>();
+    let hash = [0x55u8; 32];
+    let fasl = fasl_encode_program(&forms, &hash);
+    let (from_fasl, decoded_hash) = fasl_decode_program(&fasl).expect("qualified FASL");
+    assert_eq!(decoded_hash, hash);
+    assert_eq!(from_fasl, forms);
+
+    let wire = wire_encode_program(&forms);
+    let from_wire = wire_decode_program(&wire).expect("qualified wire");
+    assert_eq!(from_wire, forms);
+    // Both retain their explicit numeric domain after the round-trip.
+    for (number, width) in [(first, 24), (second, 48)] {
+        assert_eq!(number.numeric_domain_width(), Some(width));
+        assert_eq!(number.exact_numeric_domain_bits(), Some(vec![0; width]));
+    }
+}
+
+#[test]
+fn numeric_domain_ast_formats_reject_invalid_width_and_truncation() {
+    let number = BinaryNumber::from_numeric_domain_bits(24, &vec![1; 24]).unwrap();
+    let forms = vec![Expr {
+        kind: ExprKind::BinaryNumber(number),
+        span: Span::default(),
+    }];
+    let hash = [0x23u8; 32];
+
+    let original_fasl = fasl_encode_program(&forms, &hash);
+    let original_wire = wire_encode_program(&forms);
+
+    let mut short_fasl = original_fasl.clone();
+    short_fasl.pop();
+    assert!(fasl_decode_program(&short_fasl).is_none());
+
+    let mut short_wire = original_wire.clone();
+    short_wire.pop();
+    assert!(wire_decode_program(&short_wire).is_none());
+
+    // Explicit width is semantic framing metadata. Invalid D25 must fail
+    // rather than being auto-coerced to a nearby D24 or D48.
+    let mut wrong_fasl = original_fasl;
+    let f_tag = wrong_fasl.windows(5).position(|seq| seq == [13, 24, 0, 0, 0])
+        .expect("additive numeric FASL domain tag and width");
+    wrong_fasl[f_tag + 1] = 25;
+    assert!(fasl_decode_program(&wrong_fasl).is_none());
+
+    let mut wrong_wire = original_wire;
+    let w_tag = wrong_wire.windows(2).position(|seq| seq == [0x5B, 24])
+        .expect("additive numeric wire domain tag and width");
+    wrong_wire[w_tag + 1] = 25;
+    assert!(wire_decode_program(&wrong_wire).is_none());
+}
