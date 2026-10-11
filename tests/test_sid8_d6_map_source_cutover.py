@@ -1,9 +1,8 @@
 #!/usr/bin/env python3
 """Source-level regression for audited historical MAP -> current D6 cutover.
 
-The historical 8-bit MAP has two same-named D6/D8 successors. These two
-particular Lisp modules use only one sequence per call, so their concrete
-old MAP heads were resolved to the ratified D6 resident. No global SID8
+The historical 8-bit MAP has two same-named D6/D8 successors. These audited source sites each apply MAP to exactly one sequence, so their
+concrete old MAP heads were resolved to the ratified D6 resident. No global SID8
 correspondence or D8 identity is changed by this source-local proof.
 """
 import json
@@ -46,7 +45,7 @@ class AuditedMapSourceCutover(unittest.TestCase):
         source = KNOWLEDGE.read_text(encoding="utf-8")
         expected = "(101000 (00001000 (clause) (00100111 (00000001 tell) module-name clause)) clauses)"
         self.assertEqual(source.count(expected), 1)
-        self.assertNotRegex(source, r"\\(00110111(?=\\s|\\))")
+        self.assertNotRegex(source, r"\(00110111(?=\s|\))")
 
     def test_core_let_expansion_maps_are_single_sequence(self):
         source = CORE.read_text(encoding="utf-8")
@@ -57,7 +56,7 @@ class AuditedMapSourceCutover(unittest.TestCase):
         for expr in expected:
             with self.subTest(expr=expr):
                 self.assertEqual(source.count(expr), 1)
-        self.assertNotRegex(source, r"\\(00110111(?=\\s|\\))")
+        self.assertNotRegex(source, r"\(00110111(?=\s|\))")
 
     def test_linter_eight_single_sequence_maps_keep_old_macro_datum(self):
         source = LINTER.read_text(encoding="utf-8")
