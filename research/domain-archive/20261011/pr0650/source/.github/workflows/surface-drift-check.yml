@@ -1,0 +1,60 @@
+name: Surface Drift Check
+
+on:
+  push:
+    paths:
+      - 'lib/core.my'
+      - 'lib/surface/**'
+      - 'crates/my-lisp/src/eval/builtins.rs'
+      - 'crates/my-lisp/src/language_items.rs'
+      - 'crates/my-lisp-cli/src/repl.rs'
+      - 'crates/my-lisp-cli/src/repl/surface_catalog.rs'
+      - 'scripts/check-surface-coverage.lisp'
+      - 'scripts/check_trilingual_surface.py'
+      - 'scripts/check_semantic_registry.py'
+      - 'scripts/translate-program.py'
+      - 'docs/adr/ADR-005-TRILINGUAL-SURFACE-PARITY.md'
+      - 'docs/adr/ADR-007-MEANING-FIRST-SURFACES.md'
+      - 'docs/adr/ADR-008-NUMERIC-SURFACE-AUTHORITY.md'
+  pull_request:
+    paths:
+      - 'lib/core.my'
+      - 'lib/surface/**'
+      - 'crates/my-lisp/src/eval/builtins.rs'
+      - 'crates/my-lisp/src/language_items.rs'
+      - 'crates/my-lisp-cli/src/repl.rs'
+      - 'crates/my-lisp-cli/src/repl/surface_catalog.rs'
+      - 'scripts/check-surface-coverage.lisp'
+      - 'scripts/check_trilingual_surface.py'
+      - 'scripts/check_semantic_registry.py'
+      - 'scripts/translate-program.py'
+      - 'docs/adr/ADR-005-TRILINGUAL-SURFACE-PARITY.md'
+      - 'docs/adr/ADR-007-MEANING-FIRST-SURFACES.md'
+      - 'docs/adr/ADR-008-NUMERIC-SURFACE-AUTHORITY.md'
+
+jobs:
+  drift-check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build my-lisp for Lisp-owned surface checks
+        run: cargo build --release -p my-lisp-cli --bin my-lisp
+
+      - name: Check runtime names against numeric authority
+        run: ./target/release/my-lisp scripts/check-surface-coverage.lisp
+
+      - name: Check UK / EN / SA parity from numeric identities
+        run: python3 scripts/check_trilingual_surface.py
+
+      - name: Check numeric identity and symbolic separation
+        run: python3 scripts/check_semantic_registry.py
+
+      - name: Report
+        if: always()
+        run: |
+          echo "Surface drift check complete."
+          echo "Meaning comes first; human-language surfaces are peers."
+          echo "Shared punctuation belongs to sym, not to a human language."
+          echo "semantic-registry.wsm is the sole numeric surface authority."
+          echo "uk-sa-coverage.wsm is historical audit only."
