@@ -21,7 +21,7 @@
        (no-inference . "bits, width alone, human literals, and host storage cannot confer numeric-domain membership")
        (non-collapse . "D24 and D48 remain distinct domain identities even if payload magnitude coincides")
        (no-literals-required . "numeric source tokens are optional projection, not semantic identity")
-       (admission-scope . "domain names, equal rank, and exact widths only: no proof of full resident occupancy")
+       (admission-scope . "The Dn law now admits all 2^n exact n-bit words specifically as natural numeric atoms; this does NOT allocate unrelated function roles, additional signed/rational scalar atoms or execution mechanisms")
        (same-domain-natural-addition . "For admitted natural a,b both in exact Dn, compute exact a+b with carry; if sum fits in n bits then result is exact Dn; otherwise the n+1-bit sum is carried in exact D(2n), the next owner-ratified numeric domain. For two n-bit natural operands the sum never needs more than n+1 significant bits.")
        (add-carry-preservation . "No n-bit truncation, wraparound or modulo 2^n; exact output is left-zero-filled to its selected domain width. Explicit Dn/D(2n) identity is retained and is not inferred from normalized magnitude alone.")
        (addition-bridge-scope . "Only the carry-driven same-Dn natural addition Dn to D(2n) is currently executable; signed/rational composition does not authorize arithmetic promotion or implicit mixed-domain coercion.")
