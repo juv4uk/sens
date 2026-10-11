@@ -7,6 +7,9 @@ on:
     paths:
       - "knowledge/d10-filter/all-candidates.tsv"
       - "knowledge/d10-current-inventory.json"
+      - "knowledge/d10-candidate-database-v1.json"
+      - "scripts/check_d10_candidate_database.py"
+      - "scripts/d10_batch_work.py"
       - "scripts/d10_prepare_filter_input.py"
       - "scripts/d10_restore_candidate_catalog.py"
       - "tests/test_d10_restore_candidate_catalog.py"
@@ -42,6 +45,26 @@ jobs:
           python3 -O -m unittest discover -s tests -p 'test_d10_mechanical_filter.py' -v
           python3 -O -m unittest discover -s tests -p 'test_d10_prepare_filter_input.py' -v
           python3 -O -m unittest discover -s tests -p 'test_d10_restore_candidate_catalog.py' -v
+      - name: Partition entire pending D10 database into bounded proof batches
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 scripts/d10_batch_work.py --self-test
+          python3 -O scripts/d10_batch_work.py --self-test
+          python3 scripts/d10_batch_work.py \
+            --batch-size 64 --output-dir "$RUNNER_TEMP/d10-batch" \
+            | tee "$RUNNER_TEMP/d10-batch-run.json"
+          python3 - "$RUNNER_TEMP/d10-batch/summary.json" <<'PY'
+          import csv, json, pathlib, sys
+          summary = json.loads(pathlib.Path(sys.argv[1]).read_text())
+          folder = pathlib.Path(sys.argv[1]).parent
+          with (folder / "all-work.tsv").open(newline="", encoding="utf-8") as stream:
+              rows = list(csv.DictReader(stream, delimiter="\t"))
+          assert len(rows) == summary["still_pending_work"]
+          assert len(rows) + summary["already_transferred_by_exact_proposal"] == summary["source_pending"]
+          assert summary["executed_witnesses_created"] == 0
+          print("D10_WORK_BATCHES", summary["batches"], "PENDING", len(rows))
+          PY
       - name: Materialize current pinned name index and run F1-F4 gates
         shell: bash
         run: |
@@ -186,6 +209,16 @@ jobs:
           done
           echo "D10_SIEVE_BLOCKED: main write contention after bounded safe retries" >&2
           exit 1
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: d10-bulk-proof-work-queue
+          path: |
+            ${{ runner.temp }}/d10-batch/all-work.tsv
+            ${{ runner.temp }}/d10-batch/batch-*.tsv
+            ${{ runner.temp }}/d10-batch/summary.json
+          if-no-files-found: warn
+          retention-days: 30
       - uses: actions/upload-artifact@v4
         if: always()
         with:
