@@ -7,6 +7,7 @@ on:
       - "scripts/stage-two-projections.py"
       - "tests/test_stage_two_projections.py"
       - "tests/test_migrated_two_projections.py"
+      - "tests/test_migrated_historical_two_projections.py"
       - "examples/migrated/**"
       - "scripts/publish_verified_uk_triplets.py"
       - "tests/test_publish_verified_uk_triplets.py"
@@ -30,6 +31,7 @@ on:
       - "scripts/stage-two-projections.py"
       - "tests/test_stage_two_projections.py"
       - "tests/test_migrated_two_projections.py"
+      - "tests/test_migrated_historical_two_projections.py"
       - "examples/migrated/**"
       - "scripts/publish_verified_uk_triplets.py"
       - "tests/test_publish_verified_uk_triplets.py"
@@ -62,6 +64,7 @@ jobs:
         run: |
           python3 -m unittest discover -s tests -p 'test_stage_two_projections.py' -v
           python3 -m unittest discover -s tests -p 'test_migrated_two_projections.py' -v
+          python3 -m unittest discover -s tests -p 'test_migrated_historical_two_projections.py' -v
       - name: No-clobber atomic exporter of verified Ukrainian T5 triplets
         run: python3 -m unittest discover -s tests -p 'test_publish_verified_uk_triplets.py' -v
       - name: Reproduce two known canonical uk → T5 → spaced-view canaries
