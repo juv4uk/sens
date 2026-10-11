@@ -26,7 +26,7 @@ SCHEMA = "sens-t5-migration-inventory/v1"
 
 EXT = {".rs", ".py", ".sh", ".yml", ".yaml", ".toml"}
 EXCLUDE_PREFIXES = (
-    "vendor/", "target/", "archive/", "docs/",
+    "vendor/", "target/", "archive/", "research/domain-archive/", "docs/",
     "knowledge/", "memory/", "дослідження/", "public/",
 )
 
