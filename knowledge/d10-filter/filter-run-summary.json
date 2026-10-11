@@ -3,7 +3,7 @@
   "authority": "RESEARCH-HOLD-F1-F4-NO-RATIFICATION",
   "complete_historical_branches_claimed": false,
   "current_inventory": {
-    "git_blob": "328d4babc0bef534eedaefe8b541373c326cf5da",
+    "git_blob": "b77c5b4aae35bcf377e8406f59328e6d82808a45",
     "path": "knowledge/d10-v9-semantic-inventory.json",
     "placed": 719,
     "ratified": 0,
@@ -13,20 +13,20 @@
   "files_sha256": {
     "accepted-queue.tsv": "26e71d70821778bfe7e871c470ac0d54b36eb9465685137a4fe4fe84739d44b8",
     "escalated.tsv": "26e71d70821778bfe7e871c470ac0d54b36eb9465685137a4fe4fe84739d44b8",
-    "rejected.tsv": "4850b21fc4bd7eba6d1fa72ae9c1d8532fc67f9555f0ff1dd6a0d56b8aca086c"
+    "rejected.tsv": "e936cc23508ec4955f3693cd455a1f7c938d0f2ac6be2784b577773285e43625"
   },
   "historical_catalog_reconciliation": {
-    "canonical_overlay_ids_added": 34,
+    "canonical_overlay_ids_added": 0,
     "colliding_spelling_groups_not_deduped": 287,
     "current_canonical_selected": 759,
-    "current_inventory_git_blob": "328d4babc0bef534eedaefe8b541373c326cf5da",
+    "current_inventory_git_blob": "b77c5b4aae35bcf377e8406f59328e6d82808a45",
     "full_union_candidate_ids": 1809,
     "full_union_ids": 1809,
     "full_union_names": 1495,
     "historical_commit": "17ab25d65346a6a1bfc71f0ed6d64ee75fc6f22f",
     "historical_git_blob": "4afd4c6292db8c93b001cae3162a85bc4307cf41",
     "new_allocations": 0,
-    "new_candidate_ids_beyond_historical": 280,
+    "new_candidate_ids_beyond_historical": 314,
     "new_names_beyond_historical": 0,
     "new_ratifications": 0,
     "restored_old_only_candidate_ids": 0,
@@ -36,13 +36,13 @@
     "source_historical_names": 1495,
     "source_historical_records": 1495,
     "source_id_overlap": 1495,
-    "source_latest_ids": 1775,
+    "source_latest_ids": 1809,
     "source_latest_names": 1495,
-    "source_latest_records": 1775,
-    "source_union_candidate_ids": 1775
+    "source_latest_records": 1809,
+    "source_union_candidate_ids": 1809
   },
   "input_index": "knowledge/d10-filter/all-candidates.tsv",
-  "input_index_sha256": "9b153953d1129715ec29c793c6624a7f65e50e8e90d5eeaf0c84fc29d5990061",
+  "input_index_sha256": "f71120e3201801668199054fea9a816aff4bb001db5623111962510edbee88b2",
   "mechanical_partition": {
     "accepted": 0,
     "escalated": 0,
@@ -60,5 +60,5 @@
   },
   "physical_t5_authorized": false,
   "schema": "d10-unified-filter-run/v1",
-  "source_commit": "509b7b1694735849b9c7cb6dd72a89739e68c76f"
+  "source_commit": "55667be6e4b73a20ebdc06104e0142ea100da84c"
 }
