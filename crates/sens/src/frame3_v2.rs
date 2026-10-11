@@ -399,7 +399,7 @@ mod tests {
         let source = words("10 001 00 000 01");
         let v1 = super::super::encode(&source).unwrap();
         let v2 = encode_v2(&source).unwrap();
-        assert!(v2.contains(&GRAMMAR));
+        assert_eq!(v2[4], GRAMMAR, "one-block fixture must use grammar tag");
         assert_eq!(v1[2], 1);
         assert_eq!(v2[2], 2);
         assert!(v2.len() < v1.len(), "whole-file v2 must win for this D2 fixture");
