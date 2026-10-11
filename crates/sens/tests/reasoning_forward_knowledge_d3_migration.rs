@@ -28,7 +28,11 @@ fn session(migrated: bool) -> Session {
             eval_parsed_expressions(&parsed, &mut session)
                 .expect("candidate reasoning source must load");
         } else {
-            eval_program(old, &mut session).expect("pre-migration source must load");
+            // The frozen W8 corpus already contains short D3-D6 selectors.
+            // The ordinary numeric reader cannot execute it faithfully.
+            // Compare *both* variants under the same pinned typed reader.
+            sens::eval_pinned_reasoning_source(name, old, &mut session)
+                .expect("pre-migration W8 source must load through the same typed reader");
         }
     }
     session
