@@ -81,6 +81,10 @@ class LegacyD3GuardTests(unittest.TestCase):
         source = (ROOT / "scripts" / "check-domain-table-readable.lisp").read_text(encoding="utf-8")
         self.assertEqual(MODULE.scan_lisp(source, "scripts/check-domain-table-readable.lisp"), [])
 
+    def test_island_math_evidence_guard_uses_only_d1_cond_tests(self):
+        source = (ROOT / "scripts" / "check-island-math-evidence.lisp").read_text(encoding="utf-8")
+        self.assertEqual(MODULE.scan_lisp(source, "scripts/check-island-math-evidence.lisp"), [])
+
     def test_historical_paths_and_metadata_excluded(self):
         for path in ("docs/research/old.lisp", "research/domain-archive/a.lisp",
                      "tests/fixtures/old.lisp", "lib/domains/d3.lisp",
