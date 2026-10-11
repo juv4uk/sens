@@ -435,7 +435,7 @@ class ThreePassMigrationTests(unittest.TestCase):
 
 
     def test_global_text7_call_head_uses_same_frame_as_define_target(self):
-        source="""\\
+        source="""\
 (00001001 foo
   (00001000 ()
     1))
@@ -499,7 +499,7 @@ class ThreePassMigrationTests(unittest.TestCase):
 
 
     def test_machine_block_local_callable_shadows_builtin_surface(self):
-        source="""\\
+        source="""\
 (00001001 first
   (00001000 (first)
     (first)))
