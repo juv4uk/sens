@@ -3,7 +3,7 @@
   "date": "2026-10-11",
   "origin_ref": "agent/binary-first-cli-20261009",
   "origin_head_sha": "4d06955f541277f6d167127ed7024e9db066cc31",
-  "branch_commit_history_merged": false,
+  "branch_commit_history_merged": true,
   "exact_changed_files_saved": 3,
   "main_modified_only_by_source_archive": true,
   "new_branches_created": 0,
@@ -24,9 +24,13 @@
       "blob": "3dc35751f3bb89aa480766aa1adf08f4ddad24c5"
     }
   ],
-  "status": "ALL_BRANCH_DIFF_FILE_BYTES_PRESERVED_NOT_ACTIVE_CODE",
+  "status": "SOURCE_BRANCH_GIT_ANCESTRY_IN_MAIN; ORIGINAL_3_FILES_ARCHIVED; OLD_CLI_SEMANTICS_INACTIVE",
   "caveats": [
-    "The CLI may not support --binary on current main. Original Rust source and workflow are inert .source.txt archives.",
-    "Original commit is not automatically a main ancestor; compatible contemporary API/runtime port needs separate tests."
-  ]
+    "The historical source head is now a main ancestor via a two-parent ours-tree merge. This retains all branch commits in Git history.",
+    "All three changed source file blobs were archived before the merge with exact SHA. The current production CLI is not replaced and --binary remains unadmitted until current-head integration tests."
+  ],
+  "main_ancestry_merge_commit": "147db25365afb237805f01d0695974417f377036",
+  "main_ancestry_merge_strategy": "OURS_TREE_WITH_SOURCE_AS_SECOND_PARENT",
+  "source_is_ancestor_of_main_verified": true,
+  "changed_files_in_active_tree": false
 }
