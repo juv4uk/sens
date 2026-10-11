@@ -2,6 +2,15 @@
 
 This is an execution and blocker ledger, not a claim that the repository is fully migrated.
 
+## 2026-10-12: runtime gate corrects unsafe D6 LET migration
+
+- Source-specific `D6:001000 LET` replacement was attempted on **44** old binder heads (`lib/forward.lisp`: 19; `lib/knowledge.lisp`: 25) but failed executable parity: [Hosted CI 38184594810](https://github.com/juv4uk/sens/actions/runs/38184594810), `domain identity is not callable under its ratified law: D6 001000`. This is a true callability gap, not a mere width/syntax issue. **All 44 replacements were reverted** in [commit 98dbf014](https://github.com/juv4uk/sens/commit/98dbf014b0b109a52e8632e372b7e10964c6eb7e). The 44 are **not** counted as migrated.
+- The existing source guard `tests/test_sid8_let_source_cohort.py` and its CI workflow now **assert preservation** of the 44 historical source heads until a runtime/oracle proof admits exact D6 LET. The guard explicitly preserves current D8 `00101100` MOD in three active modules; it cannot be remapped using historical SID8 MEMBER.
+- Separate **two-source D3 migration**: `scripts/enforce-function-table-mechanisms.lisp` and `scripts/enforce-island-math-evidence.lisp` had **18 historical executable call heads** rewritten to ratified D1/D3/D8/D9 successors, with two old three-field COND clauses normalized into two-field D3 and explicit D1-true fallback. Original-blob pin, malformed three-field, and host-truth negative controls in `tests/test_sid8_d3_enforcement_cutover.py` all [PASS in source bulk CI 38184594850](https://github.com/juv4uk/sens/actions/runs/38184594850). These are source-level checks only, **not** full runtime parity.
+- Broader Hosted CI at the same SHA also reported *other* active D3/FS/time failures; a focused green source witness must not be reported as overall green.
+- Runtime implementation/verification follow-up tracked under [D6 issue #3394](https://github.com/juv4uk/sens/issues/3394). No new branches or physical `.sens` files.
+- The earlier **7,551** source-head tally therefore changes to **7,569** for that original accounted cohort plus these two scripts; additional parallel-worker D4-only edits are recorded elsewhere in this ledger and must not be double-counted. Historical unadmitted cells and donor files are retained.
+
 ## 2026-10-12: whole-corpus read-only triage and three D3-source repairs
 
 - Live GitHub Actions [#38183466413](https://github.com/juv4uk/sens/actions/runs/38183466413) **PASS**: **686 tracked .lisp files** were classified. **157 active candidates**, 168 contract/record-only, 173 preserved original archives, 154 preserved test/evidence witnesses and 34 unclassified paths. No source content, historical proof or binary format was changed by the census.
