@@ -1,0 +1,50 @@
+{
+  "schema": "sens.domain-research-archive-extension/v1",
+  "date": "2026-10-11",
+  "source_repository": "juv4uk/sens",
+  "source_pr": 1995,
+  "source_pr_url": "https://github.com/juv4uk/sens/pull/1995",
+  "source_head_sha": "470515d4b15f70fa6d01136281ea23b2b5339249",
+  "status": "HISTORICAL_BENCHMARK_EVIDENCE_ONLY_NOT_RATIFIED_NOT_EXECUTABLE",
+  "files_total": 4,
+  "files_archived_verified": 2,
+  "files_source_only": 2,
+  "scope": "Раннє 3-replay Cachegrind порівняння Sens8/Inline64/BitBytes/SmallSpill (гарантоване походження не є доказом сучасної відповідності).",
+  "limitations": "Не переносити історичний SID8 у поточні закони; старі порівняння не мають автоматичного статусу актуального бенчмарка або production winner.",
+  "records": [
+    {
+      "original_path": "benchmarks/identity-carrier/README.md",
+      "original_git_blob_sha": "3e4c408fa3cdfc12a0c31b4405427b3dae00ae06",
+      "archive_path": "research/domain-archive/20261011/pr1995/benchmarks/identity-carrier/README.md",
+      "archive_git_blob_sha": "3e4c408fa3cdfc12a0c31b4405427b3dae00ae06",
+      "status": "BYTE_IDENTICAL_ARCHIVED"
+    },
+    {
+      "original_path": "docs/research/1989-carrier-bench.tsv",
+      "original_git_blob_sha": "c41bbdf9283c7b0378dd3b3cd3b68c302f01e102",
+      "archive_path": "research/domain-archive/20261011/pr1995/docs/research/1989-carrier-bench.tsv",
+      "archive_git_blob_sha": "c41bbdf9283c7b0378dd3b3cd3b68c302f01e102",
+      "status": "BYTE_IDENTICAL_ARCHIVED"
+    },
+    {
+      "original_path": "benchmarks/identity-carrier/carrier_bench.c",
+      "original_git_blob_sha": "88adb7170cd9d5055ebfa9422553095a9f97d15c",
+      "archive_path": null,
+      "archive_git_blob_sha": null,
+      "status": "SOURCE_REFERENCED_NOT_COPIED"
+    },
+    {
+      "original_path": "benchmarks/identity-carrier/run.py",
+      "original_git_blob_sha": "219dc828d35b5c92c6fcfbefe7b7b50d87602dfb",
+      "archive_path": null,
+      "archive_git_blob_sha": null,
+      "status": "SOURCE_REFERENCED_NOT_COPIED"
+    }
+  ],
+  "coordination": [
+    "#5549",
+    "#5132",
+    "#5041"
+  ],
+  "admission": "Будь-яке рішення щодо нових доменів тільки через незалежні оракули, семантичну дедуплікацію та ратифікацію власника."
+}
