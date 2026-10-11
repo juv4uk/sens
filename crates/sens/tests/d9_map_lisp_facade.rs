@@ -21,9 +21,14 @@ fn internal_map_facade_is_not_d9_auto_dispatch() {
     assert_eq!(empty.value.to_string(), "()");
     let failure = sens::parse_mixed_exact_domain("(101001100 (001 ()))")
         .expect("exact D9 source must not silently reinterpret a numeric value");
-    // D9 admission is a separate task; use ordinary source to ensure no
-    // accidental name/ID coercion in the Lisp-derived facade.
-    assert!(!failure.is_empty());
+    // D9 has no admitted callable mechanism. A number is never promoted
+    // to a function merely because the spelling happens to be binary.
+    let error = sens::eval_parsed_expressions(&failure, &mut session)
+        .expect_err("unadmitted 9-bit head must fail closed");
+    assert!(
+        error.message.contains("not callable"),
+        "expected the named non-callable diagnostic: {error:?}"
+    );
 }
 
 #[test]
