@@ -13,7 +13,7 @@
 
 T5 зберігає всі слова, включно з W1..W9, `00/01/10/11` як точними D2, провідними нулями і роздільниками. F3 не має права «канонізувати» QUOTE-дані або перетворювати невиконувані структури на інші слова.
 
-**Це ще дослідний перемикач**, не production інтеграція. Чинний `sens-trit` та canonical loader поки читають лише `.sens`; автоматичне читання `.senc` ЗАБОРОНЕНО, доки не готовий окремий explicit F3 reader, два незалежні оракули та позитивний CI. Дійсний `.senc` за замовчуванням **не** стає «виконуваним SENS-файлом» у `sens-trit`.
+**Оновлено:** чинний sens-trit має лише явні команди open-f3, decode-f3, eval-f3 для .senc, а звичайні .sens маршрути зберігають T5. Явний декодер обмежений програмами до 16 фізичних байтів T5, вимагає мітку 0xf3, відновлює точні слова і викликає той самий виробничий SENS читач/виконавець. **Автовизначення F3, неявного виконання або декодерного fallback немає.**
 
 ## Атомарний робочий свідок (у main)
 
@@ -28,6 +28,41 @@ cargo run --locked --release -p sens --example two_codec_small_programs -- --con
 Третя команда створює `/tmp/output-stem.senc` або `/tmp/output-stem.sens` через `create_new`, не перезаписує наявного файла, не змінює вхідний T5. Проводить декодування обраного носія **через заявлений формат**, перевіряє канонічний T5 reader та **точну рівність кожного вихідного фізичного байта**. Вибір на користь F3 — лише якщо `len([0xf3] + F3-body) < len(T5)`. При рівності вибираємо T5.
 
 Звіт `--report` читає **всі git-tracked `*.sens`** без ручного cherry-pick, показує рішення, розмір обох носіїв за можливості, статус і фактичний файл. Позитивний тест вимагає, щоб серед них було хоча б по одному T5 та F3, і сумарний результат був менший за повний початковий T5-корпус. [CI тут](../.github/workflows/two-codec-small-f3-policy.yml).
+
+
+## Явний робочий маршрут CLI (перевірено на реальних фізичних файлах)
+
+~~~sh
+cargo build --locked --release -p sens-cli --bin sens-trit
+
+# .senc необхідно заздалегідь створити лише за допуском tiny F3:
+target/release/sens-trit open-f3 /tmp/short.senc
+target/release/sens-trit decode-f3 /tmp/short.senc
+target/release/sens-trit eval-f3 /tmp/short.senc
+
+# T5 без змін:
+target/release/sens-trit open tests/fixtures/migration-quote-cohort-main/quote-legacy.sens
+~~~
+
+Явний маршрут реалізований у [bounded F3 decoder](../crates/sens/src/frame3_small.rs)
+і [CLI sens-trit](../crates/sens-cli/src/bin/sens-trit.rs), використовує той самий
+production canonical T5/D2 parser і pure SENS evaluator; F3 не має окремих
+семантичних правил. Для .sens звичайні open/view/decode/eval збережено;
+однопараметричне .senc не відкривається і не виконується мовчки.
+
+[Успішний CI #38170264184](https://github.com/juv4uk/sens/actions/runs/38170264184)
+на SHA e1dc3384b53e61e17e25fcf4f74fdb04bcfa890a перевірив усі **9 F3**
+кандидатів із повного корпусу **23** tracked файлів: для кожного збіглися
+open, decode і eval через T5 та явний F3; перевірено wrong-marker,
+invalid extension, порожнє й завелике F3. [Артефакт реальних файлів і
+результатів CLI](https://github.com/juv4uk/sens/actions/runs/38170264184/artifacts/11713558135).
+
+**Межа безпеки:** початковий F3 0xf3 + rank не має CRC/MAC.
+Якщо пошкодження випадково перетворює файл на **інший допустимий фізичний
+F3**, сам декодер не може визначити підміну; для публікації за межами
+перевіреного каталогу потрібна довірена контрольна сума маніфесту або
+криптографічний підпис. Stage manifest уже має SHA-256 кожного файла.
+Тому мітка й негативні тести НЕ означають повного захисту від довільної корупції.
 
 ## Що означає «один байт»
 
@@ -63,7 +98,7 @@ cargo run --locked --release -p sens --example two_codec_small_programs -- --con
 
 1. Одна й та сама точна мова з обома кодеками; жодних «псевдооператорів» або зміни арності, `QUOTE` дані залишаються даними; `((0))` не рекламувати як виконувану програму.
 2. Explicit caller/extension codec selection, `0xf3` маркер F3; без content sniffing, без неявного fallback та без одночасного T5/F3 трактування одного файла.
-3. Canonical Rust D2/physical T5 oracle + незалежний reference decoder F3; **виправити поточний Rust↔Python F3 parity blocker 1062/1703**, інакше F3 лишається дослідом.
+3. Canonical Rust D2/physical T5 oracle + незалежний reference decoder F3; **паритет фізичного носія та незалежний обмежений семантичний допуск D3** успішно розділено і перевірено в [CI #38169848649](https://github.com/juv4uk/sens/actions/runs/38169848649): 1703 записи, 2229 фізичних перевірок, 6 D3 admitted, 551 D3 rejected, 31 негативний тест, 0 failures. Це НЕ доказ повної семантики D1–D9.
 4. Тільки real physical bytes включно з F3-маркером; підбір F3 лише в короткій області; більший/непідтримуваний F3 не шкодить загальному режиму.
 5. Малий декодер без надмірних алокацій та непропорційних обчислень; оновити CLI й безпекові guards тільки після двох оракулів, окремої fail-closed межі й зеленого CI.
 6. Нових Git-гілок не створювати; один production Rust-власник [#5439](https://github.com/juv4uk/sens/issues/5439) та інтегратор [#5041](https://github.com/juv4uk/sens/issues/5041).
