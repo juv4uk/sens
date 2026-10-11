@@ -5,12 +5,17 @@ on:
     paths:
       - 'knowledge/d10-v2-semantic-inventory.json'
       - 'knowledge/d10-v3-semantic-inventory.json'
+      - 'knowledge/d10-v4-semantic-inventory.json'
+      - 'knowledge/d10-flavors-restarts-research-v1.json'
+      - 'knowledge/d10-time-law-review-v2.json'
       - 'knowledge/d10-current-inventory.json'
       - 'knowledge/d10-selected-coordinate-allocation-v1.json'
       - 'scripts/check_d10_v2_current_placement.py'
       - 'scripts/check_d10_v3_archived_candidates.py'
+      - 'scripts/check_d10_v4_research_candidates.py'
       - 'tests/test_d10_v2_current_placement.py'
       - 'tests/test_d10_v3_archived_candidates.py'
+      - 'tests/test_d10_v4_research_candidates.py'
       - 'tests/test_d10_completion_readiness.py'
       - 'scripts/check_d10_completion_readiness.py'
       - '.github/workflows/d10-completion-readiness.yml'
@@ -43,6 +48,10 @@ jobs:
         run: |
           python3 scripts/check_d10_v3_archived_candidates.py --self-test
           python3 -m unittest discover -s tests -p test_d10_v3_archived_candidates.py -v
+      - name: Перевірити 9 нових доказових кандидатів v4 та 8 негативних мутацій
+        run: |
+          python3 scripts/check_d10_v4_research_candidates.py --self-test
+          python3 -m unittest discover -s tests -p test_d10_v4_research_candidates.py -v
       - name: Порахувати реальний запас D10
         run: |
           python3 scripts/check_d10_completion_readiness.py >"$RUNNER_TEMP/d10-readiness.json"
