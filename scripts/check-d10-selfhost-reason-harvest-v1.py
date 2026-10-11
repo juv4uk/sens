@@ -44,12 +44,25 @@ assert len({r["semantic_name"].upper() for r in inv["rows"]}) == len(inv["rows"]
 donors = {r["path"]: r for r in h["donors"]}
 assert set(donors) == {"lib/meta-eval.lisp", "lib/reason.lisp"}
 lines = {}
+source_dispositions = []
 for path, donor in donors.items():
-    raw = (root / path).read_bytes()
-    actual = hashlib.sha1(
+    # The attested source is immutable evidence, not today's mutable library.
+    snapshot = root / "knowledge/d10-source-snapshots" / (donor["source_sha"] + ".lisp")
+    assert snapshot.is_file(), ("missing immutable donor snapshot", path, donor["source_sha"])
+    raw = snapshot.read_bytes()
+    historical_actual = hashlib.sha1(
         b"blob " + str(len(raw)).encode("ascii") + bytes([0]) + raw
     ).hexdigest()
-    assert actual == donor["source_sha"], (path, actual)
+    assert historical_actual == donor["source_sha"], (path, historical_actual)
+    # Report live drift explicitly; drift is not proof of equivalence and does not
+    # rewrite the old attestation. Keep this check research-only and fail closed
+    # if the historical snapshot itself is unavailable or corrupt.
+    live_raw = (root / path).read_bytes()
+    live_actual = hashlib.sha1(
+        b"blob " + str(len(live_raw)).encode("ascii") + bytes([0]) + live_raw
+    ).hexdigest()
+    disposition = "HISTORICAL-BLOB-MATCH" if live_actual == donor["source_sha"] else "CURRENT-BLOB-DRIFT"
+    source_dispositions.append(f"{path}={disposition}")
     lines[path] = raw.decode("utf-8").splitlines()
 for row in rows:
     got = all_ids[row["stable_id"]]
@@ -81,4 +94,4 @@ assert state["target"]["remaining_semantic_candidates"] == 1024-n
 assert state["target"]["law_forced_coordinates"] == 256
 assert state["target"]["ratified_residents"] == 0
 assert "knowledge/d10-selfhost-reason-harvest-v1.json" in inv["sources"]
-print(f"D10-SELFHOST-REASON-HARVEST: PASS ({len(rows)} new, {n}/1024, remaining {1024-n}, ratified 0)")
+print(f"D10-SELFHOST-REASON-HARVEST: PASS ({len(rows)} archived candidates, {n}/1024, remaining {1024-n}, ratified 0); source disposition: {', '.join(source_dispositions)}")
