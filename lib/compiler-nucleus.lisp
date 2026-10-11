@@ -393,14 +393,14 @@
 
 ; Validate source shape only after SENS has already derived the abstract role.
 ; This is deliberately role -> arity/shape, never domain-bits -> shape.
+; Arguments are proper SENS compiler-program-data lists.  Exact cardinality
+; must be tested using the D3 ATOM predicate on the tail, not a D4
+; operator applied to an already-computed D1 predicate bit.
 (0011 compiler-exactly-one
   (0010 (arguments)
     (110
       ((010 arguments) (compiler-false ()))
-      ((010 (011 arguments))
-       (110
-         ((0100 (010 (011 arguments))) (compiler-true ()))
-         ((compiler-true ()) (compiler-false ()))))
+      ((010 (011 arguments)) (compiler-true ()))
       ((compiler-true ()) (compiler-false ())))))
 
 (0011 compiler-exactly-two
@@ -408,10 +408,7 @@
     (110
       ((010 arguments) (compiler-false ()))
       ((010 (011 arguments)) (compiler-false ()))
-      ((010 (011 (011 arguments)))
-       (110
-         ((0100 (010 (011 (011 arguments)))) (compiler-true ()))
-         ((compiler-true ()) (compiler-false ()))))
+      ((010 (011 (011 arguments))) (compiler-true ()))
       ((compiler-true ()) (compiler-false ())))))
 
 ; D4 LAMBDA is parameters plus one-or-more body expressions.
