@@ -11116,7 +11116,20 @@
       "law": "Receives transformed instance, added/discarded slot names and pre-redefinition bound values for discarded slots; allows user-defined migration hooks.",
       "selected": false,
       "ratified": false,
-      "physical_t5_authorized": false
+      "physical_t5_authorized": false,
+      "source_evidence": {
+        "status": "SOURCE-PINNED-LAW-AND-WITNESSES; NOT SELECTED",
+        "source_git_blob": "3c6e85d94e78cdd5fe9b9b645095b48335f768e5",
+        "law_source_key": "observable_law",
+        "positive_source_key": "positive_witness",
+        "negative_source_key": "falsifier",
+        "law": "Receives transformed instance, added/discarded slot names and pre-redefinition bound values for discarded slots; allows user-defined migration hooks.",
+        "positive": "Old x,y slots discarded, new rho/theta added: hook can use old property-list x,y to fill new values.",
+        "negative": "Fail if discarded values are unavailable to hook or new initforms overwrite explicit migrated values.",
+        "independent_semantic_review": "PENDING",
+        "core_vs_library": "PENDING",
+        "ratification": false
+      }
     },
     {
       "coordinate": "1100111111",
@@ -11128,7 +11141,20 @@
       "law": "Returns an ordered proper list of method qualifiers, separate from specializers and from runtime applicability.",
       "selected": false,
       "ratified": false,
-      "physical_t5_authorized": false
+      "physical_t5_authorized": false,
+      "source_evidence": {
+        "status": "SOURCE-PINNED-LAW-AND-WITNESSES; NOT SELECTED",
+        "source_git_blob": "3c6e85d94e78cdd5fe9b9b645095b48335f768e5",
+        "law_source_key": "observable_law",
+        "positive_source_key": "positive_witness",
+        "negative_source_key": "falsifier",
+        "law": "Returns an ordered proper list of method qualifiers, separate from specializers and from runtime applicability.",
+        "positive": "Method with (:before) returns (:before), primary method returns ().",
+        "negative": "Fail if returns method precedence position instead of stored qualifier list.",
+        "independent_semantic_review": "PENDING",
+        "core_vs_library": "PENDING",
+        "ratification": false
+      }
     },
     {
       "coordinate": "1101000000",
@@ -11140,7 +11166,20 @@
       "law": "Invoked on generic call with zero applicable methods; default signals error, overriding method may return alternative result.",
       "selected": false,
       "ratified": false,
-      "physical_t5_authorized": false
+      "physical_t5_authorized": false,
+      "source_evidence": {
+        "status": "SOURCE-PINNED-LAW-AND-WITNESSES; NOT SELECTED",
+        "source_git_blob": "3c6e85d94e78cdd5fe9b9b645095b48335f768e5",
+        "law_source_key": "observable_law",
+        "positive_source_key": "positive_witness",
+        "negative_source_key": "falsifier",
+        "law": "Invoked on generic call with zero applicable methods; default signals error, overriding method may return alternative result.",
+        "positive": "Generic with zero applicable methods routes to this method with original arguments, before keyword-validity checking.",
+        "negative": "Fail if arbitrarily selects unrelated method or converts zero candidates to D1:NO without explicit result law.",
+        "independent_semantic_review": "PENDING",
+        "core_vs_library": "PENDING",
+        "ratification": false
+      }
     },
     {
       "coordinate": "1101000001",
@@ -11152,7 +11191,20 @@
       "law": "When CALL-NEXT-METHOD has no next method, no-next-method is invoked with generic, current method and args; default error.",
       "selected": false,
       "ratified": false,
-      "physical_t5_authorized": false
+      "physical_t5_authorized": false,
+      "source_evidence": {
+        "status": "SOURCE-PINNED-LAW-AND-WITNESSES; NOT SELECTED",
+        "source_git_blob": "3c6e85d94e78cdd5fe9b9b645095b48335f768e5",
+        "law_source_key": "observable_law",
+        "positive_source_key": "positive_witness",
+        "negative_source_key": "falsifier",
+        "law": "When CALL-NEXT-METHOD has no next method, no-next-method is invoked with generic, current method and args; default error.",
+        "positive": "Last primary method invokes CALL-NEXT-METHOD; no-next-method receives the precise current method.",
+        "negative": "Fail if silently returns NIL or restarts from the first method.",
+        "independent_semantic_review": "PENDING",
+        "core_vs_library": "PENDING",
+        "ratification": false
+      }
     },
     {
       "coordinate": "1101000010",
@@ -11164,7 +11216,20 @@
       "law": "Creates a new generic function for an unbound global function name or returns/modifies an existing generic descriptor; rejects ordinary-function/macro collision.",
       "selected": false,
       "ratified": false,
-      "physical_t5_authorized": false
+      "physical_t5_authorized": false,
+      "source_evidence": {
+        "status": "SOURCE-PINNED-LAW-AND-WITNESSES; NOT SELECTED",
+        "source_git_blob": "3c6e85d94e78cdd5fe9b9b645095b48335f768e5",
+        "law_source_key": "observable_law",
+        "positive_source_key": "positive_witness",
+        "negative_source_key": "falsifier",
+        "law": "Creates a new generic function for an unbound global function name or returns/modifies an existing generic descriptor; rejects ordinary-function/macro collision.",
+        "positive": "Repeated ensure on an existing generic reuses its identity and leaves unrelated methods intact.",
+        "negative": "Fail if existing ordinary function is silently overwritten or unrelated methods vanish.",
+        "independent_semantic_review": "PENDING",
+        "core_vs_library": "PENDING",
+        "ratification": false
+      }
     },
     {
       "coordinate": "1101000011",
@@ -11176,7 +11241,20 @@
       "law": "Changes existing instance slot values according to valid initargs without adding/removing slots and without re-running omitted initforms.",
       "selected": false,
       "ratified": false,
-      "physical_t5_authorized": false
+      "physical_t5_authorized": false,
+      "source_evidence": {
+        "status": "SOURCE-PINNED-LAW-AND-WITNESSES; NOT SELECTED",
+        "source_git_blob": "3c6e85d94e78cdd5fe9b9b645095b48335f768e5",
+        "law_source_key": "observable_law",
+        "positive_source_key": "positive_witness",
+        "negative_source_key": "falsifier",
+        "law": "Changes existing instance slot values according to valid initargs without adding/removing slots and without re-running omitted initforms.",
+        "positive": "Instance a=1,b=2 reinit a=3 => same instance with a=3,b=2.",
+        "negative": "Fail if b resets to initform or the instance layout changes.",
+        "independent_semantic_review": "PENDING",
+        "core_vs_library": "PENDING",
+        "ratification": false
+      }
     },
     {
       "coordinate": "1101000100",
@@ -12004,7 +12082,20 @@
       "coordinate_basis": "NEXT-FREE-NONCANONICAL-RESEARCH-NAME-RESERVATION",
       "selected": false,
       "ratified": false,
-      "physical_t5_authorized": false
+      "physical_t5_authorized": false,
+      "source_evidence": {
+        "status": "SOURCE-PINNED-LAW-AND-WITNESSES; NOT SELECTED",
+        "source_git_blob": "fecd72417f556024fa20d5e6f1340960c5b82c7b",
+        "law_source_key": "law",
+        "positive_source_key": "positives",
+        "negative_source_key": "falsifiers",
+        "law": "A calendar-specific, validity-checked civil date plus UT hours maps to a continuous Julian-day value whose fractional-day origin is noon; year 0 is astronomical, not historical. Invalid civil dates are rejected rather than normalized.",
+        "positive": "[{\"input\":[\"GREGORIAN\",2000,1,1,12],\"expected\":2451545},{\"input\":[\"GREGORIAN\",2000,1,1,0],\"expected\":2451544.5}]",
+        "negative": "[{\"input\":[\"GREGORIAN\",2000,2,30,0],\"forbidden\":\"valid JD; source normalization must not masquerade as accepted civil date\"},{\"input\":[\"JULIAN\",2000,1,1,12],\"forbidden\":2451545}]",
+        "independent_semantic_review": "PENDING",
+        "core_vs_library": "PENDING",
+        "ratification": false
+      }
     },
     {
       "coordinate": "1110001001",
@@ -12016,7 +12107,20 @@
       "coordinate_basis": "NEXT-FREE-NONCANONICAL-RESEARCH-NAME-RESERVATION",
       "selected": false,
       "ratified": false,
-      "physical_t5_authorized": false
+      "physical_t5_authorized": false,
+      "source_evidence": {
+        "status": "SOURCE-PINNED-LAW-AND-WITNESSES; NOT SELECTED",
+        "source_git_blob": "fecd72417f556024fa20d5e6f1340960c5b82c7b",
+        "law_source_key": "law",
+        "positive_source_key": "positives",
+        "negative_source_key": "falsifiers",
+        "law": "Inverse on admitted civil-date domain of CALENDAR-TO-JULIAN-DAY; noon JD integral; midnight JD half-integer, with an explicit chosen calendar and astronomical year numbering.",
+        "positive": "[{\"input\":[2451545,\"GREGORIAN\"],\"expected\":[2000,1,1,12]},{\"input\":[2451544.5,\"GREGORIAN\"],\"expected\":[2000,1,1,0]}]",
+        "negative": "[{\"input\":[2451545,\"GREGORIAN\"],\"forbidden\":[2000,1,1,0]},{\"input\":[2451545,\"JULIAN\"],\"forbidden\":[2000,1,1,12]}]",
+        "independent_semantic_review": "PENDING",
+        "core_vs_library": "PENDING",
+        "ratification": false
+      }
     },
     {
       "coordinate": "1110001010",
@@ -12028,7 +12132,20 @@
       "coordinate_basis": "NEXT-FREE-NONCANONICAL-RESEARCH-NAME-RESERVATION",
       "selected": false,
       "ratified": false,
-      "physical_t5_authorized": false
+      "physical_t5_authorized": false,
+      "source_evidence": {
+        "status": "SOURCE-PINNED-LAW-AND-WITNESSES; NOT SELECTED",
+        "source_git_blob": "fecd72417f556024fa20d5e6f1340960c5b82c7b",
+        "law_source_key": "law",
+        "positive_source_key": "positives",
+        "negative_source_key": "falsifiers",
+        "law": "Synchronous leapfrog: derive every new position from previous snapshot and half-step velocity, then every new half-step velocity from accelerations evaluated on the same next-position snapshot. Original snapshot unchanged; update order must not change result.",
+        "positive": "[{\"input\":{\"x\":0,\"vhalf\":1,\"a\":2,\"dt\":2},\"expected\":{\"x\":2,\"vhalf\":5}},{\"input\":{\"x\":4,\"vhalf\":-2,\"a\":9,\"dt\":0},\"expected\":{\"x\":4,\"vhalf\":-2}}]",
+        "negative": "[{\"input\":{\"x\":0,\"vhalf\":1,\"a\":2,\"dt\":2},\"forbidden\":{\"x\":6,\"vhalf\":5}},{\"input\":\"two interacting particles\",\"forbidden\":\"result changes with iteration order\"}]",
+        "independent_semantic_review": "PENDING",
+        "core_vs_library": "PENDING",
+        "ratification": false
+      }
     },
     {
       "coordinate": "1110001011",
@@ -12040,7 +12157,20 @@
       "coordinate_basis": "NEXT-FREE-NONCANONICAL-RESEARCH-NAME-RESERVATION",
       "selected": false,
       "ratified": false,
-      "physical_t5_authorized": false
+      "physical_t5_authorized": false,
+      "source_evidence": {
+        "status": "SOURCE-PINNED-LAW-AND-WITNESSES; NOT SELECTED",
+        "source_git_blob": "fecd72417f556024fa20d5e6f1340960c5b82c7b",
+        "law_source_key": "law",
+        "positive_source_key": "positives",
+        "negative_source_key": "falsifiers",
+        "law": "Apply explicit window pointwise then DFT; return one-sided magnitude and atan2 phase with declared zero-amplitude phase convention 0. No implicit device, sample rate, hop or tensor layout.",
+        "positive": "[{\"input\":{\"samples\":[1,0,0,0],\"window\":[1,1,1,1]},\"expected\":{\"magnitude\":[1,1,1],\"phase\":[0,0,0]}},{\"input\":{\"samples\":[1,1,1,1],\"window\":[1,1,1,1]},\"expected\":{\"magnitude\":[4,0,0],\"phase\":[0,0,0]}}]",
+        "negative": "[{\"input\":{\"samples\":[1,0,0],\"window\":[1,1]},\"forbidden\":\"silent truncation\"},{\"input\":{\"samples\":[0,0,0,0],\"window\":[1,1,1,1]},\"forbidden\":\"claimed measured physical phase for zero amplitude\"}]",
+        "independent_semantic_review": "PENDING",
+        "core_vs_library": "PENDING",
+        "ratification": false
+      }
     },
     {
       "coordinate": "1110001100",
@@ -12052,7 +12182,20 @@
       "coordinate_basis": "NEXT-FREE-NONCANONICAL-RESEARCH-NAME-RESERVATION",
       "selected": false,
       "ratified": false,
-      "physical_t5_authorized": false
+      "physical_t5_authorized": false,
+      "source_evidence": {
+        "status": "SOURCE-PINNED-LAW-AND-WITNESSES; NOT SELECTED",
+        "source_git_blob": "fecd72417f556024fa20d5e6f1340960c5b82c7b",
+        "law_source_key": "law",
+        "positive_source_key": "positives",
+        "negative_source_key": "falsifiers",
+        "law": "For equal nonempty sample and reference vectors, use signed correlation, normalized by the geometric mean of energies, to classify a reliable coherent bit. Zero energy or confidence below threshold yields AMBIGUOUS rather than a reliable fabricated bit.",
+        "positive": "[{\"input\":{\"samples\":[1,1],\"reference\":[1,1],\"threshold\":0.5},\"expected\":{\"bit\":1,\"confidence\":1}},{\"input\":{\"samples\":[-1,-1],\"reference\":[1,1],\"threshold\":0.5},\"expected\":{\"bit\":0,\"confidence\":1}}]",
+        "negative": "[{\"input\":{\"samples\":[0,0],\"reference\":[1,1],\"threshold\":0.5},\"forbidden\":\"reliably classified bit 1\"},{\"input\":{\"samples\":[1],\"reference\":[1,1],\"threshold\":0.5},\"forbidden\":\"silent zip truncation\"}]",
+        "independent_semantic_review": "PENDING",
+        "core_vs_library": "PENDING",
+        "ratification": false
+      }
     },
     {
       "coordinate": "1110001101",
@@ -12064,7 +12207,20 @@
       "coordinate_basis": "NEXT-FREE-NONCANONICAL-RESEARCH-NAME-RESERVATION",
       "selected": false,
       "ratified": false,
-      "physical_t5_authorized": false
+      "physical_t5_authorized": false,
+      "source_evidence": {
+        "status": "SOURCE-PINNED-LAW-AND-WITNESSES; NOT SELECTED",
+        "source_git_blob": "fecd72417f556024fa20d5e6f1340960c5b82c7b",
+        "law_source_key": "law",
+        "positive_source_key": "positives",
+        "negative_source_key": "falsifiers",
+        "law": "Generate two-tone samples from a single phase accumulator: successive symbol tones may differ but phase never resets at a symbol boundary. Reject non-integral samples-per-symbol, Nyquist violations and invalid bits.",
+        "positive": "[{\"input\":{\"bits\":\"01\",\"sample_rate\":16,\"symbol_rate\":2,\"tone0\":1.5,\"tone1\":2.5,\"amplitude\":1},\"expected\":\"16 samples; sample[8] = -1 within tolerance\"},{\"input\":{\"bits\":\"\",\"sample_rate\":16,\"symbol_rate\":2,\"tone0\":1.5,\"tone1\":2.5,\"amplitude\":1},\"expected\":[]}]",
+        "negative": "[{\"input\":{\"bits\":\"01\",\"sample_rate\":16,\"symbol_rate\":2,\"tone0\":8,\"tone1\":2.5,\"amplitude\":1},\"forbidden\":\"accepted at Nyquist\"},{\"input\":{\"bits\":\"0x1\",\"sample_rate\":16,\"symbol_rate\":2,\"tone0\":1.5,\"tone1\":2.5,\"amplitude\":1},\"forbidden\":\"accepted arbitrary alphabet\"}]",
+        "independent_semantic_review": "PENDING",
+        "core_vs_library": "PENDING",
+        "ratification": false
+      }
     },
     {
       "coordinate": "1110001110",
@@ -12076,7 +12232,20 @@
       "coordinate_basis": "NEXT-FREE-NONCANONICAL-RESEARCH-NAME-RESERVATION",
       "selected": false,
       "ratified": false,
-      "physical_t5_authorized": false
+      "physical_t5_authorized": false,
+      "source_evidence": {
+        "status": "SOURCE-PINNED-LAW-AND-WITNESSES; NOT SELECTED",
+        "source_git_blob": "fecd72417f556024fa20d5e6f1340960c5b82c7b",
+        "law_source_key": "law",
+        "positive_source_key": "positives",
+        "negative_source_key": "falsifiers",
+        "law": "Period is the difference between successive crossings in the same direction, with timestamps in exact rational time; adjacent opposite-direction crossings may represent a half-period instead.",
+        "positive": "[{\"input\":[[\"UP\",0],[\"DOWN\",5],[\"UP\",10]],\"expected\":10},{\"input\":[[\"UP\",0]],\"expected\":\"INSUFFICIENT\"}]",
+        "negative": "[{\"input\":[[\"UP\",0],[\"DOWN\",5],[\"UP\",10]],\"forbidden\":5}]",
+        "independent_semantic_review": "PENDING",
+        "core_vs_library": "PENDING",
+        "ratification": false
+      }
     },
     {
       "coordinate": "1110001111",
@@ -12088,7 +12257,20 @@
       "coordinate_basis": "NEXT-FREE-NONCANONICAL-RESEARCH-NAME-RESERVATION",
       "selected": false,
       "ratified": false,
-      "physical_t5_authorized": false
+      "physical_t5_authorized": false,
+      "source_evidence": {
+        "status": "SOURCE-PINNED-LAW-AND-WITNESSES; NOT SELECTED",
+        "source_git_blob": "fecd72417f556024fa20d5e6f1340960c5b82c7b",
+        "law_source_key": "law",
+        "positive_source_key": "positives",
+        "negative_source_key": "falsifiers",
+        "law": "Classify distinct valid frame identities: cardinality 0 UNLOCKED, 1 LOCKED, greater than 1 AMBIGUOUS.",
+        "positive": "[{\"input\":[],\"expected\":\"UNLOCKED\"},{\"input\":[\"A\",\"A\"],\"expected\":\"LOCKED(A)\"}]",
+        "negative": "[{\"input\":[\"A\",\"B\"],\"forbidden\":\"LOCKED(A)\"}]",
+        "independent_semantic_review": "PENDING",
+        "core_vs_library": "PENDING",
+        "ratification": false
+      }
     },
     {
       "coordinate": "1110010000",
@@ -12100,7 +12282,20 @@
       "coordinate_basis": "NEXT-FREE-NONCANONICAL-RESEARCH-NAME-RESERVATION",
       "selected": false,
       "ratified": false,
-      "physical_t5_authorized": false
+      "physical_t5_authorized": false,
+      "source_evidence": {
+        "status": "SOURCE-PINNED-LAW-AND-WITNESSES; NOT SELECTED",
+        "source_git_blob": "fecd72417f556024fa20d5e6f1340960c5b82c7b",
+        "law_source_key": "law",
+        "positive_source_key": "positives",
+        "negative_source_key": "falsifiers",
+        "law": "(JD-2451545)/36525.",
+        "positive": "[{\"input\":2451545,\"expected\":0},{\"input\":2488070,\"expected\":1}]",
+        "negative": "[{\"input\":2451545,\"forbidden\":1}]",
+        "independent_semantic_review": "PENDING",
+        "core_vs_library": "PENDING",
+        "ratification": false
+      }
     },
     {
       "coordinate": "1110010001",
@@ -18244,5 +18439,26 @@
       }
     ],
     "caution": "Any implementation-dependent or derived pathname law remains a source-grounded question; no D10 resident, host I/O operation or codec permission"
+  },
+  "source_witness_enrichment": {
+    "date": "2026-10-11",
+    "status": "D10-RESEARCH-SOURCE-ENRICHMENT-UNRATIFIED",
+    "new_source_witness_passports": 15,
+    "selected_unchanged": 715,
+    "provisional_unchanged": 309,
+    "ratified_unchanged": 0,
+    "requires": "Independent oracle and Core-vs-library review before canonical selection",
+    "sources": [
+      {
+        "path": "knowledge/d10-clos-instance-lifecycle-residual-v1.json",
+        "git_blob": "3c6e85d94e78cdd5fe9b9b645095b48335f768e5",
+        "rows": 6
+      },
+      {
+        "path": "knowledge/d10-hobbies-source-laws-v1.json",
+        "git_blob": "fecd72417f556024fa20d5e6f1340960c5b82c7b",
+        "rows": 9
+      }
+    ]
   }
 }
