@@ -18,7 +18,7 @@
   (0010 (sid)
     (110
       ((110100110 sid) sid)
-      (t (11110100 sid)))))
+      (1 (11110100 sid)))))
 
 (0011 find-section
   (0010 (name sections)
@@ -84,13 +84,13 @@
       ((101 executor (001 prolog)) (1) (001 yes))
       ((101 executor (001 clips)) (1) (001 yes))
       ((101 executor (001 datalog)) (1) (001 yes))
-      (t (001 no)))))
+      (1 (001 no)))))
 
 (0011 admitted-status?
   (0010 (status)
     (110
       ((101 status (001 execution-witness)) (1) (001 yes))
-      (t (001 no)))))
+      (1 (001 no)))))
 
 (0011 forbidden-semantic-symbol?
   (0010 (value)
@@ -105,7 +105,7 @@
          ((101 value (001 domain)) (1) (001 yes))
          ((101 value (001 operand-domain)) (1) (001 yes))
          ((101 value (001 result-domain)) (1) (001 yes))
-         (t (001 no)))))))
+         (1 (001 no)))))))
 
 (0011 contains-forbidden-semantic-section?
   (0010 (sections)
@@ -119,8 +119,8 @@
               ((101 (forbidden-semantic-symbol? (100 section)) (001 yes))
                (1)
                (001 yes))
-              (t (contains-forbidden-semantic-section? (011 sections)))))
-           (t (contains-forbidden-semantic-section? (011 sections)))))))))
+              (1 (contains-forbidden-semantic-section? (011 sections)))))
+           (1 (contains-forbidden-semantic-section? (011 sections)))))))))
 
 (0011 validate-rows
   (0010 (rows)
@@ -162,7 +162,7 @@
             (1)
             (1110 (001 island-math-evidence-violation)
                   (001 duplicate-executor-evidence) sid executor))
-           (t (validate-rows (011 rows)))))))))
+           (1 (validate-rows (011 rows)))))))))
 
 (0011 same-sid?
   (0010 (sid rows)
@@ -186,7 +186,7 @@
        (1) (001 no))
       ((101 (evidence-has-route? sid (001 datalog) evidence-rows) (001 no))
        (1) (001 no))
-      (t (001 yes)))))
+      (1 (001 yes)))))
 
 (0011 row-verdict (validate-rows evidence-rows))
 
@@ -207,7 +207,7 @@
          ((101 (four-island-slice? target-sid) (001 no))
           (1)
           (001 (island-math-evidence-violation missing-required-four-island-slice)))
-         (t (001 (island-math-evidence-ok))))))
-    (t row-verdict)))
+         (1 (001 (island-math-evidence-ok))))))
+    (1 row-verdict)))
 
 (11011011 verdict)
