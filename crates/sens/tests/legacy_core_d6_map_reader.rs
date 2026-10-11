@@ -61,6 +61,23 @@ fn legacy_core_let_star_uses_derived_lambda_not_unadmitted_d6_let() {
 }
 
 #[test]
+fn likhtar_macro_expands_without_unadmitted_d6_let_dispatch() {
+    let mut session = Session::default();
+    sens::eval_pinned_legacy_core_source("lib/core.lisp", SOURCE, &mut session)
+        .expect("pinned Lisp Core bootstrap must load");
+    for (form, expected) in [
+        ("(нехай-похідне () 42)", "42"),
+        ("(нехай-похідне ((x 7)) x)", "7"),
+        ("(нехай-похідне ((x 7) (y 9)) (00100111 x y))", "(7 9)"),
+    ] {
+        let value = eval_program(form, &mut session)
+            .unwrap_or_else(|e| panic!("ЛІХТАР macro failed {form}: {e:?}"))
+            .value.to_string();
+        assert_eq!(value, expected, "ЛІХТАР did not preserve parallel bindings: {form}");
+    }
+}
+
+#[test]
 fn derived_map_preserves_macro_binding_parameter_and_value_lists() {
     let mut session = Session::default();
     sens::eval_pinned_legacy_core_source("lib/core.lisp", SOURCE, &mut session)
