@@ -102,7 +102,7 @@ def verify(v11,v12,m,index,foundation):
 def check(root=ROOT,self_test=False):
     root=root.resolve()
     ptr=json.loads((root/"knowledge/d10-current-inventory.json").read_text())
-    cur=ptr["canonical_current"]
+    cur=ptr.get("historical_v12_research_inventory",ptr["canonical_current"])
     frozen=ptr["historical_v11_research_inventory"]
     hook=ptr["current_v12_historical_identity_type_selection"]
     need(cur["path"]=="knowledge/d10-v12-semantic-inventory.json" and
