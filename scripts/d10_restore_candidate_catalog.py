@@ -81,6 +81,41 @@ def parse_array(raw):
         raise ValueError("INVALID_JSON_LIST") from exc
 
 
+
+def find_name_line(canonical_text, name, case_sensitive=True):
+    """Return the exact 1-based line of a canonical JSON semantic_name field.
+
+    Searching only the JSON key/value line prevents a spelling that occurs in
+    provenance, an example, or a witness from masquerading as the inventory row.
+    No match returns None; multiple matching rows fail closed rather than
+    fabricating a unique source pin.
+    """
+    target = name if case_sensitive else name.casefold()
+    found = []
+    for line_number, raw_line in enumerate(canonical_text.splitlines(), 1):
+        line = raw_line.strip()
+        if not line.startswith('"semantic_name"'):
+            continue
+        key, separator, raw_value = line.partition(":")
+        if not separator or key.strip() != '"semantic_name"':
+            continue
+        raw_value = raw_value.strip()
+        if raw_value.endswith(","):
+            raw_value = raw_value[:-1].rstrip()
+        try:
+            value = json.loads(raw_value)
+        except json.JSONDecodeError as exc:
+            raise ValueError(f"INVALID_CANONICAL_SEMANTIC_NAME_LINE:{line_number}") from exc
+        if not isinstance(value, str):
+            raise ValueError(f"INVALID_CANONICAL_SEMANTIC_NAME_TYPE:{line_number}")
+        comparable = value if case_sensitive else value.casefold()
+        if comparable == target:
+            found.append(line_number)
+    if len(found) > 1:
+        raise ValueError(f"AMBIGUOUS_CANONICAL_SEMANTIC_NAME:{name}")
+    return found[0] if found else None
+
+
 def merge_catalog(root, historical_path, current_path, output_path):
     raw_old = historical_path.read_bytes()
     if git_blob(raw_old) != HISTORICAL_BLOB:
