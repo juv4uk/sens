@@ -172,7 +172,7 @@ fn collect_source_bindings(
         }
         return;
     }
-    if descend_legacy_machine_wrappers && is_legacy_w8_lambda_head(source, head) {
+    if descend_legacy_machine_wrappers && (is_legacy_w8_lambda_head(source, head) || is_legacy_w8_macro_head(source, head)) {
         // W8 lambda parameter lists are binding data, not call-head positions.
         for child in items.iter().skip(2) {
             collect_source_bindings(
@@ -265,7 +265,7 @@ fn lift_expression(
                     span,
                 });
             }
-            if descend_legacy_machine_wrappers && is_legacy_w8_lambda_head(source, &lifted[0]) {
+            if descend_legacy_machine_wrappers && (is_legacy_w8_lambda_head(source, &lifted[0]) || is_legacy_w8_macro_head(source, &lifted[0])) {
                 for item in lifted.iter_mut().skip(2) {
                     *item = lift_expression(
                         source,
@@ -457,6 +457,10 @@ fn is_legacy_w8_lambda_head(source: &str, head: &Expr) -> bool {
     source_spelling(source, head) == Some("00001000")
 }
 
+fn is_legacy_w8_macro_head(source: &str, head: &Expr) -> bool {
+    source_spelling(source, head) == Some("00001010")
+}
+
 fn is_legacy_w8_cond_head(source: &str, head: &Expr) -> bool {
     source_spelling(source, head) == Some("00000111")
 }
@@ -502,6 +506,28 @@ mod tests {
     fn only(mut expressions: Vec<Expr>) -> Expr {
         assert_eq!(expressions.len(), 1);
         expressions.remove(0)
+    }
+
+    #[test]
+    fn w8_macro_wrapper_lifts_only_executable_d3_body() {
+        let source = "(00001010 m (value) (110 ((010 value) (001 (101 value value)))))";
+        let parsed = parse_mixed_exact_domain_machine_source("lib/machine/dispatch/macro-probe.lisp", source)
+            .expect("W8 macro bodies are executable while their binders remain data");
+        let ExprKind::List(defmacro) = &parsed[0].kind else { panic!("macro"); };
+        assert!(matches!(&defmacro[0].kind, ExprKind::Sid(_)));
+        let ExprKind::List(params) = &defmacro[2].kind else { panic!("macro parameter data"); };
+        assert!(matches!(&params[0].kind, ExprKind::Symbol(_)));
+        let ExprKind::List(cond) = &defmacro[3].kind else { panic!("macro body"); };
+        assert!(matches!(&cond[0].kind, ExprKind::DomainIdentity(id)
+            if id.width() == 3 && id.packed_bits() == 0b110));
+        let ExprKind::List(clause) = &cond[1].kind else { panic!("clause"); };
+        let ExprKind::List(test) = &clause[0].kind else { panic!("test"); };
+        assert!(matches!(&test[0].kind, ExprKind::DomainIdentity(id)
+            if id.width() == 3 && id.packed_bits() == 0b010));
+        let ExprKind::List(quoted) = &clause[1].kind else { panic!("quoted data"); };
+        let ExprKind::List(data) = &quoted[1].kind else { panic!("data"); };
+        assert!(!matches!(&data[0].kind, ExprKind::DomainIdentity(_)),
+            "macro templates inside QUOTE cannot become evaluated code");
     }
 
     #[test]
