@@ -251,6 +251,34 @@ pub(super) fn arithmetic_on_values(
             })
             .collect::<Result<Vec<&BinaryNumber>, _>>()?;
 
+        // Current Core numeric-domain law is deliberately narrower than the
+        // historical/unqualified Number arithmetic path. It admits only
+        // two already-qualified operands in the SAME Dn, and ADD may yield
+        // D(2n) on carry. Never infer domain membership from magnitude.
+        if numbers.iter().any(|number| number.numeric_domain_width().is_some()) {
+            if operator != "+" || numbers.len() != 2 {
+                return Err(LanguageError::new(
+                    ErrorKind::Type,
+                    "qualified Dn numeric arithmetic currently admits binary same-domain ADD only",
+                    span,
+                ));
+            }
+            let sum = numbers[0].add_admitted_numeric(numbers[1]).ok_or_else(|| {
+                LanguageError::new(
+                    ErrorKind::Type,
+                    "numeric ADD requires two explicitly admitted operands from the same Dn",
+                    span,
+                )
+            })?;
+            if environment
+                .numeric_bit_limit()
+                .is_some_and(|limit| sum.width() > limit)
+            {
+                return Err(arithmetic_overflow(span));
+            }
+            return Ok(Value::BinaryNumber(sum));
+        }
+
         let result = match operator {
             "+" => numbers
                 .into_iter()
@@ -425,6 +453,13 @@ pub(super) fn division_on_values(
             })
             .collect::<Result<Vec<&BinaryNumber>, _>>()?;
 
+        if numbers.iter().any(|number| number.numeric_domain_width().is_some()) {
+            return Err(LanguageError::new(
+                ErrorKind::Type,
+                "division of Dn-qualified numeric operands has no admitted domain law",
+                span,
+            ));
+        }
         let mut result = if argument_count == 1 {
             BinaryNumber::one()
         } else {
@@ -529,6 +564,16 @@ pub(super) fn comparison_on_values(
             })
             .collect::<Result<Vec<&BinaryNumber>, _>>()?;
 
+        if numbers.iter().any(|number| number.numeric_domain_width().is_some()) {
+            let width = numbers.first().and_then(|number| number.numeric_domain_width());
+            if width.is_none() || numbers.iter().any(|number| number.numeric_domain_width() != width) {
+                return Err(LanguageError::new(
+                    ErrorKind::Type,
+                    "cross-domain or unqualified numeric comparison is not admitted",
+                    span,
+                ));
+            }
+        }
         let holds = numbers.windows(2).all(|pair| match operator {
             "<" => pair[0] < pair[1],
             ">" => pair[0] > pair[1],
@@ -573,4 +618,63 @@ pub(super) fn comparison_on_values(
     // #1716/#1826: exact-Q decides whether the predicate may answer; the
     // answer itself belongs to the exact one-bit predicate domain.
     Ok(Value::predicate_bit(holds))
+}
+
+#[cfg(test)]
+mod qualified_numeric_domain_value_tests {
+    use super::*;
+
+    fn in_domain(width: usize, bits: Vec<u8>) -> Value {
+        Value::BinaryNumber(
+            BinaryNumber::from_numeric_domain_bits(width, &bits)
+                .expect("exact numeric domain bits"),
+        )
+    }
+
+    #[test]
+    fn core_runtime_adds_d24_values_to_d48_value_and_retains_domain_identity() {
+        let max = in_domain(24, vec![1; 24]);
+        let env = Environment::default();
+        let sum = arithmetic_on_values("+", &[max.clone(), max.clone()], &env, Span::default())
+            .expect("same-domain natural ADD");
+        let Value::BinaryNumber(sum_bits) = sum else {
+            panic!("must return an exact domain-qualified numeric Value")
+        };
+        assert_eq!(sum_bits.numeric_domain_width(), Some(48));
+        let full = sum_bits.exact_numeric_domain_bits().unwrap();
+        assert_eq!(full.len(), 48);
+        assert_eq!(&full[..23], &[0; 23]);
+        assert_eq!(full[47], 0);
+
+        let zero = in_domain(24, vec![0; 24]);
+        let result = arithmetic_on_values("+", &[zero.clone(), zero], &env, Span::default())
+            .unwrap();
+        let Value::BinaryNumber(same) = result else { panic!("D24 result") };
+        assert_eq!(same.numeric_domain_width(), Some(24));
+        assert_eq!(same.exact_numeric_domain_bits(), Some(vec![0; 24]));
+    }
+
+    #[test]
+    fn core_runtime_rejects_unadmitted_numeric_domain_operations() {
+        let env = Environment::default();
+        let d24 = in_domain(24, vec![0; 24]);
+        let d48 = in_domain(48, vec![0; 48]);
+        for values in [
+            vec![d24.clone(), d48.clone()],
+            vec![d24.clone(), Value::BinaryNumber(BinaryNumber::one())],
+        ] {
+            let e = arithmetic_on_values("+", &values, &env, Span::default()).unwrap_err();
+            assert_eq!(e.kind, ErrorKind::Type);
+            let cmp = comparison_on_values("=", &values, Span::default()).unwrap_err();
+            assert_eq!(cmp.kind, ErrorKind::Type);
+        }
+        for op in ["*", "-"] {
+            let e = arithmetic_on_values(op, &[d24.clone(), d24.clone()], &env, Span::default()).unwrap_err();
+            assert_eq!(e.kind, ErrorKind::Type);
+        }
+        let e = division_on_values(&[d24.clone(), d24.clone()], 2, &env, Span::default()).unwrap_err();
+        assert_eq!(e.kind, ErrorKind::Type);
+        let e = arithmetic_on_values("+", &[d24], &env, Span::default()).unwrap_err();
+        assert_eq!(e.kind, ErrorKind::Type);
+    }
 }
