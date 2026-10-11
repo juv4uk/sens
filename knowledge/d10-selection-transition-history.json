@@ -382,6 +382,35 @@
         "scripts/check_d10_selection_transition_history.py",
         "scripts/check-d10-proposal-ledger.py"
       ]
+    },
+    {
+      "id": "d10.math.unique-bounded-modular-lift.replay-651.20261011",
+      "authority": "#4013 #4463 — актуальне перенесення перевіреного архівного закону",
+      "evidence": [
+        "knowledge/d10-unique-bounded-modular-lift-20261009.json",
+        "docs/research/d10-bounded-modular-lift-20261009.uk.md",
+        "tests/oracles/d10_unique_bounded_modular_lift_chez.ss",
+        "tests/test_d10_unique_bounded_modular_lift.py"
+      ],
+      "previous_inventory_blob_sha": "9e053a51b3b49741e3245ef02e3e366d16acb261",
+      "resulting_inventory_blob_sha": "79007165e5124dc48b1ca91be6df91d2a857c727",
+      "added_stable_ids": [
+        "d10.math.unique-bounded-modular-lift.20261011"
+      ],
+      "appended_sources": [
+        "knowledge/d10-unique-bounded-modular-lift-20261009.json"
+      ],
+      "coordinates_added": 0,
+      "ratified_added": 0,
+      "delta_selected": 1,
+      "previous_selected": 651,
+      "resulting_selected": 652,
+      "decision": "RESEARCH selection only, owner ratification and Core-vs-derived review pending; no coordinates, no physical T5 authorization",
+      "tests": [
+        "scripts/check_d10_selection_transition_history.py --self-test",
+        "scripts/check-d10-proposal-ledger.py --self-test",
+        "scripts/check_d10_unique_bounded_modular_lift.py"
+      ]
     }
   ]
 }
