@@ -185,7 +185,7 @@
   },
   "still_not_measured": [
     "whole-chain seed-v0 input closure total and minimality",
-    "CML-only external dependency source closure for rebuilding the CML runner (including pinned wsm-os-target); it remains outside the trusted seed metric and is listed in the CML census",
+    "CML outer Cargo registry/cache byte size and a clean offline dependency-graph proof; the pinned wsm-os-target tree and its selected compile-source subset are now measured separately in the CML census.",
     "minimal Git object/ref metadata required for git rev-parse (full checkout .git snapshots are measured separately but are not minimal)",
     "shared-library/toolchain dependency bytes",
     "minimum possible seed size",
@@ -287,7 +287,7 @@
       "finish an automated cfg/module graph and transitive compile-time/runtime path-input audit across CML and SENS",
       "validate the selected SENS xtask/sens Cargo dependency graph with a clean offline build against the vendored source override; active vendor packages are pinned and separately byte-accounted",
       "derive the minimum Git ref/object metadata needed by the two git rev-parse call sites or remove those runtime calls while preserving revision proof",
-      "record CML-only wsm-os-target/registry build dependencies in the separate external ledger without folding their source bytes into trusted seed",
+      "Validate the selected default-feature CML dependency graph under a controlled clean build; wsm-os-target has a separate pinned tree/source ledger, while registry/cache bytes remain external and are not part of the seed subtotal.",
       "verify runtime versus build-only inputs with a clean controlled reproduction and derive the minimum operational closure",
       "do not publish a whole-chain seed total until the full required-input set is complete and its boundary/minimality is proved"
     ],
@@ -331,6 +331,7 @@
     "Cross-repository closure update (2026-10-12): recorded the pinned CML K1 runner build/test source subset separately: 70 CML module/metadata files totaling 1,320,729 bytes. The SENS verified subset now includes three previously omitted SENS files consumed by the CML runner/build process, reaching 117 paths / 1,432,402 bytes. The two subtotals have distinct scopes and are not a full seed total.",
     "Vendor dependency correction (2026-10-12): pinned `.cargo/config.toml` replaces crates.io with the SENS `vendor/` directory. The selected xtask -> sens compile path uses seven vendored crates, 296 tracked files / 4,419,723 bytes. This third-party source bundle is explicitly external and excluded from the trusted-seed subtotal; exact file-level blob SHAs and sizes are in the closure census.",
     "Git metadata measurement (2026-10-12): K1 follow-up CI run 38185559594 passed both independent runs and byte-identical report comparison. Summed `.git` regular-file bytes were 66,126,630 and 66,122,122 across the CML/SENS/WSM checkout snapshots; 4,508-byte difference means these are environment snapshots, not the minimized metadata seed. They remain separate external dependency evidence, not seed bytes.",
-    "Measured operational subset (2026-10-12): the pinned K1 runner checkpoint (34,575,192 B), 114 known SENS runtime-build input paths (1,397,243 B), and the pinned WSM nucleus source (11,461 B) sum to 35,983,896 B. This is a measured subtotal only, not the complete seed total or a minimality claim; external dependencies and unclosed runtime paths remain separate."
+    "Measured operational subset (2026-10-12): the pinned K1 runner checkpoint (34,575,192 B), 114 known SENS runtime-build input paths (1,397,243 B), and the pinned WSM nucleus source (11,461 B) sum to 35,983,896 B. This is a measured subtotal only, not the complete seed total or a minimality claim; external dependencies and unclosed runtime paths remain separate.",
+    "CML external dependency update (2026-10-12): the pinned `wsm-os-target` Git repository is 22 tracked files / 48,742 bytes; the selected compile-source subset (workspace Cargo.toml, LICENSE, crate Cargo.toml, lib.rs) is 4 files / 24,935 bytes. These are external dependency bytes and excluded from trusted-seed subtotal. The CML census also lists the seven default-feature crates.io package versions/checksums separately."
   ]
 }
