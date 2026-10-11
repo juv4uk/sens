@@ -74,6 +74,19 @@ fn content_store_membership_is_an_exact_d1_bit_not_structural_one() {
 }
 
 #[test]
+fn world_fourth_field_uses_d3_projection_not_unadmitted_d6_cadddr() {
+    let mut session = session();
+    for (source, expected) in [
+        ("(world-metadata (empty-world))", "()"),
+        ("(world-metadata (make-world (quote ()) (quote ()) (quote (marker))))", "(marker)"),
+        ("(world-metadata (world-tell (make-world (quote ()) (quote ()) (quote (marker))) (quote zoo) (quote ((has-fur cat)))))", "(marker)"),
+    ] {
+        assert_eq!(observe(&mut session, source), expected,
+            "World metadata is the fourth cons field, derived from D3");
+    }
+}
+
+#[test]
 fn world_dedup_source_can_export_its_own_knowledge_envelope() {
     let mut session = session();
     let src = "(let ((source (world-tell (empty-world) (quote zoo) (quote ((has-fur cat)))))) (car (make-world-knowledge-package source (quote zoo))))";
