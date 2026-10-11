@@ -505,6 +505,36 @@ mod tests {
     }
 
     #[test]
+    fn time_source_requires_owner_path_and_lifts_nested_d3_calls() {
+        let fixture = "(00001001 t (00001000 (x) (110 ((010 x) (001 ())) ((101 x x) (001 1)))))";
+        assert!(parse_mixed_exact_domain_time_source("lib/not-time.lisp", fixture).is_err());
+        let parsed = parse_mixed_exact_domain_time_source("lib/time.lisp", fixture)
+            .expect("time loader must lift exact calls inside W8 bootstrap wrappers");
+        let ExprKind::List(defined) = &parsed[0].kind else { panic!("definition"); };
+        let ExprKind::List(lambda) = &defined[2].kind else { panic!("lambda"); };
+        let ExprKind::List(cond) = &lambda[2].kind else { panic!("cond"); };
+        assert!(matches!(&cond[0].kind, ExprKind::DomainIdentity(id)
+            if id.width() == 3 && id.packed_bits() == 0b110));
+        let ExprKind::List(first_clause) = &cond[1].kind else { panic!("clause"); };
+        let ExprKind::List(atom) = &first_clause[0].kind else { panic!("atom"); };
+        assert!(matches!(&atom[0].kind, ExprKind::DomainIdentity(id)
+            if id.width() == 3 && id.packed_bits() == 0b010));
+        let ExprKind::List(second_clause) = &cond[2].kind else { panic!("clause"); };
+        let ExprKind::List(eq) = &second_clause[0].kind else { panic!("eq"); };
+        assert!(matches!(&eq[0].kind, ExprKind::DomainIdentity(id)
+            if id.width() == 3 && id.packed_bits() == 0b101));
+        let quoted = "(00001001 datum (00001000 (x) (00000001 (110 (010 x)))))";
+        let parsed = parse_mixed_exact_domain_time_source("lib/time.lisp", quoted)
+            .expect("legacy W8 QUOTE remains data");
+        let ExprKind::List(root) = &parsed[0].kind else { panic!("define"); };
+        let ExprKind::List(lambda) = &root[2].kind else { panic!("lambda"); };
+        let ExprKind::List(quote) = &lambda[2].kind else { panic!("quote"); };
+        let ExprKind::List(data) = &quote[1].kind else { panic!("quoted list"); };
+        assert!(!matches!(&data[0].kind, ExprKind::DomainIdentity(_)),
+            "quoted 110 must not become executable D3 COND");
+    }
+
+    #[test]
     fn ukrainian_callable_heads_lower_to_exact_domain_without_rewriting_lisp() {
         let source = "(визначити хід (функція (x) (перше x)))";
         let parsed = only(parse_mixed_exact_domain(source).expect("ratified ук surface"));
