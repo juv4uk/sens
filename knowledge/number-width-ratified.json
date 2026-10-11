@@ -26,14 +26,17 @@
     "A numeric object is exact bits + explicit numeric domain + admitted domain law, never an unqualified Number24 tier.",
     "Equality of bit payload or mathematical magnitude cannot implicitly identify different domains; bridges require an independent law.",
     "Numeric source literals and Text7 digits are optional surface projections, not semantic requirements.",
-    "Domain rank/existence/width is admitted now; full resident allocation, arithmetic execution, signedness, rational layout, overflow and automatic widening are not ratified."
+    "For addition of two admitted nonnegative values in the SAME Dn numeric domain, compute the exact sum, including carry. If it fits n bits the result stays in Dn; if it needs n+1 bits it is admitted in next numeric domain D(2n), with all bits preserved. This is an explicit same-domain-addition bridge only.",
+    "Domain-qualified output retains its exact width, zero-filling unused high bits of the D(2n) word; zero-fill does not change its domain identity.",
+    "This law ratifies overflow promotion for same-domain natural addition ONLY; mixed-domain operators, negative values, fractions, multiplication/other operation promotion and implicit general widening remain deferred."
   ],
   "not_yet_ratified": [
     "signedness",
     "two's-complement or other polarity encoding",
     "integer versus rational field layout",
-    "overflow versus automatic widening semantics",
-    "decimal literal lowering law"
+    "decimal literal lowering law",
+    "mixed-domain implicit coercion and general widening",
+    "multiplication and other-operation overflow policy"
   ],
   "domain_family": "numeric",
   "domain_rank": "same-semantic-domain-rank-as-D1-D9",
@@ -45,6 +48,18 @@
     "D192"
   ],
   "semantic_identity": "exact numeric domain D(24*2^n) + exact binary domain word + admitted domain law",
-  "domain_residency_scope": "numeric domains are owner-ratified as peers; complete occupancy, sign/rationals, width bridges, overflow and runtime admission remain separate",
-  "no_literal_dependency": true
+  "domain_residency_scope": "numerical D24/D48/... exist as peer domains, plus exact same-domain natural-addition overflow promotion is ratified; other operations and general widening/bridges remain separate",
+  "no_literal_dependency": true,
+  "addition_widening": {
+    "status": "owner-ratified",
+    "date": "2026-10-11",
+    "scope": "two nonnegative operands admitted in the same numeric domain Dn, n=24*2^k",
+    "selection": "if sum < 2^n, result domain Dn; otherwise result domain D(2n)",
+    "max_sum_bits": "n+1",
+    "required_successor": "D(2n)",
+    "representation": "exactly domain-width binary bits; left zero-fill to output width, never truncate carry",
+    "no_wraparound": true,
+    "no_unqualified_number_identity": true,
+    "deferred": "mixed-domain operands; general coercion; multiplication promotion; signed/rational arithmetic"
+  }
 }
