@@ -194,16 +194,15 @@ pub fn encode_binary_frame(frame: &BinaryFrame) -> Result<Vec<u8>, BinaryFrameEr
             } else if !negative {
                 return Err(BinaryFrameError::NonCanonicalNumber {index: 0});
             }
-            // Strict constructor replay proves canonical gcd and nonunit den.
+            // Replay constructor against the actual operands. For negative
+            // integers the denominator is the exact Dn(1), not the magnitude.
+            let mut one_word = vec![0u8; width];
+            one_word[width - 1] = 1;
+            let unit = BinaryNumber::from_numeric_domain_bits(width, &one_word)
+                .ok_or(BinaryFrameError::InvalidNumber {index: 0})?;
             let canonical = domain_numeric::canonical_parts(
-                negative, numerator,
-                denominator.unwrap_or_else(|| numerator) // checked below
-            );
-            if let Some(d) = denominator {
-                if canonical != Some(Value::NumericComposition(value.clone())) || d.is_zero() {
-                    return Err(BinaryFrameError::NonCanonicalNumber {index: 0});
-                }
-            } else if !value.as_parts().0 {
+                negative, numerator, denominator.unwrap_or(&unit));
+            if canonical != Some(Value::NumericComposition(value.clone())) {
                 return Err(BinaryFrameError::NonCanonicalNumber {index: 0});
             }
         }
@@ -236,6 +235,34 @@ pub fn encode_binary_frame(frame: &BinaryFrame) -> Result<Vec<u8>, BinaryFrameEr
     }
 
     Ok(out)
+}
+
+/// Strict additive Core numeric Value framing; a physical-T5 .sens decoder
+/// is a distinct authority and MUST NOT interpret these records as its words.
+pub fn encode_numeric_value_frame(value: &Value) -> Result<Vec<u8>, BinaryFrameError> {
+    match value {
+        Value::BinaryNumber(n) if n.numeric_domain_width().is_some() =>
+            encode_binary_frame(&BinaryFrame::BinaryNumber(n.clone())),
+        Value::NumericComposition(c) =>
+            encode_binary_frame(&BinaryFrame::NumericComposition(c.clone())),
+        _ => Err(BinaryFrameError::InvalidNumber {index: 0}),
+    }
+}
+
+/// Reconstruct exact Dn-qualified natural/negative/reduced-rational Value.
+/// Reject every other frame rather than losing a domain or normalizing away
+/// a noncanonical wire representation.
+pub fn decode_numeric_value_frame(bits: &[u8])
+    -> Result<(Value, usize), BinaryFrameError>
+{
+    let (frame, consumed) = decode_binary_frame(bits)?;
+    let value = match frame {
+        BinaryFrame::BinaryNumber(n) if n.numeric_domain_width().is_some() =>
+            Value::BinaryNumber(n),
+        BinaryFrame::NumericComposition(c) => Value::NumericComposition(c),
+        _ => return Err(BinaryFrameError::InvalidNumber {index: 0}),
+    };
+    Ok((value, consumed))
 }
 
 pub fn encode_binary_program(frames: &[BinaryFrame]) -> Result<Vec<u8>, BinaryFrameError> {
@@ -877,7 +904,7 @@ mod tests {
     fn malformed_or_noncanonical_payloads_fail_closed() {
         assert!(matches!(
             decode_binary_frame(&[1, 1, 1, 1, 1, 1]),
-            Err(BinaryFrameError::ReservedExtension { .. })
+            Err(BinaryFrameError::UnexpectedEnd { .. })
         ));
         assert!(matches!(
             decode_binary_frame(&[1, 1, 0, 0, 0, 0, 0, 0]),
