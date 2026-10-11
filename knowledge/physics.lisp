@@ -1,5 +1,5 @@
 ;; knowledge/physics.lisp
-(defmodule physics (00000001 (
+(defmodule physics (001 (
   ;; Rule: Anything with mass is attracted by gravity
   ((attracted-by-gravity (var x)) (has-mass (var x)))
   
