@@ -70,6 +70,55 @@ This is an execution and blocker ledger, not a claim that the repository is full
 - 11 machine sources: `lib/machine/dispatch/native-first-coverage.lisp` (2), `lib/machine/dispatch/native-first-parity.lisp` (76), `lib/machine/effects/u64.lisp` (134), `lib/machine/capability-axis.lisp` (14), `lib/machine/lowering/semantic-x86-64.lisp` (364), `lib/machine/admission/x86-64.lisp` (582), `lib/machine/atoms/x86-64.lisp` (482), `lib/machine/encoding/x86-64.lisp` (640), `lib/machine/operands/x86-64.lisp` (172), `lib/machine/profile/minimal-runtime-x86-64.lisp` (139), `lib/machine/projection/x86-64.lisp` (69) = 2674 heads. The machine evidence generators remain untouched.
 - New source guard: `tests/test_sid8_broad_source_cutover.py` and `tests/test_sid8_machine_source_cutover.py` plus dedicated CI workflows. [Broad source regression PASS](https://github.com/juv4uk/sens/actions/runs/38167970204), [machine source regression PASS](https://github.com/juv4uk/sens/actions/runs/38168282905), [Hosted CI PASS](https://github.com/juv4uk/sens/actions/runs/38168282909). These are **not** full historical-old-vs-new semantic oracle or physical T5 admission claims.
 
+## Additional exact-domain source cohort — 2026-10-11 late cutover
+
+The previously published 86-file / 15,898-occurrence census above is an earlier
+baseline, **not** a live all-repository completion count. The following source
+changes were independently verified by Git object write receipts after that
+baseline and must not be silently double-counted:
+
+- Five Lisp policy records: `knowledge/foreign-tools-census.lisp`,
+  `knowledge/language-policy.lisp`, `knowledge/swarm-legacy-deprecation.lisp`,
+  `knowledge/swarm-no-live-callers-audit.lisp`,
+  `knowledge/file-authority-policy.lisp`: 10 historical executable DEFINE/QUOTE
+  heads moved into ratified D4:0011 / D3:001 in a single main commit
+  `9e78972c866461dc36736d2b58dc10ec2c51d3d7`. Historical quoted data remained intact.
+- `lib/machine/lowering/semantic-effects.lisp` (13), and
+  `examples/ukrainian-greeting.lisp` (14): 27 additional audited call-head
+  replacements, main commit `bc47ca0926dc764581463be53603625dedda90de`.
+- `knowledge/guard-runtime-policy.lisp`: 36 additional audited source heads
+  replaced, with the unique fallback host `t` condition mapped explicitly to
+  admitted D1 `1` in predicate position. Main commit
+  `ea37c962d6b3e151ecb73d5ec706875040869ad9`.
+- **Net new in this cohort: 8 modified original Lisp files, 73 former SID8 call
+  heads replaced, 1 explicit host-T to D1 predicate correction.**
+- Independent positive/negative tests:
+  `tests/test_d3_legacy_logic_guard.py`,
+  `tests/test_sid8_policy_source_cutover.py`,
+  `.github/workflows/sid8-policy-source-cutover.yml`.
+  These are source-form tests, **not** runtime semantic parity certificates.
+- Stale machine-integrity guard detected by CI: it demanded 15 historical
+  `(00001001 ...)` definitions despite all three full machine sources having
+  migrated to `(0011 ...)`. Commit
+  `f665a1b7323bf35ed123db2210399943683b7385` updated the exact required
+  markers and added a negative test that old SID8 cannot satisfy those markers.
+  The independent `lisp-paren-balance` workflow passed on that commit.
+
+### Intentionally held sources
+
+- `knowledge/guard-fact-policy.lisp` and
+  `scripts/{enforce-island-math-evidence,enforce-function-table-mechanisms,semantic-authority-guard-enforce}.lisp`
+  still carry legacy COND clauses, expected-result fields or host truth values.
+  These cannot be made exact two-field D3:110 by only changing the eight-bit word.
+- `lib/function-table-mechanisms.lisp` stores a table of historical identities.
+  Its row heads are *data*, not executable call heads; do not blindly shorten them.
+- `lib/machine/block.lisp` retains immutable historical source provenance for
+  the independent physical admission proof and must not be rewritten without
+  that proof. `racket/boot/core.lisp` contains composite DEFMACRO and likewise
+  requires a separate cutover.
+- The new strict D3 scanner reports existing historical logic as blockers; do
+  not weaken it to obtain a superficial green CI or claim old/new full parity.
+
 ## Safety of completion claims
 
 - Syntax/Hosted CI green on intermediate migrated cohorts; T5 file-authority and migration readiness gates separately remain fail-closed on historical corpus.
