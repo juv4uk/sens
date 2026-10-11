@@ -8,8 +8,8 @@
 ; re-exported from semantic lowering as a compatibility convenience.
 
 ; Historical byte-SID projection retained only as compatibility/provenance.
-(00001001 x86-legacy-sid-lowering-profile-v1
-  (00000001
+(0011 x86-legacy-sid-lowering-profile-v1
+  (001
     ((00000010 sequence "tag-test: TEST/AND/CMP")
      (00000011 direct "CMP/SETE")
      (00000100 runtime "allocate+STORE-pair")
@@ -87,45 +87,45 @@
 ;
 ; RAX carries the result per SysV x86-64. RCX is caller-saved, so the proof
 ; routine does not violate the host ABI by clobbering a callee-saved register.
-(00001001 x86-lower-add-u64-forms
-  (00001000 (left right)
-    (00100111
-      (00100111 (00000001 mov-r64-imm64) (00000001 rax) left)
-      (00100111 (00000001 mov-r64-imm64) (00000001 rcx) right)
-      (00100111 (00000001 add-r64-r64) (00000001 rax) (00000001 rcx))
-      (00100111 (00000001 ret)))))
+(0011 x86-lower-add-u64-forms
+  (0010 (left right)
+    (1110
+      (1110 (001 mov-r64-imm64) (001 rax) left)
+      (1110 (001 mov-r64-imm64) (001 rcx) right)
+      (1110 (001 add-r64-r64) (001 rax) (001 rcx))
+      (1110 (001 ret)))))
 
 ; #4001 bounded exact-D5 DIFFERENCE/TIMES witnesses. These routines only
 ; describe machine forms. Selection is guarded below by exact D5 evaluation,
 ; so SUB/IMUL are used only when inputs and the exact result all fit u64.
-(00001001 x86-lower-difference-u64-forms
-  (00001000 (left right)
-    (00100111
-      (00100111 (00000001 mov-r64-imm64) (00000001 rax) left)
-      (00100111 (00000001 mov-r64-imm64) (00000001 rcx) right)
-      (00100111 (00000001 sub-r64-r64) (00000001 rax) (00000001 rcx))
-      (00100111 (00000001 ret)))))
+(0011 x86-lower-difference-u64-forms
+  (0010 (left right)
+    (1110
+      (1110 (001 mov-r64-imm64) (001 rax) left)
+      (1110 (001 mov-r64-imm64) (001 rcx) right)
+      (1110 (001 sub-r64-r64) (001 rax) (001 rcx))
+      (1110 (001 ret)))))
 
-(00001001 x86-lower-times-u64-forms
-  (00001000 (left right)
-    (00100111
-      (00100111 (00000001 mov-r64-imm64) (00000001 rax) left)
-      (00100111 (00000001 mov-r64-imm64) (00000001 rcx) right)
-      (00100111 (00000001 imul-r64-r64) (00000001 rax) (00000001 rcx))
-      (00100111 (00000001 ret)))))
+(0011 x86-lower-times-u64-forms
+  (0010 (left right)
+    (1110
+      (1110 (001 mov-r64-imm64) (001 rax) left)
+      (1110 (001 mov-r64-imm64) (001 rcx) right)
+      (1110 (001 imul-r64-r64) (001 rax) (001 rcx))
+      (1110 (001 ret)))))
 
 ; #4017 first exact-D5 QUOTIENT machine witness.
 ; This intentionally proves only x/x = 1 for positive signed-i64 operands.
 ; The narrow relation guarantees exact divisibility without borrowing a
 ; spelling, historical SID8 remainder helper, or truncating rational semantics.
-(00001001 x86-lower-quotient-i64-equal-forms
-  (00001000 (left right)
-    (00100111
-      (00100111 (00000001 mov-r64-imm64) (00000001 rax) left)
-      (00100111 (00000001 mov-r64-imm64) (00000001 rcx) right)
-      (00100111 (00000001 cqo))
-      (00100111 (00000001 idiv-r64) (00000001 rcx))
-      (00100111 (00000001 ret)))))
+(0011 x86-lower-quotient-i64-equal-forms
+  (0010 (left right)
+    (1110
+      (1110 (001 mov-r64-imm64) (001 rax) left)
+      (1110 (001 mov-r64-imm64) (001 rcx) right)
+      (1110 (001 cqo))
+      (1110 (001 idiv-r64) (001 rcx))
+      (1110 (001 ret)))))
 
 ; #196 bounded conditional-growth witness for existing EQ + COND semantics.
 ; This routine does not define equality or conditional evaluation. It chooses
@@ -136,63 +136,63 @@
 ; landing at the ELSE arm. This is deliberately not a general label resolver,
 ; branch assembler, or compiler policy. It returns structured forms only;
 ; closed admission remains the sole path to bytes.
-(00001001 x86-lower-eq-cond-u64-forms
-  (00001000 (left right then-value else-value)
-    (00100111
-      (00100111 (00000001 mov-r64-imm64) (00000001 rax) left)
-      (00100111 (00000001 mov-r64-imm64) (00000001 rcx) right)
-      (00100111 (00000001 cmp-r64-r64) (00000001 rax) (00000001 rcx))
-      (00100111 (00000001 jnz-rel8) #d11)
-      (00100111 (00000001 mov-r64-imm64) (00000001 rax) then-value)
-      (00100111 (00000001 ret))
-      (00100111 (00000001 mov-r64-imm64) (00000001 rax) else-value)
-      (00100111 (00000001 ret)))))
+(0011 x86-lower-eq-cond-u64-forms
+  (0010 (left right then-value else-value)
+    (1110
+      (1110 (001 mov-r64-imm64) (001 rax) left)
+      (1110 (001 mov-r64-imm64) (001 rcx) right)
+      (1110 (001 cmp-r64-r64) (001 rax) (001 rcx))
+      (1110 (001 jnz-rel8) #d11)
+      (1110 (001 mov-r64-imm64) (001 rax) then-value)
+      (1110 (001 ret))
+      (1110 (001 mov-r64-imm64) (001 rax) else-value)
+      (1110 (001 ret)))))
 
 ; #196 conditional+structural composition helper. Each branch constructs one
 ; bounded pair in the same native-call arena and returns its CAR. The caller
 ; selects distinct caller-saved extended GPRs so #207's widened MOV imm64
 ; admission is exercised by semantic composition rather than by an ISA-only
 ; witness. RAX remains the guest ABI result register.
-(00001001 x86-lower-bounded-car-cons-u64-arm-forms
-  (00001000 (left right left-register right-register)
-    (00100111
-      (00100111 (00000001 mov-r64-imm64) left-register left)
-      (00100111
-        (00000001 mov-mem-disp8-r64)
-        (00000001 rdi)
+(0011 x86-lower-bounded-car-cons-u64-arm-forms
+  (0010 (left right left-register right-register)
+    (1110
+      (1110 (001 mov-r64-imm64) left-register left)
+      (1110
+        (001 mov-mem-disp8-r64)
+        (001 rdi)
         x86-pair-car-offset
         left-register)
-      (00100111 (00000001 mov-r64-imm64) right-register right)
-      (00100111
-        (00000001 mov-mem-disp8-r64)
-        (00000001 rdi)
+      (1110 (001 mov-r64-imm64) right-register right)
+      (1110
+        (001 mov-mem-disp8-r64)
+        (001 rdi)
         x86-pair-cdr-offset
         right-register)
-      (00100111
-        (00000001 mov-r64-mem-disp8)
-        (00000001 rax)
-        (00000001 rdi)
+      (1110
+        (001 mov-r64-mem-disp8)
+        (001 rax)
+        (001 rdi)
         x86-pair-car-offset)
-      (00100111 (00000001 ret)))))
+      (1110 (001 ret)))))
 
 ; Third bounded #196 slice: compose runtime COND/EQ choice with structural
 ; CAR(CONS ...) branch bodies. This remains deliberately finite: JNZ +33 skips
 ; exactly one six-form CAR(CONS) arm (10+4+10+4+4+1 bytes with base RDI), and
 ; each arm returns directly. No label resolver, register allocator, GC, or
 ; general recursive expression lowering is claimed here.
-(00001001 x86-lower-eq-cond-car-cons-u64-forms
-  (00001000 (left right then-car then-cdr else-car else-cdr)
+(0011 x86-lower-eq-cond-car-cons-u64-forms
+  (0010 (left right then-car then-cdr else-car else-cdr)
     (приєднати
-      (00100111
-        (00100111 (00000001 mov-r64-imm64) (00000001 rax) left)
-        (00100111 (00000001 mov-r64-imm64) (00000001 rcx) right)
-        (00100111 (00000001 cmp-r64-r64) (00000001 rax) (00000001 rcx))
-        (00100111 (00000001 jnz-rel8) 33))
+      (1110
+        (1110 (001 mov-r64-imm64) (001 rax) left)
+        (1110 (001 mov-r64-imm64) (001 rcx) right)
+        (1110 (001 cmp-r64-r64) (001 rax) (001 rcx))
+        (1110 (001 jnz-rel8) 33))
       (приєднати
         (x86-lower-bounded-car-cons-u64-arm-forms
-          then-car then-cdr (00000001 r8) (00000001 r9))
+          then-car then-cdr (001 r8) (001 r9))
         (x86-lower-bounded-car-cons-u64-arm-forms
-          else-car else-cdr (00000001 r10) (00000001 r11))))))
+          else-car else-cdr (001 r10) (001 r11))))))
 
 ; Bounded structural witness for semantic identities 00000100/00000101/00000110.
 ; The host contributes only a raw writable arena pointer in RDI. Lisp owns
@@ -203,34 +203,34 @@
 ; This is deliberately not a claim that arbitrary first-class pair values may
 ; already escape native code: pair-x86-64.lisp fixes lifetime=native-call and
 ; escape=forbidden for this proof slice.
-(00001001 x86-lower-bounded-pair-store-u64-forms
-  (00001000 (left right)
-    (00100111
-      (00100111 (00000001 mov-r64-imm64) (00000001 rax) left)
-      (00100111
-        (00000001 mov-mem-disp8-r64)
-        (00000001 rdi)
+(0011 x86-lower-bounded-pair-store-u64-forms
+  (0010 (left right)
+    (1110
+      (1110 (001 mov-r64-imm64) (001 rax) left)
+      (1110
+        (001 mov-mem-disp8-r64)
+        (001 rdi)
         x86-pair-car-offset
-        (00000001 rax))
-      (00100111 (00000001 mov-r64-imm64) (00000001 rax) right)
-      (00100111
-        (00000001 mov-mem-disp8-r64)
-        (00000001 rdi)
+        (001 rax))
+      (1110 (001 mov-r64-imm64) (001 rax) right)
+      (1110
+        (001 mov-mem-disp8-r64)
+        (001 rdi)
         x86-pair-cdr-offset
-        (00000001 rax)))))
+        (001 rax)))))
 
 ; Historical internal name retained as an explicit forwarding closure.
 ; Do not place the bare function designator in value position: the strict
 ; source path must make callability explicit and preserve structured forms.
-(00001001 x86-lower-bounded-pair-store-u64-instructions
-  (00001000 (left right)
+(0011 x86-lower-bounded-pair-store-u64-instructions
+  (0010 (left right)
     (x86-lower-bounded-pair-store-u64-forms left right)))
 
 ; Append only the finite structured machine-form lists using current D3
 ; primitives. Do not route this boundary through Core4's deferred legacy
 ; reverse-onto/COND implementation: tests and authority remain language-owned.
-(00001001 x86-machine-append-forms
-  (00001000 (values tail)
+(0011 x86-machine-append-forms
+  (0010 (values tail)
     (110
       ((010 values) tail)
       ((010 ()) (111 (100 values) (x86-machine-append-forms (011 values) tail))))))
@@ -240,49 +240,49 @@
 ; traversals currently consume graded relation answers as COND control and must
 ; keep failing closed until their predicate adapter is migrated. This narrow
 ; witness should not depend on an unfinished generic traversal path.
-(00001001 x86-lower-cons-car-u64-forms
-  (00001000 (left right)
-    (00100111
-      (00100111 (00000001 mov-r64-imm64) (00000001 rax) left)
-      (00100111
-        (00000001 mov-mem-disp8-r64)
-        (00000001 rdi)
+(0011 x86-lower-cons-car-u64-forms
+  (0010 (left right)
+    (1110
+      (1110 (001 mov-r64-imm64) (001 rax) left)
+      (1110
+        (001 mov-mem-disp8-r64)
+        (001 rdi)
         x86-pair-car-offset
-        (00000001 rax))
-      (00100111 (00000001 mov-r64-imm64) (00000001 rax) right)
-      (00100111
-        (00000001 mov-mem-disp8-r64)
-        (00000001 rdi)
+        (001 rax))
+      (1110 (001 mov-r64-imm64) (001 rax) right)
+      (1110
+        (001 mov-mem-disp8-r64)
+        (001 rdi)
         x86-pair-cdr-offset
-        (00000001 rax))
-      (00100111
-        (00000001 mov-r64-mem-disp8)
-        (00000001 rax)
-        (00000001 rdi)
+        (001 rax))
+      (1110
+        (001 mov-r64-mem-disp8)
+        (001 rax)
+        (001 rdi)
         x86-pair-car-offset)
-      (00100111 (00000001 ret)))))
+      (1110 (001 ret)))))
 
-(00001001 x86-lower-cons-cdr-u64-forms
-  (00001000 (left right)
-    (00100111
-      (00100111 (00000001 mov-r64-imm64) (00000001 rax) left)
-      (00100111
-        (00000001 mov-mem-disp8-r64)
-        (00000001 rdi)
+(0011 x86-lower-cons-cdr-u64-forms
+  (0010 (left right)
+    (1110
+      (1110 (001 mov-r64-imm64) (001 rax) left)
+      (1110
+        (001 mov-mem-disp8-r64)
+        (001 rdi)
         x86-pair-car-offset
-        (00000001 rax))
-      (00100111 (00000001 mov-r64-imm64) (00000001 rax) right)
-      (00100111
-        (00000001 mov-mem-disp8-r64)
-        (00000001 rdi)
+        (001 rax))
+      (1110 (001 mov-r64-imm64) (001 rax) right)
+      (1110
+        (001 mov-mem-disp8-r64)
+        (001 rdi)
         x86-pair-cdr-offset
-        (00000001 rax))
-      (00100111
-        (00000001 mov-r64-mem-disp8)
-        (00000001 rax)
-        (00000001 rdi)
+        (001 rax))
+      (1110
+        (001 mov-r64-mem-disp8)
+        (001 rax)
+        (001 rdi)
         x86-pair-cdr-offset)
-      (00100111 (00000001 ret)))))
+      (1110 (001 ret)))))
 
 ; Bounded semantic entry for the Vertical Day CAR witness.
 ; Canonical CAR/CDR own pair validity and therefore fail with the language's
@@ -290,8 +290,8 @@
 ; language-owned gate succeeds do the extracted u64 fields become structured
 ; machine forms, pass closed admission, and enter the semantics-blind host.
 ; No pair predicate or tag rule is duplicated in this machine layer.
-(00001001 x86-call-semantic-car-u64
-  (00001000 (pair-value)
+(0011 x86-call-semantic-car-u64
+  (0010 (pair-value)
     (x86-call-admitted-u64
       (x86-lower-cons-car-u64-forms
         (100 pair-value)
@@ -307,8 +307,8 @@
 ;   DIFFERENCE: both exact-integer inputs in u64 and left >= right.
 ; Anything outside those proved rectangles fails closed to the exact Lisp/Q
 ; fallback. Historical SID8 values and human spellings never participate.
-(00001001 x86-current-d5-u32-inputs?
-  (00001000 (left right)
+(0011 x86-current-d5-u32-inputs?
+  (0010 (left right)
     (110
       ((x86-admission-exact-integer? left)
        (110
@@ -318,12 +318,12 @@
             ((x86-admission-exact-integer? right)
              (x86-admission-within-inclusive-integer-range?
                right 0 4294967295))
-            ((010 ()) (00000001 ()))))
-         ((010 ()) (00000001 ()))))
-      ((010 ()) (00000001 ())))))
+            ((010 ()) (001 ()))))
+         ((010 ()) (001 ()))))
+      ((010 ()) (001 ())))))
 
-(00001001 x86-current-d5-difference-u64-safe?
-  (00001000 (left right)
+(0011 x86-current-d5-difference-u64-safe?
+  (0010 (left right)
     (110
       ((x86-admission-exact-integer? left)
        (110
@@ -337,52 +337,52 @@
                 ; Exact-Q >= returns D1 1/0. Compare explicitly because 0 is
                 ; itself a value and must never become generic truthiness.
                 (110
-                  ((00011110 left right)  (010 (00000001 ())))
-                  ((010 ()) (00000001 ()))))
-               ((010 ()) (00000001 ()))))
-            ((010 ()) (00000001 ()))))
-         ((010 ()) (00000001 ()))))
-      ((010 ()) (00000001 ())))))
+                  ((110110 left right)  (010 (001 ())))
+                  ((010 ()) (001 ()))))
+               ((010 ()) (001 ()))))
+            ((010 ()) (001 ()))))
+         ((010 ()) (001 ()))))
+      ((010 ()) (001 ())))))
 
 ; #4068 width-safe machine key helper. Width and packed bits are separate
 ; mechanism scalars derived from Rust DomainIdentity; source leading zeros are never
 ; consulted.
-(00001001 x86-current-domain-key?
-  (00001000 (width bits expected-width expected-bits)
+(0011 x86-current-domain-key?
+  (0010 (width bits expected-width expected-bits)
     (110
       ((101 width expected-width)
        (101 bits expected-bits))
-      ((010 ()) (00000001 ())))))
+      ((010 ()) (001 ())))))
 
-(00001001 x86-lower-current-binary-u64-forms
-  (00001000 (width bits left right)
+(0011 x86-lower-current-binary-u64-forms
+  (0010 (width bits left right)
     (110
       ((x86-current-domain-key? width bits 5 10)
        (110
          ((x86-current-d5-u32-inputs? left right)
           (x86-lower-add-u64-forms left right))
-         ((010 ()) (00000001 exact-d5-fallback-required))))
+         ((010 ()) (001 exact-d5-fallback-required))))
       ((x86-current-domain-key? width bits 5 11)
        (110
          ((x86-current-d5-difference-u64-safe? left right)
           (x86-lower-difference-u64-forms left right))
-         ((010 ()) (00000001 exact-d5-fallback-required))))
+         ((010 ()) (001 exact-d5-fallback-required))))
       ((x86-current-domain-key? width bits 5 22)
        (110
          ((x86-current-d5-u32-inputs? left right)
           (x86-lower-times-u64-forms left right))
-         ((010 ()) (00000001 exact-d5-fallback-required))))
+         ((010 ()) (001 exact-d5-fallback-required))))
       ((010 ())
-       (00000001 unsupported-current-domain-binary-u64)))))
+       (001 unsupported-current-domain-binary-u64)))))
 
-(00001001 x86-encode-current-binary-u64
-  (00001000 (width bits left right)
-    ((00001000 (forms)
+(0011 x86-encode-current-binary-u64
+  (0010 (width bits left right)
+    ((0010 (forms)
        (110
-        ((101 forms (00000001 unsupported-current-domain-binary-u64))
-         (00000001 unsupported-current-domain-binary-u64))
-        ((101 forms (00000001 exact-d5-fallback-required))
-         (00000001 exact-d5-fallback-required))
+        ((101 forms (001 unsupported-current-domain-binary-u64))
+         (001 unsupported-current-domain-binary-u64))
+        ((101 forms (001 exact-d5-fallback-required))
+         (001 exact-d5-fallback-required))
         ((010 ())
          (x86-encode-admitted-program forms))))
       (x86-lower-current-binary-u64-forms
@@ -392,48 +392,48 @@
 ; Language meaning is already admitted as LOWER_DOMAIN_COMPOSITION over exact
 ; D5 PLUS/DIFFERENCE with exact integer 1. This machine slice reuses the same
 ; admitted ADD/SUB forms and adds no arithmetic meaning of its own.
-(00001001 x86-current-d6-add1-u64-safe?
-  (00001000 (value)
+(0011 x86-current-d6-add1-u64-safe?
+  (0010 (value)
     (110
       ((x86-admission-exact-integer? value)
        (x86-admission-within-inclusive-integer-range?
          value 0 18446744073709551614))
-      ((010 ()) (00000001 ())))))
+      ((010 ()) (001 ())))))
 
-(00001001 x86-current-d6-sub1-u64-safe?
-  (00001000 (value)
+(0011 x86-current-d6-sub1-u64-safe?
+  (0010 (value)
     (110
       ((x86-admission-exact-integer? value)
        (x86-admission-within-inclusive-integer-range?
          value 1 18446744073709551615))
-      ((010 ()) (00000001 ())))))
+      ((010 ()) (001 ())))))
 
-(00001001 x86-lower-current-d6-unary-u64-forms
-  (00001000 (width bits value)
+(0011 x86-lower-current-d6-unary-u64-forms
+  (0010 (width bits value)
     (110
       ((x86-current-domain-key? width bits 6 14)
        (110
          ((x86-current-d6-add1-u64-safe? value)
           (x86-lower-add-u64-forms value 1))
-         ((010 ()) (00000001 exact-d6-fallback-required))))
+         ((010 ()) (001 exact-d6-fallback-required))))
       ((x86-current-domain-key? width bits 6 15)
        (110
          ((x86-current-d6-sub1-u64-safe? value)
           (x86-lower-difference-u64-forms value 1))
-         ((010 ()) (00000001 exact-d6-fallback-required))))
+         ((010 ()) (001 exact-d6-fallback-required))))
       ((010 ())
-       (00000001 unsupported-current-domain-d6-unary-u64)))))
+       (001 unsupported-current-domain-d6-unary-u64)))))
 
-(00001001 x86-encode-current-d6-unary-u64
-  (00001000 (width bits value)
+(0011 x86-encode-current-d6-unary-u64
+  (0010 (width bits value)
     (let ((forms
                   (x86-lower-current-d6-unary-u64-forms
                     width bits value)))
       (110
-        ((101 forms (00000001 unsupported-current-domain-d6-unary-u64))
-         (00000001 unsupported-current-domain-d6-unary-u64))
-        ((101 forms (00000001 exact-d6-fallback-required))
-         (00000001 exact-d6-fallback-required))
+        ((101 forms (001 unsupported-current-domain-d6-unary-u64))
+         (001 unsupported-current-domain-d6-unary-u64))
+        ((101 forms (001 exact-d6-fallback-required))
+         (001 exact-d6-fallback-required))
         ((010 ())
          (x86-encode-admitted-program forms))))))
 
@@ -441,8 +441,8 @@
 ; Only equal positive exact integers inside signed i64 enter IDIV. This is a
 ; proof slice, not a claim of general integer division. All non-equal,
 ; rational, zero, negative or out-of-range cases remain exact Lisp/Q fallback.
-(00001001 x86-current-d5-quotient-i64-equal-safe?
-  (00001000 (left right)
+(0011 x86-current-d5-quotient-i64-equal-safe?
+  (0010 (left right)
     (110
       ((x86-admission-exact-integer? left)
        (110
@@ -454,31 +454,31 @@
                ((x86-admission-within-inclusive-integer-range?
                   right 1 9223372036854775807)
                 (101 left right))
-               ((010 ()) (00000001 ()))))
-            ((010 ()) (00000001 ()))))
-         ((010 ()) (00000001 ()))))
-      ((010 ()) (00000001 ())))))
+               ((010 ()) (001 ()))))
+            ((010 ()) (001 ()))))
+         ((010 ()) (001 ()))))
+      ((010 ()) (001 ())))))
 
-(00001001 x86-lower-current-quotient-i64-forms
-  (00001000 (width bits left right)
+(0011 x86-lower-current-quotient-i64-forms
+  (0010 (width bits left right)
     (110
       ((x86-current-domain-key? width bits 5 23)
        (110
          ((x86-current-d5-quotient-i64-equal-safe? left right)
           (x86-lower-quotient-i64-equal-forms left right))
-         ((010 ()) (00000001 exact-d5-fallback-required))))
-      ((010 ()) (00000001 unsupported-current-domain-quotient-i64)))))
+         ((010 ()) (001 exact-d5-fallback-required))))
+      ((010 ()) (001 unsupported-current-domain-quotient-i64)))))
 
-(00001001 x86-encode-current-quotient-i64
-  (00001000 (width bits left right)
+(0011 x86-encode-current-quotient-i64
+  (0010 (width bits left right)
     (let ((forms
                   (x86-lower-current-quotient-i64-forms
                     width bits left right)))
       (110
-        ((101 forms (00000001 unsupported-current-domain-quotient-i64))
-         (00000001 unsupported-current-domain-quotient-i64))
-        ((101 forms (00000001 exact-d5-fallback-required))
-         (00000001 exact-d5-fallback-required))
+        ((101 forms (001 unsupported-current-domain-quotient-i64))
+         (001 unsupported-current-domain-quotient-i64))
+        ((101 forms (001 exact-d5-fallback-required))
+         (001 exact-d5-fallback-required))
         ((010 ())
          (x86-encode-admitted-program forms))))))
 
@@ -487,8 +487,8 @@
 ; No native-call wrapper exposes that 0/1 as a language predicate. The
 ; language-visible result boundary remains the existing D5 -> D1
 ; canonicalization in Rust.
-(00001001 x86-current-d5-order-i63-safe?
-  (00001000 (left right)
+(0011 x86-current-d5-order-i63-safe?
+  (0010 (left right)
     (110
       ((x86-admission-exact-integer? left)
        (110
@@ -498,44 +498,44 @@
             ((x86-admission-exact-integer? right)
              (x86-admission-within-inclusive-integer-range?
                right 0 9223372036854775807))
-            ((010 ()) (00000001 ()))))
-         ((010 ()) (00000001 ()))))
-      ((010 ()) (00000001 ())))))
+            ((010 ()) (001 ()))))
+         ((010 ()) (001 ()))))
+      ((010 ()) (001 ())))))
 
-(00001001 x86-lower-order-i64-forms
-  (00001000 (width bits left right)
+(0011 x86-lower-order-i64-forms
+  (0010 (width bits left right)
     (110
       ((x86-current-d5-order-i63-safe? left right)
        (110
          ((x86-current-domain-key? width bits 5 26)
-          (00100111
-            (00100111 (00000001 mov-r64-imm64) (00000001 rax) left)
-            (00100111 (00000001 mov-r64-imm64) (00000001 rcx) right)
-            (00100111 (00000001 cmp-r64-r64) (00000001 rax) (00000001 rcx))
-            (00100111 (00000001 setl-r8) (00000001 al))
-            (00100111 (00000001 movzx-r64-r8) (00000001 rax) (00000001 al))
-            (00100111 (00000001 ret))))
+          (1110
+            (1110 (001 mov-r64-imm64) (001 rax) left)
+            (1110 (001 mov-r64-imm64) (001 rcx) right)
+            (1110 (001 cmp-r64-r64) (001 rax) (001 rcx))
+            (1110 (001 setl-r8) (001 al))
+            (1110 (001 movzx-r64-r8) (001 rax) (001 al))
+            (1110 (001 ret))))
          ((x86-current-domain-key? width bits 5 27)
-          (00100111
-            (00100111 (00000001 mov-r64-imm64) (00000001 rax) left)
-            (00100111 (00000001 mov-r64-imm64) (00000001 rcx) right)
-            (00100111 (00000001 cmp-r64-r64) (00000001 rax) (00000001 rcx))
-            (00100111 (00000001 setg-r8) (00000001 al))
-            (00100111 (00000001 movzx-r64-r8) (00000001 rax) (00000001 al))
-            (00100111 (00000001 ret))))
+          (1110
+            (1110 (001 mov-r64-imm64) (001 rax) left)
+            (1110 (001 mov-r64-imm64) (001 rcx) right)
+            (1110 (001 cmp-r64-r64) (001 rax) (001 rcx))
+            (1110 (001 setg-r8) (001 al))
+            (1110 (001 movzx-r64-r8) (001 rax) (001 al))
+            (1110 (001 ret))))
          ((010 ())
-          (00000001 unsupported-current-domain-order-i64))))
+          (001 unsupported-current-domain-order-i64))))
       ((010 ())
-       (00000001 exact-d5-fallback-required)))))
+       (001 exact-d5-fallback-required)))))
 
-(00001001 x86-encode-current-order-bit
-  (00001000 (width bits left right)
+(0011 x86-encode-current-order-bit
+  (0010 (width bits left right)
     (let ((forms (x86-lower-order-i64-forms width bits left right)))
       (110
-        ((101 forms (00000001 unsupported-current-domain-order-i64))
-         (00000001 unsupported-current-domain-order-i64))
-        ((101 forms (00000001 exact-d5-fallback-required))
-         (00000001 exact-d5-fallback-required))
+        ((101 forms (001 unsupported-current-domain-order-i64))
+         (001 unsupported-current-domain-order-i64))
+        ((101 forms (001 exact-d5-fallback-required))
+         (001 exact-d5-fallback-required))
         ((010 ())
          (x86-encode-admitted-program forms))))))
 
@@ -544,52 +544,52 @@
 ; carriers. Native CMP-to-zero is therefore admitted only for exact
 ; nonnegative u64 integers. The emitted 0/1 remains INTERNAL machine data;
 ; language-visible result remains exact D1.
-(00001001 x86-current-d5-zerop-u64-safe?
-  (00001000 (value)
+(0011 x86-current-d5-zerop-u64-safe?
+  (0010 (value)
     (110
       ((x86-admission-exact-integer? value)
        (x86-admission-within-inclusive-integer-range?
          value 0 18446744073709551615))
-      ((010 ()) (00000001 ())))))
+      ((010 ()) (001 ())))))
 
-(00001001 x86-lower-zerop-u64-forms
-  (00001000 (value)
-    (00100111
-      (00100111 (00000001 mov-r64-imm64) (00000001 rax) value)
-      (00100111 (00000001 mov-r64-imm64) (00000001 rcx) 0)
-      (00100111 (00000001 cmp-r64-r64) (00000001 rax) (00000001 rcx))
-      (00100111 (00000001 sete-r8) (00000001 al))
-      (00100111 (00000001 movzx-r64-r8) (00000001 rax) (00000001 al))
-      (00100111 (00000001 ret)))))
+(0011 x86-lower-zerop-u64-forms
+  (0010 (value)
+    (1110
+      (1110 (001 mov-r64-imm64) (001 rax) value)
+      (1110 (001 mov-r64-imm64) (001 rcx) 0)
+      (1110 (001 cmp-r64-r64) (001 rax) (001 rcx))
+      (1110 (001 sete-r8) (001 al))
+      (1110 (001 movzx-r64-r8) (001 rax) (001 al))
+      (1110 (001 ret)))))
 
-(00001001 x86-lower-current-zerop-u64-forms
-  (00001000 (width bits value)
+(0011 x86-lower-current-zerop-u64-forms
+  (0010 (width bits value)
     (110
       ((x86-current-domain-key? width bits 5 8)
        (110
          ((x86-current-d5-zerop-u64-safe? value)
           (x86-lower-zerop-u64-forms value))
-         ((010 ()) (00000001 exact-d5-fallback-required))))
+         ((010 ()) (001 exact-d5-fallback-required))))
       ((010 ())
-       (00000001 unsupported-current-domain-zerop-u64)))))
+       (001 unsupported-current-domain-zerop-u64)))))
 
-(00001001 x86-encode-current-zerop-bit
-  (00001000 (width bits value)
-    (10011100
+(0011 x86-encode-current-zerop-bit
+  (0010 (width bits value)
+    (001000
       ((forms (x86-lower-current-zerop-u64-forms width bits value)))
       (110
-        ((101 forms (00000001 unsupported-current-domain-zerop-u64))
-         (00000001 unsupported-current-domain-zerop-u64))
-        ((101 forms (00000001 exact-d5-fallback-required))
-         (00000001 exact-d5-fallback-required))
+        ((101 forms (001 unsupported-current-domain-zerop-u64))
+         (001 unsupported-current-domain-zerop-u64))
+        ((101 forms (001 exact-d5-fallback-required))
+         (001 exact-d5-fallback-required))
         ((010 ())
          (x86-encode-admitted-program forms))))))
 
 ; #3996 exact-domain structural D3 dispatcher.
 ; These are bounded native-call witnesses only. They do not claim a general
 ; allocator, escaping pair ABI, GC, or arbitrary first-class native pair value.
-(00001001 x86-lower-current-structural-u64-forms
-  (00001000 (width bits left right)
+(0011 x86-lower-current-structural-u64-forms
+  (0010 (width bits left right)
     (110
       ((x86-current-domain-key? width bits 3 7)
        (x86-lower-bounded-pair-store-u64-forms left right))
@@ -598,16 +598,16 @@
       ((x86-current-domain-key? width bits 3 3)
        (x86-lower-cons-cdr-u64-forms left right))
       ((010 ())
-       (00000001 unsupported-current-domain-structural-u64)))))
+       (001 unsupported-current-domain-structural-u64)))))
 
-(00001001 x86-encode-current-structural-u64
-  (00001000 (width bits left right)
+(0011 x86-encode-current-structural-u64
+  (0010 (width bits left right)
     (let ((forms
                   (x86-lower-current-structural-u64-forms
                     width bits left right)))
       (110
-        ((101 forms (00000001 unsupported-current-domain-structural-u64))
-         (00000001 unsupported-current-domain-structural-u64))
+        ((101 forms (001 unsupported-current-domain-structural-u64))
+         (001 unsupported-current-domain-structural-u64))
         ((010 ())
          (x86-encode-admitted-program-or-reject forms))))))
 
@@ -616,8 +616,8 @@
 ; machine API. The equality decision stays internal to the already-witnessed
 ; two-arm composition; the language boundary remains exact D1/EMPTY according
 ; to current D3 law.
-(00001001 x86-lower-current-eq-cond-u64-forms
-  (00001000
+(0011 x86-lower-current-eq-cond-u64-forms
+  (0010
     (eq-width eq-bits cond-width cond-bits left right then-value else-value)
     (110
       ((x86-current-domain-key? eq-width eq-bits 3 5)
@@ -626,20 +626,20 @@
           (x86-lower-eq-cond-u64-forms
             left right then-value else-value))
          ((010 ())
-          (00000001 unsupported-current-domain-eq-cond-u64))))
+          (001 unsupported-current-domain-eq-cond-u64))))
       ((010 ())
-       (00000001 unsupported-current-domain-eq-cond-u64)))))
+       (001 unsupported-current-domain-eq-cond-u64)))))
 
-(00001001 x86-encode-current-eq-cond-u64
-  (00001000
+(0011 x86-encode-current-eq-cond-u64
+  (0010
     (eq-width eq-bits cond-width cond-bits left right then-value else-value)
     (let ((forms
             (x86-lower-current-eq-cond-u64-forms
               eq-width eq-bits cond-width cond-bits
               left right then-value else-value)))
       (110
-        ((101 forms (00000001 unsupported-current-domain-eq-cond-u64))
-         (00000001 unsupported-current-domain-eq-cond-u64))
+        ((101 forms (001 unsupported-current-domain-eq-cond-u64))
+         (001 unsupported-current-domain-eq-cond-u64))
         ((010 ())
          (x86-encode-admitted-program-or-reject forms))))))
 
