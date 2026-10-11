@@ -7,31 +7,31 @@
 ; contract, their difference, impact, guidance, and evidence as one stable
 ; WSM value. Rust adapters observe mechanisms; WSM owns interpretation.
 
-(00001011 guard-decision?
-  (00001000 (decision)
-    (00000111
-      ((00000011 decision (00000001 allow)) t)
-      ((00000011 decision (00000001 warn)) t)
-      ((00000011 decision (00000001 reject)) t)
-      ((00000011 decision (00000001 unknown)) t)
+(0011 guard-decision?
+  (0010 (decision)
+    (110
+      ((101 decision (001 allow)) t)
+      ((101 decision (001 warn)) t)
+      ((101 decision (001 reject)) t)
+      ((101 decision (001 unknown)) t)
       )))
 
-(00001011 guard-evidence-status?
-  (00001000 (status)
-    (00000111
-      ((00000011 status (00000001 confirmed)) t)
-      ((00000011 status (00000001 partial)) t)
-      ((00000011 status (00000001 unresolved)) t)
-      ((00000011 status (00000001 broken)) t)
+(0011 guard-evidence-status?
+  (0010 (status)
+    (110
+      ((101 status (001 confirmed)) t)
+      ((101 status (001 partial)) t)
+      ((101 status (001 unresolved)) t)
+      ((101 status (001 broken)) t)
       )))
 
 ; UNKNOWN is a routing state, not a dead end. These routes distinguish
 ; distributed local knowledge, owner authority, and external research.
 ; UNKNOWN — це стан маршрутизації, а не глухий кут. Маршрути розрізняють
 ; розподілене локальне знання, владу власника і зовнішнє дослідження.
-(00001011 guard-unknown-routes
-  (00001000 ()
-    (00000001
+(0011 guard-unknown-routes
+  (0010 ()
+    (001
       (((route ask-agent)
         (when ecosystem-local-or-component-owned)
         (action ask-responsible-live-agent)
@@ -45,64 +45,64 @@
         (action search-authoritative-external-sources)
         (verify citations-and-access-date))))))
 
-(00001011 make-guard-finding
-  (00001000 (decision evidence-status subject state contract delta impact guidance evidence)
-    (00000111
-      ((00100001 (guard-decision? decision))
-       (00100111 (00000001 invalid-guard-decision) decision))
-      ((00100001 (guard-evidence-status? evidence-status))
-       (00100111 (00000001 invalid-evidence-status) evidence-status))
-      ((00000010 ())
-       (00100111
-         (00000001 guard-finding)
-         (00100111 (00000001 schema) (00000001 guard/1))
-         (00100111 (00000001 decision) decision)
-         (00100111 (00000001 evidence-status) evidence-status)
-         (00100111 (00000001 subject) subject)
-         (00100111 (00000001 state) state)
-         (00100111 (00000001 contract) contract)
-         (00100111 (00000001 difference) delta)
-         (00100111 (00000001 impact) impact)
-         (00100111 (00000001 guidance) guidance)
-         (00100111 (00000001 evidence) evidence)
-         (00100111
-           (00000001 unknown-routes)
-           (00000111
-             ((00000011 decision (00000001 unknown)) (guard-unknown-routes))
+(0011 make-guard-finding
+  (0010 (decision evidence-status subject state contract delta impact guidance evidence)
+    (110
+      ((0100 (guard-decision? decision))
+       (1110 (001 invalid-guard-decision) decision))
+      ((0100 (guard-evidence-status? evidence-status))
+       (1110 (001 invalid-evidence-status) evidence-status))
+      ((010 ())
+       (1110
+         (001 guard-finding)
+         (1110 (001 schema) (001 guard/1))
+         (1110 (001 decision) decision)
+         (1110 (001 evidence-status) evidence-status)
+         (1110 (001 subject) subject)
+         (1110 (001 state) state)
+         (1110 (001 contract) contract)
+         (1110 (001 difference) delta)
+         (1110 (001 impact) impact)
+         (1110 (001 guidance) guidance)
+         (1110 (001 evidence) evidence)
+         (1110
+           (001 unknown-routes)
+           (110
+             ((101 decision (001 unknown)) (guard-unknown-routes))
              )))))))
 
 ; A missing fact is UNKNOWN, never an implicit rejection.
 ; Відсутній факт означає UNKNOWN, а не неявну заборону.
-(00001011 guard-unknown
-  (00001000 (subject missing-evidence guidance)
+(0011 guard-unknown
+  (0010 (subject missing-evidence guidance)
     (make-guard-finding
-      (00000001 unknown)
-      (00000001 unresolved)
+      (001 unknown)
+      (001 unresolved)
       subject
-      (00000001 not-observed)
-      (00000001 insufficient-evidence)
+      (001 not-observed)
+      (001 insufficient-evidence)
       missing-evidence
-      (00000001 decision-not-earned)
+      (001 decision-not-earned)
       guidance
-      (00000001 ()))))
+      (001 ()))))
 
 ; Oracle gives expected semantic truth; an observer gives actual truth;
 ; Guard explains the relation without replacing either authority.
 ; Oracle дає очікувану семантику, observer — фактичний стан, Guard пояснює
 ; їхнє співвідношення, не підміняючи жодне джерело.
-(00001011 guard-compare
-  (00001000 (subject expected observed evidence)
-    (00000111
-      ((00100010 expected observed)
+(0011 guard-compare
+  (0010 (subject expected observed evidence)
+    (110
+      ((11110111 expected observed)
        (make-guard-finding
-         (00000001 allow) (00000001 confirmed) subject observed expected
-         (00000001 ()) (00000001 invariant-preserved) (00000001 no-action) evidence))
-      ((00000010 ())
+         (001 allow) (001 confirmed) subject observed expected
+         (001 ()) (001 invariant-preserved) (001 no-action) evidence))
+      ((010 ())
        (make-guard-finding
-         (00000001 warn) (00000001 confirmed) subject observed expected
-         (00100111 (00000001 expected) expected (00000001 observed) observed)
-         (00000001 contract-drift)
-         (00000001 reconcile-observation-with-contract)
+         (001 warn) (001 confirmed) subject observed expected
+         (1110 (001 expected) expected (001 observed) observed)
+         (001 contract-drift)
+         (001 reconcile-observation-with-contract)
          evidence)))))
 
 ; Synchronization is a guarded transaction: first establish a commit freeze,
@@ -111,51 +111,51 @@
 ; Синхронізація — guarded transaction: спершу freeze комітів, потім sync,
 ; потім запис observed drift і лише після цього відкриття вікна. Це policy,
 ; а не прихований Git lock.
-(00001011 guard-sync-window
-  (00001000 (commit-state sync-state drift-state evidence)
-    (00000111
-      ((00100001 (00000011 commit-state (00000001 frozen)))
+(0011 guard-sync-window
+  (0010 (commit-state sync-state drift-state evidence)
+    (110
+      ((0100 (101 commit-state (001 frozen)))
        (make-guard-finding
-         (00000001 reject) (00000001 confirmed) (00000001 ecosystem-sync)
-         commit-state (00000001 commits-frozen-before-sync)
-         (00100111 (00000001 expected) (00000001 frozen) (00000001 observed) commit-state)
-         (00000001 concurrent-commits-can-create-unrecorded-drift)
-         (00000001 freeze-commits-before-synchronization)
+         (001 reject) (001 confirmed) (001 ecosystem-sync)
+         commit-state (001 commits-frozen-before-sync)
+         (1110 (001 expected) (001 frozen) (001 observed) commit-state)
+         (001 concurrent-commits-can-create-unrecorded-drift)
+         (001 freeze-commits-before-synchronization)
          evidence))
-      ((00100001 (00000011 sync-state (00000001 completed)))
+      ((0100 (101 sync-state (001 completed)))
        (make-guard-finding
-         (00000001 warn) (00000001 unresolved) (00000001 ecosystem-sync)
-         sync-state (00000001 synchronization-completed)
-         (00100111 (00000001 expected) (00000001 completed) (00000001 observed) sync-state)
-         (00000001 drift-cannot-yet-be-classified)
-         (00000001 complete-sync-and-preserve-logs)
+         (001 warn) (001 unresolved) (001 ecosystem-sync)
+         sync-state (001 synchronization-completed)
+         (1110 (001 expected) (001 completed) (001 observed) sync-state)
+         (001 drift-cannot-yet-be-classified)
+         (001 complete-sync-and-preserve-logs)
          evidence))
-      ((00100001 (00000011 drift-state (00000001 recorded)))
+      ((0100 (101 drift-state (001 recorded)))
        (make-guard-finding
-         (00000001 warn) (00000001 unresolved) (00000001 ecosystem-sync)
-         drift-state (00000001 drift-recorded)
-         (00100111 (00000001 expected) (00000001 recorded) (00000001 observed) drift-state)
-         (00000001 synchronization-result-has-no-drift-record)
-         (00000001 record-drift-before-unfreezing-commits)
+         (001 warn) (001 unresolved) (001 ecosystem-sync)
+         drift-state (001 drift-recorded)
+         (1110 (001 expected) (001 recorded) (001 observed) drift-state)
+         (001 synchronization-result-has-no-drift-record)
+         (001 record-drift-before-unfreezing-commits)
          evidence))
-      ((00000010 ())
+      ((010 ())
        (make-guard-finding
-         (00000001 allow) (00000001 confirmed) (00000001 ecosystem-sync)
-         (00100111 commit-state sync-state drift-state)
-         (00000001 freeze-sync-record-unfreeze)
-         (00000001 ())
-         (00000001 synchronization-boundary-observed)
-         (00000001 reopen-commit-window)
+         (001 allow) (001 confirmed) (001 ecosystem-sync)
+         (1110 commit-state sync-state drift-state)
+         (001 freeze-sync-record-unfreeze)
+         (001 ())
+         (001 synchronization-boundary-observed)
+         (001 reopen-commit-window)
          evidence)))))
 
 ; Reference records are ordinary data. The evolving ecosystem directory lives
 ; in knowledge/guard-reference.lisp; these accessors remain generic.
 ; Довідкові записи — звичайні дані. Змінний каталог екосистеми лежить у
 ; knowledge/guard-reference.lisp, а ці функції лишаються загальними.
-(00001011 guard-reference-field
-  (00001000 (field reference)
-    (10011100 ((entry (00101101 field (00000110 reference))))
-      (00000111
+(0011 guard-reference-field
+  (0010 (field reference)
+    (001000 ((entry (11100 field (011 reference))))
+      (110
         
-        ((00000010 entry)  (00000001 ()))
-        ((00000010 ()) (00101111 entry))))))
+        ((010 entry)  (001 ()))
+        ((010 ()) (1001 entry))))))
