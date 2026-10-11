@@ -14,294 +14,294 @@
 ; literal tag. Every other clause below uses the two-part migration-compatible
 ; form instead, which `evaluate_cond` resolves via generic/structural truthiness.
 
-(00001001 pd-question-choice
-  (00001000 (name options)
-    (00100111 (00000001 choice-question/1) name options)))
+(0011 pd-question-choice
+  (0010 (name options)
+    (1110 (001 choice-question/1) name options)))
 
-(00001001 pd-question-noul
-  (00001000 (name)
-    (00100111 (00000001 noul-question/1) name)))
+(0011 pd-question-noul
+  (0010 (name)
+    (1110 (001 noul-question/1) name)))
 
-(00001001 pd-question-score
-  (00001000 (name levels)
-    (00100111 (00000001 score-question/1) name levels)))
+(0011 pd-question-score
+  (0010 (name levels)
+    (1110 (001 score-question/1) name levels)))
 
-(00001001 pd-member?
-  (00001000 (value values)
-    (00000111
-      ((00000010 values) () (00000001 ()))
-      ((00000010 values) (1) (00000001 ()))
-      ((00100010 value (00000101 values)) (1) t)
-      (t (pd-member? value (00000110 values))))))
+(0011 pd-member?
+  (0010 (value values)
+    (110
+      ((010 values) () (001 ()))
+      ((010 values) (1) (001 ()))
+      ((11110111 value (100 values)) (1) t)
+      (t (pd-member? value (011 values))))))
 
-(00001001 pd-proper-list?
-  (00001000 (value)
-    (00000111
-      ((00000010 value) () (00000111
-         ((00000011 value (00000001 ())) t)
-         (t (00000001 ()))))
-      ((00000010 value) (1) (00000111
-         ((00000011 value (00000001 ())) t)
-         (t (00000001 ()))))
-      (t (pd-proper-list? (00000110 value))))))
+(0011 pd-proper-list?
+  (0010 (value)
+    (110
+      ((010 value) () (110
+         ((101 value (001 ())) t)
+         (t (001 ()))))
+      ((010 value) (1) (110
+         ((101 value (001 ())) t)
+         (t (001 ()))))
+      (t (pd-proper-list? (011 value))))))
 
-(00001001 pd-probability-valid?
-  (00001000 (probability)
-    (00000111
-      ((00011010 probability 0) 1 (00000001 ()))
-      ((00011010 1 probability) 1 (00000001 ()))
+(0011 pd-probability-valid?
+  (0010 (probability)
+    (110
+      ((11010 probability 0) 1 (001 ()))
+      ((11010 1 probability) 1 (001 ()))
       (t t))))
 
-(00001001 pd-sum-probabilities
-  (00001000 (distribution)
-    (00000111
-      ((00000010 distribution) () 0)
-      ((00000010 distribution) (1) 0)
+(0011 pd-sum-probabilities
+  (0010 (distribution)
+    (110
+      ((010 distribution) () 0)
+      ((010 distribution) (1) 0)
       (t
-       (00001100 (00101111 (00000101 distribution))
-          (pd-sum-probabilities (00000110 distribution)))))))
+       (01010 (1001 (100 distribution))
+          (pd-sum-probabilities (011 distribution)))))))
 
-(00001001 pd-distribution-entries-valid?
-  (00001000 (distribution options seen)
-    (00000111
-      ((00000010 distribution) () t)
-      ((00000010 distribution) (1) t)
+(0011 pd-distribution-entries-valid?
+  (0010 (distribution options seen)
+    (110
+      ((010 distribution) () t)
+      ((010 distribution) (1) t)
       (t
-       (10011100 ((entry (00000101 distribution)))
-         (00000111
-           ((00011100 (00101000 entry) 2) 1
-            (10011100 ((entry-key-ref (00000101 entry))
-                  (probability (00101111 entry)))
-              (00000111
+       (001000 ((entry (100 distribution)))
+         (110
+           ((11110111 (000000 entry) 2) 1
+            (001000 ((entry-key-ref (100 entry))
+                  (probability (1001 entry)))
+              (110
                 ((pd-member? entry-key-ref options)
-                 (00000111
-                   ((pd-member? entry-key-ref seen) (00000001 ()))
+                 (110
+                   ((pd-member? entry-key-ref seen) (001 ()))
                    ((pd-probability-valid? probability)
                     (pd-distribution-entries-valid?
-                      (00000110 distribution)
+                      (011 distribution)
                       options
-                      (00000100 entry-key-ref seen)))
-                   (t (00000001 ()))))
-                (t (00000001 ())))))
-           (t (00000001 ()))))))))
+                      (111 entry-key-ref seen)))
+                   (t (001 ()))))
+                (t (001 ())))))
+           (t (001 ()))))))))
 
-(00001001 pd-all-options-present?
-  (00001000 (options distribution)
-    (00000111
-      ((00000010 options) () t)
-      ((00000010 options) (1) t)
+(0011 pd-all-options-present?
+  (0010 (options distribution)
+    (110
+      ((010 options) () t)
+      ((010 options) (1) t)
       (t
-       (00000111
-         ((pd-member? (00000101 options) (00110111 (00001000 (entry) (00000101 entry)) distribution))
-          (pd-all-options-present? (00000110 options) distribution))
-         (t (00000001 ())))))))
+       (110
+         ((pd-member? (100 options) (101000 (0010 (entry) (100 entry)) distribution))
+          (pd-all-options-present? (011 options) distribution))
+         (t (001 ())))))))
 
-(00001001 pd-distribution-valid?
-  (00001000 (options distribution)
-    (00000111
+(0011 pd-distribution-valid?
+  (0010 (options distribution)
+    (110
       ((pd-proper-list? options)
-       (00000111
+       (110
          ((pd-proper-list? distribution)
-          (00000111
-            ((00000010 options) () (00000001 ()))
-            ((00000010 options) (1) (00000001 ()))
-            ((00000010 distribution) () (00000001 ()))
-            ((00000010 distribution) (1) (00000001 ()))
-            ((pd-distribution-entries-valid? distribution options (00000001 ()))
-             (00000111
-               ((00011100 (pd-sum-probabilities distribution) 1) 1
+          (110
+            ((010 options) () (001 ()))
+            ((010 options) (1) (001 ()))
+            ((010 distribution) () (001 ()))
+            ((010 distribution) (1) (001 ()))
+            ((pd-distribution-entries-valid? distribution options (001 ()))
+             (110
+               ((11110111 (pd-sum-probabilities distribution) 1) 1
                 (pd-all-options-present? options distribution))
-               (t (00000001 ()))))
-            (t (00000001 ()))))
-         (t (00000001 ()))))
-      (t (00000001 ())))))
+               (t (001 ()))))
+            (t (001 ()))))
+         (t (001 ()))))
+      (t (001 ())))))
 
-(00001001 pd-max-probability
-  (00001000 (distribution current)
-    (00000111
-      ((00000010 distribution) () current)
-      ((00000010 distribution) (1) current)
+(0011 pd-max-probability
+  (0010 (distribution current)
+    (110
+      ((010 distribution) () current)
+      ((010 distribution) (1) current)
       (t
-       (10011100 ((probability (00101111 (00000101 distribution))))
-         (00000111
-           ((00011010 current probability) 1
-            (pd-max-probability (00000110 distribution) probability))
+       (001000 ((probability (1001 (100 distribution))))
+         (110
+           ((11010 current probability) 1
+            (pd-max-probability (011 distribution) probability))
            (t
-            (pd-max-probability (00000110 distribution) current))))))))
+            (pd-max-probability (011 distribution) current))))))))
 
-(00001001 pd-confidence
-  (00001000 (distribution)
+(0011 pd-confidence
+  (0010 (distribution)
     (pd-max-probability distribution 0)))
 
-(00001001 pd-choice-observe
-  (00001000 (question distribution source)
-    (00000111
-      ((pd-distribution-valid? (00110000 question) distribution)
-       (00100111
-         (00000001 choice-observation/1)
+(0011 pd-choice-observe
+  (0010 (question distribution source)
+    (110
+      ((pd-distribution-valid? (10011 question) distribution)
+       (1110
+         (001 choice-observation/1)
          question
          distribution
          (pd-confidence distribution)
          source))
       (t
        (make-invalid
-         (00000001 malformed-choice-distribution)
-         (00100111 question distribution))))))
+         (001 malformed-choice-distribution)
+         (1110 question distribution))))))
 
-(00001001 pd-noul-observe
-  (00001000 (question yes-probability source)
-    (00000111
+(0011 pd-noul-observe
+  (0010 (question yes-probability source)
+    (110
       ((pd-probability-valid? yes-probability)
-       (10011100 ((distribution
-               (00100111
-                 (00100111 (00000001 yes) yes-probability)
-                 (00100111 (00000001 no) (00001101 1 yes-probability)))))
-         (00100111
-           (00000001 noul-observation/1)
+       (001000 ((distribution
+               (1110
+                 (1110 (001 yes) yes-probability)
+                 (1110 (001 no) (01011 1 yes-probability)))))
+         (1110
+           (001 noul-observation/1)
            question
            distribution
            (pd-confidence distribution)
            source)))
       (t
        (make-invalid
-         (00000001 malformed-noul-probability)
-         (00100111 question yes-probability))))))
+         (001 malformed-noul-probability)
+         (1110 question yes-probability))))))
 
-(00001001 pd-score-observe
-  (00001000 (question distribution source)
-    (00000111
-      ((pd-distribution-valid? (00110000 question) distribution)
-       (00100111
-         (00000001 score-observation/1)
+(0011 pd-score-observe
+  (0010 (question distribution source)
+    (110
+      ((pd-distribution-valid? (10011 question) distribution)
+       (1110
+         (001 score-observation/1)
          question
          distribution
          (pd-confidence distribution)
          source))
       (t
        (make-invalid
-         (00000001 malformed-score-distribution)
-         (00100111 question distribution))))))
+         (001 malformed-score-distribution)
+         (1110 question distribution))))))
 
-(00001001 pd-observation-confidence
-  (00001000 (observation)
-    (00110001 observation)))
+(0011 pd-observation-confidence
+  (0010 (observation)
+    (100111 observation)))
 
-(00001001 pd-observation-provenance
-  (00001000 (observation)
-    (00110010 observation)))
+(0011 pd-observation-provenance
+  (0010 (observation)
+    (110110101 observation)))
 
-(00001001 pd-noul-policy
-  (00001000 (observation threshold)
-    (00000111
-      ((00100010 (00000101 observation) (00000001 noul-observation/1)) (1)
-       (00000111
+(0011 pd-noul-policy
+  (0010 (observation threshold)
+    (110
+      ((11110111 (100 observation) (001 noul-observation/1)) (1)
+       (110
          ((pd-probability-valid? threshold)
-          (10011100 ((probability (00101111 (00000101 (00110000 observation)))))
-            (00000111
-              ((00011010 probability threshold) 1
-               (00100111 (00000001 decision/1)
-                     (00000001 defer)
+          (001000 ((probability (1001 (100 (10011 observation)))))
+            (110
+              ((11010 probability threshold) 1
+               (1110 (001 decision/1)
+                     (001 defer)
                      observation
-                     (00100111 (00000001 threshold) threshold)))
+                     (1110 (001 threshold) threshold)))
               (t
-               (00100111 (00000001 decision/1)
-                     (00000001 accept)
+               (1110 (001 decision/1)
+                     (001 accept)
                      observation
-                     (00100111 (00000001 threshold) threshold))))))
+                     (1110 (001 threshold) threshold))))))
          (t
           (make-invalid
-            (00000001 malformed-policy-threshold)
+            (001 malformed-policy-threshold)
             threshold))))
       (t
        (make-invalid
-         (00000001 unsupported-decision-observation)
+         (001 unsupported-decision-observation)
          observation)))))
 
-(00001001 pd-choice-policy
-  (00001000 (observation option threshold)
-    (00000111
-      ((00100010 (00000101 observation) (00000001 choice-observation/1)) (1)
-       (00000111
+(0011 pd-choice-policy
+  (0010 (observation option threshold)
+    (110
+      ((11110111 (100 observation) (001 choice-observation/1)) (1)
+       (110
          ((pd-probability-valid? threshold)
-          (10011100 ((entry (pd-find-option option (00110000 observation))))
-            (00000111
-              ((00000010 entry) () (make-invalid
-                 (00000001 option-not-observed)
-                 (00100111 option observation)))
-              ((00000010 entry) (1) (make-invalid
-                 (00000001 option-not-observed)
-                 (00100111 option observation)))
-              ((00011010 (00101111 entry) threshold) 1
-               (00100111 (00000001 decision/1)
-                     (00000001 defer)
+          (001000 ((entry (pd-find-option option (10011 observation))))
+            (110
+              ((010 entry) () (make-invalid
+                 (001 option-not-observed)
+                 (1110 option observation)))
+              ((010 entry) (1) (make-invalid
+                 (001 option-not-observed)
+                 (1110 option observation)))
+              ((11010 (1001 entry) threshold) 1
+               (1110 (001 decision/1)
+                     (001 defer)
                      observation
-                     (00100111 (00000001 option) option)
-                     (00100111 (00000001 threshold) threshold)))
+                     (1110 (001 option) option)
+                     (1110 (001 threshold) threshold)))
               (t
-               (00100111 (00000001 decision/1)
-                     (00000001 accept)
+               (1110 (001 decision/1)
+                     (001 accept)
                      observation
-                     (00100111 (00000001 option) option)
-                     (00100111 (00000001 threshold) threshold))))))
+                     (1110 (001 option) option)
+                     (1110 (001 threshold) threshold))))))
          (t
           (make-invalid
-            (00000001 malformed-policy-threshold)
+            (001 malformed-policy-threshold)
             threshold))))
       (t
        (make-invalid
-         (00000001 unsupported-decision-observation)
+         (001 unsupported-decision-observation)
          observation)))))
 
-(00001001 pd-find-option
-  (00001000 (option distribution)
-    (00000111
-      ((00000010 distribution) () (00000001 ()))
-      ((00000010 distribution) (1) (00000001 ()))
-      ((00100010 option (00000101 (00000101 distribution))) (1) (00000101 distribution))
-      (t (pd-find-option option (00000110 distribution))))))
+(0011 pd-find-option
+  (0010 (option distribution)
+    (110
+      ((010 distribution) () (001 ()))
+      ((010 distribution) (1) (001 ()))
+      ((11110111 option (100 (100 distribution))) (1) (100 distribution))
+      (t (pd-find-option option (011 distribution))))))
 
-(00001001 pd-two-question-consistency
-  (00001000 (left right relation)
-    (00000111
-      ((00000011 relation (00000001 independent)) (1)
-       (00100111
-         (00000001 decision-relation/1)
-         (00000001 independent)
+(0011 pd-two-question-consistency
+  (0010 (left right relation)
+    (110
+      ((101 relation (001 independent)) (1)
+       (1110
+         (001 decision-relation/1)
+         (001 independent)
          left
          right))
-      ((00000011 relation (00000001 agree)) (1)
-       (00000111
-         ((00100010 (00110000 left) (00110000 right)) (1)
-          (00100111 (00000001 decision-relation/1) (00000001 agree) left right))
-         (t (make-disputed (00100111 left right)))))
+      ((101 relation (001 agree)) (1)
+       (110
+         ((11110111 (10011 left) (10011 right)) (1)
+          (1110 (001 decision-relation/1) (001 agree) left right))
+         (t (make-disputed (1110 left right)))))
       (t
        (make-invalid
-         (00000001 unsupported-question-relation)
-         (00100111 relation left right))))))
+         (001 unsupported-question-relation)
+         (1110 relation left right))))))
 
-(00001001 pd-synthetic-witness
-  (00001000 (state choice-question noul-question score-question)
-    (00100111
-      (00000001 probabilistic-witness/1)
+(0011 pd-synthetic-witness
+  (0010 (state choice-question noul-question score-question)
+    (1110
+      (001 probabilistic-witness/1)
       state
       (pd-choice-observe
         choice-question
-        (00000001 ((billing 3/4) (technical 1/4)))
-        (00100111 (00000001 source)
-              (00000001 synthetic-witness)
-              (00000001 state)
+        (001 ((billing 3/4) (technical 1/4)))
+        (1110 (001 source)
+              (001 synthetic-witness)
+              (001 state)
               state))
       (pd-noul-observe
         noul-question
         2/3
-        (00100111 (00000001 source)
-              (00000001 synthetic-witness)
-              (00000001 state)
+        (1110 (001 source)
+              (001 synthetic-witness)
+              (001 state)
               state))
       (pd-score-observe
         score-question
-        (00000001 ((low 1/4) (medium 1/2) (high 1/4)))
-        (00100111 (00000001 source)
-              (00000001 synthetic-witness)
-              (00000001 state)
+        (001 ((low 1/4) (medium 1/2) (high 1/4)))
+        (1110 (001 source)
+              (001 synthetic-witness)
+              (001 state)
               state)))))
