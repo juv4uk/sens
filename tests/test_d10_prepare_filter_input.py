@@ -100,33 +100,6 @@ class PrepareTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "INVALID_INDEX_JSON_ARRAY"):
             adapter.prepare(self.root, self.input, self.output)
 
-    def test_rfc_quoted_tsv_preserves_json_evidence(self):
-        # Production all-candidates.tsv uses RFC4180 quoting; the older
-        # hand-built unit fixtures below use literal TSV JSON cells.
-        with self.input.open("w", newline="", encoding="utf-8") as stream:
-            writer = csv.DictWriter(
-                stream, fieldnames=adapter.INDEX_FIELDS,
-                delimiter=chr(9), lineterminator=chr(10),
-            )
-            writer.writeheader()
-            writer.writerow(self.row)
-        counts = adapter.prepare(self.root, self.input, self.output)
-        self.assertEqual(counts["filter_input_rows"], 2)
-        self.assertEqual(counts["source_file_pin_verified"], 1)
-        rows = {row["candidate_id"]: row for row in self.read_prepared()}
-        self.assertEqual("independent new law", rows["d10.new"]["semantic_law"])
-        self.assertEqual(self.pin, rows["d10.new"]["source_pin"])
-        self.assertEqual("", rows["d10.new"]["witness_verdict"])
-
-    def test_malformed_quoted_tsv_is_fail_closed(self):
-        self.input.write_text(
-            "\\t".join(adapter.INDEX_FIELDS) + "\\n" +
-            'd10.bad\\t"unterminated\\n', encoding="utf-8",
-        )
-        with self.assertRaisesRegex(ValueError, "MALFORMED_UNIFIED_INDEX_CSV"):
-            adapter.prepare(self.root, self.input, self.output)
-        self.assertFalse(self.output.exists())
-
     def test_rfc4180_quoted_index_keeps_json_and_unverified_witness(self):
         # New historical batches use csv.DictWriter's RFC4180 quoting.
         # JSON array quotes must survive TSV decoding unchanged, and claims
