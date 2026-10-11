@@ -1,0 +1,81 @@
+{
+  "schema": "sens-historical-source-archive/v1",
+  "date": "2026-10-11",
+  "repository": "juv4uk/sens",
+  "semantic_state": "SOURCE_ONLY; NO LIVE CONTRACT CHANGES; NO D10 RATIFICATION",
+  "merge_policy": "Original Git blobs anchored directly in main; research or old checks cannot be treated as current CI or executable authority",
+  "snapshots": [
+    {
+      "branch": "research/2250-math-placement-first-witness",
+      "original_path": "scripts/research-2250-math-placement.py",
+      "blob_sha": "5c4670081eb65f67abf4e2f234853e4c7858dbaf",
+      "destination": "research/domain-archive/20261011/history-recovered/research__2250-math-placement-first-witness/scripts/research-2250-math-placement.py.source.txt"
+    },
+    {
+      "branch": "research/2250-math-placement-first-witness",
+      "original_path": "scripts/research-2276-law-fingerprints.py",
+      "blob_sha": "877133092b093573454370c2107a1bef85deff73",
+      "destination": "research/domain-archive/20261011/history-recovered/research__2250-math-placement-first-witness/scripts/research-2276-law-fingerprints.py.source.txt"
+    },
+    {
+      "branch": "research/3039-d5-multilaw-atlas",
+      "original_path": "knowledge/d5-multilaw-atlas.json",
+      "blob_sha": "94e7f85c8431d2817686cee6065839ed669446f9",
+      "destination": "research/domain-archive/20261011/history-recovered/research__3039-d5-multilaw-atlas/knowledge/d5-multilaw-atlas.json.source.txt"
+    },
+    {
+      "branch": "research/3077-d6-multilaw-atlas",
+      "original_path": "knowledge/d6-multilaw-atlas.json",
+      "blob_sha": "8d031ae2484023b083301a7fc8d3ecdfad50fdec",
+      "destination": "research/domain-archive/20261011/history-recovered/research__3077-d6-multilaw-atlas/knowledge/d6-multilaw-atlas.json.source.txt"
+    },
+    {
+      "branch": "research/4438-lisp-guided-sens-pair",
+      "original_path": "docs/sens-paired-bootstrap.uk.md",
+      "blob_sha": "3e0732a49b923f4ed8c753ba81a3f022f31c71ed",
+      "destination": "research/domain-archive/20261011/history-recovered/research__4438-lisp-guided-sens-pair/docs/sens-paired-bootstrap.uk.md.source.txt"
+    },
+    {
+      "branch": "research/2450-core-math-equivalence",
+      "original_path": "benchmarks/core-math-equivalence/run.py",
+      "blob_sha": "7d3dc26545d527f8607ab0dfcb1f52dc2fd26e96",
+      "destination": "research/domain-archive/20261011/history-recovered/research__2450-core-math-equivalence/benchmarks/core-math-equivalence/run.py.source.txt"
+    },
+    {
+      "branch": "research/3039-d5-multilaw-atlas",
+      "original_path": "scripts/check-3039-d5-multilaw-atlas.py",
+      "blob_sha": "0723d9b62ef4c4ad5f5569ea4de78dd4c5d0cb1c",
+      "destination": "research/domain-archive/20261011/history-recovered/research__3039-d5-multilaw-atlas/scripts/check-3039-d5-multilaw-atlas.py.source.txt"
+    },
+    {
+      "branch": "research/3077-d6-multilaw-atlas",
+      "original_path": "scripts/check-3077-d6-multilaw-atlas.py",
+      "blob_sha": "b7fb46c92d78443ea2117a18fcf937292597c307",
+      "destination": "research/domain-archive/20261011/history-recovered/research__3077-d6-multilaw-atlas/scripts/check-3077-d6-multilaw-atlas.py.source.txt"
+    },
+    {
+      "branch": "research/d10-placement-proof-crosswalk-20261011",
+      "original_path": "scripts/check_d10_placement_proof_crosswalk.py",
+      "blob_sha": "cd31ad2a313ec69930cbdd14b66162b2f6c7abb3",
+      "destination": "research/domain-archive/20261011/history-recovered/research__d10-placement-proof-crosswalk-20261011/scripts/check_d10_placement_proof_crosswalk.py.source.txt"
+    },
+    {
+      "branch": "research/d10-placement-proof-crosswalk-20261011",
+      "original_path": "scripts/check_d10_candidate_location_census.py",
+      "blob_sha": "92c84d453fac04e04abb9eeba5721c3f44744428",
+      "destination": "research/domain-archive/20261011/history-recovered/research__d10-placement-proof-crosswalk-20261011/scripts/check_d10_candidate_location_census.py.source.txt"
+    },
+    {
+      "branch": "research/d10-lisp15-appendix-reconcile-20261009",
+      "original_path": "scripts/check_d10_historical_lisp15_reconciliation.py",
+      "blob_sha": "6cae55631e109a611252dc16f3846dfdee58d5bc",
+      "destination": "research/domain-archive/20261011/history-recovered/research__d10-lisp15-appendix-reconcile-20261009/scripts/check_d10_historical_lisp15_reconciliation.py.source.txt"
+    },
+    {
+      "branch": "research/d10-lisp15-appendix-reconcile-20261009",
+      "original_path": "tests/test_d10_historical_lisp15_reconciliation.py",
+      "blob_sha": "0353c97c93a1ba1af8fc6b2ea59e14982699b132",
+      "destination": "research/domain-archive/20261011/history-recovered/research__d10-lisp15-appendix-reconcile-20261009/tests/test_d10_historical_lisp15_reconciliation.py.source.txt"
+    }
+  ]
+}
