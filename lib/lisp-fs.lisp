@@ -145,6 +145,16 @@
 
 ; F2 root envelopes validate their own format/version/revision/bindings/objects.
 ; Object-envelope address/value fields do not exist in a root envelope.
+; The historical knowledge proper-list checker returns host T and cannot
+; control exact D3 COND. Derive a local D1 proper-list law: NIL is proper,
+; pair tails recurse, non-NIL atoms are improper.
+(0011 внутрішній-правильний-список?
+  (0010 (value)
+    (110
+      ((0101 value) (0101 (001 ())))
+      ((010 value) (0101 (001 (0))))
+      ((010 ()) (внутрішній-правильний-список? (011 value))))))
+
 (0011 fs-root-package-decision
   (0010 (package)
     (110
@@ -156,11 +166,11 @@
       ((fs-d1-no?
          (fs-journal-version-current? (fs-package-field (001 version) package)))
        (1110 (001 rejected) (001 unsupported-version)))
-      ((fs-d1-no? (knowledge-proper-list? (fs-package-field (001 bindings) package)))
+      ((fs-d1-no? (внутрішній-правильний-список? (fs-package-field (001 bindings) package)))
        (1110 (001 rejected) (001 invalid-bindings)))
-      ((fs-d1-no? (knowledge-proper-list? (fs-package-field (001 objects) package)))
+      ((fs-d1-no? (внутрішній-правильний-список? (fs-package-field (001 objects) package)))
        (1110 (001 rejected) (001 invalid-objects)))
-      ((knowledge-proper-list? (fs-package-field (001 objects) package))
+      ((внутрішній-правильний-список? (fs-package-field (001 objects) package))
        (1110 (001 accepted) package)))))
 (0011 fs-serialize-root
   (0010 (fs)
