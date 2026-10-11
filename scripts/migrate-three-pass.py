@@ -722,6 +722,14 @@ def encode_clause(node,resolver,text7,lexical_env=()):
             words.extend(
                 encode(item,resolver,text7,quoted=False,lexical_env=lexical_env)
             )
+        elif isinstance(item,Atom) and item.tok.text in lexical_env:
+            # A bare variable in a COND predicate/result position is still an
+            # executable lexical reference, not quoted data. Only names in the
+            # current proven lexical environment take this route; all other
+            # atoms preserve the existing literal-data behavior below.
+            words.extend(
+                encode(item,resolver,text7,quoted=False,lexical_env=lexical_env)
+            )
         else:
             words.extend(
                 encode(item,resolver,text7,quoted=True,lexical_env=())
