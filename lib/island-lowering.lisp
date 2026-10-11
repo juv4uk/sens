@@ -12,60 +12,60 @@
 ; only as exact SID8 + arguments; the adapter builds private native syntax after
 ; SID selection and never accepts operator text across this boundary.
 
-(00001001 island-lowering-append4
-  (00001000 (a b c d)
-    (00111010 a (00111010 b (00111010 c d)))))
+(0011 island-lowering-append4
+  (0010 (a b c d)
+    (110011110 a (110011110 b (110011110 c d)))))
 
-(00001001 island-lowering-add-payload
-  (00001000 (executor left right)
-    (10011100 ((l (01001100 left))
-          (r (01001100 right)))
-      (00000111
-        ((00000011 executor (00000001 common-lisp)) 
+(0011 island-lowering-add-payload
+  (0010 (executor left right)
+    (001000 ((l (11110100 left))
+          (r (11110100 right)))
+      (110
+        ((101 executor (001 common-lisp)) 
          (island-lowering-append4 "" l " " r))
-        ((00000011 executor (00000001 prolog)) 
+        ((101 executor (001 prolog)) 
          (island-lowering-append4 "" l " " r))
-        ((00000011 executor (00000001 datalog)) 
+        ((101 executor (001 datalog)) 
          (island-lowering-append4 "" l " " r))
-        ((00000011 executor (00000001 clips)) 
+        ((101 executor (001 clips)) 
          (island-lowering-append4 "" l " " r))
-        ((00000001 island-lowering-fallback) 
-         (00000001 ()))))))
+        ((001 island-lowering-fallback) 
+         (001 ()))))))
 
-(00001001 island-lower-binary
-  (00001000 (sid executor left right)
-    (10011100 ((selection (mechanism-select sid executor)))
-      (00000111
-        ((0100 (00000010 selection))
-         (00000111
-           ((00000011 (00000101 selection) (00000001 mechanism-selected))
+(0011 island-lower-binary
+  (0010 (sid executor left right)
+    (001000 ((selection (mechanism-select sid executor)))
+      (110
+        ((0100 (010 selection))
+         (110
+           ((101 (100 selection) (001 mechanism-selected))
             
-            (10011100 ((mechanism (00110001 selection)))
-              (00000111
-                ((00000011 mechanism (00000001 bounded-exact-add))
+            (001000 ((mechanism (100111 selection)))
+              (110
+                ((101 mechanism (001 bounded-exact-add))
                  
-                 (10011100 ((payload
+                 (001000 ((payload
                          (island-lowering-add-payload executor left right)))
-                   (00000111
-                     ((0100 (00000010 payload))
-                      (00100111
-                        (00000001 island-lowering-failure)
-                        (00000001 unsupported-executor)
+                   (110
+                     ((0100 (010 payload))
+                      (1110
+                        (001 island-lowering-failure)
+                        (001 unsupported-executor)
                         sid executor mechanism))
-                     ((00000010 payload) 
-                      (00100111
-                        (00000001 island-lowering-result)
+                     ((010 payload) 
+                      (1110
+                        (001 island-lowering-result)
                         sid executor mechanism payload)))))
-                ((00000001 island-lowering-other-mechanism) 
-                 (00100111
-                   (00000001 island-lowering-failure)
-                   (00000001 unsupported-selected-mechanism)
+                ((001 island-lowering-other-mechanism) 
+                 (1110
+                   (001 island-lowering-failure)
+                   (001 unsupported-selected-mechanism)
                    sid executor mechanism)))))
-           ((00000001 island-lowering-selection-not-selected)
+           ((001 island-lowering-selection-not-selected)
             
             selection)))
-        ((00000001 island-lowering-malformed) 
-         (00100111
-           (00000001 island-lowering-failure)
-           (00000001 malformed-selection)
+        ((001 island-lowering-malformed) 
+         (1110
+           (001 island-lowering-failure)
+           (001 malformed-selection)
            sid executor))))))
