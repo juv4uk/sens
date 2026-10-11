@@ -1,0 +1,11 @@
+# Exact compare pin main SHA: bbd2b0a34812cac98efc9607b2ca6e6cb62f5016
+# Source: existing branch refs only. Commit ancestry is triage, not semantic acceptance; divergent heads require content dedup and exact-head tests.
+branch	source_sha	compare_status	ahead_by	behind_by	classification
+agent/chatgpt/4349-structural-effect	a084021e31dd548fe6055d374bb94846345accae	diverged	11	5501	NEEDS_CONTENT_REVIEW
+agent/chatgpt/4349-structural-effect-v2	6e227878831696183775e270fcabef4c83802893	diverged	5	5500	NEEDS_CONTENT_REVIEW
+agent/chatgpt/4349-structural-effects-clean	c2f8420d225ec40d2a63cced0749f2d1adfc9740	diverged	26	5497	NEEDS_CONTENT_REVIEW
+agent/chatgpt/4349-structural-effects-current-main	cd00228fa3460899991c3ad0ab7a7eb7158d190b	diverged	33	5488	NEEDS_CONTENT_REVIEW
+agent/chatgpt/4358-d5-arith-effects	20e399ced06d9f20f84b35c558bbc0ac50d92adb	diverged	10	5500	NEEDS_CONTENT_REVIEW
+agent/chatgpt/4359-aes-pclmul-differential	b30d5617edf5ec0f9f7c09f38a1f8bd69d04f369	diverged	2	5499	NEEDS_CONTENT_REVIEW
+agent/chatgpt/4360-vex-asm-diff	cc309eb2d339082df5c90428ba8759d2d031e820	behind	0	5469	NO_UNMERGED_COMMITS
+agent/chatgpt/4365-semantic-effect-lowering	255a6d72b6b6ebbb2cc6bbb7ea3ec69fc5a03e44	diverged	10	5498	NEEDS_CONTENT_REVIEW
