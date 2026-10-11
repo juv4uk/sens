@@ -200,7 +200,7 @@
       "pr": 4441,
       "source": "https://github.com/juv4uk/sens/pull/4441",
       "original_path": "crates/sens/src/ladder_reader.rs",
-      "archived_path": "research/domain-archive/20261011/pr4441/crates/sens/src/ladder_reader.rs",
+      "archived_path": "research/domain-archive/20261011/pr4441/crates/sens/src/ladder_reader.rs.source.txt",
       "exact_git_blob": "5b5347e2d0c18d879115d095dcfc2cbd484e7092"
     },
     {
@@ -461,5 +461,6 @@
     "Some original PRs asserted selected on obsolete main; those old SHA chains are not portable to current main",
     "Never retire active proof guards; reconcile failed source HOLD checks and rerun exact-head independent oracles",
     "D11 only after owner ratifies fully placed D10"
-  ]
+  ],
+  "archival_extension_note": "The byte-identical research Rust file is renamed with .source.txt, so live migration producer inventory excludes this non-executable archive."
 }
