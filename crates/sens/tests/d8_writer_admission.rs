@@ -7,7 +7,7 @@ fn d8_writer_serializes_structural_data_by_ratified_identity() {
     for (source, expected) in [
         ("(11110100 (001 (a b)))", "\"(a b)\""),
         ("(11110100 (001 ()))", "\"()\""),
-        ("(11110100 7)", "\"7\""),
+        ("(11110100 7)", "\"#q2:111/1\""),
     ] {
         let parsed = parse_mixed_exact_domain_legacy_core_source("lib/core.lisp", source)
             .unwrap_or_else(|e| panic!("D8 surface must be an exact call head: {source}: {e:?}"));
