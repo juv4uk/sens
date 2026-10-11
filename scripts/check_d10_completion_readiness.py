@@ -27,7 +27,7 @@ def source_queue(knowledge, selected, proposed):
     donor = defaultdict(list)
     ignored = {"d10-v1-semantic-inventory.json", "d10-v2-semantic-inventory.json",
                "d10-current-inventory.json", "d10-selected-coordinate-allocation-v1.json",
-               "d10-fill-v1-state.json",
+               "d10-v3-semantic-inventory.json", "d10-fill-v1-state.json",
                "d10-growth-baseline-v1.json", "d10-selection-transition-history.json",
                "d10-selector-seed.json"}
     for p in sorted(knowledge.glob("d10-*.json")):
@@ -57,7 +57,7 @@ def source_queue(knowledge, selected, proposed):
 def audit(root):
     k = root / "knowledge"
     data = (k / "d10-v1-semantic-inventory.json").read_bytes()
-    current_bytes = (k / "d10-v2-semantic-inventory.json").read_bytes()
+    current_bytes = (k / "d10-v3-semantic-inventory.json").read_bytes()
     inv = json.loads(current_bytes)
     hist = json.loads((k / "d10-selection-transition-history.json").read_text())
     with (k / "d10-proposal-ledger.tsv").open(newline="", encoding="utf-8") as f:
@@ -88,42 +88,46 @@ def audit(root):
     missing = [r["semantic_name"] for r in rows[625:] if r["semantic_name"].upper() not in proposed]
     if missing:
         errors.append("SELECTED-WITHOUT-PROPOSAL")
+    # v1 is the frozen selection SHA witness. v2 preserves the original
+    # 419-address owner gauge. v3 appends 23 already documented research laws.
     research_allocated = 0
     try:
-        pointer = json.loads((k / "d10-current-inventory.json").read_text())
-        original = json.loads(data)
-        overlay_bytes = (k / "d10-selected-coordinate-allocation-v1.json").read_bytes()
-        gauge = json.loads(overlay_bytes)
-        historical = {r["stable_id"]: r for r in original["rows"]}
-        allocated = {r["stable_id"]: r for r in gauge["rows"]}
-        valid = (
-            pointer["canonical_current"]["git_blob"] == sha(current_bytes)
-            and pointer["historical_selection"]["git_blob"] == sha(data)
-            and pointer["historical_address_allocation"]["git_blob"] == sha(overlay_bytes)
-            and len(rows) == len(original["rows"]) == 675
-            and len(allocated) == 419
+        ptr = json.loads((k/"d10-current-inventory.json").read_text(encoding="utf-8"))
+        v2raw = (k/"d10-v2-semantic-inventory.json").read_bytes()
+        v2 = json.loads(v2raw)
+        archived = ptr["current_archival_candidate_selection"]
+        src_path = root/archived["source_path"]
+        donor_raw = src_path.read_bytes()
+        donor = json.loads(donor_raw)
+        added = donor["records"]
+        history_ok = (
+            ptr["canonical_current"]["git_blob"] == sha(current_bytes)
+            and ptr["canonical_current"]["path"] == "knowledge/d10-v3-semantic-inventory.json"
+            and ptr["historical_v2_coordinate_inventory"]["git_blob"] == sha(v2raw)
+            and ptr["historical_selection"]["git_blob"] == sha(data)
+            and archived["source_git_blob"] == sha(donor_raw)
+            and len(v2["rows"]) == 675
+            and rows[:675] == v2["rows"]
+            and len(added) == 23
             and all(
-                r["stable_id"] in historical and
-                r["semantic_name"] == historical[r["stable_id"]]["semantic_name"] and
-                r["coordinate"] == (
-                    allocated[r["stable_id"]]["coordinate"]
-                    if historical[r["stable_id"]]["coordinate"] is None
-                    else historical[r["stable_id"]]["coordinate"]
-                )
-                for r in rows
+                r["stable_id"] == d["stable_id"]
+                and r["semantic_name"] == d["semantic_name"]
+                and r["behavior"] == d["observable_law"]
+                and r["ratified_resident"] is False
+                for r, d in zip(rows[675:], added)
             )
         )
-        if valid:
-            research_allocated = 419
+        if history_ok:
+            research_allocated = 442
         else:
-            errors.append("CURRENT-D10-PLACEMENT-DRIFT")
+            errors.append("CURRENT-D10-ARCHIVED-CANDIDATE-DRIFT")
     except (OSError, ValueError, KeyError, TypeError):
-        errors.append("CURRENT-D10-PLACEMENT-INVALID")
+        errors.append("CURRENT-D10-ARCHIVED-CANDIDATE-INVALID")
     inventory_full = len(rows) == capacity
     placement_full = len(placed) == capacity
     return {"schema": "d10-completion-readiness/v1",
             "inventory_blob": sha(current_bytes), "historical_inventory_blob": sha(data),
-            "current_inventory_path": "knowledge/d10-v2-semantic-inventory.json", "capacity": capacity,
+            "current_inventory_path": "knowledge/d10-v3-semantic-inventory.json", "capacity": capacity,
             "selected": len(rows), "remaining": capacity-len(rows),
             "placed": len(placed), "unplaced": len(rows)-len(placed),
             "ratified": ratified, "inventory_full": inventory_full,
@@ -137,7 +141,7 @@ def audit(root):
             "ready_to_start_d11": inventory_full and placement_full and ratified == capacity and not errors,
             "source_queue": source_queue(k, set(names), proposed),
             "blocking_errors": errors,
-            "caution": "675 selected D10 meanings have coordinates; 349 semantic places remain empty; no D10 ratification or physical authorization."}
+            "caution": "698 selected D10 research meanings have coordinates (23 archived additions); 326 semantic meanings still missing. Core review, independent oracle and ratification remain pending."}
 
 def main():
     p = argparse.ArgumentParser(description=__doc__)
