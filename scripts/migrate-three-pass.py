@@ -690,7 +690,7 @@ def encode_lambda_params(node: ListNode,text7):
     return words
 
 
-def encode_atom_data(node: Atom,text7,lexical_env=()):
+def encode_atom_data(node: Atom,text7,lexical_env=(),quoted=False):
     t=node.tok.text
     if t in lexical_env:
         return encode_text7_identifier(t,text7,node.tok)
@@ -701,6 +701,11 @@ def encode_atom_data(node: Atom,text7,lexical_env=()):
         )
     if t in D1_UK_SURFACES:
         return [D1_UK_SURFACES[t]]
+    if quoted:
+        # Quoted Lisp symbols are data, so frame them as Text7 identifiers.
+        # This does not make a spelling callable: unresolved live heads still
+        # pass through to the exact-word gate and are rejected there.
+        return encode_text7_identifier(t,text7,node.tok)
     return [t]
 
 
@@ -867,7 +872,7 @@ def encode(node,resolver,text7,quoted=False,lexical_env=()):
     if isinstance(node,String):
         return encode_string(node,text7)
     if isinstance(node,Atom):
-        return encode_atom_data(node,text7,lexical_env=lexical_env)
+        return encode_atom_data(node,text7,lexical_env=lexical_env,quoted=quoted)
     raise TypeError(node)
 
 def line_col(source: str,offset: int):
