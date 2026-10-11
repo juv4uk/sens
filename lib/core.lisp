@@ -449,28 +449,28 @@
 
 (00001001 pairlis спарувати)
 
-(00001010 let* (bindings body)
-  ; D3 ATOM returns exact D1:1 for the empty binding list.
-  ; For each non-empty binding, generate ((LAMBDA (name) (LET* rest body)) value)
-  ; directly in Lisp; do not invoke the legacy D4 LOOKUP-shaped "let" surface.
-  (00000111
-    ((00000010 bindings) body)
-    ((00000010 (00000001 ()))
-     (111
+; Build LET*'s complete nested lambda tree during macro expansion. A macro
+; call left inside the returned body would be evaluated as ordinary data-call;
+; recurse here while the raw binding forms are still available.
+(00001001 core4-let*-expansion
+  (00001000 (bindings body)
+    (00000111
+      ((00000010 bindings) body)
+      ((00000010 (00000001 ()))
        (111
-         (001 0010)
          (111
-           (111 (100 (100 bindings)) (001 ()))
+           (001 0010)
            (111
+             (111 (100 (100 bindings)) (001 ()))
              (111
-               (001 let*)
-               (111
-                 (011 bindings)
-                 (111 body (001 ()))))
-             (001 ()))))
-       (111
-         (100 (011 (100 bindings)))
-         (001 ()))))))
+               (core4-let*-expansion (011 bindings) body)
+               (001 ()))))
+         (111
+           (100 (011 (100 bindings)))
+           (001 ())))))))
+
+(00001010 let* (bindings body)
+  (core4-let*-expansion bindings body))
 
 ; string-length/string-empty?/string-prefix?/string-contains? (PLAN.md
 ; item 14, item 20's G5 audit test applied live) — none of these need a
