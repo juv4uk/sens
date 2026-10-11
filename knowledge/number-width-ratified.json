@@ -33,7 +33,7 @@
     "NEG(x) admits strictly positive Dn natural magnitude x; NEG(0) is normalized to Dn zero and must never persist as a second negative zero. NEG does not redefine the n-bit magnitude payload and is not yet an executable opcode.",
     "RATIO(p,q) has strictly positive natural denominator q, signed-or-natural numerator p, and must be reduced by gcd(abs(p),q)=1. Zero numerator canonicalizes to zero; denominator one canonicalizes to the signed-or-natural integer. A non-integral rational has denominator >1.",
     "Each RATIO component preserves its own explicitly admitted Dn numeric-domain identity; gcd normalization rewrites magnitudes within these existing domains without implicit numeric-domain coercion. Equality of rational magnitudes does not itself alias different domain-qualified identities.",
-    "Compositional mathematical NEG/RATIO are admitted as D24+ laws only, not a new domain family, not a reserved bit pattern, not a scalar D24 word, not a source literal or a wire/FASL layout. Execution, binary operation codes, composition framing and signed/rational arithmetic algorithms remain separately gated.",
+    "NEG and gcd-reduced RATIO remain compositions over existing admitted Dn atoms, never new domains, stolen n-bit payload bits or source literals. Core now executes canonical negative and fractional Values through already admitted + - * / and D1 comparisons on same-Dn operands, but no new binary opcode, physical reader, FASL/wire composite encoding, mixed-Dn arithmetic or external kernel is admitted.",
     "Same-domain Dn natural multiplication is exact: if product fits n bits retain Dn, otherwise use next D(2n), since two n-bit natural operands have product width at most 2n. Never truncate or wrap.",
     "Same-domain nonnegative natural subtraction retains Dn. A negative difference belongs to canonical NEG composition and must not be returned as an n-bit wrapped natural, nor called executable before a canonical NEG Value path exists.",
     "Same-domain Dn Euclidean division by a nonzero divisor yields exact Dn quotient and Dn remainder (a=b*q+r, 0<=r<b). Exact zero-remainder quotient is a Dn natural; nonzero remainder requires the canonical reduced RATIO composition and cannot be rounded to a natural.",
@@ -45,8 +45,8 @@
     "decimal literal lowering law",
     "mixed-domain implicit coercion and general widening",
     "binary opcode and production encoding for signed and rational compositions",
-    "signed and rational arithmetic runtime admission and conformance",
-    "overflow for other operations beyond same-domain natural ADD/MUL"
+    "overflow for other operations beyond same-domain natural ADD/MUL",
+    "canonical physical NEG/RATIO composition reader and transport and source macro projection"
   ],
   "domain_family": "numeric",
   "domain_rank": "same-semantic-domain-rank-as-D1-D9",
@@ -58,7 +58,7 @@
     "D192"
   ],
   "semantic_identity": "base: exact n-bit natural Dn word + exact numeric domain + law; composite: exact admitted Dn component identities + canonical NEG/RATIO composition law (physical encoding deferred)",
-  "domain_residency_scope": "all 2^n natural base atoms admitted in each Dn; exact two-operand same-Dn ADD, MUL, nonnegative SUB and exact natural DIV in Core, and NEG/RATIO mathematical composition laws without runtime encoding; other operations remain separately gated",
+  "domain_residency_scope": "all base Dn natural atoms preserved; same-Dn natural ADD/MUL/SUB/exact DIV and canonical signed/rational NEG/RATIO Core runtime with explicit result-domain growth; separate physical reader/wire and mixed-domain arithmetic deferred",
   "no_literal_dependency": true,
   "addition_widening": {
     "status": "owner-ratified",
@@ -87,7 +87,8 @@
     "rounding_forbidden": true,
     "binary_composition_opcode": "deferred",
     "wire_fasl_and_physical_encoding": "deferred",
-    "callability_and_signed_rational_arithmetic": "deferred"
+    "callability_and_signed_rational_arithmetic": "Core-executable canonical NEG/RATIO Value via existing arithmetic operator dispatch for same-Dn operands; runtime proof 2026-10-11; no new binary opcode or physical source reader",
+    "expression_and_macro_projection": "deferred"
   },
   "natural_arithmetic": {
     "status": "owner-directed Core implementation of exact mathematical laws",
@@ -99,6 +100,19 @@
     "div_rem": "nonzero b: q and r retain Dn, with a=b*q+r and 0<=r<b; zero remainder quotient executable, nonzero remainder requires canonical RATIO (runtime deferred)",
     "no_implicit_mixed_domain_coercion": true,
     "no_rounding_or_wraparound": true,
-    "signed_and_rational_runtime": "deferred"
+    "signed_and_rational_runtime": "Core-executable with same-Dn exact composite Value, other kernels deferred"
+  },
+  "numeric_composition_runtime": {
+    "status": "Core-executable; physical SENS binary NEG/RATIO reader and wire encoding deferred",
+    "date": "2026-10-11",
+    "implementation": "crates/sens/src/domain_numeric.rs",
+    "semantic_domain": "original admitted Dn components, not any new domain",
+    "value_identity": "Canonical NEG(nonzero natural) or gcd-reduced RATIO(p,q); no negative zero; positive integer and zero collapse to base Dn Value",
+    "operations": "existing ADD/SUB/MUL/DIV and exact D1 comparisons for two operands sharing one admitted numeric domain Dn; unary NEG and reciprocal",
+    "domain_growth": "for compositional arithmetic only: select smallest D(24*2^k) at least as wide as operands' admitted Dn and capable of holding reduced numerator and denominator; domain growth explicit, no mixed-domain operand admission",
+    "unqualified_or_mixed_numeric_coercion": false,
+    "float_rounding": false,
+    "physical_composite_codec": "deferred",
+    "external_substrates": "frozen"
   }
 }
