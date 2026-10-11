@@ -1,0 +1,3377 @@
+{
+  "schema": "d10-selected-coordinate-allocation/v1",
+  "status": "OWNER-DIRECTED-RESEARCH-COORDINATE-ALLOCATION-UNRATIFIED",
+  "authority": "Owner directive 2026-10-11: allocate coordinates for 419 selected D10 rows in main, without branches",
+  "source_inventory_path": "knowledge/d10-v1-semantic-inventory.json",
+  "source_inventory_git_blob": "4c803abf0f22582ef8234d9ba60ca4796d433eb5",
+  "source_selector_seed_path": "knowledge/d10-selector-seed.json",
+  "source_selector_seed_git_blob": "ce1cfbaf2812010e1e4d0b5dfc9c36cbd9278a0c",
+  "domain": "D10",
+  "width": 10,
+  "capacity": 1024,
+  "policy": "Preserve 256 selector-law coordinates; assign the smallest unused 10-bit code to each remaining selected row in immutable inventory order, no semantic changes",
+  "scope": "Research allocation; NOT canonical placement authority, ratification, opcode or T5 encoding. Historical frozen canonical inventory intentionally unchanged pending separate placement migration.",
+  "accounting": {
+    "selected": 675,
+    "law_forced": 256,
+    "allocated_from_unplaced": 419,
+    "total_assigned": 675,
+    "still_unassigned_selected": 0,
+    "missing_semantics": 349,
+    "ratified": 0
+  },
+  "rows": [
+    {
+      "stable_id": "d10.bridge.16592788ef60fafb",
+      "semantic_name": "MISSING-CAPABILITY",
+      "selected_inventory_index": 0,
+      "coordinate": "0000000000",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.bridge.6898d14e7d0fafc5",
+      "semantic_name": "RESULT-COUNT",
+      "selected_inventory_index": 1,
+      "coordinate": "0000000001",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.bridge.9348ac86d4d019d4",
+      "semantic_name": "ISLAND-CALL",
+      "selected_inventory_index": 2,
+      "coordinate": "0000000010",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.bridge.949b87c2b4e57649",
+      "semantic_name": "EXECUTION-WITNESS",
+      "selected_inventory_index": 3,
+      "coordinate": "0000000011",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.bridge.b5ea21fb87af4ee7",
+      "semantic_name": "NATIVE-OBSERVATION",
+      "selected_inventory_index": 4,
+      "coordinate": "0000000100",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.bridge.c66ef27c9d2bfe4c",
+      "semantic_name": "BRIDGE",
+      "selected_inventory_index": 5,
+      "coordinate": "0000000101",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.crossrepo.early.7e7576e6a5af03b7",
+      "semantic_name": "IF",
+      "selected_inventory_index": 6,
+      "coordinate": "0000000110",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.crossrepo.early.c54e7e4316a0f576",
+      "semantic_name": "NUMERIC-NOT-EQUAL",
+      "selected_inventory_index": 7,
+      "coordinate": "0000000111",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.crossrepo.early.df61e09eb40f66de",
+      "semantic_name": "APPQ",
+      "selected_inventory_index": 8,
+      "coordinate": "0000001000",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.crossrepo.early.e341ebf53d16f5c8",
+      "semantic_name": "DEFINE-BATCH",
+      "selected_inventory_index": 9,
+      "coordinate": "0000001001",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.crossrepo.early.f2cfe79e398f7f24",
+      "semantic_name": "READTABLE",
+      "selected_inventory_index": 10,
+      "coordinate": "0000001010",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.crossrepo.early.fbbdb9f97d617f40",
+      "semantic_name": "CALL/CC",
+      "selected_inventory_index": 11,
+      "coordinate": "0000001011",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.crossrepo.koans.06aa667b66eda1fc",
+      "semantic_name": "COERCE",
+      "selected_inventory_index": 12,
+      "coordinate": "0000001100",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.crossrepo.koans.09ef6cea8657b6ce",
+      "semantic_name": "BIT-VECTOR-P",
+      "selected_inventory_index": 13,
+      "coordinate": "0000001101",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.crossrepo.koans.0edca11200ae5700",
+      "semantic_name": "DEFCLASS",
+      "selected_inventory_index": 14,
+      "coordinate": "0000001110",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.crossrepo.koans.0f1de1be19160f5a",
+      "semantic_name": "SLOT-VALUE",
+      "selected_inventory_index": 15,
+      "coordinate": "0000001111",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.crossrepo.koans.15060349336a3708",
+      "semantic_name": "MAKE-INSTANCE",
+      "selected_inventory_index": 16,
+      "coordinate": "0000010000",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.crossrepo.koans.192017552cbfb355",
+      "semantic_name": "SEARCH",
+      "selected_inventory_index": 17,
+      "coordinate": "0000010001",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.crossrepo.koans.21c5d59e5d2abd0e",
+      "semantic_name": "RETURN-FROM",
+      "selected_inventory_index": 18,
+      "coordinate": "0000010010",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.crossrepo.koans.2ebc9090d1217cbf",
+      "semantic_name": "CHARACTERP",
+      "selected_inventory_index": 19,
+      "coordinate": "0000010011",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.crossrepo.koans.34a32de6e93ef9e9",
+      "semantic_name": "MAKE-HASH-TABLE",
+      "selected_inventory_index": 20,
+      "coordinate": "0000010100",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.crossrepo.koans.38e9791ae8a745fe",
+      "semantic_name": "HASH-TABLE-P",
+      "selected_inventory_index": 21,
+      "coordinate": "0000010101",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.crossrepo.koans.41f530f6bb388791",
+      "semantic_name": "TYPEP",
+      "selected_inventory_index": 22,
+      "coordinate": "0000010110",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.crossrepo.koans.45aba00bce4b45f3",
+      "semantic_name": "DEFGENERIC",
+      "selected_inventory_index": 23,
+      "coordinate": "0000010111",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.crossrepo.koans.46801b92169fff06",
+      "semantic_name": "MULTIPLE-VALUE-LIST",
+      "selected_inventory_index": 24,
+      "coordinate": "0000011000",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.crossrepo.koans.4bc8bc0337f5abe6",
+      "semantic_name": "CONCATENATE",
+      "selected_inventory_index": 25,
+      "coordinate": "0000011001",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.crossrepo.koans.58f0048925c7dcf2",
+      "semantic_name": "UNLESS",
+      "selected_inventory_index": 26,
+      "coordinate": "0000011010",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.crossrepo.koans.6ff4f70d305014a4",
+      "semantic_name": "BLOCK",
+      "selected_inventory_index": 27,
+      "coordinate": "0000011011",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.crossrepo.koans.740762c2f021d8bf",
+      "semantic_name": "GETHASH",
+      "selected_inventory_index": 28,
+      "coordinate": "0000011100",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.crossrepo.koans.756f9665e03d3108",
+      "semantic_name": "DEFMETHOD",
+      "selected_inventory_index": 29,
+      "coordinate": "0000011101",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.crossrepo.koans.7cb614c79c6b9e69",
+      "semantic_name": "SUBTYPEP",
+      "selected_inventory_index": 30,
+      "coordinate": "0000011110",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.crossrepo.koans.82ab0f11504ad273",
+      "semantic_name": "DESTRUCTURING-BIND",
+      "selected_inventory_index": 31,
+      "coordinate": "0000011111",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.crossrepo.koans.96ccb98390f405d8",
+      "semantic_name": "HASH-TABLE-COUNT",
+      "selected_inventory_index": 32,
+      "coordinate": "0000100000",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.crossrepo.koans.a915f51c8cabeae5",
+      "semantic_name": "WHEN",
+      "selected_inventory_index": 33,
+      "coordinate": "0000100001",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.crossrepo.koans.b0637ddab7192426",
+      "semantic_name": "CHECK-TYPE",
+      "selected_inventory_index": 34,
+      "coordinate": "0000100010",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.crossrepo.koans.cab801cf8e258449",
+      "semantic_name": "FORMAT",
+      "selected_inventory_index": 35,
+      "coordinate": "0000100011",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.crossrepo.koans.e929ed55d5400863",
+      "semantic_name": "TYPE-OF",
+      "selected_inventory_index": 36,
+      "coordinate": "0000100100",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.crossrepo.portable.0818540bbb725701",
+      "semantic_name": "CAPTURE-ENVIRONMENT",
+      "selected_inventory_index": 37,
+      "coordinate": "0000100101",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.crossrepo.portable.0a9e280f95dd5d31",
+      "semantic_name": "FIXNUM->FLONUM",
+      "selected_inventory_index": 38,
+      "coordinate": "0000100110",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.crossrepo.portable.0e0677665249b8f9",
+      "semantic_name": "MAKE-CHANNEL",
+      "selected_inventory_index": 39,
+      "coordinate": "0000100111",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.crossrepo.portable.2982bc0cfd701ac8",
+      "semantic_name": "EOF-OBJECT?",
+      "selected_inventory_index": 40,
+      "coordinate": "0000101000",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.crossrepo.portable.3ce9ccba86133181",
+      "semantic_name": "NULL-ENVIRONMENT",
+      "selected_inventory_index": 41,
+      "coordinate": "0000101001",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.crossrepo.portable.4542c71c3a466ab4",
+      "semantic_name": "CHANNEL-SEND",
+      "selected_inventory_index": 42,
+      "coordinate": "0000101010",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.crossrepo.portable.50799e42b2372493",
+      "semantic_name": "CALL-WITH-VALUES",
+      "selected_inventory_index": 43,
+      "coordinate": "0000101011",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.crossrepo.portable.66ee8572b7f5ca2b",
+      "semantic_name": "VECTOR->LIST",
+      "selected_inventory_index": 44,
+      "coordinate": "0000101100",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.crossrepo.portable.67589d8479d4fb82",
+      "semantic_name": "DEFINE-CUSTOM-TYPE",
+      "selected_inventory_index": 45,
+      "coordinate": "0000101101",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.crossrepo.portable.6890a34598686969",
+      "semantic_name": "STRING-JOIN",
+      "selected_inventory_index": 46,
+      "coordinate": "0000101110",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.crossrepo.portable.74c97450ed90f255",
+      "semantic_name": "LIST->VECTOR",
+      "selected_inventory_index": 47,
+      "coordinate": "0000101111",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.crossrepo.portable.80421dbd5105fc9d",
+      "semantic_name": "VECTOR->STRING",
+      "selected_inventory_index": 48,
+      "coordinate": "0000110000",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.crossrepo.portable.85258dd87cc637d5",
+      "semantic_name": "MODULO",
+      "selected_inventory_index": 49,
+      "coordinate": "0000110001",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.crossrepo.portable.973740e9c6dde448",
+      "semantic_name": "FLUSH",
+      "selected_inventory_index": 50,
+      "coordinate": "0000110010",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.crossrepo.portable.98d243fba8537473",
+      "semantic_name": "STRING->VECTOR",
+      "selected_inventory_index": 51,
+      "coordinate": "0000110011",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.crossrepo.portable.b5af0a7c928c4f4f",
+      "semantic_name": "READ-CHAR",
+      "selected_inventory_index": 52,
+      "coordinate": "0000110100",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.crossrepo.portable.c33147d6a05ec2d0",
+      "semantic_name": "CHANNEL-RECEIVE",
+      "selected_inventory_index": 53,
+      "coordinate": "0000110101",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.crossrepo.portable.c9c19f2cbb116818",
+      "semantic_name": "VECTOR-SLICE",
+      "selected_inventory_index": 54,
+      "coordinate": "0000110110",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.crossrepo.portable.e6b54318e4ed5eb1",
+      "semantic_name": "WRITE-STRING",
+      "selected_inventory_index": 55,
+      "coordinate": "0000110111",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.crossrepo.portable.e9c5e4e05dd5691c",
+      "semantic_name": "STRING-SPLIT",
+      "selected_inventory_index": 56,
+      "coordinate": "0000111000",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.crossrepo.portable.f43f640178fb2bb8",
+      "semantic_name": "READ-BYTE",
+      "selected_inventory_index": 57,
+      "coordinate": "0000111001",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.crossrepo.portable.fbdaffd8cdf97d55",
+      "semantic_name": "WRITE-BYTE",
+      "selected_inventory_index": 58,
+      "coordinate": "0000111010",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.forward.022a97b1bb7244c8",
+      "semantic_name": "MATCH-ONE-CONDITION",
+      "selected_inventory_index": 59,
+      "coordinate": "0000111011",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.forward.03cb5c7dfe52ee7d",
+      "semantic_name": "CONDITION-IS-AND?",
+      "selected_inventory_index": 60,
+      "coordinate": "0000111100",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.forward.0605416682d9c37c",
+      "semantic_name": "MATCH-EXISTS-CONDITION",
+      "selected_inventory_index": 61,
+      "coordinate": "0000111101",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.forward.13fee7a6e2cdd322",
+      "semantic_name": "CONDITION-IS-FORALL?",
+      "selected_inventory_index": 62,
+      "coordinate": "0000111110",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.forward.14697462da4366f2",
+      "semantic_name": "JTMS-STATE-SUBST",
+      "selected_inventory_index": 63,
+      "coordinate": "0000111111",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.forward.1a2d7526901bc272",
+      "semantic_name": "MATCH-NEGATED-CONDITION",
+      "selected_inventory_index": 64,
+      "coordinate": "0001000000",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.forward.1d0d6a4c58de4fa6",
+      "semantic_name": "MATCH-CONDITIONS",
+      "selected_inventory_index": 65,
+      "coordinate": "0001000001",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.forward.272b65957473a815",
+      "semantic_name": "CONDITION-IS-NOT?",
+      "selected_inventory_index": 66,
+      "coordinate": "0001000010",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.forward.28bd75f0f882b92f",
+      "semantic_name": "MATCH-CONDITIONS-JTMS",
+      "selected_inventory_index": 67,
+      "coordinate": "0001000011",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.forward.2ebd0001d13e0700",
+      "semantic_name": "MATCH-TEST-CONDITION",
+      "selected_inventory_index": 68,
+      "coordinate": "0001000100",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.forward.4da32404e28cdd68",
+      "semantic_name": "CONDITION-IS-EXISTS?",
+      "selected_inventory_index": 69,
+      "coordinate": "0001000101",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.forward.57b3e4f93d9bb02d",
+      "semantic_name": "MATCH-CONDITION-AGAINST-FACTS",
+      "selected_inventory_index": 70,
+      "coordinate": "0001000110",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.forward.62f4c67a5e87460d",
+      "semantic_name": "MATCH-AND-CONDITION",
+      "selected_inventory_index": 71,
+      "coordinate": "0001000111",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.forward.6f5786573ba8603d",
+      "semantic_name": "MATCH-PLAIN-CONDITION-JTMS",
+      "selected_inventory_index": 72,
+      "coordinate": "0001001000",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.forward.7d09083d7dbc0951",
+      "semantic_name": "FORALL-EVERY-CANDIDATE-SATISFIES?",
+      "selected_inventory_index": 73,
+      "coordinate": "0001001001",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.forward.8877867473fd3e2a",
+      "semantic_name": "FIRE-RULES-MULTI",
+      "selected_inventory_index": 74,
+      "coordinate": "0001001010",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.forward.8b4a53a013867ebf",
+      "semantic_name": "JTMS-MAKE-STATE",
+      "selected_inventory_index": 75,
+      "coordinate": "0001001011",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.forward.8ea4e7248eb20e1a",
+      "semantic_name": "MATCH-FORALL-CONDITION",
+      "selected_inventory_index": 76,
+      "coordinate": "0001001100",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.forward.ab10f3b5553d2070",
+      "semantic_name": "JTMS-STATE-USED",
+      "selected_inventory_index": 77,
+      "coordinate": "0001001101",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.forward.c5d5059e75133175",
+      "semantic_name": "MATCH-ONE-CONDITION-JTMS",
+      "selected_inventory_index": 78,
+      "coordinate": "0001001110",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.forward.d4850df00d1f1d84",
+      "semantic_name": "CONDITION-IS-TEST?",
+      "selected_inventory_index": 79,
+      "coordinate": "0001001111",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.forward.d4f31203838f06cd",
+      "semantic_name": "FIRE-RULE-MULTI",
+      "selected_inventory_index": 80,
+      "coordinate": "0001010000",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.forward.e6388253c74f02d9",
+      "semantic_name": "MATCH-OR-CONDITION",
+      "selected_inventory_index": 81,
+      "coordinate": "0001010001",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.forward.ec697a4164384b8d",
+      "semantic_name": "RUN-MULTI",
+      "selected_inventory_index": 82,
+      "coordinate": "0001010010",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.forward.eec8fab861521eea",
+      "semantic_name": "MATCH-OR-CONDITION-JTMS",
+      "selected_inventory_index": 83,
+      "coordinate": "0001010011",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.forward.ef4703c320091533",
+      "semantic_name": "CONDITION-IS-OR?",
+      "selected_inventory_index": 84,
+      "coordinate": "0001010100",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.hist.maclisp.102c3ce43e683d0c",
+      "semantic_name": "REMPROP",
+      "selected_inventory_index": 85,
+      "coordinate": "0001010101",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.hist.maclisp.11119ebfbc3d078a",
+      "semantic_name": "FILLARRAY",
+      "selected_inventory_index": 86,
+      "coordinate": "0001010110",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.hist.maclisp.269ade4261beb5cf",
+      "semantic_name": "FUNCALL",
+      "selected_inventory_index": 87,
+      "coordinate": "0001010111",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.hist.maclisp.30fae6df6e0e018c",
+      "semantic_name": "GETL",
+      "selected_inventory_index": 88,
+      "coordinate": "0001011000",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.hist.maclisp.32ef4b1cebec4d55",
+      "semantic_name": "SASSQ",
+      "selected_inventory_index": 89,
+      "coordinate": "0001011001",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.hist.maclisp.3a93db0a6c226a0e",
+      "semantic_name": "INDEX",
+      "selected_inventory_index": 90,
+      "coordinate": "0001011010",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.hist.maclisp.682c422c24c3a722",
+      "semantic_name": "REMOB",
+      "selected_inventory_index": 91,
+      "coordinate": "0001011011",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.hist.maclisp.745bea1b0d24953f",
+      "semantic_name": "COPYSYMBOL",
+      "selected_inventory_index": 92,
+      "coordinate": "0001011100",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.hist.maclisp.75f67fd5c67cf640",
+      "semantic_name": "INTERN",
+      "selected_inventory_index": 93,
+      "coordinate": "0001011101",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.hist.maclisp.788703675f6ee596",
+      "semantic_name": "LISTARRAY",
+      "selected_inventory_index": 94,
+      "coordinate": "0001011110",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.hist.maclisp.89d1d017be79c6bd",
+      "semantic_name": "MAKUNBOUND",
+      "selected_inventory_index": 95,
+      "coordinate": "0001011111",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.hist.maclisp.9030b182953944a4",
+      "semantic_name": "SYMEVAL",
+      "selected_inventory_index": 96,
+      "coordinate": "0001100000",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.hist.maclisp.958a7031fad15486",
+      "semantic_name": "CATCH",
+      "selected_inventory_index": 97,
+      "coordinate": "0001100001",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.hist.maclisp.99d317c76fbe2f3b",
+      "semantic_name": "MEMQ",
+      "selected_inventory_index": 98,
+      "coordinate": "0001100010",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.hist.maclisp.b698846a8d261e38",
+      "semantic_name": "SETPLIST",
+      "selected_inventory_index": 99,
+      "coordinate": "0001100011",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.hist.maclisp.c0fafcb70bae18de",
+      "semantic_name": "STORE",
+      "selected_inventory_index": 100,
+      "coordinate": "0001100100",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.hist.maclisp.c9b76144127fe569",
+      "semantic_name": "SASSOC",
+      "selected_inventory_index": 101,
+      "coordinate": "0001100101",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.hist.maclisp.cbbf2982c40d934f",
+      "semantic_name": "DELQ",
+      "selected_inventory_index": 102,
+      "coordinate": "0001100110",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.hist.maclisp.d5ce244619643706",
+      "semantic_name": "SXHASH",
+      "selected_inventory_index": 103,
+      "coordinate": "0001100111",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.hist.maclisp.eff34e02df6fac9e",
+      "semantic_name": "PROGN",
+      "selected_inventory_index": 104,
+      "coordinate": "0001101000",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.hist.maclisp.fbe1a64bc90a6d66",
+      "semantic_name": "ARRAYDIMS",
+      "selected_inventory_index": 105,
+      "coordinate": "0001101001",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.hist.maclisp2.00b186a751f2bf41",
+      "semantic_name": "MAKE-ARRAY",
+      "selected_inventory_index": 106,
+      "coordinate": "0001101010",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.hist.maclisp2.0a58b93efe66e566",
+      "semantic_name": "EXPLODEC",
+      "selected_inventory_index": 107,
+      "coordinate": "0001101011",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.hist.maclisp2.0c799fc7a78221ef",
+      "semantic_name": "MAPATOMS",
+      "selected_inventory_index": 108,
+      "coordinate": "0001101100",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.hist.maclisp2.8640e315ce28e457",
+      "semantic_name": "MAKNAM",
+      "selected_inventory_index": 109,
+      "coordinate": "0001101101",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.hist.maclisp2.96a3f62f67b534ab",
+      "semantic_name": "EXPLODEN",
+      "selected_inventory_index": 110,
+      "coordinate": "0001101110",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.hist.maclisp2.98f32b7f660f5166",
+      "semantic_name": "READLIST",
+      "selected_inventory_index": 111,
+      "coordinate": "0001101111",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.hist.maclisp2.9971e13cc99f7894",
+      "semantic_name": "REARRAY",
+      "selected_inventory_index": 112,
+      "coordinate": "0001110000",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.hist.maclisp2.c61f02c101efc659",
+      "semantic_name": "EXPLODE",
+      "selected_inventory_index": 113,
+      "coordinate": "0001110001",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.hist.maclisp2.da21f2a4677b28bb",
+      "semantic_name": "FLATSIZE",
+      "selected_inventory_index": 114,
+      "coordinate": "0001110010",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.hist.maclisp2.e66815545f1c1352",
+      "semantic_name": "SORTCAR",
+      "selected_inventory_index": 115,
+      "coordinate": "0001110011",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.hist.maclisp2.ef4b3d2bd0b0d6a4",
+      "semantic_name": "FLATC",
+      "selected_inventory_index": 116,
+      "coordinate": "0001110100",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.hist.maclisp2.f19feec5b438e912",
+      "semantic_name": "IMPLODE",
+      "selected_inventory_index": 117,
+      "coordinate": "0001110101",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.knowledge.01a15c89ef056f03",
+      "semantic_name": "MAKE-CLAIM",
+      "selected_inventory_index": 118,
+      "coordinate": "0001110110",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.knowledge.02b539a1876ef014",
+      "semantic_name": "OBSERVATION-SOURCE",
+      "selected_inventory_index": 119,
+      "coordinate": "0001110111",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.knowledge.065ff6c037cda600",
+      "semantic_name": "CHECK-CONFLICT",
+      "selected_inventory_index": 120,
+      "coordinate": "0001111000",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.knowledge.0b9406e2c91bc7b5",
+      "semantic_name": "ADVICE-NEGATIVE-HEAD-CONFLICT",
+      "selected_inventory_index": 121,
+      "coordinate": "0001111001",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.knowledge.0d9b5d35f817a690",
+      "semantic_name": "ADVICE-ALL-DECISION",
+      "selected_inventory_index": 122,
+      "coordinate": "0001111010",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.knowledge.0ddb077d9f3510d5",
+      "semantic_name": "INTENT-REQUIRES",
+      "selected_inventory_index": 123,
+      "coordinate": "0001111011",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.knowledge.0ffd261daf815c3f",
+      "semantic_name": "MODULE-JOURNAL-EVENTS",
+      "selected_inventory_index": 124,
+      "coordinate": "0001111100",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.knowledge.1cf280cba4d5c6a6",
+      "semantic_name": "ADVICE-DECISION",
+      "selected_inventory_index": 125,
+      "coordinate": "0001111101",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.knowledge.26cef044cf3539f7",
+      "semantic_name": "INTENT-CAPABILITIES-SATISFIED?",
+      "selected_inventory_index": 126,
+      "coordinate": "0001111110",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.knowledge.280389ace9a9d7e5",
+      "semantic_name": "KNOWLEDGE-PACKAGE-ENTRIES-VALID?",
+      "selected_inventory_index": 127,
+      "coordinate": "0001111111",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.knowledge.2c3e5a5392de9409",
+      "semantic_name": "KNOWLEDGE-CLAUSE-VALID?",
+      "selected_inventory_index": 128,
+      "coordinate": "0010000000",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.knowledge.45369b21a80b3c99",
+      "semantic_name": "CLAUSES->TELL-EVENTS",
+      "selected_inventory_index": 129,
+      "coordinate": "0010000001",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.knowledge.476a5d13244efd9e",
+      "semantic_name": "MODULE-JOURNAL-HAS-MODULE?",
+      "selected_inventory_index": 130,
+      "coordinate": "0010000010",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.knowledge.4aba51353ffe338c",
+      "semantic_name": "APPLY-JOURNAL-EVENT",
+      "selected_inventory_index": 131,
+      "coordinate": "0010000011",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.knowledge.58252b08812d5f7e",
+      "semantic_name": "OPPOSITE-KNOWLEDGE-HEAD",
+      "selected_inventory_index": 132,
+      "coordinate": "0010000100",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.knowledge.5d12503b3a4eafef",
+      "semantic_name": "MAKE-INTENT",
+      "selected_inventory_index": 133,
+      "coordinate": "0010000101",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.knowledge.789a0b4818ce6303",
+      "semantic_name": "KNOWLEDGE-PACKAGE-FIELD",
+      "selected_inventory_index": 134,
+      "coordinate": "0010000110",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.knowledge.7a0e31e730db56b0",
+      "semantic_name": "EVIDENCE-CLAIM-REF",
+      "selected_inventory_index": 135,
+      "coordinate": "0010000111",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.knowledge.7f63897ae35ce464",
+      "semantic_name": "KNOWLEDGE-CLAUSES-VALID?",
+      "selected_inventory_index": 136,
+      "coordinate": "0010001000",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.knowledge.7fecac9e596977c7",
+      "semantic_name": "MAKE-KNOWLEDGE-PACKAGE",
+      "selected_inventory_index": 137,
+      "coordinate": "0010001001",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.knowledge.83302489268459c7",
+      "semantic_name": "KNOWLEDGE-TERMS-VALID?",
+      "selected_inventory_index": 138,
+      "coordinate": "0010001010",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.knowledge.891bc9722190ee5d",
+      "semantic_name": "ADVICE-BATCH-CONFLICT",
+      "selected_inventory_index": 139,
+      "coordinate": "0010001011",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.knowledge.a692d520b4a43804",
+      "semantic_name": "RESULT-NOT-HEAD?",
+      "selected_inventory_index": 140,
+      "coordinate": "0010001100",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.knowledge.a7e206d384237270",
+      "semantic_name": "KNOWLEDGE-TERM-VALID?",
+      "selected_inventory_index": 141,
+      "coordinate": "0010001101",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.knowledge.a7e3aaefbaf29ee4",
+      "semantic_name": "KNOWLEDGE-PROPER-LIST?",
+      "selected_inventory_index": 142,
+      "coordinate": "0010001110",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.knowledge.aa4b7e3f4a78b990",
+      "semantic_name": "MAKE-EVIDENCE",
+      "selected_inventory_index": 143,
+      "coordinate": "0010001111",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.knowledge.b136bcbe1da26b01",
+      "semantic_name": "INTENT-STOP-ON",
+      "selected_inventory_index": 144,
+      "coordinate": "0010010000",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.knowledge.b511e52114cb33b9",
+      "semantic_name": "EVIDENCE-SOURCE-REF",
+      "selected_inventory_index": 145,
+      "coordinate": "0010010001",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.knowledge.cc2a52e60bbb9647",
+      "semantic_name": "KNOWLEDGE-PACKAGE-DECISION",
+      "selected_inventory_index": 146,
+      "coordinate": "0010010010",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.knowledge.cc9b9cfcd0fb18d1",
+      "semantic_name": "MAKE-OBSERVATION",
+      "selected_inventory_index": 147,
+      "coordinate": "0010010011",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.knowledge.cd4bae7128135b89",
+      "semantic_name": "KNOWLEDGE-NOT-HEAD?",
+      "selected_inventory_index": 148,
+      "coordinate": "0010010100",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.knowledge.e16499916ff26cdb",
+      "semantic_name": "KNOWLEDGE-GOAL-VALID?",
+      "selected_inventory_index": 149,
+      "coordinate": "0010010101",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.knowledge.ef2680c0a2be25a7",
+      "semantic_name": "RESULT-PROPER-LIST?",
+      "selected_inventory_index": 150,
+      "coordinate": "0010010110",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.knowledge.f879dbd07a26a666",
+      "semantic_name": "KNOWLEDGE-GOALS-VALID?",
+      "selected_inventory_index": 151,
+      "coordinate": "0010010111",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.knowledge.fa417329836bc401",
+      "semantic_name": "ADVICE-CONFLICT-PROOF",
+      "selected_inventory_index": 152,
+      "coordinate": "0010011000",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.knowledge.fc81b6ac5b1f4b1a",
+      "semantic_name": "SOURCE-REF?",
+      "selected_inventory_index": 153,
+      "coordinate": "0010011001",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.knowledge.ff7b880c9be99434",
+      "semantic_name": "INTENT-PRODUCES",
+      "selected_inventory_index": 154,
+      "coordinate": "0010011010",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.lib.04a9548ac98a58f9",
+      "semantic_name": "SCIENCE-MERGE-DIMENSIONS",
+      "selected_inventory_index": 155,
+      "coordinate": "0010011011",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.lib.04b1b297b8cfc5fe",
+      "semantic_name": "PROLOG-VALUES-TO-DATALOG-FACTS",
+      "selected_inventory_index": 156,
+      "coordinate": "0010011100",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.lib.0969e96ea4d2d020",
+      "semantic_name": "TRANSLATION-ENVELOPE-VALID?",
+      "selected_inventory_index": 157,
+      "coordinate": "0010011101",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.lib.0e1c082d11d49537",
+      "semantic_name": "TRANSLATION-AMBIGUITY-VALID?",
+      "selected_inventory_index": 158,
+      "coordinate": "0010011110",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.lib.21599c341e38ba46",
+      "semantic_name": "FS-BINDING-ADDRESSES-PRESENT?",
+      "selected_inventory_index": 159,
+      "coordinate": "0010011111",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.lib.29770976affe40e3",
+      "semantic_name": "WORLD-CLIMB-TO-DEPTH",
+      "selected_inventory_index": 160,
+      "coordinate": "0010100000",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.lib.2ab545f220ead889",
+      "semantic_name": "UTF8-BYTE?",
+      "selected_inventory_index": 161,
+      "coordinate": "0010100001",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.lib.2b1c04d8da36d19f",
+      "semantic_name": "UTF8-CONTINUATION-BYTE?",
+      "selected_inventory_index": 162,
+      "coordinate": "0010100010",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.lib.30a26951923db088",
+      "semantic_name": "TRANSLATION-REVIEW-VALID?",
+      "selected_inventory_index": 163,
+      "coordinate": "0010100011",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.lib.317eeffc73342b18",
+      "semantic_name": "WORLD-JOURNAL-PREFIX",
+      "selected_inventory_index": 164,
+      "coordinate": "0010100100",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.lib.39412302796bd17e",
+      "semantic_name": "TRANSLATION-CANDIDATE-PAYLOAD-VALID?",
+      "selected_inventory_index": 165,
+      "coordinate": "0010100101",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.lib.3b1f6370d84807b4",
+      "semantic_name": "FS-ALL-ADDRESSES-PRESENT?",
+      "selected_inventory_index": 166,
+      "coordinate": "0010100110",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.lib.44d144a2c4f2a62c",
+      "semantic_name": "TRANSLATION-BATCH-VALID?",
+      "selected_inventory_index": 167,
+      "coordinate": "0010100111",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.lib.55de5f0b3896dc6e",
+      "semantic_name": "WORLD-NO-COMMON-ANCESTOR?",
+      "selected_inventory_index": 168,
+      "coordinate": "0010101000",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.lib.56310cf7d7b503ec",
+      "semantic_name": "TRANSLATION-REVIEW-ADVICE-DECISION",
+      "selected_inventory_index": 169,
+      "coordinate": "0010101001",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.lib.5879b7448425418a",
+      "semantic_name": "SCIENCE-DIMENSIONS-VALID?",
+      "selected_inventory_index": 170,
+      "coordinate": "0010101010",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.lib.60968cf61f024f2a",
+      "semantic_name": "UTF8-TWO-CONTINUATIONS?",
+      "selected_inventory_index": 171,
+      "coordinate": "0010101011",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.lib.61043fc937c01d44",
+      "semantic_name": "TRANSLATION-ALTERNATIVES-VALID?",
+      "selected_inventory_index": 172,
+      "coordinate": "0010101100",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.lib.6a6ff0bdd334f067",
+      "semantic_name": "NARRATE-PROVED-OUTCOME",
+      "selected_inventory_index": 173,
+      "coordinate": "0010101101",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.lib.725057d3abd5ae52",
+      "semantic_name": "NARRATE-INVALID-OUTCOME-SHAPE",
+      "selected_inventory_index": 174,
+      "coordinate": "0010101110",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.lib.775227ddda9615b4",
+      "semantic_name": "UTF8-ALL-BYTES?",
+      "selected_inventory_index": 175,
+      "coordinate": "0010101111",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.lib.854c309cc6dfdfb2",
+      "semantic_name": "TRANSLATION-STATUS-VALID?",
+      "selected_inventory_index": 176,
+      "coordinate": "0010110000",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.lib.86bfeec8824ea88f",
+      "semantic_name": "FS-RECOVER-COMMIT",
+      "selected_inventory_index": 177,
+      "coordinate": "0010110001",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.lib.8963984a1d55b0cc",
+      "semantic_name": "UTF8-THREE-BYTE-SECOND-OK?",
+      "selected_inventory_index": 178,
+      "coordinate": "0010110010",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.lib.8aaee4b441b0c401",
+      "semantic_name": "SCIENCE-NEGATE-DIMENSIONS",
+      "selected_inventory_index": 179,
+      "coordinate": "0010110011",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.lib.8b93a8112ea17a80",
+      "semantic_name": "WORLD-NOT-ANCESTOR?",
+      "selected_inventory_index": 180,
+      "coordinate": "0010110100",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.lib.8f52d5785c044a9a",
+      "semantic_name": "WORLD-COMMON-ANCESTOR-ALIGNED",
+      "selected_inventory_index": 181,
+      "coordinate": "0010110101",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.lib.95b47c5fcd18b4d5",
+      "semantic_name": "FS-ROOT-PACKAGE-DECISION",
+      "selected_inventory_index": 182,
+      "coordinate": "0010110110",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.lib.9e650eca21552008",
+      "semantic_name": "FS-OBJECT-PACKAGE-DECISION",
+      "selected_inventory_index": 183,
+      "coordinate": "0010110111",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.lib.a96361be62d0eed2",
+      "semantic_name": "TRANSLATION-KIND-VALID?",
+      "selected_inventory_index": 184,
+      "coordinate": "0010111000",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.lib.afb9c92fa0108898",
+      "semantic_name": "PROLOG-SUBSTITUTIONS-TO-DATALOG-FACTS",
+      "selected_inventory_index": 185,
+      "coordinate": "0010111001",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.lib.c4701dc7ce95ae8c",
+      "semantic_name": "TRANSLATION-REVIEW-CANDIDATE",
+      "selected_inventory_index": 186,
+      "coordinate": "0010111010",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.lib.c7c05ac69ef88d8a",
+      "semantic_name": "UTF8-IN-RANGE?",
+      "selected_inventory_index": 187,
+      "coordinate": "0010111011",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.lib.d2f580d906911b06",
+      "semantic_name": "WORLD-AT-DEPTH-FROM",
+      "selected_inventory_index": 188,
+      "coordinate": "0010111100",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.lib.d5eb0d93145b8c94",
+      "semantic_name": "UTF8-FOUR-BYTE-SECOND-OK?",
+      "selected_inventory_index": 189,
+      "coordinate": "0010111101",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.lib.d85004e5cb653807",
+      "semantic_name": "TRANSLATION-REVIEW-STATUS-VALID?",
+      "selected_inventory_index": 190,
+      "coordinate": "0010111110",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.lib.d94cde8011a2ea26",
+      "semantic_name": "FS-JOURNAL-EVENT-DECISION",
+      "selected_inventory_index": 191,
+      "coordinate": "0010111111",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.lib.e25eaf825aab56af",
+      "semantic_name": "SCIENCE-ADD-DIMENSION",
+      "selected_inventory_index": 192,
+      "coordinate": "0011000000",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.lib.e5ca8e1a8334618f",
+      "semantic_name": "FS-RECOVER-ROOT-PACKAGE",
+      "selected_inventory_index": 193,
+      "coordinate": "0011000001",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.paip.166d9036a7efacba",
+      "semantic_name": "EMPTY-QUEUE?",
+      "selected_inventory_index": 194,
+      "coordinate": "0011000010",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.paip.1b114e8244aa1520",
+      "semantic_name": "MEMO",
+      "selected_inventory_index": 195,
+      "coordinate": "0011000011",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.paip.1d52accd0c9d57a7",
+      "semantic_name": "FRONT",
+      "selected_inventory_index": 196,
+      "coordinate": "0011000100",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.paip.1f7614c2540acd89",
+      "semantic_name": "ONCE-ONLY",
+      "selected_inventory_index": 197,
+      "coordinate": "0011000101",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.paip.35556e9f23b46e49",
+      "semantic_name": "ENQUEUE",
+      "selected_inventory_index": 198,
+      "coordinate": "0011000110",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.paip.3a204f4ea82d1122",
+      "semantic_name": "DEQUEUE",
+      "selected_inventory_index": 199,
+      "coordinate": "0011000111",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.paip.69d9fcb9d367520a",
+      "semantic_name": "FIND-ALL",
+      "selected_inventory_index": 200,
+      "coordinate": "0011001000",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.paip.71184990c42de3ee",
+      "semantic_name": "MAP-INTO",
+      "selected_inventory_index": 201,
+      "coordinate": "0011001001",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.paip.81ab43199f71a8d8",
+      "semantic_name": "MAPPEND",
+      "selected_inventory_index": 202,
+      "coordinate": "0011001010",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.paip.84e4729545f2daca",
+      "semantic_name": "SORT*",
+      "selected_inventory_index": 203,
+      "coordinate": "0011001011",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.paip.890d5b3ad59fd876",
+      "semantic_name": "MAKE-QUEUE",
+      "selected_inventory_index": 204,
+      "coordinate": "0011001100",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.paip.9e7435fb8d689398",
+      "semantic_name": "LAST1",
+      "selected_inventory_index": 205,
+      "coordinate": "0011001101",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.paip.b44ddadce041218d",
+      "semantic_name": "FLATTEN",
+      "selected_inventory_index": 206,
+      "coordinate": "0011001110",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.paip.bd1bbda28298c2c0",
+      "semantic_name": "PARTITION-IF",
+      "selected_inventory_index": 207,
+      "coordinate": "0011001111",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.paip.bf1225a22d406e68",
+      "semantic_name": "NEW-SYMBOL",
+      "selected_inventory_index": 208,
+      "coordinate": "0011010000",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.paip.c1b740635246d4fc",
+      "semantic_name": "QUEUE-NCONC",
+      "selected_inventory_index": 209,
+      "coordinate": "0011010001",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.paip.cd1ddf0183d791e5",
+      "semantic_name": "FORCE",
+      "selected_inventory_index": 210,
+      "coordinate": "0011010010",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.paip.cf9aa3e6cc56fe82",
+      "semantic_name": "FIND-IF-ANYWHERE",
+      "selected_inventory_index": 211,
+      "coordinate": "0011010011",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.paip.da85db62a69b7233",
+      "semantic_name": "DELAY",
+      "selected_inventory_index": 212,
+      "coordinate": "0011010100",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.paip.e203c49df944f8df",
+      "semantic_name": "CLEAR-MEMOIZE",
+      "selected_inventory_index": 213,
+      "coordinate": "0011010101",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.paip.e7380398ec6d7198",
+      "semantic_name": "MEMOIZE",
+      "selected_inventory_index": 214,
+      "coordinate": "0011010110",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.paip.fc5f29b3ef760732",
+      "semantic_name": "MKLIST",
+      "selected_inventory_index": 215,
+      "coordinate": "0011010111",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.paip.fd257dfefeee0915",
+      "semantic_name": "UNIQUE-FIND-IF-ANYWHERE",
+      "selected_inventory_index": 216,
+      "coordinate": "0011011000",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.panini.1c1ead6dc5c51be4",
+      "semantic_name": "PARADIGM-ATMANEPADA",
+      "selected_inventory_index": 217,
+      "coordinate": "0011011001",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.panini.2293480958af019f",
+      "semantic_name": "STOP-DEVOICE",
+      "selected_inventory_index": 218,
+      "coordinate": "0011011010",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.panini.37e4f6168c30e92e",
+      "semantic_name": "SANDHI-IKO-YAN-ACI",
+      "selected_inventory_index": 219,
+      "coordinate": "0011011011",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.panini.49746bdfda61803b",
+      "semantic_name": "IT-DELETABLE?",
+      "selected_inventory_index": 220,
+      "coordinate": "0011011100",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.panini.4c84cb58e0632e99",
+      "semantic_name": "PARADIGM-PARASMAIPADA",
+      "selected_inventory_index": 221,
+      "coordinate": "0011011101",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.panini.55d9101f67b1855c",
+      "semantic_name": "APPLY-ECO-SANDHI",
+      "selected_inventory_index": 222,
+      "coordinate": "0011011110",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.panini.5e9d123c92f86e3b",
+      "semantic_name": "ANUVRTTI-GRAPH-VALID?",
+      "selected_inventory_index": 223,
+      "coordinate": "0011011111",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.panini.6205b261a6b937d1",
+      "semantic_name": "SANDHI-KHARI-SAVARNE",
+      "selected_inventory_index": 224,
+      "coordinate": "0011100000",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.panini.67c8dbcc9bf2e7bb",
+      "semantic_name": "JOIN-WORDS-SANDHI",
+      "selected_inventory_index": 225,
+      "coordinate": "0011100001",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.panini.68316abc99d04f3a",
+      "semantic_name": "DERIVE-VERB-LAKARA",
+      "selected_inventory_index": 226,
+      "coordinate": "0011100010",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.panini.73932a8d771d3df2",
+      "semantic_name": "STOP-VOICE",
+      "selected_inventory_index": 227,
+      "coordinate": "0011100011",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.panini.788f4dc0e7e814e1",
+      "semantic_name": "RESOLVE-PRATYAHARA",
+      "selected_inventory_index": 228,
+      "coordinate": "0011100100",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.panini.7ccbe766ae6ec09a",
+      "semantic_name": "PARADIGM-FULL",
+      "selected_inventory_index": 229,
+      "coordinate": "0011100101",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.panini.7e298bd948d01a33",
+      "semantic_name": "SANDHI-JHALAM-JHASHI",
+      "selected_inventory_index": 230,
+      "coordinate": "0011100110",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.panini.8abf7d39d6427885",
+      "semantic_name": "DERIVE-VERB-ATMANEPADA",
+      "selected_inventory_index": 231,
+      "coordinate": "0011100111",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.panini.94fc9099e8a0655f",
+      "semantic_name": "AMBIGUOUS-APAVADA?",
+      "selected_inventory_index": 232,
+      "coordinate": "0011101000",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.panini.a0197c3f0c535406",
+      "semantic_name": "DERIVE-VERB-OPTATIVE",
+      "selected_inventory_index": 233,
+      "coordinate": "0011101001",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.panini.bda85c260614cf78",
+      "semantic_name": "SAP-ELIGIBLE?",
+      "selected_inventory_index": 234,
+      "coordinate": "0011101010",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.panini.c5cdd1d037223f96",
+      "semantic_name": "SANDHI-MANUSVARA",
+      "selected_inventory_index": 235,
+      "coordinate": "0011101011",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.panini.e6a13dd97de2c49b",
+      "semantic_name": "PRATYAHARA-MEMBER?",
+      "selected_inventory_index": 236,
+      "coordinate": "0011101100",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.panini.ed2aa1ac6280ff39",
+      "semantic_name": "APPLY-SANDHI",
+      "selected_inventory_index": 237,
+      "coordinate": "0011101101",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.panini.f1ad2f908ec2d260",
+      "semantic_name": "APPLY-GUNA",
+      "selected_inventory_index": 238,
+      "coordinate": "0011101110",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.panini.fd566d5d1157a92d",
+      "semantic_name": "DERIVE-VERB-FUTURE",
+      "selected_inventory_index": 239,
+      "coordinate": "0011101111",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.recovery.37ea896b2d33d921",
+      "semantic_name": "NTP-QUERY-RAW",
+      "selected_inventory_index": 240,
+      "coordinate": "0011110000",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.recovery.55fdf410b6e198cb",
+      "semantic_name": "UNIX-TIME-NOW",
+      "selected_inventory_index": 241,
+      "coordinate": "0011110001",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.recovery.566101e22c0dc780",
+      "semantic_name": "BOOLE",
+      "selected_inventory_index": 242,
+      "coordinate": "0011110010",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.recovery.91f8375bccc065bd",
+      "semantic_name": "TIMEZONE-DECLARATIONS-RAW",
+      "selected_inventory_index": 243,
+      "coordinate": "0011110011",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.recovery.a1fe04a8fb42b80f",
+      "semantic_name": "COMPILE-FILE",
+      "selected_inventory_index": 244,
+      "coordinate": "0011110100",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.recovery.bd77582d6d45d144",
+      "semantic_name": "LDB",
+      "selected_inventory_index": 245,
+      "coordinate": "0011110101",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.recovery.cf0d799baca24634",
+      "semantic_name": "MONO-NS",
+      "selected_inventory_index": 246,
+      "coordinate": "0011110110",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.recovery.da8e5dccbde8b276",
+      "semantic_name": "MASK-FIELD",
+      "selected_inventory_index": 247,
+      "coordinate": "0011110111",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.recovery2.4637a4b216d0c931",
+      "semantic_name": "SCHAR",
+      "selected_inventory_index": 248,
+      "coordinate": "0011111000",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.xrepo.mal.081cac9ac0745ee4",
+      "semantic_name": "SWAP-REF!",
+      "selected_inventory_index": 249,
+      "coordinate": "0011111001",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.xrepo.mal.2d7acb5034834296",
+      "semantic_name": "MACROP",
+      "selected_inventory_index": 250,
+      "coordinate": "0011111010",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.xrepo.mal.2ed937e54b081de4",
+      "semantic_name": "REF-CELLP",
+      "selected_inventory_index": 251,
+      "coordinate": "0011111011",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.xrepo.mal.4617a451a1d575cb",
+      "semantic_name": "MAP-KEYS",
+      "selected_inventory_index": 252,
+      "coordinate": "0011111100",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.xrepo.mal.4625e1bf9d1f0f24",
+      "semantic_name": "MAPP",
+      "selected_inventory_index": 253,
+      "coordinate": "0011111101",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.xrepo.mal.4d65dec1be54770f",
+      "semantic_name": "MAP-VALUES",
+      "selected_inventory_index": 254,
+      "coordinate": "0011111110",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.xrepo.mal.50255d6fc0d7b72a",
+      "semantic_name": "SEQ-VIEW",
+      "selected_inventory_index": 255,
+      "coordinate": "0011111111",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.xrepo.mal.562967fe22291080",
+      "semantic_name": "DEREF",
+      "selected_inventory_index": 256,
+      "coordinate": "0100000000",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.xrepo.mal.57b39afa4ec59d9a",
+      "semantic_name": "SEQUENTIALP",
+      "selected_inventory_index": 257,
+      "coordinate": "0100000001",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.xrepo.mal.6fb04a1ad14befb7",
+      "semantic_name": "KEYWORDP",
+      "selected_inventory_index": 258,
+      "coordinate": "0100000010",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.xrepo.mal.8bf2e1fa349ead2e",
+      "semantic_name": "KEYWORD",
+      "selected_inventory_index": 259,
+      "coordinate": "0100000011",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.xrepo.mal.a389c3b1248f055b",
+      "semantic_name": "FUNCTIONP",
+      "selected_inventory_index": 260,
+      "coordinate": "0100000100",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.xrepo.mal.aa681dfe8a01b653",
+      "semantic_name": "WITH-META",
+      "selected_inventory_index": 261,
+      "coordinate": "0100000101",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.xrepo.mal.af86e4bc14b61622",
+      "semantic_name": "META",
+      "selected_inventory_index": 262,
+      "coordinate": "0100000110",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.xrepo.mal.cccb18087a3612c7",
+      "semantic_name": "REF-CELL",
+      "selected_inventory_index": 263,
+      "coordinate": "0100000111",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.xrepo.mal.d174c7961ea500b7",
+      "semantic_name": "SEQUENCE-COUNT",
+      "selected_inventory_index": 264,
+      "coordinate": "0100001000",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.xrepo.mal.e490e1c97fbdf0be",
+      "semantic_name": "MAP-DISSOC",
+      "selected_inventory_index": 265,
+      "coordinate": "0100001001",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.xrepo.mal.e7ccb65f56df8020",
+      "semantic_name": "SEQUENCE-EMPTY?",
+      "selected_inventory_index": 266,
+      "coordinate": "0100001010",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.xrepo.mal.eabdd9abe55be826",
+      "semantic_name": "RESET-REF!",
+      "selected_inventory_index": 267,
+      "coordinate": "0100001011",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.xrepo.mal.f3b45d71a4e4987a",
+      "semantic_name": "LISTP",
+      "selected_inventory_index": 268,
+      "coordinate": "0100001100",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.xrepo.mal.f7707dc99a43cf4b",
+      "semantic_name": "MAP-FROM-PAIRS",
+      "selected_inventory_index": 269,
+      "coordinate": "0100001101",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.xrepo.mal.fb3558ec01201b4f",
+      "semantic_name": "VECTORP",
+      "selected_inventory_index": 270,
+      "coordinate": "0100001110",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.yantra.cbc45d185cd6836c",
+      "semantic_name": "JSON-ESCAPE-CHAR",
+      "selected_inventory_index": 527,
+      "coordinate": "0100001111",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.yantra.2419b9bd686760dd",
+      "semantic_name": "JSON-ESCAPE",
+      "selected_inventory_index": 528,
+      "coordinate": "0100010000",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.yantra.9841aa039ca01a02",
+      "semantic_name": "JSON-ENCODE-STRING",
+      "selected_inventory_index": 529,
+      "coordinate": "0100010001",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.yantra.9b0f7ae48dcda39a",
+      "semantic_name": "JSON-OBJECT?",
+      "selected_inventory_index": 530,
+      "coordinate": "0100010010",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.yantra.4398051a217172ec",
+      "semantic_name": "JSON-ENCODE-VALUE",
+      "selected_inventory_index": 531,
+      "coordinate": "0100010011",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.yantra.4eb9326e697ef6f4",
+      "semantic_name": "JSON-ENCODE-OBJECT",
+      "selected_inventory_index": 532,
+      "coordinate": "0100010100",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.yantra.0d2fe63e3714a814",
+      "semantic_name": "JSON-ENCODE-ARRAY",
+      "selected_inventory_index": 533,
+      "coordinate": "0100010101",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.yantra.0bd6f96192e78781",
+      "semantic_name": "JSON-MESSAGE-CONTENT",
+      "selected_inventory_index": 534,
+      "coordinate": "0100010110",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.yantra.0969ab6cb0349857",
+      "semantic_name": "JSON-TO-TOOL-CALL",
+      "selected_inventory_index": 535,
+      "coordinate": "0100010111",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.yantra.71e11ed738c864a5",
+      "semantic_name": "JSON-TO-MESSAGE",
+      "selected_inventory_index": 536,
+      "coordinate": "0100011000",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.yantra.6d2cdb1436748719",
+      "semantic_name": "EXTRACT-ASSISTANT-MESSAGE",
+      "selected_inventory_index": 537,
+      "coordinate": "0100011001",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.yantra.8e0f089b42a7103f",
+      "semantic_name": "ENCODE-TOOL-CALL",
+      "selected_inventory_index": 538,
+      "coordinate": "0100011010",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.yantra.26cb9104ba0d041d",
+      "semantic_name": "ENCODE-MESSAGE",
+      "selected_inventory_index": 539,
+      "coordinate": "0100011011",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.yantra.d9f88c2c47f50972",
+      "semantic_name": "BUILD-REQUEST-BODY",
+      "selected_inventory_index": 540,
+      "coordinate": "0100011100",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.yantra.56009c37c02644bc",
+      "semantic_name": "CLAIMS-EXECUTION?",
+      "selected_inventory_index": 541,
+      "coordinate": "0100011101",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.yantra.07ec7a79a6c04cc7",
+      "semantic_name": "HAS-TOOL-RESULT?",
+      "selected_inventory_index": 542,
+      "coordinate": "0100011110",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.yantra.38ca9000c2005bd4",
+      "semantic_name": "ALL-COVERED?",
+      "selected_inventory_index": 543,
+      "coordinate": "0100011111",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.yantra.6e8665deafad71e1",
+      "semantic_name": "ENDS-WITH-OWNED-TOOL-RESULTS?",
+      "selected_inventory_index": 544,
+      "coordinate": "0100100000",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.yantra.97858538390157a9",
+      "semantic_name": "VALID-FINAL?",
+      "selected_inventory_index": 545,
+      "coordinate": "0100100001",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.clips.77c8b904659d32b9",
+      "semantic_name": "CLIPS-STRIP-MODULE-PREFIX",
+      "selected_inventory_index": 546,
+      "coordinate": "0100100010",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.clips.923a2738cfce945c",
+      "semantic_name": "CLIPS-LOOKUP-SLOT-VALUE",
+      "selected_inventory_index": 547,
+      "coordinate": "0100100011",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.clips.f6d7678b2f1f15f9",
+      "semantic_name": "CLIPS-POSITIONAL-ARGS",
+      "selected_inventory_index": 548,
+      "coordinate": "0100100100",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.clips.302b5ae8469a5671",
+      "semantic_name": "CLIPS-SPLIT-AT-ARROW",
+      "selected_inventory_index": 549,
+      "coordinate": "0100100101",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.clips.ca6732aa34af8727",
+      "semantic_name": "CLIPS-ASSERT-FORM?",
+      "selected_inventory_index": 550,
+      "coordinate": "0100100110",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.clips.f10ba8d6153f4c98",
+      "semantic_name": "CLIPS-PRINTOUT-FORM?",
+      "selected_inventory_index": 551,
+      "coordinate": "0100100111",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.clips.da41def12667b799",
+      "semantic_name": "CLIPS-DROP-PRINTOUTS",
+      "selected_inventory_index": 552,
+      "coordinate": "0100101000",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.clips.2bb6281b6c020d15",
+      "semantic_name": "CLIPS-ALL-ASSERTS?",
+      "selected_inventory_index": 553,
+      "coordinate": "0100101001",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.clips.6e2fea5ee9ab25a0",
+      "semantic_name": "CLIPS-ASSERT-CONCLUSIONS",
+      "selected_inventory_index": 554,
+      "coordinate": "0100101010",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.clips.2b04c98bce9c8880",
+      "semantic_name": "CLIPS-CLAUSES-FOR-CONCLUSIONS",
+      "selected_inventory_index": 555,
+      "coordinate": "0100101011",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.clips.cd8ee31c8469b006",
+      "semantic_name": "CLIPS-RULE-PREAMBLE-FORM?",
+      "selected_inventory_index": 556,
+      "coordinate": "0100101100",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.clips.62e760721a28b6e3",
+      "semantic_name": "CLIPS-STRIP-RULE-PREAMBLE",
+      "selected_inventory_index": 557,
+      "coordinate": "0100101101",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.machine.96f37e6d810f9b77",
+      "semantic_name": "MY-RESULT-OK",
+      "selected_inventory_index": 558,
+      "coordinate": "0100101110",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.machine.cc3f2b670da8c675",
+      "semantic_name": "MY-RESULT-FAIL",
+      "selected_inventory_index": 559,
+      "coordinate": "0100101111",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.machine.b81d0a1c35c8efbe",
+      "semantic_name": "MY-RESULT-FAIL?",
+      "selected_inventory_index": 560,
+      "coordinate": "0100110000",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.machine.dc7d9f820624ca7e",
+      "semantic_name": "MY-FRAME-BOUND?",
+      "selected_inventory_index": 561,
+      "coordinate": "0100110001",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.machine.f18c8fc1b733c761",
+      "semantic_name": "MY-FRAME-LOOKUP",
+      "selected_inventory_index": 562,
+      "coordinate": "0100110010",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.machine.705b5d0b44e81b1e",
+      "semantic_name": "MY-ENV-DEFINE",
+      "selected_inventory_index": 563,
+      "coordinate": "0100110011",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.machine.57afb6213e2f6075",
+      "semantic_name": "ENV-BOUND?",
+      "selected_inventory_index": 564,
+      "coordinate": "0100110100",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.machine.d99a25cdccc9ce54",
+      "semantic_name": "MY-REFRESH-SHARED-FRAME",
+      "selected_inventory_index": 565,
+      "coordinate": "0100110101",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.machine.8b886d9f7d31ce91",
+      "semantic_name": "MY-CLOSURE?",
+      "selected_inventory_index": 566,
+      "coordinate": "0100110110",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.machine.bd201f97d4ed66de",
+      "semantic_name": "MY-RECURSIVE-CLOSURE?",
+      "selected_inventory_index": 567,
+      "coordinate": "0100110111",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.machine.7c1a387aff73d1ff",
+      "semantic_name": "MY-GROUP-CLOSURE?",
+      "selected_inventory_index": 568,
+      "coordinate": "0100111000",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.machine.26c82f465a195d62",
+      "semantic_name": "MY-ARITY-OK?",
+      "selected_inventory_index": 569,
+      "coordinate": "0100111001",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.machine.ee8217ea9b0c7c06",
+      "semantic_name": "MY-ARITY-DETAIL",
+      "selected_inventory_index": 570,
+      "coordinate": "0100111010",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.machine.80f3b6b826b22af4",
+      "semantic_name": "MY-LAMBDA-LIST-ERROR",
+      "selected_inventory_index": 571,
+      "coordinate": "0100111011",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.machine.fb30aa468abb2629",
+      "semantic_name": "MY-MAKE-CLOSURE",
+      "selected_inventory_index": 572,
+      "coordinate": "0100111100",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.machine.3337746644f15629",
+      "semantic_name": "MY-APPLY-RESULT",
+      "selected_inventory_index": 573,
+      "coordinate": "0100111101",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.machine.28dcbf57806dbb95",
+      "semantic_name": "MY-EVAL-RESULT",
+      "selected_inventory_index": 574,
+      "coordinate": "0100111110",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.machine.65d4e53edc28c170",
+      "semantic_name": "MY-EVAL-TOP-FORM",
+      "selected_inventory_index": 575,
+      "coordinate": "0100111111",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.machine.08d3fb1c185e71a8",
+      "semantic_name": "MY-EVAL-PROGRAM",
+      "selected_inventory_index": 576,
+      "coordinate": "0101000000",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.machine.6a6905970a03e550",
+      "semantic_name": "MY-DEF-DEPENDENCIES",
+      "selected_inventory_index": 577,
+      "coordinate": "0101000001",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.machine.4d44decd59656584",
+      "semantic_name": "MY-BUILD-DEPENDENCY-GRAPH",
+      "selected_inventory_index": 578,
+      "coordinate": "0101000010",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.machine.0bc4e0ff85daa7c0",
+      "semantic_name": "MY-GRAPH-REACHES?",
+      "selected_inventory_index": 579,
+      "coordinate": "0101000011",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.machine.86814bf3ba25ca5b",
+      "semantic_name": "MY-SCC-NAMES",
+      "selected_inventory_index": 580,
+      "coordinate": "0101000100",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.machine.ee9d2a7c157a9b73",
+      "semantic_name": "MY-EVAL-LAMBDA-BLOCK",
+      "selected_inventory_index": 581,
+      "coordinate": "0101000101",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.machine.b4b836ada52f7ca6",
+      "semantic_name": "MY-INSTALL-GROUP-ENV",
+      "selected_inventory_index": 582,
+      "coordinate": "0101000110",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.machine.a263adcf19d5a1ca",
+      "semantic_name": "MY-LAMBDA-DEF-REFERENCES-NAME?",
+      "selected_inventory_index": 583,
+      "coordinate": "0101000111",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.machine.f154a68f9e4c8738",
+      "semantic_name": "AVL-MAKE-BALANCED-NODE",
+      "selected_inventory_index": 584,
+      "coordinate": "0101001000",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.machine.2efd783343ccd4e8",
+      "semantic_name": "AVL-BALANCE-FACTOR",
+      "selected_inventory_index": 585,
+      "coordinate": "0101001001",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.machine.c28b75f0d170e80f",
+      "semantic_name": "AVL-ROTATE-LEFT",
+      "selected_inventory_index": 586,
+      "coordinate": "0101001010",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.machine.b6fd42aa44e4dfe0",
+      "semantic_name": "AVL-ROTATE-RIGHT",
+      "selected_inventory_index": 587,
+      "coordinate": "0101001011",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.machine.3f8bf759e8f7d323",
+      "semantic_name": "AVL-REBALANCE",
+      "selected_inventory_index": 588,
+      "coordinate": "0101001100",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.historic.c049f95c4ca41542",
+      "semantic_name": "PUTD",
+      "selected_inventory_index": 589,
+      "coordinate": "0101001101",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.historic.d0d44c0e2ba1f005",
+      "semantic_name": "GETD",
+      "selected_inventory_index": 590,
+      "coordinate": "0101001110",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.historic.c332fa2b6a1e4e14",
+      "semantic_name": "COPYD",
+      "selected_inventory_index": 591,
+      "coordinate": "0101001111",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.historic.8b11476d47c1684d",
+      "semantic_name": "REMD",
+      "selected_inventory_index": 592,
+      "coordinate": "0101010000",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.historic.1c81ce0782696b75",
+      "semantic_name": "FLUIDP",
+      "selected_inventory_index": 593,
+      "coordinate": "0101010001",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.historic.4e2e6d96a347d73e",
+      "semantic_name": "GLOBALP",
+      "selected_inventory_index": 594,
+      "coordinate": "0101010010",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.historic.4f348833247141ee",
+      "semantic_name": "UNFLUID",
+      "selected_inventory_index": 595,
+      "coordinate": "0101010011",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.historic.0de26dcb037110a6",
+      "semantic_name": "EXPRP",
+      "selected_inventory_index": 596,
+      "coordinate": "0101010100",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.historic.796512ddb82e5b8a",
+      "semantic_name": "FEXPRP",
+      "selected_inventory_index": 597,
+      "coordinate": "0101010101",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.historic.21896fc2d2833202",
+      "semantic_name": "NEXPRP",
+      "selected_inventory_index": 598,
+      "coordinate": "0101010110",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.historic.718af1f534119f2e",
+      "semantic_name": "FUNBOUNDP",
+      "selected_inventory_index": 599,
+      "coordinate": "0101010111",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.historic.3454b68291a9ae8c",
+      "semantic_name": "UNDO",
+      "selected_inventory_index": 600,
+      "coordinate": "0101011000",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.historic.c678ec3b515e6c8b",
+      "semantic_name": "INTERLISP-HISTORY-REPLAY",
+      "selected_inventory_index": 601,
+      "coordinate": "0101011001",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.selfhost.09a6fd81aa502e63",
+      "semantic_name": "MY-ERROR",
+      "selected_inventory_index": 602,
+      "coordinate": "0101011010",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.selfhost.3beb560f4cd7ec16",
+      "semantic_name": "ENV-LOOKUP",
+      "selected_inventory_index": 603,
+      "coordinate": "0101011011",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.selfhost.b4fdcb5c6c8b13bd",
+      "semantic_name": "MY-UNRESOLVED-NAME?",
+      "selected_inventory_index": 604,
+      "coordinate": "0101011100",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.selfhost.5309c5bd61ff5c8a",
+      "semantic_name": "MY-LAMBDA-FORM?",
+      "selected_inventory_index": 605,
+      "coordinate": "0101011101",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.selfhost.93a82f406215da50",
+      "semantic_name": "MY-LAMBDA-DEF-FORM?",
+      "selected_inventory_index": 606,
+      "coordinate": "0101011110",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.selfhost.85b6437380ff9636",
+      "semantic_name": "MY-COMPARE-CHAIN",
+      "selected_inventory_index": 607,
+      "coordinate": "0101011111",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.selfhost.cf99268652f01895",
+      "semantic_name": "MY-FIXED-PARAM-COUNT",
+      "selected_inventory_index": 608,
+      "coordinate": "0101100000",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.selfhost.e3ae9ddbece09e5a",
+      "semantic_name": "MY-REST-PARAM?",
+      "selected_inventory_index": 609,
+      "coordinate": "0101100001",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.selfhost.be603cbb7e1114da",
+      "semantic_name": "BIND-PARAMS",
+      "selected_inventory_index": 610,
+      "coordinate": "0101100010",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.selfhost.365a398818913e52",
+      "semantic_name": "MY-EVAL-LIST-RESULT",
+      "selected_inventory_index": 611,
+      "coordinate": "0101100011",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.selfhost.1e28ce95ce6da9c6",
+      "semantic_name": "MY-EVAL-BODY-RESULT",
+      "selected_inventory_index": 612,
+      "coordinate": "0101100100",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.selfhost.7fc14cac0f80a3d2",
+      "semantic_name": "MY-PARAMS-BIND-NAME?",
+      "selected_inventory_index": 613,
+      "coordinate": "0101100101",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.selfhost.322d84493f3a2a7f",
+      "semantic_name": "MY-FORM-REFERENCES-NAME?",
+      "selected_inventory_index": 614,
+      "coordinate": "0101100110",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.selfhost.c93b0f91a008f01d",
+      "semantic_name": "MY-SELECT-DEFS-BY-NAMES",
+      "selected_inventory_index": 615,
+      "coordinate": "0101100111",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.selfhost.1fbe91dfc7848611",
+      "semantic_name": "MY-REMOVE-DEFS-BY-NAMES",
+      "selected_inventory_index": 616,
+      "coordinate": "0101101000",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.selfhost.55858c673fdf15bf",
+      "semantic_name": "MY-GROUP-CLOSURE-FROM-DEF",
+      "selected_inventory_index": 617,
+      "coordinate": "0101101001",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.selfhost.3e8f4cb25ef4f151",
+      "semantic_name": "MY-BUILD-GROUP-ENV",
+      "selected_inventory_index": 618,
+      "coordinate": "0101101010",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.selfhost.163eaab94f398d7d",
+      "semantic_name": "RENAME-VARS",
+      "selected_inventory_index": 619,
+      "coordinate": "0101101011",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.selfhost.5f67c3a32d0975dd",
+      "semantic_name": "PROVE-RULE",
+      "selected_inventory_index": 620,
+      "coordinate": "0101101100",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.selfhost.feb219b211363fe4",
+      "semantic_name": "PROVE-GOAL-STATE",
+      "selected_inventory_index": 621,
+      "coordinate": "0101101101",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.selfhost.7bfaa23e9875b86f",
+      "semantic_name": "MAP-GOAL-RESULTS",
+      "selected_inventory_index": 622,
+      "coordinate": "0101101110",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.selfhost.3c1f7df087adec0f",
+      "semantic_name": "COUNT-USAGE",
+      "selected_inventory_index": 623,
+      "coordinate": "0101101111",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.selfhost.6d1ee434e5343094",
+      "semantic_name": "MERGE-USAGE",
+      "selected_inventory_index": 624,
+      "coordinate": "0101110000",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.hist.primary.dpb.20261009",
+      "semantic_name": "DPB",
+      "selected_inventory_index": 625,
+      "coordinate": "0101110001",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.hist.primary.array-displacement.20261009",
+      "semantic_name": "ARRAY-DISPLACEMENT",
+      "selected_inventory_index": 626,
+      "coordinate": "0101110010",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.clos.slot-boundp.v1",
+      "semantic_name": "SLOT-BOUNDP",
+      "selected_inventory_index": 627,
+      "coordinate": "0101110011",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.clos.slot-makunbound.v1",
+      "semantic_name": "SLOT-MAKUNBOUND",
+      "selected_inventory_index": 628,
+      "coordinate": "0101110100",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.clos.remove-method.v1",
+      "semantic_name": "REMOVE-METHOD",
+      "selected_inventory_index": 629,
+      "coordinate": "0101110101",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.hobby.spanda.bounded-rational-approx.v1",
+      "semantic_name": "BOUNDED-RATIONAL-APPROX",
+      "selected_inventory_index": 630,
+      "coordinate": "0101110110",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.words.primitive-binary-root.v1",
+      "semantic_name": "PRIMITIVE-BINARY-WORD-ROOT",
+      "selected_inventory_index": 631,
+      "coordinate": "0101110111",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.fpga.gray.encode-word.20261009",
+      "semantic_name": "GRAY-ENCODE-WORD",
+      "selected_inventory_index": 632,
+      "coordinate": "0101111000",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.fpga.gray.decode-word.20261009",
+      "semantic_name": "GRAY-DECODE-WORD",
+      "selected_inventory_index": 633,
+      "coordinate": "0101111001",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.math.finite-bayes-update-exact.20261009",
+      "semantic_name": "FINITE-BAYES-UPDATE-EXACT",
+      "selected_inventory_index": 634,
+      "coordinate": "0101111010",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.fpga.gf2.minimum-recurrence.20261009",
+      "semantic_name": "BINARY-LFSR-MINIMAL-RECURRENCE",
+      "selected_inventory_index": 635,
+      "coordinate": "0101111011",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.hist.primary.20261009.deposit-field",
+      "semantic_name": "DEPOSIT-FIELD",
+      "selected_inventory_index": 636,
+      "coordinate": "0101111100",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.hist.primary.20261009.hashtable-entries",
+      "semantic_name": "HASHTABLE-ENTRIES",
+      "selected_inventory_index": 637,
+      "coordinate": "0101111101",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.science.covariance-transport.20261009",
+      "semantic_name": "COVARIANCE-TRANSPORT",
+      "selected_inventory_index": 638,
+      "coordinate": "0101111110",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.science.frame-state-transform.20261009",
+      "semantic_name": "FRAME-STATE-TRANSFORM",
+      "selected_inventory_index": 639,
+      "coordinate": "0101111111",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.science.rational-resample.20261009",
+      "semantic_name": "RATIONAL-RESAMPLE",
+      "selected_inventory_index": 640,
+      "coordinate": "1010000000",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.hobby.clock.allan-variance.v1",
+      "semantic_name": "ALLAN-VARIANCE",
+      "selected_inventory_index": 641,
+      "coordinate": "1010000001",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.hobby.radio.differential-encode.v1",
+      "semantic_name": "DIFFERENTIAL-ENCODE",
+      "selected_inventory_index": 642,
+      "coordinate": "1010000010",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.hobby.radio.differential-decode.v1",
+      "semantic_name": "DIFFERENTIAL-DECODE",
+      "selected_inventory_index": 643,
+      "coordinate": "1010000011",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.hobby.radio.differential-phasor.v1",
+      "semantic_name": "DIFFERENTIAL-PHASOR",
+      "selected_inventory_index": 644,
+      "coordinate": "1010000100",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.hobby.babbage.exact-finite-difference-certificate.v1",
+      "semantic_name": "FINITE-DIFFERENCE-CERTIFICATE",
+      "selected_inventory_index": 645,
+      "coordinate": "1010000101",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.crosshobby.hysteretic-boolean-step.20261009",
+      "semantic_name": "HYSTERETIC-BOOLEAN-STEP",
+      "selected_inventory_index": 646,
+      "coordinate": "1010000110",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.math.exact-barycentric-interpolate.20261011",
+      "semantic_name": "EXACT-BARYCENTRIC-INTERPOLATE",
+      "selected_inventory_index": 647,
+      "coordinate": "1010000111",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.ai.finite-simple-temporal-closure.20261011",
+      "semantic_name": "FINITE-SIMPLE-TEMPORAL-CLOSURE",
+      "selected_inventory_index": 648,
+      "coordinate": "1010001000",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.logic.exact-boolean-prime-implicants.20261011",
+      "semantic_name": "EXACT-BOOLEAN-PRIME-IMPLICANTS",
+      "selected_inventory_index": 649,
+      "coordinate": "1010001001",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.ai.binary-constraint-support-projection.20261011",
+      "semantic_name": "BINARY-CONSTRAINT-SUPPORT-PROJECTION",
+      "selected_inventory_index": 650,
+      "coordinate": "1010001010",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.math.unique-bounded-modular-lift.20261011",
+      "semantic_name": "UNIQUE-BOUNDED-MODULAR-LIFT",
+      "selected_inventory_index": 651,
+      "coordinate": "1010001011",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.math.prefix-free-kraft-certificate.20261011",
+      "semantic_name": "PREFIX-FREE-KRAFT-CERTIFICATE",
+      "selected_inventory_index": 652,
+      "coordinate": "1010001100",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.math.finite-code-unique-decipherability.20261011",
+      "semantic_name": "FINITE-CODE-UNIQUE-DECIPHERABILITY",
+      "selected_inventory_index": 653,
+      "coordinate": "1010001101",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.math.generalized-congruence-merge.20261011",
+      "semantic_name": "GENERALIZED-CONGRUENCE-MERGE",
+      "selected_inventory_index": 654,
+      "coordinate": "1010001110",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.measure.hadamard-variance.20261011",
+      "semantic_name": "HADAMARD-VARIANCE",
+      "selected_inventory_index": 655,
+      "coordinate": "1010001111",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.math.finite-convolution.20261011",
+      "semantic_name": "FINITE-CONVOLUTION",
+      "selected_inventory_index": 656,
+      "coordinate": "1010010000",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.signal.phase-unwrap.20261011",
+      "semantic_name": "PHASE-UNWRAP",
+      "selected_inventory_index": 657,
+      "coordinate": "1010010001",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.words.debruijn-binary-cycle.20261011",
+      "semantic_name": "DE-BRUIJN-BINARY-CYCLE?",
+      "selected_inventory_index": 658,
+      "coordinate": "1010010010",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.words.binary-lyndon-factorization.20261011",
+      "semantic_name": "BINARY-LYNDON-FACTORIZATION",
+      "selected_inventory_index": 659,
+      "coordinate": "1010010011",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.math.stern-brocot-run-path.20261011",
+      "semantic_name": "STERN-BROCOT-RUN-PATH",
+      "selected_inventory_index": 660,
+      "coordinate": "1010010100",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.archive.minimal-abductive-explanations.20261011",
+      "semantic_name": "MINIMAL-ABDUCTIVE-EXPLANATIONS",
+      "selected_inventory_index": 661,
+      "coordinate": "1010010101",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.archive.correlated-affine-combination.20261011",
+      "semantic_name": "CORRELATED-AFFINE-COMBINATION",
+      "selected_inventory_index": 662,
+      "coordinate": "1010010110",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.archive.sound-affine-product-enclosure.20261011",
+      "semantic_name": "SOUND-AFFINE-PRODUCT-ENCLOSURE",
+      "selected_inventory_index": 663,
+      "coordinate": "1010010111",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.archive.allen-interval-relation.20261011",
+      "semantic_name": "ALLEN-INTERVAL-RELATION",
+      "selected_inventory_index": 664,
+      "coordinate": "1010011000",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.archive.atms-consistent-label-join.20261011",
+      "semantic_name": "ATMS-CONSISTENT-LABEL-JOIN",
+      "selected_inventory_index": 665,
+      "coordinate": "1010011001",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.archive.pinhole-image-project.20261011",
+      "semantic_name": "PINHOLE-IMAGE-PROJECT",
+      "selected_inventory_index": 666,
+      "coordinate": "1010011010",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.archive.pixel-to-camera-ray.20261011",
+      "semantic_name": "PIXEL-TO-CAMERA-RAY",
+      "selected_inventory_index": 667,
+      "coordinate": "1010011011",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.archive.finite-string-critical-pair-confluence.20261011",
+      "semantic_name": "FINITE-STRING-CRITICAL-PAIR-CONFLUENCE",
+      "selected_inventory_index": 668,
+      "coordinate": "1010011100",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.archive.first-order-least-general-generalization.20261011",
+      "semantic_name": "FIRST-ORDER-LEAST-GENERAL-GENERALIZATION",
+      "selected_inventory_index": 669,
+      "coordinate": "1010011101",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.archive.exact-perceptron-mistake-step.20261011",
+      "semantic_name": "EXACT-PERCEPTRON-MISTAKE-STEP",
+      "selected_inventory_index": 670,
+      "coordinate": "1010011110",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.archive.lower-mechanical-word.20261011",
+      "semantic_name": "LOWER-MECHANICAL-WORD",
+      "selected_inventory_index": 671,
+      "coordinate": "1010011111",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.archive.affine-quantity-transport.20261011",
+      "semantic_name": "AFFINE-QUANTITY-TRANSPORT",
+      "selected_inventory_index": 672,
+      "coordinate": "1010100000",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.archive.ground-congruence-closure-partition.20261011",
+      "semantic_name": "GROUND-CONGRUENCE-CLOSURE-PARTITION",
+      "selected_inventory_index": 673,
+      "coordinate": "1010100001",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.archive.cyclic-binary-word-canon.20261011",
+      "semantic_name": "CYCLIC-BINARY-WORD-CANON",
+      "selected_inventory_index": 674,
+      "coordinate": "1010100010",
+      "coordinate_basis": "ORDER-PRESERVING-FREE-CODE-GAUGE",
+      "ratified_resident": false
+    }
+  ]
+}
