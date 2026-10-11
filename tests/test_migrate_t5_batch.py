@@ -55,15 +55,10 @@ class RealBatchTest(unittest.TestCase):
         self.assertEqual(passes["passthrough-head"], 0)
         physical = output / "compiler-nucleus.sens"
         self.assertTrue(physical.is_file())
-        spec = importlib.util.spec_from_file_location(
-            "sens_three_pass_compiler_regression",
-            REPO / "scripts" / "migrate-three-pass.py",
-        )
-        self.assertIsNotNone(spec)
-        migrator = importlib.util.module_from_spec(spec)
-        spec.loader.exec_module(migrator)
-        words = migrator.decode_bytes(physical.read_bytes())
-        self.assertEqual(migrator.encode_words(words), physical.read_bytes())
+        sys.path.insert(0, str(REPO / "scripts"))
+        from sens_t5_codec import decode_bytes, encode_words
+        words = decode_bytes(physical.read_bytes())
+        self.assertEqual(encode_words(words), physical.read_bytes())
         self.assertEqual(source.read_bytes(), before, "migration must keep canonical source byte-exact")
 
     def test_audited_d9_sid8_maps_to_exact_d9_without_reusing_legacy_bits(self):
