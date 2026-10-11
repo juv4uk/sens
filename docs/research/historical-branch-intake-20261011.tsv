@@ -227,14 +227,14 @@ analysis/4774-nested-d3-quote-runtime-boundary-20261009	UNTRIAGED	-	-	BRANCH-NAM
 arch/contract-7-open-primitive-archipelago	UNTRIAGED	-	-	BRANCH-NAME-ONLY
 arch/793-life-2-pattern-catalog	UNTRIAGED	-	-	BRANCH-NAME-ONLY
 architecture/archipelago-v1	UNTRIAGED	-	-	BRANCH-NAME-ONLY
-archive/d8-3778-rejected-axis-20261011-gpt6	UNTRIAGED	-	-	BRANCH-NAME-ONLY
+archive/d8-3778-rejected-axis-20261011-gpt6	ALREADY-IN-MAIN-ARCHIVED	-	208e3eb0e1337a0ff37dbbe13c0407b5bd45d65b	research/domain-archive/20261011/extension-d8-3778-negative-axes-20261011.json (7/7 exact blob)
 archive/d10-canonical-topological-order-proof-20261011	ALREADY-IN-MAIN-ARCHIVED	-	-	research/domain-archive/20261011/d10-canonical-topological-order/provenance.json
 archive/domain-research-d3-d10-supplement-20261011	ALREADY-IN-MAIN-ANCESTOR	-	-	compare main...archive/domain-research-d3-d10-supplement-20261011 ahead=0
-archive/domain-research-migrator-remnants-20261011	UNTRIAGED	-	-	BRANCH-NAME-ONLY
+archive/domain-research-migrator-remnants-20261011	ALREADY-IN-MAIN-ANCESTOR	-	8b527ef5ed077929c8a0daede9a134b23f84fd28	compare ahead=0 (source branch ancestor of main)
 archive/pr616-core-cond-m1-20261011	ALREADY-IN-MAIN-ARCHIVED	-	-	research/domain-archive/20261011/extension-pr616-core-cond-m1-20261011.json
 archive/ramka3-5326-5328-proof-history-20261011	ALREADY-IN-MAIN-ARCHIVED	-	-	research/domain-archive/20261011/extension-ramka3-pr5326-5328-20261011.json
-archive/retired-rust-semantic-suites-20261009	UNTRIAGED	-	-	BRANCH-NAME-ONLY
-archive/3182-cond-workflow-20261011-gpt6	UNTRIAGED	-	-	BRANCH-NAME-ONLY
+archive/retired-rust-semantic-suites-20261009	ALREADY-IN-MAIN-ANCESTOR	-	020e1472c8bec1e6369c9b8ba83593ea94ecfd0d	compare ahead=0 (source branch ancestor of main)
+archive/3182-cond-workflow-20261011-gpt6	ALREADY-IN-MAIN-ARCHIVED	-	1b069f30d54ab7b2b68e70455904209d6edb9f31	research/domain-archive/20261011/supplement-migrator-remnants-20261011.json (2/2 exact blob)
 assist/352-string-order-current-main	UNTRIAGED	-	-	BRANCH-NAME-ONLY
 assist/352-string-order-current-main-v2	UNTRIAGED	-	-	BRANCH-NAME-ONLY
 assist/369-translation-symbol-witness-current-main	UNTRIAGED	-	-	BRANCH-NAME-ONLY
@@ -3136,10 +3136,10 @@ replay-d6-add1-sub1-4139	UNTRIAGED	-	-	BRANCH-NAME-ONLY
 replay-machine-effect-explicit-outputs-4381	UNTRIAGED	-	-	BRANCH-NAME-ONLY
 research/adaptyvnyi-enkoder-2026-10-10	UNTRIAGED	-	-	BRANCH-NAME-ONLY
 research/archive-bench-1995-20261011-gpt6	ALREADY-IN-MAIN-ARCHIVED-NEWER	-	-	research/domain-archive/20261011/extension-benchmark-identity-carrier-1995-20261011.json
-research/archive-d6-nonprefix-2546-20261011-gpt6	UNTRIAGED	-	-	BRANCH-NAME-ONLY
-research/archive-pr3182-cond-proof-20261011	UNTRIAGED	-	-	BRANCH-NAME-ONLY
-research/archive-readfile-profile-pr347-pr379-20261011-gpt6	UNTRIAGED	-	-	BRANCH-NAME-ONLY
-research/archive-width-carrier-2005-20261011-gpt6	UNTRIAGED	-	-	BRANCH-NAME-ONLY
+research/archive-d6-nonprefix-2546-20261011-gpt6	ALREADY-IN-MAIN-ARCHIVED	-	5e2022fc9377b8075a098cb9b013f1b72a5a8b40	research/domain-archive/20261011/extension-d6-nonprefix-pr2546-20261011.json (4/4 exact blob)
+research/archive-pr3182-cond-proof-20261011	ALREADY-IN-MAIN-ARCHIVED	-	6e0b3290ef0996fc3f23ebf96cca155fd9eeef54	research/domain-archive/20261011/supplement-migrator-remnants-20261011.json (2/2 exact blob)
+research/archive-readfile-profile-pr347-pr379-20261011-gpt6	ALREADY-IN-MAIN-ARCHIVED	-	a5b27ff042310fbd6c79ef143e7e75b85318690c	research/domain-archive/20261011/benchmark-readfile-profile-347-379-20261011.json (4/4 exact blob)
+research/archive-width-carrier-2005-20261011-gpt6	ALREADY-IN-MAIN-ARCHIVED-NEWER	-	8e34830ce4edb9cfd043f5184cb174d583f27b78	research/domain-archive/20261011/extension-width-carrier-2005-20261011.json (5/6 exact; latest manifest covers 7/7 archival files)
 research/axiom-corpus-3451	UNTRIAGED	-	-	BRANCH-NAME-ONLY
 research/bench-paired-wall-replay-20261010	UNTRIAGED	-	-	BRANCH-NAME-ONLY
 research/bench-triad-replay-20261010	UNTRIAGED	-	-	BRANCH-NAME-ONLY
