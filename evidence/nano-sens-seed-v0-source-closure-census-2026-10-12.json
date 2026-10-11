@@ -8,28 +8,28 @@
     "tree_sha": "d0787a40fcea36501747732aa61b6de19fe29c70",
     "tree_entry_count": 8038
   },
-  "reason_for_census": "The measured CML test runner invokes `cargo run --manifest-path external/sens/Cargo.toml -p xtask -- compiler-export` at runtime. Cargo therefore compiles the SENS xtask and SENS library from pinned checkout inputs. This census records a verifiable subset of those repository inputs; it is not the complete runtime closure.",
+  "reason_for_census": "The measured CML runner invokes `cargo run --manifest-path external/sens/Cargo.toml -p xtask -- compiler-export` at runtime. Cargo compiles `xtask` and the SENS library from the pinned checkout; lib.rs embeds multiple Lisp libraries/data files at compile time. This census now excludes a cfg(test)-only Rust source and adds 12 directly observed lib.rs compile-time includes. It remains a verified subset, not the complete runtime closure or minimum seed total.",
   "known_input_subset": {
-    "file_count": 102,
-    "total_on_disk_source_bytes": 1145608,
+    "file_count": 113,
+    "total_on_disk_source_bytes": 1337942,
     "sum_is_lower_bound_only": true,
     "categories": {
-      "rust_source_files_count": 71,
-      "rust_source_files_bytes": 1072899,
+      "rust_source_files_count": 70,
+      "rust_source_files_bytes": 1069628,
       "workspace_cargo_manifests_count": 20,
       "workspace_cargo_manifests_bytes": 7424,
-      "root_workspace_and_known_compiler_inputs_count": 11,
-      "root_workspace_and_known_compiler_inputs_bytes": 65285
+      "root_workspace_and_known_compiler_inputs_count": 23,
+      "root_workspace_and_known_compiler_inputs_bytes": 260890
     },
-    "file_metrics": "Every listed input records exact Git blob SHA-1 and repository on-disk byte size at the pinned commit."
+    "file_metrics": "70 production Rust source files across crates/sens/src/** and crates/xtask/src/**; 20 Cargo package manifests; 23 root, contract, authority, and compile-time included source/data files. The cfg(test)-only bootstrap_measurement.rs is explicitly excluded. This is a pinned, verified subset; closure is not complete."
   },
   "closure_gaps": [
-    "Audit every include_str!/include_bytes!/include! in the 71 listed Rust source files and add every referenced data file exactly once.",
-    "Confirm the complete Cargo workspace package-metadata closure and distinguish build-only manifests from packages whose source is compiled.",
-    "Inventory all crates.io registry source dependencies needed by cargo run -p xtask; classify them under the explicit external dependency policy rather than silently omitting them.",
-    "Record the .git metadata required by xtask's `git rev-parse HEAD` call, or remove that runtime requirement in the K2 candidate by passing the pinned revision explicitly.",
-    "Verify which inputs are consumed at runtime versus only at build time with a clean, offline/controlled repro.",
-    "Do not publish a whole-chain seed byte total until this closure audit is complete and minimized."
+    "Finish a path-by-path production module graph/cfg scan for all 70 listed Rust sources and verify every compile-time include edge; current include edge list records all direct edges inspected so far, not a completed automated exhaustive scan.",
+    "Inventory build scripts, proc-macro build-time inputs, and any environment variables that affect deterministic compilation.",
+    "Record the `.git` metadata required by xtask's runtime `git rev-parse HEAD`, or remove that runtime requirement in K2 by passing the pinned source revision explicitly.",
+    "Audit Cargo registry source/index/cache availability under a clean offline reproduction; the exact required crate versions/checksums are listed, but crate source byte sizes/cache bytes are not.",
+    "Verify runtime versus build-only data inputs with a clean controlled reproduction and determine the minimal operational closure without silently moving required files outside the boundary.",
+    "Do not publish a whole-chain seed byte total until closure is complete, external dependency policy is explicit, and the minimal input set is verified."
   ],
   "external_toolchain_or_runtime_dependencies_separate": [
     "rustc",
@@ -135,11 +135,6 @@
       "path": "crates/sens/src/bits.rs",
       "git_blob_sha1": "9d9dcd69b7fa076793a8fc26b8514fd8fea7b430",
       "size_bytes": 8156
-    },
-    {
-      "path": "crates/sens/src/bootstrap_measurement.rs",
-      "git_blob_sha1": "6dd7c707c455935c32c038623ccfb48fde78556e",
-      "size_bytes": 3271
     },
     {
       "path": "crates/sens/src/canonical_reader.rs",
@@ -547,9 +542,204 @@
       "size_bytes": 24506
     },
     {
+      "path": "lib/core2.lisp",
+      "git_blob_sha1": "9a39a1d341dde7faf3a1899b52f78a7b1e931783",
+      "size_bytes": 572,
+      "discovery": "compile-time include observed in crates/sens/src/lib.rs"
+    },
+    {
+      "path": "lib/core3.lisp",
+      "git_blob_sha1": "17677dc6bfc32ae41749e9c4ce7bf31e0e15fc83",
+      "size_bytes": 1156,
+      "discovery": "compile-time include observed in crates/sens/src/lib.rs"
+    },
+    {
+      "path": "lib/core4.lisp",
+      "git_blob_sha1": "425db176b82f76e79d7343f7a629929ade22b087",
+      "size_bytes": 59301,
+      "discovery": "compile-time include observed in crates/sens/src/lib.rs"
+    },
+    {
+      "path": "lib/core4.lisp.fasl",
+      "git_blob_sha1": "684dada94c8e2e0aff777d7714269e46a3e910fc",
+      "size_bytes": 22745,
+      "discovery": "compile-time include observed in crates/sens/src/lib.rs"
+    },
+    {
+      "path": "lib/fs.lisp",
+      "git_blob_sha1": "d8226c0a7d4f05b71be252f38c5c250714fff5a0",
+      "size_bytes": 2302,
+      "discovery": "compile-time include observed in crates/sens/src/lib.rs"
+    },
+    {
+      "path": "lib/generated/meta-semantic-registry.lisp",
+      "git_blob_sha1": "ef00dd20dedab5e47e0cf529a103c321f62d5a37",
+      "size_bytes": 28464,
+      "discovery": "compile-time include observed in crates/sens/src/lib.rs"
+    },
+    {
+      "path": "lib/macro.lisp",
+      "git_blob_sha1": "eb2da1efd301896063a4d3abc2668f1e4b04fc14",
+      "size_bytes": 1547,
+      "discovery": "compile-time include observed in crates/sens/src/lib.rs"
+    },
+    {
+      "path": "lib/meta-eval.lisp",
+      "git_blob_sha1": "7d3289001cece9ba5997ae7dd7d7d6f65edaf2a6",
+      "size_bytes": 51662,
+      "discovery": "compile-time include observed in crates/sens/src/lib.rs"
+    },
+    {
+      "path": "lib/process.lisp",
+      "git_blob_sha1": "afa338881007106bc961c0eaf5598deda979a48e",
+      "size_bytes": 3498,
+      "discovery": "compile-time include observed in crates/sens/src/lib.rs"
+    },
+    {
+      "path": "lib/tcp.lisp",
+      "git_blob_sha1": "45161e80b50f7264754ac357308c175c547c23cb",
+      "size_bytes": 2105,
+      "discovery": "compile-time include observed in crates/sens/src/lib.rs"
+    },
+    {
+      "path": "lib/time.lisp",
+      "git_blob_sha1": "74013e20c0c5abb9a68c62334f40095c29294a53",
+      "size_bytes": 10801,
+      "discovery": "compile-time include observed in crates/sens/src/lib.rs"
+    },
+    {
+      "path": "lib/utf8.lisp",
+      "git_blob_sha1": "6d3e0c8441894493d8611d0459dfb486b8fdb2ec",
+      "size_bytes": 11452,
+      "discovery": "compile-time include observed in crates/sens/src/lib.rs"
+    },
+    {
       "path": "LICENSE",
       "git_blob_sha1": "a49660652423dcc5352c11456f31bca8806c0d25",
       "size_bytes": 649
     }
-  ]
+  ],
+  "excluded_from_production_closure": [
+    {
+      "path": "crates/sens/src/bootstrap_measurement.rs",
+      "git_blob_sha1": "6dd7c707c455935c32c038623ccfb48fde78556e",
+      "size_bytes": 3271,
+      "reason": "Declared only under #[cfg(test)] in crates/sens/src/lib.rs; not compiled by cargo run -p xtask -- compiler-export."
+    }
+  ],
+  "compile_time_include_edges": [
+    {
+      "from": "crates/sens/src/lib.rs",
+      "paths": [
+        "lib/macro.lisp",
+        "lib/core2.lisp",
+        "lib/core3.lisp",
+        "lib/core4.lisp",
+        "lib/core4.lisp.fasl",
+        "lib/generated/meta-semantic-registry.lisp",
+        "lib/meta-eval.lisp",
+        "lib/time.lisp",
+        "lib/utf8.lisp",
+        "lib/process.lisp",
+        "lib/tcp.lisp",
+        "lib/fs.lisp"
+      ]
+    },
+    {
+      "from": "crates/sens/src/compiler_language.rs",
+      "paths": [
+        "lib/compiler-nucleus.lisp",
+        "language-contract.lisp",
+        "knowledge/bija3-l1-l5-structure-projection.json",
+        "contracts/bija3-l1-l5-ratification.lisp",
+        "knowledge/d4-bootstrap-compiler-structure-projection.json",
+        "contracts/d4-bootstrap-ratification.lisp"
+      ]
+    },
+    {
+      "from": "crates/xtask/src/compiler_export.rs",
+      "paths": [
+        "lib/compiler-nucleus.lisp",
+        "contracts/compiler-nucleus-identity-corpus-v1.tsv"
+      ]
+    },
+    {
+      "from": "crates/sens/src/semantic_registry.rs",
+      "paths": [
+        "crates/sens/src/semantic_registry_generated.rs",
+        "crates/sens/src/domain_surface_registry_generated.rs",
+        "crates/sens/src/d5_definition_bindings_generated.rs"
+      ]
+    },
+    {
+      "from": "crates/sens/src/language_items.rs",
+      "paths": [
+        "crates/sens/src/function_signatures_generated.rs"
+      ]
+    },
+    {
+      "from": "crates/sens/src/eval/necessary_forms.rs",
+      "paths": [
+        "crates/sens/src/eval/necessary_forms_generated.rs"
+      ]
+    }
+  ],
+  "external_build_dependency_inventory": {
+    "policy": "External dependency bytes are excluded from the trusted-seed source-subset total and must remain listed separately; a complete report must not silently omit their presence or availability requirement.",
+    "package_resolution": "Pinned Cargo.lock blob 293e933d0fdb78954386243eae431c2826b62a79 contains 101 workspace/registry package records; not all 101 are built by the `xtask compiler-export` invocation.",
+    "invocation_dependency_path": [
+      "xtask 0.1.0",
+      "sens 0.41.0 (workspace path dependency)",
+      "serde 1.0.229",
+      "serde_core 1.0.229",
+      "serde_derive 1.0.229",
+      "proc-macro2 1.0.107",
+      "quote 1.0.47",
+      "syn 3.0.3",
+      "unicode-ident 1.0.24"
+    ],
+    "registry_crates": [
+      {
+        "name": "serde",
+        "version": "1.0.229",
+        "checksum": "4148590afebada386688f18773da617792bf2ef03ffc1e4cbd2b1d45b023e0ba"
+      },
+      {
+        "name": "serde_core",
+        "version": "1.0.229",
+        "checksum": "67dca2c9c51e58a4791a4b1ed58308b39c64224d349a935ab5039aa360942a48"
+      },
+      {
+        "name": "serde_derive",
+        "version": "1.0.229",
+        "checksum": "e7a5d71263a5a7d47b41f6b3f06ba276f10cc18b0931f1799f710578e2309348"
+      },
+      {
+        "name": "proc-macro2",
+        "version": "1.0.107",
+        "checksum": "985e7ec9bb745e6ce6535b544d84d6cd6f7ad8bd711c398938ae983b91a766d9"
+      },
+      {
+        "name": "quote",
+        "version": "1.0.47",
+        "checksum": "1fbf4db142a473a8d80c26bbf18454ed458bf8d26c8219c331daecfdbd079001"
+      },
+      {
+        "name": "syn",
+        "version": "3.0.3",
+        "checksum": "53e9bae58849f64dfa4f5d5ae372c8341f7305f82a3868709269343628b659a3"
+      },
+      {
+        "name": "unicode-ident",
+        "version": "1.0.24",
+        "checksum": "e6e4313cd5fcd3dad5cafa179702e2b244f760991f45397d14d4ebf38247da75"
+      }
+    ],
+    "excluded_from_invocation_dependency_graph": [
+      "serde_json (sens dev-dependency)",
+      "sens-host (sens dev-dependency)",
+      "workspace packages not reachable from xtask's non-test dependency graph"
+    ],
+    "remaining": "Registry source archives/cache bytes and Cargo index/network/cache availability are not measured here; report as external dependencies, never as invisible inputs."
+  }
 }
