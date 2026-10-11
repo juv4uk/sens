@@ -1,0 +1,42 @@
+{
+  "schema": "sens.domain-research-archive-extension/v1",
+  "date": "2026-10-11",
+  "status": "HISTORICAL-EVIDENCE-NOT-ACTIVE",
+  "foundation_sha": "d640c1f43eab04038ead41c3b4b92ce1ffdbadb4",
+  "file_count": 4,
+  "records": [
+    {
+      "pr": 2812,
+      "source_commit": "0bb7f07c8f17e942dcea1b1bb321cf0bf0e345cc",
+      "source_path": "crates/sens/src/text7.rs",
+      "archived_path": "research/domain-archive/20261011/pr2812/crates/sens/src/text7.rs.source.txt",
+      "exact_original_blob_sha": "4729280d87949379826761644573c02e91383586",
+      "description": "D7 Text7 реалізація на Rust, історична"
+    },
+    {
+      "pr": 2815,
+      "source_commit": "04142e57c282fb8726b1fa732319f4c4173dd8b2",
+      "source_path": "knowledge/d6-runtime-admission-audit.json",
+      "archived_path": "research/domain-archive/20261011/pr2815/knowledge/d6-runtime-admission-audit.json",
+      "exact_original_blob_sha": "798d7aa0510b184a5ca6f1d027e256a538d0419b",
+      "description": "D6 машинний аудит допуску"
+    },
+    {
+      "pr": 2217,
+      "source_commit": "69181ec05fa484ef37383e2b2e5e603898b87d39",
+      "source_path": "docs/research/2214-domain-width-pareto.uk.md",
+      "archived_path": "research/domain-archive/20261011/pr2217/docs/research/2214-domain-width-pareto.uk.md",
+      "exact_original_blob_sha": "4f6a941616d6e44f9fc9abd9155d3e5da9743220",
+      "description": "порівняння вартості D4/D5"
+    },
+    {
+      "pr": 3245,
+      "source_commit": "9a4b5d96b58226e65ea81bb7519cc555f685bbd1",
+      "source_path": "knowledge/domain-surface-registry.lisp",
+      "archived_path": "research/domain-archive/20261011/pr3245/knowledge/domain-surface-registry.lisp.source.txt",
+      "exact_original_blob_sha": "114b35e7ad36203cd000806f1abd59dcf93ddf35",
+      "description": "D3 українсько-санскритські поверхні, історичне"
+    }
+  ],
+  "policy": "no active Rust/runtime/Lisp imports; do not ratify or change D1-D10; selectively promote only after independent source+oracle and CI"
+}
