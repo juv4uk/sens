@@ -14,6 +14,34 @@ fn session() -> Session {
 }
 
 #[test]
+fn source_cutover_blocks_old_d6_let_and_unadmitted_d9_map_heads() {
+    for (path, source, expected_macro_count) in [
+        ("lib/persistent-map.lisp", include_str!("../../../lib/persistent-map.lisp"), 2),
+        ("lib/content-store.lisp", include_str!("../../../lib/content-store.lisp"), 0),
+        ("lib/lisp-fs.lisp", include_str!("../../../lib/lisp-fs.lisp"), 14),
+    ] {
+        for head in [
+            "001000",    // D6 LET: replaced with the Lisp-owned ЛІХТАР macro
+            "101001100", // D9 MAP->LIST
+            "101100101", // D9 MAP-GET
+            "101100010", // D9 MAP-CONTAINS?
+            "101101110", // D9 MAP-INSERT
+            "110111011", // D9 ANSWER-NOT: D1-only cases use D4 NOT
+        ] {
+            assert!(
+                !source.contains(&format!("({head} ")),
+                "obsolete executable head {head} reappeared in {path}"
+            );
+        }
+        assert_eq!(
+            source.matches("(нехай-похідне").count(),
+            expected_macro_count,
+            "source macro cutover drift in {path}"
+        );
+    }
+}
+
+#[test]
 fn internal_map_facade_is_not_d9_auto_dispatch() {
     let mut session = session();
     let empty = eval_program("(внутрішня-мапа-список map-empty)", &mut session)
