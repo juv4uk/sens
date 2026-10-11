@@ -52,9 +52,16 @@ class D6ParityDualityCurrentAuthorityTests(unittest.TestCase):
             self.assertEqual(result.returncode, 0, msg=result.stderr)
             relation = json.loads((out / "relation.json").read_text(encoding="utf-8"))
             self.assertEqual(relation["schema"], "d6-parity-duality/v2")
-            self.assertEqual(relation["resident_projection"]["EVENP"]["current_bits"], "010000")
-            self.assertEqual(relation["resident_projection"]["ODDP"]["current_bits"], "010001")
-            self.assertEqual(relation["status"]["semantic_relation"], "BOUNDED-CONFIRMED-EXACT-INTEGER")
+            self.assertEqual(
+                relation["resident_projection"]["EVENP"]["current_bits"], "010000"
+            )
+            self.assertEqual(
+                relation["resident_projection"]["ODDP"]["current_bits"], "010001"
+            )
+            self.assertEqual(
+                relation["status"]["semantic_relation"],
+                "BOUNDED-CONFIRMED-EXACT-INTEGER",
+            )
             self.assertEqual(relation["status"]["geometry"], "NEIGHBORHOOD-CANDIDATE")
             self.assertNotIn("sr-qcstbceparwp", result.stdout)
             self.assertNotIn("sr-vnrkjfutjtyh", result.stdout)
