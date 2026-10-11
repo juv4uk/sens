@@ -1,0 +1,5037 @@
+{
+  "schema": "d10-historical-lisp-branch-evidence-intake/v1",
+  "date": "2026-10-11",
+  "status": "RESEARCH-PENDING-DEDUP-NO-CANONICAL-SELECTION",
+  "authority": "Owner directed historical Lisp branch research intake; no ratification; main only; no branch creation",
+  "baseline": {
+    "canonical_path": "knowledge/d10-v5-semantic-inventory.json",
+    "canonical_blob": "c8a23d0db0eebca0c8d780cc93bc1fda78425c44",
+    "selected_canonical": 715,
+    "ratified": 0,
+    "capacity": 1024,
+    "prior_historical_queue": {
+      "path": "knowledge/d10-historical-candidate-coordinate-queue-v1.json",
+      "blob": "131369263ac37c27798bb3c95521eb99e52b8f10",
+      "count": 80
+    },
+    "prior_name_queue": {
+      "path": "knowledge/d10-provisional-candidate-coordinate-queue-v1.json",
+      "blob": "2c5391d4c8c64e297994387e0ded47b7e65e0e71",
+      "count": 96
+    },
+    "foundation_blob": "09d1d71c39d1484dfd005a5068dbb18b76f0f0d4"
+  },
+  "source_dossiers": [
+    {
+      "path": "knowledge/d10-r6rs-hashtable-hygiene-audit-v1.json",
+      "git_blob": "c6af11760a10a5944d9df286c52eb84e18bd3c96",
+      "sections": [
+        "rows"
+      ]
+    },
+    {
+      "path": "knowledge/d10-r7rs-primary-manual-slice-v1.json",
+      "git_blob": "891728c08c7df93e84c75b74585f9fc1a438a3c2",
+      "sections": [
+        "rows"
+      ]
+    },
+    {
+      "path": "knowledge/d10-mop-metaobject-reader-census-20261009.json",
+      "git_blob": "a830d9b2e29293ebc3f95ba2c905b420c1a03368",
+      "sections": [
+        "entries"
+      ]
+    },
+    {
+      "path": "knowledge/d10-clhs-streams-census-20261009.json",
+      "git_blob": "4c39efaf558dd654272a690e6a01c0ae1c1b262f",
+      "sections": [
+        "rows",
+        "root_reviews"
+      ]
+    },
+    {
+      "path": "knowledge/d10-clhs-pathnames-census-20261009.json",
+      "git_blob": "f32d199c1325e7daebcd7598c5121b23312bfd57",
+      "sections": [
+        "roles",
+        "deep_review"
+      ]
+    },
+    {
+      "path": "knowledge/d10-historical-coverage-gap-audit-v1.json",
+      "git_blob": "bff3156b89c6c0e6e69dd8d3a4e99c16c4c2e35b",
+      "sections": [
+        "exact_name_absent_research"
+      ]
+    },
+    {
+      "path": "knowledge/d10-historical-clos-interlisp-residual-review-v1.json",
+      "git_blob": "df8ed73011df39f9ec689046ce6936cc00892215",
+      "sections": [
+        "rows"
+      ]
+    },
+    {
+      "path": "knowledge/d10-flavors-restarts-research-v1.json",
+      "git_blob": "1cbeac30ba5227a547ebf0f64de8ec4209260684",
+      "sections": [
+        "rows"
+      ]
+    },
+    {
+      "path": "knowledge/d10-historical-maclisp-v2.json",
+      "git_blob": "912e2f6f5d379f4734a1d1746c6bf9db67b6af47",
+      "sections": [
+        "selected",
+        "excluded_or_held"
+      ]
+    },
+    {
+      "path": "knowledge/d10-crossrepo-early-lisp-v1.json",
+      "git_blob": "4523aad78809da4da9ce37408a676e352b1ec508",
+      "sections": [
+        "selected_rows",
+        "reviewed_nonselect"
+      ]
+    },
+    {
+      "path": "knowledge/d10-interlisp-psl-history-harvest-v1.json",
+      "git_blob": "c862fc5d5fe45a0a01eb0115ec9f8e9b2553817d",
+      "sections": [
+        "rows"
+      ]
+    },
+    {
+      "path": "knowledge/d10-psl-interlisp-lispm-unmerged-residual-v1.json",
+      "git_blob": "f5438abf3460fa7caac14a30edf511f907a5be44",
+      "sections": [
+        "proposals"
+      ]
+    },
+    {
+      "path": "knowledge/d10-r6rs-copy-mutable-oracle-v1.json",
+      "git_blob": "99d3e1ba5f381df356fd0b335dfbf75c5027877d",
+      "sections": [
+        "rows"
+      ]
+    },
+    {
+      "path": "knowledge/d10-clos-instance-lifecycle-residual-v1.json",
+      "git_blob": "3c6e85d94e78cdd5fe9b9b645095b48335f768e5",
+      "sections": [
+        "rows"
+      ]
+    }
+  ],
+  "accounting": {
+    "donor_records": 273,
+    "unique_donor_names": 256,
+    "already_canonical": 47,
+    "lower_ratified": 9,
+    "already_queued": 38,
+    "new_historical_names": 162,
+    "provisional_research_addresses": 25,
+    "not_allocated_pending_semantic_proof": 137,
+    "reserved_prior": 176,
+    "still_unreserved_coordinates": 108,
+    "excluded_total": 94
+  },
+  "allocation_rule": "Research-only temporary addresses from lowest free 10-bit words after canonical 715 and two earlier noncanonical queues, only with concrete behavioral law + positive witness + falsifier and without obvious D2/host/derived flag. NO canonical residency. Reservations may be changed by future semantic adjudication.",
+  "exclusion_rule": "Exact selected D10, exact owner-ratified D1-D9 names, and already indexed historical/name queues are not re-added. Semantic equivalence still requires peer review.",
+  "new_candidates": [
+    {
+      "semantic_name": "MAKE-EQ-HASHTABLE",
+      "review_class": "BEHAVIOR-SPECIFIED-RESEARCH",
+      "previous_source_review": "HOLD-RESEARCH-NO-ADMISSION",
+      "observable_law": "новий змінюваний словник з тотожністю ключів eq?",
+      "positive_witnesses": [
+        "два різні, але структурно рівні об'єкти не обов'язково один ключ"
+      ],
+      "falsifier": "словник тихцем порівнює структурною рівністю",
+      "provenance": [
+        {
+          "path": "knowledge/d10-r6rs-hashtable-hygiene-audit-v1.json",
+          "git_blob": "c6af11760a10a5944d9df286c52eb84e18bd3c96",
+          "field": "rows",
+          "record_id": "R6RS-01",
+          "original_spelling": "MAKE-EQ-HASHTABLE",
+          "primary_url": "https://r6rs.org/final/html/r6rs-lib/r6rs-lib-Z-H-14.html",
+          "locator": "13.1",
+          "review_status": "HOLD-RESEARCH-NO-ADMISSION"
+        }
+      ],
+      "provisional_coordinate": "1101111011",
+      "coordinate_basis": "NONCANONICAL-HISTORICAL-EVIDENCE-RESEARCH-RESERVATION",
+      "selected_in_canonical_d10": false,
+      "ratified_resident": false,
+      "physical_t5_authorized": false
+    },
+    {
+      "semantic_name": "MAKE-EQV-HASHTABLE",
+      "review_class": "BEHAVIOR-SPECIFIED-RESEARCH",
+      "previous_source_review": "HOLD-RESEARCH-NO-ADMISSION",
+      "observable_law": "новий змінюваний словник з порівнянням eqv?",
+      "positive_witnesses": [
+        "ключі з різною числовою репрезентацією перевіряти за eqv?"
+      ],
+      "falsifier": "вибір порівняння ігнорується",
+      "provenance": [
+        {
+          "path": "knowledge/d10-r6rs-hashtable-hygiene-audit-v1.json",
+          "git_blob": "c6af11760a10a5944d9df286c52eb84e18bd3c96",
+          "field": "rows",
+          "record_id": "R6RS-02",
+          "original_spelling": "MAKE-EQV-HASHTABLE",
+          "primary_url": "https://r6rs.org/final/html/r6rs-lib/r6rs-lib-Z-H-14.html",
+          "locator": "13.1",
+          "review_status": "HOLD-RESEARCH-NO-ADMISSION"
+        }
+      ],
+      "provisional_coordinate": "1101111100",
+      "coordinate_basis": "NONCANONICAL-HISTORICAL-EVIDENCE-RESEARCH-RESERVATION",
+      "selected_in_canonical_d10": false,
+      "ratified_resident": false,
+      "physical_t5_authorized": false
+    },
+    {
+      "semantic_name": "MAKE-HASHTABLE",
+      "review_class": "BEHAVIOR-SPECIFIED-RESEARCH",
+      "previous_source_review": "HOLD-RESEARCH-NO-ADMISSION",
+      "observable_law": "створення словника із заданими чистими hash/equiv процедурами та сумісним відношенням",
+      "positive_witnesses": [
+        "еквівалентні ключі мають збігатися за хешем; однаковий ключ замінює значення"
+      ],
+      "falsifier": "несумісні hash/equiv мовчки гарантовано коректні",
+      "provenance": [
+        {
+          "path": "knowledge/d10-r6rs-hashtable-hygiene-audit-v1.json",
+          "git_blob": "c6af11760a10a5944d9df286c52eb84e18bd3c96",
+          "field": "rows",
+          "record_id": "R6RS-03",
+          "original_spelling": "MAKE-HASHTABLE",
+          "primary_url": "https://r6rs.org/final/html/r6rs-lib/r6rs-lib-Z-H-14.html",
+          "locator": "13.1",
+          "review_status": "HOLD-RESEARCH-NO-ADMISSION"
+        }
+      ],
+      "provisional_coordinate": "1101111101",
+      "coordinate_basis": "NONCANONICAL-HISTORICAL-EVIDENCE-RESEARCH-RESERVATION",
+      "selected_in_canonical_d10": false,
+      "ratified_resident": false,
+      "physical_t5_authorized": false
+    },
+    {
+      "semantic_name": "HASHTABLE-REF",
+      "review_class": "BEHAVIOR-SPECIFIED-RESEARCH",
+      "previous_source_review": "HOLD-RESEARCH-NO-ADMISSION",
+      "observable_law": "пошук ключа з явним значенням за відсутності",
+      "positive_witnesses": [
+        "пошук відсутнього ключа повертає саме переданий default"
+      ],
+      "falsifier": "втрата відмінності між відсутнім та значенням #f",
+      "provenance": [
+        {
+          "path": "knowledge/d10-r6rs-hashtable-hygiene-audit-v1.json",
+          "git_blob": "c6af11760a10a5944d9df286c52eb84e18bd3c96",
+          "field": "rows",
+          "record_id": "R6RS-04",
+          "original_spelling": "HASHTABLE-REF",
+          "primary_url": "https://r6rs.org/final/html/r6rs-lib/r6rs-lib-Z-H-14.html",
+          "locator": "13.2",
+          "review_status": "HOLD-RESEARCH-NO-ADMISSION"
+        }
+      ],
+      "provisional_coordinate": "1101111110",
+      "coordinate_basis": "NONCANONICAL-HISTORICAL-EVIDENCE-RESEARCH-RESERVATION",
+      "selected_in_canonical_d10": false,
+      "ratified_resident": false,
+      "physical_t5_authorized": false
+    },
+    {
+      "semantic_name": "HASHTABLE-UPDATE!",
+      "review_class": "BEHAVIOR-SPECIFIED-RESEARCH",
+      "previous_source_review": "HOLD-RESEARCH-NO-ADMISSION",
+      "observable_law": "оновити асоціацію результатом однієї процедури від поточного значення або default",
+      "positive_witnesses": [
+        "відсутній ключ створює ключ з proc(default)"
+      ],
+      "falsifier": "процедуру викликають на помилковому нульовому значенні",
+      "provenance": [
+        {
+          "path": "knowledge/d10-r6rs-hashtable-hygiene-audit-v1.json",
+          "git_blob": "c6af11760a10a5944d9df286c52eb84e18bd3c96",
+          "field": "rows",
+          "record_id": "R6RS-05",
+          "original_spelling": "HASHTABLE-UPDATE!",
+          "primary_url": "https://r6rs.org/final/html/r6rs-lib/r6rs-lib-Z-H-14.html",
+          "locator": "13.2",
+          "review_status": "HOLD-RESEARCH-NO-ADMISSION"
+        }
+      ],
+      "provisional_coordinate": "1101111111",
+      "coordinate_basis": "NONCANONICAL-HISTORICAL-EVIDENCE-RESEARCH-RESERVATION",
+      "selected_in_canonical_d10": false,
+      "ratified_resident": false,
+      "physical_t5_authorized": false
+    },
+    {
+      "semantic_name": "HASHTABLE-KEYS",
+      "review_class": "BEHAVIOR-SPECIFIED-RESEARCH",
+      "previous_source_review": "HOLD-RESEARCH-NO-ADMISSION",
+      "observable_law": "повернути вектор усіх ключів, порядок стандартом не задано",
+      "positive_witnesses": [
+        "кількість і множина ключів збігаються зі словником"
+      ],
+      "falsifier": "сортування нав'язується як обов'язкове спостереження",
+      "provenance": [
+        {
+          "path": "knowledge/d10-r6rs-hashtable-hygiene-audit-v1.json",
+          "git_blob": "c6af11760a10a5944d9df286c52eb84e18bd3c96",
+          "field": "rows",
+          "record_id": "R6RS-07",
+          "original_spelling": "HASHTABLE-KEYS",
+          "primary_url": "https://r6rs.org/final/html/r6rs-lib/r6rs-lib-Z-H-14.html",
+          "locator": "13.2",
+          "review_status": "HOLD-RESEARCH-NO-ADMISSION"
+        }
+      ],
+      "provisional_coordinate": "1110000000",
+      "coordinate_basis": "NONCANONICAL-HISTORICAL-EVIDENCE-RESEARCH-RESERVATION",
+      "selected_in_canonical_d10": false,
+      "ratified_resident": false,
+      "physical_t5_authorized": false
+    },
+    {
+      "semantic_name": "HASHTABLE-HASH-FUNCTION",
+      "review_class": "BEHAVIOR-SPECIFIED-RESEARCH",
+      "previous_source_review": "HOLD-RESEARCH-NO-ADMISSION",
+      "observable_law": "повернути hash-процедуру словника, але #f для eq?/eqv? конструкторів",
+      "positive_witnesses": [
+        "eq-hashtable має результат #f"
+      ],
+      "falsifier": "повернута довільна внутрішня функція для eq-hashtable",
+      "provenance": [
+        {
+          "path": "knowledge/d10-r6rs-hashtable-hygiene-audit-v1.json",
+          "git_blob": "c6af11760a10a5944d9df286c52eb84e18bd3c96",
+          "field": "rows",
+          "record_id": "R6RS-09",
+          "original_spelling": "HASHTABLE-HASH-FUNCTION",
+          "primary_url": "https://r6rs.org/final/html/r6rs-lib/r6rs-lib-Z-H-14.html",
+          "locator": "13.3",
+          "review_status": "HOLD-RESEARCH-NO-ADMISSION"
+        }
+      ],
+      "provisional_coordinate": "1110000001",
+      "coordinate_basis": "NONCANONICAL-HISTORICAL-EVIDENCE-RESEARCH-RESERVATION",
+      "selected_in_canonical_d10": false,
+      "ratified_resident": false,
+      "physical_t5_authorized": false
+    },
+    {
+      "semantic_name": "HASHTABLE-EQUIVALENCE-FUNCTION",
+      "review_class": "BEHAVIOR-SPECIFIED-RESEARCH",
+      "previous_source_review": "HOLD-RESEARCH-NO-ADMISSION",
+      "observable_law": "повернути функцію еквівалентності, що визначає семантику ключів",
+      "positive_witnesses": [
+        "eq-словник повертає eq?"
+      ],
+      "falsifier": "повернута функція порівняння має інше відношення",
+      "provenance": [
+        {
+          "path": "knowledge/d10-r6rs-hashtable-hygiene-audit-v1.json",
+          "git_blob": "c6af11760a10a5944d9df286c52eb84e18bd3c96",
+          "field": "rows",
+          "record_id": "R6RS-10",
+          "original_spelling": "HASHTABLE-EQUIVALENCE-FUNCTION",
+          "primary_url": "https://r6rs.org/final/html/r6rs-lib/r6rs-lib-Z-H-14.html",
+          "locator": "13.3",
+          "review_status": "HOLD-RESEARCH-NO-ADMISSION"
+        }
+      ],
+      "provisional_coordinate": "1110000010",
+      "coordinate_basis": "NONCANONICAL-HISTORICAL-EVIDENCE-RESEARCH-RESERVATION",
+      "selected_in_canonical_d10": false,
+      "ratified_resident": false,
+      "physical_t5_authorized": false
+    },
+    {
+      "semantic_name": "EQUAL-HASH",
+      "review_class": "BEHAVIOR-SPECIFIED-RESEARCH",
+      "previous_source_review": "HOLD-RESEARCH-NO-ADMISSION",
+      "observable_law": "структурний хеш, сумісний з equal?, мусить завершуватися і для циклів",
+      "positive_witnesses": [
+        "два equal? циклічні об'єкти мають сумісний hash і обчислення завершується"
+      ],
+      "falsifier": "нескінченна рекурсія для циклічної структури",
+      "provenance": [
+        {
+          "path": "knowledge/d10-r6rs-hashtable-hygiene-audit-v1.json",
+          "git_blob": "c6af11760a10a5944d9df286c52eb84e18bd3c96",
+          "field": "rows",
+          "record_id": "R6RS-12",
+          "original_spelling": "EQUAL-HASH",
+          "primary_url": "https://r6rs.org/final/html/r6rs-lib/r6rs-lib-Z-H-14.html",
+          "locator": "13.4",
+          "review_status": "HOLD-RESEARCH-NO-ADMISSION"
+        }
+      ],
+      "provisional_coordinate": "1110000011",
+      "coordinate_basis": "NONCANONICAL-HISTORICAL-EVIDENCE-RESEARCH-RESERVATION",
+      "selected_in_canonical_d10": false,
+      "ratified_resident": false,
+      "physical_t5_authorized": false
+    },
+    {
+      "semantic_name": "STRING-CI-HASH",
+      "review_class": "BEHAVIOR-SPECIFIED-RESEARCH",
+      "previous_source_review": "HOLD-RESEARCH-NO-ADMISSION",
+      "observable_law": "хеш рядка без врахування регістру, сумісний зі string-ci=?",
+      "positive_witnesses": [
+        "ключі, рівні за string-ci=?, мають рівні хеші"
+      ],
+      "falsifier": "рядки, що відрізняються регістром, гарантовано мають різні хеші",
+      "provenance": [
+        {
+          "path": "knowledge/d10-r6rs-hashtable-hygiene-audit-v1.json",
+          "git_blob": "c6af11760a10a5944d9df286c52eb84e18bd3c96",
+          "field": "rows",
+          "record_id": "R6RS-13",
+          "original_spelling": "STRING-CI-HASH",
+          "primary_url": "https://r6rs.org/final/html/r6rs-lib/r6rs-lib-Z-H-14.html",
+          "locator": "13.4",
+          "review_status": "HOLD-RESEARCH-NO-ADMISSION"
+        }
+      ],
+      "provisional_coordinate": "1110000100",
+      "coordinate_basis": "NONCANONICAL-HISTORICAL-EVIDENCE-RESEARCH-RESERVATION",
+      "selected_in_canonical_d10": false,
+      "ratified_resident": false,
+      "physical_t5_authorized": false
+    },
+    {
+      "semantic_name": "IDENTIFIER?",
+      "review_class": "BEHAVIOR-SPECIFIED-RESEARCH",
+      "previous_source_review": "HOLD-RESEARCH-NO-ADMISSION",
+      "observable_law": "предикат синтаксичного об'єкта, що представляє ідентифікатор, не просто символ",
+      "positive_witnesses": [
+        "звичайний datum символ не проходить перевірку identifier?"
+      ],
+      "falsifier": "довільний символ вважається контекстним identifier",
+      "provenance": [
+        {
+          "path": "knowledge/d10-r6rs-hashtable-hygiene-audit-v1.json",
+          "git_blob": "c6af11760a10a5944d9df286c52eb84e18bd3c96",
+          "field": "rows",
+          "record_id": "R6RS-14",
+          "original_spelling": "IDENTIFIER?",
+          "primary_url": "https://r6rs.org/final/html/r6rs-lib/r6rs-lib-Z-H-13.html",
+          "locator": "12.5",
+          "review_status": "HOLD-RESEARCH-NO-ADMISSION"
+        }
+      ],
+      "provisional_coordinate": "1110000101",
+      "coordinate_basis": "NONCANONICAL-HISTORICAL-EVIDENCE-RESEARCH-RESERVATION",
+      "selected_in_canonical_d10": false,
+      "ratified_resident": false,
+      "physical_t5_authorized": false
+    },
+    {
+      "semantic_name": "BOUND-IDENTIFIER=?",
+      "review_class": "BEHAVIOR-SPECIFIED-RESEARCH",
+      "previous_source_review": "HOLD-RESEARCH-NO-ADMISSION",
+      "observable_law": "рівність зв'язаних ідентифікаторів за іменем і контекстними мітками",
+      "positive_witnesses": [
+        "однаковий текст, але незалежно згенеровані мітки не дають bound-identifier=?"
+      ],
+      "falsifier": "порівняння лише по рядку імені",
+      "provenance": [
+        {
+          "path": "knowledge/d10-r6rs-hashtable-hygiene-audit-v1.json",
+          "git_blob": "c6af11760a10a5944d9df286c52eb84e18bd3c96",
+          "field": "rows",
+          "record_id": "R6RS-15",
+          "original_spelling": "BOUND-IDENTIFIER=?",
+          "primary_url": "https://r6rs.org/final/html/r6rs-lib/r6rs-lib-Z-H-13.html",
+          "locator": "12.5",
+          "review_status": "HOLD-RESEARCH-NO-ADMISSION"
+        }
+      ],
+      "provisional_coordinate": "1110000110",
+      "coordinate_basis": "NONCANONICAL-HISTORICAL-EVIDENCE-RESEARCH-RESERVATION",
+      "selected_in_canonical_d10": false,
+      "ratified_resident": false,
+      "physical_t5_authorized": false
+    },
+    {
+      "semantic_name": "FREE-IDENTIFIER=?",
+      "review_class": "BEHAVIOR-SPECIFIED-RESEARCH",
+      "previous_source_review": "HOLD-RESEARCH-NO-ADMISSION",
+      "observable_law": "рівність ідентифікаторів як лексичних посилань на ту саму прив'язку",
+      "positive_witnesses": [
+        "різні контекстні записи з тією самою лексичною прив'язкою еквівалентні"
+      ],
+      "falsifier": "порівняння тільки поверхневого імені",
+      "provenance": [
+        {
+          "path": "knowledge/d10-r6rs-hashtable-hygiene-audit-v1.json",
+          "git_blob": "c6af11760a10a5944d9df286c52eb84e18bd3c96",
+          "field": "rows",
+          "record_id": "R6RS-16",
+          "original_spelling": "FREE-IDENTIFIER=?",
+          "primary_url": "https://r6rs.org/final/html/r6rs-lib/r6rs-lib-Z-H-13.html",
+          "locator": "12.5",
+          "review_status": "HOLD-RESEARCH-NO-ADMISSION"
+        }
+      ],
+      "provisional_coordinate": "1110000111",
+      "coordinate_basis": "NONCANONICAL-HISTORICAL-EVIDENCE-RESEARCH-RESERVATION",
+      "selected_in_canonical_d10": false,
+      "ratified_resident": false,
+      "physical_t5_authorized": false
+    },
+    {
+      "semantic_name": "SYNTAX->DATUM",
+      "review_class": "BEHAVIOR-SPECIFIED-RESEARCH",
+      "previous_source_review": "HOLD-RESEARCH-NO-ADMISSION",
+      "observable_law": "зняття синтаксичного контексту із синтаксичного об'єкта до звичайних даних",
+      "positive_witnesses": [
+        "після конверсії ідентифікатор стає символом без marks/lexical context"
+      ],
+      "falsifier": "контекстні мітки потай залишаються семантично активними",
+      "provenance": [
+        {
+          "path": "knowledge/d10-r6rs-hashtable-hygiene-audit-v1.json",
+          "git_blob": "c6af11760a10a5944d9df286c52eb84e18bd3c96",
+          "field": "rows",
+          "record_id": "R6RS-17",
+          "original_spelling": "SYNTAX->DATUM",
+          "primary_url": "https://r6rs.org/final/html/r6rs-lib/r6rs-lib-Z-H-13.html",
+          "locator": "12.6",
+          "review_status": "HOLD-RESEARCH-NO-ADMISSION"
+        }
+      ],
+      "provisional_coordinate": "1110001000",
+      "coordinate_basis": "NONCANONICAL-HISTORICAL-EVIDENCE-RESEARCH-RESERVATION",
+      "selected_in_canonical_d10": false,
+      "ratified_resident": false,
+      "physical_t5_authorized": false
+    },
+    {
+      "semantic_name": "DATUM->SYNTAX",
+      "review_class": "BEHAVIOR-SPECIFIED-RESEARCH",
+      "previous_source_review": "HOLD-RESEARCH-NO-ADMISSION",
+      "observable_law": "перенесення лексичного контексту шаблонного ідентифікатора на datum",
+      "positive_witnesses": [
+        "однаковий datum з різними template-id має різну лексичну прив'язку"
+      ],
+      "falsifier": "контекст з template-id губиться та спричиняє небажане захоплення",
+      "provenance": [
+        {
+          "path": "knowledge/d10-r6rs-hashtable-hygiene-audit-v1.json",
+          "git_blob": "c6af11760a10a5944d9df286c52eb84e18bd3c96",
+          "field": "rows",
+          "record_id": "R6RS-18",
+          "original_spelling": "DATUM->SYNTAX",
+          "primary_url": "https://r6rs.org/final/html/r6rs-lib/r6rs-lib-Z-H-13.html",
+          "locator": "12.6",
+          "review_status": "HOLD-RESEARCH-NO-ADMISSION"
+        }
+      ],
+      "provisional_coordinate": "1110001001",
+      "coordinate_basis": "NONCANONICAL-HISTORICAL-EVIDENCE-RESEARCH-RESERVATION",
+      "selected_in_canonical_d10": false,
+      "ratified_resident": false,
+      "physical_t5_authorized": false
+    },
+    {
+      "semantic_name": "MAKE-VARIABLE-TRANSFORMER",
+      "review_class": "BEHAVIOR-SPECIFIED-RESEARCH",
+      "previous_source_review": "HOLD-RESEARCH-NO-ADMISSION",
+      "observable_law": "трансформер, що перехоплює також set! позицію ідентифікатора",
+      "positive_witnesses": [
+        "ліва частина set! переписується трансформером, а не відхиляється"
+      ],
+      "falsifier": "звичайний transformer помилково отримує право переписати set!",
+      "provenance": [
+        {
+          "path": "knowledge/d10-r6rs-hashtable-hygiene-audit-v1.json",
+          "git_blob": "c6af11760a10a5944d9df286c52eb84e18bd3c96",
+          "field": "rows",
+          "record_id": "R6RS-19",
+          "original_spelling": "MAKE-VARIABLE-TRANSFORMER",
+          "primary_url": "https://r6rs.org/final/html/r6rs-lib/r6rs-lib-Z-H-13.html",
+          "locator": "12.3",
+          "review_status": "HOLD-RESEARCH-NO-ADMISSION"
+        }
+      ],
+      "provisional_coordinate": "1110001010",
+      "coordinate_basis": "NONCANONICAL-HISTORICAL-EVIDENCE-RESEARCH-RESERVATION",
+      "selected_in_canonical_d10": false,
+      "ratified_resident": false,
+      "physical_t5_authorized": false
+    },
+    {
+      "semantic_name": "DELAY-FORCE",
+      "review_class": "SOURCE-NAME-OR-HOLD",
+      "previous_source_review": "HOLD-D2-DERIVABILITY",
+      "observable_law": "Описує ліниве обчислення ланцюга promise через хвостовий FORCE без необмеженого накопичення відкладених примусових викликів.",
+      "positive_witnesses": [
+        "Нескінченний фільтр потоку проходить довгий ланцюг відкладених обіцянок без наростання незавершених FORCE-фреймів."
+      ],
+      "falsifier": "Реалізація нарощує лінійний стек/ланцюг відкладених примусових викликів або обчислює тіло завчасно.",
+      "provenance": [
+        {
+          "path": "knowledge/d10-r7rs-primary-manual-slice-v1.json",
+          "git_blob": "891728c08c7df93e84c75b74585f9fc1a438a3c2",
+          "field": "rows",
+          "record_id": "R7RS-HIST-001",
+          "original_spelling": "DELAY-FORCE",
+          "primary_url": "https://standards.scheme.org/r7rs-html5/index.html",
+          "locator": "4.2.5",
+          "review_status": "HOLD-D2-DERIVABILITY"
+        }
+      ],
+      "provisional_coordinate": null,
+      "coordinate_basis": "NOT-ALLOCATED-PENDING-DEDUP",
+      "selected_in_canonical_d10": false,
+      "ratified_resident": false,
+      "physical_t5_authorized": false
+    },
+    {
+      "semantic_name": "MAKE-PROMISE",
+      "review_class": "SOURCE-NAME-OR-HOLD",
+      "previous_source_review": "HOLD-DERIVABILITY",
+      "observable_law": "Перетворює вже обчислене значення на готову обіцянку; якщо аргумент уже promise, повертає його без створення іншого.",
+      "positive_witnesses": [
+        "make-promise на тому самому promise повертає ту саму ідентичність; force готового значення не виконує його вдруге."
+      ],
+      "falsifier": "Повторно загортає переданий promise або повторно обчислює передане готове значення.",
+      "provenance": [
+        {
+          "path": "knowledge/d10-r7rs-primary-manual-slice-v1.json",
+          "git_blob": "891728c08c7df93e84c75b74585f9fc1a438a3c2",
+          "field": "rows",
+          "record_id": "R7RS-HIST-002",
+          "original_spelling": "MAKE-PROMISE",
+          "primary_url": "https://standards.scheme.org/r7rs-html5/index.html",
+          "locator": "4.2.5",
+          "review_status": "HOLD-DERIVABILITY"
+        }
+      ],
+      "provisional_coordinate": null,
+      "coordinate_basis": "NOT-ALLOCATED-PENDING-DEDUP",
+      "selected_in_canonical_d10": false,
+      "ratified_resident": false,
+      "physical_t5_authorized": false
+    },
+    {
+      "semantic_name": "PROMISE?",
+      "review_class": "SOURCE-NAME-OR-HOLD",
+      "previous_source_review": "HOLD-TYPE-DERIVED",
+      "observable_law": "Розпізнає обіцянку, але стандарт допускає реалізаційні варіації щодо спостережуваної відмінності обіцянки від значення.",
+      "positive_witnesses": [
+        "Порівняти promise? на delay-value, forced promise і plain datum у конкретному стандартизованому профілі."
+      ],
+      "falsifier": "Вимагати безумовної об'єктної ідентичності promise/вмісту, яку стандарт допускає не розрізняти.",
+      "provenance": [
+        {
+          "path": "knowledge/d10-r7rs-primary-manual-slice-v1.json",
+          "git_blob": "891728c08c7df93e84c75b74585f9fc1a438a3c2",
+          "field": "rows",
+          "record_id": "R7RS-HIST-003",
+          "original_spelling": "PROMISE?",
+          "primary_url": "https://standards.scheme.org/r7rs-html5/index.html",
+          "locator": "4.2.5",
+          "review_status": "HOLD-TYPE-DERIVED"
+        }
+      ],
+      "provisional_coordinate": null,
+      "coordinate_basis": "NOT-ALLOCATED-PENDING-DEDUP",
+      "selected_in_canonical_d10": false,
+      "ratified_resident": false,
+      "physical_t5_authorized": false
+    },
+    {
+      "semantic_name": "CASE-LAMBDA",
+      "review_class": "SOURCE-NAME-OR-HOLD",
+      "previous_source_review": "HOLD-D2-SYNTAX",
+      "observable_law": "Перший підпис аргументів (formals), що приймає арність виклику, визначає гілку процедури; lexical scope.",
+      "positive_witnesses": [
+        "Визначити дві гілки 1 і 2 аргументи й перевірити відповідний результат; коли перетинаються — вибір першої."
+      ],
+      "falsifier": "Виклик із жодною відповідною арністю або вибір пізнішої гілки за наявності ранішої відповідної.",
+      "provenance": [
+        {
+          "path": "knowledge/d10-r7rs-primary-manual-slice-v1.json",
+          "git_blob": "891728c08c7df93e84c75b74585f9fc1a438a3c2",
+          "field": "rows",
+          "record_id": "R7RS-HIST-004",
+          "original_spelling": "CASE-LAMBDA",
+          "primary_url": "https://standards.scheme.org/r7rs-html5/index.html",
+          "locator": "4.2.9",
+          "review_status": "HOLD-D2-SYNTAX"
+        }
+      ],
+      "provisional_coordinate": null,
+      "coordinate_basis": "NOT-ALLOCATED-PENDING-DEDUP",
+      "selected_in_canonical_d10": false,
+      "ratified_resident": false,
+      "physical_t5_authorized": false
+    },
+    {
+      "semantic_name": "DEFINE-RECORD-TYPE",
+      "review_class": "SOURCE-NAME-OR-HOLD",
+      "previous_source_review": "HOLD-D2-SYNTAX",
+      "observable_law": "Кожне визначення породжує новий тип навіть при однаковому імені/формі, разом із конструктором, предикатом, accessors і mutators.",
+      "positive_witnesses": [
+        "Два незалежні визначення із однаковими полями розрізняють типи та їхні предикати."
+      ],
+      "falsifier": "Зливати нові типи лише за схожістю назви/полів або не перевіряти дублікат поля.",
+      "provenance": [
+        {
+          "path": "knowledge/d10-r7rs-primary-manual-slice-v1.json",
+          "git_blob": "891728c08c7df93e84c75b74585f9fc1a438a3c2",
+          "field": "rows",
+          "record_id": "R7RS-HIST-005",
+          "original_spelling": "DEFINE-RECORD-TYPE",
+          "primary_url": "https://standards.scheme.org/r7rs-html5/index.html",
+          "locator": "5.5",
+          "review_status": "HOLD-D2-SYNTAX"
+        }
+      ],
+      "provisional_coordinate": null,
+      "coordinate_basis": "NOT-ALLOCATED-PENDING-DEDUP",
+      "selected_in_canonical_d10": false,
+      "ratified_resident": false,
+      "physical_t5_authorized": false
+    },
+    {
+      "semantic_name": "RAISE-CONTINUABLE",
+      "review_class": "SOURCE-NAME-OR-HOLD",
+      "previous_source_review": "HOLD-D2-CONTROL",
+      "observable_law": "Динамічний обробник отримує condition; якщо повертає значення, обчислення триває та ці значення стають результатом виклику.",
+      "positive_witnesses": [
+        "Обробник повертає 42, навколишнє обчислення додає 23 => 65."
+      ],
+      "falsifier": "Після нормального повернення обробника операція безпідставно кидає вторинний виняток як для non-continuable raise.",
+      "provenance": [
+        {
+          "path": "knowledge/d10-r7rs-primary-manual-slice-v1.json",
+          "git_blob": "891728c08c7df93e84c75b74585f9fc1a438a3c2",
+          "field": "rows",
+          "record_id": "R7RS-HIST-006",
+          "original_spelling": "RAISE-CONTINUABLE",
+          "primary_url": "https://standards.scheme.org/r7rs-html5/index.html",
+          "locator": "6.11",
+          "review_status": "HOLD-D2-CONTROL"
+        }
+      ],
+      "provisional_coordinate": null,
+      "coordinate_basis": "NOT-ALLOCATED-PENDING-DEDUP",
+      "selected_in_canonical_d10": false,
+      "ratified_resident": false,
+      "physical_t5_authorized": false
+    },
+    {
+      "semantic_name": "BYTEVECTOR-COPY!",
+      "review_class": "SOURCE-NAME-OR-HOLD",
+      "previous_source_review": "HOLD-EFFECT-DERIVABILITY",
+      "observable_law": "Мутує цільовий байтовий вектор, копіюючи діапазон; якщо джерело і призначення перекриваються, результат як при тимчасовій копії.",
+      "positive_witnesses": [
+        "У [1,2,3,4] self-copy source [0,3) to at 1 gives [1,1,2,3]."
+      ],
+      "falsifier": "Перекриття читає вже перезаписаний байт і дає [1,1,1,1] або втрачає елементи.",
+      "provenance": [
+        {
+          "path": "knowledge/d10-r7rs-primary-manual-slice-v1.json",
+          "git_blob": "891728c08c7df93e84c75b74585f9fc1a438a3c2",
+          "field": "rows",
+          "record_id": "R7RS-HIST-007",
+          "original_spelling": "BYTEVECTOR-COPY!",
+          "primary_url": "https://standards.scheme.org/r7rs-html5/index.html",
+          "locator": "6.9",
+          "review_status": "HOLD-EFFECT-DERIVABILITY"
+        }
+      ],
+      "provisional_coordinate": null,
+      "coordinate_basis": "NOT-ALLOCATED-PENDING-DEDUP",
+      "selected_in_canonical_d10": false,
+      "ratified_resident": false,
+      "physical_t5_authorized": false
+    },
+    {
+      "semantic_name": "CALL-WITH-PORT",
+      "review_class": "BEHAVIOR-SPECIFIED-RESEARCH",
+      "previous_source_review": "HOLD-EFFECT-CONTINUATION",
+      "observable_law": "Нормальне повернення процедури закриває port; лише nonlocal escape не дозволяє безумовно закривати port, якщо захоплене продовження ще може відновити роботу.",
+      "positive_witnesses": [
+        "Звичайне повернення закриває port рівно один раз та зберігає повернені значення."
+      ],
+      "falsifier": "Код назавжди закриває port на першому escape, а дозволене повернення у захоплене продовження потребує той самий port.",
+      "provenance": [
+        {
+          "path": "knowledge/d10-r7rs-primary-manual-slice-v1.json",
+          "git_blob": "891728c08c7df93e84c75b74585f9fc1a438a3c2",
+          "field": "rows",
+          "record_id": "R7RS-HIST-008",
+          "original_spelling": "CALL-WITH-PORT",
+          "primary_url": "https://standards.scheme.org/r7rs-html5/index.html",
+          "locator": "6.13.1",
+          "review_status": "HOLD-EFFECT-CONTINUATION"
+        }
+      ],
+      "provisional_coordinate": "1110001011",
+      "coordinate_basis": "NONCANONICAL-HISTORICAL-EVIDENCE-RESEARCH-RESERVATION",
+      "selected_in_canonical_d10": false,
+      "ratified_resident": false,
+      "physical_t5_authorized": false
+    },
+    {
+      "semantic_name": "WITH-EXCEPTION-HANDLER",
+      "review_class": "SOURCE-NAME-OR-HOLD",
+      "previous_source_review": "HOLD-D2-CONTROL",
+      "observable_law": "Встановлює поточний обробник у динамічному середовищі лише на час thunk; вкладені/зовнішні обробники мають коректний порядок.",
+      "positive_witnesses": [
+        "Внутрішній handler отримує condition усередині свого thunk, після виходу діє зовнішній."
+      ],
+      "falsifier": "Leak handler за межі динамічної області або статичний lexical lookup замість динамічного.",
+      "provenance": [
+        {
+          "path": "knowledge/d10-r7rs-primary-manual-slice-v1.json",
+          "git_blob": "891728c08c7df93e84c75b74585f9fc1a438a3c2",
+          "field": "rows",
+          "record_id": "R7RS-HIST-009",
+          "original_spelling": "WITH-EXCEPTION-HANDLER",
+          "primary_url": "https://standards.scheme.org/r7rs-html5/index.html",
+          "locator": "6.11",
+          "review_status": "HOLD-D2-CONTROL"
+        }
+      ],
+      "provisional_coordinate": null,
+      "coordinate_basis": "NOT-ALLOCATED-PENDING-DEDUP",
+      "selected_in_canonical_d10": false,
+      "ratified_resident": false,
+      "physical_t5_authorized": false
+    },
+    {
+      "semantic_name": "DEFINE-VALUES",
+      "review_class": "SOURCE-NAME-OR-HOLD",
+      "previous_source_review": "HOLD-D2-SYNTAX",
+      "observable_law": "Зв'язує кілька імен із multiple values одного expression за formals підписом, де дублікати змінних недопустимі.",
+      "positive_witnesses": [
+        "define-values (x y) із двома значеннями створює два окремих bindings."
+      ],
+      "falsifier": "Дубль імен допускається або multiple-value arity неправильно спроєктована на одну Lisp-пару.",
+      "provenance": [
+        {
+          "path": "knowledge/d10-r7rs-primary-manual-slice-v1.json",
+          "git_blob": "891728c08c7df93e84c75b74585f9fc1a438a3c2",
+          "field": "rows",
+          "record_id": "R7RS-HIST-010",
+          "original_spelling": "DEFINE-VALUES",
+          "primary_url": "https://standards.scheme.org/r7rs-html5/index.html",
+          "locator": "5.3.3",
+          "review_status": "HOLD-D2-SYNTAX"
+        }
+      ],
+      "provisional_coordinate": null,
+      "coordinate_basis": "NOT-ALLOCATED-PENDING-DEDUP",
+      "selected_in_canonical_d10": false,
+      "ratified_resident": false,
+      "physical_t5_authorized": false
+    },
+    {
+      "semantic_name": "GUARD",
+      "review_class": "SOURCE-NAME-OR-HOLD",
+      "previous_source_review": "HOLD-D2-CONTROL",
+      "observable_law": "Забезпечує condition matching і вихід до коду обробки, не вводячи ще один незалежний домен керування.",
+      "positive_witnesses": [
+        "Підходящий guard clause обробляє condition без втрати зв'язків/контексту."
+      ],
+      "falsifier": "Гілка без збігу приховує первинну умову чи підміняє динамічний handler.",
+      "provenance": [
+        {
+          "path": "knowledge/d10-r7rs-primary-manual-slice-v1.json",
+          "git_blob": "891728c08c7df93e84c75b74585f9fc1a438a3c2",
+          "field": "rows",
+          "record_id": "R7RS-HIST-011",
+          "original_spelling": "GUARD",
+          "primary_url": "https://standards.scheme.org/r7rs-html5/index.html",
+          "locator": "4.2.7",
+          "review_status": "HOLD-D2-CONTROL"
+        }
+      ],
+      "provisional_coordinate": null,
+      "coordinate_basis": "NOT-ALLOCATED-PENDING-DEDUP",
+      "selected_in_canonical_d10": false,
+      "ratified_resident": false,
+      "physical_t5_authorized": false
+    },
+    {
+      "semantic_name": "CLASS-SLOTS",
+      "review_class": "SOURCE-NAME-OR-HOLD",
+      "previous_source_review": "HOLD-INTROSPECTION-OR-DERIVED",
+      "observable_law": "Read specified metaobject state only; distinctness from already-selected D10 and source implementation representation NOT proved.",
+      "positive_witnesses": [],
+      "falsifier": null,
+      "provenance": [
+        {
+          "path": "knowledge/d10-mop-metaobject-reader-census-20261009.json",
+          "git_blob": "a830d9b2e29293ebc3f95ba2c905b420c1a03368",
+          "field": "entries",
+          "record_id": "mop-reader-class_slots",
+          "original_spelling": "CLASS-SLOTS",
+          "primary_url": "https://clos-mop.hexstreamsoft.com/generic-functions-and-methods/",
+          "locator": null,
+          "review_status": "HOLD-INTROSPECTION-OR-DERIVED"
+        }
+      ],
+      "provisional_coordinate": null,
+      "coordinate_basis": "NOT-ALLOCATED-PENDING-DEDUP",
+      "selected_in_canonical_d10": false,
+      "ratified_resident": false,
+      "physical_t5_authorized": false
+    },
+    {
+      "semantic_name": "CLASS-DIRECT-SLOTS",
+      "review_class": "BEHAVIOR-SPECIFIED-RESEARCH",
+      "previous_source_review": "REVIEW-SEMANTIC-LAW",
+      "observable_law": "Return only class-declared direct slot-definition metaobjects; exclude inherited slot definitions even though effective CLASS-SLOTS includes them.",
+      "positive_witnesses": [
+        "Parent P owns slot a; child C declares b: direct C slot names include b but exclude inherited a.",
+        "For parent P, its direct slot definitions include a; no-value class has empty direct slot set."
+      ],
+      "falsifier": "Returning effective inherited slot list as direct class slots.",
+      "provenance": [
+        {
+          "path": "knowledge/d10-mop-metaobject-reader-census-20261009.json",
+          "git_blob": "a830d9b2e29293ebc3f95ba2c905b420c1a03368",
+          "field": "entries",
+          "record_id": "mop-reader-class_direct_slots",
+          "original_spelling": "CLASS-DIRECT-SLOTS",
+          "primary_url": "https://clos-mop.hexstreamsoft.com/generic-functions-and-methods/",
+          "locator": null,
+          "review_status": "REVIEW-SEMANTIC-LAW"
+        }
+      ],
+      "provisional_coordinate": "1110001100",
+      "coordinate_basis": "NONCANONICAL-HISTORICAL-EVIDENCE-RESEARCH-RESERVATION",
+      "selected_in_canonical_d10": false,
+      "ratified_resident": false,
+      "physical_t5_authorized": false
+    },
+    {
+      "semantic_name": "CLASS-DEFAULT-INITARGS",
+      "review_class": "SOURCE-NAME-OR-HOLD",
+      "previous_source_review": "HOLD-INTROSPECTION-OR-DERIVED",
+      "observable_law": "Read specified metaobject state only; distinctness from already-selected D10 and source implementation representation NOT proved.",
+      "positive_witnesses": [],
+      "falsifier": null,
+      "provenance": [
+        {
+          "path": "knowledge/d10-mop-metaobject-reader-census-20261009.json",
+          "git_blob": "a830d9b2e29293ebc3f95ba2c905b420c1a03368",
+          "field": "entries",
+          "record_id": "mop-reader-class_default_initargs",
+          "original_spelling": "CLASS-DEFAULT-INITARGS",
+          "primary_url": "https://clos-mop.hexstreamsoft.com/generic-functions-and-methods/",
+          "locator": null,
+          "review_status": "HOLD-INTROSPECTION-OR-DERIVED"
+        }
+      ],
+      "provisional_coordinate": null,
+      "coordinate_basis": "NOT-ALLOCATED-PENDING-DEDUP",
+      "selected_in_canonical_d10": false,
+      "ratified_resident": false,
+      "physical_t5_authorized": false
+    },
+    {
+      "semantic_name": "CLASS-DIRECT-DEFAULT-INITARGS",
+      "review_class": "SOURCE-NAME-OR-HOLD",
+      "previous_source_review": "HOLD-INTROSPECTION-OR-DERIVED",
+      "observable_law": "Read specified metaobject state only; distinctness from already-selected D10 and source implementation representation NOT proved.",
+      "positive_witnesses": [],
+      "falsifier": null,
+      "provenance": [
+        {
+          "path": "knowledge/d10-mop-metaobject-reader-census-20261009.json",
+          "git_blob": "a830d9b2e29293ebc3f95ba2c905b420c1a03368",
+          "field": "entries",
+          "record_id": "mop-reader-class_direct_default_initargs",
+          "original_spelling": "CLASS-DIRECT-DEFAULT-INITARGS",
+          "primary_url": "https://clos-mop.hexstreamsoft.com/generic-functions-and-methods/",
+          "locator": null,
+          "review_status": "HOLD-INTROSPECTION-OR-DERIVED"
+        }
+      ],
+      "provisional_coordinate": null,
+      "coordinate_basis": "NOT-ALLOCATED-PENDING-DEDUP",
+      "selected_in_canonical_d10": false,
+      "ratified_resident": false,
+      "physical_t5_authorized": false
+    },
+    {
+      "semantic_name": "CLASS-PRECEDENCE-LIST",
+      "review_class": "BEHAVIOR-SPECIFIED-RESEARCH",
+      "previous_source_review": "REVIEW-SEMANTIC-LAW",
+      "observable_law": "For finalized class C, return a linearized list of class metaobjects with C first, T last, each class/superclass exactly once, respecting source-superclass precedence.",
+      "positive_witnesses": [
+        "Single inheritance child C of P: C precedes P and T, no duplicates.",
+        "Distinct parent order influences the computed precedence under compatible local precedence rules."
+      ],
+      "falsifier": "Returning only direct superclasses, duplicated class objects or alphabetical/sorted order is not class precedence.",
+      "provenance": [
+        {
+          "path": "knowledge/d10-mop-metaobject-reader-census-20261009.json",
+          "git_blob": "a830d9b2e29293ebc3f95ba2c905b420c1a03368",
+          "field": "entries",
+          "record_id": "mop-reader-class_precedence_list",
+          "original_spelling": "CLASS-PRECEDENCE-LIST",
+          "primary_url": "https://clos-mop.hexstreamsoft.com/generic-functions-and-methods/",
+          "locator": null,
+          "review_status": "REVIEW-SEMANTIC-LAW"
+        }
+      ],
+      "provisional_coordinate": "1110001101",
+      "coordinate_basis": "NONCANONICAL-HISTORICAL-EVIDENCE-RESEARCH-RESERVATION",
+      "selected_in_canonical_d10": false,
+      "ratified_resident": false,
+      "physical_t5_authorized": false
+    },
+    {
+      "semantic_name": "CLASS-DIRECT-SUPERCLASSES",
+      "review_class": "SOURCE-NAME-OR-HOLD",
+      "previous_source_review": "HOLD-INTROSPECTION-OR-DERIVED",
+      "observable_law": "Read specified metaobject state only; distinctness from already-selected D10 and source implementation representation NOT proved.",
+      "positive_witnesses": [],
+      "falsifier": null,
+      "provenance": [
+        {
+          "path": "knowledge/d10-mop-metaobject-reader-census-20261009.json",
+          "git_blob": "a830d9b2e29293ebc3f95ba2c905b420c1a03368",
+          "field": "entries",
+          "record_id": "mop-reader-class_direct_superclasses",
+          "original_spelling": "CLASS-DIRECT-SUPERCLASSES",
+          "primary_url": "https://clos-mop.hexstreamsoft.com/generic-functions-and-methods/",
+          "locator": null,
+          "review_status": "HOLD-INTROSPECTION-OR-DERIVED"
+        }
+      ],
+      "provisional_coordinate": null,
+      "coordinate_basis": "NOT-ALLOCATED-PENDING-DEDUP",
+      "selected_in_canonical_d10": false,
+      "ratified_resident": false,
+      "physical_t5_authorized": false
+    },
+    {
+      "semantic_name": "CLASS-DIRECT-SUBCLASSES",
+      "review_class": "SOURCE-NAME-OR-HOLD",
+      "previous_source_review": "HOLD-INTROSPECTION-OR-DERIVED",
+      "observable_law": "Read specified metaobject state only; distinctness from already-selected D10 and source implementation representation NOT proved.",
+      "positive_witnesses": [],
+      "falsifier": null,
+      "provenance": [
+        {
+          "path": "knowledge/d10-mop-metaobject-reader-census-20261009.json",
+          "git_blob": "a830d9b2e29293ebc3f95ba2c905b420c1a03368",
+          "field": "entries",
+          "record_id": "mop-reader-class_direct_subclasses",
+          "original_spelling": "CLASS-DIRECT-SUBCLASSES",
+          "primary_url": "https://clos-mop.hexstreamsoft.com/generic-functions-and-methods/",
+          "locator": null,
+          "review_status": "HOLD-INTROSPECTION-OR-DERIVED"
+        }
+      ],
+      "provisional_coordinate": null,
+      "coordinate_basis": "NOT-ALLOCATED-PENDING-DEDUP",
+      "selected_in_canonical_d10": false,
+      "ratified_resident": false,
+      "physical_t5_authorized": false
+    },
+    {
+      "semantic_name": "CLASS-FINALIZED-P",
+      "review_class": "SOURCE-NAME-OR-HOLD",
+      "previous_source_review": "HOLD-INTROSPECTION-OR-DERIVED",
+      "observable_law": "Read specified metaobject state only; distinctness from already-selected D10 and source implementation representation NOT proved.",
+      "positive_witnesses": [],
+      "falsifier": null,
+      "provenance": [
+        {
+          "path": "knowledge/d10-mop-metaobject-reader-census-20261009.json",
+          "git_blob": "a830d9b2e29293ebc3f95ba2c905b420c1a03368",
+          "field": "entries",
+          "record_id": "mop-reader-class_finalized_p",
+          "original_spelling": "CLASS-FINALIZED-P",
+          "primary_url": "https://clos-mop.hexstreamsoft.com/generic-functions-and-methods/",
+          "locator": null,
+          "review_status": "HOLD-INTROSPECTION-OR-DERIVED"
+        }
+      ],
+      "provisional_coordinate": null,
+      "coordinate_basis": "NOT-ALLOCATED-PENDING-DEDUP",
+      "selected_in_canonical_d10": false,
+      "ratified_resident": false,
+      "physical_t5_authorized": false
+    },
+    {
+      "semantic_name": "CLASS-PROTOTYPE",
+      "review_class": "SOURCE-NAME-OR-HOLD",
+      "previous_source_review": "HOLD-INTROSPECTION-OR-DERIVED",
+      "observable_law": "Read specified metaobject state only; distinctness from already-selected D10 and source implementation representation NOT proved.",
+      "positive_witnesses": [],
+      "falsifier": null,
+      "provenance": [
+        {
+          "path": "knowledge/d10-mop-metaobject-reader-census-20261009.json",
+          "git_blob": "a830d9b2e29293ebc3f95ba2c905b420c1a03368",
+          "field": "entries",
+          "record_id": "mop-reader-class_prototype",
+          "original_spelling": "CLASS-PROTOTYPE",
+          "primary_url": "https://clos-mop.hexstreamsoft.com/generic-functions-and-methods/",
+          "locator": null,
+          "review_status": "HOLD-INTROSPECTION-OR-DERIVED"
+        }
+      ],
+      "provisional_coordinate": null,
+      "coordinate_basis": "NOT-ALLOCATED-PENDING-DEDUP",
+      "selected_in_canonical_d10": false,
+      "ratified_resident": false,
+      "physical_t5_authorized": false
+    },
+    {
+      "semantic_name": "GENERIC-FUNCTION-NAME",
+      "review_class": "SOURCE-NAME-OR-HOLD",
+      "previous_source_review": "HOLD-INTROSPECTION-OR-DERIVED",
+      "observable_law": "Read specified metaobject state only; distinctness from already-selected D10 and source implementation representation NOT proved.",
+      "positive_witnesses": [],
+      "falsifier": null,
+      "provenance": [
+        {
+          "path": "knowledge/d10-mop-metaobject-reader-census-20261009.json",
+          "git_blob": "a830d9b2e29293ebc3f95ba2c905b420c1a03368",
+          "field": "entries",
+          "record_id": "mop-reader-generic_function_name",
+          "original_spelling": "GENERIC-FUNCTION-NAME",
+          "primary_url": "https://clos-mop.hexstreamsoft.com/generic-functions-and-methods/",
+          "locator": null,
+          "review_status": "HOLD-INTROSPECTION-OR-DERIVED"
+        }
+      ],
+      "provisional_coordinate": null,
+      "coordinate_basis": "NOT-ALLOCATED-PENDING-DEDUP",
+      "selected_in_canonical_d10": false,
+      "ratified_resident": false,
+      "physical_t5_authorized": false
+    },
+    {
+      "semantic_name": "GENERIC-FUNCTION-METHODS",
+      "review_class": "BEHAVIOR-SPECIFIED-RESEARCH",
+      "previous_source_review": "REVIEW-SEMANTIC-LAW",
+      "observable_law": "Read the set of exact method metaobjects attached to a generic function; adding/removing a method changes membership without invoking any method body.",
+      "positive_witnesses": [
+        "Generic G with integer and string methods: introspection returns precisely both method metaobjects.",
+        "Remove integer method: introspection still returns string method, without deleting generic G."
+      ],
+      "falsifier": "Confuse applicable-method selection for current arguments with registered method-object membership.",
+      "provenance": [
+        {
+          "path": "knowledge/d10-mop-metaobject-reader-census-20261009.json",
+          "git_blob": "a830d9b2e29293ebc3f95ba2c905b420c1a03368",
+          "field": "entries",
+          "record_id": "mop-reader-generic_function_methods",
+          "original_spelling": "GENERIC-FUNCTION-METHODS",
+          "primary_url": "https://clos-mop.hexstreamsoft.com/generic-functions-and-methods/",
+          "locator": null,
+          "review_status": "REVIEW-SEMANTIC-LAW"
+        }
+      ],
+      "provisional_coordinate": "1110001110",
+      "coordinate_basis": "NONCANONICAL-HISTORICAL-EVIDENCE-RESEARCH-RESERVATION",
+      "selected_in_canonical_d10": false,
+      "ratified_resident": false,
+      "physical_t5_authorized": false
+    },
+    {
+      "semantic_name": "GENERIC-FUNCTION-LAMBDA-LIST",
+      "review_class": "SOURCE-NAME-OR-HOLD",
+      "previous_source_review": "HOLD-INTROSPECTION-OR-DERIVED",
+      "observable_law": "Read specified metaobject state only; distinctness from already-selected D10 and source implementation representation NOT proved.",
+      "positive_witnesses": [],
+      "falsifier": null,
+      "provenance": [
+        {
+          "path": "knowledge/d10-mop-metaobject-reader-census-20261009.json",
+          "git_blob": "a830d9b2e29293ebc3f95ba2c905b420c1a03368",
+          "field": "entries",
+          "record_id": "mop-reader-generic_function_lambda_list",
+          "original_spelling": "GENERIC-FUNCTION-LAMBDA-LIST",
+          "primary_url": "https://clos-mop.hexstreamsoft.com/generic-functions-and-methods/",
+          "locator": null,
+          "review_status": "HOLD-INTROSPECTION-OR-DERIVED"
+        }
+      ],
+      "provisional_coordinate": null,
+      "coordinate_basis": "NOT-ALLOCATED-PENDING-DEDUP",
+      "selected_in_canonical_d10": false,
+      "ratified_resident": false,
+      "physical_t5_authorized": false
+    },
+    {
+      "semantic_name": "GENERIC-FUNCTION-ARGUMENT-PRECEDENCE-ORDER",
+      "review_class": "BEHAVIOR-SPECIFIED-RESEARCH",
+      "previous_source_review": "REVIEW-SEMANTIC-LAW",
+      "observable_law": "Return the permutation of required generic-function parameter names specifying argument precedence for method specificity, not parameter types or method objects.",
+      "positive_witnesses": [
+        "Generic with two required parameters and an explicitly reversed precedence order returns the reversed symbol sequence.",
+        "Order contains each required parameter once and excludes optional/rest parameters."
+      ],
+      "falsifier": "Return default lambda-list textual order when a distinct explicit precedence order was specified.",
+      "provenance": [
+        {
+          "path": "knowledge/d10-mop-metaobject-reader-census-20261009.json",
+          "git_blob": "a830d9b2e29293ebc3f95ba2c905b420c1a03368",
+          "field": "entries",
+          "record_id": "mop-reader-generic_function_argument_precedence_order",
+          "original_spelling": "GENERIC-FUNCTION-ARGUMENT-PRECEDENCE-ORDER",
+          "primary_url": "https://clos-mop.hexstreamsoft.com/generic-functions-and-methods/",
+          "locator": null,
+          "review_status": "REVIEW-SEMANTIC-LAW"
+        }
+      ],
+      "provisional_coordinate": "1110001111",
+      "coordinate_basis": "NONCANONICAL-HISTORICAL-EVIDENCE-RESEARCH-RESERVATION",
+      "selected_in_canonical_d10": false,
+      "ratified_resident": false,
+      "physical_t5_authorized": false
+    },
+    {
+      "semantic_name": "GENERIC-FUNCTION-DECLARATIONS",
+      "review_class": "SOURCE-NAME-OR-HOLD",
+      "previous_source_review": "HOLD-INTROSPECTION-OR-DERIVED",
+      "observable_law": "Read specified metaobject state only; distinctness from already-selected D10 and source implementation representation NOT proved.",
+      "positive_witnesses": [],
+      "falsifier": null,
+      "provenance": [
+        {
+          "path": "knowledge/d10-mop-metaobject-reader-census-20261009.json",
+          "git_blob": "a830d9b2e29293ebc3f95ba2c905b420c1a03368",
+          "field": "entries",
+          "record_id": "mop-reader-generic_function_declarations",
+          "original_spelling": "GENERIC-FUNCTION-DECLARATIONS",
+          "primary_url": "https://clos-mop.hexstreamsoft.com/generic-functions-and-methods/",
+          "locator": null,
+          "review_status": "HOLD-INTROSPECTION-OR-DERIVED"
+        }
+      ],
+      "provisional_coordinate": null,
+      "coordinate_basis": "NOT-ALLOCATED-PENDING-DEDUP",
+      "selected_in_canonical_d10": false,
+      "ratified_resident": false,
+      "physical_t5_authorized": false
+    },
+    {
+      "semantic_name": "GENERIC-FUNCTION-METHOD-CLASS",
+      "review_class": "SOURCE-NAME-OR-HOLD",
+      "previous_source_review": "HOLD-INTROSPECTION-OR-DERIVED",
+      "observable_law": "Read specified metaobject state only; distinctness from already-selected D10 and source implementation representation NOT proved.",
+      "positive_witnesses": [],
+      "falsifier": null,
+      "provenance": [
+        {
+          "path": "knowledge/d10-mop-metaobject-reader-census-20261009.json",
+          "git_blob": "a830d9b2e29293ebc3f95ba2c905b420c1a03368",
+          "field": "entries",
+          "record_id": "mop-reader-generic_function_method_class",
+          "original_spelling": "GENERIC-FUNCTION-METHOD-CLASS",
+          "primary_url": "https://clos-mop.hexstreamsoft.com/generic-functions-and-methods/",
+          "locator": null,
+          "review_status": "HOLD-INTROSPECTION-OR-DERIVED"
+        }
+      ],
+      "provisional_coordinate": null,
+      "coordinate_basis": "NOT-ALLOCATED-PENDING-DEDUP",
+      "selected_in_canonical_d10": false,
+      "ratified_resident": false,
+      "physical_t5_authorized": false
+    },
+    {
+      "semantic_name": "GENERIC-FUNCTION-METHOD-COMBINATION",
+      "review_class": "SOURCE-NAME-OR-HOLD",
+      "previous_source_review": "HOLD-INTROSPECTION-OR-DERIVED",
+      "observable_law": "Read specified metaobject state only; distinctness from already-selected D10 and source implementation representation NOT proved.",
+      "positive_witnesses": [],
+      "falsifier": null,
+      "provenance": [
+        {
+          "path": "knowledge/d10-mop-metaobject-reader-census-20261009.json",
+          "git_blob": "a830d9b2e29293ebc3f95ba2c905b420c1a03368",
+          "field": "entries",
+          "record_id": "mop-reader-generic_function_method_combination",
+          "original_spelling": "GENERIC-FUNCTION-METHOD-COMBINATION",
+          "primary_url": "https://clos-mop.hexstreamsoft.com/generic-functions-and-methods/",
+          "locator": null,
+          "review_status": "HOLD-INTROSPECTION-OR-DERIVED"
+        }
+      ],
+      "provisional_coordinate": null,
+      "coordinate_basis": "NOT-ALLOCATED-PENDING-DEDUP",
+      "selected_in_canonical_d10": false,
+      "ratified_resident": false,
+      "physical_t5_authorized": false
+    },
+    {
+      "semantic_name": "STREAM",
+      "review_class": "SOURCE-NAME-OR-HOLD",
+      "previous_source_review": "READ-ONLY-SOURCE-GRADED-CENSUS-NOT-SELECTED",
+      "observable_law": null,
+      "positive_witnesses": [],
+      "falsifier": null,
+      "provenance": [
+        {
+          "path": "knowledge/d10-clhs-streams-census-20261009.json",
+          "git_blob": "4c39efaf558dd654272a690e6a01c0ae1c1b262f",
+          "field": "rows",
+          "record_id": null,
+          "original_spelling": "STREAM",
+          "primary_url": "https://www.cs.cmu.edu/Groups/AI/html/hyperspec/HyperSpec/Body/sec_the_streams_dictionary.html",
+          "locator": null,
+          "review_status": "READ-ONLY-SOURCE-GRADED-CENSUS-NOT-SELECTED"
+        }
+      ],
+      "provisional_coordinate": null,
+      "coordinate_basis": "NOT-ALLOCATED-PENDING-DEDUP",
+      "selected_in_canonical_d10": false,
+      "ratified_resident": false,
+      "physical_t5_authorized": false
+    },
+    {
+      "semantic_name": "BROADCAST-STREAM",
+      "review_class": "SOURCE-NAME-OR-HOLD",
+      "previous_source_review": "READ-ONLY-SOURCE-GRADED-CENSUS-NOT-SELECTED",
+      "observable_law": null,
+      "positive_witnesses": [],
+      "falsifier": null,
+      "provenance": [
+        {
+          "path": "knowledge/d10-clhs-streams-census-20261009.json",
+          "git_blob": "4c39efaf558dd654272a690e6a01c0ae1c1b262f",
+          "field": "rows",
+          "record_id": null,
+          "original_spelling": "BROADCAST-STREAM",
+          "primary_url": "https://www.cs.cmu.edu/Groups/AI/html/hyperspec/HyperSpec/Body/sec_the_streams_dictionary.html",
+          "locator": null,
+          "review_status": "READ-ONLY-SOURCE-GRADED-CENSUS-NOT-SELECTED"
+        }
+      ],
+      "provisional_coordinate": null,
+      "coordinate_basis": "NOT-ALLOCATED-PENDING-DEDUP",
+      "selected_in_canonical_d10": false,
+      "ratified_resident": false,
+      "physical_t5_authorized": false
+    },
+    {
+      "semantic_name": "CONCATENATED-STREAM",
+      "review_class": "SOURCE-NAME-OR-HOLD",
+      "previous_source_review": "READ-ONLY-SOURCE-GRADED-CENSUS-NOT-SELECTED",
+      "observable_law": null,
+      "positive_witnesses": [],
+      "falsifier": null,
+      "provenance": [
+        {
+          "path": "knowledge/d10-clhs-streams-census-20261009.json",
+          "git_blob": "4c39efaf558dd654272a690e6a01c0ae1c1b262f",
+          "field": "rows",
+          "record_id": null,
+          "original_spelling": "CONCATENATED-STREAM",
+          "primary_url": "https://www.cs.cmu.edu/Groups/AI/html/hyperspec/HyperSpec/Body/sec_the_streams_dictionary.html",
+          "locator": null,
+          "review_status": "READ-ONLY-SOURCE-GRADED-CENSUS-NOT-SELECTED"
+        }
+      ],
+      "provisional_coordinate": null,
+      "coordinate_basis": "NOT-ALLOCATED-PENDING-DEDUP",
+      "selected_in_canonical_d10": false,
+      "ratified_resident": false,
+      "physical_t5_authorized": false
+    },
+    {
+      "semantic_name": "ECHO-STREAM",
+      "review_class": "SOURCE-NAME-OR-HOLD",
+      "previous_source_review": "READ-ONLY-SOURCE-GRADED-CENSUS-NOT-SELECTED",
+      "observable_law": null,
+      "positive_witnesses": [],
+      "falsifier": null,
+      "provenance": [
+        {
+          "path": "knowledge/d10-clhs-streams-census-20261009.json",
+          "git_blob": "4c39efaf558dd654272a690e6a01c0ae1c1b262f",
+          "field": "rows",
+          "record_id": null,
+          "original_spelling": "ECHO-STREAM",
+          "primary_url": "https://www.cs.cmu.edu/Groups/AI/html/hyperspec/HyperSpec/Body/sec_the_streams_dictionary.html",
+          "locator": null,
+          "review_status": "READ-ONLY-SOURCE-GRADED-CENSUS-NOT-SELECTED"
+        }
+      ],
+      "provisional_coordinate": null,
+      "coordinate_basis": "NOT-ALLOCATED-PENDING-DEDUP",
+      "selected_in_canonical_d10": false,
+      "ratified_resident": false,
+      "physical_t5_authorized": false
+    },
+    {
+      "semantic_name": "FILE-STREAM",
+      "review_class": "SOURCE-NAME-OR-HOLD",
+      "previous_source_review": "READ-ONLY-SOURCE-GRADED-CENSUS-NOT-SELECTED",
+      "observable_law": null,
+      "positive_witnesses": [],
+      "falsifier": null,
+      "provenance": [
+        {
+          "path": "knowledge/d10-clhs-streams-census-20261009.json",
+          "git_blob": "4c39efaf558dd654272a690e6a01c0ae1c1b262f",
+          "field": "rows",
+          "record_id": null,
+          "original_spelling": "FILE-STREAM",
+          "primary_url": "https://www.cs.cmu.edu/Groups/AI/html/hyperspec/HyperSpec/Body/sec_the_streams_dictionary.html",
+          "locator": null,
+          "review_status": "READ-ONLY-SOURCE-GRADED-CENSUS-NOT-SELECTED"
+        }
+      ],
+      "provisional_coordinate": null,
+      "coordinate_basis": "NOT-ALLOCATED-PENDING-DEDUP",
+      "selected_in_canonical_d10": false,
+      "ratified_resident": false,
+      "physical_t5_authorized": false
+    },
+    {
+      "semantic_name": "STRING-STREAM",
+      "review_class": "SOURCE-NAME-OR-HOLD",
+      "previous_source_review": "READ-ONLY-SOURCE-GRADED-CENSUS-NOT-SELECTED",
+      "observable_law": null,
+      "positive_witnesses": [],
+      "falsifier": null,
+      "provenance": [
+        {
+          "path": "knowledge/d10-clhs-streams-census-20261009.json",
+          "git_blob": "4c39efaf558dd654272a690e6a01c0ae1c1b262f",
+          "field": "rows",
+          "record_id": null,
+          "original_spelling": "STRING-STREAM",
+          "primary_url": "https://www.cs.cmu.edu/Groups/AI/html/hyperspec/HyperSpec/Body/sec_the_streams_dictionary.html",
+          "locator": null,
+          "review_status": "READ-ONLY-SOURCE-GRADED-CENSUS-NOT-SELECTED"
+        }
+      ],
+      "provisional_coordinate": null,
+      "coordinate_basis": "NOT-ALLOCATED-PENDING-DEDUP",
+      "selected_in_canonical_d10": false,
+      "ratified_resident": false,
+      "physical_t5_authorized": false
+    },
+    {
+      "semantic_name": "SYNONYM-STREAM",
+      "review_class": "SOURCE-NAME-OR-HOLD",
+      "previous_source_review": "READ-ONLY-SOURCE-GRADED-CENSUS-NOT-SELECTED",
+      "observable_law": null,
+      "positive_witnesses": [],
+      "falsifier": null,
+      "provenance": [
+        {
+          "path": "knowledge/d10-clhs-streams-census-20261009.json",
+          "git_blob": "4c39efaf558dd654272a690e6a01c0ae1c1b262f",
+          "field": "rows",
+          "record_id": null,
+          "original_spelling": "SYNONYM-STREAM",
+          "primary_url": "https://www.cs.cmu.edu/Groups/AI/html/hyperspec/HyperSpec/Body/sec_the_streams_dictionary.html",
+          "locator": null,
+          "review_status": "READ-ONLY-SOURCE-GRADED-CENSUS-NOT-SELECTED"
+        }
+      ],
+      "provisional_coordinate": null,
+      "coordinate_basis": "NOT-ALLOCATED-PENDING-DEDUP",
+      "selected_in_canonical_d10": false,
+      "ratified_resident": false,
+      "physical_t5_authorized": false
+    },
+    {
+      "semantic_name": "TWO-WAY-STREAM",
+      "review_class": "SOURCE-NAME-OR-HOLD",
+      "previous_source_review": "READ-ONLY-SOURCE-GRADED-CENSUS-NOT-SELECTED",
+      "observable_law": null,
+      "positive_witnesses": [],
+      "falsifier": null,
+      "provenance": [
+        {
+          "path": "knowledge/d10-clhs-streams-census-20261009.json",
+          "git_blob": "4c39efaf558dd654272a690e6a01c0ae1c1b262f",
+          "field": "rows",
+          "record_id": null,
+          "original_spelling": "TWO-WAY-STREAM",
+          "primary_url": "https://www.cs.cmu.edu/Groups/AI/html/hyperspec/HyperSpec/Body/sec_the_streams_dictionary.html",
+          "locator": null,
+          "review_status": "READ-ONLY-SOURCE-GRADED-CENSUS-NOT-SELECTED"
+        }
+      ],
+      "provisional_coordinate": null,
+      "coordinate_basis": "NOT-ALLOCATED-PENDING-DEDUP",
+      "selected_in_canonical_d10": false,
+      "ratified_resident": false,
+      "physical_t5_authorized": false
+    },
+    {
+      "semantic_name": "INPUT-STREAM-P",
+      "review_class": "SOURCE-NAME-OR-HOLD",
+      "previous_source_review": "READ-ONLY-SOURCE-GRADED-CENSUS-NOT-SELECTED",
+      "observable_law": null,
+      "positive_witnesses": [],
+      "falsifier": null,
+      "provenance": [
+        {
+          "path": "knowledge/d10-clhs-streams-census-20261009.json",
+          "git_blob": "4c39efaf558dd654272a690e6a01c0ae1c1b262f",
+          "field": "rows",
+          "record_id": null,
+          "original_spelling": "INPUT-STREAM-P",
+          "primary_url": "https://www.cs.cmu.edu/Groups/AI/html/hyperspec/HyperSpec/Body/sec_the_streams_dictionary.html",
+          "locator": null,
+          "review_status": "READ-ONLY-SOURCE-GRADED-CENSUS-NOT-SELECTED"
+        }
+      ],
+      "provisional_coordinate": null,
+      "coordinate_basis": "NOT-ALLOCATED-PENDING-DEDUP",
+      "selected_in_canonical_d10": false,
+      "ratified_resident": false,
+      "physical_t5_authorized": false
+    },
+    {
+      "semantic_name": "OUTPUT-STREAM-P",
+      "review_class": "SOURCE-NAME-OR-HOLD",
+      "previous_source_review": "READ-ONLY-SOURCE-GRADED-CENSUS-NOT-SELECTED",
+      "observable_law": null,
+      "positive_witnesses": [],
+      "falsifier": null,
+      "provenance": [
+        {
+          "path": "knowledge/d10-clhs-streams-census-20261009.json",
+          "git_blob": "4c39efaf558dd654272a690e6a01c0ae1c1b262f",
+          "field": "rows",
+          "record_id": null,
+          "original_spelling": "OUTPUT-STREAM-P",
+          "primary_url": "https://www.cs.cmu.edu/Groups/AI/html/hyperspec/HyperSpec/Body/sec_the_streams_dictionary.html",
+          "locator": null,
+          "review_status": "READ-ONLY-SOURCE-GRADED-CENSUS-NOT-SELECTED"
+        }
+      ],
+      "provisional_coordinate": null,
+      "coordinate_basis": "NOT-ALLOCATED-PENDING-DEDUP",
+      "selected_in_canonical_d10": false,
+      "ratified_resident": false,
+      "physical_t5_authorized": false
+    },
+    {
+      "semantic_name": "INTERACTIVE-STREAM-P",
+      "review_class": "SOURCE-NAME-OR-HOLD",
+      "previous_source_review": "READ-ONLY-SOURCE-GRADED-CENSUS-NOT-SELECTED",
+      "observable_law": null,
+      "positive_witnesses": [],
+      "falsifier": null,
+      "provenance": [
+        {
+          "path": "knowledge/d10-clhs-streams-census-20261009.json",
+          "git_blob": "4c39efaf558dd654272a690e6a01c0ae1c1b262f",
+          "field": "rows",
+          "record_id": null,
+          "original_spelling": "INTERACTIVE-STREAM-P",
+          "primary_url": "https://www.cs.cmu.edu/Groups/AI/html/hyperspec/HyperSpec/Body/sec_the_streams_dictionary.html",
+          "locator": null,
+          "review_status": "READ-ONLY-SOURCE-GRADED-CENSUS-NOT-SELECTED"
+        }
+      ],
+      "provisional_coordinate": null,
+      "coordinate_basis": "NOT-ALLOCATED-PENDING-DEDUP",
+      "selected_in_canonical_d10": false,
+      "ratified_resident": false,
+      "physical_t5_authorized": false
+    },
+    {
+      "semantic_name": "OPEN-STREAM-P",
+      "review_class": "SOURCE-NAME-OR-HOLD",
+      "previous_source_review": "READ-ONLY-SOURCE-GRADED-CENSUS-NOT-SELECTED",
+      "observable_law": null,
+      "positive_witnesses": [],
+      "falsifier": null,
+      "provenance": [
+        {
+          "path": "knowledge/d10-clhs-streams-census-20261009.json",
+          "git_blob": "4c39efaf558dd654272a690e6a01c0ae1c1b262f",
+          "field": "rows",
+          "record_id": null,
+          "original_spelling": "OPEN-STREAM-P",
+          "primary_url": "https://www.cs.cmu.edu/Groups/AI/html/hyperspec/HyperSpec/Body/sec_the_streams_dictionary.html",
+          "locator": null,
+          "review_status": "READ-ONLY-SOURCE-GRADED-CENSUS-NOT-SELECTED"
+        }
+      ],
+      "provisional_coordinate": null,
+      "coordinate_basis": "NOT-ALLOCATED-PENDING-DEDUP",
+      "selected_in_canonical_d10": false,
+      "ratified_resident": false,
+      "physical_t5_authorized": false
+    },
+    {
+      "semantic_name": "STREAM-ELEMENT-TYPE",
+      "review_class": "SOURCE-NAME-OR-HOLD",
+      "previous_source_review": "READ-ONLY-SOURCE-GRADED-CENSUS-NOT-SELECTED",
+      "observable_law": null,
+      "positive_witnesses": [],
+      "falsifier": null,
+      "provenance": [
+        {
+          "path": "knowledge/d10-clhs-streams-census-20261009.json",
+          "git_blob": "4c39efaf558dd654272a690e6a01c0ae1c1b262f",
+          "field": "rows",
+          "record_id": null,
+          "original_spelling": "STREAM-ELEMENT-TYPE",
+          "primary_url": "https://www.cs.cmu.edu/Groups/AI/html/hyperspec/HyperSpec/Body/sec_the_streams_dictionary.html",
+          "locator": null,
+          "review_status": "READ-ONLY-SOURCE-GRADED-CENSUS-NOT-SELECTED"
+        }
+      ],
+      "provisional_coordinate": null,
+      "coordinate_basis": "NOT-ALLOCATED-PENDING-DEDUP",
+      "selected_in_canonical_d10": false,
+      "ratified_resident": false,
+      "physical_t5_authorized": false
+    },
+    {
+      "semantic_name": "STREAMP",
+      "review_class": "SOURCE-NAME-OR-HOLD",
+      "previous_source_review": "READ-ONLY-SOURCE-GRADED-CENSUS-NOT-SELECTED",
+      "observable_law": null,
+      "positive_witnesses": [],
+      "falsifier": null,
+      "provenance": [
+        {
+          "path": "knowledge/d10-clhs-streams-census-20261009.json",
+          "git_blob": "4c39efaf558dd654272a690e6a01c0ae1c1b262f",
+          "field": "rows",
+          "record_id": null,
+          "original_spelling": "STREAMP",
+          "primary_url": "https://www.cs.cmu.edu/Groups/AI/html/hyperspec/HyperSpec/Body/sec_the_streams_dictionary.html",
+          "locator": null,
+          "review_status": "READ-ONLY-SOURCE-GRADED-CENSUS-NOT-SELECTED"
+        }
+      ],
+      "provisional_coordinate": null,
+      "coordinate_basis": "NOT-ALLOCATED-PENDING-DEDUP",
+      "selected_in_canonical_d10": false,
+      "ratified_resident": false,
+      "physical_t5_authorized": false
+    },
+    {
+      "semantic_name": "PEEK-CHAR",
+      "review_class": "SOURCE-NAME-OR-HOLD",
+      "previous_source_review": "READ-ONLY-SOURCE-GRADED-CENSUS-NOT-SELECTED",
+      "observable_law": null,
+      "positive_witnesses": [],
+      "falsifier": null,
+      "provenance": [
+        {
+          "path": "knowledge/d10-clhs-streams-census-20261009.json",
+          "git_blob": "4c39efaf558dd654272a690e6a01c0ae1c1b262f",
+          "field": "rows",
+          "record_id": null,
+          "original_spelling": "PEEK-CHAR",
+          "primary_url": "https://www.cs.cmu.edu/Groups/AI/html/hyperspec/HyperSpec/Body/sec_the_streams_dictionary.html",
+          "locator": null,
+          "review_status": "READ-ONLY-SOURCE-GRADED-CENSUS-NOT-SELECTED"
+        }
+      ],
+      "provisional_coordinate": null,
+      "coordinate_basis": "NOT-ALLOCATED-PENDING-DEDUP",
+      "selected_in_canonical_d10": false,
+      "ratified_resident": false,
+      "physical_t5_authorized": false
+    },
+    {
+      "semantic_name": "READ-CHAR-NO-HANG",
+      "review_class": "SOURCE-NAME-OR-HOLD",
+      "previous_source_review": "READ-ONLY-SOURCE-GRADED-CENSUS-NOT-SELECTED",
+      "observable_law": null,
+      "positive_witnesses": [],
+      "falsifier": null,
+      "provenance": [
+        {
+          "path": "knowledge/d10-clhs-streams-census-20261009.json",
+          "git_blob": "4c39efaf558dd654272a690e6a01c0ae1c1b262f",
+          "field": "rows",
+          "record_id": null,
+          "original_spelling": "READ-CHAR-NO-HANG",
+          "primary_url": "https://www.cs.cmu.edu/Groups/AI/html/hyperspec/HyperSpec/Body/sec_the_streams_dictionary.html",
+          "locator": null,
+          "review_status": "READ-ONLY-SOURCE-GRADED-CENSUS-NOT-SELECTED"
+        }
+      ],
+      "provisional_coordinate": null,
+      "coordinate_basis": "NOT-ALLOCATED-PENDING-DEDUP",
+      "selected_in_canonical_d10": false,
+      "ratified_resident": false,
+      "physical_t5_authorized": false
+    },
+    {
+      "semantic_name": "FRESH-LINE",
+      "review_class": "SOURCE-NAME-OR-HOLD",
+      "previous_source_review": "READ-ONLY-SOURCE-GRADED-CENSUS-NOT-SELECTED",
+      "observable_law": null,
+      "positive_witnesses": [],
+      "falsifier": null,
+      "provenance": [
+        {
+          "path": "knowledge/d10-clhs-streams-census-20261009.json",
+          "git_blob": "4c39efaf558dd654272a690e6a01c0ae1c1b262f",
+          "field": "rows",
+          "record_id": null,
+          "original_spelling": "FRESH-LINE",
+          "primary_url": "https://www.cs.cmu.edu/Groups/AI/html/hyperspec/HyperSpec/Body/sec_the_streams_dictionary.html",
+          "locator": null,
+          "review_status": "READ-ONLY-SOURCE-GRADED-CENSUS-NOT-SELECTED"
+        }
+      ],
+      "provisional_coordinate": null,
+      "coordinate_basis": "NOT-ALLOCATED-PENDING-DEDUP",
+      "selected_in_canonical_d10": false,
+      "ratified_resident": false,
+      "physical_t5_authorized": false
+    },
+    {
+      "semantic_name": "UNREAD-CHAR",
+      "review_class": "SOURCE-NAME-OR-HOLD",
+      "previous_source_review": "READ-ONLY-SOURCE-GRADED-CENSUS-NOT-SELECTED",
+      "observable_law": null,
+      "positive_witnesses": [],
+      "falsifier": null,
+      "provenance": [
+        {
+          "path": "knowledge/d10-clhs-streams-census-20261009.json",
+          "git_blob": "4c39efaf558dd654272a690e6a01c0ae1c1b262f",
+          "field": "rows",
+          "record_id": null,
+          "original_spelling": "UNREAD-CHAR",
+          "primary_url": "https://www.cs.cmu.edu/Groups/AI/html/hyperspec/HyperSpec/Body/sec_the_streams_dictionary.html",
+          "locator": null,
+          "review_status": "READ-ONLY-SOURCE-GRADED-CENSUS-NOT-SELECTED"
+        }
+      ],
+      "provisional_coordinate": null,
+      "coordinate_basis": "NOT-ALLOCATED-PENDING-DEDUP",
+      "selected_in_canonical_d10": false,
+      "ratified_resident": false,
+      "physical_t5_authorized": false
+    },
+    {
+      "semantic_name": "WRITE-CHAR",
+      "review_class": "SOURCE-NAME-OR-HOLD",
+      "previous_source_review": "READ-ONLY-SOURCE-GRADED-CENSUS-NOT-SELECTED",
+      "observable_law": null,
+      "positive_witnesses": [],
+      "falsifier": null,
+      "provenance": [
+        {
+          "path": "knowledge/d10-clhs-streams-census-20261009.json",
+          "git_blob": "4c39efaf558dd654272a690e6a01c0ae1c1b262f",
+          "field": "rows",
+          "record_id": null,
+          "original_spelling": "WRITE-CHAR",
+          "primary_url": "https://www.cs.cmu.edu/Groups/AI/html/hyperspec/HyperSpec/Body/sec_the_streams_dictionary.html",
+          "locator": null,
+          "review_status": "READ-ONLY-SOURCE-GRADED-CENSUS-NOT-SELECTED"
+        }
+      ],
+      "provisional_coordinate": null,
+      "coordinate_basis": "NOT-ALLOCATED-PENDING-DEDUP",
+      "selected_in_canonical_d10": false,
+      "ratified_resident": false,
+      "physical_t5_authorized": false
+    },
+    {
+      "semantic_name": "READ-LINE",
+      "review_class": "SOURCE-NAME-OR-HOLD",
+      "previous_source_review": "READ-ONLY-SOURCE-GRADED-CENSUS-NOT-SELECTED",
+      "observable_law": null,
+      "positive_witnesses": [],
+      "falsifier": null,
+      "provenance": [
+        {
+          "path": "knowledge/d10-clhs-streams-census-20261009.json",
+          "git_blob": "4c39efaf558dd654272a690e6a01c0ae1c1b262f",
+          "field": "rows",
+          "record_id": null,
+          "original_spelling": "READ-LINE",
+          "primary_url": "https://www.cs.cmu.edu/Groups/AI/html/hyperspec/HyperSpec/Body/sec_the_streams_dictionary.html",
+          "locator": null,
+          "review_status": "READ-ONLY-SOURCE-GRADED-CENSUS-NOT-SELECTED"
+        }
+      ],
+      "provisional_coordinate": null,
+      "coordinate_basis": "NOT-ALLOCATED-PENDING-DEDUP",
+      "selected_in_canonical_d10": false,
+      "ratified_resident": false,
+      "physical_t5_authorized": false
+    },
+    {
+      "semantic_name": "WRITE-LINE",
+      "review_class": "SOURCE-NAME-OR-HOLD",
+      "previous_source_review": "READ-ONLY-SOURCE-GRADED-CENSUS-NOT-SELECTED",
+      "observable_law": null,
+      "positive_witnesses": [],
+      "falsifier": null,
+      "provenance": [
+        {
+          "path": "knowledge/d10-clhs-streams-census-20261009.json",
+          "git_blob": "4c39efaf558dd654272a690e6a01c0ae1c1b262f",
+          "field": "rows",
+          "record_id": null,
+          "original_spelling": "WRITE-LINE",
+          "primary_url": "https://www.cs.cmu.edu/Groups/AI/html/hyperspec/HyperSpec/Body/sec_the_streams_dictionary.html",
+          "locator": null,
+          "review_status": "READ-ONLY-SOURCE-GRADED-CENSUS-NOT-SELECTED"
+        }
+      ],
+      "provisional_coordinate": null,
+      "coordinate_basis": "NOT-ALLOCATED-PENDING-DEDUP",
+      "selected_in_canonical_d10": false,
+      "ratified_resident": false,
+      "physical_t5_authorized": false
+    },
+    {
+      "semantic_name": "READ-SEQUENCE",
+      "review_class": "SOURCE-NAME-OR-HOLD",
+      "previous_source_review": "READ-ONLY-SOURCE-GRADED-CENSUS-NOT-SELECTED",
+      "observable_law": null,
+      "positive_witnesses": [],
+      "falsifier": null,
+      "provenance": [
+        {
+          "path": "knowledge/d10-clhs-streams-census-20261009.json",
+          "git_blob": "4c39efaf558dd654272a690e6a01c0ae1c1b262f",
+          "field": "rows",
+          "record_id": null,
+          "original_spelling": "READ-SEQUENCE",
+          "primary_url": "https://www.cs.cmu.edu/Groups/AI/html/hyperspec/HyperSpec/Body/sec_the_streams_dictionary.html",
+          "locator": null,
+          "review_status": "READ-ONLY-SOURCE-GRADED-CENSUS-NOT-SELECTED"
+        }
+      ],
+      "provisional_coordinate": null,
+      "coordinate_basis": "NOT-ALLOCATED-PENDING-DEDUP",
+      "selected_in_canonical_d10": false,
+      "ratified_resident": false,
+      "physical_t5_authorized": false
+    },
+    {
+      "semantic_name": "WRITE-SEQUENCE",
+      "review_class": "SOURCE-NAME-OR-HOLD",
+      "previous_source_review": "READ-ONLY-SOURCE-GRADED-CENSUS-NOT-SELECTED",
+      "observable_law": null,
+      "positive_witnesses": [],
+      "falsifier": null,
+      "provenance": [
+        {
+          "path": "knowledge/d10-clhs-streams-census-20261009.json",
+          "git_blob": "4c39efaf558dd654272a690e6a01c0ae1c1b262f",
+          "field": "rows",
+          "record_id": null,
+          "original_spelling": "WRITE-SEQUENCE",
+          "primary_url": "https://www.cs.cmu.edu/Groups/AI/html/hyperspec/HyperSpec/Body/sec_the_streams_dictionary.html",
+          "locator": null,
+          "review_status": "READ-ONLY-SOURCE-GRADED-CENSUS-NOT-SELECTED"
+        }
+      ],
+      "provisional_coordinate": null,
+      "coordinate_basis": "NOT-ALLOCATED-PENDING-DEDUP",
+      "selected_in_canonical_d10": false,
+      "ratified_resident": false,
+      "physical_t5_authorized": false
+    },
+    {
+      "semantic_name": "FILE-LENGTH",
+      "review_class": "SOURCE-NAME-OR-HOLD",
+      "previous_source_review": "READ-ONLY-SOURCE-GRADED-CENSUS-NOT-SELECTED",
+      "observable_law": null,
+      "positive_witnesses": [],
+      "falsifier": null,
+      "provenance": [
+        {
+          "path": "knowledge/d10-clhs-streams-census-20261009.json",
+          "git_blob": "4c39efaf558dd654272a690e6a01c0ae1c1b262f",
+          "field": "rows",
+          "record_id": null,
+          "original_spelling": "FILE-LENGTH",
+          "primary_url": "https://www.cs.cmu.edu/Groups/AI/html/hyperspec/HyperSpec/Body/sec_the_streams_dictionary.html",
+          "locator": null,
+          "review_status": "READ-ONLY-SOURCE-GRADED-CENSUS-NOT-SELECTED"
+        }
+      ],
+      "provisional_coordinate": null,
+      "coordinate_basis": "NOT-ALLOCATED-PENDING-DEDUP",
+      "selected_in_canonical_d10": false,
+      "ratified_resident": false,
+      "physical_t5_authorized": false
+    },
+    {
+      "semantic_name": "FILE-POSITION",
+      "review_class": "SOURCE-NAME-OR-HOLD",
+      "previous_source_review": "READ-ONLY-SOURCE-GRADED-CENSUS-NOT-SELECTED",
+      "observable_law": null,
+      "positive_witnesses": [],
+      "falsifier": null,
+      "provenance": [
+        {
+          "path": "knowledge/d10-clhs-streams-census-20261009.json",
+          "git_blob": "4c39efaf558dd654272a690e6a01c0ae1c1b262f",
+          "field": "rows",
+          "record_id": null,
+          "original_spelling": "FILE-POSITION",
+          "primary_url": "https://www.cs.cmu.edu/Groups/AI/html/hyperspec/HyperSpec/Body/sec_the_streams_dictionary.html",
+          "locator": null,
+          "review_status": "READ-ONLY-SOURCE-GRADED-CENSUS-NOT-SELECTED"
+        }
+      ],
+      "provisional_coordinate": null,
+      "coordinate_basis": "NOT-ALLOCATED-PENDING-DEDUP",
+      "selected_in_canonical_d10": false,
+      "ratified_resident": false,
+      "physical_t5_authorized": false
+    },
+    {
+      "semantic_name": "FILE-STRING-LENGTH",
+      "review_class": "SOURCE-NAME-OR-HOLD",
+      "previous_source_review": "READ-ONLY-SOURCE-GRADED-CENSUS-NOT-SELECTED",
+      "observable_law": null,
+      "positive_witnesses": [],
+      "falsifier": null,
+      "provenance": [
+        {
+          "path": "knowledge/d10-clhs-streams-census-20261009.json",
+          "git_blob": "4c39efaf558dd654272a690e6a01c0ae1c1b262f",
+          "field": "rows",
+          "record_id": null,
+          "original_spelling": "FILE-STRING-LENGTH",
+          "primary_url": "https://www.cs.cmu.edu/Groups/AI/html/hyperspec/HyperSpec/Body/sec_the_streams_dictionary.html",
+          "locator": null,
+          "review_status": "READ-ONLY-SOURCE-GRADED-CENSUS-NOT-SELECTED"
+        }
+      ],
+      "provisional_coordinate": null,
+      "coordinate_basis": "NOT-ALLOCATED-PENDING-DEDUP",
+      "selected_in_canonical_d10": false,
+      "ratified_resident": false,
+      "physical_t5_authorized": false
+    },
+    {
+      "semantic_name": "STREAM-EXTERNAL-FORMAT",
+      "review_class": "SOURCE-NAME-OR-HOLD",
+      "previous_source_review": "READ-ONLY-SOURCE-GRADED-CENSUS-NOT-SELECTED",
+      "observable_law": null,
+      "positive_witnesses": [],
+      "falsifier": null,
+      "provenance": [
+        {
+          "path": "knowledge/d10-clhs-streams-census-20261009.json",
+          "git_blob": "4c39efaf558dd654272a690e6a01c0ae1c1b262f",
+          "field": "rows",
+          "record_id": null,
+          "original_spelling": "STREAM-EXTERNAL-FORMAT",
+          "primary_url": "https://www.cs.cmu.edu/Groups/AI/html/hyperspec/HyperSpec/Body/sec_the_streams_dictionary.html",
+          "locator": null,
+          "review_status": "READ-ONLY-SOURCE-GRADED-CENSUS-NOT-SELECTED"
+        }
+      ],
+      "provisional_coordinate": null,
+      "coordinate_basis": "NOT-ALLOCATED-PENDING-DEDUP",
+      "selected_in_canonical_d10": false,
+      "ratified_resident": false,
+      "physical_t5_authorized": false
+    },
+    {
+      "semantic_name": "LISTEN",
+      "review_class": "SOURCE-NAME-OR-HOLD",
+      "previous_source_review": "READ-ONLY-SOURCE-GRADED-CENSUS-NOT-SELECTED",
+      "observable_law": null,
+      "positive_witnesses": [],
+      "falsifier": null,
+      "provenance": [
+        {
+          "path": "knowledge/d10-clhs-streams-census-20261009.json",
+          "git_blob": "4c39efaf558dd654272a690e6a01c0ae1c1b262f",
+          "field": "rows",
+          "record_id": null,
+          "original_spelling": "LISTEN",
+          "primary_url": "https://www.cs.cmu.edu/Groups/AI/html/hyperspec/HyperSpec/Body/sec_the_streams_dictionary.html",
+          "locator": null,
+          "review_status": "READ-ONLY-SOURCE-GRADED-CENSUS-NOT-SELECTED"
+        }
+      ],
+      "provisional_coordinate": null,
+      "coordinate_basis": "NOT-ALLOCATED-PENDING-DEDUP",
+      "selected_in_canonical_d10": false,
+      "ratified_resident": false,
+      "physical_t5_authorized": false
+    },
+    {
+      "semantic_name": "CLEAR-INPUT",
+      "review_class": "SOURCE-NAME-OR-HOLD",
+      "previous_source_review": "READ-ONLY-SOURCE-GRADED-CENSUS-NOT-SELECTED",
+      "observable_law": null,
+      "positive_witnesses": [],
+      "falsifier": null,
+      "provenance": [
+        {
+          "path": "knowledge/d10-clhs-streams-census-20261009.json",
+          "git_blob": "4c39efaf558dd654272a690e6a01c0ae1c1b262f",
+          "field": "rows",
+          "record_id": null,
+          "original_spelling": "CLEAR-INPUT",
+          "primary_url": "https://www.cs.cmu.edu/Groups/AI/html/hyperspec/HyperSpec/Body/sec_the_streams_dictionary.html",
+          "locator": null,
+          "review_status": "READ-ONLY-SOURCE-GRADED-CENSUS-NOT-SELECTED"
+        }
+      ],
+      "provisional_coordinate": null,
+      "coordinate_basis": "NOT-ALLOCATED-PENDING-DEDUP",
+      "selected_in_canonical_d10": false,
+      "ratified_resident": false,
+      "physical_t5_authorized": false
+    },
+    {
+      "semantic_name": "FINISH-OUTPUT",
+      "review_class": "SOURCE-NAME-OR-HOLD",
+      "previous_source_review": "READ-ONLY-SOURCE-GRADED-CENSUS-NOT-SELECTED",
+      "observable_law": null,
+      "positive_witnesses": [],
+      "falsifier": null,
+      "provenance": [
+        {
+          "path": "knowledge/d10-clhs-streams-census-20261009.json",
+          "git_blob": "4c39efaf558dd654272a690e6a01c0ae1c1b262f",
+          "field": "rows",
+          "record_id": null,
+          "original_spelling": "FINISH-OUTPUT",
+          "primary_url": "https://www.cs.cmu.edu/Groups/AI/html/hyperspec/HyperSpec/Body/sec_the_streams_dictionary.html",
+          "locator": null,
+          "review_status": "READ-ONLY-SOURCE-GRADED-CENSUS-NOT-SELECTED"
+        }
+      ],
+      "provisional_coordinate": null,
+      "coordinate_basis": "NOT-ALLOCATED-PENDING-DEDUP",
+      "selected_in_canonical_d10": false,
+      "ratified_resident": false,
+      "physical_t5_authorized": false
+    },
+    {
+      "semantic_name": "FORCE-OUTPUT",
+      "review_class": "SOURCE-NAME-OR-HOLD",
+      "previous_source_review": "READ-ONLY-SOURCE-GRADED-CENSUS-NOT-SELECTED",
+      "observable_law": null,
+      "positive_witnesses": [],
+      "falsifier": null,
+      "provenance": [
+        {
+          "path": "knowledge/d10-clhs-streams-census-20261009.json",
+          "git_blob": "4c39efaf558dd654272a690e6a01c0ae1c1b262f",
+          "field": "rows",
+          "record_id": null,
+          "original_spelling": "FORCE-OUTPUT",
+          "primary_url": "https://www.cs.cmu.edu/Groups/AI/html/hyperspec/HyperSpec/Body/sec_the_streams_dictionary.html",
+          "locator": null,
+          "review_status": "READ-ONLY-SOURCE-GRADED-CENSUS-NOT-SELECTED"
+        }
+      ],
+      "provisional_coordinate": null,
+      "coordinate_basis": "NOT-ALLOCATED-PENDING-DEDUP",
+      "selected_in_canonical_d10": false,
+      "ratified_resident": false,
+      "physical_t5_authorized": false
+    },
+    {
+      "semantic_name": "CLEAR-OUTPUT",
+      "review_class": "SOURCE-NAME-OR-HOLD",
+      "previous_source_review": "READ-ONLY-SOURCE-GRADED-CENSUS-NOT-SELECTED",
+      "observable_law": null,
+      "positive_witnesses": [],
+      "falsifier": null,
+      "provenance": [
+        {
+          "path": "knowledge/d10-clhs-streams-census-20261009.json",
+          "git_blob": "4c39efaf558dd654272a690e6a01c0ae1c1b262f",
+          "field": "rows",
+          "record_id": null,
+          "original_spelling": "CLEAR-OUTPUT",
+          "primary_url": "https://www.cs.cmu.edu/Groups/AI/html/hyperspec/HyperSpec/Body/sec_the_streams_dictionary.html",
+          "locator": null,
+          "review_status": "READ-ONLY-SOURCE-GRADED-CENSUS-NOT-SELECTED"
+        }
+      ],
+      "provisional_coordinate": null,
+      "coordinate_basis": "NOT-ALLOCATED-PENDING-DEDUP",
+      "selected_in_canonical_d10": false,
+      "ratified_resident": false,
+      "physical_t5_authorized": false
+    },
+    {
+      "semantic_name": "Y-OR-N-P",
+      "review_class": "SOURCE-NAME-OR-HOLD",
+      "previous_source_review": "READ-ONLY-SOURCE-GRADED-CENSUS-NOT-SELECTED",
+      "observable_law": null,
+      "positive_witnesses": [],
+      "falsifier": null,
+      "provenance": [
+        {
+          "path": "knowledge/d10-clhs-streams-census-20261009.json",
+          "git_blob": "4c39efaf558dd654272a690e6a01c0ae1c1b262f",
+          "field": "rows",
+          "record_id": null,
+          "original_spelling": "Y-OR-N-P",
+          "primary_url": "https://www.cs.cmu.edu/Groups/AI/html/hyperspec/HyperSpec/Body/sec_the_streams_dictionary.html",
+          "locator": null,
+          "review_status": "READ-ONLY-SOURCE-GRADED-CENSUS-NOT-SELECTED"
+        }
+      ],
+      "provisional_coordinate": null,
+      "coordinate_basis": "NOT-ALLOCATED-PENDING-DEDUP",
+      "selected_in_canonical_d10": false,
+      "ratified_resident": false,
+      "physical_t5_authorized": false
+    },
+    {
+      "semantic_name": "YES-OR-NO-P",
+      "review_class": "SOURCE-NAME-OR-HOLD",
+      "previous_source_review": "READ-ONLY-SOURCE-GRADED-CENSUS-NOT-SELECTED",
+      "observable_law": null,
+      "positive_witnesses": [],
+      "falsifier": null,
+      "provenance": [
+        {
+          "path": "knowledge/d10-clhs-streams-census-20261009.json",
+          "git_blob": "4c39efaf558dd654272a690e6a01c0ae1c1b262f",
+          "field": "rows",
+          "record_id": null,
+          "original_spelling": "YES-OR-NO-P",
+          "primary_url": "https://www.cs.cmu.edu/Groups/AI/html/hyperspec/HyperSpec/Body/sec_the_streams_dictionary.html",
+          "locator": null,
+          "review_status": "READ-ONLY-SOURCE-GRADED-CENSUS-NOT-SELECTED"
+        }
+      ],
+      "provisional_coordinate": null,
+      "coordinate_basis": "NOT-ALLOCATED-PENDING-DEDUP",
+      "selected_in_canonical_d10": false,
+      "ratified_resident": false,
+      "physical_t5_authorized": false
+    },
+    {
+      "semantic_name": "MAKE-SYNONYM-STREAM",
+      "review_class": "BEHAVIOR-SPECIFIED-RESEARCH",
+      "previous_source_review": "READ-ONLY-SOURCE-GRADED-CENSUS-NOT-SELECTED | HOLD-REQUIRES-DYNAMIC-BINDING-ORACLE",
+      "observable_law": "Stream operations dynamically delegate to the stream currently bound to the symbol; rebinding the dynamic variable changes target without reconstructing alias.",
+      "positive_witnesses": [
+        "Bind variable to input stream '1' and read alias -> 1; alias object identity unchanged",
+        "Rebind same variable to another input stream '2' and read same alias -> 2"
+      ],
+      "falsifier": "Alias continues reading original stream after rebinding, or silently treats symbol as a copied stream.",
+      "provenance": [
+        {
+          "path": "knowledge/d10-clhs-streams-census-20261009.json",
+          "git_blob": "4c39efaf558dd654272a690e6a01c0ae1c1b262f",
+          "field": "rows",
+          "record_id": null,
+          "original_spelling": "MAKE-SYNONYM-STREAM",
+          "primary_url": "https://www.cs.cmu.edu/Groups/AI/html/hyperspec/HyperSpec/Body/sec_the_streams_dictionary.html",
+          "locator": null,
+          "review_status": "READ-ONLY-SOURCE-GRADED-CENSUS-NOT-SELECTED"
+        },
+        {
+          "path": "knowledge/d10-clhs-streams-census-20261009.json",
+          "git_blob": "4c39efaf558dd654272a690e6a01c0ae1c1b262f",
+          "field": "root_reviews",
+          "record_id": null,
+          "original_spelling": "MAKE-SYNONYM-STREAM",
+          "primary_url": "https://www.cs.cmu.edu/Groups/AI/html/hyperspec/HyperSpec/Body/fun_make-synonym-stream.html",
+          "locator": null,
+          "review_status": "HOLD-REQUIRES-DYNAMIC-BINDING-ORACLE"
+        }
+      ],
+      "provisional_coordinate": "1110010000",
+      "coordinate_basis": "NONCANONICAL-HISTORICAL-EVIDENCE-RESEARCH-RESERVATION",
+      "selected_in_canonical_d10": false,
+      "ratified_resident": false,
+      "physical_t5_authorized": false
+    },
+    {
+      "semantic_name": "SYNONYM-STREAM-SYMBOL",
+      "review_class": "SOURCE-NAME-OR-HOLD",
+      "previous_source_review": "READ-ONLY-SOURCE-GRADED-CENSUS-NOT-SELECTED",
+      "observable_law": null,
+      "positive_witnesses": [],
+      "falsifier": null,
+      "provenance": [
+        {
+          "path": "knowledge/d10-clhs-streams-census-20261009.json",
+          "git_blob": "4c39efaf558dd654272a690e6a01c0ae1c1b262f",
+          "field": "rows",
+          "record_id": null,
+          "original_spelling": "SYNONYM-STREAM-SYMBOL",
+          "primary_url": "https://www.cs.cmu.edu/Groups/AI/html/hyperspec/HyperSpec/Body/sec_the_streams_dictionary.html",
+          "locator": null,
+          "review_status": "READ-ONLY-SOURCE-GRADED-CENSUS-NOT-SELECTED"
+        }
+      ],
+      "provisional_coordinate": null,
+      "coordinate_basis": "NOT-ALLOCATED-PENDING-DEDUP",
+      "selected_in_canonical_d10": false,
+      "ratified_resident": false,
+      "physical_t5_authorized": false
+    },
+    {
+      "semantic_name": "BROADCAST-STREAM-STREAMS",
+      "review_class": "SOURCE-NAME-OR-HOLD",
+      "previous_source_review": "READ-ONLY-SOURCE-GRADED-CENSUS-NOT-SELECTED",
+      "observable_law": null,
+      "positive_witnesses": [],
+      "falsifier": null,
+      "provenance": [
+        {
+          "path": "knowledge/d10-clhs-streams-census-20261009.json",
+          "git_blob": "4c39efaf558dd654272a690e6a01c0ae1c1b262f",
+          "field": "rows",
+          "record_id": null,
+          "original_spelling": "BROADCAST-STREAM-STREAMS",
+          "primary_url": "https://www.cs.cmu.edu/Groups/AI/html/hyperspec/HyperSpec/Body/sec_the_streams_dictionary.html",
+          "locator": null,
+          "review_status": "READ-ONLY-SOURCE-GRADED-CENSUS-NOT-SELECTED"
+        }
+      ],
+      "provisional_coordinate": null,
+      "coordinate_basis": "NOT-ALLOCATED-PENDING-DEDUP",
+      "selected_in_canonical_d10": false,
+      "ratified_resident": false,
+      "physical_t5_authorized": false
+    },
+    {
+      "semantic_name": "MAKE-BROADCAST-STREAM",
+      "review_class": "SOURCE-NAME-OR-HOLD",
+      "previous_source_review": "READ-ONLY-SOURCE-GRADED-CENSUS-NOT-SELECTED",
+      "observable_law": null,
+      "positive_witnesses": [],
+      "falsifier": null,
+      "provenance": [
+        {
+          "path": "knowledge/d10-clhs-streams-census-20261009.json",
+          "git_blob": "4c39efaf558dd654272a690e6a01c0ae1c1b262f",
+          "field": "rows",
+          "record_id": null,
+          "original_spelling": "MAKE-BROADCAST-STREAM",
+          "primary_url": "https://www.cs.cmu.edu/Groups/AI/html/hyperspec/HyperSpec/Body/sec_the_streams_dictionary.html",
+          "locator": null,
+          "review_status": "READ-ONLY-SOURCE-GRADED-CENSUS-NOT-SELECTED"
+        }
+      ],
+      "provisional_coordinate": null,
+      "coordinate_basis": "NOT-ALLOCATED-PENDING-DEDUP",
+      "selected_in_canonical_d10": false,
+      "ratified_resident": false,
+      "physical_t5_authorized": false
+    },
+    {
+      "semantic_name": "MAKE-TWO-WAY-STREAM",
+      "review_class": "SOURCE-NAME-OR-HOLD",
+      "previous_source_review": "READ-ONLY-SOURCE-GRADED-CENSUS-NOT-SELECTED",
+      "observable_law": null,
+      "positive_witnesses": [],
+      "falsifier": null,
+      "provenance": [
+        {
+          "path": "knowledge/d10-clhs-streams-census-20261009.json",
+          "git_blob": "4c39efaf558dd654272a690e6a01c0ae1c1b262f",
+          "field": "rows",
+          "record_id": null,
+          "original_spelling": "MAKE-TWO-WAY-STREAM",
+          "primary_url": "https://www.cs.cmu.edu/Groups/AI/html/hyperspec/HyperSpec/Body/sec_the_streams_dictionary.html",
+          "locator": null,
+          "review_status": "READ-ONLY-SOURCE-GRADED-CENSUS-NOT-SELECTED"
+        }
+      ],
+      "provisional_coordinate": null,
+      "coordinate_basis": "NOT-ALLOCATED-PENDING-DEDUP",
+      "selected_in_canonical_d10": false,
+      "ratified_resident": false,
+      "physical_t5_authorized": false
+    },
+    {
+      "semantic_name": "TWO-WAY-STREAM-INPUT-STREAM",
+      "review_class": "SOURCE-NAME-OR-HOLD",
+      "previous_source_review": "READ-ONLY-SOURCE-GRADED-CENSUS-NOT-SELECTED",
+      "observable_law": null,
+      "positive_witnesses": [],
+      "falsifier": null,
+      "provenance": [
+        {
+          "path": "knowledge/d10-clhs-streams-census-20261009.json",
+          "git_blob": "4c39efaf558dd654272a690e6a01c0ae1c1b262f",
+          "field": "rows",
+          "record_id": null,
+          "original_spelling": "TWO-WAY-STREAM-INPUT-STREAM",
+          "primary_url": "https://www.cs.cmu.edu/Groups/AI/html/hyperspec/HyperSpec/Body/sec_the_streams_dictionary.html",
+          "locator": null,
+          "review_status": "READ-ONLY-SOURCE-GRADED-CENSUS-NOT-SELECTED"
+        }
+      ],
+      "provisional_coordinate": null,
+      "coordinate_basis": "NOT-ALLOCATED-PENDING-DEDUP",
+      "selected_in_canonical_d10": false,
+      "ratified_resident": false,
+      "physical_t5_authorized": false
+    },
+    {
+      "semantic_name": "TWO-WAY-STREAM-OUTPUT-STREAM",
+      "review_class": "SOURCE-NAME-OR-HOLD",
+      "previous_source_review": "READ-ONLY-SOURCE-GRADED-CENSUS-NOT-SELECTED",
+      "observable_law": null,
+      "positive_witnesses": [],
+      "falsifier": null,
+      "provenance": [
+        {
+          "path": "knowledge/d10-clhs-streams-census-20261009.json",
+          "git_blob": "4c39efaf558dd654272a690e6a01c0ae1c1b262f",
+          "field": "rows",
+          "record_id": null,
+          "original_spelling": "TWO-WAY-STREAM-OUTPUT-STREAM",
+          "primary_url": "https://www.cs.cmu.edu/Groups/AI/html/hyperspec/HyperSpec/Body/sec_the_streams_dictionary.html",
+          "locator": null,
+          "review_status": "READ-ONLY-SOURCE-GRADED-CENSUS-NOT-SELECTED"
+        }
+      ],
+      "provisional_coordinate": null,
+      "coordinate_basis": "NOT-ALLOCATED-PENDING-DEDUP",
+      "selected_in_canonical_d10": false,
+      "ratified_resident": false,
+      "physical_t5_authorized": false
+    },
+    {
+      "semantic_name": "ECHO-STREAM-INPUT-STREAM",
+      "review_class": "SOURCE-NAME-OR-HOLD",
+      "previous_source_review": "READ-ONLY-SOURCE-GRADED-CENSUS-NOT-SELECTED",
+      "observable_law": null,
+      "positive_witnesses": [],
+      "falsifier": null,
+      "provenance": [
+        {
+          "path": "knowledge/d10-clhs-streams-census-20261009.json",
+          "git_blob": "4c39efaf558dd654272a690e6a01c0ae1c1b262f",
+          "field": "rows",
+          "record_id": null,
+          "original_spelling": "ECHO-STREAM-INPUT-STREAM",
+          "primary_url": "https://www.cs.cmu.edu/Groups/AI/html/hyperspec/HyperSpec/Body/sec_the_streams_dictionary.html",
+          "locator": null,
+          "review_status": "READ-ONLY-SOURCE-GRADED-CENSUS-NOT-SELECTED"
+        }
+      ],
+      "provisional_coordinate": null,
+      "coordinate_basis": "NOT-ALLOCATED-PENDING-DEDUP",
+      "selected_in_canonical_d10": false,
+      "ratified_resident": false,
+      "physical_t5_authorized": false
+    },
+    {
+      "semantic_name": "ECHO-STREAM-OUTPUT-STREAM",
+      "review_class": "SOURCE-NAME-OR-HOLD",
+      "previous_source_review": "READ-ONLY-SOURCE-GRADED-CENSUS-NOT-SELECTED",
+      "observable_law": null,
+      "positive_witnesses": [],
+      "falsifier": null,
+      "provenance": [
+        {
+          "path": "knowledge/d10-clhs-streams-census-20261009.json",
+          "git_blob": "4c39efaf558dd654272a690e6a01c0ae1c1b262f",
+          "field": "rows",
+          "record_id": null,
+          "original_spelling": "ECHO-STREAM-OUTPUT-STREAM",
+          "primary_url": "https://www.cs.cmu.edu/Groups/AI/html/hyperspec/HyperSpec/Body/sec_the_streams_dictionary.html",
+          "locator": null,
+          "review_status": "READ-ONLY-SOURCE-GRADED-CENSUS-NOT-SELECTED"
+        }
+      ],
+      "provisional_coordinate": null,
+      "coordinate_basis": "NOT-ALLOCATED-PENDING-DEDUP",
+      "selected_in_canonical_d10": false,
+      "ratified_resident": false,
+      "physical_t5_authorized": false
+    },
+    {
+      "semantic_name": "MAKE-ECHO-STREAM",
+      "review_class": "SOURCE-NAME-OR-HOLD",
+      "previous_source_review": "READ-ONLY-SOURCE-GRADED-CENSUS-NOT-SELECTED",
+      "observable_law": null,
+      "positive_witnesses": [],
+      "falsifier": null,
+      "provenance": [
+        {
+          "path": "knowledge/d10-clhs-streams-census-20261009.json",
+          "git_blob": "4c39efaf558dd654272a690e6a01c0ae1c1b262f",
+          "field": "rows",
+          "record_id": null,
+          "original_spelling": "MAKE-ECHO-STREAM",
+          "primary_url": "https://www.cs.cmu.edu/Groups/AI/html/hyperspec/HyperSpec/Body/sec_the_streams_dictionary.html",
+          "locator": null,
+          "review_status": "READ-ONLY-SOURCE-GRADED-CENSUS-NOT-SELECTED"
+        }
+      ],
+      "provisional_coordinate": null,
+      "coordinate_basis": "NOT-ALLOCATED-PENDING-DEDUP",
+      "selected_in_canonical_d10": false,
+      "ratified_resident": false,
+      "physical_t5_authorized": false
+    },
+    {
+      "semantic_name": "CONCATENATED-STREAM-STREAMS",
+      "review_class": "SOURCE-NAME-OR-HOLD",
+      "previous_source_review": "READ-ONLY-SOURCE-GRADED-CENSUS-NOT-SELECTED",
+      "observable_law": null,
+      "positive_witnesses": [],
+      "falsifier": null,
+      "provenance": [
+        {
+          "path": "knowledge/d10-clhs-streams-census-20261009.json",
+          "git_blob": "4c39efaf558dd654272a690e6a01c0ae1c1b262f",
+          "field": "rows",
+          "record_id": null,
+          "original_spelling": "CONCATENATED-STREAM-STREAMS",
+          "primary_url": "https://www.cs.cmu.edu/Groups/AI/html/hyperspec/HyperSpec/Body/sec_the_streams_dictionary.html",
+          "locator": null,
+          "review_status": "READ-ONLY-SOURCE-GRADED-CENSUS-NOT-SELECTED"
+        }
+      ],
+      "provisional_coordinate": null,
+      "coordinate_basis": "NOT-ALLOCATED-PENDING-DEDUP",
+      "selected_in_canonical_d10": false,
+      "ratified_resident": false,
+      "physical_t5_authorized": false
+    },
+    {
+      "semantic_name": "MAKE-CONCATENATED-STREAM",
+      "review_class": "BEHAVIOR-SPECIFIED-RESEARCH",
+      "previous_source_review": "READ-ONLY-SOURCE-GRADED-CENSUS-NOT-SELECTED | HOLD-NEEDS-ORACLE-AND-DEDUP",
+      "observable_law": "Read first input stream to EOF, then next; only terminal EOF after all children exhausted; consumption advances constituent cursor.",
+      "positive_witnesses": [
+        "Concatenate streams yielding 'ab' and 'cd', four successive READ-CHAR results a,b,c,d",
+        "With first empty stream and second 'x', first READ-CHAR returns x"
+      ],
+      "falsifier": "Skip unexhausted first stream, interleave streams, or expose EOF before advancing to next.",
+      "provenance": [
+        {
+          "path": "knowledge/d10-clhs-streams-census-20261009.json",
+          "git_blob": "4c39efaf558dd654272a690e6a01c0ae1c1b262f",
+          "field": "rows",
+          "record_id": null,
+          "original_spelling": "MAKE-CONCATENATED-STREAM",
+          "primary_url": "https://www.cs.cmu.edu/Groups/AI/html/hyperspec/HyperSpec/Body/sec_the_streams_dictionary.html",
+          "locator": null,
+          "review_status": "READ-ONLY-SOURCE-GRADED-CENSUS-NOT-SELECTED"
+        },
+        {
+          "path": "knowledge/d10-clhs-streams-census-20261009.json",
+          "git_blob": "4c39efaf558dd654272a690e6a01c0ae1c1b262f",
+          "field": "root_reviews",
+          "record_id": null,
+          "original_spelling": "MAKE-CONCATENATED-STREAM",
+          "primary_url": "https://www.cs.cmu.edu/Groups/AI/util/html/hyperspec/HyperSpec/Body/fun_make-conc_nated-stream.html",
+          "locator": null,
+          "review_status": "HOLD-NEEDS-ORACLE-AND-DEDUP"
+        }
+      ],
+      "provisional_coordinate": "1110010001",
+      "coordinate_basis": "NONCANONICAL-HISTORICAL-EVIDENCE-RESEARCH-RESERVATION",
+      "selected_in_canonical_d10": false,
+      "ratified_resident": false,
+      "physical_t5_authorized": false
+    },
+    {
+      "semantic_name": "GET-OUTPUT-STREAM-STRING",
+      "review_class": "BEHAVIOR-SPECIFIED-RESEARCH",
+      "previous_source_review": "READ-ONLY-SOURCE-GRADED-CENSUS-NOT-SELECTED | HOLD-NEEDS-ORACLE-AND-DEDUP",
+      "observable_law": "Return accumulated output and clear pending characters; repeated call without more output returns empty string.",
+      "positive_witnesses": [
+        "Write 'ab' then first extraction returns 'ab'",
+        "Second extraction without new writes returns empty string; after write 'c', next extraction returns 'c'"
+      ],
+      "falsifier": "Second extraction returns 'ab' again or extraction silently closes the stream.",
+      "provenance": [
+        {
+          "path": "knowledge/d10-clhs-streams-census-20261009.json",
+          "git_blob": "4c39efaf558dd654272a690e6a01c0ae1c1b262f",
+          "field": "rows",
+          "record_id": null,
+          "original_spelling": "GET-OUTPUT-STREAM-STRING",
+          "primary_url": "https://www.cs.cmu.edu/Groups/AI/html/hyperspec/HyperSpec/Body/sec_the_streams_dictionary.html",
+          "locator": null,
+          "review_status": "READ-ONLY-SOURCE-GRADED-CENSUS-NOT-SELECTED"
+        },
+        {
+          "path": "knowledge/d10-clhs-streams-census-20261009.json",
+          "git_blob": "4c39efaf558dd654272a690e6a01c0ae1c1b262f",
+          "field": "root_reviews",
+          "record_id": null,
+          "original_spelling": "GET-OUTPUT-STREAM-STRING",
+          "primary_url": "https://www.cs.cmu.edu/Groups/AI/util/html/hyperspec/HyperSpec/Body/fun_get-outpu_tream-string.html",
+          "locator": null,
+          "review_status": "HOLD-NEEDS-ORACLE-AND-DEDUP"
+        }
+      ],
+      "provisional_coordinate": "1110010010",
+      "coordinate_basis": "NONCANONICAL-HISTORICAL-EVIDENCE-RESEARCH-RESERVATION",
+      "selected_in_canonical_d10": false,
+      "ratified_resident": false,
+      "physical_t5_authorized": false
+    },
+    {
+      "semantic_name": "MAKE-STRING-INPUT-STREAM",
+      "review_class": "SOURCE-NAME-OR-HOLD",
+      "previous_source_review": "READ-ONLY-SOURCE-GRADED-CENSUS-NOT-SELECTED",
+      "observable_law": null,
+      "positive_witnesses": [],
+      "falsifier": null,
+      "provenance": [
+        {
+          "path": "knowledge/d10-clhs-streams-census-20261009.json",
+          "git_blob": "4c39efaf558dd654272a690e6a01c0ae1c1b262f",
+          "field": "rows",
+          "record_id": null,
+          "original_spelling": "MAKE-STRING-INPUT-STREAM",
+          "primary_url": "https://www.cs.cmu.edu/Groups/AI/html/hyperspec/HyperSpec/Body/sec_the_streams_dictionary.html",
+          "locator": null,
+          "review_status": "READ-ONLY-SOURCE-GRADED-CENSUS-NOT-SELECTED"
+        }
+      ],
+      "provisional_coordinate": null,
+      "coordinate_basis": "NOT-ALLOCATED-PENDING-DEDUP",
+      "selected_in_canonical_d10": false,
+      "ratified_resident": false,
+      "physical_t5_authorized": false
+    },
+    {
+      "semantic_name": "MAKE-STRING-OUTPUT-STREAM",
+      "review_class": "SOURCE-NAME-OR-HOLD",
+      "previous_source_review": "READ-ONLY-SOURCE-GRADED-CENSUS-NOT-SELECTED",
+      "observable_law": null,
+      "positive_witnesses": [],
+      "falsifier": null,
+      "provenance": [
+        {
+          "path": "knowledge/d10-clhs-streams-census-20261009.json",
+          "git_blob": "4c39efaf558dd654272a690e6a01c0ae1c1b262f",
+          "field": "rows",
+          "record_id": null,
+          "original_spelling": "MAKE-STRING-OUTPUT-STREAM",
+          "primary_url": "https://www.cs.cmu.edu/Groups/AI/html/hyperspec/HyperSpec/Body/sec_the_streams_dictionary.html",
+          "locator": null,
+          "review_status": "READ-ONLY-SOURCE-GRADED-CENSUS-NOT-SELECTED"
+        }
+      ],
+      "provisional_coordinate": null,
+      "coordinate_basis": "NOT-ALLOCATED-PENDING-DEDUP",
+      "selected_in_canonical_d10": false,
+      "ratified_resident": false,
+      "physical_t5_authorized": false
+    },
+    {
+      "semantic_name": "STREAM-ERROR-STREAM",
+      "review_class": "SOURCE-NAME-OR-HOLD",
+      "previous_source_review": "READ-ONLY-SOURCE-GRADED-CENSUS-NOT-SELECTED",
+      "observable_law": null,
+      "positive_witnesses": [],
+      "falsifier": null,
+      "provenance": [
+        {
+          "path": "knowledge/d10-clhs-streams-census-20261009.json",
+          "git_blob": "4c39efaf558dd654272a690e6a01c0ae1c1b262f",
+          "field": "rows",
+          "record_id": null,
+          "original_spelling": "STREAM-ERROR-STREAM",
+          "primary_url": "https://www.cs.cmu.edu/Groups/AI/html/hyperspec/HyperSpec/Body/sec_the_streams_dictionary.html",
+          "locator": null,
+          "review_status": "READ-ONLY-SOURCE-GRADED-CENSUS-NOT-SELECTED"
+        }
+      ],
+      "provisional_coordinate": null,
+      "coordinate_basis": "NOT-ALLOCATED-PENDING-DEDUP",
+      "selected_in_canonical_d10": false,
+      "ratified_resident": false,
+      "physical_t5_authorized": false
+    },
+    {
+      "semantic_name": "WITH-OPEN-STREAM",
+      "review_class": "SOURCE-NAME-OR-HOLD",
+      "previous_source_review": "READ-ONLY-SOURCE-GRADED-CENSUS-NOT-SELECTED",
+      "observable_law": null,
+      "positive_witnesses": [],
+      "falsifier": null,
+      "provenance": [
+        {
+          "path": "knowledge/d10-clhs-streams-census-20261009.json",
+          "git_blob": "4c39efaf558dd654272a690e6a01c0ae1c1b262f",
+          "field": "rows",
+          "record_id": null,
+          "original_spelling": "WITH-OPEN-STREAM",
+          "primary_url": "https://www.cs.cmu.edu/Groups/AI/html/hyperspec/HyperSpec/Body/sec_the_streams_dictionary.html",
+          "locator": null,
+          "review_status": "READ-ONLY-SOURCE-GRADED-CENSUS-NOT-SELECTED"
+        }
+      ],
+      "provisional_coordinate": null,
+      "coordinate_basis": "NOT-ALLOCATED-PENDING-DEDUP",
+      "selected_in_canonical_d10": false,
+      "ratified_resident": false,
+      "physical_t5_authorized": false
+    },
+    {
+      "semantic_name": "WITH-INPUT-FROM-STRING",
+      "review_class": "SOURCE-NAME-OR-HOLD",
+      "previous_source_review": "READ-ONLY-SOURCE-GRADED-CENSUS-NOT-SELECTED",
+      "observable_law": null,
+      "positive_witnesses": [],
+      "falsifier": null,
+      "provenance": [
+        {
+          "path": "knowledge/d10-clhs-streams-census-20261009.json",
+          "git_blob": "4c39efaf558dd654272a690e6a01c0ae1c1b262f",
+          "field": "rows",
+          "record_id": null,
+          "original_spelling": "WITH-INPUT-FROM-STRING",
+          "primary_url": "https://www.cs.cmu.edu/Groups/AI/html/hyperspec/HyperSpec/Body/sec_the_streams_dictionary.html",
+          "locator": null,
+          "review_status": "READ-ONLY-SOURCE-GRADED-CENSUS-NOT-SELECTED"
+        }
+      ],
+      "provisional_coordinate": null,
+      "coordinate_basis": "NOT-ALLOCATED-PENDING-DEDUP",
+      "selected_in_canonical_d10": false,
+      "ratified_resident": false,
+      "physical_t5_authorized": false
+    },
+    {
+      "semantic_name": "WITH-OUTPUT-TO-STRING",
+      "review_class": "SOURCE-NAME-OR-HOLD",
+      "previous_source_review": "READ-ONLY-SOURCE-GRADED-CENSUS-NOT-SELECTED",
+      "observable_law": null,
+      "positive_witnesses": [],
+      "falsifier": null,
+      "provenance": [
+        {
+          "path": "knowledge/d10-clhs-streams-census-20261009.json",
+          "git_blob": "4c39efaf558dd654272a690e6a01c0ae1c1b262f",
+          "field": "rows",
+          "record_id": null,
+          "original_spelling": "WITH-OUTPUT-TO-STRING",
+          "primary_url": "https://www.cs.cmu.edu/Groups/AI/html/hyperspec/HyperSpec/Body/sec_the_streams_dictionary.html",
+          "locator": null,
+          "review_status": "READ-ONLY-SOURCE-GRADED-CENSUS-NOT-SELECTED"
+        }
+      ],
+      "provisional_coordinate": null,
+      "coordinate_basis": "NOT-ALLOCATED-PENDING-DEDUP",
+      "selected_in_canonical_d10": false,
+      "ratified_resident": false,
+      "physical_t5_authorized": false
+    },
+    {
+      "semantic_name": "*DEBUG-IO*",
+      "review_class": "SOURCE-NAME-OR-HOLD",
+      "previous_source_review": "READ-ONLY-SOURCE-GRADED-CENSUS-NOT-SELECTED",
+      "observable_law": null,
+      "positive_witnesses": [],
+      "falsifier": null,
+      "provenance": [
+        {
+          "path": "knowledge/d10-clhs-streams-census-20261009.json",
+          "git_blob": "4c39efaf558dd654272a690e6a01c0ae1c1b262f",
+          "field": "rows",
+          "record_id": null,
+          "original_spelling": "*DEBUG-IO*",
+          "primary_url": "https://www.cs.cmu.edu/Groups/AI/html/hyperspec/HyperSpec/Body/sec_the_streams_dictionary.html",
+          "locator": null,
+          "review_status": "READ-ONLY-SOURCE-GRADED-CENSUS-NOT-SELECTED"
+        }
+      ],
+      "provisional_coordinate": null,
+      "coordinate_basis": "NOT-ALLOCATED-PENDING-DEDUP",
+      "selected_in_canonical_d10": false,
+      "ratified_resident": false,
+      "physical_t5_authorized": false
+    },
+    {
+      "semantic_name": "*ERROR-OUTPUT*",
+      "review_class": "SOURCE-NAME-OR-HOLD",
+      "previous_source_review": "READ-ONLY-SOURCE-GRADED-CENSUS-NOT-SELECTED",
+      "observable_law": null,
+      "positive_witnesses": [],
+      "falsifier": null,
+      "provenance": [
+        {
+          "path": "knowledge/d10-clhs-streams-census-20261009.json",
+          "git_blob": "4c39efaf558dd654272a690e6a01c0ae1c1b262f",
+          "field": "rows",
+          "record_id": null,
+          "original_spelling": "*ERROR-OUTPUT*",
+          "primary_url": "https://www.cs.cmu.edu/Groups/AI/html/hyperspec/HyperSpec/Body/sec_the_streams_dictionary.html",
+          "locator": null,
+          "review_status": "READ-ONLY-SOURCE-GRADED-CENSUS-NOT-SELECTED"
+        }
+      ],
+      "provisional_coordinate": null,
+      "coordinate_basis": "NOT-ALLOCATED-PENDING-DEDUP",
+      "selected_in_canonical_d10": false,
+      "ratified_resident": false,
+      "physical_t5_authorized": false
+    },
+    {
+      "semantic_name": "*QUERY-IO*",
+      "review_class": "SOURCE-NAME-OR-HOLD",
+      "previous_source_review": "READ-ONLY-SOURCE-GRADED-CENSUS-NOT-SELECTED",
+      "observable_law": null,
+      "positive_witnesses": [],
+      "falsifier": null,
+      "provenance": [
+        {
+          "path": "knowledge/d10-clhs-streams-census-20261009.json",
+          "git_blob": "4c39efaf558dd654272a690e6a01c0ae1c1b262f",
+          "field": "rows",
+          "record_id": null,
+          "original_spelling": "*QUERY-IO*",
+          "primary_url": "https://www.cs.cmu.edu/Groups/AI/html/hyperspec/HyperSpec/Body/sec_the_streams_dictionary.html",
+          "locator": null,
+          "review_status": "READ-ONLY-SOURCE-GRADED-CENSUS-NOT-SELECTED"
+        }
+      ],
+      "provisional_coordinate": null,
+      "coordinate_basis": "NOT-ALLOCATED-PENDING-DEDUP",
+      "selected_in_canonical_d10": false,
+      "ratified_resident": false,
+      "physical_t5_authorized": false
+    },
+    {
+      "semantic_name": "*STANDARD-INPUT*",
+      "review_class": "SOURCE-NAME-OR-HOLD",
+      "previous_source_review": "READ-ONLY-SOURCE-GRADED-CENSUS-NOT-SELECTED",
+      "observable_law": null,
+      "positive_witnesses": [],
+      "falsifier": null,
+      "provenance": [
+        {
+          "path": "knowledge/d10-clhs-streams-census-20261009.json",
+          "git_blob": "4c39efaf558dd654272a690e6a01c0ae1c1b262f",
+          "field": "rows",
+          "record_id": null,
+          "original_spelling": "*STANDARD-INPUT*",
+          "primary_url": "https://www.cs.cmu.edu/Groups/AI/html/hyperspec/HyperSpec/Body/sec_the_streams_dictionary.html",
+          "locator": null,
+          "review_status": "READ-ONLY-SOURCE-GRADED-CENSUS-NOT-SELECTED"
+        }
+      ],
+      "provisional_coordinate": null,
+      "coordinate_basis": "NOT-ALLOCATED-PENDING-DEDUP",
+      "selected_in_canonical_d10": false,
+      "ratified_resident": false,
+      "physical_t5_authorized": false
+    },
+    {
+      "semantic_name": "*STANDARD-OUTPUT*",
+      "review_class": "SOURCE-NAME-OR-HOLD",
+      "previous_source_review": "READ-ONLY-SOURCE-GRADED-CENSUS-NOT-SELECTED",
+      "observable_law": null,
+      "positive_witnesses": [],
+      "falsifier": null,
+      "provenance": [
+        {
+          "path": "knowledge/d10-clhs-streams-census-20261009.json",
+          "git_blob": "4c39efaf558dd654272a690e6a01c0ae1c1b262f",
+          "field": "rows",
+          "record_id": null,
+          "original_spelling": "*STANDARD-OUTPUT*",
+          "primary_url": "https://www.cs.cmu.edu/Groups/AI/html/hyperspec/HyperSpec/Body/sec_the_streams_dictionary.html",
+          "locator": null,
+          "review_status": "READ-ONLY-SOURCE-GRADED-CENSUS-NOT-SELECTED"
+        }
+      ],
+      "provisional_coordinate": null,
+      "coordinate_basis": "NOT-ALLOCATED-PENDING-DEDUP",
+      "selected_in_canonical_d10": false,
+      "ratified_resident": false,
+      "physical_t5_authorized": false
+    },
+    {
+      "semantic_name": "*TRACE-OUTPUT*",
+      "review_class": "SOURCE-NAME-OR-HOLD",
+      "previous_source_review": "READ-ONLY-SOURCE-GRADED-CENSUS-NOT-SELECTED",
+      "observable_law": null,
+      "positive_witnesses": [],
+      "falsifier": null,
+      "provenance": [
+        {
+          "path": "knowledge/d10-clhs-streams-census-20261009.json",
+          "git_blob": "4c39efaf558dd654272a690e6a01c0ae1c1b262f",
+          "field": "rows",
+          "record_id": null,
+          "original_spelling": "*TRACE-OUTPUT*",
+          "primary_url": "https://www.cs.cmu.edu/Groups/AI/html/hyperspec/HyperSpec/Body/sec_the_streams_dictionary.html",
+          "locator": null,
+          "review_status": "READ-ONLY-SOURCE-GRADED-CENSUS-NOT-SELECTED"
+        }
+      ],
+      "provisional_coordinate": null,
+      "coordinate_basis": "NOT-ALLOCATED-PENDING-DEDUP",
+      "selected_in_canonical_d10": false,
+      "ratified_resident": false,
+      "physical_t5_authorized": false
+    },
+    {
+      "semantic_name": "*TERMINAL-IO*",
+      "review_class": "SOURCE-NAME-OR-HOLD",
+      "previous_source_review": "READ-ONLY-SOURCE-GRADED-CENSUS-NOT-SELECTED",
+      "observable_law": null,
+      "positive_witnesses": [],
+      "falsifier": null,
+      "provenance": [
+        {
+          "path": "knowledge/d10-clhs-streams-census-20261009.json",
+          "git_blob": "4c39efaf558dd654272a690e6a01c0ae1c1b262f",
+          "field": "rows",
+          "record_id": null,
+          "original_spelling": "*TERMINAL-IO*",
+          "primary_url": "https://www.cs.cmu.edu/Groups/AI/html/hyperspec/HyperSpec/Body/sec_the_streams_dictionary.html",
+          "locator": null,
+          "review_status": "READ-ONLY-SOURCE-GRADED-CENSUS-NOT-SELECTED"
+        }
+      ],
+      "provisional_coordinate": null,
+      "coordinate_basis": "NOT-ALLOCATED-PENDING-DEDUP",
+      "selected_in_canonical_d10": false,
+      "ratified_resident": false,
+      "physical_t5_authorized": false
+    },
+    {
+      "semantic_name": "STREAM-ERROR",
+      "review_class": "SOURCE-NAME-OR-HOLD",
+      "previous_source_review": "READ-ONLY-SOURCE-GRADED-CENSUS-NOT-SELECTED",
+      "observable_law": null,
+      "positive_witnesses": [],
+      "falsifier": null,
+      "provenance": [
+        {
+          "path": "knowledge/d10-clhs-streams-census-20261009.json",
+          "git_blob": "4c39efaf558dd654272a690e6a01c0ae1c1b262f",
+          "field": "rows",
+          "record_id": null,
+          "original_spelling": "STREAM-ERROR",
+          "primary_url": "https://www.cs.cmu.edu/Groups/AI/html/hyperspec/HyperSpec/Body/sec_the_streams_dictionary.html",
+          "locator": null,
+          "review_status": "READ-ONLY-SOURCE-GRADED-CENSUS-NOT-SELECTED"
+        }
+      ],
+      "provisional_coordinate": null,
+      "coordinate_basis": "NOT-ALLOCATED-PENDING-DEDUP",
+      "selected_in_canonical_d10": false,
+      "ratified_resident": false,
+      "physical_t5_authorized": false
+    },
+    {
+      "semantic_name": "END-OF-FILE",
+      "review_class": "SOURCE-NAME-OR-HOLD",
+      "previous_source_review": "READ-ONLY-SOURCE-GRADED-CENSUS-NOT-SELECTED",
+      "observable_law": null,
+      "positive_witnesses": [],
+      "falsifier": null,
+      "provenance": [
+        {
+          "path": "knowledge/d10-clhs-streams-census-20261009.json",
+          "git_blob": "4c39efaf558dd654272a690e6a01c0ae1c1b262f",
+          "field": "rows",
+          "record_id": null,
+          "original_spelling": "END-OF-FILE",
+          "primary_url": "https://www.cs.cmu.edu/Groups/AI/html/hyperspec/HyperSpec/Body/sec_the_streams_dictionary.html",
+          "locator": null,
+          "review_status": "READ-ONLY-SOURCE-GRADED-CENSUS-NOT-SELECTED"
+        }
+      ],
+      "provisional_coordinate": null,
+      "coordinate_basis": "NOT-ALLOCATED-PENDING-DEDUP",
+      "selected_in_canonical_d10": false,
+      "ratified_resident": false,
+      "physical_t5_authorized": false
+    },
+    {
+      "semantic_name": "PATHNAME",
+      "review_class": "SOURCE-NAME-OR-HOLD",
+      "previous_source_review": "TYPE-NOT-AUTOMATIC-RESIDENT | REVIEW-PURE-VALUE",
+      "observable_law": null,
+      "positive_witnesses": [],
+      "falsifier": null,
+      "provenance": [
+        {
+          "path": "knowledge/d10-clhs-pathnames-census-20261009.json",
+          "git_blob": "f32d199c1325e7daebcd7598c5121b23312bfd57",
+          "field": "roles",
+          "record_id": null,
+          "original_spelling": "PATHNAME",
+          "primary_url": null,
+          "locator": null,
+          "review_status": "TYPE-NOT-AUTOMATIC-RESIDENT"
+        },
+        {
+          "path": "knowledge/d10-clhs-pathnames-census-20261009.json",
+          "git_blob": "f32d199c1325e7daebcd7598c5121b23312bfd57",
+          "field": "roles",
+          "record_id": null,
+          "original_spelling": "PATHNAME",
+          "primary_url": null,
+          "locator": null,
+          "review_status": "REVIEW-PURE-VALUE"
+        }
+      ],
+      "provisional_coordinate": null,
+      "coordinate_basis": "NOT-ALLOCATED-PENDING-DEDUP",
+      "selected_in_canonical_d10": false,
+      "ratified_resident": false,
+      "physical_t5_authorized": false
+    },
+    {
+      "semantic_name": "LOGICAL-PATHNAME",
+      "review_class": "SOURCE-NAME-OR-HOLD",
+      "previous_source_review": "TYPE-NOT-AUTOMATIC-RESIDENT | REVIEW-PURE-VALUE",
+      "observable_law": null,
+      "positive_witnesses": [],
+      "falsifier": null,
+      "provenance": [
+        {
+          "path": "knowledge/d10-clhs-pathnames-census-20261009.json",
+          "git_blob": "f32d199c1325e7daebcd7598c5121b23312bfd57",
+          "field": "roles",
+          "record_id": null,
+          "original_spelling": "LOGICAL-PATHNAME",
+          "primary_url": null,
+          "locator": null,
+          "review_status": "TYPE-NOT-AUTOMATIC-RESIDENT"
+        },
+        {
+          "path": "knowledge/d10-clhs-pathnames-census-20261009.json",
+          "git_blob": "f32d199c1325e7daebcd7598c5121b23312bfd57",
+          "field": "roles",
+          "record_id": null,
+          "original_spelling": "LOGICAL-PATHNAME",
+          "primary_url": null,
+          "locator": null,
+          "review_status": "REVIEW-PURE-VALUE"
+        }
+      ],
+      "provisional_coordinate": null,
+      "coordinate_basis": "NOT-ALLOCATED-PENDING-DEDUP",
+      "selected_in_canonical_d10": false,
+      "ratified_resident": false,
+      "physical_t5_authorized": false
+    },
+    {
+      "semantic_name": "MAKE-PATHNAME",
+      "review_class": "SOURCE-NAME-OR-HOLD",
+      "previous_source_review": "REVIEW-PURE-VALUE",
+      "observable_law": null,
+      "positive_witnesses": [],
+      "falsifier": null,
+      "provenance": [
+        {
+          "path": "knowledge/d10-clhs-pathnames-census-20261009.json",
+          "git_blob": "f32d199c1325e7daebcd7598c5121b23312bfd57",
+          "field": "roles",
+          "record_id": null,
+          "original_spelling": "MAKE-PATHNAME",
+          "primary_url": null,
+          "locator": null,
+          "review_status": "REVIEW-PURE-VALUE"
+        }
+      ],
+      "provisional_coordinate": null,
+      "coordinate_basis": "NOT-ALLOCATED-PENDING-DEDUP",
+      "selected_in_canonical_d10": false,
+      "ratified_resident": false,
+      "physical_t5_authorized": false
+    },
+    {
+      "semantic_name": "PATHNAMEP",
+      "review_class": "SOURCE-NAME-OR-HOLD",
+      "previous_source_review": "REVIEW-PURE-VALUE",
+      "observable_law": null,
+      "positive_witnesses": [],
+      "falsifier": null,
+      "provenance": [
+        {
+          "path": "knowledge/d10-clhs-pathnames-census-20261009.json",
+          "git_blob": "f32d199c1325e7daebcd7598c5121b23312bfd57",
+          "field": "roles",
+          "record_id": null,
+          "original_spelling": "PATHNAMEP",
+          "primary_url": null,
+          "locator": null,
+          "review_status": "REVIEW-PURE-VALUE"
+        }
+      ],
+      "provisional_coordinate": null,
+      "coordinate_basis": "NOT-ALLOCATED-PENDING-DEDUP",
+      "selected_in_canonical_d10": false,
+      "ratified_resident": false,
+      "physical_t5_authorized": false
+    },
+    {
+      "semantic_name": "PATHNAME-HOST",
+      "review_class": "SOURCE-NAME-OR-HOLD",
+      "previous_source_review": "REVIEW-PURE-VALUE",
+      "observable_law": null,
+      "positive_witnesses": [],
+      "falsifier": null,
+      "provenance": [
+        {
+          "path": "knowledge/d10-clhs-pathnames-census-20261009.json",
+          "git_blob": "f32d199c1325e7daebcd7598c5121b23312bfd57",
+          "field": "roles",
+          "record_id": null,
+          "original_spelling": "PATHNAME-HOST",
+          "primary_url": null,
+          "locator": null,
+          "review_status": "REVIEW-PURE-VALUE"
+        }
+      ],
+      "provisional_coordinate": null,
+      "coordinate_basis": "NOT-ALLOCATED-PENDING-DEDUP",
+      "selected_in_canonical_d10": false,
+      "ratified_resident": false,
+      "physical_t5_authorized": false
+    },
+    {
+      "semantic_name": "PATHNAME-DEVICE",
+      "review_class": "SOURCE-NAME-OR-HOLD",
+      "previous_source_review": "REVIEW-PURE-VALUE",
+      "observable_law": null,
+      "positive_witnesses": [],
+      "falsifier": null,
+      "provenance": [
+        {
+          "path": "knowledge/d10-clhs-pathnames-census-20261009.json",
+          "git_blob": "f32d199c1325e7daebcd7598c5121b23312bfd57",
+          "field": "roles",
+          "record_id": null,
+          "original_spelling": "PATHNAME-DEVICE",
+          "primary_url": null,
+          "locator": null,
+          "review_status": "REVIEW-PURE-VALUE"
+        }
+      ],
+      "provisional_coordinate": null,
+      "coordinate_basis": "NOT-ALLOCATED-PENDING-DEDUP",
+      "selected_in_canonical_d10": false,
+      "ratified_resident": false,
+      "physical_t5_authorized": false
+    },
+    {
+      "semantic_name": "PATHNAME-DIRECTORY",
+      "review_class": "SOURCE-NAME-OR-HOLD",
+      "previous_source_review": "REVIEW-PURE-VALUE",
+      "observable_law": null,
+      "positive_witnesses": [],
+      "falsifier": null,
+      "provenance": [
+        {
+          "path": "knowledge/d10-clhs-pathnames-census-20261009.json",
+          "git_blob": "f32d199c1325e7daebcd7598c5121b23312bfd57",
+          "field": "roles",
+          "record_id": null,
+          "original_spelling": "PATHNAME-DIRECTORY",
+          "primary_url": null,
+          "locator": null,
+          "review_status": "REVIEW-PURE-VALUE"
+        }
+      ],
+      "provisional_coordinate": null,
+      "coordinate_basis": "NOT-ALLOCATED-PENDING-DEDUP",
+      "selected_in_canonical_d10": false,
+      "ratified_resident": false,
+      "physical_t5_authorized": false
+    },
+    {
+      "semantic_name": "PATHNAME-NAME",
+      "review_class": "SOURCE-NAME-OR-HOLD",
+      "previous_source_review": "REVIEW-PURE-VALUE",
+      "observable_law": null,
+      "positive_witnesses": [],
+      "falsifier": null,
+      "provenance": [
+        {
+          "path": "knowledge/d10-clhs-pathnames-census-20261009.json",
+          "git_blob": "f32d199c1325e7daebcd7598c5121b23312bfd57",
+          "field": "roles",
+          "record_id": null,
+          "original_spelling": "PATHNAME-NAME",
+          "primary_url": null,
+          "locator": null,
+          "review_status": "REVIEW-PURE-VALUE"
+        }
+      ],
+      "provisional_coordinate": null,
+      "coordinate_basis": "NOT-ALLOCATED-PENDING-DEDUP",
+      "selected_in_canonical_d10": false,
+      "ratified_resident": false,
+      "physical_t5_authorized": false
+    },
+    {
+      "semantic_name": "PATHNAME-TYPE",
+      "review_class": "SOURCE-NAME-OR-HOLD",
+      "previous_source_review": "REVIEW-PURE-VALUE",
+      "observable_law": null,
+      "positive_witnesses": [],
+      "falsifier": null,
+      "provenance": [
+        {
+          "path": "knowledge/d10-clhs-pathnames-census-20261009.json",
+          "git_blob": "f32d199c1325e7daebcd7598c5121b23312bfd57",
+          "field": "roles",
+          "record_id": null,
+          "original_spelling": "PATHNAME-TYPE",
+          "primary_url": null,
+          "locator": null,
+          "review_status": "REVIEW-PURE-VALUE"
+        }
+      ],
+      "provisional_coordinate": null,
+      "coordinate_basis": "NOT-ALLOCATED-PENDING-DEDUP",
+      "selected_in_canonical_d10": false,
+      "ratified_resident": false,
+      "physical_t5_authorized": false
+    },
+    {
+      "semantic_name": "PATHNAME-VERSION",
+      "review_class": "SOURCE-NAME-OR-HOLD",
+      "previous_source_review": "REVIEW-PURE-VALUE",
+      "observable_law": null,
+      "positive_witnesses": [],
+      "falsifier": null,
+      "provenance": [
+        {
+          "path": "knowledge/d10-clhs-pathnames-census-20261009.json",
+          "git_blob": "f32d199c1325e7daebcd7598c5121b23312bfd57",
+          "field": "roles",
+          "record_id": null,
+          "original_spelling": "PATHNAME-VERSION",
+          "primary_url": null,
+          "locator": null,
+          "review_status": "REVIEW-PURE-VALUE"
+        }
+      ],
+      "provisional_coordinate": null,
+      "coordinate_basis": "NOT-ALLOCATED-PENDING-DEDUP",
+      "selected_in_canonical_d10": false,
+      "ratified_resident": false,
+      "physical_t5_authorized": false
+    },
+    {
+      "semantic_name": "LOAD-LOGICAL-PATHNAME-TRANSLATIONS",
+      "review_class": "SOURCE-NAME-OR-HOLD",
+      "previous_source_review": "HOLD-EXTERNAL-IO",
+      "observable_law": null,
+      "positive_witnesses": [],
+      "falsifier": null,
+      "provenance": [
+        {
+          "path": "knowledge/d10-clhs-pathnames-census-20261009.json",
+          "git_blob": "f32d199c1325e7daebcd7598c5121b23312bfd57",
+          "field": "roles",
+          "record_id": null,
+          "original_spelling": "LOAD-LOGICAL-PATHNAME-TRANSLATIONS",
+          "primary_url": null,
+          "locator": null,
+          "review_status": "HOLD-EXTERNAL-IO"
+        }
+      ],
+      "provisional_coordinate": null,
+      "coordinate_basis": "NOT-ALLOCATED-PENDING-DEDUP",
+      "selected_in_canonical_d10": false,
+      "ratified_resident": false,
+      "physical_t5_authorized": false
+    },
+    {
+      "semantic_name": "LOGICAL-PATHNAME-TRANSLATIONS",
+      "review_class": "SOURCE-NAME-OR-HOLD",
+      "previous_source_review": "HOLD-IMPLEMENTATION-DEFINED",
+      "observable_law": null,
+      "positive_witnesses": [],
+      "falsifier": null,
+      "provenance": [
+        {
+          "path": "knowledge/d10-clhs-pathnames-census-20261009.json",
+          "git_blob": "f32d199c1325e7daebcd7598c5121b23312bfd57",
+          "field": "roles",
+          "record_id": null,
+          "original_spelling": "LOGICAL-PATHNAME-TRANSLATIONS",
+          "primary_url": null,
+          "locator": null,
+          "review_status": "HOLD-IMPLEMENTATION-DEFINED"
+        }
+      ],
+      "provisional_coordinate": null,
+      "coordinate_basis": "NOT-ALLOCATED-PENDING-DEDUP",
+      "selected_in_canonical_d10": false,
+      "ratified_resident": false,
+      "physical_t5_authorized": false
+    },
+    {
+      "semantic_name": "*DEFAULT-PATHNAME-DEFAULTS*",
+      "review_class": "SOURCE-NAME-OR-HOLD",
+      "previous_source_review": "HOLD-DYNAMIC-HOST-STATE",
+      "observable_law": null,
+      "positive_witnesses": [],
+      "falsifier": null,
+      "provenance": [
+        {
+          "path": "knowledge/d10-clhs-pathnames-census-20261009.json",
+          "git_blob": "f32d199c1325e7daebcd7598c5121b23312bfd57",
+          "field": "roles",
+          "record_id": null,
+          "original_spelling": "*DEFAULT-PATHNAME-DEFAULTS*",
+          "primary_url": null,
+          "locator": null,
+          "review_status": "HOLD-DYNAMIC-HOST-STATE"
+        }
+      ],
+      "provisional_coordinate": null,
+      "coordinate_basis": "NOT-ALLOCATED-PENDING-DEDUP",
+      "selected_in_canonical_d10": false,
+      "ratified_resident": false,
+      "physical_t5_authorized": false
+    },
+    {
+      "semantic_name": "NAMESTRING",
+      "review_class": "SOURCE-NAME-OR-HOLD",
+      "previous_source_review": "HOLD-IMPLEMENTATION-DEFINED",
+      "observable_law": null,
+      "positive_witnesses": [],
+      "falsifier": null,
+      "provenance": [
+        {
+          "path": "knowledge/d10-clhs-pathnames-census-20261009.json",
+          "git_blob": "f32d199c1325e7daebcd7598c5121b23312bfd57",
+          "field": "roles",
+          "record_id": null,
+          "original_spelling": "NAMESTRING",
+          "primary_url": null,
+          "locator": null,
+          "review_status": "HOLD-IMPLEMENTATION-DEFINED"
+        }
+      ],
+      "provisional_coordinate": null,
+      "coordinate_basis": "NOT-ALLOCATED-PENDING-DEDUP",
+      "selected_in_canonical_d10": false,
+      "ratified_resident": false,
+      "physical_t5_authorized": false
+    },
+    {
+      "semantic_name": "FILE-NAMESTRING",
+      "review_class": "SOURCE-NAME-OR-HOLD",
+      "previous_source_review": "HOLD-IMPLEMENTATION-DEFINED",
+      "observable_law": null,
+      "positive_witnesses": [],
+      "falsifier": null,
+      "provenance": [
+        {
+          "path": "knowledge/d10-clhs-pathnames-census-20261009.json",
+          "git_blob": "f32d199c1325e7daebcd7598c5121b23312bfd57",
+          "field": "roles",
+          "record_id": null,
+          "original_spelling": "FILE-NAMESTRING",
+          "primary_url": null,
+          "locator": null,
+          "review_status": "HOLD-IMPLEMENTATION-DEFINED"
+        }
+      ],
+      "provisional_coordinate": null,
+      "coordinate_basis": "NOT-ALLOCATED-PENDING-DEDUP",
+      "selected_in_canonical_d10": false,
+      "ratified_resident": false,
+      "physical_t5_authorized": false
+    },
+    {
+      "semantic_name": "DIRECTORY-NAMESTRING",
+      "review_class": "SOURCE-NAME-OR-HOLD",
+      "previous_source_review": "HOLD-IMPLEMENTATION-DEFINED",
+      "observable_law": null,
+      "positive_witnesses": [],
+      "falsifier": null,
+      "provenance": [
+        {
+          "path": "knowledge/d10-clhs-pathnames-census-20261009.json",
+          "git_blob": "f32d199c1325e7daebcd7598c5121b23312bfd57",
+          "field": "roles",
+          "record_id": null,
+          "original_spelling": "DIRECTORY-NAMESTRING",
+          "primary_url": null,
+          "locator": null,
+          "review_status": "HOLD-IMPLEMENTATION-DEFINED"
+        }
+      ],
+      "provisional_coordinate": null,
+      "coordinate_basis": "NOT-ALLOCATED-PENDING-DEDUP",
+      "selected_in_canonical_d10": false,
+      "ratified_resident": false,
+      "physical_t5_authorized": false
+    },
+    {
+      "semantic_name": "HOST-NAMESTRING",
+      "review_class": "SOURCE-NAME-OR-HOLD",
+      "previous_source_review": "HOLD-IMPLEMENTATION-DEFINED",
+      "observable_law": null,
+      "positive_witnesses": [],
+      "falsifier": null,
+      "provenance": [
+        {
+          "path": "knowledge/d10-clhs-pathnames-census-20261009.json",
+          "git_blob": "f32d199c1325e7daebcd7598c5121b23312bfd57",
+          "field": "roles",
+          "record_id": null,
+          "original_spelling": "HOST-NAMESTRING",
+          "primary_url": null,
+          "locator": null,
+          "review_status": "HOLD-IMPLEMENTATION-DEFINED"
+        }
+      ],
+      "provisional_coordinate": null,
+      "coordinate_basis": "NOT-ALLOCATED-PENDING-DEDUP",
+      "selected_in_canonical_d10": false,
+      "ratified_resident": false,
+      "physical_t5_authorized": false
+    },
+    {
+      "semantic_name": "ENOUGH-NAMESTRING",
+      "review_class": "SOURCE-NAME-OR-HOLD",
+      "previous_source_review": "HOLD-IMPLEMENTATION-DEFINED | HOLD-IMPLEMENTATION-DEFINED",
+      "observable_law": "For any given pathname/defaults, merging enough-namestring representation with defaults must equal merging original pathname with defaults, modulo pathname equality.",
+      "positive_witnesses": [
+        "Express output for same explicit pathname/default directory without requiring host spelling",
+        "Round-trip through parse-namestring + merge with defaults reconstructs same path"
+      ],
+      "falsifier": "Hard-code Unix slash syntax as a universal semantic law.",
+      "provenance": [
+        {
+          "path": "knowledge/d10-clhs-pathnames-census-20261009.json",
+          "git_blob": "f32d199c1325e7daebcd7598c5121b23312bfd57",
+          "field": "roles",
+          "record_id": null,
+          "original_spelling": "ENOUGH-NAMESTRING",
+          "primary_url": null,
+          "locator": null,
+          "review_status": "HOLD-IMPLEMENTATION-DEFINED"
+        },
+        {
+          "path": "knowledge/d10-clhs-pathnames-census-20261009.json",
+          "git_blob": "f32d199c1325e7daebcd7598c5121b23312bfd57",
+          "field": "deep_review",
+          "record_id": null,
+          "original_spelling": "ENOUGH-NAMESTRING",
+          "primary_url": null,
+          "locator": null,
+          "review_status": "HOLD-IMPLEMENTATION-DEFINED"
+        }
+      ],
+      "provisional_coordinate": null,
+      "coordinate_basis": "NOT-ALLOCATED-PENDING-DEDUP",
+      "selected_in_canonical_d10": false,
+      "ratified_resident": false,
+      "physical_t5_authorized": false
+    },
+    {
+      "semantic_name": "PARSE-NAMESTRING",
+      "review_class": "SOURCE-NAME-OR-HOLD",
+      "previous_source_review": "HOLD-IMPLEMENTATION-DEFINED",
+      "observable_law": null,
+      "positive_witnesses": [],
+      "falsifier": null,
+      "provenance": [
+        {
+          "path": "knowledge/d10-clhs-pathnames-census-20261009.json",
+          "git_blob": "f32d199c1325e7daebcd7598c5121b23312bfd57",
+          "field": "roles",
+          "record_id": null,
+          "original_spelling": "PARSE-NAMESTRING",
+          "primary_url": null,
+          "locator": null,
+          "review_status": "HOLD-IMPLEMENTATION-DEFINED"
+        }
+      ],
+      "provisional_coordinate": null,
+      "coordinate_basis": "NOT-ALLOCATED-PENDING-DEDUP",
+      "selected_in_canonical_d10": false,
+      "ratified_resident": false,
+      "physical_t5_authorized": false
+    },
+    {
+      "semantic_name": "WILD-PATHNAME-P",
+      "review_class": "SOURCE-NAME-OR-HOLD",
+      "previous_source_review": "REVIEW-PURE-VALUE",
+      "observable_law": null,
+      "positive_witnesses": [],
+      "falsifier": null,
+      "provenance": [
+        {
+          "path": "knowledge/d10-clhs-pathnames-census-20261009.json",
+          "git_blob": "f32d199c1325e7daebcd7598c5121b23312bfd57",
+          "field": "roles",
+          "record_id": null,
+          "original_spelling": "WILD-PATHNAME-P",
+          "primary_url": null,
+          "locator": null,
+          "review_status": "REVIEW-PURE-VALUE"
+        }
+      ],
+      "provisional_coordinate": null,
+      "coordinate_basis": "NOT-ALLOCATED-PENDING-DEDUP",
+      "selected_in_canonical_d10": false,
+      "ratified_resident": false,
+      "physical_t5_authorized": false
+    },
+    {
+      "semantic_name": "PATHNAME-MATCH-P",
+      "review_class": "SOURCE-NAME-OR-HOLD",
+      "previous_source_review": "HOLD-IMPLEMENTATION-DEFINED | HOLD-IMPLEMENTATION-DEFINED",
+      "observable_law": "Wildcard match is directional; a wildcard in the first pathname matches only a wildcard in the second; actual matching mechanics implementation-defined.",
+      "positive_witnesses": [
+        "Nonwild name 'tone' matches :wild name in second argument",
+        "First argument wild :name does not match a concrete 'tone' in second argument"
+      ],
+      "falsifier": "Treating pathname-match-p as symmetric or assuming cross-host wildcard syntax.",
+      "provenance": [
+        {
+          "path": "knowledge/d10-clhs-pathnames-census-20261009.json",
+          "git_blob": "f32d199c1325e7daebcd7598c5121b23312bfd57",
+          "field": "roles",
+          "record_id": null,
+          "original_spelling": "PATHNAME-MATCH-P",
+          "primary_url": null,
+          "locator": null,
+          "review_status": "HOLD-IMPLEMENTATION-DEFINED"
+        },
+        {
+          "path": "knowledge/d10-clhs-pathnames-census-20261009.json",
+          "git_blob": "f32d199c1325e7daebcd7598c5121b23312bfd57",
+          "field": "deep_review",
+          "record_id": null,
+          "original_spelling": "PATHNAME-MATCH-P",
+          "primary_url": null,
+          "locator": null,
+          "review_status": "HOLD-IMPLEMENTATION-DEFINED"
+        }
+      ],
+      "provisional_coordinate": null,
+      "coordinate_basis": "NOT-ALLOCATED-PENDING-DEDUP",
+      "selected_in_canonical_d10": false,
+      "ratified_resident": false,
+      "physical_t5_authorized": false
+    },
+    {
+      "semantic_name": "TRANSLATE-LOGICAL-PATHNAME",
+      "review_class": "SOURCE-NAME-OR-HOLD",
+      "previous_source_review": "HOLD-IMPLEMENTATION-DEFINED",
+      "observable_law": null,
+      "positive_witnesses": [],
+      "falsifier": null,
+      "provenance": [
+        {
+          "path": "knowledge/d10-clhs-pathnames-census-20261009.json",
+          "git_blob": "f32d199c1325e7daebcd7598c5121b23312bfd57",
+          "field": "roles",
+          "record_id": null,
+          "original_spelling": "TRANSLATE-LOGICAL-PATHNAME",
+          "primary_url": null,
+          "locator": null,
+          "review_status": "HOLD-IMPLEMENTATION-DEFINED"
+        }
+      ],
+      "provisional_coordinate": null,
+      "coordinate_basis": "NOT-ALLOCATED-PENDING-DEDUP",
+      "selected_in_canonical_d10": false,
+      "ratified_resident": false,
+      "physical_t5_authorized": false
+    },
+    {
+      "semantic_name": "TRANSLATE-PATHNAME",
+      "review_class": "SOURCE-NAME-OR-HOLD",
+      "previous_source_review": "HOLD-IMPLEMENTATION-DEFINED",
+      "observable_law": null,
+      "positive_witnesses": [],
+      "falsifier": null,
+      "provenance": [
+        {
+          "path": "knowledge/d10-clhs-pathnames-census-20261009.json",
+          "git_blob": "f32d199c1325e7daebcd7598c5121b23312bfd57",
+          "field": "roles",
+          "record_id": null,
+          "original_spelling": "TRANSLATE-PATHNAME",
+          "primary_url": null,
+          "locator": null,
+          "review_status": "HOLD-IMPLEMENTATION-DEFINED"
+        }
+      ],
+      "provisional_coordinate": null,
+      "coordinate_basis": "NOT-ALLOCATED-PENDING-DEDUP",
+      "selected_in_canonical_d10": false,
+      "ratified_resident": false,
+      "physical_t5_authorized": false
+    },
+    {
+      "semantic_name": "MERGE-PATHNAMES",
+      "review_class": "BEHAVIOR-SPECIFIED-RESEARCH",
+      "previous_source_review": "REVIEW-PURE-VALUE | HOLD-BEHAVIORAL-REVIEW",
+      "observable_law": "Fill unspecified name/type/host/device/version from explicit defaults; relative directory values concatenate with default directory, preserving component semantics.",
+      "positive_witnesses": [
+        "Explicit (:absolute \"science\") base + (:relative \"trial\") filename gives directory (:absolute \"science\" \"trial\")",
+        "If pathname specifies name but not type, defaults supply type; existing path name takes precedence"
+      ],
+      "falsifier": "Returning default name when input name supplied or dropping relative directory element.",
+      "provenance": [
+        {
+          "path": "knowledge/d10-clhs-pathnames-census-20261009.json",
+          "git_blob": "f32d199c1325e7daebcd7598c5121b23312bfd57",
+          "field": "roles",
+          "record_id": null,
+          "original_spelling": "MERGE-PATHNAMES",
+          "primary_url": null,
+          "locator": null,
+          "review_status": "REVIEW-PURE-VALUE"
+        },
+        {
+          "path": "knowledge/d10-clhs-pathnames-census-20261009.json",
+          "git_blob": "f32d199c1325e7daebcd7598c5121b23312bfd57",
+          "field": "deep_review",
+          "record_id": null,
+          "original_spelling": "MERGE-PATHNAMES",
+          "primary_url": null,
+          "locator": null,
+          "review_status": "HOLD-BEHAVIORAL-REVIEW"
+        }
+      ],
+      "provisional_coordinate": "1110010011",
+      "coordinate_basis": "NONCANONICAL-HISTORICAL-EVIDENCE-RESEARCH-RESERVATION",
+      "selected_in_canonical_d10": false,
+      "ratified_resident": false,
+      "physical_t5_authorized": false
+    },
+    {
+      "semantic_name": "PARAMETERIZE",
+      "review_class": "SOURCE-NAME-OR-HOLD",
+      "previous_source_review": "HOLD-D2-CONTROL",
+      "observable_law": null,
+      "positive_witnesses": [],
+      "falsifier": null,
+      "provenance": [
+        {
+          "path": "knowledge/d10-historical-coverage-gap-audit-v1.json",
+          "git_blob": "bff3156b89c6c0e6e69dd8d3a4e99c16c4c2e35b",
+          "field": "exact_name_absent_research",
+          "record_id": "HIST-GAP-002",
+          "original_spelling": "PARAMETERIZE",
+          "primary_url": "https://www.gnu.org/software/mit-scheme/documentation/stable/mit-scheme-ref/Dynamic-Binding.html",
+          "locator": null,
+          "review_status": "HOLD-D2-CONTROL"
+        }
+      ],
+      "provisional_coordinate": null,
+      "coordinate_basis": "NOT-ALLOCATED-PENDING-DEDUP",
+      "selected_in_canonical_d10": false,
+      "ratified_resident": false,
+      "physical_t5_authorized": false
+    },
+    {
+      "semantic_name": "MAKE-PARAMETER",
+      "review_class": "SOURCE-NAME-OR-HOLD",
+      "previous_source_review": "HOLD-DERIVABILITY",
+      "observable_law": null,
+      "positive_witnesses": [],
+      "falsifier": null,
+      "provenance": [
+        {
+          "path": "knowledge/d10-historical-coverage-gap-audit-v1.json",
+          "git_blob": "bff3156b89c6c0e6e69dd8d3a4e99c16c4c2e35b",
+          "field": "exact_name_absent_research",
+          "record_id": "HIST-GAP-003",
+          "original_spelling": "MAKE-PARAMETER",
+          "primary_url": "https://www.gnu.org/software/mit-scheme/documentation/stable/mit-scheme-ref/Dynamic-Binding.html",
+          "locator": null,
+          "review_status": "HOLD-DERIVABILITY"
+        }
+      ],
+      "provisional_coordinate": null,
+      "coordinate_basis": "NOT-ALLOCATED-PENDING-DEDUP",
+      "selected_in_canonical_d10": false,
+      "ratified_resident": false,
+      "physical_t5_authorized": false
+    },
+    {
+      "semantic_name": "SYNTAX-RULES",
+      "review_class": "SOURCE-NAME-OR-HOLD",
+      "previous_source_review": "HOLD-D2-SYNTAX",
+      "observable_law": null,
+      "positive_witnesses": [],
+      "falsifier": null,
+      "provenance": [
+        {
+          "path": "knowledge/d10-historical-coverage-gap-audit-v1.json",
+          "git_blob": "bff3156b89c6c0e6e69dd8d3a4e99c16c4c2e35b",
+          "field": "exact_name_absent_research",
+          "record_id": "HIST-GAP-004",
+          "original_spelling": "SYNTAX-RULES",
+          "primary_url": "https://docs.scheme.org/guide/macros/",
+          "locator": null,
+          "review_status": "HOLD-D2-SYNTAX"
+        }
+      ],
+      "provisional_coordinate": null,
+      "coordinate_basis": "NOT-ALLOCATED-PENDING-DEDUP",
+      "selected_in_canonical_d10": false,
+      "ratified_resident": false,
+      "physical_t5_authorized": false
+    },
+    {
+      "semantic_name": "SYNTAX-CASE",
+      "review_class": "SOURCE-NAME-OR-HOLD",
+      "previous_source_review": "HOLD-D2-SYNTAX",
+      "observable_law": null,
+      "positive_witnesses": [],
+      "falsifier": null,
+      "provenance": [
+        {
+          "path": "knowledge/d10-historical-coverage-gap-audit-v1.json",
+          "git_blob": "bff3156b89c6c0e6e69dd8d3a4e99c16c4c2e35b",
+          "field": "exact_name_absent_research",
+          "record_id": "HIST-GAP-005",
+          "original_spelling": "SYNTAX-CASE",
+          "primary_url": "https://www.scheme.com/syntax-case/",
+          "locator": null,
+          "review_status": "HOLD-D2-SYNTAX"
+        }
+      ],
+      "provisional_coordinate": null,
+      "coordinate_basis": "NOT-ALLOCATED-PENDING-DEDUP",
+      "selected_in_canonical_d10": false,
+      "ratified_resident": false,
+      "physical_t5_authorized": false
+    },
+    {
+      "semantic_name": "DEFINE-SYNTAX",
+      "review_class": "SOURCE-NAME-OR-HOLD",
+      "previous_source_review": "HOLD-D2-SYNTAX | CURRENT-PROJECTION",
+      "observable_law": null,
+      "positive_witnesses": [],
+      "falsifier": null,
+      "provenance": [
+        {
+          "path": "knowledge/d10-historical-coverage-gap-audit-v1.json",
+          "git_blob": "bff3156b89c6c0e6e69dd8d3a4e99c16c4c2e35b",
+          "field": "exact_name_absent_research",
+          "record_id": "HIST-GAP-006",
+          "original_spelling": "DEFINE-SYNTAX",
+          "primary_url": "https://docs.scheme.org/guide/macros/",
+          "locator": null,
+          "review_status": "HOLD-D2-SYNTAX"
+        },
+        {
+          "path": "knowledge/d10-crossrepo-early-lisp-v1.json",
+          "git_blob": "4523aad78809da4da9ce37408a676e352b1ec508",
+          "field": "reviewed_nonselect",
+          "record_id": null,
+          "original_spelling": "DEFINE-SYNTAX",
+          "primary_url": null,
+          "locator": null,
+          "review_status": "CURRENT-PROJECTION"
+        }
+      ],
+      "provisional_coordinate": null,
+      "coordinate_basis": "NOT-ALLOCATED-PENDING-DEDUP",
+      "selected_in_canonical_d10": false,
+      "ratified_resident": false,
+      "physical_t5_authorized": false
+    },
+    {
+      "semantic_name": "COMPUTE-APPLICABLE-METHODS",
+      "review_class": "SOURCE-NAME-OR-HOLD",
+      "previous_source_review": "HOLD-DUPLICATE-4800",
+      "observable_law": null,
+      "positive_witnesses": [],
+      "falsifier": null,
+      "provenance": [
+        {
+          "path": "knowledge/d10-historical-coverage-gap-audit-v1.json",
+          "git_blob": "bff3156b89c6c0e6e69dd8d3a4e99c16c4c2e35b",
+          "field": "exact_name_absent_research",
+          "record_id": "HIST-GAP-012",
+          "original_spelling": "COMPUTE-APPLICABLE-METHODS",
+          "primary_url": "https://lisp-docs.github.io/docs/tutorial/advanced_topics/mop",
+          "locator": null,
+          "review_status": "HOLD-DUPLICATE-4800"
+        }
+      ],
+      "provisional_coordinate": null,
+      "coordinate_basis": "NOT-ALLOCATED-PENDING-DEDUP",
+      "selected_in_canonical_d10": false,
+      "ratified_resident": false,
+      "physical_t5_authorized": false
+    },
+    {
+      "semantic_name": "MASTERSCOPE",
+      "review_class": "SOURCE-NAME-OR-HOLD",
+      "previous_source_review": "HOLD-ENVIRONMENT-PACKAGE",
+      "observable_law": null,
+      "positive_witnesses": [],
+      "falsifier": null,
+      "provenance": [
+        {
+          "path": "knowledge/d10-historical-coverage-gap-audit-v1.json",
+          "git_blob": "bff3156b89c6c0e6e69dd8d3a4e99c16c4c2e35b",
+          "field": "exact_name_absent_research",
+          "record_id": "HIST-GAP-013",
+          "original_spelling": "MASTERSCOPE",
+          "primary_url": "https://interlisp.org/documentation/IRM.pdf",
+          "locator": null,
+          "review_status": "HOLD-ENVIRONMENT-PACKAGE"
+        }
+      ],
+      "provisional_coordinate": null,
+      "coordinate_basis": "NOT-ALLOCATED-PENDING-DEDUP",
+      "selected_in_canonical_d10": false,
+      "ratified_resident": false,
+      "physical_t5_authorized": false
+    },
+    {
+      "semantic_name": "DWIM",
+      "review_class": "SOURCE-NAME-OR-HOLD",
+      "previous_source_review": "HOLD-HEURISTIC",
+      "observable_law": null,
+      "positive_witnesses": [],
+      "falsifier": null,
+      "provenance": [
+        {
+          "path": "knowledge/d10-historical-coverage-gap-audit-v1.json",
+          "git_blob": "bff3156b89c6c0e6e69dd8d3a4e99c16c4c2e35b",
+          "field": "exact_name_absent_research",
+          "record_id": "HIST-GAP-014",
+          "original_spelling": "DWIM",
+          "primary_url": "https://interlisp.org/documentation/IRM.pdf",
+          "locator": null,
+          "review_status": "HOLD-HEURISTIC"
+        }
+      ],
+      "provisional_coordinate": null,
+      "coordinate_basis": "NOT-ALLOCATED-PENDING-DEDUP",
+      "selected_in_canonical_d10": false,
+      "ratified_resident": false,
+      "physical_t5_authorized": false
+    },
+    {
+      "semantic_name": "WHOPPER",
+      "review_class": "SOURCE-NAME-OR-HOLD",
+      "previous_source_review": "HOLD-D2-CONTROL",
+      "observable_law": null,
+      "positive_witnesses": [],
+      "falsifier": null,
+      "provenance": [
+        {
+          "path": "knowledge/d10-historical-coverage-gap-audit-v1.json",
+          "git_blob": "bff3156b89c6c0e6e69dd8d3a4e99c16c4c2e35b",
+          "field": "exact_name_absent_research",
+          "record_id": "HIST-GAP-015",
+          "original_spelling": "WHOPPER",
+          "primary_url": "https://manuals.plus/m/15ff2561cd4183c1377f8c5613f66c568a38d5fb213b76c4b54974ac1c65e1ac",
+          "locator": null,
+          "review_status": "HOLD-D2-CONTROL"
+        }
+      ],
+      "provisional_coordinate": null,
+      "coordinate_basis": "NOT-ALLOCATED-PENDING-DEDUP",
+      "selected_in_canonical_d10": false,
+      "ratified_resident": false,
+      "physical_t5_authorized": false
+    },
+    {
+      "semantic_name": "SUBRCALL",
+      "review_class": "SOURCE-NAME-OR-HOLD",
+      "previous_source_review": "MECHANISM-NO-CORE-SLOT",
+      "observable_law": null,
+      "positive_witnesses": [],
+      "falsifier": null,
+      "provenance": [
+        {
+          "path": "knowledge/d10-historical-maclisp-v2.json",
+          "git_blob": "912e2f6f5d379f4734a1d1746c6bf9db67b6af47",
+          "field": "excluded_or_held",
+          "record_id": null,
+          "original_spelling": "SUBRCALL",
+          "primary_url": null,
+          "locator": null,
+          "review_status": "MECHANISM-NO-CORE-SLOT"
+        }
+      ],
+      "provisional_coordinate": null,
+      "coordinate_basis": "NOT-ALLOCATED-PENDING-DEDUP",
+      "selected_in_canonical_d10": false,
+      "ratified_resident": false,
+      "physical_t5_authorized": false
+    },
+    {
+      "semantic_name": "LSUBRCALL",
+      "review_class": "SOURCE-NAME-OR-HOLD",
+      "previous_source_review": "MECHANISM-NO-CORE-SLOT",
+      "observable_law": null,
+      "positive_witnesses": [],
+      "falsifier": null,
+      "provenance": [
+        {
+          "path": "knowledge/d10-historical-maclisp-v2.json",
+          "git_blob": "912e2f6f5d379f4734a1d1746c6bf9db67b6af47",
+          "field": "excluded_or_held",
+          "record_id": null,
+          "original_spelling": "LSUBRCALL",
+          "primary_url": null,
+          "locator": null,
+          "review_status": "MECHANISM-NO-CORE-SLOT"
+        }
+      ],
+      "provisional_coordinate": null,
+      "coordinate_basis": "NOT-ALLOCATED-PENDING-DEDUP",
+      "selected_in_canonical_d10": false,
+      "ratified_resident": false,
+      "physical_t5_authorized": false
+    },
+    {
+      "semantic_name": "ARRAYCALL",
+      "review_class": "SOURCE-NAME-OR-HOLD",
+      "previous_source_review": "MECHANISM-NO-CORE-SLOT",
+      "observable_law": null,
+      "positive_witnesses": [],
+      "falsifier": null,
+      "provenance": [
+        {
+          "path": "knowledge/d10-historical-maclisp-v2.json",
+          "git_blob": "912e2f6f5d379f4734a1d1746c6bf9db67b6af47",
+          "field": "excluded_or_held",
+          "record_id": null,
+          "original_spelling": "ARRAYCALL",
+          "primary_url": null,
+          "locator": null,
+          "review_status": "MECHANISM-NO-CORE-SLOT"
+        }
+      ],
+      "provisional_coordinate": null,
+      "coordinate_basis": "NOT-ALLOCATED-PENDING-DEDUP",
+      "selected_in_canonical_d10": false,
+      "ratified_resident": false,
+      "physical_t5_authorized": false
+    },
+    {
+      "semantic_name": "DUMPARRAYS",
+      "review_class": "SOURCE-NAME-OR-HOLD",
+      "previous_source_review": "HOST-CAPABILITY-HOLD",
+      "observable_law": null,
+      "positive_witnesses": [],
+      "falsifier": null,
+      "provenance": [
+        {
+          "path": "knowledge/d10-historical-maclisp-v2.json",
+          "git_blob": "912e2f6f5d379f4734a1d1746c6bf9db67b6af47",
+          "field": "excluded_or_held",
+          "record_id": null,
+          "original_spelling": "DUMPARRAYS",
+          "primary_url": null,
+          "locator": null,
+          "review_status": "HOST-CAPABILITY-HOLD"
+        }
+      ],
+      "provisional_coordinate": null,
+      "coordinate_basis": "NOT-ALLOCATED-PENDING-DEDUP",
+      "selected_in_canonical_d10": false,
+      "ratified_resident": false,
+      "physical_t5_authorized": false
+    },
+    {
+      "semantic_name": "LOADARRAYS",
+      "review_class": "SOURCE-NAME-OR-HOLD",
+      "previous_source_review": "HOST-CAPABILITY-HOLD",
+      "observable_law": null,
+      "positive_witnesses": [],
+      "falsifier": null,
+      "provenance": [
+        {
+          "path": "knowledge/d10-historical-maclisp-v2.json",
+          "git_blob": "912e2f6f5d379f4734a1d1746c6bf9db67b6af47",
+          "field": "excluded_or_held",
+          "record_id": null,
+          "original_spelling": "LOADARRAYS",
+          "primary_url": null,
+          "locator": null,
+          "review_status": "HOST-CAPABILITY-HOLD"
+        }
+      ],
+      "provisional_coordinate": null,
+      "coordinate_basis": "NOT-ALLOCATED-PENDING-DEDUP",
+      "selected_in_canonical_d10": false,
+      "ratified_resident": false,
+      "physical_t5_authorized": false
+    },
+    {
+      "semantic_name": "FIX",
+      "review_class": "SOURCE-NAME-OR-HOLD",
+      "previous_source_review": "CORE-MATH-OR-CARRIER-HOLD",
+      "observable_law": null,
+      "positive_witnesses": [],
+      "falsifier": null,
+      "provenance": [
+        {
+          "path": "knowledge/d10-historical-maclisp-v2.json",
+          "git_blob": "912e2f6f5d379f4734a1d1746c6bf9db67b6af47",
+          "field": "excluded_or_held",
+          "record_id": null,
+          "original_spelling": "FIX",
+          "primary_url": null,
+          "locator": null,
+          "review_status": "CORE-MATH-OR-CARRIER-HOLD"
+        }
+      ],
+      "provisional_coordinate": null,
+      "coordinate_basis": "NOT-ALLOCATED-PENDING-DEDUP",
+      "selected_in_canonical_d10": false,
+      "ratified_resident": false,
+      "physical_t5_authorized": false
+    },
+    {
+      "semantic_name": "FLOATP",
+      "review_class": "SOURCE-NAME-OR-HOLD",
+      "previous_source_review": "CORE-MATH-OR-CARRIER-HOLD",
+      "observable_law": null,
+      "positive_witnesses": [],
+      "falsifier": null,
+      "provenance": [
+        {
+          "path": "knowledge/d10-historical-maclisp-v2.json",
+          "git_blob": "912e2f6f5d379f4734a1d1746c6bf9db67b6af47",
+          "field": "excluded_or_held",
+          "record_id": null,
+          "original_spelling": "FLOATP",
+          "primary_url": null,
+          "locator": null,
+          "review_status": "CORE-MATH-OR-CARRIER-HOLD"
+        }
+      ],
+      "provisional_coordinate": null,
+      "coordinate_basis": "NOT-ALLOCATED-PENDING-DEDUP",
+      "selected_in_canonical_d10": false,
+      "ratified_resident": false,
+      "physical_t5_authorized": false
+    },
+    {
+      "semantic_name": "BIGP",
+      "review_class": "SOURCE-NAME-OR-HOLD",
+      "previous_source_review": "CORE-MATH-OR-CARRIER-HOLD",
+      "observable_law": null,
+      "positive_witnesses": [],
+      "falsifier": null,
+      "provenance": [
+        {
+          "path": "knowledge/d10-historical-maclisp-v2.json",
+          "git_blob": "912e2f6f5d379f4734a1d1746c6bf9db67b6af47",
+          "field": "excluded_or_held",
+          "record_id": null,
+          "original_spelling": "BIGP",
+          "primary_url": null,
+          "locator": null,
+          "review_status": "CORE-MATH-OR-CARRIER-HOLD"
+        }
+      ],
+      "provisional_coordinate": null,
+      "coordinate_basis": "NOT-ALLOCATED-PENDING-DEDUP",
+      "selected_in_canonical_d10": false,
+      "ratified_resident": false,
+      "physical_t5_authorized": false
+    },
+    {
+      "semantic_name": "COS",
+      "review_class": "SOURCE-NAME-OR-HOLD",
+      "previous_source_review": "CORE-MATH-HOLD",
+      "observable_law": null,
+      "positive_witnesses": [],
+      "falsifier": null,
+      "provenance": [
+        {
+          "path": "knowledge/d10-historical-maclisp-v2.json",
+          "git_blob": "912e2f6f5d379f4734a1d1746c6bf9db67b6af47",
+          "field": "excluded_or_held",
+          "record_id": null,
+          "original_spelling": "COS",
+          "primary_url": null,
+          "locator": null,
+          "review_status": "CORE-MATH-HOLD"
+        }
+      ],
+      "provisional_coordinate": null,
+      "coordinate_basis": "NOT-ALLOCATED-PENDING-DEDUP",
+      "selected_in_canonical_d10": false,
+      "ratified_resident": false,
+      "physical_t5_authorized": false
+    },
+    {
+      "semantic_name": "RANDOM",
+      "review_class": "SOURCE-NAME-OR-HOLD",
+      "previous_source_review": "NONDETERMINISM-HOLD",
+      "observable_law": null,
+      "positive_witnesses": [],
+      "falsifier": null,
+      "provenance": [
+        {
+          "path": "knowledge/d10-historical-maclisp-v2.json",
+          "git_blob": "912e2f6f5d379f4734a1d1746c6bf9db67b6af47",
+          "field": "excluded_or_held",
+          "record_id": null,
+          "original_spelling": "RANDOM",
+          "primary_url": null,
+          "locator": null,
+          "review_status": "NONDETERMINISM-HOLD"
+        }
+      ],
+      "provisional_coordinate": null,
+      "coordinate_basis": "NOT-ALLOCATED-PENDING-DEDUP",
+      "selected_in_canonical_d10": false,
+      "ratified_resident": false,
+      "physical_t5_authorized": false
+    },
+    {
+      "semantic_name": "SIGNP",
+      "review_class": "SOURCE-NAME-OR-HOLD",
+      "previous_source_review": "CURRENT-PROJECTION-REVIEW",
+      "observable_law": null,
+      "positive_witnesses": [],
+      "falsifier": null,
+      "provenance": [
+        {
+          "path": "knowledge/d10-historical-maclisp-v2.json",
+          "git_blob": "912e2f6f5d379f4734a1d1746c6bf9db67b6af47",
+          "field": "excluded_or_held",
+          "record_id": null,
+          "original_spelling": "SIGNP",
+          "primary_url": null,
+          "locator": null,
+          "review_status": "CURRENT-PROJECTION-REVIEW"
+        }
+      ],
+      "provisional_coordinate": null,
+      "coordinate_basis": "NOT-ALLOCATED-PENDING-DEDUP",
+      "selected_in_canonical_d10": false,
+      "ratified_resident": false,
+      "physical_t5_authorized": false
+    },
+    {
+      "semantic_name": "READ-MANY",
+      "review_class": "SOURCE-NAME-OR-HOLD",
+      "previous_source_review": "CURRENT-PROJECTION",
+      "observable_law": null,
+      "positive_witnesses": [],
+      "falsifier": null,
+      "provenance": [
+        {
+          "path": "knowledge/d10-crossrepo-early-lisp-v1.json",
+          "git_blob": "4523aad78809da4da9ce37408a676e352b1ec508",
+          "field": "reviewed_nonselect",
+          "record_id": null,
+          "original_spelling": "READ-MANY",
+          "primary_url": null,
+          "locator": null,
+          "review_status": "CURRENT-PROJECTION"
+        }
+      ],
+      "provisional_coordinate": null,
+      "coordinate_basis": "NOT-ALLOCATED-PENDING-DEDUP",
+      "selected_in_canonical_d10": false,
+      "ratified_resident": false,
+      "physical_t5_authorized": false
+    },
+    {
+      "semantic_name": "SLURP",
+      "review_class": "SOURCE-NAME-OR-HOLD",
+      "previous_source_review": "CURRENT-PROJECTION",
+      "observable_law": null,
+      "positive_witnesses": [],
+      "falsifier": null,
+      "provenance": [
+        {
+          "path": "knowledge/d10-crossrepo-early-lisp-v1.json",
+          "git_blob": "4523aad78809da4da9ce37408a676e352b1ec508",
+          "field": "reviewed_nonselect",
+          "record_id": null,
+          "original_spelling": "SLURP",
+          "primary_url": null,
+          "locator": null,
+          "review_status": "CURRENT-PROJECTION"
+        }
+      ],
+      "provisional_coordinate": null,
+      "coordinate_basis": "NOT-ALLOCATED-PENDING-DEDUP",
+      "selected_in_canonical_d10": false,
+      "ratified_resident": false,
+      "physical_t5_authorized": false
+    },
+    {
+      "semantic_name": "SPIT",
+      "review_class": "SOURCE-NAME-OR-HOLD",
+      "previous_source_review": "CURRENT-PROJECTION",
+      "observable_law": null,
+      "positive_witnesses": [],
+      "falsifier": null,
+      "provenance": [
+        {
+          "path": "knowledge/d10-crossrepo-early-lisp-v1.json",
+          "git_blob": "4523aad78809da4da9ce37408a676e352b1ec508",
+          "field": "reviewed_nonselect",
+          "record_id": null,
+          "original_spelling": "SPIT",
+          "primary_url": null,
+          "locator": null,
+          "review_status": "CURRENT-PROJECTION"
+        }
+      ],
+      "provisional_coordinate": null,
+      "coordinate_basis": "NOT-ALLOCATED-PENDING-DEDUP",
+      "selected_in_canonical_d10": false,
+      "ratified_resident": false,
+      "physical_t5_authorized": false
+    },
+    {
+      "semantic_name": "SET!",
+      "review_class": "SOURCE-NAME-OR-HOLD",
+      "previous_source_review": "CURRENT-PROJECTION",
+      "observable_law": null,
+      "positive_witnesses": [],
+      "falsifier": null,
+      "provenance": [
+        {
+          "path": "knowledge/d10-crossrepo-early-lisp-v1.json",
+          "git_blob": "4523aad78809da4da9ce37408a676e352b1ec508",
+          "field": "reviewed_nonselect",
+          "record_id": null,
+          "original_spelling": "SET!",
+          "primary_url": null,
+          "locator": null,
+          "review_status": "CURRENT-PROJECTION"
+        }
+      ],
+      "provisional_coordinate": null,
+      "coordinate_basis": "NOT-ALLOCATED-PENDING-DEDUP",
+      "selected_in_canonical_d10": false,
+      "ratified_resident": false,
+      "physical_t5_authorized": false
+    },
+    {
+      "semantic_name": "UNQUOTE",
+      "review_class": "SOURCE-NAME-OR-HOLD",
+      "previous_source_review": "CURRENT-PROJECTION",
+      "observable_law": null,
+      "positive_witnesses": [],
+      "falsifier": null,
+      "provenance": [
+        {
+          "path": "knowledge/d10-crossrepo-early-lisp-v1.json",
+          "git_blob": "4523aad78809da4da9ce37408a676e352b1ec508",
+          "field": "reviewed_nonselect",
+          "record_id": null,
+          "original_spelling": "UNQUOTE",
+          "primary_url": null,
+          "locator": null,
+          "review_status": "CURRENT-PROJECTION"
+        }
+      ],
+      "provisional_coordinate": null,
+      "coordinate_basis": "NOT-ALLOCATED-PENDING-DEDUP",
+      "selected_in_canonical_d10": false,
+      "ratified_resident": false,
+      "physical_t5_authorized": false
+    },
+    {
+      "semantic_name": "FIRST",
+      "review_class": "SOURCE-NAME-OR-HOLD",
+      "previous_source_review": "CURRENT-PROJECTION",
+      "observable_law": null,
+      "positive_witnesses": [],
+      "falsifier": null,
+      "provenance": [
+        {
+          "path": "knowledge/d10-crossrepo-early-lisp-v1.json",
+          "git_blob": "4523aad78809da4da9ce37408a676e352b1ec508",
+          "field": "reviewed_nonselect",
+          "record_id": null,
+          "original_spelling": "FIRST",
+          "primary_url": null,
+          "locator": null,
+          "review_status": "CURRENT-PROJECTION"
+        }
+      ],
+      "provisional_coordinate": null,
+      "coordinate_basis": "NOT-ALLOCATED-PENDING-DEDUP",
+      "selected_in_canonical_d10": false,
+      "ratified_resident": false,
+      "physical_t5_authorized": false
+    },
+    {
+      "semantic_name": "REST",
+      "review_class": "SOURCE-NAME-OR-HOLD",
+      "previous_source_review": "CURRENT-PROJECTION",
+      "observable_law": null,
+      "positive_witnesses": [],
+      "falsifier": null,
+      "provenance": [
+        {
+          "path": "knowledge/d10-crossrepo-early-lisp-v1.json",
+          "git_blob": "4523aad78809da4da9ce37408a676e352b1ec508",
+          "field": "reviewed_nonselect",
+          "record_id": null,
+          "original_spelling": "REST",
+          "primary_url": null,
+          "locator": null,
+          "review_status": "CURRENT-PROJECTION"
+        }
+      ],
+      "provisional_coordinate": null,
+      "coordinate_basis": "NOT-ALLOCATED-PENDING-DEDUP",
+      "selected_in_canonical_d10": false,
+      "ratified_resident": false,
+      "physical_t5_authorized": false
+    },
+    {
+      "semantic_name": "DEBUG",
+      "review_class": "SOURCE-NAME-OR-HOLD",
+      "previous_source_review": "NO-SEMANTIC-SLOT",
+      "observable_law": null,
+      "positive_witnesses": [],
+      "falsifier": null,
+      "provenance": [
+        {
+          "path": "knowledge/d10-crossrepo-early-lisp-v1.json",
+          "git_blob": "4523aad78809da4da9ce37408a676e352b1ec508",
+          "field": "reviewed_nonselect",
+          "record_id": null,
+          "original_spelling": "DEBUG",
+          "primary_url": null,
+          "locator": null,
+          "review_status": "NO-SEMANTIC-SLOT"
+        }
+      ],
+      "provisional_coordinate": null,
+      "coordinate_basis": "NOT-ALLOCATED-PENDING-DEDUP",
+      "selected_in_canonical_d10": false,
+      "ratified_resident": false,
+      "physical_t5_authorized": false
+    },
+    {
+      "semantic_name": "DEFN",
+      "review_class": "SOURCE-NAME-OR-HOLD",
+      "previous_source_review": "CURRENT-PROJECTION",
+      "observable_law": null,
+      "positive_witnesses": [],
+      "falsifier": null,
+      "provenance": [
+        {
+          "path": "knowledge/d10-crossrepo-early-lisp-v1.json",
+          "git_blob": "4523aad78809da4da9ce37408a676e352b1ec508",
+          "field": "reviewed_nonselect",
+          "record_id": null,
+          "original_spelling": "DEFN",
+          "primary_url": null,
+          "locator": null,
+          "review_status": "CURRENT-PROJECTION"
+        }
+      ],
+      "provisional_coordinate": null,
+      "coordinate_basis": "NOT-ALLOCATED-PENDING-DEDUP",
+      "selected_in_canonical_d10": false,
+      "ratified_resident": false,
+      "physical_t5_authorized": false
+    },
+    {
+      "semantic_name": "GE",
+      "review_class": "SOURCE-NAME-OR-HOLD",
+      "previous_source_review": "CURRENT-PROJECTION",
+      "observable_law": null,
+      "positive_witnesses": [],
+      "falsifier": null,
+      "provenance": [
+        {
+          "path": "knowledge/d10-crossrepo-early-lisp-v1.json",
+          "git_blob": "4523aad78809da4da9ce37408a676e352b1ec508",
+          "field": "reviewed_nonselect",
+          "record_id": null,
+          "original_spelling": "GE",
+          "primary_url": null,
+          "locator": null,
+          "review_status": "CURRENT-PROJECTION"
+        }
+      ],
+      "provisional_coordinate": null,
+      "coordinate_basis": "NOT-ALLOCATED-PENDING-DEDUP",
+      "selected_in_canonical_d10": false,
+      "ratified_resident": false,
+      "physical_t5_authorized": false
+    },
+    {
+      "semantic_name": "LE",
+      "review_class": "SOURCE-NAME-OR-HOLD",
+      "previous_source_review": "CURRENT-PROJECTION",
+      "observable_law": null,
+      "positive_witnesses": [],
+      "falsifier": null,
+      "provenance": [
+        {
+          "path": "knowledge/d10-crossrepo-early-lisp-v1.json",
+          "git_blob": "4523aad78809da4da9ce37408a676e352b1ec508",
+          "field": "reviewed_nonselect",
+          "record_id": null,
+          "original_spelling": "LE",
+          "primary_url": null,
+          "locator": null,
+          "review_status": "CURRENT-PROJECTION"
+        }
+      ],
+      "provisional_coordinate": null,
+      "coordinate_basis": "NOT-ALLOCATED-PENDING-DEDUP",
+      "selected_in_canonical_d10": false,
+      "ratified_resident": false,
+      "physical_t5_authorized": false
+    },
+    {
+      "semantic_name": "GT",
+      "review_class": "SOURCE-NAME-OR-HOLD",
+      "previous_source_review": "CURRENT-PROJECTION",
+      "observable_law": null,
+      "positive_witnesses": [],
+      "falsifier": null,
+      "provenance": [
+        {
+          "path": "knowledge/d10-crossrepo-early-lisp-v1.json",
+          "git_blob": "4523aad78809da4da9ce37408a676e352b1ec508",
+          "field": "reviewed_nonselect",
+          "record_id": null,
+          "original_spelling": "GT",
+          "primary_url": null,
+          "locator": null,
+          "review_status": "CURRENT-PROJECTION"
+        }
+      ],
+      "provisional_coordinate": null,
+      "coordinate_basis": "NOT-ALLOCATED-PENDING-DEDUP",
+      "selected_in_canonical_d10": false,
+      "ratified_resident": false,
+      "physical_t5_authorized": false
+    },
+    {
+      "semantic_name": "LT",
+      "review_class": "SOURCE-NAME-OR-HOLD",
+      "previous_source_review": "CURRENT-PROJECTION",
+      "observable_law": null,
+      "positive_witnesses": [],
+      "falsifier": null,
+      "provenance": [
+        {
+          "path": "knowledge/d10-crossrepo-early-lisp-v1.json",
+          "git_blob": "4523aad78809da4da9ce37408a676e352b1ec508",
+          "field": "reviewed_nonselect",
+          "record_id": null,
+          "original_spelling": "LT",
+          "primary_url": null,
+          "locator": null,
+          "review_status": "CURRENT-PROJECTION"
+        }
+      ],
+      "provisional_coordinate": null,
+      "coordinate_basis": "NOT-ALLOCATED-PENDING-DEDUP",
+      "selected_in_canonical_d10": false,
+      "ratified_resident": false,
+      "physical_t5_authorized": false
+    }
+  ],
+  "already_accounted": [
+    {
+      "semantic_name": "HASHTABLE-COPY",
+      "reason": "ALREADY-IN-HISTORICAL-OR-NAME-QUEUE",
+      "source_paths": [
+        "knowledge/d10-r6rs-hashtable-hygiene-audit-v1.json",
+        "knowledge/d10-r6rs-copy-mutable-oracle-v1.json"
+      ]
+    },
+    {
+      "semantic_name": "HASHTABLE-ENTRIES",
+      "reason": "ALREADY-CANONICAL-715",
+      "source_paths": [
+        "knowledge/d10-r6rs-hashtable-hygiene-audit-v1.json"
+      ]
+    },
+    {
+      "semantic_name": "HASHTABLE-MUTABLE?",
+      "reason": "ALREADY-IN-HISTORICAL-OR-NAME-QUEUE",
+      "source_paths": [
+        "knowledge/d10-r6rs-hashtable-hygiene-audit-v1.json",
+        "knowledge/d10-r6rs-copy-mutable-oracle-v1.json"
+      ]
+    },
+    {
+      "semantic_name": "CLASS-NAME",
+      "reason": "ALREADY-IN-HISTORICAL-OR-NAME-QUEUE",
+      "source_paths": [
+        "knowledge/d10-mop-metaobject-reader-census-20261009.json"
+      ]
+    },
+    {
+      "semantic_name": "READ-BYTE",
+      "reason": "ALREADY-CANONICAL-715",
+      "source_paths": [
+        "knowledge/d10-clhs-streams-census-20261009.json"
+      ]
+    },
+    {
+      "semantic_name": "WRITE-BYTE",
+      "reason": "ALREADY-CANONICAL-715",
+      "source_paths": [
+        "knowledge/d10-clhs-streams-census-20261009.json"
+      ]
+    },
+    {
+      "semantic_name": "READ-CHAR",
+      "reason": "ALREADY-CANONICAL-715",
+      "source_paths": [
+        "knowledge/d10-clhs-streams-census-20261009.json"
+      ]
+    },
+    {
+      "semantic_name": "TERPRI",
+      "reason": "LOWER-RATIFIED-D1-D9",
+      "source_paths": [
+        "knowledge/d10-clhs-streams-census-20261009.json"
+      ]
+    },
+    {
+      "semantic_name": "WRITE-STRING",
+      "reason": "ALREADY-CANONICAL-715",
+      "source_paths": [
+        "knowledge/d10-clhs-streams-census-20261009.json"
+      ]
+    },
+    {
+      "semantic_name": "OPEN",
+      "reason": "LOWER-RATIFIED-D1-D9",
+      "source_paths": [
+        "knowledge/d10-clhs-streams-census-20261009.json"
+      ]
+    },
+    {
+      "semantic_name": "CLOSE",
+      "reason": "LOWER-RATIFIED-D1-D9",
+      "source_paths": [
+        "knowledge/d10-clhs-streams-census-20261009.json"
+      ]
+    },
+    {
+      "semantic_name": "WITH-OPEN-FILE",
+      "reason": "LOWER-RATIFIED-D1-D9",
+      "source_paths": [
+        "knowledge/d10-clhs-streams-census-20261009.json"
+      ]
+    },
+    {
+      "semantic_name": "DYNAMIC-WIND",
+      "reason": "ALREADY-IN-HISTORICAL-OR-NAME-QUEUE",
+      "source_paths": [
+        "knowledge/d10-historical-coverage-gap-audit-v1.json",
+        "knowledge/d10-historical-clos-interlisp-residual-review-v1.json"
+      ]
+    },
+    {
+      "semantic_name": "CHANGE-CLASS",
+      "reason": "ALREADY-CANONICAL-715",
+      "source_paths": [
+        "knowledge/d10-historical-coverage-gap-audit-v1.json",
+        "knowledge/d10-historical-clos-interlisp-residual-review-v1.json"
+      ]
+    },
+    {
+      "semantic_name": "UPDATE-INSTANCE-FOR-DIFFERENT-CLASS",
+      "reason": "ALREADY-IN-HISTORICAL-OR-NAME-QUEUE",
+      "source_paths": [
+        "knowledge/d10-historical-coverage-gap-audit-v1.json",
+        "knowledge/d10-historical-clos-interlisp-residual-review-v1.json"
+      ]
+    },
+    {
+      "semantic_name": "FIND-METHOD",
+      "reason": "ALREADY-CANONICAL-715",
+      "source_paths": [
+        "knowledge/d10-historical-coverage-gap-audit-v1.json",
+        "knowledge/d10-historical-clos-interlisp-residual-review-v1.json"
+      ]
+    },
+    {
+      "semantic_name": "ADD-METHOD",
+      "reason": "ALREADY-IN-HISTORICAL-OR-NAME-QUEUE",
+      "source_paths": [
+        "knowledge/d10-historical-coverage-gap-audit-v1.json",
+        "knowledge/d10-historical-clos-interlisp-residual-review-v1.json"
+      ]
+    },
+    {
+      "semantic_name": "REMOVE-METHOD",
+      "reason": "ALREADY-CANONICAL-715",
+      "source_paths": [
+        "knowledge/d10-historical-coverage-gap-audit-v1.json",
+        "knowledge/d10-historical-clos-interlisp-residual-review-v1.json"
+      ]
+    },
+    {
+      "semantic_name": "ALLOCATE-INSTANCE",
+      "reason": "ALREADY-IN-HISTORICAL-OR-NAME-QUEUE",
+      "source_paths": [
+        "knowledge/d10-historical-clos-interlisp-residual-review-v1.json"
+      ]
+    },
+    {
+      "semantic_name": "INTERLISP-RECORD-FIELD-RESOLVE",
+      "reason": "ALREADY-IN-HISTORICAL-OR-NAME-QUEUE",
+      "source_paths": [
+        "knowledge/d10-historical-clos-interlisp-residual-review-v1.json"
+      ]
+    },
+    {
+      "semantic_name": "MASTERSCOPE-CALL-RELATION",
+      "reason": "ALREADY-IN-HISTORICAL-OR-NAME-QUEUE",
+      "source_paths": [
+        "knowledge/d10-historical-clos-interlisp-residual-review-v1.json"
+      ]
+    },
+    {
+      "semantic_name": "APPLICABLE-METHODS",
+      "reason": "ALREADY-CANONICAL-715",
+      "source_paths": [
+        "knowledge/d10-flavors-restarts-research-v1.json"
+      ]
+    },
+    {
+      "semantic_name": "NEXT-METHOD-AVAILABLE?",
+      "reason": "ALREADY-CANONICAL-715",
+      "source_paths": [
+        "knowledge/d10-flavors-restarts-research-v1.json"
+      ]
+    },
+    {
+      "semantic_name": "CALL-NEXT-METHOD",
+      "reason": "ALREADY-IN-HISTORICAL-OR-NAME-QUEUE",
+      "source_paths": [
+        "knowledge/d10-flavors-restarts-research-v1.json"
+      ]
+    },
+    {
+      "semantic_name": "STANDARD-METHOD-COMBINATION",
+      "reason": "ALREADY-CANONICAL-715",
+      "source_paths": [
+        "knowledge/d10-flavors-restarts-research-v1.json"
+      ]
+    },
+    {
+      "semantic_name": "MESSAGE-UNHANDLED",
+      "reason": "ALREADY-IN-HISTORICAL-OR-NAME-QUEUE",
+      "source_paths": [
+        "knowledge/d10-flavors-restarts-research-v1.json"
+      ]
+    },
+    {
+      "semantic_name": "SIGNAL-CONDITION",
+      "reason": "ALREADY-IN-HISTORICAL-OR-NAME-QUEUE",
+      "source_paths": [
+        "knowledge/d10-flavors-restarts-research-v1.json"
+      ]
+    },
+    {
+      "semantic_name": "FIND-RESTART",
+      "reason": "ALREADY-CANONICAL-715",
+      "source_paths": [
+        "knowledge/d10-flavors-restarts-research-v1.json"
+      ]
+    },
+    {
+      "semantic_name": "INVOKE-RESTART",
+      "reason": "ALREADY-IN-HISTORICAL-OR-NAME-QUEUE",
+      "source_paths": [
+        "knowledge/d10-flavors-restarts-research-v1.json"
+      ]
+    },
+    {
+      "semantic_name": "MAKNAM",
+      "reason": "ALREADY-CANONICAL-715",
+      "source_paths": [
+        "knowledge/d10-historical-maclisp-v2.json"
+      ]
+    },
+    {
+      "semantic_name": "IMPLODE",
+      "reason": "ALREADY-CANONICAL-715",
+      "source_paths": [
+        "knowledge/d10-historical-maclisp-v2.json"
+      ]
+    },
+    {
+      "semantic_name": "READLIST",
+      "reason": "ALREADY-CANONICAL-715",
+      "source_paths": [
+        "knowledge/d10-historical-maclisp-v2.json"
+      ]
+    },
+    {
+      "semantic_name": "EXPLODE",
+      "reason": "ALREADY-CANONICAL-715",
+      "source_paths": [
+        "knowledge/d10-historical-maclisp-v2.json"
+      ]
+    },
+    {
+      "semantic_name": "EXPLODEC",
+      "reason": "ALREADY-CANONICAL-715",
+      "source_paths": [
+        "knowledge/d10-historical-maclisp-v2.json"
+      ]
+    },
+    {
+      "semantic_name": "EXPLODEN",
+      "reason": "ALREADY-CANONICAL-715",
+      "source_paths": [
+        "knowledge/d10-historical-maclisp-v2.json"
+      ]
+    },
+    {
+      "semantic_name": "FLATSIZE",
+      "reason": "ALREADY-CANONICAL-715",
+      "source_paths": [
+        "knowledge/d10-historical-maclisp-v2.json"
+      ]
+    },
+    {
+      "semantic_name": "FLATC",
+      "reason": "ALREADY-CANONICAL-715",
+      "source_paths": [
+        "knowledge/d10-historical-maclisp-v2.json"
+      ]
+    },
+    {
+      "semantic_name": "MAPATOMS",
+      "reason": "ALREADY-CANONICAL-715",
+      "source_paths": [
+        "knowledge/d10-historical-maclisp-v2.json"
+      ]
+    },
+    {
+      "semantic_name": "MAKE-ARRAY",
+      "reason": "ALREADY-CANONICAL-715",
+      "source_paths": [
+        "knowledge/d10-historical-maclisp-v2.json"
+      ]
+    },
+    {
+      "semantic_name": "REARRAY",
+      "reason": "ALREADY-CANONICAL-715",
+      "source_paths": [
+        "knowledge/d10-historical-maclisp-v2.json"
+      ]
+    },
+    {
+      "semantic_name": "SORTCAR",
+      "reason": "ALREADY-CANONICAL-715",
+      "source_paths": [
+        "knowledge/d10-historical-maclisp-v2.json"
+      ]
+    },
+    {
+      "semantic_name": "APPQ",
+      "reason": "ALREADY-CANONICAL-715",
+      "source_paths": [
+        "knowledge/d10-crossrepo-early-lisp-v1.json"
+      ]
+    },
+    {
+      "semantic_name": "DEFINE-BATCH",
+      "reason": "ALREADY-CANONICAL-715",
+      "source_paths": [
+        "knowledge/d10-crossrepo-early-lisp-v1.json"
+      ]
+    },
+    {
+      "semantic_name": "CALL/CC",
+      "reason": "ALREADY-CANONICAL-715",
+      "source_paths": [
+        "knowledge/d10-crossrepo-early-lisp-v1.json"
+      ]
+    },
+    {
+      "semantic_name": "READTABLE",
+      "reason": "ALREADY-CANONICAL-715",
+      "source_paths": [
+        "knowledge/d10-crossrepo-early-lisp-v1.json"
+      ]
+    },
+    {
+      "semantic_name": "IF",
+      "reason": "ALREADY-CANONICAL-715",
+      "source_paths": [
+        "knowledge/d10-crossrepo-early-lisp-v1.json"
+      ]
+    },
+    {
+      "semantic_name": "NUMERIC-NOT-EQUAL",
+      "reason": "ALREADY-CANONICAL-715",
+      "source_paths": [
+        "knowledge/d10-crossrepo-early-lisp-v1.json"
+      ]
+    },
+    {
+      "semantic_name": "MOD",
+      "reason": "LOWER-RATIFIED-D1-D9",
+      "source_paths": [
+        "knowledge/d10-crossrepo-early-lisp-v1.json"
+      ]
+    },
+    {
+      "semantic_name": "APPLY",
+      "reason": "LOWER-RATIFIED-D1-D9",
+      "source_paths": [
+        "knowledge/d10-crossrepo-early-lisp-v1.json"
+      ]
+    },
+    {
+      "semantic_name": "EVALQUOTE",
+      "reason": "LOWER-RATIFIED-D1-D9",
+      "source_paths": [
+        "knowledge/d10-crossrepo-early-lisp-v1.json"
+      ]
+    },
+    {
+      "semantic_name": "PAIRLIS",
+      "reason": "LOWER-RATIFIED-D1-D9",
+      "source_paths": [
+        "knowledge/d10-crossrepo-early-lisp-v1.json"
+      ]
+    },
+    {
+      "semantic_name": "ASSOC",
+      "reason": "LOWER-RATIFIED-D1-D9",
+      "source_paths": [
+        "knowledge/d10-crossrepo-early-lisp-v1.json"
+      ]
+    },
+    {
+      "semantic_name": "PUTD",
+      "reason": "ALREADY-CANONICAL-715",
+      "source_paths": [
+        "knowledge/d10-interlisp-psl-history-harvest-v1.json"
+      ]
+    },
+    {
+      "semantic_name": "GETD",
+      "reason": "ALREADY-CANONICAL-715",
+      "source_paths": [
+        "knowledge/d10-interlisp-psl-history-harvest-v1.json"
+      ]
+    },
+    {
+      "semantic_name": "COPYD",
+      "reason": "ALREADY-CANONICAL-715",
+      "source_paths": [
+        "knowledge/d10-interlisp-psl-history-harvest-v1.json"
+      ]
+    },
+    {
+      "semantic_name": "REMD",
+      "reason": "ALREADY-CANONICAL-715",
+      "source_paths": [
+        "knowledge/d10-interlisp-psl-history-harvest-v1.json"
+      ]
+    },
+    {
+      "semantic_name": "FLUIDP",
+      "reason": "ALREADY-CANONICAL-715",
+      "source_paths": [
+        "knowledge/d10-interlisp-psl-history-harvest-v1.json"
+      ]
+    },
+    {
+      "semantic_name": "GLOBALP",
+      "reason": "ALREADY-CANONICAL-715",
+      "source_paths": [
+        "knowledge/d10-interlisp-psl-history-harvest-v1.json"
+      ]
+    },
+    {
+      "semantic_name": "UNFLUID",
+      "reason": "ALREADY-CANONICAL-715",
+      "source_paths": [
+        "knowledge/d10-interlisp-psl-history-harvest-v1.json"
+      ]
+    },
+    {
+      "semantic_name": "EXPRP",
+      "reason": "ALREADY-CANONICAL-715",
+      "source_paths": [
+        "knowledge/d10-interlisp-psl-history-harvest-v1.json"
+      ]
+    },
+    {
+      "semantic_name": "FEXPRP",
+      "reason": "ALREADY-CANONICAL-715",
+      "source_paths": [
+        "knowledge/d10-interlisp-psl-history-harvest-v1.json"
+      ]
+    },
+    {
+      "semantic_name": "NEXPRP",
+      "reason": "ALREADY-CANONICAL-715",
+      "source_paths": [
+        "knowledge/d10-interlisp-psl-history-harvest-v1.json"
+      ]
+    },
+    {
+      "semantic_name": "FUNBOUNDP",
+      "reason": "ALREADY-CANONICAL-715",
+      "source_paths": [
+        "knowledge/d10-interlisp-psl-history-harvest-v1.json"
+      ]
+    },
+    {
+      "semantic_name": "UNDO",
+      "reason": "ALREADY-CANONICAL-715",
+      "source_paths": [
+        "knowledge/d10-interlisp-psl-history-harvest-v1.json"
+      ]
+    },
+    {
+      "semantic_name": "INTERLISP-HISTORY-REPLAY",
+      "reason": "ALREADY-CANONICAL-715",
+      "source_paths": [
+        "knowledge/d10-interlisp-psl-history-harvest-v1.json"
+      ]
+    },
+    {
+      "semantic_name": "WRAP",
+      "reason": "ALREADY-CANONICAL-715",
+      "source_paths": [
+        "knowledge/d10-psl-interlisp-lispm-unmerged-residual-v1.json"
+      ]
+    },
+    {
+      "semantic_name": "REMOVE-WRAPPER",
+      "reason": "ALREADY-CANONICAL-715",
+      "source_paths": [
+        "knowledge/d10-psl-interlisp-lispm-unmerged-residual-v1.json"
+      ]
+    },
+    {
+      "semantic_name": "WRAPPED?",
+      "reason": "ALREADY-IN-HISTORICAL-OR-NAME-QUEUE",
+      "source_paths": [
+        "knowledge/d10-psl-interlisp-lispm-unmerged-residual-v1.json"
+      ]
+    },
+    {
+      "semantic_name": "WRAPPER-OF-TYPE?",
+      "reason": "ALREADY-IN-HISTORICAL-OR-NAME-QUEUE",
+      "source_paths": [
+        "knowledge/d10-psl-interlisp-lispm-unmerged-residual-v1.json"
+      ]
+    },
+    {
+      "semantic_name": "WRAPPER-TYPES",
+      "reason": "ALREADY-IN-HISTORICAL-OR-NAME-QUEUE",
+      "source_paths": [
+        "knowledge/d10-psl-interlisp-lispm-unmerged-residual-v1.json"
+      ]
+    },
+    {
+      "semantic_name": "FUNCTION-LAMBDA-LIST",
+      "reason": "ALREADY-IN-HISTORICAL-OR-NAME-QUEUE",
+      "source_paths": [
+        "knowledge/d10-psl-interlisp-lispm-unmerged-residual-v1.json"
+      ]
+    },
+    {
+      "semantic_name": "FUNCTION-BASIC-DEFINITION",
+      "reason": "ALREADY-IN-HISTORICAL-OR-NAME-QUEUE",
+      "source_paths": [
+        "knowledge/d10-psl-interlisp-lispm-unmerged-residual-v1.json"
+      ]
+    },
+    {
+      "semantic_name": "CATCH-ALL",
+      "reason": "ALREADY-IN-HISTORICAL-OR-NAME-QUEUE",
+      "source_paths": [
+        "knowledge/d10-psl-interlisp-lispm-unmerged-residual-v1.json"
+      ]
+    },
+    {
+      "semantic_name": "UNWIND-ALL",
+      "reason": "ALREADY-IN-HISTORICAL-OR-NAME-QUEUE",
+      "source_paths": [
+        "knowledge/d10-psl-interlisp-lispm-unmerged-residual-v1.json"
+      ]
+    },
+    {
+      "semantic_name": "RESETLST",
+      "reason": "ALREADY-IN-HISTORICAL-OR-NAME-QUEUE",
+      "source_paths": [
+        "knowledge/d10-psl-interlisp-lispm-unmerged-residual-v1.json"
+      ]
+    },
+    {
+      "semantic_name": "RESETSAVE",
+      "reason": "ALREADY-IN-HISTORICAL-OR-NAME-QUEUE",
+      "source_paths": [
+        "knowledge/d10-psl-interlisp-lispm-unmerged-residual-v1.json"
+      ]
+    },
+    {
+      "semantic_name": "RESETVAR",
+      "reason": "ALREADY-IN-HISTORICAL-OR-NAME-QUEUE",
+      "source_paths": [
+        "knowledge/d10-psl-interlisp-lispm-unmerged-residual-v1.json"
+      ]
+    },
+    {
+      "semantic_name": "RESETVARS",
+      "reason": "ALREADY-IN-HISTORICAL-OR-NAME-QUEUE",
+      "source_paths": [
+        "knowledge/d10-psl-interlisp-lispm-unmerged-residual-v1.json"
+      ]
+    },
+    {
+      "semantic_name": "RESETFORM",
+      "reason": "ALREADY-IN-HISTORICAL-OR-NAME-QUEUE",
+      "source_paths": [
+        "knowledge/d10-psl-interlisp-lispm-unmerged-residual-v1.json"
+      ]
+    },
+    {
+      "semantic_name": "DEFRESOURCE",
+      "reason": "ALREADY-IN-HISTORICAL-OR-NAME-QUEUE",
+      "source_paths": [
+        "knowledge/d10-psl-interlisp-lispm-unmerged-residual-v1.json"
+      ]
+    },
+    {
+      "semantic_name": "ALLOCATE-RESOURCE",
+      "reason": "ALREADY-IN-HISTORICAL-OR-NAME-QUEUE",
+      "source_paths": [
+        "knowledge/d10-psl-interlisp-lispm-unmerged-residual-v1.json"
+      ]
+    },
+    {
+      "semantic_name": "DEALLOCATE-RESOURCE",
+      "reason": "ALREADY-IN-HISTORICAL-OR-NAME-QUEUE",
+      "source_paths": [
+        "knowledge/d10-psl-interlisp-lispm-unmerged-residual-v1.json"
+      ]
+    },
+    {
+      "semantic_name": "USING-RESOURCE",
+      "reason": "ALREADY-IN-HISTORICAL-OR-NAME-QUEUE",
+      "source_paths": [
+        "knowledge/d10-psl-interlisp-lispm-unmerged-residual-v1.json"
+      ]
+    },
+    {
+      "semantic_name": "CLEAR-RESOURCE",
+      "reason": "ALREADY-IN-HISTORICAL-OR-NAME-QUEUE",
+      "source_paths": [
+        "knowledge/d10-psl-interlisp-lispm-unmerged-residual-v1.json"
+      ]
+    },
+    {
+      "semantic_name": "MAP-RESOURCE",
+      "reason": "ALREADY-IN-HISTORICAL-OR-NAME-QUEUE",
+      "source_paths": [
+        "knowledge/d10-psl-interlisp-lispm-unmerged-residual-v1.json"
+      ]
+    },
+    {
+      "semantic_name": "DEALLOCATE-WHOLE-RESOURCE",
+      "reason": "ALREADY-IN-HISTORICAL-OR-NAME-QUEUE",
+      "source_paths": [
+        "knowledge/d10-psl-interlisp-lispm-unmerged-residual-v1.json"
+      ]
+    },
+    {
+      "semantic_name": "MAKE-INSTANCES-OBSOLETE",
+      "reason": "ALREADY-CANONICAL-715",
+      "source_paths": [
+        "knowledge/d10-clos-instance-lifecycle-residual-v1.json"
+      ]
+    },
+    {
+      "semantic_name": "UPDATE-INSTANCE-FOR-REDEFINED-CLASS",
+      "reason": "ALREADY-IN-HISTORICAL-OR-NAME-QUEUE",
+      "source_paths": [
+        "knowledge/d10-clos-instance-lifecycle-residual-v1.json"
+      ]
+    },
+    {
+      "semantic_name": "METHOD-QUALIFIERS",
+      "reason": "ALREADY-IN-HISTORICAL-OR-NAME-QUEUE",
+      "source_paths": [
+        "knowledge/d10-clos-instance-lifecycle-residual-v1.json"
+      ]
+    },
+    {
+      "semantic_name": "NO-APPLICABLE-METHOD",
+      "reason": "ALREADY-IN-HISTORICAL-OR-NAME-QUEUE",
+      "source_paths": [
+        "knowledge/d10-clos-instance-lifecycle-residual-v1.json"
+      ]
+    },
+    {
+      "semantic_name": "NO-NEXT-METHOD",
+      "reason": "ALREADY-IN-HISTORICAL-OR-NAME-QUEUE",
+      "source_paths": [
+        "knowledge/d10-clos-instance-lifecycle-residual-v1.json"
+      ]
+    },
+    {
+      "semantic_name": "ENSURE-GENERIC-FUNCTION",
+      "reason": "ALREADY-IN-HISTORICAL-OR-NAME-QUEUE",
+      "source_paths": [
+        "knowledge/d10-clos-instance-lifecycle-residual-v1.json"
+      ]
+    },
+    {
+      "semantic_name": "REINITIALIZE-INSTANCE",
+      "reason": "ALREADY-IN-HISTORICAL-OR-NAME-QUEUE",
+      "source_paths": [
+        "knowledge/d10-clos-instance-lifecycle-residual-v1.json"
+      ]
+    },
+    {
+      "semantic_name": "FUNCTION-KEYWORDS",
+      "reason": "ALREADY-CANONICAL-715",
+      "source_paths": [
+        "knowledge/d10-clos-instance-lifecycle-residual-v1.json"
+      ]
+    }
+  ]
+}
