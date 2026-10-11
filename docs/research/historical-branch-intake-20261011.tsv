@@ -3914,7 +3914,7 @@ test/369-preserve-result-status-symbol-consumers	UNTRIAGED	-	-	BRANCH-NAME-ONLY
 test/369-preserve-translation-symbol-consumers	UNTRIAGED	-	-	BRANCH-NAME-ONLY
 test/369-quantity-current-main-red	UNTRIAGED	-	-	BRANCH-NAME-ONLY
 test/369-symbol-class-membership-red	UNTRIAGED	-	-	BRANCH-NAME-ONLY
-test/369-symbol-runtime-class-membership	UNTRIAGED	-	-	BRANCH-NAME-ONLY
+test/369-symbol-runtime-class-membership	ALREADY-IN-MAIN-ARCHIVED	cb40adca6c466f99bb2cb7fff88f3835b6540373	287a9d800caa1a18284423ca96e463a3d2aece99	Exact branch fixture blob 0d0151c80ddb2f5d500472789685ee867ae0ded9 archived byte-for-byte at research/domain-archive/20261011/pr0396/tests/fixtures/structural-observation-v1.lisp; README marks historical/non-active because expected class-membership records conflict with current D1 YES/NO conformance. PR #396 closed archived; owner verdict remains open in #369/#389 lineage.
 test/371-numeric-buffer-identity-preservation	UNTRIAGED	-	-	BRANCH-NAME-ONLY
 test/509-native-evaluator-parity	UNTRIAGED	-	-	BRANCH-NAME-ONLY
 test/509-native-evaluator-parity-replay	UNTRIAGED	-	-	BRANCH-NAME-ONLY
