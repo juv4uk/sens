@@ -17,6 +17,27 @@ fn eval_store(source: &str) -> String {
         .to_string()
 }
 
+fn eval_store_fixture(source: &str) -> String {
+    let mut session = Session::default();
+    sens::eval_pinned_legacy_core_source("lib/core.lisp", include_str!("../../../lib/core.lisp"), &mut session).unwrap();
+    sens::eval_pinned_reasoning_source("lib/unify.lisp", include_str!("../../../lib/unify.lisp"), &mut session).unwrap();
+    sens::eval_pinned_reasoning_source("lib/reason.lisp", include_str!("../../../lib/reason.lisp"), &mut session).unwrap();
+    sens::eval_pinned_reasoning_source("lib/forward.lisp", include_str!("../../../lib/forward.lisp"), &mut session).unwrap();
+    sens::eval_pinned_reasoning_source("lib/knowledge.lisp", include_str!("../../../lib/knowledge.lisp"), &mut session).unwrap();
+    sens::eval_pinned_reasoning_source("lib/persistent-map.lisp", include_str!("../../../lib/persistent-map.lisp"), &mut session).unwrap();
+    sens::eval_pinned_reasoning_source("lib/world.lisp", include_str!("../../../lib/world.lisp"), &mut session).unwrap();
+    sens::eval_pinned_reasoning_source("lib/content-store.lisp", include_str!("../../../lib/content-store.lisp"), &mut session).unwrap();
+    sens::eval_pinned_reasoning_source("lib/lisp-fs.lisp", include_str!("../../../lib/lisp-fs.lisp"), &mut session).unwrap();
+    sens::eval_pinned_fs_fixture_source(
+        "tests/fixtures/lisp-fs-conformance.lisp",
+        source,
+        &mut session,
+    )
+    .expect("pinned filesystem conformance fixture must execute as exact domains")
+    .value
+    .to_string()
+}
+
 fn eval_store_error(source: &str) -> String {
     let mut session = Session::default();
     sens::eval_pinned_legacy_core_source("lib/core.lisp", include_str!("../../../lib/core.lisp"), &mut session).unwrap();
@@ -80,7 +101,7 @@ fn lisp_fs_deduplicates_equal_objects_but_keeps_explicit_missing_status() {
 #[test]
 fn lisp_fs_conformance_fixture_is_deterministic() {
     assert_eq!(
-        eval_store(include_str!("../../../tests/fixtures/lisp-fs-conformance.lisp")),
+        eval_store_fixture(include_str!("../../../tests/fixtures/lisp-fs-conformance.lisp")),
         "((found (hello world) \"(hello world)\") (not-found \"notes/empty\") (found () \"()\") (not-found \"missing\") 2 1 2)"
     );
 }
