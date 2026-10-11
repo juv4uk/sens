@@ -555,6 +555,19 @@ pub fn load_time_library(session: &mut Session) -> Result<EvalResult, LanguageEr
     Ok(result)
 }
 
+/// Execute only a specifically pinned reasoning library through the exact
+/// domain-width reader. The caller supplies the identity-checked repository
+/// path; ordinary eval_program continues to mean ordinary Lisp, not inference
+/// from unknown three-bit tokens. No W8 -> D8 conversion occurs here.
+pub fn eval_pinned_reasoning_source(
+    path: &str,
+    source: &str,
+    session: &mut Session,
+) -> Result<EvalResult, LanguageError> {
+    let expressions = parse_mixed_exact_domain_reasoning_source(path, source)?;
+    eval_parsed_expressions(&expressions, session)
+}
+
 /// Load the shared byte/text adapters used by process and TCP boundaries.
 /// `load_process_library` remains the compatibility entry point already used
 /// by native embedders, so it now installs both language-owned text adapters:
