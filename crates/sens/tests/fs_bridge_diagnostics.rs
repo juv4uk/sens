@@ -85,6 +85,23 @@ fn referenced_root_rebuilds_its_binding_map_without_nil_tail_access() {
 }
 
 #[test]
+fn referenced_root_decisions_isolate_the_rejected_stage() {
+    let mut session = session();
+    let prefix = "(let* ((value (quote (hello world))) (written (fs-write (fs-empty) \"notes/today\" value)) (fs (car written)) (root (fs-root-package fs)) (object (fs-object-package value)))";
+    let cases = [
+        ("(fs-root-package-decision root)", "accepted"),
+        ("(fs-object-package-decision object)", "accepted"),
+        ("(fs-build-object-store (list object) (empty-content-store))", "accepted"),
+        ("(fs-reconstruct-root root (list object))", "accepted"),
+    ];
+    for (form, expected_tag) in cases {
+        let expression = format!("{prefix} (car {form}))");
+        let actual = observe(&mut session, &expression);
+        assert_eq!(actual, expected_tag, "decision diverged at {form}; use full envelopes to locate rejection");
+    }
+}
+
+#[test]
 fn referenced_root_rebuild_is_a_separate_atomic_witness() {
     let mut session = session();
     let source = "(let* ((value (quote (hello world))) (written (fs-write (fs-empty) \"notes/today\" value)) (fs (car written)) (root (fs-root-package fs)) (object (fs-object-package value))) (car (fs-reconstruct-root root (list object))))";
