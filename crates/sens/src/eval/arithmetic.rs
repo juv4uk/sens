@@ -471,6 +471,20 @@ pub(super) fn division_on_values(
     }
     // Reciprocal or exact rational division over admitted D24+ values.
     if values.iter().any(domain_numeric::is_domain_value) {
+        // Validate domain admission BEFORE divisor error classification:
+        // D24 / D48(0) is a forbidden mixed-domain expression, not an
+        // admitted D24 divide-by-zero.
+        let admitted_operands = match values {
+            [single] => domain_numeric::is_domain_value(single),
+            [lhs, rhs] if argument_count == 2 =>
+                domain_numeric::compare("=", lhs, rhs).is_some(),
+            _ => false,
+        };
+        if !admitted_operands {
+            return Err(LanguageError::new(
+                ErrorKind::Type, "numeric division requires admitted same-Dn values", span,
+            ));
+        }
         let denominator_is_zero = match values {
             [_] => matches!(&values[0], Value::BinaryNumber(n) if n.is_zero()),
             [_, rhs] => matches!(rhs, Value::BinaryNumber(n) if n.is_zero()),
