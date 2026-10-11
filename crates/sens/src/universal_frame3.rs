@@ -337,7 +337,10 @@ mod tests {
         ] {
             roundtrip(sample);
         }
-        for width in 1..=9 {
+        // D2:00 та D2:11 — структурні, НЕ окремі атоми.
+        roundtrip("10 0 00 1 01");
+        roundtrip("10 1 11 0 01");
+        for width in [1, 3, 4, 5, 6, 7, 8, 9] {
             let word = "0".repeat(width);
             roundtrip(&word);
             let max = "1".repeat(width);
