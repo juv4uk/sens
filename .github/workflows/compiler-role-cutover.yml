@@ -26,6 +26,7 @@ on:
       - "crates/sens/src/lib.rs"
       - "crates/sens/Cargo.toml"
       - "crates/xtask/src/compiler_export.rs"
+      - "crates/xtask/src/compiler_compile.rs"
       - "crates/xtask/src/main.rs"
       - "crates/xtask/tests/compiler_export_cli.rs"
       - ".github/workflows/compiler-role-cutover.yml"
@@ -54,6 +55,7 @@ on:
       - "crates/sens/src/lib.rs"
       - "crates/sens/Cargo.toml"
       - "crates/xtask/src/compiler_export.rs"
+      - "crates/xtask/src/compiler_compile.rs"
       - "crates/xtask/src/main.rs"
       - "crates/xtask/tests/compiler_export_cli.rs"
       - ".github/workflows/compiler-role-cutover.yml"
@@ -120,6 +122,9 @@ jobs:
 
       - name: Compiler semantic export CLI
         run: cargo test -p xtask --test compiler_export_cli -- --nocapture
+
+      - name: Canonical SW1 -> SENS compiler -> canonical artifact
+        run: cargo test -p xtask compiler_compile::tests -- --nocapture
       - name: Whole-nucleus lowering coverage when present
         run: |
           if test -f crates/sens/tests/compiler_selfhost_lowering_coverage.rs; then
