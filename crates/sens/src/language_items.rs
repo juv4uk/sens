@@ -49,8 +49,6 @@ pub struct LanguageItem {
     pub name: String,
     /// Canonical domain-qualified identity when this registry row has migrated.
     pub domain_identity: Option<CoreDomainIdentity>,
-    /// Explicit compatibility-only registry identity for still-byte-shaped generated metadata.
-    pub legacy_registry_id: Sens8,
     pub signature: &'static str,
     pub documentation: &'static str,
     pub kind: LanguageItemKind,
@@ -79,7 +77,6 @@ fn semantic_language_items_with(
         items.extend(surfaces.into_iter().map(|name| LanguageItem {
             name: name.to_string(),
             domain_identity: semantic_registry::domain_identity_for_surface(name),
-            legacy_registry_id: semantic_id,
             signature: row.signature,
             documentation: row.documentation,
             kind: row.kind,
@@ -102,4 +99,25 @@ pub fn language_items() -> Vec<LanguageItem> {
         semantic_registry::stable_surfaces_for_semantic_id,
         semantic_registry::admitted_surfaces_for_semantic_id,
     )
+}
+
+#[cfg(test)]
+mod exact_domain_metadata_migration_tests {
+    use super::*;
+
+    #[test]
+    fn admitted_canonical_function_metadata_carries_exact_domain() {
+        let items = language_items();
+        for name in ["як-є", "атом?", "перше", "решта", "сполучити"] {
+            if let Some(row) = items.iter().find(|item| item.name == name) {
+                let identity = row.domain_identity
+                    .expect("ратифікована функція не може мати нетипізований metadata ID");
+                assert_eq!(
+                    semantic_registry::domain_identity_for_surface(name),
+                    Some(identity),
+                    "metadata повинні відповідати єдиній доменній таблиці"
+                );
+            }
+        }
+    }
 }
