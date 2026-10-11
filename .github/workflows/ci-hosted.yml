@@ -21,6 +21,8 @@ jobs:
       - uses: dtolnay/rust-toolchain@stable
       - name: Compile canonical SENS Core
         run: cargo check --locked -p sens --lib
+      - name: Carry-safe same-domain D24/D48/... addition (Core-only Rust)
+        run: cargo test --locked -p sens --lib binary_number::tests::numeric_domain_addition
       - name: Ratified numeric D24/D48/... peer domains (Core-only)
         run: |
           python3 scripts/check-numeric-domain-ratification.py --self-test
