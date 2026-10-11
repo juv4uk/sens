@@ -194,12 +194,14 @@
 
 ; D5:10101 REVERSE-ONTO: canonical ratified surface owns the exact-domain
 ; binding. The historical English spelling below is compatibility-only.
+; D1-controlled reverse: empty ends the fold; a pair advances it.
+; Structural (0) and historical truth coercion are not valid D3 predicates.
 (00001001 зворот-до
   (00001000 (values acc)
     (00000111
-      ((0100 (00000010 values)) acc)
-      ((00100010 (00000010 values) (00000001 (0)))
-       (зворот-до (00000110 values) (00000100 (00000101 values) acc))))))
+      ((0101 values) acc)
+      ((0100 (010 values))
+       (зворот-до (011 values) (111 (100 values) acc))))))
 
 (00001001 reverse-onto зворот-до)
 
