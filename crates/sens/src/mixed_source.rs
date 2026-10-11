@@ -45,6 +45,23 @@ pub fn parse_mixed_exact_domain_machine_source(
     parse_mixed_source(source, true)
 }
 
+/// Parse only the language-owned time module with exact-width D3 call heads.
+/// Its W8 DEFINE/LAMBDA wrappers remain bootstrap syntax; no general source
+/// inference or W8-to-D8 promotion is authorized.
+pub fn parse_mixed_exact_domain_time_source(
+    path: &str,
+    source: &str,
+) -> Result<Vec<Expr>, LanguageError> {
+    if path != "lib/time.lisp" {
+        return Err(LanguageError::new(
+            ErrorKind::Parse,
+            "time-source exact-domain reader is restricted to lib/time.lisp",
+            Span::default(),
+        ));
+    }
+    parse_mixed_source(source, true)
+}
+
 /// Parse the one owner-approved Core4 source file using the mixed exact-width
 /// reader. Core4's historical W8 DEFINE/LAMBDA/COND wrappers remain compatible
 /// syntax, but executable D3-D6 heads inside their bodies are lifted to typed
