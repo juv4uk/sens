@@ -1,16 +1,12 @@
 #!/usr/bin/env python3
-"""#2764 — standing guard for the current owner-ratified Core D6 baseline.
+"""#2764 — integrity guard for the historical PRE-#3393 OD-006 D6 map.
 
-OD-006 / merged #2753 supersedes the earlier sparse 16+48 occupancy model.
+Current semantic and coordinate authority is #3393 / Contract 11.8 in
+knowledge/d6-ratified.json. The OD-006 table below is preserved solely as a
+chronological historical artifact and is NOT current occupancy authority.
 
-Canonical input:
-    knowledge/d6-historical-full-map.json
-
-This guard validates owner occupancy only.  Semantic derivability belongs to
-#2765 and runtime executability belongs to #2766.
-
-Pre-OD006 sparse closure/frontier experiments remain historical evidence, not
-current occupancy authority.
+This guard validates only the internal completeness of that older table.
+Semantic derivability belongs to #2765 and runtime executability belongs to #2766.
 """
 
 from __future__ import annotations
@@ -158,6 +154,8 @@ def build_result() -> dict[str, Any]:
         "selector_count": len(selector_coords),
         "historical_nonselector_count": len(rows) - len(selector_coords),
         "status_counts": EXPECTED_STATUS_COUNTS,
+        "current_occupancy_authority": False,
+        "authority_scope": "historical-OD-006-only; superseded by #3393 / Contract 11.8",
         "legacy_sparse_16_plus_48_current_authority": False,
         "legacy_pure_unknown_current_authority": False,
         "former_setq_001111_current_claim": False,

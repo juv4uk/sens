@@ -164,6 +164,24 @@ def classify(path: str, root: Path) -> dict:
     role, reason = classify_role(path)
     codec = codec_of(path, root)
     lane = owner_lane(path)
+    # Рамка-3 є окремим дослідним носієм: згадка T5 у коментарі
+    # не створює T5-сумісності чи права на канонічний .sens.
+    if path == "crates/sens/src/universal_frame3.rs":
+        return {
+            "schema": SCHEMA,
+            "repository": "juv4uk/sens",
+            "path": path,
+            "role": "producer",
+            "canonical_path": "n/a",
+            "extension": ".rs",
+            "codec": "FRAME3_RESEARCH",
+            "authority": "research/universal-frame3 (не canonical)",
+            "dependency": "UNKNOWN",
+            "base_sha": None,
+            "owner_lane": lane,
+            "migration_status": "BLOCKED",
+            "reason": "окремий дослідний формат: T5 parity і production admission не доведено",
+        }
     is_senc = (path.startswith("research/")
                or bool(re.search(r"framed3|tb33|adaptive|senc", path, re.IGNORECASE)))
 

@@ -20,7 +20,7 @@ fn complete_from_depth(words: &[&str]) -> Vec<String> {
         }
         assert!(depth >= 0);
     }
-    result.extend(std::iter::repeat("01".to_string()).take(depth as usize));
+    result.extend(std::iter::repeat_n("01".to_string(), depth as usize));
     result
 }
 
@@ -130,7 +130,7 @@ fn restore_all_ends(short: &[&str], k: usize) -> Vec<String> {
         }
         assert!(depth >= 0, "неправильний структурний D2");
     }
-    restored.extend(std::iter::repeat("01".to_string()).take(depth as usize));
+    restored.extend(std::iter::repeat_n("01".to_string(), depth as usize));
     restored
 }
 
@@ -141,7 +141,7 @@ fn all_initial_opens_and_all_terminal_closes_are_reversible_with_explicit_count(
         for payload in ["0", "000", "000000000"] {
             let mut program = vec!["10"; depth];
             program.push(payload);
-            program.extend(std::iter::repeat("01").take(depth));
+            program.extend(std::iter::repeat_n("01", depth));
             assert!(parse_canonical_binary(&program.join(" ")).is_ok());
             let (count, short) = trim_all_ends(&program);
             assert_eq!(count, depth);
