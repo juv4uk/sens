@@ -384,13 +384,14 @@ fn canonicalize_domain_result(
     ))
 }
 
-/// Compact-derived bootstrap laws ratified by Contract D4: NOT, NULL, LIST, APPEND.
+/// Compact-derived D4 value-call mechanisms with direct reference semantics.
 ///
-/// These are bounded reference value-call mechanisms. NOT consumes and returns
-/// only exact D1 PredicateBit values; NULL checks structural EMPTY (Value::Nil).
-/// Neither law coerces Number 0/1, host Bool, historical truth, or EMPTY into a
-/// predicate. LIST/APPEND use the D3 pair/empty value algebra. These mechanisms
-/// do not add residents, host effects, or historical W8 aliases.
+/// NOT consumes and returns only exact D1 PredicateBit values; NULL checks
+/// structural EMPTY (Value::Nil). Neither coerces Number 0/1, host Bool,
+/// historical truth, or EMPTY into a predicate. LIST and APPEND are derived
+/// Lisp-owned Core4 closures, not Rust residents: without the explicit Core4
+/// library slot they must remain unavailable, and with it dispatch reaches the
+/// language-owned closure through `Environment::domain_code_slot`.
 fn require_exactly_one_d4_argument(
     coordinate: u8,
     args: &[Value],
@@ -435,34 +436,6 @@ fn invoke_compact_derived_d4(
             require_exactly_one_d4_argument(0b0101, args, span)?;
             Ok(Value::predicate_bit(matches!(args[0], Value::Nil)))
         })()),
-        // Ratified D4 LIST: collect evaluated values into a proper list.
-        0b1110 => Some(Ok(Value::list(args.iter().cloned()))),
-        // Ratified D4 APPEND: combine only proper lists, left to right.
-        // Never coerce a D1 predicate, Text7 datum, symbol, or dotted tail
-        // into a proper-list carrier. Each pair is observed, not mutated.
-        0b1111 => {
-            let mut items = Vec::new();
-            for value in args {
-                let mut cursor = value;
-                loop {
-                    match cursor {
-                        Value::Nil => break,
-                        Value::Pair(head, tail) => {
-                            items.push(head.as_ref().clone());
-                            cursor = tail.as_ref();
-                        }
-                        _ => {
-                            return Some(Err(LanguageError::new(
-                                ErrorKind::Type,
-                                "D4:1111 APPEND requires proper lists; no implicit tail or D1 coercion",
-                                span,
-                            )));
-                        }
-                    }
-                }
-            }
-            Some(Ok(Value::list(items)))
-        }
         _ => None,
     }
 }
@@ -639,6 +612,21 @@ mod exact_domain_primitive_tests {
         CoreDomainIdentity::D4(crate::CoreD4::from_word(
             crate::Bit4::new(bits).expect("D4 word"),
         ))
+    }
+
+    #[test]
+    fn d4_list_and_append_require_lisp_owned_core4_bindings() {
+        let environment = Environment::root();
+        let span = Span { start: 0, end: 0 };
+        for (bits, args) in [
+            (0b1110, vec![Value::Nil]),
+            (0b1111, vec![Value::Nil, Value::Nil]),
+        ] {
+            let error = invoke_domain_identity(d4(bits), &args, &environment, span)
+                .expect_err("bare D4 LIST/APPEND must not gain a Rust fallback resident");
+            assert_eq!(error.kind, ErrorKind::Type);
+            assert!(error.message.contains("no admitted value-call mechanism"));
+        }
     }
 
     #[test]
