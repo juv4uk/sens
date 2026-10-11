@@ -16,10 +16,10 @@
 ; CML may key this definition/call by SID 00100001 as a compilation mechanism,
 ; but the selected law remains Core1-owned.
 
-(00001011 not
-  (00001000 (value)
-    (00000111
-      (value (00000001 ()))
-      ((00000001 T) (00000001 T)))))
+(0011 not
+  (0010 (value)
+    (110
+      (value (001 ()))
+      ((001 T) (001 T)))))
 
-(00000001 core1-s3-compiler-prelude-ready)
+(001 core1-s3-compiler-prelude-ready)
