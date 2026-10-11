@@ -29,6 +29,7 @@ on:
       - "crates/xtask/src/compiler_compile.rs"
       - "crates/xtask/src/main.rs"
       - "crates/xtask/tests/compiler_export_cli.rs"
+      - "crates/xtask/tests/compiler_triplet_cli.rs"
       - ".github/workflows/compiler-role-cutover.yml"
   push:
     branches: [main]
@@ -58,6 +59,7 @@ on:
       - "crates/xtask/src/compiler_compile.rs"
       - "crates/xtask/src/main.rs"
       - "crates/xtask/tests/compiler_export_cli.rs"
+      - "crates/xtask/tests/compiler_triplet_cli.rs"
       - ".github/workflows/compiler-role-cutover.yml"
 
 concurrency:
@@ -122,6 +124,9 @@ jobs:
 
       - name: Compiler semantic export CLI
         run: cargo test -p xtask --test compiler_export_cli -- --nocapture
+
+      - name: Physical T5 triplet through the public compiler CLI
+        run: cargo test -p xtask --test compiler_triplet_cli -- --nocapture
 
       - name: Canonical SW1 and physical T5 triplet -> SENS compiler -> artifact
         run: cargo test -p xtask compiler_compile::tests -- --nocapture
