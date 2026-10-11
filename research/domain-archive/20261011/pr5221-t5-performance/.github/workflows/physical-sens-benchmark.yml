@@ -1,0 +1,135 @@
+name: Current physical SENS performance benchmarks
+
+# Longitudinal numerical evidence, not a semantics authority or unit-test clone.
+# No global cancel-in-progress: every selected SHA can finish its measurement.
+on:
+  push:
+    branches: [main]
+    paths:
+      - "benchmarks/physical-sens-runtime/**"
+      - "benchmarks/current-en-vs-d1d8/performance_scoreboard.py"
+      - "examples/binary/d5-label-*.bits"
+      - "crates/sens/examples/physical_sens_hot_bench.rs"
+      - "crates/sens/examples/physical_sens_d5_hot_bench.rs"
+      - "crates/sens-cli/src/bin/sens-trit.rs"
+      - "crates/sens-cli/src/main.rs"
+      - "crates/sens/src/ternary_transport.rs"
+      - "crates/sens/src/canonical_reader.rs"
+      - "crates/sens/src/source_words.rs"
+      - ".github/workflows/physical-sens-benchmark.yml"
+  pull_request:
+    paths:
+      - "benchmarks/physical-sens-runtime/**"
+      - "benchmarks/current-en-vs-d1d8/performance_scoreboard.py"
+      - "examples/binary/d5-label-*.bits"
+      - "crates/sens-cli/src/**"
+      - "crates/sens/src/ternary_transport.rs"
+      - "crates/sens/src/canonical_reader.rs"
+      - ".github/workflows/physical-sens-benchmark.yml"
+  schedule:
+    - cron: "30 1 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  physical-runtime:
+    name: median/p95 of physical T5, D2, startup and execution
+    runs-on: ubuntu-24.04
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v5
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+        with:
+          shared-key: physical-sens-runtime-bench
+
+      - name: Prove canonical transport parity for every 1- and 2-byte T5 stream
+        run: cargo test --locked -p sens --lib every_short_admitted_t5_stream_is_already_a_unique_canonical_encoding
+
+      - name: Compile actual production release entrypoints
+        run: cargo build --locked --release -p sens-cli --bin sens --bin sens-trit
+
+      - name: Compile hot canonical D2 and evaluation phase probe
+        run: cargo build --locked --release -p sens --example physical_sens_hot_bench
+
+      - name: Measure physical binary workloads and identical-byte T5 decoders
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 benchmarks/physical-sens-runtime/run.py \
+            --sens target/release/sens \
+            --sens-trit target/release/sens-trit \
+            --reps 19 --warmups 3 --sizes 1,16,128,1024 \
+            --out "$RUNNER_TEMP/sens-physical-bench"
+
+      - name: Measure hot in-process T5, D2 and execution without startup
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 benchmarks/physical-sens-runtime/hot.py \
+            --binary target/release/examples/physical_sens_hot_bench \
+            --sizes 1,16,128,1024 --samples 11 --work-budget 65536 \
+            --out "$RUNNER_TEMP/sens-physical-bench"
+
+      - name: Measure D5 LABEL recursion, copy and higher-order MAP from real T5
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 benchmarks/physical-sens-runtime/d5_workloads.py \
+            --sens target/release/sens \
+            --sens-trit target/release/sens-trit \
+            --reps 19 --warmups 3 \
+            --out "$RUNNER_TEMP/sens-physical-bench"
+
+      - name: Compile hot D5 execution phase probe (no process startup in samples)
+        run: cargo build --locked --release -p sens --example physical_sens_d5_hot_bench
+
+      - name: Measure in-process D5 recursion, copy and MAP from physical T5
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 benchmarks/physical-sens-runtime/d5_hot.py \
+            --helper target/release/examples/physical_sens_d5_hot_bench \
+            --sens target/release/sens \
+            --sens-trit target/release/sens-trit \
+            --reps 9 --iterations 64 \
+            --out "$RUNNER_TEMP/sens-physical-bench"
+
+      - name: Score measured T5/D2 routes with p50 p95 and same-byte ratios
+        run: |
+          python3 benchmarks/current-en-vs-d1d8/performance_scoreboard.py \
+            --physical-hot-json "$RUNNER_TEMP/sens-physical-bench/hot-results.json" \
+            --out "$RUNNER_TEMP/sens-physical-bench/scoreboard.md"
+
+      - name: Publish exact measurements (not unit-test tallies)
+        if: always()
+        shell: bash
+        run: |
+          if test -s "$RUNNER_TEMP/sens-physical-bench/report.md"; then
+            cat "$RUNNER_TEMP/sens-physical-bench/report.md" >> "$GITHUB_STEP_SUMMARY"
+            if test -s "$RUNNER_TEMP/sens-physical-bench/hot-report.md"; then
+              cat "$RUNNER_TEMP/sens-physical-bench/hot-report.md" >> "$GITHUB_STEP_SUMMARY"
+            fi
+            if test -s "$RUNNER_TEMP/sens-physical-bench/d5-report.md"; then
+              cat "$RUNNER_TEMP/sens-physical-bench/d5-report.md" >> "$GITHUB_STEP_SUMMARY"
+            fi
+            if test -s "$RUNNER_TEMP/sens-physical-bench/d5-hot-report.md"; then
+              cat "$RUNNER_TEMP/sens-physical-bench/d5-hot-report.md" >> "$GITHUB_STEP_SUMMARY"
+            fi
+            if test -s "$RUNNER_TEMP/sens-physical-bench/scoreboard.md"; then
+              cat "$RUNNER_TEMP/sens-physical-bench/scoreboard.md" >> "$GITHUB_STEP_SUMMARY"
+            fi
+          else
+            echo 'Benchmark did not finish. No performance claim from this run.' >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+      - name: Save raw trials, environment, medians and digests
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: sens-physical-runtime-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/sens-physical-bench/
+          if-no-files-found: warn
+          retention-days: 30
