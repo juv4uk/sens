@@ -58,16 +58,22 @@ class CatalogRestoreTests(unittest.TestCase):
         report = merge.merge_catalog(self.root, self.old, self.current, self.output)
         self.assertEqual(3, report["source_historical_ids"])
         self.assertEqual(2, report["source_latest_ids"])
+        self.assertEqual(0, report["source_id_overlap"])
         self.assertEqual(3, report["restored_prior_only_ids"])
-        self.assertEqual(5, report["full_union_ids"])
+        self.assertEqual(5, report["source_union_candidate_ids"])
+        self.assertEqual(1, report["canonical_overlay_ids_added"])
+        self.assertEqual(7, report["full_union_ids"])
+        self.assertEqual(4, report["full_union_names"])
         self.assertEqual(1, report["colliding_spelling_groups_not_deduped"])
         result = merge.literal_tsv(self.output)
         self.assertEqual({
             "d10.alpha", "d10.name.1", "d10.name.2", "d10.name.3",
-            "d10.name.4"
+            "d10.name.4", "d10.canonical"
         }, set(result))
         self.assertEqual("ALPHA", result["d10.alpha"]["semantic_name"])
         self.assertEqual("ALPHA", result["d10.name.1"]["semantic_name"])
+        self.assertEqual("ALPHA", result["d10.canonical"]["semantic_name"])
+        self.assertEqual("0000000010", result["d10.canonical"]["canonical_coordinate"])
         self.assertEqual("d10.alpha", result["d10.alpha"]["candidate_id"])
         self.assertEqual("d10.name.1", result["d10.name.1"]["candidate_id"])
         self.assertIn("HISTORIC_SOURCE_ID:d10.name.2",
@@ -78,9 +84,9 @@ class CatalogRestoreTests(unittest.TestCase):
 
     def test_historical_and_current_same_name_distinct_ids_survive(self):
         report = merge.merge_catalog(self.root, self.old, self.current, self.output)
-        self.assertEqual(5, report["full_union_names"])  # old workflow key
+        self.assertEqual(4, report["full_union_names"])
         rows = merge.literal_tsv(self.output)
-        self.assertEqual({"d10.alpha", "d10.name.1"},
+        self.assertEqual({"d10.alpha", "d10.name.1", "d10.canonical"},
                          {ident for ident, row in rows.items()
                           if row["semantic_name"] == "ALPHA"})
         self.assertEqual(0, report["new_ratifications"])
@@ -107,8 +113,9 @@ class CatalogRestoreTests(unittest.TestCase):
             writer.writeheader()
             writer.writerows(self.current_rows)
         report = merge.merge_catalog(self.root, self.old, self.current, self.output)
-        self.assertEqual(5, report["full_union_names"])
-        self.assertEqual(3, report["restored_old_only_names"])
+        self.assertEqual(4, report["full_union_names"])
+        self.assertEqual(2, report["restored_old_only_names"])
+        self.assertEqual(6, report["full_union_ids"])
 
     def test_duplicate_source_name_preserves_independent_candidate_ids(self):
         # Same spelling is not a semantic equivalence certificate. Retain both
