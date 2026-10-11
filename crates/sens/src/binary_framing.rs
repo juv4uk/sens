@@ -818,7 +818,7 @@ mod tests {
         // Not a new language source literal: only mechanical framing metadata.
         let plain = BinaryFrame::BinaryNumber(BinaryNumber::one());
         let old = encode_binary_frame(&plain).unwrap();
-        assert_eq!(old, [1, 1, 1, 1, 0, 1, 0, 1, 1]); // 6-bit tag, gamma0(1), 1
+        assert_eq!(old, [1, 1, 1, 1, 0, 1, 0, 1, 0, 1]); // 6-bit tag, gamma0(1), 1
         assert_eq!(decode_binary_frame(&old).unwrap().0, plain);
         for width in [24usize, 48, 96, 192, 384] {
             for word in [vec![0; width], vec![1; width]] {
