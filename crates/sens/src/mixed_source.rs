@@ -126,7 +126,11 @@ pub fn parse_mixed_exact_domain_reasoning_source(
             Span::default(),
         ));
     }
-    parse_mixed_source(source, true)
+    if matches!(path, "lib/world.lisp" | "lib/knowledge.lisp" | "lib/lisp-fs.lisp") {
+        parse_mixed_pinned_d8_writer(source)
+    } else {
+        parse_mixed_source(source, true)
+    }
 }
 
 /// Exact D3/D4 call heads are intentionally present in this single
@@ -145,11 +149,7 @@ pub fn parse_mixed_exact_domain_fs_fixture_source(
             Span::default(),
         ));
     }
-    if matches!(path, "lib/world.lisp" | "lib/knowledge.lisp" | "lib/lisp-fs.lisp") {
-        parse_mixed_pinned_d8_writer(source)
-    } else {
-        parse_mixed_source(source, true)
-    }
+    parse_mixed_source(source, true)
 }
 
 /// Read only the frozen legacy library core with exact D3-D6 callable heads.
