@@ -25,7 +25,8 @@ jobs:
         run: |
           cargo test --locked -p sens --lib binary_number::tests
           cargo test --locked -p sens --lib qualified_numeric_domain_value_tests
-          cargo test --locked -p sens --lib binary_framing::tests::d24_numeric_value
+          cargo test --locked -p sens --lib binary_framing::tests
+          cargo test --locked -p sens --lib outer_envelope::tests::unratified_outer_n_path
       - name: Ratified numeric D24/D48/... peer domains (Core-only)
         run: |
           python3 scripts/check-numeric-domain-ratification.py --self-test
