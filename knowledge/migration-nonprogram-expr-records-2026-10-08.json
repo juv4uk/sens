@@ -22,7 +22,7 @@
     },
     {
       "path": "tests/fixtures/exact-q-binary-v1.lisp",
-      "git_blob_sha1": "6189e79606c8b0c925edfb75f36300e2d1982498"
+      "git_blob_sha1": "512adfb3a48de48b6af5273be01634469fef1ccd"
     },
     {
       "path": "tests/fixtures/knowledge-clause-kind-v1.lisp",
@@ -68,6 +68,13 @@
       "current_git_blob_sha1": "128a2d0c939a760db97f05a09ae6257d45c7e44a",
       "reviewed_commit": "d6e0d1dec6b47a728f5c0b728e147b8cae48d70a",
       "reason": "Only reclassifies the historical Contract 8.0 three-part COND row from active/constitutive expectation to historical-compatibility provenance. The file remains a non-executable record envelope; no automatic .sens companion or semantic migration is admitted."
+    },
+    {
+      "path": "tests/fixtures/exact-q-binary-v1.lisp",
+      "previous_git_blob_sha1": "6189e79606c8b0c925edfb75f36300e2d1982498",
+      "current_git_blob_sha1": "512adfb3a48de48b6af5273be01634469fef1ccd",
+      "reviewed_commit": "309813e3ead48b616dd41ba776deb2c68fbd38e6",
+      "reason": "Only appends two historical #216/#1827 exact-Q predicate record envelopes ((= 3 3) integer equality and (< 1 2 3 4) four-term less-than chain) as quoted (expr . source) data. The file remains a non-executable record envelope; no automatic .sens companion or semantic migration is admitted."
     }
   ]
 }
