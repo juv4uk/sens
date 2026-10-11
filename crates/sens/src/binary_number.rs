@@ -399,7 +399,7 @@ impl BinaryNumber {
     /// A width is legitimate only when it is 24 * 2^k, k >= 0.
     /// This helper checks the *domain family*, not resident admissibility.
     pub fn is_numeric_domain_width(width: usize) -> bool {
-        width >= 24 && width % 24 == 0 && (width / 24).is_power_of_two()
+        width >= 24 && width.is_multiple_of(24) && (width / 24).is_power_of_two()
     }
 
     /// Exact magnitude capacity of one admitted numeric domain.
