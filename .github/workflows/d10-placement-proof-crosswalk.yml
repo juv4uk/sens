@@ -6,6 +6,9 @@ on:
       - 'knowledge/d10-selector-seed.json'
       - 'knowledge/d10-v1-semantic-inventory.json'
       - 'scripts/check_d10_placement_proof_crosswalk.py'
+      - 'scripts/check_d10_candidate_location_census.py'
+      - 'knowledge/d10-proposal-ledger.tsv'
+      - 'research/d10/staging-20261011/**'
       - '.github/workflows/d10-placement-proof-crosswalk.yml'
   workflow_dispatch:
 
@@ -22,10 +25,17 @@ jobs:
           set -euo pipefail
           python3 scripts/check_d10_placement_proof_crosswalk.py --self-test --manifest /tmp/d10-placement-crosswalk.json
           python3 -O scripts/check_d10_placement_proof_crosswalk.py --self-test
+      - name: Reconcile canonical and archived D10 candidates
+        run: |
+          set -euo pipefail
+          python3 scripts/check_d10_candidate_location_census.py --self-test --output /tmp/d10-all-candidates.json
+          python3 -O scripts/check_d10_candidate_location_census.py --self-test
       - name: Save machine-readable source-to-coordinate crosswalk
         if: success()
         uses: actions/upload-artifact@v4
         with:
           name: d10-placement-proof-crosswalk
-          path: /tmp/d10-placement-crosswalk.json
+          path: |
+            /tmp/d10-placement-crosswalk.json
+            /tmp/d10-all-candidates.json
           retention-days: 14
