@@ -130,8 +130,12 @@ fn compile_t5_triplet_bytes(
 
     let visible = open_ternary_program(physical_t5)
         .map_err(|error| format!("canonical physical T5 open failed: {error}"))?;
-    if visible_view != visible.as_bytes() {
-        return Err("triplet view does not byte-match the canonical T5 decoder output".into());
+    // The Rust renderer returns the spaced words without a newline, while the
+    // on-disk view contract requires exactly one final LF.
+    let mut canonical_view = visible.as_bytes().to_vec();
+    canonical_view.push(b'\n');
+    if visible_view != canonical_view.as_slice() {
+        return Err("triplet view does not byte-match the canonical T5 decoder output plus one LF".into());
     }
     let reencoded_t5 = encode_binary_projection_ternary(&visible)
         .map_err(|error| format!("canonical T5 re-encode failed: {error}"))?;
