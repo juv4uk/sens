@@ -51,6 +51,9 @@ jobs:
       - name: World D3 complete CLI binary compilation
         if: always()
         run: cargo check --locked -p sens-cli --bins
+      - name: D8 exact writer admission witnesses
+        if: always()
+        run: cargo test --locked -p sens --test d8_writer_admission
       - name: D9 Lisp-derived AVL facade witnesses
         if: always()
         run: cargo test --locked -p sens --test d9_map_lisp_facade
