@@ -1,0 +1,1937 @@
+{
+  "schema": "sens-d10-old-lisp-residual-candidates/v1",
+  "date": "2026-10-11",
+  "state": "RESEARCH-NOT-SELECTED-NOT-RATIFIED",
+  "scope": "Additional exact historic Lisp source labels from seven existing main dossiers, absent from ratified D1-D9, canonical D10 v5 and two existing candidate queues. Labels are not independently proven semantics.",
+  "source_pins": [
+    {
+      "path": "knowledge/d10-historical-lisp15-reconciliation-20261009.json",
+      "sha": "da6f108e4f8553a150f0abed8f3758944193c49a"
+    },
+    {
+      "path": "knowledge/d10-historical-maclisp-v1.json",
+      "sha": "68d8d063f8ff138a17c4df23c187424cdd3253b1"
+    },
+    {
+      "path": "knowledge/d10-historical-maclisp-v2.json",
+      "sha": "912e2f6f5d379f4734a1d1746c6bf9db67b6af47"
+    },
+    {
+      "path": "knowledge/d10-interlisp-psl-history-harvest-v1.json",
+      "sha": "c862fc5d5fe45a0a01eb0115ec9f8e9b2553817d"
+    },
+    {
+      "path": "knowledge/d10-psl-interlisp-lispm-unmerged-residual-v1.json",
+      "sha": "f5438abf3460fa7caac14a30edf511f907a5be44"
+    },
+    {
+      "path": "knowledge/d10-historical-clos-interlisp-residual-review-v1.json",
+      "sha": "df8ed73011df39f9ec689046ce6936cc00892215"
+    },
+    {
+      "path": "knowledge/d10-historical-primary-manual-reconciliation-20261009.json",
+      "sha": "37e10ef9a953ea62beb5e4b46ef20f21cbfb3ee4"
+    }
+  ],
+  "baseline_pins": [
+    {
+      "path": "knowledge/d10-v5-semantic-inventory.json",
+      "sha": "c8a23d0db0eebca0c8d780cc93bc1fda78425c44"
+    },
+    {
+      "path": "knowledge/d10-provisional-candidate-coordinate-queue-v1.json",
+      "sha": "2c5391d4c8c64e297994387e0ded47b7e65e0e71"
+    },
+    {
+      "path": "knowledge/d10-historical-candidate-coordinate-queue-v1.json",
+      "sha": "131369263ac37c27798bb3c95521eb99e52b8f10"
+    },
+    {
+      "path": "knowledge/d1-d9-foundation.json",
+      "sha": "09d1d71c39d1484dfd005a5068dbb18b76f0f0d4"
+    }
+  ],
+  "accounting": {
+    "current_selected": 715,
+    "first_queue": 96,
+    "historical_queue": 80,
+    "new_distinct_unselected": 80,
+    "non_identity_labels": 2,
+    "selected_delta": 0,
+    "coordinates_delta": 0,
+    "ratified_delta": 0
+  },
+  "policy": [
+    "Research intake only; do not count these 80 labels as D10 residents.",
+    "Preserve historical HOLD/derived/D2-control/backend/mechanism verdicts.",
+    "Require individual law, positive and falsifying examples, semantic dedup and independent oracle prior to selection.",
+    "No new Git branches, no change to physical T5, D1-D9, or D10 selected code map."
+  ],
+  "candidates": [
+    {
+      "semantic_name": "A-LIST",
+      "status": "RESEARCH-UNSELECTED",
+      "selected": false,
+      "coordinate": null,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "traces": [
+        {
+          "path": "knowledge/d10-historical-lisp15-reconciliation-20261009.json",
+          "blob_sha": "da6f108e4f8553a150f0abed8f3758944193c49a",
+          "collection": "rows",
+          "index": 5,
+          "review_id": "L15-06",
+          "verdict": "HOLD-DERIVATION-OWNERSHIP-OR-SUBSTRATE",
+          "law_summary": "binding environment representation/context",
+          "positive": null,
+          "negative": null,
+          "reference": "McCarthy evaluator lineage 1960; LISP 1.5 manual",
+          "reason": null
+        }
+      ]
+    },
+    {
+      "semantic_name": "ADVANCE",
+      "status": "RESEARCH-UNSELECTED",
+      "selected": false,
+      "coordinate": null,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "traces": [
+        {
+          "path": "knowledge/d10-historical-lisp15-reconciliation-20261009.json",
+          "blob_sha": "da6f108e4f8553a150f0abed8f3758944193c49a",
+          "collection": "rows",
+          "index": 26,
+          "review_id": "L15-27",
+          "verdict": "HOLD-DERIVATION-OWNERSHIP-OR-SUBSTRATE",
+          "law_summary": "character-level reader/buffer/print-name machinery",
+          "positive": null,
+          "negative": null,
+          "reference": "character handling / LISP 1.5 Appendix F",
+          "reason": null
+        }
+      ]
+    },
+    {
+      "semantic_name": "APVAL",
+      "status": "RESEARCH-UNSELECTED",
+      "selected": false,
+      "coordinate": null,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "traces": [
+        {
+          "path": "knowledge/d10-historical-lisp15-reconciliation-20261009.json",
+          "blob_sha": "da6f108e4f8553a150f0abed8f3758944193c49a",
+          "collection": "rows",
+          "index": 22,
+          "review_id": "L15-23",
+          "verdict": "PARTIAL-OVERLAP-REVIEW-RESIDUAL-SEPARATELY",
+          "law_summary": "implicit mutable metadata attached to atomic symbols",
+          "positive": null,
+          "negative": null,
+          "reference": "LISP 1.5 manual 1962 property-list system",
+          "reason": null
+        }
+      ]
+    },
+    {
+      "semantic_name": "ARRAY",
+      "status": "RESEARCH-UNSELECTED",
+      "selected": false,
+      "coordinate": null,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "traces": [
+        {
+          "path": "knowledge/d10-historical-lisp15-reconciliation-20261009.json",
+          "blob_sha": "da6f108e4f8553a150f0abed8f3758944193c49a",
+          "collection": "rows",
+          "index": 11,
+          "review_id": "L15-12",
+          "verdict": "PARTIAL-OVERLAP-REVIEW-RESIDUAL-SEPARATELY",
+          "law_summary": "construct finite indexed aggregate",
+          "positive": null,
+          "negative": null,
+          "reference": "LISP 1.5 ARRAY; current SENS VECTOR",
+          "reason": null
+        }
+      ]
+    },
+    {
+      "semantic_name": "ARRAYCALL",
+      "status": "RESEARCH-UNSELECTED",
+      "selected": false,
+      "coordinate": null,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "traces": [
+        {
+          "path": "knowledge/d10-historical-maclisp-v2.json",
+          "blob_sha": "912e2f6f5d379f4734a1d1746c6bf9db67b6af47",
+          "collection": "excluded_or_held",
+          "index": 2,
+          "review_id": null,
+          "verdict": "MECHANISM-NO-CORE-SLOT",
+          "law_summary": null,
+          "positive": null,
+          "negative": null,
+          "reference": null,
+          "reason": "typed low-level array calling/access mechanism"
+        }
+      ]
+    },
+    {
+      "semantic_name": "ATTRIB",
+      "status": "RESEARCH-UNSELECTED",
+      "selected": false,
+      "coordinate": null,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "traces": [
+        {
+          "path": "knowledge/d10-historical-lisp15-reconciliation-20261009.json",
+          "blob_sha": "da6f108e4f8553a150f0abed8f3758944193c49a",
+          "collection": "rows",
+          "index": 22,
+          "review_id": "L15-23",
+          "verdict": "PARTIAL-OVERLAP-REVIEW-RESIDUAL-SEPARATELY",
+          "law_summary": "implicit mutable metadata attached to atomic symbols",
+          "positive": null,
+          "negative": null,
+          "reference": "LISP 1.5 manual 1962 property-list system",
+          "reason": null
+        }
+      ]
+    },
+    {
+      "semantic_name": "BACKQUANTIZE",
+      "status": "RESEARCH-UNSELECTED",
+      "selected": false,
+      "coordinate": null,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "traces": [
+        {
+          "path": "knowledge/d10-historical-primary-manual-reconciliation-20261009.json",
+          "blob_sha": "37e10ef9a953ea62beb5e4b46ef20f21cbfb3ee4",
+          "collection": "proposals",
+          "index": 11,
+          "review_id": "HIST-20261009-12",
+          "verdict": "HOLD-UNVERIFIED-SOURCE",
+          "law_summary": "claimed splicing macro behavior; not source-attested by this audit",
+          "positive": "find exact historical original spelling, syntax and evaluation phase in a primary document",
+          "negative": "misread BACKQUOTE or UNQUOTE-SPLICING as independently named BACKQUANTIZE",
+          "reference": "https://github.com/juv4uk/sens/blob/main/knowledge/d9-overflow-review-v1.json",
+          "reason": null
+        }
+      ]
+    },
+    {
+      "semantic_name": "BIGP",
+      "status": "RESEARCH-UNSELECTED",
+      "selected": false,
+      "coordinate": null,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "traces": [
+        {
+          "path": "knowledge/d10-historical-maclisp-v2.json",
+          "blob_sha": "912e2f6f5d379f4734a1d1746c6bf9db67b6af47",
+          "collection": "excluded_or_held",
+          "index": 7,
+          "review_id": null,
+          "verdict": "CORE-MATH-OR-CARRIER-HOLD",
+          "law_summary": null,
+          "positive": null,
+          "negative": null,
+          "reference": null,
+          "reason": "historical machine numeric carrier predicate"
+        }
+      ]
+    },
+    {
+      "semantic_name": "CHARCOUNT",
+      "status": "RESEARCH-UNSELECTED",
+      "selected": false,
+      "coordinate": null,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "traces": [
+        {
+          "path": "knowledge/d10-historical-lisp15-reconciliation-20261009.json",
+          "blob_sha": "da6f108e4f8553a150f0abed8f3758944193c49a",
+          "collection": "rows",
+          "index": 26,
+          "review_id": "L15-27",
+          "verdict": "HOLD-DERIVATION-OWNERSHIP-OR-SUBSTRATE",
+          "law_summary": "character-level reader/buffer/print-name machinery",
+          "positive": null,
+          "negative": null,
+          "reference": "character handling / LISP 1.5 Appendix F",
+          "reason": null
+        }
+      ]
+    },
+    {
+      "semantic_name": "CLEARBUFF",
+      "status": "RESEARCH-UNSELECTED",
+      "selected": false,
+      "coordinate": null,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "traces": [
+        {
+          "path": "knowledge/d10-historical-lisp15-reconciliation-20261009.json",
+          "blob_sha": "da6f108e4f8553a150f0abed8f3758944193c49a",
+          "collection": "rows",
+          "index": 26,
+          "review_id": "L15-27",
+          "verdict": "HOLD-DERIVATION-OWNERSHIP-OR-SUBSTRATE",
+          "law_summary": "character-level reader/buffer/print-name machinery",
+          "positive": null,
+          "negative": null,
+          "reference": "character handling / LISP 1.5 Appendix F",
+          "reason": null
+        }
+      ]
+    },
+    {
+      "semantic_name": "COLLECTION",
+      "status": "RESEARCH-UNSELECTED",
+      "selected": false,
+      "coordinate": null,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "traces": [
+        {
+          "path": "knowledge/d10-historical-primary-manual-reconciliation-20261009.json",
+          "blob_sha": "37e10ef9a953ea62beb5e4b46ef20f21cbfb3ee4",
+          "collection": "proposals",
+          "index": 12,
+          "review_id": "HIST-20261009-13",
+          "verdict": "HOLD-UNVERIFIED-SOURCE",
+          "law_summary": "generic 'collect elements' lacks operation/ordering/multiplicity contract",
+          "positive": "identify donor implementation/manual and provide order/duplicates/identity behavior before proposing",
+          "negative": "assert any traversal helper is a novel Core semantic primitive",
+          "reference": "https://github.com/juv4uk/sens/blob/main/knowledge/d9-overflow-review-v1.json",
+          "reason": null
+        }
+      ]
+    },
+    {
+      "semantic_name": "COMMON",
+      "status": "RESEARCH-UNSELECTED",
+      "selected": false,
+      "coordinate": null,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "traces": [
+        {
+          "path": "knowledge/d10-historical-lisp15-reconciliation-20261009.json",
+          "blob_sha": "da6f108e4f8553a150f0abed8f3758944193c49a",
+          "collection": "rows",
+          "index": 24,
+          "review_id": "L15-25",
+          "verdict": "HOLD-DERIVATION-OWNERSHIP-OR-SUBSTRATE",
+          "law_summary": "a-list based communication between compiled and interpreted functions",
+          "positive": null,
+          "negative": null,
+          "reference": "LISP 1.5 compiler/manual 1962",
+          "reason": null
+        }
+      ]
+    },
+    {
+      "semantic_name": "CONC",
+      "status": "RESEARCH-UNSELECTED",
+      "selected": false,
+      "coordinate": null,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "traces": [
+        {
+          "path": "knowledge/d10-historical-lisp15-reconciliation-20261009.json",
+          "blob_sha": "da6f108e4f8553a150f0abed8f3758944193c49a",
+          "collection": "rows",
+          "index": 1,
+          "review_id": "L15-02",
+          "verdict": "PARTIAL-OVERLAP-REVIEW-RESIDUAL-SEPARATELY",
+          "law_summary": "destructive concatenation/deletion/mapping over mutable list structure",
+          "positive": null,
+          "negative": null,
+          "reference": "LISP 1.5 Programmer's Manual, 1962, list-structure functions",
+          "reason": null
+        }
+      ]
+    },
+    {
+      "semantic_name": "COPY",
+      "status": "RESEARCH-UNSELECTED",
+      "selected": false,
+      "coordinate": null,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "traces": [
+        {
+          "path": "knowledge/d10-historical-lisp15-reconciliation-20261009.json",
+          "blob_sha": "da6f108e4f8553a150f0abed8f3758944193c49a",
+          "collection": "rows",
+          "index": 29,
+          "review_id": "L15-30",
+          "verdict": "PARTIAL-OVERLAP-REVIEW-RESIDUAL-SEPARATELY",
+          "law_summary": "recursive algorithms over list/function basis",
+          "positive": null,
+          "negative": null,
+          "reference": "LISP 1.5 manual",
+          "reason": null
+        }
+      ]
+    },
+    {
+      "semantic_name": "COS",
+      "status": "RESEARCH-UNSELECTED",
+      "selected": false,
+      "coordinate": null,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "traces": [
+        {
+          "path": "knowledge/d10-historical-maclisp-v2.json",
+          "blob_sha": "912e2f6f5d379f4734a1d1746c6bf9db67b6af47",
+          "collection": "excluded_or_held",
+          "index": 8,
+          "review_id": null,
+          "verdict": "CORE-MATH-HOLD",
+          "law_summary": null,
+          "positive": null,
+          "negative": null,
+          "reference": null,
+          "reason": "numeric transcendental operation belongs to the separate math bridge review"
+        }
+      ]
+    },
+    {
+      "semantic_name": "COUNT",
+      "status": "RESEARCH-UNSELECTED",
+      "selected": false,
+      "coordinate": null,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "traces": [
+        {
+          "path": "knowledge/d10-historical-lisp15-reconciliation-20261009.json",
+          "blob_sha": "da6f108e4f8553a150f0abed8f3758944193c49a",
+          "collection": "rows",
+          "index": 27,
+          "review_id": "L15-28",
+          "verdict": "HOLD-DERIVATION-OWNERSHIP-OR-SUBSTRATE",
+          "law_summary": "debugging/tracing/counting output and system observation",
+          "positive": null,
+          "negative": null,
+          "reference": "LISP 1.5 system/manual",
+          "reason": null
+        }
+      ]
+    },
+    {
+      "semantic_name": "COUNT-LEADING-ZEROS",
+      "status": "RESEARCH-UNSELECTED",
+      "selected": false,
+      "coordinate": null,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "traces": [
+        {
+          "path": "knowledge/d10-historical-primary-manual-reconciliation-20261009.json",
+          "blob_sha": "37e10ef9a953ea62beb5e4b46ef20f21cbfb3ee4",
+          "collection": "proposals",
+          "index": 8,
+          "review_id": "HIST-20261009-09",
+          "verdict": "HOLD-D8-DERIVABILITY",
+          "law_summary": "for a nonnegative fixed-width W-bit word x, CLZ(x) = W - integer-length(x), with CLZ(0)=W; must specify width W",
+          "positive": "CLZ(0,W)=W; CLZ(1,W)=W-1; CLZ(highest_bit,W)=0",
+          "negative": "one unbounded integer without width is silently assumed to have a universal number of leading zeros",
+          "reference": "https://tumbleweed.nu/r/lm-3/uv/chinual.html",
+          "reason": null
+        }
+      ]
+    },
+    {
+      "semantic_name": "CSET",
+      "status": "RESEARCH-UNSELECTED",
+      "selected": false,
+      "coordinate": null,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "traces": [
+        {
+          "path": "knowledge/d10-historical-lisp15-reconciliation-20261009.json",
+          "blob_sha": "da6f108e4f8553a150f0abed8f3758944193c49a",
+          "collection": "rows",
+          "index": 22,
+          "review_id": "L15-23",
+          "verdict": "PARTIAL-OVERLAP-REVIEW-RESIDUAL-SEPARATELY",
+          "law_summary": "implicit mutable metadata attached to atomic symbols",
+          "positive": null,
+          "negative": null,
+          "reference": "LISP 1.5 manual 1962 property-list system",
+          "reason": null
+        }
+      ]
+    },
+    {
+      "semantic_name": "CSETQ",
+      "status": "RESEARCH-UNSELECTED",
+      "selected": false,
+      "coordinate": null,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "traces": [
+        {
+          "path": "knowledge/d10-historical-lisp15-reconciliation-20261009.json",
+          "blob_sha": "da6f108e4f8553a150f0abed8f3758944193c49a",
+          "collection": "rows",
+          "index": 22,
+          "review_id": "L15-23",
+          "verdict": "PARTIAL-OVERLAP-REVIEW-RESIDUAL-SEPARATELY",
+          "law_summary": "implicit mutable metadata attached to atomic symbols",
+          "positive": null,
+          "negative": null,
+          "reference": "LISP 1.5 manual 1962 property-list system",
+          "reason": null
+        }
+      ]
+    },
+    {
+      "semantic_name": "CURCHAR",
+      "status": "RESEARCH-UNSELECTED",
+      "selected": false,
+      "coordinate": null,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "traces": [
+        {
+          "path": "knowledge/d10-historical-lisp15-reconciliation-20261009.json",
+          "blob_sha": "da6f108e4f8553a150f0abed8f3758944193c49a",
+          "collection": "rows",
+          "index": 26,
+          "review_id": "L15-27",
+          "verdict": "HOLD-DERIVATION-OWNERSHIP-OR-SUBSTRATE",
+          "law_summary": "character-level reader/buffer/print-name machinery",
+          "positive": null,
+          "negative": null,
+          "reference": "character handling / LISP 1.5 Appendix F",
+          "reason": null
+        }
+      ]
+    },
+    {
+      "semantic_name": "DEFLIST",
+      "status": "RESEARCH-UNSELECTED",
+      "selected": false,
+      "coordinate": null,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "traces": [
+        {
+          "path": "knowledge/d10-historical-lisp15-reconciliation-20261009.json",
+          "blob_sha": "da6f108e4f8553a150f0abed8f3758944193c49a",
+          "collection": "rows",
+          "index": 22,
+          "review_id": "L15-23",
+          "verdict": "PARTIAL-OVERLAP-REVIEW-RESIDUAL-SEPARATELY",
+          "law_summary": "implicit mutable metadata attached to atomic symbols",
+          "positive": null,
+          "negative": null,
+          "reference": "LISP 1.5 manual 1962 property-list system",
+          "reason": null
+        }
+      ]
+    },
+    {
+      "semantic_name": "DUMP",
+      "status": "RESEARCH-UNSELECTED",
+      "selected": false,
+      "coordinate": null,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "traces": [
+        {
+          "path": "knowledge/d10-historical-lisp15-reconciliation-20261009.json",
+          "blob_sha": "da6f108e4f8553a150f0abed8f3758944193c49a",
+          "collection": "rows",
+          "index": 28,
+          "review_id": "L15-29",
+          "verdict": "PARTIAL-OVERLAP-REVIEW-RESIDUAL-SEPARATELY",
+          "law_summary": "machine/system/compiler/storage control",
+          "positive": null,
+          "negative": null,
+          "reference": "LISP 1.5 system/manual",
+          "reason": null
+        }
+      ]
+    },
+    {
+      "semantic_name": "DUMPARRAYS",
+      "status": "RESEARCH-UNSELECTED",
+      "selected": false,
+      "coordinate": null,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "traces": [
+        {
+          "path": "knowledge/d10-historical-maclisp-v2.json",
+          "blob_sha": "912e2f6f5d379f4734a1d1746c6bf9db67b6af47",
+          "collection": "excluded_or_held",
+          "index": 3,
+          "review_id": null,
+          "verdict": "HOST-CAPABILITY-HOLD",
+          "law_summary": null,
+          "positive": null,
+          "negative": null,
+          "reference": null,
+          "reason": "system-dependent file persistence boundary"
+        }
+      ]
+    },
+    {
+      "semantic_name": "EFFACE",
+      "status": "RESEARCH-UNSELECTED",
+      "selected": false,
+      "coordinate": null,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "traces": [
+        {
+          "path": "knowledge/d10-historical-lisp15-reconciliation-20261009.json",
+          "blob_sha": "da6f108e4f8553a150f0abed8f3758944193c49a",
+          "collection": "rows",
+          "index": 1,
+          "review_id": "L15-02",
+          "verdict": "PARTIAL-OVERLAP-REVIEW-RESIDUAL-SEPARATELY",
+          "law_summary": "destructive concatenation/deletion/mapping over mutable list structure",
+          "positive": null,
+          "negative": null,
+          "reference": "LISP 1.5 Programmer's Manual, 1962, list-structure functions",
+          "reason": null
+        }
+      ]
+    },
+    {
+      "semantic_name": "ENDREAD",
+      "status": "RESEARCH-UNSELECTED",
+      "selected": false,
+      "coordinate": null,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "traces": [
+        {
+          "path": "knowledge/d10-historical-lisp15-reconciliation-20261009.json",
+          "blob_sha": "da6f108e4f8553a150f0abed8f3758944193c49a",
+          "collection": "rows",
+          "index": 26,
+          "review_id": "L15-27",
+          "verdict": "HOLD-DERIVATION-OWNERSHIP-OR-SUBSTRATE",
+          "law_summary": "character-level reader/buffer/print-name machinery",
+          "positive": null,
+          "negative": null,
+          "reference": "character handling / LISP 1.5 Appendix F",
+          "reason": null
+        }
+      ]
+    },
+    {
+      "semantic_name": "ENV",
+      "status": "RESEARCH-UNSELECTED",
+      "selected": false,
+      "coordinate": null,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "traces": [
+        {
+          "path": "knowledge/d10-historical-lisp15-reconciliation-20261009.json",
+          "blob_sha": "da6f108e4f8553a150f0abed8f3758944193c49a",
+          "collection": "rows",
+          "index": 6,
+          "review_id": "L15-07",
+          "verdict": "PARTIAL-OVERLAP-REVIEW-RESIDUAL-SEPARATELY",
+          "law_summary": "enumerate visible lexical bindings with shadow resolution",
+          "positive": null,
+          "negative": null,
+          "reference": "current SENS capability; historical environment concept is older but reflection spelling is not backdated",
+          "reason": null
+        }
+      ]
+    },
+    {
+      "semantic_name": "ERROR1",
+      "status": "RESEARCH-UNSELECTED",
+      "selected": false,
+      "coordinate": null,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "traces": [
+        {
+          "path": "knowledge/d10-historical-lisp15-reconciliation-20261009.json",
+          "blob_sha": "da6f108e4f8553a150f0abed8f3758944193c49a",
+          "collection": "rows",
+          "index": 4,
+          "review_id": "L15-05",
+          "verdict": "HOLD-DERIVATION-OWNERSHIP-OR-SUBSTRATE",
+          "law_summary": "marks/prints character-reader error position",
+          "positive": null,
+          "negative": null,
+          "reference": "LISP 1.5 Programmer's Manual Appendix F, 1962",
+          "reason": null
+        }
+      ]
+    },
+    {
+      "semantic_name": "EXCISE",
+      "status": "RESEARCH-UNSELECTED",
+      "selected": false,
+      "coordinate": null,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "traces": [
+        {
+          "path": "knowledge/d10-historical-lisp15-reconciliation-20261009.json",
+          "blob_sha": "da6f108e4f8553a150f0abed8f3758944193c49a",
+          "collection": "rows",
+          "index": 28,
+          "review_id": "L15-29",
+          "verdict": "PARTIAL-OVERLAP-REVIEW-RESIDUAL-SEPARATELY",
+          "law_summary": "machine/system/compiler/storage control",
+          "positive": null,
+          "negative": null,
+          "reference": "LISP 1.5 system/manual",
+          "reason": null
+        }
+      ]
+    },
+    {
+      "semantic_name": "FIX",
+      "status": "RESEARCH-UNSELECTED",
+      "selected": false,
+      "coordinate": null,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "traces": [
+        {
+          "path": "knowledge/d10-historical-maclisp-v2.json",
+          "blob_sha": "912e2f6f5d379f4734a1d1746c6bf9db67b6af47",
+          "collection": "excluded_or_held",
+          "index": 5,
+          "review_id": null,
+          "verdict": "CORE-MATH-OR-CARRIER-HOLD",
+          "law_summary": null,
+          "positive": null,
+          "negative": null,
+          "reference": null,
+          "reason": "historical fixed/floating conversion carrier semantics"
+        }
+      ]
+    },
+    {
+      "semantic_name": "FIXP",
+      "status": "RESEARCH-UNSELECTED",
+      "selected": false,
+      "coordinate": null,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "traces": [
+        {
+          "path": "knowledge/d10-historical-lisp15-reconciliation-20261009.json",
+          "blob_sha": "da6f108e4f8553a150f0abed8f3758944193c49a",
+          "collection": "rows",
+          "index": 19,
+          "review_id": "L15-20",
+          "verdict": "PARTIAL-OVERLAP-REVIEW-RESIDUAL-SEPARATELY",
+          "law_summary": "fixed/floating and logical-word observations tied to machine carrier",
+          "positive": null,
+          "negative": null,
+          "reference": "Memo 24, 1961; LISP 1.5 manual",
+          "reason": null
+        }
+      ]
+    },
+    {
+      "semantic_name": "FLAG",
+      "status": "RESEARCH-UNSELECTED",
+      "selected": false,
+      "coordinate": null,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "traces": [
+        {
+          "path": "knowledge/d10-historical-lisp15-reconciliation-20261009.json",
+          "blob_sha": "da6f108e4f8553a150f0abed8f3758944193c49a",
+          "collection": "rows",
+          "index": 22,
+          "review_id": "L15-23",
+          "verdict": "PARTIAL-OVERLAP-REVIEW-RESIDUAL-SEPARATELY",
+          "law_summary": "implicit mutable metadata attached to atomic symbols",
+          "positive": null,
+          "negative": null,
+          "reference": "LISP 1.5 manual 1962 property-list system",
+          "reason": null
+        }
+      ]
+    },
+    {
+      "semantic_name": "FLOATP",
+      "status": "RESEARCH-UNSELECTED",
+      "selected": false,
+      "coordinate": null,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "traces": [
+        {
+          "path": "knowledge/d10-historical-lisp15-reconciliation-20261009.json",
+          "blob_sha": "da6f108e4f8553a150f0abed8f3758944193c49a",
+          "collection": "rows",
+          "index": 19,
+          "review_id": "L15-20",
+          "verdict": "PARTIAL-OVERLAP-REVIEW-RESIDUAL-SEPARATELY",
+          "law_summary": "fixed/floating and logical-word observations tied to machine carrier",
+          "positive": null,
+          "negative": null,
+          "reference": "Memo 24, 1961; LISP 1.5 manual",
+          "reason": null
+        },
+        {
+          "path": "knowledge/d10-historical-maclisp-v2.json",
+          "blob_sha": "912e2f6f5d379f4734a1d1746c6bf9db67b6af47",
+          "collection": "excluded_or_held",
+          "index": 6,
+          "review_id": null,
+          "verdict": "CORE-MATH-OR-CARRIER-HOLD",
+          "law_summary": null,
+          "positive": null,
+          "negative": null,
+          "reference": null,
+          "reason": "historical machine numeric carrier predicate"
+        }
+      ]
+    },
+    {
+      "semantic_name": "GENERATE-EXPANSION",
+      "status": "RESEARCH-UNSELECTED",
+      "selected": false,
+      "coordinate": null,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "traces": [
+        {
+          "path": "knowledge/d10-historical-primary-manual-reconciliation-20261009.json",
+          "blob_sha": "37e10ef9a953ea62beb5e4b46ef20f21cbfb3ee4",
+          "collection": "proposals",
+          "index": 10,
+          "review_id": "HIST-20261009-11",
+          "verdict": "HOLD-UNVERIFIED-SOURCE",
+          "law_summary": "claimed macro's own expansion function; lacks primary definition and stage-specific behavior",
+          "positive": "locate authoritative manual page and distinguish from single-step expansion or macro-function lookup",
+          "negative": "mere alias of MACROEXPAND-1 given a new coordinate",
+          "reference": "https://github.com/juv4uk/sens/blob/main/knowledge/d9-overflow-review-v1.json",
+          "reason": null
+        }
+      ]
+    },
+    {
+      "semantic_name": "LAP",
+      "status": "RESEARCH-UNSELECTED",
+      "selected": false,
+      "coordinate": null,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "traces": [
+        {
+          "path": "knowledge/d10-historical-lisp15-reconciliation-20261009.json",
+          "blob_sha": "da6f108e4f8553a150f0abed8f3758944193c49a",
+          "collection": "rows",
+          "index": 28,
+          "review_id": "L15-29",
+          "verdict": "PARTIAL-OVERLAP-REVIEW-RESIDUAL-SEPARATELY",
+          "law_summary": "machine/system/compiler/storage control",
+          "positive": null,
+          "negative": null,
+          "reference": "LISP 1.5 system/manual",
+          "reason": null
+        }
+      ]
+    },
+    {
+      "semantic_name": "LEFTSHIFT",
+      "status": "RESEARCH-UNSELECTED",
+      "selected": false,
+      "coordinate": null,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "traces": [
+        {
+          "path": "knowledge/d10-historical-lisp15-reconciliation-20261009.json",
+          "blob_sha": "da6f108e4f8553a150f0abed8f3758944193c49a",
+          "collection": "rows",
+          "index": 19,
+          "review_id": "L15-20",
+          "verdict": "PARTIAL-OVERLAP-REVIEW-RESIDUAL-SEPARATELY",
+          "law_summary": "fixed/floating and logical-word observations tied to machine carrier",
+          "positive": null,
+          "negative": null,
+          "reference": "Memo 24, 1961; LISP 1.5 manual",
+          "reason": null
+        }
+      ]
+    },
+    {
+      "semantic_name": "LOAD",
+      "status": "RESEARCH-UNSELECTED",
+      "selected": false,
+      "coordinate": null,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "traces": [
+        {
+          "path": "knowledge/d10-historical-lisp15-reconciliation-20261009.json",
+          "blob_sha": "da6f108e4f8553a150f0abed8f3758944193c49a",
+          "collection": "rows",
+          "index": 28,
+          "review_id": "L15-29",
+          "verdict": "PARTIAL-OVERLAP-REVIEW-RESIDUAL-SEPARATELY",
+          "law_summary": "machine/system/compiler/storage control",
+          "positive": null,
+          "negative": null,
+          "reference": "LISP 1.5 system/manual",
+          "reason": null
+        }
+      ]
+    },
+    {
+      "semantic_name": "LOADARRAYS",
+      "status": "RESEARCH-UNSELECTED",
+      "selected": false,
+      "coordinate": null,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "traces": [
+        {
+          "path": "knowledge/d10-historical-maclisp-v2.json",
+          "blob_sha": "912e2f6f5d379f4734a1d1746c6bf9db67b6af47",
+          "collection": "excluded_or_held",
+          "index": 4,
+          "review_id": null,
+          "verdict": "HOST-CAPABILITY-HOLD",
+          "law_summary": null,
+          "positive": null,
+          "negative": null,
+          "reference": null,
+          "reason": "system-dependent file persistence boundary"
+        }
+      ]
+    },
+    {
+      "semantic_name": "LOCF",
+      "status": "RESEARCH-UNSELECTED",
+      "selected": false,
+      "coordinate": null,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "traces": [
+        {
+          "path": "knowledge/d10-historical-primary-manual-reconciliation-20261009.json",
+          "blob_sha": "37e10ef9a953ea62beb5e4b46ef20f21cbfb3ee4",
+          "collection": "proposals",
+          "index": 3,
+          "review_id": "HIST-20261009-04",
+          "verdict": "HOLD-MECHANISM-VS-SEMANTICS",
+          "law_summary": "locate an existing generalized place as a first-class reference to that same cell (not allocate a detached new cell)",
+          "positive": "obtain reference to array element, update through reference, observe same original element changes; require lifetime/alias safety model",
+          "negative": "reference points to a detached copy, or lets invalid pointer escape lifetime boundary",
+          "reference": "https://tumbleweed.nu/r/lm-3/uv/chinual.html",
+          "reason": null
+        }
+      ]
+    },
+    {
+      "semantic_name": "LOGOR",
+      "status": "RESEARCH-UNSELECTED",
+      "selected": false,
+      "coordinate": null,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "traces": [
+        {
+          "path": "knowledge/d10-historical-lisp15-reconciliation-20261009.json",
+          "blob_sha": "da6f108e4f8553a150f0abed8f3758944193c49a",
+          "collection": "rows",
+          "index": 19,
+          "review_id": "L15-20",
+          "verdict": "PARTIAL-OVERLAP-REVIEW-RESIDUAL-SEPARATELY",
+          "law_summary": "fixed/floating and logical-word observations tied to machine carrier",
+          "positive": null,
+          "negative": null,
+          "reference": "Memo 24, 1961; LISP 1.5 manual",
+          "reason": null
+        }
+      ]
+    },
+    {
+      "semantic_name": "LSUBRCALL",
+      "status": "RESEARCH-UNSELECTED",
+      "selected": false,
+      "coordinate": null,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "traces": [
+        {
+          "path": "knowledge/d10-historical-maclisp-v2.json",
+          "blob_sha": "912e2f6f5d379f4734a1d1746c6bf9db67b6af47",
+          "collection": "excluded_or_held",
+          "index": 1,
+          "review_id": null,
+          "verdict": "MECHANISM-NO-CORE-SLOT",
+          "law_summary": null,
+          "positive": null,
+          "negative": null,
+          "reference": null,
+          "reason": "explicit list-subroutine calling convention"
+        }
+      ]
+    },
+    {
+      "semantic_name": "MAKNUM",
+      "status": "RESEARCH-UNSELECTED",
+      "selected": false,
+      "coordinate": null,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "traces": [
+        {
+          "path": "knowledge/d10-historical-primary-manual-reconciliation-20261009.json",
+          "blob_sha": "37e10ef9a953ea62beb5e4b46ef20f21cbfb3ee4",
+          "collection": "proposals",
+          "index": 5,
+          "review_id": "HIST-20261009-06",
+          "verdict": "HOLD-SUBSTRATE-IDENTITY",
+          "law_summary": "map runtime object identity to positive integer, such that equal integer iff EQ identity; historically pointer or table-based, no portable persistent address guarantee",
+          "positive": "two distinct EQ-nonidentical cons cells map to different live ids; identical object maps to same live id",
+          "negative": "structural equality alone forces same identity id; id asserted stable after serialization/restart",
+          "reference": "https://softwarepreservation.computerhistory.org/LISP/MIT/MACLISP_Reference_Manual-Dec_17_1975.pdf",
+          "reason": null
+        }
+      ]
+    },
+    {
+      "semantic_name": "MKNAM",
+      "status": "RESEARCH-UNSELECTED",
+      "selected": false,
+      "coordinate": null,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "traces": [
+        {
+          "path": "knowledge/d10-historical-lisp15-reconciliation-20261009.json",
+          "blob_sha": "da6f108e4f8553a150f0abed8f3758944193c49a",
+          "collection": "rows",
+          "index": 26,
+          "review_id": "L15-27",
+          "verdict": "HOLD-DERIVATION-OWNERSHIP-OR-SUBSTRATE",
+          "law_summary": "character-level reader/buffer/print-name machinery",
+          "positive": null,
+          "negative": null,
+          "reference": "character handling / LISP 1.5 Appendix F",
+          "reason": null
+        }
+      ]
+    },
+    {
+      "semantic_name": "MULTIPLE-VALUE-PROG1",
+      "status": "RESEARCH-UNSELECTED",
+      "selected": false,
+      "coordinate": null,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "traces": [
+        {
+          "path": "knowledge/d10-historical-primary-manual-reconciliation-20261009.json",
+          "blob_sha": "37e10ef9a953ea62beb5e4b46ef20f21cbfb3ee4",
+          "collection": "proposals",
+          "index": 4,
+          "review_id": "HIST-20261009-05",
+          "verdict": "HOLD-D2-CONTROL",
+          "law_summary": "preserve all first-form return values, execute later effects in sequence, and return exactly the preserved cardinality and values",
+          "positive": "first expression yields (a,b); later expression changes state and yields c; overall result still (a,b) and effect occurred",
+          "negative": "only primary a retained or final c replaces first values",
+          "reference": "https://metaspec.dev/s_multiple-value-prog1.html",
+          "reason": null
+        }
+      ]
+    },
+    {
+      "semantic_name": "MUNKAM",
+      "status": "RESEARCH-UNSELECTED",
+      "selected": false,
+      "coordinate": null,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "traces": [
+        {
+          "path": "knowledge/d10-historical-primary-manual-reconciliation-20261009.json",
+          "blob_sha": "37e10ef9a953ea62beb5e4b46ef20f21cbfb3ee4",
+          "collection": "proposals",
+          "index": 6,
+          "review_id": "HIST-20261009-07",
+          "verdict": "HOLD-SUBSTRATE-IDENTITY",
+          "law_summary": "reverse a live object identity integer previously produced by MAKNUM; arbitrary/forged numbers are outside guaranteed contract",
+          "positive": "for a live x, MUNKAM(MAKNUM(x)) is EQ to x",
+          "negative": "accept arbitrary forged handle as a valid object or claim stable cross-process object restoration",
+          "reference": "https://softwarepreservation.computerhistory.org/LISP/MIT/MACLISP_Reference_Manual-Dec_17_1975.pdf",
+          "reason": null
+        }
+      ]
+    },
+    {
+      "semantic_name": "NCONC",
+      "status": "RESEARCH-UNSELECTED",
+      "selected": false,
+      "coordinate": null,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "traces": [
+        {
+          "path": "knowledge/d10-historical-lisp15-reconciliation-20261009.json",
+          "blob_sha": "da6f108e4f8553a150f0abed8f3758944193c49a",
+          "collection": "rows",
+          "index": 1,
+          "review_id": "L15-02",
+          "verdict": "PARTIAL-OVERLAP-REVIEW-RESIDUAL-SEPARATELY",
+          "law_summary": "destructive concatenation/deletion/mapping over mutable list structure",
+          "positive": null,
+          "negative": null,
+          "reference": "LISP 1.5 Programmer's Manual, 1962, list-structure functions",
+          "reason": null
+        }
+      ]
+    },
+    {
+      "semantic_name": "NUMOB",
+      "status": "RESEARCH-UNSELECTED",
+      "selected": false,
+      "coordinate": null,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "traces": [
+        {
+          "path": "knowledge/d10-historical-lisp15-reconciliation-20261009.json",
+          "blob_sha": "da6f108e4f8553a150f0abed8f3758944193c49a",
+          "collection": "rows",
+          "index": 26,
+          "review_id": "L15-27",
+          "verdict": "HOLD-DERIVATION-OWNERSHIP-OR-SUBSTRATE",
+          "law_summary": "character-level reader/buffer/print-name machinery",
+          "positive": null,
+          "negative": null,
+          "reference": "character handling / LISP 1.5 Appendix F",
+          "reason": null
+        }
+      ]
+    },
+    {
+      "semantic_name": "OBARRAY",
+      "status": "RESEARCH-UNSELECTED",
+      "selected": false,
+      "coordinate": null,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "traces": [
+        {
+          "path": "knowledge/d10-historical-lisp15-reconciliation-20261009.json",
+          "blob_sha": "da6f108e4f8553a150f0abed8f3758944193c49a",
+          "collection": "rows",
+          "index": 30,
+          "review_id": "L15-31",
+          "verdict": "HOLD-OBARRAY-MULTI-TABLE-IDENTITY-AND-ISOLATION-ONLY",
+          "law_summary": "The selected D10 inventory already contains MAPATOMS with the same MacLisp p. 2-95 law: apply a function to every symbol in a selected/current intern table without exposing its bucket representation. The remaining historical question is whether MacLisp's multi-obarray state and same-print-name/non-EQ symbols in different tables require a separate portable language-visible law.",
+          "positive": null,
+          "negative": null,
+          "reference": "MacLisp Reference Manual, 17 Dec 1975, §5.4 pp. 2-53–2-54 (interning/multiple obarrays) and §9 mapping functions p. 2-95 (MAPATOMS); https://softwarepreservation.computerhistory.org/LISP/MIT/MACLISP_Reference_Manual-Dec_17_1975.pdf",
+          "reason": null
+        }
+      ]
+    },
+    {
+      "semantic_name": "OBLIST",
+      "status": "RESEARCH-UNSELECTED",
+      "selected": false,
+      "coordinate": null,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "traces": [
+        {
+          "path": "knowledge/d10-historical-lisp15-reconciliation-20261009.json",
+          "blob_sha": "da6f108e4f8553a150f0abed8f3758944193c49a",
+          "collection": "rows",
+          "index": 21,
+          "review_id": "L15-22",
+          "verdict": "PARTIAL-OVERLAP-REVIEW-RESIDUAL-SEPARATELY",
+          "law_summary": "find/create interned atom by print name; enumerate/remove global object-list membership",
+          "positive": null,
+          "negative": null,
+          "reference": "LISP 1.5 manual 1962",
+          "reason": null
+        }
+      ]
+    },
+    {
+      "semantic_name": "OPCHAR",
+      "status": "RESEARCH-UNSELECTED",
+      "selected": false,
+      "coordinate": null,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "traces": [
+        {
+          "path": "knowledge/d10-historical-lisp15-reconciliation-20261009.json",
+          "blob_sha": "da6f108e4f8553a150f0abed8f3758944193c49a",
+          "collection": "rows",
+          "index": 26,
+          "review_id": "L15-27",
+          "verdict": "HOLD-DERIVATION-OWNERSHIP-OR-SUBSTRATE",
+          "law_summary": "character-level reader/buffer/print-name machinery",
+          "positive": null,
+          "negative": null,
+          "reference": "character handling / LISP 1.5 Appendix F",
+          "reason": null
+        }
+      ]
+    },
+    {
+      "semantic_name": "OPDEFINE",
+      "status": "RESEARCH-UNSELECTED",
+      "selected": false,
+      "coordinate": null,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "traces": [
+        {
+          "path": "knowledge/d10-historical-lisp15-reconciliation-20261009.json",
+          "blob_sha": "da6f108e4f8553a150f0abed8f3758944193c49a",
+          "collection": "rows",
+          "index": 28,
+          "review_id": "L15-29",
+          "verdict": "PARTIAL-OVERLAP-REVIEW-RESIDUAL-SEPARATELY",
+          "law_summary": "machine/system/compiler/storage control",
+          "positive": null,
+          "negative": null,
+          "reference": "LISP 1.5 system/manual",
+          "reason": null
+        }
+      ]
+    },
+    {
+      "semantic_name": "PACK",
+      "status": "RESEARCH-UNSELECTED",
+      "selected": false,
+      "coordinate": null,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "traces": [
+        {
+          "path": "knowledge/d10-historical-lisp15-reconciliation-20261009.json",
+          "blob_sha": "da6f108e4f8553a150f0abed8f3758944193c49a",
+          "collection": "rows",
+          "index": 26,
+          "review_id": "L15-27",
+          "verdict": "HOLD-DERIVATION-OWNERSHIP-OR-SUBSTRATE",
+          "law_summary": "character-level reader/buffer/print-name machinery",
+          "positive": null,
+          "negative": null,
+          "reference": "character handling / LISP 1.5 Appendix F",
+          "reason": null
+        }
+      ]
+    },
+    {
+      "semantic_name": "PNAME-VIEW",
+      "status": "RESEARCH-UNSELECTED",
+      "selected": false,
+      "coordinate": null,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "traces": [
+        {
+          "path": "knowledge/d10-historical-lisp15-reconciliation-20261009.json",
+          "blob_sha": "da6f108e4f8553a150f0abed8f3758944193c49a",
+          "collection": "rows",
+          "index": 9,
+          "review_id": "L15-10",
+          "verdict": "PARTIAL-OVERLAP-REVIEW-RESIDUAL-SEPARATELY",
+          "law_summary": "observe exact symbol name as text",
+          "positive": null,
+          "negative": null,
+          "reference": "historical PNAME lineage; current SENS surface is modern",
+          "reason": null
+        }
+      ]
+    },
+    {
+      "semantic_name": "PRINTPROP",
+      "status": "RESEARCH-UNSELECTED",
+      "selected": false,
+      "coordinate": null,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "traces": [
+        {
+          "path": "knowledge/d10-historical-lisp15-reconciliation-20261009.json",
+          "blob_sha": "da6f108e4f8553a150f0abed8f3758944193c49a",
+          "collection": "rows",
+          "index": 22,
+          "review_id": "L15-23",
+          "verdict": "PARTIAL-OVERLAP-REVIEW-RESIDUAL-SEPARATELY",
+          "law_summary": "implicit mutable metadata attached to atomic symbols",
+          "positive": null,
+          "negative": null,
+          "reference": "LISP 1.5 manual 1962 property-list system",
+          "reason": null
+        }
+      ]
+    },
+    {
+      "semantic_name": "PROP",
+      "status": "RESEARCH-UNSELECTED",
+      "selected": false,
+      "coordinate": null,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "traces": [
+        {
+          "path": "knowledge/d10-historical-lisp15-reconciliation-20261009.json",
+          "blob_sha": "da6f108e4f8553a150f0abed8f3758944193c49a",
+          "collection": "rows",
+          "index": 22,
+          "review_id": "L15-23",
+          "verdict": "PARTIAL-OVERLAP-REVIEW-RESIDUAL-SEPARATELY",
+          "law_summary": "implicit mutable metadata attached to atomic symbols",
+          "positive": null,
+          "negative": null,
+          "reference": "LISP 1.5 manual 1962 property-list system",
+          "reason": null
+        }
+      ]
+    },
+    {
+      "semantic_name": "PUNCH",
+      "status": "RESEARCH-UNSELECTED",
+      "selected": false,
+      "coordinate": null,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "traces": [
+        {
+          "path": "knowledge/d10-historical-lisp15-reconciliation-20261009.json",
+          "blob_sha": "da6f108e4f8553a150f0abed8f3758944193c49a",
+          "collection": "rows",
+          "index": 25,
+          "review_id": "L15-26",
+          "verdict": "PARTIAL-OVERLAP-REVIEW-RESIDUAL-SEPARATELY",
+          "law_summary": "console/card/punch/assembly I/O and transcript effects",
+          "positive": null,
+          "negative": null,
+          "reference": "LISP 1.5 manual 1962",
+          "reason": null
+        }
+      ]
+    },
+    {
+      "semantic_name": "PUNCHDEF",
+      "status": "RESEARCH-UNSELECTED",
+      "selected": false,
+      "coordinate": null,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "traces": [
+        {
+          "path": "knowledge/d10-historical-lisp15-reconciliation-20261009.json",
+          "blob_sha": "da6f108e4f8553a150f0abed8f3758944193c49a",
+          "collection": "rows",
+          "index": 25,
+          "review_id": "L15-26",
+          "verdict": "PARTIAL-OVERLAP-REVIEW-RESIDUAL-SEPARATELY",
+          "law_summary": "console/card/punch/assembly I/O and transcript effects",
+          "positive": null,
+          "negative": null,
+          "reference": "LISP 1.5 manual 1962",
+          "reason": null
+        }
+      ]
+    },
+    {
+      "semantic_name": "PUNCHLAP",
+      "status": "RESEARCH-UNSELECTED",
+      "selected": false,
+      "coordinate": null,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "traces": [
+        {
+          "path": "knowledge/d10-historical-lisp15-reconciliation-20261009.json",
+          "blob_sha": "da6f108e4f8553a150f0abed8f3758944193c49a",
+          "collection": "rows",
+          "index": 25,
+          "review_id": "L15-26",
+          "verdict": "PARTIAL-OVERLAP-REVIEW-RESIDUAL-SEPARATELY",
+          "law_summary": "console/card/punch/assembly I/O and transcript effects",
+          "positive": null,
+          "negative": null,
+          "reference": "LISP 1.5 manual 1962",
+          "reason": null
+        }
+      ]
+    },
+    {
+      "semantic_name": "RANDOM",
+      "status": "RESEARCH-UNSELECTED",
+      "selected": false,
+      "coordinate": null,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "traces": [
+        {
+          "path": "knowledge/d10-historical-maclisp-v2.json",
+          "blob_sha": "912e2f6f5d379f4734a1d1746c6bf9db67b6af47",
+          "collection": "excluded_or_held",
+          "index": 9,
+          "review_id": null,
+          "verdict": "NONDETERMINISM-HOLD",
+          "law_summary": null,
+          "positive": null,
+          "negative": null,
+          "reference": null,
+          "reason": "requires an explicit randomness/source law"
+        }
+      ]
+    },
+    {
+      "semantic_name": "READCH",
+      "status": "RESEARCH-UNSELECTED",
+      "selected": false,
+      "coordinate": null,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "traces": [
+        {
+          "path": "knowledge/d10-historical-lisp15-reconciliation-20261009.json",
+          "blob_sha": "da6f108e4f8553a150f0abed8f3758944193c49a",
+          "collection": "rows",
+          "index": 26,
+          "review_id": "L15-27",
+          "verdict": "HOLD-DERIVATION-OWNERSHIP-OR-SUBSTRATE",
+          "law_summary": "character-level reader/buffer/print-name machinery",
+          "positive": null,
+          "negative": null,
+          "reference": "character handling / LISP 1.5 Appendix F",
+          "reason": null
+        }
+      ]
+    },
+    {
+      "semantic_name": "READLAP",
+      "status": "RESEARCH-UNSELECTED",
+      "selected": false,
+      "coordinate": null,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "traces": [
+        {
+          "path": "knowledge/d10-historical-lisp15-reconciliation-20261009.json",
+          "blob_sha": "da6f108e4f8553a150f0abed8f3758944193c49a",
+          "collection": "rows",
+          "index": 25,
+          "review_id": "L15-26",
+          "verdict": "PARTIAL-OVERLAP-REVIEW-RESIDUAL-SEPARATELY",
+          "law_summary": "console/card/punch/assembly I/O and transcript effects",
+          "positive": null,
+          "negative": null,
+          "reference": "LISP 1.5 manual 1962",
+          "reason": null
+        }
+      ]
+    },
+    {
+      "semantic_name": "RECLAIM",
+      "status": "RESEARCH-UNSELECTED",
+      "selected": false,
+      "coordinate": null,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "traces": [
+        {
+          "path": "knowledge/d10-historical-lisp15-reconciliation-20261009.json",
+          "blob_sha": "da6f108e4f8553a150f0abed8f3758944193c49a",
+          "collection": "rows",
+          "index": 28,
+          "review_id": "L15-29",
+          "verdict": "PARTIAL-OVERLAP-REVIEW-RESIDUAL-SEPARATELY",
+          "law_summary": "machine/system/compiler/storage control",
+          "positive": null,
+          "negative": null,
+          "reference": "LISP 1.5 system/manual",
+          "reason": null
+        }
+      ]
+    },
+    {
+      "semantic_name": "REMFLAG",
+      "status": "RESEARCH-UNSELECTED",
+      "selected": false,
+      "coordinate": null,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "traces": [
+        {
+          "path": "knowledge/d10-historical-lisp15-reconciliation-20261009.json",
+          "blob_sha": "da6f108e4f8553a150f0abed8f3758944193c49a",
+          "collection": "rows",
+          "index": 22,
+          "review_id": "L15-23",
+          "verdict": "PARTIAL-OVERLAP-REVIEW-RESIDUAL-SEPARATELY",
+          "law_summary": "implicit mutable metadata attached to atomic symbols",
+          "positive": null,
+          "negative": null,
+          "reference": "LISP 1.5 manual 1962 property-list system",
+          "reason": null
+        }
+      ]
+    },
+    {
+      "semantic_name": "SELECT",
+      "status": "RESEARCH-UNSELECTED",
+      "selected": false,
+      "coordinate": null,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "traces": [
+        {
+          "path": "knowledge/d10-historical-lisp15-reconciliation-20261009.json",
+          "blob_sha": "da6f108e4f8553a150f0abed8f3758944193c49a",
+          "collection": "rows",
+          "index": 16,
+          "review_id": "L15-17",
+          "verdict": "PARTIAL-OVERLAP-REVIEW-RESIDUAL-SEPARATELY",
+          "law_summary": "historical list/logical/numeric/control conveniences",
+          "positive": null,
+          "negative": null,
+          "reference": "LISP I / LISP 1.5 manual lineage",
+          "reason": null
+        }
+      ]
+    },
+    {
+      "semantic_name": "SIGNP",
+      "status": "RESEARCH-UNSELECTED",
+      "selected": false,
+      "coordinate": null,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "traces": [
+        {
+          "path": "knowledge/d10-historical-maclisp-v2.json",
+          "blob_sha": "912e2f6f5d379f4734a1d1746c6bf9db67b6af47",
+          "collection": "excluded_or_held",
+          "index": 10,
+          "review_id": null,
+          "verdict": "CURRENT-PROJECTION-REVIEW",
+          "law_summary": null,
+          "positive": null,
+          "negative": null,
+          "reference": null,
+          "reason": "parameterized sign test is expressible through current comparison predicates; no new slot in this tranche"
+        }
+      ]
+    },
+    {
+      "semantic_name": "SPEAK",
+      "status": "RESEARCH-UNSELECTED",
+      "selected": false,
+      "coordinate": null,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "traces": [
+        {
+          "path": "knowledge/d10-historical-lisp15-reconciliation-20261009.json",
+          "blob_sha": "da6f108e4f8553a150f0abed8f3758944193c49a",
+          "collection": "rows",
+          "index": 27,
+          "review_id": "L15-28",
+          "verdict": "HOLD-DERIVATION-OWNERSHIP-OR-SUBSTRATE",
+          "law_summary": "debugging/tracing/counting output and system observation",
+          "positive": null,
+          "negative": null,
+          "reference": "LISP 1.5 system/manual",
+          "reason": null
+        }
+      ]
+    },
+    {
+      "semantic_name": "SPECIAL-BINDING",
+      "status": "RESEARCH-UNSELECTED",
+      "selected": false,
+      "coordinate": null,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "traces": [
+        {
+          "path": "knowledge/d10-historical-lisp15-reconciliation-20261009.json",
+          "blob_sha": "da6f108e4f8553a150f0abed8f3758944193c49a",
+          "collection": "rows",
+          "index": 23,
+          "review_id": "L15-24",
+          "verdict": "PARTIAL-OVERLAP-REVIEW-RESIDUAL-SEPARATELY",
+          "law_summary": "fixed SPECIAL cell used for dynamically visible free-variable communication; bind saves/restores prior value",
+          "positive": null,
+          "negative": null,
+          "reference": "LISP 1.5 compiler/manual 1962",
+          "reason": null
+        }
+      ]
+    },
+    {
+      "semantic_name": "STARTREAD",
+      "status": "RESEARCH-UNSELECTED",
+      "selected": false,
+      "coordinate": null,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "traces": [
+        {
+          "path": "knowledge/d10-historical-lisp15-reconciliation-20261009.json",
+          "blob_sha": "da6f108e4f8553a150f0abed8f3758944193c49a",
+          "collection": "rows",
+          "index": 26,
+          "review_id": "L15-27",
+          "verdict": "HOLD-DERIVATION-OWNERSHIP-OR-SUBSTRATE",
+          "law_summary": "character-level reader/buffer/print-name machinery",
+          "positive": null,
+          "negative": null,
+          "reference": "character handling / LISP 1.5 Appendix F",
+          "reason": null
+        }
+      ]
+    },
+    {
+      "semantic_name": "SUBRCALL",
+      "status": "RESEARCH-UNSELECTED",
+      "selected": false,
+      "coordinate": null,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "traces": [
+        {
+          "path": "knowledge/d10-historical-maclisp-v2.json",
+          "blob_sha": "912e2f6f5d379f4734a1d1746c6bf9db67b6af47",
+          "collection": "excluded_or_held",
+          "index": 0,
+          "review_id": null,
+          "verdict": "MECHANISM-NO-CORE-SLOT",
+          "law_summary": null,
+          "positive": null,
+          "negative": null,
+          "reference": null,
+          "reason": "explicit compiled-subroutine calling convention"
+        }
+      ]
+    },
+    {
+      "semantic_name": "TABLESPACE",
+      "status": "RESEARCH-UNSELECTED",
+      "selected": false,
+      "coordinate": null,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "traces": [
+        {
+          "path": "knowledge/d10-historical-primary-manual-reconciliation-20261009.json",
+          "blob_sha": "37e10ef9a953ea62beb5e4b46ef20f21cbfb3ee4",
+          "collection": "proposals",
+          "index": 9,
+          "review_id": "HIST-20261009-10",
+          "verdict": "HOLD-UNVERIFIED-SOURCE",
+          "law_summary": "claimed allocated hash table capacity distinct from number of stored entries; standard/portable behavior unproven",
+          "positive": "find primary definition differentiating capacity n from count k; require n>=k if applicable",
+          "negative": "merely relabel count as capacity or invent a new Core law without source",
+          "reference": "https://github.com/juv4uk/sens/blob/main/knowledge/d9-overflow-review-v1.json",
+          "reason": null
+        }
+      ]
+    },
+    {
+      "semantic_name": "TEMPUS-FUGIT",
+      "status": "RESEARCH-UNSELECTED",
+      "selected": false,
+      "coordinate": null,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "traces": [
+        {
+          "path": "knowledge/d10-historical-lisp15-reconciliation-20261009.json",
+          "blob_sha": "da6f108e4f8553a150f0abed8f3758944193c49a",
+          "collection": "rows",
+          "index": 28,
+          "review_id": "L15-29",
+          "verdict": "PARTIAL-OVERLAP-REVIEW-RESIDUAL-SEPARATELY",
+          "law_summary": "machine/system/compiler/storage control",
+          "positive": null,
+          "negative": null,
+          "reference": "LISP 1.5 system/manual",
+          "reason": null
+        }
+      ]
+    },
+    {
+      "semantic_name": "THE",
+      "status": "RESEARCH-UNSELECTED",
+      "selected": false,
+      "coordinate": null,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "traces": [
+        {
+          "path": "knowledge/d10-historical-primary-manual-reconciliation-20261009.json",
+          "blob_sha": "37e10ef9a953ea62beb5e4b46ef20f21cbfb3ee4",
+          "collection": "proposals",
+          "index": 7,
+          "review_id": "HIST-20261009-08",
+          "verdict": "HOLD-D2-TYPE-CONTROL",
+          "law_summary": "declaration of expected type(s) of expression result(s), preserving exact return value cardinality; mismatched types have undefined consequences, NOT mandated runtime check",
+          "positive": "correctly typed two-result expression returns the same two values with declaration in place",
+          "negative": "wrongly claim THE necessarily throws runtime type error for a violated declaration",
+          "reference": "https://www.cs.cmu.edu/Groups/AI/util/html/hyperspec/HyperSpec/Body/speope_the.html",
+          "reason": null
+        }
+      ]
+    },
+    {
+      "semantic_name": "TRACE",
+      "status": "RESEARCH-UNSELECTED",
+      "selected": false,
+      "coordinate": null,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "traces": [
+        {
+          "path": "knowledge/d10-historical-lisp15-reconciliation-20261009.json",
+          "blob_sha": "da6f108e4f8553a150f0abed8f3758944193c49a",
+          "collection": "rows",
+          "index": 27,
+          "review_id": "L15-28",
+          "verdict": "HOLD-DERIVATION-OWNERSHIP-OR-SUBSTRATE",
+          "law_summary": "debugging/tracing/counting output and system observation",
+          "positive": null,
+          "negative": null,
+          "reference": "LISP 1.5 system/manual",
+          "reason": null
+        }
+      ]
+    },
+    {
+      "semantic_name": "TRACESET",
+      "status": "RESEARCH-UNSELECTED",
+      "selected": false,
+      "coordinate": null,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "traces": [
+        {
+          "path": "knowledge/d10-historical-lisp15-reconciliation-20261009.json",
+          "blob_sha": "da6f108e4f8553a150f0abed8f3758944193c49a",
+          "collection": "rows",
+          "index": 27,
+          "review_id": "L15-28",
+          "verdict": "HOLD-DERIVATION-OWNERSHIP-OR-SUBSTRATE",
+          "law_summary": "debugging/tracing/counting output and system observation",
+          "positive": null,
+          "negative": null,
+          "reference": "LISP 1.5 system/manual",
+          "reason": null
+        }
+      ]
+    },
+    {
+      "semantic_name": "TRANSFORMER",
+      "status": "RESEARCH-UNSELECTED",
+      "selected": false,
+      "coordinate": null,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "traces": [
+        {
+          "path": "knowledge/d10-historical-lisp15-reconciliation-20261009.json",
+          "blob_sha": "da6f108e4f8553a150f0abed8f3758944193c49a",
+          "collection": "rows",
+          "index": 18,
+          "review_id": "L15-19",
+          "verdict": "HOLD-DERIVATION-OWNERSHIP-OR-SUBSTRATE",
+          "law_summary": "source-form transformation with re-evaluation protocol",
+          "positive": null,
+          "negative": null,
+          "reference": "Hart AIM-057, October 1963",
+          "reason": null
+        }
+      ]
+    },
+    {
+      "semantic_name": "UNCOMMON",
+      "status": "RESEARCH-UNSELECTED",
+      "selected": false,
+      "coordinate": null,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "traces": [
+        {
+          "path": "knowledge/d10-historical-lisp15-reconciliation-20261009.json",
+          "blob_sha": "da6f108e4f8553a150f0abed8f3758944193c49a",
+          "collection": "rows",
+          "index": 24,
+          "review_id": "L15-25",
+          "verdict": "HOLD-DERIVATION-OWNERSHIP-OR-SUBSTRATE",
+          "law_summary": "a-list based communication between compiled and interpreted functions",
+          "positive": null,
+          "negative": null,
+          "reference": "LISP 1.5 compiler/manual 1962",
+          "reason": null
+        }
+      ]
+    },
+    {
+      "semantic_name": "UNCOUNT",
+      "status": "RESEARCH-UNSELECTED",
+      "selected": false,
+      "coordinate": null,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "traces": [
+        {
+          "path": "knowledge/d10-historical-lisp15-reconciliation-20261009.json",
+          "blob_sha": "da6f108e4f8553a150f0abed8f3758944193c49a",
+          "collection": "rows",
+          "index": 27,
+          "review_id": "L15-28",
+          "verdict": "HOLD-DERIVATION-OWNERSHIP-OR-SUBSTRATE",
+          "law_summary": "debugging/tracing/counting output and system observation",
+          "positive": null,
+          "negative": null,
+          "reference": "LISP 1.5 system/manual",
+          "reason": null
+        }
+      ]
+    },
+    {
+      "semantic_name": "UNPACK",
+      "status": "RESEARCH-UNSELECTED",
+      "selected": false,
+      "coordinate": null,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "traces": [
+        {
+          "path": "knowledge/d10-historical-lisp15-reconciliation-20261009.json",
+          "blob_sha": "da6f108e4f8553a150f0abed8f3758944193c49a",
+          "collection": "rows",
+          "index": 26,
+          "review_id": "L15-27",
+          "verdict": "HOLD-DERIVATION-OWNERSHIP-OR-SUBSTRATE",
+          "law_summary": "character-level reader/buffer/print-name machinery",
+          "positive": null,
+          "negative": null,
+          "reference": "character handling / LISP 1.5 Appendix F",
+          "reason": null
+        }
+      ]
+    },
+    {
+      "semantic_name": "UNSPECIAL",
+      "status": "RESEARCH-UNSELECTED",
+      "selected": false,
+      "coordinate": null,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "traces": [
+        {
+          "path": "knowledge/d10-historical-lisp15-reconciliation-20261009.json",
+          "blob_sha": "da6f108e4f8553a150f0abed8f3758944193c49a",
+          "collection": "rows",
+          "index": 23,
+          "review_id": "L15-24",
+          "verdict": "PARTIAL-OVERLAP-REVIEW-RESIDUAL-SEPARATELY",
+          "law_summary": "fixed SPECIAL cell used for dynamically visible free-variable communication; bind saves/restores prior value",
+          "positive": null,
+          "negative": null,
+          "reference": "LISP 1.5 compiler/manual 1962",
+          "reason": null
+        }
+      ]
+    },
+    {
+      "semantic_name": "UNTRACE",
+      "status": "RESEARCH-UNSELECTED",
+      "selected": false,
+      "coordinate": null,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "traces": [
+        {
+          "path": "knowledge/d10-historical-lisp15-reconciliation-20261009.json",
+          "blob_sha": "da6f108e4f8553a150f0abed8f3758944193c49a",
+          "collection": "rows",
+          "index": 27,
+          "review_id": "L15-28",
+          "verdict": "HOLD-DERIVATION-OWNERSHIP-OR-SUBSTRATE",
+          "law_summary": "debugging/tracing/counting output and system observation",
+          "positive": null,
+          "negative": null,
+          "reference": "LISP 1.5 system/manual",
+          "reason": null
+        }
+      ]
+    },
+    {
+      "semantic_name": "UNTRACESET",
+      "status": "RESEARCH-UNSELECTED",
+      "selected": false,
+      "coordinate": null,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "traces": [
+        {
+          "path": "knowledge/d10-historical-lisp15-reconciliation-20261009.json",
+          "blob_sha": "da6f108e4f8553a150f0abed8f3758944193c49a",
+          "collection": "rows",
+          "index": 27,
+          "review_id": "L15-28",
+          "verdict": "HOLD-DERIVATION-OWNERSHIP-OR-SUBSTRATE",
+          "law_summary": "debugging/tracing/counting output and system observation",
+          "positive": null,
+          "negative": null,
+          "reference": "LISP 1.5 system/manual",
+          "reason": null
+        }
+      ]
+    }
+  ],
+  "not_programmatic_names": [
+    {
+      "source_path": "knowledge/d10-historical-lisp15-reconciliation-20261009.json",
+      "label": "association list",
+      "status": "NON-IDENTITY-HISTORICAL-LABEL"
+    },
+    {
+      "source_path": "knowledge/d10-historical-lisp15-reconciliation-20261009.json",
+      "label": "Hart MACRO",
+      "status": "NON-IDENTITY-HISTORICAL-LABEL"
+    }
+  ]
+}
