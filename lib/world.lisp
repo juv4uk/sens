@@ -118,10 +118,21 @@
       ((world-module-missing? world module-name)
        (001 Module-not-found)))))
 
+; Derived D1 symbol predicate for world module names. This is a Lisp
+; law over ATOM/NULL/EQ and exact D8 write+string-to-symbol mechanisms,
+; not a native admission of the unrelated D9:110101100 coordinate.
+(0011 внутрішній-символ?
+  (0010 (value)
+    (110
+      ((0101 value) (0101 (001 (0))))
+      ((0100 (010 value)) (0101 (001 (0))))
+      ((101 value (11101101 (11110100 value))) (0101 (001 ())))
+      ((010 ()) (0101 (001 (0)))))))
+
 (0011 advice-decision-in-world
   (0010 (world module-name clause)
     (110
-      ((101 (110101100 module-name) (001 ()))
+      ((0100 (внутрішній-символ? module-name))
        (1110 (001 rejected) (1110 (001 reason) (001 invalid-module)) (1110 (001 input) clause)))
       ((101 (knowledge-clause-valid? clause) (001 ()))
        (1110 (001 rejected) (1110 (001 reason) (001 invalid-clause)) (1110 (001 input) clause)))
@@ -160,7 +171,7 @@
 (0011 advice-all-decision-in-world
   (0010 (world module-name clauses)
     (110
-      ((101 (110101100 module-name) (001 ()))
+      ((0100 (внутрішній-символ? module-name))
        (1110 (001 rejected) (1110 (001 reason) (001 invalid-module)) (1110 (001 input) clauses)))
       
       ((010 clauses)  (1110 (001 rejected) (1110 (001 reason) (001 invalid-batch)) (1110 (001 input) clauses)))
@@ -323,7 +334,7 @@
 (0011 make-world-knowledge-package
   (0010 (world module-name)
     (110
-      ((101 (110101100 module-name) (001 ()))
+      ((0100 (внутрішній-символ? module-name))
        (1110 (001 rejected) (1110 (001 reason) (001 invalid-module)) (1110 (001 input) module-name)))
       ((world-module-missing? world module-name)
        (1110 (001 rejected) (1110 (001 reason) (001 Module-not-found)) (1110 (001 input) module-name)))
