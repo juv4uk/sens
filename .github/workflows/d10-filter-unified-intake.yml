@@ -118,14 +118,44 @@ jobs:
             echo "D10_SIEVE_UNCHANGED"
             exit 0
           fi
-          git fetch origin main --quiet
-          if [[ "$(git rev-parse HEAD)" != "$(git rev-parse refs/remotes/origin/main)" ]]; then
-            echo "D10_SIEVE_BLOCKED: main advanced; no rebase, overwrite, or new branch" >&2
-            exit 1
-          fi
-          git -c user.name='sens-d10-sieve[bot]' -c user.email='41898282+github-actions[bot]@users.noreply.github.com' \
-            commit -m "data(d10): publish evidence-verified F1-F4 triage partition"
-          git push origin HEAD:main
+          # Single-writer with optimistic main fast-forward, not a new branch.
+          # If other agents moved main, only rebase our 4 GENERATED paths
+          # when no source, contract, or output path changed since checkout.
+          for attempt in 1 2 3 4 5; do
+            git fetch origin main --quiet
+            latest="$(git rev-parse refs/remotes/origin/main)"
+            if ! git diff --quiet "$GITHUB_SHA" "$latest" -- \
+               knowledge/d10-filter/all-candidates.tsv \
+               knowledge/d10-current-inventory.json \
+               knowledge/d1-d9-foundation.json \
+               scripts/d10_prepare_filter_input.py \
+               scripts/d10_mechanical_filter.py \
+               knowledge/d10-filter/accepted-queue.tsv \
+               knowledge/d10-filter/rejected.tsv \
+               knowledge/d10-filter/escalated.tsv \
+               knowledge/d10-filter/filter-run-summary.json; then
+              echo "D10_SIEVE_BLOCKED: relevant inputs or outputs changed; regenerate receipts on latest main" >&2
+              exit 1
+            fi
+            git reset --mixed "$latest"
+            git add -- knowledge/d10-filter/accepted-queue.tsv \
+               knowledge/d10-filter/rejected.tsv \
+               knowledge/d10-filter/escalated.tsv \
+               knowledge/d10-filter/filter-run-summary.json
+            if git diff --cached --quiet; then
+              echo "D10_SIEVE_UNCHANGED_AFTER_MAIN_REFRESH"
+              exit 0
+            fi
+            git -c user.name='sens-d10-sieve[bot]' -c user.email='41898282+github-actions[bot]@users.noreply.github.com' \
+              commit -m "data(d10): publish evidence-verified F1-F4 triage partition"
+            if git push origin HEAD:main; then
+              echo "D10_SIEVE_PUBLISHED_MAIN"
+              exit 0
+            fi
+            echo "D10_SIEVE_RETRY_FAST_FORWARD $attempt"
+          done
+          echo "D10_SIEVE_BLOCKED: main write contention after bounded safe retries" >&2
+          exit 1
       - uses: actions/upload-artifact@v4
         if: always()
         with:
