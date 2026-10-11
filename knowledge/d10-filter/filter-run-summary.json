@@ -3,12 +3,12 @@
   "authority": "RESEARCH-HOLD-F1-F4-NO-RATIFICATION",
   "complete_historical_branches_claimed": false,
   "current_inventory": {
-    "git_blob": "d897100ecbda727f1028e6a16eddc7f77070fd24",
-    "path": "knowledge/d10-v11-semantic-inventory.json",
+    "git_blob": "185ecb2d5c4d0f9410aede7d40fb038a3ac76e31",
+    "path": "knowledge/d10-v12-semantic-inventory.json",
     "placed": 719,
     "ratified": 0,
-    "selected": 823,
-    "unplaced": 104
+    "selected": 827,
+    "unplaced": 108
   },
   "files_sha256": {
     "accepted-queue.tsv": "26e71d70821778bfe7e871c470ac0d54b36eb9465685137a4fe4fe84739d44b8",
@@ -18,8 +18,8 @@
   "historical_catalog_reconciliation": {
     "canonical_overlay_ids_added": 0,
     "colliding_spelling_groups_not_deduped": 287,
-    "current_canonical_selected": 823,
-    "current_inventory_git_blob": "d897100ecbda727f1028e6a16eddc7f77070fd24",
+    "current_canonical_selected": 827,
+    "current_inventory_git_blob": "185ecb2d5c4d0f9410aede7d40fb038a3ac76e31",
     "full_union_candidate_ids": 1809,
     "full_union_ids": 1809,
     "full_union_names": 1495,
@@ -42,14 +42,14 @@
     "source_union_candidate_ids": 1809
   },
   "input_index": "knowledge/d10-filter/all-candidates.tsv",
-  "input_index_sha256": "cd711568e39eddde1370b85bdf8c3811d200171aceb7c46c8b4ccfec22a13163",
+  "input_index_sha256": "73a1dfee00baa1da1544860d274023ca48a1acdf848a1b9a9c0b566f09366b69",
   "mechanical_partition": {
     "accepted": 0,
     "escalated": 0,
     "rejected": 1809
   },
   "name_index": {
-    "canonical_selected": 823,
+    "canonical_selected": 827,
     "executed_witnesses_supplied": 0,
     "filter_input_rows": 1809,
     "index_rows": 1809,
@@ -60,5 +60,5 @@
   },
   "physical_t5_authorized": false,
   "schema": "d10-unified-filter-run/v1",
-  "source_commit": "153f3c245ab90968845258d810167fb2e281d5c3"
+  "source_commit": "47a5aca4f55f3560c36d0203331adaf2ee599bfa"
 }
