@@ -1,0 +1,34 @@
+name: D10 exact numeric inequality donor replay
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'scripts/check_d10_numeric_not_equal_donor_20261012.py'
+      - 'knowledge/d10-crossrepo-early-lisp-v1.json'
+      - 'knowledge/d10-v18-semantic-inventory.json'
+      - 'knowledge/d10-owner-whole-domain-ratification-20261012.json'
+      - 'knowledge/d10-current-inventory.json'
+      - '.github/workflows/d10-numeric-ne-donor-20261012.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  numeric-inequality-pinned-go-vs-python:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Checkout pinned historical Go donor without creating a branch
+        uses: actions/checkout@v4
+        with:
+          repository: juv4uk/lisp-1
+          ref: f6719457ff38e01fc87c6aea027bedfad1742cdd
+          path: .d10-external-go-donor
+          persist-credentials: false
+      - uses: actions/setup-go@v5
+        with:
+          go-version: '1.23'
+      - name: Replay exact donor leaf against independent Python big integers
+        run: |
+          python3 scripts/check_d10_numeric_not_equal_donor_20261012.py --donor-root .d10-external-go-donor --self-test
+          python3 -O scripts/check_d10_numeric_not_equal_donor_20261012.py --donor-root .d10-external-go-donor --self-test
