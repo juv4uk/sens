@@ -1,0 +1,55 @@
+name: Історичні Git-гілки → аудит main (тільки читання)
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - scripts/audit_historical_branches.py
+      - .github/workflows/audit-all-branches-main.yml
+
+permissions:
+  contents: read
+
+concurrency:
+  group: sens-all-history-branch-audit
+  cancel-in-progress: false
+
+jobs:
+  inventory:
+    name: Перевірити всі refs на досяжність із main
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - name: Забрати тільки наявний main
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Отримати всі refs у локальну базу Git
+        run: |
+          set -euo pipefail
+          git fetch --no-tags origin '+refs/heads/*:refs/remotes/origin/*'
+          git for-each-ref refs/remotes/origin --format='%(refname)' | wc -l
+      - name: Класифікувати досяжність; без автоматичного merge
+        run: |
+          set -euo pipefail
+          python3 scripts/audit_historical_branches.py --output "$RUNNER_TEMP/sens-all-branches.jsonl" | tee "$RUNNER_TEMP/sens-audit-summary.json"
+          {
+            echo '### Аудит Git-гілок відносно main'
+            echo '~~~json'
+            cat "$RUNNER_TEMP/sens-audit-summary.json"
+            echo '~~~'
+            echo 'Незлиту семантику переносити після source SHA, дедуплікації та oracle.'
+          } >> "$GITHUB_STEP_SUMMARY"
+      - name: Зберегти машинний звіт
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: sens-all-history-main-audit
+          path: |
+            ${{ runner.temp }}/sens-all-branches.jsonl
+            ${{ runner.temp }}/sens-audit-summary.json
+          if-no-files-found: warn
+          retention-days: 30
