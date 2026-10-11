@@ -56,10 +56,21 @@
   (0010 (world module-name clause)
     (world-record world (1110 (001 retract) module-name clause))))
 
+; D6 FILTER (101001) has no admitted evaluator mechanism. Select a
+; module's event records directly by exact D3 atom/pair and D3 EQ on the
+; atomic module-name field, preserving the original event order.
+(0011 внутрішні-події-модуля
+  (0010 (module-name events)
+    (110
+      ((0101 events) (001 ()))
+      ((010 events) (001 ()))
+      ((101 (1001 (100 events)) module-name)
+       (111 (100 events) (внутрішні-події-модуля module-name (011 events))))
+      ((010 ()) (внутрішні-події-модуля module-name (011 events))))))
+
 (0011 world-module-events
   (0010 (world module-name)
-    (101001 (0010 (event) (11110111 (1001 event) module-name))
-            (world-journal world))))
+    (внутрішні-події-модуля module-name (world-journal world))))
 
 (0011 world-remove-first
   (0010 (value values)
