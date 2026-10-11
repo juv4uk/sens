@@ -1,0 +1,294 @@
+{
+  "schema": "d10-historical-primary-selection-20261009/v1",
+  "status": "SELECTED-RESEARCH-UNRATIFIED",
+  "owner_authority": "#4013 #4463 #4182; selection only, no coordinate/ratification",
+  "source_foundation": {
+    "foundation_blob": "09d1d71c39d1484dfd005a5068dbb18b76f0f0d4",
+    "d10_prior_blob": "73dd518469f972c55411e004b70b054ba8b3ec86",
+    "prior_selected": 625,
+    "prior_ratified": 0
+  },
+  "sources": [
+    "https://www.cs.cmu.edu/Groups/AI/util/html/hyperspec/HyperSpec/Body/fun_dpb.html",
+    "https://www.cs.cmu.edu/Groups/AI/util/html/hyperspec/HyperSpec/Body/fun_deposit-field.html",
+    "https://www.cs.cmu.edu/Groups/AI/html/hyperspec/HyperSpec/Body/fun_array-displacement.html",
+    "https://r6rs.org/final/html/r6rs-lib/r6rs-lib-Z-H-14.html",
+    "https://r6rs.org/r6rs-errata.html"
+  ],
+  "admission_scope": "4 language-visible value/observation laws; no syntactic-control change; no machine-specific pointer/ABI; no physical T5; historical primary specifications are oracle references, local Python models are bounded test models rather than independent donor runtimes",
+  "rows": [
+    {
+      "semantic_name": "DPB",
+      "surface_uk": "вставити-бітове-поле",
+      "surface_ukr": "вст-біт-пл",
+      "relation_class": "BIT-FIELD-UPDATE-ALGEBRA",
+      "behavior": "Replace the specified integer bit field with the low s bits of newbyte, preserving every bit outside [p,p+s), for nonnegative s and p; byte-size zero is identity.",
+      "primary_url": "https://www.cs.cmu.edu/Groups/AI/util/html/hyperspec/HyperSpec/Body/fun_dpb.html",
+      "primary_section": "ANSI CLHS: Function DPB; see Notes equation for LOGBITP",
+      "historical_source": "Common Lisp / DEC PDP-10 deposit byte",
+      "arguments": [
+        "newbyte integer",
+        "bytespec (size s, position p)",
+        "integer target"
+      ],
+      "results": [
+        "one result integer"
+      ],
+      "positive_witnesses": [
+        {
+          "input": [
+            1,
+            1,
+            10,
+            0
+          ],
+          "result": 1024
+        },
+        {
+          "input": [
+            -2,
+            2,
+            10,
+            0
+          ],
+          "result": 2048
+        },
+        {
+          "input": [
+            123,
+            0,
+            8,
+            39
+          ],
+          "result": 39
+        }
+      ],
+      "falsifier": "Any output bit j outside [p,p+s) differs from target bit j, or LDB of resulting field differs from low s bits of newbyte.",
+      "neighbors": [
+        "D10 LDB",
+        "D10 MASK-FIELD",
+        "D8 LOGBITP",
+        "D8 ARITHMETIC-SHIFT"
+      ],
+      "distinction": "Existing LDB/MASK-FIELD extract or observe fields; DPB returns modified target and keeps exterior bits.",
+      "owner": "SENS single D10 semantic arithmetic; no new evaluation or D2 control",
+      "stable_id": "d10.hist.primary.20261009.dpb",
+      "proposal_status": "pending-owner-ratification",
+      "decision": "SELECT-D10-RESEARCH-CANDIDATE",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "ratified_resident": false,
+      "source_class": "HISTORICAL-PRIMARY-MANUAL-20261009",
+      "language_visible": true,
+      "mechanism_only": false,
+      "falsified": false,
+      "exact_D1_D9_duplicate": false,
+      "exact_existing_D10_duplicate": false,
+      "provenance": [
+        "#4013",
+        "#4463",
+        "#4839",
+        "#4841",
+        "https://www.cs.cmu.edu/Groups/AI/util/html/hyperspec/HyperSpec/Body/fun_dpb.html"
+      ]
+    },
+    {
+      "semantic_name": "DEPOSIT-FIELD",
+      "surface_uk": "вписати-вирівняне-поле",
+      "surface_ukr": "впис-вир-пл",
+      "relation_class": "BIT-FIELD-UPDATE-ALGEBRA",
+      "behavior": "Replace target bits [p,p+s) with the bits from the SAME POSITIONS of newbyte; outside bits stay from target. Unlike DPB, newbyte is position-aligned, not right-justified.",
+      "primary_url": "https://www.cs.cmu.edu/Groups/AI/util/html/hyperspec/HyperSpec/Body/fun_deposit-field.html",
+      "primary_section": "ANSI CLHS: Function DEPOSIT-FIELD; Notes, LOGBITP bit-selection equality",
+      "historical_source": "Common Lisp bit-field primitives",
+      "arguments": [
+        "newbyte integer position-aligned",
+        "bytespec (size s, position p)",
+        "integer target"
+      ],
+      "results": [
+        "one result integer"
+      ],
+      "positive_witnesses": [
+        {
+          "input": [
+            7,
+            2,
+            1,
+            0
+          ],
+          "result": 6
+        },
+        {
+          "input": [
+            -1,
+            4,
+            0,
+            0
+          ],
+          "result": 15
+        },
+        {
+          "input": [
+            10,
+            2,
+            1,
+            0
+          ],
+          "result": 2
+        }
+      ],
+      "falsifier": "newbyte=10,s=2,p=1,target=0 returns 4 (DPB's right-justified semantics) rather than 2.",
+      "neighbors": [
+        "D10 LDB",
+        "D10 MASK-FIELD",
+        "new D10 DPB"
+      ],
+      "distinction": "DPB reads the low s bits of its newbyte then shifts to position p; DEPOSIT-FIELD keeps source position p unchanged.",
+      "owner": "SENS single D10 semantic arithmetic; no new D2 control",
+      "stable_id": "d10.hist.primary.20261009.deposit-field",
+      "proposal_status": "pending-owner-ratification",
+      "decision": "SELECT-D10-RESEARCH-CANDIDATE",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "ratified_resident": false,
+      "source_class": "HISTORICAL-PRIMARY-MANUAL-20261009",
+      "language_visible": true,
+      "mechanism_only": false,
+      "falsified": false,
+      "exact_D1_D9_duplicate": false,
+      "exact_existing_D10_duplicate": false,
+      "provenance": [
+        "#4013",
+        "#4463",
+        "#4839",
+        "#4841",
+        "https://www.cs.cmu.edu/Groups/AI/util/html/hyperspec/HyperSpec/Body/fun_deposit-field.html"
+      ]
+    },
+    {
+      "semantic_name": "ARRAY-DISPLACEMENT",
+      "surface_uk": "зміщення-подання-масиву",
+      "surface_ukr": "зм-под-мас",
+      "relation_class": "ARRAY-SHARED-STORAGE-OBSERVATION",
+      "behavior": "Return two values (immediate backing array, nonnegative displaced index offset) for an explicitly displaced array; for a non-displaced array return NIL and zero under the ordinary standard case. Observations reflect shared backing storage, not copied elements.",
+      "primary_url": "https://www.cs.cmu.edu/Groups/AI/html/hyperspec/HyperSpec/Body/fun_array-displacement.html",
+      "primary_section": "ANSI CLHS: Function ARRAY-DISPLACEMENT; Examples and implementation-dependence caveat",
+      "historical_source": "ANSI Common Lisp displaced arrays",
+      "arguments": [
+        "array"
+      ],
+      "results": [
+        "backing-array or NIL",
+        "nonnegative offset"
+      ],
+      "positive_witnesses": [
+        {
+          "input": "make A size5, make B size4 displaced-to A offset1; query B",
+          "result": "(A,1)"
+        },
+        {
+          "input": "make C size2 displaced-to B offset2; query C",
+          "result": "(B,2), NOT (A,3)"
+        },
+        {
+          "input": "non-displaced simple array X",
+          "result": "(NIL,0) under ordinary undisplaced semantics"
+        }
+      ],
+      "falsifier": "Return deep backing A for C instead of immediate B, report copied independent storage, or collapse 2 return values into one.",
+      "neighbors": [
+        "D10 MAKE-ARRAY",
+        "D10 REARRAY",
+        "D10 ARRAYDIMS",
+        "D8 VALUES",
+        "D9 ROW-MAJOR-AREF"
+      ],
+      "distinction": "Neither constructing/reshaping an array nor reading its dimensions answers immediate alias-to-target and offset as two values.",
+      "owner": "SENS D10 observable array semantics; representation/address mechanism stays substrate-specific",
+      "stable_id": "d10.hist.primary.20261009.array-displacement",
+      "proposal_status": "pending-owner-ratification",
+      "decision": "SELECT-D10-RESEARCH-CANDIDATE",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "ratified_resident": false,
+      "source_class": "HISTORICAL-PRIMARY-MANUAL-20261009",
+      "language_visible": true,
+      "mechanism_only": false,
+      "falsified": false,
+      "exact_D1_D9_duplicate": false,
+      "exact_existing_D10_duplicate": false,
+      "provenance": [
+        "#4013",
+        "#4463",
+        "#4839",
+        "#4841",
+        "https://www.cs.cmu.edu/Groups/AI/html/hyperspec/HyperSpec/Body/fun_array-displacement.html"
+      ]
+    },
+    {
+      "semantic_name": "HASHTABLE-ENTRIES",
+      "surface_uk": "пари-хеш-таблиці",
+      "surface_ukr": "пар-хеш",
+      "relation_class": "HASH-TABLE-PAIR-PROJECTION",
+      "behavior": "Return two values: vector of all keys and vector of their corresponding values aligned by index; ordering is unspecified but the correspondence is preserved.",
+      "primary_url": "https://r6rs.org/final/html/r6rs-lib/r6rs-lib-Z-H-14.html",
+      "primary_section": "R6RS Standard Libraries 2007 §13.3 Inspection, HASHTABLE-ENTRIES, plus published R6RS errata",
+      "historical_source": "R6RS Scheme (2007)",
+      "arguments": [
+        "mutable-or-immutable hashtable"
+      ],
+      "results": [
+        "keys vector",
+        "values vector"
+      ],
+      "positive_witnesses": [
+        {
+          "input": "{a:1,b:2}",
+          "result": "two vectors, same length, aligned pairs exactly {(a,1),(b,2)} in any order"
+        },
+        {
+          "input": "empty hashtable",
+          "result": "two zero-length vectors"
+        }
+      ],
+      "falsifier": "Keys and values independently shuffled so pair correspondence is lost, duplicate a key, or claim insertion order is guaranteed.",
+      "neighbors": [
+        "D10 MAKE-HASH-TABLE",
+        "D10 GETHASH",
+        "D10 HASH-TABLE-COUNT",
+        "D8 VALUES",
+        "D10 CALL-WITH-VALUES"
+      ],
+      "distinction": "Single paired observation from one state, not two unrelated unordered reads and not simple GETHASH lookup.",
+      "owner": "SENS D10 observation/data; no new D2 control",
+      "stable_id": "d10.hist.primary.20261009.hashtable-entries",
+      "proposal_status": "pending-owner-ratification",
+      "decision": "SELECT-D10-RESEARCH-CANDIDATE",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "ratified_resident": false,
+      "source_class": "HISTORICAL-PRIMARY-MANUAL-20261009",
+      "language_visible": true,
+      "mechanism_only": false,
+      "falsified": false,
+      "exact_D1_D9_duplicate": false,
+      "exact_existing_D10_duplicate": false,
+      "provenance": [
+        "#4013",
+        "#4463",
+        "#4839",
+        "#4841",
+        "https://r6rs.org/final/html/r6rs-lib/r6rs-lib-Z-H-14.html"
+      ]
+    }
+  ],
+  "accounting": {
+    "prior_selected": 625,
+    "new_selected": 4,
+    "after_selected": 629,
+    "ratified_added": 0,
+    "coordinates_added": 0,
+    "remaining": 395
+  }
+}
