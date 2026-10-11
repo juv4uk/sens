@@ -12,7 +12,7 @@ from copy import deepcopy
 from pathlib import Path
 
 ROOT=Path(__file__).resolve().parents[1]
-MANIFEST="knowledge/d10-v15-source-law-intake-20261011.json"
+MANIFEST="knowledge/d10-v15-source-law-intake-20261012.json"
 
 def require(condition,why):
     if not condition:
