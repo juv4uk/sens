@@ -1,0 +1,11 @@
+# Exact compare pin main SHA: 2dfc2b699dffb5f6ce25003ec1cb2607c83485b0
+# Three GPU blocked-handoff refs edit the same evidence path; preserve all heads as history, not as competing live claims.
+branch	source_sha	compare_status	ahead_by	behind_by	reported_file_entries	classification
+agent/1180-core1-sid8-resolver	88672d700cc02ac1ea37764f2807e592eeafe22c	diverged	13	8036	5	HISTORY_ATTACHED_CONTENT_REVIEW_REQUIRED
+agent/3111-station-checkin-v1	297f3f74db5eedebcc6ed29930f9bdcff128701a	behind	0	6950	0	ALREADY_IN_MAIN_ANCESTRY
+agent/3158-resource-request-v1	a2c090736609cabafbf6fa9165a98bfb1bcdb9a9	diverged	19	6955	14	HISTORY_ATTACHED_CONTENT_REVIEW_REQUIRED
+agent/3561-conformance-corpus	57f596785ebbd52ea45eadf9549d55ba1501b5f0	diverged	1	6518	2	HISTORY_ATTACHED_CONTENT_REVIEW_REQUIRED
+agent/3760-fixpoint-prep	41be0518aa376789f5929f925b0fdbdcb2009e18	diverged	2	6506	2	HISTORY_ATTACHED_CONTENT_REVIEW_REQUIRED
+agent/3766-gpu-oracle-blocked-handoff	ff4276b744ce929b91622e06bc82a345049e707f	diverged	1	6617	1	OVERLAPPING_GPU_EVIDENCE_HISTORY
+agent/3766-gpu-oracle-blocked-handoff-v2	a5f85a61547fd44768dc7e9381ce09d8c974f818	diverged	1	6616	1	OVERLAPPING_GPU_EVIDENCE_HISTORY
+agent/3766-gpu-oracle-blocked-handoff-v3	3f1071dd7299e434dac1be88381039003b5ef31f	diverged	1	6614	1	OVERLAPPING_GPU_EVIDENCE_HISTORY
