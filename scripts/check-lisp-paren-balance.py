@@ -81,25 +81,25 @@ ENCODER = pathlib.Path("lib/machine/encoding/x86-64.lisp")
 ADMISSION = pathlib.Path("lib/machine/admission/x86-64.lisp")
 
 REQUIRED_LOWERING_FORMS = (
-    "(00001001 x86-lower-add-u64-forms",
-    "(00001001 x86-lower-cons-car-u64-forms",
-    "(00001001 x86-call-semantic-car-u64",
-    "(00001001 x86-encode-current-eq-cond-u64",
+    "(0011 x86-lower-add-u64-forms",
+    "(0011 x86-lower-cons-car-u64-forms",
+    "(0011 x86-call-semantic-car-u64",
+    "(0011 x86-encode-current-eq-cond-u64",
 )
 REQUIRED_ENCODER_FORMS = (
-    "(00001001 x86-reg-code",
-    "(00001001 x86-disp8-byte",
-    "(00001001 x86-imm32-bytes",
-    "(00001001 x86-rel32-bytes",
-    "(00001001 x86-encode-mov-mem-disp8-r64",
-    "(00001001 x86-encode-program",
+    "(0011 x86-reg-code",
+    "(0011 x86-disp8-byte",
+    "(0011 x86-imm32-bytes",
+    "(0011 x86-rel32-bytes",
+    "(0011 x86-encode-mov-mem-disp8-r64",
+    "(0011 x86-encode-program",
 )
 REQUIRED_ADMISSION_FORMS = (
-    "(00001001 x86-admitted-program?",
-    "(00001001 x86-admitted-instruction?",
-    "(00001001 x86-first-unadmitted-form",
-    "(00001001 x86-encode-admitted-instruction",
-    "(00001001 x86-encode-admitted-program-or-reject",
+    "(0011 x86-admitted-program?",
+    "(0011 x86-admitted-instruction?",
+    "(0011 x86-first-unadmitted-form",
+    "(0011 x86-encode-admitted-instruction",
+    "(0011 x86-encode-admitted-program-or-reject",
 )
 
 # Every marker the #5423 forensics observed being committed in place of real

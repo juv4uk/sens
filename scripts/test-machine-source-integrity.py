@@ -90,6 +90,16 @@ class MachineIntegrityWitnesses(unittest.TestCase):
                 self.assertNotEqual(result.returncode, 0, str(relative))
                 self.assertIn("mandatory machine authority file missing", result.stdout)
 
+    def test_legacy_sid8_define_cannot_satisfy_current_entrypoint(self) -> None:
+        source = (ROOT / CRITICAL[0]).read_text(encoding="utf-8")
+        current = "(0011 x86-admitted-program?"
+        legacy = "(00001001 x86-admitted-program?"
+        self.assertEqual(source.count(current), 1, "expected owner-admitted D4 DEFINE")
+        result = run_fixture(replacement=(CRITICAL[0], source.replace(current, legacy, 1)))
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn("missing required entry point", result.stdout)
+        self.assertIn(current, result.stdout)
+
     def test_admission_pointer_marker_rejected(self) -> None:
         source = (ROOT / CRITICAL[0]).read_text(encoding="utf-8")
         result = run_fixture(replacement=(CRITICAL[0], source + "\n; SEE_LOCAL_FIX_bad\n"))
