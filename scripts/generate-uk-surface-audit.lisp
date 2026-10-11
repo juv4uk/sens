@@ -88,10 +88,7 @@
 
 (0011 candidate-section (find-section (001 назви) (011 profile-form)))
 (0011 candidate-rows
-  (110
-    ((010 candidate-section) () (001 ()))
-    ((010 candidate-section) (1) (001 ()))
-    (t (011 candidate-section))))
+  (110 ((010 candidate-section) (001 ())) ((010 (001 ())) (011 candidate-section))))
 
 (0011 find-candidate-row
   (0010 (sid rows)
@@ -133,15 +130,11 @@
 
 (0011 candidate-full-word
   (0010 (candidate)
-    (110 ((010 candidate) () (001 —))
-          ((010 candidate) (1) (001 —))
-          (t (10011 candidate)))))
+    (110 ((010 candidate) (001 —)) ((010 (001 ())) (10011 candidate)))))
 
 (0011 candidate-evidence-status
   (0010 (candidate)
-    (110 ((010 candidate) () (001 no-staging-evidence))
-          ((010 candidate) (1) (001 no-staging-evidence))
-          (t (100111 candidate)))))
+    (110 ((010 candidate) (001 no-staging-evidence)) ((010 (001 ())) (100111 candidate)))))
 
 ; `candidate-compact-uk` belongs to #86/#89. #85 must expose the empty slot,
 ; not invent abbreviations while performing an inventory.
@@ -149,10 +142,7 @@
 
 (0011 ambiguity-status
   (0010 (candidate)
-    (110
-      ((010 candidate) () (001 needs-research))
-      ((010 candidate) (1) (001 needs-research))
-      (t (001 not-yet-assessed)))))
+    (110 ((010 candidate) (001 needs-research)) ((010 (001 ())) (001 not-yet-assessed)))))
 
 ; Per-identity status from the staging profile: чинна -> stable,
 ; кандидат-сумісності -> compatibility-only, any other candidate -> candidate.
@@ -200,11 +190,7 @@
 
 (0011 count-class
   (0010 (wanted rows acc)
-    (110
-      ((010 rows) () acc)
-      ((010 rows) (1) acc)
-      (t
-       (001001 ((sid (100 (100 rows)))
+    (110 ((010 rows) acc) ((010 (001 ())) (001001 ((sid (100 (100 rows)))
               (uk (10011 (100 rows)))
               (candidate (find-candidate-row sid candidate-rows))
               (class (audit-class uk candidate)))
@@ -214,14 +200,8 @@
 
 (0011 count-candidates
   (0010 (rows acc)
-    (110
-      ((010 rows) () acc)
-      ((010 rows) (1) acc)
-      (t
-       (count-candidates (011 rows)
-         (110 ((010 (find-candidate-row (100 (100 rows)) candidate-rows)) () acc)
-               ((010 (find-candidate-row (100 (100 rows)) candidate-rows)) (1) acc)
-               (t (01010 acc 1))))))))
+    (110 ((010 rows) acc) ((010 (001 ())) (count-candidates (011 rows)
+         (110 ((010 (find-candidate-row (100 (100 rows)) candidate-rows)) acc) ((010 (001 ())) (01010 acc 1))))))))
 
 (0011 total (000000 ft-rows))
 (0011 full-count (count-class (001 full) ft-rows 0))
