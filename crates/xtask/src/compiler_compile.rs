@@ -13,7 +13,8 @@ use sens::{
     compiler_evidence_canonical_bytes, compiler_evidence_from_canonical_bytes,
     compiler_program_artifact_from_sens, encode_binary_projection_ternary, lower_program,
     lowered_program_to_exact_data, open_ternary_program, parse_canonical_binary,
-    parse_mixed_exact_domain, sha256_source, wire_decode_program, wire_encode_program, Value,
+    parse_mixed_exact_domain, sha256_source, verify_compiler_program_artifact_from_sens,
+    wire_decode_program, wire_encode_program, Value,
 };
 use std::fs::{self, OpenOptions};
 use std::io::{self, Write};
@@ -101,6 +102,16 @@ fn compile_program_data(
     }
     if artifact_schema(&decoded)? != schema {
         return Err("compiler artifact schema changed across canonical byte round-trip".into());
+    }
+    if accepted {
+        verify_compiler_program_artifact_from_sens(
+            &decoded,
+            program_wire_sha256,
+            sens_revision,
+        )
+        .map_err(|error| {
+            format!("SENS compiler artifact failed current-authority verification: {error}")
+        })?;
     }
 
     Ok((canonical_bytes, accepted))
