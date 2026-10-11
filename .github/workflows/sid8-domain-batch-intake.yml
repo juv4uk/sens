@@ -1,0 +1,94 @@
+# Produces only staging artifacts. Never treats legacy SID8 bytes as current D8
+# and never publishes semantic code without a separate oracle witness.
+name: SID8 to domain-ladder staged migration
+on:
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/sid8-domain-batch-intake.yml"
+      - "scripts/migrate-three-pass.py"
+      - "scripts/sens_t5_codec.py"
+      - "knowledge/sens8-current-coverage-v1.json"
+      - "knowledge/d1-d9-foundation.json"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build-staged-migration:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Convert legacy Core1 source into isolated physical T5 staging
+        shell: bash
+        run: |
+          set +e
+          python3 scripts/migrate-three-pass.py lib/core1.lisp \
+            --source-era legacy \
+            --out "$RUNNER_TEMP/legacy-core1" \
+            --report "$RUNNER_TEMP/legacy-core1-report.json"
+          result=$?
+          set -e
+          echo "Core1 staging exit status: $result"
+          test -s "$RUNNER_TEMP/legacy-core1-report.json"
+      - name: Scan all library Lisp with safe ambiguity blocking
+        shell: bash
+        run: |
+          set +e
+          python3 scripts/migrate-three-pass.py lib \
+            --source-era auto --unpaired-only \
+            --out "$RUNNER_TEMP/library-auto" \
+            --report "$RUNNER_TEMP/library-auto-report.json"
+          result=$?
+          set -e
+          echo "Library auto staging exit status: $result"
+          test -s "$RUNNER_TEMP/library-auto-report.json"
+      - name: Convert existing example sources into isolated physical T5 staging
+        shell: bash
+        run: |
+          set +e
+          python3 scripts/migrate-three-pass.py examples/migrated \
+            --source-era auto --unpaired-only \
+            --out "$RUNNER_TEMP/examples-current" \
+            --report "$RUNNER_TEMP/examples-report.json"
+          result=$?
+          set -e
+          echo "Example staging exit status: $result"
+          test -s "$RUNNER_TEMP/examples-report.json"
+      - name: Summarize exact staged admissions and blockers
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          import json
+          import os
+          from pathlib import Path
+          base = Path(os.environ["RUNNER_TEMP"])
+          for name in ("legacy-core1", "library-auto", "examples"):
+              report = json.loads((base / f"{name}-report.json").read_text())
+              summary = report["summary"]
+              print(f"{name}: admitted={summary['files_written']} blocked={summary['files_blocked']}")
+              for row in report["files"]:
+                  if row["status"] == "written":
+                      assert row["output"].endswith(".sens")
+                      assert row["semantic_word_count"] > 0
+                      assert row["physical_sha256"]
+          PY
+      - name: Upload migration evidence and actual physical T5 bytes
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: sid8-domain-staging
+          retention-days: 7
+          if-no-files-found: error
+          path: |
+            ${{ runner.temp }}/legacy-core1-report.json
+            ${{ runner.temp }}/library-auto-report.json
+            ${{ runner.temp }}/examples-report.json
+            ${{ runner.temp }}/legacy-core1/**/*.sens
+            ${{ runner.temp }}/library-auto/**/*.sens
+            ${{ runner.temp }}/examples-current/**/*.sens
