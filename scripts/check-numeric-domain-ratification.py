@@ -132,7 +132,9 @@ def selftest(policy, ratification, lang):
         ({"extended_number_laws": dict(policy["extended_number_laws"], wire_fasl_and_physical_encoding="unconditionally executable")}, "composite wire layout still deferred"),
         ({"natural_arithmetic": dict(policy["natural_arithmetic"], mul="truncate high bits")}, "multiplication result domain"),
         ({"natural_arithmetic": dict(policy["natural_arithmetic"], no_rounding_or_wraparound=False)}, "no rounding/wraparound"),
-        ({"natural_arithmetic": dict(policy["natural_arithmetic"], signed_and_rational_runtime="complete")}, "signed/rational Value still deferred"),
+        ({"natural_arithmetic": dict(policy["natural_arithmetic"], signed_and_rational_runtime="disabled")}, "signed/rational Core Value must execute"),
+        ({"numeric_composition_runtime": dict(policy["numeric_composition_runtime"], physical_composite_codec="complete")}, "physical composite codec remains deferred"),
+        ({"numeric_composition_runtime": dict(policy["numeric_composition_runtime"], float_rounding=True)}, "exact rational no floats"),
     ]
     for change, why in edits:
         try:
