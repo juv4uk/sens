@@ -1,0 +1,46 @@
+name: lisp-paren-balance
+
+# Static syntax + critical-source integrity guard: every .lisp file under lib/
+# must be paren-balanced, and the three critical machine sources
+# (lib/machine/{admission,encoding,lowering}/) must be full sources — not
+# one-line pointers. Catches the #4375 unclosed-list class and the #5423
+# balanced-placeholder class at push time, instead of via a late, unnamed
+# `exit code 1` inside a large gate step. Hosted runner: no CUDA/hardware.
+#
+# The mutation job proves the guard fails closed on the exact #5423 placeholder
+# shapes and on missing authority files, so the trust does not rest on a guard
+# that only happens to pass today.
+
+on:
+  push:
+    paths:
+      - "lib/**/*.lisp"
+      - "scripts/check-lisp-paren-balance.py"
+      - "scripts/test-machine-source-integrity.py"
+      - ".github/workflows/lisp-paren-balance.yml"
+  pull_request:
+    paths:
+      - "lib/**/*.lisp"
+      - "scripts/check-lisp-paren-balance.py"
+      - "scripts/test-machine-source-integrity.py"
+      - ".github/workflows/lisp-paren-balance.yml"
+  workflow_dispatch:
+
+jobs:
+  guard:
+    name: Lisp paren balance + machine-source integrity
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v5
+      - name: Lisp paren balance (lib/)
+        run: python3 scripts/check-lisp-paren-balance.py --paths lib
+
+  mutation:
+    name: Critical-source mutation witnesses
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v5
+      - name: Balanced placeholders and missing files must fail the guard
+        run: python3 scripts/test-machine-source-integrity.py
