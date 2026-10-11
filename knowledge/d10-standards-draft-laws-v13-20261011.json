@@ -1,0 +1,357 @@
+{
+  "schema": "d10-v13-authoring-proposed-laws/v1",
+  "date": "2026-10-11",
+  "authority": "ARCHIVAL_DONOR_RECONSTRUCTION_UNEXECUTED",
+  "laws": {
+    "MAKE-BROADCAST-STREAM": {
+      "law": "Construct an output composite over ordered output streams; every output operation writes to every constituent in order; no constituents is valid and discards output.",
+      "positive": "Writing 'ab' through composite with two string outputs appends 'ab' to each.",
+      "negative": "Reject an input-only constituent as an output sink."
+    },
+    "BROADCAST-STREAM-STREAMS": {
+      "law": "For a broadcast stream, return its ordered constituent output streams without copying their data or consuming output.",
+      "positive": "Constructor(s1,s2) exposes s1,s2 in constructor order.",
+      "negative": "Do not return input streams or confuse this with writing output."
+    },
+    "MAKE-ECHO-STREAM": {
+      "law": "Construct a bidirectional composite from an input stream and output stream; consumed input is echoed to output and explicit output is sent to output.",
+      "positive": "Reading character A from input causes A to appear in output; explicit B write also appears.",
+      "negative": "Echo does not manufacture a second copy of A on a mere unread operation."
+    },
+    "ECHO-STREAM-INPUT-STREAM": {
+      "law": "Return the exact input constituent of an echo stream, without consuming any input.",
+      "positive": "Echo(sin,sout) has input constituent sin.",
+      "negative": "Must not return sout or advance sin."
+    },
+    "ECHO-STREAM-OUTPUT-STREAM": {
+      "law": "Return the exact output constituent of an echo stream, without producing output.",
+      "positive": "Echo(sin,sout) has output constituent sout.",
+      "negative": "Must not return sin or write echoed input."
+    },
+    "MAKE-TWO-WAY-STREAM": {
+      "law": "Build a bidirectional stream whose reads delegate to the designated input stream and writes delegate to the designated output stream; unlike an echo stream, reads need not echo.",
+      "positive": "Read X from input and write Y: output receives only Y.",
+      "negative": "Treat reading as an implicit echo or treat output sink as input."
+    },
+    "TWO-WAY-STREAM-INPUT-STREAM": {
+      "law": "Return the input constituent of a two-way stream without consuming it.",
+      "positive": "Two-way(sin,sout) yields sin.",
+      "negative": "Must not return sout."
+    },
+    "TWO-WAY-STREAM-OUTPUT-STREAM": {
+      "law": "Return the output constituent of a two-way stream without writing to it.",
+      "positive": "Two-way(sin,sout) yields sout.",
+      "negative": "Must not return sin."
+    },
+    "MAKE-STRING-INPUT-STREAM": {
+      "law": "Given string and optional bounding start,end indices, expose successive characters in [start,end), then EOF without reading outside range.",
+      "positive": "The stream over 'abcde' bounds [1,4) yields b,c,d then EOF.",
+      "negative": "Do not read the excluded endpoints or accept indices outside the string."
+    },
+    "MAKE-STRING-OUTPUT-STREAM": {
+      "law": "Create character output stream accumulating writes for later GET-OUTPUT-STREAM-STRING retrieval; initial buffer is empty.",
+      "positive": "Write A then B, extraction returns 'AB'.",
+      "negative": "Creation does not itself write characters and need not create a file."
+    },
+    "LISTEN": {
+      "law": "Observe whether a character is immediately available from a character input stream without consuming it; EOF can return false.",
+      "positive": "Nonempty string input yields true and next READ-CHAR still sees the first character.",
+      "negative": "Never advance stream position or block waiting for unavailable future input."
+    },
+    "PEEK-CHAR": {
+      "law": "Return the next matching input character without consuming it; optional peek-type may skip characters before the match and the specified EOF behavior applies.",
+      "positive": "PEEK-CHAR nil before 'ab' yields a and following READ-CHAR yields a.",
+      "negative": "Do not consume the observed matched character."
+    },
+    "READ-CHAR-NO-HANG": {
+      "law": "Attempt a character read only if immediately available; distinguish no available input from EOF, with optional EOF policy.",
+      "positive": "For ready 'a' consumes and yields a; a temporarily unavailable stream yields NIL instead of waiting.",
+      "negative": "Do not report transient no-data as an actual EOF condition."
+    },
+    "READ-LINE": {
+      "law": "Consume one line up to but not including newline and return text plus missing-newline flag; handle an EOF before any character under eof-error-p/eof-value policy.",
+      "positive": "Input 'a\\nb' yields first line 'a' with missing-newline false, second 'b' with true.",
+      "negative": "Never include terminating newline in the returned line text."
+    },
+    "READ-SEQUENCE": {
+      "law": "Destructively fill specified sequence slice from stream elements; return the index of first element not updated when EOF intervenes.",
+      "positive": "Three-character input into a five-cell vector starting at index 1 updates three cells and returns index 4.",
+      "negative": "Do not overwrite sequence cells past end bound or assume full reads."
+    },
+    "WRITE-SEQUENCE": {
+      "law": "Write successive elements from bounded sequence subsequence to output stream and return the sequence; preserve ordering and bounds.",
+      "positive": "Write [A,B,C] from [1,3) emits B,C.",
+      "negative": "Do not write elements before start or after end."
+    },
+    "FRESH-LINE": {
+      "law": "Output newline only if output stream is not already at the beginning of a line; return whether newline was emitted.",
+      "positive": "After writing 'x', FRESH-LINE emits a newline; calling again at line start emits none.",
+      "negative": "Never insert repeated blank lines at an existing line boundary."
+    },
+    "CLEAR-INPUT": {
+      "law": "Discard input already available in the buffer of an input stream; do not promise to drain future input.",
+      "positive": "A buffered unread character may be discarded by CLEAR-INPUT.",
+      "negative": "Do not block until the physical input source closes."
+    },
+    "CLEAR-OUTPUT": {
+      "law": "Try to abort pending, not-yet-transmitted output for a stream; already delivered data remains delivered.",
+      "positive": "Pending buffered data may be discarded while previously flushed data remains visible.",
+      "negative": "Do not claim bytes already sent to a device can be recalled."
+    },
+    "FINISH-OUTPUT": {
+      "law": "Force pending output transmission and wait until it is completed as specified by the stream; unlike FORCE-OUTPUT it waits.",
+      "positive": "Buffered output is pushed and completion observed before returning.",
+      "negative": "Do not treat return before completion as FINISH-OUTPUT."
+    },
+    "FORCE-OUTPUT": {
+      "law": "Initiate transmission of buffered output without promising completion before return; unlike FINISH-OUTPUT waiting is not required.",
+      "positive": "A pending buffer is scheduled for delivery.",
+      "negative": "Do not require full completion before returning or discard the pending buffer."
+    },
+    "FILE-LENGTH": {
+      "law": "For a file stream, return length in stream elements, or NIL when it cannot be determined; do not confuse character count with encoded bytes.",
+      "positive": "A known 3-element binary file reports 3.",
+      "negative": "Character translations do not guarantee one-byte-per-character length."
+    },
+    "FILE-POSITION": {
+      "law": "Without second argument observe current file position or NIL if unknown; with position designator attempt seek and return success predicate; preserve stream element units.",
+      "positive": "For seekable file, save position p, read, seek back to p and reread same element.",
+      "negative": "Never assume character-stream positions increment one per character."
+    },
+    "FILE-STRING-LENGTH": {
+      "law": "Return number of file position units output by writing given string or character to the designated character output file stream; result can depend on encoding.",
+      "positive": "One ASCII character on one-byte external format has encoded file length 1.",
+      "negative": "Do not equate Unicode codepoint count to all external-format lengths."
+    },
+    "STREAM-ELEMENT-TYPE": {
+      "law": "Report a type specifier for elements a stream can read/write; permitted representations need not be uniquely normalized.",
+      "positive": "Character stream element-type admits characters; binary stream admits relevant integers.",
+      "negative": "Do not require exact textual equality of equivalent type specifiers."
+    },
+    "STREAM-EXTERNAL-FORMAT": {
+      "law": "For a file stream report the implementation's external format designator, whose representation may be implementation-specific.",
+      "positive": "Character file opened with selected external format reports a corresponding designator.",
+      "negative": "Do not claim the reported designator is portable to every Lisp runtime."
+    },
+    "INPUT-STREAM-P": {
+      "law": "Return generalized true iff object is an input-capable stream, including bidirectional composites.",
+      "positive": "Make-string-input-stream object yields true.",
+      "negative": "An output-only string stream must not be reported input-capable."
+    },
+    "OUTPUT-STREAM-P": {
+      "law": "Return generalized true iff object is an output-capable stream, including bidirectional composites.",
+      "positive": "Make-string-output-stream object yields true.",
+      "negative": "An input-only string stream must not be reported output-capable."
+    },
+    "INTERACTIVE-STREAM-P": {
+      "law": "Return generalized true for an interactive stream designating a human interaction source or sink, false for ordinary noninteractive streams.",
+      "positive": "An ordinary string input stream reports false.",
+      "negative": "Do not infer interactivity solely from input/output capability."
+    },
+    "OPEN-STREAM-P": {
+      "law": "Report whether a stream is open; closing it changes this predicate without changing its identity.",
+      "positive": "An open output stream yields true, after CLOSE yields false.",
+      "negative": "Do not return true only because the stream object still exists."
+    },
+    "STREAMP": {
+      "law": "Return generalized true exactly for stream objects, independent of current open/closed state.",
+      "positive": "A closed string stream remains a stream.",
+      "negative": "Do not test only open streams."
+    },
+    "FILE-STREAM": {
+      "law": "Classify file-connected stream objects as file-stream class; do not treat an in-memory string stream as file-connected.",
+      "positive": "Stream obtained by opening a file is a file stream.",
+      "negative": "An ordinary string-output-stream is not a file-stream."
+    },
+    "END-OF-FILE": {
+      "law": "Represent the standard end-of-file condition signaled by a read with eof-error-p true at actual EOF; not a successful EOF value.",
+      "positive": "Reading past exhausted input with eof-error-p true signals END-OF-FILE.",
+      "negative": "EOF-value return with eof-error-p false must not signal that condition."
+    },
+    "MAKE-PATHNAME": {
+      "law": "Construct pathname from host/device/directory/name/type/version components and optional defaults, preserving unspecified components under documented merge/case rules.",
+      "positive": "Supplying name 'abc' and type 'lisp' produces pathname with matching NAME and TYPE.",
+      "negative": "Do not silently reinterpret explicit host or component case as a literal OS file open."
+    },
+    "PARSE-NAMESTRING": {
+      "law": "Parse a bounded namestring into pathname and stopping index under host/default/junk-allowed rules, with filesystem-dependent component interpretation.",
+      "positive": "Parsing 'file.lisp' yields pathname designator plus consumed end index.",
+      "negative": "Do not claim a unique portable component representation for every host string."
+    },
+    "PATHNAME": {
+      "law": "Coerce a pathname designator (pathname, string, file stream where allowed) to pathname object under implementation pathname syntax.",
+      "positive": "Applying PATHNAME to an existing pathname preserves pathname identity/equality.",
+      "negative": "Do not treat an arbitrary list as a pathname designator."
+    },
+    "PATHNAMEP": {
+      "law": "Return generalized true exactly for pathname objects, irrespective of whether the named file exists.",
+      "positive": "MAKE-PATHNAME result yields true without touching file system.",
+      "negative": "A random string designating a file need not itself satisfy PATHNAMEP."
+    },
+    "NAMESTRING": {
+      "law": "For a pathname represent its full pathname syntax as a namestring when a valid representation exists; result is subject to filesystem and host conventions.",
+      "positive": "A simple pathname on host supports a namestring that can be parsed on that host.",
+      "negative": "Do not treat pathname strings as universally identical across file systems."
+    },
+    "HOST-NAMESTRING": {
+      "law": "Return the host-only namestring component for pathname without appending its directory, name or type.",
+      "positive": "A pathname with host H has host-only representation H under its host syntax.",
+      "negative": "Do not return the entire original file namestring."
+    },
+    "DIRECTORY-NAMESTRING": {
+      "law": "Return a namestring representing only pathname directory components, with host-specific syntax and NIL/unrepresentable outcomes.",
+      "positive": "Directory /tmp/part in pathname yields directory representation without leaf file name.",
+      "negative": "Do not include the filename/type component in DIRECTORY-NAMESTRING."
+    },
+    "FILE-NAMESTRING": {
+      "law": "Return the file portion of pathname namestring (name, type and version as supported), excluding host/device/directory.",
+      "positive": "For directory /tmp and leaf 'a.lisp', file namestring denotes 'a.lisp'.",
+      "negative": "Do not return directory prefix."
+    },
+    "PATHNAME-HOST": {
+      "law": "Extract pathname host component with optional :case normalization; host is not inferred to equal device.",
+      "positive": "MAKE-PATHNAME with host H yields H under local case.",
+      "negative": "Do not return full namestring in place of host."
+    },
+    "PATHNAME-DEVICE": {
+      "law": "Extract pathname device component with optional :case normalization; may be :UNSPECIFIC when host has no device concept.",
+      "positive": "A pathname created with explicit device D reports D under suitable host.",
+      "negative": "Do not mistake directory for device."
+    },
+    "PATHNAME-DIRECTORY": {
+      "law": "Extract structured pathname directory component (absolute/relative marker plus segments where applicable) under host case convention.",
+      "positive": "Pathname /a/b/c.lisp on Unix-like host reports absolute directory a,b.",
+      "negative": "Do not return leaf filename or force Unix syntax on all hosts."
+    },
+    "PATHNAME-NAME": {
+      "law": "Extract only pathname name component, not extension/type or directory, respecting :case.",
+      "positive": "On appropriate host, 'a.lisp' yields name 'a'.",
+      "negative": "Do not include '.lisp' type in the name."
+    },
+    "PATHNAME-TYPE": {
+      "law": "Extract pathname type component (extension-like but host-defined), respecting :case, distinguishing NIL/:UNSPECIFIC where relevant.",
+      "positive": "On appropriate host, 'a.lisp' yields type 'lisp'.",
+      "negative": "Do not confuse empty string type with unspecified type."
+    },
+    "PATHNAME-VERSION": {
+      "law": "Extract pathname version component where provided/supported; may be NIL or a special version keyword.",
+      "positive": "A pathname constructed with explicit version returns that version under its host conventions.",
+      "negative": "Do not conflate version with filename extension/type."
+    },
+    "LOGICAL-PATHNAME": {
+      "law": "Coerce a valid logical pathname designator to a logical-pathname object using registered logical host syntax, not physical path resolution.",
+      "positive": "Valid logical host notation produces a logical pathname.",
+      "negative": "Unregistered logical host cannot silently become a physical pathname."
+    },
+    "LOGICAL-PATHNAME-TRANSLATIONS": {
+      "law": "Read or set host-specific ordered translation patterns for logical pathname host; first applicable translation determines expansion.",
+      "positive": "Given an ordered translation table, translate-logical-pathname chooses first matching mapping.",
+      "negative": "Do not imply physical filesystem access when merely retrieving the table."
+    },
+    "LOAD-LOGICAL-PATHNAME-TRANSLATIONS": {
+      "law": "Attempt to load translations for a named logical host, returning true if translations were loaded/available, or signal/return per specified host rules.",
+      "positive": "A configured logical host translation file enables subsequent logical resolution.",
+      "negative": "Do not report success when no host translations could be established."
+    },
+    "HASHTABLE-COPY": {
+      "law": "R6RS HASHTABLE-COPY creates separate table with identical key-value associations and same key semantics; returned copy is immutable by default, mutable only when optional argument true.",
+      "positive": "Copy of table mapping a→1 maps a→1 but modifying original associations does not alter copy.",
+      "negative": "Default copy may not be treated as mutable; copying does not deep-copy each key/value."
+    },
+    "HASHTABLE-MUTABLE?": {
+      "law": "R6RS predicate returns true exactly when hashtable can be mutated through hash table updates, false for immutable copy.",
+      "positive": "Copy table without mutable flag yields false; copy with true flag yields true.",
+      "negative": "Do not infer mutability from size or presence of key associations."
+    },
+    "CLASS-DIRECT-SUBCLASSES": {
+      "law": "CLOS MOP reader returns the class metaobjects whose direct superclasses include given class, excluding indirect descendants.",
+      "positive": "If B directly inherits A and C inherits B, A's direct-subclasses includes B not C.",
+      "negative": "Do not include all transitive descendants."
+    },
+    "CLASS-DIRECT-SUPERCLASSES": {
+      "law": "CLOS MOP reader yields direct superclass metaobjects of class in specified precedence; not entire transitive class precedence list.",
+      "positive": "Class C inheriting A and B directly returns [A,B].",
+      "negative": "Do not append T unless it was a direct superclass."
+    },
+    "CLASS-DEFAULT-INITARGS": {
+      "law": "For finalized class, return effective default initialization arguments computed from class precedence and inherited direct defaults; error on class not finalized.",
+      "positive": "Inherited superclass default initarg appears in finalized subclass effective list unless overridden.",
+      "negative": "Do not return only direct defaults or claim valid access before finalization."
+    },
+    "CLASS-DIRECT-DEFAULT-INITARGS": {
+      "law": "Return default initarg specifications declared directly by class, not inherited/effective defaults.",
+      "positive": "Class with no direct defaults yields empty list even if superclass declares one.",
+      "negative": "Do not return merged inherited defaults."
+    },
+    "CLASS-SLOTS": {
+      "law": "For finalized class, return effective slot-definition metaobjects after inheritance/class slot merging; distinguish from class-direct-slots.",
+      "positive": "Subclass with inherited and direct slots yields both among effective slots.",
+      "negative": "Do not exclude inherited slot definitions."
+    },
+    "CLASS-FINALIZED-P": {
+      "law": "Return true iff class finalization has occurred; return false for uninitialized or forward-referenced class.",
+      "positive": "A nonfinalized class returns false; after FINALIZE-INHERITANCE it returns true.",
+      "negative": "Do not equate merely allocated class metaobject with finalized."
+    },
+    "CLASS-PROTOTYPE": {
+      "law": "For finalized class return representative prototype instance; initialization state unspecified, and portable clients must not mutate prototype slots.",
+      "positive": "Prototype is instance of target finalized class.",
+      "negative": "Do not require initialized slots or mutate prototype as a regular user object."
+    },
+    "GENERIC-FUNCTION-DECLARATIONS": {
+      "law": "CLOS MOP reader returns the declaration specifications associated with generic-function metaobject; does not inspect method bodies.",
+      "positive": "A generic function created with declarations returns corresponding declaration list.",
+      "negative": "Do not mistake per-method declarations for generic-function declarations."
+    },
+    "GENERIC-FUNCTION-LAMBDA-LIST": {
+      "law": "Return lambda-list associated with generic-function metaobject, not a particular method's differing implementation local parameter names.",
+      "positive": "A generic function requiring x,y has two required argument positions in its lambda list.",
+      "negative": "Do not return one chosen method's specialized lambda list."
+    },
+    "GENERIC-FUNCTION-METHOD-CLASS": {
+      "law": "Return class metaobject designated to construct newly added method instances for generic function.",
+      "positive": "Generic function configured with method-class C reports C.",
+      "negative": "Do not confuse method class with class of the generic function itself."
+    },
+    "GENERIC-FUNCTION-METHOD-COMBINATION": {
+      "law": "Return method-combination metaobject associated with generic function; this controls method combination but is not method list.",
+      "positive": "A configured :around/:before combination property is represented by the returned combination object.",
+      "negative": "Do not return set of methods instead of the combination metaobject."
+    },
+    "GENERIC-FUNCTION-NAME": {
+      "law": "Return name associated with generic-function metaobject, possibly NIL, independent of method names.",
+      "positive": "A named generic function's name reader returns its name.",
+      "negative": "Do not infer generic function name from a method qualifier."
+    },
+    "COS": {
+      "law": "Compute cosine of numeric argument in radians; for complex inputs use analytic complex cosine; floating accuracy remains implementation-specific.",
+      "positive": "COS(0)=1 up to permitted numeric type/precision.",
+      "negative": "Do not treat numeric argument as degrees by default."
+    },
+    "RANDOM": {
+      "law": "Generate pseudo-random value below positive bound n from random-state: for positive integer n result is integer in [0,n); for positive float bound result is nonnegative float below bound.",
+      "positive": "RANDOM(5) always yields integer among 0..4 under a valid state.",
+      "negative": "Do not return bound itself or treat successive results as a deterministic pure function of n alone."
+    },
+    "FLOATP": {
+      "law": "Historical floating-point type predicate tests representation category (float), not integrality of mathematical value.",
+      "positive": "A float 1.0 satisfies FLOATP even when numerical value equals integer 1.",
+      "negative": "An exact integer 1 must not satisfy FLOATP."
+    },
+    "FIXP": {
+      "law": "Historical FIXP tests whether object is implemented as machine fixed integer under donor implementation, not any arbitrary-precision integer.",
+      "positive": "A machine fixnum 3 yields true in a runtime supporting that historical type.",
+      "negative": "A bignum exceeding fixnum range does not satisfy FIXP even though NUMBERP may hold."
+    },
+    "LEFTSHIFT": {
+      "law": "On historical nonnegative finite machine integer x and nonnegative shift count n, shift bits left by n inserting zeros; overflow handling depends on donor word width.",
+      "positive": "Unsigned binary 0011 shifted left by 2 becomes 1100 where width permits.",
+      "negative": "Do not assume infinite precision if historical machine word overflow semantics apply."
+    },
+    "LOGOR": {
+      "law": "Bitwise inclusive OR on integer bit representations; a result bit is 1 iff at least one operand corresponding bit is 1, with donor sign-width conventions.",
+      "positive": "0101 LOGOR 0011 is 0111 at fixed 4-bit nonnegative width.",
+      "negative": "Do not apply logical short-circuit boolean OR to entire integer words."
+    }
+  }
+}
