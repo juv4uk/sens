@@ -1,0 +1,11 @@
+# Exact compare pin main SHA: f4d5fb065c102b7502f08cf52a09f58260075a8e
+# Classification NO_UNMERGED_COMMITS is ancestry-only, not semantic approval; NEEDS_CONTENT_REVIEW not verified unique content.
+branch	source_sha	compare_status	ahead_by	behind_by	classification
+604-lisp-coverage-binary-clean	120f509830341eed2152c7523c01523d4ca53f19	behind	0	5454	NO_UNMERGED_COMMITS
+1413	75fb8cb2bc3f010a072d87a930a57038648f6458	behind	0	6978	NO_UNMERGED_COMMITS
+виправлення/реєстр-бенчмарків-38-20261010	8146248a7378958df841392d9659f2c2645fdb2a	diverged	1	778	NEEDS_CONTENT_REVIEW
+виправлення/машинне-приймання-cond-20261010	9db38ad52d6a357e1b82f83c0ee5837f8e4803bf	diverged	1	325	NEEDS_CONTENT_REVIEW
+виправлення/читач-т5-захист-20261010	cbc3f18c45ebb4a7846dd3dd1679d5651ecac433	diverged	3	778	NEEDS_CONTENT_REVIEW
+add-complete-d7-domain-table	884aa169ab98a2eed6a99a194a7583cd60589b15	diverged	6	5607	NEEDS_CONTENT_REVIEW
+add-d8-domain-table	0436cfe97b0d08bfa2ffefe26352374b4478a0ed	diverged	11	5613	NEEDS_CONTENT_REVIEW
+agent/binary-first-cli-20261009	4d06955f541277f6d167127ed7024e9db066cc31	diverged	7	1171	NEEDS_CONTENT_REVIEW
