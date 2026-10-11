@@ -761,6 +761,8 @@ pub(super) fn value_to_expr(value: Value, span: Span) -> Result<Expr, LanguageEr
         Value::Number(number, exactness) => ExprKind::Number(*number, *exactness),
         Value::Rational(rational) => ExprKind::Rational(rational.clone()),
         Value::BinaryNumber(number) => ExprKind::BinaryNumber(number.clone()),
+        Value::NumericComposition(_) => return Err(LanguageError::new(ErrorKind::Type,
+            "domain-qualified NEG/RATIO has no admitted source expression or macro code projection", span)),
         Value::Sid(sid) => ExprKind::Sid(*sid),
         Value::DomainIdentity(identity) => ExprKind::DomainIdentity(*identity),
         Value::NumericBuffer(buffer) => ExprKind::NumericBuffer(buffer.clone()),
