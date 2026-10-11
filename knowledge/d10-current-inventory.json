@@ -106,5 +106,14 @@
     ],
     "core_review": "PENDING",
     "oracle_parity": "PENDING"
+  },
+  "historical_lisp_branch_candidate_intake": {
+    "path": "knowledge/d10-historical-lisp-branch-candidate-intake-20261011.json",
+    "git_blob": "42362a46d7587e375ed19c156a0b67e40b86939a",
+    "source_dossiers": 20,
+    "distinct_unselected_name_candidates": 222,
+    "selected_added": 0,
+    "ratified_added": 0,
+    "role": "UNCANONICAL-RESEARCH-INTAKE-NOT-CORE"
   }
 }
