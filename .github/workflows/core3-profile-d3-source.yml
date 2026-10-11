@@ -4,6 +4,8 @@ on:
     branches: [main]
     paths:
       - scripts/check-core3-profile-contract.lisp
+      - scripts/check-core4-predicate-answer-scale.lisp
+      - experiments/core4-predicate-answer-carrier-matrix.lisp
       - tests/test_core3_profile_d3_source.py
       - .github/workflows/core3-profile-d3-source.yml
   workflow_dispatch:
