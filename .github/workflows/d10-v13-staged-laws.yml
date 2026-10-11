@@ -1,0 +1,21 @@
+name: D10 v13 staged semantic law check
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'knowledge/d10-standards-draft-laws-v13-20261011.json'
+      - 'scripts/check_d10_v13_standards.py'
+      - '.github/workflows/d10-v13-staged-laws.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  verify-proposals:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Check all 70 researched descriptions
+        run: python3 scripts/check_d10_v13_standards.py
