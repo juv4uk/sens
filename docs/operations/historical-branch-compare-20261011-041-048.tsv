@@ -1,0 +1,11 @@
+# Exact compare pin main SHA: 69f6bd1b73bad7f98599c7999fec918985231873
+# Ancestry triage only; no semantic acceptance. Diverged refs were separately blob-compared and unique source snapshots preserved.
+branch	source_sha	compare_status	ahead_by	behind_by	classification
+agent/chatgpt-sol/compiler-export-3829	0056a9bc65248ea227feaed3c214c97bb57f15f4	behind	0	5953	NO_UNMERGED_COMMITS
+agent/chatgpt-sol/3760-current-sens-fixed-point	85f4a02d3b703c4e439bc2e25b834e232003dec1	behind	0	5978	NO_UNMERGED_COMMITS
+agent/chatgpt-sol/3802-gpu-execution-packet	0cb092a614115052321e242fb8a1d32327bfcfd6	diverged	6	5937	NEEDS_CONTENT_REVIEW
+agent/chatgpt-sol/3835-compilation-artifact	ffa7ddc2c702919c83fbce06a976c4b204a65442	behind	0	5942	NO_UNMERGED_COMMITS
+agent/compiler-authority-3757	2cad567f6a016f27a9ad0c33a78c85167560dfb8	diverged	2	6027	NEEDS_CONTENT_REVIEW
+agent/compiler-bootstrap-boundary-3805	0c3c0c40873ca448f39dae0528cabe57bbc273b4	behind	0	5982	NO_UNMERGED_COMMITS
+agent/compiler-d3-vertical-3758	42065f195033cab0c50596fbc35a55e1642f9d11	diverged	3	6025	NEEDS_CONTENT_REVIEW
+agent/compiler-export-library-3833	ef85f29616e313306139333f7e01570d14e2a831	diverged	4	5944	NEEDS_CONTENT_REVIEW

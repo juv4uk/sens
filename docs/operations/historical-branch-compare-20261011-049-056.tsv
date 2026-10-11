@@ -1,0 +1,11 @@
+# Exact compare pin main SHA: 8a5996052f22a46183ff77090ce2ccb677e73823
+# Ancestry triage only; no semantic acceptance. Diverged refs were separately blob-compared and unique source snapshots preserved.
+branch	source_sha	compare_status	ahead_by	behind_by	classification
+agent/compiler-migration-from-cml	ddfa5640e24873c58ebd9cef50b1bfe5ef31753c	behind	0	5923	NO_UNMERGED_COMMITS
+agent/compiler-nucleus-3759	e54338da6e0448ca18f9a2f9bd33fca5fa6776a6	behind	0	6010	NO_UNMERGED_COMMITS
+agent/compiler-nucleus-diff-3804	a17f37b9b257512d634502fe20e2cc3c854ba4c2	behind	0	5981	NO_UNMERGED_COMMITS
+agent/compiler-role-cutover-3810	9768763fb5a311a9bccb220d9462d809bae49b92	behind	0	5986	NO_UNMERGED_COMMITS
+agent/core1-s3-compiler-prelude	077e8ddb937fa6e8fdf4034d436bb892a96f6bb4	behind	0	7557	NO_UNMERGED_COMMITS
+agent/d1-d3-uk-sa-surface	912547e31cb9c494e55ba9253c73e14125f35525	diverged	2	6356	NEEDS_CONTENT_REVIEW
+agent/d3-l1-l5-compiler-law-3809	c940d220170c1dddf482f03c7467b0aa9602c2c6	diverged	3	5998	NEEDS_CONTENT_REVIEW
+agent/d6-authority-drift-3763	ea840163618b1f19645c52b8da864eab7c684d6e	diverged	2	6030	NEEDS_CONTENT_REVIEW
