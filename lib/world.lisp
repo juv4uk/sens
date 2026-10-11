@@ -72,16 +72,15 @@
   (0010 (world module-name)
     (внутрішні-події-модуля module-name (world-journal world))))
 
+; Retract the first structurally equal clause; both atoms and nested
+; pairs are compared with the locally-derived exact D1 equality law.
 (0011 world-remove-first
   (0010 (value values)
     (110
-      
-      ((010 values)  (001 ()))
-      ((11110111 value (100 values)) (011 values))
-      ((11110111
-        (11110111 value (100 values))
-        (11110111 (001 d1-no-left) (001 d1-no-right)))
-       (111 (100 values) (world-remove-first value (011 values)))))))
+      ((0101 values) (001 ()))
+      ((010 values) (001 ()))
+      ((внутрішня-рівність-версій value (100 values)) (011 values))
+      ((010 ()) (111 (100 values) (world-remove-first value (011 values)))))))
 
 (0011 world-apply-event
   (0010 (clauses event)
@@ -89,10 +88,7 @@
       ((101 (100 event) (001 tell)) (111 (10011 event) clauses))
       ((101 (100 event) (001 retract))
        (world-remove-first (10011 event) clauses))
-      ((11110111
-        (101 (100 event) (001 retract))
-        (11110111 (001 d1-no-left) (001 d1-no-right)))
-       clauses))))
+      ((010 ()) clauses))))
 
 ; D4 NOT of the D3 ATOM predicate: a module is known only when its
 ; event stream is a nonempty pair. D3 CONS cannot be a one-argument NOT.
