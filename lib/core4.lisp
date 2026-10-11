@@ -179,8 +179,10 @@
 (00001001 length-onto
   (00001000 (values acc)
     (00000111
-      ((0100 (00000010 values)) acc)
-      ((00100010 (00000010 values) (00000001 (0)))
+      ; D1 ATOM chooses the empty proper-list tail; a pair must recurse.
+      ; Never run Core4 NOT or graded EQUAL as a COND predicate.
+      ((00000010 values) acc)
+      ((00000010 (00000001 ()))
        (length-onto (00000110 values) (00001100 acc 1))))))
 
 
