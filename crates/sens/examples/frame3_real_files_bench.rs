@@ -46,7 +46,7 @@ fn run() -> Result<(), Box<dyn std::error::Error>> {
     println!("# F3=original research carrier with 1-byte profile label included");
     println!("# timings=warm Rust encode/decode, {} samples p50 ns/op, unpaired order", SAMPLES);
     println!("# this benchmark checks Rust D2 admission, NOT evaluation of arbitrary files");
-    println!("file\\tstatus\\tt5_bytes\\tf3_total_bytes\\tt5_encode_p50_ns\\tf3_encode_p50_ns\\tt5_decode_p50_ns\\tf3_decode_p50_ns");
+    println!("file\tstatus\tt5_bytes\tf3_total_bytes\tt5_encode_p50_ns\tf3_encode_p50_ns\tt5_decode_p50_ns\tf3_decode_p50_ns");
     let mut scanned = 0usize;
     let mut admitted = 0usize;
     let mut f3_supported = 0usize;
@@ -56,7 +56,7 @@ fn run() -> Result<(), Box<dyn std::error::Error>> {
         scanned += 1;
         let raw = fs::read(Path::new(&path))?;
         let Ok(physical) = PhysicalT5Program::decode(&raw) else {
-            println!("{path}\\tREJECTED_RUST_T5_READER\\t{}\\tNA\\tNA\\tNA\\tNA\\tNA",raw.len());
+            println!("{path}\tREJECTED_RUST_T5_READER\t{}\tNA\tNA\tNA\tNA\tNA",raw.len());
             continue;
         };
         let words = decode_ternary_words(&raw).map_err(|e| format!("T5 decode after admission: {e:?}"))?;
@@ -79,7 +79,7 @@ fn run() -> Result<(), Box<dyn std::error::Error>> {
             std::hint::black_box(decode_ternary_words(std::hint::black_box(&raw)).unwrap());
         });
         let Ok(body) = senc::frame_encode(&as_text) else {
-            println!("{path}\\tF3_UNSUPPORTED\\t{}\\tNA\\t{t5_en}\\tNA\\t{t5_de}\\tNA",raw.len());
+            println!("{path}\tF3_UNSUPPORTED\t{}\tNA\t{t5_en}\tNA\t{t5_de}\tNA",raw.len());
             continue;
         };
         let mut f3 = vec![senc::FRAME_LABEL];
@@ -87,7 +87,7 @@ fn run() -> Result<(), Box<dyn std::error::Error>> {
         match senc::decode_senc(&f3) {
             Ok(restored) if restored == as_text => {}
             Err(senc::SencError::NotCanonical) => {
-                println!("{path}\\tF3_REJECTED_NONCANONICAL\\t{}\\tNA\\t{t5_en}\\tNA\\t{t5_de}\\tNA",raw.len());
+                println!("{path}\tF3_REJECTED_NONCANONICAL\t{}\tNA\t{t5_en}\tNA\t{t5_de}\tNA",raw.len());
                 continue;
             }
             other => return Err(format!("F3 did not roundtrip exact source: {path}: {other:?}").into()),
@@ -104,7 +104,7 @@ fn run() -> Result<(), Box<dyn std::error::Error>> {
         let f3_de = time_ns(|| {
             std::hint::black_box(senc::decode_senc(std::hint::black_box(&f3)).unwrap());
         });
-        println!("{path}\\tROUNDTRIP_OK\\t{}\\t{}\\t{t5_en}\\t{f3_en}\\t{t5_de}\\t{f3_de}",raw.len(),f3.len());
+        println!("{path}\tROUNDTRIP_OK\t{}\t{}\t{t5_en}\t{f3_en}\t{t5_de}\t{f3_de}",raw.len(),f3.len());
     }
     eprintln!("REAL_FILE_BENCH: tracked={scanned}, Rust-T5-admitted={admitted}, F3-exact-roundtrip={f3_supported}, compared-only-on-F3-supported T5={t5_total}B F3={f3_total}B");
     if admitted == 0 {
