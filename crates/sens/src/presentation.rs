@@ -79,6 +79,14 @@ fn render_uk(value: &Value) -> String {
         Value::Number(number, Exactness::Inexact) => uk_decimal(canonical_inexact(*number)),
         Value::Rational(number) => number.to_string(),
         Value::BinaryNumber(number) => number.to_decimal_string(),
+        Value::NumericComposition(number) => {
+            let (negative, numerator, denominator) = number.as_parts();
+            let sign = if negative { "-" } else { "" };
+            match denominator {
+                Some(d) => format!("{sign}{}/{}", numerator.to_decimal_string(), d.to_decimal_string()),
+                None => format!("-{numerator}"),
+            }
+        },
         Value::Sid(sid) => {
             format!("#<вбудована {}>", uk_semantic_name(*sid))
         }
