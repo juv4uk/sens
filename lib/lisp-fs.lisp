@@ -34,7 +34,7 @@
 ; зберігати старий корінь, тому branching і rollback лишаються можливими.
 (0011 fs-write
   (0010 (fs name value)
-    (001000 ((address (knowledge-content-address value)))
+    (нехай-похідне ((address (knowledge-content-address value)))
       (1110
         (1110
           (content-store-put (fs-objects fs) value)
@@ -46,12 +46,12 @@
 ; fs-read повертає (found value address) або (not-found name).
 (0011 fs-read
   (0010 (fs name)
-    (001000 ((binding (101100101 name (fs-bindings fs))))
+    (нехай-похідне ((binding (101100101 name (fs-bindings fs))))
       (110
         ((0100 (010 binding)) (1110 (001 not-found) name))
         ((010 binding)  (1110 (001 not-found) name))
         ((010 ())
-          (001000 ((address (100 binding)))
+          (нехай-похідне ((address (100 binding)))
             (110
               ((0100 (content-store-contains? (fs-objects fs) address))
                (1110 (001 not-found) name))
@@ -108,7 +108,7 @@
 
 (0011 fs-package-field
   (0010 (name package)
-    (001000 ((entry (11100 name package)))
+    (нехай-похідне ((entry (11100 name package)))
       (110
         ((11110111 entry (001 ())) (001 ()))
         ((fs-d1-no? (11110111 entry (001 ()))) (011 entry))))))
@@ -179,7 +179,7 @@
       ((0100 (010 packages)) (1110 (001 accepted) store))
       ((010 packages)  (1110 (001 accepted) store))
       ((010 ())
-        (001000 ((decision (fs-object-package-decision (100 packages))))
+        (нехай-похідне ((decision (fs-object-package-decision (100 packages))))
           (110
             ((0100 (101 (100 decision) (001 accepted))) decision)
             ((010 ()) (fs-build-object-store
@@ -204,11 +204,11 @@
 
 (0011 fs-reconstruct-root
   (0010 (root-package object-packages)
-    (001000 ((root-decision (fs-root-package-decision root-package)))
+    (нехай-похідне ((root-decision (fs-root-package-decision root-package)))
       (110
         ((0100 (101 (100 root-decision) (001 accepted))) root-decision)
         ((010 ())
-          (001000 ((objects-decision
+          (нехай-похідне ((objects-decision
                   (fs-build-object-store object-packages (empty-content-store))))
             (110
               ((0100 (101 (100 objects-decision) (001 accepted))) objects-decision)
@@ -225,7 +225,7 @@
                   (001 accepted)
                   (1110
                     (1001 objects-decision)
-                    (001000 ((bindings (fs-package-field (001 bindings) root-package)))
+                    (нехай-похідне ((bindings (fs-package-field (001 bindings) root-package)))
                       (fs-bindings-from-list bindings map-empty))
                     (fs-package-field (001 revision) root-package)))))))))))
 
@@ -329,19 +329,19 @@
 
 (0011 fs-journal-replay-event
   (0010 (fs event)
-    (001000 ((decision (fs-journal-event-decision event)))
+    (нехай-похідне ((decision (fs-journal-event-decision event)))
       (110
         ((0100 (101 (100 decision) (001 accepted))) decision)
         ((010 ())
-          (001000 ((op (fs-package-field (001 op) event)))
+          (нехай-похідне ((op (fs-package-field (001 op) event)))
             (110
               ((101 op (001 write))
-               (001000 ((written (fs-write fs
+               (нехай-похідне ((written (fs-write fs
                                         (fs-package-field (001 name) event)
                                         (fs-package-field (001 value) event))))
                  (1110 (001 accepted) (100 written))))
               ((101 op (001 bind))
-               (001000 ((address (fs-package-field (001 address) event)))
+               (нехай-похідне ((address (fs-package-field (001 address) event)))
                  (110
                    ((0100 (content-store-contains? (fs-objects fs) address))
                     (1110 (001 rejected) (001 missing-object)))
@@ -371,7 +371,7 @@
       ((0100 (010 journal)) (1110 (001 accepted) fs))
       ((010 journal)  (1110 (001 accepted) fs))
       ((010 ())
-        (001000 ((decision (fs-journal-replay-event fs (100 journal))))
+        (нехай-похідне ((decision (fs-journal-replay-event fs (100 journal))))
           (110
             ((0100 (101 (100 decision) (001 accepted))) decision)
             ((010 ()) (fs-journal-replay-onto (011 journal) (1001 decision)))))))))
@@ -415,7 +415,7 @@
       ((0100 (101 completed-stage (001 root-pointer)))
        (1110 (001 recovered) old-package))
       ((010 ())
-        (001000 ((decision (fs-root-package-decision candidate-package)))
+        (нехай-похідне ((decision (fs-root-package-decision candidate-package)))
           (110
             ((101 (100 decision) (001 accepted))
              (1110 (001 recovered) candidate-package))
