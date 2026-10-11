@@ -591,10 +591,10 @@ pub fn is_reserved_surface_name(name: &str) -> bool {
     eval::canon::is_reserved_surface(name)
 }
 
-/// Mechanical source/UI routing query: does this surface resolve to this exact
-/// eight-bit function SID?
-pub fn surface_has_sid(name: &str, sid: Sens8) -> bool {
-    eval::canon::surface_has_sid(name, sid)
+/// Перевірити точну доменну тотожність поверхневої назви.
+/// Збіг бітів без збігу домену не створює еквівалентності.
+pub fn surface_has_domain_identity(name: &str, identity: CoreDomainIdentity) -> bool {
+    semantic_registry::domain_identity_for_surface(name) == Some(identity)
 }
 
 /// True for any admitted surface whose Lisp-owned evaluator dispatch class is Define.
@@ -803,5 +803,22 @@ mod core4_bootstrap_cache_tests {
         let dependent_let_star = eval_program("(let* ((x 7) (y x)) y)", &mut session)
             .expect("let* must evaluate bindings sequentially on Core4 source fallback");
         assert_eq!(dependent_let_star.value.to_string(), "7");
+    }
+}
+
+#[cfg(test)]
+mod exact_surface_domain_query_migration_tests {
+    use super::*;
+
+    #[test]
+    fn surface_query_is_domain_qualified_not_packed_byte() {
+        let quote = semantic_registry::domain_identity_for_surface("як-є")
+            .expect("ратифікована D3 QUOTE");
+        let cons = semantic_registry::domain_identity_for_surface("сполучити")
+            .expect("ратифікована D3 CONS");
+        assert_ne!(quote, cons);
+        assert!(surface_has_domain_identity("як-є", quote));
+        assert!(!surface_has_domain_identity("як-є", cons));
+        assert!(!surface_has_domain_identity("неіснуюча-функція", quote));
     }
 }

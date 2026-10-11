@@ -45,10 +45,6 @@ pub(crate) fn is_reserved_surface(surface: &str) -> bool {
     routed_sid_for_surface(surface).is_some()
 }
 
-pub(crate) fn surface_has_sid(surface: &str, sid: Sens8) -> bool {
-    semantic_registry::semantic_id_for_surface(surface) == Some(sid)
-}
-
 /// Surface, яку не можна перевизначити: Canon, necessary form, або примітив.
 /// M8 (#1590): після lower admitted surface → SENS, біндинг `+` не змінює Call.
 pub(crate) fn ensure_bindable(surface: &str, span: Span) -> Result<(), LanguageError> {
