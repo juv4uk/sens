@@ -130,10 +130,19 @@ fn real_core_session_runs_natural_math_and_fails_closed_on_unencoded_composites(
 
     session.environment.define("a", Value::BinaryNumber(d(24, 2)));
     session.environment.define("b", Value::BinaryNumber(d(24, 3)));
-    for expr in ["(- a b)", "(/ a b)"] {
-        let err = eval_program(expr, &mut session).expect_err("NEG/RATIO runtime still blocked");
-        assert_eq!(err.kind, sens::ErrorKind::Type, "{expr}");
+    for (expr, expected) in [("(- a b)", "-1"), ("(/ a b)", "2/3")] {
+        let result = eval_program(expr, &mut session)
+            .expect("exact NEG/RATIO composition must execute").value;
+        assert_eq!(result.to_string(), expected, "{expr}");
     }
+    let a = eval_program("(- a b)", &mut session).unwrap().value;
+    let q = eval_program("(/ a b)", &mut session).unwrap().value;
+    session.environment.define("negative", a);
+    session.environment.define("ratio", q);
+    assert_eq!(eval_program("(+ negative b)", &mut session).unwrap().value,
+        Value::BinaryNumber(d(24, 2)));
+    assert_eq!(eval_program("(* ratio b)", &mut session).unwrap().value,
+        Value::BinaryNumber(d(24, 2)));
     session.environment.define("b", Value::BinaryNumber(d(24, 0)));
     assert_eq!(eval_program("(/ a b)", &mut session).unwrap_err().kind,
         sens::ErrorKind::DivisionByZero);
