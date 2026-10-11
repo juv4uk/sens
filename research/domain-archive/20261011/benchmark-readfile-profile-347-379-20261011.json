@@ -1,0 +1,61 @@
+{
+  "schema": "sens.historical-benchmark-provenance/v1",
+  "date": "2026-10-11",
+  "status": "ARCHIVED-RESEARCH-ONLY-NOT_EXECUTABLE",
+  "source_repository": "juv4uk/sens",
+  "historical_pull_requests": [
+    347,
+    379
+  ],
+  "total_source_refs": 4,
+  "unique_archived_blobs": 3,
+  "subject": "#333 Lisp-owned read-file/UTF-8 stage profiling; historical code and workflow, not current benchmark authority",
+  "records": [
+    {
+      "source_pr": 347,
+      "source_pr_url": "https://github.com/juv4uk/sens/pull/347",
+      "source_commit": "7ab734f7456371531657c0b281ae40f5964a81ef",
+      "original_path": ".github/workflows/issue-333-readfile-stage-profile.yml",
+      "original_blob_sha": "5a68e4da392024784b92cbe89dc99c511dd11b77",
+      "archive_path": "research/domain-archive/20261011/pr347/.github/workflows/issue-333-readfile-stage-profile.yml.source.txt",
+      "archived_blob_sha": "5a68e4da392024784b92cbe89dc99c511dd11b77",
+      "status": "BYTE_IDENTICAL_ARCHIVED"
+    },
+    {
+      "source_pr": 347,
+      "source_pr_url": "https://github.com/juv4uk/sens/pull/347",
+      "source_commit": "7ab734f7456371531657c0b281ae40f5964a81ef",
+      "original_path": "scripts/profile-read-file-stages.lisp",
+      "original_blob_sha": "ab8bec13a7b223f78082e41fdca71dcdda5e208c",
+      "archive_path": "research/domain-archive/20261011/pr347/scripts/profile-read-file-stages.lisp.source.txt",
+      "archived_blob_sha": "ab8bec13a7b223f78082e41fdca71dcdda5e208c",
+      "status": "BYTE_IDENTICAL_ARCHIVED"
+    },
+    {
+      "source_pr": 379,
+      "source_pr_url": "https://github.com/juv4uk/sens/pull/379",
+      "source_commit": "1a5eb2b7f529591bb07899f5abbb8ffeef53a4b2",
+      "original_path": ".github/workflows/issue-333-readfile-stage-profile.yml",
+      "original_blob_sha": "5a68e4da392024784b92cbe89dc99c511dd11b77",
+      "archive_path": "research/domain-archive/20261011/pr347/.github/workflows/issue-333-readfile-stage-profile.yml.source.txt",
+      "archived_blob_sha": "5a68e4da392024784b92cbe89dc99c511dd11b77",
+      "status": "BYTE_IDENTICAL_ARCHIVED"
+    },
+    {
+      "source_pr": 379,
+      "source_pr_url": "https://github.com/juv4uk/sens/pull/379",
+      "source_commit": "1a5eb2b7f529591bb07899f5abbb8ffeef53a4b2",
+      "original_path": "scripts/profile-read-file-stages.lisp",
+      "original_blob_sha": "87e2910677e8ade5c2ba40ef5dd8ddb73a5594cf",
+      "archive_path": "research/domain-archive/20261011/pr379/scripts/profile-read-file-stages.lisp.source.txt",
+      "archived_blob_sha": "87e2910677e8ade5c2ba40ef5dd8ddb73a5594cf",
+      "status": "BYTE_IDENTICAL_ARCHIVED"
+    }
+  ],
+  "dedup": "The same workflow Git blob (5a68e4da392024784b92cbe89dc99c511dd11b77) appears in PR #347 and #379; stored once with two provenance records.",
+  "guardrails": [
+    "Historical code/workflow stored exclusively as inert .source.txt under research/domain-archive",
+    "No edits to runtime, GitHub Actions, D1–D10 canonical domains, ledger or codec",
+    "Source identity does not establish current benchmark performance or ratification"
+  ]
+}
