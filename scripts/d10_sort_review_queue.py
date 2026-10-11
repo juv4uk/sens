@@ -157,16 +157,24 @@ def validate(root, manifest_path, write=False):
         raise ValueError("PRESERVED_ARCHIVE_CHANGED")
     pointer = json.loads((root / "knowledge/d10-current-inventory.json")
                          .read_text(encoding="utf-8"))
-    current = pointer["canonical_current"]
-    if current["git_blob"] != manifest["canonical_inventory_git_blob"]:
-        raise ValueError("CURRENT_INVENTORY_MOVED_REGENERATE")
-    canonical_path = root / current["path"]
-    if git_blob(canonical_path.read_bytes()) != current["git_blob"]:
-        raise ValueError("CANONICAL_INVENTORY_PIN_MISMATCH")
+    live = pointer["canonical_current"]
+    pinned_original = pointer.get("historical_v9_research_inventory", live)
+    if pinned_original["git_blob"] != manifest["canonical_inventory_git_blob"]:
+        raise ValueError("FROZEN_TRIAGE_INVENTORY_PIN_MISMATCH")
+    canonical_path = root / pinned_original["path"]
+    if git_blob(canonical_path.read_bytes()) != pinned_original["git_blob"]:
+        raise ValueError("ARCHIVED_INVENTORY_PIN_MISMATCH")
     canonical = json.loads(canonical_path.read_text(encoding="utf-8"))
     selected_by_id = {r["stable_id"]: r for r in canonical["rows"]}
-    if len(selected_by_id) != current["selected"]:
-        raise ValueError("CANONICAL_COUNT_MISMATCH")
+    if len(selected_by_id) != pinned_original["selected"]:
+        raise ValueError("ARCHIVED_CANONICAL_COUNT_MISMATCH")
+    live_bytes = (root / live["path"]).read_bytes()
+    if git_blob(live_bytes) != live["git_blob"]:
+        raise ValueError("LIVE_INVENTORY_PIN_MISMATCH")
+    current_rows = json.loads(live_bytes)["rows"]
+    if (len(current_rows) < len(canonical["rows"]) or
+            current_rows[:len(canonical["rows"])] != canonical["rows"]):
+        raise ValueError("FROZEN_V9_PREFIX_REWRITTEN")
     rows = parse_source(original.decode("utf-8"))
     catalog_selected = {r["candidate_id"]: r for r in rows
                         if r["current_d10_selected"] == "RESEARCH_SELECTED_UNRATIFIED"}

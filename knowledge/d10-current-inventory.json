@@ -1,12 +1,12 @@
 {
   "schema": "d10-current-inventory-pointer/v1",
-  "status": "OWNER-DIRECTED-RESEARCH-SELECTION-759-UNRATIFIED",
+  "status": "OWNER-DIRECTED-RESEARCH-SELECTION-799-UNRATIFIED",
   "canonical_current": {
-    "path": "knowledge/d10-v9-semantic-inventory.json",
-    "git_blob": "b77c5b4aae35bcf377e8406f59328e6d82808a45",
-    "selected": 759,
+    "path": "knowledge/d10-v10-semantic-inventory.json",
+    "git_blob": "e1855199bbc70d21046c673679ab3c77d8436b65",
+    "selected": 799,
     "placed": 719,
-    "unplaced": 40,
+    "unplaced": 80,
     "ratified": 0
   },
   "historical_selection": {
@@ -20,10 +20,10 @@
     "role": "PINNED-GAUGE-ASSIGNMENT"
   },
   "policy": {
-    "description": "Canonical D10 v9 includes 34 additional source-SHA-pinned semantic law descriptions as preliminary research only; F2/F3 receipts remain missing and no new physical D10 authorization is granted.",
-    "selected_only": "759 research-selected descriptions; 719 placed, 40 unplaced; 265 remaining; 0 ratified. Newly added 34 F1-only source-verified descriptions are not proven distinct Core laws.",
+    "description": "Research-only v10 adds 40 SHA-pinned historical candidate IDs with textual law+donor+positive/negative CLAIMS; tests not run and F3 not proven.",
+    "selected_only": "799 selected research descriptions; 719 placed, 80 unplaced, 225 remaining; 0 ratified.",
     "ratification": "No D10 meaning has been ratified. D10 10-bit execution and physical T5 encoding are not authorized.",
-    "next_step": "Run actual positive/negative witnesses, independently check D1-D9 and D10 semantic distinctness, adjudicate Core-vs-derived, and only then consider coordinate assignment and owner ratification."
+    "next_step": "F2 execute claims on independent donor and SENS oracles; F3 behavioral dedup relative to D1-D9+D10; F4 coordinate only if admitted."
   },
   "branch_policy": "MAIN-ONLY; NO-NEW-BRANCHES",
   "historical_v2_coordinate_inventory": {
@@ -229,5 +229,30 @@
     "coordinates_added": 0,
     "ratified_added": 0,
     "proof_status": "F1-PINNED-F2-F3-UNPROVEN"
+  },
+  "historical_v9_research_inventory": {
+    "path": "knowledge/d10-v9-semantic-inventory.json",
+    "git_blob": "b77c5b4aae35bcf377e8406f59328e6d82808a45",
+    "selected": 759,
+    "placed": 719,
+    "unplaced": 40,
+    "ratified": 0,
+    "role": "FROZEN-PRE-V10-ARCHIVE"
+  },
+  "current_v10_p0_text_witness_selection": {
+    "previous_inventory": "knowledge/d10-v9-semantic-inventory.json",
+    "manifest": {
+      "path": "knowledge/d10-p0-research-intake-v10-20261011.json",
+      "git_blob": "c642d3af06c6e37d72ef1d4911903f8f17180fbd"
+    },
+    "source_catalog": {
+      "path": "knowledge/d10-source-snapshots/d10-v9-unified-catalog-1809.tsv",
+      "git_blob": "1660a19ff9482f932fb9a40fa78ad1fa50134c31"
+    },
+    "selected_added": 40,
+    "coordinates_added": 0,
+    "ratified_added": 0,
+    "oracle_parity": "NOT_EXECUTED",
+    "dedup": "NOT_PROVED"
   }
 }

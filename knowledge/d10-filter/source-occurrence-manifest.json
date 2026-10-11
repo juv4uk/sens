@@ -3,7 +3,7 @@
   "date": "2026-10-11",
   "role": "ARCHIVAL_PROVENANCE_EXPANSION_NOT_CORE_SELECTION",
   "input": {
-    "path": "knowledge/d10-filter/all-candidates.tsv",
+    "path": "knowledge/d10-source-snapshots/d10-v9-unified-catalog-1809.tsv",
     "git_blob": "1660a19ff9482f932fb9a40fa78ad1fa50134c31"
   },
   "output": {

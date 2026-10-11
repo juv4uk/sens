@@ -1,0 +1,1200 @@
+{
+  "schema": "d10-v10-provisional-owner-directed-research-intake/v1",
+  "date": "2026-10-11",
+  "policy": {
+    "authority": "OWNER-DIRECTED-RESEARCH-SELECTED-UNRATIFIED",
+    "not_ratification": true,
+    "not_semantically_proven": true,
+    "no_code_allocation": true,
+    "archives_immutable": true,
+    "branch_policy": "main only; no new branches"
+  },
+  "previous": {
+    "path": "knowledge/d10-v9-semantic-inventory.json",
+    "git_blob": "b77c5b4aae35bcf377e8406f59328e6d82808a45",
+    "selected": 759,
+    "placed": 719,
+    "unplaced": 40
+  },
+  "candidate_index": {
+    "path": "knowledge/d10-source-snapshots/d10-v9-unified-catalog-1809.tsv",
+    "git_blob": "1660a19ff9482f932fb9a40fa78ad1fa50134c31",
+    "candidate_rows": 1809
+  },
+  "foundation": {
+    "path": "knowledge/d1-d9-foundation.json",
+    "git_blob": "09d1d71c39d1484dfd005a5068dbb18b76f0f0d4"
+  },
+  "source_archive": {
+    "path": "knowledge/d10-filter/all-source-occurrences.tsv",
+    "git_blob": "101a8e59146f95ec35ed60e2281da32476037984",
+    "occurrences": 7396
+  },
+  "counts": {
+    "selected_added": 40,
+    "result_selected": 799,
+    "result_placed": 719,
+    "result_unplaced": 80,
+    "result_remaining": 225,
+    "ratified_added": 0,
+    "codewords_allocated": 0
+  },
+  "selection_gate": "Only candidates with nonempty law, donor, positive and negative TEXT CLAIMS; exact-name absent from D1-D9 and existing D10. This does NOT prove independent semantics. F2/F3 remain HOLD.",
+  "evidence_status": {
+    "source_catalog_blob_verified": true,
+    "donor_source_replayed": false,
+    "positive_negative_cases_executed": false,
+    "semantic_distinctness_proven": false,
+    "lower_domain_behavioral_dedup_proven": false
+  },
+  "candidates": [
+    {
+      "id": "d10.name.00127",
+      "name": "BOUND-IDENTIFIER=?",
+      "law": "рівність зв'язаних ідентифікаторів за іменем і контекстними мітками",
+      "source_occurrences": 3,
+      "source_records_sha_pinned": [
+        "knowledge/d10-historical-lisp-all-source-consolidation-20261011.json@962208ecad6b4b4d8845ea7dedaf88c34e93e702:candidates[40]",
+        "knowledge/d10-historical-lisp-branch-candidate-intake-20261011.json@42362a46d7587e375ed19c156a0b67e40b86939a:candidates[1]",
+        "knowledge/d10-historical-lisp-branch-evidence-intake-20261011.json@615307670709d8429d8b74daafe8fe24b36960ea:new_candidates[11]"
+      ],
+      "donor_claims": [
+        "knowledge/d10-r6rs-hashtable-hygiene-audit-v1.json@c6af11760a10a5944d9df286c52eb84e18bd3c96",
+        "knowledge/d10-r6rs-hashtable-hygiene-audit-v1.json@c6af11760a10a5944d9df286c52eb84e18bd3c96:R6RS-15"
+      ],
+      "positive_witness_claims": [
+        "[\"однаковий текст, але незалежно згенеровані мітки не дають bound-identifier=?\"]",
+        "однаковий текст, але незалежно згенеровані мітки не дають bound-identifier=?"
+      ],
+      "negative_witness_claims": [
+        "порівняння лише по рядку імені"
+      ],
+      "F1": "SOURCE-INDEX-SHA-PINNED-DONOR-PROVENANCE-UNEXECUTED",
+      "F2": "HOLD_NOT_RUN",
+      "F3": "HOLD_BEHAVIORAL_DEDUP_UNPROVEN",
+      "F4": "NO_COORDINATE",
+      "ratified": false
+    },
+    {
+      "id": "d10.name.00266",
+      "name": "CALL-WITH-PORT",
+      "law": "Нормальне повернення процедури закриває port; лише nonlocal escape не дозволяє безумовно закривати port, якщо захоплене продовження ще може відновити роботу.",
+      "source_occurrences": 2,
+      "source_records_sha_pinned": [
+        "knowledge/d10-historical-lisp-branch-candidate-intake-20261011.json@42362a46d7587e375ed19c156a0b67e40b86939a:candidates[3]",
+        "knowledge/d10-historical-lisp-branch-evidence-intake-20261011.json@615307670709d8429d8b74daafe8fe24b36960ea:new_candidates[23]"
+      ],
+      "donor_claims": [
+        "knowledge/d10-r7rs-primary-manual-slice-v1.json@891728c08c7df93e84c75b74585f9fc1a438a3c2",
+        "knowledge/d10-r7rs-primary-manual-slice-v1.json@891728c08c7df93e84c75b74585f9fc1a438a3c2:R7RS-HIST-008"
+      ],
+      "positive_witness_claims": [
+        "[\"Звичайне повернення закриває port рівно один раз та зберігає повернені значення.\"]",
+        "Звичайне повернення закриває port рівно один раз та зберігає повернені значення."
+      ],
+      "negative_witness_claims": [
+        "Код назавжди закриває port на першому escape, а дозволене повернення у захоплене продовження потребує той самий port."
+      ],
+      "F1": "SOURCE-INDEX-SHA-PINNED-DONOR-PROVENANCE-UNEXECUTED",
+      "F2": "HOLD_NOT_RUN",
+      "F3": "HOLD_BEHAVIORAL_DEDUP_UNPROVEN",
+      "F4": "NO_COORDINATE",
+      "ratified": false
+    },
+    {
+      "id": "d10.name.00272",
+      "name": "CASE-LAMBDA",
+      "law": "Перший підпис аргументів (formals), що приймає арність виклику, визначає гілку процедури; lexical scope.",
+      "source_occurrences": 2,
+      "source_records_sha_pinned": [
+        "knowledge/d10-historical-lisp-branch-candidate-intake-20261011.json@42362a46d7587e375ed19c156a0b67e40b86939a:candidates[4]",
+        "knowledge/d10-historical-lisp-branch-evidence-intake-20261011.json@615307670709d8429d8b74daafe8fe24b36960ea:new_candidates[19]"
+      ],
+      "donor_claims": [
+        "knowledge/d10-r7rs-primary-manual-slice-v1.json@891728c08c7df93e84c75b74585f9fc1a438a3c2",
+        "knowledge/d10-r7rs-primary-manual-slice-v1.json@891728c08c7df93e84c75b74585f9fc1a438a3c2:R7RS-HIST-004"
+      ],
+      "positive_witness_claims": [
+        "[\"Визначити дві гілки 1 і 2 аргументи й перевірити відповідний результат; коли перетинаються — вибір першої.\"]",
+        "Визначити дві гілки 1 і 2 аргументи й перевірити відповідний результат; коли перетинаються — вибір першої."
+      ],
+      "negative_witness_claims": [
+        "Виклик із жодною відповідною арністю або вибір пізнішої гілки за наявності ранішої відповідної."
+      ],
+      "F1": "SOURCE-INDEX-SHA-PINNED-DONOR-PROVENANCE-UNEXECUTED",
+      "F2": "HOLD_NOT_RUN",
+      "F3": "HOLD_BEHAVIORAL_DEDUP_UNPROVEN",
+      "F4": "NO_COORDINATE",
+      "ratified": false
+    },
+    {
+      "id": "d10.name.00274",
+      "name": "CATCH-ALL",
+      "law": "Піймати throw незалежно від tag і викликати handler(tag,value); handler може повторно throw.",
+      "source_occurrences": 5,
+      "source_records_sha_pinned": [
+        "knowledge/d10-historical-candidate-coordinate-queue-v1.json@131369263ac37c27798bb3c95521eb99e52b8f10:candidates[5]",
+        "knowledge/d10-historical-lisp-all-source-consolidation-20261011.json@962208ecad6b4b4d8845ea7dedaf88c34e93e702:candidates[47]",
+        "knowledge/d10-historical-lisp-main-consolidation-20261011.json@8c8253e5dd78cdec25de95009e9200ff08af4cc7:ledger_rows[5]",
+        "knowledge/d10-proposal-ledger.tsv@f10c545598b6aaf90f8f5caf8f49683448ff420f:line150",
+        "knowledge/d10-source-snapshots/d10-proposal-ledger-f10c545598b6a6af.tsv@f10c545598b6aaf90f8f5caf8f49683448ff420f:source-record"
+      ],
+      "donor_claims": [
+        "f5438abf3460fa7caac14a30edf511f907a5be44",
+        "https://reduce-algebra.sourceforge.io/lisp-docs/allman1.pdf",
+        "juv4uk/sens@ffb1e8fefe3eaed1f77ddb890cd744f9ac328f2d:knowledge/d10-psl-interlisp-lispm-unmerged-residual-v1.json:243",
+        "knowledge/d10-historical-candidate-coordinate-queue-v1.json@131369263ac37c27798bb3c95521eb99e52b8f10",
+        "knowledge/d10-psl-interlisp-lispm-unmerged-residual-v1.json",
+        "knowledge/d10-psl-interlisp-lispm-unmerged-residual-v1.json@f5438abf3460fa7caac14a30edf511f907a5be44"
+      ],
+      "positive_witness_claims": [
+        "Викинути 'red 7; handler бачить і 'red і 7; може вирішити повторно передати."
+      ],
+      "negative_witness_claims": [
+        "Потай втрачається tag або замість handler виконується звичайний catch без фільтра."
+      ],
+      "F1": "SOURCE-INDEX-SHA-PINNED-DONOR-PROVENANCE-UNEXECUTED",
+      "F2": "HOLD_NOT_RUN",
+      "F3": "HOLD_BEHAVIORAL_DEDUP_UNPROVEN",
+      "F4": "NO_COORDINATE",
+      "ratified": false
+    },
+    {
+      "id": "d10.name.00522",
+      "name": "DATUM->SYNTAX",
+      "law": "перенесення лексичного контексту шаблонного ідентифікатора на datum",
+      "source_occurrences": 2,
+      "source_records_sha_pinned": [
+        "knowledge/d10-historical-lisp-all-source-consolidation-20261011.json@962208ecad6b4b4d8845ea7dedaf88c34e93e702:candidates[74]",
+        "knowledge/d10-historical-lisp-branch-evidence-intake-20261011.json@615307670709d8429d8b74daafe8fe24b36960ea:new_candidates[14]"
+      ],
+      "donor_claims": [
+        "knowledge/d10-r6rs-hashtable-hygiene-audit-v1.json@c6af11760a10a5944d9df286c52eb84e18bd3c96",
+        "knowledge/d10-r6rs-hashtable-hygiene-audit-v1.json@c6af11760a10a5944d9df286c52eb84e18bd3c96:R6RS-18"
+      ],
+      "positive_witness_claims": [
+        "[\"однаковий datum з різними template-id має різну лексичну прив'язку\"]"
+      ],
+      "negative_witness_claims": [
+        "контекст з template-id губиться та спричиняє небажане захоплення"
+      ],
+      "F1": "SOURCE-INDEX-SHA-PINNED-DONOR-PROVENANCE-UNEXECUTED",
+      "F2": "HOLD_NOT_RUN",
+      "F3": "HOLD_BEHAVIORAL_DEDUP_UNPROVEN",
+      "F4": "NO_COORDINATE",
+      "ratified": false
+    },
+    {
+      "id": "d10.name.00534",
+      "name": "DEFINE-VALUES",
+      "law": "Зв'язує кілька імен із multiple values одного expression за formals підписом, де дублікати змінних недопустимі.",
+      "source_occurrences": 2,
+      "source_records_sha_pinned": [
+        "knowledge/d10-historical-lisp-branch-candidate-intake-20261011.json@42362a46d7587e375ed19c156a0b67e40b86939a:candidates[10]",
+        "knowledge/d10-historical-lisp-branch-evidence-intake-20261011.json@615307670709d8429d8b74daafe8fe24b36960ea:new_candidates[25]"
+      ],
+      "donor_claims": [
+        "knowledge/d10-r7rs-primary-manual-slice-v1.json@891728c08c7df93e84c75b74585f9fc1a438a3c2",
+        "knowledge/d10-r7rs-primary-manual-slice-v1.json@891728c08c7df93e84c75b74585f9fc1a438a3c2:R7RS-HIST-010"
+      ],
+      "positive_witness_claims": [
+        "[\"define-values (x y) із двома значеннями створює два окремих bindings.\"]",
+        "define-values (x y) із двома значеннями створює два окремих bindings."
+      ],
+      "negative_witness_claims": [
+        "Дубль імен допускається або multiple-value arity неправильно спроєктована на одну Lisp-пару."
+      ],
+      "F1": "SOURCE-INDEX-SHA-PINNED-DONOR-PROVENANCE-UNEXECUTED",
+      "F2": "HOLD_NOT_RUN",
+      "F3": "HOLD_BEHAVIORAL_DEDUP_UNPROVEN",
+      "F4": "NO_COORDINATE",
+      "ratified": false
+    },
+    {
+      "id": "d10.name.00573",
+      "name": "DYNAMIC-WIND",
+      "law": "Run before/after hooks whenever a captured continuation reenters/exits dynamic extent, not only at normal function call/return.",
+      "source_occurrences": 3,
+      "source_records_sha_pinned": [
+        "knowledge/d10-historical-candidate-coordinate-queue-v1.json@131369263ac37c27798bb3c95521eb99e52b8f10:candidates[42]",
+        "knowledge/d10-historical-lisp-all-source-consolidation-20261011.json@962208ecad6b4b4d8845ea7dedaf88c34e93e702:candidates[88]",
+        "knowledge/d10-historical-lisp-main-consolidation-20261011.json@8c8253e5dd78cdec25de95009e9200ff08af4cc7:ledger_rows[42]"
+      ],
+      "donor_claims": [
+        "df8ed73011df39f9ec689046ce6936cc00892215",
+        "https://standards.scheme.org/r7rs-html5/index.html",
+        "knowledge/d10-historical-candidate-coordinate-queue-v1.json@131369263ac37c27798bb3c95521eb99e52b8f10",
+        "knowledge/d10-historical-clos-interlisp-residual-review-v1.json",
+        "knowledge/d10-historical-coverage-gap-audit-v1.json@bff3156b89c6c0e6e69dd8d3a4e99c16c4c2e35b"
+      ],
+      "positive_witness_claims": [
+        "Captured continuation reentered after nonlocal exit repeats before and then after; ordered event trace must match Scheme specification."
+      ],
+      "negative_witness_claims": [
+        "Running before/after only once despite continuation reentry violates the required trace."
+      ],
+      "F1": "SOURCE-INDEX-SHA-PINNED-DONOR-PROVENANCE-UNEXECUTED",
+      "F2": "HOLD_NOT_RUN",
+      "F3": "HOLD_BEHAVIORAL_DEDUP_UNPROVEN",
+      "F4": "NO_COORDINATE",
+      "ratified": false
+    },
+    {
+      "id": "d10.name.00600",
+      "name": "EQUAL-HASH",
+      "law": "структурний хеш, сумісний з equal?, мусить завершуватися і для циклів",
+      "source_occurrences": 3,
+      "source_records_sha_pinned": [
+        "knowledge/d10-historical-lisp-all-source-consolidation-20261011.json@962208ecad6b4b4d8845ea7dedaf88c34e93e702:candidates[99]",
+        "knowledge/d10-historical-lisp-branch-candidate-intake-20261011.json@42362a46d7587e375ed19c156a0b67e40b86939a:candidates[12]",
+        "knowledge/d10-historical-lisp-branch-evidence-intake-20261011.json@615307670709d8429d8b74daafe8fe24b36960ea:new_candidates[8]"
+      ],
+      "donor_claims": [
+        "knowledge/d10-r6rs-hashtable-hygiene-audit-v1.json@c6af11760a10a5944d9df286c52eb84e18bd3c96",
+        "knowledge/d10-r6rs-hashtable-hygiene-audit-v1.json@c6af11760a10a5944d9df286c52eb84e18bd3c96:R6RS-12"
+      ],
+      "positive_witness_claims": [
+        "[\"два equal? циклічні об'єкти мають сумісний hash і обчислення завершується\"]",
+        "два equal? циклічні об'єкти мають сумісний hash і обчислення завершується"
+      ],
+      "negative_witness_claims": [
+        "нескінченна рекурсія для циклічної структури"
+      ],
+      "F1": "SOURCE-INDEX-SHA-PINNED-DONOR-PROVENANCE-UNEXECUTED",
+      "F2": "HOLD_NOT_RUN",
+      "F3": "HOLD_BEHAVIORAL_DEDUP_UNPROVEN",
+      "F4": "NO_COORDINATE",
+      "ratified": false
+    },
+    {
+      "id": "d10.name.00636",
+      "name": "FIND-CLASS",
+      "law": "Resolve a symbol to a class metaobject in the explicitly applicable environment; missing with errorp false returns NIL, with default true signals error.",
+      "source_occurrences": 3,
+      "source_records_sha_pinned": [
+        "knowledge/d10-historical-candidate-coordinate-queue-v1.json@131369263ac37c27798bb3c95521eb99e52b8f10:candidates[28]",
+        "knowledge/d10-historical-lisp-all-source-consolidation-20261011.json@962208ecad6b4b4d8845ea7dedaf88c34e93e702:candidates[110]",
+        "knowledge/d10-historical-lisp-main-consolidation-20261011.json@8c8253e5dd78cdec25de95009e9200ff08af4cc7:ledger_rows[28]"
+      ],
+      "donor_claims": [
+        "d8c6a2fdf60c11e23016be7aad5037bb5c26782d",
+        "https://franz.com/support/documentation/10.0/ansicl/dictentr/find-cla.htm",
+        "knowledge/d10-clos-slot-state-historical-review-v1.json",
+        "knowledge/d10-clos-slot-state-historical-review-v1.json@d8c6a2fdf60c11e23016be7aad5037bb5c26782d",
+        "knowledge/d10-historical-candidate-coordinate-queue-v1.json@131369263ac37c27798bb3c95521eb99e52b8f10"
+      ],
+      "positive_witness_claims": [
+        "FIND-CLASS(Book,false,env) returns same class as CLASS-OF(book); missing(false)=NIL."
+      ],
+      "negative_witness_claims": [
+        "Different environment binding must not silently alias class with same printed name; errorp true cannot silently return NIL."
+      ],
+      "F1": "SOURCE-INDEX-SHA-PINNED-DONOR-PROVENANCE-UNEXECUTED",
+      "F2": "HOLD_NOT_RUN",
+      "F3": "HOLD_BEHAVIORAL_DEDUP_UNPROVEN",
+      "F4": "NO_COORDINATE",
+      "ratified": false
+    },
+    {
+      "id": "d10.name.00691",
+      "name": "FREE-IDENTIFIER=?",
+      "law": "рівність ідентифікаторів як лексичних посилань на ту саму прив'язку",
+      "source_occurrences": 3,
+      "source_records_sha_pinned": [
+        "knowledge/d10-historical-lisp-all-source-consolidation-20261011.json@962208ecad6b4b4d8845ea7dedaf88c34e93e702:candidates[116]",
+        "knowledge/d10-historical-lisp-branch-candidate-intake-20261011.json@42362a46d7587e375ed19c156a0b67e40b86939a:candidates[13]",
+        "knowledge/d10-historical-lisp-branch-evidence-intake-20261011.json@615307670709d8429d8b74daafe8fe24b36960ea:new_candidates[12]"
+      ],
+      "donor_claims": [
+        "knowledge/d10-r6rs-hashtable-hygiene-audit-v1.json@c6af11760a10a5944d9df286c52eb84e18bd3c96",
+        "knowledge/d10-r6rs-hashtable-hygiene-audit-v1.json@c6af11760a10a5944d9df286c52eb84e18bd3c96:R6RS-16"
+      ],
+      "positive_witness_claims": [
+        "[\"різні контекстні записи з тією самою лексичною прив'язкою еквівалентні\"]",
+        "різні контекстні записи з тією самою лексичною прив'язкою еквівалентні"
+      ],
+      "negative_witness_claims": [
+        "порівняння тільки поверхневого імені"
+      ],
+      "F1": "SOURCE-INDEX-SHA-PINNED-DONOR-PROVENANCE-UNEXECUTED",
+      "F2": "HOLD_NOT_RUN",
+      "F3": "HOLD_BEHAVIORAL_DEDUP_UNPROVEN",
+      "F4": "NO_COORDINATE",
+      "ratified": false
+    },
+    {
+      "id": "d10.name.00706",
+      "name": "FUNCTION-LAMBDA-LIST",
+      "law": "Відновити список параметрів функції, для compiled opaque можуть генеруватися placeholder імена.",
+      "source_occurrences": 5,
+      "source_records_sha_pinned": [
+        "knowledge/d10-historical-candidate-coordinate-queue-v1.json@131369263ac37c27798bb3c95521eb99e52b8f10:candidates[3]",
+        "knowledge/d10-historical-lisp-all-source-consolidation-20261011.json@962208ecad6b4b4d8845ea7dedaf88c34e93e702:candidates[119]",
+        "knowledge/d10-historical-lisp-main-consolidation-20261011.json@8c8253e5dd78cdec25de95009e9200ff08af4cc7:ledger_rows[3]",
+        "knowledge/d10-proposal-ledger.tsv@f10c545598b6aaf90f8f5caf8f49683448ff420f:line148",
+        "knowledge/d10-source-snapshots/d10-proposal-ledger-f10c545598b6a6af.tsv@f10c545598b6aaf90f8f5caf8f49683448ff420f:source-record"
+      ],
+      "donor_claims": [
+        "f5438abf3460fa7caac14a30edf511f907a5be44",
+        "https://reduce-algebra.sourceforge.io/lisp-docs/allman1.pdf",
+        "juv4uk/sens@ffb1e8fefe3eaed1f77ddb890cd744f9ac328f2d:knowledge/d10-psl-interlisp-lispm-unmerged-residual-v1.json:189",
+        "knowledge/d10-historical-candidate-coordinate-queue-v1.json@131369263ac37c27798bb3c95521eb99e52b8f10",
+        "knowledge/d10-psl-interlisp-lispm-unmerged-residual-v1.json",
+        "knowledge/d10-psl-interlisp-lispm-unmerged-residual-v1.json@f5438abf3460fa7caac14a30edf511f907a5be44"
+      ],
+      "positive_witness_claims": [
+        "Зібрати параметри lambda(a,b); для невідкритого compiled arity знайти два позиційні placeholder."
+      ],
+      "negative_witness_claims": [
+        "Проголошувати справжні імена локальних параметрів обов'язково відомими з компільованого коду."
+      ],
+      "F1": "SOURCE-INDEX-SHA-PINNED-DONOR-PROVENANCE-UNEXECUTED",
+      "F2": "HOLD_NOT_RUN",
+      "F3": "HOLD_BEHAVIORAL_DEDUP_UNPROVEN",
+      "F4": "NO_COORDINATE",
+      "ratified": false
+    },
+    {
+      "id": "d10.name.00748",
+      "name": "HASHTABLE-EQUIVALENCE-FUNCTION",
+      "law": "повернути функцію еквівалентності, що визначає семантику ключів",
+      "source_occurrences": 3,
+      "source_records_sha_pinned": [
+        "knowledge/d10-historical-lisp-all-source-consolidation-20261011.json@962208ecad6b4b4d8845ea7dedaf88c34e93e702:candidates[131]",
+        "knowledge/d10-historical-lisp-branch-candidate-intake-20261011.json@42362a46d7587e375ed19c156a0b67e40b86939a:candidates[19]",
+        "knowledge/d10-historical-lisp-branch-evidence-intake-20261011.json@615307670709d8429d8b74daafe8fe24b36960ea:new_candidates[7]"
+      ],
+      "donor_claims": [
+        "knowledge/d10-r6rs-hashtable-hygiene-audit-v1.json@c6af11760a10a5944d9df286c52eb84e18bd3c96",
+        "knowledge/d10-r6rs-hashtable-hygiene-audit-v1.json@c6af11760a10a5944d9df286c52eb84e18bd3c96:R6RS-10"
+      ],
+      "positive_witness_claims": [
+        "[\"eq-словник повертає eq?\"]",
+        "eq-словник повертає eq?"
+      ],
+      "negative_witness_claims": [
+        "повернута функція порівняння має інше відношення"
+      ],
+      "F1": "SOURCE-INDEX-SHA-PINNED-DONOR-PROVENANCE-UNEXECUTED",
+      "F2": "HOLD_NOT_RUN",
+      "F3": "HOLD_BEHAVIORAL_DEDUP_UNPROVEN",
+      "F4": "NO_COORDINATE",
+      "ratified": false
+    },
+    {
+      "id": "d10.name.00749",
+      "name": "HASHTABLE-HASH-FUNCTION",
+      "law": "повернути hash-процедуру словника, але #f для eq?/eqv? конструкторів",
+      "source_occurrences": 3,
+      "source_records_sha_pinned": [
+        "knowledge/d10-historical-lisp-all-source-consolidation-20261011.json@962208ecad6b4b4d8845ea7dedaf88c34e93e702:candidates[132]",
+        "knowledge/d10-historical-lisp-branch-candidate-intake-20261011.json@42362a46d7587e375ed19c156a0b67e40b86939a:candidates[20]",
+        "knowledge/d10-historical-lisp-branch-evidence-intake-20261011.json@615307670709d8429d8b74daafe8fe24b36960ea:new_candidates[6]"
+      ],
+      "donor_claims": [
+        "knowledge/d10-r6rs-hashtable-hygiene-audit-v1.json@c6af11760a10a5944d9df286c52eb84e18bd3c96",
+        "knowledge/d10-r6rs-hashtable-hygiene-audit-v1.json@c6af11760a10a5944d9df286c52eb84e18bd3c96:R6RS-09"
+      ],
+      "positive_witness_claims": [
+        "[\"eq-hashtable має результат #f\"]",
+        "eq-hashtable має результат #f"
+      ],
+      "negative_witness_claims": [
+        "повернута довільна внутрішня функція для eq-hashtable"
+      ],
+      "F1": "SOURCE-INDEX-SHA-PINNED-DONOR-PROVENANCE-UNEXECUTED",
+      "F2": "HOLD_NOT_RUN",
+      "F3": "HOLD_BEHAVIORAL_DEDUP_UNPROVEN",
+      "F4": "NO_COORDINATE",
+      "ratified": false
+    },
+    {
+      "id": "d10.name.00750",
+      "name": "HASHTABLE-KEYS",
+      "law": "повернути вектор усіх ключів, порядок стандартом не задано",
+      "source_occurrences": 3,
+      "source_records_sha_pinned": [
+        "knowledge/d10-historical-lisp-all-source-consolidation-20261011.json@962208ecad6b4b4d8845ea7dedaf88c34e93e702:candidates[133]",
+        "knowledge/d10-historical-lisp-branch-candidate-intake-20261011.json@42362a46d7587e375ed19c156a0b67e40b86939a:candidates[21]",
+        "knowledge/d10-historical-lisp-branch-evidence-intake-20261011.json@615307670709d8429d8b74daafe8fe24b36960ea:new_candidates[5]"
+      ],
+      "donor_claims": [
+        "knowledge/d10-r6rs-hashtable-hygiene-audit-v1.json@c6af11760a10a5944d9df286c52eb84e18bd3c96",
+        "knowledge/d10-r6rs-hashtable-hygiene-audit-v1.json@c6af11760a10a5944d9df286c52eb84e18bd3c96:R6RS-07"
+      ],
+      "positive_witness_claims": [
+        "[\"кількість і множина ключів збігаються зі словником\"]",
+        "кількість і множина ключів збігаються зі словником"
+      ],
+      "negative_witness_claims": [
+        "сортування нав'язується як обов'язкове спостереження"
+      ],
+      "F1": "SOURCE-INDEX-SHA-PINNED-DONOR-PROVENANCE-UNEXECUTED",
+      "F2": "HOLD_NOT_RUN",
+      "F3": "HOLD_BEHAVIORAL_DEDUP_UNPROVEN",
+      "F4": "NO_COORDINATE",
+      "ratified": false
+    },
+    {
+      "id": "d10.name.00752",
+      "name": "HASHTABLE-REF",
+      "law": "пошук ключа з явним значенням за відсутності",
+      "source_occurrences": 3,
+      "source_records_sha_pinned": [
+        "knowledge/d10-historical-lisp-all-source-consolidation-20261011.json@962208ecad6b4b4d8845ea7dedaf88c34e93e702:candidates[135]",
+        "knowledge/d10-historical-lisp-branch-candidate-intake-20261011.json@42362a46d7587e375ed19c156a0b67e40b86939a:candidates[22]",
+        "knowledge/d10-historical-lisp-branch-evidence-intake-20261011.json@615307670709d8429d8b74daafe8fe24b36960ea:new_candidates[3]"
+      ],
+      "donor_claims": [
+        "knowledge/d10-r6rs-hashtable-hygiene-audit-v1.json@c6af11760a10a5944d9df286c52eb84e18bd3c96",
+        "knowledge/d10-r6rs-hashtable-hygiene-audit-v1.json@c6af11760a10a5944d9df286c52eb84e18bd3c96:R6RS-04"
+      ],
+      "positive_witness_claims": [
+        "[\"пошук відсутнього ключа повертає саме переданий default\"]",
+        "пошук відсутнього ключа повертає саме переданий default"
+      ],
+      "negative_witness_claims": [
+        "втрата відмінності між відсутнім та значенням #f"
+      ],
+      "F1": "SOURCE-INDEX-SHA-PINNED-DONOR-PROVENANCE-UNEXECUTED",
+      "F2": "HOLD_NOT_RUN",
+      "F3": "HOLD_BEHAVIORAL_DEDUP_UNPROVEN",
+      "F4": "NO_COORDINATE",
+      "ratified": false
+    },
+    {
+      "id": "d10.name.00763",
+      "name": "IDENTIFIER?",
+      "law": "предикат синтаксичного об'єкта, що представляє ідентифікатор, не просто символ",
+      "source_occurrences": 3,
+      "source_records_sha_pinned": [
+        "knowledge/d10-historical-lisp-all-source-consolidation-20261011.json@962208ecad6b4b4d8845ea7dedaf88c34e93e702:candidates[138]",
+        "knowledge/d10-historical-lisp-branch-candidate-intake-20261011.json@42362a46d7587e375ed19c156a0b67e40b86939a:candidates[24]",
+        "knowledge/d10-historical-lisp-branch-evidence-intake-20261011.json@615307670709d8429d8b74daafe8fe24b36960ea:new_candidates[10]"
+      ],
+      "donor_claims": [
+        "knowledge/d10-r6rs-hashtable-hygiene-audit-v1.json@c6af11760a10a5944d9df286c52eb84e18bd3c96",
+        "knowledge/d10-r6rs-hashtable-hygiene-audit-v1.json@c6af11760a10a5944d9df286c52eb84e18bd3c96:R6RS-14"
+      ],
+      "positive_witness_claims": [
+        "[\"звичайний datum символ не проходить перевірку identifier?\"]",
+        "звичайний datum символ не проходить перевірку identifier?"
+      ],
+      "negative_witness_claims": [
+        "довільний символ вважається контекстним identifier"
+      ],
+      "F1": "SOURCE-INDEX-SHA-PINNED-DONOR-PROVENANCE-UNEXECUTED",
+      "F2": "HOLD_NOT_RUN",
+      "F3": "HOLD_BEHAVIORAL_DEDUP_UNPROVEN",
+      "F4": "NO_COORDINATE",
+      "ratified": false
+    },
+    {
+      "id": "d10.name.00880",
+      "name": "MAKE-EQ-HASHTABLE",
+      "law": "новий змінюваний словник з тотожністю ключів eq?",
+      "source_occurrences": 3,
+      "source_records_sha_pinned": [
+        "knowledge/d10-historical-lisp-all-source-consolidation-20261011.json@962208ecad6b4b4d8845ea7dedaf88c34e93e702:candidates[167]",
+        "knowledge/d10-historical-lisp-branch-candidate-intake-20261011.json@42362a46d7587e375ed19c156a0b67e40b86939a:candidates[27]",
+        "knowledge/d10-historical-lisp-branch-evidence-intake-20261011.json@615307670709d8429d8b74daafe8fe24b36960ea:new_candidates[0]"
+      ],
+      "donor_claims": [
+        "knowledge/d10-r6rs-hashtable-hygiene-audit-v1.json@c6af11760a10a5944d9df286c52eb84e18bd3c96",
+        "knowledge/d10-r6rs-hashtable-hygiene-audit-v1.json@c6af11760a10a5944d9df286c52eb84e18bd3c96:R6RS-01"
+      ],
+      "positive_witness_claims": [
+        "[\"два різні, але структурно рівні об'єкти не обов'язково один ключ\"]",
+        "два різні, але структурно рівні об'єкти не обов'язково один ключ"
+      ],
+      "negative_witness_claims": [
+        "словник тихцем порівнює структурною рівністю"
+      ],
+      "F1": "SOURCE-INDEX-SHA-PINNED-DONOR-PROVENANCE-UNEXECUTED",
+      "F2": "HOLD_NOT_RUN",
+      "F3": "HOLD_BEHAVIORAL_DEDUP_UNPROVEN",
+      "F4": "NO_COORDINATE",
+      "ratified": false
+    },
+    {
+      "id": "d10.name.00881",
+      "name": "MAKE-EQV-HASHTABLE",
+      "law": "новий змінюваний словник з порівнянням eqv?",
+      "source_occurrences": 3,
+      "source_records_sha_pinned": [
+        "knowledge/d10-historical-lisp-all-source-consolidation-20261011.json@962208ecad6b4b4d8845ea7dedaf88c34e93e702:candidates[168]",
+        "knowledge/d10-historical-lisp-branch-candidate-intake-20261011.json@42362a46d7587e375ed19c156a0b67e40b86939a:candidates[28]",
+        "knowledge/d10-historical-lisp-branch-evidence-intake-20261011.json@615307670709d8429d8b74daafe8fe24b36960ea:new_candidates[1]"
+      ],
+      "donor_claims": [
+        "knowledge/d10-r6rs-hashtable-hygiene-audit-v1.json@c6af11760a10a5944d9df286c52eb84e18bd3c96",
+        "knowledge/d10-r6rs-hashtable-hygiene-audit-v1.json@c6af11760a10a5944d9df286c52eb84e18bd3c96:R6RS-02"
+      ],
+      "positive_witness_claims": [
+        "[\"ключі з різною числовою репрезентацією перевіряти за eqv?\"]",
+        "ключі з різною числовою репрезентацією перевіряти за eqv?"
+      ],
+      "negative_witness_claims": [
+        "вибір порівняння ігнорується"
+      ],
+      "F1": "SOURCE-INDEX-SHA-PINNED-DONOR-PROVENANCE-UNEXECUTED",
+      "F2": "HOLD_NOT_RUN",
+      "F3": "HOLD_BEHAVIORAL_DEDUP_UNPROVEN",
+      "F4": "NO_COORDINATE",
+      "ratified": false
+    },
+    {
+      "id": "d10.name.00900",
+      "name": "MAKE-SYNONYM-STREAM",
+      "law": "Stream operations dynamically delegate to the stream currently bound to the symbol; rebinding the dynamic variable changes target without reconstructing alias.",
+      "source_occurrences": 4,
+      "source_records_sha_pinned": [
+        "knowledge/d10-historical-lisp-branch-candidate-intake-20261011.json@42362a46d7587e375ed19c156a0b67e40b86939a:candidates[31]",
+        "knowledge/d10-historical-lisp-branch-evidence-intake-20261011.json@615307670709d8429d8b74daafe8fe24b36960ea:new_candidates[77]",
+        "knowledge/d10-proposal-ledger.tsv@f10c545598b6aaf90f8f5caf8f49683448ff420f:line138",
+        "knowledge/d10-source-snapshots/d10-proposal-ledger-f10c545598b6a6af.tsv@f10c545598b6aaf90f8f5caf8f49683448ff420f:source-record"
+      ],
+      "donor_claims": [
+        "juv4uk/sens@f8dad0b095961c13c023661f65137274c0e6b6c6:knowledge/d10-clhs-streams-census-20261009.json:1089-1110",
+        "knowledge/d10-clhs-streams-census-20261009.json@4c39efaf558dd654272a690e6a01c0ae1c1b262f"
+      ],
+      "positive_witness_claims": [
+        "Bind variable to input stream '1' and read alias -> 1; alias object identity unchanged | Rebind same variable to another input stream '2' and read same alias -> 2",
+        "[\"Bind variable to input stream '1' and read alias -> 1; alias object identity unchanged\",\"Rebind same variable to another input stream '2' and read same alias -> 2\"]"
+      ],
+      "negative_witness_claims": [
+        "Alias continues reading original stream after rebinding, or silently treats symbol as a copied stream."
+      ],
+      "F1": "SOURCE-INDEX-SHA-PINNED-DONOR-PROVENANCE-UNEXECUTED",
+      "F2": "HOLD_NOT_RUN",
+      "F3": "HOLD_BEHAVIORAL_DEDUP_UNPROVEN",
+      "F4": "NO_COORDINATE",
+      "ratified": false
+    },
+    {
+      "id": "d10.name.00904",
+      "name": "MAKE-VARIABLE-TRANSFORMER",
+      "law": "трансформер, що перехоплює також set! позицію ідентифікатора",
+      "source_occurrences": 3,
+      "source_records_sha_pinned": [
+        "knowledge/d10-historical-lisp-all-source-consolidation-20261011.json@962208ecad6b4b4d8845ea7dedaf88c34e93e702:candidates[171]",
+        "knowledge/d10-historical-lisp-branch-candidate-intake-20261011.json@42362a46d7587e375ed19c156a0b67e40b86939a:candidates[32]",
+        "knowledge/d10-historical-lisp-branch-evidence-intake-20261011.json@615307670709d8429d8b74daafe8fe24b36960ea:new_candidates[15]"
+      ],
+      "donor_claims": [
+        "knowledge/d10-r6rs-hashtable-hygiene-audit-v1.json@c6af11760a10a5944d9df286c52eb84e18bd3c96",
+        "knowledge/d10-r6rs-hashtable-hygiene-audit-v1.json@c6af11760a10a5944d9df286c52eb84e18bd3c96:R6RS-19"
+      ],
+      "positive_witness_claims": [
+        "[\"ліва частина set! переписується трансформером, а не відхиляється\"]",
+        "ліва частина set! переписується трансформером, а не відхиляється"
+      ],
+      "negative_witness_claims": [
+        "звичайний transformer помилково отримує право переписати set!"
+      ],
+      "F1": "SOURCE-INDEX-SHA-PINNED-DONOR-PROVENANCE-UNEXECUTED",
+      "F2": "HOLD_NOT_RUN",
+      "F3": "HOLD_BEHAVIORAL_DEDUP_UNPROVEN",
+      "F4": "NO_COORDINATE",
+      "ratified": false
+    },
+    {
+      "id": "d10.name.00920",
+      "name": "MAP-RESOURCE",
+      "law": "Обійти всі створені у ресурсі об'єкти та надати callback object, in-use bit, resource-data.",
+      "source_occurrences": 5,
+      "source_records_sha_pinned": [
+        "knowledge/d10-historical-candidate-coordinate-queue-v1.json@131369263ac37c27798bb3c95521eb99e52b8f10:candidates[17]",
+        "knowledge/d10-historical-lisp-all-source-consolidation-20261011.json@962208ecad6b4b4d8845ea7dedaf88c34e93e702:candidates[177]",
+        "knowledge/d10-historical-lisp-main-consolidation-20261011.json@8c8253e5dd78cdec25de95009e9200ff08af4cc7:ledger_rows[17]",
+        "knowledge/d10-proposal-ledger.tsv@f10c545598b6aaf90f8f5caf8f49683448ff420f:line162",
+        "knowledge/d10-source-snapshots/d10-proposal-ledger-f10c545598b6a6af.tsv@f10c545598b6aaf90f8f5caf8f49683448ff420f:source-record"
+      ],
+      "donor_claims": [
+        "f5438abf3460fa7caac14a30edf511f907a5be44",
+        "https://tumbleweed.nu/r/lm-3/uv/chinual.html",
+        "juv4uk/sens@ffb1e8fefe3eaed1f77ddb890cd744f9ac328f2d:knowledge/d10-psl-interlisp-lispm-unmerged-residual-v1.json:571",
+        "knowledge/d10-historical-candidate-coordinate-queue-v1.json@131369263ac37c27798bb3c95521eb99e52b8f10",
+        "knowledge/d10-psl-interlisp-lispm-unmerged-residual-v1.json",
+        "knowledge/d10-psl-interlisp-lispm-unmerged-residual-v1.json@f5438abf3460fa7caac14a30edf511f907a5be44"
+      ],
+      "positive_witness_claims": [
+        "Побачити як leased, так і free об'єкти; кожен виклик callback містить стан in-use."
+      ],
+      "negative_witness_claims": [
+        "Побачити лише free list або пропустити in-use state."
+      ],
+      "F1": "SOURCE-INDEX-SHA-PINNED-DONOR-PROVENANCE-UNEXECUTED",
+      "F2": "HOLD_NOT_RUN",
+      "F3": "HOLD_BEHAVIORAL_DEDUP_UNPROVEN",
+      "F4": "NO_COORDINATE",
+      "ratified": false
+    },
+    {
+      "id": "d10.name.01038",
+      "name": "NO-APPLICABLE-METHOD",
+      "law": "Invoked on generic call with zero applicable methods; default signals error, overriding method may return alternative result.",
+      "source_occurrences": 3,
+      "source_records_sha_pinned": [
+        "knowledge/d10-historical-candidate-coordinate-queue-v1.json@131369263ac37c27798bb3c95521eb99e52b8f10:candidates[21]",
+        "knowledge/d10-historical-lisp-all-source-consolidation-20261011.json@962208ecad6b4b4d8845ea7dedaf88c34e93e702:candidates[198]",
+        "knowledge/d10-historical-lisp-main-consolidation-20261011.json@8c8253e5dd78cdec25de95009e9200ff08af4cc7:ledger_rows[21]"
+      ],
+      "donor_claims": [
+        "3c6e85d94e78cdd5fe9b9b645095b48335f768e5",
+        "https://www.cs.cmu.edu/Groups/AI/html/hyperspec/HyperSpec/Body/stagenfun_no-_cable-method.html",
+        "knowledge/d10-clos-instance-lifecycle-residual-v1.json",
+        "knowledge/d10-clos-instance-lifecycle-residual-v1.json@3c6e85d94e78cdd5fe9b9b645095b48335f768e5",
+        "knowledge/d10-historical-candidate-coordinate-queue-v1.json@131369263ac37c27798bb3c95521eb99e52b8f10"
+      ],
+      "positive_witness_claims": [
+        "Generic with zero applicable methods routes to this method with original arguments, before keyword-validity checking."
+      ],
+      "negative_witness_claims": [
+        "Fail if arbitrarily selects unrelated method or converts zero candidates to D1:NO without explicit result law."
+      ],
+      "F1": "SOURCE-INDEX-SHA-PINNED-DONOR-PROVENANCE-UNEXECUTED",
+      "F2": "HOLD_NOT_RUN",
+      "F3": "HOLD_BEHAVIORAL_DEDUP_UNPROVEN",
+      "F4": "NO_COORDINATE",
+      "ratified": false
+    },
+    {
+      "id": "d10.name.01039",
+      "name": "NO-NEXT-METHOD",
+      "law": "When CALL-NEXT-METHOD has no next method, no-next-method is invoked with generic, current method and args; default error.",
+      "source_occurrences": 3,
+      "source_records_sha_pinned": [
+        "knowledge/d10-historical-candidate-coordinate-queue-v1.json@131369263ac37c27798bb3c95521eb99e52b8f10:candidates[22]",
+        "knowledge/d10-historical-lisp-all-source-consolidation-20261011.json@962208ecad6b4b4d8845ea7dedaf88c34e93e702:candidates[199]",
+        "knowledge/d10-historical-lisp-main-consolidation-20261011.json@8c8253e5dd78cdec25de95009e9200ff08af4cc7:ledger_rows[22]"
+      ],
+      "donor_claims": [
+        "3c6e85d94e78cdd5fe9b9b645095b48335f768e5",
+        "https://www.cs.cmu.edu/Groups/AI/util/html/hyperspec/HyperSpec/Body/stagenfun_no-next-method.html",
+        "knowledge/d10-clos-instance-lifecycle-residual-v1.json",
+        "knowledge/d10-clos-instance-lifecycle-residual-v1.json@3c6e85d94e78cdd5fe9b9b645095b48335f768e5",
+        "knowledge/d10-historical-candidate-coordinate-queue-v1.json@131369263ac37c27798bb3c95521eb99e52b8f10"
+      ],
+      "positive_witness_claims": [
+        "Last primary method invokes CALL-NEXT-METHOD; no-next-method receives the precise current method."
+      ],
+      "negative_witness_claims": [
+        "Fail if silently returns NIL or restarts from the first method."
+      ],
+      "F1": "SOURCE-INDEX-SHA-PINNED-DONOR-PROVENANCE-UNEXECUTED",
+      "F2": "HOLD_NOT_RUN",
+      "F3": "HOLD_BEHAVIORAL_DEDUP_UNPROVEN",
+      "F4": "NO_COORDINATE",
+      "ratified": false
+    },
+    {
+      "id": "d10.name.01133",
+      "name": "RAISE-CONTINUABLE",
+      "law": "Динамічний обробник отримує condition; якщо повертає значення, обчислення триває та ці значення стають результатом виклику.",
+      "source_occurrences": 2,
+      "source_records_sha_pinned": [
+        "knowledge/d10-historical-lisp-branch-candidate-intake-20261011.json@42362a46d7587e375ed19c156a0b67e40b86939a:candidates[37]",
+        "knowledge/d10-historical-lisp-branch-evidence-intake-20261011.json@615307670709d8429d8b74daafe8fe24b36960ea:new_candidates[21]"
+      ],
+      "donor_claims": [
+        "knowledge/d10-r7rs-primary-manual-slice-v1.json@891728c08c7df93e84c75b74585f9fc1a438a3c2",
+        "knowledge/d10-r7rs-primary-manual-slice-v1.json@891728c08c7df93e84c75b74585f9fc1a438a3c2:R7RS-HIST-006"
+      ],
+      "positive_witness_claims": [
+        "[\"Обробник повертає 42, навколишнє обчислення додає 23 => 65.\"]",
+        "Обробник повертає 42, навколишнє обчислення додає 23 => 65."
+      ],
+      "negative_witness_claims": [
+        "Після нормального повернення обробника операція безпідставно кидає вторинний виняток як для non-continuable raise."
+      ],
+      "F1": "SOURCE-INDEX-SHA-PINNED-DONOR-PROVENANCE-UNEXECUTED",
+      "F2": "HOLD_NOT_RUN",
+      "F3": "HOLD_BEHAVIORAL_DEDUP_UNPROVEN",
+      "F4": "NO_COORDINATE",
+      "ratified": false
+    },
+    {
+      "id": "d10.name.01170",
+      "name": "RESETFORM",
+      "law": "Виконати setter, що повертає старий стан, запустити body і відновити налаштування застосуванням setter до збереженого значення.",
+      "source_occurrences": 5,
+      "source_records_sha_pinned": [
+        "knowledge/d10-historical-candidate-coordinate-queue-v1.json@131369263ac37c27798bb3c95521eb99e52b8f10:candidates[11]",
+        "knowledge/d10-historical-lisp-all-source-consolidation-20261011.json@962208ecad6b4b4d8845ea7dedaf88c34e93e702:candidates[246]",
+        "knowledge/d10-historical-lisp-main-consolidation-20261011.json@8c8253e5dd78cdec25de95009e9200ff08af4cc7:ledger_rows[11]",
+        "knowledge/d10-proposal-ledger.tsv@f10c545598b6aaf90f8f5caf8f49683448ff420f:line156",
+        "knowledge/d10-source-snapshots/d10-proposal-ledger-f10c545598b6a6af.tsv@f10c545598b6aaf90f8f5caf8f49683448ff420f:source-record"
+      ],
+      "donor_claims": [
+        "f5438abf3460fa7caac14a30edf511f907a5be44",
+        "https://softwarepreservation.computerhistory.org/LISP/interlisp/Interlisp-Oct_1978.pdf",
+        "juv4uk/sens@ffb1e8fefe3eaed1f77ddb890cd744f9ac328f2d:knowledge/d10-psl-interlisp-lispm-unmerged-residual-v1.json:407",
+        "knowledge/d10-historical-candidate-coordinate-queue-v1.json@131369263ac37c27798bb3c95521eb99e52b8f10",
+        "knowledge/d10-psl-interlisp-lispm-unmerged-residual-v1.json",
+        "knowledge/d10-psl-interlisp-lispm-unmerged-residual-v1.json@f5438abf3460fa7caac14a30edf511f907a5be44"
+      ],
+      "positive_witness_claims": [
+        "(RESETFORM (RADIX 8) (FOO)) повертає старий radix після FOO."
+      ],
+      "negative_witness_claims": [
+        "Вважати, що setter сам не має потреби повертати старий стан."
+      ],
+      "F1": "SOURCE-INDEX-SHA-PINNED-DONOR-PROVENANCE-UNEXECUTED",
+      "F2": "HOLD_NOT_RUN",
+      "F3": "HOLD_BEHAVIORAL_DEDUP_UNPROVEN",
+      "F4": "NO_COORDINATE",
+      "ratified": false
+    },
+    {
+      "id": "d10.name.01171",
+      "name": "RESETLST",
+      "law": "Рамка для послідовності змін зі стеком відновлення на normal completion/error/CONTROL-D у задокументованому діапазоні.",
+      "source_occurrences": 5,
+      "source_records_sha_pinned": [
+        "knowledge/d10-historical-candidate-coordinate-queue-v1.json@131369263ac37c27798bb3c95521eb99e52b8f10:candidates[7]",
+        "knowledge/d10-historical-lisp-all-source-consolidation-20261011.json@962208ecad6b4b4d8845ea7dedaf88c34e93e702:candidates[247]",
+        "knowledge/d10-historical-lisp-main-consolidation-20261011.json@8c8253e5dd78cdec25de95009e9200ff08af4cc7:ledger_rows[7]",
+        "knowledge/d10-proposal-ledger.tsv@f10c545598b6aaf90f8f5caf8f49683448ff420f:line152",
+        "knowledge/d10-source-snapshots/d10-proposal-ledger-f10c545598b6a6af.tsv@f10c545598b6aaf90f8f5caf8f49683448ff420f:source-record"
+      ],
+      "donor_claims": [
+        "f5438abf3460fa7caac14a30edf511f907a5be44",
+        "https://softwarepreservation.computerhistory.org/LISP/interlisp/Interlisp-Oct_1978.pdf",
+        "juv4uk/sens@ffb1e8fefe3eaed1f77ddb890cd744f9ac328f2d:knowledge/d10-psl-interlisp-lispm-unmerged-residual-v1.json:297",
+        "knowledge/d10-historical-candidate-coordinate-queue-v1.json@131369263ac37c27798bb3c95521eb99e52b8f10",
+        "knowledge/d10-psl-interlisp-lispm-unmerged-residual-v1.json",
+        "knowledge/d10-psl-interlisp-lispm-unmerged-residual-v1.json@f5438abf3460fa7caac14a30edf511f907a5be44"
+      ],
+      "positive_witness_claims": [
+        "Зберегти radix, змінити його, спричинити error або RESET; старий radix має відновитися."
+      ],
+      "negative_witness_claims": [
+        "Оголосити гарантію для всіх можливих інших нелокальних переходів, які посібник прямо виключає."
+      ],
+      "F1": "SOURCE-INDEX-SHA-PINNED-DONOR-PROVENANCE-UNEXECUTED",
+      "F2": "HOLD_NOT_RUN",
+      "F3": "HOLD_BEHAVIORAL_DEDUP_UNPROVEN",
+      "F4": "NO_COORDINATE",
+      "ratified": false
+    },
+    {
+      "id": "d10.name.01172",
+      "name": "RESETSAVE",
+      "law": "Зареєструвати відновлення змінної або старого стану оператора у найближчій RESETLST/RESET рамці.",
+      "source_occurrences": 5,
+      "source_records_sha_pinned": [
+        "knowledge/d10-historical-candidate-coordinate-queue-v1.json@131369263ac37c27798bb3c95521eb99e52b8f10:candidates[8]",
+        "knowledge/d10-historical-lisp-all-source-consolidation-20261011.json@962208ecad6b4b4d8845ea7dedaf88c34e93e702:candidates[248]",
+        "knowledge/d10-historical-lisp-main-consolidation-20261011.json@8c8253e5dd78cdec25de95009e9200ff08af4cc7:ledger_rows[8]",
+        "knowledge/d10-proposal-ledger.tsv@f10c545598b6aaf90f8f5caf8f49683448ff420f:line153",
+        "knowledge/d10-source-snapshots/d10-proposal-ledger-f10c545598b6a6af.tsv@f10c545598b6aaf90f8f5caf8f49683448ff420f:source-record"
+      ],
+      "donor_claims": [
+        "f5438abf3460fa7caac14a30edf511f907a5be44",
+        "https://softwarepreservation.computerhistory.org/LISP/interlisp/Interlisp-Oct_1978.pdf",
+        "juv4uk/sens@ffb1e8fefe3eaed1f77ddb890cd744f9ac328f2d:knowledge/d10-psl-interlisp-lispm-unmerged-residual-v1.json:324",
+        "knowledge/d10-historical-candidate-coordinate-queue-v1.json@131369263ac37c27798bb3c95521eb99e52b8f10",
+        "knowledge/d10-psl-interlisp-lispm-unmerged-residual-v1.json",
+        "knowledge/d10-psl-interlisp-lispm-unmerged-residual-v1.json@f5438abf3460fa7caac14a30edf511f907a5be44"
+      ],
+      "positive_witness_claims": [
+        "RESETSAVE (RADIX 8) зберігає попередній radix; RESETSAVE NIL (LIST 'CLOSEF FILE) викликає cleanup."
+      ],
+      "negative_witness_claims": [
+        "Застосувати cleanup до неправильного попереднього стану або не виконати його на error."
+      ],
+      "F1": "SOURCE-INDEX-SHA-PINNED-DONOR-PROVENANCE-UNEXECUTED",
+      "F2": "HOLD_NOT_RUN",
+      "F3": "HOLD_BEHAVIORAL_DEDUP_UNPROVEN",
+      "F4": "NO_COORDINATE",
+      "ratified": false
+    },
+    {
+      "id": "d10.name.01173",
+      "name": "RESETVAR",
+      "law": "Тимчасово встановити глобальну змінну й відновити попередній стан після області.",
+      "source_occurrences": 5,
+      "source_records_sha_pinned": [
+        "knowledge/d10-historical-candidate-coordinate-queue-v1.json@131369263ac37c27798bb3c95521eb99e52b8f10:candidates[9]",
+        "knowledge/d10-historical-lisp-all-source-consolidation-20261011.json@962208ecad6b4b4d8845ea7dedaf88c34e93e702:candidates[249]",
+        "knowledge/d10-historical-lisp-main-consolidation-20261011.json@8c8253e5dd78cdec25de95009e9200ff08af4cc7:ledger_rows[9]",
+        "knowledge/d10-proposal-ledger.tsv@f10c545598b6aaf90f8f5caf8f49683448ff420f:line154",
+        "knowledge/d10-source-snapshots/d10-proposal-ledger-f10c545598b6a6af.tsv@f10c545598b6aaf90f8f5caf8f49683448ff420f:source-record"
+      ],
+      "donor_claims": [
+        "f5438abf3460fa7caac14a30edf511f907a5be44",
+        "https://softwarepreservation.computerhistory.org/LISP/interlisp/Interlisp-Oct_1978.pdf",
+        "juv4uk/sens@ffb1e8fefe3eaed1f77ddb890cd744f9ac328f2d:knowledge/d10-psl-interlisp-lispm-unmerged-residual-v1.json:351",
+        "knowledge/d10-historical-candidate-coordinate-queue-v1.json@131369263ac37c27798bb3c95521eb99e52b8f10",
+        "knowledge/d10-psl-interlisp-lispm-unmerged-residual-v1.json",
+        "knowledge/d10-psl-interlisp-lispm-unmerged-residual-v1.json@f5438abf3460fa7caac14a30edf511f907a5be44"
+      ],
+      "positive_witness_claims": [
+        "Resetvar x new (f) бачить x=new всередині та x=old після."
+      ],
+      "negative_witness_claims": [
+        "Затерти старий global x назавжди при помилці."
+      ],
+      "F1": "SOURCE-INDEX-SHA-PINNED-DONOR-PROVENANCE-UNEXECUTED",
+      "F2": "HOLD_NOT_RUN",
+      "F3": "HOLD_BEHAVIORAL_DEDUP_UNPROVEN",
+      "F4": "NO_COORDINATE",
+      "ratified": false
+    },
+    {
+      "id": "d10.name.01174",
+      "name": "RESETVARS",
+      "law": "Тимчасово перевизначати набір global vars; семантика залежить від shallow/deep binding.",
+      "source_occurrences": 5,
+      "source_records_sha_pinned": [
+        "knowledge/d10-historical-candidate-coordinate-queue-v1.json@131369263ac37c27798bb3c95521eb99e52b8f10:candidates[10]",
+        "knowledge/d10-historical-lisp-all-source-consolidation-20261011.json@962208ecad6b4b4d8845ea7dedaf88c34e93e702:candidates[250]",
+        "knowledge/d10-historical-lisp-main-consolidation-20261011.json@8c8253e5dd78cdec25de95009e9200ff08af4cc7:ledger_rows[10]",
+        "knowledge/d10-proposal-ledger.tsv@f10c545598b6aaf90f8f5caf8f49683448ff420f:line155",
+        "knowledge/d10-source-snapshots/d10-proposal-ledger-f10c545598b6a6af.tsv@f10c545598b6aaf90f8f5caf8f49683448ff420f:source-record"
+      ],
+      "donor_claims": [
+        "f5438abf3460fa7caac14a30edf511f907a5be44",
+        "https://softwarepreservation.computerhistory.org/LISP/interlisp/Interlisp-Oct_1978.pdf",
+        "juv4uk/sens@ffb1e8fefe3eaed1f77ddb890cd744f9ac328f2d:knowledge/d10-psl-interlisp-lispm-unmerged-residual-v1.json:379",
+        "knowledge/d10-historical-candidate-coordinate-queue-v1.json@131369263ac37c27798bb3c95521eb99e52b8f10",
+        "knowledge/d10-psl-interlisp-lispm-unmerged-residual-v1.json",
+        "knowledge/d10-psl-interlisp-lispm-unmerged-residual-v1.json@f5438abf3460fa7caac14a30edf511f907a5be44"
+      ],
+      "positive_witness_claims": [
+        "Два globals тимчасово змінені в body, і кожен відновлений у правильній області."
+      ],
+      "negative_witness_claims": [
+        "Вважати deep binding завжди тотожним shallow binding для втручання у global storage."
+      ],
+      "F1": "SOURCE-INDEX-SHA-PINNED-DONOR-PROVENANCE-UNEXECUTED",
+      "F2": "HOLD_NOT_RUN",
+      "F3": "HOLD_BEHAVIORAL_DEDUP_UNPROVEN",
+      "F4": "NO_COORDINATE",
+      "ratified": false
+    },
+    {
+      "id": "d10.name.01276",
+      "name": "SLOT-MISSING",
+      "law": "When an accessor targets a slot absent from a standard-class object, dispatch to the operation-aware method with class, object, name and operation; on read, primary returned value is observed.",
+      "source_occurrences": 3,
+      "source_records_sha_pinned": [
+        "knowledge/d10-historical-candidate-coordinate-queue-v1.json@131369263ac37c27798bb3c95521eb99e52b8f10:candidates[25]",
+        "knowledge/d10-historical-lisp-all-source-consolidation-20261011.json@962208ecad6b4b4d8845ea7dedaf88c34e93e702:candidates[286]",
+        "knowledge/d10-historical-lisp-main-consolidation-20261011.json@8c8253e5dd78cdec25de95009e9200ff08af4cc7:ledger_rows[25]"
+      ],
+      "donor_claims": [
+        "d8c6a2fdf60c11e23016be7aad5037bb5c26782d",
+        "https://www.cs.cmu.edu/Groups/AI/util/html/hyperspec/HyperSpec/Body/stagenfun_slot-missing.html",
+        "knowledge/d10-clos-slot-state-historical-review-v1.json",
+        "knowledge/d10-clos-slot-state-historical-review-v1.json@d8c6a2fdf60c11e23016be7aad5037bb5c26782d",
+        "knowledge/d10-historical-candidate-coordinate-queue-v1.json@131369263ac37c27798bb3c95521eb99e52b8f10"
+      ],
+      "positive_witness_claims": [
+        "Custom SLOT-MISSING for SLOT-VALUE(C,z) returns sentinel, while existing-but-unbound a must follow SLOT-UNBOUND instead."
+      ],
+      "negative_witness_claims": [
+        "Do not conflate missing slot with unbound, and do not use hook return as result of SETF/MAKUNBOUND."
+      ],
+      "F1": "SOURCE-INDEX-SHA-PINNED-DONOR-PROVENANCE-UNEXECUTED",
+      "F2": "HOLD_NOT_RUN",
+      "F3": "HOLD_BEHAVIORAL_DEDUP_UNPROVEN",
+      "F4": "NO_COORDINATE",
+      "ratified": false
+    },
+    {
+      "id": "d10.name.01277",
+      "name": "SLOT-UNBOUND",
+      "law": "On read of existing-but-unbound slot in a standard-class instance, dispatch to distinct hook; default signals UNBOUND-SLOT; primary handler value is used if provided.",
+      "source_occurrences": 3,
+      "source_records_sha_pinned": [
+        "knowledge/d10-historical-candidate-coordinate-queue-v1.json@131369263ac37c27798bb3c95521eb99e52b8f10:candidates[26]",
+        "knowledge/d10-historical-lisp-all-source-consolidation-20261011.json@962208ecad6b4b4d8845ea7dedaf88c34e93e702:candidates[287]",
+        "knowledge/d10-historical-lisp-main-consolidation-20261011.json@8c8253e5dd78cdec25de95009e9200ff08af4cc7:ledger_rows[26]"
+      ],
+      "donor_claims": [
+        "d8c6a2fdf60c11e23016be7aad5037bb5c26782d",
+        "https://www.cs.cmu.edu/Groups/AI/util/html/hyperspec/HyperSpec/Body/stagenfun_slot-unbound.html",
+        "knowledge/d10-clos-slot-state-historical-review-v1.json",
+        "knowledge/d10-clos-slot-state-historical-review-v1.json@d8c6a2fdf60c11e23016be7aad5037bb5c26782d",
+        "knowledge/d10-historical-candidate-coordinate-queue-v1.json@131369263ac37c27798bb3c95521eb99e52b8f10"
+      ],
+      "positive_witness_claims": [
+        "C has declared unbound a; SLOT-VALUE(C,a) follows SLOT-UNBOUND; SLOT-VALUE(C,z) follows SLOT-MISSING."
+      ],
+      "negative_witness_claims": [
+        "Never route a nonexisting slot to SLOT-UNBOUND; reading unbound cannot silently return NIL."
+      ],
+      "F1": "SOURCE-INDEX-SHA-PINNED-DONOR-PROVENANCE-UNEXECUTED",
+      "F2": "HOLD_NOT_RUN",
+      "F3": "HOLD_BEHAVIORAL_DEDUP_UNPROVEN",
+      "F4": "NO_COORDINATE",
+      "ratified": false
+    },
+    {
+      "id": "d10.name.01309",
+      "name": "STRING-CI-HASH",
+      "law": "хеш рядка без врахування регістру, сумісний зі string-ci=?",
+      "source_occurrences": 3,
+      "source_records_sha_pinned": [
+        "knowledge/d10-historical-lisp-all-source-consolidation-20261011.json@962208ecad6b4b4d8845ea7dedaf88c34e93e702:candidates[298]",
+        "knowledge/d10-historical-lisp-branch-candidate-intake-20261011.json@42362a46d7587e375ed19c156a0b67e40b86939a:candidates[38]",
+        "knowledge/d10-historical-lisp-branch-evidence-intake-20261011.json@615307670709d8429d8b74daafe8fe24b36960ea:new_candidates[9]"
+      ],
+      "donor_claims": [
+        "knowledge/d10-r6rs-hashtable-hygiene-audit-v1.json@c6af11760a10a5944d9df286c52eb84e18bd3c96",
+        "knowledge/d10-r6rs-hashtable-hygiene-audit-v1.json@c6af11760a10a5944d9df286c52eb84e18bd3c96:R6RS-13"
+      ],
+      "positive_witness_claims": [
+        "[\"ключі, рівні за string-ci=?, мають рівні хеші\"]",
+        "ключі, рівні за string-ci=?, мають рівні хеші"
+      ],
+      "negative_witness_claims": [
+        "рядки, що відрізняються регістром, гарантовано мають різні хеші"
+      ],
+      "F1": "SOURCE-INDEX-SHA-PINNED-DONOR-PROVENANCE-UNEXECUTED",
+      "F2": "HOLD_NOT_RUN",
+      "F3": "HOLD_BEHAVIORAL_DEDUP_UNPROVEN",
+      "F4": "NO_COORDINATE",
+      "ratified": false
+    },
+    {
+      "id": "d10.name.01329",
+      "name": "SYNTAX->DATUM",
+      "law": "зняття синтаксичного контексту із синтаксичного об'єкта до звичайних даних",
+      "source_occurrences": 2,
+      "source_records_sha_pinned": [
+        "knowledge/d10-historical-lisp-all-source-consolidation-20261011.json@962208ecad6b4b4d8845ea7dedaf88c34e93e702:candidates[304]",
+        "knowledge/d10-historical-lisp-branch-evidence-intake-20261011.json@615307670709d8429d8b74daafe8fe24b36960ea:new_candidates[13]"
+      ],
+      "donor_claims": [
+        "knowledge/d10-r6rs-hashtable-hygiene-audit-v1.json@c6af11760a10a5944d9df286c52eb84e18bd3c96",
+        "knowledge/d10-r6rs-hashtable-hygiene-audit-v1.json@c6af11760a10a5944d9df286c52eb84e18bd3c96:R6RS-17"
+      ],
+      "positive_witness_claims": [
+        "[\"після конверсії ідентифікатор стає символом без marks/lexical context\"]"
+      ],
+      "negative_witness_claims": [
+        "контекстні мітки потай залишаються семантично активними"
+      ],
+      "F1": "SOURCE-INDEX-SHA-PINNED-DONOR-PROVENANCE-UNEXECUTED",
+      "F2": "HOLD_NOT_RUN",
+      "F3": "HOLD_BEHAVIORAL_DEDUP_UNPROVEN",
+      "F4": "NO_COORDINATE",
+      "ratified": false
+    },
+    {
+      "id": "d10.name.01422",
+      "name": "UNWIND-ALL",
+      "law": "Уніфікувати normal and caught nonlocal exit для handler(tag,value), при нормальному результаті tag=nil.",
+      "source_occurrences": 5,
+      "source_records_sha_pinned": [
+        "knowledge/d10-historical-candidate-coordinate-queue-v1.json@131369263ac37c27798bb3c95521eb99e52b8f10:candidates[6]",
+        "knowledge/d10-historical-lisp-all-source-consolidation-20261011.json@962208ecad6b4b4d8845ea7dedaf88c34e93e702:candidates[335]",
+        "knowledge/d10-historical-lisp-main-consolidation-20261011.json@8c8253e5dd78cdec25de95009e9200ff08af4cc7:ledger_rows[6]",
+        "knowledge/d10-proposal-ledger.tsv@f10c545598b6aaf90f8f5caf8f49683448ff420f:line151",
+        "knowledge/d10-source-snapshots/d10-proposal-ledger-f10c545598b6a6af.tsv@f10c545598b6aaf90f8f5caf8f49683448ff420f:source-record"
+      ],
+      "donor_claims": [
+        "f5438abf3460fa7caac14a30edf511f907a5be44",
+        "https://reduce-algebra.sourceforge.io/lisp-docs/allman1.pdf",
+        "juv4uk/sens@ffb1e8fefe3eaed1f77ddb890cd744f9ac328f2d:knowledge/d10-psl-interlisp-lispm-unmerged-residual-v1.json:270",
+        "knowledge/d10-historical-candidate-coordinate-queue-v1.json@131369263ac37c27798bb3c95521eb99e52b8f10",
+        "knowledge/d10-psl-interlisp-lispm-unmerged-residual-v1.json",
+        "knowledge/d10-psl-interlisp-lispm-unmerged-residual-v1.json@f5438abf3460fa7caac14a30edf511f907a5be44"
+      ],
+      "positive_witness_claims": [
+        "Нормальне завершення x викликає handler(nil,x); tagged throw викликає handler(tag,val)."
+      ],
+      "negative_witness_claims": [
+        "Не виконати handler на нормальному завершенні або загубити tag при throw."
+      ],
+      "F1": "SOURCE-INDEX-SHA-PINNED-DONOR-PROVENANCE-UNEXECUTED",
+      "F2": "HOLD_NOT_RUN",
+      "F3": "HOLD_BEHAVIORAL_DEDUP_UNPROVEN",
+      "F4": "NO_COORDINATE",
+      "ratified": false
+    },
+    {
+      "id": "d10.name.01423",
+      "name": "UPDATE-INSTANCE-FOR-DIFFERENT-CLASS",
+      "law": "Customization hook triggered during CHANGE-CLASS, receiving an ephemeral copy of the prior instance and the altered current instance; not a standalone call for user code.",
+      "source_occurrences": 3,
+      "source_records_sha_pinned": [
+        "knowledge/d10-historical-candidate-coordinate-queue-v1.json@131369263ac37c27798bb3c95521eb99e52b8f10:candidates[38]",
+        "knowledge/d10-historical-lisp-all-source-consolidation-20261011.json@962208ecad6b4b4d8845ea7dedaf88c34e93e702:candidates[336]",
+        "knowledge/d10-historical-lisp-main-consolidation-20261011.json@8c8253e5dd78cdec25de95009e9200ff08af4cc7:ledger_rows[38]"
+      ],
+      "donor_claims": [
+        "df8ed73011df39f9ec689046ce6936cc00892215",
+        "https://www.cs.cmu.edu/Groups/AI/util/html/hyperspec/HyperSpec/Body/stagenfun_upd_ferent-class.html",
+        "knowledge/d10-historical-candidate-coordinate-queue-v1.json@131369263ac37c27798bb3c95521eb99e52b8f10",
+        "knowledge/d10-historical-clos-interlisp-residual-review-v1.json",
+        "knowledge/d10-historical-coverage-gap-audit-v1.json@bff3156b89c6c0e6e69dd8d3a4e99c16c4c2e35b"
+      ],
+      "positive_witness_claims": [
+        "Transition A->B invokes hook after preserving shared slots; hook can read old-only slot from ephemeral previous object."
+      ],
+      "negative_witness_claims": [
+        "Calling hook as an independent public operation, treating previous as persistent, or assuming its return value is a general semantic result is not allowed."
+      ],
+      "F1": "SOURCE-INDEX-SHA-PINNED-DONOR-PROVENANCE-UNEXECUTED",
+      "F2": "HOLD_NOT_RUN",
+      "F3": "HOLD_BEHAVIORAL_DEDUP_UNPROVEN",
+      "F4": "NO_COORDINATE",
+      "ratified": false
+    },
+    {
+      "id": "d10.name.01424",
+      "name": "UPDATE-INSTANCE-FOR-REDEFINED-CLASS",
+      "law": "Receives transformed instance, added/discarded slot names and pre-redefinition bound values for discarded slots; allows user-defined migration hooks.",
+      "source_occurrences": 3,
+      "source_records_sha_pinned": [
+        "knowledge/d10-historical-candidate-coordinate-queue-v1.json@131369263ac37c27798bb3c95521eb99e52b8f10:candidates[19]",
+        "knowledge/d10-historical-lisp-all-source-consolidation-20261011.json@962208ecad6b4b4d8845ea7dedaf88c34e93e702:candidates[337]",
+        "knowledge/d10-historical-lisp-main-consolidation-20261011.json@8c8253e5dd78cdec25de95009e9200ff08af4cc7:ledger_rows[19]"
+      ],
+      "donor_claims": [
+        "3c6e85d94e78cdd5fe9b9b645095b48335f768e5",
+        "https://www.cs.cmu.edu/Groups/AI/util/html/hyperspec/HyperSpec/Body/stagenfun_upd_efined-class.html",
+        "knowledge/d10-clos-instance-lifecycle-residual-v1.json",
+        "knowledge/d10-clos-instance-lifecycle-residual-v1.json@3c6e85d94e78cdd5fe9b9b645095b48335f768e5",
+        "knowledge/d10-historical-candidate-coordinate-queue-v1.json@131369263ac37c27798bb3c95521eb99e52b8f10"
+      ],
+      "positive_witness_claims": [
+        "Old x,y slots discarded, new rho/theta added: hook can use old property-list x,y to fill new values."
+      ],
+      "negative_witness_claims": [
+        "Fail if discarded values are unavailable to hook or new initforms overwrite explicit migrated values."
+      ],
+      "F1": "SOURCE-INDEX-SHA-PINNED-DONOR-PROVENANCE-UNEXECUTED",
+      "F2": "HOLD_NOT_RUN",
+      "F3": "HOLD_BEHAVIORAL_DEDUP_UNPROVEN",
+      "F4": "NO_COORDINATE",
+      "ratified": false
+    },
+    {
+      "id": "d10.name.01450",
+      "name": "WITH-EXCEPTION-HANDLER",
+      "law": "Встановлює поточний обробник у динамічному середовищі лише на час thunk; вкладені/зовнішні обробники мають коректний порядок.",
+      "source_occurrences": 2,
+      "source_records_sha_pinned": [
+        "knowledge/d10-historical-lisp-branch-candidate-intake-20261011.json@42362a46d7587e375ed19c156a0b67e40b86939a:candidates[41]",
+        "knowledge/d10-historical-lisp-branch-evidence-intake-20261011.json@615307670709d8429d8b74daafe8fe24b36960ea:new_candidates[24]"
+      ],
+      "donor_claims": [
+        "knowledge/d10-r7rs-primary-manual-slice-v1.json@891728c08c7df93e84c75b74585f9fc1a438a3c2",
+        "knowledge/d10-r7rs-primary-manual-slice-v1.json@891728c08c7df93e84c75b74585f9fc1a438a3c2:R7RS-HIST-009"
+      ],
+      "positive_witness_claims": [
+        "[\"Внутрішній handler отримує condition усередині свого thunk, після виходу діє зовнішній.\"]",
+        "Внутрішній handler отримує condition усередині свого thunk, після виходу діє зовнішній."
+      ],
+      "negative_witness_claims": [
+        "Leak handler за межі динамічної області або статичний lexical lookup замість динамічного."
+      ],
+      "F1": "SOURCE-INDEX-SHA-PINNED-DONOR-PROVENANCE-UNEXECUTED",
+      "F2": "HOLD_NOT_RUN",
+      "F3": "HOLD_BEHAVIORAL_DEDUP_UNPROVEN",
+      "F4": "NO_COORDINATE",
+      "ratified": false
+    },
+    {
+      "id": "d10.name.01484",
+      "name": "WRAPPED?",
+      "law": "Спостерігати факт наявності принаймні однієї обгортки на іменованій функції.",
+      "source_occurrences": 5,
+      "source_records_sha_pinned": [
+        "knowledge/d10-historical-candidate-coordinate-queue-v1.json@131369263ac37c27798bb3c95521eb99e52b8f10:candidates[0]",
+        "knowledge/d10-historical-lisp-all-source-consolidation-20261011.json@962208ecad6b4b4d8845ea7dedaf88c34e93e702:candidates[348]",
+        "knowledge/d10-historical-lisp-main-consolidation-20261011.json@8c8253e5dd78cdec25de95009e9200ff08af4cc7:ledger_rows[0]",
+        "knowledge/d10-proposal-ledger.tsv@f10c545598b6aaf90f8f5caf8f49683448ff420f:line145",
+        "knowledge/d10-source-snapshots/d10-proposal-ledger-f10c545598b6a6af.tsv@f10c545598b6aaf90f8f5caf8f49683448ff420f:source-record"
+      ],
+      "donor_claims": [
+        "f5438abf3460fa7caac14a30edf511f907a5be44",
+        "https://reduce-algebra.sourceforge.io/lisp-docs/allman1.pdf",
+        "juv4uk/sens@ffb1e8fefe3eaed1f77ddb890cd744f9ac328f2d:knowledge/d10-psl-interlisp-lispm-unmerged-residual-v1.json:108",
+        "knowledge/d10-historical-candidate-coordinate-queue-v1.json@131369263ac37c27798bb3c95521eb99e52b8f10",
+        "knowledge/d10-psl-interlisp-lispm-unmerged-residual-v1.json",
+        "knowledge/d10-psl-interlisp-lispm-unmerged-residual-v1.json@f5438abf3460fa7caac14a30edf511f907a5be44"
+      ],
+      "positive_witness_claims": [
+        "Без обгорток повернути NO, з однією YES."
+      ],
+      "negative_witness_claims": [
+        "Результат залежить від зміни базового тіла замість стану обгорток."
+      ],
+      "F1": "SOURCE-INDEX-SHA-PINNED-DONOR-PROVENANCE-UNEXECUTED",
+      "F2": "HOLD_NOT_RUN",
+      "F3": "HOLD_BEHAVIORAL_DEDUP_UNPROVEN",
+      "F4": "NO_COORDINATE",
+      "ratified": false
+    },
+    {
+      "id": "d10.name.01485",
+      "name": "WRAPPER-OF-TYPE?",
+      "law": "Спостерігати наявність обгортки конкретного типу, а не будь-якої.",
+      "source_occurrences": 5,
+      "source_records_sha_pinned": [
+        "knowledge/d10-historical-candidate-coordinate-queue-v1.json@131369263ac37c27798bb3c95521eb99e52b8f10:candidates[1]",
+        "knowledge/d10-historical-lisp-all-source-consolidation-20261011.json@962208ecad6b4b4d8845ea7dedaf88c34e93e702:candidates[349]",
+        "knowledge/d10-historical-lisp-main-consolidation-20261011.json@8c8253e5dd78cdec25de95009e9200ff08af4cc7:ledger_rows[1]",
+        "knowledge/d10-proposal-ledger.tsv@f10c545598b6aaf90f8f5caf8f49683448ff420f:line146",
+        "knowledge/d10-source-snapshots/d10-proposal-ledger-f10c545598b6a6af.tsv@f10c545598b6aaf90f8f5caf8f49683448ff420f:source-record"
+      ],
+      "donor_claims": [
+        "f5438abf3460fa7caac14a30edf511f907a5be44",
+        "https://reduce-algebra.sourceforge.io/lisp-docs/allman1.pdf",
+        "juv4uk/sens@ffb1e8fefe3eaed1f77ddb890cd744f9ac328f2d:knowledge/d10-psl-interlisp-lispm-unmerged-residual-v1.json:135",
+        "knowledge/d10-historical-candidate-coordinate-queue-v1.json@131369263ac37c27798bb3c95521eb99e52b8f10",
+        "knowledge/d10-psl-interlisp-lispm-unmerged-residual-v1.json",
+        "knowledge/d10-psl-interlisp-lispm-unmerged-residual-v1.json@f5438abf3460fa7caac14a30edf511f907a5be44"
+      ],
+      "positive_witness_claims": [
+        "Після додавання only trace: query trace позитивний, advice негативний."
+      ],
+      "negative_witness_claims": [
+        "Query непов'язаного типу повертає позитивний результат."
+      ],
+      "F1": "SOURCE-INDEX-SHA-PINNED-DONOR-PROVENANCE-UNEXECUTED",
+      "F2": "HOLD_NOT_RUN",
+      "F3": "HOLD_BEHAVIORAL_DEDUP_UNPROVEN",
+      "F4": "NO_COORDINATE",
+      "ratified": false
+    },
+    {
+      "id": "d10.name.01486",
+      "name": "WRAPPER-TYPES",
+      "law": "Отримати типи чинних обгорток функції у реальному порядку вкладення.",
+      "source_occurrences": 5,
+      "source_records_sha_pinned": [
+        "knowledge/d10-historical-candidate-coordinate-queue-v1.json@131369263ac37c27798bb3c95521eb99e52b8f10:candidates[2]",
+        "knowledge/d10-historical-lisp-all-source-consolidation-20261011.json@962208ecad6b4b4d8845ea7dedaf88c34e93e702:candidates[350]",
+        "knowledge/d10-historical-lisp-main-consolidation-20261011.json@8c8253e5dd78cdec25de95009e9200ff08af4cc7:ledger_rows[2]",
+        "knowledge/d10-proposal-ledger.tsv@f10c545598b6aaf90f8f5caf8f49683448ff420f:line147",
+        "knowledge/d10-source-snapshots/d10-proposal-ledger-f10c545598b6a6af.tsv@f10c545598b6aaf90f8f5caf8f49683448ff420f:source-record"
+      ],
+      "donor_claims": [
+        "f5438abf3460fa7caac14a30edf511f907a5be44",
+        "https://reduce-algebra.sourceforge.io/lisp-docs/allman1.pdf",
+        "juv4uk/sens@ffb1e8fefe3eaed1f77ddb890cd744f9ac328f2d:knowledge/d10-psl-interlisp-lispm-unmerged-residual-v1.json:162",
+        "knowledge/d10-historical-candidate-coordinate-queue-v1.json@131369263ac37c27798bb3c95521eb99e52b8f10",
+        "knowledge/d10-psl-interlisp-lispm-unmerged-residual-v1.json",
+        "knowledge/d10-psl-interlisp-lispm-unmerged-residual-v1.json@f5438abf3460fa7caac14a30edf511f907a5be44"
+      ],
+      "positive_witness_claims": [
+        "Два типи на f відображаються у списку типів; після видалення одного список коротший."
+      ],
+      "negative_witness_claims": [
+        "Плутати порядок реальних шарів із глобальною майбутньою wrapper-standard-order."
+      ],
+      "F1": "SOURCE-INDEX-SHA-PINNED-DONOR-PROVENANCE-UNEXECUTED",
+      "F2": "HOLD_NOT_RUN",
+      "F3": "HOLD_BEHAVIORAL_DEDUP_UNPROVEN",
+      "F4": "NO_COORDINATE",
+      "ratified": false
+    }
+  ]
+}

@@ -12,6 +12,9 @@ on:
       - 'knowledge/d10-v7-semantic-inventory.json'
       - 'knowledge/d10-v8-semantic-inventory.json'
       - 'knowledge/d10-v9-semantic-inventory.json'
+      - 'knowledge/d10-v10-semantic-inventory.json'
+      - 'knowledge/d10-p0-research-intake-v10-20261011.json'
+      - 'knowledge/d10-source-snapshots/d10-v9-unified-catalog-1809.tsv'
       - 'knowledge/d10-source-reviewed-v9-batch-20261011.json'
       - 'knowledge/d10-source-snapshots/d10-v9-f1-rejected-992fe91211b57965.tsv'
       - 'knowledge/d10-mop-database-v8-selection-20261011.json'
@@ -34,6 +37,7 @@ on:
       - 'scripts/check_d10_v7_historical_lisp_streams.py'
       - 'scripts/check_d10_v8_mop_database.py'
       - 'scripts/check_d10_v9_source_reviewed_batch.py'
+      - 'scripts/check_d10_v10_p0_intake.py'
       - 'scripts/check_d10_candidate_database.py'
       - 'scripts/check_d10_candidate_coordinate_queue.py'
       - 'scripts/check_d10_historical_candidate_queue.py'
@@ -95,6 +99,10 @@ jobs:
         run: |
           python3 scripts/check_d10_v9_source_reviewed_batch.py --self-test
           python3 -O scripts/check_d10_v9_source_reviewed_batch.py --self-test
+      - name: Verify D10 v10 +40 preliminary research laws without forged F2 F3 or coordinates
+        run: |
+          python3 scripts/check_d10_v10_p0_intake.py --self-test
+          python3 -O scripts/check_d10_v10_p0_intake.py --self-test
       - name: Порахувати реальний запас D10
         run: |
           python3 scripts/check_d10_completion_readiness.py >"$RUNNER_TEMP/d10-readiness.json"

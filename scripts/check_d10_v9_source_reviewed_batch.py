@@ -102,13 +102,14 @@ def check(root=ROOT):
     root = root.resolve()
     pointer = json.loads((root / "knowledge/d10-current-inventory.json").read_text(encoding="utf-8"))
     live = pointer["canonical_current"]
+    v9_fixed = pointer.get("historical_v9_research_inventory", live)
     archive = pointer["historical_v8_research_inventory"]
     info = pointer["current_v9_source_reviewed_batch"]
     need(archive["path"] == "knowledge/d10-v8-semantic-inventory.json"
          and info["previous_blob"] == archive["git_blob"], "archived v8 pointer")
-    need(live["path"] == "knowledge/d10-v9-semantic-inventory.json", "canonical v9 pointer")
+    need(v9_fixed["path"] == "knowledge/d10-v9-semantic-inventory.json", "frozen v9 path")
     raw8 = pinned(root, archive["path"], archive["git_blob"])
-    raw9 = pinned(root, live["path"], live["git_blob"])
+    raw9 = pinned(root, v9_fixed["path"], v9_fixed["git_blob"])
     manifest_raw = pinned(root, info["manifest"]["path"], info["manifest"]["git_blob"])
     manifest = json.loads(manifest_raw)
     require_source = manifest["source_filter"]
@@ -116,8 +117,17 @@ def check(root=ROOT):
     foundation = json.loads(pinned(root, manifest["source_foundation"]["path"],
                                    manifest["source_foundation"]["git_blob"]))
     result = verify_rows(json.loads(raw8), json.loads(raw9), manifest, source, foundation)
-    need((live["selected"], live["placed"], live["unplaced"], live["ratified"])
-         == (759, 719, 40, 0), "pointer accounting")
+    need((v9_fixed["selected"], v9_fixed["placed"], v9_fixed["unplaced"], v9_fixed["ratified"])
+         == (759, 719, 40, 0), "frozen v9 pointer accounting")
+    raw_live = pinned(root, live["path"], live["git_blob"])
+    current = json.loads(raw_live)
+    need(len(current["rows"]) >= 759 and current["rows"][:759] == json.loads(raw9)["rows"],
+         "current inventory rewrote frozen v9")
+    coords = [r["coordinate"] for r in current["rows"] if r.get("coordinate") is not None]
+    ratified = sum(r.get("ratified_resident") is True for r in current["rows"])
+    need((live["selected"], live["placed"], live["unplaced"], live["ratified"]) ==
+         (len(current["rows"]), len(coords), len(current["rows"]) - len(coords), ratified),
+         "live v10 pointer accounting")
     return result
 
 

@@ -3,7 +3,7 @@
   "date": "2026-10-11",
   "authority": "RESEARCH_WORKLIST_NO_CORE_ADMISSION",
   "input": {
-    "path": "knowledge/d10-filter/all-candidates.tsv",
+    "path": "knowledge/d10-source-snapshots/d10-v9-unified-catalog-1809.tsv",
     "git_blob": "1660a19ff9482f932fb9a40fa78ad1fa50134c31"
   },
   "preserved_archive_git_blob": "101a8e59146f95ec35ed60e2281da32476037984",
