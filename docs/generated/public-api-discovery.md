@@ -658,6 +658,7 @@
 | `lib/quantity.lisp` | function | `*science-source-schema*` | unreviewed |
 | `lib/quantity.lisp` | function | `*scientific-constant-schema*` | unreviewed |
 | `lib/quantity.lisp` | function | `science-proper-list?` | unreviewed |
+| `lib/quantity.lisp` | function | `science-list-length-equals?` | unreviewed |
 | `lib/quantity.lisp` | function | `science-sixth` | unreviewed |
 | `lib/quantity.lisp` | function | `science-seventh` | unreviewed |
 | `lib/quantity.lisp` | function | `make-dimension` | unreviewed |
@@ -684,7 +685,6 @@
 | `lib/quantity.lisp` | function | `scientific-constant-status-valid?` | unreviewed |
 | `lib/quantity.lisp` | function | `scientific-constant-kind-valid?` | unreviewed |
 | `lib/quantity.lisp` | function | `make-scientific-constant` | unreviewed |
-| `lib/quantity.lisp` | function | `science-list-length-equals?` | unreviewed |
 | `lib/quantity.lisp` | function | `scientific-constant?` | unreviewed |
 | `lib/quantity.lisp` | function | `scientific-constant-name` | unreviewed |
 | `lib/quantity.lisp` | function | `scientific-constant-quantity` | unreviewed |
