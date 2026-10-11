@@ -58,6 +58,10 @@ def load_json(path: Path, label: str) -> dict[str, Any]:
 def make_report(args: argparse.Namespace) -> dict[str, Any]:
     seed = readable_file(args.seed, "seed")
     c1 = readable_file(args.c1_executable, "C1 executable")
+    c2 = readable_file(args.c2_executable, "C2 executable") if args.c2_executable else None
+    require(seed.resolve() != c1.resolve(), "seed and C1 paths must identify different artifacts")
+    if c2 is not None:
+        require(seed.resolve() != c2.resolve(), "seed and C2 paths must identify different artifacts")
     lineage_path = readable_file(args.lineage_report, "lineage report")
     lineage = load_json(lineage_path, "lineage report")
 
@@ -94,6 +98,17 @@ def make_report(args: argparse.Namespace) -> dict[str, Any]:
     require(fresh.get("c0_produced_c1") is True and fresh.get("c1_produced_c2") is True,
             "lineage does not prove both bootstrap generation steps")
 
+    equivalence = lineage.get("equivalence")
+    require(isinstance(equivalence, dict), "lineage.equivalence must be an object")
+    require(equivalence.get("selected_method") == "byte-identical-artifact",
+            "lineage did not pass the strongest byte-identical-artifact criterion")
+    attempts = equivalence.get("attempts")
+    require(isinstance(attempts, list) and len(attempts) > 0,
+            "lineage equivalence attempts are missing")
+    require(attempts[0].get("method") == "byte-identical-artifact"
+            and attempts[0].get("status") == "pass",
+            "lineage first/strongest equivalence attempt is not PASS")
+
     evidence = lineage.get("evidence")
     require(isinstance(evidence, dict), "lineage.evidence must be an object")
     c1_sha = sha256_file(c1)
@@ -104,6 +119,13 @@ def make_report(args: argparse.Namespace) -> dict[str, Any]:
             "lineage does not record byte-identical C1/C2 executable bytes")
     require(evidence.get("c1_executable_size") == c1_size,
             "measured C1 executable size disagrees with the lineage evidence")
+    c2_sha = sha256_file(c2) if c2 is not None else None
+    c2_size = c2.stat().st_size if c2 is not None else None
+    if c2 is not None:
+        require(c2_sha == c1_sha, "measured C2 executable SHA-256 differs from C1")
+        require(c2_size == c1_size, "measured C2 executable size differs from C1")
+        require(evidence.get("c2_executable_sha256") == c2_sha,
+                "measured C2 executable SHA-256 disagrees with the lineage evidence")
     require(HEX64.fullmatch(c1_sha) is not None, "computed C1 SHA-256 is malformed")
     require(args.seed_role.strip(), "--seed-role must describe the exact measured seed artifact")
     require(args.toolchain.strip(), "--toolchain must record the toolchain used")
@@ -125,7 +147,7 @@ def make_report(args: argparse.Namespace) -> dict[str, Any]:
             "abi_profile": args.abi_profile,
             "build_command": args.build_command,
         },
-        "trusted_seed": {
+        "seed_artifact": {
             "role_declared_by_operator": args.seed_role,
             "file_name": seed.name,
             "file_bytes": seed.stat().st_size,
@@ -143,7 +165,14 @@ def make_report(args: argparse.Namespace) -> dict[str, Any]:
             "c2_executable_sha256": evidence.get("c2_executable_sha256"),
             "byte_identical_executables": True,
             "fresh_bootstrap_flags_validated": True,
+            "c2_executable_remeasured": c2 is not None,
         },
+        "c2_executable": ({
+            "file_name": c2.name,
+            "file_bytes": c2_size,
+            "sha256": c2_sha,
+            "matches_pinned_lineage": True,
+        } if c2 is not None else None),
         "not_measured": [
             "ELF/PE section sizes",
             "loadable-segment bytes",
@@ -155,6 +184,7 @@ def make_report(args: argparse.Namespace) -> dict[str, Any]:
             "File size is not a semantic-size measure.",
             "Seed identity is operator-declared and must be reviewed separately.",
             "This tool validates supplied lineage evidence; it does not rerun C0/C1/C2.",
+            "Without --c2-executable, C2 file bytes are not independently remeasured.",
         ],
     }
 
@@ -164,10 +194,12 @@ def self_test() -> None:
         root = Path(directory)
         seed = root / "seed.bin"
         c1 = root / "c1.bin"
+        c2 = root / "c2.bin"
         lineage_path = root / "lineage.json"
         seed.write_bytes(b"seed-123")
         c1_bytes = b"c1-executable-fixture"
         c1.write_bytes(c1_bytes)
+        c2.write_bytes(c1_bytes)
         c1_sha = hashlib.sha256(c1_bytes).hexdigest()
         source_revision = "a" * 40
         report = {
@@ -177,6 +209,10 @@ def self_test() -> None:
             "generations": {
                 "c1": {"produced": True, "executable": True},
                 "c2": {"produced": True, "executable": True},
+            },
+            "equivalence": {
+                "selected_method": "byte-identical-artifact",
+                "attempts": [{"method": "byte-identical-artifact", "status": "pass"}],
             },
             "fresh_bootstrap": {
                 "preexisting_c1_read": False,
@@ -192,15 +228,17 @@ def self_test() -> None:
         }
         lineage_path.write_text(json.dumps(report), encoding="utf-8")
         args = argparse.Namespace(
-            seed=str(seed), c1_executable=str(c1), lineage_report=str(lineage_path),
+            seed=str(seed), c1_executable=str(c1), c2_executable=str(c2), lineage_report=str(lineage_path),
             source_revision=source_revision, seed_role="test fixture only",
             toolchain="self-test", target="test-target", abi_profile="test-abi",
             build_command="not a real build; fixture only",
         )
         measured = make_report(args)
-        assert measured["trusted_seed"]["file_bytes"] == len(b"seed-123")
+        assert measured["seed_artifact"]["file_bytes"] == len(b"seed-123")
         assert measured["c1_executable"]["file_bytes"] == len(c1_bytes)
         assert measured["c1_c2_lineage"]["byte_identical_executables"] is True
+        assert measured["c1_c2_lineage"]["c2_executable_remeasured"] is True
+        assert measured["c2_executable"]["file_bytes"] == len(c1_bytes)
 
         report["evidence"]["c1_executable_size"] = len(c1_bytes) + 1
         lineage_path.write_text(json.dumps(report), encoding="utf-8")
@@ -221,7 +259,17 @@ def self_test() -> None:
         else:
             raise AssertionError("negative control accepted a pre-existing C1 read")
 
-    print("NANO-SENS-SIZE SELF-TEST: PASS (3 positive assertions, 2 negative controls)")
+        report["fresh_bootstrap"]["preexisting_c1_read"] = False
+        lineage_path.write_text(json.dumps(report), encoding="utf-8")
+        c2.write_bytes(b"not-the-same-C2")
+        try:
+            make_report(args)
+        except MeasurementError as error:
+            assert "C2 executable SHA-256 differs" in str(error)
+        else:
+            raise AssertionError("negative control accepted non-identical C2 bytes")
+
+    print("NANO-SENS-SIZE SELF-TEST: PASS (5 positive assertions, 3 negative controls)")
 
 
 def main() -> int:
@@ -229,6 +277,7 @@ def main() -> int:
     parser.add_argument("--seed", help="exact trusted bootstrap seed artifact to measure")
     parser.add_argument("--seed-role", help="explain exactly what the seed file contains")
     parser.add_argument("--c1-executable", help="C1 executable file from the same pinned lineage")
+    parser.add_argument("--c2-executable", help="optional C2 executable to independently compare with C1")
     parser.add_argument("--lineage-report", help="validated compiler-selfhost-lineage-report/1 JSON")
     parser.add_argument("--source-revision", help="40-character SENS source SHA pinned in the lineage")
     parser.add_argument("--toolchain", help="full toolchain description/version")
