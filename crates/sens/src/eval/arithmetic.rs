@@ -791,11 +791,14 @@ mod qualified_numeric_domain_value_tests {
         }
         session.environment.define("a", make(1));
         session.environment.define("b", make(3));
-        for expr in ["(- a b)", "(/ a b)"] {
-            let err = crate::eval_program(expr, &mut session)
-                .expect_err("NEG/RATIO composition not yet an executable Value");
-            assert_eq!(err.kind, ErrorKind::Type, "{expr}");
-        }
+        let minus = crate::eval_program("(- a b)", &mut session).unwrap().value;
+        assert_eq!(minus.to_string(), "-2");
+        let fraction = crate::eval_program("(/ a b)", &mut session).unwrap().value;
+        assert_eq!(fraction.to_string(), "1/3");
+        session.environment.define("negative", minus);
+        session.environment.define("fraction", fraction);
+        assert_eq!(crate::eval_program("(+ negative b)", &mut session).unwrap().value, make(1));
+        assert_eq!(crate::eval_program("(* fraction b)", &mut session).unwrap().value, make(1));
         session.environment.define("b", make(0));
         let err = crate::eval_program("(/ a b)", &mut session)
             .expect_err("divide by zero must fail");
