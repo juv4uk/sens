@@ -1,6 +1,6 @@
 # Nano-SENS seed-v0 — виміряний baseline (2026-10-12)
 
-Статус: **PASS — два незалежні чисті прогони; звіти байт-ідентичні.** Це перший виміряний operational seed-v0, не мінімальний і не SENS-native seed.
+Статус: **PASS для runner-component baseline; BLOCKED для повної метрики seed-input closure.** Два незалежні чисті прогони дали однаковий звіт. Пізніший аудит виявив, що runner під час виконання запускає `cargo run -p xtask -- compiler-export` у pinned SENS checkout; отже, вимір 34,580,696 Б — розмір компонента, а не повного набору байтів, без яких ланцюг не стартує. Повний seed-total не публікувати, доки closure не перелічено й не виміряно.
 
 ## Первинні докази
 
@@ -83,3 +83,40 @@ K2 must publish two separate series:
 - **independence-index**: publish the formula and explicit inventory of which required executable components are authored in SENS versus Rust/host tools. It must not be an arbitrary scalar: report the numerator/denominator or component ledger, with each component pinned and each classification supported by evidence.
 
 A replacement only counts if the complete positive corpus, fail-closed negative corpus, lineage, and two clean runs all pass. If trusted-seed bytes fall while the independence measure does not improve (or vice versa), record that tradeoff rather than declaring an overall win. K3 and K4 remain behind their own gates; this K1 result is not permission to combine campaigns.
+
+
+## Виправлення межі seed-v0 — аудит runtime input closure (2026-10-12)
+
+Перевірка коду після K1 виявила, що `src/sens_c1_artifact.rs::pinned_compiler_export()` під час тесту запускає окремий процес:
+
+```text
+cargo run --manifest-path external/sens/Cargo.toml -p xtask -- compiler-export
+```
+
+Отже, `seed-v0-c0-runner.bin` (34,580,696 Б у первинному прогоні) — виміряний ELF-компонент, але не єдиний runtime-вхід. Ланцюгу також потрібні pinned SENS checkout/ Cargo workspace inputs для побудови `xtask` і SENS runtime. Це не toolchain/linker/ОС: кодові файли й compiler nucleus не можна непомітно переносити в «external dependencies» і виключати з seed-total.
+
+Відомі точні pinned вузли ланцюга на SENS SHA `d0787a40fcea36501747732aa61b6de19fe29c70`:
+
+| Файл | Git blob SHA | Bytes |
+|---|---|---:|
+| `Cargo.toml` | `880cd66b98fd2fb9ea34fe428526f09a073fb8c3` | 1,399 |
+| `Cargo.lock` | `293e933d0fdb78954386243eae431c2826b62a79` | 20,813 |
+| `.cargo/config.toml` | `ae9cf46bf18b89c74c88462c29713601c7972f01` | 136 |
+| `crates/xtask/Cargo.toml` | `eed4c217f9d61b4db486b06df0fe80c163961a25` | 345 |
+| `crates/xtask/src/main.rs` | `7b05ea47e12d35e702bd33b1969b1767ce0ddab8` | 9,133 |
+| `crates/xtask/src/compiler_export.rs` | `8d8afb359f9f7adb35c4c76f662189226b5a332a` | 10,553 |
+| `crates/sens/Cargo.toml` | `50b4c7a37ca3aa82993bea6b258b5de3b488820c` | 674 |
+| `crates/sens/src/lib.rs` | `386158468ec44c20433ddee8432c1c81f9907ef9` | 27,192 |
+| `crates/sens/src/compiler_language.rs` | `b15cee61eb8f0c40761a0d467c3818eeea89ca5f` | 59,607 |
+| `lib/compiler-nucleus.lisp` | `c81ff7341a3a18c7cb6ff8e77038318bb935b232` | pinned input; exact bytes to include in closure sum |
+| `contracts/compiler-nucleus-identity-corpus-v1.tsv` | `c57b0df98f467ddcad067158dad1c97a349ad1bf` | 426 |
+
+Це **частковий список відомих вузлів**, не остаточний мінімальний closure: Cargo workspace resolution і всі компільовані модулі `crates/sens` / `crates/xtask`, усі `include_str!` файли та інші path inputs ще треба інвентаризувати й дедуплікувати. Тому `whole_chain_seed_closure_status = BLOCKED_UNENUMERATED`; одне число для повного seed наразі не публікується. Компонентний вимір зберігається як історично pinned baseline й не стирається.
+
+### K2 — перший кандидат після closure-аудиту
+
+Поточний вузький target: **Rust transport/exporter** `crates/xtask/src/compiler_export.rs`, який читає D3/D4 identity-only corpus, викликає `sens::compiler_semantic_input_from_sens` і сам форматує compiler-semantic-request. Сам role-law вже виконується з `lib/compiler-nucleus.lisp` через `crates/sens/src/compiler_language.rs`; його не переносити до другої Rust-таблиці й не дублювати значення в Lisp.
+
+K2 candidate — перенести формування запитів/обхід дев'яти fixture-рядків до SENS-owned програми та залишити в хості тільки представницькі механізми, pinned provenance й execution boundary. Спочатку довести побайтний паритет зі старим exporter і негативне fail-closed поводження. Якщо для запуску нової програми все одно потрібен окремий Cargo-built `xtask`, trusted-seed reduction не зараховується.
+
+**Обов'язкова передумова перед K2:** замкнути мінімальний file closure і baseline bundle-total. Далі кожну заміну вимірювати як ціле: trusted-seed bytes (у межах повного closure) та independence-index окремо; індекс спершу визначити як прозорий ledger компонентів із формулою, а не довільний скаляр. Повний CML library corpus, fail-closed негативні випадки, lineage та два чисті byte-identical runs залишаються обов'язковими.
