@@ -103,8 +103,8 @@ impl DomainIdentity {
             {
                 Some(CoreDomainIdentity::D6(value))
             }
-            Self::D8(value) if value.word().packed_bits() == 0b11110100 => {
-                // D8 WRITE-TO-STRING has an explicit primitive mechanism.
+            Self::D8(value) if matches!(value.word().packed_bits(), 0b11101010 | 0b11110100) => {
+                // Only D8 READ and WRITE-TO-STRING have explicit mechanisms.
                 // No other ratified D8 coordinate is made callable here.
                 Some(CoreDomainIdentity::D8(value))
             }
