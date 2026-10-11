@@ -46,6 +46,8 @@ jobs:
           cargo test --locked -p sens --test content_store
           cargo test --locked -p sens --test content_store_authority
           cargo check --locked -p sens-cli --bins
+      - name: Forward and knowledge D3 candidates differential oracle
+        run: cargo test --locked -p sens --test reasoning_forward_knowledge_d3_migration
       - name: D3 obsolete COND/ATOM/EQ scanner regression tests
         run: python3 -m unittest discover -s tests -p 'test_d3_legacy_logic_guard.py' -v
       - name: Migrated time-source exact D3 runtime witnesses
