@@ -62,7 +62,8 @@ def verify(v9,v10,manifest,source,foundation):
                 if col=="source_records_sha_pinned":
                     fail(values==r["source_records_sha_pinned"] and
                          len(values)==int(old["source_record_count"]),"source losses")
-                else: fail(values==r[target],"row evidence drift "+col)
+                else: fail(values==r["donor_provenance_claims" if col=="donor_provenance_claims" else target],
+                           "row evidence drift "+col)
         fail(r["source_git_blob"]==manifest["candidate_index"]["git_blob"] and
              r["source_path"]==manifest["candidate_index"]["path"] and
              r["source_candidate_id"]==identity,"catalog pin")
