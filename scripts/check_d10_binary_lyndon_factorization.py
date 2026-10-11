@@ -43,7 +43,13 @@ def check(report,inventory,foundation):
     assert report["sources"][0]["url"]=="https://doc.sagemath.org/html/en/reference/combinat/sage/combinat/words/finite_word.html"
     other={str(s).upper() for d in foundation["domains"].values() for s in d["residents"].values()}
     now={r["semantic_name"].upper() for r in inventory["rows"]}
-    assert c["semantic_name"] not in (other|now), "distinct identity already selected"
+    assert c["semantic_name"] not in other
+    if c["semantic_name"] in now:
+        from check_d10_existing_combinatorial_laws_selected import verify_promoted
+        matching = [r for r in inventory["rows"] if r["semantic_name"] == c["semantic_name"]]
+        assert len(matching) == 1
+        proof = verify_promoted(c["semantic_name"], matching[0])
+        assert proof["law"] == c["law"]
     assert "PRIMITIVE-BINARY-WORD-ROOT" in now
     assert SCHEME.read_text(encoding="utf-8").startswith("#!r6rs")
     assert PYTHON.read_text(encoding="utf-8").startswith("#!/usr/bin/env python3")

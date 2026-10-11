@@ -43,6 +43,18 @@ def _sha(data: bytes) -> str:
     return hashlib.sha256(data).hexdigest()
 
 
+def split_nul_delimited_paths(raw: bytes) -> list[str]:
+    """Decode the NUL-terminated path stream emitted by Git's -z options."""
+    if not raw:
+        return []
+    if not raw.endswith(b"\0"):
+        raise ValueError("NUL-delimited Git output is missing its final terminator")
+    fields = raw[:-1].split(b"\0")
+    if any(not field for field in fields):
+        raise ValueError("NUL-delimited Git output contains an empty path")
+    return [os.fsdecode(field) for field in fields]
+
+
 def require_changed_views(report: dict, changed_sens: list[str]) -> None:
     """PR/push gate: no NEW/MODIFIED physical .sens without a verified view.
 

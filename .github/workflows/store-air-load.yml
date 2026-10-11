@@ -28,6 +28,8 @@ jobs:
           python-version: '3.x'
       - name: Перевірити AIR adapter boundary / Validate AIR adapter boundary
         run: python3 benchmarks/store-air-load/air_adapter.py --self-test
+      - name: Негативний свідок BLOCKED / Fail-closed benchmark evidence
+        run: python3 benchmarks/store-air-load/test_blocked.py -v
 
       - uses: Swatinem/rust-cache@v2
         with:
@@ -75,6 +77,9 @@ jobs:
           import json
           from pathlib import Path
 
+          if not __debug__:
+              raise SystemExit("STORE-AIR-LOAD: BLOCKED — Python -O вимикає доказові assert")
+
           rows = [
               json.loads(line)
               for line in Path('/tmp/store-air-load.jsonl').read_text().splitlines()
@@ -107,6 +112,9 @@ jobs:
           python3 - <<'PY'
           import json
           from pathlib import Path
+
+          if not __debug__:
+              raise SystemExit("STORE-AIR-LOAD: BLOCKED — Python -O вимикає доказові assert")
 
           rows = [
               json.loads(line)

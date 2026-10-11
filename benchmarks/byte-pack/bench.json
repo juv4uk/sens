@@ -1,0 +1,20 @@
+{
+  "schema": "sens-benchmark-manifest/v1",
+  "stand": "byte-pack",
+  "wing": "Constrained physical carriers — research only",
+  "roles": [
+    "RESEARCH",
+    "FALSIFIER",
+    "MEASUREMENT"
+  ],
+  "question": "Can bounded T21/T22/T33 rank-unrank reduce physical bytes while preserving canonical round-trip and rejecting malformed carriers?",
+  "claim": "Python carrier experiment only; fixed blocks require external metadata; no .sens replacement, language-speed claim, or production codec authority.",
+  "witness": [
+    "носій22.py",
+    "T22-EXPERIMENT.uk.md"
+  ],
+  "status": "RESEARCH-ONLY; hosted replay pending",
+  "generation": "2026-10-10; CPython 3.13.5 Linux x86_64; seed 20261010; 9036 locally reported checks, hosted replay pending",
+  "axis": "physical bytes / rank-unrank correctness / Python wall time",
+  "reproduce": "python3 benchmarks/byte-pack/носій22.py --verify && python3 benchmarks/byte-pack/носій22.py --bench --ntrits 4620 --reps 15 --out /tmp/t22-results.json"
+}

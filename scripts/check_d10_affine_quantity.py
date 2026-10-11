@@ -98,7 +98,9 @@ def verify(data,inv,lower):
     assert inv["accounting"]["ratified_d10_residents"]==0
     assert len(inv["rows"])==inv["accounting"]["selected_semantic_candidates"]
     names={r["semantic_name"] for r in inv["rows"]}
-    assert NAME not in names, "already selected, coordinate with canonical transition writer"
+    if NAME in names:
+        from check_d10_alltime_archived_14_selection import verify_promoted
+        verify_promoted(NAME, inv)
     assert {n["semantic_name"] for n in c["preselected_neighbors"]} <= names
     assert lower["status"]=="owner-ratified"
     assert NAME not in {str(n).upper()

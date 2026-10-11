@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import os
 from pathlib import Path
 import sys
 import tempfile
@@ -94,6 +95,70 @@ class SafeTripletPublisher(unittest.TestCase):
             self.assertEqual(res["summary"]["blocked"], 1)
             self.assertEqual(view.read_text(encoding="utf-8"), "tampered \u2603\n")
             self.assertFalse(view.with_suffix(".sens").exists())
+
+    def test_link_failure_mid_second_triplet_rolls_back_every_file(self):
+        # Негативний свідок: фізичний T5 не повинен залишитися сиротою
+        # після відмови четвертого hard-link (три файли першої трійки вже є).
+        with tempfile.TemporaryDirectory() as td:
+            mirror = Path(td) / "mirror"
+            report = Path(td) / "blocked.json"
+            original = {rel: (ROOT / rel).read_bytes()
+                        for rel in (self.REL1, self.REL2)}
+            real_link = os.link
+            observed = []
+
+            def interrupt_link(source, destination):
+                observed.append(Path(destination))
+                if len(observed) == 4:
+                    raise OSError("injected fourth-link failure")
+                return real_link(source, destination)
+
+            with mock.patch("publish_verified_uk_triplets.os.link",
+                            side_effect=interrupt_link):
+                with self.assertRaisesRegex(OSError, "fourth-link failure"):
+                    export(ROOT, mirror, report, [self.REL1, self.REL2],
+                           write=True)
+            self.assertEqual(len(observed), 4)
+            for rel in (self.REL1, self.REL2):
+                stem = mirror / rel
+                for path in (stem, stem.with_suffix(".sens"),
+                             stem.with_suffix("")):
+                    self.assertFalse(path.exists(), str(path))
+                    self.assertFalse(path.is_symlink(), str(path))
+                self.assertEqual((ROOT / rel).read_bytes(), original[rel])
+            self.assertFalse(report.exists())
+            self.assertEqual(list(mirror.rglob(".t5-stage-*")), [])
+            # Тільки новостворені посилання видаляються, не оригінали.
+            self.assertEqual({rel: (ROOT / rel).read_bytes()
+                              for rel in (self.REL1, self.REL2)}, original)
+
+    def test_second_verifier_failure_rolls_back_all_six_published_files(self):
+        # Негативний свідок після завершення фізичного запису:
+        # перевірка другої трійки відмовила — усі шість файлів відкотити.
+        with tempfile.TemporaryDirectory() as td:
+            mirror = Path(td) / "mirror"
+            report = Path(td) / "blocked.json"
+            original = {rel: (ROOT / rel).read_bytes()
+                        for rel in (self.REL1, self.REL2)}
+            good_verdict = {"runtime_oracle_admitted_by_this_audit": False}
+            with mock.patch(
+                "publish_verified_uk_triplets.verify",
+                side_effect=[good_verdict,
+                             ProjectionBlocked("injected second-verifier failure")],
+            ) as verifier:
+                with self.assertRaisesRegex(ProjectionBlocked,
+                                            "second-verifier failure"):
+                    export(ROOT, mirror, report, [self.REL1, self.REL2],
+                           write=True)
+            self.assertEqual(verifier.call_count, 2)
+            for rel in (self.REL1, self.REL2):
+                stem = mirror / rel
+                self.assertFalse(stem.exists())
+                self.assertFalse(stem.with_suffix(".sens").exists())
+                self.assertFalse(stem.with_suffix("").exists())
+                self.assertEqual((ROOT / rel).read_bytes(), original[rel])
+            self.assertFalse(report.exists())
+            self.assertEqual(list(mirror.rglob(".t5-stage-*")), [])
 
     def test_report_write_failure_rolls_back_all_new_triplets(self):
         with tempfile.TemporaryDirectory() as td:

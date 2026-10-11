@@ -21,7 +21,7 @@ from pathlib import Path
 from typing import Any
 
 REPO = Path(__file__).resolve().parents[2]
-CLOSURE = REPO / "benchmarks/d6-closure-map/run.py"
+CLOSURE = REPO / "benchmarks/d6-unknown-frontier/pre-od006-closure.py"
 MIDDLE = REPO / "scripts/research-2624-d6-middle-corners.py"
 READINESS = REPO / "scripts/research-2619-d6-residency-readiness.py"
 LEDGER = REPO / "docs/research/2344-post-d4-historical-ledger.json"

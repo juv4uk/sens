@@ -145,7 +145,12 @@ fn eval_physical_t5(bytes: &[u8]) -> Result<sens::EvalResult, String> {
     let forms = sens::parse_canonical_word_sequence(&words)
         .map_err(|err| format!("exact packed binary reader rejected: {err}"))?;
 
-    let mut pure = Session::default();
+    // The physically typed D1–D9 entry point has no implicit Lisp macro
+    // surface. Session::default() loads lib/macro.lisp on EVERY invocation;
+    // that bootstrap dominates tiny admitted binary programs and is neither
+    // needed nor authorized for this capability-free physical route.
+    // Textual .lisp and the explicit sens-trit eval-core4 remain unchanged.
+    let mut pure = Session::bare();
     eval_parsed_expressions(&forms, &mut pure)
         .map_err(|err| format!("current SENS execution rejected: {err}"))
 }

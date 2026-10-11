@@ -166,4 +166,4 @@
       ((00000011 (00000101 words) (00000001 does))
        
        (understand-query-relation words))
-      (1 (00000001 ())))))
+      )))

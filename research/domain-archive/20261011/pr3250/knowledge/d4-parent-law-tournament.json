@@ -1,0 +1,264 @@
+{
+  "schema": "d4-cleanroom-parent-law/v1",
+  "authority": "#3244",
+  "parent_cleanroom": "#3225",
+  "d3_authority": "#3202",
+  "statuses": [
+    "PROVED-GENERATOR",
+    "REFUTED",
+    "UNKNOWN"
+  ],
+  "suffix_rule": {
+    "required_children": 2,
+    "suffixes": [
+      "0",
+      "1"
+    ],
+    "isolated_child_placement_allowed": false
+  },
+  "parents": [
+    {
+      "bits": "000",
+      "role": "EMPTY"
+    },
+    {
+      "bits": "001",
+      "role": "QUOTE"
+    },
+    {
+      "bits": "010",
+      "role": "ATOM"
+    },
+    {
+      "bits": "011",
+      "role": "CDR"
+    },
+    {
+      "bits": "100",
+      "role": "CAR"
+    },
+    {
+      "bits": "101",
+      "role": "EQ"
+    },
+    {
+      "bits": "110",
+      "role": "COND"
+    },
+    {
+      "bits": "111",
+      "role": "CONS"
+    }
+  ],
+  "positive_controls": [
+    {
+      "parent": "011",
+      "status": "PROVED-GENERATOR",
+      "generator": "selector-compose",
+      "suffix_meaning": {
+        "0": "compose-CAR",
+        "1": "compose-CDR"
+      },
+      "children": {
+        "0": "0110",
+        "1": "0111"
+      },
+      "equation": "G(selector,bit)=compose(selector, bit==0 ? CAR : CDR)",
+      "parent_recovery": "forget appended bit",
+      "falsifier": "non-selector parent does not satisfy selector composition law"
+    },
+    {
+      "parent": "100",
+      "status": "PROVED-GENERATOR",
+      "generator": "selector-compose",
+      "suffix_meaning": {
+        "0": "compose-CAR",
+        "1": "compose-CDR"
+      },
+      "children": {
+        "0": "1000",
+        "1": "1001"
+      },
+      "equation": "G(selector,bit)=compose(selector, bit==0 ? CAR : CDR)",
+      "parent_recovery": "forget appended bit",
+      "falsifier": "non-selector parent does not satisfy selector composition law"
+    }
+  ],
+  "capabilities": [
+    {
+      "id": "late-bound-executable-construction",
+      "evidence": "#3235",
+      "coordinate": null
+    },
+    {
+      "id": "unbounded-semantic-reentry",
+      "evidence": "#3233",
+      "coordinate": null
+    }
+  ],
+  "candidate_relations": [
+    {
+      "parent": "000",
+      "capability_pair": [
+        "late-bound-executable-construction",
+        "unbounded-semantic-reentry"
+      ],
+      "status": "UNKNOWN",
+      "shared_generator": null,
+      "sibling_meaning": null,
+      "parent_recovery": null,
+      "falsifier": null
+    },
+    {
+      "parent": "001",
+      "capability_pair": [
+        "late-bound-executable-construction",
+        "unbounded-semantic-reentry"
+      ],
+      "status": "UNKNOWN",
+      "shared_generator": null,
+      "sibling_meaning": null,
+      "parent_recovery": null,
+      "falsifier": null,
+      "evidence_ref": "#3254",
+      "evidence_note": "late-binding and stage-entry axes vary independently; no single suffix factor proved"
+    },
+    {
+      "parent": "010",
+      "capability_pair": [
+        "late-bound-executable-construction",
+        "unbounded-semantic-reentry"
+      ],
+      "status": "UNKNOWN",
+      "shared_generator": null,
+      "sibling_meaning": null,
+      "parent_recovery": null,
+      "falsifier": null
+    },
+    {
+      "parent": "011",
+      "capability_pair": [
+        "late-bound-executable-construction",
+        "unbounded-semantic-reentry"
+      ],
+      "status": "UNKNOWN",
+      "shared_generator": null,
+      "sibling_meaning": null,
+      "parent_recovery": null,
+      "falsifier": null
+    },
+    {
+      "parent": "100",
+      "capability_pair": [
+        "late-bound-executable-construction",
+        "unbounded-semantic-reentry"
+      ],
+      "status": "UNKNOWN",
+      "shared_generator": null,
+      "sibling_meaning": null,
+      "parent_recovery": null,
+      "falsifier": null
+    },
+    {
+      "parent": "101",
+      "capability_pair": [
+        "late-bound-executable-construction",
+        "unbounded-semantic-reentry"
+      ],
+      "status": "UNKNOWN",
+      "shared_generator": null,
+      "sibling_meaning": null,
+      "parent_recovery": null,
+      "falsifier": null
+    },
+    {
+      "parent": "110",
+      "capability_pair": [
+        "late-bound-executable-construction",
+        "unbounded-semantic-reentry"
+      ],
+      "status": "UNKNOWN",
+      "shared_generator": null,
+      "sibling_meaning": null,
+      "parent_recovery": null,
+      "falsifier": null
+    },
+    {
+      "parent": "111",
+      "capability_pair": [
+        "late-bound-executable-construction",
+        "unbounded-semantic-reentry"
+      ],
+      "status": "UNKNOWN",
+      "shared_generator": null,
+      "sibling_meaning": null,
+      "parent_recovery": null,
+      "falsifier": null
+    }
+  ],
+  "rules": [
+    "single isolated capability never earns a D4 coordinate",
+    "PROVED-GENERATOR requires both children under one shared generator equation",
+    "history and empty-slot fit are invalid tie-breaks",
+    "all-UNKNOWN is a valid tournament outcome"
+  ],
+  "selector_parent_relations": [
+    {
+      "parent": "000",
+      "status": "REFUTED",
+      "reason": "EMPTY is not a selector parent under selector composition law"
+    },
+    {
+      "parent": "001",
+      "status": "REFUTED",
+      "reason": "QUOTE is not a selector parent under selector composition law"
+    },
+    {
+      "parent": "010",
+      "status": "REFUTED",
+      "reason": "ATOM is not a selector parent under selector composition law"
+    },
+    {
+      "parent": "011",
+      "status": "PROVED-GENERATOR",
+      "control_ref": "positive_controls:011"
+    },
+    {
+      "parent": "100",
+      "status": "PROVED-GENERATOR",
+      "control_ref": "positive_controls:100"
+    },
+    {
+      "parent": "101",
+      "status": "REFUTED",
+      "reason": "EQ is not a selector parent under selector composition law"
+    },
+    {
+      "parent": "110",
+      "status": "REFUTED",
+      "reason": "COND is not a selector parent under selector composition law"
+    },
+    {
+      "parent": "111",
+      "status": "REFUTED",
+      "reason": "CONS is not a selector parent under selector composition law"
+    }
+  ],
+  "single_child_negative_control": {
+    "parent": "001",
+    "status": "UNKNOWN",
+    "parent_invariant": "synthetic relation",
+    "bit_meaning": "0 proposes one child only",
+    "child0_semantics": "synthetic capability",
+    "child1_semantics": null,
+    "shared_generator": "partial-only",
+    "parent_recovery": "forget appended bit",
+    "falsifier": "missing opposite sibling prevents generator proof"
+  },
+  "candidate_context": {
+    "minimality_candidate": "#3247",
+    "candidate_table_is_semantic_authority": false,
+    "unallocated_coordinates_allowed": true,
+    "promotion_rule": "candidate presence never upgrades relation status without a parent-law certificate"
+  }
+}

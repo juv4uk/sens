@@ -21,9 +21,132 @@ cargo test -p sens \
 # #291: quantity semantics live in Lisp. The shell observes only the named
 # pass envelope; expected scientific quantities and relations stay in the
 # Lisp witness itself. No replacement Rust observer is introduced.
-quantity_status="$(cargo run --quiet -p sens-cli --bin sens -- tests/fixtures/exact-quantity-arithmetic-witness.lisp)"
-if [[ "$quantity_status" != "(exact-quantity-arithmetic-witness (status pass))" ]]; then
-  printf 'exact quantity Lisp witness failed: %s\n' "$quantity_status" >&2
+# #5408: насамперед випробувати саму послідовну лексичну область D6.
+# Повний закон величин перевіряється лише після проходження цього SENS-свідка.
+lambda_witness="witnesses/quantity-lambda-binding.lisp"
+if lambda_status="$(cargo run --quiet -p sens-cli --bin sens -- "$lambda_witness" 2>&1)"; then
+  if [[ "$lambda_status" != "7" ]]; then
+    printf 'QUANTITY-LAMBDA-BLOCKED: очікувано точне SENS 7, одержано: %s\n' "$lambda_status" >&2
+    exit 1
+  fi
+  printf 'QUANTITY-LAMBDA-PASS: D5 LAMBDA => 7\n'
+else
+  lambda_rc=$?
+  printf 'QUANTITY-LAMBDA-BLOCKED: виконання D5 LAMBDA завершилося %s: %s\n' "$lambda_rc" "$lambda_status" >&2
+  exit 1
+fi
+
+binding_witness="witnesses/quantity-sequential-binding.lisp"
+if binding_status="$(cargo run --quiet -p sens-cli --bin sens -- "$binding_witness" 2>&1)"; then
+  if [[ "$binding_status" != "7" ]]; then
+    printf 'QUANTITY-BINDING-BLOCKED: очікувано SENS 7, одержано: %s\n' "$binding_status" >&2
+    exit 1
+  fi
+  printf 'QUANTITY-BINDING-PASS: D6 нехай* => 7\n'
+else
+  binding_rc=$?
+  printf 'QUANTITY-BINDING-BLOCKED: SENS-свідок завершився %s: %s\n' "$binding_rc" "$binding_status" >&2
+  exit 1
+fi
+
+quantity_witness="tests/fixtures/exact-quantity-arithmetic-witness.lisp"
+if quantity_status="$(cargo run --quiet -p sens-cli --bin sens -- "$quantity_witness" 2>&1)"; then
+  if [[ "$quantity_status" != "(exact-quantity-arithmetic-witness (status pass))" ]]; then
+    printf 'exact quantity Lisp witness returned a non-pass result: %s\n' "$quantity_status" >&2
+    # Diagnostic-only replay. Preserve the real failure and the Lisp-owned
+    # pass envelope; never alter or suppress the source witness.
+    quantity_diag_dir="${RUNNER_TEMP:-$(mktemp -d)}"
+    python3 - "$quantity_witness" "$quantity_diag_dir" <<'PY'
+from pathlib import Path
+import sys
+
+source = Path(sys.argv[1]).read_text(encoding="utf-8").rstrip()
+tail = "\n(exact-quantity-arithmetic-witness)"
+if not source.endswith(tail):
+    raise SystemExit("QUANTITY-DIAGNOSTIC-BLOCKED: fixture tail changed")
+prefix = source[:-len(tail)].rstrip()
+root = Path(sys.argv[2])
+probes = {
+    "speed-record-valid": "(scientific-constant? si:defining-speed-of-light)",
+    "speed-proper-list": "(science-proper-list? si:defining-speed-of-light)",
+    "speed-length-seven": "(00011100 (00101000 si:defining-speed-of-light) 7)",
+    "speed-length-raw": "(00101000 si:defining-speed-of-light)",
+    "numeric-seven-equalp": "(00011100 7 7)",
+    "speed-length-eq": "(00000011 (00101000 si:defining-speed-of-light) 7)",
+    "speed-schema": "(00000011 (00000101 si:defining-speed-of-light) *scientific-constant-schema*)",
+    "speed-name-symbol": "(00100011 (scientific-constant-name si:defining-speed-of-light))",
+    "speed-quantity-valid": "(quantity? (scientific-constant-quantity si:defining-speed-of-light))",
+    "speed-status-valid": "(scientific-constant-status-valid? (scientific-constant-status si:defining-speed-of-light))",
+    "speed-kind-valid": "(scientific-constant-kind-valid? (scientific-constant-kind si:defining-speed-of-light))",
+    "speed-source-valid": "(science-source? (scientific-constant-source si:defining-speed-of-light))",
+}
+for name, expression in probes.items():
+    (root / f"quantity-{name}.lisp").write_text(prefix + "\n" + expression + "\n", encoding="utf-8")
+PY
+    for stage in speed-record-valid speed-proper-list speed-length-seven speed-length-raw numeric-seven-equalp speed-length-eq speed-schema speed-name-symbol speed-quantity-valid speed-status-valid speed-kind-valid speed-source-valid; do
+      probe="$quantity_diag_dir/quantity-$stage.lisp"
+      if probe_out="$(cargo run --quiet -p sens-cli --bin sens -- "$probe" 2>&1)"; then
+        printf 'QUANTITY-PROBE %s=%s\n' "$stage" "$probe_out" >&2
+      else
+        printf 'QUANTITY-PROBE %s=ERROR %s\n' "$stage" "$probe_out" >&2
+      fi
+    done
+    exit 1
+  fi
+else
+  quantity_rc=$?
+  printf 'exact quantity Lisp witness failed (exit %s):\n%s\n' "$quantity_rc" "$quantity_status" >&2
+
+  # Diagnostic-only replay of the existing definitions. Read bindings and
+  # calls separately so a non-callable value cannot masquerade as a law failure.
+  # The source, expected quantities and failing gate stay unchanged.
+  quantity_diag_dir="${RUNNER_TEMP:-$(mktemp -d)}"
+  python3 - "$quantity_witness" "$quantity_diag_dir" <<'PY'
+from pathlib import Path
+import sys
+
+source = Path(sys.argv[1]).read_text(encoding="utf-8")
+tail = "\n(exact-quantity-arithmetic-witness)"
+base = source.rstrip()
+if not base.endswith(tail):
+    raise SystemExit("QUANTITY-DIAGNOSTIC-BLOCKED: unexpected fixture terminator; refusing to rewrite")
+prefix = base[:-len(tail)].rstrip()
+root = Path(sys.argv[2])
+probes = {
+    "rows-binding": "\nexact-quantity-arithmetic-rows\n",
+    "check-binding": "\nexact-quantity-arithmetic-check\n",
+    "witness-binding": "\nexact-quantity-arithmetic-witness\n",
+    "rows-call": "\n(exact-quantity-arithmetic-rows)\n",
+    "check-call": "\n(exact-quantity-arithmetic-check (exact-quantity-arithmetic-rows))\n",
+    "planck-record": "\n(scientific-constant-quantity si:defining-planck-constant)\n",
+    "cesium-record": "\n(scientific-constant-quantity si:defining-cesium-frequency)\n",
+    "quantity-product": "\n(quantity-product (scientific-constant-quantity si:defining-planck-constant) (scientific-constant-quantity si:defining-cesium-frequency))\n",
+    "one-second": "\n(make-quantity 1 (make-unit (00100111 (make-dimension (00000001 second) 1))))\n",
+    "distance-product": "\n(quantity-product (scientific-constant-quantity si:defining-speed-of-light) (make-quantity 1 (make-unit (00100111 (make-dimension (00000001 second) 1)))))\n",
+    "planck-value": "\n(quantity-value (scientific-constant-quantity si:defining-planck-constant))\n",
+    "planck-unit": "\n(quantity-unit (scientific-constant-quantity si:defining-planck-constant))\n",
+    "numeric-product": "\n(00001110 (quantity-value (scientific-constant-quantity si:defining-planck-constant)) (quantity-value (scientific-constant-quantity si:defining-cesium-frequency)))\n",
+    "product-units": "\n(unit-product (quantity-unit (scientific-constant-quantity si:defining-planck-constant)) (quantity-unit (scientific-constant-quantity si:defining-cesium-frequency)))\n",
+    "merge-dimensions": "\n(science-merge-dimensions (unit-dimensions (quantity-unit (scientific-constant-quantity si:defining-planck-constant))) (unit-dimensions (quantity-unit (scientific-constant-quantity si:defining-cesium-frequency))))\n",
+}
+for stage, suffix in probes.items():
+    (root / f"exact-quantity-{stage}-probe.lisp").write_text(
+        prefix + suffix, encoding="utf-8"
+    )
+PY
+
+  for stage in rows-binding check-binding witness-binding rows-call check-call planck-record cesium-record planck-value planck-unit numeric-product quantity-product one-second merge-dimensions product-units distance-product; do
+    probe="$quantity_diag_dir/exact-quantity-$stage-probe.lisp"
+    log="$quantity_diag_dir/exact-quantity-$stage-probe.log"
+    if cargo run --quiet -p sens-cli --bin sens -- "$probe" >"$log" 2>&1; then
+      printf 'QUANTITY-DIAGNOSTIC %s=PASS\n' "$stage"
+      cat "$log"
+    else
+      probe_rc=$?
+      printf 'QUANTITY-DIAGNOSTIC %s=FAIL exit=%s\n' "$stage" "$probe_rc" >&2
+      cat "$log" >&2
+    fi
+  done
   exit 1
 fi
 

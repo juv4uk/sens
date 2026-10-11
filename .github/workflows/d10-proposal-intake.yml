@@ -12,6 +12,7 @@ on:
       - knowledge/d10-growth-baseline-v1.json
       - tests/test_d10_proposal_ledger_growth.py
       - scripts/check-d10-proposal-ledger.py
+      - tools/d10_hysteresis_chez.ss
       - .github/workflows/d10-proposal-intake.yml
   push:
     branches:
@@ -24,6 +25,7 @@ on:
       - docs/architecture/ARCHIPELAGO-V1.uk.md
       - scripts/check-d10-proposal-ledger.py
       - tests/test_d10_proposal_ledger_growth.py
+      - tools/d10_hysteresis_chez.ss
       - .github/workflows/d10-proposal-intake.yml
 
 permissions:
@@ -32,10 +34,44 @@ permissions:
 jobs:
   validate:
     runs-on: ubuntu-latest
-    timeout-minutes: 4
+    timeout-minutes: 12
     steps:
       - uses: actions/checkout@v4
       - name: Перевірити D10 intake та негативні контролі
         run: python3 scripts/check-d10-proposal-ledger.py --self-test
+      - name: Негативні свідки оптимізованого Python для D10
+        shell: bash
+        run: |
+          set -euo pipefail
+          for mode in cli env; do
+            log="$RUNNER_TEMP/d10-intake-optimized-$mode.log"
+            if [[ "$mode" == cli ]]; then
+              if python3 -O scripts/check-d10-proposal-ledger.py --self-test >"$log" 2>&1; then
+                echo "::error::D10 intake помилково прийняв Python -O"
+                exit 1
+              fi
+            else
+              if PYTHONOPTIMIZE=2 python3 scripts/check-d10-proposal-ledger.py --self-test >"$log" 2>&1; then
+                echo "::error::D10 intake помилково прийняв PYTHONOPTIMIZE=2"
+                exit 1
+              fi
+            fi
+            if ! grep -Fq "D10-PROPOSAL-LEDGER: BLOCKED" "$log"; then
+              cat "$log"
+              echo "::error::D10 intake відмовив без названої причини"
+              exit 1
+            fi
+          done
       - name: Перевірити контракти зростання й 10 негативних випадків
         run: python3 -m unittest discover -s tests -p test_d10_proposal_ledger_growth.py -v
+
+      - name: Незалежний Chez-свідок точної двопорогової семантики D10
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq chezscheme
+          log="$RUNNER_TEMP/d10-hysteresis-chez.log"
+          scheme --script tools/d10_hysteresis_chez.ss >"$log" 2>&1
+          cat "$log"
+          grep -Eq '^D10-HYSTERESIS-CHEZ: PASS independent exact-rational checks=[0-9]+$' "$log"

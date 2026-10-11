@@ -2,6 +2,10 @@
 import json
 from pathlib import Path
 
+# Оптимізований Python прибирає assert: без них фундамент не атестовано.
+if not __debug__:
+    raise SystemExit("D1-D9-FOUNDATION: BLOCKED — Python -O вимикає перевірки")
+
 root=Path(__file__).resolve().parents[1]
 old=json.loads((root/"knowledge/d1-d5-foundation.json").read_text(encoding="utf-8"))
 d6f=json.loads((root/"knowledge/d1-d6-foundation.json").read_text(encoding="utf-8"))

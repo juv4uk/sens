@@ -2,6 +2,10 @@
 import json
 from pathlib import Path
 
+# Оптимізований Python прибирає assert; це не може бути доказом D5.
+if not __debug__:
+    raise SystemExit("D5-CURRENT-AUTHORITY: BLOCKED — Python -O вимикає перевірки")
+
 root=Path(__file__).resolve().parents[1]
 d=json.loads((root/"knowledge/d5-ratified.json").read_text(encoding="utf-8"))
 contract=(root/"contracts/d5-ratification.lisp").read_text(encoding="utf-8")

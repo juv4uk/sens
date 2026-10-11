@@ -90,22 +90,38 @@ fn call_nucleus(identity: DomainIdentity) -> Expr {
     ])
 }
 
-fn assert_no_legacy_identity(expr: &Expr) {
+fn legacy_source_context(expr: &Expr, top_level_index: usize) -> String {
+    let excerpt = NUCLEUS
+        .get(expr.span.start..expr.span.end)
+        .unwrap_or("<фрагмент поза межами джерела>");
+    format!(
+        "lib/compiler-nucleus.lisp, верхньорівнева форма {top_level_index}, байти {}..{}, фрагмент {excerpt:?}",
+        expr.span.start, expr.span.end
+    )
+}
+
+fn assert_no_legacy_identity(expr: &Expr, top_level_index: usize) {
     match &expr.kind {
-        ExprKind::Sid(sid) => panic!("legacy Sid entered SENS compiler nucleus: {sid}"),
-        ExprKind::Call(sid, _) => panic!("legacy Call entered SENS compiler nucleus: {sid}"),
+        ExprKind::Sid(sid) => panic!(
+            "legacy Sid entered SENS compiler nucleus: {sid}; {}",
+            legacy_source_context(expr, top_level_index)
+        ),
+        ExprKind::Call(sid, _) => panic!(
+            "legacy Call entered SENS compiler nucleus: {sid}; {}",
+            legacy_source_context(expr, top_level_index)
+        ),
         ExprKind::List(items) => {
             for item in items.iter() {
-                assert_no_legacy_identity(item);
+                assert_no_legacy_identity(item, top_level_index);
             }
         }
         ExprKind::Pair(head, tail) => {
-            assert_no_legacy_identity(head);
-            assert_no_legacy_identity(tail);
+            assert_no_legacy_identity(head, top_level_index);
+            assert_no_legacy_identity(tail, top_level_index);
         }
         ExprKind::DomainCall(_, args) => {
             for arg in args.iter() {
-                assert_no_legacy_identity(arg);
+                assert_no_legacy_identity(arg, top_level_index);
             }
         }
         ExprKind::Number(_, _)
@@ -139,8 +155,8 @@ fn nucleus_source_lowers_without_legacy_sid_or_call_nodes() {
     let parsed = parse_mixed_exact_domain(NUCLEUS).expect("compiler nucleus source parses");
     let lowered = lower_program(&parsed);
     assert!(lowered.len() >= 2, "compiler nucleus contains executable language definitions");
-    for expression in &lowered {
-        assert_no_legacy_identity(expression);
+    for (top_level_index, expression) in lowered.iter().enumerate() {
+        assert_no_legacy_identity(expression, top_level_index);
     }
 }
 

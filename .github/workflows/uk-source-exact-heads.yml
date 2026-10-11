@@ -17,6 +17,12 @@ on:
     paths:
       - "crates/sens/src/mixed_source.rs"
       - "crates/sens/src/semantic_registry.rs"
+      - "crates/sens/src/domain_surface_registry_generated.rs"
+      - "lib/compiler-nucleus.lisp"
+      - "crates/sens/tests/compiler_uk_projection.rs"
+      - "lib/domains/d3.lisp"
+      - "lib/domains/d4.lisp"
+      - "lib/domains/d5.lisp"
       - ".github/workflows/uk-source-exact-heads.yml"
   workflow_dispatch:
 
@@ -35,7 +41,7 @@ jobs:
       - uses: dtolnay/rust-toolchain@stable
       - name: Ukrainian canonical heads are exact DomainIdentity, never runtime SID lookup
         run: cargo test -p sens --lib mixed_source::tests -- --nocapture
-      - name: Real compiler Ukrainian source 51 definitions lower to exact D4 without rewriting .lisp
+      - name: 51 історичне W8-визначення та ратифікована українська проєкція D3/D4
         run: cargo test -p sens --test compiler_uk_projection -- --nocapture
       - name: Current source surface rows must match ratified D3-D5
         run: cargo test -p sens --lib semantic_registry::tests -- --nocapture

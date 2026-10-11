@@ -14,6 +14,10 @@ semantics: 32-bit width prefix + packed payload bytes.
 
 from __future__ import annotations
 
+# Режим Python -O прибирає assert, тому не може засвідчувати Foundation-0.
+if not __debug__:
+    raise SystemExit("FOUNDATION-0: BLOCKED — Python -O вимикає assert")
+
 from dataclasses import dataclass
 from itertools import product
 from typing import Iterable

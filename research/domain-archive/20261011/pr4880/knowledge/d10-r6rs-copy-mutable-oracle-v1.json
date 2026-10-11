@@ -1,0 +1,90 @@
+{
+  "schema": "d10-r6rs-copy-mutable-research/v1",
+  "date": "2026-10-09",
+  "status": "HOLD-OWNER-SEMANTIC-REVIEW-NO-SELECTED-ADMISSION",
+  "baseline": {
+    "foundation_blob": "09d1d71c39d1484dfd005a5068dbb18b76f0f0d4",
+    "d10_blob": "73dd518469f972c55411e004b70b054ba8b3ec86",
+    "selected_at_audit": 625,
+    "ratified_at_audit": 0
+  },
+  "source": {
+    "title": "Revised6 Report on the Algorithmic Language Scheme — Standard Libraries (2007)",
+    "section": "13.2 Procedures; 13.3 Inspection",
+    "url": "https://r6rs.org/final/html/r6rs-lib/r6rs-lib-Z-H-14.html",
+    "prior_donor": "knowledge/d10-r6rs-hashtable-hygiene-audit-v1.json"
+  },
+  "ownership": "Candidate language-observable table-copy and mutability capabilities; prove independent irreducible root versus selected MAKE-HASH-TABLE/GETHASH and value identity prior to canonical selection. No D2 change or T5 authority.",
+  "rows": [
+    {
+      "id": "r6rs-copy-v1",
+      "historical_name": "HASHTABLE-COPY",
+      "surface_uk": "копіювати-хештаблицю",
+      "surface_ukr": "створити-копію-хештаблиці",
+      "reference_id": "R6RS-06",
+      "section": "13.2",
+      "arity": "1 or 2 (hashtable[, mutable-flag])",
+      "law": "Return a distinct hashtable carrying the same associations. If mutable-flag is absent or false, result is immutable; if true result is mutable. Subsequent association edits in mutable copy do not change original table.",
+      "positive_witnesses": [
+        "Copy of mutable {1↦one, 2↦two} with no second argument has both associations and hashtable-mutable? false; source stays mutable.",
+        "Copy with explicit true has hashtable-mutable? true; set! copy[1]=changed leaves original[1]=one."
+      ],
+      "falsifiers": [
+        "A default copy accepts mutation or is reported mutable.",
+        "Mutating explicit-mutable copy changes an original association or losing mappings during copy."
+      ],
+      "semantic_neighbors": [
+        "D10 MAKE-HASH-TABLE",
+        "D10 GETHASH",
+        "D10 HASH-TABLE-P",
+        "D8 COPY-STRUCTURE"
+      ],
+      "dedup_basis": "Exact lower and D10 name absent at pinned snapshot; semantic equivalence to any general copy+freeze operation not proven.",
+      "ownership_question": "Is default-immutable copied map a universal observable law, or a derived library function from D10 map constructors and capability flags?",
+      "status": "HOLD-RESEARCH-NO-ADMISSION",
+      "selected_in_d10": false,
+      "coordinate": null,
+      "ratified": false,
+      "physical_t5_authorized": false
+    },
+    {
+      "id": "r6rs-mutable-v1",
+      "historical_name": "HASHTABLE-MUTABLE?",
+      "surface_uk": "змінна-хештаблиця?",
+      "surface_ukr": "чи-дозволено-змінювати-хештаблицю?",
+      "reference_id": "R6RS-11",
+      "section": "13.3",
+      "arity": "1 (hashtable)",
+      "law": "Return a boolean describing whether mutation of the hashtable is permitted; two tables with equal associations can differ in mutable state.",
+      "positive_witnesses": [
+        "Fresh make-eqv-hashtable is mutable.",
+        "Immutable default copy and explicit mutable copy have equal initial mappings, but mutability predicates return false versus true."
+      ],
+      "falsifiers": [
+        "Result is inferred exclusively from hashtable contents or size, so equal-association mutable/immutable instances are indistinguishable.",
+        "A default immutable copy is reported mutable."
+      ],
+      "semantic_neighbors": [
+        "D10 HASH-TABLE-P",
+        "D10 MAKE-HASH-TABLE",
+        "D10 GETHASH"
+      ],
+      "dedup_basis": "Exact lower and D10 name absent at pinned snapshot; possibility of deriving from representation flag must be separately checked.",
+      "ownership_question": "Is mutability an independently observable table capability in the global semantics, or representation metadata requiring no Core resident?",
+      "status": "HOLD-RESEARCH-NO-ADMISSION",
+      "selected_in_d10": false,
+      "coordinate": null,
+      "ratified": false,
+      "physical_t5_authorized": false
+    }
+  ],
+  "admission": {
+    "new_selected": 0,
+    "new_coordinates": 0,
+    "new_ratified": 0,
+    "independent_donor_oracle": "tests/d10_r6rs_hashtable_copy_mutable.ss",
+    "oracle_interpreter": "Chez Scheme R6RS",
+    "oracle_is_sens_runtime": false,
+    "post_oracle_next_gate": "Owner semantic dedup and arbitration via #4463/#4013, then serialized canonical-inventory selection under #4867; no automatic mutation."
+  }
+}

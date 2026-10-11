@@ -1,0 +1,226 @@
+name: SENS file authority guard — physical T5 oracle
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      base_sha:
+        description: "Exact Git commit SHA to use as the audit base"
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: sens-file-authority-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  file-authority:
+    name: Physical SENS T5 file-admission oracle
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.x'
+
+      - name: Build exact physical SENS entrypoints
+        run: cargo build --locked -p sens-cli --bin sens --bin sens-trit
+
+      - name: Test transport in ordinary and optimized Python
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 tools/important_file_guard.py --self-test
+          python3 -O tools/important_file_guard.py --self-test
+
+      - name: Prove D2 to physical T5 and reject mixed textual calls
+        shell: bash
+        run: |
+          set -euo pipefail
+          cargo test --locked -p sens-cli --test file_authority_t5_boundary_cli -- --nocapture
+          # Канонічна обмежена ук-трійка має власний незалежний read-only доказ.
+          bash scripts/check-triple-projection.sh \
+            --fixture tests/fixtures/migration-d1-cond-cohort/branch.lisp
+
+      - name: Select and validate the exact Git comparison base
+        id: base
+        shell: bash
+        env:
+          PR_BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          PUSH_BEFORE_SHA: ${{ github.event.before }}
+          MANUAL_BASE_SHA: ${{ inputs.base_sha }}
+        run: |
+          set -euo pipefail
+          case "$GITHUB_EVENT_NAME" in
+            pull_request) base="$PR_BASE_SHA" ;;
+            push) base="$PUSH_BEFORE_SHA" ;;
+            workflow_dispatch) base="$MANUAL_BASE_SHA" ;;
+            *) echo "SENS_FILE_AUTHORITY_BLOCKED: unsupported event" >&2; exit 2 ;;
+          esac
+          [[ "$base" =~ ^[0-9a-f]{40}$ && "$base" != "0000000000000000000000000000000000000000" ]] || {
+            echo "SENS_FILE_AUTHORITY_BLOCKED: missing or invalid base SHA" >&2
+            exit 2
+          }
+          git cat-file -e "$base^{commit}"
+          git merge-base --is-ancestor "$base" HEAD
+          printf 'sha=%s\n' "$base" >> "$GITHUB_OUTPUT"
+
+      - name: Transport Git paths and package SENS source only
+        id: transport
+        shell: bash
+        env:
+          BASE_SHA: ${{ steps.base.outputs.sha }}
+        run: |
+          set -euo pipefail
+          log="$RUNNER_TEMP/file-authority-transport.log"
+          if python3 tools/important_file_guard.py \
+            --base "$BASE_SHA" \
+            --output "$RUNNER_TEMP/file-authority.lisp" >"$log" 2>&1; then
+            cat "$log"
+          else
+            cat "$log" >&2
+            echo "SENS_FILE_AUTHORITY_BLOCKED: Git transport failed" >&2
+            exit 2
+          fi
+          proof="$(tail -n 1 "$log")"
+          pattern='^GIT_PATH_TRANSPORT_READY base=([0-9a-f]{40}) head=([0-9a-f]{40}) added_paths=([0-9]+) tracked_tools_paths=([0-9]+)$'
+          if [[ ! "$proof" =~ $pattern ]]; then
+            echo "SENS_FILE_AUTHORITY_BLOCKED: missing exact Git transport inventory" >&2
+            exit 2
+          fi
+          proof_base="${BASH_REMATCH[1]}"
+          proof_head="${BASH_REMATCH[2]}"
+          added_count="${BASH_REMATCH[3]}"
+          tools_count="${BASH_REMATCH[4]}"
+          current_head="$(git rev-parse --verify 'HEAD^{commit}')"
+          if [[ "$proof_base" != "$BASE_SHA" || "$proof_head" != "$current_head" ]]; then
+            echo "SENS_FILE_AUTHORITY_BLOCKED: inventory SHA mismatch" >&2
+            exit 2
+          fi
+          printf 'added_paths=%s\ntracked_tools_paths=%s\n' \
+            "$added_count" "$tools_count" >>"$GITHUB_OUTPUT"
+
+      - name: Prove canonical binary projection encoding remains admitted
+        shell: bash
+        run: |
+          set -euo pipefail
+          printf '%s\n' '10 001 00 000 01' > "$RUNNER_TEMP/canonical-projection.lisp"
+          target/debug/sens-trit encode "$RUNNER_TEMP/canonical-projection.lisp"
+          target/debug/sens-trit open "$RUNNER_TEMP/canonical-projection.sens" > "$RUNNER_TEMP/canonical-projection.words"
+          test "$(cat "$RUNNER_TEMP/canonical-projection.words")" = "10 001 00 000 01"
+
+      - name: Prove noncanonical text is rejected without emitting physical SENS
+        shell: bash
+        run: |
+          set -euo pipefail
+          source="$RUNNER_TEMP/noncanonical-source.lisp"
+          output="$RUNNER_TEMP/noncanonical-source.sens"
+          log="$RUNNER_TEMP/noncanonical-source-encode.log"
+          printf '%s\n' '(ordinary-name "text data")' > "$source"
+          if target/debug/sens-trit encode "$source" >"$log" 2>&1; then
+            cat "$log"
+            echo "SENS_FILE_AUTHORITY_BLOCKED: noncanonical textual source was accepted" >&2
+            exit 1
+          fi
+          cat "$log" >&2
+          if ! grep -Fq 'InvalidBinaryProjection' "$log"; then
+            echo "SENS_FILE_AUTHORITY_BLOCKED: negative control failed for an unexpected reason" >&2
+            exit 2
+          fi
+          if test -e "$output"; then
+            echo "SENS_FILE_AUTHORITY_BLOCKED: encoder emitted .sens despite rejecting input" >&2
+            exit 3
+          fi
+          echo "SENS_FILE_AUTHORITY_NEGATIVE_CONTROL_PASS: textual call/string rejected; no .sens emitted"
+
+      - name: Encode the complete oracle into physical T5
+        shell: bash
+        run: |
+          set -euo pipefail
+          log="$RUNNER_TEMP/file-authority-encode.log"
+          if target/debug/sens-trit encode "$RUNNER_TEMP/file-authority.lisp" >"$log" 2>&1; then
+            cat "$log"
+            test -s "$RUNNER_TEMP/file-authority.sens"
+          else
+            cat "$log" >&2
+            if grep -Fq 'InvalidBinaryProjection' "$log"; then
+              echo "SENS_FILE_AUTHORITY_BLOCKED: assembled Lisp source is not an admitted canonical binary projection; no text fallback is permitted" >&2
+            else
+              echo "SENS_FILE_AUTHORITY_BLOCKED: physical encoding failed; inspect the encoder diagnostic above" >&2
+            fi
+            if test -e "$RUNNER_TEMP/file-authority.sens"; then
+              echo "SENS_FILE_AUTHORITY_BLOCKED: encoder left an output file after failure" >&2
+              exit 3
+            fi
+            exit 2
+          fi
+
+      - name: Execute and attest the physical SENS authority verdict
+        shell: bash
+        env:
+          EXPECTED_ADDED_PATHS: ${{ steps.transport.outputs.added_paths }}
+          EXPECTED_TRACKED_TOOLS_PATHS: ${{ steps.transport.outputs.tracked_tools_paths }}
+        run: |
+          set -euo pipefail
+          verdict_pattern='^\(SENS_FILE_AUTHORITY_PASS new-paths [0-9]+ tracked-tool-paths [0-9]+\)$'
+
+          if [[ ! "$EXPECTED_ADDED_PATHS" =~ ^[0-9]+$ ||
+                ! "$EXPECTED_TRACKED_TOOLS_PATHS" =~ ^[0-9]+$ ]]; then
+            echo "SENS_FILE_AUTHORITY_BLOCKED: missing numeric Git inventory evidence" >&2
+            exit 2
+          fi
+          check_inventory_verdict() {
+            local candidate="$1" count_added="$2" count_tools="$3"
+            [[ "$candidate" =~ $verdict_pattern ]] &&
+              [[ "$candidate" == "(SENS_FILE_AUTHORITY_PASS new-paths $count_added tracked-tool-paths $count_tools)" ]]
+          }
+          
+          # Незалежні фальсифікатори: чужий текст/порожній вивід — не рішення SENS.
+          valid='(SENS_FILE_AUTHORITY_PASS new-paths 0 tracked-tool-paths 1)'
+          if ! check_inventory_verdict "$valid" 0 1; then
+            echo "SENS_FILE_AUTHORITY_BLOCKED: validator rejected canonical inventory" >&2
+            exit 2
+          fi
+          if check_inventory_verdict "$valid" 1 1 || check_inventory_verdict "$valid" 0 2; then
+            echo "SENS_FILE_AUTHORITY_BLOCKED: wrong inventory counts were accepted" >&2
+            exit 2
+          fi
+          for invalid in '' 'SENS_FILE_AUTHORITY_PASS' \
+            '(SENS_FILE_AUTHORITY_PASS new-paths 0 tracked-tool-paths 1) junk' \
+            '(SENS_FILE_AUTHORITY_PASS new-paths unknown tracked-tool-paths 1)' \
+            '(FOREIGN_PASS new-paths 0 tracked-tool-paths 1)'; do
+            if [[ "$invalid" =~ $verdict_pattern ]]; then
+              echo "SENS_FILE_AUTHORITY_BLOCKED: fake or incomplete verdict was admitted" >&2
+              exit 2
+            fi
+          done
+
+          log="$RUNNER_TEMP/file-authority-execution.log"
+          if target/debug/sens "$RUNNER_TEMP/file-authority.sens" >"$log" 2>&1; then
+            cat "$log"
+          else
+            cat "$log" >&2
+            echo "SENS_FILE_AUTHORITY_BLOCKED: physical SENS execution failed" >&2
+            exit 1
+          fi
+
+          # CLI друкує EvalResult.output, потім EvalResult.value: остаточне
+          # значення мусить бути повним, типізованим рішенням SENS, не substring.
+          verdict="$(tail -n 1 "$log")"
+          if ! check_inventory_verdict "$verdict" "$EXPECTED_ADDED_PATHS" "$EXPECTED_TRACKED_TOOLS_PATHS"; then
+            echo "SENS_FILE_AUTHORITY_BLOCKED: final SENS verdict mismatches Git inventory" >&2
+            exit 2
+          fi
+
+      - name: Diff hygiene
+        run: git diff --check

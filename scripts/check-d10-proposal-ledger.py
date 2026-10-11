@@ -274,6 +274,9 @@ def main() -> int:
     parser.add_argument("--self-test", action="store_true")
     args = parser.parse_args()
     if args.self_test:
+        # Оптимізований Python вилучає assert, а без них немає доказового self-test.
+        if not __debug__:
+            raise SystemExit("D10-PROPOSAL-LEDGER: BLOCKED — Python -O вимикає негативні перевірки")
         self_test()
     if not args.ledger.is_file():
         print(f"D10-PROPOSAL-LEDGER: BLOCK missing {args.ledger}")

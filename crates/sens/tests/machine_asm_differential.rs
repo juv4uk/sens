@@ -1,4 +1,4 @@
-use sens::{eval_program, load_core_library, Session};
+use sens::{eval_parsed_expressions, eval_program, load_core_library, parse_mixed_exact_domain_machine_source, Session};
 use std::fs;
 use std::path::{Path, PathBuf};
 use std::process::{Command, Output};
@@ -8,11 +8,17 @@ fn repo_root() -> PathBuf {
 }
 
 fn load_lisp_file(path: &str, session: &mut Session) {
-    let path = repo_root().join(path);
-    let source = fs::read_to_string(&path)
-        .unwrap_or_else(|error| panic!("{} must exist: {error}", path.display()));
-    eval_program(&source, session)
-        .unwrap_or_else(|error| panic!("{} must load as ordinary sens: {error}", path.display()));
+    assert!(
+        path.starts_with("lib/machine/"),
+        "machine-source reader is restricted to lib/machine/** fixtures: {path}"
+    );
+    let file_path = repo_root().join(path);
+    let source = fs::read_to_string(&file_path)
+        .unwrap_or_else(|error| panic!("{} must exist: {error}", file_path.display()));
+    let expressions = parse_mixed_exact_domain_machine_source(path, &source)
+        .unwrap_or_else(|error| panic!("{path} must parse as exact-domain machine source: {error}"));
+    eval_parsed_expressions(&expressions, session)
+        .unwrap_or_else(|error| panic!("{path} must load through exact-domain reader: {error}"));
 }
 
 fn machine_session() -> Session {
@@ -240,4 +246,174 @@ fn gas_and_nasm_match_lisp_owned_encoder_for_admitted_corpus() {
     }
 
     fs::remove_dir_all(&temp).expect("clean witness temp directory");
+}
+
+
+// Окремий від зовнішніх асемблерів етапний свідок виклику.
+// Якщо реальна збірка ще заблокована, звіт показує перший несправний вузол.
+#[test]
+#[ignore = "машинний GitHub-hosted маршрут; той самий профіль, що GAS/NASM"]
+fn x86_encoder_callability_stage_probe() {
+    let mut session = machine_session();
+    let stages = [
+        ("код_rax", "(x86-reg-code (quote rax))"),
+        ("код_rcx", "(x86-reg-code (quote rcx))"),
+        ("залишок_3", "(x86-low3 1)"),
+        ("верхній_1", "(x86-high1 1)"),
+        ("префікс_REX", "(x86-encode-rex 1 0 0 0)"),
+        ("поле_ModRM", "(x86-encode-modrm 3 1 0)"),
+        ("код_xmm0", "(x86-xmm-reg-code (quote xmm0))"),
+        ("код_xmm1", "(x86-xmm-reg-code (quote xmm1))"),
+        ("верхній_xmm0", "(x86-high1 (x86-xmm-reg-code (quote xmm0)))"),
+        ("верхній_xmm1", "(x86-high1 (x86-xmm-reg-code (quote xmm1)))"),
+        ("умова_без_REX_XMM", "(менше? (додати (x86-high1 (x86-xmm-reg-code (quote xmm0))) (x86-high1 (x86-xmm-reg-code (quote xmm1)))) 1)"),
+        ("SSE_66_енкодер", "(x86-encode-sse-66-map-xmm-xmm 56 220 (quote xmm0) (quote xmm1))"),
+        ("AESENC_енкодер", "(x86-encode-aesenc-xmm-xmm (quote xmm0) (quote xmm1))"),
+        ("PCLMUL_exact_integer", "(x86-admission-exact-integer? 17)"),
+        ("PCLMUL_range_uimm8", "(x86-admission-within-inclusive-integer-range? 17 0 255)"),
+        ("PCLMUL_uimm8", "(x86-admission-uimm8? 17)"),
+        ("PCLMUL_pattern_match", "(x86-admission-pattern-match? (quote (pclmulqdq-xmm-xmm-imm8 xmm-register xmm-register uimm8)) (quote (pclmulqdq-xmm-xmm-imm8 xmm0 xmm1 17)))"),
+        ("PCLMUL_admitted", "(x86-admitted-instruction? (quote (pclmulqdq-xmm-xmm-imm8 xmm0 xmm1 17)))"),
+        ("PCLMUL_SSE_map", "(x86-encode-sse-66-map-xmm-xmm 58 104 (quote xmm0) (quote xmm1))"),
+        ("PCLMUL_encoder_direct", "(x86-encode-pclmulqdq-xmm-xmm-imm8 (quote xmm0) (quote xmm1) 17)"),
+        ("PCLMUL_instruction_encoder", "(x86-encode-admitted-instruction (quote (pclmulqdq-xmm-xmm-imm8 xmm0 xmm1 17)))"),
+        ("PCLMUL_whole_program", "(x86-encode-admitted-program (quote ((pclmulqdq-xmm-xmm-imm8 xmm0 xmm1 17))))"),
+        ("старий_LIST", "(00100111 72 1 200)"),
+        ("чинний_LIST", "(list 72 1 200)"),
+        ("старий_LET", "(10011100 ((n 1)) n)"),
+        ("чинний_LET", "(let ((n 1)) n)"),
+        ("байти_add", "(x86-encode-add-r64-r64 (quote rax) (quote rcx))"),
+        (
+            "одна_інструкція",
+            "(x86-encode-admitted-instruction (quote (add-r64-r64 rax rcx)))",
+        ),
+        (
+            "повна_програма",
+            "(x86-encode-admitted-program (quote ((add-r64-r64 rax rcx))))",
+        ),
+    ];
+    let mut failed = Vec::new();
+    for (stage, source) in stages {
+        match eval_program(source, &mut session) {
+            Ok(observation) => eprintln!(
+                "X86_ЕТАП_УСПІХ stage={stage} value={}",
+                observation.value
+            ),
+            Err(error) => {
+                eprintln!("X86_ЕТАП_БЛОКУВАННЯ stage={stage} error={error}");
+                failed.push(stage);
+            }
+        }
+    }
+    assert!(
+        failed.is_empty(),
+        "Не доведено виклики x86-кодувальника на етапах: {failed:?}"
+    );
+}
+
+
+// Незалежна атестація всіх 16 механічних номерів регістрів.
+// Перевіряємо точний результат, а не тільки відсутність помилки виклику.
+// #d потрібен, щоб числа 10/11 не стали двійковими словами.
+#[test]
+#[ignore = "разом з GAS/NASM на GitHub-hosted runner"]
+fn x86_register_fields_have_exact_values_for_all_16_codes() {
+    let mut session = machine_session();
+    for code in 0u32..16 {
+        let low_source = format!("(x86-low3 #d{code})");
+        let high_source = format!("(x86-high1 #d{code})");
+        let low = eval_program(&low_source, &mut session)
+            .unwrap_or_else(|error| panic!("Невикличний low3 для {code}: {error}"));
+        let high = eval_program(&high_source, &mut session)
+            .unwrap_or_else(|error| panic!("Невикличний high1 для {code}: {error}"));
+        assert_eq!(
+            low.value.to_string(),
+            (code % 8).to_string(),
+            "Невірні молодші три біти регістра {code}"
+        );
+        assert_eq!(
+            high.value.to_string(),
+            (code / 8).to_string(),
+            "Невірний старший біт регістра {code}"
+        );
+        eprintln!("X86_ПОЛЯ_РЕГІСТРА_УСПІХ code={code} low3={} high1={}",
+                  low.value, high.value);
+    }
+}
+
+
+// Атестуємо саме генератор ADD, окремо від ще заблокованого admission.
+// Кожне байтове очікування порівнюється також із двома незалежними асемблерами.
+#[test]
+#[ignore = "зовнішні GAS/NASM на GitHub-hosted runner"]
+fn x86_direct_add_byte_parity_with_gas_nasm() {
+    assert!(tool_version("as", &["--version"]).ends_with(" 2.42"));
+    assert_eq!(tool_version("nasm", &["-v"]), "NASM version 2.16.01");
+    assert!(tool_version("objcopy", &["--version"]).ends_with(" 2.42"));
+
+    let mut session = machine_session();
+    let temp = std::env::temp_dir().join(format!("sens-asm-direct-add-{}", std::process::id()));
+    if temp.exists() {
+        fs::remove_dir_all(&temp).expect("прибрати попередній артефакт");
+    }
+    fs::create_dir_all(&temp).expect("створити каталог незалежного свідка");
+    let cases: [(&str, &str, &str, &str, &[u8]); 2] = [
+        ("rax_rcx", "rax", "rcx", "add rax, rcx", &[72, 1, 200]),
+        ("r8_r9", "r8", "r9", "add r8, r9", &[77, 1, 200]),
+    ];
+    for (name, destination, source, instruction, expected) in cases {
+        let expression = format!(
+            "(x86-encode-add-r64-r64 (quote {destination}) (quote {source}))"
+        );
+        let observed = eval_program(&expression, &mut session)
+            .unwrap_or_else(|error| panic!("Недоступний прямий ADD {name}: {error}"));
+        let bytes = parse_byte_list(&observed.value.to_string());
+        assert_eq!(bytes, expected, "{name}: невірні незалежні байтові очікування");
+        let gas = gas_bytes(&temp, name, instruction);
+        let nasm = nasm_bytes(&temp, name, instruction);
+        assert_eq!(bytes, gas, "{name}: різниця з GAS");
+        assert_eq!(bytes, nasm, "{name}: різниця з NASM");
+        eprintln!("X86_ПРЯМИЙ_ADD_ПАРИТЕТ_УСПІХ name={name} bytes={bytes:?}");
+    }
+    fs::remove_dir_all(&temp).expect("очистити фізичне свідчення");
+}
+
+
+// Перевірка етапу складання фізичних байтів — незалежно від admission.
+// Порожній, один та два блоки: точний порядок без англійських macro-підмін.
+#[test]
+#[ignore = "штатний профіль x86 на GitHub-hosted runner"]
+fn x86_byte_program_stitches_without_legacy_callable() {
+    let mut session = machine_session();
+    let cases = [
+        ("порожня", "(x86-encode-program (quote ()))", "()"),
+        ("одна", "(x86-encode-program (quote ((72 1 200))))", "(72 1 200)"),
+        (
+            "дві",
+            "(x86-encode-program (quote ((72 1 200) (195))))",
+            "(72 1 200 195)",
+        ),
+    ];
+    for (name, source, expected) in cases {
+        let observed = eval_program(source, &mut session)
+            .unwrap_or_else(|error| panic!("X86_СКЛАДАННЯ_БЛОКУВАННЯ stage={name}: {error}"));
+        assert_eq!(
+            observed.value.to_string(),
+            expected,
+            "X86_СКЛАДАННЯ_НЕСПІВПАДІННЯ stage={name}"
+        );
+        eprintln!("X86_СКЛАДАННЯ_УСПІХ stage={name} bytes={expected}");
+    }
+    // Довільний атом не є ознакою EOF; він повинен відхилятися, а не
+    // матеріалізуватися у порожній машинний потік.
+    let malformed = eval_program(
+        "(x86-encode-program (quote не-список))",
+        &mut session,
+    )
+    .expect("non-list instruction input must return the explicit SENS rejection envelope");
+    assert!(
+        malformed.value.to_string().starts_with("(rejected machine-operand instruction-list"),
+        "Неспискова структура має повернути явне SENS-відхилення, а не порожній потік: {}",
+        malformed.value
+    );
 }

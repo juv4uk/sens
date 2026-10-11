@@ -14,6 +14,10 @@ The witness is intentionally tiny and exhaustive over bounded spaces.
 
 from __future__ import annotations
 
+# Оптимізований Python прибирає assert; доказові перевірки обов'язкові.
+if not __debug__:
+    raise SystemExit("FOUNDATION-1: BLOCKED — Python -O вимикає assert")
+
 import itertools
 from dataclasses import dataclass
 

@@ -1,7 +1,9 @@
 #![cfg(all(any(target_os = "linux", target_os = "windows"), target_arch = "x86_64"))]
 
+
 use sens::{
-    eval_program, load_core_library, register_capability, Environment, Exactness, Expr,
+    eval_parsed_expressions, eval_program, load_core_library, parse_mixed_exact_domain,
+    parse_mixed_exact_domain_machine_source, register_capability, Environment, Exactness, Expr,
     LanguageError, Session, Span, Value,
 };
 use sens_host::install;
@@ -32,11 +34,24 @@ fn repo_root() -> PathBuf {
 }
 
 fn load_lisp_file(path: &str, session: &mut Session) {
-    let path = repo_root().join(path);
-    let source = fs::read_to_string(&path)
-        .unwrap_or_else(|error| panic!("{} must exist: {error}", path.display()));
-    eval_program(&source, session)
-        .unwrap_or_else(|error| panic!("{} must load as ordinary sens: {error}", path.display()));
+    assert!(
+        path.starts_with("lib/machine/"),
+        "machine-source reader is restricted to lib/machine/** fixtures: {path}"
+    );
+    let file_path = repo_root().join(path);
+    let source = fs::read_to_string(&file_path)
+        .unwrap_or_else(|error| panic!("{} must exist: {error}", file_path.display()));
+    let expressions = parse_mixed_exact_domain_machine_source(path, &source)
+        .unwrap_or_else(|error| panic!("{path} must parse as exact-domain machine source: {error}"));
+    eval_parsed_expressions(&expressions, session)
+        .unwrap_or_else(|error| panic!("{path} must load through the machine-source reader: {error}"));
+}
+
+fn eval_uk_program(source: &str, session: &mut Session) -> sens::EvalResult {
+    let expressions = parse_mixed_exact_domain(source)
+        .unwrap_or_else(|error| panic!("Ukrainian exact-domain witness must parse: {error}"));
+    eval_parsed_expressions(&expressions, session)
+        .unwrap_or_else(|error| panic!("Ukrainian exact-domain witness must evaluate: {error}"))
 }
 
 fn spy_executor(
@@ -136,10 +151,8 @@ fn semantic_lowering_must_produce_structured_forms_before_admission_and_executio
     .expect("admitted semantic ADD forms must execute through the canonical gateway");
     assert_eq!(add.value.to_string(), "5");
 
-    let interpreter_car = eval_program("(перше (сполучити 2 3))", &mut session)
-        .expect("interpreter CAR reference witness must remain valid");
-    let interpreter_cdr = eval_program("(решта (сполучити 2 3))", &mut session)
-        .expect("interpreter CDR reference witness must remain valid");
+    let interpreter_car = eval_uk_program("(перше (сполучити 2 3))", &mut session);
+    let interpreter_cdr = eval_uk_program("(решта (сполучити 2 3))", &mut session);
 
     let native_car = eval_program(
         "(x86-call-admitted-u64 (x86-lower-cons-car-u64-forms 2 3) x86-pair-cell-bytes)",
@@ -219,10 +232,8 @@ fn interpreter_pair_reference_witnesses_remain_two_and_three() {
     let mut session = Session::default();
     load_core_library(&mut session).expect("core must bootstrap before pair reference witness");
 
-    let car = eval_program("(перше (сполучити 2 3))", &mut session)
-        .expect("interpreter CAR witness must remain valid");
-    let cdr = eval_program("(решта (сполучити 2 3))", &mut session)
-        .expect("interpreter CDR witness must remain valid");
+    let car = eval_uk_program("(перше (сполучити 2 3))", &mut session);
+    let cdr = eval_uk_program("(решта (сполучити 2 3))", &mut session);
 
     assert_eq!(car.value.to_string(), "2");
     assert_eq!(cdr.value.to_string(), "3");
@@ -349,10 +360,81 @@ fn native_pair_car_cdr_match_the_interpreter_reference_witness() {
     load_lisp_file("lib/machine/admission/x86-64.lisp", &mut session);
     load_lisp_file("lib/machine/lowering/semantic-x86-64.lisp", &mut session);
 
-    let interpreter_car = eval_program("(перше (сполучити 2 3))", &mut session)
-        .expect("interpreter CAR reference witness must remain valid");
-    let interpreter_cdr = eval_program("(решта (сполучити 2 3))", &mut session)
-        .expect("interpreter CDR reference witness must remain valid");
+    let interpreter_car = eval_uk_program("(перше (сполучити 2 3))", &mut session);
+    let interpreter_cdr = eval_uk_program("(решта (сполучити 2 3))", &mut session);
+
+
+    // Failure-only stage inventory for Contract 11.8 callability diagnosis.
+    // These probes report but never turn a failed stage into a passing test.
+    for (name, source) in [
+        ("wire-denominator-zero", "(x86-admission-wire-denominator-one? \"0/1\")"),
+        ("ge-lower-zero", "(не-менше? 0 -128)"),
+        ("ge-normalize-zero", "(тотожне? (не-менше? 0 -128) 1)"),
+        ("le-upper-zero", "(не-більше? 0 127)"),
+        ("le-normalize-zero", "(тотожне? (не-більше? 0 127) 1)"),
+        ("eq-number-control", "(тотожне? 1 1)"),
+        ("exact-integer-zero", "(x86-admission-exact-integer? 0)"),
+        ("disp8-zero", "(x86-admission-disp8? 0)"),
+        ("disp8-eight", "(x86-admission-disp8? 8)"),
+        ("pattern-store", "(x86-admission-pattern-match? (quote (mov-mem-disp8-r64 register disp8 register)) (quote (mov-mem-disp8-r64 rdi 0 rax)))"),
+        ("instruction-store", "(x86-admitted-instruction? (quote (mov-mem-disp8-r64 rdi 0 rax)))"),
+        ("whole-admission", "(x86-admitted-program? (quote ((mov-r64-imm64 rax 2) (mov-mem-disp8-r64 rdi 0 rax) (mov-r64-imm64 rax 3) (mov-mem-disp8-r64 rdi 8 rax) (mov-r64-mem-disp8 rax rdi 0) (ret))))"),
+    ] {
+        let result = eval_program(source, &mut session)
+            .map(|value| format!("{:?}", value.value))
+            .unwrap_or_else(|error| format!("ERROR: {error}"));
+        eprintln!("MACHINE-ADMISSION-STAGE {name}: {result}");
+    }
+
+    // Split the post-admission path so an encoder/arithmetic error cannot
+    // be misattributed to the raw CPU bridge. Failure-only observations never
+    // alter the critical assertion below.
+    for (name, source) in [
+        ("lowered-car-forms", "(x86-lower-cons-car-u64-forms 2 3)"),
+        ("lowered-car-admission", "(x86-admitted-program? (x86-lower-cons-car-u64-forms 2 3))"),
+        ("encode-mov-imm-left", "(x86-encode-admitted-instruction (quote (mov-r64-imm64 rax 2)))"),
+        ("encode-store-car", "(x86-encode-admitted-instruction (quote (mov-mem-disp8-r64 rdi 0 rax)))"),
+        ("encode-mov-imm-right", "(x86-encode-admitted-instruction (quote (mov-r64-imm64 rax 3)))"),
+        ("encode-store-cdr", "(x86-encode-admitted-instruction (quote (mov-mem-disp8-r64 rdi 8 rax)))"),
+        ("encode-load-car", "(x86-encode-admitted-instruction (quote (mov-r64-mem-disp8 rax rdi 0)))"),
+        ("encode-ret", "(x86-encode-admitted-instruction (quote (ret)))"),
+        ("reg-code-rdi", "(x86-reg-code (quote rdi))"),
+        ("reg-code-rax", "(x86-reg-code (quote rax))"),
+        ("reg-low3-rdi", "(x86-low3 (x86-reg-code (quote rdi)))"),
+        ("reg-high1-rdi", "(x86-high1 (x86-reg-code (quote rdi)))"),
+        ("rex-rdi", "(x86-encode-rex 1 0 0 (x86-high1 (x86-reg-code (quote rdi))))"),
+        ("modrm-store", "(x86-encode-modrm 1 (x86-low3 (x86-reg-code (quote rax))) (x86-low3 (x86-reg-code (quote rdi))))"),
+        ("sib-store", "(x86-encode-sib 0 4 4)"),
+        ("disp8-zero", "(x86-disp8-byte 0)"),
+        ("disp8-eight", "(x86-disp8-byte 8)"),
+        ("plus-disp8-zero", "(00001100 0 256)"),
+        ("mod-disp8-zero", "(00010011 (00001100 0 256) 256)"),
+        ("store-direct", "(x86-encode-mov-mem-disp8-r64 (quote rdi) 0 (quote rax))"),
+        ("lowered-car-encoding", "(x86-encode-admitted-program (x86-lower-cons-car-u64-forms 2 3))"),
+    ] {
+        let result = eval_program(source, &mut session)
+            .map(|value| format!("{:?}", value.value))
+            .unwrap_or_else(|error| format!("ERROR: {error}"));
+        eprintln!("MACHINE-CAR-STAGE {name}: {result}");
+    }
+
+    // Non-asserting encoder probe: isolate arithmetic failures before changing Lisp source.
+    for (stage, probe) in [
+        ("eq-numbers", "(101 7 4)"),
+        ("disp8-byte", "(x86-disp8-byte 0)"),
+        ("modrm-store", "(x86-encode-modrm 1 0 7)"),
+        ("sib", "(x86-encode-sib 0 4 4)"),
+        ("reg-code", "(x86-reg-code (00000001 rax))"),
+        ("rex", "(x86-encode-rex 1 0 0 0)"),
+        ("u64-bytes", "(x86-u64-bytes 2)"),
+        ("mov-imm", "(x86-encode-mov-r64-imm64 (00000001 rax) 2)"),
+        ("store", "(x86-encode-mov-mem-disp8-r64 (00000001 rdi) 0 (00000001 rax))"),
+    ] {
+        match eval_program(probe, &mut session) {
+            Ok(output) => println!("MACHINE-ENCODE-PROBE {stage}: OK {:?}", output.value),
+            Err(error) => println!("MACHINE-ENCODE-PROBE {stage}: ERROR {error:?}"),
+        }
+    }
 
     let native_car = eval_program(
         "(native-call-u64-raw (x86-encode-admitted-program (x86-lower-cons-car-u64-forms 2 3)) x86-pair-cell-bytes)",
@@ -365,6 +447,15 @@ fn native_pair_car_cdr_match_the_interpreter_reference_witness() {
     )
     .expect("Lisp-owned CONS+CDR forms must materialize through admission before raw host execution");
 
+    let native_semantic_car = eval_uk_program(
+        "(x86-call-semantic-car-u64 (сполучити 2 3))",
+        &mut session,
+    );
+    assert_eq!(
+        native_semantic_car.value,
+        interpreter_car.value,
+        "the Lisp-owned semantic CAR route must use exact CAR/CDR decomposition before native execution"
+    );
     assert_eq!(native_car.value, interpreter_car.value);
     assert_eq!(native_cdr.value, interpreter_cdr.value);
 }

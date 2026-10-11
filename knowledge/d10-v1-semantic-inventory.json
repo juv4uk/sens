@@ -8,10 +8,10 @@
   "capacity": 1024,
   "current_foundation": "#4008 / Contract 11.8 / D1-D9",
   "accounting": {
-    "selected_semantic_candidates": 645,
+    "selected_semantic_candidates": 675,
     "law_forced_coordinates": 256,
-    "unplaced_selected_candidates": 389,
-    "remaining_semantic_inventory": 379,
+    "unplaced_selected_candidates": 419,
+    "remaining_semantic_inventory": 349,
     "ratified_d10_residents": 0
   },
   "rules": [
@@ -14301,6 +14301,2778 @@
       "donor_coordinate_authority": "NONE",
       "ratified_resident": false,
       "physical_t5_authorized": false
+    },
+    {
+      "stable_id": "d10.hobby.babbage.exact-finite-difference-certificate.v1",
+      "semantic_name": "FINITE-DIFFERENCE-CERTIFICATE",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "BABBAGE-1822-EXACT-DIFFERENCES-RESEARCH",
+      "relation_class": "EXACT-POLYNOMIAL-SEQUENCE-DEGREE-BOUND-WITNESS",
+      "surface_uk": "посвідчити-скінченні-різниці",
+      "surface_ukr": "св-різн",
+      "arity": 2,
+      "argument_shape": "(samples:finite-list-of-exact-rationals, max_degree:d>=0 with len(samples)>=d+2)-> CERTIFIED(initial differences through d,next exact value) or NOT_CERTIFIED(first nonzero (d+1)-difference index,value)",
+      "behavior": "For at least d+2 equally-spaced exact samples, certify their table has identically zero (d+1)th forward differences; on success expose first forward differences orders 0..d and one exact next sample by Newton's finite binomial formula. On failure show the first nonzero (d+1)-difference. Return INSUFFICIENT-DATA if fewer than d+2 samples; no claim about future physical samples or noise.",
+      "positive_witnesses": [
+        {
+          "input": "samples=[1,4,9,16], d=2",
+          "result": "CERTIFIED: initial [1,3,2], next=25"
+        },
+        {
+          "input": "samples=[7,7,7], d=0",
+          "result": "CERTIFIED: initial [7], next=7"
+        },
+        {
+          "input": "samples=[1,4,9,17], d=2",
+          "result": "NOT_CERTIFIED: first Δ³[0]=1"
+        }
+      ],
+      "falsifiers": [
+        "Accept [1,4,9,17] as quadratic-certified (third difference is +1)",
+        "Claim any 3 samples certify degree<=2; fourth independent datum is required",
+        "Lose exact rational values to floating point",
+        "Claim predicted next mathematical sample must match noisy astronomical observations"
+      ],
+      "semantic_neighbors": [
+        "D8 polynomial and exact arithmetic",
+        "D10 BOUNDED-RATIONAL-APPROX",
+        "D10 FINITE-BAYES-UPDATE-EXACT",
+        "D9 UNIFY/PROVE-GOAL (unrelated)"
+      ],
+      "dedup_check": "На чинних 645 відібраних D10 та D1–D9 немає того самого сертифіката нульових різниць порядку d+1 із вимогою щонайменше d+2 незалежних відліків; мінімальність Core проти похідної Core-Math лишається на перегляді. Історичні 635 кандидатів первинного досліду не є нинішнім snapshot.",
+      "primary_url": "https://en.wikisource.org/wiki/Page:Memoirs_of_Royal_Astronomical_Society_Volume_01.djvu/332",
+      "source_title": "Charles Babbage, A Note respecting the Application of Machinery to the Calculation of Astronomical Tables (1822), Memoirs RAS Vol 1, p.309",
+      "source_scope": "Historical inspiration and finite-difference mechanism; precise certification/error-output interface is a modern SENS research proposal, not an alleged Babbage API.",
+      "user_domain_examples": [
+        "astronomy ephemeris polynomial tables",
+        "musical discrete motifs/tempo curves",
+        "FPGA exact recurrence",
+        "SDR calibration sample sequences",
+        "horology periodic observations"
+      ],
+      "provenance": [
+        "#4013",
+        "#4463",
+        "Babbage 1822 RAS p309",
+        "https://collection.sciencemuseumgroup.org.uk/objects/co62243/difference-engine-no-1-difference-engine",
+        "#5003 (історичний дослід, перенесено на main 645)",
+        "knowledge/d10-babbage-reiter-hobby-selected-20261009.json"
+      ],
+      "proposal_status": "pending-owner-review",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "ratified_resident": false,
+      "physical_t5_authorized": false
+    },
+    {
+      "stable_id": "d10.crosshobby.hysteretic-boolean-step.20261009",
+      "semantic_name": "HYSTERETIC-BOOLEAN-STEP",
+      "surface_uk": "гістеркрок",
+      "surface_ukr": "оновити-двопороговий-стан",
+      "source_class": "SOURCE-GROUNDED-EXACT-RATIONAL-STATE-LAW",
+      "relation_class": "TWO-THRESHOLD-MEMORY-UPDATE",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "proposal_status": "pending-owner-review",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "ratified_resident": false,
+      "physical_t5_authorized": false,
+      "arity": 4,
+      "argument_shape": "(state:D1 yes/no,low:exact rational,high:exact rational,sample:exact rational) -> D1 yes/no, low<high",
+      "behavior": "Given strict lower threshold low<high and an exact rational sample x, return D1 NO when x<=low, D1 YES when x>=high, and the unmodified previous D1 state when low<x<high; reject non-rational/NaN/inverted-or-equal thresholds. This defines deterministic equality at thresholds as a SENS mathematical tie convention, not a claim about uncertain analog transition voltages.",
+      "positive_witnesses": [
+        "step(NO,0,2,1)=NO; step(YES,0,2,1)=YES (same sample preserves different histories).",
+        "step(NO,0,2,2)=YES; step(YES,0,2,0)=NO.",
+        "step(NO,-1/2,1/2,1/4)=NO; step(YES,-1/2,1/2,1/4)=YES."
+      ],
+      "falsifier_spec": "A single midpoint threshold toggles output inside open hysteresis band; equality at high/low does not switch as specified; equal or inverted bounds are accepted; the previous state affects the saturated region.",
+      "dedup_check": "Звірено з ратифікованими D1–D9 і всіма 646 selected D10: немає тотожного іменованого двопорогового станового переходу; композиційність через порівняння+COND не заперечується, Core-vs-library лишається на розгляді.",
+      "ownership_test": "UNIVERSAL-BORDER: this describes an observable pure state-update function independent of ADC, transistor polarity, FPGA registers, analog voltages, transport, clock scheduler, branch mechanics, or D2 evaluation.",
+      "independent_oracle_note": "Pure exact-rational Python exhaustive mathematical oracle plus a real Chez Scheme executable independent implementation in CI; neither proves executed analog hardware parity or SENS native binary machine execution.",
+      "examples_scope": "Threshold comparisons over exact rationals, with explicit domains, not floating-point tolerance or analog metastability.",
+      "decision": "SELECT-D10-RESEARCH-CANDIDATE",
+      "language_visible": true,
+      "mechanism_only": false,
+      "source_path": "knowledge/d10-hysteretic-boolean-source-law-20261009.json",
+      "primary_url": "https://www.ti.com/document-viewer/lit/html/scea046",
+      "source_section": "Two distinct Schmitt thresholds and retention of previous Boolean state inside the band; exact equality is a SENS tie convention",
+      "provenance": [
+        "#4013",
+        "#4463",
+        "#4948",
+        "Texas Instruments SCEA046 https://www.ti.com/document-viewer/lit/html/scea046",
+        "Texas Instruments SNOA997A https://www.ti.com/document-viewer/lit/html/SNOA997A",
+        "knowledge/d10-hysteretic-boolean-source-law-20261009.json",
+        "Git source blob 2cd823d1744153bc985bcb8ddd46ffb55d30fafd"
+      ],
+      "dedup": {
+        "exact_in_d1_d9": false,
+        "exact_in_prior_d10": false,
+        "prior_d10_blob": "ad2200c1d4e153d8efb0f390cc8680f0fb656b5b",
+        "neighbors": [
+          "D1 PredicateBit",
+          "D3 COND",
+          "D6 ordered comparison",
+          "D10 FINITE-MEALY-RUN"
+        ],
+        "derivability": "PENDING-OWNER-REVIEW; comparison+COND+prior state suffice as derived implementation"
+      }
+    },
+    {
+      "stable_id": "d10.math.exact-barycentric-interpolate.20261011",
+      "semantic_name": "EXACT-BARYCENTRIC-INTERPOLATE",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "MATHEMATICS-ORACLE-ARCHIVE",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "EXACT-RATIONAL-INTERPOLATION",
+      "behavior": "Given 1..n pairwise-distinct exact rational node abscissas x_i and exact rational ordinates y_i, and exact rational query x, return the unique exact rational value of polynomial degree at most n−1 interpolating all nodes (x_i,y_i). Evaluate at x_i exactly y_i, reject duplicate x_i, empty set and inexact values; permutation of nodes must not alter result. Evaluate by barycentric rational weights, not floating coefficients.",
+      "provenance": [
+        "#4013",
+        "#4463",
+        "knowledge/d10-exact-barycentric-interpolation-research-v1.json",
+        "https://dlmf.nist.gov/3.3"
+      ],
+      "ratified_resident": false,
+      "source_path": "knowledge/d10-exact-barycentric-interpolation-research-v1.json",
+      "primary_url": "https://dlmf.nist.gov/3.3",
+      "proposal_status": "pending-owner-review",
+      "surface_uk": "точно-інтерполювати",
+      "surface_ukr": "обчислити-поліном-за-вузлами",
+      "positive_witnesses": [
+        {
+          "nodes": [
+            [
+              0,
+              0
+            ],
+            [
+              1,
+              1
+            ],
+            [
+              2,
+              4
+            ]
+          ],
+          "query": "1/2",
+          "expected": "1/4",
+          "why": "quadratic x² exact rational"
+        },
+        {
+          "nodes": [
+            [
+              0,
+              0
+            ],
+            [
+              1,
+              1
+            ],
+            [
+              2,
+              4
+            ]
+          ],
+          "query": "3",
+          "expected": "9",
+          "why": "polynomial extrapolation, not physical prediction"
+        },
+        {
+          "nodes": [
+            [
+              -1,
+              1
+            ],
+            [
+              1,
+              5
+            ]
+          ],
+          "query": "0",
+          "expected": "3",
+          "why": "2*x+3"
+        },
+        {
+          "nodes": [
+            [
+              1,
+              7
+            ]
+          ],
+          "query": "5/2",
+          "expected": "7",
+          "why": "unique constant polynomial"
+        },
+        {
+          "nodes": [
+            [
+              0,
+              5
+            ],
+            [
+              1,
+              5
+            ],
+            [
+              2,
+              5
+            ]
+          ],
+          "query": "3/2",
+          "expected": "5",
+          "why": "constant samples stay constant"
+        }
+      ],
+      "falsifiers": [
+        "Return a rounded float 0.25 rather than exact rational 1/4 on exact nodes/query.",
+        "Silently accept repeated x_i with inconsistent y_i, giving division by zero or arbitrary output.",
+        "Return interpolated coefficients rather than evaluated exact p(x), violating the declared result type.",
+        "Change result when reversing the node list, or produce a value other than y_i at an interpolation node.",
+        "Conflate polynomial interpolation with band-limited SDR reconstruction, sensor uncertainty propagation, hardware timing, or physical ephemeris accuracy."
+      ]
+    },
+    {
+      "stable_id": "d10.ai.finite-simple-temporal-closure.20261011",
+      "semantic_name": "FINITE-SIMPLE-TEMPORAL-CLOSURE",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "SYMBOLIC-AI-ORACLE-ARCHIVE",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "FINITE-EXACT-TEMPORAL-CLOSURE",
+      "behavior": "Для скінченних подій та цілих обмежень різниць повертає точні найтісніші наслідкові межі між усіма парами або явний від'ємний цикл суперечності; необмежені межі відмінні від нульових.",
+      "provenance": [
+        "#4013",
+        "#4463",
+        "knowledge/d10-finite-temporal-constraint-closure-v1.json",
+        "https://doi.org/10.1016/0004-3702(91)90006-6"
+      ],
+      "ratified_resident": false,
+      "source_path": "knowledge/d10-finite-temporal-constraint-closure-v1.json",
+      "primary_url": "https://doi.org/10.1016/0004-3702(91)90006-6",
+      "proposal_status": "pending-owner-review",
+      "surface_uk": "зімкнути-часові-межі",
+      "surface_ukr": "замчас",
+      "positive_witnesses": [
+        "0→1 <=4, 1→2 <=3, 0→2 <=15 gives tight 0→2 <=7, other direction is UNBOUNDED; cycle 0→1 <=2,1→2 <=1,2→0 <=-4 impossible"
+      ],
+      "falsifiers": [
+        "Treat disconnected/unbounded as zero",
+        "Treat constraint as reverse directed",
+        "Forget parallel tighter edge",
+        "Missing implied two-hop bound",
+        "Wrong positive cycle as conflict",
+        "Empty constraints reported UNSAT",
+        "Forge negative cycle with nonnegative sum",
+        "Accept finite-domain-only clock saturation"
+      ]
+    },
+    {
+      "stable_id": "d10.logic.exact-boolean-prime-implicants.20261011",
+      "semantic_name": "EXACT-BOOLEAN-PRIME-IMPLICANTS",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "HISTORICAL-LOGIC-ORACLE-ARCHIVE",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "BOOLEAN-PRIME-CUBE-FAMILY",
+      "behavior": "Let U={0,...,2^n-1}, ON∩DC=∅ and OFF=U\\(ON∪DC). A cube is an n-character pattern in {0,1,-}, where '-' is free. Return EVERY and ONLY cube c whose coverage intersects ON, whose coverage has empty intersection with OFF, and for which no strictly less constrained cube c' (covering strictly more assignments) also avoids OFF. Sort cubes by canonical lexicographic order '-'<'0'<'1'. The output is the complete prime implicant family, NOT a chosen minimum cover and not an individual Boolean gate.",
+      "provenance": [
+        "#4013",
+        "#4463",
+        "knowledge/d10-quine-prime-implicants-20261009.json",
+        "https://doi.org/10.2307/2262498"
+      ],
+      "ratified_resident": false,
+      "source_path": "knowledge/d10-quine-prime-implicants-20261009.json",
+      "primary_url": "https://doi.org/10.1080/00029890.1952.11988183",
+      "proposal_status": "pending-owner-review",
+      "surface_uk": "прості-імпліканти",
+      "surface_ukr": "усі-максимальні-куби-булевої-функції",
+      "positive_witnesses": [
+        {
+          "width": 2,
+          "on": [
+            1,
+            3
+          ],
+          "dc": [],
+          "result": [
+            "-1"
+          ]
+        },
+        {
+          "width": 2,
+          "on": [
+            1,
+            2
+          ],
+          "dc": [],
+          "result": [
+            "01",
+            "10"
+          ]
+        },
+        {
+          "width": 3,
+          "on": [
+            1,
+            3,
+            5,
+            7
+          ],
+          "dc": [],
+          "result": [
+            "--1"
+          ]
+        },
+        {
+          "width": 2,
+          "on": [
+            0
+          ],
+          "dc": [
+            1
+          ],
+          "result": [
+            "0-"
+          ]
+        },
+        {
+          "width": 2,
+          "on": [
+            0,
+            1,
+            2,
+            3
+          ],
+          "dc": [],
+          "result": [
+            "--"
+          ]
+        },
+        {
+          "width": 2,
+          "on": [],
+          "dc": [
+            1,
+            2
+          ],
+          "result": []
+        },
+        {
+          "width": 0,
+          "on": [
+            0
+          ],
+          "dc": [],
+          "result": [
+            ""
+          ]
+        }
+      ],
+      "falsifiers": [
+        "Any returned cube intersects OFF.",
+        "A reported prime cube can free another constrained bit without touching OFF.",
+        "ON coverage is lost or cubes covering only DC are reported.",
+        "Returns one minimized sum-of-products cover rather than all primes.",
+        "Treats a don't-care as mandatory output-1 or silently allows overlapping ON/DC."
+      ]
+    },
+    {
+      "stable_id": "d10.ai.binary-constraint-support-projection.20261011",
+      "semantic_name": "BINARY-CONSTRAINT-SUPPORT-PROJECTION",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "SYMBOLIC-AI-EXTERNAL-ORACLE-ARCHIVE",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "FINITE-BINARY-RELATION-SUPPORT",
+      "behavior": "Для скінченних подій та цілих обмежень різниць повертає точні найтісніші наслідкові межі між усіма парами або явний від'ємний цикл суперечності; необмежені межі відмінні від нульових.",
+      "provenance": [
+        "#4013",
+        "#4463",
+        "knowledge/d10-symbolic-ai-arc-support-20261009.json",
+        "https://doi.org/10.1016/0004-3702(77)90007-8"
+      ],
+      "ratified_resident": false,
+      "source_path": "knowledge/d10-symbolic-ai-arc-support-20261009.json",
+      "primary_url": "https://doi.org/10.1016/0004-3702(77)90007-8",
+      "proposal_status": "pending-owner-review",
+      "surface_uk": "відсіяти-без-опори",
+      "surface_ukr": "звузити-два-домени-за-відношенням",
+      "positive_witnesses": [
+        {
+          "dx": [
+            1,
+            2,
+            3
+          ],
+          "dy": [
+            4,
+            5
+          ],
+          "allowed": [
+            [
+              1,
+              4
+            ],
+            [
+              2,
+              6
+            ],
+            [
+              3,
+              5
+            ]
+          ],
+          "out": {
+            "status": "SUPPORTED",
+            "left": [
+              1,
+              3
+            ],
+            "right": [
+              4,
+              5
+            ]
+          }
+        },
+        {
+          "dx": [
+            1,
+            2
+          ],
+          "dy": [
+            3,
+            4
+          ],
+          "allowed": [
+            [
+              1,
+              3
+            ],
+            [
+              2,
+              4
+            ]
+          ],
+          "out": {
+            "status": "SUPPORTED",
+            "left": [
+              1,
+              2
+            ],
+            "right": [
+              3,
+              4
+            ]
+          }
+        },
+        {
+          "dx": [
+            1,
+            2
+          ],
+          "dy": [
+            3
+          ],
+          "allowed": [
+            [
+              1,
+              4
+            ],
+            [
+              2,
+              5
+            ]
+          ],
+          "out": {
+            "status": "NO-SUPPORT",
+            "left": [],
+            "right": []
+          }
+        },
+        {
+          "dx": [
+            2
+          ],
+          "dy": [
+            3
+          ],
+          "allowed": [
+            [
+              2,
+              3
+            ]
+          ],
+          "out": {
+            "status": "SUPPORTED",
+            "left": [
+              2
+            ],
+            "right": [
+              3
+            ]
+          }
+        },
+        {
+          "dx": [],
+          "dy": [
+            1
+          ],
+          "allowed": [
+            [
+              0,
+              1
+            ]
+          ],
+          "out": {
+            "status": "NO-SUPPORT",
+            "left": [],
+            "right": []
+          }
+        }
+      ],
+      "falsifiers": [
+        "A value x with no R-related y in the current Dy must be removed; keeping x violates sound support pruning.",
+        "Arbitrary Cartesian product of output domains is NOT guaranteed to be contained in R; do not claim universal pair compatibility or global CSP solution.",
+        "When all allowed pairs are removed, return named NO-SUPPORT rather than SUCCESS(empty,empty), avoiding contradictory proof status.",
+        "Monotonicity: reducing either input domain cannot invent any supported output; repeated projection must be idempotent.",
+        "Reject unsorted/duplicate finite lists, float/boolean values, non-pair relation members: no silent coercion into semantic identity."
+      ]
+    },
+    {
+      "stable_id": "d10.math.unique-bounded-modular-lift.20261011",
+      "semantic_name": "UNIQUE-BOUNDED-MODULAR-LIFT",
+      "surface_uk": "єдине-підняття-остачі",
+      "surface_ukr": "відновити-єдине-ціле-за-циклічним-відліком",
+      "source_class": "EXACT-INTEGER-CYCLIC-LIFT-RESEARCH",
+      "relation_class": "BOUNDED-CONGRUENCE-MULTIPLICITY-CERTIFICATE",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "proposal_status": "pending-owner-review",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "ratified_resident": false,
+      "physical_t5_authorized": false,
+      "arity": 4,
+      "argument_shape": "(M:integer>=2,r:integer 0<=r<M,lo,hi:integers lo<=hi) -> NONE(0) | UNIQUE(z) | AMBIGUOUS(count,first,second)",
+      "behavior": "Find all integers z with lo<=z<=hi and z mod M=r. Return NONE with count 0 if there are none; return UNIQUE with the exact only z if count 1; return AMBIGUOUS with exact count>=2 and first two solutions in increasing order if there are at least two. All integer arithmetic; invalid domains are reported as ERROR, never guessed or clamped. kmin = ceil((lo-r)/M), kmax = floor((hi-r)/M), solutions z=r+k*M for integer k in [kmin,kmax], count=max(0,kmax-kmin+1)",
+      "positive_witnesses": [
+        "(4096,2,4090,4100) -> UNIQUE 4098",
+        "(4096,2,3,4097) -> NONE count=0",
+        "(4096,2,0,8194) -> AMBIGUOUS count=3 first=2 second=4098",
+        "(7,6,-10,-1) -> AMBIGUOUS count=2 first=-8 second=-1",
+        "(5,2,-3,-3) -> UNIQUE -3",
+        "(7,0,1,6) -> NONE count=0",
+        "(7,0,0,7) -> AMBIGUOUS count=2 first=0 second=7"
+      ],
+      "falsifier_spec": "Return nearest unwrapped branch even when both 2 and 4098 are inside allowed interval [0,8194]: an explicit ambiguous result is required. | Treat residues from a circular sector CONTAINS predicate as unique absolute position; membership alone does not specify turn count. | Return 0 where lo=1,hi=6,M=7,r=0, or omit negative lifts, or exclude a matching inclusive endpoint. | Claim a fixed 4096 period for all counters: the modulus is a caller-supplied integer and generic law is exact. | Claim data from a wrapped register alone reveals number of full turns, velocity, direction or phase under aliasing: without admissible interval no such information is justified.",
+      "dedup_check": "Звірено з D1–D9 та попередніми 647 D10. Немає тотожного закону сертифікації 0/1/кількох цілочисельних піднять у замкненому інтервалі; DIVMOD, GENERALIZED-CONGRUENCE-MERGE, Forth WITHIN та unwrap не видають цього свідчення. Похідність через floor/ceil визнається; Core-vs-library лишається на розгляді.",
+      "ownership_test": "UNIVERSAL-BORDER: скінченний цілочисельний закон множинності не залежить від AS5600, SDR, FPGA, драйвера, фізичного обертання, T5 чи ABI.",
+      "independent_oracle_note": "Research Chez Scheme 16/16 explicit examples; Python exact-integer formula vs brute-force enumeration; neither executes binary SENS.",
+      "decision": "SELECT-D10-RESEARCH-CANDIDATE",
+      "language_visible": true,
+      "mechanism_only": false,
+      "source_path": "knowledge/d10-unique-bounded-modular-lift-20261009.json",
+      "primary_url": "https://numpy.org/doc/stable/reference/generated/numpy.unwrap.html",
+      "source_section": "Official reference to periodic unwrapping; the zero/one/many certificate itself is new derived SENS math, not NumPy API.",
+      "provenance": [
+        "#4013",
+        "#4463",
+        "docs/research/d10-bounded-modular-lift-20261009.uk.md",
+        "knowledge/d10-unique-bounded-modular-lift-20261009.json",
+        "https://numpy.org/doc/stable/reference/generated/numpy.unwrap.html",
+        "Git source blob 4ec2aaef1bfb1a7cf2c2ebd9755eca1563cacfbe"
+      ],
+      "dedup": {
+        "exact_in_d1_d9": false,
+        "exact_in_prior_d10": false,
+        "prior_d10_blob": "7e13e929338baeef9b16c2139d24b78e23ea1e03",
+        "neighbors": [
+          "D9 DIVMOD",
+          "D10 GENERALIZED-CONGRUENCE-MERGE",
+          "Forth WITHIN",
+          "NumPy unwrap"
+        ],
+        "derivability": "PENDING-OWNER-REVIEW; a derived exact integer certificate"
+      }
+    },
+    {
+      "stable_id": "d10.math.prefix-free-kraft-certificate.20261011",
+      "semantic_name": "PREFIX-FREE-KRAFT-CERTIFICATE",
+      "surface_uk": "посвідчити-префіксний-код",
+      "surface_ukr": "перевірити-префіксність-і-суму-крафта",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "decision": "SELECT-D10-RESEARCH-CANDIDATE",
+      "proposal_status": "pending-owner-review",
+      "source_class": "KRAFT-INEQUALITY-EXACT-CODEBOOK-20261011",
+      "relation_class": "FINITE-BINARY-PREFIX-FREE-EXACT-DYADIC-CERTIFICATE",
+      "arity": 1,
+      "argument_shape": "(finite ordered list of finite binary words, empty word allowed) -> tagged certificate or first collision; invalid input rejected",
+      "result_shape": "CERTIFIED(numerator,denominator) | NOT_PREFIX_FREE(i,j,shared_shorter_word) | INVALID_INPUT",
+      "behavior": "Return CERTIFIED with reduced exact Kraft sum Σ 2^-length for an actually prefix-free finite ordered binary codebook; otherwise return first conflicting pair of indices i<j with a concrete shorter-prefix witness (duplicates conflict). An empty codebook has sum zero; a singleton empty word has sum one. Reject nonbinary or non-sequence inputs. This does not claim that the Kraft inequality alone proves that the submitted words are prefix-free.",
+      "positive_witnesses": [
+        {
+          "input": [
+            "0",
+            "10",
+            "11"
+          ],
+          "result": "CERTIFIED(1,1)"
+        },
+        {
+          "input": [
+            "00",
+            "01"
+          ],
+          "result": "CERTIFIED(1,2)"
+        },
+        {
+          "input": [
+            "0",
+            "00"
+          ],
+          "result": "NOT_PREFIX_FREE(0,1,'0')"
+        },
+        {
+          "input": [],
+          "result": "CERTIFIED(0,1)"
+        },
+        {
+          "input": [
+            ""
+          ],
+          "result": "CERTIFIED(1,1)"
+        }
+      ],
+      "falsifiers": [
+        "Accept concrete words ['0','00'] because their Kraft sum 3/4 <= 1",
+        "Accept duplicate codewords at distinct indices",
+        "Count the empty word as weight zero or ignore it",
+        "Use floating point and lose exact dyadic denominator",
+        "Call this physical T5/Framed3 admission rather than a pure codebook law"
+      ],
+      "dedup_check": "No exact semantic counterpart in ratified D1-D9 or selected 647 D10: distinguishes concrete codeword prefix collisions (with first-index witness) from length-vector Kraft feasibility, Gray transforms, word root and physical frame parsing. Derivability and Core-vs-library remain pending.",
+      "ownership_test": "UNIVERSAL-BORDER: a pure finite language-visible certificate over binary words and exact rationals; independent of physical transport, CPU, FPGA, compressed representation, D2 parser or host-IO mechanism.",
+      "language_visible": true,
+      "mechanism_only": false,
+      "source_path": "knowledge/d10-prefix-free-kraft-certificate-20261011.json",
+      "primary_url": "https://www.mit.edu/~6.450/handouts/6.450book.pdf",
+      "source_section": "Coding for Discrete Sources §2.3.3, Kraft inequality; first index pair witness is a new SENS interface.",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "donor_coordinate_authority": "NONE",
+      "ratified_resident": false,
+      "physical_t5_authorized": false,
+      "provenance": [
+        "#4013",
+        "#4463",
+        "#5041",
+        "knowledge/d10-prefix-free-kraft-certificate-20261011.json",
+        "https://www.mit.edu/~6.450/handouts/6.450book.pdf",
+        "juv4uk/sens@81c805e22b1ed528869e49e7dc5e02a744ee8751:knowledge/d10-prefix-free-kraft-certificate-20261011.json:1"
+      ]
+    },
+    {
+      "stable_id": "d10.math.finite-code-unique-decipherability.20261011",
+      "semantic_name": "FINITE-CODE-UNIQUE-DECIPHERABILITY",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "SARDINAS-PATTERSON-FINITE-BINARY-CODE-THEOREM",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "FINITE-STRING-UNIQUE-DECODABILITY",
+      "behavior": "For a finite ordered codebook of distinct nonempty symbol identities mapped to nonempty finite binary words, return YES exactly if no two different nonempty finite sequences of identities concatenate to the same binary string, otherwise NO; empty codebook YES, repeated codewords for different identities NO, malformed input rejected.",
+      "source_path": "knowledge/d10-unique-decipherability-selected-20261011.json",
+      "primary_url": "https://doi.org/10.1016/S0019-9958(67)80002-0",
+      "provenance": [
+        "#4013",
+        "#4463",
+        "#5041",
+        "knowledge/d10-unique-decipherability-selected-20261011.json",
+        "knowledge/d10-unique-decipherability-historical-20261009.json",
+        "https://doi.org/10.1016/S0019-9958(63)80011-X",
+        "https://doi.org/10.1016/S0019-9958(67)80002-0"
+      ],
+      "surface_uk": "однозначність-декодування?",
+      "surface_ukr": "код-однозначно-декодується?",
+      "positive_witnesses": [
+        {
+          "input": [],
+          "result": "YES"
+        },
+        {
+          "input": [
+            [
+              "a",
+              "0"
+            ],
+            [
+              "b",
+              "11"
+            ]
+          ],
+          "result": "YES"
+        },
+        {
+          "input": [
+            [
+              "a",
+              "0"
+            ],
+            [
+              "b",
+              "01"
+            ]
+          ],
+          "result": "YES, despite non-prefix-free"
+        },
+        {
+          "input": [
+            [
+              "a",
+              "0"
+            ],
+            [
+              "b",
+              "01"
+            ],
+            [
+              "c",
+              "10"
+            ]
+          ],
+          "result": "NO, [a,c] and [b,a] both encode 010"
+        },
+        {
+          "input": [
+            [
+              "a",
+              "0"
+            ],
+            [
+              "b",
+              "0"
+            ]
+          ],
+          "result": "NO, differing identity one-symbol collision"
+        }
+      ],
+      "falsifiers": [
+        "Treat every non-prefix-free code as non-unique",
+        "Accept a 010 collision between [a,c] and [b,a]",
+        "Treat duplicate codewords for distinct identities as uniquely decodable",
+        "Accept empty, nonbinary codewords or duplicate identities",
+        "Conclude unique decodability solely because brute-force search to a fixed bound found no collision"
+      ],
+      "dedup_check": "Exact D1–D9 behavioral name scan plus selected 653 D10: no same predicate. Distinct from PREFIX-FREE-KRAFT-CERTIFICATE on [0,01], which is non-prefix-free and uniquely decipherable. Core-vs-derived review still pending.",
+      "ownership_test": "Pure finite language-visible codebook property with exact terminating residual closure, independent from physical SENS, D2 parse, Rust transport, GPU, FPGA and ISA.",
+      "ratified_resident": false,
+      "physical_t5_authorized": false
+    },
+    {
+      "stable_id": "d10.math.generalized-congruence-merge.20261011",
+      "semantic_name": "GENERALIZED-CONGRUENCE-MERGE",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "SYMPY-1.14-MODULAR-CRT-PROVENANCE",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "EXACT-GENERALIZED-CHINESE-REMAINDER-CERTIFICATE",
+      "behavior": "Given integers a,b and positive moduli m,n, return CONFLICT(gcd(m,n),b−a) iff inconsistent; otherwise CONSISTENT(r,lcm(m,n)) with unique exact canonical residue 0<=r<L congruent to a mod m and b mod n.",
+      "surface_uk": "звести-остачі",
+      "surface_ukr": "узгодити-періодичні-остачі",
+      "source_path": "knowledge/d10-generalized-crt-selection-20261011.json",
+      "primary_url": "https://docs.sympy.org/latest/modules/ntheory.html",
+      "provenance": [
+        "#4013",
+        "#4463",
+        "#5041",
+        "knowledge/d10-generalized-congruence-research-v1.json",
+        "knowledge/d10-generalized-crt-selection-20261011.json",
+        "sympy/sympy@16fa855354eb7bcabd3fe10993841e03b1382692:sympy/ntheory/modular.py:172-211",
+        "tests/test_d10_generalized_crt.py"
+      ],
+      "positive_witnesses": [
+        {
+          "input": [
+            2,
+            3,
+            3,
+            5
+          ],
+          "result": [
+            "CONSISTENT",
+            8,
+            15
+          ]
+        },
+        {
+          "input": [
+            2,
+            4,
+            6,
+            8
+          ],
+          "result": [
+            "CONSISTENT",
+            6,
+            8
+          ]
+        },
+        {
+          "input": [
+            -1,
+            6,
+            5,
+            8
+          ],
+          "result": [
+            "CONSISTENT",
+            5,
+            24
+          ]
+        },
+        {
+          "input": [
+            1,
+            4,
+            2,
+            6
+          ],
+          "result": [
+            "CONFLICT",
+            2,
+            1
+          ]
+        }
+      ],
+      "falsifiers": [
+        "Coprime-only CRT rejects consistent noncoprime 2(mod4),6(mod8)",
+        "Blind product period 32 instead of lcm 8",
+        "Noncanonical residue outside [0,L)",
+        "Inconsistent system [1 mod4,2 mod6] returns fabricated answer",
+        "Zero/negative moduli silently admitted"
+      ],
+      "dedup_check": "D1-D9@09d1d71c39d1484dfd005a5068dbb18b76f0f0d4 and prior selected D10@184063ce850bafcb13d585336e1c6ee5f58c5f28: no equal joint-congruence canonical merge law; D6 GCD/REMAINDER, D9 DIVMOD, D10 MODULO and UNIQUE-BOUNDED-MODULAR-LIFT are different observations.",
+      "ownership_test": "Universal integer constraint compatibility independent of clock/radio/FPGA substrates; Core-vs-derived owner review pending.",
+      "ratified_resident": false,
+      "physical_t5_authorized": false
+    },
+    {
+      "stable_id": "d10.measure.hadamard-variance.20261011",
+      "semantic_name": "HADAMARD-VARIANCE",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "NIST-SP1065-CHEZ-DONOR",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "OVERLAPPING-HADAMARD-FREQUENCY-VARIANCE",
+      "behavior": "For N zero-dead-time uniformly sampled fractional-frequency observations y, positive integer m and N >= 3m, average each m-point contiguous block: a_i=(1/m)*sum(y[i:i+m]); compute the mean squared second difference of consecutive m-block averages divided by 6, over all i=0..N-3m. Return exact rational variance when inputs are exact rational. Reject invalid m or insufficient data.",
+      "surface_uk": "дисперсія-адамарова",
+      "surface_ukr": "дисперсія-частотної-стійкості-адамарова",
+      "positive_witnesses": [
+        {
+          "input": [
+            0,
+            0,
+            1
+          ],
+          "m": 1,
+          "expected": "1/6",
+          "explanation": "single second-frequency-difference squared divided by 6"
+        },
+        {
+          "input": [
+            0,
+            0,
+            0,
+            1,
+            0
+          ],
+          "m": 1,
+          "expected": "5/18",
+          "explanation": "three overlapping triplets: squared differences 0,1,4"
+        },
+        {
+          "input": [
+            0,
+            0,
+            1,
+            1,
+            0,
+            0
+          ],
+          "m": 2,
+          "expected": "2/3",
+          "explanation": "block means 0,1,0; m=2 reflects averaging time"
+        },
+        {
+          "input": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ],
+          "m": 1,
+          "expected": "0",
+          "explanation": "linear frequency drift annihilated by second differences"
+        }
+      ],
+      "falsifiers": [
+        "Use the Allan first-difference estimator instead of the Hadamard second-difference estimator: a linear frequency drift becomes nonzero, violating the contract.",
+        "Normalize by 2 instead of 6, or silently use sample variance N-1; the 3-sample impulse must equal exactly 1/6.",
+        "Allow m=0, negative/non-integer m, N<3*m or silently fill missing samples; valid samples must be uniformly timed with no dead-time.",
+        "Conflate the HVAR finite nonoverlapping/overlapping convention or claim a different confidence estimator (modified or total Hadamard) is the same statistic."
+      ],
+      "provenance": [
+        "#4013",
+        "#4463",
+        "knowledge/d10-existing-math-signal-selected-20261011.json",
+        "knowledge/d10-hadamard-variance-proposal-20261009.json",
+        "https://www.nist.gov/publications/handbook-frequency-stability-analysis",
+        "tests/oracles/d10_hadamard_chez.ss",
+        "scripts/check_d10_hadamard_proposal_v1.py"
+      ],
+      "behavioral_dedup": "Hadamard exact second difference has zero response to linear fractional-frequency drift, unlike Allan first difference; do not conflate overlapping estimator conventions",
+      "owner_review": "CORE-VS-DERIVED-PENDING",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.math.finite-convolution.20261011",
+      "semantic_name": "FINITE-CONVOLUTION",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "SOURCE-PINNED-EXACT-MATH-SIGNAL-RESEARCH",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "FINITE-LINEAR-CONVOLUTION-ALGEBRA",
+      "behavior": "For nonempty length n,m produce n+m-1 coefficients c[k]=Σ_i a[i]*b[k−i], treating out-of-bounds as zero; if either input empty the result is empty.",
+      "surface_uk": "скінченна-згортка",
+      "surface_ukr": "згорнути-послідовності",
+      "positive_witnesses": [
+        {
+          "in": [
+            [
+              1,
+              2,
+              3
+            ],
+            [
+              1,
+              1
+            ]
+          ],
+          "out": [
+            1,
+            3,
+            5,
+            3
+          ]
+        },
+        {
+          "in": [
+            [
+              0,
+              1
+            ],
+            [
+              1,
+              -1
+            ]
+          ],
+          "out": [
+            0,
+            1,
+            -1
+          ]
+        },
+        {
+          "in": [
+            [
+              2
+            ],
+            [
+              -3
+            ]
+          ],
+          "out": [
+            -6
+          ]
+        }
+      ],
+      "falsifiers": [
+        "Cyclic convolution wraps the final coefficient into the first sample.",
+        "Cross-correlation fails reversing kernel where required by convolution.",
+        "Output shape differs from n+m-1 for nonempty inputs."
+      ],
+      "provenance": [
+        "#4013",
+        "#4463",
+        "knowledge/d10-existing-math-signal-selected-20261011.json",
+        "knowledge/d10-crossdomain-math-signal-research-v1.json",
+        "https://numpy.org/doc/stable/reference/generated/numpy.convolve.html",
+        "tests/test_d10_crossdomain_math_laws.py"
+      ],
+      "behavioral_dedup": "Full linear exact convolution with n+m-1 coefficient law, unlike filtering/vector access or rational resampling using an explicitly supplied convolution substep.",
+      "owner_review": "CORE-VS-DERIVED-PENDING",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.signal.phase-unwrap.20261011",
+      "semantic_name": "PHASE-UNWRAP",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "SOURCE-PINNED-EXACT-MATH-SIGNAL-RESEARCH",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "LOCAL-MINIMUM-JUMP-PHASE-RECONSTRUCTION",
+      "behavior": "q[0]=p[0]; for each next i choose Δ congruent to (p[i]-p[i-1]) modulo period minimizing |Δ|; for exact half-period ties preserve the sign of the original raw difference; q[i]=q[i-1]+Δ. Empty input yields empty. This is local minimal-jump phase reconstruction, not a proof of physical phase trajectory.",
+      "surface_uk": "розгорнути-фазу",
+      "surface_ukr": "усунути-періодичні-стрибки",
+      "positive_witnesses": [
+        {
+          "in": [
+            [
+              0,
+              1,
+              2,
+              -1,
+              0
+            ],
+            4
+          ],
+          "out": [
+            0,
+            1,
+            2,
+            3,
+            4
+          ]
+        },
+        {
+          "in": [
+            [
+              1,
+              2,
+              3,
+              4,
+              5,
+              6,
+              1,
+              2
+            ],
+            6
+          ],
+          "out": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8
+          ]
+        },
+        {
+          "in": [
+            [
+              0,
+              180,
+              -180
+            ],
+            360
+          ],
+          "out": [
+            0,
+            180,
+            180
+          ]
+        }
+      ],
+      "falsifiers": [
+        "Replacing the entire sequence with input modulo period loses accumulated revolutions.",
+        "For adjacent raw differences inside half period, altering values violates continuity law.",
+        "Half-period ties picked without stated rule make result nondeterministic."
+      ],
+      "provenance": [
+        "#4013",
+        "#4463",
+        "knowledge/d10-existing-math-signal-selected-20261011.json",
+        "knowledge/d10-crossdomain-math-signal-research-v1.json",
+        "https://numpy.org/doc/stable/reference/generated/numpy.unwrap.html",
+        "tests/test_d10_crossdomain_math_laws.py"
+      ],
+      "behavioral_dedup": "Canonical minimal adjacent unwrapping with specified half-period tie polarity and accumulation, not residue-class, physical ground-truth motion or one-modulus bounded inverse image.",
+      "owner_review": "CORE-VS-DERIVED-PENDING",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.words.debruijn-binary-cycle.20261011",
+      "semantic_name": "DE-BRUIJN-BINARY-CYCLE?",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "SOURCE-PINNED-FORMAL-FINITE-COMBINATORICS-RESEARCH",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "CYCLIC-BINARY-EXHAUSTIVE-WINDOW-CERTIFICATE",
+      "behavior": "For n>=1, return D1 TRUE=1 iff length(word)=2^n AND the cyclic windows word[i],...,word[(i+n-1) mod 2^n] over all starts i∈[0,2^n) are pairwise distinct (equivalently cover all 2^n possible n-bit strings exactly once). Return D1 FALSE=0 for any well-typed word failing length or uniqueness. Invalid non-D1 data or n<=0 is a domain error, never a sneaky TRUE.",
+      "surface_uk": "повний-двійковий-цикл?",
+      "surface_ukr": "чи-усі-н-бітові-вікна-рівно-раз?",
+      "positive_witnesses": [
+        {
+          "word": "01",
+          "n": 1,
+          "value": 1,
+          "why": "both 1-bit patterns exactly once"
+        },
+        {
+          "word": "10",
+          "n": 1,
+          "value": 1,
+          "why": "cyclic rotation preserves coverage"
+        },
+        {
+          "word": "0011",
+          "n": 2,
+          "value": 1,
+          "why": "00, 01, 11, 10 each once"
+        },
+        {
+          "word": "00010111",
+          "n": 3,
+          "value": 1,
+          "why": "SageMath example order three"
+        },
+        {
+          "word": "00101110",
+          "n": 3,
+          "value": 1,
+          "why": "rotation of valid SageMath cycle"
+        },
+        {
+          "word": "00010110",
+          "n": 3,
+          "value": 0,
+          "why": "changed bit creates duplicate cyclic n-window"
+        },
+        {
+          "word": "00000000",
+          "n": 3,
+          "value": 0,
+          "why": "repeated zero windows"
+        },
+        {
+          "word": "000101110",
+          "n": 3,
+          "value": 0,
+          "why": "extra delimiter/bit changes required exact length"
+        },
+        {
+          "word": "",
+          "n": 1,
+          "value": 0,
+          "why": "empty word never has required length"
+        },
+        {
+          "word": "0101",
+          "n": 2,
+          "value": 0,
+          "why": "primitive 01 repetition does not cover all 2-bit patterns"
+        }
+      ],
+      "falsifiers": [
+        "Counting only linear substrings without wrap-around rejects valid 0011 at n=2",
+        "Accepting length 2^n with duplicate n-bit windows mistakes length for universal coverage",
+        "Treating a repeated primitive block as sufficient wrongly accepts 0101 at n=2",
+        "Treating word rotations as semantically different wrongly rejects 10001011 at n=3",
+        "Using an LFSR period alone without the all-zero state can miss one n-bit window"
+      ],
+      "provenance": [
+        "#4013",
+        "#4463",
+        "knowledge/d10-existing-combinatorial-laws-selected-20261011.json",
+        "knowledge/d10-debruijn-binary-cycle-research-v1.json",
+        "https://doc.sagemath.org/html/en/reference/combinat/sage/combinat/debruijn_sequence.html",
+        "scripts/check_d10_debruijn_binary_cycle.py",
+        "tests/test_d10_debruijn_binary_cycle.py"
+      ],
+      "historical_source_blob": "9c989ef46a7fc2798a21267a92a7d8690ecaad84",
+      "behavioral_dedup": "PRIMITIVE-BINARY-WORD-ROOT: predicate checks all cyclic n-bit windows, not primitive-root decomposition",
+      "owner_review": "CORE-VS-DERIVED-PENDING",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.words.binary-lyndon-factorization.20261011",
+      "semantic_name": "BINARY-LYNDON-FACTORIZATION",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "SOURCE-PINNED-FORMAL-FINITE-COMBINATORICS-RESEARCH",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "UNIQUE-ORDERED-LYNDON-FACTOR-DECOMPOSITION",
+      "behavior": "Return the unique finite factor list (l1,...,lk) such that concat(li)=w; all li are Lyndon (strictly lexicographically smaller than every proper nonempty suffix); and l1 >= l2 >= ... >= lk under explicit lexicographic 0<1. For empty source return []. No dependence on physical packing, phoneme ordering or hardware transport.",
+      "surface_uk": "розкласти-двійкове-слово",
+      "surface_ukr": "чин-розкладу-Ліндона",
+      "positive_witnesses": [
+        {
+          "input": "",
+          "factors": []
+        },
+        {
+          "input": "0",
+          "factors": [
+            "0"
+          ]
+        },
+        {
+          "input": "1111",
+          "factors": [
+            "1",
+            "1",
+            "1",
+            "1"
+          ]
+        },
+        {
+          "input": "01010",
+          "factors": [
+            "01",
+            "01",
+            "0"
+          ]
+        },
+        {
+          "input": "010010010001000",
+          "factors": [
+            "01",
+            "001",
+            "001",
+            "0001",
+            "0",
+            "0",
+            "0"
+          ]
+        },
+        {
+          "input": "001001",
+          "factors": [
+            "001",
+            "001"
+          ]
+        },
+        {
+          "input": "101",
+          "factors": [
+            "1",
+            "01"
+          ]
+        }
+      ],
+      "falsifiers": [
+        "Returning a shortest repeated primitive root (e.g. 01010 -> 01010) instead of the ordered factor list is wrong.",
+        "Allowing increasing factors l_i<l_(i+1) violates the theorem's canonical ordering.",
+        "Factoring by a hidden phoneme collation rather than explicit D1 order 0<1 changes identity.",
+        "Treating nonempty '00' as a Lyndon component is invalid: it equals a proper suffix only lexically larger, and is not primitive."
+      ],
+      "provenance": [
+        "#4013",
+        "#4463",
+        "knowledge/d10-existing-combinatorial-laws-selected-20261011.json",
+        "knowledge/d10-binary-lyndon-factorization-v1.json",
+        "https://doc.sagemath.org/html/en/reference/combinat/sage/combinat/words/finite_word.html",
+        "scripts/check_d10_binary_lyndon_factorization.py"
+      ],
+      "historical_source_blob": "7c7633e2e1041075bf589937e0b4f6ce72be0dcd",
+      "behavioral_dedup": "PRIMITIVE-BINARY-WORD-ROOT: returns unique nonincreasing full Lyndon factorization, not shortest repeated root",
+      "owner_review": "CORE-VS-DERIVED-PENDING",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.math.stern-brocot-run-path.20261011",
+      "semantic_name": "STERN-BROCOT-RUN-PATH",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "SOURCE-PINNED-FORMAL-FINITE-COMBINATORICS-RESEARCH",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "EXACT-CANONICAL-STERN-BROCOT-BIT-RUNS",
+      "behavior": "Generate exact L/R path from root 1/1 by repeated numerator/denominator comparison and subtractive Euclid; compress maximal same-bit runs using quotient floor((a-1)/b) or floor((b-1)/a), preserving final equality stop without one extra step. Reject nonpositive and imprecise source inputs; reverse accepts ONLY alternating positive-length bit runs. Two-direction round trips are identity and representation is unique for every positive rational.",
+      "surface_uk": "шлдр",
+      "surface_ukr": "стиснений-шлях-дробу",
+      "positive_witnesses": [
+        {
+          "rational": "1/1",
+          "runs": [],
+          "note": "root needs zero directions"
+        },
+        {
+          "rational": "1/2",
+          "runs": [
+            [
+              0,
+              1
+            ]
+          ],
+          "note": "one left branch"
+        },
+        {
+          "rational": "2/1",
+          "runs": [
+            [
+              1,
+              1
+            ]
+          ],
+          "note": "one right branch"
+        },
+        {
+          "rational": "2/3",
+          "runs": [
+            [
+              0,
+              1
+            ],
+            [
+              1,
+              1
+            ]
+          ],
+          "note": "left then right"
+        },
+        {
+          "rational": "3/2",
+          "runs": [
+            [
+              1,
+              1
+            ],
+            [
+              0,
+              1
+            ]
+          ],
+          "note": "right then left"
+        },
+        {
+          "rational": "5/2",
+          "runs": [
+            [
+              1,
+              2
+            ],
+            [
+              0,
+              1
+            ]
+          ],
+          "note": "two rights one left"
+        },
+        {
+          "rational": "13/9",
+          "runs": [
+            [
+              1,
+              1
+            ],
+            [
+              0,
+              2
+            ],
+            [
+              1,
+              3
+            ]
+          ],
+          "note": "exact run compression from Euclid, final right run of 3"
+        },
+        {
+          "rational": "1/1000000001",
+          "runs": [
+            [
+              0,
+              1000000000
+            ]
+          ],
+          "note": "billion path steps represented by one positive run"
+        },
+        {
+          "rational": "1000000001/1",
+          "runs": [
+            [
+              1,
+              1000000000
+            ]
+          ],
+          "note": "unbounded integer width, no bit expansion"
+        }
+      ],
+      "falsifiers": [
+        "For 3/1, returning right-run count 3 rather than 2 introduces an extra branch past the exact rational.",
+        "For 1/1, returning any left or right step is not the root path.",
+        "For 5/2, reversing R² L into L R² reaches a different fraction.",
+        "Consecutive same-direction run records must reject rather than silently admit a noncanonical alternative code.",
+        "Zero/negative run counts, boolean bits, floats and nonpositive input rationals must reject.",
+        "A billion left steps must remain a run count, not allocate a billion-element bit sequence.",
+        "Turning the path into the nearest denominator-bounded fraction instead of exactly reversible p/q changes the mathematical meaning."
+      ],
+      "provenance": [
+        "#4013",
+        "#4463",
+        "knowledge/d10-existing-combinatorial-laws-selected-20261011.json",
+        "knowledge/d10-stern-brocot-run-path-20261009.json",
+        "https://devel.isa-afp.org/browser_info/current/AFP/Stern_Brocot/Stern_Brocot_Tree.html",
+        "scripts/check_d10_stern_brocot_runs.py"
+      ],
+      "historical_source_blob": "37cd7d1e77881d0818641d04c8d8b2ac4a605892",
+      "behavioral_dedup": "BOUNDED-RATIONAL-APPROX: lossless canonical positive fraction path rather than approximate bounded fraction",
+      "owner_review": "CORE-VS-DERIVED-PENDING",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.archive.minimal-abductive-explanations.20261011",
+      "semantic_name": "MINIMAL-ABDUCTIVE-EXPLANATIONS",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "SOURCE-PINNED-ARCHIVAL-D10-RESEARCH",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "SOURCE-GROUNDED-RESEARCH-CERTIFICATE",
+      "behavior": "For a finite ground propositional Horn theory T, designated abducibles A, observation g and finite integrity constraints IC, return the canonical antichain of inclusion-minimal Δ ⊆ A such that g belongs to the least fixed-point closure of T ∪ Δ and no integrity constraint is fully satisfied by that closure.",
+      "surface_uk": "пояснити-припущеннями",
+      "surface_ukr": "знайти-мінімальні-пояснення",
+      "archival_surface_uk": "пояснити-припущеннями",
+      "archival_surface_ukr": "знайти-мінімальні-пояснення",
+      "positive_witnesses": "wet_shoes follows from either rain or sprinkler, so the complete minimal explanation family is [[rain],[sprinkler]].",
+      "falsifiers": [
+        "Returning both rain and sprinkler as one required set is wrong when either alone proves wet_shoes.",
+        "Returning a superset such as [rain,sprinkler] is wrong when a proper subset already explains the observation.",
+        "Hypothesizing an atom outside the designated abducible set is forbidden.",
+        "A forbidden conjunction reached through derived facts must reject that candidate even when the forbidden atom was not explicitly hypothesized.",
+        "A mutually recursive Horn cycle without a seed must not prove itself.",
+        "A successful empty explanation [[]] must remain distinct from no explanations []."
+      ],
+      "argument_shape": "See source research dossier",
+      "result_shape": "See source research dossier",
+      "provenance": [
+        "#4013",
+        "#4463",
+        "#5041",
+        "research/d10/staging-20261011/d10-existing-research-batch-replay-20261011.json",
+        "knowledge/d10-alltime-existing-research-selected-batch14-20261011.json",
+        "knowledge/d10-abductive-minimal-explanations-v1.json",
+        "https://academic.oup.com/logcom/article-abstract/2/6/719/942121"
+      ],
+      "historical_donor_git_blob": "5e7dc4fc9f31c7a702233f92398ea9d0e643dac1",
+      "historical_review_status": "HOLD-CORE-VS-LIBRARY-REVIEW",
+      "owner_review": "CORE-VS-DERIVED-PENDING",
+      "physical_t5_authorized": false,
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.archive.correlated-affine-combination.20261011",
+      "semantic_name": "CORRELATED-AFFINE-COMBINATION",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "SOURCE-PINNED-ARCHIVAL-D10-RESEARCH",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "SOURCE-GROUNDED-RESEARCH-CERTIFICATE",
+      "behavior": "Combine affine forms coefficientwise by exact shared-noise identity; the exact same x minus x is zero, different noise IDs are not equated.",
+      "surface_uk": "кор-аф",
+      "surface_ukr": "поєднати-корельовані-афінні-форми",
+      "archival_surface_uk": "кор-аф",
+      "archival_surface_ukr": "поєднати-корельовані-афінні-форми",
+      "positive_witnesses": [
+        "x=10+a => x-x = [0,0]",
+        "x=10+a, y=10+b => x-y = [-2,2]",
+        "(3+2a+b)-(2+2a-b)=1+2b"
+      ],
+      "falsifiers": [
+        "Standard intervals give [-2,2] for x-x: incorrect for repeated same observation",
+        "Merging a and b due to equal magnitudes gives false cancellation"
+      ],
+      "argument_shape": "(op:{ADD,SUB}, x:Affine<Q,noise-id>, y:Affine<Q,noise-id>) -> Affine<Q,noise-id>",
+      "result_shape": "See source research dossier",
+      "provenance": [
+        "#4013",
+        "#4463",
+        "#5041",
+        "research/d10/staging-20261011/d10-existing-research-batch-replay-20261011.json",
+        "knowledge/d10-alltime-existing-research-selected-batch14-20261011.json",
+        "knowledge/d10-affine-correlated-uncertainty-v1.json"
+      ],
+      "historical_donor_git_blob": "bda21a562e114da055d91321eb96fcddabc92f8b",
+      "historical_review_status": "HOLD-CORE-MATH-DERIVABILITY",
+      "owner_review": "CORE-VS-DERIVED-PENDING",
+      "physical_t5_authorized": false,
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.archive.sound-affine-product-enclosure.20261011",
+      "semantic_name": "SOUND-AFFINE-PRODUCT-ENCLOSURE",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "SOURCE-PINNED-ARCHIVAL-D10-RESEARCH",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "SOURCE-GROUNDED-RESEARCH-CERTIFICATE",
+      "behavior": "Compute linearized product with exact coefficients x0*yi+y0*xi; residual is conservatively enclosed by an explicit fresh noise coefficient (Σ|xi|)(Σ|yi|). Does not assert probabilistic independence or optimal tightness.",
+      "surface_uk": "аф-пох",
+      "surface_ukr": "обмежити-добуток-афінних-форм",
+      "archival_surface_uk": "аф-пох",
+      "archival_surface_ukr": "обмежити-добуток-афінних-форм",
+      "positive_witnesses": [
+        "(1+a)*(1-a): actual [0,1], safe [0,2]",
+        "2*(3+4a)=6+8a with no fresh error",
+        "a*a: actual [0,1], safe [-1,1]"
+      ],
+      "falsifiers": [
+        "Reused fresh ID collides with existing IDs and must BLOCK",
+        "Any exact product outside claimed range refutes soundness"
+      ],
+      "argument_shape": "(x:Affine<Q,noise-id>, y:Affine<Q,noise-id>, fresh-id:Symbol) -> Affine<Q,noise-id> or BLOCK",
+      "result_shape": "See source research dossier",
+      "provenance": [
+        "#4013",
+        "#4463",
+        "#5041",
+        "research/d10/staging-20261011/d10-existing-research-batch-replay-20261011.json",
+        "knowledge/d10-alltime-existing-research-selected-batch14-20261011.json",
+        "knowledge/d10-affine-correlated-uncertainty-v1.json"
+      ],
+      "historical_donor_git_blob": "bda21a562e114da055d91321eb96fcddabc92f8b",
+      "historical_review_status": "HOLD-CORE-MATH-DERIVABILITY",
+      "owner_review": "CORE-VS-DERIVED-PENDING",
+      "physical_t5_authorized": false,
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.archive.allen-interval-relation.20261011",
+      "semantic_name": "ALLEN-INTERVAL-RELATION",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "SOURCE-PINNED-ARCHIVAL-D10-RESEARCH",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "QUALITATIVE-TEMPORAL-ALGEBRA",
+      "behavior": "Exactly one of BEFORE, MEETS, OVERLAPS, STARTS, DURING, FINISHES, EQUALS and their six distinct converse relations for two nonempty intervals; MEETS differs from a positive temporal gap; swapping operands yields the specified inverse.",
+      "surface_uk": "відношення-інтервалів",
+      "surface_ukr": "визначити-зв'язок-інтервалів",
+      "archival_surface_uk": "відношення-часових-відрізків",
+      "archival_surface_ukr": "яке-відношення-між-інтервалами",
+      "positive_witnesses": [
+        "[0,1] BEFORE [2,3]",
+        "[0,1] MEETS [1,2]",
+        "[0,2] OVERLAPS [1,3]",
+        "[0,3] CONTAINS [1,2]",
+        "[0,2] EQUALS [0,2]"
+      ],
+      "falsifiers": [
+        "Coincident endpoints MEETS must never be BEFORE",
+        "All 13 mutually exclusive relations appear on small exhaustive ordered endpoint samples",
+        "Swapping intervals returns exact converse; EQUALS is self-converse",
+        "Empty/reversed interval must raise an explicit invalid-input outcome, not a fabricated relation"
+      ],
+      "argument_shape": "((a_start,a_end),(b_start,b_end)) -> one of 13 tagged Allen relations, exact rational endpoints a_start<a_end and b_start<b_end",
+      "result_shape": "See source research dossier",
+      "provenance": [
+        "#4013",
+        "#4463",
+        "#5041",
+        "research/d10/staging-20261011/d10-existing-research-batch-replay-20261011.json",
+        "knowledge/d10-alltime-existing-research-selected-batch14-20261011.json",
+        "knowledge/d10-allen-atms-research-20261009.json",
+        "https://doi.org/10.1145/182.358434"
+      ],
+      "historical_donor_git_blob": "0ae083a67c1c22d5b0cb47ade37ed20c16fa6523",
+      "historical_review_status": "HOLD-CORE-DERIVABILITY",
+      "owner_review": "CORE-VS-DERIVED-PENDING",
+      "physical_t5_authorized": false,
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.archive.atms-consistent-label-join.20261011",
+      "semantic_name": "ATMS-CONSISTENT-LABEL-JOIN",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "SOURCE-PINNED-ARCHIVAL-D10-RESEARCH",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "ASSUMPTION-SUPPORT-ALGEBRA",
+      "behavior": "Form all unions of one left support and one right support. Discard any union that contains a known inconsistent nogood as a subset. Remove strict supersets of surviving support environments. Return the antichain sorted first by support cardinality then lexicographically. Empty environment () denotes unconditional support and differs from no support alternatives ().",
+      "surface_uk": "об'єднати-мітки-підтримки",
+      "surface_ukr": "мінімізувати-набори-підтримки",
+      "archival_surface_uk": "з'єднати-сумісні-припущення",
+      "archival_surface_ukr": "об'єднати-мінімальні-несуперечливі-підтримки",
+      "positive_witnesses": [
+        "left {{0},{1}}, right {{2}}, nogoods {{0,2}} -> {{1,2}}",
+        "left {{}}, right {{4}}, no nogood -> {{4}}",
+        "left {{0},{0,1}}, right {{}}, no nogoods -> {{0}}",
+        "empty nogood {} invalidates every candidate"
+      ],
+      "falsifiers": [
+        "No returned support can contain any nogood subset",
+        "No two returned environments may be strict subsets of one another",
+        "Order/duplicate of input supports may not change canonical result",
+        "An empty family of alternatives is not the same as one empty support",
+        "Inputs remain unchanged"
+      ],
+      "argument_shape": "(left_label,right_label,nogoods) -> ordered minimal consistent finite assumption environments; each assumption is an exact nonnegative integer ID",
+      "result_shape": "See source research dossier",
+      "provenance": [
+        "#4013",
+        "#4463",
+        "#5041",
+        "research/d10/staging-20261011/d10-existing-research-batch-replay-20261011.json",
+        "knowledge/d10-alltime-existing-research-selected-batch14-20261011.json",
+        "knowledge/d10-allen-atms-research-20261009.json",
+        "https://doi.org/10.1016/0004-3702(86)90080-9"
+      ],
+      "historical_donor_git_blob": "0ae083a67c1c22d5b0cb47ade37ed20c16fa6523",
+      "historical_review_status": "HOLD-D9-LOGIC-DERIVABILITY",
+      "owner_review": "CORE-VS-DERIVED-PENDING",
+      "physical_t5_authorized": false,
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.archive.pinhole-image-project.20261011",
+      "semantic_name": "PINHOLE-IMAGE-PROJECT",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "SOURCE-PINNED-ARCHIVAL-D10-RESEARCH",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "SOURCE-GROUNDED-RESEARCH-CERTIFICATE",
+      "behavior": "Return exact (u,v)=(fx*Xc/Zc+cx,fy*Yc/Zc+cy). Mathematically defined for negative Z too; a separate physical visibility predicate may require Z>0. Do not silently apply lens distortion or infer extrinsics.",
+      "surface_uk": "перспективо-проєкція",
+      "surface_ukr": "проєктувати-тривимірну-точку-на-площину",
+      "archival_surface_uk": "перспективо-проєкція",
+      "archival_surface_ukr": "проєктувати-тривимірну-точку-на-площину",
+      "positive_witnesses": [
+        {
+          "args": [
+            "2",
+            "3",
+            "4",
+            "10",
+            "20",
+            "3",
+            "4"
+          ],
+          "expected": [
+            "8",
+            "19"
+          ]
+        },
+        {
+          "args": [
+            "1",
+            "-1",
+            "2",
+            "3",
+            "5",
+            "0",
+            "0"
+          ],
+          "expected": [
+            "3/2",
+            "-5/2"
+          ]
+        }
+      ],
+      "falsifiers": [
+        "Zc=0 is an explicit invalid projection, not infinity, a float, or a dropped point.",
+        "Scaling (Xc,Yc,Zc) by any nonzero rational must not change the pixel projection.",
+        "Optical distortion/pose and sensor pitch cannot be introduced implicitly."
+      ],
+      "argument_shape": "(Xc,Yc,Zc,fx,fy,cx,cy) all exact rationals, Zc != 0",
+      "result_shape": "See source research dossier",
+      "provenance": [
+        "#4013",
+        "#4463",
+        "#5041",
+        "research/d10/staging-20261011/d10-existing-research-batch-replay-20261011.json",
+        "knowledge/d10-alltime-existing-research-selected-batch14-20261011.json",
+        "knowledge/d10-astrophoto-exact-pinhole-research-20261009.json",
+        "https://docs.opencv.org/5.0/main_modules/calib.html"
+      ],
+      "historical_donor_git_blob": "cb5f6eb6a9d481c7801d0b71e75cd44ebda1a0de",
+      "historical_review_status": "HOLD-EXACT-MATH-DERIVABILITY",
+      "owner_review": "CORE-VS-DERIVED-PENDING",
+      "physical_t5_authorized": false,
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.archive.pixel-to-camera-ray.20261011",
+      "semantic_name": "PIXEL-TO-CAMERA-RAY",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "SOURCE-PINNED-ARCHIVAL-D10-RESEARCH",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "SOURCE-GROUNDED-RESEARCH-CERTIFICATE",
+      "behavior": "Return canonical unnormalized direction ((u-cx)/fx,(v-cy)/fy,1) in camera coordinates. This is a RAY, not a reconstructed 3D point/depth. For a distortion-free pinhole, projecting any nonzero exact multiple of the direction returns the original pixel.",
+      "surface_uk": "піксель-промінь",
+      "surface_ukr": "відновити-напрям-променя-з-пікселя",
+      "archival_surface_uk": "піксель-промінь",
+      "archival_surface_ukr": "відновити-напрям-променя-з-пікселя",
+      "positive_witnesses": [
+        {
+          "args": [
+            "8",
+            "19",
+            "10",
+            "20",
+            "3",
+            "4"
+          ],
+          "expected": [
+            "1/2",
+            "3/4",
+            "1"
+          ]
+        },
+        {
+          "args": [
+            "0",
+            "0",
+            "2",
+            "3",
+            "0",
+            "0"
+          ],
+          "expected": [
+            "0",
+            "0",
+            "1"
+          ]
+        }
+      ],
+      "falsifiers": [
+        "fx=0 or fy=0 must not be accepted.",
+        "Recovered ray may not falsely claim unique object distance.",
+        "Composing ray and projection must reproduce the input pixel exactly."
+      ],
+      "argument_shape": "(u,v,fx,fy,cx,cy) all exact rationals, fx != 0, fy != 0",
+      "result_shape": "See source research dossier",
+      "provenance": [
+        "#4013",
+        "#4463",
+        "#5041",
+        "research/d10/staging-20261011/d10-existing-research-batch-replay-20261011.json",
+        "knowledge/d10-alltime-existing-research-selected-batch14-20261011.json",
+        "knowledge/d10-astrophoto-exact-pinhole-research-20261009.json",
+        "https://docs.opencv.org/5.0/main_modules/calib.html"
+      ],
+      "historical_donor_git_blob": "cb5f6eb6a9d481c7801d0b71e75cd44ebda1a0de",
+      "historical_review_status": "HOLD-EXACT-MATH-DERIVABILITY",
+      "owner_review": "CORE-VS-DERIVED-PENDING",
+      "physical_t5_authorized": false,
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.archive.finite-string-critical-pair-confluence.20261011",
+      "semantic_name": "FINITE-STRING-CRITICAL-PAIR-CONFLUENCE",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "SOURCE-PINNED-ARCHIVAL-D10-RESEARCH",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "LENGTH-DECREASING-GROUND-STRING-REWRITING-CRITICAL-PAIR-CONFLUENCE",
+      "behavior": "Compute all same-source one-step peaks arising from overlapping (including nested) occurrences of any pair of left sides. Each critical pair is joinable iff its two descendants share at least one reachable normal form under the same rules. Because every rule strictly shortens finite words, termination is proved by exact length. Then all critical pairs joinable is equivalent to confluence of the entire finite string rewrite relation (critical pair criterion + Newman's lemma). Return CONFLUENT or a concrete NONCONFLUENT witness: source, two branches, and separately reachable normal-form sets with empty intersection. Wording does not imply that a nonconfluent ruleset lacks individual common normal forms for other starting words.",
+      "surface_uk": "узгодженість-переписувань",
+      "surface_ukr": "свідок-конфлікту-критичних-пар-двійкових-правил",
+      "archival_surface_uk": "узгодженість-переписувань",
+      "archival_surface_ukr": "свідок-конфлікту-критичних-пар-двійкових-правил",
+      "positive_witnesses": [
+        {
+          "rules": [
+            [
+              "00",
+              "0"
+            ]
+          ],
+          "verdict": "CONFLUENT",
+          "reason": "00→0 is length-decreasing; overlapping runs of zeros converge"
+        },
+        {
+          "rules": [
+            [
+              "01",
+              "0"
+            ],
+            [
+              "10",
+              "0"
+            ]
+          ],
+          "verdict": "CONFLUENT",
+          "reason": "critical peak 010 reduces to 00 by either branch"
+        },
+        {
+          "rules": [
+            [
+              "01",
+              "0"
+            ],
+            [
+              "10",
+              "1"
+            ]
+          ],
+          "verdict": "NONCONFLUENT",
+          "reason": "010 can yield 00 or 01 and subsequently 0; direct normal-form witness may vary, compute oracle, don't assert exact branches blindly"
+        },
+        {
+          "rules": [
+            [
+              "00",
+              "0"
+            ],
+            [
+              "00",
+              "1"
+            ]
+          ],
+          "verdict": "NONCONFLUENT",
+          "reason": "00 rewrites to both irreducible 0 and 1"
+        },
+        {
+          "rules": [],
+          "verdict": "CONFLUENT",
+          "reason": "no redex, reflexive closure is confluent"
+        }
+      ],
+      "falsifiers": [
+        "Never count disjoint non-overlapping redex occurrences as unjoinable critical conflicts; the two orders commute.",
+        "Two peaks may differ immediately yet be joinable later; comparing only first descendants is unsound.",
+        "Identical left sides with distinct right sides yield a critical peak; omitting containment or same-position overlaps misses a real conflict.",
+        "Do not invoke termination/Newman's lemma for length-preserving, length-growing, cyclic or unrestricted higher-order rewrite systems.",
+        "Do not return a nonconfluence witness without two reachable branches whose normal-form sets are disjoint."
+      ],
+      "argument_shape": "(ordered finite list of (nonempty-binary-lhs, strictly-shorter-binary-rhs))->CONFLUENT or NONCONFLUENT(witness)",
+      "result_shape": "See source research dossier",
+      "provenance": [
+        "#4013",
+        "#4463",
+        "#5041",
+        "research/d10/staging-20261011/d10-existing-research-batch-replay-20261011.json",
+        "knowledge/d10-alltime-existing-research-selected-batch14-20261011.json",
+        "knowledge/d10-critical-pairs-confluence-20261009.json"
+      ],
+      "historical_donor_git_blob": "6530444a1f4417dbebfa93c93f74c4dca5e5aefb",
+      "historical_review_status": "RESEARCH-HOLD-CORE-VS-LIBRARY-NOT-SELECTED",
+      "owner_review": "CORE-VS-DERIVED-PENDING",
+      "physical_t5_authorized": false,
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.archive.first-order-least-general-generalization.20261011",
+      "semantic_name": "FIRST-ORDER-LEAST-GENERAL-GENERALIZATION",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "SOURCE-PINNED-ARCHIVAL-D10-RESEARCH",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "SOURCE-GROUNDED-EXACT-SEMANTIC-LAW",
+      "behavior": "For TWO finite ground, ordered, free first-order constructor terms (not D2 executable expressions), return their least general generalization modulo alpha-renaming and two substitutions which reconstruct each term EXACTLY. Identical atoms and equal-name/equal-arity constructors are retained. Every incompatible ordered pair of subterms becomes one fresh hole; equal ordered disagreement pairs reuse the SAME hole, even in disjoint branches. A different arity or constructor is a disagreement. Fresh holes are numbered by first depth-first left-to-right appearance. A non-ground input, binder, improper term or unbounded depth is BLOCKED. This operation is not unification and never claims a physical .sens semantics.",
+      "surface_uk": "найточніше-спільне-узагальнення",
+      "surface_ukr": "спільний-шаблон-термів",
+      "archival_surface_uk": "найточніше-спільне-узагальнення",
+      "archival_surface_ukr": "спільний-шаблон-термів",
+      "positive_witnesses": [
+        {
+          "left": {
+            "f": "pair",
+            "args": [
+              {
+                "a": "a"
+              },
+              {
+                "a": "a"
+              }
+            ]
+          },
+          "right": {
+            "f": "pair",
+            "args": [
+              {
+                "a": "b"
+              },
+              {
+                "a": "b"
+              }
+            ]
+          },
+          "expected_generalizer": {
+            "f": "pair",
+            "args": [
+              {
+                "hole": "V0"
+              },
+              {
+                "hole": "V0"
+              }
+            ]
+          },
+          "meaning": "Repeated ordered disagreement uses exactly one hole, not two independent variables"
+        },
+        {
+          "left": {
+            "f": "pair",
+            "args": [
+              {
+                "a": "a"
+              },
+              {
+                "a": "b"
+              }
+            ]
+          },
+          "right": {
+            "f": "pair",
+            "args": [
+              {
+                "a": "b"
+              },
+              {
+                "a": "a"
+              }
+            ]
+          },
+          "expected_generalizer": {
+            "f": "pair",
+            "args": [
+              {
+                "hole": "V0"
+              },
+              {
+                "hole": "V1"
+              }
+            ]
+          },
+          "meaning": "Swapped difference pairs are not the same ordered pair"
+        },
+        {
+          "left": {
+            "f": "observation",
+            "args": [
+              {
+                "a": "star"
+              },
+              {
+                "f": "band",
+                "args": [
+                  {
+                    "a": "radio"
+                  }
+                ]
+              }
+            ]
+          },
+          "right": {
+            "f": "observation",
+            "args": [
+              {
+                "a": "star"
+              },
+              {
+                "f": "band",
+                "args": [
+                  {
+                    "a": "optical"
+                  }
+                ]
+              }
+            ]
+          },
+          "expected_generalizer": {
+            "f": "observation",
+            "args": [
+              {
+                "a": "star"
+              },
+              {
+                "f": "band",
+                "args": [
+                  {
+                    "hole": "V0"
+                  }
+                ]
+              }
+            ]
+          },
+          "meaning": "Astronomy schema retains shared star and band constructor"
+        }
+      ],
+      "falsifiers": [
+        "A procedure that assigns two holes to identical ordered disagreement pairs is too general",
+        "A procedure that shares a variable between (a,b) and (b,a) loses ordered relationships",
+        "A procedure that discards shared constructors is not least-general",
+        "A procedure that reconstructs only one source or drops the second substitution is insufficient",
+        "A procedure that treats differing constructor arities as equal is unsound",
+        "A procedure that interprets Lisp binders or Text7 frames as freely substitutable constructors violates the bounded contract"
+      ],
+      "argument_shape": "See source research dossier",
+      "result_shape": "See source research dossier",
+      "provenance": [
+        "#4013",
+        "#4463",
+        "#5041",
+        "research/d10/staging-20261011/d10-existing-research-batch-replay-20261011.json",
+        "knowledge/d10-alltime-existing-research-selected-batch14-20261011.json",
+        "knowledge/d10-first-order-lgg-research-v1.json"
+      ],
+      "historical_donor_git_blob": "7a80d91597bae89e130da5081576b449b3228526",
+      "historical_review_status": "HOLD-CORE-VS-LIBRARY-REVIEW",
+      "owner_review": "CORE-VS-DERIVED-PENDING",
+      "physical_t5_authorized": false,
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.archive.exact-perceptron-mistake-step.20261011",
+      "semantic_name": "EXACT-PERCEPTRON-MISTAKE-STEP",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "SOURCE-PINNED-ARCHIVAL-D10-RESEARCH",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "SOURCE-GROUNDED-EXACT-SEMANTIC-LAW",
+      "behavior": "Given nonempty finite equal-length vectors of exact rationals weights w and nonzero feature x, label y in {-1,+1}, and strictly positive exact learning rate η, compute the exact margin m=y * sum_i(w_i*x_i). If m>0 return (w,corrected=NO), otherwise return (w+η*y*x,corrected=YES). A zero margin must trigger correction for either label. This is one pure mathematical update; no assumptions about convergence, SGD, hidden layers, approximate floats or physical sensor uncertainties.",
+      "surface_uk": "помкрок",
+      "surface_ukr": "виправити-ваги-перцептрона",
+      "archival_surface_uk": "помкрок",
+      "archival_surface_ukr": "виправити-ваги-перцептрона",
+      "positive_witnesses": [
+        {
+          "w": [
+            "0",
+            "0"
+          ],
+          "x": [
+            "2",
+            "-1"
+          ],
+          "y": 1,
+          "eta": "1",
+          "result": [
+            "2",
+            "-1"
+          ],
+          "corrected": true
+        },
+        {
+          "w": [
+            "2",
+            "-1"
+          ],
+          "x": [
+            "2",
+            "-1"
+          ],
+          "y": 1,
+          "eta": "1",
+          "result": [
+            "2",
+            "-1"
+          ],
+          "corrected": false
+        },
+        {
+          "w": [
+            "2",
+            "-1"
+          ],
+          "x": [
+            "1",
+            "2"
+          ],
+          "y": -1,
+          "eta": "1",
+          "result": [
+            "1",
+            "-3"
+          ],
+          "corrected": true
+        },
+        {
+          "w": [
+            "1/2",
+            "1/3"
+          ],
+          "x": [
+            "3/2",
+            "-1/2"
+          ],
+          "y": -1,
+          "eta": "2/3",
+          "result": [
+            "-1/2",
+            "2/3"
+          ],
+          "corrected": true
+        }
+      ],
+      "falsifiers": [
+        "A margin of exactly zero is incorrectly treated as strictly classified and does not update.",
+        "A nonpositive learning rate, wrong vector shape, float, forbidden label or zero feature vector is accepted.",
+        "The exact margin gain after a correction differs from eta * ||x||².",
+        "The weight vector is changed when the signed margin was strictly positive.",
+        "A claim that all non-linearly separable training samples converge violates the restricted Novikoff theorem."
+      ],
+      "argument_shape": "(weights:nonempty-vector exact-rational, feature:same-length nonzero exact-rational-vector, label:integer ±1, eta:exact-rational>0)",
+      "result_shape": "(updated-weight-vector exact-rational, correction-indicator D1 YES/NO)",
+      "provenance": [
+        "#4013",
+        "#4463",
+        "#5041",
+        "research/d10/staging-20261011/d10-existing-research-batch-replay-20261011.json",
+        "knowledge/d10-alltime-existing-research-selected-batch14-20261011.json",
+        "knowledge/d10-rosenblatt-novikoff-exact-step-20261009.json"
+      ],
+      "historical_donor_git_blob": "98ae2ca35cc259ebc9c6d929d9531ec6b54a2bf3",
+      "historical_review_status": "HOLD-CORE-VERSUS-LIBRARY",
+      "owner_review": "CORE-VS-DERIVED-PENDING",
+      "physical_t5_authorized": false,
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.archive.lower-mechanical-word.20261011",
+      "semantic_name": "LOWER-MECHANICAL-WORD",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "SOURCE-PINNED-ARCHIVAL-D10-RESEARCH",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "SOURCE-GROUNDED-EXACT-SEMANTIC-LAW",
+      "behavior": "For i=0..n−1 output D1 bit floor((i+1)*k/n + rho)-floor(i*k/n + rho). No floating-point approximation, no implicit hardware clock, and no two-valued T5 code.",
+      "surface_uk": "рівномірне-двійкове-слово",
+      "surface_ukr": "згенерувати-нижнє-механічне-слово",
+      "archival_surface_uk": "рівномірне-двійкове-слово",
+      "archival_surface_ukr": "згенерувати-нижнє-механічне-слово",
+      "positive_witnesses": [
+        {
+          "input": {
+            "n": 8,
+            "k": 3,
+            "rho": "0"
+          },
+          "bits": "00100101"
+        },
+        {
+          "input": {
+            "n": 8,
+            "k": 3,
+            "rho": "1/2"
+          },
+          "bits": "01010010"
+        },
+        {
+          "input": {
+            "n": 8,
+            "k": 5,
+            "rho": "0"
+          },
+          "bits": "01011011"
+        },
+        {
+          "input": {
+            "n": 12,
+            "k": 4,
+            "rho": "0"
+          },
+          "bits": "001001001001"
+        },
+        {
+          "input": {
+            "n": 5,
+            "k": 2,
+            "rho": "1/3"
+          },
+          "bits": "01001"
+        },
+        {
+          "input": {
+            "n": 4,
+            "k": 4,
+            "rho": "0"
+          },
+          "bits": "1111"
+        },
+        {
+          "input": {
+            "n": 3,
+            "k": 0,
+            "rho": "0"
+          },
+          "bits": "000"
+        }
+      ],
+      "falsifiers": [
+        "An 8-step, 3-event output with adjacent long clumps (e.g. 11100000) breaks balanced prefix behavior",
+        "An off-by-one period that returns k−1 or k+1 events is incorrect",
+        "A floating accumulator whose rounding changes the binary word at exact rational ties violates identity",
+        "A rotation of a word may be a useful musical variant but does not in general satisfy the same rho=0 identity"
+      ],
+      "argument_shape": "(positive_integer_period_n, event_count_k_in_[0,n], rational_phase_rho_in_[0,1)) -> finite D1 bit sequence length n",
+      "result_shape": "See source research dossier",
+      "provenance": [
+        "#4013",
+        "#4463",
+        "#5041",
+        "research/d10/staging-20261011/d10-existing-research-batch-replay-20261011.json",
+        "knowledge/d10-alltime-existing-research-selected-batch14-20261011.json",
+        "knowledge/d10-lower-mechanical-word-research-v1.json"
+      ],
+      "historical_donor_git_blob": "73ab26108a890264fba353d450d46d424c6f6895",
+      "historical_review_status": "SOURCE-PROVED-OWNER-REVIEW",
+      "owner_review": "CORE-VS-DERIVED-PENDING",
+      "physical_t5_authorized": false,
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.archive.affine-quantity-transport.20261011",
+      "semantic_name": "AFFINE-QUANTITY-TRANSPORT",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "SOURCE-PINNED-ARCHIVAL-D10-RESEARCH",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "SOURCE-GROUNDED-EXACT-SEMANTIC-LAW",
+      "behavior": "Reject unless seven dimension exponents match exactly and source/target scale are >0. For POINT, coordinate source base = source_scale*x+source_origin, target result=(source_base-target_origin)/target_scale. For DELTA, source_base=source_scale*x, target result=source_base/target_scale; both origins ignored. Preserve kind, exact rational, and compositional inverse. Errors for invalid kind/dimensions/scale/float, not coercions.",
+      "surface_uk": "афпв",
+      "surface_ukr": "афінно-перевести-величину",
+      "archival_surface_uk": "афпв",
+      "archival_surface_ukr": "афінно-перевести-величину",
+      "positive_witnesses": [
+        {
+          "kind": "POINT",
+          "input": "0 Celsius",
+          "result": "27315/100 K",
+          "explanation": "temperature origin offset is exact"
+        },
+        {
+          "kind": "DELTA",
+          "input": "5 Celsius-difference",
+          "result": "5 K-difference",
+          "explanation": "offset never applied"
+        },
+        {
+          "kind": "POINT",
+          "input": "32 Fahrenheit",
+          "result": "27315/100 K",
+          "explanation": "exact scale 5/9 and Fahrenheit origin 45967/180 K"
+        },
+        {
+          "kind": "DELTA",
+          "input": "9 Fahrenheit-difference",
+          "result": "5 K-difference",
+          "explanation": "5/9 times 9"
+        },
+        {
+          "kind": "POINT",
+          "input": "27315/100 Kelvin",
+          "result": "0 Celsius",
+          "explanation": "invertibility"
+        },
+        {
+          "kind": "POINT",
+          "input": "4 source calibrated volts, source origin -1/10 baseV, target origin 1/10 baseV",
+          "result": "19/5 target volts",
+          "explanation": "calibration offsets compose in exact rational arithmetic"
+        }
+      ],
+      "falsifiers": [
+        "A 5 °C DELTA converted to 278.15 K confuses a difference with a point.",
+        "A 0 °C POINT converted to 0 K loses the exact origin translation.",
+        "Converting seconds to metres when seven base dimensions mismatch must reject.",
+        "Applying an origin offset to a DELTA violates composition under instrument zero calibration.",
+        "Treating floats as exact or allowing zero/negative scale silently invalidates the pure law.",
+        "Converting a POINT roundtrip through arbitrary intermediate affine unit must be identity."
+      ],
+      "argument_shape": "See source research dossier",
+      "result_shape": "(exact_fraction_value_in_target, same_kind), never host floats",
+      "provenance": [
+        "#4013",
+        "#4463",
+        "#5041",
+        "research/d10/staging-20261011/d10-existing-research-batch-replay-20261011.json",
+        "knowledge/d10-alltime-existing-research-selected-batch14-20261011.json",
+        "knowledge/d10-affine-quantity-point-delta-20261009.json",
+        "https://www.nist.gov/pml/special-publication-811/nist-guide-si-chapter-8"
+      ],
+      "historical_donor_git_blob": "d9802b683e775e24973db960a283fb923478f03f",
+      "historical_review_status": "RESEARCH-PENDING-OWNER-REVIEW",
+      "owner_review": "CORE-VS-DERIVED-PENDING",
+      "physical_t5_authorized": false,
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.archive.ground-congruence-closure-partition.20261011",
+      "semantic_name": "GROUND-CONGRUENCE-CLOSURE-PARTITION",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "SOURCE-PINNED-ARCHIVAL-D10-RESEARCH",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "SOURCE-GROUNDED-EXACT-SEMANTIC-LAW",
+      "behavior": "Given finite acyclic ground term nodes with uninterpreted symbols, equations, and equality queries: return least equivalence relation containing the equations and closed under functions with equal symbols and pointwise equal arguments; booleans represent logical entailment, NOT proof of disequality.",
+      "surface_uk": "зімкнути-рівності-термів",
+      "surface_ukr": "найменше-конгруентне-замикання-основних-термів",
+      "archival_surface_uk": "зімкнути-рівності-термів",
+      "archival_surface_ukr": "найменше-конгруентне-замикання-основних-термів",
+      "positive_witnesses": [
+        {
+          "name": "same-symbol congruence and unlike-symbol negative",
+          "input": {
+            "nodes": [
+              {
+                "id": "a",
+                "symbol": "A",
+                "args": []
+              },
+              {
+                "id": "b",
+                "symbol": "B",
+                "args": []
+              },
+              {
+                "id": "fa",
+                "symbol": "F",
+                "args": [
+                  "a"
+                ]
+              },
+              {
+                "id": "fb",
+                "symbol": "F",
+                "args": [
+                  "b"
+                ]
+              },
+              {
+                "id": "ga",
+                "symbol": "G",
+                "args": [
+                  "a"
+                ]
+              }
+            ],
+            "equalities": [
+              [
+                "a",
+                "b"
+              ]
+            ],
+            "queries": [
+              [
+                "fa",
+                "fb"
+              ],
+              [
+                "fa",
+                "ga"
+              ],
+              [
+                "a",
+                "b"
+              ]
+            ]
+          },
+          "output": {
+            "classes": [
+              [
+                "a",
+                "b"
+              ],
+              [
+                "fa",
+                "fb"
+              ],
+              [
+                "ga"
+              ]
+            ],
+            "entailed": [
+              true,
+              false,
+              true
+            ]
+          }
+        },
+        {
+          "name": "absence of axioms",
+          "input": {
+            "nodes": [
+              {
+                "id": "a",
+                "symbol": "A",
+                "args": []
+              },
+              {
+                "id": "b",
+                "symbol": "B",
+                "args": []
+              },
+              {
+                "id": "fa",
+                "symbol": "F",
+                "args": [
+                  "a"
+                ]
+              },
+              {
+                "id": "fb",
+                "symbol": "F",
+                "args": [
+                  "b"
+                ]
+              },
+              {
+                "id": "ga",
+                "symbol": "G",
+                "args": [
+                  "a"
+                ]
+              }
+            ],
+            "equalities": [],
+            "queries": [
+              [
+                "fa",
+                "fb"
+              ],
+              [
+                "fa",
+                "ga"
+              ],
+              [
+                "a",
+                "b"
+              ]
+            ]
+          },
+          "output": {
+            "classes": [
+              [
+                "a"
+              ],
+              [
+                "b"
+              ],
+              [
+                "fa"
+              ],
+              [
+                "fb"
+              ],
+              [
+                "ga"
+              ]
+            ],
+            "entailed": [
+              false,
+              false,
+              false
+            ]
+          }
+        },
+        {
+          "name": "direct unrelated function equation without equality of leaves",
+          "input": {
+            "nodes": [
+              {
+                "id": "a",
+                "symbol": "A",
+                "args": []
+              },
+              {
+                "id": "b",
+                "symbol": "B",
+                "args": []
+              },
+              {
+                "id": "fa",
+                "symbol": "F",
+                "args": [
+                  "a"
+                ]
+              },
+              {
+                "id": "fb",
+                "symbol": "F",
+                "args": [
+                  "b"
+                ]
+              },
+              {
+                "id": "ga",
+                "symbol": "G",
+                "args": [
+                  "a"
+                ]
+              }
+            ],
+            "equalities": [
+              [
+                "fa",
+                "ga"
+              ]
+            ],
+            "queries": [
+              [
+                "fa",
+                "fb"
+              ],
+              [
+                "fa",
+                "ga"
+              ],
+              [
+                "a",
+                "b"
+              ]
+            ]
+          },
+          "output": {
+            "classes": [
+              [
+                "a"
+              ],
+              [
+                "b"
+              ],
+              [
+                "fa",
+                "ga"
+              ],
+              [
+                "fb"
+              ]
+            ],
+            "entailed": [
+              false,
+              true,
+              false
+            ]
+          }
+        },
+        {
+          "name": "transitive ground axioms",
+          "input": {
+            "nodes": [
+              {
+                "id": "a",
+                "symbol": "A",
+                "args": []
+              },
+              {
+                "id": "b",
+                "symbol": "B",
+                "args": []
+              },
+              {
+                "id": "c",
+                "symbol": "C",
+                "args": []
+              },
+              {
+                "id": "fa",
+                "symbol": "F",
+                "args": [
+                  "a"
+                ]
+              },
+              {
+                "id": "fc",
+                "symbol": "F",
+                "args": [
+                  "c"
+                ]
+              }
+            ],
+            "equalities": [
+              [
+                "a",
+                "b"
+              ],
+              [
+                "b",
+                "c"
+              ]
+            ],
+            "queries": [
+              [
+                "fa",
+                "fc"
+              ],
+              [
+                "a",
+                "c"
+              ]
+            ]
+          },
+          "output": {
+            "classes": [
+              [
+                "a",
+                "b",
+                "c"
+              ],
+              [
+                "fa",
+                "fc"
+              ]
+            ],
+            "entailed": [
+              true,
+              true
+            ]
+          }
+        },
+        {
+          "name": "identical syntax with two DAG node IDs",
+          "input": {
+            "nodes": [
+              {
+                "id": "a",
+                "symbol": "A",
+                "args": []
+              },
+              {
+                "id": "fa1",
+                "symbol": "F",
+                "args": [
+                  "a"
+                ]
+              },
+              {
+                "id": "fa2",
+                "symbol": "F",
+                "args": [
+                  "a"
+                ]
+              }
+            ],
+            "equalities": [],
+            "queries": [
+              [
+                "fa1",
+                "fa2"
+              ]
+            ]
+          },
+          "output": {
+            "classes": [
+              [
+                "a"
+              ],
+              [
+                "fa1",
+                "fa2"
+              ]
+            ],
+            "entailed": [
+              true
+            ]
+          }
+        }
+      ],
+      "falsifiers": [
+        "given a=b infer F(a)=F(b), not F(a)=G(b)",
+        "same-symbol same-argument terms equal even when no equations",
+        "no stated equations never entail equality of two distinct constants",
+        "entailed=false is not explicit disequality",
+        "unknown node, forward/cyclic reference, inconsistent function arity BLOCK",
+        "no rewriting or symbolic variable substitution is smuggled into congruence"
+      ],
+      "argument_shape": "nodes topological DAG ids, single fixed symbol arity, equality pairs and queries; no variables, quantifiers, rewriting, host effects, numeric semantics, structural D2 or device state",
+      "result_shape": "lexicographically stable partition classes plus ordered entailed booleans",
+      "provenance": [
+        "#4013",
+        "#4463",
+        "#5041",
+        "research/d10/staging-20261011/d10-existing-research-batch-replay-20261011.json",
+        "knowledge/d10-alltime-existing-research-selected-batch14-20261011.json",
+        "knowledge/d10-ground-congruence-closure-research-20261009.json",
+        "https://doi.org/10.1145/322186.322198"
+      ],
+      "historical_donor_git_blob": "8144d5cd76d8b2e6099bba074fe96e910ca53156",
+      "historical_review_status": "HOLD-CORE-VS-LIBRARY",
+      "owner_review": "CORE-VS-DERIVED-PENDING",
+      "physical_t5_authorized": false,
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.archive.cyclic-binary-word-canon.20261011",
+      "semantic_name": "CYCLIC-BINARY-WORD-CANON",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "SOURCE-PINNED-ARCHIVAL-D10-RESEARCH",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "SOURCE-GROUNDED-EXACT-SEMANTIC-LAW",
+      "behavior": "For finite nonempty w of length N, define rotate(w,k)[i]=w[(i+k) mod N]. Choose c=min_lex {rotate(w,k) | 0<=k<N}. Return (c, min {k | rotate(w,k)=c}). No reversal, sorting, primitive-root contraction, incomplete-period padding, byte alignment, or physical carrier framing.",
+      "surface_uk": "циклім",
+      "surface_ukr": "канонічний-цикл-двійкового-слова",
+      "archival_surface_uk": "циклім",
+      "archival_surface_ukr": "канонічний-цикл-двійкового-слова",
+      "positive_witnesses": [
+        {
+          "word": "1100",
+          "canonical": "0011",
+          "least_left_shift": 2,
+          "why": "cross-boundary least rotation"
+        },
+        {
+          "word": "1001",
+          "canonical": "0011",
+          "least_left_shift": 1,
+          "why": "same circle with different original phase"
+        },
+        {
+          "word": "1010",
+          "canonical": "0101",
+          "least_left_shift": 1,
+          "why": "two identical least rotations, choose earlier k=1 rather than 3"
+        },
+        {
+          "word": "010010",
+          "canonical": "001001",
+          "least_left_shift": 2,
+          "why": "repeated cyclic minimum at k=2 and k=5; stable source index 2"
+        },
+        {
+          "word": "1111",
+          "canonical": "1111",
+          "least_left_shift": 0,
+          "why": "all rotations identical; earliest shift 0"
+        },
+        {
+          "word": "01010",
+          "canonical": "00101",
+          "least_left_shift": 4,
+          "why": "aperiodic word with prefix period 2, root algorithm is inapplicable"
+        },
+        {
+          "word": "0110",
+          "canonical": "0011",
+          "least_left_shift": 3,
+          "why": "left circular shift, not bit reversal"
+        },
+        {
+          "word": "0",
+          "canonical": "0",
+          "least_left_shift": 0,
+          "why": "one-bit nonempty identity"
+        }
+      ],
+      "falsifiers": [
+        "Returning 0101 shift 3 instead of shift 1 for 1010 violates smallest-offset witness.",
+        "Returning 01 (shortest repeated root) instead of the full 4-bit 0101 for 1010 changes the semantic object length.",
+        "Returning 01010 for 01010 because its prefix period appears to be 2 misses least full cyclic shift 00101.",
+        "Returning reversed 0011 from 1100 without proving a circular shift (or any reverse operation) must reject.",
+        "Returning empty word as a valid canonical cyclic phase erases the precondition N>0.",
+        "Treating Python True as exact bit 1 silently conflates bool with bit identity in the typed oracle.",
+        "Treating physical T5 padding/separators as elements of the cyclic mathematical word is a carrier/semantics violation."
+      ],
+      "argument_shape": "See source research dossier",
+      "result_shape": "See source research dossier",
+      "provenance": [
+        "#4013",
+        "#4463",
+        "#5041",
+        "research/d10/staging-20261011/d10-existing-research-batch-replay-20261011.json",
+        "knowledge/d10-alltime-existing-research-selected-batch14-20261011.json",
+        "knowledge/d10-cyclic-word-canon-20261009.json",
+        "https://doc.sagemath.org/html/en/reference/combinat/sage/combinat/words/finite_word.html"
+      ],
+      "historical_donor_git_blob": "4bd679f2bbcf7875d6d5bd5d7a32a80a79926435",
+      "historical_review_status": "RESEARCH-PENDING-OWNER-REVIEW",
+      "owner_review": "CORE-VS-DERIVED-PENDING",
+      "physical_t5_authorized": false,
+      "ratified_resident": false
     }
   ],
   "parent_domain": {
@@ -14344,6 +17116,14 @@
     "knowledge/d10-gf2-minimal-recurrence-research-v1.json",
     "knowledge/d10-historical-primary-admission-batch2-v1.json",
     "knowledge/d10-interdisciplinary-science-proposals-20261009.json",
-    "knowledge/d10-clock-radio-math-selection-20261009.json"
+    "knowledge/d10-clock-radio-math-selection-20261009.json",
+    "knowledge/d10-babbage-reiter-hobby-selected-20261009.json",
+    "knowledge/d10-hysteretic-boolean-source-law-20261009.json",
+    "knowledge/d10-archive-admission-20261011.uk.md",
+    "knowledge/d10-unique-decipherability-selected-20261011.json",
+    "knowledge/d10-generalized-crt-selection-20261011.json",
+    "knowledge/d10-existing-math-signal-selected-20261011.json",
+    "knowledge/d10-existing-combinatorial-laws-selected-20261011.json",
+    "knowledge/d10-alltime-existing-research-selected-batch14-20261011.json"
   ]
 }

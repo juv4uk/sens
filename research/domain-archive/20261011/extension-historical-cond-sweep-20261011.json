@@ -1,0 +1,35 @@
+{
+  "schema": "sens.domain-research-archive-extension/v1",
+  "date": "2026-10-11",
+  "archive_status": "EVIDENCE-ONLY-NONNORMATIVE",
+  "foundation_sha": "0c4dffed16f2067d125bff28ebf76712d5c1de07",
+  "file_count": 3,
+  "records": [
+    {
+      "pr": 3182,
+      "source_commit": "03aa306efff78c978fce49ce0fcfa670c857ccd8",
+      "original_path": "scripts/cond-three-part-inventory.py",
+      "archive_path": "research/domain-archive/20261011/pr3182/scripts/cond-three-part-inventory.py.source.txt",
+      "original_blob_sha": "59b6db7a1b153293cc487844585d337f81d5cabe",
+      "role": "історичний аудит COND (не чинний контракт)"
+    },
+    {
+      "pr": 5139,
+      "source_commit": "5dba2ce7cee6f0c6aa272d9cd70a9651605ca825",
+      "original_path": "docs/research/branch-sweep-triage-20261009.md",
+      "archive_path": "research/domain-archive/20261011/pr5139/docs/research/branch-sweep-triage-20261009.md",
+      "original_blob_sha": "a14d4092f404e9b535c3fee74462c202d32fe7ce",
+      "role": "проміжний каталог історичних гілок, не допуск"
+    },
+    {
+      "pr": 5305,
+      "source_commit": "84042de3daa8ce17d91ba3f188d497e36daff6be",
+      "original_path": "docs/research/suchasnyi-stan-2026-10-10.md",
+      "archive_path": "research/domain-archive/20261011/pr5305/docs/research/suchasnyi-stan-2026-10-10.md",
+      "original_blob_sha": "8c8604703b2a1026de2559657c58d089b796064b",
+      "role": "історичний огляд першоджерел, не норма кодека"
+    }
+  ],
+  "admission": "not merged as executable code; semantic dedup D1-D9+D10, law and falsifier, CI and ratification required",
+  "policy": "immutable historical source; no running archived scripts; no change to D10 selected/ratified inventory"
+}

@@ -211,70 +211,77 @@
 ; never from human decimal presentation.  A reduced exact number is an
 ; integer exactly when its canonical denominator is 1.  Non-number values
 ; have no #q2: prefix and therefore fail closed before numeric comparisons.
+; Use ratified D9 string identities here. The old W8 compatibility
+; string predicates produce pair-shaped (0)/(1) answers, which strict D3 COND
+; must never consume as PredicateBit controls.
 (00001001 x86-admission-wire-denominator-one?
   (00001000 (text)
-    (00000111
-      ((00111100 text) (00000001 ()))
-      ((00000011 (00111111 text) "/")
-       (10011100 ((rest (01000000 text)))
-         (00000111
-           ((00111100 rest) (00000001 ()))
-           ((00000011 (00111111 rest) "1")
-            (00000111
-              ((00111100 (01000000 rest)) t)
-              ((00000011 0 0) (00000001 ()))))
-           ((00000011 0 0) (00000001 ())))))
-      ((00000011 0 0)
+    ; The admitted W8 string predicates return the current scalar D1 answer
+    ; on valid strings. Keep these calls within the machine-source compatibility
+    ; boundary; do not lift them to D9 without expanding the reader's scope.
+    (110
+      ((00111100 text) (010 (00000001 (00000000))))
+      ((101 (00111111 text) "/")
+       ((00001000 (rest)
+         (110
+           ((00111100 rest) (010 (00000001 (00000000))))
+           ((101 (00111111 rest) "1")
+            (110
+              ((00111100 (01000000 rest)) (010 (00000001 ())))
+              ((101 0 0) (010 (00000001 (00000000))))))
+           ((101 0 0) (010 (00000001 (00000000))))))
+        (01000000 text)))
+      ((101 0 0)
        (x86-admission-wire-denominator-one? (01000000 text))))))
-
 (00001001 x86-admission-exact-integer?
   (00001000 (value)
-    (10011100 ((wire (01001100 value)))
-      (00000111
+    ((00001000 (wire)
+      (110
         ((00111101 "#q2:" wire)
          (x86-admission-wire-denominator-one? wire))
-        ((00000011 0 0) (00000001 ()))))))
-
+        ((101 0 0) (010 (00000001 (00000000))))))
+      (01000110 value))))
 (00001001 x86-admission-within-inclusive-integer-range?
   (00001000 (value lower upper)
-    ; Exact-Q comparisons answer 1 (так) / 0 (ні), and 0 is truthy -- so a
-    ; bare `and` over comparison results (the pre-exact-Q idiom) admitted
-    ; every operand, overflowing disp8/imm slots. E1 (#216): explicit
-    ; expected-result domains.
-    (00000111
-      ((00011110 value lower) 
-        (00000111
-          ((00011101 value upper)  t)
-          (1 (00000001 ()))))
-      (1 (00000001 ())))))
+    ; Contract 11.8: current D6 >=/<= producers answer exact D1 control.
+    ; Never compare PredicateBit with a Number or route via host truthiness.
+    (110
+      ((тотожне? (не-менше? value lower) 1)
+       (110
+         ((тотожне? (не-більше? value upper) 1)
+          (010 (00000001 ())))
+         ((010 (00000001 ()))
+          (010 (00000001 (00000000))))))
+      ((010 (00000001 ()))
+       (010 (00000001 (00000000)))))))
 
 (00001001 x86-admission-disp8?
   (00001000 (value)
-    (00000111
+    (110
       ((x86-admission-exact-integer? value)
        (x86-admission-within-inclusive-integer-range? value -128 127))
-      (1 (00000001 ())))))
+      ((010 ()) (010 (00000001 (00000000)))))))
 
 (00001001 x86-admission-imm32?
   (00001000 (value)
-    (00000111
+    (110
       ((x86-admission-exact-integer? value)
        (x86-admission-within-inclusive-integer-range? value -2147483648 2147483647))
-      (1 (00000001 ())))))
+      ((010 ()) (010 (00000001 (00000000)))))))
 
 (00001001 x86-admission-uimm8?
   (00001000 (value)
-    (00000111
+    (110
       ((x86-admission-exact-integer? value)
        (x86-admission-within-inclusive-integer-range? value 0 255))
-      (1 (00000001 ())))))
+      ((010 ()) (010 (00000001 (00000000)))))))
 
 (00001001 x86-admission-rel32?
   (00001000 (value)
-    (00000111
+    (110
       ((x86-admission-exact-integer? value)
        (x86-admission-within-inclusive-integer-range? value -2147483648 2147483647))
-      (1 (00000001 ())))))
+      ((010 ()) (010 (00000001 (00000000)))))))
 
 ; `immediate`, `register`, and `disp8` are operand-slot wildcards, not
 ; opcode wildcards. `register` only admits the 16 GPR names x86-reg-code
@@ -282,58 +289,67 @@
 ; match, the same way an out-of-range immediate would fail the encoder
 ; later. The selected Lisp encoder still validates whether the operand can
 ; be represented before the raw host capability is reachable.
+; Current D3 call heads: EQ=101, CAR=100, CDR=011. Do not reintroduce legacy head aliases.
 (00001001 x86-admission-pattern-match?
   (00001000 (pattern form)
-    (00000111
+    (110
       
-      ((00000010 pattern)  (00000111
-         ((00000011 pattern (00000001 immediate)) t)
-         ((00000011 pattern (00000001 register))
-          (00000111
+      ((010 pattern)  (110
+         ((101 pattern (00000001 immediate)) (010 (00000001 ())))
+         ((101 pattern (00000001 register))
+          (110
+            ((010 form)
+             (110
+               ((0101 (x86-reg-code form)) (010 (00000001 (00000000))))
+               ((010 (x86-reg-code form))
+                (010 ()))
+               ((010 ()) (010 (00000001 (00000000))))))
+            ((010 ()) (010 (00000001 (00000000))))))
+         ((101 pattern (00000001 xmm-register))
+          (110
+            ((010 form)
+             (110
+               ((0101 (x86-xmm-reg-code form)) (010 (00000001 (00000000))))
+               ((010 (x86-xmm-reg-code form))
+                (010 ()))
+               ((010 ()) (010 (00000001 (00000000))))))
+            ((010 ()) (010 (00000001 (00000000))))))
+         ((101 pattern (00000001 disp8))
+          (110
             
-            ((00000010 form)  (00100001 (00000011 (x86-reg-code form) (00000001 ()))))
-            (1 (00000001 ()))))
-         ((00000011 pattern (00000001 xmm-register))
-          (00000111
+            ((010 form)  (x86-admission-disp8? form))
+            ((010 ()) (010 (00000001 (00000000))))))
+         ((101 pattern (00000001 imm32))
+          (110
             
-            ((00000010 form)  (00100001 (00000011 (x86-xmm-reg-code form) (00000001 ()))))
-            (1 (00000001 ()))))
-         ((00000011 pattern (00000001 disp8))
-          (00000111
+            ((010 form)  (x86-admission-imm32? form))
+            ((010 ()) (010 (00000001 (00000000))))))
+         ((101 pattern (00000001 uimm8))
+          (110
             
-            ((00000010 form)  (x86-admission-disp8? form))
-            (1 (00000001 ()))))
-         ((00000011 pattern (00000001 imm32))
-          (00000111
+            ((010 form)  (x86-admission-uimm8? form))
+            ((010 ()) (010 (00000001 (00000000))))))
+         ((101 pattern (00000001 rel32))
+          (110
             
-            ((00000010 form)  (x86-admission-imm32? form))
-            (1 (00000001 ()))))
-         ((00000011 pattern (00000001 uimm8))
-          (00000111
-            
-            ((00000010 form)  (x86-admission-uimm8? form))
-            (1 (00000001 ()))))
-         ((00000011 pattern (00000001 rel32))
-          (00000111
-            
-            ((00000010 form)  (x86-admission-rel32? form))
-            (1 (00000001 ()))))
+            ((010 form)  (x86-admission-rel32? form))
+            ((010 ()) (010 (00000001 (00000000))))))
          
-         ((00000010 form)  (00000011 pattern form))
-         (1 (00000001 ()))))
+         ((010 form)  (101 pattern form))
+         ((010 ()) (010 (00000001 (00000000))))))
       
-      ((00000010 form)  (00000001 ()))
-      ((x86-admission-pattern-match? (00000101 pattern) (00000101 form))
-       (x86-admission-pattern-match? (00000110 pattern) (00000110 form)))
-      (1 (00000001 ())))))
+      ((010 form)  (010 (00000001 (00000000))))
+      ((x86-admission-pattern-match? (100 pattern) (100 form))
+       (x86-admission-pattern-match? (011 pattern) (011 form)))
+      ((010 ()) (010 (00000001 (00000000)))))))
 
 (00001001 x86-admitted-instruction-against?
   (00001000 (patterns form)
-    (00000111
+    (110
       
-      ((00000010 patterns)  (00000001 ()))
-      ((x86-admission-pattern-match? (00000101 patterns) form) t)
-      (1 (x86-admitted-instruction-against? (00000110 patterns) form)))))
+      ((010 patterns)  (010 (00000001 (00000000))))
+      ((x86-admission-pattern-match? (100 patterns) form) (010 (00000001 ())))
+      ((010 ()) (x86-admitted-instruction-against? (011 patterns) form)))))
 
 (00001001 x86-admitted-instruction?
   (00001000 (form)
@@ -341,28 +357,30 @@
 
 (00001001 x86-first-unadmitted-form
   (00001000 (forms)
-    (00000111
+    (110
       
-      ((00000010 forms)  (00000111
-         ((00000011 forms (00000001 ())) (00000001 ()))
-         (1 forms)))
-      ((x86-admitted-instruction? (00000101 forms))
-       (x86-first-unadmitted-form (00000110 forms)))
-      (1 (00000101 forms)))))
+      ((010 forms)  (110
+         ((0101 forms) (00000001 ()))
+         ((010 ()) forms)))
+      ((x86-admitted-instruction? (100 forms))
+       (x86-first-unadmitted-form (011 forms)))
+      ((010 ()) (100 forms)))))
 
 (00001001 x86-admitted-program?
   (00001000 (forms)
-    (00000111
+    (110
       
-      ((00000010 forms)  (00000011 forms (00000001 ())))
-      ((x86-admitted-instruction? (00000101 forms))
-       (x86-admitted-program? (00000110 forms)))
-      (1 (00000001 ())))))
+      ((010 forms)  (110
+         ((0101 forms) (010 (00000001 ())))
+         ((010 ()) (010 (00000001 (00000000))))))
+      ((x86-admitted-instruction? (100 forms))
+       (x86-admitted-program? (011 forms)))
+      ((010 ()) (010 (00000001 (00000000)))))))
 
 (00001001 x86-encode-admitted-instruction
   (00001000 (form)
-    (00000111
-      ((00100010 form (00000001 (ret)))
+    (110
+      ((x86-admission-pattern-match? (00000001 (ret)) form)
        (x86-encode-ret))
       ((x86-admission-pattern-match? (00000001 (mov-r64-imm64 register immediate)) form)
        (x86-encode-mov-r64-imm64 (00101111 form) (00110000 form)))
@@ -554,7 +572,7 @@
        (x86-encode-movzx-r64-r8 (00101111 form) (00110000 form)))
       ((x86-admission-pattern-match? (00000001 (imul-r64-r64 register register)) form)
        (x86-encode-imul-r64-r64 (00101111 form) (00110000 form)))
-      ((00100010 form (00000001 (cqo)))
+      ((x86-admission-pattern-match? (00000001 (cqo)) form)
        (x86-encode-cqo))
       ((x86-admission-pattern-match? (00000001 (idiv-r64 register)) form)
        (x86-encode-idiv-r64 (00101111 form)))
@@ -616,7 +634,7 @@
        (x86-encode-cmovnle-r64-r64 (00101111 form) (00110000 form)))
       ((x86-admission-pattern-match? (00000001 (cmovg-r64-r64 register register)) form)
        (x86-encode-cmovg-r64-r64 (00101111 form) (00110000 form)))
-      ((00100010 form (00000001 (nop)))
+      ((x86-admission-pattern-match? (00000001 (nop)) form)
        (x86-encode-nop))
       ((x86-admission-pattern-match? (00000001 (test-r64-imm32 register imm32)) form)
        (x86-encode-test-r64-imm32 (00101111 form) (00110000 form)))
@@ -638,25 +656,25 @@
        (x86-encode-popcnt-r64-r64 (00101111 form) (00110000 form)))
       ((x86-admission-pattern-match? (00000001 (tzcnt-r64-r64 register register)) form)
        (x86-encode-tzcnt-r64-r64 (00101111 form) (00110000 form)))
-      ((00100010 form (00000001 (cld)))
+      ((x86-admission-pattern-match? (00000001 (cld)) form)
        (x86-encode-cld))
-      ((00100010 form (00000001 (std)))
+      ((x86-admission-pattern-match? (00000001 (std)) form)
        (x86-encode-std))
-      ((00100010 form (00000001 (stosq)))
+      ((x86-admission-pattern-match? (00000001 (stosq)) form)
        (x86-encode-stosq))
-      ((00100010 form (00000001 (rep-stosq)))
+      ((x86-admission-pattern-match? (00000001 (rep-stosq)) form)
        (x86-encode-rep-stosq))
-      ((00100010 form (00000001 (stosb)))
+      ((x86-admission-pattern-match? (00000001 (stosb)) form)
        (x86-encode-stosb))
-      ((00100010 form (00000001 (rep-stosb)))
+      ((x86-admission-pattern-match? (00000001 (rep-stosb)) form)
        (x86-encode-rep-stosb))
-      ((00100010 form (00000001 (movsq)))
+      ((x86-admission-pattern-match? (00000001 (movsq)) form)
        (x86-encode-movsq))
-      ((00100010 form (00000001 (rep-movsq)))
+      ((x86-admission-pattern-match? (00000001 (rep-movsq)) form)
        (x86-encode-rep-movsq))
-      ((00100010 form (00000001 (movsb)))
+      ((x86-admission-pattern-match? (00000001 (movsb)) form)
        (x86-encode-movsb))
-      ((00100010 form (00000001 (rep-movsb)))
+      ((x86-admission-pattern-match? (00000001 (rep-movsb)) form)
        (x86-encode-rep-movsb))
       ((x86-admission-pattern-match? (00000001 (bsf-r64-r64 register register)) form)
        (x86-encode-bsf-r64-r64 (00101111 form) (00110000 form)))
@@ -674,7 +692,7 @@
        (x86-encode-rdrand-r64 (00101111 form)))
       ((x86-admission-pattern-match? (00000001 (rdseed-r64 register)) form)
        (x86-encode-rdseed-r64 (00101111 form)))
-      ((00100010 form (00000001 (rdtsc)))
+      ((x86-admission-pattern-match? (00000001 (rdtsc)) form)
        (x86-encode-rdtsc))
       ((x86-admission-pattern-match? (00000001 (cmpxchg-r64-r64 register register)) form)
        (x86-encode-cmpxchg-r64-r64 (00101111 form) (00110000 form)))
@@ -792,35 +810,46 @@
          (00101111 form) (00110000 form) (00110001 form) (00110010 form)))
       ; Unreachable after admission. Keep fail-closed data instead of inventing
       ; a fallback encoder.
-      (1 (00000001 ())))))
+      ((010 ()) (00000001 ())))))
+
+; Keep instruction mapping inside the current D3 value algebra. The shared
+; Core4 map-onto body still uses compatibility predicates as COND control.
+(00001001 x86-encode-instruction-list
+  (00001000 (forms)
+    (110
+      ((010 forms) (00000001 ()))
+      ((0100 (010 forms))
+       (111
+         (x86-encode-admitted-instruction (100 forms))
+         (x86-encode-instruction-list (011 forms)))))))
 
 (00001001 x86-encode-admitted-program
   (00001000 (forms)
-    (x86-encode-program (00110111 x86-encode-admitted-instruction forms))))
+    (x86-encode-program (x86-encode-instruction-list forms))))
 
 ; #177 safe composition seam. Unlike x86-encode-admitted-program, this entry
 ; point is safe for callers holding arbitrary structured machine data: it must
 ; prove admission before any byte materialization can happen.
 (00001001 x86-encode-admitted-program-or-reject
   (00001000 (forms)
-    (00000111
+    (110
       ((x86-admitted-program? forms)
        (x86-encode-admitted-program forms))
-      (1
+      ((010 ())
        (00100111 (00000001 rejected)
              (00000001 unadmitted-machine-form)
              (x86-first-unadmitted-form forms))))))
 
 (00001001 x86-call-admitted-u64
   (00001000 (forms arena-bytes)
-    (00000111
+    (110
       ((x86-admitted-program? forms)
-       (00000111
-         ((00000011 arena-bytes 0)
+       (110
+         ((101 arena-bytes 0)
           (native-call-u64-raw (x86-encode-admitted-program forms)))
-         (1
+         ((010 ())
           (native-call-u64-raw (x86-encode-admitted-program forms) arena-bytes))))
-      (1
+      ((010 ())
        (00100111 (00000001 rejected)
              (00000001 unadmitted-machine-form)
              (x86-first-unadmitted-form forms))))))

@@ -49,8 +49,5 @@
     (tcp-write-via-raw connection text)))
 
 
-; #469: post-core public identities declare only numeric IDs plus the source
-; binding they just defined. No human-language alias is encoded in this file.
-(my-postcore-materialize-stable-peers 165 tcp-listen)
-(my-postcore-materialize-stable-peers 163 tcp-read)
-(my-postcore-materialize-stable-peers 164 tcp-write)
+; Stable surface peers are projected by load_process_library/load_tcp_library
+; after the TCP closures exist. Avoid the retired per-file post-core materializer.

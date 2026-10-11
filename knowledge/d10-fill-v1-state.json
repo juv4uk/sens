@@ -28,10 +28,10 @@
     "width": 10,
     "capacity": 1024,
     "dense_target": 1024,
-    "selected_semantic_candidates": 645,
-    "remaining_semantic_candidates": 379,
+    "selected_semantic_candidates": 675,
+    "remaining_semantic_candidates": 349,
     "law_forced_coordinates": 256,
-    "unplaced_selected_candidates": 389,
+    "unplaced_selected_candidates": 419,
     "ratified_residents": 0
   },
   "first_tranche": {
@@ -392,5 +392,56 @@
     "ratified_added": 0,
     "base_inventory_blob_sha": "9b1c4984283d923516a618f9fc99dea247711857",
     "resulting_inventory_blob_sha": "259382f69460c6d5a5ba8b2b171fe13815d6916f"
+  },
+  "babbage_finite_difference_research_replay": {
+    "source": "knowledge/d10-babbage-reiter-hobby-selected-20261009.json",
+    "source_blob_sha": "4cf8359f34924015f2efca3ddba2df567b5b43db",
+    "selected": 1,
+    "previous_selected": 645,
+    "resulting_selected": 646,
+    "base_inventory_blob_sha": "259382f69460c6d5a5ba8b2b171fe13815d6916f",
+    "resulting_inventory_blob_sha": "ad2200c1d4e153d8efb0f390cc8680f0fb656b5b",
+    "coordinates_added": 0,
+    "ratified_added": 0,
+    "derivability": "PENDING-OWNER-REVIEW",
+    "duplicate_reiter_diagnosis": "NOT-SELECTED; pending ledger FINITE-MINIMAL-DIAGNOSES already covers minimal hitting-set semantics"
+  },
+  "hysteretic_boolean_research_replay": {
+    "source": "knowledge/d10-hysteretic-boolean-source-law-20261009.json",
+    "source_blob_sha": "2cd823d1744153bc985bcb8ddd46ffb55d30fafd",
+    "selected": 1,
+    "previous_selected": 646,
+    "resulting_selected": 647,
+    "base_inventory_blob_sha": "ad2200c1d4e153d8efb0f390cc8680f0fb656b5b",
+    "resulting_inventory_blob_sha": "7e13e929338baeef9b16c2139d24b78e23ea1e03",
+    "coordinates_added": 0,
+    "ratified_added": 0,
+    "derivability": "PENDING-OWNER-REVIEW",
+    "independent_evidence": "TI SCEA046 dual hysteresis thresholds + existing research witnesses; comparator polarity is an explicit modeling convention"
+  },
+  "archive_selection_20261011": {
+    "source": "knowledge/d10-archive-admission-20261011.uk.md",
+    "previous": 647,
+    "selected": 651,
+    "added": 4,
+    "coordinates_added": 0,
+    "ratified_added": 0
+  },
+  "unique_bounded_modular_lift_current_main": {
+    "artifact": "knowledge/d10-unique-bounded-modular-lift-20261009.json",
+    "selected": 1,
+    "previous_selected": 651,
+    "resulting_selected": 652,
+    "coordinates_added": 0,
+    "ratified_added": 0,
+    "status": "RESEARCH-UNRATIFIED",
+    "derivability": "PENDING-OWNER-REVIEW"
+  },
+  "prefix_free_kraft_current_main": {
+    "artifact": "knowledge/d10-prefix-free-kraft-certificate-20261011.json",
+    "selected": 1,
+    "coordinates_added": 0,
+    "ratified_added": 0,
+    "oracle": "two independent exhaustive methods, 3616 finite ordered codebooks"
   }
 }

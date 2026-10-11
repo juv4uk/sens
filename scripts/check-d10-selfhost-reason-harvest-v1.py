@@ -8,6 +8,11 @@ import hashlib
 import json
 from pathlib import Path
 
+# Тимчасовий чужомовний доказовий шар: -O прибирає всі assert.
+# Поки закони не перенесені у виконуваний SENS, заборонити хибний PASS.
+if not __debug__:
+    raise SystemExit("D10-SELFHOST-REASON-HARVEST_BLOCKED: Python -O disables assertions")
+
 root = Path(__file__).resolve().parents[1]
 read = lambda p: json.loads((root / p).read_text(encoding="utf-8"))
 h = read("knowledge/d10-selfhost-reason-harvest-v1.json")

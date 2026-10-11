@@ -13,8 +13,8 @@ class CodecTests(unittest.TestCase):
     def test_known_t5_and_framed_examples(self):
         for words, t5, compressed in [
             ("10 01", "64", "00"),
-            ("10 001 00 000 01", "638906a1", "23d0"),
-            ("10 100 00 10 111 00 1 00 0 01 01", "66386789893b35", "2109895eb5"),
+            ("10 001 00 000 01", "638906a1", "4060"),
+            ("10 100 00 10 111 00 1 00 0 01 01", "66386789893b35", "365f1bd0c9"),
         ]:
             with self.subTest(words=words):
                 words = tuple(words.split())
@@ -23,7 +23,7 @@ class CodecTests(unittest.TestCase):
                 self.assertEqual(framed.decode(bytes.fromhex(compressed)), words)
 
     def test_capacity_and_invalid_codepoints(self):
-        self.assertEqual(framed._buckets()[:3], ((1, 5, 11), (2, 12, 17), (3, 18, 22)))
+        self.assertEqual(framed._buckets()[:3], ((1, 4, 8), (2, 9, 14), (3, 15, 20)))
         for width, lo, hi in framed._buckets():
             used = sum(framed.capacity(n) for n in range(lo, hi + 1))
             self.assertLessEqual(used, 256 ** width)
@@ -35,7 +35,7 @@ class CodecTests(unittest.TestCase):
 
     def test_rank_roundtrips(self):
         randomizer = random.Random(20261010)
-        for n in range(5, framed.MAX_TRITS + 1):
+        for n in range(4, framed.MAX_TRITS + 1):
             cap = framed.capacity(n)
             if cap == 0:
                 continue

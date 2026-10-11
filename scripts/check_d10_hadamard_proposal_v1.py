@@ -58,7 +58,12 @@ def check_static(proposal, ledger, inv, found, baseline, history, donor):
     assert r["semantic_law"]==proposal["law"]
     assert r["surface_uk"]==proposal["surface_uk"]
     assert r["surface_ukr"]==proposal["surface_ukr"]
-    assert r["dedup_check"]==f"D1-D9@{FOUND_PIN}=NO-MATCH;D10@{D10_PIN}=NO-MATCH"
+    # Historical pending intake used D10_PIN at source authoring.
+    # Upon separately proof-pinned selection, the D10 dedup must name the
+    # immediately preceding canonical 655-row inventory, not the old 632 snapshot.
+    selection_pin = ("7d8745cb6f183cf0c015812359a6c0f87c4c2ffb"
+                     if any(x["semantic_name"] == NAME for x in inv["rows"]) else D10_PIN)
+    assert r["dedup_check"]==f"D1-D9@{FOUND_PIN}=NO-MATCH;D10@{selection_pin}=NO-MATCH"
     assert r["donor_provenance"]==f"juv4uk/sens@{SOURCE_PIN}:knowledge/d10-hadamard-variance-proposal-20261009.json:1"
     assert "UNIVERSAL-BORDER:" in r["ownership_test"]
     assert len(proposal["positive_witnesses"])>=2 and len(proposal["falsifiers"])>=3

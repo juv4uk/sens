@@ -1,0 +1,466 @@
+{
+  "schema": "sens.domain-research-archive/v2",
+  "date": "2026-10-11",
+  "basis_main": "596e0f52a2692e0fad059db07be0662247638421",
+  "archive_status": "PRESERVED-EVIDENCE-NONNORMATIVE",
+  "archived_file_count": 59,
+  "source_pull_requests": [
+    2779,
+    3035,
+    3250,
+    4400,
+    4402,
+    4437,
+    4441,
+    4868,
+    4948,
+    5003,
+    5286,
+    5288,
+    5310,
+    5323,
+    5529,
+    5531,
+    5532,
+    5534,
+    5536,
+    5537
+  ],
+  "canonical_d10_observation": {
+    "selected": 647,
+    "capacity": 1024,
+    "unplaced": 391,
+    "ratified": 0,
+    "proposal_ledger_rows": 129,
+    "proposals_added_from_existing_research": 32,
+    "ledger_ci": "https://github.com/juv4uk/sens/actions/runs/38096596935"
+  },
+  "retired_conflicting_pull_requests": [
+    5529,
+    5531,
+    5536,
+    5537
+  ],
+  "records": [
+    {
+      "pr": 2779,
+      "source": "https://github.com/juv4uk/sens/pull/2779",
+      "original_path": "crates/sens/tests/text7_shiva_w7_synthesis.rs",
+      "archived_path": "research/domain-archive/20261011/pr2779/crates/sens/tests/text7_shiva_w7_synthesis.rs",
+      "exact_git_blob": "a8edf78d91e9c48a2c17eb673937178292c34a3a"
+    },
+    {
+      "pr": 2779,
+      "source": "https://github.com/juv4uk/sens/pull/2779",
+      "original_path": "docs/research/2497-d7-d14-constitutional-demarcation.md",
+      "archived_path": "research/domain-archive/20261011/pr2779/docs/research/2497-d7-d14-constitutional-demarcation.md",
+      "exact_git_blob": "1d950ff3eb60e7072cd753b272749ac145f4a81d"
+    },
+    {
+      "pr": 2779,
+      "source": "https://github.com/juv4uk/sens/pull/2779",
+      "original_path": "docs/research/2497-d7-d14-constitutional-demarcation.uk.md",
+      "archived_path": "research/domain-archive/20261011/pr2779/docs/research/2497-d7-d14-constitutional-demarcation.uk.md",
+      "exact_git_blob": "5085d7940793c65bf6f06dd4e9393d615d132f56"
+    },
+    {
+      "pr": 2779,
+      "source": "https://github.com/juv4uk/sens/pull/2779",
+      "original_path": "docs/research/2756-d7-text7-shiva-w7-synthesis.md",
+      "archived_path": "research/domain-archive/20261011/pr2779/docs/research/2756-d7-text7-shiva-w7-synthesis.md",
+      "exact_git_blob": "8a7ee5faeefecf6fdf26d4cc8903e4c747dc98f6"
+    },
+    {
+      "pr": 2779,
+      "source": "https://github.com/juv4uk/sens/pull/2779",
+      "original_path": "docs/research/2756-d7-text7-shiva-w7-synthesis.uk.md",
+      "archived_path": "research/domain-archive/20261011/pr2779/docs/research/2756-d7-text7-shiva-w7-synthesis.uk.md",
+      "exact_git_blob": "cacdec259a54e01fc79b7ccba87cfe735e87b359"
+    },
+    {
+      "pr": 2779,
+      "source": "https://github.com/juv4uk/sens/pull/2779",
+      "original_path": "knowledge/d7-sound-text7-w7-map.json",
+      "archived_path": "research/domain-archive/20261011/pr2779/knowledge/d7-sound-text7-w7-map.json",
+      "exact_git_blob": "7847bebef5699b8eb7008107c90662c5d089419a"
+    },
+    {
+      "pr": 3035,
+      "source": "https://github.com/juv4uk/sens/pull/3035",
+      "original_path": "knowledge/d5-zerop-numberp-pair.json",
+      "archived_path": "research/domain-archive/20261011/pr3035/knowledge/d5-zerop-numberp-pair.json",
+      "exact_git_blob": "03ae1971a806ad87645654a8610a64faafacb651"
+    },
+    {
+      "pr": 3035,
+      "source": "https://github.com/juv4uk/sens/pull/3035",
+      "original_path": "scripts/research-3032-d5-zerop-numberp-pair.py",
+      "archived_path": "research/domain-archive/20261011/pr3035/scripts/research-3032-d5-zerop-numberp-pair.py",
+      "exact_git_blob": "cad0391f742c75f66888969cd9c45d3469603b8a"
+    },
+    {
+      "pr": 3250,
+      "source": "https://github.com/juv4uk/sens/pull/3250",
+      "original_path": "knowledge/d4-parent-law-tournament.json",
+      "archived_path": "research/domain-archive/20261011/pr3250/knowledge/d4-parent-law-tournament.json",
+      "exact_git_blob": "ae1c35af23ca08ff4b31e3f2f03886dc1844cb6b"
+    },
+    {
+      "pr": 4400,
+      "source": "https://github.com/juv4uk/sens/pull/4400",
+      "original_path": "benchmarks/domain-altitude-economy/README.md",
+      "archived_path": "research/domain-archive/20261011/pr4400/benchmarks/domain-altitude-economy/README.md",
+      "exact_git_blob": "89fbd1b677dd91361fb29f6447afdc2d0e0921a8"
+    },
+    {
+      "pr": 4400,
+      "source": "https://github.com/juv4uk/sens/pull/4400",
+      "original_path": "benchmarks/domain-altitude-economy/candidates.v1.json",
+      "archived_path": "research/domain-archive/20261011/pr4400/benchmarks/domain-altitude-economy/candidates.v1.json",
+      "exact_git_blob": "d02538ba8ddf695d47ba085e24469ceb0228500f"
+    },
+    {
+      "pr": 4400,
+      "source": "https://github.com/juv4uk/sens/pull/4400",
+      "original_path": "benchmarks/domain-altitude-economy/run.py",
+      "archived_path": "research/domain-archive/20261011/pr4400/benchmarks/domain-altitude-economy/run.py",
+      "exact_git_blob": "deeb4b9b265c0c8bfb335c521734935d68b8be71"
+    },
+    {
+      "pr": 4400,
+      "source": "https://github.com/juv4uk/sens/pull/4400",
+      "original_path": "benchmarks/domain-altitude-economy/schema.json",
+      "archived_path": "research/domain-archive/20261011/pr4400/benchmarks/domain-altitude-economy/schema.json",
+      "exact_git_blob": "6c5e2577decba6a6d590bd3cbd1c62b9b53f6798"
+    },
+    {
+      "pr": 4402,
+      "source": "https://github.com/juv4uk/sens/pull/4402",
+      "original_path": "benchmarks/domain-altitude-economy/README.md",
+      "archived_path": "research/domain-archive/20261011/pr4402/benchmarks/domain-altitude-economy/README.md",
+      "exact_git_blob": "4273f86a45e7bb24c19086232b63804600c9771a"
+    },
+    {
+      "pr": 4402,
+      "source": "https://github.com/juv4uk/sens/pull/4402",
+      "original_path": "benchmarks/domain-altitude-economy/inventory.py",
+      "archived_path": "research/domain-archive/20261011/pr4402/benchmarks/domain-altitude-economy/inventory.py",
+      "exact_git_blob": "103f3a25a2d61093474bad6fc7bfb43fed071ac1"
+    },
+    {
+      "pr": 4402,
+      "source": "https://github.com/juv4uk/sens/pull/4402",
+      "original_path": "benchmarks/domain-altitude-economy/run.py",
+      "archived_path": "research/domain-archive/20261011/pr4402/benchmarks/domain-altitude-economy/run.py",
+      "exact_git_blob": "ac9cb7c5c379f6e3774c01f6a02e1f10c85c95c3"
+    },
+    {
+      "pr": 4402,
+      "source": "https://github.com/juv4uk/sens/pull/4402",
+      "original_path": "benchmarks/domain-altitude-economy/test_inventory.py",
+      "archived_path": "research/domain-archive/20261011/pr4402/benchmarks/domain-altitude-economy/test_inventory.py",
+      "exact_git_blob": "81b0729f1896565d9c20dcdbb579ba48a5074fd6"
+    },
+    {
+      "pr": 4402,
+      "source": "https://github.com/juv4uk/sens/pull/4402",
+      "original_path": "benchmarks/domain-altitude-economy/test_run.py",
+      "archived_path": "research/domain-archive/20261011/pr4402/benchmarks/domain-altitude-economy/test_run.py",
+      "exact_git_blob": "d74cb910390c9d5cd534f6823fdadef78717481f"
+    },
+    {
+      "pr": 4437,
+      "source": "https://github.com/juv4uk/sens/pull/4437",
+      "original_path": "scripts/domain_word_carrier.py",
+      "archived_path": "research/domain-archive/20261011/pr4437/scripts/domain_word_carrier.py",
+      "exact_git_blob": "71631b37412cbf616699ad466966896365524c89"
+    },
+    {
+      "pr": 4437,
+      "source": "https://github.com/juv4uk/sens/pull/4437",
+      "original_path": "tests/test_actual_si_derived_library_migration.py",
+      "archived_path": "research/domain-archive/20261011/pr4437/tests/test_actual_si_derived_library_migration.py",
+      "exact_git_blob": "fc35cec70019ef1b49ec5d5d250ae6183aa09195"
+    },
+    {
+      "pr": 4437,
+      "source": "https://github.com/juv4uk/sens/pull/4437",
+      "original_path": "tests/test_domain_word_carrier.py",
+      "archived_path": "research/domain-archive/20261011/pr4437/tests/test_domain_word_carrier.py",
+      "exact_git_blob": "2450bebd2bd8c16898d8b4c96d374e7eb89a8c5b"
+    },
+    {
+      "pr": 4437,
+      "source": "https://github.com/juv4uk/sens/pull/4437",
+      "original_path": "tests/test_migrator_ladder_authority.py",
+      "archived_path": "research/domain-archive/20261011/pr4437/tests/test_migrator_ladder_authority.py",
+      "exact_git_blob": "fd3ea6ed6db5fee96a14891f5917154ca1d25b27"
+    },
+    {
+      "pr": 4441,
+      "source": "https://github.com/juv4uk/sens/pull/4441",
+      "original_path": "crates/sens/src/ladder_reader.rs",
+      "archived_path": "research/domain-archive/20261011/pr4441/crates/sens/src/ladder_reader.rs.source.txt",
+      "exact_git_blob": "5b5347e2d0c18d879115d095dcfc2cbd484e7092"
+    },
+    {
+      "pr": 4868,
+      "source": "https://github.com/juv4uk/sens/pull/4868",
+      "original_path": "docs/research/d10-find-method-selection-v1.uk.md",
+      "archived_path": "research/domain-archive/20261011/pr4868/docs/research/d10-find-method-selection-v1.uk.md",
+      "exact_git_blob": "cbb2c921eda600b0828c11faab6c2dea9ba59f31"
+    },
+    {
+      "pr": 4868,
+      "source": "https://github.com/juv4uk/sens/pull/4868",
+      "original_path": "knowledge/d10-find-method-selection-v1.json",
+      "archived_path": "research/domain-archive/20261011/pr4868/knowledge/d10-find-method-selection-v1.json",
+      "exact_git_blob": "1038ba45160fd902b13a8364869957fc03823bc3"
+    },
+    {
+      "pr": 4868,
+      "source": "https://github.com/juv4uk/sens/pull/4868",
+      "original_path": "scripts/check_d10_find_method_selected_v1.py",
+      "archived_path": "research/domain-archive/20261011/pr4868/scripts/check_d10_find_method_selected_v1.py",
+      "exact_git_blob": "94f05725504a5cadaef9e2b8cab2eb6ca28576a4"
+    },
+    {
+      "pr": 4868,
+      "source": "https://github.com/juv4uk/sens/pull/4868",
+      "original_path": "tests/fixtures/d10-find-method-real-cl-oracle.lisp",
+      "archived_path": "research/domain-archive/20261011/pr4868/tests/fixtures/d10-find-method-real-cl-oracle.lisp",
+      "exact_git_blob": "db9b9d6e288bbd0f2877f6c08b77029f1a4f3fb3"
+    },
+    {
+      "pr": 4948,
+      "source": "https://github.com/juv4uk/sens/pull/4948",
+      "original_path": "tests/oracles/d10_hysteresis_chez.ss",
+      "archived_path": "research/domain-archive/20261011/pr4948/tests/oracles/d10_hysteresis_chez.ss",
+      "exact_git_blob": "3862fc6445bf332ed6ef6d38c69567ffe3268014"
+    },
+    {
+      "pr": 5003,
+      "source": "https://github.com/juv4uk/sens/pull/5003",
+      "original_path": "scripts/check_d10_babbage_reiter_selection.py",
+      "archived_path": "research/domain-archive/20261011/pr5003/scripts/check_d10_babbage_reiter_selection.py",
+      "exact_git_blob": "530bf05ebb3664d266a6a76b5d335741ca0e05ea"
+    },
+    {
+      "pr": 5286,
+      "source": "https://github.com/juv4uk/sens/pull/5286",
+      "original_path": "hardware/sens-silicon/README.md",
+      "archived_path": "research/domain-archive/20261011/pr5286/hardware/sens-silicon/README.md",
+      "exact_git_blob": "0e692fbcfcaa5cf18044f41cc0dc13c598f736e1"
+    },
+    {
+      "pr": 5286,
+      "source": "https://github.com/juv4uk/sens/pull/5286",
+      "original_path": "hardware/sens-silicon/rtl/sens_d3_microcore.sv",
+      "archived_path": "research/domain-archive/20261011/pr5286/hardware/sens-silicon/rtl/sens_d3_microcore.sv",
+      "exact_git_blob": "291aa4edc8e401835c1ae5f4b70d2328eae9b784"
+    },
+    {
+      "pr": 5286,
+      "source": "https://github.com/juv4uk/sens/pull/5286",
+      "original_path": "hardware/sens-silicon/rtl/sens_silicon_d3.sv",
+      "archived_path": "research/domain-archive/20261011/pr5286/hardware/sens-silicon/rtl/sens_silicon_d3.sv",
+      "exact_git_blob": "cad4d1a3b88e5f4b30e7280336a82ccacf4836e8"
+    },
+    {
+      "pr": 5286,
+      "source": "https://github.com/juv4uk/sens/pull/5286",
+      "original_path": "hardware/sens-silicon/rtl/sens_t5_decoder.sv",
+      "archived_path": "research/domain-archive/20261011/pr5286/hardware/sens-silicon/rtl/sens_t5_decoder.sv",
+      "exact_git_blob": "e0c9a927ab0c6afece122fbddcc14d456e2c6142"
+    },
+    {
+      "pr": 5286,
+      "source": "https://github.com/juv4uk/sens/pull/5286",
+      "original_path": "hardware/sens-silicon/tb/d3-primitives.t5.hex",
+      "archived_path": "research/domain-archive/20261011/pr5286/hardware/sens-silicon/tb/d3-primitives.t5.hex",
+      "exact_git_blob": "3b3168b2821720396b711c39e7bad3eddc546f3f"
+    },
+    {
+      "pr": 5286,
+      "source": "https://github.com/juv4uk/sens/pull/5286",
+      "original_path": "hardware/sens-silicon/tb/tb_sens_silicon_d3.sv",
+      "archived_path": "research/domain-archive/20261011/pr5286/hardware/sens-silicon/tb/tb_sens_silicon_d3.sv",
+      "exact_git_blob": "0efacf557c9c6d5c81ceefd1cfa3db2ce2662e89"
+    },
+    {
+      "pr": 5286,
+      "source": "https://github.com/juv4uk/sens/pull/5286",
+      "original_path": "hardware/sens-silicon/tests/check_silicon_d3_vectors.py",
+      "archived_path": "research/domain-archive/20261011/pr5286/hardware/sens-silicon/tests/check_silicon_d3_vectors.py",
+      "exact_git_blob": "d3b9b43c230213a517c285bf66f19116cfde17d4"
+    },
+    {
+      "pr": 5288,
+      "source": "https://github.com/juv4uk/sens/pull/5288",
+      "original_path": "crates/sens/examples/microcpu_native.rs",
+      "archived_path": "research/domain-archive/20261011/pr5288/crates/sens/examples/microcpu_native.rs",
+      "exact_git_blob": "eccb706e114ca9f58438d02a85a188e7f2f26052"
+    },
+    {
+      "pr": 5310,
+      "source": "https://github.com/juv4uk/sens/pull/5310",
+      "original_path": "tests/test_d10_yantra_dual_provenance.py",
+      "archived_path": "research/domain-archive/20261011/pr5310/tests/test_d10_yantra_dual_provenance.py",
+      "exact_git_blob": "af2e48c6dfeefd17db18728a7e84e814bea103d3"
+    },
+    {
+      "pr": 5323,
+      "source": "https://github.com/juv4uk/sens/pull/5323",
+      "original_path": "docs/architecture/sens-zero-stability-proposal.uk.md",
+      "archived_path": "research/domain-archive/20261011/pr5323/docs/architecture/sens-zero-stability-proposal.uk.md",
+      "exact_git_blob": "2dce917ca38abdd4ea630f936f8f532b62f6a203"
+    },
+    {
+      "pr": 5529,
+      "source": "https://github.com/juv4uk/sens/pull/5529",
+      "original_path": "knowledge/d10-cnf-unit-fixpoint-selection-20261011.json",
+      "archived_path": "research/domain-archive/20261011/pr5529/knowledge/d10-cnf-unit-fixpoint-selection-20261011.json",
+      "exact_git_blob": "a147cfae6251a8d12b65c686b500d5c191766f4b"
+    },
+    {
+      "pr": 5529,
+      "source": "https://github.com/juv4uk/sens/pull/5529",
+      "original_path": "knowledge/d10-existing-evidence-harvest-20261011-a.json",
+      "archived_path": "research/domain-archive/20261011/pr5529/knowledge/d10-existing-evidence-harvest-20261011-a.json",
+      "exact_git_blob": "3793e8fd198928b11ee14df9fedfa1dcb234a590"
+    },
+    {
+      "pr": 5529,
+      "source": "https://github.com/juv4uk/sens/pull/5529",
+      "original_path": "knowledge/d10-existing-evidence-harvest-20261011-b.json",
+      "archived_path": "research/domain-archive/20261011/pr5529/knowledge/d10-existing-evidence-harvest-20261011-b.json",
+      "exact_git_blob": "828af35f83552741c6899ad919f9c31c42ac12d0"
+    },
+    {
+      "pr": 5531,
+      "source": "https://github.com/juv4uk/sens/pull/5531",
+      "original_path": "docs/research/d10-prefix-free-kraft-certificate.uk.md",
+      "archived_path": "research/domain-archive/20261011/pr5531/docs/research/d10-prefix-free-kraft-certificate.uk.md",
+      "exact_git_blob": "23f76851b2bb612fef95506361a342ab768f1dd8"
+    },
+    {
+      "pr": 5531,
+      "source": "https://github.com/juv4uk/sens/pull/5531",
+      "original_path": "knowledge/d10-existing-research-batch-replay-20261011.json",
+      "archived_path": "research/domain-archive/20261011/pr5531/knowledge/d10-existing-research-batch-replay-20261011.json",
+      "exact_git_blob": "f69df75b9d6a6b99bb88178f2719fc1cc58614de"
+    },
+    {
+      "pr": 5531,
+      "source": "https://github.com/juv4uk/sens/pull/5531",
+      "original_path": "knowledge/d10-prefix-free-kraft-certificate-20261011.json",
+      "archived_path": "research/domain-archive/20261011/pr5531/knowledge/d10-prefix-free-kraft-certificate-20261011.json",
+      "exact_git_blob": "8e5408f28a6f8e276b999463429241b42e2a284e"
+    },
+    {
+      "pr": 5531,
+      "source": "https://github.com/juv4uk/sens/pull/5531",
+      "original_path": "scripts/check_d10_existing_research_batch.py",
+      "archived_path": "research/domain-archive/20261011/pr5531/scripts/check_d10_existing_research_batch.py",
+      "exact_git_blob": "06233a15ba2ceace81e60aa3ae89c258a9f7e0be"
+    },
+    {
+      "pr": 5531,
+      "source": "https://github.com/juv4uk/sens/pull/5531",
+      "original_path": "scripts/check_d10_prefix_free_kraft_certificate.py",
+      "archived_path": "research/domain-archive/20261011/pr5531/scripts/check_d10_prefix_free_kraft_certificate.py",
+      "exact_git_blob": "81c6e70b288137c0f60d492d0bd617c3b491324a"
+    },
+    {
+      "pr": 5532,
+      "source": "https://github.com/juv4uk/sens/pull/5532",
+      "original_path": "docs/research/d10-bounded-modular-lift-20261009.uk.md",
+      "archived_path": "research/domain-archive/20261011/pr5532/docs/research/d10-bounded-modular-lift-20261009.uk.md",
+      "exact_git_blob": "e3f3f4aba5e003fff6396dcc10cca09ef01bf424"
+    },
+    {
+      "pr": 5532,
+      "source": "https://github.com/juv4uk/sens/pull/5532",
+      "original_path": "scripts/check_d10_unique_bounded_modular_lift.py",
+      "archived_path": "research/domain-archive/20261011/pr5532/scripts/check_d10_unique_bounded_modular_lift.py",
+      "exact_git_blob": "57ea6e54713be22a34f45da168073474477d1471"
+    },
+    {
+      "pr": 5534,
+      "source": "https://github.com/juv4uk/sens/pull/5534",
+      "original_path": "docs/research/d10-change-class-selection-v1.uk.md",
+      "archived_path": "research/domain-archive/20261011/pr5534/docs/research/d10-change-class-selection-v1.uk.md",
+      "exact_git_blob": "c70ff49540b55d7acf999c632fb47b03c5a0e37f"
+    },
+    {
+      "pr": 5534,
+      "source": "https://github.com/juv4uk/sens/pull/5534",
+      "original_path": "knowledge/d10-change-class-selection-v1.json",
+      "archived_path": "research/domain-archive/20261011/pr5534/knowledge/d10-change-class-selection-v1.json",
+      "exact_git_blob": "f17fcbc8b7b2062c8a33e34783c924f35352d16e"
+    },
+    {
+      "pr": 5534,
+      "source": "https://github.com/juv4uk/sens/pull/5534",
+      "original_path": "scripts/check_d10_change_class_selected_v1.py",
+      "archived_path": "research/domain-archive/20261011/pr5534/scripts/check_d10_change_class_selected_v1.py",
+      "exact_git_blob": "5d024e407532016d11cb538bc64e93b2326a2cc1"
+    },
+    {
+      "pr": 5534,
+      "source": "https://github.com/juv4uk/sens/pull/5534",
+      "original_path": "tests/fixtures/d10-change-class-real-cl-oracle.lisp",
+      "archived_path": "research/domain-archive/20261011/pr5534/tests/fixtures/d10-change-class-real-cl-oracle.lisp",
+      "exact_git_blob": "374c0b4e80caa25ea2ac8543ff7d637cb2709566"
+    },
+    {
+      "pr": 5536,
+      "source": "https://github.com/juv4uk/sens/pull/5536",
+      "original_path": "scripts/check_d10_debruijn_binary_cycle.py",
+      "archived_path": "research/domain-archive/20261011/pr5536/scripts/check_d10_debruijn_binary_cycle.py",
+      "exact_git_blob": "db1e6aa665ac12370865f0d388ad0af864e62ce9"
+    },
+    {
+      "pr": 5536,
+      "source": "https://github.com/juv4uk/sens/pull/5536",
+      "original_path": "scripts/check_d10_dung_grounded.py",
+      "archived_path": "research/domain-archive/20261011/pr5536/scripts/check_d10_dung_grounded.py",
+      "exact_git_blob": "ea26b79a4038ed22c968824cdb9e1b79f9ef647b"
+    },
+    {
+      "pr": 5536,
+      "source": "https://github.com/juv4uk/sens/pull/5536",
+      "original_path": "scripts/check_d10_maling_symbolic_differentiation.py",
+      "archived_path": "research/domain-archive/20261011/pr5536/scripts/check_d10_maling_symbolic_differentiation.py",
+      "exact_git_blob": "2d2748abd132fe2924a7771f8bfa7cda251ca98f"
+    },
+    {
+      "pr": 5536,
+      "source": "https://github.com/juv4uk/sens/pull/5536",
+      "original_path": "scripts/check_d10_reiter_minimal_diagnoses.py",
+      "archived_path": "research/domain-archive/20261011/pr5536/scripts/check_d10_reiter_minimal_diagnoses.py",
+      "exact_git_blob": "a1ffa293288b952a7127f53534ea95ef31d7b2e8"
+    },
+    {
+      "pr": 5536,
+      "source": "https://github.com/juv4uk/sens/pull/5536",
+      "original_path": "scripts/check_d10_unique_bounded_modular_lift.py",
+      "archived_path": "research/domain-archive/20261011/pr5536/scripts/check_d10_unique_bounded_modular_lift.py",
+      "exact_git_blob": "ad92e7687c27219b67aa75a65de925a05d3cdd99"
+    },
+    {
+      "pr": 5537,
+      "source": "https://github.com/juv4uk/sens/pull/5537",
+      "original_path": "knowledge/d10-archive-admission-20261011.uk.md",
+      "archived_path": "research/domain-archive/20261011/pr5537/knowledge/d10-archive-admission-20261011.uk.md",
+      "exact_git_blob": "ef2970a6b2ce82ac1549f8768a5985fe361436c5"
+    }
+  ],
+  "policy": [
+    "Copy unchanged bytes as research evidence in main, no publication as executable or normative selected D10",
+    "Some original PRs asserted selected on obsolete main; those old SHA chains are not portable to current main",
+    "Never retire active proof guards; reconcile failed source HOLD checks and rerun exact-head independent oracles",
+    "D11 only after owner ratifies fully placed D10"
+  ],
+  "archival_extension_note": "The byte-identical research Rust file is renamed with .source.txt, so live migration producer inventory excludes this non-executable archive."
+}

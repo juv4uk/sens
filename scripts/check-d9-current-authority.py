@@ -2,6 +2,10 @@
 import json
 from pathlib import Path
 
+# У режимі -O Python прибирає assert: не можна підтверджувати D9 без перевірок.
+if not __debug__:
+    raise SystemExit("D9-CURRENT-AUTHORITY: BLOCKED — Python -O вимикає перевірки")
+
 root=Path(__file__).resolve().parents[1]
 d9=json.loads((root/"knowledge/d9-ratified.json").read_text(encoding="utf-8"))
 source=json.loads((root/"knowledge/d9-v1-gauge-fixed-candidate.json").read_text(encoding="utf-8"))

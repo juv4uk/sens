@@ -1,0 +1,29 @@
+# Read-only fail-closed перевірка реєстру переходу на новий кодек (М0 #5444).
+# Не змінює жодного фізичного .sens/.senc і не вводить новий кодер.
+name: T5 migration inventory (М0)
+
+on:
+  # census класифікує за вмістом, а не тільки за розширенням:
+  # будь-який новий файл може стати producer/consumer T5.
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  inventory:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Незалежний негативний свідок
+        run: python3 scripts/test-t5-migration-inventory.py
+      - name: Live-реєстр == закомічений manifest (fail-closed)
+        run: python3 scripts/report_t5_migration_inventory.py --check data/t5-migration-inventory.jsonl

@@ -51,13 +51,23 @@ pub fn eval_parsed_expressions(
 /// Виконати програму, вже зведену `lower_program`.
 /// Мігрувані D3/D4 голови несуть exact domain identity; неперенесені
 /// compatibility-голови ще можуть нести historical Sens8.
+/// Прив'язати безадресну внутрішню помилку до виконуваної верхньої форми.
+/// Точні діапазони помилок зберігаються; семантика виконання не змінюється.
+fn top_level_error_span(mut error: LanguageError, expression: &Expr) -> LanguageError {
+    if error.span == Span::default() {
+        error.span = expression.span;
+    }
+    error
+}
+
 pub fn eval_lowered_expressions(
     expressions: &[Expr],
     session: &mut Session,
 ) -> Result<EvalResult, LanguageError> {
     let mut value = Value::Nil;
     for expression in expressions {
-        value = evaluate(expression, &session.environment)?;
+        value = evaluate(expression, &session.environment)
+            .map_err(|error| top_level_error_span(error, expression))?;
     }
     Ok(EvalResult {
         value,
@@ -119,7 +129,20 @@ pub(crate) fn invoke_value(
         Value::Closure(closure) => closures::apply_values(closure.clone(), arguments, span),
         _ => Err(LanguageError::new(
             ErrorKind::Type,
-            "expression is not callable · vyraz ne mozhna vyklykaty · Ausdruck ist nicht aufrufbar",
+            format!(
+                "expression is not callable · vyraz ne mozhna vyklykaty · Ausdruck ist nicht aufrufbar (носій: {})",
+                match function {
+                    Value::Nil => "порожня структура",
+                    Value::Bool(_) => "історичний булевий носій",
+                    Value::Number(_, _) | Value::Rational(_) => "число",
+                    Value::BinaryNumber(_) => "двійкове число",
+                    Value::Symbol(_) => "символ",
+                    Value::Pair(_, _) => "пара",
+                    Value::Macro(_) => "макрос",
+                    Value::String(_) | Value::Text7(_) => "текст",
+                    _ => "інший невикликний носій",
+                },
+            ),
             span,
         )),
     }
@@ -562,5 +585,30 @@ impl ExprKindExt for ExprKind {
             ExprKind::Symbol(symbol) => Some(symbol),
             _ => None,
         }
+    }
+}
+
+#[cfg(test)]
+mod top_level_error_span_tests {
+    use super::*;
+
+    #[test]
+    fn preserves_precise_span_and_recovers_missing_top_level_location() {
+        let source = "; Початковий коментар\n(1)";
+        let forms = parse(source).expect("джерельна форма");
+        let form = &forms[0];
+        assert_eq!(form.span.start, source.find("(1)").unwrap());
+
+        let missing = LanguageError::new(ErrorKind::Type, "не можна викликати", Span::default());
+        let repaired = top_level_error_span(missing, form);
+        assert_eq!(repaired.span, form.span);
+        assert_eq!(repaired.line_col(source), (2, 1));
+
+        let precise = Span {
+            start: form.span.start + 1,
+            end: form.span.start + 2,
+        };
+        let already_located = LanguageError::new(ErrorKind::Type, "точний діапазон", precise);
+        assert_eq!(top_level_error_span(already_located, form).span, precise);
     }
 }

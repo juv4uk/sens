@@ -1,0 +1,210 @@
+{
+  "schema": "d10-hobby-exact-measurement-intake/v1",
+  "status": "SELECTED-RESEARCH-PENDING-OWNER-REVIEW",
+  "authority": [
+    "#4013",
+    "#4463",
+    "#4867"
+  ],
+  "baseline": {
+    "main_inventory_sha": "a55f307c27f17091795d75ebfcd7d051547d80bc",
+    "selected": 630,
+    "foundation_sha": "09d1d71c39d1484dfd005a5068dbb18b76f0f0d4"
+  },
+  "origin": {
+    "donor_repo": "juv4uk/spanda",
+    "donor_path": "README.md",
+    "donor_blob_sha": "d339363e03798941280d7394fb6b24a76ff43dd3",
+    "source_url": "https://github.com/juv4uk/spanda/blob/main/README.md",
+    "exact_reference_url": "https://docs.python.org/3/library/fractions.html#fractions.Fraction.limit_denominator",
+    "source_maturity": "Spanda ADC rational recovery is documented DESIGN, not shipped implementation; new Python oracle implemented in this PR."
+  },
+  "selected": [
+    {
+      "stable_id": "d10.hobby.spanda.bounded-rational-approx.v1",
+      "semantic_name": "BOUNDED-RATIONAL-APPROX",
+      "surface_uk": "наблизити-дробом",
+      "surface_ukr": "найближчий-дріб-із-межею-знаменника",
+      "source_class": "CROSSREPO-SPANDA-EXACT-RECOVERY",
+      "relation_class": "EXACT-NUMERIC-APPROXIMATION",
+      "arity": "(x: exact rational, maximum_denominator: positive integer)->(closest exact rational, signed exact residual)",
+      "behavior": "For exact x and Q>=1, return reduced p/q with 1<=q<=Q minimizing exact |x-p/q| over all rationals. Break ties by smallest reduced denominator, then smallest signed numerator. Return residual r=x-p/q exactly; no float, no ADC uncertainty inference, no machine or physical T5 authority.",
+      "positives": [
+        {
+          "input": "x=355/113, Q=100",
+          "result": "p/q=311/99; residual=355/113-311/99"
+        },
+        {
+          "input": "x=2/3, Q=3",
+          "result": "p/q=2/3; residual=0"
+        },
+        {
+          "input": "x=-1/2, Q=1",
+          "result": "p/q=-1; residual=+1/2 (tie chooses smaller signed numerator)"
+        }
+      ],
+      "falsifiers": [
+        "RATIONALIZE returns an arbitrary exact rational without enforcing Q, so it is not equivalent to a bounded recovery.",
+        "Returning a float or silently discarding signed residual violates exact representation.",
+        "Returning q>Q or any fraction with larger exact error violates best-approximation law.",
+        "Breaking Q=1 halfway ties differently from the declared denominator/numerator order.",
+        "ADC measurement uncertainty must not be inferred from the approximation residual."
+      ],
+      "dedup": {
+        "exact_in_d1_d9": false,
+        "exact_in_prior_d10": false,
+        "neighbors": [
+          "D8 RATIONAL",
+          "D8 RATIONALIZE",
+          "D9 DIVMOD",
+          "D10 numeric/accuracy families"
+        ],
+        "derivable": "A higher-order library program can enumerate candidate rationals using D8/D9 exact arithmetic; derivability does not establish duplicate semantic identity, but Core versus Core-Math ownership remains owner-review.",
+        "independence_test": "Universal denominator-constrained closest-rational relation with explicit residual/tie is not the same observable contract as unconstrained RATIONALIZE; requires proof whether it deserves a 10-bit Core resident."
+      },
+      "language_visible": true,
+      "mechanism_only": false,
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "ratified_resident": false,
+      "proposal_status": "pending-owner-review",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "decision": "SELECT-D10-CANDIDATE",
+      "physical_t5_authorized": false,
+      "source_path": "knowledge/d10-hobby-exact-measurement-intake-v1.json",
+      "provenance": [
+        "#4013",
+        "#4463",
+        "juv4uk/spanda:README.md@d339363e03798941280d7394fb6b24a76ff43dd3",
+        "https://docs.python.org/3/library/fractions.html#fractions.Fraction.limit_denominator"
+      ]
+    }
+  ],
+  "hobby_review": [
+    {
+      "interest": "astronomy / astrophysics",
+      "repo": "juv4uk/WSM-24",
+      "candidate": "XYZ-TO-RADEC",
+      "decision": "HOLD-CORE-MATH-PROJECTION",
+      "reason": "Coordinates and trig projection are mathematical library operations; WSM-24 source is an implementation, not automatic new core identity.",
+      "source": "src/brahmanda/projection.clj@68c6db2eefad71e8e325b971e7714273922d79a8"
+    },
+    {
+      "interest": "orbital physics",
+      "repo": "juv4uk/vsop2013",
+      "candidate": "LEAPFROG-STATE-STEP",
+      "decision": "HOLD-CORE-MATH",
+      "reason": "Numerical integrator strategy; requires stability/error and dimension/units contracts, not substrate opcodes.",
+      "source": "gravityIntegration/README.md"
+    },
+    {
+      "interest": "amateur radio / SDR / acoustics",
+      "repo": "juv4uk/radio-log",
+      "candidate": "FINITE-CONVOLUTION",
+      "decision": "PEER-CLAIM",
+      "reason": "Another agent claimed this source/math lane in #4013; no duplication.",
+      "source": "#4013; radio-log/docs/sens-radio.md"
+    },
+    {
+      "interest": "pendulum / ESP32 / radio phase",
+      "repo": "juv4uk/esp32-pendulum",
+      "candidate": "PHASE-UNWRAP",
+      "decision": "PEER-CLAIM",
+      "reason": "Another agent owns this source/math lane. The donor unwrap.c remains TODO; don't claim production source.",
+      "source": "components/physics/unwrap.c@d4e96f8611bf1c7ffce3cf291adfecb3372be43f"
+    },
+    {
+      "interest": "horology / 24-hour dial",
+      "repo": "juv4uk/WSM-24",
+      "candidate": "CYCLIC-TIME-PROJECTION",
+      "decision": "HOLD-MATH",
+      "reason": "Cyclic time-to-angle is derived from mod and scaling unless a new independent state law is proven.",
+      "source": "src/brahmanda/coordinates.clj@3c71175d4ebad6c07832f2c3e656d22834a50974"
+    },
+    {
+      "interest": "Sanskrit / Panini / Shiva-sutras",
+      "repo": "juv4uk/shiva-sutras",
+      "candidate": "RESOLVE-PRATYAHARA",
+      "decision": "ALREADY-SELECTED-D10",
+      "reason": "Existing selected D10 semantics, no second slot.",
+      "source": "README.md@6c932545f63f6c1895767c42b85f679272237f02"
+    },
+    {
+      "interest": "language and typography",
+      "repo": "juv4uk/vidyut",
+      "candidate": "LONGEST-MATCH-TEXT-MAPPING",
+      "decision": "HOLD-D7-OR-LIBRARY",
+      "reason": "Previously indexed in linguistic donor audit; independently verify D7/text ownership and semantic novelty.",
+      "source": "knowledge/d10-crossrepo-linguistic-v1.json"
+    },
+    {
+      "interest": "logic / Prolog / Advice Taker",
+      "repo": "juv4uk/sens",
+      "candidate": "PROVE-GOAL-STATE",
+      "decision": "ALREADY-SELECTED-D10",
+      "reason": "Selected in self-hosting reasoning harvest; preserve existing root.",
+      "source": "lib/reason.lisp; knowledge/d10-v1-semantic-inventory.json"
+    },
+    {
+      "interest": "radio receive provenance",
+      "repo": "juv4uk/radio-log",
+      "candidate": "RAW-OBSERVATION-INFERENCE",
+      "decision": "PROJECTION-EXISTING-EVIDENCE",
+      "reason": "Existing evidence/provenance family in D9/D10; radio frame/modem/CRC hardware is mechanism, not SENS semantics.",
+      "source": "docs/sens-radio.md@bfe72ef56a7498ac46d73375af83f66d4cfca768"
+    },
+    {
+      "interest": "FPGA / analog switch matrix",
+      "repo": "juv4uk/spanda",
+      "candidate": "FRACTION-TO-CROSSPOINT-MASK",
+      "decision": "MECHANISM-ONLY",
+      "reason": "FPGA hardware encoding and 8x16 switch-matrix transport are mechanisms, distinct from rational identity.",
+      "source": "README.md@d339363e03798941280d7394fb6b24a76ff43dd3"
+    },
+    {
+      "interest": "chess / game-tree algorithms",
+      "repo": "juv4uk/chess-lisp-zero",
+      "candidate": "STABLE-ARGMAX-STATE-SUCCESSOR",
+      "decision": "HOLD-DERIVABLE-LIBRARY",
+      "reason": "lib/search.lisp selects the first maximal-scored successor by a strict > comparison, preserving deterministic tie order, and minimax depth recursion. This is an observable deterministic fold/search law but appears derivable from D6 ordering + enumerating successors, not a justified new Core D10 resident.",
+      "source": "lib/search.lisp@a2186134e82e27a946ccaaa0b11471131b9efa1e",
+      "positive_witness": "Two equal scored legal successors A then B must select A; reversing their order may select B. Counterexample: unstable hash iteration destroys tie reproducibility."
+    },
+    {
+      "interest": "chess / pure transition plus reject safety",
+      "repo": "juv4uk/chess-lisp-zero",
+      "candidate": "VALIDATED-STATE-TRANSITION-NO-MUTATION",
+      "decision": "HOLD-STATE-LAW-REVIEW",
+      "reason": "WASM smoke witnesses initial 20 moves, deterministic E2E4 resulting FEN and rejection of illegal A1-H8 without changing terminal state. State preservation on invalid input is a strong language-level boundary candidate, but existing selected D10 UNDO and APPLY-JOURNAL-EVENT plus user D2 control must be deduped before any slot.",
+      "source": "tools/wasm-chess-smoke.mjs@c351113fa6197faa2c7e82751d0657a3377d619e",
+      "positive_witness": "Apply a valid state transition => new position; reject invalid transition => previous state unchanged; no invented state. Falsifier: partial board mutation on error."
+    },
+    {
+      "interest": "epistemology / Sanskrit philology / formal research claims",
+      "repo": "juv4uk/shiva-sutras",
+      "candidate": "REPRODUCIBILITY-IS-NOT-AUTHENTICITY",
+      "decision": "HOLD-EXISTING-EPISTEMIC-CLAIM-SYSTEM",
+      "reason": "A source can be byte-reproducible yet have uncertain historical attribution. Explicitly treat repeatable processing as distinct from source-authenticity proof; D10 already has MAKE-CLAIM, MAKE-EVIDENCE, EVIDENCE-SOURCE-REF, NATIVE-OBSERVATION, so this likely is a law/invariant on epistemic records rather than a new opcode.",
+      "source": "RESEARCH_MAP.md@763bf48a7ff890ca6947707f16d98bea605f97c1",
+      "positive_witness": "Identical bytes in repeated retrievals do not automatically imply verified attribution. Falsifier: promoting source to AUTHENTIC solely because hashes match."
+    },
+    {
+      "interest": "self-improving editor / Emacs and live Lisp laboratory",
+      "repo": "juv4uk/my-idea",
+      "candidate": "LIVE-DEFINITION-REPLACE",
+      "decision": "HOLD-EXISTING-D8-D10-OR-D2",
+      "reason": "Self-extending Lisp inside a persistent REPL is a core user goal, but named definition replacement overlaps existing D8 definitions and D10 COPYD/UNDO plus D2 evaluator control. Needs a proof distinct from ordinary DEFINE and generic method transitions before admission.",
+      "source": "README.md@858cf81cf46b27036a783ece10d82e9ac8ac7837",
+      "positive_witness": "Redefine function F while REPL stays live, future calls take new definition, rollback semantics explicit. Falsifier: evaluator unexpectedly retains stale definition."
+    },
+    {
+      "interest": "bare-metal Lisp machine / UEFI and x86-64 assembly",
+      "repo": "juv4uk/wsm-os-lisp",
+      "candidate": "BOOT-ARTIFACT-PARITY-WITNESS",
+      "decision": "HOLD-MECHANISM-AND-OBSERVATION",
+      "reason": "Boot, QEMU-versus-hardware parity, driver ABI and ASM instructions remain machine execution substrate. Can use source-pinned epistemic evidence objects already in D10, but no new D10 opcode merely because a CPU/device needs an operation.",
+      "source": "README.md@5a2a15b76cf5d0006c09d4edbbde50a4f7f094ac",
+      "positive_witness": "Same pinned binary artifact observed under QEMU and native must have distinct observation classes; QEMU success does not prove physical boot."
+    }
+  ]
+}

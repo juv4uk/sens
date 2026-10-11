@@ -1,0 +1,57 @@
+name: Direct physical T5 interpreter parity and isolated timing
+
+on:
+  pull_request:
+    paths:
+      - "crates/sens/src/binary_execution.rs"
+      - "crates/sens/src/lib.rs"
+      - "crates/sens-cli/src/bin/sens-trit.rs"
+      - "crates/sens/tests/direct_t5_pipeline.rs"
+      - "crates/sens/examples/bench_direct_t5.rs"
+      - "scripts/check_direct_t5_timing.py"
+      - "tests/test_direct_t5_timing_guard.py"
+      - ".github/workflows/direct-physical-t5.yml"
+  push:
+    branches: [main]
+    paths:
+      - "crates/sens/src/binary_execution.rs"
+      - "crates/sens/src/lib.rs"
+      - "crates/sens-cli/src/bin/sens-trit.rs"
+      - "crates/sens/tests/direct_t5_pipeline.rs"
+      - "crates/sens/examples/bench_direct_t5.rs"
+      - "scripts/check_direct_t5_timing.py"
+      - "tests/test_direct_t5_timing_guard.py"
+      - ".github/workflows/direct-physical-t5.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  physical-source-free-evaluation:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v5
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Physical input / visible reference semantic parity
+        run: cargo test --locked -q -p sens --test direct_t5_pipeline
+      - name: Original SENS CLI evaluation and diagnostic regression
+        run: cargo test --locked -q -p sens-cli --bin sens-trit
+      - name: Негативні свідки коректності T5-вимірювань за Python і Python -O
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m unittest discover -s tests -p 'test_direct_t5_timing_guard.py' -v
+          python3 -O -m unittest discover -s tests -p 'test_direct_t5_timing_guard.py' -v
+      - name: Physical decode vs visible parser vs cached AST, measurement-only
+        shell: bash
+        run: |
+          set -euo pipefail
+          cargo run --locked --release --quiet -p sens --example bench_direct_t5 -- 2000 \
+            | tee "$RUNNER_TEMP/t5-direct-timing.csv"
+          python3 scripts/check_direct_t5_timing.py "$RUNNER_TEMP/t5-direct-timing.csv"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: t5-direct-timing
+          path: ${{ runner.temp }}/t5-direct-timing.csv
+          retention-days: 14

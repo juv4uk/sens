@@ -384,14 +384,32 @@ fn canonicalize_domain_result(
     ))
 }
 
-/// Compact-derived bootstrap law ratified at D4:1110 LIST / D4:1111 APPEND.
+/// Compact-derived bootstrap laws ratified by Contract D4: NOT, NULL, LIST, APPEND.
 ///
-/// This is a bounded reference value-call mechanism expressed solely in the
-/// D3 pair/empty value algebra; not a host effect, new resident, historical
-/// W8 alias, or licence to promote arbitrary D4 identities into builtins.
-/// A language-defined closure may replace the reference once independent
-/// Lisp↔Rust parity has been established.
-fn invoke_compact_derived_d4_lists(
+/// These are bounded reference value-call mechanisms. NOT consumes and returns
+/// only exact D1 PredicateBit values; NULL checks structural EMPTY (Value::Nil).
+/// Neither law coerces Number 0/1, host Bool, historical truth, or EMPTY into a
+/// predicate. LIST/APPEND use the D3 pair/empty value algebra. These mechanisms
+/// do not add residents, host effects, or historical W8 aliases.
+fn require_exactly_one_d4_argument(
+    coordinate: u8,
+    args: &[Value],
+    span: Span,
+) -> Result<(), LanguageError> {
+    if args.len() == 1 {
+        return Ok(());
+    }
+    Err(LanguageError::new(
+        ErrorKind::Arity,
+        format!(
+            "D4:{coordinate:04b} expects exactly one argument / потребує рівно один аргумент; отримано {}",
+            args.len()
+        ),
+        span,
+    ))
+}
+
+fn invoke_compact_derived_d4(
     identity: CoreDomainIdentity,
     args: &[Value],
     span: Span,
@@ -400,6 +418,23 @@ fn invoke_compact_derived_d4_lists(
         return None;
     };
     match word.word().packed_bits() {
+        // Ratified D4 NOT: exact D1 NO/YES is negated without host truthiness.
+        0b0100 => Some((|| {
+            require_exactly_one_d4_argument(0b0100, args, span)?;
+            let value = args[0].as_predicate_bit().ok_or_else(|| {
+                LanguageError::new(
+                    ErrorKind::Type,
+                    "D4:0100 NOT requires an exact D1 PredicateBit; Number, host Bool, and structural EMPTY are not predicates",
+                    span,
+                )
+            })?;
+            Ok(Value::predicate_bit(!value))
+        })()),
+        // Ratified D4 NULL: only structural empty list is empty; D1 NO is data.
+        0b0101 => Some((|| {
+            require_exactly_one_d4_argument(0b0101, args, span)?;
+            Ok(Value::predicate_bit(matches!(args[0], Value::Nil)))
+        })()),
         // Ratified D4 LIST: collect evaluated values into a proper list.
         0b1110 => Some(Ok(Value::list(args.iter().cloned()))),
         // Ratified D4 APPEND: combine only proper lists, left to right.
@@ -442,7 +477,7 @@ pub(crate) fn invoke_domain_identity(
         return result;
     }
 
-    if let Some(result) = invoke_compact_derived_d4_lists(identity, args, span) {
+    if let Some(result) = invoke_compact_derived_d4(identity, args, span) {
         return result;
     }
 
@@ -598,6 +633,67 @@ mod exact_domain_primitive_tests {
         CoreDomainIdentity::D3(crate::Bija3::from_word(
             crate::Bit3::new(bits).expect("D3 word"),
         ))
+    }
+
+    fn d4(bits: u8) -> CoreDomainIdentity {
+        CoreDomainIdentity::D4(crate::CoreD4::from_word(
+            crate::Bit4::new(bits).expect("D4 word"),
+        ))
+    }
+
+    #[test]
+    fn d4_not_negates_only_exact_d1_predicate_bits() {
+        let environment = Environment::root();
+        let span = Span { start: 0, end: 0 };
+
+        for (input, expected) in [(false, true), (true, false)] {
+            let result = invoke_domain_identity(
+                d4(0b0100),
+                &[Value::predicate_bit(input)],
+                &environment,
+                span,
+            )
+            .expect("ratified D4 NOT has a compact value-call mechanism");
+            assert_eq!(result.as_predicate_bit(), Some(expected));
+        }
+
+        for invalid in [
+            Value::Number(0.0, crate::Exactness::Exact),
+            Value::Number(1.0, crate::Exactness::Exact),
+            Value::Nil,
+            Value::Bool(false),
+        ] {
+            let error = invoke_domain_identity(d4(0b0100), &[invalid], &environment, span)
+                .expect_err("D4 NOT must reject non-D1 values without coercion");
+            assert_eq!(error.kind, ErrorKind::Type);
+        }
+
+        let arity = invoke_domain_identity(d4(0b0100), &[], &environment, span)
+            .expect_err("NOT arity remains one");
+        assert_eq!(arity.kind, ErrorKind::Arity);
+    }
+
+    #[test]
+    fn d4_null_tests_structural_empty_not_d1_no() {
+        let environment = Environment::root();
+        let span = Span { start: 0, end: 0 };
+
+        for (value, expected) in [
+            (Value::Nil, true),
+            (Value::predicate_bit(false), false),
+            (Value::predicate_bit(true), false),
+            (Value::Number(0.0, crate::Exactness::Exact), false),
+            (Value::Number(1.0, crate::Exactness::Exact), false),
+            (Value::list([Value::Nil]), false),
+        ] {
+            let result = invoke_domain_identity(d4(0b0101), &[value], &environment, span)
+                .expect("ratified D4 NULL has a compact value-call mechanism");
+            assert_eq!(result.as_predicate_bit(), Some(expected));
+        }
+
+        let arity = invoke_domain_identity(d4(0b0101), &[], &environment, span)
+            .expect_err("NULL arity remains one");
+        assert_eq!(arity.kind, ErrorKind::Arity);
     }
 
     #[test]

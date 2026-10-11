@@ -7,10 +7,24 @@ on:
     branches: [main]
     paths:
       - "benchmarks/physical-binary-performance/**"
+      - "scripts/sens_t5_codec.py"
+      - "tests/fixtures/migration-quote-cohort-main/*.sens"
+      - "tests/fixtures/migration-multiform-cohort-main/*.sens"
+      - "tests/fixtures/migration-d1-cond-cohort/*.sens"
+      - "tests/fixtures/migration-pair-cohort-main/*.sens"
+      - "tests/fixtures/migration-d4-selector-cohort/*.sens"
+      - "tests/fixtures/migration-eq-cond-cohort-main/*.sens"
       - ".github/workflows/physical-binary-performance.yml"
   pull_request:
     paths:
       - "benchmarks/physical-binary-performance/**"
+      - "scripts/sens_t5_codec.py"
+      - "tests/fixtures/migration-quote-cohort-main/*.sens"
+      - "tests/fixtures/migration-multiform-cohort-main/*.sens"
+      - "tests/fixtures/migration-d1-cond-cohort/*.sens"
+      - "tests/fixtures/migration-pair-cohort-main/*.sens"
+      - "tests/fixtures/migration-d4-selector-cohort/*.sens"
+      - "tests/fixtures/migration-eq-cond-cohort-main/*.sens"
       - "crates/sens/src/ternary_transport.rs"
       - "crates/sens/src/canonical_reader.rs"
       - "crates/sens/src/eval/**"
@@ -56,8 +70,15 @@ jobs:
             crates/sens-cli/src/main.rs \
             crates/sens-cli/src/bin/sens-trit.rs \
             benchmarks/physical-binary-performance/run.py \
+            scripts/sens_t5_codec.py \
             tests/fixtures/migration-quote-cohort-main/quote-legacy.sens \
             tests/fixtures/migration-multiform-cohort-main/two-forms.sens \
+            tests/fixtures/migration-d1-cond-cohort/branch.sens \
+            tests/fixtures/migration-pair-cohort-main/pair-cons.sens \
+            tests/fixtures/migration-pair-cohort-main/pair-car-cdr.sens \
+            tests/fixtures/migration-d4-selector-cohort/caar.sens \
+            tests/fixtures/migration-eq-cond-cohort-main/eq-cond-select.sens \
+            tests/fixtures/migration-eq-cond-cohort-main/eq-cond-skip.sens \
             > /tmp/sens-physical-performance/inputs.sha256
       - name: Build release binaries that actually run the language
         run: cargo build --locked --release -p sens-cli --bin sens --bin sens-trit

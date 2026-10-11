@@ -11,6 +11,10 @@ run() {
   "$@"
 }
 
+# Перевірки нижче користуються assert: оптимізований Python їх прибирає.
+# Fail-closed до запуску будь-якого доказового кроку.
+run python3 -c 'import sys; sys.exit("BINARY-LANGUAGE-PIPELINE: BLOCKED — Python -O/PYTHONOPTIMIZE вимикає assert") if not __debug__ else None'
+
 # F−1/F0: нейтральний binary carrier та exact bounded word identity.
 run python3 scripts/research-2106-binary-substrate.py
 run python3 scripts/research-2077-binary-word-law.py
@@ -24,10 +28,77 @@ run python3 scripts/generate-bija3-l1-l5-structure.py --check
 run python3 scripts/check-domain-tables.py
 
 # Binary-domain task governance: schema, witness, falsifier and status discipline.
+# Негативний свідок: автономний валідатор не може обійти self-test.
+run python3 - <<'PY'
+import subprocess
+import sys
+result = subprocess.run(
+    [sys.executable, "-O", "scripts/check-binary-domain-format.py", "--self-test"],
+    capture_output=True, text=True, check=False,
+)
+if result.returncode == 0 or "BINARY-DOMAIN-FORMAT: BLOCKED" not in result.stderr:
+    raise SystemExit("BINARY-DOMAIN-FORMAT: FAILED — optimized Python bypassed evidence")
+if "binary-domain-selftest-ok" in result.stdout:
+    raise SystemExit("BINARY-DOMAIN-FORMAT: FAILED — false optimized PASS")
+print("BINARY-DOMAIN-FORMAT: optimized Python named rejection PASS")
+PY
 run python3 scripts/check-binary-domain-format.py --self-test
 
 # One-way valve: host u8/Sid8 must not become semantic identity again.
 run bash scripts/sid-binary-identity-guard.sh
+
+
+# Від'ємні свідки охорони: відсутнє джерело, помилка grep та заборонений SID.
+# Жоден свідок не змінює репозиторій або середовище наступних CI-кроків.
+guard_probe="$(mktemp -d)"
+trap 'rm -rf -- "$guard_probe"' EXIT
+
+if ( cd "$guard_probe" && bash "$ROOT/scripts/sid-binary-identity-guard.sh" ) \
+    >"$guard_probe/missing.log" 2>&1; then
+  printf 'SID-NEGATIVE: відсутні джерела помилково допущено\n' >&2
+  exit 1
+fi
+if ! grep -Fq 'missing active source' "$guard_probe/missing.log"; then
+  cat "$guard_probe/missing.log" >&2
+  printf 'SID-NEGATIVE: немає названої причини відмови для відсутнього джерела\n' >&2
+  exit 1
+fi
+
+cat >"$guard_probe/grep" <<'SH'
+#!/bin/sh
+exit 2
+SH
+chmod +x "$guard_probe/grep"
+if PATH="$guard_probe:$PATH" bash scripts/sid-binary-identity-guard.sh \
+    >"$guard_probe/grep-error.log" 2>&1; then
+  printf 'SID-NEGATIVE: grep exit=2 помилково допущено\n' >&2
+  exit 1
+fi
+if ! grep -Fq 'grep завершився з помилкою 2' "$guard_probe/grep-error.log"; then
+  cat "$guard_probe/grep-error.log" >&2
+  printf 'SID-NEGATIVE: немає названої причини помилки grep\n' >&2
+  exit 1
+fi
+
+cat >"$guard_probe/grep" <<'SH'
+#!/bin/sh
+printf 'crates/sens/src/eval/lower.rs:1:type Sid = u8\n'
+exit 0
+SH
+if PATH="$guard_probe:$PATH" bash scripts/sid-binary-identity-guard.sh \
+    >"$guard_probe/forbidden.log" 2>&1; then
+  printf 'SID-NEGATIVE: заборонений Sid=u8 помилково допущено\n' >&2
+  exit 1
+fi
+if ! grep -Fq 'SID-BINARY-IDENTITY violation' "$guard_probe/forbidden.log"; then
+  cat "$guard_probe/forbidden.log" >&2
+  printf 'SID-NEGATIVE: немає названої забороненої конструкції\n' >&2
+  exit 1
+fi
+rm -rf -- "$guard_probe"
+trap - EXIT
+printf 'SID-BINARY-IDENTITY: NEGATIVE CONTROLS PASS\n'
+
 
 
 # Explicit negative controls required by #4268.
@@ -35,6 +106,9 @@ run python3 - <<'PY'
 import importlib.util
 import sys
 from pathlib import Path
+
+if not __debug__:
+    raise SystemExit("BINARY-LANGUAGE-NEGATIVE-CONTROLS: BLOCKED — Python -O вимикає assert")
 
 ROOT = Path.cwd()
 SCRIPTS = ROOT / "scripts"
@@ -126,18 +200,42 @@ physical_decoder = transport_source[decode_start:decode_end]
 assert "parts.join(" not in physical_decoder
 assert "parse_binary_source_words(&visible)" not in physical_decoder
 
-# The alternate sens-trit entrypoint must obey the same direct typed-word path.
+# The alternate sens-trit entrypoint delegates through the shared physical-program API.
+# Verify both delegation and the source-free decode/parse/lower implementation.
 trit_source = (ROOT / "crates/sens-cli/src/bin/sens-trit.rs").read_text(encoding="utf-8")
 trit_start = trit_source.index("fn eval_t5_bytes_core4(")
 trit_end = trit_source.index("\n}\n", trit_start) + 3
 trit_route = trit_source[trit_start:trit_end]
-assert "sens::decode_ternary_words(bytes)" in trit_route
-assert "sens::parse_canonical_word_sequence(&words)" in trit_route
+assert "sens::PhysicalT5Program::decode(bytes)" in trit_route
+assert "program.execute(&mut session)" in trit_route
 assert "sens::decode_ternary_program(bytes)" not in trit_route
 assert "sens::pack_binary_source_words" not in trit_route
 assert "sens::parse_canonical_packed_words" not in trit_route
 assert "sens::open_ternary_program(bytes)" not in trit_route
 assert "sens::parse_canonical_binary(&visible)" not in trit_route
+
+binary_execution_source = (ROOT / "crates/sens/src/binary_execution.rs").read_text(encoding="utf-8")
+physical_decode_start = binary_execution_source.index("pub fn decode(physical: &[u8])")
+physical_decode_end = binary_execution_source.index("/// Number of top-level D2 forms", physical_decode_start)
+physical_decode_route = binary_execution_source[physical_decode_start:physical_decode_end]
+assert "decode_ternary_words(physical)" in physical_decode_route
+assert "parse_t5_domain_words(&words)" in physical_decode_route
+assert "lower_program(&parsed)" in physical_decode_route
+assert "parse_binary_source_words" not in physical_decode_route
+assert "parse_canonical_binary" not in physical_decode_route
+
+# Pin the whole physical route against every retired text/repack escape hatch.
+for forbidden in (
+    "decode_ternary_program(",
+    "open_ternary_program(",
+    "parse_binary_source_words(",
+    "parse_canonical_binary(",
+    "pack_binary_source_words(",
+    "parse_canonical_packed_words(",
+    "render_ternary_words_spaced(",
+):
+    assert forbidden not in physical_decode_route, ("noncanonical physical decoder", forbidden)
+    assert forbidden not in trit_route, ("noncanonical trit caller", forbidden)
 
 # Transport validation itself must keep D2 grammar on the same direct typed words,
 # rather than serialize and immediately decode a second packed payload.

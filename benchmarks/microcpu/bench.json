@@ -1,0 +1,21 @@
+{
+  "schema": "sens-benchmark-manifest/v1",
+  "stand": "microcpu",
+  "wing": "Physical T5 / exact D1–D3 CPU mechanisms",
+  "roles": [
+    "RESEARCH",
+    "MEASUREMENT",
+    "FALSIFIER"
+  ],
+  "question": "Can a bounded D1–D3 T5 program compile once to a flat CPU slot tape and replay without decoding or parsing each run?",
+  "claim": "CPython research-only bounded slot machine: precise cold T5+compile versus warm slot replay phases on identical physical bytes, with a separate Rust SENS oracle check. No Rust/Python language speedup, FPGA performance or novel language-law claim.",
+  "witness": [
+    "slot_cpu.py",
+    "bench.py",
+    "../../tests/test_microcpu_slots.py"
+  ],
+  "status": "EXPERIMENTAL-BOUNDED; RUST-ORACLE-CHECKED",
+  "generation": "Contract 11.8 D1/D2/D3 ratified subset",
+  "axis": "physical-t5/microcpu-d1-d3-slots-cpu",
+  "reproduce": "python3 -m unittest discover -s tests -p 'test_microcpu_slots.py' -v && python3 benchmarks/microcpu/bench.py --samples 11 --loops 80 --warmup 3 --out /tmp/sens-microcpu.json"
+}

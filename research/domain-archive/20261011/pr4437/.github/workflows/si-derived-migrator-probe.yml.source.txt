@@ -1,0 +1,94 @@
+name: SI derived actual migrator probe
+
+on:
+  pull_request:
+    paths:
+      - ".github/workflows/si-derived-migrator-probe.yml"
+  push:
+    branches: [research/4430-typed-domain-carrier]
+    paths:
+      - ".github/workflows/si-derived-migrator-probe.yml"
+      - "scripts/domain_word_carrier.py"
+      - "tests/test_actual_si_derived_library_migration.py"
+      - "scripts/migrate-three-pass.py"
+      - "tests/test_three_pass_migration.py"
+      - "tests/test_migrator_ladder_authority.py"
+      - "scripts/domain_tables.py"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  run-existing-migrators:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run ladder + existing migration regression tests
+        run: python3 -m unittest tests/test_migrator_ladder_authority.py tests/test_three_pass_migration.py tests/test_sens_code_migration.py -v
+      - name: Run ACTUAL existing migration scripts against real lib/si-derived.lisp
+        shell: bash
+        run: |
+          set -u
+          mkdir -p "$RUNNER_TEMP/si-input" "$RUNNER_TEMP/si-binary" "$RUNNER_TEMP/si-3pass"
+          cp lib/si-derived.lisp "$RUNNER_TEMP/si-input/si-derived.lisp"
+
+          echo "::group::Existing migrate-to-sens-codes.py --binary-mirror"
+          python3 scripts/migrate-to-sens-codes.py "$RUNNER_TEMP/si-input" \
+            --foundation knowledge/d1-d9-foundation.json \
+            --binary-mirror "$RUNNER_TEMP/si-binary" \
+            --report "$RUNNER_TEMP/report-binary.json" || echo "binary migrator refused some input"
+          python3 - <<'PY'
+          import json,os
+          from pathlib import Path
+          base=Path(os.environ["RUNNER_TEMP"])
+          p=base/"report-binary.json"
+          if p.exists():
+              r=json.loads(p.read_text())
+              print("BINARY-MIGRATOR-REPORT",json.dumps(r.get("summary"),ensure_ascii=False))
+              for row in r.get("files",[]):
+                  print("BINARY-MIGRATOR-FILE",json.dumps(row,ensure_ascii=False))
+          print("BINARY-MIRROR-EXISTS",(base/"si-binary/si-derived.lisp").exists())
+          if (base/"si-binary/si-derived.lisp").exists():
+              print("BINARY-MIRROR-CONTENT", (base/"si-binary/si-derived.lisp").read_text()[:4000])
+          PY
+          echo "::endgroup::"
+
+          echo "::group::Existing migrate-three-pass.py"
+          python3 scripts/migrate-three-pass.py "$RUNNER_TEMP/si-input" \
+            --out "$RUNNER_TEMP/si-3pass" \
+            --foundation knowledge/d1-d9-foundation.json \
+            --domain-surfaces crates/sens/src/domain_surface_registry_generated.rs \
+            --semantic-generated crates/sens/src/semantic_registry_generated.rs \
+            --semantic-registry crates/sens/src/semantic_registry.rs \
+            --necessary-forms crates/sens/src/eval/necessary_forms_generated.rs \
+            --historical-map contracts/core1-historical-sid-map.lisp \
+            --text7 crates/sens/src/text7_projection_generated.rs \
+            --report "$RUNNER_TEMP/report-3pass.json" || echo "3-pass migrator refused some input"
+          python3 - <<'PY'
+          import json,os
+          from pathlib import Path
+          base=Path(os.environ["RUNNER_TEMP"])
+          p=base/"report-3pass.json"
+          if p.exists():
+              r=json.loads(p.read_text())
+              print("THREE-PASS-SUMMARY",json.dumps(r.get("summary"),ensure_ascii=False))
+              for row in r.get("files",[]):
+                  print("THREE-PASS-FILE",json.dumps(row,ensure_ascii=False))
+          o=base/"si-3pass/si-derived"
+          print("THREE-PASS-OUTPUT-EXISTS",o.exists())
+          if o.exists(): print("THREE-PASS-OUTPUT",o.read_text()[:5000])
+          PY
+          echo "::endgroup::"
+
+      - name: Upload factual execution reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: si-derived-existing-migrator-probe
+          path: |
+            ${{ runner.temp }}/report-binary.json
+            ${{ runner.temp }}/report-3pass.json
+            ${{ runner.temp }}/si-3pass/
+            ${{ runner.temp }}/si-binary/
+          if-no-files-found: warn

@@ -28,7 +28,9 @@ class ContractTests(unittest.TestCase):
                 data[row['line']-1] = '(00001001 '+row['source_name'] if source['path'].endswith('vector.lisp') else '(00001011 '+row['source_name']
             raw = ('\n'.join(data)+'\n').encode()
             source['git_blob_sha'] = checker.sha_blob(raw)
-            (self.root / source['path']).write_bytes(raw)
+            snapshot = self.root / "knowledge/d10-source-snapshots" / (source["git_blob_sha"] + ".lisp")
+            snapshot.parent.mkdir(parents=True, exist_ok=True)
+            snapshot.write_bytes(raw)
         self.save()
 
     def save(self):
@@ -40,7 +42,9 @@ class ContractTests(unittest.TestCase):
         self.assertEqual(checker.verify(self.root)['new_d10_selected'],0)
 
     def test_catches_corrupt_source(self):
-        (self.root / 'lib/persistent-vector.lisp').write_text('TAMPER')
+        pin = next(s['git_blob_sha'] for s in self.review['donors']
+                   if s['path'] == 'lib/persistent-vector.lisp')
+        (self.root / 'knowledge/d10-source-snapshots' / (pin + '.lisp')).write_text('TAMPER')
         with self.assertRaises(AssertionError): checker.verify(self.root)
 
     def test_catches_renumbered_d9_coordinate(self):

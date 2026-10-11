@@ -2,6 +2,10 @@
 import json
 from pathlib import Path
 
+# Optimized Python removes assert statements; never report an audit PASS without them.
+if not __debug__:
+    raise SystemExit("D2-STRUCTURE-AUDIT: BLOCKED — Python -O disables assertions")
+
 root=Path(__file__).resolve().parents[1]
 audit=json.loads((root/"knowledge/d2-structure-audit.json").read_text(encoding="utf-8"))
 

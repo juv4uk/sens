@@ -1,0 +1,112 @@
+{
+  "schema": "d10-existing-evidence-harvest/v1",
+  "date": "2026-10-11",
+  "status": "RESEARCH-SELECTED-NOT-RATIFIED",
+  "baseline": {
+    "selected": 648,
+    "inventory_blob": "92bfe63031eb89ca1d67fb073c599dbb9177ccea"
+  },
+  "new_selected": 10,
+  "selected_total": 658,
+  "remaining": 366,
+  "coordinates_assigned": 0,
+  "ratifications": 0,
+  "items": [
+    {
+      "semantic_name": "BINARY-LYNDON-FACTORIZATION",
+      "stable_id": "d10.harvest.existing.binary-lyndon-factorization.20261011",
+      "proposal_id": "D10P-601101",
+      "source_path": "knowledge/d10-binary-lyndon-factorization-v1.json",
+      "source_blob": "7c7633e2e1041075bf589937e0b4f6ce72be0dcd",
+      "positive_witnesses": 7,
+      "falsifiers": 4
+    },
+    {
+      "semantic_name": "DE-BRUIJN-BINARY-CYCLE?",
+      "stable_id": "d10.harvest.existing.de-bruijn-binary-cycle-.20261011",
+      "proposal_id": "D10P-601102",
+      "source_path": "knowledge/d10-debruijn-binary-cycle-research-v1.json",
+      "source_blob": "9c989ef46a7fc2798a21267a92a7d8690ecaad84",
+      "positive_witnesses": 10,
+      "falsifiers": 5
+    },
+    {
+      "semantic_name": "FINITE-STATE-SHORTEST-DISTINGUISHER",
+      "stable_id": "d10.harvest.existing.finite-state-shortest-distinguisher.20261011",
+      "proposal_id": "D10P-601103",
+      "source_path": "knowledge/d10-finite-state-distinguishing-suffix-research-v1.json",
+      "source_blob": "42c79041e72ec956cca34c783f28ea54b772802f",
+      "positive_witnesses": 6,
+      "falsifiers": 5
+    },
+    {
+      "semantic_name": "EXACT-BOOLEAN-PRIME-IMPLICANTS",
+      "stable_id": "d10.logic.prime-implicants.quine.20261009",
+      "proposal_id": "D10P-601104",
+      "source_path": "knowledge/d10-quine-prime-implicants-20261009.json",
+      "source_blob": "e57850674310d92dcb0b2ce2db7f13987b61b562",
+      "positive_witnesses": 7,
+      "falsifiers": 5
+    },
+    {
+      "semantic_name": "FINITE-CODE-UNIQUE-DECIPHERABILITY",
+      "stable_id": "d10.harvest.existing.finite-code-unique-decipherability.20261011",
+      "proposal_id": "D10P-601105",
+      "source_path": "knowledge/d10-unique-decipherability-historical-20261009.json",
+      "source_blob": "ba024956e114eb7622dd5aa48b71d5910abdadf9",
+      "positive_witnesses": 3,
+      "falsifiers": 5
+    },
+    {
+      "semantic_name": "STERN-BROCOT-RUN-PATH",
+      "stable_id": "d10.harvest.existing.stern-brocot-run-path.20261011",
+      "proposal_id": "D10P-601106",
+      "source_path": "knowledge/d10-stern-brocot-run-path-20261009.json",
+      "source_blob": "37cd7d1e77881d0818641d04c8d8b2ac4a605892",
+      "positive_witnesses": 9,
+      "falsifiers": 7
+    },
+    {
+      "semantic_name": "BINARY-CONSTRAINT-SUPPORT-PROJECTION",
+      "stable_id": "d10.harvest.existing.binary-constraint-support-projection.20261011",
+      "proposal_id": "D10P-601107",
+      "source_path": "knowledge/d10-symbolic-ai-arc-support-20261009.json",
+      "source_blob": "94766a413363e46705de8ad3e61d0c8995e52727",
+      "positive_witnesses": 5,
+      "falsifiers": 5
+    },
+    {
+      "semantic_name": "FINITE-STRING-CRITICAL-PAIR-CONFLUENCE",
+      "stable_id": "d10.rewrite.binary-length-decreasing-confluence.20261009",
+      "proposal_id": "D10P-601108",
+      "source_path": "knowledge/d10-critical-pairs-confluence-20261009.json",
+      "source_blob": "6530444a1f4417dbebfa93c93f74c4dca5e5aefb",
+      "positive_witnesses": 5,
+      "falsifiers": 5
+    },
+    {
+      "semantic_name": "EXACT-PERCEPTRON-MISTAKE-STEP",
+      "stable_id": "d10.harvest.existing.exact-perceptron-mistake-step.20261011",
+      "proposal_id": "D10P-601109",
+      "source_path": "knowledge/d10-rosenblatt-novikoff-exact-step-20261009.json",
+      "source_blob": "98ae2ca35cc259ebc9c6d929d9531ec6b54a2bf3",
+      "positive_witnesses": 4,
+      "falsifiers": 5
+    },
+    {
+      "semantic_name": "UNIQUE-BOUNDED-MODULAR-LIFT",
+      "stable_id": "d10.harvest.existing.unique-bounded-modular-lift.20261011",
+      "proposal_id": "D10P-601110",
+      "source_path": "knowledge/d10-unique-bounded-modular-lift-20261009.json",
+      "source_blob": "4ec2aaef1bfb1a7cf2c2ebd9755eca1563cacfbe",
+      "positive_witnesses": 7,
+      "falsifiers": 5
+    }
+  ],
+  "notes": [
+    "Donors already in repo; no newly invented semantics",
+    "Derived-vs-primitive still awaiting owner review",
+    "No .sens, D1-D9, D2 or codec changes",
+    "No new exact-head oracle PASS claimed"
+  ]
+}

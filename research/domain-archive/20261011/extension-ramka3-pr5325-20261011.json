@@ -1,0 +1,29 @@
+{
+  "schema": "sens.domain-research-archive-extension/v1",
+  "date": "2026-10-11",
+  "parent_main": "66c5b42ffb084a82a6a2ef62e2ac360cebc9beea",
+  "source_pull_request": "https://github.com/juv4uk/sens/pull/5325",
+  "source_head": "d319e92dea09ebeead65c7da58af038edbcbd54b",
+  "status": "RESEARCH-EVIDENCE-ONLY-NONNORMATIVE",
+  "file_count": 2,
+  "records": [
+    {
+      "pr": 5325,
+      "original_path": "дослідження/рамка3/ДОКАЗ-12.md",
+      "archived_path": "research/domain-archive/20261011/pr5325/дослідження/рамка3/ДОКАЗ-12.md",
+      "exact_git_blob": "6abd9d04a4e8044d3ce7fb576ebdd9a5f1d2439b"
+    },
+    {
+      "pr": 5325,
+      "original_path": "дослідження/рамка3/перевірка_носія.py",
+      "archived_path": "research/domain-archive/20261011/pr5325/дослідження/рамка3/перевірка_носія.py.source.txt",
+      "exact_git_blob": "3fa2aa68211de891cbff93452aa60dd8d4c13add"
+    }
+  ],
+  "admission_note": "Збережені незмінні Git blob; неактивний архів, не виконуваний код. Доказ оборотності рамки до 12 тритів потребує незалежних тестів та підтвердження; архівування не означає нормативний формат, обраний кодек, семантику доменів, ратифікацію або PASS CI.",
+  "related_issues": [
+    5041,
+    5438,
+    5440
+  ]
+}

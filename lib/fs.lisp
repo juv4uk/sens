@@ -38,7 +38,5 @@
   (00001000 (path text)
     (00101111 (00100111 (write-file-bytes path (utf8-encode-string text)) text))))
  
-; #469: post-core public identities declare only numeric IDs plus the source
-; binding they just defined. No human-language alias is encoded in this file.
-(my-postcore-materialize-stable-peers 166 read-file)
-(my-postcore-materialize-stable-peers 167 write-file)
+; Stable surface peers are projected by load_fs_library after the public
+; file closures exist. Avoid the retired per-file post-core materializer.

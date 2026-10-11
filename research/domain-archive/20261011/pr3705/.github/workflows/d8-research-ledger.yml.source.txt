@@ -1,0 +1,72 @@
+name: D8 consolidated research ledger
+
+on:
+  pull_request:
+    paths:
+      - "benchmarks/d8-research-ledger/**"
+      - "docs/research/3673-d8-research-ledger.md"
+      - "docs/research/3673-d8-research-ledger.uk.md"
+      - "knowledge/d6-ratified.json"
+      - ".github/workflows/d8-research-ledger.yml"
+  push:
+    branches:
+      - main
+    paths:
+      - "benchmarks/d8-research-ledger/**"
+      - "docs/research/3673-d8-research-ledger.md"
+      - "docs/research/3673-d8-research-ledger.uk.md"
+      - "knowledge/d6-ratified.json"
+      - ".github/workflows/d8-research-ledger.yml"
+  workflow_dispatch:
+
+jobs:
+  ledger:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Build D8 research ledger
+        run: |
+          rm -rf /tmp/d8-research-ledger
+          python3 benchmarks/d8-research-ledger/run.py \
+            --out /tmp/d8-research-ledger
+
+      - name: Assert current accounting
+        run: |
+          python3 - <<'PY'
+          import json
+          p=json.load(open("/tmp/d8-research-ledger/ledger.json"))
+          a=p["accounting"]
+          assert p["status"] == "RESEARCH-UNRATIFIED"
+          assert a["capacity"] == 256
+          assert a["selector_candidate_coordinates"] == 64
+          assert a["product_family_footprint_coordinates"] == 12
+          assert a["analyzed_unique_coordinates"] == 76
+          assert a["untouched_coordinates"] == 180
+          assert a["fixed_novel_coordinate_candidates_full"] == 2
+          assert a["fixed_novel_coordinate_candidates_protocol_bounded"] == 1
+          assert a["gauge_unresolved_novel_semantics"] == 3
+          assert a["falsified_axis_hypotheses"] == 5
+          PY
+
+      - name: Verify deterministic replay
+        run: |
+          rm -rf /tmp/d8-research-ledger-2
+          python3 benchmarks/d8-research-ledger/run.py \
+            --out /tmp/d8-research-ledger-2
+          cmp /tmp/d8-research-ledger/ledger.json \
+              /tmp/d8-research-ledger-2/ledger.json
+
+      - name: Publish report
+        if: always()
+        run: |
+          test ! -f /tmp/d8-research-ledger/report.md || \
+            cat /tmp/d8-research-ledger/report.md >> "$GITHUB_STEP_SUMMARY"
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: d8-research-ledger
+          path: /tmp/d8-research-ledger/
+          retention-days: 14

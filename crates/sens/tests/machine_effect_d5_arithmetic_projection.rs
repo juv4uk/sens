@@ -1,4 +1,7 @@
-use sens::{eval_program, load_core_library, lower_program, parse, ExprKind, Session};
+use sens::{
+    eval_parsed_expressions, eval_program, load_core_library, lower_program,
+    parse, parse_mixed_exact_domain_machine_source, ExprKind, Session,
+};
 use serde_json::Value;
 use std::fs;
 use std::path::PathBuf;
@@ -16,9 +19,15 @@ fn read(path: &str) -> String {
 }
 
 fn load_lisp_file(path: &str, session: &mut Session) {
+    assert!(
+        path.starts_with("lib/machine/"),
+        "machine-source reader is restricted to lib/machine/** fixtures: {path}"
+    );
     let source = read(path);
-    eval_program(&source, session)
-        .unwrap_or_else(|error| panic!("{path} must load as ordinary sens: {error}"));
+    let expressions = parse_mixed_exact_domain_machine_source(path, &source)
+        .unwrap_or_else(|error| panic!("{path} must parse as exact-domain machine source: {error}"));
+    eval_parsed_expressions(&expressions, session)
+        .unwrap_or_else(|error| panic!("{path} must load through the machine-source reader: {error}"));
 }
 
 fn eval_value(source: &str, session: &mut Session) -> String {
@@ -260,5 +269,179 @@ fn sub_mul_effect_bounds_fail_closed_before_target_projection() {
         ),
         "machine-effect-rejected",
         "valid DIFFERENCE identity with unsafe bounded carrier must reject as an effect"
+    );
+}
+
+#[test]
+fn bounded_effect_source_keeps_exact_d1_controls() {
+    // #5360: застаріла масова міграція не має повертати числове 1 чи історичне t у D3 COND.
+    let text = read("lib/machine/effects/u64.lisp");
+    for (number, line) in text.lines().enumerate() {
+        let active = line.split(';').next().unwrap_or("").trim_start();
+        assert!(
+            !active.starts_with("(1 ")
+                && !active.starts_with("(1\t")
+                && !active.contains(" t)"),
+            "Джерело D5 повернуло неточний D1 у рядку {}: {}",
+            number + 1,
+            line
+        );
+    }
+    assert!(
+        text.matches("(00000010 (00000001 ()))").count() >= 8,
+        "Вісім доведених предикатних відповідей D1:YES мають залишатися в джерелі"
+    );
+    for застарілий_код in ["(00000011 ", "(00100010 "] {
+        assert!(
+            !text.contains(застарілий_код),
+            "Історичний 8-бітовий виклик рівності знову з'явився в D5: {застарілий_код}"
+        );
+    }
+}
+
+#[test]
+fn bounded_effect_negative_form_predicates_return_exact_d1_no() {
+    // #5361: D1:0 не є порожнім списком; у COND дозволений лише точний PredicateBit.
+    let mut session = Session::default();
+    load_core_library(&mut session).expect("ядро");
+    load_lisp_file("lib/machine/effects/u64.lisp", &mut session);
+
+    for source in [
+        "(machine-effect-bounded-u64-add-form? (00000001 ()))",
+        "(machine-effect-bounded-u64-sub-form? (00000001 ()))",
+        "(machine-effect-bounded-u64-mul-form? (00000001 ()))",
+    ] {
+        let actual = eval_program(source, &mut session)
+            .unwrap_or_else(|error| panic!("{source}: {error}"))
+            .value;
+        assert_eq!(
+            actual.as_predicate_bit(),
+            Some(false),
+            "{source} має повернути точний D1:0, а не () чи числовий нуль"
+        );
+    }
+}
+
+#[test]
+fn bounded_effect_integer_range_answer_is_exact_d1() {
+    // #5361: негативний вихід за будь-яку межу має бути D1:0, а не ().
+    let mut session = Session::default();
+    load_core_library(&mut session).expect("ядро");
+    load_lisp_file("lib/machine/effects/u64.lisp", &mut session);
+    for (source, expected) in [
+        ("(machine-effect-within-inclusive-integer-range? 5 0 10)", true),
+        ("(machine-effect-within-inclusive-integer-range? -1 0 10)", false),
+        ("(machine-effect-within-inclusive-integer-range? 11 0 10)", false),
+    ] {
+        let actual = eval_program(source, &mut session)
+            .unwrap_or_else(|error| panic!("{source}: {error}"))
+            .value;
+        assert_eq!(
+            actual.as_predicate_bit(),
+            Some(expected),
+            "{source}: результат має належати точному домену D1"
+        );
+    }
+}
+
+#[test]
+fn bounded_effect_carriers_reject_out_of_range_with_exact_d1_no() {
+    // #5361: структурне () не може керувати строгим D3 COND.
+    let mut session = Session::default();
+    load_core_library(&mut session).expect("ядро");
+    load_lisp_file("lib/machine/effects/u64.lisp", &mut session);
+    for source in [
+        "(machine-effect-u32-carrier? 4294967296)",
+        "(machine-effect-u64-carrier? -1)",
+        "(machine-effect-u64-carrier? 18446744073709551616)",
+    ] {
+        let actual = eval_program(source, &mut session)
+            .unwrap_or_else(|error| panic!("{source}: {error}"))
+            .value;
+        assert_eq!(
+            actual.as_predicate_bit(),
+            Some(false),
+            "{source}: позадоменний носій мусить повернути точний D1:0"
+        );
+    }
+}
+
+#[test]
+fn bounded_effect_structural_forms_return_exact_d1_for_matching_and_mismatched_kinds() {
+    // #5354: позитивні і чужі ефекти мають давати типізований D1, а не Lisp truthiness.
+    let mut session = Session::default();
+    load_core_library(&mut session).expect("ядро");
+    load_lisp_file("lib/machine/effects/u64.lisp", &mut session);
+    for (source, expected) in [
+        ("(machine-effect-bounded-u64-add-form? (quote (bounded-u64-add 2 3)))", true),
+        ("(machine-effect-bounded-u64-sub-form? (quote (bounded-u64-sub 5 3)))", true),
+        ("(machine-effect-bounded-u64-mul-form? (quote (bounded-u64-mul 2 3)))", true),
+        ("(machine-effect-bounded-u64-add-form? (quote (bounded-u64-sub 5 3)))", false),
+        ("(machine-effect-bounded-u64-sub-form? (quote (bounded-u64-mul 2 3)))", false),
+        ("(machine-effect-bounded-u64-mul-form? (quote (bounded-u64-add 2 3)))", false),
+    ] {
+        let actual = eval_program(source, &mut session)
+            .unwrap_or_else(|error| panic!("{source}: {error}"))
+            .value;
+        assert_eq!(
+            actual.as_predicate_bit(),
+            Some(expected),
+            "{source}: відповідь мусить бути точним D1-предикатом"
+        );
+    }
+}
+
+
+/// Окремий falsifier: ратифіковані D5/D6 порівняння повинні
+/// відрізняти арифметичний носій від точного предиката D1.
+/// Усі кейси виконуються до фінальної відмови, щоб first-fail не приховав решту.
+#[test]
+fn d5_d6_comparison_truth_table_is_exact_d1() {
+    let mut session = Session::default();
+    load_core_library(&mut session).expect("канонічне ядро");
+    let witnesses = [
+        ("(не-менше? -1 0)", false),
+        ("(не-менше? 0 0)", true),
+        ("(не-менше? 1 0)", true),
+        ("(не-менше? 0 1)", false),
+        ("(не-більше? -1 0)", true),
+        ("(не-більше? 0 0)", true),
+        ("(не-більше? 1 0)", false),
+        ("(не-більше? 0 1)", true),
+        ("(менше? 2 3)", true),
+        ("(менше? 3 2)", false),
+        ("(менше? -1 0)", true),
+        ("(менше? 0 -1)", false),
+        ("(менше? 4294967295 4294967296)", true),
+        ("(менше? 4294967296 4294967295)", false),
+        ("(не-більше? 4294967296 4294967295)", false),
+        ("(не-менше? 4294967296 0)", true),
+    ];
+    let mut violations = Vec::new();
+    for (source, expected) in witnesses {
+        match eval_program(source, &mut session) {
+            Ok(answer) => {
+                let actual = answer.value.as_predicate_bit();
+                eprintln!(
+                    "D6_ТОЧНИЙ_СВІДОК expression={source} rendered={} d1={actual:?} expected={expected}",
+                    answer.value
+                );
+                if actual != Some(expected) {
+                    violations.push(format!(
+                        "{source}: d1={actual:?}, value={}, expected={expected}",
+                        answer.value
+                    ));
+                }
+            }
+            Err(error) => {
+                eprintln!("D6_НЕВИКЛИЧНИЙ_СВІДОК expression={source} error={error}");
+                violations.push(format!("{source}: {error}"));
+            }
+        }
+    }
+    assert!(
+        violations.is_empty(),
+        "Порушено точні D1/D6 межі (негативи не можна вважати PASS): {}",
+        violations.join("; ")
     );
 }

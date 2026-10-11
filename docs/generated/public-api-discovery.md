@@ -4,9 +4,9 @@
 > top-level визначення, але **не** оголошує їх публічним API.
 
 - проскановано бібліотечних файлів: 51
-- top-level функцій: 946
+- top-level функцій: 945
 - top-level макросів: 34
-- усього визначень: 980
+- усього визначень: 979
 - класифікація: `unreviewed`
 
 | джерело | вид | ім'я | класифікація |
@@ -72,9 +72,6 @@
 | `lib/clips-import.lisp` | function | `clips-import-forms` | unreviewed |
 | `lib/clips-import.lisp` | function | `clips-import` | unreviewed |
 | `lib/clips-import.lisp` | function | `clips-import-file` | unreviewed |
-| `lib/compiler-nucleus.lisp` | function | `compiler-authority-find` | unreviewed |
-| `lib/compiler-nucleus.lisp` | function | `compiler-nucleus` | unreviewed |
-| `lib/compiler-nucleus.lisp` | function | `compiler-domain-shape` | unreviewed |
 | `lib/compiler-nucleus.lisp` | function | `compiler-true` | unreviewed |
 | `lib/compiler-nucleus.lisp` | function | `compiler-false` | unreviewed |
 | `lib/compiler-nucleus.lisp` | function | `compiler-bits-equal` | unreviewed |
@@ -156,6 +153,8 @@
 | `lib/core4.lisp` | function | `filter-onto` | unreviewed |
 | `lib/core4.lisp` | function | `filter` | unreviewed |
 | `lib/core4.lisp` | function | `reduce` | unreviewed |
+| `lib/core4.lisp` | function | `core4-let-parameters` | unreviewed |
+| `lib/core4.lisp` | function | `core4-let-values` | unreviewed |
 | `lib/core4.lisp` | macro | `let` | unreviewed |
 | `lib/core4.lisp` | function | `equal?` | unreviewed |
 | `lib/core4.lisp` | function | `truthy?` | unreviewed |

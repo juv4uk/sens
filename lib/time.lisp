@@ -247,20 +247,9 @@
   (00001000 (config)
     (00110000 config)))
 
-; Registry-driven peer materialization for the stable public time identities.
-; The numeric IDs are authority; this file does not name or implement any
-; language-to-language alias. Candidate surfaces remain unavailable.
-(my-postcore-materialize-stable-peers 1079 utc-now)
-(my-postcore-materialize-stable-peers 1080 utc-from-unix)
-(my-postcore-materialize-stable-peers 1081 unix-time-observation->utc)
-(my-postcore-materialize-stable-peers 1082 milliseconds-from-nanoseconds)
-(my-postcore-materialize-stable-peers 1083 mono-ms)
-(my-postcore-materialize-stable-peers 1084 timezone-name)
-(my-postcore-materialize-stable-peers 1085 timezone-detect)
-(my-postcore-materialize-stable-peers 1086 timezone-offset-seconds)
-(my-postcore-materialize-stable-peers 1087 deadline-reached?)
-(my-postcore-materialize-stable-peers 1088 deadline-reached-at?)
-(my-postcore-materialize-stable-peers 1089 elapsed-ns)
-(my-postcore-materialize-stable-peers 1090 deadline-from)
-(my-postcore-materialize-stable-peers 1091 deadline-after-ns)
-(my-postcore-materialize-stable-peers 1092 internet-time-sync)
+; Реєстр містить стабільні поверхні всіх наведених часових функцій.
+; Після визначення Lisp-замикань load_time_library застосовує чинну механічну
+; проєкцію stable peers із цього реєстру до наявних значень. Повторні
+; my-postcore-виклики тут застаріли: їхній шлях зупиняв завантаження,
+; хоча не створював жодного нового мовного закону. Часова семантика вище
+; залишається власністю SENS.

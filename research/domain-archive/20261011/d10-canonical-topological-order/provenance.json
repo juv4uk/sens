@@ -1,0 +1,36 @@
+{
+  "schema": "sens-alltime-research-archive/v1",
+  "date": "2026-10-11",
+  "domain": "D10",
+  "status": "RESEARCH_UNRATIFIED_HOLD",
+  "selection": false,
+  "coordinate": null,
+  "ratified": false,
+  "origin": {
+    "repo": "juv4uk/sens",
+    "branch": "research/d10-canonical-topological-order-20261011",
+    "head_sha": "e55784716c18b862ed7c66400958b90feeb509a1"
+  },
+  "baseline_main_sha": "1faa79478bbeecb41f4a4108a91fcf0cccf3395f",
+  "archived": [
+    {
+      "original_path": "docs/research/d10-canonical-topological-order-20261011.uk.md",
+      "archive_path": "research/domain-archive/20261011/d10-canonical-topological-order/d10-canonical-topological-order-20261011.uk.md",
+      "blob_sha": "09aa12f0cee7c6fb079be80cc96bc3bc561247b8",
+      "kind": "research_text"
+    },
+    {
+      "original_path": "tools/research_d10_canonical_topological_order.py",
+      "archive_path": "research/domain-archive/20261011/d10-canonical-topological-order/research_d10_canonical_topological_order.py.source.txt",
+      "blob_sha": "ff52f0d26b198fdf2297be1f0b57ca7aaf524673",
+      "kind": "inactive_host_oracle"
+    }
+  ],
+  "authority": "No D10 resident/coordinate; candidate and oracle only. Requires independent proof, dedup and owner review.",
+  "coordination": [
+    "#5131",
+    "#5041",
+    "#5540",
+    "#4013"
+  ]
+}

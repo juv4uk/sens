@@ -1,0 +1,322 @@
+{
+  "schema": "d10-fill-v1-state/v1",
+  "status": "RESEARCH-UNRATIFIED",
+  "authority": "#4012",
+  "date": "2026-10-07",
+  "foundation": {
+    "current_contract": "11.8",
+    "current_authority": "#4008",
+    "current_domains": [
+      "D1",
+      "D2",
+      "D3",
+      "D4",
+      "D5",
+      "D6",
+      "D7",
+      "D8",
+      "D9"
+    ],
+    "parent_domain": "D9",
+    "d9_occupancy": 512,
+    "d9_ratified": true,
+    "d9_ratified_map": "knowledge/d9-ratified.json",
+    "research_domain": "D10"
+  },
+  "target": {
+    "domain": "D10",
+    "width": 10,
+    "capacity": 1024,
+    "dense_target": 1024,
+    "selected_semantic_candidates": 625,
+    "remaining_semantic_candidates": 399,
+    "law_forced_coordinates": 256,
+    "unplaced_selected_candidates": 369,
+    "ratified_residents": 0
+  },
+  "first_tranche": {
+    "kind": "PROVED-SELECTOR-GENERATOR",
+    "artifact": "knowledge/d10-selector-seed.json",
+    "parents": 128,
+    "children": 256,
+    "coordinate_rule": "D9 proved selector p -> D10 p0/p1",
+    "meaning_rule": "suffix 0 appends A/CAR; suffix 1 appends D/CDR"
+  },
+  "authority_boundary": {
+    "d9_coordinates": "NORMATIVE D9 parent identities under #4008",
+    "d9_to_d10_children": "NO AUTOMATIC SEMANTICS FROM WIDTH OR SUFFIX",
+    "d9_selector_law": "MAY CROSS because independently proved",
+    "legacy_sens8_sid8_function8": "NO D10 PLACEMENT AUTHORITY"
+  },
+  "construction_order": [
+    "preserve D9 positive/negative evidence and holdouts",
+    "generate law-forced candidates",
+    "build 1024 distinct semantic meanings",
+    "reject exact D1-D9 duplicates, pure aliases, mechanism-only rows and falsified rows",
+    "classify generator/algebra/duality/product/local families",
+    "fix theorem-forced geometry only",
+    "gauge-fix residual placement only after semantic inventory is complete",
+    "owner ratification last"
+  ],
+  "recovery_v1": {
+    "artifact": "knowledge/d10-recovery-v1.json",
+    "source_rows": 19,
+    "selected": 8,
+    "projection": 4,
+    "hold": 7,
+    "coordinates_assigned": 0
+  },
+  "donor_audits": {
+    "sens8": {
+      "artifact": "knowledge/sens8-current-coverage-v1.json",
+      "authority": "#4021",
+      "total_cells": 256,
+      "named_rows": 182,
+      "named_rows_accounted": 182,
+      "direct_current": 153,
+      "current_projection_or_derived": 20,
+      "d10_recovery_candidates": 4,
+      "internal_no_slot": 4,
+      "mechanism_hold": 1,
+      "donor_exhausted": true,
+      "new_d10_candidates_added_by_this_audit": 0
+    }
+  },
+  "recovery_v2": {
+    "artifact": "knowledge/d10-recovery-v2.json",
+    "source_hold_rows": 7,
+    "selected": 1,
+    "projection": 1,
+    "hold": 5,
+    "coordinates_assigned": 0
+  },
+  "library_harvest_v1": {
+    "artifact": "knowledge/d10-library-harvest-v1.json",
+    "selected": 39,
+    "coordinates_assigned": 0,
+    "excluded_classes": [
+      "schema/version/global constants",
+      "onto accumulators",
+      "generic local helpers",
+      "compatibility wrappers",
+      "host mechanisms"
+    ]
+  },
+  "forward_harvest_v1": {
+    "artifact": "knowledge/d10-forward-harvest-v1.json",
+    "selected": 26,
+    "coordinates_assigned": 0,
+    "excluded_no_slot": [
+      "*working-memory*",
+      "*justified-memory*",
+      "*jtms-memory*",
+      "find-entry",
+      "map-apply-head",
+      "map-apply-head-jtms"
+    ]
+  },
+  "knowledge_harvest_v1": {
+    "artifact": "knowledge/d10-knowledge-harvest-v1.json",
+    "selected": 37,
+    "coordinates_assigned": 0,
+    "excluded_classes": [
+      "epistemic-- internal helpers",
+      "global/version cells",
+      "macro state wrappers",
+      "TCP/file transport",
+      "usage counters"
+    ]
+  },
+  "ownership_gate": {
+    "authority": "#4033",
+    "artifact": "knowledge/island-ownership-gate-v1.json",
+    "status": "SUPERSEDED-BY-OWNER-CORRECTION-4162",
+    "definite_noncore_selected": 0,
+    "definite_noncore_reclassified": 55,
+    "review_required_selected": 0,
+    "no_new_definite_noncore": true,
+    "rule": "Ownership-only exclusion is superseded. All owner repositories are D10 semantic donors; only duplicates, aliases, mechanism-only rows and falsified semantics are excluded."
+  },
+  "historical_maclisp_v1": {
+    "artifact": "knowledge/d10-historical-maclisp-v1.json",
+    "source": "MacLisp Reference Manual 1975",
+    "selected": 21,
+    "coordinates_assigned": 0,
+    "ownership": "CORE-OWNED-CANDIDATE",
+    "sens8_preservation": "UNCHANGED"
+  },
+  "historical_maclisp_v2": {
+    "artifact": "knowledge/d10-historical-maclisp-v2.json",
+    "selected": 12,
+    "projections": 9,
+    "held_or_excluded": 11,
+    "coordinates_assigned": 0,
+    "ownership": "CORE-OWNED-CANDIDATE",
+    "sens8_preservation": "UNCHANGED"
+  },
+  "wsm_os_lisp_ownership": {
+    "artifact": "knowledge/d10-wsm-os-lisp-ownership-v1.json",
+    "authority": "#4045",
+    "wsm_issue": "juv4uk/wsm-os-lisp#74",
+    "core_review_rows": 4,
+    "selected_d10_candidates": 0,
+    "wsm_owned_package_rows": 24,
+    "mechanism_only_rows": 8,
+    "coordinates_assigned": 0,
+    "inventory_count_unchanged": true
+  },
+  "ownership_cleanup_v1": {
+    "authority": "#4047",
+    "artifact": "knowledge/d10-noncore-reclassification-v1.json",
+    "removed_from_core": 55,
+    "selected_after": 345,
+    "selector_coordinates_preserved": 256,
+    "review_required_still_selected": 15,
+    "ratification_effect": "NONE",
+    "status": "HISTORICAL-REVERSED-BY-4162",
+    "restored_to_d10": 55
+  },
+  "crossrepo_mal_v1": {
+    "authority": "#4053",
+    "artifact": "knowledge/d10-crossrepo-mal-v1.json",
+    "reviewed": 62,
+    "selected": 22,
+    "projections": 38,
+    "hold": 2,
+    "coordinates_assigned": 0
+  },
+  "crossrepo_early_lisp_v1": {
+    "authority": "#4071",
+    "artifact": "knowledge/d10-crossrepo-early-lisp-v1.json",
+    "donors_reviewed": 4,
+    "selected": 6,
+    "projections": 17,
+    "hold": 1,
+    "no_slot": 1,
+    "coordinates_assigned": 0
+  },
+  "crossrepo_lisp_koans_v1": {
+    "authority": "#4074",
+    "artifact": "knowledge/d10-crossrepo-lisp-koans-v1.json",
+    "reviewed": 36,
+    "selected": 25,
+    "exact_lower_duplicates": 11,
+    "coordinates_assigned": 0
+  },
+  "crossrepo_golisp_pascal_v1": {
+    "authority": "#4077",
+    "artifact": "knowledge/d10-crossrepo-golisp-pascal-v1.json",
+    "donors_reviewed": 2,
+    "selected": 22,
+    "coordinates_assigned": 0
+  },
+  "crossrepo_paip_v1": {
+    "artifact": "knowledge/d10-crossrepo-paip-v1.json",
+    "selected": 23,
+    "clojure_code": "REVIEWED-EXHAUSTED-FOR-CORE",
+    "clojure_cookbook": "REVIEWED-EXHAUSTED-FOR-CORE",
+    "coordinates_assigned": 0
+  },
+  "ownership_cleanup_v2": {
+    "authority": "#4092",
+    "artifact": "knowledge/d10-review-reclassification-v2.json",
+    "removed_from_core": 15,
+    "selected_after": 428,
+    "selector_coordinates_preserved": 256,
+    "review_required_still_selected": 0,
+    "ratification_effect": "NONE",
+    "status": "HISTORICAL-REVERSED-BY-4162",
+    "restored_to_d10": 15
+  },
+  "island_bridge_v1": {
+    "authority": "#4094",
+    "artifact": "knowledge/d10-island-bridge-factorization-v1.json",
+    "selected": 6,
+    "derived_no_separate_resident": 8,
+    "mechanism_only": 1,
+    "execution_repositories_reviewed": 11,
+    "coordinates_assigned": 0,
+    "ratification_effect": "NONE"
+  },
+  "archipelago": {
+    "artifact": "knowledge/archipelago-map-v1.json",
+    "authority": "#4140",
+    "execution_islands": [
+      "common-lisp",
+      "prolog",
+      "clips",
+      "datalog"
+    ],
+    "repository_count": 87,
+    "core_bridge_meanings": 6,
+    "ownership_rule": "Execution islands may remain mechanisms, but semantic package/domain ownership no longer creates separate D10 namespaces. Distinct language-visible meanings share the single D10 bitstream.",
+    "ownership_debt_selected": 0,
+    "status": "EXECUTION-MECHANISM-ONLY"
+  },
+  "owner_correction_single_stream": {
+    "authority": "#4162",
+    "artifact": "knowledge/d10-single-stream-restoration-v1.json",
+    "restored_from_cleanup_v1": 55,
+    "restored_from_cleanup_v2": 15,
+    "restored_total": 70,
+    "selected_after": 504,
+    "remaining_after": 520,
+    "rule": "D10 is one global 10-bit semantic stream. Package/domain ownership does not imply no-slot."
+  },
+  "owner_repo_donor_matrix": {
+    "artifact": "knowledge/d10-owner-repo-donor-matrix-v3.json",
+    "authority": "#4162",
+    "repositories": 87,
+    "direct_semantic_donors": 43,
+    "mechanism_gated_donors": 11,
+    "evidence_donors": 33,
+    "namespace_rule": "ONE-GLOBAL-D10-BITSTREAM"
+  },
+  "crossrepo_panini_v1": {
+    "authority": "#4182 / juv4uk/my-lisp-panini#52",
+    "artifact": "knowledge/d10-crossrepo-panini-v1.json",
+    "selected": 23,
+    "coordinates_assigned": 0,
+    "ratification_effect": "NONE"
+  },
+  "yantra_library_harvest_v1": {
+    "authority": "#4013 / #4162 / #4463",
+    "artifact": "knowledge/d10-yantra-library-harvest-v1.json",
+    "donor": "lib/yantra.lisp",
+    "selected": 19,
+    "coordinates_assigned": 0,
+    "ratification_effect": "NONE"
+  },
+  "clips_library_harvest_v1": {
+    "authority": "#4013 / #4162 / #4463",
+    "artifact": "knowledge/d10-clips-library-harvest-v1.json",
+    "selected": 12,
+    "coordinates_assigned": 0,
+    "ratification_effect": "NONE"
+  },
+  "lisp_machine_evaluator_harvest_v1": {
+    "authority": "#4013 / #4162 / #4463",
+    "artifact": "knowledge/d10-lisp-machine-evaluator-harvest-v1.json",
+    "donors": [
+      "lib/meta-eval.lisp",
+      "lib/persistent-map.lisp"
+    ],
+    "selected": 31,
+    "coordinates_assigned": 0,
+    "ratification_effect": "NONE"
+  },
+  "interlisp_psl_history_harvest_v1": {
+    "authority": "#4013 / #4162 / #4463",
+    "artifact": "knowledge/d10-interlisp-psl-history-harvest-v1.json",
+    "selected": 13,
+    "coordinates_assigned": 0,
+    "ratification_effect": "NONE"
+  },
+  "selfhost_reason_harvest_v1": {
+    "authority": "#4013 / #4162 / #4463",
+    "artifact": "knowledge/d10-selfhost-reason-harvest-v1.json",
+    "selected": 23,
+    "coordinates_assigned": 0,
+    "ratification_effect": "NONE"
+  }
+}

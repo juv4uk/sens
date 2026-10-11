@@ -15,5 +15,5 @@
   "status": "RESEARCH-ONLY",
   "generation": "unknown",
   "axis": "core-math/goal-proof-gate",
-  "reproduce": "python3 benchmarks/core-math-goal-proof-gate/run.py --out /tmp/core-math-goal-proof-gate"
+  "reproduce": "set -euo pipefail; donor_sha=b797bdcff8141149d14ded716e1e65bd7e11dd14; temp=\"$(mktemp -d /tmp/core-math-neutral-XXXXXX)\"; paths=(scripts/research-2433-core-math-neutral-growth.py docs/research/2433-core-math-neutral-v1.json docs/research/2433-core-math-research-projection.json docs/research/2433-core-math-generation-certificates.json); for p in \"${paths[@]}\"; do test ! -e \"$p\" || { echo \"BLOCKED: pinned donor path already exists: $p\" >&2; exit 2; }; done; trap 'rm -f scripts/research-2433-core-math-neutral-growth.py docs/research/2433-core-math-neutral-v1.json docs/research/2433-core-math-research-projection.json docs/research/2433-core-math-generation-certificates.json; rm -rf \"$temp\"' EXIT; git fetch --no-tags --depth=1 origin \"$donor_sha\"; mkdir -p docs/research; for p in \"${paths[@]}\"; do git show \"$donor_sha:$p\" > \"$p\"; done; python3 benchmarks/core-math-goal-proof-gate/run.py --out \"$temp/out\""
 }

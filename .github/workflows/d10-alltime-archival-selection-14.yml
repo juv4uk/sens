@@ -1,0 +1,29 @@
+name: D10 alltime archive 14 historical source proofs
+on:
+  pull_request:
+    paths:
+      - 'knowledge/d10-alltime-existing-research-selected-batch14-20261011.json'
+      - 'knowledge/d10-v1-semantic-inventory.json'
+      - 'knowledge/d10-selection-transition-history.json'
+      - 'knowledge/d10-proposal-ledger.tsv'
+      - 'research/d10/staging-20261011/d10-existing-research-batch-replay-20261011.json'
+      - 'scripts/check_d10_alltime_archived_14_selection.py'
+      - '.github/workflows/d10-alltime-archival-selection-14.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  validate-fourteen-archival-laws:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify 11 exact source Git blobs and 14 research-only admissions
+        run: |
+          set -euo pipefail
+          python3 scripts/check_d10_alltime_archived_14_selection.py --self-test
+          python3 -O scripts/check_d10_alltime_archived_14_selection.py --self-test
+      - name: Verify original D10 historical append-only proof and pending ledger
+        run: |
+          set -euo pipefail
+          python3 scripts/check_d10_selection_transition_history.py --self-test
+          python3 scripts/check-d10-proposal-ledger.py --self-test

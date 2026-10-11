@@ -8,6 +8,9 @@ on:
     paths:
       - ".github/workflows/physical-t5-performance.yml"
       - "benchmarks/byte-pack/physical_t5.py"
+      - "benchmarks/byte-pack/physical_phase.py"
+      - "crates/sens/examples/physical_t5_phase_probe.rs"
+      - "tests/test_physical_t5_inprocess_protocol.py"
       - "crates/sens-cli/src/main.rs"
       - "crates/sens-cli/src/bin/sens-trit.rs"
       - "crates/sens/src/canonical_reader.rs"
@@ -18,6 +21,9 @@ on:
     paths:
       - ".github/workflows/physical-t5-performance.yml"
       - "benchmarks/byte-pack/physical_t5.py"
+      - "benchmarks/byte-pack/physical_phase.py"
+      - "crates/sens/examples/physical_t5_phase_probe.rs"
+      - "tests/test_physical_t5_inprocess_protocol.py"
       - "crates/sens-cli/src/main.rs"
       - "crates/sens-cli/src/bin/sens-trit.rs"
       - "crates/sens/src/canonical_reader.rs"
@@ -59,6 +65,25 @@ jobs:
             --warmup 4 \
             --reps 25
 
+      - name: Validate in-process evidence protocol (fail closed)
+        run: python3 -m unittest discover -s tests -p 'test_physical_t5_inprocess_protocol.py' -v
+
+      - name: Build real pure SENS in-process phase probe
+        run: cargo build --locked --release -p sens --example physical_t5_phase_probe
+
+      - name: Measure in-process decode, parse and hot execution
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 benchmarks/byte-pack/physical_phase.py \
+            --helper target/release/examples/physical_t5_phase_probe \
+            --sens target/release/sens \
+            --trit target/release/sens-trit \
+            --out "$RUNNER_TEMP/physical-t5-bench" \
+            --warmup 3 \
+            --reps 11 \
+            --inner 200
+
       - name: Publish measured summary
         if: always()
         shell: bash
@@ -67,6 +92,16 @@ jobs:
             cat "$RUNNER_TEMP/physical-t5-bench/report.md" >> "$GITHUB_STEP_SUMMARY"
           else
             echo "No measurements: build or parity blocked; no speed claim." >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+      - name: Show in-process phase results
+        if: always()
+        shell: bash
+        run: |
+          if test -s "$RUNNER_TEMP/physical-t5-bench/inprocess.md"; then
+            cat "$RUNNER_TEMP/physical-t5-bench/inprocess.md" >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "No phase-local evidence: protocol, oracle or build blocked." >> "$GITHUB_STEP_SUMMARY"
           fi
 
       - name: Upload raw timings, SHA and statistics

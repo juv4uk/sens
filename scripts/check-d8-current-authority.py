@@ -2,6 +2,10 @@
 import json
 from pathlib import Path
 
+# Під -O Python усуває assert: жодної удаваної атестації D8.
+if not __debug__:
+    raise SystemExit("D8-CURRENT-AUTHORITY: BLOCKED — Python -O вимикає перевірки")
+
 root=Path(__file__).resolve().parents[1]
 d=json.loads((root/"knowledge/d8-ratified.json").read_text(encoding="utf-8"))
 source=json.loads((root/"knowledge/d8-v2-gauge-fixed-candidate.json").read_text(encoding="utf-8"))

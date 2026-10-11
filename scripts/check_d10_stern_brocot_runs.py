@@ -131,7 +131,12 @@ def validate_dossier(d,inv,foundation):
     names={row["semantic_name"] for row in inv["rows"]}
     assert "BOUNDED-RATIONAL-APPROX" in names
     assert "PRIMITIVE-BINARY-WORD-ROOT" in names
-    assert NAME not in names, "candidate already selected; reconcile merge first"
+    if NAME in names:
+        from check_d10_existing_combinatorial_laws_selected import verify_promoted
+        matching = [r for r in inv["rows"] if r["semantic_name"] == NAME]
+        assert len(matching) == 1
+        proof = verify_promoted(NAME, matching[0])
+        assert proof["law"] == c["law"]
     assert foundation["status"]=="owner-ratified"
     lower={str(x).upper() for v in foundation["domains"].values()
            for x in v["residents"].values()}

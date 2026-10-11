@@ -74,7 +74,12 @@ def check(manifest,foundation=None,inventory=None):
         assert inventory['accounting']['ratified_d10_residents']==0
         lower={str(name).upper() for dom in foundation['domains'].values() for name in dom.get('residents',{}).values()}
         selected={str(row['semantic_name']).upper() for row in inventory['rows']}
-        assert not ({r['semantic_name'] for r in rows}&(lower|selected)), 'new identity overlaps lower or selected D10'
+        assert not ({r['semantic_name'] for r in rows} & lower), 'research law duplicates ratified lower domain'
+        if {r['semantic_name'] for r in rows} & selected:
+            from check_d10_alltime_archived_14_selection import verify_promoted
+            for source in rows:
+                if source['semantic_name'] in selected:
+                    verify_promoted(source['semantic_name'], inventory)
     return {'proposals':2,'selected_additions':0,'ratified_additions':0}
 
 if __name__=='__main__':

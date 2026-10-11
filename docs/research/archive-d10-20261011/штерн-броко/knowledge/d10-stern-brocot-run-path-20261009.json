@@ -1,0 +1,230 @@
+{
+  "schema": "d10-stern-brocot-run-path-research/v1",
+  "date": "2026-10-09",
+  "status": "RESEARCH-PENDING-OWNER-REVIEW",
+  "authority": [
+    "#4013",
+    "#4301",
+    "#4463",
+    "#4182"
+  ],
+  "sources": [
+    {
+      "title": "Isabelle AFP Stern_Brocot_Tree — mk_path and stern_brocot_rationals theorem",
+      "url": "https://devel.isa-afp.org/browser_info/current/AFP/Stern_Brocot/Stern_Brocot_Tree.html",
+      "attested": "Unique exact positive rational is reached by left/right subtractive Euclidean path, root 1/1; formal proof of completeness and non-repetition."
+    },
+    {
+      "title": "Milad Niqui, Exact arithmetic on the Stern-Brocot tree, Journal of Discrete Algorithms 5, 356–379 (2007)",
+      "url": "https://doi.org/10.1016/j.jda.2005.03.007",
+      "attested": "Tree-path representations support exact computation with rational numbers, not an FPGA-specific transport scheme."
+    },
+    {
+      "title": "Owner spanda original E-P Dance exact p/q / FPGA / analog triangle",
+      "url": "https://github.com/juv4uk/spanda/blob/master/README.md",
+      "owner_repo": "juv4uk/spanda",
+      "path": "README.md",
+      "blob_sha": "d339363e03798941280d7394fb6b24a76ff43dd3",
+      "attested": "Owner names Stern–Brocot / continued fractions as a route to exact p/q from observed analog values; motivation only, not pre-existing implementation of this particular path codec."
+    }
+  ],
+  "attribution_limit": "Formal AFP describes uncompressed L/R mk_path and tree theorems. Batched positive run lengths, compact structure, strict exact-bit representation and explicit error behavior are a new proposed SENS data law, not attributed to the 19th century or to FPGA protocol.",
+  "snapshot": {
+    "d10_inventory_sha": "65014431ac3e64633cd0be3630cfafc5e7a9aea3",
+    "foundation_sha": "09d1d71c39d1484dfd005a5068dbb18b76f0f0d4",
+    "selected": 634,
+    "ratified": 0
+  },
+  "candidate": {
+    "semantic_name": "STERN-BROCOT-RUN-PATH",
+    "proposal_id": "D10P-4952",
+    "surface_uk": "шлдр",
+    "surface_ukr": "стиснений-шлях-дробу",
+    "width": 10,
+    "coordinate": null,
+    "selected": false,
+    "ratified": false,
+    "proposal_status": "pending-review",
+    "domain": "exact positive rational p/q (p>0,q>0, gcd normalized), not floats or physical voltages",
+    "result": "canonical alternating sequence of (D1 predicate bit, positive integer count) where bit 0=LEFT below current Stern–Brocot node and bit 1=RIGHT above current node; 1/1 maps to empty run sequence",
+    "reverse": "from a canonical run sequence, recover the original exact positive rational by left/right bounding-fraction mediants in O(number of runs), without expanding large counts",
+    "law": "Generate exact L/R path from root 1/1 by repeated numerator/denominator comparison and subtractive Euclid; compress maximal same-bit runs using quotient floor((a-1)/b) or floor((b-1)/a), preserving final equality stop without one extra step. Reject nonpositive and imprecise source inputs; reverse accepts ONLY alternating positive-length bit runs. Two-direction round trips are identity and representation is unique for every positive rational.",
+    "positives": [
+      {
+        "rational": "1/1",
+        "runs": [],
+        "note": "root needs zero directions"
+      },
+      {
+        "rational": "1/2",
+        "runs": [
+          [
+            0,
+            1
+          ]
+        ],
+        "note": "one left branch"
+      },
+      {
+        "rational": "2/1",
+        "runs": [
+          [
+            1,
+            1
+          ]
+        ],
+        "note": "one right branch"
+      },
+      {
+        "rational": "2/3",
+        "runs": [
+          [
+            0,
+            1
+          ],
+          [
+            1,
+            1
+          ]
+        ],
+        "note": "left then right"
+      },
+      {
+        "rational": "3/2",
+        "runs": [
+          [
+            1,
+            1
+          ],
+          [
+            0,
+            1
+          ]
+        ],
+        "note": "right then left"
+      },
+      {
+        "rational": "5/2",
+        "runs": [
+          [
+            1,
+            2
+          ],
+          [
+            0,
+            1
+          ]
+        ],
+        "note": "two rights one left"
+      },
+      {
+        "rational": "13/9",
+        "runs": [
+          [
+            1,
+            1
+          ],
+          [
+            0,
+            2
+          ],
+          [
+            1,
+            3
+          ]
+        ],
+        "note": "exact run compression from Euclid, final right run of 3"
+      },
+      {
+        "rational": "1/1000000001",
+        "runs": [
+          [
+            0,
+            1000000000
+          ]
+        ],
+        "note": "billion path steps represented by one positive run"
+      },
+      {
+        "rational": "1000000001/1",
+        "runs": [
+          [
+            1,
+            1000000000
+          ]
+        ],
+        "note": "unbounded integer width, no bit expansion"
+      }
+    ],
+    "falsifiers": [
+      "For 3/1, returning right-run count 3 rather than 2 introduces an extra branch past the exact rational.",
+      "For 1/1, returning any left or right step is not the root path.",
+      "For 5/2, reversing R² L into L R² reaches a different fraction.",
+      "Consecutive same-direction run records must reject rather than silently admit a noncanonical alternative code.",
+      "Zero/negative run counts, boolean bits, floats and nonpositive input rationals must reject.",
+      "A billion left steps must remain a run count, not allocate a billion-element bit sequence.",
+      "Turning the path into the nearest denominator-bounded fraction instead of exactly reversible p/q changes the mathematical meaning."
+    ],
+    "behavioral_neighbors": [
+      {
+        "name": "BOUNDED-RATIONAL-APPROX",
+        "difference": "chooses nearest fraction under external bound and returns exact signed remainder, not bijective positive rational to unique ordered tree-path runs"
+      },
+      {
+        "name": "D8 RATIONAL",
+        "difference": "exact ratio representation and arithmetic do not specify one rooted binary L/R path"
+      },
+      {
+        "name": "D8 ROTATE",
+        "difference": "bit shift by given amount, unrelated to positive rational Stern–Brocot geodesic"
+      },
+      {
+        "name": "PRIMITIVE-BINARY-WORD-ROOT",
+        "difference": "extracts repeated prefix of bit string; no rational value inverse or mediant semantics"
+      },
+      {
+        "name": "MERGE-CONGRUENCE-CONSTRAINTS",
+        "difference": "solves modular equation constraints and conflicts, not path encoding exact rationals"
+      }
+    ],
+    "hobbies": [
+      "spanda analog-to-exact p/q reconstruction",
+      "FPGA structured switch-control rational parametrization",
+      "astronomical rational period ratios",
+      "SDR and acoustics periodic rational cadence",
+      "horology gear/tick ratios",
+      "Sanskrit/prosody exact length ratios",
+      "Lisp binary symbolic tree representation"
+    ],
+    "derivability": "Euclid and exact rational arithmetic suffice to define this as a derived procedure; uniqueness and compact exact structure do NOT prove that a new irreducible evaluator primitive is required. Owner decides D10 research selection vs Core-Math library.",
+    "semantic_boundaries": [
+      "Research bit is a D1 value and count is arbitrary exact positive integer; it is NOT a T5 word framing byte.",
+      "No D2 syntax/control or D7 text alphabet reuse.",
+      "No actual analog sensor calibration or FPGA map is implied.",
+      "Input positive exact rational only, NOT 0/1 or infinity/1 boundary sentinels."
+    ]
+  },
+  "holds": [
+    {
+      "name": "STERN-BROCOT-CLOSEST-BY-BOUND",
+      "status": "HOLD-BEHAVIORAL-OVERLAP",
+      "reason": "Competes with already selected BOUNDED-RATIONAL-APPROX and must not count a duplicate nearest-fraction law."
+    },
+    {
+      "name": "ANALOG-FPGA-SWITCH-MASK-FROM-PATH",
+      "status": "HOLD-HARDWARE-MECHANISM",
+      "reason": "Actual switch topology, voltage transfer and ADC are device protocols, not a universal D10 language meaning."
+    },
+    {
+      "name": "SIGNED-ZERO-INFINITY-BROCODING",
+      "status": "HOLD-DOMAIN-EXTENSION",
+      "reason": "Signed rationals, zero and infinity require explicit tagged extension not in the proven positive Stern–Brocot path theorem."
+    }
+  ],
+  "accounting": {
+    "selected_delta": 0,
+    "ratified_delta": 0,
+    "assigned_coordinates": 0,
+    "ledger_append_intent": 1
+  }
+}
