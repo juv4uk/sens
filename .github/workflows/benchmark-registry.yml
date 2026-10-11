@@ -34,6 +34,13 @@ jobs:
       - name: Validate manifests and generated index
         run: python3 scripts/benchmark_registry.py --check
 
+      - name: Verify historical paired effect methodology (synthetic falsifiers only)
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m unittest discover -s benchmarks/bench-methodology -p 'test_paired_effect.py' -v
+          python3 -m unittest discover -s tests -p 'test_paired_effect_ci.py' -v
+
       - name: Verify and measure bounded T21/T22/T33 research candidate
         shell: bash
         run: |
