@@ -13,7 +13,7 @@
 
 T5 зберігає всі слова, включно з W1..W9, `00/01/10/11` як точними D2, провідними нулями і роздільниками. F3 не має права «канонізувати» QUOTE-дані або перетворювати невиконувані структури на інші слова.
 
-**Оновлено:** чинний sens-trit має лише явні команди open-f3, decode-f3, eval-f3 для .senc, а звичайні .sens маршрути зберігають T5. Явний декодер обмежений програмами до 16 фізичних байтів T5, вимагає мітку 0xf3, відновлює точні слова і викликає той самий виробничий SENS читач/виконавець. **Автовизначення F3, неявного виконання або декодерного fallback немає.**
+**Оновлено:** чинний sens-trit має явні команди encode-f3 для маленького T5 .sens, open-f3, decode-f3, eval-f3 для .senc; звичайні .sens маршрути зберігають T5. Явний декодер обмежений програмами до 16 фізичних байтів T5, вимагає мітку 0xf3, відновлює точні слова і викликає той самий виробничий SENS читач/виконавець. **Автовизначення F3, неявного виконання або декодерного fallback немає.**
 
 ## Атомарний робочий свідок (у main)
 
@@ -36,6 +36,7 @@ cargo run --locked --release -p sens --example two_codec_small_programs -- --con
 cargo build --locked --release -p sens-cli --bin sens-trit
 
 # .senc необхідно заздалегідь створити лише за допуском tiny F3:
+target/release/sens-trit encode-f3 /tmp/short.sens  # створить short.senc без перезапису
 target/release/sens-trit open-f3 /tmp/short.senc
 target/release/sens-trit decode-f3 /tmp/short.senc
 target/release/sens-trit eval-f3 /tmp/short.senc
@@ -56,6 +57,8 @@ production canonical T5/D2 parser і pure SENS evaluator; F3 не має окр�
 open, decode і eval через T5 та явний F3; перевірено wrong-marker,
 invalid extension, порожнє й завелике F3. [Артефакт реальних файлів і
 результатів CLI](https://github.com/juv4uk/sens/actions/runs/38170264184/artifacts/11713558135).
+
+**Остаточний позитивний тест encoder+decoder:** [CI #38170817413](https://github.com/juv4uk/sens/actions/runs/38170817413) на SHA 2ac5cbe001dcc949561aeb6bca231e52befd75a7. Створено справжній 3B F3 з 4B T5 через штатну encode-f3; байти однакові з відомим зразком, оригінальний T5 незмінений, подвійний запис відхилено, завеликі програми відхилено; open/decode/eval parity для всіх 9 F3 кандидатів — PASS. [Бінарний артефакт](https://github.com/juv4uk/sens/actions/runs/38170817413/artifacts/11714003230).
 
 **Межа безпеки:** початковий F3 0xf3 + rank не має CRC/MAC.
 Якщо пошкодження випадково перетворює файл на **інший допустимий фізичний
