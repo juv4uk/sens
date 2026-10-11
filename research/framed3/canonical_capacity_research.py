@@ -253,7 +253,7 @@ def by_trit_length(mode: str, max_bits: int = 16) -> dict[int, int]:
 def main() -> None:
     from canonical_d2_rank_research import count_inner
 
-    max_bits = 14
+    max_bits = 33
     print("== Валідація структурної моделі проти count_inner ==")
     print(f"{'біти':>5} {'структ':>10} {'count_inner':>12} {'каноніч':>10} "
           f"{'suворе':>10}  {'зекономлено %':>14}")
