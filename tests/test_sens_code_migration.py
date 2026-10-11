@@ -276,5 +276,69 @@ class SensCodeMigrationTests(unittest.TestCase):
             self.assertEqual(target.read_bytes(), encode_projection('000'))
 
 
+    def test_binary_migration_blocks_whole_batch_if_one_source_is_unadmitted(self):
+        for option, extension in (("--sens-mirror", ".sens"), ("--binary-mirror", ".lisp")):
+            with self.subTest(option=option), tempfile.TemporaryDirectory() as td:
+                root = Path(td) / "source"
+                root.mkdir()
+                (root / "a-good.lisp").write_text("()\n", encoding="utf-8")
+                (root / "z-blocked.lisp").write_text("(QUOTE binary)\n", encoding="utf-8")
+                out = Path(td) / "out"
+                report = Path(td) / "report.json"
+                command = [
+                    sys.executable, str(SCRIPT), str(root),
+                    "--foundation", str(FOUNDATION),
+                    option, str(out),
+                    "--text7-projection", str(TEXT7),
+                    "--historical-map", str(HISTORICAL),
+                    "--semantic-registry", str(REGISTRY),
+                    "--report", str(report),
+                    "--domain-surfaces", *[str(x) for x in DOMAIN_SURFACES],
+                ]
+                result = subprocess.run(command, cwd=ROOT, capture_output=True, text=True)
+                self.assertEqual(result.returncode, 2, result.stdout + result.stderr)
+                rows = json.loads(report.read_text(encoding="utf-8"))
+                self.assertEqual(rows["summary"]["files_seen"], 2)
+                self.assertEqual(rows["summary"]["files_written"], 0)
+                self.assertEqual(rows["summary"]["files_blocked"], 1)
+                self.assertFalse((out / ("a-good" + extension)).exists())
+                self.assertFalse((out / ("z-blocked" + extension)).exists())
+                self.assertIn("not-written", {row["status"] for row in rows["files"]})
+
+    def test_binary_migration_rolls_back_batch_on_existing_target(self):
+        for option, extension in (("--sens-mirror", ".sens"), ("--binary-mirror", ".lisp")):
+            with self.subTest(option=option), tempfile.TemporaryDirectory() as td:
+                root = Path(td) / "source"
+                root.mkdir()
+                for name in ("a-good.lisp", "z-already-exists.lisp"):
+                    (root / name).write_text("()\n", encoding="utf-8")
+                out = Path(td) / "out"
+                out.mkdir()
+                old_target = out / ("z-already-exists" + extension)
+                old_target.write_bytes(b"preexisting-authority-must-survive")
+                report = Path(td) / "report.json"
+                command = [
+                    sys.executable, str(SCRIPT), str(root),
+                    "--foundation", str(FOUNDATION),
+                    option, str(out),
+                    "--text7-projection", str(TEXT7),
+                    "--historical-map", str(HISTORICAL),
+                    "--semantic-registry", str(REGISTRY),
+                    "--report", str(report),
+                    "--domain-surfaces", *[str(x) for x in DOMAIN_SURFACES],
+                ]
+                result = subprocess.run(command, cwd=ROOT, capture_output=True, text=True)
+                self.assertEqual(result.returncode, 2, result.stdout + result.stderr)
+                rows = json.loads(report.read_text(encoding="utf-8"))
+                self.assertEqual(rows["summary"]["files_written"], 0)
+                self.assertEqual(rows["summary"]["files_blocked"], 1)
+                self.assertTrue(any(
+                    "BATCH_PUBLICATION_BLOCKED" in blocker["reason"]
+                    for row in rows["files"] for blocker in row["blockers"]
+                ))
+                self.assertFalse((out / ("a-good" + extension)).exists())
+                self.assertEqual(old_target.read_bytes(), b"preexisting-authority-must-survive")
+
+
 if __name__ == "__main__":
     unittest.main()
