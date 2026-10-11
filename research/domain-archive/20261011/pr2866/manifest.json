@@ -1,0 +1,38 @@
+{
+  "schema": "sens-historical-branch-archive/v1",
+  "archived_at": "2026-10-11",
+  "source": {
+    "repo": "juv4uk/sens",
+    "pr": 2866,
+    "title": "fix(2864): make kernel ABI an explicit legacy-u8 projection",
+    "branch": "fix/2864-kernel-abi-domain-boundary",
+    "head_sha": "009679530f06263ba527c2046181a84267d8c059",
+    "base": "main",
+    "base_sha": "42e3945c5e8f27902ade6fedf52f54786c56f914"
+  },
+  "files": [
+    {
+      "path": ".github/workflows/kernel-abi-transport-boundary.yml",
+      "patch_present": true,
+      "patch_chars": 533
+    },
+    {
+      "path": "contracts/kernel-abi-transport-boundary.lisp",
+      "patch_present": true,
+      "patch_chars": 1636
+    },
+    {
+      "path": "scripts/check-kernel-abi-transport-boundary.lisp",
+      "patch_present": true,
+      "patch_chars": 1556
+    }
+  ],
+  "current_main": {
+    "contract_blob": "5d83094bd85c716b6ce8203b2b20681d1a2d9ea8",
+    "checker_blob": "effb6e56bbfc7aac1f77e0040f2418c60209217b",
+    "workflow_blob": "c15ed975730c014e2f13a87f0970bee7aad6be7d",
+    "wrapper_type": "LegacyAbiSemanticId",
+    "protection": "current source rejects language SID/identity imports and permits only explicit language-to-legacy ABI projection"
+  },
+  "disposition": "ALREADY-IN-MAIN-NEWER / archive superseded contract alternative"
+}
