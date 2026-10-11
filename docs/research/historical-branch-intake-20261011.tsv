@@ -894,7 +894,7 @@ feat/115-authority-guard	UNTRIAGED	-	-	BRANCH-NAME-ONLY
 feat/115-authority-guard-main	UNTRIAGED	-	-	BRANCH-NAME-ONLY
 feat/115-lisp-authority-policy	UNTRIAGED	-	-	BRANCH-NAME-ONLY
 feat/115-lisp-authority-policy-green	UNTRIAGED	-	-	BRANCH-NAME-ONLY
-feat/116-portable-witness-adapters	UNTRIAGED	-	-	BRANCH-NAME-ONLY
+feat/116-portable-witness-adapters	ALREADY-IN-MAIN-ARCHIVED	(manifest/readme in archive)	7f35d6a8d78d0ad6afe9385609998fab8039b02d	Exact RED-only backend adapter contract test + manifest archived under research/domain-archive/20261011/pr0164; no active manifest/test in main and branch uses crates/my-lisp. PR #164 closed archived.
 feat/116-portable-witness-main	UNTRIAGED	-	-	BRANCH-NAME-ONLY
 feat/150-machine-noninterference-green	UNTRIAGED	-	-	BRANCH-NAME-ONLY
 feat/177-machine-block-roundtrip	UNTRIAGED	-	-	BRANCH-NAME-ONLY
@@ -921,7 +921,7 @@ feat/244-canon0-indeterminacy	UNTRIAGED	-	-	BRANCH-NAME-ONLY
 feat/300-rust-retirement-valve	UNTRIAGED	-	-	BRANCH-NAME-ONLY
 feat/332-cli-bootstrap-perf	UNTRIAGED	-	-	BRANCH-NAME-ONLY
 feat/382-repo-tooling-inventory	UNTRIAGED	-	-	BRANCH-NAME-ONLY
-feat/383-knowledge-authority-classification	UNTRIAGED	-	-	BRANCH-NAME-ONLY
+feat/383-knowledge-authority-classification	ALREADY-IN-MAIN-ARCHIVED	0ec34afd04bcebe518adc7b17b2c966b79ac3fcb	96b7f6a0b963c65752bcff6654aa1bc847bfa8ba	All five branch source blobs archived under research/domain-archive/20261011/pr0427; main authority map already states knowledge/ has no independent semantic authority, checker/workflow not activated due old source era. PR #427 closed archive-only.
 feat/487-derived-admission-coverage-input-20261007	UNTRIAGED	-	-	BRANCH-NAME-ONLY
 feat/487-lisp-encoder-coverage-parity	UNTRIAGED	-	-	BRANCH-NAME-ONLY
 feat/505-native-first-classifier	UNTRIAGED	-	-	BRANCH-NAME-ONLY
@@ -2777,7 +2777,7 @@ replay/628-native-first-totality-current	UNTRIAGED	-	-	BRANCH-NAME-ONLY
 replay/635-authority-inventory-current	UNTRIAGED	-	-	BRANCH-NAME-ONLY
 replay/636-uk-peer-1050-current	UNTRIAGED	-	-	BRANCH-NAME-ONLY
 replay/640-uk-peer-1050-f78e	UNTRIAGED	-	-	BRANCH-NAME-ONLY
-replay/643-surface-coverage-current-main	UNTRIAGED	-	-	BRANCH-NAME-ONLY
+replay/643-surface-coverage-current-main	ALREADY-IN-MAIN-ARCHIVED	757252d13c7466efb54d82949a829b8d15f7af43	bbd1cdcae0850a6ff7c3835bac6134177c2e8b0f	All six PR paths archived under research/domain-archive/20261011/pr0650; old workflow uses crates/my-lisp/lib/core.my; deleted Python file preserved from PR base. Current surface-drift workflow/Python checker not overwritten/deleted. PR #650 closed archived.
 replay/649-fast-readfile-post-648	UNTRIAGED	-	-	BRANCH-NAME-ONLY
 replay/651-calendar-current-main	UNTRIAGED	-	-	BRANCH-NAME-ONLY
 replay/651-calendar-post-655	UNTRIAGED	-	-	BRANCH-NAME-ONLY
