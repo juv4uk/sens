@@ -120,6 +120,12 @@ fn encode_record(record: &OuterRecord, out: &mut Vec<u8>) -> Result<(), OuterEnv
             append_fixed(u64::from(payload), width, out);
         }
         OuterRecord::N(value) => {
+            // OuterEnvelope is still a draft: its N field contains only
+            // normalized magnitude bits. Explicit D24/D48/... identity
+            // must never disappear during this legacy/candidate transport.
+            if value.numeric_domain_width().is_some() {
+                return Err(OuterEnvelopeError::InvalidNumber { bit: out.len() });
+            }
             append_fixed(0b11110, 5, out);
             append_gamma0(value.width(), out)?;
             out.extend_from_slice(value.as_bits());
@@ -382,6 +388,13 @@ mod tests {
             }
         }
         assert_eq!(count, 510);
+    }
+
+    #[test]
+    fn unratified_outer_n_path_cannot_strip_d24_numeric_identity() {
+        let domain_number = BinaryNumber::from_numeric_domain_bits(24, &vec![0; 24]).unwrap();
+        let err = encode_outer_records(&[OuterRecord::N(domain_number)]).unwrap_err();
+        assert!(matches!(err, OuterEnvelopeError::InvalidNumber { .. }));
     }
 
     #[test]
