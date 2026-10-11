@@ -7,8 +7,8 @@
   "source_head_sha": "470515d4b15f70fa6d01136281ea23b2b5339249",
   "status": "HISTORICAL_BENCHMARK_EVIDENCE_ONLY_NOT_RATIFIED_NOT_EXECUTABLE",
   "files_total": 4,
-  "files_archived_verified": 2,
-  "files_source_only": 2,
+  "files_archived_verified": 4,
+  "files_source_only": 0,
   "scope": "Раннє 3-replay Cachegrind порівняння Sens8/Inline64/BitBytes/SmallSpill (гарантоване походження не є доказом сучасної відповідності).",
   "limitations": "Не переносити історичний SID8 у поточні закони; старі порівняння не мають автоматичного статусу актуального бенчмарка або production winner.",
   "records": [
@@ -29,16 +29,16 @@
     {
       "original_path": "benchmarks/identity-carrier/carrier_bench.c",
       "original_git_blob_sha": "88adb7170cd9d5055ebfa9422553095a9f97d15c",
-      "archive_path": null,
-      "archive_git_blob_sha": null,
-      "status": "SOURCE_REFERENCED_NOT_COPIED"
+      "archive_path": "research/domain-archive/20261011/pr1995/benchmarks/identity-carrier/carrier_bench.c.source.txt",
+      "archive_git_blob_sha": "88adb7170cd9d5055ebfa9422553095a9f97d15c",
+      "status": "BYTE_IDENTICAL_ARCHIVED"
     },
     {
       "original_path": "benchmarks/identity-carrier/run.py",
       "original_git_blob_sha": "219dc828d35b5c92c6fcfbefe7b7b50d87602dfb",
-      "archive_path": null,
-      "archive_git_blob_sha": null,
-      "status": "SOURCE_REFERENCED_NOT_COPIED"
+      "archive_path": "research/domain-archive/20261011/pr1995/benchmarks/identity-carrier/run.py.source.txt",
+      "archive_git_blob_sha": "219dc828d35b5c92c6fcfbefe7b7b50d87602dfb",
+      "status": "BYTE_IDENTICAL_ARCHIVED"
     }
   ],
   "coordination": [
@@ -46,5 +46,6 @@
     "#5132",
     "#5041"
   ],
-  "admission": "Будь-яке рішення щодо нових доменів тільки через незалежні оракули, семантичну дедуплікацію та ратифікацію власника."
+  "admission": "Будь-яке рішення щодо нових доменів тільки через незалежні оракули, семантичну дедуплікацію та ратифікацію власника.",
+  "archive_execution_policy": "All original historical programs are stored under *.source.txt in research/domain-archive; not imported, not executable in CI, not canonical runtime."
 }
