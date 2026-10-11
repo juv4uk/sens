@@ -23,17 +23,21 @@ fn main() {
         environment: Environment::root(),
     };
     load_core_library(&mut session).unwrap();
-    for source in [
-        include_str!("../../../../lib/unify.lisp"),
-        include_str!("../../../../lib/reason.lisp"),
-        include_str!("../../../../lib/forward.lisp"),
-        include_str!("../../../../lib/knowledge.lisp"),
-        include_str!("../../../../lib/persistent-map.lisp"),
-        include_str!("../../../../lib/world.lisp"),
-        include_str!("../../../../lib/content-store.lisp"),
-        include_str!("../../../../lib/lisp-fs.lisp"),
+    for (path, source) in [
+        ("lib/unify.lisp", include_str!("../../../../lib/unify.lisp")),
+        ("lib/reason.lisp", include_str!("../../../../lib/reason.lisp")),
+        ("lib/forward.lisp", include_str!("../../../../lib/forward.lisp")),
+        ("lib/knowledge.lisp", include_str!("../../../../lib/knowledge.lisp")),
+        ("lib/persistent-map.lisp", include_str!("../../../../lib/persistent-map.lisp")),
+        ("lib/world.lisp", include_str!("../../../../lib/world.lisp")),
+        ("lib/content-store.lisp", include_str!("../../../../lib/content-store.lisp")),
+        ("lib/lisp-fs.lisp", include_str!("../../../../lib/lisp-fs.lisp")),
     ] {
-        eval_program(source, &mut session).unwrap();
+        if matches!(path, "lib/forward.lisp" | "lib/knowledge.lisp" | "lib/world.lisp") {
+            sens::eval_pinned_reasoning_source(path, source, &mut session).unwrap();
+        } else {
+            eval_program(source, &mut session).unwrap();
+        }
     }
     let root = eval_program(
         &format!("(fs-deserialize-root {})", string_literal(records[0])),
