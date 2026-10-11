@@ -2,9 +2,9 @@
 //! Independent witness: semantic identity, canonicality, bit length, and
 //! refusal to interpret legacy/unqualified numbers as admitted Dn values.
 use sens::{
-    BinaryFrame, BinaryFrameError, BinaryNumber, DomainNumericComposition,
-    Value, decode_binary_frame, encode_binary_frame, encode_numeric_value_frame,
-    decode_numeric_value_frame,
+    BinaryFrame, BinaryFrameError, BinaryNumber,
+    Value, PackedBitstream, decode_binary_frame, encode_binary_frame, encode_numeric_value_frame,
+    decode_numeric_value_frame, encode_packed_numeric_value, decode_packed_numeric_value,
 };
 
 fn d(width: usize, v: u64) -> BinaryNumber {
@@ -47,6 +47,25 @@ fn signed_and_rational_values_roundtrip_without_domain_loss() {
             let bytes = bits_to_bytes(&bits);
             assert_eq!(bytes.len(),bits.len().div_ceil(8));
             assert!(bytes.last().is_some());
+            let packed = encode_packed_numeric_value(&value).unwrap();
+            assert_eq!(packed.bytes(), bytes);
+            assert_eq!(packed.bit_len(), bits.len());
+            assert_eq!(decode_packed_numeric_value(&packed).unwrap(),value);
+            let (reconstructed_bytes, reconstructed_len) = packed.clone().into_parts();
+            let from_parts = PackedBitstream::from_parts(reconstructed_bytes, reconstructed_len)
+                .expect("canonical padding and exact meaningful bit count");
+            assert_eq!(decode_packed_numeric_value(&from_parts).unwrap(),value);
+            if packed.bit_len() % 8 != 0 {
+                let (mut bytes, bit_len) = packed.clone().into_parts();
+                *bytes.last_mut().unwrap() |= 1; // a forbidden physical padding bit
+                assert!(PackedBitstream::from_parts(bytes, bit_len).is_none());
+            }
+            let mut with_tail = bits.clone();
+            with_tail.push(0); // extra meaningful bit must never be ignored
+            let mut tail_bytes = bits_to_bytes(&with_tail);
+            let tail = PackedBitstream::from_parts(std::mem::take(&mut tail_bytes),
+                with_tail.len()).unwrap();
+            assert!(decode_packed_numeric_value(&tail).is_err());
             let mut broken = bits.clone();
             broken.pop();
             assert!(decode_numeric_value_frame(&broken).is_err());
