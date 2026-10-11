@@ -21,11 +21,11 @@
 
 ; Compute using let binding
 ; Використання let привязки
-(10011100 ((total-tasks 457)
+(нехай ((total-tasks 457)
       (completed-tasks 232))
   ; Calculate remaining
   ; Обчислити залишене
-  (00001101 total-tasks completed-tasks))
+  (відняти total-tasks completed-tasks))
 
 ; Print description - the CLI will output the numeric result
 ; але вивід опису відбудеться через коментарі
