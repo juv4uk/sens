@@ -12,11 +12,12 @@ DOMAIN_TABLES = tuple(ROOT / "lib" / "domains" / f"d{width}.lisp" for width in r
 D7_TABLE = ROOT / "lib" / "domains" / "d7.lisp"
 D8_TABLE = ROOT / "lib" / "domains" / "d8.lisp"
 D9_TABLE = ROOT / "lib" / "domains" / "d9.lisp"
-CURRENT_HUMAN_TABLES = DOMAIN_TABLES + (D7_TABLE, D8_TABLE, D9_TABLE,)
+D10_TABLE = ROOT / "lib" / "domains" / "d10.lisp"
+CURRENT_HUMAN_TABLES = DOMAIN_TABLES + (D7_TABLE, D8_TABLE, D9_TABLE, D10_TABLE,)
 
 TOKEN = r'(\(\)|"[^"]*"|[^()\s]+)'
 ROW = re.compile(
-    r'^\s*\(([01]{1,9})\s+'
+    r'^\s*\(([01]{1,10})\s+'
     + r'\(ук\s+' + TOKEN + r'\)\s+'
     + r'\(укр\s+' + TOKEN + r'\)\s+'
     + r'\(san\s+' + TOKEN + r'\)\s+'
