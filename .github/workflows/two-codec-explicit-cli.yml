@@ -57,6 +57,51 @@ jobs:
           cmp "$RUNNER_TEMP/f3-eval.txt" "$RUNNER_TEMP/t5-eval.txt"
           "$bin" open "$canonical" > "$RUNNER_TEMP/t5-open.txt"
           cmp "$RUNNER_TEMP/t5-open.txt" "$RUNNER_TEMP/f3-human.txt"
+      - name: All 9 real tiny F3 staged files match canonical T5 CLI parsing and execution
+        shell: bash
+        run: |
+          set -euo pipefail
+          cargo build --locked --release -p sens --example two_codec_small_programs
+          python3 scripts/prepare-two-codec-migration.py \
+            --stage "$RUNNER_TEMP/full-tiny-stage" \
+            > "$RUNNER_TEMP/full-tiny-manifest.json"
+          python3 scripts/prepare-two-codec-migration.py \
+            --verify-stage "$RUNNER_TEMP/full-tiny-stage" \
+            > "$RUNNER_TEMP/full-tiny-audit.json"
+          python3 - "$RUNNER_TEMP/full-tiny-stage" "$RUNNER_TEMP/full-tiny-manifest.json" <<'PY'
+          import json, subprocess, sys
+          from pathlib import Path
+          stage = Path(sys.argv[1])
+          manifest = json.loads(Path(sys.argv[2]).read_text())
+          binary = Path("target/release/sens-trit").resolve()
+          f3 = 0
+          for row in manifest["files"]:
+              source = Path(row["source"]).resolve()
+              if row["codec"] != "F3":
+                  if row["codec"] != "T5":
+                      raise SystemExit("unknown codec")
+                  continue
+              f3 += 1
+              framed = stage / row["staged_file"]
+              for old_cmd, new_cmd in [
+                  ("open", "open-f3"),
+                  ("decode", "decode-f3"),
+                  ("eval", "eval-f3"),
+              ]:
+                  base = subprocess.run([binary, old_cmd, source],
+                      text=True, capture_output=True, check=False)
+                  trial = subprocess.run([binary, new_cmd, framed],
+                      text=True, capture_output=True, check=False)
+                  if (base.returncode, base.stdout) != (trial.returncode, trial.stdout):
+                      raise SystemExit(
+                          f"wrong SENS semantics: {source} {new_cmd}: "
+                          f"T5={base.returncode}/{base.stdout!r} "
+                          f"F3={trial.returncode}/{trial.stdout!r}"
+                      )
+          if f3 < 9:
+              raise SystemExit(f"tiny real F3 coverage dropped to {f3}")
+          print(f"TWO_CODEC_ALL_TINY_CLI_PARITY_PASS f3={f3} total={manifest['source_files']}")
+          PY
       - name: The wrong extension and malformed frame MUST fail with no fallback
         shell: bash
         run: |
