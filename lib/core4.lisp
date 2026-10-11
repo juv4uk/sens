@@ -298,29 +298,31 @@
 ; while executing under strict D3:110 COND.
 (00001001 core4-let-parameters
   (00001000 (bindings)
-    (00000111
-      ((00000010 bindings) (00000001 ()))
-      ((00000010 (00000001 ()))
-       (00000100
-         (00000101 (00000101 bindings))
-         (core4-let-parameters (00000110 bindings)))))))
+    (110
+      ((010 bindings) (001 ()))
+      ((010 (001 ()))
+       (111
+         (100 (100 bindings))
+         (core4-let-parameters (011 bindings)))))))
 
 (00001001 core4-let-values
   (00001000 (bindings)
-    (00000111
-      ((00000010 bindings) (00000001 ()))
-      ((00000010 (00000001 ()))
-       (00000100
-         (00000101 (00000110 (00000101 bindings)))
-         (core4-let-values (00000110 bindings)))))))
+    (110
+      ((010 bindings) (001 ()))
+      ((010 (001 ()))
+       (111
+         (100 (011 (100 bindings)))
+         (core4-let-values (011 bindings)))))))
 
+; Quote the ratified exact D4 LAMBDA identity (0010), not its legacy W8
+; spelling. The enclosing transformer is still a source-era W8 macro.
 (00001010 let (bindings body)
-  (00000100
-    (00000100
-      (00000001 00001000)
-      (00000100
+  (111
+    (111
+      (001 0010)
+      (111
         (core4-let-parameters bindings)
-        (00000100 body (00000001 ()))))
+        (111 body (001 ()))))
     (core4-let-values bindings)))
 
 ; `let*` is `let` with sequential (not parallel) dependency: each binding's
