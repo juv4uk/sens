@@ -1,0 +1,144 @@
+{
+  "schema": "d10-research-intake-v12/1",
+  "date": "2026-10-11",
+  "authority": "ARCHIVAL-SOURCE-RESEARCH-ONLY; NO CORE RATIFICATION",
+  "previous": {
+    "path": "knowledge/d10-v11-semantic-inventory.json",
+    "git_blob": "d897100ecbda727f1028e6a16eddc7f77070fd24",
+    "selected": 823
+  },
+  "source": {
+    "path": "knowledge/d10-source-snapshots/d10-v9-unified-catalog-1809.tsv",
+    "git_blob": "1660a19ff9482f932fb9a40fa78ad1fa50134c31",
+    "records": 1809
+  },
+  "foundation": {
+    "path": "knowledge/d1-d9-foundation.json",
+    "git_blob": "09d1d71c39d1484dfd005a5068dbb18b76f0f0d4"
+  },
+  "counts": {
+    "prior_selected": 823,
+    "research_added": 4,
+    "after_selected": 827,
+    "after_placed": 719,
+    "after_unplaced": 108,
+    "remaining": 197,
+    "ratified": 0,
+    "new_coordinates": 0,
+    "executed_F2_receipts": 0,
+    "F3_proofs": 0
+  },
+  "note": "F1 catalog provenance plus textual donor claims only. MAKNUM/MUNKAM are historical live-process handles, not persistent addresses or current physical encoding. THE matches published Common Lisp special operator law; no actual donor-oracle parity claimed. D10 candidate laws require independent F2/F3+owner review.",
+  "independent_reference_for_THE": "https://www.cs.cmu.edu/Groups/AI/util/html/hyperspec/HyperSpec/Body/speope_the.html",
+  "candidates": [
+    {
+      "id": "d10.name.00909",
+      "name": "MAKNUM",
+      "law": "map runtime object identity to positive integer, such that equal integer iff EQ identity; historically pointer or table-based, no portable persistent address guarantee",
+      "law_variants": [
+        "map runtime object identity to positive integer, such that equal integer iff EQ identity; historically pointer or table-based, no portable persistent address guarantee"
+      ],
+      "donor_claims": [
+        "knowledge/d10-historical-primary-manual-reconciliation-20261009.json@37e10ef9a953ea62beb5e4b46ef20f21cbfb3ee4"
+      ],
+      "positive_witness_claims": [
+        "two distinct EQ-nonidentical cons cells map to different live ids; identical object maps to same live id"
+      ],
+      "negative_witness_claims": [
+        "structural equality alone forces same identity id; id asserted stable after serialization/restart"
+      ],
+      "source_records_sha_pinned": [
+        "knowledge/d10-historical-lisp-all-source-consolidation-20261011.json@962208ecad6b4b4d8845ea7dedaf88c34e93e702:candidates[173]",
+        "knowledge/d10-historical-lisp-branch-candidate-intake-20261011.json@42362a46d7587e375ed19c156a0b67e40b86939a:candidates[33]",
+        "knowledge/d10-historical-lisp-residual-intake-20261011.json@d48b4e960945af7aa9b5683b0e4a1d2e443c588d:candidates[40]"
+      ],
+      "co_named_archive_ids": [],
+      "F1": "CATALOG-SHA-PINNED; DONOR-FUNCTION-NOT-EXECUTED",
+      "F2": "HOLD_NOT_RUN",
+      "F3": "HOLD_DEDUP_UNPROVEN",
+      "F4": "NO_COORDINATE",
+      "ratified": false
+    },
+    {
+      "id": "d10.name.00978",
+      "name": "MUNKAM",
+      "law": "reverse a live object identity integer previously produced by MAKNUM; arbitrary/forged numbers are outside guaranteed contract",
+      "law_variants": [
+        "reverse a live object identity integer previously produced by MAKNUM; arbitrary/forged numbers are outside guaranteed contract"
+      ],
+      "donor_claims": [
+        "knowledge/d10-historical-primary-manual-reconciliation-20261009.json@37e10ef9a953ea62beb5e4b46ef20f21cbfb3ee4"
+      ],
+      "positive_witness_claims": [
+        "for a live x, MUNKAM(MAKNUM(x)) is EQ to x"
+      ],
+      "negative_witness_claims": [
+        "accept arbitrary forged handle as a valid object or claim stable cross-process object restoration"
+      ],
+      "source_records_sha_pinned": [
+        "knowledge/d10-historical-lisp-all-source-consolidation-20261011.json@962208ecad6b4b4d8845ea7dedaf88c34e93e702:candidates[191]",
+        "knowledge/d10-historical-lisp-branch-candidate-intake-20261011.json@42362a46d7587e375ed19c156a0b67e40b86939a:candidates[35]",
+        "knowledge/d10-historical-lisp-residual-intake-20261011.json@d48b4e960945af7aa9b5683b0e4a1d2e443c588d:candidates[43]"
+      ],
+      "co_named_archive_ids": [],
+      "F1": "CATALOG-SHA-PINNED; DONOR-FUNCTION-NOT-EXECUTED",
+      "F2": "HOLD_NOT_RUN",
+      "F3": "HOLD_DEDUP_UNPROVEN",
+      "F4": "NO_COORDINATE",
+      "ratified": false
+    },
+    {
+      "id": "d10.name.01287",
+      "name": "SPECIAL-BINDING",
+      "law": "fixed SPECIAL cell used for dynamically visible free-variable communication; bind saves/restores prior value",
+      "law_variants": [
+        "fixed SPECIAL cell used for dynamically visible free-variable communication; bind saves/restores prior value"
+      ],
+      "donor_claims": [
+        "knowledge/d10-historical-lisp15-reconciliation-20261009.json@da6f108e4f8553a150f0abed8f3758944193c49a"
+      ],
+      "positive_witness_claims": [],
+      "negative_witness_claims": [],
+      "source_records_sha_pinned": [
+        "knowledge/d10-historical-lisp-all-source-consolidation-20261011.json@962208ecad6b4b4d8845ea7dedaf88c34e93e702:candidates[292]",
+        "knowledge/d10-historical-lisp-branch-candidate-intake-20261011.json@42362a46d7587e375ed19c156a0b67e40b86939a:candidates[105]",
+        "knowledge/d10-historical-lisp-residual-intake-20261011.json@d48b4e960945af7aa9b5683b0e4a1d2e443c588d:candidates[65]"
+      ],
+      "co_named_archive_ids": [],
+      "F1": "CATALOG-SHA-PINNED; DONOR-FUNCTION-NOT-EXECUTED",
+      "F2": "HOLD_NOT_RUN",
+      "F3": "HOLD_DEDUP_UNPROVEN",
+      "F4": "NO_COORDINATE",
+      "ratified": false
+    },
+    {
+      "id": "d10.name.01343",
+      "name": "THE",
+      "law": "declaration of expected type(s) of expression result(s), preserving exact return value cardinality; mismatched types have undefined consequences, NOT mandated runtime check",
+      "law_variants": [
+        "declaration of expected type(s) of expression result(s), preserving exact return value cardinality; mismatched types have undefined consequences, NOT mandated runtime check"
+      ],
+      "donor_claims": [
+        "knowledge/d10-historical-primary-manual-reconciliation-20261009.json@37e10ef9a953ea62beb5e4b46ef20f21cbfb3ee4",
+        "knowledge/d10-recovery-v1.json@94defd3830eebe2d69cf9f7c313b8ab0846460ca"
+      ],
+      "positive_witness_claims": [
+        "correctly typed two-result expression returns the same two values with declaration in place"
+      ],
+      "negative_witness_claims": [
+        "wrongly claim THE necessarily throws runtime type error for a violated declaration"
+      ],
+      "source_records_sha_pinned": [
+        "knowledge/d10-historical-lisp-all-source-consolidation-20261011.json@962208ecad6b4b4d8845ea7dedaf88c34e93e702:candidates[310]",
+        "knowledge/d10-historical-lisp-branch-candidate-intake-20261011.json@42362a46d7587e375ed19c156a0b67e40b86939a:candidates[40]",
+        "knowledge/d10-historical-lisp-residual-intake-20261011.json@d48b4e960945af7aa9b5683b0e4a1d2e443c588d:candidates[70]"
+      ],
+      "co_named_archive_ids": [],
+      "F1": "CATALOG-SHA-PINNED; DONOR-FUNCTION-NOT-EXECUTED",
+      "F2": "HOLD_NOT_RUN",
+      "F3": "HOLD_DEDUP_UNPROVEN",
+      "F4": "NO_COORDINATE",
+      "ratified": false
+    }
+  ]
+}

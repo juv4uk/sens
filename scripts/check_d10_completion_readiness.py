@@ -299,13 +299,20 @@ def audit(root):
             manifest11 = json.loads(manifest_raw11)
             catalog_pin11 = manifest11["source"]
             catalog_raw11 = (root / catalog_pin11["path"]).read_bytes()
-            v11_suffix = rows[799:]
+            frozen_v11_info = ptr.get("historical_v11_research_inventory", {})
+            frozen_v11_raw = (root / frozen_v11_info["path"]).read_bytes()
+            frozen_v11 = json.loads(frozen_v11_raw)
+            v11_suffix = frozen_v11["rows"][799:]
             v11_good = (
                 v11_ref.get("previous_inventory") == "knowledge/d10-v10-semantic-inventory.json"
                 and manifest_pin11["git_blob"] == sha(manifest_raw11)
                 and catalog_pin11["path"] == v11_ref["source"]["path"]
                 and catalog_pin11["git_blob"] == v11_ref["source"]["git_blob"]
                 and sha(catalog_raw11) == catalog_pin11["git_blob"]
+                and frozen_v11_info["path"] == "knowledge/d10-v11-semantic-inventory.json"
+                and frozen_v11_info["git_blob"] == sha(frozen_v11_raw)
+                and len(frozen_v11["rows"]) == 823
+                and preserves_archived_prefix(rows, frozen_v11["rows"])
                 and len(v11_suffix) == len(manifest11["candidates"]) == 24
                 and all(
                     r["stable_id"] == p["id"]
@@ -328,6 +335,47 @@ def audit(root):
                 )
             else:
                 errors.append("D10-V11-SOURCE-BATCH-SHA-OR-LAW-DRIFT")
+        # v12: preserve the frozen 823-row v11 prefix and verify every
+        # new historical text-law candidate against the immutable SHA-pinned
+        # 1809-ID archive. No F2/F3/coordinate authority is implied.
+        if len(rows) > 823:
+            v12_ref = ptr.get("current_v12_historical_identity_type_selection", {})
+            v12_mp = v12_ref.get("manifest", {})
+            v12_manifest_raw = (root / v12_mp["path"]).read_bytes()
+            v12_manifest = json.loads(v12_manifest_raw)
+            v12_source_pin = v12_manifest["source"]
+            v12_source_bytes = (root / v12_source_pin["path"]).read_bytes()
+            v12_suffix = rows[823:]
+            v12_claims = v12_manifest["candidates"]
+            v12_good = (
+                v12_ref.get("previous_inventory") == "knowledge/d10-v11-semantic-inventory.json"
+                and v12_mp.get("git_blob") == sha(v12_manifest_raw)
+                and v12_manifest["previous"]["git_blob"] == sha(frozen_v11_raw)
+                and v12_ref["source"]["path"] == v12_source_pin["path"]
+                and v12_ref["source"]["git_blob"] == v12_source_pin["git_blob"]
+                and sha(v12_source_bytes) == v12_source_pin["git_blob"]
+                and len(v12_suffix) == len(v12_claims) == 4
+                and all(
+                    r["stable_id"] == p["id"]
+                    and r["semantic_name"] == p["name"]
+                    and r["behavior"] == p["law"]
+                    and r["source_path"] == v12_source_pin["path"]
+                    and r["source_git_blob"] == v12_source_pin["git_blob"]
+                    and r["coordinate"] is None
+                    and r["ratified_resident"] is False
+                    and r["physical_t5_authorized"] is False
+                    and r["witness_independence"] == "PENDING"
+                    and p["F2"] == "HOLD_NOT_RUN"
+                    and p["F3"] == "HOLD_DEDUP_UNPROVEN"
+                    for r,p in zip(v12_suffix, v12_claims)
+                )
+            )
+            if v12_good:
+                source_review_exceptions.update(
+                    r["semantic_name"].upper() for r in v12_suffix
+                )
+            else:
+                errors.append("D10-V12-SOURCE-BATCH-SHA-OR-LAW-DRIFT")
         if sources_good and legacy_ok and v5_good:
             research_allocated=len(placed)-256
             source_review_exceptions |= all_review_names | v5_source_names

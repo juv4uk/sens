@@ -1,12 +1,12 @@
 {
   "schema": "d10-current-inventory-pointer/v1",
-  "status": "OWNER-DIRECTED-RESEARCH-SELECTION-823-UNRATIFIED",
+  "status": "OWNER-DIRECTED-PRELIMINARY-RESEARCH-SELECTION-827-UNRATIFIED",
   "canonical_current": {
-    "path": "knowledge/d10-v11-semantic-inventory.json",
-    "git_blob": "d897100ecbda727f1028e6a16eddc7f77070fd24",
-    "selected": 823,
+    "path": "knowledge/d10-v12-semantic-inventory.json",
+    "git_blob": "185ecb2d5c4d0f9410aede7d40fb038a3ac76e31",
+    "selected": 827,
     "placed": 719,
-    "unplaced": 104,
+    "unplaced": 108,
     "ratified": 0
   },
   "historical_selection": {
@@ -20,10 +20,10 @@
     "role": "PINNED-GAUGE-ASSIGNMENT"
   },
   "policy": {
-    "description": "Research-only v11 adds 24 unique-name historical text law descriptions with pinned archive; F2/F3 pending; no Core or physical authorization.",
-    "selected_only": "823 preliminary research descriptions; 719 placed, 104 unplaced; 201 remaining; 0 ratified.",
+    "description": "Research-only v12 appends four SHA-pinned historic identity and type laws, F2/F3 pending, no codewords or Core ratifications.",
+    "selected_only": "827 preliminary research descriptions; 719 placed, 108 unplaced; 197 remaining; 0 ratified.",
     "ratification": "No D10 meaning has been ratified. D10 10-bit execution and physical T5 encoding are not authorized.",
-    "next_step": "Independent donor oracle F2 with positives/negatives, semantic F3 dedup and owner Core review before coordinate placement."
+    "next_step": "Execute positive/negative donor and SENS oracles, establish F3 semantic distinction vs D1–D9/D10, owner review before code assignment."
   },
   "branch_policy": "MAIN-ONLY; NO-NEW-BRANCHES",
   "historical_v2_coordinate_inventory": {
@@ -279,5 +279,30 @@
     "ratified_added": 0,
     "oracle_parity": "NOT_EXECUTED",
     "dedup": "NOT_PROVED"
+  },
+  "historical_v11_research_inventory": {
+    "path": "knowledge/d10-v11-semantic-inventory.json",
+    "git_blob": "d897100ecbda727f1028e6a16eddc7f77070fd24",
+    "selected": 823,
+    "placed": 719,
+    "unplaced": 104,
+    "ratified": 0,
+    "role": "FROZEN-PRE-V12-ARCHIVE"
+  },
+  "current_v12_historical_identity_type_selection": {
+    "manifest": {
+      "path": "knowledge/d10-historical-identity-types-v12-20261011.json",
+      "git_blob": "7b46a464c93fb1810f19f2ed0538215bf1db412d"
+    },
+    "previous_inventory": "knowledge/d10-v11-semantic-inventory.json",
+    "source": {
+      "path": "knowledge/d10-source-snapshots/d10-v9-unified-catalog-1809.tsv",
+      "git_blob": "1660a19ff9482f932fb9a40fa78ad1fa50134c31"
+    },
+    "selected_added": 4,
+    "coordinates_added": 0,
+    "ratified_added": 0,
+    "oracle_parity": "NOT_EXECUTED",
+    "dedup": "UNPROVEN"
   }
 }

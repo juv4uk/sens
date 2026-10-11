@@ -105,9 +105,11 @@ def verify(v10, v11, manifest, catalog, foundation):
 def check(root=ROOT, self_test=False):
     root = root.resolve()
     ptr = json.loads((root / "knowledge/d10-current-inventory.json").read_text())
-    live, old = ptr["canonical_current"],ptr["historical_v10_research_inventory"]
+    live = ptr["canonical_current"]
+    frozen = ptr.get("historical_v11_research_inventory",live)
+    old = ptr["historical_v10_research_inventory"]
     hook = ptr["current_v11_historical_law_selection"]
-    need(live["path"] == "knowledge/d10-v11-semantic-inventory.json", "live pointer")
+    need(frozen["path"] == "knowledge/d10-v11-semantic-inventory.json", "frozen v11 pointer")
     need(old["path"] == "knowledge/d10-v10-semantic-inventory.json", "archive pointer")
     mp = hook["manifest"]
     need(mp["path"] == MANIFEST, "manifest pointer")
@@ -116,13 +118,21 @@ def check(root=ROOT, self_test=False):
     need(all(hook["source"][key] == m["source"][key] for key in ("path","git_blob")),
          "source pin mismatch")
     v10 = json.loads(pinned(root,old["path"],old["git_blob"]))
-    v11 = json.loads(pinned(root,live["path"],live["git_blob"]))
+    v11 = json.loads(pinned(root,frozen["path"],frozen["git_blob"]))
     f = m["foundation"]
     foundation = json.loads(pinned(root,f["path"],f["git_blob"]))
     catalog = pinned(root,m["source"]["path"],m["source"]["git_blob"])
     result = verify(v10,v11,m,catalog,foundation)
+    need((frozen["selected"],frozen["placed"],frozen["unplaced"],frozen["ratified"]) ==
+         (823,719,104,0), "frozen v11 accounting")
+    latest = json.loads(pinned(root,live["path"],live["git_blob"]))
+    need(len(latest["rows"]) >= 823 and latest["rows"][:823] == v11["rows"],
+         "frozen v11 prefix rewritten")
+    coords = [r["coordinate"] for r in latest["rows"] if r.get("coordinate") is not None]
     need((live["selected"],live["placed"],live["unplaced"],live["ratified"]) ==
-         (823,719,104,0), "live accounting")
+         (len(latest["rows"]),len(coords),len(latest["rows"])-len(coords),
+          sum(r.get("ratified_resident") is True for r in latest["rows"])),
+         "live v12 accounting")
     if self_test:
         for field,bad in [("behavior","FORGED"),("coordinate","0000000000"),
                           ("ratified_resident",True),("source_candidate_id","FORGED")]:
