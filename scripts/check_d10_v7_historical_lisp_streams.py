@@ -44,7 +44,9 @@ def check():
     selection=ptr["current_v7_historical_lisp_selection"]
     need(selection["manifest"]["git_blob"]==sha(manifest_raw),"manifest pointer pin")
     pins=selection["source_pins"]
-    need([x["git_blob"] for x in pins]==[sha(census_raw),sha(intake_raw),sha(oracle_raw)],"source pins")
+    observed=[sha(census_raw),sha(intake_raw),sha(oracle_raw)]
+    pinned=[x["git_blob"] for x in pins]
+    need(pinned==observed,"source pins: expected="+repr(pinned)+" computed="+repr(observed))
     need(manifest["baseline"]["git_blob"]==sha(raw6) and manifest["donor_oracle"]["git_blob"]==sha(oracle_raw),"manifest pins")
     names=[r["semantic_name"].upper() for r in v7["rows"]]
     ids=[r["stable_id"] for r in v7["rows"]]

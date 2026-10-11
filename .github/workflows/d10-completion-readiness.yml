@@ -76,10 +76,10 @@ jobs:
           python3 scripts/check_d10_historical_candidate_queue.py
       - name: Verify historical CLOS v6 archive including falsification tests
         run: python3 scripts/check_d10_v6_historical_clos.py --self-test
-      - name: Verify two historical Lisp stream laws in v7
-        run: python3 scripts/check_d10_v7_historical_lisp_streams.py
       - name: Reconcile unified candidate catalog and six negative tests
         run: python3 scripts/check_d10_candidate_database.py --self-test
+      - name: Verify two historical Lisp stream laws in v7
+        run: python3 scripts/check_d10_v7_historical_lisp_streams.py
       - name: Порахувати реальний запас D10
         run: |
           python3 scripts/check_d10_completion_readiness.py >"$RUNNER_TEMP/d10-readiness.json"
