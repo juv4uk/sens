@@ -21,8 +21,8 @@
 ; A capability name never mints a semantic identity. Target-specific lowering
 ; remains under lib/machine/lowering/*.
 
-(00001001 machine-capability-axis-v3
-  (00000001
+(0011 machine-capability-axis-v3
+  (001
     ((5 8
        ((integer-zero-test bounded-nonnegative-u64 internal-bit-d1-boundary)))
      (5 10
@@ -53,8 +53,8 @@
      (3 3
        ((pair-field-load tail bounded-u64))))))
 
-(00001001 machine-capability-target-witnesses-v2
-  (00000001
+(0011 machine-capability-target-witnesses-v2
+  (001
     ((x86-64
        (integer-zero-test bounded-nonnegative-u64 internal-bit-d1-boundary
          (admitted-form cmp-r64-r64)
@@ -109,15 +109,15 @@
          (admitted-form mov-r64-mem-disp8)
          (lowering x86-lower-cons-cdr-u64-forms))))))
 
-(00001001 machine-target-witness-status-v1
-  (00000001
+(0011 machine-target-witness-status-v1
+  (001
     ((x86-64 witnessed)
      (arm64 absent)
      (risc-v absent)
      (fpga absent))))
 
-(00001001 machine-capability-find-domain-row
-  (00001000 (width bits rows)
+(0011 machine-capability-find-domain-row
+  (0010 (width bits rows)
     (cond
       ((atom? rows) ())
       ((eq? width (car (car rows)))
@@ -131,8 +131,8 @@
          width bits (cdr rows))))))
 
 ; Current lookup: explicit width + packed-bits mechanism key only.
-(00001001 machine-capabilities-for-domain
-  (00001000 (width bits)
+(0011 machine-capabilities-for-domain
+  (0010 (width bits)
     (cond
       ((atom? (machine-capability-find-domain-row
                 width bits machine-capability-axis-v3)) ())
@@ -141,16 +141,16 @@
          (machine-capability-find-domain-row
            width bits machine-capability-axis-v3))))))))
 
-(00001001 machine-capability-find-row
-  (00001000 (key rows)
+(0011 machine-capability-find-row
+  (0010 (key rows)
     (cond
       ((atom? rows) ())
       ((eq? key (car (car rows))) (car rows))
       ((atom? ())
        (machine-capability-find-row key (cdr rows))))))
 
-(00001001 machine-target-witness-status
-  (00001000 (target)
+(0011 machine-target-witness-status
+  (0010 (target)
     (cond
       ((atom? (machine-capability-find-row
                 target machine-target-witness-status-v1)) (quote absent))
