@@ -42,8 +42,8 @@ def read_pinned(relative, expected, root=ROOT):
 
 
 def verify_payload(pointer, v7, v8, manifest, catalog, donor, ledger):
-    need(pointer["canonical_current"]["path"] == "knowledge/d10-v8-semantic-inventory.json",
-         "unexpected canonical research path")
+    need(pointer["historical_v8_research_inventory"]["path"] == "knowledge/d10-v8-semantic-inventory.json",
+         "unexpected frozen v8 research path")
     need(v8["schema"] == "d10-v8-semantic-inventory/v1", "v8 schema")
     need(v8["status"] == "RESEARCH-UNRATIFIED-PARTIAL", "research-only status")
     need(v8["previous_inventory"]["git_blob"] == FROZEN_V7, "v7 predecessor pin")
@@ -117,8 +117,20 @@ def check(root=ROOT, self_test=False):
     need(frozen["path"] == "knowledge/d10-v7-semantic-inventory.json"
          and frozen["git_blob"] == FROZEN_V7, "frozen v7 pointer changed")
     canonical = ptr["canonical_current"]
+    frozen_v8 = ptr["historical_v8_research_inventory"]
     v7 = read_pinned(frozen["path"], FROZEN_V7, root)
-    v8 = read_pinned(canonical["path"], canonical["git_blob"], root)
+    v8 = read_pinned(frozen_v8["path"], frozen_v8["git_blob"], root)
+    live = read_pinned(canonical["path"], canonical["git_blob"], root)
+    need(len(live["rows"]) >= len(v8["rows"])
+         and live["rows"][:len(v8["rows"])] == v8["rows"],
+         "later inventory rewrote historical v8")
+    live_coords = [row["coordinate"] for row in live["rows"]
+                   if row.get("coordinate") is not None]
+    live_ratified = sum(row.get("ratified_resident") is True for row in live["rows"])
+    need((canonical["selected"], canonical["placed"], canonical["unplaced"], canonical["ratified"])
+         == (len(live["rows"]), len(live_coords),
+             len(live["rows"])-len(live_coords), live_ratified),
+         "current pointer/accounting drift")
     selection = ptr["current_v8_mop_database_selection"]
     manifest = read_pinned(selection["manifest"]["path"], selection["manifest"]["git_blob"], root)
     catalog = read_pinned(manifest["source_database"]["path"], manifest["source_database"]["git_blob"], root)
@@ -126,8 +138,8 @@ def check(root=ROOT, self_test=False):
     need(manifest["source_database"]["path"] == selection["source_database"]["path"]
          and manifest["source_database"]["git_blob"] == selection["source_database"]["git_blob"],
          "database provenance pointer")
-    need((canonical["selected"], canonical["placed"], canonical["unplaced"], canonical["ratified"])
-         == (725, 719, 6, 0), "canonical pointer accounting")
+    need((frozen_v8["selected"], frozen_v8["placed"], frozen_v8["unplaced"], frozen_v8["ratified"])
+         == (725, 719, 6, 0), "frozen v8 pointer accounting")
     with (k / "d10-proposal-ledger.tsv").open(newline="", encoding="utf-8") as f:
         ledger = list(csv.DictReader(f, delimiter="\t"))
     result = verify_payload(ptr, v7, v8, manifest, catalog, donor, ledger)
