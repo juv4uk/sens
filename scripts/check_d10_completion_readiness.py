@@ -85,6 +85,37 @@ def audit(root):
     missing = [r["semantic_name"] for r in rows[625:] if r["semantic_name"].upper() not in proposed]
     if missing:
         errors.append("SELECTED-WITHOUT-PROPOSAL")
+    # Research-stage allocation is a separately pinned coordinate map. It does
+    # not grant normative D10 placement, executable opcodes, or ratification.
+    research_allocated = 0
+    gauge_path = k / "d10-selected-coordinate-allocation-v1.json"
+    if gauge_path.exists():
+        try:
+            gauge = json.loads(gauge_path.read_text(encoding="utf-8"))
+            pending = [r for r in rows if r.get("coordinate") is None]
+            taken = set(placed)
+            free_words = [format(i, "010b") for i in range(capacity)
+                          if format(i, "010b") not in taken]
+            proposals = gauge["rows"]
+            good = (
+                gauge.get("schema") == "d10-selected-coordinate-allocation/v1"
+                and gauge.get("status") == "OWNER-DIRECTED-RESEARCH-COORDINATE-ALLOCATION-UNRATIFIED"
+                and gauge.get("source_inventory_git_blob") == sha(data)
+                and len(proposals) == len(pending)
+                and all(
+                    p.get("stable_id") == r.get("stable_id")
+                    and p.get("semantic_name") == r.get("semantic_name")
+                    and p.get("coordinate") == free_words[i]
+                    and p.get("ratified_resident") is False
+                    for i, (p, r) in enumerate(zip(proposals, pending))
+                )
+            )
+            if good:
+                research_allocated = len(proposals)
+            else:
+                errors.append("RESEARCH-COORDINATE-ALLOCATION-DRIFT")
+        except (OSError, ValueError, KeyError, TypeError):
+            errors.append("RESEARCH-COORDINATE-ALLOCATION-INVALID")
     inventory_full = len(rows) == capacity
     placement_full = len(placed) == capacity
     return {"schema": "d10-completion-readiness/v1",
@@ -92,6 +123,10 @@ def audit(root):
             "selected": len(rows), "remaining": capacity-len(rows),
             "placed": len(placed), "unplaced": len(rows)-len(placed),
             "ratified": ratified, "inventory_full": inventory_full,
+            "research_gauge_allocated": research_allocated,
+            "selected_research_mapped": len(placed) + research_allocated,
+            "selected_research_unmapped": len(rows) - len(placed) - research_allocated,
+            "research_gauge_is_normative": False,
             "placement_full": placement_full,
             "ready_for_owner_review": inventory_full and placement_full and not errors,
             "ready_to_start_d11": inventory_full and placement_full and ratified == capacity and not errors,
