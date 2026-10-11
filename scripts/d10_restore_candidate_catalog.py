@@ -10,7 +10,7 @@ import csv
 import json
 from pathlib import Path
 
-from d10_prepare_filter_input import INDEX_FIELDS, json_list
+from d10_prepare_filter_input import INDEX_FIELDS, json_list, find_name_line
 from d10_mechanical_filter import git_blob, safe_file
 
 HISTORICAL_COMMIT = "17ab25d65346a6a1bfc71f0ed6d64ee75fc6f22f"
