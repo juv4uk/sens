@@ -16,36 +16,24 @@
 
 (0011 assoc
   (0010 (key alist)
-    (110
-      ((010 alist) () ())
-      ((010 alist) (1) ())
-      (t (110
+    (110 ((010 alist) ()) ((010 (001 ())) (110
            ((101 (1000 alist) key) (100 alist))
            (t (assoc key (011 alist))))))))
 
 (0011 assoc-str
   (0010 (key alist)
-    (110
-      ((010 alist) () ())
-      ((010 alist) (1) ())
-      (t (110
+    (110 ((010 alist) ()) ((010 (001 ())) (110
            ((101 (1000 alist) key) (011 (100 alist)))
            (t (assoc-str key (011 alist))))))))
 
 (0011 alist-keys
   (0010 (alist)
-    (110
-      ((010 alist) () ())
-      ((010 alist) (1) ())
-      (t (111 (1000 alist) (alist-keys (011 alist)))))))
+    (110 ((010 alist) ()) ((010 (001 ())) (111 (1000 alist) (alist-keys (011 alist)))))))
 
 ;; Unique list (preserve order of first appearance)
 (0011 uniq
   (0010 (lst)
-    (110
-      ((010 lst) () ())
-      ((010 lst) (1) ())
-      (t (110
+    (110 ((010 lst) ()) ((010 (001 ())) (110
            ((11101 (100 lst) (011 lst)) (uniq (011 lst)))
            (t (111 (100 lst) (uniq (011 lst)))))))))
 
@@ -61,25 +49,16 @@
 
 (0011 walk-observed
   (0010 (v)
-    (110
-      ((010 v) () ())
-      ((010 v) (1) ())
-      (t
-       (001000 ((head (100 v)))
-         (110
-           ((010 head) () (110
+    (110 ((010 v) ()) ((010 (001 ())) (001000 ((head (100 v)))
+         (110 ((010 head) (110
               ((101 head (001 quote))
                (1110 (001 quote)))
               ((101 head (001 lambda))
                (111 (001 lambda)
-                     (110 ((010 (0111 v)) () ())
-                           ((010 (0111 v)) (1) ())
-                           (t (walk-observed (100 (0111 v)))))))
+                     (110 ((010 (0111 v)) ()) ((010 (001 ())) (walk-observed (100 (0111 v)))))))
               ((101 head (001 def))
                (111 (001 def)
-                     (110 ((010 (0111 v)) () ())
-                           ((010 (0111 v)) (1) ())
-                           (t (walk-observed (100 (0111 v)))))))
+                     (110 ((010 (0111 v)) ()) ((010 (001 ())) (walk-observed (100 (0111 v)))))))
               ((101 head (001 defmacro))
                (111 (001 defmacro)
                      (110 ((010 (0111 v)) () ())
@@ -90,51 +69,17 @@
               ((101 head (001 cond))
                (111 (001 cond) (walk-cond-clauses (011 v))))
               (t
-               (111 (001 application) (walk-list v)))))
-           ((010 head) (1) (110
-              ((101 head (001 quote))
-               (1110 (001 quote)))
-              ((101 head (001 lambda))
-               (111 (001 lambda)
-                     (110 ((010 (0111 v)) () ())
-                           ((010 (0111 v)) (1) ())
-                           (t (walk-observed (100 (0111 v)))))))
-              ((101 head (001 def))
-               (111 (001 def)
-                     (110 ((010 (0111 v)) () ())
-                           ((010 (0111 v)) (1) ())
-                           (t (walk-observed (100 (0111 v)))))))
-              ((101 head (001 defmacro))
-               (111 (001 defmacro)
-                     (110 ((010 (0111 v)) () ())
-                           ((010 (0111 v)) (1) ())
-                           ((010 (011 (0111 v))) () ())
-                           ((010 (011 (0111 v))) (1) ())
-                           (t (walk-observed (100 (011 (0111 v))))))))
-              ((101 head (001 cond))
-               (111 (001 cond) (walk-cond-clauses (011 v))))
-              (t
-               (111 (001 application) (walk-list v)))))
-           (t
-            (111 (001 application) (walk-list v)))))))))
+               (111 (001 application) (walk-list v))))) ((010 (001 ())) (111 (001 application) (walk-list v)))))))))
 
 (0011 walk-cond-clauses
   (0010 (clauses)
-    (110
-      ((010 clauses) () ())
-      ((010 clauses) (1) ())
-      (t (1111 (walk-observed (1000 clauses))
-                 (1111 (110 ((010 (011 (100 clauses))) () ())
-                               ((010 (011 (100 clauses))) (1) ())
-                               (t (walk-observed (1001 (100 clauses)))))
+    (110 ((010 clauses) ()) ((010 (001 ())) (1111 (walk-observed (1000 clauses))
+                 (1111 (110 ((010 (011 (100 clauses))) ()) ((010 (001 ())) (walk-observed (1001 (100 clauses)))))
                          (walk-cond-clauses (011 clauses))))))))
 
 (0011 walk-list
   (0010 (lst)
-    (110
-      ((010 lst) () ())
-      ((010 lst) (1) ())
-      (t (1111 (walk-observed (100 lst))
+    (110 ((010 lst) ()) ((010 (001 ())) (1111 (walk-observed (100 lst))
                  (walk-list (011 lst)))))))
 
 ;; Parse expr using read-all (canonical), then walk for observed-forms.
@@ -147,10 +92,7 @@
        ())
       (t
        (001000 ((forms (110101001 expr-str)))
-         (110
-           ((010 forms) () ())
-           ((010 forms) (1) ())
-           (t (uniq (walk-observed (100 forms))))))))))
+         (110 ((010 forms) ()) ((010 (001 ())) (uniq (walk-observed (100 forms))))))))))
 
 ;; Build identity record and compute ID
 ;; Identity includes axioms, not just expr+outcome: two fixtures can share the
@@ -197,11 +139,7 @@
 ;; Emit all fixtures
 (0011 emit-all
   (0010 (remaining)
-    (110
-      ((010 remaining) () (001 ()))
-      ((010 remaining) (1) (001 ()))
-      (t
-       (001000 ((printed (emit-fixture (100 remaining))))
+    (110 ((010 remaining) (001 ())) ((010 (001 ())) (001000 ((printed (emit-fixture (100 remaining))))
          (emit-all (011 remaining)))))))
 
 ;; Header
