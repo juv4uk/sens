@@ -148,7 +148,7 @@
             (00100111 (00000001 case) (00000001 malformed-row-tail))
             (00100111 (00000001 actual) rows)))))
       ((атом? ())
-       ((функція (row)
+       ((00001000 (row)
          (00000111
            ((exact-quantity-structural-equal? (00101111 row) (00110000 row))
             (exact-quantity-arithmetic-check (00000110 rows)))
