@@ -4,7 +4,7 @@ This is an execution and blocker ledger, not a claim that the repository is full
 
 ## Exact completed changes
 
-- **11,356 audited SID8 occurrences replaced** in **68 existing `.lisp` files** (library, executable experiments, benchmarks and service programs), on **main**.
+- **15,898 audited SID8 occurrences replaced** in **86 existing `.lisp` files** (library, executable experiments, benchmarks and service programs), on **main**.
 - No new Git branches and no `.sens` creation.
 - Baseline legacy correspondence: `knowledge/sens8-current-coverage-v1.json` (256 historic cells).
 - Only the 171 unambiguous, ratified current targets were used automatically.
@@ -33,7 +33,10 @@ This is an execution and blocker ledger, not a claim that the repository is full
 | Five scripts: check-repo-tooling-inventory, generate-meta-semantic-registry, generate-rust-evaluator-dispatch, generate-rust-function-signatures, generate-rust-profile-mechanism-routes | 903 |
 | Five scripts: generate-rust-semantic-registry, oracle-batch, machine-authority-guard, program-symbol-table, release | 616 |
 | Three scripts: semantic-authority-guard, symbol-table, перевірити-український-профіль | 340 |
-| **Total** | **11356** |
+| Seven additional scripts / executable experiment (23 source-proven single-list MAP calls) | 1868 |
+| Five machine dispatcher, u64 effect, capability and lowering sources | 590 |
+| Six x86-64 admission, atoms, encoding, operand, profile and projection sources | 2084 |
+| **Total** | **15898** |
 
 ## Known fail-closed blockers
 
@@ -59,6 +62,13 @@ This is an execution and blocker ledger, not a claim that the repository is full
 - **Does not touch** `benchmarks/sens-surface/results/`, archived source snapshots, ratification contracts or versioned historical proof fixtures; changing them would falsify earlier evidence.
 - Last source cohort [Hosted CI PASS](https://github.com/juv4uk/sens/actions/runs/38166695598) on commit `394ba53`. Pre-existing independent [T5 inventory M0 FAIL](https://github.com/juv4uk/sens/actions/runs/38166695668) records a live/manifest drift; no claim of overall green CI or all-oracle executable semantic parity.
 - No `.sens` outputs, branch creation, or retrospective historical rewriting was performed.
+
+## 2026-10-11 next wide direct-to-main cutover (18 files)
+
+- **18 further original `.lisp` files, 4542 SID8 executable heads** replaced in place, without creating a branch or `.sens` file. No generated encoder coverage tables or immutable benchmark history modified.
+- 7 scripts/experiments: `scripts/build-dependency-classification.lisp` (496), `scripts/check-core4-predicate-answer-scale.lisp` (182), `scripts/check-core4-predicate-answer-boundary.lisp` (61), `experiments/probabilistic-decision-jev-like.lisp` (264), `scripts/generate-function-table.lisp` (209), `scripts/generate-uk-surface-audit.lisp` (285), `scripts/verify-repo.lisp` (371) = 1868 heads. In this set **23 formerly ambiguous historical MAP heads** are verified to accept exactly one sequence and therefore use **D6:101000**. The D8 MAP remains distinct and the global audit map is unchanged.
+- 11 machine sources: `lib/machine/dispatch/native-first-coverage.lisp` (2), `lib/machine/dispatch/native-first-parity.lisp` (76), `lib/machine/effects/u64.lisp` (134), `lib/machine/capability-axis.lisp` (14), `lib/machine/lowering/semantic-x86-64.lisp` (364), `lib/machine/admission/x86-64.lisp` (582), `lib/machine/atoms/x86-64.lisp` (482), `lib/machine/encoding/x86-64.lisp` (640), `lib/machine/operands/x86-64.lisp` (172), `lib/machine/profile/minimal-runtime-x86-64.lisp` (139), `lib/machine/projection/x86-64.lisp` (69) = 2674 heads. The machine evidence generators remain untouched.
+- New source guard: `tests/test_sid8_broad_source_cutover.py` and `tests/test_sid8_machine_source_cutover.py` plus dedicated CI workflows. [Broad source regression PASS](https://github.com/juv4uk/sens/actions/runs/38167970204), [machine source regression PASS](https://github.com/juv4uk/sens/actions/runs/38168282905), [Hosted CI PASS](https://github.com/juv4uk/sens/actions/runs/38168282909). These are **not** full historical-old-vs-new semantic oracle or physical T5 admission claims.
 
 ## Safety of completion claims
 
