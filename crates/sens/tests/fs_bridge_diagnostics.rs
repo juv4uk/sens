@@ -246,6 +246,20 @@ fn root_proper_list_validation_is_exact_d1_and_rejects_dotted_tails() {
 }
 
 #[test]
+fn world_module_membership_is_d1_and_not_unary_cons() {
+    let mut session = session();
+    for (src, expected) in [
+        ("(world-module-missing? (empty-world) (quote zoo))", true),
+        ("(world-module-known? (empty-world) (quote zoo))", false),
+        ("(world-module-known? (world-tell (empty-world) (quote zoo) (quote ((has-fur cat)))) (quote zoo))", true),
+    ] {
+        let result = eval_program(src, &mut session)
+            .unwrap_or_else(|e| panic!("world module membership {src}: {e:?}")).value;
+        assert_eq!(result.as_predicate_bit(), Some(expected), "{src}");
+    }
+}
+
+#[test]
 fn world_module_name_symbol_law_is_d1_and_rejects_non_symbols() {
     let mut session = session();
     for (value, expected) in [
