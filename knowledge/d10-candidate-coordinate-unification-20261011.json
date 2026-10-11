@@ -9220,21 +9220,28 @@
       "ratified": false,
       "physical_t5_authorized": false,
       "proof_readiness": {
-        "status": "INCOMPLETE-SOURCE-SEMANTICS",
-        "missing": [
-          "semantic-law",
-          "positive-witness",
-          "negative-falsifier"
-        ],
+        "status": "SOURCE-LAW-WITNESSES-PRESENT-UNVERIFIED",
+        "missing": [],
         "selection": false,
         "ratification": false,
-        "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+        "next_gate": "D1-D9-DEDUPE-CORE-VS-LIBRARY-AND-INDEPENDENT-ORACLE"
       },
       "source_candidate_gate": {
         "status": "LIBRARY-DEFINITION-CORE-VS-DERIVED-UNREVIEWED",
         "source_kind": "library-definition",
         "not_a_ratified_resident": true,
         "reason": "A source occurrence or wish-list name is not an independent D10 law; candidate requires typed contract and distinct behavior."
+      },
+      "source_evidence": {
+        "status": "SOURCE-DERIVED-REVIEW-EXAMPLES-NOT-EXECUTED",
+        "source_git_blob": "8eb1e12611f180a6131affc6e9f618a7cdea3449",
+        "source_path": "lib/quantity.lisp",
+        "law": "Return YES exactly for a finite proper list terminated by (); return NO for atom other than () or an improper dotted tail. This source defines a recursive list predicate, not new language control.",
+        "positive": "science-proper-list?(())=YES; science-proper-list?((a b))=YES.",
+        "negative": "science-proper-list?(a)=NO, science-proper-list?((a . b))=NO; classifying dotted pair as proper is incorrect.",
+        "core_vs_library": "DERIVED-LIBRARY-ALREADY-EXPRESSIBLE-CAR-CDR",
+        "oracle_execution": "NOT-RUN",
+        "ratification": false
       }
     },
     {
@@ -9257,21 +9264,28 @@
       "ratified": false,
       "physical_t5_authorized": false,
       "proof_readiness": {
-        "status": "INCOMPLETE-SOURCE-SEMANTICS",
-        "missing": [
-          "semantic-law",
-          "positive-witness",
-          "negative-falsifier"
-        ],
+        "status": "SOURCE-LAW-WITNESSES-PRESENT-UNVERIFIED",
+        "missing": [],
         "selection": false,
         "ratification": false,
-        "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+        "next_gate": "D1-D9-DEDUPE-CORE-VS-LIBRARY-AND-INDEPENDENT-ORACLE"
       },
       "source_candidate_gate": {
         "status": "LIBRARY-DEFINITION-CORE-VS-DERIVED-UNREVIEWED",
         "source_kind": "library-definition",
         "not_a_ratified_resident": true,
         "reason": "A source occurrence or wish-list name is not an independent D10 law; candidate requires typed contract and distinct behavior."
+      },
+      "source_evidence": {
+        "status": "SOURCE-DERIVED-REVIEW-EXAMPLES-NOT-EXECUTED",
+        "source_git_blob": "8eb1e12611f180a6131affc6e9f618a7cdea3449",
+        "source_path": "lib/quantity.lisp",
+        "law": "For a proper list of length at least 6, return its element at zero-based index 5 via five CDR steps then CAR.",
+        "positive": "science-sixth((a b c d e f g)) = f.",
+        "negative": "Returning e (fifth element) or g (seventh element) breaks the pinned CAR/CDR composition; no claim of short-list validation.",
+        "core_vs_library": "DERIVED-LIBRARY-ALREADY-EXPRESSIBLE-CAR-CDR",
+        "oracle_execution": "NOT-RUN",
+        "ratification": false
       }
     },
     {
@@ -9294,21 +9308,28 @@
       "ratified": false,
       "physical_t5_authorized": false,
       "proof_readiness": {
-        "status": "INCOMPLETE-SOURCE-SEMANTICS",
-        "missing": [
-          "semantic-law",
-          "positive-witness",
-          "negative-falsifier"
-        ],
+        "status": "SOURCE-LAW-WITNESSES-PRESENT-UNVERIFIED",
+        "missing": [],
         "selection": false,
         "ratification": false,
-        "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+        "next_gate": "D1-D9-DEDUPE-CORE-VS-LIBRARY-AND-INDEPENDENT-ORACLE"
       },
       "source_candidate_gate": {
         "status": "LIBRARY-DEFINITION-CORE-VS-DERIVED-UNREVIEWED",
         "source_kind": "library-definition",
         "not_a_ratified_resident": true,
         "reason": "A source occurrence or wish-list name is not an independent D10 law; candidate requires typed contract and distinct behavior."
+      },
+      "source_evidence": {
+        "status": "SOURCE-DERIVED-REVIEW-EXAMPLES-NOT-EXECUTED",
+        "source_git_blob": "8eb1e12611f180a6131affc6e9f618a7cdea3449",
+        "source_path": "lib/quantity.lisp",
+        "law": "For a proper list of length at least 7, return its zero-based index 6 element via six CDR steps then CAR.",
+        "positive": "science-seventh((a b c d e f g h)) = g.",
+        "negative": "Returning f or h instead of g breaks the pinned CAR/CDR composition; no claim of short-list validation.",
+        "core_vs_library": "DERIVED-LIBRARY-ALREADY-EXPRESSIBLE-CAR-CDR",
+        "oracle_execution": "NOT-RUN",
+        "ratification": false
       }
     },
     {
@@ -9494,6 +9515,22 @@
         "source_kind": "library-definition",
         "not_a_ratified_resident": true,
         "reason": "A source occurrence or wish-list name is not an independent D10 law; candidate requires typed contract and distinct behavior."
+      },
+      "source_data_evidence": {
+        "status": "PINNED-EXACT-SI-DATA-NOT-INDEPENDENT-D10-OPERATION",
+        "role": "CANONICAL-SCIENTIFIC-CONSTANT-RECORD",
+        "canonical_record": "si:defining-cesium-frequency",
+        "defining_constant": "cesium-frequency",
+        "bipm_exact_decimal": "9192631770",
+        "bipm_unit": "Hz",
+        "lib_si_literal": "9192631770",
+        "source_path": "lib/si.lisp",
+        "source_git_blob": "2b94f1ea6d2fb05c084c3a0d863c14119a5ba11f",
+        "standard_url": "https://www.bipm.org/en/measurement-units/si-defining-constants",
+        "canonical_name_count": 1,
+        "alias_of": null,
+        "semantic_selection": false,
+        "ratification": false
       }
     },
     {
@@ -9531,6 +9568,22 @@
         "source_kind": "library-definition",
         "not_a_ratified_resident": true,
         "reason": "A source occurrence or wish-list name is not an independent D10 law; candidate requires typed contract and distinct behavior."
+      },
+      "source_data_evidence": {
+        "status": "PINNED-EXACT-SI-DATA-NOT-INDEPENDENT-D10-OPERATION",
+        "role": "CANONICAL-SCIENTIFIC-CONSTANT-RECORD",
+        "canonical_record": "si:defining-speed-of-light",
+        "defining_constant": "speed-of-light",
+        "bipm_exact_decimal": "299792458",
+        "bipm_unit": "m/s",
+        "lib_si_literal": "299792458",
+        "source_path": "lib/si.lisp",
+        "source_git_blob": "2b94f1ea6d2fb05c084c3a0d863c14119a5ba11f",
+        "standard_url": "https://www.bipm.org/en/measurement-units/si-defining-constants",
+        "canonical_name_count": 1,
+        "alias_of": null,
+        "semantic_selection": false,
+        "ratification": false
       }
     },
     {
@@ -9568,6 +9621,22 @@
         "source_kind": "library-definition",
         "not_a_ratified_resident": true,
         "reason": "A source occurrence or wish-list name is not an independent D10 law; candidate requires typed contract and distinct behavior."
+      },
+      "source_data_evidence": {
+        "status": "PINNED-EXACT-SI-DATA-NOT-INDEPENDENT-D10-OPERATION",
+        "role": "CANONICAL-SCIENTIFIC-CONSTANT-RECORD",
+        "canonical_record": "si:defining-planck-constant",
+        "defining_constant": "planck-constant",
+        "bipm_exact_decimal": "6.62607015e-34",
+        "bipm_unit": "J s",
+        "lib_si_literal": "132521403/200000000000000000000000000000000000000000",
+        "source_path": "lib/si.lisp",
+        "source_git_blob": "2b94f1ea6d2fb05c084c3a0d863c14119a5ba11f",
+        "standard_url": "https://www.bipm.org/en/measurement-units/si-defining-constants",
+        "canonical_name_count": 1,
+        "alias_of": null,
+        "semantic_selection": false,
+        "ratification": false
       }
     },
     {
@@ -9605,6 +9674,22 @@
         "source_kind": "library-definition",
         "not_a_ratified_resident": true,
         "reason": "A source occurrence or wish-list name is not an independent D10 law; candidate requires typed contract and distinct behavior."
+      },
+      "source_data_evidence": {
+        "status": "PINNED-EXACT-SI-DATA-NOT-INDEPENDENT-D10-OPERATION",
+        "role": "CANONICAL-SCIENTIFIC-CONSTANT-RECORD",
+        "canonical_record": "si:defining-elementary-charge",
+        "defining_constant": "elementary-charge",
+        "bipm_exact_decimal": "1.602176634e-19",
+        "bipm_unit": "C",
+        "lib_si_literal": "801088317/5000000000000000000000000000",
+        "source_path": "lib/si.lisp",
+        "source_git_blob": "2b94f1ea6d2fb05c084c3a0d863c14119a5ba11f",
+        "standard_url": "https://www.bipm.org/en/measurement-units/si-defining-constants",
+        "canonical_name_count": 1,
+        "alias_of": null,
+        "semantic_selection": false,
+        "ratification": false
       }
     },
     {
@@ -9642,6 +9727,22 @@
         "source_kind": "library-definition",
         "not_a_ratified_resident": true,
         "reason": "A source occurrence or wish-list name is not an independent D10 law; candidate requires typed contract and distinct behavior."
+      },
+      "source_data_evidence": {
+        "status": "PINNED-EXACT-SI-DATA-NOT-INDEPENDENT-D10-OPERATION",
+        "role": "CANONICAL-SCIENTIFIC-CONSTANT-RECORD",
+        "canonical_record": "si:defining-boltzmann-constant",
+        "defining_constant": "boltzmann-constant",
+        "bipm_exact_decimal": "1.380649e-23",
+        "bipm_unit": "J/K",
+        "lib_si_literal": "1380649/100000000000000000000000000000",
+        "source_path": "lib/si.lisp",
+        "source_git_blob": "2b94f1ea6d2fb05c084c3a0d863c14119a5ba11f",
+        "standard_url": "https://www.bipm.org/en/measurement-units/si-defining-constants",
+        "canonical_name_count": 1,
+        "alias_of": null,
+        "semantic_selection": false,
+        "ratification": false
       }
     },
     {
@@ -9679,6 +9780,22 @@
         "source_kind": "library-definition",
         "not_a_ratified_resident": true,
         "reason": "A source occurrence or wish-list name is not an independent D10 law; candidate requires typed contract and distinct behavior."
+      },
+      "source_data_evidence": {
+        "status": "PINNED-EXACT-SI-DATA-NOT-INDEPENDENT-D10-OPERATION",
+        "role": "CANONICAL-SCIENTIFIC-CONSTANT-RECORD",
+        "canonical_record": "si:defining-avogadro-constant",
+        "defining_constant": "avogadro-constant",
+        "bipm_exact_decimal": "6.02214076e23",
+        "bipm_unit": "mol^-1",
+        "lib_si_literal": "602214076000000000000000",
+        "source_path": "lib/si.lisp",
+        "source_git_blob": "2b94f1ea6d2fb05c084c3a0d863c14119a5ba11f",
+        "standard_url": "https://www.bipm.org/en/measurement-units/si-defining-constants",
+        "canonical_name_count": 1,
+        "alias_of": null,
+        "semantic_selection": false,
+        "ratification": false
       }
     },
     {
@@ -9716,6 +9833,22 @@
         "source_kind": "library-definition",
         "not_a_ratified_resident": true,
         "reason": "A source occurrence or wish-list name is not an independent D10 law; candidate requires typed contract and distinct behavior."
+      },
+      "source_data_evidence": {
+        "status": "PINNED-EXACT-SI-DATA-NOT-INDEPENDENT-D10-OPERATION",
+        "role": "CANONICAL-SCIENTIFIC-CONSTANT-RECORD",
+        "canonical_record": "si:defining-luminous-efficacy",
+        "defining_constant": "luminous-efficacy",
+        "bipm_exact_decimal": "683",
+        "bipm_unit": "lm/W",
+        "lib_si_literal": "683",
+        "source_path": "lib/si.lisp",
+        "source_git_blob": "2b94f1ea6d2fb05c084c3a0d863c14119a5ba11f",
+        "standard_url": "https://www.bipm.org/en/measurement-units/si-defining-constants",
+        "canonical_name_count": 1,
+        "alias_of": null,
+        "semantic_selection": false,
+        "ratification": false
       }
     },
     {
@@ -9738,21 +9871,28 @@
       "ratified": false,
       "physical_t5_authorized": false,
       "proof_readiness": {
-        "status": "INCOMPLETE-SOURCE-SEMANTICS",
-        "missing": [
-          "semantic-law",
-          "positive-witness",
-          "negative-falsifier"
-        ],
+        "status": "SOURCE-LAW-WITNESSES-PRESENT-UNVERIFIED",
+        "missing": [],
         "selection": false,
         "ratification": false,
-        "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+        "next_gate": "D1-D9-DEDUPE-CORE-VS-LIBRARY-AND-INDEPENDENT-ORACLE"
       },
       "source_candidate_gate": {
         "status": "LIBRARY-DEFINITION-CORE-VS-DERIVED-UNREVIEWED",
         "source_kind": "library-definition",
         "not_a_ratified_resident": true,
         "reason": "A source occurrence or wish-list name is not an independent D10 law; candidate requires typed contract and distinct behavior."
+      },
+      "source_evidence": {
+        "status": "SOURCE-DERIVED-REVIEW-EXAMPLES-NOT-EXECUTED",
+        "source_git_blob": "2b94f1ea6d2fb05c084c3a0d863c14119a5ba11f",
+        "source_path": "lib/si.lisp",
+        "law": "Project the exact numeric VALUE field out of a scientific-constant/1 record holding a quantity/1 record; this accessor performs structural CAR/CDR projection only.",
+        "positive": "si:constant-value(si:defining-speed-of-light) = 299792458 (m/s is metadata on the parent record, not in the returned number).",
+        "negative": "Returning the whole quantity record, unit metadata, or an inexact floating approximation violates exact value projection; malformed records have no new exception contract here.",
+        "core_vs_library": "DERIVED-LIBRARY-ALREADY-EXPRESSIBLE-CAR-CDR",
+        "oracle_execution": "NOT-RUN",
+        "ratification": false
       }
     },
     {
@@ -9790,6 +9930,22 @@
         "source_kind": "library-definition",
         "not_a_ratified_resident": true,
         "reason": "A source occurrence or wish-list name is not an independent D10 law; candidate requires typed contract and distinct behavior."
+      },
+      "source_data_evidence": {
+        "status": "PINNED-EXACT-SI-DATA-NOT-INDEPENDENT-D10-OPERATION",
+        "role": "DERIVED-NUMERIC-VIEW",
+        "canonical_record": "si:defining-cesium-frequency",
+        "defining_constant": "cesium-frequency",
+        "bipm_exact_decimal": "9192631770",
+        "bipm_unit": "Hz",
+        "lib_si_literal": "9192631770",
+        "source_path": "lib/si.lisp",
+        "source_git_blob": "2b94f1ea6d2fb05c084c3a0d863c14119a5ba11f",
+        "standard_url": "https://www.bipm.org/en/measurement-units/si-defining-constants",
+        "canonical_name_count": 1,
+        "alias_of": "si:defining-cesium-frequency",
+        "semantic_selection": false,
+        "ratification": false
       }
     },
     {
@@ -9827,6 +9983,22 @@
         "source_kind": "library-definition",
         "not_a_ratified_resident": true,
         "reason": "A source occurrence or wish-list name is not an independent D10 law; candidate requires typed contract and distinct behavior."
+      },
+      "source_data_evidence": {
+        "status": "PINNED-EXACT-SI-DATA-NOT-INDEPENDENT-D10-OPERATION",
+        "role": "DERIVED-NUMERIC-VIEW",
+        "canonical_record": "si:defining-speed-of-light",
+        "defining_constant": "speed-of-light",
+        "bipm_exact_decimal": "299792458",
+        "bipm_unit": "m/s",
+        "lib_si_literal": "299792458",
+        "source_path": "lib/si.lisp",
+        "source_git_blob": "2b94f1ea6d2fb05c084c3a0d863c14119a5ba11f",
+        "standard_url": "https://www.bipm.org/en/measurement-units/si-defining-constants",
+        "canonical_name_count": 1,
+        "alias_of": "si:defining-speed-of-light",
+        "semantic_selection": false,
+        "ratification": false
       }
     },
     {
@@ -9864,6 +10036,22 @@
         "source_kind": "library-definition",
         "not_a_ratified_resident": true,
         "reason": "A source occurrence or wish-list name is not an independent D10 law; candidate requires typed contract and distinct behavior."
+      },
+      "source_data_evidence": {
+        "status": "PINNED-EXACT-SI-DATA-NOT-INDEPENDENT-D10-OPERATION",
+        "role": "DERIVED-NUMERIC-VIEW",
+        "canonical_record": "si:defining-planck-constant",
+        "defining_constant": "planck-constant",
+        "bipm_exact_decimal": "6.62607015e-34",
+        "bipm_unit": "J s",
+        "lib_si_literal": "132521403/200000000000000000000000000000000000000000",
+        "source_path": "lib/si.lisp",
+        "source_git_blob": "2b94f1ea6d2fb05c084c3a0d863c14119a5ba11f",
+        "standard_url": "https://www.bipm.org/en/measurement-units/si-defining-constants",
+        "canonical_name_count": 1,
+        "alias_of": "si:defining-planck-constant",
+        "semantic_selection": false,
+        "ratification": false
       }
     },
     {
@@ -9901,6 +10089,22 @@
         "source_kind": "library-definition",
         "not_a_ratified_resident": true,
         "reason": "A source occurrence or wish-list name is not an independent D10 law; candidate requires typed contract and distinct behavior."
+      },
+      "source_data_evidence": {
+        "status": "PINNED-EXACT-SI-DATA-NOT-INDEPENDENT-D10-OPERATION",
+        "role": "DERIVED-NUMERIC-VIEW",
+        "canonical_record": "si:defining-elementary-charge",
+        "defining_constant": "elementary-charge",
+        "bipm_exact_decimal": "1.602176634e-19",
+        "bipm_unit": "C",
+        "lib_si_literal": "801088317/5000000000000000000000000000",
+        "source_path": "lib/si.lisp",
+        "source_git_blob": "2b94f1ea6d2fb05c084c3a0d863c14119a5ba11f",
+        "standard_url": "https://www.bipm.org/en/measurement-units/si-defining-constants",
+        "canonical_name_count": 1,
+        "alias_of": "si:defining-elementary-charge",
+        "semantic_selection": false,
+        "ratification": false
       }
     },
     {
@@ -9938,6 +10142,22 @@
         "source_kind": "library-definition",
         "not_a_ratified_resident": true,
         "reason": "A source occurrence or wish-list name is not an independent D10 law; candidate requires typed contract and distinct behavior."
+      },
+      "source_data_evidence": {
+        "status": "PINNED-EXACT-SI-DATA-NOT-INDEPENDENT-D10-OPERATION",
+        "role": "DERIVED-NUMERIC-VIEW",
+        "canonical_record": "si:defining-boltzmann-constant",
+        "defining_constant": "boltzmann-constant",
+        "bipm_exact_decimal": "1.380649e-23",
+        "bipm_unit": "J/K",
+        "lib_si_literal": "1380649/100000000000000000000000000000",
+        "source_path": "lib/si.lisp",
+        "source_git_blob": "2b94f1ea6d2fb05c084c3a0d863c14119a5ba11f",
+        "standard_url": "https://www.bipm.org/en/measurement-units/si-defining-constants",
+        "canonical_name_count": 1,
+        "alias_of": "si:defining-boltzmann-constant",
+        "semantic_selection": false,
+        "ratification": false
       }
     },
     {
@@ -9975,6 +10195,22 @@
         "source_kind": "library-definition",
         "not_a_ratified_resident": true,
         "reason": "A source occurrence or wish-list name is not an independent D10 law; candidate requires typed contract and distinct behavior."
+      },
+      "source_data_evidence": {
+        "status": "PINNED-EXACT-SI-DATA-NOT-INDEPENDENT-D10-OPERATION",
+        "role": "DERIVED-NUMERIC-VIEW",
+        "canonical_record": "si:defining-avogadro-constant",
+        "defining_constant": "avogadro-constant",
+        "bipm_exact_decimal": "6.02214076e23",
+        "bipm_unit": "mol^-1",
+        "lib_si_literal": "602214076000000000000000",
+        "source_path": "lib/si.lisp",
+        "source_git_blob": "2b94f1ea6d2fb05c084c3a0d863c14119a5ba11f",
+        "standard_url": "https://www.bipm.org/en/measurement-units/si-defining-constants",
+        "canonical_name_count": 1,
+        "alias_of": "si:defining-avogadro-constant",
+        "semantic_selection": false,
+        "ratification": false
       }
     },
     {
@@ -10012,6 +10248,22 @@
         "source_kind": "library-definition",
         "not_a_ratified_resident": true,
         "reason": "A source occurrence or wish-list name is not an independent D10 law; candidate requires typed contract and distinct behavior."
+      },
+      "source_data_evidence": {
+        "status": "PINNED-EXACT-SI-DATA-NOT-INDEPENDENT-D10-OPERATION",
+        "role": "DERIVED-NUMERIC-VIEW",
+        "canonical_record": "si:defining-luminous-efficacy",
+        "defining_constant": "luminous-efficacy",
+        "bipm_exact_decimal": "683",
+        "bipm_unit": "lm/W",
+        "lib_si_literal": "683",
+        "source_path": "lib/si.lisp",
+        "source_git_blob": "2b94f1ea6d2fb05c084c3a0d863c14119a5ba11f",
+        "standard_url": "https://www.bipm.org/en/measurement-units/si-defining-constants",
+        "canonical_name_count": 1,
+        "alias_of": "si:defining-luminous-efficacy",
+        "semantic_selection": false,
+        "ratification": false
       }
     },
     {
@@ -10049,6 +10301,22 @@
         "source_kind": "library-definition",
         "not_a_ratified_resident": true,
         "reason": "A source occurrence or wish-list name is not an independent D10 law; candidate requires typed contract and distinct behavior."
+      },
+      "source_data_evidence": {
+        "status": "PINNED-EXACT-SI-DATA-NOT-INDEPENDENT-D10-OPERATION",
+        "role": "COMPATIBILITY-ALIAS",
+        "canonical_record": "si:defining-cesium-frequency",
+        "defining_constant": "cesium-frequency",
+        "bipm_exact_decimal": "9192631770",
+        "bipm_unit": "Hz",
+        "lib_si_literal": "9192631770",
+        "source_path": "lib/si.lisp",
+        "source_git_blob": "2b94f1ea6d2fb05c084c3a0d863c14119a5ba11f",
+        "standard_url": "https://www.bipm.org/en/measurement-units/si-defining-constants",
+        "canonical_name_count": 1,
+        "alias_of": "si:defining-cesium-frequency",
+        "semantic_selection": false,
+        "ratification": false
       }
     },
     {
@@ -10086,6 +10354,22 @@
         "source_kind": "library-definition",
         "not_a_ratified_resident": true,
         "reason": "A source occurrence or wish-list name is not an independent D10 law; candidate requires typed contract and distinct behavior."
+      },
+      "source_data_evidence": {
+        "status": "PINNED-EXACT-SI-DATA-NOT-INDEPENDENT-D10-OPERATION",
+        "role": "COMPATIBILITY-ALIAS",
+        "canonical_record": "si:defining-speed-of-light",
+        "defining_constant": "speed-of-light",
+        "bipm_exact_decimal": "299792458",
+        "bipm_unit": "m/s",
+        "lib_si_literal": "299792458",
+        "source_path": "lib/si.lisp",
+        "source_git_blob": "2b94f1ea6d2fb05c084c3a0d863c14119a5ba11f",
+        "standard_url": "https://www.bipm.org/en/measurement-units/si-defining-constants",
+        "canonical_name_count": 1,
+        "alias_of": "si:defining-speed-of-light",
+        "semantic_selection": false,
+        "ratification": false
       }
     },
     {
@@ -10123,6 +10407,22 @@
         "source_kind": "library-definition",
         "not_a_ratified_resident": true,
         "reason": "A source occurrence or wish-list name is not an independent D10 law; candidate requires typed contract and distinct behavior."
+      },
+      "source_data_evidence": {
+        "status": "PINNED-EXACT-SI-DATA-NOT-INDEPENDENT-D10-OPERATION",
+        "role": "COMPATIBILITY-ALIAS",
+        "canonical_record": "si:defining-planck-constant",
+        "defining_constant": "planck-constant",
+        "bipm_exact_decimal": "6.62607015e-34",
+        "bipm_unit": "J s",
+        "lib_si_literal": "132521403/200000000000000000000000000000000000000000",
+        "source_path": "lib/si.lisp",
+        "source_git_blob": "2b94f1ea6d2fb05c084c3a0d863c14119a5ba11f",
+        "standard_url": "https://www.bipm.org/en/measurement-units/si-defining-constants",
+        "canonical_name_count": 1,
+        "alias_of": "si:defining-planck-constant",
+        "semantic_selection": false,
+        "ratification": false
       }
     },
     {
@@ -10160,6 +10460,22 @@
         "source_kind": "library-definition",
         "not_a_ratified_resident": true,
         "reason": "A source occurrence or wish-list name is not an independent D10 law; candidate requires typed contract and distinct behavior."
+      },
+      "source_data_evidence": {
+        "status": "PINNED-EXACT-SI-DATA-NOT-INDEPENDENT-D10-OPERATION",
+        "role": "COMPATIBILITY-ALIAS",
+        "canonical_record": "si:defining-elementary-charge",
+        "defining_constant": "elementary-charge",
+        "bipm_exact_decimal": "1.602176634e-19",
+        "bipm_unit": "C",
+        "lib_si_literal": "801088317/5000000000000000000000000000",
+        "source_path": "lib/si.lisp",
+        "source_git_blob": "2b94f1ea6d2fb05c084c3a0d863c14119a5ba11f",
+        "standard_url": "https://www.bipm.org/en/measurement-units/si-defining-constants",
+        "canonical_name_count": 1,
+        "alias_of": "si:defining-elementary-charge",
+        "semantic_selection": false,
+        "ratification": false
       }
     },
     {
@@ -10197,6 +10513,22 @@
         "source_kind": "library-definition",
         "not_a_ratified_resident": true,
         "reason": "A source occurrence or wish-list name is not an independent D10 law; candidate requires typed contract and distinct behavior."
+      },
+      "source_data_evidence": {
+        "status": "PINNED-EXACT-SI-DATA-NOT-INDEPENDENT-D10-OPERATION",
+        "role": "COMPATIBILITY-ALIAS",
+        "canonical_record": "si:defining-boltzmann-constant",
+        "defining_constant": "boltzmann-constant",
+        "bipm_exact_decimal": "1.380649e-23",
+        "bipm_unit": "J/K",
+        "lib_si_literal": "1380649/100000000000000000000000000000",
+        "source_path": "lib/si.lisp",
+        "source_git_blob": "2b94f1ea6d2fb05c084c3a0d863c14119a5ba11f",
+        "standard_url": "https://www.bipm.org/en/measurement-units/si-defining-constants",
+        "canonical_name_count": 1,
+        "alias_of": "si:defining-boltzmann-constant",
+        "semantic_selection": false,
+        "ratification": false
       }
     },
     {
@@ -10234,6 +10566,22 @@
         "source_kind": "library-definition",
         "not_a_ratified_resident": true,
         "reason": "A source occurrence or wish-list name is not an independent D10 law; candidate requires typed contract and distinct behavior."
+      },
+      "source_data_evidence": {
+        "status": "PINNED-EXACT-SI-DATA-NOT-INDEPENDENT-D10-OPERATION",
+        "role": "COMPATIBILITY-ALIAS",
+        "canonical_record": "si:defining-avogadro-constant",
+        "defining_constant": "avogadro-constant",
+        "bipm_exact_decimal": "6.02214076e23",
+        "bipm_unit": "mol^-1",
+        "lib_si_literal": "602214076000000000000000",
+        "source_path": "lib/si.lisp",
+        "source_git_blob": "2b94f1ea6d2fb05c084c3a0d863c14119a5ba11f",
+        "standard_url": "https://www.bipm.org/en/measurement-units/si-defining-constants",
+        "canonical_name_count": 1,
+        "alias_of": "si:defining-avogadro-constant",
+        "semantic_selection": false,
+        "ratification": false
       }
     },
     {
@@ -10271,6 +10619,22 @@
         "source_kind": "library-definition",
         "not_a_ratified_resident": true,
         "reason": "A source occurrence or wish-list name is not an independent D10 law; candidate requires typed contract and distinct behavior."
+      },
+      "source_data_evidence": {
+        "status": "PINNED-EXACT-SI-DATA-NOT-INDEPENDENT-D10-OPERATION",
+        "role": "COMPATIBILITY-ALIAS",
+        "canonical_record": "si:defining-luminous-efficacy",
+        "defining_constant": "luminous-efficacy",
+        "bipm_exact_decimal": "683",
+        "bipm_unit": "lm/W",
+        "lib_si_literal": "683",
+        "source_path": "lib/si.lisp",
+        "source_git_blob": "2b94f1ea6d2fb05c084c3a0d863c14119a5ba11f",
+        "standard_url": "https://www.bipm.org/en/measurement-units/si-defining-constants",
+        "canonical_name_count": 1,
+        "alias_of": "si:defining-luminous-efficacy",
+        "semantic_selection": false,
+        "ratification": false
       }
     },
     {
@@ -10308,6 +10672,22 @@
         "source_kind": "library-definition",
         "not_a_ratified_resident": true,
         "reason": "A source occurrence or wish-list name is not an independent D10 law; candidate requires typed contract and distinct behavior."
+      },
+      "source_data_evidence": {
+        "status": "PINNED-EXACT-SI-DATA-NOT-INDEPENDENT-D10-OPERATION",
+        "role": "COMPATIBILITY-ALIAS",
+        "canonical_record": "si:defining-cesium-frequency",
+        "defining_constant": "cesium-frequency",
+        "bipm_exact_decimal": "9192631770",
+        "bipm_unit": "Hz",
+        "lib_si_literal": "9192631770",
+        "source_path": "lib/si.lisp",
+        "source_git_blob": "2b94f1ea6d2fb05c084c3a0d863c14119a5ba11f",
+        "standard_url": "https://www.bipm.org/en/measurement-units/si-defining-constants",
+        "canonical_name_count": 1,
+        "alias_of": "si:defining-cesium-frequency",
+        "semantic_selection": false,
+        "ratification": false
       }
     },
     {
@@ -10345,6 +10725,22 @@
         "source_kind": "library-definition",
         "not_a_ratified_resident": true,
         "reason": "A source occurrence or wish-list name is not an independent D10 law; candidate requires typed contract and distinct behavior."
+      },
+      "source_data_evidence": {
+        "status": "PINNED-EXACT-SI-DATA-NOT-INDEPENDENT-D10-OPERATION",
+        "role": "COMPATIBILITY-ALIAS",
+        "canonical_record": "si:defining-speed-of-light",
+        "defining_constant": "speed-of-light",
+        "bipm_exact_decimal": "299792458",
+        "bipm_unit": "m/s",
+        "lib_si_literal": "299792458",
+        "source_path": "lib/si.lisp",
+        "source_git_blob": "2b94f1ea6d2fb05c084c3a0d863c14119a5ba11f",
+        "standard_url": "https://www.bipm.org/en/measurement-units/si-defining-constants",
+        "canonical_name_count": 1,
+        "alias_of": "si:defining-speed-of-light",
+        "semantic_selection": false,
+        "ratification": false
       }
     },
     {
@@ -10382,6 +10778,22 @@
         "source_kind": "library-definition",
         "not_a_ratified_resident": true,
         "reason": "A source occurrence or wish-list name is not an independent D10 law; candidate requires typed contract and distinct behavior."
+      },
+      "source_data_evidence": {
+        "status": "PINNED-EXACT-SI-DATA-NOT-INDEPENDENT-D10-OPERATION",
+        "role": "COMPATIBILITY-ALIAS",
+        "canonical_record": "si:defining-planck-constant",
+        "defining_constant": "planck-constant",
+        "bipm_exact_decimal": "6.62607015e-34",
+        "bipm_unit": "J s",
+        "lib_si_literal": "132521403/200000000000000000000000000000000000000000",
+        "source_path": "lib/si.lisp",
+        "source_git_blob": "2b94f1ea6d2fb05c084c3a0d863c14119a5ba11f",
+        "standard_url": "https://www.bipm.org/en/measurement-units/si-defining-constants",
+        "canonical_name_count": 1,
+        "alias_of": "si:defining-planck-constant",
+        "semantic_selection": false,
+        "ratification": false
       }
     },
     {
@@ -10419,6 +10831,22 @@
         "source_kind": "library-definition",
         "not_a_ratified_resident": true,
         "reason": "A source occurrence or wish-list name is not an independent D10 law; candidate requires typed contract and distinct behavior."
+      },
+      "source_data_evidence": {
+        "status": "PINNED-EXACT-SI-DATA-NOT-INDEPENDENT-D10-OPERATION",
+        "role": "COMPATIBILITY-ALIAS",
+        "canonical_record": "si:defining-elementary-charge",
+        "defining_constant": "elementary-charge",
+        "bipm_exact_decimal": "1.602176634e-19",
+        "bipm_unit": "C",
+        "lib_si_literal": "801088317/5000000000000000000000000000",
+        "source_path": "lib/si.lisp",
+        "source_git_blob": "2b94f1ea6d2fb05c084c3a0d863c14119a5ba11f",
+        "standard_url": "https://www.bipm.org/en/measurement-units/si-defining-constants",
+        "canonical_name_count": 1,
+        "alias_of": "si:defining-elementary-charge",
+        "semantic_selection": false,
+        "ratification": false
       }
     },
     {
@@ -10456,6 +10884,22 @@
         "source_kind": "library-definition",
         "not_a_ratified_resident": true,
         "reason": "A source occurrence or wish-list name is not an independent D10 law; candidate requires typed contract and distinct behavior."
+      },
+      "source_data_evidence": {
+        "status": "PINNED-EXACT-SI-DATA-NOT-INDEPENDENT-D10-OPERATION",
+        "role": "COMPATIBILITY-ALIAS",
+        "canonical_record": "si:defining-boltzmann-constant",
+        "defining_constant": "boltzmann-constant",
+        "bipm_exact_decimal": "1.380649e-23",
+        "bipm_unit": "J/K",
+        "lib_si_literal": "1380649/100000000000000000000000000000",
+        "source_path": "lib/si.lisp",
+        "source_git_blob": "2b94f1ea6d2fb05c084c3a0d863c14119a5ba11f",
+        "standard_url": "https://www.bipm.org/en/measurement-units/si-defining-constants",
+        "canonical_name_count": 1,
+        "alias_of": "si:defining-boltzmann-constant",
+        "semantic_selection": false,
+        "ratification": false
       }
     },
     {
@@ -10493,6 +10937,22 @@
         "source_kind": "library-definition",
         "not_a_ratified_resident": true,
         "reason": "A source occurrence or wish-list name is not an independent D10 law; candidate requires typed contract and distinct behavior."
+      },
+      "source_data_evidence": {
+        "status": "PINNED-EXACT-SI-DATA-NOT-INDEPENDENT-D10-OPERATION",
+        "role": "COMPATIBILITY-ALIAS",
+        "canonical_record": "si:defining-avogadro-constant",
+        "defining_constant": "avogadro-constant",
+        "bipm_exact_decimal": "6.02214076e23",
+        "bipm_unit": "mol^-1",
+        "lib_si_literal": "602214076000000000000000",
+        "source_path": "lib/si.lisp",
+        "source_git_blob": "2b94f1ea6d2fb05c084c3a0d863c14119a5ba11f",
+        "standard_url": "https://www.bipm.org/en/measurement-units/si-defining-constants",
+        "canonical_name_count": 1,
+        "alias_of": "si:defining-avogadro-constant",
+        "semantic_selection": false,
+        "ratification": false
       }
     },
     {
@@ -10530,6 +10990,22 @@
         "source_kind": "library-definition",
         "not_a_ratified_resident": true,
         "reason": "A source occurrence or wish-list name is not an independent D10 law; candidate requires typed contract and distinct behavior."
+      },
+      "source_data_evidence": {
+        "status": "PINNED-EXACT-SI-DATA-NOT-INDEPENDENT-D10-OPERATION",
+        "role": "COMPATIBILITY-ALIAS",
+        "canonical_record": "si:defining-luminous-efficacy",
+        "defining_constant": "luminous-efficacy",
+        "bipm_exact_decimal": "683",
+        "bipm_unit": "lm/W",
+        "lib_si_literal": "683",
+        "source_path": "lib/si.lisp",
+        "source_git_blob": "2b94f1ea6d2fb05c084c3a0d863c14119a5ba11f",
+        "standard_url": "https://www.bipm.org/en/measurement-units/si-defining-constants",
+        "canonical_name_count": 1,
+        "alias_of": "si:defining-luminous-efficacy",
+        "semantic_selection": false,
+        "ratification": false
       }
     },
     {
@@ -22867,7 +23343,7 @@
         "rows": 9
       }
     ],
-    "total_passports": 98,
+    "total_passports": 102,
     "latest_sources": [
       {
         "path": "knowledge/d10-general-congruence-merge-hobbies-v1.json",
@@ -22915,7 +23391,7 @@
         "rows": 3
       }
     ],
-    "latest_source_pass": 6,
+    "latest_source_pass": 4,
     "source_verified_at": "b3cd6dbe9a8094e3794c1421e91f3d5b4c5247b6",
     "latest_model_review_specs": [
       "CALL-NEXT-METHOD",
@@ -22924,7 +23400,10 @@
       "INVOKE-RESTART",
       "CANONICAL-UNICODE-NORMALIZE",
       "LONGEST-MATCH-TEXT-MAPPING"
-    ]
+    ],
+    "latest_exact_si_data_records": 28,
+    "si_source_git_blob": "2b94f1ea6d2fb05c084c3a0d863c14119a5ba11f",
+    "quantity_source_git_blob": "8eb1e12611f180a6131affc6e9f618a7cdea3449"
   },
   "evidence_gate": {
     "date": "2026-10-11",
@@ -22934,15 +23413,15 @@
     "formal_ratified": 0,
     "semantic_source_audit": {
       "total": 309,
-      "has_law": 209,
-      "has_positive": 188,
-      "has_negative": 188,
-      "law_and_witnesses": 188,
-      "missing_law": 100,
-      "missing_positive": 121,
-      "missing_negative": 121
+      "has_law": 213,
+      "has_positive": 192,
+      "has_negative": 192,
+      "law_and_witnesses": 192,
+      "missing_law": 96,
+      "missing_positive": 117,
+      "missing_negative": 117
     },
-    "note": "11 source donor summaries are NOT unique D10 semantics; no witnesses or D10 residency granted.",
+    "note": "All 28 SI names denote seven constants as data, not twenty-eight independent D10 residents; other source witness records are research-only.",
     "uncorroborated_source_name_census": 96,
     "source_census_triage": {
       "SOURCE-VARIABLE-NOT-A-FIRST-CLASS-FUNCTION": 3,
@@ -22951,6 +23430,9 @@
       "LIBRARY-DEFINITION-CORE-VS-DERIVED-UNREVIEWED": 32,
       "USER-INTEREST-NAME-ONLY-NO-SOURCE-OPERATION": 49
     },
-    "source_behavior_claims_for_projection": 11
+    "source_behavior_claims_for_projection": 11,
+    "exact_si_data_aliases": 28,
+    "si_independent_function_residents_added": 0,
+    "provisional_source_functions_witnessed": 4
   }
 }
