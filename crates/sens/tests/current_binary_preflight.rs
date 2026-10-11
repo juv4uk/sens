@@ -157,3 +157,71 @@ fn core4_local_binding_heads_are_current_and_postcore_libraries_load() {
         }
     }
 }
+
+/// Diagnose the first non-callable top-level time form after Core4 bootstrap.
+/// This test intentionally preserves strict runtime behavior: it reports the
+/// exact top-level index and source bytes instead of replacing the failed form.
+#[test]
+fn time_library_top_level_replay_reports_first_noncallable_form() {
+    let mut session = Session::default();
+    sens::load_core_library(&mut session).expect("Core4 bootstrap");
+    let source = include_str!("../../../lib/time.lisp");
+    let parsed = sens::parse(source).expect("time library syntax");
+
+    for (index, expression) in parsed.iter().enumerate() {
+        if let Err(error) =
+            eval_parsed_expressions(std::slice::from_ref(expression), &mut session)
+        {
+            let start = (expression.span.start as usize).min(source.len());
+            let end = (expression.span.end as usize).min(source.len()).max(start);
+            let preview_end = end.min(start.saturating_add(180));
+            let snippet = String::from_utf8_lossy(&source.as_bytes()[start..preview_end]);
+            panic!(
+                "TIME-DIAGNOSTIC: top_level_index={} source_span={}..{} source={:?} error={:?}",
+                index + 1,
+                start,
+                end,
+                snippet.replace('\n', " "),
+                error
+            );
+        }
+    }
+}
+
+
+/// Compare the actual whole-file loader route with the successful formwise
+/// replay above. This diagnostic prints the first enclosing top-level form
+/// if batch evaluation fails, but does not turn the finding into fake success
+/// or suppress any runtime error in the loader itself.
+#[test]
+fn time_library_loader_reports_first_failing_form() {
+    let source = include_str!("../../../lib/time.lisp");
+    let parsed = sens::parse(source).expect("time library syntax");
+    let mut session = Session::default();
+    sens::load_core_library(&mut session).expect("Core4 bootstrap");
+
+    sens::load_time_library(&mut session).unwrap_or_else(|error| {
+        let start = (error.span.start as usize).min(source.len());
+        let end = (error.span.end as usize).min(source.len()).max(start);
+        let form = parsed.iter().enumerate().find(|(_, expression)| {
+            let form_start = expression.span.start as usize;
+            let form_end = expression.span.end as usize;
+            form_start <= start && end <= form_end
+        });
+        let (form_label, snippet) = form
+            .map(|(index, expression)| {
+                let form_start = (expression.span.start as usize).min(source.len());
+                let form_end = (expression.span.end as usize).min(source.len()).max(form_start);
+                let preview_end = form_end.min(form_start.saturating_add(180));
+                (
+                    format!("{}:{}..{}", index + 1, expression.span.start, expression.span.end),
+                    String::from_utf8_lossy(&source.as_bytes()[form_start..preview_end]).replace('\n', " "),
+                )
+            })
+            .unwrap_or_else(|| ("unmapped".to_owned(), "<no containing top-level form>".to_owned()));
+        panic!(
+            "TIME-LOADER-REGRESSION: error_span={}..{} enclosing_form={} source={:?} error={:?}",
+            start, end, form_label, snippet, error
+        );
+    });
+}
