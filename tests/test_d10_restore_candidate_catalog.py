@@ -81,6 +81,34 @@ class CatalogRestoreTests(unittest.TestCase):
         self.assertEqual(4, report["full_union_names"])
         self.assertEqual(2, report["restored_old_only_names"])
 
+    def test_duplicate_source_name_preserves_independent_candidate_ids(self):
+        duplicate = self.make("DELTA", "d10.name.4")
+        duplicate["semantic_law_variants"] = json.dumps(["independent law claim"])
+        duplicate["donor_provenance_claims"] = json.dumps(["second donor source"])
+        duplicate["source_records_sha_pinned"] = json.dumps(["second-source@" + "a" * 40])
+        self.write(self.current, self.current_rows + [duplicate])
+
+        report = merge.merge_catalog(self.root, self.old, self.current, self.output)
+        self.assertEqual(2, report["source_latest_names"])  # distinct names, not rows
+        result = merge.literal_tsv(self.output)
+        row = result["delta"]
+        self.assertEqual("2", row["source_record_count"])
+        self.assertEqual("0", row["ratified"])
+        self.assertEqual("NONE", row["canonical_coordinate"])
+        self.assertIn("independent law claim", json.loads(row["semantic_law_variants"]))
+        self.assertIn("second donor source", json.loads(row["donor_provenance_claims"]))
+        self.assertIn("second-source@" + "a" * 40,
+                      json.loads(row["source_records_sha_pinned"]))
+        tags = json.loads(row["historical_status_claims"])
+        self.assertIn("SOURCE_CANDIDATE_ID:d10.name.2", tags)
+        self.assertIn("SOURCE_CANDIDATE_ID:d10.name.4", tags)
+
+    def test_repeated_name_with_same_candidate_id_still_fails(self):
+        duplicate = dict(self.current_rows[1])
+        self.write(self.current, self.current_rows + [duplicate])
+        with self.assertRaisesRegex(ValueError, "DUPLICATE_CANDIDATE_ID"):
+            merge.merge_catalog(self.root, self.old, self.current, self.output)
+
     def test_historical_blob_tampering_fails(self):
         self.old.write_text(self.old.read_text() + "\n")
         with self.assertRaisesRegex(ValueError, "HISTORICAL_CATALOG_BLOB_CHANGED"):
