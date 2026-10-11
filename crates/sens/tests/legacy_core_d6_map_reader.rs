@@ -45,6 +45,22 @@ fn legacy_core_let_uses_lisp_owned_map_without_unadmitted_d6_dispatch() {
 }
 
 #[test]
+fn legacy_core_let_star_uses_derived_lambda_not_unadmitted_d6_let() {
+    let mut session = Session::default();
+    sens::eval_pinned_legacy_core_source("lib/core.lisp", SOURCE, &mut session)
+        .expect("source-pinned core");
+    for (form, expected) in [
+        ("(let* () 42)", "42"),
+        ("(let* ((x 7)) x)", "7"),
+        ("(let* ((x 7) (y x)) y)", "7"),
+    ] {
+        let actual = eval_program(form, &mut session)
+            .unwrap_or_else(|e| panic!("lambda-derived let* {form}: {e:?}")).value.to_string();
+        assert_eq!(actual, expected, "sequential binding {form}");
+    }
+}
+
+#[test]
 fn derived_map_preserves_macro_binding_parameter_and_value_lists() {
     let mut session = Session::default();
     sens::eval_pinned_legacy_core_source("lib/core.lisp", SOURCE, &mut session)
