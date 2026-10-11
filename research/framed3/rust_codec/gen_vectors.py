@@ -10,6 +10,43 @@ import research_codec as rc
 import tb33_tail_research as tb
 import adaptive_encoder as A
 
+
+# Independent Python D3 executable-subprofile oracle. The legacy transport
+# oracle accepts many D2-shaped DATA trees; the Rust explicit .senc decoder
+# intentionally rejects some of them as executable CODE. They must not be
+# mislabeled as Rust/Python transport bit mismatches.
+from test_canonical_capacity_research import parse_program, Rejected
+from semantic_redundancy_research import Word, FIXED_ARITY
+
+
+def d3_code_admitted(ws):
+    try:
+        root = parse_program(tuple(ws))
+    except (Rejected, ValueError, IndexError):
+        return False
+
+    def legal(node, data=False):
+        if isinstance(node, Word):
+            return True
+        items = node.items
+        if not items:
+            return data
+        if data:
+            return all(legal(item, True) for item in items)
+        head, *args = items
+        if not isinstance(head, Word):
+            return False  # No ratified nested-head D3 callable.
+        name = head.bits
+        if name in FIXED_ARITY:
+            return len(args) == FIXED_ARITY[name] and all(
+                legal(item, name == "001") for item in args
+            )
+        if name in ("000", "110"):
+            return all(legal(item) for item in args)
+        return False
+
+    return legal(root)
+
 PROFILE = {"т5": "T5", "рамка3": "Frame3", "тб33": "Tb33"}
 
 
@@ -34,7 +71,7 @@ def line(words):
     except Exception:
         prof = "-"
         chos = "-"
-    return "\t".join([" ".join(ws), t5.hex(), frh, tbh, prof, chos])
+    return "\t".join([" ".join(ws), t5.hex(), frh, tbh, prof, chos, "D3" if d3_code_admitted(ws) else "REJECT"])
 
 
 def all_bitstrings(n):
