@@ -45,11 +45,11 @@ pub fn parse_mixed_exact_domain_machine_source(
     parse_mixed_source(source, true)
 }
 
-/// The only approved D8 writer head at this migration boundary is the
+/// The only approved D8 READ/WRITE head at this migration boundary is the
 /// ratified eight-bit WRITE-TO-STRING, never an inferred compatibility byte.
 /// It is lifted *only* for path-pinned, trusted Lisp library sources.
 /// Historical W8 QUOTE remains opaque, and binder names remain source data.
-fn lift_pinned_d8_writer(
+fn lift_pinned_d8_io(
     source: &str,
     expression: Expr,
     depth: u32,
@@ -57,7 +57,7 @@ fn lift_pinned_d8_writer(
     if depth > MAX_STRUCTURE_DEPTH {
         return Err(LanguageError::new(
             ErrorKind::Parse,
-            "pinned D8 writer source exceeds structure depth",
+            "pinned D8 READ/WRITE source exceeds structure depth",
             expression.span,
         ));
     }
@@ -77,15 +77,15 @@ fn lift_pinned_d8_writer(
         return Ok(Expr { kind: ExprKind::List(items), span });
     }
 
-    if head_spelling == Some("11110100") {
-        let words = parse_binary_source_words("11110100")?;
+    if matches!(head_spelling, Some("11110100" | "11101010")) {
+        let words = parse_binary_source_words(head_spelling.expect("known ratified D8 IO head"))?;
         let word = words.first().expect("one static ratified D8 source word").word;
         lifted[0] = Expr {
             kind: ExprKind::DomainIdentity(DomainIdentity::from_source_word(word)),
             span: lifted[0].span,
         };
     } else if matches!(&lifted[0].kind, ExprKind::List(_)) {
-        lifted[0] = lift_pinned_d8_writer(source, lifted[0].clone(), depth + 1)?;
+        lifted[0] = lift_pinned_d8_io(source, lifted[0].clone(), depth + 1)?;
     }
 
     let skip_binding_slot = is_legacy_w8_define_head(source, &items[0])
@@ -97,7 +97,7 @@ fn lift_pinned_d8_writer(
         if skip_binding_slot && index == 1 {
             continue;
         }
-        lifted[index] = lift_pinned_d8_writer(source, lifted[index].clone(), depth + 1)?;
+        lifted[index] = lift_pinned_d8_io(source, lifted[index].clone(), depth + 1)?;
     }
     Ok(Expr {
         kind: ExprKind::List(Rc::from(lifted.into_boxed_slice())),
@@ -105,10 +105,10 @@ fn lift_pinned_d8_writer(
     })
 }
 
-fn parse_mixed_pinned_d8_writer(source: &str) -> Result<Vec<Expr>, LanguageError> {
+fn parse_mixed_pinned_d8_io(source: &str) -> Result<Vec<Expr>, LanguageError> {
     parse_mixed_source(source, true)?
         .into_iter()
-        .map(|expr| lift_pinned_d8_writer(source, expr, 0))
+        .map(|expr| lift_pinned_d8_io(source, expr, 0))
         .collect()
 }
 
@@ -127,7 +127,7 @@ pub fn parse_mixed_exact_domain_reasoning_source(
         ));
     }
     if matches!(path, "lib/world.lisp" | "lib/knowledge.lisp" | "lib/lisp-fs.lisp") {
-        parse_mixed_pinned_d8_writer(source)
+        parse_mixed_pinned_d8_io(source)
     } else {
         parse_mixed_source(source, true)
     }
@@ -166,7 +166,7 @@ pub fn parse_mixed_exact_domain_legacy_core_source(
             Span::default(),
         ));
     }
-    parse_mixed_pinned_d8_writer(source)
+    parse_mixed_pinned_d8_io(source)
 }
 
 /// Parse only the language-owned time module with exact-width D3 call heads.
