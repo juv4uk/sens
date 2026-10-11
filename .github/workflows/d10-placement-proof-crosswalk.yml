@@ -1,0 +1,31 @@
+name: D10 placement proof crosswalk
+on:
+  pull_request:
+    paths:
+      - 'knowledge/d9-ratified.json'
+      - 'knowledge/d10-selector-seed.json'
+      - 'knowledge/d10-v1-semantic-inventory.json'
+      - 'scripts/check_d10_placement_proof_crosswalk.py'
+      - '.github/workflows/d10-placement-proof-crosswalk.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  theorem-crosswalk:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify canonical D9 to D10 placements (debug and optimized)
+        run: |
+          set -euo pipefail
+          python3 scripts/check_d10_placement_proof_crosswalk.py --self-test --manifest /tmp/d10-placement-crosswalk.json
+          python3 -O scripts/check_d10_placement_proof_crosswalk.py --self-test
+      - name: Save machine-readable source-to-coordinate crosswalk
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: d10-placement-proof-crosswalk
+          path: /tmp/d10-placement-crosswalk.json
+          retention-days: 14
