@@ -1,0 +1,44 @@
+name: Historical Git branch source reconciliation
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - scripts/report_branch_unique_blobs.py
+      - .github/workflows/main-branch-source-reconciliation.yml
+
+permissions:
+  contents: read
+
+concurrency:
+  group: history-source-reconcile-main
+  cancel-in-progress: false
+
+jobs:
+  compare-immutable-git-blobs:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Fetch existing historical heads into ephemeral runner only
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch --no-tags origin '+refs/heads/*:refs/remotes/origin/*'
+      - name: Reconcile all 4034 source HEAD SHA against current main tree
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 scripts/report_branch_unique_blobs.py --output "$RUNNER_TEMP/source-blob-reconciliation.json"
+      - name: Save exact provenance report without creating Git branches
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: full-branch-source-blob-reconciliation-${{ github.run_id }}
+          path: ${{ runner.temp }}/source-blob-reconciliation.json
+          if-no-files-found: ignore
