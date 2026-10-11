@@ -1,0 +1,120 @@
+{
+  "schema": "d10-generalized-crt-selection/v1",
+  "date": "2026-10-11",
+  "status": "SELECTED-RESEARCH-NOT-RATIFIED",
+  "semantic_name": "GENERALIZED-CONGRUENCE-MERGE",
+  "stable_id": "d10.math.generalized-congruence-merge.20261011",
+  "surfaces": {
+    "uk": "звести-остачі",
+    "ukr": "узгодити-періодичні-остачі"
+  },
+  "origin": {
+    "repo": "juv4uk/sens",
+    "git_sha": "c67db6cdd820dea8d3a110caed359507c0a2d7a4",
+    "file": "knowledge/d10-generalized-congruence-research-v1.json",
+    "blob": "cad78f4597387b3daf01599026099645d8e2bc57"
+  },
+  "independent_donor": {
+    "software": "SymPy",
+    "version": "1.14.0",
+    "fn": "sympy.ntheory.modular.solve_congruence",
+    "upstream_ref": "sympy/sympy@16fa855354eb7bcabd3fe10993841e03b1382692:sympy/ntheory/modular.py:172-211",
+    "test": "tests/test_d10_generalized_crt.py",
+    "recorded_test_cases": 13689,
+    "scope": "previously recorded external-donor run, no fresh hosted rerun claimed"
+  },
+  "law": "For exact integers a,b and positive moduli m,n, g=gcd(m,n), L=lcm(m,n); return CONFLICT(g,b-a) iff (b-a) is not divisible by g; otherwise unique CONSISTENT(r,L) where 0<=r<L, r≡a(mod m), r≡b(mod n).",
+  "positive_witnesses": [
+    {
+      "args": [
+        2,
+        3,
+        3,
+        5
+      ],
+      "expect": [
+        "CONSISTENT",
+        8,
+        15
+      ]
+    },
+    {
+      "args": [
+        2,
+        4,
+        6,
+        8
+      ],
+      "expect": [
+        "CONSISTENT",
+        6,
+        8
+      ]
+    },
+    {
+      "args": [
+        -1,
+        6,
+        5,
+        8
+      ],
+      "expect": [
+        "CONSISTENT",
+        5,
+        24
+      ]
+    },
+    {
+      "args": [
+        12,
+        6,
+        0,
+        6
+      ],
+      "expect": [
+        "CONSISTENT",
+        0,
+        6
+      ]
+    },
+    {
+      "args": [
+        1,
+        4,
+        2,
+        6
+      ],
+      "expect": [
+        "CONFLICT",
+        2,
+        1
+      ]
+    }
+  ],
+  "falsifiers": [
+    "Rejects noncoprime consistent constraints [2 mod 4, 6 mod 8]",
+    "Incorrectly returns lcm period 32, not 8, for [2 mod 4,6 mod 8]",
+    "Returns a residue outside the canonical 0..L-1 range",
+    "Accepts modulus 0 or inexact input silently",
+    "Returns a fake residue for unsatisfiable constraints [1 mod 4, 2 mod 6]"
+  ],
+  "dedup": {
+    "foundation_blob": "09d1d71c39d1484dfd005a5068dbb18b76f0f0d4",
+    "before_d10_blob": "184063ce850bafcb13d585336e1c6ee5f58c5f28",
+    "behavioral_neighbors": [
+      "D6 GCD",
+      "D6 REMAINDER",
+      "D9 DIVMOD",
+      "D10 MODULO",
+      "D10 UNIQUE-BOUNDED-MODULAR-LIFT"
+    ],
+    "distinction": "Observes exact simultaneous compatibility of *two* modular constraints and their unique canonical merged period, unlike a single-modulus residue or a bounded one-modulus inverse-image classifier.",
+    "core_vs_library": "PENDING owner evaluation; derivability from extended Euclid is not exclusion under current D10 selection policy."
+  },
+  "authority": {
+    "research_selected": true,
+    "coordinate": null,
+    "ratified": false,
+    "physical_t5_authorized": false
+  }
+}

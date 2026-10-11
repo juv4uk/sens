@@ -8,10 +8,10 @@
   "capacity": 1024,
   "current_foundation": "#4008 / Contract 11.8 / D1-D9",
   "accounting": {
-    "selected_semantic_candidates": 654,
+    "selected_semantic_candidates": 655,
     "law_forced_coordinates": 256,
-    "unplaced_selected_candidates": 398,
-    "remaining_semantic_inventory": 370,
+    "unplaced_selected_candidates": 399,
+    "remaining_semantic_inventory": 369,
     "ratified_d10_residents": 0
   },
   "rules": [
@@ -15067,6 +15067,94 @@
       "ownership_test": "Pure finite language-visible codebook property with exact terminating residual closure, independent from physical SENS, D2 parse, Rust transport, GPU, FPGA and ISA.",
       "ratified_resident": false,
       "physical_t5_authorized": false
+    },
+    {
+      "stable_id": "d10.math.generalized-congruence-merge.20261011",
+      "semantic_name": "GENERALIZED-CONGRUENCE-MERGE",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "SYMPY-1.14-MODULAR-CRT-PROVENANCE",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "EXACT-GENERALIZED-CHINESE-REMAINDER-CERTIFICATE",
+      "behavior": "Given integers a,b and positive moduli m,n, return CONFLICT(gcd(m,n),b−a) iff inconsistent; otherwise CONSISTENT(r,lcm(m,n)) with unique exact canonical residue 0<=r<L congruent to a mod m and b mod n.",
+      "surface_uk": "звести-остачі",
+      "surface_ukr": "узгодити-періодичні-остачі",
+      "source_path": "knowledge/d10-generalized-crt-selection-20261011.json",
+      "primary_url": "https://docs.sympy.org/latest/modules/ntheory.html",
+      "provenance": [
+        "#4013",
+        "#4463",
+        "#5041",
+        "knowledge/d10-generalized-congruence-research-v1.json",
+        "knowledge/d10-generalized-crt-selection-20261011.json",
+        "sympy/sympy@16fa855354eb7bcabd3fe10993841e03b1382692:sympy/ntheory/modular.py:172-211",
+        "tests/test_d10_generalized_crt.py"
+      ],
+      "positive_witnesses": [
+        {
+          "input": [
+            2,
+            3,
+            3,
+            5
+          ],
+          "result": [
+            "CONSISTENT",
+            8,
+            15
+          ]
+        },
+        {
+          "input": [
+            2,
+            4,
+            6,
+            8
+          ],
+          "result": [
+            "CONSISTENT",
+            6,
+            8
+          ]
+        },
+        {
+          "input": [
+            -1,
+            6,
+            5,
+            8
+          ],
+          "result": [
+            "CONSISTENT",
+            5,
+            24
+          ]
+        },
+        {
+          "input": [
+            1,
+            4,
+            2,
+            6
+          ],
+          "result": [
+            "CONFLICT",
+            2,
+            1
+          ]
+        }
+      ],
+      "falsifiers": [
+        "Coprime-only CRT rejects consistent noncoprime 2(mod4),6(mod8)",
+        "Blind product period 32 instead of lcm 8",
+        "Noncanonical residue outside [0,L)",
+        "Inconsistent system [1 mod4,2 mod6] returns fabricated answer",
+        "Zero/negative moduli silently admitted"
+      ],
+      "dedup_check": "D1-D9@09d1d71c39d1484dfd005a5068dbb18b76f0f0d4 and prior selected D10@184063ce850bafcb13d585336e1c6ee5f58c5f28: no equal joint-congruence canonical merge law; D6 GCD/REMAINDER, D9 DIVMOD, D10 MODULO and UNIQUE-BOUNDED-MODULAR-LIFT are different observations.",
+      "ownership_test": "Universal integer constraint compatibility independent of clock/radio/FPGA substrates; Core-vs-derived owner review pending.",
+      "ratified_resident": false,
+      "physical_t5_authorized": false
     }
   ],
   "parent_domain": {
@@ -15114,6 +15202,7 @@
     "knowledge/d10-babbage-reiter-hobby-selected-20261009.json",
     "knowledge/d10-hysteretic-boolean-source-law-20261009.json",
     "knowledge/d10-archive-admission-20261011.uk.md",
-    "knowledge/d10-unique-decipherability-selected-20261011.json"
+    "knowledge/d10-unique-decipherability-selected-20261011.json",
+    "knowledge/d10-generalized-crt-selection-20261011.json"
   ]
 }

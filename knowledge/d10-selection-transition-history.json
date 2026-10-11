@@ -467,6 +467,34 @@
         "python3 scripts/check_d10_selection_transition_history.py --self-test",
         "python3 scripts/check-d10-proposal-ledger.py"
       ]
+    },
+    {
+      "id": "d10.math.generalized-congruence-merge.after-654.20261011",
+      "authority": "#4013 #4463 #5041; research selection only",
+      "evidence": [
+        "knowledge/d10-generalized-crt-selection-20261011.json",
+        "knowledge/d10-generalized-congruence-research-v1.json",
+        "tests/test_d10_generalized_crt.py"
+      ],
+      "previous_inventory_blob_sha": "184063ce850bafcb13d585336e1c6ee5f58c5f28",
+      "resulting_inventory_blob_sha": "7d8745cb6f183cf0c015812359a6c0f87c4c2ffb",
+      "added_stable_ids": [
+        "d10.math.generalized-congruence-merge.20261011"
+      ],
+      "appended_sources": [
+        "knowledge/d10-generalized-crt-selection-20261011.json"
+      ],
+      "coordinates_added": 0,
+      "ratified_added": 0,
+      "delta_selected": 1,
+      "previous_selected": 654,
+      "resulting_selected": 655,
+      "decision": "selected research only; source-backed 13689-case SymPy 1.14.0 previous donor witness, owner Core-vs-derived still pending",
+      "tests": [
+        "python3 -m unittest tests.test_d10_generalized_crt -v",
+        "python3 scripts/check_d10_selection_transition_history.py --self-test",
+        "python3 scripts/check-d10-proposal-ledger.py"
+      ]
     }
   ]
 }
