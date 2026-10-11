@@ -1,0 +1,11 @@
+# Exact compare pin main SHA: 5e9d4ed835d5ed4e9074427f673f50e7b2fdadb5
+# SID8 transport/bootstrap and I5/semantic ownership variants retained as history; no blind live-tree activation.
+branch	source_sha	compare_status	ahead_by	behind_by	reported_file_entries	classification
+agent/1135-core4-source-replay	d2ffb621c6ba684d6f8c6e7ce7db9ce09e2322d7	behind	0	8088	0	ALREADY_IN_MAIN_ANCESTRY
+agent/1167-core1-sid8-self-carry	b88d4e28b384e43a45c5e265cee0473941a6687e	diverged	4	7980	3	HISTORY_ATTACHED_CONTENT_REVIEW_REQUIRED
+agent/1167-core1-sid8-value-transport	83b069a3d70b218c73a5f1c736f916591e2515ca	diverged	13	8011	2	HISTORY_ATTACHED_CONTENT_REVIEW_REQUIRED
+agent/1173-coordinate-law-bare-sid	d0b0aa387c899be9c7c9afed0337c768c89f0547	behind	0	7871	0	ALREADY_IN_MAIN_ANCESTRY
+agent/1173-i5-machine-profile-bare-sid8	e07d791a09493b889c57dd93ef34b52bec3502ce	diverged	3	7863	3	HISTORY_ATTACHED_CONTENT_REVIEW_REQUIRED
+agent/1173-machine-capability-bare-sid	6e65c255a4d19c6cd39678093c61938b050e84fe	behind	0	7894	0	ALREADY_IN_MAIN_ANCESTRY
+agent/1173-primitive-budget-bare-sid8	364a9f313250f6837653f0bb6400468501e9724a	behind	0	7857	0	ALREADY_IN_MAIN_ANCESTRY
+agent/1173-semantic-ownership-bare-sid8	c9a59bc7b4f3ac8054a59fbd0471058e9c7495a3	diverged	2	7878	2	HISTORY_ATTACHED_CONTENT_REVIEW_REQUIRED
