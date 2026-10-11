@@ -152,3 +152,25 @@ baseline and must not be silently double-counted:
 - Syntax/Hosted CI green on intermediate migrated cohorts; T5 file-authority and migration readiness gates separately remain fail-closed on historical corpus.
 - No claim of semantic equivalence for all rewrites yet; independent oracle/runtime parity remains required.
 - Do not call this a completed all-repository SID8 retirement, and do not delete the old correspondence ledger while unresolved cells remain.
+
+## 2026-10-12: велика партія джерельної заміни, runtime-holds
+
+Цей запис обліковує **синтаксичні зміни в існуючих .lisp на main**, а не повні old/current семантичні parity чи фізичний T5 admission. Жодного нового Git branch або файлу .sens.
+
+| Файл | Замінено виконуваних голів SID8 | Семантичні утримання |
+|---|---:|---|
+| `lib/forward.lisp` | 551 | D6 LET 19 викликів повернуто до старого виконуваного коду, 00001010 DEFMACRO не переносити підстановкою |
+| `lib/knowledge.lisp` | 888 | D6 LET 25 повернуто; DEFMACRO на hold |
+| `lib/world.lisp` | 463 | D6 LET 13 повернуто; некерований D6 CADDDR інший агент замінив явним D3-складенням |
+| `racket/boot/core.lisp` | 297 | DEFMACRO на hold |
+| `lib/time.lisp` | 210 | D10 host-observation names не перенумеровано |
+| `lib/core.lisp` | 880 | DEFMACRO, D10, internal nonresident на hold |
+| `lib/core4.lisp` | 889 | DEFMACRO, D10, internal nonresident на hold |
+| **Початкові заміни** | **4178** | **57 D6 LET повернуто; нетто 4121** |
+
+Важливий негативний свідок: [Hosted CI 38180474196](https://github.com/juv4uk/sens/actions/runs/38180474196) показав **нова регресія D6 001000 LET (не викликальний)** у forward/knowledge та **D6 100111 CADDDR** у world. Довести механізм виклику D6 у Lisp-owned oracle до повторного перенесення цих форм, а не замінювати W8-код лише за збігом імені. Точковий відкат 57 LET call-heads: [world](https://github.com/juv4uk/sens/commit/cb0a9787ecaaae37868579dee2ca47540b5be808), [forward](https://github.com/juv4uk/sens/commit/4a823e5a7608b965b130e32cd423aae13ea11a12), [knowledge](https://github.com/juv4uk/sens/commit/eeed54d48b47fc5ab0b454032774f38267828c8d). Runtime-блокер координовано в [#5603](https://github.com/juv4uk/sens/issues/5603).
+
+**Окремий захисний відкат:** механічно переписані D3/D4 голови у `knowledge/guard-reference.lisp` (265) і `knowledge/guard-fact-policy.lisp` (108) **не входять у підсумок** — у цих джерелах є старі трьохпольові COND, а D3:110 допускає рівно двопольові клаузи. Обидва файли відновлено точно до попереднього Git blob: [guard-fact](https://github.com/juv4uk/sens/commit/f30c2754ba34fd6b7736749b143988657e4242f7), [guard-reference](https://github.com/juv4uk/sens/commit/423f9601245777de28f1153aad482c73bbcdb89f). Потрібна окрема трансформація структури COND із доказом, не коротший код.
+
+Залишкові red CI, наявні і до цієї партії: строгий D3-сканер, raw-timezone witnesses, world/content-store та інвентаризаційний T5 manifest. Не зараховувати тільки green syntax або source-level rewrite за execution admission.
+
