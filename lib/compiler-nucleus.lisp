@@ -67,17 +67,13 @@
   (0010 (seed)
     (010 (111 seed ()))))
 
+; A verified bit sequence is a proper list of D1 atoms. To test the
+; empty-list terminator, use the ratified ATOM predicate, not EQ over a
+; non-atomic pair: exact D3 EQ admits two ATOMS, not a list-versus-NIL.
 (0011 compiler-bits-equal
   (0010 (seed left right)
     (110
-      ((101 left (001 ()))
-       (101 right (001 ())))
-      ((101 right (001 ()))
-       (compiler-false seed))
-      ((010 left)
-       (110
-         ((010 right) (compiler-true seed))
-         ((compiler-true seed) (compiler-false seed))))
+      ((010 left) (010 right))
       ((010 right) (compiler-false seed))
       ((101 (100 left) (100 right))
        (compiler-bits-equal seed (011 left) (011 right)))
@@ -97,12 +93,8 @@
 (0011 compiler-xor-bits
   (0010 (seed left right)
     (110
-      ((101 left (001 ())) ())
-      ((010 left)
-       (110
-         ((101 right (001 ())) ())
-         ((compiler-true seed) ())))
-      ((101 right (001 ())) ())
+      ((010 left) ())
+      ((010 right) ())
       ((compiler-true seed)
        (111
          (compiler-bit-xor seed (100 left) (100 right))
