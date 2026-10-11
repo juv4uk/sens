@@ -31,10 +31,10 @@
     "capacity": 1024,
     "already_selected_v5": 715,
     "unfilled_canonical_slots": 309,
-    "historical_source_sets": 13,
-    "unselected_unique_names": 285,
-    "unselected_with_law_witness_falsifier": 35,
-    "hold_or_derived_only_name_count": 138,
+    "historical_source_sets": 25,
+    "unselected_unique_names": 352,
+    "unselected_with_law_witness_falsifier": 63,
+    "hold_or_derived_only_name_count": 205,
     "core_newly_selected": 0,
     "ratified_added": 0
   },
@@ -155,9 +155,149 @@
       "extracted_spellings": 31,
       "already_in_selected_v5": 31,
       "new_union_names_at_source": 0
+    },
+    {
+      "family": "GOLISP-PASCAL-REPOS",
+      "path": "knowledge/d10-crossrepo-golisp-pascal-v1.json",
+      "git_blob": "4914c152a03d78de926943f605992f88c2c0e0d6",
+      "source_rows": 22,
+      "extracted_spellings": 22,
+      "already_in_selected_v5": 22,
+      "new_union_names_at_source": 0
+    },
+    {
+      "family": "LISP-KOANS",
+      "path": "knowledge/d10-crossrepo-lisp-koans-v1.json",
+      "git_blob": "4a45760e93d4fb3f4d9e33914cf44f314d0a30b4",
+      "source_rows": 25,
+      "extracted_spellings": 25,
+      "already_in_selected_v5": 25,
+      "new_union_names_at_source": 0
+    },
+    {
+      "family": "MAKE-A-LISP",
+      "path": "knowledge/d10-crossrepo-mal-v1.json",
+      "git_blob": "f0a432a28de471efde8d59106670ef79f4c2082c",
+      "source_rows": 62,
+      "extracted_spellings": 62,
+      "already_in_selected_v5": 22,
+      "new_union_names_at_source": 37
+    },
+    {
+      "family": "D9-OVERFLOW-RECOVERY",
+      "path": "knowledge/d10-recovery-v1.json",
+      "git_blob": "94defd3830eebe2d69cf9f7c313b8ab0846460ca",
+      "source_rows": 19,
+      "extracted_spellings": 19,
+      "already_in_selected_v5": 9,
+      "new_union_names_at_source": 10
+    },
+    {
+      "family": "D9-OVERFLOW-RECOVERY-V2",
+      "path": "knowledge/d10-recovery-v2.json",
+      "git_blob": "07cb183dec2aefc5fd668e03b4823f31b75a3b01",
+      "source_rows": 7,
+      "extracted_spellings": 7,
+      "already_in_selected_v5": 1,
+      "new_union_names_at_source": 0
+    },
+    {
+      "family": "SENS-OLD-LISP-LIBRARY",
+      "path": "knowledge/d10-library-harvest-v1.json",
+      "git_blob": "9527695a70aa0ab8096675c1bdd37c74c03f4367",
+      "source_rows": 39,
+      "extracted_spellings": 39,
+      "already_in_selected_v5": 39,
+      "new_union_names_at_source": 0
+    },
+    {
+      "family": "FORWARD-LISP-LIBRARY",
+      "path": "knowledge/d10-forward-harvest-v1.json",
+      "git_blob": "f1b8a808975b8c3ec82df70b9c505362de6bb52d",
+      "source_rows": 26,
+      "extracted_spellings": 26,
+      "already_in_selected_v5": 26,
+      "new_union_names_at_source": 0
+    },
+    {
+      "family": "KNOWLEDGE-LISP-LIBRARY",
+      "path": "knowledge/d10-knowledge-harvest-v1.json",
+      "git_blob": "abdcfc3780c1085620db36050a534f99cec69a4b",
+      "source_rows": 37,
+      "extracted_spellings": 37,
+      "already_in_selected_v5": 37,
+      "new_union_names_at_source": 0
+    },
+    {
+      "family": "CLIPS-LISP-LIBRARY",
+      "path": "knowledge/d10-clips-library-harvest-v1.json",
+      "git_blob": "57b34e2e33bf8256b4b81a276638528d97a47baf",
+      "source_rows": 12,
+      "extracted_spellings": 12,
+      "already_in_selected_v5": 12,
+      "new_union_names_at_source": 0
+    },
+    {
+      "family": "HISTORICAL-LISP-PRIMARY-MANUAL",
+      "path": "knowledge/d10-historical-primary-manual-reconciliation-20261009.json",
+      "git_blob": "37e10ef9a953ea62beb5e4b46ef20f21cbfb3ee4",
+      "source_rows": 13,
+      "extracted_spellings": 13,
+      "already_in_selected_v5": 3,
+      "new_union_names_at_source": 4
+    },
+    {
+      "family": "R6RS-LISP-SCHEME-AUDIT",
+      "path": "knowledge/d10-r6rs-hashtable-hygiene-audit-v1.json",
+      "git_blob": "c6af11760a10a5944d9df286c52eb84e18bd3c96",
+      "source_rows": 19,
+      "extracted_spellings": 19,
+      "already_in_selected_v5": 1,
+      "new_union_names_at_source": 16
+    },
+    {
+      "family": "PSL-INTERLISP-LISPM-RESIDUAL",
+      "path": "knowledge/d10-psl-interlisp-lispm-unmerged-residual-v1.json",
+      "git_blob": "f5438abf3460fa7caac14a30edf511f907a5be44",
+      "source_rows": 21,
+      "extracted_spellings": 21,
+      "already_in_selected_v5": 2,
+      "new_union_names_at_source": 0
     }
   ],
   "candidates": [
+    {
+      "semantic_name": "-",
+      "status": "UNSELECTED-RESEARCH-REVIEW",
+      "selected_d10": false,
+      "coordinate": null,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "evidence_sources": [
+        {
+          "family": "MAKE-A-LISP",
+          "path": "knowledge/d10-crossrepo-mal-v1.json",
+          "git_blob": "f0a432a28de471efde8d59106670ef79f4c2082c",
+          "prior_status": "CURRENT-OR-DERIVED-PROJECTION"
+        }
+      ]
+    },
+    {
+      "semantic_name": "*",
+      "status": "UNSELECTED-RESEARCH-REVIEW",
+      "selected_d10": false,
+      "coordinate": null,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "evidence_sources": [
+        {
+          "family": "MAKE-A-LISP",
+          "path": "knowledge/d10-crossrepo-mal-v1.json",
+          "git_blob": "f0a432a28de471efde8d59106670ef79f4c2082c",
+          "prior_status": "CURRENT-OR-DERIVED-PROJECTION"
+        }
+      ]
+    },
     {
       "semantic_name": "*DIMENSION-SCHEMA*",
       "status": "UNSELECTED-RESEARCH-REVIEW",
@@ -312,6 +452,118 @@
       ]
     },
     {
+      "semantic_name": "/",
+      "status": "UNSELECTED-RESEARCH-REVIEW",
+      "selected_d10": false,
+      "coordinate": null,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "evidence_sources": [
+        {
+          "family": "MAKE-A-LISP",
+          "path": "knowledge/d10-crossrepo-mal-v1.json",
+          "git_blob": "f0a432a28de471efde8d59106670ef79f4c2082c",
+          "prior_status": "CURRENT-OR-DERIVED-PROJECTION"
+        }
+      ]
+    },
+    {
+      "semantic_name": "+",
+      "status": "UNSELECTED-RESEARCH-REVIEW",
+      "selected_d10": false,
+      "coordinate": null,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "evidence_sources": [
+        {
+          "family": "MAKE-A-LISP",
+          "path": "knowledge/d10-crossrepo-mal-v1.json",
+          "git_blob": "f0a432a28de471efde8d59106670ef79f4c2082c",
+          "prior_status": "CURRENT-OR-DERIVED-PROJECTION"
+        }
+      ]
+    },
+    {
+      "semantic_name": "<",
+      "status": "UNSELECTED-RESEARCH-REVIEW",
+      "selected_d10": false,
+      "coordinate": null,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "evidence_sources": [
+        {
+          "family": "MAKE-A-LISP",
+          "path": "knowledge/d10-crossrepo-mal-v1.json",
+          "git_blob": "f0a432a28de471efde8d59106670ef79f4c2082c",
+          "prior_status": "CURRENT-OR-DERIVED-PROJECTION"
+        }
+      ]
+    },
+    {
+      "semantic_name": "<=",
+      "status": "UNSELECTED-RESEARCH-REVIEW",
+      "selected_d10": false,
+      "coordinate": null,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "evidence_sources": [
+        {
+          "family": "MAKE-A-LISP",
+          "path": "knowledge/d10-crossrepo-mal-v1.json",
+          "git_blob": "f0a432a28de471efde8d59106670ef79f4c2082c",
+          "prior_status": "CURRENT-OR-DERIVED-PROJECTION"
+        }
+      ]
+    },
+    {
+      "semantic_name": "=",
+      "status": "UNSELECTED-RESEARCH-REVIEW",
+      "selected_d10": false,
+      "coordinate": null,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "evidence_sources": [
+        {
+          "family": "MAKE-A-LISP",
+          "path": "knowledge/d10-crossrepo-mal-v1.json",
+          "git_blob": "f0a432a28de471efde8d59106670ef79f4c2082c",
+          "prior_status": "CURRENT-OR-DERIVED-PROJECTION"
+        }
+      ]
+    },
+    {
+      "semantic_name": ">",
+      "status": "UNSELECTED-RESEARCH-REVIEW",
+      "selected_d10": false,
+      "coordinate": null,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "evidence_sources": [
+        {
+          "family": "MAKE-A-LISP",
+          "path": "knowledge/d10-crossrepo-mal-v1.json",
+          "git_blob": "f0a432a28de471efde8d59106670ef79f4c2082c",
+          "prior_status": "CURRENT-OR-DERIVED-PROJECTION"
+        }
+      ]
+    },
+    {
+      "semantic_name": ">=",
+      "status": "UNSELECTED-RESEARCH-REVIEW",
+      "selected_d10": false,
+      "coordinate": null,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "evidence_sources": [
+        {
+          "family": "MAKE-A-LISP",
+          "path": "knowledge/d10-crossrepo-mal-v1.json",
+          "git_blob": "f0a432a28de471efde8d59106670ef79f4c2082c",
+          "prior_status": "CURRENT-OR-DERIVED-PROJECTION"
+        }
+      ]
+    },
+    {
       "semantic_name": "A-LIST",
       "status": "UNSELECTED-RESEARCH-REVIEW",
       "selected_d10": false,
@@ -452,6 +704,16 @@
           "falsifier": "Подвійно виданий один leased object потрапляє двом активним споживачам.",
           "source_reference": "https://tumbleweed.nu/r/lm-3/uv/chinual4th.html",
           "provisional_noncanonical_coordinate": "1100111000"
+        },
+        {
+          "family": "PSL-INTERLISP-LISPM-RESIDUAL",
+          "path": "knowledge/d10-psl-interlisp-lispm-unmerged-residual-v1.json",
+          "git_blob": "f5438abf3460fa7caac14a30edf511f907a5be44",
+          "prior_status": "HOLD-ISLAND-RESOURCE-MECHANISM",
+          "law": "Видати вільний сумісний об'єкт із пулу або створити новий; виділений не видається одночасно двом споживачам.",
+          "witness": "За зайнятого R1 наступний lease дає відмінний R2; після release допустиме повторне використання R1.",
+          "falsifier": "Подвійно виданий один leased object потрапляє двом активним споживачам.",
+          "source_reference": "https://tumbleweed.nu/r/lm-3/uv/chinual4th.html"
         }
       ]
     },
@@ -486,6 +748,22 @@
           "git_blob": "da6f108e4f8553a150f0abed8f3758944193c49a",
           "prior_status": "RESEARCH",
           "law": "historical list/logical/numeric/control conveniences"
+        }
+      ]
+    },
+    {
+      "semantic_name": "APPLY",
+      "status": "UNSELECTED-RESEARCH-REVIEW",
+      "selected_d10": false,
+      "coordinate": null,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "evidence_sources": [
+        {
+          "family": "MAKE-A-LISP",
+          "path": "knowledge/d10-crossrepo-mal-v1.json",
+          "git_blob": "f0a432a28de471efde8d59106670ef79f4c2082c",
+          "prior_status": "CURRENT-OR-DERIVED-PROJECTION"
         }
       ]
     },
@@ -558,6 +836,22 @@
       ]
     },
     {
+      "semantic_name": "ASSOC",
+      "status": "UNSELECTED-RESEARCH-REVIEW",
+      "selected_d10": false,
+      "coordinate": null,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "evidence_sources": [
+        {
+          "family": "MAKE-A-LISP",
+          "path": "knowledge/d10-crossrepo-mal-v1.json",
+          "git_blob": "f0a432a28de471efde8d59106670ef79f4c2082c",
+          "prior_status": "CURRENT-OR-DERIVED-PROJECTION"
+        }
+      ]
+    },
+    {
       "semantic_name": "ASSOCIATION LIST",
       "status": "UNSELECTED-RESEARCH-REVIEW",
       "selected_d10": false,
@@ -626,6 +920,39 @@
       ]
     },
     {
+      "semantic_name": "BACKQUANTIZE",
+      "status": "UNSELECTED-RESEARCH-REVIEW",
+      "selected_d10": false,
+      "coordinate": null,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "evidence_sources": [
+        {
+          "family": "D9-OVERFLOW-RECOVERY",
+          "path": "knowledge/d10-recovery-v1.json",
+          "git_blob": "94defd3830eebe2d69cf9f7c313b8ab0846460ca",
+          "prior_status": "HOLD-SEMANTIC-REVIEW",
+          "law": "splice a list of forms into a surrounding form"
+        },
+        {
+          "family": "D9-OVERFLOW-RECOVERY-V2",
+          "path": "knowledge/d10-recovery-v2.json",
+          "git_blob": "07cb183dec2aefc5fd668e03b4823f31b75a3b01",
+          "prior_status": "HOLD-SEMANTIC-REVIEW"
+        },
+        {
+          "family": "HISTORICAL-LISP-PRIMARY-MANUAL",
+          "path": "knowledge/d10-historical-primary-manual-reconciliation-20261009.json",
+          "git_blob": "37e10ef9a953ea62beb5e4b46ef20f21cbfb3ee4",
+          "prior_status": "HOLD-UNVERIFIED-SOURCE",
+          "law": "claimed splicing macro behavior; not source-attested by this audit",
+          "witness": "find exact historical original spelling, syntax and evaluation phase in a primary document",
+          "falsifier": "misread BACKQUOTE or UNQUOTE-SPLICING as independently named BACKQUANTIZE",
+          "source_reference": "https://github.com/juv4uk/sens/blob/main/knowledge/d9-overflow-review-v1.json"
+        }
+      ]
+    },
+    {
       "semantic_name": "BINDINGS",
       "status": "UNSELECTED-RESEARCH-REVIEW",
       "selected_d10": false,
@@ -656,6 +983,26 @@
           "git_blob": "2c5391d4c8c64e297994387e0ded47b7e65e0e71",
           "prior_status": "NAME-ONLY-NO-SEMANTIC-EVIDENCE",
           "provisional_noncanonical_coordinate": "1011111010"
+        }
+      ]
+    },
+    {
+      "semantic_name": "BOUND-IDENTIFIER=?",
+      "status": "UNSELECTED-RESEARCH-REVIEW",
+      "selected_d10": false,
+      "coordinate": null,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "evidence_sources": [
+        {
+          "family": "R6RS-LISP-SCHEME-AUDIT",
+          "path": "knowledge/d10-r6rs-hashtable-hygiene-audit-v1.json",
+          "git_blob": "c6af11760a10a5944d9df286c52eb84e18bd3c96",
+          "prior_status": "HOLD-RESEARCH-NO-ADMISSION",
+          "law": "рівність зв'язаних ідентифікаторів за іменем і контекстними мітками",
+          "witness": "однаковий текст, але незалежно згенеровані мітки не дають bound-identifier=?",
+          "falsifier": "порівняння лише по рядку імені",
+          "source_reference": "https://r6rs.org/final/html/r6rs-lib/r6rs-lib-Z-H-13.html"
         }
       ]
     },
@@ -796,6 +1143,16 @@
           "falsifier": "Потай втрачається tag або замість handler виконується звичайний catch без фільтра.",
           "source_reference": "https://reduce-algebra.sourceforge.io/lisp-docs/allman1.pdf",
           "provisional_noncanonical_coordinate": "1100110000"
+        },
+        {
+          "family": "PSL-INTERLISP-LISPM-RESIDUAL",
+          "path": "knowledge/d10-psl-interlisp-lispm-unmerged-residual-v1.json",
+          "git_blob": "f5438abf3460fa7caac14a30edf511f907a5be44",
+          "prior_status": "HOLD-D2-ONLY",
+          "law": "Піймати throw незалежно від tag і викликати handler(tag,value); handler може повторно throw.",
+          "witness": "Викинути 'red 7; handler бачить і 'red і 7; може вирішити повторно передати.",
+          "falsifier": "Потай втрачається tag або замість handler виконується звичайний catch без фільтра.",
+          "source_reference": "https://reduce-algebra.sourceforge.io/lisp-docs/allman1.pdf"
         }
       ]
     },
@@ -813,6 +1170,22 @@
           "git_blob": "da6f108e4f8553a150f0abed8f3758944193c49a",
           "prior_status": "RESEARCH",
           "law": "character-level reader/buffer/print-name machinery"
+        }
+      ]
+    },
+    {
+      "semantic_name": "CL-EVAL",
+      "status": "UNSELECTED-RESEARCH-REVIEW",
+      "selected_d10": false,
+      "coordinate": null,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "evidence_sources": [
+        {
+          "family": "MAKE-A-LISP",
+          "path": "knowledge/d10-crossrepo-mal-v1.json",
+          "git_blob": "f0a432a28de471efde8d59106670ef79f4c2082c",
+          "prior_status": "HOLD-SEMANTIC-REVIEW"
         }
       ]
     },
@@ -865,6 +1238,16 @@
           "falsifier": "Deallocate старого R1 після clear тихо повертає його у новий pool.",
           "source_reference": "https://tumbleweed.nu/r/lm-3/uv/chinual4th.html",
           "provisional_noncanonical_coordinate": "1100111011"
+        },
+        {
+          "family": "PSL-INTERLISP-LISPM-RESIDUAL",
+          "path": "knowledge/d10-psl-interlisp-lispm-unmerged-residual-v1.json",
+          "git_blob": "f5438abf3460fa7caac14a30edf511f907a5be44",
+          "prior_status": "HOLD-EPOCH-STALE-HANDLE-SEMANTICS",
+          "law": "Забути всі раніше відстежені об'єкти ресурсу, і при майбутній deallocation старого leased object видати error.",
+          "witness": "Clear while R1 in-use; future deallocate(R1) повинна сигналізувати застарілий ресурс.",
+          "falsifier": "Deallocate старого R1 після clear тихо повертає його у новий pool.",
+          "source_reference": "https://tumbleweed.nu/r/lm-3/uv/chinual4th.html"
         }
       ]
     },
@@ -882,6 +1265,23 @@
           "git_blob": "da6f108e4f8553a150f0abed8f3758944193c49a",
           "prior_status": "RESEARCH",
           "law": "character-level reader/buffer/print-name machinery"
+        }
+      ]
+    },
+    {
+      "semantic_name": "CODEPOINT->STRING",
+      "status": "UNSELECTED-RESEARCH-REVIEW",
+      "selected_d10": false,
+      "coordinate": null,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "evidence_sources": [
+        {
+          "family": "D9-OVERFLOW-RECOVERY",
+          "path": "knowledge/d10-recovery-v1.json",
+          "git_blob": "94defd3830eebe2d69cf9f7c313b8ab0846460ca",
+          "prior_status": "LOWER-SURFACE-PROJECTION",
+          "law": "Materialize one Unicode scalar as a string"
         }
       ]
     },
@@ -918,6 +1318,39 @@
           "prior_status": "HOLD-TOOLING-OWNERSHIP",
           "law": "Compute free identifiers of mutually recursive letrec definitions with all names in scope for all initializers and body",
           "provisional_noncanonical_coordinate": "1101100000"
+        }
+      ]
+    },
+    {
+      "semantic_name": "COLLECTION",
+      "status": "UNSELECTED-RESEARCH-REVIEW",
+      "selected_d10": false,
+      "coordinate": null,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "evidence_sources": [
+        {
+          "family": "D9-OVERFLOW-RECOVERY",
+          "path": "knowledge/d10-recovery-v1.json",
+          "git_blob": "94defd3830eebe2d69cf9f7c313b8ab0846460ca",
+          "prior_status": "HOLD-SEMANTIC-REVIEW",
+          "law": "collect the elements of a set, list or sequence"
+        },
+        {
+          "family": "D9-OVERFLOW-RECOVERY-V2",
+          "path": "knowledge/d10-recovery-v2.json",
+          "git_blob": "07cb183dec2aefc5fd668e03b4823f31b75a3b01",
+          "prior_status": "HOLD-SEMANTIC-REVIEW"
+        },
+        {
+          "family": "HISTORICAL-LISP-PRIMARY-MANUAL",
+          "path": "knowledge/d10-historical-primary-manual-reconciliation-20261009.json",
+          "git_blob": "37e10ef9a953ea62beb5e4b46ef20f21cbfb3ee4",
+          "prior_status": "HOLD-UNVERIFIED-SOURCE",
+          "law": "generic 'collect elements' lacks operation/ordering/multiplicity contract",
+          "witness": "identify donor implementation/manual and provide order/duplicates/identity behavior before proposing",
+          "falsifier": "assert any traversal helper is a novel Core semantic primitive",
+          "source_reference": "https://github.com/juv4uk/sens/blob/main/knowledge/d9-overflow-review-v1.json"
         }
       ]
     },
@@ -991,6 +1424,38 @@
       ]
     },
     {
+      "semantic_name": "CONCAT",
+      "status": "UNSELECTED-RESEARCH-REVIEW",
+      "selected_d10": false,
+      "coordinate": null,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "evidence_sources": [
+        {
+          "family": "MAKE-A-LISP",
+          "path": "knowledge/d10-crossrepo-mal-v1.json",
+          "git_blob": "f0a432a28de471efde8d59106670ef79f4c2082c",
+          "prior_status": "CURRENT-OR-DERIVED-PROJECTION"
+        }
+      ]
+    },
+    {
+      "semantic_name": "CONJ",
+      "status": "UNSELECTED-RESEARCH-REVIEW",
+      "selected_d10": false,
+      "coordinate": null,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "evidence_sources": [
+        {
+          "family": "MAKE-A-LISP",
+          "path": "knowledge/d10-crossrepo-mal-v1.json",
+          "git_blob": "f0a432a28de471efde8d59106670ef79f4c2082c",
+          "prior_status": "CURRENT-OR-DERIVED-PROJECTION"
+        }
+      ]
+    },
+    {
       "semantic_name": "CONNECTED-COMPONENTS?",
       "status": "UNSELECTED-RESEARCH-REVIEW",
       "selected_d10": false,
@@ -1004,6 +1469,38 @@
           "git_blob": "2c5391d4c8c64e297994387e0ded47b7e65e0e71",
           "prior_status": "NAME-ONLY-NO-SEMANTIC-EVIDENCE",
           "provisional_noncanonical_coordinate": "1100100010"
+        }
+      ]
+    },
+    {
+      "semantic_name": "CONS",
+      "status": "UNSELECTED-RESEARCH-REVIEW",
+      "selected_d10": false,
+      "coordinate": null,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "evidence_sources": [
+        {
+          "family": "MAKE-A-LISP",
+          "path": "knowledge/d10-crossrepo-mal-v1.json",
+          "git_blob": "f0a432a28de471efde8d59106670ef79f4c2082c",
+          "prior_status": "CURRENT-OR-DERIVED-PROJECTION"
+        }
+      ]
+    },
+    {
+      "semantic_name": "CONTAINS?",
+      "status": "UNSELECTED-RESEARCH-REVIEW",
+      "selected_d10": false,
+      "coordinate": null,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "evidence_sources": [
+        {
+          "family": "MAKE-A-LISP",
+          "path": "knowledge/d10-crossrepo-mal-v1.json",
+          "git_blob": "f0a432a28de471efde8d59106670ef79f4c2082c",
+          "prior_status": "CURRENT-OR-DERIVED-PROJECTION"
         }
       ]
     },
@@ -1085,6 +1582,39 @@
       ]
     },
     {
+      "semantic_name": "COUNT-LEADING-ZEROS",
+      "status": "UNSELECTED-RESEARCH-REVIEW",
+      "selected_d10": false,
+      "coordinate": null,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "evidence_sources": [
+        {
+          "family": "D9-OVERFLOW-RECOVERY",
+          "path": "knowledge/d10-recovery-v1.json",
+          "git_blob": "94defd3830eebe2d69cf9f7c313b8ab0846460ca",
+          "prior_status": "HOLD-SEMANTIC-REVIEW",
+          "law": "count leading zero bits of an integer"
+        },
+        {
+          "family": "D9-OVERFLOW-RECOVERY-V2",
+          "path": "knowledge/d10-recovery-v2.json",
+          "git_blob": "07cb183dec2aefc5fd668e03b4823f31b75a3b01",
+          "prior_status": "HOLD-SEMANTIC-REVIEW"
+        },
+        {
+          "family": "HISTORICAL-LISP-PRIMARY-MANUAL",
+          "path": "knowledge/d10-historical-primary-manual-reconciliation-20261009.json",
+          "git_blob": "37e10ef9a953ea62beb5e4b46ef20f21cbfb3ee4",
+          "prior_status": "HOLD-D8-DERIVABILITY",
+          "law": "for a nonnegative fixed-width W-bit word x, CLZ(x) = W - integer-length(x), with CLZ(0)=W; must specify width W",
+          "witness": "CLZ(0,W)=W; CLZ(1,W)=W-1; CLZ(highest_bit,W)=0",
+          "falsifier": "one unbounded integer without width is silently assumed to have a universal number of leading zeros",
+          "source_reference": "https://tumbleweed.nu/r/lm-3/uv/chinual.html"
+        }
+      ]
+    },
+    {
       "semantic_name": "CSET",
       "status": "UNSELECTED-RESEARCH-REVIEW",
       "selected_d10": false,
@@ -1136,6 +1666,26 @@
       ]
     },
     {
+      "semantic_name": "DATUM->SYNTAX",
+      "status": "UNSELECTED-RESEARCH-REVIEW",
+      "selected_d10": false,
+      "coordinate": null,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "evidence_sources": [
+        {
+          "family": "R6RS-LISP-SCHEME-AUDIT",
+          "path": "knowledge/d10-r6rs-hashtable-hygiene-audit-v1.json",
+          "git_blob": "c6af11760a10a5944d9df286c52eb84e18bd3c96",
+          "prior_status": "HOLD-RESEARCH-NO-ADMISSION",
+          "law": "перенесення лексичного контексту шаблонного ідентифікатора на datum",
+          "witness": "однаковий datum з різними template-id має різну лексичну прив'язку",
+          "falsifier": "контекст з template-id губиться та спричиняє небажане захоплення",
+          "source_reference": "https://r6rs.org/final/html/r6rs-lib/r6rs-lib-Z-H-13.html"
+        }
+      ]
+    },
+    {
       "semantic_name": "DEALLOCATE-RESOURCE",
       "status": "UNSELECTED-RESEARCH-REVIEW",
       "selected_d10": false,
@@ -1153,6 +1703,16 @@
           "falsifier": "Deallocate трактується як обов'язкове OS free і забороняє reuse.",
           "source_reference": "https://tumbleweed.nu/r/lm-3/uv/chinual4th.html",
           "provisional_noncanonical_coordinate": "1100111001"
+        },
+        {
+          "family": "PSL-INTERLISP-LISPM-RESIDUAL",
+          "path": "knowledge/d10-psl-interlisp-lispm-unmerged-residual-v1.json",
+          "git_blob": "f5438abf3460fa7caac14a30edf511f907a5be44",
+          "prior_status": "HOLD-ISLAND-RESOURCE-MECHANISM",
+          "law": "Повернути виділений об'єкт пулу для можливого повторного використання, не доводячи негайного звільнення фізичної пам'яті.",
+          "witness": "R1 після deallocate знову вільний для наступного allocate.",
+          "falsifier": "Deallocate трактується як обов'язкове OS free і забороняє reuse.",
+          "source_reference": "https://tumbleweed.nu/r/lm-3/uv/chinual4th.html"
         }
       ]
     },
@@ -1174,6 +1734,16 @@
           "falsifier": "Трактувати операцію як фізичне знищення pooled objects.",
           "source_reference": "https://tumbleweed.nu/r/lm-3/uv/chinual.html",
           "provisional_noncanonical_coordinate": "1100111101"
+        },
+        {
+          "family": "PSL-INTERLISP-LISPM-RESIDUAL",
+          "path": "knowledge/d10-psl-interlisp-lispm-unmerged-residual-v1.json",
+          "git_blob": "f5438abf3460fa7caac14a30edf511f907a5be44",
+          "prior_status": "HOLD-RESOURCE-RESET",
+          "law": "Повернути всі ресурси в пул одразу; не означає free heap.",
+          "witness": "Завантажені ресурсні об'єкти стають повторно доступними після whole deallocate.",
+          "falsifier": "Трактувати операцію як фізичне знищення pooled objects.",
+          "source_reference": "https://tumbleweed.nu/r/lm-3/uv/chinual.html"
         }
       ]
     },
@@ -1213,6 +1783,23 @@
       ]
     },
     {
+      "semantic_name": "DEFMACRO",
+      "status": "UNSELECTED-RESEARCH-REVIEW",
+      "selected_d10": false,
+      "coordinate": null,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "evidence_sources": [
+        {
+          "family": "D9-OVERFLOW-RECOVERY",
+          "path": "knowledge/d10-recovery-v1.json",
+          "git_blob": "94defd3830eebe2d69cf9f7c313b8ab0846460ca",
+          "prior_status": "LOWER-SURFACE-PROJECTION",
+          "law": "Bind a language-owned macro"
+        }
+      ]
+    },
+    {
       "semantic_name": "DEFRESOURCE",
       "status": "UNSELECTED-RESEARCH-REVIEW",
       "selected_d10": false,
@@ -1230,6 +1817,16 @@
           "falsifier": "Повторно видати несумісний об'єкт без matcher/checker.",
           "source_reference": "https://tumbleweed.nu/r/lm-3/uv/chinual4th.html",
           "provisional_noncanonical_coordinate": "1100110111"
+        },
+        {
+          "family": "PSL-INTERLISP-LISPM-RESIDUAL",
+          "path": "knowledge/d10-psl-interlisp-lispm-unmerged-residual-v1.json",
+          "git_blob": "f5438abf3460fa7caac14a30edf511f907a5be44",
+          "prior_status": "HOLD-ISLAND-RESOURCE-MECHANISM",
+          "law": "Описати іменований пул із constructor, matcher, initializer та checker; semantics candidate is lease contract, not allocator address.",
+          "witness": "Для параметра розміру повторно видати лише сумісний об'єкт або сконструювати новий.",
+          "falsifier": "Повторно видати несумісний об'єкт без matcher/checker.",
+          "source_reference": "https://tumbleweed.nu/r/lm-3/uv/chinual4th.html"
         }
       ]
     },
@@ -1576,6 +2173,26 @@
       ]
     },
     {
+      "semantic_name": "EQUAL-HASH",
+      "status": "UNSELECTED-RESEARCH-REVIEW",
+      "selected_d10": false,
+      "coordinate": null,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "evidence_sources": [
+        {
+          "family": "R6RS-LISP-SCHEME-AUDIT",
+          "path": "knowledge/d10-r6rs-hashtable-hygiene-audit-v1.json",
+          "git_blob": "c6af11760a10a5944d9df286c52eb84e18bd3c96",
+          "prior_status": "HOLD-RESEARCH-NO-ADMISSION",
+          "law": "структурний хеш, сумісний з equal?, мусить завершуватися і для циклів",
+          "witness": "два equal? циклічні об'єкти мають сумісний hash і обчислення завершується",
+          "falsifier": "нескінченна рекурсія для циклічної структури",
+          "source_reference": "https://r6rs.org/final/html/r6rs-lib/r6rs-lib-Z-H-14.html"
+        }
+      ]
+    },
+    {
       "semantic_name": "ERROR",
       "status": "UNSELECTED-RESEARCH-REVIEW",
       "selected_d10": false,
@@ -1713,6 +2330,22 @@
       ]
     },
     {
+      "semantic_name": "FALSE?",
+      "status": "UNSELECTED-RESEARCH-REVIEW",
+      "selected_d10": false,
+      "coordinate": null,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "evidence_sources": [
+        {
+          "family": "MAKE-A-LISP",
+          "path": "knowledge/d10-crossrepo-mal-v1.json",
+          "git_blob": "f0a432a28de471efde8d59106670ef79f4c2082c",
+          "prior_status": "CURRENT-OR-DERIVED-PROJECTION"
+        }
+      ]
+    },
+    {
       "semantic_name": "FEN-FROM-BOARD",
       "status": "UNSELECTED-RESEARCH-REVIEW",
       "selected_d10": false,
@@ -1778,6 +2411,22 @@
       ]
     },
     {
+      "semantic_name": "FIRST",
+      "status": "UNSELECTED-RESEARCH-REVIEW",
+      "selected_d10": false,
+      "coordinate": null,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "evidence_sources": [
+        {
+          "family": "MAKE-A-LISP",
+          "path": "knowledge/d10-crossrepo-mal-v1.json",
+          "git_blob": "f0a432a28de471efde8d59106670ef79f4c2082c",
+          "prior_status": "CURRENT-OR-DERIVED-PROJECTION"
+        }
+      ]
+    },
+    {
       "semantic_name": "FIXP",
       "status": "UNSELECTED-RESEARCH-REVIEW",
       "selected_d10": false,
@@ -1829,6 +2478,26 @@
       ]
     },
     {
+      "semantic_name": "FREE-IDENTIFIER=?",
+      "status": "UNSELECTED-RESEARCH-REVIEW",
+      "selected_d10": false,
+      "coordinate": null,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "evidence_sources": [
+        {
+          "family": "R6RS-LISP-SCHEME-AUDIT",
+          "path": "knowledge/d10-r6rs-hashtable-hygiene-audit-v1.json",
+          "git_blob": "c6af11760a10a5944d9df286c52eb84e18bd3c96",
+          "prior_status": "HOLD-RESEARCH-NO-ADMISSION",
+          "law": "рівність ідентифікаторів як лексичних посилань на ту саму прив'язку",
+          "witness": "різні контекстні записи з тією самою лексичною прив'язкою еквівалентні",
+          "falsifier": "порівняння тільки поверхневого імені",
+          "source_reference": "https://r6rs.org/final/html/r6rs-lib/r6rs-lib-Z-H-13.html"
+        }
+      ]
+    },
+    {
       "semantic_name": "FSUBR",
       "status": "UNSELECTED-RESEARCH-REVIEW",
       "selected_d10": false,
@@ -1863,6 +2532,16 @@
           "falsifier": "Повернути зовнішню обгортку замість базової функції.",
           "source_reference": "https://reduce-algebra.sourceforge.io/lisp-docs/allman1.pdf",
           "provisional_noncanonical_coordinate": "1100101111"
+        },
+        {
+          "family": "PSL-INTERLISP-LISPM-RESIDUAL",
+          "path": "knowledge/d10-psl-interlisp-lispm-unmerged-residual-v1.json",
+          "git_blob": "f5438abf3460fa7caac14a30edf511f907a5be44",
+          "prior_status": "HOLD-REPRESENTATION-DEPENDENT",
+          "law": "Отримати початкову функцію, навіть коли її обгорнуто; базова функція лишається відмінною від wrapper chain.",
+          "witness": "Після WRAP f повернути базовий опис f, не wrapper.",
+          "falsifier": "Повернути зовнішню обгортку замість базової функції.",
+          "source_reference": "https://reduce-algebra.sourceforge.io/lisp-docs/allman1.pdf"
         }
       ]
     },
@@ -1884,6 +2563,16 @@
           "falsifier": "Проголошувати справжні імена локальних параметрів обов'язково відомими з компільованого коду.",
           "source_reference": "https://reduce-algebra.sourceforge.io/lisp-docs/allman1.pdf",
           "provisional_noncanonical_coordinate": "1100101110"
+        },
+        {
+          "family": "PSL-INTERLISP-LISPM-RESIDUAL",
+          "path": "knowledge/d10-psl-interlisp-lispm-unmerged-residual-v1.json",
+          "git_blob": "f5438abf3460fa7caac14a30edf511f907a5be44",
+          "prior_status": "HOLD-REPRESENTATION-DEPENDENT",
+          "law": "Відновити список параметрів функції, для compiled opaque можуть генеруватися placeholder імена.",
+          "witness": "Зібрати параметри lambda(a,b); для невідкритого compiled arity знайти два позиційні placeholder.",
+          "falsifier": "Проголошувати справжні імена локальних параметрів обов'язково відомими з компільованого коду.",
+          "source_reference": "https://reduce-algebra.sourceforge.io/lisp-docs/allman1.pdf"
         }
       ]
     },
@@ -1905,6 +2594,40 @@
             "back/app/services/search_service.py@84ac0b144978a92f03c2baacebb1fcacea25559e"
           ],
           "provisional_noncanonical_coordinate": "1101101001"
+        }
+      ]
+    },
+    {
+      "semantic_name": "GENERATE-EXPANSION",
+      "status": "UNSELECTED-RESEARCH-REVIEW",
+      "selected_d10": false,
+      "coordinate": null,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "evidence_sources": [
+        {
+          "family": "D9-OVERFLOW-RECOVERY",
+          "path": "knowledge/d10-recovery-v1.json",
+          "git_blob": "94defd3830eebe2d69cf9f7c313b8ab0846460ca",
+          "prior_status": "HOLD-SEMANTIC-REVIEW",
+          "law": "the macro's own one-step expansion function"
+        },
+        {
+          "family": "D9-OVERFLOW-RECOVERY-V2",
+          "path": "knowledge/d10-recovery-v2.json",
+          "git_blob": "07cb183dec2aefc5fd668e03b4823f31b75a3b01",
+          "prior_status": "CURRENT-PROJECTION",
+          "law": "retrieve the macro expansion function associated with a macro name/environment"
+        },
+        {
+          "family": "HISTORICAL-LISP-PRIMARY-MANUAL",
+          "path": "knowledge/d10-historical-primary-manual-reconciliation-20261009.json",
+          "git_blob": "37e10ef9a953ea62beb5e4b46ef20f21cbfb3ee4",
+          "prior_status": "HOLD-UNVERIFIED-SOURCE",
+          "law": "claimed macro's own expansion function; lacks primary definition and stage-specific behavior",
+          "witness": "locate authoritative manual page and distinguish from single-step expansion or macro-function lookup",
+          "falsifier": "mere alias of MACROEXPAND-1 given a new coordinate",
+          "source_reference": "https://github.com/juv4uk/sens/blob/main/knowledge/d9-overflow-review-v1.json"
         }
       ]
     },
@@ -1973,6 +2696,12 @@
           "git_blob": "da6f108e4f8553a150f0abed8f3758944193c49a",
           "prior_status": "RESEARCH",
           "law": "implicit mutable metadata attached to atomic symbols"
+        },
+        {
+          "family": "MAKE-A-LISP",
+          "path": "knowledge/d10-crossrepo-mal-v1.json",
+          "git_blob": "f0a432a28de471efde8d59106670ef79f4c2082c",
+          "prior_status": "CURRENT-OR-DERIVED-PROJECTION"
         }
       ]
     },
@@ -2070,6 +2799,76 @@
             "Mutating explicit-mutable copy changes an original association or losing mappings during copy."
           ],
           "provisional_noncanonical_coordinate": "1101010110"
+        },
+        {
+          "family": "R6RS-LISP-SCHEME-AUDIT",
+          "path": "knowledge/d10-r6rs-hashtable-hygiene-audit-v1.json",
+          "git_blob": "c6af11760a10a5944d9df286c52eb84e18bd3c96",
+          "prior_status": "HOLD-RESEARCH-NO-ADMISSION",
+          "law": "копія словника за замовчуванням незмінна, з mutable=true змінна",
+          "witness": "копія зі старими асоціаціями не приймає set! без mutable",
+          "falsifier": "копія за замовчуванням залишається змінною",
+          "source_reference": "https://r6rs.org/final/html/r6rs-lib/r6rs-lib-Z-H-14.html"
+        }
+      ]
+    },
+    {
+      "semantic_name": "HASHTABLE-EQUIVALENCE-FUNCTION",
+      "status": "UNSELECTED-RESEARCH-REVIEW",
+      "selected_d10": false,
+      "coordinate": null,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "evidence_sources": [
+        {
+          "family": "R6RS-LISP-SCHEME-AUDIT",
+          "path": "knowledge/d10-r6rs-hashtable-hygiene-audit-v1.json",
+          "git_blob": "c6af11760a10a5944d9df286c52eb84e18bd3c96",
+          "prior_status": "HOLD-RESEARCH-NO-ADMISSION",
+          "law": "повернути функцію еквівалентності, що визначає семантику ключів",
+          "witness": "eq-словник повертає eq?",
+          "falsifier": "повернута функція порівняння має інше відношення",
+          "source_reference": "https://r6rs.org/final/html/r6rs-lib/r6rs-lib-Z-H-14.html"
+        }
+      ]
+    },
+    {
+      "semantic_name": "HASHTABLE-HASH-FUNCTION",
+      "status": "UNSELECTED-RESEARCH-REVIEW",
+      "selected_d10": false,
+      "coordinate": null,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "evidence_sources": [
+        {
+          "family": "R6RS-LISP-SCHEME-AUDIT",
+          "path": "knowledge/d10-r6rs-hashtable-hygiene-audit-v1.json",
+          "git_blob": "c6af11760a10a5944d9df286c52eb84e18bd3c96",
+          "prior_status": "HOLD-RESEARCH-NO-ADMISSION",
+          "law": "повернути hash-процедуру словника, але #f для eq?/eqv? конструкторів",
+          "witness": "eq-hashtable має результат #f",
+          "falsifier": "повернута довільна внутрішня функція для eq-hashtable",
+          "source_reference": "https://r6rs.org/final/html/r6rs-lib/r6rs-lib-Z-H-14.html"
+        }
+      ]
+    },
+    {
+      "semantic_name": "HASHTABLE-KEYS",
+      "status": "UNSELECTED-RESEARCH-REVIEW",
+      "selected_d10": false,
+      "coordinate": null,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "evidence_sources": [
+        {
+          "family": "R6RS-LISP-SCHEME-AUDIT",
+          "path": "knowledge/d10-r6rs-hashtable-hygiene-audit-v1.json",
+          "git_blob": "c6af11760a10a5944d9df286c52eb84e18bd3c96",
+          "prior_status": "HOLD-RESEARCH-NO-ADMISSION",
+          "law": "повернути вектор усіх ключів, порядок стандартом не задано",
+          "witness": "кількість і множина ключів збігаються зі словником",
+          "falsifier": "сортування нав'язується як обов'язкове спостереження",
+          "source_reference": "https://r6rs.org/final/html/r6rs-lib/r6rs-lib-Z-H-14.html"
         }
       ]
     },
@@ -2095,6 +2894,56 @@
             "A default immutable copy is reported mutable."
           ],
           "provisional_noncanonical_coordinate": "1101010111"
+        },
+        {
+          "family": "R6RS-LISP-SCHEME-AUDIT",
+          "path": "knowledge/d10-r6rs-hashtable-hygiene-audit-v1.json",
+          "git_blob": "c6af11760a10a5944d9df286c52eb84e18bd3c96",
+          "prior_status": "HOLD-RESEARCH-NO-ADMISSION",
+          "law": "перевірка змінності екземпляра словника",
+          "witness": "за замовчуванням копія незмінна, оригінал змінний",
+          "falsifier": "копія default проголошена змінною",
+          "source_reference": "https://r6rs.org/final/html/r6rs-lib/r6rs-lib-Z-H-14.html"
+        }
+      ]
+    },
+    {
+      "semantic_name": "HASHTABLE-REF",
+      "status": "UNSELECTED-RESEARCH-REVIEW",
+      "selected_d10": false,
+      "coordinate": null,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "evidence_sources": [
+        {
+          "family": "R6RS-LISP-SCHEME-AUDIT",
+          "path": "knowledge/d10-r6rs-hashtable-hygiene-audit-v1.json",
+          "git_blob": "c6af11760a10a5944d9df286c52eb84e18bd3c96",
+          "prior_status": "HOLD-RESEARCH-NO-ADMISSION",
+          "law": "пошук ключа з явним значенням за відсутності",
+          "witness": "пошук відсутнього ключа повертає саме переданий default",
+          "falsifier": "втрата відмінності між відсутнім та значенням #f",
+          "source_reference": "https://r6rs.org/final/html/r6rs-lib/r6rs-lib-Z-H-14.html"
+        }
+      ]
+    },
+    {
+      "semantic_name": "HASHTABLE-UPDATE!",
+      "status": "UNSELECTED-RESEARCH-REVIEW",
+      "selected_d10": false,
+      "coordinate": null,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "evidence_sources": [
+        {
+          "family": "R6RS-LISP-SCHEME-AUDIT",
+          "path": "knowledge/d10-r6rs-hashtable-hygiene-audit-v1.json",
+          "git_blob": "c6af11760a10a5944d9df286c52eb84e18bd3c96",
+          "prior_status": "HOLD-RESEARCH-NO-ADMISSION",
+          "law": "оновити асоціацію результатом однієї процедури від поточного значення або default",
+          "witness": "відсутній ключ створює ключ з proc(default)",
+          "falsifier": "процедуру викликають на помилковому нульовому значенні",
+          "source_reference": "https://r6rs.org/final/html/r6rs-lib/r6rs-lib-Z-H-14.html"
         }
       ]
     },
@@ -2112,6 +2961,26 @@
           "git_blob": "2c5391d4c8c64e297994387e0ded47b7e65e0e71",
           "prior_status": "NAME-ONLY-NO-SEMANTIC-EVIDENCE",
           "provisional_noncanonical_coordinate": "1100001011"
+        }
+      ]
+    },
+    {
+      "semantic_name": "IDENTIFIER?",
+      "status": "UNSELECTED-RESEARCH-REVIEW",
+      "selected_d10": false,
+      "coordinate": null,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "evidence_sources": [
+        {
+          "family": "R6RS-LISP-SCHEME-AUDIT",
+          "path": "knowledge/d10-r6rs-hashtable-hygiene-audit-v1.json",
+          "git_blob": "c6af11760a10a5944d9df286c52eb84e18bd3c96",
+          "prior_status": "HOLD-RESEARCH-NO-ADMISSION",
+          "law": "предикат синтаксичного об'єкта, що представляє ідентифікатор, не просто символ",
+          "witness": "звичайний datum символ не проходить перевірку identifier?",
+          "falsifier": "довільний символ вважається контекстним identifier",
+          "source_reference": "https://r6rs.org/final/html/r6rs-lib/r6rs-lib-Z-H-13.html"
         }
       ]
     },
@@ -2190,6 +3059,29 @@
           "law": "Return exact predicate 1 only for allowable NTP stratum range 1..15 inclusive, otherwise 0.",
           "falsifier": "0 and 16 reject, 1 and 15 accept; exact 1/0 used under D2 control.",
           "provisional_noncanonical_coordinate": "1101001101"
+        }
+      ]
+    },
+    {
+      "semantic_name": "INVOKE",
+      "status": "UNSELECTED-RESEARCH-REVIEW",
+      "selected_d10": false,
+      "coordinate": null,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "evidence_sources": [
+        {
+          "family": "D9-OVERFLOW-RECOVERY",
+          "path": "knowledge/d10-recovery-v1.json",
+          "git_blob": "94defd3830eebe2d69cf9f7c313b8ab0846460ca",
+          "prior_status": "HOLD-SEMANTIC-REVIEW",
+          "law": "shared/runtime invocation mechanism; no independent Core language meaning selected in this tranche"
+        },
+        {
+          "family": "D9-OVERFLOW-RECOVERY-V2",
+          "path": "knowledge/d10-recovery-v2.json",
+          "git_blob": "07cb183dec2aefc5fd668e03b4823f31b75a3b01",
+          "prior_status": "HOLD-SEMANTIC-REVIEW"
         }
       ]
     },
@@ -2465,6 +3357,22 @@
       ]
     },
     {
+      "semantic_name": "LIST",
+      "status": "UNSELECTED-RESEARCH-REVIEW",
+      "selected_d10": false,
+      "coordinate": null,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "evidence_sources": [
+        {
+          "family": "MAKE-A-LISP",
+          "path": "knowledge/d10-crossrepo-mal-v1.json",
+          "git_blob": "f0a432a28de471efde8d59106670ef79f4c2082c",
+          "prior_status": "CURRENT-OR-DERIVED-PROJECTION"
+        }
+      ]
+    },
+    {
       "semantic_name": "LOAD",
       "status": "UNSELECTED-RESEARCH-REVIEW",
       "selected_d10": false,
@@ -2478,6 +3386,26 @@
           "git_blob": "da6f108e4f8553a150f0abed8f3758944193c49a",
           "prior_status": "RESEARCH",
           "law": "machine/system/compiler/storage control"
+        }
+      ]
+    },
+    {
+      "semantic_name": "LOCF",
+      "status": "UNSELECTED-RESEARCH-REVIEW",
+      "selected_d10": false,
+      "coordinate": null,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "evidence_sources": [
+        {
+          "family": "HISTORICAL-LISP-PRIMARY-MANUAL",
+          "path": "knowledge/d10-historical-primary-manual-reconciliation-20261009.json",
+          "git_blob": "37e10ef9a953ea62beb5e4b46ef20f21cbfb3ee4",
+          "prior_status": "HOLD-MECHANISM-VS-SEMANTICS",
+          "law": "locate an existing generalized place as a first-class reference to that same cell (not allocate a detached new cell)",
+          "witness": "obtain reference to array element, update through reference, observe same original element changes; require lifetime/alias safety model",
+          "falsifier": "reference points to a detached copy, or lets invalid pointer escape lifetime boundary",
+          "source_reference": "https://tumbleweed.nu/r/lm-3/uv/chinual.html"
         }
       ]
     },
@@ -2573,6 +3501,66 @@
       ]
     },
     {
+      "semantic_name": "MAKE-EQ-HASHTABLE",
+      "status": "UNSELECTED-RESEARCH-REVIEW",
+      "selected_d10": false,
+      "coordinate": null,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "evidence_sources": [
+        {
+          "family": "R6RS-LISP-SCHEME-AUDIT",
+          "path": "knowledge/d10-r6rs-hashtable-hygiene-audit-v1.json",
+          "git_blob": "c6af11760a10a5944d9df286c52eb84e18bd3c96",
+          "prior_status": "HOLD-RESEARCH-NO-ADMISSION",
+          "law": "новий змінюваний словник з тотожністю ключів eq?",
+          "witness": "два різні, але структурно рівні об'єкти не обов'язково один ключ",
+          "falsifier": "словник тихцем порівнює структурною рівністю",
+          "source_reference": "https://r6rs.org/final/html/r6rs-lib/r6rs-lib-Z-H-14.html"
+        }
+      ]
+    },
+    {
+      "semantic_name": "MAKE-EQV-HASHTABLE",
+      "status": "UNSELECTED-RESEARCH-REVIEW",
+      "selected_d10": false,
+      "coordinate": null,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "evidence_sources": [
+        {
+          "family": "R6RS-LISP-SCHEME-AUDIT",
+          "path": "knowledge/d10-r6rs-hashtable-hygiene-audit-v1.json",
+          "git_blob": "c6af11760a10a5944d9df286c52eb84e18bd3c96",
+          "prior_status": "HOLD-RESEARCH-NO-ADMISSION",
+          "law": "новий змінюваний словник з порівнянням eqv?",
+          "witness": "ключі з різною числовою репрезентацією перевіряти за eqv?",
+          "falsifier": "вибір порівняння ігнорується",
+          "source_reference": "https://r6rs.org/final/html/r6rs-lib/r6rs-lib-Z-H-14.html"
+        }
+      ]
+    },
+    {
+      "semantic_name": "MAKE-HASHTABLE",
+      "status": "UNSELECTED-RESEARCH-REVIEW",
+      "selected_d10": false,
+      "coordinate": null,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "evidence_sources": [
+        {
+          "family": "R6RS-LISP-SCHEME-AUDIT",
+          "path": "knowledge/d10-r6rs-hashtable-hygiene-audit-v1.json",
+          "git_blob": "c6af11760a10a5944d9df286c52eb84e18bd3c96",
+          "prior_status": "HOLD-RESEARCH-NO-ADMISSION",
+          "law": "створення словника із заданими чистими hash/equiv процедурами та сумісним відношенням",
+          "witness": "еквівалентні ключі мають збігатися за хешем; однаковий ключ замінює значення",
+          "falsifier": "несумісні hash/equiv мовчки гарантовано коректні",
+          "source_reference": "https://r6rs.org/final/html/r6rs-lib/r6rs-lib-Z-H-14.html"
+        }
+      ]
+    },
+    {
       "semantic_name": "MAKE-PARAMETER",
       "status": "UNSELECTED-RESEARCH-REVIEW",
       "selected_d10": false,
@@ -2587,6 +3575,26 @@
           "prior_status": "HOLD-DERIVABILITY",
           "law": "first-class parameter object with optional conversion procedure; check behavior rather than name alone",
           "source_reference": "https://www.gnu.org/software/mit-scheme/documentation/stable/mit-scheme-ref/Dynamic-Binding.html"
+        }
+      ]
+    },
+    {
+      "semantic_name": "MAKE-VARIABLE-TRANSFORMER",
+      "status": "UNSELECTED-RESEARCH-REVIEW",
+      "selected_d10": false,
+      "coordinate": null,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "evidence_sources": [
+        {
+          "family": "R6RS-LISP-SCHEME-AUDIT",
+          "path": "knowledge/d10-r6rs-hashtable-hygiene-audit-v1.json",
+          "git_blob": "c6af11760a10a5944d9df286c52eb84e18bd3c96",
+          "prior_status": "HOLD-RESEARCH-NO-ADMISSION",
+          "law": "трансформер, що перехоплює також set! позицію ідентифікатора",
+          "witness": "ліва частина set! переписується трансформером, а не відхиляється",
+          "falsifier": "звичайний transformer помилково отримує право переписати set!",
+          "source_reference": "https://r6rs.org/final/html/r6rs-lib/r6rs-lib-Z-H-13.html"
         }
       ]
     },
@@ -2608,6 +3616,26 @@
       ]
     },
     {
+      "semantic_name": "MAKNUM",
+      "status": "UNSELECTED-RESEARCH-REVIEW",
+      "selected_d10": false,
+      "coordinate": null,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "evidence_sources": [
+        {
+          "family": "HISTORICAL-LISP-PRIMARY-MANUAL",
+          "path": "knowledge/d10-historical-primary-manual-reconciliation-20261009.json",
+          "git_blob": "37e10ef9a953ea62beb5e4b46ef20f21cbfb3ee4",
+          "prior_status": "HOLD-SUBSTRATE-IDENTITY",
+          "law": "map runtime object identity to positive integer, such that equal integer iff EQ identity; historically pointer or table-based, no portable persistent address guarantee",
+          "witness": "two distinct EQ-nonidentical cons cells map to different live ids; identical object maps to same live id",
+          "falsifier": "structural equality alone forces same identity id; id asserted stable after serialization/restart",
+          "source_reference": "https://softwarepreservation.computerhistory.org/LISP/MIT/MACLISP_Reference_Manual-Dec_17_1975.pdf"
+        }
+      ]
+    },
+    {
       "semantic_name": "MAP",
       "status": "UNSELECTED-RESEARCH-REVIEW",
       "selected_d10": false,
@@ -2621,6 +3649,12 @@
           "git_blob": "da6f108e4f8553a150f0abed8f3758944193c49a",
           "prior_status": "RESEARCH",
           "law": "recursive algorithms over list/function basis"
+        },
+        {
+          "family": "MAKE-A-LISP",
+          "path": "knowledge/d10-crossrepo-mal-v1.json",
+          "git_blob": "f0a432a28de471efde8d59106670ef79f4c2082c",
+          "prior_status": "CURRENT-OR-DERIVED-PROJECTION"
         }
       ]
     },
@@ -2676,6 +3710,16 @@
           "falsifier": "Побачити лише free list або пропустити in-use state.",
           "source_reference": "https://tumbleweed.nu/r/lm-3/uv/chinual.html",
           "provisional_noncanonical_coordinate": "1100111100"
+        },
+        {
+          "family": "PSL-INTERLISP-LISPM-RESIDUAL",
+          "path": "knowledge/d10-psl-interlisp-lispm-unmerged-residual-v1.json",
+          "git_blob": "f5438abf3460fa7caac14a30edf511f907a5be44",
+          "prior_status": "HOLD-DERIVED-RESOURCE-QUERY",
+          "law": "Обійти всі створені у ресурсі об'єкти та надати callback object, in-use bit, resource-data.",
+          "witness": "Побачити як leased, так і free об'єкти; кожен виклик callback містить стан in-use.",
+          "falsifier": "Побачити лише free list або пропустити in-use state.",
+          "source_reference": "https://tumbleweed.nu/r/lm-3/uv/chinual.html"
         }
       ]
     },
@@ -2915,6 +3959,46 @@
       ]
     },
     {
+      "semantic_name": "MULTIPLE-VALUE-PROG1",
+      "status": "UNSELECTED-RESEARCH-REVIEW",
+      "selected_d10": false,
+      "coordinate": null,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "evidence_sources": [
+        {
+          "family": "HISTORICAL-LISP-PRIMARY-MANUAL",
+          "path": "knowledge/d10-historical-primary-manual-reconciliation-20261009.json",
+          "git_blob": "37e10ef9a953ea62beb5e4b46ef20f21cbfb3ee4",
+          "prior_status": "HOLD-D2-CONTROL",
+          "law": "preserve all first-form return values, execute later effects in sequence, and return exactly the preserved cardinality and values",
+          "witness": "first expression yields (a,b); later expression changes state and yields c; overall result still (a,b) and effect occurred",
+          "falsifier": "only primary a retained or final c replaces first values",
+          "source_reference": "https://metaspec.dev/s_multiple-value-prog1.html"
+        }
+      ]
+    },
+    {
+      "semantic_name": "MUNKAM",
+      "status": "UNSELECTED-RESEARCH-REVIEW",
+      "selected_d10": false,
+      "coordinate": null,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "evidence_sources": [
+        {
+          "family": "HISTORICAL-LISP-PRIMARY-MANUAL",
+          "path": "knowledge/d10-historical-primary-manual-reconciliation-20261009.json",
+          "git_blob": "37e10ef9a953ea62beb5e4b46ef20f21cbfb3ee4",
+          "prior_status": "HOLD-SUBSTRATE-IDENTITY",
+          "law": "reverse a live object identity integer previously produced by MAKNUM; arbitrary/forged numbers are outside guaranteed contract",
+          "witness": "for a live x, MUNKAM(MAKNUM(x)) is EQ to x",
+          "falsifier": "accept arbitrary forged handle as a valid object or claim stable cross-process object restoration",
+          "source_reference": "https://softwarepreservation.computerhistory.org/LISP/MIT/MACLISP_Reference_Manual-Dec_17_1975.pdf"
+        }
+      ]
+    },
+    {
       "semantic_name": "N-A",
       "status": "UNSELECTED-RESEARCH-REVIEW",
       "selected_d10": false,
@@ -3000,6 +4084,22 @@
       ]
     },
     {
+      "semantic_name": "NIL?",
+      "status": "UNSELECTED-RESEARCH-REVIEW",
+      "selected_d10": false,
+      "coordinate": null,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "evidence_sources": [
+        {
+          "family": "MAKE-A-LISP",
+          "path": "knowledge/d10-crossrepo-mal-v1.json",
+          "git_blob": "f0a432a28de471efde8d59106670ef79f4c2082c",
+          "prior_status": "CURRENT-OR-DERIVED-PROJECTION"
+        }
+      ]
+    },
+    {
       "semantic_name": "NO-APPLICABLE-METHOD",
       "status": "UNSELECTED-RESEARCH-REVIEW",
       "selected_d10": false,
@@ -3058,6 +4158,38 @@
           "witness": "Last primary method invokes CALL-NEXT-METHOD; no-next-method receives the precise current method.",
           "falsifier": "Fail if silently returns NIL or restarts from the first method.",
           "source_reference": "https://www.cs.cmu.edu/Groups/AI/util/html/hyperspec/HyperSpec/Body/stagenfun_no-next-method.html"
+        }
+      ]
+    },
+    {
+      "semantic_name": "NTH",
+      "status": "UNSELECTED-RESEARCH-REVIEW",
+      "selected_d10": false,
+      "coordinate": null,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "evidence_sources": [
+        {
+          "family": "MAKE-A-LISP",
+          "path": "knowledge/d10-crossrepo-mal-v1.json",
+          "git_blob": "f0a432a28de471efde8d59106670ef79f4c2082c",
+          "prior_status": "CURRENT-OR-DERIVED-PROJECTION"
+        }
+      ]
+    },
+    {
+      "semantic_name": "NUMBER?",
+      "status": "UNSELECTED-RESEARCH-REVIEW",
+      "selected_d10": false,
+      "coordinate": null,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "evidence_sources": [
+        {
+          "family": "MAKE-A-LISP",
+          "path": "knowledge/d10-crossrepo-mal-v1.json",
+          "git_blob": "f0a432a28de471efde8d59106670ef79f4c2082c",
+          "prior_status": "CURRENT-OR-DERIVED-PROJECTION"
         }
       ]
     },
@@ -3403,6 +4535,22 @@
       ]
     },
     {
+      "semantic_name": "PR-STR",
+      "status": "UNSELECTED-RESEARCH-REVIEW",
+      "selected_d10": false,
+      "coordinate": null,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "evidence_sources": [
+        {
+          "family": "MAKE-A-LISP",
+          "path": "knowledge/d10-crossrepo-mal-v1.json",
+          "git_blob": "f0a432a28de471efde8d59106670ef79f4c2082c",
+          "prior_status": "CURRENT-OR-DERIVED-PROJECTION"
+        }
+      ]
+    },
+    {
       "semantic_name": "PRATYAHARA-MEMBERS",
       "status": "UNSELECTED-RESEARCH-REVIEW",
       "selected_d10": false,
@@ -3471,6 +4619,22 @@
       ]
     },
     {
+      "semantic_name": "PRINTLN",
+      "status": "UNSELECTED-RESEARCH-REVIEW",
+      "selected_d10": false,
+      "coordinate": null,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "evidence_sources": [
+        {
+          "family": "MAKE-A-LISP",
+          "path": "knowledge/d10-crossrepo-mal-v1.json",
+          "git_blob": "f0a432a28de471efde8d59106670ef79f4c2082c",
+          "prior_status": "CURRENT-OR-DERIVED-PROJECTION"
+        }
+      ]
+    },
+    {
       "semantic_name": "PRINTPROP",
       "status": "UNSELECTED-RESEARCH-REVIEW",
       "selected_d10": false,
@@ -3484,6 +4648,22 @@
           "git_blob": "da6f108e4f8553a150f0abed8f3758944193c49a",
           "prior_status": "RESEARCH",
           "law": "implicit mutable metadata attached to atomic symbols"
+        }
+      ]
+    },
+    {
+      "semantic_name": "PRN",
+      "status": "UNSELECTED-RESEARCH-REVIEW",
+      "selected_d10": false,
+      "coordinate": null,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "evidence_sources": [
+        {
+          "family": "MAKE-A-LISP",
+          "path": "knowledge/d10-crossrepo-mal-v1.json",
+          "git_blob": "f0a432a28de471efde8d59106670ef79f4c2082c",
+          "prior_status": "CURRENT-OR-DERIVED-PROJECTION"
         }
       ]
     },
@@ -3649,6 +4829,22 @@
       ]
     },
     {
+      "semantic_name": "READ-STRING",
+      "status": "UNSELECTED-RESEARCH-REVIEW",
+      "selected_d10": false,
+      "coordinate": null,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "evidence_sources": [
+        {
+          "family": "MAKE-A-LISP",
+          "path": "knowledge/d10-crossrepo-mal-v1.json",
+          "git_blob": "f0a432a28de471efde8d59106670ef79f4c2082c",
+          "prior_status": "CURRENT-OR-DERIVED-PROJECTION"
+        }
+      ]
+    },
+    {
       "semantic_name": "READCH",
       "status": "UNSELECTED-RESEARCH-REVIEW",
       "selected_d10": false,
@@ -3679,6 +4875,22 @@
           "git_blob": "da6f108e4f8553a150f0abed8f3758944193c49a",
           "prior_status": "RESEARCH",
           "law": "console/card/punch/assembly I/O and transcript effects"
+        }
+      ]
+    },
+    {
+      "semantic_name": "READLINE",
+      "status": "UNSELECTED-RESEARCH-REVIEW",
+      "selected_d10": false,
+      "coordinate": null,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "evidence_sources": [
+        {
+          "family": "MAKE-A-LISP",
+          "path": "knowledge/d10-crossrepo-mal-v1.json",
+          "git_blob": "f0a432a28de471efde8d59106670ef79f4c2082c",
+          "prior_status": "HOLD-SEMANTIC-REVIEW"
         }
       ]
     },
@@ -3765,6 +4977,16 @@
           "falsifier": "Вважати, що setter сам не має потреби повертати старий стан.",
           "source_reference": "https://softwarepreservation.computerhistory.org/LISP/interlisp/Interlisp-Oct_1978.pdf",
           "provisional_noncanonical_coordinate": "1100110110"
+        },
+        {
+          "family": "PSL-INTERLISP-LISPM-RESIDUAL",
+          "path": "knowledge/d10-psl-interlisp-lispm-unmerged-residual-v1.json",
+          "git_blob": "f5438abf3460fa7caac14a30edf511f907a5be44",
+          "prior_status": "HOLD-D2-DERIVABLE",
+          "law": "Виконати setter, що повертає старий стан, запустити body і відновити налаштування застосуванням setter до збереженого значення.",
+          "witness": "(RESETFORM (RADIX 8) (FOO)) повертає старий radix після FOO.",
+          "falsifier": "Вважати, що setter сам не має потреби повертати старий стан.",
+          "source_reference": "https://softwarepreservation.computerhistory.org/LISP/interlisp/Interlisp-Oct_1978.pdf"
         }
       ]
     },
@@ -3786,6 +5008,16 @@
           "falsifier": "Оголосити гарантію для всіх можливих інших нелокальних переходів, які посібник прямо виключає.",
           "source_reference": "https://softwarepreservation.computerhistory.org/LISP/interlisp/Interlisp-Oct_1978.pdf",
           "provisional_noncanonical_coordinate": "1100110010"
+        },
+        {
+          "family": "PSL-INTERLISP-LISPM-RESIDUAL",
+          "path": "knowledge/d10-psl-interlisp-lispm-unmerged-residual-v1.json",
+          "git_blob": "f5438abf3460fa7caac14a30edf511f907a5be44",
+          "prior_status": "HOLD-D2-RESTORATION",
+          "law": "Рамка для послідовності змін зі стеком відновлення на normal completion/error/CONTROL-D у задокументованому діапазоні.",
+          "witness": "Зберегти radix, змінити його, спричинити error або RESET; старий radix має відновитися.",
+          "falsifier": "Оголосити гарантію для всіх можливих інших нелокальних переходів, які посібник прямо виключає.",
+          "source_reference": "https://softwarepreservation.computerhistory.org/LISP/interlisp/Interlisp-Oct_1978.pdf"
         }
       ]
     },
@@ -3807,6 +5039,16 @@
           "falsifier": "Застосувати cleanup до неправильного попереднього стану або не виконати його на error.",
           "source_reference": "https://softwarepreservation.computerhistory.org/LISP/interlisp/Interlisp-Oct_1978.pdf",
           "provisional_noncanonical_coordinate": "1100110011"
+        },
+        {
+          "family": "PSL-INTERLISP-LISPM-RESIDUAL",
+          "path": "knowledge/d10-psl-interlisp-lispm-unmerged-residual-v1.json",
+          "git_blob": "f5438abf3460fa7caac14a30edf511f907a5be44",
+          "prior_status": "HOLD-D2-RESTORATION",
+          "law": "Зареєструвати відновлення змінної або старого стану оператора у найближчій RESETLST/RESET рамці.",
+          "witness": "RESETSAVE (RADIX 8) зберігає попередній radix; RESETSAVE NIL (LIST 'CLOSEF FILE) викликає cleanup.",
+          "falsifier": "Застосувати cleanup до неправильного попереднього стану або не виконати його на error.",
+          "source_reference": "https://softwarepreservation.computerhistory.org/LISP/interlisp/Interlisp-Oct_1978.pdf"
         }
       ]
     },
@@ -3828,6 +5070,16 @@
           "falsifier": "Затерти старий global x назавжди при помилці.",
           "source_reference": "https://softwarepreservation.computerhistory.org/LISP/interlisp/Interlisp-Oct_1978.pdf",
           "provisional_noncanonical_coordinate": "1100110100"
+        },
+        {
+          "family": "PSL-INTERLISP-LISPM-RESIDUAL",
+          "path": "knowledge/d10-psl-interlisp-lispm-unmerged-residual-v1.json",
+          "git_blob": "f5438abf3460fa7caac14a30edf511f907a5be44",
+          "prior_status": "HOLD-D2-DERIVABLE",
+          "law": "Тимчасово встановити глобальну змінну й відновити попередній стан після області.",
+          "witness": "Resetvar x new (f) бачить x=new всередині та x=old після.",
+          "falsifier": "Затерти старий global x назавжди при помилці.",
+          "source_reference": "https://softwarepreservation.computerhistory.org/LISP/interlisp/Interlisp-Oct_1978.pdf"
         }
       ]
     },
@@ -3849,6 +5101,32 @@
           "falsifier": "Вважати deep binding завжди тотожним shallow binding для втручання у global storage.",
           "source_reference": "https://softwarepreservation.computerhistory.org/LISP/interlisp/Interlisp-Oct_1978.pdf",
           "provisional_noncanonical_coordinate": "1100110101"
+        },
+        {
+          "family": "PSL-INTERLISP-LISPM-RESIDUAL",
+          "path": "knowledge/d10-psl-interlisp-lispm-unmerged-residual-v1.json",
+          "git_blob": "f5438abf3460fa7caac14a30edf511f907a5be44",
+          "prior_status": "HOLD-D2-BINDING-DERIVABILITY",
+          "law": "Тимчасово перевизначати набір global vars; семантика залежить від shallow/deep binding.",
+          "witness": "Два globals тимчасово змінені в body, і кожен відновлений у правильній області.",
+          "falsifier": "Вважати deep binding завжди тотожним shallow binding для втручання у global storage.",
+          "source_reference": "https://softwarepreservation.computerhistory.org/LISP/interlisp/Interlisp-Oct_1978.pdf"
+        }
+      ]
+    },
+    {
+      "semantic_name": "REST",
+      "status": "UNSELECTED-RESEARCH-REVIEW",
+      "selected_d10": false,
+      "coordinate": null,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "evidence_sources": [
+        {
+          "family": "MAKE-A-LISP",
+          "path": "knowledge/d10-crossrepo-mal-v1.json",
+          "git_blob": "f0a432a28de471efde8d59106670ef79f4c2082c",
+          "prior_status": "CURRENT-OR-DERIVED-PROJECTION"
         }
       ]
     },
@@ -4513,6 +5791,22 @@
       ]
     },
     {
+      "semantic_name": "SLURP",
+      "status": "UNSELECTED-RESEARCH-REVIEW",
+      "selected_d10": false,
+      "coordinate": null,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "evidence_sources": [
+        {
+          "family": "MAKE-A-LISP",
+          "path": "knowledge/d10-crossrepo-mal-v1.json",
+          "git_blob": "f0a432a28de471efde8d59106670ef79f4c2082c",
+          "prior_status": "CURRENT-OR-DERIVED-PROJECTION"
+        }
+      ]
+    },
+    {
       "semantic_name": "SPEAK",
       "status": "UNSELECTED-RESEARCH-REVIEW",
       "selected_d10": false,
@@ -4615,6 +5909,39 @@
       ]
     },
     {
+      "semantic_name": "STR",
+      "status": "UNSELECTED-RESEARCH-REVIEW",
+      "selected_d10": false,
+      "coordinate": null,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "evidence_sources": [
+        {
+          "family": "MAKE-A-LISP",
+          "path": "knowledge/d10-crossrepo-mal-v1.json",
+          "git_blob": "f0a432a28de471efde8d59106670ef79f4c2082c",
+          "prior_status": "CURRENT-OR-DERIVED-PROJECTION"
+        }
+      ]
+    },
+    {
+      "semantic_name": "STRING->CODEPOINT",
+      "status": "UNSELECTED-RESEARCH-REVIEW",
+      "selected_d10": false,
+      "coordinate": null,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "evidence_sources": [
+        {
+          "family": "D9-OVERFLOW-RECOVERY",
+          "path": "knowledge/d10-recovery-v1.json",
+          "git_blob": "94defd3830eebe2d69cf9f7c313b8ab0846460ca",
+          "prior_status": "LOWER-SURFACE-PROJECTION",
+          "law": "Return the Unicode scalar value of one-character string"
+        }
+      ]
+    },
+    {
       "semantic_name": "STRING->SYMBOL",
       "status": "UNSELECTED-RESEARCH-REVIEW",
       "selected_d10": false,
@@ -4628,6 +5955,42 @@
           "git_blob": "da6f108e4f8553a150f0abed8f3758944193c49a",
           "prior_status": "RESEARCH",
           "law": "materialize a symbol carrying exact supplied name"
+        }
+      ]
+    },
+    {
+      "semantic_name": "STRING-CI-HASH",
+      "status": "UNSELECTED-RESEARCH-REVIEW",
+      "selected_d10": false,
+      "coordinate": null,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "evidence_sources": [
+        {
+          "family": "R6RS-LISP-SCHEME-AUDIT",
+          "path": "knowledge/d10-r6rs-hashtable-hygiene-audit-v1.json",
+          "git_blob": "c6af11760a10a5944d9df286c52eb84e18bd3c96",
+          "prior_status": "HOLD-RESEARCH-NO-ADMISSION",
+          "law": "хеш рядка без врахування регістру, сумісний зі string-ci=?",
+          "witness": "ключі, рівні за string-ci=?, мають рівні хеші",
+          "falsifier": "рядки, що відрізняються регістром, гарантовано мають різні хеші",
+          "source_reference": "https://r6rs.org/final/html/r6rs-lib/r6rs-lib-Z-H-14.html"
+        }
+      ]
+    },
+    {
+      "semantic_name": "STRING?",
+      "status": "UNSELECTED-RESEARCH-REVIEW",
+      "selected_d10": false,
+      "coordinate": null,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "evidence_sources": [
+        {
+          "family": "MAKE-A-LISP",
+          "path": "knowledge/d10-crossrepo-mal-v1.json",
+          "git_blob": "f0a432a28de471efde8d59106670ef79f4c2082c",
+          "prior_status": "CURRENT-OR-DERIVED-PROJECTION"
         }
       ]
     },
@@ -4649,6 +6012,22 @@
       ]
     },
     {
+      "semantic_name": "SYMBOL",
+      "status": "UNSELECTED-RESEARCH-REVIEW",
+      "selected_d10": false,
+      "coordinate": null,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "evidence_sources": [
+        {
+          "family": "MAKE-A-LISP",
+          "path": "knowledge/d10-crossrepo-mal-v1.json",
+          "git_blob": "f0a432a28de471efde8d59106670ef79f4c2082c",
+          "prior_status": "CURRENT-OR-DERIVED-PROJECTION"
+        }
+      ]
+    },
+    {
       "semantic_name": "SYMBOL->STRING",
       "status": "UNSELECTED-RESEARCH-REVIEW",
       "selected_d10": false,
@@ -4662,6 +6041,42 @@
           "git_blob": "da6f108e4f8553a150f0abed8f3758944193c49a",
           "prior_status": "RESEARCH",
           "law": "observe exact symbol name as text"
+        }
+      ]
+    },
+    {
+      "semantic_name": "SYMBOL?",
+      "status": "UNSELECTED-RESEARCH-REVIEW",
+      "selected_d10": false,
+      "coordinate": null,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "evidence_sources": [
+        {
+          "family": "MAKE-A-LISP",
+          "path": "knowledge/d10-crossrepo-mal-v1.json",
+          "git_blob": "f0a432a28de471efde8d59106670ef79f4c2082c",
+          "prior_status": "CURRENT-OR-DERIVED-PROJECTION"
+        }
+      ]
+    },
+    {
+      "semantic_name": "SYNTAX->DATUM",
+      "status": "UNSELECTED-RESEARCH-REVIEW",
+      "selected_d10": false,
+      "coordinate": null,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "evidence_sources": [
+        {
+          "family": "R6RS-LISP-SCHEME-AUDIT",
+          "path": "knowledge/d10-r6rs-hashtable-hygiene-audit-v1.json",
+          "git_blob": "c6af11760a10a5944d9df286c52eb84e18bd3c96",
+          "prior_status": "HOLD-RESEARCH-NO-ADMISSION",
+          "law": "зняття синтаксичного контексту із синтаксичного об'єкта до звичайних даних",
+          "witness": "після конверсії ідентифікатор стає символом без marks/lexical context",
+          "falsifier": "контекстні мітки потай залишаються семантично активними",
+          "source_reference": "https://r6rs.org/final/html/r6rs-lib/r6rs-lib-Z-H-13.html"
         }
       ]
     },
@@ -4702,6 +6117,39 @@
       ]
     },
     {
+      "semantic_name": "TABLESPACE",
+      "status": "UNSELECTED-RESEARCH-REVIEW",
+      "selected_d10": false,
+      "coordinate": null,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "evidence_sources": [
+        {
+          "family": "D9-OVERFLOW-RECOVERY",
+          "path": "knowledge/d10-recovery-v1.json",
+          "git_blob": "94defd3830eebe2d69cf9f7c313b8ab0846460ca",
+          "prior_status": "HOLD-SEMANTIC-REVIEW",
+          "law": "number of cells in a hash table"
+        },
+        {
+          "family": "D9-OVERFLOW-RECOVERY-V2",
+          "path": "knowledge/d10-recovery-v2.json",
+          "git_blob": "07cb183dec2aefc5fd668e03b4823f31b75a3b01",
+          "prior_status": "HOLD-SEMANTIC-REVIEW"
+        },
+        {
+          "family": "HISTORICAL-LISP-PRIMARY-MANUAL",
+          "path": "knowledge/d10-historical-primary-manual-reconciliation-20261009.json",
+          "git_blob": "37e10ef9a953ea62beb5e4b46ef20f21cbfb3ee4",
+          "prior_status": "HOLD-UNVERIFIED-SOURCE",
+          "law": "claimed allocated hash table capacity distinct from number of stored entries; standard/portable behavior unproven",
+          "witness": "find primary definition differentiating capacity n from count k; require n>=k if applicable",
+          "falsifier": "merely relabel count as capacity or invent a new Core law without source",
+          "source_reference": "https://github.com/juv4uk/sens/blob/main/knowledge/d9-overflow-review-v1.json"
+        }
+      ]
+    },
+    {
       "semantic_name": "TEMPUS-FUGIT",
       "status": "UNSELECTED-RESEARCH-REVIEW",
       "selected_d10": false,
@@ -4732,6 +6180,33 @@
           "git_blob": "da6f108e4f8553a150f0abed8f3758944193c49a",
           "prior_status": "RESEARCH",
           "law": "console/card/punch/assembly I/O and transcript effects"
+        }
+      ]
+    },
+    {
+      "semantic_name": "THE",
+      "status": "UNSELECTED-RESEARCH-REVIEW",
+      "selected_d10": false,
+      "coordinate": null,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "evidence_sources": [
+        {
+          "family": "D9-OVERFLOW-RECOVERY",
+          "path": "knowledge/d10-recovery-v1.json",
+          "git_blob": "94defd3830eebe2d69cf9f7c313b8ab0846460ca",
+          "prior_status": "MECHANISM-OR-SURFACE-PROJECTION",
+          "law": "declare a value's type for compilation without checking"
+        },
+        {
+          "family": "HISTORICAL-LISP-PRIMARY-MANUAL",
+          "path": "knowledge/d10-historical-primary-manual-reconciliation-20261009.json",
+          "git_blob": "37e10ef9a953ea62beb5e4b46ef20f21cbfb3ee4",
+          "prior_status": "HOLD-D2-TYPE-CONTROL",
+          "law": "declaration of expected type(s) of expression result(s), preserving exact return value cardinality; mismatched types have undefined consequences, NOT mandated runtime check",
+          "witness": "correctly typed two-result expression returns the same two values with declaration in place",
+          "falsifier": "wrongly claim THE necessarily throws runtime type error for a violated declaration",
+          "source_reference": "https://www.cs.cmu.edu/Groups/AI/util/html/hyperspec/HyperSpec/Body/speope_the.html"
         }
       ]
     },
@@ -4772,6 +6247,22 @@
       ]
     },
     {
+      "semantic_name": "THROW",
+      "status": "UNSELECTED-RESEARCH-REVIEW",
+      "selected_d10": false,
+      "coordinate": null,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "evidence_sources": [
+        {
+          "family": "MAKE-A-LISP",
+          "path": "knowledge/d10-crossrepo-mal-v1.json",
+          "git_blob": "f0a432a28de471efde8d59106670ef79f4c2082c",
+          "prior_status": "CURRENT-OR-DERIVED-PROJECTION"
+        }
+      ]
+    },
+    {
       "semantic_name": "TIME-LONGITUDE-POLAR-PROJECTION",
       "status": "UNSELECTED-RESEARCH-REVIEW",
       "selected_d10": false,
@@ -4785,6 +6276,22 @@
           "git_blob": "131369263ac37c27798bb3c95521eb99e52b8f10",
           "prior_status": "HOLD",
           "provisional_noncanonical_coordinate": "1101111000"
+        }
+      ]
+    },
+    {
+      "semantic_name": "TIME-MS",
+      "status": "UNSELECTED-RESEARCH-REVIEW",
+      "selected_d10": false,
+      "coordinate": null,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "evidence_sources": [
+        {
+          "family": "MAKE-A-LISP",
+          "path": "knowledge/d10-crossrepo-mal-v1.json",
+          "git_blob": "f0a432a28de471efde8d59106670ef79f4c2082c",
+          "prior_status": "CURRENT-OR-DERIVED-PROJECTION"
         }
       ]
     },
@@ -4923,6 +6430,22 @@
           "git_blob": "2c5391d4c8c64e297994387e0ded47b7e65e0e71",
           "prior_status": "NAME-ONLY-NO-SEMANTIC-EVIDENCE",
           "provisional_noncanonical_coordinate": "1100011010"
+        }
+      ]
+    },
+    {
+      "semantic_name": "TRUE?",
+      "status": "UNSELECTED-RESEARCH-REVIEW",
+      "selected_d10": false,
+      "coordinate": null,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "evidence_sources": [
+        {
+          "family": "MAKE-A-LISP",
+          "path": "knowledge/d10-crossrepo-mal-v1.json",
+          "git_blob": "f0a432a28de471efde8d59106670ef79f4c2082c",
+          "prior_status": "CURRENT-OR-DERIVED-PROJECTION"
         }
       ]
     },
@@ -5121,6 +6644,16 @@
           "falsifier": "Не виконати handler на нормальному завершенні або загубити tag при throw.",
           "source_reference": "https://reduce-algebra.sourceforge.io/lisp-docs/allman1.pdf",
           "provisional_noncanonical_coordinate": "1100110001"
+        },
+        {
+          "family": "PSL-INTERLISP-LISPM-RESIDUAL",
+          "path": "knowledge/d10-psl-interlisp-lispm-unmerged-residual-v1.json",
+          "git_blob": "f5438abf3460fa7caac14a30edf511f907a5be44",
+          "prior_status": "HOLD-D2-ONLY",
+          "law": "Уніфікувати normal and caught nonlocal exit для handler(tag,value), при нормальному результаті tag=nil.",
+          "witness": "Нормальне завершення x викликає handler(nil,x); tagged throw викликає handler(tag,val).",
+          "falsifier": "Не виконати handler на нормальному завершенні або загубити tag при throw.",
+          "source_reference": "https://reduce-algebra.sourceforge.io/lisp-docs/allman1.pdf"
         }
       ]
     },
@@ -5202,6 +6735,32 @@
           "falsifier": "Об'єкт назавжди залишається in-use після throw.",
           "source_reference": "https://tumbleweed.nu/r/lm-3/uv/chinual4th.html",
           "provisional_noncanonical_coordinate": "1100111010"
+        },
+        {
+          "family": "PSL-INTERLISP-LISPM-RESIDUAL",
+          "path": "knowledge/d10-psl-interlisp-lispm-unmerged-residual-v1.json",
+          "git_blob": "f5438abf3460fa7caac14a30edf511f907a5be44",
+          "prior_status": "HOLD-D2-DERIVABLE",
+          "law": "Scoped resource lease, який використовує unwind-protect для повернення об'єкта навіть при throw.",
+          "witness": "throw всередині body; resource lease повернений в pool.",
+          "falsifier": "Об'єкт назавжди залишається in-use після throw.",
+          "source_reference": "https://tumbleweed.nu/r/lm-3/uv/chinual4th.html"
+        }
+      ]
+    },
+    {
+      "semantic_name": "VEC",
+      "status": "UNSELECTED-RESEARCH-REVIEW",
+      "selected_d10": false,
+      "coordinate": null,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "evidence_sources": [
+        {
+          "family": "MAKE-A-LISP",
+          "path": "knowledge/d10-crossrepo-mal-v1.json",
+          "git_blob": "f0a432a28de471efde8d59106670ef79f4c2082c",
+          "prior_status": "CURRENT-OR-DERIVED-PROJECTION"
         }
       ]
     },
@@ -5219,6 +6778,12 @@
           "git_blob": "da6f108e4f8553a150f0abed8f3758944193c49a",
           "prior_status": "RESEARCH",
           "law": "construct finite indexed aggregate"
+        },
+        {
+          "family": "MAKE-A-LISP",
+          "path": "knowledge/d10-crossrepo-mal-v1.json",
+          "git_blob": "f0a432a28de471efde8d59106670ef79f4c2082c",
+          "prior_status": "CURRENT-OR-DERIVED-PROJECTION"
         }
       ]
     },
@@ -5361,6 +6926,16 @@
           "falsifier": "Результат залежить від зміни базового тіла замість стану обгорток.",
           "source_reference": "https://reduce-algebra.sourceforge.io/lisp-docs/allman1.pdf",
           "provisional_noncanonical_coordinate": "1100101011"
+        },
+        {
+          "family": "PSL-INTERLISP-LISPM-RESIDUAL",
+          "path": "knowledge/d10-psl-interlisp-lispm-unmerged-residual-v1.json",
+          "git_blob": "f5438abf3460fa7caac14a30edf511f907a5be44",
+          "prior_status": "HOLD-DERIVABLE-QUERY",
+          "law": "Спостерігати факт наявності принаймні однієї обгортки на іменованій функції.",
+          "witness": "Без обгорток повернути NO, з однією YES.",
+          "falsifier": "Результат залежить від зміни базового тіла замість стану обгорток.",
+          "source_reference": "https://reduce-algebra.sourceforge.io/lisp-docs/allman1.pdf"
         }
       ]
     },
@@ -5382,6 +6957,16 @@
           "falsifier": "Query непов'язаного типу повертає позитивний результат.",
           "source_reference": "https://reduce-algebra.sourceforge.io/lisp-docs/allman1.pdf",
           "provisional_noncanonical_coordinate": "1100101100"
+        },
+        {
+          "family": "PSL-INTERLISP-LISPM-RESIDUAL",
+          "path": "knowledge/d10-psl-interlisp-lispm-unmerged-residual-v1.json",
+          "git_blob": "f5438abf3460fa7caac14a30edf511f907a5be44",
+          "prior_status": "HOLD-DERIVABLE-QUERY",
+          "law": "Спостерігати наявність обгортки конкретного типу, а не будь-якої.",
+          "witness": "Після додавання only trace: query trace позитивний, advice негативний.",
+          "falsifier": "Query непов'язаного типу повертає позитивний результат.",
+          "source_reference": "https://reduce-algebra.sourceforge.io/lisp-docs/allman1.pdf"
         }
       ]
     },
@@ -5403,6 +6988,16 @@
           "falsifier": "Плутати порядок реальних шарів із глобальною майбутньою wrapper-standard-order.",
           "source_reference": "https://reduce-algebra.sourceforge.io/lisp-docs/allman1.pdf",
           "provisional_noncanonical_coordinate": "1100101101"
+        },
+        {
+          "family": "PSL-INTERLISP-LISPM-RESIDUAL",
+          "path": "knowledge/d10-psl-interlisp-lispm-unmerged-residual-v1.json",
+          "git_blob": "f5438abf3460fa7caac14a30edf511f907a5be44",
+          "prior_status": "HOLD-DERIVABLE-QUERY",
+          "law": "Отримати типи чинних обгорток функції у реальному порядку вкладення.",
+          "witness": "Два типи на f відображаються у списку типів; після видалення одного список коротший.",
+          "falsifier": "Плутати порядок реальних шарів із глобальною майбутньою wrapper-standard-order.",
+          "source_reference": "https://reduce-algebra.sourceforge.io/lisp-docs/allman1.pdf"
         }
       ]
     },
