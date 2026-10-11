@@ -297,6 +297,32 @@ fn convert(input: &Path, output_stem: &Path) -> Result<(), String> {
     Ok(())
 }
 
+/// Offline-only exact restore of an explicitly selected file. This must never
+/// be wired into production .sens content auto-detection.
+fn restore_to_t5(input: &Path, output_stem: &Path) -> Result<(), String> {
+    let extension = input.extension().and_then(|x| x.to_str())
+        .ok_or("missing .sens/.senc source extension")?;
+    if output_stem.extension().is_some() {
+        return Err("restore destination must be an extension-free output stem".into());
+    }
+    let raw = fs::read(input).map_err(|e| format!("restore source: {e}"))?;
+    let restored = explicit_decode(&raw, extension)?;
+    read_t5_canon(&restored)?;
+    let destination = output_stem.with_extension("sens");
+    if destination == input {
+        return Err("restore cannot overwrite its input".into());
+    }
+    let mut out = OpenOptions::new().write(true).create_new(true)
+        .open(&destination).map_err(|e| format!("restore create-new: {e}"))?;
+    out.write_all(&restored).map_err(|e| format!("restore write: {e}"))?;
+    out.sync_all().map_err(|e| format!("restore sync: {e}"))?;
+    if fs::read(&destination).map_err(|e| format!("restore read: {e}"))? != restored {
+        return Err("restored physical bytes disagree with decoded T5".into());
+    }
+    println!("{}\tRESTORED_T5\t{}B", destination.display(), restored.len());
+    Ok(())
+}
+
 fn run() -> Result<(), String> {
     let args = std::env::args().skip(1).collect::<Vec<_>>();
     match args.as_slice() {
@@ -304,7 +330,9 @@ fn run() -> Result<(), String> {
         [flag] if flag == "--report" => report(),
         [flag, source, target] if flag == "--convert" =>
             convert(Path::new(source), Path::new(target)),
-        _ => Err("usage: two_codec_small_programs --self-test | --report | --convert in.sens OUT_STEM".into()),
+        [flag, source, target] if flag == "--restore" =>
+            restore_to_t5(Path::new(source), Path::new(target)),
+        _ => Err("usage: two_codec_small_programs --self-test | --report | --convert in.sens OUT_STEM | --restore in.(sens|senc) OUT_STEM".into()),
     }
 }
 
