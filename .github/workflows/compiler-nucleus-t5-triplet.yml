@@ -20,6 +20,7 @@ on:
       - "lib/domains/d3.lisp"
       - "lib/domains/d4.lisp"
       - "crates/sens-cli/src/bin/sens-trit.rs"
+      - "tests/test_migrate_t5_batch.py"
   workflow_dispatch:
 
 permissions:
