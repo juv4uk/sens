@@ -172,8 +172,17 @@ def validate(root, manifest_path, write=False):
     if git_blob(live_bytes) != live["git_blob"]:
         raise ValueError("LIVE_INVENTORY_PIN_MISMATCH")
     current_rows = json.loads(live_bytes)["rows"]
-    if (len(current_rows) < len(canonical["rows"]) or
-            current_rows[:len(canonical["rows"])] != canonical["rows"]):
+    review_rows = current_rows
+    if live["path"] == "knowledge/d10-v18-semantic-inventory.json":
+        from check_d10_v18_research_placement import check as verify_v18
+        verify_v18(root)
+        frozen = pointer["historical_v17_research_inventory"]
+        frozen_raw = (root / frozen["path"]).read_bytes()
+        if git_blob(frozen_raw) != frozen["git_blob"]:
+            raise ValueError("FROZEN_V17_SHA_DRIFT")
+        review_rows = json.loads(frozen_raw)["rows"]
+    if (len(review_rows) < len(canonical["rows"]) or
+            review_rows[:len(canonical["rows"])] != canonical["rows"]):
         raise ValueError("FROZEN_V9_PREFIX_REWRITTEN")
     rows = parse_source(original.decode("utf-8"))
     catalog_selected = {r["candidate_id"]: r for r in rows

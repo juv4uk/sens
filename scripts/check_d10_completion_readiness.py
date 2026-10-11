@@ -104,8 +104,12 @@ def audit(root):
     try:
         ptr = json.loads((k/"d10-current-inventory.json").read_text(encoding="utf-8"))
         if ptr["canonical_current"]["path"] == "knowledge/d10-v18-semantic-inventory.json":
-            from check_d10_v18_research_placement import check as verify_v18_gauge
-            verify_v18_gauge(root)
+            import importlib.util
+            verifier = importlib.util.spec_from_file_location(
+                "d10_v18_gauge_verifier", root / "scripts/check_d10_v18_research_placement.py")
+            module = importlib.util.module_from_spec(verifier)
+            verifier.loader.exec_module(module)
+            module.check(root)
             frozen = ptr["historical_v17_research_inventory"]
             snapshot_raw = (root / frozen["path"]).read_bytes()
             if sha(snapshot_raw) != frozen["git_blob"]:

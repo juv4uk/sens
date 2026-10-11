@@ -68,8 +68,22 @@ def verify(document: dict, root: Path = ROOT) -> dict:
     live_bytes = live_path.read_bytes()
     require(digest(live_bytes) == live["git_blob"], "current D10 SHA drift")
     live_rows = json.loads(live_bytes)["rows"]
-    require(len(live_rows) >= len(current["rows"])
-            and live_rows[:len(current["rows"])] == current["rows"], "current D10 broke archived v7 prefix")
+    review_rows = live_rows
+    if live["path"] == "knowledge/d10-v18-semantic-inventory.json":
+        # The v18 migration is coordinate-only: preserve frozen semantic
+        # snapshots and separately verify every live coordinate against gauge.
+        import importlib.util
+        verifier = importlib.util.spec_from_file_location(
+            "d10_v18_database_verifier", root / "scripts/check_d10_v18_research_placement.py")
+        module = importlib.util.module_from_spec(verifier)
+        verifier.loader.exec_module(module)
+        module.check(root)
+        frozen = pointer["historical_v17_research_inventory"]
+        archived_bytes = (root / frozen["path"]).read_bytes()
+        require(digest(archived_bytes) == frozen["git_blob"], "frozen v17 git SHA drift")
+        review_rows = json.loads(archived_bytes)["rows"]
+    require(len(review_rows) >= len(current["rows"])
+            and review_rows[:len(current["rows"])] == current["rows"], "current D10 broke archived v7 prefix")
     selected = document["selected"]
     pending = document["pending"]
     excluded = document["lower_domain_name_overlaps"]
