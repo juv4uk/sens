@@ -86,8 +86,8 @@ class BatchSourceTests(unittest.TestCase):
                 # three-field/host-truth D3 semantics are intentionally
                 # still present, and never declared fully migrated.
                 self.assertIn(path, MOD.PARTIAL_D4_WITH_LEGACY_D3)
-                self.assertEqual(row["status"], "blocked")
                 row = report["files"][0]
+                self.assertEqual(row["status"], "blocked")
                 self.assertTrue(
                     any("COND_HOST_TRUTH" in reason
                         or "COND_NOT_TWO_FIELDS" in reason
