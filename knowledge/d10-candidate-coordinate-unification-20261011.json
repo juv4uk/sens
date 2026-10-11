@@ -3,7 +3,7 @@
   "date": "2026-10-11",
   "branch_policy": "DIRECT-TO-MAIN-NO-NEW-GIT-BRANCHES",
   "authority": "CANDIDATE-CENSUS-RESEARCH-ONLY; no ratification, T5 or executable opcode authority",
-  "interpretation": "A 1024-cell research census from pinned existing sources. 715 records remain selected semantic candidates; 212 additional occupied coordinates are only provisional name reservations (including 36 source-dossier followups), not adopted Core laws. Missing cells remain vacant instead of fabricated.",
+  "interpretation": "1024-cell source-pinned research census: 715 currently selected laws, 222 tentative research candidates without Core authority, 87 empty cells. Library-only and exact lower-domain names stay in the source census without occupying a D10 code.",
   "sources": [
     {
       "path": "knowledge/d10-v5-semantic-inventory.json",
@@ -96,25 +96,42 @@
     {
       "path": "knowledge/d10-reason-alternate-define-donor-v1.json",
       "git_blob": "2534d44e679f2c3d5fd9e8c34416cb08f1150d4d"
+    },
+    {
+      "path": "research/domain-archive/20261011/pr4883/knowledge/d10-loops-active-values-intake-v1.json",
+      "git_blob": "f88711aa939c84f55e61038cf4d362731d8f4597"
+    },
+    {
+      "path": "knowledge/d10-symbolic-ai-strips-goal-regression-research-v1.json",
+      "git_blob": "371e84f7a15e2be1ebaccf38a1155a7237446700"
+    },
+    {
+      "path": "knowledge/d10-interdisciplinary-science-proposals-20261009.json",
+      "git_blob": "80bb9e97bfbfe8f3afe96f25bf07b5c8905233ed"
+    },
+    {
+      "path": "knowledge/d10-proposal-ledger-symbolic-v3.tsv",
+      "git_blob": "d190cb2685728b4535a2ba5f71217923b8d6e5d9"
     }
   ],
   "accounting": {
     "canonical_selected": 715,
     "provisional_source": 96,
     "provisional_historical": 80,
-    "provisional_new_source": 36,
+    "provisional_new_source": 46,
     "lower_overlap_excluded": 97,
-    "additional_source_names_unallocated": 97,
-    "unallocated": 97,
+    "additional_source_names_unallocated": 273,
+    "unallocated": 87,
     "ratified": 0,
-    "candidate_names_with_10bit_research_coordinates": 927,
-    "accounted_names_including_lower_overlaps_and_unallocated_source_census": 1121,
+    "candidate_names_with_10bit_research_coordinates": 937,
+    "accounted_names_including_lower_overlaps_and_unallocated_source_census": 1307,
     "capacity": 1024,
     "selected_semantic_candidates": 715,
     "ratified_d10_residents": 0,
     "pending_evidence_for_formal_full_domain": 309,
     "verified_all_1024_assigned_to_semantics": false,
-    "provisional_followup_new_source": 29
+    "provisional_followup_new_source": 39,
+    "symbolic_ledger_candidate_names_preserved_without_core_admission": 176
   },
   "policies": [
     "Preserve v5 and ratified D1-D9 byte-for-byte; this artifact does not mutate the normative tables.",
@@ -12216,53 +12233,336 @@
     },
     {
       "coordinate": "1110011111",
-      "status": "NO-ATTESTED-D10-CANDIDATE",
-      "semantic_name": null
+      "status": "PROVISIONAL-SOURCE-RESEARCH-HOLD-NOT-SELECTED",
+      "semantic_name": "ACTIVE-VALUE-GET",
+      "coordinate_basis": "SOURCE-PINNED-NONCANONICAL-RESEARCH-RESERVATION",
+      "selected": false,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "stable_id": "d10.loops.1983.active-value-get",
+      "source_path": "research/domain-archive/20261011/pr4883/knowledge/d10-loops-active-values-intake-v1.json",
+      "source_git_blob": "f88711aa939c84f55e61038cf4d362731d8f4597",
+      "source_status": "SELECTED-RESEARCH-CANDIDATE",
+      "observable_law": "Nested getter evaluation first resolves deeper localState (inner→outer) and returns the outermost getFn result; a missing getFn yields the resolved localState.",
+      "positive_witnesses": [
+        "Nested stored 10; inner get adds 2, outer get multiplies by 3 -> 36, trace inner:get,outer:get.",
+        "A plain value is read unchanged, and getFn absent returns child-localState result."
+      ],
+      "falsifiers": [
+        "Executing outer get before inner get returns a different result/trace.",
+        "GetLocalStateOnly must not invoke any nested getFn, and must expose immediate nested value."
+      ],
+      "source_historical_reference": "https://www.markstefik.com/wp-content/uploads/2011/04/1983-loops-manual-Bobrow-Stefik-part-1.pdf",
+      "core_vs_library_review": "Could be derived using closures wrapping DEREF with explicitly composed observers.",
+      "independent_oracle": "PENDING-EXTERNAL-LOOPS"
     },
     {
       "coordinate": "1110100000",
-      "status": "NO-ATTESTED-D10-CANDIDATE",
-      "semantic_name": null
+      "status": "PROVISIONAL-SOURCE-RESEARCH-HOLD-NOT-SELECTED",
+      "semantic_name": "ACTIVE-VALUE-PUT",
+      "coordinate_basis": "SOURCE-PINNED-NONCANONICAL-RESEARCH-RESERVATION",
+      "selected": false,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "stable_id": "d10.loops.1983.active-value-put",
+      "source_path": "research/domain-archive/20261011/pr4883/knowledge/d10-loops-active-values-intake-v1.json",
+      "source_git_blob": "f88711aa939c84f55e61038cf4d362731d8f4597",
+      "source_status": "SELECTED-RESEARCH-CANDIDATE",
+      "observable_law": "An outer putFn is invoked first and may call PutLocalState, triggering inner putFns outer→inner; if putFn absent, store new value as this node's localState, without mandatory propagation; raw only bypass skips inner effects.",
+      "positive_witnesses": [
+        "Nested state 10; put 19 with outer and inner delegating writes -> trace outer:put,inner:put and terminal state 19.",
+        "An outer handler that does not delegate leaves inner state unchanged; absent putFn replaces its own localState."
+      ],
+      "falsifiers": [
+        "Invoking inner put before outer violates nested ordering.",
+        "A putFn that deliberately does not delegate must not trigger inner put; PutLocalStateOnly must suppress nested handlers."
+      ],
+      "source_historical_reference": "https://www.markstefik.com/wp-content/uploads/2011/04/1983-loops-manual-Bobrow-Stefik-part-1.pdf",
+      "core_vs_library_review": "Potential closure-based composition; must prove material language-visible difference before ratification.",
+      "independent_oracle": "PENDING-EXTERNAL-LOOPS"
     },
     {
       "coordinate": "1110100001",
-      "status": "NO-ATTESTED-D10-CANDIDATE",
-      "semantic_name": null
+      "status": "PROVISIONAL-SOURCE-RESEARCH-HOLD-NOT-SELECTED",
+      "semantic_name": "FINITE-STRIPS-GOAL-REGRESSION",
+      "coordinate_basis": "SOURCE-PINNED-NONCANONICAL-RESEARCH-RESERVATION",
+      "selected": false,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "stable_id": "d10.symbolic-ai.strips-weakest-positive-predecessor.research.20261009",
+      "source_path": "knowledge/d10-symbolic-ai-strips-goal-regression-research-v1.json",
+      "source_git_blob": "371e84f7a15e2be1ebaccf38a1155a7237446700",
+      "source_status": "HOLD-CORE-VS-DERIVED-LIBRARY-REVIEW",
+      "observable_law": "{\"action_applicable\":\"Pre subset_of S\",\"forward_result\":\"post(S)=(S \\\\ Delete) union Add\",\"goal_after\":\"Goal subset_of post(S)\",\"impossible\":\"Goal intersects Delete\",\"possible\":\"RequiredBefore = Pre union (Goal \\\\ Add)\",\"theorem\":\"for all S subset_of the finite universe: possible && RequiredBefore subset_of S iff action_applicable(S) && goal_after(S)\",\"impossible_convention\":\"No S can achieve Goal by this action. This is NOT the same as POSSIBLE(required_before=[]).\",\"duplicate_and_overflow\":\"all duplicated inputs, ambiguous Add∩Delete, or >16 atom universe reject (no guess)\"}",
+      "positive_witnesses": [
+        {
+          "pre": [
+            "ready"
+          ],
+          "add": [
+            "observed"
+          ],
+          "delete": [],
+          "goal": [
+            "observed"
+          ],
+          "status": "POSSIBLE",
+          "required_before": [
+            "ready"
+          ]
+        },
+        {
+          "pre": [],
+          "add": [
+            "observed"
+          ],
+          "delete": [],
+          "goal": [
+            "observed"
+          ],
+          "status": "POSSIBLE",
+          "required_before": []
+        },
+        {
+          "pre": [
+            "ready"
+          ],
+          "add": [
+            "observed"
+          ],
+          "delete": [
+            "obsolete"
+          ],
+          "goal": [
+            "observed",
+            "retained"
+          ],
+          "status": "POSSIBLE",
+          "required_before": [
+            "ready",
+            "retained"
+          ]
+        },
+        {
+          "pre": [
+            "ready"
+          ],
+          "add": [
+            "observed"
+          ],
+          "delete": [
+            "ready"
+          ],
+          "goal": [
+            "observed"
+          ],
+          "status": "POSSIBLE",
+          "required_before": [
+            "ready"
+          ]
+        }
+      ],
+      "falsifiers": [
+        {
+          "pre": [],
+          "add": [],
+          "delete": [
+            "observed"
+          ],
+          "goal": [
+            "observed"
+          ],
+          "must": "IMPOSSIBLE_BY_DELETE, NOT POSSIBLE([])"
+        },
+        {
+          "pre": [
+            "ready"
+          ],
+          "add": [
+            "observed"
+          ],
+          "delete": [],
+          "goal": [
+            "observed"
+          ],
+          "must": "cannot forget ready, otherwise empty state would falsely pass"
+        },
+        {
+          "pre": [],
+          "add": [
+            "observed"
+          ],
+          "delete": [
+            "ready"
+          ],
+          "goal": [
+            "observed",
+            "ready"
+          ],
+          "must": "cannot ignore deleted goal ready"
+        },
+        {
+          "pre": [],
+          "add": [
+            "observed"
+          ],
+          "delete": [
+            "observed"
+          ],
+          "goal": [],
+          "must": "BLOCKED ambiguous Add/Delete, do not invent effect priority"
+        },
+        {
+          "pre": [
+            "ready",
+            "ready"
+          ],
+          "add": [],
+          "delete": [],
+          "goal": [],
+          "must": "BLOCKED duplicate IDs rather than count them as multiset"
+        },
+        {
+          "pre": [],
+          "add": [
+            "observed"
+          ],
+          "delete": [],
+          "goal": [
+            "observed"
+          ],
+          "must": "MUST allow POSSIBLE([]) and keep it distinct from impossible"
+        }
+      ],
+      "historical_primary": "https://www.sciencedirect.com/science/article/pii/0004370271900105",
+      "core_vs_library_review": "HOLD until concrete witness that library composition of finite set operations and forward apply is insufficient as a language-visible root",
+      "independent_oracle": "PENDING-CI"
     },
     {
       "coordinate": "1110100010",
-      "status": "NO-ATTESTED-D10-CANDIDATE",
-      "semantic_name": null
+      "status": "PROVISIONAL-SOURCE-RESEARCH-HOLD-NOT-SELECTED",
+      "semantic_name": "FOURIER-TRANSFORM",
+      "coordinate_basis": "SOURCE-PINNED-NONCANONICAL-RESEARCH-RESERVATION",
+      "selected": false,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "source_path": "knowledge/d10-interdisciplinary-science-proposals-20261009.json",
+      "source_git_blob": "80bb9e97bfbfe8f3afe96f25bf07b5c8905233ed",
+      "source_status": "HOLD-DERIVABILITY-OR-EXTERNAL-SCOPE",
+      "ownership_hold": "DFT follows from exact complex arithmetic; FFT is algorithmic acceleration and convention, not independent semantic identity",
+      "historical_primary": "https://fftw.org/doc/Complex-DFTs.html",
+      "core_vs_library_review": "D8 COMPLEX and arithmetic; check library composite before code assignment",
+      "positive_witnesses": [],
+      "falsifiers": [],
+      "independent_oracle": "NO-EVIDENCE-HELD"
     },
     {
       "coordinate": "1110100011",
-      "status": "NO-ATTESTED-D10-CANDIDATE",
-      "semantic_name": null
+      "status": "PROVISIONAL-SOURCE-RESEARCH-HOLD-NOT-SELECTED",
+      "semantic_name": "SATURATING-ADD",
+      "coordinate_basis": "SOURCE-PINNED-NONCANONICAL-RESEARCH-RESERVATION",
+      "selected": false,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "source_path": "knowledge/d10-interdisciplinary-science-proposals-20261009.json",
+      "source_git_blob": "80bb9e97bfbfe8f3afe96f25bf07b5c8905233ed",
+      "source_status": "HOLD-DERIVABILITY-OR-EXTERNAL-SCOPE",
+      "ownership_hold": "Likely composite of arithmetic MIN/MAX with a fixed-width bounds law; need signedness and width contract",
+      "historical_primary": "https://doc.rust-lang.org/std/primitive.i32.html#method.saturating_add",
+      "core_vs_library_review": "D5 PLUS and D6 MIN/MAX",
+      "positive_witnesses": [],
+      "falsifiers": [],
+      "independent_oracle": "NO-EVIDENCE-HELD"
     },
     {
       "coordinate": "1110100100",
-      "status": "NO-ATTESTED-D10-CANDIDATE",
-      "semantic_name": null
+      "status": "PROVISIONAL-SOURCE-RESEARCH-HOLD-NOT-SELECTED",
+      "semantic_name": "TIME-SCALE-CONVERT",
+      "coordinate_basis": "SOURCE-PINNED-NONCANONICAL-RESEARCH-RESERVATION",
+      "selected": false,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "source_path": "knowledge/d10-interdisciplinary-science-proposals-20261009.json",
+      "source_git_blob": "80bb9e97bfbfe8f3afe96f25bf07b5c8905233ed",
+      "source_status": "HOLD-DERIVABILITY-OR-EXTERNAL-SCOPE",
+      "ownership_hold": "UTC↔TAI↔UT1 depends on authoritative time-scale tables at epoch, not timezone offset or fixed 37-second constant",
+      "historical_primary": "https://www.iers.org/iers/en/dataproducts/tools/webservices/webservice-time",
+      "core_vs_library_review": "D9 UNIX-TIME-OBSERVATION->UTC and TIMEZONE-OFFSET-SECONDS; external data effect boundary",
+      "positive_witnesses": [],
+      "falsifiers": [],
+      "independent_oracle": "NO-EVIDENCE-HELD"
     },
     {
       "coordinate": "1110100101",
-      "status": "NO-ATTESTED-D10-CANDIDATE",
-      "semantic_name": null
+      "status": "PROVISIONAL-SOURCE-RESEARCH-HOLD-NOT-SELECTED",
+      "semantic_name": "PANINI-PHONEME-TRANSDUCE",
+      "coordinate_basis": "SOURCE-PINNED-NONCANONICAL-RESEARCH-RESERVATION",
+      "selected": false,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "source_path": "knowledge/d10-interdisciplinary-science-proposals-20261009.json",
+      "source_git_blob": "80bb9e97bfbfe8f3afe96f25bf07b5c8905233ed",
+      "source_status": "HOLD-DERIVABILITY-OR-EXTERNAL-SCOPE",
+      "ownership_hold": "Need show new semantic law beyond ratified D7 phoneme identities and D10 Panini derivation functions; not a new alphabet table",
+      "historical_primary": "https://www.sanskritlibrary.org/Sanskrit/Vyakarana/",
+      "core_vs_library_review": "D7 phoneme coordinate identities, D10 RESOLVE-PRATYAHARA/DERIVE-VERB-*",
+      "positive_witnesses": [],
+      "falsifiers": [],
+      "independent_oracle": "NO-EVIDENCE-HELD"
     },
     {
       "coordinate": "1110100110",
-      "status": "NO-ATTESTED-D10-CANDIDATE",
-      "semantic_name": null
+      "status": "PROVISIONAL-SOURCE-RESEARCH-HOLD-NOT-SELECTED",
+      "semantic_name": "OSCILLATOR-PHASE-STEP",
+      "coordinate_basis": "SOURCE-PINNED-NONCANONICAL-RESEARCH-RESERVATION",
+      "selected": false,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "source_path": "knowledge/d10-interdisciplinary-science-proposals-20261009.json",
+      "source_git_blob": "80bb9e97bfbfe8f3afe96f25bf07b5c8905233ed",
+      "source_status": "HOLD-DERIVABILITY-OR-EXTERNAL-SCOPE",
+      "ownership_hold": "Discrete oscillator phase advancement might be derived from modulo + arithmetic; must specify phase error and fixed-point precision",
+      "historical_primary": "https://wiki.gnuradio.org/index.php/Signal_Source",
+      "core_vs_library_review": "D10 MODULO and numeric arithmetic",
+      "positive_witnesses": [],
+      "falsifiers": [],
+      "independent_oracle": "NO-EVIDENCE-HELD"
     },
     {
       "coordinate": "1110100111",
-      "status": "NO-ATTESTED-D10-CANDIDATE",
-      "semantic_name": null
+      "status": "PROVISIONAL-SOURCE-RESEARCH-HOLD-NOT-SELECTED",
+      "semantic_name": "ADC-QUANTIZE",
+      "coordinate_basis": "SOURCE-PINNED-NONCANONICAL-RESEARCH-RESERVATION",
+      "selected": false,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "source_path": "knowledge/d10-interdisciplinary-science-proposals-20261009.json",
+      "source_git_blob": "80bb9e97bfbfe8f3afe96f25bf07b5c8905233ed",
+      "source_status": "HOLD-DERIVABILITY-OR-EXTERNAL-SCOPE",
+      "ownership_hold": "Likely derived clipping and rounding; source-specific ADC calibration curves and saturation must be separated from core semantics",
+      "historical_primary": "https://www.nist.gov/publications/guide-expression-uncertainty-measurement",
+      "core_vs_library_review": "D8 ROUND and numerical comparisons",
+      "positive_witnesses": [],
+      "falsifiers": [],
+      "independent_oracle": "NO-EVIDENCE-HELD"
     },
     {
       "coordinate": "1110101000",
-      "status": "NO-ATTESTED-D10-CANDIDATE",
-      "semantic_name": null
+      "status": "PROVISIONAL-SOURCE-RESEARCH-HOLD-NOT-SELECTED",
+      "semantic_name": "CRC-UPDATE",
+      "coordinate_basis": "SOURCE-PINNED-NONCANONICAL-RESEARCH-RESERVATION",
+      "selected": false,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "source_path": "knowledge/d10-interdisciplinary-science-proposals-20261009.json",
+      "source_git_blob": "80bb9e97bfbfe8f3afe96f25bf07b5c8905233ed",
+      "source_status": "HOLD-DERIVABILITY-OR-EXTERNAL-SCOPE",
+      "ownership_hold": "CRC polynomial and bit order are caller parameters; transport/link framing stays outside D2 language structure",
+      "historical_primary": "https://www.itu.int/rec/T-REC-V.42/en",
+      "core_vs_library_review": "D8 LOGBITP + arithmetic + binary carrier, not a D2 syntax operation",
+      "positive_witnesses": [],
+      "falsifiers": [],
+      "independent_oracle": "NO-EVIDENCE-HELD"
     },
     {
       "coordinate": "1110101001",
@@ -14254,6 +14554,1767 @@
       "kind": "LIBRARY-IMPLEMENTATION-SYMBOL",
       "status": "SOURCE-NAME-ONLY-NOT-AN-INDEPENDENT-CORE-LAW",
       "coordinate": null
+    },
+    {
+      "semantic_name": "clips-deftemplate-form?",
+      "source_path": "knowledge/d10-proposal-ledger-symbolic-v3.tsv",
+      "source_git_blob": "d190cb2685728b4535a2ba5f71217923b8d6e5d9",
+      "source_locator": "juv4uk/sens@7fd5a01f86fc33e7651de7880a8fda434629354a:lib/clips-import.lisp:121",
+      "recorded_law_claim": "імпортує/оперує CLIPS-семантикою",
+      "previous_status": "pending-review",
+      "status": "LIBRARY-DEFINED-SYMBOL-HOLD-NONCORE-NO-COORDINATE",
+      "coordinate": null
+    },
+    {
+      "semantic_name": "clips-string-empty?",
+      "source_path": "knowledge/d10-proposal-ledger-symbolic-v3.tsv",
+      "source_git_blob": "d190cb2685728b4535a2ba5f71217923b8d6e5d9",
+      "source_locator": "juv4uk/sens@7fd5a01f86fc33e7651de7880a8fda434629354a:lib/clips-import.lisp:158",
+      "recorded_law_claim": "імпортує/оперує CLIPS-семантикою",
+      "previous_status": "pending-review",
+      "status": "LIBRARY-DEFINED-SYMBOL-HOLD-NONCORE-NO-COORDINATE",
+      "coordinate": null
+    },
+    {
+      "semantic_name": "clips-string-starts-with-double-colon?",
+      "source_path": "knowledge/d10-proposal-ledger-symbolic-v3.tsv",
+      "source_git_blob": "d190cb2685728b4535a2ba5f71217923b8d6e5d9",
+      "source_locator": "juv4uk/sens@7fd5a01f86fc33e7651de7880a8fda434629354a:lib/clips-import.lisp:160",
+      "recorded_law_claim": "імпортує/оперує CLIPS-семантикою",
+      "previous_status": "pending-review",
+      "status": "LIBRARY-DEFINED-SYMBOL-HOLD-NONCORE-NO-COORDINATE",
+      "coordinate": null
+    },
+    {
+      "semantic_name": "clips-string-after-last-double-colon",
+      "source_path": "knowledge/d10-proposal-ledger-symbolic-v3.tsv",
+      "source_git_blob": "d190cb2685728b4535a2ba5f71217923b8d6e5d9",
+      "source_locator": "juv4uk/sens@7fd5a01f86fc33e7651de7880a8fda434629354a:lib/clips-import.lisp:168",
+      "recorded_law_claim": "імпортує/оперує CLIPS-семантикою",
+      "previous_status": "pending-review",
+      "status": "LIBRARY-DEFINED-SYMBOL-HOLD-NONCORE-NO-COORDINATE",
+      "coordinate": null
+    },
+    {
+      "semantic_name": "clips-deftemplate-name",
+      "source_path": "knowledge/d10-proposal-ledger-symbolic-v3.tsv",
+      "source_git_blob": "d190cb2685728b4535a2ba5f71217923b8d6e5d9",
+      "source_locator": "juv4uk/sens@7fd5a01f86fc33e7651de7880a8fda434629354a:lib/clips-import.lisp:189",
+      "recorded_law_claim": "імпортує/оперує CLIPS-семантикою",
+      "previous_status": "pending-review",
+      "status": "LIBRARY-DEFINED-SYMBOL-HOLD-NONCORE-NO-COORDINATE",
+      "coordinate": null
+    },
+    {
+      "semantic_name": "clips-slot-name",
+      "source_path": "knowledge/d10-proposal-ledger-symbolic-v3.tsv",
+      "source_git_blob": "d190cb2685728b4535a2ba5f71217923b8d6e5d9",
+      "source_locator": "juv4uk/sens@7fd5a01f86fc33e7651de7880a8fda434629354a:lib/clips-import.lisp:191",
+      "recorded_law_claim": "імпортує/оперує CLIPS-семантикою",
+      "previous_status": "pending-review",
+      "status": "LIBRARY-DEFINED-SYMBOL-HOLD-NONCORE-NO-COORDINATE",
+      "coordinate": null
+    },
+    {
+      "semantic_name": "clips-slot-names",
+      "source_path": "knowledge/d10-proposal-ledger-symbolic-v3.tsv",
+      "source_git_blob": "d190cb2685728b4535a2ba5f71217923b8d6e5d9",
+      "source_locator": "juv4uk/sens@7fd5a01f86fc33e7651de7880a8fda434629354a:lib/clips-import.lisp:193",
+      "recorded_law_claim": "імпортує/оперує CLIPS-семантикою",
+      "previous_status": "pending-review",
+      "status": "LIBRARY-DEFINED-SYMBOL-HOLD-NONCORE-NO-COORDINATE",
+      "coordinate": null
+    },
+    {
+      "semantic_name": "clips-deftemplate-slots",
+      "source_path": "knowledge/d10-proposal-ledger-symbolic-v3.tsv",
+      "source_git_blob": "d190cb2685728b4535a2ba5f71217923b8d6e5d9",
+      "source_locator": "juv4uk/sens@7fd5a01f86fc33e7651de7880a8fda434629354a:lib/clips-import.lisp:200",
+      "recorded_law_claim": "імпортує/оперує CLIPS-семантикою",
+      "previous_status": "pending-review",
+      "status": "LIBRARY-DEFINED-SYMBOL-HOLD-NONCORE-NO-COORDINATE",
+      "coordinate": null
+    },
+    {
+      "semantic_name": "clips-templates-from-forms",
+      "source_path": "knowledge/d10-proposal-ledger-symbolic-v3.tsv",
+      "source_git_blob": "d190cb2685728b4535a2ba5f71217923b8d6e5d9",
+      "source_locator": "juv4uk/sens@7fd5a01f86fc33e7651de7880a8fda434629354a:lib/clips-import.lisp:204",
+      "recorded_law_claim": "імпортує/оперує CLIPS-семантикою",
+      "previous_status": "pending-review",
+      "status": "LIBRARY-DEFINED-SYMBOL-HOLD-NONCORE-NO-COORDINATE",
+      "coordinate": null
+    },
+    {
+      "semantic_name": "clips-template-slot-order",
+      "source_path": "knowledge/d10-proposal-ledger-symbolic-v3.tsv",
+      "source_git_blob": "d190cb2685728b4535a2ba5f71217923b8d6e5d9",
+      "source_locator": "juv4uk/sens@7fd5a01f86fc33e7651de7880a8fda434629354a:lib/clips-import.lisp:214",
+      "recorded_law_claim": "імпортує/оперує CLIPS-семантикою",
+      "previous_status": "pending-review",
+      "status": "LIBRARY-DEFINED-SYMBOL-HOLD-NONCORE-NO-COORDINATE",
+      "coordinate": null
+    },
+    {
+      "semantic_name": "clips-slot-value-of",
+      "source_path": "knowledge/d10-proposal-ledger-symbolic-v3.tsv",
+      "source_git_blob": "d190cb2685728b4535a2ba5f71217923b8d6e5d9",
+      "source_locator": "juv4uk/sens@7fd5a01f86fc33e7651de7880a8fda434629354a:lib/clips-import.lisp:248",
+      "recorded_law_claim": "імпортує/оперує CLIPS-семантикою",
+      "previous_status": "pending-review",
+      "status": "LIBRARY-DEFINED-SYMBOL-HOLD-NONCORE-NO-COORDINATE",
+      "coordinate": null
+    },
+    {
+      "semantic_name": "clips-convert-template",
+      "source_path": "knowledge/d10-proposal-ledger-symbolic-v3.tsv",
+      "source_git_blob": "d190cb2685728b4535a2ba5f71217923b8d6e5d9",
+      "source_locator": "juv4uk/sens@7fd5a01f86fc33e7651de7880a8fda434629354a:lib/clips-import.lisp:314",
+      "recorded_law_claim": "імпортує/оперує CLIPS-семантикою",
+      "previous_status": "pending-review",
+      "status": "LIBRARY-DEFINED-SYMBOL-HOLD-NONCORE-NO-COORDINATE",
+      "coordinate": null
+    },
+    {
+      "semantic_name": "clips-convert-template-list",
+      "source_path": "knowledge/d10-proposal-ledger-symbolic-v3.tsv",
+      "source_git_blob": "d190cb2685728b4535a2ba5f71217923b8d6e5d9",
+      "source_locator": "juv4uk/sens@7fd5a01f86fc33e7651de7880a8fda434629354a:lib/clips-import.lisp:343",
+      "recorded_law_claim": "імпортує/оперує CLIPS-семантикою",
+      "previous_status": "pending-review",
+      "status": "LIBRARY-DEFINED-SYMBOL-HOLD-NONCORE-NO-COORDINATE",
+      "coordinate": null
+    },
+    {
+      "semantic_name": "clips-fact-clause",
+      "source_path": "knowledge/d10-proposal-ledger-symbolic-v3.tsv",
+      "source_git_blob": "d190cb2685728b4535a2ba5f71217923b8d6e5d9",
+      "source_locator": "juv4uk/sens@7fd5a01f86fc33e7651de7880a8fda434629354a:lib/clips-import.lisp:351",
+      "recorded_law_claim": "імпортує/оперує CLIPS-семантикою",
+      "previous_status": "pending-review",
+      "status": "LIBRARY-DEFINED-SYMBOL-HOLD-NONCORE-NO-COORDINATE",
+      "coordinate": null
+    },
+    {
+      "semantic_name": "clips-facts->clauses-onto",
+      "source_path": "knowledge/d10-proposal-ledger-symbolic-v3.tsv",
+      "source_git_blob": "d190cb2685728b4535a2ba5f71217923b8d6e5d9",
+      "source_locator": "juv4uk/sens@7fd5a01f86fc33e7651de7880a8fda434629354a:lib/clips-import.lisp:372",
+      "recorded_law_claim": "імпортує/оперує CLIPS-семантикою",
+      "previous_status": "pending-review",
+      "status": "LIBRARY-DEFINED-SYMBOL-HOLD-NONCORE-NO-COORDINATE",
+      "coordinate": null
+    },
+    {
+      "semantic_name": "facts",
+      "source_path": "knowledge/d10-proposal-ledger-symbolic-v3.tsv",
+      "source_git_blob": "d190cb2685728b4535a2ba5f71217923b8d6e5d9",
+      "source_locator": "juv4uk/sens@7fd5a01f86fc33e7651de7880a8fda434629354a:lib/clips-import.lisp:378",
+      "recorded_law_claim": "поведінка визначена джерелом facts",
+      "previous_status": "pending-review",
+      "status": "LIBRARY-DEFINED-SYMBOL-HOLD-NONCORE-NO-COORDINATE",
+      "coordinate": null
+    },
+    {
+      "semantic_name": "clips-facts->clauses",
+      "source_path": "knowledge/d10-proposal-ledger-symbolic-v3.tsv",
+      "source_git_blob": "d190cb2685728b4535a2ba5f71217923b8d6e5d9",
+      "source_locator": "juv4uk/sens@7fd5a01f86fc33e7651de7880a8fda434629354a:lib/clips-import.lisp:381",
+      "recorded_law_claim": "імпортує/оперує CLIPS-семантикою",
+      "previous_status": "pending-review",
+      "status": "LIBRARY-DEFINED-SYMBOL-HOLD-NONCORE-NO-COORDINATE",
+      "coordinate": null
+    },
+    {
+      "semantic_name": "clips-deffacts->clauses",
+      "source_path": "knowledge/d10-proposal-ledger-symbolic-v3.tsv",
+      "source_git_blob": "d190cb2685728b4535a2ba5f71217923b8d6e5d9",
+      "source_locator": "juv4uk/sens@7fd5a01f86fc33e7651de7880a8fda434629354a:lib/clips-import.lisp:387",
+      "recorded_law_claim": "імпортує/оперує CLIPS-семантикою",
+      "previous_status": "pending-review",
+      "status": "LIBRARY-DEFINED-SYMBOL-HOLD-NONCORE-NO-COORDINATE",
+      "coordinate": null
+    },
+    {
+      "semantic_name": "clips-var?",
+      "source_path": "knowledge/d10-proposal-ledger-symbolic-v3.tsv",
+      "source_git_blob": "d190cb2685728b4535a2ba5f71217923b8d6e5d9",
+      "source_locator": "juv4uk/sens@7fd5a01f86fc33e7651de7880a8fda434629354a:lib/clips-import.lisp:444",
+      "recorded_law_claim": "імпортує/оперує CLIPS-семантикою",
+      "previous_status": "pending-review",
+      "status": "LIBRARY-DEFINED-SYMBOL-HOLD-NONCORE-NO-COORDINATE",
+      "coordinate": null
+    },
+    {
+      "semantic_name": "clips-symbol-starts-with-?",
+      "source_path": "knowledge/d10-proposal-ledger-symbolic-v3.tsv",
+      "source_git_blob": "d190cb2685728b4535a2ba5f71217923b8d6e5d9",
+      "source_locator": "juv4uk/sens@7fd5a01f86fc33e7651de7880a8fda434629354a:lib/clips-import.lisp:455",
+      "recorded_law_claim": "імпортує/оперує CLIPS-семантикою",
+      "previous_status": "pending-review",
+      "status": "LIBRARY-DEFINED-SYMBOL-HOLD-NONCORE-NO-COORDINATE",
+      "coordinate": null
+    },
+    {
+      "semantic_name": "clips-var-term",
+      "source_path": "knowledge/d10-proposal-ledger-symbolic-v3.tsv",
+      "source_git_blob": "d190cb2685728b4535a2ba5f71217923b8d6e5d9",
+      "source_locator": "juv4uk/sens@7fd5a01f86fc33e7651de7880a8fda434629354a:lib/clips-import.lisp:459",
+      "recorded_law_claim": "імпортує/оперує CLIPS-семантикою",
+      "previous_status": "pending-review",
+      "status": "LIBRARY-DEFINED-SYMBOL-HOLD-NONCORE-NO-COORDINATE",
+      "coordinate": null
+    },
+    {
+      "semantic_name": "clips-convert-vars",
+      "source_path": "knowledge/d10-proposal-ledger-symbolic-v3.tsv",
+      "source_git_blob": "d190cb2685728b4535a2ba5f71217923b8d6e5d9",
+      "source_locator": "juv4uk/sens@7fd5a01f86fc33e7651de7880a8fda434629354a:lib/clips-import.lisp:465",
+      "recorded_law_claim": "імпортує/оперує CLIPS-семантикою",
+      "previous_status": "pending-review",
+      "status": "LIBRARY-DEFINED-SYMBOL-HOLD-NONCORE-NO-COORDINATE",
+      "coordinate": null
+    },
+    {
+      "semantic_name": "clips-defrule->clauses",
+      "source_path": "knowledge/d10-proposal-ledger-symbolic-v3.tsv",
+      "source_git_blob": "d190cb2685728b4535a2ba5f71217923b8d6e5d9",
+      "source_locator": "juv4uk/sens@7fd5a01f86fc33e7651de7880a8fda434629354a:lib/clips-import.lisp:815",
+      "recorded_law_claim": "імпортує/оперує CLIPS-семантикою",
+      "previous_status": "pending-review",
+      "status": "LIBRARY-DEFINED-SYMBOL-HOLD-NONCORE-NO-COORDINATE",
+      "coordinate": null
+    },
+    {
+      "semantic_name": "clips-form->clauses",
+      "source_path": "knowledge/d10-proposal-ledger-symbolic-v3.tsv",
+      "source_git_blob": "d190cb2685728b4535a2ba5f71217923b8d6e5d9",
+      "source_locator": "juv4uk/sens@7fd5a01f86fc33e7651de7880a8fda434629354a:lib/clips-import.lisp:832",
+      "recorded_law_claim": "імпортує/оперує CLIPS-семантикою",
+      "previous_status": "pending-review",
+      "status": "LIBRARY-DEFINED-SYMBOL-HOLD-NONCORE-NO-COORDINATE",
+      "coordinate": null
+    },
+    {
+      "semantic_name": "clips-cons-each-onto",
+      "source_path": "knowledge/d10-proposal-ledger-symbolic-v3.tsv",
+      "source_git_blob": "d190cb2685728b4535a2ba5f71217923b8d6e5d9",
+      "source_locator": "juv4uk/sens@7fd5a01f86fc33e7651de7880a8fda434629354a:lib/clips-import.lisp:871",
+      "recorded_law_claim": "імпортує/оперує CLIPS-семантикою",
+      "previous_status": "pending-review",
+      "status": "LIBRARY-DEFINED-SYMBOL-HOLD-NONCORE-NO-COORDINATE",
+      "coordinate": null
+    },
+    {
+      "semantic_name": "clips-import-forms-onto",
+      "source_path": "knowledge/d10-proposal-ledger-symbolic-v3.tsv",
+      "source_git_blob": "d190cb2685728b4535a2ba5f71217923b8d6e5d9",
+      "source_locator": "juv4uk/sens@7fd5a01f86fc33e7651de7880a8fda434629354a:lib/clips-import.lisp:878",
+      "recorded_law_claim": "імпортує/оперує CLIPS-семантикою",
+      "previous_status": "pending-review",
+      "status": "LIBRARY-DEFINED-SYMBOL-HOLD-NONCORE-NO-COORDINATE",
+      "coordinate": null
+    },
+    {
+      "semantic_name": "forms",
+      "source_path": "knowledge/d10-proposal-ledger-symbolic-v3.tsv",
+      "source_git_blob": "d190cb2685728b4535a2ba5f71217923b8d6e5d9",
+      "source_locator": "juv4uk/sens@7fd5a01f86fc33e7651de7880a8fda434629354a:lib/clips-import.lisp:884",
+      "recorded_law_claim": "поведінка визначена джерелом forms",
+      "previous_status": "pending-review",
+      "status": "LIBRARY-DEFINED-SYMBOL-HOLD-NONCORE-NO-COORDINATE",
+      "coordinate": null
+    },
+    {
+      "semantic_name": "clips-import-forms",
+      "source_path": "knowledge/d10-proposal-ledger-symbolic-v3.tsv",
+      "source_git_blob": "d190cb2685728b4535a2ba5f71217923b8d6e5d9",
+      "source_locator": "juv4uk/sens@7fd5a01f86fc33e7651de7880a8fda434629354a:lib/clips-import.lisp:887",
+      "recorded_law_claim": "імпортує/оперує CLIPS-семантикою",
+      "previous_status": "pending-review",
+      "status": "LIBRARY-DEFINED-SYMBOL-HOLD-NONCORE-NO-COORDINATE",
+      "coordinate": null
+    },
+    {
+      "semantic_name": "clips-import",
+      "source_path": "knowledge/d10-proposal-ledger-symbolic-v3.tsv",
+      "source_git_blob": "d190cb2685728b4535a2ba5f71217923b8d6e5d9",
+      "source_locator": "juv4uk/sens@7fd5a01f86fc33e7651de7880a8fda434629354a:lib/clips-import.lisp:891",
+      "recorded_law_claim": "імпортує/оперує CLIPS-семантикою",
+      "previous_status": "pending-review",
+      "status": "LIBRARY-DEFINED-SYMBOL-HOLD-NONCORE-NO-COORDINATE",
+      "coordinate": null
+    },
+    {
+      "semantic_name": "clips-import-file",
+      "source_path": "knowledge/d10-proposal-ledger-symbolic-v3.tsv",
+      "source_git_blob": "d190cb2685728b4535a2ba5f71217923b8d6e5d9",
+      "source_locator": "juv4uk/sens@7fd5a01f86fc33e7651de7880a8fda434629354a:lib/clips-import.lisp:915",
+      "recorded_law_claim": "імпортує/оперує CLIPS-семантикою",
+      "previous_status": "pending-review",
+      "status": "LIBRARY-DEFINED-SYMBOL-HOLD-NONCORE-NO-COORDINATE",
+      "coordinate": null
+    },
+    {
+      "semantic_name": "defmodule",
+      "source_path": "knowledge/d10-proposal-ledger-symbolic-v3.tsv",
+      "source_git_blob": "d190cb2685728b4535a2ba5f71217923b8d6e5d9",
+      "source_locator": "juv4uk/sens@4bf50fc8e93f1b57a9cc10aa250e0b530b8424ae:lib/knowledge.lisp:70",
+      "recorded_law_claim": "оперує модулем знань",
+      "previous_status": "pending-review",
+      "status": "LIBRARY-DEFINED-SYMBOL-HOLD-NONCORE-NO-COORDINATE",
+      "coordinate": null
+    },
+    {
+      "semantic_name": "retract-knowledge",
+      "source_path": "knowledge/d10-proposal-ledger-symbolic-v3.tsv",
+      "source_git_blob": "d190cb2685728b4535a2ba5f71217923b8d6e5d9",
+      "source_locator": "juv4uk/sens@4bf50fc8e93f1b57a9cc10aa250e0b530b8424ae:lib/knowledge.lisp:81",
+      "recorded_law_claim": "відкликає твердження з бази знань",
+      "previous_status": "pending-review",
+      "status": "LIBRARY-DEFINED-SYMBOL-HOLD-NONCORE-NO-COORDINATE",
+      "coordinate": null
+    },
+    {
+      "semantic_name": "module-journal-events-onto",
+      "source_path": "knowledge/d10-proposal-ledger-symbolic-v3.tsv",
+      "source_git_blob": "d190cb2685728b4535a2ba5f71217923b8d6e5d9",
+      "source_locator": "juv4uk/sens@4bf50fc8e93f1b57a9cc10aa250e0b530b8424ae:lib/knowledge.lisp:91",
+      "recorded_law_claim": "оперує модулем знань",
+      "previous_status": "pending-review",
+      "status": "LIBRARY-DEFINED-SYMBOL-HOLD-NONCORE-NO-COORDINATE",
+      "coordinate": null
+    },
+    {
+      "semantic_name": "journal",
+      "source_path": "knowledge/d10-proposal-ledger-symbolic-v3.tsv",
+      "source_git_blob": "d190cb2685728b4535a2ba5f71217923b8d6e5d9",
+      "source_locator": "juv4uk/sens@4bf50fc8e93f1b57a9cc10aa250e0b530b8424ae:lib/knowledge.lisp:99",
+      "recorded_law_claim": "веде журнал подій",
+      "previous_status": "pending-review",
+      "status": "LIBRARY-DEFINED-SYMBOL-HOLD-NONCORE-NO-COORDINATE",
+      "coordinate": null
+    },
+    {
+      "semantic_name": "module-known?",
+      "source_path": "knowledge/d10-proposal-ledger-symbolic-v3.tsv",
+      "source_git_blob": "d190cb2685728b4535a2ba5f71217923b8d6e5d9",
+      "source_locator": "juv4uk/sens@4bf50fc8e93f1b57a9cc10aa250e0b530b8424ae:lib/knowledge.lisp:129",
+      "recorded_law_claim": "оперує модулем знань",
+      "previous_status": "pending-review",
+      "status": "LIBRARY-DEFINED-SYMBOL-HOLD-NONCORE-NO-COORDINATE",
+      "coordinate": null
+    },
+    {
+      "semantic_name": "module-clauses-now",
+      "source_path": "knowledge/d10-proposal-ledger-symbolic-v3.tsv",
+      "source_git_blob": "d190cb2685728b4535a2ba5f71217923b8d6e5d9",
+      "source_locator": "juv4uk/sens@4bf50fc8e93f1b57a9cc10aa250e0b530b8424ae:lib/knowledge.lisp:150",
+      "recorded_law_claim": "оперує модулем знань",
+      "previous_status": "pending-review",
+      "status": "LIBRARY-DEFINED-SYMBOL-HOLD-NONCORE-NO-COORDINATE",
+      "coordinate": null
+    },
+    {
+      "semantic_name": "load-knowledge",
+      "source_path": "knowledge/d10-proposal-ledger-symbolic-v3.tsv",
+      "source_git_blob": "d190cb2685728b4535a2ba5f71217923b8d6e5d9",
+      "source_locator": "juv4uk/sens@4bf50fc8e93f1b57a9cc10aa250e0b530b8424ae:lib/knowledge.lisp:156",
+      "recorded_law_claim": "поведінка визначена джерелом load-knowledge",
+      "previous_status": "pending-review",
+      "status": "LIBRARY-DEFINED-SYMBOL-HOLD-NONCORE-NO-COORDINATE",
+      "coordinate": null
+    },
+    {
+      "semantic_name": "reason-in",
+      "source_path": "knowledge/d10-proposal-ledger-symbolic-v3.tsv",
+      "source_git_blob": "d190cb2685728b4535a2ba5f71217923b8d6e5d9",
+      "source_locator": "juv4uk/sens@4bf50fc8e93f1b57a9cc10aa250e0b530b8424ae:lib/knowledge.lisp:160",
+      "recorded_law_claim": "виконує виведення",
+      "previous_status": "pending-review",
+      "status": "LIBRARY-DEFINED-SYMBOL-HOLD-NONCORE-NO-COORDINATE",
+      "coordinate": null
+    },
+    {
+      "semantic_name": "forward-in",
+      "source_path": "knowledge/d10-proposal-ledger-symbolic-v3.tsv",
+      "source_git_blob": "d190cb2685728b4535a2ba5f71217923b8d6e5d9",
+      "source_locator": "juv4uk/sens@4bf50fc8e93f1b57a9cc10aa250e0b530b8424ae:lib/knowledge.lisp:202",
+      "recorded_law_claim": "пряме виведення",
+      "previous_status": "pending-review",
+      "status": "LIBRARY-DEFINED-SYMBOL-HOLD-NONCORE-NO-COORDINATE",
+      "coordinate": null
+    },
+    {
+      "semantic_name": "check-conflict?",
+      "source_path": "knowledge/d10-proposal-ledger-symbolic-v3.tsv",
+      "source_git_blob": "d190cb2685728b4535a2ba5f71217923b8d6e5d9",
+      "source_locator": "juv4uk/sens@4bf50fc8e93f1b57a9cc10aa250e0b530b8424ae:lib/knowledge.lisp:213",
+      "recorded_law_claim": "поведінка визначена джерелом check-conflict?",
+      "previous_status": "pending-review",
+      "status": "LIBRARY-DEFINED-SYMBOL-HOLD-NONCORE-NO-COORDINATE",
+      "coordinate": null
+    },
+    {
+      "semantic_name": "tell-knowledge",
+      "source_path": "knowledge/d10-proposal-ledger-symbolic-v3.tsv",
+      "source_git_blob": "d190cb2685728b4535a2ba5f71217923b8d6e5d9",
+      "source_locator": "juv4uk/sens@4bf50fc8e93f1b57a9cc10aa250e0b530b8424ae:lib/knowledge.lisp:232",
+      "recorded_law_claim": "додає факт у світ/знання",
+      "previous_status": "pending-review",
+      "status": "LIBRARY-DEFINED-SYMBOL-HOLD-NONCORE-NO-COORDINATE",
+      "coordinate": null
+    },
+    {
+      "semantic_name": "advise",
+      "source_path": "knowledge/d10-proposal-ledger-symbolic-v3.tsv",
+      "source_git_blob": "d190cb2685728b4535a2ba5f71217923b8d6e5d9",
+      "source_locator": "juv4uk/sens@4bf50fc8e93f1b57a9cc10aa250e0b530b8424ae:lib/knowledge.lisp:406",
+      "recorded_law_claim": "поведінка визначена джерелом advise",
+      "previous_status": "pending-review",
+      "status": "LIBRARY-DEFINED-SYMBOL-HOLD-NONCORE-NO-COORDINATE",
+      "coordinate": null
+    },
+    {
+      "semantic_name": "module-name",
+      "source_path": "knowledge/d10-proposal-ledger-symbolic-v3.tsv",
+      "source_git_blob": "d190cb2685728b4535a2ba5f71217923b8d6e5d9",
+      "source_locator": "juv4uk/sens@4bf50fc8e93f1b57a9cc10aa250e0b530b8424ae:lib/knowledge.lisp:509",
+      "recorded_law_claim": "оперує модулем знань",
+      "previous_status": "pending-review",
+      "status": "LIBRARY-DEFINED-SYMBOL-HOLD-NONCORE-NO-COORDINATE",
+      "coordinate": null
+    },
+    {
+      "semantic_name": "clauses",
+      "source_path": "knowledge/d10-proposal-ledger-symbolic-v3.tsv",
+      "source_git_blob": "d190cb2685728b4535a2ba5f71217923b8d6e5d9",
+      "source_locator": "juv4uk/sens@4bf50fc8e93f1b57a9cc10aa250e0b530b8424ae:lib/knowledge.lisp:512",
+      "recorded_law_claim": "поведінка визначена джерелом clauses",
+      "previous_status": "pending-review",
+      "status": "LIBRARY-DEFINED-SYMBOL-HOLD-NONCORE-NO-COORDINATE",
+      "coordinate": null
+    },
+    {
+      "semantic_name": "advise-all",
+      "source_path": "knowledge/d10-proposal-ledger-symbolic-v3.tsv",
+      "source_git_blob": "d190cb2685728b4535a2ba5f71217923b8d6e5d9",
+      "source_locator": "juv4uk/sens@4bf50fc8e93f1b57a9cc10aa250e0b530b8424ae:lib/knowledge.lisp:532",
+      "recorded_law_claim": "поведінка визначена джерелом advise-all",
+      "previous_status": "pending-review",
+      "status": "LIBRARY-DEFINED-SYMBOL-HOLD-NONCORE-NO-COORDINATE",
+      "coordinate": null
+    },
+    {
+      "semantic_name": "import-knowledge-package",
+      "source_path": "knowledge/d10-proposal-ledger-symbolic-v3.tsv",
+      "source_git_blob": "d190cb2685728b4535a2ba5f71217923b8d6e5d9",
+      "source_locator": "juv4uk/sens@4bf50fc8e93f1b57a9cc10aa250e0b530b8424ae:lib/knowledge.lisp:631",
+      "recorded_law_claim": "поведінка визначена джерелом import-knowledge-package",
+      "previous_status": "pending-review",
+      "status": "LIBRARY-DEFINED-SYMBOL-HOLD-NONCORE-NO-COORDINATE",
+      "coordinate": null
+    },
+    {
+      "semantic_name": "import-knowledge-file",
+      "source_path": "knowledge/d10-proposal-ledger-symbolic-v3.tsv",
+      "source_git_blob": "d190cb2685728b4535a2ba5f71217923b8d6e5d9",
+      "source_locator": "juv4uk/sens@4bf50fc8e93f1b57a9cc10aa250e0b530b8424ae:lib/knowledge.lisp:650",
+      "recorded_law_claim": "поведінка визначена джерелом import-knowledge-file",
+      "previous_status": "pending-review",
+      "status": "LIBRARY-DEFINED-SYMBOL-HOLD-NONCORE-NO-COORDINATE",
+      "coordinate": null
+    },
+    {
+      "semantic_name": "write-knowledge-package",
+      "source_path": "knowledge/d10-proposal-ledger-symbolic-v3.tsv",
+      "source_git_blob": "d190cb2685728b4535a2ba5f71217923b8d6e5d9",
+      "source_locator": "juv4uk/sens@4bf50fc8e93f1b57a9cc10aa250e0b530b8424ae:lib/knowledge.lisp:659",
+      "recorded_law_claim": "поведінка визначена джерелом write-knowledge-package",
+      "previous_status": "pending-review",
+      "status": "LIBRARY-DEFINED-SYMBOL-HOLD-NONCORE-NO-COORDINATE",
+      "coordinate": null
+    },
+    {
+      "semantic_name": "tcp-read-to-eof",
+      "source_path": "knowledge/d10-proposal-ledger-symbolic-v3.tsv",
+      "source_git_blob": "d190cb2685728b4535a2ba5f71217923b8d6e5d9",
+      "source_locator": "juv4uk/sens@4bf50fc8e93f1b57a9cc10aa250e0b530b8424ae:lib/knowledge.lisp:680",
+      "recorded_law_claim": "поведінка визначена джерелом tcp-read-to-eof",
+      "previous_status": "pending-review",
+      "status": "LIBRARY-DEFINED-SYMBOL-HOLD-NONCORE-NO-COORDINATE",
+      "coordinate": null
+    },
+    {
+      "semantic_name": "accumulated",
+      "source_path": "knowledge/d10-proposal-ledger-symbolic-v3.tsv",
+      "source_git_blob": "d190cb2685728b4535a2ba5f71217923b8d6e5d9",
+      "source_locator": "juv4uk/sens@4bf50fc8e93f1b57a9cc10aa250e0b530b8424ae:lib/knowledge.lisp:686",
+      "recorded_law_claim": "поведінка визначена джерелом accumulated",
+      "previous_status": "pending-review",
+      "status": "LIBRARY-DEFINED-SYMBOL-HOLD-NONCORE-NO-COORDINATE",
+      "coordinate": null
+    },
+    {
+      "semantic_name": "send-knowledge-package",
+      "source_path": "knowledge/d10-proposal-ledger-symbolic-v3.tsv",
+      "source_git_blob": "d190cb2685728b4535a2ba5f71217923b8d6e5d9",
+      "source_locator": "juv4uk/sens@4bf50fc8e93f1b57a9cc10aa250e0b530b8424ae:lib/knowledge.lisp:688",
+      "recorded_law_claim": "поведінка визначена джерелом send-knowledge-package",
+      "previous_status": "pending-review",
+      "status": "LIBRARY-DEFINED-SYMBOL-HOLD-NONCORE-NO-COORDINATE",
+      "coordinate": null
+    },
+    {
+      "semantic_name": "receive-knowledge-package",
+      "source_path": "knowledge/d10-proposal-ledger-symbolic-v3.tsv",
+      "source_git_blob": "d190cb2685728b4535a2ba5f71217923b8d6e5d9",
+      "source_locator": "juv4uk/sens@4bf50fc8e93f1b57a9cc10aa250e0b530b8424ae:lib/knowledge.lisp:705",
+      "recorded_law_claim": "поведінка визначена джерелом receive-knowledge-package",
+      "previous_status": "pending-review",
+      "status": "LIBRARY-DEFINED-SYMBOL-HOLD-NONCORE-NO-COORDINATE",
+      "coordinate": null
+    },
+    {
+      "semantic_name": "string-through-line",
+      "source_path": "knowledge/d10-proposal-ledger-symbolic-v3.tsv",
+      "source_git_blob": "d190cb2685728b4535a2ba5f71217923b8d6e5d9",
+      "source_locator": "juv4uk/sens@4bf50fc8e93f1b57a9cc10aa250e0b530b8424ae:lib/knowledge.lisp:719",
+      "recorded_law_claim": "поведінка визначена джерелом string-through-line",
+      "previous_status": "pending-review",
+      "status": "LIBRARY-DEFINED-SYMBOL-HOLD-NONCORE-NO-COORDINATE",
+      "coordinate": null
+    },
+    {
+      "semantic_name": "text",
+      "source_path": "knowledge/d10-proposal-ledger-symbolic-v3.tsv",
+      "source_git_blob": "d190cb2685728b4535a2ba5f71217923b8d6e5d9",
+      "source_locator": "juv4uk/sens@4bf50fc8e93f1b57a9cc10aa250e0b530b8424ae:lib/knowledge.lisp:725",
+      "recorded_law_claim": "поведінка визначена джерелом text",
+      "previous_status": "pending-review",
+      "status": "LIBRARY-DEFINED-SYMBOL-HOLD-NONCORE-NO-COORDINATE",
+      "coordinate": null
+    },
+    {
+      "semantic_name": "tcp-read-frame",
+      "source_path": "knowledge/d10-proposal-ledger-symbolic-v3.tsv",
+      "source_git_blob": "d190cb2685728b4535a2ba5f71217923b8d6e5d9",
+      "source_locator": "juv4uk/sens@4bf50fc8e93f1b57a9cc10aa250e0b530b8424ae:lib/knowledge.lisp:728",
+      "recorded_law_claim": "поведінка визначена джерелом tcp-read-frame",
+      "previous_status": "pending-review",
+      "status": "LIBRARY-DEFINED-SYMBOL-HOLD-NONCORE-NO-COORDINATE",
+      "coordinate": null
+    },
+    {
+      "semantic_name": "exchange-knowledge-package",
+      "source_path": "knowledge/d10-proposal-ledger-symbolic-v3.tsv",
+      "source_git_blob": "d190cb2685728b4535a2ba5f71217923b8d6e5d9",
+      "source_locator": "juv4uk/sens@4bf50fc8e93f1b57a9cc10aa250e0b530b8424ae:lib/knowledge.lisp:741",
+      "recorded_law_claim": "поведінка визначена джерелом exchange-knowledge-package",
+      "previous_status": "pending-review",
+      "status": "LIBRARY-DEFINED-SYMBOL-HOLD-NONCORE-NO-COORDINATE",
+      "coordinate": null
+    },
+    {
+      "semantic_name": "connection",
+      "source_path": "knowledge/d10-proposal-ledger-symbolic-v3.tsv",
+      "source_git_blob": "d190cb2685728b4535a2ba5f71217923b8d6e5d9",
+      "source_locator": "juv4uk/sens@4bf50fc8e93f1b57a9cc10aa250e0b530b8424ae:lib/knowledge.lisp:756",
+      "recorded_law_claim": "поведінка визначена джерелом connection",
+      "previous_status": "pending-review",
+      "status": "LIBRARY-DEFINED-SYMBOL-HOLD-NONCORE-NO-COORDINATE",
+      "coordinate": null
+    },
+    {
+      "semantic_name": "accept-knowledge-exchange",
+      "source_path": "knowledge/d10-proposal-ledger-symbolic-v3.tsv",
+      "source_git_blob": "d190cb2685728b4535a2ba5f71217923b8d6e5d9",
+      "source_locator": "juv4uk/sens@4bf50fc8e93f1b57a9cc10aa250e0b530b8424ae:lib/knowledge.lisp:762",
+      "recorded_law_claim": "поведінка визначена джерелом accept-knowledge-exchange",
+      "previous_status": "pending-review",
+      "status": "LIBRARY-DEFINED-SYMBOL-HOLD-NONCORE-NO-COORDINATE",
+      "coordinate": null
+    },
+    {
+      "semantic_name": "decision",
+      "source_path": "knowledge/d10-proposal-ledger-symbolic-v3.tsv",
+      "source_git_blob": "d190cb2685728b4535a2ba5f71217923b8d6e5d9",
+      "source_locator": "juv4uk/sens@4bf50fc8e93f1b57a9cc10aa250e0b530b8424ae:lib/knowledge.lisp:780",
+      "recorded_law_claim": "поведінка визначена джерелом decision",
+      "previous_status": "pending-review",
+      "status": "LIBRARY-DEFINED-SYMBOL-HOLD-NONCORE-NO-COORDINATE",
+      "coordinate": null
+    },
+    {
+      "semantic_name": "contains-atom?",
+      "source_path": "knowledge/d10-proposal-ledger-symbolic-v3.tsv",
+      "source_git_blob": "d190cb2685728b4535a2ba5f71217923b8d6e5d9",
+      "source_locator": "juv4uk/sens@4bf50fc8e93f1b57a9cc10aa250e0b530b8424ae:lib/knowledge.lisp:795",
+      "recorded_law_claim": "поведінка визначена джерелом contains-atom?",
+      "previous_status": "pending-review",
+      "status": "LIBRARY-DEFINED-SYMBOL-HOLD-NONCORE-NO-COORDINATE",
+      "coordinate": null
+    },
+    {
+      "semantic_name": "is-fact?",
+      "source_path": "knowledge/d10-proposal-ledger-symbolic-v3.tsv",
+      "source_git_blob": "d190cb2685728b4535a2ba5f71217923b8d6e5d9",
+      "source_locator": "juv4uk/sens@4bf50fc8e93f1b57a9cc10aa250e0b530b8424ae:lib/knowledge.lisp:812",
+      "recorded_law_claim": "поведінка визначена джерелом is-fact?",
+      "previous_status": "pending-review",
+      "status": "LIBRARY-DEFINED-SYMBOL-HOLD-NONCORE-NO-COORDINATE",
+      "coordinate": null
+    },
+    {
+      "semantic_name": "collect-facts-about",
+      "source_path": "knowledge/d10-proposal-ledger-symbolic-v3.tsv",
+      "source_git_blob": "d190cb2685728b4535a2ba5f71217923b8d6e5d9",
+      "source_locator": "juv4uk/sens@4bf50fc8e93f1b57a9cc10aa250e0b530b8424ae:lib/knowledge.lisp:824",
+      "recorded_law_claim": "поведінка визначена джерелом collect-facts-about",
+      "previous_status": "pending-review",
+      "status": "LIBRARY-DEFINED-SYMBOL-HOLD-NONCORE-NO-COORDINATE",
+      "coordinate": null
+    },
+    {
+      "semantic_name": "item",
+      "source_path": "knowledge/d10-proposal-ledger-symbolic-v3.tsv",
+      "source_git_blob": "d190cb2685728b4535a2ba5f71217923b8d6e5d9",
+      "source_locator": "juv4uk/sens@4bf50fc8e93f1b57a9cc10aa250e0b530b8424ae:lib/knowledge.lisp:834",
+      "recorded_law_claim": "поведінка визначена джерелом item",
+      "previous_status": "pending-review",
+      "status": "LIBRARY-DEFINED-SYMBOL-HOLD-NONCORE-NO-COORDINATE",
+      "coordinate": null
+    },
+    {
+      "semantic_name": "head",
+      "source_path": "knowledge/d10-proposal-ledger-symbolic-v3.tsv",
+      "source_git_blob": "d190cb2685728b4535a2ba5f71217923b8d6e5d9",
+      "source_locator": "juv4uk/sens@4bf50fc8e93f1b57a9cc10aa250e0b530b8424ae:lib/knowledge.lisp:841",
+      "recorded_law_claim": "поведінка визначена джерелом head",
+      "previous_status": "pending-review",
+      "status": "LIBRARY-DEFINED-SYMBOL-HOLD-NONCORE-NO-COORDINATE",
+      "coordinate": null
+    },
+    {
+      "semantic_name": "describe",
+      "source_path": "knowledge/d10-proposal-ledger-symbolic-v3.tsv",
+      "source_git_blob": "d190cb2685728b4535a2ba5f71217923b8d6e5d9",
+      "source_locator": "juv4uk/sens@4bf50fc8e93f1b57a9cc10aa250e0b530b8424ae:lib/knowledge.lisp:845",
+      "recorded_law_claim": "поведінка визначена джерелом describe",
+      "previous_status": "pending-review",
+      "status": "LIBRARY-DEFINED-SYMBOL-HOLD-NONCORE-NO-COORDINATE",
+      "coordinate": null
+    },
+    {
+      "semantic_name": "record-usage!",
+      "source_path": "knowledge/d10-proposal-ledger-symbolic-v3.tsv",
+      "source_git_blob": "d190cb2685728b4535a2ba5f71217923b8d6e5d9",
+      "source_locator": "juv4uk/sens@4bf50fc8e93f1b57a9cc10aa250e0b530b8424ae:lib/knowledge.lisp:882",
+      "recorded_law_claim": "поведінка визначена джерелом record-usage!",
+      "previous_status": "pending-review",
+      "status": "LIBRARY-DEFINED-SYMBOL-HOLD-NONCORE-NO-COORDINATE",
+      "coordinate": null
+    },
+    {
+      "semantic_name": "usage-of",
+      "source_path": "knowledge/d10-proposal-ledger-symbolic-v3.tsv",
+      "source_git_blob": "d190cb2685728b4535a2ba5f71217923b8d6e5d9",
+      "source_locator": "juv4uk/sens@4bf50fc8e93f1b57a9cc10aa250e0b530b8424ae:lib/knowledge.lisp:886",
+      "recorded_law_claim": "поведінка визначена джерелом usage-of",
+      "previous_status": "pending-review",
+      "status": "LIBRARY-DEFINED-SYMBOL-HOLD-NONCORE-NO-COORDINATE",
+      "coordinate": null
+    },
+    {
+      "semantic_name": "narrate-fact",
+      "source_path": "knowledge/d10-proposal-ledger-symbolic-v3.tsv",
+      "source_git_blob": "d190cb2685728b4535a2ba5f71217923b8d6e5d9",
+      "source_locator": "juv4uk/sens@65947fdab49b3b503827102720a17c3d512df62d:lib/narrate.lisp:60",
+      "recorded_law_claim": "будує оповідь із фактів",
+      "previous_status": "pending-review",
+      "status": "LIBRARY-DEFINED-SYMBOL-HOLD-NONCORE-NO-COORDINATE",
+      "coordinate": null
+    },
+    {
+      "semantic_name": "provenance-goal",
+      "source_path": "knowledge/d10-proposal-ledger-symbolic-v3.tsv",
+      "source_git_blob": "d190cb2685728b4535a2ba5f71217923b8d6e5d9",
+      "source_locator": "juv4uk/sens@65947fdab49b3b503827102720a17c3d512df62d:lib/narrate.lisp:68",
+      "recorded_law_claim": "поведінка визначена джерелом provenance-goal",
+      "previous_status": "pending-review",
+      "status": "LIBRARY-DEFINED-SYMBOL-HOLD-NONCORE-NO-COORDINATE",
+      "coordinate": null
+    },
+    {
+      "semantic_name": "provenance-source",
+      "source_path": "knowledge/d10-proposal-ledger-symbolic-v3.tsv",
+      "source_git_blob": "d190cb2685728b4535a2ba5f71217923b8d6e5d9",
+      "source_locator": "juv4uk/sens@65947fdab49b3b503827102720a17c3d512df62d:lib/narrate.lisp:69",
+      "recorded_law_claim": "поведінка визначена джерелом provenance-source",
+      "previous_status": "pending-review",
+      "status": "LIBRARY-DEFINED-SYMBOL-HOLD-NONCORE-NO-COORDINATE",
+      "coordinate": null
+    },
+    {
+      "semantic_name": "provenance-rule",
+      "source_path": "knowledge/d10-proposal-ledger-symbolic-v3.tsv",
+      "source_git_blob": "d190cb2685728b4535a2ba5f71217923b8d6e5d9",
+      "source_locator": "juv4uk/sens@65947fdab49b3b503827102720a17c3d512df62d:lib/narrate.lisp:70",
+      "recorded_law_claim": "поведінка визначена джерелом provenance-rule",
+      "previous_status": "pending-review",
+      "status": "LIBRARY-DEFINED-SYMBOL-HOLD-NONCORE-NO-COORDINATE",
+      "coordinate": null
+    },
+    {
+      "semantic_name": "provenance-derived-from",
+      "source_path": "knowledge/d10-proposal-ledger-symbolic-v3.tsv",
+      "source_git_blob": "d190cb2685728b4535a2ba5f71217923b8d6e5d9",
+      "source_locator": "juv4uk/sens@65947fdab49b3b503827102720a17c3d512df62d:lib/narrate.lisp:71",
+      "recorded_law_claim": "поведінка визначена джерелом provenance-derived-from",
+      "previous_status": "pending-review",
+      "status": "LIBRARY-DEFINED-SYMBOL-HOLD-NONCORE-NO-COORDINATE",
+      "coordinate": null
+    },
+    {
+      "semantic_name": "narrate-derivation",
+      "source_path": "knowledge/d10-proposal-ledger-symbolic-v3.tsv",
+      "source_git_blob": "d190cb2685728b4535a2ba5f71217923b8d6e5d9",
+      "source_locator": "juv4uk/sens@65947fdab49b3b503827102720a17c3d512df62d:lib/narrate.lisp:73",
+      "recorded_law_claim": "будує оповідь із фактів",
+      "previous_status": "pending-review",
+      "status": "LIBRARY-DEFINED-SYMBOL-HOLD-NONCORE-NO-COORDINATE",
+      "coordinate": null
+    },
+    {
+      "semantic_name": "narrate-provenance",
+      "source_path": "knowledge/d10-proposal-ledger-symbolic-v3.tsv",
+      "source_git_blob": "d190cb2685728b4535a2ba5f71217923b8d6e5d9",
+      "source_locator": "juv4uk/sens@65947fdab49b3b503827102720a17c3d512df62d:lib/narrate.lisp:83",
+      "recorded_law_claim": "будує оповідь із фактів",
+      "previous_status": "pending-review",
+      "status": "LIBRARY-DEFINED-SYMBOL-HOLD-NONCORE-NO-COORDINATE",
+      "coordinate": null
+    },
+    {
+      "semantic_name": "narrate-answer",
+      "source_path": "knowledge/d10-proposal-ledger-symbolic-v3.tsv",
+      "source_git_blob": "d190cb2685728b4535a2ba5f71217923b8d6e5d9",
+      "source_locator": "juv4uk/sens@65947fdab49b3b503827102720a17c3d512df62d:lib/narrate.lisp:107",
+      "recorded_law_claim": "будує оповідь із фактів",
+      "previous_status": "pending-review",
+      "status": "LIBRARY-DEFINED-SYMBOL-HOLD-NONCORE-NO-COORDINATE",
+      "coordinate": null
+    },
+    {
+      "semantic_name": "narrate-outcome-arity?",
+      "source_path": "knowledge/d10-proposal-ledger-symbolic-v3.tsv",
+      "source_git_blob": "d190cb2685728b4535a2ba5f71217923b8d6e5d9",
+      "source_locator": "juv4uk/sens@65947fdab49b3b503827102720a17c3d512df62d:lib/narrate.lisp:141",
+      "recorded_law_claim": "будує оповідь із фактів",
+      "previous_status": "pending-review",
+      "status": "LIBRARY-DEFINED-SYMBOL-HOLD-NONCORE-NO-COORDINATE",
+      "coordinate": null
+    },
+    {
+      "semantic_name": "narrate-outcome",
+      "source_path": "knowledge/d10-proposal-ledger-symbolic-v3.tsv",
+      "source_git_blob": "d190cb2685728b4535a2ba5f71217923b8d6e5d9",
+      "source_locator": "juv4uk/sens@65947fdab49b3b503827102720a17c3d512df62d:lib/narrate.lisp:149",
+      "recorded_law_claim": "будує оповідь із фактів",
+      "previous_status": "pending-review",
+      "status": "LIBRARY-DEFINED-SYMBOL-HOLD-NONCORE-NO-COORDINATE",
+      "coordinate": null
+    },
+    {
+      "semantic_name": "unknown",
+      "source_path": "knowledge/d10-proposal-ledger-symbolic-v3.tsv",
+      "source_git_blob": "d190cb2685728b4535a2ba5f71217923b8d6e5d9",
+      "source_locator": "juv4uk/sens@65947fdab49b3b503827102720a17c3d512df62d:lib/narrate.lisp:170",
+      "recorded_law_claim": "перевіряє наявність знання",
+      "previous_status": "pending-review",
+      "status": "LIBRARY-DEFINED-SYMBOL-HOLD-NONCORE-NO-COORDINATE",
+      "coordinate": null
+    },
+    {
+      "semantic_name": "because",
+      "source_path": "knowledge/d10-proposal-ledger-symbolic-v3.tsv",
+      "source_git_blob": "d190cb2685728b4535a2ba5f71217923b8d6e5d9",
+      "source_locator": "juv4uk/sens@65947fdab49b3b503827102720a17c3d512df62d:lib/narrate.lisp:171",
+      "recorded_law_claim": "поведінка визначена джерелом because",
+      "previous_status": "pending-review",
+      "status": "LIBRARY-DEFINED-SYMBOL-HOLD-NONCORE-NO-COORDINATE",
+      "coordinate": null
+    },
+    {
+      "semantic_name": "no-proof-found-for",
+      "source_path": "knowledge/d10-proposal-ledger-symbolic-v3.tsv",
+      "source_git_blob": "d190cb2685728b4535a2ba5f71217923b8d6e5d9",
+      "source_locator": "juv4uk/sens@65947fdab49b3b503827102720a17c3d512df62d:lib/narrate.lisp:172",
+      "recorded_law_claim": "поведінка визначена джерелом no-proof-found-for",
+      "previous_status": "pending-review",
+      "status": "LIBRARY-DEFINED-SYMBOL-HOLD-NONCORE-NO-COORDINATE",
+      "coordinate": null
+    },
+    {
+      "semantic_name": "outcome",
+      "source_path": "knowledge/d10-proposal-ledger-symbolic-v3.tsv",
+      "source_git_blob": "d190cb2685728b4535a2ba5f71217923b8d6e5d9",
+      "source_locator": "juv4uk/sens@65947fdab49b3b503827102720a17c3d512df62d:lib/narrate.lisp:173",
+      "recorded_law_claim": "поведінка визначена джерелом outcome",
+      "previous_status": "pending-review",
+      "status": "LIBRARY-DEFINED-SYMBOL-HOLD-NONCORE-NO-COORDINATE",
+      "coordinate": null
+    },
+    {
+      "semantic_name": "partial",
+      "source_path": "knowledge/d10-proposal-ledger-symbolic-v3.tsv",
+      "source_git_blob": "d190cb2685728b4535a2ba5f71217923b8d6e5d9",
+      "source_locator": "juv4uk/sens@65947fdab49b3b503827102720a17c3d512df62d:lib/narrate.lisp:179",
+      "recorded_law_claim": "поведінка визначена джерелом partial",
+      "previous_status": "pending-review",
+      "status": "LIBRARY-DEFINED-SYMBOL-HOLD-NONCORE-NO-COORDINATE",
+      "coordinate": null
+    },
+    {
+      "semantic_name": "value",
+      "source_path": "knowledge/d10-proposal-ledger-symbolic-v3.tsv",
+      "source_git_blob": "d190cb2685728b4535a2ba5f71217923b8d6e5d9",
+      "source_locator": "juv4uk/sens@65947fdab49b3b503827102720a17c3d512df62d:lib/narrate.lisp:180",
+      "recorded_law_claim": "поведінка визначена джерелом value",
+      "previous_status": "pending-review",
+      "status": "LIBRARY-DEFINED-SYMBOL-HOLD-NONCORE-NO-COORDINATE",
+      "coordinate": null
+    },
+    {
+      "semantic_name": "bound",
+      "source_path": "knowledge/d10-proposal-ledger-symbolic-v3.tsv",
+      "source_git_blob": "d190cb2685728b4535a2ba5f71217923b8d6e5d9",
+      "source_locator": "juv4uk/sens@65947fdab49b3b503827102720a17c3d512df62d:lib/narrate.lisp:182",
+      "recorded_law_claim": "поведінка визначена джерелом bound",
+      "previous_status": "pending-review",
+      "status": "LIBRARY-DEFINED-SYMBOL-HOLD-NONCORE-NO-COORDINATE",
+      "coordinate": null
+    },
+    {
+      "semantic_name": "blocked",
+      "source_path": "knowledge/d10-proposal-ledger-symbolic-v3.tsv",
+      "source_git_blob": "d190cb2685728b4535a2ba5f71217923b8d6e5d9",
+      "source_locator": "juv4uk/sens@65947fdab49b3b503827102720a17c3d512df62d:lib/narrate.lisp:189",
+      "recorded_law_claim": "поведінка визначена джерелом blocked",
+      "previous_status": "pending-review",
+      "status": "LIBRARY-DEFINED-SYMBOL-HOLD-NONCORE-NO-COORDINATE",
+      "coordinate": null
+    },
+    {
+      "semantic_name": "disputed",
+      "source_path": "knowledge/d10-proposal-ledger-symbolic-v3.tsv",
+      "source_git_blob": "d190cb2685728b4535a2ba5f71217923b8d6e5d9",
+      "source_locator": "juv4uk/sens@65947fdab49b3b503827102720a17c3d512df62d:lib/narrate.lisp:197",
+      "recorded_law_claim": "поведінка визначена джерелом disputed",
+      "previous_status": "pending-review",
+      "status": "LIBRARY-DEFINED-SYMBOL-HOLD-NONCORE-NO-COORDINATE",
+      "coordinate": null
+    },
+    {
+      "semantic_name": "both-sides-have-evidence",
+      "source_path": "knowledge/d10-proposal-ledger-symbolic-v3.tsv",
+      "source_git_blob": "d190cb2685728b4535a2ba5f71217923b8d6e5d9",
+      "source_locator": "juv4uk/sens@65947fdab49b3b503827102720a17c3d512df62d:lib/narrate.lisp:199",
+      "recorded_law_claim": "поведінка визначена джерелом both-sides-have-evidence",
+      "previous_status": "pending-review",
+      "status": "LIBRARY-DEFINED-SYMBOL-HOLD-NONCORE-NO-COORDINATE",
+      "coordinate": null
+    },
+    {
+      "semantic_name": "invalid",
+      "source_path": "knowledge/d10-proposal-ledger-symbolic-v3.tsv",
+      "source_git_blob": "d190cb2685728b4535a2ba5f71217923b8d6e5d9",
+      "source_locator": "juv4uk/sens@65947fdab49b3b503827102720a17c3d512df62d:lib/narrate.lisp:206",
+      "recorded_law_claim": "поведінка визначена джерелом invalid",
+      "previous_status": "pending-review",
+      "status": "LIBRARY-DEFINED-SYMBOL-HOLD-NONCORE-NO-COORDINATE",
+      "coordinate": null
+    },
+    {
+      "semantic_name": "payload",
+      "source_path": "knowledge/d10-proposal-ledger-symbolic-v3.tsv",
+      "source_git_blob": "d190cb2685728b4535a2ba5f71217923b8d6e5d9",
+      "source_locator": "juv4uk/sens@65947fdab49b3b503827102720a17c3d512df62d:lib/narrate.lisp:209",
+      "recorded_law_claim": "поведінка визначена джерелом payload",
+      "previous_status": "pending-review",
+      "status": "LIBRARY-DEFINED-SYMBOL-HOLD-NONCORE-NO-COORDINATE",
+      "coordinate": null
+    },
+    {
+      "semantic_name": "make-world",
+      "source_path": "knowledge/d10-proposal-ledger-symbolic-v3.tsv",
+      "source_git_blob": "d190cb2685728b4535a2ba5f71217923b8d6e5d9",
+      "source_locator": "juv4uk/sens@67344c605d63fe70a398b52da56105a7b581cfa4:lib/world.lisp:19",
+      "recorded_law_claim": "конструює значення",
+      "previous_status": "pending-review",
+      "status": "LIBRARY-DEFINED-SYMBOL-HOLD-NONCORE-NO-COORDINATE",
+      "coordinate": null
+    },
+    {
+      "semantic_name": "empty-world",
+      "source_path": "knowledge/d10-proposal-ledger-symbolic-v3.tsv",
+      "source_git_blob": "d190cb2685728b4535a2ba5f71217923b8d6e5d9",
+      "source_locator": "juv4uk/sens@67344c605d63fe70a398b52da56105a7b581cfa4:lib/world.lisp:23",
+      "recorded_law_claim": "оперує станом світу",
+      "previous_status": "pending-review",
+      "status": "LIBRARY-DEFINED-SYMBOL-HOLD-NONCORE-NO-COORDINATE",
+      "coordinate": null
+    },
+    {
+      "semantic_name": "world?",
+      "source_path": "knowledge/d10-proposal-ledger-symbolic-v3.tsv",
+      "source_git_blob": "d190cb2685728b4535a2ba5f71217923b8d6e5d9",
+      "source_locator": "juv4uk/sens@67344c605d63fe70a398b52da56105a7b581cfa4:lib/world.lisp:27",
+      "recorded_law_claim": "оперує станом світу",
+      "previous_status": "pending-review",
+      "status": "LIBRARY-DEFINED-SYMBOL-HOLD-NONCORE-NO-COORDINATE",
+      "coordinate": null
+    },
+    {
+      "semantic_name": "world-parent",
+      "source_path": "knowledge/d10-proposal-ledger-symbolic-v3.tsv",
+      "source_git_blob": "d190cb2685728b4535a2ba5f71217923b8d6e5d9",
+      "source_locator": "juv4uk/sens@67344c605d63fe70a398b52da56105a7b581cfa4:lib/world.lisp:35",
+      "recorded_law_claim": "оперує станом світу",
+      "previous_status": "pending-review",
+      "status": "LIBRARY-DEFINED-SYMBOL-HOLD-NONCORE-NO-COORDINATE",
+      "coordinate": null
+    },
+    {
+      "semantic_name": "world-journal",
+      "source_path": "knowledge/d10-proposal-ledger-symbolic-v3.tsv",
+      "source_git_blob": "d190cb2685728b4535a2ba5f71217923b8d6e5d9",
+      "source_locator": "juv4uk/sens@67344c605d63fe70a398b52da56105a7b581cfa4:lib/world.lisp:36",
+      "recorded_law_claim": "оперує станом світу",
+      "previous_status": "pending-review",
+      "status": "LIBRARY-DEFINED-SYMBOL-HOLD-NONCORE-NO-COORDINATE",
+      "coordinate": null
+    },
+    {
+      "semantic_name": "world-metadata",
+      "source_path": "knowledge/d10-proposal-ledger-symbolic-v3.tsv",
+      "source_git_blob": "d190cb2685728b4535a2ba5f71217923b8d6e5d9",
+      "source_locator": "juv4uk/sens@67344c605d63fe70a398b52da56105a7b581cfa4:lib/world.lisp:37",
+      "recorded_law_claim": "оперує станом світу",
+      "previous_status": "pending-review",
+      "status": "LIBRARY-DEFINED-SYMBOL-HOLD-NONCORE-NO-COORDINATE",
+      "coordinate": null
+    },
+    {
+      "semantic_name": "world-record",
+      "source_path": "knowledge/d10-proposal-ledger-symbolic-v3.tsv",
+      "source_git_blob": "d190cb2685728b4535a2ba5f71217923b8d6e5d9",
+      "source_locator": "juv4uk/sens@67344c605d63fe70a398b52da56105a7b581cfa4:lib/world.lisp:43",
+      "recorded_law_claim": "оперує станом світу",
+      "previous_status": "pending-review",
+      "status": "LIBRARY-DEFINED-SYMBOL-HOLD-NONCORE-NO-COORDINATE",
+      "coordinate": null
+    },
+    {
+      "semantic_name": "event",
+      "source_path": "knowledge/d10-proposal-ledger-symbolic-v3.tsv",
+      "source_git_blob": "d190cb2685728b4535a2ba5f71217923b8d6e5d9",
+      "source_locator": "juv4uk/sens@67344c605d63fe70a398b52da56105a7b581cfa4:lib/world.lisp:46",
+      "recorded_law_claim": "поведінка визначена джерелом event",
+      "previous_status": "pending-review",
+      "status": "LIBRARY-DEFINED-SYMBOL-HOLD-NONCORE-NO-COORDINATE",
+      "coordinate": null
+    },
+    {
+      "semantic_name": "world-tell",
+      "source_path": "knowledge/d10-proposal-ledger-symbolic-v3.tsv",
+      "source_git_blob": "d190cb2685728b4535a2ba5f71217923b8d6e5d9",
+      "source_locator": "juv4uk/sens@67344c605d63fe70a398b52da56105a7b581cfa4:lib/world.lisp:49",
+      "recorded_law_claim": "оперує станом світу",
+      "previous_status": "pending-review",
+      "status": "LIBRARY-DEFINED-SYMBOL-HOLD-NONCORE-NO-COORDINATE",
+      "coordinate": null
+    },
+    {
+      "semantic_name": "world-retract",
+      "source_path": "knowledge/d10-proposal-ledger-symbolic-v3.tsv",
+      "source_git_blob": "d190cb2685728b4535a2ba5f71217923b8d6e5d9",
+      "source_locator": "juv4uk/sens@67344c605d63fe70a398b52da56105a7b581cfa4:lib/world.lisp:53",
+      "recorded_law_claim": "відкликає твердження з бази знань",
+      "previous_status": "pending-review",
+      "status": "LIBRARY-DEFINED-SYMBOL-HOLD-NONCORE-NO-COORDINATE",
+      "coordinate": null
+    },
+    {
+      "semantic_name": "world-module-events",
+      "source_path": "knowledge/d10-proposal-ledger-symbolic-v3.tsv",
+      "source_git_blob": "d190cb2685728b4535a2ba5f71217923b8d6e5d9",
+      "source_locator": "juv4uk/sens@67344c605d63fe70a398b52da56105a7b581cfa4:lib/world.lisp:57",
+      "recorded_law_claim": "оперує станом світу",
+      "previous_status": "pending-review",
+      "status": "LIBRARY-DEFINED-SYMBOL-HOLD-NONCORE-NO-COORDINATE",
+      "coordinate": null
+    },
+    {
+      "semantic_name": "world-remove-first",
+      "source_path": "knowledge/d10-proposal-ledger-symbolic-v3.tsv",
+      "source_git_blob": "d190cb2685728b4535a2ba5f71217923b8d6e5d9",
+      "source_locator": "juv4uk/sens@67344c605d63fe70a398b52da56105a7b581cfa4:lib/world.lisp:62",
+      "recorded_law_claim": "оперує станом світу",
+      "previous_status": "pending-review",
+      "status": "LIBRARY-DEFINED-SYMBOL-HOLD-NONCORE-NO-COORDINATE",
+      "coordinate": null
+    },
+    {
+      "semantic_name": "world-apply-event",
+      "source_path": "knowledge/d10-proposal-ledger-symbolic-v3.tsv",
+      "source_git_blob": "d190cb2685728b4535a2ba5f71217923b8d6e5d9",
+      "source_locator": "juv4uk/sens@67344c605d63fe70a398b52da56105a7b581cfa4:lib/world.lisp:70",
+      "recorded_law_claim": "оперує станом світу",
+      "previous_status": "pending-review",
+      "status": "LIBRARY-DEFINED-SYMBOL-HOLD-NONCORE-NO-COORDINATE",
+      "coordinate": null
+    },
+    {
+      "semantic_name": "world-module-known?",
+      "source_path": "knowledge/d10-proposal-ledger-symbolic-v3.tsv",
+      "source_git_blob": "d190cb2685728b4535a2ba5f71217923b8d6e5d9",
+      "source_locator": "juv4uk/sens@67344c605d63fe70a398b52da56105a7b581cfa4:lib/world.lisp:78",
+      "recorded_law_claim": "оперує станом світу",
+      "previous_status": "pending-review",
+      "status": "LIBRARY-DEFINED-SYMBOL-HOLD-NONCORE-NO-COORDINATE",
+      "coordinate": null
+    },
+    {
+      "semantic_name": "world-clauses",
+      "source_path": "knowledge/d10-proposal-ledger-symbolic-v3.tsv",
+      "source_git_blob": "d190cb2685728b4535a2ba5f71217923b8d6e5d9",
+      "source_locator": "juv4uk/sens@67344c605d63fe70a398b52da56105a7b581cfa4:lib/world.lisp:85",
+      "recorded_law_claim": "оперує станом світу",
+      "previous_status": "pending-review",
+      "status": "LIBRARY-DEFINED-SYMBOL-HOLD-NONCORE-NO-COORDINATE",
+      "coordinate": null
+    },
+    {
+      "semantic_name": "reason-in-world",
+      "source_path": "knowledge/d10-proposal-ledger-symbolic-v3.tsv",
+      "source_git_blob": "d190cb2685728b4535a2ba5f71217923b8d6e5d9",
+      "source_locator": "juv4uk/sens@67344c605d63fe70a398b52da56105a7b581cfa4:lib/world.lisp:96",
+      "recorded_law_claim": "оперує станом світу",
+      "previous_status": "pending-review",
+      "status": "LIBRARY-DEFINED-SYMBOL-HOLD-NONCORE-NO-COORDINATE",
+      "coordinate": null
+    },
+    {
+      "semantic_name": "goal",
+      "source_path": "knowledge/d10-proposal-ledger-symbolic-v3.tsv",
+      "source_git_blob": "d190cb2685728b4535a2ba5f71217923b8d6e5d9",
+      "source_locator": "juv4uk/sens@67344c605d63fe70a398b52da56105a7b581cfa4:lib/world.lisp:100",
+      "recorded_law_claim": "поведінка визначена джерелом goal",
+      "previous_status": "pending-review",
+      "status": "LIBRARY-DEFINED-SYMBOL-HOLD-NONCORE-NO-COORDINATE",
+      "coordinate": null
+    },
+    {
+      "semantic_name": "forward-in-world",
+      "source_path": "knowledge/d10-proposal-ledger-symbolic-v3.tsv",
+      "source_git_blob": "d190cb2685728b4535a2ba5f71217923b8d6e5d9",
+      "source_locator": "juv4uk/sens@67344c605d63fe70a398b52da56105a7b581cfa4:lib/world.lisp:103",
+      "recorded_law_claim": "оперує станом світу",
+      "previous_status": "pending-review",
+      "status": "LIBRARY-DEFINED-SYMBOL-HOLD-NONCORE-NO-COORDINATE",
+      "coordinate": null
+    },
+    {
+      "semantic_name": "advice-decision-in-world",
+      "source_path": "knowledge/d10-proposal-ledger-symbolic-v3.tsv",
+      "source_git_blob": "d190cb2685728b4535a2ba5f71217923b8d6e5d9",
+      "source_locator": "juv4uk/sens@67344c605d63fe70a398b52da56105a7b581cfa4:lib/world.lisp:126",
+      "recorded_law_claim": "оперує станом світу",
+      "previous_status": "pending-review",
+      "status": "LIBRARY-DEFINED-SYMBOL-HOLD-NONCORE-NO-COORDINATE",
+      "coordinate": null
+    },
+    {
+      "semantic_name": "advise-world",
+      "source_path": "knowledge/d10-proposal-ledger-symbolic-v3.tsv",
+      "source_git_blob": "d190cb2685728b4535a2ba5f71217923b8d6e5d9",
+      "source_locator": "juv4uk/sens@67344c605d63fe70a398b52da56105a7b581cfa4:lib/world.lisp:152",
+      "recorded_law_claim": "оперує станом світу",
+      "previous_status": "pending-review",
+      "status": "LIBRARY-DEFINED-SYMBOL-HOLD-NONCORE-NO-COORDINATE",
+      "coordinate": null
+    },
+    {
+      "semantic_name": "advice-all-decision-in-world",
+      "source_path": "knowledge/d10-proposal-ledger-symbolic-v3.tsv",
+      "source_git_blob": "d190cb2685728b4535a2ba5f71217923b8d6e5d9",
+      "source_locator": "juv4uk/sens@67344c605d63fe70a398b52da56105a7b581cfa4:lib/world.lisp:167",
+      "recorded_law_claim": "оперує станом світу",
+      "previous_status": "pending-review",
+      "status": "LIBRARY-DEFINED-SYMBOL-HOLD-NONCORE-NO-COORDINATE",
+      "coordinate": null
+    },
+    {
+      "semantic_name": "world-tell-all",
+      "source_path": "knowledge/d10-proposal-ledger-symbolic-v3.tsv",
+      "source_git_blob": "d190cb2685728b4535a2ba5f71217923b8d6e5d9",
+      "source_locator": "juv4uk/sens@67344c605d63fe70a398b52da56105a7b581cfa4:lib/world.lisp:198",
+      "recorded_law_claim": "оперує станом світу",
+      "previous_status": "pending-review",
+      "status": "LIBRARY-DEFINED-SYMBOL-HOLD-NONCORE-NO-COORDINATE",
+      "coordinate": null
+    },
+    {
+      "semantic_name": "advise-all-world",
+      "source_path": "knowledge/d10-proposal-ledger-symbolic-v3.tsv",
+      "source_git_blob": "d190cb2685728b4535a2ba5f71217923b8d6e5d9",
+      "source_locator": "juv4uk/sens@67344c605d63fe70a398b52da56105a7b581cfa4:lib/world.lisp:269",
+      "recorded_law_claim": "оперує станом світу",
+      "previous_status": "pending-review",
+      "status": "LIBRARY-DEFINED-SYMBOL-HOLD-NONCORE-NO-COORDINATE",
+      "coordinate": null
+    },
+    {
+      "semantic_name": "legacy-world-transition-expansion",
+      "source_path": "knowledge/d10-proposal-ledger-symbolic-v3.tsv",
+      "source_git_blob": "d190cb2685728b4535a2ba5f71217923b8d6e5d9",
+      "source_locator": "juv4uk/sens@67344c605d63fe70a398b52da56105a7b581cfa4:lib/world.lisp:287",
+      "recorded_law_claim": "оперує станом світу",
+      "previous_status": "pending-review",
+      "status": "LIBRARY-DEFINED-SYMBOL-HOLD-NONCORE-NO-COORDINATE",
+      "coordinate": null
+    },
+    {
+      "semantic_name": "make-world-knowledge-package",
+      "source_path": "knowledge/d10-proposal-ledger-symbolic-v3.tsv",
+      "source_git_blob": "d190cb2685728b4535a2ba5f71217923b8d6e5d9",
+      "source_locator": "juv4uk/sens@67344c605d63fe70a398b52da56105a7b581cfa4:lib/world.lisp:332",
+      "recorded_law_claim": "конструює значення",
+      "previous_status": "pending-review",
+      "status": "LIBRARY-DEFINED-SYMBOL-HOLD-NONCORE-NO-COORDINATE",
+      "coordinate": null
+    },
+    {
+      "semantic_name": "import-knowledge-package-world",
+      "source_path": "knowledge/d10-proposal-ledger-symbolic-v3.tsv",
+      "source_git_blob": "d190cb2685728b4535a2ba5f71217923b8d6e5d9",
+      "source_locator": "juv4uk/sens@67344c605d63fe70a398b52da56105a7b581cfa4:lib/world.lisp:345",
+      "recorded_law_claim": "оперує станом світу",
+      "previous_status": "pending-review",
+      "status": "LIBRARY-DEFINED-SYMBOL-HOLD-NONCORE-NO-COORDINATE",
+      "coordinate": null
+    },
+    {
+      "semantic_name": "world-depth",
+      "source_path": "knowledge/d10-proposal-ledger-symbolic-v3.tsv",
+      "source_git_blob": "d190cb2685728b4535a2ba5f71217923b8d6e5d9",
+      "source_locator": "juv4uk/sens@67344c605d63fe70a398b52da56105a7b581cfa4:lib/world.lisp:414",
+      "recorded_law_claim": "оперує станом світу",
+      "previous_status": "pending-review",
+      "status": "LIBRARY-DEFINED-SYMBOL-HOLD-NONCORE-NO-COORDINATE",
+      "coordinate": null
+    },
+    {
+      "semantic_name": "current-depth",
+      "source_path": "knowledge/d10-proposal-ledger-symbolic-v3.tsv",
+      "source_git_blob": "d190cb2685728b4535a2ba5f71217923b8d6e5d9",
+      "source_locator": "juv4uk/sens@67344c605d63fe70a398b52da56105a7b581cfa4:lib/world.lisp:429",
+      "recorded_law_claim": "поведінка визначена джерелом current-depth",
+      "previous_status": "pending-review",
+      "status": "LIBRARY-DEFINED-SYMBOL-HOLD-NONCORE-NO-COORDINATE",
+      "coordinate": null
+    },
+    {
+      "semantic_name": "world-at-depth",
+      "source_path": "knowledge/d10-proposal-ledger-symbolic-v3.tsv",
+      "source_git_blob": "d190cb2685728b4535a2ba5f71217923b8d6e5d9",
+      "source_locator": "juv4uk/sens@67344c605d63fe70a398b52da56105a7b581cfa4:lib/world.lisp:432",
+      "recorded_law_claim": "оперує станом світу",
+      "previous_status": "pending-review",
+      "status": "LIBRARY-DEFINED-SYMBOL-HOLD-NONCORE-NO-COORDINATE",
+      "coordinate": null
+    },
+    {
+      "semantic_name": "world-diff",
+      "source_path": "knowledge/d10-proposal-ledger-symbolic-v3.tsv",
+      "source_git_blob": "d190cb2685728b4535a2ba5f71217923b8d6e5d9",
+      "source_locator": "juv4uk/sens@67344c605d63fe70a398b52da56105a7b581cfa4:lib/world.lisp:457",
+      "recorded_law_claim": "оперує станом світу",
+      "previous_status": "pending-review",
+      "status": "LIBRARY-DEFINED-SYMBOL-HOLD-NONCORE-NO-COORDINATE",
+      "coordinate": null
+    },
+    {
+      "semantic_name": "world-common-ancestor",
+      "source_path": "knowledge/d10-proposal-ledger-symbolic-v3.tsv",
+      "source_git_blob": "d190cb2685728b4535a2ba5f71217923b8d6e5d9",
+      "source_locator": "juv4uk/sens@67344c605d63fe70a398b52da56105a7b581cfa4:lib/world.lisp:510",
+      "recorded_law_claim": "оперує станом світу",
+      "previous_status": "pending-review",
+      "status": "LIBRARY-DEFINED-SYMBOL-HOLD-NONCORE-NO-COORDINATE",
+      "coordinate": null
+    },
+    {
+      "semantic_name": "world-branch-diff",
+      "source_path": "knowledge/d10-proposal-ledger-symbolic-v3.tsv",
+      "source_git_blob": "d190cb2685728b4535a2ba5f71217923b8d6e5d9",
+      "source_locator": "juv4uk/sens@67344c605d63fe70a398b52da56105a7b581cfa4:lib/world.lisp:528",
+      "recorded_law_claim": "оперує станом світу",
+      "previous_status": "pending-review",
+      "status": "LIBRARY-DEFINED-SYMBOL-HOLD-NONCORE-NO-COORDINATE",
+      "coordinate": null
+    },
+    {
+      "semantic_name": "knowledge-content-address",
+      "source_path": "knowledge/d10-proposal-ledger-symbolic-v3.tsv",
+      "source_git_blob": "d190cb2685728b4535a2ba5f71217923b8d6e5d9",
+      "source_locator": "juv4uk/sens@67344c605d63fe70a398b52da56105a7b581cfa4:lib/world.lisp:559",
+      "recorded_law_claim": "поведінка визначена джерелом knowledge-content-address",
+      "previous_status": "pending-review",
+      "status": "LIBRARY-DEFINED-SYMBOL-HOLD-NONCORE-NO-COORDINATE",
+      "coordinate": null
+    },
+    {
+      "semantic_name": "knowledge",
+      "source_path": "knowledge/d10-proposal-ledger-symbolic-v3.tsv",
+      "source_git_blob": "d190cb2685728b4535a2ba5f71217923b8d6e5d9",
+      "source_locator": "juv4uk/sens@67344c605d63fe70a398b52da56105a7b581cfa4:lib/world.lisp:561",
+      "recorded_law_claim": "поведінка визначена джерелом knowledge",
+      "previous_status": "pending-review",
+      "status": "LIBRARY-DEFINED-SYMBOL-HOLD-NONCORE-NO-COORDINATE",
+      "coordinate": null
+    },
+    {
+      "semantic_name": "world-address-content",
+      "source_path": "knowledge/d10-proposal-ledger-symbolic-v3.tsv",
+      "source_git_blob": "d190cb2685728b4535a2ba5f71217923b8d6e5d9",
+      "source_locator": "juv4uk/sens@67344c605d63fe70a398b52da56105a7b581cfa4:lib/world.lisp:563",
+      "recorded_law_claim": "оперує станом світу",
+      "previous_status": "pending-review",
+      "status": "LIBRARY-DEFINED-SYMBOL-HOLD-NONCORE-NO-COORDINATE",
+      "coordinate": null
+    },
+    {
+      "semantic_name": "world-content-address",
+      "source_path": "knowledge/d10-proposal-ledger-symbolic-v3.tsv",
+      "source_git_blob": "d190cb2685728b4535a2ba5f71217923b8d6e5d9",
+      "source_locator": "juv4uk/sens@67344c605d63fe70a398b52da56105a7b581cfa4:lib/world.lisp:569",
+      "recorded_law_claim": "оперує станом світу",
+      "previous_status": "pending-review",
+      "status": "LIBRARY-DEFINED-SYMBOL-HOLD-NONCORE-NO-COORDINATE",
+      "coordinate": null
+    },
+    {
+      "semantic_name": "json-escape-onto",
+      "source_path": "knowledge/d10-proposal-ledger-symbolic-v3.tsv",
+      "source_git_blob": "d190cb2685728b4535a2ba5f71217923b8d6e5d9",
+      "source_locator": "juv4uk/sens@76460b72cccad6bc44b39e87372f37613735d7a1:lib/yantra.lisp:60",
+      "recorded_law_claim": "поведінка визначена джерелом json-escape-onto",
+      "previous_status": "pending-review",
+      "status": "LIBRARY-DEFINED-SYMBOL-HOLD-NONCORE-NO-COORDINATE",
+      "coordinate": null
+    },
+    {
+      "semantic_name": "acc",
+      "source_path": "knowledge/d10-proposal-ledger-symbolic-v3.tsv",
+      "source_git_blob": "d190cb2685728b4535a2ba5f71217923b8d6e5d9",
+      "source_locator": "juv4uk/sens@76460b72cccad6bc44b39e87372f37613735d7a1:lib/yantra.lisp:65",
+      "recorded_law_claim": "поведінка визначена джерелом acc",
+      "previous_status": "pending-review",
+      "status": "LIBRARY-DEFINED-SYMBOL-HOLD-NONCORE-NO-COORDINATE",
+      "coordinate": null
+    },
+    {
+      "semantic_name": "strcat-onto",
+      "source_path": "knowledge/d10-proposal-ledger-symbolic-v3.tsv",
+      "source_git_blob": "d190cb2685728b4535a2ba5f71217923b8d6e5d9",
+      "source_locator": "juv4uk/sens@76460b72cccad6bc44b39e87372f37613735d7a1:lib/yantra.lisp:73",
+      "recorded_law_claim": "поведінка визначена джерелом strcat-onto",
+      "previous_status": "pending-review",
+      "status": "LIBRARY-DEFINED-SYMBOL-HOLD-NONCORE-NO-COORDINATE",
+      "coordinate": null
+    },
+    {
+      "semantic_name": "strcat",
+      "source_path": "knowledge/d10-proposal-ledger-symbolic-v3.tsv",
+      "source_git_blob": "d190cb2685728b4535a2ba5f71217923b8d6e5d9",
+      "source_locator": "juv4uk/sens@76460b72cccad6bc44b39e87372f37613735d7a1:lib/yantra.lisp:80",
+      "recorded_law_claim": "поведінка визначена джерелом strcat",
+      "previous_status": "pending-review",
+      "status": "LIBRARY-DEFINED-SYMBOL-HOLD-NONCORE-NO-COORDINATE",
+      "coordinate": null
+    },
+    {
+      "semantic_name": "args",
+      "source_path": "knowledge/d10-proposal-ledger-symbolic-v3.tsv",
+      "source_git_blob": "d190cb2685728b4535a2ba5f71217923b8d6e5d9",
+      "source_locator": "juv4uk/sens@76460b72cccad6bc44b39e87372f37613735d7a1:lib/yantra.lisp:81",
+      "recorded_law_claim": "поведінка визначена джерелом args",
+      "previous_status": "pending-review",
+      "status": "LIBRARY-DEFINED-SYMBOL-HOLD-NONCORE-NO-COORDINATE",
+      "coordinate": null
+    },
+    {
+      "semantic_name": "json-encode-key",
+      "source_path": "knowledge/d10-proposal-ledger-symbolic-v3.tsv",
+      "source_git_blob": "d190cb2685728b4535a2ba5f71217923b8d6e5d9",
+      "source_locator": "juv4uk/sens@76460b72cccad6bc44b39e87372f37613735d7a1:lib/yantra.lisp:87",
+      "recorded_law_claim": "поведінка визначена джерелом json-encode-key",
+      "previous_status": "pending-review",
+      "status": "LIBRARY-DEFINED-SYMBOL-HOLD-NONCORE-NO-COORDINATE",
+      "coordinate": null
+    },
+    {
+      "semantic_name": "json-encode-object-entries",
+      "source_path": "knowledge/d10-proposal-ledger-symbolic-v3.tsv",
+      "source_git_blob": "d190cb2685728b4535a2ba5f71217923b8d6e5d9",
+      "source_locator": "juv4uk/sens@76460b72cccad6bc44b39e87372f37613735d7a1:lib/yantra.lisp:130",
+      "recorded_law_claim": "поведінка визначена джерелом json-encode-object-entries",
+      "previous_status": "pending-review",
+      "status": "LIBRARY-DEFINED-SYMBOL-HOLD-NONCORE-NO-COORDINATE",
+      "coordinate": null
+    },
+    {
+      "semantic_name": "entries",
+      "source_path": "knowledge/d10-proposal-ledger-symbolic-v3.tsv",
+      "source_git_blob": "d190cb2685728b4535a2ba5f71217923b8d6e5d9",
+      "source_locator": "juv4uk/sens@76460b72cccad6bc44b39e87372f37613735d7a1:lib/yantra.lisp:137",
+      "recorded_law_claim": "поведінка визначена джерелом entries",
+      "previous_status": "pending-review",
+      "status": "LIBRARY-DEFINED-SYMBOL-HOLD-NONCORE-NO-COORDINATE",
+      "coordinate": null
+    },
+    {
+      "semantic_name": "json-encode-array-items",
+      "source_path": "knowledge/d10-proposal-ledger-symbolic-v3.tsv",
+      "source_git_blob": "d190cb2685728b4535a2ba5f71217923b8d6e5d9",
+      "source_locator": "juv4uk/sens@76460b72cccad6bc44b39e87372f37613735d7a1:lib/yantra.lisp:149",
+      "recorded_law_claim": "поведінка визначена джерелом json-encode-array-items",
+      "previous_status": "pending-review",
+      "status": "LIBRARY-DEFINED-SYMBOL-HOLD-NONCORE-NO-COORDINATE",
+      "coordinate": null
+    },
+    {
+      "semantic_name": "items",
+      "source_path": "knowledge/d10-proposal-ledger-symbolic-v3.tsv",
+      "source_git_blob": "d190cb2685728b4535a2ba5f71217923b8d6e5d9",
+      "source_locator": "juv4uk/sens@76460b72cccad6bc44b39e87372f37613735d7a1:lib/yantra.lisp:155",
+      "recorded_law_claim": "поведінка визначена джерелом items",
+      "previous_status": "pending-review",
+      "status": "LIBRARY-DEFINED-SYMBOL-HOLD-NONCORE-NO-COORDINATE",
+      "coordinate": null
+    },
+    {
+      "semantic_name": "json-encode",
+      "source_path": "knowledge/d10-proposal-ledger-symbolic-v3.tsv",
+      "source_git_blob": "d190cb2685728b4535a2ba5f71217923b8d6e5d9",
+      "source_locator": "juv4uk/sens@76460b72cccad6bc44b39e87372f37613735d7a1:lib/yantra.lisp:165",
+      "recorded_law_claim": "поведінка визначена джерелом json-encode",
+      "previous_status": "pending-review",
+      "status": "LIBRARY-DEFINED-SYMBOL-HOLD-NONCORE-NO-COORDINATE",
+      "coordinate": null
+    },
+    {
+      "semantic_name": "alist-ref",
+      "source_path": "knowledge/d10-proposal-ledger-symbolic-v3.tsv",
+      "source_git_blob": "d190cb2685728b4535a2ba5f71217923b8d6e5d9",
+      "source_locator": "juv4uk/sens@76460b72cccad6bc44b39e87372f37613735d7a1:lib/yantra.lisp:175",
+      "recorded_law_claim": "поведінка визначена джерелом alist-ref",
+      "previous_status": "pending-review",
+      "status": "LIBRARY-DEFINED-SYMBOL-HOLD-NONCORE-NO-COORDINATE",
+      "coordinate": null
+    },
+    {
+      "semantic_name": "msg-role",
+      "source_path": "knowledge/d10-proposal-ledger-symbolic-v3.tsv",
+      "source_git_blob": "d190cb2685728b4535a2ba5f71217923b8d6e5d9",
+      "source_locator": "juv4uk/sens@76460b72cccad6bc44b39e87372f37613735d7a1:lib/yantra.lisp:181",
+      "recorded_law_claim": "поведінка визначена джерелом msg-role",
+      "previous_status": "pending-review",
+      "status": "LIBRARY-DEFINED-SYMBOL-HOLD-NONCORE-NO-COORDINATE",
+      "coordinate": null
+    },
+    {
+      "semantic_name": "msg-content",
+      "source_path": "knowledge/d10-proposal-ledger-symbolic-v3.tsv",
+      "source_git_blob": "d190cb2685728b4535a2ba5f71217923b8d6e5d9",
+      "source_locator": "juv4uk/sens@76460b72cccad6bc44b39e87372f37613735d7a1:lib/yantra.lisp:182",
+      "recorded_law_claim": "поведінка визначена джерелом msg-content",
+      "previous_status": "pending-review",
+      "status": "LIBRARY-DEFINED-SYMBOL-HOLD-NONCORE-NO-COORDINATE",
+      "coordinate": null
+    },
+    {
+      "semantic_name": "msg-tool-calls",
+      "source_path": "knowledge/d10-proposal-ledger-symbolic-v3.tsv",
+      "source_git_blob": "d190cb2685728b4535a2ba5f71217923b8d6e5d9",
+      "source_locator": "juv4uk/sens@76460b72cccad6bc44b39e87372f37613735d7a1:lib/yantra.lisp:183",
+      "recorded_law_claim": "поведінка визначена джерелом msg-tool-calls",
+      "previous_status": "pending-review",
+      "status": "LIBRARY-DEFINED-SYMBOL-HOLD-NONCORE-NO-COORDINATE",
+      "coordinate": null
+    },
+    {
+      "semantic_name": "msg-tool-call-id",
+      "source_path": "knowledge/d10-proposal-ledger-symbolic-v3.tsv",
+      "source_git_blob": "d190cb2685728b4535a2ba5f71217923b8d6e5d9",
+      "source_locator": "juv4uk/sens@76460b72cccad6bc44b39e87372f37613735d7a1:lib/yantra.lisp:184",
+      "recorded_law_claim": "поведінка визначена джерелом msg-tool-call-id",
+      "previous_status": "pending-review",
+      "status": "LIBRARY-DEFINED-SYMBOL-HOLD-NONCORE-NO-COORDINATE",
+      "coordinate": null
+    },
+    {
+      "semantic_name": "tc-id",
+      "source_path": "knowledge/d10-proposal-ledger-symbolic-v3.tsv",
+      "source_git_blob": "d190cb2685728b4535a2ba5f71217923b8d6e5d9",
+      "source_locator": "juv4uk/sens@76460b72cccad6bc44b39e87372f37613735d7a1:lib/yantra.lisp:186",
+      "recorded_law_claim": "поведінка визначена джерелом tc-id",
+      "previous_status": "pending-review",
+      "status": "LIBRARY-DEFINED-SYMBOL-HOLD-NONCORE-NO-COORDINATE",
+      "coordinate": null
+    },
+    {
+      "semantic_name": "tc-name",
+      "source_path": "knowledge/d10-proposal-ledger-symbolic-v3.tsv",
+      "source_git_blob": "d190cb2685728b4535a2ba5f71217923b8d6e5d9",
+      "source_locator": "juv4uk/sens@76460b72cccad6bc44b39e87372f37613735d7a1:lib/yantra.lisp:187",
+      "recorded_law_claim": "поведінка визначена джерелом tc-name",
+      "previous_status": "pending-review",
+      "status": "LIBRARY-DEFINED-SYMBOL-HOLD-NONCORE-NO-COORDINATE",
+      "coordinate": null
+    },
+    {
+      "semantic_name": "tc-arguments",
+      "source_path": "knowledge/d10-proposal-ledger-symbolic-v3.tsv",
+      "source_git_blob": "d190cb2685728b4535a2ba5f71217923b8d6e5d9",
+      "source_locator": "juv4uk/sens@76460b72cccad6bc44b39e87372f37613735d7a1:lib/yantra.lisp:188",
+      "recorded_law_claim": "поведінка визначена джерелом tc-arguments",
+      "previous_status": "pending-review",
+      "status": "LIBRARY-DEFINED-SYMBOL-HOLD-NONCORE-NO-COORDINATE",
+      "coordinate": null
+    },
+    {
+      "semantic_name": "json->tool-call",
+      "source_path": "knowledge/d10-proposal-ledger-symbolic-v3.tsv",
+      "source_git_blob": "d190cb2685728b4535a2ba5f71217923b8d6e5d9",
+      "source_locator": "juv4uk/sens@76460b72cccad6bc44b39e87372f37613735d7a1:lib/yantra.lisp:198",
+      "recorded_law_claim": "поведінка визначена джерелом json->tool-call",
+      "previous_status": "pending-review",
+      "status": "LIBRARY-DEFINED-SYMBOL-HOLD-NONCORE-NO-COORDINATE",
+      "coordinate": null
+    },
+    {
+      "semantic_name": "json->message",
+      "source_path": "knowledge/d10-proposal-ledger-symbolic-v3.tsv",
+      "source_git_blob": "d190cb2685728b4535a2ba5f71217923b8d6e5d9",
+      "source_locator": "juv4uk/sens@76460b72cccad6bc44b39e87372f37613735d7a1:lib/yantra.lisp:205",
+      "recorded_law_claim": "поведінка визначена джерелом json->message",
+      "previous_status": "pending-review",
+      "status": "LIBRARY-DEFINED-SYMBOL-HOLD-NONCORE-NO-COORDINATE",
+      "coordinate": null
+    },
+    {
+      "semantic_name": "bash-tool-schema",
+      "source_path": "knowledge/d10-proposal-ledger-symbolic-v3.tsv",
+      "source_git_blob": "d190cb2685728b4535a2ba5f71217923b8d6e5d9",
+      "source_locator": "juv4uk/sens@76460b72cccad6bc44b39e87372f37613735d7a1:lib/yantra.lisp:244",
+      "recorded_law_claim": "поведінка визначена джерелом bash-tool-schema",
+      "previous_status": "pending-review",
+      "status": "LIBRARY-DEFINED-SYMBOL-HOLD-NONCORE-NO-COORDINATE",
+      "coordinate": null
+    },
+    {
+      "semantic_name": "http-post-json",
+      "source_path": "knowledge/d10-proposal-ledger-symbolic-v3.tsv",
+      "source_git_blob": "d190cb2685728b4535a2ba5f71217923b8d6e5d9",
+      "source_locator": "juv4uk/sens@76460b72cccad6bc44b39e87372f37613735d7a1:lib/yantra.lisp:270",
+      "recorded_law_claim": "поведінка визначена джерелом http-post-json",
+      "previous_status": "pending-review",
+      "status": "LIBRARY-DEFINED-SYMBOL-HOLD-NONCORE-NO-COORDINATE",
+      "coordinate": null
+    },
+    {
+      "semantic_name": "http-transport-exit",
+      "source_path": "knowledge/d10-proposal-ledger-symbolic-v3.tsv",
+      "source_git_blob": "d190cb2685728b4535a2ba5f71217923b8d6e5d9",
+      "source_locator": "juv4uk/sens@76460b72cccad6bc44b39e87372f37613735d7a1:lib/yantra.lisp:294",
+      "recorded_law_claim": "поведінка визначена джерелом http-transport-exit",
+      "previous_status": "pending-review",
+      "status": "LIBRARY-DEFINED-SYMBOL-HOLD-NONCORE-NO-COORDINATE",
+      "coordinate": null
+    },
+    {
+      "semantic_name": "http-transport-body",
+      "source_path": "knowledge/d10-proposal-ledger-symbolic-v3.tsv",
+      "source_git_blob": "d190cb2685728b4535a2ba5f71217923b8d6e5d9",
+      "source_locator": "juv4uk/sens@76460b72cccad6bc44b39e87372f37613735d7a1:lib/yantra.lisp:295",
+      "recorded_law_claim": "поведінка визначена джерелом http-transport-body",
+      "previous_status": "pending-review",
+      "status": "LIBRARY-DEFINED-SYMBOL-HOLD-NONCORE-NO-COORDINATE",
+      "coordinate": null
+    },
+    {
+      "semantic_name": "http-transport-stderr",
+      "source_path": "knowledge/d10-proposal-ledger-symbolic-v3.tsv",
+      "source_git_blob": "d190cb2685728b4535a2ba5f71217923b8d6e5d9",
+      "source_locator": "juv4uk/sens@76460b72cccad6bc44b39e87372f37613735d7a1:lib/yantra.lisp:296",
+      "recorded_law_claim": "поведінка визначена джерелом http-transport-stderr",
+      "previous_status": "pending-review",
+      "status": "LIBRARY-DEFINED-SYMBOL-HOLD-NONCORE-NO-COORDINATE",
+      "coordinate": null
+    },
+    {
+      "semantic_name": "execute-bash",
+      "source_path": "knowledge/d10-proposal-ledger-symbolic-v3.tsv",
+      "source_git_blob": "d190cb2685728b4535a2ba5f71217923b8d6e5d9",
+      "source_locator": "juv4uk/sens@76460b72cccad6bc44b39e87372f37613735d7a1:lib/yantra.lisp:305",
+      "recorded_law_claim": "поведінка визначена джерелом execute-bash",
+      "previous_status": "pending-review",
+      "status": "LIBRARY-DEFINED-SYMBOL-HOLD-NONCORE-NO-COORDINATE",
+      "coordinate": null
+    },
+    {
+      "semantic_name": "dispatch-tool",
+      "source_path": "knowledge/d10-proposal-ledger-symbolic-v3.tsv",
+      "source_git_blob": "d190cb2685728b4535a2ba5f71217923b8d6e5d9",
+      "source_locator": "juv4uk/sens@76460b72cccad6bc44b39e87372f37613735d7a1:lib/yantra.lisp:323",
+      "recorded_law_claim": "поведінка визначена джерелом dispatch-tool",
+      "previous_status": "pending-review",
+      "status": "LIBRARY-DEFINED-SYMBOL-HOLD-NONCORE-NO-COORDINATE",
+      "coordinate": null
+    },
+    {
+      "semantic_name": "execute-tool-call",
+      "source_path": "knowledge/d10-proposal-ledger-symbolic-v3.tsv",
+      "source_git_blob": "d190cb2685728b4535a2ba5f71217923b8d6e5d9",
+      "source_locator": "juv4uk/sens@76460b72cccad6bc44b39e87372f37613735d7a1:lib/yantra.lisp:329",
+      "recorded_law_claim": "поведінка визначена джерелом execute-tool-call",
+      "previous_status": "pending-review",
+      "status": "LIBRARY-DEFINED-SYMBOL-HOLD-NONCORE-NO-COORDINATE",
+      "coordinate": null
+    },
+    {
+      "semantic_name": "append-tool-results",
+      "source_path": "knowledge/d10-proposal-ledger-symbolic-v3.tsv",
+      "source_git_blob": "d190cb2685728b4535a2ba5f71217923b8d6e5d9",
+      "source_locator": "juv4uk/sens@76460b72cccad6bc44b39e87372f37613735d7a1:lib/yantra.lisp:336",
+      "recorded_law_claim": "поведінка визначена джерелом append-tool-results",
+      "previous_status": "pending-review",
+      "status": "LIBRARY-DEFINED-SYMBOL-HOLD-NONCORE-NO-COORDINATE",
+      "coordinate": null
+    },
+    {
+      "semantic_name": "tcs",
+      "source_path": "knowledge/d10-proposal-ledger-symbolic-v3.tsv",
+      "source_git_blob": "d190cb2685728b4535a2ba5f71217923b8d6e5d9",
+      "source_locator": "juv4uk/sens@76460b72cccad6bc44b39e87372f37613735d7a1:lib/yantra.lisp:342",
+      "recorded_law_claim": "поведінка визначена джерелом tcs",
+      "previous_status": "pending-review",
+      "status": "LIBRARY-DEFINED-SYMBOL-HOLD-NONCORE-NO-COORDINATE",
+      "coordinate": null
+    },
+    {
+      "semantic_name": "claim-markers",
+      "source_path": "knowledge/d10-proposal-ledger-symbolic-v3.tsv",
+      "source_git_blob": "d190cb2685728b4535a2ba5f71217923b8d6e5d9",
+      "source_locator": "juv4uk/sens@76460b72cccad6bc44b39e87372f37613735d7a1:lib/yantra.lisp:352",
+      "recorded_law_claim": "поведінка визначена джерелом claim-markers",
+      "previous_status": "pending-review",
+      "status": "LIBRARY-DEFINED-SYMBOL-HOLD-NONCORE-NO-COORDINATE",
+      "coordinate": null
+    },
+    {
+      "semantic_name": "markers-contained?",
+      "source_path": "knowledge/d10-proposal-ledger-symbolic-v3.tsv",
+      "source_git_blob": "d190cb2685728b4535a2ba5f71217923b8d6e5d9",
+      "source_locator": "juv4uk/sens@76460b72cccad6bc44b39e87372f37613735d7a1:lib/yantra.lisp:355",
+      "recorded_law_claim": "поведінка визначена джерелом markers-contained?",
+      "previous_status": "pending-review",
+      "status": "LIBRARY-DEFINED-SYMBOL-HOLD-NONCORE-NO-COORDINATE",
+      "coordinate": null
+    },
+    {
+      "semantic_name": "msg-call-ids",
+      "source_path": "knowledge/d10-proposal-ledger-symbolic-v3.tsv",
+      "source_git_blob": "d190cb2685728b4535a2ba5f71217923b8d6e5d9",
+      "source_locator": "juv4uk/sens@76460b72cccad6bc44b39e87372f37613735d7a1:lib/yantra.lisp:393",
+      "recorded_law_claim": "поведінка визначена джерелом msg-call-ids",
+      "previous_status": "pending-review",
+      "status": "LIBRARY-DEFINED-SYMBOL-HOLD-NONCORE-NO-COORDINATE",
+      "coordinate": null
+    },
+    {
+      "semantic_name": "id-in-list?",
+      "source_path": "knowledge/d10-proposal-ledger-symbolic-v3.tsv",
+      "source_git_blob": "d190cb2685728b4535a2ba5f71217923b8d6e5d9",
+      "source_locator": "juv4uk/sens@76460b72cccad6bc44b39e87372f37613735d7a1:lib/yantra.lisp:396",
+      "recorded_law_claim": "поведінка визначена джерелом id-in-list?",
+      "previous_status": "pending-review",
+      "status": "LIBRARY-DEFINED-SYMBOL-HOLD-NONCORE-NO-COORDINATE",
+      "coordinate": null
+    },
+    {
+      "semantic_name": "collect-trailing-tools",
+      "source_path": "knowledge/d10-proposal-ledger-symbolic-v3.tsv",
+      "source_git_blob": "d190cb2685728b4535a2ba5f71217923b8d6e5d9",
+      "source_locator": "juv4uk/sens@76460b72cccad6bc44b39e87372f37613735d7a1:lib/yantra.lisp:427",
+      "recorded_law_claim": "поведінка визначена джерелом collect-trailing-tools",
+      "previous_status": "pending-review",
+      "status": "LIBRARY-DEFINED-SYMBOL-HOLD-NONCORE-NO-COORDINATE",
+      "coordinate": null
+    },
+    {
+      "semantic_name": "invalid-completion-nudge",
+      "source_path": "knowledge/d10-proposal-ledger-symbolic-v3.tsv",
+      "source_git_blob": "d190cb2685728b4535a2ba5f71217923b8d6e5d9",
+      "source_locator": "juv4uk/sens@76460b72cccad6bc44b39e87372f37613735d7a1:lib/yantra.lisp:453",
+      "recorded_law_claim": "поведінка визначена джерелом invalid-completion-nudge",
+      "previous_status": "pending-review",
+      "status": "LIBRARY-DEFINED-SYMBOL-HOLD-NONCORE-NO-COORDINATE",
+      "coordinate": null
+    },
+    {
+      "semantic_name": "max-turns",
+      "source_path": "knowledge/d10-proposal-ledger-symbolic-v3.tsv",
+      "source_git_blob": "d190cb2685728b4535a2ba5f71217923b8d6e5d9",
+      "source_locator": "juv4uk/sens@76460b72cccad6bc44b39e87372f37613735d7a1:lib/yantra.lisp:462",
+      "recorded_law_claim": "поведінка визначена джерелом max-turns",
+      "previous_status": "pending-review",
+      "status": "LIBRARY-DEFINED-SYMBOL-HOLD-NONCORE-NO-COORDINATE",
+      "coordinate": null
+    },
+    {
+      "semantic_name": "count-with-role",
+      "source_path": "knowledge/d10-proposal-ledger-symbolic-v3.tsv",
+      "source_git_blob": "d190cb2685728b4535a2ba5f71217923b8d6e5d9",
+      "source_locator": "juv4uk/sens@76460b72cccad6bc44b39e87372f37613735d7a1:lib/yantra.lisp:464",
+      "recorded_law_claim": "поведінка визначена джерелом count-with-role",
+      "previous_status": "pending-review",
+      "status": "LIBRARY-DEFINED-SYMBOL-HOLD-NONCORE-NO-COORDINATE",
+      "coordinate": null
+    },
+    {
+      "semantic_name": "agent-loop",
+      "source_path": "knowledge/d10-proposal-ledger-symbolic-v3.tsv",
+      "source_git_blob": "d190cb2685728b4535a2ba5f71217923b8d6e5d9",
+      "source_locator": "juv4uk/sens@76460b72cccad6bc44b39e87372f37613735d7a1:lib/yantra.lisp:472",
+      "recorded_law_claim": "поведінка визначена джерелом agent-loop",
+      "previous_status": "pending-review",
+      "status": "LIBRARY-DEFINED-SYMBOL-HOLD-NONCORE-NO-COORDINATE",
+      "coordinate": null
+    },
+    {
+      "semantic_name": "with-reply",
+      "source_path": "knowledge/d10-proposal-ledger-symbolic-v3.tsv",
+      "source_git_blob": "d190cb2685728b4535a2ba5f71217923b8d6e5d9",
+      "source_locator": "juv4uk/sens@76460b72cccad6bc44b39e87372f37613735d7a1:lib/yantra.lisp:492",
+      "recorded_law_claim": "поведінка визначена джерелом with-reply",
+      "previous_status": "pending-review",
+      "status": "LIBRARY-DEFINED-SYMBOL-HOLD-NONCORE-NO-COORDINATE",
+      "coordinate": null
+    },
+    {
+      "semantic_name": "turn",
+      "source_path": "knowledge/d10-proposal-ledger-symbolic-v3.tsv",
+      "source_git_blob": "d190cb2685728b4535a2ba5f71217923b8d6e5d9",
+      "source_locator": "juv4uk/sens@76460b72cccad6bc44b39e87372f37613735d7a1:lib/yantra.lisp:493",
+      "recorded_law_claim": "поведінка визначена джерелом turn",
+      "previous_status": "pending-review",
+      "status": "LIBRARY-DEFINED-SYMBOL-HOLD-NONCORE-NO-COORDINATE",
+      "coordinate": null
+    },
+    {
+      "semantic_name": "run-agent",
+      "source_path": "knowledge/d10-proposal-ledger-symbolic-v3.tsv",
+      "source_git_blob": "d190cb2685728b4535a2ba5f71217923b8d6e5d9",
+      "source_locator": "juv4uk/sens@76460b72cccad6bc44b39e87372f37613735d7a1:lib/yantra.lisp:508",
+      "recorded_law_claim": "поведінка визначена джерелом run-agent",
+      "previous_status": "pending-review",
+      "status": "LIBRARY-DEFINED-SYMBOL-HOLD-NONCORE-NO-COORDINATE",
+      "coordinate": null
+    },
+    {
+      "semantic_name": "result-status",
+      "source_path": "knowledge/d10-proposal-ledger-symbolic-v3.tsv",
+      "source_git_blob": "d190cb2685728b4535a2ba5f71217923b8d6e5d9",
+      "source_locator": "juv4uk/sens@76460b72cccad6bc44b39e87372f37613735d7a1:lib/yantra.lisp:516",
+      "recorded_law_claim": "поведінка визначена джерелом result-status",
+      "previous_status": "pending-review",
+      "status": "LIBRARY-DEFINED-SYMBOL-HOLD-NONCORE-NO-COORDINATE",
+      "coordinate": null
+    },
+    {
+      "semantic_name": "result-epistemic-status",
+      "source_path": "knowledge/d10-proposal-ledger-symbolic-v3.tsv",
+      "source_git_blob": "d190cb2685728b4535a2ba5f71217923b8d6e5d9",
+      "source_locator": "juv4uk/sens@76460b72cccad6bc44b39e87372f37613735d7a1:lib/yantra.lisp:517",
+      "recorded_law_claim": "поведінка визначена джерелом result-epistemic-status",
+      "previous_status": "pending-review",
+      "status": "LIBRARY-DEFINED-SYMBOL-HOLD-NONCORE-NO-COORDINATE",
+      "coordinate": null
+    },
+    {
+      "semantic_name": "result-answer",
+      "source_path": "knowledge/d10-proposal-ledger-symbolic-v3.tsv",
+      "source_git_blob": "d190cb2685728b4535a2ba5f71217923b8d6e5d9",
+      "source_locator": "juv4uk/sens@76460b72cccad6bc44b39e87372f37613735d7a1:lib/yantra.lisp:518",
+      "recorded_law_claim": "поведінка визначена джерелом result-answer",
+      "previous_status": "pending-review",
+      "status": "LIBRARY-DEFINED-SYMBOL-HOLD-NONCORE-NO-COORDINATE",
+      "coordinate": null
+    },
+    {
+      "semantic_name": "result-turn",
+      "source_path": "knowledge/d10-proposal-ledger-symbolic-v3.tsv",
+      "source_git_blob": "d190cb2685728b4535a2ba5f71217923b8d6e5d9",
+      "source_locator": "juv4uk/sens@76460b72cccad6bc44b39e87372f37613735d7a1:lib/yantra.lisp:519",
+      "recorded_law_claim": "поведінка визначена джерелом result-turn",
+      "previous_status": "pending-review",
+      "status": "LIBRARY-DEFINED-SYMBOL-HOLD-NONCORE-NO-COORDINATE",
+      "coordinate": null
+    },
+    {
+      "semantic_name": "result-messages",
+      "source_path": "knowledge/d10-proposal-ledger-symbolic-v3.tsv",
+      "source_git_blob": "d190cb2685728b4535a2ba5f71217923b8d6e5d9",
+      "source_locator": "juv4uk/sens@76460b72cccad6bc44b39e87372f37613735d7a1:lib/yantra.lisp:520",
+      "recorded_law_claim": "поведінка визначена джерелом result-messages",
+      "previous_status": "pending-review",
+      "status": "LIBRARY-DEFINED-SYMBOL-HOLD-NONCORE-NO-COORDINATE",
+      "coordinate": null
+    },
+    {
+      "semantic_name": "ollama-url",
+      "source_path": "knowledge/d10-proposal-ledger-symbolic-v3.tsv",
+      "source_git_blob": "d190cb2685728b4535a2ba5f71217923b8d6e5d9",
+      "source_locator": "juv4uk/sens@76460b72cccad6bc44b39e87372f37613735d7a1:lib/yantra.lisp:528",
+      "recorded_law_claim": "поведінка визначена джерелом ollama-url",
+      "previous_status": "pending-review",
+      "status": "LIBRARY-DEFINED-SYMBOL-HOLD-NONCORE-NO-COORDINATE",
+      "coordinate": null
+    },
+    {
+      "semantic_name": "ollama-model",
+      "source_path": "knowledge/d10-proposal-ledger-symbolic-v3.tsv",
+      "source_git_blob": "d190cb2685728b4535a2ba5f71217923b8d6e5d9",
+      "source_locator": "juv4uk/sens@76460b72cccad6bc44b39e87372f37613735d7a1:lib/yantra.lisp:529",
+      "recorded_law_claim": "поведінка визначена джерелом ollama-model",
+      "previous_status": "pending-review",
+      "status": "LIBRARY-DEFINED-SYMBOL-HOLD-NONCORE-NO-COORDINATE",
+      "coordinate": null
+    },
+    {
+      "semantic_name": "ollama-complete",
+      "source_path": "knowledge/d10-proposal-ledger-symbolic-v3.tsv",
+      "source_git_blob": "d190cb2685728b4535a2ba5f71217923b8d6e5d9",
+      "source_locator": "juv4uk/sens@76460b72cccad6bc44b39e87372f37613735d7a1:lib/yantra.lisp:531",
+      "recorded_law_claim": "поведінка визначена джерелом ollama-complete",
+      "previous_status": "pending-review",
+      "status": "LIBRARY-DEFINED-SYMBOL-HOLD-NONCORE-NO-COORDINATE",
+      "coordinate": null
     }
-  ]
+  ],
+  "census_integrity_note": "The symbolic-v3 proposal ledger includes implementation helpers, variable names, CLIPS import functions and device/host hooks. These are source names only, not evidence of independent primitive semantics. Preserve provenance without assigning Core addresses."
 }
