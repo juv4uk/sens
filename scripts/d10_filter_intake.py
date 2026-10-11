@@ -21,7 +21,7 @@ OUTPUT = ('candidate_id', 'semantic_name', 'status', 'reason', 'donor_provenance
           'witness_result_ref', 'semantic_proof_ref', 'duplicate_of',
           'conflict_target', 'coordinate', 'source_refs')
 HEX = re.compile(r'^[0-9a-f]{64}$')
-PIN = re.compile(r'@[0-9a-f]{40}(?::|/|$)')
+PIN = re.compile(r'@([0-9a-f]{40})(?::|/|$)')
 
 
 class IntakeError(ValueError):
@@ -74,11 +74,14 @@ def classify(row, record, root):
     is_pinned = PIN.search(provenance) or ('https://' in provenance and
                                          ('page=' in provenance or 'p=' in provenance))
     if (not is_pinned or not checked_proof(source, root) or
-            source_ref != provenance or not source.get('content_sha256')):
+            source_ref != provenance or not HEX.fullmatch(str(source.get('content_sha256', '')))):
         return result('EXCLUDE_NO_PROVENANCE', 'F1: source reference or verified source proof missing')
 
-    # F2: replayed positive, negative and independent-oracle witness.
-    if (not checked_proof(witness, root) or witness.get('source_ref') != provenance or
+    # F2: a witness on a different donor commit is always invalid.
+    donor_sha = PIN.search(provenance)
+    pinned_witness = (witness.get('run_commit') == donor_sha.group(1) if donor_sha
+                      else witness.get('source_sha256') == source.get('content_sha256'))
+    if (not pinned_witness or not checked_proof(witness, root) or witness.get('source_ref') != provenance or
             witness.get('result') != 'PASS' or witness.get('exit_code') != 0 or
             witness.get('positive_pass') is not True or witness.get('negative_pass') is not True or
             witness.get('oracle_pass') is not True or not witness.get('run_url') or
