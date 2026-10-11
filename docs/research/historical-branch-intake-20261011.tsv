@@ -4101,19 +4101,19 @@ work/chatgpt-uk-peer-1045	UNTRIAGED	-	-	BRANCH-NAME-ONLY
 work/chatgpt-uk-peer-1046	UNTRIAGED	-	-	BRANCH-NAME-ONLY
 work/chatgpt-uk-peer-1047-main	UNTRIAGED	-	-	BRANCH-NAME-ONLY
 work/chatgpt-uk-peer-1047	UNTRIAGED	-	-	BRANCH-NAME-ONLY
-work/chatgpt-uk-peer-1048	UNTRIAGED	-	-	BRANCH-NAME-ONLY
+work/chatgpt-uk-peer-1048	ALREADY-IN-MAIN-NEWER	-	6e451d0bc151d0e4741d07136660ec2fddf592c3	Current canonical surface/name audit contains preferred first-character peer; 1048 no-bridge guard already exists in full-nightly; PR #489 closed superseded; old define-era branch not required.
 work/chatgpt-uk-peer-1049	UNTRIAGED	-	-	BRANCH-NAME-ONLY
 work/chatgpt-uk-peer-1050	UNTRIAGED	-	-	BRANCH-NAME-ONLY
 work/chatgpt-uk-peer-1051	UNTRIAGED	-	-	BRANCH-NAME-ONLY
 work/chatgpt-uk-peer-1052	UNTRIAGED	-	-	BRANCH-NAME-ONLY
-work/chatgpt-uk-peer-1053	UNTRIAGED	-	-	BRANCH-NAME-ONLY
-work/chatgpt-uk-peer-1054	UNTRIAGED	-	-	BRANCH-NAME-ONLY
-work/chatgpt-uk-peer-1055	UNTRIAGED	-	-	BRANCH-NAME-ONLY
-work/chatgpt-uk-peer-1057	UNTRIAGED	-	-	BRANCH-NAME-ONLY
+work/chatgpt-uk-peer-1053	ALREADY-IN-MAIN-NEWER	530f3f2afa02468b3228a903fe0c5f4949d22d41	c380d9300b21d4085f92497b662525de7e51bbf9	Current registry/name audit preserves D8 CODE-CHAR projection; guard for stale define bridge added by main 530f3f2; PR #567 closed superseded.
+work/chatgpt-uk-peer-1054	ALREADY-IN-MAIN-NEWER	530f3f2afa02468b3228a903fe0c5f4949d22d41	78e9d9f4cbcc4b32a8e7052a821950518f9137e9	Current registry/name audit preserves D8 CHAR-CODE projection; guard for stale define bridge added by main 530f3f2; PR #570 closed superseded.
+work/chatgpt-uk-peer-1055	ALREADY-IN-MAIN-NEWER	530f3f2afa02468b3228a903fe0c5f4949d22d41	54bb6ddbf21719b983d8b84db54639c97ed98ef9	Current semantic registry maps number->string to число-у-текст; no-bridge guard added by main 530f3f2; PR #578 closed superseded.
+work/chatgpt-uk-peer-1057	ALREADY-IN-MAIN-NEWER	530f3f2afa02468b3228a903fe0c5f4949d22d41	7021cc8c9bb8b2bbcbaa1ef050cbb62cddff3bf3	Current semantic registry/function table maps print to друкувати; no-bridge guard added by main 530f3f2; PR #579 closed superseded.
 work/chatgpt-uk-peer-1058	UNTRIAGED	-	-	BRANCH-NAME-ONLY
 work/chatgpt-uk-peer-1059	UNTRIAGED	-	-	BRANCH-NAME-ONLY
 work/chatgpt-uk-peer-1060	UNTRIAGED	-	-	BRANCH-NAME-ONLY
-work/chatgpt-uk-peer-1061	UNTRIAGED	-	-	BRANCH-NAME-ONLY
+work/chatgpt-uk-peer-1061	ALREADY-IN-MAIN-NEWER	530f3f2afa02468b3228a903fe0c5f4949d22d41	7df411d5e61cfe01cb31ecee260b0ba7499fac70	Current semantic registry/function table maps write-to-string to значення-у-текст; no-bridge guard added by main 530f3f2; PR #625 closed superseded.
 work/chatgpt-uk-peer-slice	UNTRIAGED	-	-	BRANCH-NAME-ONLY
 work/1623-wire	UNTRIAGED	-	-	BRANCH-NAME-ONLY
 work/1623-wire-current	UNTRIAGED	-	-	BRANCH-NAME-ONLY
