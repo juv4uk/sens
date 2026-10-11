@@ -1,0 +1,41 @@
+{
+  "schema": "sens-historical-branch-archive/v1",
+  "archived_at": "2026-10-11",
+  "source": {
+    "repo": "juv4uk/sens",
+    "pr": 1083,
+    "title": "feat(#1061): bind generated projections to Canon source and target digests",
+    "branch": "agent/1061-projection-provenance",
+    "head_sha": "69e36652f121fcb6670877fd83b05960fe14739b",
+    "base": "main",
+    "base_sha": "42e3945c5e8f27902ade6fedf52f54786c56f914",
+    "reason": "Historical generator for source/target digest manifest from old Canon SID 00001100, using prior binary 8/u8 assumptions. Current main has no matching provenance manifest/generator. Preserve full source for review; do not activate historical SID model or report as current generated artifact."
+  },
+  "files": [
+    {
+      "original_path": ".github/workflows/ci.yml",
+      "archived_path": "research/domain-archive/20261011/pr1083/source/.github/workflows/ci.yml",
+      "git_blob_sha": "712bd2a0d35c361eaeab4c288acc5ab2afdc2655",
+      "bytes": 22805
+    },
+    {
+      "original_path": "knowledge/projection-provenance.lisp",
+      "archived_path": "research/domain-archive/20261011/pr1083/source/knowledge/projection-provenance.lisp",
+      "git_blob_sha": "b99dcfae2b50eb47ceece276cae12f254bc9ceff",
+      "bytes": 3087
+    },
+    {
+      "original_path": "knowledge/repo-tooling-inventory.lisp",
+      "archived_path": "research/domain-archive/20261011/pr1083/source/knowledge/repo-tooling-inventory.lisp",
+      "git_blob_sha": "45a73dc512bfa55c2909a120d0c9c174bd9d9880",
+      "bytes": 16259
+    },
+    {
+      "original_path": "scripts/generate-projection-provenance.lisp",
+      "archived_path": "research/domain-archive/20261011/pr1083/source/scripts/generate-projection-provenance.lisp",
+      "git_blob_sha": "266e2084b3375305de8b5008ca2fa9c5f4a90d91",
+      "bytes": 5487
+    }
+  ],
+  "disposition": "ARCHIVE-ONLY / CURRENT CONTRACT AND BYTE-PARITY REVIEW REQUIRED"
+}
