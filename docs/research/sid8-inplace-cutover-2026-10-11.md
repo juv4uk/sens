@@ -119,14 +119,15 @@ baseline and must not be silently double-counted:
 - The new strict D3 scanner reports existing historical logic as blockers; do
   not weaken it to obtain a superficial green CI or claim old/new full parity.
 
-## Nine-file source and fixture cutover (2026-10-11 late)
+## Eight-file source and fixture cutover; Guard held (2026-10-11 late)
 
-- **Nine original .lisp files, 333 audited historical executable call-head substitutions in-place on main.** This is a separate cohort beyond the earlier 86-file ledger, not a claim of repository-wide completion. No alternate extension, no branch, no alteration of archival evidence.
-- Five files in one Git tree transaction, [8c7221a](https://github.com/juv4uk/sens/commit/8c7221a483d97703ff72566f08c02e7dcf45202e): knowledge/guard-reference.lisp (272), knowledge/astronomy.lisp (1), knowledge/physics.lisp (1), knowledge/family.lisp (1), lib/machine/layout/pair-x86-64.lisp (5).
-- Four live executable fixtures in another Git tree transaction, [bca3d00](https://github.com/juv4uk/sens/commit/bca3d0074e42b247b2823617c9ae7e3cc05f9228): tests/fixtures/lisp-fs-conformance.lisp (10), tests/fixtures/rivnopravnist-uk.lisp (8), tests/fixtures/semantic-registry-self-hosted-witness.lisp (32), tests/fixtures/semantic-coordinate-matrix-845.lisp (3).
-- Independent source regression tests/test_sid8_knowledge_layout_source.py and dedicated workflow audit-domain-knowledge-layout.yml check all nine; focused [GitHub Actions run 38171461792 PASS](https://github.com/juv4uk/sens/actions/runs/38171461792).
-- Historic numeric value 00000001 in the semantic-registry identity table remains **data**, not a callable head; the regression test requires its preservation.
-- Existing broad Hosted CI D3 logic failures were reproduced on main before this cohort (run 38170921529). The focused tests are green, but independent all-program old/new runtime parity or a fully green Hosted CI is **not claimed**.
+- **Eight original .lisp files, 61 audited SID8 executable heads replaced in-place on main.** The source and fixture changes were made without new Git branches or generating physical artifacts.
+- First transaction [8c7221a](https://github.com/juv4uk/sens/commit/8c7221a483d97703ff72566f08c02e7dcf45202e): knowledge/astronomy.lisp (1), knowledge/physics.lisp (1), knowledge/family.lisp (1), lib/machine/layout/pair-x86-64.lisp (5). Four surviving files, 8 replacements.
+- Second transaction [bca3d00](https://github.com/juv4uk/sens/commit/bca3d0074e42b247b2823617c9ae7e3cc05f9228): tests/fixtures/lisp-fs-conformance.lisp (10), tests/fixtures/rivnopravnist-uk.lisp (8), tests/fixtures/semantic-registry-self-hosted-witness.lisp (32), tests/fixtures/semantic-coordinate-matrix-845.lisp (3). Four surviving live fixtures, 53 replacements.
+- **Explicit semantic hold:** knowledge/guard-reference.lisp initially received 272 mechanical substitutions, but its 15 old COND forms contain three-field clauses, so assigning current D3:110 alone would change/invalidly encode branch semantics. Restored byte-for-byte to historical source blob f97371fd503075caec9344062847fb7c0e7642e7; 272 are **excluded** from all migration credits. Restore commit [437142b](https://github.com/juv4uk/sens/commit/437142b05da07159db78155ee6114c66bb234d5b). It remains a blocked file needing a separate old-conditional-law to current two-field D3 proof.
+- Source checks in tests/test_sid8_knowledge_layout_source.py and .github/workflows/audit-domain-knowledge-layout.yml protect the eight migrated projections and fail-closed Guard hold. A prior successful run 38171461792 predates the Guard rollback; rerun required for the updated assertion.
+- The historical literal 00000001 in semantic-registry identity data is preserved; executable head rewrite cannot change the meaning of binary value data.
+- Pre-existing broad Hosted CI failures in stale D3 logic were present before this work (run 38170921529). Full executable old/current parity and all-program release admission are **not claimed**.
 
 ## Safety of completion claims
 
