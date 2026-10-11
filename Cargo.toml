@@ -27,6 +27,9 @@ members = [
 # Use a single shared lock-file at the workspace root.
 # Використовуємо єдиний shared Cargo.lock у корені воркспейсу.
 # Einzelne gemeinsame Cargo.lock-Datei im Workspace-Root.
+# Active development/test default: SENS Core only. Frozen workspace members
+# remain in the manifest for provenance and future explicit owner reactivation.
+default-members = ["crates/sens", "crates/sens-cli"]
 resolver = "2"
 
 # Release profile for wasm-pack: optimize for binary size.

@@ -1,0 +1,113 @@
+name: Hosted CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+# Не скасовувати перевірку закріпленого SHA через наступний push у main.
+# PR/manual runs мають ту саму ізоляцію груп, але теж залишаються fail-closed.
+concurrency:
+  group: hosted-ci-${{ github.event_name == 'workflow_dispatch' && github.run_id || github.event.pull_request.number || github.ref }}
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  critical:
+    name: portable critical gates
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v5
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: clippy
+      - name: Python and repository structure gates
+        run: |
+          python3 scripts/numeric_source_inventory.py --self-test
+          python3 scripts/public_api_inventory.py --check
+          python3 scripts/sens8-semantic-ratchet.py --self-test
+          python3 scripts/sens8-semantic-ratchet.py --summary
+      - name: Binary exact-width foundation and one-way authority
+        shell: bash
+        run: bash scripts/test-binary-language-pipeline.sh
+
+      - name: One-file canonical T5 migration canary
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/migration-one"
+          # The canonical converter intentionally exits 2 on an unsupported
+          # semantic/source form. Report the actual fail-closed JSON reason
+          # BEFORE returning the same non-zero code under bash -e.
+          if python3 scripts/migrate-one-to-sens.py \
+            tests/fixtures/migration-multiform-cohort/two-forms.lisp \
+            --source-era legacy \
+            --output "$RUNNER_TEMP/migration-one/two-forms.sens" \
+            > "$RUNNER_TEMP/migration-one/report.json"; then
+            :
+          else
+            code=$?
+            echo "::error title=One-file T5 migration BLOCKED::Canonical three-pass returned status $code; no physical admission"
+            if test -s "$RUNNER_TEMP/migration-one/report.json"; then
+              cat "$RUNNER_TEMP/migration-one/report.json"
+            else
+              echo "No JSON report was emitted; inspect stderr from canonical migrator"
+            fi
+            exit "$code"
+          fi
+          if ! cmp -s "$RUNNER_TEMP/migration-one/two-forms.sens" \
+            tests/fixtures/migration-multiform-cohort/two-forms.sens; then
+            echo "::error title=One-file T5 byte identity mismatch::Generated physical T5 differs from the immutable reference"
+            sha256sum "$RUNNER_TEMP/migration-one/two-forms.sens" \
+              tests/fixtures/migration-multiform-cohort/two-forms.sens
+            exit 1
+          fi
+          python3 - <<'PY'
+          import json, os
+          from pathlib import Path
+          row=json.loads((Path(os.environ["RUNNER_TEMP"])/"migration-one/report.json").read_text())
+          # Жодних assert: python -O не повинен вимикати перевірку свідчення.
+          expected = ("written", 14, "NOT_VERIFIED")
+          observed = (row.get("status"), row.get("bytes"), row.get("semantic_parity"))
+          if observed != expected:
+              raise SystemExit(f"Канонічне T5-свідчення невірне: {observed!r} != {expected!r}")
+          print("CANONICAL T5 MATCH; independent semantic admission is a separate gate")
+          PY
+      - name: Publish one-file migration evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: migration-one-canonical-two-form
+          path: ${{ runner.temp }}/migration-one/
+          if-no-files-found: error
+      - name: Build SENS CLI
+        run: cargo build -p sens-cli --bin sens
+      - name: D7 domain table is canonical-parser re-readable
+        run: cargo run --quiet -p sens-cli --bin sens-to-sens -- --check lib/domains/d7.lisp
+      - name: D7 ratified coordinate and W7 admission
+        run: |
+          python3 scripts/check-d7-current-authority.py
+          python3 scripts/check-domain-tables.py
+          python3 benchmarks/d7-ratification-conformance/validate.py
+          python3 scripts/d7_source_projection.py --check
+          python3 -m unittest discover -s tests -p 'test_d7_source_projection.py' -v
+          cargo test --locked -p sens --test d7_w7_pack --test text7_canonical_wire
+      - name: Current Core4 FASL freshness
+        run: cargo test -p sens --test core_fasl_freshness -- --nocapture
+      - name: Current semantic slice
+        run: bash scripts/test-current-semantic-slice.sh
+      - name: Critical machine and surface witnesses
+        run: cargo test -p sens --test machine_lowering_boundary --test machine_admission_adversarial --test machine_type_discipline --test machine_noninterference_contract --test machine_atoms --test machine_block_roundtrip --test machine_minimal_profile --test uk_surface_equivalence --test public_api_inventory_contract --test english_names_in_code
+      - name: Native CPU vertical witnesses
+        run: cargo test -p sens-host --test native_lisp_bytes --test native_cond_profile
+      - name: CLI smoke
+        run: cargo test -p sens-cli --test cli
+      - name: Governance and policy checks
+        run: |
+          cargo test -p xtask --test license_policy
+          cargo run --quiet -p sens-cli --bin sens -- scripts/verify-repo.lisp
+      - name: Clippy
+        run: cargo clippy -p sens -p sens-host -p sens-cli -p xtask --all-targets -- -D warnings
