@@ -1,0 +1,34 @@
+name: D10 existing math-signal selection proof
+on:
+  pull_request:
+    paths:
+      - 'knowledge/d10-existing-math-signal-selected-20261011.json'
+      - 'knowledge/d10-v1-semantic-inventory.json'
+      - 'knowledge/d10-proposal-ledger.tsv'
+      - 'scripts/check_d10_existing_math_signal_selected.py'
+      - 'scripts/check_d10_crossdomain_math_signal.py'
+      - 'tests/test_d10_crossdomain_math_laws.py'
+      - '.github/workflows/d10-existing-math-signal-selection.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  exact-existing-evidence:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify source pins, canonical append, ledger, witnesses and falsifiers
+        run: |
+          set -euo pipefail
+          python3 scripts/check_d10_existing_math_signal_selected.py --self-test
+          python3 -O scripts/check_d10_existing_math_signal_selected.py --self-test
+      - name: Replay 2 source math laws with independent exact bounded models
+        run: |
+          set -euo pipefail
+          python3 tests/test_d10_crossdomain_math_laws.py
+          python3 -O tests/test_d10_crossdomain_math_laws.py
+      - name: Reconcile older research-era HOLD guards, never erase them
+        run: |
+          set -euo pipefail
+          python3 scripts/check_d10_crossdomain_math_signal.py
+          python3 scripts/check_d10_hadamard_proposal_v1.py

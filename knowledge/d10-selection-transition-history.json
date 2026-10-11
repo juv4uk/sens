@@ -495,6 +495,39 @@
         "python3 scripts/check_d10_selection_transition_history.py --self-test",
         "python3 scripts/check-d10-proposal-ledger.py"
       ]
+    },
+    {
+      "id": "d10.exact-math-signal.from-existing-evidence.after-655.20261011",
+      "authority": "#4013 #4463 #5041; research selection, owner ratification pending",
+      "evidence": [
+        "knowledge/d10-existing-math-signal-selected-20261011.json",
+        "knowledge/d10-hadamard-variance-proposal-20261009.json",
+        "knowledge/d10-crossdomain-math-signal-research-v1.json",
+        "tests/test_d10_crossdomain_math_laws.py",
+        "tests/oracles/d10_hadamard_chez.ss"
+      ],
+      "previous_inventory_blob_sha": "7d8745cb6f183cf0c015812359a6c0f87c4c2ffb",
+      "resulting_inventory_blob_sha": "d3d913ea48730f21764903860444f437b4e111be",
+      "added_stable_ids": [
+        "d10.measure.hadamard-variance.20261011",
+        "d10.math.finite-convolution.20261011",
+        "d10.signal.phase-unwrap.20261011"
+      ],
+      "appended_sources": [
+        "knowledge/d10-existing-math-signal-selected-20261011.json"
+      ],
+      "coordinates_added": 0,
+      "ratified_added": 0,
+      "delta_selected": 3,
+      "previous_selected": 655,
+      "resulting_selected": 658,
+      "decision": "reuse existing NIST/Chez and source-pinned exact Fraction corpus. Three non-equivalent observable operations; Core-vs-derived and ratification pending.",
+      "tests": [
+        "python3 scripts/check_d10_existing_math_signal_selected.py --self-test",
+        "python3 scripts/check_d10_crossdomain_math_signal.py",
+        "python3 scripts/check_d10_hadamard_proposal_v1.py",
+        "python3 scripts/check_d10_selection_transition_history.py --self-test"
+      ]
     }
   ]
 }
