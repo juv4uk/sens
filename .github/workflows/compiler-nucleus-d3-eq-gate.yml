@@ -1,0 +1,65 @@
+name: Compiler nucleus exact D3 EQ and semantic export regression
+on:
+  push:
+    paths:
+      - "lib/compiler-nucleus.lisp"
+      - "crates/sens/src/compiler_language.rs"
+      - "crates/xtask/src/compiler_export.rs"
+      - "crates/xtask/tests/compiler_export_cli.rs"
+      - ".github/workflows/compiler-nucleus-d3-eq-gate.yml"
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  compiler-nucleus:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Regression - only D3 equality in the compiler bit-law
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          source=Path("lib/compiler-nucleus.lisp").read_text()
+          if "11110111" in source:
+              raise SystemExit("BLOCK: uncallable historical 8-bit numeric equality")
+          needle="(101 (100 left) (100 right))"
+          if needle not in source:
+              raise SystemExit("BLOCK: exact D3 equality no longer used by bit-list law")
+          if "(101 left (001 ()))" not in source or "(101 right (001 ()))" not in source:
+              raise SystemExit("BLOCK: binary list nil equality replaced or lost")
+          print("COMPILER_NUCLEUS_D3_EQ_STATIC_PASS")
+          PY
+      - name: Prove semantic compiler export of all current D3-D4 roles
+        shell: bash
+        run: |
+          set -euo pipefail
+          cargo test --locked -p xtask --test compiler_export_cli -- --nocapture \
+            2>&1 | tee "$RUNNER_TEMP/compiler-nucleus-exact-export.log"
+          cargo run --locked --quiet -p xtask -- compiler-export \
+            > "$RUNNER_TEMP/compiler-nucleus-requests.lisp"
+          test "$(grep -c '^(compiler-semantic-request' "$RUNNER_TEMP/compiler-nucleus-requests.lisp")" -eq 9
+          cargo run --locked --quiet -p xtask -- compiler-export --fixture nucleus-d3-001 \
+            > "$RUNNER_TEMP/compiler-nucleus-quote.lisp"
+          grep -Fq '(execution-role . quote-form)' "$RUNNER_TEMP/compiler-nucleus-quote.lisp"
+          echo COMPILER_NUCLEUS_D3_EQ_EXPORT_PASS
+      - name: Compare canonical SENS core law verifier
+        shell: bash
+        run: |
+          set -euo pipefail
+          cargo test --locked -p sens compiler_language::tests::semantic_input_api_owns_law_proof_and_root_authority_facts -- --nocapture \
+            2>&1 | tee "$RUNNER_TEMP/compiler-nucleus-core-law.log"
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: compiler-nucleus-d3-eq-exact
+          path: |
+            ${{ runner.temp }}/compiler-nucleus-exact-export.log
+            ${{ runner.temp }}/compiler-nucleus-requests.lisp
+            ${{ runner.temp }}/compiler-nucleus-quote.lisp
+            ${{ runner.temp }}/compiler-nucleus-core-law.log
+          if-no-files-found: warn
+          retention-days: 30
