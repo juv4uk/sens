@@ -11,7 +11,7 @@ def sha(path):
     b=(R/path).read_bytes()
     return hashlib.sha1(b"blob "+str(len(b)).encode()+b"\0"+b).hexdigest()
 def check(pointer,old,new,proof,queue):
-    need(pointer["canonical_current"]["path"] in ("knowledge/d10-v6-semantic-inventory.json","knowledge/d10-v7-semantic-inventory.json","knowledge/d10-v8-semantic-inventory.json"),"current path")
+    need(pointer["canonical_current"]["path"] in ("knowledge/d10-v6-semantic-inventory.json","knowledge/d10-v7-semantic-inventory.json","knowledge/d10-v8-semantic-inventory.json","knowledge/d10-v9-semantic-inventory.json"),"current path")
     if pointer["canonical_current"]["path"]=="knowledge/d10-v6-semantic-inventory.json":
         need(pointer["canonical_current"]["git_blob"]==sha("knowledge/d10-v6-semantic-inventory.json"),"current SHA")
     else:
