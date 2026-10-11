@@ -60,9 +60,12 @@ jobs:
           folder = pathlib.Path(sys.argv[1]).parent
           with (folder / "all-work.tsv").open(newline="", encoding="utf-8") as stream:
               rows = list(csv.DictReader(stream, delimiter="\t"))
-          assert len(rows) == summary["still_pending_work"]
-          assert len(rows) + summary["already_transferred_by_exact_proposal"] == summary["source_pending"]
-          assert summary["executed_witnesses_created"] == 0
+          if len(rows) != summary["still_pending_work"]:
+              raise SystemExit("D10_BATCH_BLOCKED: work-count drift")
+          if len(rows) + summary["already_transferred_by_exact_proposal"] != summary["source_pending"]:
+              raise SystemExit("D10_BATCH_BLOCKED: lost pending candidates")
+          if summary["executed_witnesses_created"] != 0:
+              raise SystemExit("D10_BATCH_BLOCKED: fabricated witness receipt")
           print("D10_WORK_BATCHES", summary["batches"], "PENDING", len(rows))
           PY
       - name: Materialize current pinned name index and run F1-F4 gates
