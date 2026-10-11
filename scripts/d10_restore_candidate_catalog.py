@@ -38,10 +38,29 @@ def literal_tsv(path):
                 raise ValueError(f"INVALID_SOURCE_CATALOG_LINE:{number}")
             record = dict(zip(INDEX_FIELDS, parts))
             key = record["semantic_name"].strip().casefold()
-            if not key or key in rows:
-                raise ValueError(f"DUPLICATE_SOURCE_NAME:{number}:{key}")
+            if not key:
+                raise ValueError(f"EMPTY_SOURCE_NAME:{number}")
             if record["ratified"] != "0":
                 raise ValueError("UNEXPECTED_RATIFICATION")
+            if key in rows:
+                # Exact frozen source contains repeated normalized names. A
+                # duplicate source *appearance* is not an extra D10 law.
+                # Preserve every provenance occurrence, alias and law claim.
+                prior = rows[key]
+                for column in ARRAY_FIELDS:
+                    variants = parse_array(prior[column])
+                    for value in parse_array(record[column]):
+                        if value not in variants:
+                            variants.append(value)
+                    if column == "historical_status_claims":
+                        for mark in ("HISTORIC_SOURCE_ID:" + record["candidate_id"],
+                                     "HISTORIC_REPEATED_NAME_APPEARANCE:" + str(number)):
+                            if mark not in variants:
+                                variants.append(mark)
+                    prior[column] = json.dumps(variants, ensure_ascii=False, separators=(",", ":"))
+                if record["source_record_count"].isdigit() and prior["source_record_count"].isdigit():
+                    prior["source_record_count"] = str(int(prior["source_record_count"]) + int(record["source_record_count"]))
+                continue
             rows[key] = record
         return rows
     rows = {}
