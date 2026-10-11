@@ -8779,7 +8779,18 @@
       ],
       "selected": false,
       "ratified": false,
-      "physical_t5_authorized": false
+      "physical_t5_authorized": false,
+      "proof_readiness": {
+        "status": "INCOMPLETE-SOURCE-SEMANTICS",
+        "missing": [
+          "semantic-law",
+          "positive-witness",
+          "negative-falsifier"
+        ],
+        "selection": false,
+        "ratification": false,
+        "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+      }
     },
     {
       "coordinate": "1011001100",
@@ -8800,7 +8811,18 @@
       ],
       "selected": false,
       "ratified": false,
-      "physical_t5_authorized": false
+      "physical_t5_authorized": false,
+      "proof_readiness": {
+        "status": "INCOMPLETE-SOURCE-SEMANTICS",
+        "missing": [
+          "semantic-law",
+          "positive-witness",
+          "negative-falsifier"
+        ],
+        "selection": false,
+        "ratification": false,
+        "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+      }
     },
     {
       "coordinate": "1011001101",
@@ -8821,7 +8843,18 @@
       ],
       "selected": false,
       "ratified": false,
-      "physical_t5_authorized": false
+      "physical_t5_authorized": false,
+      "proof_readiness": {
+        "status": "INCOMPLETE-SOURCE-SEMANTICS",
+        "missing": [
+          "semantic-law",
+          "positive-witness",
+          "negative-falsifier"
+        ],
+        "selection": false,
+        "ratification": false,
+        "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+      }
     },
     {
       "coordinate": "1011001110",
@@ -8842,7 +8875,18 @@
       ],
       "selected": false,
       "ratified": false,
-      "physical_t5_authorized": false
+      "physical_t5_authorized": false,
+      "proof_readiness": {
+        "status": "INCOMPLETE-SOURCE-SEMANTICS",
+        "missing": [
+          "semantic-law",
+          "positive-witness",
+          "negative-falsifier"
+        ],
+        "selection": false,
+        "ratification": false,
+        "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+      }
     },
     {
       "coordinate": "1011001111",
@@ -8863,7 +8907,18 @@
       ],
       "selected": false,
       "ratified": false,
-      "physical_t5_authorized": false
+      "physical_t5_authorized": false,
+      "proof_readiness": {
+        "status": "INCOMPLETE-SOURCE-SEMANTICS",
+        "missing": [
+          "semantic-law",
+          "positive-witness",
+          "negative-falsifier"
+        ],
+        "selection": false,
+        "ratification": false,
+        "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+      }
     },
     {
       "coordinate": "1011010000",
@@ -8884,7 +8939,18 @@
       ],
       "selected": false,
       "ratified": false,
-      "physical_t5_authorized": false
+      "physical_t5_authorized": false,
+      "proof_readiness": {
+        "status": "INCOMPLETE-SOURCE-SEMANTICS",
+        "missing": [
+          "semantic-law",
+          "positive-witness",
+          "negative-falsifier"
+        ],
+        "selection": false,
+        "ratification": false,
+        "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+      }
     },
     {
       "coordinate": "1011010001",
@@ -8904,7 +8970,18 @@
       ],
       "selected": false,
       "ratified": false,
-      "physical_t5_authorized": false
+      "physical_t5_authorized": false,
+      "proof_readiness": {
+        "status": "INCOMPLETE-SOURCE-SEMANTICS",
+        "missing": [
+          "semantic-law",
+          "positive-witness",
+          "negative-falsifier"
+        ],
+        "selection": false,
+        "ratification": false,
+        "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+      }
     },
     {
       "coordinate": "1011010010",
@@ -8924,7 +9001,18 @@
       ],
       "selected": false,
       "ratified": false,
-      "physical_t5_authorized": false
+      "physical_t5_authorized": false,
+      "proof_readiness": {
+        "status": "INCOMPLETE-SOURCE-SEMANTICS",
+        "missing": [
+          "semantic-law",
+          "positive-witness",
+          "negative-falsifier"
+        ],
+        "selection": false,
+        "ratification": false,
+        "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+      }
     },
     {
       "coordinate": "1011010011",
@@ -8944,7 +9032,18 @@
       ],
       "selected": false,
       "ratified": false,
-      "physical_t5_authorized": false
+      "physical_t5_authorized": false,
+      "proof_readiness": {
+        "status": "INCOMPLETE-SOURCE-SEMANTICS",
+        "missing": [
+          "semantic-law",
+          "positive-witness",
+          "negative-falsifier"
+        ],
+        "selection": false,
+        "ratification": false,
+        "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+      }
     },
     {
       "coordinate": "1011010100",
@@ -8964,7 +9063,18 @@
       ],
       "selected": false,
       "ratified": false,
-      "physical_t5_authorized": false
+      "physical_t5_authorized": false,
+      "proof_readiness": {
+        "status": "INCOMPLETE-SOURCE-SEMANTICS",
+        "missing": [
+          "semantic-law",
+          "positive-witness",
+          "negative-falsifier"
+        ],
+        "selection": false,
+        "ratification": false,
+        "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+      }
     },
     {
       "coordinate": "1011010101",
@@ -8984,7 +9094,18 @@
       ],
       "selected": false,
       "ratified": false,
-      "physical_t5_authorized": false
+      "physical_t5_authorized": false,
+      "proof_readiness": {
+        "status": "INCOMPLETE-SOURCE-SEMANTICS",
+        "missing": [
+          "semantic-law",
+          "positive-witness",
+          "negative-falsifier"
+        ],
+        "selection": false,
+        "ratification": false,
+        "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+      }
     },
     {
       "coordinate": "1011010110",
@@ -9004,7 +9125,18 @@
       ],
       "selected": false,
       "ratified": false,
-      "physical_t5_authorized": false
+      "physical_t5_authorized": false,
+      "proof_readiness": {
+        "status": "INCOMPLETE-SOURCE-SEMANTICS",
+        "missing": [
+          "semantic-law",
+          "positive-witness",
+          "negative-falsifier"
+        ],
+        "selection": false,
+        "ratification": false,
+        "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+      }
     },
     {
       "coordinate": "1011010111",
@@ -9024,7 +9156,18 @@
       ],
       "selected": false,
       "ratified": false,
-      "physical_t5_authorized": false
+      "physical_t5_authorized": false,
+      "proof_readiness": {
+        "status": "INCOMPLETE-SOURCE-SEMANTICS",
+        "missing": [
+          "semantic-law",
+          "positive-witness",
+          "negative-falsifier"
+        ],
+        "selection": false,
+        "ratification": false,
+        "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+      }
     },
     {
       "coordinate": "1011011000",
@@ -9044,7 +9187,18 @@
       ],
       "selected": false,
       "ratified": false,
-      "physical_t5_authorized": false
+      "physical_t5_authorized": false,
+      "proof_readiness": {
+        "status": "INCOMPLETE-SOURCE-SEMANTICS",
+        "missing": [
+          "semantic-law",
+          "positive-witness",
+          "negative-falsifier"
+        ],
+        "selection": false,
+        "ratification": false,
+        "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+      }
     },
     {
       "coordinate": "1011011001",
@@ -9064,7 +9218,18 @@
       ],
       "selected": false,
       "ratified": false,
-      "physical_t5_authorized": false
+      "physical_t5_authorized": false,
+      "proof_readiness": {
+        "status": "INCOMPLETE-SOURCE-SEMANTICS",
+        "missing": [
+          "semantic-law",
+          "positive-witness",
+          "negative-falsifier"
+        ],
+        "selection": false,
+        "ratification": false,
+        "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+      }
     },
     {
       "coordinate": "1011011010",
@@ -9084,7 +9249,18 @@
       ],
       "selected": false,
       "ratified": false,
-      "physical_t5_authorized": false
+      "physical_t5_authorized": false,
+      "proof_readiness": {
+        "status": "INCOMPLETE-SOURCE-SEMANTICS",
+        "missing": [
+          "semantic-law",
+          "positive-witness",
+          "negative-falsifier"
+        ],
+        "selection": false,
+        "ratification": false,
+        "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+      }
     },
     {
       "coordinate": "1011011011",
@@ -9104,7 +9280,18 @@
       ],
       "selected": false,
       "ratified": false,
-      "physical_t5_authorized": false
+      "physical_t5_authorized": false,
+      "proof_readiness": {
+        "status": "INCOMPLETE-SOURCE-SEMANTICS",
+        "missing": [
+          "semantic-law",
+          "positive-witness",
+          "negative-falsifier"
+        ],
+        "selection": false,
+        "ratification": false,
+        "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+      }
     },
     {
       "coordinate": "1011011100",
@@ -9124,7 +9311,18 @@
       ],
       "selected": false,
       "ratified": false,
-      "physical_t5_authorized": false
+      "physical_t5_authorized": false,
+      "proof_readiness": {
+        "status": "INCOMPLETE-SOURCE-SEMANTICS",
+        "missing": [
+          "semantic-law",
+          "positive-witness",
+          "negative-falsifier"
+        ],
+        "selection": false,
+        "ratification": false,
+        "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+      }
     },
     {
       "coordinate": "1011011101",
@@ -9144,7 +9342,18 @@
       ],
       "selected": false,
       "ratified": false,
-      "physical_t5_authorized": false
+      "physical_t5_authorized": false,
+      "proof_readiness": {
+        "status": "INCOMPLETE-SOURCE-SEMANTICS",
+        "missing": [
+          "semantic-law",
+          "positive-witness",
+          "negative-falsifier"
+        ],
+        "selection": false,
+        "ratification": false,
+        "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+      }
     },
     {
       "coordinate": "1011011110",
@@ -9164,7 +9373,18 @@
       ],
       "selected": false,
       "ratified": false,
-      "physical_t5_authorized": false
+      "physical_t5_authorized": false,
+      "proof_readiness": {
+        "status": "INCOMPLETE-SOURCE-SEMANTICS",
+        "missing": [
+          "semantic-law",
+          "positive-witness",
+          "negative-falsifier"
+        ],
+        "selection": false,
+        "ratification": false,
+        "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+      }
     },
     {
       "coordinate": "1011011111",
@@ -9184,7 +9404,18 @@
       ],
       "selected": false,
       "ratified": false,
-      "physical_t5_authorized": false
+      "physical_t5_authorized": false,
+      "proof_readiness": {
+        "status": "INCOMPLETE-SOURCE-SEMANTICS",
+        "missing": [
+          "semantic-law",
+          "positive-witness",
+          "negative-falsifier"
+        ],
+        "selection": false,
+        "ratification": false,
+        "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+      }
     },
     {
       "coordinate": "1011100000",
@@ -9204,7 +9435,18 @@
       ],
       "selected": false,
       "ratified": false,
-      "physical_t5_authorized": false
+      "physical_t5_authorized": false,
+      "proof_readiness": {
+        "status": "INCOMPLETE-SOURCE-SEMANTICS",
+        "missing": [
+          "semantic-law",
+          "positive-witness",
+          "negative-falsifier"
+        ],
+        "selection": false,
+        "ratification": false,
+        "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+      }
     },
     {
       "coordinate": "1011100001",
@@ -9224,7 +9466,18 @@
       ],
       "selected": false,
       "ratified": false,
-      "physical_t5_authorized": false
+      "physical_t5_authorized": false,
+      "proof_readiness": {
+        "status": "INCOMPLETE-SOURCE-SEMANTICS",
+        "missing": [
+          "semantic-law",
+          "positive-witness",
+          "negative-falsifier"
+        ],
+        "selection": false,
+        "ratification": false,
+        "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+      }
     },
     {
       "coordinate": "1011100010",
@@ -9244,7 +9497,18 @@
       ],
       "selected": false,
       "ratified": false,
-      "physical_t5_authorized": false
+      "physical_t5_authorized": false,
+      "proof_readiness": {
+        "status": "INCOMPLETE-SOURCE-SEMANTICS",
+        "missing": [
+          "semantic-law",
+          "positive-witness",
+          "negative-falsifier"
+        ],
+        "selection": false,
+        "ratification": false,
+        "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+      }
     },
     {
       "coordinate": "1011100011",
@@ -9264,7 +9528,18 @@
       ],
       "selected": false,
       "ratified": false,
-      "physical_t5_authorized": false
+      "physical_t5_authorized": false,
+      "proof_readiness": {
+        "status": "INCOMPLETE-SOURCE-SEMANTICS",
+        "missing": [
+          "semantic-law",
+          "positive-witness",
+          "negative-falsifier"
+        ],
+        "selection": false,
+        "ratification": false,
+        "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+      }
     },
     {
       "coordinate": "1011100100",
@@ -9284,7 +9559,18 @@
       ],
       "selected": false,
       "ratified": false,
-      "physical_t5_authorized": false
+      "physical_t5_authorized": false,
+      "proof_readiness": {
+        "status": "INCOMPLETE-SOURCE-SEMANTICS",
+        "missing": [
+          "semantic-law",
+          "positive-witness",
+          "negative-falsifier"
+        ],
+        "selection": false,
+        "ratification": false,
+        "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+      }
     },
     {
       "coordinate": "1011100101",
@@ -9304,7 +9590,18 @@
       ],
       "selected": false,
       "ratified": false,
-      "physical_t5_authorized": false
+      "physical_t5_authorized": false,
+      "proof_readiness": {
+        "status": "INCOMPLETE-SOURCE-SEMANTICS",
+        "missing": [
+          "semantic-law",
+          "positive-witness",
+          "negative-falsifier"
+        ],
+        "selection": false,
+        "ratification": false,
+        "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+      }
     },
     {
       "coordinate": "1011100110",
@@ -9324,7 +9621,18 @@
       ],
       "selected": false,
       "ratified": false,
-      "physical_t5_authorized": false
+      "physical_t5_authorized": false,
+      "proof_readiness": {
+        "status": "INCOMPLETE-SOURCE-SEMANTICS",
+        "missing": [
+          "semantic-law",
+          "positive-witness",
+          "negative-falsifier"
+        ],
+        "selection": false,
+        "ratification": false,
+        "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+      }
     },
     {
       "coordinate": "1011100111",
@@ -9344,7 +9652,18 @@
       ],
       "selected": false,
       "ratified": false,
-      "physical_t5_authorized": false
+      "physical_t5_authorized": false,
+      "proof_readiness": {
+        "status": "INCOMPLETE-SOURCE-SEMANTICS",
+        "missing": [
+          "semantic-law",
+          "positive-witness",
+          "negative-falsifier"
+        ],
+        "selection": false,
+        "ratification": false,
+        "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+      }
     },
     {
       "coordinate": "1011101000",
@@ -9364,7 +9683,18 @@
       ],
       "selected": false,
       "ratified": false,
-      "physical_t5_authorized": false
+      "physical_t5_authorized": false,
+      "proof_readiness": {
+        "status": "INCOMPLETE-SOURCE-SEMANTICS",
+        "missing": [
+          "semantic-law",
+          "positive-witness",
+          "negative-falsifier"
+        ],
+        "selection": false,
+        "ratification": false,
+        "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+      }
     },
     {
       "coordinate": "1011101001",
@@ -9384,7 +9714,18 @@
       ],
       "selected": false,
       "ratified": false,
-      "physical_t5_authorized": false
+      "physical_t5_authorized": false,
+      "proof_readiness": {
+        "status": "INCOMPLETE-SOURCE-SEMANTICS",
+        "missing": [
+          "semantic-law",
+          "positive-witness",
+          "negative-falsifier"
+        ],
+        "selection": false,
+        "ratification": false,
+        "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+      }
     },
     {
       "coordinate": "1011101010",
@@ -9404,7 +9745,18 @@
       ],
       "selected": false,
       "ratified": false,
-      "physical_t5_authorized": false
+      "physical_t5_authorized": false,
+      "proof_readiness": {
+        "status": "INCOMPLETE-SOURCE-SEMANTICS",
+        "missing": [
+          "semantic-law",
+          "positive-witness",
+          "negative-falsifier"
+        ],
+        "selection": false,
+        "ratification": false,
+        "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+      }
     },
     {
       "coordinate": "1011101011",
@@ -9424,7 +9776,18 @@
       ],
       "selected": false,
       "ratified": false,
-      "physical_t5_authorized": false
+      "physical_t5_authorized": false,
+      "proof_readiness": {
+        "status": "INCOMPLETE-SOURCE-SEMANTICS",
+        "missing": [
+          "semantic-law",
+          "positive-witness",
+          "negative-falsifier"
+        ],
+        "selection": false,
+        "ratification": false,
+        "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+      }
     },
     {
       "coordinate": "1011101100",
@@ -9444,7 +9807,18 @@
       ],
       "selected": false,
       "ratified": false,
-      "physical_t5_authorized": false
+      "physical_t5_authorized": false,
+      "proof_readiness": {
+        "status": "INCOMPLETE-SOURCE-SEMANTICS",
+        "missing": [
+          "semantic-law",
+          "positive-witness",
+          "negative-falsifier"
+        ],
+        "selection": false,
+        "ratification": false,
+        "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+      }
     },
     {
       "coordinate": "1011101101",
@@ -9464,7 +9838,18 @@
       ],
       "selected": false,
       "ratified": false,
-      "physical_t5_authorized": false
+      "physical_t5_authorized": false,
+      "proof_readiness": {
+        "status": "INCOMPLETE-SOURCE-SEMANTICS",
+        "missing": [
+          "semantic-law",
+          "positive-witness",
+          "negative-falsifier"
+        ],
+        "selection": false,
+        "ratification": false,
+        "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+      }
     },
     {
       "coordinate": "1011101110",
@@ -9484,7 +9869,18 @@
       ],
       "selected": false,
       "ratified": false,
-      "physical_t5_authorized": false
+      "physical_t5_authorized": false,
+      "proof_readiness": {
+        "status": "INCOMPLETE-SOURCE-SEMANTICS",
+        "missing": [
+          "semantic-law",
+          "positive-witness",
+          "negative-falsifier"
+        ],
+        "selection": false,
+        "ratification": false,
+        "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+      }
     },
     {
       "coordinate": "1011101111",
@@ -9504,7 +9900,18 @@
       ],
       "selected": false,
       "ratified": false,
-      "physical_t5_authorized": false
+      "physical_t5_authorized": false,
+      "proof_readiness": {
+        "status": "INCOMPLETE-SOURCE-SEMANTICS",
+        "missing": [
+          "semantic-law",
+          "positive-witness",
+          "negative-falsifier"
+        ],
+        "selection": false,
+        "ratification": false,
+        "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+      }
     },
     {
       "coordinate": "1011110000",
@@ -9524,7 +9931,18 @@
       ],
       "selected": false,
       "ratified": false,
-      "physical_t5_authorized": false
+      "physical_t5_authorized": false,
+      "proof_readiness": {
+        "status": "INCOMPLETE-SOURCE-SEMANTICS",
+        "missing": [
+          "semantic-law",
+          "positive-witness",
+          "negative-falsifier"
+        ],
+        "selection": false,
+        "ratification": false,
+        "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+      }
     },
     {
       "coordinate": "1011110001",
@@ -9544,7 +9962,18 @@
       ],
       "selected": false,
       "ratified": false,
-      "physical_t5_authorized": false
+      "physical_t5_authorized": false,
+      "proof_readiness": {
+        "status": "INCOMPLETE-SOURCE-SEMANTICS",
+        "missing": [
+          "semantic-law",
+          "positive-witness",
+          "negative-falsifier"
+        ],
+        "selection": false,
+        "ratification": false,
+        "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+      }
     },
     {
       "coordinate": "1011110010",
@@ -9564,7 +9993,18 @@
       ],
       "selected": false,
       "ratified": false,
-      "physical_t5_authorized": false
+      "physical_t5_authorized": false,
+      "proof_readiness": {
+        "status": "INCOMPLETE-SOURCE-SEMANTICS",
+        "missing": [
+          "semantic-law",
+          "positive-witness",
+          "negative-falsifier"
+        ],
+        "selection": false,
+        "ratification": false,
+        "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+      }
     },
     {
       "coordinate": "1011110011",
@@ -9584,7 +10024,18 @@
       ],
       "selected": false,
       "ratified": false,
-      "physical_t5_authorized": false
+      "physical_t5_authorized": false,
+      "proof_readiness": {
+        "status": "INCOMPLETE-SOURCE-SEMANTICS",
+        "missing": [
+          "semantic-law",
+          "positive-witness",
+          "negative-falsifier"
+        ],
+        "selection": false,
+        "ratification": false,
+        "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+      }
     },
     {
       "coordinate": "1011110100",
@@ -9604,7 +10055,18 @@
       ],
       "selected": false,
       "ratified": false,
-      "physical_t5_authorized": false
+      "physical_t5_authorized": false,
+      "proof_readiness": {
+        "status": "INCOMPLETE-SOURCE-SEMANTICS",
+        "missing": [
+          "semantic-law",
+          "positive-witness",
+          "negative-falsifier"
+        ],
+        "selection": false,
+        "ratification": false,
+        "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+      }
     },
     {
       "coordinate": "1011110101",
@@ -9624,7 +10086,18 @@
       ],
       "selected": false,
       "ratified": false,
-      "physical_t5_authorized": false
+      "physical_t5_authorized": false,
+      "proof_readiness": {
+        "status": "INCOMPLETE-SOURCE-SEMANTICS",
+        "missing": [
+          "semantic-law",
+          "positive-witness",
+          "negative-falsifier"
+        ],
+        "selection": false,
+        "ratification": false,
+        "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+      }
     },
     {
       "coordinate": "1011110110",
@@ -9644,7 +10117,18 @@
       ],
       "selected": false,
       "ratified": false,
-      "physical_t5_authorized": false
+      "physical_t5_authorized": false,
+      "proof_readiness": {
+        "status": "INCOMPLETE-SOURCE-SEMANTICS",
+        "missing": [
+          "semantic-law",
+          "positive-witness",
+          "negative-falsifier"
+        ],
+        "selection": false,
+        "ratification": false,
+        "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+      }
     },
     {
       "coordinate": "1011110111",
@@ -9664,7 +10148,18 @@
       ],
       "selected": false,
       "ratified": false,
-      "physical_t5_authorized": false
+      "physical_t5_authorized": false,
+      "proof_readiness": {
+        "status": "INCOMPLETE-SOURCE-SEMANTICS",
+        "missing": [
+          "semantic-law",
+          "positive-witness",
+          "negative-falsifier"
+        ],
+        "selection": false,
+        "ratification": false,
+        "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+      }
     },
     {
       "coordinate": "1011111000",
@@ -9684,7 +10179,18 @@
       ],
       "selected": false,
       "ratified": false,
-      "physical_t5_authorized": false
+      "physical_t5_authorized": false,
+      "proof_readiness": {
+        "status": "INCOMPLETE-SOURCE-SEMANTICS",
+        "missing": [
+          "semantic-law",
+          "positive-witness",
+          "negative-falsifier"
+        ],
+        "selection": false,
+        "ratification": false,
+        "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+      }
     },
     {
       "coordinate": "1011111001",
@@ -9704,7 +10210,18 @@
       ],
       "selected": false,
       "ratified": false,
-      "physical_t5_authorized": false
+      "physical_t5_authorized": false,
+      "proof_readiness": {
+        "status": "INCOMPLETE-SOURCE-SEMANTICS",
+        "missing": [
+          "semantic-law",
+          "positive-witness",
+          "negative-falsifier"
+        ],
+        "selection": false,
+        "ratification": false,
+        "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+      }
     },
     {
       "coordinate": "1011111010",
@@ -9731,7 +10248,18 @@
       ],
       "selected": false,
       "ratified": false,
-      "physical_t5_authorized": false
+      "physical_t5_authorized": false,
+      "proof_readiness": {
+        "status": "INCOMPLETE-SOURCE-SEMANTICS",
+        "missing": [
+          "semantic-law",
+          "positive-witness",
+          "negative-falsifier"
+        ],
+        "selection": false,
+        "ratification": false,
+        "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+      }
     },
     {
       "coordinate": "1011111011",
@@ -9758,7 +10286,18 @@
       ],
       "selected": false,
       "ratified": false,
-      "physical_t5_authorized": false
+      "physical_t5_authorized": false,
+      "proof_readiness": {
+        "status": "INCOMPLETE-SOURCE-SEMANTICS",
+        "missing": [
+          "semantic-law",
+          "positive-witness",
+          "negative-falsifier"
+        ],
+        "selection": false,
+        "ratification": false,
+        "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+      }
     },
     {
       "coordinate": "1011111100",
@@ -9785,7 +10324,18 @@
       ],
       "selected": false,
       "ratified": false,
-      "physical_t5_authorized": false
+      "physical_t5_authorized": false,
+      "proof_readiness": {
+        "status": "INCOMPLETE-SOURCE-SEMANTICS",
+        "missing": [
+          "semantic-law",
+          "positive-witness",
+          "negative-falsifier"
+        ],
+        "selection": false,
+        "ratification": false,
+        "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+      }
     },
     {
       "coordinate": "1011111101",
@@ -9812,7 +10362,18 @@
       ],
       "selected": false,
       "ratified": false,
-      "physical_t5_authorized": false
+      "physical_t5_authorized": false,
+      "proof_readiness": {
+        "status": "INCOMPLETE-SOURCE-SEMANTICS",
+        "missing": [
+          "semantic-law",
+          "positive-witness",
+          "negative-falsifier"
+        ],
+        "selection": false,
+        "ratification": false,
+        "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+      }
     },
     {
       "coordinate": "1011111110",
@@ -9839,7 +10400,18 @@
       ],
       "selected": false,
       "ratified": false,
-      "physical_t5_authorized": false
+      "physical_t5_authorized": false,
+      "proof_readiness": {
+        "status": "INCOMPLETE-SOURCE-SEMANTICS",
+        "missing": [
+          "semantic-law",
+          "positive-witness",
+          "negative-falsifier"
+        ],
+        "selection": false,
+        "ratification": false,
+        "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+      }
     },
     {
       "coordinate": "1011111111",
@@ -9866,7 +10438,18 @@
       ],
       "selected": false,
       "ratified": false,
-      "physical_t5_authorized": false
+      "physical_t5_authorized": false,
+      "proof_readiness": {
+        "status": "INCOMPLETE-SOURCE-SEMANTICS",
+        "missing": [
+          "semantic-law",
+          "positive-witness",
+          "negative-falsifier"
+        ],
+        "selection": false,
+        "ratification": false,
+        "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+      }
     },
     {
       "coordinate": "1100000000",
@@ -9893,7 +10476,18 @@
       ],
       "selected": false,
       "ratified": false,
-      "physical_t5_authorized": false
+      "physical_t5_authorized": false,
+      "proof_readiness": {
+        "status": "INCOMPLETE-SOURCE-SEMANTICS",
+        "missing": [
+          "semantic-law",
+          "positive-witness",
+          "negative-falsifier"
+        ],
+        "selection": false,
+        "ratification": false,
+        "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+      }
     },
     {
       "coordinate": "1100000001",
@@ -9920,7 +10514,18 @@
       ],
       "selected": false,
       "ratified": false,
-      "physical_t5_authorized": false
+      "physical_t5_authorized": false,
+      "proof_readiness": {
+        "status": "INCOMPLETE-SOURCE-SEMANTICS",
+        "missing": [
+          "semantic-law",
+          "positive-witness",
+          "negative-falsifier"
+        ],
+        "selection": false,
+        "ratification": false,
+        "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+      }
     },
     {
       "coordinate": "1100000010",
@@ -9947,7 +10552,18 @@
       ],
       "selected": false,
       "ratified": false,
-      "physical_t5_authorized": false
+      "physical_t5_authorized": false,
+      "proof_readiness": {
+        "status": "INCOMPLETE-SOURCE-SEMANTICS",
+        "missing": [
+          "semantic-law",
+          "positive-witness",
+          "negative-falsifier"
+        ],
+        "selection": false,
+        "ratification": false,
+        "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+      }
     },
     {
       "coordinate": "1100000011",
@@ -9974,7 +10590,18 @@
       ],
       "selected": false,
       "ratified": false,
-      "physical_t5_authorized": false
+      "physical_t5_authorized": false,
+      "proof_readiness": {
+        "status": "INCOMPLETE-SOURCE-SEMANTICS",
+        "missing": [
+          "semantic-law",
+          "positive-witness",
+          "negative-falsifier"
+        ],
+        "selection": false,
+        "ratification": false,
+        "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+      }
     },
     {
       "coordinate": "1100000100",
@@ -10001,7 +10628,18 @@
       ],
       "selected": false,
       "ratified": false,
-      "physical_t5_authorized": false
+      "physical_t5_authorized": false,
+      "proof_readiness": {
+        "status": "INCOMPLETE-SOURCE-SEMANTICS",
+        "missing": [
+          "semantic-law",
+          "positive-witness",
+          "negative-falsifier"
+        ],
+        "selection": false,
+        "ratification": false,
+        "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+      }
     },
     {
       "coordinate": "1100000101",
@@ -10028,7 +10666,18 @@
       ],
       "selected": false,
       "ratified": false,
-      "physical_t5_authorized": false
+      "physical_t5_authorized": false,
+      "proof_readiness": {
+        "status": "INCOMPLETE-SOURCE-SEMANTICS",
+        "missing": [
+          "semantic-law",
+          "positive-witness",
+          "negative-falsifier"
+        ],
+        "selection": false,
+        "ratification": false,
+        "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+      }
     },
     {
       "coordinate": "1100000110",
@@ -10055,7 +10704,18 @@
       ],
       "selected": false,
       "ratified": false,
-      "physical_t5_authorized": false
+      "physical_t5_authorized": false,
+      "proof_readiness": {
+        "status": "INCOMPLETE-SOURCE-SEMANTICS",
+        "missing": [
+          "semantic-law",
+          "positive-witness",
+          "negative-falsifier"
+        ],
+        "selection": false,
+        "ratification": false,
+        "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+      }
     },
     {
       "coordinate": "1100000111",
@@ -10082,7 +10742,18 @@
       ],
       "selected": false,
       "ratified": false,
-      "physical_t5_authorized": false
+      "physical_t5_authorized": false,
+      "proof_readiness": {
+        "status": "INCOMPLETE-SOURCE-SEMANTICS",
+        "missing": [
+          "semantic-law",
+          "positive-witness",
+          "negative-falsifier"
+        ],
+        "selection": false,
+        "ratification": false,
+        "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+      }
     },
     {
       "coordinate": "1100001000",
@@ -10109,7 +10780,18 @@
       ],
       "selected": false,
       "ratified": false,
-      "physical_t5_authorized": false
+      "physical_t5_authorized": false,
+      "proof_readiness": {
+        "status": "INCOMPLETE-SOURCE-SEMANTICS",
+        "missing": [
+          "semantic-law",
+          "positive-witness",
+          "negative-falsifier"
+        ],
+        "selection": false,
+        "ratification": false,
+        "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+      }
     },
     {
       "coordinate": "1100001001",
@@ -10136,7 +10818,18 @@
       ],
       "selected": false,
       "ratified": false,
-      "physical_t5_authorized": false
+      "physical_t5_authorized": false,
+      "proof_readiness": {
+        "status": "INCOMPLETE-SOURCE-SEMANTICS",
+        "missing": [
+          "semantic-law",
+          "positive-witness",
+          "negative-falsifier"
+        ],
+        "selection": false,
+        "ratification": false,
+        "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+      }
     },
     {
       "coordinate": "1100001010",
@@ -10157,7 +10850,18 @@
       ],
       "selected": false,
       "ratified": false,
-      "physical_t5_authorized": false
+      "physical_t5_authorized": false,
+      "proof_readiness": {
+        "status": "INCOMPLETE-SOURCE-SEMANTICS",
+        "missing": [
+          "semantic-law",
+          "positive-witness",
+          "negative-falsifier"
+        ],
+        "selection": false,
+        "ratification": false,
+        "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+      }
     },
     {
       "coordinate": "1100001011",
@@ -10178,7 +10882,18 @@
       ],
       "selected": false,
       "ratified": false,
-      "physical_t5_authorized": false
+      "physical_t5_authorized": false,
+      "proof_readiness": {
+        "status": "INCOMPLETE-SOURCE-SEMANTICS",
+        "missing": [
+          "semantic-law",
+          "positive-witness",
+          "negative-falsifier"
+        ],
+        "selection": false,
+        "ratification": false,
+        "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+      }
     },
     {
       "coordinate": "1100001100",
@@ -10199,7 +10914,18 @@
       ],
       "selected": false,
       "ratified": false,
-      "physical_t5_authorized": false
+      "physical_t5_authorized": false,
+      "proof_readiness": {
+        "status": "INCOMPLETE-SOURCE-SEMANTICS",
+        "missing": [
+          "semantic-law",
+          "positive-witness",
+          "negative-falsifier"
+        ],
+        "selection": false,
+        "ratification": false,
+        "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+      }
     },
     {
       "coordinate": "1100001101",
@@ -10220,7 +10946,18 @@
       ],
       "selected": false,
       "ratified": false,
-      "physical_t5_authorized": false
+      "physical_t5_authorized": false,
+      "proof_readiness": {
+        "status": "INCOMPLETE-SOURCE-SEMANTICS",
+        "missing": [
+          "semantic-law",
+          "positive-witness",
+          "negative-falsifier"
+        ],
+        "selection": false,
+        "ratification": false,
+        "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+      }
     },
     {
       "coordinate": "1100001110",
@@ -10241,7 +10978,18 @@
       ],
       "selected": false,
       "ratified": false,
-      "physical_t5_authorized": false
+      "physical_t5_authorized": false,
+      "proof_readiness": {
+        "status": "INCOMPLETE-SOURCE-SEMANTICS",
+        "missing": [
+          "semantic-law",
+          "positive-witness",
+          "negative-falsifier"
+        ],
+        "selection": false,
+        "ratification": false,
+        "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+      }
     },
     {
       "coordinate": "1100001111",
@@ -10262,7 +11010,18 @@
       ],
       "selected": false,
       "ratified": false,
-      "physical_t5_authorized": false
+      "physical_t5_authorized": false,
+      "proof_readiness": {
+        "status": "INCOMPLETE-SOURCE-SEMANTICS",
+        "missing": [
+          "semantic-law",
+          "positive-witness",
+          "negative-falsifier"
+        ],
+        "selection": false,
+        "ratification": false,
+        "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+      }
     },
     {
       "coordinate": "1100010000",
@@ -10283,7 +11042,18 @@
       ],
       "selected": false,
       "ratified": false,
-      "physical_t5_authorized": false
+      "physical_t5_authorized": false,
+      "proof_readiness": {
+        "status": "INCOMPLETE-SOURCE-SEMANTICS",
+        "missing": [
+          "semantic-law",
+          "positive-witness",
+          "negative-falsifier"
+        ],
+        "selection": false,
+        "ratification": false,
+        "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+      }
     },
     {
       "coordinate": "1100010001",
@@ -10304,7 +11074,18 @@
       ],
       "selected": false,
       "ratified": false,
-      "physical_t5_authorized": false
+      "physical_t5_authorized": false,
+      "proof_readiness": {
+        "status": "INCOMPLETE-SOURCE-SEMANTICS",
+        "missing": [
+          "semantic-law",
+          "positive-witness",
+          "negative-falsifier"
+        ],
+        "selection": false,
+        "ratification": false,
+        "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+      }
     },
     {
       "coordinate": "1100010010",
@@ -10325,7 +11106,18 @@
       ],
       "selected": false,
       "ratified": false,
-      "physical_t5_authorized": false
+      "physical_t5_authorized": false,
+      "proof_readiness": {
+        "status": "INCOMPLETE-SOURCE-SEMANTICS",
+        "missing": [
+          "semantic-law",
+          "positive-witness",
+          "negative-falsifier"
+        ],
+        "selection": false,
+        "ratification": false,
+        "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+      }
     },
     {
       "coordinate": "1100010011",
@@ -10346,7 +11138,18 @@
       ],
       "selected": false,
       "ratified": false,
-      "physical_t5_authorized": false
+      "physical_t5_authorized": false,
+      "proof_readiness": {
+        "status": "INCOMPLETE-SOURCE-SEMANTICS",
+        "missing": [
+          "semantic-law",
+          "positive-witness",
+          "negative-falsifier"
+        ],
+        "selection": false,
+        "ratification": false,
+        "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+      }
     },
     {
       "coordinate": "1100010100",
@@ -10370,7 +11173,18 @@
       ],
       "selected": false,
       "ratified": false,
-      "physical_t5_authorized": false
+      "physical_t5_authorized": false,
+      "proof_readiness": {
+        "status": "INCOMPLETE-SOURCE-SEMANTICS",
+        "missing": [
+          "semantic-law",
+          "positive-witness",
+          "negative-falsifier"
+        ],
+        "selection": false,
+        "ratification": false,
+        "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+      }
     },
     {
       "coordinate": "1100010101",
@@ -10394,7 +11208,18 @@
       ],
       "selected": false,
       "ratified": false,
-      "physical_t5_authorized": false
+      "physical_t5_authorized": false,
+      "proof_readiness": {
+        "status": "INCOMPLETE-SOURCE-SEMANTICS",
+        "missing": [
+          "semantic-law",
+          "positive-witness",
+          "negative-falsifier"
+        ],
+        "selection": false,
+        "ratification": false,
+        "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+      }
     },
     {
       "coordinate": "1100010110",
@@ -10418,7 +11243,18 @@
       ],
       "selected": false,
       "ratified": false,
-      "physical_t5_authorized": false
+      "physical_t5_authorized": false,
+      "proof_readiness": {
+        "status": "INCOMPLETE-SOURCE-SEMANTICS",
+        "missing": [
+          "semantic-law",
+          "positive-witness",
+          "negative-falsifier"
+        ],
+        "selection": false,
+        "ratification": false,
+        "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+      }
     },
     {
       "coordinate": "1100010111",
@@ -10442,7 +11278,18 @@
       ],
       "selected": false,
       "ratified": false,
-      "physical_t5_authorized": false
+      "physical_t5_authorized": false,
+      "proof_readiness": {
+        "status": "INCOMPLETE-SOURCE-SEMANTICS",
+        "missing": [
+          "semantic-law",
+          "positive-witness",
+          "negative-falsifier"
+        ],
+        "selection": false,
+        "ratification": false,
+        "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+      }
     },
     {
       "coordinate": "1100011000",
@@ -10467,7 +11314,18 @@
       ],
       "selected": false,
       "ratified": false,
-      "physical_t5_authorized": false
+      "physical_t5_authorized": false,
+      "proof_readiness": {
+        "status": "INCOMPLETE-SOURCE-SEMANTICS",
+        "missing": [
+          "semantic-law",
+          "positive-witness",
+          "negative-falsifier"
+        ],
+        "selection": false,
+        "ratification": false,
+        "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+      }
     },
     {
       "coordinate": "1100011001",
@@ -10492,7 +11350,18 @@
       ],
       "selected": false,
       "ratified": false,
-      "physical_t5_authorized": false
+      "physical_t5_authorized": false,
+      "proof_readiness": {
+        "status": "INCOMPLETE-SOURCE-SEMANTICS",
+        "missing": [
+          "semantic-law",
+          "positive-witness",
+          "negative-falsifier"
+        ],
+        "selection": false,
+        "ratification": false,
+        "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+      }
     },
     {
       "coordinate": "1100011010",
@@ -10517,7 +11386,18 @@
       ],
       "selected": false,
       "ratified": false,
-      "physical_t5_authorized": false
+      "physical_t5_authorized": false,
+      "proof_readiness": {
+        "status": "INCOMPLETE-SOURCE-SEMANTICS",
+        "missing": [
+          "semantic-law",
+          "positive-witness",
+          "negative-falsifier"
+        ],
+        "selection": false,
+        "ratification": false,
+        "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+      }
     },
     {
       "coordinate": "1100011011",
@@ -10542,7 +11422,18 @@
       ],
       "selected": false,
       "ratified": false,
-      "physical_t5_authorized": false
+      "physical_t5_authorized": false,
+      "proof_readiness": {
+        "status": "INCOMPLETE-SOURCE-SEMANTICS",
+        "missing": [
+          "semantic-law",
+          "positive-witness",
+          "negative-falsifier"
+        ],
+        "selection": false,
+        "ratification": false,
+        "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+      }
     },
     {
       "coordinate": "1100011100",
@@ -10567,7 +11458,18 @@
       ],
       "selected": false,
       "ratified": false,
-      "physical_t5_authorized": false
+      "physical_t5_authorized": false,
+      "proof_readiness": {
+        "status": "INCOMPLETE-SOURCE-SEMANTICS",
+        "missing": [
+          "semantic-law",
+          "positive-witness",
+          "negative-falsifier"
+        ],
+        "selection": false,
+        "ratification": false,
+        "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+      }
     },
     {
       "coordinate": "1100011101",
@@ -10592,7 +11494,18 @@
       ],
       "selected": false,
       "ratified": false,
-      "physical_t5_authorized": false
+      "physical_t5_authorized": false,
+      "proof_readiness": {
+        "status": "INCOMPLETE-SOURCE-SEMANTICS",
+        "missing": [
+          "semantic-law",
+          "positive-witness",
+          "negative-falsifier"
+        ],
+        "selection": false,
+        "ratification": false,
+        "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+      }
     },
     {
       "coordinate": "1100011110",
@@ -10614,7 +11527,18 @@
       ],
       "selected": false,
       "ratified": false,
-      "physical_t5_authorized": false
+      "physical_t5_authorized": false,
+      "proof_readiness": {
+        "status": "INCOMPLETE-SOURCE-SEMANTICS",
+        "missing": [
+          "semantic-law",
+          "positive-witness",
+          "negative-falsifier"
+        ],
+        "selection": false,
+        "ratification": false,
+        "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+      }
     },
     {
       "coordinate": "1100011111",
@@ -10636,7 +11560,18 @@
       ],
       "selected": false,
       "ratified": false,
-      "physical_t5_authorized": false
+      "physical_t5_authorized": false,
+      "proof_readiness": {
+        "status": "INCOMPLETE-SOURCE-SEMANTICS",
+        "missing": [
+          "semantic-law",
+          "positive-witness",
+          "negative-falsifier"
+        ],
+        "selection": false,
+        "ratification": false,
+        "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+      }
     },
     {
       "coordinate": "1100100000",
@@ -10658,7 +11593,18 @@
       ],
       "selected": false,
       "ratified": false,
-      "physical_t5_authorized": false
+      "physical_t5_authorized": false,
+      "proof_readiness": {
+        "status": "INCOMPLETE-SOURCE-SEMANTICS",
+        "missing": [
+          "semantic-law",
+          "positive-witness",
+          "negative-falsifier"
+        ],
+        "selection": false,
+        "ratification": false,
+        "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+      }
     },
     {
       "coordinate": "1100100001",
@@ -10680,7 +11626,18 @@
       ],
       "selected": false,
       "ratified": false,
-      "physical_t5_authorized": false
+      "physical_t5_authorized": false,
+      "proof_readiness": {
+        "status": "INCOMPLETE-SOURCE-SEMANTICS",
+        "missing": [
+          "semantic-law",
+          "positive-witness",
+          "negative-falsifier"
+        ],
+        "selection": false,
+        "ratification": false,
+        "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+      }
     },
     {
       "coordinate": "1100100010",
@@ -10702,7 +11659,18 @@
       ],
       "selected": false,
       "ratified": false,
-      "physical_t5_authorized": false
+      "physical_t5_authorized": false,
+      "proof_readiness": {
+        "status": "INCOMPLETE-SOURCE-SEMANTICS",
+        "missing": [
+          "semantic-law",
+          "positive-witness",
+          "negative-falsifier"
+        ],
+        "selection": false,
+        "ratification": false,
+        "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+      }
     },
     {
       "coordinate": "1100100011",
@@ -10724,7 +11692,18 @@
       ],
       "selected": false,
       "ratified": false,
-      "physical_t5_authorized": false
+      "physical_t5_authorized": false,
+      "proof_readiness": {
+        "status": "INCOMPLETE-SOURCE-SEMANTICS",
+        "missing": [
+          "semantic-law",
+          "positive-witness",
+          "negative-falsifier"
+        ],
+        "selection": false,
+        "ratification": false,
+        "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+      }
     },
     {
       "coordinate": "1100100100",
@@ -10744,7 +11723,18 @@
       ],
       "selected": false,
       "ratified": false,
-      "physical_t5_authorized": false
+      "physical_t5_authorized": false,
+      "proof_readiness": {
+        "status": "INCOMPLETE-SOURCE-SEMANTICS",
+        "missing": [
+          "semantic-law",
+          "positive-witness",
+          "negative-falsifier"
+        ],
+        "selection": false,
+        "ratification": false,
+        "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+      }
     },
     {
       "coordinate": "1100100101",
@@ -10764,7 +11754,18 @@
       ],
       "selected": false,
       "ratified": false,
-      "physical_t5_authorized": false
+      "physical_t5_authorized": false,
+      "proof_readiness": {
+        "status": "INCOMPLETE-SOURCE-SEMANTICS",
+        "missing": [
+          "semantic-law",
+          "positive-witness",
+          "negative-falsifier"
+        ],
+        "selection": false,
+        "ratification": false,
+        "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+      }
     },
     {
       "coordinate": "1100100110",
@@ -10784,7 +11785,18 @@
       ],
       "selected": false,
       "ratified": false,
-      "physical_t5_authorized": false
+      "physical_t5_authorized": false,
+      "proof_readiness": {
+        "status": "INCOMPLETE-SOURCE-SEMANTICS",
+        "missing": [
+          "semantic-law",
+          "positive-witness",
+          "negative-falsifier"
+        ],
+        "selection": false,
+        "ratification": false,
+        "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+      }
     },
     {
       "coordinate": "1100100111",
@@ -10807,7 +11819,18 @@
       ],
       "selected": false,
       "ratified": false,
-      "physical_t5_authorized": false
+      "physical_t5_authorized": false,
+      "proof_readiness": {
+        "status": "INCOMPLETE-SOURCE-SEMANTICS",
+        "missing": [
+          "semantic-law",
+          "positive-witness",
+          "negative-falsifier"
+        ],
+        "selection": false,
+        "ratification": false,
+        "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+      }
     },
     {
       "coordinate": "1100101000",
@@ -10830,7 +11853,18 @@
       ],
       "selected": false,
       "ratified": false,
-      "physical_t5_authorized": false
+      "physical_t5_authorized": false,
+      "proof_readiness": {
+        "status": "INCOMPLETE-SOURCE-SEMANTICS",
+        "missing": [
+          "semantic-law",
+          "positive-witness",
+          "negative-falsifier"
+        ],
+        "selection": false,
+        "ratification": false,
+        "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+      }
     },
     {
       "coordinate": "1100101001",
@@ -10853,7 +11887,18 @@
       ],
       "selected": false,
       "ratified": false,
-      "physical_t5_authorized": false
+      "physical_t5_authorized": false,
+      "proof_readiness": {
+        "status": "INCOMPLETE-SOURCE-SEMANTICS",
+        "missing": [
+          "semantic-law",
+          "positive-witness",
+          "negative-falsifier"
+        ],
+        "selection": false,
+        "ratification": false,
+        "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+      }
     },
     {
       "coordinate": "1100101010",
@@ -10876,7 +11921,18 @@
       ],
       "selected": false,
       "ratified": false,
-      "physical_t5_authorized": false
+      "physical_t5_authorized": false,
+      "proof_readiness": {
+        "status": "INCOMPLETE-SOURCE-SEMANTICS",
+        "missing": [
+          "semantic-law",
+          "positive-witness",
+          "negative-falsifier"
+        ],
+        "selection": false,
+        "ratification": false,
+        "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+      }
     },
     {
       "coordinate": "1100101011",
@@ -10888,7 +11944,17 @@
       "law": "Спостерігати факт наявності принаймні однієї обгортки на іменованій функції.",
       "selected": false,
       "ratified": false,
-      "physical_t5_authorized": false
+      "physical_t5_authorized": false,
+      "proof_readiness": {
+        "status": "INCOMPLETE-SOURCE-SEMANTICS",
+        "missing": [
+          "positive-witness",
+          "negative-falsifier"
+        ],
+        "selection": false,
+        "ratification": false,
+        "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+      }
     },
     {
       "coordinate": "1100101100",
@@ -10900,7 +11966,17 @@
       "law": "Спостерігати наявність обгортки конкретного типу, а не будь-якої.",
       "selected": false,
       "ratified": false,
-      "physical_t5_authorized": false
+      "physical_t5_authorized": false,
+      "proof_readiness": {
+        "status": "INCOMPLETE-SOURCE-SEMANTICS",
+        "missing": [
+          "positive-witness",
+          "negative-falsifier"
+        ],
+        "selection": false,
+        "ratification": false,
+        "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+      }
     },
     {
       "coordinate": "1100101101",
@@ -10912,7 +11988,17 @@
       "law": "Отримати типи чинних обгорток функції у реальному порядку вкладення.",
       "selected": false,
       "ratified": false,
-      "physical_t5_authorized": false
+      "physical_t5_authorized": false,
+      "proof_readiness": {
+        "status": "INCOMPLETE-SOURCE-SEMANTICS",
+        "missing": [
+          "positive-witness",
+          "negative-falsifier"
+        ],
+        "selection": false,
+        "ratification": false,
+        "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+      }
     },
     {
       "coordinate": "1100101110",
@@ -10924,7 +12010,17 @@
       "law": "Відновити список параметрів функції, для compiled opaque можуть генеруватися placeholder імена.",
       "selected": false,
       "ratified": false,
-      "physical_t5_authorized": false
+      "physical_t5_authorized": false,
+      "proof_readiness": {
+        "status": "INCOMPLETE-SOURCE-SEMANTICS",
+        "missing": [
+          "positive-witness",
+          "negative-falsifier"
+        ],
+        "selection": false,
+        "ratification": false,
+        "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+      }
     },
     {
       "coordinate": "1100101111",
@@ -10936,7 +12032,17 @@
       "law": "Отримати початкову функцію, навіть коли її обгорнуто; базова функція лишається відмінною від wrapper chain.",
       "selected": false,
       "ratified": false,
-      "physical_t5_authorized": false
+      "physical_t5_authorized": false,
+      "proof_readiness": {
+        "status": "INCOMPLETE-SOURCE-SEMANTICS",
+        "missing": [
+          "positive-witness",
+          "negative-falsifier"
+        ],
+        "selection": false,
+        "ratification": false,
+        "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+      }
     },
     {
       "coordinate": "1100110000",
@@ -10948,7 +12054,17 @@
       "law": "Піймати throw незалежно від tag і викликати handler(tag,value); handler може повторно throw.",
       "selected": false,
       "ratified": false,
-      "physical_t5_authorized": false
+      "physical_t5_authorized": false,
+      "proof_readiness": {
+        "status": "INCOMPLETE-SOURCE-SEMANTICS",
+        "missing": [
+          "positive-witness",
+          "negative-falsifier"
+        ],
+        "selection": false,
+        "ratification": false,
+        "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+      }
     },
     {
       "coordinate": "1100110001",
@@ -10960,7 +12076,17 @@
       "law": "Уніфікувати normal and caught nonlocal exit для handler(tag,value), при нормальному результаті tag=nil.",
       "selected": false,
       "ratified": false,
-      "physical_t5_authorized": false
+      "physical_t5_authorized": false,
+      "proof_readiness": {
+        "status": "INCOMPLETE-SOURCE-SEMANTICS",
+        "missing": [
+          "positive-witness",
+          "negative-falsifier"
+        ],
+        "selection": false,
+        "ratification": false,
+        "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+      }
     },
     {
       "coordinate": "1100110010",
@@ -10972,7 +12098,17 @@
       "law": "Рамка для послідовності змін зі стеком відновлення на normal completion/error/CONTROL-D у задокументованому діапазоні.",
       "selected": false,
       "ratified": false,
-      "physical_t5_authorized": false
+      "physical_t5_authorized": false,
+      "proof_readiness": {
+        "status": "INCOMPLETE-SOURCE-SEMANTICS",
+        "missing": [
+          "positive-witness",
+          "negative-falsifier"
+        ],
+        "selection": false,
+        "ratification": false,
+        "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+      }
     },
     {
       "coordinate": "1100110011",
@@ -10984,7 +12120,17 @@
       "law": "Зареєструвати відновлення змінної або старого стану оператора у найближчій RESETLST/RESET рамці.",
       "selected": false,
       "ratified": false,
-      "physical_t5_authorized": false
+      "physical_t5_authorized": false,
+      "proof_readiness": {
+        "status": "INCOMPLETE-SOURCE-SEMANTICS",
+        "missing": [
+          "positive-witness",
+          "negative-falsifier"
+        ],
+        "selection": false,
+        "ratification": false,
+        "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+      }
     },
     {
       "coordinate": "1100110100",
@@ -10996,7 +12142,17 @@
       "law": "Тимчасово встановити глобальну змінну й відновити попередній стан після області.",
       "selected": false,
       "ratified": false,
-      "physical_t5_authorized": false
+      "physical_t5_authorized": false,
+      "proof_readiness": {
+        "status": "INCOMPLETE-SOURCE-SEMANTICS",
+        "missing": [
+          "positive-witness",
+          "negative-falsifier"
+        ],
+        "selection": false,
+        "ratification": false,
+        "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+      }
     },
     {
       "coordinate": "1100110101",
@@ -11008,7 +12164,17 @@
       "law": "Тимчасово перевизначати набір global vars; семантика залежить від shallow/deep binding.",
       "selected": false,
       "ratified": false,
-      "physical_t5_authorized": false
+      "physical_t5_authorized": false,
+      "proof_readiness": {
+        "status": "INCOMPLETE-SOURCE-SEMANTICS",
+        "missing": [
+          "positive-witness",
+          "negative-falsifier"
+        ],
+        "selection": false,
+        "ratification": false,
+        "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+      }
     },
     {
       "coordinate": "1100110110",
@@ -11020,7 +12186,17 @@
       "law": "Виконати setter, що повертає старий стан, запустити body і відновити налаштування застосуванням setter до збереженого значення.",
       "selected": false,
       "ratified": false,
-      "physical_t5_authorized": false
+      "physical_t5_authorized": false,
+      "proof_readiness": {
+        "status": "INCOMPLETE-SOURCE-SEMANTICS",
+        "missing": [
+          "positive-witness",
+          "negative-falsifier"
+        ],
+        "selection": false,
+        "ratification": false,
+        "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+      }
     },
     {
       "coordinate": "1100110111",
@@ -11032,7 +12208,17 @@
       "law": "Описати іменований пул із constructor, matcher, initializer та checker; semantics candidate is lease contract, not allocator address.",
       "selected": false,
       "ratified": false,
-      "physical_t5_authorized": false
+      "physical_t5_authorized": false,
+      "proof_readiness": {
+        "status": "INCOMPLETE-SOURCE-SEMANTICS",
+        "missing": [
+          "positive-witness",
+          "negative-falsifier"
+        ],
+        "selection": false,
+        "ratification": false,
+        "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+      }
     },
     {
       "coordinate": "1100111000",
@@ -11044,7 +12230,17 @@
       "law": "Видати вільний сумісний об'єкт із пулу або створити новий; виділений не видається одночасно двом споживачам.",
       "selected": false,
       "ratified": false,
-      "physical_t5_authorized": false
+      "physical_t5_authorized": false,
+      "proof_readiness": {
+        "status": "INCOMPLETE-SOURCE-SEMANTICS",
+        "missing": [
+          "positive-witness",
+          "negative-falsifier"
+        ],
+        "selection": false,
+        "ratification": false,
+        "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+      }
     },
     {
       "coordinate": "1100111001",
@@ -11056,7 +12252,17 @@
       "law": "Повернути виділений об'єкт пулу для можливого повторного використання, не доводячи негайного звільнення фізичної пам'яті.",
       "selected": false,
       "ratified": false,
-      "physical_t5_authorized": false
+      "physical_t5_authorized": false,
+      "proof_readiness": {
+        "status": "INCOMPLETE-SOURCE-SEMANTICS",
+        "missing": [
+          "positive-witness",
+          "negative-falsifier"
+        ],
+        "selection": false,
+        "ratification": false,
+        "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+      }
     },
     {
       "coordinate": "1100111010",
@@ -11068,7 +12274,17 @@
       "law": "Scoped resource lease, який використовує unwind-protect для повернення об'єкта навіть при throw.",
       "selected": false,
       "ratified": false,
-      "physical_t5_authorized": false
+      "physical_t5_authorized": false,
+      "proof_readiness": {
+        "status": "INCOMPLETE-SOURCE-SEMANTICS",
+        "missing": [
+          "positive-witness",
+          "negative-falsifier"
+        ],
+        "selection": false,
+        "ratification": false,
+        "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+      }
     },
     {
       "coordinate": "1100111011",
@@ -11080,7 +12296,17 @@
       "law": "Забути всі раніше відстежені об'єкти ресурсу, і при майбутній deallocation старого leased object видати error.",
       "selected": false,
       "ratified": false,
-      "physical_t5_authorized": false
+      "physical_t5_authorized": false,
+      "proof_readiness": {
+        "status": "INCOMPLETE-SOURCE-SEMANTICS",
+        "missing": [
+          "positive-witness",
+          "negative-falsifier"
+        ],
+        "selection": false,
+        "ratification": false,
+        "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+      }
     },
     {
       "coordinate": "1100111100",
@@ -11092,7 +12318,17 @@
       "law": "Обійти всі створені у ресурсі об'єкти та надати callback object, in-use bit, resource-data.",
       "selected": false,
       "ratified": false,
-      "physical_t5_authorized": false
+      "physical_t5_authorized": false,
+      "proof_readiness": {
+        "status": "INCOMPLETE-SOURCE-SEMANTICS",
+        "missing": [
+          "positive-witness",
+          "negative-falsifier"
+        ],
+        "selection": false,
+        "ratification": false,
+        "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+      }
     },
     {
       "coordinate": "1100111101",
@@ -11104,7 +12340,17 @@
       "law": "Повернути всі ресурси в пул одразу; не означає free heap.",
       "selected": false,
       "ratified": false,
-      "physical_t5_authorized": false
+      "physical_t5_authorized": false,
+      "proof_readiness": {
+        "status": "INCOMPLETE-SOURCE-SEMANTICS",
+        "missing": [
+          "positive-witness",
+          "negative-falsifier"
+        ],
+        "selection": false,
+        "ratification": false,
+        "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+      }
     },
     {
       "coordinate": "1100111110",
@@ -11129,6 +12375,13 @@
         "independent_semantic_review": "PENDING",
         "core_vs_library": "PENDING",
         "ratification": false
+      },
+      "proof_readiness": {
+        "status": "SOURCE-LAW-WITNESSES-PRESENT-UNVERIFIED",
+        "missing": [],
+        "selection": false,
+        "ratification": false,
+        "next_gate": "D1-D9-DEDUPE-CORE-VS-LIBRARY-AND-INDEPENDENT-ORACLE"
       }
     },
     {
@@ -11154,6 +12407,13 @@
         "independent_semantic_review": "PENDING",
         "core_vs_library": "PENDING",
         "ratification": false
+      },
+      "proof_readiness": {
+        "status": "SOURCE-LAW-WITNESSES-PRESENT-UNVERIFIED",
+        "missing": [],
+        "selection": false,
+        "ratification": false,
+        "next_gate": "D1-D9-DEDUPE-CORE-VS-LIBRARY-AND-INDEPENDENT-ORACLE"
       }
     },
     {
@@ -11179,6 +12439,13 @@
         "independent_semantic_review": "PENDING",
         "core_vs_library": "PENDING",
         "ratification": false
+      },
+      "proof_readiness": {
+        "status": "SOURCE-LAW-WITNESSES-PRESENT-UNVERIFIED",
+        "missing": [],
+        "selection": false,
+        "ratification": false,
+        "next_gate": "D1-D9-DEDUPE-CORE-VS-LIBRARY-AND-INDEPENDENT-ORACLE"
       }
     },
     {
@@ -11204,6 +12471,13 @@
         "independent_semantic_review": "PENDING",
         "core_vs_library": "PENDING",
         "ratification": false
+      },
+      "proof_readiness": {
+        "status": "SOURCE-LAW-WITNESSES-PRESENT-UNVERIFIED",
+        "missing": [],
+        "selection": false,
+        "ratification": false,
+        "next_gate": "D1-D9-DEDUPE-CORE-VS-LIBRARY-AND-INDEPENDENT-ORACLE"
       }
     },
     {
@@ -11229,6 +12503,13 @@
         "independent_semantic_review": "PENDING",
         "core_vs_library": "PENDING",
         "ratification": false
+      },
+      "proof_readiness": {
+        "status": "SOURCE-LAW-WITNESSES-PRESENT-UNVERIFIED",
+        "missing": [],
+        "selection": false,
+        "ratification": false,
+        "next_gate": "D1-D9-DEDUPE-CORE-VS-LIBRARY-AND-INDEPENDENT-ORACLE"
       }
     },
     {
@@ -11254,6 +12535,13 @@
         "independent_semantic_review": "PENDING",
         "core_vs_library": "PENDING",
         "ratification": false
+      },
+      "proof_readiness": {
+        "status": "SOURCE-LAW-WITNESSES-PRESENT-UNVERIFIED",
+        "missing": [],
+        "selection": false,
+        "ratification": false,
+        "next_gate": "D1-D9-DEDUPE-CORE-VS-LIBRARY-AND-INDEPENDENT-ORACLE"
       }
     },
     {
@@ -11279,6 +12567,13 @@
         "independent_semantic_review": "PENDING",
         "core_vs_library": "PENDING",
         "ratification": false
+      },
+      "proof_readiness": {
+        "status": "SOURCE-LAW-WITNESSES-PRESENT-UNVERIFIED",
+        "missing": [],
+        "selection": false,
+        "ratification": false,
+        "next_gate": "D1-D9-DEDUPE-CORE-VS-LIBRARY-AND-INDEPENDENT-ORACLE"
       }
     },
     {
@@ -11304,6 +12599,13 @@
         "independent_semantic_review": "PENDING",
         "core_vs_library": "PENDING",
         "ratification": false
+      },
+      "proof_readiness": {
+        "status": "SOURCE-LAW-WITNESSES-PRESENT-UNVERIFIED",
+        "missing": [],
+        "selection": false,
+        "ratification": false,
+        "next_gate": "D1-D9-DEDUPE-CORE-VS-LIBRARY-AND-INDEPENDENT-ORACLE"
       }
     },
     {
@@ -11329,6 +12631,13 @@
         "independent_semantic_review": "PENDING",
         "core_vs_library": "PENDING",
         "ratification": false
+      },
+      "proof_readiness": {
+        "status": "SOURCE-LAW-WITNESSES-PRESENT-UNVERIFIED",
+        "missing": [],
+        "selection": false,
+        "ratification": false,
+        "next_gate": "D1-D9-DEDUPE-CORE-VS-LIBRARY-AND-INDEPENDENT-ORACLE"
       }
     },
     {
@@ -11354,6 +12663,13 @@
         "independent_semantic_review": "PENDING",
         "core_vs_library": "PENDING",
         "ratification": false
+      },
+      "proof_readiness": {
+        "status": "SOURCE-LAW-WITNESSES-PRESENT-UNVERIFIED",
+        "missing": [],
+        "selection": false,
+        "ratification": false,
+        "next_gate": "D1-D9-DEDUPE-CORE-VS-LIBRARY-AND-INDEPENDENT-ORACLE"
       }
     },
     {
@@ -11366,7 +12682,17 @@
       "law": "Delegate to the next ordered method preserving or explicitly replacing arguments under established method-combination semantics",
       "selected": false,
       "ratified": false,
-      "physical_t5_authorized": false
+      "physical_t5_authorized": false,
+      "proof_readiness": {
+        "status": "INCOMPLETE-SOURCE-SEMANTICS",
+        "missing": [
+          "positive-witness",
+          "negative-falsifier"
+        ],
+        "selection": false,
+        "ratification": false,
+        "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+      }
     },
     {
       "coordinate": "1101001001",
@@ -11378,7 +12704,17 @@
       "law": "Represent failure of explicit message dispatch when no applicable method is available, keeping object/message identity in data",
       "selected": false,
       "ratified": false,
-      "physical_t5_authorized": false
+      "physical_t5_authorized": false,
+      "proof_readiness": {
+        "status": "INCOMPLETE-SOURCE-SEMANTICS",
+        "missing": [
+          "positive-witness",
+          "negative-falsifier"
+        ],
+        "selection": false,
+        "ratification": false,
+        "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+      }
     },
     {
       "coordinate": "1101001010",
@@ -11390,7 +12726,17 @@
       "law": "Present a first-class condition value to an explicitly supplied lexical handler chain without turning it into host I/O",
       "selected": false,
       "ratified": false,
-      "physical_t5_authorized": false
+      "physical_t5_authorized": false,
+      "proof_readiness": {
+        "status": "INCOMPLETE-SOURCE-SEMANTICS",
+        "missing": [
+          "positive-witness",
+          "negative-falsifier"
+        ],
+        "selection": false,
+        "ratification": false,
+        "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+      }
     },
     {
       "coordinate": "1101001011",
@@ -11402,7 +12748,17 @@
       "law": "Invoke a selected restart with exact supplied arguments, with scope and continuation preserved",
       "selected": false,
       "ratified": false,
-      "physical_t5_authorized": false
+      "physical_t5_authorized": false,
+      "proof_readiness": {
+        "status": "INCOMPLETE-SOURCE-SEMANTICS",
+        "missing": [
+          "positive-witness",
+          "negative-falsifier"
+        ],
+        "selection": false,
+        "ratification": false,
+        "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+      }
     },
     {
       "coordinate": "1101001100",
@@ -11427,6 +12783,13 @@
         "independent_semantic_review": "PENDING",
         "core_vs_library": "PENDING",
         "ratification": false
+      },
+      "proof_readiness": {
+        "status": "SOURCE-LAW-WITNESSES-PRESENT-UNVERIFIED",
+        "missing": [],
+        "selection": false,
+        "ratification": false,
+        "next_gate": "D1-D9-DEDUPE-CORE-VS-LIBRARY-AND-INDEPENDENT-ORACLE"
       }
     },
     {
@@ -11452,6 +12815,13 @@
         "independent_semantic_review": "PENDING",
         "core_vs_library": "PENDING",
         "ratification": false
+      },
+      "proof_readiness": {
+        "status": "SOURCE-LAW-WITNESSES-PRESENT-UNVERIFIED",
+        "missing": [],
+        "selection": false,
+        "ratification": false,
+        "next_gate": "D1-D9-DEDUPE-CORE-VS-LIBRARY-AND-INDEPENDENT-ORACLE"
       }
     },
     {
@@ -11477,6 +12847,13 @@
         "independent_semantic_review": "PENDING",
         "core_vs_library": "PENDING",
         "ratification": false
+      },
+      "proof_readiness": {
+        "status": "SOURCE-LAW-WITNESSES-PRESENT-UNVERIFIED",
+        "missing": [],
+        "selection": false,
+        "ratification": false,
+        "next_gate": "D1-D9-DEDUPE-CORE-VS-LIBRARY-AND-INDEPENDENT-ORACLE"
       }
     },
     {
@@ -11502,6 +12879,13 @@
         "independent_semantic_review": "PENDING",
         "core_vs_library": "PENDING",
         "ratification": false
+      },
+      "proof_readiness": {
+        "status": "SOURCE-LAW-WITNESSES-PRESENT-UNVERIFIED",
+        "missing": [],
+        "selection": false,
+        "ratification": false,
+        "next_gate": "D1-D9-DEDUPE-CORE-VS-LIBRARY-AND-INDEPENDENT-ORACLE"
       }
     },
     {
@@ -11527,6 +12911,13 @@
         "independent_semantic_review": "PENDING",
         "core_vs_library": "PENDING",
         "ratification": false
+      },
+      "proof_readiness": {
+        "status": "SOURCE-LAW-WITNESSES-PRESENT-UNVERIFIED",
+        "missing": [],
+        "selection": false,
+        "ratification": false,
+        "next_gate": "D1-D9-DEDUPE-CORE-VS-LIBRARY-AND-INDEPENDENT-ORACLE"
       }
     },
     {
@@ -11552,6 +12943,13 @@
         "independent_semantic_review": "PENDING",
         "core_vs_library": "PENDING",
         "ratification": false
+      },
+      "proof_readiness": {
+        "status": "SOURCE-LAW-WITNESSES-PRESENT-UNVERIFIED",
+        "missing": [],
+        "selection": false,
+        "ratification": false,
+        "next_gate": "D1-D9-DEDUPE-CORE-VS-LIBRARY-AND-INDEPENDENT-ORACLE"
       }
     },
     {
@@ -11577,6 +12975,13 @@
         "independent_semantic_review": "PENDING",
         "core_vs_library": "PENDING",
         "ratification": false
+      },
+      "proof_readiness": {
+        "status": "SOURCE-LAW-WITNESSES-PRESENT-UNVERIFIED",
+        "missing": [],
+        "selection": false,
+        "ratification": false,
+        "next_gate": "D1-D9-DEDUPE-CORE-VS-LIBRARY-AND-INDEPENDENT-ORACLE"
       }
     },
     {
@@ -11602,6 +13007,13 @@
         "independent_semantic_review": "PENDING",
         "core_vs_library": "PENDING",
         "ratification": false
+      },
+      "proof_readiness": {
+        "status": "SOURCE-LAW-WITNESSES-PRESENT-UNVERIFIED",
+        "missing": [],
+        "selection": false,
+        "ratification": false,
+        "next_gate": "D1-D9-DEDUPE-CORE-VS-LIBRARY-AND-INDEPENDENT-ORACLE"
       }
     },
     {
@@ -11627,6 +13039,13 @@
         "independent_semantic_review": "PENDING",
         "core_vs_library": "PENDING",
         "ratification": false
+      },
+      "proof_readiness": {
+        "status": "SOURCE-LAW-WITNESSES-PRESENT-UNVERIFIED",
+        "missing": [],
+        "selection": false,
+        "ratification": false,
+        "next_gate": "D1-D9-DEDUPE-CORE-VS-LIBRARY-AND-INDEPENDENT-ORACLE"
       }
     },
     {
@@ -11652,6 +13071,13 @@
         "independent_semantic_review": "PENDING",
         "core_vs_library": "PENDING",
         "ratification": false
+      },
+      "proof_readiness": {
+        "status": "SOURCE-LAW-WITNESSES-PRESENT-UNVERIFIED",
+        "missing": [],
+        "selection": false,
+        "ratification": false,
+        "next_gate": "D1-D9-DEDUPE-CORE-VS-LIBRARY-AND-INDEPENDENT-ORACLE"
       }
     },
     {
@@ -11677,6 +13103,13 @@
         "independent_semantic_review": "PENDING",
         "core_vs_library": "PENDING",
         "ratification": false
+      },
+      "proof_readiness": {
+        "status": "SOURCE-LAW-WITNESSES-PRESENT-UNVERIFIED",
+        "missing": [],
+        "selection": false,
+        "ratification": false,
+        "next_gate": "D1-D9-DEDUPE-CORE-VS-LIBRARY-AND-INDEPENDENT-ORACLE"
       }
     },
     {
@@ -11702,6 +13135,13 @@
         "independent_semantic_review": "PENDING",
         "core_vs_library": "PENDING",
         "ratification": false
+      },
+      "proof_readiness": {
+        "status": "SOURCE-LAW-WITNESSES-PRESENT-UNVERIFIED",
+        "missing": [],
+        "selection": false,
+        "ratification": false,
+        "next_gate": "D1-D9-DEDUPE-CORE-VS-LIBRARY-AND-INDEPENDENT-ORACLE"
       }
     },
     {
@@ -11714,7 +13154,17 @@
       "law": "Return a bound logic variable value from a substitution alist keyed by possibly structured variable name, or the original variable if unbound",
       "selected": false,
       "ratified": false,
-      "physical_t5_authorized": false
+      "physical_t5_authorized": false,
+      "proof_readiness": {
+        "status": "INCOMPLETE-SOURCE-SEMANTICS",
+        "missing": [
+          "positive-witness",
+          "negative-falsifier"
+        ],
+        "selection": false,
+        "ratification": false,
+        "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+      }
     },
     {
       "coordinate": "1101011001",
@@ -11726,7 +13176,17 @@
       "law": "Follow transitive bound-variable references until a nonvariable or an unbound variable is reached, preserving the original unbound variable",
       "selected": false,
       "ratified": false,
-      "physical_t5_authorized": false
+      "physical_t5_authorized": false,
+      "proof_readiness": {
+        "status": "INCOMPLETE-SOURCE-SEMANTICS",
+        "missing": [
+          "positive-witness",
+          "negative-falsifier"
+        ],
+        "selection": false,
+        "ratification": false,
+        "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+      }
     },
     {
       "coordinate": "1101011010",
@@ -11738,7 +13198,17 @@
       "law": "Recognize explicit unification failure only for the designated failure atom, not for a nonempty substitution alist",
       "selected": false,
       "ratified": false,
-      "physical_t5_authorized": false
+      "physical_t5_authorized": false,
+      "proof_readiness": {
+        "status": "INCOMPLETE-SOURCE-SEMANTICS",
+        "missing": [
+          "positive-witness",
+          "negative-falsifier"
+        ],
+        "selection": false,
+        "ratification": false,
+        "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+      }
     },
     {
       "coordinate": "1101011011",
@@ -11750,7 +13220,17 @@
       "law": "Unify two dereferenced logic terms recursively, propagating substitutions or explicit failure across compound pairs",
       "selected": false,
       "ratified": false,
-      "physical_t5_authorized": false
+      "physical_t5_authorized": false,
+      "proof_readiness": {
+        "status": "INCOMPLETE-SOURCE-SEMANTICS",
+        "missing": [
+          "positive-witness",
+          "negative-falsifier"
+        ],
+        "selection": false,
+        "ratification": false,
+        "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+      }
     },
     {
       "coordinate": "1101011100",
@@ -11762,7 +13242,17 @@
       "law": "Bind a logic variable to a term when identities differ and occurs-check permits it, otherwise preserve substitution or return failure",
       "selected": false,
       "ratified": false,
-      "physical_t5_authorized": false
+      "physical_t5_authorized": false,
+      "proof_readiness": {
+        "status": "INCOMPLETE-SOURCE-SEMANTICS",
+        "missing": [
+          "positive-witness",
+          "negative-falsifier"
+        ],
+        "selection": false,
+        "ratification": false,
+        "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+      }
     },
     {
       "coordinate": "1101011101",
@@ -11774,7 +13264,17 @@
       "law": "Evaluate each conjunction condition through an injected goal strategy, branching across every successful intermediate state and collecting final states",
       "selected": false,
       "ratified": false,
-      "physical_t5_authorized": false
+      "physical_t5_authorized": false,
+      "proof_readiness": {
+        "status": "INCOMPLETE-SOURCE-SEMANTICS",
+        "missing": [
+          "positive-witness",
+          "negative-falsifier"
+        ],
+        "selection": false,
+        "ratification": false,
+        "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+      }
     },
     {
       "coordinate": "1101011110",
@@ -11786,7 +13286,17 @@
       "law": "Continue a conjunction against every intermediate state returned by one condition and concatenate resulting final states in order",
       "selected": false,
       "ratified": false,
-      "physical_t5_authorized": false
+      "physical_t5_authorized": false,
+      "proof_readiness": {
+        "status": "INCOMPLETE-SOURCE-SEMANTICS",
+        "missing": [
+          "positive-witness",
+          "negative-falsifier"
+        ],
+        "selection": false,
+        "ratification": false,
+        "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+      }
     },
     {
       "coordinate": "1101011111",
@@ -11798,7 +13308,17 @@
       "law": "Compute free identifiers of sequential let* bindings using each earlier binding only in later initializers and the body",
       "selected": false,
       "ratified": false,
-      "physical_t5_authorized": false
+      "physical_t5_authorized": false,
+      "proof_readiness": {
+        "status": "INCOMPLETE-SOURCE-SEMANTICS",
+        "missing": [
+          "positive-witness",
+          "negative-falsifier"
+        ],
+        "selection": false,
+        "ratification": false,
+        "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+      }
     },
     {
       "coordinate": "1101100000",
@@ -11810,7 +13330,17 @@
       "law": "Compute free identifiers of mutually recursive letrec definitions with all names in scope for all initializers and body",
       "selected": false,
       "ratified": false,
-      "physical_t5_authorized": false
+      "physical_t5_authorized": false,
+      "proof_readiness": {
+        "status": "INCOMPLETE-SOURCE-SEMANTICS",
+        "missing": [
+          "positive-witness",
+          "negative-falsifier"
+        ],
+        "selection": false,
+        "ratification": false,
+        "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+      }
     },
     {
       "coordinate": "1101100001",
@@ -11822,7 +13352,17 @@
       "law": "For finite acyclic first-order terms, unify two terms while refusing any new binding V:=T when V occurs inside T; observable success/failure plus induced substitution. SWI special case with ALREADY cyclic inputs is non-portable and excluded.",
       "selected": false,
       "ratified": false,
-      "physical_t5_authorized": false
+      "physical_t5_authorized": false,
+      "proof_readiness": {
+        "status": "INCOMPLETE-SOURCE-SEMANTICS",
+        "missing": [
+          "positive-witness",
+          "negative-falsifier"
+        ],
+        "selection": false,
+        "ratification": false,
+        "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+      }
     },
     {
       "coordinate": "1101100010",
@@ -11834,7 +13374,17 @@
       "law": "Monotonic disequality constraint on two terms: immediate success if terms cannot unify, failure if equal, otherwise residual delayed constraint preventing future bindings that make them identical. Distinct from immediate syntactic non-equality or D1 1-bit boolean comparison.",
       "selected": false,
       "ratified": false,
-      "physical_t5_authorized": false
+      "physical_t5_authorized": false,
+      "proof_readiness": {
+        "status": "INCOMPLETE-SOURCE-SEMANTICS",
+        "missing": [
+          "positive-witness",
+          "negative-falsifier"
+        ],
+        "selection": false,
+        "ratification": false,
+        "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+      }
     },
     {
       "coordinate": "1101100011",
@@ -11846,7 +13396,17 @@
       "law": "Copy a term with fresh variables while extracting pending attribute constraints as explicit residual goals G. Replaying G restores the constraints onto the copy; copying alone DOES NOT implicitly preserve them for copy_term/3.",
       "selected": false,
       "ratified": false,
-      "physical_t5_authorized": false
+      "physical_t5_authorized": false,
+      "proof_readiness": {
+        "status": "INCOMPLETE-SOURCE-SEMANTICS",
+        "missing": [
+          "positive-witness",
+          "negative-falsifier"
+        ],
+        "selection": false,
+        "ratification": false,
+        "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+      }
     },
     {
       "coordinate": "1101100100",
@@ -11858,7 +13418,17 @@
       "law": "Apply a finite rewrite table where the result for a matched input depends on lexical context classes such as word-start and after-consonant, with deterministic longest-key matching and case projections.",
       "selected": false,
       "ratified": false,
-      "physical_t5_authorized": false
+      "physical_t5_authorized": false,
+      "proof_readiness": {
+        "status": "INCOMPLETE-SOURCE-SEMANTICS",
+        "missing": [
+          "positive-witness",
+          "negative-falsifier"
+        ],
+        "selection": false,
+        "ratification": false,
+        "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+      }
     },
     {
       "coordinate": "1101100101",
@@ -11870,7 +13440,17 @@
       "law": "Map Unicode-equivalent representations to canonical NFC/NFD forms while preserving semantic equivalence for downstream transliteration.",
       "selected": false,
       "ratified": false,
-      "physical_t5_authorized": false
+      "physical_t5_authorized": false,
+      "proof_readiness": {
+        "status": "INCOMPLETE-SOURCE-SEMANTICS",
+        "missing": [
+          "positive-witness",
+          "negative-falsifier"
+        ],
+        "selection": false,
+        "ratification": false,
+        "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+      }
     },
     {
       "coordinate": "1101100110",
@@ -11882,7 +13462,17 @@
       "law": "At each input position choose the longest defined mapping key starting there, with token-kind context for marks/consonants.",
       "selected": false,
       "ratified": false,
-      "physical_t5_authorized": false
+      "physical_t5_authorized": false,
+      "proof_readiness": {
+        "status": "INCOMPLETE-SOURCE-SEMANTICS",
+        "missing": [
+          "positive-witness",
+          "negative-falsifier"
+        ],
+        "selection": false,
+        "ratification": false,
+        "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+      }
     },
     {
       "coordinate": "1101100111",
@@ -11894,7 +13484,17 @@
       "law": "Generate inflected word forms from lemma-class affix rules, including tag-bearing alternatives and alternation classes.",
       "selected": false,
       "ratified": false,
-      "physical_t5_authorized": false
+      "physical_t5_authorized": false,
+      "proof_readiness": {
+        "status": "INCOMPLETE-SOURCE-SEMANTICS",
+        "missing": [
+          "positive-witness",
+          "negative-falsifier"
+        ],
+        "selection": false,
+        "ratification": false,
+        "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+      }
     },
     {
       "coordinate": "1101101000",
@@ -11906,7 +13506,17 @@
       "law": "Parse a structured text query, apply field/tag/date restrictions, compute text relevance, emit ordered results with snippets and pagination totals.",
       "selected": false,
       "ratified": false,
-      "physical_t5_authorized": false
+      "physical_t5_authorized": false,
+      "proof_readiness": {
+        "status": "INCOMPLETE-SOURCE-SEMANTICS",
+        "missing": [
+          "positive-witness",
+          "negative-falsifier"
+        ],
+        "selection": false,
+        "ratification": false,
+        "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+      }
     },
     {
       "coordinate": "1101101001",
@@ -11918,7 +13528,17 @@
       "law": "Return title/path/alias candidates ordered by prefix and similarity scores.",
       "selected": false,
       "ratified": false,
-      "physical_t5_authorized": false
+      "physical_t5_authorized": false,
+      "proof_readiness": {
+        "status": "INCOMPLETE-SOURCE-SEMANTICS",
+        "missing": [
+          "positive-witness",
+          "negative-falsifier"
+        ],
+        "selection": false,
+        "ratification": false,
+        "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+      }
     },
     {
       "coordinate": "1101101010",
@@ -11930,7 +13550,17 @@
       "law": "Search/navigation across note links and graph relations.",
       "selected": false,
       "ratified": false,
-      "physical_t5_authorized": false
+      "physical_t5_authorized": false,
+      "proof_readiness": {
+        "status": "INCOMPLETE-SOURCE-SEMANTICS",
+        "missing": [
+          "positive-witness",
+          "negative-falsifier"
+        ],
+        "selection": false,
+        "ratification": false,
+        "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+      }
     },
     {
       "coordinate": "1101101011",
@@ -11942,7 +13572,17 @@
       "law": "Send query text to an HTTP endpoint and return the response.",
       "selected": false,
       "ratified": false,
-      "physical_t5_authorized": false
+      "physical_t5_authorized": false,
+      "proof_readiness": {
+        "status": "INCOMPLETE-SOURCE-SEMANTICS",
+        "missing": [
+          "positive-witness",
+          "negative-falsifier"
+        ],
+        "selection": false,
+        "ratification": false,
+        "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+      }
     },
     {
       "coordinate": "1101101100",
@@ -11954,7 +13594,17 @@
       "law": "Expose a web search page and query handling.",
       "selected": false,
       "ratified": false,
-      "physical_t5_authorized": false
+      "physical_t5_authorized": false,
+      "proof_readiness": {
+        "status": "INCOMPLETE-SOURCE-SEMANTICS",
+        "missing": [
+          "positive-witness",
+          "negative-falsifier"
+        ],
+        "selection": false,
+        "ratification": false,
+        "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+      }
     },
     {
       "coordinate": "1101101101",
@@ -11966,7 +13616,17 @@
       "law": "Evaluate planetary ephemeris at a time coordinate and copy the resulting position/velocity into simulation state.",
       "selected": false,
       "ratified": false,
-      "physical_t5_authorized": false
+      "physical_t5_authorized": false,
+      "proof_readiness": {
+        "status": "INCOMPLETE-SOURCE-SEMANTICS",
+        "missing": [
+          "positive-witness",
+          "negative-falsifier"
+        ],
+        "selection": false,
+        "ratification": false,
+        "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+      }
     },
     {
       "coordinate": "1101101110",
@@ -11978,7 +13638,17 @@
       "law": "Advance position and mid-step velocity by a fixed timestep using acceleration, then atomically commit temporary state.",
       "selected": false,
       "ratified": false,
-      "physical_t5_authorized": false
+      "physical_t5_authorized": false,
+      "proof_readiness": {
+        "status": "INCOMPLETE-SOURCE-SEMANTICS",
+        "missing": [
+          "positive-witness",
+          "negative-falsifier"
+        ],
+        "selection": false,
+        "ratification": false,
+        "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+      }
     },
     {
       "coordinate": "1101101111",
@@ -11990,7 +13660,17 @@
       "law": "Represent a claim/result together with the explicit assumption chain on which its validity depends, preserving provenance rather than treating the result as floating authority.",
       "selected": false,
       "ratified": false,
-      "physical_t5_authorized": false
+      "physical_t5_authorized": false,
+      "proof_readiness": {
+        "status": "INCOMPLETE-SOURCE-SEMANTICS",
+        "missing": [
+          "positive-witness",
+          "negative-falsifier"
+        ],
+        "selection": false,
+        "ratification": false,
+        "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+      }
     },
     {
       "coordinate": "1101110000",
@@ -12002,7 +13682,18 @@
       "law": null,
       "selected": false,
       "ratified": false,
-      "physical_t5_authorized": false
+      "physical_t5_authorized": false,
+      "proof_readiness": {
+        "status": "INCOMPLETE-SOURCE-SEMANTICS",
+        "missing": [
+          "semantic-law",
+          "positive-witness",
+          "negative-falsifier"
+        ],
+        "selection": false,
+        "ratification": false,
+        "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+      }
     },
     {
       "coordinate": "1101110001",
@@ -12014,7 +13705,18 @@
       "law": null,
       "selected": false,
       "ratified": false,
-      "physical_t5_authorized": false
+      "physical_t5_authorized": false,
+      "proof_readiness": {
+        "status": "INCOMPLETE-SOURCE-SEMANTICS",
+        "missing": [
+          "semantic-law",
+          "positive-witness",
+          "negative-falsifier"
+        ],
+        "selection": false,
+        "ratification": false,
+        "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+      }
     },
     {
       "coordinate": "1101110010",
@@ -12026,7 +13728,18 @@
       "law": null,
       "selected": false,
       "ratified": false,
-      "physical_t5_authorized": false
+      "physical_t5_authorized": false,
+      "proof_readiness": {
+        "status": "INCOMPLETE-SOURCE-SEMANTICS",
+        "missing": [
+          "semantic-law",
+          "positive-witness",
+          "negative-falsifier"
+        ],
+        "selection": false,
+        "ratification": false,
+        "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+      }
     },
     {
       "coordinate": "1101110011",
@@ -12038,7 +13751,18 @@
       "law": null,
       "selected": false,
       "ratified": false,
-      "physical_t5_authorized": false
+      "physical_t5_authorized": false,
+      "proof_readiness": {
+        "status": "INCOMPLETE-SOURCE-SEMANTICS",
+        "missing": [
+          "semantic-law",
+          "positive-witness",
+          "negative-falsifier"
+        ],
+        "selection": false,
+        "ratification": false,
+        "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+      }
     },
     {
       "coordinate": "1101110100",
@@ -12050,7 +13774,18 @@
       "law": null,
       "selected": false,
       "ratified": false,
-      "physical_t5_authorized": false
+      "physical_t5_authorized": false,
+      "proof_readiness": {
+        "status": "INCOMPLETE-SOURCE-SEMANTICS",
+        "missing": [
+          "semantic-law",
+          "positive-witness",
+          "negative-falsifier"
+        ],
+        "selection": false,
+        "ratification": false,
+        "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+      }
     },
     {
       "coordinate": "1101110101",
@@ -12062,7 +13797,18 @@
       "law": null,
       "selected": false,
       "ratified": false,
-      "physical_t5_authorized": false
+      "physical_t5_authorized": false,
+      "proof_readiness": {
+        "status": "INCOMPLETE-SOURCE-SEMANTICS",
+        "missing": [
+          "semantic-law",
+          "positive-witness",
+          "negative-falsifier"
+        ],
+        "selection": false,
+        "ratification": false,
+        "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+      }
     },
     {
       "coordinate": "1101110110",
@@ -12074,7 +13820,18 @@
       "law": null,
       "selected": false,
       "ratified": false,
-      "physical_t5_authorized": false
+      "physical_t5_authorized": false,
+      "proof_readiness": {
+        "status": "INCOMPLETE-SOURCE-SEMANTICS",
+        "missing": [
+          "semantic-law",
+          "positive-witness",
+          "negative-falsifier"
+        ],
+        "selection": false,
+        "ratification": false,
+        "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+      }
     },
     {
       "coordinate": "1101110111",
@@ -12086,7 +13843,18 @@
       "law": null,
       "selected": false,
       "ratified": false,
-      "physical_t5_authorized": false
+      "physical_t5_authorized": false,
+      "proof_readiness": {
+        "status": "INCOMPLETE-SOURCE-SEMANTICS",
+        "missing": [
+          "semantic-law",
+          "positive-witness",
+          "negative-falsifier"
+        ],
+        "selection": false,
+        "ratification": false,
+        "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+      }
     },
     {
       "coordinate": "1101111000",
@@ -12098,7 +13866,18 @@
       "law": null,
       "selected": false,
       "ratified": false,
-      "physical_t5_authorized": false
+      "physical_t5_authorized": false,
+      "proof_readiness": {
+        "status": "INCOMPLETE-SOURCE-SEMANTICS",
+        "missing": [
+          "semantic-law",
+          "positive-witness",
+          "negative-falsifier"
+        ],
+        "selection": false,
+        "ratification": false,
+        "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+      }
     },
     {
       "coordinate": "1101111001",
@@ -12110,7 +13889,18 @@
       "law": null,
       "selected": false,
       "ratified": false,
-      "physical_t5_authorized": false
+      "physical_t5_authorized": false,
+      "proof_readiness": {
+        "status": "INCOMPLETE-SOURCE-SEMANTICS",
+        "missing": [
+          "semantic-law",
+          "positive-witness",
+          "negative-falsifier"
+        ],
+        "selection": false,
+        "ratification": false,
+        "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+      }
     },
     {
       "coordinate": "1101111010",
@@ -12122,7 +13912,18 @@
       "law": null,
       "selected": false,
       "ratified": false,
-      "physical_t5_authorized": false
+      "physical_t5_authorized": false,
+      "proof_readiness": {
+        "status": "INCOMPLETE-SOURCE-SEMANTICS",
+        "missing": [
+          "semantic-law",
+          "positive-witness",
+          "negative-falsifier"
+        ],
+        "selection": false,
+        "ratification": false,
+        "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+      }
     },
     {
       "coordinate": "1101111011",
@@ -12147,6 +13948,13 @@
         "independent_semantic_review": "PENDING",
         "core_vs_library": "PENDING",
         "ratification": false
+      },
+      "proof_readiness": {
+        "status": "SOURCE-LAW-WITNESSES-PRESENT-UNVERIFIED",
+        "missing": [],
+        "selection": false,
+        "ratification": false,
+        "next_gate": "D1-D9-DEDUPE-CORE-VS-LIBRARY-AND-INDEPENDENT-ORACLE"
       }
     },
     {
@@ -12159,7 +13967,18 @@
       "coordinate_basis": "DETERMINISTIC-NEXT-FREE-NONCANONICAL-RESEARCH-RESERVATION",
       "selected": false,
       "ratified": false,
-      "physical_t5_authorized": false
+      "physical_t5_authorized": false,
+      "proof_readiness": {
+        "status": "INCOMPLETE-SOURCE-SEMANTICS",
+        "missing": [
+          "semantic-law",
+          "positive-witness",
+          "negative-falsifier"
+        ],
+        "selection": false,
+        "ratification": false,
+        "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+      }
     },
     {
       "coordinate": "1101111101",
@@ -12184,6 +14003,13 @@
         "independent_semantic_review": "PENDING",
         "core_vs_library": "PENDING",
         "ratification": false
+      },
+      "proof_readiness": {
+        "status": "SOURCE-LAW-WITNESSES-PRESENT-UNVERIFIED",
+        "missing": [],
+        "selection": false,
+        "ratification": false,
+        "next_gate": "D1-D9-DEDUPE-CORE-VS-LIBRARY-AND-INDEPENDENT-ORACLE"
       }
     },
     {
@@ -12196,7 +14022,18 @@
       "coordinate_basis": "DETERMINISTIC-NEXT-FREE-NONCANONICAL-RESEARCH-RESERVATION",
       "selected": false,
       "ratified": false,
-      "physical_t5_authorized": false
+      "physical_t5_authorized": false,
+      "proof_readiness": {
+        "status": "INCOMPLETE-SOURCE-SEMANTICS",
+        "missing": [
+          "semantic-law",
+          "positive-witness",
+          "negative-falsifier"
+        ],
+        "selection": false,
+        "ratification": false,
+        "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+      }
     },
     {
       "coordinate": "1101111111",
@@ -12208,7 +14045,18 @@
       "coordinate_basis": "DETERMINISTIC-NEXT-FREE-NONCANONICAL-RESEARCH-RESERVATION",
       "selected": false,
       "ratified": false,
-      "physical_t5_authorized": false
+      "physical_t5_authorized": false,
+      "proof_readiness": {
+        "status": "INCOMPLETE-SOURCE-SEMANTICS",
+        "missing": [
+          "semantic-law",
+          "positive-witness",
+          "negative-falsifier"
+        ],
+        "selection": false,
+        "ratification": false,
+        "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+      }
     },
     {
       "coordinate": "1110000000",
@@ -12233,6 +14081,13 @@
         "independent_semantic_review": "PENDING",
         "core_vs_library": "PENDING",
         "ratification": false
+      },
+      "proof_readiness": {
+        "status": "SOURCE-LAW-WITNESSES-PRESENT-UNVERIFIED",
+        "missing": [],
+        "selection": false,
+        "ratification": false,
+        "next_gate": "D1-D9-DEDUPE-CORE-VS-LIBRARY-AND-INDEPENDENT-ORACLE"
       }
     },
     {
@@ -12245,7 +14100,18 @@
       "coordinate_basis": "DETERMINISTIC-NEXT-FREE-NONCANONICAL-RESEARCH-RESERVATION",
       "selected": false,
       "ratified": false,
-      "physical_t5_authorized": false
+      "physical_t5_authorized": false,
+      "proof_readiness": {
+        "status": "INCOMPLETE-SOURCE-SEMANTICS",
+        "missing": [
+          "semantic-law",
+          "positive-witness",
+          "negative-falsifier"
+        ],
+        "selection": false,
+        "ratification": false,
+        "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+      }
     },
     {
       "coordinate": "1110000010",
@@ -12270,6 +14136,13 @@
         "independent_semantic_review": "PENDING",
         "core_vs_library": "PENDING",
         "ratification": false
+      },
+      "proof_readiness": {
+        "status": "SOURCE-LAW-WITNESSES-PRESENT-UNVERIFIED",
+        "missing": [],
+        "selection": false,
+        "ratification": false,
+        "next_gate": "D1-D9-DEDUPE-CORE-VS-LIBRARY-AND-INDEPENDENT-ORACLE"
       }
     },
     {
@@ -12295,6 +14168,13 @@
         "independent_semantic_review": "PENDING",
         "core_vs_library": "PENDING",
         "ratification": false
+      },
+      "proof_readiness": {
+        "status": "SOURCE-LAW-WITNESSES-PRESENT-UNVERIFIED",
+        "missing": [],
+        "selection": false,
+        "ratification": false,
+        "next_gate": "D1-D9-DEDUPE-CORE-VS-LIBRARY-AND-INDEPENDENT-ORACLE"
       }
     },
     {
@@ -12307,7 +14187,18 @@
       "coordinate_basis": "NEXT-FREE-NONCANONICAL-RESEARCH-NAME-RESERVATION",
       "selected": false,
       "ratified": false,
-      "physical_t5_authorized": false
+      "physical_t5_authorized": false,
+      "proof_readiness": {
+        "status": "INCOMPLETE-SOURCE-SEMANTICS",
+        "missing": [
+          "semantic-law",
+          "positive-witness",
+          "negative-falsifier"
+        ],
+        "selection": false,
+        "ratification": false,
+        "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+      }
     },
     {
       "coordinate": "1110000101",
@@ -12319,7 +14210,18 @@
       "coordinate_basis": "NEXT-FREE-NONCANONICAL-RESEARCH-NAME-RESERVATION",
       "selected": false,
       "ratified": false,
-      "physical_t5_authorized": false
+      "physical_t5_authorized": false,
+      "proof_readiness": {
+        "status": "INCOMPLETE-SOURCE-SEMANTICS",
+        "missing": [
+          "semantic-law",
+          "positive-witness",
+          "negative-falsifier"
+        ],
+        "selection": false,
+        "ratification": false,
+        "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+      }
     },
     {
       "coordinate": "1110000110",
@@ -12331,7 +14233,18 @@
       "coordinate_basis": "NEXT-FREE-NONCANONICAL-RESEARCH-NAME-RESERVATION",
       "selected": false,
       "ratified": false,
-      "physical_t5_authorized": false
+      "physical_t5_authorized": false,
+      "proof_readiness": {
+        "status": "INCOMPLETE-SOURCE-SEMANTICS",
+        "missing": [
+          "semantic-law",
+          "positive-witness",
+          "negative-falsifier"
+        ],
+        "selection": false,
+        "ratification": false,
+        "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+      }
     },
     {
       "coordinate": "1110000111",
@@ -12343,7 +14256,18 @@
       "coordinate_basis": "NEXT-FREE-NONCANONICAL-RESEARCH-NAME-RESERVATION",
       "selected": false,
       "ratified": false,
-      "physical_t5_authorized": false
+      "physical_t5_authorized": false,
+      "proof_readiness": {
+        "status": "INCOMPLETE-SOURCE-SEMANTICS",
+        "missing": [
+          "semantic-law",
+          "positive-witness",
+          "negative-falsifier"
+        ],
+        "selection": false,
+        "ratification": false,
+        "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+      }
     },
     {
       "coordinate": "1110001000",
@@ -12368,6 +14292,13 @@
         "independent_semantic_review": "PENDING",
         "core_vs_library": "PENDING",
         "ratification": false
+      },
+      "proof_readiness": {
+        "status": "SOURCE-LAW-WITNESSES-PRESENT-UNVERIFIED",
+        "missing": [],
+        "selection": false,
+        "ratification": false,
+        "next_gate": "D1-D9-DEDUPE-CORE-VS-LIBRARY-AND-INDEPENDENT-ORACLE"
       }
     },
     {
@@ -12393,6 +14324,13 @@
         "independent_semantic_review": "PENDING",
         "core_vs_library": "PENDING",
         "ratification": false
+      },
+      "proof_readiness": {
+        "status": "SOURCE-LAW-WITNESSES-PRESENT-UNVERIFIED",
+        "missing": [],
+        "selection": false,
+        "ratification": false,
+        "next_gate": "D1-D9-DEDUPE-CORE-VS-LIBRARY-AND-INDEPENDENT-ORACLE"
       }
     },
     {
@@ -12418,6 +14356,13 @@
         "independent_semantic_review": "PENDING",
         "core_vs_library": "PENDING",
         "ratification": false
+      },
+      "proof_readiness": {
+        "status": "SOURCE-LAW-WITNESSES-PRESENT-UNVERIFIED",
+        "missing": [],
+        "selection": false,
+        "ratification": false,
+        "next_gate": "D1-D9-DEDUPE-CORE-VS-LIBRARY-AND-INDEPENDENT-ORACLE"
       }
     },
     {
@@ -12443,6 +14388,13 @@
         "independent_semantic_review": "PENDING",
         "core_vs_library": "PENDING",
         "ratification": false
+      },
+      "proof_readiness": {
+        "status": "SOURCE-LAW-WITNESSES-PRESENT-UNVERIFIED",
+        "missing": [],
+        "selection": false,
+        "ratification": false,
+        "next_gate": "D1-D9-DEDUPE-CORE-VS-LIBRARY-AND-INDEPENDENT-ORACLE"
       }
     },
     {
@@ -12468,6 +14420,13 @@
         "independent_semantic_review": "PENDING",
         "core_vs_library": "PENDING",
         "ratification": false
+      },
+      "proof_readiness": {
+        "status": "SOURCE-LAW-WITNESSES-PRESENT-UNVERIFIED",
+        "missing": [],
+        "selection": false,
+        "ratification": false,
+        "next_gate": "D1-D9-DEDUPE-CORE-VS-LIBRARY-AND-INDEPENDENT-ORACLE"
       }
     },
     {
@@ -12493,6 +14452,13 @@
         "independent_semantic_review": "PENDING",
         "core_vs_library": "PENDING",
         "ratification": false
+      },
+      "proof_readiness": {
+        "status": "SOURCE-LAW-WITNESSES-PRESENT-UNVERIFIED",
+        "missing": [],
+        "selection": false,
+        "ratification": false,
+        "next_gate": "D1-D9-DEDUPE-CORE-VS-LIBRARY-AND-INDEPENDENT-ORACLE"
       }
     },
     {
@@ -12518,6 +14484,13 @@
         "independent_semantic_review": "PENDING",
         "core_vs_library": "PENDING",
         "ratification": false
+      },
+      "proof_readiness": {
+        "status": "SOURCE-LAW-WITNESSES-PRESENT-UNVERIFIED",
+        "missing": [],
+        "selection": false,
+        "ratification": false,
+        "next_gate": "D1-D9-DEDUPE-CORE-VS-LIBRARY-AND-INDEPENDENT-ORACLE"
       }
     },
     {
@@ -12543,6 +14516,13 @@
         "independent_semantic_review": "PENDING",
         "core_vs_library": "PENDING",
         "ratification": false
+      },
+      "proof_readiness": {
+        "status": "SOURCE-LAW-WITNESSES-PRESENT-UNVERIFIED",
+        "missing": [],
+        "selection": false,
+        "ratification": false,
+        "next_gate": "D1-D9-DEDUPE-CORE-VS-LIBRARY-AND-INDEPENDENT-ORACLE"
       }
     },
     {
@@ -12568,6 +14548,13 @@
         "independent_semantic_review": "PENDING",
         "core_vs_library": "PENDING",
         "ratification": false
+      },
+      "proof_readiness": {
+        "status": "SOURCE-LAW-WITNESSES-PRESENT-UNVERIFIED",
+        "missing": [],
+        "selection": false,
+        "ratification": false,
+        "next_gate": "D1-D9-DEDUPE-CORE-VS-LIBRARY-AND-INDEPENDENT-ORACLE"
       }
     },
     {
@@ -12580,7 +14567,18 @@
       "coordinate_basis": "NEXT-FREE-NONCANONICAL-RESEARCH-NAME-RESERVATION",
       "selected": false,
       "ratified": false,
-      "physical_t5_authorized": false
+      "physical_t5_authorized": false,
+      "proof_readiness": {
+        "status": "INCOMPLETE-SOURCE-SEMANTICS",
+        "missing": [
+          "semantic-law",
+          "positive-witness",
+          "negative-falsifier"
+        ],
+        "selection": false,
+        "ratification": false,
+        "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+      }
     },
     {
       "coordinate": "1110010010",
@@ -12592,7 +14590,18 @@
       "coordinate_basis": "NEXT-FREE-NONCANONICAL-RESEARCH-NAME-RESERVATION",
       "selected": false,
       "ratified": false,
-      "physical_t5_authorized": false
+      "physical_t5_authorized": false,
+      "proof_readiness": {
+        "status": "INCOMPLETE-SOURCE-SEMANTICS",
+        "missing": [
+          "semantic-law",
+          "positive-witness",
+          "negative-falsifier"
+        ],
+        "selection": false,
+        "ratification": false,
+        "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+      }
     },
     {
       "coordinate": "1110010011",
@@ -12604,7 +14613,18 @@
       "coordinate_basis": "NEXT-FREE-NONCANONICAL-RESEARCH-NAME-RESERVATION",
       "selected": false,
       "ratified": false,
-      "physical_t5_authorized": false
+      "physical_t5_authorized": false,
+      "proof_readiness": {
+        "status": "INCOMPLETE-SOURCE-SEMANTICS",
+        "missing": [
+          "semantic-law",
+          "positive-witness",
+          "negative-falsifier"
+        ],
+        "selection": false,
+        "ratification": false,
+        "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+      }
     },
     {
       "coordinate": "1110010100",
@@ -12616,7 +14636,18 @@
       "coordinate_basis": "NEXT-FREE-NONCANONICAL-RESEARCH-NAME-RESERVATION",
       "selected": false,
       "ratified": false,
-      "physical_t5_authorized": false
+      "physical_t5_authorized": false,
+      "proof_readiness": {
+        "status": "INCOMPLETE-SOURCE-SEMANTICS",
+        "missing": [
+          "semantic-law",
+          "positive-witness",
+          "negative-falsifier"
+        ],
+        "selection": false,
+        "ratification": false,
+        "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+      }
     },
     {
       "coordinate": "1110010101",
@@ -12628,7 +14659,18 @@
       "coordinate_basis": "NEXT-FREE-NONCANONICAL-RESEARCH-NAME-RESERVATION",
       "selected": false,
       "ratified": false,
-      "physical_t5_authorized": false
+      "physical_t5_authorized": false,
+      "proof_readiness": {
+        "status": "INCOMPLETE-SOURCE-SEMANTICS",
+        "missing": [
+          "semantic-law",
+          "positive-witness",
+          "negative-falsifier"
+        ],
+        "selection": false,
+        "ratification": false,
+        "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+      }
     },
     {
       "coordinate": "1110010110",
@@ -12640,7 +14682,18 @@
       "coordinate_basis": "NEXT-FREE-NONCANONICAL-RESEARCH-NAME-RESERVATION",
       "selected": false,
       "ratified": false,
-      "physical_t5_authorized": false
+      "physical_t5_authorized": false,
+      "proof_readiness": {
+        "status": "INCOMPLETE-SOURCE-SEMANTICS",
+        "missing": [
+          "semantic-law",
+          "positive-witness",
+          "negative-falsifier"
+        ],
+        "selection": false,
+        "ratification": false,
+        "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+      }
     },
     {
       "coordinate": "1110010111",
@@ -12652,7 +14705,18 @@
       "coordinate_basis": "NEXT-FREE-NONCANONICAL-RESEARCH-NAME-RESERVATION",
       "selected": false,
       "ratified": false,
-      "physical_t5_authorized": false
+      "physical_t5_authorized": false,
+      "proof_readiness": {
+        "status": "INCOMPLETE-SOURCE-SEMANTICS",
+        "missing": [
+          "semantic-law",
+          "positive-witness",
+          "negative-falsifier"
+        ],
+        "selection": false,
+        "ratification": false,
+        "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+      }
     },
     {
       "coordinate": "1110011000",
@@ -12664,7 +14728,18 @@
       "coordinate_basis": "NEXT-FREE-NONCANONICAL-RESEARCH-NAME-RESERVATION",
       "selected": false,
       "ratified": false,
-      "physical_t5_authorized": false
+      "physical_t5_authorized": false,
+      "proof_readiness": {
+        "status": "INCOMPLETE-SOURCE-SEMANTICS",
+        "missing": [
+          "semantic-law",
+          "positive-witness",
+          "negative-falsifier"
+        ],
+        "selection": false,
+        "ratification": false,
+        "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+      }
     },
     {
       "coordinate": "1110011001",
@@ -12676,7 +14751,18 @@
       "coordinate_basis": "NEXT-FREE-NONCANONICAL-RESEARCH-NAME-RESERVATION",
       "selected": false,
       "ratified": false,
-      "physical_t5_authorized": false
+      "physical_t5_authorized": false,
+      "proof_readiness": {
+        "status": "INCOMPLETE-SOURCE-SEMANTICS",
+        "missing": [
+          "semantic-law",
+          "positive-witness",
+          "negative-falsifier"
+        ],
+        "selection": false,
+        "ratification": false,
+        "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+      }
     },
     {
       "coordinate": "1110011010",
@@ -12688,7 +14774,18 @@
       "coordinate_basis": "NEXT-FREE-NONCANONICAL-RESEARCH-NAME-RESERVATION",
       "selected": false,
       "ratified": false,
-      "physical_t5_authorized": false
+      "physical_t5_authorized": false,
+      "proof_readiness": {
+        "status": "INCOMPLETE-SOURCE-SEMANTICS",
+        "missing": [
+          "semantic-law",
+          "positive-witness",
+          "negative-falsifier"
+        ],
+        "selection": false,
+        "ratification": false,
+        "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+      }
     },
     {
       "coordinate": "1110011011",
@@ -12700,7 +14797,18 @@
       "coordinate_basis": "NEXT-FREE-NONCANONICAL-RESEARCH-NAME-RESERVATION",
       "selected": false,
       "ratified": false,
-      "physical_t5_authorized": false
+      "physical_t5_authorized": false,
+      "proof_readiness": {
+        "status": "INCOMPLETE-SOURCE-SEMANTICS",
+        "missing": [
+          "semantic-law",
+          "positive-witness",
+          "negative-falsifier"
+        ],
+        "selection": false,
+        "ratification": false,
+        "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+      }
     },
     {
       "coordinate": "1110011100",
@@ -12712,7 +14820,18 @@
       "coordinate_basis": "NEXT-FREE-NONCANONICAL-RESEARCH-NAME-RESERVATION",
       "selected": false,
       "ratified": false,
-      "physical_t5_authorized": false
+      "physical_t5_authorized": false,
+      "proof_readiness": {
+        "status": "INCOMPLETE-SOURCE-SEMANTICS",
+        "missing": [
+          "semantic-law",
+          "positive-witness",
+          "negative-falsifier"
+        ],
+        "selection": false,
+        "ratification": false,
+        "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+      }
     },
     {
       "coordinate": "1110011101",
@@ -12724,7 +14843,18 @@
       "coordinate_basis": "NEXT-FREE-NONCANONICAL-RESEARCH-NAME-RESERVATION",
       "selected": false,
       "ratified": false,
-      "physical_t5_authorized": false
+      "physical_t5_authorized": false,
+      "proof_readiness": {
+        "status": "INCOMPLETE-SOURCE-SEMANTICS",
+        "missing": [
+          "semantic-law",
+          "positive-witness",
+          "negative-falsifier"
+        ],
+        "selection": false,
+        "ratification": false,
+        "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+      }
     },
     {
       "coordinate": "1110011110",
@@ -12736,7 +14866,18 @@
       "coordinate_basis": "NEXT-FREE-NONCANONICAL-RESEARCH-NAME-RESERVATION",
       "selected": false,
       "ratified": false,
-      "physical_t5_authorized": false
+      "physical_t5_authorized": false,
+      "proof_readiness": {
+        "status": "INCOMPLETE-SOURCE-SEMANTICS",
+        "missing": [
+          "semantic-law",
+          "positive-witness",
+          "negative-falsifier"
+        ],
+        "selection": false,
+        "ratification": false,
+        "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+      }
     },
     {
       "coordinate": "1110011111",
@@ -12761,7 +14902,17 @@
       ],
       "source_historical_reference": "https://www.markstefik.com/wp-content/uploads/2011/04/1983-loops-manual-Bobrow-Stefik-part-1.pdf",
       "core_vs_library_review": "Could be derived using closures wrapping DEREF with explicitly composed observers.",
-      "independent_oracle": "PENDING-EXTERNAL-LOOPS"
+      "independent_oracle": "PENDING-EXTERNAL-LOOPS",
+      "proof_readiness": {
+        "status": "INCOMPLETE-SOURCE-SEMANTICS",
+        "missing": [
+          "positive-witness",
+          "negative-falsifier"
+        ],
+        "selection": false,
+        "ratification": false,
+        "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+      }
     },
     {
       "coordinate": "1110100000",
@@ -12786,7 +14937,17 @@
       ],
       "source_historical_reference": "https://www.markstefik.com/wp-content/uploads/2011/04/1983-loops-manual-Bobrow-Stefik-part-1.pdf",
       "core_vs_library_review": "Potential closure-based composition; must prove material language-visible difference before ratification.",
-      "independent_oracle": "PENDING-EXTERNAL-LOOPS"
+      "independent_oracle": "PENDING-EXTERNAL-LOOPS",
+      "proof_readiness": {
+        "status": "INCOMPLETE-SOURCE-SEMANTICS",
+        "missing": [
+          "positive-witness",
+          "negative-falsifier"
+        ],
+        "selection": false,
+        "ratification": false,
+        "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+      }
     },
     {
       "coordinate": "1110100001",
@@ -12943,7 +15104,17 @@
       ],
       "historical_primary": "https://www.sciencedirect.com/science/article/pii/0004370271900105",
       "core_vs_library_review": "HOLD until concrete witness that library composition of finite set operations and forward apply is insufficient as a language-visible root",
-      "independent_oracle": "PENDING-CI"
+      "independent_oracle": "PENDING-CI",
+      "proof_readiness": {
+        "status": "INCOMPLETE-SOURCE-SEMANTICS",
+        "missing": [
+          "positive-witness",
+          "negative-falsifier"
+        ],
+        "selection": false,
+        "ratification": false,
+        "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+      }
     },
     {
       "coordinate": "1110100010",
@@ -12961,7 +15132,18 @@
       "core_vs_library_review": "D8 COMPLEX and arithmetic; check library composite before code assignment",
       "positive_witnesses": [],
       "falsifiers": [],
-      "independent_oracle": "NO-EVIDENCE-HELD"
+      "independent_oracle": "NO-EVIDENCE-HELD",
+      "proof_readiness": {
+        "status": "INCOMPLETE-SOURCE-SEMANTICS",
+        "missing": [
+          "semantic-law",
+          "positive-witness",
+          "negative-falsifier"
+        ],
+        "selection": false,
+        "ratification": false,
+        "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+      }
     },
     {
       "coordinate": "1110100011",
@@ -12979,7 +15161,18 @@
       "core_vs_library_review": "D5 PLUS and D6 MIN/MAX",
       "positive_witnesses": [],
       "falsifiers": [],
-      "independent_oracle": "NO-EVIDENCE-HELD"
+      "independent_oracle": "NO-EVIDENCE-HELD",
+      "proof_readiness": {
+        "status": "INCOMPLETE-SOURCE-SEMANTICS",
+        "missing": [
+          "semantic-law",
+          "positive-witness",
+          "negative-falsifier"
+        ],
+        "selection": false,
+        "ratification": false,
+        "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+      }
     },
     {
       "coordinate": "1110100100",
@@ -12997,7 +15190,18 @@
       "core_vs_library_review": "D9 UNIX-TIME-OBSERVATION->UTC and TIMEZONE-OFFSET-SECONDS; external data effect boundary",
       "positive_witnesses": [],
       "falsifiers": [],
-      "independent_oracle": "NO-EVIDENCE-HELD"
+      "independent_oracle": "NO-EVIDENCE-HELD",
+      "proof_readiness": {
+        "status": "INCOMPLETE-SOURCE-SEMANTICS",
+        "missing": [
+          "semantic-law",
+          "positive-witness",
+          "negative-falsifier"
+        ],
+        "selection": false,
+        "ratification": false,
+        "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+      }
     },
     {
       "coordinate": "1110100101",
@@ -13015,7 +15219,18 @@
       "core_vs_library_review": "D7 phoneme coordinate identities, D10 RESOLVE-PRATYAHARA/DERIVE-VERB-*",
       "positive_witnesses": [],
       "falsifiers": [],
-      "independent_oracle": "NO-EVIDENCE-HELD"
+      "independent_oracle": "NO-EVIDENCE-HELD",
+      "proof_readiness": {
+        "status": "INCOMPLETE-SOURCE-SEMANTICS",
+        "missing": [
+          "semantic-law",
+          "positive-witness",
+          "negative-falsifier"
+        ],
+        "selection": false,
+        "ratification": false,
+        "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+      }
     },
     {
       "coordinate": "1110100110",
@@ -13033,7 +15248,18 @@
       "core_vs_library_review": "D10 MODULO and numeric arithmetic",
       "positive_witnesses": [],
       "falsifiers": [],
-      "independent_oracle": "NO-EVIDENCE-HELD"
+      "independent_oracle": "NO-EVIDENCE-HELD",
+      "proof_readiness": {
+        "status": "INCOMPLETE-SOURCE-SEMANTICS",
+        "missing": [
+          "semantic-law",
+          "positive-witness",
+          "negative-falsifier"
+        ],
+        "selection": false,
+        "ratification": false,
+        "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+      }
     },
     {
       "coordinate": "1110100111",
@@ -13051,7 +15277,18 @@
       "core_vs_library_review": "D8 ROUND and numerical comparisons",
       "positive_witnesses": [],
       "falsifiers": [],
-      "independent_oracle": "NO-EVIDENCE-HELD"
+      "independent_oracle": "NO-EVIDENCE-HELD",
+      "proof_readiness": {
+        "status": "INCOMPLETE-SOURCE-SEMANTICS",
+        "missing": [
+          "semantic-law",
+          "positive-witness",
+          "negative-falsifier"
+        ],
+        "selection": false,
+        "ratification": false,
+        "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+      }
     },
     {
       "coordinate": "1110101000",
@@ -13069,7 +15306,18 @@
       "core_vs_library_review": "D8 LOGBITP + arithmetic + binary carrier, not a D2 syntax operation",
       "positive_witnesses": [],
       "falsifiers": [],
-      "independent_oracle": "NO-EVIDENCE-HELD"
+      "independent_oracle": "NO-EVIDENCE-HELD",
+      "proof_readiness": {
+        "status": "INCOMPLETE-SOURCE-SEMANTICS",
+        "missing": [
+          "semantic-law",
+          "positive-witness",
+          "negative-falsifier"
+        ],
+        "selection": false,
+        "ratification": false,
+        "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+      }
     },
     {
       "coordinate": "1110101001",
@@ -13098,6 +15346,13 @@
         "source_census_name": "STREAM",
         "source_path": "knowledge/d10-clhs-streams-census-20261009.json",
         "source_kind": "system-class"
+      },
+      "proof_readiness": {
+        "status": "SOURCE-LAW-WITNESSES-PRESENT-UNVERIFIED",
+        "missing": [],
+        "selection": false,
+        "ratification": false,
+        "next_gate": "D1-D9-DEDUPE-CORE-VS-LIBRARY-AND-INDEPENDENT-ORACLE"
       }
     },
     {
@@ -13127,6 +15382,13 @@
         "source_census_name": "BROADCAST-STREAM",
         "source_path": "knowledge/d10-clhs-streams-census-20261009.json",
         "source_kind": "system-class"
+      },
+      "proof_readiness": {
+        "status": "SOURCE-LAW-WITNESSES-PRESENT-UNVERIFIED",
+        "missing": [],
+        "selection": false,
+        "ratification": false,
+        "next_gate": "D1-D9-DEDUPE-CORE-VS-LIBRARY-AND-INDEPENDENT-ORACLE"
       }
     },
     {
@@ -13156,6 +15418,13 @@
         "source_census_name": "CONCATENATED-STREAM",
         "source_path": "knowledge/d10-clhs-streams-census-20261009.json",
         "source_kind": "system-class"
+      },
+      "proof_readiness": {
+        "status": "SOURCE-LAW-WITNESSES-PRESENT-UNVERIFIED",
+        "missing": [],
+        "selection": false,
+        "ratification": false,
+        "next_gate": "D1-D9-DEDUPE-CORE-VS-LIBRARY-AND-INDEPENDENT-ORACLE"
       }
     },
     {
@@ -13185,6 +15454,13 @@
         "source_census_name": "ECHO-STREAM",
         "source_path": "knowledge/d10-clhs-streams-census-20261009.json",
         "source_kind": "system-class"
+      },
+      "proof_readiness": {
+        "status": "SOURCE-LAW-WITNESSES-PRESENT-UNVERIFIED",
+        "missing": [],
+        "selection": false,
+        "ratification": false,
+        "next_gate": "D1-D9-DEDUPE-CORE-VS-LIBRARY-AND-INDEPENDENT-ORACLE"
       }
     },
     {
@@ -13214,6 +15490,13 @@
         "source_census_name": "FILE-STREAM",
         "source_path": "knowledge/d10-clhs-streams-census-20261009.json",
         "source_kind": "system-class"
+      },
+      "proof_readiness": {
+        "status": "SOURCE-LAW-WITNESSES-PRESENT-UNVERIFIED",
+        "missing": [],
+        "selection": false,
+        "ratification": false,
+        "next_gate": "D1-D9-DEDUPE-CORE-VS-LIBRARY-AND-INDEPENDENT-ORACLE"
       }
     },
     {
@@ -13243,6 +15526,13 @@
         "source_census_name": "STRING-STREAM",
         "source_path": "knowledge/d10-clhs-streams-census-20261009.json",
         "source_kind": "system-class"
+      },
+      "proof_readiness": {
+        "status": "SOURCE-LAW-WITNESSES-PRESENT-UNVERIFIED",
+        "missing": [],
+        "selection": false,
+        "ratification": false,
+        "next_gate": "D1-D9-DEDUPE-CORE-VS-LIBRARY-AND-INDEPENDENT-ORACLE"
       }
     },
     {
@@ -13272,6 +15562,13 @@
         "source_census_name": "SYNONYM-STREAM",
         "source_path": "knowledge/d10-clhs-streams-census-20261009.json",
         "source_kind": "system-class"
+      },
+      "proof_readiness": {
+        "status": "SOURCE-LAW-WITNESSES-PRESENT-UNVERIFIED",
+        "missing": [],
+        "selection": false,
+        "ratification": false,
+        "next_gate": "D1-D9-DEDUPE-CORE-VS-LIBRARY-AND-INDEPENDENT-ORACLE"
       }
     },
     {
@@ -13301,6 +15598,13 @@
         "source_census_name": "TWO-WAY-STREAM",
         "source_path": "knowledge/d10-clhs-streams-census-20261009.json",
         "source_kind": "system-class"
+      },
+      "proof_readiness": {
+        "status": "SOURCE-LAW-WITNESSES-PRESENT-UNVERIFIED",
+        "missing": [],
+        "selection": false,
+        "ratification": false,
+        "next_gate": "D1-D9-DEDUPE-CORE-VS-LIBRARY-AND-INDEPENDENT-ORACLE"
       }
     },
     {
@@ -13330,6 +15634,13 @@
         "source_census_name": "INPUT-STREAM-P",
         "source_path": "knowledge/d10-clhs-streams-census-20261009.json",
         "source_kind": "function"
+      },
+      "proof_readiness": {
+        "status": "SOURCE-LAW-WITNESSES-PRESENT-UNVERIFIED",
+        "missing": [],
+        "selection": false,
+        "ratification": false,
+        "next_gate": "D1-D9-DEDUPE-CORE-VS-LIBRARY-AND-INDEPENDENT-ORACLE"
       }
     },
     {
@@ -13359,6 +15670,13 @@
         "source_census_name": "OUTPUT-STREAM-P",
         "source_path": "knowledge/d10-clhs-streams-census-20261009.json",
         "source_kind": "function"
+      },
+      "proof_readiness": {
+        "status": "SOURCE-LAW-WITNESSES-PRESENT-UNVERIFIED",
+        "missing": [],
+        "selection": false,
+        "ratification": false,
+        "next_gate": "D1-D9-DEDUPE-CORE-VS-LIBRARY-AND-INDEPENDENT-ORACLE"
       }
     },
     {
@@ -13388,6 +15706,13 @@
         "source_census_name": "INTERACTIVE-STREAM-P",
         "source_path": "knowledge/d10-clhs-streams-census-20261009.json",
         "source_kind": "function"
+      },
+      "proof_readiness": {
+        "status": "SOURCE-LAW-WITNESSES-PRESENT-UNVERIFIED",
+        "missing": [],
+        "selection": false,
+        "ratification": false,
+        "next_gate": "D1-D9-DEDUPE-CORE-VS-LIBRARY-AND-INDEPENDENT-ORACLE"
       }
     },
     {
@@ -13417,6 +15742,13 @@
         "source_census_name": "OPEN-STREAM-P",
         "source_path": "knowledge/d10-clhs-streams-census-20261009.json",
         "source_kind": "function"
+      },
+      "proof_readiness": {
+        "status": "SOURCE-LAW-WITNESSES-PRESENT-UNVERIFIED",
+        "missing": [],
+        "selection": false,
+        "ratification": false,
+        "next_gate": "D1-D9-DEDUPE-CORE-VS-LIBRARY-AND-INDEPENDENT-ORACLE"
       }
     },
     {
@@ -13446,6 +15778,13 @@
         "source_census_name": "STREAM-ELEMENT-TYPE",
         "source_path": "knowledge/d10-clhs-streams-census-20261009.json",
         "source_kind": "function"
+      },
+      "proof_readiness": {
+        "status": "SOURCE-LAW-WITNESSES-PRESENT-UNVERIFIED",
+        "missing": [],
+        "selection": false,
+        "ratification": false,
+        "next_gate": "D1-D9-DEDUPE-CORE-VS-LIBRARY-AND-INDEPENDENT-ORACLE"
       }
     },
     {
@@ -13475,6 +15814,13 @@
         "source_census_name": "STREAMP",
         "source_path": "knowledge/d10-clhs-streams-census-20261009.json",
         "source_kind": "function"
+      },
+      "proof_readiness": {
+        "status": "SOURCE-LAW-WITNESSES-PRESENT-UNVERIFIED",
+        "missing": [],
+        "selection": false,
+        "ratification": false,
+        "next_gate": "D1-D9-DEDUPE-CORE-VS-LIBRARY-AND-INDEPENDENT-ORACLE"
       }
     },
     {
@@ -13504,6 +15850,13 @@
         "source_census_name": "PEEK-CHAR",
         "source_path": "knowledge/d10-clhs-streams-census-20261009.json",
         "source_kind": "function"
+      },
+      "proof_readiness": {
+        "status": "SOURCE-LAW-WITNESSES-PRESENT-UNVERIFIED",
+        "missing": [],
+        "selection": false,
+        "ratification": false,
+        "next_gate": "D1-D9-DEDUPE-CORE-VS-LIBRARY-AND-INDEPENDENT-ORACLE"
       }
     },
     {
@@ -13533,6 +15886,13 @@
         "source_census_name": "READ-CHAR-NO-HANG",
         "source_path": "knowledge/d10-clhs-streams-census-20261009.json",
         "source_kind": "function"
+      },
+      "proof_readiness": {
+        "status": "SOURCE-LAW-WITNESSES-PRESENT-UNVERIFIED",
+        "missing": [],
+        "selection": false,
+        "ratification": false,
+        "next_gate": "D1-D9-DEDUPE-CORE-VS-LIBRARY-AND-INDEPENDENT-ORACLE"
       }
     },
     {
@@ -13562,6 +15922,13 @@
         "source_census_name": "TERPRI",
         "source_path": "knowledge/d10-clhs-streams-census-20261009.json",
         "source_kind": "function"
+      },
+      "proof_readiness": {
+        "status": "SOURCE-LAW-WITNESSES-PRESENT-UNVERIFIED",
+        "missing": [],
+        "selection": false,
+        "ratification": false,
+        "next_gate": "D1-D9-DEDUPE-CORE-VS-LIBRARY-AND-INDEPENDENT-ORACLE"
       }
     },
     {
@@ -13591,6 +15958,13 @@
         "source_census_name": "FRESH-LINE",
         "source_path": "knowledge/d10-clhs-streams-census-20261009.json",
         "source_kind": "function"
+      },
+      "proof_readiness": {
+        "status": "SOURCE-LAW-WITNESSES-PRESENT-UNVERIFIED",
+        "missing": [],
+        "selection": false,
+        "ratification": false,
+        "next_gate": "D1-D9-DEDUPE-CORE-VS-LIBRARY-AND-INDEPENDENT-ORACLE"
       }
     },
     {
@@ -13620,6 +15994,13 @@
         "source_census_name": "UNREAD-CHAR",
         "source_path": "knowledge/d10-clhs-streams-census-20261009.json",
         "source_kind": "function"
+      },
+      "proof_readiness": {
+        "status": "SOURCE-LAW-WITNESSES-PRESENT-UNVERIFIED",
+        "missing": [],
+        "selection": false,
+        "ratification": false,
+        "next_gate": "D1-D9-DEDUPE-CORE-VS-LIBRARY-AND-INDEPENDENT-ORACLE"
       }
     },
     {
@@ -13649,6 +16030,13 @@
         "source_census_name": "WRITE-CHAR",
         "source_path": "knowledge/d10-clhs-streams-census-20261009.json",
         "source_kind": "function"
+      },
+      "proof_readiness": {
+        "status": "SOURCE-LAW-WITNESSES-PRESENT-UNVERIFIED",
+        "missing": [],
+        "selection": false,
+        "ratification": false,
+        "next_gate": "D1-D9-DEDUPE-CORE-VS-LIBRARY-AND-INDEPENDENT-ORACLE"
       }
     },
     {
@@ -13678,6 +16066,13 @@
         "source_census_name": "READ-LINE",
         "source_path": "knowledge/d10-clhs-streams-census-20261009.json",
         "source_kind": "function"
+      },
+      "proof_readiness": {
+        "status": "SOURCE-LAW-WITNESSES-PRESENT-UNVERIFIED",
+        "missing": [],
+        "selection": false,
+        "ratification": false,
+        "next_gate": "D1-D9-DEDUPE-CORE-VS-LIBRARY-AND-INDEPENDENT-ORACLE"
       }
     },
     {
@@ -13707,6 +16102,13 @@
         "source_census_name": "WRITE-LINE",
         "source_path": "knowledge/d10-clhs-streams-census-20261009.json",
         "source_kind": "function"
+      },
+      "proof_readiness": {
+        "status": "SOURCE-LAW-WITNESSES-PRESENT-UNVERIFIED",
+        "missing": [],
+        "selection": false,
+        "ratification": false,
+        "next_gate": "D1-D9-DEDUPE-CORE-VS-LIBRARY-AND-INDEPENDENT-ORACLE"
       }
     },
     {
@@ -13736,6 +16138,13 @@
         "source_census_name": "READ-SEQUENCE",
         "source_path": "knowledge/d10-clhs-streams-census-20261009.json",
         "source_kind": "function"
+      },
+      "proof_readiness": {
+        "status": "SOURCE-LAW-WITNESSES-PRESENT-UNVERIFIED",
+        "missing": [],
+        "selection": false,
+        "ratification": false,
+        "next_gate": "D1-D9-DEDUPE-CORE-VS-LIBRARY-AND-INDEPENDENT-ORACLE"
       }
     },
     {
@@ -13765,6 +16174,13 @@
         "source_census_name": "WRITE-SEQUENCE",
         "source_path": "knowledge/d10-clhs-streams-census-20261009.json",
         "source_kind": "function"
+      },
+      "proof_readiness": {
+        "status": "SOURCE-LAW-WITNESSES-PRESENT-UNVERIFIED",
+        "missing": [],
+        "selection": false,
+        "ratification": false,
+        "next_gate": "D1-D9-DEDUPE-CORE-VS-LIBRARY-AND-INDEPENDENT-ORACLE"
       }
     },
     {
@@ -13794,6 +16210,13 @@
         "source_census_name": "FILE-LENGTH",
         "source_path": "knowledge/d10-clhs-streams-census-20261009.json",
         "source_kind": "function"
+      },
+      "proof_readiness": {
+        "status": "SOURCE-LAW-WITNESSES-PRESENT-UNVERIFIED",
+        "missing": [],
+        "selection": false,
+        "ratification": false,
+        "next_gate": "D1-D9-DEDUPE-CORE-VS-LIBRARY-AND-INDEPENDENT-ORACLE"
       }
     },
     {
@@ -13823,6 +16246,13 @@
         "source_census_name": "FILE-POSITION",
         "source_path": "knowledge/d10-clhs-streams-census-20261009.json",
         "source_kind": "function"
+      },
+      "proof_readiness": {
+        "status": "SOURCE-LAW-WITNESSES-PRESENT-UNVERIFIED",
+        "missing": [],
+        "selection": false,
+        "ratification": false,
+        "next_gate": "D1-D9-DEDUPE-CORE-VS-LIBRARY-AND-INDEPENDENT-ORACLE"
       }
     },
     {
@@ -13852,6 +16282,13 @@
         "source_census_name": "FILE-STRING-LENGTH",
         "source_path": "knowledge/d10-clhs-streams-census-20261009.json",
         "source_kind": "function"
+      },
+      "proof_readiness": {
+        "status": "SOURCE-LAW-WITNESSES-PRESENT-UNVERIFIED",
+        "missing": [],
+        "selection": false,
+        "ratification": false,
+        "next_gate": "D1-D9-DEDUPE-CORE-VS-LIBRARY-AND-INDEPENDENT-ORACLE"
       }
     },
     {
@@ -13884,6 +16321,13 @@
         "source_census_name": "OPEN",
         "source_path": "knowledge/d10-clhs-streams-census-20261009.json",
         "source_kind": "function"
+      },
+      "proof_readiness": {
+        "status": "SOURCE-LAW-WITNESSES-PRESENT-UNVERIFIED",
+        "missing": [],
+        "selection": false,
+        "ratification": false,
+        "next_gate": "D1-D9-DEDUPE-CORE-VS-LIBRARY-AND-INDEPENDENT-ORACLE"
       }
     },
     {
@@ -13916,6 +16360,13 @@
         "source_census_name": "STREAM-EXTERNAL-FORMAT",
         "source_path": "knowledge/d10-clhs-streams-census-20261009.json",
         "source_kind": "function"
+      },
+      "proof_readiness": {
+        "status": "SOURCE-LAW-WITNESSES-PRESENT-UNVERIFIED",
+        "missing": [],
+        "selection": false,
+        "ratification": false,
+        "next_gate": "D1-D9-DEDUPE-CORE-VS-LIBRARY-AND-INDEPENDENT-ORACLE"
       }
     },
     {
@@ -13948,6 +16399,13 @@
         "source_census_name": "CLOSE",
         "source_path": "knowledge/d10-clhs-streams-census-20261009.json",
         "source_kind": "function"
+      },
+      "proof_readiness": {
+        "status": "SOURCE-LAW-WITNESSES-PRESENT-UNVERIFIED",
+        "missing": [],
+        "selection": false,
+        "ratification": false,
+        "next_gate": "D1-D9-DEDUPE-CORE-VS-LIBRARY-AND-INDEPENDENT-ORACLE"
       }
     },
     {
@@ -13967,7 +16425,14 @@
       "negative_falsifier": "Opening the designated file or fabricating a different identity is not required.",
       "core_vs_library": "PENDING-SEMANTIC-DERIVABILITY",
       "independent_oracle": "NOT-EXECUTED",
-      "coordinate_basis": "RESEARCH-ONLY-NOT-RUNTIME"
+      "coordinate_basis": "RESEARCH-ONLY-NOT-RUNTIME",
+      "proof_readiness": {
+        "status": "SOURCE-LAW-WITNESSES-PRESENT-UNVERIFIED",
+        "missing": [],
+        "selection": false,
+        "ratification": false,
+        "next_gate": "D1-D9-DEDUPE-CORE-VS-LIBRARY-AND-INDEPENDENT-ORACLE"
+      }
     },
     {
       "coordinate": "1111001000",
@@ -13986,7 +16451,14 @@
       "negative_falsifier": "Defaults replace an explicitly supplied component.",
       "core_vs_library": "PENDING-SEMANTIC-DERIVABILITY",
       "independent_oracle": "NOT-EXECUTED",
-      "coordinate_basis": "RESEARCH-ONLY-NOT-RUNTIME"
+      "coordinate_basis": "RESEARCH-ONLY-NOT-RUNTIME",
+      "proof_readiness": {
+        "status": "SOURCE-LAW-WITNESSES-PRESENT-UNVERIFIED",
+        "missing": [],
+        "selection": false,
+        "ratification": false,
+        "next_gate": "D1-D9-DEDUPE-CORE-VS-LIBRARY-AND-INDEPENDENT-ORACLE"
+      }
     },
     {
       "coordinate": "1111001001",
@@ -14005,7 +16477,14 @@
       "negative_falsifier": "Accept every path-looking string as a pathname object.",
       "core_vs_library": "PENDING-SEMANTIC-DERIVABILITY",
       "independent_oracle": "NOT-EXECUTED",
-      "coordinate_basis": "RESEARCH-ONLY-NOT-RUNTIME"
+      "coordinate_basis": "RESEARCH-ONLY-NOT-RUNTIME",
+      "proof_readiness": {
+        "status": "SOURCE-LAW-WITNESSES-PRESENT-UNVERIFIED",
+        "missing": [],
+        "selection": false,
+        "ratification": false,
+        "next_gate": "D1-D9-DEDUPE-CORE-VS-LIBRARY-AND-INDEPENDENT-ORACLE"
+      }
     },
     {
       "coordinate": "1111001010",
@@ -14024,7 +16503,14 @@
       "negative_falsifier": "Return a different component in place of host.",
       "core_vs_library": "PENDING-SEMANTIC-DERIVABILITY",
       "independent_oracle": "NOT-EXECUTED",
-      "coordinate_basis": "RESEARCH-ONLY-NOT-RUNTIME"
+      "coordinate_basis": "RESEARCH-ONLY-NOT-RUNTIME",
+      "proof_readiness": {
+        "status": "SOURCE-LAW-WITNESSES-PRESENT-UNVERIFIED",
+        "missing": [],
+        "selection": false,
+        "ratification": false,
+        "next_gate": "D1-D9-DEDUPE-CORE-VS-LIBRARY-AND-INDEPENDENT-ORACLE"
+      }
     },
     {
       "coordinate": "1111001011",
@@ -14043,7 +16529,14 @@
       "negative_falsifier": "Return a different component in place of device.",
       "core_vs_library": "PENDING-SEMANTIC-DERIVABILITY",
       "independent_oracle": "NOT-EXECUTED",
-      "coordinate_basis": "RESEARCH-ONLY-NOT-RUNTIME"
+      "coordinate_basis": "RESEARCH-ONLY-NOT-RUNTIME",
+      "proof_readiness": {
+        "status": "SOURCE-LAW-WITNESSES-PRESENT-UNVERIFIED",
+        "missing": [],
+        "selection": false,
+        "ratification": false,
+        "next_gate": "D1-D9-DEDUPE-CORE-VS-LIBRARY-AND-INDEPENDENT-ORACLE"
+      }
     },
     {
       "coordinate": "1111001100",
@@ -14062,7 +16555,14 @@
       "negative_falsifier": "Return a different component in place of directory.",
       "core_vs_library": "PENDING-SEMANTIC-DERIVABILITY",
       "independent_oracle": "NOT-EXECUTED",
-      "coordinate_basis": "RESEARCH-ONLY-NOT-RUNTIME"
+      "coordinate_basis": "RESEARCH-ONLY-NOT-RUNTIME",
+      "proof_readiness": {
+        "status": "SOURCE-LAW-WITNESSES-PRESENT-UNVERIFIED",
+        "missing": [],
+        "selection": false,
+        "ratification": false,
+        "next_gate": "D1-D9-DEDUPE-CORE-VS-LIBRARY-AND-INDEPENDENT-ORACLE"
+      }
     },
     {
       "coordinate": "1111001101",
@@ -14081,7 +16581,14 @@
       "negative_falsifier": "Return a different component in place of name.",
       "core_vs_library": "PENDING-SEMANTIC-DERIVABILITY",
       "independent_oracle": "NOT-EXECUTED",
-      "coordinate_basis": "RESEARCH-ONLY-NOT-RUNTIME"
+      "coordinate_basis": "RESEARCH-ONLY-NOT-RUNTIME",
+      "proof_readiness": {
+        "status": "SOURCE-LAW-WITNESSES-PRESENT-UNVERIFIED",
+        "missing": [],
+        "selection": false,
+        "ratification": false,
+        "next_gate": "D1-D9-DEDUPE-CORE-VS-LIBRARY-AND-INDEPENDENT-ORACLE"
+      }
     },
     {
       "coordinate": "1111001110",
@@ -14100,7 +16607,14 @@
       "negative_falsifier": "Return a different component in place of type.",
       "core_vs_library": "PENDING-SEMANTIC-DERIVABILITY",
       "independent_oracle": "NOT-EXECUTED",
-      "coordinate_basis": "RESEARCH-ONLY-NOT-RUNTIME"
+      "coordinate_basis": "RESEARCH-ONLY-NOT-RUNTIME",
+      "proof_readiness": {
+        "status": "SOURCE-LAW-WITNESSES-PRESENT-UNVERIFIED",
+        "missing": [],
+        "selection": false,
+        "ratification": false,
+        "next_gate": "D1-D9-DEDUPE-CORE-VS-LIBRARY-AND-INDEPENDENT-ORACLE"
+      }
     },
     {
       "coordinate": "1111001111",
@@ -14119,7 +16633,14 @@
       "negative_falsifier": "Return a different component in place of version.",
       "core_vs_library": "PENDING-SEMANTIC-DERIVABILITY",
       "independent_oracle": "NOT-EXECUTED",
-      "coordinate_basis": "RESEARCH-ONLY-NOT-RUNTIME"
+      "coordinate_basis": "RESEARCH-ONLY-NOT-RUNTIME",
+      "proof_readiness": {
+        "status": "SOURCE-LAW-WITNESSES-PRESENT-UNVERIFIED",
+        "missing": [],
+        "selection": false,
+        "ratification": false,
+        "next_gate": "D1-D9-DEDUPE-CORE-VS-LIBRARY-AND-INDEPENDENT-ORACLE"
+      }
     },
     {
       "coordinate": "1111010000",
@@ -14138,7 +16659,14 @@
       "negative_falsifier": "Treat an arbitrary physical pathname as a valid logical-host pathname.",
       "core_vs_library": "PENDING-SEMANTIC-DERIVABILITY",
       "independent_oracle": "NOT-EXECUTED",
-      "coordinate_basis": "RESEARCH-ONLY-NOT-RUNTIME"
+      "coordinate_basis": "RESEARCH-ONLY-NOT-RUNTIME",
+      "proof_readiness": {
+        "status": "SOURCE-LAW-WITNESSES-PRESENT-UNVERIFIED",
+        "missing": [],
+        "selection": false,
+        "ratification": false,
+        "next_gate": "D1-D9-DEDUPE-CORE-VS-LIBRARY-AND-INDEPENDENT-ORACLE"
+      }
     },
     {
       "coordinate": "1111010001",
@@ -14157,7 +16685,14 @@
       "negative_falsifier": "A wildcard in the name causes the type-only test to be true.",
       "core_vs_library": "PENDING-SEMANTIC-DERIVABILITY",
       "independent_oracle": "NOT-EXECUTED",
-      "coordinate_basis": "RESEARCH-ONLY-NOT-RUNTIME"
+      "coordinate_basis": "RESEARCH-ONLY-NOT-RUNTIME",
+      "proof_readiness": {
+        "status": "SOURCE-LAW-WITNESSES-PRESENT-UNVERIFIED",
+        "missing": [],
+        "selection": false,
+        "ratification": false,
+        "next_gate": "D1-D9-DEDUPE-CORE-VS-LIBRARY-AND-INDEPENDENT-ORACLE"
+      }
     },
     {
       "coordinate": "1111010010",
@@ -14176,7 +16711,14 @@
       "negative_falsifier": "Reject input/output arguments of incompatible stream capability.",
       "core_vs_library": "PENDING-STREAM-ABSTRACTION-AND-D2-REVIEW",
       "independent_oracle": "NOT-EXECUTED",
-      "coordinate_basis": "RESEARCH-NONCANONICAL-NOT-CORE"
+      "coordinate_basis": "RESEARCH-NONCANONICAL-NOT-CORE",
+      "proof_readiness": {
+        "status": "SOURCE-LAW-WITNESSES-PRESENT-UNVERIFIED",
+        "missing": [],
+        "selection": false,
+        "ratification": false,
+        "next_gate": "D1-D9-DEDUPE-CORE-VS-LIBRARY-AND-INDEPENDENT-ORACLE"
+      }
     },
     {
       "coordinate": "1111010011",
@@ -14195,7 +16737,14 @@
       "negative_falsifier": "Return O for the input query.",
       "core_vs_library": "PENDING-STREAM-ABSTRACTION-AND-D2-REVIEW",
       "independent_oracle": "NOT-EXECUTED",
-      "coordinate_basis": "RESEARCH-NONCANONICAL-NOT-CORE"
+      "coordinate_basis": "RESEARCH-NONCANONICAL-NOT-CORE",
+      "proof_readiness": {
+        "status": "SOURCE-LAW-WITNESSES-PRESENT-UNVERIFIED",
+        "missing": [],
+        "selection": false,
+        "ratification": false,
+        "next_gate": "D1-D9-DEDUPE-CORE-VS-LIBRARY-AND-INDEPENDENT-ORACLE"
+      }
     },
     {
       "coordinate": "1111010100",
@@ -14214,7 +16763,14 @@
       "negative_falsifier": "Return I for the output query.",
       "core_vs_library": "PENDING-STREAM-ABSTRACTION-AND-D2-REVIEW",
       "independent_oracle": "NOT-EXECUTED",
-      "coordinate_basis": "RESEARCH-NONCANONICAL-NOT-CORE"
+      "coordinate_basis": "RESEARCH-NONCANONICAL-NOT-CORE",
+      "proof_readiness": {
+        "status": "SOURCE-LAW-WITNESSES-PRESENT-UNVERIFIED",
+        "missing": [],
+        "selection": false,
+        "ratification": false,
+        "next_gate": "D1-D9-DEDUPE-CORE-VS-LIBRARY-AND-INDEPENDENT-ORACLE"
+      }
     },
     {
       "coordinate": "1111010101",
@@ -14233,7 +16789,14 @@
       "negative_falsifier": "Return O when asked for echo input.",
       "core_vs_library": "PENDING-STREAM-ABSTRACTION-AND-D2-REVIEW",
       "independent_oracle": "NOT-EXECUTED",
-      "coordinate_basis": "RESEARCH-NONCANONICAL-NOT-CORE"
+      "coordinate_basis": "RESEARCH-NONCANONICAL-NOT-CORE",
+      "proof_readiness": {
+        "status": "SOURCE-LAW-WITNESSES-PRESENT-UNVERIFIED",
+        "missing": [],
+        "selection": false,
+        "ratification": false,
+        "next_gate": "D1-D9-DEDUPE-CORE-VS-LIBRARY-AND-INDEPENDENT-ORACLE"
+      }
     },
     {
       "coordinate": "1111010110",
@@ -14252,7 +16815,14 @@
       "negative_falsifier": "Return I when asked for echo output.",
       "core_vs_library": "PENDING-STREAM-ABSTRACTION-AND-D2-REVIEW",
       "independent_oracle": "NOT-EXECUTED",
-      "coordinate_basis": "RESEARCH-NONCANONICAL-NOT-CORE"
+      "coordinate_basis": "RESEARCH-NONCANONICAL-NOT-CORE",
+      "proof_readiness": {
+        "status": "SOURCE-LAW-WITNESSES-PRESENT-UNVERIFIED",
+        "missing": [],
+        "selection": false,
+        "ratification": false,
+        "next_gate": "D1-D9-DEDUPE-CORE-VS-LIBRARY-AND-INDEPENDENT-ORACLE"
+      }
     },
     {
       "coordinate": "1111010111",
@@ -14271,7 +16841,14 @@
       "negative_falsifier": "Echo each read character twice or drop direct output.",
       "core_vs_library": "PENDING-STREAM-ABSTRACTION-AND-D2-REVIEW",
       "independent_oracle": "NOT-EXECUTED",
-      "coordinate_basis": "RESEARCH-NONCANONICAL-NOT-CORE"
+      "coordinate_basis": "RESEARCH-NONCANONICAL-NOT-CORE",
+      "proof_readiness": {
+        "status": "SOURCE-LAW-WITNESSES-PRESENT-UNVERIFIED",
+        "missing": [],
+        "selection": false,
+        "ratification": false,
+        "next_gate": "D1-D9-DEDUPE-CORE-VS-LIBRARY-AND-INDEPENDENT-ORACLE"
+      }
     },
     {
       "coordinate": "1111011000",
@@ -14290,7 +16867,14 @@
       "negative_falsifier": "Return an output stream not associated with the concatenation.",
       "core_vs_library": "PENDING-STREAM-ABSTRACTION-AND-D2-REVIEW",
       "independent_oracle": "NOT-EXECUTED",
-      "coordinate_basis": "RESEARCH-NONCANONICAL-NOT-CORE"
+      "coordinate_basis": "RESEARCH-NONCANONICAL-NOT-CORE",
+      "proof_readiness": {
+        "status": "SOURCE-LAW-WITNESSES-PRESENT-UNVERIFIED",
+        "missing": [],
+        "selection": false,
+        "ratification": false,
+        "next_gate": "D1-D9-DEDUPE-CORE-VS-LIBRARY-AND-INDEPENDENT-ORACLE"
+      }
     },
     {
       "coordinate": "1111011001",
@@ -14309,7 +16893,14 @@
       "negative_falsifier": "Read from the second input before consuming the first.",
       "core_vs_library": "PENDING-STREAM-ABSTRACTION-AND-D2-REVIEW",
       "independent_oracle": "NOT-EXECUTED",
-      "coordinate_basis": "RESEARCH-NONCANONICAL-NOT-CORE"
+      "coordinate_basis": "RESEARCH-NONCANONICAL-NOT-CORE",
+      "proof_readiness": {
+        "status": "SOURCE-LAW-WITNESSES-PRESENT-UNVERIFIED",
+        "missing": [],
+        "selection": false,
+        "ratification": false,
+        "next_gate": "D1-D9-DEDUPE-CORE-VS-LIBRARY-AND-INDEPENDENT-ORACLE"
+      }
     },
     {
       "coordinate": "1111011010",
@@ -14328,7 +16919,14 @@
       "negative_falsifier": "Second query repeats the previously removed characters.",
       "core_vs_library": "PENDING-STREAM-ABSTRACTION-AND-D2-REVIEW",
       "independent_oracle": "NOT-EXECUTED",
-      "coordinate_basis": "RESEARCH-NONCANONICAL-NOT-CORE"
+      "coordinate_basis": "RESEARCH-NONCANONICAL-NOT-CORE",
+      "proof_readiness": {
+        "status": "SOURCE-LAW-WITNESSES-PRESENT-UNVERIFIED",
+        "missing": [],
+        "selection": false,
+        "ratification": false,
+        "next_gate": "D1-D9-DEDUPE-CORE-VS-LIBRARY-AND-INDEPENDENT-ORACLE"
+      }
     },
     {
       "coordinate": "1111011011",
@@ -14347,7 +16945,14 @@
       "negative_falsifier": "Include characters outside [start,end) or recycle on EOF.",
       "core_vs_library": "PENDING-STREAM-ABSTRACTION-AND-D2-REVIEW",
       "independent_oracle": "NOT-EXECUTED",
-      "coordinate_basis": "RESEARCH-NONCANONICAL-NOT-CORE"
+      "coordinate_basis": "RESEARCH-NONCANONICAL-NOT-CORE",
+      "proof_readiness": {
+        "status": "SOURCE-LAW-WITNESSES-PRESENT-UNVERIFIED",
+        "missing": [],
+        "selection": false,
+        "ratification": false,
+        "next_gate": "D1-D9-DEDUPE-CORE-VS-LIBRARY-AND-INDEPENDENT-ORACLE"
+      }
     },
     {
       "coordinate": "1111011100",
@@ -14366,7 +16971,14 @@
       "negative_falsifier": "Lose the order of written characters.",
       "core_vs_library": "PENDING-STREAM-ABSTRACTION-AND-D2-REVIEW",
       "independent_oracle": "NOT-EXECUTED",
-      "coordinate_basis": "RESEARCH-NONCANONICAL-NOT-CORE"
+      "coordinate_basis": "RESEARCH-NONCANONICAL-NOT-CORE",
+      "proof_readiness": {
+        "status": "SOURCE-LAW-WITNESSES-PRESENT-UNVERIFIED",
+        "missing": [],
+        "selection": false,
+        "ratification": false,
+        "next_gate": "D1-D9-DEDUPE-CORE-VS-LIBRARY-AND-INDEPENDENT-ORACLE"
+      }
     },
     {
       "coordinate": "1111011101",
@@ -14385,7 +16997,14 @@
       "previous_source_index_name": "STREAM-ERROR-STREAM",
       "core_vs_library": "PENDING-UNIVERSAL-PORTABILITY-AND-DERIVABILITY",
       "independent_oracle": "NOT-EXECUTED",
-      "coordinate_basis": "NONCANONICAL-RESEARCH-ONLY"
+      "coordinate_basis": "NONCANONICAL-RESEARCH-ONLY",
+      "proof_readiness": {
+        "status": "SOURCE-LAW-WITNESSES-PRESENT-UNVERIFIED",
+        "missing": [],
+        "selection": false,
+        "ratification": false,
+        "next_gate": "D1-D9-DEDUPE-CORE-VS-LIBRARY-AND-INDEPENDENT-ORACLE"
+      }
     },
     {
       "coordinate": "1111011110",
@@ -14404,7 +17023,14 @@
       "previous_source_index_name": "WITH-OPEN-FILE",
       "core_vs_library": "PENDING-UNIVERSAL-PORTABILITY-AND-DERIVABILITY",
       "independent_oracle": "NOT-EXECUTED",
-      "coordinate_basis": "NONCANONICAL-RESEARCH-ONLY"
+      "coordinate_basis": "NONCANONICAL-RESEARCH-ONLY",
+      "proof_readiness": {
+        "status": "SOURCE-LAW-WITNESSES-PRESENT-UNVERIFIED",
+        "missing": [],
+        "selection": false,
+        "ratification": false,
+        "next_gate": "D1-D9-DEDUPE-CORE-VS-LIBRARY-AND-INDEPENDENT-ORACLE"
+      }
     },
     {
       "coordinate": "1111011111",
@@ -14423,7 +17049,14 @@
       "previous_source_index_name": "WITH-OPEN-STREAM",
       "core_vs_library": "PENDING-UNIVERSAL-PORTABILITY-AND-DERIVABILITY",
       "independent_oracle": "NOT-EXECUTED",
-      "coordinate_basis": "NONCANONICAL-RESEARCH-ONLY"
+      "coordinate_basis": "NONCANONICAL-RESEARCH-ONLY",
+      "proof_readiness": {
+        "status": "SOURCE-LAW-WITNESSES-PRESENT-UNVERIFIED",
+        "missing": [],
+        "selection": false,
+        "ratification": false,
+        "next_gate": "D1-D9-DEDUPE-CORE-VS-LIBRARY-AND-INDEPENDENT-ORACLE"
+      }
     },
     {
       "coordinate": "1111100000",
@@ -14442,7 +17075,14 @@
       "previous_source_index_name": "WITH-INPUT-FROM-STRING",
       "core_vs_library": "PENDING-UNIVERSAL-PORTABILITY-AND-DERIVABILITY",
       "independent_oracle": "NOT-EXECUTED",
-      "coordinate_basis": "NONCANONICAL-RESEARCH-ONLY"
+      "coordinate_basis": "NONCANONICAL-RESEARCH-ONLY",
+      "proof_readiness": {
+        "status": "SOURCE-LAW-WITNESSES-PRESENT-UNVERIFIED",
+        "missing": [],
+        "selection": false,
+        "ratification": false,
+        "next_gate": "D1-D9-DEDUPE-CORE-VS-LIBRARY-AND-INDEPENDENT-ORACLE"
+      }
     },
     {
       "coordinate": "1111100001",
@@ -14461,7 +17101,14 @@
       "previous_source_index_name": "WITH-OUTPUT-TO-STRING",
       "core_vs_library": "PENDING-UNIVERSAL-PORTABILITY-AND-DERIVABILITY",
       "independent_oracle": "NOT-EXECUTED",
-      "coordinate_basis": "NONCANONICAL-RESEARCH-ONLY"
+      "coordinate_basis": "NONCANONICAL-RESEARCH-ONLY",
+      "proof_readiness": {
+        "status": "SOURCE-LAW-WITNESSES-PRESENT-UNVERIFIED",
+        "missing": [],
+        "selection": false,
+        "ratification": false,
+        "next_gate": "D1-D9-DEDUPE-CORE-VS-LIBRARY-AND-INDEPENDENT-ORACLE"
+      }
     },
     {
       "coordinate": "1111100010",
@@ -14480,7 +17127,14 @@
       "previous_source_index_name": "*DEBUG-IO*",
       "core_vs_library": "PENDING-UNIVERSAL-PORTABILITY-AND-DERIVABILITY",
       "independent_oracle": "NOT-EXECUTED",
-      "coordinate_basis": "NONCANONICAL-RESEARCH-ONLY"
+      "coordinate_basis": "NONCANONICAL-RESEARCH-ONLY",
+      "proof_readiness": {
+        "status": "SOURCE-LAW-WITNESSES-PRESENT-UNVERIFIED",
+        "missing": [],
+        "selection": false,
+        "ratification": false,
+        "next_gate": "D1-D9-DEDUPE-CORE-VS-LIBRARY-AND-INDEPENDENT-ORACLE"
+      }
     },
     {
       "coordinate": "1111100011",
@@ -14499,7 +17153,14 @@
       "previous_source_index_name": "*ERROR-OUTPUT*",
       "core_vs_library": "PENDING-UNIVERSAL-PORTABILITY-AND-DERIVABILITY",
       "independent_oracle": "NOT-EXECUTED",
-      "coordinate_basis": "NONCANONICAL-RESEARCH-ONLY"
+      "coordinate_basis": "NONCANONICAL-RESEARCH-ONLY",
+      "proof_readiness": {
+        "status": "SOURCE-LAW-WITNESSES-PRESENT-UNVERIFIED",
+        "missing": [],
+        "selection": false,
+        "ratification": false,
+        "next_gate": "D1-D9-DEDUPE-CORE-VS-LIBRARY-AND-INDEPENDENT-ORACLE"
+      }
     },
     {
       "coordinate": "1111100100",
@@ -14518,7 +17179,14 @@
       "previous_source_index_name": "*QUERY-IO*",
       "core_vs_library": "PENDING-UNIVERSAL-PORTABILITY-AND-DERIVABILITY",
       "independent_oracle": "NOT-EXECUTED",
-      "coordinate_basis": "NONCANONICAL-RESEARCH-ONLY"
+      "coordinate_basis": "NONCANONICAL-RESEARCH-ONLY",
+      "proof_readiness": {
+        "status": "SOURCE-LAW-WITNESSES-PRESENT-UNVERIFIED",
+        "missing": [],
+        "selection": false,
+        "ratification": false,
+        "next_gate": "D1-D9-DEDUPE-CORE-VS-LIBRARY-AND-INDEPENDENT-ORACLE"
+      }
     },
     {
       "coordinate": "1111100101",
@@ -14538,7 +17206,14 @@
       "previous_source_index_path": "knowledge/d10-clhs-streams-census-20261009.json",
       "core_vs_library": "PENDING-D2-ENVIRONMENT-AND-CORE-VS-LIBRARY",
       "independent_oracle": "NOT-EXECUTED",
-      "coordinate_basis": "NONCANONICAL-SOURCE-GROUNDED-RESEARCH-RESERVATION"
+      "coordinate_basis": "NONCANONICAL-SOURCE-GROUNDED-RESEARCH-RESERVATION",
+      "proof_readiness": {
+        "status": "SOURCE-LAW-WITNESSES-PRESENT-UNVERIFIED",
+        "missing": [],
+        "selection": false,
+        "ratification": false,
+        "next_gate": "D1-D9-DEDUPE-CORE-VS-LIBRARY-AND-INDEPENDENT-ORACLE"
+      }
     },
     {
       "coordinate": "1111100110",
@@ -14558,7 +17233,14 @@
       "previous_source_index_path": "knowledge/d10-clhs-streams-census-20261009.json",
       "core_vs_library": "PENDING-D2-ENVIRONMENT-AND-CORE-VS-LIBRARY",
       "independent_oracle": "NOT-EXECUTED",
-      "coordinate_basis": "NONCANONICAL-SOURCE-GROUNDED-RESEARCH-RESERVATION"
+      "coordinate_basis": "NONCANONICAL-SOURCE-GROUNDED-RESEARCH-RESERVATION",
+      "proof_readiness": {
+        "status": "SOURCE-LAW-WITNESSES-PRESENT-UNVERIFIED",
+        "missing": [],
+        "selection": false,
+        "ratification": false,
+        "next_gate": "D1-D9-DEDUPE-CORE-VS-LIBRARY-AND-INDEPENDENT-ORACLE"
+      }
     },
     {
       "coordinate": "1111100111",
@@ -14578,7 +17260,14 @@
       "previous_source_index_path": "knowledge/d10-clhs-streams-census-20261009.json",
       "core_vs_library": "PENDING-D2-ENVIRONMENT-AND-CORE-VS-LIBRARY",
       "independent_oracle": "NOT-EXECUTED",
-      "coordinate_basis": "NONCANONICAL-SOURCE-GROUNDED-RESEARCH-RESERVATION"
+      "coordinate_basis": "NONCANONICAL-SOURCE-GROUNDED-RESEARCH-RESERVATION",
+      "proof_readiness": {
+        "status": "SOURCE-LAW-WITNESSES-PRESENT-UNVERIFIED",
+        "missing": [],
+        "selection": false,
+        "ratification": false,
+        "next_gate": "D1-D9-DEDUPE-CORE-VS-LIBRARY-AND-INDEPENDENT-ORACLE"
+      }
     },
     {
       "coordinate": "1111101000",
@@ -14598,7 +17287,14 @@
       "previous_source_index_path": "knowledge/d10-clhs-streams-census-20261009.json",
       "core_vs_library": "PENDING-D2-ENVIRONMENT-AND-CORE-VS-LIBRARY",
       "independent_oracle": "NOT-EXECUTED",
-      "coordinate_basis": "NONCANONICAL-SOURCE-GROUNDED-RESEARCH-RESERVATION"
+      "coordinate_basis": "NONCANONICAL-SOURCE-GROUNDED-RESEARCH-RESERVATION",
+      "proof_readiness": {
+        "status": "SOURCE-LAW-WITNESSES-PRESENT-UNVERIFIED",
+        "missing": [],
+        "selection": false,
+        "ratification": false,
+        "next_gate": "D1-D9-DEDUPE-CORE-VS-LIBRARY-AND-INDEPENDENT-ORACLE"
+      }
     },
     {
       "coordinate": "1111101001",
@@ -14618,7 +17314,14 @@
       "previous_source_index_path": "knowledge/d10-clhs-streams-census-20261009.json",
       "core_vs_library": "PENDING-D2-ENVIRONMENT-AND-CORE-VS-LIBRARY",
       "independent_oracle": "NOT-EXECUTED",
-      "coordinate_basis": "NONCANONICAL-SOURCE-GROUNDED-RESEARCH-RESERVATION"
+      "coordinate_basis": "NONCANONICAL-SOURCE-GROUNDED-RESEARCH-RESERVATION",
+      "proof_readiness": {
+        "status": "SOURCE-LAW-WITNESSES-PRESENT-UNVERIFIED",
+        "missing": [],
+        "selection": false,
+        "ratification": false,
+        "next_gate": "D1-D9-DEDUPE-CORE-VS-LIBRARY-AND-INDEPENDENT-ORACLE"
+      }
     },
     {
       "coordinate": "1111101010",
@@ -14638,7 +17341,14 @@
       "previous_source_index_path": "knowledge/d10-clhs-streams-census-20261009.json",
       "core_vs_library": "PENDING-D2-ENVIRONMENT-AND-CORE-VS-LIBRARY",
       "independent_oracle": "NOT-EXECUTED",
-      "coordinate_basis": "NONCANONICAL-SOURCE-GROUNDED-RESEARCH-RESERVATION"
+      "coordinate_basis": "NONCANONICAL-SOURCE-GROUNDED-RESEARCH-RESERVATION",
+      "proof_readiness": {
+        "status": "SOURCE-LAW-WITNESSES-PRESENT-UNVERIFIED",
+        "missing": [],
+        "selection": false,
+        "ratification": false,
+        "next_gate": "D1-D9-DEDUPE-CORE-VS-LIBRARY-AND-INDEPENDENT-ORACLE"
+      }
     },
     {
       "coordinate": "1111101011",
@@ -14658,7 +17368,14 @@
       "previous_source_index_path": "knowledge/d10-reason-alternate-define-donor-v1.json",
       "core_vs_library": "PENDING-D2-ENVIRONMENT-AND-CORE-VS-LIBRARY",
       "independent_oracle": "NOT-EXECUTED",
-      "coordinate_basis": "NONCANONICAL-SOURCE-GROUNDED-RESEARCH-RESERVATION"
+      "coordinate_basis": "NONCANONICAL-SOURCE-GROUNDED-RESEARCH-RESERVATION",
+      "proof_readiness": {
+        "status": "SOURCE-LAW-WITNESSES-PRESENT-UNVERIFIED",
+        "missing": [],
+        "selection": false,
+        "ratification": false,
+        "next_gate": "D1-D9-DEDUPE-CORE-VS-LIBRARY-AND-INDEPENDENT-ORACLE"
+      }
     },
     {
       "coordinate": "1111101100",
@@ -14678,7 +17395,14 @@
       "previous_source_index_path": "knowledge/d10-reason-alternate-define-donor-v1.json",
       "core_vs_library": "PENDING-D2-ENVIRONMENT-AND-CORE-VS-LIBRARY",
       "independent_oracle": "NOT-EXECUTED",
-      "coordinate_basis": "NONCANONICAL-SOURCE-GROUNDED-RESEARCH-RESERVATION"
+      "coordinate_basis": "NONCANONICAL-SOURCE-GROUNDED-RESEARCH-RESERVATION",
+      "proof_readiness": {
+        "status": "SOURCE-LAW-WITNESSES-PRESENT-UNVERIFIED",
+        "missing": [],
+        "selection": false,
+        "ratification": false,
+        "next_gate": "D1-D9-DEDUPE-CORE-VS-LIBRARY-AND-INDEPENDENT-ORACLE"
+      }
     },
     {
       "coordinate": "1111101101",
@@ -14698,7 +17422,14 @@
       "previous_source_index_path": "knowledge/d10-reason-alternate-define-donor-v1.json",
       "core_vs_library": "PENDING-D2-ENVIRONMENT-AND-CORE-VS-LIBRARY",
       "independent_oracle": "NOT-EXECUTED",
-      "coordinate_basis": "NONCANONICAL-SOURCE-GROUNDED-RESEARCH-RESERVATION"
+      "coordinate_basis": "NONCANONICAL-SOURCE-GROUNDED-RESEARCH-RESERVATION",
+      "proof_readiness": {
+        "status": "SOURCE-LAW-WITNESSES-PRESENT-UNVERIFIED",
+        "missing": [],
+        "selection": false,
+        "ratification": false,
+        "next_gate": "D1-D9-DEDUPE-CORE-VS-LIBRARY-AND-INDEPENDENT-ORACLE"
+      }
     },
     {
       "coordinate": "1111101110",
@@ -14718,7 +17449,14 @@
       "previous_source_index_path": "knowledge/d10-reason-alternate-define-donor-v1.json",
       "core_vs_library": "PENDING-D2-ENVIRONMENT-AND-CORE-VS-LIBRARY",
       "independent_oracle": "NOT-EXECUTED",
-      "coordinate_basis": "NONCANONICAL-SOURCE-GROUNDED-RESEARCH-RESERVATION"
+      "coordinate_basis": "NONCANONICAL-SOURCE-GROUNDED-RESEARCH-RESERVATION",
+      "proof_readiness": {
+        "status": "SOURCE-LAW-WITNESSES-PRESENT-UNVERIFIED",
+        "missing": [],
+        "selection": false,
+        "ratification": false,
+        "next_gate": "D1-D9-DEDUPE-CORE-VS-LIBRARY-AND-INDEPENDENT-ORACLE"
+      }
     },
     {
       "coordinate": "1111101111",
@@ -14738,7 +17476,14 @@
       "previous_source_index_path": "knowledge/d10-reason-alternate-define-donor-v1.json",
       "core_vs_library": "PENDING-D2-ENVIRONMENT-AND-CORE-VS-LIBRARY",
       "independent_oracle": "NOT-EXECUTED",
-      "coordinate_basis": "NONCANONICAL-SOURCE-GROUNDED-RESEARCH-RESERVATION"
+      "coordinate_basis": "NONCANONICAL-SOURCE-GROUNDED-RESEARCH-RESERVATION",
+      "proof_readiness": {
+        "status": "SOURCE-LAW-WITNESSES-PRESENT-UNVERIFIED",
+        "missing": [],
+        "selection": false,
+        "ratification": false,
+        "next_gate": "D1-D9-DEDUPE-CORE-VS-LIBRARY-AND-INDEPENDENT-ORACLE"
+      }
     },
     {
       "coordinate": "1111110000",
@@ -14758,7 +17503,14 @@
       "previous_source_index_path": "knowledge/d10-reason-alternate-define-donor-v1.json",
       "core_vs_library": "PENDING-D2-ENVIRONMENT-AND-CORE-VS-LIBRARY",
       "independent_oracle": "NOT-EXECUTED",
-      "coordinate_basis": "NONCANONICAL-SOURCE-GROUNDED-RESEARCH-RESERVATION"
+      "coordinate_basis": "NONCANONICAL-SOURCE-GROUNDED-RESEARCH-RESERVATION",
+      "proof_readiness": {
+        "status": "SOURCE-LAW-WITNESSES-PRESENT-UNVERIFIED",
+        "missing": [],
+        "selection": false,
+        "ratification": false,
+        "next_gate": "D1-D9-DEDUPE-CORE-VS-LIBRARY-AND-INDEPENDENT-ORACLE"
+      }
     },
     {
       "coordinate": "1111110001",
@@ -14778,7 +17530,14 @@
       "previous_source_index_path": "knowledge/d10-reason-alternate-define-donor-v1.json",
       "core_vs_library": "PENDING-D2-ENVIRONMENT-AND-CORE-VS-LIBRARY",
       "independent_oracle": "NOT-EXECUTED",
-      "coordinate_basis": "NONCANONICAL-SOURCE-GROUNDED-RESEARCH-RESERVATION"
+      "coordinate_basis": "NONCANONICAL-SOURCE-GROUNDED-RESEARCH-RESERVATION",
+      "proof_readiness": {
+        "status": "SOURCE-LAW-WITNESSES-PRESENT-UNVERIFIED",
+        "missing": [],
+        "selection": false,
+        "ratification": false,
+        "next_gate": "D1-D9-DEDUPE-CORE-VS-LIBRARY-AND-INDEPENDENT-ORACLE"
+      }
     },
     {
       "coordinate": "1111110010",
@@ -14798,7 +17557,14 @@
       "previous_source_index_path": "knowledge/d10-reason-alternate-define-donor-v1.json",
       "core_vs_library": "PENDING-D2-ENVIRONMENT-AND-CORE-VS-LIBRARY",
       "independent_oracle": "NOT-EXECUTED",
-      "coordinate_basis": "NONCANONICAL-SOURCE-GROUNDED-RESEARCH-RESERVATION"
+      "coordinate_basis": "NONCANONICAL-SOURCE-GROUNDED-RESEARCH-RESERVATION",
+      "proof_readiness": {
+        "status": "SOURCE-LAW-WITNESSES-PRESENT-UNVERIFIED",
+        "missing": [],
+        "selection": false,
+        "ratification": false,
+        "next_gate": "D1-D9-DEDUPE-CORE-VS-LIBRARY-AND-INDEPENDENT-ORACLE"
+      }
     },
     {
       "coordinate": "1111110011",
@@ -14818,7 +17584,14 @@
       "previous_source_index_path": "knowledge/d10-reason-alternate-define-donor-v1.json",
       "core_vs_library": "PENDING-D2-ENVIRONMENT-AND-CORE-VS-LIBRARY",
       "independent_oracle": "NOT-EXECUTED",
-      "coordinate_basis": "NONCANONICAL-SOURCE-GROUNDED-RESEARCH-RESERVATION"
+      "coordinate_basis": "NONCANONICAL-SOURCE-GROUNDED-RESEARCH-RESERVATION",
+      "proof_readiness": {
+        "status": "SOURCE-LAW-WITNESSES-PRESENT-UNVERIFIED",
+        "missing": [],
+        "selection": false,
+        "ratification": false,
+        "next_gate": "D1-D9-DEDUPE-CORE-VS-LIBRARY-AND-INDEPENDENT-ORACLE"
+      }
     },
     {
       "coordinate": "1111110100",
@@ -14838,7 +17611,14 @@
       "previous_source_index_path": "knowledge/d10-reason-alternate-define-donor-v1.json",
       "core_vs_library": "PENDING-D2-ENVIRONMENT-AND-CORE-VS-LIBRARY",
       "independent_oracle": "NOT-EXECUTED",
-      "coordinate_basis": "NONCANONICAL-SOURCE-GROUNDED-RESEARCH-RESERVATION"
+      "coordinate_basis": "NONCANONICAL-SOURCE-GROUNDED-RESEARCH-RESERVATION",
+      "proof_readiness": {
+        "status": "SOURCE-LAW-WITNESSES-PRESENT-UNVERIFIED",
+        "missing": [],
+        "selection": false,
+        "ratification": false,
+        "next_gate": "D1-D9-DEDUPE-CORE-VS-LIBRARY-AND-INDEPENDENT-ORACLE"
+      }
     },
     {
       "coordinate": "1111110101",
@@ -14858,7 +17638,14 @@
       "previous_source_index_path": "knowledge/d10-reason-alternate-define-donor-v1.json",
       "core_vs_library": "PENDING-D2-ENVIRONMENT-AND-CORE-VS-LIBRARY",
       "independent_oracle": "NOT-EXECUTED",
-      "coordinate_basis": "NONCANONICAL-SOURCE-GROUNDED-RESEARCH-RESERVATION"
+      "coordinate_basis": "NONCANONICAL-SOURCE-GROUNDED-RESEARCH-RESERVATION",
+      "proof_readiness": {
+        "status": "SOURCE-LAW-WITNESSES-PRESENT-UNVERIFIED",
+        "missing": [],
+        "selection": false,
+        "ratification": false,
+        "next_gate": "D1-D9-DEDUPE-CORE-VS-LIBRARY-AND-INDEPENDENT-ORACLE"
+      }
     },
     {
       "coordinate": "1111110110",
@@ -14878,7 +17665,14 @@
       "previous_source_index_path": "knowledge/d10-reason-alternate-define-donor-v1.json",
       "core_vs_library": "PENDING-D2-ENVIRONMENT-AND-CORE-VS-LIBRARY",
       "independent_oracle": "NOT-EXECUTED",
-      "coordinate_basis": "NONCANONICAL-SOURCE-GROUNDED-RESEARCH-RESERVATION"
+      "coordinate_basis": "NONCANONICAL-SOURCE-GROUNDED-RESEARCH-RESERVATION",
+      "proof_readiness": {
+        "status": "SOURCE-LAW-WITNESSES-PRESENT-UNVERIFIED",
+        "missing": [],
+        "selection": false,
+        "ratification": false,
+        "next_gate": "D1-D9-DEDUPE-CORE-VS-LIBRARY-AND-INDEPENDENT-ORACLE"
+      }
     },
     {
       "coordinate": "1111110111",
@@ -14898,7 +17692,14 @@
       "previous_source_index_path": "knowledge/d10-reason-alternate-define-donor-v1.json",
       "core_vs_library": "PENDING-D2-ENVIRONMENT-AND-CORE-VS-LIBRARY",
       "independent_oracle": "NOT-EXECUTED",
-      "coordinate_basis": "NONCANONICAL-SOURCE-GROUNDED-RESEARCH-RESERVATION"
+      "coordinate_basis": "NONCANONICAL-SOURCE-GROUNDED-RESEARCH-RESERVATION",
+      "proof_readiness": {
+        "status": "SOURCE-LAW-WITNESSES-PRESENT-UNVERIFIED",
+        "missing": [],
+        "selection": false,
+        "ratification": false,
+        "next_gate": "D1-D9-DEDUPE-CORE-VS-LIBRARY-AND-INDEPENDENT-ORACLE"
+      }
     },
     {
       "coordinate": "1111111000",
@@ -14918,7 +17719,14 @@
       "previous_source_index_path": "knowledge/d10-reason-alternate-define-donor-v1.json",
       "core_vs_library": "PENDING-D2-ENVIRONMENT-AND-CORE-VS-LIBRARY",
       "independent_oracle": "NOT-EXECUTED",
-      "coordinate_basis": "NONCANONICAL-SOURCE-GROUNDED-RESEARCH-RESERVATION"
+      "coordinate_basis": "NONCANONICAL-SOURCE-GROUNDED-RESEARCH-RESERVATION",
+      "proof_readiness": {
+        "status": "SOURCE-LAW-WITNESSES-PRESENT-UNVERIFIED",
+        "missing": [],
+        "selection": false,
+        "ratification": false,
+        "next_gate": "D1-D9-DEDUPE-CORE-VS-LIBRARY-AND-INDEPENDENT-ORACLE"
+      }
     },
     {
       "coordinate": "1111111001",
@@ -14938,7 +17746,14 @@
       "previous_source_index_path": "knowledge/d10-reason-alternate-define-donor-v1.json",
       "core_vs_library": "PENDING-D2-ENVIRONMENT-AND-CORE-VS-LIBRARY",
       "independent_oracle": "NOT-EXECUTED",
-      "coordinate_basis": "NONCANONICAL-SOURCE-GROUNDED-RESEARCH-RESERVATION"
+      "coordinate_basis": "NONCANONICAL-SOURCE-GROUNDED-RESEARCH-RESERVATION",
+      "proof_readiness": {
+        "status": "SOURCE-LAW-WITNESSES-PRESENT-UNVERIFIED",
+        "missing": [],
+        "selection": false,
+        "ratification": false,
+        "next_gate": "D1-D9-DEDUPE-CORE-VS-LIBRARY-AND-INDEPENDENT-ORACLE"
+      }
     },
     {
       "coordinate": "1111111010",
@@ -14958,7 +17773,14 @@
       "previous_source_index_path": "knowledge/d10-reason-alternate-define-donor-v1.json",
       "core_vs_library": "PENDING-D2-ENVIRONMENT-AND-CORE-VS-LIBRARY",
       "independent_oracle": "NOT-EXECUTED",
-      "coordinate_basis": "NONCANONICAL-SOURCE-GROUNDED-RESEARCH-RESERVATION"
+      "coordinate_basis": "NONCANONICAL-SOURCE-GROUNDED-RESEARCH-RESERVATION",
+      "proof_readiness": {
+        "status": "SOURCE-LAW-WITNESSES-PRESENT-UNVERIFIED",
+        "missing": [],
+        "selection": false,
+        "ratification": false,
+        "next_gate": "D1-D9-DEDUPE-CORE-VS-LIBRARY-AND-INDEPENDENT-ORACLE"
+      }
     },
     {
       "coordinate": "1111111011",
@@ -14978,7 +17800,14 @@
       "previous_source_index_path": "knowledge/d10-reason-alternate-define-donor-v1.json",
       "core_vs_library": "PENDING-D2-READER-STATE-AND-CORE-VS-LIBRARY",
       "independent_oracle": "NOT-EXECUTED",
-      "coordinate_basis": "NONCANONICAL-SOURCE-GROUNDED-RESEARCH-RESERVATION"
+      "coordinate_basis": "NONCANONICAL-SOURCE-GROUNDED-RESEARCH-RESERVATION",
+      "proof_readiness": {
+        "status": "SOURCE-LAW-WITNESSES-PRESENT-UNVERIFIED",
+        "missing": [],
+        "selection": false,
+        "ratification": false,
+        "next_gate": "D1-D9-DEDUPE-CORE-VS-LIBRARY-AND-INDEPENDENT-ORACLE"
+      }
     },
     {
       "coordinate": "1111111100",
@@ -14998,7 +17827,14 @@
       "previous_source_index_path": "knowledge/d10-reason-alternate-define-donor-v1.json",
       "core_vs_library": "PENDING-D2-READER-STATE-AND-CORE-VS-LIBRARY",
       "independent_oracle": "NOT-EXECUTED",
-      "coordinate_basis": "NONCANONICAL-SOURCE-GROUNDED-RESEARCH-RESERVATION"
+      "coordinate_basis": "NONCANONICAL-SOURCE-GROUNDED-RESEARCH-RESERVATION",
+      "proof_readiness": {
+        "status": "SOURCE-LAW-WITNESSES-PRESENT-UNVERIFIED",
+        "missing": [],
+        "selection": false,
+        "ratification": false,
+        "next_gate": "D1-D9-DEDUPE-CORE-VS-LIBRARY-AND-INDEPENDENT-ORACLE"
+      }
     },
     {
       "coordinate": "1111111101",
@@ -15018,7 +17854,14 @@
       "previous_source_index_path": "knowledge/d10-reason-alternate-define-donor-v1.json",
       "core_vs_library": "PENDING-D2-READER-STATE-AND-CORE-VS-LIBRARY",
       "independent_oracle": "NOT-EXECUTED",
-      "coordinate_basis": "NONCANONICAL-SOURCE-GROUNDED-RESEARCH-RESERVATION"
+      "coordinate_basis": "NONCANONICAL-SOURCE-GROUNDED-RESEARCH-RESERVATION",
+      "proof_readiness": {
+        "status": "SOURCE-LAW-WITNESSES-PRESENT-UNVERIFIED",
+        "missing": [],
+        "selection": false,
+        "ratification": false,
+        "next_gate": "D1-D9-DEDUPE-CORE-VS-LIBRARY-AND-INDEPENDENT-ORACLE"
+      }
     },
     {
       "coordinate": "1111111110",
@@ -15038,7 +17881,14 @@
       "previous_source_index_path": "knowledge/d10-reason-alternate-define-donor-v1.json",
       "core_vs_library": "PENDING-D2-READER-STATE-AND-CORE-VS-LIBRARY",
       "independent_oracle": "NOT-EXECUTED",
-      "coordinate_basis": "NONCANONICAL-SOURCE-GROUNDED-RESEARCH-RESERVATION"
+      "coordinate_basis": "NONCANONICAL-SOURCE-GROUNDED-RESEARCH-RESERVATION",
+      "proof_readiness": {
+        "status": "SOURCE-LAW-WITNESSES-PRESENT-UNVERIFIED",
+        "missing": [],
+        "selection": false,
+        "ratification": false,
+        "next_gate": "D1-D9-DEDUPE-CORE-VS-LIBRARY-AND-INDEPENDENT-ORACLE"
+      }
     },
     {
       "coordinate": "1111111111",
@@ -15058,7 +17908,14 @@
       "previous_source_index_path": "knowledge/d10-reason-alternate-define-donor-v1.json",
       "core_vs_library": "PENDING-D2-READER-STATE-AND-CORE-VS-LIBRARY",
       "independent_oracle": "NOT-EXECUTED",
-      "coordinate_basis": "NONCANONICAL-SOURCE-GROUNDED-RESEARCH-RESERVATION"
+      "coordinate_basis": "NONCANONICAL-SOURCE-GROUNDED-RESEARCH-RESERVATION",
+      "proof_readiness": {
+        "status": "SOURCE-LAW-WITNESSES-PRESENT-UNVERIFIED",
+        "missing": [],
+        "selection": false,
+        "ratification": false,
+        "next_gate": "D1-D9-DEDUPE-CORE-VS-LIBRARY-AND-INDEPENDENT-ORACLE"
+      }
     }
   ],
   "lower_domain_exact_name_conflicts": [
@@ -18776,5 +21633,58 @@
         "rows": 2
       }
     ]
+  },
+  "evidence_gate": {
+    "date": "2026-10-11",
+    "status": "RESEARCH-ONLY-NO-RATIFICATION",
+    "canonical_research_selected": 715,
+    "provisional_unselected": 309,
+    "formal_ratified": 0,
+    "semantic_source_audit": {
+      "total": 309,
+      "law_and_witnesses": 123,
+      "has_law": 173,
+      "has_positive": 123,
+      "has_negative": 123,
+      "missing_law": 136,
+      "missing_positive": 186,
+      "missing_negative": 186,
+      "needs_review": 309,
+      "by_status": {
+        "PROVISIONAL-NAME-QUEUE-NOT-SELECTED": {
+          "total": 96,
+          "witnessed": 0
+        },
+        "PROVISIONAL-HISTORICAL-HOLD-NOT-SELECTED": {
+          "total": 80,
+          "witnessed": 22
+        },
+        "PROVISIONAL-SOURCE-RESEARCH-HOLD-NOT-SELECTED": {
+          "total": 46,
+          "witnessed": 14
+        },
+        "PROVISIONAL-HISTORICAL-LAW-REVIEW-HOLD-NOT-SELECTED": {
+          "total": 30,
+          "witnessed": 30
+        },
+        "PROVISIONAL-PATHNAME-LAW-CANDIDATE-NOT-SELECTED": {
+          "total": 11,
+          "witnessed": 11
+        },
+        "PROVISIONAL-STANDARD-STREAM-LAW-NOT-SELECTED": {
+          "total": 11,
+          "witnessed": 11
+        },
+        "PROVISIONAL-STANDARD-CONTRACT-HOST-REVIEW-NOT-SELECTED": {
+          "total": 8,
+          "witnessed": 8
+        },
+        "PROVISIONAL-HISTORICAL-ENVIRONMENT-LAW-NOT-SELECTED": {
+          "total": 27,
+          "witnessed": 27
+        }
+      }
+    },
+    "note": "Evidence presence is not equivalent to an independent semantic primitive or ratified resident."
   }
 }
