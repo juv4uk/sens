@@ -12,7 +12,7 @@ import re
 
 ROOT = Path(__file__).resolve().parents[1]
 DOC = ROOT / "docs/architecture/ARCHIPELAGO-V1.uk.md"
-INVENTORY = ROOT / "knowledge/d10-v1-semantic-inventory.json"
+POINTER = ROOT / "knowledge/d10-current-inventory.json"
 MATRIX = ROOT / "knowledge/d10-owner-repo-donor-matrix-v3.json"
 
 BEGIN = "<!-- D10-INVENTORY-COUNTS:BEGIN -->"
@@ -90,7 +90,18 @@ def validate(document: str, inventory: dict, matrix: dict) -> dict:
 
 def main() -> None:
     document = DOC.read_text(encoding="utf-8")
-    inventory = json.loads(INVENTORY.read_text(encoding="utf-8"))
+    pointer = json.loads(POINTER.read_text(encoding="utf-8"))
+    current_path = Path(pointer["canonical_current"]["path"])
+    if current_path.is_absolute() or ".." in current_path.parts:
+        raise ValueError("unsafe canonical D10 inventory path")
+    inventory_raw = (ROOT / current_path).read_bytes()
+    import hashlib
+    actual_sha = hashlib.sha1(
+        b"blob " + str(len(inventory_raw)).encode("ascii") + b"\0" + inventory_raw
+    ).hexdigest()
+    if actual_sha != pointer["canonical_current"]["git_blob"]:
+        raise ValueError("canonical D10 inventory SHA mismatch")
+    inventory = json.loads(inventory_raw)
     matrix = json.loads(MATRIX.read_text(encoding="utf-8"))
     result = validate(document, inventory, matrix)
     print("D10-ARCHIPELAGO-DOC-PROJECTION: PASS", json.dumps(result, sort_keys=True))
