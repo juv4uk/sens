@@ -126,7 +126,10 @@ def verify_dossier(
     assert len({x["proposal_id"] for x in rows}) == len(rows)
     for row in rows:
         name = row["semantic_name"].upper()
-        assert name not in lower and name not in upper, "D1-D9/D10 collision"
+        assert name not in lower, "ratified lower-domain identity collision"
+        if name in upper:
+            from check_d10_alltime_archived_14_selection import verify_promoted
+            verify_promoted(name, inventory)
         assert row["triage_status"].startswith("HOLD-")
         assert row["coordinate"] is None
         assert row["ratified_resident"] is False

@@ -560,6 +560,57 @@
         "python3 scripts/check_d10_binary_lyndon_factorization.py",
         "python3 scripts/check_d10_stern_brocot_runs.py --self-test"
       ]
+    },
+    {
+      "id": "d10.alltime.archive-verified-14.after-661.20261011",
+      "authority": "#4013 #4463 #5041 — owner mandate fill existing D10 research, selection only",
+      "evidence": [
+        "research/d10/staging-20261011/d10-existing-research-batch-replay-20261011.json",
+        "knowledge/d10-alltime-existing-research-selected-batch14-20261011.json",
+        "knowledge/d10-abductive-minimal-explanations-v1.json",
+        "knowledge/d10-affine-correlated-uncertainty-v1.json",
+        "knowledge/d10-allen-atms-research-20261009.json",
+        "knowledge/d10-astrophoto-exact-pinhole-research-20261009.json",
+        "knowledge/d10-critical-pairs-confluence-20261009.json",
+        "knowledge/d10-first-order-lgg-research-v1.json",
+        "knowledge/d10-rosenblatt-novikoff-exact-step-20261009.json",
+        "knowledge/d10-lower-mechanical-word-research-v1.json",
+        "knowledge/d10-affine-quantity-point-delta-20261009.json",
+        "knowledge/d10-ground-congruence-closure-research-20261009.json",
+        "knowledge/d10-cyclic-word-canon-20261009.json"
+      ],
+      "previous_inventory_blob_sha": "415f3516d599eb0aa6b3f50fb659a022ba0d758e",
+      "resulting_inventory_blob_sha": "4c803abf0f22582ef8234d9ba60ca4796d433eb5",
+      "added_stable_ids": [
+        "d10.archive.minimal-abductive-explanations.20261011",
+        "d10.archive.correlated-affine-combination.20261011",
+        "d10.archive.sound-affine-product-enclosure.20261011",
+        "d10.archive.allen-interval-relation.20261011",
+        "d10.archive.atms-consistent-label-join.20261011",
+        "d10.archive.pinhole-image-project.20261011",
+        "d10.archive.pixel-to-camera-ray.20261011",
+        "d10.archive.finite-string-critical-pair-confluence.20261011",
+        "d10.archive.first-order-least-general-generalization.20261011",
+        "d10.archive.exact-perceptron-mistake-step.20261011",
+        "d10.archive.lower-mechanical-word.20261011",
+        "d10.archive.affine-quantity-transport.20261011",
+        "d10.archive.ground-congruence-closure-partition.20261011",
+        "d10.archive.cyclic-binary-word-canon.20261011"
+      ],
+      "appended_sources": [
+        "knowledge/d10-alltime-existing-research-selected-batch14-20261011.json"
+      ],
+      "delta_selected": 14,
+      "previous_selected": 661,
+      "resulting_selected": 675,
+      "coordinates_added": 0,
+      "ratified_added": 0,
+      "decision": "Select 14 source-pinned already researched observable laws. Historical HOLD preserved; Core-vs-derived awaits owner's D10 ratification; no coordinate or physical T5 authority.",
+      "tests": [
+        "python3 scripts/check_d10_alltime_archived_14_selection.py --self-test",
+        "python3 scripts/check_d10_selection_transition_history.py --self-test",
+        "python3 scripts/check-d10-proposal-ledger.py --self-test"
+      ]
     }
   ]
 }
