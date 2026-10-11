@@ -18,44 +18,44 @@
 ;
 ; Failure is named data, never ()/false.
 
-(00001001 prolog-values-to-datalog-facts
-  (00001000 (role values)
-    (00000111
+(0011 prolog-values-to-datalog-facts
+  (0010 (role values)
+    (110
       
-      ((0100 (00000010 values))
-       (00000100 (00100111 role (00000101 values))
-             (prolog-values-to-datalog-facts role (00000110 values)))))))
+      ((0100 (010 values))
+       (111 (1110 role (100 values))
+             (prolog-values-to-datalog-facts role (011 values)))))))
 
-(00001001 prolog-substitutions-to-datalog-facts
-  (00001000 (observation)
-    (10011100 ((source-ref-row (00101101 (00000001 source-ref) (00000110 observation)))
-          (variable-row (00101101 (00000001 variable) (00000110 observation)))
-          (values-row (00101101 (00000001 values) (00000110 observation))))
-      (00000111
-        ((0100 (00000010 source-ref-row))
-         (00100111 (00000001 projection-failure) (00000001 missing-source-ref)))
-        ((00000010 source-ref-row) 
-         (00100111 (00000001 projection-failure) (00000001 malformed-source-ref)))
-        ((0100 (00000010 source-ref-row))
-         (00000111
-           ((0100 (00000010 variable-row))
-            (00100111 (00000001 projection-failure) (00000001 missing-variable-role)))
-           ((00000010 variable-row) 
-            (00100111 (00000001 projection-failure) (00000001 malformed-variable-role)))
-           ((0100 (00000010 variable-row))
-            (00000111
-              ((0100 (00000010 values-row))
-               (00100111 (00000001 projection-failure) (00000001 missing-values)))
-              ((00000010 values-row) 
-               (00100111 (00000001 projection-failure) (00000001 malformed-values)))
-              ((0100 (00000010 values-row))
-               (00100111
-                 (00000001 projection-result)
-                 (00100111 (00000001 projection)
-                       (00000001 prolog-substitutions-to-datalog-facts))
-                 (00100111 (00000001 source-ref)
-                       (00000101 (00000110 source-ref-row)))
-                 (00100111 (00000001 facts)
+(0011 prolog-substitutions-to-datalog-facts
+  (0010 (observation)
+    (001000 ((source-ref-row (11100 (001 source-ref) (011 observation)))
+          (variable-row (11100 (001 variable) (011 observation)))
+          (values-row (11100 (001 values) (011 observation))))
+      (110
+        ((0100 (010 source-ref-row))
+         (1110 (001 projection-failure) (001 missing-source-ref)))
+        ((010 source-ref-row) 
+         (1110 (001 projection-failure) (001 malformed-source-ref)))
+        ((0100 (010 source-ref-row))
+         (110
+           ((0100 (010 variable-row))
+            (1110 (001 projection-failure) (001 missing-variable-role)))
+           ((010 variable-row) 
+            (1110 (001 projection-failure) (001 malformed-variable-role)))
+           ((0100 (010 variable-row))
+            (110
+              ((0100 (010 values-row))
+               (1110 (001 projection-failure) (001 missing-values)))
+              ((010 values-row) 
+               (1110 (001 projection-failure) (001 malformed-values)))
+              ((0100 (010 values-row))
+               (1110
+                 (001 projection-result)
+                 (1110 (001 projection)
+                       (001 prolog-substitutions-to-datalog-facts))
+                 (1110 (001 source-ref)
+                       (100 (011 source-ref-row)))
+                 (1110 (001 facts)
                        (prolog-values-to-datalog-facts
-                         (00000101 (00000110 variable-row))
-                         (00000110 values-row)))))))))))))
+                         (100 (011 variable-row))
+                         (011 values-row)))))))))))))
