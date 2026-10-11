@@ -6,8 +6,8 @@ use sens::{
 };
 
 const CORE: &str = include_str!("../../../lib/core.lisp");
-const OLD: &str = include_str!("../../../lib/world.lisp");
-const D3: &str = include_str!("../../../tests/fixtures/world-d3-candidate.lisp");
+const OLD: &str = include_str!("../../../tests/fixtures/world-d3-before.lisp");
+const D3: &str = include_str!("../../../lib/world.lisp");
 
 fn world_session(migrated: bool) -> Session {
     let mut s = Session::default();
