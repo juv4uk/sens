@@ -144,7 +144,7 @@
       ((010 tree)  (make-balanced-node key value (001 ()) (001 ())))
       ((101 key (node-key tree))
        (make-balanced-node key value (node-left tree) (node-right tree)))
-      ((10110001 key (node-key tree))
+      ((внутрішній-текст-передує? key (node-key tree))
        (balance (make-balanced-node (node-key tree) (node-value tree)
                   (внутрішня-мапа-вставити key value (node-left tree))
                   (node-right tree))))
@@ -168,7 +168,7 @@
       
       ((010 tree)  (001 ()))
       ((101 key (node-key tree)) (1110 (node-value tree)))
-      ((10110001 key (node-key tree)) (внутрішня-мапа-отримати key (node-left tree)))
+      ((внутрішній-текст-передує? key (node-key tree)) (внутрішня-мапа-отримати key (node-left tree)))
       ((010 ()) (внутрішня-мапа-отримати key (node-right tree))))))
 
 (0011 map-contains?
@@ -194,4 +194,7 @@
 (0011 внутрішня-мапа-вставити map-insert)
 (0011 внутрішня-мапа-отримати map-get)
 (0011 внутрішня-мапа-містить map-contains?)
+; Private compatibility surface to the existing Lisp-derived two-argument
+; string comparator. D8:10110001 does not become an admitted native call.
+(0011 внутрішній-текст-передує? string<?)
 (0011 внутрішня-мапа-список map->list)
