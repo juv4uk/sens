@@ -50,14 +50,10 @@ else
 fi
 
 quantity_witness="tests/fixtures/exact-quantity-arithmetic-witness.lisp"
-if quantity_status="$(cargo run --quiet -p sens-cli --bin sens -- "$quantity_witness" 2>&1)"; then
-  if [[ "$quantity_status" != "(exact-quantity-arithmetic-witness (status pass))" ]]; then
-    printf 'exact quantity Lisp witness returned a non-pass result: %s\n' "$quantity_status" >&2
-    exit 1
-  fi
-else
-  quantity_rc=$?
-  printf 'exact quantity Lisp witness failed (exit %s):\n%s\n' "$quantity_rc" "$quantity_status" >&2
+quantity_rc=0
+quantity_status="$(cargo run --quiet -p sens-cli --bin sens -- "$quantity_witness" 2>&1)" || quantity_rc=$?
+if [[ "$quantity_rc" -ne 0 || "$quantity_status" != "(exact-quantity-arithmetic-witness (status pass))" ]]; then
+  printf 'exact quantity Lisp witness non-pass or execution error (exit %s):\n%s\n' "$quantity_rc" "$quantity_status" >&2
 
   # Diagnostic-only replay of the existing definitions. Read bindings and
   # calls separately so a non-callable value cannot masquerade as a law failure.
@@ -84,6 +80,14 @@ probes = {
     "cesium-record": "\n(scientific-constant-quantity si:defining-cesium-frequency)\n",
     "quantity-product": "\n(quantity-product (scientific-constant-quantity si:defining-planck-constant) (scientific-constant-quantity si:defining-cesium-frequency))\n",
     "one-second": "\n(make-quantity 1 (make-unit (00100111 (make-dimension (00000001 second) 1))))\n",
+    "speed-record-length": "\n(00101000 si:defining-speed-of-light)\n",
+    "speed-proper-list": "\n(science-proper-list? si:defining-speed-of-light)\n",
+    "speed-quantity-valid": "\n(quantity? (scientific-constant-quantity si:defining-speed-of-light))\n",
+    "speed-status-valid": "\n(scientific-constant-status-valid? (scientific-constant-status si:defining-speed-of-light))\n",
+    "speed-kind-valid": "\n(scientific-constant-kind-valid? (scientific-constant-kind si:defining-speed-of-light))\n",
+    "speed-source-valid": "\n(science-source? (scientific-constant-source si:defining-speed-of-light))\n",
+    "speed-constant-valid": "\n(scientific-constant? si:defining-speed-of-light)\n",
+    "speed-constant-clauses": "\n(scientific-constant->clauses si:defining-speed-of-light)\n",
     "distance-product": "\n(quantity-product (scientific-constant-quantity si:defining-speed-of-light) (make-quantity 1 (make-unit (00100111 (make-dimension (00000001 second) 1)))))\n",
     "planck-value": "\n(quantity-value (scientific-constant-quantity si:defining-planck-constant))\n",
     "planck-unit": "\n(quantity-unit (scientific-constant-quantity si:defining-planck-constant))\n",
@@ -97,11 +101,11 @@ for stage, suffix in probes.items():
     )
 PY
 
-  for stage in rows-binding check-binding witness-binding rows-call check-call planck-record cesium-record planck-value planck-unit numeric-product quantity-product one-second merge-dimensions product-units distance-product; do
+  for stage in rows-binding check-binding witness-binding rows-call check-call planck-record cesium-record planck-value planck-unit numeric-product quantity-product one-second merge-dimensions product-units speed-record-length speed-proper-list speed-quantity-valid speed-status-valid speed-kind-valid speed-source-valid speed-constant-valid speed-constant-clauses distance-product; do
     probe="$quantity_diag_dir/exact-quantity-$stage-probe.lisp"
     log="$quantity_diag_dir/exact-quantity-$stage-probe.log"
     if cargo run --quiet -p sens-cli --bin sens -- "$probe" >"$log" 2>&1; then
-      printf 'QUANTITY-DIAGNOSTIC %s=PASS\n' "$stage"
+      printf 'QUANTITY-DIAGNOSTIC %s=EXECUTED\n' "$stage"
       cat "$log"
     else
       probe_rc=$?
