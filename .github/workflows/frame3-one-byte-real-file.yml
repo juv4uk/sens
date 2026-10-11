@@ -40,6 +40,18 @@ jobs:
           test "$(wc -c < "$RUNNER_TEMP/frame3-one-byte/atom-nil.f3m")" -eq 1
           test "$(od -An -tx1 "$RUNNER_TEMP/frame3-one-byte/car-cons-one-nil.f3m" | tr -d ' \n')" = '45'
           awk -F '\\t' '$1 == "45" && $2 == 1 && $3 > 1 { ok=1 } END { exit !ok }' "$RUNNER_TEMP/frame3-one-byte/program-results.tsv"
+      - name: Paired speed benchmark for one-byte profile, T5 and execution
+        shell: bash
+        run: |
+          set -euo pipefail
+          {
+            echo "# sha=$GITHUB_SHA"
+            echo "# cpu=$(grep -m1 'model name' /proc/cpuinfo || true)"
+            echo "# machine=$(uname -srm)"
+            echo "# compiler=$(rustc --version)"
+            cargo run --locked --release -p sens --example frame3_one_byte_research --quiet -- --speed
+          } | tee "$RUNNER_TEMP/frame3-one-byte/speed.tsv"
+          awk -F '\t' '$1 == "f3m_encode_exact_words" && $2 > 0 { en=1 } $1 == "t5_decode_5b_to_typed_words" && $2 > 0 { de=1 } $1 == "f3m_decode_parse_execute" && $2 > 0 { ev=1 } END { exit !(en && de && ev) }' "$RUNNER_TEMP/frame3-one-byte/speed.tsv"
       - name: Preserve proof and actual one-byte physical files
         if: always()
         uses: actions/upload-artifact@v4
@@ -63,6 +75,7 @@ jobs:
             echo "# sha=$GITHUB_SHA"
             echo "# os=$(uname -srm)"
             echo "# rustc=$(rustc --version)"
+            echo "# cpu=$(grep -m1 'model name' /proc/cpuinfo || true)"
             cargo run --locked --release -p sens --example frame3_real_files_bench --quiet
           } | tee "$RUNNER_TEMP/frame3-real-file-results.tsv"
           # Guard against silently shrinking real-file coverage or cheating on subset total.
