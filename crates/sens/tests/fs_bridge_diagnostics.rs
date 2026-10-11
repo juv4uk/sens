@@ -246,6 +246,23 @@ fn root_proper_list_validation_is_exact_d1_and_rejects_dotted_tails() {
 }
 
 #[test]
+fn world_module_name_symbol_law_is_d1_and_rejects_non_symbols() {
+    let mut session = session();
+    for (value, expected) in [
+        ("(quote zoo)", true),
+        ("\"zoo\"", false),
+        ("7", false),
+        ("(quote (zoo))", false),
+        ("(quote ())", false),
+    ] {
+        let code = format!("(внутрішній-символ? {value})");
+        let observed = eval_program(&code, &mut session)
+            .unwrap_or_else(|e| panic!("world module name {code}: {e:?}")).value;
+        assert_eq!(observed.as_predicate_bit(), Some(expected), "{code}");
+    }
+}
+
+#[test]
 fn world_knowledge_package_version_is_pair_safe_and_exact_d1() {
     let mut session = session();
     for (left, right, expected) in [
