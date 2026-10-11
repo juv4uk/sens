@@ -123,7 +123,7 @@ jobs:
       - name: Compiler semantic export CLI
         run: cargo test -p xtask --test compiler_export_cli -- --nocapture
 
-      - name: Canonical SW1 -> SENS compiler -> canonical artifact
+      - name: Canonical SW1 and physical T5 triplet -> SENS compiler -> artifact
         run: cargo test -p xtask compiler_compile::tests -- --nocapture
       - name: Whole-nucleus lowering coverage when present
         run: |
