@@ -97,3 +97,31 @@ and multiple roots, and paired physical byte/performance evidence.
 `((ATOM))` is structurally parseable but not executable; a quote of
 it remains valid data, not an executable-call witness. The Rust grammar
 rank does not yet remove these semantically impossible calls.
+
+
+## Conservative D3 executable-code witness in Rust
+
+The same crate now exports
+[crates/sens/src/frame3_semantic.rs](../../crates/sens/src/frame3_semantic.rs)
+as `sens::frame3_semantic`. `check_executable_code(&Expr)` reads the
+canonical D2 AST and uses **only ratified exact D3 function bits**:
+
+- QUOTE(001), ATOM(010), CDR(011), CAR(100): exactly one argument;
+- EQ(101), CONS(111): exactly two arguments;
+- QUOTE data is **never recursively checked as executable code**;
+- bad evaluated operands of the other five fixed-arity forms may prove a
+  call impossible, as can an impossible evaluated nested head;
+- COND(110), dynamic heads, higher domains and unknown forms remain
+  `NotProvenImpossible`, **not valid by implication**.
+
+Negative/positive Rust tests live in
+[frame3_grammar_rank.rs](../../crates/sens/tests/frame3_grammar_rank.rs)
+next to the actual D2 reader and typed-identity parity tests. For
+example, `((ATOM))` is rejected **as executable code**, while
+`(QUOTE ((ATOM)))` is retained **as data**.
+
+This is an *admissibility witness*, **not yet a semantics-aware dense
+rank over only valid programs**. No physical code points are removed
+until a formally countable executable profile with distinguishable
+code/data contexts exists. In particular the structural rank stays
+lossless for ALL syntactically accepted D2 data.
