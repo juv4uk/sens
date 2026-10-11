@@ -1,0 +1,41 @@
+{
+  "schema": "sens-historical-branch-archive/v1",
+  "archived_at": "2026-10-11",
+  "source": {
+    "repo": "juv4uk/sens",
+    "pr": 1094,
+    "title": "refactor(#577): extract introspect.rs from main.rs (slice 2, pure move under #299 substrate policy)",
+    "branch": "refactor/577-introspect",
+    "head_sha": "abba5b1e9a05225a7806d85c60fca43f889e4264",
+    "base": "main",
+    "base_sha": "42e3945c5e8f27902ade6fedf52f54786c56f914",
+    "reason": "Historical pure-move extraction of swarm-node introspection code and old CI timeout/build changes. Current main's swarm-node main.rs is materially newer; its old branch ancestry is not a safe direct merge. The missing current-main crate build check is now integrated separately."
+  },
+  "files": [
+    {
+      "original_path": ".github/workflows/ci.yml",
+      "archived_path": "research/domain-archive/20261011/pr1094/source/.github/workflows/ci.yml",
+      "git_blob_sha": "fa7539c742ca794e33cd4ac5b598887b21ffa223",
+      "bytes": 19504
+    },
+    {
+      "original_path": "crates/swarm-node/src/introspect.rs",
+      "archived_path": "research/domain-archive/20261011/pr1094/source/crates/swarm-node/src/introspect.rs",
+      "git_blob_sha": "6fd46ae43507945c922cc86dd65529fcf5aae238",
+      "bytes": 19409
+    },
+    {
+      "original_path": "crates/swarm-node/src/main.rs",
+      "archived_path": "research/domain-archive/20261011/pr1094/source/crates/swarm-node/src/main.rs",
+      "git_blob_sha": "92704ec2a7f048e4a846cdc3a801e9c3d867d9d1",
+      "bytes": 123567
+    }
+  ],
+  "current_main": {
+    "main_rs_blob": "920c1f6d550a746b5f6089db6ec66cedc01947fa",
+    "main_rs_bytes": 141765,
+    "introspect_module_present": false,
+    "swarm_node_build_step_commit": "7649512dbfe3d13b0477a26d842e3dbd25605922"
+  },
+  "disposition": "ARCHIVE-ONLY / REPLAY FROM CURRENT MAIN REQUIRED"
+}
