@@ -297,7 +297,7 @@
     (00000111
       ((00000011 (scientific-constant? constant) (00000001 ())) (00000001 ()))
       ((00000010 ())
-       (10011100 ((name (scientific-constant-name constant)))
+       ((00001000 (name)
          (00100111
            (00100111 (00100111 (00000001 scientific-constant) name))
            (00100111
@@ -323,4 +323,5 @@
            (00100111
              (00100111 (00000001 constant-source)
                    name
-                   (scientific-constant-source constant)))))))))
+                   (scientific-constant-source constant)))))
+        (scientific-constant-name constant))))))
