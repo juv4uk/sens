@@ -20,7 +20,9 @@
     "frontier_no_exact_name_overlap": 50,
     "union_selected_and_ledger_distinct": 754,
     "staging_distinct": 40,
-    "staging_untracked": 0
+    "staging_untracked": 0,
+    "extra_source_grade_names_outside_canonical_and_ledger": 5,
+    "distinct_name_union_including_partial_knowledge_scan": 759
   },
   "source_slice_counts": {
     "evidence": 10,
@@ -6866,6 +6868,45 @@
     "No textual match does not prove a new Core semantic law.",
     "Four research-slice lists are subsets of current proposal names; do not add their counts to 129.",
     "This does not exhaust every historic branch/PR across the 87 owner-affiliated repositories.",
-    "No D10 coordinates or user ratification are granted by this read-only index."
-  ]
+    "No D10 coordinates or user ratification are granted by this read-only index.",
+    "Five additional source-grade names were found outside both canonical and ledger in a non-exhaustive 40-dossier scan. One dossier claims SELECTED without canonical intake; reconcile, do not promote blindly."
+  ],
+  "additional_source_grade_names_from_partial_knowledge_scan": [
+    {
+      "name": "MINIMAL-CONFLICT-DIAGNOSES",
+      "path": "knowledge/d10-babbage-reiter-hobby-selected-20261009.json",
+      "blob": "4cf8359f34924015f2efca3ddba2df567b5b43db",
+      "state": "SELECTED-IN-SOURCE-DOSSIER-NOT-CANONICAL-OR-LEDGER",
+      "semantic_warning": "Behaviorally compare with pending FINITE-MINIMAL-DIAGNOSES"
+    },
+    {
+      "name": "CANONICAL-DIRECTED-CYCLE-WITNESS",
+      "path": "knowledge/d10-canonical-directed-cycle-witness-research-v1.json",
+      "blob": "87917f230c9d75624697b4db22368d89139d78bb",
+      "state": "HOLD-CORE-LIBRARY-DERIVABILITY"
+    },
+    {
+      "name": "GENERALIZED-CONGRUENCE-MERGE",
+      "path": "knowledge/d10-generalized-congruence-research-v1.json",
+      "blob": "cad78f4597387b3daf01599026099645d8e2bc57",
+      "state": "STACKED-PR-5586-NOT-IN-MAIN"
+    },
+    {
+      "name": "FINITE-CODE-AMBIGUITY-WITNESS",
+      "path": "knowledge/d10-unique-decipherability-historical-20261009.json",
+      "blob": "ba024956e114eb7622dd5aa48b71d5910abdadf9",
+      "state": "HOLD-DERIVED-FROM-DECIPHERABILITY"
+    },
+    {
+      "name": "EXACT-SYMMETRIC-SQUARED-CHAMFER",
+      "path": "knowledge/d10-wsm24-exact-chamfer-hobbies-v1.json",
+      "blob": "37bfcf9bffaf9daf519a3c63dbce3bcbe6f422c6",
+      "state": "PROPOSAL-HOLD-CORE-MATH-REVIEW"
+    }
+  ],
+  "partial_knowledge_scan": {
+    "sampled_d10_json_dossiers": 40,
+    "exhaustive": false,
+    "note": "Files discovered by selected GitHub code searches; this is NOT all repository files or all historical PRs. Each additional name has semantic law and positive/negative witnesses in pinned dossier."
+  }
 }
