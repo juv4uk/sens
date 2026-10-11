@@ -13,25 +13,25 @@
   "files_sha256": {
     "accepted-queue.tsv": "26e71d70821778bfe7e871c470ac0d54b36eb9465685137a4fe4fe84739d44b8",
     "escalated.tsv": "26e71d70821778bfe7e871c470ac0d54b36eb9465685137a4fe4fe84739d44b8",
-    "rejected.tsv": "53cfb386dadd59a8d537344620ad346113b623d6120c05053b78f0df96077b93"
+    "rejected.tsv": "a3a2a8045c17bf910254fa30dfda1a1282367219c08ec6b668bde9c0587fc98f"
   },
   "input_index": "knowledge/d10-filter/all-candidates.tsv",
-  "input_index_sha256": "6da7be4d9579f8e520257c2ba6e1be8f2caef4fc23f19bbfe210d10f1c19a292",
+  "input_index_sha256": "65aedc0a136eeae33074d478d7859bef911f1e31ca3840ae47addb4f067538d7",
   "mechanical_partition": {
     "accepted": 0,
     "escalated": 0,
-    "rejected": 1495
+    "rejected": 995
   },
   "name_index": {
     "canonical_selected": 721,
     "executed_witnesses_supplied": 0,
-    "filter_input_rows": 1495,
-    "index_rows": 1495,
+    "filter_input_rows": 995,
+    "index_rows": 995,
     "new_selected_since_index": 0,
     "semantic_dedup_certificates_supplied": 0,
-    "source_file_pin_verified": 1495
+    "source_file_pin_verified": 990
   },
   "physical_t5_authorized": false,
   "schema": "d10-unified-filter-run/v1",
-  "source_commit": "be69cc01645c9690502a1a057710c83fd7569ba8"
+  "source_commit": "d6286acb5e57b0b6e33ca6566f3dc7b81bed1b0e"
 }
