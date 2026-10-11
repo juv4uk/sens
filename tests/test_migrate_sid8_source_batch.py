@@ -65,6 +65,30 @@ class BatchSourceTests(unittest.TestCase):
             with self.subTest(path=row["path"]):
                 self.assertEqual(row["status"], "source-era-unproved")
 
+    def test_historical_cond_guard_rejects_other_active_policy_sources(self):
+        # Executable historical COND clauses may carry a third explicit
+        # expected-result field or a host T fallback. Replacing just the
+        # eight-bit head with D3:110 would change semantics at runtime.
+        # Fail closed until a source-specific two-branch D1/D3 oracle exists.
+        paths = (
+            "knowledge/guard-fact-policy.lisp",
+            "scripts/enforce-function-table-mechanisms.lisp",
+            "scripts/enforce-island-math-evidence.lisp",
+        )
+        for path in paths:
+            with self.subTest(path=path):
+                report = MOD.run(ROOT, False, {path})
+                self.assertEqual(report["summary"]["admitted_files"], 0)
+                self.assertEqual(report["summary"]["blocked_files"], 1)
+                row = report["files"][0]
+                self.assertEqual(row["status"], "blocked")
+                self.assertTrue(
+                    any("COND_HOST_TRUTH" in reason
+                        or "COND_NOT_TWO_FIELDS" in reason
+                        for reason in row["reasons"]),
+                    f"{path}: missing D3 semantic blocker {row['reasons']}",
+                )
+
     def test_immutable_guard_reference_not_rewritten_until_cond_law(self):
         report = MOD.run(ROOT, False, {"knowledge/guard-reference.lisp"})
         self.assertEqual(report["summary"]["admitted_files"], 0)
