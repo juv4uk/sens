@@ -434,6 +434,18 @@ class ThreePassMigrationTests(unittest.TestCase):
 
 
 
+    def test_global_define_shadows_builtin_surface_with_bound_text7_frame(self):
+        # Pass 2 knows 'car' as D3 CAR, but the source-defined callable must
+        # win at its own call site without rewriting the literal D3 code.
+        source="(00001001 car (00001000 () 1))\n(car)\n"
+        projection,resolver=self.migrate(source)
+        frame=mod.frame_text7(
+            mod.text7_encode("car",self.text7,mod.Tok("ATOM","car",0)),
+            mod.Tok("ATOM","car",0),
+        )
+        self.assertGreaterEqual(projection.count(" ".join(frame)),2)
+        self.assertEqual(resolver.counts["pass4-text7-global"],1)
+
     def test_global_text7_call_head_uses_same_frame_as_define_target(self):
         source="""\
 (00001001 foo

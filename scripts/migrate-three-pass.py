@@ -571,6 +571,15 @@ class Resolver:
             self.counts["pass1-sens8"]+=1
             return [ident[0]],"pass1-sens8"
 
+        # Source-defined global callables shadow human builtin surfaces.
+        # Exact binary identities above remain authoritative: only a name
+        # that appeared as a proven global DEFINE target takes this route.
+        # Resolve it before pass-2/pass-3 surface mappings; otherwise
+        # (define car ...) followed by (car) accidentally calls D3 CAR.
+        if t in self.global_binding_words:
+            self.counts["pass4-text7-global"]+=1
+            return self.global_binding_words[t],"pass4-text7-global"
+
         # Pass 2: known my-lisp/current admitted surfaces. A surface known to
         # the old registry but lacking a current resident is a blocker.
         if t in self.my:
@@ -593,12 +602,6 @@ class Resolver:
                 )
             self.counts["pass3-lisp15"]+=1
             return [ident[0]],"pass3-lisp15"
-        # A source-proven global DEFINE target is a contextual Text7 binding,
-        # not a semantic function identity. Its call head uses the exact same
-        # D2/W7 frame as the DEFINE target.
-        if t in self.global_binding_words:
-            self.counts["pass4-text7-global"]+=1
-            return self.global_binding_words[t],"pass4-text7-global"
         # D1/D2 or any unresolved dynamic/user function stays exactly as written.
         self.counts["passthrough-head"]+=1
         return [t],"passthrough-head"
