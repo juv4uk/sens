@@ -11,3 +11,5 @@ PR #5529, #5531, #5536, #5537 закрито як застарілі конфл�
 Архівні `scripts/`, `tests/`, `hardware/`, `crates/` не приєднані до поточного build/CI та не становлять виробничу реалізацію. Доступність доказу не дорівнює допуску нового коду до канонічного домену. Для перенесення будь-якої функції: original SHA/path/line → behavioral dedup D1–D9+D10 → independent oracle/falsifiers → source-HOLD reconciliation → ledger+inventory+append history на точному HEAD → green required CI → власницька ратифікація.
 
 Координація подальшого вибору: [#5041](https://github.com/juv4uk/sens/issues/5041), [#5539](https://github.com/juv4uk/sens/issues/5539), [#5540](https://github.com/juv4uk/sens/issues/5540).
+
+**Знятий хибний blocker:** `pr4441/crates/sens/src/ladder_reader.rs` перейменовано в `ladder_reader.rs.source.txt` без зміни байтів і Git SHA. Архів не має ставати production-постачальником T5; чинні guards не вимикалися.

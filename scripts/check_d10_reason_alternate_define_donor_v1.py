@@ -9,7 +9,9 @@ import re
 
 ROOT = Path(__file__).resolve().parents[1]
 LEDGER = ROOT / "knowledge/d10-reason-alternate-define-donor-v1.json"
-SOURCE = ROOT / "lib/reason.lisp"
+# Historical source must be verified against its immutable archived Git blob, not
+# the actively evolving lib/reason.lisp. This is donor research, not runtime parity.
+SOURCE = ROOT / "research/domain-archive/20261011/historical-source/lib/reason.lisp"
 INVENTORY = ROOT / "knowledge/d10-v1-semantic-inventory.json"
 D9 = ROOT / "knowledge/d9-ratified.json"
 STATE = ROOT / "knowledge/d10-fill-v1-state.json"

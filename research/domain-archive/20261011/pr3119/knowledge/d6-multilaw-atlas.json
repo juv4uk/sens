@@ -1,0 +1,239 @@
+{
+  "schema": "d6-multilaw-atlas/v1",
+  "issue": "#3077",
+  "stable_corpus": {
+    "schema": "d3-d8-stable-resident-corpus/v1",
+    "corpus_hash": "sha256:4cb258dbe135e2de93c49916a5b68b192cc6c04e625c87c72675891cfaf035bc",
+    "donor": "#3051"
+  },
+  "domain": "D6",
+  "occupancy": {
+    "used": 64,
+    "capacity": 64
+  },
+  "production_map_mutation": "NONE",
+  "policy": {
+    "stable_resident_ids_are_research_handles": true,
+    "human_names_in_objective": false,
+    "current_bits_in_objective": false,
+    "semantic_law_separate_from_geometry": true,
+    "relation_only_has_zero_solver_credit": true,
+    "product_axis_candidate_has_zero_solver_credit": true,
+    "selector_prefix_generator_is_positive_control": true,
+    "no_global_d6_suffix_theorem": true
+  },
+  "relations": [
+    {
+      "relation_id": "D6-SELECTOR-PREFIX-GENERATOR",
+      "residents": [
+        "sr-rdapecsrwudm",
+        "sr-mmzhagkbupkb",
+        "sr-dkukqhkjwwcr",
+        "sr-wmdkybxsrgwn",
+        "sr-ybrsvxvygtfc",
+        "sr-kdcfwpzvfpht",
+        "sr-decesnwtjrpt",
+        "sr-wcdxhccdskpm",
+        "sr-kjqswejfjunn",
+        "sr-phtrgpsgaypv",
+        "sr-xnttkkaujarj",
+        "sr-qkvbuurbajxd",
+        "sr-etnmfcnqauxu",
+        "sr-gdqfjbxkdqdx",
+        "sr-ctjganypjbwf",
+        "sr-fksbeptunkzv"
+      ],
+      "relation_type": "GENERATOR",
+      "semantic_equation": "selector descendant = repeated FIRST/REST projection composition",
+      "carrier_scope": "list/tree projection",
+      "geometry_status": "PREFIX-GENERATOR",
+      "solver_credit": 1,
+      "orientation_status": "PROVED",
+      "evidence_refs": [
+        "#1968",
+        "#2329",
+        "#2502"
+      ],
+      "negative_controls": [
+        "label erasure",
+        "non-selector D6 residents receive no selector credit"
+      ]
+    },
+    {
+      "relation_id": "D6-PARITY-COMPLEMENT",
+      "residents": [
+        "sr-qcstbceparwp",
+        "sr-vnrkjfutjtyh"
+      ],
+      "relation_type": "DUALITY-COMPLEMENT",
+      "semantic_equation": "ODD(x) = NOT(EVEN(x)); EVEN(x) = NOT(ODD(x))",
+      "carrier_scope": "integer parity",
+      "geometry_status": "NEIGHBORHOOD-CANDIDATE",
+      "solver_credit": 0,
+      "orientation_status": "UNKNOWN",
+      "evidence_refs": [
+        "#3078",
+        "#3079",
+        "#3104"
+      ],
+      "negative_controls": [
+        "CURRENT adjacency is diagnostic only",
+        "shared D6 axis not inferred"
+      ]
+    },
+    {
+      "relation_id": "D6-SET-LATTICE",
+      "residents": [
+        "sr-svxqxmwqfxrj",
+        "sr-kugyrdnvubfp"
+      ],
+      "relation_type": "LATTICE",
+      "semantic_equation": "INTERSECTION/UNION satisfy finite-set meet/join laws",
+      "carrier_scope": "finite-set/lattice/v1",
+      "geometry_status": "RELATION-ONLY",
+      "solver_credit": 0,
+      "orientation_status": "NOT-APPLICABLE",
+      "evidence_refs": [
+        "#3085",
+        "#3089"
+      ],
+      "negative_controls": [
+        "numeric MIN/MAX has same abstract lattice signature but distinct carrier"
+      ]
+    },
+    {
+      "relation_id": "D6-PAIR-MUTATION-AXIS",
+      "residents": [
+        "sr-tdedcubrnwcy",
+        "sr-gmqxwcmzqfnp"
+      ],
+      "relation_type": "SELECTOR-INDEXED-MUTATION-DUALITY",
+      "semantic_equation": "one destructive pair-update mechanism selected by FIRST vs REST field",
+      "carrier_scope": "mutable pair",
+      "geometry_status": "PRODUCT-AXIS-CANDIDATE",
+      "solver_credit": 0,
+      "orientation_status": "UNKNOWN",
+      "evidence_refs": [
+        "#3082",
+        "#3090",
+        "#3104"
+      ],
+      "negative_controls": [
+        "change-both-fields model falsified",
+        "CURRENT one-bit edge gives no automatic credit"
+      ]
+    },
+    {
+      "relation_id": "D6-BINDING-ORDER-POLICY",
+      "residents": [
+        "sr-bdhyqsyttxzy",
+        "sr-npgqyeyykjdd"
+      ],
+      "relation_type": "BINDING-ORDER-POLICY",
+      "semantic_equation": "parallel initializers use incoming environment; sequential initializers see prior bindings",
+      "carrier_scope": "binding environment",
+      "geometry_status": "PRODUCT-AXIS-CANDIDATE",
+      "solver_credit": 0,
+      "orientation_status": "UNKNOWN",
+      "evidence_refs": [
+        "#3081",
+        "#3091",
+        "#3104"
+      ],
+      "negative_controls": [
+        "independent initializers agree",
+        "CURRENT one-bit edge gives no automatic credit"
+      ]
+    },
+    {
+      "relation_id": "D6-MACRO-STEP-CLOSURE",
+      "residents": [
+        "sr-nktdyaykppbg",
+        "sr-ztbkmfrnrcjr"
+      ],
+      "relation_type": "ITERATION-CLOSURE",
+      "semantic_equation": "FULL = repeated STEP until reached fixed point",
+      "carrier_scope": "macro expansion",
+      "geometry_status": "RELATION-ONLY",
+      "solver_credit": 0,
+      "orientation_status": "NOT-APPLICABLE",
+      "evidence_refs": [
+        "#3083",
+        "#3094"
+      ],
+      "negative_controls": [
+        "multi-step macro falsifies universal STEP=FULL",
+        "resource bound returns incomplete"
+      ]
+    },
+    {
+      "relation_id": "D6-NUMERIC-ORDER-LATTICE",
+      "residents": [
+        "sr-yrkaryqscnkp",
+        "sr-wtfwqasswbym",
+        "sr-bbzkrkjhkqts",
+        "sr-xpftsrbepvhk"
+      ],
+      "relation_type": "DUALITY+LATTICE+ENTAILMENT",
+      "semantic_equation": "LEQ/GEQ are order duals; MIN/MAX are meet/join; order is recoverable from extrema",
+      "carrier_scope": "exact rational total order",
+      "geometry_status": "RELATION-ONLY",
+      "solver_credit": 0,
+      "orientation_status": "UNKNOWN",
+      "evidence_refs": [
+        "#3084",
+        "#3095"
+      ],
+      "negative_controls": [
+        "finite-set lattice shares abstract signature without semantic identity collapse"
+      ]
+    },
+    {
+      "relation_id": "D6-ORDER-REVERSAL-BY-NEG",
+      "residents": [
+        "sr-jksmnurxmrzb",
+        "sr-yrkaryqscnkp",
+        "sr-wtfwqasswbym",
+        "sr-bbzkrkjhkqts",
+        "sr-xpftsrbepvhk"
+      ],
+      "relation_type": "INVOLUTION+DUALITY+LATTICE-AUTOMORPHISM",
+      "semantic_equation": "NEG reverses LEQ/GEQ and swaps MIN/MAX while NEG∘NEG=id",
+      "carrier_scope": "exact rational total order",
+      "geometry_status": "RELATION-ONLY",
+      "solver_credit": 0,
+      "orientation_status": "UNKNOWN",
+      "evidence_refs": [
+        "#3105",
+        "#3106",
+        "#3099"
+      ],
+      "negative_controls": [
+        "single-operand negation control fails",
+        "coordinate transform remains UNKNOWN"
+      ]
+    }
+  ],
+  "geometry_theorems": [
+    {
+      "theorem_id": "D6-SHARED-LSB-S1",
+      "relation_refs": [
+        "D6-PARITY-COMPLEMENT",
+        "D6-PAIR-MUTATION-AXIS",
+        "D6-BINDING-ORDER-POLICY"
+      ],
+      "current_observation": "all three CURRENT pairs are Hamming-1 on LSB",
+      "semantic_constraint_graph_components": 3,
+      "exact_axis_assignments": 216,
+      "common_axis_assignments": 6,
+      "shared_axis_forced": false,
+      "solver_credit": 0,
+      "status": "CURRENT-SHARED-AXIS-OBSERVED-BUT-NOT-FORCED",
+      "d6_residents_unconstrained_by_slice": 42,
+      "evidence_refs": [
+        "#3099",
+        "#3104"
+      ]
+    }
+  ]
+}
