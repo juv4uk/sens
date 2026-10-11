@@ -1,0 +1,50 @@
+name: Binary-first executable CLI
+on:
+  pull_request:
+    paths:
+      - "crates/sens-cli/src/main.rs"
+      - "crates/sens/src/canonical_reader.rs"
+      - "crates/sens/src/source_words.rs"
+      - ".github/workflows/binary-first-cli.yml"
+      - "docs/binary-first-cli.uk.md"
+  push:
+    branches: [main]
+    paths:
+      - "crates/sens-cli/src/main.rs"
+      - "crates/sens/src/canonical_reader.rs"
+      - "crates/sens/src/source_words.rs"
+      - ".github/workflows/binary-first-cli.yml"
+      - "docs/binary-first-cli.uk.md"
+
+permissions:
+  contents: read
+
+jobs:
+  binary-source-boundary:
+    name: strict binary parser and CLI smoke
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v5
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Verify binary CLI tests (no semantic oracle shortcuts)
+        run: cargo test --locked -p sens-cli --bin sens binary_cli_ -- --nocapture
+      - name: Verify exact-word parser
+        run: cargo test --locked -p sens --test domain_ladder
+      - name: Machine-only source is accepted without bootstrap
+        run: |
+          printf '10 001 00 000 01\n' | cargo run --locked --quiet -p sens-cli --bin sens -- --binary-check -
+      - name: Human names and damaged binary are rejected (no fallback)
+        run: |
+          if printf '(CONS x y)\n' | cargo run --locked --quiet -p sens-cli --bin sens -- --binary-check -; then
+            echo "FAIL: human syntax entered exact binary reader" >&2
+            exit 1
+          fi
+          if printf '10 001 00 000\n' | cargo run --locked --quiet -p sens-cli --bin sens -- --binary-check -; then
+            echo "FAIL: malformed D2 frame admitted" >&2
+            exit 1
+          fi
+          if printf '1111111111\n' | cargo run --locked --quiet -p sens-cli --bin sens -- --binary-check -; then
+            echo "FAIL: invalid 10-bit coordinate admitted" >&2
+            exit 1
+          fi
