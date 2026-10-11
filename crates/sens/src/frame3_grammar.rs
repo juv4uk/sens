@@ -42,6 +42,34 @@ impl ExactWord {
     pub fn bits(self) -> u16 {
         self.bits
     }
+
+    /// Direct typed codec handoff; never creates a textual 0/1 projection.
+    pub fn from_binary_source(word: crate::BinarySourceWord) -> Self {
+        Self {
+            width: word.width() as u8,
+            bits: word.packed_bits(),
+        }
+    }
+
+    /// Exact typed restoration, with no lossy 8-bit cast for W9.
+    pub fn to_binary_source(self) -> crate::BinarySourceWord {
+        use crate::{
+            BinarySourceWord, Bit1, Bit2, Bit3, Bit4, Bit5, Bit6, Bit7, Bit8, Bit9,
+        };
+        // Private fields and the checked constructor make these valid.
+        match self.width {
+            1 => BinarySourceWord::W1(Bit1::new(self.bits as u8).unwrap()),
+            2 => BinarySourceWord::W2(Bit2::new(self.bits as u8).unwrap()),
+            3 => BinarySourceWord::W3(Bit3::new(self.bits as u8).unwrap()),
+            4 => BinarySourceWord::W4(Bit4::new(self.bits as u8).unwrap()),
+            5 => BinarySourceWord::W5(Bit5::new(self.bits as u8).unwrap()),
+            6 => BinarySourceWord::W6(Bit6::new(self.bits as u8).unwrap()),
+            7 => BinarySourceWord::W7(Bit7::new(self.bits as u8).unwrap()),
+            8 => BinarySourceWord::W8(Bit8::new(self.bits as u8).unwrap()),
+            9 => BinarySourceWord::W9(Bit9::new(self.bits).unwrap()),
+            _ => unreachable!("checked exact word width"),
+        }
+    }
 }
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
@@ -151,6 +179,28 @@ fn count_suffix(remaining: usize, stack: &[u8], memo: &mut Memo) -> u128 {
     }
     memo.insert(key, total);
     total
+}
+
+/// A ready-to-use bridge for the existing Universal Frame3 typed word API.
+pub fn rank_binary_source_words(
+    words: &[crate::BinarySourceWord],
+) -> Result<GrammarRank, GrammarRankError> {
+    let exact = words
+        .iter()
+        .copied()
+        .map(ExactWord::from_binary_source)
+        .collect::<Vec<_>>();
+    rank_single_root(&exact)
+}
+
+/// Reconstruct the original typed words, without symbol/name reinterpretation.
+pub fn unrank_binary_source_words(
+    inner_bits: usize,
+    ordinal: u128,
+) -> Result<Vec<crate::BinarySourceWord>, GrammarRankError> {
+    unrank_single_root(inner_bits, ordinal).map(|words| {
+        words.into_iter().map(ExactWord::to_binary_source).collect()
+    })
 }
 
 pub fn count_inner(inner_bits: usize) -> Result<u128, GrammarRankError> {
