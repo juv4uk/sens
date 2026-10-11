@@ -4,9 +4,9 @@
 > top-level визначення, але **не** оголошує їх публічним API.
 
 - проскановано бібліотечних файлів: 51
-- top-level функцій: 945
+- top-level функцій: 947
 - top-level макросів: 34
-- усього визначень: 979
+- усього визначень: 981
 - класифікація: `unreviewed`
 
 | джерело | вид | ім'я | класифікація |
@@ -164,6 +164,7 @@
 | `lib/core4.lisp` | function | `assoc` | unreviewed |
 | `lib/core4.lisp` | function | `спарувати` | unreviewed |
 | `lib/core4.lisp` | function | `pairlis` | unreviewed |
+| `lib/core4.lisp` | function | `core4-let*-expansion` | unreviewed |
 | `lib/core4.lisp` | macro | `let*` | unreviewed |
 | `lib/core4.lisp` | function | `string-membership-helper` | unreviewed |
 | `lib/core4.lisp` | function | `string-order-helper` | unreviewed |
@@ -658,6 +659,7 @@
 | `lib/quantity.lisp` | function | `*science-source-schema*` | unreviewed |
 | `lib/quantity.lisp` | function | `*scientific-constant-schema*` | unreviewed |
 | `lib/quantity.lisp` | function | `science-proper-list?` | unreviewed |
+| `lib/quantity.lisp` | function | `science-list-length-equals?` | unreviewed |
 | `lib/quantity.lisp` | function | `science-sixth` | unreviewed |
 | `lib/quantity.lisp` | function | `science-seventh` | unreviewed |
 | `lib/quantity.lisp` | function | `make-dimension` | unreviewed |
