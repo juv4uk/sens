@@ -108,6 +108,7 @@ def validate(policy, ratification, lang):
         "(numeric-domain-natural-add-carry",
         "(numeric-domain-natural-mul-sub-exact-div",
         "(numeric-domain-signed-reduced-ratio-composition",
+        "(numeric-domain-composition-runtime",
         "D24, D48, D96, D192",
         "contracts/numeric-domains-ratification.lisp",
         "ontological domain rank",
@@ -135,6 +136,8 @@ def selftest(policy, ratification, lang):
         ({"natural_arithmetic": dict(policy["natural_arithmetic"], signed_and_rational_runtime="disabled")}, "signed/rational Core Value must execute"),
         ({"numeric_composition_runtime": dict(policy["numeric_composition_runtime"], physical_composite_codec="complete")}, "physical composite codec remains deferred"),
         ({"numeric_composition_runtime": dict(policy["numeric_composition_runtime"], float_rounding=True)}, "exact rational no floats"),
+        ({"numeric_composition_runtime": dict(policy["numeric_composition_runtime"], status="research")}, "composite Core runtime status"),
+        ({"extended_number_laws": dict(policy["extended_number_laws"], callability_and_signed_rational_arithmetic="deferred")}, "signed/rational Core runtime must execute"),
     ]
     for change, why in edits:
         try:
@@ -165,7 +168,7 @@ def main():
     except (ValueError, KeyError, OSError) as exc:
         print(str(exc), file=sys.stderr)
         return 1
-    print("NUMERIC-DOMAIN-RATIFICATION: PASS D24+ natural ADD/MUL/SUB/exact DIV and NEG/RATIO composition laws; signed/rational runtime deferred")
+    print("NUMERIC-DOMAIN-RATIFICATION: PASS D24+ natural and exact NEG/RATIO Core runtime, external/physical codec deferred")
     return 0
 
 if __name__ == "__main__":
