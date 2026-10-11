@@ -108,6 +108,42 @@ target/release/sens-trit open tests/fixtures/migration-quote-cohort-main/quote-l
 
 **SENS CLI encoder+decoder завершено:** [CI #38170817413](https://github.com/juv4uk/sens/actions/runs/38170817413), SHA 2ac5cbe001dcc949561aeb6bca231e52befd75a7, SUCCESS. Мала QUOTE-програма 4B T5 → 3B F3, оригінал побайтово не змінено, повторний запис і перевищення межі відхилено, дев’ять вибраних F3 дали exact open/decode/eval parity. [Raw artifact](https://github.com/juv4uk/sens/actions/runs/38170817413/artifacts/11714003230).
 
+## M3: цілісність перенесених F3 і фактичний CML blocker
+
+Оригінальна tiny F3 має щільний фізичний rank, але **не містить CRC/MAC**.
+Для файла з неперевіреного носія декодування й виконання дозволяти тільки
+після порівняння із **довіреним** SHA-256 конкретних фізичних байтів.
+Нові явні команди (не впливають на звичайний .sens/T5):
+
+~~~sh
+target/release/sens-trit verify-f3-sha256 /tmp/short.senc EXPECTED_TRUSTED_64_LOWERCASE_HEX
+target/release/sens-trit eval-f3-sha256 /tmp/short.senc EXPECTED_TRUSTED_64_LOWERCASE_HEX
+~~~
+
+EXPECTED_TRUSTED_64_LOWERCASE_HEX потрібно брати з перевіреного manifest
+або підписаного джерела. Хеш від недовіреного сусіднього файла не є доказом
+автентичності. CLI читає фізичний файл один раз, звіряє хеш **до** декодера
+F3 і до SENS evaluator, на невідповідність відмовляє без fallback.
+
+[SHA і transport CI #38172737465](https://github.com/juv4uk/sens/actions/runs/38172737465)
+на кодовому SHA db3c4ed9e57eb1ab80fc285533ae93b1c6d068cc — **SUCCESS**:
+усі 9 малих F3 кандидатів із 23 фізичних джерел пройшли порівняння
+зі звичайними T5 після перевірки staged SHA-256; negative на модифікований
+F3 і помилковий SHA спрацювали. [Raw artifacts](https://github.com/juv4uk/sens/actions/runs/38172737465/artifacts/11714671813).
+
+**CML зараз BLOCKED, а не мігрований:**
+- [Candidate export failure](https://github.com/juv4uk/cml/actions/runs/38172268895):
+  SENS xtask compiler-export відмовляє на nucleus-d3-001, q2:1/1 not callable;
+- [Candidate CML compilation](https://github.com/juv4uk/cml/actions/runs/38172451274):
+  142 compile errors на старі sens::sid/Sid8 після прив'язки нового SENS;
+- [Дослідний інтеграційний тест](https://github.com/juv4uk/cml/blob/master/tests/tiny_f3_to_cml_lowering_test.rs)
+  вже існує в поточній default-гілці CML master, але **IR parity поки не доведено**.
+
+Поки CML не пройде compiler-export і заміну історичних кодових залежностей
+на SENS-верифіковані DomainCall, production external/sens gitlink лишається
+незмінним. У жодному разі не повертати старі SID8 як владу мови для
+тимчасового обходу компіляції.
+
 ## Власники й статуси суміжних компонентів
 
 [Машиночитаний інвентар споживачів](migration-two-codec-consumers-2026-10-11.tsv)
