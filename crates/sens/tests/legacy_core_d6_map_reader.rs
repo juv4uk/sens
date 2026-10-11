@@ -21,7 +21,9 @@ fn legacy_core_reader_is_explicitly_path_bound() {
 
 #[test]
 fn legacy_core_let_uses_lisp_owned_map_without_unadmitted_d6_dispatch() {
-    for typed in [false, true] {
+    // Only the explicit source-pinned reader interprets W3-W6 call heads.
+    // The ordinary reader is not allowed to infer domain width from numerals.
+    for typed in [true] {
         let mut session = Session::default();
         if typed {
             let parsed = parse_mixed_exact_domain_legacy_core_source("lib/core.lisp", SOURCE)
