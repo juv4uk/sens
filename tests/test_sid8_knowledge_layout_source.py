@@ -38,5 +38,22 @@ class KnowledgeLayoutSourceTests(unittest.TestCase):
                 self.assertIn(expression, source)
         self.assertNotRegex(source, r"\(00001001(?=\s|\))")
 
+    def test_four_live_fixture_source_heads(self):
+        expected = {
+            "lisp-fs-conformance.lisp": ("(001000 ((empty", "(001 (hello world))"),
+            "rivnopravnist-uk.lisp": ("(0011 подвоїти", "(01010 число число)", "(110"),
+            "semantic-registry-self-hosted-witness.lisp": ("(0011 semantic-registry-self-hosted-witness", "(0010 (source)"),
+            "semantic-coordinate-matrix-845.lisp": ("(0011 semantic-coordinate-matrix-845", "(001 ("),
+        }
+        for filename, needles in expected.items():
+            with self.subTest(filename=filename):
+                source = (ROOT / "tests" / "fixtures" / filename).read_text()
+                for snippet in needles:
+                    self.assertIn(snippet, source)
+                self.assertNotRegex(source, r"\\(00001001(?=\\s|\\))")
+        # Binary-id data is still historical data, NOT an executable call head.
+        registry = (ROOT / "tests/fixtures/semantic-registry-self-hosted-witness.lisp").read_text()
+        self.assertIn("(semantic-registry-row-in registry 00000001)", registry)
+
 if __name__ == "__main__":
     unittest.main()
