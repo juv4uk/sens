@@ -1,0 +1,11 @@
+# Exact compare pin main SHA: 66e5d9a1e16c4c01c068a853f401e95d816bbdcb
+# Branch trees retained via parent ancestry; no blind source-tree overwrite.
+branch	source_sha	compare_status	ahead_by	behind_by	changed_paths	classification
+agent/retire-rust-legacy-logic-tests-20261009	df2a3b9b189b742d7ad5c9c8bec13b9c911b69c7	diverged	16	1878	16	HISTORY_ATTACHED_CONTENT_REVIEW_REQUIRED
+agent/selfhost-lineage-contract-3822	0d05cca69a83fff6c51b8ca7e4c75643734f4366	behind	0	6173	0	ALREADY_IN_MAIN_ANCESTRY
+agent/selfhost-program-compile-3839	f995a33bbbefccd4e8ca47b3e0252444b40df4a2	behind	0	6122	0	ALREADY_IN_MAIN_ANCESTRY
+agent/selfhost-program-data-3838	11e4bf8e1c2f6e9d15072ef44eefb2317ea68d3b	behind	0	6134	0	ALREADY_IN_MAIN_ANCESTRY
+agent/selfhost-role-closure-3824	d6281955a882015ca4124009a429c774ed82632c	behind	0	6157	0	ALREADY_IN_MAIN_ANCESTRY
+agent/truncation-guard-admission-20261010	bb28494bb4045457a676e39cde4c9f0fd7614fa8	diverged	3	762	3	HISTORY_ATTACHED_CONTENT_REVIEW_REQUIRED
+agent/vivaka-hub/misunderstanding-taxonomy	59a042f93e33f70d53087f32111047b1f594b68d	behind	0	5861	0	ALREADY_IN_MAIN_ANCESTRY
+agent/vivaka-hub/4375-lisp-paren-guard	5267f15c19fbe56fa3da705db267a6d89adc457e	behind	0	5040	0	ALREADY_IN_MAIN_ANCESTRY
