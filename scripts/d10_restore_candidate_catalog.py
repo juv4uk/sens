@@ -11,7 +11,7 @@ import hashlib
 import json
 from pathlib import Path
 
-from d10_prepare_filter_input import INDEX_FIELDS
+from d10_prepare_filter_input import INDEX_FIELDS, json_list
 from d10_mechanical_filter import git_blob, safe_file
 
 HISTORICAL_COMMIT = "17ab25d65346a6a1bfc71f0ed6d64ee75fc6f22f"
@@ -50,13 +50,13 @@ def literal_tsv(path):
 
 
 def parse_array(raw):
+    # Restore both frozen literal-TSV JSON arrays and RFC4180-escaped
+    # JSON arrays emitted by the new unified index producer. Decode exactly,
+    # never treat undecodable claims as provenance or executed witnesses.
     try:
-        obj = json.loads(raw)
+        return json_list(raw)
     except (ValueError, TypeError) as exc:
         raise ValueError("INVALID_JSON_LIST") from exc
-    if not isinstance(obj, list) or any(not isinstance(x, str) for x in obj):
-        raise ValueError("INVALID_JSON_LIST")
-    return obj
 
 
 def merge_catalog(root, historical_path, current_path, output_path):
