@@ -1,0 +1,11 @@
+# Exact compare pin main SHA: d22f87a94d279f9436560d2fef6018905d593ffd
+# Five bootstrap-bundle revisions share core compiler files; preserve all commit histories, don't overwrite current tree.
+branch	source_sha	compare_status	ahead_by	behind_by	reported_file_entries	classification
+agent/3840-bootstrap-bundle-final-r2	2716b04b9dc01da1f6b67ec0e30fb85c5d04ae9a	diverged	1	6625	3	HISTORY_ATTACHED_CONTENT_REVIEW_REQUIRED
+agent/3840-bootstrap-bundle-post-repair	919c4b4b11651ac10024742256c00daa3158d515	behind	0	6622	0	ALREADY_IN_MAIN_ANCESTRY
+agent/3840-bootstrap-bundle-v2	599f33666fcec3506f4dc4976193ae2d74603f6d	diverged	9	6638	7	HISTORY_ATTACHED_CONTENT_REVIEW_REQUIRED
+agent/3840-bootstrap-bundle-v3	edfca944c167f2752123acf056b799463c7d069c	diverged	7	6636	7	HISTORY_ATTACHED_CONTENT_REVIEW_REQUIRED
+agent/3840-bootstrap-bundle-v4	b8dafdedcb62b1d12a3e3e1cfe7c37dd5b289f2d	diverged	3	6631	3	HISTORY_ATTACHED_CONTENT_REVIEW_REQUIRED
+agent/3840-bootstrap-replay-after-3894	2c254241cadda79cf474f3ca7497b74a1f6c4ed3	diverged	3	6625	3	HISTORY_ATTACHED_CONTENT_REVIEW_REQUIRED
+agent/3858-zero-dep-core	5f0f62d46f382fb5055925ff1124594ecf030ac5	diverged	3	6656	3	HISTORY_ATTACHED_CONTENT_REVIEW_REQUIRED
+agent/3874-cond-repair-after-3888	72407b4c58b1daf20f2272c92cfd62dbaa4fe45a	behind	0	6629	0	ALREADY_IN_MAIN_ANCESTRY
