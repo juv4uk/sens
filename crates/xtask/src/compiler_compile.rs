@@ -166,7 +166,32 @@ fn compile_t5_triplet_bytes(
     let binary_lowered = lower_program(&binary_parsed);
     let binary_identity_wire = wire_encode_program(&binary_lowered);
     if source_identity_wire != binary_identity_wire {
-        return Err("SENS source and physical-T5 view disagree after exact-domain lowering".into());
+        let common_forms = source_lowered.len().min(binary_lowered.len());
+        for index in 0..common_forms {
+            let source_form = wire_encode_program(std::slice::from_ref(&source_lowered[index]));
+            let binary_form = wire_encode_program(std::slice::from_ref(&binary_lowered[index]));
+            if source_form != binary_form {
+                let first_wire_difference = source_form
+                    .iter()
+                    .zip(binary_form.iter())
+                    .position(|(left, right)| left != right)
+                    .unwrap_or(source_form.len().min(binary_form.len()));
+                return Err(format!(
+                    "SENS source and physical-T5 view disagree after exact-domain lowering at top-level form {index}; first per-form wire difference={first_wire_difference}; source form={:?}; physical-T5 form={:?}",
+                    source_lowered[index], binary_lowered[index]
+                ));
+            }
+        }
+        if source_lowered.len() != binary_lowered.len() {
+            return Err(format!(
+                "SENS source and physical-T5 view have different top-level form counts: source={}, physical-T5={}",
+                source_lowered.len(), binary_lowered.len()
+            ));
+        }
+        return Err(format!(
+            "SENS source and physical-T5 view differ in whole-program wire (source_bytes={}, physical_T5_bytes={}) although individual top-level forms appear equal",
+            source_identity_wire.len(), binary_identity_wire.len()
+        ));
     }
 
     let program = lowered_program_to_exact_data(&binary_lowered)
