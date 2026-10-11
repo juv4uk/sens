@@ -138,7 +138,9 @@ fn bench_speed() -> Result<(), Box<dyn std::error::Error>> {
     let expected = eval_parsed_expressions(
         &parse_canonical_binary(&visible)?, &mut Session::default()
     )?;
-    let t5_value = PhysicalT5Program::decode(&full_t5)?.execute(&mut Session::default())?;
+    let t5_value = PhysicalT5Program::decode(&full_t5)
+        .map_err(|error| format!("T5 physical decode: {error:?}"))?
+        .execute(&mut Session::default())?;
     if expected != t5_value { return Err("real evaluator mismatch".into()); }
     println!("# exact_program=CAR(CONS(1,NIL)), same D1/D2/D3 typed word sequence");
     println!("# profile=.f3m externally selected; 1 byte excludes decoder/profile selector");
