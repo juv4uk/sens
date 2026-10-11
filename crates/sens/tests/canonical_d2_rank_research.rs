@@ -98,7 +98,8 @@ fn exact_d2_reader_matches_independent_grammar_on_every_short_typed_word_stream(
             words.extend(body.iter().cloned());
             words.push("01".to_owned());
             let expected_accept = independent_accepts(&words);
-            let rust_accept = parse_canonical_binary(&words.join(" ")).is_ok();
+            let rust_accept = parse_canonical_binary(&words.join(" "))
+                .is_ok_and(|forms| forms.len() == 1);
             assert_eq!(
                 rust_accept,
                 expected_accept,
