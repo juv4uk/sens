@@ -295,9 +295,14 @@
 ; es gibt also kein variadisches/Rest-Body, auf das man sich stützen
 ; könnte. Für eine Folge von Ausdrücken genauso einpacken, wie es der
 ; Rest dieses Codes bereits tut — `(let (...) ((lambda () ausdruck1 ausdruck2)))`.
+; D6:101000 MAP is a ratified coordinate, but currently has no
+; admitted evaluator call mechanism. Until that mechanism is proved, the
+; existing Lisp-owned map closure is the executable derivation for let.
+; No invented D6 runtime dispatch or numeric/legacy fallback is introduced.
+(00001001 внутрішнє-відображення map)
 (00001010 let (bindings body)
-  (00000100 (00100111 (00000001 00001000) (101000 (00001000 (binding) (00000101 binding)) bindings) body)
-        (101000 (00001000 (binding) (00101111 binding)) bindings)))
+  (00000100 (00100111 (00000001 00001000) (внутрішнє-відображення (00001000 (binding) (00000101 binding)) bindings) body)
+        (внутрішнє-відображення (00001000 (binding) (00101111 binding)) bindings)))
 
 ; `let*` is `let` with sequential (not parallel) dependency: each binding's
 ; value expression can see every binding before it. Expands recursively —
