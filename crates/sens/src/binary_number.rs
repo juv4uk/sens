@@ -227,11 +227,48 @@ impl BinaryNumber {
         a
     }
 
-    /// The four owner-ratified language-level Number widths (2026-10-06).
-    /// This is only a capacity predicate, NOT a decision to zero-pad a
-    /// canonical value or to select an automatic widening policy.
+    /// Owner-ratified numeric domain family D24, D48, D96, D192, ...
+    /// A width is legitimate only when it is 24 * 2^k, k >= 0.
+    /// This helper checks the *domain family*, not resident admissibility.
+    pub fn is_numeric_domain_width(width: usize) -> bool {
+        width >= 24 && width % 24 == 0 && (width / 24).is_power_of_two()
+    }
+
+    /// Exact magnitude capacity of one admitted numeric domain.
+    /// Domain identity must still be carried explicitly by the caller.
     pub fn fits_ratified_width(&self, width: usize) -> bool {
-        matches!(width, 24 | 48 | 96 | 192) && self.width() <= width
+        Self::is_numeric_domain_width(width) && self.width() <= width
+    }
+
+    /// Mechanical realization of the owner-ratified, SAME-DOMAIN natural
+    /// addition law. Both operands are already admitted by their caller as
+    /// Dn; this function neither infers domain membership from bits nor
+    /// creates a second semantic representation.
+    ///
+    /// Exact carry over n bits raises the result to the next domain D(2n).
+    /// Otherwise the result remains in Dn. Returned bits are explicitly
+    /// zero-filled to the selected domain's FULL width (not normalized).
+    /// The (width, bits) pair is a mechanism boundary, not itself a SENS
+    /// language value; generic mixed-domain coercion remains unratified.
+    pub fn add_in_numeric_domain(
+        &self,
+        other: &Self,
+        input_domain_width: usize,
+    ) -> Option<(usize, Vec<u8>)> {
+        if !self.fits_ratified_width(input_domain_width)
+            || !other.fits_ratified_width(input_domain_width)
+        {
+            return None;
+        }
+        let sum = self.add(other);
+        let output_width = if sum.width() > input_domain_width {
+            input_domain_width.checked_mul(2)?
+        } else {
+            input_domain_width
+        };
+        let mut exact_domain_bits = vec![0; output_width - sum.width()];
+        exact_domain_bits.extend_from_slice(sum.as_bits());
+        Some((output_width, exact_domain_bits))
     }
 
     /// Human-facing decimal projection without making a host integer the
@@ -378,6 +415,50 @@ mod tests {
             assert!(max.fits_ratified_width(width));
             assert!(!max.add(&BinaryNumber::one()).fits_ratified_width(width));
         }
+    }
+
+    #[test]
+    fn numeric_domain_addition_carries_d24_into_d48_without_truncation() {
+        // Inputs are direct bits with explicit domain width, not literals.
+        let max = BinaryNumber::from_bits(vec![1; 24]).unwrap();
+        let (width, exact_bits) = max.add_in_numeric_domain(&max, 24).unwrap();
+        assert_eq!(width, 48);
+        assert_eq!(exact_bits.len(), 48);
+        assert_eq!(&exact_bits[..23], &[0; 23]);
+        assert_eq!(&exact_bits[23..47], &[1; 24]);
+        assert_eq!(exact_bits[47], 0);
+        // Mechanism reduction to host integers is strictly an independent
+        // oracle; the SENS result remains full exact D48 bits.
+        let magnitude = BinaryNumber::from_bits(exact_bits).unwrap();
+        assert_eq!(magnitude.to_decimal_string(), (2u64 * ((1u64 << 24) - 1)).to_string());
+
+        // Carry must not trigger promotion when a same-domain sum still fits.
+        let one = BinaryNumber::one();
+        let (small_width, small_bits) = one.add_in_numeric_domain(&one, 24).unwrap();
+        assert_eq!(small_width, 24);
+        assert_eq!(small_bits.len(), 24);
+        assert_eq!(&small_bits[..22], &[0; 22]);
+        assert_eq!(&small_bits[22..], &[1, 0]);
+    }
+
+    #[test]
+    fn numeric_domain_addition_widens_unbounded_rungs_and_rejects_bad_domains() {
+        for width in [24, 48, 96, 192, 384, 768] {
+            let max = BinaryNumber::from_bits(vec![1; width]).unwrap();
+            let (target_width, result) = max.add_in_numeric_domain(&max, width).unwrap();
+            assert_eq!(target_width, width * 2);
+            assert_eq!(result.len(), target_width);
+            assert_eq!(result.iter().take(width - 1).filter(|&&b| b != 0).count(), 0);
+            assert!(result[(width - 1)..(2 * width - 1)].iter().all(|&bit| bit == 1));
+            assert_eq!(result[2 * width - 1], 0);
+            assert!(max.fits_ratified_width(width));
+        }
+        let one = BinaryNumber::one();
+        for invalid_width in [0, 1, 23, 25, 47, 72, 192 + 1] {
+            assert_eq!(one.add_in_numeric_domain(&one, invalid_width), None);
+        }
+        let wide = BinaryNumber::from_bits(vec![1; 25]).unwrap();
+        assert_eq!(wide.add_in_numeric_domain(&one, 24), None);
     }
 
     #[test]
