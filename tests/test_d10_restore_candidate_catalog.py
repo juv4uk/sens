@@ -32,7 +32,7 @@ class CatalogRestoreTests(unittest.TestCase):
         self.old_rows = [self.make("ALPHA", "d10.alpha"), self.make("BETA", "d10.name.2"),
                          self.make("GAMMA", "d10.name.3")]
         self.current_rows = [self.make("ALPHA", "d10.name.1"),
-                             self.make("DELTA", "d10.name.2")]
+                             self.make("DELTA", "d10.name.4")]
         self.write(self.old, self.old_rows)
         self.write(self.current, self.current_rows)
         self.original = merge.HISTORICAL_BLOB
@@ -56,20 +56,49 @@ class CatalogRestoreTests(unittest.TestCase):
 
     def test_union_preserves_all_names_and_original_source_ids(self):
         report = merge.merge_catalog(self.root, self.old, self.current, self.output)
-        self.assertEqual(3, report["source_historical_names"])
-        self.assertEqual(2, report["source_latest_names"])
-        self.assertEqual(2, report["restored_old_only_names"])
-        self.assertEqual(4, report["full_union_names"])
+        self.assertEqual(3, report["source_historical_ids"])
+        self.assertEqual(2, report["source_latest_ids"])
+        self.assertEqual(3, report["restored_prior_only_ids"])
+        self.assertEqual(5, report["full_union_ids"])
+        self.assertEqual(1, report["colliding_spelling_groups_not_deduped"])
         result = merge.literal_tsv(self.output)
-        self.assertEqual({"alpha", "beta", "gamma", "delta"}, set(result))
-        self.assertEqual("d10.canonical", result["alpha"]["candidate_id"])
-        self.assertEqual("0000000010", result["alpha"]["canonical_coordinate"])
-        self.assertNotEqual(result["beta"]["candidate_id"], result["delta"]["candidate_id"])
+        self.assertEqual({
+            "d10.alpha", "d10.name.1", "d10.name.2", "d10.name.3",
+            "d10.name.4"
+        }, set(result))
+        self.assertEqual("ALPHA", result["d10.alpha"]["semantic_name"])
+        self.assertEqual("ALPHA", result["d10.name.1"]["semantic_name"])
+        self.assertEqual("d10.alpha", result["d10.alpha"]["candidate_id"])
+        self.assertEqual("d10.name.1", result["d10.name.1"]["candidate_id"])
         self.assertIn("HISTORIC_SOURCE_ID:d10.name.2",
-                      json.loads(result["beta"]["historical_status_claims"]))
+                      json.loads(result["d10.name.2"]["historical_status_claims"]))
         self.assertIn("RESTORED_FROM_1495_NAME_FROZEN_INTAKE",
-                      json.loads(result["beta"]["historical_status_claims"]))
-        self.assertEqual("0", result["beta"]["ratified"])
+                      json.loads(result["d10.name.2"]["historical_status_claims"]))
+        self.assertEqual("0", result["d10.name.2"]["ratified"])
+
+    def test_historical_and_current_same_name_distinct_ids_survive(self):
+        report = merge.merge_catalog(self.root, self.old, self.current, self.output)
+        self.assertEqual(5, report["full_union_names"])  # old workflow key
+        rows = merge.literal_tsv(self.output)
+        self.assertEqual({"d10.alpha", "d10.name.1"},
+                         {ident for ident, row in rows.items()
+                          if row["semantic_name"] == "ALPHA"})
+        self.assertEqual(0, report["new_ratifications"])
+        self.assertEqual(0, report["new_allocations"])
+
+    def test_same_candidate_id_with_conflicting_name_blocks(self):
+        self.current_rows[1]["candidate_id"] = "d10.name.2"
+        self.write(self.current, self.current_rows)
+        with self.assertRaisesRegex(ValueError, "HISTORICAL_ID_NAME_CONFLICT"):
+            merge.merge_catalog(self.root, self.old, self.current, self.output)
+        self.assertFalse(self.output.exists())
+
+    def test_duplicate_candidate_id_in_one_source_blocks(self):
+        self.current_rows[1]["candidate_id"] = self.current_rows[0]["candidate_id"]
+        self.write(self.current, self.current_rows)
+        with self.assertRaisesRegex(ValueError, "DUPLICATE_OR_EMPTY_SOURCE_IDENTITY"):
+            merge.merge_catalog(self.root, self.old, self.current, self.output)
+        self.assertFalse(self.output.exists())
 
     def test_new_catalog_rfc_tsv_quoting_is_accepted(self):
         with self.current.open("w", encoding="utf-8", newline="") as stream:
@@ -78,8 +107,8 @@ class CatalogRestoreTests(unittest.TestCase):
             writer.writeheader()
             writer.writerows(self.current_rows)
         report = merge.merge_catalog(self.root, self.old, self.current, self.output)
-        self.assertEqual(4, report["full_union_names"])
-        self.assertEqual(2, report["restored_old_only_names"])
+        self.assertEqual(5, report["full_union_names"])
+        self.assertEqual(3, report["restored_old_only_names"])
 
     def test_duplicate_source_name_preserves_independent_candidate_ids(self):
         duplicate = self.make("DELTA", "d10.name.4")
