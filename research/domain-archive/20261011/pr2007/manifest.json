@@ -1,0 +1,140 @@
+{
+  "schema": "sens-historical-branch-archive/v1",
+  "archived_at": "2026-10-11",
+  "source": {
+    "repo": "juv4uk/sens",
+    "pr": 2007,
+    "title": "runtime(#1713): replay exact PredicateBit + strict Core4 source on current main",
+    "branch": "replay/1713-predicatebit-20261001",
+    "head_sha": "8df1104819e39e7ab16222a5c36a7f356efcfdd1",
+    "base": "main",
+    "base_sha": "42e3945c5e8f27902ade6fedf52f54786c56f914"
+  },
+  "files": [
+    {
+      "path": "crates/sens/src/environment.rs",
+      "patch_present": true,
+      "patch_chars": 1029
+    },
+    {
+      "path": "crates/sens/src/eval/arithmetic.rs",
+      "patch_present": true,
+      "patch_chars": 984
+    },
+    {
+      "path": "crates/sens/src/eval/builtins.rs",
+      "patch_present": true,
+      "patch_chars": 2548
+    },
+    {
+      "path": "crates/sens/src/eval/closures.rs",
+      "patch_present": true,
+      "patch_chars": 728
+    },
+    {
+      "path": "crates/sens/src/eval/mod.rs",
+      "patch_present": true,
+      "patch_chars": 2308
+    },
+    {
+      "path": "crates/sens/src/eval/special_forms/core.rs",
+      "patch_present": true,
+      "patch_chars": 7079
+    },
+    {
+      "path": "crates/sens/src/eval/special_forms/strings.rs",
+      "patch_present": true,
+      "patch_chars": 349
+    },
+    {
+      "path": "crates/sens/src/lib.rs",
+      "patch_present": true,
+      "patch_chars": 951
+    },
+    {
+      "path": "crates/sens/src/presentation.rs",
+      "patch_present": true,
+      "patch_chars": 509
+    },
+    {
+      "path": "crates/sens/src/value.rs",
+      "patch_present": true,
+      "patch_chars": 1876
+    },
+    {
+      "path": "crates/sens/tests/mccarthy_1960_functions.rs",
+      "patch_present": true,
+      "patch_chars": 441
+    },
+    {
+      "path": "crates/sens/tests/string_order_predicatebit.rs",
+      "patch_present": true,
+      "patch_chars": 1137
+    },
+    {
+      "path": "lib/bridge/prolog-to-datalog.lisp",
+      "patch_present": true,
+      "patch_chars": 3023
+    },
+    {
+      "path": "lib/core.lisp",
+      "patch_present": true,
+      "patch_chars": 22849
+    },
+    {
+      "path": "lib/core4.lisp",
+      "patch_present": true,
+      "patch_chars": 22849
+    },
+    {
+      "path": "lib/life-1-scheduler.lisp",
+      "patch_present": true,
+      "patch_chars": 7141
+    },
+    {
+      "path": "lib/macro.lisp",
+      "patch_present": true,
+      "patch_chars": 418
+    },
+    {
+      "path": "scripts/build-constitution.lisp",
+      "patch_present": true,
+      "patch_chars": 544
+    },
+    {
+      "path": "scripts/check-island-math-evidence.lisp",
+      "patch_present": true,
+      "patch_chars": 16042
+    },
+    {
+      "path": "scripts/check-repo-tooling-inventory.lisp",
+      "patch_present": true,
+      "patch_chars": 23710
+    },
+    {
+      "path": "scripts/semantic-authority-guard-enforce.lisp",
+      "patch_present": true,
+      "patch_chars": 565
+    },
+    {
+      "path": "scripts/semantic-authority-guard.lisp",
+      "patch_present": true,
+      "patch_chars": 4729
+    },
+    {
+      "path": "tests/fixtures/life-1-scheduler-witness.lisp",
+      "patch_present": true,
+      "patch_chars": 3887
+    }
+  ],
+  "current_main_reconciliation": {
+    "core_value_model": "Current main models D1 as DomainIdentity::D1(PredicateBit), rather than the branch's specific Value::PredicateBit variant.",
+    "source": "Current main's core/core4 are much newer than this 2026-10-01 replay; do not copy them wholesale.",
+    "unique_tests": [
+      "string_order_predicatebit.rs",
+      "mccarthy_1960_functions.rs"
+    ],
+    "test_status": "Branch test sources preserved in diff; not active on main or claimed green."
+  },
+  "disposition": "ARCHIVE-ONLY / STRICT-PREDICATEBEHAVIOR NEEDS CURRENT-MAIN REPLAY"
+}
