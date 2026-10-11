@@ -31,29 +31,29 @@
 
 ; --- Constructors (Spec §6 exact arg order) ---------------------------
 
-(00001001 make-observation
-  (00001000 (source statement)
-    (00100111 (00000001 observation) (00100111 (00000001 source) source) (00100111 (00000001 statement) statement))))
+(0011 make-observation
+  (0010 (source statement)
+    (1110 (001 observation) (1110 (001 source) source) (1110 (001 statement) statement))))
 
-(00001001 make-claim
-  (00001000 (statement source review)
-    (00100111 (00000001 claim) (00100111 (00000001 statement) statement) (00100111 (00000001 source) source) (00100111 (00000001 review) review))))
+(0011 make-claim
+  (0010 (statement source review)
+    (1110 (001 claim) (1110 (001 statement) statement) (1110 (001 source) source) (1110 (001 review) review))))
 
-(00001001 make-evidence
-  (00001000 (claim-ref method outcome source-ref)
-    (00100111 (00000001 evidence)
-          (00100111 (00000001 claim-ref) claim-ref)
-          (00100111 (00000001 method) method)
-          (00100111 (00000001 outcome) outcome)
-          (00100111 (00000001 source-ref) source-ref))))
+(0011 make-evidence
+  (0010 (claim-ref method outcome source-ref)
+    (1110 (001 evidence)
+          (1110 (001 claim-ref) claim-ref)
+          (1110 (001 method) method)
+          (1110 (001 outcome) outcome)
+          (1110 (001 source-ref) source-ref))))
 
-(00001001 make-intent
-  (00001000 (goal requirements stop-condition produces)
-    (00100111 (00000001 intent)
-          (00100111 (00000001 goal) goal)
-          (00100111 (00000001 requires) requirements)
-          (00100111 (00000001 stop-on) stop-condition)
-          (00100111 (00000001 produces) produces))))
+(0011 make-intent
+  (0010 (goal requirements stop-condition produces)
+    (1110 (001 intent)
+          (1110 (001 goal) goal)
+          (1110 (001 requires) requirements)
+          (1110 (001 stop-on) stop-condition)
+          (1110 (001 produces) produces))))
 
 ; --- Shape predicates ---------------------------------------------------
 ; All return t for valid, () for malformed — no new error/exception type,
@@ -64,17 +64,17 @@
 ; must be one of the four v0 variants, payload must be a nonempty proper
 ; list. It does not, and must not, judge whether a digest is
 ; cryptographically real, a proof belongs to a World, or a test exists.
-(00001001 source-ref?
-  (00001000 (value)
-    (00000111
+(0011 source-ref?
+  (0010 (value)
+    (110
       
-      ((00000010 value)  (00000001 ()))
+      ((010 value)  (001 ()))
       
-      ((00000010 (00000110 value))  (00000001 ()))
-      ((00000011 (00000101 value) (00000001 digest)) t)
-      ((00000011 (00000101 value) (00000001 proof)) t)
-      ((00000011 (00000101 value) (00000001 test)) t)
-      ((00000011 (00000101 value) (00000001 observation)) t)
+      ((010 (011 value))  (001 ()))
+      ((101 (100 value) (001 digest)) t)
+      ((101 (100 value) (001 proof)) t)
+      ((101 (100 value) (001 test)) t)
+      ((101 (100 value) (001 observation)) t)
       )))
 
 ; claim-ref shape check — no claim-ref? predicate is spec-mandated (and
@@ -83,14 +83,14 @@
 ; semantically weak" philosophy as source-ref?: car must be the symbol
 ; claim-ref, cdr nonempty. Architect-decision extension of the
 ; documented philosophy, not a literal spec requirement.
-(00001001 epistemic--claim-ref?
-  (00001000 (value)
-    (00000111
+(0011 epistemic--claim-ref?
+  (0010 (value)
+    (110
       
-      ((00000010 value)  (00000001 ()))
+      ((010 value)  (001 ()))
       
-      ((00000010 (00000110 value))  (00000001 ()))
-      ((00000011 (00000101 value) (00000001 claim-ref)) t)
+      ((010 (011 value))  (001 ()))
+      ((101 (100 value) (001 claim-ref)) t)
       )))
 
 ; observation? must NOT be tag-only: the `observation` tag is reused both
@@ -104,24 +104,24 @@
 ; shown or disallowed in the docs, not this phase's problem to solve):
 ; if an observation-variant source-ref's payload were itself a full
 ; nested Observation record, this becomes structurally undecidable.
-(00001001 observation?
-  (00001000 (value)
-    (00000111
+(0011 observation?
+  (0010 (value)
+    (110
       
-      ((00000010 value)  (00000001 ()))
-      ((00100001 (00000011 (00000101 value) (00000001 observation))) (00000001 ()))
+      ((010 value)  (001 ()))
+      ((0100 (101 (100 value) (001 observation))) (001 ()))
       
-      ((00000010 (00000110 value))  (00000001 ()))
+      ((010 (011 value))  (001 ()))
       
-      ((00000010 (00110100 value))  (00000001 ()))
-      ((00100001 (00000011 (00000101 (00110100 value)) (00000001 source))) (00000001 ()))
+      ((010 (1001 value))  (001 ()))
+      ((0100 (101 (100 (1001 value)) (001 source))) (001 ()))
       
-      ((00000010 (00110101 value))  (00000001 ()))
+      ((010 (0111 value))  (001 ()))
       
-      ((00000010 (00000101 (00110101 value)))  (00000001 ()))
-      ((00100001 (00000011 (00000101 (00000101 (00110101 value))) (00000001 statement))) (00000001 ()))
-      ((10110001 (00000010 (00000110 (00110101 value)))) (00000001 ()))
-      ((00000010 ()) t))))
+      ((010 (100 (0111 value)))  (001 ()))
+      ((0100 (101 (100 (100 (0111 value))) (001 statement))) (001 ()))
+      ((110111011 (010 (011 (0111 value)))) (001 ()))
+      ((010 ()) t))))
 
 ; claim? — also validates `review` strictly against its finite enum
 ; {proposed, reviewed, rejected} via member?, unlike source-ref?'s
@@ -129,91 +129,91 @@
 ; a fully decidable finite set, not an open-ended claim about the world
 ; (real-file digest, proof membership, test existence), so there is no
 ; reason to leave it unchecked. Architect decision, not silently assumed.
-(00001001 claim?
-  (00001000 (value)
-    (00000111
+(0011 claim?
+  (0010 (value)
+    (110
       
-      ((00000010 value)  (00000001 ()))
-      ((00100001 (00000011 (00000101 value) (00000001 claim))) (00000001 ()))
+      ((010 value)  (001 ()))
+      ((0100 (101 (100 value) (001 claim))) (001 ()))
       
-      ((00000010 (00000110 value))  (00000001 ()))
+      ((010 (011 value))  (001 ()))
       
-      ((00000010 (00110100 value))  (00000001 ()))
-      ((00100001 (00000011 (00000101 (00110100 value)) (00000001 statement))) (00000001 ()))
+      ((010 (1001 value))  (001 ()))
+      ((0100 (101 (100 (1001 value)) (001 statement))) (001 ()))
       
-      ((00000010 (00110101 value))  (00000001 ()))
+      ((010 (0111 value))  (001 ()))
       
-      ((00000010 (00000101 (00110101 value)))  (00000001 ()))
-      ((00100001 (00000011 (00000101 (00000101 (00110101 value))) (00000001 source))) (00000001 ()))
+      ((010 (100 (0111 value)))  (001 ()))
+      ((0100 (101 (100 (100 (0111 value))) (001 source))) (001 ()))
       
-      ((00000010 (00000110 (00110101 value)))  (00000001 ()))
+      ((010 (011 (0111 value)))  (001 ()))
       
-      ((00000010 (00000101 (00000110 (00110101 value))))  (00000001 ()))
-      ((00100001 (00000011 (00000101 (00000101 (00000110 (00110101 value)))) (00000001 review))) (00000001 ()))
-      ((00100001 (00101100 (00110100 (00000101 (00000110 (00110101 value)))) (00000001 (proposed reviewed rejected)))) (00000001 ()))
-      ((10110001 (00000010 (00000110 (00000110 (00110101 value))))) (00000001 ()))
-      ((00000010 ()) t))))
+      ((010 (100 (011 (0111 value))))  (001 ()))
+      ((0100 (101 (100 (100 (011 (0111 value)))) (001 review))) (001 ()))
+      ((0100 (11101 (1001 (100 (011 (0111 value)))) (001 (proposed reviewed rejected)))) (001 ()))
+      ((110111011 (010 (011 (011 (0111 value))))) (001 ()))
+      ((010 ()) t))))
 
 ; evidence? — same reasoning as claim? for the finite outcome enum
 ; {supports, contradicts, inconclusive}.
-(00001001 evidence?
-  (00001000 (value)
-    (00000111
+(0011 evidence?
+  (0010 (value)
+    (110
       
-      ((00000010 value)  (00000001 ()))
-      ((00100001 (00000011 (00000101 value) (00000001 evidence))) (00000001 ()))
+      ((010 value)  (001 ()))
+      ((0100 (101 (100 value) (001 evidence))) (001 ()))
       
-      ((00000010 (00000110 value))  (00000001 ()))
+      ((010 (011 value))  (001 ()))
       
-      ((00000010 (00110100 value))  (00000001 ()))
-      ((00100001 (00000011 (00000101 (00110100 value)) (00000001 claim-ref))) (00000001 ()))
+      ((010 (1001 value))  (001 ()))
+      ((0100 (101 (100 (1001 value)) (001 claim-ref))) (001 ()))
       
-      ((00000010 (00110101 value))  (00000001 ()))
+      ((010 (0111 value))  (001 ()))
       
-      ((00000010 (00000101 (00110101 value)))  (00000001 ()))
-      ((00100001 (00000011 (00000101 (00000101 (00110101 value))) (00000001 method))) (00000001 ()))
+      ((010 (100 (0111 value)))  (001 ()))
+      ((0100 (101 (100 (100 (0111 value))) (001 method))) (001 ()))
       
-      ((00000010 (00000110 (00110101 value)))  (00000001 ()))
+      ((010 (011 (0111 value)))  (001 ()))
       
-      ((00000010 (00000101 (00000110 (00110101 value))))  (00000001 ()))
-      ((00100001 (00000011 (00000101 (00000101 (00000110 (00110101 value)))) (00000001 outcome))) (00000001 ()))
-      ((00100001 (00101100 (00110100 (00000101 (00000110 (00110101 value)))) (00000001 (supports contradicts inconclusive)))) (00000001 ()))
+      ((010 (100 (011 (0111 value))))  (001 ()))
+      ((0100 (101 (100 (100 (011 (0111 value)))) (001 outcome))) (001 ()))
+      ((0100 (11101 (1001 (100 (011 (0111 value)))) (001 (supports contradicts inconclusive)))) (001 ()))
       
-      ((00000010 (00000110 (00000110 (00110101 value))))  (00000001 ()))
+      ((010 (011 (011 (0111 value))))  (001 ()))
       
-      ((00000010 (00000101 (00000110 (00000110 (00110101 value)))))  (00000001 ()))
-      ((00100001 (00000011 (00000101 (00000101 (00000110 (00000110 (00110101 value))))) (00000001 source-ref))) (00000001 ()))
-      ((10110001 (00000010 (00000110 (00000110 (00000110 (00110101 value)))))) (00000001 ()))
-      ((00000010 ()) t))))
+      ((010 (100 (011 (011 (0111 value)))))  (001 ()))
+      ((0100 (101 (100 (100 (011 (011 (0111 value))))) (001 source-ref))) (001 ()))
+      ((110111011 (010 (011 (011 (011 (0111 value)))))) (001 ()))
+      ((010 ()) t))))
 
-(00001001 intent?
-  (00001000 (value)
-    (00000111
+(0011 intent?
+  (0010 (value)
+    (110
       
-      ((00000010 value)  (00000001 ()))
-      ((00100001 (00000011 (00000101 value) (00000001 intent))) (00000001 ()))
+      ((010 value)  (001 ()))
+      ((0100 (101 (100 value) (001 intent))) (001 ()))
       
-      ((00000010 (00000110 value))  (00000001 ()))
+      ((010 (011 value))  (001 ()))
       
-      ((00000010 (00110100 value))  (00000001 ()))
-      ((00100001 (00000011 (00000101 (00110100 value)) (00000001 goal))) (00000001 ()))
+      ((010 (1001 value))  (001 ()))
+      ((0100 (101 (100 (1001 value)) (001 goal))) (001 ()))
       
-      ((00000010 (00110101 value))  (00000001 ()))
+      ((010 (0111 value))  (001 ()))
       
-      ((00000010 (00000101 (00110101 value)))  (00000001 ()))
-      ((00100001 (00000011 (00000101 (00000101 (00110101 value))) (00000001 requires))) (00000001 ()))
+      ((010 (100 (0111 value)))  (001 ()))
+      ((0100 (101 (100 (100 (0111 value))) (001 requires))) (001 ()))
       
-      ((00000010 (00000110 (00110101 value)))  (00000001 ()))
+      ((010 (011 (0111 value)))  (001 ()))
       
-      ((00000010 (00000101 (00000110 (00110101 value))))  (00000001 ()))
-      ((00100001 (00000011 (00000101 (00000101 (00000110 (00110101 value)))) (00000001 stop-on))) (00000001 ()))
+      ((010 (100 (011 (0111 value))))  (001 ()))
+      ((0100 (101 (100 (100 (011 (0111 value)))) (001 stop-on))) (001 ()))
       
-      ((00000010 (00000110 (00000110 (00110101 value))))  (00000001 ()))
+      ((010 (011 (011 (0111 value))))  (001 ()))
       
-      ((00000010 (00000101 (00000110 (00000110 (00110101 value)))))  (00000001 ()))
-      ((00100001 (00000011 (00000101 (00000101 (00000110 (00000110 (00110101 value))))) (00000001 produces))) (00000001 ()))
-      ((10110001 (00000010 (00000110 (00000110 (00000110 (00110101 value)))))) (00000001 ()))
-      ((00000010 ()) t))))
+      ((010 (100 (011 (011 (0111 value)))))  (001 ()))
+      ((0100 (101 (100 (100 (011 (011 (0111 value))))) (001 produces))) (001 ()))
+      ((110111011 (010 (011 (011 (011 (0111 value)))))) (001 ()))
+      ((010 ()) t))))
 
 ; --- Accessors ------------------------------------------------------------
 ; lib/core.lisp's assoc (line 311) returns the whole matched (field value)
@@ -222,24 +222,24 @@
 ; (cadr (assoc 'field (cdr record))), not (cdr (assoc ...)).
 
 ; Spec-literal (Spec §6 names these explicitly):
-(00001001 claim-statement (00001000 (claim) (00110100 (00101101 (00000001 statement) (00000110 claim)))))
-(00001001 claim-review (00001000 (claim) (00110100 (00101101 (00000001 review) (00000110 claim)))))
-(00001001 evidence-outcome (00001000 (evidence) (00110100 (00101101 (00000001 outcome) (00000110 evidence)))))
-(00001001 evidence-source-ref (00001000 (evidence) (00110100 (00101101 (00000001 source-ref) (00000110 evidence)))))
-(00001001 intent-goal (00001000 (intent) (00110100 (00101101 (00000001 goal) (00000110 intent)))))
+(0011 claim-statement (0010 (claim) (1001 (11100 (001 statement) (011 claim)))))
+(0011 claim-review (0010 (claim) (1001 (11100 (001 review) (011 claim)))))
+(0011 evidence-outcome (0010 (evidence) (1001 (11100 (001 outcome) (011 evidence)))))
+(0011 evidence-source-ref (0010 (evidence) (1001 (11100 (001 source-ref) (011 evidence)))))
+(0011 intent-goal (0010 (intent) (1001 (11100 (001 goal) (011 intent)))))
 
 ; Architect-completed by symmetry — the spec names accessors for claim's
 ; statement/review, evidence's outcome/source-ref, and intent's goal, but
 ; not for observation's fields, evidence's claim-ref/method, or intent's
 ; requires/stop-on/produces. Added here for API completeness, not
 ; spec-literal:
-(00001001 observation-source (00001000 (observation) (00110100 (00101101 (00000001 source) (00000110 observation)))))
-(00001001 observation-statement (00001000 (observation) (00110100 (00101101 (00000001 statement) (00000110 observation)))))
-(00001001 evidence-claim-ref (00001000 (evidence) (00110100 (00101101 (00000001 claim-ref) (00000110 evidence)))))
-(00001001 evidence-method (00001000 (evidence) (00110100 (00101101 (00000001 method) (00000110 evidence)))))
-(00001001 intent-requires (00001000 (intent) (00110100 (00101101 (00000001 requires) (00000110 intent)))))
-(00001001 intent-stop-on (00001000 (intent) (00110100 (00101101 (00000001 stop-on) (00000110 intent)))))
-(00001001 intent-produces (00001000 (intent) (00110100 (00101101 (00000001 produces) (00000110 intent)))))
+(0011 observation-source (0010 (observation) (1001 (11100 (001 source) (011 observation)))))
+(0011 observation-statement (0010 (observation) (1001 (11100 (001 statement) (011 observation)))))
+(0011 evidence-claim-ref (0010 (evidence) (1001 (11100 (001 claim-ref) (011 evidence)))))
+(0011 evidence-method (0010 (evidence) (1001 (11100 (001 method) (011 evidence)))))
+(0011 intent-requires (0010 (intent) (1001 (11100 (001 requires) (011 intent)))))
+(0011 intent-stop-on (0010 (intent) (1001 (11100 (001 stop-on) (011 intent)))))
+(0011 intent-produces (0010 (intent) (1001 (11100 (001 produces) (011 intent)))))
 
 ; --- Narrow relations -------------------------------------------------
 
@@ -264,25 +264,25 @@
 ; exactly like the old evidence-supports? did; callers who want the
 ; evidence itself, not just the fact of its existence, now have it for
 ; free instead of re-deriving it.
-(00001001 supporting-evidence
-  (00001000 (evidence claim-ref)
-    (00000111
-      ((00100001 (10010000 evidence)) (00000001 ()))
-      ((00100001 (epistemic--claim-ref? claim-ref)) (00000001 ()))
-      ((00100001 (00000011 (10010010 evidence) (00000001 supports))) (00000001 ()))
-      ((00100001 (00100010 (evidence-claim-ref evidence) claim-ref)) (00000001 ()))
-      ((00000010 ()) evidence))))
+(0011 supporting-evidence
+  (0010 (evidence claim-ref)
+    (110
+      ((0100 (101010110 evidence)) (001 ()))
+      ((0100 (epistemic--claim-ref? claim-ref)) (001 ()))
+      ((0100 (101 (101111111 evidence) (001 supports))) (001 ()))
+      ((0100 (11110111 (evidence-claim-ref evidence) claim-ref)) (001 ()))
+      ((010 ()) evidence))))
 
 ; local helper for intent-capabilities-satisfied? — no every?/all? helper
 ; exists in lib/core.lisp (confirmed directly, not assumed), so this small
 ; recursive walk lives here instead of being added to core.lisp.
-(00001001 epistemic--all-required-present?
-  (00001000 (requirements effective-capabilities)
-    (00000111
+(0011 epistemic--all-required-present?
+  (0010 (requirements effective-capabilities)
+    (110
       
-      ((00000010 requirements)  t)
-      ((00100001 (00101100 (00000101 requirements) effective-capabilities)) (00000001 ()))
-      ((00000010 ()) (epistemic--all-required-present? (00000110 requirements) effective-capabilities)))))
+      ((010 requirements)  t)
+      ((0100 (11101 (100 requirements) effective-capabilities)) (001 ()))
+      ((010 ()) (epistemic--all-required-present? (011 requirements) effective-capabilities)))))
 
 ; intent-capabilities-satisfied? checks ONLY the requires-subset
 ; membership relation: every symbol in the intent's `requires` list must
@@ -299,8 +299,8 @@
 ; `effective-capabilities` is taken here as a plain list of capability
 ; symbols (matching the `requires` shape) to check membership against —
 ; the same plain-list convention `requires` itself uses.
-(00001001 intent-capabilities-satisfied?
-  (00001000 (intent effective-capabilities)
-    (00000111
-      ((00100001 (10010101 intent)) (00000001 ()))
-      ((00000010 ()) (epistemic--all-required-present? (intent-requires intent) effective-capabilities)))))
+(0011 intent-capabilities-satisfied?
+  (0010 (intent effective-capabilities)
+    (110
+      ((0100 (101101100 intent)) (001 ()))
+      ((010 ()) (epistemic--all-required-present? (intent-requires intent) effective-capabilities)))))
