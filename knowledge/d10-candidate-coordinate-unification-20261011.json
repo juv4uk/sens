@@ -13477,14 +13477,23 @@
       "ratified": false,
       "physical_t5_authorized": false,
       "proof_readiness": {
-        "status": "INCOMPLETE-SOURCE-SEMANTICS",
-        "missing": [
-          "positive-witness",
-          "negative-falsifier"
-        ],
+        "status": "SOURCE-LAW-WITNESSES-PRESENT-UNVERIFIED",
+        "missing": [],
         "selection": false,
         "ratification": false,
-        "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+        "next_gate": "D1-D9-DEDUPE-CORE-VS-LIBRARY-AND-INDEPENDENT-ORACLE"
+      },
+      "source_evidence": {
+        "status": "SOURCE-DERIVED-REVIEW-WITNESS-UNRATIFIED",
+        "source_git_blob": "1cbeac30ba5227a547ebf0f64de8ec4209260684",
+        "law": "Delegate to the next ordered method preserving or explicitly replacing arguments under established method-combination semantics.",
+        "positive": "With applicable methods M1 (more specific) and M2 (less specific), invoking next method in M1 invokes M2 in the established order.",
+        "negative": "Calling M1 again or a nonapplicable M3 instead of the next method violates method-combination order.",
+        "origin": "MODEL-AUTHORED-SPEC-WITNESSES-NOT-RUN-IN-SENS",
+        "oracle": "NOT-EXECUTED",
+        "core_vs_library": "PENDING",
+        "d2_control": "PENDING",
+        "ratification": false
       }
     },
     {
@@ -13499,14 +13508,23 @@
       "ratified": false,
       "physical_t5_authorized": false,
       "proof_readiness": {
-        "status": "INCOMPLETE-SOURCE-SEMANTICS",
-        "missing": [
-          "positive-witness",
-          "negative-falsifier"
-        ],
+        "status": "SOURCE-LAW-WITNESSES-PRESENT-UNVERIFIED",
+        "missing": [],
         "selection": false,
         "ratification": false,
-        "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+        "next_gate": "D1-D9-DEDUPE-CORE-VS-LIBRARY-AND-INDEPENDENT-ORACLE"
+      },
+      "source_evidence": {
+        "status": "SOURCE-DERIVED-REVIEW-WITNESS-UNRATIFIED",
+        "source_git_blob": "1cbeac30ba5227a547ebf0f64de8ec4209260684",
+        "law": "Represent failure of explicit message dispatch when no applicable method is available, preserving object and message identity.",
+        "positive": "Sending message q to O without applicable methods exposes an unhandled-message failure retaining O and q.",
+        "negative": "Do not report successful dispatch or discard object/message identity in the failure condition.",
+        "origin": "MODEL-AUTHORED-SPEC-WITNESSES-NOT-RUN-IN-SENS",
+        "oracle": "NOT-EXECUTED",
+        "core_vs_library": "PENDING",
+        "d2_control": "PENDING",
+        "ratification": false
       }
     },
     {
@@ -13521,14 +13539,23 @@
       "ratified": false,
       "physical_t5_authorized": false,
       "proof_readiness": {
-        "status": "INCOMPLETE-SOURCE-SEMANTICS",
-        "missing": [
-          "positive-witness",
-          "negative-falsifier"
-        ],
+        "status": "SOURCE-LAW-WITNESSES-PRESENT-UNVERIFIED",
+        "missing": [],
         "selection": false,
         "ratification": false,
-        "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+        "next_gate": "D1-D9-DEDUPE-CORE-VS-LIBRARY-AND-INDEPENDENT-ORACLE"
+      },
+      "source_evidence": {
+        "status": "SOURCE-DERIVED-REVIEW-WITNESS-UNRATIFIED",
+        "source_git_blob": "1cbeac30ba5227a547ebf0f64de8ec4209260684",
+        "law": "Present a first-class condition value to an explicitly supplied lexical handler chain without implicit host I/O.",
+        "positive": "Handler H matching condition C receives exactly C when C is signalled in its active lexical context.",
+        "negative": "Do not replace C with a generic value or silently route it through host I/O instead of handler dispatch.",
+        "origin": "MODEL-AUTHORED-SPEC-WITNESSES-NOT-RUN-IN-SENS",
+        "oracle": "NOT-EXECUTED",
+        "core_vs_library": "PENDING",
+        "d2_control": "PENDING",
+        "ratification": false
       }
     },
     {
@@ -13543,14 +13570,23 @@
       "ratified": false,
       "physical_t5_authorized": false,
       "proof_readiness": {
-        "status": "INCOMPLETE-SOURCE-SEMANTICS",
-        "missing": [
-          "positive-witness",
-          "negative-falsifier"
-        ],
+        "status": "SOURCE-LAW-WITNESSES-PRESENT-UNVERIFIED",
+        "missing": [],
         "selection": false,
         "ratification": false,
-        "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+        "next_gate": "D1-D9-DEDUPE-CORE-VS-LIBRARY-AND-INDEPENDENT-ORACLE"
+      },
+      "source_evidence": {
+        "status": "SOURCE-DERIVED-REVIEW-WITNESS-UNRATIFIED",
+        "source_git_blob": "1cbeac30ba5227a547ebf0f64de8ec4209260684",
+        "law": "Invoke a selected restart with exact supplied arguments, with scope and continuation preserved.",
+        "positive": "If R is active and maps argument V to result f(V), invoking R(V) transfers control to that restart and supplies V.",
+        "negative": "An inactive restart or different restart must not be silently invoked, and argument V must not be replaced.",
+        "origin": "MODEL-AUTHORED-SPEC-WITNESSES-NOT-RUN-IN-SENS",
+        "oracle": "NOT-EXECUTED",
+        "core_vs_library": "PENDING",
+        "d2_control": "PENDING",
+        "ratification": false
       }
     },
     {
@@ -14355,14 +14391,23 @@
       "ratified": false,
       "physical_t5_authorized": false,
       "proof_readiness": {
-        "status": "INCOMPLETE-SOURCE-SEMANTICS",
-        "missing": [
-          "positive-witness",
-          "negative-falsifier"
-        ],
+        "status": "SOURCE-LAW-WITNESSES-PRESENT-UNVERIFIED",
+        "missing": [],
         "selection": false,
         "ratification": false,
-        "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+        "next_gate": "D1-D9-DEDUPE-CORE-VS-LIBRARY-AND-INDEPENDENT-ORACLE"
+      },
+      "source_evidence": {
+        "status": "SOURCE-DERIVED-REVIEW-WITNESS-UNRATIFIED",
+        "source_git_blob": "f72f9724acfa13f71bd52d5fdae19bddad860731",
+        "law": "Map Unicode-equivalent representations to canonical NFC/NFD forms while preserving semantic equivalence for downstream transliteration.",
+        "positive": "NFC('e' + U+0301) equals U+00E9, and NFD(U+00E9) equals 'e' + U+0301; Python unicodedata reference checked, not SENS.",
+        "negative": "NFC must not treat unrelated characters or compatibility-only substitutions as canonical equivalents.",
+        "origin": "MODEL-AUTHORED-SPEC-WITNESSES-NOT-RUN-IN-SENS",
+        "oracle": "REFERENCE-PYTHON-ONLY",
+        "core_vs_library": "PENDING",
+        "d2_control": "PENDING",
+        "ratification": false
       }
     },
     {
@@ -14377,14 +14422,23 @@
       "ratified": false,
       "physical_t5_authorized": false,
       "proof_readiness": {
-        "status": "INCOMPLETE-SOURCE-SEMANTICS",
-        "missing": [
-          "positive-witness",
-          "negative-falsifier"
-        ],
+        "status": "SOURCE-LAW-WITNESSES-PRESENT-UNVERIFIED",
+        "missing": [],
         "selection": false,
         "ratification": false,
-        "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+        "next_gate": "D1-D9-DEDUPE-CORE-VS-LIBRARY-AND-INDEPENDENT-ORACLE"
+      },
+      "source_evidence": {
+        "status": "SOURCE-DERIVED-REVIEW-WITNESS-UNRATIFIED",
+        "source_git_blob": "f72f9724acfa13f71bd52d5fdae19bddad860731",
+        "law": "At each input position select the longest defined matching source key under the applicable token-kind context.",
+        "positive": "For synthetic mapping {'a':'X','ab':'Y'}, input 'ab' produces Y in a context admitting both keys.",
+        "negative": "Selecting a shorter matching 'a' when 'ab' is available contradicts the longest-match rule.",
+        "origin": "MODEL-AUTHORED-SPEC-WITNESSES-NOT-RUN-IN-SENS",
+        "oracle": "NOT-EXECUTED",
+        "core_vs_library": "PENDING",
+        "d2_control": "PENDING",
+        "ratification": false
       }
     },
     {
@@ -16238,7 +16292,9 @@
       "proof_readiness": {
         "status": "INCOMPLETE-SOURCE-SEMANTICS",
         "missing": [
-          "semantic-law"
+          "semantic-law",
+          "positive-witness",
+          "negative-falsifier"
         ],
         "selection": false,
         "ratification": false,
@@ -16265,7 +16321,9 @@
       "proof_readiness": {
         "status": "INCOMPLETE-SOURCE-SEMANTICS",
         "missing": [
-          "semantic-law"
+          "semantic-law",
+          "positive-witness",
+          "negative-falsifier"
         ],
         "selection": false,
         "ratification": false,
@@ -16292,7 +16350,9 @@
       "proof_readiness": {
         "status": "INCOMPLETE-SOURCE-SEMANTICS",
         "missing": [
-          "semantic-law"
+          "semantic-law",
+          "positive-witness",
+          "negative-falsifier"
         ],
         "selection": false,
         "ratification": false,
@@ -16319,7 +16379,9 @@
       "proof_readiness": {
         "status": "INCOMPLETE-SOURCE-SEMANTICS",
         "missing": [
-          "semantic-law"
+          "semantic-law",
+          "positive-witness",
+          "negative-falsifier"
         ],
         "selection": false,
         "ratification": false,
@@ -16346,7 +16408,9 @@
       "proof_readiness": {
         "status": "INCOMPLETE-SOURCE-SEMANTICS",
         "missing": [
-          "semantic-law"
+          "semantic-law",
+          "positive-witness",
+          "negative-falsifier"
         ],
         "selection": false,
         "ratification": false,
@@ -16373,7 +16437,9 @@
       "proof_readiness": {
         "status": "INCOMPLETE-SOURCE-SEMANTICS",
         "missing": [
-          "semantic-law"
+          "semantic-law",
+          "positive-witness",
+          "negative-falsifier"
         ],
         "selection": false,
         "ratification": false,
@@ -16400,7 +16466,9 @@
       "proof_readiness": {
         "status": "INCOMPLETE-SOURCE-SEMANTICS",
         "missing": [
-          "semantic-law"
+          "semantic-law",
+          "positive-witness",
+          "negative-falsifier"
         ],
         "selection": false,
         "ratification": false,
@@ -22678,7 +22746,7 @@
         "rows": 9
       }
     ],
-    "total_passports": 92,
+    "total_passports": 98,
     "latest_sources": [
       {
         "path": "knowledge/d10-general-congruence-merge-hobbies-v1.json",
@@ -22726,8 +22794,16 @@
         "rows": 3
       }
     ],
-    "latest_source_pass": 3,
-    "source_verified_at": "b3cd6dbe9a8094e3794c1421e91f3d5b4c5247b6"
+    "latest_source_pass": 6,
+    "source_verified_at": "b3cd6dbe9a8094e3794c1421e91f3d5b4c5247b6",
+    "latest_model_review_specs": [
+      "CALL-NEXT-METHOD",
+      "MESSAGE-UNHANDLED",
+      "SIGNAL-CONDITION",
+      "INVOKE-RESTART",
+      "CANONICAL-UNICODE-NORMALIZE",
+      "LONGEST-MATCH-TEXT-MAPPING"
+    ]
   },
   "evidence_gate": {
     "date": "2026-10-11",
@@ -22738,14 +22814,14 @@
     "semantic_source_audit": {
       "total": 309,
       "has_law": 198,
-      "has_positive": 189,
-      "has_negative": 189,
-      "law_and_witnesses": 182,
+      "has_positive": 188,
+      "has_negative": 188,
+      "law_and_witnesses": 188,
       "missing_law": 111,
-      "missing_positive": 120,
-      "missing_negative": 120
+      "missing_positive": 121,
+      "missing_negative": 121
     },
-    "note": "Source witness presence does not imply verified primitive or ratified D10 resident.",
+    "note": "Review witnesses are source-grounded proposals, NOT executed SENS oracles or independent Core residency.",
     "uncorroborated_source_name_census": 96,
     "source_census_triage": {
       "SOURCE-VARIABLE-NOT-A-FIRST-CLASS-FUNCTION": 3,
