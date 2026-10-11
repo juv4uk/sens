@@ -20,13 +20,13 @@
            (mp (00010100 (00001100 (00001110 5 doy) 2) 153))
            (day (00001100 (00001101 doy (00010100 (00001100 (00001110 153 mp) 2) 5)) 1))
            (month (00001100 mp
-                    (00000111
+                    (110
                       ((00011010 mp #d10) 3)
-                      ((00000010 (00000001 ())) -9))))
+                      ((010 (00000001 ())) -9))))
            (year (00001100 y
-                   (00000111
+                   (110
                      ((00011101 month 2) 1)
-                     ((00000010 (00000001 ())) 0)))))
+                     ((010 (00000001 ())) 0)))))
       (00100111 year month day))))
 
 ; Pure language-level conversion from an exact Unix timestamp into UTC calendar
@@ -51,14 +51,14 @@
 ; The host observes only the Unix clock. Calendar meaning stays here in Lisp.
 (00001001 unix-time-observation->utc
   (00001000 (observation)
-    (00000111
-      ((00000011 (00000101 observation) (00000001 unix-time))
+    (110
+      ((101 (00000101 observation) (00000001 unix-time))
        (00100111
          (00000001 utc)
          (00000101 observation)
          (00101111 observation)
          (00110000 observation)))
-      ((00000010 (00000001 ()))
+      ((010 (00000001 ()))
        (00100111 (00000001 rejected) (00000001 invalid-unix-time-observation)))))
 )
 
@@ -97,22 +97,22 @@
 
 (00001001 internet-time-fields->observation
   (00001000 (host mode stratum ntp-seconds fraction)
-    (00000111
+    (110
       ((internet-time-mode-valid? mode)
-       (00000111
+       (110
          ((internet-time-stratum-valid? stratum)
-          (00000111
+          (110
             ((00011010 ntp-seconds 2208988800)
              (00100111 (00000001 rejected) (00000001 invalid-epoch)))
-            ((00000010 (00000001 ()))
+            ((010 (00000001 ()))
              (00100111
                (00000001 accepted)
                host
                (00001101 ntp-seconds 2208988800)
                (00010100 (00001110 fraction #d1000000000) 4294967296)))))
-         ((00000010 (00000001 ()))
+         ((010 (00000001 ()))
           (00100111 (00000001 rejected) (00000001 invalid-response)))))
-      ((00000010 (00000001 ()))
+      ((010 (00000001 ()))
        (00100111 (00000001 rejected) (00000001 invalid-response))))))
 
 
@@ -122,15 +122,15 @@
 ; Lisp owns every protocol interpretation after that raw observation boundary.
 (00001001 internet-time-raw->observation
   (00001000 (raw)
-    (00000111
-      ((00000011 (00000101 raw) (00000001 ntp-fields))
+    (110
+      ((101 (00000101 raw) (00000001 ntp-fields))
        (internet-time-fields->observation
          (00101111 raw)
          (00110000 raw)
          (00000101 (00000110 (00000110 (00000110 raw))))
          (00000101 (00000110 (00000110 (00000110 (00000110 raw)))))
          (00000101 (00000110 (00000110 (00000110 (00000110 (00000110 raw))))))))
-      ((00000010 (00000001 ())) raw)))
+      ((010 (00000001 ())) raw)))
 )
 
 ; Public internet-time meaning is language-owned. Rust exposes only the raw NTP
@@ -143,15 +143,15 @@
 ; Turning an accepted timestamp into calendar meaning is also language policy.
 (00001001 internet-time-observation->utc
   (00001000 (observation)
-    (00000111
-      ((00000011 (00000101 observation) (00000001 accepted))
+    (110
+      ((101 (00000101 observation) (00000001 accepted))
        (00100111
          (00000001 accepted)
          (00101111 observation)
          (01011111
            (00110000 observation)
            (00000101 (00000110 (00000110 (00000110 observation)))))))
-      ((00000010 (00000001 ())) observation))))
+      ((010 (00000001 ())) observation))))
 
 
 ; Nanoseconds are the one monotonic host observation. Milliseconds are only a
@@ -196,24 +196,24 @@
 ; precedence and the public detected/unknown result shape.
 (00001001 timezone-declarations->observation
   (00001000 (tz-value etc-timezone-value)
-    (00000111
+    (110
       ((and (00100100 tz-value) (00011011 (00111011 tz-value) 0))
        (00100111 (00000001 detected) tz-value (00000001 TZ)))
       ((and (00100100 etc-timezone-value) (00011011 (00111011 etc-timezone-value) 0))
        (00100111 (00000001 detected) etc-timezone-value (00000001 etc-timezone)))
-      ((00000010 (00000001 ()))
+      ((010 (00000001 ()))
        (00100111 (00000001 unknown) (00000001 host-declaration-unavailable)))))
 )
 
 ; Adapt the mechanism-only host observation to public timezone meaning.
 (00001001 timezone-raw->observation
   (00001000 (raw)
-    (00000111
-      ((00000011 (00000101 raw) (00000001 timezone-declarations))
+    (110
+      ((101 (00000101 raw) (00000001 timezone-declarations))
        (timezone-declarations->observation
          (00101111 raw)
          (00110000 raw)))
-      ((00000010 (00000001 ()))
+      ((010 (00000001 ()))
        (00100111 (00000001 rejected) (00000001 invalid-timezone-observation)))))
 )
 
@@ -224,18 +224,18 @@
 
 (00001001 timezone-config
   (00001000 (name offset-seconds)
-    (00000111
+    (110
       ((00100100 name)
-       (00000111
+       (110
          ((00011010 offset-seconds -86400)
           (00100111 (00000001 rejected) (00000001 invalid-offset)))
          ((00011011 offset-seconds 86400)
           (00100111 (00000001 rejected) (00000001 invalid-offset)))
-         ((00000010 (00000001 ()))
+         ((010 (00000001 ()))
           (00100111
             (00000001 accepted)
             (00100111 (00000001 timezone) name offset-seconds)))))
-      ((00000010 (00000001 ()))
+      ((010 (00000001 ()))
        (00100111 (00000001 rejected) (00000001 invalid-name))))))
 
 
