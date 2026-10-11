@@ -1,0 +1,55 @@
+{
+  "schema": "sens.domain-research-archive-extension/v1",
+  "date": "2026-10-11",
+  "status": "HISTORICAL-NEGATIVE-RESEARCH-NONNORMATIVE",
+  "source_pr": 3778,
+  "source_head_sha": "9dde3ba36d803a8f5327842e713094eb377864f5",
+  "base_main_sha": "1faa79478bbeecb41f4a4108a91fcf0cccf3395f",
+  "scope": "D8 rejected independent second axes: CURRY/FLIP, INTEGERP/RATIONALP sign, RECIP/EXPT sign",
+  "file_count": 6,
+  "records": [
+    {
+      "source_pr": 3778,
+      "source_head_sha": "9dde3ba36d803a8f5327842e713094eb377864f5",
+      "original_path": ".github/workflows/d8-curry-flip-independence.yml",
+      "archived_path": "research/domain-archive/20261011/pr3778/.github/workflows/d8-curry-flip-independence.yml.source.txt",
+      "exact_git_blob": "764ea8123defe412309fd6586856ba8c32c1bba9"
+    },
+    {
+      "source_pr": 3778,
+      "source_head_sha": "9dde3ba36d803a8f5327842e713094eb377864f5",
+      "original_path": ".github/workflows/d8-expt-recip-sign.yml",
+      "archived_path": "research/domain-archive/20261011/pr3778/.github/workflows/d8-expt-recip-sign.yml.source.txt",
+      "exact_git_blob": "5e2e23cacfc9470776950ea0d7e06915342f0e70"
+    },
+    {
+      "source_pr": 3778,
+      "source_head_sha": "9dde3ba36d803a8f5327842e713094eb377864f5",
+      "original_path": ".github/workflows/d8-integerp-rationalp-sign.yml",
+      "archived_path": "research/domain-archive/20261011/pr3778/.github/workflows/d8-integerp-rationalp-sign.yml.source.txt",
+      "exact_git_blob": "0733ff3cfaf503c31f0c627aac213fd35efaf090"
+    },
+    {
+      "source_pr": 3778,
+      "source_head_sha": "9dde3ba36d803a8f5327842e713094eb377864f5",
+      "original_path": "benchmarks/d8-curry-flip-independence/run.py",
+      "archived_path": "research/domain-archive/20261011/pr3778/benchmarks/d8-curry-flip-independence/run.py.source.txt",
+      "exact_git_blob": "c0a8bab20b24d1bf356cd0ecc7b70429899ba546"
+    },
+    {
+      "source_pr": 3778,
+      "source_head_sha": "9dde3ba36d803a8f5327842e713094eb377864f5",
+      "original_path": "benchmarks/d8-expt-recip-sign/run.py",
+      "archived_path": "research/domain-archive/20261011/pr3778/benchmarks/d8-expt-recip-sign/run.py.source.txt",
+      "exact_git_blob": "12f2f499b4c8667e08ad02044a078491445eea3c"
+    },
+    {
+      "source_pr": 3778,
+      "source_head_sha": "9dde3ba36d803a8f5327842e713094eb377864f5",
+      "original_path": "benchmarks/d8-integerp-rationalp-sign/run.py",
+      "archived_path": "research/domain-archive/20261011/pr3778/benchmarks/d8-integerp-rationalp-sign/run.py.source.txt",
+      "exact_git_blob": "edd1aab341fe293c72e381ecbcd370d2d99c55d5"
+    }
+  ],
+  "safeguards": "Source blobs unchanged; .py/.yml archived as .source.txt, outside live workflow and runtime. No domain coordinates, selection, ratification or CI guard changes."
+}

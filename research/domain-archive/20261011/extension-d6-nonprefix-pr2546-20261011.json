@@ -1,0 +1,65 @@
+{
+  "schema": "sens.domain-archive-d6-nonprefix/v1",
+  "date": "2026-10-11",
+  "domain": "D6",
+  "source_pr": 2546,
+  "source_head_sha": "57803f40775dcd32e7809b5a9c33719068fd0cb2",
+  "status": "HISTORICAL_RESEARCH_ONLY_UNRATIFIED_NOT_EXECUTABLE",
+  "semantic_claim": "Four observationally distinct binding-policy states require two independent semantic axes; prefix orientation is a local coordinate law, and nonprefix short external table indices are not intrinsic semantic compression.",
+  "evidence_kind": "HISTORICAL_FALSIFIER_AND_PROVENANCE",
+  "evidence_disposition": "ARCHIVED_FOR_REVIEW_NOT_NEW_RESIDENT",
+  "source_files_verified": 3,
+  "source_files_total": 3,
+  "files": [
+    {
+      "source_pr": 2546,
+      "source_commit_sha": "57803f40775dcd32e7809b5a9c33719068fd0cb2",
+      "original_path": "docs/research/2527-d6-nonprefix-falsifier.uk.md",
+      "archive_path": "research/domain-archive/20261011/pr2546/docs/research/2527-d6-nonprefix-falsifier.uk.md",
+      "original_blob_sha": "8ae616b534c1e4fc0a392f61f48ddaac62c20f86",
+      "archive_blob_sha": "8ae616b534c1e4fc0a392f61f48ddaac62c20f86",
+      "bytes": 3464,
+      "byte_identical": true
+    },
+    {
+      "source_pr": 2546,
+      "source_commit_sha": "57803f40775dcd32e7809b5a9c33719068fd0cb2",
+      "original_path": "docs/research/2527-d6-nonprefix-falsifier.md",
+      "archive_path": "research/domain-archive/20261011/pr2546/docs/research/2527-d6-nonprefix-falsifier.md",
+      "original_blob_sha": "6e3a323c0fd7b6d689f075e19ac0299b6a3e9b9f",
+      "archive_blob_sha": "6e3a323c0fd7b6d689f075e19ac0299b6a3e9b9f",
+      "bytes": 3488,
+      "byte_identical": true
+    },
+    {
+      "source_pr": 2546,
+      "source_commit_sha": "57803f40775dcd32e7809b5a9c33719068fd0cb2",
+      "original_path": "scripts/research-2527-d6-nonprefix-falsifier.py",
+      "archive_path": "research/domain-archive/20261011/pr2546/scripts/research-2527-d6-nonprefix-falsifier.py.source.txt",
+      "original_blob_sha": "e20b10d16af4e70b973a2d74f4f0c63bb3da4c10",
+      "archive_blob_sha": "e20b10d16af4e70b973a2d74f4f0c63bb3da4c10",
+      "bytes": 8889,
+      "byte_identical": true
+    }
+  ],
+  "controls": [
+    "D1-D9_RATIFICATION_UNCHANGED",
+    "D10_SELECTED_UNCHANGED",
+    "NO_ACTIVE_RUNTIME_CODE",
+    "NO_ACTIVE_WORKFLOW",
+    "NO_CI_WAIVER",
+    "NO_AUTOMATIC_SEMANTIC_ADMISSION"
+  ],
+  "required_followup": [
+    "check D6 historical-semantic equivalence to already merged witnesses",
+    "check repository-wide source/blob duplication before merge",
+    "pass exact-head CI, source provenance and M0",
+    "single-writer integration only"
+  ],
+  "coordination": [
+    "#5549",
+    "#5131",
+    "#5041",
+    "#2527"
+  ]
+}
