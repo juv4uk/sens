@@ -24,13 +24,12 @@
 (00001001 science-proper-list?
   (00001000 (x)
     (00000111
-      ; Pair cells recurse through CDR; never pass a compound value to EQ.
-      ((тотожне? (00000010 x) ні)
-       (science-proper-list? (00000110 x)))
-      ; EQ is atom-only. This branch runs only when X itself is an atom.
-      ((00000010 x) 
+      ; Атом: порожній хвіст завершує правильний список; інший атом — ні.
+      ((00000010 x)
        (00000011 x (00000001 ())))
-      )))
+      ; Пара: точний D1-предикат забезпечує рекурсію без невідомого імені.
+      ((00000010 (00000001 ()))
+       (science-proper-list? (00000110 x))))))
 
 (00001001 science-sixth
   (00001000 (values)
