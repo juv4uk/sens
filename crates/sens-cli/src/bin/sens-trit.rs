@@ -86,7 +86,9 @@ fn eval_t5_bytes_core4(
         sens::T5ExecutionError::Language(error) =>
             format!("canonical packed SENS parser rejected: {error}"),
     })?;
-    let mut session = sens::Session::default();
+    // Bare physical eval must not inherit the historical macro bootstrap.
+    // The explicit eval-core4 path below admits it only through load_core_library.
+    let mut session = sens::Session::bare();
     if bootstrap_core {
         sens::load_core_library(&mut session)
             .map_err(|e| format!("explicit Core4 bootstrap rejected: {e:?}"))?;
