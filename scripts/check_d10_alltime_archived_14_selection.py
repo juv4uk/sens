@@ -115,6 +115,24 @@ def verify(proof, archive, inv, foundation, ledger, history):
     return {"selected": 675, "new": 14, "sources_checked": len(donors),
             "placed": 256, "unplaced": 419, "missing": 349, "ratified": 0}
 
+def verify_promoted(name, inventory):
+    """Accept a formerly HOLD donor only after checking the entire subsequent
+    source-pinned research admission. The historical donor stays unchanged."""
+    proof, archive, foundation, history = (
+        data(DOSSIER), data(ARCHIVE), data("knowledge/d1-d9-foundation.json"),
+        data("knowledge/d10-selection-transition-history.json"))
+    with (ROOT / "knowledge/d10-proposal-ledger.tsv").open(
+        "r", encoding="utf-8", newline="") as f:
+        ledger = list(csv.DictReader(f, delimiter="\t"))
+    verdict = verify(proof, archive, inventory, foundation, ledger, history)
+    require(verdict["new"] == 14, "full archive admission not proved")
+    matches = [row for row in inventory["rows"] if row["semantic_name"] == name]
+    require(len(matches) == 1 and name in {
+        item["semantic_name"] for item in proof["records"]},
+        "candidate lacks independent source-pinned selected evidence")
+    return matches[0]
+
+
 def negative_tests(proof, archive, inv, foundation, ledger, history):
     cases = [
         ("missing law", lambda p, a, i, f, l, h: p["records"][0].__setitem__("observable_law", "")),
