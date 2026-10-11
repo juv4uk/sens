@@ -28,10 +28,10 @@
     "width": 10,
     "capacity": 1024,
     "dense_target": 1024,
-    "selected_semantic_candidates": 655,
-    "remaining_semantic_candidates": 369,
+    "selected_semantic_candidates": 658,
+    "remaining_semantic_candidates": 366,
     "law_forced_coordinates": 256,
-    "unplaced_selected_candidates": 399,
+    "unplaced_selected_candidates": 402,
     "ratified_residents": 0
   },
   "first_tranche": {
