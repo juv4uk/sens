@@ -218,7 +218,7 @@ def make_report(args: argparse.Namespace) -> dict[str, Any]:
     require(args.abi_profile.strip(), "--abi-profile must record the target ABI/profile")
     require(args.build_command.strip(), "--build-command must record the exact build command")
 
-    return {
+    report = {
         "schema": SCHEMA,
         "status": "MEASURED_WITH_PINNED_SELFHOST_LINEAGE",
         "measurement_scope": "regular-file-bytes-only",
@@ -351,6 +351,15 @@ def self_test() -> None:
         assert measured["c2_executable"]["file_bytes"] == len(c1_bytes)
         assert measured["c1_static_link_strip_variant"]["file_bytes"] == len(b"static-c1-executable-fixture")
         assert measured["c1_static_link_strip_variant"]["observable_output_byte_identical_to_baseline"] is True
+
+        static_output.write_bytes(b"different-output")
+        try:
+            make_report(args)
+        except MeasurementError as error:
+            assert "static-linked C1 output differs" in str(error)
+        else:
+            raise AssertionError("negative control accepted divergent static C1 output")
+        static_output.write_bytes(b"canonical-output")
 
         report["evidence"]["c1_executable_size"] = len(c1_bytes) + 1
         lineage_path.write_text(json.dumps(report), encoding="utf-8")
