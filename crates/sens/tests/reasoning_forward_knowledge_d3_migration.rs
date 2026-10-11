@@ -12,8 +12,10 @@ const KNOWLEDGE_D3: &str = include_str!("../../../tests/fixtures/knowledge-d3-ca
 
 fn session(migrated: bool) -> Session {
     let mut session = Session::default();
-    for source in [CORE, UNIFY, REASON] {
-        eval_program(source, &mut session).expect("base Lisp bootstrap");
+    eval_program(CORE, &mut session).expect("core bootstrap");
+    for (path, source) in [("lib/unify.lisp", UNIFY), ("lib/reason.lisp", REASON)] {
+        sens::eval_pinned_reasoning_source(path, source, &mut session)
+            .expect("exact-domain reasoning prerequisite bootstrap");
     }
     for (name, old, candidate) in [
         ("lib/forward.lisp", FORWARD_OLD, FORWARD_D3),
