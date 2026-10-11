@@ -2,6 +2,15 @@
 
 This is an execution and blocker ledger, not a claim that the repository is fully migrated.
 
+## 2026-10-12: expanded live-source census and D3 regression protection
+
+- Current read-only census: [GitHub Actions #38176044721](https://github.com/juv4uk/sens/actions/runs/38176044721), **196 scoped sources scanned, 0 additional automatically admissible files, 18 blocked files**. Other files are already migrated, nonprogram, or lack old-era evidence. The scanner's admitted count is not an all-repository certification metric.
+- Four attempted mechanical in-place rewrites (**410 SID8 heads** in `knowledge/guard-reference.lisp`, `knowledge/guard-fact-policy.lisp`, `scripts/enforce-function-table-mechanisms.lisp`, and `scripts/enforce-island-math-evidence.lisp`) were **reverted** after the owner-approved D3 semantic guard proved that old three-field COND / host T truth logic would not commute with bare D3:110. **These 410 do not add to the completed-migration ledger.**
+- A new test `tests/test_migrate_sid8_source_batch.py::test_historical_cond_guard_rejects_other_active_policy_sources` permanently keeps all four cases fail-closed until a genuine two-branch predicate-bit conversion is proved. The existing reference guard is retained.
+- The source-delta analyzer `scripts/check_sid8_source_delta_d3.py`, with four focused unit tests and `.github/workflows/sid8-source-d3-delta.yml`, now rejects newly introduced `COND_NOT_TWO_FIELDS`, `COND_HOST_TRUTH`, or `D3_WRONG_ARITY` on commits that modify legacy-era Lisp. The focused delta workflow passed [Actions #38176233631](https://github.com/juv4uk/sens/actions/runs/38176233631). It proves **no newly introduced D3 scanner findings**, not execution parity.
+- The main Hosted CI still reports separate D3/source integration failures; do not claim full green. The active blocker queue is given verbatim in the census artifact/log, including legacy DEFMACRO's compound D4/D5 successor, D10 observation cells, historical control semantics, and nonsemantic helper cells.
+- No new branches or .sens files were created by this effort; all historical source blobs remain recoverable, and the blocked files are restored to their pre-experiment bytes.
+
 ## Exact completed changes
 
 - **15,898 audited SID8 occurrences replaced** in **86 existing `.lisp` files** in the earlier audited cohorts; three additional local MAP replacements are recorded under blocker 2 below. (library, executable experiments, benchmarks and service programs), on **main**.
