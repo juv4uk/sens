@@ -1,0 +1,26 @@
+name: D5 name-erased function identity proof
+on:
+  pull_request:
+    paths:
+      - "benchmarks/axiom-corpus-function-description/**"
+      - "crates/sens/tests/axiom_corpus_function_description.rs"
+      - ".github/workflows/d5-axiom-function-description.yml"
+  push:
+    branches: [main]
+    paths:
+      - "benchmarks/axiom-corpus-function-description/**"
+      - "crates/sens/tests/axiom_corpus_function_description.rs"
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  D5:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Reproduce exact D5 name-erased original proof
+        run: cargo test -p sens --test axiom_corpus_function_description -- --nocapture
+      - name: Keep generated benchmark registry reproducible
+        run: python3 scripts/benchmark_registry.py --check
