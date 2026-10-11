@@ -84,45 +84,45 @@
 ;   (is X a Y)   / (is X an Y) / (is X Y)  -> Anfrage: (Y X)
 ;   (does X V Y)                           -> Anfrage: (V X Y)
 
-(00001001 strip-article
-  (00001000 (words)
-    (00000111
-      ((00000011 (00000101 words) (00000001 a))
+(0011 strip-article
+  (0010 (words)
+    (110
+      ((101 (100 words) (001 a))
        
-       (00000110 words))
-      ((00000011 (00000101 words) (00000001 an))
+       (011 words))
+      ((101 (100 words) (001 an))
        
-       (00000110 words))
-      ((0100 (00000011 (00000101 words) (00000001 an)))
+       (011 words))
+      ((0100 (101 (100 words) (001 an)))
        words))))
 
-(00001001 understand-is
-  (00001000 (words)
-    (10011100 ((subject (00000101 words))
-          (after-is (strip-article (00110101 words))))
-      (00100111 (00100111 (00000101 after-is) subject)))))
+(0011 understand-is
+  (0010 (words)
+    (001000 ((subject (100 words))
+          (after-is (strip-article (0111 words))))
+      (1110 (1110 (100 after-is) subject)))))
 
-(00001001 understand-relation
-  (00001000 (words)
-    (00100111 (00100111 (00101111 words) (00000101 words) (00110000 words)))))
+(0011 understand-relation
+  (0010 (words)
+    (1110 (1110 (1001 words) (100 words) (10011 words)))))
 
-(00001001 understand-universal
-  (00001000 (words)
-    (10011100 ((subject-class (00101111 words))
-          (property (00110110 words)))
-      (00100111 (00100111 (00000001 has) (00100111 (00000001 var) (00000001 w)) property)
-            (00100111 subject-class (00100111 (00000001 var) (00000001 w)))))))
+(0011 understand-universal
+  (0010 (words)
+    (001000 ((subject-class (1001 words))
+          (property (100111 words)))
+      (1110 (1110 (001 has) (1110 (001 var) (001 w)) property)
+            (1110 subject-class (1110 (001 var) (001 w)))))))
 
-(00001001 understand
-  (00001000 (words)
-    (00000111
-      ((00000011 (00000101 words) (00000001 all))
+(0011 understand
+  (0010 (words)
+    (110
+      ((101 (100 words) (001 all))
        
        (understand-universal words))
-      ((00000011 (00101111 words) (00000001 is))
+      ((101 (1001 words) (001 is))
        
        (understand-is words))
-      ((0100 (00000011 (00101111 words) (00000001 is)))
+      ((0100 (101 (1001 words) (001 is)))
        (understand-relation words)))))
 
 ; `understand-query` is the goal-shaped complement of `understand`: it turns
@@ -147,23 +147,23 @@
 ; in die Wissensbasis aufgenommen werden, liefert dies genau ein Ziel — das,
 ; wonach man *fragt*. Kontrolliert, strukturell, deterministisch: keine
 ; Morphologie, kein Netz, kein LLM.
-(00001001 understand-query-is
-  (00001000 (words)
-    (10011100 ((subject (00101111 words))
-          (after (00110101 words)))
-      (00100111 (00000101 (strip-article after)) subject))))
+(0011 understand-query-is
+  (0010 (words)
+    (001000 ((subject (1001 words))
+          (after (0111 words)))
+      (1110 (100 (strip-article after)) subject))))
 
-(00001001 understand-query-relation
-  (00001000 (words)
-    (00100111 (00110000 words) (00101111 words) (00110001 words))))
+(0011 understand-query-relation
+  (0010 (words)
+    (1110 (10011 words) (1001 words) (100111 words))))
 
-(00001001 understand-query
-  (00001000 (words)
-    (00000111
-      ((00000011 (00000101 words) (00000001 is))
+(0011 understand-query
+  (0010 (words)
+    (110
+      ((101 (100 words) (001 is))
        
        (understand-query-is words))
-      ((00000011 (00000101 words) (00000001 does))
+      ((101 (100 words) (001 does))
        
        (understand-query-relation words))
       )))
