@@ -42,6 +42,21 @@ fn journal_event_fields_are_retrieved_from_a_real_alist() {
 }
 
 #[test]
+fn root_envelope_accepts_its_own_schema_without_object_only_fields() {
+    let mut session = session();
+    assert_eq!(
+        observe(&mut session, "(car (fs-root-package-decision (fs-root-package (fs-empty))))"),
+        "accepted",
+        "root metadata consists of format/version/revision/bindings/objects, not an address/value pair"
+    );
+    assert_eq!(
+        observe(&mut session, "(fs-package-field (quote address) (fs-root-package (fs-empty)))"),
+        "()",
+        "the absent object address remains absent in a root envelope"
+    );
+}
+
+#[test]
 fn empty_object_store_uses_an_admitted_two_argument_lisp_closure() {
     let mut s = session();
     assert_eq!(
