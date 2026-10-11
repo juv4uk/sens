@@ -1,0 +1,11 @@
+# Exact compare pin main SHA: e92410447164df961e9d17f9740edc37c10cf826
+# File counts are paths returned by the compare API; overlapping branches intentionally not merged into live tree.
+branch	source_sha	compare_status	ahead_by	behind_by	reported_file_entries	classification
+agent/384-workflow-inventory	cda9060c53a24aed58662068211e457db859259a	diverged	5	8074	4	HISTORY_ATTACHED_CONTENT_REVIEW_REQUIRED
+agent/553-semantic-ownership-lisp	09a65bd6f55358de8c9a4b023c3df5d1e555abaa	diverged	11	8071	4	HISTORY_ATTACHED_CONTENT_REVIEW_REQUIRED
+agent/990-four-island-math-contract	9b647dc6b06897a00db3d398ef0fd911da8143c0	diverged	6	8077	4	HISTORY_ATTACHED_CONTENT_REVIEW_REQUIRED
+agent/990-island-math-evidence	73866ff6554586b5c556f99c60879f9e0a4c8466	diverged	23	8071	13	HISTORY_ATTACHED_CONTENT_REVIEW_REQUIRED
+agent/990-island-math-evidence-replay	bebb8cfb3418a916e3cc8efb79186a260532863d	diverged	10	8067	10	HISTORY_ATTACHED_CONTENT_REVIEW_REQUIRED
+agent/992-clips-eval-observation	90693ea47fd655f59ea4a7d6201b46ab0d503377	diverged	4	7718	2	HISTORY_ATTACHED_CONTENT_REVIEW_REQUIRED
+agent/992-clips-result-current-main	b050ad02b4d9dec3a573e54afb83d315c8bc42ad	behind	0	7705	0	ALREADY_IN_MAIN_ANCESTRY
+agent/992-clips-router-replay-main	96005e45aa5b56fc9d12210100cfefc858335775	diverged	5	7716	3	HISTORY_ATTACHED_CONTENT_REVIEW_REQUIRED
