@@ -412,6 +412,7 @@ fn require_exactly_one_d4_argument(
 fn invoke_compact_derived_d4(
     identity: CoreDomainIdentity,
     args: &[Value],
+    environment: &Environment,
     span: Span,
 ) -> Option<Result<Value, LanguageError>> {
     let CoreDomainIdentity::D4(word) = identity else {
@@ -435,12 +436,15 @@ fn invoke_compact_derived_d4(
             require_exactly_one_d4_argument(0b0101, args, span)?;
             Ok(Value::predicate_bit(matches!(args[0], Value::Nil)))
         })()),
-        // Ratified D4 LIST: collect evaluated values into a proper list.
-        0b1110 => Some(Ok(Value::list(args.iter().cloned()))),
+        // D4 LIST's reference mechanism is available only after explicit Core4 bootstrap.
+        // Without that profile it must remain a missing value-call mechanism.
+        0b1110 if environment.selected_core_profile() == Some(crate::CoreProfile::Core4) => {
+            Some(Ok(Value::list(args.iter().cloned())))
+        },
         // Ratified D4 APPEND: combine only proper lists, left to right.
         // Never coerce a D1 predicate, Text7 datum, symbol, or dotted tail
         // into a proper-list carrier. Each pair is observed, not mutated.
-        0b1111 => {
+        0b1111 if environment.selected_core_profile() == Some(crate::CoreProfile::Core4) => {
             let mut items = Vec::new();
             for value in args {
                 let mut cursor = value;
@@ -477,7 +481,7 @@ pub(crate) fn invoke_domain_identity(
         return result;
     }
 
-    if let Some(result) = invoke_compact_derived_d4(identity, args, span) {
+    if let Some(result) = invoke_compact_derived_d4(identity, args, environment, span) {
         return result;
     }
 
@@ -694,6 +698,40 @@ mod exact_domain_primitive_tests {
         let arity = invoke_domain_identity(d4(0b0101), &[], &environment, span)
             .expect_err("NULL arity remains one");
         assert_eq!(arity.kind, ErrorKind::Arity);
+    }
+
+    #[test]
+    fn d4_list_and_append_need_explicit_core4_profile() {
+        let bare = Environment::root();
+        let span = Span { start: 0, end: 0 };
+        for bits in [0b1110, 0b1111] {
+            let error = invoke_domain_identity(d4(bits), &[Value::Nil], &bare, span)
+                .expect_err("bare exact-domain evaluation must not activate Core4 LIST/APPEND");
+            assert!(
+                error.message.contains("no admitted value-call mechanism"),
+                "unexpected failure instead of a missing Core4 mechanism: {error}"
+            );
+        }
+
+        let core4 = Environment::root();
+        core4.select_core_profile(crate::CoreProfile::Core4);
+        let list = invoke_domain_identity(
+            d4(0b1110),
+            &[Value::Number(7.0, crate::Exactness::Exact)],
+            &core4,
+            span,
+        )
+        .expect("the explicit Core4 profile admits D4 LIST");
+        assert_eq!(list.to_string(), "(7)");
+
+        let append = invoke_domain_identity(
+            d4(0b1111),
+            &[Value::list([Value::Number(7.0, crate::Exactness::Exact)])],
+            &core4,
+            span,
+        )
+        .expect("the explicit Core4 profile admits D4 APPEND");
+        assert_eq!(append.to_string(), "(7)");
     }
 
     #[test]
