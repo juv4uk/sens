@@ -37,7 +37,7 @@
     "format": "ELF",
     "section_measurement": "GNU readelf -W -l/-S",
     "component_class": "runner-executable-component",
-    "whole_chain_seed_closure_status": "BLOCKED_UNENUMERATED",
+    "whole_chain_seed_closure_status": "BLOCKED_PARTIAL_LOWER_BOUND_NOT_COMPLETE_OR_MINIMIZED",
     "whole_chain_seed_closure_total_bytes": null
   },
   "c1_c2": {
@@ -85,7 +85,7 @@
     "new_branches_or_domains_for_nano_sens": false
   },
   "required_runtime_input_chain": {
-    "status": "PARTIALLY_ENUMERATED_NOT_YET_A_COMPLETE_MINIMUM_FILE_SET",
+    "status": "PARTIAL_CENSUS_RECORDED_NOT_YET_A_COMPLETE_MINIMUM_FILE_SET",
     "pinned_sens_source_commit": "d0787a40fcea36501747732aa61b6de19fe29c70",
     "observed_runtime_call": "src/sens_c1_artifact.rs::pinned_compiler_export() -> cargo run --manifest-path external/sens/Cargo.toml -p xtask -- compiler-export",
     "known_required_repo_inputs": [
@@ -168,9 +168,22 @@
       "measure each file's bytes and exact SHA on the pinned commit",
       "separate Cargo/rustc/GCC/linker/OS/registry dependency packages into a non-counted external-dependency ledger",
       "calculate one total only after proving the file closure is minimal and fail-closed"
-    ]
+    ],
+    "partial_census": {
+      "file": "evidence/nano-sens-seed-v0-source-closure-census-2026-10-12.json",
+      "pinned_sens_commit": "d0787a40fcea36501747732aa61b6de19fe29c70",
+      "source_and_manifest_file_count": 102,
+      "known_subset_on_disk_bytes": 1145608,
+      "status": "LOWER_BOUND_ONLY_NOT_THE_SEED_TOTAL",
+      "includes_counts": {
+        "rust_source_files": 71,
+        "workspace_package_manifests": 20,
+        "root_or_authority_inputs": 11
+      }
+    }
   },
   "notes": [
-    "Metric integrity correction (2026-10-12): the earlier 34,580,696-byte value remains a valid on-disk measurement of one ELF runner component. Code inspection shows this runner invokes cargo run -p xtask -- compiler-export at runtime, so the runner alone does not represent the complete seed input closure. The full-chain seed total is NOT MEASURED until every required non-toolchain input file is enumerated, pinned and counted."
+    "Metric integrity correction (2026-10-12): the earlier 34,580,696-byte value remains a valid on-disk measurement of one ELF runner component. Code inspection shows this runner invokes cargo run -p xtask -- compiler-export at runtime, so the runner alone does not represent the complete seed input closure. The full-chain seed total is NOT MEASURED until every required non-toolchain input file is enumerated, pinned and counted.",
+    "Follow-up closure census records 102 pinned files (1,145,608 bytes) for a source/manifest lower-bound subset. This is not a seed total: include macro dependencies, full Cargo build/runtime closure, registry source packages and current Git metadata dependency are not yet minimized or fully classified."
   ]
 }
