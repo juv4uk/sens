@@ -4618,7 +4618,22 @@
       "law_source": null,
       "selected": true,
       "ratified": false,
-      "physical_t5_authorized": false
+      "physical_t5_authorized": false,
+      "branch_proposal_evidence": [
+        {
+          "proposal_id": "D10P-0001",
+          "branch": "research/d10-placement-proof-crosswalk-20261011",
+          "branch_json_path": "research/d10/staging-20261011/d10-all-candidate-locations-main-653-20261011.json",
+          "source_git_blob": "ddf767304787e2bf9433a2574d483cf712102b1c",
+          "archived_classification": "ALREADY_SELECTED_D10",
+          "original_source": "juv4uk/sens@310698601033c4c9c2ff56138458b8569840e0a4:knowledge/d10-historical-primary-admission-batch1-v1.json:16",
+          "semantic_coordinate": "0101110001",
+          "crosscheck_selected": true,
+          "law_claim": "Замінює лише біти заданого поля цілого молодшими бітами нового значення; решту бітів зберігає.",
+          "positive_source_grade": [],
+          "evidence_status": "SOURCE-CLAIM-CROSSWALK-NOT-ORACLE-NOT-RATIFIED"
+        }
+      ]
     },
     {
       "coordinate": "0101110010",
@@ -4630,7 +4645,22 @@
       "law_source": null,
       "selected": true,
       "ratified": false,
-      "physical_t5_authorized": false
+      "physical_t5_authorized": false,
+      "branch_proposal_evidence": [
+        {
+          "proposal_id": "D10P-0002",
+          "branch": "research/d10-placement-proof-crosswalk-20261011",
+          "branch_json_path": "research/d10/staging-20261011/d10-all-candidate-locations-main-653-20261011.json",
+          "source_git_blob": "ddf767304787e2bf9433a2574d483cf712102b1c",
+          "archived_classification": "ALREADY_SELECTED_D10",
+          "original_source": "juv4uk/sens@310698601033c4c9c2ff56138458b8569840e0a4:knowledge/d10-historical-primary-admission-batch1-v1.json:55",
+          "semantic_coordinate": "0101110010",
+          "crosscheck_selected": true,
+          "law_claim": "Повертає масив-основу та точний зсув у двох значеннях; спільне сховище не копіюється.",
+          "positive_source_grade": [],
+          "evidence_status": "SOURCE-CLAIM-CROSSWALK-NOT-ORACLE-NOT-RATIFIED"
+        }
+      ]
     },
     {
       "coordinate": "0101110011",
@@ -4642,7 +4672,22 @@
       "law_source": "knowledge/d10-clos-slot-state-historical-review-v1.json",
       "selected": true,
       "ratified": false,
-      "physical_t5_authorized": false
+      "physical_t5_authorized": false,
+      "branch_proposal_evidence": [
+        {
+          "proposal_id": "D10P-0003",
+          "branch": "research/d10-placement-proof-crosswalk-20261011",
+          "branch_json_path": "research/d10/staging-20261011/d10-all-candidate-locations-main-653-20261011.json",
+          "source_git_blob": "ddf767304787e2bf9433a2574d483cf712102b1c",
+          "archived_classification": "ALREADY_SELECTED_D10",
+          "original_source": "juv4uk/sens@310698601033c4c9c2ff56138458b8569840e0a4:knowledge/d10-clos-slot-state-historical-review-v1.json:37",
+          "semantic_coordinate": "0101110011",
+          "crosscheck_selected": true,
+          "law_claim": "Розрізняє наявну незв'язану комірку і комірку зі значенням NIL; відсутня комірка окремий випадок.",
+          "positive_source_grade": [],
+          "evidence_status": "SOURCE-CLAIM-CROSSWALK-NOT-ORACLE-NOT-RATIFIED"
+        }
+      ]
     },
     {
       "coordinate": "0101110100",
@@ -4654,7 +4699,22 @@
       "law_source": "knowledge/d10-clos-slot-state-historical-review-v1.json",
       "selected": true,
       "ratified": false,
-      "physical_t5_authorized": false
+      "physical_t5_authorized": false,
+      "branch_proposal_evidence": [
+        {
+          "proposal_id": "D10P-0004",
+          "branch": "research/d10-placement-proof-crosswalk-20261011",
+          "branch_json_path": "research/d10/staging-20261011/d10-all-candidate-locations-main-653-20261011.json",
+          "source_git_blob": "ddf767304787e2bf9433a2574d483cf712102b1c",
+          "archived_classification": "ALREADY_SELECTED_D10",
+          "original_source": "juv4uk/sens@310698601033c4c9c2ff56138458b8569840e0a4:knowledge/d10-clos-slot-state-historical-review-v1.json:55",
+          "semantic_coordinate": "0101110100",
+          "crosscheck_selected": true,
+          "law_claim": "Переводить наявну комірку об'єкта у незв'язаний стан зі збереженням тотожності об'єкта й інших комірок.",
+          "positive_source_grade": [],
+          "evidence_status": "SOURCE-CLAIM-CROSSWALK-NOT-ORACLE-NOT-RATIFIED"
+        }
+      ]
     },
     {
       "coordinate": "0101110101",
@@ -4666,7 +4726,22 @@
       "law_source": "knowledge/d10-historical-clos-interlisp-residual-review-v1.json",
       "selected": true,
       "ratified": false,
-      "physical_t5_authorized": false
+      "physical_t5_authorized": false,
+      "branch_proposal_evidence": [
+        {
+          "proposal_id": "D10P-0005",
+          "branch": "research/d10-placement-proof-crosswalk-20261011",
+          "branch_json_path": "research/d10/staging-20261011/d10-all-candidate-locations-main-653-20261011.json",
+          "source_git_blob": "ddf767304787e2bf9433a2574d483cf712102b1c",
+          "archived_classification": "ALREADY_SELECTED_D10",
+          "original_source": "juv4uk/sens@310698601033c4c9c2ff56138458b8569840e0a4:knowledge/d10-historical-clos-interlisp-residual-review-v1.json:53",
+          "semantic_coordinate": "0101110101",
+          "crosscheck_selected": true,
+          "law_claim": "Вилучає тільки ідентифікований об'єкт методу з узагальненої функції; інші методи та функцію зберігає.",
+          "positive_source_grade": [],
+          "evidence_status": "SOURCE-CLAIM-CROSSWALK-NOT-ORACLE-NOT-RATIFIED"
+        }
+      ]
     },
     {
       "coordinate": "0101110110",
@@ -4678,7 +4753,22 @@
       "law_source": "knowledge/d10-hobby-exact-measurement-intake-v1.json",
       "selected": true,
       "ratified": false,
-      "physical_t5_authorized": false
+      "physical_t5_authorized": false,
+      "branch_proposal_evidence": [
+        {
+          "proposal_id": "D10P-0006",
+          "branch": "research/d10-placement-proof-crosswalk-20261011",
+          "branch_json_path": "research/d10/staging-20261011/d10-all-candidate-locations-main-653-20261011.json",
+          "source_git_blob": "ddf767304787e2bf9433a2574d483cf712102b1c",
+          "archived_classification": "ALREADY_SELECTED_D10",
+          "original_source": "juv4uk/spanda@cf9caa1e52b9e832f865f3a06cb86b20059d8927:README.md:37-38",
+          "semantic_coordinate": "0101110110",
+          "crosscheck_selected": true,
+          "law_claim": "Для точного раціонального x та Q>=1 повертає найближчий скорочений p/q з q<=Q і точний знаковий залишок x-p/q; tie: менший знаменник потім менший чисельник.",
+          "positive_source_grade": [],
+          "evidence_status": "SOURCE-CLAIM-CROSSWALK-NOT-ORACLE-NOT-RATIFIED"
+        }
+      ]
     },
     {
       "coordinate": "0101110111",
@@ -4690,7 +4780,22 @@
       "law_source": null,
       "selected": true,
       "ratified": false,
-      "physical_t5_authorized": false
+      "physical_t5_authorized": false,
+      "branch_proposal_evidence": [
+        {
+          "proposal_id": "D10P-0007",
+          "branch": "research/d10-placement-proof-crosswalk-20261011",
+          "branch_json_path": "research/d10/staging-20261011/d10-all-candidate-locations-main-653-20261011.json",
+          "source_git_blob": "ddf767304787e2bf9433a2574d483cf712102b1c",
+          "archived_classification": "ALREADY_SELECTED_D10",
+          "original_source": "juv4uk/sens@42c2aa06aaeb1be6a48fb83f94e302fc982ecf95:knowledge/d10-primitive-binary-word-root-v1.json:37",
+          "semantic_coordinate": "0101110111",
+          "crosscheck_selected": true,
+          "law_claim": "Найкоротший префікс двійкового слова який при цілочисельному повторенні точно відтворює повне слово; порожній вхід дає порожній результат.",
+          "positive_source_grade": [],
+          "evidence_status": "SOURCE-CLAIM-CROSSWALK-NOT-ORACLE-NOT-RATIFIED"
+        }
+      ]
     },
     {
       "coordinate": "0101111000",
@@ -4702,7 +4807,22 @@
       "law_source": "knowledge/d10-gray-reflected-binary-research-v1.json",
       "selected": true,
       "ratified": false,
-      "physical_t5_authorized": false
+      "physical_t5_authorized": false,
+      "branch_proposal_evidence": [
+        {
+          "proposal_id": "D10P-0009",
+          "branch": "research/d10-placement-proof-crosswalk-20261011",
+          "branch_json_path": "research/d10/staging-20261011/d10-all-candidate-locations-main-653-20261011.json",
+          "source_git_blob": "ddf767304787e2bf9433a2574d483cf712102b1c",
+          "archived_classification": "ALREADY_SELECTED_D10",
+          "original_source": "juv4uk/sens@0cf23c95660aa7ae199e6f683bc76f14eabbf958:knowledge/d10-gray-reflected-binary-research-v1.json:36",
+          "semantic_coordinate": "0101111000",
+          "crosscheck_selected": true,
+          "law_claim": "Кодує беззнаковий двійковий ранг довжини w відбитим кодом Грея n XOR (n>>1); зберігає ширину; сусідні слова відрізняються лише одним бітом.",
+          "positive_source_grade": [],
+          "evidence_status": "SOURCE-CLAIM-CROSSWALK-NOT-ORACLE-NOT-RATIFIED"
+        }
+      ]
     },
     {
       "coordinate": "0101111001",
@@ -4714,7 +4834,22 @@
       "law_source": "knowledge/d10-gray-reflected-binary-research-v1.json",
       "selected": true,
       "ratified": false,
-      "physical_t5_authorized": false
+      "physical_t5_authorized": false,
+      "branch_proposal_evidence": [
+        {
+          "proposal_id": "D10P-0010",
+          "branch": "research/d10-placement-proof-crosswalk-20261011",
+          "branch_json_path": "research/d10/staging-20261011/d10-all-candidate-locations-main-653-20261011.json",
+          "source_git_blob": "ddf767304787e2bf9433a2574d483cf712102b1c",
+          "archived_classification": "ALREADY_SELECTED_D10",
+          "original_source": "juv4uk/sens@0cf23c95660aa7ae199e6f683bc76f14eabbf958:knowledge/d10-gray-reflected-binary-research-v1.json:58",
+          "semantic_coordinate": "0101111001",
+          "crosscheck_selected": true,
+          "law_claim": "Декодує відбите слово Грея в точний двійковий ранг через префіксний XOR від старшого біта до молодшого; зберігає ширину.",
+          "positive_source_grade": [],
+          "evidence_status": "SOURCE-CLAIM-CROSSWALK-NOT-ORACLE-NOT-RATIFIED"
+        }
+      ]
     },
     {
       "coordinate": "0101111010",
@@ -4726,7 +4861,22 @@
       "law_source": "knowledge/d10-finite-bayes-update-research-v1.json",
       "selected": true,
       "ratified": false,
-      "physical_t5_authorized": false
+      "physical_t5_authorized": false,
+      "branch_proposal_evidence": [
+        {
+          "proposal_id": "D10P-0011",
+          "branch": "research/d10-placement-proof-crosswalk-20261011",
+          "branch_json_path": "research/d10/staging-20261011/d10-all-candidate-locations-main-653-20261011.json",
+          "source_git_blob": "ddf767304787e2bf9433a2574d483cf712102b1c",
+          "archived_classification": "ALREADY_SELECTED_D10",
+          "original_source": "juv4uk/sens@29e0ca9bb8eae931f380f17e4b8040d29cd4f996:knowledge/d10-finite-bayes-update-research-v1.json:13",
+          "semantic_coordinate": "0101111010",
+          "crosscheck_selected": true,
+          "law_claim": "Для точної скінченної ймовірнісної моделі p_i і likelihood l_i: при Z=сума(p_i*l_i)>0 повертає впорядковані точні posterior_i=p_i*l_i/Z і Z; нульове Z або невалідні ймовірності відхиляє.",
+          "positive_source_grade": [],
+          "evidence_status": "SOURCE-CLAIM-CROSSWALK-NOT-ORACLE-NOT-RATIFIED"
+        }
+      ]
     },
     {
       "coordinate": "0101111011",
@@ -4738,7 +4888,22 @@
       "law_source": "knowledge/d10-gf2-minimal-recurrence-research-v1.json",
       "selected": true,
       "ratified": false,
-      "physical_t5_authorized": false
+      "physical_t5_authorized": false,
+      "branch_proposal_evidence": [
+        {
+          "proposal_id": "D10P-4952",
+          "branch": "research/d10-placement-proof-crosswalk-20261011",
+          "branch_json_path": "research/d10/staging-20261011/d10-all-candidate-locations-main-653-20261011.json",
+          "source_git_blob": "ddf767304787e2bf9433a2574d483cf712102b1c",
+          "archived_classification": "ALREADY_SELECTED_D10",
+          "original_source": "juv4uk/sens@0a05dd1caf7b8fd9cb91ebf8c0c16bdf975f4911:knowledge/d10-gf2-minimal-recurrence-research-v1.json:1",
+          "semantic_coordinate": "0101111011",
+          "crosscheck_selected": true,
+          "law_claim": "Найменший порядок однорідної XOR-рекуренції GF(2) для скінченного слова з лексикографічно найменшими коефіцієнтами; результат містить і порядок L, і taps. Не гарантує майбутніх бітів.",
+          "positive_source_grade": [],
+          "evidence_status": "SOURCE-CLAIM-CROSSWALK-NOT-ORACLE-NOT-RATIFIED"
+        }
+      ]
     },
     {
       "coordinate": "0101111100",
@@ -4750,7 +4915,22 @@
       "law_source": null,
       "selected": true,
       "ratified": false,
-      "physical_t5_authorized": false
+      "physical_t5_authorized": false,
+      "branch_proposal_evidence": [
+        {
+          "proposal_id": "D10P-503101",
+          "branch": "research/d10-placement-proof-crosswalk-20261011",
+          "branch_json_path": "research/d10/staging-20261011/d10-all-candidate-locations-main-653-20261011.json",
+          "source_git_blob": "ddf767304787e2bf9433a2574d483cf712102b1c",
+          "archived_classification": "ALREADY_SELECTED_D10",
+          "original_source": "juv4uk/sens@85764319d459d9756eee2c281aa3fe5911c3c4f5:knowledge/d10-historical-primary-admission-batch2-v1.json:27",
+          "semantic_coordinate": "0101111100",
+          "crosscheck_selected": true,
+          "law_claim": "Заміщує цільове бітове поле бітами джерела з відповідних абсолютних позицій, а не наймолодшими бітами; позапольові біти незмінні.",
+          "positive_source_grade": [],
+          "evidence_status": "SOURCE-CLAIM-CROSSWALK-NOT-ORACLE-NOT-RATIFIED"
+        }
+      ]
     },
     {
       "coordinate": "0101111101",
@@ -4762,7 +4942,22 @@
       "law_source": null,
       "selected": true,
       "ratified": false,
-      "physical_t5_authorized": false
+      "physical_t5_authorized": false,
+      "branch_proposal_evidence": [
+        {
+          "proposal_id": "D10P-503102",
+          "branch": "research/d10-placement-proof-crosswalk-20261011",
+          "branch_json_path": "research/d10/staging-20261011/d10-all-candidate-locations-main-653-20261011.json",
+          "source_git_blob": "ddf767304787e2bf9433a2574d483cf712102b1c",
+          "archived_classification": "ALREADY_SELECTED_D10",
+          "original_source": "juv4uk/sens@85764319d459d9756eee2c281aa3fe5911c3c4f5:knowledge/d10-historical-primary-admission-batch2-v1.json:101",
+          "semantic_coordinate": "0101111101",
+          "crosscheck_selected": true,
+          "law_claim": "Повертає два вектори ключів і значень однакової довжини; кожен індекс відповідає одній парі, порядок обходу не гарантований.",
+          "positive_source_grade": [],
+          "evidence_status": "SOURCE-CLAIM-CROSSWALK-NOT-ORACLE-NOT-RATIFIED"
+        }
+      ]
     },
     {
       "coordinate": "0101111110",
@@ -4774,7 +4969,22 @@
       "law_source": "knowledge/d10-interdisciplinary-science-proposals-20261009.json",
       "selected": true,
       "ratified": false,
-      "physical_t5_authorized": false
+      "physical_t5_authorized": false,
+      "branch_proposal_evidence": [
+        {
+          "proposal_id": "D10P-503103",
+          "branch": "research/d10-placement-proof-crosswalk-20261011",
+          "branch_json_path": "research/d10/staging-20261011/d10-all-candidate-locations-main-653-20261011.json",
+          "source_git_blob": "ddf767304787e2bf9433a2574d483cf712102b1c",
+          "archived_classification": "ALREADY_SELECTED_D10",
+          "original_source": "juv4uk/sens@cc5e7f7a0dd0a61a6908531d9fc46a3d8d6d3ab7:knowledge/d10-interdisciplinary-science-proposals-20261009.json:10",
+          "semantic_coordinate": "0101111110",
+          "crosscheck_selected": true,
+          "law_claim": "Given an n×n symmetric covariance matrix Sigma and an m×n Jacobian J at the same linearization point, yield m×m J*Sigma*transpose(J), retaining nonzero cross-covariances; reject inconsistent shapes. This is a first-order linearized covariance law and must not claim exact uncertainty propagation for arbitrary nonlinear distributions.",
+          "positive_source_grade": [],
+          "evidence_status": "SOURCE-CLAIM-CROSSWALK-NOT-ORACLE-NOT-RATIFIED"
+        }
+      ]
     },
     {
       "coordinate": "0101111111",
@@ -4786,7 +4996,22 @@
       "law_source": "knowledge/d10-interdisciplinary-science-proposals-20261009.json",
       "selected": true,
       "ratified": false,
-      "physical_t5_authorized": false
+      "physical_t5_authorized": false,
+      "branch_proposal_evidence": [
+        {
+          "proposal_id": "D10P-503104",
+          "branch": "research/d10-placement-proof-crosswalk-20261011",
+          "branch_json_path": "research/d10/staging-20261011/d10-all-candidate-locations-main-653-20261011.json",
+          "source_git_blob": "ddf767304787e2bf9433a2574d483cf712102b1c",
+          "archived_classification": "ALREADY_SELECTED_D10",
+          "original_source": "juv4uk/sens@cc5e7f7a0dd0a61a6908531d9fc46a3d8d6d3ab7:knowledge/d10-interdisciplinary-science-proposals-20261009.json:24",
+          "semantic_coordinate": "0101111111",
+          "crosscheck_selected": true,
+          "law_claim": "For an epoch-aligned frame rotation R(t), derivative Rdot(t), source position p and source velocity v, yield target p'=R*p and v'=R*v+Rdot*p. A rotation-only position law does not suffice for velocity in a time-varying frame; reject mismatched dimensions and epochs.",
+          "positive_source_grade": [],
+          "evidence_status": "SOURCE-CLAIM-CROSSWALK-NOT-ORACLE-NOT-RATIFIED"
+        }
+      ]
     },
     {
       "coordinate": "0110000000",
@@ -7870,7 +8095,22 @@
       "law_source": "knowledge/d10-interdisciplinary-science-proposals-20261009.json",
       "selected": true,
       "ratified": false,
-      "physical_t5_authorized": false
+      "physical_t5_authorized": false,
+      "branch_proposal_evidence": [
+        {
+          "proposal_id": "D10P-503105",
+          "branch": "research/d10-placement-proof-crosswalk-20261011",
+          "branch_json_path": "research/d10/staging-20261011/d10-all-candidate-locations-main-653-20261011.json",
+          "source_git_blob": "ddf767304787e2bf9433a2574d483cf712102b1c",
+          "archived_classification": "ALREADY_SELECTED_D10",
+          "original_source": "juv4uk/sens@cc5e7f7a0dd0a61a6908531d9fc46a3d8d6d3ab7:knowledge/d10-interdisciplinary-science-proposals-20261009.json:38",
+          "semantic_coordinate": "1010000000",
+          "crosscheck_selected": true,
+          "law_claim": "For input signal x sampled at fs, positive integer interpolation L and decimation M, and explicit FIR taps h, zero-insert by L, convolve causally with h, then retain indices divisible by M: output rate fs*L/M. The explicit finite-output convention is output indices n<length(x)*L, with zero prehistory; repeated processing on disjoint chunks must preserve FIR history and global decimation phase.",
+          "positive_source_grade": [],
+          "evidence_status": "SOURCE-CLAIM-CROSSWALK-NOT-ORACLE-NOT-RATIFIED"
+        }
+      ]
     },
     {
       "coordinate": "1010000001",
@@ -7882,7 +8122,22 @@
       "law_source": "knowledge/d10-clock-radio-math-selection-20261009.json",
       "selected": true,
       "ratified": false,
-      "physical_t5_authorized": false
+      "physical_t5_authorized": false,
+      "branch_proposal_evidence": [
+        {
+          "proposal_id": "D10P-503106",
+          "branch": "research/d10-placement-proof-crosswalk-20261011",
+          "branch_json_path": "research/d10/staging-20261011/d10-all-candidate-locations-main-653-20261011.json",
+          "source_git_blob": "ddf767304787e2bf9433a2574d483cf712102b1c",
+          "archived_classification": "ALREADY_SELECTED_D10",
+          "original_source": "juv4uk/sens@b88296f0ddfe5a833e9e10ef6eef77ef504c3683:knowledge/d10-clock-radio-math-selection-20261009.json:20",
+          "semantic_coordinate": "1010000001",
+          "crosscheck_selected": true,
+          "law_claim": "Сумує квадрати різниць сусідніх дробових частот з нормуванням 2(N-1).",
+          "positive_source_grade": [],
+          "evidence_status": "SOURCE-CLAIM-CROSSWALK-NOT-ORACLE-NOT-RATIFIED"
+        }
+      ]
     },
     {
       "coordinate": "1010000010",
@@ -7894,7 +8149,22 @@
       "law_source": "knowledge/d10-clock-radio-math-selection-20261009.json",
       "selected": true,
       "ratified": false,
-      "physical_t5_authorized": false
+      "physical_t5_authorized": false,
+      "branch_proposal_evidence": [
+        {
+          "proposal_id": "D10P-503107",
+          "branch": "research/d10-placement-proof-crosswalk-20261011",
+          "branch_json_path": "research/d10/staging-20261011/d10-all-candidate-locations-main-653-20261011.json",
+          "source_git_blob": "ddf767304787e2bf9433a2574d483cf712102b1c",
+          "archived_classification": "ALREADY_SELECTED_D10",
+          "original_source": "juv4uk/sens@b88296f0ddfe5a833e9e10ef6eef77ef504c3683:knowledge/d10-clock-radio-math-selection-20261009.json:83",
+          "semantic_coordinate": "1010000010",
+          "crosscheck_selected": true,
+          "law_claim": "Кодує модульним накопиченням, повертає вихід і останній стан для наступного фрагмента.",
+          "positive_source_grade": [],
+          "evidence_status": "SOURCE-CLAIM-CROSSWALK-NOT-ORACLE-NOT-RATIFIED"
+        }
+      ]
     },
     {
       "coordinate": "1010000011",
@@ -7906,7 +8176,22 @@
       "law_source": "knowledge/d10-clock-radio-math-selection-20261009.json",
       "selected": true,
       "ratified": false,
-      "physical_t5_authorized": false
+      "physical_t5_authorized": false,
+      "branch_proposal_evidence": [
+        {
+          "proposal_id": "D10P-503108",
+          "branch": "research/d10-placement-proof-crosswalk-20261011",
+          "branch_json_path": "research/d10/staging-20261011/d10-all-candidate-locations-main-653-20261011.json",
+          "source_git_blob": "ddf767304787e2bf9433a2574d483cf712102b1c",
+          "archived_classification": "ALREADY_SELECTED_D10",
+          "original_source": "juv4uk/sens@b88296f0ddfe5a833e9e10ef6eef77ef504c3683:knowledge/d10-clock-radio-math-selection-20261009.json:163",
+          "semantic_coordinate": "1010000011",
+          "crosscheck_selected": true,
+          "law_claim": "Обчислює модульні різниці закодованих входів і зберігає останній закодований вхід.",
+          "positive_source_grade": [],
+          "evidence_status": "SOURCE-CLAIM-CROSSWALK-NOT-ORACLE-NOT-RATIFIED"
+        }
+      ]
     },
     {
       "coordinate": "1010000100",
@@ -7918,7 +8203,22 @@
       "law_source": "knowledge/d10-clock-radio-math-selection-20261009.json",
       "selected": true,
       "ratified": false,
-      "physical_t5_authorized": false
+      "physical_t5_authorized": false,
+      "branch_proposal_evidence": [
+        {
+          "proposal_id": "D10P-503109",
+          "branch": "research/d10-placement-proof-crosswalk-20261011",
+          "branch_json_path": "research/d10/staging-20261011/d10-all-candidate-locations-main-653-20261011.json",
+          "source_git_blob": "ddf767304787e2bf9433a2574d483cf712102b1c",
+          "archived_classification": "ALREADY_SELECTED_D10",
+          "original_source": "juv4uk/sens@b88296f0ddfe5a833e9e10ef6eef77ef504c3683:knowledge/d10-clock-radio-math-selection-20261009.json:242",
+          "semantic_coordinate": "1010000100",
+          "crosscheck_selected": true,
+          "law_claim": "Множить комплексний відлік на спряжений попередній без нормування амплітуди.",
+          "positive_source_grade": [],
+          "evidence_status": "SOURCE-CLAIM-CROSSWALK-NOT-ORACLE-NOT-RATIFIED"
+        }
+      ]
     },
     {
       "coordinate": "1010000101",
@@ -7930,7 +8230,22 @@
       "law_source": null,
       "selected": true,
       "ratified": false,
-      "physical_t5_authorized": false
+      "physical_t5_authorized": false,
+      "branch_proposal_evidence": [
+        {
+          "proposal_id": "D10P-0916",
+          "branch": "research/d10-placement-proof-crosswalk-20261011",
+          "branch_json_path": "research/d10/staging-20261011/d10-all-candidate-locations-main-653-20261011.json",
+          "source_git_blob": "ddf767304787e2bf9433a2574d483cf712102b1c",
+          "archived_classification": "ALREADY_SELECTED_D10",
+          "original_source": "juv4uk/sens@0d325c3fa023274f32a6ab7888601d40fc6404a9:knowledge/d10-babbage-reiter-hobby-selected-20261009.json:21",
+          "semantic_coordinate": "1010000101",
+          "crosscheck_selected": true,
+          "law_claim": "Для щонайменше d+2 точних рівновіддалених зразків підтверджує нульові скінченні різниці порядку d+1, видає явне свідчення першої ненульової різниці або точне наступне значення Ньютона.",
+          "positive_source_grade": [],
+          "evidence_status": "SOURCE-CLAIM-CROSSWALK-NOT-ORACLE-NOT-RATIFIED"
+        }
+      ]
     },
     {
       "coordinate": "1010000110",
@@ -7942,7 +8257,22 @@
       "law_source": "knowledge/d10-hysteretic-boolean-source-law-20261009.json",
       "selected": true,
       "ratified": false,
-      "physical_t5_authorized": false
+      "physical_t5_authorized": false,
+      "branch_proposal_evidence": [
+        {
+          "proposal_id": "D10P-0901",
+          "branch": "research/d10-placement-proof-crosswalk-20261011",
+          "branch_json_path": "research/d10/staging-20261011/d10-all-candidate-locations-main-653-20261011.json",
+          "source_git_blob": "ddf767304787e2bf9433a2574d483cf712102b1c",
+          "archived_classification": "ALREADY_SELECTED_D10",
+          "original_source": "juv4uk/sens@5c6788962198588dcde9400506be8a005d8a6e40:knowledge/d10-hysteretic-boolean-source-law-20261009.json:54",
+          "semantic_coordinate": "1010000110",
+          "crosscheck_selected": true,
+          "law_claim": "Двопороговий D1 стан: для точних раціональних low<high і x повертає NO за x<=low, YES за x>=high, попередній біт у відкритій середині; неточний вхід і невалідні пороги відхиляє.",
+          "positive_source_grade": [],
+          "evidence_status": "SOURCE-CLAIM-CROSSWALK-NOT-ORACLE-NOT-RATIFIED"
+        }
+      ]
     },
     {
       "coordinate": "1010000111",
@@ -7954,7 +8284,33 @@
       "law_source": "knowledge/d10-exact-barycentric-interpolation-research-v1.json",
       "selected": true,
       "ratified": false,
-      "physical_t5_authorized": false
+      "physical_t5_authorized": false,
+      "branch_proposal_evidence": [
+        {
+          "proposal_id": "D10P-6104",
+          "branch": "research/d10-placement-proof-crosswalk-20261011",
+          "branch_json_path": "research/d10/staging-20261011/d10-all-candidate-locations-main-653-20261011.json",
+          "source_git_blob": "ddf767304787e2bf9433a2574d483cf712102b1c",
+          "archived_classification": "ALREADY_SELECTED_D10",
+          "original_source": "juv4uk/sens@c67db6cdd820dea8d3a110caed359507c0a2d7a4:knowledge/d10-exact-barycentric-interpolation-research-v1.json:1",
+          "semantic_coordinate": "1010000111",
+          "crosscheck_selected": true,
+          "law_claim": "Given 1..n pairwise-distinct exact rational node abscissas x_i and exact rational ordinates y_i, and exact rational query x, return the unique exact rational value of polynomial degree at most n−1 interpolating all nodes (x_i,y_i). Evaluate at x_i exactly y_i, reject duplicate x_i, empty set and inexact values; permutation of nodes must not alter result. Evaluate by barycentric rational weights, not floating coefficients.",
+          "positive_source_grade": [
+            {
+              "source": "archival",
+              "donor_path": "knowledge/d10-exact-barycentric-interpolation-research-v1.json",
+              "old_status": "HOLD-CORE-VS-DERIVED-LIBRARY-PENDING-OWNER-REVIEW"
+            },
+            {
+              "source": "replay",
+              "donor_path": null,
+              "old_status": null
+            }
+          ],
+          "evidence_status": "SOURCE-CLAIM-CROSSWALK-NOT-ORACLE-NOT-RATIFIED"
+        }
+      ]
     },
     {
       "coordinate": "1010001000",
@@ -7966,7 +8322,33 @@
       "law_source": "knowledge/d10-finite-temporal-constraint-closure-v1.json",
       "selected": true,
       "ratified": false,
-      "physical_t5_authorized": false
+      "physical_t5_authorized": false,
+      "branch_proposal_evidence": [
+        {
+          "proposal_id": "D10P-2026101102",
+          "branch": "research/d10-placement-proof-crosswalk-20261011",
+          "branch_json_path": "research/d10/staging-20261011/d10-all-candidate-locations-main-653-20261011.json",
+          "source_git_blob": "ddf767304787e2bf9433a2574d483cf712102b1c",
+          "archived_classification": "ALREADY_SELECTED_D10",
+          "original_source": "juv4uk/sens@c67db6cdd820dea8d3a110caed359507c0a2d7a4:knowledge/d10-finite-temporal-constraint-closure-v1.json:1",
+          "semantic_coordinate": "1010001000",
+          "crosscheck_selected": true,
+          "law_claim": "Точні межі різниць подій або негативний цикл у скінченній мережі часових обмежень. самостійне спостережуване відношення між часовими обмеженнями; не механізм таймера",
+          "positive_source_grade": [
+            {
+              "source": "archival",
+              "donor_path": "knowledge/d10-finite-temporal-constraint-closure-v1.json",
+              "old_status": null
+            },
+            {
+              "source": "replay",
+              "donor_path": null,
+              "old_status": null
+            }
+          ],
+          "evidence_status": "SOURCE-CLAIM-CROSSWALK-NOT-ORACLE-NOT-RATIFIED"
+        }
+      ]
     },
     {
       "coordinate": "1010001001",
@@ -7978,7 +8360,38 @@
       "law_source": "knowledge/d10-quine-prime-implicants-20261009.json",
       "selected": true,
       "ratified": false,
-      "physical_t5_authorized": false
+      "physical_t5_authorized": false,
+      "branch_proposal_evidence": [
+        {
+          "proposal_id": "D10P-2026101103",
+          "branch": "research/d10-placement-proof-crosswalk-20261011",
+          "branch_json_path": "research/d10/staging-20261011/d10-all-candidate-locations-main-653-20261011.json",
+          "source_git_blob": "ddf767304787e2bf9433a2574d483cf712102b1c",
+          "archived_classification": "ALREADY_SELECTED_D10",
+          "original_source": "juv4uk/sens@c67db6cdd820dea8d3a110caed359507c0a2d7a4:knowledge/d10-quine-prime-implicants-20261009.json:1",
+          "semantic_coordinate": "1010001001",
+          "crosscheck_selected": true,
+          "law_claim": "Усі прості імпліканти булевої функції з визначеними ON/DC множинами. повна множина максимальних допустимих кубів, не один мінімізований вираз",
+          "positive_source_grade": [
+            {
+              "source": "evidence",
+              "donor_path": "knowledge/d10-quine-prime-implicants-20261009.json",
+              "old_status": null
+            },
+            {
+              "source": "archival",
+              "donor_path": "knowledge/d10-quine-prime-implicants-20261009.json",
+              "old_status": "RESEARCH-UNSELECTED"
+            },
+            {
+              "source": "replay",
+              "donor_path": null,
+              "old_status": null
+            }
+          ],
+          "evidence_status": "SOURCE-CLAIM-CROSSWALK-NOT-ORACLE-NOT-RATIFIED"
+        }
+      ]
     },
     {
       "coordinate": "1010001010",
@@ -7990,7 +8403,33 @@
       "law_source": "knowledge/d10-symbolic-ai-arc-support-20261009.json",
       "selected": true,
       "ratified": false,
-      "physical_t5_authorized": false
+      "physical_t5_authorized": false,
+      "branch_proposal_evidence": [
+        {
+          "proposal_id": "D10P-6101",
+          "branch": "research/d10-placement-proof-crosswalk-20261011",
+          "branch_json_path": "research/d10/staging-20261011/d10-all-candidate-locations-main-653-20261011.json",
+          "source_git_blob": "ddf767304787e2bf9433a2574d483cf712102b1c",
+          "archived_classification": "ALREADY_SELECTED_D10",
+          "original_source": "juv4uk/sens@c67db6cdd820dea8d3a110caed359507c0a2d7a4:knowledge/d10-symbolic-ai-arc-support-20261009.json:1",
+          "semantic_coordinate": "1010001010",
+          "crosscheck_selected": true,
+          "law_claim": "Let M={ (x,y) in R : x in Dx and y in Dy }. When M is empty return NO-SUPPORT (not a set of newly invented values). Otherwise return SUPPORTED(sorted unique projection_x(M), sorted unique projection_y(M)). No pair outside R is certified, and supported value in each output has an existential compatible value in the other output. Returns no witness to a globally satisfiable larger constraint network.",
+          "positive_source_grade": [
+            {
+              "source": "evidence",
+              "donor_path": "knowledge/d10-symbolic-ai-arc-support-20261009.json",
+              "old_status": null
+            },
+            {
+              "source": "replay",
+              "donor_path": null,
+              "old_status": null
+            }
+          ],
+          "evidence_status": "SOURCE-CLAIM-CROSSWALK-NOT-ORACLE-NOT-RATIFIED"
+        }
+      ]
     },
     {
       "coordinate": "1010001011",
@@ -8002,7 +8441,33 @@
       "law_source": "knowledge/d10-unique-bounded-modular-lift-20261009.json",
       "selected": true,
       "ratified": false,
-      "physical_t5_authorized": false
+      "physical_t5_authorized": false,
+      "branch_proposal_evidence": [
+        {
+          "proposal_id": "D10P-6106",
+          "branch": "research/d10-placement-proof-crosswalk-20261011",
+          "branch_json_path": "research/d10/staging-20261011/d10-all-candidate-locations-main-653-20261011.json",
+          "source_git_blob": "ddf767304787e2bf9433a2574d483cf712102b1c",
+          "archived_classification": "ALREADY_SELECTED_D10",
+          "original_source": "juv4uk/sens@c67db6cdd820dea8d3a110caed359507c0a2d7a4:knowledge/d10-unique-bounded-modular-lift-20261009.json:1",
+          "semantic_coordinate": "1010001011",
+          "crosscheck_selected": true,
+          "law_claim": "Find all integers z with lo<=z<=hi and z mod M=r. Return NONE with count 0 if there are none; return UNIQUE with the exact only z if count 1; return AMBIGUOUS with exact count>=2 and first two solutions in increasing order if there are at least two. All integer arithmetic; invalid domains are reported as ERROR, never guessed or clamped.",
+          "positive_source_grade": [
+            {
+              "source": "evidence",
+              "donor_path": "knowledge/d10-unique-bounded-modular-lift-20261009.json",
+              "old_status": null
+            },
+            {
+              "source": "replay",
+              "donor_path": null,
+              "old_status": null
+            }
+          ],
+          "evidence_status": "SOURCE-CLAIM-CROSSWALK-NOT-ORACLE-NOT-RATIFIED"
+        }
+      ]
     },
     {
       "coordinate": "1010001100",
@@ -8014,7 +8479,28 @@
       "law_source": "knowledge/d10-prefix-free-kraft-certificate-20261011.json",
       "selected": true,
       "ratified": false,
-      "physical_t5_authorized": false
+      "physical_t5_authorized": false,
+      "branch_proposal_evidence": [
+        {
+          "proposal_id": "D10P-0910",
+          "branch": "research/d10-placement-proof-crosswalk-20261011",
+          "branch_json_path": "research/d10/staging-20261011/d10-all-candidate-locations-main-653-20261011.json",
+          "source_git_blob": "ddf767304787e2bf9433a2574d483cf712102b1c",
+          "archived_classification": "ALREADY_SELECTED_D10",
+          "original_source": "juv4uk/sens@81c805e22b1ed528869e49e7dc5e02a744ee8751:knowledge/d10-prefix-free-kraft-certificate-20261011.json:1",
+          "semantic_coordinate": "1010001100",
+          "crosscheck_selected": true,
+          "law_claim": "Для скінченної впорядкованої множини конкретних двійкових слів повертає першу пару префіксної колізії або точну скорочену суму Крафта; умова Σ2^-довжина<=1 сама по собі не доводить префіксності поданих слів.",
+          "positive_source_grade": [
+            {
+              "source": "replay",
+              "donor_path": null,
+              "old_status": null
+            }
+          ],
+          "evidence_status": "SOURCE-CLAIM-CROSSWALK-NOT-ORACLE-NOT-RATIFIED"
+        }
+      ]
     },
     {
       "coordinate": "1010001101",
@@ -8039,6 +8525,32 @@
           "evidence_scope": "ARCHIVED-RESEARCH-NOT-NATIVE-SENS-EXECUTION",
           "owner_core_ratification": false,
           "coordinate_basis": "EXACT-SEMANTIC-NAME-MATCH-SELECTED-CANONICAL"
+        }
+      ],
+      "branch_proposal_evidence": [
+        {
+          "proposal_id": "D10P-503113",
+          "branch": "research/d10-placement-proof-crosswalk-20261011",
+          "branch_json_path": "research/d10/staging-20261011/d10-all-candidate-locations-main-653-20261011.json",
+          "source_git_blob": "ddf767304787e2bf9433a2574d483cf712102b1c",
+          "archived_classification": "UNSELECTED_NO_EXACT_NAME_MATCH_REVIEW",
+          "original_source": "juv4uk/sens@c67db6cdd820dea8d3a110caed359507c0a2d7a4:knowledge/d10-unique-decipherability-historical-20261009.json:22",
+          "semantic_coordinate": "1010001101",
+          "crosscheck_selected": true,
+          "law_claim": "Для скінченного впорядкованого набору різних ідентичностей із непорожніми двійковими кодовими словами визначити, чи будь-які дві різні непорожні послідовності ідентичностей можуть давати той самий конкатенований бітовий потік. Префіксність не є необхідною умовою; порожній кодбук має результат YES.",
+          "positive_source_grade": [
+            {
+              "source": "evidence",
+              "donor_path": "knowledge/d10-unique-decipherability-historical-20261009.json",
+              "old_status": null
+            },
+            {
+              "source": "next",
+              "donor_path": "juv4uk/sens@c67db6cdd820dea8d3a110caed359507c0a2d7a4:knowledge/d10-unique-decipherability-historical-20261009.json:22",
+              "old_status": null
+            }
+          ],
+          "evidence_status": "SOURCE-CLAIM-CROSSWALK-NOT-ORACLE-NOT-RATIFIED"
         }
       ]
     },
@@ -8078,6 +8590,21 @@
           "owner_core_ratification": false,
           "coordinate_basis": "EXACT-SEMANTIC-NAME-MATCH-SELECTED-CANONICAL"
         }
+      ],
+      "branch_proposal_evidence": [
+        {
+          "proposal_id": "D10P-0008",
+          "branch": "research/d10-placement-proof-crosswalk-20261011",
+          "branch_json_path": "research/d10/staging-20261011/d10-all-candidate-locations-main-653-20261011.json",
+          "source_git_blob": "ddf767304787e2bf9433a2574d483cf712102b1c",
+          "archived_classification": "UNSELECTED_NO_EXACT_NAME_MATCH_REVIEW",
+          "original_source": "juv4uk/sens@38c4ce09ff60c8a75816e6efd71d647e55cbaec4:knowledge/d10-hadamard-variance-proposal-20261009.json:1",
+          "semantic_coordinate": "1010001111",
+          "crosscheck_selected": true,
+          "law_claim": "For N zero-dead-time uniformly sampled fractional-frequency observations y, positive integer m and N >= 3m, average each m-point contiguous block: a_i=(1/m)*sum(y[i:i+m]); compute the mean squared second difference of consecutive m-block averages divided by 6, over all i=0..N-3m. Return exact rational variance when inputs are exact rational. Reject invalid m or insufficient data.",
+          "positive_source_grade": [],
+          "evidence_status": "SOURCE-CLAIM-CROSSWALK-NOT-ORACLE-NOT-RATIFIED"
+        }
       ]
     },
     {
@@ -8115,6 +8642,27 @@
           "evidence_scope": "ARCHIVED-RESEARCH-NOT-NATIVE-SENS-EXECUTION",
           "owner_core_ratification": false,
           "coordinate_basis": "EXACT-SEMANTIC-NAME-MATCH-SELECTED-CANONICAL"
+        }
+      ],
+      "branch_proposal_evidence": [
+        {
+          "proposal_id": "D10P-503116",
+          "branch": "research/d10-placement-proof-crosswalk-20261011",
+          "branch_json_path": "research/d10/staging-20261011/d10-all-candidate-locations-main-653-20261011.json",
+          "source_git_blob": "ddf767304787e2bf9433a2574d483cf712102b1c",
+          "archived_classification": "UNSELECTED_NO_EXACT_NAME_MATCH_REVIEW",
+          "original_source": "juv4uk/sens@c67db6cdd820dea8d3a110caed359507c0a2d7a4:knowledge/d10-crossdomain-math-signal-research-v1.json:23",
+          "semantic_coordinate": "1010010000",
+          "crosscheck_selected": true,
+          "law_claim": "Для двох скінченних послідовностей над точним комутативним кільцем довжини n та m повернути коефіцієнти c[k]=Σᵢ a[i]·b[k−i], поза межами вхідних послідовностей вважати значення нулем. Якщо обидві послідовності непорожні, довжина результату n+m−1; якщо будь-яка порожня — результат порожній. Циклічне згортання не допускається.",
+          "positive_source_grade": [
+            {
+              "source": "next",
+              "donor_path": "juv4uk/sens@c67db6cdd820dea8d3a110caed359507c0a2d7a4:knowledge/d10-crossdomain-math-signal-research-v1.json:23",
+              "old_status": null
+            }
+          ],
+          "evidence_status": "SOURCE-CLAIM-CROSSWALK-NOT-ORACLE-NOT-RATIFIED"
         }
       ]
     },
@@ -8154,6 +8702,27 @@
           "owner_core_ratification": false,
           "coordinate_basis": "EXACT-SEMANTIC-NAME-MATCH-SELECTED-CANONICAL"
         }
+      ],
+      "branch_proposal_evidence": [
+        {
+          "proposal_id": "D10P-503117",
+          "branch": "research/d10-placement-proof-crosswalk-20261011",
+          "branch_json_path": "research/d10/staging-20261011/d10-all-candidate-locations-main-653-20261011.json",
+          "source_git_blob": "ddf767304787e2bf9433a2574d483cf712102b1c",
+          "archived_classification": "UNSELECTED_NO_EXACT_NAME_MATCH_REVIEW",
+          "original_source": "juv4uk/sens@c67db6cdd820dea8d3a110caed359507c0a2d7a4:knowledge/d10-crossdomain-math-signal-research-v1.json:112",
+          "semantic_coordinate": "1010010001",
+          "crosscheck_selected": true,
+          "law_claim": "Для скінченної послідовності точних раціональних фаз і додатного раціонального періоду залишити перше значення, далі для кожної сусідньої різниці вибрати конгруентну різницю мінімального абсолютного значення та накопичити її. За точного напівперіодного нічиєго випадку зберігати знак початкової різниці; порожній вхід повертає порожній результат. Це локальне правило найменшого стрибка, не твердження про фізичну траєкторію фази.",
+          "positive_source_grade": [
+            {
+              "source": "next",
+              "donor_path": "juv4uk/sens@c67db6cdd820dea8d3a110caed359507c0a2d7a4:knowledge/d10-crossdomain-math-signal-research-v1.json:112",
+              "old_status": null
+            }
+          ],
+          "evidence_status": "SOURCE-CLAIM-CROSSWALK-NOT-ORACLE-NOT-RATIFIED"
+        }
       ]
     },
     {
@@ -8179,6 +8748,37 @@
           "evidence_scope": "ARCHIVED-RESEARCH-NOT-NATIVE-SENS-EXECUTION",
           "owner_core_ratification": false,
           "coordinate_basis": "EXACT-SEMANTIC-NAME-MATCH-SELECTED-CANONICAL"
+        }
+      ],
+      "branch_proposal_evidence": [
+        {
+          "proposal_id": "D10P-6105",
+          "branch": "research/d10-placement-proof-crosswalk-20261011",
+          "branch_json_path": "research/d10/staging-20261011/d10-all-candidate-locations-main-653-20261011.json",
+          "source_git_blob": "ddf767304787e2bf9433a2574d483cf712102b1c",
+          "archived_classification": "UNSELECTED_NO_EXACT_NAME_MATCH_REVIEW",
+          "original_source": "juv4uk/sens@c67db6cdd820dea8d3a110caed359507c0a2d7a4:knowledge/d10-debruijn-binary-cycle-research-v1.json:1",
+          "semantic_coordinate": "1010010010",
+          "crosscheck_selected": true,
+          "law_claim": "For n>=1, return D1 TRUE=1 iff length(word)=2^n AND the cyclic windows word[i],...,word[(i+n-1) mod 2^n] over all starts i∈[0,2^n) are pairwise distinct (equivalently cover all 2^n possible n-bit strings exactly once). Return D1 FALSE=0 for any well-typed word failing length or uniqueness. Invalid non-D1 data or n<=0 is a domain error, never a sneaky TRUE.",
+          "positive_source_grade": [
+            {
+              "source": "evidence",
+              "donor_path": "knowledge/d10-debruijn-binary-cycle-research-v1.json",
+              "old_status": null
+            },
+            {
+              "source": "archival",
+              "donor_path": "knowledge/d10-debruijn-binary-cycle-research-v1.json",
+              "old_status": "HOLD-OWNER-CORE-VS-LIBRARY-REVIEW-NOT-SELECTED"
+            },
+            {
+              "source": "replay",
+              "donor_path": null,
+              "old_status": null
+            }
+          ],
+          "evidence_status": "SOURCE-CLAIM-CROSSWALK-NOT-ORACLE-NOT-RATIFIED"
         }
       ]
     },
@@ -8206,6 +8806,37 @@
           "owner_core_ratification": false,
           "coordinate_basis": "EXACT-SEMANTIC-NAME-MATCH-SELECTED-CANONICAL"
         }
+      ],
+      "branch_proposal_evidence": [
+        {
+          "proposal_id": "D10P-8008",
+          "branch": "research/d10-placement-proof-crosswalk-20261011",
+          "branch_json_path": "research/d10/staging-20261011/d10-all-candidate-locations-main-653-20261011.json",
+          "source_git_blob": "ddf767304787e2bf9433a2574d483cf712102b1c",
+          "archived_classification": "UNSELECTED_NO_EXACT_NAME_MATCH_REVIEW",
+          "original_source": "juv4uk/sens@c67db6cdd820dea8d3a110caed359507c0a2d7a4:knowledge/d10-binary-lyndon-factorization-v1.json:1",
+          "semantic_coordinate": "1010010011",
+          "crosscheck_selected": true,
+          "law_claim": "Return the unique finite factor list (l1,...,lk) such that concat(li)=w; all li are Lyndon (strictly lexicographically smaller than every proper nonempty suffix); and l1 >= l2 >= ... >= lk under explicit lexicographic 0<1. For empty source return []. No dependence on physical packing, phoneme ordering or hardware transport.",
+          "positive_source_grade": [
+            {
+              "source": "evidence",
+              "donor_path": "knowledge/d10-binary-lyndon-factorization-v1.json",
+              "old_status": null
+            },
+            {
+              "source": "archival",
+              "donor_path": "knowledge/d10-binary-lyndon-factorization-v1.json",
+              "old_status": "RESEARCH-HOLD-CORE-VS-LIBRARY-OWNER-REVIEW"
+            },
+            {
+              "source": "replay",
+              "donor_path": null,
+              "old_status": null
+            }
+          ],
+          "evidence_status": "SOURCE-CLAIM-CROSSWALK-NOT-ORACLE-NOT-RATIFIED"
+        }
       ]
     },
     {
@@ -8231,6 +8862,32 @@
           "evidence_scope": "ARCHIVED-RESEARCH-NOT-NATIVE-SENS-EXECUTION",
           "owner_core_ratification": false,
           "coordinate_basis": "EXACT-SEMANTIC-NAME-MATCH-SELECTED-CANONICAL"
+        }
+      ],
+      "branch_proposal_evidence": [
+        {
+          "proposal_id": "D10P-601106",
+          "branch": "research/d10-placement-proof-crosswalk-20261011",
+          "branch_json_path": "research/d10/staging-20261011/d10-all-candidate-locations-main-653-20261011.json",
+          "source_git_blob": "ddf767304787e2bf9433a2574d483cf712102b1c",
+          "archived_classification": "UNSELECTED_NO_EXACT_NAME_MATCH_REVIEW",
+          "original_source": "juv4uk/sens@c67db6cdd820dea8d3a110caed359507c0a2d7a4:knowledge/d10-stern-brocot-run-path-20261009.json:1",
+          "semantic_coordinate": "1010010100",
+          "crosscheck_selected": true,
+          "law_claim": "Generate exact L/R path from root 1/1 by repeated numerator/denominator comparison and subtractive Euclid; compress maximal same-bit runs using quotient floor((a-1)/b) or floor((b-1)/a), preserving final equality stop without one extra step. Reject nonpositive and imprecise source inputs; reverse accepts ONLY alternating positive-length bit runs. Two-direction round trips are identity and representation is unique for every positive rational.",
+          "positive_source_grade": [
+            {
+              "source": "evidence",
+              "donor_path": "knowledge/d10-stern-brocot-run-path-20261009.json",
+              "old_status": null
+            },
+            {
+              "source": "replay",
+              "donor_path": null,
+              "old_status": null
+            }
+          ],
+          "evidence_status": "SOURCE-CLAIM-CROSSWALK-NOT-ORACLE-NOT-RATIFIED"
         }
       ]
     },
@@ -8258,6 +8915,32 @@
           "owner_core_ratification": false,
           "coordinate_basis": "EXACT-SEMANTIC-NAME-MATCH-SELECTED-CANONICAL"
         }
+      ],
+      "branch_proposal_evidence": [
+        {
+          "proposal_id": "D10P-8001",
+          "branch": "research/d10-placement-proof-crosswalk-20261011",
+          "branch_json_path": "research/d10/staging-20261011/d10-all-candidate-locations-main-653-20261011.json",
+          "source_git_blob": "ddf767304787e2bf9433a2574d483cf712102b1c",
+          "archived_classification": "UNSELECTED_NO_EXACT_NAME_MATCH_REVIEW",
+          "original_source": "juv4uk/sens@c67db6cdd820dea8d3a110caed359507c0a2d7a4:knowledge/d10-abductive-minimal-explanations-v1.json:1",
+          "semantic_coordinate": "1010010101",
+          "crosscheck_selected": true,
+          "law_claim": "For a finite ground propositional Horn theory T, designated abducibles A, observation g and finite integrity constraints IC, return the canonical antichain of inclusion-minimal Δ ⊆ A such that g belongs to the least fixed-point closure of T ∪ Δ and no integrity constraint is fully satisfied by that closure.",
+          "positive_source_grade": [
+            {
+              "source": "archival",
+              "donor_path": "knowledge/d10-abductive-minimal-explanations-v1.json",
+              "old_status": "HOLD-CORE-VS-LIBRARY-REVIEW"
+            },
+            {
+              "source": "replay",
+              "donor_path": null,
+              "old_status": null
+            }
+          ],
+          "evidence_status": "SOURCE-CLAIM-CROSSWALK-NOT-ORACLE-NOT-RATIFIED"
+        }
       ]
     },
     {
@@ -8284,6 +8967,32 @@
           "owner_core_ratification": false,
           "coordinate_basis": "EXACT-SEMANTIC-NAME-MATCH-SELECTED-CANONICAL"
         }
+      ],
+      "branch_proposal_evidence": [
+        {
+          "proposal_id": "D10P-8002",
+          "branch": "research/d10-placement-proof-crosswalk-20261011",
+          "branch_json_path": "research/d10/staging-20261011/d10-all-candidate-locations-main-653-20261011.json",
+          "source_git_blob": "ddf767304787e2bf9433a2574d483cf712102b1c",
+          "archived_classification": "UNSELECTED_NO_EXACT_NAME_MATCH_REVIEW",
+          "original_source": "juv4uk/sens@c67db6cdd820dea8d3a110caed359507c0a2d7a4:knowledge/d10-affine-correlated-uncertainty-v1.json:1",
+          "semantic_coordinate": "1010010110",
+          "crosscheck_selected": true,
+          "law_claim": "Combine affine forms coefficientwise by exact shared-noise identity; the exact same x minus x is zero, different noise IDs are not equated.",
+          "positive_source_grade": [
+            {
+              "source": "archival",
+              "donor_path": "knowledge/d10-affine-correlated-uncertainty-v1.json",
+              "old_status": "HOLD-CORE-MATH-DERIVABILITY"
+            },
+            {
+              "source": "replay",
+              "donor_path": null,
+              "old_status": null
+            }
+          ],
+          "evidence_status": "SOURCE-CLAIM-CROSSWALK-NOT-ORACLE-NOT-RATIFIED"
+        }
       ]
     },
     {
@@ -8309,6 +9018,32 @@
           "evidence_scope": "ARCHIVED-RESEARCH-NOT-NATIVE-SENS-EXECUTION",
           "owner_core_ratification": false,
           "coordinate_basis": "EXACT-SEMANTIC-NAME-MATCH-SELECTED-CANONICAL"
+        }
+      ],
+      "branch_proposal_evidence": [
+        {
+          "proposal_id": "D10P-8003",
+          "branch": "research/d10-placement-proof-crosswalk-20261011",
+          "branch_json_path": "research/d10/staging-20261011/d10-all-candidate-locations-main-653-20261011.json",
+          "source_git_blob": "ddf767304787e2bf9433a2574d483cf712102b1c",
+          "archived_classification": "UNSELECTED_NO_EXACT_NAME_MATCH_REVIEW",
+          "original_source": "juv4uk/sens@c67db6cdd820dea8d3a110caed359507c0a2d7a4:knowledge/d10-affine-correlated-uncertainty-v1.json:1",
+          "semantic_coordinate": "1010010111",
+          "crosscheck_selected": true,
+          "law_claim": "Compute linearized product with exact coefficients x0*yi+y0*xi; residual is conservatively enclosed by an explicit fresh noise coefficient (Σ|xi|)(Σ|yi|). Does not assert probabilistic independence or optimal tightness.",
+          "positive_source_grade": [
+            {
+              "source": "archival",
+              "donor_path": "knowledge/d10-affine-correlated-uncertainty-v1.json",
+              "old_status": "HOLD-CORE-MATH-DERIVABILITY"
+            },
+            {
+              "source": "replay",
+              "donor_path": null,
+              "old_status": null
+            }
+          ],
+          "evidence_status": "SOURCE-CLAIM-CROSSWALK-NOT-ORACLE-NOT-RATIFIED"
         }
       ]
     },
@@ -8348,6 +9083,32 @@
           "owner_core_ratification": false,
           "coordinate_basis": "EXACT-SEMANTIC-NAME-MATCH-SELECTED-CANONICAL"
         }
+      ],
+      "branch_proposal_evidence": [
+        {
+          "proposal_id": "D10P-503114",
+          "branch": "research/d10-placement-proof-crosswalk-20261011",
+          "branch_json_path": "research/d10/staging-20261011/d10-all-candidate-locations-main-653-20261011.json",
+          "source_git_blob": "ddf767304787e2bf9433a2574d483cf712102b1c",
+          "archived_classification": "UNSELECTED_NO_EXACT_NAME_MATCH_REVIEW",
+          "original_source": "juv4uk/sens@c67db6cdd820dea8d3a110caed359507c0a2d7a4:knowledge/d10-allen-atms-research-20261009.json:21",
+          "semantic_coordinate": "1010011000",
+          "crosscheck_selected": true,
+          "law_claim": "Для двох непорожніх строгих інтервалів [start,end) із start<end повернути рівно одне з 13 відношень Аллена: BEFORE, MEETS, OVERLAPS, STARTS, DURING, FINISHES, EQUALS та їхні обернені відношення. MEETS означає спільну межу, а не позитивний часовий проміжок; перестановка аргументів повертає задане обернене відношення.",
+          "positive_source_grade": [
+            {
+              "source": "archival",
+              "donor_path": "knowledge/d10-allen-atms-research-20261009.json",
+              "old_status": "HOLD-CORE-DERIVABILITY"
+            },
+            {
+              "source": "next",
+              "donor_path": "juv4uk/sens@c67db6cdd820dea8d3a110caed359507c0a2d7a4:knowledge/d10-allen-atms-research-20261009.json:21",
+              "old_status": null
+            }
+          ],
+          "evidence_status": "SOURCE-CLAIM-CROSSWALK-NOT-ORACLE-NOT-RATIFIED"
+        }
       ]
     },
     {
@@ -8386,6 +9147,32 @@
           "owner_core_ratification": false,
           "coordinate_basis": "EXACT-SEMANTIC-NAME-MATCH-SELECTED-CANONICAL"
         }
+      ],
+      "branch_proposal_evidence": [
+        {
+          "proposal_id": "D10P-503115",
+          "branch": "research/d10-placement-proof-crosswalk-20261011",
+          "branch_json_path": "research/d10/staging-20261011/d10-all-candidate-locations-main-653-20261011.json",
+          "source_git_blob": "ddf767304787e2bf9433a2574d483cf712102b1c",
+          "archived_classification": "UNSELECTED_NO_EXACT_NAME_MATCH_REVIEW",
+          "original_source": "juv4uk/sens@c67db6cdd820dea8d3a110caed359507c0a2d7a4:knowledge/d10-allen-atms-research-20261009.json:63",
+          "semantic_coordinate": "1010011001",
+          "crosscheck_selected": true,
+          "law_claim": "Для двох скінченних наборів support-environment і набору nogood утворити всі об'єднання по одному середовищу з кожного боку; відкинути об'єднання, що містять відомий nogood як підмножину; вилучити строгі надмножини інших результатів; повернути антинанцюг у порядку зростання кардинальності, потім лексикографічно. Порожнє середовище () відрізняється від відсутності альтернатив ().",
+          "positive_source_grade": [
+            {
+              "source": "archival",
+              "donor_path": "knowledge/d10-allen-atms-research-20261009.json",
+              "old_status": "HOLD-D9-LOGIC-DERIVABILITY"
+            },
+            {
+              "source": "next",
+              "donor_path": "juv4uk/sens@c67db6cdd820dea8d3a110caed359507c0a2d7a4:knowledge/d10-allen-atms-research-20261009.json:63",
+              "old_status": null
+            }
+          ],
+          "evidence_status": "SOURCE-CLAIM-CROSSWALK-NOT-ORACLE-NOT-RATIFIED"
+        }
       ]
     },
     {
@@ -8411,6 +9198,32 @@
           "evidence_scope": "ARCHIVED-RESEARCH-NOT-NATIVE-SENS-EXECUTION",
           "owner_core_ratification": false,
           "coordinate_basis": "EXACT-SEMANTIC-NAME-MATCH-SELECTED-CANONICAL"
+        }
+      ],
+      "branch_proposal_evidence": [
+        {
+          "proposal_id": "D10P-8006",
+          "branch": "research/d10-placement-proof-crosswalk-20261011",
+          "branch_json_path": "research/d10/staging-20261011/d10-all-candidate-locations-main-653-20261011.json",
+          "source_git_blob": "ddf767304787e2bf9433a2574d483cf712102b1c",
+          "archived_classification": "UNSELECTED_NO_EXACT_NAME_MATCH_REVIEW",
+          "original_source": "juv4uk/sens@c67db6cdd820dea8d3a110caed359507c0a2d7a4:knowledge/d10-astrophoto-exact-pinhole-research-20261009.json:1",
+          "semantic_coordinate": "1010011010",
+          "crosscheck_selected": true,
+          "law_claim": "Return exact (u,v)=(fx*Xc/Zc+cx,fy*Yc/Zc+cy). Mathematically defined for negative Z too; a separate physical visibility predicate may require Z>0. Do not silently apply lens distortion or infer extrinsics.",
+          "positive_source_grade": [
+            {
+              "source": "archival",
+              "donor_path": "knowledge/d10-astrophoto-exact-pinhole-research-20261009.json",
+              "old_status": "HOLD-EXACT-MATH-DERIVABILITY"
+            },
+            {
+              "source": "replay",
+              "donor_path": null,
+              "old_status": null
+            }
+          ],
+          "evidence_status": "SOURCE-CLAIM-CROSSWALK-NOT-ORACLE-NOT-RATIFIED"
         }
       ]
     },
@@ -8438,6 +9251,32 @@
           "owner_core_ratification": false,
           "coordinate_basis": "EXACT-SEMANTIC-NAME-MATCH-SELECTED-CANONICAL"
         }
+      ],
+      "branch_proposal_evidence": [
+        {
+          "proposal_id": "D10P-8007",
+          "branch": "research/d10-placement-proof-crosswalk-20261011",
+          "branch_json_path": "research/d10/staging-20261011/d10-all-candidate-locations-main-653-20261011.json",
+          "source_git_blob": "ddf767304787e2bf9433a2574d483cf712102b1c",
+          "archived_classification": "UNSELECTED_NO_EXACT_NAME_MATCH_REVIEW",
+          "original_source": "juv4uk/sens@c67db6cdd820dea8d3a110caed359507c0a2d7a4:knowledge/d10-astrophoto-exact-pinhole-research-20261009.json:1",
+          "semantic_coordinate": "1010011011",
+          "crosscheck_selected": true,
+          "law_claim": "Return canonical unnormalized direction ((u-cx)/fx,(v-cy)/fy,1) in camera coordinates. This is a RAY, not a reconstructed 3D point/depth. For a distortion-free pinhole, projecting any nonzero exact multiple of the direction returns the original pixel.",
+          "positive_source_grade": [
+            {
+              "source": "archival",
+              "donor_path": "knowledge/d10-astrophoto-exact-pinhole-research-20261009.json",
+              "old_status": "HOLD-EXACT-MATH-DERIVABILITY"
+            },
+            {
+              "source": "replay",
+              "donor_path": null,
+              "old_status": null
+            }
+          ],
+          "evidence_status": "SOURCE-CLAIM-CROSSWALK-NOT-ORACLE-NOT-RATIFIED"
+        }
       ]
     },
     {
@@ -8463,6 +9302,37 @@
           "evidence_scope": "ARCHIVED-RESEARCH-NOT-NATIVE-SENS-EXECUTION",
           "owner_core_ratification": false,
           "coordinate_basis": "EXACT-SEMANTIC-NAME-MATCH-SELECTED-CANONICAL"
+        }
+      ],
+      "branch_proposal_evidence": [
+        {
+          "proposal_id": "D10P-8009",
+          "branch": "research/d10-placement-proof-crosswalk-20261011",
+          "branch_json_path": "research/d10/staging-20261011/d10-all-candidate-locations-main-653-20261011.json",
+          "source_git_blob": "ddf767304787e2bf9433a2574d483cf712102b1c",
+          "archived_classification": "UNSELECTED_NO_EXACT_NAME_MATCH_REVIEW",
+          "original_source": "juv4uk/sens@c67db6cdd820dea8d3a110caed359507c0a2d7a4:knowledge/d10-critical-pairs-confluence-20261009.json:1",
+          "semantic_coordinate": "1010011100",
+          "crosscheck_selected": true,
+          "law_claim": "Compute all same-source one-step peaks arising from overlapping (including nested) occurrences of any pair of left sides. Each critical pair is joinable iff its two descendants share at least one reachable normal form under the same rules. Because every rule strictly shortens finite words, termination is proved by exact length. Then all critical pairs joinable is equivalent to confluence of the entire finite string rewrite relation (critical pair criterion + Newman's lemma). Return CONFLUENT or a concrete NONCONFLUENT witness: source, two branches, and separately reachable normal-form sets with empty intersection. Wording does not imply that a nonconfluent ruleset lacks individual common normal forms for other starting words.",
+          "positive_source_grade": [
+            {
+              "source": "evidence",
+              "donor_path": "knowledge/d10-critical-pairs-confluence-20261009.json",
+              "old_status": null
+            },
+            {
+              "source": "archival",
+              "donor_path": "knowledge/d10-critical-pairs-confluence-20261009.json",
+              "old_status": "RESEARCH-HOLD-CORE-VS-LIBRARY-NOT-SELECTED"
+            },
+            {
+              "source": "replay",
+              "donor_path": null,
+              "old_status": null
+            }
+          ],
+          "evidence_status": "SOURCE-CLAIM-CROSSWALK-NOT-ORACLE-NOT-RATIFIED"
         }
       ]
     },
@@ -8490,6 +9360,32 @@
           "owner_core_ratification": false,
           "coordinate_basis": "EXACT-SEMANTIC-NAME-MATCH-SELECTED-CANONICAL"
         }
+      ],
+      "branch_proposal_evidence": [
+        {
+          "proposal_id": "D10P-8013",
+          "branch": "research/d10-placement-proof-crosswalk-20261011",
+          "branch_json_path": "research/d10/staging-20261011/d10-all-candidate-locations-main-653-20261011.json",
+          "source_git_blob": "ddf767304787e2bf9433a2574d483cf712102b1c",
+          "archived_classification": "UNSELECTED_NO_EXACT_NAME_MATCH_REVIEW",
+          "original_source": "juv4uk/sens@c67db6cdd820dea8d3a110caed359507c0a2d7a4:knowledge/d10-first-order-lgg-research-v1.json:1",
+          "semantic_coordinate": "1010011101",
+          "crosscheck_selected": true,
+          "law_claim": "For TWO finite ground, ordered, free first-order constructor terms (not D2 executable expressions), return their least general generalization modulo alpha-renaming and two substitutions which reconstruct each term EXACTLY. Identical atoms and equal-name/equal-arity constructors are retained. Every incompatible ordered pair of subterms becomes one fresh hole; equal ordered disagreement pairs reuse the SAME hole, even in disjoint branches. A different arity or constructor is a disagreement. Fresh holes are numbered by first depth-first left-to-right appearance. A non-ground input, binder, improper term or unbounded depth is BLOCKED. This operation is not unification and never claims a physical .sens semantics.",
+          "positive_source_grade": [
+            {
+              "source": "archival",
+              "donor_path": "knowledge/d10-first-order-lgg-research-v1.json",
+              "old_status": "HOLD-CORE-VS-LIBRARY-REVIEW"
+            },
+            {
+              "source": "replay",
+              "donor_path": null,
+              "old_status": null
+            }
+          ],
+          "evidence_status": "SOURCE-CLAIM-CROSSWALK-NOT-ORACLE-NOT-RATIFIED"
+        }
       ]
     },
     {
@@ -8515,6 +9411,37 @@
           "evidence_scope": "ARCHIVED-RESEARCH-NOT-NATIVE-SENS-EXECUTION",
           "owner_core_ratification": false,
           "coordinate_basis": "EXACT-SEMANTIC-NAME-MATCH-SELECTED-CANONICAL"
+        }
+      ],
+      "branch_proposal_evidence": [
+        {
+          "proposal_id": "D10P-8014",
+          "branch": "research/d10-placement-proof-crosswalk-20261011",
+          "branch_json_path": "research/d10/staging-20261011/d10-all-candidate-locations-main-653-20261011.json",
+          "source_git_blob": "ddf767304787e2bf9433a2574d483cf712102b1c",
+          "archived_classification": "UNSELECTED_NO_EXACT_NAME_MATCH_REVIEW",
+          "original_source": "juv4uk/sens@c67db6cdd820dea8d3a110caed359507c0a2d7a4:knowledge/d10-rosenblatt-novikoff-exact-step-20261009.json:1",
+          "semantic_coordinate": "1010011110",
+          "crosscheck_selected": true,
+          "law_claim": "Given nonempty finite equal-length vectors of exact rationals weights w and nonzero feature x, label y in {-1,+1}, and strictly positive exact learning rate η, compute the exact margin m=y * sum_i(w_i*x_i). If m>0 return (w,corrected=NO), otherwise return (w+η*y*x,corrected=YES). A zero margin must trigger correction for either label. This is one pure mathematical update; no assumptions about convergence, SGD, hidden layers, approximate floats or physical sensor uncertainties.",
+          "positive_source_grade": [
+            {
+              "source": "evidence",
+              "donor_path": "knowledge/d10-rosenblatt-novikoff-exact-step-20261009.json",
+              "old_status": null
+            },
+            {
+              "source": "archival",
+              "donor_path": "knowledge/d10-rosenblatt-novikoff-exact-step-20261009.json",
+              "old_status": "HOLD-CORE-VERSUS-LIBRARY"
+            },
+            {
+              "source": "replay",
+              "donor_path": null,
+              "old_status": null
+            }
+          ],
+          "evidence_status": "SOURCE-CLAIM-CROSSWALK-NOT-ORACLE-NOT-RATIFIED"
         }
       ]
     },
@@ -8542,6 +9469,32 @@
           "owner_core_ratification": false,
           "coordinate_basis": "EXACT-SEMANTIC-NAME-MATCH-SELECTED-CANONICAL"
         }
+      ],
+      "branch_proposal_evidence": [
+        {
+          "proposal_id": "D10P-8016",
+          "branch": "research/d10-placement-proof-crosswalk-20261011",
+          "branch_json_path": "research/d10/staging-20261011/d10-all-candidate-locations-main-653-20261011.json",
+          "source_git_blob": "ddf767304787e2bf9433a2574d483cf712102b1c",
+          "archived_classification": "UNSELECTED_NO_EXACT_NAME_MATCH_REVIEW",
+          "original_source": "juv4uk/sens@c67db6cdd820dea8d3a110caed359507c0a2d7a4:knowledge/d10-lower-mechanical-word-research-v1.json:1",
+          "semantic_coordinate": "1010011111",
+          "crosscheck_selected": true,
+          "law_claim": "For i=0..n−1 output D1 bit floor((i+1)*k/n + rho)-floor(i*k/n + rho). No floating-point approximation, no implicit hardware clock, and no two-valued T5 code.",
+          "positive_source_grade": [
+            {
+              "source": "archival",
+              "donor_path": "knowledge/d10-lower-mechanical-word-research-v1.json",
+              "old_status": "SOURCE-PROVED-OWNER-REVIEW"
+            },
+            {
+              "source": "replay",
+              "donor_path": null,
+              "old_status": null
+            }
+          ],
+          "evidence_status": "SOURCE-CLAIM-CROSSWALK-NOT-ORACLE-NOT-RATIFIED"
+        }
       ]
     },
     {
@@ -8567,6 +9520,32 @@
           "evidence_scope": "ARCHIVED-RESEARCH-NOT-NATIVE-SENS-EXECUTION",
           "owner_core_ratification": false,
           "coordinate_basis": "EXACT-SEMANTIC-NAME-MATCH-SELECTED-CANONICAL"
+        }
+      ],
+      "branch_proposal_evidence": [
+        {
+          "proposal_id": "D10P-8017",
+          "branch": "research/d10-placement-proof-crosswalk-20261011",
+          "branch_json_path": "research/d10/staging-20261011/d10-all-candidate-locations-main-653-20261011.json",
+          "source_git_blob": "ddf767304787e2bf9433a2574d483cf712102b1c",
+          "archived_classification": "UNSELECTED_NO_EXACT_NAME_MATCH_REVIEW",
+          "original_source": "juv4uk/sens@c67db6cdd820dea8d3a110caed359507c0a2d7a4:knowledge/d10-affine-quantity-point-delta-20261009.json:1",
+          "semantic_coordinate": "1010100000",
+          "crosscheck_selected": true,
+          "law_claim": "Reject unless seven dimension exponents match exactly and source/target scale are >0. For POINT, coordinate source base = source_scale*x+source_origin, target result=(source_base-target_origin)/target_scale. For DELTA, source_base=source_scale*x, target result=source_base/target_scale; both origins ignored. Preserve kind, exact rational, and compositional inverse. Errors for invalid kind/dimensions/scale/float, not coercions.",
+          "positive_source_grade": [
+            {
+              "source": "archival",
+              "donor_path": "knowledge/d10-affine-quantity-point-delta-20261009.json",
+              "old_status": "RESEARCH-PENDING-OWNER-REVIEW"
+            },
+            {
+              "source": "replay",
+              "donor_path": null,
+              "old_status": null
+            }
+          ],
+          "evidence_status": "SOURCE-CLAIM-CROSSWALK-NOT-ORACLE-NOT-RATIFIED"
         }
       ]
     },
@@ -8594,6 +9573,32 @@
           "owner_core_ratification": false,
           "coordinate_basis": "EXACT-SEMANTIC-NAME-MATCH-SELECTED-CANONICAL"
         }
+      ],
+      "branch_proposal_evidence": [
+        {
+          "proposal_id": "D10P-6103",
+          "branch": "research/d10-placement-proof-crosswalk-20261011",
+          "branch_json_path": "research/d10/staging-20261011/d10-all-candidate-locations-main-653-20261011.json",
+          "source_git_blob": "ddf767304787e2bf9433a2574d483cf712102b1c",
+          "archived_classification": "UNSELECTED_NO_EXACT_NAME_MATCH_REVIEW",
+          "original_source": "juv4uk/sens@c67db6cdd820dea8d3a110caed359507c0a2d7a4:knowledge/d10-ground-congruence-closure-research-20261009.json:1",
+          "semantic_coordinate": "1010100001",
+          "crosscheck_selected": true,
+          "law_claim": "Given finite acyclic ground term nodes with uninterpreted symbols, equations, and equality queries: return least equivalence relation containing the equations and closed under functions with equal symbols and pointwise equal arguments; booleans represent logical entailment, NOT proof of disequality.",
+          "positive_source_grade": [
+            {
+              "source": "archival",
+              "donor_path": "knowledge/d10-ground-congruence-closure-research-20261009.json",
+              "old_status": "HOLD-CORE-VS-LIBRARY"
+            },
+            {
+              "source": "replay",
+              "donor_path": null,
+              "old_status": null
+            }
+          ],
+          "evidence_status": "SOURCE-CLAIM-CROSSWALK-NOT-ORACLE-NOT-RATIFIED"
+        }
       ]
     },
     {
@@ -8619,6 +9624,32 @@
           "evidence_scope": "ARCHIVED-RESEARCH-NOT-NATIVE-SENS-EXECUTION",
           "owner_core_ratification": false,
           "coordinate_basis": "EXACT-SEMANTIC-NAME-MATCH-SELECTED-CANONICAL"
+        }
+      ],
+      "branch_proposal_evidence": [
+        {
+          "proposal_id": "D10P-8019",
+          "branch": "research/d10-placement-proof-crosswalk-20261011",
+          "branch_json_path": "research/d10/staging-20261011/d10-all-candidate-locations-main-653-20261011.json",
+          "source_git_blob": "ddf767304787e2bf9433a2574d483cf712102b1c",
+          "archived_classification": "UNSELECTED_NO_EXACT_NAME_MATCH_REVIEW",
+          "original_source": "juv4uk/sens@c67db6cdd820dea8d3a110caed359507c0a2d7a4:knowledge/d10-cyclic-word-canon-20261009.json:1",
+          "semantic_coordinate": "1010100010",
+          "crosscheck_selected": true,
+          "law_claim": "For finite nonempty w of length N, define rotate(w,k)[i]=w[(i+k) mod N]. Choose c=min_lex {rotate(w,k) | 0<=k<N}. Return (c, min {k | rotate(w,k)=c}). No reversal, sorting, primitive-root contraction, incomplete-period padding, byte alignment, or physical carrier framing.",
+          "positive_source_grade": [
+            {
+              "source": "archival",
+              "donor_path": "knowledge/d10-cyclic-word-canon-20261009.json",
+              "old_status": "RESEARCH-PENDING-OWNER-REVIEW"
+            },
+            {
+              "source": "replay",
+              "donor_path": null,
+              "old_status": null
+            }
+          ],
+          "evidence_status": "SOURCE-CLAIM-CROSSWALK-NOT-ORACLE-NOT-RATIFIED"
         }
       ]
     },
@@ -8646,6 +9677,21 @@
           "owner_core_ratification": false,
           "coordinate_basis": "EXACT-SEMANTIC-NAME-MATCH-SELECTED-CANONICAL"
         }
+      ],
+      "branch_proposal_evidence": [
+        {
+          "proposal_id": "D10P-0070",
+          "branch": "research/d10-placement-proof-crosswalk-20261011",
+          "branch_json_path": "research/d10/staging-20261011/d10-all-candidate-locations-main-653-20261011.json",
+          "source_git_blob": "ddf767304787e2bf9433a2574d483cf712102b1c",
+          "archived_classification": "UNSELECTED_NO_EXACT_NAME_MATCH_REVIEW",
+          "original_source": "juv4uk/sens@6c64d7837c2d06a56e2363aad6faf4ad9ac00200:knowledge/d10-maling-symbolic-differentiation-1959-v1.json:19",
+          "semantic_coordinate": "1010100011",
+          "crosscheck_selected": true,
+          "law_claim": "Для скінченного ациклічного AST Const(integer)|Var(name)|Add(expr,expr)|Mul(expr,expr) і заданої змінної повертає дерево формальної похідної за правилами константи, змінної, суми й добутку; вивід точний і навмисно не спрощується, вхід не мутується. Обмежений сучасний контракт, натхнений Maling MIT AI Memo 10 (1959), а не твердження про дослівну транскрипцію мемо; Core-vs-library мінімальність лишається на власниковому перегляді.",
+          "positive_source_grade": [],
+          "evidence_status": "SOURCE-CLAIM-CROSSWALK-NOT-ORACLE-NOT-RATIFIED"
+        }
       ]
     },
     {
@@ -8671,6 +9717,21 @@
           "evidence_scope": "ARCHIVED-RESEARCH-NOT-NATIVE-SENS-EXECUTION",
           "owner_core_ratification": false,
           "coordinate_basis": "EXACT-SEMANTIC-NAME-MATCH-SELECTED-CANONICAL"
+        }
+      ],
+      "branch_proposal_evidence": [
+        {
+          "proposal_id": "D10P-499001",
+          "branch": "research/d10-placement-proof-crosswalk-20261011",
+          "branch_json_path": "research/d10/staging-20261011/d10-all-candidate-locations-main-653-20261011.json",
+          "source_git_blob": "ddf767304787e2bf9433a2574d483cf712102b1c",
+          "archived_classification": "UNSELECTED_NO_EXACT_NAME_MATCH_REVIEW",
+          "original_source": "juv4uk/sens@9e79f08935dd9d92c23047a4b2b89b10a76ea32f:docs/mccarthy-machine-map.md:89",
+          "semantic_coordinate": "1010100100",
+          "crosscheck_selected": true,
+          "law_claim": "Із скінченної множини моделей базової теорії залишає всі моделі без строго меншої множини заданих аномальних атомів за незмінного значення зафіксованих атомів; несумісність повертає окреме NO-MODELS.",
+          "positive_source_grade": [],
+          "evidence_status": "SOURCE-CLAIM-CROSSWALK-NOT-ORACLE-NOT-RATIFIED"
         }
       ]
     },
@@ -8698,6 +9759,21 @@
           "owner_core_ratification": false,
           "coordinate_basis": "EXACT-SEMANTIC-NAME-MATCH-SELECTED-CANONICAL"
         }
+      ],
+      "branch_proposal_evidence": [
+        {
+          "proposal_id": "D10P-499701",
+          "branch": "research/d10-placement-proof-crosswalk-20261011",
+          "branch_json_path": "research/d10/staging-20261011/d10-all-candidate-locations-main-653-20261011.json",
+          "source_git_blob": "ddf767304787e2bf9433a2574d483cf712102b1c",
+          "archived_classification": "UNSELECTED_NO_EXACT_NAME_MATCH_REVIEW",
+          "original_source": "juv4uk/sens@391374a1be7105af4b5a2890eda86ec381db3d92:knowledge/d10-floyd-hoare-finite-inductiveness-20261009.json:1",
+          "semantic_coordinate": "1010100101",
+          "crosscheck_selected": true,
+          "law_claim": "Для скінченного повного графа станів і кандидата-інваріанта повертає YES точно тоді коли всі початкові стани всередині інваріанта та кожний перехід зі стану інваріанта веде знов усередину; інакше найменший свідок початкового порушення чи втечі ребра.",
+          "positive_source_grade": [],
+          "evidence_status": "SOURCE-CLAIM-CROSSWALK-NOT-ORACLE-NOT-RATIFIED"
+        }
       ]
     },
     {
@@ -8724,6 +9800,21 @@
           "owner_core_ratification": false,
           "coordinate_basis": "EXACT-SEMANTIC-NAME-MATCH-SELECTED-CANONICAL"
         }
+      ],
+      "branch_proposal_evidence": [
+        {
+          "proposal_id": "D10P-4971",
+          "branch": "research/d10-placement-proof-crosswalk-20261011",
+          "branch_json_path": "research/d10/staging-20261011/d10-all-candidate-locations-main-653-20261011.json",
+          "source_git_blob": "ddf767304787e2bf9433a2574d483cf712102b1c",
+          "archived_classification": "UNSELECTED_NO_EXACT_NAME_MATCH_REVIEW",
+          "original_source": "juv4uk/sens@49407a607e530d73c83795711cc2ce48b908691f:knowledge/d10-dung-grounded-argumentation-20261009.json:58-69",
+          "semantic_coordinate": "1010100110",
+          "crosscheck_selected": true,
+          "law_claim": "Скінченний орієнтований граф нападів між унікальними аргументами переводить у три неперетинні списки даних IN, OUT, UNDEC за найменшою нерухомою точкою захисту Данга 1995; відсутність доведення не тотожна OUT, а взаємна атака без зовнішнього захисту залишає UNDEC; D1 предикати лишаються двійковими.",
+          "positive_source_grade": [],
+          "evidence_status": "SOURCE-CLAIM-CROSSWALK-NOT-ORACLE-NOT-RATIFIED"
+        }
       ]
     },
     {
@@ -8749,6 +9840,21 @@
           "evidence_scope": "ARCHIVED-RESEARCH-NOT-NATIVE-SENS-EXECUTION",
           "owner_core_ratification": false,
           "coordinate_basis": "EXACT-SEMANTIC-NAME-MATCH-SELECTED-CANONICAL"
+        }
+      ],
+      "branch_proposal_evidence": [
+        {
+          "proposal_id": "D10P-5007",
+          "branch": "research/d10-placement-proof-crosswalk-20261011",
+          "branch_json_path": "research/d10/staging-20261011/d10-all-candidate-locations-main-653-20261011.json",
+          "source_git_blob": "ddf767304787e2bf9433a2574d483cf712102b1c",
+          "archived_classification": "UNSELECTED_NO_EXACT_NAME_MATCH_REVIEW",
+          "original_source": "juv4uk/sens@808424f4e2c8257e04605889a54e11e2c3fb9ffa:knowledge/d10-reiter-minimal-diagnoses-20261009.json:39-50",
+          "semantic_coordinate": "1010100111",
+          "crosscheck_selected": true,
+          "law_claim": "Із явної скінченної сім'ї наборів конфліктних припущень повертає ВСІ мінімальні за включенням набори компонентів, які перетинають кожен конфлікт; додає для кожного вилученого компонента перший приватний конфлікт як сертифікат мінімальності; порожня сім'я має один порожній діагноз, порожній конфлікт означає NO-DIAGNOSIS.",
+          "positive_source_grade": [],
+          "evidence_status": "SOURCE-CLAIM-CROSSWALK-NOT-ORACLE-NOT-RATIFIED"
         }
       ]
     },
@@ -8788,6 +9894,27 @@
           "owner_core_ratification": false,
           "coordinate_basis": "EXACT-SEMANTIC-NAME-MATCH-SELECTED-CANONICAL"
         }
+      ],
+      "branch_proposal_evidence": [
+        {
+          "proposal_id": "D10P-503110",
+          "branch": "research/d10-placement-proof-crosswalk-20261011",
+          "branch_json_path": "research/d10/staging-20261011/d10-all-candidate-locations-main-653-20261011.json",
+          "source_git_blob": "ddf767304787e2bf9433a2574d483cf712102b1c",
+          "archived_classification": "UNSELECTED_NO_EXACT_NAME_MATCH_REVIEW",
+          "original_source": "juv4uk/sens@c67db6cdd820dea8d3a110caed359507c0a2d7a4:knowledge/d10-adjust-array-rearray-differential-v1.json:19",
+          "semantic_coordinate": "1010101000",
+          "crosscheck_selected": true,
+          "law_claim": "Змінити розміри або подання масиву за контрактом ADJUST-ARRAY: для змінного масиву повертається той самий об'єкт; якщо повернуто інший об'єкт, аргумент лишається незміненим. Окремо визначаються fill-pointer та спільне сховище displaced view; ланцюг A→B→C не можна сплющувати так, щоб A перестав посилатися на B.",
+          "positive_source_grade": [
+            {
+              "source": "next",
+              "donor_path": "juv4uk/sens@c67db6cdd820dea8d3a110caed359507c0a2d7a4:knowledge/d10-adjust-array-rearray-differential-v1.json:19",
+              "old_status": null
+            }
+          ],
+          "evidence_status": "SOURCE-CLAIM-CROSSWALK-NOT-ORACLE-NOT-RATIFIED"
+        }
       ]
     },
     {
@@ -8825,6 +9952,27 @@
           "evidence_scope": "ARCHIVED-RESEARCH-NOT-NATIVE-SENS-EXECUTION",
           "owner_core_ratification": false,
           "coordinate_basis": "EXACT-SEMANTIC-NAME-MATCH-SELECTED-CANONICAL"
+        }
+      ],
+      "branch_proposal_evidence": [
+        {
+          "proposal_id": "D10P-503111",
+          "branch": "research/d10-placement-proof-crosswalk-20261011",
+          "branch_json_path": "research/d10/staging-20261011/d10-all-candidate-locations-main-653-20261011.json",
+          "source_git_blob": "ddf767304787e2bf9433a2574d483cf712102b1c",
+          "archived_classification": "UNSELECTED_NO_EXACT_NAME_MATCH_REVIEW",
+          "original_source": "juv4uk/sens@c67db6cdd820dea8d3a110caed359507c0a2d7a4:knowledge/d10-psl-interlisp-lispm-unmerged-residual-v1.json:54",
+          "semantic_coordinate": "1010101001",
+          "crosscheck_selected": true,
+          "law_claim": "Установити wrapper перед викликом функції, делегувати базовій функції й зберігати відмінність базової функції та ланцюга обгорток; вкладені обгортки мають зберігати визначений порядок виконання.",
+          "positive_source_grade": [
+            {
+              "source": "next",
+              "donor_path": "juv4uk/sens@c67db6cdd820dea8d3a110caed359507c0a2d7a4:knowledge/d10-psl-interlisp-lispm-unmerged-residual-v1.json:54",
+              "old_status": null
+            }
+          ],
+          "evidence_status": "SOURCE-CLAIM-CROSSWALK-NOT-ORACLE-NOT-RATIFIED"
         }
       ]
     },
@@ -8864,6 +10012,27 @@
           "owner_core_ratification": false,
           "coordinate_basis": "EXACT-SEMANTIC-NAME-MATCH-SELECTED-CANONICAL"
         }
+      ],
+      "branch_proposal_evidence": [
+        {
+          "proposal_id": "D10P-503112",
+          "branch": "research/d10-placement-proof-crosswalk-20261011",
+          "branch_json_path": "research/d10/staging-20261011/d10-all-candidate-locations-main-653-20261011.json",
+          "source_git_blob": "ddf767304787e2bf9433a2574d483cf712102b1c",
+          "archived_classification": "UNSELECTED_NO_EXACT_NAME_MATCH_REVIEW",
+          "original_source": "juv4uk/sens@c67db6cdd820dea8d3a110caed359507c0a2d7a4:knowledge/d10-psl-interlisp-lispm-unmerged-residual-v1.json:81",
+          "semantic_coordinate": "1010101010",
+          "crosscheck_selected": true,
+          "law_claim": "Вилучити обгортки заданого типу, не знімаючи обгорток інших типів і не втрачаючи базову функцію; результат зберігає порядок решти wrapper chain.",
+          "positive_source_grade": [
+            {
+              "source": "next",
+              "donor_path": "juv4uk/sens@c67db6cdd820dea8d3a110caed359507c0a2d7a4:knowledge/d10-psl-interlisp-lispm-unmerged-residual-v1.json:81",
+              "old_status": null
+            }
+          ],
+          "evidence_status": "SOURCE-CLAIM-CROSSWALK-NOT-ORACLE-NOT-RATIFIED"
+        }
       ]
     },
     {
@@ -8889,6 +10058,21 @@
           "evidence_scope": "ARCHIVED-RESEARCH-NOT-NATIVE-SENS-EXECUTION",
           "owner_core_ratification": false,
           "coordinate_basis": "EXACT-SEMANTIC-NAME-MATCH-SELECTED-CANONICAL"
+        }
+      ],
+      "branch_proposal_evidence": [
+        {
+          "proposal_id": "D10P-20261011",
+          "branch": "research/d10-placement-proof-crosswalk-20261011",
+          "branch_json_path": "research/d10/staging-20261011/d10-all-candidate-locations-main-653-20261011.json",
+          "source_git_blob": "ddf767304787e2bf9433a2574d483cf712102b1c",
+          "archived_classification": "UNSELECTED_NO_EXACT_NAME_MATCH_REVIEW",
+          "original_source": "juv4uk/sens@6936c459a29435f023790d64f12ee820bccddb00:research/d10/mealy_distinguishing_word.py:31",
+          "semantic_coordinate": "1010101011",
+          "crosscheck_selected": true,
+          "law_claim": "Для двох повних детермінованих скінченних автоматів Мілі з однаковою впорядкованою абеткою повертає найкоротше лексикографічно перше слово розбіжності вихідних потоків або ознаку повної еквівалентності.",
+          "positive_source_grade": [],
+          "evidence_status": "SOURCE-CLAIM-CROSSWALK-NOT-ORACLE-NOT-RATIFIED"
         }
       ]
     },
@@ -8916,6 +10100,21 @@
           "owner_core_ratification": false,
           "coordinate_basis": "EXACT-SEMANTIC-NAME-MATCH-SELECTED-CANONICAL"
         }
+      ],
+      "branch_proposal_evidence": [
+        {
+          "proposal_id": "D10P-4870",
+          "branch": "research/d10-placement-proof-crosswalk-20261011",
+          "branch_json_path": "research/d10/staging-20261011/d10-all-candidate-locations-main-653-20261011.json",
+          "source_git_blob": "ddf767304787e2bf9433a2574d483cf712102b1c",
+          "archived_classification": "UNSELECTED_NO_EXACT_NAME_MATCH_REVIEW",
+          "original_source": "juv4uk/sens@c67db6cdd820dea8d3a110caed359507c0a2d7a4:knowledge/d10-clos-slot-observation-v1.json:38-43",
+          "semantic_coordinate": "1010101100",
+          "crosscheck_selected": true,
+          "law_claim": "Return the direct class metaobject of an object; do not confuse the class object with a type specifier/name or the superclass.",
+          "positive_source_grade": [],
+          "evidence_status": "SOURCE-CLAIM-CROSSWALK-NOT-ORACLE-NOT-RATIFIED"
+        }
       ]
     },
     {
@@ -8941,6 +10140,21 @@
           "evidence_scope": "ARCHIVED-RESEARCH-NOT-NATIVE-SENS-EXECUTION",
           "owner_core_ratification": false,
           "coordinate_basis": "EXACT-SEMANTIC-NAME-MATCH-SELECTED-CANONICAL"
+        }
+      ],
+      "branch_proposal_evidence": [
+        {
+          "proposal_id": "D10P-4871",
+          "branch": "research/d10-placement-proof-crosswalk-20261011",
+          "branch_json_path": "research/d10/staging-20261011/d10-all-candidate-locations-main-653-20261011.json",
+          "source_git_blob": "ddf767304787e2bf9433a2574d483cf712102b1c",
+          "archived_classification": "UNSELECTED_NO_EXACT_NAME_MATCH_REVIEW",
+          "original_source": "juv4uk/sens@c67db6cdd820dea8d3a110caed359507c0a2d7a4:knowledge/d10-historical-clos-interlisp-residual-review-v1.json:36-49",
+          "semantic_coordinate": "1010101101",
+          "crosscheck_selected": true,
+          "law_claim": "Look up a method by its exact ordered qualifiers and specializers within one generic function; this is not runtime applicable-method selection.",
+          "positive_source_grade": [],
+          "evidence_status": "SOURCE-CLAIM-CROSSWALK-NOT-ORACLE-NOT-RATIFIED"
         }
       ]
     },
@@ -8968,6 +10182,21 @@
           "owner_core_ratification": false,
           "coordinate_basis": "EXACT-SEMANTIC-NAME-MATCH-SELECTED-CANONICAL"
         }
+      ],
+      "branch_proposal_evidence": [
+        {
+          "proposal_id": "D10P-4872",
+          "branch": "research/d10-placement-proof-crosswalk-20261011",
+          "branch_json_path": "research/d10/staging-20261011/d10-all-candidate-locations-main-653-20261011.json",
+          "source_git_blob": "ddf767304787e2bf9433a2574d483cf712102b1c",
+          "archived_classification": "UNSELECTED_NO_EXACT_NAME_MATCH_REVIEW",
+          "original_source": "juv4uk/sens@c67db6cdd820dea8d3a110caed359507c0a2d7a4:knowledge/d10-historical-clos-interlisp-residual-review-v1.json:70-83",
+          "semantic_coordinate": "1010101110",
+          "crosscheck_selected": true,
+          "law_claim": "Change an existing instance to another class in place while retaining its identity and common slot values, and leaving previously unbound common slots unbound.",
+          "positive_source_grade": [],
+          "evidence_status": "SOURCE-CLAIM-CROSSWALK-NOT-ORACLE-NOT-RATIFIED"
+        }
       ]
     },
     {
@@ -8993,6 +10222,27 @@
           "evidence_scope": "ARCHIVED-RESEARCH-NOT-NATIVE-SENS-EXECUTION",
           "owner_core_ratification": false,
           "coordinate_basis": "EXACT-SEMANTIC-NAME-MATCH-SELECTED-CANONICAL"
+        }
+      ],
+      "branch_proposal_evidence": [
+        {
+          "proposal_id": "D10P-6102",
+          "branch": "research/d10-placement-proof-crosswalk-20261011",
+          "branch_json_path": "research/d10/staging-20261011/d10-all-candidate-locations-main-653-20261011.json",
+          "source_git_blob": "ddf767304787e2bf9433a2574d483cf712102b1c",
+          "archived_classification": "UNSELECTED_NO_EXACT_NAME_MATCH_REVIEW",
+          "original_source": "juv4uk/sens@c67db6cdd820dea8d3a110caed359507c0a2d7a4:scripts/research_d10_finite_arc_consistency.py:1",
+          "semantic_coordinate": "1010101111",
+          "crosscheck_selected": true,
+          "law_claim": "Given named finite domains and directed binary compatibility relations, iteratively eliminate unsupported source values to the greatest arc-consistent fixed point, independent of work-list order; return exact reduced domains and a separate EMPTY-DOMAIN-CONTRADICTION status when any domain is empty. Nonempty closure does not imply global satisfiability.",
+          "positive_source_grade": [
+            {
+              "source": "replay",
+              "donor_path": null,
+              "old_status": null
+            }
+          ],
+          "evidence_status": "SOURCE-CLAIM-CROSSWALK-NOT-ORACLE-NOT-RATIFIED"
         }
       ]
     },
@@ -9020,6 +10270,27 @@
           "owner_core_ratification": false,
           "coordinate_basis": "EXACT-SEMANTIC-NAME-MATCH-SELECTED-CANONICAL"
         }
+      ],
+      "branch_proposal_evidence": [
+        {
+          "proposal_id": "D10P-0917",
+          "branch": "research/d10-placement-proof-crosswalk-20261011",
+          "branch_json_path": "research/d10/staging-20261011/d10-all-candidate-locations-main-653-20261011.json",
+          "source_git_blob": "ddf767304787e2bf9433a2574d483cf712102b1c",
+          "archived_classification": "UNSELECTED_NO_EXACT_NAME_MATCH_REVIEW",
+          "original_source": "pysathq/pysat@152884a6d1889f56a61049aaa773be23f0a8d8c1:pysat/solvers.py:4330",
+          "semantic_coordinate": "1010110000",
+          "crosscheck_selected": true,
+          "law_claim": "Скінченна CNF: додає лише логічно вимушені одиничними клаузами літерали до нерухомої точки; повертає QUIESCENT або CONTRADICTION; QUIESCENT не означає SAT.",
+          "positive_source_grade": [
+            {
+              "source": "replay",
+              "donor_path": null,
+              "old_status": null
+            }
+          ],
+          "evidence_status": "SOURCE-CLAIM-CROSSWALK-NOT-ORACLE-NOT-RATIFIED"
+        }
       ]
     },
     {
@@ -9045,6 +10316,32 @@
           "evidence_scope": "ARCHIVED-RESEARCH-NOT-NATIVE-SENS-EXECUTION",
           "owner_core_ratification": false,
           "coordinate_basis": "EXACT-SEMANTIC-NAME-MATCH-SELECTED-CANONICAL"
+        }
+      ],
+      "branch_proposal_evidence": [
+        {
+          "proposal_id": "D10P-601103",
+          "branch": "research/d10-placement-proof-crosswalk-20261011",
+          "branch_json_path": "research/d10/staging-20261011/d10-all-candidate-locations-main-653-20261011.json",
+          "source_git_blob": "ddf767304787e2bf9433a2574d483cf712102b1c",
+          "archived_classification": "UNSELECTED_NO_EXACT_NAME_MATCH_REVIEW",
+          "original_source": "juv4uk/sens@c67db6cdd820dea8d3a110caed359507c0a2d7a4:knowledge/d10-finite-state-distinguishing-suffix-research-v1.json:1",
+          "semantic_coordinate": "1010110001",
+          "crosscheck_selected": true,
+          "law_claim": "Shortest, then 0-first lexicographically least suffix distinguishing acceptance of p and q in a total deterministic D1-binary automaton; empty witness differs from no witness",
+          "positive_source_grade": [
+            {
+              "source": "evidence",
+              "donor_path": "knowledge/d10-finite-state-distinguishing-suffix-research-v1.json",
+              "old_status": null
+            },
+            {
+              "source": "replay",
+              "donor_path": null,
+              "old_status": null
+            }
+          ],
+          "evidence_status": "SOURCE-CLAIM-CROSSWALK-NOT-ORACLE-NOT-RATIFIED"
         }
       ]
     },
@@ -9072,6 +10369,27 @@
           "owner_core_ratification": false,
           "coordinate_basis": "EXACT-SEMANTIC-NAME-MATCH-SELECTED-CANONICAL"
         }
+      ],
+      "branch_proposal_evidence": [
+        {
+          "proposal_id": "D10P-601201",
+          "branch": "research/d10-placement-proof-crosswalk-20261011",
+          "branch_json_path": "research/d10/staging-20261011/d10-all-candidate-locations-main-653-20261011.json",
+          "source_git_blob": "ddf767304787e2bf9433a2574d483cf712102b1c",
+          "archived_classification": "UNSELECTED_NO_EXACT_NAME_MATCH_REVIEW",
+          "original_source": "juv4uk/sens@c67db6cdd820dea8d3a110caed359507c0a2d7a4:knowledge/d10-forth-circular-arc-v1.json:1",
+          "semantic_coordinate": "1010110010",
+          "crosscheck_selected": true,
+          "law_claim": "If start<end, return start<=test<end. If start>end, return test>=start OR test<end. If start==end, return NO, not whole ring. This is explicit-modulus, exact rational-free generalization of Forth WITHIN for canonical residues. It must not wrap invalid out-of-domain inputs silently.",
+          "positive_source_grade": [
+            {
+              "source": "replay",
+              "donor_path": null,
+              "old_status": null
+            }
+          ],
+          "evidence_status": "SOURCE-CLAIM-CROSSWALK-NOT-ORACLE-NOT-RATIFIED"
+        }
       ]
     },
     {
@@ -9097,6 +10415,27 @@
           "evidence_scope": "ARCHIVED-RESEARCH-NOT-NATIVE-SENS-EXECUTION",
           "owner_core_ratification": false,
           "coordinate_basis": "EXACT-SEMANTIC-NAME-MATCH-SELECTED-CANONICAL"
+        }
+      ],
+      "branch_proposal_evidence": [
+        {
+          "proposal_id": "D10P-601205",
+          "branch": "research/d10-placement-proof-crosswalk-20261011",
+          "branch_json_path": "research/d10/staging-20261011/d10-all-candidate-locations-main-653-20261011.json",
+          "source_git_blob": "ddf767304787e2bf9433a2574d483cf712102b1c",
+          "archived_classification": "UNSELECTED_NO_EXACT_NAME_MATCH_REVIEW",
+          "original_source": "juv4uk/sens@c67db6cdd820dea8d3a110caed359507c0a2d7a4:knowledge/d10-crossrepo-chess-law-proposals-20261009.json:1",
+          "semantic_coordinate": "1010110011",
+          "crosscheck_selected": true,
+          "law_claim": "Given a finite chain from leaf to root, current per-node (visit_count,value_sum) and a leaf-side exact score v, visit_count increases exactly once at every chain node, value_sum at node depth k from leaf increases (-1)^k*v, and no off-path node changes. The sign changes because each node's score is from its own side-to-move perspective.",
+          "positive_source_grade": [
+            {
+              "source": "replay",
+              "donor_path": null,
+              "old_status": null
+            }
+          ],
+          "evidence_status": "SOURCE-CLAIM-CROSSWALK-NOT-ORACLE-NOT-RATIFIED"
         }
       ]
     },
@@ -9124,6 +10463,27 @@
           "owner_core_ratification": false,
           "coordinate_basis": "EXACT-SEMANTIC-NAME-MATCH-SELECTED-CANONICAL"
         }
+      ],
+      "branch_proposal_evidence": [
+        {
+          "proposal_id": "D10P-601206",
+          "branch": "research/d10-placement-proof-crosswalk-20261011",
+          "branch_json_path": "research/d10/staging-20261011/d10-all-candidate-locations-main-653-20261011.json",
+          "source_git_blob": "ddf767304787e2bf9433a2574d483cf712102b1c",
+          "archived_classification": "UNSELECTED_NO_EXACT_NAME_MATCH_REVIEW",
+          "original_source": "juv4uk/sens@c67db6cdd820dea8d3a110caed359507c0a2d7a4:knowledge/d10-crossrepo-chess-law-proposals-20261009.json:1",
+          "semantic_coordinate": "1010110100",
+          "crosscheck_selected": true,
+          "law_claim": "Given the exact subset of K,Q,k,q before a legal move: moving a white/black king erases both own rights; moving a rook from its home corner erases that right; capturing a rook on its home corner erases that captured side's right; all unrelated rights are preserved. Rights never reappear. This operation updates rights only; it does not itself establish legal move, king safety or FEN validity.",
+          "positive_source_grade": [
+            {
+              "source": "replay",
+              "donor_path": null,
+              "old_status": null
+            }
+          ],
+          "evidence_status": "SOURCE-CLAIM-CROSSWALK-NOT-ORACLE-NOT-RATIFIED"
+        }
       ]
     },
     {
@@ -9149,6 +10509,27 @@
           "evidence_scope": "ARCHIVED-RESEARCH-NOT-NATIVE-SENS-EXECUTION",
           "owner_core_ratification": false,
           "coordinate_basis": "EXACT-SEMANTIC-NAME-MATCH-SELECTED-CANONICAL"
+        }
+      ],
+      "branch_proposal_evidence": [
+        {
+          "proposal_id": "D10P-601207",
+          "branch": "research/d10-placement-proof-crosswalk-20261011",
+          "branch_json_path": "research/d10/staging-20261011/d10-all-candidate-locations-main-653-20261011.json",
+          "source_git_blob": "ddf767304787e2bf9433a2574d483cf712102b1c",
+          "archived_classification": "UNSELECTED_NO_EXACT_NAME_MATCH_REVIEW",
+          "original_source": "juv4uk/sens@c67db6cdd820dea8d3a110caed359507c0a2d7a4:knowledge/d10-linguistic-law-intake-20261009.json:1",
+          "semantic_coordinate": "1010110101",
+          "crosscheck_selected": true,
+          "law_claim": "Transfer 1-based positions of U+0301 stress from source vowel nuclei to corresponding target vowel nuclei, recognizing upper/lower case equally; reject invalid or out-of-range marks and a pre-accented target. No rewriting of other characters.",
+          "positive_source_grade": [
+            {
+              "source": "replay",
+              "donor_path": null,
+              "old_status": null
+            }
+          ],
+          "evidence_status": "SOURCE-CLAIM-CROSSWALK-NOT-ORACLE-NOT-RATIFIED"
         }
       ]
     },
@@ -9176,6 +10557,27 @@
           "owner_core_ratification": false,
           "coordinate_basis": "EXACT-SEMANTIC-NAME-MATCH-SELECTED-CANONICAL"
         }
+      ],
+      "branch_proposal_evidence": [
+        {
+          "proposal_id": "D10P-601208",
+          "branch": "research/d10-placement-proof-crosswalk-20261011",
+          "branch_json_path": "research/d10/staging-20261011/d10-all-candidate-locations-main-653-20261011.json",
+          "source_git_blob": "ddf767304787e2bf9433a2574d483cf712102b1c",
+          "archived_classification": "UNSELECTED_NO_EXACT_NAME_MATCH_REVIEW",
+          "original_source": "juv4uk/sens@c67db6cdd820dea8d3a110caed359507c0a2d7a4:knowledge/d10-linguistic-law-intake-20261009.json:1",
+          "semantic_coordinate": "1010110110",
+          "crosscheck_selected": true,
+          "law_claim": "An explicit finite rule table selects word-start replacement before default; otherwise longest matching multigraph before shorter graph, then a specified after-consonant rule; preserve unmatched characters and apostrophe word continuity.",
+          "positive_source_grade": [
+            {
+              "source": "replay",
+              "donor_path": null,
+              "old_status": null
+            }
+          ],
+          "evidence_status": "SOURCE-CLAIM-CROSSWALK-NOT-ORACLE-NOT-RATIFIED"
+        }
       ]
     },
     {
@@ -9201,6 +10603,27 @@
           "evidence_scope": "ARCHIVED-RESEARCH-NOT-NATIVE-SENS-EXECUTION",
           "owner_core_ratification": false,
           "coordinate_basis": "EXACT-SEMANTIC-NAME-MATCH-SELECTED-CANONICAL"
+        }
+      ],
+      "branch_proposal_evidence": [
+        {
+          "proposal_id": "D10P-601209",
+          "branch": "research/d10-placement-proof-crosswalk-20261011",
+          "branch_json_path": "research/d10/staging-20261011/d10-all-candidate-locations-main-653-20261011.json",
+          "source_git_blob": "ddf767304787e2bf9433a2574d483cf712102b1c",
+          "archived_classification": "UNSELECTED_NO_EXACT_NAME_MATCH_REVIEW",
+          "original_source": "juv4uk/sens@c67db6cdd820dea8d3a110caed359507c0a2d7a4:knowledge/d10-music-enharmonic-primary-review-v1.json:1",
+          "semantic_coordinate": "1010110111",
+          "crosscheck_selected": true,
+          "law_claim": "Given two valid 12-TET MusicXML-like pitches (step, integer alter, octave), return 1 iff their exact sounding semitone index matches AND their notation triple differs; otherwise 0. An equal note written identically is not an enharmonic respelling.",
+          "positive_source_grade": [
+            {
+              "source": "replay",
+              "donor_path": null,
+              "old_status": null
+            }
+          ],
+          "evidence_status": "SOURCE-CLAIM-CROSSWALK-NOT-ORACLE-NOT-RATIFIED"
         }
       ]
     },
@@ -9228,6 +10651,27 @@
           "owner_core_ratification": false,
           "coordinate_basis": "EXACT-SEMANTIC-NAME-MATCH-SELECTED-CANONICAL"
         }
+      ],
+      "branch_proposal_evidence": [
+        {
+          "proposal_id": "D10P-601210",
+          "branch": "research/d10-placement-proof-crosswalk-20261011",
+          "branch_json_path": "research/d10/staging-20261011/d10-all-candidate-locations-main-653-20261011.json",
+          "source_git_blob": "ddf767304787e2bf9433a2574d483cf712102b1c",
+          "archived_classification": "UNSELECTED_NO_EXACT_NAME_MATCH_REVIEW",
+          "original_source": "juv4uk/sens@c67db6cdd820dea8d3a110caed359507c0a2d7a4:knowledge/d10-music-enharmonic-primary-review-v1.json:1",
+          "semantic_coordinate": "1010111000",
+          "crosscheck_selected": true,
+          "law_claim": "Given two valid pitches, return ordered signed pair (target octave*7+step ordinal minus source octave*7+step ordinal, target exact 12-TET semitone number minus source semitone number); neither component may be silently discarded.",
+          "positive_source_grade": [
+            {
+              "source": "replay",
+              "donor_path": null,
+              "old_status": null
+            }
+          ],
+          "evidence_status": "SOURCE-CLAIM-CROSSWALK-NOT-ORACLE-NOT-RATIFIED"
+        }
       ]
     },
     {
@@ -9253,6 +10697,27 @@
           "evidence_scope": "ARCHIVED-RESEARCH-NOT-NATIVE-SENS-EXECUTION",
           "owner_core_ratification": false,
           "coordinate_basis": "EXACT-SEMANTIC-NAME-MATCH-SELECTED-CANONICAL"
+        }
+      ],
+      "branch_proposal_evidence": [
+        {
+          "proposal_id": "D10P-601211",
+          "branch": "research/d10-placement-proof-crosswalk-20261011",
+          "branch_json_path": "research/d10/staging-20261011/d10-all-candidate-locations-main-653-20261011.json",
+          "source_git_blob": "ddf767304787e2bf9433a2574d483cf712102b1c",
+          "archived_classification": "UNSELECTED_NO_EXACT_NAME_MATCH_REVIEW",
+          "original_source": "juv4uk/sens@c67db6cdd820dea8d3a110caed359507c0a2d7a4:knowledge/d10-interlisp-dwim-safe-suggestion-v1.json:1",
+          "semantic_coordinate": "1010111001",
+          "crosscheck_selected": true,
+          "law_claim": "Return the unique lowest-distance candidate within an explicit maximum adjacent-transposition edit bound. Exact binary identity is never guessed; equal-score distinct identities produce AMBIGUOUS; bit words or D2 syntax are blocked. Never rewrite or evaluate source.",
+          "positive_source_grade": [
+            {
+              "source": "replay",
+              "donor_path": null,
+              "old_status": null
+            }
+          ],
+          "evidence_status": "SOURCE-CLAIM-CROSSWALK-NOT-ORACLE-NOT-RATIFIED"
         }
       ]
     },
@@ -9496,7 +10961,22 @@
         "source_kind": "pending-proposal",
         "not_a_ratified_resident": true,
         "reason": "A source occurrence or wish-list name is not an independent D10 law; candidate requires typed contract and distinct behavior."
-      }
+      },
+      "branch_proposal_evidence": [
+        {
+          "proposal_id": "D10P-0024",
+          "branch": "research/d10-placement-proof-crosswalk-20261011",
+          "branch_json_path": "research/d10/staging-20261011/d10-all-candidate-locations-main-653-20261011.json",
+          "source_git_blob": "ddf767304787e2bf9433a2574d483cf712102b1c",
+          "archived_classification": "UNSELECTED_NO_EXACT_NAME_MATCH_REVIEW",
+          "original_source": "juv4uk/sens@3335d09015cb8c96d4e2ed96f8d1339b4eb4f984:lib/forward.lisp:318",
+          "semantic_coordinate": "1011001011",
+          "crosscheck_selected": false,
+          "law_claim": "Поведінка визначена джерелом forward.lisp:318 (fact).",
+          "positive_source_grade": [],
+          "evidence_status": "SOURCE-CLAIM-CROSSWALK-NOT-ORACLE-NOT-RATIFIED"
+        }
+      ]
     },
     {
       "coordinate": "1011001100",
@@ -9543,7 +11023,22 @@
         "owner_review": "PENDING",
         "core_vs_library": "LIKELY-DERIVED-REQUIRES-REVIEW",
         "ratification": false
-      }
+      },
+      "branch_proposal_evidence": [
+        {
+          "proposal_id": "D10P-0046",
+          "branch": "research/d10-placement-proof-crosswalk-20261011",
+          "branch_json_path": "research/d10/staging-20261011/d10-all-candidate-locations-main-653-20261011.json",
+          "source_git_blob": "ddf767304787e2bf9433a2574d483cf712102b1c",
+          "archived_classification": "UNSELECTED_NO_EXACT_NAME_MATCH_REVIEW",
+          "original_source": "juv4uk/sens@3335d09015cb8c96d4e2ed96f8d1339b4eb4f984:lib/forward.lisp:512",
+          "semantic_coordinate": "1011001100",
+          "crosscheck_selected": false,
+          "law_claim": "Поведінка визначена джерелом forward.lisp:512 (find-entry).",
+          "positive_source_grade": [],
+          "evidence_status": "SOURCE-CLAIM-CROSSWALK-NOT-ORACLE-NOT-RATIFIED"
+        }
+      ]
     },
     {
       "coordinate": "1011001101",
@@ -9581,7 +11076,22 @@
         "source_kind": "pending-proposal",
         "not_a_ratified_resident": true,
         "reason": "A source occurrence or wish-list name is not an independent D10 law; candidate requires typed contract and distinct behavior."
-      }
+      },
+      "branch_proposal_evidence": [
+        {
+          "proposal_id": "D10P-0050",
+          "branch": "research/d10-placement-proof-crosswalk-20261011",
+          "branch_json_path": "research/d10/staging-20261011/d10-all-candidate-locations-main-653-20261011.json",
+          "source_git_blob": "ddf767304787e2bf9433a2574d483cf712102b1c",
+          "archived_classification": "UNSELECTED_NO_EXACT_NAME_MATCH_REVIEW",
+          "original_source": "juv4uk/sens@3335d09015cb8c96d4e2ed96f8d1339b4eb4f984:lib/forward.lisp:548",
+          "semantic_coordinate": "1011001101",
+          "crosscheck_selected": false,
+          "law_claim": "Поведінка визначена джерелом forward.lisp:548 (new-entries).",
+          "positive_source_grade": [],
+          "evidence_status": "SOURCE-CLAIM-CROSSWALK-NOT-ORACLE-NOT-RATIFIED"
+        }
+      ]
     },
     {
       "coordinate": "1011001110",
@@ -9628,7 +11138,22 @@
         "owner_review": "PENDING",
         "core_vs_library": "LIKELY-DERIVED-REQUIRES-REVIEW",
         "ratification": false
-      }
+      },
+      "branch_proposal_evidence": [
+        {
+          "proposal_id": "D10P-0054",
+          "branch": "research/d10-placement-proof-crosswalk-20261011",
+          "branch_json_path": "research/d10/staging-20261011/d10-all-candidate-locations-main-653-20261011.json",
+          "source_git_blob": "ddf767304787e2bf9433a2574d483cf712102b1c",
+          "archived_classification": "UNSELECTED_NO_EXACT_NAME_MATCH_REVIEW",
+          "original_source": "juv4uk/sens@3335d09015cb8c96d4e2ed96f8d1339b4eb4f984:lib/forward.lisp:690",
+          "semantic_coordinate": "1011001110",
+          "crosscheck_selected": false,
+          "law_claim": "Поведінка визначена джерелом forward.lisp:690 (map-apply-head-jtms).",
+          "positive_source_grade": [],
+          "evidence_status": "SOURCE-CLAIM-CROSSWALK-NOT-ORACLE-NOT-RATIFIED"
+        }
+      ]
     },
     {
       "coordinate": "1011001111",
@@ -9666,7 +11191,22 @@
         "source_kind": "pending-proposal",
         "not_a_ratified_resident": true,
         "reason": "A source occurrence or wish-list name is not an independent D10 law; candidate requires typed contract and distinct behavior."
-      }
+      },
+      "branch_proposal_evidence": [
+        {
+          "proposal_id": "D10P-0067",
+          "branch": "research/d10-placement-proof-crosswalk-20261011",
+          "branch_json_path": "research/d10/staging-20261011/d10-all-candidate-locations-main-653-20261011.json",
+          "source_git_blob": "ddf767304787e2bf9433a2574d483cf712102b1c",
+          "archived_classification": "UNSELECTED_NO_EXACT_NAME_MATCH_REVIEW",
+          "original_source": "juv4uk/sens@3335d09015cb8c96d4e2ed96f8d1339b4eb4f984:lib/forward.lisp:1086",
+          "semantic_coordinate": "1011001111",
+          "crosscheck_selected": false,
+          "law_claim": "Поведінка визначена джерелом forward.lisp:1086 (bindings).",
+          "positive_source_grade": [],
+          "evidence_status": "SOURCE-CLAIM-CROSSWALK-NOT-ORACLE-NOT-RATIFIED"
+        }
+      ]
     },
     {
       "coordinate": "1011010000",
@@ -9713,7 +11253,22 @@
         "owner_review": "PENDING",
         "core_vs_library": "LIKELY-DERIVED-REQUIRES-REVIEW",
         "ratification": false
-      }
+      },
+      "branch_proposal_evidence": [
+        {
+          "proposal_id": "D10P-0069",
+          "branch": "research/d10-placement-proof-crosswalk-20261011",
+          "branch_json_path": "research/d10/staging-20261011/d10-all-candidate-locations-main-653-20261011.json",
+          "source_git_blob": "ddf767304787e2bf9433a2574d483cf712102b1c",
+          "archived_classification": "UNSELECTED_NO_EXACT_NAME_MATCH_REVIEW",
+          "original_source": "juv4uk/sens@3335d09015cb8c96d4e2ed96f8d1339b4eb4f984:lib/forward.lisp:1245",
+          "semantic_coordinate": "1011010000",
+          "crosscheck_selected": false,
+          "law_claim": "Поведінка визначена джерелом forward.lisp:1245 (map-apply-head).",
+          "positive_source_grade": [],
+          "evidence_status": "SOURCE-CLAIM-CROSSWALK-NOT-ORACLE-NOT-RATIFIED"
+        }
+      ]
     },
     {
       "coordinate": "1011010001",
@@ -24926,6 +26481,376 @@
         }
       ]
     },
-    "note": "Every matched archived selected semantic record has its original law attached to its exact current research coordinate; this does not change D10 canonical v5 or execute an oracle."
+    "note": "Census covers previous 51 archived evidence records and 129 crosswalk proposals; non-D10 source helper names remain unassigned rather than usurping Core coordinates.",
+    "proposal_crosswalk": {
+      "status": "PROVENANCE-PINNED-PLACEMENT-WITH-EXCLUSIONS",
+      "source_branch": "research/d10-placement-proof-crosswalk-20261011",
+      "source_path": "research/d10/staging-20261011/d10-all-candidate-locations-main-653-20261011.json",
+      "source_git_blob": "ddf767304787e2bf9433a2574d483cf712102b1c",
+      "all_source_proposals": 129,
+      "mapped_selected": 72,
+      "mapped_provisional": 6,
+      "not_admitted_source_definitions": 51,
+      "no_new_opcode_codes": true,
+      "unmatched": [
+        {
+          "semantic_name": "ASSERT-FACT!",
+          "proposal_id": "D10P-0012",
+          "classification": "EXACT_NAME_MATCH_RATIFIED_D1_D9_REVIEW",
+          "reason": "UNPLACED-IN-D10; SOURCE-DEFINED-OR-LOWER-DOMAIN-CANDIDATE-NOT-AUTOMATIC-RESIDENT",
+          "donor_source": "juv4uk/sens@3335d09015cb8c96d4e2ed96f8d1339b4eb4f984:lib/forward.lisp:62"
+        },
+        {
+          "semantic_name": "FIRE-RULE",
+          "proposal_id": "D10P-0013",
+          "classification": "EXACT_NAME_MATCH_RATIFIED_D1_D9_REVIEW",
+          "reason": "UNPLACED-IN-D10; SOURCE-DEFINED-OR-LOWER-DOMAIN-CANDIDATE-NOT-AUTOMATIC-RESIDENT",
+          "donor_source": "juv4uk/sens@3335d09015cb8c96d4e2ed96f8d1339b4eb4f984:lib/forward.lisp:70"
+        },
+        {
+          "semantic_name": "FIRE-RULE-ON-FACTS",
+          "proposal_id": "D10P-0014",
+          "classification": "EXACT_NAME_MATCH_RATIFIED_D1_D9_REVIEW",
+          "reason": "UNPLACED-IN-D10; SOURCE-DEFINED-OR-LOWER-DOMAIN-CANDIDATE-NOT-AUTOMATIC-RESIDENT",
+          "donor_source": "juv4uk/sens@3335d09015cb8c96d4e2ed96f8d1339b4eb4f984:lib/forward.lisp:107"
+        },
+        {
+          "semantic_name": "FIRE-RULE-ON-WORKING-MEMORY",
+          "proposal_id": "D10P-0015",
+          "classification": "EXACT_NAME_MATCH_RATIFIED_D1_D9_REVIEW",
+          "reason": "UNPLACED-IN-D10; SOURCE-DEFINED-OR-LOWER-DOMAIN-CANDIDATE-NOT-AUTOMATIC-RESIDENT",
+          "donor_source": "juv4uk/sens@3335d09015cb8c96d4e2ed96f8d1339b4eb4f984:lib/forward.lisp:124"
+        },
+        {
+          "semantic_name": "FIRE-RULES-ON-FACTS",
+          "proposal_id": "D10P-0016",
+          "classification": "EXACT_NAME_MATCH_RATIFIED_D1_D9_REVIEW",
+          "reason": "UNPLACED-IN-D10; SOURCE-DEFINED-OR-LOWER-DOMAIN-CANDIDATE-NOT-AUTOMATIC-RESIDENT",
+          "donor_source": "juv4uk/sens@3335d09015cb8c96d4e2ed96f8d1339b4eb4f984:lib/forward.lisp:146"
+        },
+        {
+          "semantic_name": "FIRE-RULES-ON-WORKING-MEMORY",
+          "proposal_id": "D10P-0017",
+          "classification": "EXACT_NAME_MATCH_RATIFIED_D1_D9_REVIEW",
+          "reason": "UNPLACED-IN-D10; SOURCE-DEFINED-OR-LOWER-DOMAIN-CANDIDATE-NOT-AUTOMATIC-RESIDENT",
+          "donor_source": "juv4uk/sens@3335d09015cb8c96d4e2ed96f8d1339b4eb4f984:lib/forward.lisp:154"
+        },
+        {
+          "semantic_name": "APPEND-NEW",
+          "proposal_id": "D10P-0018",
+          "classification": "EXACT_NAME_MATCH_RATIFIED_D1_D9_REVIEW",
+          "reason": "UNPLACED-IN-D10; SOURCE-DEFINED-OR-LOWER-DOMAIN-CANDIDATE-NOT-AUTOMATIC-RESIDENT",
+          "donor_source": "juv4uk/sens@3335d09015cb8c96d4e2ed96f8d1339b4eb4f984:lib/forward.lisp:198"
+        },
+        {
+          "semantic_name": "RUN",
+          "proposal_id": "D10P-0019",
+          "classification": "EXACT_NAME_MATCH_RATIFIED_D1_D9_REVIEW",
+          "reason": "UNPLACED-IN-D10; SOURCE-DEFINED-OR-LOWER-DOMAIN-CANDIDATE-NOT-AUTOMATIC-RESIDENT",
+          "donor_source": "juv4uk/sens@3335d09015cb8c96d4e2ed96f8d1339b4eb4f984:lib/forward.lisp:206"
+        },
+        {
+          "semantic_name": "ASSERT-FACTS!",
+          "proposal_id": "D10P-0020",
+          "classification": "EXACT_NAME_MATCH_RATIFIED_D1_D9_REVIEW",
+          "reason": "UNPLACED-IN-D10; SOURCE-DEFINED-OR-LOWER-DOMAIN-CANDIDATE-NOT-AUTOMATIC-RESIDENT",
+          "donor_source": "juv4uk/sens@3335d09015cb8c96d4e2ed96f8d1339b4eb4f984:lib/forward.lisp:213"
+        },
+        {
+          "semantic_name": "RETRACT-FACT",
+          "proposal_id": "D10P-0021",
+          "classification": "EXACT_NAME_MATCH_RATIFIED_D1_D9_REVIEW",
+          "reason": "UNPLACED-IN-D10; SOURCE-DEFINED-OR-LOWER-DOMAIN-CANDIDATE-NOT-AUTOMATIC-RESIDENT",
+          "donor_source": "juv4uk/sens@3335d09015cb8c96d4e2ed96f8d1339b4eb4f984:lib/forward.lisp:246"
+        },
+        {
+          "semantic_name": "RETRACT-FACT!",
+          "proposal_id": "D10P-0022",
+          "classification": "EXACT_NAME_MATCH_RATIFIED_D1_D9_REVIEW",
+          "reason": "UNPLACED-IN-D10; SOURCE-DEFINED-OR-LOWER-DOMAIN-CANDIDATE-NOT-AUTOMATIC-RESIDENT",
+          "donor_source": "juv4uk/sens@3335d09015cb8c96d4e2ed96f8d1339b4eb4f984:lib/forward.lisp:254"
+        },
+        {
+          "semantic_name": "MAKE-JUSTIFIED",
+          "proposal_id": "D10P-0023",
+          "classification": "EXACT_NAME_MATCH_RATIFIED_D1_D9_REVIEW",
+          "reason": "UNPLACED-IN-D10; SOURCE-DEFINED-OR-LOWER-DOMAIN-CANDIDATE-NOT-AUTOMATIC-RESIDENT",
+          "donor_source": "juv4uk/sens@3335d09015cb8c96d4e2ed96f8d1339b4eb4f984:lib/forward.lisp:316"
+        },
+        {
+          "semantic_name": "FACT-OF",
+          "proposal_id": "D10P-0025",
+          "classification": "EXACT_NAME_MATCH_RATIFIED_D1_D9_REVIEW",
+          "reason": "UNPLACED-IN-D10; SOURCE-DEFINED-OR-LOWER-DOMAIN-CANDIDATE-NOT-AUTOMATIC-RESIDENT",
+          "donor_source": "juv4uk/sens@3335d09015cb8c96d4e2ed96f8d1339b4eb4f984:lib/forward.lisp:320"
+        },
+        {
+          "semantic_name": "SUPPORTS-OF",
+          "proposal_id": "D10P-0026",
+          "classification": "EXACT_NAME_MATCH_RATIFIED_D1_D9_REVIEW",
+          "reason": "UNPLACED-IN-D10; SOURCE-DEFINED-OR-LOWER-DOMAIN-CANDIDATE-NOT-AUTOMATIC-RESIDENT",
+          "donor_source": "juv4uk/sens@3335d09015cb8c96d4e2ed96f8d1339b4eb4f984:lib/forward.lisp:321"
+        },
+        {
+          "semantic_name": "AXIOM",
+          "proposal_id": "D10P-0027",
+          "classification": "EXACT_NAME_MATCH_RATIFIED_D1_D9_REVIEW",
+          "reason": "UNPLACED-IN-D10; SOURCE-DEFINED-OR-LOWER-DOMAIN-CANDIDATE-NOT-AUTOMATIC-RESIDENT",
+          "donor_source": "juv4uk/sens@3335d09015cb8c96d4e2ed96f8d1339b4eb4f984:lib/forward.lisp:322"
+        },
+        {
+          "semantic_name": "MAP-FACT-OF",
+          "proposal_id": "D10P-0028",
+          "classification": "EXACT_NAME_MATCH_RATIFIED_D1_D9_REVIEW",
+          "reason": "UNPLACED-IN-D10; SOURCE-DEFINED-OR-LOWER-DOMAIN-CANDIDATE-NOT-AUTOMATIC-RESIDENT",
+          "donor_source": "juv4uk/sens@3335d09015cb8c96d4e2ed96f8d1339b4eb4f984:lib/forward.lisp:324"
+        },
+        {
+          "semantic_name": "FIRE-RULE-TMS",
+          "proposal_id": "D10P-0029",
+          "classification": "EXACT_NAME_MATCH_RATIFIED_D1_D9_REVIEW",
+          "reason": "UNPLACED-IN-D10; SOURCE-DEFINED-OR-LOWER-DOMAIN-CANDIDATE-NOT-AUTOMATIC-RESIDENT",
+          "donor_source": "juv4uk/sens@3335d09015cb8c96d4e2ed96f8d1339b4eb4f984:lib/forward.lisp:333"
+        },
+        {
+          "semantic_name": "FIRE-RULE-ON-FACTS-TMS",
+          "proposal_id": "D10P-0030",
+          "classification": "EXACT_NAME_MATCH_RATIFIED_D1_D9_REVIEW",
+          "reason": "UNPLACED-IN-D10; SOURCE-DEFINED-OR-LOWER-DOMAIN-CANDIDATE-NOT-AUTOMATIC-RESIDENT",
+          "donor_source": "juv4uk/sens@3335d09015cb8c96d4e2ed96f8d1339b4eb4f984:lib/forward.lisp:345"
+        },
+        {
+          "semantic_name": "FIRE-RULES-ON-FACTS-TMS",
+          "proposal_id": "D10P-0031",
+          "classification": "EXACT_NAME_MATCH_RATIFIED_D1_D9_REVIEW",
+          "reason": "UNPLACED-IN-D10; SOURCE-DEFINED-OR-LOWER-DOMAIN-CANDIDATE-NOT-AUTOMATIC-RESIDENT",
+          "donor_source": "juv4uk/sens@3335d09015cb8c96d4e2ed96f8d1339b4eb4f984:lib/forward.lisp:356"
+        },
+        {
+          "semantic_name": "JUSTIFIED-MEMBER?",
+          "proposal_id": "D10P-0032",
+          "classification": "EXACT_NAME_MATCH_RATIFIED_D1_D9_REVIEW",
+          "reason": "UNPLACED-IN-D10; SOURCE-DEFINED-OR-LOWER-DOMAIN-CANDIDATE-NOT-AUTOMATIC-RESIDENT",
+          "donor_source": "juv4uk/sens@3335d09015cb8c96d4e2ed96f8d1339b4eb4f984:lib/forward.lisp:364"
+        },
+        {
+          "semantic_name": "ADD-NEW-JUSTIFIED",
+          "proposal_id": "D10P-0033",
+          "classification": "EXACT_NAME_MATCH_RATIFIED_D1_D9_REVIEW",
+          "reason": "UNPLACED-IN-D10; SOURCE-DEFINED-OR-LOWER-DOMAIN-CANDIDATE-NOT-AUTOMATIC-RESIDENT",
+          "donor_source": "juv4uk/sens@3335d09015cb8c96d4e2ed96f8d1339b4eb4f984:lib/forward.lisp:372"
+        },
+        {
+          "semantic_name": "RUN-TMS",
+          "proposal_id": "D10P-0034",
+          "classification": "EXACT_NAME_MATCH_RATIFIED_D1_D9_REVIEW",
+          "reason": "UNPLACED-IN-D10; SOURCE-DEFINED-OR-LOWER-DOMAIN-CANDIDATE-NOT-AUTOMATIC-RESIDENT",
+          "donor_source": "juv4uk/sens@3335d09015cb8c96d4e2ed96f8d1339b4eb4f984:lib/forward.lisp:382"
+        },
+        {
+          "semantic_name": "ASSERT-FACT-TMS!",
+          "proposal_id": "D10P-0035",
+          "classification": "EXACT_NAME_MATCH_RATIFIED_D1_D9_REVIEW",
+          "reason": "UNPLACED-IN-D10; SOURCE-DEFINED-OR-LOWER-DOMAIN-CANDIDATE-NOT-AUTOMATIC-RESIDENT",
+          "donor_source": "juv4uk/sens@3335d09015cb8c96d4e2ed96f8d1339b4eb4f984:lib/forward.lisp:392"
+        },
+        {
+          "semantic_name": "RUN-TMS!",
+          "proposal_id": "D10P-0036",
+          "classification": "EXACT_NAME_MATCH_RATIFIED_D1_D9_REVIEW",
+          "reason": "UNPLACED-IN-D10; SOURCE-DEFINED-OR-LOWER-DOMAIN-CANDIDATE-NOT-AUTOMATIC-RESIDENT",
+          "donor_source": "juv4uk/sens@3335d09015cb8c96d4e2ed96f8d1339b4eb4f984:lib/forward.lisp:395"
+        },
+        {
+          "semantic_name": "REMOVE-JUSTIFIED",
+          "proposal_id": "D10P-0037",
+          "classification": "EXACT_NAME_MATCH_RATIFIED_D1_D9_REVIEW",
+          "reason": "UNPLACED-IN-D10; SOURCE-DEFINED-OR-LOWER-DOMAIN-CANDIDATE-NOT-AUTOMATIC-RESIDENT",
+          "donor_source": "juv4uk/sens@3335d09015cb8c96d4e2ed96f8d1339b4eb4f984:lib/forward.lisp:398"
+        },
+        {
+          "semantic_name": "DEPENDENTS-OF",
+          "proposal_id": "D10P-0038",
+          "classification": "EXACT_NAME_MATCH_RATIFIED_D1_D9_REVIEW",
+          "reason": "UNPLACED-IN-D10; SOURCE-DEFINED-OR-LOWER-DOMAIN-CANDIDATE-NOT-AUTOMATIC-RESIDENT",
+          "donor_source": "juv4uk/sens@3335d09015cb8c96d4e2ed96f8d1339b4eb4f984:lib/forward.lisp:406"
+        },
+        {
+          "semantic_name": "RETRACT-FACT-TMS",
+          "proposal_id": "D10P-0039",
+          "classification": "EXACT_NAME_MATCH_RATIFIED_D1_D9_REVIEW",
+          "reason": "UNPLACED-IN-D10; SOURCE-DEFINED-OR-LOWER-DOMAIN-CANDIDATE-NOT-AUTOMATIC-RESIDENT",
+          "donor_source": "juv4uk/sens@3335d09015cb8c96d4e2ed96f8d1339b4eb4f984:lib/forward.lisp:417"
+        },
+        {
+          "semantic_name": "RETRACT-FACTS-TMS",
+          "proposal_id": "D10P-0040",
+          "classification": "EXACT_NAME_MATCH_RATIFIED_D1_D9_REVIEW",
+          "reason": "UNPLACED-IN-D10; SOURCE-DEFINED-OR-LOWER-DOMAIN-CANDIDATE-NOT-AUTOMATIC-RESIDENT",
+          "donor_source": "juv4uk/sens@3335d09015cb8c96d4e2ed96f8d1339b4eb4f984:lib/forward.lisp:421"
+        },
+        {
+          "semantic_name": "RETRACT-FACT-TMS!",
+          "proposal_id": "D10P-0041",
+          "classification": "EXACT_NAME_MATCH_RATIFIED_D1_D9_REVIEW",
+          "reason": "UNPLACED-IN-D10; SOURCE-DEFINED-OR-LOWER-DOMAIN-CANDIDATE-NOT-AUTOMATIC-RESIDENT",
+          "donor_source": "juv4uk/sens@3335d09015cb8c96d4e2ed96f8d1339b4eb4f984:lib/forward.lisp:428"
+        },
+        {
+          "semantic_name": "JUSTIFICATIONS-OF",
+          "proposal_id": "D10P-0042",
+          "classification": "EXACT_NAME_MATCH_RATIFIED_D1_D9_REVIEW",
+          "reason": "UNPLACED-IN-D10; SOURCE-DEFINED-OR-LOWER-DOMAIN-CANDIDATE-NOT-AUTOMATIC-RESIDENT",
+          "donor_source": "juv4uk/sens@3335d09015cb8c96d4e2ed96f8d1339b4eb4f984:lib/forward.lisp:479"
+        },
+        {
+          "semantic_name": "FIRE-RULE-JTMS",
+          "proposal_id": "D10P-0043",
+          "classification": "EXACT_NAME_MATCH_RATIFIED_D1_D9_REVIEW",
+          "reason": "UNPLACED-IN-D10; SOURCE-DEFINED-OR-LOWER-DOMAIN-CANDIDATE-NOT-AUTOMATIC-RESIDENT",
+          "donor_source": "juv4uk/sens@3335d09015cb8c96d4e2ed96f8d1339b4eb4f984:lib/forward.lisp:481"
+        },
+        {
+          "semantic_name": "FIRE-RULE-ON-FACTS-JTMS",
+          "proposal_id": "D10P-0044",
+          "classification": "EXACT_NAME_MATCH_RATIFIED_D1_D9_REVIEW",
+          "reason": "UNPLACED-IN-D10; SOURCE-DEFINED-OR-LOWER-DOMAIN-CANDIDATE-NOT-AUTOMATIC-RESIDENT",
+          "donor_source": "juv4uk/sens@3335d09015cb8c96d4e2ed96f8d1339b4eb4f984:lib/forward.lisp:493"
+        },
+        {
+          "semantic_name": "FIRE-RULES-ON-FACTS-JTMS",
+          "proposal_id": "D10P-0045",
+          "classification": "EXACT_NAME_MATCH_RATIFIED_D1_D9_REVIEW",
+          "reason": "UNPLACED-IN-D10; SOURCE-DEFINED-OR-LOWER-DOMAIN-CANDIDATE-NOT-AUTOMATIC-RESIDENT",
+          "donor_source": "juv4uk/sens@3335d09015cb8c96d4e2ed96f8d1339b4eb4f984:lib/forward.lisp:504"
+        },
+        {
+          "semantic_name": "REMOVE-ENTRY-JTMS",
+          "proposal_id": "D10P-0047",
+          "classification": "EXACT_NAME_MATCH_RATIFIED_D1_D9_REVIEW",
+          "reason": "UNPLACED-IN-D10; SOURCE-DEFINED-OR-LOWER-DOMAIN-CANDIDATE-NOT-AUTOMATIC-RESIDENT",
+          "donor_source": "juv4uk/sens@3335d09015cb8c96d4e2ed96f8d1339b4eb4f984:lib/forward.lisp:520"
+        },
+        {
+          "semantic_name": "ADD-JUSTIFICATION",
+          "proposal_id": "D10P-0048",
+          "classification": "EXACT_NAME_MATCH_RATIFIED_D1_D9_REVIEW",
+          "reason": "UNPLACED-IN-D10; SOURCE-DEFINED-OR-LOWER-DOMAIN-CANDIDATE-NOT-AUTOMATIC-RESIDENT",
+          "donor_source": "juv4uk/sens@3335d09015cb8c96d4e2ed96f8d1339b4eb4f984:lib/forward.lisp:532"
+        },
+        {
+          "semantic_name": "ADD-NEW-ENTRIES-JTMS",
+          "proposal_id": "D10P-0049",
+          "classification": "EXACT_NAME_MATCH_RATIFIED_D1_D9_REVIEW",
+          "reason": "UNPLACED-IN-D10; SOURCE-DEFINED-OR-LOWER-DOMAIN-CANDIDATE-NOT-AUTOMATIC-RESIDENT",
+          "donor_source": "juv4uk/sens@3335d09015cb8c96d4e2ed96f8d1339b4eb4f984:lib/forward.lisp:542"
+        },
+        {
+          "semantic_name": "RUN-JTMS",
+          "proposal_id": "D10P-0051",
+          "classification": "EXACT_NAME_MATCH_RATIFIED_D1_D9_REVIEW",
+          "reason": "UNPLACED-IN-D10; SOURCE-DEFINED-OR-LOWER-DOMAIN-CANDIDATE-NOT-AUTOMATIC-RESIDENT",
+          "donor_source": "juv4uk/sens@3335d09015cb8c96d4e2ed96f8d1339b4eb4f984:lib/forward.lisp:556"
+        },
+        {
+          "semantic_name": "ASSERT-FACT-JTMS!",
+          "proposal_id": "D10P-0052",
+          "classification": "EXACT_NAME_MATCH_RATIFIED_D1_D9_REVIEW",
+          "reason": "UNPLACED-IN-D10; SOURCE-DEFINED-OR-LOWER-DOMAIN-CANDIDATE-NOT-AUTOMATIC-RESIDENT",
+          "donor_source": "juv4uk/sens@3335d09015cb8c96d4e2ed96f8d1339b4eb4f984:lib/forward.lisp:565"
+        },
+        {
+          "semantic_name": "RUN-JTMS!",
+          "proposal_id": "D10P-0053",
+          "classification": "EXACT_NAME_MATCH_RATIFIED_D1_D9_REVIEW",
+          "reason": "UNPLACED-IN-D10; SOURCE-DEFINED-OR-LOWER-DOMAIN-CANDIDATE-NOT-AUTOMATIC-RESIDENT",
+          "donor_source": "juv4uk/sens@3335d09015cb8c96d4e2ed96f8d1339b4eb4f984:lib/forward.lisp:568"
+        },
+        {
+          "semantic_name": "FIRE-RULE-JTMS-MULTI",
+          "proposal_id": "D10P-0055",
+          "classification": "EXACT_NAME_MATCH_RATIFIED_D1_D9_REVIEW",
+          "reason": "UNPLACED-IN-D10; SOURCE-DEFINED-OR-LOWER-DOMAIN-CANDIDATE-NOT-AUTOMATIC-RESIDENT",
+          "donor_source": "juv4uk/sens@3335d09015cb8c96d4e2ed96f8d1339b4eb4f984:lib/forward.lisp:698"
+        },
+        {
+          "semantic_name": "FIRE-RULES-JTMS-MULTI",
+          "proposal_id": "D10P-0056",
+          "classification": "EXACT_NAME_MATCH_RATIFIED_D1_D9_REVIEW",
+          "reason": "UNPLACED-IN-D10; SOURCE-DEFINED-OR-LOWER-DOMAIN-CANDIDATE-NOT-AUTOMATIC-RESIDENT",
+          "donor_source": "juv4uk/sens@3335d09015cb8c96d4e2ed96f8d1339b4eb4f984:lib/forward.lisp:702"
+        },
+        {
+          "semantic_name": "RUN-JTMS-MULTI",
+          "proposal_id": "D10P-0057",
+          "classification": "EXACT_NAME_MATCH_RATIFIED_D1_D9_REVIEW",
+          "reason": "UNPLACED-IN-D10; SOURCE-DEFINED-OR-LOWER-DOMAIN-CANDIDATE-NOT-AUTOMATIC-RESIDENT",
+          "donor_source": "juv4uk/sens@3335d09015cb8c96d4e2ed96f8d1339b4eb4f984:lib/forward.lisp:710"
+        },
+        {
+          "semantic_name": "RUN-JTMS-MULTI!",
+          "proposal_id": "D10P-0058",
+          "classification": "EXACT_NAME_MATCH_RATIFIED_D1_D9_REVIEW",
+          "reason": "UNPLACED-IN-D10; SOURCE-DEFINED-OR-LOWER-DOMAIN-CANDIDATE-NOT-AUTOMATIC-RESIDENT",
+          "donor_source": "juv4uk/sens@3335d09015cb8c96d4e2ed96f8d1339b4eb4f984:lib/forward.lisp:717"
+        },
+        {
+          "semantic_name": "PRUNE-JUSTIFICATIONS",
+          "proposal_id": "D10P-0059",
+          "classification": "EXACT_NAME_MATCH_RATIFIED_D1_D9_REVIEW",
+          "reason": "UNPLACED-IN-D10; SOURCE-DEFINED-OR-LOWER-DOMAIN-CANDIDATE-NOT-AUTOMATIC-RESIDENT",
+          "donor_source": "juv4uk/sens@3335d09015cb8c96d4e2ed96f8d1339b4eb4f984:lib/forward.lisp:720"
+        },
+        {
+          "semantic_name": "PRUNE-ENTRY",
+          "proposal_id": "D10P-0060",
+          "classification": "EXACT_NAME_MATCH_RATIFIED_D1_D9_REVIEW",
+          "reason": "UNPLACED-IN-D10; SOURCE-DEFINED-OR-LOWER-DOMAIN-CANDIDATE-NOT-AUTOMATIC-RESIDENT",
+          "donor_source": "juv4uk/sens@3335d09015cb8c96d4e2ed96f8d1339b4eb4f984:lib/forward.lisp:728"
+        },
+        {
+          "semantic_name": "PRUNE-ALL-ENTRIES",
+          "proposal_id": "D10P-0061",
+          "classification": "EXACT_NAME_MATCH_RATIFIED_D1_D9_REVIEW",
+          "reason": "UNPLACED-IN-D10; SOURCE-DEFINED-OR-LOWER-DOMAIN-CANDIDATE-NOT-AUTOMATIC-RESIDENT",
+          "donor_source": "juv4uk/sens@3335d09015cb8c96d4e2ed96f8d1339b4eb4f984:lib/forward.lisp:732"
+        },
+        {
+          "semantic_name": "UNSUPPORTED-FACTS",
+          "proposal_id": "D10P-0062",
+          "classification": "EXACT_NAME_MATCH_RATIFIED_D1_D9_REVIEW",
+          "reason": "UNPLACED-IN-D10; SOURCE-DEFINED-OR-LOWER-DOMAIN-CANDIDATE-NOT-AUTOMATIC-RESIDENT",
+          "donor_source": "juv4uk/sens@3335d09015cb8c96d4e2ed96f8d1339b4eb4f984:lib/forward.lisp:739"
+        },
+        {
+          "semantic_name": "DROP-UNSUPPORTED",
+          "proposal_id": "D10P-0063",
+          "classification": "EXACT_NAME_MATCH_RATIFIED_D1_D9_REVIEW",
+          "reason": "UNPLACED-IN-D10; SOURCE-DEFINED-OR-LOWER-DOMAIN-CANDIDATE-NOT-AUTOMATIC-RESIDENT",
+          "donor_source": "juv4uk/sens@3335d09015cb8c96d4e2ed96f8d1339b4eb4f984:lib/forward.lisp:748"
+        },
+        {
+          "semantic_name": "RETRACT-FACT-JTMS",
+          "proposal_id": "D10P-0064",
+          "classification": "EXACT_NAME_MATCH_RATIFIED_D1_D9_REVIEW",
+          "reason": "UNPLACED-IN-D10; SOURCE-DEFINED-OR-LOWER-DOMAIN-CANDIDATE-NOT-AUTOMATIC-RESIDENT",
+          "donor_source": "juv4uk/sens@3335d09015cb8c96d4e2ed96f8d1339b4eb4f984:lib/forward.lisp:762"
+        },
+        {
+          "semantic_name": "RETRACT-FACTS-JTMS",
+          "proposal_id": "D10P-0065",
+          "classification": "EXACT_NAME_MATCH_RATIFIED_D1_D9_REVIEW",
+          "reason": "UNPLACED-IN-D10; SOURCE-DEFINED-OR-LOWER-DOMAIN-CANDIDATE-NOT-AUTOMATIC-RESIDENT",
+          "donor_source": "juv4uk/sens@3335d09015cb8c96d4e2ed96f8d1339b4eb4f984:lib/forward.lisp:772"
+        },
+        {
+          "semantic_name": "RETRACT-FACT-JTMS!",
+          "proposal_id": "D10P-0066",
+          "classification": "EXACT_NAME_MATCH_RATIFIED_D1_D9_REVIEW",
+          "reason": "UNPLACED-IN-D10; SOURCE-DEFINED-OR-LOWER-DOMAIN-CANDIDATE-NOT-AUTOMATIC-RESIDENT",
+          "donor_source": "juv4uk/sens@3335d09015cb8c96d4e2ed96f8d1339b4eb4f984:lib/forward.lisp:779"
+        }
+      ]
+    }
   }
 }
