@@ -3,8 +3,8 @@
 **Рішення власника 11.10.2026 новіше за попереднє правило про один універсальний кодек.**
 Утримуємо два фізичні кодеки: чинний T5 з явним розширенням .sens і
 авторську Рамку-3 (F3) з явним розширенням .senc та міткою 0xF3.
-**Явний маленький F3 reader у SENS Core / CLI вже є**: open-f3, decode-f3,
-eval-f3, без автоматичного визначення. Чинні .sens не переписувати
+**Явний маленький F3 encoder + reader у SENS Core / CLI вже є**: encode-f3,
+open-f3, decode-f3, eval-f3, без автоматичного визначення. Чинні .sens не переписувати
 і не перейменовувати; звичайні команди залишилися на T5.
 Дослідний профіль .f3m — не третій виробничий кодек.
 
@@ -92,6 +92,7 @@ codec, selected_bytes, staged_file, staged_sha256.
 
 ~~~sh
 cargo build --locked --release -p sens-cli --bin sens-trit
+target/release/sens-trit encode-f3 /tmp/short.sens  # create-new short.senc
 target/release/sens-trit open-f3 /tmp/short.senc
 target/release/sens-trit decode-f3 /tmp/short.senc
 target/release/sens-trit eval-f3 /tmp/short.senc
@@ -104,6 +105,8 @@ target/release/sens-trit open tests/fixtures/migration-quote-cohort-main/quote-l
 фізичний F3 коротший, T5-основа не більше 16 байтів, D3 code admission і
 одна канонічна форма. Не вмикати жодного autodetect за байтами.
 [Повний інструмент випробування 9 файлів](../.github/workflows/two-codec-explicit-cli.yml).
+
+**SENS CLI encoder+decoder завершено:** [CI #38170817413](https://github.com/juv4uk/sens/actions/runs/38170817413), SHA 2ac5cbe001dcc949561aeb6bca231e52befd75a7, SUCCESS. Мала QUOTE-програма 4B T5 → 3B F3, оригінал побайтово не змінено, повторний запис і перевищення межі відхилено, дев’ять вибраних F3 дали exact open/decode/eval parity. [Raw artifact](https://github.com/juv4uk/sens/actions/runs/38170817413/artifacts/11714003230).
 
 ## Власники й статуси суміжних компонентів
 
