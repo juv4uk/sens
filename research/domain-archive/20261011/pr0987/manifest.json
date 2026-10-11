@@ -1,0 +1,29 @@
+{
+  "schema": "sens-historical-branch-archive/v1",
+  "archived_at": "2026-10-11",
+  "source": {
+    "repo": "juv4uk/sens",
+    "pr": 987,
+    "title": "refactor(#577): extract cli.rs from main.rs (slice 1 v2, pure move under #299 substrate policy)",
+    "branch": "refactor/577-cli-v2",
+    "head_sha": "50a06f95d03811fceb5049715e08cb32137c111d",
+    "base": "main",
+    "base_sha": "42e3945c5e8f27902ade6fedf52f54786c56f914",
+    "reason": "Pure extraction refactor authored against older main; current main.rs has materially evolved (141,765 chars vs branch 130,870), and no cli.rs exists on current main. Preserve exact branch source; do not apply old diff to newer main without rerunning current tests."
+  },
+  "files": [
+    {
+      "original_path": "crates/swarm-node/src/cli.rs",
+      "archived_path": "research/domain-archive/20261011/pr0987/source/crates/swarm-node/src/cli.rs",
+      "git_blob_sha": "33082b7ea6638c0f4240b3e8b48157d026d78e74",
+      "bytes": 11425
+    },
+    {
+      "original_path": "crates/swarm-node/src/main.rs",
+      "archived_path": "research/domain-archive/20261011/pr0987/source/crates/swarm-node/src/main.rs",
+      "git_blob_sha": "e86e088afaea10b2c0591f09f6adedc93af64dda",
+      "bytes": 130870
+    }
+  ],
+  "disposition": "ARCHIVE-ONLY / exact current-main replay required"
+}
