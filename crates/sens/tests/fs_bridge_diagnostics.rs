@@ -42,6 +42,25 @@ fn journal_event_fields_are_retrieved_from_a_real_alist() {
 }
 
 #[test]
+fn root_commit_equality_is_structural_and_d1_only() {
+    let mut session = session();
+    for (a,b,expected) in [
+        ("(a (b . c))", "(a (b . c))", true),
+        ("(a (b . c))", "(a (b . d))", false),
+        ("()", "()", true),
+        ("()", "(a)", false),
+        ("(a)", "()", false),
+    ] {
+        let source = format!("(внутрішня-рівність-структур (quote {a}) (quote {b}))");
+        let value = eval_program(&source, &mut session)
+            .unwrap_or_else(|e| panic!("structural D1 comparison {source}: {e:?}"))
+            .value;
+        assert_eq!(value.as_predicate_bit(), Some(expected),
+            "root commit must compare full data, not SHA or host truth");
+    }
+}
+
+#[test]
 fn root_envelope_accepts_its_own_schema_without_object_only_fields() {
     let mut session = session();
     assert_eq!(
