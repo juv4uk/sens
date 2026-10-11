@@ -67,10 +67,7 @@
 (0011 machine-path
   (0010 (sid)
     (001000 ((row (find-machine-row sid machine-rows)))
-      (110
-        ((010 row) () "()")
-        ((010 row) (1) "()")
-        (t (10011 row))))))
+      (110 ((010 row) "()") ((010 (001 ())) (10011 row))))))
 
 ; Historical (McCarthy 1960 / Lisp 1.5) realization projection. Its rows
 ; never create an identity: they may only annotate IDs that already exist
@@ -93,10 +90,7 @@
 (0011 mccarthy-label
   (0010 (sid)
     (001000 ((row (find-historical-row sid historical-rows)))
-      (110
-        ((010 row) () "()")
-        ((010 row) (1) "()")
-        (t (str+ (11110100 (100111 row)) " (" (11110100 (110110101 row)) ")"))))))
+      (110 ((010 row) "()") ((010 (001 ())) (str+ (11110100 (100111 row)) " (" (11110100 (110110101 row)) ")"))))))
 
 ; A surface word is usually a symbol (write-to-string strips the
 ; Lisp-level Symbol wrapping down to bare text); the reconstructed
@@ -141,10 +135,7 @@
 
 (0011 surface-word
   (0010 (surface-entry)
-    (110
-      ((010 surface-entry) () (001 ()))
-      ((010 surface-entry) (1) (001 ()))
-      (t (100 (011 surface-entry))))))
+    (110 ((010 surface-entry) (001 ())) ((010 (001 ())) (100 (011 surface-entry))))))
 
 (0011 get-surface
   (0010 (lang surfaces)
