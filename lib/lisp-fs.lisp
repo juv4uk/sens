@@ -199,20 +199,25 @@
                  (011 packages)
                  (content-store-put store (1001 decision))))))))))
 
+; All-addresses checks are exact D1 folds: NIL returns YES; improper
+; tails and missing content return NO. No host T, structural EMPTY, or
+; permissive truth coercion may leave these predicates.
 (0011 fs-all-addresses-present?
   (0010 (addresses store)
     (110
-      
-      ((010 addresses)  t)
-      ((0100 (content-store-contains? store (100 addresses))) (001 ()))
+      ((0101 addresses) (0101 (001 ())))
+      ((010 addresses) (0101 (001 (0))))
+      ((0100 (content-store-contains? store (100 addresses)))
+       (0101 (001 (0))))
       ((010 ()) (fs-all-addresses-present? (011 addresses) store)))))
 
 (0011 fs-binding-addresses-present?
   (0010 (entries store)
     (110
-      
-      ((010 entries)  t)
-      ((0100 (content-store-contains? store (011 (100 entries)))) (001 ()))
+      ((0101 entries) (0101 (001 ())))
+      ((010 entries) (0101 (001 (0))))
+      ((0100 (content-store-contains? store (011 (100 entries))))
+       (0101 (001 (0))))
       ((010 ()) (fs-binding-addresses-present? (011 entries) store)))))
 
 (0011 fs-reconstruct-root
