@@ -39,6 +39,49 @@
 
 Вихідні рядки відсортовано стабільно за `candidate_id`; кожен ID входу рівно в одному TSV. Окремий read-only summary/census із `source_ref` і SHA-256 файлів: scanned ref heads, unique candidate IDs, source rows, accepted/rejected/escalated counts, excluded by reason, incomplete source families. Заборонити невідомі/порожні статуси.
 
+## Реальний запуск інструмента трьох черг
+
+Виконуваний intake/partitioner у `scripts/d10_filter_intake.py` (поточні
+негативні регресії: `tests/test_d10_filter_intake.py`). Він **не завантажує
+Git refs, не виконує довільний код із TSV і не перевіряє GitHub Actions через
+мережу**. Ф1–Ф4 застосовуються **тільки до доказових записів, попередньо
+перевірених незалежним агентом/CI**. Самопроголошені `PASS` або
+`NO-MATCH` не замінюють реплей, а поле `bulk_ready` у цьому
+локальному звіті свідомо дорівнює `false`.
+
+```sh
+python3 scripts/d10_filter_intake.py \
+  --input knowledge/d10-filter/all-candidates.tsv \
+  --evidence knowledge/d10-filter/verified-evidence.json \
+  --census knowledge/d10-filter/coverage-manifest.json \
+  --evidence-root . \
+  --out-dir knowledge/d10-filter
+python3 -m unittest discover -s tests -p test_d10_filter_intake.py -v
+```
+
+`verified-evidence.json` має ключі за `candidate_id`. Для кожного запису:
+`provenance` — `verified, artifact, sha256, source_ref, content_sha256`;
+`witness` — `verified, artifact, sha256, source_ref, run_commit,
+result=PASS, exit_code=0, positive_pass, negative_pass, oracle_pass,
+run_url, tool_version`; `semantic` — такий самий pinned
+`artifact/sha256/verified`, `classification=duplicate|distinct`,
+`duplicate_of` і `bidirectional` для дубля або
+`counterexample_checked/lower_domain_review/current_d10_review`
+для нового закону; `conflict` — `verified, artifact, sha256,
+status=none|conflict, target`. Артефакт перевіряється за локальним SHA-256,
+шляхи поза `--evidence-root` заборонені. Для git-донора witness
+`run_commit` мусить збігатися з pinned donor SHA.
+
+`coverage-manifest.json` передає `coverage_complete`,
+`source_manifest_verified`, `unreadable_sources`, `candidate_count`.
+Їх слід отримати **незалежним сканером усіх сторінок історії**,
+а не проставляти вручну. Якщо покриття не підтверджене, інструмент
+повертає код 3 і зберігає три часткові черги з явним
+`coverage_complete=false`. Неправильна схема чи втрачений/дубльований
+ID — код 2 без декларації про успіх. Тільки повний незалежний
+witness/source-verifier і full-census CI можуть згодом підтвердити
+підготовлену чергу до bulk-ухвали власника.
+
 ## Bulk-схвалення / розміщення
 
 Власник переглядає тільки `accepted-queue.tsv`, дає один bulk-вердикт і може викреслити винятки; `escalated.tsv` проходить окремо. **Лише після явного схвалення** single-writer послідовно виділяє найменші вільні 10-бітні координати без повторів, проводить append-only зміну канонічного інвентарю, оновлює current-pointer/CI і запускає негативні перевірки. Жодне схвалення черги не означає автоматичну ратифікацію чи T5 runtime admission.
