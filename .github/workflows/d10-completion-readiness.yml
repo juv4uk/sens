@@ -10,6 +10,7 @@ on:
       - 'knowledge/d10-v6-semantic-inventory.json'
       - 'knowledge/d10-v6-historical-clos-selection-20261011.json'
       - 'knowledge/d10-v7-semantic-inventory.json'
+      - 'knowledge/d10-candidate-database-v1.json'
       - 'knowledge/d10-historical-lisp-streams-selected-v7-20261011.json'
       - 'knowledge/d10-provisional-candidate-coordinate-queue-v1.json'
       - 'knowledge/d10-historical-candidate-coordinate-queue-v1.json'
@@ -26,6 +27,7 @@ on:
       - 'scripts/check_d10_v5_research_candidates.py'
       - 'scripts/check_d10_v6_historical_clos.py'
       - 'scripts/check_d10_v7_historical_lisp_streams.py'
+      - 'scripts/check_d10_candidate_database.py'
       - 'scripts/check_d10_candidate_coordinate_queue.py'
       - 'scripts/check_d10_historical_candidate_queue.py'
       - 'tests/test_d10_v2_current_placement.py'
@@ -76,6 +78,8 @@ jobs:
         run: python3 scripts/check_d10_v6_historical_clos.py --self-test
       - name: Verify two historical Lisp stream laws in v7
         run: python3 scripts/check_d10_v7_historical_lisp_streams.py
+      - name: Reconcile unified candidate catalog and six negative tests
+        run: python3 scripts/check_d10_candidate_database.py --self-test
       - name: Порахувати реальний запас D10
         run: |
           python3 scripts/check_d10_completion_readiness.py >"$RUNNER_TEMP/d10-readiness.json"
