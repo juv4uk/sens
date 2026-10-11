@@ -914,8 +914,11 @@ def binary_rewrite(
                 elif not quoted and is_bound(token):
                     emit_text7_atom(token, role="reference")
                 else:
+                    source_line, source_col = line_col(source, start)
+                    context = "quoted-data" if quoted else "unbound-reference"
                     raise BinaryMigrationError(
-                        f"UNADMITTED_TEXT7_CONTEXT {token!r}: source atom is "
+                        f"UNADMITTED_TEXT7_CONTEXT {token!r} "
+                        f"at {source_line}:{source_col} ({context}): source atom is "
                         "neither an admitted D4 DEFINE/LAMBDA binder nor a "
                         "previously bound executable reference; quoted data "
                         "and String values require distinct exact runtime law"
