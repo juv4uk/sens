@@ -69,7 +69,9 @@ def verify_current_residents(path: Path | None = None) -> dict[str, dict[str, An
     residents = data.get("residents")
     expected_coordinates = {format(i, "06b") for i in range(64)}
     if not isinstance(residents, dict) or set(residents) != expected_coordinates:
-        raise AssertionError("ratified D6 map must contain all exact six-bit coordinates")
+        raise AssertionError(
+            "ratified D6 map must contain all exact six-bit coordinates"
+        )
     if len(set(residents.values())) != 64:
         raise AssertionError("ratified D6 residents must be unique")
 
@@ -80,7 +82,9 @@ def verify_current_residents(path: Path | None = None) -> dict[str, dict[str, An
     for name in (EVEN_NAME, ODD_NAME):
         matches = [row for row in rows if row.get("resident") == name]
         if len(matches) != 1:
-            raise AssertionError(f"current #3393 D6 map must contain exactly one {name} row")
+            raise AssertionError(
+                f"current #3393 D6 map must contain exactly one {name} row"
+            )
         row = matches[0]
         coordinate = row.get("coordinate")
         if (
@@ -89,7 +93,9 @@ def verify_current_residents(path: Path | None = None) -> dict[str, dict[str, An
             or set(coordinate) - {"0", "1"}
             or residents.get(coordinate) != name
         ):
-            raise AssertionError(f"{name} row disagrees with the authoritative resident map")
+            raise AssertionError(
+                f"{name} row disagrees with the authoritative resident map"
+            )
         if row.get("status") != "OWNER-RATIFIED":
             raise AssertionError(f"{name} is not owner-ratified")
         by_name[name] = {
@@ -206,7 +212,10 @@ def geometry_accounting(current: dict[str, dict[str, Any]]) -> dict[str, Any]:
         "coordinate_accounting": {
             "arbitrary_pair_direct_coordinate_bits": 12,
             "current_shared_prefix_plus_orientation_bits": current_axis_payload_bits,
-            "note": "coordinate/certificate accounting only; does not prove a semantic law",
+            "note": (
+                "coordinate/certificate accounting only; "
+                "does not prove a semantic law"
+            ),
         },
         "reencoding_guard": (
             "the exact-integer complement law survives coordinate re-encoding; "
@@ -228,7 +237,8 @@ def main() -> int:
     witness = semantic_witness(values)
     geometry = geometry_accounting(current)
 
-    with (args.out / "integer-witness.tsv").open("w", newline="", encoding="utf-8") as fh:
+    witness_path = args.out / "integer-witness.tsv"
+    with witness_path.open("w", newline="", encoding="utf-8") as fh:
         writer = csv.DictWriter(
             fh,
             fieldnames=list(witness["rows"][0].keys()),
@@ -288,7 +298,9 @@ def main() -> int:
     report = [
         "# D6 parity duality — #3078",
         "",
-        f"Current owner-ratified residents checked: **{EVEN_NAME} = {current[EVEN_NAME]['current_bits']}**, **{ODD_NAME} = {current[ODD_NAME]['current_bits']}** (#3393).",
+        f"Current owner-ratified residents checked: **{EVEN_NAME} = "
+        f"{current[EVEN_NAME]['current_bits']}**, **{ODD_NAME} = "
+        f"{current[ODD_NAME]['current_bits']}** (#3393).",
         f"Exact integer cases: **{len(values)}**.",
         f"Period-2 checks: **{witness['period2_checks']}**.",
         "Predicate results: exact **D1 1/0**.",
@@ -303,12 +315,16 @@ def main() -> int:
         "- non-integers fail OUT-OF-SCOPE in this witness.",
         "",
         "Current coordinate observation:",
-        f"- ratified coordinates are {current[EVEN_NAME]['current_bits']} and {current[ODD_NAME]['current_bits']};",
-        f"- observed Hamming distance = **{geometry['current_ratified_projection']['hamming_distance']}**;",
-        f"- owner law status = **{geometry['semantic_geometry_status']}**, not semantic proof;",
+        f"- ratified coordinates are {current[EVEN_NAME]['current_bits']} "
+        f"and {current[ODD_NAME]['current_bits']};",
+        f"- observed Hamming distance = "
+        f"**{geometry['current_ratified_projection']['hamming_distance']}**;",
+        f"- owner law status = **{geometry['semantic_geometry_status']}**, "
+        "not semantic proof;",
         "- the parity theorem does not depend on these coordinates.",
         "",
-        "Handoff: exact-integer duality is confirmed within this bounded witness; coordinate neighborhood remains a candidate only.",
+        "Handoff: exact-integer duality is confirmed within this bounded witness; "
+        "coordinate neighborhood remains a candidate only.",
         "",
     ]
     rendered = "\n".join(report)
