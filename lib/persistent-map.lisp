@@ -96,14 +96,14 @@
 
 (0011 rotate-left
   (0010 (n)
-    (001000 ((r (node-right n)))
+    (нехай-похідне ((r (node-right n)))
       (make-balanced-node (node-key r) (node-value r)
         (make-balanced-node (node-key n) (node-value n) (node-left n) (node-left r))
         (node-right r)))))
 
 (0011 rotate-right
   (0010 (n)
-    (001000 ((l (node-left n)))
+    (нехай-похідне ((l (node-left n)))
       (make-balanced-node (node-key l) (node-value l)
         (node-left l)
         (make-balanced-node (node-key n) (node-value n) (node-right l) (node-right n))))))
