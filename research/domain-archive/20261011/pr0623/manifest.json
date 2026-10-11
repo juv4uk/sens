@@ -1,0 +1,36 @@
+{
+  "schema": "sens-historical-branch-archive/v1",
+  "archived_at": "2026-10-11",
+  "source": {
+    "repo": "juv4uk/sens",
+    "pr": 623,
+    "branch": "work/chatgpt-606-generated-postcore-cache",
+    "head_sha": "1894dcf0c599e35f14aa594453aacc64cfbaa949",
+    "base_sha": "42e3945c5e8f27902ade6fedf52f54786c56f914",
+    "title": "feat(#606): generate post-core peer cache from semantic registry"
+  },
+  "main_reconciliation": {
+    "core_lisp_main_blob": "7f5dddd6e0a849e4ed18b15be6e243e1fe01bd62",
+    "time_lisp_main_blob": "c6a936fcb63a86dfd3964ed885d1b9b98aa63232",
+    "process_lisp_main_blob": "6b60d1d50aeb092d3be6794abaec45966eeb27fe",
+    "finding": "Current main has a materially newer Core and no identical postcore cache generator/workflow paths. Current time/process sources state that legacy per-file my-postcore materializer calls were retired; blindly merging the old whole-file/core/FASL state would regress newer Contract 11.8 changes."
+  },
+  "branch_file_blobs": {
+    ".github/workflows/postcore-peer-cache.yml": "5d9c6f26bf210e8023d58480c022d040c3ca0555",
+    ".github/workflows/temp-606-regenerate-fasl.yml": "9a0984903cb499994c501e2816220f0e388b3ecd",
+    "knowledge/repo-tooling-inventory.lisp": "3ef8e0465767ed1601d888b84dac45488115ec86",
+    "lib/core.lisp": "6f0133cda903247cccef06dfd3d0f7fde243bfd4",
+    "lib/core.lisp.fasl": "efada5d34b712631014ffa68eaca8fd36dd04210",
+    "lib/generated/postcore-stable-peer-projection.lisp": "28df6e0309acbb92dab4a521c0a401a6299a1866",
+    "scripts/generate-postcore-peer-cache.lisp": "b6fb9e8bacd44be81b8933dd60314da08ea086ee"
+  },
+  "patch_path": "research/domain-archive/20261011/pr0623/postcore-cache-review.patch",
+  "binary_archive_path": "research/domain-archive/20261011/pr0623/lib/core.lisp.fasl.base64.txt",
+  "disposition": "ARCHIVE-ONLY / OWNER-VERDICT-NEEDED",
+  "main_current_status": {
+    "generator_workflow_same_path_present": false,
+    "generated_projection_same_path_present": false,
+    "core_materializer_current": "present in lib/core.lisp, but current library call sites show retired/disabled path",
+    "no_production_merge_authorized": true
+  }
+}
