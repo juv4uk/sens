@@ -126,7 +126,7 @@ def tokenize(source: str) -> list[Token]:
             result.append(Token("atom", "<character>", at))
         else:
             start = i
-            while i < n and not source[i].isspace() and source[i] not in "();'`\",": 
+            while i < n and not source[i].isspace() and source[i] not in "();`\",": 
                 i += 1
             if i == start:
                 raise Unscannable(f"unsupported reader token at {at}")
