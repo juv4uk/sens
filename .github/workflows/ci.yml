@@ -1,6 +1,6 @@
-name: CI
+name: CI — основні перевірки SENS
 
-# Owner freeze 2026-10-11: Core only. Original workflow is preserved at
+# Замороження власником 2026-10-11: лише Core. Початковий workflow збережено в
 # research/paused-actions/20261011/ci-pre-freeze.yml.
 on:
   push:
@@ -13,15 +13,15 @@ permissions:
 
 jobs:
   core:
-    name: Core-only source and domain contract
+    name: Перевірка ядра та доменного контракту
     runs-on: ubuntu-24.04
     timeout-minutes: 30
     steps:
       - uses: actions/checkout@v5
       - uses: dtolnay/rust-toolchain@stable
-      - name: Core crate compilation (no other kernels)
+      - name: Компіляція crate ядра без інших обчислювальних ядер
         run: cargo check --locked -p sens --lib
-      - name: Carry-safe D24/D48 numeric and Value evaluator (Core-only Rust)
+      - name: Числова арифметика D24/D48 і Value evaluator без переповнення
         run: |
           cargo test --locked -p sens --lib binary_number::tests
           cargo test --locked -p sens --lib qualified_numeric_domain_value_tests
@@ -31,15 +31,15 @@ jobs:
           cargo test --locked -p sens --test numeric_domain_math_stress
           cargo test --locked -p sens --test numeric_composition_frames
           cargo test --locked -p sens --test physical_d2_d7_binding
-      - name: Ratified numeric D24/D48/... peer domains (Core-only)
+      - name: Перевірка ратифікованих числових доменів D24/D48/…
         run: |
           python3 scripts/check-numeric-domain-ratification.py --self-test
           python3 scripts/check-numeric-domain-ratification.py
-      - name: Exact-width Core semantic identity
+      - name: Семантична ідентичність ядра з точною шириною
         run: cargo test --locked -p sens --test domain_ladder --test domain_ast_value_identity --test domain_width_authority_test
-      - name: D3 old COND/ATOM/EQ regression tests
+      - name: Регресійні тести старої логіки COND/ATOM/EQ у D3
         run: python3 -m unittest discover -s tests -p 'test_d3_legacy_logic_guard.py' -v
-      - name: D3 active source and evaluator semantics audit (fail closed)
+      - name: Аудит активного джерела та семантики evaluator D3 із fail-closed
         run: python3 scripts/check_d3_legacy_logic.py --strict
-      - name: Core source hygiene
+      - name: Перевірка чистоти змін у вихідному коді ядра
         run: git diff --check
