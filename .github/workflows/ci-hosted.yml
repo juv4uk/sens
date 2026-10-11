@@ -50,8 +50,10 @@ jobs:
           cargo test --locked -p sens --test content_store
           cargo test --locked -p sens --test content_store_authority
       - name: D3 obsolete COND/ATOM/EQ scanner regression tests
+        if: always()
         run: python3 -m unittest discover -s tests -p 'test_d3_legacy_logic_guard.py' -v
       - name: Migrated time-source exact D3 runtime witnesses
+        if: always()
         run: |
           cargo test --locked -p sens --lib mixed_source::tests
           cargo test --locked -p sens --test timezone_raw
