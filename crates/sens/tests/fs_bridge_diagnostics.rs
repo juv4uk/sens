@@ -233,6 +233,25 @@ fn root_proper_list_validation_is_exact_d1_and_rejects_dotted_tails() {
 }
 
 #[test]
+fn world_knowledge_package_version_is_pair_safe_and_exact_d1() {
+    let mut session = session();
+    for (left, right, expected) in [
+        ("(0 1)", "(0 1)", true),
+        ("(0 1)", "(0 2)", false),
+        ("(0 1)", "(0)", false),
+        ("(0 1)", "()", false),
+    ] {
+        let code = format!(
+            "(внутрішня-рівність-версій (quote {left}) (quote {right}))"
+        );
+        let value = eval_program(&code, &mut session)
+            .unwrap_or_else(|e| panic!("pair-safe package version {code}: {e:?}"))
+            .value;
+        assert_eq!(value.as_predicate_bit(), Some(expected), "{code}");
+    }
+}
+
+#[test]
 fn root_commit_equality_is_structural_and_d1_only() {
     let mut session = session();
     for (a,b,expected) in [
