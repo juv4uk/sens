@@ -17,7 +17,7 @@ sys.path.insert(0, str(ROOT / "scripts"))
 from sens_t5_codec import decode_bytes, encode_words  # noqa: E402
 
 FORM = ("10", "001", "00", "000", "01")
-PHASES = {"t5_render_legacy", "t5_render_one_pass", "t5_open_d2", "t5_visible_parse_d2", "t5_direct_d2", "t5_words_d2", "d2_parse", "packed_width_d2", "eval_from_ast", "eval_lowered", "t5_encode_two_pass", "t5_encode_streaming"}
+PHASES = {"t5_render_legacy", "t5_render_one_pass", "t5_decode_single_pass", "t5_decode_with_reencode", "t5_open_d2", "t5_visible_parse_d2", "t5_direct_d2", "t5_words_d2", "d2_parse", "packed_width_d2", "eval_from_ast", "eval_lowered", "t5_encode_two_pass", "t5_encode_streaming"}
 
 
 def parse_record(line: str, prefix: str) -> dict[str, str]:
@@ -154,6 +154,30 @@ def main() -> int:
         direct = phases["t5_render_one_pass"]["median_ns_op"]
         ratio = f"{legacy / direct:.3f}x" if direct else "undefined"
         lines.append(f"| {forms} | {legacy:,} | {direct:,} | {ratio} |")
+    # Compare the exact previous O(n) canonicality re-encode against a
+    # proven single-pass T5 decoder. Both parse the same physical bytes; the
+    # re-encode control remains benchmark-only, never a new language rule.
+    lines.extend([
+        "",
+        "## Канонічний T5 decoder: один прохід проти повторного пакування",
+        "",
+        "| Форми | Один прохід, p50 нс | Декодер + старий re-encode, p50 нс | old/new |",
+        "|---:|---:|---:|---:|",
+    ])
+    for forms in sizes:
+        phases = {row["phase"]: row for row in measures if row["forms"] == forms}
+        direct = phases["t5_decode_single_pass"]["median_ns_op"]
+        old = phases["t5_decode_with_reencode"]["median_ns_op"]
+        ratio = f"{old / direct:.3f}x" if direct else "undefined"
+        lines.append(f"| {forms} | {direct:,} | {old:,} | {ratio} |")
+    lines.extend([
+        "",
+        "Ті самі фізичні байти, однакові декодовані W1–W9 слова. "
+        "Старий re-encode включено тільки в контроль бенчмарка. "
+        "Відношення old/new є локальним показником витрат перевірки, "
+        "а не прискоренням усієї мови.",
+        "",
+    ])
     lines.extend([
         "",
         "Обидва варіанти приймають ті самі вже декодовані точні T5 слова. "

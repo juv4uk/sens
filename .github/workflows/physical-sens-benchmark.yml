@@ -45,6 +45,9 @@ jobs:
         with:
           shared-key: physical-sens-runtime-bench
 
+      - name: Prove canonical transport parity for every 1- and 2-byte T5 stream
+        run: cargo test --locked -p sens --lib every_short_admitted_t5_stream_is_already_a_unique_canonical_encoding
+
       - name: Compile actual production release entrypoints
         run: cargo build --locked --release -p sens-cli --bin sens --bin sens-trit
 
