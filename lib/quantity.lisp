@@ -125,7 +125,7 @@
          ((00000010 ()) (00100111 dimension))))
       ((00000011 (dimension-base dimension)
            (dimension-base (00000101 dimensions)))
-       (10011100 ((sum
+       (нехай ((sum
                (00001100 (dimension-exponent dimension)
                   (dimension-exponent (00000101 dimensions)))))
          (00000111
@@ -296,7 +296,7 @@
     (00000111
       ((00000011 (scientific-constant? constant) (00000001 ())) (00000001 ()))
       ((00000010 ())
-       (10011100 ((name (scientific-constant-name constant)))
+       (нехай ((name (scientific-constant-name constant)))
          (00100111
            (00100111 (00100111 (00000001 scientific-constant) name))
            (00100111
