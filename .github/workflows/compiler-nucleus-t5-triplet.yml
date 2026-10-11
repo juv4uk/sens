@@ -49,15 +49,32 @@ jobs:
           work="$RUNNER_TEMP/compiler-nucleus-t5"
           rm -rf "$work"
           mkdir -p "$work"
+          set +e
           python3 scripts/migrate-three-pass.py \
             lib/compiler-nucleus.lisp \
             --out "$work/candidate" \
             --report "$work/migration-report.json"
+          migration_rc=$?
+          set -e
+          if [[ -f "$work/migration-report.json" ]]; then
+            python3 - "$work/migration-report.json" <<'PY'
+          import json, pathlib, sys
+          report = json.loads(pathlib.Path(sys.argv[1]).read_text(encoding="utf-8"))
+          print(json.dumps({
+              "summary": report.get("summary"),
+              "files": [{k: row.get(k) for k in ("path", "output", "status", "reason", "token", "line", "column", "passes") if k in row}
+                        for row in report.get("files", [])]
+          }, ensure_ascii=False, sort_keys=True))
+          PY
+          fi
+          if [[ "$migration_rc" -ne 0 ]]; then
+            echo "The canonical migrator blocked the compiler source; no projection was published." >&2
+            exit "$migration_rc"
+          fi
           python3 - "$work/migration-report.json" <<'PY'
           import json, pathlib, sys
           report = json.loads(pathlib.Path(sys.argv[1]).read_text(encoding="utf-8"))
           summary = report["summary"]
-          print(json.dumps(summary, ensure_ascii=False, sort_keys=True))
           if summary["files_seen"] != 1 or summary["files_written"] != 1 or summary["files_blocked"] != 0:
               raise SystemExit("compiler nucleus was not migrated as exactly one fully encoded source")
           row = report["files"][0]
