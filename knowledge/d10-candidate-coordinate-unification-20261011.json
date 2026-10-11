@@ -11946,14 +11946,24 @@
       "ratified": false,
       "physical_t5_authorized": false,
       "proof_readiness": {
-        "status": "INCOMPLETE-SOURCE-SEMANTICS",
-        "missing": [
-          "positive-witness",
-          "negative-falsifier"
-        ],
+        "status": "SOURCE-LAW-WITNESSES-PRESENT-UNVERIFIED",
+        "missing": [],
         "selection": false,
         "ratification": false,
-        "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+        "next_gate": "D1-D9-DEDUPE-CORE-VS-LIBRARY-AND-INDEPENDENT-ORACLE"
+      },
+      "source_evidence": {
+        "status": "SOURCE-WITNESS-RESEARCH-NOT-SELECTED",
+        "source_git_blob": "f5438abf3460fa7caac14a30edf511f907a5be44",
+        "law_source_key": "observable_behavior",
+        "positive_source_key": "positive_witness_spec",
+        "negative_source_key": "falsifier_spec",
+        "law": "Спостерігати факт наявності принаймні однієї обгортки на іменованій функції.",
+        "positive": "Без обгорток повернути NO, з однією YES.",
+        "negative": "Результат залежить від зміни базового тіла замість стану обгорток.",
+        "owner_review": "PENDING",
+        "independent_oracle": "PENDING",
+        "ratification": false
       }
     },
     {
@@ -11968,14 +11978,24 @@
       "ratified": false,
       "physical_t5_authorized": false,
       "proof_readiness": {
-        "status": "INCOMPLETE-SOURCE-SEMANTICS",
-        "missing": [
-          "positive-witness",
-          "negative-falsifier"
-        ],
+        "status": "SOURCE-LAW-WITNESSES-PRESENT-UNVERIFIED",
+        "missing": [],
         "selection": false,
         "ratification": false,
-        "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+        "next_gate": "D1-D9-DEDUPE-CORE-VS-LIBRARY-AND-INDEPENDENT-ORACLE"
+      },
+      "source_evidence": {
+        "status": "SOURCE-WITNESS-RESEARCH-NOT-SELECTED",
+        "source_git_blob": "f5438abf3460fa7caac14a30edf511f907a5be44",
+        "law_source_key": "observable_behavior",
+        "positive_source_key": "positive_witness_spec",
+        "negative_source_key": "falsifier_spec",
+        "law": "Спостерігати наявність обгортки конкретного типу, а не будь-якої.",
+        "positive": "Після додавання only trace: query trace позитивний, advice негативний.",
+        "negative": "Query непов'язаного типу повертає позитивний результат.",
+        "owner_review": "PENDING",
+        "independent_oracle": "PENDING",
+        "ratification": false
       }
     },
     {
@@ -11990,14 +12010,24 @@
       "ratified": false,
       "physical_t5_authorized": false,
       "proof_readiness": {
-        "status": "INCOMPLETE-SOURCE-SEMANTICS",
-        "missing": [
-          "positive-witness",
-          "negative-falsifier"
-        ],
+        "status": "SOURCE-LAW-WITNESSES-PRESENT-UNVERIFIED",
+        "missing": [],
         "selection": false,
         "ratification": false,
-        "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+        "next_gate": "D1-D9-DEDUPE-CORE-VS-LIBRARY-AND-INDEPENDENT-ORACLE"
+      },
+      "source_evidence": {
+        "status": "SOURCE-WITNESS-RESEARCH-NOT-SELECTED",
+        "source_git_blob": "f5438abf3460fa7caac14a30edf511f907a5be44",
+        "law_source_key": "observable_behavior",
+        "positive_source_key": "positive_witness_spec",
+        "negative_source_key": "falsifier_spec",
+        "law": "Отримати типи чинних обгорток функції у реальному порядку вкладення.",
+        "positive": "Два типи на f відображаються у списку типів; після видалення одного список коротший.",
+        "negative": "Плутати порядок реальних шарів із глобальною майбутньою wrapper-standard-order.",
+        "owner_review": "PENDING",
+        "independent_oracle": "PENDING",
+        "ratification": false
       }
     },
     {
@@ -12012,14 +12042,24 @@
       "ratified": false,
       "physical_t5_authorized": false,
       "proof_readiness": {
-        "status": "INCOMPLETE-SOURCE-SEMANTICS",
-        "missing": [
-          "positive-witness",
-          "negative-falsifier"
-        ],
+        "status": "SOURCE-LAW-WITNESSES-PRESENT-UNVERIFIED",
+        "missing": [],
         "selection": false,
         "ratification": false,
-        "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+        "next_gate": "D1-D9-DEDUPE-CORE-VS-LIBRARY-AND-INDEPENDENT-ORACLE"
+      },
+      "source_evidence": {
+        "status": "SOURCE-WITNESS-RESEARCH-NOT-SELECTED",
+        "source_git_blob": "f5438abf3460fa7caac14a30edf511f907a5be44",
+        "law_source_key": "observable_behavior",
+        "positive_source_key": "positive_witness_spec",
+        "negative_source_key": "falsifier_spec",
+        "law": "Відновити список параметрів функції, для compiled opaque можуть генеруватися placeholder імена.",
+        "positive": "Зібрати параметри lambda(a,b); для невідкритого compiled arity знайти два позиційні placeholder.",
+        "negative": "Проголошувати справжні імена локальних параметрів обов'язково відомими з компільованого коду.",
+        "owner_review": "PENDING",
+        "independent_oracle": "PENDING",
+        "ratification": false
       }
     },
     {
@@ -12034,14 +12074,24 @@
       "ratified": false,
       "physical_t5_authorized": false,
       "proof_readiness": {
-        "status": "INCOMPLETE-SOURCE-SEMANTICS",
-        "missing": [
-          "positive-witness",
-          "negative-falsifier"
-        ],
+        "status": "SOURCE-LAW-WITNESSES-PRESENT-UNVERIFIED",
+        "missing": [],
         "selection": false,
         "ratification": false,
-        "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+        "next_gate": "D1-D9-DEDUPE-CORE-VS-LIBRARY-AND-INDEPENDENT-ORACLE"
+      },
+      "source_evidence": {
+        "status": "SOURCE-WITNESS-RESEARCH-NOT-SELECTED",
+        "source_git_blob": "f5438abf3460fa7caac14a30edf511f907a5be44",
+        "law_source_key": "observable_behavior",
+        "positive_source_key": "positive_witness_spec",
+        "negative_source_key": "falsifier_spec",
+        "law": "Отримати початкову функцію, навіть коли її обгорнуто; базова функція лишається відмінною від wrapper chain.",
+        "positive": "Після WRAP f повернути базовий опис f, не wrapper.",
+        "negative": "Повернути зовнішню обгортку замість базової функції.",
+        "owner_review": "PENDING",
+        "independent_oracle": "PENDING",
+        "ratification": false
       }
     },
     {
@@ -12056,14 +12106,24 @@
       "ratified": false,
       "physical_t5_authorized": false,
       "proof_readiness": {
-        "status": "INCOMPLETE-SOURCE-SEMANTICS",
-        "missing": [
-          "positive-witness",
-          "negative-falsifier"
-        ],
+        "status": "SOURCE-LAW-WITNESSES-PRESENT-UNVERIFIED",
+        "missing": [],
         "selection": false,
         "ratification": false,
-        "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+        "next_gate": "D1-D9-DEDUPE-CORE-VS-LIBRARY-AND-INDEPENDENT-ORACLE"
+      },
+      "source_evidence": {
+        "status": "SOURCE-WITNESS-RESEARCH-NOT-SELECTED",
+        "source_git_blob": "f5438abf3460fa7caac14a30edf511f907a5be44",
+        "law_source_key": "observable_behavior",
+        "positive_source_key": "positive_witness_spec",
+        "negative_source_key": "falsifier_spec",
+        "law": "Піймати throw незалежно від tag і викликати handler(tag,value); handler може повторно throw.",
+        "positive": "Викинути 'red 7; handler бачить і 'red і 7; може вирішити повторно передати.",
+        "negative": "Потай втрачається tag або замість handler виконується звичайний catch без фільтра.",
+        "owner_review": "PENDING",
+        "independent_oracle": "PENDING",
+        "ratification": false
       }
     },
     {
@@ -12078,14 +12138,24 @@
       "ratified": false,
       "physical_t5_authorized": false,
       "proof_readiness": {
-        "status": "INCOMPLETE-SOURCE-SEMANTICS",
-        "missing": [
-          "positive-witness",
-          "negative-falsifier"
-        ],
+        "status": "SOURCE-LAW-WITNESSES-PRESENT-UNVERIFIED",
+        "missing": [],
         "selection": false,
         "ratification": false,
-        "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+        "next_gate": "D1-D9-DEDUPE-CORE-VS-LIBRARY-AND-INDEPENDENT-ORACLE"
+      },
+      "source_evidence": {
+        "status": "SOURCE-WITNESS-RESEARCH-NOT-SELECTED",
+        "source_git_blob": "f5438abf3460fa7caac14a30edf511f907a5be44",
+        "law_source_key": "observable_behavior",
+        "positive_source_key": "positive_witness_spec",
+        "negative_source_key": "falsifier_spec",
+        "law": "Уніфікувати normal and caught nonlocal exit для handler(tag,value), при нормальному результаті tag=nil.",
+        "positive": "Нормальне завершення x викликає handler(nil,x); tagged throw викликає handler(tag,val).",
+        "negative": "Не виконати handler на нормальному завершенні або загубити tag при throw.",
+        "owner_review": "PENDING",
+        "independent_oracle": "PENDING",
+        "ratification": false
       }
     },
     {
@@ -12100,14 +12170,24 @@
       "ratified": false,
       "physical_t5_authorized": false,
       "proof_readiness": {
-        "status": "INCOMPLETE-SOURCE-SEMANTICS",
-        "missing": [
-          "positive-witness",
-          "negative-falsifier"
-        ],
+        "status": "SOURCE-LAW-WITNESSES-PRESENT-UNVERIFIED",
+        "missing": [],
         "selection": false,
         "ratification": false,
-        "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+        "next_gate": "D1-D9-DEDUPE-CORE-VS-LIBRARY-AND-INDEPENDENT-ORACLE"
+      },
+      "source_evidence": {
+        "status": "SOURCE-WITNESS-RESEARCH-NOT-SELECTED",
+        "source_git_blob": "f5438abf3460fa7caac14a30edf511f907a5be44",
+        "law_source_key": "observable_behavior",
+        "positive_source_key": "positive_witness_spec",
+        "negative_source_key": "falsifier_spec",
+        "law": "Рамка для послідовності змін зі стеком відновлення на normal completion/error/CONTROL-D у задокументованому діапазоні.",
+        "positive": "Зберегти radix, змінити його, спричинити error або RESET; старий radix має відновитися.",
+        "negative": "Оголосити гарантію для всіх можливих інших нелокальних переходів, які посібник прямо виключає.",
+        "owner_review": "PENDING",
+        "independent_oracle": "PENDING",
+        "ratification": false
       }
     },
     {
@@ -12122,14 +12202,24 @@
       "ratified": false,
       "physical_t5_authorized": false,
       "proof_readiness": {
-        "status": "INCOMPLETE-SOURCE-SEMANTICS",
-        "missing": [
-          "positive-witness",
-          "negative-falsifier"
-        ],
+        "status": "SOURCE-LAW-WITNESSES-PRESENT-UNVERIFIED",
+        "missing": [],
         "selection": false,
         "ratification": false,
-        "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+        "next_gate": "D1-D9-DEDUPE-CORE-VS-LIBRARY-AND-INDEPENDENT-ORACLE"
+      },
+      "source_evidence": {
+        "status": "SOURCE-WITNESS-RESEARCH-NOT-SELECTED",
+        "source_git_blob": "f5438abf3460fa7caac14a30edf511f907a5be44",
+        "law_source_key": "observable_behavior",
+        "positive_source_key": "positive_witness_spec",
+        "negative_source_key": "falsifier_spec",
+        "law": "Зареєструвати відновлення змінної або старого стану оператора у найближчій RESETLST/RESET рамці.",
+        "positive": "RESETSAVE (RADIX 8) зберігає попередній radix; RESETSAVE NIL (LIST 'CLOSEF FILE) викликає cleanup.",
+        "negative": "Застосувати cleanup до неправильного попереднього стану або не виконати його на error.",
+        "owner_review": "PENDING",
+        "independent_oracle": "PENDING",
+        "ratification": false
       }
     },
     {
@@ -12144,14 +12234,24 @@
       "ratified": false,
       "physical_t5_authorized": false,
       "proof_readiness": {
-        "status": "INCOMPLETE-SOURCE-SEMANTICS",
-        "missing": [
-          "positive-witness",
-          "negative-falsifier"
-        ],
+        "status": "SOURCE-LAW-WITNESSES-PRESENT-UNVERIFIED",
+        "missing": [],
         "selection": false,
         "ratification": false,
-        "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+        "next_gate": "D1-D9-DEDUPE-CORE-VS-LIBRARY-AND-INDEPENDENT-ORACLE"
+      },
+      "source_evidence": {
+        "status": "SOURCE-WITNESS-RESEARCH-NOT-SELECTED",
+        "source_git_blob": "f5438abf3460fa7caac14a30edf511f907a5be44",
+        "law_source_key": "observable_behavior",
+        "positive_source_key": "positive_witness_spec",
+        "negative_source_key": "falsifier_spec",
+        "law": "Тимчасово встановити глобальну змінну й відновити попередній стан після області.",
+        "positive": "Resetvar x new (f) бачить x=new всередині та x=old після.",
+        "negative": "Затерти старий global x назавжди при помилці.",
+        "owner_review": "PENDING",
+        "independent_oracle": "PENDING",
+        "ratification": false
       }
     },
     {
@@ -12166,14 +12266,24 @@
       "ratified": false,
       "physical_t5_authorized": false,
       "proof_readiness": {
-        "status": "INCOMPLETE-SOURCE-SEMANTICS",
-        "missing": [
-          "positive-witness",
-          "negative-falsifier"
-        ],
+        "status": "SOURCE-LAW-WITNESSES-PRESENT-UNVERIFIED",
+        "missing": [],
         "selection": false,
         "ratification": false,
-        "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+        "next_gate": "D1-D9-DEDUPE-CORE-VS-LIBRARY-AND-INDEPENDENT-ORACLE"
+      },
+      "source_evidence": {
+        "status": "SOURCE-WITNESS-RESEARCH-NOT-SELECTED",
+        "source_git_blob": "f5438abf3460fa7caac14a30edf511f907a5be44",
+        "law_source_key": "observable_behavior",
+        "positive_source_key": "positive_witness_spec",
+        "negative_source_key": "falsifier_spec",
+        "law": "Тимчасово перевизначати набір global vars; семантика залежить від shallow/deep binding.",
+        "positive": "Два globals тимчасово змінені в body, і кожен відновлений у правильній області.",
+        "negative": "Вважати deep binding завжди тотожним shallow binding для втручання у global storage.",
+        "owner_review": "PENDING",
+        "independent_oracle": "PENDING",
+        "ratification": false
       }
     },
     {
@@ -12188,14 +12298,24 @@
       "ratified": false,
       "physical_t5_authorized": false,
       "proof_readiness": {
-        "status": "INCOMPLETE-SOURCE-SEMANTICS",
-        "missing": [
-          "positive-witness",
-          "negative-falsifier"
-        ],
+        "status": "SOURCE-LAW-WITNESSES-PRESENT-UNVERIFIED",
+        "missing": [],
         "selection": false,
         "ratification": false,
-        "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+        "next_gate": "D1-D9-DEDUPE-CORE-VS-LIBRARY-AND-INDEPENDENT-ORACLE"
+      },
+      "source_evidence": {
+        "status": "SOURCE-WITNESS-RESEARCH-NOT-SELECTED",
+        "source_git_blob": "f5438abf3460fa7caac14a30edf511f907a5be44",
+        "law_source_key": "observable_behavior",
+        "positive_source_key": "positive_witness_spec",
+        "negative_source_key": "falsifier_spec",
+        "law": "Виконати setter, що повертає старий стан, запустити body і відновити налаштування застосуванням setter до збереженого значення.",
+        "positive": "(RESETFORM (RADIX 8) (FOO)) повертає старий radix після FOO.",
+        "negative": "Вважати, що setter сам не має потреби повертати старий стан.",
+        "owner_review": "PENDING",
+        "independent_oracle": "PENDING",
+        "ratification": false
       }
     },
     {
@@ -12210,14 +12330,24 @@
       "ratified": false,
       "physical_t5_authorized": false,
       "proof_readiness": {
-        "status": "INCOMPLETE-SOURCE-SEMANTICS",
-        "missing": [
-          "positive-witness",
-          "negative-falsifier"
-        ],
+        "status": "SOURCE-LAW-WITNESSES-PRESENT-UNVERIFIED",
+        "missing": [],
         "selection": false,
         "ratification": false,
-        "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+        "next_gate": "D1-D9-DEDUPE-CORE-VS-LIBRARY-AND-INDEPENDENT-ORACLE"
+      },
+      "source_evidence": {
+        "status": "SOURCE-WITNESS-RESEARCH-NOT-SELECTED",
+        "source_git_blob": "f5438abf3460fa7caac14a30edf511f907a5be44",
+        "law_source_key": "observable_behavior",
+        "positive_source_key": "positive_witness_spec",
+        "negative_source_key": "falsifier_spec",
+        "law": "Описати іменований пул із constructor, matcher, initializer та checker; semantics candidate is lease contract, not allocator address.",
+        "positive": "Для параметра розміру повторно видати лише сумісний об'єкт або сконструювати новий.",
+        "negative": "Повторно видати несумісний об'єкт без matcher/checker.",
+        "owner_review": "PENDING",
+        "independent_oracle": "PENDING",
+        "ratification": false
       }
     },
     {
@@ -12232,14 +12362,24 @@
       "ratified": false,
       "physical_t5_authorized": false,
       "proof_readiness": {
-        "status": "INCOMPLETE-SOURCE-SEMANTICS",
-        "missing": [
-          "positive-witness",
-          "negative-falsifier"
-        ],
+        "status": "SOURCE-LAW-WITNESSES-PRESENT-UNVERIFIED",
+        "missing": [],
         "selection": false,
         "ratification": false,
-        "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+        "next_gate": "D1-D9-DEDUPE-CORE-VS-LIBRARY-AND-INDEPENDENT-ORACLE"
+      },
+      "source_evidence": {
+        "status": "SOURCE-WITNESS-RESEARCH-NOT-SELECTED",
+        "source_git_blob": "f5438abf3460fa7caac14a30edf511f907a5be44",
+        "law_source_key": "observable_behavior",
+        "positive_source_key": "positive_witness_spec",
+        "negative_source_key": "falsifier_spec",
+        "law": "Видати вільний сумісний об'єкт із пулу або створити новий; виділений не видається одночасно двом споживачам.",
+        "positive": "За зайнятого R1 наступний lease дає відмінний R2; після release допустиме повторне використання R1.",
+        "negative": "Подвійно виданий один leased object потрапляє двом активним споживачам.",
+        "owner_review": "PENDING",
+        "independent_oracle": "PENDING",
+        "ratification": false
       }
     },
     {
@@ -12254,14 +12394,24 @@
       "ratified": false,
       "physical_t5_authorized": false,
       "proof_readiness": {
-        "status": "INCOMPLETE-SOURCE-SEMANTICS",
-        "missing": [
-          "positive-witness",
-          "negative-falsifier"
-        ],
+        "status": "SOURCE-LAW-WITNESSES-PRESENT-UNVERIFIED",
+        "missing": [],
         "selection": false,
         "ratification": false,
-        "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+        "next_gate": "D1-D9-DEDUPE-CORE-VS-LIBRARY-AND-INDEPENDENT-ORACLE"
+      },
+      "source_evidence": {
+        "status": "SOURCE-WITNESS-RESEARCH-NOT-SELECTED",
+        "source_git_blob": "f5438abf3460fa7caac14a30edf511f907a5be44",
+        "law_source_key": "observable_behavior",
+        "positive_source_key": "positive_witness_spec",
+        "negative_source_key": "falsifier_spec",
+        "law": "Повернути виділений об'єкт пулу для можливого повторного використання, не доводячи негайного звільнення фізичної пам'яті.",
+        "positive": "R1 після deallocate знову вільний для наступного allocate.",
+        "negative": "Deallocate трактується як обов'язкове OS free і забороняє reuse.",
+        "owner_review": "PENDING",
+        "independent_oracle": "PENDING",
+        "ratification": false
       }
     },
     {
@@ -12276,14 +12426,24 @@
       "ratified": false,
       "physical_t5_authorized": false,
       "proof_readiness": {
-        "status": "INCOMPLETE-SOURCE-SEMANTICS",
-        "missing": [
-          "positive-witness",
-          "negative-falsifier"
-        ],
+        "status": "SOURCE-LAW-WITNESSES-PRESENT-UNVERIFIED",
+        "missing": [],
         "selection": false,
         "ratification": false,
-        "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+        "next_gate": "D1-D9-DEDUPE-CORE-VS-LIBRARY-AND-INDEPENDENT-ORACLE"
+      },
+      "source_evidence": {
+        "status": "SOURCE-WITNESS-RESEARCH-NOT-SELECTED",
+        "source_git_blob": "f5438abf3460fa7caac14a30edf511f907a5be44",
+        "law_source_key": "observable_behavior",
+        "positive_source_key": "positive_witness_spec",
+        "negative_source_key": "falsifier_spec",
+        "law": "Scoped resource lease, який використовує unwind-protect для повернення об'єкта навіть при throw.",
+        "positive": "throw всередині body; resource lease повернений в pool.",
+        "negative": "Об'єкт назавжди залишається in-use після throw.",
+        "owner_review": "PENDING",
+        "independent_oracle": "PENDING",
+        "ratification": false
       }
     },
     {
@@ -12298,14 +12458,24 @@
       "ratified": false,
       "physical_t5_authorized": false,
       "proof_readiness": {
-        "status": "INCOMPLETE-SOURCE-SEMANTICS",
-        "missing": [
-          "positive-witness",
-          "negative-falsifier"
-        ],
+        "status": "SOURCE-LAW-WITNESSES-PRESENT-UNVERIFIED",
+        "missing": [],
         "selection": false,
         "ratification": false,
-        "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+        "next_gate": "D1-D9-DEDUPE-CORE-VS-LIBRARY-AND-INDEPENDENT-ORACLE"
+      },
+      "source_evidence": {
+        "status": "SOURCE-WITNESS-RESEARCH-NOT-SELECTED",
+        "source_git_blob": "f5438abf3460fa7caac14a30edf511f907a5be44",
+        "law_source_key": "observable_behavior",
+        "positive_source_key": "positive_witness_spec",
+        "negative_source_key": "falsifier_spec",
+        "law": "Забути всі раніше відстежені об'єкти ресурсу, і при майбутній deallocation старого leased object видати error.",
+        "positive": "Clear while R1 in-use; future deallocate(R1) повинна сигналізувати застарілий ресурс.",
+        "negative": "Deallocate старого R1 після clear тихо повертає його у новий pool.",
+        "owner_review": "PENDING",
+        "independent_oracle": "PENDING",
+        "ratification": false
       }
     },
     {
@@ -12320,14 +12490,24 @@
       "ratified": false,
       "physical_t5_authorized": false,
       "proof_readiness": {
-        "status": "INCOMPLETE-SOURCE-SEMANTICS",
-        "missing": [
-          "positive-witness",
-          "negative-falsifier"
-        ],
+        "status": "SOURCE-LAW-WITNESSES-PRESENT-UNVERIFIED",
+        "missing": [],
         "selection": false,
         "ratification": false,
-        "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+        "next_gate": "D1-D9-DEDUPE-CORE-VS-LIBRARY-AND-INDEPENDENT-ORACLE"
+      },
+      "source_evidence": {
+        "status": "SOURCE-WITNESS-RESEARCH-NOT-SELECTED",
+        "source_git_blob": "f5438abf3460fa7caac14a30edf511f907a5be44",
+        "law_source_key": "observable_behavior",
+        "positive_source_key": "positive_witness_spec",
+        "negative_source_key": "falsifier_spec",
+        "law": "Обійти всі створені у ресурсі об'єкти та надати callback object, in-use bit, resource-data.",
+        "positive": "Побачити як leased, так і free об'єкти; кожен виклик callback містить стан in-use.",
+        "negative": "Побачити лише free list або пропустити in-use state.",
+        "owner_review": "PENDING",
+        "independent_oracle": "PENDING",
+        "ratification": false
       }
     },
     {
@@ -12342,14 +12522,24 @@
       "ratified": false,
       "physical_t5_authorized": false,
       "proof_readiness": {
-        "status": "INCOMPLETE-SOURCE-SEMANTICS",
-        "missing": [
-          "positive-witness",
-          "negative-falsifier"
-        ],
+        "status": "SOURCE-LAW-WITNESSES-PRESENT-UNVERIFIED",
+        "missing": [],
         "selection": false,
         "ratification": false,
-        "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+        "next_gate": "D1-D9-DEDUPE-CORE-VS-LIBRARY-AND-INDEPENDENT-ORACLE"
+      },
+      "source_evidence": {
+        "status": "SOURCE-WITNESS-RESEARCH-NOT-SELECTED",
+        "source_git_blob": "f5438abf3460fa7caac14a30edf511f907a5be44",
+        "law_source_key": "observable_behavior",
+        "positive_source_key": "positive_witness_spec",
+        "negative_source_key": "falsifier_spec",
+        "law": "Повернути всі ресурси в пул одразу; не означає free heap.",
+        "positive": "Завантажені ресурсні об'єкти стають повторно доступними після whole deallocate.",
+        "negative": "Трактувати операцію як фізичне знищення pooled objects.",
+        "owner_review": "PENDING",
+        "independent_oracle": "PENDING",
+        "ratification": false
       }
     },
     {
@@ -13156,14 +13346,24 @@
       "ratified": false,
       "physical_t5_authorized": false,
       "proof_readiness": {
-        "status": "INCOMPLETE-SOURCE-SEMANTICS",
-        "missing": [
-          "positive-witness",
-          "negative-falsifier"
-        ],
+        "status": "SOURCE-LAW-WITNESSES-PRESENT-UNVERIFIED",
+        "missing": [],
         "selection": false,
         "ratification": false,
-        "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+        "next_gate": "D1-D9-DEDUPE-CORE-VS-LIBRARY-AND-INDEPENDENT-ORACLE"
+      },
+      "source_evidence": {
+        "status": "SOURCE-WITNESS-RESEARCH-NOT-SELECTED",
+        "source_git_blob": "78eac7f7d0d05ec5734ccb61e73c1bed7ec707fa",
+        "law_source_key": "behavior",
+        "positive_source_key": "witness_positive",
+        "negative_source_key": "witness_falsifier",
+        "law": "Return a bound logic variable value from a substitution alist keyed by possibly structured variable name, or the original variable if unbound",
+        "positive": "Bound logic variable retrieves exactly the existing value; unbound variable returns itself",
+        "negative": "Distinguish unbound from binding to empty data, and show a behavior not expressible through D9 WALK plus alist lookup",
+        "owner_review": "PENDING",
+        "independent_oracle": "PENDING",
+        "ratification": false
       }
     },
     {
@@ -13178,14 +13378,24 @@
       "ratified": false,
       "physical_t5_authorized": false,
       "proof_readiness": {
-        "status": "INCOMPLETE-SOURCE-SEMANTICS",
-        "missing": [
-          "positive-witness",
-          "negative-falsifier"
-        ],
+        "status": "SOURCE-LAW-WITNESSES-PRESENT-UNVERIFIED",
+        "missing": [],
         "selection": false,
         "ratification": false,
-        "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+        "next_gate": "D1-D9-DEDUPE-CORE-VS-LIBRARY-AND-INDEPENDENT-ORACLE"
+      },
+      "source_evidence": {
+        "status": "SOURCE-WITNESS-RESEARCH-NOT-SELECTED",
+        "source_git_blob": "78eac7f7d0d05ec5734ccb61e73c1bed7ec707fa",
+        "law_source_key": "behavior",
+        "positive_source_key": "witness_positive",
+        "negative_source_key": "witness_falsifier",
+        "law": "Follow transitive bound-variable references until a nonvariable or an unbound variable is reached, preserving the original unbound variable",
+        "positive": "Substitution chain x→y→a resolves deterministically to a; unbound x remains x",
+        "negative": "D9 WALK/UNIFY or recurrent LOOKUP-SUBST may already express this exact transitive dereference",
+        "owner_review": "PENDING",
+        "independent_oracle": "PENDING",
+        "ratification": false
       }
     },
     {
@@ -13200,14 +13410,24 @@
       "ratified": false,
       "physical_t5_authorized": false,
       "proof_readiness": {
-        "status": "INCOMPLETE-SOURCE-SEMANTICS",
-        "missing": [
-          "positive-witness",
-          "negative-falsifier"
-        ],
+        "status": "SOURCE-LAW-WITNESSES-PRESENT-UNVERIFIED",
+        "missing": [],
         "selection": false,
         "ratification": false,
-        "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+        "next_gate": "D1-D9-DEDUPE-CORE-VS-LIBRARY-AND-INDEPENDENT-ORACLE"
+      },
+      "source_evidence": {
+        "status": "SOURCE-WITNESS-RESEARCH-NOT-SELECTED",
+        "source_git_blob": "78eac7f7d0d05ec5734ccb61e73c1bed7ec707fa",
+        "law_source_key": "behavior",
+        "positive_source_key": "witness_positive",
+        "negative_source_key": "witness_falsifier",
+        "law": "Recognize explicit unification failure only for the designated failure atom, not for a nonempty substitution alist",
+        "positive": "Only the exact designated failure atom is failure; nonempty association list is not",
+        "negative": "An ordinary D3 atom/eq or existing D9 result check can classify identically without introducing a new value",
+        "owner_review": "PENDING",
+        "independent_oracle": "PENDING",
+        "ratification": false
       }
     },
     {
@@ -13222,14 +13442,24 @@
       "ratified": false,
       "physical_t5_authorized": false,
       "proof_readiness": {
-        "status": "INCOMPLETE-SOURCE-SEMANTICS",
-        "missing": [
-          "positive-witness",
-          "negative-falsifier"
-        ],
+        "status": "SOURCE-LAW-WITNESSES-PRESENT-UNVERIFIED",
+        "missing": [],
         "selection": false,
         "ratification": false,
-        "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+        "next_gate": "D1-D9-DEDUPE-CORE-VS-LIBRARY-AND-INDEPENDENT-ORACLE"
+      },
+      "source_evidence": {
+        "status": "SOURCE-WITNESS-RESEARCH-NOT-SELECTED",
+        "source_git_blob": "78eac7f7d0d05ec5734ccb61e73c1bed7ec707fa",
+        "law_source_key": "behavior",
+        "positive_source_key": "witness_positive",
+        "negative_source_key": "witness_falsifier",
+        "law": "Unify two dereferenced logic terms recursively, propagating substitutions or explicit failure across compound pairs",
+        "positive": "Two compatible compound pairs produce substitutions and incompatible atoms return an explicit failure",
+        "negative": "The D9 UNIFY contract already calls this helper; no independent observable semantics demonstrated",
+        "owner_review": "PENDING",
+        "independent_oracle": "PENDING",
+        "ratification": false
       }
     },
     {
@@ -13244,14 +13474,24 @@
       "ratified": false,
       "physical_t5_authorized": false,
       "proof_readiness": {
-        "status": "INCOMPLETE-SOURCE-SEMANTICS",
-        "missing": [
-          "positive-witness",
-          "negative-falsifier"
-        ],
+        "status": "SOURCE-LAW-WITNESSES-PRESENT-UNVERIFIED",
+        "missing": [],
         "selection": false,
         "ratification": false,
-        "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+        "next_gate": "D1-D9-DEDUPE-CORE-VS-LIBRARY-AND-INDEPENDENT-ORACLE"
+      },
+      "source_evidence": {
+        "status": "SOURCE-WITNESS-RESEARCH-NOT-SELECTED",
+        "source_git_blob": "78eac7f7d0d05ec5734ccb61e73c1bed7ec707fa",
+        "law_source_key": "behavior",
+        "positive_source_key": "witness_positive",
+        "negative_source_key": "witness_falsifier",
+        "law": "Bind a logic variable to a term when identities differ and occurs-check permits it, otherwise preserve substitution or return failure",
+        "positive": "Binding a fresh logic variable succeeds but occurs-check rejects x within (f x)",
+        "negative": "D9 UNIFY plus D9 OCCURS-CHECK? already enforce this behavior; show an independently visible semantic distinction",
+        "owner_review": "PENDING",
+        "independent_oracle": "PENDING",
+        "ratification": false
       }
     },
     {
@@ -13266,14 +13506,24 @@
       "ratified": false,
       "physical_t5_authorized": false,
       "proof_readiness": {
-        "status": "INCOMPLETE-SOURCE-SEMANTICS",
-        "missing": [
-          "positive-witness",
-          "negative-falsifier"
-        ],
+        "status": "SOURCE-LAW-WITNESSES-PRESENT-UNVERIFIED",
+        "missing": [],
         "selection": false,
         "ratification": false,
-        "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+        "next_gate": "D1-D9-DEDUPE-CORE-VS-LIBRARY-AND-INDEPENDENT-ORACLE"
+      },
+      "source_evidence": {
+        "status": "SOURCE-WITNESS-RESEARCH-NOT-SELECTED",
+        "source_git_blob": "78eac7f7d0d05ec5734ccb61e73c1bed7ec707fa",
+        "law_source_key": "behavior",
+        "positive_source_key": "witness_positive",
+        "negative_source_key": "witness_falsifier",
+        "law": "Evaluate each conjunction condition through an injected goal strategy, branching across every successful intermediate state and collecting final states",
+        "positive": "Empty conjunction returns exactly singleton list [state], not state nor empty list",
+        "negative": "Compare selected MATCH-CONDITIONS and MAP-GOAL-RESULTS plus D3 COND/D4 LIST/APPEND for full result equivalence",
+        "owner_review": "PENDING",
+        "independent_oracle": "PENDING",
+        "ratification": false
       }
     },
     {
@@ -13288,14 +13538,24 @@
       "ratified": false,
       "physical_t5_authorized": false,
       "proof_readiness": {
-        "status": "INCOMPLETE-SOURCE-SEMANTICS",
-        "missing": [
-          "positive-witness",
-          "negative-falsifier"
-        ],
+        "status": "SOURCE-LAW-WITNESSES-PRESENT-UNVERIFIED",
+        "missing": [],
         "selection": false,
         "ratification": false,
-        "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+        "next_gate": "D1-D9-DEDUPE-CORE-VS-LIBRARY-AND-INDEPENDENT-ORACLE"
+      },
+      "source_evidence": {
+        "status": "SOURCE-WITNESS-RESEARCH-NOT-SELECTED",
+        "source_git_blob": "78eac7f7d0d05ec5734ccb61e73c1bed7ec707fa",
+        "law_source_key": "behavior",
+        "positive_source_key": "witness_positive",
+        "negative_source_key": "witness_falsifier",
+        "law": "Continue a conjunction against every intermediate state returned by one condition and concatenate resulting final states in order",
+        "positive": "A first goal yielding A,B and continuation yielding X,X for A and Y for B returns X,X,Y",
+        "negative": "If D4 APPEND/ordinary mapped recursion derives same order and multiplicity this is a helper, not an additional semantic identity",
+        "owner_review": "PENDING",
+        "independent_oracle": "PENDING",
+        "ratification": false
       }
     },
     {
@@ -13310,14 +13570,24 @@
       "ratified": false,
       "physical_t5_authorized": false,
       "proof_readiness": {
-        "status": "INCOMPLETE-SOURCE-SEMANTICS",
-        "missing": [
-          "positive-witness",
-          "negative-falsifier"
-        ],
+        "status": "SOURCE-LAW-WITNESSES-PRESENT-UNVERIFIED",
+        "missing": [],
         "selection": false,
         "ratification": false,
-        "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+        "next_gate": "D1-D9-DEDUPE-CORE-VS-LIBRARY-AND-INDEPENDENT-ORACLE"
+      },
+      "source_evidence": {
+        "status": "SOURCE-WITNESS-RESEARCH-NOT-SELECTED",
+        "source_git_blob": "78eac7f7d0d05ec5734ccb61e73c1bed7ec707fa",
+        "law_source_key": "behavior",
+        "positive_source_key": "witness_positive",
+        "negative_source_key": "witness_falsifier",
+        "law": "Compute free identifiers of sequential let* bindings using each earlier binding only in later initializers and the body",
+        "positive": "Sequential let* binders affect later initializers and body but not their own initializer",
+        "negative": "Static linter traversal is tooling unless compiler-visible reflection proves an irreducible portable operation",
+        "owner_review": "PENDING",
+        "independent_oracle": "PENDING",
+        "ratification": false
       }
     },
     {
@@ -13332,14 +13602,24 @@
       "ratified": false,
       "physical_t5_authorized": false,
       "proof_readiness": {
-        "status": "INCOMPLETE-SOURCE-SEMANTICS",
-        "missing": [
-          "positive-witness",
-          "negative-falsifier"
-        ],
+        "status": "SOURCE-LAW-WITNESSES-PRESENT-UNVERIFIED",
+        "missing": [],
         "selection": false,
         "ratification": false,
-        "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+        "next_gate": "D1-D9-DEDUPE-CORE-VS-LIBRARY-AND-INDEPENDENT-ORACLE"
+      },
+      "source_evidence": {
+        "status": "SOURCE-WITNESS-RESEARCH-NOT-SELECTED",
+        "source_git_blob": "78eac7f7d0d05ec5734ccb61e73c1bed7ec707fa",
+        "law_source_key": "behavior",
+        "positive_source_key": "witness_positive",
+        "negative_source_key": "witness_falsifier",
+        "law": "Compute free identifiers of mutually recursive letrec definitions with all names in scope for all initializers and body",
+        "positive": "All letrec binder names are in scope in all initializers and body",
+        "negative": "This is an ordinary scoping analysis under ratified binding semantics unless externally observable as new language law",
+        "owner_review": "PENDING",
+        "independent_oracle": "PENDING",
+        "ratification": false
       }
     },
     {
@@ -13354,14 +13634,24 @@
       "ratified": false,
       "physical_t5_authorized": false,
       "proof_readiness": {
-        "status": "INCOMPLETE-SOURCE-SEMANTICS",
-        "missing": [
-          "positive-witness",
-          "negative-falsifier"
-        ],
+        "status": "SOURCE-LAW-WITNESSES-PRESENT-UNVERIFIED",
+        "missing": [],
         "selection": false,
         "ratification": false,
-        "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+        "next_gate": "D1-D9-DEDUPE-CORE-VS-LIBRARY-AND-INDEPENDENT-ORACLE"
+      },
+      "source_evidence": {
+        "status": "SOURCE-WITNESS-RESEARCH-NOT-SELECTED",
+        "source_git_blob": "66ec74d6127f806372d51dd25c27898094124c36",
+        "law_source_key": "semantic_law",
+        "positive_source_key": "positive_cases",
+        "negative_source_key": "falsifiers",
+        "law": "For finite acyclic first-order terms, unify two terms while refusing any new binding V:=T when V occurs inside T; observable success/failure plus induced substitution. SWI special case with ALREADY cyclic inputs is non-portable and excluded.",
+        "positive": "[\"occurs-ground-injective\",\"occurs-sharing-preserved\"]",
+        "negative": "[\"occurs-rejects-new-cycle\",\"occurs-rejects-functor-mismatch\"]",
+        "owner_review": "PENDING",
+        "independent_oracle": "PENDING",
+        "ratification": false
       }
     },
     {
@@ -13376,14 +13666,24 @@
       "ratified": false,
       "physical_t5_authorized": false,
       "proof_readiness": {
-        "status": "INCOMPLETE-SOURCE-SEMANTICS",
-        "missing": [
-          "positive-witness",
-          "negative-falsifier"
-        ],
+        "status": "SOURCE-LAW-WITNESSES-PRESENT-UNVERIFIED",
+        "missing": [],
         "selection": false,
         "ratification": false,
-        "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+        "next_gate": "D1-D9-DEDUPE-CORE-VS-LIBRARY-AND-INDEPENDENT-ORACLE"
+      },
+      "source_evidence": {
+        "status": "SOURCE-WITNESS-RESEARCH-NOT-SELECTED",
+        "source_git_blob": "66ec74d6127f806372d51dd25c27898094124c36",
+        "law_source_key": "semantic_law",
+        "positive_source_key": "positive_cases",
+        "negative_source_key": "falsifiers",
+        "law": "Monotonic disequality constraint on two terms: immediate success if terms cannot unify, failure if equal, otherwise residual delayed constraint preventing future bindings that make them identical. Distinct from immediate syntactic non-equality or D1 1-bit boolean comparison.",
+        "positive": "[\"dif-ground-distinct\",\"dif-delayed-survives-unbound\",\"dif-accepts-safe-binding\"]",
+        "negative": "[\"dif-rejects-ground-equal\",\"dif-prevents-delayed-equality\"]",
+        "owner_review": "PENDING",
+        "independent_oracle": "PENDING",
+        "ratification": false
       }
     },
     {
@@ -13398,14 +13698,24 @@
       "ratified": false,
       "physical_t5_authorized": false,
       "proof_readiness": {
-        "status": "INCOMPLETE-SOURCE-SEMANTICS",
-        "missing": [
-          "positive-witness",
-          "negative-falsifier"
-        ],
+        "status": "SOURCE-LAW-WITNESSES-PRESENT-UNVERIFIED",
+        "missing": [],
         "selection": false,
         "ratification": false,
-        "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+        "next_gate": "D1-D9-DEDUPE-CORE-VS-LIBRARY-AND-INDEPENDENT-ORACLE"
+      },
+      "source_evidence": {
+        "status": "SOURCE-WITNESS-RESEARCH-NOT-SELECTED",
+        "source_git_blob": "66ec74d6127f806372d51dd25c27898094124c36",
+        "law_source_key": "semantic_law",
+        "positive_source_key": "positive_cases",
+        "negative_source_key": "falsifiers",
+        "law": "Copy a term with fresh variables while extracting pending attribute constraints as explicit residual goals G. Replaying G restores the constraints onto the copy; copying alone DOES NOT implicitly preserve them for copy_term/3.",
+        "positive": "[\"copy-fresh-sharing\",\"copy-restores-one-constraint\",\"copy-restores-two-constraints\"]",
+        "negative": "[\"copy-without-residual-replay-allows-forbidden-value\"]",
+        "owner_review": "PENDING",
+        "independent_oracle": "PENDING",
+        "ratification": false
       }
     },
     {
@@ -14638,15 +14948,24 @@
       "ratified": false,
       "physical_t5_authorized": false,
       "proof_readiness": {
-        "status": "INCOMPLETE-SOURCE-SEMANTICS",
-        "missing": [
-          "semantic-law",
-          "positive-witness",
-          "negative-falsifier"
-        ],
+        "status": "SOURCE-LAW-WITNESSES-PRESENT-UNVERIFIED",
+        "missing": [],
         "selection": false,
         "ratification": false,
-        "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+        "next_gate": "D1-D9-DEDUPE-CORE-VS-LIBRARY-AND-INDEPENDENT-ORACLE"
+      },
+      "source_evidence": {
+        "status": "SOURCE-WITNESS-RESEARCH-NOT-SELECTED",
+        "source_git_blob": "4cf8359f34924015f2efca3ddba2df567b5b43db",
+        "law_source_key": "behavior",
+        "positive_source_key": "positive_witnesses",
+        "negative_source_key": "falsifiers",
+        "law": "Given a complete family of system conflict sets already derived from a model and observations, return all inclusion-minimal component subsets intersecting every conflict. Empty family returns singleton empty diagnosis; any empty conflict yields no diagnosis. This does not itself derive conflicts, identify real-world broken hardware, or assign Bayesian probabilities.",
+        "positive": "[{\"input\":\"components={A,B,C}; conflicts={{A,B},{B,C}}\",\"result\":\"diagnoses={{B},{A,C}}\"},{\"input\":\"components={A,B}; conflicts=∅\",\"result\":\"diagnoses={∅}\"},{\"input\":\"components={A,B}; conflicts={∅}\",\"result\":\"diagnoses=∅\"}]",
+        "negative": "[\"Return {A,B,C} despite strict subset {B} hitting every conflict\",\"Merge empty conflict and no conflicts into the same result\",\"Call a hitting set a proven broken component without complete conflict evidence\",\"Confuse minimum-cardinality with inclusion-minimal, which may have differing sizes\"]",
+        "owner_review": "PENDING",
+        "independent_oracle": "PENDING",
+        "ratification": false
       }
     },
     {
@@ -14661,15 +14980,24 @@
       "ratified": false,
       "physical_t5_authorized": false,
       "proof_readiness": {
-        "status": "INCOMPLETE-SOURCE-SEMANTICS",
-        "missing": [
-          "semantic-law",
-          "positive-witness",
-          "negative-falsifier"
-        ],
+        "status": "SOURCE-LAW-WITNESSES-PRESENT-UNVERIFIED",
+        "missing": [],
         "selection": false,
         "ratification": false,
-        "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+        "next_gate": "D1-D9-DEDUPE-CORE-VS-LIBRARY-AND-INDEPENDENT-ORACLE"
+      },
+      "source_evidence": {
+        "status": "SOURCE-WITNESS-RESEARCH-NOT-SELECTED",
+        "source_git_blob": "37e10ef9a953ea62beb5e4b46ef20f21cbfb3ee4",
+        "law_source_key": "observable_claim",
+        "positive_source_key": "positive_witness_spec",
+        "negative_source_key": "falsifier_spec",
+        "law": "locate an existing generalized place as a first-class reference to that same cell (not allocate a detached new cell)",
+        "positive": "obtain reference to array element, update through reference, observe same original element changes; require lifetime/alias safety model",
+        "negative": "reference points to a detached copy, or lets invalid pointer escape lifetime boundary",
+        "owner_review": "PENDING",
+        "independent_oracle": "PENDING",
+        "ratification": false
       }
     },
     {
@@ -14684,15 +15012,24 @@
       "ratified": false,
       "physical_t5_authorized": false,
       "proof_readiness": {
-        "status": "INCOMPLETE-SOURCE-SEMANTICS",
-        "missing": [
-          "semantic-law",
-          "positive-witness",
-          "negative-falsifier"
-        ],
+        "status": "SOURCE-LAW-WITNESSES-PRESENT-UNVERIFIED",
+        "missing": [],
         "selection": false,
         "ratification": false,
-        "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+        "next_gate": "D1-D9-DEDUPE-CORE-VS-LIBRARY-AND-INDEPENDENT-ORACLE"
+      },
+      "source_evidence": {
+        "status": "SOURCE-WITNESS-RESEARCH-NOT-SELECTED",
+        "source_git_blob": "37e10ef9a953ea62beb5e4b46ef20f21cbfb3ee4",
+        "law_source_key": "observable_claim",
+        "positive_source_key": "positive_witness_spec",
+        "negative_source_key": "falsifier_spec",
+        "law": "preserve all first-form return values, execute later effects in sequence, and return exactly the preserved cardinality and values",
+        "positive": "first expression yields (a,b); later expression changes state and yields c; overall result still (a,b) and effect occurred",
+        "negative": "only primary a retained or final c replaces first values",
+        "owner_review": "PENDING",
+        "independent_oracle": "PENDING",
+        "ratification": false
       }
     },
     {
@@ -14707,15 +15044,24 @@
       "ratified": false,
       "physical_t5_authorized": false,
       "proof_readiness": {
-        "status": "INCOMPLETE-SOURCE-SEMANTICS",
-        "missing": [
-          "semantic-law",
-          "positive-witness",
-          "negative-falsifier"
-        ],
+        "status": "SOURCE-LAW-WITNESSES-PRESENT-UNVERIFIED",
+        "missing": [],
         "selection": false,
         "ratification": false,
-        "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+        "next_gate": "D1-D9-DEDUPE-CORE-VS-LIBRARY-AND-INDEPENDENT-ORACLE"
+      },
+      "source_evidence": {
+        "status": "SOURCE-WITNESS-RESEARCH-NOT-SELECTED",
+        "source_git_blob": "37e10ef9a953ea62beb5e4b46ef20f21cbfb3ee4",
+        "law_source_key": "observable_claim",
+        "positive_source_key": "positive_witness_spec",
+        "negative_source_key": "falsifier_spec",
+        "law": "map runtime object identity to positive integer, such that equal integer iff EQ identity; historically pointer or table-based, no portable persistent address guarantee",
+        "positive": "two distinct EQ-nonidentical cons cells map to different live ids; identical object maps to same live id",
+        "negative": "structural equality alone forces same identity id; id asserted stable after serialization/restart",
+        "owner_review": "PENDING",
+        "independent_oracle": "PENDING",
+        "ratification": false
       }
     },
     {
@@ -14730,15 +15076,24 @@
       "ratified": false,
       "physical_t5_authorized": false,
       "proof_readiness": {
-        "status": "INCOMPLETE-SOURCE-SEMANTICS",
-        "missing": [
-          "semantic-law",
-          "positive-witness",
-          "negative-falsifier"
-        ],
+        "status": "SOURCE-LAW-WITNESSES-PRESENT-UNVERIFIED",
+        "missing": [],
         "selection": false,
         "ratification": false,
-        "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+        "next_gate": "D1-D9-DEDUPE-CORE-VS-LIBRARY-AND-INDEPENDENT-ORACLE"
+      },
+      "source_evidence": {
+        "status": "SOURCE-WITNESS-RESEARCH-NOT-SELECTED",
+        "source_git_blob": "37e10ef9a953ea62beb5e4b46ef20f21cbfb3ee4",
+        "law_source_key": "observable_claim",
+        "positive_source_key": "positive_witness_spec",
+        "negative_source_key": "falsifier_spec",
+        "law": "reverse a live object identity integer previously produced by MAKNUM; arbitrary/forged numbers are outside guaranteed contract",
+        "positive": "for a live x, MUNKAM(MAKNUM(x)) is EQ to x",
+        "negative": "accept arbitrary forged handle as a valid object or claim stable cross-process object restoration",
+        "owner_review": "PENDING",
+        "independent_oracle": "PENDING",
+        "ratification": false
       }
     },
     {
@@ -14753,15 +15108,24 @@
       "ratified": false,
       "physical_t5_authorized": false,
       "proof_readiness": {
-        "status": "INCOMPLETE-SOURCE-SEMANTICS",
-        "missing": [
-          "semantic-law",
-          "positive-witness",
-          "negative-falsifier"
-        ],
+        "status": "SOURCE-LAW-WITNESSES-PRESENT-UNVERIFIED",
+        "missing": [],
         "selection": false,
         "ratification": false,
-        "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+        "next_gate": "D1-D9-DEDUPE-CORE-VS-LIBRARY-AND-INDEPENDENT-ORACLE"
+      },
+      "source_evidence": {
+        "status": "SOURCE-WITNESS-RESEARCH-NOT-SELECTED",
+        "source_git_blob": "37e10ef9a953ea62beb5e4b46ef20f21cbfb3ee4",
+        "law_source_key": "observable_claim",
+        "positive_source_key": "positive_witness_spec",
+        "negative_source_key": "falsifier_spec",
+        "law": "declaration of expected type(s) of expression result(s), preserving exact return value cardinality; mismatched types have undefined consequences, NOT mandated runtime check",
+        "positive": "correctly typed two-result expression returns the same two values with declaration in place",
+        "negative": "wrongly claim THE necessarily throws runtime type error for a violated declaration",
+        "owner_review": "PENDING",
+        "independent_oracle": "PENDING",
+        "ratification": false
       }
     },
     {
@@ -14776,15 +15140,24 @@
       "ratified": false,
       "physical_t5_authorized": false,
       "proof_readiness": {
-        "status": "INCOMPLETE-SOURCE-SEMANTICS",
-        "missing": [
-          "semantic-law",
-          "positive-witness",
-          "negative-falsifier"
-        ],
+        "status": "SOURCE-LAW-WITNESSES-PRESENT-UNVERIFIED",
+        "missing": [],
         "selection": false,
         "ratification": false,
-        "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+        "next_gate": "D1-D9-DEDUPE-CORE-VS-LIBRARY-AND-INDEPENDENT-ORACLE"
+      },
+      "source_evidence": {
+        "status": "SOURCE-WITNESS-RESEARCH-NOT-SELECTED",
+        "source_git_blob": "37e10ef9a953ea62beb5e4b46ef20f21cbfb3ee4",
+        "law_source_key": "observable_claim",
+        "positive_source_key": "positive_witness_spec",
+        "negative_source_key": "falsifier_spec",
+        "law": "for a nonnegative fixed-width W-bit word x, CLZ(x) = W - integer-length(x), with CLZ(0)=W; must specify width W",
+        "positive": "CLZ(0,W)=W; CLZ(1,W)=W-1; CLZ(highest_bit,W)=0",
+        "negative": "one unbounded integer without width is silently assumed to have a universal number of leading zeros",
+        "owner_review": "PENDING",
+        "independent_oracle": "PENDING",
+        "ratification": false
       }
     },
     {
@@ -14799,15 +15172,24 @@
       "ratified": false,
       "physical_t5_authorized": false,
       "proof_readiness": {
-        "status": "INCOMPLETE-SOURCE-SEMANTICS",
-        "missing": [
-          "semantic-law",
-          "positive-witness",
-          "negative-falsifier"
-        ],
+        "status": "SOURCE-LAW-WITNESSES-PRESENT-UNVERIFIED",
+        "missing": [],
         "selection": false,
         "ratification": false,
-        "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+        "next_gate": "D1-D9-DEDUPE-CORE-VS-LIBRARY-AND-INDEPENDENT-ORACLE"
+      },
+      "source_evidence": {
+        "status": "SOURCE-WITNESS-RESEARCH-NOT-SELECTED",
+        "source_git_blob": "37e10ef9a953ea62beb5e4b46ef20f21cbfb3ee4",
+        "law_source_key": "observable_claim",
+        "positive_source_key": "positive_witness_spec",
+        "negative_source_key": "falsifier_spec",
+        "law": "claimed allocated hash table capacity distinct from number of stored entries; standard/portable behavior unproven",
+        "positive": "find primary definition differentiating capacity n from count k; require n>=k if applicable",
+        "negative": "merely relabel count as capacity or invent a new Core law without source",
+        "owner_review": "PENDING",
+        "independent_oracle": "PENDING",
+        "ratification": false
       }
     },
     {
@@ -14822,15 +15204,24 @@
       "ratified": false,
       "physical_t5_authorized": false,
       "proof_readiness": {
-        "status": "INCOMPLETE-SOURCE-SEMANTICS",
-        "missing": [
-          "semantic-law",
-          "positive-witness",
-          "negative-falsifier"
-        ],
+        "status": "SOURCE-LAW-WITNESSES-PRESENT-UNVERIFIED",
+        "missing": [],
         "selection": false,
         "ratification": false,
-        "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+        "next_gate": "D1-D9-DEDUPE-CORE-VS-LIBRARY-AND-INDEPENDENT-ORACLE"
+      },
+      "source_evidence": {
+        "status": "SOURCE-WITNESS-RESEARCH-NOT-SELECTED",
+        "source_git_blob": "37e10ef9a953ea62beb5e4b46ef20f21cbfb3ee4",
+        "law_source_key": "observable_claim",
+        "positive_source_key": "positive_witness_spec",
+        "negative_source_key": "falsifier_spec",
+        "law": "claimed macro's own expansion function; lacks primary definition and stage-specific behavior",
+        "positive": "locate authoritative manual page and distinguish from single-step expansion or macro-function lookup",
+        "negative": "mere alias of MACROEXPAND-1 given a new coordinate",
+        "owner_review": "PENDING",
+        "independent_oracle": "PENDING",
+        "ratification": false
       }
     },
     {
@@ -14845,15 +15236,24 @@
       "ratified": false,
       "physical_t5_authorized": false,
       "proof_readiness": {
-        "status": "INCOMPLETE-SOURCE-SEMANTICS",
-        "missing": [
-          "semantic-law",
-          "positive-witness",
-          "negative-falsifier"
-        ],
+        "status": "SOURCE-LAW-WITNESSES-PRESENT-UNVERIFIED",
+        "missing": [],
         "selection": false,
         "ratification": false,
-        "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+        "next_gate": "D1-D9-DEDUPE-CORE-VS-LIBRARY-AND-INDEPENDENT-ORACLE"
+      },
+      "source_evidence": {
+        "status": "SOURCE-WITNESS-RESEARCH-NOT-SELECTED",
+        "source_git_blob": "37e10ef9a953ea62beb5e4b46ef20f21cbfb3ee4",
+        "law_source_key": "observable_claim",
+        "positive_source_key": "positive_witness_spec",
+        "negative_source_key": "falsifier_spec",
+        "law": "claimed splicing macro behavior; not source-attested by this audit",
+        "positive": "find exact historical original spelling, syntax and evaluation phase in a primary document",
+        "negative": "misread BACKQUOTE or UNQUOTE-SPLICING as independently named BACKQUANTIZE",
+        "owner_review": "PENDING",
+        "independent_oracle": "PENDING",
+        "ratification": false
       }
     },
     {
@@ -14868,15 +15268,24 @@
       "ratified": false,
       "physical_t5_authorized": false,
       "proof_readiness": {
-        "status": "INCOMPLETE-SOURCE-SEMANTICS",
-        "missing": [
-          "semantic-law",
-          "positive-witness",
-          "negative-falsifier"
-        ],
+        "status": "SOURCE-LAW-WITNESSES-PRESENT-UNVERIFIED",
+        "missing": [],
         "selection": false,
         "ratification": false,
-        "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+        "next_gate": "D1-D9-DEDUPE-CORE-VS-LIBRARY-AND-INDEPENDENT-ORACLE"
+      },
+      "source_evidence": {
+        "status": "SOURCE-WITNESS-RESEARCH-NOT-SELECTED",
+        "source_git_blob": "37e10ef9a953ea62beb5e4b46ef20f21cbfb3ee4",
+        "law_source_key": "observable_claim",
+        "positive_source_key": "positive_witness_spec",
+        "negative_source_key": "falsifier_spec",
+        "law": "generic 'collect elements' lacks operation/ordering/multiplicity contract",
+        "positive": "identify donor implementation/manual and provide order/duplicates/identity behavior before proposing",
+        "negative": "assert any traversal helper is a novel Core semantic primitive",
+        "owner_review": "PENDING",
+        "independent_oracle": "PENDING",
+        "ratification": false
       }
     },
     {
@@ -14904,14 +15313,11 @@
       "core_vs_library_review": "Could be derived using closures wrapping DEREF with explicitly composed observers.",
       "independent_oracle": "PENDING-EXTERNAL-LOOPS",
       "proof_readiness": {
-        "status": "INCOMPLETE-SOURCE-SEMANTICS",
-        "missing": [
-          "positive-witness",
-          "negative-falsifier"
-        ],
+        "status": "SOURCE-LAW-WITNESSES-PRESENT-UNVERIFIED",
+        "missing": [],
         "selection": false,
         "ratification": false,
-        "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+        "next_gate": "D1-D9-DEDUPE-CORE-VS-LIBRARY-AND-INDEPENDENT-ORACLE"
       }
     },
     {
@@ -14939,14 +15345,11 @@
       "core_vs_library_review": "Potential closure-based composition; must prove material language-visible difference before ratification.",
       "independent_oracle": "PENDING-EXTERNAL-LOOPS",
       "proof_readiness": {
-        "status": "INCOMPLETE-SOURCE-SEMANTICS",
-        "missing": [
-          "positive-witness",
-          "negative-falsifier"
-        ],
+        "status": "SOURCE-LAW-WITNESSES-PRESENT-UNVERIFIED",
+        "missing": [],
         "selection": false,
         "ratification": false,
-        "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+        "next_gate": "D1-D9-DEDUPE-CORE-VS-LIBRARY-AND-INDEPENDENT-ORACLE"
       }
     },
     {
@@ -15106,14 +15509,11 @@
       "core_vs_library_review": "HOLD until concrete witness that library composition of finite set operations and forward apply is insufficient as a language-visible root",
       "independent_oracle": "PENDING-CI",
       "proof_readiness": {
-        "status": "INCOMPLETE-SOURCE-SEMANTICS",
-        "missing": [
-          "positive-witness",
-          "negative-falsifier"
-        ],
+        "status": "SOURCE-LAW-WITNESSES-PRESENT-UNVERIFIED",
+        "missing": [],
         "selection": false,
         "ratification": false,
-        "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+        "next_gate": "D1-D9-DEDUPE-CORE-VS-LIBRARY-AND-INDEPENDENT-ORACLE"
       }
     },
     {
@@ -21590,49 +21990,35 @@
         "rows": 9
       }
     ],
-    "total_passports": 36,
+    "total_passports": 78,
     "latest_sources": [
       {
-        "path": "knowledge/d10-clos-slot-state-historical-review-v1.json",
-        "git_blob": "d8c6a2fdf60c11e23016be7aad5037bb5c26782d",
-        "rows": 4
+        "path": "knowledge/d10-psl-interlisp-lispm-unmerged-residual-v1.json",
+        "git_blob": "f5438abf3460fa7caac14a30edf511f907a5be44",
+        "rows": 19
       },
       {
-        "path": "knowledge/d10-time-law-review-v2.json",
-        "git_blob": "cf28529677096a934aa0c31a4a3feefba6c51f12",
-        "rows": 4
+        "path": "knowledge/d10-unify-lexical-harvest-v1.json",
+        "git_blob": "78eac7f7d0d05ec5734ccb61e73c1bed7ec707fa",
+        "rows": 9
       },
       {
-        "path": "knowledge/d10-historical-clos-interlisp-residual-review-v1.json",
-        "git_blob": "df8ed73011df39f9ec689046ce6936cc00892215",
-        "rows": 6
+        "path": "knowledge/d10-prolog-constraint-hobbies-research-v1.json",
+        "git_blob": "66ec74d6127f806372d51dd25c27898094124c36",
+        "rows": 3
       },
       {
-        "path": "knowledge/d10-r6rs-copy-mutable-oracle-v1.json",
-        "git_blob": "99d3e1ba5f381df356fd0b335dfbf75c5027877d",
-        "rows": 2
-      },
-      {
-        "path": "knowledge/d10-cross-hobby-bounded-rational-v1.json",
-        "git_blob": "b93217e9b45c1339f09146a1daf4aa323e611ea9",
+        "path": "knowledge/d10-babbage-reiter-hobby-selected-20261009.json",
+        "git_blob": "4cf8359f34924015f2efca3ddba2df567b5b43db",
         "rows": 1
       },
       {
-        "path": "knowledge/d10-brzozowski-1964-ai-donor-v1.json",
-        "git_blob": "23a88762560ddfc82ebf434a65efe1e929173e76",
-        "rows": 1
-      },
-      {
-        "path": "knowledge/d10-gf2-linear-complexity-research-20261009.json",
-        "git_blob": "adf2be1236a6fd9418d29506a9ff00f539e4b812",
-        "rows": 1
-      },
-      {
-        "path": "knowledge/d10-finite-transducer-cross-hobby-v1.json",
-        "git_blob": "6337398217818c86ac27dc164ce8af4239704d95",
-        "rows": 2
+        "path": "knowledge/d10-historical-primary-manual-reconciliation-20261009.json",
+        "git_blob": "37e10ef9a953ea62beb5e4b46ef20f21cbfb3ee4",
+        "rows": 10
       }
-    ]
+    ],
+    "latest_source_pass": 42
   },
   "evidence_gate": {
     "date": "2026-10-11",
@@ -21642,49 +22028,14 @@
     "formal_ratified": 0,
     "semantic_source_audit": {
       "total": 309,
-      "law_and_witnesses": 123,
-      "has_law": 173,
-      "has_positive": 123,
-      "has_negative": 123,
-      "missing_law": 136,
-      "missing_positive": 186,
-      "missing_negative": 186,
-      "needs_review": 309,
-      "by_status": {
-        "PROVISIONAL-NAME-QUEUE-NOT-SELECTED": {
-          "total": 96,
-          "witnessed": 0
-        },
-        "PROVISIONAL-HISTORICAL-HOLD-NOT-SELECTED": {
-          "total": 80,
-          "witnessed": 22
-        },
-        "PROVISIONAL-SOURCE-RESEARCH-HOLD-NOT-SELECTED": {
-          "total": 46,
-          "witnessed": 14
-        },
-        "PROVISIONAL-HISTORICAL-LAW-REVIEW-HOLD-NOT-SELECTED": {
-          "total": 30,
-          "witnessed": 30
-        },
-        "PROVISIONAL-PATHNAME-LAW-CANDIDATE-NOT-SELECTED": {
-          "total": 11,
-          "witnessed": 11
-        },
-        "PROVISIONAL-STANDARD-STREAM-LAW-NOT-SELECTED": {
-          "total": 11,
-          "witnessed": 11
-        },
-        "PROVISIONAL-STANDARD-CONTRACT-HOST-REVIEW-NOT-SELECTED": {
-          "total": 8,
-          "witnessed": 8
-        },
-        "PROVISIONAL-HISTORICAL-ENVIRONMENT-LAW-NOT-SELECTED": {
-          "total": 27,
-          "witnessed": 27
-        }
-      }
+      "law_and_witnesses": 168,
+      "has_law": 184,
+      "has_positive": 168,
+      "has_negative": 168,
+      "missing_law": 125,
+      "missing_positive": 141,
+      "missing_negative": 141
     },
-    "note": "Evidence presence is not equivalent to an independent semantic primitive or ratified resident."
+    "note": "Source witness presence is not proof of independent D10 residency or ratification."
   }
 }
