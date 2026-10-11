@@ -39,11 +39,6 @@ jobs:
         run: python3 -O research/framed3/bench_efficiency.py --check
       - name: Наявні дослідні позитивні/негативні suites
         run: python3 -m unittest discover -s research/framed3 -p 'test_*.py' -v
-      - name: Rust ↔ Python точні байти й негативні маркери
-        shell: bash
-        run: |
-          set -euo pipefail
-          bash research/framed3/rust_codec/run_parity.sh
       - name: Парні часи кодування, декодування і повні фізичні байти
         shell: bash
         run: |
@@ -60,6 +55,13 @@ jobs:
           path: ${{ runner.temp }}/paired-codecs.json
           if-no-files-found: warn
           retention-days: 30
+
+      # Mandatory parity remains fail-closed; benchmark artifact above is retained first.
+      - name: Rust ↔ Python точні байти й негативні маркери
+        shell: bash
+        run: |
+          set -euo pipefail
+          bash research/framed3/rust_codec/run_parity.sh
 
   constrained-trit-blocks:
     name: T21 / T22 / T33 — незалежний повноблоковий дослід
