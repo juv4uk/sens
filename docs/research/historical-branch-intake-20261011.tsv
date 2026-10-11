@@ -23,7 +23,7 @@ agent/chatgpt/public-api-inventory-20261010	UNTRIAGED	-	-	BRANCH-NAME-ONLY
 agent/chatgpt/replay-2000-unbounded-width-20261009	UNTRIAGED	-	-	BRANCH-NAME-ONLY
 agent/chatgpt/sweep-triage-addendum-20261009	UNTRIAGED	-	-	BRANCH-NAME-ONLY
 agent/chatgpt/sweep-triage-ledger-20261009	UNTRIAGED	-	-	BRANCH-NAME-ONLY
-agent/chatgpt/2372-vex3-current-main	UNTRIAGED	-	-	BRANCH-NAME-ONLY
+agent/chatgpt/2372-vex3-current-main	TARGET-DEFAULT-BRANCH	-	-	CANONICAL-DESTINATION-NOT-A-SOURCE
 agent/chatgpt/2372-vex3-replay	UNTRIAGED	-	-	BRANCH-NAME-ONLY
 agent/chatgpt/4342-machine-effect-seam	UNTRIAGED	-	-	BRANCH-NAME-ONLY
 agent/chatgpt/4343-roundtrip-clean	UNTRIAGED	-	-	BRANCH-NAME-ONLY
