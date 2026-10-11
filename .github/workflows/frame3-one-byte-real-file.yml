@@ -3,12 +3,14 @@ on:
   push:
     paths:
       - 'crates/sens/examples/frame3_one_byte_research.rs'
+      - 'research/framed3/fixtures/*.f3m'
       - 'crates/sens/examples/frame3_real_files_bench.rs'
       - 'research/framed3/rust_codec/senc.rs'
       - '.github/workflows/frame3-one-byte-real-file.yml'
   pull_request:
     paths:
       - 'crates/sens/examples/frame3_one_byte_research.rs'
+      - 'research/framed3/fixtures/*.f3m'
       - 'crates/sens/examples/frame3_real_files_bench.rs'
       - 'research/framed3/rust_codec/senc.rs'
       - '.github/workflows/frame3-one-byte-real-file.yml'
@@ -34,6 +36,7 @@ jobs:
             cargo run --locked --release -p sens --example frame3_one_byte_research --quiet -- "$RUNNER_TEMP/frame3-one-byte"
           } | tee "$RUNNER_TEMP/frame3-one-byte/program-results.tsv"
           test "$(wc -c < "$RUNNER_TEMP/frame3-one-byte/car-cons-one-nil.f3m")" -eq 1
+          cmp research/framed3/fixtures/car-cons-one-nil.f3m "$RUNNER_TEMP/frame3-one-byte/car-cons-one-nil.f3m"
           test "$(wc -c < "$RUNNER_TEMP/frame3-one-byte/atom-nil.f3m")" -eq 1
           test "$(od -An -tx1 "$RUNNER_TEMP/frame3-one-byte/car-cons-one-nil.f3m" | tr -d ' \n')" = '45'
           grep -q '^45' "$RUNNER_TEMP/frame3-one-byte/program-results.tsv"
