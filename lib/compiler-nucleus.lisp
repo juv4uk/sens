@@ -293,18 +293,20 @@
 
 ; Empty role means the law did not admit this identity. Do not emit a
 ; malformed request carrying (), especially for a wrong-width domain.
+; Empty role is NIL, which is itself an atom in this language. Test
+; exact equality with () before emitting a compiler request.
 (0011 compiler-request-from-role
   (0010 (seed ідентичність role proof-ref походження)
     (110
-      ((010 role)
+      ((101 role ()) ())
+      ((compiler-true seed)
        (111
          ідентичність
          (111
            role
            (111
              proof-ref
-             (111 походження ())))))
-      ((compiler-true seed) ()))))
+             (111 походження ()))))))))
 
 (0011 compiler-request-from-l1-l5
   (0010 (decompose ідентичність law proof-ref походження)
