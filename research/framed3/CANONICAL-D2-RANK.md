@@ -59,3 +59,41 @@ python3 -m unittest discover -s research/framed3 -p 'test_canonical_d2_rank_rese
 python3 -O -m unittest discover -s research/framed3 -p 'test_canonical_d2_rank_research.py' -v
 cargo test --manifest-path crates/sens/Cargo.toml --test canonical_d2_rank_research -- --nocapture
 ```
+
+
+## Rust candidate module in core (11.10.2026)
+
+The algorithm is now ported from the Python research oracle to
+[crates/sens/src/frame3_grammar.rs](../../crates/sens/src/frame3_grammar.rs)
+and exported from `sens::frame3_grammar`. This is a strictly bounded
+**grammar candidate**, not a new production mode. It provides:
+
+- ExactWord(width, bits), preserving 1..9-bit identities and leading zeros.
+- count_inner, rank_single_root and unrank_single_root using the exact D2
+  separator/open/close/dot states; fixed outer 10/01 frame.
+- encode_body_at_known_length / decode_body_at_known_length with strict
+  integer-range and byte-width checks; the exact inner bit length MUST
+  be provided by an authenticated/bounded external envelope.
+- rank_binary_source_words / unrank_binary_source_words for direct
+  in-process `BinarySourceWord` exchange. No textual bit rendering,
+  no 8-bit truncation of D9, no historical symbol names.
+
+[crates/sens/tests/frame3_grammar_rank.rs](../../crates/sens/tests/frame3_grammar_rank.rs)
+independently compares **all exact 0..8 inner-bit word streams** against
+the actual canonical Rust reader and checks dense 0-based rank coverage.
+It also tests every width/value D1–D9, separators, dotted pairs, nested
+quotation data, unused codes, truncation and invalid bounds.
+
+[Focused Rust CI #38124757032](https://github.com/juv4uk/sens/actions/runs/38124757032)
+is **SUCCESS**, including the new Rust tests, `cargo clippy -D warnings`,
+and existing Universal Frame3 codec tests. This does not override
+separate failing Hosted CI or physical-file authority gates.
+
+**Do not silently switch .sens to this profile:** the live
+`universal_frame3.rs` codec still supports RAW/REPEAT only. Future
+codec work needs a versioned mode with full-file length/word-count/
+integrity overhead, explicit code/data semantic admission, atom-only
+and multiple roots, and paired physical byte/performance evidence.
+`((ATOM))` is structurally parseable but not executable; a quote of
+it remains valid data, not an executable-call witness. The Rust grammar
+rank does not yet remove these semantically impossible calls.
