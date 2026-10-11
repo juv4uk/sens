@@ -58,6 +58,34 @@
 
 Вимір seed поки **BLOCKED** на визначенні й отриманні точного файлу C0/seed і C1 executable відповідного pinned lineage. Старий звіт має C1 hash/розмір, але немає доступного workflow artifact у збережених артефактах зазначеного run; не підміняти бінарний файл даними з JSON і не називати виміряним seed рядок у source.
 
+## Виконуваний вхід до SENS-компілятора
+
+Додано команду оболонки `cargo xtask compiler-compile`, яка з'єднує вже наявні codec і SENS-written compile body:
+
+```text
+canonical sens-syntax-wire/1 (SW1) bytes
+  -> wire_decode_program + exact byte roundtrip
+  -> lowered_program_to_exact_data (representation conversion only)
+  -> lib/compiler-nucleus.lisp:
+       compiler-compile-program-artifact
+  -> compiler-compilation-artifact/1 or compiler-compilation-error/1
+  -> canonical compiler-evidence bytes
+```
+
+Приклад:
+
+```sh
+cargo xtask compiler-compile --input /path/to/program.sw1 --out /path/to/new-artifact.cevb
+```
+
+- `--input` має містити саме canonical SW1 bytes; це внутрішній compiler-program-data transport, **не** фізичний T5 `.sens` або opt-in F3 `.senc`. Формати не визначаються sniffing і не підміняють один одного.
+- `--out` — новий файл; наявний шлях не перезаписується.
+- Команда використовує Git HEAD як provenance revision. SENS обирає запити/ролі та складає весь program artifact; wrapper виконує лише codec roundtrip, representation conversion, provenance та канонічний evidence encode/decode.
+- Семантична відмова зберігається як канонічний `compiler-compilation-error/1` артефакт і повертає ненульовий exit code. Невалідний/неканонічний SW1 не запускає compiler.
+- Додано локальні unit-тести в `crates/xtask/src/compiler_compile.rs` для повторюваного артефакту, roundtrip verification, неправильного wire та D8 fail-closed. Workflow `.github/workflows/compiler-role-cutover.yml` містить команду `cargo test -p xtask compiler_compile::tests -- --nocapture`; віддалений результат цього запуску потрібно підтвердити окремо.
+
+Це реальний executable front-end до вже наявного SENS-written компілятора, але ще не повний parser для фізичного T5/F3 файла і не машинний backend: вони мають залишатися окремими, явно версійованими межами.
+
 ## Acceptance gates
 
 - [ ] З чистого checkout і без читання заздалегідь зібраного C1/C2 повторно запустити чинний self-host lineage flow.
