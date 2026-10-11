@@ -3,6 +3,7 @@ import csv
 import hashlib
 import importlib.util
 import json
+import subprocess
 import tempfile
 import unittest
 from pathlib import Path
@@ -111,6 +112,64 @@ class FilterTests(unittest.TestCase):
         self.set_valid_dedup()
         self.row['witness_sha'] = 'f'*64
         self.assertEqual('HOLD_NOT_RUN', self.result()['reason'])
+
+
+    def pin_historical_donor(self):
+        # A real immutable commit, not a synthetic spelling or the mutable worktree.
+        subprocess.run(["git", "init", "-q", str(self.root)], check=True, capture_output=True)
+        subprocess.run(["git", "-C", str(self.root), "add", "knowledge"], check=True, capture_output=True)
+        subprocess.run([
+            "git", "-C", str(self.root), "-c", "user.email=ci@example.invalid",
+            "-c", "user.name=CI", "commit", "--no-gpg-sign", "-qm", "pin donor"
+        ], check=True, capture_output=True)
+        commit = subprocess.check_output(
+            ["git", "-C", str(self.root), "rev-parse", "HEAD"], text=True
+        ).strip()
+        self.row['donor_provenance'] = (
+            f"juv4uk/sens@{commit}:knowledge/source.json:1"
+        )
+        return commit
+
+    def test_real_commit_pinned_historical_ledger_provenance_passes_f1(self):
+        self.pin_historical_donor()
+        self.set_valid_witness()
+        self.set_valid_dedup()
+        (self.root / 'knowledge/source.json').write_text('changed since the pinned commit\n')
+        self.assertEqual('accepted', self.result()['decision'])
+
+    def test_historical_donor_pin_is_byte_exact(self):
+        self.pin_historical_donor()
+        self.row['source_pin'] = 'f' * 40
+        result = self.result()
+        self.assertEqual(('escalated', 'HOLD_UNVERIFIED_PIN'),
+                         (result['decision'], result['reason']))
+
+    def test_nonexistent_commit_and_invalid_line_are_hold_not_no_provenance(self):
+        commit = self.pin_historical_donor()
+        self.row['donor_provenance'] = (
+            f"juv4uk/sens@{'0'*40}:knowledge/source.json:1"
+        )
+        self.assertEqual('HOLD_UNVERIFIED_PIN', self.result()['reason'])
+        self.row['donor_provenance'] = (
+            f"juv4uk/sens@{commit}:knowledge/source.json:999"
+        )
+        self.assertEqual('HOLD_UNVERIFIED_PIN', self.result()['reason'])
+
+    def test_foreign_commit_without_archived_source_is_hold(self):
+        commit = self.pin_historical_donor()
+        self.row['donor_provenance'] = (
+            f"juv4uk/spanda@{commit}:README.md:1"
+        )
+        result = self.result()
+        self.assertEqual(('escalated', 'HOLD_UNVERIFIED_PIN'),
+                         (result['decision'], result['reason']))
+
+    def test_pinned_git_path_traversal_never_reads_outside_donor(self):
+        commit = self.pin_historical_donor()
+        self.row['donor_provenance'] = (
+            f"juv4uk/sens@{commit}:../knowledge/source.json:1"
+        )
+        self.assertEqual('HOLD_UNVERIFIED_PIN', self.result()['reason'])
 
     def test_no_lost_or_duplicate_rows(self):
         self.set_valid_witness()
