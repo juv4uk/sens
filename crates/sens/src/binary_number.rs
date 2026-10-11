@@ -719,9 +719,8 @@ mod tests {
             let product_word = product.exact_numeric_domain_bits().unwrap();
             assert_eq!(product_word.len(), 2*width);
             // (2^n-1)^2 = 2^(2n) - 2^(n+1) + 1
-            let mut expected = vec![1u8; 2*width];
-            expected[width-1] = 0;
-            expected[width] = 0;
+            let mut expected = vec![0u8; 2*width];
+            expected[..width-1].fill(1);
             expected[2*width-1] = 1;
             assert_eq!(product_word, expected);
             let zero = BinaryNumber::from_numeric_domain_bits(width, &vec![0; width]).unwrap();
