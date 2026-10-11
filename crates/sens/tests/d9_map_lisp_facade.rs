@@ -38,5 +38,5 @@ fn internal_map_facade_inserts_and_reads_one_element() {
         "(внутрішня-мапа-список (внутрішня-мапа-вставити \"a\" 7 map-empty))",
         &mut session
     ).expect("one-key AVL map should traverse without D9 dispatch");
-    assert_eq!(listed.value.to_string(), "((\"a\" 7))");
+    assert_eq!(listed.value.to_string(), "((\"a\" . 7))");
 }
