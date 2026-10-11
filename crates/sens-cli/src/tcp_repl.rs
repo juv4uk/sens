@@ -68,7 +68,7 @@ pub(crate) fn run_tcp_repl(port: u16, core_lib: &str, allowed: &[String]) {
         if load_macro_library(&mut session).is_ok() {
             if let Ok(core_ast) = parse(core_lib) {
                 if eval_parsed_expressions(&core_ast, &mut session).is_ok()
-                    && eval_program(TIME_LIBRARY_SOURCE, &mut session).is_ok()
+                    && sens::load_time_library(&mut session).is_ok()
                 {
                     let _ = load_process_library(&mut session);
                 }
