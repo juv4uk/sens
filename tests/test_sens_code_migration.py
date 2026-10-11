@@ -116,6 +116,31 @@ class SensCodeMigrationTests(unittest.TestCase):
             self.assertTrue(converted.startswith(f"10 {bits} 00 "), (surface, converted))
             self.assertTrue(hits, surface)
 
+
+    def test_bound_callable_shadows_builtin_surface_in_binary_projection(self):
+        # A source-proven Text7 callable beats its namesake builtin; a bare
+        # builtin with no binder must still resolve to the exact D3 function.
+        builtin, builtin_hits, _ = self.binary("(car ())\n")
+        self.assertTrue(builtin.startswith("10 100 00 "), builtin)
+        self.assertEqual(builtin_hits[0].label, "CAR")
+
+        for source in (
+            "(00001001 car (00001000 () 1))\n(car)\n",
+            "(00001001 f (00001000 (car) (car)))\n",
+        ):
+            with self.subTest(source=source):
+                converted, hits, shadowed = self.binary(source)
+                cells = mod.encode_text7_spelling("car", self.text7)
+                frame = " ".join(["10"] + [
+                    word for idx, cell in enumerate(cells)
+                    for word in ((["00"] if idx else []) + [cell])
+                ] + ["01"])
+                self.assertGreaterEqual(converted.count(frame), 2, converted)
+                self.assertTrue(all(set(word) <= {"0", "1"}
+                                    for word in converted.split()), converted)
+                self.assertFalse(any(hit.label == "CAR" for hit in hits))
+                self.assertFalse(shadowed)
+
     def test_admitted_contextual_text7_binder_is_physical_t5_roundtrip(self):
         # A named DEFINE and LAMBDA parameter use contextual D2/W7 keys;
         # the standalone W7 payload remains data, never an implicit symbol.

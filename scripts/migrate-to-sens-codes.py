@@ -840,34 +840,38 @@ def binary_rewrite(
                 raise BinaryMigrationError(
                     "history-aware SourceResolver is required for binary migration"
                 )
-            resolution = resolver.resolve_head(token)
-            if resolution.resolved:
-                identity = resolution.current
-                assert identity is not None
-                if identity.label == "EMPTY":
-                    raise BinaryMigrationError(
-                        "structural EMPTY/000 cannot be used as a callable head"
-                    )
-                out.append(identity.bits)
-                resolved_label = identity.label
-                line, col = line_col(source, start)
-                hits.append(Hit(
-                    line, col, identity.label, identity.bits, identity.domain,
-                ))
-            elif not resolution.ambiguous and is_bound(token):
-                # Existing Rust Core dispatch checks the D2/W7 key in the
-                # environment in executable call-head position.
+            # An explicit D4 DEFINE or lexical LAMBDA binding takes priority
+            # over a similarly spelled human surface for a built-in operation.
+            # Only names actually introduced by the source get this treatment;
+            # unresolved/unbound heads remain fail-closed. Exact binary words
+            # cannot be registered as Text7 binders and still go to the resolver.
+            if is_bound(token) and not re.fullmatch(r"[01]{3,9}", token):
                 emit_text7_atom(token, role="call-head")
             else:
-                detail = (
-                    ", ".join(resolution.ambiguous)
-                    if resolution.ambiguous
-                    else "no proven current exact-domain identity or bound D2/D7 name"
-                )
-                raise BinaryMigrationError(
-                    f"unresolved executable head {token!r}: "
-                    f"{resolution.kind}; {detail}"
-                )
+                resolution = resolver.resolve_head(token)
+                if resolution.resolved:
+                    identity = resolution.current
+                    assert identity is not None
+                    if identity.label == "EMPTY":
+                        raise BinaryMigrationError(
+                            "structural EMPTY/000 cannot be used as a callable head"
+                        )
+                    out.append(identity.bits)
+                    resolved_label = identity.label
+                    line, col = line_col(source, start)
+                    hits.append(Hit(
+                        line, col, identity.label, identity.bits, identity.domain,
+                    ))
+                else:
+                    detail = (
+                        ", ".join(resolution.ambiguous)
+                        if resolution.ambiguous
+                        else "no proven current exact-domain identity or bound D2/D7 name"
+                    )
+                    raise BinaryMigrationError(
+                        f"unresolved executable head {token!r}: "
+                        f"{resolution.kind}; {detail}"
+                    )
         else:
             # Explicit legacy SID values are semantic identities even outside a
             # call head; migrate them by named historical evidence rather than
