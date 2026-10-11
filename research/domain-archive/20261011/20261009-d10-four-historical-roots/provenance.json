@@ -1,0 +1,56 @@
+{
+  "schema": "sens-branch-historical-intake/v1",
+  "status": "PARTIAL-ARCHIVED-NOT-WHOLE-BRANCH-MERGED",
+  "created_utc_date": "2026-10-11",
+  "repo": "juv4uk/sens",
+  "source_branch": "integration/d10-four-historical-roots-current-main-20261009",
+  "source_head_sha": "0986db8bbcfea918433062c8248547be74776af2",
+  "source_commits_ahead_of_prior_main": 1,
+  "archive": [
+    {
+      "source_path": "docs/research/d10-historical-primary-selected-20261009.uk.md",
+      "archive_path": "research/domain-archive/20261011/20261009-d10-four-historical-roots/selection.uk.md",
+      "source_blob_sha": "a37e33ec3e8723e90c22230dca46a3a032a7d804",
+      "archive_blob_sha": "a37e33ec3e8723e90c22230dca46a3a032a7d804",
+      "main_commit_sha": "a0c6aff7063068b6805c2391766a133812b7940a",
+      "byte_identical": true
+    },
+    {
+      "source_path": "knowledge/d10-historical-primary-selected-20261009.json",
+      "archive_path": "research/domain-archive/20261011/20261009-d10-four-historical-roots/selection.source.json",
+      "source_blob_sha": "e1b8ad2c502495371847cf6706566094397bddab",
+      "archive_blob_sha": "e1b8ad2c502495371847cf6706566094397bddab",
+      "main_commit_sha": "512d0e53ad9657c1532d6cf2b9e343fc5547d2eb",
+      "byte_identical": true
+    },
+    {
+      "source_path": ".github/workflows/d10-historical-primary-selection.yml",
+      "archive_path": "research/domain-archive/20261011/20261009-d10-four-historical-roots/d10-historical-primary-selection.yml.source.txt",
+      "source_blob_sha": "d1c30c7e75f3b12e237be1c2ed686450f40ed45e",
+      "archive_blob_sha": "d1c30c7e75f3b12e237be1c2ed686450f40ed45e",
+      "main_commit_sha": "2b7cc74f883069411b158819b3ed6268918f7fdb",
+      "byte_identical": true
+    },
+    {
+      "source_path": "scripts/check_d10_historical_primary_selection.py",
+      "archive_path": "research/domain-archive/20261011/20261009-d10-four-historical-roots/check_d10_historical_primary_selection.py.source.txt",
+      "source_blob_sha": "385d3f0b0691ccb64551f0288aef7f944cce1fc4",
+      "archive_blob_sha": "385d3f0b0691ccb64551f0288aef7f944cce1fc4",
+      "main_commit_sha": "b6217d6241afe686f796771673446245867fee88",
+      "byte_identical": true
+    },
+    {
+      "source_path": "scripts/d10_historical_snapshot_compat.py",
+      "archive_path": "research/domain-archive/20261011/20261009-d10-four-historical-roots/d10_historical_snapshot_compat.py.source.txt",
+      "source_blob_sha": "3d0c28ac44eaa743533af104895c0d56db7c6969",
+      "archive_blob_sha": "3d0c28ac44eaa743533af104895c0d56db7c6969",
+      "main_commit_sha": "a870730cdcce09dc8c7f3c82355f0d463c7019dd",
+      "byte_identical": true
+    }
+  ],
+  "archived_source_files_count": 5,
+  "other_changed_paths_existing_on_main_with_changed_blobs": 14,
+  "semantic_dedup_verdict": "PENDING_REVIEW",
+  "source_domain_status": "D10 RESEARCH ONLY; no ratification; no coordinate assignment",
+  "safety": "Historical artifacts are inert archive only. Current authoritative D10 ledger/inventory and executable code untouched. Do not claim CI green or whole-branch merge."
+}
