@@ -1,0 +1,109 @@
+{
+  "schema": "nano-sens-k1-static-link-report/1",
+  "status": "MEASURED_NO_SIZE_WIN",
+  "campaign": "K1 static-link + strip C1",
+  "run": {
+    "repository": "juv4uk/cml",
+    "branch": "master",
+    "commit_sha": "3320fe3b00a4a099ecb9ff06e22e0be2b1fee499",
+    "workflow_run_id": 38183052531,
+    "workflow_url": "https://github.com/juv4uk/cml/actions/runs/38183052531",
+    "workflow_result": "PASS",
+    "full_cml_library_tests": {
+      "clean_run_1": {
+        "passed": 189,
+        "failed": 0
+      },
+      "clean_run_2": {
+        "passed": 189,
+        "failed": 0
+      }
+    },
+    "fail_closed_negative_control": "malformed SW1 input was rejected by static-linked C1",
+    "artifact_retention_days": 30,
+    "artifact_expiry_utc": "2026-11-10T23:08:06Z"
+  },
+  "measurement": {
+    "schema": "nano-sens-size-report/1",
+    "clean_runs": 2,
+    "each_report_sha256": "ad41654be6b742816566c3f542b9e1712677e8be63880cc5c12e42ce583f519d",
+    "report_bytes_identical": true,
+    "two_clean_runs_proof_schema": "nano-sens-two-clean-runs-proof/1",
+    "two_clean_runs_proof_sha256": "19e53c84f07a8d1964929b76a75ec60f56fcb863d43788231b99c0bbd0e39015",
+    "github_proof_artifact_id": 11718651632,
+    "github_proof_artifact_sha256": "sha256:251d473356883e496b75c6629d5c2535162ef144137bb0e4dfb0da6c85081d8d",
+    "pinned_lineage_report_sha256": "17f04a3a88a51914ec41a4b931c8b516c847e9b9dc65cd3ddba0406d8cc9bd5f",
+    "measurement_tool_commit": "2f66fc07e1900d0bffa0847757f3498645303e76"
+  },
+  "source_pins": {
+    "cml_workflow_head_sha": "3320fe3b00a4a099ecb9ff06e22e0be2b1fee499",
+    "sens_source_sha": "d0787a40fcea36501747732aa61b6de19fe29c70",
+    "wsm_my_lisp_witness_sha": "a6bd9747196f2d676ab6883cbb4b84c7fcfc6947",
+    "compiler_nucleus_sha256": "34863f297e0f4f6f21c30dffc34a8bb85822015a89d13028c700b5a679f61b7e",
+    "language_contract_sha256": "177d532d24c1f0738a934152f65c7f01f90b5593c8dbfe519e31148c0aa80c40",
+    "structural_law_projection_sha256": "3ce5bb4e042bfec446199a9c77787d0a022109e9a6d6442a4f93b50f68e34e9a"
+  },
+  "size_comparison": {
+    "metrics": [
+      "on_disk_file_bytes",
+      "loadable_segment_file_bytes",
+      "code_section_bytes"
+    ],
+    "measurement_tool": "GNU readelf -W -l/-S",
+    "baseline_dynamic_c1": {
+      "file_name": "c1-executable.bin",
+      "sha256": "27b8fbf096cddbb77be2b4bf57cc58bf8b4fac4accc42adbcfbc10d6cd95f375",
+      "on_disk_file_bytes": 92248,
+      "loadable_segment_file_bytes": 85685,
+      "code_section_bytes": 70655
+    },
+    "k1_static_link_strip_c1": {
+      "file_name": "c1-static-executable.bin",
+      "flags": [
+        "-static",
+        "-s",
+        "-Wl,--build-id=none"
+      ],
+      "sha256": "c14a22b3983d4a09cf639079a7e343151ecca122badc7a5c9d25789a4062d5dd",
+      "on_disk_file_bytes": 792544,
+      "loadable_segment_file_bytes": 775255,
+      "code_section_bytes": 586312
+    },
+    "delta_static_minus_dynamic": {
+      "on_disk_file_bytes": 700296,
+      "loadable_segment_file_bytes": 689570,
+      "code_section_bytes": 515657
+    },
+    "increase_percent": {
+      "on_disk_file_bytes": 759.14,
+      "loadable_segment_file_bytes": 804.77,
+      "code_section_bytes": 729.82
+    }
+  },
+  "semantic_equivalence": {
+    "static_c1_output_sha256": "303d96cd1467fae319fb2dcf2c12e1a73c840bb0a0ecab67f3609ffde411d79a",
+    "baseline_c1_output_sha256": "303d96cd1467fae319fb2dcf2c12e1a73c840bb0a0ecab67f3609ffde411d79a",
+    "byte_identical_output": true,
+    "c1_c2_executable_sha256": "27b8fbf096cddbb77be2b4bf57cc58bf8b4fac4accc42adbcfbc10d6cd95f375",
+    "lineage_criterion": "byte-identical-artifact"
+  },
+  "decision": {
+    "gate_status": "PASS_MEASURED",
+    "size_reduction": false,
+    "verdict": "Do not adopt K1 as a seed-size reduction. Static-linking the already stripped C1 preserves output but expands every recorded size metric substantially.",
+    "caveat": "Shared-library dependency bytes are outside the defined seed-byte count and remain unmeasured; no reduction claim may be made by moving dependencies outside the metric.",
+    "next_campaign": "K2, one Rust-owned bootstrap/compiler component replaced at a time; track trusted-seed bytes and independence-index separately."
+  },
+  "excluded_from_seed_bytes": {
+    "toolchain": [
+      "rustc 1.99.0",
+      "Cargo 1.99.0",
+      "GCC 13.3.0",
+      "GNU ld 2.42"
+    ],
+    "target": "x86_64-linux-gnu",
+    "os": "ubuntu-latest",
+    "wsm_my_lisp_assembly": "external test witness fixture; pinned but not included in seed_artifact.file_bytes",
+    "shared_library_dependency_bytes": "not added to the seed byte metric"
+  }
+}
