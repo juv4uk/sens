@@ -77,7 +77,7 @@ fn lift_pinned_d8_io(
         return Ok(Expr { kind: ExprKind::List(items), span });
     }
 
-    if matches!(head_spelling, Some("11110100" | "11101010")) {
+    if matches!(head_spelling, Some("11110100" | "11101010" | "11101101")) {
         let words = parse_binary_source_words(head_spelling.expect("known ratified D8 IO head"))?;
         let word = words.first().expect("one static ratified D8 source word").word;
         lifted[0] = Expr {
