@@ -67,10 +67,10 @@ jobs:
           retention-days: 1
       - name: Pin exact x86 encoder source
         run: |
-          test "$(git hash-object lib/machine/encoding/x86-64.lisp)" = "4f4f7b4035395fac6b785f5fdb489104c1c89064"
-          test "$(git hash-object lib/machine/lowering/semantic-x86-64.lisp)" = "6a9dbd838f407f93e1ecd09f88edf512a64218be"
-          test "$(git hash-object lib/machine/operands/x86-64.lisp)" = "07a3a2726472c248e5879a9da4b6ba61c2988636"
-          test "$(git hash-object lib/machine/admission/x86-64.lisp)" = "d16a59491d149e2b4384d779cdfa553e0936a61b"
+          test "$(git hash-object lib/machine/encoding/x86-64.lisp)" = "76648f7d870dfb38d8c36ec5e8f09ad1162e6319"
+          test "$(git hash-object lib/machine/lowering/semantic-x86-64.lisp)" = "0576141d27c5845bbb1306afdb6e07d6e8c0ce9f"
+          test "$(git hash-object lib/machine/operands/x86-64.lisp)" = "e66b15569621d0179c5cadf9686f55e696b45152"
+          test "$(git hash-object lib/machine/admission/x86-64.lisp)" = "b6f3bb0aa136860fb343aa89c13e1ce63914bbda"
           test "$(git hash-object crates/sens/tests/x86_64_lisp_encoder.rs)" = "8ebd29ff3996c065383d49f2d49d618b809c0512"
           test "$(git hash-object crates/sens-host/tests/native_cond_profile.rs)" = "a5964dbfdec8b4abcf8102d1dce214b7bd8770e9"
       - name: Exact imm32 byte projection through Lisp encoder
