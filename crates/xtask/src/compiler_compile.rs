@@ -78,12 +78,12 @@ fn artifact_schema(value: &Value) -> Result<&str, String> {
 /// the explicit SW1 bootstrap route and the physical-T5 triplet route.
 fn compile_program_data(
     program: Value,
-    source_digest: &str,
+    program_wire_sha256: &str,
     sens_revision: &str,
 ) -> Result<(Vec<u8>, bool), String> {
     // This is the language compiler entry point. Do not replace it with a Rust
     // walk over expressions or per-node host identity->role lookups.
-    let artifact = compiler_program_artifact_from_sens(program, source_digest, sens_revision)
+    let artifact = compiler_program_artifact_from_sens(program, program_wire_sha256, sens_revision)
         .map_err(|error| format!("SENS compiler invocation failed: {error}"))?;
     let schema = artifact_schema(&artifact)?;
     let accepted = schema == "compiler-compilation-artifact/1";
@@ -412,6 +412,9 @@ mod tests {
         assert!(compile_t5_triplet_bytes(
             source, &physical, b"10 100 00 000 01\n", revision,
         ).is_err(), "a mismatched extensionless view must block");
+        assert!(compile_t5_triplet_bytes(
+            source, &physical, b"10 001 00 000 01", revision,
+        ).is_err(), "the canonical extensionless view requires exactly one trailing LF");
         assert!(compile_t5_triplet_bytes(
             b"(інакше ())\n", &physical, view, revision,
         ).is_err(), "a source that lowers to a different exact program must block");
