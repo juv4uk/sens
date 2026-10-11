@@ -1,0 +1,73 @@
+{
+  "schema": "sens-source-archive/v1",
+  "date": "2026-10-11",
+  "window": "2026-10-06..2026-10-11",
+  "source_pr": "https://github.com/juv4uk/sens/pull/5600",
+  "source_commit": "0b9d5a49675317db9bee3d0594e6e73bf37803da",
+  "mode": "INERT_SNAPSHOT_NOT_ACTIVE_SEMANTICS",
+  "meaning": "Source objects for replay/semantic dedup; not selected into current live registry, not D10 ratification, no D1-D9 or codec change.",
+  "historic_snapshot": "PR #5600 builds from 653 to 698; main is advancing independently and is sole authority.",
+  "previous_source": "Original tranche23 dossier already archived at d2d36509d71978fc55bde54f2fa431a7a1c79901",
+  "files": [
+    {
+      "path": "knowledge/d10-alltime-existing-research-selected-batch14-20261011.json",
+      "sha": "7953a24a2bb487ec8785a140775b2a9c0fddbb8e",
+      "archive_path": "research/domain-archive/20261011/pr5600/knowledge/d10-alltime-existing-research-selected-batch14-20261011.json.source.txt"
+    },
+    {
+      "path": "knowledge/d10-complete-existing-candidate-name-census-20261011.json",
+      "sha": "b82aba4d71b35db869d68c7dbf4d5e3e9f0d6616",
+      "archive_path": "research/domain-archive/20261011/pr5600/knowledge/d10-complete-existing-candidate-name-census-20261011.json.source.txt"
+    },
+    {
+      "path": "knowledge/d10-existing-combinatorial-laws-selected-20261011.json",
+      "sha": "f2e710f6323327689f359d50e248e0d8d3e91a0a",
+      "archive_path": "research/domain-archive/20261011/pr5600/knowledge/d10-existing-combinatorial-laws-selected-20261011.json.source.txt"
+    },
+    {
+      "path": "knowledge/d10-existing-math-signal-selected-20261011.json",
+      "sha": "81ab10c6cd9373744e938696eab8d411e0990794",
+      "archive_path": "research/domain-archive/20261011/pr5600/knowledge/d10-existing-math-signal-selected-20261011.json.source.txt"
+    },
+    {
+      "path": "knowledge/d10-generalized-crt-selection-20261011.json",
+      "sha": "fd1a86a4ed018e4bee7162d656617b54fd948d31",
+      "archive_path": "research/domain-archive/20261011/pr5600/knowledge/d10-generalized-crt-selection-20261011.json.source.txt"
+    },
+    {
+      "path": "knowledge/d10-source-universe-891-20261011.json",
+      "sha": "32289bf6a9da5f3a3c5bb4d40a12fa91d32eba52",
+      "archive_path": "research/domain-archive/20261011/pr5600/knowledge/d10-source-universe-891-20261011.json.source.txt"
+    },
+    {
+      "path": "knowledge/d10-unique-decipherability-selected-20261011.json",
+      "sha": "eae88d2f6767f28f92e3b55920e7fdc40bb4a354",
+      "archive_path": "research/domain-archive/20261011/pr5600/knowledge/d10-unique-decipherability-selected-20261011.json.source.txt"
+    },
+    {
+      "path": "scripts/check_d10_alltime_archived_14_selection.py",
+      "sha": "f0708cf731fc679239f502a7455455c8472da4e7",
+      "archive_path": "research/domain-archive/20261011/pr5600/scripts/check_d10_alltime_archived_14_selection.py.source.txt"
+    },
+    {
+      "path": "scripts/check_d10_existing_ledger_tranche23.py",
+      "sha": "5ef99126ccc1ca641bf4b1d7a09ee3eb5e3c508f",
+      "archive_path": "research/domain-archive/20261011/pr5600/scripts/check_d10_existing_ledger_tranche23.py.source.txt"
+    },
+    {
+      "path": "scripts/check_d10_candidate_names_census.py",
+      "sha": "288a7dc35976068e38fb2659fecb0a11441ed553",
+      "archive_path": "research/domain-archive/20261011/pr5600/scripts/check_d10_candidate_names_census.py.source.txt"
+    },
+    {
+      "path": "scripts/check_d10_existing_combinatorial_laws_selected.py",
+      "sha": "3c014761daf6c7683ac276e6c9fdd40980286d2e",
+      "archive_path": "research/domain-archive/20261011/pr5600/scripts/check_d10_existing_combinatorial_laws_selected.py.source.txt"
+    },
+    {
+      "path": "scripts/check_d10_existing_math_signal_selected.py",
+      "sha": "174fea733336005027b54f6cba55b540f46c14a5",
+      "archive_path": "research/domain-archive/20261011/pr5600/scripts/check_d10_existing_math_signal_selected.py.source.txt"
+    }
+  ]
+}
