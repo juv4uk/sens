@@ -129,7 +129,7 @@ fn compile_t5_triplet_bytes(
     }
 
     let visible = open_ternary_program(physical_t5)
-        .map_err(|error| format!("canonical physical T5 open failed: {error}"))?;
+        .map_err(|error| format!("canonical physical T5 open failed: {error:?}"))?;
     // The Rust renderer returns the spaced words without a newline, while the
     // on-disk view contract requires exactly one final LF.
     let mut canonical_view = visible.as_bytes().to_vec();
@@ -138,7 +138,7 @@ fn compile_t5_triplet_bytes(
         return Err("triplet view does not byte-match the canonical T5 decoder output plus one LF".into());
     }
     let reencoded_t5 = encode_binary_projection_ternary(&visible)
-        .map_err(|error| format!("canonical T5 re-encode failed: {error}"))?;
+        .map_err(|error| format!("canonical T5 re-encode failed: {error:?}"))?;
     if reencoded_t5.as_slice() != physical_t5 {
         return Err("physical T5 is not byte-canonical after decode/encode".into());
     }
@@ -183,7 +183,7 @@ fn compile_sw1_bytes(input: &[u8], sens_revision: &str) -> Result<(Vec<u8>, bool
     }
 
     let expressions = wire_decode_program(input)
-        .map_err(|error| format!("canonical sens-syntax-wire/1 decode failed: {error}"))?;
+        .ok_or_else(|| "canonical sens-syntax-wire/1 decode failed: invalid physical wire".to_string())?;
 
     // Decode acceptance alone is not treated as proof of canonicality. The
     // exact wire must survive a decode/encode round-trip byte-for-byte.
@@ -434,7 +434,7 @@ mod tests {
             source, &physical, b"10 001 00 000 01", revision,
         ).is_err(), "the canonical extensionless view requires exactly one trailing LF");
         assert!(compile_t5_triplet_bytes(
-            b"(інакше ())\n", &physical, view, revision,
+            "(інакше ())\n".as_bytes(), &physical, view, revision,
         ).is_err(), "a source that lowers to a different exact program must block");
     }
 
