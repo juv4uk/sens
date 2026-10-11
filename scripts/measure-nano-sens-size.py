@@ -390,7 +390,7 @@ def self_test() -> None:
         else:
             raise AssertionError("negative control accepted non-identical C2 bytes")
 
-    print("NANO-SENS-SIZE SELF-TEST: PASS (5 positive assertions, 3 negative controls)")
+    print("NANO-SENS-SIZE SELF-TEST: PASS (5 positive assertions, 4 negative controls)")
 
 
 def main() -> int:
