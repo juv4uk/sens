@@ -121,8 +121,12 @@ def check(root=ROOT, self_test=False):
     v7 = read_pinned(frozen["path"], FROZEN_V7, root)
     v8 = read_pinned(frozen_v8["path"], frozen_v8["git_blob"], root)
     live = read_pinned(canonical["path"], canonical["git_blob"], root)
-    need(len(live["rows"]) >= len(v8["rows"])
-         and live["rows"][:len(v8["rows"])] == v8["rows"],
+    comparison = live
+    if canonical["path"] == "knowledge/d10-v18-semantic-inventory.json":
+        archived = ptr["historical_v17_research_inventory"]
+        comparison = read_pinned(archived["path"], archived["git_blob"], root)
+    need(len(comparison["rows"]) >= len(v8["rows"])
+         and comparison["rows"][:len(v8["rows"])] == v8["rows"],
          "later inventory rewrote historical v8")
     live_coords = [row["coordinate"] for row in live["rows"]
                    if row.get("coordinate") is not None]

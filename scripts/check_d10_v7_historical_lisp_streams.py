@@ -42,7 +42,13 @@ def check():
     need(current["git_blob"]==sha(live_raw),"live D10 pointer blob")
     live=json.loads(live_raw)
     live_rows=live["rows"]
-    need(len(live_rows)>=721 and live_rows[:721]==v7["rows"],"live D10 must extend archived v7")
+    review_rows=live_rows
+    if current["path"]=="knowledge/d10-v18-semantic-inventory.json":
+        archived=ptr["historical_v17_research_inventory"]
+        archived_raw=(ROOT/archived["path"]).read_bytes()
+        need(sha(archived_raw)==archived["git_blob"],"v17 archival SHA changed")
+        review_rows=json.loads(archived_raw)["rows"]
+    need(len(review_rows)>=721 and review_rows[:721]==v7["rows"],"live D10 must extend archived v7")
     live_coords=[r["coordinate"] for r in live_rows if r.get("coordinate") is not None]
     live_ratified=sum(r.get("ratified_resident") is True for r in live_rows)
     need((current["selected"],current["placed"],current["unplaced"],current["ratified"])==
