@@ -118,6 +118,14 @@ class LegacyD3GuardTests(unittest.TestCase):
         drift = MODULE.scan_core_rust(bad)
         self.assertEqual({item.operation for item in drift}, {"ATOM", "EQ", "COND"})
 
+    def test_live_time_library_uses_only_current_d3_call_heads(self):
+        source = (ROOT / "lib/time.lisp").read_text(encoding="utf-8")
+        findings = MODULE.scan_lisp(source, "lib/time.lisp")
+        rejected = [item for item in findings if item.rule in (
+            "LEGACY_W8_CALL", "D3_WRONG_ARITY",
+            "COND_NOT_TWO_FIELDS", "COND_HOST_TRUTH")]
+        self.assertEqual(rejected, [], "Time loader now uses a path-bound exact D3 reader")
+
     def test_git_audit_reports_files_and_strict_exit(self):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
