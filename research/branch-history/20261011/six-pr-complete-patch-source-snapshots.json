@@ -1,0 +1,185 @@
+{
+  "schema": "sens.branch-history-six-pr-patch-snapshots/v1",
+  "date": "2026-10-11",
+  "status": "ALL_19_ORIGINAL_CHANGED_FILE_BLOBS_PRESERVED_NOT_MERGED",
+  "snapshot_branch_inventory": 4133,
+  "main_ancestry_report": {
+    "run": "https://github.com/juv4uk/sens/actions/runs/38104852799",
+    "in_main_ancestry": 1256,
+    "needs_content_review": 2877
+  },
+  "no_new_branches_created": true,
+  "files_verified_byte_exact": 19,
+  "pr_patch_snapshots": [
+    {
+      "source_pr": "https://github.com/juv4uk/sens/pull/5214",
+      "original_head_sha": "822524bf20d0ab12830c554ed283554f23c008dc",
+      "changed_files_reported": 3,
+      "archived_changed_files": [
+        {
+          "original_path": "crates/sens/examples/t5_view_ab.rs",
+          "archived_path": "research/branch-history/20261011/source-pr5214/crates/sens/examples/t5_view_ab.rs.source.txt",
+          "original_git_blob_sha": "26ee41c1a71530a269e3b8962e81873821bd8b5e",
+          "status": "GIT-BLOB-EQUAL-TO-ORIGINAL_AT_MAIN"
+        },
+        {
+          "original_path": ".github/workflows/physical-t5-performance.yml",
+          "archived_path": "research/branch-history/20261011/source-pr5214/.github/workflows/physical-t5-performance.yml.source.txt",
+          "original_git_blob_sha": "a7be629111da8a9f80e40d5423505d43f0b7c8d7",
+          "status": "GIT-BLOB-EQUAL-TO-ORIGINAL_AT_MAIN"
+        },
+        {
+          "original_path": "crates/sens/src/ternary_transport.rs",
+          "archived_path": "research/branch-history/20261011/source-pr5214/crates/sens/src/ternary_transport.rs.source.txt",
+          "original_git_blob_sha": "4e0b99514c1b97e284cc8de0d1427a07fe16c220",
+          "status": "GIT-BLOB-EQUAL-TO-ORIGINAL_AT_MAIN"
+        }
+      ],
+      "semantic_review": "PENDING; do not activate CI, runtime, compiler, ABI or ratified domains based on archive alone",
+      "historical_branch_commit_merged": false
+    },
+    {
+      "source_pr": "https://github.com/juv4uk/sens/pull/5476",
+      "original_head_sha": "a7073f3105a3be281120821b6a73e46aa4fb92e8",
+      "changed_files_reported": 5,
+      "archived_changed_files": [
+        {
+          "original_path": "tests/test_migrate_approved_t5.py",
+          "archived_path": "research/branch-history/20261011/source-pr5476/tests/test_migrate_approved_t5.py.source.txt",
+          "original_git_blob_sha": "602310aa79759f04017c590f8fdd69243ba5a1a0",
+          "status": "GIT-BLOB-EQUAL-TO-ORIGINAL_AT_MAIN"
+        },
+        {
+          "original_path": ".github/workflows/important-file-guard.yml",
+          "archived_path": "research/branch-history/20261011/source-pr5476/.github/workflows/important-file-guard.yml.source.txt",
+          "original_git_blob_sha": "325797ef71f173de132e5c7b5b7f936e2c07253b",
+          "status": "GIT-BLOB-EQUAL-TO-ORIGINAL_AT_MAIN"
+        },
+        {
+          "original_path": ".github/workflows/sens-code-migration.yml",
+          "archived_path": "research/branch-history/20261011/source-pr5476/.github/workflows/sens-code-migration.yml.source.txt",
+          "original_git_blob_sha": "bbb8e1642c90943f740a8625f24cec6a728c1fd1",
+          "status": "GIT-BLOB-EQUAL-TO-ORIGINAL_AT_MAIN"
+        },
+        {
+          "original_path": "scripts/migrate-three-pass.py",
+          "archived_path": "research/branch-history/20261011/source-pr5476/scripts/migrate-three-pass.py.source.txt",
+          "original_git_blob_sha": "79a1b819b05393b758657b5075e337cc7f3f469c",
+          "status": "GIT-BLOB-EQUAL-TO-ORIGINAL_AT_MAIN"
+        },
+        {
+          "original_path": "tests/test_three_pass_migration.py",
+          "archived_path": "research/branch-history/20261011/source-pr5476/tests/test_three_pass_migration.py.source.txt",
+          "original_git_blob_sha": "ab218580e943a35d8790c7935e821cca88833157",
+          "status": "GIT-BLOB-EQUAL-TO-ORIGINAL_AT_MAIN"
+        }
+      ],
+      "semantic_review": "PENDING; do not activate CI, runtime, compiler, ABI or ratified domains based on archive alone",
+      "historical_branch_commit_merged": false
+    },
+    {
+      "source_pr": "https://github.com/juv4uk/sens/pull/173",
+      "original_head_sha": "350145462449349cf3de826f8b9b1eeb36d62c41",
+      "changed_files_reported": 2,
+      "archived_changed_files": [
+        {
+          "original_path": "tests/fixtures/backend-adapters.lisp",
+          "archived_path": "research/branch-history/20261011/source-pr0173/tests/fixtures/backend-adapters.lisp.source.txt",
+          "original_git_blob_sha": "372d98c78181231abd9c504679217de454268e69",
+          "status": "GIT-BLOB-EQUAL-TO-ORIGINAL_AT_MAIN"
+        },
+        {
+          "original_path": "crates/my-lisp/tests/witness_authority.rs",
+          "archived_path": "research/branch-history/20261011/source-pr173/crates/my-lisp/tests/witness_authority.rs.source.txt",
+          "original_git_blob_sha": "19768c9ef6ad8ddc2f5a448f1a7a29c750898e4f",
+          "status": "GIT-BLOB-EQUAL-TO-ORIGINAL_AT_MAIN"
+        }
+      ],
+      "semantic_review": "PENDING; do not activate CI, runtime, compiler, ABI or ratified domains based on archive alone",
+      "historical_branch_commit_merged": false
+    },
+    {
+      "source_pr": "https://github.com/juv4uk/sens/pull/3745",
+      "original_head_sha": "f9a19ec81b70efb9512397a37eea41b30162eeaa",
+      "changed_files_reported": 2,
+      "archived_changed_files": [
+        {
+          "original_path": "benchmarks/sens-surface/gpu_numeric_buffer_map.py",
+          "archived_path": "research/branch-history/20261011/source-pr3745/benchmarks/sens-surface/gpu_numeric_buffer_map.py.source.txt",
+          "original_git_blob_sha": "45b53dbfb0d25d35d54866be92ff474f9668b4ff",
+          "status": "GIT-BLOB-EQUAL-TO-ORIGINAL_AT_MAIN"
+        },
+        {
+          "original_path": ".github/workflows/gpu-worker-smoke.yml",
+          "archived_path": "research/branch-history/20261011/source-pr3745/.github/workflows/gpu-worker-smoke.yml.source.txt",
+          "original_git_blob_sha": "ca9b597222b5f8a3ba59ebece54c6aaaa3b3f495",
+          "status": "GIT-BLOB-EQUAL-TO-ORIGINAL_AT_MAIN"
+        }
+      ],
+      "semantic_review": "PENDING; do not activate CI, runtime, compiler, ABI or ratified domains based on archive alone",
+      "historical_branch_commit_merged": false
+    },
+    {
+      "source_pr": "https://github.com/juv4uk/sens/pull/2350",
+      "original_head_sha": "3d81fa1392b00678a7f46f02cb19246effd17f1a",
+      "changed_files_reported": 3,
+      "archived_changed_files": [
+        {
+          "original_path": "scripts/bench-2346-gf2-affine-certificate-economy.py",
+          "archived_path": "research/branch-history/20261011/source-pr2350/scripts/bench-2346-gf2-affine-certificate-economy.py.source.txt",
+          "original_git_blob_sha": "6243167764df55dd5f3ae033bd3c086a47492107",
+          "status": "GIT-BLOB-EQUAL-TO-ORIGINAL_AT_MAIN"
+        },
+        {
+          "original_path": ".github/workflows/gf2-affine-certificate-economy.yml",
+          "archived_path": "research/branch-history/20261011/source-pr2350/.github/workflows/gf2-affine-certificate-economy.yml.source.txt",
+          "original_git_blob_sha": "847c21b6ed80f0766eeeeea7326bccadbf9cd231",
+          "status": "GIT-BLOB-EQUAL-TO-ORIGINAL_AT_MAIN"
+        },
+        {
+          "original_path": "knowledge/repo-tooling-inventory.lisp",
+          "archived_path": "research/branch-history/20261011/source-pr2350/knowledge/repo-tooling-inventory.lisp.source.txt",
+          "original_git_blob_sha": "bd022822923d67818758875335c2f0f1cbae27e5",
+          "status": "GIT-BLOB-EQUAL-TO-ORIGINAL_AT_MAIN"
+        }
+      ],
+      "semantic_review": "PENDING; do not activate CI, runtime, compiler, ABI or ratified domains based on archive alone",
+      "historical_branch_commit_merged": false
+    },
+    {
+      "source_pr": "https://github.com/juv4uk/sens/pull/484",
+      "original_head_sha": "25796d2a6e9e9a0d067f85093d1e868426a36081",
+      "changed_files_reported": 4,
+      "archived_changed_files": [
+        {
+          "original_path": "tests/fixtures/machine-immediate-branch-atoms-witness.lisp",
+          "archived_path": "research/branch-history/20261011/source-pr0484/tests/fixtures/machine-immediate-branch-atoms-witness.lisp.source.txt",
+          "original_git_blob_sha": "efd39d085684f0737c48b5bbdbfaa1db494c81fe",
+          "status": "GIT-BLOB-EQUAL-TO-ORIGINAL_AT_MAIN"
+        },
+        {
+          "original_path": "lib/machine/atoms/x86-64.lisp",
+          "archived_path": "research/branch-history/20261011/source-pr484/lib/machine/atoms/x86-64.lisp.source.txt",
+          "original_git_blob_sha": "d6a1b2e7ab554ce6bb0a4a7ef1fb1faa112e23ec",
+          "status": "GIT-BLOB-EQUAL-TO-ORIGINAL_AT_MAIN"
+        },
+        {
+          "original_path": "lib/machine/operands/x86-64.lisp",
+          "archived_path": "research/branch-history/20261011/source-pr484/lib/machine/operands/x86-64.lisp.source.txt",
+          "original_git_blob_sha": "80c35a3b3ca93550baf3df8ffc11f19b236c303c",
+          "status": "GIT-BLOB-EQUAL-TO-ORIGINAL_AT_MAIN"
+        },
+        {
+          "original_path": "scripts/test-current-semantic-slice.sh",
+          "archived_path": "research/branch-history/20261011/source-pr484/scripts/test-current-semantic-slice.sh.source.txt",
+          "original_git_blob_sha": "72c3ee13ef5912d1e656ddbdb09139e920e7f591",
+          "status": "GIT-BLOB-EQUAL-TO-ORIGINAL_AT_MAIN"
+        }
+      ],
+      "semantic_review": "PENDING; do not activate CI, runtime, compiler, ABI or ratified domains based on archive alone",
+      "historical_branch_commit_merged": false
+    }
+  ],
+  "source_review_note": "Original Git blob SHA comparisons were checked on main after each replay, 19/19 exact. This contains all paths listed as changed by these six PRs but not entire branch histories or unchanged base files. Do not close PR solely on evidence snapshot without semantic equivalence verification.",
+  "prohibition": "No new Git branches, no force pushes, no new PR lanes."
+}
