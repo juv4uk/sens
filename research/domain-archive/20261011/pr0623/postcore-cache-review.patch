@@ -1,0 +1,469 @@
+# Historical source patch for SENS PR #623
+# Original head: 1894dcf0c599e35f14aa594453aacc64cfbaa949
+# Base main recorded by the PR: 42e3945c5e8f27902ade6fedf52f54786c56f914
+# Captured via GitHub PR patch API on 2026-10-11.
+# Binary lib/core.lisp.fasl is archived separately as Base64 with its original Git blob SHA.
+
+===== FILE .github/workflows/postcore-peer-cache.yml =====
+@@ -0,0 +1,72 @@
++name: Post-core Peer Cache
++
++on:
++  push:
++    branches: [main]
++    paths:
++      - "lib/core.lisp"
++      - "lib/core.lisp.fasl"
++      - "lib/surface/semantic-registry.lisp"
++      - "lib/generated/postcore-stable-peer-projection.lisp"
++      - "lib/time.lisp"
++      - "lib/process.lisp"
++      - "lib/tcp.lisp"
++      - "lib/fs.lisp"
++      - "scripts/generate-postcore-peer-cache.lisp"
++      - ".github/workflows/postcore-peer-cache.yml"
++  pull_request:
++    paths:
++      - "lib/core.lisp"
++      - "lib/core.lisp.fasl"
++      - "lib/surface/semantic-registry.lisp"
++      - "lib/generated/postcore-stable-peer-projection.lisp"
++      - "lib/time.lisp"
++      - "lib/process.lisp"
++      - "lib/tcp.lisp"
++      - "lib/fs.lisp"
++      - "scripts/generate-postcore-peer-cache.lisp"
++      - ".github/workflows/postcore-peer-cache.yml"
++  workflow_dispatch:
++
++permissions:
++  contents: read
++
++jobs:
++  check:
++    name: registry-derived cache + FASL
++    runs-on: ubuntu-latest
++    timeout-minutes: 15
++    steps:
++      - uses: actions/checkout@v5
++      - uses: dtolnay/rust-toolchain@stable
++
++      - name: Build Lisp generator and FASL encoder
++        run: cargo build -p my-lisp-cli --bin my-lisp --bin gen-fasl
++
++      - name: Regenerate post-core cache from semantic authority
++        run: |
++          set -euo pipefail
++          timeout 30s ./target/debug/my-lisp scripts/generate-postcore-peer-cache.lisp
++          git diff --exit-code -- lib/generated/postcore-stable-peer-projection.lisp
++
++      - name: Require core block to equal Lisp-generated projection
++        run: |
++          set -euo pipefail
++          awk '
++            /^; BEGIN GENERATED POSTCORE STABLE PEER PROJECTION/ { inside=1; next }
++            /^; END GENERATED POSTCORE STABLE PEER PROJECTION/ { inside=0 }
++            inside { print }
++          ' lib/core.lisp > /tmp/postcore-stable-peer-projection.lisp
++          cmp /tmp/postcore-stable-peer-projection.lisp lib/generated/postcore-stable-peer-projection.lisp
++
++      - name: Require exact committed FASL
++        run: |
++          set -euo pipefail
++          ./target/debug/gen-fasl lib/core.lisp /tmp/core.lisp.fasl
++          cmp /tmp/core.lisp.fasl lib/core.lisp.fasl
++
++      - name: Execute post-core authority witness
++        run: |
++          set -euo pipefail
++          status="$(./target/debug/my-lisp tests/fixtures/postcore-peer-materialization-witness.lisp)"
++          test "$status" = "(postcore-peer-materialization-witness (status pass))"
+
+===== FILE .github/workflows/temp-606-regenerate-fasl.yml =====
+@@ -0,0 +1,42 @@
++name: TEMP 606 Regenerate FASL
++
++on:
++  push:
++    branches:
++      - work/chatgpt-606-generated-postcore-cache
++    paths:
++      - ".github/workflows/temp-606-regenerate-fasl.yml"
++  workflow_dispatch:
++
++permissions:
++  contents: write
++
++jobs:
++  regenerate:
++    runs-on: ubuntu-latest
++    timeout-minutes: 15
++    steps:
++      - uses: actions/checkout@v5
++        with:
++          fetch-depth: 0
++          ref: work/chatgpt-606-generated-postcore-cache
++      - uses: dtolnay/rust-toolchain@stable
++
++      - name: Regenerate exact core FASL
++        run: |
++          set -euo pipefail
++          cargo build -p my-lisp-cli --bin gen-fasl
++          ./target/debug/gen-fasl lib/core.lisp lib/core.lisp.fasl
++          git diff --exit-code -- lib/core.lisp
++
++      - name: Commit only regenerated binary
++        run: |
++          set -euo pipefail
++          test -n "$(git status --porcelain -- lib/core.lisp.fasl)"
++          git config user.name "github-actions[bot]"
++          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
++          git add lib/core.lisp.fasl
++          git diff --cached --name-only | grep -Fxq 'lib/core.lisp.fasl'
++          test "$(git diff --cached --name-only | wc -l)" -eq 1
++          git commit -m "chore(#606): regenerate core FASL"
++          git push origin HEAD:refs/heads/work/chatgpt-606-generated-postcore-cache
+
+===== FILE knowledge/repo-tooling-inventory.lisp =====
+@@ -31,6 +31,7 @@
+ (tool (path "scripts/gen-docs-index.sh") (kind generator) (language shell) (role documentation-index-generator) (lifecycle active) (callers unknown) (authority-source unknown) (migration-issue ()) (replacement ()) (removal-condition explicit-review))
+ (tool (path "scripts/gen-functions.lisp") (kind generator) (language lisp) (role functions-documentation-generator) (lifecycle active) (callers unknown) (authority-source unknown) (migration-issue ()) (replacement ()) (removal-condition explicit-review))
+ (tool (path "scripts/generate-function-table.lisp") (kind generator) (language lisp) (role function-table-generator) (lifecycle active) (callers unknown) (authority-source "lib/surface/semantic-registry.lisp") (migration-issue ()) (replacement ()) (removal-condition explicit-review))
++(tool (path "scripts/generate-postcore-peer-cache.lisp") (kind generator) (language lisp) (role postcore-peer-cache-generator) (lifecycle active) (callers (".github/workflows/postcore-peer-cache.yml")) (authority-source "lib/surface/semantic-registry.lisp") (migration-issue ()) (replacement ()) (removal-condition issue-606-superseded-by-ratified-successor))
+ (tool (path "scripts/generate-meta-eval-evidence.py") (kind generator) (language python) (role meta-eval-human-evidence-projection) (lifecycle transitional) (callers ("crates/xtask/src/checks.rs")) (authority-source unknown) (migration-issue 351) (replacement ()) (removal-condition migration-issue-complete-and-callers-switched))
+ (tool (path "scripts/generate-meta-semantic-registry.py") (kind generator) (language python) (role meta-semantic-registry-generator) (lifecycle transitional) (callers unknown) (authority-source "lib/surface/semantic-registry.lisp") (migration-issue 317) (replacement ()) (removal-condition migration-issue-complete-and-callers-switched))
+ (tool (path "scripts/generate-uk-surface-audit.lisp") (kind generator) (language lisp) (role ukrainian-surface-audit-generator) (lifecycle active) (callers unknown) (authority-source "lib/surface/semantic-registry.lisp") (migration-issue ()) (replacement ()) (removal-condition explicit-review))
+
+===== FILE lib/core.lisp =====
+@@ -781,6 +781,10 @@
+ ; Keep only unique stable spellings from lib/surface/semantic-registry.lisp.
+ ; Candidate spellings are deliberately absent and therefore cannot become
+ ; executable merely by appearing in documentation.
++; The block below must byte-match the Lisp-generated projection from
++; semantic-registry + numeric post-core declarations. Do not edit rows by hand;
++; CI compares it with lib/generated/postcore-stable-peer-projection.lisp.
++; BEGIN GENERATED POSTCORE STABLE PEER PROJECTION — scripts/generate-postcore-peer-cache.lisp
+ (def my-postcore-stable-peer-projection
+   (quote (
+     (1079 utc-now поточний-всч)
+@@ -798,6 +802,7 @@
+     (1091 deadline-after-ns дедлайн-через-нс)
+     (1092 internet-time-sync запитати-інтернет-час)
+   )))
++; END GENERATED POSTCORE STABLE PEER PROJECTION
+ 
+ (def my-postcore-peer-group
+   (lambda (semantic-id groups)
+
+===== FILE lib/core.lisp.fasl =====
+(binary patch omitted by GitHub; see exact blob archive)
+
+===== FILE lib/generated/postcore-stable-peer-projection.lisp =====
+@@ -0,0 +1,17 @@
++(def my-postcore-stable-peer-projection
++  (quote (
++    (1079 utc-now поточний-всч)
++    (1080 utc-from-unix всч-із-юнікс)
++    (1081 unix-time-observation->utc юнікс-спостереження-у-всч)
++    (1082 milliseconds-from-nanoseconds мілісекунди-із-наносекунд)
++    (1083 mono-ms монотонний-мс)
++    (1084 timezone-name назва-часового-поясу)
++    (1085 timezone-detect визначити-часовий-пояс)
++    (1086 timezone-offset-seconds зміщення-часового-поясу-в-секундах)
++    (1087 deadline-reached? дедлайн-досягнуто?)
++    (1088 deadline-reached-at? дедлайн-досягнуто-на-момент?)
++    (1089 elapsed-ns минуло-нс)
++    (1090 deadline-from дедлайн-від)
++    (1091 deadline-after-ns дедлайн-через-нс)
++    (1092 internet-time-sync запитати-інтернет-час)
++  )))
+
+===== FILE scripts/generate-postcore-peer-cache.lisp =====
+@@ -0,0 +1,287 @@
++; scripts/generate-postcore-peer-cache.lisp — #606
++;
++; Generate the capability-free post-core stable-peer cache embedded in
++; lib/core.lisp from the one semantic spelling authority:
++;   lib/surface/semantic-registry.lisp
++;
++; Post-core libraries contribute only numeric semantic IDs + the source binding
++; they just defined through (my-postcore-materialize-stable-peers ID SOURCE).
++; They never contribute peer spellings. Candidate surfaces are ignored.
++;
++; The generator writes lib/generated/postcore-stable-peer-projection.lisp.
++; CI requires the marked block in core.lisp to byte-match that projection, so
++; bare-core/WASM bootstraps still need no filesystem capability at runtime.
++;
++; Usage from repository root:
++;   cargo run -p my-lisp-cli --bin my-lisp -- scripts/generate-postcore-peer-cache.lisp
++;
++; The source path list below is library topology, not surface authority. Adding
++; another post-core library that uses the materialization macro must add its
++; source path here; all peer names still come exclusively from the registry.
++
++(def postcore-cache-source-paths
++  (quote (
++    "lib/time.lisp"
++    "lib/process.lisp"
++    "lib/tcp.lisp"
++    "lib/fs.lisp"
++  )))
++
++; Host load owns only fast file transport/parsing. This temporary macro owns
++; the interpretation: the registry's sr/1 envelope becomes quoted data.
++(defmacro sr/1 rows
++  (list (quote quote) rows))
++
++(def postcore-cache-authority-rows
++  (load "lib/surface/semantic-registry.lisp"))
++(print (quote (postcore-cache-debug authority-loaded)))
++
++(def postcore-cache-member-status
++  (lambda (needle items)
++    (cond
++      ((atom items) (structural-kind empty-list)
++       (quote absent))
++      ((atom items) (structural-kind pair)
++       (cond
++         ((eq needle (car items)) (identity-relation same)
++          (quote present))
++         ((eq needle (car items)) (identity-relation distinct)
++          (postcore-cache-member-status needle (cdr items))))))))
++
++(def postcore-cache-find-authority-row
++  (lambda (semantic-id rows)
++    (cond
++      ((atom rows) (structural-kind empty-list)
++       (quote ()))
++      ((atom rows) (structural-kind pair)
++       (let ((row (car rows)))
++         (cond
++           ((= semantic-id (car row)) 1
++            row)
++           ((= semantic-id (car row)) 0
++            (postcore-cache-find-authority-row semantic-id (cdr rows)))))))))
++
++(def postcore-cache-surfaces-with-status-onto
++  (lambda (status surfaces acc)
++    (cond
++      ((atom surfaces) (structural-kind empty-list)
++       (reverse acc))
++      ((atom surfaces) (structural-kind pair)
++       (let* ((surface (car surfaces))
++              (word (second surface))
++              (surface-status (third surface)))
++         (cond
++           ((eq surface-status status) (identity-relation same)
++            (cond
++              ((eq word (quote —)) (identity-relation same)
++               (postcore-cache-surfaces-with-status-onto
++                 status
++                 (cdr surfaces)
++                 acc))
++              ((eq word (quote —)) (identity-relation distinct)
++               (cond
++                 ((eq
++                    (postcore-cache-member-status word acc)
++                    (quote present))
++                  (identity-relation same)
++                  (postcore-cache-surfaces-with-status-onto
++                    status
++                    (cdr surfaces)
++                    acc))
++                 ((eq
++                    (postcore-cache-member-status word acc)
++                    (quote absent))
++                  (identity-relation same)
++                  (postcore-cache-surfaces-with-status-onto
++                    status
++                    (cdr surfaces)
++                    (cons word acc)))))))
++           ((eq surface-status status) (identity-relation distinct)
++            (postcore-cache-surfaces-with-status-onto
++              status
++              (cdr surfaces)
++              acc))))))))
++
++(def postcore-cache-stable-surfaces
++  (lambda (semantic-id)
++    (let ((row
++            (postcore-cache-find-authority-row
++              semantic-id
++              postcore-cache-authority-rows)))
++      (cond
++        ((atom row) (structural-kind empty-list)
++         (quote ()))
++        ((atom row) (structural-kind pair)
++         (postcore-cache-surfaces-with-status-onto
++           (quote stable)
++           (cdr row)
++           (quote ())))))))
++
++; Collect numeric declarations through a tiny filesystem manifest. LOAD is the
++; fast host mechanism; this Lisp macro owns the declaration shape. The manifest
++; is reset on every generator run, so removed declarations cannot survive as
++; stale data between local runs.
++(def postcore-cache-declaration-manifest
++  "/tmp/my-lisp-postcore-cache-declarations.lisp")
++
++(def postcore-cache-manifest-reset
++  (write-file postcore-cache-declaration-manifest "(quote ())"))
++
++(defmacro my-postcore-materialize-stable-peers args
++  (let* ((semantic-id (car args))
++         (source (second args))
++         (declaration (list semantic-id source)))
++    (list
++      (quote write-file)
++      postcore-cache-declaration-manifest
++      (list
++        (quote write-to-string)
++        (list
++          (quote list)
++          (list (quote quote) (quote quote))
++          (list
++            (quote cons)
++            (list (quote quote) declaration)
++            (list (quote load) postcore-cache-declaration-manifest)))))))
++
++(def postcore-cache-load-sources
++  (lambda (paths)
++    (cond
++      ((atom paths) (structural-kind empty-list)
++       (quote loaded))
++      ((atom paths) (structural-kind pair)
++       (let ((loaded (load (car paths))))
++         (postcore-cache-load-sources (cdr paths)))))))
++
++(def postcore-cache-source-load-status
++  (postcore-cache-load-sources postcore-cache-source-paths))
++
++(def postcore-cache-declarations
++  (reverse (load postcore-cache-declaration-manifest)))
++
++(print
++  (list
++    (quote postcore-cache-debug)
++    (quote declarations-loaded)
++    (length postcore-cache-declarations)))
++
++(def postcore-cache-declarations-valid?
++  (lambda (declarations)
++    (cond
++      ((atom declarations) (structural-kind empty-list)
++       (quote valid))
++      ((atom declarations) (structural-kind pair)
++       (let* ((declaration (car declarations))
++              (semantic-id (car declaration))
++              (source (second declaration))
++              (stable-peers
++                (postcore-cache-stable-surfaces semantic-id)))
++         (cond
++           ((eq
++              (postcore-cache-member-status source stable-peers)
++              (quote present))
++            (identity-relation same)
++            (postcore-cache-declarations-valid? (cdr declarations)))
++           ((eq
++              (postcore-cache-member-status source stable-peers)
++              (quote absent))
++            (identity-relation same)
++            (quote invalid))))))))
++
++(def postcore-cache-expected-groups-onto
++  (lambda (declarations acc)
++    (cond
++      ((atom declarations) (structural-kind empty-list)
++       (reverse acc))
++      ((atom declarations) (structural-kind pair)
++       (let* ((semantic-id (car (car declarations)))
++              (stable-peers
++                (postcore-cache-stable-surfaces semantic-id)))
++         (cond
++           ((> (length stable-peers) 1) 1
++            (postcore-cache-expected-groups-onto
++              (cdr declarations)
++              (cons (cons semantic-id stable-peers) acc)))
++           ((> (length stable-peers) 1) 0
++            (postcore-cache-expected-groups-onto
++              (cdr declarations)
++              acc))))))))
++
++(def postcore-cache-expected-groups
++  (postcore-cache-expected-groups-onto
++    postcore-cache-declarations
++    (quote ())))
++(print (quote (postcore-cache-debug groups-derived)))
++
++(def postcore-cache-render-peers-onto
++  (lambda (peers acc)
++    (cond
++      ((atom peers) (structural-kind empty-list)
++       acc)
++      ((atom peers) (structural-kind pair)
++       (postcore-cache-render-peers-onto
++         (cdr peers)
++         (string-append
++           acc
++           (string-append " " (write-to-string (car peers)))))))))
++
++(def postcore-cache-render-group
++  (lambda (group)
++    (string-append
++      "    ("
++      (string-append
++        (number->string (car group))
++        (string-append
++          (postcore-cache-render-peers-onto (cdr group) "")
++          ")")))))
++
++(def postcore-cache-render-groups-onto
++  (lambda (groups acc)
++    (cond
++      ((atom groups) (structural-kind empty-list)
++       acc)
++      ((atom groups) (structural-kind pair)
++       (postcore-cache-render-groups-onto
++         (cdr groups)
++         (string-append
++           acc
++           (string-append
++             (postcore-cache-render-group (car groups))
++             "\n")))))))
++
++(def postcore-cache-render-definition
++  (lambda (groups)
++    (string-append
++      "(def my-postcore-stable-peer-projection\n  (quote (\n"
++      (string-append
++        (postcore-cache-render-groups-onto groups "")
++        "  )))"))))
++
++(def postcore-cache-output-path
++  "lib/generated/postcore-stable-peer-projection.lisp")
++
++(print (quote (postcore-cache-debug render-ready)))
++
++(cond
++  ((eq
++     (postcore-cache-declarations-valid? postcore-cache-declarations)
++     (quote valid))
++   (identity-relation same)
++   (let ((output
++           (string-append
++             (postcore-cache-render-definition
++               postcore-cache-expected-groups)
++             "\n")))
++     (let ((written
++             (write-file postcore-cache-output-path output)))
++       (print
++         (list
++           (quote postcore-peer-cache-generator)
++           (list (quote groups) (length postcore-cache-expected-groups))
++           (list (quote write-result) written)
++           (quote (status written)))))))
++  ((eq
++     (postcore-cache-declarations-valid? postcore-cache-declarations)
++     (quote invalid))
++   (identity-relation same)
++   (postcore-cache-generator-invalid-source-declaration)))
