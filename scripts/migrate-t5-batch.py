@@ -31,6 +31,7 @@ INPUTS = {
     "semantic_registry": ROOT / "crates/sens/src/semantic_registry.rs",
     "necessary_forms": ROOT / "crates/sens/src/eval/necessary_forms_generated.rs",
     "historical_map": ROOT / "contracts/core1-historical-sid-map.lisp",
+    "legacy_coverage": ROOT / "knowledge/sens8-current-coverage-v1.json",
     "text7": ROOT / "crates/sens/src/text7_projection_generated.rs",
 }
 EXCLUDE = set(mig.SKIP_DIRS)
@@ -112,7 +113,8 @@ def run(args: argparse.Namespace) -> dict:
         raise ValueError("current D8 source requires owner-ratified D8 foundation")
     legacy, my, upper = mig.build_three_pass_maps(
         data, INPUTS["domain_surfaces"], INPUTS["semantic_generated"],
-        INPUTS["semantic_registry"], INPUTS["necessary_forms"], INPUTS["historical_map"]
+        INPUTS["semantic_registry"], INPUTS["necessary_forms"], INPUTS["historical_map"],
+        INPUTS["legacy_coverage"]
     )
     text7 = mig.build_text7(data, INPUTS["text7"])
     ledger = sorted(failures, key=lambda e: e["path"])

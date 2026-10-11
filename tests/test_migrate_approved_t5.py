@@ -45,6 +45,17 @@ class ApprovedT5MigrationTests(unittest.TestCase):
             args.extend(["--reader", str(ROOT / "target" / "debug" / reader_name)])
         return subprocess.run(args, cwd=ROOT, capture_output=True, text=True, timeout=60)
 
+    def test_approved_driver_loads_owner_audited_sid8_successors(self):
+        import importlib.util
+        spec = importlib.util.spec_from_file_location("sens_approved_t5_audit_test", SCRIPT)
+        self.assertIsNotNone(spec)
+        approved = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(approved)
+        legacy, _my, _upper, _text7 = approved.load_engine_maps(ROOT)
+        self.assertEqual(legacy["01001000"][:2], ("11011011", "D8"))
+        self.assertEqual(legacy["01001011"][:2], ("110101001", "D9"))
+        self.assertNotEqual(legacy["01001011"][0], "01001011")
+
     def test_dry_run_is_manifest_only(self):
         with tempfile.TemporaryDirectory() as td:
             base = Path(td)

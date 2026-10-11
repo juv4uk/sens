@@ -36,6 +36,24 @@ class RealBatchTest(unittest.TestCase):
             *(["--write"] if write else []),
         ], text=True, capture_output=True)
 
+    def test_audited_d9_sid8_maps_to_exact_d9_without_reusing_legacy_bits(self):
+        source = self.root / "lib/legacy-d9.lisp"
+        source.write_text("(01001011 ())" + chr(10), encoding="utf-8")
+        p = self.call("lib/legacy-d9.lisp", write=True, era="legacy")
+        self.assertEqual(p.returncode, 0, p.stderr + p.stdout)
+        report = json.loads(self.report.read_text(encoding="utf-8"))
+        self.assertEqual(report["summary"]["files_written"], 1)
+        self.assertEqual(report["files"][0]["passes"]["pass1-sens8"], 1)
+        spec = importlib.util.spec_from_file_location("sens_batch_test", DRIVER)
+        self.assertIsNotNone(spec)
+        batch = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(batch)
+        physical = (self.out / "lib/legacy-d9.sens").read_bytes()
+        self.assertEqual(batch.mig.decode_bytes(physical),
+                         ["10", "110101001", "00", "000", "01"])
+        self.assertEqual(source.read_text(encoding="utf-8"),
+                         "(01001011 ())" + chr(10))
+
     def test_real_existing_core1_converts_to_exact_physical_t5(self):
         before = (self.root / "lib/third.lisp").read_bytes()
         expected = PROVEN.with_suffix(".sens").read_bytes()
