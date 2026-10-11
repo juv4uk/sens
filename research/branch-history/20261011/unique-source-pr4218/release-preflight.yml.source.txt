@@ -1,0 +1,43 @@
+name: Release Preflight
+
+on:
+  pull_request:
+    paths:
+      - "Cargo.lock"
+      - "Cargo.toml"
+      - "crates/**/Cargo.toml"
+      - "guix.scm"
+      - "packaging/install.sh"
+      - "packaging/windows/sens.wxs"
+      - "packaging/islands-manifest-v1.json"
+      - "scripts/release.lisp"
+      - ".github/workflows/release.yml"
+      - ".github/workflows/release-preflight.yml"
+  workflow_dispatch:
+
+concurrency:
+  group: release-preflight-${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  release-preflight:
+    # #975 / #4196: this lane intentionally matches the exact l0.42.0
+    # candidate gate. It is release-preparation evidence, not the ordinary
+    # fast PR lane.
+    name: exact workspace release preflight
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v5
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: clippy
+      - uses: Swatinem/rust-cache@v2
+        with:
+          shared-key: release-preflight
+
+      - name: Full workspace tests
+        run: cargo test --workspace
+
+      - name: Full workspace clippy
+        run: cargo clippy --workspace --all-targets -- -D warnings
