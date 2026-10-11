@@ -187,6 +187,7 @@ pub use outer_envelope::{encode_outer_records, OuterEnvelope, OuterEnvelopeError
 pub use binary_framing::{
     decode_binary_frame, decode_binary_program, encode_binary_frame, encode_binary_program,
     decode_numeric_value_frame, encode_numeric_value_frame,
+    decode_packed_numeric_value, encode_packed_numeric_value,
     BinaryFrame, BinaryFrameError,
 };
 pub use gpu_execution_packet::{
