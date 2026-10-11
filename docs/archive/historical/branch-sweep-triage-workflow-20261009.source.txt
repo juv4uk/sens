@@ -1,0 +1,60 @@
+name: Safe branch sweep verdict catalog (read-only)
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [safe-branch-sweep-20261009]
+    paths:
+      - "scripts/triage_branch_sweep.py"
+      - "tests/test_triage_branch_sweep.py"
+      - ".github/workflows/branch-sweep-triage.yml"
+  pull_request:
+    paths:
+      - "scripts/triage_branch_sweep.py"
+      - "tests/test_triage_branch_sweep.py"
+      - ".github/workflows/branch-sweep-triage.yml"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: sweep-triage-shared
+  cancel-in-progress: true
+
+jobs:
+  complete-census-and-verdict-catalog:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 65
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Check fail-closed verdict rules
+        run: python3 -m unittest discover -s tests -p 'test_triage_branch_sweep.py' -v
+      - name: Retrieve branch references without writing main
+        run: git fetch --no-tags origin '+refs/heads/*:refs/remotes/origin/*'
+      - name: Regenerate real-commit-date Git census
+        run: |
+          python3 scripts/audit_branch_merges.py \
+            --main-ref origin/main \
+            --output artifacts/historical-branch-merge-census.json
+      - name: Generate a four-verdict, no-gap initial catalogue
+        run: |
+          python3 scripts/triage_branch_sweep.py \
+            --census artifacts/historical-branch-merge-census.json \
+            --output artifacts/historical-branch-verdicts.json
+      - name: Upload census and provisional verdicts
+        uses: actions/upload-artifact@v4
+        with:
+          name: safe-branch-sweep-triage-read-only
+          path: |
+            artifacts/historical-branch-merge-census.json
+            artifacts/historical-branch-verdicts.json
+          if-no-files-found: error
+          retention-days: 14
+      - name: Explicit non-admission notice
+        run: |
+          echo '## Safe-branch sweep triage: NOT a merge permit' >> "$GITHUB_STEP_SUMMARY"
+          echo 'Every head is catalogued, but CONFLICT is a hold until manual proof.' >> "$GITHUB_STEP_SUMMARY"
+          echo 'Even a successful audit cannot authorize main promotion.' >> "$GITHUB_STEP_SUMMARY"
+          echo 'Do not count skipped GPU/FPGA checks as successful verification.' >> "$GITHUB_STEP_SUMMARY"
