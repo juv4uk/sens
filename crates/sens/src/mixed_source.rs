@@ -45,6 +45,73 @@ pub fn parse_mixed_exact_domain_machine_source(
     parse_mixed_source(source, true)
 }
 
+/// The only approved D8 writer head at this migration boundary is the
+/// ratified eight-bit WRITE-TO-STRING, never an inferred compatibility byte.
+/// It is lifted *only* for path-pinned, trusted Lisp library sources.
+/// Historical W8 QUOTE remains opaque, and binder names remain source data.
+fn lift_pinned_d8_writer(
+    source: &str,
+    expression: Expr,
+    depth: u32,
+) -> Result<Expr, LanguageError> {
+    if depth > MAX_STRUCTURE_DEPTH {
+        return Err(LanguageError::new(
+            ErrorKind::Parse,
+            "pinned D8 writer source exceeds structure depth",
+            expression.span,
+        ));
+    }
+    let Expr { kind, span } = expression;
+    let ExprKind::List(items) = kind else {
+        return Ok(Expr { kind, span });
+    };
+    if items.is_empty() {
+        return Ok(Expr { kind: ExprKind::List(items), span });
+    }
+    let mut lifted = items.to_vec();
+    let head_spelling = source_spelling(source, &lifted[0]);
+    if is_legacy_w8_quote_head(source, &lifted[0])
+        || is_exact_quote(&lifted[0])
+        || head_spelling == Some("'")
+    {
+        return Ok(Expr { kind: ExprKind::List(items), span });
+    }
+
+    if head_spelling == Some("11110100") {
+        let words = parse_binary_source_words("11110100")?;
+        let word = words.first().expect("one static ratified D8 source word").word;
+        lifted[0] = Expr {
+            kind: ExprKind::DomainIdentity(DomainIdentity::from_source_word(word)),
+            span: lifted[0].span,
+        };
+    } else if matches!(&lifted[0].kind, ExprKind::List(_)) {
+        lifted[0] = lift_pinned_d8_writer(source, lifted[0].clone(), depth + 1)?;
+    }
+
+    let skip_binding_slot = is_legacy_w8_define_head(source, &items[0])
+        || is_legacy_w8_lambda_head(source, &items[0])
+        || is_legacy_w8_macro_head(source, &items[0])
+        || is_exact_d4_binding_head(&items[0]);
+
+    for index in 1..lifted.len() {
+        if skip_binding_slot && index == 1 {
+            continue;
+        }
+        lifted[index] = lift_pinned_d8_writer(source, lifted[index].clone(), depth + 1)?;
+    }
+    Ok(Expr {
+        kind: ExprKind::List(Rc::from(lifted.into_boxed_slice())),
+        span,
+    })
+}
+
+fn parse_mixed_pinned_d8_writer(source: &str) -> Result<Vec<Expr>, LanguageError> {
+    parse_mixed_source(source, true)?
+        .into_iter()
+        .map(|expr| lift_pinned_d8_writer(source, expr, 0))
+        .collect()
+}
+
 /// Migrate only the three pinned reasoning modules. W8 syntax containers
 /// remain compatible while their executable D3 call heads retain exact width.
 /// This is NOT a general license to reinterpret W8 data or older Lisp files.
@@ -78,7 +145,11 @@ pub fn parse_mixed_exact_domain_fs_fixture_source(
             Span::default(),
         ));
     }
-    parse_mixed_source(source, true)
+    if matches!(path, "lib/world.lisp" | "lib/knowledge.lisp" | "lib/lisp-fs.lisp") {
+        parse_mixed_pinned_d8_writer(source)
+    } else {
+        parse_mixed_source(source, true)
+    }
 }
 
 /// Read only the frozen legacy library core with exact D3-D6 callable heads.
@@ -95,7 +166,7 @@ pub fn parse_mixed_exact_domain_legacy_core_source(
             Span::default(),
         ));
     }
-    parse_mixed_source(source, true)
+    parse_mixed_pinned_d8_writer(source)
 }
 
 /// Parse only the language-owned time module with exact-width D3 call heads.
