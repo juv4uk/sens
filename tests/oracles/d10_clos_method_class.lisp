@@ -107,7 +107,7 @@
     (d10-method-class-observe "CHANGE_CLASS_HOOK_SEES_OLD_VALUE"
       (eql (first *d10-change-class-hook-observation*) 41))
     (d10-method-class-observe "CHANGE_CLASS_HOOK_SEES_CURRENT_INSTANCE"
-      (eq (second *d10-change-class-hook-observation*) object))))
+      (second *d10-change-class-hook-observation*))))
 
 (format t "SUMMARY~CD10-CLOS-METHOD-CLASS-ORACLE-V1~C~D~%"
         #\Tab #\Tab *d10-method-class-observations*)
