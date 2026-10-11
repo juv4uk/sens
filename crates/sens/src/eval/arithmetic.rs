@@ -634,7 +634,7 @@ mod qualified_numeric_domain_value_tests {
     #[test]
     fn core_runtime_adds_d24_values_to_d48_value_and_retains_domain_identity() {
         let max = in_domain(24, vec![1; 24]);
-        let env = Environment::default();
+        let env = Environment::root();
         let sum = arithmetic_on_values("+", &[max.clone(), max.clone()], &env, Span::default())
             .expect("same-domain natural ADD");
         let Value::BinaryNumber(sum_bits) = sum else {
@@ -655,8 +655,25 @@ mod qualified_numeric_domain_value_tests {
     }
 
     #[test]
+    fn source_expression_uses_binary_domain_values_without_numeric_literals() {
+        // Only the admitted D24 payloads are supplied directly as values.
+        // This is the real evaluator path through a named environment binding.
+        let mut session = crate::Session::default();
+        let max = in_domain(24, vec![1; 24]);
+        session.environment.define("a", max.clone());
+        session.environment.define("b", max);
+        let result = crate::eval_program("(+ a b)", &mut session)
+            .expect("Core addition over domain-qualified values").value;
+        let Value::BinaryNumber(value) = result else {
+            panic!("domain-qualified Value expected")
+        };
+        assert_eq!(value.numeric_domain_width(), Some(48));
+        assert_eq!(value.exact_numeric_domain_bits().unwrap().len(), 48);
+    }
+
+    #[test]
     fn core_runtime_rejects_unadmitted_numeric_domain_operations() {
-        let env = Environment::default();
+        let env = Environment::root();
         let d24 = in_domain(24, vec![0; 24]);
         let d48 = in_domain(48, vec![0; 48]);
         for values in [
