@@ -1,0 +1,5158 @@
+{
+  "schema": "d10-complete-candidate-source-census/v1",
+  "date": "2026-10-11",
+  "status": "SCOPE-LIMITED-NAME-CENSUS-NO-AUTHORITY",
+  "authority": "SOURCE-NAMES-ONLY-NOT-NEW-SEMANTIC-SELECTION",
+  "pinned": [
+    {
+      "path": "knowledge/d10-v1-semantic-inventory.json",
+      "git_blob": "96f9a5e464c4a0f689065bf88b6d9aee48ad6d49"
+    },
+    {
+      "path": "knowledge/d10-proposal-ledger.tsv",
+      "git_blob": "a65e5838577a508eceafc67119d8b0e6131fce99"
+    },
+    {
+      "path": "knowledge/d1-d9-foundation.json",
+      "git_blob": "09d1d71c39d1484dfd005a5068dbb18b76f0f0d4"
+    },
+    {
+      "path": "knowledge/d10-library-source-symbols-v1.json",
+      "git_blob": "12b8d4b944da1f44902224bba8879483e4ad3348"
+    },
+    {
+      "path": "knowledge/d10-interest-proposal-v1.json",
+      "git_blob": "b0a061b7a4cd63e7432323c30eb867c3e02b6f67"
+    }
+  ],
+  "source_counts": {
+    "ledger": 130,
+    "library": 102,
+    "interest": 52
+  },
+  "selected": 698,
+  "selected_plus_extra_name_union": 891,
+  "extra_unique_names": 193,
+  "unselected_names_by_provenance": {
+    "PROPOSAL_LEDGER": 57,
+    "LIBRARY_SOURCE_SYMBOL": 87,
+    "OWNER_INTEREST_FAMILY": 49
+  },
+  "names": [
+    {
+      "semantic_name": "*DIMENSION-SCHEMA*",
+      "raw_names": [
+        "*dimension-schema*"
+      ],
+      "origins": [
+        {
+          "source": "LIBRARY_SOURCE_SYMBOL",
+          "path": "lib/quantity.lisp",
+          "git_blob": "40c38e6019beccddd8577aa7af5a0957f4932b89",
+          "line": 18,
+          "kind": "library-defined",
+          "status": "research-unratified"
+        }
+      ],
+      "already_selected": false,
+      "ratified_d1_d9_name_match": false
+    },
+    {
+      "semantic_name": "*QUANTITY-SCHEMA*",
+      "raw_names": [
+        "*quantity-schema*"
+      ],
+      "origins": [
+        {
+          "source": "LIBRARY_SOURCE_SYMBOL",
+          "path": "lib/quantity.lisp",
+          "git_blob": "40c38e6019beccddd8577aa7af5a0957f4932b89",
+          "line": 20,
+          "kind": "library-defined",
+          "status": "research-unratified"
+        }
+      ],
+      "already_selected": false,
+      "ratified_d1_d9_name_match": false
+    },
+    {
+      "semantic_name": "*SCIENCE-SOURCE-SCHEMA*",
+      "raw_names": [
+        "*science-source-schema*"
+      ],
+      "origins": [
+        {
+          "source": "LIBRARY_SOURCE_SYMBOL",
+          "path": "lib/quantity.lisp",
+          "git_blob": "40c38e6019beccddd8577aa7af5a0957f4932b89",
+          "line": 21,
+          "kind": "library-defined",
+          "status": "research-unratified"
+        }
+      ],
+      "already_selected": false,
+      "ratified_d1_d9_name_match": false
+    },
+    {
+      "semantic_name": "*SCIENTIFIC-CONSTANT-SCHEMA*",
+      "raw_names": [
+        "*scientific-constant-schema*"
+      ],
+      "origins": [
+        {
+          "source": "LIBRARY_SOURCE_SYMBOL",
+          "path": "lib/quantity.lisp",
+          "git_blob": "40c38e6019beccddd8577aa7af5a0957f4932b89",
+          "line": 22,
+          "kind": "library-defined",
+          "status": "research-unratified"
+        }
+      ],
+      "already_selected": false,
+      "ratified_d1_d9_name_match": false
+    },
+    {
+      "semantic_name": "*TRANSLATION-EVIDENCE-SCHEMA*",
+      "raw_names": [
+        "*translation-evidence-schema*"
+      ],
+      "origins": [
+        {
+          "source": "LIBRARY_SOURCE_SYMBOL",
+          "path": "lib/translation.lisp",
+          "git_blob": "80cd225cba549a837097b1e633b6662c9434a148",
+          "line": 37,
+          "kind": "library-defined",
+          "status": "research-unratified"
+        }
+      ],
+      "already_selected": false,
+      "ratified_d1_d9_name_match": false
+    },
+    {
+      "semantic_name": "*TRANSLATION-EVIDENCE*",
+      "raw_names": [
+        "*translation-evidence*"
+      ],
+      "origins": [
+        {
+          "source": "LIBRARY_SOURCE_SYMBOL",
+          "path": "lib/translation.lisp",
+          "git_blob": "80cd225cba549a837097b1e633b6662c9434a148",
+          "line": 38,
+          "kind": "library-defined",
+          "status": "research-unratified"
+        }
+      ],
+      "already_selected": false,
+      "ratified_d1_d9_name_match": false
+    },
+    {
+      "semantic_name": "*TRANSLATION-REVIEW-SCHEMA*",
+      "raw_names": [
+        "*translation-review-schema*"
+      ],
+      "origins": [
+        {
+          "source": "LIBRARY_SOURCE_SYMBOL",
+          "path": "lib/translation.lisp",
+          "git_blob": "80cd225cba549a837097b1e633b6662c9434a148",
+          "line": 36,
+          "kind": "library-defined",
+          "status": "research-unratified"
+        }
+      ],
+      "already_selected": false,
+      "ratified_d1_d9_name_match": false
+    },
+    {
+      "semantic_name": "*TRANSLATION-SCHEMA*",
+      "raw_names": [
+        "*translation-schema*"
+      ],
+      "origins": [
+        {
+          "source": "LIBRARY_SOURCE_SYMBOL",
+          "path": "lib/translation.lisp",
+          "git_blob": "80cd225cba549a837097b1e633b6662c9434a148",
+          "line": 35,
+          "kind": "library-defined",
+          "status": "research-unratified"
+        }
+      ],
+      "already_selected": false,
+      "ratified_d1_d9_name_match": false
+    },
+    {
+      "semantic_name": "*UNIT-SCHEMA*",
+      "raw_names": [
+        "*unit-schema*"
+      ],
+      "origins": [
+        {
+          "source": "LIBRARY_SOURCE_SYMBOL",
+          "path": "lib/quantity.lisp",
+          "git_blob": "40c38e6019beccddd8577aa7af5a0957f4932b89",
+          "line": 19,
+          "kind": "library-defined",
+          "status": "research-unratified"
+        }
+      ],
+      "already_selected": false,
+      "ratified_d1_d9_name_match": false
+    },
+    {
+      "semantic_name": "ADD-EDGE",
+      "raw_names": [
+        "add-edge"
+      ],
+      "origins": [
+        {
+          "source": "OWNER_INTEREST_FAMILY",
+          "family": "graph",
+          "donor_repos": [
+            "juv4uk/basalt",
+            "juv4uk/graph-heavy-basalt",
+            "juv4uk/knowledge-graph-basalt"
+          ],
+          "status": "RESEARCH-UNRATIFIED",
+          "semantic_law_documented": false
+        }
+      ],
+      "already_selected": false,
+      "ratified_d1_d9_name_match": false
+    },
+    {
+      "semantic_name": "ADD-JUSTIFICATION",
+      "raw_names": [
+        "add-justification"
+      ],
+      "origins": [
+        {
+          "source": "PROPOSAL_LEDGER",
+          "id": "D10P-0048",
+          "law": "Поведінка визначена джерелом forward.lisp:532 (add-justification).",
+          "original_status": "pending-review"
+        }
+      ],
+      "already_selected": false,
+      "ratified_d1_d9_name_match": true
+    },
+    {
+      "semantic_name": "ADD-NEW-ENTRIES-JTMS",
+      "raw_names": [
+        "add-new-entries-jtms"
+      ],
+      "origins": [
+        {
+          "source": "PROPOSAL_LEDGER",
+          "id": "D10P-0049",
+          "law": "Поведінка визначена джерелом forward.lisp:542 (add-new-entries-jtms).",
+          "original_status": "pending-review"
+        }
+      ],
+      "already_selected": false,
+      "ratified_d1_d9_name_match": true
+    },
+    {
+      "semantic_name": "ADD-NEW-JUSTIFIED",
+      "raw_names": [
+        "add-new-justified"
+      ],
+      "origins": [
+        {
+          "source": "PROPOSAL_LEDGER",
+          "id": "D10P-0033",
+          "law": "Поведінка визначена джерелом forward.lisp:372 (add-new-justified).",
+          "original_status": "pending-review"
+        }
+      ],
+      "already_selected": false,
+      "ratified_d1_d9_name_match": true
+    },
+    {
+      "semantic_name": "ADJUST-ARRAY",
+      "raw_names": [
+        "ADJUST-ARRAY"
+      ],
+      "origins": [
+        {
+          "source": "PROPOSAL_LEDGER",
+          "id": "D10P-503110",
+          "law": "Змінити розміри або подання масиву за контрактом ADJUST-ARRAY: для змінного масиву повертається той самий об'єкт; якщо повернуто інший об'єкт, аргумент лишається незміненим. Окремо визначаються fill-pointer та спільне сховище displaced view; ланцюг A→B→C не можна сплющувати так, щоб A перестав посилатися на B.",
+          "original_status": "pending-review"
+        }
+      ],
+      "already_selected": true,
+      "ratified_d1_d9_name_match": false
+    },
+    {
+      "semantic_name": "AFFINE-QUANTITY-TRANSPORT",
+      "raw_names": [
+        "AFFINE-QUANTITY-TRANSPORT"
+      ],
+      "origins": [
+        {
+          "source": "PROPOSAL_LEDGER",
+          "id": "D10P-8017",
+          "law": "Reject unless seven dimension exponents match exactly and source/target scale are >0. For POINT, coordinate source base = source_scale*x+source_origin, target result=(source_base-target_origin)/target_scale. For DELTA, source_base=source_scale*x, target result=source_base/target_scale; both origins ignored. Preserve kind, exact rational, and compositional inverse. Errors for invalid kind/dimensions/scale/float, not coercions.",
+          "original_status": "pending-review"
+        }
+      ],
+      "already_selected": true,
+      "ratified_d1_d9_name_match": false
+    },
+    {
+      "semantic_name": "ALLAN-VARIANCE",
+      "raw_names": [
+        "ALLAN-VARIANCE"
+      ],
+      "origins": [
+        {
+          "source": "PROPOSAL_LEDGER",
+          "id": "D10P-503106",
+          "law": "Сумує квадрати різниць сусідніх дробових частот з нормуванням 2(N-1).",
+          "original_status": "pending-review"
+        }
+      ],
+      "already_selected": true,
+      "ratified_d1_d9_name_match": false
+    },
+    {
+      "semantic_name": "ALLEN-INTERVAL-RELATION",
+      "raw_names": [
+        "ALLEN-INTERVAL-RELATION"
+      ],
+      "origins": [
+        {
+          "source": "PROPOSAL_LEDGER",
+          "id": "D10P-503114",
+          "law": "Для двох непорожніх строгих інтервалів [start,end) із start<end повернути рівно одне з 13 відношень Аллена: BEFORE, MEETS, OVERLAPS, STARTS, DURING, FINISHES, EQUALS та їхні обернені відношення. MEETS означає спільну межу, а не позитивний часовий проміжок; перестановка аргументів повертає задане обернене відношення.",
+          "original_status": "pending-review"
+        }
+      ],
+      "already_selected": true,
+      "ratified_d1_d9_name_match": false
+    },
+    {
+      "semantic_name": "ALPHA-BETA-SEARCH",
+      "raw_names": [
+        "alpha-beta-search"
+      ],
+      "origins": [
+        {
+          "source": "OWNER_INTEREST_FAMILY",
+          "family": "chess",
+          "donor_repos": [
+            "juv4uk/chess",
+            "juv4uk/lisp-chess-engine",
+            "juv4uk/simple-lisp-chess-engine",
+            "juv4uk/chess-lisp-zero",
+            "juv4uk/chess-tauri-zero",
+            "juv4uk/hsChess",
+            "juv4uk/alpha-zero-general",
+            "juv4uk/lc0"
+          ],
+          "status": "RESEARCH-UNRATIFIED",
+          "semantic_law_documented": false
+        }
+      ],
+      "already_selected": false,
+      "ratified_d1_d9_name_match": false
+    },
+    {
+      "semantic_name": "ALTERNATING-ZERO-SUM-BACKUP",
+      "raw_names": [
+        "ALTERNATING-ZERO-SUM-BACKUP"
+      ],
+      "origins": [
+        {
+          "source": "PROPOSAL_LEDGER",
+          "id": "D10P-601205",
+          "law": "Given a finite chain from leaf to root, current per-node (visit_count,value_sum) and a leaf-side exact score v, visit_count increases exactly once at every chain node, value_sum at node depth k from leaf increases (-1)^k*v, and no off-path node changes. The sign changes because each node's score is from its own side-to-move perspective.",
+          "original_status": "pending-review"
+        }
+      ],
+      "already_selected": true,
+      "ratified_d1_d9_name_match": false
+    },
+    {
+      "semantic_name": "APPEND-NEW",
+      "raw_names": [
+        "append-new"
+      ],
+      "origins": [
+        {
+          "source": "PROPOSAL_LEDGER",
+          "id": "D10P-0018",
+          "law": "Поведінка визначена джерелом forward.lisp:198 (append-new).",
+          "original_status": "pending-review"
+        }
+      ],
+      "already_selected": false,
+      "ratified_d1_d9_name_match": true
+    },
+    {
+      "semantic_name": "APPLY-MOVE",
+      "raw_names": [
+        "apply-move"
+      ],
+      "origins": [
+        {
+          "source": "OWNER_INTEREST_FAMILY",
+          "family": "chess",
+          "donor_repos": [
+            "juv4uk/chess",
+            "juv4uk/lisp-chess-engine",
+            "juv4uk/simple-lisp-chess-engine",
+            "juv4uk/chess-lisp-zero",
+            "juv4uk/chess-tauri-zero",
+            "juv4uk/hsChess",
+            "juv4uk/alpha-zero-general",
+            "juv4uk/lc0"
+          ],
+          "status": "RESEARCH-UNRATIFIED",
+          "semantic_law_documented": false
+        }
+      ],
+      "already_selected": false,
+      "ratified_d1_d9_name_match": false
+    },
+    {
+      "semantic_name": "APPLY-SANDHI",
+      "raw_names": [
+        "apply-sandhi"
+      ],
+      "origins": [
+        {
+          "source": "OWNER_INTEREST_FAMILY",
+          "family": "sanskrit",
+          "donor_repos": [
+            "juv4uk/shiva-sutras",
+            "juv4uk/vidyut",
+            "juv4uk/spanda",
+            "juv4uk/sanskritworld_texts",
+            "juv4uk/panca-vac"
+          ],
+          "status": "RESEARCH-UNRATIFIED",
+          "semantic_law_documented": false
+        }
+      ],
+      "already_selected": true,
+      "ratified_d1_d9_name_match": false
+    },
+    {
+      "semantic_name": "ARRAY-DISPLACEMENT",
+      "raw_names": [
+        "ARRAY-DISPLACEMENT"
+      ],
+      "origins": [
+        {
+          "source": "PROPOSAL_LEDGER",
+          "id": "D10P-0002",
+          "law": "Повертає масив-основу та точний зсув у двох значеннях; спільне сховище не копіюється.",
+          "original_status": "pending-review"
+        }
+      ],
+      "already_selected": true,
+      "ratified_d1_d9_name_match": false
+    },
+    {
+      "semantic_name": "ASPECT-ANGLE",
+      "raw_names": [
+        "aspect-angle"
+      ],
+      "origins": [
+        {
+          "source": "OWNER_INTEREST_FAMILY",
+          "family": "astronomy",
+          "donor_repos": [
+            "juv4uk/vsop2013",
+            "juv4uk/VedicAstro"
+          ],
+          "status": "RESEARCH-UNRATIFIED",
+          "semantic_law_documented": false
+        }
+      ],
+      "already_selected": false,
+      "ratified_d1_d9_name_match": false
+    },
+    {
+      "semantic_name": "ASSERT-FACT-JTMS!",
+      "raw_names": [
+        "assert-fact-jtms!"
+      ],
+      "origins": [
+        {
+          "source": "PROPOSAL_LEDGER",
+          "id": "D10P-0052",
+          "law": "Поведінка визначена джерелом forward.lisp:565 (assert-fact-jtms!).",
+          "original_status": "pending-review"
+        }
+      ],
+      "already_selected": false,
+      "ratified_d1_d9_name_match": true
+    },
+    {
+      "semantic_name": "ASSERT-FACT-TMS!",
+      "raw_names": [
+        "assert-fact-tms!"
+      ],
+      "origins": [
+        {
+          "source": "PROPOSAL_LEDGER",
+          "id": "D10P-0035",
+          "law": "Поведінка визначена джерелом forward.lisp:392 (assert-fact-tms!).",
+          "original_status": "pending-review"
+        }
+      ],
+      "already_selected": false,
+      "ratified_d1_d9_name_match": true
+    },
+    {
+      "semantic_name": "ASSERT-FACT!",
+      "raw_names": [
+        "assert-fact!"
+      ],
+      "origins": [
+        {
+          "source": "PROPOSAL_LEDGER",
+          "id": "D10P-0012",
+          "law": "Поведінка визначена джерелом forward.lisp:62 (assert-fact!).",
+          "original_status": "pending-review"
+        }
+      ],
+      "already_selected": false,
+      "ratified_d1_d9_name_match": true
+    },
+    {
+      "semantic_name": "ASSERT-FACTS!",
+      "raw_names": [
+        "assert-facts!"
+      ],
+      "origins": [
+        {
+          "source": "PROPOSAL_LEDGER",
+          "id": "D10P-0020",
+          "law": "Поведінка визначена джерелом forward.lisp:213 (assert-facts!).",
+          "original_status": "pending-review"
+        }
+      ],
+      "already_selected": false,
+      "ratified_d1_d9_name_match": true
+    },
+    {
+      "semantic_name": "ATMS-CONSISTENT-LABEL-JOIN",
+      "raw_names": [
+        "ATMS-CONSISTENT-LABEL-JOIN"
+      ],
+      "origins": [
+        {
+          "source": "PROPOSAL_LEDGER",
+          "id": "D10P-503115",
+          "law": "Для двох скінченних наборів support-environment і набору nogood утворити всі об'єднання по одному середовищу з кожного боку; відкинути об'єднання, що містять відомий nogood як підмножину; вилучити строгі надмножини інших результатів; повернути антинанцюг у порядку зростання кардинальності, потім лексикографічно. Порожнє середовище () відрізняється від відсутності альтернатив ().",
+          "original_status": "pending-review"
+        }
+      ],
+      "already_selected": true,
+      "ratified_d1_d9_name_match": false
+    },
+    {
+      "semantic_name": "AXIOM",
+      "raw_names": [
+        "axiom"
+      ],
+      "origins": [
+        {
+          "source": "PROPOSAL_LEDGER",
+          "id": "D10P-0027",
+          "law": "Поведінка визначена джерелом forward.lisp:322 (axiom).",
+          "original_status": "pending-review"
+        }
+      ],
+      "already_selected": false,
+      "ratified_d1_d9_name_match": true
+    },
+    {
+      "semantic_name": "AYANAMSA",
+      "raw_names": [
+        "ayanamsa"
+      ],
+      "origins": [
+        {
+          "source": "OWNER_INTEREST_FAMILY",
+          "family": "astronomy",
+          "donor_repos": [
+            "juv4uk/vsop2013",
+            "juv4uk/VedicAstro"
+          ],
+          "status": "RESEARCH-UNRATIFIED",
+          "semantic_law_documented": false
+        }
+      ],
+      "already_selected": false,
+      "ratified_d1_d9_name_match": false
+    },
+    {
+      "semantic_name": "BINARY-CONSTRAINT-SUPPORT-PROJECTION",
+      "raw_names": [
+        "BINARY-CONSTRAINT-SUPPORT-PROJECTION"
+      ],
+      "origins": [
+        {
+          "source": "PROPOSAL_LEDGER",
+          "id": "D10P-6101",
+          "law": "Let M={ (x,y) in R : x in Dx and y in Dy }. When M is empty return NO-SUPPORT (not a set of newly invented values). Otherwise return SUPPORTED(sorted unique projection_x(M), sorted unique projection_y(M)). No pair outside R is certified, and supported value in each output has an existential compatible value in the other output. Returns no witness to a globally satisfiable larger constraint network.",
+          "original_status": "pending-review"
+        }
+      ],
+      "already_selected": true,
+      "ratified_d1_d9_name_match": false
+    },
+    {
+      "semantic_name": "BINARY-LFSR-MINIMAL-RECURRENCE",
+      "raw_names": [
+        "BINARY-LFSR-MINIMAL-RECURRENCE"
+      ],
+      "origins": [
+        {
+          "source": "PROPOSAL_LEDGER",
+          "id": "D10P-4952",
+          "law": "Найменший порядок однорідної XOR-рекуренції GF(2) для скінченного слова з лексикографічно найменшими коефіцієнтами; результат містить і порядок L, і taps. Не гарантує майбутніх бітів.",
+          "original_status": "pending-review"
+        }
+      ],
+      "already_selected": true,
+      "ratified_d1_d9_name_match": false
+    },
+    {
+      "semantic_name": "BINARY-LYNDON-FACTORIZATION",
+      "raw_names": [
+        "BINARY-LYNDON-FACTORIZATION"
+      ],
+      "origins": [
+        {
+          "source": "PROPOSAL_LEDGER",
+          "id": "D10P-8008",
+          "law": "Return the unique finite factor list (l1,...,lk) such that concat(li)=w; all li are Lyndon (strictly lexicographically smaller than every proper nonempty suffix); and l1 >= l2 >= ... >= lk under explicit lexicographic 0<1. For empty source return []. No dependence on physical packing, phoneme ordering or hardware transport.",
+          "original_status": "pending-review"
+        }
+      ],
+      "already_selected": true,
+      "ratified_d1_d9_name_match": false
+    },
+    {
+      "semantic_name": "BINDINGS",
+      "raw_names": [
+        "bindings"
+      ],
+      "origins": [
+        {
+          "source": "PROPOSAL_LEDGER",
+          "id": "D10P-0067",
+          "law": "Поведінка визначена джерелом forward.lisp:1086 (bindings).",
+          "original_status": "pending-review"
+        }
+      ],
+      "already_selected": false,
+      "ratified_d1_d9_name_match": false
+    },
+    {
+      "semantic_name": "BOARD-FROM-FEN",
+      "raw_names": [
+        "board-from-fen"
+      ],
+      "origins": [
+        {
+          "source": "OWNER_INTEREST_FAMILY",
+          "family": "chess",
+          "donor_repos": [
+            "juv4uk/chess",
+            "juv4uk/lisp-chess-engine",
+            "juv4uk/simple-lisp-chess-engine",
+            "juv4uk/chess-lisp-zero",
+            "juv4uk/chess-tauri-zero",
+            "juv4uk/hsChess",
+            "juv4uk/alpha-zero-general",
+            "juv4uk/lc0"
+          ],
+          "status": "RESEARCH-UNRATIFIED",
+          "semantic_law_documented": false
+        }
+      ],
+      "already_selected": false,
+      "ratified_d1_d9_name_match": false
+    },
+    {
+      "semantic_name": "BOUNDED-RATIONAL-APPROX",
+      "raw_names": [
+        "BOUNDED-RATIONAL-APPROX"
+      ],
+      "origins": [
+        {
+          "source": "PROPOSAL_LEDGER",
+          "id": "D10P-0006",
+          "law": "Для точного раціонального x та Q>=1 повертає найближчий скорочений p/q з q<=Q і точний знаковий залишок x-p/q; tie: менший знаменник потім менший чисельник.",
+          "original_status": "pending-review"
+        }
+      ],
+      "already_selected": true,
+      "ratified_d1_d9_name_match": false
+    },
+    {
+      "semantic_name": "C",
+      "raw_names": [
+        "c"
+      ],
+      "origins": [
+        {
+          "source": "LIBRARY_SOURCE_SYMBOL",
+          "path": "lib/si.lisp",
+          "git_blob": "2b94f1ea6d2fb05c084c3a0d863c14119a5ba11f",
+          "line": 119,
+          "kind": "library-defined",
+          "status": "research-unratified"
+        }
+      ],
+      "already_selected": false,
+      "ratified_d1_d9_name_match": false
+    },
+    {
+      "semantic_name": "CHANGE-CLASS",
+      "raw_names": [
+        "CHANGE-CLASS"
+      ],
+      "origins": [
+        {
+          "source": "PROPOSAL_LEDGER",
+          "id": "D10P-4872",
+          "law": "Change an existing instance to another class in place while retaining its identity and common slot values, and leaving previously unbound common slots unbound.",
+          "original_status": "pending-review"
+        }
+      ],
+      "already_selected": true,
+      "ratified_d1_d9_name_match": false
+    },
+    {
+      "semantic_name": "CHESS-CASTLING-RIGHTS-TRANSITION",
+      "raw_names": [
+        "CHESS-CASTLING-RIGHTS-TRANSITION"
+      ],
+      "origins": [
+        {
+          "source": "PROPOSAL_LEDGER",
+          "id": "D10P-601206",
+          "law": "Given the exact subset of K,Q,k,q before a legal move: moving a white/black king erases both own rights; moving a rook from its home corner erases that right; capturing a rook on its home corner erases that captured side's right; all unrelated rights are preserved. Rights never reappear. This operation updates rights only; it does not itself establish legal move, king safety or FEN validity.",
+          "original_status": "pending-review"
+        }
+      ],
+      "already_selected": true,
+      "ratified_d1_d9_name_match": false
+    },
+    {
+      "semantic_name": "CIRCULAR-HALF-OPEN-CONTAINS",
+      "raw_names": [
+        "CIRCULAR-HALF-OPEN-CONTAINS"
+      ],
+      "origins": [
+        {
+          "source": "PROPOSAL_LEDGER",
+          "id": "D10P-601201",
+          "law": "If start<end, return start<=test<end. If start>end, return test>=start OR test<end. If start==end, return NO, not whole ring. This is explicit-modulus, exact rational-free generalization of Forth WITHIN for canonical residues. It must not wrap invalid out-of-domain inputs silently.",
+          "original_status": "pending-review"
+        }
+      ],
+      "already_selected": true,
+      "ratified_d1_d9_name_match": false
+    },
+    {
+      "semantic_name": "CLASS-OF",
+      "raw_names": [
+        "CLASS-OF"
+      ],
+      "origins": [
+        {
+          "source": "PROPOSAL_LEDGER",
+          "id": "D10P-4870",
+          "law": "Return the direct class metaobject of an object; do not confuse the class object with a type specifier/name or the superclass.",
+          "original_status": "pending-review"
+        }
+      ],
+      "already_selected": true,
+      "ratified_d1_d9_name_match": false
+    },
+    {
+      "semantic_name": "CONNECTED-COMPONENTS?",
+      "raw_names": [
+        "connected-components?"
+      ],
+      "origins": [
+        {
+          "source": "OWNER_INTEREST_FAMILY",
+          "family": "graph",
+          "donor_repos": [
+            "juv4uk/basalt",
+            "juv4uk/graph-heavy-basalt",
+            "juv4uk/knowledge-graph-basalt"
+          ],
+          "status": "RESEARCH-UNRATIFIED",
+          "semantic_law_documented": false
+        }
+      ],
+      "already_selected": false,
+      "ratified_d1_d9_name_match": false
+    },
+    {
+      "semantic_name": "CONTEXTUAL-LONGEST-TRANSLITERATE",
+      "raw_names": [
+        "CONTEXTUAL-LONGEST-TRANSLITERATE"
+      ],
+      "origins": [
+        {
+          "source": "PROPOSAL_LEDGER",
+          "id": "D10P-601208",
+          "law": "An explicit finite rule table selects word-start replacement before default; otherwise longest matching multigraph before shorter graph, then a specified after-consonant rule; preserve unmatched characters and apostrophe word continuity.",
+          "original_status": "pending-review"
+        }
+      ],
+      "already_selected": true,
+      "ratified_d1_d9_name_match": false
+    },
+    {
+      "semantic_name": "CORRELATED-AFFINE-COMBINATION",
+      "raw_names": [
+        "CORRELATED-AFFINE-COMBINATION"
+      ],
+      "origins": [
+        {
+          "source": "PROPOSAL_LEDGER",
+          "id": "D10P-8002",
+          "law": "Combine affine forms coefficientwise by exact shared-noise identity; the exact same x minus x is zero, different noise IDs are not equated.",
+          "original_status": "pending-review"
+        }
+      ],
+      "already_selected": true,
+      "ratified_d1_d9_name_match": false
+    },
+    {
+      "semantic_name": "COVARIANCE-TRANSPORT",
+      "raw_names": [
+        "COVARIANCE-TRANSPORT"
+      ],
+      "origins": [
+        {
+          "source": "PROPOSAL_LEDGER",
+          "id": "D10P-503103",
+          "law": "Given an n×n symmetric covariance matrix Sigma and an m×n Jacobian J at the same linearization point, yield m×m J*Sigma*transpose(J), retaining nonzero cross-covariances; reject inconsistent shapes. This is a first-order linearized covariance law and must not claim exact uncertainty propagation for arbitrary nonlinear distributions.",
+          "original_status": "pending-review"
+        }
+      ],
+      "already_selected": true,
+      "ratified_d1_d9_name_match": false
+    },
+    {
+      "semantic_name": "CYCLIC-BINARY-WORD-CANON",
+      "raw_names": [
+        "CYCLIC-BINARY-WORD-CANON"
+      ],
+      "origins": [
+        {
+          "source": "PROPOSAL_LEDGER",
+          "id": "D10P-8019",
+          "law": "For finite nonempty w of length N, define rotate(w,k)[i]=w[(i+k) mod N]. Choose c=min_lex {rotate(w,k) | 0<=k<N}. Return (c, min {k | rotate(w,k)=c}). No reversal, sorting, primitive-root contraction, incomplete-period padding, byte alignment, or physical carrier framing.",
+          "original_status": "pending-review"
+        }
+      ],
+      "already_selected": true,
+      "ratified_d1_d9_name_match": false
+    },
+    {
+      "semantic_name": "DE-BRUIJN-BINARY-CYCLE?",
+      "raw_names": [
+        "DE-BRUIJN-BINARY-CYCLE?"
+      ],
+      "origins": [
+        {
+          "source": "PROPOSAL_LEDGER",
+          "id": "D10P-6105",
+          "law": "For n>=1, return D1 TRUE=1 iff length(word)=2^n AND the cyclic windows word[i],...,word[(i+n-1) mod 2^n] over all starts i∈[0,2^n) are pairwise distinct (equivalently cover all 2^n possible n-bit strings exactly once). Return D1 FALSE=0 for any well-typed word failing length or uniqueness. Invalid non-D1 data or n<=0 is a domain error, never a sneaky TRUE.",
+          "original_status": "pending-review"
+        }
+      ],
+      "already_selected": true,
+      "ratified_d1_d9_name_match": false
+    },
+    {
+      "semantic_name": "DELTA-NU-CS",
+      "raw_names": [
+        "delta-nu-cs"
+      ],
+      "origins": [
+        {
+          "source": "LIBRARY_SOURCE_SYMBOL",
+          "path": "lib/si.lisp",
+          "git_blob": "2b94f1ea6d2fb05c084c3a0d863c14119a5ba11f",
+          "line": 118,
+          "kind": "library-defined",
+          "status": "research-unratified"
+        }
+      ],
+      "already_selected": false,
+      "ratified_d1_d9_name_match": false
+    },
+    {
+      "semantic_name": "DEPENDENTS-OF",
+      "raw_names": [
+        "dependents-of"
+      ],
+      "origins": [
+        {
+          "source": "PROPOSAL_LEDGER",
+          "id": "D10P-0038",
+          "law": "Поведінка визначена джерелом forward.lisp:406 (dependents-of).",
+          "original_status": "pending-review"
+        }
+      ],
+      "already_selected": false,
+      "ratified_d1_d9_name_match": true
+    },
+    {
+      "semantic_name": "DEPOSIT-FIELD",
+      "raw_names": [
+        "DEPOSIT-FIELD"
+      ],
+      "origins": [
+        {
+          "source": "PROPOSAL_LEDGER",
+          "id": "D10P-503101",
+          "law": "Заміщує цільове бітове поле бітами джерела з відповідних абсолютних позицій, а не наймолодшими бітами; позапольові біти незмінні.",
+          "original_status": "pending-review"
+        }
+      ],
+      "already_selected": true,
+      "ratified_d1_d9_name_match": false
+    },
+    {
+      "semantic_name": "DERIVE-LAKARA",
+      "raw_names": [
+        "derive-lakara"
+      ],
+      "origins": [
+        {
+          "source": "OWNER_INTEREST_FAMILY",
+          "family": "sanskrit",
+          "donor_repos": [
+            "juv4uk/shiva-sutras",
+            "juv4uk/vidyut",
+            "juv4uk/spanda",
+            "juv4uk/sanskritworld_texts",
+            "juv4uk/panca-vac"
+          ],
+          "status": "RESEARCH-UNRATIFIED",
+          "semantic_law_documented": false
+        }
+      ],
+      "already_selected": false,
+      "ratified_d1_d9_name_match": false
+    },
+    {
+      "semantic_name": "DETRANSLIT-LATYNKA",
+      "raw_names": [
+        "detranslit-latynka"
+      ],
+      "origins": [
+        {
+          "source": "OWNER_INTEREST_FAMILY",
+          "family": "ukrainian-nlp",
+          "donor_repos": [
+            "juv4uk/dict_uk",
+            "juv4uk/nlp_uk",
+            "juv4uk/latynka",
+            "juv4uk/pravda",
+            "juv4uk/word2vec",
+            "juv4uk/Ucuddle-Search-Engine"
+          ],
+          "status": "RESEARCH-UNRATIFIED",
+          "semantic_law_documented": false
+        }
+      ],
+      "already_selected": false,
+      "ratified_d1_d9_name_match": false
+    },
+    {
+      "semantic_name": "DEVICE-DESCRIPTOR",
+      "raw_names": [
+        "device-descriptor"
+      ],
+      "origins": [
+        {
+          "source": "OWNER_INTEREST_FAMILY",
+          "family": "retro-os",
+          "donor_repos": [
+            "juv4uk/coreboot",
+            "juv4uk/minix",
+            "juv4uk/me_cleaner",
+            "juv4uk/fpga-lisp"
+          ],
+          "status": "RESEARCH-UNRATIFIED",
+          "semantic_law_documented": false
+        }
+      ],
+      "already_selected": false,
+      "ratified_d1_d9_name_match": false
+    },
+    {
+      "semantic_name": "DIFFERENTIAL-DECODE",
+      "raw_names": [
+        "DIFFERENTIAL-DECODE"
+      ],
+      "origins": [
+        {
+          "source": "PROPOSAL_LEDGER",
+          "id": "D10P-503108",
+          "law": "Обчислює модульні різниці закодованих входів і зберігає останній закодований вхід.",
+          "original_status": "pending-review"
+        }
+      ],
+      "already_selected": true,
+      "ratified_d1_d9_name_match": false
+    },
+    {
+      "semantic_name": "DIFFERENTIAL-ENCODE",
+      "raw_names": [
+        "DIFFERENTIAL-ENCODE"
+      ],
+      "origins": [
+        {
+          "source": "PROPOSAL_LEDGER",
+          "id": "D10P-503107",
+          "law": "Кодує модульним накопиченням, повертає вихід і останній стан для наступного фрагмента.",
+          "original_status": "pending-review"
+        }
+      ],
+      "already_selected": true,
+      "ratified_d1_d9_name_match": false
+    },
+    {
+      "semantic_name": "DIFFERENTIAL-PHASOR",
+      "raw_names": [
+        "DIFFERENTIAL-PHASOR"
+      ],
+      "origins": [
+        {
+          "source": "PROPOSAL_LEDGER",
+          "id": "D10P-503109",
+          "law": "Множить комплексний відлік на спряжений попередній без нормування амплітуди.",
+          "original_status": "pending-review"
+        }
+      ],
+      "already_selected": true,
+      "ratified_d1_d9_name_match": false
+    },
+    {
+      "semantic_name": "DIMENSION-BASE",
+      "raw_names": [
+        "dimension-base"
+      ],
+      "origins": [
+        {
+          "source": "LIBRARY_SOURCE_SYMBOL",
+          "path": "lib/quantity.lisp",
+          "git_blob": "40c38e6019beccddd8577aa7af5a0957f4932b89",
+          "line": 62,
+          "kind": "library-defined",
+          "status": "research-unratified"
+        }
+      ],
+      "already_selected": false,
+      "ratified_d1_d9_name_match": true
+    },
+    {
+      "semantic_name": "DIMENSION-EXPONENT",
+      "raw_names": [
+        "dimension-exponent"
+      ],
+      "origins": [
+        {
+          "source": "LIBRARY_SOURCE_SYMBOL",
+          "path": "lib/quantity.lisp",
+          "git_blob": "40c38e6019beccddd8577aa7af5a0957f4932b89",
+          "line": 65,
+          "kind": "library-defined",
+          "status": "research-unratified"
+        }
+      ],
+      "already_selected": false,
+      "ratified_d1_d9_name_match": true
+    },
+    {
+      "semantic_name": "DIMENSION?",
+      "raw_names": [
+        "dimension?"
+      ],
+      "origins": [
+        {
+          "source": "LIBRARY_SOURCE_SYMBOL",
+          "path": "lib/quantity.lisp",
+          "git_blob": "40c38e6019beccddd8577aa7af5a0957f4932b89",
+          "line": 47,
+          "kind": "library-defined",
+          "status": "research-unratified"
+        }
+      ],
+      "already_selected": false,
+      "ratified_d1_d9_name_match": true
+    },
+    {
+      "semantic_name": "DPB",
+      "raw_names": [
+        "DPB"
+      ],
+      "origins": [
+        {
+          "source": "PROPOSAL_LEDGER",
+          "id": "D10P-0001",
+          "law": "Замінює лише біти заданого поля цілого молодшими бітами нового значення; решту бітів зберігає.",
+          "original_status": "pending-review"
+        }
+      ],
+      "already_selected": true,
+      "ratified_d1_d9_name_match": false
+    },
+    {
+      "semantic_name": "DROP-UNSUPPORTED",
+      "raw_names": [
+        "drop-unsupported"
+      ],
+      "origins": [
+        {
+          "source": "PROPOSAL_LEDGER",
+          "id": "D10P-0063",
+          "law": "Поведінка визначена джерелом forward.lisp:748 (drop-unsupported).",
+          "original_status": "pending-review"
+        }
+      ],
+      "already_selected": false,
+      "ratified_d1_d9_name_match": true
+    },
+    {
+      "semantic_name": "E",
+      "raw_names": [
+        "e"
+      ],
+      "origins": [
+        {
+          "source": "LIBRARY_SOURCE_SYMBOL",
+          "path": "lib/si.lisp",
+          "git_blob": "2b94f1ea6d2fb05c084c3a0d863c14119a5ba11f",
+          "line": 121,
+          "kind": "library-defined",
+          "status": "research-unratified"
+        }
+      ],
+      "already_selected": false,
+      "ratified_d1_d9_name_match": false
+    },
+    {
+      "semantic_name": "ECLIPTIC-TO-EQUATORIAL",
+      "raw_names": [
+        "ecliptic-to-equatorial"
+      ],
+      "origins": [
+        {
+          "source": "OWNER_INTEREST_FAMILY",
+          "family": "astronomy",
+          "donor_repos": [
+            "juv4uk/vsop2013",
+            "juv4uk/VedicAstro"
+          ],
+          "status": "RESEARCH-UNRATIFIED",
+          "semantic_law_documented": false
+        }
+      ],
+      "already_selected": false,
+      "ratified_d1_d9_name_match": false
+    },
+    {
+      "semantic_name": "ENERGY-OF",
+      "raw_names": [
+        "energy-of"
+      ],
+      "origins": [
+        {
+          "source": "OWNER_INTEREST_FAMILY",
+          "family": "physics",
+          "donor_repos": [
+            "juv4uk/esp32-pendulum"
+          ],
+          "status": "RESEARCH-UNRATIFIED",
+          "semantic_law_documented": false
+        }
+      ],
+      "already_selected": false,
+      "ratified_d1_d9_name_match": false
+    },
+    {
+      "semantic_name": "ENHARMONIC-SPELLING-DISTINCT?",
+      "raw_names": [
+        "ENHARMONIC-SPELLING-DISTINCT?"
+      ],
+      "origins": [
+        {
+          "source": "PROPOSAL_LEDGER",
+          "id": "D10P-601209",
+          "law": "Given two valid 12-TET MusicXML-like pitches (step, integer alter, octave), return 1 iff their exact sounding semitone index matches AND their notation triple differs; otherwise 0. An equal note written identically is not an enharmonic respelling.",
+          "original_status": "pending-review"
+        }
+      ],
+      "already_selected": true,
+      "ratified_d1_d9_name_match": false
+    },
+    {
+      "semantic_name": "EVALUATE-POSITION",
+      "raw_names": [
+        "evaluate-position"
+      ],
+      "origins": [
+        {
+          "source": "OWNER_INTEREST_FAMILY",
+          "family": "chess",
+          "donor_repos": [
+            "juv4uk/chess",
+            "juv4uk/lisp-chess-engine",
+            "juv4uk/simple-lisp-chess-engine",
+            "juv4uk/chess-lisp-zero",
+            "juv4uk/chess-tauri-zero",
+            "juv4uk/hsChess",
+            "juv4uk/alpha-zero-general",
+            "juv4uk/lc0"
+          ],
+          "status": "RESEARCH-UNRATIFIED",
+          "semantic_law_documented": false
+        }
+      ],
+      "already_selected": false,
+      "ratified_d1_d9_name_match": false
+    },
+    {
+      "semantic_name": "EXACT-BARYCENTRIC-INTERPOLATE",
+      "raw_names": [
+        "EXACT-BARYCENTRIC-INTERPOLATE"
+      ],
+      "origins": [
+        {
+          "source": "PROPOSAL_LEDGER",
+          "id": "D10P-6104",
+          "law": "Given 1..n pairwise-distinct exact rational node abscissas x_i and exact rational ordinates y_i, and exact rational query x, return the unique exact rational value of polynomial degree at most n−1 interpolating all nodes (x_i,y_i). Evaluate at x_i exactly y_i, reject duplicate x_i, empty set and inexact values; permutation of nodes must not alter result. Evaluate by barycentric rational weights, not floating coefficients.",
+          "original_status": "pending-review"
+        }
+      ],
+      "already_selected": true,
+      "ratified_d1_d9_name_match": false
+    },
+    {
+      "semantic_name": "EXACT-BOOLEAN-PRIME-IMPLICANTS",
+      "raw_names": [
+        "EXACT-BOOLEAN-PRIME-IMPLICANTS"
+      ],
+      "origins": [
+        {
+          "source": "PROPOSAL_LEDGER",
+          "id": "D10P-2026101103",
+          "law": "Усі прості імпліканти булевої функції з визначеними ON/DC множинами. повна множина максимальних допустимих кубів, не один мінімізований вираз",
+          "original_status": "pending-review"
+        }
+      ],
+      "already_selected": true,
+      "ratified_d1_d9_name_match": false
+    },
+    {
+      "semantic_name": "EXACT-PERCEPTRON-MISTAKE-STEP",
+      "raw_names": [
+        "EXACT-PERCEPTRON-MISTAKE-STEP"
+      ],
+      "origins": [
+        {
+          "source": "PROPOSAL_LEDGER",
+          "id": "D10P-8014",
+          "law": "Given nonempty finite equal-length vectors of exact rationals weights w and nonzero feature x, label y in {-1,+1}, and strictly positive exact learning rate η, compute the exact margin m=y * sum_i(w_i*x_i). If m>0 return (w,corrected=NO), otherwise return (w+η*y*x,corrected=YES). A zero margin must trigger correction for either label. This is one pure mathematical update; no assumptions about convergence, SGD, hidden layers, approximate floats or physical sensor uncertainties.",
+          "original_status": "pending-review"
+        }
+      ],
+      "already_selected": true,
+      "ratified_d1_d9_name_match": false
+    },
+    {
+      "semantic_name": "FACT",
+      "raw_names": [
+        "fact"
+      ],
+      "origins": [
+        {
+          "source": "PROPOSAL_LEDGER",
+          "id": "D10P-0024",
+          "law": "Поведінка визначена джерелом forward.lisp:318 (fact).",
+          "original_status": "pending-review"
+        }
+      ],
+      "already_selected": false,
+      "ratified_d1_d9_name_match": false
+    },
+    {
+      "semantic_name": "FACT-OF",
+      "raw_names": [
+        "fact-of"
+      ],
+      "origins": [
+        {
+          "source": "PROPOSAL_LEDGER",
+          "id": "D10P-0025",
+          "law": "Поведінка визначена джерелом forward.lisp:320 (fact-of).",
+          "original_status": "pending-review"
+        }
+      ],
+      "already_selected": false,
+      "ratified_d1_d9_name_match": true
+    },
+    {
+      "semantic_name": "FEN-FROM-BOARD",
+      "raw_names": [
+        "fen-from-board"
+      ],
+      "origins": [
+        {
+          "source": "OWNER_INTEREST_FAMILY",
+          "family": "chess",
+          "donor_repos": [
+            "juv4uk/chess",
+            "juv4uk/lisp-chess-engine",
+            "juv4uk/simple-lisp-chess-engine",
+            "juv4uk/chess-lisp-zero",
+            "juv4uk/chess-tauri-zero",
+            "juv4uk/hsChess",
+            "juv4uk/alpha-zero-general",
+            "juv4uk/lc0"
+          ],
+          "status": "RESEARCH-UNRATIFIED",
+          "semantic_law_documented": false
+        }
+      ],
+      "already_selected": false,
+      "ratified_d1_d9_name_match": false
+    },
+    {
+      "semantic_name": "FIND-ENTRY",
+      "raw_names": [
+        "find-entry"
+      ],
+      "origins": [
+        {
+          "source": "PROPOSAL_LEDGER",
+          "id": "D10P-0046",
+          "law": "Поведінка визначена джерелом forward.lisp:512 (find-entry).",
+          "original_status": "pending-review"
+        }
+      ],
+      "already_selected": false,
+      "ratified_d1_d9_name_match": false
+    },
+    {
+      "semantic_name": "FIND-METHOD",
+      "raw_names": [
+        "FIND-METHOD"
+      ],
+      "origins": [
+        {
+          "source": "PROPOSAL_LEDGER",
+          "id": "D10P-4871",
+          "law": "Look up a method by its exact ordered qualifiers and specializers within one generic function; this is not runtime applicable-method selection.",
+          "original_status": "pending-review"
+        }
+      ],
+      "already_selected": true,
+      "ratified_d1_d9_name_match": false
+    },
+    {
+      "semantic_name": "FINITE-BAYES-UPDATE-EXACT",
+      "raw_names": [
+        "FINITE-BAYES-UPDATE-EXACT"
+      ],
+      "origins": [
+        {
+          "source": "PROPOSAL_LEDGER",
+          "id": "D10P-0011",
+          "law": "Для точної скінченної ймовірнісної моделі p_i і likelihood l_i: при Z=сума(p_i*l_i)>0 повертає впорядковані точні posterior_i=p_i*l_i/Z і Z; нульове Z або невалідні ймовірності відхиляє.",
+          "original_status": "pending-review"
+        }
+      ],
+      "already_selected": true,
+      "ratified_d1_d9_name_match": false
+    },
+    {
+      "semantic_name": "FINITE-BINARY-ARC-CONSISTENCY-FIXPOINT",
+      "raw_names": [
+        "FINITE-BINARY-ARC-CONSISTENCY-FIXPOINT"
+      ],
+      "origins": [
+        {
+          "source": "PROPOSAL_LEDGER",
+          "id": "D10P-6102",
+          "law": "Given named finite domains and directed binary compatibility relations, iteratively eliminate unsupported source values to the greatest arc-consistent fixed point, independent of work-list order; return exact reduced domains and a separate EMPTY-DOMAIN-CONTRADICTION status when any domain is empty. Nonempty closure does not imply global satisfiability.",
+          "original_status": "pending-review"
+        }
+      ],
+      "already_selected": true,
+      "ratified_d1_d9_name_match": false
+    },
+    {
+      "semantic_name": "FINITE-CNF-UNIT-FIXPOINT",
+      "raw_names": [
+        "FINITE-CNF-UNIT-FIXPOINT"
+      ],
+      "origins": [
+        {
+          "source": "PROPOSAL_LEDGER",
+          "id": "D10P-0917",
+          "law": "Скінченна CNF: додає лише логічно вимушені одиничними клаузами літерали до нерухомої точки; повертає QUIESCENT або CONTRADICTION; QUIESCENT не означає SAT.",
+          "original_status": "pending-review"
+        }
+      ],
+      "already_selected": true,
+      "ratified_d1_d9_name_match": false
+    },
+    {
+      "semantic_name": "FINITE-CODE-UNIQUE-DECIPHERABILITY",
+      "raw_names": [
+        "FINITE-CODE-UNIQUE-DECIPHERABILITY"
+      ],
+      "origins": [
+        {
+          "source": "PROPOSAL_LEDGER",
+          "id": "D10P-503113",
+          "law": "Для скінченного впорядкованого набору різних ідентичностей із непорожніми двійковими кодовими словами визначити, чи будь-які дві різні непорожні послідовності ідентичностей можуть давати той самий конкатенований бітовий потік. Префіксність не є необхідною умовою; порожній кодбук має результат YES.",
+          "original_status": "pending-review"
+        }
+      ],
+      "already_selected": true,
+      "ratified_d1_d9_name_match": false
+    },
+    {
+      "semantic_name": "FINITE-CONVOLUTION",
+      "raw_names": [
+        "FINITE-CONVOLUTION"
+      ],
+      "origins": [
+        {
+          "source": "PROPOSAL_LEDGER",
+          "id": "D10P-503116",
+          "law": "Для двох скінченних послідовностей над точним комутативним кільцем довжини n та m повернути коефіцієнти c[k]=Σᵢ a[i]·b[k−i], поза межами вхідних послідовностей вважати значення нулем. Якщо обидві послідовності непорожні, довжина результату n+m−1; якщо будь-яка порожня — результат порожній. Циклічне згортання не допускається.",
+          "original_status": "pending-review"
+        }
+      ],
+      "already_selected": true,
+      "ratified_d1_d9_name_match": false
+    },
+    {
+      "semantic_name": "FINITE-DIFFERENCE-CERTIFICATE",
+      "raw_names": [
+        "FINITE-DIFFERENCE-CERTIFICATE"
+      ],
+      "origins": [
+        {
+          "source": "PROPOSAL_LEDGER",
+          "id": "D10P-0916",
+          "law": "Для щонайменше d+2 точних рівновіддалених зразків підтверджує нульові скінченні різниці порядку d+1, видає явне свідчення першої ненульової різниці або точне наступне значення Ньютона.",
+          "original_status": "pending-review"
+        }
+      ],
+      "already_selected": true,
+      "ratified_d1_d9_name_match": false
+    },
+    {
+      "semantic_name": "FINITE-INDUCTIVE-SAFETY-WITNESS",
+      "raw_names": [
+        "FINITE-INDUCTIVE-SAFETY-WITNESS"
+      ],
+      "origins": [
+        {
+          "source": "PROPOSAL_LEDGER",
+          "id": "D10P-499701",
+          "law": "Для скінченного повного графа станів і кандидата-інваріанта повертає YES точно тоді коли всі початкові стани всередині інваріанта та кожний перехід зі стану інваріанта веде знов усередину; інакше найменший свідок початкового порушення чи втечі ребра.",
+          "original_status": "pending-review"
+        }
+      ],
+      "already_selected": true,
+      "ratified_d1_d9_name_match": false
+    },
+    {
+      "semantic_name": "FINITE-MEALY-DISTINGUISHING-WORD",
+      "raw_names": [
+        "FINITE-MEALY-DISTINGUISHING-WORD"
+      ],
+      "origins": [
+        {
+          "source": "PROPOSAL_LEDGER",
+          "id": "D10P-20261011",
+          "law": "Для двох повних детермінованих скінченних автоматів Мілі з однаковою впорядкованою абеткою повертає найкоротше лексикографічно перше слово розбіжності вихідних потоків або ознаку повної еквівалентності.",
+          "original_status": "pending-review"
+        }
+      ],
+      "already_selected": true,
+      "ratified_d1_d9_name_match": false
+    },
+    {
+      "semantic_name": "FINITE-MINIMAL-DIAGNOSES",
+      "raw_names": [
+        "FINITE-MINIMAL-DIAGNOSES"
+      ],
+      "origins": [
+        {
+          "source": "PROPOSAL_LEDGER",
+          "id": "D10P-5007",
+          "law": "Із явної скінченної сім'ї наборів конфліктних припущень повертає ВСІ мінімальні за включенням набори компонентів, які перетинають кожен конфлікт; додає для кожного вилученого компонента перший приватний конфлікт як сертифікат мінімальності; порожня сім'я має один порожній діагноз, порожній конфлікт означає NO-DIAGNOSIS.",
+          "original_status": "pending-review"
+        }
+      ],
+      "already_selected": true,
+      "ratified_d1_d9_name_match": false
+    },
+    {
+      "semantic_name": "FINITE-PREDICATE-CIRCUMSCRIPTION",
+      "raw_names": [
+        "FINITE-PREDICATE-CIRCUMSCRIPTION"
+      ],
+      "origins": [
+        {
+          "source": "PROPOSAL_LEDGER",
+          "id": "D10P-499001",
+          "law": "Із скінченної множини моделей базової теорії залишає всі моделі без строго меншої множини заданих аномальних атомів за незмінного значення зафіксованих атомів; несумісність повертає окреме NO-MODELS.",
+          "original_status": "pending-review"
+        }
+      ],
+      "already_selected": true,
+      "ratified_d1_d9_name_match": false
+    },
+    {
+      "semantic_name": "FINITE-SIMPLE-TEMPORAL-CLOSURE",
+      "raw_names": [
+        "FINITE-SIMPLE-TEMPORAL-CLOSURE"
+      ],
+      "origins": [
+        {
+          "source": "PROPOSAL_LEDGER",
+          "id": "D10P-2026101102",
+          "law": "Точні межі різниць подій або негативний цикл у скінченній мережі часових обмежень. самостійне спостережуване відношення між часовими обмеженнями; не механізм таймера",
+          "original_status": "pending-review"
+        }
+      ],
+      "already_selected": true,
+      "ratified_d1_d9_name_match": false
+    },
+    {
+      "semantic_name": "FINITE-STATE-SHORTEST-DISTINGUISHER",
+      "raw_names": [
+        "FINITE-STATE-SHORTEST-DISTINGUISHER"
+      ],
+      "origins": [
+        {
+          "source": "PROPOSAL_LEDGER",
+          "id": "D10P-601103",
+          "law": "Shortest, then 0-first lexicographically least suffix distinguishing acceptance of p and q in a total deterministic D1-binary automaton; empty witness differs from no witness",
+          "original_status": "pending-review"
+        }
+      ],
+      "already_selected": true,
+      "ratified_d1_d9_name_match": false
+    },
+    {
+      "semantic_name": "FINITE-STRING-CRITICAL-PAIR-CONFLUENCE",
+      "raw_names": [
+        "FINITE-STRING-CRITICAL-PAIR-CONFLUENCE"
+      ],
+      "origins": [
+        {
+          "source": "PROPOSAL_LEDGER",
+          "id": "D10P-8009",
+          "law": "Compute all same-source one-step peaks arising from overlapping (including nested) occurrences of any pair of left sides. Each critical pair is joinable iff its two descendants share at least one reachable normal form under the same rules. Because every rule strictly shortens finite words, termination is proved by exact length. Then all critical pairs joinable is equivalent to confluence of the entire finite string rewrite relation (critical pair criterion + Newman's lemma). Return CONFLUENT or a concrete NONCONFLUENT witness: source, two branches, and separately reachable normal-form sets with empty intersection. Wording does not imply that a nonconfluent ruleset lacks individual common normal forms for other starting words.",
+          "original_status": "pending-review"
+        }
+      ],
+      "already_selected": true,
+      "ratified_d1_d9_name_match": false
+    },
+    {
+      "semantic_name": "FINITE-SYMBOLIC-DIFFERENTIATION",
+      "raw_names": [
+        "FINITE-SYMBOLIC-DIFFERENTIATION"
+      ],
+      "origins": [
+        {
+          "source": "PROPOSAL_LEDGER",
+          "id": "D10P-0070",
+          "law": "Для скінченного ациклічного AST Const(integer)|Var(name)|Add(expr,expr)|Mul(expr,expr) і заданої змінної повертає дерево формальної похідної за правилами константи, змінної, суми й добутку; вивід точний і навмисно не спрощується, вхід не мутується. Обмежений сучасний контракт, натхнений Maling MIT AI Memo 10 (1959), а не твердження про дослівну транскрипцію мемо; Core-vs-library мінімальність лишається на власниковому перегляді.",
+          "original_status": "pending-review"
+        }
+      ],
+      "already_selected": true,
+      "ratified_d1_d9_name_match": false
+    },
+    {
+      "semantic_name": "FIRE-RULE",
+      "raw_names": [
+        "fire-rule"
+      ],
+      "origins": [
+        {
+          "source": "PROPOSAL_LEDGER",
+          "id": "D10P-0013",
+          "law": "Поведінка визначена джерелом forward.lisp:70 (fire-rule).",
+          "original_status": "pending-review"
+        }
+      ],
+      "already_selected": false,
+      "ratified_d1_d9_name_match": true
+    },
+    {
+      "semantic_name": "FIRE-RULE-JTMS",
+      "raw_names": [
+        "fire-rule-jtms"
+      ],
+      "origins": [
+        {
+          "source": "PROPOSAL_LEDGER",
+          "id": "D10P-0043",
+          "law": "Поведінка визначена джерелом forward.lisp:481 (fire-rule-jtms).",
+          "original_status": "pending-review"
+        }
+      ],
+      "already_selected": false,
+      "ratified_d1_d9_name_match": true
+    },
+    {
+      "semantic_name": "FIRE-RULE-JTMS-MULTI",
+      "raw_names": [
+        "fire-rule-jtms-multi"
+      ],
+      "origins": [
+        {
+          "source": "PROPOSAL_LEDGER",
+          "id": "D10P-0055",
+          "law": "Поведінка визначена джерелом forward.lisp:698 (fire-rule-jtms-multi).",
+          "original_status": "pending-review"
+        }
+      ],
+      "already_selected": false,
+      "ratified_d1_d9_name_match": true
+    },
+    {
+      "semantic_name": "FIRE-RULE-ON-FACTS",
+      "raw_names": [
+        "fire-rule-on-facts"
+      ],
+      "origins": [
+        {
+          "source": "PROPOSAL_LEDGER",
+          "id": "D10P-0014",
+          "law": "Поведінка визначена джерелом forward.lisp:107 (fire-rule-on-facts).",
+          "original_status": "pending-review"
+        }
+      ],
+      "already_selected": false,
+      "ratified_d1_d9_name_match": true
+    },
+    {
+      "semantic_name": "FIRE-RULE-ON-FACTS-JTMS",
+      "raw_names": [
+        "fire-rule-on-facts-jtms"
+      ],
+      "origins": [
+        {
+          "source": "PROPOSAL_LEDGER",
+          "id": "D10P-0044",
+          "law": "Поведінка визначена джерелом forward.lisp:493 (fire-rule-on-facts-jtms).",
+          "original_status": "pending-review"
+        }
+      ],
+      "already_selected": false,
+      "ratified_d1_d9_name_match": true
+    },
+    {
+      "semantic_name": "FIRE-RULE-ON-FACTS-TMS",
+      "raw_names": [
+        "fire-rule-on-facts-tms"
+      ],
+      "origins": [
+        {
+          "source": "PROPOSAL_LEDGER",
+          "id": "D10P-0030",
+          "law": "Поведінка визначена джерелом forward.lisp:345 (fire-rule-on-facts-tms).",
+          "original_status": "pending-review"
+        }
+      ],
+      "already_selected": false,
+      "ratified_d1_d9_name_match": true
+    },
+    {
+      "semantic_name": "FIRE-RULE-ON-WORKING-MEMORY",
+      "raw_names": [
+        "fire-rule-on-working-memory"
+      ],
+      "origins": [
+        {
+          "source": "PROPOSAL_LEDGER",
+          "id": "D10P-0015",
+          "law": "Поведінка визначена джерелом forward.lisp:124 (fire-rule-on-working-memory).",
+          "original_status": "pending-review"
+        }
+      ],
+      "already_selected": false,
+      "ratified_d1_d9_name_match": true
+    },
+    {
+      "semantic_name": "FIRE-RULE-TMS",
+      "raw_names": [
+        "fire-rule-tms"
+      ],
+      "origins": [
+        {
+          "source": "PROPOSAL_LEDGER",
+          "id": "D10P-0029",
+          "law": "Поведінка визначена джерелом forward.lisp:333 (fire-rule-tms).",
+          "original_status": "pending-review"
+        }
+      ],
+      "already_selected": false,
+      "ratified_d1_d9_name_match": true
+    },
+    {
+      "semantic_name": "FIRE-RULES-JTMS-MULTI",
+      "raw_names": [
+        "fire-rules-jtms-multi"
+      ],
+      "origins": [
+        {
+          "source": "PROPOSAL_LEDGER",
+          "id": "D10P-0056",
+          "law": "Поведінка визначена джерелом forward.lisp:702 (fire-rules-jtms-multi).",
+          "original_status": "pending-review"
+        }
+      ],
+      "already_selected": false,
+      "ratified_d1_d9_name_match": true
+    },
+    {
+      "semantic_name": "FIRE-RULES-ON-FACTS",
+      "raw_names": [
+        "fire-rules-on-facts"
+      ],
+      "origins": [
+        {
+          "source": "PROPOSAL_LEDGER",
+          "id": "D10P-0016",
+          "law": "Поведінка визначена джерелом forward.lisp:146 (fire-rules-on-facts).",
+          "original_status": "pending-review"
+        }
+      ],
+      "already_selected": false,
+      "ratified_d1_d9_name_match": true
+    },
+    {
+      "semantic_name": "FIRE-RULES-ON-FACTS-JTMS",
+      "raw_names": [
+        "fire-rules-on-facts-jtms"
+      ],
+      "origins": [
+        {
+          "source": "PROPOSAL_LEDGER",
+          "id": "D10P-0045",
+          "law": "Поведінка визначена джерелом forward.lisp:504 (fire-rules-on-facts-jtms).",
+          "original_status": "pending-review"
+        }
+      ],
+      "already_selected": false,
+      "ratified_d1_d9_name_match": true
+    },
+    {
+      "semantic_name": "FIRE-RULES-ON-FACTS-TMS",
+      "raw_names": [
+        "fire-rules-on-facts-tms"
+      ],
+      "origins": [
+        {
+          "source": "PROPOSAL_LEDGER",
+          "id": "D10P-0031",
+          "law": "Поведінка визначена джерелом forward.lisp:356 (fire-rules-on-facts-tms).",
+          "original_status": "pending-review"
+        }
+      ],
+      "already_selected": false,
+      "ratified_d1_d9_name_match": true
+    },
+    {
+      "semantic_name": "FIRE-RULES-ON-WORKING-MEMORY",
+      "raw_names": [
+        "fire-rules-on-working-memory"
+      ],
+      "origins": [
+        {
+          "source": "PROPOSAL_LEDGER",
+          "id": "D10P-0017",
+          "law": "Поведінка визначена джерелом forward.lisp:154 (fire-rules-on-working-memory).",
+          "original_status": "pending-review"
+        }
+      ],
+      "already_selected": false,
+      "ratified_d1_d9_name_match": true
+    },
+    {
+      "semantic_name": "FIRST-ORDER-LEAST-GENERAL-GENERALIZATION",
+      "raw_names": [
+        "FIRST-ORDER-LEAST-GENERAL-GENERALIZATION"
+      ],
+      "origins": [
+        {
+          "source": "PROPOSAL_LEDGER",
+          "id": "D10P-8013",
+          "law": "For TWO finite ground, ordered, free first-order constructor terms (not D2 executable expressions), return their least general generalization modulo alpha-renaming and two substitutions which reconstruct each term EXACTLY. Identical atoms and equal-name/equal-arity constructors are retained. Every incompatible ordered pair of subterms becomes one fresh hole; equal ordered disagreement pairs reuse the SAME hole, even in disjoint branches. A different arity or constructor is a disagreement. Fresh holes are numbered by first depth-first left-to-right appearance. A non-ground input, binder, improper term or unbounded depth is BLOCKED. This operation is not unification and never claims a physical .sens semantics.",
+          "original_status": "pending-review"
+        }
+      ],
+      "already_selected": true,
+      "ratified_d1_d9_name_match": false
+    },
+    {
+      "semantic_name": "FRAME-STATE-TRANSFORM",
+      "raw_names": [
+        "FRAME-STATE-TRANSFORM"
+      ],
+      "origins": [
+        {
+          "source": "PROPOSAL_LEDGER",
+          "id": "D10P-503104",
+          "law": "For an epoch-aligned frame rotation R(t), derivative Rdot(t), source position p and source velocity v, yield target p'=R*p and v'=R*v+Rdot*p. A rotation-only position law does not suffice for velocity in a time-varying frame; reject mismatched dimensions and epochs.",
+          "original_status": "pending-review"
+        }
+      ],
+      "already_selected": true,
+      "ratified_d1_d9_name_match": false
+    },
+    {
+      "semantic_name": "GENERALIZED-CONGRUENCE-MERGE",
+      "raw_names": [
+        "GENERALIZED-CONGRUENCE-MERGE"
+      ],
+      "origins": [
+        {
+          "source": "PROPOSAL_LEDGER",
+          "id": "D10P-700001",
+          "law": "За цілими a,b і додатними m,n визначити g=gcd(m,n); якщо (b−a) не ділиться на g повернути CONFLICT(g,b−a), інакше єдиний залишок r за L=lcm(m,n) та CONSISTENT(r,L).",
+          "original_status": "pending-review"
+        }
+      ],
+      "already_selected": true,
+      "ratified_d1_d9_name_match": false
+    },
+    {
+      "semantic_name": "GENERATE-MOVES",
+      "raw_names": [
+        "generate-moves"
+      ],
+      "origins": [
+        {
+          "source": "OWNER_INTEREST_FAMILY",
+          "family": "chess",
+          "donor_repos": [
+            "juv4uk/chess",
+            "juv4uk/lisp-chess-engine",
+            "juv4uk/simple-lisp-chess-engine",
+            "juv4uk/chess-lisp-zero",
+            "juv4uk/chess-tauri-zero",
+            "juv4uk/hsChess",
+            "juv4uk/alpha-zero-general",
+            "juv4uk/lc0"
+          ],
+          "status": "RESEARCH-UNRATIFIED",
+          "semantic_law_documented": false
+        }
+      ],
+      "already_selected": false,
+      "ratified_d1_d9_name_match": false
+    },
+    {
+      "semantic_name": "GRAY-DECODE-WORD",
+      "raw_names": [
+        "GRAY-DECODE-WORD"
+      ],
+      "origins": [
+        {
+          "source": "PROPOSAL_LEDGER",
+          "id": "D10P-0010",
+          "law": "Декодує відбите слово Грея в точний двійковий ранг через префіксний XOR від старшого біта до молодшого; зберігає ширину.",
+          "original_status": "pending-review"
+        }
+      ],
+      "already_selected": true,
+      "ratified_d1_d9_name_match": false
+    },
+    {
+      "semantic_name": "GRAY-ENCODE-WORD",
+      "raw_names": [
+        "GRAY-ENCODE-WORD"
+      ],
+      "origins": [
+        {
+          "source": "PROPOSAL_LEDGER",
+          "id": "D10P-0009",
+          "law": "Кодує беззнаковий двійковий ранг довжини w відбитим кодом Грея n XOR (n>>1); зберігає ширину; сусідні слова відрізняються лише одним бітом.",
+          "original_status": "pending-review"
+        }
+      ],
+      "already_selected": true,
+      "ratified_d1_d9_name_match": false
+    },
+    {
+      "semantic_name": "GROUND-CONGRUENCE-CLOSURE-PARTITION",
+      "raw_names": [
+        "GROUND-CONGRUENCE-CLOSURE-PARTITION"
+      ],
+      "origins": [
+        {
+          "source": "PROPOSAL_LEDGER",
+          "id": "D10P-6103",
+          "law": "Given finite acyclic ground term nodes with uninterpreted symbols, equations, and equality queries: return least equivalence relation containing the equations and closed under functions with equal symbols and pointwise equal arguments; booleans represent logical entailment, NOT proof of disequality.",
+          "original_status": "pending-review"
+        }
+      ],
+      "already_selected": true,
+      "ratified_d1_d9_name_match": false
+    },
+    {
+      "semantic_name": "GROUNDED-ARGUMENT-LABELING",
+      "raw_names": [
+        "GROUNDED-ARGUMENT-LABELING"
+      ],
+      "origins": [
+        {
+          "source": "PROPOSAL_LEDGER",
+          "id": "D10P-4971",
+          "law": "Скінченний орієнтований граф нападів між унікальними аргументами переводить у три неперетинні списки даних IN, OUT, UNDEC за найменшою нерухомою точкою захисту Данга 1995; відсутність доведення не тотожна OUT, а взаємна атака без зовнішнього захисту залишає UNDEC; D1 предикати лишаються двійковими.",
+          "original_status": "pending-review"
+        }
+      ],
+      "already_selected": true,
+      "ratified_d1_d9_name_match": false
+    },
+    {
+      "semantic_name": "GUNA-OF",
+      "raw_names": [
+        "guna-of"
+      ],
+      "origins": [
+        {
+          "source": "OWNER_INTEREST_FAMILY",
+          "family": "sanskrit",
+          "donor_repos": [
+            "juv4uk/shiva-sutras",
+            "juv4uk/vidyut",
+            "juv4uk/spanda",
+            "juv4uk/sanskritworld_texts",
+            "juv4uk/panca-vac"
+          ],
+          "status": "RESEARCH-UNRATIFIED",
+          "semantic_law_documented": false
+        }
+      ],
+      "already_selected": false,
+      "ratified_d1_d9_name_match": false
+    },
+    {
+      "semantic_name": "H",
+      "raw_names": [
+        "h"
+      ],
+      "origins": [
+        {
+          "source": "LIBRARY_SOURCE_SYMBOL",
+          "path": "lib/si.lisp",
+          "git_blob": "2b94f1ea6d2fb05c084c3a0d863c14119a5ba11f",
+          "line": 120,
+          "kind": "library-defined",
+          "status": "research-unratified"
+        }
+      ],
+      "already_selected": false,
+      "ratified_d1_d9_name_match": false
+    },
+    {
+      "semantic_name": "HADAMARD-VARIANCE",
+      "raw_names": [
+        "HADAMARD-VARIANCE"
+      ],
+      "origins": [
+        {
+          "source": "PROPOSAL_LEDGER",
+          "id": "D10P-0008",
+          "law": "For N zero-dead-time uniformly sampled fractional-frequency observations y, positive integer m and N >= 3m, average each m-point contiguous block: a_i=(1/m)*sum(y[i:i+m]); compute the mean squared second difference of consecutive m-block averages divided by 6, over all i=0..N-3m. Return exact rational variance when inputs are exact rational. Reject invalid m or insufficient data.",
+          "original_status": "pending-review"
+        }
+      ],
+      "already_selected": true,
+      "ratified_d1_d9_name_match": false
+    },
+    {
+      "semantic_name": "HASHTABLE-ENTRIES",
+      "raw_names": [
+        "HASHTABLE-ENTRIES"
+      ],
+      "origins": [
+        {
+          "source": "PROPOSAL_LEDGER",
+          "id": "D10P-503102",
+          "law": "Повертає два вектори ключів і значень однакової довжини; кожен індекс відповідає одній парі, порядок обходу не гарантований.",
+          "original_status": "pending-review"
+        }
+      ],
+      "already_selected": true,
+      "ratified_d1_d9_name_match": false
+    },
+    {
+      "semantic_name": "HELIOCENTRIC-POSITION",
+      "raw_names": [
+        "heliocentric-position"
+      ],
+      "origins": [
+        {
+          "source": "OWNER_INTEREST_FAMILY",
+          "family": "astronomy",
+          "donor_repos": [
+            "juv4uk/vsop2013",
+            "juv4uk/VedicAstro"
+          ],
+          "status": "RESEARCH-UNRATIFIED",
+          "semantic_law_documented": false
+        }
+      ],
+      "already_selected": false,
+      "ratified_d1_d9_name_match": false
+    },
+    {
+      "semantic_name": "HYSTERETIC-BOOLEAN-STEP",
+      "raw_names": [
+        "HYSTERETIC-BOOLEAN-STEP"
+      ],
+      "origins": [
+        {
+          "source": "PROPOSAL_LEDGER",
+          "id": "D10P-0901",
+          "law": "Двопороговий D1 стан: для точних раціональних low<high і x повертає NO за x<=low, YES за x>=high, попередній біт у відкритій середині; неточний вхід і невалідні пороги відхиляє.",
+          "original_status": "pending-review"
+        }
+      ],
+      "already_selected": true,
+      "ratified_d1_d9_name_match": false
+    },
+    {
+      "semantic_name": "IO-PORT-READ",
+      "raw_names": [
+        "io-port-read"
+      ],
+      "origins": [
+        {
+          "source": "OWNER_INTEREST_FAMILY",
+          "family": "retro-os",
+          "donor_repos": [
+            "juv4uk/coreboot",
+            "juv4uk/minix",
+            "juv4uk/me_cleaner",
+            "juv4uk/fpga-lisp"
+          ],
+          "status": "RESEARCH-UNRATIFIED",
+          "semantic_law_documented": false
+        }
+      ],
+      "already_selected": false,
+      "ratified_d1_d9_name_match": false
+    },
+    {
+      "semantic_name": "IO-PORT-WRITE",
+      "raw_names": [
+        "io-port-write"
+      ],
+      "origins": [
+        {
+          "source": "OWNER_INTEREST_FAMILY",
+          "family": "retro-os",
+          "donor_repos": [
+            "juv4uk/coreboot",
+            "juv4uk/minix",
+            "juv4uk/me_cleaner",
+            "juv4uk/fpga-lisp"
+          ],
+          "status": "RESEARCH-UNRATIFIED",
+          "semantic_law_documented": false
+        }
+      ],
+      "already_selected": false,
+      "ratified_d1_d9_name_match": false
+    },
+    {
+      "semantic_name": "IS-CHECK?",
+      "raw_names": [
+        "is-check?"
+      ],
+      "origins": [
+        {
+          "source": "OWNER_INTEREST_FAMILY",
+          "family": "chess",
+          "donor_repos": [
+            "juv4uk/chess",
+            "juv4uk/lisp-chess-engine",
+            "juv4uk/simple-lisp-chess-engine",
+            "juv4uk/chess-lisp-zero",
+            "juv4uk/chess-tauri-zero",
+            "juv4uk/hsChess",
+            "juv4uk/alpha-zero-general",
+            "juv4uk/lc0"
+          ],
+          "status": "RESEARCH-UNRATIFIED",
+          "semantic_law_documented": false
+        }
+      ],
+      "already_selected": false,
+      "ratified_d1_d9_name_match": false
+    },
+    {
+      "semantic_name": "IS-MATE?",
+      "raw_names": [
+        "is-mate?"
+      ],
+      "origins": [
+        {
+          "source": "OWNER_INTEREST_FAMILY",
+          "family": "chess",
+          "donor_repos": [
+            "juv4uk/chess",
+            "juv4uk/lisp-chess-engine",
+            "juv4uk/simple-lisp-chess-engine",
+            "juv4uk/chess-lisp-zero",
+            "juv4uk/chess-tauri-zero",
+            "juv4uk/hsChess",
+            "juv4uk/alpha-zero-general",
+            "juv4uk/lc0"
+          ],
+          "status": "RESEARCH-UNRATIFIED",
+          "semantic_law_documented": false
+        }
+      ],
+      "already_selected": false,
+      "ratified_d1_d9_name_match": false
+    },
+    {
+      "semantic_name": "IS-STALEMATE?",
+      "raw_names": [
+        "is-stalemate?"
+      ],
+      "origins": [
+        {
+          "source": "OWNER_INTEREST_FAMILY",
+          "family": "chess",
+          "donor_repos": [
+            "juv4uk/chess",
+            "juv4uk/lisp-chess-engine",
+            "juv4uk/simple-lisp-chess-engine",
+            "juv4uk/chess-lisp-zero",
+            "juv4uk/chess-tauri-zero",
+            "juv4uk/hsChess",
+            "juv4uk/alpha-zero-general",
+            "juv4uk/lc0"
+          ],
+          "status": "RESEARCH-UNRATIFIED",
+          "semantic_law_documented": false
+        }
+      ],
+      "already_selected": false,
+      "ratified_d1_d9_name_match": false
+    },
+    {
+      "semantic_name": "JULIAN-DATE",
+      "raw_names": [
+        "julian-date"
+      ],
+      "origins": [
+        {
+          "source": "OWNER_INTEREST_FAMILY",
+          "family": "astronomy",
+          "donor_repos": [
+            "juv4uk/vsop2013",
+            "juv4uk/VedicAstro"
+          ],
+          "status": "RESEARCH-UNRATIFIED",
+          "semantic_law_documented": false
+        }
+      ],
+      "already_selected": false,
+      "ratified_d1_d9_name_match": false
+    },
+    {
+      "semantic_name": "JUSTIFICATIONS-OF",
+      "raw_names": [
+        "justifications-of"
+      ],
+      "origins": [
+        {
+          "source": "PROPOSAL_LEDGER",
+          "id": "D10P-0042",
+          "law": "Поведінка визначена джерелом forward.lisp:479 (justifications-of).",
+          "original_status": "pending-review"
+        }
+      ],
+      "already_selected": false,
+      "ratified_d1_d9_name_match": true
+    },
+    {
+      "semantic_name": "JUSTIFIED-MEMBER?",
+      "raw_names": [
+        "justified-member?"
+      ],
+      "origins": [
+        {
+          "source": "PROPOSAL_LEDGER",
+          "id": "D10P-0032",
+          "law": "Поведінка визначена джерелом forward.lisp:364 (justified-member?).",
+          "original_status": "pending-review"
+        }
+      ],
+      "already_selected": false,
+      "ratified_d1_d9_name_match": true
+    },
+    {
+      "semantic_name": "K",
+      "raw_names": [
+        "k"
+      ],
+      "origins": [
+        {
+          "source": "LIBRARY_SOURCE_SYMBOL",
+          "path": "lib/si.lisp",
+          "git_blob": "2b94f1ea6d2fb05c084c3a0d863c14119a5ba11f",
+          "line": 122,
+          "kind": "library-defined",
+          "status": "research-unratified"
+        }
+      ],
+      "already_selected": false,
+      "ratified_d1_d9_name_match": false
+    },
+    {
+      "semantic_name": "K-CD",
+      "raw_names": [
+        "k-cd"
+      ],
+      "origins": [
+        {
+          "source": "LIBRARY_SOURCE_SYMBOL",
+          "path": "lib/si.lisp",
+          "git_blob": "2b94f1ea6d2fb05c084c3a0d863c14119a5ba11f",
+          "line": 124,
+          "kind": "library-defined",
+          "status": "research-unratified"
+        }
+      ],
+      "already_selected": false,
+      "ratified_d1_d9_name_match": false
+    },
+    {
+      "semantic_name": "LEGAL-MOVES?",
+      "raw_names": [
+        "legal-moves?"
+      ],
+      "origins": [
+        {
+          "source": "OWNER_INTEREST_FAMILY",
+          "family": "chess",
+          "donor_repos": [
+            "juv4uk/chess",
+            "juv4uk/lisp-chess-engine",
+            "juv4uk/simple-lisp-chess-engine",
+            "juv4uk/chess-lisp-zero",
+            "juv4uk/chess-tauri-zero",
+            "juv4uk/hsChess",
+            "juv4uk/alpha-zero-general",
+            "juv4uk/lc0"
+          ],
+          "status": "RESEARCH-UNRATIFIED",
+          "semantic_law_documented": false
+        }
+      ],
+      "already_selected": false,
+      "ratified_d1_d9_name_match": false
+    },
+    {
+      "semantic_name": "LEMMATIZE-UK",
+      "raw_names": [
+        "lemmatize-uk"
+      ],
+      "origins": [
+        {
+          "source": "OWNER_INTEREST_FAMILY",
+          "family": "ukrainian-nlp",
+          "donor_repos": [
+            "juv4uk/dict_uk",
+            "juv4uk/nlp_uk",
+            "juv4uk/latynka",
+            "juv4uk/pravda",
+            "juv4uk/word2vec",
+            "juv4uk/Ucuddle-Search-Engine"
+          ],
+          "status": "RESEARCH-UNRATIFIED",
+          "semantic_law_documented": false
+        }
+      ],
+      "already_selected": false,
+      "ratified_d1_d9_name_match": false
+    },
+    {
+      "semantic_name": "LOWER-MECHANICAL-WORD",
+      "raw_names": [
+        "LOWER-MECHANICAL-WORD"
+      ],
+      "origins": [
+        {
+          "source": "PROPOSAL_LEDGER",
+          "id": "D10P-8016",
+          "law": "For i=0..n−1 output D1 bit floor((i+1)*k/n + rho)-floor(i*k/n + rho). No floating-point approximation, no implicit hardware clock, and no two-valued T5 code.",
+          "original_status": "pending-review"
+        }
+      ],
+      "already_selected": true,
+      "ratified_d1_d9_name_match": false
+    },
+    {
+      "semantic_name": "MAKE-DIMENSION",
+      "raw_names": [
+        "make-dimension"
+      ],
+      "origins": [
+        {
+          "source": "LIBRARY_SOURCE_SYMBOL",
+          "path": "lib/quantity.lisp",
+          "git_blob": "40c38e6019beccddd8577aa7af5a0957f4932b89",
+          "line": 43,
+          "kind": "library-defined",
+          "status": "research-unratified"
+        }
+      ],
+      "already_selected": false,
+      "ratified_d1_d9_name_match": true
+    },
+    {
+      "semantic_name": "MAKE-JUSTIFIED",
+      "raw_names": [
+        "make-justified"
+      ],
+      "origins": [
+        {
+          "source": "PROPOSAL_LEDGER",
+          "id": "D10P-0023",
+          "law": "Поведінка визначена джерелом forward.lisp:316 (make-justified).",
+          "original_status": "pending-review"
+        }
+      ],
+      "already_selected": false,
+      "ratified_d1_d9_name_match": true
+    },
+    {
+      "semantic_name": "MAKE-QUANTITY",
+      "raw_names": [
+        "make-quantity"
+      ],
+      "origins": [
+        {
+          "source": "LIBRARY_SOURCE_SYMBOL",
+          "path": "lib/quantity.lisp",
+          "git_blob": "40c38e6019beccddd8577aa7af5a0957f4932b89",
+          "line": 96,
+          "kind": "library-defined",
+          "status": "research-unratified"
+        }
+      ],
+      "already_selected": false,
+      "ratified_d1_d9_name_match": true
+    },
+    {
+      "semantic_name": "MAKE-SCIENCE-SOURCE",
+      "raw_names": [
+        "make-science-source"
+      ],
+      "origins": [
+        {
+          "source": "LIBRARY_SOURCE_SYMBOL",
+          "path": "lib/quantity.lisp",
+          "git_blob": "40c38e6019beccddd8577aa7af5a0957f4932b89",
+          "line": 191,
+          "kind": "library-defined",
+          "status": "research-unratified"
+        }
+      ],
+      "already_selected": false,
+      "ratified_d1_d9_name_match": true
+    },
+    {
+      "semantic_name": "MAKE-SCIENTIFIC-CONSTANT",
+      "raw_names": [
+        "make-scientific-constant"
+      ],
+      "origins": [
+        {
+          "source": "LIBRARY_SOURCE_SYMBOL",
+          "path": "lib/quantity.lisp",
+          "git_blob": "40c38e6019beccddd8577aa7af5a0957f4932b89",
+          "line": 227,
+          "kind": "library-defined",
+          "status": "research-unratified"
+        }
+      ],
+      "already_selected": false,
+      "ratified_d1_d9_name_match": true
+    },
+    {
+      "semantic_name": "MAKE-TRANSLATION-REVIEW",
+      "raw_names": [
+        "make-translation-review"
+      ],
+      "origins": [
+        {
+          "source": "LIBRARY_SOURCE_SYMBOL",
+          "path": "lib/translation.lisp",
+          "git_blob": "80cd225cba549a837097b1e633b6662c9434a148",
+          "line": 134,
+          "kind": "library-defined",
+          "status": "research-unratified"
+        }
+      ],
+      "already_selected": false,
+      "ratified_d1_d9_name_match": true
+    },
+    {
+      "semantic_name": "MAKE-UNIT",
+      "raw_names": [
+        "make-unit"
+      ],
+      "origins": [
+        {
+          "source": "LIBRARY_SOURCE_SYMBOL",
+          "path": "lib/quantity.lisp",
+          "git_blob": "40c38e6019beccddd8577aa7af5a0957f4932b89",
+          "line": 79,
+          "kind": "library-defined",
+          "status": "research-unratified"
+        }
+      ],
+      "already_selected": false,
+      "ratified_d1_d9_name_match": true
+    },
+    {
+      "semantic_name": "MAP-APPLY-HEAD",
+      "raw_names": [
+        "map-apply-head"
+      ],
+      "origins": [
+        {
+          "source": "PROPOSAL_LEDGER",
+          "id": "D10P-0069",
+          "law": "Поведінка визначена джерелом forward.lisp:1245 (map-apply-head).",
+          "original_status": "pending-review"
+        }
+      ],
+      "already_selected": false,
+      "ratified_d1_d9_name_match": false
+    },
+    {
+      "semantic_name": "MAP-APPLY-HEAD-JTMS",
+      "raw_names": [
+        "map-apply-head-jtms"
+      ],
+      "origins": [
+        {
+          "source": "PROPOSAL_LEDGER",
+          "id": "D10P-0054",
+          "law": "Поведінка визначена джерелом forward.lisp:690 (map-apply-head-jtms).",
+          "original_status": "pending-review"
+        }
+      ],
+      "already_selected": false,
+      "ratified_d1_d9_name_match": false
+    },
+    {
+      "semantic_name": "MAP-FACT-OF",
+      "raw_names": [
+        "map-fact-of"
+      ],
+      "origins": [
+        {
+          "source": "PROPOSAL_LEDGER",
+          "id": "D10P-0028",
+          "law": "Поведінка визначена джерелом forward.lisp:324 (map-fact-of).",
+          "original_status": "pending-review"
+        }
+      ],
+      "already_selected": false,
+      "ratified_d1_d9_name_match": true
+    },
+    {
+      "semantic_name": "MCTS-BACKPROPAGATE",
+      "raw_names": [
+        "mcts-backpropagate"
+      ],
+      "origins": [
+        {
+          "source": "OWNER_INTEREST_FAMILY",
+          "family": "chess",
+          "donor_repos": [
+            "juv4uk/chess",
+            "juv4uk/lisp-chess-engine",
+            "juv4uk/simple-lisp-chess-engine",
+            "juv4uk/chess-lisp-zero",
+            "juv4uk/chess-tauri-zero",
+            "juv4uk/hsChess",
+            "juv4uk/alpha-zero-general",
+            "juv4uk/lc0"
+          ],
+          "status": "RESEARCH-UNRATIFIED",
+          "semantic_law_documented": false
+        }
+      ],
+      "already_selected": false,
+      "ratified_d1_d9_name_match": false
+    },
+    {
+      "semantic_name": "MCTS-SELECT",
+      "raw_names": [
+        "mcts-select"
+      ],
+      "origins": [
+        {
+          "source": "OWNER_INTEREST_FAMILY",
+          "family": "chess",
+          "donor_repos": [
+            "juv4uk/chess",
+            "juv4uk/lisp-chess-engine",
+            "juv4uk/simple-lisp-chess-engine",
+            "juv4uk/chess-lisp-zero",
+            "juv4uk/chess-tauri-zero",
+            "juv4uk/hsChess",
+            "juv4uk/alpha-zero-general",
+            "juv4uk/lc0"
+          ],
+          "status": "RESEARCH-UNRATIFIED",
+          "semantic_law_documented": false
+        }
+      ],
+      "already_selected": false,
+      "ratified_d1_d9_name_match": false
+    },
+    {
+      "semantic_name": "MEMORY-MAP-OF",
+      "raw_names": [
+        "memory-map-of"
+      ],
+      "origins": [
+        {
+          "source": "OWNER_INTEREST_FAMILY",
+          "family": "retro-os",
+          "donor_repos": [
+            "juv4uk/coreboot",
+            "juv4uk/minix",
+            "juv4uk/me_cleaner",
+            "juv4uk/fpga-lisp"
+          ],
+          "status": "RESEARCH-UNRATIFIED",
+          "semantic_law_documented": false
+        }
+      ],
+      "already_selected": false,
+      "ratified_d1_d9_name_match": false
+    },
+    {
+      "semantic_name": "MINIMAL-ABDUCTIVE-EXPLANATIONS",
+      "raw_names": [
+        "MINIMAL-ABDUCTIVE-EXPLANATIONS"
+      ],
+      "origins": [
+        {
+          "source": "PROPOSAL_LEDGER",
+          "id": "D10P-8001",
+          "law": "For a finite ground propositional Horn theory T, designated abducibles A, observation g and finite integrity constraints IC, return the canonical antichain of inclusion-minimal Δ ⊆ A such that g belongs to the least fixed-point closure of T ∪ Δ and no integrity constraint is fully satisfied by that closure.",
+          "original_status": "pending-review"
+        }
+      ],
+      "already_selected": true,
+      "ratified_d1_d9_name_match": false
+    },
+    {
+      "semantic_name": "N-A",
+      "raw_names": [
+        "n-a"
+      ],
+      "origins": [
+        {
+          "source": "LIBRARY_SOURCE_SYMBOL",
+          "path": "lib/si.lisp",
+          "git_blob": "2b94f1ea6d2fb05c084c3a0d863c14119a5ba11f",
+          "line": 123,
+          "kind": "library-defined",
+          "status": "research-unratified"
+        }
+      ],
+      "already_selected": false,
+      "ratified_d1_d9_name_match": false
+    },
+    {
+      "semantic_name": "NAKSHATRA-OF",
+      "raw_names": [
+        "nakshatra-of"
+      ],
+      "origins": [
+        {
+          "source": "OWNER_INTEREST_FAMILY",
+          "family": "astronomy",
+          "donor_repos": [
+            "juv4uk/vsop2013",
+            "juv4uk/VedicAstro"
+          ],
+          "status": "RESEARCH-UNRATIFIED",
+          "semantic_law_documented": false
+        }
+      ],
+      "already_selected": false,
+      "ratified_d1_d9_name_match": false
+    },
+    {
+      "semantic_name": "NEIGHBORS-OF",
+      "raw_names": [
+        "neighbors-of"
+      ],
+      "origins": [
+        {
+          "source": "OWNER_INTEREST_FAMILY",
+          "family": "graph",
+          "donor_repos": [
+            "juv4uk/basalt",
+            "juv4uk/graph-heavy-basalt",
+            "juv4uk/knowledge-graph-basalt"
+          ],
+          "status": "RESEARCH-UNRATIFIED",
+          "semantic_law_documented": false
+        }
+      ],
+      "already_selected": false,
+      "ratified_d1_d9_name_match": false
+    },
+    {
+      "semantic_name": "NEW-ENTRIES",
+      "raw_names": [
+        "new-entries"
+      ],
+      "origins": [
+        {
+          "source": "PROPOSAL_LEDGER",
+          "id": "D10P-0050",
+          "law": "Поведінка визначена джерелом forward.lisp:548 (new-entries).",
+          "original_status": "pending-review"
+        }
+      ],
+      "already_selected": false,
+      "ratified_d1_d9_name_match": false
+    },
+    {
+      "semantic_name": "NOTATED-CHROMATIC-INTERVAL",
+      "raw_names": [
+        "NOTATED-CHROMATIC-INTERVAL"
+      ],
+      "origins": [
+        {
+          "source": "PROPOSAL_LEDGER",
+          "id": "D10P-601210",
+          "law": "Given two valid pitches, return ordered signed pair (target octave*7+step ordinal minus source octave*7+step ordinal, target exact 12-TET semitone number minus source semitone number); neither component may be silently discarded.",
+          "original_status": "pending-review"
+        }
+      ],
+      "already_selected": true,
+      "ratified_d1_d9_name_match": false
+    },
+    {
+      "semantic_name": "ORBITAL-ELEMENTS",
+      "raw_names": [
+        "orbital-elements"
+      ],
+      "origins": [
+        {
+          "source": "OWNER_INTEREST_FAMILY",
+          "family": "astronomy",
+          "donor_repos": [
+            "juv4uk/vsop2013",
+            "juv4uk/VedicAstro"
+          ],
+          "status": "RESEARCH-UNRATIFIED",
+          "semantic_law_documented": false
+        }
+      ],
+      "already_selected": false,
+      "ratified_d1_d9_name_match": false
+    },
+    {
+      "semantic_name": "PENDULUM-PERIOD",
+      "raw_names": [
+        "pendulum-period"
+      ],
+      "origins": [
+        {
+          "source": "OWNER_INTEREST_FAMILY",
+          "family": "physics",
+          "donor_repos": [
+            "juv4uk/esp32-pendulum"
+          ],
+          "status": "RESEARCH-UNRATIFIED",
+          "semantic_law_documented": false
+        }
+      ],
+      "already_selected": false,
+      "ratified_d1_d9_name_match": false
+    },
+    {
+      "semantic_name": "PENDULUM-STEP",
+      "raw_names": [
+        "pendulum-step"
+      ],
+      "origins": [
+        {
+          "source": "OWNER_INTEREST_FAMILY",
+          "family": "physics",
+          "donor_repos": [
+            "juv4uk/esp32-pendulum"
+          ],
+          "status": "RESEARCH-UNRATIFIED",
+          "semantic_law_documented": false
+        }
+      ],
+      "already_selected": false,
+      "ratified_d1_d9_name_match": false
+    },
+    {
+      "semantic_name": "PERFT",
+      "raw_names": [
+        "perft"
+      ],
+      "origins": [
+        {
+          "source": "OWNER_INTEREST_FAMILY",
+          "family": "chess",
+          "donor_repos": [
+            "juv4uk/chess",
+            "juv4uk/lisp-chess-engine",
+            "juv4uk/simple-lisp-chess-engine",
+            "juv4uk/chess-lisp-zero",
+            "juv4uk/chess-tauri-zero",
+            "juv4uk/hsChess",
+            "juv4uk/alpha-zero-general",
+            "juv4uk/lc0"
+          ],
+          "status": "RESEARCH-UNRATIFIED",
+          "semantic_law_documented": false
+        }
+      ],
+      "already_selected": false,
+      "ratified_d1_d9_name_match": false
+    },
+    {
+      "semantic_name": "PGN-PARSE",
+      "raw_names": [
+        "pgn-parse"
+      ],
+      "origins": [
+        {
+          "source": "OWNER_INTEREST_FAMILY",
+          "family": "chess",
+          "donor_repos": [
+            "juv4uk/chess",
+            "juv4uk/lisp-chess-engine",
+            "juv4uk/simple-lisp-chess-engine",
+            "juv4uk/chess-lisp-zero",
+            "juv4uk/chess-tauri-zero",
+            "juv4uk/hsChess",
+            "juv4uk/alpha-zero-general",
+            "juv4uk/lc0"
+          ],
+          "status": "RESEARCH-UNRATIFIED",
+          "semantic_law_documented": false
+        }
+      ],
+      "already_selected": false,
+      "ratified_d1_d9_name_match": false
+    },
+    {
+      "semantic_name": "PHASE-UNWRAP",
+      "raw_names": [
+        "PHASE-UNWRAP"
+      ],
+      "origins": [
+        {
+          "source": "PROPOSAL_LEDGER",
+          "id": "D10P-503117",
+          "law": "Для скінченної послідовності точних раціональних фаз і додатного раціонального періоду залишити перше значення, далі для кожної сусідньої різниці вибрати конгруентну різницю мінімального абсолютного значення та накопичити її. За точного напівперіодного нічиєго випадку зберігати знак початкової різниці; порожній вхід повертає порожній результат. Це локальне правило найменшого стрибка, не твердження про фізичну траєкторію фази.",
+          "original_status": "pending-review"
+        }
+      ],
+      "already_selected": true,
+      "ratified_d1_d9_name_match": false
+    },
+    {
+      "semantic_name": "PIECE-AT",
+      "raw_names": [
+        "piece-at"
+      ],
+      "origins": [
+        {
+          "source": "OWNER_INTEREST_FAMILY",
+          "family": "chess",
+          "donor_repos": [
+            "juv4uk/chess",
+            "juv4uk/lisp-chess-engine",
+            "juv4uk/simple-lisp-chess-engine",
+            "juv4uk/chess-lisp-zero",
+            "juv4uk/chess-tauri-zero",
+            "juv4uk/hsChess",
+            "juv4uk/alpha-zero-general",
+            "juv4uk/lc0"
+          ],
+          "status": "RESEARCH-UNRATIFIED",
+          "semantic_law_documented": false
+        }
+      ],
+      "already_selected": false,
+      "ratified_d1_d9_name_match": false
+    },
+    {
+      "semantic_name": "PINHOLE-IMAGE-PROJECT",
+      "raw_names": [
+        "PINHOLE-IMAGE-PROJECT"
+      ],
+      "origins": [
+        {
+          "source": "PROPOSAL_LEDGER",
+          "id": "D10P-8006",
+          "law": "Return exact (u,v)=(fx*Xc/Zc+cx,fy*Yc/Zc+cy). Mathematically defined for negative Z too; a separate physical visibility predicate may require Z>0. Do not silently apply lens distortion or infer extrinsics.",
+          "original_status": "pending-review"
+        }
+      ],
+      "already_selected": true,
+      "ratified_d1_d9_name_match": false
+    },
+    {
+      "semantic_name": "PIXEL-TO-CAMERA-RAY",
+      "raw_names": [
+        "PIXEL-TO-CAMERA-RAY"
+      ],
+      "origins": [
+        {
+          "source": "PROPOSAL_LEDGER",
+          "id": "D10P-8007",
+          "law": "Return canonical unnormalized direction ((u-cx)/fx,(v-cy)/fy,1) in camera coordinates. This is a RAY, not a reconstructed 3D point/depth. For a distortion-free pinhole, projecting any nonzero exact multiple of the direction returns the original pixel.",
+          "original_status": "pending-review"
+        }
+      ],
+      "already_selected": true,
+      "ratified_d1_d9_name_match": false
+    },
+    {
+      "semantic_name": "PLANET-LONGITUDE",
+      "raw_names": [
+        "planet-longitude"
+      ],
+      "origins": [
+        {
+          "source": "OWNER_INTEREST_FAMILY",
+          "family": "astronomy",
+          "donor_repos": [
+            "juv4uk/vsop2013",
+            "juv4uk/VedicAstro"
+          ],
+          "status": "RESEARCH-UNRATIFIED",
+          "semantic_law_documented": false
+        }
+      ],
+      "already_selected": false,
+      "ratified_d1_d9_name_match": false
+    },
+    {
+      "semantic_name": "PRATYAHARA-MEMBERS",
+      "raw_names": [
+        "pratyahara-members"
+      ],
+      "origins": [
+        {
+          "source": "OWNER_INTEREST_FAMILY",
+          "family": "sanskrit",
+          "donor_repos": [
+            "juv4uk/shiva-sutras",
+            "juv4uk/vidyut",
+            "juv4uk/spanda",
+            "juv4uk/sanskritworld_texts",
+            "juv4uk/panca-vac"
+          ],
+          "status": "RESEARCH-UNRATIFIED",
+          "semantic_law_documented": false
+        }
+      ],
+      "already_selected": false,
+      "ratified_d1_d9_name_match": false
+    },
+    {
+      "semantic_name": "PREFIX-FREE-KRAFT-CERTIFICATE",
+      "raw_names": [
+        "PREFIX-FREE-KRAFT-CERTIFICATE"
+      ],
+      "origins": [
+        {
+          "source": "PROPOSAL_LEDGER",
+          "id": "D10P-0910",
+          "law": "Для скінченної впорядкованої множини конкретних двійкових слів повертає першу пару префіксної колізії або точну скорочену суму Крафта; умова Σ2^-довжина<=1 сама по собі не доводить префіксності поданих слів.",
+          "original_status": "pending-review"
+        }
+      ],
+      "already_selected": true,
+      "ratified_d1_d9_name_match": false
+    },
+    {
+      "semantic_name": "PRIMITIVE-BINARY-WORD-ROOT",
+      "raw_names": [
+        "PRIMITIVE-BINARY-WORD-ROOT"
+      ],
+      "origins": [
+        {
+          "source": "PROPOSAL_LEDGER",
+          "id": "D10P-0007",
+          "law": "Найкоротший префікс двійкового слова який при цілочисельному повторенні точно відтворює повне слово; порожній вхід дає порожній результат.",
+          "original_status": "pending-review"
+        }
+      ],
+      "already_selected": true,
+      "ratified_d1_d9_name_match": false
+    },
+    {
+      "semantic_name": "PRUNE-ALL-ENTRIES",
+      "raw_names": [
+        "prune-all-entries"
+      ],
+      "origins": [
+        {
+          "source": "PROPOSAL_LEDGER",
+          "id": "D10P-0061",
+          "law": "Поведінка визначена джерелом forward.lisp:732 (prune-all-entries).",
+          "original_status": "pending-review"
+        }
+      ],
+      "already_selected": false,
+      "ratified_d1_d9_name_match": true
+    },
+    {
+      "semantic_name": "PRUNE-ENTRY",
+      "raw_names": [
+        "prune-entry"
+      ],
+      "origins": [
+        {
+          "source": "PROPOSAL_LEDGER",
+          "id": "D10P-0060",
+          "law": "Поведінка визначена джерелом forward.lisp:728 (prune-entry).",
+          "original_status": "pending-review"
+        }
+      ],
+      "already_selected": false,
+      "ratified_d1_d9_name_match": true
+    },
+    {
+      "semantic_name": "PRUNE-JUSTIFICATIONS",
+      "raw_names": [
+        "prune-justifications"
+      ],
+      "origins": [
+        {
+          "source": "PROPOSAL_LEDGER",
+          "id": "D10P-0059",
+          "law": "Поведінка визначена джерелом forward.lisp:720 (prune-justifications).",
+          "original_status": "pending-review"
+        }
+      ],
+      "already_selected": false,
+      "ratified_d1_d9_name_match": true
+    },
+    {
+      "semantic_name": "QUANTITY-PRODUCT",
+      "raw_names": [
+        "quantity-product"
+      ],
+      "origins": [
+        {
+          "source": "LIBRARY_SOURCE_SYMBOL",
+          "path": "lib/quantity.lisp",
+          "git_blob": "40c38e6019beccddd8577aa7af5a0957f4932b89",
+          "line": 179,
+          "kind": "library-defined",
+          "status": "research-unratified"
+        }
+      ],
+      "already_selected": false,
+      "ratified_d1_d9_name_match": true
+    },
+    {
+      "semantic_name": "QUANTITY-QUOTIENT",
+      "raw_names": [
+        "quantity-quotient"
+      ],
+      "origins": [
+        {
+          "source": "LIBRARY_SOURCE_SYMBOL",
+          "path": "lib/quantity.lisp",
+          "git_blob": "40c38e6019beccddd8577aa7af5a0957f4932b89",
+          "line": 185,
+          "kind": "library-defined",
+          "status": "research-unratified"
+        }
+      ],
+      "already_selected": false,
+      "ratified_d1_d9_name_match": true
+    },
+    {
+      "semantic_name": "QUANTITY-UNIT",
+      "raw_names": [
+        "quantity-unit"
+      ],
+      "origins": [
+        {
+          "source": "LIBRARY_SOURCE_SYMBOL",
+          "path": "lib/quantity.lisp",
+          "git_blob": "40c38e6019beccddd8577aa7af5a0957f4932b89",
+          "line": 114,
+          "kind": "library-defined",
+          "status": "research-unratified"
+        }
+      ],
+      "already_selected": false,
+      "ratified_d1_d9_name_match": true
+    },
+    {
+      "semantic_name": "QUANTITY-VALUE",
+      "raw_names": [
+        "quantity-value"
+      ],
+      "origins": [
+        {
+          "source": "LIBRARY_SOURCE_SYMBOL",
+          "path": "lib/quantity.lisp",
+          "git_blob": "40c38e6019beccddd8577aa7af5a0957f4932b89",
+          "line": 111,
+          "kind": "library-defined",
+          "status": "research-unratified"
+        }
+      ],
+      "already_selected": false,
+      "ratified_d1_d9_name_match": true
+    },
+    {
+      "semantic_name": "QUANTITY?",
+      "raw_names": [
+        "quantity?"
+      ],
+      "origins": [
+        {
+          "source": "LIBRARY_SOURCE_SYMBOL",
+          "path": "lib/quantity.lisp",
+          "git_blob": "40c38e6019beccddd8577aa7af5a0957f4932b89",
+          "line": 100,
+          "kind": "library-defined",
+          "status": "research-unratified"
+        }
+      ],
+      "already_selected": false,
+      "ratified_d1_d9_name_match": true
+    },
+    {
+      "semantic_name": "RATIONAL-RESAMPLE",
+      "raw_names": [
+        "RATIONAL-RESAMPLE"
+      ],
+      "origins": [
+        {
+          "source": "PROPOSAL_LEDGER",
+          "id": "D10P-503105",
+          "law": "For input signal x sampled at fs, positive integer interpolation L and decimation M, and explicit FIR taps h, zero-insert by L, convolve causally with h, then retain indices divisible by M: output rate fs*L/M. The explicit finite-output convention is output indices n<length(x)*L, with zero prehistory; repeated processing on disjoint chunks must preserve FIR history and global decimation phase.",
+          "original_status": "pending-review"
+        }
+      ],
+      "already_selected": true,
+      "ratified_d1_d9_name_match": false
+    },
+    {
+      "semantic_name": "REMOVE-ENTRY-JTMS",
+      "raw_names": [
+        "remove-entry-jtms"
+      ],
+      "origins": [
+        {
+          "source": "PROPOSAL_LEDGER",
+          "id": "D10P-0047",
+          "law": "Поведінка визначена джерелом forward.lisp:520 (remove-entry-jtms).",
+          "original_status": "pending-review"
+        }
+      ],
+      "already_selected": false,
+      "ratified_d1_d9_name_match": true
+    },
+    {
+      "semantic_name": "REMOVE-JUSTIFIED",
+      "raw_names": [
+        "remove-justified"
+      ],
+      "origins": [
+        {
+          "source": "PROPOSAL_LEDGER",
+          "id": "D10P-0037",
+          "law": "Поведінка визначена джерелом forward.lisp:398 (remove-justified).",
+          "original_status": "pending-review"
+        }
+      ],
+      "already_selected": false,
+      "ratified_d1_d9_name_match": true
+    },
+    {
+      "semantic_name": "REMOVE-METHOD",
+      "raw_names": [
+        "REMOVE-METHOD"
+      ],
+      "origins": [
+        {
+          "source": "PROPOSAL_LEDGER",
+          "id": "D10P-0005",
+          "law": "Вилучає тільки ідентифікований об'єкт методу з узагальненої функції; інші методи та функцію зберігає.",
+          "original_status": "pending-review"
+        }
+      ],
+      "already_selected": true,
+      "ratified_d1_d9_name_match": false
+    },
+    {
+      "semantic_name": "REMOVE-WRAPPER",
+      "raw_names": [
+        "REMOVE-WRAPPER"
+      ],
+      "origins": [
+        {
+          "source": "PROPOSAL_LEDGER",
+          "id": "D10P-503112",
+          "law": "Вилучити обгортки заданого типу, не знімаючи обгорток інших типів і не втрачаючи базову функцію; результат зберігає порядок решти wrapper chain.",
+          "original_status": "pending-review"
+        }
+      ],
+      "already_selected": true,
+      "ratified_d1_d9_name_match": false
+    },
+    {
+      "semantic_name": "RETRACT-FACT",
+      "raw_names": [
+        "retract-fact"
+      ],
+      "origins": [
+        {
+          "source": "PROPOSAL_LEDGER",
+          "id": "D10P-0021",
+          "law": "Поведінка визначена джерелом forward.lisp:246 (retract-fact).",
+          "original_status": "pending-review"
+        }
+      ],
+      "already_selected": false,
+      "ratified_d1_d9_name_match": true
+    },
+    {
+      "semantic_name": "RETRACT-FACT-JTMS",
+      "raw_names": [
+        "retract-fact-jtms"
+      ],
+      "origins": [
+        {
+          "source": "PROPOSAL_LEDGER",
+          "id": "D10P-0064",
+          "law": "Поведінка визначена джерелом forward.lisp:762 (retract-fact-jtms).",
+          "original_status": "pending-review"
+        }
+      ],
+      "already_selected": false,
+      "ratified_d1_d9_name_match": true
+    },
+    {
+      "semantic_name": "RETRACT-FACT-JTMS!",
+      "raw_names": [
+        "retract-fact-jtms!"
+      ],
+      "origins": [
+        {
+          "source": "PROPOSAL_LEDGER",
+          "id": "D10P-0066",
+          "law": "Поведінка визначена джерелом forward.lisp:779 (retract-fact-jtms!).",
+          "original_status": "pending-review"
+        }
+      ],
+      "already_selected": false,
+      "ratified_d1_d9_name_match": true
+    },
+    {
+      "semantic_name": "RETRACT-FACT-TMS",
+      "raw_names": [
+        "retract-fact-tms"
+      ],
+      "origins": [
+        {
+          "source": "PROPOSAL_LEDGER",
+          "id": "D10P-0039",
+          "law": "Поведінка визначена джерелом forward.lisp:417 (retract-fact-tms).",
+          "original_status": "pending-review"
+        }
+      ],
+      "already_selected": false,
+      "ratified_d1_d9_name_match": true
+    },
+    {
+      "semantic_name": "RETRACT-FACT-TMS!",
+      "raw_names": [
+        "retract-fact-tms!"
+      ],
+      "origins": [
+        {
+          "source": "PROPOSAL_LEDGER",
+          "id": "D10P-0041",
+          "law": "Поведінка визначена джерелом forward.lisp:428 (retract-fact-tms!).",
+          "original_status": "pending-review"
+        }
+      ],
+      "already_selected": false,
+      "ratified_d1_d9_name_match": true
+    },
+    {
+      "semantic_name": "RETRACT-FACT!",
+      "raw_names": [
+        "retract-fact!"
+      ],
+      "origins": [
+        {
+          "source": "PROPOSAL_LEDGER",
+          "id": "D10P-0022",
+          "law": "Поведінка визначена джерелом forward.lisp:254 (retract-fact!).",
+          "original_status": "pending-review"
+        }
+      ],
+      "already_selected": false,
+      "ratified_d1_d9_name_match": true
+    },
+    {
+      "semantic_name": "RETRACT-FACTS-JTMS",
+      "raw_names": [
+        "retract-facts-jtms"
+      ],
+      "origins": [
+        {
+          "source": "PROPOSAL_LEDGER",
+          "id": "D10P-0065",
+          "law": "Поведінка визначена джерелом forward.lisp:772 (retract-facts-jtms).",
+          "original_status": "pending-review"
+        }
+      ],
+      "already_selected": false,
+      "ratified_d1_d9_name_match": true
+    },
+    {
+      "semantic_name": "RETRACT-FACTS-TMS",
+      "raw_names": [
+        "retract-facts-tms"
+      ],
+      "origins": [
+        {
+          "source": "PROPOSAL_LEDGER",
+          "id": "D10P-0040",
+          "law": "Поведінка визначена джерелом forward.lisp:421 (retract-facts-tms).",
+          "original_status": "pending-review"
+        }
+      ],
+      "already_selected": false,
+      "ratified_d1_d9_name_match": true
+    },
+    {
+      "semantic_name": "RISE-SET",
+      "raw_names": [
+        "rise-set"
+      ],
+      "origins": [
+        {
+          "source": "OWNER_INTEREST_FAMILY",
+          "family": "astronomy",
+          "donor_repos": [
+            "juv4uk/vsop2013",
+            "juv4uk/VedicAstro"
+          ],
+          "status": "RESEARCH-UNRATIFIED",
+          "semantic_law_documented": false
+        }
+      ],
+      "already_selected": false,
+      "ratified_d1_d9_name_match": false
+    },
+    {
+      "semantic_name": "RUN",
+      "raw_names": [
+        "run"
+      ],
+      "origins": [
+        {
+          "source": "PROPOSAL_LEDGER",
+          "id": "D10P-0019",
+          "law": "Поведінка визначена джерелом forward.lisp:206 (run).",
+          "original_status": "pending-review"
+        }
+      ],
+      "already_selected": false,
+      "ratified_d1_d9_name_match": true
+    },
+    {
+      "semantic_name": "RUN-JTMS",
+      "raw_names": [
+        "run-jtms"
+      ],
+      "origins": [
+        {
+          "source": "PROPOSAL_LEDGER",
+          "id": "D10P-0051",
+          "law": "Поведінка визначена джерелом forward.lisp:556 (run-jtms).",
+          "original_status": "pending-review"
+        }
+      ],
+      "already_selected": false,
+      "ratified_d1_d9_name_match": true
+    },
+    {
+      "semantic_name": "RUN-JTMS-MULTI",
+      "raw_names": [
+        "run-jtms-multi"
+      ],
+      "origins": [
+        {
+          "source": "PROPOSAL_LEDGER",
+          "id": "D10P-0057",
+          "law": "Поведінка визначена джерелом forward.lisp:710 (run-jtms-multi).",
+          "original_status": "pending-review"
+        }
+      ],
+      "already_selected": false,
+      "ratified_d1_d9_name_match": true
+    },
+    {
+      "semantic_name": "RUN-JTMS-MULTI!",
+      "raw_names": [
+        "run-jtms-multi!"
+      ],
+      "origins": [
+        {
+          "source": "PROPOSAL_LEDGER",
+          "id": "D10P-0058",
+          "law": "Поведінка визначена джерелом forward.lisp:717 (run-jtms-multi!).",
+          "original_status": "pending-review"
+        }
+      ],
+      "already_selected": false,
+      "ratified_d1_d9_name_match": true
+    },
+    {
+      "semantic_name": "RUN-JTMS!",
+      "raw_names": [
+        "run-jtms!"
+      ],
+      "origins": [
+        {
+          "source": "PROPOSAL_LEDGER",
+          "id": "D10P-0053",
+          "law": "Поведінка визначена джерелом forward.lisp:568 (run-jtms!).",
+          "original_status": "pending-review"
+        }
+      ],
+      "already_selected": false,
+      "ratified_d1_d9_name_match": true
+    },
+    {
+      "semantic_name": "RUN-TMS",
+      "raw_names": [
+        "run-tms"
+      ],
+      "origins": [
+        {
+          "source": "PROPOSAL_LEDGER",
+          "id": "D10P-0034",
+          "law": "Поведінка визначена джерелом forward.lisp:382 (run-tms).",
+          "original_status": "pending-review"
+        }
+      ],
+      "already_selected": false,
+      "ratified_d1_d9_name_match": true
+    },
+    {
+      "semantic_name": "RUN-TMS!",
+      "raw_names": [
+        "run-tms!"
+      ],
+      "origins": [
+        {
+          "source": "PROPOSAL_LEDGER",
+          "id": "D10P-0036",
+          "law": "Поведінка визначена джерелом forward.lisp:395 (run-tms!).",
+          "original_status": "pending-review"
+        }
+      ],
+      "already_selected": false,
+      "ratified_d1_d9_name_match": true
+    },
+    {
+      "semantic_name": "SCIENCE-ADD-DIMENSION",
+      "raw_names": [
+        "science-add-dimension"
+      ],
+      "origins": [
+        {
+          "source": "LIBRARY_SOURCE_SYMBOL",
+          "path": "lib/quantity.lisp",
+          "git_blob": "40c38e6019beccddd8577aa7af5a0957f4932b89",
+          "line": 120,
+          "kind": "library-defined",
+          "status": "research-unratified"
+        }
+      ],
+      "already_selected": true,
+      "ratified_d1_d9_name_match": false
+    },
+    {
+      "semantic_name": "SCIENCE-DIMENSIONS-VALID?",
+      "raw_names": [
+        "science-dimensions-valid?"
+      ],
+      "origins": [
+        {
+          "source": "LIBRARY_SOURCE_SYMBOL",
+          "path": "lib/quantity.lisp",
+          "git_blob": "40c38e6019beccddd8577aa7af5a0957f4932b89",
+          "line": 68,
+          "kind": "library-defined",
+          "status": "research-unratified"
+        }
+      ],
+      "already_selected": true,
+      "ratified_d1_d9_name_match": false
+    },
+    {
+      "semantic_name": "SCIENCE-MERGE-DIMENSIONS",
+      "raw_names": [
+        "science-merge-dimensions"
+      ],
+      "origins": [
+        {
+          "source": "LIBRARY_SOURCE_SYMBOL",
+          "path": "lib/quantity.lisp",
+          "git_blob": "40c38e6019beccddd8577aa7af5a0957f4932b89",
+          "line": 143,
+          "kind": "library-defined",
+          "status": "research-unratified"
+        }
+      ],
+      "already_selected": true,
+      "ratified_d1_d9_name_match": false
+    },
+    {
+      "semantic_name": "SCIENCE-NEGATE-DIMENSIONS",
+      "raw_names": [
+        "science-negate-dimensions"
+      ],
+      "origins": [
+        {
+          "source": "LIBRARY_SOURCE_SYMBOL",
+          "path": "lib/quantity.lisp",
+          "git_blob": "40c38e6019beccddd8577aa7af5a0957f4932b89",
+          "line": 153,
+          "kind": "library-defined",
+          "status": "research-unratified"
+        }
+      ],
+      "already_selected": true,
+      "ratified_d1_d9_name_match": false
+    },
+    {
+      "semantic_name": "SCIENCE-PROPER-LIST?",
+      "raw_names": [
+        "science-proper-list?"
+      ],
+      "origins": [
+        {
+          "source": "LIBRARY_SOURCE_SYMBOL",
+          "path": "lib/quantity.lisp",
+          "git_blob": "40c38e6019beccddd8577aa7af5a0957f4932b89",
+          "line": 24,
+          "kind": "library-defined",
+          "status": "research-unratified"
+        }
+      ],
+      "already_selected": false,
+      "ratified_d1_d9_name_match": false
+    },
+    {
+      "semantic_name": "SCIENCE-SEVENTH",
+      "raw_names": [
+        "science-seventh"
+      ],
+      "origins": [
+        {
+          "source": "LIBRARY_SOURCE_SYMBOL",
+          "path": "lib/quantity.lisp",
+          "git_blob": "40c38e6019beccddd8577aa7af5a0957f4932b89",
+          "line": 39,
+          "kind": "library-defined",
+          "status": "research-unratified"
+        }
+      ],
+      "already_selected": false,
+      "ratified_d1_d9_name_match": false
+    },
+    {
+      "semantic_name": "SCIENCE-SIXTH",
+      "raw_names": [
+        "science-sixth"
+      ],
+      "origins": [
+        {
+          "source": "LIBRARY_SOURCE_SYMBOL",
+          "path": "lib/quantity.lisp",
+          "git_blob": "40c38e6019beccddd8577aa7af5a0957f4932b89",
+          "line": 35,
+          "kind": "library-defined",
+          "status": "research-unratified"
+        }
+      ],
+      "already_selected": false,
+      "ratified_d1_d9_name_match": false
+    },
+    {
+      "semantic_name": "SCIENCE-SOURCE?",
+      "raw_names": [
+        "science-source?"
+      ],
+      "origins": [
+        {
+          "source": "LIBRARY_SOURCE_SYMBOL",
+          "path": "lib/quantity.lisp",
+          "git_blob": "40c38e6019beccddd8577aa7af5a0957f4932b89",
+          "line": 195,
+          "kind": "library-defined",
+          "status": "research-unratified"
+        }
+      ],
+      "already_selected": false,
+      "ratified_d1_d9_name_match": true
+    },
+    {
+      "semantic_name": "SCIENTIFIC-CONSTANT->CLAUSES",
+      "raw_names": [
+        "scientific-constant->clauses"
+      ],
+      "origins": [
+        {
+          "source": "LIBRARY_SOURCE_SYMBOL",
+          "path": "lib/quantity.lisp",
+          "git_blob": "40c38e6019beccddd8577aa7af5a0957f4932b89",
+          "line": 285,
+          "kind": "library-defined",
+          "status": "research-unratified"
+        }
+      ],
+      "already_selected": false,
+      "ratified_d1_d9_name_match": true
+    },
+    {
+      "semantic_name": "SCIENTIFIC-CONSTANT-KIND",
+      "raw_names": [
+        "scientific-constant-kind"
+      ],
+      "origins": [
+        {
+          "source": "LIBRARY_SOURCE_SYMBOL",
+          "path": "lib/quantity.lisp",
+          "git_blob": "40c38e6019beccddd8577aa7af5a0957f4932b89",
+          "line": 273,
+          "kind": "library-defined",
+          "status": "research-unratified"
+        }
+      ],
+      "already_selected": false,
+      "ratified_d1_d9_name_match": true
+    },
+    {
+      "semantic_name": "SCIENTIFIC-CONSTANT-KIND-VALID?",
+      "raw_names": [
+        "scientific-constant-kind-valid?"
+      ],
+      "origins": [
+        {
+          "source": "LIBRARY_SOURCE_SYMBOL",
+          "path": "lib/quantity.lisp",
+          "git_blob": "40c38e6019beccddd8577aa7af5a0957f4932b89",
+          "line": 218,
+          "kind": "library-defined",
+          "status": "research-unratified"
+        }
+      ],
+      "already_selected": false,
+      "ratified_d1_d9_name_match": true
+    },
+    {
+      "semantic_name": "SCIENTIFIC-CONSTANT-NAME",
+      "raw_names": [
+        "scientific-constant-name"
+      ],
+      "origins": [
+        {
+          "source": "LIBRARY_SOURCE_SYMBOL",
+          "path": "lib/quantity.lisp",
+          "git_blob": "40c38e6019beccddd8577aa7af5a0957f4932b89",
+          "line": 256,
+          "kind": "library-defined",
+          "status": "research-unratified"
+        }
+      ],
+      "already_selected": false,
+      "ratified_d1_d9_name_match": true
+    },
+    {
+      "semantic_name": "SCIENTIFIC-CONSTANT-QUANTITY",
+      "raw_names": [
+        "scientific-constant-quantity"
+      ],
+      "origins": [
+        {
+          "source": "LIBRARY_SOURCE_SYMBOL",
+          "path": "lib/quantity.lisp",
+          "git_blob": "40c38e6019beccddd8577aa7af5a0957f4932b89",
+          "line": 259,
+          "kind": "library-defined",
+          "status": "research-unratified"
+        }
+      ],
+      "already_selected": false,
+      "ratified_d1_d9_name_match": true
+    },
+    {
+      "semantic_name": "SCIENTIFIC-CONSTANT-SOURCE",
+      "raw_names": [
+        "scientific-constant-source"
+      ],
+      "origins": [
+        {
+          "source": "LIBRARY_SOURCE_SYMBOL",
+          "path": "lib/quantity.lisp",
+          "git_blob": "40c38e6019beccddd8577aa7af5a0957f4932b89",
+          "line": 279,
+          "kind": "library-defined",
+          "status": "research-unratified"
+        }
+      ],
+      "already_selected": false,
+      "ratified_d1_d9_name_match": true
+    },
+    {
+      "semantic_name": "SCIENTIFIC-CONSTANT-STATUS",
+      "raw_names": [
+        "scientific-constant-status"
+      ],
+      "origins": [
+        {
+          "source": "LIBRARY_SOURCE_SYMBOL",
+          "path": "lib/quantity.lisp",
+          "git_blob": "40c38e6019beccddd8577aa7af5a0957f4932b89",
+          "line": 270,
+          "kind": "library-defined",
+          "status": "research-unratified"
+        }
+      ],
+      "already_selected": false,
+      "ratified_d1_d9_name_match": true
+    },
+    {
+      "semantic_name": "SCIENTIFIC-CONSTANT-STATUS-VALID?",
+      "raw_names": [
+        "scientific-constant-status-valid?"
+      ],
+      "origins": [
+        {
+          "source": "LIBRARY_SOURCE_SYMBOL",
+          "path": "lib/quantity.lisp",
+          "git_blob": "40c38e6019beccddd8577aa7af5a0957f4932b89",
+          "line": 210,
+          "kind": "library-defined",
+          "status": "research-unratified"
+        }
+      ],
+      "already_selected": false,
+      "ratified_d1_d9_name_match": true
+    },
+    {
+      "semantic_name": "SCIENTIFIC-CONSTANT-SYSTEM",
+      "raw_names": [
+        "scientific-constant-system"
+      ],
+      "origins": [
+        {
+          "source": "LIBRARY_SOURCE_SYMBOL",
+          "path": "lib/quantity.lisp",
+          "git_blob": "40c38e6019beccddd8577aa7af5a0957f4932b89",
+          "line": 276,
+          "kind": "library-defined",
+          "status": "research-unratified"
+        }
+      ],
+      "already_selected": false,
+      "ratified_d1_d9_name_match": true
+    },
+    {
+      "semantic_name": "SCIENTIFIC-CONSTANT-UNIT",
+      "raw_names": [
+        "scientific-constant-unit"
+      ],
+      "origins": [
+        {
+          "source": "LIBRARY_SOURCE_SYMBOL",
+          "path": "lib/quantity.lisp",
+          "git_blob": "40c38e6019beccddd8577aa7af5a0957f4932b89",
+          "line": 266,
+          "kind": "library-defined",
+          "status": "research-unratified"
+        }
+      ],
+      "already_selected": false,
+      "ratified_d1_d9_name_match": true
+    },
+    {
+      "semantic_name": "SCIENTIFIC-CONSTANT-VALUE",
+      "raw_names": [
+        "scientific-constant-value"
+      ],
+      "origins": [
+        {
+          "source": "LIBRARY_SOURCE_SYMBOL",
+          "path": "lib/quantity.lisp",
+          "git_blob": "40c38e6019beccddd8577aa7af5a0957f4932b89",
+          "line": 262,
+          "kind": "library-defined",
+          "status": "research-unratified"
+        }
+      ],
+      "already_selected": false,
+      "ratified_d1_d9_name_match": true
+    },
+    {
+      "semantic_name": "SCIENTIFIC-CONSTANT?",
+      "raw_names": [
+        "scientific-constant?"
+      ],
+      "origins": [
+        {
+          "source": "LIBRARY_SOURCE_SYMBOL",
+          "path": "lib/quantity.lisp",
+          "git_blob": "40c38e6019beccddd8577aa7af5a0957f4932b89",
+          "line": 238,
+          "kind": "library-defined",
+          "status": "research-unratified"
+        }
+      ],
+      "already_selected": false,
+      "ratified_d1_d9_name_match": true
+    },
+    {
+      "semantic_name": "SHORTEST-PATH",
+      "raw_names": [
+        "shortest-path"
+      ],
+      "origins": [
+        {
+          "source": "OWNER_INTEREST_FAMILY",
+          "family": "graph",
+          "donor_repos": [
+            "juv4uk/basalt",
+            "juv4uk/graph-heavy-basalt",
+            "juv4uk/knowledge-graph-basalt"
+          ],
+          "status": "RESEARCH-UNRATIFIED",
+          "semantic_law_documented": false
+        }
+      ],
+      "already_selected": false,
+      "ratified_d1_d9_name_match": false
+    },
+    {
+      "semantic_name": "SI:AVOGADRO-CONSTANT",
+      "raw_names": [
+        "si:avogadro-constant"
+      ],
+      "origins": [
+        {
+          "source": "LIBRARY_SOURCE_SYMBOL",
+          "path": "lib/si.lisp",
+          "git_blob": "2b94f1ea6d2fb05c084c3a0d863c14119a5ba11f",
+          "line": 113,
+          "kind": "library-defined",
+          "status": "research-unratified"
+        }
+      ],
+      "already_selected": false,
+      "ratified_d1_d9_name_match": false
+    },
+    {
+      "semantic_name": "SI:BOLTZMANN-CONSTANT",
+      "raw_names": [
+        "si:boltzmann-constant"
+      ],
+      "origins": [
+        {
+          "source": "LIBRARY_SOURCE_SYMBOL",
+          "path": "lib/si.lisp",
+          "git_blob": "2b94f1ea6d2fb05c084c3a0d863c14119a5ba11f",
+          "line": 112,
+          "kind": "library-defined",
+          "status": "research-unratified"
+        }
+      ],
+      "already_selected": false,
+      "ratified_d1_d9_name_match": false
+    },
+    {
+      "semantic_name": "SI:C",
+      "raw_names": [
+        "si:c"
+      ],
+      "origins": [
+        {
+          "source": "LIBRARY_SOURCE_SYMBOL",
+          "path": "lib/si.lisp",
+          "git_blob": "2b94f1ea6d2fb05c084c3a0d863c14119a5ba11f",
+          "line": 126,
+          "kind": "library-defined",
+          "status": "research-unratified"
+        }
+      ],
+      "already_selected": false,
+      "ratified_d1_d9_name_match": false
+    },
+    {
+      "semantic_name": "SI:CESIUM-FREQUENCY",
+      "raw_names": [
+        "si:cesium-frequency"
+      ],
+      "origins": [
+        {
+          "source": "LIBRARY_SOURCE_SYMBOL",
+          "path": "lib/si.lisp",
+          "git_blob": "2b94f1ea6d2fb05c084c3a0d863c14119a5ba11f",
+          "line": 108,
+          "kind": "library-defined",
+          "status": "research-unratified"
+        }
+      ],
+      "already_selected": false,
+      "ratified_d1_d9_name_match": false
+    },
+    {
+      "semantic_name": "SI:CONSTANT-VALUE",
+      "raw_names": [
+        "si:constant-value"
+      ],
+      "origins": [
+        {
+          "source": "LIBRARY_SOURCE_SYMBOL",
+          "path": "lib/si.lisp",
+          "git_blob": "2b94f1ea6d2fb05c084c3a0d863c14119a5ba11f",
+          "line": 103,
+          "kind": "library-defined",
+          "status": "research-unratified"
+        }
+      ],
+      "already_selected": false,
+      "ratified_d1_d9_name_match": false
+    },
+    {
+      "semantic_name": "SI:DEFINING-AVOGADRO-CONSTANT",
+      "raw_names": [
+        "si:defining-avogadro-constant"
+      ],
+      "origins": [
+        {
+          "source": "LIBRARY_SOURCE_SYMBOL",
+          "path": "lib/si.lisp",
+          "git_blob": "2b94f1ea6d2fb05c084c3a0d863c14119a5ba11f",
+          "line": 80,
+          "kind": "library-defined",
+          "status": "research-unratified"
+        }
+      ],
+      "already_selected": false,
+      "ratified_d1_d9_name_match": false
+    },
+    {
+      "semantic_name": "SI:DEFINING-BOLTZMANN-CONSTANT",
+      "raw_names": [
+        "si:defining-boltzmann-constant"
+      ],
+      "origins": [
+        {
+          "source": "LIBRARY_SOURCE_SYMBOL",
+          "path": "lib/si.lisp",
+          "git_blob": "2b94f1ea6d2fb05c084c3a0d863c14119a5ba11f",
+          "line": 67,
+          "kind": "library-defined",
+          "status": "research-unratified"
+        }
+      ],
+      "already_selected": false,
+      "ratified_d1_d9_name_match": false
+    },
+    {
+      "semantic_name": "SI:DEFINING-CESIUM-FREQUENCY",
+      "raw_names": [
+        "si:defining-cesium-frequency"
+      ],
+      "origins": [
+        {
+          "source": "LIBRARY_SOURCE_SYMBOL",
+          "path": "lib/si.lisp",
+          "git_blob": "2b94f1ea6d2fb05c084c3a0d863c14119a5ba11f",
+          "line": 25,
+          "kind": "library-defined",
+          "status": "research-unratified"
+        }
+      ],
+      "already_selected": false,
+      "ratified_d1_d9_name_match": false
+    },
+    {
+      "semantic_name": "SI:DEFINING-ELEMENTARY-CHARGE",
+      "raw_names": [
+        "si:defining-elementary-charge"
+      ],
+      "origins": [
+        {
+          "source": "LIBRARY_SOURCE_SYMBOL",
+          "path": "lib/si.lisp",
+          "git_blob": "2b94f1ea6d2fb05c084c3a0d863c14119a5ba11f",
+          "line": 56,
+          "kind": "library-defined",
+          "status": "research-unratified"
+        }
+      ],
+      "already_selected": false,
+      "ratified_d1_d9_name_match": false
+    },
+    {
+      "semantic_name": "SI:DEFINING-LUMINOUS-EFFICACY",
+      "raw_names": [
+        "si:defining-luminous-efficacy"
+      ],
+      "origins": [
+        {
+          "source": "LIBRARY_SOURCE_SYMBOL",
+          "path": "lib/si.lisp",
+          "git_blob": "2b94f1ea6d2fb05c084c3a0d863c14119a5ba11f",
+          "line": 89,
+          "kind": "library-defined",
+          "status": "research-unratified"
+        }
+      ],
+      "already_selected": false,
+      "ratified_d1_d9_name_match": false
+    },
+    {
+      "semantic_name": "SI:DEFINING-PLANCK-CONSTANT",
+      "raw_names": [
+        "si:defining-planck-constant"
+      ],
+      "origins": [
+        {
+          "source": "LIBRARY_SOURCE_SYMBOL",
+          "path": "lib/si.lisp",
+          "git_blob": "2b94f1ea6d2fb05c084c3a0d863c14119a5ba11f",
+          "line": 44,
+          "kind": "library-defined",
+          "status": "research-unratified"
+        }
+      ],
+      "already_selected": false,
+      "ratified_d1_d9_name_match": false
+    },
+    {
+      "semantic_name": "SI:DEFINING-SPEED-OF-LIGHT",
+      "raw_names": [
+        "si:defining-speed-of-light"
+      ],
+      "origins": [
+        {
+          "source": "LIBRARY_SOURCE_SYMBOL",
+          "path": "lib/si.lisp",
+          "git_blob": "2b94f1ea6d2fb05c084c3a0d863c14119a5ba11f",
+          "line": 34,
+          "kind": "library-defined",
+          "status": "research-unratified"
+        }
+      ],
+      "already_selected": false,
+      "ratified_d1_d9_name_match": false
+    },
+    {
+      "semantic_name": "SI:DELTA-NU-CS",
+      "raw_names": [
+        "si:delta-nu-cs"
+      ],
+      "origins": [
+        {
+          "source": "LIBRARY_SOURCE_SYMBOL",
+          "path": "lib/si.lisp",
+          "git_blob": "2b94f1ea6d2fb05c084c3a0d863c14119a5ba11f",
+          "line": 125,
+          "kind": "library-defined",
+          "status": "research-unratified"
+        }
+      ],
+      "already_selected": false,
+      "ratified_d1_d9_name_match": false
+    },
+    {
+      "semantic_name": "SI:E",
+      "raw_names": [
+        "si:e"
+      ],
+      "origins": [
+        {
+          "source": "LIBRARY_SOURCE_SYMBOL",
+          "path": "lib/si.lisp",
+          "git_blob": "2b94f1ea6d2fb05c084c3a0d863c14119a5ba11f",
+          "line": 128,
+          "kind": "library-defined",
+          "status": "research-unratified"
+        }
+      ],
+      "already_selected": false,
+      "ratified_d1_d9_name_match": false
+    },
+    {
+      "semantic_name": "SI:ELEMENTARY-CHARGE",
+      "raw_names": [
+        "si:elementary-charge"
+      ],
+      "origins": [
+        {
+          "source": "LIBRARY_SOURCE_SYMBOL",
+          "path": "lib/si.lisp",
+          "git_blob": "2b94f1ea6d2fb05c084c3a0d863c14119a5ba11f",
+          "line": 111,
+          "kind": "library-defined",
+          "status": "research-unratified"
+        }
+      ],
+      "already_selected": false,
+      "ratified_d1_d9_name_match": false
+    },
+    {
+      "semantic_name": "SI:H",
+      "raw_names": [
+        "si:h"
+      ],
+      "origins": [
+        {
+          "source": "LIBRARY_SOURCE_SYMBOL",
+          "path": "lib/si.lisp",
+          "git_blob": "2b94f1ea6d2fb05c084c3a0d863c14119a5ba11f",
+          "line": 127,
+          "kind": "library-defined",
+          "status": "research-unratified"
+        }
+      ],
+      "already_selected": false,
+      "ratified_d1_d9_name_match": false
+    },
+    {
+      "semantic_name": "SI:K",
+      "raw_names": [
+        "si:k"
+      ],
+      "origins": [
+        {
+          "source": "LIBRARY_SOURCE_SYMBOL",
+          "path": "lib/si.lisp",
+          "git_blob": "2b94f1ea6d2fb05c084c3a0d863c14119a5ba11f",
+          "line": 129,
+          "kind": "library-defined",
+          "status": "research-unratified"
+        }
+      ],
+      "already_selected": false,
+      "ratified_d1_d9_name_match": false
+    },
+    {
+      "semantic_name": "SI:K-CD",
+      "raw_names": [
+        "si:k-cd"
+      ],
+      "origins": [
+        {
+          "source": "LIBRARY_SOURCE_SYMBOL",
+          "path": "lib/si.lisp",
+          "git_blob": "2b94f1ea6d2fb05c084c3a0d863c14119a5ba11f",
+          "line": 131,
+          "kind": "library-defined",
+          "status": "research-unratified"
+        }
+      ],
+      "already_selected": false,
+      "ratified_d1_d9_name_match": false
+    },
+    {
+      "semantic_name": "SI:LUMINOUS-EFFICACY",
+      "raw_names": [
+        "si:luminous-efficacy"
+      ],
+      "origins": [
+        {
+          "source": "LIBRARY_SOURCE_SYMBOL",
+          "path": "lib/si.lisp",
+          "git_blob": "2b94f1ea6d2fb05c084c3a0d863c14119a5ba11f",
+          "line": 114,
+          "kind": "library-defined",
+          "status": "research-unratified"
+        }
+      ],
+      "already_selected": false,
+      "ratified_d1_d9_name_match": false
+    },
+    {
+      "semantic_name": "SI:N-A",
+      "raw_names": [
+        "si:n-a"
+      ],
+      "origins": [
+        {
+          "source": "LIBRARY_SOURCE_SYMBOL",
+          "path": "lib/si.lisp",
+          "git_blob": "2b94f1ea6d2fb05c084c3a0d863c14119a5ba11f",
+          "line": 130,
+          "kind": "library-defined",
+          "status": "research-unratified"
+        }
+      ],
+      "already_selected": false,
+      "ratified_d1_d9_name_match": false
+    },
+    {
+      "semantic_name": "SI:PLANCK-CONSTANT",
+      "raw_names": [
+        "si:planck-constant"
+      ],
+      "origins": [
+        {
+          "source": "LIBRARY_SOURCE_SYMBOL",
+          "path": "lib/si.lisp",
+          "git_blob": "2b94f1ea6d2fb05c084c3a0d863c14119a5ba11f",
+          "line": 110,
+          "kind": "library-defined",
+          "status": "research-unratified"
+        }
+      ],
+      "already_selected": false,
+      "ratified_d1_d9_name_match": false
+    },
+    {
+      "semantic_name": "SI:SPEED-OF-LIGHT",
+      "raw_names": [
+        "si:speed-of-light"
+      ],
+      "origins": [
+        {
+          "source": "LIBRARY_SOURCE_SYMBOL",
+          "path": "lib/si.lisp",
+          "git_blob": "2b94f1ea6d2fb05c084c3a0d863c14119a5ba11f",
+          "line": 109,
+          "kind": "library-defined",
+          "status": "research-unratified"
+        }
+      ],
+      "already_selected": false,
+      "ratified_d1_d9_name_match": false
+    },
+    {
+      "semantic_name": "SLOT-BOUNDP",
+      "raw_names": [
+        "SLOT-BOUNDP"
+      ],
+      "origins": [
+        {
+          "source": "PROPOSAL_LEDGER",
+          "id": "D10P-0003",
+          "law": "Розрізняє наявну незв'язану комірку і комірку зі значенням NIL; відсутня комірка окремий випадок.",
+          "original_status": "pending-review"
+        }
+      ],
+      "already_selected": true,
+      "ratified_d1_d9_name_match": false
+    },
+    {
+      "semantic_name": "SLOT-MAKUNBOUND",
+      "raw_names": [
+        "SLOT-MAKUNBOUND"
+      ],
+      "origins": [
+        {
+          "source": "PROPOSAL_LEDGER",
+          "id": "D10P-0004",
+          "law": "Переводить наявну комірку об'єкта у незв'язаний стан зі збереженням тотожності об'єкта й інших комірок.",
+          "original_status": "pending-review"
+        }
+      ],
+      "already_selected": true,
+      "ratified_d1_d9_name_match": false
+    },
+    {
+      "semantic_name": "SOUND-AFFINE-PRODUCT-ENCLOSURE",
+      "raw_names": [
+        "SOUND-AFFINE-PRODUCT-ENCLOSURE"
+      ],
+      "origins": [
+        {
+          "source": "PROPOSAL_LEDGER",
+          "id": "D10P-8003",
+          "law": "Compute linearized product with exact coefficients x0*yi+y0*xi; residual is conservatively enclosed by an explicit fresh noise coefficient (Σ|xi|)(Σ|yi|). Does not assert probabilistic independence or optimal tightness.",
+          "original_status": "pending-review"
+        }
+      ],
+      "already_selected": true,
+      "ratified_d1_d9_name_match": false
+    },
+    {
+      "semantic_name": "STEM-UK",
+      "raw_names": [
+        "stem-uk"
+      ],
+      "origins": [
+        {
+          "source": "OWNER_INTEREST_FAMILY",
+          "family": "ukrainian-nlp",
+          "donor_repos": [
+            "juv4uk/dict_uk",
+            "juv4uk/nlp_uk",
+            "juv4uk/latynka",
+            "juv4uk/pravda",
+            "juv4uk/word2vec",
+            "juv4uk/Ucuddle-Search-Engine"
+          ],
+          "status": "RESEARCH-UNRATIFIED",
+          "semantic_law_documented": false
+        }
+      ],
+      "already_selected": false,
+      "ratified_d1_d9_name_match": false
+    },
+    {
+      "semantic_name": "STERN-BROCOT-RUN-PATH",
+      "raw_names": [
+        "STERN-BROCOT-RUN-PATH"
+      ],
+      "origins": [
+        {
+          "source": "PROPOSAL_LEDGER",
+          "id": "D10P-601106",
+          "law": "Generate exact L/R path from root 1/1 by repeated numerator/denominator comparison and subtractive Euclid; compress maximal same-bit runs using quotient floor((a-1)/b) or floor((b-1)/a), preserving final equality stop without one extra step. Reject nonpositive and imprecise source inputs; reverse accepts ONLY alternating positive-length bit runs. Two-direction round trips are identity and representation is unique for every positive rational.",
+          "original_status": "pending-review"
+        }
+      ],
+      "already_selected": true,
+      "ratified_d1_d9_name_match": false
+    },
+    {
+      "semantic_name": "STOP-DEVOICE",
+      "raw_names": [
+        "stop-devoice"
+      ],
+      "origins": [
+        {
+          "source": "OWNER_INTEREST_FAMILY",
+          "family": "sanskrit",
+          "donor_repos": [
+            "juv4uk/shiva-sutras",
+            "juv4uk/vidyut",
+            "juv4uk/spanda",
+            "juv4uk/sanskritworld_texts",
+            "juv4uk/panca-vac"
+          ],
+          "status": "RESEARCH-UNRATIFIED",
+          "semantic_law_documented": false
+        }
+      ],
+      "already_selected": true,
+      "ratified_d1_d9_name_match": false
+    },
+    {
+      "semantic_name": "STOP-VOICE",
+      "raw_names": [
+        "stop-voice"
+      ],
+      "origins": [
+        {
+          "source": "OWNER_INTEREST_FAMILY",
+          "family": "sanskrit",
+          "donor_repos": [
+            "juv4uk/shiva-sutras",
+            "juv4uk/vidyut",
+            "juv4uk/spanda",
+            "juv4uk/sanskritworld_texts",
+            "juv4uk/panca-vac"
+          ],
+          "status": "RESEARCH-UNRATIFIED",
+          "semantic_law_documented": false
+        }
+      ],
+      "already_selected": true,
+      "ratified_d1_d9_name_match": false
+    },
+    {
+      "semantic_name": "STRESS-SYLLABLE-TRANSFER",
+      "raw_names": [
+        "STRESS-SYLLABLE-TRANSFER"
+      ],
+      "origins": [
+        {
+          "source": "PROPOSAL_LEDGER",
+          "id": "D10P-601207",
+          "law": "Transfer 1-based positions of U+0301 stress from source vowel nuclei to corresponding target vowel nuclei, recognizing upper/lower case equally; reject invalid or out-of-range marks and a pre-accented target. No rewriting of other characters.",
+          "original_status": "pending-review"
+        }
+      ],
+      "already_selected": true,
+      "ratified_d1_d9_name_match": false
+    },
+    {
+      "semantic_name": "SUBGRAPH-OF",
+      "raw_names": [
+        "subgraph-of"
+      ],
+      "origins": [
+        {
+          "source": "OWNER_INTEREST_FAMILY",
+          "family": "graph",
+          "donor_repos": [
+            "juv4uk/basalt",
+            "juv4uk/graph-heavy-basalt",
+            "juv4uk/knowledge-graph-basalt"
+          ],
+          "status": "RESEARCH-UNRATIFIED",
+          "semantic_law_documented": false
+        }
+      ],
+      "already_selected": false,
+      "ratified_d1_d9_name_match": false
+    },
+    {
+      "semantic_name": "SUPPORTS-OF",
+      "raw_names": [
+        "supports-of"
+      ],
+      "origins": [
+        {
+          "source": "PROPOSAL_LEDGER",
+          "id": "D10P-0026",
+          "law": "Поведінка визначена джерелом forward.lisp:321 (supports-of).",
+          "original_status": "pending-review"
+        }
+      ],
+      "already_selected": false,
+      "ratified_d1_d9_name_match": true
+    },
+    {
+      "semantic_name": "TITHI-OF",
+      "raw_names": [
+        "tithi-of"
+      ],
+      "origins": [
+        {
+          "source": "OWNER_INTEREST_FAMILY",
+          "family": "astronomy",
+          "donor_repos": [
+            "juv4uk/vsop2013",
+            "juv4uk/VedicAstro"
+          ],
+          "status": "RESEARCH-UNRATIFIED",
+          "semantic_law_documented": false
+        }
+      ],
+      "already_selected": false,
+      "ratified_d1_d9_name_match": false
+    },
+    {
+      "semantic_name": "TOKENIZE-UK",
+      "raw_names": [
+        "tokenize-uk"
+      ],
+      "origins": [
+        {
+          "source": "OWNER_INTEREST_FAMILY",
+          "family": "ukrainian-nlp",
+          "donor_repos": [
+            "juv4uk/dict_uk",
+            "juv4uk/nlp_uk",
+            "juv4uk/latynka",
+            "juv4uk/pravda",
+            "juv4uk/word2vec",
+            "juv4uk/Ucuddle-Search-Engine"
+          ],
+          "status": "RESEARCH-UNRATIFIED",
+          "semantic_law_documented": false
+        }
+      ],
+      "already_selected": false,
+      "ratified_d1_d9_name_match": false
+    },
+    {
+      "semantic_name": "TOPOLOGICAL-SORT",
+      "raw_names": [
+        "topological-sort"
+      ],
+      "origins": [
+        {
+          "source": "OWNER_INTEREST_FAMILY",
+          "family": "graph",
+          "donor_repos": [
+            "juv4uk/basalt",
+            "juv4uk/graph-heavy-basalt",
+            "juv4uk/knowledge-graph-basalt"
+          ],
+          "status": "RESEARCH-UNRATIFIED",
+          "semantic_law_documented": false
+        }
+      ],
+      "already_selected": false,
+      "ratified_d1_d9_name_match": false
+    },
+    {
+      "semantic_name": "TRANSLATION-ADMISSION-PAYLOAD",
+      "raw_names": [
+        "translation-admission-payload"
+      ],
+      "origins": [
+        {
+          "source": "LIBRARY_SOURCE_SYMBOL",
+          "path": "lib/translation.lisp",
+          "git_blob": "80cd225cba549a837097b1e633b6662c9434a148",
+          "line": 277,
+          "kind": "library-defined",
+          "status": "research-unratified"
+        }
+      ],
+      "already_selected": false,
+      "ratified_d1_d9_name_match": true
+    },
+    {
+      "semantic_name": "TRANSLATION-ADMITTABLE?",
+      "raw_names": [
+        "translation-admittable?"
+      ],
+      "origins": [
+        {
+          "source": "LIBRARY_SOURCE_SYMBOL",
+          "path": "lib/translation.lisp",
+          "git_blob": "80cd225cba549a837097b1e633b6662c9434a148",
+          "line": 261,
+          "kind": "library-defined",
+          "status": "research-unratified"
+        }
+      ],
+      "already_selected": false,
+      "ratified_d1_d9_name_match": true
+    },
+    {
+      "semantic_name": "TRANSLATION-ALTERNATIVES-VALID?",
+      "raw_names": [
+        "translation-alternatives-valid?"
+      ],
+      "origins": [
+        {
+          "source": "LIBRARY_SOURCE_SYMBOL",
+          "path": "lib/translation.lisp",
+          "git_blob": "80cd225cba549a837097b1e633b6662c9434a148",
+          "line": 110,
+          "kind": "library-defined",
+          "status": "research-unratified"
+        }
+      ],
+      "already_selected": true,
+      "ratified_d1_d9_name_match": false
+    },
+    {
+      "semantic_name": "TRANSLATION-AMBIGUITY-VALID?",
+      "raw_names": [
+        "translation-ambiguity-valid?"
+      ],
+      "origins": [
+        {
+          "source": "LIBRARY_SOURCE_SYMBOL",
+          "path": "lib/translation.lisp",
+          "git_blob": "80cd225cba549a837097b1e633b6662c9434a148",
+          "line": 124,
+          "kind": "library-defined",
+          "status": "research-unratified"
+        }
+      ],
+      "already_selected": true,
+      "ratified_d1_d9_name_match": false
+    },
+    {
+      "semantic_name": "TRANSLATION-BATCH-VALID?",
+      "raw_names": [
+        "translation-batch-valid?"
+      ],
+      "origins": [
+        {
+          "source": "LIBRARY_SOURCE_SYMBOL",
+          "path": "lib/translation.lisp",
+          "git_blob": "80cd225cba549a837097b1e633b6662c9434a148",
+          "line": 94,
+          "kind": "library-defined",
+          "status": "research-unratified"
+        }
+      ],
+      "already_selected": true,
+      "ratified_d1_d9_name_match": false
+    },
+    {
+      "semantic_name": "TRANSLATION-CANDIDATE-PAYLOAD-VALID?",
+      "raw_names": [
+        "translation-candidate-payload-valid?"
+      ],
+      "origins": [
+        {
+          "source": "LIBRARY_SOURCE_SYMBOL",
+          "path": "lib/translation.lisp",
+          "git_blob": "80cd225cba549a837097b1e633b6662c9434a148",
+          "line": 102,
+          "kind": "library-defined",
+          "status": "research-unratified"
+        }
+      ],
+      "already_selected": true,
+      "ratified_d1_d9_name_match": false
+    },
+    {
+      "semantic_name": "TRANSLATION-ENVELOPE-VALID?",
+      "raw_names": [
+        "translation-envelope-valid?"
+      ],
+      "origins": [
+        {
+          "source": "LIBRARY_SOURCE_SYMBOL",
+          "path": "lib/translation.lisp",
+          "git_blob": "80cd225cba549a837097b1e633b6662c9434a148",
+          "line": 74,
+          "kind": "library-defined",
+          "status": "research-unratified"
+        }
+      ],
+      "already_selected": true,
+      "ratified_d1_d9_name_match": false
+    },
+    {
+      "semantic_name": "TRANSLATION-EVIDENCE-ENTRY",
+      "raw_names": [
+        "translation-evidence-entry"
+      ],
+      "origins": [
+        {
+          "source": "LIBRARY_SOURCE_SYMBOL",
+          "path": "lib/translation.lisp",
+          "git_blob": "80cd225cba549a837097b1e633b6662c9434a148",
+          "line": 295,
+          "kind": "library-defined",
+          "status": "research-unratified"
+        }
+      ],
+      "already_selected": false,
+      "ratified_d1_d9_name_match": true
+    },
+    {
+      "semantic_name": "TRANSLATION-EVIDENCE-NEXT",
+      "raw_names": [
+        "translation-evidence-next"
+      ],
+      "origins": [
+        {
+          "source": "LIBRARY_SOURCE_SYMBOL",
+          "path": "lib/translation.lisp",
+          "git_blob": "80cd225cba549a837097b1e633b6662c9434a148",
+          "line": 299,
+          "kind": "library-defined",
+          "status": "research-unratified"
+        }
+      ],
+      "already_selected": false,
+      "ratified_d1_d9_name_match": true
+    },
+    {
+      "semantic_name": "TRANSLATION-EVIDENCE-WORTHY?",
+      "raw_names": [
+        "translation-evidence-worthy?"
+      ],
+      "origins": [
+        {
+          "source": "LIBRARY_SOURCE_SYMBOL",
+          "path": "lib/translation.lisp",
+          "git_blob": "80cd225cba549a837097b1e633b6662c9434a148",
+          "line": 287,
+          "kind": "library-defined",
+          "status": "research-unratified"
+        }
+      ],
+      "already_selected": false,
+      "ratified_d1_d9_name_match": true
+    },
+    {
+      "semantic_name": "TRANSLATION-KIND",
+      "raw_names": [
+        "translation-kind"
+      ],
+      "origins": [
+        {
+          "source": "LIBRARY_SOURCE_SYMBOL",
+          "path": "lib/translation.lisp",
+          "git_blob": "80cd225cba549a837097b1e633b6662c9434a148",
+          "line": 43,
+          "kind": "library-defined",
+          "status": "research-unratified"
+        }
+      ],
+      "already_selected": false,
+      "ratified_d1_d9_name_match": true
+    },
+    {
+      "semantic_name": "TRANSLATION-KIND-VALID?",
+      "raw_names": [
+        "translation-kind-valid?"
+      ],
+      "origins": [
+        {
+          "source": "LIBRARY_SOURCE_SYMBOL",
+          "path": "lib/translation.lisp",
+          "git_blob": "80cd225cba549a837097b1e633b6662c9434a148",
+          "line": 61,
+          "kind": "library-defined",
+          "status": "research-unratified"
+        }
+      ],
+      "already_selected": true,
+      "ratified_d1_d9_name_match": false
+    },
+    {
+      "semantic_name": "TRANSLATION-PAYLOAD",
+      "raw_names": [
+        "translation-payload"
+      ],
+      "origins": [
+        {
+          "source": "LIBRARY_SOURCE_SYMBOL",
+          "path": "lib/translation.lisp",
+          "git_blob": "80cd225cba549a837097b1e633b6662c9434a148",
+          "line": 49,
+          "kind": "library-defined",
+          "status": "research-unratified"
+        }
+      ],
+      "already_selected": false,
+      "ratified_d1_d9_name_match": true
+    },
+    {
+      "semantic_name": "TRANSLATION-REVIEW",
+      "raw_names": [
+        "translation-review"
+      ],
+      "origins": [
+        {
+          "source": "LIBRARY_SOURCE_SYMBOL",
+          "path": "lib/translation.lisp",
+          "git_blob": "80cd225cba549a837097b1e633b6662c9434a148",
+          "line": 222,
+          "kind": "library-defined",
+          "status": "research-unratified"
+        }
+      ],
+      "already_selected": false,
+      "ratified_d1_d9_name_match": true
+    },
+    {
+      "semantic_name": "TRANSLATION-REVIEW-ADVICE-DECISION",
+      "raw_names": [
+        "translation-review-advice-decision"
+      ],
+      "origins": [
+        {
+          "source": "LIBRARY_SOURCE_SYMBOL",
+          "path": "lib/translation.lisp",
+          "git_blob": "80cd225cba549a837097b1e633b6662c9434a148",
+          "line": 176,
+          "kind": "library-defined",
+          "status": "research-unratified"
+        }
+      ],
+      "already_selected": true,
+      "ratified_d1_d9_name_match": false
+    },
+    {
+      "semantic_name": "TRANSLATION-REVIEW-CANDIDATE",
+      "raw_names": [
+        "translation-review-candidate"
+      ],
+      "origins": [
+        {
+          "source": "LIBRARY_SOURCE_SYMBOL",
+          "path": "lib/translation.lisp",
+          "git_blob": "80cd225cba549a837097b1e633b6662c9434a148",
+          "line": 198,
+          "kind": "library-defined",
+          "status": "research-unratified"
+        }
+      ],
+      "already_selected": true,
+      "ratified_d1_d9_name_match": false
+    },
+    {
+      "semantic_name": "TRANSLATION-REVIEW-CODE",
+      "raw_names": [
+        "translation-review-code"
+      ],
+      "origins": [
+        {
+          "source": "LIBRARY_SOURCE_SYMBOL",
+          "path": "lib/translation.lisp",
+          "git_blob": "80cd225cba549a837097b1e633b6662c9434a148",
+          "line": 141,
+          "kind": "library-defined",
+          "status": "research-unratified"
+        }
+      ],
+      "already_selected": false,
+      "ratified_d1_d9_name_match": true
+    },
+    {
+      "semantic_name": "TRANSLATION-REVIEW-DETAIL",
+      "raw_names": [
+        "translation-review-detail"
+      ],
+      "origins": [
+        {
+          "source": "LIBRARY_SOURCE_SYMBOL",
+          "path": "lib/translation.lisp",
+          "git_blob": "80cd225cba549a837097b1e633b6662c9434a148",
+          "line": 147,
+          "kind": "library-defined",
+          "status": "research-unratified"
+        }
+      ],
+      "already_selected": false,
+      "ratified_d1_d9_name_match": true
+    },
+    {
+      "semantic_name": "TRANSLATION-REVIEW-PROPOSAL",
+      "raw_names": [
+        "translation-review-proposal"
+      ],
+      "origins": [
+        {
+          "source": "LIBRARY_SOURCE_SYMBOL",
+          "path": "lib/translation.lisp",
+          "git_blob": "80cd225cba549a837097b1e633b6662c9434a148",
+          "line": 144,
+          "kind": "library-defined",
+          "status": "research-unratified"
+        }
+      ],
+      "already_selected": false,
+      "ratified_d1_d9_name_match": true
+    },
+    {
+      "semantic_name": "TRANSLATION-REVIEW-STATUS",
+      "raw_names": [
+        "translation-review-status"
+      ],
+      "origins": [
+        {
+          "source": "LIBRARY_SOURCE_SYMBOL",
+          "path": "lib/translation.lisp",
+          "git_blob": "80cd225cba549a837097b1e633b6662c9434a148",
+          "line": 138,
+          "kind": "library-defined",
+          "status": "research-unratified"
+        }
+      ],
+      "already_selected": false,
+      "ratified_d1_d9_name_match": true
+    },
+    {
+      "semantic_name": "TRANSLATION-REVIEW-STATUS-VALID?",
+      "raw_names": [
+        "translation-review-status-valid?"
+      ],
+      "origins": [
+        {
+          "source": "LIBRARY_SOURCE_SYMBOL",
+          "path": "lib/translation.lisp",
+          "git_blob": "80cd225cba549a837097b1e633b6662c9434a148",
+          "line": 150,
+          "kind": "library-defined",
+          "status": "research-unratified"
+        }
+      ],
+      "already_selected": true,
+      "ratified_d1_d9_name_match": false
+    },
+    {
+      "semantic_name": "TRANSLATION-REVIEW-VALID?",
+      "raw_names": [
+        "translation-review-valid?"
+      ],
+      "origins": [
+        {
+          "source": "LIBRARY_SOURCE_SYMBOL",
+          "path": "lib/translation.lisp",
+          "git_blob": "80cd225cba549a837097b1e633b6662c9434a148",
+          "line": 159,
+          "kind": "library-defined",
+          "status": "research-unratified"
+        }
+      ],
+      "already_selected": true,
+      "ratified_d1_d9_name_match": false
+    },
+    {
+      "semantic_name": "TRANSLATION-REVIEW-WITH-EVIDENCE",
+      "raw_names": [
+        "translation-review-with-evidence"
+      ],
+      "origins": [
+        {
+          "source": "LIBRARY_SOURCE_SYMBOL",
+          "path": "lib/translation.lisp",
+          "git_blob": "80cd225cba549a837097b1e633b6662c9434a148",
+          "line": 306,
+          "kind": "library-defined",
+          "status": "research-unratified"
+        }
+      ],
+      "already_selected": false,
+      "ratified_d1_d9_name_match": true
+    },
+    {
+      "semantic_name": "TRANSLATION-SOURCE",
+      "raw_names": [
+        "translation-source"
+      ],
+      "origins": [
+        {
+          "source": "LIBRARY_SOURCE_SYMBOL",
+          "path": "lib/translation.lisp",
+          "git_blob": "80cd225cba549a837097b1e633b6662c9434a148",
+          "line": 46,
+          "kind": "library-defined",
+          "status": "research-unratified"
+        }
+      ],
+      "already_selected": false,
+      "ratified_d1_d9_name_match": true
+    },
+    {
+      "semantic_name": "TRANSLATION-STATUS",
+      "raw_names": [
+        "translation-status"
+      ],
+      "origins": [
+        {
+          "source": "LIBRARY_SOURCE_SYMBOL",
+          "path": "lib/translation.lisp",
+          "git_blob": "80cd225cba549a837097b1e633b6662c9434a148",
+          "line": 40,
+          "kind": "library-defined",
+          "status": "research-unratified"
+        }
+      ],
+      "already_selected": false,
+      "ratified_d1_d9_name_match": true
+    },
+    {
+      "semantic_name": "TRANSLATION-STATUS-VALID?",
+      "raw_names": [
+        "translation-status-valid?"
+      ],
+      "origins": [
+        {
+          "source": "LIBRARY_SOURCE_SYMBOL",
+          "path": "lib/translation.lisp",
+          "git_blob": "80cd225cba549a837097b1e633b6662c9434a148",
+          "line": 52,
+          "kind": "library-defined",
+          "status": "research-unratified"
+        }
+      ],
+      "already_selected": true,
+      "ratified_d1_d9_name_match": false
+    },
+    {
+      "semantic_name": "TRANSLIT-LATYNKA",
+      "raw_names": [
+        "translit-latynka"
+      ],
+      "origins": [
+        {
+          "source": "OWNER_INTEREST_FAMILY",
+          "family": "ukrainian-nlp",
+          "donor_repos": [
+            "juv4uk/dict_uk",
+            "juv4uk/nlp_uk",
+            "juv4uk/latynka",
+            "juv4uk/pravda",
+            "juv4uk/word2vec",
+            "juv4uk/Ucuddle-Search-Engine"
+          ],
+          "status": "RESEARCH-UNRATIFIED",
+          "semantic_law_documented": false
+        }
+      ],
+      "already_selected": false,
+      "ratified_d1_d9_name_match": false
+    },
+    {
+      "semantic_name": "UCI-PARSE",
+      "raw_names": [
+        "uci-parse"
+      ],
+      "origins": [
+        {
+          "source": "OWNER_INTEREST_FAMILY",
+          "family": "chess",
+          "donor_repos": [
+            "juv4uk/chess",
+            "juv4uk/lisp-chess-engine",
+            "juv4uk/simple-lisp-chess-engine",
+            "juv4uk/chess-lisp-zero",
+            "juv4uk/chess-tauri-zero",
+            "juv4uk/hsChess",
+            "juv4uk/alpha-zero-general",
+            "juv4uk/lc0"
+          ],
+          "status": "RESEARCH-UNRATIFIED",
+          "semantic_law_documented": false
+        }
+      ],
+      "already_selected": false,
+      "ratified_d1_d9_name_match": false
+    },
+    {
+      "semantic_name": "UNIQUE-BOUNDED-MODULAR-LIFT",
+      "raw_names": [
+        "UNIQUE-BOUNDED-MODULAR-LIFT"
+      ],
+      "origins": [
+        {
+          "source": "PROPOSAL_LEDGER",
+          "id": "D10P-6106",
+          "law": "Find all integers z with lo<=z<=hi and z mod M=r. Return NONE with count 0 if there are none; return UNIQUE with the exact only z if count 1; return AMBIGUOUS with exact count>=2 and first two solutions in increasing order if there are at least two. All integer arithmetic; invalid domains are reported as ERROR, never guessed or clamped.",
+          "original_status": "pending-review"
+        }
+      ],
+      "already_selected": true,
+      "ratified_d1_d9_name_match": false
+    },
+    {
+      "semantic_name": "UNIQUE-SURFACE-CORRECTION-SUGGESTION",
+      "raw_names": [
+        "UNIQUE-SURFACE-CORRECTION-SUGGESTION"
+      ],
+      "origins": [
+        {
+          "source": "PROPOSAL_LEDGER",
+          "id": "D10P-601211",
+          "law": "Return the unique lowest-distance candidate within an explicit maximum adjacent-transposition edit bound. Exact binary identity is never guessed; equal-score distinct identities produce AMBIGUOUS; bit words or D2 syntax are blocked. Never rewrite or evaluate source.",
+          "original_status": "pending-review"
+        }
+      ],
+      "already_selected": true,
+      "ratified_d1_d9_name_match": false
+    },
+    {
+      "semantic_name": "UNIT-DIMENSIONS",
+      "raw_names": [
+        "unit-dimensions"
+      ],
+      "origins": [
+        {
+          "source": "LIBRARY_SOURCE_SYMBOL",
+          "path": "lib/quantity.lisp",
+          "git_blob": "40c38e6019beccddd8577aa7af5a0957f4932b89",
+          "line": 93,
+          "kind": "library-defined",
+          "status": "research-unratified"
+        }
+      ],
+      "already_selected": false,
+      "ratified_d1_d9_name_match": true
+    },
+    {
+      "semantic_name": "UNIT-PRODUCT",
+      "raw_names": [
+        "unit-product"
+      ],
+      "origins": [
+        {
+          "source": "LIBRARY_SOURCE_SYMBOL",
+          "path": "lib/quantity.lisp",
+          "git_blob": "40c38e6019beccddd8577aa7af5a0957f4932b89",
+          "line": 165,
+          "kind": "library-defined",
+          "status": "research-unratified"
+        }
+      ],
+      "already_selected": false,
+      "ratified_d1_d9_name_match": true
+    },
+    {
+      "semantic_name": "UNIT-QUOTIENT",
+      "raw_names": [
+        "unit-quotient"
+      ],
+      "origins": [
+        {
+          "source": "LIBRARY_SOURCE_SYMBOL",
+          "path": "lib/quantity.lisp",
+          "git_blob": "40c38e6019beccddd8577aa7af5a0957f4932b89",
+          "line": 172,
+          "kind": "library-defined",
+          "status": "research-unratified"
+        }
+      ],
+      "already_selected": false,
+      "ratified_d1_d9_name_match": true
+    },
+    {
+      "semantic_name": "UNIT?",
+      "raw_names": [
+        "unit?"
+      ],
+      "origins": [
+        {
+          "source": "LIBRARY_SOURCE_SYMBOL",
+          "path": "lib/quantity.lisp",
+          "git_blob": "40c38e6019beccddd8577aa7af5a0957f4932b89",
+          "line": 83,
+          "kind": "library-defined",
+          "status": "research-unratified"
+        }
+      ],
+      "already_selected": false,
+      "ratified_d1_d9_name_match": true
+    },
+    {
+      "semantic_name": "UNSUPPORTED-FACTS",
+      "raw_names": [
+        "unsupported-facts"
+      ],
+      "origins": [
+        {
+          "source": "PROPOSAL_LEDGER",
+          "id": "D10P-0062",
+          "law": "Поведінка визначена джерелом forward.lisp:739 (unsupported-facts).",
+          "original_status": "pending-review"
+        }
+      ],
+      "already_selected": false,
+      "ratified_d1_d9_name_match": true
+    },
+    {
+      "semantic_name": "VRDDHI-OF",
+      "raw_names": [
+        "vrddhi-of"
+      ],
+      "origins": [
+        {
+          "source": "OWNER_INTEREST_FAMILY",
+          "family": "sanskrit",
+          "donor_repos": [
+            "juv4uk/shiva-sutras",
+            "juv4uk/vidyut",
+            "juv4uk/spanda",
+            "juv4uk/sanskritworld_texts",
+            "juv4uk/panca-vac"
+          ],
+          "status": "RESEARCH-UNRATIFIED",
+          "semantic_law_documented": false
+        }
+      ],
+      "already_selected": false,
+      "ratified_d1_d9_name_match": false
+    },
+    {
+      "semantic_name": "WORD-EMBEDDING",
+      "raw_names": [
+        "word-embedding"
+      ],
+      "origins": [
+        {
+          "source": "OWNER_INTEREST_FAMILY",
+          "family": "ukrainian-nlp",
+          "donor_repos": [
+            "juv4uk/dict_uk",
+            "juv4uk/nlp_uk",
+            "juv4uk/latynka",
+            "juv4uk/pravda",
+            "juv4uk/word2vec",
+            "juv4uk/Ucuddle-Search-Engine"
+          ],
+          "status": "RESEARCH-UNRATIFIED",
+          "semantic_law_documented": false
+        }
+      ],
+      "already_selected": false,
+      "ratified_d1_d9_name_match": false
+    },
+    {
+      "semantic_name": "WRAP",
+      "raw_names": [
+        "WRAP"
+      ],
+      "origins": [
+        {
+          "source": "PROPOSAL_LEDGER",
+          "id": "D10P-503111",
+          "law": "Установити wrapper перед викликом функції, делегувати базовій функції й зберігати відмінність базової функції та ланцюга обгорток; вкладені обгортки мають зберігати визначений порядок виконання.",
+          "original_status": "pending-review"
+        }
+      ],
+      "already_selected": true,
+      "ratified_d1_d9_name_match": false
+    }
+  ],
+  "limits": [
+    "An observed distinct source name is NOT a proven new semantic law.",
+    "Library names include helper definitions, constants and aliases, not automatically D10 residents.",
+    "Owner-interest thematic candidates do not establish an executable native D10 oracle.",
+    "Exact-name D1–D9 overlap is not enough to decide behavioral dedup.",
+    "Selected names here are research-only and still require owner Core ratification."
+  ]
+}
