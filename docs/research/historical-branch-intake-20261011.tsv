@@ -764,7 +764,7 @@ docs/verified-benchmark-summary-main-20261011	UNTRIAGED	-	-	BRANCH-NAME-ONLY
 docs/147-landing-proof	UNTRIAGED	-	-	BRANCH-NAME-ONLY
 docs/153-gc-roadmap-current-runtime	UNTRIAGED	-	-	BRANCH-NAME-ONLY
 docs/177-machine-atoms-design	UNTRIAGED	-	-	BRANCH-NAME-ONLY
-docs/219-reasoning-honesty-current	UNTRIAGED	-	-	BRANCH-NAME-ONLY
+docs/219-reasoning-honesty-current	ALREADY-IN-MAIN-NEWER	8a5996052f22a46183ff77090ce2ccb677e73823	06cf9354594bb48b408826bb2cf4a52ed9c25e34	English ADR honesty text reconciled and missing Ukrainian peer added on main; commits ef113f7fe5e208a37bd63a9fdc6f4fc9c290fe88 + 8a5996052f22a46183ff77090ce2ccb677e73823; PR #367 closed as integrated without stale ancestry.
 docs/299-strict-all-rust-valve	UNTRIAGED	-	-	BRANCH-NAME-ONLY
 docs/299-uk-first-valve	UNTRIAGED	-	-	BRANCH-NAME-ONLY
 docs/813-machine-admission-reconciliation-current-2	UNTRIAGED	-	-	BRANCH-NAME-ONLY
