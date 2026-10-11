@@ -66,6 +66,15 @@ fn publish_triplet(tree: &TempTree) -> Triplet {
         report.is_file(),
         "triplet publisher should create its provenance report"
     );
+    let report_text = fs::read_to_string(&report).expect("read triplet publisher report");
+    assert!(
+        report_text.contains("\"original_executables_oracle_certified\": 0"),
+        "mechanical triplet projection must not claim semantic-oracle admission"
+    );
+    assert!(
+        report_text.contains("written-mechanical-only-not-oracle-admitted"),
+        "publisher status must preserve its explicit semantic-admission boundary"
+    );
 
     let lisp = mirror.join(SOURCE_RELATIVE);
     let sens = lisp.with_extension("sens");
@@ -174,5 +183,44 @@ fn sw1_and_triplet_modes_cannot_be_selected_together() {
     assert!(
         !artifact.exists(),
         "ambiguous input mode must not publish compiler evidence"
+    );
+}
+
+#[test]
+fn existing_artifact_is_never_overwritten() {
+    let tree = TempTree::new();
+    let triplet = publish_triplet(&tree);
+    let artifact = tree.path().join("immutable.bin");
+    fs::write(&artifact, b"pre-existing evidence").expect("seed output file");
+
+    let output = compiler_triplet(&triplet.sens, &artifact);
+    assert!(!output.status.success());
+    assert_eq!(
+        fs::read(&artifact).expect("original artifact remains"),
+        b"pre-existing evidence"
+    );
+}
+
+#[cfg(unix)]
+#[test]
+fn symlinked_physical_t5_is_rejected() {
+    use std::os::unix::fs::symlink;
+
+    let tree = TempTree::new();
+    let triplet = publish_triplet(&tree);
+    let alias = tree.path().join("symlink-alias");
+    let lisp = alias.with_extension("lisp");
+    let sens = alias.with_extension("sens");
+    let view = alias.with_extension("");
+    fs::copy(&triplet.lisp, &lisp).expect("copy source projection");
+    fs::copy(&triplet.view, &view).expect("copy bit-view projection");
+    symlink(&triplet.sens, &sens).expect("create physical T5 symlink");
+    let artifact = tree.path().join("must-not-exist.bin");
+
+    let output = compiler_triplet(&sens, &artifact);
+    assert!(!output.status.success());
+    assert!(
+        !artifact.exists(),
+        "symlinked T5 input must not publish compiler evidence"
     );
 }
