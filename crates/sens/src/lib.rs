@@ -155,6 +155,14 @@ mod value;
 
 pub use binary_number::{BinaryNumber, BinaryNumberError};
 pub use domain_numeric::DomainNumericComposition;
+
+/// Host embedding adapter for already-ratified exact same-Dn + - * /
+/// Value operations. Does not introduce any SENS callable identity, opcode,
+/// human literal or physical T5 grammar. Operands must be admitted Dn Values.
+pub fn domain_numeric_value(operator: &str, lhs: &Value, rhs: &Value) -> Option<Value> {
+    domain_numeric::compute(operator, lhs, rhs)
+}
+
 pub use bit9::Bit9;
 pub use bits::{Bit1, Bit2, Bit3, Bit4, Bit5, Bit6, Bit7, Bit8, Bits};
 pub use canonical_reader::{parse_canonical_binary, parse_canonical_packed_words, parse_canonical_word_sequence};
@@ -178,6 +186,7 @@ pub use packed_bits::{BitPacker, PackedBitstream};
 pub use outer_envelope::{encode_outer_records, OuterEnvelope, OuterEnvelopeError, OuterRecord};
 pub use binary_framing::{
     decode_binary_frame, decode_binary_program, encode_binary_frame, encode_binary_program,
+    decode_numeric_value_frame, encode_numeric_value_frame,
     BinaryFrame, BinaryFrameError,
 };
 pub use gpu_execution_packet::{
