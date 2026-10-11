@@ -148,12 +148,12 @@
        (make-balanced-node key value (node-left tree) (node-right tree)))
       ((10110001 key (node-key tree))
        (balance (make-balanced-node (node-key tree) (node-value tree)
-                  (101101110 key value (node-left tree))
+                  (внутрішня-мапа-вставити key value (node-left tree))
                   (node-right tree))))
       ((010 ())
        (balance (make-balanced-node (node-key tree) (node-value tree)
                   (node-left tree)
-                  (101101110 key value (node-right tree))))))))
+                  (внутрішня-мапа-вставити key value (node-right tree))))))))
 
 ; Returns '() if `key` is absent, or a one-element list `(value)` if
 ; present — the classic "maybe" shape (same idiom lib/reason.lisp's proof
@@ -170,11 +170,11 @@
       
       ((010 tree)  (001 ()))
       ((101 key (node-key tree)) (1110 (node-value tree)))
-      ((10110001 key (node-key tree)) (101100101 key (node-left tree)))
-      ((010 ()) (101100101 key (node-right tree))))))
+      ((10110001 key (node-key tree)) (внутрішня-мапа-отримати key (node-left tree)))
+      ((010 ()) (внутрішня-мапа-отримати key (node-right tree))))))
 
 (0011 map-contains?
-  (0010 (key tree) (110111011 (010 (101100101 key tree)))))
+  (0010 (key tree) (0100 (010 (внутрішня-мапа-отримати key tree)))))
 
 ; In-order traversal — the keys come back sorted, a free side effect of
 ; the tree being a BST, not something map->list computes separately.
@@ -185,6 +185,15 @@
     (110
       
       ((010 tree)  (001 ()))
-      ((010 ()) (1111 (101001100 (node-left tree))
+      ((010 ()) (1111 (внутрішня-мапа-список (node-left tree))
                  (111 (111 (node-key tree) (node-value tree))
-                       (101001100 (node-right tree))))))))
+                       (внутрішня-мапа-список (node-right tree))))))))
+
+; Derived callable closures for D9 map concepts (internal staging only).
+; The ratified D9 coordinates are NOT automatically assigned mechanisms.
+; Executable code here calls already-defined Lisp closures by non-registry
+; private Ukrainian names; external D9 identity stays fail-closed.
+(0011 внутрішня-мапа-вставити map-insert)
+(0011 внутрішня-мапа-отримати map-get)
+(0011 внутрішня-мапа-містить map-contains?)
+(0011 внутрішня-мапа-список map->list)
