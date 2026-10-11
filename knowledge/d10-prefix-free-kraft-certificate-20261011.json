@@ -1,0 +1,110 @@
+{
+  "schema": "sens-d10-prefix-free-kraft-certificate/v1",
+  "date": "2026-10-11",
+  "status": "RESEARCH-SELECTED-CANDIDATE-UNRATIFIED",
+  "stable_id": "d10.math.prefix-free-kraft-certificate.20261011",
+  "semantic_name": "PREFIX-FREE-KRAFT-CERTIFICATE",
+  "surface_uk": "посвідчити-префіксний-код",
+  "surface_ukr": "перевірити-префіксність-і-суму-крафта",
+  "foundation": "D1-D9 ratified / Contract 11.8",
+  "semantic_law": {
+    "input": "Finite ordered sequence of finite strings over {0,1}; empty word allowed, duplicate codewords retain their original indices.",
+    "output": "CERTIFIED(p,q) with exact reduced dyadic Kraft sum p/q when no two distinct indexed words are prefix comparable; otherwise NOT_PREFIX_FREE(i,j,prefix) for lexicographically first index pair i<j with one word a prefix of the other, including equality.",
+    "failure": "Nonbinary words, non-string elements, or non-finite/non-sequence input rejected explicitly; no silent coercion.",
+    "rules": [
+      "The empty codeword is a valid complete code by itself (Kraft=1); two empty codewords conflict.",
+      "The empty list is certified with Kraft sum 0.",
+      "Kraft <=1 is necessary for actual prefix-free words, not sufficient for those already chosen words.",
+      "The first conflicting pair is ordered by input indices (i,j), not by word lexical ordering.",
+      "No physical SENS/T5/Framed3 code authority follows from a mathematical certificate."
+    ]
+  },
+  "witnesses": [
+    {
+      "input": [
+        "0",
+        "10",
+        "11"
+      ],
+      "result": "CERTIFIED(1,1)"
+    },
+    {
+      "input": [
+        "00",
+        "01"
+      ],
+      "result": "CERTIFIED(1,2)"
+    },
+    {
+      "input": [
+        "0",
+        "00"
+      ],
+      "result": "NOT_PREFIX_FREE(0,1,'0') despite 3/4 Kraft sum"
+    },
+    {
+      "input": [
+        "0",
+        "0"
+      ],
+      "result": "NOT_PREFIX_FREE(0,1,'0') duplicate"
+    },
+    {
+      "input": [
+        ""
+      ],
+      "result": "CERTIFIED(1,1)"
+    },
+    {
+      "input": [
+        "",
+        "0"
+      ],
+      "result": "NOT_PREFIX_FREE(0,1,'')"
+    },
+    {
+      "input": [],
+      "result": "CERTIFIED(0,1)"
+    }
+  ],
+  "source": {
+    "primary_url": "https://www.mit.edu/~6.450/handouts/6.450book.pdf",
+    "primary_scope": "MIT Coding for Discrete Sources §2.3.3, Kraft inequality for actual prefix-free codes; exact first-conflict witness is new SENS research interface, not an assertion of MIT API.",
+    "historical": "Leon G. Kraft, 1949; see McMillan 1956",
+    "additional_reference": "https://mathweb.ucsd.edu/~sbuss/CourseWeb/Math267A_1997W/wholecourse.pdf"
+  },
+  "dedup": {
+    "ratified_lower_snapshot": "09d1d71c39d1484dfd005a5068dbb18b76f0f0d4",
+    "selected_d10_snapshot": "7e13e929338baeef9b16c2139d24b78e23ea1e03",
+    "exact_name_overlap": false,
+    "behavioral_neighbors": [
+      "PRIMITIVE-BINARY-WORD-ROOT",
+      "GRAY-ENCODE-WORD",
+      "JSON-ENCODE-VALUE",
+      "D2 frame parsing and Framed3 research"
+    ],
+    "observation": "Only this proposal couples explicit prefix-conflict witness on a concrete codebook to exact dyadic Kraft total; naming is not itself a proof of semantic irreducibility.",
+    "core_vs_library": "PENDING OWNER REVIEW: certificate is mathematically composable from string-prefix comparisons and exact arithmetic."
+  },
+  "independent_oracles": [
+    "Pairwise all index pairs + rational Fraction summation.",
+    "Dyadic cylinder integer intervals on common depth + disjointness and integer volume."
+  ],
+  "checks": {
+    "script": "scripts/check_d10_prefix_free_kraft_certificate.py",
+    "exhaustive": "3616 ordered collections of up to 3 words drawn from all binary words length 0..3; 8 positive/negative witnesses; 4 invalid-input reject cases"
+  },
+  "authority": {
+    "selected_research_only": true,
+    "coordinate": null,
+    "ratified_resident": false,
+    "physical_t5_authorized": false,
+    "changes_to_D1_D9": 0,
+    "changes_to_D2": 0
+  },
+  "coordination": [
+    "#4013",
+    "#4463",
+    "#5041"
+  ]
+}

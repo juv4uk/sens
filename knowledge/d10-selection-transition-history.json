@@ -411,6 +411,35 @@
         "scripts/check-d10-proposal-ledger.py --self-test",
         "scripts/check_d10_unique_bounded_modular_lift.py"
       ]
+    },
+    {
+      "id": "d10.math.prefix-free-kraft-certificate.current-main.20261011",
+      "authority": "#4013 #4463 #5041; isolated exact binary-codebook certificate",
+      "evidence": [
+        "knowledge/d10-prefix-free-kraft-certificate-20261011.json",
+        "docs/research/d10-prefix-free-kraft-certificate.uk.md",
+        "scripts/check_d10_prefix_free_kraft_certificate.py"
+      ],
+      "previous_inventory_blob_sha": "79007165e5124dc48b1ca91be6df91d2a857c727",
+      "resulting_inventory_blob_sha": "3c02b877815506ebe6a4c8db5dfa1c2a9fbadd3b",
+      "added_stable_ids": [
+        "d10.math.prefix-free-kraft-certificate.20261011"
+      ],
+      "appended_sources": [
+        "knowledge/d10-prefix-free-kraft-certificate-20261011.json"
+      ],
+      "coordinates_added": 0,
+      "ratified_added": 0,
+      "delta_selected": 1,
+      "previous_selected": 652,
+      "resulting_selected": 653,
+      "decision": "selected research only; no ratification, coordinate, runtime or physical codec authority; owner review of Core-vs-derived pending",
+      "tests": [
+        "python3 scripts/check_d10_prefix_free_kraft_certificate.py",
+        "python3 -O scripts/check_d10_prefix_free_kraft_certificate.py",
+        "scripts/check_d10_selection_transition_history.py --self-test",
+        "scripts/check-d10-proposal-ledger.py --self-test"
+      ]
     }
   ]
 }
