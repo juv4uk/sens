@@ -27,7 +27,7 @@ def source_queue(knowledge, selected, proposed):
     donor = defaultdict(list)
     ignored = {"d10-v1-semantic-inventory.json", "d10-v2-semantic-inventory.json",
                "d10-current-inventory.json", "d10-selected-coordinate-allocation-v1.json",
-               "d10-v3-semantic-inventory.json", "d10-fill-v1-state.json",
+               "d10-v3-semantic-inventory.json", "d10-v4-semantic-inventory.json", "d10-fill-v1-state.json",
                "d10-growth-baseline-v1.json", "d10-selection-transition-history.json",
                "d10-selector-seed.json"}
     for p in sorted(knowledge.glob("d10-*.json")):
@@ -57,7 +57,7 @@ def source_queue(knowledge, selected, proposed):
 def audit(root):
     k = root / "knowledge"
     data = (k / "d10-v1-semantic-inventory.json").read_bytes()
-    current_bytes = (k / "d10-v3-semantic-inventory.json").read_bytes()
+    current_bytes = (k / "d10-v4-semantic-inventory.json").read_bytes()
     inv = json.loads(current_bytes)
     hist = json.loads((k / "d10-selection-transition-history.json").read_text())
     with (k / "d10-proposal-ledger.tsv").open(newline="", encoding="utf-8") as f:
@@ -85,49 +85,79 @@ def audit(root):
     if transitions and transitions[-1].get("resulting_inventory_blob_sha") != sha(data):
         errors.append("APPEND-SHA-DRIFT")
     proposed = {x["semantic_name"].upper() for x in ledger}
-    missing = [r["semantic_name"] for r in rows[625:] if r["semantic_name"].upper() not in proposed]
-    if missing:
-        errors.append("SELECTED-WITHOUT-PROPOSAL")
-    # v1 is the frozen selection SHA witness. v2 preserves the original
-    # 419-address owner gauge. v3 appends 23 already documented research laws.
+    # Historical v1 selection chain, v2 419-gauge, v3 23-donor selection
+    # and v4 nine independent review records have distinct SHA-pinned roles.
     research_allocated = 0
+    source_review_exceptions = set()
     try:
         ptr = json.loads((k/"d10-current-inventory.json").read_text(encoding="utf-8"))
         v2raw = (k/"d10-v2-semantic-inventory.json").read_bytes()
-        v2 = json.loads(v2raw)
-        archived = ptr["current_archival_candidate_selection"]
-        src_path = root/archived["source_path"]
-        donor_raw = src_path.read_bytes()
-        donor = json.loads(donor_raw)
-        added = donor["records"]
-        history_ok = (
+        v3raw = (k/"d10-v3-semantic-inventory.json").read_bytes()
+        v2, v3 = json.loads(v2raw), json.loads(v3raw)
+        archive = ptr["current_archival_candidate_selection"]
+        donor_raw = (root/archive["source_path"]).read_bytes()
+        historical = json.loads(donor_raw)
+        added = historical["records"]
+        source_items = ptr["current_research_candidate_selection"]["source_pins"]
+        recent = rows[698:]
+        sources_good = len(source_items)==2 and len(recent)==9
+        all_review_names=set()
+        for pin in source_items:
+            pth = pin["path"]
+            if pth not in ("knowledge/d10-flavors-restarts-research-v1.json",
+                           "knowledge/d10-time-law-review-v2.json"):
+                sources_good=False
+                continue
+            source_data=(root/pth).read_bytes()
+            if sha(source_data)!=pin["git_blob"]:
+                sources_good=False
+                continue
+            donor_obj=json.loads(source_data)
+            for row in recent:
+                if row.get("source_path")==pth:
+                    match=next((z for z in donor_obj["rows"] if z.get("semantic_name")==row["semantic_name"]),None)
+                    if (match is None or match.get("triage_status")!="SEMANTIC-CANDIDATE"
+                        or row.get("source_git_blob")!=pin["git_blob"]
+                        or row.get("behavior")!=(match.get("semantic_law") or match.get("observable_law"))
+                        or row.get("falsifier")!=match.get("falsifier")
+                        or row.get("ratified_resident") is not False):
+                        sources_good=False
+                    else:
+                        all_review_names.add(row["semantic_name"].upper())
+        sources_good = sources_good and len(all_review_names)==9
+        legacy_ok = (
             ptr["canonical_current"]["git_blob"] == sha(current_bytes)
-            and ptr["canonical_current"]["path"] == "knowledge/d10-v3-semantic-inventory.json"
-            and ptr["historical_v2_coordinate_inventory"]["git_blob"] == sha(v2raw)
-            and ptr["historical_selection"]["git_blob"] == sha(data)
-            and archived["source_git_blob"] == sha(donor_raw)
-            and len(v2["rows"]) == 675
-            and rows[:675] == v2["rows"]
-            and len(added) == 23
-            and all(
-                r["stable_id"] == d["stable_id"]
-                and r["semantic_name"] == d["semantic_name"]
-                and r["behavior"] == d["observable_law"]
-                and r["ratified_resident"] is False
-                for r, d in zip(rows[675:], added)
-            )
+            and ptr["canonical_current"]["path"] == "knowledge/d10-v4-semantic-inventory.json"
+            and ptr["historical_v3_research_inventory"]["git_blob"]==sha(v3raw)
+            and ptr["historical_v2_coordinate_inventory"]["git_blob"]==sha(v2raw)
+            and ptr["historical_selection"]["git_blob"]==sha(data)
+            and archive["source_git_blob"]==sha(donor_raw)
+            and len(v2["rows"])==675 and len(v3["rows"])==698
+            and rows[:698]==v3["rows"]
+            and v3["rows"][:675]==v2["rows"]
+            and len(added)==23
+            and all(r["stable_id"]==d["stable_id"]
+                    and r["semantic_name"]==d["semantic_name"]
+                    and r["behavior"]==d["observable_law"]
+                    for r,d in zip(v3["rows"][675:],added))
         )
-        if history_ok:
-            research_allocated = 442
+        if sources_good and legacy_ok:
+            research_allocated=451
+            source_review_exceptions=all_review_names
         else:
-            errors.append("CURRENT-D10-ARCHIVED-CANDIDATE-DRIFT")
-    except (OSError, ValueError, KeyError, TypeError):
-        errors.append("CURRENT-D10-ARCHIVED-CANDIDATE-INVALID")
+            errors.append("CURRENT-D10-RESEARCH-REVIEW-SHA-OR-LAW-DRIFT")
+    except (OSError,ValueError,KeyError,TypeError):
+        errors.append("CURRENT-D10-RESEARCH-REVIEW-INVALID")
+    missing = [r["semantic_name"] for r in rows[625:]
+               if r["semantic_name"].upper() not in proposed
+               and r["semantic_name"].upper() not in source_review_exceptions]
+    if missing:
+        errors.append("SELECTED-WITHOUT-PROPOSAL")
     inventory_full = len(rows) == capacity
     placement_full = len(placed) == capacity
     return {"schema": "d10-completion-readiness/v1",
             "inventory_blob": sha(current_bytes), "historical_inventory_blob": sha(data),
-            "current_inventory_path": "knowledge/d10-v3-semantic-inventory.json", "capacity": capacity,
+            "current_inventory_path": "knowledge/d10-v4-semantic-inventory.json", "capacity": capacity,
             "selected": len(rows), "remaining": capacity-len(rows),
             "placed": len(placed), "unplaced": len(rows)-len(placed),
             "ratified": ratified, "inventory_full": inventory_full,
@@ -141,7 +171,7 @@ def audit(root):
             "ready_to_start_d11": inventory_full and placement_full and ratified == capacity and not errors,
             "source_queue": source_queue(k, set(names), proposed),
             "blocking_errors": errors,
-            "caution": "698 selected D10 research meanings have coordinates (23 archived additions); 326 semantic meanings still missing. Core review, independent oracle and ratification remain pending."}
+            "caution": "707 selected research meanings have 10-bit coordinates; 317 absent. Last nine still require independent executable oracle and owner Core/D2/library review; D10 ratification remains zero."}
 
 def main():
     p = argparse.ArgumentParser(description=__doc__)
