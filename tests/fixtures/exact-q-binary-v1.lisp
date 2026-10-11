@@ -67,3 +67,16 @@
 ((expr . "(list 0 0/1 1 1/1)")
  (expected . "(0 0 1 1)")
  (case . denominator-one-source-spellings-write-canonically))
+
+; Preserved from historical #216 work: equality on an exact integer is an
+; exact-Q YES and remains a canonical one-bit PredicateBit, not a host bool.
+((expr . "(= 3 3)")
+ (expected . "1")
+ (expected-domain . "predicate-bit")
+ (case . integer-equality-yes))
+
+; Comparison remains chained across every adjacent pair in the exact-Q domain.
+((expr . "(< 1 2 3 4)")
+ (expected . "1")
+ (expected-domain . "predicate-bit")
+ (case . integer-less-chain-four-yes))
