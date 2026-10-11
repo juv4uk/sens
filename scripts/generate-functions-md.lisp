@@ -10,147 +10,147 @@
 ;   sens scripts/generate-functions-md.lisp          — переписати розділи
 ;   sens scripts/generate-functions-md.lisp --check  — лише перевірити
 
-(00001001 tracked
-  (00000001 ("result-status.lisp" "narrate.lisp" "translation.lisp" "quantity.lisp" "si.lisp")))
+(0011 tracked
+  (001 ("result-status.lisp" "narrate.lisp" "translation.lisp" "quantity.lisp" "si.lisp")))
 
-(00001001 reference-path "docs/FUNCTIONS.md")
+(0011 reference-path "docs/FUNCTIONS.md")
 
-(00001001 str+
-  (00001000 args
-    (00111001 (00001000 (acc s) (00111010 acc s)) "" args)))
+(0011 str+
+  (0010 args
+    (101110 (0010 (acc s) (110011110 acc s)) "" args)))
 
-(00001001 definition-head?
-  (00001000 (head)
-    (00000111
-      ((00100010 head (00000001 def)) (1) t)
-      ((00100010 head (00000001 define)) (1) t)
-      ((00100010 head 00001001) (1) t)
-      ((00100010 head 00001011) (1) t)
-      (t t (00000001 ())))))
+(0011 definition-head?
+  (0010 (head)
+    (110
+      ((11110111 head (001 def)) (1) t)
+      ((11110111 head (001 define)) (1) t)
+      ((11110111 head 00001001) (1) t)
+      ((11110111 head 00001011) (1) t)
+      (t t (001 ())))))
 
-(00001001 defined-names
-  (00001000 (forms)
-    (00000111
-      ((00000010 forms) () (00000001 ()))
-      ((00000010 forms) (0)
-       (00000111
-         ((00000010 (00000101 forms)) (0)
-          (00000111
-            ((definition-head? (00000101 (00000101 forms))) t
-             (00000100 (01000010 (00101111 (00000101 forms)))
-                   (defined-names (00000110 forms))))
-            (t t (defined-names (00000110 forms)))))
-         (t t (defined-names (00000110 forms))))))))
+(0011 defined-names
+  (0010 (forms)
+    (110
+      ((010 forms) () (001 ()))
+      ((010 forms) (0)
+       (110
+         ((010 (100 forms)) (0)
+          (110
+            ((definition-head? (100 (100 forms))) t
+             (111 (11101110 (1001 (100 forms)))
+                   (defined-names (011 forms))))
+            (t t (defined-names (011 forms)))))
+         (t t (defined-names (011 forms))))))))
 
-(00001001 count-items
-  (00001000 (items)
-    (00000111
-      ((00000010 items) () 0)
-      ((00000010 items) (0) (00001100 1 (count-items (00000110 items)))))))
+(0011 count-items
+  (0010 (items)
+    (110
+      ((010 items) () 0)
+      ((010 items) (0) (01010 1 (count-items (011 items)))))))
 
 ; Markdown is human presentation. number->string owns canonical machine
 ; numeric wire, so it must not render human section counts.  Build decimal
 ; radix ten only from base-neutral single-bit numeric source; this generator
 ; must not create new numeric-reader migration debt.
-(00001001 functions-md-decimal-radix
-  (00001100 1 1 1 1 1 1 1 1 1 1))
+(0011 functions-md-decimal-radix
+  (01010 1 1 1 1 1 1 1 1 1 1))
 
 ; Use only two-part COND with EQ.  On current main EQ yields the existing
 ; answer carrier; on the PredicateBit runtime it yields the one-bit carrier.
 ; That keeps this human-presentation helper valid across the active migration.
-(00001001 decimal-count->string-onto
-  (00001000 (n acc)
-    (00000111
-      ((00000011 n 0) acc)
-      ((00000011 0 0)
+(0011 decimal-count->string-onto
+  (0010 (n acc)
+    (110
+      ((101 n 0) acc)
+      ((101 0 0)
        (decimal-count->string-onto
-         (00010100 n functions-md-decimal-radix)
-         (00111010
-           (01000111 (00010011 n functions-md-decimal-radix))
+         (10111 n functions-md-decimal-radix)
+         (110011110
+           (01000111 (00101100 n functions-md-decimal-radix))
            acc))))))
 
-(00001001 decimal-count->string
-  (00001000 (n)
-    (00000111
-      ((00000011 n 0) "0")
-      ((00000011 0 0) (decimal-count->string-onto n "")))))
+(0011 decimal-count->string
+  (0010 (n)
+    (110
+      ((101 n 0) "0")
+      ((101 0 0) (decimal-count->string-onto n "")))))
 
-(00001001 backtick-join
-  (00001000 (names)
-    (00000111
-      ((00000010 names) () "")
-      ((00000010 names) (0)
-       (00000111
-         ((00000010 (00000110 names)) () (str+ "`" (00000101 names) "`"))
-         ((00000010 (00000110 names)) (0)
-          (str+ "`" (00000101 names) "`, " (backtick-join (00000110 names)))))))))
+(0011 backtick-join
+  (0010 (names)
+    (110
+      ((010 names) () "")
+      ((010 names) (0)
+       (110
+         ((010 (011 names)) () (str+ "`" (100 names) "`"))
+         ((010 (011 names)) (0)
+          (str+ "`" (100 names) "`, " (backtick-join (011 names)))))))))
 
-(00001001 render-section
-  (00001000 (file)
-    (10011100 ((names (defined-names (01001011 (10100110 (str+ "lib/" file))))))
+(0011 render-section
+  (0010 (file)
+    (001000 ((names (defined-names (110101001 (110110111 (str+ "lib/" file))))))
       (str+ "### " file " (" (decimal-count->string (count-items names)) ")\n\n"
             (backtick-join names) "\n"))))
 
 ; Позиція першого входження marker у s, починаючи з i; -1 якщо нема.
-(00001001 pos-of
-  (00001000 (s marker i)
-    (00000111
-      ((00111100 s) (1) -1)
-      ((00111101 marker s) t i)
-      (t t (pos-of (01000000 s) marker (00001100 i 1))))))
+(0011 pos-of
+  (0010 (s marker i)
+    (110
+      ((110011100 s) (1) -1)
+      ((110101010 marker s) t i)
+      (t t (pos-of (110011101 s) marker (01010 i 1))))))
 
 ; string-length у ядрі — нехвостова рекурсія (переповнює стек на довгому
 ; документі); string-slice сам обрізає кінець до довжини рядка.
-(00001001 to-end 1000000000)
+(0011 to-end 1000000000)
 
-(00001001 slice-from
-  (00001000 (s i)
-    (01000001 s i to-end)))
+(0011 slice-from
+  (0010 (s i)
+    (110100011 s i to-end)))
 
 ; Замінює розділ файлу: від «### файл (» до наступного «\n### » (або кінця).
-(00001001 replace-section
-  (00001000 (doc file)
-    (10011100 ((marker (str+ "### " file " (")))
-      (10011100 ((start (pos-of doc marker 0)))
-        (00000111
-          ((00011010 start 0) 1 (00000101 (00000001 ())))
-          ((00011010 start 0) 0
-           (10011100 ((after (00001100 start (00111011 marker))))
-             (10011100 ((offset (pos-of (slice-from doc after) "\n### " 0)))
-               (10011100 ((end (00000111
-                            ((00011010 offset 0) 1 to-end)
-                            ((00011010 offset 0) 0 (00001100 after offset)))))
-                 (str+ (01000001 doc 0 start)
+(0011 replace-section
+  (0010 (doc file)
+    (001000 ((marker (str+ "### " file " (")))
+      (001000 ((start (pos-of doc marker 0)))
+        (110
+          ((11010 start 0) 1 (100 (001 ())))
+          ((11010 start 0) 0
+           (001000 ((after (01010 start (110100010 marker))))
+             (001000 ((offset (pos-of (slice-from doc after) "\n### " 0)))
+               (001000 ((end (110
+                            ((11010 offset 0) 1 to-end)
+                            ((11010 offset 0) 0 (01010 after offset)))))
+                 (str+ (110100011 doc 0 start)
                        (render-section file)
                        (slice-from doc end)))))))))))
 
-(00001001 replace-all
-  (00001000 (doc files)
-    (00000111
-      ((00000010 files) () doc)
-      ((00000010 files) (0) (replace-all (replace-section doc (00000101 files)) (00000110 files))))))
+(0011 replace-all
+  (0010 (doc files)
+    (110
+      ((010 files) () doc)
+      ((010 files) (0) (replace-all (replace-section doc (100 files)) (011 files))))))
 
-(00001001 current (10100110 reference-path))
-(00001001 generated (replace-all current tracked))
+(0011 current (110110111 reference-path))
+(0011 generated (replace-all current tracked))
 
-(00000111
-  ((00000010 *argv*)
+(110
+  ((010 *argv*)
    ()
-   (00101111
-     (00100111
-       (10100111 reference-path generated)
-       (01001000 "docs/FUNCTIONS.md sections refreshed"))))
-  ((00100010 (00000101 *argv*) "--check")
+   (1001
+     (1110
+       (110111100 reference-path generated)
+       (11011011 "docs/FUNCTIONS.md sections refreshed"))))
+  ((11110111 (100 *argv*) "--check")
    (1)
-   (00000111
-     ((00100010 current generated) (1) (01001000 "docs/FUNCTIONS.md sections are current"))
-     ((00100010 current generated) (0)
-      (00101111
-        (00100111
-          (01001000 "docs/FUNCTIONS.md sections are stale")
-          (00000101 (00000001 ())))))))
+   (110
+     ((11110111 current generated) (1) (11011011 "docs/FUNCTIONS.md sections are current"))
+     ((11110111 current generated) (0)
+      (1001
+        (1110
+          (11011011 "docs/FUNCTIONS.md sections are stale")
+          (100 (001 ())))))))
   (t t
-   (00101111
-     (00100111
-       (10100111 reference-path generated)
-       (01001000 "docs/FUNCTIONS.md sections refreshed")))))
+   (1001
+     (1110
+       (110111100 reference-path generated)
+       (11011011 "docs/FUNCTIONS.md sections refreshed")))))
