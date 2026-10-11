@@ -38,7 +38,44 @@
     "section_measurement": "GNU readelf -W -l/-S",
     "component_class": "runner-executable-component",
     "whole_chain_seed_closure_status": "BLOCKED_PARTIAL_LOWER_BOUND_NOT_COMPLETE_OR_MINIMIZED",
-    "whole_chain_seed_closure_total_bytes": null
+    "whole_chain_seed_closure_total_bytes": null,
+    "known_operational_input_subset": {
+      "schema": "nano-sens-known-operational-input-subtotal/1",
+      "status": "MEASURED_SUBSET_NOT_FULL_SEED_TOTAL",
+      "cml_runner": {
+        "repository": "juv4uk/cml",
+        "commit": "3320fe3b00a4a099ecb9ff06e22e0be2b1fee499",
+        "workflow_run": "https://github.com/juv4uk/cml/actions/runs/38183052531",
+        "path": "seed-v0-c0-runner.bin",
+        "sha256": "fe5b6912d0cc346c531ef1f96f7d15e894d69fadb21515cdd53dd717215892d9",
+        "on_disk_bytes": 34575192,
+        "role": "tested K1 checkpoint runner component; do not compare as a size win with binaries from other source checkpoints"
+      },
+      "sens_runtime_build_inputs": {
+        "repository": "juv4uk/sens",
+        "commit": "d0787a40fcea36501747732aa61b6de19fe29c70",
+        "file_count": 114,
+        "on_disk_bytes": 1397243,
+        "scope": "known SENS/xtask production source + workspace manifests + compiler include/input subset used by the nested cargo run; excludes three CML-only build inputs"
+      },
+      "wsm_nucleus": {
+        "repository": "juv4uk/wsm-my-lisp",
+        "commit": "a6bd9747196f2d676ab6883cbb4b84c7fcfc6947",
+        "path": "asm/nucleus.s",
+        "git_blob_sha1": "0fd0787bff2f64f0f9432f4395e9acb177544973",
+        "on_disk_bytes": 11461,
+        "role": "source file read by the CML lib-test witness"
+      },
+      "sum_bytes": 35983896,
+      "formula": "34,575,192 + 1,397,243 + 11,461 = 35,983,896 bytes",
+      "exclusions": [
+        "not a whole-chain total and not a claim of minimality",
+        "external vendored crate packages are separately listed and excluded: 7 packages / 296 files / 4,419,723 tracked bytes",
+        "Git metadata is separately measured as full-checkout external metadata snapshots; minimal required refs/objects are not derived",
+        "rustc, Cargo, GCC, assembler/linker, OS/shared libraries and other declared external dependencies are excluded",
+        "remaining unenumerated runtime/build paths may increase the total"
+      ]
+    }
   },
   "c1_c2": {
     "c1_executable_sha256": "27b8fbf096cddbb77be2b4bf57cc58bf8b4fac4accc42adbcfbc10d6cd95f375",
@@ -277,6 +314,11 @@
         "file_count": 70,
         "on_disk_bytes": 1320729,
         "scope": "CML module source + tracked build metadata only; separate subtotal, not added to SENS subtotal"
+      },
+      "known_operational_subset": {
+        "file_count": 114,
+        "on_disk_bytes": 1397243,
+        "description": "SENS source+manifest/data subset used by nested cargo run; excludes the three extra SENS paths needed only to build the CML runner."
       }
     },
     "external_dependency_ledger": "evidence/nano-sens-seed-v0-source-closure-census-2026-10-12.json :: external_build_dependency_inventory"
@@ -288,6 +330,7 @@
     "Include-edge scan correction (2026-10-12): crates/sens/src/gpu_oracle_conformance.rs additionally includes lib/core.lisp (59,301 bytes). The corrected verified subset is now 114 pinned paths / 1,397,243 bytes; this remains a partial subset, not the whole seed-total.",
     "Cross-repository closure update (2026-10-12): recorded the pinned CML K1 runner build/test source subset separately: 70 CML module/metadata files totaling 1,320,729 bytes. The SENS verified subset now includes three previously omitted SENS files consumed by the CML runner/build process, reaching 117 paths / 1,432,402 bytes. The two subtotals have distinct scopes and are not a full seed total.",
     "Vendor dependency correction (2026-10-12): pinned `.cargo/config.toml` replaces crates.io with the SENS `vendor/` directory. The selected xtask -> sens compile path uses seven vendored crates, 296 tracked files / 4,419,723 bytes. This third-party source bundle is explicitly external and excluded from the trusted-seed subtotal; exact file-level blob SHAs and sizes are in the closure census.",
-    "Git metadata measurement (2026-10-12): K1 follow-up CI run 38185559594 passed both independent runs and byte-identical report comparison. Summed `.git` regular-file bytes were 66,126,630 and 66,122,122 across the CML/SENS/WSM checkout snapshots; 4,508-byte difference means these are environment snapshots, not the minimized metadata seed. They remain separate external dependency evidence, not seed bytes."
+    "Git metadata measurement (2026-10-12): K1 follow-up CI run 38185559594 passed both independent runs and byte-identical report comparison. Summed `.git` regular-file bytes were 66,126,630 and 66,122,122 across the CML/SENS/WSM checkout snapshots; 4,508-byte difference means these are environment snapshots, not the minimized metadata seed. They remain separate external dependency evidence, not seed bytes.",
+    "Measured operational subset (2026-10-12): the pinned K1 runner checkpoint (34,575,192 B), 114 known SENS runtime-build input paths (1,397,243 B), and the pinned WSM nucleus source (11,461 B) sum to 35,983,896 B. This is a measured subtotal only, not the complete seed total or a minimality claim; external dependencies and unclosed runtime paths remain separate."
   ]
 }
