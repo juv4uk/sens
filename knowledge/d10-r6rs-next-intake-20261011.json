@@ -1,0 +1,81 @@
+{
+  "schema": "d10-r6rs-followup-intake/v1",
+  "date": "2026-10-11",
+  "status": "RESEARCH-INTAKE-F1-PINNED-F2-F3-HOLD-NOT-CANONICAL",
+  "source": {
+    "path": "knowledge/d10-r6rs-copy-mutable-oracle-v1.json",
+    "git_blob": "99d3e1ba5f381df356fd0b335dfbf75c5027877d",
+    "standard": "https://r6rs.org/final/html/r6rs-lib/r6rs-lib-Z-H-14.html",
+    "oracle_script": "tests/d10_r6rs_hashtable_copy_mutable.ss",
+    "oracle_executed_now": false
+  },
+  "baseline": {
+    "path": "knowledge/d10-v9-semantic-inventory.json",
+    "git_blob": "328d4babc0bef534eedaefe8b541373c326cf5da",
+    "selected": 759,
+    "placed": 719,
+    "ratified": 0
+  },
+  "counts": {
+    "candidates": 2,
+    "selected_added": 0,
+    "coordinates_added": 0,
+    "ratified_added": 0
+  },
+  "candidates": [
+    {
+      "candidate_id": "d10.r6rs.intake.hashtable-copy.20261011",
+      "semantic_name": "HASHTABLE-COPY",
+      "surface_uk": "копіювати-хештаблицю",
+      "surface_ukr": "створити-копію-хештаблиці",
+      "observable_law": "Return a distinct hashtable carrying the same associations. If mutable-flag is absent or false, result is immutable; if true result is mutable. Subsequent association edits in mutable copy do not change original table.",
+      "positive_witnesses": [
+        "Copy of mutable {1↦one, 2↦two} with no second argument has both associations and hashtable-mutable? false; source stays mutable.",
+        "Copy with explicit true has hashtable-mutable? true; set! copy[1]=changed leaves original[1]=one."
+      ],
+      "falsifiers": [
+        "A default copy accepts mutation or is reported mutable.",
+        "Mutating explicit-mutable copy changes an original association or losing mappings during copy."
+      ],
+      "source_reference": "https://r6rs.org/final/html/r6rs-lib/r6rs-lib-Z-H-14.html",
+      "oracle_file": "tests/d10_r6rs_hashtable_copy_mutable.ss",
+      "F1": "SOURCE-SHA-PINNED",
+      "F2": "HOLD-ORACLE-NOT-REPLAYED",
+      "F3": "HOLD-DEDUP-UNPROVEN",
+      "F4": "NO-COORDINATE",
+      "selected_in_canonical": false,
+      "ratified": false,
+      "coordinate": null
+    },
+    {
+      "candidate_id": "d10.r6rs.intake.hashtable-mutable.20261011",
+      "semantic_name": "HASHTABLE-MUTABLE?",
+      "surface_uk": "змінна-хештаблиця?",
+      "surface_ukr": "чи-дозволено-змінювати-хештаблицю?",
+      "observable_law": "Return a boolean describing whether mutation of the hashtable is permitted; two tables with equal associations can differ in mutable state.",
+      "positive_witnesses": [
+        "Fresh make-eqv-hashtable is mutable.",
+        "Immutable default copy and explicit mutable copy have equal initial mappings, but mutability predicates return false versus true."
+      ],
+      "falsifiers": [
+        "Result is inferred exclusively from hashtable contents or size, so equal-association mutable/immutable instances are indistinguishable.",
+        "A default immutable copy is reported mutable."
+      ],
+      "source_reference": "https://r6rs.org/final/html/r6rs-lib/r6rs-lib-Z-H-14.html",
+      "oracle_file": "tests/d10_r6rs_hashtable_copy_mutable.ss",
+      "F1": "SOURCE-SHA-PINNED",
+      "F2": "HOLD-ORACLE-NOT-REPLAYED",
+      "F3": "HOLD-DEDUP-UNPROVEN",
+      "F4": "NO-COORDINATE",
+      "selected_in_canonical": false,
+      "ratified": false,
+      "coordinate": null
+    }
+  ],
+  "notes": [
+    "Owner D10 filling authorization does not imply F2/F3 PASS",
+    "R6RS donor's original historical HOLD remains intact",
+    "No physical encoding, runtime, D1-D9 or D2 alteration",
+    "Research intake is input to next serialized canonical selection, not a duplicate D10 v9"
+  ]
+}

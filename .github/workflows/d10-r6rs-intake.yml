@@ -1,0 +1,15 @@
+name: D10 R6RS source-reviewed intake
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'knowledge/d10-r6rs-next-intake-20261011.json'
+      - 'knowledge/d10-r6rs-copy-mutable-oracle-v1.json'
+      - 'scripts/check_d10_r6rs_next_intake.py'
+  workflow_dispatch:
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: python3 scripts/check_d10_r6rs_next_intake.py
