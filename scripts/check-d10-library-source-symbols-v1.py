@@ -128,7 +128,9 @@ def validate(raw: dict, library: dict, inventory: dict, state: dict,
                 not isinstance(pinned, str) or not re.fullmatch(r"[0-9a-f]{40}", pinned)
                 or path in file_lines):
             raise ValueError("unsafe/duplicate D10 donor path or blob pin")
-        disk = root / path
+        # Історичний донор є байтовим Git-знімком; lib/* на main змінюється
+        # незалежно й не може заднім числом змінити доказові line pins.
+        disk = root / "knowledge/d10-source-snapshots" / f"{pinned}.lisp"
         if disk.is_symlink() or not disk.is_file():
             raise ValueError(f"D10 source missing/unsafe: {path}")
         content = disk.read_bytes()

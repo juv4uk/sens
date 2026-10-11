@@ -155,7 +155,12 @@ def read(path: Path) -> dict:
 
 
 def run() -> dict:
-    return verify(read(LEDGER), SOURCE.read_bytes(), read(INVENTORY), read(STATE),
+    ledger = read(LEDGER)
+    pin = ledger.get("source", {}).get("git_blob_sha1")
+    if not isinstance(pin, str) or not re.fullmatch(r"[0-9a-f]{40}", pin):
+        raise ValueError("invalid historical reason Git source pin")
+    snapshot = ROOT / "knowledge/d10-source-snapshots" / f"{pin}.lisp"
+    return verify(ledger, snapshot.read_bytes(), read(INVENTORY), read(STATE),
                   read(CANONICAL), read(RAW_EXISTING), read(D9))
 
 

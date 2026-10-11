@@ -6,6 +6,7 @@ Run from a COMPLETE sens repository checkout. This program never modifies tables
 import argparse
 import hashlib
 import json
+import re
 from pathlib import Path
 
 REVIEW = 'knowledge/d10-d9-donor-dedup-v1.json'
@@ -32,7 +33,10 @@ def verify(root):
     selected = {row['semantic_name'].upper() for row in inventory['rows']}
     donors = {}
     for source in review['donors']:
-        raw = (root / source['path']).read_bytes()
+        pin = source['git_blob_sha']
+        if not isinstance(pin, str) or not re.fullmatch(r'[0-9a-f]{40}', pin):
+            raise ValueError('invalid historical Git source pin')
+        raw = (root / 'knowledge/d10-source-snapshots' / (pin + '.lisp')).read_bytes()
         assert sha_blob(raw) == source['git_blob_sha'], source['path']
         donors[source['path']] = raw.decode('utf8').splitlines()
     assert len(review['d9_existing']) == 7
