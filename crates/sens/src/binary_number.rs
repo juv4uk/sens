@@ -19,6 +19,10 @@ pub enum BinaryNumberError {
 #[derive(Clone, Eq, Hash, PartialEq)]
 pub struct BinaryNumber {
     bits: Vec<u8>,
+    // None is the historic/unqualified normalized Number pathway.
+    // Some(n) is an explicitly admitted numeric domain Dn (n=24*2^k).
+    // The field is authority-bearing and therefore participates in Eq/Hash.
+    numeric_domain_width: Option<usize>,
 }
 
 impl BinaryNumber {
@@ -66,6 +70,7 @@ impl BinaryNumber {
         }
         Ok(Self {
             bits: bits.to_vec(),
+            numeric_domain_width: None,
         })
     }
 
@@ -74,17 +79,18 @@ impl BinaryNumber {
         match first_one {
             Some(index) => Self {
                 bits: bits[index..].to_vec(),
+                numeric_domain_width: None,
             },
-            None => Self { bits: vec![0] },
+            None => Self { bits: vec![0], numeric_domain_width: None },
         }
     }
 
     pub fn zero() -> Self {
-        Self { bits: vec![0] }
+        Self { bits: vec![0], numeric_domain_width: None }
     }
 
     pub fn one() -> Self {
-        Self { bits: vec![1] }
+        Self { bits: vec![1], numeric_domain_width: None }
     }
 
     pub fn is_zero(&self) -> bool {
@@ -93,6 +99,48 @@ impl BinaryNumber {
 
     pub fn width(&self) -> usize {
         self.bits.len()
+    }
+
+    /// The explicitly admitted SENS numeric-domain identity, when present.
+    /// Width of the normalized *magnitude* is a different property.
+    pub fn numeric_domain_width(&self) -> Option<usize> {
+        self.numeric_domain_width
+    }
+
+    /// Construct an admitted numeric value from a FULL-WIDTH binary domain
+    /// word. No source literal, text round-trip, or inferred domain.
+    /// Leading zeroes are retained logically via the exact domain field.
+    pub fn from_numeric_domain_bits(width: usize, word: &[u8]) -> Option<Self> {
+        if !Self::is_numeric_domain_width(width)
+            || word.len() != width
+            || word.iter().any(|&bit| bit > 1)
+        {
+            return None;
+        }
+        let mut value = Self::normalize(word.to_vec());
+        value.numeric_domain_width = Some(width);
+        Some(value)
+    }
+
+    /// Exact-width binary word of an already-domain-qualified value.
+    /// None means legacy/unqualified Number, never guessed from magnitude.
+    pub fn exact_numeric_domain_bits(&self) -> Option<Vec<u8>> {
+        let domain_width = self.numeric_domain_width?;
+        let mut out = vec![0; domain_width.checked_sub(self.width())?];
+        out.extend_from_slice(&self.bits);
+        Some(out)
+    }
+
+    /// Owner-ratified SAME-DOMAIN natural addition, preserving explicit Dn
+    /// on no carry and carrying exact bits into D(2n) on overflow.
+    /// Mixed domains, legacy/qualified mixes, and unadmitted widths fail closed.
+    pub fn add_admitted_numeric(&self, other: &Self) -> Option<Self> {
+        let width = self.numeric_domain_width?;
+        if other.numeric_domain_width != Some(width) {
+            return None;
+        }
+        let (out_width, out_bits) = self.add_in_numeric_domain(other, width)?;
+        Self::from_numeric_domain_bits(out_width, &out_bits)
     }
 
     pub fn as_bits(&self) -> &[u8] {
@@ -257,6 +305,8 @@ impl BinaryNumber {
     ) -> Option<(usize, Vec<u8>)> {
         if !self.fits_ratified_width(input_domain_width)
             || !other.fits_ratified_width(input_domain_width)
+            || self.numeric_domain_width.is_some_and(|d| d != input_domain_width)
+            || other.numeric_domain_width.is_some_and(|d| d != input_domain_width)
         {
             return None;
         }
@@ -297,8 +347,9 @@ impl BinaryNumber {
 
 impl Ord for BinaryNumber {
     fn cmp(&self, other: &Self) -> Ordering {
-        self.width()
-            .cmp(&other.width())
+        self.numeric_domain_width
+            .cmp(&other.numeric_domain_width)
+            .then_with(|| self.width().cmp(&other.width()))
             .then_with(|| self.bits.cmp(&other.bits))
     }
 }
@@ -459,6 +510,48 @@ mod tests {
         }
         let wide = BinaryNumber::from_bits(vec![1; 25]).unwrap();
         assert_eq!(wide.add_in_numeric_domain(&one, 24), None);
+    }
+
+    #[test]
+    fn admitted_domain_number_is_part_of_value_identity_and_keeps_exact_word() {
+        let mut d24 = vec![0; 24];
+        d24[23] = 1;
+        let mut d48 = vec![0; 48];
+        d48[47] = 1;
+        let a = BinaryNumber::from_numeric_domain_bits(24, &d24).unwrap();
+        let b = BinaryNumber::from_numeric_domain_bits(48, &d48).unwrap();
+        assert_eq!(a.numeric_domain_width(), Some(24));
+        assert_eq!(b.numeric_domain_width(), Some(48));
+        assert_eq!(a.exact_numeric_domain_bits(), Some(d24.clone()));
+        assert_eq!(b.exact_numeric_domain_bits(), Some(d48.clone()));
+        assert_ne!(a, b, "different admitted numeric domains must never alias");
+        assert_ne!(a, BinaryNumber::one(), "legacy unqualified value is not D24");
+        assert_eq!(a.cmp(&b), std::cmp::Ordering::Less);
+        assert!(BinaryNumber::from_numeric_domain_bits(24, &[0; 23]).is_none());
+        assert!(BinaryNumber::from_numeric_domain_bits(24, &[0; 25]).is_none());
+        assert!(BinaryNumber::from_numeric_domain_bits(25, &[0; 25]).is_none());
+        let mut invalid = d24;
+        invalid[3] = 2;
+        assert!(BinaryNumber::from_numeric_domain_bits(24, &invalid).is_none());
+    }
+
+    #[test]
+    fn admitted_d24_addition_promotes_through_real_domain_qualified_value() {
+        let full = BinaryNumber::from_numeric_domain_bits(24, &vec![1; 24]).unwrap();
+        let sum = full.add_admitted_numeric(&full).unwrap();
+        assert_eq!(sum.numeric_domain_width(), Some(48));
+        let exact = sum.exact_numeric_domain_bits().unwrap();
+        assert_eq!(exact.len(), 48);
+        assert_eq!(&exact[..23], &[0; 23]);
+        assert!(exact[23..47].iter().all(|&b| b == 1));
+        assert_eq!(exact[47], 0);
+        let small = BinaryNumber::from_numeric_domain_bits(24, &vec![0; 24]).unwrap();
+        let same = small.add_admitted_numeric(&small).unwrap();
+        assert_eq!(same.numeric_domain_width(), Some(24));
+        assert_eq!(same.exact_numeric_domain_bits(), Some(vec![0; 24]));
+        assert!(full.add_admitted_numeric(&BinaryNumber::one()).is_none());
+        let another_domain = BinaryNumber::from_numeric_domain_bits(48, &vec![0; 48]).unwrap();
+        assert!(full.add_admitted_numeric(&another_domain).is_none());
     }
 
     #[test]
