@@ -42,7 +42,13 @@ pub fn parse_mixed_exact_domain_machine_source(
             Span::default(),
         ));
     }
-    parse_mixed_source(source, true)
+    // Only the already-admitted D8 I/O identities are projected here, after
+    // the exact D3-D6 machine-source pass.  This does not license arbitrary D8
+    // or D9 call heads; quoting and binder data remain opaque.
+    parse_mixed_source(source, true)?
+        .into_iter()
+        .map(|expr| lift_pinned_d8_io(source, expr, 0))
+        .collect()
 }
 
 /// The only approved D8 READ/WRITE head at this migration boundary is the
@@ -1357,6 +1363,41 @@ mod tests {
     }
 
     
+    #[test]
+    fn machine_reader_lifts_only_admitted_d8_io_and_preserves_quoted_data() {
+        let source = "(0011 wire (0010 (value) (11110100 value)))";
+        let parsed = only(parse_mixed_exact_domain_machine_source(
+            "lib/machine/tests/d8-wire.lisp", source
+        ).expect("trusted machine-source reader"));
+        let ExprKind::List(definition) = &parsed.kind else { panic!("DEFINE"); };
+        let ExprKind::List(lambda) = &definition[2].kind else { panic!("LAMBDA"); };
+        let ExprKind::List(call) = &lambda[2].kind else { panic!("call"); };
+        assert!(matches!(
+            &call[0].kind, ExprKind::DomainIdentity(id)
+                if id.width() == 8 && id.packed_bits() == 0b11110100
+        ), "trusted machine D8 WRITE-TO-STRING must carry exact identity");
+
+        let ordinary = only(parse_mixed_exact_domain("(11110100 2)").expect("ordinary reader"));
+        let ExprKind::List(ordinary_call) = &ordinary.kind else { panic!("ordinary call"); };
+        assert!(!matches!(&ordinary_call[0].kind, ExprKind::DomainIdentity(_)),
+            "ordinary source never infers D8 from eight bits");
+
+        let quoted = only(parse_mixed_exact_domain_machine_source(
+            "lib/machine/tests/d8-wire.lisp", "(001 (11110100 2))"
+        ).expect("quoted data"));
+        let ExprKind::List(quote) = &quoted.kind else { panic!("QUOTE"); };
+        let ExprKind::List(payload) = &quote[1].kind else { panic!("quoted payload"); };
+        assert!(!matches!(&payload[0].kind, ExprKind::DomainIdentity(_)),
+            "quoted D8-shaped data must never become callable");
+
+        let other = only(parse_mixed_exact_domain_machine_source(
+            "lib/machine/tests/d8-wire.lisp", "(11110000 2)"
+        ).expect("other W8 call head"));
+        let ExprKind::List(other_call) = &other.kind else { panic!("other call"); };
+        assert!(!matches!(&other_call[0].kind, ExprKind::DomainIdentity(_)),
+            "no general D8 callability expansion");
+    }
+
     #[test]
     fn machine_source_mode_lifts_an_immediately_applied_lambda_head() {
         let source = "((00001000 (x) (100 x)) 7)";
