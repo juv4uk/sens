@@ -1,0 +1,24 @@
+name: Core3 profile exact two-field D3 source cutover
+on:
+  push:
+    branches: [main]
+    paths:
+      - scripts/check-core3-profile-contract.lisp
+      - tests/test_core3_profile_d3_source.py
+      - .github/workflows/core3-profile-d3-source.yml
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  replay-source:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Verify pinned original, exact cutover, negative controls
+        run: python3 -m unittest discover -s tests -p test_core3_profile_d3_source.py -v
