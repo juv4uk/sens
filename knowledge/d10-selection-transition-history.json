@@ -397,9 +397,7 @@
       "added_stable_ids": [
         "d10.math.unique-bounded-modular-lift.20261011"
       ],
-      "appended_sources": [
-        "knowledge/d10-unique-bounded-modular-lift-20261009.json"
-      ],
+      "appended_sources": [],
       "coordinates_added": 0,
       "ratified_added": 0,
       "delta_selected": 1,
@@ -410,7 +408,8 @@
         "scripts/check_d10_selection_transition_history.py --self-test",
         "scripts/check-d10-proposal-ledger.py --self-test",
         "scripts/check_d10_unique_bounded_modular_lift.py"
-      ]
+      ],
+      "source_provenance_note": "Actual historical canonical inventory.sources remained unchanged in 651→653; the law's file remains pinned under evidence[]. No source-tail event occurred."
     },
     {
       "id": "d10.math.prefix-free-kraft-certificate.current-main.20261011",
@@ -425,9 +424,7 @@
       "added_stable_ids": [
         "d10.math.prefix-free-kraft-certificate.20261011"
       ],
-      "appended_sources": [
-        "knowledge/d10-prefix-free-kraft-certificate-20261011.json"
-      ],
+      "appended_sources": [],
       "coordinates_added": 0,
       "ratified_added": 0,
       "delta_selected": 1,
@@ -439,7 +436,8 @@
         "python3 -O scripts/check_d10_prefix_free_kraft_certificate.py",
         "scripts/check_d10_selection_transition_history.py --self-test",
         "scripts/check-d10-proposal-ledger.py --self-test"
-      ]
+      ],
+      "source_provenance_note": "Actual historical canonical inventory.sources remained unchanged in 651→653; the law's file remains pinned under evidence[]. No source-tail event occurred."
     },
     {
       "id": "d10.math.finite-code-unique-decipherability.after-653.20261011",
