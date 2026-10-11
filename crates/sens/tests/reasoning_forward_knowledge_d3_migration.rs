@@ -5,10 +5,10 @@ use sens::{eval_parsed_expressions, eval_program, parse_mixed_exact_domain_reaso
 const CORE: &str = include_str!("../../../lib/core.lisp");
 const UNIFY: &str = include_str!("../../../lib/unify.lisp");
 const REASON: &str = include_str!("../../../lib/reason.lisp");
-const FORWARD_OLD: &str = include_str!("../../../lib/forward.lisp");
-const FORWARD_D3: &str = include_str!("../../../tests/fixtures/forward-d3-candidate.lisp");
-const KNOWLEDGE_OLD: &str = include_str!("../../../lib/knowledge.lisp");
-const KNOWLEDGE_D3: &str = include_str!("../../../tests/fixtures/knowledge-d3-candidate.lisp");
+const FORWARD_OLD: &str = include_str!("../../../tests/fixtures/forward-d3-before.lisp");
+const FORWARD_D3: &str = include_str!("../../../lib/forward.lisp");
+const KNOWLEDGE_OLD: &str = include_str!("../../../tests/fixtures/knowledge-d3-before.lisp");
+const KNOWLEDGE_D3: &str = include_str!("../../../lib/knowledge.lisp");
 
 fn session(migrated: bool) -> Session {
     let mut session = Session::default();
