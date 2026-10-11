@@ -43,7 +43,7 @@ class KnowledgeLayoutSourceTests(unittest.TestCase):
             "lisp-fs-conformance.lisp": ("(001000 ((empty", "(001 (hello world))"),
             "rivnopravnist-uk.lisp": ("(0011 подвоїти", "(01010 число число)", "(110"),
             "semantic-registry-self-hosted-witness.lisp": ("(0011 semantic-registry-self-hosted-witness", "(0010 (source)"),
-            "semantic-coordinate-matrix-845.lisp": ("(0011 semantic-coordinate-matrix-845", "(001 ("),
+            "semantic-coordinate-matrix-845.lisp": ("(0011 semantic-coordinate-matrix-845", "(001\n"),
         }
         for filename, needles in expected.items():
             with self.subTest(filename=filename):
