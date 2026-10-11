@@ -1,0 +1,12 @@
+# Exact compare pin main SHA: d604c281e04d74dbc860dab1ed8259f5e003667c
+# Eight refs represent seven unique branch heads (current-main and final-current-main share the same SHA).
+# All these compiler-artifact/bootstrap variants overlap core compiler files; history is retained without tree overlay.
+branch	source_sha	compare_status	ahead_by	behind_by	reported_file_entries	classification
+agent/3839-whole-artifact-digest	48effde6d7a2ef5f15269b0d24e969cb6281290f	diverged	9	6618	4	HISTORY_ATTACHED_CONTENT_REVIEW_REQUIRED
+agent/3839-whole-artifact-v2	9ee0fde02cd98866e7f83c2dff752ac193e59af0	diverged	10	6618	6	HISTORY_ATTACHED_CONTENT_REVIEW_REQUIRED
+agent/3840-bootstrap-bundle	4b602effb629d23a67ee020de8c66bc5cd16974c	diverged	8	6599	4	HISTORY_ATTACHED_CONTENT_REVIEW_REQUIRED
+agent/3840-bootstrap-bundle-after-3896	c66f1dc5d05f1524fbd03612166742a97321ed11	diverged	7	6591	7	HISTORY_ATTACHED_CONTENT_REVIEW_REQUIRED
+agent/3840-bootstrap-bundle-clean-main	52cfad6717494dc1391cffffd65d608e256e3ecd	diverged	3	6591	3	HISTORY_ATTACHED_CONTENT_REVIEW_REQUIRED
+agent/3840-bootstrap-bundle-current-main	1320d4d3dc71649079585af797f6b7de7f186523	diverged	1	6583	3	HISTORY_ATTACHED_CONTENT_REVIEW_REQUIRED
+agent/3840-bootstrap-bundle-final	18496bc6858131da18891599eff2e78d15832811	diverged	3	6583	3	HISTORY_ATTACHED_CONTENT_REVIEW_REQUIRED
+agent/3840-bootstrap-bundle-final-current-main	1320d4d3dc71649079585af797f6b7de7f186523	diverged	1	6583	3	SAME_HEAD_AS_CURRENT_MAIN
