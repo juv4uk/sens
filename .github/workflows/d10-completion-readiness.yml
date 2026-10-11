@@ -15,6 +15,10 @@ on:
       - 'knowledge/d10-v10-semantic-inventory.json'
       - 'knowledge/d10-v11-semantic-inventory.json'
       - 'knowledge/d10-v12-semantic-inventory.json'
+      - 'knowledge/d10-v13-semantic-inventory.json'
+      - 'knowledge/d10-v14-semantic-inventory.json'
+      - 'knowledge/d10-v14-source-law-intake-20261011.json'
+      - 'knowledge/d10-candidate-coordinate-unification-20261011.json'
       - 'knowledge/d10-historical-identity-types-v12-20261011.json'
       - 'knowledge/d10-historical-law-intake-v11-20261011.json'
       - 'knowledge/d10-p0-research-intake-v10-20261011.json'
@@ -44,6 +48,7 @@ on:
       - 'scripts/check_d10_v10_p0_intake.py'
       - 'scripts/check_d10_v11_historical_law.py'
       - 'scripts/check_d10_v12_historical_identity_types.py'
+      - 'scripts/check_d10_v14_source_laws.py'
       - 'scripts/check_d10_candidate_database.py'
       - 'scripts/check_d10_candidate_coordinate_queue.py'
       - 'scripts/check_d10_historical_candidate_queue.py'
@@ -117,6 +122,10 @@ jobs:
         run: |
           python3 scripts/check_d10_v12_historical_identity_types.py --self-test
           python3 -O scripts/check_d10_v12_historical_identity_types.py --self-test
+      - name: Validate 22 v14 research-only laws, pinned source and negative mutants
+        run: |
+          python3 scripts/check_d10_v14_source_laws.py --self-test
+          python3 -O scripts/check_d10_v14_source_laws.py --self-test
       - name: Порахувати реальний запас D10
         run: |
           python3 scripts/check_d10_completion_readiness.py >"$RUNNER_TEMP/d10-readiness.json"

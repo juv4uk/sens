@@ -1,12 +1,12 @@
 {
   "schema": "d10-current-inventory-pointer/v1",
-  "status": "OWNER-DIRECTED-PRELIMINARY-RESEARCH-SELECTION-897-UNRATIFIED",
+  "status": "OWNER-DIRECTED-RESEARCH-SELECTION-919-UNRATIFIED",
   "canonical_current": {
-    "path": "knowledge/d10-v13-semantic-inventory.json",
-    "git_blob": "3cdfd2c7eed56c3148de4c386175d3ea991fb57f",
-    "selected": 897,
+    "path": "knowledge/d10-v14-semantic-inventory.json",
+    "git_blob": "d8109f3cf17a826ecc45dd045fcad41a2a491640",
+    "selected": 919,
     "placed": 719,
-    "unplaced": 178,
+    "unplaced": 200,
     "ratified": 0
   },
   "historical_selection": {
@@ -20,8 +20,8 @@
     "role": "PINNED-GAUGE-ASSIGNMENT"
   },
   "policy": {
-    "description": "v13 append-only 70 source-index-pinned historical standards DRAFT meanings with illustrative tests; F2/F3 not proven.",
-    "selected_only": "897 provisional research descriptions; 719 placed, 178 unplaced; 127 remaining.",
+    "description": "v14: 22 documented archival source-law candidate descriptions appended, all without F2/F3 or coordinates; preserve v13 prefix.",
+    "selected_only": "919 research descriptions; 719 placed, 200 unplaced, 105 remaining; full-domain ratification only after 1024 meaningful laws and coordinates.",
     "ratification": "Whole-domain D10 ratification to follow fully populated 1024 inventory with reviewed proofs, not per-function ratification.",
     "next_step": "Execute positive/negative donor and SENS oracles, establish F3 semantic distinction vs D1–D9/D10, owner review before code assignment."
   },
@@ -335,5 +335,30 @@
     "ratified_added": 0,
     "oracle_parity": "NOT_EXECUTED",
     "F3_distinctness": "UNPROVEN"
+  },
+  "historical_v13_research_inventory": {
+    "path": "knowledge/d10-v13-semantic-inventory.json",
+    "git_blob": "3cdfd2c7eed56c3148de4c386175d3ea991fb57f",
+    "selected": 897,
+    "placed": 719,
+    "unplaced": 178,
+    "ratified": 0,
+    "role": "FROZEN-PRE-V14-ARCHIVE"
+  },
+  "current_v14_source_law_selection": {
+    "previous_inventory": "knowledge/d10-v13-semantic-inventory.json",
+    "manifest": {
+      "path": "knowledge/d10-v14-source-law-intake-20261011.json",
+      "git_blob": "95b270b291e8cf7fce1fe06dac024d8258541d44"
+    },
+    "source": {
+      "path": "knowledge/d10-candidate-coordinate-unification-20261011.json",
+      "git_blob": "e14a3301c24bf3e9af9b5568aaf5ecf720eed17e"
+    },
+    "research_added": 22,
+    "coordinates_added": 0,
+    "ratified_added": 0,
+    "F2": "NOT_RUN",
+    "F3": "UNPROVEN"
   }
 }

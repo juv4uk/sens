@@ -384,7 +384,10 @@ def audit(root):
             v13_manifest = json.loads(v13_raw)
             old_v12 = ptr.get("historical_v12_research_inventory", {})
             v12_raw = (root / old_v12["path"]).read_bytes()
-            new_rows = rows[827:]
+            v13_archive = ptr.get("historical_v13_research_inventory", {})
+            v13_fixed_bytes = (root / v13_archive["path"]).read_bytes()
+            v13_fixed = json.loads(v13_fixed_bytes)
+            new_rows = v13_fixed["rows"][827:]
             proofs = v13_manifest["candidates"]
             author = v13_manifest["law_authors"]
             author_raw = (root / author["path"]).read_bytes()
@@ -395,6 +398,9 @@ def audit(root):
                 and old_v12["git_blob"] == sha(v12_raw)
                 and len(json.loads(v12_raw)["rows"]) == 827
                 and preserves_archived_prefix(rows, json.loads(v12_raw)["rows"])
+                and v13_archive.get("git_blob") == sha(v13_fixed_bytes)
+                and len(v13_fixed["rows"]) == 897
+                and preserves_archived_prefix(rows, v13_fixed["rows"])
                 and v13_manifest["previous"]["git_blob"] == sha(v12_raw)
                 and v13_hook["source"] == src
                 and v13_hook["authoring"] == author
@@ -422,6 +428,48 @@ def audit(root):
                 )
             else:
                 errors.append("D10-V13-SOURCE-BATCH-SHA-OR-LAW-DRIFT")
+        # v14: 22 pinned archive contracts, illustrative examples only.
+        # The 1024 source slots are NOT evidence of 1024 admitted D10 laws.
+        if len(rows) > 897:
+            v14_ref = ptr.get("current_v14_source_law_selection", {})
+            v14_pin = v14_ref.get("manifest", {})
+            v14_raw = (root / v14_pin["path"]).read_bytes()
+            v14_manifest = json.loads(v14_raw)
+            v14_src = v14_manifest["source"]
+            v14_src_raw = (root / v14_src["path"]).read_bytes()
+            v14_new = rows[897:919]
+            v14_p = v14_manifest["candidates"]
+            v14_good = (
+                v14_pin.get("git_blob") == sha(v14_raw)
+                and v14_manifest["previous"]["git_blob"] == sha(v13_fixed_bytes)
+                and v14_ref["previous_inventory"] == "knowledge/d10-v13-semantic-inventory.json"
+                and v14_ref["source"]["git_blob"] == v14_src["git_blob"]
+                and v14_ref["source"]["path"] == v14_src["path"]
+                and sha(v14_src_raw) == v14_src["git_blob"]
+                and len(v14_new) == len(v14_p) == 22
+                and all(
+                    r["stable_id"] == p["id"]
+                    and r["semantic_name"] == p["name"]
+                    and r["behavior"] == p["law"]
+                    and r["positive_witness_claim"] == p["positive_illustrative_claim"]
+                    and r["negative_witness_claim"] == p["negative_illustrative_claim"]
+                    and r["source_path"] == v14_src["path"]
+                    and r["source_git_blob"] == v14_src["git_blob"]
+                    and r["coordinate"] is None
+                    and r["ratified_resident"] is False
+                    and r["physical_t5_authorized"] is False
+                    and r["witness_independence"] == "PENDING"
+                    and p["F2"] == "HOLD_DONOR_NOT_RUN"
+                    and p["F3"] == "HOLD_DISTINCTNESS_UNPROVEN"
+                    for r,p in zip(v14_new, v14_p)
+                )
+            )
+            if v14_good:
+                source_review_exceptions.update(
+                    r["semantic_name"].upper() for r in v14_new
+                )
+            else:
+                errors.append("D10-V14-SOURCE-BATCH-SHA-OR-LAW-DRIFT")
         if sources_good and legacy_ok and v5_good:
             research_allocated=len(placed)-256
             source_review_exceptions |= all_review_names | v5_source_names
