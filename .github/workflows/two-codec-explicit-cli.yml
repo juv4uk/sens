@@ -107,6 +107,22 @@ jobs:
                           f"T5={base.returncode}/{base.stdout!r} "
                           f"F3={trial.returncode}/{trial.stdout!r}"
                       )
+              # The physical .senc hash comes from the independent stage manifest.
+              # SHA is checked BEFORE F3 decode/evaluation, not after.
+              trusted = row["staged_sha256"]
+              checked = subprocess.run(
+                  [binary, "eval-f3-sha256", framed, trusted],
+                  text=True, capture_output=True, check=False)
+              oracle = subprocess.run(
+                  [binary, "eval", source],
+                  text=True, capture_output=True, check=False)
+              if (checked.returncode, checked.stdout) != (oracle.returncode, oracle.stdout):
+                  raise SystemExit(f"F3 hash verified eval differs: {framed}")
+              wrong = subprocess.run(
+                  [binary, "eval-f3-sha256", framed, "0"*64],
+                  text=True, capture_output=True, check=False)
+              if wrong.returncode == 0:
+                  raise SystemExit(f"F3 accepted untrusted physical carrier: {framed}")
           if f3 < 9:
               raise SystemExit(f"tiny real F3 coverage dropped to {f3}")
           print(f"TWO_CODEC_ALL_TINY_CLI_PARITY_PASS f3={f3} total={manifest['source_files']}")
