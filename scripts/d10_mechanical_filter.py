@@ -5,6 +5,7 @@ import csv
 import hashlib
 import json
 import re
+import subprocess
 from pathlib import Path
 
 COLUMNS = ("candidate_id", "semantic_name", "semantic_law", "donor_provenance",
@@ -24,6 +25,43 @@ def safe_file(root, name):
     if not target.is_relative_to(root.resolve()) or not target.is_file():
         return None
     return target
+
+
+def read_donor_provenance(root, locator):
+    """Resolve an exact source blob; never substitute working-tree bytes for a pinned commit."""
+    pinned = re.fullmatch(
+        r"([A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+)@([0-9a-f]{40}):([^:\t\n]+):([1-9][0-9]*)(?:-([1-9][0-9]*))?",
+        locator,
+    )
+    if pinned:
+        repo, commit, path, first, last = pinned.groups()
+        # Foreign repositories and primary-source URLs require separately archived proofs.
+        if repo != "juv4uk/sens" or path.startswith("/") or "\\" in path or any(
+            part in ("", ".", "..") for part in path.split("/")
+        ):
+            return None
+        try:
+            verify = subprocess.run(
+                ["git", "-C", str(root), "rev-parse", "--verify", f"{commit}^{{commit}}"],
+                capture_output=True, check=False, timeout=10,
+            )
+            if verify.returncode or verify.stdout.decode("ascii", errors="replace").strip() != commit:
+                return None
+            source = subprocess.run(
+                ["git", "-C", str(root), "show", f"{commit}:{path}"],
+                capture_output=True, check=False, timeout=10,
+            )
+            if source.returncode:
+                return None
+        except (OSError, subprocess.TimeoutExpired):
+            return None
+        return source.stdout, int(first), int(last or first)
+    local = re.fullmatch(r"([^:\t\n]+):([1-9][0-9]*)(?:-([1-9][0-9]*))?", locator)
+    if local:
+        path = safe_file(root, local.group(1))
+        if path is not None:
+            return path.read_bytes(), int(local.group(2)), int(local.group(3) or local.group(2))
+    return None
 
 
 def read_json_receipt(root, path, digest):
@@ -67,16 +105,19 @@ def evaluate(row, root, inventory_sha, foundation_sha, occupied):
         return out
     # F1: pinned repository source, with a real line locator.
     source = row["donor_provenance"]
-    match = re.fullmatch(r"([^:\t]+):([1-9][0-9]*)(?:-[1-9][0-9]*)?", source)
-    if not name or not ident or not row["semantic_law"] or not match:
+    if not name or not ident or not row["semantic_law"] or not source:
         return verdict("rejected", "EXCLUDE_NO_PROVENANCE")
-    path = safe_file(root, match.group(1))
-    if path is None or not re.fullmatch(r"[0-9a-f]{40}", row["source_pin"]):
-        return verdict("rejected", "HOLD_UNVERIFIED_PIN")
-    if git_blob(path.read_bytes()) != row["source_pin"]:
-        return verdict("rejected", "HOLD_UNVERIFIED_PIN")
-    if int(match.group(2)) > len(path.read_text(encoding="utf-8", errors="replace").splitlines()):
-        return verdict("rejected", "HOLD_UNVERIFIED_PIN")
+    pinned = read_donor_provenance(root, source)
+    if pinned is None:
+        # Unsupported but identified historical sources must not disappear as "no provenance".
+        if "@" in source or source.startswith(("https://", "http://")) or re.search(r":[1-9][0-9]*(?:-[1-9][0-9]*)?$", source):
+            return verdict("escalated", "HOLD_UNVERIFIED_PIN")
+        return verdict("rejected", "EXCLUDE_NO_PROVENANCE")
+    raw, first, last = pinned
+    if (not re.fullmatch(r"[0-9a-f]{40}", row["source_pin"])
+            or git_blob(raw) != row["source_pin"]
+            or last < first or last > len(raw.splitlines())):
+        return verdict("escalated", "HOLD_UNVERIFIED_PIN")
     # F2: recorded command + digest-verified positive/negative oracle run receipt.
     if not row["witness_artifact"]:
         return verdict("rejected", "EXCLUDE_NO_WITNESS")
