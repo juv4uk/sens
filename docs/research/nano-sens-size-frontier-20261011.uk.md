@@ -84,7 +84,24 @@ cargo xtask compiler-compile --input /path/to/program.sw1 --out /path/to/new-art
 - Семантична відмова зберігається як канонічний `compiler-compilation-error/1` артефакт і повертає ненульовий exit code. Невалідний/неканонічний SW1 не запускає compiler.
 - Додано локальні unit-тести в `crates/xtask/src/compiler_compile.rs` для повторюваного артефакту, roundtrip verification, неправильного wire та D8 fail-closed. Workflow `.github/workflows/compiler-role-cutover.yml` містить команду `cargo test -p xtask compiler_compile::tests -- --nocapture`; віддалений результат цього запуску потрібно підтвердити окремо.
 
-Це реальний executable front-end до вже наявного SENS-written компілятора, але ще не повний parser для фізичного T5/F3 файла і не машинний backend: вони мають залишатися окремими, явно версійованими межами.
+### Під’єднання наявної трифайлової проєкції
+
+Для вже підготовленої трійки тепер передбачено окремий явний режим:
+
+```sh
+cargo xtask compiler-compile --triplet /path/to/program.sens --out /path/to/new-artifact.bin
+```
+
+Шлях `/path/to/program.sens` має мати двох однойменних сусідів: `program.lisp` та файл без розширення `program`. Контракт наявних інструментів:
+- `scripts/stage-two-projections.py` готує тільки український `.lisp` і читабельний exact-width файл `program`; сам він фізичний `.sens` не створює.
+- `scripts/sens_view.py parse /path/to/program` використовує існуючий T5 codec, щоб отримати `program.sens`. Це не перейменування тексту.
+- `scripts/verify_uk_t5_triplet.py` — read-only перевірка трійки у своєму обмеженому D1/D2/D3/D4 корпусі; його статус не є доказом runtime-семантики або release admission.
+
+Режим `--triplet` читає саме фізичний T5, отримує слова через чинний SENS-рідер, перевіряє байтову тотожність розгорнутого view і повторного T5-кодування, після чого незалежно парсить/опускає джерело та бітовий view і вимагає однакового exact-domain результату. Далі викликається той самий компіляторний корпус у `lib/compiler-nucleus.lisp`; SHA-256 фізичного `.sens` входить у provenance. Symlink/non-regular inputs і наявний output відхиляються.
+
+`--input` і `--triplet` взаємовиключні та не визначають формат за вмістом: перший залишається SW1 bootstrap-входом, другий — фізичною T5 трійкою. Це з’єднує готові кодеки з компілятором, але не означає, що увесь `lib/compiler-nucleus.lisp` вже пройшов міграцію в обмежений корпус трифайлового конвертера.
+
+Це executable front-end до наявного SENS-written компілятора, але ще не машинний backend та не повний C1 → C2 self-host proof.
 
 ## Acceptance gates
 
