@@ -62,6 +62,23 @@ pub fn parse_mixed_exact_domain_reasoning_source(
     parse_mixed_source(source, true)
 }
 
+/// Read only the frozen legacy library core with exact D3-D6 callable heads.
+/// This library (lib/core.lisp) is distinct from the canonical Core4/FASL
+/// bootstrap. W8 macro/define syntax and quoted templates remain data.
+pub fn parse_mixed_exact_domain_legacy_core_source(
+    path: &str,
+    source: &str,
+) -> Result<Vec<Expr>, LanguageError> {
+    if path != "lib/core.lisp" {
+        return Err(LanguageError::new(
+            ErrorKind::Parse,
+            "legacy core exact-domain reader is restricted to lib/core.lisp",
+            Span::default(),
+        ));
+    }
+    parse_mixed_source(source, true)
+}
+
 /// Parse only the language-owned time module with exact-width D3 call heads.
 /// Its W8 DEFINE/LAMBDA wrappers remain bootstrap syntax; no general source
 /// inference or W8-to-D8 promotion is authorized.
