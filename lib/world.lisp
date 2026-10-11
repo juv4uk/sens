@@ -83,9 +83,11 @@
         (11110111 (001 d1-no-left) (001 d1-no-right)))
        clauses))))
 
+; D4 NOT of the D3 ATOM predicate: a module is known only when its
+; event stream is a nonempty pair. D3 CONS cannot be a one-argument NOT.
 (0011 world-module-known?
   (0010 (world module-name)
-    (111 (010 (world-module-events world module-name)))))
+    (0100 (010 (world-module-events world module-name)))))
 
 (0011 world-module-missing?
   (0010 (world module-name)
