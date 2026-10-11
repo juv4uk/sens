@@ -4,7 +4,7 @@ This is an execution and blocker ledger, not a claim that the repository is full
 
 ## Exact completed changes
 
-- **15,901 audited SID8 occurrences replaced** in **88 existing `.lisp` files** (library, executable experiments, benchmarks and service programs), on **main**.
+- **15,898 audited SID8 occurrences replaced** in **86 existing `.lisp` files** in the earlier audited cohorts; three additional local MAP replacements are recorded under blocker 2 below. (library, executable experiments, benchmarks and service programs), on **main**.
 - No new Git branches and no `.sens` creation.
 - Baseline legacy correspondence: `knowledge/sens8-current-coverage-v1.json` (256 historic cells).
 - Only the 171 unambiguous, ratified current targets were used automatically.
