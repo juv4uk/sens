@@ -304,6 +304,16 @@
 ; existing Lisp-owned map closure is the executable derivation for let.
 ; No invented D6 runtime dispatch or numeric/legacy fallback is introduced.
 (00001001 внутрішнє-відображення map)
+; ЛІХТАР: a bounded macro bridge for legacy Lisp source modules.
+; A ratified D6 LET identity without an admitted evaluator mechanism is NOT
+; silently callable. This macro expands a surface call into a fresh lambda
+; application through the already proved Lisp-owned LET macro. The binding
+; list and body are syntax, not values or fabricated D6 residents.
+; (нехай-похідне ((x 7) (y 9)) (00100111 x y)) => (let ((x 7) (y 9)) ...).
+(00001010 нехай-похідне (bindings body)
+  (00000100 (00000001 let)
+    (00000100 bindings (00000100 body (00000001 ())))))
+
 (00001010 let (bindings body)
   (00000100 (00100111 (00000001 00001000) (внутрішнє-відображення (00001000 (binding) (00000101 binding)) bindings) body)
         (внутрішнє-відображення (00001000 (binding) (00101111 binding)) bindings)))
