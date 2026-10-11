@@ -103,6 +103,22 @@ fn canonical_composition_frame_rejects_negative_zero_nonreduced_and_unit_denomin
 }
 
 #[test]
+fn numeric_frame_bytes_cannot_be_misread_as_physical_t5_program() {
+    // The existing T5 transport admits only physical bytes 0..242.
+    // EXT=11 numeric records begin 111111, so their first packed byte
+    // always exceeds 242 and MUST be rejected by the physical T5 reader.
+    let minus_two = sens::domain_numeric_value("-",
+        &Value::BinaryNumber(d(24,1)), &Value::BinaryNumber(d(24,3)))
+        .expect("same D24 negative");
+    let packet = encode_packed_numeric_value(&minus_two).unwrap();
+    assert!(packet.bytes()[0] > 242);
+    assert!(matches!(
+        sens::decode_ternary_words(packet.bytes()),
+        Err(sens::TernaryTransportError::InvalidPhysicalByte)
+    ));
+}
+
+#[test]
 fn framing_keeps_legacy_rational_and_unqualified_numeric_distinct() {
     let legacy=BinaryFrame::BinaryNumber(BinaryNumber::one());
     let enc=encode_binary_frame(&legacy).unwrap();
