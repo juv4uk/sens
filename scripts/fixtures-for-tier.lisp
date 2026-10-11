@@ -19,11 +19,11 @@
 ; on its own, updated here as soon as the underlying gaps closed instead
 ; of leaving the workaround comment stale.
 
-(00001001 target-tier
-  (00000111
-    ((00000010 *argv*) () (missing-tier-argument))
-    ((00000010 *argv*) (1) (missing-tier-argument))
-    (t (01001010 (00000101 *argv*)))))
+(0011 target-tier
+  (110
+    ((010 *argv*) () (missing-tier-argument))
+    ((010 *argv*) (1) (missing-tier-argument))
+    (t (11101010 (100 *argv*)))))
 
 ; `missing-tier-argument` is deliberately unbound — calling it is a real
 ; named ErrorKind::UnknownSymbol (S2), not an invented ad-hoc error
@@ -34,20 +34,20 @@
 ; помилки, та сама конвенція, яку вже використовує scripts/release.lisp
 ; для власного випадку відсутнього аргументу.
 
-(00001001 fixture-tier
-  (00001000 (fixture)
-    (00000110 (00101101 (00000001 tier) fixture))))
+(0011 fixture-tier
+  (0010 (fixture)
+    (011 (11100 (001 tier) fixture))))
 
-(00001001 print-matching
-  (00001000 (remaining)
-    (00000111
-      ((00000010 remaining) () (00000001 ()))
-      ((00000010 remaining) (1) (00000001 ()))
-      (t ((00001000 ()
-            (00000111
-              ((00000011 (fixture-tier (00000101 remaining)) target-tier)
-               (01001000 (00000101 remaining)))
-              (t (00000001 ())))
-            (print-matching (00000110 remaining))))))))
+(0011 print-matching
+  (0010 (remaining)
+    (110
+      ((010 remaining) () (001 ()))
+      ((010 remaining) (1) (001 ()))
+      (t ((0010 ()
+            (110
+              ((101 (fixture-tier (100 remaining)) target-tier)
+               (11011011 (100 remaining)))
+              (t (001 ())))
+            (print-matching (011 remaining))))))))
 
-(print-matching (01001011 (10100110 "tests/fixtures/conformance.lisp")))
+(print-matching (110101001 (110110111 "tests/fixtures/conformance.lisp")))
