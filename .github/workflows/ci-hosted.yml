@@ -39,6 +39,8 @@ jobs:
         run: cargo test --locked -p sens --test domain_ladder --test domain_ladder_only_kernel --test domain_ast_value_identity
       - name: Verify migrated user demo sources run through canonical Core
         run: cargo test --locked -p sens --test exact_domain_migrated_demos
+      - name: World D3 candidate differential against historical source
+        run: cargo test --locked -p sens --test reasoning_world_d3_migration
       - name: D3 obsolete COND/ATOM/EQ scanner regression tests
         run: python3 -m unittest discover -s tests -p 'test_d3_legacy_logic_guard.py' -v
       - name: Migrated time-source exact D3 runtime witnesses
