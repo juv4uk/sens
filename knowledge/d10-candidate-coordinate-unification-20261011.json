@@ -8790,6 +8790,12 @@
         "selection": false,
         "ratification": false,
         "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+      },
+      "source_candidate_gate": {
+        "status": "SOURCE-VARIABLE-NOT-A-FIRST-CLASS-FUNCTION",
+        "source_kind": "pending-proposal",
+        "not_a_ratified_resident": true,
+        "reason": "A source occurrence or wish-list name is not an independent D10 law; candidate requires typed contract and distinct behavior."
       }
     },
     {
@@ -8813,15 +8819,30 @@
       "ratified": false,
       "physical_t5_authorized": false,
       "proof_readiness": {
-        "status": "INCOMPLETE-SOURCE-SEMANTICS",
-        "missing": [
-          "semantic-law",
-          "positive-witness",
-          "negative-falsifier"
-        ],
+        "status": "SOURCE-LAW-WITNESSES-PRESENT-UNVERIFIED",
+        "missing": [],
         "selection": false,
         "ratification": false,
-        "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+        "next_gate": "D1-D9-DEDUPE-CORE-VS-LIBRARY-AND-INDEPENDENT-ORACLE"
+      },
+      "source_candidate_gate": {
+        "status": "SOURCE-FUNCTION-DERIVED-REQUIRES-CORE-BOUNDARY",
+        "source_kind": "pending-proposal",
+        "not_a_ratified_resident": true,
+        "reason": "A source occurrence or wish-list name is not an independent D10 law; candidate requires typed contract and distinct behavior."
+      },
+      "source_evidence": {
+        "status": "SOURCE-DERIVED-SPEC-WITNESSES-NOT-EXECUTED",
+        "source_path": "lib/forward.lisp",
+        "source_git_blob": "b3cd6dbe9a8094e3794c1421e91f3d5b4c5247b6",
+        "source_lines": "506–516",
+        "law": "Given a fact F and an ordered list of justification entries, return the first entry E for which fact-of(E) is structurally equal to F; return the empty list if no entry matches.",
+        "positive": "find-entry(F, []) => (); find-entry(F, [entry(G),entry(F),entry(F)]) => first entry(F) when F and G differ.",
+        "negative": "Returning the first entry(G), a later duplicate entry(F), or an arbitrary truth flag violates the source recursion.",
+        "authoring_scope": "RECONSTRUCTED-FROM-VISIBLE-SOURCE-NO-INDEPENDENT-ORACLE",
+        "owner_review": "PENDING",
+        "core_vs_library": "LIKELY-DERIVED-REQUIRES-REVIEW",
+        "ratification": false
       }
     },
     {
@@ -8854,6 +8875,12 @@
         "selection": false,
         "ratification": false,
         "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+      },
+      "source_candidate_gate": {
+        "status": "SOURCE-VARIABLE-NOT-A-FIRST-CLASS-FUNCTION",
+        "source_kind": "pending-proposal",
+        "not_a_ratified_resident": true,
+        "reason": "A source occurrence or wish-list name is not an independent D10 law; candidate requires typed contract and distinct behavior."
       }
     },
     {
@@ -8877,15 +8904,30 @@
       "ratified": false,
       "physical_t5_authorized": false,
       "proof_readiness": {
-        "status": "INCOMPLETE-SOURCE-SEMANTICS",
-        "missing": [
-          "semantic-law",
-          "positive-witness",
-          "negative-falsifier"
-        ],
+        "status": "SOURCE-LAW-WITNESSES-PRESENT-UNVERIFIED",
+        "missing": [],
         "selection": false,
         "ratification": false,
-        "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+        "next_gate": "D1-D9-DEDUPE-CORE-VS-LIBRARY-AND-INDEPENDENT-ORACLE"
+      },
+      "source_candidate_gate": {
+        "status": "SOURCE-FUNCTION-DERIVED-REQUIRES-CORE-BOUNDARY",
+        "source_kind": "pending-proposal",
+        "not_a_ratified_resident": true,
+        "reason": "A source occurrence or wish-list name is not an independent D10 law; candidate requires typed contract and distinct behavior."
+      },
+      "source_evidence": {
+        "status": "SOURCE-DERIVED-SPEC-WITNESSES-NOT-EXECUTED",
+        "source_path": "lib/forward.lisp",
+        "source_git_blob": "b3cd6dbe9a8094e3794c1421e91f3d5b4c5247b6",
+        "source_lines": "689–698",
+        "law": "For each JTMS state in an ordered input sequence, instantiate the rule head using jtms-state-subst and pair that instantiated head with the state's used-support list; preserve order and multiplicity.",
+        "positive": "Empty state list => (); a single state (subst=s, used=[proof1]) maps to a single pair (apply-subst(head,s), [proof1]).",
+        "negative": "Losing the state's used provenance or emitting only the instantiated head, or changing order of multiple states, violates source construction.",
+        "authoring_scope": "RECONSTRUCTED-FROM-VISIBLE-SOURCE-NO-INDEPENDENT-ORACLE",
+        "owner_review": "PENDING",
+        "core_vs_library": "LIKELY-DERIVED-REQUIRES-REVIEW",
+        "ratification": false
       }
     },
     {
@@ -8918,6 +8960,12 @@
         "selection": false,
         "ratification": false,
         "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+      },
+      "source_candidate_gate": {
+        "status": "SOURCE-VARIABLE-NOT-A-FIRST-CLASS-FUNCTION",
+        "source_kind": "pending-proposal",
+        "not_a_ratified_resident": true,
+        "reason": "A source occurrence or wish-list name is not an independent D10 law; candidate requires typed contract and distinct behavior."
       }
     },
     {
@@ -8941,15 +8989,30 @@
       "ratified": false,
       "physical_t5_authorized": false,
       "proof_readiness": {
-        "status": "INCOMPLETE-SOURCE-SEMANTICS",
-        "missing": [
-          "semantic-law",
-          "positive-witness",
-          "negative-falsifier"
-        ],
+        "status": "SOURCE-LAW-WITNESSES-PRESENT-UNVERIFIED",
+        "missing": [],
         "selection": false,
         "ratification": false,
-        "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+        "next_gate": "D1-D9-DEDUPE-CORE-VS-LIBRARY-AND-INDEPENDENT-ORACLE"
+      },
+      "source_candidate_gate": {
+        "status": "SOURCE-FUNCTION-DERIVED-REQUIRES-CORE-BOUNDARY",
+        "source_kind": "pending-proposal",
+        "not_a_ratified_resident": true,
+        "reason": "A source occurrence or wish-list name is not an independent D10 law; candidate requires typed contract and distinct behavior."
+      },
+      "source_evidence": {
+        "status": "SOURCE-DERIVED-SPEC-WITNESSES-NOT-EXECUTED",
+        "source_path": "lib/forward.lisp",
+        "source_git_blob": "b3cd6dbe9a8094e3794c1421e91f3d5b4c5247b6",
+        "source_lines": "1240–1248",
+        "law": "For an ordered list of substitutions S, return the ordered list obtained by applying each substitution to the same rule head. Empty input returns empty output; multiplicity and order are preserved.",
+        "positive": "map-apply-head(head, []) => (); with substitutions [s1,s2] it yields [apply-subst(head,s1),apply-subst(head,s2)].",
+        "negative": "Dropping one substitution, deduplicating equal instantiated heads, or reversing output order violates the recursive CONS/map structure.",
+        "authoring_scope": "RECONSTRUCTED-FROM-VISIBLE-SOURCE-NO-INDEPENDENT-ORACLE",
+        "owner_review": "PENDING",
+        "core_vs_library": "LIKELY-DERIVED-REQUIRES-REVIEW",
+        "ratification": false
       }
     },
     {
@@ -8981,6 +9044,12 @@
         "selection": false,
         "ratification": false,
         "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+      },
+      "source_candidate_gate": {
+        "status": "LIBRARY-SCHEMA-OR-BINDING-NOT-A-FIRST-CLASS-FUNCTION",
+        "source_kind": "library-definition",
+        "not_a_ratified_resident": true,
+        "reason": "A source occurrence or wish-list name is not an independent D10 law; candidate requires typed contract and distinct behavior."
       }
     },
     {
@@ -9012,6 +9081,12 @@
         "selection": false,
         "ratification": false,
         "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+      },
+      "source_candidate_gate": {
+        "status": "LIBRARY-SCHEMA-OR-BINDING-NOT-A-FIRST-CLASS-FUNCTION",
+        "source_kind": "library-definition",
+        "not_a_ratified_resident": true,
+        "reason": "A source occurrence or wish-list name is not an independent D10 law; candidate requires typed contract and distinct behavior."
       }
     },
     {
@@ -9043,6 +9118,12 @@
         "selection": false,
         "ratification": false,
         "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+      },
+      "source_candidate_gate": {
+        "status": "LIBRARY-SCHEMA-OR-BINDING-NOT-A-FIRST-CLASS-FUNCTION",
+        "source_kind": "library-definition",
+        "not_a_ratified_resident": true,
+        "reason": "A source occurrence or wish-list name is not an independent D10 law; candidate requires typed contract and distinct behavior."
       }
     },
     {
@@ -9074,6 +9155,12 @@
         "selection": false,
         "ratification": false,
         "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+      },
+      "source_candidate_gate": {
+        "status": "LIBRARY-SCHEMA-OR-BINDING-NOT-A-FIRST-CLASS-FUNCTION",
+        "source_kind": "library-definition",
+        "not_a_ratified_resident": true,
+        "reason": "A source occurrence or wish-list name is not an independent D10 law; candidate requires typed contract and distinct behavior."
       }
     },
     {
@@ -9105,6 +9192,12 @@
         "selection": false,
         "ratification": false,
         "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+      },
+      "source_candidate_gate": {
+        "status": "LIBRARY-SCHEMA-OR-BINDING-NOT-A-FIRST-CLASS-FUNCTION",
+        "source_kind": "library-definition",
+        "not_a_ratified_resident": true,
+        "reason": "A source occurrence or wish-list name is not an independent D10 law; candidate requires typed contract and distinct behavior."
       }
     },
     {
@@ -9136,6 +9229,12 @@
         "selection": false,
         "ratification": false,
         "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+      },
+      "source_candidate_gate": {
+        "status": "LIBRARY-DEFINITION-CORE-VS-DERIVED-UNREVIEWED",
+        "source_kind": "library-definition",
+        "not_a_ratified_resident": true,
+        "reason": "A source occurrence or wish-list name is not an independent D10 law; candidate requires typed contract and distinct behavior."
       }
     },
     {
@@ -9167,6 +9266,12 @@
         "selection": false,
         "ratification": false,
         "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+      },
+      "source_candidate_gate": {
+        "status": "LIBRARY-DEFINITION-CORE-VS-DERIVED-UNREVIEWED",
+        "source_kind": "library-definition",
+        "not_a_ratified_resident": true,
+        "reason": "A source occurrence or wish-list name is not an independent D10 law; candidate requires typed contract and distinct behavior."
       }
     },
     {
@@ -9198,6 +9303,12 @@
         "selection": false,
         "ratification": false,
         "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+      },
+      "source_candidate_gate": {
+        "status": "LIBRARY-DEFINITION-CORE-VS-DERIVED-UNREVIEWED",
+        "source_kind": "library-definition",
+        "not_a_ratified_resident": true,
+        "reason": "A source occurrence or wish-list name is not an independent D10 law; candidate requires typed contract and distinct behavior."
       }
     },
     {
@@ -9229,6 +9340,12 @@
         "selection": false,
         "ratification": false,
         "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+      },
+      "source_candidate_gate": {
+        "status": "LIBRARY-SCHEMA-OR-BINDING-NOT-A-FIRST-CLASS-FUNCTION",
+        "source_kind": "library-definition",
+        "not_a_ratified_resident": true,
+        "reason": "A source occurrence or wish-list name is not an independent D10 law; candidate requires typed contract and distinct behavior."
       }
     },
     {
@@ -9260,6 +9377,12 @@
         "selection": false,
         "ratification": false,
         "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+      },
+      "source_candidate_gate": {
+        "status": "LIBRARY-SCHEMA-OR-BINDING-NOT-A-FIRST-CLASS-FUNCTION",
+        "source_kind": "library-definition",
+        "not_a_ratified_resident": true,
+        "reason": "A source occurrence or wish-list name is not an independent D10 law; candidate requires typed contract and distinct behavior."
       }
     },
     {
@@ -9291,6 +9414,12 @@
         "selection": false,
         "ratification": false,
         "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+      },
+      "source_candidate_gate": {
+        "status": "LIBRARY-SCHEMA-OR-BINDING-NOT-A-FIRST-CLASS-FUNCTION",
+        "source_kind": "library-definition",
+        "not_a_ratified_resident": true,
+        "reason": "A source occurrence or wish-list name is not an independent D10 law; candidate requires typed contract and distinct behavior."
       }
     },
     {
@@ -9322,6 +9451,12 @@
         "selection": false,
         "ratification": false,
         "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+      },
+      "source_candidate_gate": {
+        "status": "LIBRARY-SCHEMA-OR-BINDING-NOT-A-FIRST-CLASS-FUNCTION",
+        "source_kind": "library-definition",
+        "not_a_ratified_resident": true,
+        "reason": "A source occurrence or wish-list name is not an independent D10 law; candidate requires typed contract and distinct behavior."
       }
     },
     {
@@ -9353,6 +9488,12 @@
         "selection": false,
         "ratification": false,
         "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+      },
+      "source_candidate_gate": {
+        "status": "LIBRARY-DEFINITION-CORE-VS-DERIVED-UNREVIEWED",
+        "source_kind": "library-definition",
+        "not_a_ratified_resident": true,
+        "reason": "A source occurrence or wish-list name is not an independent D10 law; candidate requires typed contract and distinct behavior."
       }
     },
     {
@@ -9384,6 +9525,12 @@
         "selection": false,
         "ratification": false,
         "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+      },
+      "source_candidate_gate": {
+        "status": "LIBRARY-DEFINITION-CORE-VS-DERIVED-UNREVIEWED",
+        "source_kind": "library-definition",
+        "not_a_ratified_resident": true,
+        "reason": "A source occurrence or wish-list name is not an independent D10 law; candidate requires typed contract and distinct behavior."
       }
     },
     {
@@ -9415,6 +9562,12 @@
         "selection": false,
         "ratification": false,
         "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+      },
+      "source_candidate_gate": {
+        "status": "LIBRARY-DEFINITION-CORE-VS-DERIVED-UNREVIEWED",
+        "source_kind": "library-definition",
+        "not_a_ratified_resident": true,
+        "reason": "A source occurrence or wish-list name is not an independent D10 law; candidate requires typed contract and distinct behavior."
       }
     },
     {
@@ -9446,6 +9599,12 @@
         "selection": false,
         "ratification": false,
         "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+      },
+      "source_candidate_gate": {
+        "status": "LIBRARY-DEFINITION-CORE-VS-DERIVED-UNREVIEWED",
+        "source_kind": "library-definition",
+        "not_a_ratified_resident": true,
+        "reason": "A source occurrence or wish-list name is not an independent D10 law; candidate requires typed contract and distinct behavior."
       }
     },
     {
@@ -9477,6 +9636,12 @@
         "selection": false,
         "ratification": false,
         "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+      },
+      "source_candidate_gate": {
+        "status": "LIBRARY-DEFINITION-CORE-VS-DERIVED-UNREVIEWED",
+        "source_kind": "library-definition",
+        "not_a_ratified_resident": true,
+        "reason": "A source occurrence or wish-list name is not an independent D10 law; candidate requires typed contract and distinct behavior."
       }
     },
     {
@@ -9508,6 +9673,12 @@
         "selection": false,
         "ratification": false,
         "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+      },
+      "source_candidate_gate": {
+        "status": "LIBRARY-DEFINITION-CORE-VS-DERIVED-UNREVIEWED",
+        "source_kind": "library-definition",
+        "not_a_ratified_resident": true,
+        "reason": "A source occurrence or wish-list name is not an independent D10 law; candidate requires typed contract and distinct behavior."
       }
     },
     {
@@ -9539,6 +9710,12 @@
         "selection": false,
         "ratification": false,
         "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+      },
+      "source_candidate_gate": {
+        "status": "LIBRARY-DEFINITION-CORE-VS-DERIVED-UNREVIEWED",
+        "source_kind": "library-definition",
+        "not_a_ratified_resident": true,
+        "reason": "A source occurrence or wish-list name is not an independent D10 law; candidate requires typed contract and distinct behavior."
       }
     },
     {
@@ -9570,6 +9747,12 @@
         "selection": false,
         "ratification": false,
         "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+      },
+      "source_candidate_gate": {
+        "status": "LIBRARY-DEFINITION-CORE-VS-DERIVED-UNREVIEWED",
+        "source_kind": "library-definition",
+        "not_a_ratified_resident": true,
+        "reason": "A source occurrence or wish-list name is not an independent D10 law; candidate requires typed contract and distinct behavior."
       }
     },
     {
@@ -9601,6 +9784,12 @@
         "selection": false,
         "ratification": false,
         "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+      },
+      "source_candidate_gate": {
+        "status": "LIBRARY-DEFINITION-CORE-VS-DERIVED-UNREVIEWED",
+        "source_kind": "library-definition",
+        "not_a_ratified_resident": true,
+        "reason": "A source occurrence or wish-list name is not an independent D10 law; candidate requires typed contract and distinct behavior."
       }
     },
     {
@@ -9632,6 +9821,12 @@
         "selection": false,
         "ratification": false,
         "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+      },
+      "source_candidate_gate": {
+        "status": "LIBRARY-DEFINITION-CORE-VS-DERIVED-UNREVIEWED",
+        "source_kind": "library-definition",
+        "not_a_ratified_resident": true,
+        "reason": "A source occurrence or wish-list name is not an independent D10 law; candidate requires typed contract and distinct behavior."
       }
     },
     {
@@ -9663,6 +9858,12 @@
         "selection": false,
         "ratification": false,
         "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+      },
+      "source_candidate_gate": {
+        "status": "LIBRARY-DEFINITION-CORE-VS-DERIVED-UNREVIEWED",
+        "source_kind": "library-definition",
+        "not_a_ratified_resident": true,
+        "reason": "A source occurrence or wish-list name is not an independent D10 law; candidate requires typed contract and distinct behavior."
       }
     },
     {
@@ -9694,6 +9895,12 @@
         "selection": false,
         "ratification": false,
         "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+      },
+      "source_candidate_gate": {
+        "status": "LIBRARY-DEFINITION-CORE-VS-DERIVED-UNREVIEWED",
+        "source_kind": "library-definition",
+        "not_a_ratified_resident": true,
+        "reason": "A source occurrence or wish-list name is not an independent D10 law; candidate requires typed contract and distinct behavior."
       }
     },
     {
@@ -9725,6 +9932,12 @@
         "selection": false,
         "ratification": false,
         "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+      },
+      "source_candidate_gate": {
+        "status": "LIBRARY-DEFINITION-CORE-VS-DERIVED-UNREVIEWED",
+        "source_kind": "library-definition",
+        "not_a_ratified_resident": true,
+        "reason": "A source occurrence or wish-list name is not an independent D10 law; candidate requires typed contract and distinct behavior."
       }
     },
     {
@@ -9756,6 +9969,12 @@
         "selection": false,
         "ratification": false,
         "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+      },
+      "source_candidate_gate": {
+        "status": "LIBRARY-DEFINITION-CORE-VS-DERIVED-UNREVIEWED",
+        "source_kind": "library-definition",
+        "not_a_ratified_resident": true,
+        "reason": "A source occurrence or wish-list name is not an independent D10 law; candidate requires typed contract and distinct behavior."
       }
     },
     {
@@ -9787,6 +10006,12 @@
         "selection": false,
         "ratification": false,
         "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+      },
+      "source_candidate_gate": {
+        "status": "LIBRARY-DEFINITION-CORE-VS-DERIVED-UNREVIEWED",
+        "source_kind": "library-definition",
+        "not_a_ratified_resident": true,
+        "reason": "A source occurrence or wish-list name is not an independent D10 law; candidate requires typed contract and distinct behavior."
       }
     },
     {
@@ -9818,6 +10043,12 @@
         "selection": false,
         "ratification": false,
         "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+      },
+      "source_candidate_gate": {
+        "status": "LIBRARY-DEFINITION-CORE-VS-DERIVED-UNREVIEWED",
+        "source_kind": "library-definition",
+        "not_a_ratified_resident": true,
+        "reason": "A source occurrence or wish-list name is not an independent D10 law; candidate requires typed contract and distinct behavior."
       }
     },
     {
@@ -9849,6 +10080,12 @@
         "selection": false,
         "ratification": false,
         "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+      },
+      "source_candidate_gate": {
+        "status": "LIBRARY-DEFINITION-CORE-VS-DERIVED-UNREVIEWED",
+        "source_kind": "library-definition",
+        "not_a_ratified_resident": true,
+        "reason": "A source occurrence or wish-list name is not an independent D10 law; candidate requires typed contract and distinct behavior."
       }
     },
     {
@@ -9880,6 +10117,12 @@
         "selection": false,
         "ratification": false,
         "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+      },
+      "source_candidate_gate": {
+        "status": "LIBRARY-DEFINITION-CORE-VS-DERIVED-UNREVIEWED",
+        "source_kind": "library-definition",
+        "not_a_ratified_resident": true,
+        "reason": "A source occurrence or wish-list name is not an independent D10 law; candidate requires typed contract and distinct behavior."
       }
     },
     {
@@ -9911,6 +10154,12 @@
         "selection": false,
         "ratification": false,
         "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+      },
+      "source_candidate_gate": {
+        "status": "LIBRARY-DEFINITION-CORE-VS-DERIVED-UNREVIEWED",
+        "source_kind": "library-definition",
+        "not_a_ratified_resident": true,
+        "reason": "A source occurrence or wish-list name is not an independent D10 law; candidate requires typed contract and distinct behavior."
       }
     },
     {
@@ -9942,6 +10191,12 @@
         "selection": false,
         "ratification": false,
         "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+      },
+      "source_candidate_gate": {
+        "status": "LIBRARY-DEFINITION-CORE-VS-DERIVED-UNREVIEWED",
+        "source_kind": "library-definition",
+        "not_a_ratified_resident": true,
+        "reason": "A source occurrence or wish-list name is not an independent D10 law; candidate requires typed contract and distinct behavior."
       }
     },
     {
@@ -9973,6 +10228,12 @@
         "selection": false,
         "ratification": false,
         "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+      },
+      "source_candidate_gate": {
+        "status": "LIBRARY-DEFINITION-CORE-VS-DERIVED-UNREVIEWED",
+        "source_kind": "library-definition",
+        "not_a_ratified_resident": true,
+        "reason": "A source occurrence or wish-list name is not an independent D10 law; candidate requires typed contract and distinct behavior."
       }
     },
     {
@@ -10004,6 +10265,12 @@
         "selection": false,
         "ratification": false,
         "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+      },
+      "source_candidate_gate": {
+        "status": "LIBRARY-DEFINITION-CORE-VS-DERIVED-UNREVIEWED",
+        "source_kind": "library-definition",
+        "not_a_ratified_resident": true,
+        "reason": "A source occurrence or wish-list name is not an independent D10 law; candidate requires typed contract and distinct behavior."
       }
     },
     {
@@ -10035,6 +10302,12 @@
         "selection": false,
         "ratification": false,
         "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+      },
+      "source_candidate_gate": {
+        "status": "LIBRARY-DEFINITION-CORE-VS-DERIVED-UNREVIEWED",
+        "source_kind": "library-definition",
+        "not_a_ratified_resident": true,
+        "reason": "A source occurrence or wish-list name is not an independent D10 law; candidate requires typed contract and distinct behavior."
       }
     },
     {
@@ -10066,6 +10339,12 @@
         "selection": false,
         "ratification": false,
         "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+      },
+      "source_candidate_gate": {
+        "status": "LIBRARY-DEFINITION-CORE-VS-DERIVED-UNREVIEWED",
+        "source_kind": "library-definition",
+        "not_a_ratified_resident": true,
+        "reason": "A source occurrence or wish-list name is not an independent D10 law; candidate requires typed contract and distinct behavior."
       }
     },
     {
@@ -10097,6 +10376,12 @@
         "selection": false,
         "ratification": false,
         "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+      },
+      "source_candidate_gate": {
+        "status": "LIBRARY-DEFINITION-CORE-VS-DERIVED-UNREVIEWED",
+        "source_kind": "library-definition",
+        "not_a_ratified_resident": true,
+        "reason": "A source occurrence or wish-list name is not an independent D10 law; candidate requires typed contract and distinct behavior."
       }
     },
     {
@@ -10128,6 +10413,12 @@
         "selection": false,
         "ratification": false,
         "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+      },
+      "source_candidate_gate": {
+        "status": "LIBRARY-DEFINITION-CORE-VS-DERIVED-UNREVIEWED",
+        "source_kind": "library-definition",
+        "not_a_ratified_resident": true,
+        "reason": "A source occurrence or wish-list name is not an independent D10 law; candidate requires typed contract and distinct behavior."
       }
     },
     {
@@ -10159,6 +10450,12 @@
         "selection": false,
         "ratification": false,
         "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+      },
+      "source_candidate_gate": {
+        "status": "LIBRARY-DEFINITION-CORE-VS-DERIVED-UNREVIEWED",
+        "source_kind": "library-definition",
+        "not_a_ratified_resident": true,
+        "reason": "A source occurrence or wish-list name is not an independent D10 law; candidate requires typed contract and distinct behavior."
       }
     },
     {
@@ -10190,6 +10487,12 @@
         "selection": false,
         "ratification": false,
         "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+      },
+      "source_candidate_gate": {
+        "status": "LIBRARY-DEFINITION-CORE-VS-DERIVED-UNREVIEWED",
+        "source_kind": "library-definition",
+        "not_a_ratified_resident": true,
+        "reason": "A source occurrence or wish-list name is not an independent D10 law; candidate requires typed contract and distinct behavior."
       }
     },
     {
@@ -10221,6 +10524,12 @@
         "selection": false,
         "ratification": false,
         "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+      },
+      "source_candidate_gate": {
+        "status": "LIBRARY-DEFINITION-CORE-VS-DERIVED-UNREVIEWED",
+        "source_kind": "library-definition",
+        "not_a_ratified_resident": true,
+        "reason": "A source occurrence or wish-list name is not an independent D10 law; candidate requires typed contract and distinct behavior."
       }
     },
     {
@@ -10259,6 +10568,12 @@
         "selection": false,
         "ratification": false,
         "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+      },
+      "source_candidate_gate": {
+        "status": "USER-INTEREST-NAME-ONLY-NO-SOURCE-OPERATION",
+        "source_kind": "owner-interest",
+        "not_a_ratified_resident": true,
+        "reason": "A source occurrence or wish-list name is not an independent D10 law; candidate requires typed contract and distinct behavior."
       }
     },
     {
@@ -10297,6 +10612,12 @@
         "selection": false,
         "ratification": false,
         "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+      },
+      "source_candidate_gate": {
+        "status": "USER-INTEREST-NAME-ONLY-NO-SOURCE-OPERATION",
+        "source_kind": "owner-interest",
+        "not_a_ratified_resident": true,
+        "reason": "A source occurrence or wish-list name is not an independent D10 law; candidate requires typed contract and distinct behavior."
       }
     },
     {
@@ -10335,6 +10656,12 @@
         "selection": false,
         "ratification": false,
         "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+      },
+      "source_candidate_gate": {
+        "status": "USER-INTEREST-NAME-ONLY-NO-SOURCE-OPERATION",
+        "source_kind": "owner-interest",
+        "not_a_ratified_resident": true,
+        "reason": "A source occurrence or wish-list name is not an independent D10 law; candidate requires typed contract and distinct behavior."
       }
     },
     {
@@ -10373,6 +10700,12 @@
         "selection": false,
         "ratification": false,
         "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+      },
+      "source_candidate_gate": {
+        "status": "USER-INTEREST-NAME-ONLY-NO-SOURCE-OPERATION",
+        "source_kind": "owner-interest",
+        "not_a_ratified_resident": true,
+        "reason": "A source occurrence or wish-list name is not an independent D10 law; candidate requires typed contract and distinct behavior."
       }
     },
     {
@@ -10411,6 +10744,12 @@
         "selection": false,
         "ratification": false,
         "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+      },
+      "source_candidate_gate": {
+        "status": "USER-INTEREST-NAME-ONLY-NO-SOURCE-OPERATION",
+        "source_kind": "owner-interest",
+        "not_a_ratified_resident": true,
+        "reason": "A source occurrence or wish-list name is not an independent D10 law; candidate requires typed contract and distinct behavior."
       }
     },
     {
@@ -10449,6 +10788,12 @@
         "selection": false,
         "ratification": false,
         "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+      },
+      "source_candidate_gate": {
+        "status": "USER-INTEREST-NAME-ONLY-NO-SOURCE-OPERATION",
+        "source_kind": "owner-interest",
+        "not_a_ratified_resident": true,
+        "reason": "A source occurrence or wish-list name is not an independent D10 law; candidate requires typed contract and distinct behavior."
       }
     },
     {
@@ -10487,6 +10832,12 @@
         "selection": false,
         "ratification": false,
         "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+      },
+      "source_candidate_gate": {
+        "status": "USER-INTEREST-NAME-ONLY-NO-SOURCE-OPERATION",
+        "source_kind": "owner-interest",
+        "not_a_ratified_resident": true,
+        "reason": "A source occurrence or wish-list name is not an independent D10 law; candidate requires typed contract and distinct behavior."
       }
     },
     {
@@ -10525,6 +10876,12 @@
         "selection": false,
         "ratification": false,
         "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+      },
+      "source_candidate_gate": {
+        "status": "USER-INTEREST-NAME-ONLY-NO-SOURCE-OPERATION",
+        "source_kind": "owner-interest",
+        "not_a_ratified_resident": true,
+        "reason": "A source occurrence or wish-list name is not an independent D10 law; candidate requires typed contract and distinct behavior."
       }
     },
     {
@@ -10563,6 +10920,12 @@
         "selection": false,
         "ratification": false,
         "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+      },
+      "source_candidate_gate": {
+        "status": "USER-INTEREST-NAME-ONLY-NO-SOURCE-OPERATION",
+        "source_kind": "owner-interest",
+        "not_a_ratified_resident": true,
+        "reason": "A source occurrence or wish-list name is not an independent D10 law; candidate requires typed contract and distinct behavior."
       }
     },
     {
@@ -10601,6 +10964,12 @@
         "selection": false,
         "ratification": false,
         "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+      },
+      "source_candidate_gate": {
+        "status": "USER-INTEREST-NAME-ONLY-NO-SOURCE-OPERATION",
+        "source_kind": "owner-interest",
+        "not_a_ratified_resident": true,
+        "reason": "A source occurrence or wish-list name is not an independent D10 law; candidate requires typed contract and distinct behavior."
       }
     },
     {
@@ -10639,6 +11008,12 @@
         "selection": false,
         "ratification": false,
         "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+      },
+      "source_candidate_gate": {
+        "status": "USER-INTEREST-NAME-ONLY-NO-SOURCE-OPERATION",
+        "source_kind": "owner-interest",
+        "not_a_ratified_resident": true,
+        "reason": "A source occurrence or wish-list name is not an independent D10 law; candidate requires typed contract and distinct behavior."
       }
     },
     {
@@ -10677,6 +11052,12 @@
         "selection": false,
         "ratification": false,
         "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+      },
+      "source_candidate_gate": {
+        "status": "USER-INTEREST-NAME-ONLY-NO-SOURCE-OPERATION",
+        "source_kind": "owner-interest",
+        "not_a_ratified_resident": true,
+        "reason": "A source occurrence or wish-list name is not an independent D10 law; candidate requires typed contract and distinct behavior."
       }
     },
     {
@@ -10715,6 +11096,12 @@
         "selection": false,
         "ratification": false,
         "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+      },
+      "source_candidate_gate": {
+        "status": "USER-INTEREST-NAME-ONLY-NO-SOURCE-OPERATION",
+        "source_kind": "owner-interest",
+        "not_a_ratified_resident": true,
+        "reason": "A source occurrence or wish-list name is not an independent D10 law; candidate requires typed contract and distinct behavior."
       }
     },
     {
@@ -10753,6 +11140,12 @@
         "selection": false,
         "ratification": false,
         "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+      },
+      "source_candidate_gate": {
+        "status": "USER-INTEREST-NAME-ONLY-NO-SOURCE-OPERATION",
+        "source_kind": "owner-interest",
+        "not_a_ratified_resident": true,
+        "reason": "A source occurrence or wish-list name is not an independent D10 law; candidate requires typed contract and distinct behavior."
       }
     },
     {
@@ -10791,6 +11184,12 @@
         "selection": false,
         "ratification": false,
         "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+      },
+      "source_candidate_gate": {
+        "status": "USER-INTEREST-NAME-ONLY-NO-SOURCE-OPERATION",
+        "source_kind": "owner-interest",
+        "not_a_ratified_resident": true,
+        "reason": "A source occurrence or wish-list name is not an independent D10 law; candidate requires typed contract and distinct behavior."
       }
     },
     {
@@ -10829,6 +11228,12 @@
         "selection": false,
         "ratification": false,
         "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+      },
+      "source_candidate_gate": {
+        "status": "USER-INTEREST-NAME-ONLY-NO-SOURCE-OPERATION",
+        "source_kind": "owner-interest",
+        "not_a_ratified_resident": true,
+        "reason": "A source occurrence or wish-list name is not an independent D10 law; candidate requires typed contract and distinct behavior."
       }
     },
     {
@@ -10861,6 +11266,12 @@
         "selection": false,
         "ratification": false,
         "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+      },
+      "source_candidate_gate": {
+        "status": "USER-INTEREST-NAME-ONLY-NO-SOURCE-OPERATION",
+        "source_kind": "owner-interest",
+        "not_a_ratified_resident": true,
+        "reason": "A source occurrence or wish-list name is not an independent D10 law; candidate requires typed contract and distinct behavior."
       }
     },
     {
@@ -10893,6 +11304,12 @@
         "selection": false,
         "ratification": false,
         "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+      },
+      "source_candidate_gate": {
+        "status": "USER-INTEREST-NAME-ONLY-NO-SOURCE-OPERATION",
+        "source_kind": "owner-interest",
+        "not_a_ratified_resident": true,
+        "reason": "A source occurrence or wish-list name is not an independent D10 law; candidate requires typed contract and distinct behavior."
       }
     },
     {
@@ -10925,6 +11342,12 @@
         "selection": false,
         "ratification": false,
         "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+      },
+      "source_candidate_gate": {
+        "status": "USER-INTEREST-NAME-ONLY-NO-SOURCE-OPERATION",
+        "source_kind": "owner-interest",
+        "not_a_ratified_resident": true,
+        "reason": "A source occurrence or wish-list name is not an independent D10 law; candidate requires typed contract and distinct behavior."
       }
     },
     {
@@ -10957,6 +11380,12 @@
         "selection": false,
         "ratification": false,
         "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+      },
+      "source_candidate_gate": {
+        "status": "USER-INTEREST-NAME-ONLY-NO-SOURCE-OPERATION",
+        "source_kind": "owner-interest",
+        "not_a_ratified_resident": true,
+        "reason": "A source occurrence or wish-list name is not an independent D10 law; candidate requires typed contract and distinct behavior."
       }
     },
     {
@@ -10989,6 +11418,12 @@
         "selection": false,
         "ratification": false,
         "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+      },
+      "source_candidate_gate": {
+        "status": "USER-INTEREST-NAME-ONLY-NO-SOURCE-OPERATION",
+        "source_kind": "owner-interest",
+        "not_a_ratified_resident": true,
+        "reason": "A source occurrence or wish-list name is not an independent D10 law; candidate requires typed contract and distinct behavior."
       }
     },
     {
@@ -11021,6 +11456,12 @@
         "selection": false,
         "ratification": false,
         "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+      },
+      "source_candidate_gate": {
+        "status": "USER-INTEREST-NAME-ONLY-NO-SOURCE-OPERATION",
+        "source_kind": "owner-interest",
+        "not_a_ratified_resident": true,
+        "reason": "A source occurrence or wish-list name is not an independent D10 law; candidate requires typed contract and distinct behavior."
       }
     },
     {
@@ -11053,6 +11494,12 @@
         "selection": false,
         "ratification": false,
         "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+      },
+      "source_candidate_gate": {
+        "status": "USER-INTEREST-NAME-ONLY-NO-SOURCE-OPERATION",
+        "source_kind": "owner-interest",
+        "not_a_ratified_resident": true,
+        "reason": "A source occurrence or wish-list name is not an independent D10 law; candidate requires typed contract and distinct behavior."
       }
     },
     {
@@ -11085,6 +11532,12 @@
         "selection": false,
         "ratification": false,
         "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+      },
+      "source_candidate_gate": {
+        "status": "USER-INTEREST-NAME-ONLY-NO-SOURCE-OPERATION",
+        "source_kind": "owner-interest",
+        "not_a_ratified_resident": true,
+        "reason": "A source occurrence or wish-list name is not an independent D10 law; candidate requires typed contract and distinct behavior."
       }
     },
     {
@@ -11117,6 +11570,12 @@
         "selection": false,
         "ratification": false,
         "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+      },
+      "source_candidate_gate": {
+        "status": "USER-INTEREST-NAME-ONLY-NO-SOURCE-OPERATION",
+        "source_kind": "owner-interest",
+        "not_a_ratified_resident": true,
+        "reason": "A source occurrence or wish-list name is not an independent D10 law; candidate requires typed contract and distinct behavior."
       }
     },
     {
@@ -11149,6 +11608,12 @@
         "selection": false,
         "ratification": false,
         "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+      },
+      "source_candidate_gate": {
+        "status": "USER-INTEREST-NAME-ONLY-NO-SOURCE-OPERATION",
+        "source_kind": "owner-interest",
+        "not_a_ratified_resident": true,
+        "reason": "A source occurrence or wish-list name is not an independent D10 law; candidate requires typed contract and distinct behavior."
       }
     },
     {
@@ -11184,6 +11649,12 @@
         "selection": false,
         "ratification": false,
         "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+      },
+      "source_candidate_gate": {
+        "status": "USER-INTEREST-NAME-ONLY-NO-SOURCE-OPERATION",
+        "source_kind": "owner-interest",
+        "not_a_ratified_resident": true,
+        "reason": "A source occurrence or wish-list name is not an independent D10 law; candidate requires typed contract and distinct behavior."
       }
     },
     {
@@ -11219,6 +11690,12 @@
         "selection": false,
         "ratification": false,
         "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+      },
+      "source_candidate_gate": {
+        "status": "USER-INTEREST-NAME-ONLY-NO-SOURCE-OPERATION",
+        "source_kind": "owner-interest",
+        "not_a_ratified_resident": true,
+        "reason": "A source occurrence or wish-list name is not an independent D10 law; candidate requires typed contract and distinct behavior."
       }
     },
     {
@@ -11254,6 +11731,12 @@
         "selection": false,
         "ratification": false,
         "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+      },
+      "source_candidate_gate": {
+        "status": "USER-INTEREST-NAME-ONLY-NO-SOURCE-OPERATION",
+        "source_kind": "owner-interest",
+        "not_a_ratified_resident": true,
+        "reason": "A source occurrence or wish-list name is not an independent D10 law; candidate requires typed contract and distinct behavior."
       }
     },
     {
@@ -11289,6 +11772,12 @@
         "selection": false,
         "ratification": false,
         "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+      },
+      "source_candidate_gate": {
+        "status": "USER-INTEREST-NAME-ONLY-NO-SOURCE-OPERATION",
+        "source_kind": "owner-interest",
+        "not_a_ratified_resident": true,
+        "reason": "A source occurrence or wish-list name is not an independent D10 law; candidate requires typed contract and distinct behavior."
       }
     },
     {
@@ -11325,6 +11814,12 @@
         "selection": false,
         "ratification": false,
         "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+      },
+      "source_candidate_gate": {
+        "status": "USER-INTEREST-NAME-ONLY-NO-SOURCE-OPERATION",
+        "source_kind": "owner-interest",
+        "not_a_ratified_resident": true,
+        "reason": "A source occurrence or wish-list name is not an independent D10 law; candidate requires typed contract and distinct behavior."
       }
     },
     {
@@ -11361,6 +11856,12 @@
         "selection": false,
         "ratification": false,
         "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+      },
+      "source_candidate_gate": {
+        "status": "USER-INTEREST-NAME-ONLY-NO-SOURCE-OPERATION",
+        "source_kind": "owner-interest",
+        "not_a_ratified_resident": true,
+        "reason": "A source occurrence or wish-list name is not an independent D10 law; candidate requires typed contract and distinct behavior."
       }
     },
     {
@@ -11397,6 +11898,12 @@
         "selection": false,
         "ratification": false,
         "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+      },
+      "source_candidate_gate": {
+        "status": "USER-INTEREST-NAME-ONLY-NO-SOURCE-OPERATION",
+        "source_kind": "owner-interest",
+        "not_a_ratified_resident": true,
+        "reason": "A source occurrence or wish-list name is not an independent D10 law; candidate requires typed contract and distinct behavior."
       }
     },
     {
@@ -11433,6 +11940,12 @@
         "selection": false,
         "ratification": false,
         "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+      },
+      "source_candidate_gate": {
+        "status": "USER-INTEREST-NAME-ONLY-NO-SOURCE-OPERATION",
+        "source_kind": "owner-interest",
+        "not_a_ratified_resident": true,
+        "reason": "A source occurrence or wish-list name is not an independent D10 law; candidate requires typed contract and distinct behavior."
       }
     },
     {
@@ -11469,6 +11982,12 @@
         "selection": false,
         "ratification": false,
         "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+      },
+      "source_candidate_gate": {
+        "status": "USER-INTEREST-NAME-ONLY-NO-SOURCE-OPERATION",
+        "source_kind": "owner-interest",
+        "not_a_ratified_resident": true,
+        "reason": "A source occurrence or wish-list name is not an independent D10 law; candidate requires typed contract and distinct behavior."
       }
     },
     {
@@ -11505,6 +12024,12 @@
         "selection": false,
         "ratification": false,
         "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+      },
+      "source_candidate_gate": {
+        "status": "USER-INTEREST-NAME-ONLY-NO-SOURCE-OPERATION",
+        "source_kind": "owner-interest",
+        "not_a_ratified_resident": true,
+        "reason": "A source occurrence or wish-list name is not an independent D10 law; candidate requires typed contract and distinct behavior."
       }
     },
     {
@@ -11538,6 +12063,12 @@
         "selection": false,
         "ratification": false,
         "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+      },
+      "source_candidate_gate": {
+        "status": "USER-INTEREST-NAME-ONLY-NO-SOURCE-OPERATION",
+        "source_kind": "owner-interest",
+        "not_a_ratified_resident": true,
+        "reason": "A source occurrence or wish-list name is not an independent D10 law; candidate requires typed contract and distinct behavior."
       }
     },
     {
@@ -11571,6 +12102,12 @@
         "selection": false,
         "ratification": false,
         "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+      },
+      "source_candidate_gate": {
+        "status": "USER-INTEREST-NAME-ONLY-NO-SOURCE-OPERATION",
+        "source_kind": "owner-interest",
+        "not_a_ratified_resident": true,
+        "reason": "A source occurrence or wish-list name is not an independent D10 law; candidate requires typed contract and distinct behavior."
       }
     },
     {
@@ -11604,6 +12141,12 @@
         "selection": false,
         "ratification": false,
         "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+      },
+      "source_candidate_gate": {
+        "status": "USER-INTEREST-NAME-ONLY-NO-SOURCE-OPERATION",
+        "source_kind": "owner-interest",
+        "not_a_ratified_resident": true,
+        "reason": "A source occurrence or wish-list name is not an independent D10 law; candidate requires typed contract and distinct behavior."
       }
     },
     {
@@ -11637,6 +12180,12 @@
         "selection": false,
         "ratification": false,
         "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+      },
+      "source_candidate_gate": {
+        "status": "USER-INTEREST-NAME-ONLY-NO-SOURCE-OPERATION",
+        "source_kind": "owner-interest",
+        "not_a_ratified_resident": true,
+        "reason": "A source occurrence or wish-list name is not an independent D10 law; candidate requires typed contract and distinct behavior."
       }
     },
     {
@@ -11670,6 +12219,12 @@
         "selection": false,
         "ratification": false,
         "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+      },
+      "source_candidate_gate": {
+        "status": "USER-INTEREST-NAME-ONLY-NO-SOURCE-OPERATION",
+        "source_kind": "owner-interest",
+        "not_a_ratified_resident": true,
+        "reason": "A source occurrence or wish-list name is not an independent D10 law; candidate requires typed contract and distinct behavior."
       }
     },
     {
@@ -11703,6 +12258,12 @@
         "selection": false,
         "ratification": false,
         "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+      },
+      "source_candidate_gate": {
+        "status": "USER-INTEREST-NAME-ONLY-NO-SOURCE-OPERATION",
+        "source_kind": "owner-interest",
+        "not_a_ratified_resident": true,
+        "reason": "A source occurrence or wish-list name is not an independent D10 law; candidate requires typed contract and distinct behavior."
       }
     },
     {
@@ -11734,6 +12295,12 @@
         "selection": false,
         "ratification": false,
         "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+      },
+      "source_candidate_gate": {
+        "status": "USER-INTEREST-NAME-ONLY-NO-SOURCE-OPERATION",
+        "source_kind": "owner-interest",
+        "not_a_ratified_resident": true,
+        "reason": "A source occurrence or wish-list name is not an independent D10 law; candidate requires typed contract and distinct behavior."
       }
     },
     {
@@ -11765,6 +12332,12 @@
         "selection": false,
         "ratification": false,
         "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+      },
+      "source_candidate_gate": {
+        "status": "USER-INTEREST-NAME-ONLY-NO-SOURCE-OPERATION",
+        "source_kind": "owner-interest",
+        "not_a_ratified_resident": true,
+        "reason": "A source occurrence or wish-list name is not an independent D10 law; candidate requires typed contract and distinct behavior."
       }
     },
     {
@@ -11796,6 +12369,12 @@
         "selection": false,
         "ratification": false,
         "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+      },
+      "source_candidate_gate": {
+        "status": "USER-INTEREST-NAME-ONLY-NO-SOURCE-OPERATION",
+        "source_kind": "owner-interest",
+        "not_a_ratified_resident": true,
+        "reason": "A source occurrence or wish-list name is not an independent D10 law; candidate requires typed contract and distinct behavior."
       }
     },
     {
@@ -11830,6 +12409,12 @@
         "selection": false,
         "ratification": false,
         "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+      },
+      "source_candidate_gate": {
+        "status": "USER-INTEREST-NAME-ONLY-NO-SOURCE-OPERATION",
+        "source_kind": "owner-interest",
+        "not_a_ratified_resident": true,
+        "reason": "A source occurrence or wish-list name is not an independent D10 law; candidate requires typed contract and distinct behavior."
       }
     },
     {
@@ -11864,6 +12449,12 @@
         "selection": false,
         "ratification": false,
         "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+      },
+      "source_candidate_gate": {
+        "status": "USER-INTEREST-NAME-ONLY-NO-SOURCE-OPERATION",
+        "source_kind": "owner-interest",
+        "not_a_ratified_resident": true,
+        "reason": "A source occurrence or wish-list name is not an independent D10 law; candidate requires typed contract and distinct behavior."
       }
     },
     {
@@ -11898,6 +12489,12 @@
         "selection": false,
         "ratification": false,
         "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+      },
+      "source_candidate_gate": {
+        "status": "USER-INTEREST-NAME-ONLY-NO-SOURCE-OPERATION",
+        "source_kind": "owner-interest",
+        "not_a_ratified_resident": true,
+        "reason": "A source occurrence or wish-list name is not an independent D10 law; candidate requires typed contract and distinct behavior."
       }
     },
     {
@@ -11932,6 +12529,12 @@
         "selection": false,
         "ratification": false,
         "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+      },
+      "source_candidate_gate": {
+        "status": "USER-INTEREST-NAME-ONLY-NO-SOURCE-OPERATION",
+        "source_kind": "owner-interest",
+        "not_a_ratified_resident": true,
+        "reason": "A source occurrence or wish-list name is not an independent D10 law; candidate requires typed contract and distinct behavior."
       }
     },
     {
@@ -15635,9 +16238,7 @@
       "proof_readiness": {
         "status": "INCOMPLETE-SOURCE-SEMANTICS",
         "missing": [
-          "semantic-law",
-          "positive-witness",
-          "negative-falsifier"
+          "semantic-law"
         ],
         "selection": false,
         "ratification": false,
@@ -15664,9 +16265,7 @@
       "proof_readiness": {
         "status": "INCOMPLETE-SOURCE-SEMANTICS",
         "missing": [
-          "semantic-law",
-          "positive-witness",
-          "negative-falsifier"
+          "semantic-law"
         ],
         "selection": false,
         "ratification": false,
@@ -15693,9 +16292,7 @@
       "proof_readiness": {
         "status": "INCOMPLETE-SOURCE-SEMANTICS",
         "missing": [
-          "semantic-law",
-          "positive-witness",
-          "negative-falsifier"
+          "semantic-law"
         ],
         "selection": false,
         "ratification": false,
@@ -15722,9 +16319,7 @@
       "proof_readiness": {
         "status": "INCOMPLETE-SOURCE-SEMANTICS",
         "missing": [
-          "semantic-law",
-          "positive-witness",
-          "negative-falsifier"
+          "semantic-law"
         ],
         "selection": false,
         "ratification": false,
@@ -15751,9 +16346,7 @@
       "proof_readiness": {
         "status": "INCOMPLETE-SOURCE-SEMANTICS",
         "missing": [
-          "semantic-law",
-          "positive-witness",
-          "negative-falsifier"
+          "semantic-law"
         ],
         "selection": false,
         "ratification": false,
@@ -15780,9 +16373,7 @@
       "proof_readiness": {
         "status": "INCOMPLETE-SOURCE-SEMANTICS",
         "missing": [
-          "semantic-law",
-          "positive-witness",
-          "negative-falsifier"
+          "semantic-law"
         ],
         "selection": false,
         "ratification": false,
@@ -15809,9 +16400,7 @@
       "proof_readiness": {
         "status": "INCOMPLETE-SOURCE-SEMANTICS",
         "missing": [
-          "semantic-law",
-          "positive-witness",
-          "negative-falsifier"
+          "semantic-law"
         ],
         "selection": false,
         "ratification": false,
@@ -22089,7 +22678,7 @@
         "rows": 9
       }
     ],
-    "total_passports": 89,
+    "total_passports": 92,
     "latest_sources": [
       {
         "path": "knowledge/d10-general-congruence-merge-hobbies-v1.json",
@@ -22137,7 +22726,8 @@
         "rows": 3
       }
     ],
-    "latest_source_pass": 11
+    "latest_source_pass": 3,
+    "source_verified_at": "b3cd6dbe9a8094e3794c1421e91f3d5b4c5247b6"
   },
   "evidence_gate": {
     "date": "2026-10-11",
@@ -22147,14 +22737,22 @@
     "formal_ratified": 0,
     "semantic_source_audit": {
       "total": 309,
-      "has_law": 195,
-      "has_positive": 179,
-      "has_negative": 179,
-      "law_and_witnesses": 179,
-      "missing_law": 114,
-      "missing_positive": 130,
-      "missing_negative": 130
+      "has_law": 198,
+      "has_positive": 189,
+      "has_negative": 189,
+      "law_and_witnesses": 182,
+      "missing_law": 111,
+      "missing_positive": 120,
+      "missing_negative": 120
     },
-    "note": "Source witness presence does not imply verified primitive or ratified D10 resident."
+    "note": "Source witness presence does not imply verified primitive or ratified D10 resident.",
+    "uncorroborated_source_name_census": 96,
+    "source_census_triage": {
+      "SOURCE-VARIABLE-NOT-A-FIRST-CLASS-FUNCTION": 3,
+      "SOURCE-FUNCTION-DERIVED-REQUIRES-CORE-BOUNDARY": 3,
+      "LIBRARY-SCHEMA-OR-BINDING-NOT-A-FIRST-CLASS-FUNCTION": 9,
+      "LIBRARY-DEFINITION-CORE-VS-DERIVED-UNREVIEWED": 32,
+      "USER-INTEREST-NAME-ONLY-NO-SOURCE-OPERATION": 49
+    }
   }
 }
