@@ -10,6 +10,7 @@ on:
       - "knowledge/d10-candidate-database-v1.json"
       - "scripts/check_d10_candidate_database.py"
       - "scripts/d10_batch_work.py"
+      - "scripts/d10_full_census_batches.py"
       - "scripts/d10_prepare_filter_input.py"
       - "scripts/d10_restore_candidate_catalog.py"
       - "tests/test_d10_restore_candidate_catalog.py"
@@ -159,6 +160,15 @@ jobs:
               encoding="utf-8")
           print(json.dumps({"status":"PASS_PARTITION_NOT_RATIFICATION", "counts":stats}))
           PY
+      - name: Prepare full historical F1-F4 evidence batches
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 scripts/d10_full_census_batches.py --self-test
+          python3 -O scripts/d10_full_census_batches.py --self-test
+          python3 scripts/d10_full_census_batches.py \
+            --batch-size 64 --output-dir "$RUNNER_TEMP/d10-full-batches" \
+            | tee "$RUNNER_TEMP/d10-full-batch-run.json"
       - name: Publish deterministic evidence triage directly to current main (single writer)
         shell: bash
         run: |
@@ -212,6 +222,16 @@ jobs:
           done
           echo "D10_SIEVE_BLOCKED: main write contention after bounded safe retries" >&2
           exit 1
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: d10-full-history-proof-batches
+          path: |
+            ${{ runner.temp }}/d10-full-batches/full-work.tsv
+            ${{ runner.temp }}/d10-full-batches/full-batch-*.tsv
+            ${{ runner.temp }}/d10-full-batches/summary.json
+          if-no-files-found: warn
+          retention-days: 30
       - uses: actions/upload-artifact@v4
         if: always()
         with:
