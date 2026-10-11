@@ -65,7 +65,8 @@ jobs:
             echo "# rustc=$(rustc --version)"
             cargo run --locked --release -p sens --example frame3_real_files_bench --quiet
           } | tee "$RUNNER_TEMP/frame3-real-file-results.tsv"
-          awk -F '\\t' '$2 == "ROUNDTRIP_OK" && ($4+0) < ($3+0) { compressed++ } END { exit !(compressed >= 1) }' "$RUNNER_TEMP/frame3-real-file-results.tsv"
+          # Guard against silently shrinking real-file coverage or cheating on subset total.
+          awk -F '\\t' '$2 == "ROUNDTRIP_OK" { supported++; t5 += $3; f3 += $4 } END { exit !(supported >= 12 && f3 < t5) }' "$RUNNER_TEMP/frame3-real-file-results.tsv"
       - name: Preserve complete file sizes and all admission verdicts
         if: always()
         uses: actions/upload-artifact@v4
