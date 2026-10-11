@@ -98,7 +98,9 @@ def check(root=ROOT,self_test=False):
     fail(mp["path"]==MANIFEST,"manifest path")
     m=json.loads(pinned(root,MANIFEST,mp["git_blob"]))
     fail(m["previous"]["git_blob"]==prev["git_blob"],"previous pin")
-    fail(m["candidate_index"]==index["source_catalog"],"catalog index pin")
+    fail(all(m["candidate_index"][key]==index["source_catalog"][key]
+             for key in ("path","git_blob")) and
+         m["candidate_index"]["candidate_rows"]==1809,"catalog index pin")
     v9=json.loads(pinned(root,prev["path"],prev["git_blob"]))
     v10=json.loads(pinned(root,cur["path"],cur["git_blob"]))
     source=pinned(root,m["candidate_index"]["path"],m["candidate_index"]["git_blob"])

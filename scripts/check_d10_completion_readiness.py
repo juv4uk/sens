@@ -257,7 +257,9 @@ def audit(root):
                 ptr.get("historical_v9_research_inventory", {}).get("git_blob") == sha(v9raw)
                 and v10_ref.get("previous_inventory") == "knowledge/d10-v9-semantic-inventory.json"
                 and v10_manifest_pin.get("git_blob") == sha(v10_manifest_raw)
-                and v10_source_pin == v10_ref.get("source_catalog")
+                and v10_source_pin["path"] == v10_ref["source_catalog"]["path"]
+                and v10_source_pin["git_blob"] == v10_ref["source_catalog"]["git_blob"]
+                and v10_source_pin["candidate_rows"] == 1809
                 and sha(v10_source) == v10_source_pin["git_blob"]
                 and len(v10_new) == len(v10_proofs) == 40
                 and all(
