@@ -9,6 +9,7 @@ use sens::frame3_grammar::{
     ExactWord, GrammarRankError, MAX_INNER_BITS,
 };
 use sens::{parse_binary_source_words, parse_canonical_binary};
+use sens::frame3_semantic::{check_executable_code, AdmissionWitness};
 
 fn word(bits: &str) -> ExactWord {
     ExactWord::new(
@@ -200,4 +201,32 @@ fn codec_typed_word_bridge_preserves_every_domain_and_d2_marker() {
             "{source}"
         );
     }
+}
+
+#[test]
+fn code_data_arity_redundancy_witness_is_contextual_and_fail_conservative() {
+    fn verdict(s: &str) -> AdmissionWitness {
+        let expressions = parse_canonical_binary(s).unwrap();
+        assert_eq!(expressions.len(), 1);
+        check_executable_code(&expressions[0])
+    }
+    let dead = AdmissionWitness::ProvablyImpossible;
+    let unknown = AdmissionWitness::NotProvenImpossible;
+
+    assert_eq!(verdict("10 010 01"), dead);  // ATOM has no argument.
+    assert_eq!(verdict("10 10 010 01 01"), dead); // ((ATOM))
+    assert_eq!(verdict("10 001 01"), dead);  // QUOTE has no argument.
+    assert_eq!(verdict("10 001 0 1 01"), dead); // QUOTE has two arguments.
+    assert_eq!(verdict("10 101 0 01"), dead); // EQ needs two arguments.
+    assert_eq!(verdict("10 111 0 01"), dead); // CONS needs two arguments.
+    assert_eq!(verdict("10 010 10 010 01 01"), dead); // invalid evaluated operand.
+    assert_eq!(
+        verdict("10 001 10 10 010 01 01 01"), unknown,
+        "QUOTE preserves invalid-to-execute nested syntax as data"
+    );
+    assert_eq!(verdict("10 010 0 01"), unknown);  // Arity alone is not full validity.
+    assert_eq!(verdict("10 110 10 010 01 01"), unknown); // COND owns clauses.
+    assert_eq!(verdict("10 000 01"), unknown); // Empty D3 is NOT a callable identity.
+    assert_eq!(verdict("10 01"), unknown); // () is a value.
+    assert_eq!(verdict("10 10 001 0 01 01"), unknown); // Dynamic outer head.
 }
