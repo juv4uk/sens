@@ -251,32 +251,36 @@ pub(super) fn arithmetic_on_values(
             })
             .collect::<Result<Vec<&BinaryNumber>, _>>()?;
 
-        // Current Core numeric-domain law is deliberately narrower than the
-        // historical/unqualified Number arithmetic path. It admits only
-        // two already-qualified operands in the SAME Dn, and ADD may yield
-        // D(2n) on carry. Never infer domain membership from magnitude.
+        // Core accepts exact binary arithmetic only on TWO operands with
+        // explicitly identical Dn numeric domains. Naturals keep their Dn
+        // identity. ADD/MUL promote only if the result actually needs more
+        // bits, to the next D(2n); SUB stays in Dn if nonnegative.
+        // A negative SUB needs canonical NEG composition, not a wrapped word.
         if numbers.iter().any(|number| number.numeric_domain_width().is_some()) {
-            if operator != "+" || numbers.len() != 2 {
+            if numbers.len() != 2
+                || numbers[0].numeric_domain_width().is_none()
+                || numbers[0].numeric_domain_width() != numbers[1].numeric_domain_width()
+            {
                 return Err(LanguageError::new(
                     ErrorKind::Type,
-                    "qualified Dn numeric arithmetic currently admits binary same-domain ADD only",
+                    "qualified numeric arithmetic requires exactly two operands in the same Dn",
                     span,
                 ));
             }
-            let sum = numbers[0].add_admitted_numeric(numbers[1]).ok_or_else(|| {
-                LanguageError::new(
-                    ErrorKind::Type,
-                    "numeric ADD requires two explicitly admitted operands from the same Dn",
-                    span,
-                )
-            })?;
-            if environment
-                .numeric_bit_limit()
-                .is_some_and(|limit| sum.width() > limit)
-            {
+            let result = match operator {
+                "+" => numbers[0].add_admitted_numeric(numbers[1]),
+                "*" => numbers[0].mul_admitted_numeric(numbers[1]),
+                "-" => numbers[0].checked_sub_admitted_numeric(numbers[1]),
+                _ => None,
+            }.ok_or_else(|| LanguageError::new(
+                ErrorKind::Type,
+                "unsupported Dn operation or negative result requiring unimplemented NEG composition",
+                span,
+            ))?;
+            if environment.numeric_bit_limit().is_some_and(|limit| result.width() > limit) {
                 return Err(arithmetic_overflow(span));
             }
-            return Ok(Value::BinaryNumber(sum));
+            return Ok(Value::BinaryNumber(result));
         }
 
         let result = match operator {
@@ -454,11 +458,36 @@ pub(super) fn division_on_values(
             .collect::<Result<Vec<&BinaryNumber>, _>>()?;
 
         if numbers.iter().any(|number| number.numeric_domain_width().is_some()) {
-            return Err(LanguageError::new(
-                ErrorKind::Type,
-                "division of Dn-qualified numeric operands has no admitted domain law",
-                span,
-            ));
+            if argument_count != 2 || numbers.len() != 2
+                || numbers[0].numeric_domain_width().is_none()
+                || numbers[0].numeric_domain_width() != numbers[1].numeric_domain_width()
+            {
+                return Err(LanguageError::new(
+                    ErrorKind::Type,
+                    "qualified numeric division requires two operands in the same Dn",
+                    span,
+                ));
+            }
+            if numbers[1].is_zero() {
+                return Err(division_error(span));
+            }
+            let (quotient, remainder) = numbers[0].div_rem_admitted_numeric(numbers[1])
+                .ok_or_else(|| LanguageError::new(
+                    ErrorKind::Type, "numeric domain division failed closed", span,
+                ))?;
+            if !remainder.is_zero() {
+                // Canonical reduced RATIO is a ratified *mathematical*
+                // composition, but it has no admitted executable/wire codec.
+                return Err(LanguageError::new(
+                    ErrorKind::Type,
+                    "non-integral Dn division requires canonical RATIO composition, not rounding",
+                    span,
+                ));
+            }
+            if environment.numeric_bit_limit().is_some_and(|limit| quotient.width() > limit) {
+                return Err(arithmetic_overflow(span));
+            }
+            return Ok(Value::BinaryNumber(quotient));
         }
         let mut result = if argument_count == 1 {
             BinaryNumber::one()
@@ -672,6 +701,51 @@ mod qualified_numeric_domain_value_tests {
     }
 
     #[test]
+    fn core_runtime_exact_d24_natural_mul_sub_div_without_literals() {
+        let mut session = crate::Session::default();
+        let make = |number: u32| {
+            let mut bits = vec![0u8;24];
+            for i in 0..24 { bits[23-i] = ((number>>i)&1) as u8; }
+            in_domain(24,bits)
+        };
+        session.environment.define("a", make(6));
+        session.environment.define("b", make(2));
+        for (expr, expected) in [
+            ("(* a b)", 12),
+            ("(- a b)", 4),
+            ("(/ a b)", 3),
+        ] {
+            let result = crate::eval_program(expr, &mut session)
+                .expect("same-D24 natural arithmetic").value;
+            let Value::BinaryNumber(ref bits) = result else { panic!("numeric D24 Value") };
+            assert_eq!(bits.numeric_domain_width(), Some(24), "{expr}");
+            assert_eq!(bits.to_decimal_string(), expected.to_string(), "{expr}");
+        }
+        session.environment.define("a", make(1));
+        session.environment.define("b", make(3));
+        for expr in ["(- a b)", "(/ a b)"] {
+            let err = crate::eval_program(expr, &mut session)
+                .expect_err("NEG/RATIO composition not yet an executable Value");
+            assert_eq!(err.kind, ErrorKind::Type, "{expr}");
+        }
+        session.environment.define("b", make(0));
+        let err = crate::eval_program("(/ a b)", &mut session)
+            .expect_err("divide by zero must fail");
+        assert_eq!(err.kind, ErrorKind::DivisionByZero);
+    }
+
+    #[test]
+    fn core_runtime_d24_full_multiplication_produces_exact_d48() {
+        let env = Environment::root();
+        let max = in_domain(24, vec![1;24]);
+        let result = arithmetic_on_values("*", &[max.clone(),max], &env, Span::default()).unwrap();
+        let Value::BinaryNumber(ref bits) = result else { panic!("numeric D48 Value") };
+        assert_eq!(bits.numeric_domain_width(), Some(48));
+        assert_eq!(bits.width(), 48);
+        assert_eq!(bits.exact_numeric_domain_bits().unwrap().len(), 48);
+    }
+
+    #[test]
     fn core_runtime_rejects_unadmitted_numeric_domain_operations() {
         let env = Environment::root();
         let d24 = in_domain(24, vec![0; 24]);
@@ -685,11 +759,11 @@ mod qualified_numeric_domain_value_tests {
             let cmp = comparison_on_values("=", &values, Span::default()).unwrap_err();
             assert_eq!(cmp.kind, ErrorKind::Type);
         }
-        for op in ["*", "-"] {
-            let e = arithmetic_on_values(op, &[d24.clone(), d24.clone()], &env, Span::default()).unwrap_err();
+        for op in ["*", "-", "+"] {
+            let e = arithmetic_on_values(op, &[d24.clone(), d48.clone()], &env, Span::default()).unwrap_err();
             assert_eq!(e.kind, ErrorKind::Type);
         }
-        let e = division_on_values(&[d24.clone(), d24.clone()], 2, &env, Span::default()).unwrap_err();
+        let e = division_on_values(&[d24.clone(), d48.clone()], 2, &env, Span::default()).unwrap_err();
         assert_eq!(e.kind, ErrorKind::Type);
         let e = arithmetic_on_values("+", &[d24], &env, Span::default()).unwrap_err();
         assert_eq!(e.kind, ErrorKind::Type);
