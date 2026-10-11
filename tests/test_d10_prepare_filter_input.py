@@ -144,6 +144,35 @@ class PrepareTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "DUPLICATE_OR_EMPTY"):
             adapter.prepare(self.root, self.input, self.output)
 
+    def test_same_surface_two_distinct_candidate_ids_are_not_deduplicated(self):
+        # A spelling collision is not a semantic equivalence certificate.
+        other = dict(self.row)
+        other["candidate_id"] = "d10.historical-namesake"
+        self.write_index([other])
+        counts = adapter.prepare(self.root, self.input, self.output)
+        self.assertEqual(2, counts["index_rows"])
+        self.assertEqual(1, counts["name_collisions_not_deduped"])
+        self.assertEqual(3, counts["filter_input_rows"])  # canonical overlay
+        rows = {row["candidate_id"]: row for row in self.read_prepared()}
+        self.assertEqual({"d10.new", "d10.historical-namesake", "d10.selected"}, set(rows))
+        self.assertEqual(rows["d10.new"]["semantic_name"], rows["d10.historical-namesake"]["semantic_name"])
+        self.assertEqual("", rows["d10.historical-namesake"]["witness_verdict"])
+
+    def test_historical_namesake_does_not_replace_canonical_stable_id(self):
+        # The historical and canonical IDs both survive, with no invented
+        # proof or automatic approval on the duplicate-looking name.
+        self.row["semantic_name"] = "OLD-LAW"
+        self.row["candidate_id"] = "d10.historical-old-law"
+        self.write_index()
+        counts = adapter.prepare(self.root, self.input, self.output)
+        self.assertEqual(1, counts["new_selected_since_index"])
+        self.assertEqual(2, counts["filter_input_rows"])
+        rows = {row["candidate_id"]: row for row in self.read_prepared()}
+        self.assertEqual({"d10.historical-old-law", "d10.selected"}, set(rows))
+        for item in rows.values():
+            self.assertEqual("", item["witness_verdict"])
+            self.assertEqual("UNRATIFIED", item["ratification_state"])
+
     def test_bad_canonical_pointer_is_fail_closed(self):
         self.invpath.write_text("{}")
         with self.assertRaisesRegex(ValueError, "POINTER_SHA_MISMATCH"):
