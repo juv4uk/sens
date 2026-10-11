@@ -1,4 +1,6 @@
 use crate::BinaryNumber;
+use crate::domain_numeric::{self, DomainNumericComposition};
+use crate::Value;
 use crate::{Rational, Sens8, Text7};
 use crate::DomainIdentity;
 use std::fmt;
@@ -23,6 +25,9 @@ pub enum BinaryFrame {
     Number(Rational),
     /// Canonical #3022 natural Number. The Rational frame remains compatibility-only.
     BinaryNumber(BinaryNumber),
+    /// Transport-only signed/reduced rational composition of existing D24+ values.
+    /// The subtype tag is framing metadata, not a SENS function opcode or T5 law.
+    NumericComposition(DomainNumericComposition),
     Text(Text7),
 }
 
@@ -52,6 +57,8 @@ const TYPE_EXTENSION: [u8; 2] = [1, 1];
 const EXT_DOMAIN: [u8; 2] = [0, 0];
 const EXT_BINARY_NUMBER: [u8; 2] = [0, 1];
 const EXT_WIDE_DOMAIN: [u8; 2] = [1, 0];
+// Formerly reserved EXT=11: an additive, self-delimiting Core frame subtype.
+const EXT_NUMERIC_COMPOSITION: [u8; 2] = [1, 1];
 
 /// Encode one non-negative length as Elias-gamma(n+1).
 ///
@@ -154,6 +161,50 @@ pub fn encode_binary_frame(frame: &BinaryFrame) -> Result<Vec<u8>, BinaryFrameEr
                     }
                     out.extend_from_slice(&exact);
                 }
+            }
+        }
+        BinaryFrame::NumericComposition(value) => {
+            out.extend_from_slice(&CONTROL_ESCAPE);
+            out.extend_from_slice(&TYPE_EXTENSION);
+            out.extend_from_slice(&EXT_NUMERIC_COMPOSITION);
+            let width = value.domain_width();
+            if !BinaryNumber::is_numeric_domain_width(width) {
+                return Err(BinaryFrameError::UnsupportedDomainWidth {index: 0, width});
+            }
+            let (negative, numerator, denominator) = value.as_parts();
+            // Shape: EXT=11; gamma0(Dn width); is_ratio; is_negative;
+            // exact n-bit numerator; if ratio, exact n-bit denominator.
+            // The sign is never stolen from the n-bit magnitude.
+            encode_len_into(width, &mut out)?;
+            out.push(u8::from(denominator.is_some()));
+            out.push(u8::from(negative));
+            let word = numerator.exact_numeric_domain_bits()
+                .ok_or(BinaryFrameError::InvalidNumber {index: 0})?;
+            if word.len() != width || word.iter().all(|&v| v == 0) {
+                return Err(BinaryFrameError::NonCanonicalNumber {index: 0});
+            }
+            out.extend(word);
+            if let Some(d) = denominator {
+                let denominator_word = d.exact_numeric_domain_bits()
+                    .ok_or(BinaryFrameError::InvalidNumber {index: 0})?;
+                if denominator_word.len() != width {
+                    return Err(BinaryFrameError::InvalidNumber {index: 0});
+                }
+                out.extend(denominator_word);
+            } else if !negative {
+                return Err(BinaryFrameError::NonCanonicalNumber {index: 0});
+            }
+            // Strict constructor replay proves canonical gcd and nonunit den.
+            let canonical = domain_numeric::canonical_parts(
+                negative, numerator,
+                denominator.unwrap_or_else(|| numerator) // checked below
+            );
+            if let Some(d) = denominator {
+                if canonical != Some(Value::NumericComposition(value.clone())) || d.is_zero() {
+                    return Err(BinaryFrameError::NonCanonicalNumber {index: 0});
+                }
+            } else if !value.as_parts().0 {
+                return Err(BinaryFrameError::NonCanonicalNumber {index: 0});
             }
         }
         BinaryFrame::Text(text) => {
@@ -279,6 +330,7 @@ fn decode_frame_from(reader: &mut BitReader<'_>) -> Result<BinaryFrame, BinaryFr
                         EXT_DOMAIN => decode_domain_identity(reader),
                         EXT_BINARY_NUMBER => decode_binary_number(reader, frame_start),
                         EXT_WIDE_DOMAIN => decode_wide_domain_identity(reader, frame_start),
+                        EXT_NUMERIC_COMPOSITION => decode_numeric_composition(reader, frame_start),
                         _ => Err(BinaryFrameError::ReservedExtension { index: type_start }),
                     }
                 },
@@ -286,6 +338,53 @@ fn decode_frame_from(reader: &mut BitReader<'_>) -> Result<BinaryFrame, BinaryFr
             }
         }
         _ => unreachable!("read_bit returns only 0 or 1"),
+    }
+}
+
+fn decode_numeric_composition(
+    reader: &mut BitReader<'_>,
+    frame_start: usize,
+) -> Result<BinaryFrame, BinaryFrameError> {
+    let width = reader.read_len()?;
+    if !BinaryNumber::is_numeric_domain_width(width) {
+        return Err(BinaryFrameError::UnsupportedDomainWidth {index: frame_start, width});
+    }
+    // All numeric component words are exactly width bits and the tag is
+    // self-delimiting; rejecting truncation before allocation is mandatory.
+    let ratio = reader.read_bit()? == 1;
+    let negative = reader.read_bit()? == 1;
+    if !ratio && !negative {
+        return Err(BinaryFrameError::NonCanonicalNumber {index: frame_start});
+    }
+    let n = reader.read_bit_string(width)?;
+    let n = n.bytes().map(|v| v - b'0').collect::<Vec<_>>();
+    let numerator = BinaryNumber::from_numeric_domain_bits(width, &n)
+        .ok_or(BinaryFrameError::InvalidNumber {index: frame_start})?;
+    let denominator = if ratio {
+        let d = reader.read_bit_string(width)?;
+        let d = d.bytes().map(|v| v - b'0').collect::<Vec<_>>();
+        BinaryNumber::from_numeric_domain_bits(width, &d)
+            .ok_or(BinaryFrameError::InvalidNumber {index: frame_start})?
+    } else {
+        let mut one = vec![0; width];
+        one[width-1] = 1;
+        BinaryNumber::from_numeric_domain_bits(width, &one)
+            .ok_or(BinaryFrameError::InvalidNumber {index: frame_start})?
+    };
+    let canonical = domain_numeric::canonical_parts(negative, &numerator, &denominator)
+        .ok_or(BinaryFrameError::InvalidNumber {index: frame_start})?;
+    match canonical {
+        Value::NumericComposition(c) => {
+            if c.domain_width() != width
+                || c.as_parts().2.is_some() != ratio
+                || c.as_parts().1 != &numerator
+                || c.as_parts().2.is_some_and(|d| d != &denominator)
+            {
+                return Err(BinaryFrameError::NonCanonicalNumber {index: frame_start});
+            }
+            Ok(BinaryFrame::NumericComposition(c))
+        },
+        _ => Err(BinaryFrameError::NonCanonicalNumber {index: frame_start}),
     }
 }
 
