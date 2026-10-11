@@ -1,0 +1,22 @@
+{
+  "schema": "sens-historical-branch-archive/v1",
+  "archived_at": "2026-10-11",
+  "source": {
+    "repo": "juv4uk/sens",
+    "pr": 2810,
+    "title": "test(2804): replay projection-only runtime peers on current main",
+    "branch": "replay/2806-runtime-peer-projection-current-main",
+    "head_sha": "9086af9d9ca338382e581faebf08bffc223692fe",
+    "base": "main",
+    "base_sha": "42e3945c5e8f27902ade6fedf52f54786c56f914"
+  },
+  "files": [
+    {
+      "path": "crates/sens/tests/runtime_peer_operators.rs",
+      "patch_present": true,
+      "patch_chars": 3205
+    }
+  ],
+  "successor": "#2867 current-main subtraction supersedes stale bare-peer assertions; current test blob 96289f0d86cd0de50d56507c8b6a33ba7848b172",
+  "disposition": "ARCHIVE-ONLY / SUPERSEDED OLD EXPECTATIONS"
+}
