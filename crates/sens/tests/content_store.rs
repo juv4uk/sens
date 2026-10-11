@@ -2,7 +2,7 @@ use sens::{eval_program, Session};
 
 fn eval_store(source: &str) -> String {
     let mut session = Session::default();
-    eval_program(include_str!("../../../lib/core.lisp"), &mut session).unwrap();
+    sens::eval_pinned_legacy_core_source("lib/core.lisp", include_str!("../../../lib/core.lisp"), &mut session).unwrap();
     sens::eval_pinned_reasoning_source("lib/unify.lisp", include_str!("../../../lib/unify.lisp"), &mut session).unwrap();
     sens::eval_pinned_reasoning_source("lib/reason.lisp", include_str!("../../../lib/reason.lisp"), &mut session).unwrap();
     sens::eval_pinned_reasoning_source("lib/forward.lisp", include_str!("../../../lib/forward.lisp"), &mut session).unwrap();
@@ -19,7 +19,7 @@ fn eval_store(source: &str) -> String {
 
 fn eval_store_error(source: &str) -> String {
     let mut session = Session::default();
-    eval_program(include_str!("../../../lib/core.lisp"), &mut session).unwrap();
+    sens::eval_pinned_legacy_core_source("lib/core.lisp", include_str!("../../../lib/core.lisp"), &mut session).unwrap();
     sens::eval_pinned_reasoning_source("lib/unify.lisp", include_str!("../../../lib/unify.lisp"), &mut session).unwrap();
     sens::eval_pinned_reasoning_source("lib/reason.lisp", include_str!("../../../lib/reason.lisp"), &mut session).unwrap();
     sens::eval_pinned_reasoning_source("lib/forward.lisp", include_str!("../../../lib/forward.lisp"), &mut session).unwrap();
