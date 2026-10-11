@@ -2,6 +2,8 @@
 
 Статус: **PASS для runner-component baseline; BLOCKED для повної метрики seed-input closure.** Два незалежні чисті прогони дали однаковий звіт. Пізніший аудит виявив, що runner під час виконання запускає `cargo run -p xtask -- compiler-export` у pinned SENS checkout; отже, вимір 34,580,696 Б — розмір компонента, а не повного набору байтів, без яких ланцюг не стартує. Повний seed-total не публікувати, доки closure не перелічено й не виміряно.
 
+Зовнішні crates для compile path `xtask → sens → serde` закріплено окремо в JSON census за версіями та `Cargo.lock` checksums: `serde 1.0.229`, `serde_core 1.0.229`, `serde_derive 1.0.229`, `proc-macro2 1.0.107`, `quote 1.0.47`, `syn 3.0.3`, `unicode-ident 1.0.24`. Їхні registry archive/cache bytes не входять у наведені 1,337,942 Б; availability і розмір зовнішнього кешу ще не виміряні. `cargo run -p xtask -- compiler-export` також виконує `git rev-parse HEAD`, тому `.git` metadata лишається явною залежністю до її вимірювання або вилучення з runtime chain.
+
 ## Первинні докази
 
 - CML workflow run: [38182268999](https://github.com/juv4uk/cml/actions/runs/38182268999) — два matrix jobs і compare job завершилися PASS.
@@ -38,7 +40,7 @@ C1/C2 executable SHA-256 однаковий: `27b8fbf096cddbb77be2b4bf57cc58bf8b
 
 ## Наступні ворота — одна кампанія за раз
 
-Baseline gate зелений; дослідницькі кампанії можуть починатися послідовно, але не об'єднуватися в один результат.
+Для K1 виконано лише окремий C1-local correctness/size experiment. Повний seed-v0 gate залишається BLOCKED; K2–K4 не стартують до закриття й вимірювання повного input closure. Кампанії не змішувати.
 
 1. **K1 — static-link + strip C1:** окремий baseline/variant, повні тести, lineage та два чистих запуски; не стирати секції без їхнього окремого обліку.
 2. **K2 — заміна Rust-компонентів на SENS-програму:** кожну заміну перевіряти окремо. Вести дві незалежні метрики — trusted-seed bytes та чітко визначений independence-index.
@@ -53,7 +55,7 @@ Baseline gate зелений; дослідницькі кампанії можу
 - D10 дослідний і не є залежністю Nano-SENS. У поточному `knowledge/d10-v1-semantic-inventory.json` на main зафіксовано **675/1024** selected research candidates, 349 remaining, 0 ратифікованих D10 residents. Це не підтверджує формулювання 1024/1024 selected; іншу цифру змінювати лише після перевірки конкретного SHA та відповідного ledger.
 - Нових гілок, доменів або семантичних таблиць для Nano-SENS не створювати.
 
-**Висновок першого етапу:** метрика більше не BLOCKED. Seed-v0 = 34,580,696 bytes on-disk; обидва незалежні чисті звіти збігаються байт у байт. Оптимізація не входила до цього baseline.
+**Висновок первинного прогону:** PASS лише для вимірювання runner-component baseline; повна метрика seed-input closure і досі **BLOCKED**. Значення 34,580,696 Б — розмір ELF-компонента, не повний seed-total. Повний total не публікувати; початкова таблиця не є доказом мінімального seed.
 
 
 ## K1 — static-link + strip C1: вимір завершено, виграшу розміру немає
@@ -95,7 +97,7 @@ cargo run --manifest-path external/sens/Cargo.toml -p xtask -- compiler-export
 
 Отже, `seed-v0-c0-runner.bin` (34,580,696 Б у первинному прогоні) — виміряний ELF-компонент, але не єдиний runtime-вхід. Ланцюгу також потрібні pinned SENS checkout/ Cargo workspace inputs для побудови `xtask` і SENS runtime. Це не toolchain/linker/ОС: кодові файли й compiler nucleus не можна непомітно переносити в «external dependencies» і виключати з seed-total.
 
-Проміжний машинозчитуваний census: [`evidence/nano-sens-seed-v0-source-closure-census-2026-10-12.json`](../evidence/nano-sens-seed-v0-source-closure-census-2026-10-12.json). Він закріплює **102 файли / 1,145,608 байтів** у відомому source-and-manifest subset (71 Rust source, 20 Cargo package manifests, 11 root/authority inputs). Це лише нижня межа потрібних repository inputs, не повний closure і не число seed.
+Проміжний машинозчитуваний census: [`evidence/nano-sens-seed-v0-source-closure-census-2026-10-12.json`](../evidence/nano-sens-seed-v0-source-closure-census-2026-10-12.json). Поточний census після аудиту include-ів: **113 pinned paths / 1,337,942 Б** у перевіреному subset (70 production Rust sources, 20 Cargo package manifests, 23 root/authority/embedded inputs). Виправлено дві протилежні похибки попереднього census: вилучено 3,271-Б `bootstrap_measurement.rs`, який доступний лише під `#[cfg(test)]`, і додано 12 compile-time include-файлів з `lib.rs` (разом 195,605 Б). Цей subset все ще не є повним closure чи seed-total; повна автоматична перевірка графа модулів та `.git`/Cargo inputs залишається відкритою.
 
 Відомі точні pinned вузли ланцюга на SENS SHA `d0787a40fcea36501747732aa61b6de19fe29c70`:
 
