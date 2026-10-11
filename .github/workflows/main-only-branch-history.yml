@@ -1,0 +1,66 @@
+name: SENS main-only branch history census
+
+on:
+  create:
+  push:
+    branches: [main]
+    paths:
+      - 'research/branch-history/20261011/**'
+      - 'scripts/check_main_only_branch_history.py'
+      - '.github/workflows/main-only-branch-history.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  prohibit-new-branch-detection:
+    # This is detective, not preventive. GitHub Rulesets must restrict branch creation.
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 1
+          persist-credentials: false
+      - name: Перевірити повноту інвентарю та нові віддалені гілки
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 scripts/check_main_only_branch_history.py --check-new --output "$RUNNER_TEMP/new-branches.json"
+      - name: Опублікувати машинний звіт про нові гілки
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: main-only-new-branches-${{ github.run_id }}
+          path: ${{ runner.temp }}/new-branches.json
+          if-no-files-found: ignore
+
+  classify-legacy-branches:
+    if: github.event_name != 'create'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Завантажити всі наявні SHA, не створюючи нових гілок
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch --no-tags origin '+refs/heads/*:refs/remotes/origin/*'
+      - name: Зіставити оригінальні 4133 HEAD із поточним main
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 scripts/check_main_only_branch_history.py --check-new --classify --output "$RUNNER_TEMP/branch-verdicts.json"
+      - name: Зберегти точні результати для черги #5549
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: main-only-ancestry-verdicts-${{ github.run_id }}
+          path: ${{ runner.temp }}/branch-verdicts.json
+          if-no-files-found: ignore
