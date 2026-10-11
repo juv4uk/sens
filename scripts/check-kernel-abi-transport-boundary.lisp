@@ -2,191 +2,191 @@
 ; Host tooling may mechanically inspect files, but the admitted direction and
 ; forbidden reverse authority are owned here.
 
-(00001001 second (00001000 (x) (00000101 (00000110 x))))
-(00001001 third (00001000 (x) (00000101 (00000110 (00000110 x)))))
-(00001001 fourth (00001000 (x) (00000101 (00000110 (00000110 (00000110 x))))))
+(0011 second (0010 (x) (100 (011 x))))
+(0011 third (0010 (x) (100 (011 (011 x)))))
+(0011 fourth (0010 (x) (100 (011 (011 (011 x))))))
 
-(00001001 kab-contract
-  (00000101
-    (01001011
-      (10100110 "contracts/kernel-abi-transport-boundary.lisp"))))
+(0011 kab-contract
+  (100
+    (110101001
+      (110110111 "contracts/kernel-abi-transport-boundary.lisp"))))
 
-(00001001 kab-rows (00000110 kab-contract))
+(0011 kab-rows (011 kab-contract))
 
-(00001001 kab-find
-  (00001000 (name rows)
-    (00000111
-      ((00000010 rows)
+(0011 kab-find
+  (0010 (name rows)
+    (110
+      ((010 rows)
        ()
-       (00000001 ()))
-      ((00000010 rows)
+       (001 ()))
+      ((010 rows)
        (0)
-       (00000111
-         ((00000011 (00000101 (00000101 rows)) name)
+       (110
+         ((101 (100 (100 rows)) name)
           (1)
-          (00000101 rows))
-         ((00000011 (00000101 (00000101 rows)) name)
+          (100 rows))
+         ((101 (100 (100 rows)) name)
           (0)
-          (kab-find name (00000110 rows))))))))
+          (kab-find name (011 rows))))))))
 
-(00001001 kab-find-kernel
-  (00001000 (kernel-name rows)
-    (00000111
-      ((00000010 rows)
+(0011 kab-find-kernel
+  (0010 (kernel-name rows)
+    (110
+      ((010 rows)
        ()
-       (00000001 ()))
-      ((00000010 rows)
+       (001 ()))
+      ((010 rows)
        (0)
-       (10011100 ((row (00000101 rows)))
-         (00000111
-           ((00000011 (00000101 row) (00000001 kernel))
+       (001000 ((row (100 rows)))
+         (110
+           ((101 (100 row) (001 kernel))
             (1)
-            (00000111
-              ((00000011 (second row) kernel-name)
+            (110
+              ((101 (second row) kernel-name)
                (1)
                row)
-              ((00000011 (second row) kernel-name)
+              ((101 (second row) kernel-name)
                (0)
-               (kab-find-kernel kernel-name (00000110 rows)))))
-           ((00000011 (00000101 row) (00000001 kernel))
+               (kab-find-kernel kernel-name (011 rows)))))
+           ((101 (100 row) (001 kernel))
             (0)
-            (kab-find-kernel kernel-name (00000110 rows)))))))))
+            (kab-find-kernel kernel-name (011 rows)))))))))
 
-(00001001 kab-row-check
-  (00001000 (name expected)
-    (10011100 ((actual (kab-find name kab-rows)))
-      (00000111
-        ((00100010 actual expected)
+(0011 kab-row-check
+  (0010 (name expected)
+    (001000 ((actual (kab-find name kab-rows)))
+      (110
+        ((11110111 actual expected)
          (1)
-         (00000001 ()))
-        ((00100010 actual expected)
+         (001 ()))
+        ((11110111 actual expected)
          (0)
-         (00100111 (00000001 policy-mismatch) name expected actual))))))
+         (1110 (001 policy-mismatch) name expected actual))))))
 
-(00001001 kab-kernel-row-check
-  (00001000 (kernel-name expected)
-    (10011100 ((actual (kab-find-kernel kernel-name kab-rows)))
-      (00000111
-        ((00100010 actual expected)
+(0011 kab-kernel-row-check
+  (0010 (kernel-name expected)
+    (001000 ((actual (kab-find-kernel kernel-name kab-rows)))
+      (110
+        ((11110111 actual expected)
          (1)
-         (00000001 ()))
-        ((00100010 actual expected)
+         (001 ()))
+        ((11110111 actual expected)
          (0)
-         (00100111 (00000001 kernel-row-mismatch) kernel-name expected actual))))))
+         (1110 (001 kernel-row-mismatch) kernel-name expected actual))))))
 
-(00001001 kab-first-failure
-  (00001000 (checks)
-    (00000111
-      ((00000010 checks)
+(0011 kab-first-failure
+  (0010 (checks)
+    (110
+      ((010 checks)
        ()
-       (00000001 ()))
-      ((00000010 (00000101 checks))
+       (001 ()))
+      ((010 (100 checks))
        ()
-       (kab-first-failure (00000110 checks)))
-      ((00000010 (00000101 checks))
+       (kab-first-failure (011 checks)))
+      ((010 (100 checks))
        (0)
-       (00000101 checks))
-      ((00000010 (00000101 checks))
+       (100 checks))
+      ((010 (100 checks))
        (1)
-       (00000101 checks)))))
+       (100 checks)))))
 
-(00001001 kab-verdict
-  (00001000 ()
-    (10011100 ((failure
+(0011 kab-verdict
+  (0010 ()
+    (001000 ((failure
             (kab-first-failure
-              (00100111
+              (1110
                 (kab-row-check
-                  (00000001 owner)
-                  (00000001 (owner sens)))
+                  (001 owner)
+                  (001 (owner sens)))
                 (kab-row-check
-                  (00000001 language-identity-type)
-                  (00000001 (language-identity-type CoreDomainIdentity)))
+                  (001 language-identity-type)
+                  (001 (language-identity-type CoreDomainIdentity)))
                 (kab-row-check
-                  (00000001 shared-abi-type)
-                  (00000001 (shared-abi-type WsmKernelRequest)))
+                  (001 shared-abi-type)
+                  (001 (shared-abi-type WsmKernelRequest)))
                 (kab-row-check
-                  (00000001 shared-abi-field)
-                  (00000001 (shared-abi-field semantic_id)))
+                  (001 shared-abi-field)
+                  (001 (shared-abi-field semantic_id)))
                 (kab-row-check
-                  (00000001 shared-abi-storage)
-                  (00000001 (shared-abi-storage opaque-u8)))
+                  (001 shared-abi-storage)
+                  (001 (shared-abi-storage opaque-u8)))
                 (kab-row-check
-                  (00000001 kernel-wrapper-type)
-                  (00000001 (kernel-wrapper-type LegacyAbiSemanticId)))
+                  (001 kernel-wrapper-type)
+                  (001 (kernel-wrapper-type LegacyAbiSemanticId)))
                 (kab-row-check
-                  (00000001 kernel-wrapper-role)
-                  (00000001 (kernel-wrapper-role transport-coordinate-only)))
+                  (001 kernel-wrapper-role)
+                  (001 (kernel-wrapper-role transport-coordinate-only)))
                 (kab-row-check
-                  (00000001 wrapper-language-type-equivalence)
-                  (00000001 (wrapper-language-type-equivalence forbidden)))
+                  (001 wrapper-language-type-equivalence)
+                  (001 (wrapper-language-type-equivalence forbidden)))
                 (kab-row-check
-                  (00000001 kernel-to-language-authority)
-                  (00000001 (kernel-to-language-authority forbidden)))
+                  (001 kernel-to-language-authority)
+                  (001 (kernel-to-language-authority forbidden)))
                 (kab-row-check
-                  (00000001 kernel-may-query-semantic-registry)
-                  (00000001 (kernel-may-query-semantic-registry forbidden)))
+                  (001 kernel-may-query-semantic-registry)
+                  (001 (kernel-may-query-semantic-registry forbidden)))
                 (kab-row-check
-                  (00000001 kernel-may-import-language-identity-type)
-                  (00000001 (kernel-may-import-language-identity-type forbidden)))
+                  (001 kernel-may-import-language-identity-type)
+                  (001 (kernel-may-import-language-identity-type forbidden)))
                 (kab-row-check
-                  (00000001 kernel-may-mint-semantic-identity)
-                  (00000001 (kernel-may-mint-semantic-identity forbidden)))
+                  (001 kernel-may-mint-semantic-identity)
+                  (001 (kernel-may-mint-semantic-identity forbidden)))
                 (kab-row-check
-                  (00000001 reverse-direction)
-                  (00000001
+                  (001 reverse-direction)
+                  (001
                     (reverse-direction
                       kernel-transport-to-language-meaning
                       forbidden)))
                 (kab-row-check
-                  (00000001 native-result-role)
-                  (00000001 (native-result-role observation-only)))
+                  (001 native-result-role)
+                  (001 (native-result-role observation-only)))
                 (kab-row-check
-                  (00000001 shared-abi-source)
-                  (00000001
+                  (001 shared-abi-source)
+                  (001
                     (shared-abi-source
                       "crates/wsm-kernel-c-abi/src/lib.rs"
                       "crates/wsm-kernel-c-abi/Cargo.toml")))
                 (kab-kernel-row-check
-                  (00000001 common-lisp)
-                  (00000001
+                  (001 common-lisp)
+                  (001
                     (kernel common-lisp
                       "crates/wsm-common-lisp-kernel/src/lib.rs"
                       "crates/wsm-common-lisp-kernel/Cargo.toml")))
                 (kab-kernel-row-check
-                  (00000001 prolog)
-                  (00000001
+                  (001 prolog)
+                  (001
                     (kernel prolog
                       "crates/wsm-prolog-kernel/src/lib.rs"
                       "crates/wsm-prolog-kernel/Cargo.toml")))
                 (kab-kernel-row-check
-                  (00000001 clips)
-                  (00000001
+                  (001 clips)
+                  (001
                     (kernel clips
                       "crates/wsm-clips-kernel/src/lib.rs"
                       "crates/wsm-clips-kernel/Cargo.toml")))
                 (kab-kernel-row-check
-                  (00000001 datalog)
-                  (00000001
+                  (001 datalog)
+                  (001
                     (kernel datalog
                       "crates/wsm-datalog-kernel/src/lib.rs"
                       "crates/wsm-datalog-kernel/Cargo.toml")))))))
-      (00000111
-        ((00000010 failure)
+      (110
+        ((010 failure)
          ()
-         (00000001
+         (001
            (kernel-abi-transport-boundary-ok
              (kernels 4)
              (language-type CoreDomainIdentity)
              (abi-wrapper LegacyAbiSemanticId))))
-        ((00000010 failure)
+        ((010 failure)
          (0)
-         (00100111
-           (00000001 kernel-abi-transport-boundary-violation)
+         (1110
+           (001 kernel-abi-transport-boundary-violation)
            failure))
-        ((00000010 failure)
+        ((010 failure)
          (1)
-         (00100111
-           (00000001 kernel-abi-transport-boundary-violation)
+         (1110
+           (001 kernel-abi-transport-boundary-violation)
            failure))))))
 
 (kab-verdict)
