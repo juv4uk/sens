@@ -28,8 +28,24 @@ def validate(policy, ratification, lang):
         need(24 * (1 << (n + 1)) == 2 * (24 * (1 << n)), "doubling")
     need("D1-D8" in policy.get("separate_from", []), "function domain boundary")
     for name in ("signedness", "integer versus rational field layout",
-                 "overflow versus automatic widening semantics", "decimal literal lowering law"):
+                 "decimal literal lowering law",
+                 "mixed-domain implicit coercion and general widening",
+                 "multiplication and other-operation overflow policy"):
         need(name in policy.get("not_yet_ratified", []), "deferred law: " + name)
+    addition = policy.get("addition_widening", {})
+    need(addition.get("status") == "owner-ratified", "addition promotion status")
+    need(addition.get("required_successor") == "D(2n)", "addition successor")
+    need(addition.get("max_sum_bits") == "n+1", "addition carry upper bound")
+    need(addition.get("no_wraparound") is True, "addition carry must not wrap")
+    need(addition.get("no_unqualified_number_identity") is True, "unqualified result is forbidden")
+    for width in (24, 48, 96, 192, 384):
+        full = (1 << width) - 1
+        summed = full + full
+        need(summed.bit_length() == width + 1, "full-width addition loses carry")
+        next_width = 2 * width
+        need(summed < (1 << next_width), "next admitted domain cannot carry exact sum")
+        need(summed >= (1 << width), "overflow must be detected")
+    need(((1 << 24) - 2) + 1 < (1 << 24), "non-overflow example unexpectedly widened")
     for needle in (
         "(schema . numeric-domains-ratification/1)",
         "(status . owner-ratified)", "(family . numeric)",
@@ -37,10 +53,13 @@ def validate(policy, ratification, lang):
         "(initial-width . #d24)", "(next-width . double)",
         "(canonical-domain-names . (D24 D48 D96 D192))",
         '(domain-rule . "D(24 * 2^n), n >= 0")',
+        "(same-domain-natural-addition", "(add-carry-preservation",
+        "(addition-bridge-scope",
     ):
         need(needle in ratification, "contract: " + needle)
     for needle in (
         "(numeric-domains-peer-ratified",
+        "(numeric-domain-natural-add-carry",
         "D24, D48, D96, D192",
         "contracts/numeric-domains-ratification.lisp",
         "ontological domain rank",
@@ -56,6 +75,8 @@ def selftest(policy, ratification, lang):
         ({"domain_rank": "storage-only"}, "domain rank"),
         ({"no_literal_dependency": False}, "no literal dependency"),
         ({"not_yet_ratified": []}, "deferred law"),
+        ({"addition_widening": {"status": "research"}}, "addition promotion status"),
+        ({"addition_widening": dict(policy["addition_widening"], no_wraparound=False)}, "addition carry must not wrap"),
     ]
     for change, why in edits:
         try:
