@@ -75,11 +75,43 @@ def literal_tsv(path):
                     raise ValueError(f"INVALID_SOURCE_CATALOG_LINE:{number}")
                 record = dict(zip(INDEX_FIELDS, parts))
                 key = record["semantic_name"].strip().casefold()
-                if not key or key in rows:
-                    raise ValueError(f"DUPLICATE_SOURCE_NAME:{number}:{key}")
+                candidate_id = record["candidate_id"].strip()
+                if not key:
+                    raise ValueError(f"EMPTY_SOURCE_NAME:{number}")
+                if not candidate_id:
+                    raise ValueError(f"EMPTY_CANDIDATE_ID:{number}:{key}")
                 if record["ratified"] != "0":
                     raise ValueError("UNEXPECTED_RATIFICATION")
-                rows[key] = record
+                if key in rows:
+                    previous = rows[key]
+                    previous_id = previous["candidate_id"].strip()
+                    if candidate_id == previous_id:
+                        raise ValueError(f"DUPLICATE_CANDIDATE_ID:{number}:{candidate_id}")
+                    # The research index is a source-name catalog, so repeated
+                    # names from independent candidate IDs are evidence-bearing
+                    # records, not automatic semantic duplicates. Preserve every
+                    # distinct claim and both source IDs; admission remains false.
+                    for column in ARRAY_FIELDS:
+                        merged = []
+                        for raw in (previous[column], record[column]):
+                            for value in parse_array(raw):
+                                if value not in merged:
+                                    merged.append(value)
+                        previous[column] = json.dumps(
+                            merged, ensure_ascii=False, separators=(",", ":"))
+                    status_claims = parse_array(previous["historical_status_claims"])
+                    for source_id in (previous_id, candidate_id):
+                        tag = "SOURCE_CANDIDATE_ID:" + source_id
+                        if tag not in status_claims:
+                            status_claims.append(tag)
+                    previous["historical_status_claims"] = json.dumps(
+                        status_claims, ensure_ascii=False, separators=(",", ":"))
+                    counts = (previous["source_record_count"], record["source_record_count"])
+                    if not all(value.isdigit() for value in counts):
+                        raise ValueError(f"INVALID_SOURCE_RECORD_COUNT:{number}:{key}")
+                    previous["source_record_count"] = str(sum(map(int, counts)))
+                else:
+                    rows[key] = record
         except csv.Error as exc:
             raise ValueError(f"INVALID_CATALOG_QUOTING:{reader.line_num}") from exc
     return rows
