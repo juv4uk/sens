@@ -132,12 +132,47 @@ fn plan_v2(words: &[BinarySourceWord]) -> Vec<Step> {
     steps
 }
 
+// If no 128-word window can hold a complete, <=20-inner-bit D2 list,
+// grammar cannot enter the admissible mode set. Reuse the ALREADY proven
+// v1 RAW/REPEAT physical optimum instead of running another byte DP.
+// This is a conservative necessary-condition filter, never grammar admission.
+fn any_possible_grammar_block(words: &[BinarySourceWord]) -> bool {
+    for start in 0..words.len() {
+        let first = words[start];
+        if first.width() != 2 || first.packed_bits() != 0b10 {
+            continue;
+        }
+        let mut inner_bits = 0usize;
+        for end in (start + 1)..words.len().min(start + MAX_BLOCK_WORDS) {
+            let word = words[end];
+            if word.width() == 2 && word.packed_bits() == 0b01 && inner_bits <= MAX_INNER_BITS {
+                return true;
+            }
+            inner_bits += word.width();
+            if inner_bits > MAX_INNER_BITS {
+                break;
+            }
+        }
+    }
+    false
+}
+
 /// Explicit v2 serializer. Does NOT replace \`universal_frame3::encode\` (v1).
 pub fn encode_v2(words: &[BinarySourceWord]) -> Result<Vec<u8>, Frame3Error> {
     if words.len() > MAX_WORDS {
         return Err(Frame3Error::TooLarge);
     }
     parse_canonical_word_sequence(words).map_err(|_| Frame3Error::InvalidD2)?;
+    if !any_possible_grammar_block(words) {
+        // Same complete RAW/REPEAT cost function as v1. Only the explicit
+        // version byte and its CRC change. No T5 migration or v1 behavior.
+        let mut bytes = super::encode(words)?;
+        bytes[2] = MAGIC_V2[2];
+        let cutoff = bytes.len() - 4;
+        let crc = physical_crc32(&bytes[..cutoff]).to_be_bytes();
+        bytes[cutoff..].copy_from_slice(&crc);
+        return Ok(bytes);
+    }
     let plan = plan_v2(words);
     let mut result = Vec::with_capacity(
         3 + varint_len(words.len()) + plan[0].bytes + 4,
@@ -439,6 +474,31 @@ mod tests {
             assert!(v2.len() <= v1.len(), "{s}");
             assert_eq!(decode_v2(&v2).unwrap(), src);
         }
+    }
+
+    #[test]
+    fn no_grammar_candidate_is_exactly_the_v1_optimum_with_new_magic() {
+        for sample in ["0", "000000001", "10 111111111 01"] {
+            let source = words(sample);
+            assert!(!any_possible_grammar_block(&source));
+            let v1 = super::super::encode(&source).unwrap();
+            let v2 = encode_v2(&source).unwrap();
+            assert_eq!(&v1[3..v1.len() - 4], &v2[3..v2.len() - 4]);
+            assert_eq!(&v2[..3], &MAGIC_V2);
+            assert_eq!(decode_v2(&v2).unwrap(), source);
+        }
+        let mut long = String::from("10 ");
+        for _ in 0..80 {
+            long.push_str("000000001 ");
+        }
+        long.push_str("01");
+        let source = words(&long);
+        assert!(!any_possible_grammar_block(&source));
+        let v1 = super::super::encode(&source).unwrap();
+        let v2 = encode_v2(&source).unwrap();
+        assert_eq!(v1.len(), v2.len());
+        assert_eq!(&v1[3..v1.len() - 4], &v2[3..v2.len() - 4]);
+        assert_eq!(decode_v2(&v2).unwrap(), source);
     }
 
     #[test]
