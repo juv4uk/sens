@@ -214,8 +214,8 @@
   (0010 (module-name rules)
     (110
       ((101010010 module-name)
-       (001000 ((head (100 (100 rules))))
-         (001000 ((proofs (101111010 module-name (opposite-knowledge-head head))))
+       (10011100 ((head (100 (100 rules))))
+         (10011100 ((proofs (101111010 module-name (opposite-knowledge-head head))))
            (110
              
              ((010 proofs)  (001 ()))
@@ -362,7 +362,7 @@
   (0010 (module-name clause)
     (110
       ((101010010 module-name)
-       (001000 ((proofs (101111010 module-name (opposite-knowledge-head (100 clause)))))
+       (10011100 ((proofs (101111010 module-name (opposite-knowledge-head (100 clause)))))
          (110
            ((0100 (010 proofs)) (110
               ((101 (100 (100 clause)) (001 not)) (001 ()))
@@ -383,7 +383,7 @@
       ((101 (knowledge-clause-valid? clause) (001 ()))
        (1110 (001 rejected) (1110 (001 reason) (001 invalid-clause)) (1110 (001 input) clause)))
       ((010 ())
-       (001000 ((opposite (opposite-knowledge-head (100 clause)))
+       (10011100 ((opposite (opposite-knowledge-head (100 clause)))
              (proofs (advice-conflict-proof module-name clause)))
          (110
            ((0100 (010 proofs)) (1110 (001 accepted) (1110 (001 module) module-name) (1110 (001 knowledge) clause)))
@@ -460,11 +460,11 @@
       
       ((010 rules)  (001 ()))
       ((010 ())
-       (001000 ((head (100 (100 rules))))
+       (10011100 ((head (100 (100 rules))))
          (110
            ((knowledge-not-head? (100 head))
-            (001000 ((positive (1001 head)))
-              (001000 ((proofs (101001110 positive all-rules)))
+            (10011100 ((positive (1001 head)))
+              (10011100 ((proofs (101001110 positive all-rules)))
                 (110
                   ((0100 (010 proofs)) (advice-negative-head-conflict (011 rules) all-rules))
                   ((010 proofs)  (advice-negative-head-conflict (011 rules) all-rules))
@@ -474,19 +474,19 @@
 (0011 advice-batch-conflict
   (0010 (clauses remaining all-rules)
     (110
-      ((0100 (010 remaining)) (001000 ((global (advice-negative-head-conflict all-rules all-rules)))
+      ((0100 (010 remaining)) (10011100 ((global (advice-negative-head-conflict all-rules all-rules)))
          (110
            
            ((010 global)  (001 ()))
            ((010 ()) (1110 (100 clauses) (100 global) (10011 global))))))
-      ((010 remaining)  (001000 ((global (advice-negative-head-conflict all-rules all-rules)))
+      ((010 remaining)  (10011100 ((global (advice-negative-head-conflict all-rules all-rules)))
          (110
            
            ((010 global)  (001 ()))
            ((010 ()) (1110 (100 clauses) (100 global) (10011 global))))))
       ((010 ())
-       (001000 ((opposite (opposite-knowledge-head (100 (100 remaining)))))
-         (001000 ((proofs (101001110 opposite all-rules)))
+       (10011100 ((opposite (opposite-knowledge-head (100 (100 remaining)))))
+         (10011100 ((proofs (101001110 opposite all-rules)))
            (110
              ((0100 (010 proofs)) (advice-batch-conflict clauses (011 remaining) all-rules))
              ((010 proofs)  (advice-batch-conflict clauses (011 remaining) all-rules))
@@ -504,11 +504,11 @@
       ((101 (knowledge-clauses-valid? clauses) (001 ()))
        (1110 (001 rejected) (1110 (001 reason) (001 invalid-clause)) (1110 (001 input) clauses)))
       ((010 ())
-       (001000 ((existing (110
+       (10011100 ((existing (110
                          ((101010010 module-name)
                           (110000011 module-name))
                          )))
-         (001000 ((conflict (advice-batch-conflict clauses clauses
+         (10011100 ((conflict (advice-batch-conflict clauses clauses
                                                 (1111 clauses existing))))
            (110
              ((0100 (010 conflict)) (1110 (001 accepted)
@@ -588,7 +588,7 @@
 
 (0011 knowledge-package-field
   (0010 (name package)
-    (001000 ((entry (11100 name package)))
+    (10011100 ((entry (11100 name package)))
       (110 
             ((010 entry)  (001 ())) ((010 ()) (011 entry))))))
 
@@ -668,7 +668,7 @@
       ((101 (knowledge-clauses-valid? clauses) (001 ()))
        (1110 (001 rejected) (1110 (001 reason) (001 invalid-clause)) (1110 (001 input) clauses)))
       ((010 ())
-       (001000 ((package (make-knowledge-package module-name clauses)))
+       (10011100 ((package (make-knowledge-package module-name clauses)))
          (1001 (1110 (110111100 path (11110100 package)) package)))))))
 
 ;; TCP transport uses one package per connection and EOF as the frame boundary.
@@ -679,7 +679,7 @@
 ;; TCP-Transport: ein Paket pro Verbindung, EOF als Grenze; Empfang nie per `eval`.
 (0011 tcp-read-to-eof
   (0010 (connection accumulated)
-    (001000 ((chunk (110111110 connection)))
+    (10011100 ((chunk (110111110 connection)))
       (110
         ((110011100 chunk) accumulated)
         ((010 ()) (tcp-read-to-eof connection
@@ -697,7 +697,7 @@
       ((101 (knowledge-clauses-valid? clauses) (001 ()))
        (1110 (001 rejected) (1110 (001 reason) (001 invalid-clause)) (1110 (001 input) clauses)))
       ((010 ())
-       (001000 ((package (make-knowledge-package module-name clauses)))
+       (10011100 ((package (make-knowledge-package module-name clauses)))
          (10011 (1110 (110110011 connection (11110100 package))
                       (tcp-close connection)
                       package)))))))
@@ -727,11 +727,11 @@
 
 (0011 tcp-read-frame
   (0010 (connection accumulated)
-    (001000 ((chunk (110111110 connection)))
+    (10011100 ((chunk (110111110 connection)))
       (110
         ((110011100 chunk) (001 ()))
         ((010 ())
-         (001000 ((line (string-through-line
+         (10011100 ((line (string-through-line
                        (110011110 accumulated chunk) "")))
            (110
              ((0100 (010 line)) (tcp-read-frame connection (110011110 accumulated chunk)))
@@ -750,13 +750,13 @@
       ((101 (knowledge-clauses-valid? clauses) (001 ()))
        (1110 (001 rejected) (1110 (001 reason) (001 invalid-clause)) (1110 (001 input) clauses)))
       ((010 ())
-       (001000 ((package (make-knowledge-package module-name clauses)))
+       (10011100 ((package (make-knowledge-package module-name clauses)))
          (10011
            (1110
              (110110011 connection
                         (110011110 (11110100 package) "\n"))
              (0011 *knowledge-receipt-text* (tcp-read-frame connection ""))
-             (001000 ((receipt (11101010 *knowledge-receipt-text*)))
+             (10011100 ((receipt (11101010 *knowledge-receipt-text*)))
                (1001 (1110 (tcp-close connection) receipt))))))))))
 
 (00001010 accept-knowledge-exchange (connection)
@@ -827,13 +827,13 @@
       
       ((010 clauses)  (001 ()))
       ((010 clauses) 
-       (001000 ((clause (100 clauses)))
-         (001000 ((head (100 clause)))
+       (10011100 ((clause (100 clauses)))
+         (10011100 ((head (100 clause)))
            (110
              ((101011111 clause) 
               (101011001 item (011 clauses)))
              ((101011111 clause) 
-              (001000 ((contains (101110011 item head)))
+              (10011100 ((contains (101110011 item head)))
                 (110
                   ((101 contains (001 ())) 
                    (101011001 item (011 clauses)))
@@ -885,7 +885,7 @@
 
 (0011 usage-of
   (0010 (rule-head)
-    (001000 ((entry (11100 rule-head *usage-counts*)))
+    (10011100 ((entry (11100 rule-head *usage-counts*)))
       (110
         
         ((010 entry)  0)
