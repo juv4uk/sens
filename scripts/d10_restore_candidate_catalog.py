@@ -123,6 +123,55 @@ def find_name_line(canonical_text, name, case_sensitive=True):
     return found[0] if found else None
 
 
+HISTORICAL_LEDGER_BLOB = "f10c545598b6aaf90f8f5caf8f49683448ff420f"
+HISTORICAL_LEDGER_PATH = "knowledge/d10-proposal-ledger.tsv"
+HISTORICAL_LEDGER_ARCHIVE = (
+    "knowledge/d10-source-snapshots/d10-proposal-ledger-f10c545598b6aaf6.tsv"
+)
+
+
+def restore_historical_ledger_snapshot_locator(root, semantic_name, refs):
+    """Add a verified archived locator for stale ledger pins without deleting the original claim."""
+    result = list(refs)
+    stale_prefix = f"{HISTORICAL_LEDGER_PATH}@{HISTORICAL_LEDGER_BLOB}:"
+    if not any(ref.startswith(stale_prefix) for ref in result):
+        return result
+
+    snapshot = safe_file(root, HISTORICAL_LEDGER_ARCHIVE)
+    if snapshot is None:
+        raise ValueError("HISTORICAL_LEDGER_SNAPSHOT_MISSING")
+    raw = snapshot.read_bytes()
+    if git_blob(raw) != HISTORICAL_LEDGER_BLOB:
+        raise ValueError("HISTORICAL_LEDGER_SNAPSHOT_BLOB_MISMATCH")
+
+    try:
+        reader = csv.reader(raw.decode("utf-8").splitlines(), delimiter="\t", strict=True)
+        header = next(reader, None)
+        if not header or "semantic_name" not in header:
+            raise ValueError("HISTORICAL_LEDGER_SNAPSHOT_SCHEMA")
+        name_column = header.index("semantic_name")
+        matches = []
+        for line_number, row in enumerate(reader, start=2):
+            if len(row) != len(header):
+                raise ValueError(f"HISTORICAL_LEDGER_SNAPSHOT_ROW:{line_number}")
+            if row[name_column].strip().casefold() == semantic_name.strip().casefold():
+                matches.append(line_number)
+    except csv.Error as exc:
+        raise ValueError("HISTORICAL_LEDGER_SNAPSHOT_TSV") from exc
+
+    if len(matches) > 1:
+        raise ValueError(f"HISTORICAL_LEDGER_NAME_AMBIGUOUS:{semantic_name}")
+    if not matches:
+        return result
+
+    locator = (
+        f"{HISTORICAL_LEDGER_ARCHIVE}@{HISTORICAL_LEDGER_BLOB}:source-record"
+    )
+    if locator not in result:
+        result.append(locator)
+    return result
+
+
 def merge_catalog(root, historical_path, current_path, output_path):
     raw_old = historical_path.read_bytes()
     if git_blob(raw_old) != HISTORICAL_BLOB:
@@ -166,6 +215,10 @@ def merge_catalog(root, historical_path, current_path, output_path):
                 for value in parse_array(row[column]):
                     if value not in merged:
                         merged.append(value)
+            if column == "source_records_sha_pinned":
+                merged = restore_historical_ledger_snapshot_locator(
+                    root, primary.get("semantic_name", ""), merged
+                )
             if column == "historical_status_claims":
                 if a is not None:
                     tag = "HISTORIC_SOURCE_ID:" + ident
