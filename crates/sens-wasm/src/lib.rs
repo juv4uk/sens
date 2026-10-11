@@ -80,7 +80,7 @@ fn build_surface_layer(base: &Environment, surface: WebSurface) -> Result<Enviro
             environment: layer.clone(),
         };
         for (name, source) in SURFACE_PREREQUISITES {
-            (if name == "time.lisp" {
+            (if *name == "time.lisp" {
                 sens::load_time_library(&mut session)
             } else {
                 eval_program(source, &mut session)
