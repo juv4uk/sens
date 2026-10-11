@@ -304,9 +304,8 @@ fn main() {
     let sexpr_bootstrap_lib: &'static str = SEXPR_BOOTSTRAP
         .get_or_init(|| {
             format!(
-                "{}\n{}\n{}\n{}\n{}",
+                "{}\n{}\n{}\n{}",
                 CORE_SRC,
-                sens::TIME_LIBRARY_SOURCE,
                 sens::UTF8_LIBRARY_SOURCE,
                 sens::PROCESS_LIBRARY_SOURCE,
                 sens::FS_LIBRARY_SOURCE
