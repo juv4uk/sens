@@ -452,7 +452,7 @@
 ; call left inside the returned body would be evaluated as ordinary data-call;
 ; recurse here while the raw binding forms are still available.
 (00001001 core4-let*-expansion
-  (00001000 (bindings body)
+  (0010 (bindings body)
     (00000111
       ((00000010 bindings) body)
       ((00000010 (00000001 ()))
