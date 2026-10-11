@@ -27,11 +27,29 @@ def validate(policy, ratification, lang):
     for n in range(20):
         need(24 * (1 << (n + 1)) == 2 * (24 * (1 << n)), "doubling")
     need("D1-D8" in policy.get("separate_from", []), "function domain boundary")
-    for name in ("signedness", "integer versus rational field layout",
+    for name in ("two's-complement or other polarity encoding",
+                 "integer versus rational field layout",
                  "decimal literal lowering law",
                  "mixed-domain implicit coercion and general widening",
-                 "multiplication and other-operation overflow policy"):
+                 "multiplication and other-operation overflow policy",
+                 "binary opcode and production encoding for signed and rational compositions",
+                 "signed and rational arithmetic runtime admission and conformance"):
         need(name in policy.get("not_yet_ratified", []), "deferred law: " + name)
+    need("signedness" not in policy.get("not_yet_ratified", []), "NEG composition law must not be marked wholly deferred")
+    extended = policy.get("extended_number_laws", {})
+    need(extended.get("status") == "owner-ratified", "extended D24+ laws status")
+    need(extended.get("no_new_domains") is True, "new domains forbidden")
+    need(extended.get("no_reserved_natural_bits") is True, "natural Dn atom range must be preserved")
+    need(extended.get("no_negative_zero") is True, "negative zero forbidden")
+    need(extended.get("denominator_zero_is_error") is True, "denominator zero must fail")
+    need(extended.get("rounding_forbidden") is True, "rational rounding forbidden")
+    need("NEG(nonzero Dn magnitude)" in extended.get("sign", ""), "NEG positive magnitude law")
+    need("gcd(abs(p),q)=1" in extended.get("rational", ""), "gcd canonical ratio law")
+    need("q=1 collapses to integer" in extended.get("rational", ""), "unit denominator law")
+    need("p=0 collapses" in extended.get("rational", ""), "zero numerator law")
+    need(extended.get("binary_composition_opcode") == "deferred", "binary opcode still deferred")
+    need(extended.get("wire_fasl_and_physical_encoding") == "deferred", "composite wire layout still deferred")
+    need(extended.get("callability_and_signed_rational_arithmetic") == "deferred", "signed/rational runtime still deferred")
     addition = policy.get("addition_widening", {})
     need(addition.get("status") == "owner-ratified", "addition promotion status")
     need(addition.get("required_successor") == "D(2n)", "addition successor")
@@ -55,11 +73,14 @@ def validate(policy, ratification, lang):
         '(domain-rule . "D(24 * 2^n), n >= 0")',
         "(same-domain-natural-addition", "(add-carry-preservation",
         "(addition-bridge-scope",
+        "(base-natural-occupancy", "(signed-composition", "(rational-composition",
+        "(composite-identity", "(canonicalization",
     ):
         need(needle in ratification, "contract: " + needle)
     for needle in (
         "(numeric-domains-peer-ratified",
         "(numeric-domain-natural-add-carry",
+        "(numeric-domain-signed-reduced-ratio-composition",
         "D24, D48, D96, D192",
         "contracts/numeric-domains-ratification.lisp",
         "ontological domain rank",
@@ -77,6 +98,11 @@ def selftest(policy, ratification, lang):
         ({"not_yet_ratified": []}, "deferred law"),
         ({"addition_widening": {"status": "research"}}, "addition promotion status"),
         ({"addition_widening": dict(policy["addition_widening"], no_wraparound=False)}, "addition carry must not wrap"),
+        ({"extended_number_laws": dict(policy["extended_number_laws"], no_reserved_natural_bits=False)}, "natural Dn atom range must be preserved"),
+        ({"extended_number_laws": dict(policy["extended_number_laws"], no_negative_zero=False)}, "negative zero forbidden"),
+        ({"extended_number_laws": dict(policy["extended_number_laws"], denominator_zero_is_error=False)}, "denominator zero must fail"),
+        ({"extended_number_laws": dict(policy["extended_number_laws"], rational="not reduced")}, "gcd canonical ratio law"),
+        ({"extended_number_laws": dict(policy["extended_number_laws"], wire_fasl_and_physical_encoding="unconditionally executable")}, "composite wire layout still deferred"),
     ]
     for change, why in edits:
         try:
@@ -107,7 +133,7 @@ def main():
     except (ValueError, KeyError, OSError) as exc:
         print(str(exc), file=sys.stderr)
         return 1
-    print("NUMERIC-DOMAIN-RATIFICATION: PASS D24 D48 D96 D192 ... peer-of-D1-D9")
+    print("NUMERIC-DOMAIN-RATIFICATION: PASS D24+ full-natural atoms, NEG/RATIO composition laws and carry-safe ADD; signed/rational runtime deferred")
     return 0
 
 if __name__ == "__main__":
