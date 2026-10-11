@@ -75,7 +75,7 @@ canonical sens-syntax-wire/1 (SW1) bytes
 Приклад:
 
 ```sh
-cargo xtask compiler-compile --input /path/to/program.sw1 --out /path/to/new-artifact.cevb
+cargo xtask compiler-compile --input /path/to/program.sw1 --out /path/to/new-artifact.bin
 ```
 
 - `--input` має містити саме canonical SW1 bytes; це внутрішній compiler-program-data transport, **не** фізичний T5 `.sens` або opt-in F3 `.senc`. Формати не визначаються sniffing і не підміняють один одного.
