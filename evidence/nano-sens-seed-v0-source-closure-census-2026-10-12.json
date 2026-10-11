@@ -8,20 +8,20 @@
     "tree_sha": "d0787a40fcea36501747732aa61b6de19fe29c70",
     "tree_entry_count": 8038
   },
-  "reason_for_census": "The measured CML runner invokes `cargo run --manifest-path external/sens/Cargo.toml -p xtask -- compiler-export` at runtime. Cargo compiles `xtask` and the SENS library from the pinned checkout; lib.rs embeds multiple Lisp libraries/data files at compile time. This census now excludes a cfg(test)-only Rust source and adds 12 directly observed lib.rs compile-time includes. It remains a verified subset, not the complete runtime closure or minimum seed total.",
+  "reason_for_census": "The measured CML runner invokes `cargo run --manifest-path external/sens/Cargo.toml -p xtask -- compiler-export` at runtime. Cargo compiles `xtask` and the SENS library from the pinned checkout; source modules contain compile-time includes for compiler laws, contracts, authority projections, several Lisp libraries, and cached Core4 data. The census excludes a cfg(test)-only Rust source and adds 13 directly observed lib.rs/compiler-related compile-time inputs. It remains a verified subset, not the complete runtime closure or minimum seed total.",
   "known_input_subset": {
-    "file_count": 113,
-    "total_on_disk_source_bytes": 1337942,
+    "file_count": 114,
+    "total_on_disk_source_bytes": 1397243,
     "sum_is_lower_bound_only": true,
     "categories": {
       "rust_source_files_count": 70,
       "rust_source_files_bytes": 1069628,
       "workspace_cargo_manifests_count": 20,
       "workspace_cargo_manifests_bytes": 7424,
-      "root_workspace_and_known_compiler_inputs_count": 23,
-      "root_workspace_and_known_compiler_inputs_bytes": 260890
+      "root_workspace_and_known_compiler_inputs_count": 24,
+      "root_workspace_and_known_compiler_inputs_bytes": 320191
     },
-    "file_metrics": "70 production Rust source files across crates/sens/src/** and crates/xtask/src/**; 20 Cargo package manifests; 23 root, contract, authority, and compile-time included source/data files. The cfg(test)-only bootstrap_measurement.rs is explicitly excluded. This is a pinned, verified subset; closure is not complete."
+    "file_metrics": "70 production Rust source files across crates/sens/src/** and crates/xtask/src/**; 20 Cargo package manifests; 24 root, contract, authority, and compile-time included source/data files. The cfg(test)-only bootstrap_measurement.rs is explicitly excluded. This is a pinned, verified subset; closure is not complete."
   },
   "closure_gaps": [
     "Finish a path-by-path production module graph/cfg scan for all 70 listed Rust sources and verify every compile-time include edge; current include edge list records all direct edges inspected so far, not a completed automated exhaustive scan.",
@@ -542,6 +542,12 @@
       "size_bytes": 24506
     },
     {
+      "path": "lib/core.lisp",
+      "git_blob_sha1": "425db176b82f76e79d7343f7a629929ade22b087",
+      "size_bytes": 59301,
+      "discovery": "compile-time include observed in crates/sens/src/gpu_oracle_conformance.rs"
+    },
+    {
       "path": "lib/core2.lisp",
       "git_blob_sha1": "9a39a1d341dde7faf3a1899b52f78a7b1e931783",
       "size_bytes": 572,
@@ -682,6 +688,12 @@
       "paths": [
         "crates/sens/src/eval/necessary_forms_generated.rs"
       ]
+    },
+    {
+      "from": "crates/sens/src/gpu_oracle_conformance.rs",
+      "paths": [
+        "lib/core.lisp"
+      ]
     }
   ],
   "external_build_dependency_inventory": {
@@ -741,5 +753,36 @@
       "workspace packages not reachable from xtask's non-test dependency graph"
     ],
     "remaining": "Registry source archives/cache bytes and Cargo index/network/cache availability are not measured here; report as external dependencies, never as invisible inputs."
-  }
+  },
+  "optional_runtime_references_not_exercised_by_compiler_export": [
+    {
+      "source": "crates/sens/src/eval/builtins.rs",
+      "path": "/etc/timezone",
+      "condition": "Only read when the `timezone-declarations-raw` primitive is called; the pinned `compiler-export` invocation does not call it, so this host file is not part of the minimum input set for this specific chain."
+    },
+    {
+      "source": "crates/xtask/src/external_oracle.rs",
+      "paths": [
+        "external-oracle/conformance inputs",
+        "external-oracle inventory input"
+      ],
+      "condition": "Read only by the separate `external-oracle` subcommand, not by `compiler-export`."
+    },
+    {
+      "source": "crates/xtask/src/encoder_coverage.rs",
+      "paths": [
+        "machine-evidence.lisp",
+        "coverage.lisp"
+      ],
+      "condition": "Read/write only by the separate `generate-encoder-coverage` subcommand, not by `compiler-export`."
+    },
+    {
+      "source": "crates/xtask/src/xed_import.rs",
+      "paths": [
+        "XED vendor tree",
+        "generated machine evidence output"
+      ],
+      "condition": "Read/write only by the separate `import-xed-evidence` subcommand, not by `compiler-export`."
+    }
+  ]
 }
