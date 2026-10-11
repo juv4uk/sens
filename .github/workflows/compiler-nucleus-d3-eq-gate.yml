@@ -7,6 +7,7 @@ on:
       - "crates/xtask/src/compiler_export.rs"
       - "crates/xtask/src/compiler_compile.rs"
       - "crates/xtask/tests/compiler_export_cli.rs"
+      - "crates/xtask/tests/compiler_triplet_cli.rs"
       - ".github/workflows/compiler-nucleus-d3-eq-gate.yml"
   workflow_dispatch:
 permissions:
@@ -55,6 +56,12 @@ jobs:
           set -euo pipefail
           cargo test --locked -p sens compiler_language::tests::semantic_input_api_owns_law_proof_and_root_authority_facts -- --nocapture \
             2>&1 | tee "$RUNNER_TEMP/compiler-nucleus-core-law.log"
+      - name: Prove actual Ukrainian source-T5-view triplets compile or fail closed
+        shell: bash
+        run: |
+          set -euo pipefail
+          cargo test --locked -p xtask --test compiler_triplet_cli -- --nocapture \
+            2>&1 | tee "$RUNNER_TEMP/compiler-nucleus-triplet.log"
       - if: always()
         uses: actions/upload-artifact@v4
         with:
@@ -64,5 +71,6 @@ jobs:
             ${{ runner.temp }}/compiler-nucleus-requests.lisp
             ${{ runner.temp }}/compiler-nucleus-quote.lisp
             ${{ runner.temp }}/compiler-nucleus-core-law.log
+            ${{ runner.temp }}/compiler-nucleus-triplet.log
           if-no-files-found: warn
           retention-days: 30
