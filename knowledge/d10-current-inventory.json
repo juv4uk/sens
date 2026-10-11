@@ -1,6 +1,6 @@
 {
   "schema": "d10-current-inventory-pointer/v1",
-  "status": "OWNER-DIRECTED-RESEARCH-SELECTION-1024-COORDINATE-GAUGE-UNRATIFIED",
+  "status": "OWNER-RATIFIED-WHOLE-D10-DOMAIN-1024-EVIDENCE-AND-RUNTIME-GATES-PENDING",
   "canonical_current": {
     "path": "knowledge/d10-v18-semantic-inventory.json",
     "git_blob": "7e6acb2531308ae5f63600d4e0042111cc3ec59c",
@@ -22,8 +22,8 @@
   "policy": {
     "description": "D10 research inventory full (1024 rows) with full 10-bit research-only canonical gauge, preserving 719 old and transferring 305 from pinned existing v17 gauge. F2/F3 and F1 gaps remain.",
     "selected_only": "1024 research candidates and 1024 unique coordinate labels; full layout NOT proof of semantic independence, not instruction admission, no T5 execution permission.",
-    "ratification": "Whole-domain D10 ratification to follow fully populated 1024 inventory with reviewed proofs, not per-function ratification.",
-    "next_step": "Perform F1/F2/F3 evidence review of all 1024 claims; owner will ratify whole D10 as one domain after proof and consistency checks."
+    "ratification": "Owner ratified D10 as a whole 1024-code domain on 2026-10-12. This governance act is separate from per-row test/admission flags; F1/F2/F3 attestation and physical runtime authorization remain pending.",
+    "next_step": "Preserve ratified owner decision and complete independent F1/F2/F3 evidence, behavioural comparison, and T5 execution admission; do not silently bypass fail-closed guards."
   },
   "branch_policy": "MAIN-ONLY; NO-NEW-BRANCHES",
   "historical_v2_coordinate_inventory": {
@@ -458,5 +458,16 @@
     "old_codes_preserved": 719,
     "ratified_added": 0,
     "physical_execution_authorized": false
+  },
+  "owner_whole_domain_ratification": {
+    "status": "RATIFIED_BY_OWNER",
+    "ratified": true,
+    "mode": "WHOLE_DOMAIN_ATOMIC_NOT_PER_RESIDENT",
+    "date": "2026-10-12",
+    "path": "knowledge/d10-owner-whole-domain-ratification-20261012.json",
+    "git_blob": "444d1b502eab5b38e578429feeab996054d9b1bc",
+    "owner_decision_scope": "D10_FULL_1024_CODEWORD_CATALOGUE",
+    "unchanged_per_row_ratified_count": 0,
+    "runtime_authority": "NOT_GRANTED"
   }
 }

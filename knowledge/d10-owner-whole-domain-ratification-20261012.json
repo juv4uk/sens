@@ -1,0 +1,41 @@
+{
+  "schema": "sens-d10-whole-domain-owner-ratification/v1",
+  "date": "2026-10-12",
+  "decision": "RATIFY_D10_AS_ONE_COMPLETE_DOMAIN",
+  "decision_source": "Explicit project-owner instruction in this conversation: «ратифікую» following completion of 1024 D10 descriptions and 1024 10-bit coordinates",
+  "effective_scope": "OWNER_RATIFICATION_OF_D10_CODEBOOK_AND_DECLARED_SEMANTIC_CATALOGUE",
+  "ratification_mode": "ATOMIC_WHOLE_DOMAIN_NOT_PER_RESIDENT",
+  "ratified_by": "PROJECT_OWNER",
+  "ratified": true,
+  "inventory": {
+    "path": "knowledge/d10-v18-semantic-inventory.json",
+    "git_blob": "7e6acb2531308ae5f63600d4e0042111cc3ec59c",
+    "rows": 1024,
+    "unique_stable_ids": 1024,
+    "unique_semantic_names": 1024,
+    "unique_binary_codewords": 1024,
+    "code_width_bits": 10,
+    "full_range": [
+      "0000000000",
+      "1111111111"
+    ]
+  },
+  "preservation": {
+    "previous_history_unchanged": true,
+    "domain_d1_d9_unchanged": true,
+    "scope_d10_only": true,
+    "branches_created": 0
+  },
+  "evidence_separation": {
+    "owner_domain_ratification": true,
+    "all_semantic_laws_independently_verified": false,
+    "donor_provenance_all_verified": false,
+    "positive_and_negative_witnesses_all_replayed": false,
+    "d1_d9_d10_behavioral_independence_all_proved": false,
+    "canonical_inventory_per_resident_flags_unchanged": true,
+    "physical_runtime_t5_opcode_admission": false,
+    "lower_domain_mutation": false,
+    "independent_execution_claims_added": 0
+  },
+  "note": "Ratification is the project owner's normative decision over the complete D10 catalogue. It does not fabricate F1-F4 proofs or lift runtime safety/admission gates. The historical per-row 'ratified_resident' field remains unchanged; it is not used as a count of this whole-domain decision."
+}
