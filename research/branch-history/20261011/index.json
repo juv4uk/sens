@@ -1,0 +1,169 @@
+{
+  "schema": "sens.branch-history-census-index/v1",
+  "date": "2026-10-11",
+  "scope": "Live refs currently listable via GitHub REST; not deleted branches or all historical pull requests",
+  "repository": "juv4uk/sens",
+  "total_live_branch_refs": 4133,
+  "distinct_head_commits": 4034,
+  "main_head_at_census": "9cfaac16d236bcf88b4627dc90d43a6aab3d5039",
+  "parts": [
+    {
+      "path": "research/branch-history/20261011/live-heads-pages-01-08.json",
+      "blob_sha": "1115bc71543472c3b3ff14ab7f14e28a6c391290",
+      "count": 800,
+      "pages": [
+        1,
+        8
+      ]
+    },
+    {
+      "path": "research/branch-history/20261011/live-heads-pages-09-16.json",
+      "blob_sha": "6182e9a03b95f1a22d449b0572629d6de836998b",
+      "count": 800,
+      "pages": [
+        9,
+        16
+      ]
+    },
+    {
+      "path": "research/branch-history/20261011/live-heads-pages-17-24.json",
+      "blob_sha": "9b7bd482245ea97a89ef4e5a84af0a71990b7fb7",
+      "count": 800,
+      "pages": [
+        17,
+        24
+      ]
+    },
+    {
+      "path": "research/branch-history/20261011/live-heads-pages-25-32.json",
+      "blob_sha": "73aed943270987eee7a77052d808f0ee27b5873e",
+      "count": 800,
+      "pages": [
+        25,
+        32
+      ]
+    },
+    {
+      "path": "research/branch-history/20261011/live-heads-pages-33-40.json",
+      "blob_sha": "f95262d12eb2858336d164c4e35a8d81ca30ba8b",
+      "count": 800,
+      "pages": [
+        33,
+        40
+      ]
+    },
+    {
+      "path": "research/branch-history/20261011/live-heads-pages-41-42.json",
+      "blob_sha": "f16e83dacce5818a08bbf45d3ecc3c9f6f4dbf12",
+      "count": 133,
+      "pages": [
+        41,
+        42
+      ]
+    }
+  ],
+  "top_prefixes": [
+    [
+      "fix",
+      941
+    ],
+    [
+      "research",
+      642
+    ],
+    [
+      "replay",
+      433
+    ],
+    [
+      "feat",
+      300
+    ],
+    [
+      "agent",
+      216
+    ],
+    [
+      "impl",
+      171
+    ],
+    [
+      "bench",
+      168
+    ],
+    [
+      "test",
+      113
+    ],
+    [
+      "verify",
+      82
+    ],
+    [
+      "cleanup",
+      80
+    ],
+    [
+      "migrate",
+      64
+    ],
+    [
+      "rebase",
+      61
+    ],
+    [
+      "docs",
+      59
+    ],
+    [
+      "audit",
+      56
+    ],
+    [
+      "ci",
+      49
+    ],
+    [
+      "integration",
+      36
+    ],
+    [
+      "refactor",
+      35
+    ],
+    [
+      "perf",
+      34
+    ],
+    [
+      "work",
+      32
+    ],
+    [
+      "foundation",
+      31
+    ],
+    [
+      "feature",
+      30
+    ],
+    [
+      "migration",
+      24
+    ],
+    [
+      "diag",
+      21
+    ],
+    [
+      "guard",
+      20
+    ],
+    [
+      "release",
+      18
+    ]
+  ],
+  "provenance_rule": "Exact branch-head SHA is archived. Absence from main is not checked by this index; dedup using git ancestry and byte/semantic review. Do not equate archived branch list with integrated code.",
+  "new_branch_prohibition": "No new branch allowed. Existing branches sources only. Work only on main."
+}
