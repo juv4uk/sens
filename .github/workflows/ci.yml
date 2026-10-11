@@ -21,6 +21,10 @@ jobs:
       - uses: dtolnay/rust-toolchain@stable
       - name: Core crate compilation (no other kernels)
         run: cargo check --locked -p sens --lib
+      - name: Ratified numeric D24/D48/... peer domains (Core-only)
+        run: |
+          python3 scripts/check-numeric-domain-ratification.py --self-test
+          python3 scripts/check-numeric-domain-ratification.py
       - name: Exact-width Core semantic identity
         run: cargo test --locked -p sens --test domain_ladder --test domain_ast_value_identity --test domain_width_authority_test
       - name: Core source hygiene
