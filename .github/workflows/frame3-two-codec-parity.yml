@@ -1,0 +1,56 @@
+name: Original Frame3 - independent physical vs D3 admission parity
+on:
+  push:
+    paths:
+      - "research/framed3/rust_codec/parity.rs"
+      - "research/framed3/rust_codec/gen_vectors.py"
+      - "research/framed3/rust_codec/senc.rs"
+      - "research/framed3/rust_codec/gen_negatives.py"
+      - "research/framed3/rust_codec/run_parity.sh"
+      - "research/framed3/research_codec.py"
+      - "research/framed3/test_canonical_capacity_research.py"
+      - ".github/workflows/frame3-two-codec-parity.yml"
+  pull_request:
+    paths:
+      - "research/framed3/rust_codec/parity.rs"
+      - "research/framed3/rust_codec/gen_vectors.py"
+      - "research/framed3/rust_codec/senc.rs"
+      - "research/framed3/rust_codec/gen_negatives.py"
+      - "research/framed3/rust_codec/run_parity.sh"
+      - "research/framed3/research_codec.py"
+      - "research/framed3/test_canonical_capacity_research.py"
+      - ".github/workflows/frame3-two-codec-parity.yml"
+permissions:
+  contents: read
+jobs:
+  parity:
+    name: Original F3 Rust-Python structural/semantic split, strict vectors
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Strict physical and independently admitted D3 parity with mandatory negatives
+        shell: bash
+        run: |
+          set -euo pipefail
+          {
+            echo "sha=$GITHUB_SHA"
+            echo "rustc=$(rustc --version)"
+            echo "python=$(python3 --version)"
+            bash research/framed3/rust_codec/run_parity.sh
+          } 2>&1 | tee "$RUNNER_TEMP/frame3-two-codec-parity.log"
+          grep -q '0 failures ===' "$RUNNER_TEMP/frame3-two-codec-parity.log"
+          grep -q 'independently rejected D3' "$RUNNER_TEMP/frame3-two-codec-parity.log"
+          ! grep -Eq ' 0 negative vectors| 0 independently admitted D3| 0 independently rejected D3' "$RUNNER_TEMP/frame3-two-codec-parity.log"
+      - name: Preserve raw differential results including negative counts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: frame3-independent-parity-${{ github.sha }}
+          path: ${{ runner.temp }}/frame3-two-codec-parity.log
+          if-no-files-found: error
+          retention-days: 30
