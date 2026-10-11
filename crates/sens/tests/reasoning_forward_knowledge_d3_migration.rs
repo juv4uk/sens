@@ -12,7 +12,8 @@ const KNOWLEDGE_D3: &str = include_str!("../../../lib/knowledge.lisp");
 
 fn session(migrated: bool) -> Session {
     let mut session = Session::default();
-    eval_program(CORE, &mut session).expect("core bootstrap");
+    sens::eval_pinned_legacy_core_source("lib/core.lisp", CORE, &mut session)
+        .expect("source-pinned exact-width legacy core bootstrap");
     for (path, source) in [("lib/unify.lisp", UNIFY), ("lib/reason.lisp", REASON)] {
         sens::eval_pinned_reasoning_source(path, source, &mut session)
             .expect("exact-domain reasoning prerequisite bootstrap");
