@@ -13,45 +13,52 @@
   "files_sha256": {
     "accepted-queue.tsv": "26e71d70821778bfe7e871c470ac0d54b36eb9465685137a4fe4fe84739d44b8",
     "escalated.tsv": "26e71d70821778bfe7e871c470ac0d54b36eb9465685137a4fe4fe84739d44b8",
-    "rejected.tsv": "e154efc19b49fa39c39156b4a227f1d699810d810bc6994b118b82e5f9dd9d2d"
+    "rejected.tsv": "f24a8d42120c92169ce7c145b9fd5ff482bfce3c577038eadd50cf3ec9756277"
   },
   "historical_catalog_reconciliation": {
-    "colliding_spelling_groups_not_deduped": 776,
+    "canonical_overlay_ids_added": 0,
+    "colliding_spelling_groups_not_deduped": 276,
     "current_canonical_selected": 721,
-    "full_union_ids": 2271,
-    "full_union_names": 2271,
+    "current_inventory_git_blob": "6a45275241717dafa6a6c9ccafae1e9ad819b306",
+    "full_union_candidate_ids": 1771,
+    "full_union_ids": 1771,
+    "full_union_names": 1495,
     "historical_commit": "17ab25d65346a6a1bfc71f0ed6d64ee75fc6f22f",
     "historical_git_blob": "4afd4c6292db8c93b001cae3162a85bc4307cf41",
     "new_allocations": 0,
-    "new_ids_beyond_historical": 776,
-    "new_names_beyond_historical": 776,
+    "new_candidate_ids_beyond_historical": 276,
+    "new_names_beyond_historical": 0,
     "new_ratifications": 0,
-    "restored_old_only_names": 776,
-    "restored_prior_only_ids": 776,
-    "shared_candidate_ids": 719,
+    "restored_old_only_candidate_ids": 0,
+    "restored_old_only_names": 0,
+    "restored_prior_only_ids": 0,
     "source_historical_ids": 1495,
     "source_historical_names": 1495,
-    "source_latest_ids": 1495,
-    "source_latest_names": 1495
+    "source_historical_records": 1495,
+    "source_id_overlap": 1495,
+    "source_latest_ids": 1771,
+    "source_latest_names": 1495,
+    "source_latest_records": 1771,
+    "source_union_candidate_ids": 1771
   },
   "input_index": "knowledge/d10-filter/all-candidates.tsv",
-  "input_index_sha256": "a8c8f987746a2d7464a61fd063cbc4a0532e0c88c8c433ce3bae4e88e74491b4",
+  "input_index_sha256": "d40d1e147010fb9136a37a9b248b921ee29e2e58232ab32aa87e9d48685f4a3f",
   "mechanical_partition": {
     "accepted": 0,
     "escalated": 0,
-    "rejected": 2271
+    "rejected": 1771
   },
   "name_index": {
     "canonical_selected": 721,
     "executed_witnesses_supplied": 0,
-    "filter_input_rows": 2271,
-    "index_rows": 2271,
-    "name_collisions_not_deduped": 776,
+    "filter_input_rows": 1771,
+    "index_rows": 1771,
+    "name_collisions_not_deduped": 276,
     "new_selected_since_index": 0,
     "semantic_dedup_certificates_supplied": 0,
-    "source_file_pin_verified": 2271
+    "source_file_pin_verified": 1766
   },
   "physical_t5_authorized": false,
   "schema": "d10-unified-filter-run/v1",
-  "source_commit": "cc2154de28635269cef473e1be67c8cf2e7a5f3e"
+  "source_commit": "300de114d1aba43c6f49c345f76932e2c5f4dc16"
 }
