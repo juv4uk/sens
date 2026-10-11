@@ -32,251 +32,251 @@
 ; translation admission only; it is separate from Advice Taker's
 ; proved/unknown/partial/blocked/disputed/invalid reasoning outcomes.
 
-(00001001 *translation-schema* (00000001 translation/1))
-(00001001 *translation-review-schema* (00000001 translation-review/1))
-(00001001 *translation-evidence-schema* (00000001 translation-evidence/1))
-(00001001 *translation-evidence* (00000001 ()))
+(0011 *translation-schema* (001 translation/1))
+(0011 *translation-review-schema* (001 translation-review/1))
+(0011 *translation-evidence-schema* (001 translation-evidence/1))
+(0011 *translation-evidence* (001 ()))
 
-(00001001 translation-status
-  (00001000 (proposal) (00101111 proposal)))
+(0011 translation-status
+  (0010 (proposal) (1001 proposal)))
 
-(00001001 translation-kind
-  (00001000 (proposal) (00110000 proposal)))
+(0011 translation-kind
+  (0010 (proposal) (10011 proposal)))
 
-(00001001 translation-source
-  (00001000 (proposal) (00110001 proposal)))
+(0011 translation-source
+  (0010 (proposal) (100111 proposal)))
 
-(00001001 translation-payload
-  (00001000 (proposal) (00110010 proposal)))
+(0011 translation-payload
+  (0010 (proposal) (110110101 proposal)))
 
-(00001001 translation-status-valid?
-  (00001000 (status)
-    (00000111
-      ((00000011 (00100011 status) (00000001 ())) (00000001 ()))
-      ((00000011 status (00000001 candidate)) t)
-      ((00000011 status (00000001 ambiguous)) t)
-      ((00000011 status (00000001 rejected)) t)
+(0011 translation-status-valid?
+  (0010 (status)
+    (110
+      ((101 (110101100 status) (001 ())) (001 ()))
+      ((101 status (001 candidate)) t)
+      ((101 status (001 ambiguous)) t)
+      ((101 status (001 rejected)) t)
       )))
 
-(00001001 translation-kind-valid?
-  (00001000 (kind)
-    (00000111
-      ((00000011 (00100011 kind) (00000001 ())) (00000001 ()))
-      ((00000011 kind (00000001 clause)) t)
-      ((00000011 kind (00000001 batch)) t)
-      ((00000011 kind (00000001 query)) t)
+(0011 translation-kind-valid?
+  (0010 (kind)
+    (110
+      ((101 (110101100 kind) (001 ())) (001 ()))
+      ((101 kind (001 clause)) t)
+      ((101 kind (001 batch)) t)
+      ((101 kind (001 query)) t)
       )))
 
 ; Envelope validation owns only the protocol shell. Payload meaning is checked
 ; separately so a well-shaped translator message containing malformed semantic
 ; data can be named `invalid-candidate` instead of collapsing into a generic
 ; transport/envelope failure.
-(00001001 translation-envelope-valid?
-  (00001000 (proposal)
-    (00000111
+(0011 translation-envelope-valid?
+  (0010 (proposal)
+    (110
       
-      ((00000010 proposal)  (00000001 ()))
-      ((00000011 (knowledge-proper-list? proposal) (00000001 ())) (00000001 ()))
-      ((00000011 (00011100 (00101000 proposal) 5) (00000001 ())) (00000001 ()))
-      ((00000011 (00100011 (00000101 proposal)) (00000001 ())) (00000001 ()))
-      ((00000011 (00000101 proposal) *translation-schema*)
-       (00000111
-         ((00000011 (translation-status-valid? (translation-status proposal)) (00000001 ()))
-          (00000001 ()))
-         ((00000011 (translation-kind-valid? (translation-kind proposal)) (00000001 ()))
-          (00000001 ()))
+      ((010 proposal)  (001 ()))
+      ((101 (knowledge-proper-list? proposal) (001 ())) (001 ()))
+      ((101 (11110111 (000000 proposal) 5) (001 ())) (001 ()))
+      ((101 (110101100 (100 proposal)) (001 ())) (001 ()))
+      ((101 (100 proposal) *translation-schema*)
+       (110
+         ((101 (translation-status-valid? (translation-status proposal)) (001 ()))
+          (001 ()))
+         ((101 (translation-kind-valid? (translation-kind proposal)) (001 ()))
+          (001 ()))
          ((string-membership-helper (translation-source proposal))
           
-          (00000001 ()))
-         ((00000010 ()) t)))
+          (001 ()))
+         ((010 ()) t)))
       )))
 
-(00001001 translation-batch-valid?
-  (00001000 (payload)
-    (00000111
+(0011 translation-batch-valid?
+  (0010 (payload)
+    (110
       
-      ((00000010 payload)  (00000001 ()))
-      ((00000011 (knowledge-proper-list? payload) (00000001 ())) (00000001 ()))
-      ((00000010 ()) (knowledge-clauses-valid? payload)))))
+      ((010 payload)  (001 ()))
+      ((101 (knowledge-proper-list? payload) (001 ())) (001 ()))
+      ((010 ()) (knowledge-clauses-valid? payload)))))
 
-(00001001 translation-candidate-payload-valid?
-  (00001000 (kind payload)
-    (00000111
-      ((00000011 kind (00000001 clause)) (knowledge-clause-valid? payload))
-      ((00000011 kind (00000001 batch)) (translation-batch-valid? payload))
-      ((00000011 kind (00000001 query)) (knowledge-goal-valid? payload))
+(0011 translation-candidate-payload-valid?
+  (0010 (kind payload)
+    (110
+      ((101 kind (001 clause)) (knowledge-clause-valid? payload))
+      ((101 kind (001 batch)) (translation-batch-valid? payload))
+      ((101 kind (001 query)) (knowledge-goal-valid? payload))
       )))
 
-(00001001 translation-alternatives-valid?
-  (00001000 (kind alternatives)
-    (00000111
+(0011 translation-alternatives-valid?
+  (0010 (kind alternatives)
+    (110
       
-      ((00000010 alternatives)  (00000001 ()))
-      ((translation-candidate-payload-valid? kind (00000101 alternatives))
-       (00000111
+      ((010 alternatives)  (001 ()))
+      ((translation-candidate-payload-valid? kind (100 alternatives))
+       (110
          
-         ((00000010 (00000110 alternatives))  t)
-         ((00000010 ()) (translation-alternatives-valid? kind (00000110 alternatives)))))
+         ((010 (011 alternatives))  t)
+         ((010 ()) (translation-alternatives-valid? kind (011 alternatives)))))
       )))
 
 ; Ambiguity is evidence only when the translator exposes at least two valid
 ; alternatives. One alternative is just a candidate; zero is not ambiguity.
-(00001001 translation-ambiguity-valid?
-  (00001000 (kind payload)
-    (00000111
+(0011 translation-ambiguity-valid?
+  (0010 (kind payload)
+    (110
       
-      ((00000010 ()) (00000001 ()))
-      ((00000011 (knowledge-proper-list? payload) (00000001 ())) (00000001 ()))
+      ((010 ()) (001 ()))
+      ((101 (knowledge-proper-list? payload) (001 ())) (001 ()))
       
-      ((00000010 (00000110 payload))  (00000001 ()))
-      ((00000010 ()) (translation-alternatives-valid? kind payload)))))
+      ((010 (011 payload))  (001 ()))
+      ((010 ()) (translation-alternatives-valid? kind payload)))))
 
-(00001001 make-translation-review
-  (00001000 (status code proposal detail)
-    (00100111 *translation-review-schema* status code proposal detail)))
+(0011 make-translation-review
+  (0010 (status code proposal detail)
+    (1110 *translation-review-schema* status code proposal detail)))
 
-(00001001 translation-review-status
-  (00001000 (review) (00101111 review)))
+(0011 translation-review-status
+  (0010 (review) (1001 review)))
 
-(00001001 translation-review-code
-  (00001000 (review) (00110000 review)))
+(0011 translation-review-code
+  (0010 (review) (10011 review)))
 
-(00001001 translation-review-proposal
-  (00001000 (review) (00110001 review)))
+(0011 translation-review-proposal
+  (0010 (review) (100111 review)))
 
-(00001001 translation-review-detail
-  (00001000 (review) (00110010 review)))
+(0011 translation-review-detail
+  (0010 (review) (110110101 review)))
 
-(00001001 translation-review-status-valid?
-  (00001000 (status)
-    (00000111
-      ((00000011 (00100011 status) (00000001 ())) (00000001 ()))
-      ((00000011 status (00000001 accepted)) t)
-      ((00000011 status (00000001 rejected)) t)
-      ((00000011 status (00000001 ambiguous)) t)
+(0011 translation-review-status-valid?
+  (0010 (status)
+    (110
+      ((101 (110101100 status) (001 ())) (001 ()))
+      ((101 status (001 accepted)) t)
+      ((101 status (001 rejected)) t)
+      ((101 status (001 ambiguous)) t)
       )))
 
-(00001001 translation-review-valid?
-  (00001000 (review)
-    (00000111
+(0011 translation-review-valid?
+  (0010 (review)
+    (110
       
-      ((00000010 review)  (00000001 ()))
-      ((00000011 (knowledge-proper-list? review) (00000001 ())) (00000001 ()))
-      ((00000011 (00011100 (00101000 review) 5) (00000001 ())) (00000001 ()))
-      ((00000011 (00100011 (00000101 review)) (00000001 ())) (00000001 ()))
-      ((00000011 (00000101 review) *translation-review-schema*)
-       (00000111
-         ((00000011 (translation-review-status-valid? (translation-review-status review)) (00000001 ()))
-          (00000001 ()))
-         ((00000011 (00100011 (translation-review-code review)) (00000001 ()))
-          (00000001 ()))
-         ((00000010 ()) t)))
+      ((010 review)  (001 ()))
+      ((101 (knowledge-proper-list? review) (001 ())) (001 ()))
+      ((101 (11110111 (000000 review) 5) (001 ())) (001 ()))
+      ((101 (110101100 (100 review)) (001 ())) (001 ()))
+      ((101 (100 review) *translation-review-schema*)
+       (110
+         ((101 (translation-review-status-valid? (translation-review-status review)) (001 ()))
+          (001 ()))
+         ((101 (110101100 (translation-review-code review)) (001 ()))
+          (001 ()))
+         ((010 ()) t)))
       )))
 
-(00001001 translation-review-advice-decision
-  (00001000 (proposal decision)
-    (00000111
+(0011 translation-review-advice-decision
+  (0010 (proposal decision)
+    (110
       
-      ((00000010 decision)  (make-translation-review
-         (00000001 rejected) (00000001 malformed-advice-decision) proposal decision))
-      ((00000011 (00100011 (00000101 decision)) (00000001 ()))
+      ((010 decision)  (make-translation-review
+         (001 rejected) (001 malformed-advice-decision) proposal decision))
+      ((101 (110101100 (100 decision)) (001 ()))
        (make-translation-review
-         (00000001 rejected) (00000001 malformed-advice-decision) proposal decision))
-      ((00000011 (00000101 decision) (00000001 accepted))
+         (001 rejected) (001 malformed-advice-decision) proposal decision))
+      ((101 (100 decision) (001 accepted))
        (make-translation-review
-         (00000001 accepted) (00000001 knowledge-accepted) proposal decision))
-      ((00000011 (00000101 decision) (00000001 conflict))
+         (001 accepted) (001 knowledge-accepted) proposal decision))
+      ((101 (100 decision) (001 conflict))
        (make-translation-review
-         (00000001 rejected) (00000001 knowledge-conflict) proposal decision))
-      ((00000011 (00000101 decision) (00000001 rejected))
+         (001 rejected) (001 knowledge-conflict) proposal decision))
+      ((101 (100 decision) (001 rejected))
        (make-translation-review
-         (00000001 rejected) (00000001 knowledge-rejected) proposal decision))
-      ((00000010 ())
+         (001 rejected) (001 knowledge-rejected) proposal decision))
+      ((010 ())
        (make-translation-review
-         (00000001 rejected) (00000001 malformed-advice-decision) proposal decision)))))
+         (001 rejected) (001 malformed-advice-decision) proposal decision)))))
 
-(00001001 translation-review-candidate
-  (00001000 (module-name proposal)
-    (10011100 ((kind (translation-kind proposal))
+(0011 translation-review-candidate
+  (0010 (module-name proposal)
+    (001000 ((kind (translation-kind proposal))
           (payload (translation-payload proposal)))
-      (00000111
-        ((00000011 (translation-candidate-payload-valid? kind payload) (00000001 ()))
+      (110
+        ((101 (translation-candidate-payload-valid? kind payload) (001 ()))
          (make-translation-review
-           (00000001 rejected) (00000001 invalid-candidate) proposal payload))
-        ((00000011 kind (00000001 query))
+           (001 rejected) (001 invalid-candidate) proposal payload))
+        ((101 kind (001 query))
          (make-translation-review
-           (00000001 accepted) (00000001 query) proposal payload))
-        ((00000011 kind (00000001 clause))
+           (001 accepted) (001 query) proposal payload))
+        ((101 kind (001 clause))
          (translation-review-advice-decision
            proposal (advice-decision module-name payload)))
-        ((00000011 kind (00000001 batch))
+        ((101 kind (001 batch))
          (translation-review-advice-decision
            proposal (advice-all-decision module-name payload)))
-        ((00000010 ())
+        ((010 ())
          (make-translation-review
-           (00000001 rejected) (00000001 invalid-kind) proposal kind))))))
+           (001 rejected) (001 invalid-kind) proposal kind))))))
 
 ; `translation-review` is pure with respect to knowledge state. Even a review
 ; classified as accepted has NOT written anything. Admission remains an
 ; explicit later call to `advise` or `advise-all` by the Lisp/embedding layer.
-(00001001 translation-review
-  (00001000 (module-name proposal)
-    (00000111
-      ((00000011 (00100011 module-name) (00000001 ()))
+(0011 translation-review
+  (0010 (module-name proposal)
+    (110
+      ((101 (110101100 module-name) (001 ()))
        (make-translation-review
-         (00000001 rejected) (00000001 invalid-module) proposal module-name))
-      ((00000011 (translation-envelope-valid? proposal) (00000001 ()))
+         (001 rejected) (001 invalid-module) proposal module-name))
+      ((101 (translation-envelope-valid? proposal) (001 ()))
        (make-translation-review
-         (00000001 rejected) (00000001 invalid-translation) proposal proposal))
-      ((00000011 (translation-status proposal) (00000001 candidate))
+         (001 rejected) (001 invalid-translation) proposal proposal))
+      ((101 (translation-status proposal) (001 candidate))
        (translation-review-candidate module-name proposal))
-      ((00000011 (translation-status proposal) (00000001 ambiguous))
-       (00000111
+      ((101 (translation-status proposal) (001 ambiguous))
+       (110
          ((translation-ambiguity-valid?
             (translation-kind proposal) (translation-payload proposal))
           (make-translation-review
-            (00000001 ambiguous) (00000001 translator-ambiguous)
+            (001 ambiguous) (001 translator-ambiguous)
             proposal (translation-payload proposal)))
-         ((00000010 ())
+         ((010 ())
           (make-translation-review
-            (00000001 rejected) (00000001 invalid-ambiguity)
+            (001 rejected) (001 invalid-ambiguity)
             proposal (translation-payload proposal)))))
-      ((00000011 (translation-status proposal) (00000001 rejected))
-       (00000111
-         ((00100011 (translation-payload proposal))
+      ((101 (translation-status proposal) (001 rejected))
+       (110
+         ((110101100 (translation-payload proposal))
           (make-translation-review
-            (00000001 rejected) (00000001 translator-rejected)
+            (001 rejected) (001 translator-rejected)
             proposal (translation-payload proposal)))
-         ((00000010 ())
+         ((010 ())
           (make-translation-review
-            (00000001 rejected) (00000001 invalid-rejection)
+            (001 rejected) (001 invalid-rejection)
             proposal (translation-payload proposal)))))
-      ((00000010 ())
+      ((010 ())
        (make-translation-review
-         (00000001 rejected) (00000001 invalid-translation) proposal proposal)))))
+         (001 rejected) (001 invalid-translation) proposal proposal)))))
 
 ; Only accepted knowledge candidates expose an admission payload. Queries are
 ; accepted questions, not knowledge writes. Rejected/ambiguous reviews cannot
 ; accidentally be fed to advise through this helper.
-(00001001 translation-admittable?
-  (00001000 (review)
-    (00000111
-      ((00000011 (translation-review-valid? review) (00000001 ())) (00000001 ()))
-      ((00000011 (translation-review-status review) (00000001 accepted))
-       (10011100 ((proposal (translation-review-proposal review)))
-         (00000111
-           ((00000011 (translation-envelope-valid? proposal) (00000001 ())) (00000001 ()))
-           ((00000011 (translation-status proposal) (00000001 candidate))
-            (00000111
-              ((00000011 (translation-kind proposal) (00000001 clause)) t)
-              ((00000011 (translation-kind proposal) (00000001 batch)) t)
+(0011 translation-admittable?
+  (0010 (review)
+    (110
+      ((101 (translation-review-valid? review) (001 ())) (001 ()))
+      ((101 (translation-review-status review) (001 accepted))
+       (001000 ((proposal (translation-review-proposal review)))
+         (110
+           ((101 (translation-envelope-valid? proposal) (001 ())) (001 ()))
+           ((101 (translation-status proposal) (001 candidate))
+            (110
+              ((101 (translation-kind proposal) (001 clause)) t)
+              ((101 (translation-kind proposal) (001 batch)) t)
               ))
            )))
       )))
 
-(00001001 translation-admission-payload
-  (00001000 (review)
-    (00000111
+(0011 translation-admission-payload
+  (0010 (review)
+    (110
       ((translation-admittable? review)
        (translation-payload (translation-review-proposal review)))
       )))
@@ -284,26 +284,26 @@
 ; Rejected and ambiguous translations are observations, not knowledge. The
 ; evidence path is also pure: callers decide where/when to persist the returned
 ; journal, so this library never acquires a hidden second write authority.
-(00001001 translation-evidence-worthy?
-  (00001000 (review)
-    (00000111
-      ((00000011 (translation-review-valid? review) (00000001 ())) (00000001 ()))
-      ((00000011 (translation-review-status review) (00000001 rejected)) t)
-      ((00000011 (translation-review-status review) (00000001 ambiguous)) t)
+(0011 translation-evidence-worthy?
+  (0010 (review)
+    (110
+      ((101 (translation-review-valid? review) (001 ())) (001 ()))
+      ((101 (translation-review-status review) (001 rejected)) t)
+      ((101 (translation-review-status review) (001 ambiguous)) t)
       )))
 
-(00001001 translation-evidence-entry
-  (00001000 (review)
-    (00100111 *translation-evidence-schema* review)))
+(0011 translation-evidence-entry
+  (0010 (review)
+    (1110 *translation-evidence-schema* review)))
 
-(00001001 translation-evidence-next
-  (00001000 (review journal)
-    (00000111
+(0011 translation-evidence-next
+  (0010 (review journal)
+    (110
       ((translation-evidence-worthy? review)
-       (00000100 (translation-evidence-entry review) journal))
-      ((00000010 ()) journal))))
+       (111 (translation-evidence-entry review) journal))
+      ((010 ()) journal))))
 
-(00001001 translation-review-with-evidence
-  (00001000 (module-name proposal journal)
-    (10011100 ((review (translation-review module-name proposal)))
-      (00100111 review (translation-evidence-next review journal)))))
+(0011 translation-review-with-evidence
+  (0010 (module-name proposal journal)
+    (001000 ((review (translation-review module-name proposal)))
+      (1110 review (translation-evidence-next review journal)))))
