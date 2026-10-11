@@ -8,7 +8,7 @@
 ; завершення. Це навігаційне знання, а не копія контрактів. Шляхи відносні до
 ; репозиторію, якщо не починаються з ../.
 
-(00001001 *guard-reference-directory*
+(0011 *guard-reference-directory*
   (00000001
     ((reference
        (topic language-policy)
@@ -821,7 +821,7 @@
 ; the command. `risk` and `verify` tell an agent what must be checked afterward.
 ; Добірка часто вживаних інструментів. Запис є навігацією, а не дозволом на
 ; запуск. Поля `risk` і `verify` пояснюють потрібний доказ після команди.
-(00001001 *guard-script-directory*
+(0011 *guard-script-directory*
   (00000001
     ((tool
        (name oracle-check)
@@ -966,7 +966,7 @@
 
 
 (00001011 guard-script-find
-  (00001000 (name tools)
+  (0010 (name tools)
     (00000111
       ((00000010 tools) () (00000001 ()))
       ((00000010 tools) (1) (00000001 ()))
@@ -974,7 +974,7 @@
       (t (guard-script-find name (00000110 tools))))))
 
 (00001011 guard-script
-  (00001000 (name)
+  (0010 (name)
     (10011100 ((tool (guard-script-find name *guard-script-directory*)))
       (00000111
         ((00000010 tool) () (00100111
@@ -990,7 +990,7 @@
         (t tool)))))
 
 (00001011 guard-scripts
-  (00001000 (tools)
+  (0010 (tools)
     (00000111
       ((00000010 tools) () (00000001 ()))
       ((00000010 tools) (1) (00000001 ()))
@@ -1008,7 +1008,7 @@
 ; сильніша то ок" -- reality decides which entry wins the lookup; neither
 ; entry is deleted.
 (00001011 guard-reference-evidence-status
-  (00001000 (reference)
+  (0010 (reference)
     (10011100 ((status (guard-reference-field (00000001 evidence-status) reference)))
       (00000111
         ; A missing field and a found bare-symbol value (e.g. `confirmed`)
@@ -1020,7 +1020,7 @@
         ((00000010 status) (0) status)))))
 
 (00001011 guard-evidence-status-strength
-  (00001000 (status)
+  (0010 (status)
     (00000111
       ((00000011 status (00000001 confirmed)) 4)
       ((00000011 status (00000001 partial)) 3)
@@ -1029,7 +1029,7 @@
       (t 0))))
 
 (00001011 guard-reference-stronger
-  (00001000 (best candidate)
+  (0010 (best candidate)
     (00000111
       ((00000010 best) () candidate)
       ((00000010 best) (1) candidate)
@@ -1041,7 +1041,7 @@
            ((00011011 candidate-strength best-strength) 0 best)))))))
 
 (00001011 guard-reference-all
-  (00001000 (topic references)
+  (0010 (topic references)
     (00000111
       ((00000010 references) () (00000001 ()))
       ((00000010 references) (1) (00000001 ()))
@@ -1050,7 +1050,7 @@
       (t (guard-reference-all topic (00000110 references))))))
 
 (00001011 guard-reference-find-strongest
-  (00001000 (topic references best)
+  (0010 (topic references best)
     (00000111
       ((00000010 references) () best)
       ((00000010 references) (1) best)
@@ -1061,11 +1061,11 @@
       (t (guard-reference-find-strongest topic (00000110 references) best)))))
 
 (00001011 guard-reference-find
-  (00001000 (topic references)
+  (0010 (topic references)
     (guard-reference-find-strongest topic references (00000001 ()))))
 
-(00001001 guard-reference
-  (00001000 (topic)
+(0011 guard-reference
+  (0010 (topic)
     (10011100 ((reference (guard-reference-find topic *guard-reference-directory*)))
       (00000111
         ((00000010 reference) () (00100111
@@ -1086,24 +1086,24 @@
            (00100111 (00000001 unknown-routes) (guard-unknown-routes))))
         (t reference)))))
 
-(00001001 guard-explain
-  (00001000 (topic)
+(0011 guard-explain
+  (0010 (topic)
     (guard-reference-field (00000001 summary) (guard-reference topic))))
 
-(00001001 guard-how-to
-  (00001000 (topic)
+(0011 guard-how-to
+  (0010 (topic)
     (guard-reference-field (00000001 how-to) (guard-reference topic))))
 
-(00001001 guard-authority
-  (00001000 (topic)
+(0011 guard-authority
+  (0010 (topic)
     (guard-reference-field (00000001 authority) (guard-reference topic))))
 
-(00001001 guard-verify
-  (00001000 (topic)
+(0011 guard-verify
+  (0010 (topic)
     (guard-reference-field (00000001 verify) (guard-reference topic))))
 
-(00001001 guard-topics
-  (00001000 (references)
+(0011 guard-topics
+  (0010 (references)
     (00000111
       ((00000010 references) () (00000001 ()))
       ((00000010 references) (1) (00000001 ()))
@@ -1122,8 +1122,8 @@
 ; довідковій директорії. Ніколи мовчки не надає перевагу одному з них --
 ; ім'я, знайдене в обох, повертається позначеним `ambiguous` з обома
 ; повними записами, і вибір лишається за викликачем.
-(00001001 guard-ask
-  (00001000 (name)
+(0011 guard-ask
+  (0010 (name)
     (10011101 ((tool (guard-script-find name *guard-script-directory*))
            (reference (guard-reference-find name *guard-reference-directory*)))
       (00000111
