@@ -17,8 +17,8 @@ from fractions import Fraction
 from pathlib import Path
 from typing import Any
 
-EVEN_ID = "sr-qcstbceparwp"
-ODD_ID = "sr-vnrkjfutjtyh"
+EVEN_NAME = "EVENP"
+ODD_NAME = "ODDP"
 
 
 def bit1(value: bool) -> int:
@@ -52,17 +52,58 @@ def corpus() -> list[int]:
     return small + large
 
 
-def verify_stable_rows(path: Path) -> dict[str, dict[str, Any]]:
+def verify_current_residents(path: Path | None = None) -> dict[str, dict[str, Any]]:
+    """Read current D6 identity only from the owner-ratified #3393 map."""
+    if path is None:
+        path = Path(__file__).resolve().parents[2] / "knowledge" / "d6-ratified.json"
     data = json.loads(path.read_text(encoding="utf-8"))
-    rows = {row["stable_resident_id"]: row for row in data["rows"]}
-    assert EVEN_ID in rows and ODD_ID in rows
-    even = rows[EVEN_ID]
-    odd = rows[ODD_ID]
-    assert even["current_domain"] == odd["current_domain"] == "D6"
-    assert even["semantic_status"] == odd["semantic_status"] == "RECOVERED"
-    assert even["semantic_role"] == odd["semantic_role"] == "predicate"
-    assert even["semantic_class"] == odd["semantic_class"] == "predicate"
-    return {EVEN_ID: even, ODD_ID: odd}
+    if data.get("schema") != "d6-ratified/v1":
+        raise AssertionError("current D6 authority schema mismatch")
+    if data.get("status") != "owner-ratified" or data.get("authority") != "#3393":
+        raise AssertionError("current D6 authority must be owner-ratified #3393")
+    if data.get("width") != 6 or data.get("capacity") != 64:
+        raise AssertionError("D6 exact width/capacity mismatch")
+    if data.get("occupancy") != 64 or data.get("distinct_residents") != 64:
+        raise AssertionError("current D6 authority must remain dense 64/64")
+
+    residents = data.get("residents")
+    expected_coordinates = {format(i, "06b") for i in range(64)}
+    if not isinstance(residents, dict) or set(residents) != expected_coordinates:
+        raise AssertionError("ratified D6 map must contain all exact six-bit coordinates")
+    if len(set(residents.values())) != 64:
+        raise AssertionError("ratified D6 residents must be unique")
+
+    rows = data.get("rows")
+    if not isinstance(rows, list):
+        raise AssertionError("ratified D6 map lacks its evidence rows")
+    by_name: dict[str, dict[str, Any]] = {}
+    for name in (EVEN_NAME, ODD_NAME):
+        matches = [row for row in rows if row.get("resident") == name]
+        if len(matches) != 1:
+            raise AssertionError(f"current #3393 D6 map must contain exactly one {name} row")
+        row = matches[0]
+        coordinate = row.get("coordinate")
+        if (
+            not isinstance(coordinate, str)
+            or len(coordinate) != 6
+            or set(coordinate) - {"0", "1"}
+            or residents.get(coordinate) != name
+        ):
+            raise AssertionError(f"{name} row disagrees with the authoritative resident map")
+        if row.get("status") != "OWNER-RATIFIED":
+            raise AssertionError(f"{name} is not owner-ratified")
+        by_name[name] = {
+            "name": name,
+            "domain": "D6",
+            "current_bits": coordinate,
+            "authority": "#3393",
+            "status": row["status"],
+            "law_status": row.get("law_status", "UNSPECIFIED"),
+            "evidence": row.get("evidence", []),
+        }
+    return by_name
+
+
 
 
 def semantic_witness(values: list[int]) -> dict[str, Any]:
@@ -132,51 +173,60 @@ def semantic_witness(values: list[int]) -> dict[str, Any]:
     }
 
 
-def geometry_accounting(stable: dict[str, dict[str, Any]]) -> dict[str, Any]:
-    even_bits = stable[EVEN_ID]["current_bits"]
-    odd_bits = stable[ODD_ID]["current_bits"]
-    assert len(even_bits) == len(odd_bits) == 6
-    current_hamming = sum(a != b for a, b in zip(even_bits, odd_bits, strict=True))
-
-    # This is accounting, not a semantic theorem. A relation certificate can
-    # name both arbitrary 6-bit coordinates directly (12 coordinate bits), or a
-    # local one-bit-axis candidate can name one 5-bit prefix plus the fact that
-    # both role bits are used (5 prefix bits + 1 orientation convention).
+def geometry_accounting(current: dict[str, dict[str, Any]]) -> dict[str, Any]:
+    even_bits = current[EVEN_NAME]["current_bits"]
+    odd_bits = current[ODD_NAME]["current_bits"]
+    if len(even_bits) != 6 or len(odd_bits) != 6:
+        raise AssertionError("current D6 coordinates must preserve exact width")
+    hamming = sum(a != b for a, b in zip(even_bits, odd_bits, strict=True))
     shared_prefix = even_bits[:-1] if even_bits[:-1] == odd_bits[:-1] else None
     current_axis_payload_bits = 6 if shared_prefix is not None else None
-    arbitrary_pair_payload_bits = 12
 
+    # Coordinate geometry is a property of the ratified presentation, not a
+    # derivation of the parity law. #3393 explicitly marks this axis as candidate.
+    law_statuses = {current[EVEN_NAME]["law_status"], current[ODD_NAME]["law_status"]}
+    geometry_status = (
+        "NEIGHBORHOOD-CANDIDATE"
+        if law_statuses == {"NEIGHBORHOOD-CANDIDATE"}
+        else "BLOCKED-OWNER-LAW-REVIEW"
+    )
     return {
-        "current_projection": {
-            EVEN_ID: even_bits,
-            ODD_ID: odd_bits,
-            "hamming_distance": current_hamming,
+        "current_ratified_projection": {
+            EVEN_NAME: even_bits,
+            ODD_NAME: odd_bits,
+            "authority": "#3393",
+            "hamming_distance": hamming,
+            "law_statuses": {
+                EVEN_NAME: current[EVEN_NAME]["law_status"],
+                ODD_NAME: current[ODD_NAME]["law_status"],
+            },
         },
-        "semantic_geometry_status": "NEIGHBORHOOD-CANDIDATE",
+        "semantic_geometry_status": geometry_status,
         "one_bit_axis_is_semantically_proved": False,
         "coordinate_accounting": {
-            "arbitrary_pair_direct_coordinate_bits": arbitrary_pair_payload_bits,
+            "arbitrary_pair_direct_coordinate_bits": 12,
             "current_shared_prefix_plus_orientation_bits": current_axis_payload_bits,
-            "note": "mechanism/certificate accounting only; does not prove adjacency",
+            "note": "coordinate/certificate accounting only; does not prove a semantic law",
         },
         "reencoding_guard": (
-            "semantic complement law remains true after arbitrary coordinate "
-            "re-encoding; therefore CURRENT adjacency is not semantic authority"
+            "the exact-integer complement law survives coordinate re-encoding; "
+            "current adjacency is only an owner-ratified presentation candidate"
         ),
     }
 
 
+
+
 def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__)
-    ap.add_argument("--corpus", type=Path, required=True)
     ap.add_argument("--out", type=Path, required=True)
     args = ap.parse_args()
     args.out.mkdir(parents=True, exist_ok=True)
 
-    stable = verify_stable_rows(args.corpus)
+    current = verify_current_residents()
     values = corpus()
     witness = semantic_witness(values)
-    geometry = geometry_accounting(stable)
+    geometry = geometry_accounting(current)
 
     with (args.out / "integer-witness.tsv").open("w", newline="", encoding="utf-8") as fh:
         writer = csv.DictWriter(
@@ -189,9 +239,12 @@ def main() -> int:
         writer.writerows(witness["rows"])
 
     relation = {
-        "schema": "d6-parity-duality/v1",
-        "authority": "research-only",
-        "resident_ids": [EVEN_ID, ODD_ID],
+        "schema": "d6-parity-duality/v2",
+        "authority": "research-only; current resident projection from #3393",
+        "resident_projection": {
+            EVEN_NAME: current[EVEN_NAME],
+            ODD_NAME: current[ODD_NAME],
+        },
         "carrier": "exact-integer",
         "output_domain": "D1-PredicateBit",
         "relation_type": "DUALITY-COMPLEMENT",
@@ -218,11 +271,11 @@ def main() -> int:
         "geometry": geometry,
         "status": {
             "semantic_relation": "BOUNDED-CONFIRMED-EXACT-INTEGER",
-            "geometry": "CANDIDATE-NOT-PROVED",
+            "geometry": geometry["semantic_geometry_status"],
         },
         "non_conclusions": [
-            "CURRENT one-bit adjacency is not semantic authority",
-            "the exact 0/1 coordinate orientation is not forced by complementarity",
+            "exact-integer parity proof does not derive D6 coordinate placement",
+            "the one-bit axis is a ratified candidate, not a proved semantic law",
             "behavior outside the exact-integer carrier is not claimed",
             "no production coordinate is changed",
         ],
@@ -235,7 +288,7 @@ def main() -> int:
     report = [
         "# D6 parity duality — #3078",
         "",
-        f"Stable residents checked: **{EVEN_ID}**, **{ODD_ID}**.",
+        f"Current owner-ratified residents checked: **{EVEN_NAME} = {current[EVEN_NAME]['current_bits']}**, **{ODD_NAME} = {current[ODD_NAME]['current_bits']}** (#3393).",
         f"Exact integer cases: **{len(values)}**.",
         f"Period-2 checks: **{witness['period2_checks']}**.",
         "Predicate results: exact **D1 1/0**.",
@@ -243,24 +296,27 @@ def main() -> int:
         "Semantic result:",
         "- complementarity PASS;",
         "- mutual exclusivity PASS;",
-        "- exhaustiveness on integers PASS;",
+        "- exhaustiveness on exact integers PASS;",
         "- period-2 invariance PASS;",
         "- false period-1 law REFUTED;",
         "- false even=odd law REFUTED;",
         "- non-integers fail OUT-OF-SCOPE in this witness.",
         "",
-        "Geometry result:",
-        f"- CURRENT projection Hamming distance = **{geometry['current_projection']['hamming_distance']}**;",
-        "- one-bit neighborhood = **CANDIDATE**, not semantic theorem;",
-        "- complementarity survives arbitrary coordinate re-encoding.",
+        "Current coordinate observation:",
+        f"- ratified coordinates are {current[EVEN_NAME]['current_bits']} and {current[ODD_NAME]['current_bits']};",
+        f"- observed Hamming distance = **{geometry['current_ratified_projection']['hamming_distance']}**;",
+        f"- owner law status = **{geometry['semantic_geometry_status']}**, not semantic proof;",
+        "- the parity theorem does not depend on these coordinates.",
         "",
-        "Handoff: relation type DUALITY-COMPLEMENT; geometry remains NEIGHBORHOOD-CANDIDATE.",
+        "Handoff: exact-integer duality is confirmed within this bounded witness; coordinate neighborhood remains a candidate only.",
         "",
     ]
-    text = "\n".join(report)
-    (args.out / "report.md").write_text(text, encoding="utf-8")
-    print(text)
+    rendered = "\n".join(report)
+    (args.out / "report.md").write_text(rendered, encoding="utf-8")
+    print(rendered)
     return 0
+
+
 
 
 if __name__ == "__main__":
