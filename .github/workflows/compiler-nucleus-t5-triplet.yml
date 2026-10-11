@@ -20,6 +20,10 @@ on:
       - "lib/domains/d3.lisp"
       - "lib/domains/d4.lisp"
       - "crates/sens-cli/src/bin/sens-trit.rs"
+      - "crates/xtask/src/compiler_compile.rs"
+      - "crates/xtask/src/main.rs"
+      - "crates/sens/src/canonical_reader.rs"
+      - "crates/sens/src/binary_execution.rs"
       - "tests/test_migrate_t5_batch.py"
   workflow_dispatch:
 
@@ -161,6 +165,17 @@ jobs:
             "semantic_oracle_admitted": False
           }, sort_keys=True))
           PY
+
+      - name: Compile the compiler's own T5 triplet through the real SENS compiler
+        shell: bash
+        run: |
+          set -euo pipefail
+          artifact="$RUNNER_TEMP/compiler-nucleus-self-compile.bin"
+          cargo xtask compiler-compile \
+            --triplet "$GITHUB_WORKSPACE/lib/compiler-nucleus.sens" \
+            --out "$artifact"
+          test -s "$artifact"
+          printf 'compiler_self_compile_artifact_bytes=%s\n' "$(wc -c < "$artifact" | tr -d ' ')"
 
       - name: Commit only newly generated projections to main
         if: steps.generate.outputs.created == 'true'
