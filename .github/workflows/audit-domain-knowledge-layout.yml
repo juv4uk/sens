@@ -1,0 +1,29 @@
+name: Audited domain-source knowledge/layout cutover
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "knowledge/astronomy.lisp"
+      - "knowledge/physics.lisp"
+      - "knowledge/family.lisp"
+      - "knowledge/guard-reference.lisp"
+      - "lib/machine/layout/pair-x86-64.lisp"
+      - "tests/test_sid8_knowledge_layout_source.py"
+      - ".github/workflows/audit-domain-knowledge-layout.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Check five rewritten original Lisp files
+        run: python3 -m unittest discover -s tests -p test_sid8_knowledge_layout_source.py -v
