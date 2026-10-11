@@ -12,7 +12,7 @@
 use std::{env, fs, fs::OpenOptions, io::Write, path::Path, process};
 
 const USAGE: &str =
-    "usage: sens-trit (encode path.lisp | open path.sens | view path.sens | decode path.sens | explain path.sens | eval path.sens | eval-core4 path.sens | verify path.lisp | open-f3 path.senc | decode-f3 path.senc | eval-f3 path.senc)\n       sens-trit path.sens  # open only; never execute implicitly";
+    "usage: sens-trit (encode path.lisp | open path.sens | view path.sens | decode path.sens | explain path.sens | eval path.sens | eval-core4 path.sens | verify path.lisp | encode-f3 path.sens | open-f3 path.senc | decode-f3 path.senc | eval-f3 path.senc)\n       sens-trit path.sens  # open only; never execute implicitly";
 
 fn sibling_sens(path: &Path) -> Result<std::path::PathBuf, String> {
     if path.extension().and_then(|ext| ext.to_str()) != Some("lisp") {
@@ -38,6 +38,28 @@ fn read_explicit_f3(path: &Path) -> Result<Vec<u8>, String> {
     // parsing and execution stays in the same production D2/T5 pipeline.
     sens::frame3_small::decode_explicit_small_f3(&framed)
         .map_err(|e| format!("explicit small F3 rejected: {e:?}"))
+}
+
+
+fn write_explicit_small_f3(path: &Path) -> Result<(), String> {
+    // Operator-requested only: never change the normal T5 .sens source.
+    let original = read_sens(path)?;
+    let framed = sens::frame3_small::encode_explicit_small_f3(&original)
+        .map_err(|e| format!("tiny F3 encode rejected: {e:?}"))?
+        .ok_or("this .sens program is not a smaller valid original F3 file")?;
+    let dest = path.with_extension("senc");
+    let mut out = OpenOptions::new().create_new(true).write(true)
+        .open(&dest).map_err(|e| format!("create-new .senc: {e}"))?;
+    out.write_all(&framed).map_err(|e| format!("write .senc: {e}"))?;
+    out.sync_all().map_err(|e| format!("sync .senc: {e}"))?;
+    if fs::read(&dest).map_err(|e| format!("read-back .senc: {e}"))? != framed
+        || read_explicit_f3(&dest)? != original
+    {
+        return Err("physical tiny F3 write did not verify against input T5 bytes".into());
+    }
+    println!("{} F3 {}B <- T5 {}B; source unchanged",
+             dest.display(), framed.len(), original.len());
+    Ok(())
 }
 
 fn verify_companion(source: &str, binary: &[u8]) -> Result<(), String> {
@@ -207,6 +229,7 @@ fn execute() -> Result<(), String> {
             println!("{}", result.value);
             Ok(())
         }
+        "encode-f3" => write_explicit_small_f3(path),
         "open-f3" => {
             let canonical_t5 = read_explicit_f3(path)?;
             let human = sens::open_ternary_program(&canonical_t5)
@@ -271,6 +294,7 @@ mod eval_tests {
         assert_eq!(direct.output, framed.output);
         assert!(sens::decode_ternary_program(&bytes).is_err());
         assert!(USAGE.contains("eval-f3 path.senc"));
+        assert!(USAGE.contains("encode-f3 path.sens"));
     }
 
     #[test]
