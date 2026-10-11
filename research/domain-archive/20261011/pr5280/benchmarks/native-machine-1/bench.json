@@ -1,0 +1,23 @@
+{
+  "schema": "sens-benchmark-manifest/v1",
+  "stand": "native-machine-1",
+  "wing": "Physical T5 D3 and Linux x86-64 admitted CPU execution",
+  "roles": [
+    "MEASUREMENT",
+    "CONFORMANCE",
+    "FALSIFIER"
+  ],
+  "question": "What actual in-process wall time and admission status do current physical T5 primitives and the proven/blocked native CAR/CONS and CDR/CONS routes achieve?",
+  "claim": "AMD EPYC hosted per-SHA raw data with real T5 and exact-value witnesses; native CAR/CDR u64 bridge is BLOCKED on historic three-field COND, so there is no native speed ratio. Physical T5 is a separate workload and not a third implementation of the u64 pair. No universal speed, C/Rust, GPU or FPGA claim.",
+  "witness": [
+    "README.md",
+    "summarize.py",
+    "test_summarize.py",
+    "crates/sens-host/examples/native_machine_bench.rs",
+    ".github/workflows/native-machine-benchmark-1.yml"
+  ],
+  "status": "MEASURED-NATIVE-BLOCKED",
+  "generation": "Contract 11.8 / 2026-10-10 measured native benchmark 1",
+  "axis": "sens-native-machine/physical-t5-and-native-u64-route",
+  "reproduce": "cargo build --locked --release -p sens-host --example native_machine_bench && target/release/examples/native_machine_bench --reps 15 --warmups 4 > raw.tsv && python3 benchmarks/native-machine-1/summarize.py raw.tsv --out /tmp/sens-native-machine-1"
+}
