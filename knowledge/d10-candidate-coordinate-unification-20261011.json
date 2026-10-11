@@ -11139,21 +11139,31 @@
       "ratified": false,
       "physical_t5_authorized": false,
       "proof_readiness": {
-        "status": "INCOMPLETE-SOURCE-SEMANTICS",
-        "missing": [
-          "semantic-law",
-          "positive-witness",
-          "negative-falsifier"
-        ],
+        "status": "SOURCE-LAW-WITNESSES-PRESENT-UNVERIFIED",
+        "missing": [],
         "selection": false,
         "ratification": false,
-        "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+        "next_gate": "D1-D9-DEDUPE-CORE-VS-LIBRARY-AND-INDEPENDENT-ORACLE"
       },
       "source_candidate_gate": {
         "status": "USER-INTEREST-NAME-ONLY-NO-SOURCE-OPERATION",
         "source_kind": "owner-interest",
         "not_a_ratified_resident": true,
         "reason": "A source occurrence or wish-list name is not an independent D10 law; candidate requires typed contract and distinct behavior."
+      },
+      "source_evidence": {
+        "status": "PINNED-CHESS-LAW-REVIEW-NOT-CANONICAL",
+        "source_path": "juv4uk/chess-lisp-zero:lib/chess.lisp",
+        "source_git_blob": "41f7bd7892b1486636556ffb1191fe4a52e1d531",
+        "source_test_path": "juv4uk/chess-lisp-zero:tests/perft.lisp",
+        "source_test_git_blob": "80c8946acb0edee9b36bfd089900fc7429557f85",
+        "law": "On a valid 64-cell chess board indexed a1=0..h8=63, return exactly the board cell at requested 0..63 index, including empty cell representation ().",
+        "positive": "Initial board: piece-at(e2:index 12)=wp, piece-at(a1:index 0)=wr; e4:index 28 is initially empty.",
+        "negative": "Returning the black pawn at e7 for index 12 or a1 for index 56 reverses ranks and is incorrect.",
+        "core_vs_library": "BOARD-INDEX-PROJECTION-OF-VECTOR-REF",
+        "oracle": "DONOR-TEST-SOURCE-PINNED-NOT-EXECUTED-TODAY",
+        "semantic_review": "PENDING",
+        "ratification": false
       }
     },
     {
@@ -11183,21 +11193,31 @@
       "ratified": false,
       "physical_t5_authorized": false,
       "proof_readiness": {
-        "status": "INCOMPLETE-SOURCE-SEMANTICS",
-        "missing": [
-          "semantic-law",
-          "positive-witness",
-          "negative-falsifier"
-        ],
+        "status": "SOURCE-LAW-WITNESSES-PRESENT-UNVERIFIED",
+        "missing": [],
         "selection": false,
         "ratification": false,
-        "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+        "next_gate": "D1-D9-DEDUPE-CORE-VS-LIBRARY-AND-INDEPENDENT-ORACLE"
       },
       "source_candidate_gate": {
         "status": "USER-INTEREST-NAME-ONLY-NO-SOURCE-OPERATION",
         "source_kind": "owner-interest",
         "not_a_ratified_resident": true,
         "reason": "A source occurrence or wish-list name is not an independent D10 law; candidate requires typed contract and distinct behavior."
+      },
+      "source_evidence": {
+        "status": "PINNED-CHESS-LAW-REVIEW-NOT-CANONICAL",
+        "source_path": "juv4uk/chess-lisp-zero:lib/chess.lisp",
+        "source_git_blob": "41f7bd7892b1486636556ffb1191fe4a52e1d531",
+        "source_test_path": "juv4uk/chess-lisp-zero:tests/perft.lisp",
+        "source_test_git_blob": "80c8946acb0edee9b36bfd089900fc7429557f85",
+        "law": "For a valid position, emit the finite list of legal moves by generating pseudo moves, then filtering every move that leaves its own king in check; includes specials such as legal castling, en passant and promotion.",
+        "positive": "Pinned donor test: initial standard chess position has 20 legal moves; a standard Kiwipete fixture has 48 root legal moves.",
+        "negative": "Including a pseudo move that leaves the moving king attacked is not the legal-move generator; returning fewer than 20 from initial setup violates the pinned donor fixture.",
+        "core_vs_library": "APPLICATION-CHESS-RULES-LIBRARY",
+        "oracle": "DONOR-TEST-SOURCE-PINNED-NOT-EXECUTED-TODAY",
+        "semantic_review": "PENDING",
+        "ratification": false
       }
     },
     {
@@ -11227,21 +11247,31 @@
       "ratified": false,
       "physical_t5_authorized": false,
       "proof_readiness": {
-        "status": "INCOMPLETE-SOURCE-SEMANTICS",
-        "missing": [
-          "semantic-law",
-          "positive-witness",
-          "negative-falsifier"
-        ],
+        "status": "SOURCE-LAW-WITNESSES-PRESENT-UNVERIFIED",
+        "missing": [],
         "selection": false,
         "ratification": false,
-        "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+        "next_gate": "D1-D9-DEDUPE-CORE-VS-LIBRARY-AND-INDEPENDENT-ORACLE"
       },
       "source_candidate_gate": {
         "status": "USER-INTEREST-NAME-ONLY-NO-SOURCE-OPERATION",
         "source_kind": "owner-interest",
         "not_a_ratified_resident": true,
         "reason": "A source occurrence or wish-list name is not an independent D10 law; candidate requires typed contract and distinct behavior."
+      },
+      "source_evidence": {
+        "status": "PINNED-CHESS-LAW-REVIEW-NOT-CANONICAL",
+        "source_path": "juv4uk/chess-lisp-zero:lib/chess.lisp",
+        "source_git_blob": "41f7bd7892b1486636556ffb1191fe4a52e1d531",
+        "source_test_path": "juv4uk/chess-lisp-zero:tests/perft.lisp",
+        "source_test_git_blob": "80c8946acb0edee9b36bfd089900fc7429557f85",
+        "law": "For a candidate pseudo-generated chess move and given valid position, determine whether the mover's king remains safe following its full state transition; en-passant must account for removal of the captured pawn.",
+        "positive": "Given the initial position, legal candidate e2->e4 (12->28) is accepted; a move leaving the mover's king in check is rejected.",
+        "negative": "Treating en-passant as mere from/to mutation without removing the captured pawn can miss discovered check and must be rejected.",
+        "core_vs_library": "SOURCE-PREDICATE-CHESS-LEGAL-MOVE-REVIEW",
+        "oracle": "DONOR-TEST-SOURCE-PINNED-NOT-EXECUTED-TODAY",
+        "semantic_review": "PENDING",
+        "ratification": false
       }
     },
     {
@@ -11271,21 +11301,31 @@
       "ratified": false,
       "physical_t5_authorized": false,
       "proof_readiness": {
-        "status": "INCOMPLETE-SOURCE-SEMANTICS",
-        "missing": [
-          "semantic-law",
-          "positive-witness",
-          "negative-falsifier"
-        ],
+        "status": "SOURCE-LAW-WITNESSES-PRESENT-UNVERIFIED",
+        "missing": [],
         "selection": false,
         "ratification": false,
-        "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+        "next_gate": "D1-D9-DEDUPE-CORE-VS-LIBRARY-AND-INDEPENDENT-ORACLE"
       },
       "source_candidate_gate": {
         "status": "USER-INTEREST-NAME-ONLY-NO-SOURCE-OPERATION",
         "source_kind": "owner-interest",
         "not_a_ratified_resident": true,
         "reason": "A source occurrence or wish-list name is not an independent D10 law; candidate requires typed contract and distinct behavior."
+      },
+      "source_evidence": {
+        "status": "PINNED-CHESS-LAW-REVIEW-NOT-CANONICAL",
+        "source_path": "juv4uk/chess-lisp-zero:lib/chess.lisp",
+        "source_git_blob": "41f7bd7892b1486636556ffb1191fe4a52e1d531",
+        "source_test_path": "juv4uk/chess-lisp-zero:tests/perft.lisp",
+        "source_test_git_blob": "80c8946acb0edee9b36bfd089900fc7429557f85",
+        "law": "Given valid position and legal move, return a new position with updated board, side to move, castling rights, en-passant state and clocks; donor begins from copied board rather than mutating original position board.",
+        "positive": "From initial white-to-move state, e2->e4 yields white pawn at index 28, empty index 12 and black to move, preserving the original position board.",
+        "negative": "Original board mutated in-place or side remaining white after white move violates donor's copied-board state transition.",
+        "core_vs_library": "APPLICATION-STATE-TRANSITION-LIBRARY",
+        "oracle": "DONOR-TEST-SOURCE-PINNED-NOT-EXECUTED-TODAY",
+        "semantic_review": "PENDING",
+        "ratification": false
       }
     },
     {
@@ -11315,21 +11355,31 @@
       "ratified": false,
       "physical_t5_authorized": false,
       "proof_readiness": {
-        "status": "INCOMPLETE-SOURCE-SEMANTICS",
-        "missing": [
-          "semantic-law",
-          "positive-witness",
-          "negative-falsifier"
-        ],
+        "status": "SOURCE-LAW-WITNESSES-PRESENT-UNVERIFIED",
+        "missing": [],
         "selection": false,
         "ratification": false,
-        "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+        "next_gate": "D1-D9-DEDUPE-CORE-VS-LIBRARY-AND-INDEPENDENT-ORACLE"
       },
       "source_candidate_gate": {
         "status": "USER-INTEREST-NAME-ONLY-NO-SOURCE-OPERATION",
         "source_kind": "owner-interest",
         "not_a_ratified_resident": true,
         "reason": "A source occurrence or wish-list name is not an independent D10 law; candidate requires typed contract and distinct behavior."
+      },
+      "source_evidence": {
+        "status": "PINNED-CHESS-LAW-REVIEW-NOT-CANONICAL",
+        "source_path": "juv4uk/chess-lisp-zero:lib/chess.lisp",
+        "source_git_blob": "41f7bd7892b1486636556ffb1191fe4a52e1d531",
+        "source_test_path": "juv4uk/chess-lisp-zero:tests/perft.lisp",
+        "source_test_git_blob": "80c8946acb0edee9b36bfd089900fc7429557f85",
+        "law": "For a valid board and chosen side, locate its king and decide whether it is attacked by opposite side; pinned donor returns YES for missing king, an explicit donor edge not a general chess-law claim.",
+        "positive": "In pinned donor mate-board with black king at index 56, white queen at 49 and white king at 42, black is in check; ordinary initial white king is not in check.",
+        "negative": "For an attacked king, reporting NO violates attack predicate; dropping missing-king edge silently would depart from exact donor behavior.",
+        "core_vs_library": "CHESS-IN-CHECK-SOURCE-PROJECTION",
+        "oracle": "DONOR-TEST-SOURCE-PINNED-NOT-EXECUTED-TODAY",
+        "semantic_review": "PENDING",
+        "ratification": false
       }
     },
     {
@@ -11359,21 +11409,31 @@
       "ratified": false,
       "physical_t5_authorized": false,
       "proof_readiness": {
-        "status": "INCOMPLETE-SOURCE-SEMANTICS",
-        "missing": [
-          "semantic-law",
-          "positive-witness",
-          "negative-falsifier"
-        ],
+        "status": "SOURCE-LAW-WITNESSES-PRESENT-UNVERIFIED",
+        "missing": [],
         "selection": false,
         "ratification": false,
-        "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+        "next_gate": "D1-D9-DEDUPE-CORE-VS-LIBRARY-AND-INDEPENDENT-ORACLE"
       },
       "source_candidate_gate": {
         "status": "USER-INTEREST-NAME-ONLY-NO-SOURCE-OPERATION",
         "source_kind": "owner-interest",
         "not_a_ratified_resident": true,
         "reason": "A source occurrence or wish-list name is not an independent D10 law; candidate requires typed contract and distinct behavior."
+      },
+      "source_evidence": {
+        "status": "PINNED-CHESS-LAW-REVIEW-NOT-CANONICAL",
+        "source_path": "juv4uk/chess-lisp-zero:lib/chess.lisp",
+        "source_git_blob": "41f7bd7892b1486636556ffb1191fe4a52e1d531",
+        "source_test_path": "juv4uk/chess-lisp-zero:tests/perft.lisp",
+        "source_test_git_blob": "80c8946acb0edee9b36bfd089900fc7429557f85",
+        "law": "Return YES precisely when side to move has no legal moves and its king is in check; this is the checkmate branch of the donor chess-terminal-state operation.",
+        "positive": "Pinned donor fixture: black king a8=56, white queen b7=49, white king c6=42, black to move gives `checkmate`.",
+        "negative": "The pinned stalemate fixture (black king a8=56, white queen b6=41, white king c6=42) must not be reported as checkmate.",
+        "core_vs_library": "TERMINAL-STATE-MATCHES-CHECKMATE-DERIVED",
+        "oracle": "DONOR-TEST-SOURCE-PINNED-NOT-EXECUTED-TODAY",
+        "semantic_review": "PENDING",
+        "ratification": false
       }
     },
     {
@@ -11403,21 +11463,31 @@
       "ratified": false,
       "physical_t5_authorized": false,
       "proof_readiness": {
-        "status": "INCOMPLETE-SOURCE-SEMANTICS",
-        "missing": [
-          "semantic-law",
-          "positive-witness",
-          "negative-falsifier"
-        ],
+        "status": "SOURCE-LAW-WITNESSES-PRESENT-UNVERIFIED",
+        "missing": [],
         "selection": false,
         "ratification": false,
-        "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+        "next_gate": "D1-D9-DEDUPE-CORE-VS-LIBRARY-AND-INDEPENDENT-ORACLE"
       },
       "source_candidate_gate": {
         "status": "USER-INTEREST-NAME-ONLY-NO-SOURCE-OPERATION",
         "source_kind": "owner-interest",
         "not_a_ratified_resident": true,
         "reason": "A source occurrence or wish-list name is not an independent D10 law; candidate requires typed contract and distinct behavior."
+      },
+      "source_evidence": {
+        "status": "PINNED-CHESS-LAW-REVIEW-NOT-CANONICAL",
+        "source_path": "juv4uk/chess-lisp-zero:lib/chess.lisp",
+        "source_git_blob": "41f7bd7892b1486636556ffb1191fe4a52e1d531",
+        "source_test_path": "juv4uk/chess-lisp-zero:tests/perft.lisp",
+        "source_test_git_blob": "80c8946acb0edee9b36bfd089900fc7429557f85",
+        "law": "Return YES precisely when side to move has no legal moves and is NOT in check; this is the stalemate branch of the donor chess-terminal-state operation.",
+        "positive": "Pinned donor fixture: black king a8=56, white queen b6=41, white king c6=42, black to move gives `stalemate`.",
+        "negative": "The pinned checkmate fixture (black king a8=56, white queen b7=49, white king c6=42) must not be reported as stalemate.",
+        "core_vs_library": "TERMINAL-STATE-MATCHES-STALEMATE-DERIVED",
+        "oracle": "DONOR-TEST-SOURCE-PINNED-NOT-EXECUTED-TODAY",
+        "semantic_review": "PENDING",
+        "ratification": false
       }
     },
     {
@@ -11447,21 +11517,31 @@
       "ratified": false,
       "physical_t5_authorized": false,
       "proof_readiness": {
-        "status": "INCOMPLETE-SOURCE-SEMANTICS",
-        "missing": [
-          "semantic-law",
-          "positive-witness",
-          "negative-falsifier"
-        ],
+        "status": "SOURCE-LAW-WITNESSES-PRESENT-UNVERIFIED",
+        "missing": [],
         "selection": false,
         "ratification": false,
-        "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+        "next_gate": "D1-D9-DEDUPE-CORE-VS-LIBRARY-AND-INDEPENDENT-ORACLE"
       },
       "source_candidate_gate": {
         "status": "USER-INTEREST-NAME-ONLY-NO-SOURCE-OPERATION",
         "source_kind": "owner-interest",
         "not_a_ratified_resident": true,
         "reason": "A source occurrence or wish-list name is not an independent D10 law; candidate requires typed contract and distinct behavior."
+      },
+      "source_evidence": {
+        "status": "PINNED-CHESS-LAW-REVIEW-NOT-CANONICAL",
+        "source_path": "juv4uk/chess-lisp-zero:lib/chess.lisp",
+        "source_git_blob": "41f7bd7892b1486636556ffb1191fe4a52e1d531",
+        "source_test_path": "juv4uk/chess-lisp-zero:tests/perft.lisp",
+        "source_test_git_blob": "80c8946acb0edee9b36bfd089900fc7429557f85",
+        "law": "For nonnegative integer depth, recursively count every legal move sequence of exactly that depth from a valid position; at depth 0 return 1; not a heuristic game-tree evaluation.",
+        "positive": "Pinned donor initial-position tests: perft(0)=1 by definition, perft(1)=20, perft(2)=400, perft(3)=8902.",
+        "negative": "Returning only distinct board states rather than move sequences, or perft(initial,2)!=400, violates canonical donor perft recurrence.",
+        "core_vs_library": "APPLICATION-MOVE-TREE-LIBRARY-COMPOSITE",
+        "oracle": "DONOR-TEST-SOURCE-PINNED-NOT-EXECUTED-TODAY",
+        "semantic_review": "PENDING",
+        "ratification": false
       }
     },
     {
@@ -23418,7 +23498,7 @@
         "rows": 9
       }
     ],
-    "total_passports": 111,
+    "total_passports": 119,
     "latest_sources": [
       {
         "path": "knowledge/d10-general-congruence-merge-hobbies-v1.json",
@@ -23466,7 +23546,7 @@
         "rows": 3
       }
     ],
-    "latest_source_pass": 3,
+    "latest_source_pass": 8,
     "source_verified_at": "b3cd6dbe9a8094e3794c1421e91f3d5b4c5247b6",
     "latest_model_review_specs": [
       "CALL-NEXT-METHOD",
@@ -23493,6 +23573,16 @@
       "board-from-fen",
       "fen-from-board",
       "TIME-SCALE-CONVERT"
+    ],
+    "latest_chess_logic_contracts": [
+      "piece-at",
+      "generate-moves",
+      "legal-moves?",
+      "apply-move",
+      "is-check?",
+      "is-mate?",
+      "is-stalemate?",
+      "perft"
     ]
   },
   "evidence_gate": {
@@ -23503,13 +23593,13 @@
     "formal_ratified": 0,
     "semantic_source_audit": {
       "total": 309,
-      "has_law": 219,
-      "has_positive": 204,
-      "has_negative": 204,
-      "law_and_witnesses": 201,
-      "missing_law": 90,
-      "missing_positive": 105,
-      "missing_negative": 105
+      "has_law": 227,
+      "has_positive": 212,
+      "has_negative": 212,
+      "law_and_witnesses": 209,
+      "missing_law": 82,
+      "missing_positive": 97,
+      "missing_negative": 97
     },
     "note": "All 28 SI names denote seven constants as data, not twenty-eight independent D10 residents; other source witness records are research-only.",
     "uncorroborated_source_name_census": 96,
