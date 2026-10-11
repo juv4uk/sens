@@ -1,0 +1,77 @@
+{
+  "schema": "sens.domain-research-archive-extension/v1",
+  "date": "2026-10-11",
+  "source_repository": "juv4uk/sens",
+  "source_pr": 2005,
+  "source_pr_url": "https://github.com/juv4uk/sens/pull/2005",
+  "source_head_sha": "4bce46edc100b0a2d81e31b3cc1cd0ea5906b08c",
+  "status": "HISTORICAL-RESEARCH-ONLY-NOT-RATIFIED-NOT_EXECUTABLE",
+  "source_count": 7,
+  "archived_verified_count": 7,
+  "source_only_count": 0,
+  "summary": "Сім першоджерел PR #2005 збережено за оригінальними Git blob SHA, включно з двома програмними файлами як неактивні *.source.txt; це не діючий код.",
+  "scope": "Cachegrind smoke widths 64,65,128,255,256,257,1024,4096; no production carrier decision or D1-D10 semantic admission.",
+  "records": [
+    {
+      "original_path": "benchmarks/unbounded-width/README.md",
+      "source_blob_sha": "eec07140f3cc3b622ebe523b195aec22796ddbc4",
+      "archive_path": "research/domain-archive/20261011/pr2005/benchmarks/unbounded-width/README.md",
+      "archive_blob_sha": "eec07140f3cc3b622ebe523b195aec22796ddbc4",
+      "status": "BYTE_IDENTICAL_ARCHIVED"
+    },
+    {
+      "original_path": "benchmarks/unbounded-width/README.uk.md",
+      "source_blob_sha": "b471008f1f4be7cc1d9caaa32bf51dcd5dadda29",
+      "archive_path": "research/domain-archive/20261011/pr2005/benchmarks/unbounded-width/README.uk.md",
+      "archive_blob_sha": "b471008f1f4be7cc1d9caaa32bf51dcd5dadda29",
+      "status": "BYTE_IDENTICAL_ARCHIVED"
+    },
+    {
+      "original_path": "benchmarks/unbounded-width/run.py",
+      "source_blob_sha": "422e33e6b93d2b1c0c356f9cf6df372937f74d0e",
+      "archive_path": "research/domain-archive/20261011/pr2005/benchmarks/unbounded-width/run.py.source.txt",
+      "archive_blob_sha": "422e33e6b93d2b1c0c356f9cf6df372937f74d0e",
+      "status": "BYTE_IDENTICAL_ARCHIVED"
+    },
+    {
+      "original_path": "benchmarks/unbounded-width/width_scale.c",
+      "source_blob_sha": "72d8593012a5d79c231d5b8f03db929d3e66e07f",
+      "archive_path": "research/domain-archive/20261011/pr2005/benchmarks/unbounded-width/width_scale.c.source.txt",
+      "archive_blob_sha": "72d8593012a5d79c231d5b8f03db929d3e66e07f",
+      "status": "BYTE_IDENTICAL_ARCHIVED"
+    },
+    {
+      "original_path": "docs/research/2000-unbounded-width-report.md",
+      "source_blob_sha": "7cdd6a35d938767e66f1cca9fad018bafbc43282",
+      "archive_path": "research/domain-archive/20261011/pr2005/docs/research/2000-unbounded-width-report.md",
+      "archive_blob_sha": "7cdd6a35d938767e66f1cca9fad018bafbc43282",
+      "status": "BYTE_IDENTICAL_ARCHIVED"
+    },
+    {
+      "original_path": "docs/research/2000-unbounded-width-report.uk.md",
+      "source_blob_sha": "fd8ca578be3ed0dd868d11b6e488b7f5729c8cbe",
+      "archive_path": "research/domain-archive/20261011/pr2005/docs/research/2000-unbounded-width-report.uk.md",
+      "archive_blob_sha": "fd8ca578be3ed0dd868d11b6e488b7f5729c8cbe",
+      "status": "BYTE_IDENTICAL_ARCHIVED"
+    },
+    {
+      "original_path": "docs/research/2000-unbounded-width.tsv",
+      "source_blob_sha": "4f000aeefaa6bfa63fdf85914b4cc176d3e11e45",
+      "archive_path": "research/domain-archive/20261011/pr2005/docs/research/2000-unbounded-width.tsv",
+      "archive_blob_sha": "4f000aeefaa6bfa63fdf85914b4cc176d3e11e45",
+      "status": "BYTE_IDENTICAL_ARCHIVED"
+    }
+  ],
+  "guardrails": [
+    "Жодних змін у нормативних D1-D10 або фізичному кодеку",
+    "Не вважати історичні тести поточним PASS",
+    "Не активувати старі виконувані джерела",
+    "Всі 7 файлів архівовані; неактивні *.source.txt не запускаються як production/CI"
+  ],
+  "coordination": [
+    "#5549",
+    "#5132",
+    "#5041"
+  ],
+  "archive_execution_policy": "All original historical programs are stored under *.source.txt in research/domain-archive; not imported, not executable in CI, not canonical runtime."
+}

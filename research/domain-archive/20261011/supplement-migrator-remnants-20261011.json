@@ -1,9 +1,9 @@
 {
   "schema": "sens.domain-archive-supplement/v1",
   "date": "2026-10-11",
-  "original_file_count": 13,
+  "original_file_count": 14,
   "status": "IMMUTABLE-RESEARCH-NOT-RUNTIME",
-  "verified_blob_count": 13,
+  "verified_blob_count": 14,
   "canonical_d10_selected_delta": 0,
   "ratified_delta": 0,
   "entries": [
@@ -97,15 +97,15 @@
       "archive_path": "research/domain-archive/20261011/pr2696/docs/canonical-serialization.md",
       "original_blob_sha": "0adf120b0f11ba202978541c105bc5ae196734dc",
       "archived_blob_sha": "0adf120b0f11ba202978541c105bc5ae196734dc"
-    }
-  ],
-  "not_archived": [
+    },
     {
-      "pr": 3182,
-      "path": ".github/workflows/cond-three-part-inventory.yml",
-      "source_blob_sha": "31c87f66cb5d8ecec23482057251f62df6d2d15f",
-      "status": "COPY_NOT_AVAILABLE; SOURCE PR REMAINS ACCESSIBLE"
+      "source_pr": 3182,
+      "original_path": ".github/workflows/cond-three-part-inventory.yml",
+      "archive_path": "research/domain-archive/20261011/pr3182/.github/workflows/cond-three-part-inventory.yml.source.txt",
+      "original_blob_sha": "31c87f66cb5d8ecec23482057251f62df6d2d15f",
+      "archived_blob_sha": "31c87f66cb5d8ecec23482057251f62df6d2d15f"
     }
   ],
+  "not_archived": [],
   "policy": "Research snapshots remain inert; proof/CI required for canonical admission"
 }

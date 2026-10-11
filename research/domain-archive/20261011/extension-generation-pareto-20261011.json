@@ -1,0 +1,57 @@
+{
+  "schema": "sens.domain-research-archive-extension/v1",
+  "date": "2026-10-11",
+  "status": "ARCHIVE-EVIDENCE-ONLY-NOT-EXECUTABLE",
+  "foundation_sha": "29c8245ee0b2a736186bd4658cf0201bbc0008d5",
+  "source_prs": [
+    2412,
+    2217
+  ],
+  "file_count": 5,
+  "sha_verified_before_archive": true,
+  "scope": "Historical generation-accounting and D4/D5 transformer Pareto research; not production or domain ratification.",
+  "prior_evidence": "The PR #2217 Ukrainian Pareto report is already archived under research/domain-archive/20261011/pr2217/docs/research/2214-domain-width-pareto.uk.md (see extension-d3-d7-20261011.json).",
+  "records": [
+    {
+      "pr": 2412,
+      "source_commit": "17ddba20c91249ec3d56aa8c539159729ec37e49",
+      "source_path": "benchmarks/generation-accounting/run.py",
+      "archive_path": "research/domain-archive/20261011/pr2412/benchmarks/generation-accounting/run.py.source.txt",
+      "git_blob_sha": "cecf13f933ac95c57f0cb451afda8973ffd5367b",
+      "kind": "historical-mechanism-benchmark"
+    },
+    {
+      "pr": 2412,
+      "source_commit": "17ddba20c91249ec3d56aa8c539159729ec37e49",
+      "source_path": ".github/workflows/generation-accounting.yml",
+      "archive_path": "research/domain-archive/20261011/pr2412/.github/workflows/generation-accounting.yml.source.txt",
+      "git_blob_sha": "bd2433a160dfd010db829fbc293e7f535467bb86",
+      "kind": "inactive-historical-workflow"
+    },
+    {
+      "pr": 2217,
+      "source_commit": "69181ec05fa484ef37383e2b2e5e603898b87d39",
+      "source_path": "scripts/bench-2214-domain-width-pareto.py",
+      "archive_path": "research/domain-archive/20261011/pr2217/scripts/bench-2214-domain-width-pareto.py.source.txt",
+      "git_blob_sha": "2f8a231ef93dd4f82a71312ec90e6350bd2b4917",
+      "kind": "historical-domain-placement-benchmark"
+    },
+    {
+      "pr": 2217,
+      "source_commit": "69181ec05fa484ef37383e2b2e5e603898b87d39",
+      "source_path": ".github/workflows/domain-width-pareto.yml",
+      "archive_path": "research/domain-archive/20261011/pr2217/.github/workflows/domain-width-pareto.yml.source.txt",
+      "git_blob_sha": "e3216b316fb5bf4ab53f14fbeeffefac2e614f1b",
+      "kind": "inactive-historical-workflow"
+    },
+    {
+      "pr": 2217,
+      "source_commit": "69181ec05fa484ef37383e2b2e5e603898b87d39",
+      "source_path": "docs/research/2214-domain-width-pareto.md",
+      "archive_path": "research/domain-archive/20261011/pr2217/docs/research/2214-domain-width-pareto.md",
+      "git_blob_sha": "1511a0624dfbefec69a6e5823bfe0e7423563972",
+      "kind": "historical-research-report"
+    }
+  ],
+  "admission": "Separate independent oracle, dedup, exact-head CI and owner ratification required for semantic adoption. Do not activate historical scripts or workflows."
+}

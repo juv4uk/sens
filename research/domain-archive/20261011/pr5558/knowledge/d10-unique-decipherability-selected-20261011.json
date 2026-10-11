@@ -1,0 +1,123 @@
+{
+  "schema": "d10-unique-decipherability-selected/v1",
+  "date": "2026-10-11",
+  "status": "SELECTED-RESEARCH-UNRATIFIED",
+  "stable_id": "d10.math.finite-code-unique-decipherability.20261011",
+  "semantic_name": "FINITE-CODE-UNIQUE-DECIPHERABILITY",
+  "surface_uk": "однозначність-декодування?",
+  "surface_ukr": "код-однозначно-декодується?",
+  "source_path": "knowledge/d10-unique-decipherability-historical-20261009.json",
+  "primary_sources": [
+    {
+      "doi": "10.1016/S0019-9958(63)80011-X",
+      "year": 1963,
+      "scope": "Sardinas–Patterson criterion, finite unique decipherability"
+    },
+    {
+      "doi": "10.1016/S0019-9958(67)80002-0",
+      "year": 1967,
+      "scope": "residual quotient construction"
+    }
+  ],
+  "typed_input": "Finite ordered list of distinct nonempty symbol identities, each paired with a nonempty finite binary word; the empty list is allowed.",
+  "law": "Return D1:YES iff no two different nonempty finite source-identity sequences concatenate to the same binary string; else D1:NO. Duplicate codewords for distinct identities imply NO; malformed binary words or duplicate identities give typed rejection.",
+  "positive_witnesses": [
+    {
+      "book": [],
+      "expected": "YES"
+    },
+    {
+      "book": [
+        [
+          "a",
+          "0"
+        ],
+        [
+          "b",
+          "11"
+        ]
+      ],
+      "expected": "YES"
+    },
+    {
+      "book": [
+        [
+          "a",
+          "0"
+        ],
+        [
+          "b",
+          "01"
+        ]
+      ],
+      "expected": "YES (non-prefix-free but uniquely decodable)"
+    },
+    {
+      "book": [
+        [
+          "a",
+          "0"
+        ],
+        [
+          "b",
+          "01"
+        ],
+        [
+          "c",
+          "10"
+        ]
+      ],
+      "expected": "NO ([a,c] and [b,a] both encode 010)"
+    },
+    {
+      "book": [
+        [
+          "a",
+          "0"
+        ],
+        [
+          "b",
+          "0"
+        ]
+      ],
+      "expected": "NO (distinct identities same word)"
+    },
+    {
+      "book": [
+        [
+          "a",
+          "0"
+        ],
+        [
+          "b",
+          "1"
+        ],
+        [
+          "c",
+          "000000"
+        ]
+      ],
+      "expected": "NO ([a,a,a,a,a,a] and [c])"
+    }
+  ],
+  "falsifiers": [
+    "Rejecting [0,01] only because 0 prefixes 01",
+    "Accepting [0,01,10] despite 010 ambiguity",
+    "Treating a repeated codeword with distinct identity as uniquely decodable",
+    "Accepting empty codeword, nonbinary word or repeated source identity",
+    "Using finite brute-force search with an arbitrary depth as a proof of YES"
+  ],
+  "dedup": {
+    "lower_foundation_blob": "09d1d71c39d1484dfd005a5068dbb18b76f0f0d4",
+    "neighbor": "PREFIX-FREE-KRAFT-CERTIFICATE is not equivalent: nonprefix-free uniquely-decodable [0,01] is YES, and the prefix certificate must reject it",
+    "review": "No identical behavioral predicate found in D1–D9 or D10 selected through 653. Composability/Core-vs-library awaits owner; no change to D2 grammar or transport."
+  },
+  "test_script": "scripts/check_d10_unique_decipherability.py",
+  "proof_limit": "Independent bounded enumeration is one-sided falsification only; Sardinas–Patterson finite residual closure supplies completeness. Hosted CI pending.",
+  "authority": {
+    "coordinate": null,
+    "ratified_resident": false,
+    "physical_t5_authorized": false,
+    "foundation_unchanged": true
+  }
+}

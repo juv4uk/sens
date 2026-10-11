@@ -1,0 +1,80 @@
+name: Generation accounting research
+
+on:
+  pull_request:
+    paths:
+      - "benchmarks/generation-accounting/**"
+      - "benchmarks/generation-certificate/**"
+      - "crates/sens/examples/selector_certificate_bench.rs"
+      - "benchmarks/generator-economy/semantic-fact-ledger.json"
+      - "scripts/research-2304-semantic-fact-ledger.py"
+      - "knowledge/function-status-census.json"
+      - "knowledge/repo-tooling-inventory.lisp"
+      - ".github/workflows/generation-accounting.yml"
+  push:
+    branches: [main]
+    paths:
+      - "benchmarks/generation-accounting/**"
+      - "benchmarks/generation-certificate/**"
+      - "crates/sens/examples/selector_certificate_bench.rs"
+      - "benchmarks/generator-economy/semantic-fact-ledger.json"
+      - "scripts/research-2304-semantic-fact-ledger.py"
+      - "knowledge/function-status-census.json"
+      - "knowledge/repo-tooling-inventory.lisp"
+      - ".github/workflows/generation-accounting.yml"
+  workflow_dispatch:
+
+concurrency:
+  group: generation-accounting-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  account:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: dtolnay/rust-toolchain@stable
+
+      - uses: Swatinem/rust-cache@v2
+        with:
+          shared-key: generation-accounting
+
+      - name: Install Cachegrind
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y valgrind
+          valgrind --version
+          rustc --version
+
+      - name: Validate semantic fact ledger
+        run: |
+          rm -rf /tmp/generation-accounting
+          mkdir -p /tmp/generation-accounting
+          python3 scripts/research-2304-semantic-fact-ledger.py             --summary-json /tmp/generation-accounting/ledger-summary.json
+
+      - name: Build selector certificate witness
+        run: cargo build --release -p sens --example selector_certificate_bench
+
+      - name: Refresh selector certificate evidence
+        run: |
+          python3 benchmarks/generation-certificate/run.py             --binary target/release/examples/selector_certificate_bench             --out /tmp/generation-accounting/certificates             --reps 2000
+
+      - name: Account generated rows, proof storage and mechanism cost
+        run: |
+          python3 benchmarks/generation-accounting/run.py             --ledger-summary /tmp/generation-accounting/ledger-summary.json             --certificate-dir /tmp/generation-accounting/certificates             --out /tmp/generation-accounting/result
+
+      - name: Publish accounting report
+        if: always()
+        run: |
+          if test -f /tmp/generation-accounting/result/report.md; then
+            cat /tmp/generation-accounting/result/report.md >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: generation-accounting
+          path: /tmp/generation-accounting/
+          retention-days: 14
