@@ -138,6 +138,20 @@ class LegacyD3GuardTests(unittest.TestCase):
         old = (ROOT / "tests/fixtures/world-d3-before.lisp").read_text(encoding="utf-8")
         self.assertNotEqual(old, source, "world must not silently regress to old W8 source")
 
+    def test_migrated_reasoning_libraries_have_no_old_d3_calls(self):
+        for module in ("world", "forward", "knowledge"):
+            path = f"lib/{module}.lisp"
+            source = (ROOT / path).read_text(encoding="utf-8")
+            findings = MODULE.scan_lisp(source, path)
+            with self.subTest(module=module):
+                self.assertEqual(
+                    [f for f in findings if f.rule in (
+                        "LEGACY_W8_CALL", "D3_WRONG_ARITY",
+                        "COND_NOT_TWO_FIELDS", "COND_HOST_TRUTH"
+                    )], [],
+                    f"{path} must not silently regress to historical D3 call heads"
+                )
+
     def test_git_audit_reports_files_and_strict_exit(self):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
