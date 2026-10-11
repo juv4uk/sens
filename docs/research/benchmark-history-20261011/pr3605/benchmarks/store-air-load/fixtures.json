@@ -1,0 +1,62 @@
+{
+  "schema": "sens-store-air-load-fixtures/v1",
+  "purpose": "Фікстури STORE -> AIR -> LOAD: механічні exact-width controls та семантично звірені English/canonical пари.",
+  "fixtures": [
+    {
+      "id": "seven-bit-mechanical",
+      "kind": "mechanical",
+      "canonical_source": "10 001 01",
+      "framing_bits": 0
+    },
+    {
+      "id": "seven-bit-overhead-mechanical",
+      "kind": "mechanical",
+      "canonical_source": "10 001 01",
+      "framing_bits": 5,
+      "integrity_bits": 3,
+      "profile_overhead_bits": 2
+    },
+    {
+      "id": "zero-suffix-mechanical",
+      "kind": "mechanical",
+      "canonical_source": "1 01 000",
+      "framing_bits": 0
+    },
+    {
+      "id": "mixed-28-bit-mechanical",
+      "kind": "mechanical",
+      "canonical_source": "1 10 001 0101 10101 110011 1110001",
+      "framing_bits": 0
+    },
+    {
+      "id": "twelve-bit-mechanical",
+      "kind": "mechanical",
+      "canonical_source": "10 001 01 10101",
+      "framing_bits": 0
+    },
+    {
+      "id": "eight-bit-mechanical",
+      "kind": "mechanical",
+      "canonical_source": "10 001 001",
+      "framing_bits": 0
+    },
+    {
+      "id": "d3-quote-empty",
+      "kind": "paired-program",
+      "english_source": "(quote ())",
+      "canonical_source": "10 001 00 10 01 01",
+      "expected_value": "()",
+      "expected_output": "",
+      "framing_bits": 0
+    },
+    {
+      "id": "d3-car-empty",
+      "kind": "paired-program",
+      "english_source": "(car (quote (())))",
+      "canonical_source": "10 100 00 10 001 00 10 10 01 01 01 01",
+      "expected_value": "()",
+      "expected_output": "",
+      "framing_bits": 0
+    }
+  ]
+}
