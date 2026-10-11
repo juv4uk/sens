@@ -59,7 +59,7 @@ def audit(root):
     data = (k / "d10-v1-semantic-inventory.json").read_bytes()
     ptr0 = json.loads((k / "d10-current-inventory.json").read_text(encoding="utf-8"))
     current_path = ptr0["canonical_current"]["path"]
-    current_bytes = (k / current_path).read_bytes()
+    current_bytes = (root / current_path).read_bytes()
     inv = json.loads(current_bytes)
     hist = json.loads((k / "d10-selection-transition-history.json").read_text())
     with (k / "d10-proposal-ledger.tsv").open(newline="", encoding="utf-8") as f:
