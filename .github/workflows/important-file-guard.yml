@@ -52,6 +52,65 @@ jobs:
           bash scripts/check-triple-projection.sh \
             --fixture tests/fixtures/migration-d1-cond-cohort/branch.lisp
 
+      - name: Prove admitted D2-D7 binding migration through physical T5 (fail-closed)
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          import importlib.util
+          import os
+          import sys
+          sys.path.insert(0, "scripts")
+          spec = importlib.util.spec_from_file_location(
+              "sens_domain_migration", "scripts/migrate-to-sens-codes.py"
+          )
+          assert spec is not None and spec.loader is not None
+          migration = importlib.util.module_from_spec(spec)
+          sys.modules[spec.name] = migration
+          spec.loader.exec_module(migration)
+          foundation = Path("knowledge/d1-d9-foundation.json")
+          data, _ = migration.load_foundation(foundation)
+          code_map = migration.build_map(data, migration.CALL_DOMAINS)
+          surfaces = [Path(f"lib/domains/d{n}.lisp") for n in range(1, 7)]
+          registry = Path("lib/surface/semantic-registry.lisp")
+          code_map = migration.augment_code_map_with_domain_surfaces(code_map, surfaces)
+          code_map = migration.augment_code_map_with_registry_aliases(code_map, registry)
+          resolver = migration.build_resolver(
+              historical_map=Path("contracts/core1-historical-sid-map.lisp"),
+              foundation=foundation, registry=registry, domain_surfaces=surfaces,
+          )
+          glyphs = migration.build_text7_encoder(
+              data, Path("crates/sens/src/text7_projection_generated.rs")
+          )
+          original = "(define identity (lambda (value) value)) (identity ())"
+          projected, hits, shadowed = migration.binary_rewrite(
+              original, code_map, glyphs, resolver=resolver,
+          )
+          assert projected.strip() and set(projected) <= set("01 \n\t\r")
+          assert "identity" not in projected and "value" not in projected
+          Path(os.environ["RUNNER_TEMP"], "d2-d7-migrated.lisp").write_text(
+              projected, encoding="ascii"
+          )
+          for invalid in ('(define x "unratified string")',
+                          "(define x 261)", "(quote unbound)"):
+              try:
+                  migration.binary_rewrite(invalid, code_map, glyphs, resolver=resolver)
+              except migration.BinaryMigrationError:
+                  pass
+              else:
+                  raise AssertionError("unadmitted source silently passed: " + invalid)
+          print("D2_D7_BINDING_MIGRATION_READY canonical binary words")
+          PY
+          target/debug/sens-trit encode "$RUNNER_TEMP/d2-d7-migrated.lisp"
+          target/debug/sens-trit open "$RUNNER_TEMP/d2-d7-migrated.sens" \
+            > "$RUNNER_TEMP/d2-d7-reopened.words"
+          diff -u "$RUNNER_TEMP/d2-d7-migrated.lisp" \
+            "$RUNNER_TEMP/d2-d7-reopened.words"
+          target/debug/sens "$RUNNER_TEMP/d2-d7-migrated.sens" \
+            > "$RUNNER_TEMP/d2-d7-executed.log"
+          test "$(tail -n 1 "$RUNNER_TEMP/d2-d7-executed.log")" = '()'
+
       - name: Select and validate the exact Git comparison base
         id: base
         shell: bash
