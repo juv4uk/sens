@@ -196,5 +196,17 @@
 (0011 внутрішня-мапа-містить map-contains?)
 ; Private compatibility surface to the existing Lisp-derived two-argument
 ; string comparator. D8:10110001 does not become an admitted native call.
-(0011 внутрішній-текст-передує? string<?)
+; A strict D1 lexicographic order, derived from numeric LESSP and
+; first/rest/codepoint mechanisms. Prefix-shorter is less; equal heads
+; recurse. No host T/NIL coercion and no D8 STRING< native admission.
+(0011 внутрішній-текст-передує?
+  (0010 (a b)
+    (110
+      ((00111100 a) (0100 (00111100 b)))
+      ((00111100 b) (0101 (001 (0))))
+      ((11010 (01000101 (00111111 a)) (01000101 (00111111 b)))
+       (0101 (001 ())))
+      ((11010 (01000101 (00111111 b)) (01000101 (00111111 a)))
+       (0101 (001 (0))))
+      ((010 ()) (внутрішній-текст-передує? (01000000 a) (01000000 b))))))
 (0011 внутрішня-мапа-список map->list)
