@@ -8,8 +8,8 @@
 ; завершення. Це навігаційне знання, а не копія контрактів. Шляхи відносні до
 ; репозиторію, якщо не починаються з ../.
 
-(0011 *guard-reference-directory*
-  (001
+(00001001 *guard-reference-directory*
+  (00000001
     ((reference
        (topic language-policy)
        (summary "Українська — первинна мова в усіх авторських репозиторіях власника; кодові коментарі — українською кирилицею в UTF-8; англійська й німецька — допоміжні. CORE-RULE tier (CRITICAL, ALL_AGENTS) з 2026-09-08: знання політики саме по собі не гарантує дотримання — перевіряти мову свідомо до першого речення нової прози, не покладатися на звичку (реальний зрив і виправлення задокументовані в ecosystem/memory/CORE-RULE-ukrainian-first.md). Ecosystem-wide audit 2026-09-08 знайшов борг у 12 з 19 перевірених репозиторіїв (ecosystem/memory/LANGUAGE-DEBT-REGISTRY-2026-09-08.md); за прямою настановою власника кожен із них тепер має задачу BILINGUAL-DOCUMENTATION-AUDIT (priority 9.0) у своєму tasks.lisp, з конкретним context, не generic-описом -- claim-able через звичайний swarm цикл, не масове автоматичне виправлення. СТРУКТУРНА ЗАГОРОЖА (2026-09-08, після другого зриву цього самого правила в тій самій сесії): scripts/check-bilingual-docs тепер підключений -- pre-commit hook (git config core.hooksPath githooks, живо перевірено -- блокує реальний англомовний коміт) і CI (.github/workflows/bilingual-docs-check.yml), не лише перевірка присутності кирилиці, а порядок/обсяг української прози відносно секції English. Пілот на ecosystem+my-lisp; не покриває код-коментарі -- відомий, названий пробіл")
@@ -821,8 +821,8 @@
 ; the command. `risk` and `verify` tell an agent what must be checked afterward.
 ; Добірка часто вживаних інструментів. Запис є навігацією, а не дозволом на
 ; запуск. Поля `risk` і `verify` пояснюють потрібний доказ після команди.
-(0011 *guard-script-directory*
-  (001
+(00001001 *guard-script-directory*
+  (00000001
     ((tool
        (name oracle-check)
        (summary "Безпечна перевірка синтаксису WSM без виконання · Parse-only WSM preflight without evaluation")
@@ -965,37 +965,37 @@
         (verify (exit-0-clean no-forbidden-teleology no-paraphrase-drift))))))
 
 
-(0011 guard-script-find
-  (0010 (name tools)
-    (110
-      ((010 tools) () (001 ()))
-      ((010 tools) (1) (001 ()))
-      ((101 (guard-reference-field (001 name) (100 tools)) name) (100 tools))
-      (t (guard-script-find name (011 tools))))))
+(00001011 guard-script-find
+  (00001000 (name tools)
+    (00000111
+      ((00000010 tools) () (00000001 ()))
+      ((00000010 tools) (1) (00000001 ()))
+      ((00000011 (guard-reference-field (00000001 name) (00000101 tools)) name) (00000101 tools))
+      (t (guard-script-find name (00000110 tools))))))
 
-(0011 guard-script
-  (0010 (name)
-    (001000 ((tool (guard-script-find name *guard-script-directory*)))
-      (110
-        ((010 tool) () (1110
-           (001 tool-missing)
-           (1110 (001 name) name)
-           (1110 (001 decision) (001 unknown))
-           (1110 (001 unknown-routes) (guard-unknown-routes))))
-        ((010 tool) (1) (1110
-           (001 tool-missing)
-           (1110 (001 name) name)
-           (1110 (001 decision) (001 unknown))
-           (1110 (001 unknown-routes) (guard-unknown-routes))))
+(00001011 guard-script
+  (00001000 (name)
+    (10011100 ((tool (guard-script-find name *guard-script-directory*)))
+      (00000111
+        ((00000010 tool) () (00100111
+           (00000001 tool-missing)
+           (00100111 (00000001 name) name)
+           (00100111 (00000001 decision) (00000001 unknown))
+           (00100111 (00000001 unknown-routes) (guard-unknown-routes))))
+        ((00000010 tool) (1) (00100111
+           (00000001 tool-missing)
+           (00100111 (00000001 name) name)
+           (00100111 (00000001 decision) (00000001 unknown))
+           (00100111 (00000001 unknown-routes) (guard-unknown-routes))))
         (t tool)))))
 
-(0011 guard-scripts
-  (0010 (tools)
-    (110
-      ((010 tools) () (001 ()))
-      ((010 tools) (1) (001 ()))
-      (t (111 (guard-reference-field (001 name) (100 tools))
-               (guard-scripts (011 tools)))))))
+(00001011 guard-scripts
+  (00001000 (tools)
+    (00000111
+      ((00000010 tools) () (00000001 ()))
+      ((00000010 tools) (1) (00000001 ()))
+      (t (00000100 (guard-reference-field (00000001 name) (00000101 tools))
+               (guard-scripts (00000110 tools)))))))
 
 ; A topic may have more than one (reference ...) entry. Adding a stronger
 ; answer never deletes or rejects the older one -- it stays in the
@@ -1007,110 +1007,110 @@
 ; a claim is not evidence for it. Own words: "якщо реальність каже що нова
 ; сильніша то ок" -- reality decides which entry wins the lookup; neither
 ; entry is deleted.
-(0011 guard-reference-evidence-status
-  (0010 (reference)
-    (001000 ((status (guard-reference-field (001 evidence-status) reference)))
-      (110
+(00001011 guard-reference-evidence-status
+  (00001000 (reference)
+    (10011100 ((status (guard-reference-field (00000001 evidence-status) reference)))
+      (00000111
         ; A missing field and a found bare-symbol value (e.g. `confirmed`)
         ; are BOTH atoms -- a 2-part (atom status) truthy check cannot tell
         ; them apart. Only the empty list means "missing"; any other atom is
         ; a real found status and must be returned as-is.
-        ((010 status) () (001 unresolved))
-        ((010 status) (1) status)
-        ((010 status) (0) status)))))
+        ((00000010 status) () (00000001 unresolved))
+        ((00000010 status) (1) status)
+        ((00000010 status) (0) status)))))
 
-(0011 guard-evidence-status-strength
-  (0010 (status)
-    (110
-      ((101 status (001 confirmed)) 4)
-      ((101 status (001 partial)) 3)
-      ((101 status (001 unresolved)) 2)
-      ((101 status (001 broken)) 1)
+(00001011 guard-evidence-status-strength
+  (00001000 (status)
+    (00000111
+      ((00000011 status (00000001 confirmed)) 4)
+      ((00000011 status (00000001 partial)) 3)
+      ((00000011 status (00000001 unresolved)) 2)
+      ((00000011 status (00000001 broken)) 1)
       (t 0))))
 
-(0011 guard-reference-stronger
-  (0010 (best candidate)
-    (110
-      ((010 best) () candidate)
-      ((010 best) (1) candidate)
+(00001011 guard-reference-stronger
+  (00001000 (best candidate)
+    (00000111
+      ((00000010 best) () candidate)
+      ((00000010 best) (1) candidate)
       (t
-       (001000 ((best-strength (guard-evidence-status-strength (guard-reference-evidence-status best)))
+       (10011100 ((best-strength (guard-evidence-status-strength (guard-reference-evidence-status best)))
              (candidate-strength (guard-evidence-status-strength (guard-reference-evidence-status candidate))))
-         (110
-           ((11011 candidate-strength best-strength) 1 candidate)
-           ((11011 candidate-strength best-strength) 0 best)))))))
+         (00000111
+           ((00011011 candidate-strength best-strength) 1 candidate)
+           ((00011011 candidate-strength best-strength) 0 best)))))))
 
-(0011 guard-reference-all
-  (0010 (topic references)
-    (110
-      ((010 references) () (001 ()))
-      ((010 references) (1) (001 ()))
-      ((101 (guard-reference-field (001 topic) (100 references)) topic)
-       (111 (100 references) (guard-reference-all topic (011 references))))
-      (t (guard-reference-all topic (011 references))))))
+(00001011 guard-reference-all
+  (00001000 (topic references)
+    (00000111
+      ((00000010 references) () (00000001 ()))
+      ((00000010 references) (1) (00000001 ()))
+      ((00000011 (guard-reference-field (00000001 topic) (00000101 references)) topic)
+       (00000100 (00000101 references) (guard-reference-all topic (00000110 references))))
+      (t (guard-reference-all topic (00000110 references))))))
 
-(0011 guard-reference-find-strongest
-  (0010 (topic references best)
-    (110
-      ((010 references) () best)
-      ((010 references) (1) best)
-      ((101 (guard-reference-field (001 topic) (100 references)) topic)
+(00001011 guard-reference-find-strongest
+  (00001000 (topic references best)
+    (00000111
+      ((00000010 references) () best)
+      ((00000010 references) (1) best)
+      ((00000011 (guard-reference-field (00000001 topic) (00000101 references)) topic)
        (guard-reference-find-strongest
-         topic (011 references)
-         (guard-reference-stronger best (100 references))))
-      (t (guard-reference-find-strongest topic (011 references) best)))))
+         topic (00000110 references)
+         (guard-reference-stronger best (00000101 references))))
+      (t (guard-reference-find-strongest topic (00000110 references) best)))))
 
-(0011 guard-reference-find
-  (0010 (topic references)
-    (guard-reference-find-strongest topic references (001 ()))))
+(00001011 guard-reference-find
+  (00001000 (topic references)
+    (guard-reference-find-strongest topic references (00000001 ()))))
 
-(0011 guard-reference
-  (0010 (topic)
-    (001000 ((reference (guard-reference-find topic *guard-reference-directory*)))
-      (110
-        ((010 reference) () (1110
-           (001 reference-missing)
-           (1110 (001 schema) (001 guard-reference/1))
-           (1110 (001 topic) topic)
-           (1110 (001 decision) (001 unknown))
-           (1110 (001 evidence-status) (001 unresolved))
-           (1110 (001 guidance) (001 choose-unknown-route))
-           (1110 (001 unknown-routes) (guard-unknown-routes))))
-        ((010 reference) (1) (1110
-           (001 reference-missing)
-           (1110 (001 schema) (001 guard-reference/1))
-           (1110 (001 topic) topic)
-           (1110 (001 decision) (001 unknown))
-           (1110 (001 evidence-status) (001 unresolved))
-           (1110 (001 guidance) (001 choose-unknown-route))
-           (1110 (001 unknown-routes) (guard-unknown-routes))))
+(00001001 guard-reference
+  (00001000 (topic)
+    (10011100 ((reference (guard-reference-find topic *guard-reference-directory*)))
+      (00000111
+        ((00000010 reference) () (00100111
+           (00000001 reference-missing)
+           (00100111 (00000001 schema) (00000001 guard-reference/1))
+           (00100111 (00000001 topic) topic)
+           (00100111 (00000001 decision) (00000001 unknown))
+           (00100111 (00000001 evidence-status) (00000001 unresolved))
+           (00100111 (00000001 guidance) (00000001 choose-unknown-route))
+           (00100111 (00000001 unknown-routes) (guard-unknown-routes))))
+        ((00000010 reference) (1) (00100111
+           (00000001 reference-missing)
+           (00100111 (00000001 schema) (00000001 guard-reference/1))
+           (00100111 (00000001 topic) topic)
+           (00100111 (00000001 decision) (00000001 unknown))
+           (00100111 (00000001 evidence-status) (00000001 unresolved))
+           (00100111 (00000001 guidance) (00000001 choose-unknown-route))
+           (00100111 (00000001 unknown-routes) (guard-unknown-routes))))
         (t reference)))))
 
-(0011 guard-explain
-  (0010 (topic)
-    (guard-reference-field (001 summary) (guard-reference topic))))
+(00001001 guard-explain
+  (00001000 (topic)
+    (guard-reference-field (00000001 summary) (guard-reference topic))))
 
-(0011 guard-how-to
-  (0010 (topic)
-    (guard-reference-field (001 how-to) (guard-reference topic))))
+(00001001 guard-how-to
+  (00001000 (topic)
+    (guard-reference-field (00000001 how-to) (guard-reference topic))))
 
-(0011 guard-authority
-  (0010 (topic)
-    (guard-reference-field (001 authority) (guard-reference topic))))
+(00001001 guard-authority
+  (00001000 (topic)
+    (guard-reference-field (00000001 authority) (guard-reference topic))))
 
-(0011 guard-verify
-  (0010 (topic)
-    (guard-reference-field (001 verify) (guard-reference topic))))
+(00001001 guard-verify
+  (00001000 (topic)
+    (guard-reference-field (00000001 verify) (guard-reference topic))))
 
-(0011 guard-topics
-  (0010 (references)
-    (110
-      ((010 references) () (001 ()))
-      ((010 references) (1) (001 ()))
+(00001001 guard-topics
+  (00001000 (references)
+    (00000111
+      ((00000010 references) () (00000001 ()))
+      ((00000010 references) (1) (00000001 ()))
       (t
-       (111
-         (guard-reference-field (001 topic) (100 references))
-         (guard-topics (011 references)))))))
+       (00000100
+         (guard-reference-field (00000001 topic) (00000101 references))
+         (guard-topics (00000110 references)))))))
 
 ; One canonical entry point for a cold agent: "ask Guard" without needing
 ; to know whether the answer lives in the tool directory or the reference
@@ -1122,51 +1122,51 @@
 ; довідковій директорії. Ніколи мовчки не надає перевагу одному з них --
 ; ім'я, знайдене в обох, повертається позначеним `ambiguous` з обома
 ; повними записами, і вибір лишається за викликачем.
-(0011 guard-ask
-  (0010 (name)
-    (001001 ((tool (guard-script-find name *guard-script-directory*))
+(00001001 guard-ask
+  (00001000 (name)
+    (10011101 ((tool (guard-script-find name *guard-script-directory*))
            (reference (guard-reference-find name *guard-reference-directory*)))
-      (110
-        ((010 tool) () (110
-           ((010 reference) () (1110 (001 not-found)
-                  (1110 (001 query) name)
-                  (1110 (001 decision) (001 unknown))
-                  (1110 (001 unknown-routes) (guard-unknown-routes))))
-           ((010 reference) (1) (1110 (001 not-found)
-                  (1110 (001 query) name)
-                  (1110 (001 decision) (001 unknown))
-                  (1110 (001 unknown-routes) (guard-unknown-routes))))
+      (00000111
+        ((00000010 tool) () (00000111
+           ((00000010 reference) () (00100111 (00000001 not-found)
+                  (00100111 (00000001 query) name)
+                  (00100111 (00000001 decision) (00000001 unknown))
+                  (00100111 (00000001 unknown-routes) (guard-unknown-routes))))
+           ((00000010 reference) (1) (00100111 (00000001 not-found)
+                  (00100111 (00000001 query) name)
+                  (00100111 (00000001 decision) (00000001 unknown))
+                  (00100111 (00000001 unknown-routes) (guard-unknown-routes))))
            (t
-            (1110 (001 result)
-                  (1110 (001 type) (001 reference-topic))
-                  (1110 (001 source) (001 knowledge/guard-reference.lisp))
-                  (1110 (001 entry) reference)))))
-        ((010 tool) (1) (110
-           ((010 reference) () (1110 (001 not-found)
-                  (1110 (001 query) name)
-                  (1110 (001 decision) (001 unknown))
-                  (1110 (001 unknown-routes) (guard-unknown-routes))))
-           ((010 reference) (1) (1110 (001 not-found)
-                  (1110 (001 query) name)
-                  (1110 (001 decision) (001 unknown))
-                  (1110 (001 unknown-routes) (guard-unknown-routes))))
+            (00100111 (00000001 result)
+                  (00100111 (00000001 type) (00000001 reference-topic))
+                  (00100111 (00000001 source) (00000001 knowledge/guard-reference.lisp))
+                  (00100111 (00000001 entry) reference)))))
+        ((00000010 tool) (1) (00000111
+           ((00000010 reference) () (00100111 (00000001 not-found)
+                  (00100111 (00000001 query) name)
+                  (00100111 (00000001 decision) (00000001 unknown))
+                  (00100111 (00000001 unknown-routes) (guard-unknown-routes))))
+           ((00000010 reference) (1) (00100111 (00000001 not-found)
+                  (00100111 (00000001 query) name)
+                  (00100111 (00000001 decision) (00000001 unknown))
+                  (00100111 (00000001 unknown-routes) (guard-unknown-routes))))
            (t
-            (1110 (001 result)
-                  (1110 (001 type) (001 reference-topic))
-                  (1110 (001 source) (001 knowledge/guard-reference.lisp))
-                  (1110 (001 entry) reference)))))
+            (00100111 (00000001 result)
+                  (00100111 (00000001 type) (00000001 reference-topic))
+                  (00100111 (00000001 source) (00000001 knowledge/guard-reference.lisp))
+                  (00100111 (00000001 entry) reference)))))
         (t
-         (110
-           ((010 reference) () (1110 (001 result)
-                  (1110 (001 type) (001 tool))
-                  (1110 (001 source) (001 guard-script-directory))
-                  (1110 (001 entry) tool)))
-           ((010 reference) (1) (1110 (001 result)
-                  (1110 (001 type) (001 tool))
-                  (1110 (001 source) (001 guard-script-directory))
-                  (1110 (001 entry) tool)))
+         (00000111
+           ((00000010 reference) () (00100111 (00000001 result)
+                  (00100111 (00000001 type) (00000001 tool))
+                  (00100111 (00000001 source) (00000001 guard-script-directory))
+                  (00100111 (00000001 entry) tool)))
+           ((00000010 reference) (1) (00100111 (00000001 result)
+                  (00100111 (00000001 type) (00000001 tool))
+                  (00100111 (00000001 source) (00000001 guard-script-directory))
+                  (00100111 (00000001 entry) tool)))
            (t
-            (1110 (001 ambiguous)
-                  (1110 (001 query) name)
-                  (1110 (001 tool) tool)
-                  (1110 (001 reference-topic) reference)))))))))
+            (00100111 (00000001 ambiguous)
+                  (00100111 (00000001 query) name)
+                  (00100111 (00000001 tool) tool)
+                  (00100111 (00000001 reference-topic) reference)))))))))
