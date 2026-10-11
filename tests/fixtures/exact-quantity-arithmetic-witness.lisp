@@ -14,13 +14,13 @@
 
 (00001001 exact-quantity-arithmetic-rows
   (00001000 ()
-    ((00001000 (planck)
-  ((00001000 (cesium)
-    ((00001000 (energy)
-      ((00001000 (one-second)
-        ((00001000 (speed)
-          ((00001000 (distance)
-            ((00001000 (recovered)
+    ((0010 (planck)
+  ((0010 (cesium)
+    ((0010 (energy)
+      ((0010 (one-second)
+        ((0010 (speed)
+          ((0010 (distance)
+            ((0010 (recovered)
               (00100111
                       (00100111
                         (00000001 planck-cesium-energy-shape)
@@ -148,7 +148,7 @@
             (00100111 (00000001 case) (00000001 malformed-row-tail))
             (00100111 (00000001 actual) rows)))))
       ((атом? ())
-       ((00001000 (row)
+       ((0010 (row)
          (00000111
            ((exact-quantity-structural-equal? (00101111 row) (00110000 row))
             (exact-quantity-arithmetic-check (00000110 rows)))
