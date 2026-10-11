@@ -60,6 +60,7 @@ fn lisp_fs_keeps_old_snapshot_and_reads_new_bindings() {
 
 #[test]
 fn lisp_fs_deduplicates_equal_objects_but_keeps_explicit_missing_status() {
+    // Canonical D1 membership is a one-bit predicate, not a structural (1).
     assert_eq!(
         eval_store(
             r#"
@@ -72,7 +73,7 @@ fn lisp_fs_deduplicates_equal_objects_but_keeps_explicit_missing_status() {
                     (fs-read (car b) "missing")))))
             "#
         ),
-        "(1 (1) (not-found \"missing\"))"
+        "(1 1 (not-found \"missing\"))"
     );
 }
 
@@ -443,6 +444,7 @@ fn inserting_equal_content_twice_does_not_grow_the_store() {
 
 #[test]
 fn different_content_occupies_different_addresses() {
+    // Both membership results are exact D1, proven separately in fs_bridge_diagnostics.
     assert_eq!(
         eval_store(
             r#"
@@ -458,7 +460,7 @@ fn different_content_occupies_different_addresses() {
                         store (knowledge-content-address mars)))))
             "#
         ),
-        "(2 (1) (1))"
+        "(2 1 1)"
     );
 }
 
