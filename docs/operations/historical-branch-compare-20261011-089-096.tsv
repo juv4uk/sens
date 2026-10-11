@@ -1,0 +1,11 @@
+# Exact compare pin main SHA: 8daa0763e5cb431f6f0ddc1389fd02922024b365
+# Branches 176-* overlap in x86 admission/encoding/witness files; histories attached without blindly overlaying trees.
+branch	source_sha	compare_status	ahead_by	behind_by	changed_paths	classification
+agent/vivaka-hub/4380-migrate-code-subset	988d7ea8a29025c7e1f3faf3241659b5cf3a4ba7	behind	0	5857	0	ALREADY_IN_MAIN_ANCESTRY
+agent/vivaka-hub/4455-spaced-views	a0444ff1ffff856691f32b7b24336c4be7c54481	behind	0	5696	0	ALREADY_IN_MAIN_ANCESTRY
+agent/76-meta-registry-sr2-replay	fb8d85fc58e19152a2bc1d57d2a19556e7404fd7	diverged	14	8228	9	HISTORY_ATTACHED_CONTENT_REVIEW_REQUIRED
+agent/176-aesni-family	822b03a3c50217afec15854bfb469e614ee1386d	diverged	6	8415	3	HISTORY_ATTACHED_CONTENT_REVIEW_REQUIRED
+agent/176-aesni-mem-disp8	008976a91003c20fffe01f1ca18d42c7f5be0f12	diverged	3	8414	3	HISTORY_ATTACHED_CONTENT_REVIEW_REQUIRED
+agent/176-pclmulqdq	15b8342044c4ddf80f838286c6093f4658a0b06a	diverged	3	6838	3	HISTORY_ATTACHED_CONTENT_REVIEW_REQUIRED
+agent/176-rdrand-rdseed	879d1c41421e026f5201957d025c6087049f25c1	diverged	6	6811	3	HISTORY_ATTACHED_CONTENT_REVIEW_REQUIRED
+agent/176-vex-grammar-base	6699921c582aba867a55fa5da656dbf859c583ad	diverged	1	6046	2	HISTORY_ATTACHED_CONTENT_REVIEW_REQUIRED
