@@ -1,0 +1,37 @@
+{
+  "accepted_queue_reviewed_by_owner": false,
+  "authority": "RESEARCH-HOLD-F1-F4-NO-RATIFICATION",
+  "complete_historical_branches_claimed": false,
+  "current_inventory": {
+    "git_blob": "6a45275241717dafa6a6c9ccafae1e9ad819b306",
+    "path": "knowledge/d10-v7-semantic-inventory.json",
+    "placed": 719,
+    "ratified": 0,
+    "selected": 721,
+    "unplaced": 2
+  },
+  "files_sha256": {
+    "accepted-queue.tsv": "26e71d70821778bfe7e871c470ac0d54b36eb9465685137a4fe4fe84739d44b8",
+    "escalated.tsv": "26e71d70821778bfe7e871c470ac0d54b36eb9465685137a4fe4fe84739d44b8",
+    "rejected.tsv": "53cfb386dadd59a8d537344620ad346113b623d6120c05053b78f0df96077b93"
+  },
+  "input_index": "knowledge/d10-filter/all-candidates.tsv",
+  "input_index_sha256": "6da7be4d9579f8e520257c2ba6e1be8f2caef4fc23f19bbfe210d10f1c19a292",
+  "mechanical_partition": {
+    "accepted": 0,
+    "escalated": 0,
+    "rejected": 1495
+  },
+  "name_index": {
+    "canonical_selected": 721,
+    "executed_witnesses_supplied": 0,
+    "filter_input_rows": 1495,
+    "index_rows": 1495,
+    "new_selected_since_index": 0,
+    "semantic_dedup_certificates_supplied": 0,
+    "source_file_pin_verified": 1495
+  },
+  "physical_t5_authorized": false,
+  "schema": "d10-unified-filter-run/v1",
+  "source_commit": "be69cc01645c9690502a1a057710c83fd7569ba8"
+}
