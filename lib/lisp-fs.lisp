@@ -48,7 +48,7 @@
   (0010 (fs name)
     (нехай-похідне ((binding (внутрішня-мапа-отримати name (fs-bindings fs))))
       (110
-        ((0100 (010 binding)) (1110 (001 not-found) name))
+        ((0101 binding) (1110 (001 not-found) name))
         ((010 binding)  (1110 (001 not-found) name))
         ((010 ())
           (нехай-похідне ((address (100 binding)))
@@ -97,21 +97,21 @@
 (0011 fs-object-addresses
   (0010 (entries)
     (110
-      ((11110111 entries (001 ())) (001 ()))
-      ((fs-d1-no? (11110111 entries (001 ())))
+      ((0101 entries) (001 ()))
+      ((0100 (010 entries))
        (111 (100 (100 entries))
                  (fs-object-addresses (011 entries)))))))
 
 (0011 fs-d1-no?
   (0010 (value)
-    (11110111 value (11110111 (001 d1-no-left) (001 d1-no-right)))))
+    (0100 value)))
 
 (0011 fs-package-field
   (0010 (name package)
     (нехай-похідне ((entry (11100 name package)))
       (110
-        ((11110111 entry (001 ())) (001 ()))
-        ((fs-d1-no? (11110111 entry (001 ()))) (011 entry))))))
+        ((0101 entry) (001 ()))
+        ((010 ()) (011 entry))))))
 (0011 fs-object-package-decision
   (0010 (package)
     (110
@@ -283,7 +283,7 @@
 (0011 fs-journal-event-decision
   (0010 (event)
     (110
-      ((0100 (010 event)) (1110 (001 rejected) (001 invalid-event)))
+      ((0101 event) (1110 (001 rejected) (001 invalid-event)))
       ((010 event)  (1110 (001 rejected) (001 invalid-event)))
       ((0100 (101 (fs-package-field (001 format) event) (001 wsm-fs-event)))
        (1110 (001 rejected) (001 invalid-format)))
@@ -368,8 +368,8 @@
 (0011 fs-journal-replay-onto
   (0010 (journal fs)
     (110
-      ((0100 (010 journal)) (1110 (001 accepted) fs))
-      ((010 journal)  (1110 (001 accepted) fs))
+      ((0101 journal) (1110 (001 accepted) fs))
+      ((010 journal)  (1110 (001 rejected) (001 invalid-event)))
       ((010 ())
         (нехай-похідне ((decision (fs-journal-replay-event fs (100 journal))))
           (110
