@@ -13,7 +13,7 @@
   "files_sha256": {
     "accepted-queue.tsv": "26e71d70821778bfe7e871c470ac0d54b36eb9465685137a4fe4fe84739d44b8",
     "escalated.tsv": "26e71d70821778bfe7e871c470ac0d54b36eb9465685137a4fe4fe84739d44b8",
-    "rejected.tsv": "f24a8d42120c92169ce7c145b9fd5ff482bfce3c577038eadd50cf3ec9756277"
+    "rejected.tsv": "eaddf3b25d326fd9c9743b3d3b19ee9de602caa1fa1abec716f68e24c880a3b5"
   },
   "historical_catalog_reconciliation": {
     "canonical_overlay_ids_added": 0,
@@ -42,7 +42,7 @@
     "source_union_candidate_ids": 1771
   },
   "input_index": "knowledge/d10-filter/all-candidates.tsv",
-  "input_index_sha256": "844e7df9f2115cda56c8ac31344477c7d98db02a2f44b6a484da5296ae4b70d4",
+  "input_index_sha256": "9621976bfafc815ff3a608c44aacfbdc8ec866430c7dc41dc7ac26480fb133ed",
   "mechanical_partition": {
     "accepted": 0,
     "escalated": 0,
@@ -56,9 +56,9 @@
     "name_collisions_not_deduped": 276,
     "new_selected_since_index": 0,
     "semantic_dedup_certificates_supplied": 0,
-    "source_file_pin_verified": 1766
+    "source_file_pin_verified": 1771
   },
   "physical_t5_authorized": false,
   "schema": "d10-unified-filter-run/v1",
-  "source_commit": "047edf2749e0a000a4d201677731512e1454853f"
+  "source_commit": "ab18e2cf84ced9c085e92bd231e071fb7eac4560"
 }
