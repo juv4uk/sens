@@ -149,6 +149,23 @@ fn mismatched_view_is_blocked_without_publishing_an_artifact() {
 }
 
 #[test]
+fn mismatched_physical_t5_is_blocked_without_publishing_an_artifact() {
+    let tree = TempTree::new();
+    let triplet = publish_triplet(&tree, SOURCE_RELATIVE);
+    let other_tree = TempTree::new();
+    let other = publish_triplet(&other_tree, NESTED_SOURCE_RELATIVE);
+    fs::copy(&other.sens, &triplet.sens).expect("replace T5 with a different valid program");
+    let artifact = tree.path().join("must-not-exist.bin");
+
+    let output = compiler_triplet(&triplet.sens, &artifact);
+    assert!(!output.status.success());
+    assert!(
+        !artifact.exists(),
+        "a valid but different physical T5 program must not compile against stale siblings"
+    );
+}
+
+#[test]
 fn missing_final_lf_is_rejected_as_noncanonical_file_projection() {
     let tree = TempTree::new();
     let triplet = publish_triplet(&tree, SOURCE_RELATIVE);
