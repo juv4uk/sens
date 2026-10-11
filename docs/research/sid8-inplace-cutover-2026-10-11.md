@@ -1,5 +1,14 @@
 # SID8 → D1–D9: in-place Lisp source migration (2026-10-11)
 
+## source-lane-2026-10-12-bulk-44: дванадцять наявних .lisp, без створення .sens
+
+- **Точна заміна двох історичних імен функціональних форм** у цитованому AST-еталоні `scripts/check-core1-compiler-sid-resolver.lisp`: `00001001 DEFINE → D4:0011`, `00001000 LAMBDA → D4:0010`. Оригінальний `lib/core1-compiler-sid-resolver.lisp` вже мав нові біти; історичні SID8-значення `(ATOM 00000010)`, `(EQ 00000011)`, `(NOT 00100001)` залишені як **дані**, без перекодування.
+- `scripts/check-core4-predicate-answer-boundary.lisp`: стару тричленну умовну конструкцію замінено на двопольовий `D3:110` та явний істинний `(010 (001 ()))`. Обидва файли захищені `tests/test_sid8_core1_resolver_core4_d3_source.py` і [самостійним CI](https://github.com/juv4uk/sens/actions/runs/38185810222) **PASS**.
+- **Сім структурних D3-перетворень у п'яти файлах**: `benchmarks/lists.lisp`, `benchmarks/recursion.lisp`, `scripts/gen-functions.lisp`, `scripts/build-constitution.lisp`, `scripts/fixtures-for-tier.lisp`. Дві гілки зі спільним `ATOM` та однаковим результатом замінено на один D1-предикат і двопольовий `COND`. Заморожені оригінали, точний diff, збереження тестових даних і негативний контроль у `tests/test_sid8_d3_atom_bulk_source.py`, [CI](https://github.com/juv4uk/sens/actions/runs/38185955010) **PASS**.
+- **Ще 37 структурних D3-перетворень у п'яти більших файлах**: `scripts/build-inventory.lisp` (15), `scripts/build-dependency-classification.lisp` (9), `scripts/generate-function-table.lisp` (3), `scripts/generate-uk-surface-audit.lisp` (7), `scripts/symbol-table.lisp` (3). Точне правило: однаковий виклик `ATOM` в суміжних тричленних клаузаx з гілками `()` та `(1)`, однаковий payload і остання гілка `t`. Переписано тільки ці **цілі AST-форми**, заборонено видалення коментарів; різні результати залишено без змін. Джерела/нові Git blob SHA й негативний тест зафіксовано в `tests/test_sid8_d3_atom_37_bulk_source.py`, CI `.github/workflows/sid8-d3-atom-37-bulk.yml`.
+- **Підсумок саме цієї партії:** 12 оригінальних `.lisp` файлів, 44 **нормалізації конструкцій COND**, 2 заміни історичних імен функціональних форм у цитованому поточному AST-еталоні. Це **не** 46 нових SID8 opcode heads і не підстава довільно збільшити попередній облік 7551. Жодного `.sens`, гілки, зміни D8-ідентичностей або переписування історичного архіву.
+- Самостійні source-unit свідки не дорівнюють повній runtime parity. Існуючий Hosted CI у цей період має окремі червоні ланки `world`, `forward/knowledge`, filesystem та time; ми не підміняємо їх source-only PASS.
+
 This is an execution and blocker ledger, not a claim that the repository is fully migrated.
 
 ## 2026-10-12: runtime gate corrects unsafe D6 LET migration
