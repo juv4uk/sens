@@ -88,6 +88,13 @@ codec, selected_bytes, staged_file, staged_sha256.
 НЕнульовий status і після відновлення повторює весь аудит.
 Статус CI слід перевіряти для актуального SHA, не вгадувати.
 
+## Власники й статуси суміжних компонентів
+
+[Машиночитаний інвентар споживачів](migration-two-codec-consumers-2026-10-11.tsv)
+фіксує сім компонентів: Rust, CLI, триаду, CML, GraalVM, CUDA/Futhark
+і FPGA. Для інших репозиторіїв шлях читача наразі TO_INVENTORY,
+статус BLOCKED_UPSTREAM_CODEC_API; **це не виконана міграція**.
+
 ## Попередній доказ і незняті блокери
 
 [Верифікований proof #38168014737](https://github.com/juv4uk/sens/actions/runs/38168014737):
