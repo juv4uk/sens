@@ -1,0 +1,11 @@
+# Exact compare pin main SHA: 959f34cfc68544f71d9d5f865872b4b90c34ccb2
+# Three Core2 runtime-profile variants overlap; attach exact histories without overlaying old my-lisp layout into current live tree.
+branch	source_sha	compare_status	ahead_by	behind_by	reported_file_entries	classification
+agent/1133-core2-authority	043bce8e60db81d4ffc92fe3115fe27b315cba55	behind	0	8028	0	ALREADY_IN_MAIN_ANCESTRY
+agent/1133-core2-runtime-current-main	e5affc9527a0bf643dc3afae7ad67bdebe99a313	diverged	10	7961	10	HISTORY_ATTACHED_CONTENT_REVIEW_REQUIRED
+agent/1133-core2-runtime-final	1b63f5a362562bcaa6ac17c532998064b6c241d8	diverged	18	7960	13	HISTORY_ATTACHED_CONTENT_REVIEW_REQUIRED
+agent/1133-core2-runtime-profile	aa73cf137ab19b48b5f24bf64921e14fc22d0bdc	diverged	18	7963	12	HISTORY_ATTACHED_CONTENT_REVIEW_REQUIRED
+agent/1133-core-special-form-policy	99c301187308d6d792093193b5cd4d599acad02a	diverged	8	7960	7	HISTORY_ATTACHED_CONTENT_REVIEW_REQUIRED
+agent/1134-core3-profile-partial	b019d0375c7031b3db794ea3c18ef2f730a86478	behind	0	7985	0	ALREADY_IN_MAIN_ANCESTRY
+agent/1135-core4-live-reference-cleanup	523a3970a0a86d4395828452b258b5c65a8a7597	behind	0	7986	0	ALREADY_IN_MAIN_ANCESTRY
+agent/1135-core4-loader-switch	ebdc2f1e33b4beb0d22382cd68a1efee0cdddae0	behind	0	8015	0	ALREADY_IN_MAIN_ANCESTRY
