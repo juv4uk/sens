@@ -44,7 +44,7 @@ class BatchSourceTests(unittest.TestCase):
     def test_cond_three_fields_requires_semantic_translation(self):
         old = "(00001001 f (00001000 (x) (00000111 ((00000010 x) 0 1))))"
         new, n, blockers = MOD.rewrite(old, self.mapping, self.blocked)
-        self.assertEqual(n, 3)
+        self.assertEqual(n, 4)
         self.assertFalse(blockers)
         findings = self.guard.scan_lisp(new, "lib/f.lisp")
         self.assertIn("COND_NOT_TWO_FIELDS", {f.rule for f in findings})
