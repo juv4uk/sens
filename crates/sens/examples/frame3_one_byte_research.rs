@@ -110,11 +110,11 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     // 3 literals + 3 ATOM + 9 CONS + 9 CAR.CONS + 9 CDR.CONS
     // + 9 EQ + 3 QUOTE = exactly 45 grammar-generated programs.
     if codes.len() != 45 { return Err(format!("unexpected one-byte capacity: {}", codes.len()).into()); }
-    println!("code_hex\\tmicro_file_bytes\\tt5_full_bytes\\tdecoded_exact_words\\tactual_sens_value");
+    println!("code_hex\tmicro_file_bytes\tt5_full_bytes\tdecoded_exact_words\tactual_sens_value");
     for &code in &codes {
         let (t5_len, result) = verify_one(code)?;
         let source = decode(&[code])?.join(" ");
-        println!("{code:02x}\\t1\\t{t5_len}\\t{source}\\t{result}");
+        println!("{code:02x}\t1\t{t5_len}\t{source}\t{result}");
     }
     // Malformed/aliased inputs must remain rejected. No multi-byte extension.
     for bad in [vec![], vec![0xff], vec![0x40, 0], vec![0xf3]] {
