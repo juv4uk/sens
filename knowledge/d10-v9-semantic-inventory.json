@@ -18784,7 +18784,7 @@
       "behavior": "Мутує цільовий байтовий вектор, копіюючи діапазон; якщо джерело і призначення перекриваються, результат як при тимчасовій копії.",
       "coordinate": null,
       "coordinate_basis": "UNPLACED-NO-F2-F3-RECEIPTS",
-      "source_path": "knowledge/d10-filter/rejected.tsv",
+      "source_path": "knowledge/d10-source-snapshots/d10-v9-f1-rejected-992fe91211b57965.tsv",
       "source_git_blob": "992fe91211b57965f3a650e3e84c7e366e1028ba",
       "donor_provenance": [
         {
@@ -18812,7 +18812,7 @@
       "behavior": "Map Unicode-equivalent representations to canonical NFC/NFD forms while preserving semantic equivalence for downstream transliteration.",
       "coordinate": null,
       "coordinate_basis": "UNPLACED-NO-F2-F3-RECEIPTS",
-      "source_path": "knowledge/d10-filter/rejected.tsv",
+      "source_path": "knowledge/d10-source-snapshots/d10-v9-f1-rejected-992fe91211b57965.tsv",
       "source_git_blob": "992fe91211b57965f3a650e3e84c7e366e1028ba",
       "donor_provenance": [
         {
@@ -18846,7 +18846,7 @@
       "behavior": "Забути всі раніше відстежені об'єкти ресурсу, і при майбутній deallocation старого leased object видати error.",
       "coordinate": null,
       "coordinate_basis": "UNPLACED-NO-F2-F3-RECEIPTS",
-      "source_path": "knowledge/d10-filter/rejected.tsv",
+      "source_path": "knowledge/d10-source-snapshots/d10-v9-f1-rejected-992fe91211b57965.tsv",
       "source_git_blob": "992fe91211b57965f3a650e3e84c7e366e1028ba",
       "donor_provenance": [
         {
@@ -18880,7 +18880,7 @@
       "behavior": "for a nonnegative fixed-width W-bit word x, CLZ(x) = W - integer-length(x), with CLZ(0)=W; must specify width W",
       "coordinate": null,
       "coordinate_basis": "UNPLACED-NO-F2-F3-RECEIPTS",
-      "source_path": "knowledge/d10-filter/rejected.tsv",
+      "source_path": "knowledge/d10-source-snapshots/d10-v9-f1-rejected-992fe91211b57965.tsv",
       "source_git_blob": "992fe91211b57965f3a650e3e84c7e366e1028ba",
       "donor_provenance": [
         {
@@ -18908,7 +18908,7 @@
       "behavior": "Кожне визначення породжує новий тип навіть при однаковому імені/формі, разом із конструктором, предикатом, accessors і mutators.",
       "coordinate": null,
       "coordinate_basis": "UNPLACED-NO-F2-F3-RECEIPTS",
-      "source_path": "knowledge/d10-filter/rejected.tsv",
+      "source_path": "knowledge/d10-source-snapshots/d10-v9-f1-rejected-992fe91211b57965.tsv",
       "source_git_blob": "992fe91211b57965f3a650e3e84c7e366e1028ba",
       "donor_provenance": [
         {
@@ -18936,7 +18936,7 @@
       "behavior": "Monotonic disequality constraint on two terms: immediate success if terms cannot unify, failure if equal, otherwise residual delayed constraint preventing future bindings that make them identical. Distinct from immediate syntactic non-equality or D1 1-bit boolean comparison.",
       "coordinate": null,
       "coordinate_basis": "UNPLACED-NO-F2-F3-RECEIPTS",
-      "source_path": "knowledge/d10-filter/rejected.tsv",
+      "source_path": "knowledge/d10-source-snapshots/d10-v9-f1-rejected-992fe91211b57965.tsv",
       "source_git_blob": "992fe91211b57965f3a650e3e84c7e366e1028ba",
       "donor_provenance": [
         {
@@ -18970,7 +18970,7 @@
       "behavior": "For any given pathname/defaults, merging enough-namestring representation with defaults must equal merging original pathname with defaults, modulo pathname equality.",
       "coordinate": null,
       "coordinate_basis": "UNPLACED-NO-F2-F3-RECEIPTS",
-      "source_path": "knowledge/d10-filter/rejected.tsv",
+      "source_path": "knowledge/d10-source-snapshots/d10-v9-f1-rejected-992fe91211b57965.tsv",
       "source_git_blob": "992fe91211b57965f3a650e3e84c7e366e1028ba",
       "donor_provenance": [
         {
@@ -18998,7 +18998,7 @@
       "behavior": "оновити асоціацію результатом однієї процедури від поточного значення або default",
       "coordinate": null,
       "coordinate_basis": "UNPLACED-NO-F2-F3-RECEIPTS",
-      "source_path": "knowledge/d10-filter/rejected.tsv",
+      "source_path": "knowledge/d10-source-snapshots/d10-v9-f1-rejected-992fe91211b57965.tsv",
       "source_git_blob": "992fe91211b57965f3a650e3e84c7e366e1028ba",
       "donor_provenance": [
         {
@@ -19026,7 +19026,7 @@
       "behavior": "створення словника із заданими чистими hash/equiv процедурами та сумісним відношенням",
       "coordinate": null,
       "coordinate_basis": "UNPLACED-NO-F2-F3-RECEIPTS",
-      "source_path": "knowledge/d10-filter/rejected.tsv",
+      "source_path": "knowledge/d10-source-snapshots/d10-v9-f1-rejected-992fe91211b57965.tsv",
       "source_git_blob": "992fe91211b57965f3a650e3e84c7e366e1028ba",
       "donor_provenance": [
         {
@@ -19054,7 +19054,7 @@
       "behavior": "Перетворює вже обчислене значення на готову обіцянку; якщо аргумент уже promise, повертає його без створення іншого.",
       "coordinate": null,
       "coordinate_basis": "UNPLACED-NO-F2-F3-RECEIPTS",
-      "source_path": "knowledge/d10-filter/rejected.tsv",
+      "source_path": "knowledge/d10-source-snapshots/d10-v9-f1-rejected-992fe91211b57965.tsv",
       "source_git_blob": "992fe91211b57965f3a650e3e84c7e366e1028ba",
       "donor_provenance": [
         {
@@ -19082,7 +19082,7 @@
       "behavior": "Fill unspecified name/type/host/device/version from explicit defaults; relative directory values concatenate with default directory, preserving component semantics.",
       "coordinate": null,
       "coordinate_basis": "UNPLACED-NO-F2-F3-RECEIPTS",
-      "source_path": "knowledge/d10-filter/rejected.tsv",
+      "source_path": "knowledge/d10-source-snapshots/d10-v9-f1-rejected-992fe91211b57965.tsv",
       "source_git_blob": "992fe91211b57965f3a650e3e84c7e366e1028ba",
       "donor_provenance": [
         {
@@ -19110,7 +19110,7 @@
       "behavior": "Wildcard match is directional; a wildcard in the first pathname matches only a wildcard in the second; actual matching mechanics implementation-defined.",
       "coordinate": null,
       "coordinate_basis": "UNPLACED-NO-F2-F3-RECEIPTS",
-      "source_path": "knowledge/d10-filter/rejected.tsv",
+      "source_path": "knowledge/d10-source-snapshots/d10-v9-f1-rejected-992fe91211b57965.tsv",
       "source_git_blob": "992fe91211b57965f3a650e3e84c7e366e1028ba",
       "donor_provenance": [
         {
@@ -19138,7 +19138,7 @@
       "behavior": "Represent a claim/result together with the explicit assumption chain on which its validity depends, preserving provenance rather than treating the result as floating authority.",
       "coordinate": null,
       "coordinate_basis": "UNPLACED-NO-F2-F3-RECEIPTS",
-      "source_path": "knowledge/d10-filter/rejected.tsv",
+      "source_path": "knowledge/d10-source-snapshots/d10-v9-f1-rejected-992fe91211b57965.tsv",
       "source_git_blob": "992fe91211b57965f3a650e3e84c7e366e1028ba",
       "donor_provenance": [
         {
@@ -19172,7 +19172,7 @@
       "behavior": "Parse a structured text query, apply field/tag/date restrictions, compute text relevance, emit ordered results with snippets and pagination totals.",
       "coordinate": null,
       "coordinate_basis": "UNPLACED-NO-F2-F3-RECEIPTS",
-      "source_path": "knowledge/d10-filter/rejected.tsv",
+      "source_path": "knowledge/d10-source-snapshots/d10-v9-f1-rejected-992fe91211b57965.tsv",
       "source_git_blob": "992fe91211b57965f3a650e3e84c7e366e1028ba",
       "donor_provenance": [
         {
@@ -19206,7 +19206,7 @@
       "behavior": "At each input position choose the longest defined mapping key starting there, with token-kind context for marks/consonants.",
       "coordinate": null,
       "coordinate_basis": "UNPLACED-NO-F2-F3-RECEIPTS",
-      "source_path": "knowledge/d10-filter/rejected.tsv",
+      "source_path": "knowledge/d10-source-snapshots/d10-v9-f1-rejected-992fe91211b57965.tsv",
       "source_git_blob": "992fe91211b57965f3a650e3e84c7e366e1028ba",
       "donor_provenance": [
         {
@@ -19240,7 +19240,7 @@
       "behavior": "Apply a finite rewrite table where the result for a matched input depends on lexical context classes such as word-start and after-consonant, with deterministic longest-key matching and case projections.",
       "coordinate": null,
       "coordinate_basis": "UNPLACED-NO-F2-F3-RECEIPTS",
-      "source_path": "knowledge/d10-filter/rejected.tsv",
+      "source_path": "knowledge/d10-source-snapshots/d10-v9-f1-rejected-992fe91211b57965.tsv",
       "source_git_blob": "992fe91211b57965f3a650e3e84c7e366e1028ba",
       "donor_provenance": [
         {
@@ -19274,7 +19274,7 @@
       "behavior": "Generate inflected word forms from lemma-class affix rules, including tag-bearing alternatives and alternation classes.",
       "coordinate": null,
       "coordinate_basis": "UNPLACED-NO-F2-F3-RECEIPTS",
-      "source_path": "knowledge/d10-filter/rejected.tsv",
+      "source_path": "knowledge/d10-source-snapshots/d10-v9-f1-rejected-992fe91211b57965.tsv",
       "source_git_blob": "992fe91211b57965f3a650e3e84c7e366e1028ba",
       "donor_provenance": [
         {
@@ -19308,7 +19308,7 @@
       "behavior": "Evaluate planetary ephemeris at a time coordinate and copy the resulting position/velocity into simulation state.",
       "coordinate": null,
       "coordinate_basis": "UNPLACED-NO-F2-F3-RECEIPTS",
-      "source_path": "knowledge/d10-filter/rejected.tsv",
+      "source_path": "knowledge/d10-source-snapshots/d10-v9-f1-rejected-992fe91211b57965.tsv",
       "source_git_blob": "992fe91211b57965f3a650e3e84c7e366e1028ba",
       "donor_provenance": [
         {
@@ -19342,7 +19342,7 @@
       "behavior": "Advance position and mid-step velocity by a fixed timestep using acceleration, then atomically commit temporary state.",
       "coordinate": null,
       "coordinate_basis": "UNPLACED-NO-F2-F3-RECEIPTS",
-      "source_path": "knowledge/d10-filter/rejected.tsv",
+      "source_path": "knowledge/d10-source-snapshots/d10-v9-f1-rejected-992fe91211b57965.tsv",
       "source_git_blob": "992fe91211b57965f3a650e3e84c7e366e1028ba",
       "donor_provenance": [
         {
@@ -19376,7 +19376,7 @@
       "behavior": "For finite acyclic first-order terms, unify two terms while refusing any new binding V:=T when V occurs inside T; observable success/failure plus induced substitution. SWI special case with ALREADY cyclic inputs is non-portable and excluded.",
       "coordinate": null,
       "coordinate_basis": "UNPLACED-NO-F2-F3-RECEIPTS",
-      "source_path": "knowledge/d10-filter/rejected.tsv",
+      "source_path": "knowledge/d10-source-snapshots/d10-v9-f1-rejected-992fe91211b57965.tsv",
       "source_git_blob": "992fe91211b57965f3a650e3e84c7e366e1028ba",
       "donor_provenance": [
         {
@@ -19410,7 +19410,7 @@
       "behavior": "Видати вільний сумісний об'єкт із пулу або створити новий; виділений не видається одночасно двом споживачам.",
       "coordinate": null,
       "coordinate_basis": "UNPLACED-NO-F2-F3-RECEIPTS",
-      "source_path": "knowledge/d10-filter/rejected.tsv",
+      "source_path": "knowledge/d10-source-snapshots/d10-v9-f1-rejected-992fe91211b57965.tsv",
       "source_git_blob": "992fe91211b57965f3a650e3e84c7e366e1028ba",
       "donor_provenance": [
         {
@@ -19444,7 +19444,7 @@
       "behavior": "Повернути виділений об'єкт пулу для можливого повторного використання, не доводячи негайного звільнення фізичної пам'яті.",
       "coordinate": null,
       "coordinate_basis": "UNPLACED-NO-F2-F3-RECEIPTS",
-      "source_path": "knowledge/d10-filter/rejected.tsv",
+      "source_path": "knowledge/d10-source-snapshots/d10-v9-f1-rejected-992fe91211b57965.tsv",
       "source_git_blob": "992fe91211b57965f3a650e3e84c7e366e1028ba",
       "donor_provenance": [
         {
@@ -19478,7 +19478,7 @@
       "behavior": "Описати іменований пул із constructor, matcher, initializer та checker; semantics candidate is lease contract, not allocator address.",
       "coordinate": null,
       "coordinate_basis": "UNPLACED-NO-F2-F3-RECEIPTS",
-      "source_path": "knowledge/d10-filter/rejected.tsv",
+      "source_path": "knowledge/d10-source-snapshots/d10-v9-f1-rejected-992fe91211b57965.tsv",
       "source_git_blob": "992fe91211b57965f3a650e3e84c7e366e1028ba",
       "donor_provenance": [
         {
@@ -19512,7 +19512,7 @@
       "behavior": "Returns an ordered proper list of method qualifiers, separate from specializers and from runtime applicability.",
       "coordinate": null,
       "coordinate_basis": "UNPLACED-NO-F2-F3-RECEIPTS",
-      "source_path": "knowledge/d10-filter/rejected.tsv",
+      "source_path": "knowledge/d10-source-snapshots/d10-v9-f1-rejected-992fe91211b57965.tsv",
       "source_git_blob": "992fe91211b57965f3a650e3e84c7e366e1028ba",
       "donor_provenance": [
         {
@@ -19546,7 +19546,7 @@
       "behavior": "Resolve a symbolic record field label to a location in the current declared record layout; after layout redefinition the same field name resolves to the new offset.",
       "coordinate": null,
       "coordinate_basis": "UNPLACED-NO-F2-F3-RECEIPTS",
-      "source_path": "knowledge/d10-filter/rejected.tsv",
+      "source_path": "knowledge/d10-source-snapshots/d10-v9-f1-rejected-992fe91211b57965.tsv",
       "source_git_blob": "992fe91211b57965f3a650e3e84c7e366e1028ba",
       "donor_provenance": [
         {
@@ -19580,7 +19580,7 @@
       "behavior": "Return exact predicate 1 only for NTP modes 4 and 5, otherwise 0.",
       "coordinate": null,
       "coordinate_basis": "UNPLACED-NO-F2-F3-RECEIPTS",
-      "source_path": "knowledge/d10-filter/rejected.tsv",
+      "source_path": "knowledge/d10-source-snapshots/d10-v9-f1-rejected-992fe91211b57965.tsv",
       "source_git_blob": "992fe91211b57965f3a650e3e84c7e366e1028ba",
       "donor_provenance": [
         {
@@ -19614,7 +19614,7 @@
       "behavior": "Return exact predicate 1 only for allowable NTP stratum range 1..15 inclusive, otherwise 0.",
       "coordinate": null,
       "coordinate_basis": "UNPLACED-NO-F2-F3-RECEIPTS",
-      "source_path": "knowledge/d10-filter/rejected.tsv",
+      "source_path": "knowledge/d10-source-snapshots/d10-v9-f1-rejected-992fe91211b57965.tsv",
       "source_git_blob": "992fe91211b57965f3a650e3e84c7e366e1028ba",
       "donor_provenance": [
         {
@@ -19648,7 +19648,7 @@
       "behavior": "Copy a term with fresh variables while extracting pending attribute constraints as explicit residual goals G. Replaying G restores the constraints onto the copy; copying alone DOES NOT implicitly preserve them for copy_term/3.",
       "coordinate": null,
       "coordinate_basis": "UNPLACED-NO-F2-F3-RECEIPTS",
-      "source_path": "knowledge/d10-filter/rejected.tsv",
+      "source_path": "knowledge/d10-source-snapshots/d10-v9-f1-rejected-992fe91211b57965.tsv",
       "source_git_blob": "992fe91211b57965f3a650e3e84c7e366e1028ba",
       "donor_provenance": [
         {
@@ -19682,7 +19682,7 @@
       "behavior": "Return the class name symbol if present; anonymous classes have NIL and name is not identical to class-object identity.",
       "coordinate": null,
       "coordinate_basis": "UNPLACED-NO-F2-F3-RECEIPTS",
-      "source_path": "knowledge/d10-filter/rejected.tsv",
+      "source_path": "knowledge/d10-source-snapshots/d10-v9-f1-rejected-992fe91211b57965.tsv",
       "source_git_blob": "992fe91211b57965f3a650e3e84c7e366e1028ba",
       "donor_provenance": [
         {
@@ -19716,7 +19716,7 @@
       "behavior": "Отримати початкову функцію, навіть коли її обгорнуто; базова функція лишається відмінною від wrapper chain.",
       "coordinate": null,
       "coordinate_basis": "UNPLACED-NO-F2-F3-RECEIPTS",
-      "source_path": "knowledge/d10-filter/rejected.tsv",
+      "source_path": "knowledge/d10-source-snapshots/d10-v9-f1-rejected-992fe91211b57965.tsv",
       "source_git_blob": "992fe91211b57965f3a650e3e84c7e366e1028ba",
       "donor_provenance": [
         {
@@ -19750,7 +19750,7 @@
       "behavior": "Compute free identifiers of sequential let* bindings using each earlier binding only in later initializers and the body",
       "coordinate": null,
       "coordinate_basis": "UNPLACED-NO-F2-F3-RECEIPTS",
-      "source_path": "knowledge/d10-filter/rejected.tsv",
+      "source_path": "knowledge/d10-source-snapshots/d10-v9-f1-rejected-992fe91211b57965.tsv",
       "source_git_blob": "992fe91211b57965f3a650e3e84c7e366e1028ba",
       "donor_provenance": [
         {
@@ -19784,7 +19784,7 @@
       "behavior": "Compute free identifiers of mutually recursive letrec definitions with all names in scope for all initializers and body",
       "coordinate": null,
       "coordinate_basis": "UNPLACED-NO-F2-F3-RECEIPTS",
-      "source_path": "knowledge/d10-filter/rejected.tsv",
+      "source_path": "knowledge/d10-source-snapshots/d10-v9-f1-rejected-992fe91211b57965.tsv",
       "source_git_blob": "992fe91211b57965f3a650e3e84c7e366e1028ba",
       "donor_provenance": [
         {
@@ -19818,7 +19818,7 @@
       "behavior": "preserve all first-form return values, execute later effects in sequence, and return exactly the preserved cardinality and values",
       "coordinate": null,
       "coordinate_basis": "UNPLACED-NO-F2-F3-RECEIPTS",
-      "source_path": "knowledge/d10-filter/rejected.tsv",
+      "source_path": "knowledge/d10-source-snapshots/d10-v9-f1-rejected-992fe91211b57965.tsv",
       "source_git_blob": "992fe91211b57965f3a650e3e84c7e366e1028ba",
       "donor_provenance": [
         {
@@ -19846,7 +19846,7 @@
       "behavior": "Описує ліниве обчислення ланцюга promise через хвостовий FORCE без необмеженого накопичення відкладених примусових викликів.",
       "coordinate": null,
       "coordinate_basis": "UNPLACED-NO-F2-F3-RECEIPTS",
-      "source_path": "knowledge/d10-filter/rejected.tsv",
+      "source_path": "knowledge/d10-source-snapshots/d10-v9-f1-rejected-992fe91211b57965.tsv",
       "source_git_blob": "992fe91211b57965f3a650e3e84c7e366e1028ba",
       "donor_provenance": [
         {
