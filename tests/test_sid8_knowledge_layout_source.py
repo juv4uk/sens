@@ -50,7 +50,7 @@ class KnowledgeLayoutSourceTests(unittest.TestCase):
                 source = (ROOT / "tests" / "fixtures" / filename).read_text()
                 for snippet in needles:
                     self.assertIn(snippet, source)
-                self.assertNotRegex(source, r"\\(00001001(?=\\s|\\))")
+                self.assertNotRegex(source, r"\(00001001(?=\s|\))")
         # Binary-id data is still historical data, NOT an executable call head.
         registry = (ROOT / "tests/fixtures/semantic-registry-self-hosted-witness.lisp").read_text()
         self.assertIn("(semantic-registry-row-in registry 00000001)", registry)
