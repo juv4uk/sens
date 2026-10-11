@@ -1,0 +1,43 @@
+name: D7 ratified authority and W7 carrier
+
+on:
+  pull_request:
+    paths:
+      - "knowledge/d7-ratified.json"
+      - "knowledge/d7-v2-evidence-ledger.json"
+      - "lib/domains/d7.lisp"
+      - "contracts/d7-ratification.lisp"
+      - "language-contract.lisp"
+      - "CURRENT.md"
+      - "scripts/check-d7-current-authority.py"
+      - "crates/sens/src/canonical_reader.rs"
+      - "crates/sens/src/text7.rs"
+      - "crates/sens/src/text7_projection.rs"
+      - "crates/sens/src/eval/**"
+      - "crates/sens/tests/*text7*"
+      - "crates/sens/tests/canonical_w7_frame_invariance.rs"
+      - ".github/workflows/d7-ratified-authority.yml"
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  authority:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v5
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Check owner-ratified 126/128 D7 and reserved coordinates
+        run: python3 scripts/check-d7-current-authority.py
+      - name: Check ratified domain tables
+        run: python3 scripts/check-domain-tables.py
+      - name: Check canonical binary reader D7 mechanics
+        run: cargo test -p sens --lib canonical_reader::tests -- --nocapture
+      - name: Check D7 W7 packing and structural D2 boundaries
+        run: cargo test -p sens --test d7_w7_pack --test canonical_w7_frame_invariance --test d2_text7_frame_role_boundary
+      - name: Check Text7 exact cells and contextual bindings
+        run: cargo test -p sens --test text7_canonical_wire --test text7_contextual_binding
