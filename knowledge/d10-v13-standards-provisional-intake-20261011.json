@@ -1,0 +1,1863 @@
+{
+  "schema": "d10-v13-historical-standards-provisional-research/v1",
+  "date": "2026-10-11",
+  "authority": "UNRATIFIED_RESEARCH_PRELIMINARY",
+  "previous": {
+    "path": "knowledge/d10-v12-semantic-inventory.json",
+    "git_blob": "185ecb2d5c4d0f9410aede7d40fb038a3ac76e31",
+    "selected": 827,
+    "placed": 719,
+    "unplaced": 108,
+    "ratified": 0
+  },
+  "catalog": {
+    "path": "knowledge/d10-source-snapshots/d10-v9-unified-catalog-1809.tsv",
+    "git_blob": "1660a19ff9482f932fb9a40fa78ad1fa50134c31",
+    "rows": 1809
+  },
+  "law_authors": {
+    "path": "knowledge/d10-standards-draft-laws-v13-20261011.json",
+    "git_blob": "b67b10310ad4be8bf497b124dd30d45fe54b06f0",
+    "proposals": 70
+  },
+  "foundation": {
+    "path": "knowledge/d1-d9-foundation.json",
+    "git_blob": "09d1d71c39d1484dfd005a5068dbb18b76f0f0d4"
+  },
+  "counts": {
+    "prior_selected": 827,
+    "research_added": 70,
+    "selected_after": 897,
+    "placed_after": 719,
+    "unplaced_after": 178,
+    "remaining": 127,
+    "ratified": 0,
+    "allocated_coordinates": 0,
+    "executed_F2_proofs": 0,
+    "verified_F3_proofs": 0
+  },
+  "safety": {
+    "semantic_proofs_missing": true,
+    "donor_witnesses_not_executed": true,
+    "example_inputs_not_executed": true,
+    "domain_wide_ratification_deferred_until_1024": true,
+    "source_record_loss_forbidden": true,
+    "exact_name_only_duplicate_screen_is_not_F3": true
+  },
+  "candidates": [
+    {
+      "id": "d10.name.00874",
+      "name": "MAKE-BROADCAST-STREAM",
+      "law": "Construct an output composite over ordered output streams; every output operation writes to every constituent in order; no constituents is valid and discards output.",
+      "positive_illustrative_claim": "Writing 'ab' through composite with two string outputs appends 'ab' to each.",
+      "negative_illustrative_claim": "Reject an input-only constituent as an output sink.",
+      "archived_law_claims": [],
+      "archived_positive_claims": [
+        "[]"
+      ],
+      "archived_negative_claims": [],
+      "donor_claims": [
+        "knowledge/d10-clhs-streams-census-20261009.json@4c39efaf558dd654272a690e6a01c0ae1c1b262f"
+      ],
+      "source_records_sha_pinned": [
+        "knowledge/d10-historical-lisp-branch-candidate-intake-20261011.json@42362a46d7587e375ed19c156a0b67e40b86939a:candidates[164]",
+        "knowledge/d10-historical-lisp-branch-evidence-intake-20261011.json@615307670709d8429d8b74daafe8fe24b36960ea:new_candidates[80]"
+      ],
+      "co_named_archive_ids": [],
+      "F1": "CATALOG-SHA-PINNED-REF-DONOR_NOT_EXECUTED",
+      "F2": "HOLD_NOT_RUN",
+      "F3": "HOLD_DEDUP_UNPROVEN",
+      "F4": "NO_COORDINATE",
+      "ratified": false
+    },
+    {
+      "id": "d10.name.00133",
+      "name": "BROADCAST-STREAM-STREAMS",
+      "law": "For a broadcast stream, return its ordered constituent output streams without copying their data or consuming output.",
+      "positive_illustrative_claim": "Constructor(s1,s2) exposes s1,s2 in constructor order.",
+      "negative_illustrative_claim": "Do not return input streams or confuse this with writing output.",
+      "archived_law_claims": [],
+      "archived_positive_claims": [
+        "[]"
+      ],
+      "archived_negative_claims": [],
+      "donor_claims": [
+        "knowledge/d10-clhs-streams-census-20261009.json@4c39efaf558dd654272a690e6a01c0ae1c1b262f"
+      ],
+      "source_records_sha_pinned": [
+        "knowledge/d10-historical-lisp-branch-candidate-intake-20261011.json@42362a46d7587e375ed19c156a0b67e40b86939a:candidates[122]",
+        "knowledge/d10-historical-lisp-branch-evidence-intake-20261011.json@615307670709d8429d8b74daafe8fe24b36960ea:new_candidates[79]"
+      ],
+      "co_named_archive_ids": [],
+      "F1": "CATALOG-SHA-PINNED-REF-DONOR_NOT_EXECUTED",
+      "F2": "HOLD_NOT_RUN",
+      "F3": "HOLD_DEDUP_UNPROVEN",
+      "F4": "NO_COORDINATE",
+      "ratified": false
+    },
+    {
+      "id": "d10.name.00879",
+      "name": "MAKE-ECHO-STREAM",
+      "law": "Construct a bidirectional composite from an input stream and output stream; consumed input is echoed to output and explicit output is sent to output.",
+      "positive_illustrative_claim": "Reading character A from input causes A to appear in output; explicit B write also appears.",
+      "negative_illustrative_claim": "Echo does not manufacture a second copy of A on a mere unread operation.",
+      "archived_law_claims": [],
+      "archived_positive_claims": [
+        "[]"
+      ],
+      "archived_negative_claims": [],
+      "donor_claims": [
+        "knowledge/d10-clhs-streams-census-20261009.json@4c39efaf558dd654272a690e6a01c0ae1c1b262f"
+      ],
+      "source_records_sha_pinned": [
+        "knowledge/d10-historical-lisp-branch-candidate-intake-20261011.json@42362a46d7587e375ed19c156a0b67e40b86939a:candidates[165]",
+        "knowledge/d10-historical-lisp-branch-evidence-intake-20261011.json@615307670709d8429d8b74daafe8fe24b36960ea:new_candidates[86]"
+      ],
+      "co_named_archive_ids": [],
+      "F1": "CATALOG-SHA-PINNED-REF-DONOR_NOT_EXECUTED",
+      "F2": "HOLD_NOT_RUN",
+      "F3": "HOLD_DEDUP_UNPROVEN",
+      "F4": "NO_COORDINATE",
+      "ratified": false
+    },
+    {
+      "id": "d10.name.00576",
+      "name": "ECHO-STREAM-INPUT-STREAM",
+      "law": "Return the exact input constituent of an echo stream, without consuming any input.",
+      "positive_illustrative_claim": "Echo(sin,sout) has input constituent sin.",
+      "negative_illustrative_claim": "Must not return sout or advance sin.",
+      "archived_law_claims": [],
+      "archived_positive_claims": [
+        "[]"
+      ],
+      "archived_negative_claims": [],
+      "donor_claims": [
+        "knowledge/d10-clhs-streams-census-20261009.json@4c39efaf558dd654272a690e6a01c0ae1c1b262f"
+      ],
+      "source_records_sha_pinned": [
+        "knowledge/d10-historical-lisp-branch-candidate-intake-20261011.json@42362a46d7587e375ed19c156a0b67e40b86939a:candidates[135]",
+        "knowledge/d10-historical-lisp-branch-evidence-intake-20261011.json@615307670709d8429d8b74daafe8fe24b36960ea:new_candidates[84]"
+      ],
+      "co_named_archive_ids": [],
+      "F1": "CATALOG-SHA-PINNED-REF-DONOR_NOT_EXECUTED",
+      "F2": "HOLD_NOT_RUN",
+      "F3": "HOLD_DEDUP_UNPROVEN",
+      "F4": "NO_COORDINATE",
+      "ratified": false
+    },
+    {
+      "id": "d10.name.00577",
+      "name": "ECHO-STREAM-OUTPUT-STREAM",
+      "law": "Return the exact output constituent of an echo stream, without producing output.",
+      "positive_illustrative_claim": "Echo(sin,sout) has output constituent sout.",
+      "negative_illustrative_claim": "Must not return sin or write echoed input.",
+      "archived_law_claims": [],
+      "archived_positive_claims": [
+        "[]"
+      ],
+      "archived_negative_claims": [],
+      "donor_claims": [
+        "knowledge/d10-clhs-streams-census-20261009.json@4c39efaf558dd654272a690e6a01c0ae1c1b262f"
+      ],
+      "source_records_sha_pinned": [
+        "knowledge/d10-historical-lisp-branch-candidate-intake-20261011.json@42362a46d7587e375ed19c156a0b67e40b86939a:candidates[136]",
+        "knowledge/d10-historical-lisp-branch-evidence-intake-20261011.json@615307670709d8429d8b74daafe8fe24b36960ea:new_candidates[85]"
+      ],
+      "co_named_archive_ids": [],
+      "F1": "CATALOG-SHA-PINNED-REF-DONOR_NOT_EXECUTED",
+      "F2": "HOLD_NOT_RUN",
+      "F3": "HOLD_DEDUP_UNPROVEN",
+      "F4": "NO_COORDINATE",
+      "ratified": false
+    },
+    {
+      "id": "d10.name.00902",
+      "name": "MAKE-TWO-WAY-STREAM",
+      "law": "Build a bidirectional stream whose reads delegate to the designated input stream and writes delegate to the designated output stream; unlike an echo stream, reads need not echo.",
+      "positive_illustrative_claim": "Read X from input and write Y: output receives only Y.",
+      "negative_illustrative_claim": "Treat reading as an implicit echo or treat output sink as input.",
+      "archived_law_claims": [],
+      "archived_positive_claims": [
+        "[]"
+      ],
+      "archived_negative_claims": [],
+      "donor_claims": [
+        "knowledge/d10-clhs-streams-census-20261009.json@4c39efaf558dd654272a690e6a01c0ae1c1b262f"
+      ],
+      "source_records_sha_pinned": [
+        "knowledge/d10-historical-lisp-branch-candidate-intake-20261011.json@42362a46d7587e375ed19c156a0b67e40b86939a:candidates[169]",
+        "knowledge/d10-historical-lisp-branch-evidence-intake-20261011.json@615307670709d8429d8b74daafe8fe24b36960ea:new_candidates[81]"
+      ],
+      "co_named_archive_ids": [],
+      "F1": "CATALOG-SHA-PINNED-REF-DONOR_NOT_EXECUTED",
+      "F2": "HOLD_NOT_RUN",
+      "F3": "HOLD_DEDUP_UNPROVEN",
+      "F4": "NO_COORDINATE",
+      "ratified": false
+    },
+    {
+      "id": "d10.name.01393",
+      "name": "TWO-WAY-STREAM-INPUT-STREAM",
+      "law": "Return the input constituent of a two-way stream without consuming it.",
+      "positive_illustrative_claim": "Two-way(sin,sout) yields sin.",
+      "negative_illustrative_claim": "Must not return sout.",
+      "archived_law_claims": [],
+      "archived_positive_claims": [
+        "[]"
+      ],
+      "archived_negative_claims": [],
+      "donor_claims": [
+        "knowledge/d10-clhs-streams-census-20261009.json@4c39efaf558dd654272a690e6a01c0ae1c1b262f"
+      ],
+      "source_records_sha_pinned": [
+        "knowledge/d10-historical-lisp-branch-candidate-intake-20261011.json@42362a46d7587e375ed19c156a0b67e40b86939a:candidates[209]",
+        "knowledge/d10-historical-lisp-branch-evidence-intake-20261011.json@615307670709d8429d8b74daafe8fe24b36960ea:new_candidates[82]"
+      ],
+      "co_named_archive_ids": [],
+      "F1": "CATALOG-SHA-PINNED-REF-DONOR_NOT_EXECUTED",
+      "F2": "HOLD_NOT_RUN",
+      "F3": "HOLD_DEDUP_UNPROVEN",
+      "F4": "NO_COORDINATE",
+      "ratified": false
+    },
+    {
+      "id": "d10.name.01394",
+      "name": "TWO-WAY-STREAM-OUTPUT-STREAM",
+      "law": "Return the output constituent of a two-way stream without writing to it.",
+      "positive_illustrative_claim": "Two-way(sin,sout) yields sout.",
+      "negative_illustrative_claim": "Must not return sin.",
+      "archived_law_claims": [],
+      "archived_positive_claims": [
+        "[]"
+      ],
+      "archived_negative_claims": [],
+      "donor_claims": [
+        "knowledge/d10-clhs-streams-census-20261009.json@4c39efaf558dd654272a690e6a01c0ae1c1b262f"
+      ],
+      "source_records_sha_pinned": [
+        "knowledge/d10-historical-lisp-branch-candidate-intake-20261011.json@42362a46d7587e375ed19c156a0b67e40b86939a:candidates[210]",
+        "knowledge/d10-historical-lisp-branch-evidence-intake-20261011.json@615307670709d8429d8b74daafe8fe24b36960ea:new_candidates[83]"
+      ],
+      "co_named_archive_ids": [],
+      "F1": "CATALOG-SHA-PINNED-REF-DONOR_NOT_EXECUTED",
+      "F2": "HOLD_NOT_RUN",
+      "F3": "HOLD_DEDUP_UNPROVEN",
+      "F4": "NO_COORDINATE",
+      "ratified": false
+    },
+    {
+      "id": "d10.name.00898",
+      "name": "MAKE-STRING-INPUT-STREAM",
+      "law": "Given string and optional bounding start,end indices, expose successive characters in [start,end), then EOF without reading outside range.",
+      "positive_illustrative_claim": "The stream over 'abcde' bounds [1,4) yields b,c,d then EOF.",
+      "negative_illustrative_claim": "Do not read the excluded endpoints or accept indices outside the string.",
+      "archived_law_claims": [],
+      "archived_positive_claims": [
+        "[]"
+      ],
+      "archived_negative_claims": [],
+      "donor_claims": [
+        "knowledge/d10-clhs-streams-census-20261009.json@4c39efaf558dd654272a690e6a01c0ae1c1b262f"
+      ],
+      "source_records_sha_pinned": [
+        "knowledge/d10-historical-lisp-branch-candidate-intake-20261011.json@42362a46d7587e375ed19c156a0b67e40b86939a:candidates[167]",
+        "knowledge/d10-historical-lisp-branch-evidence-intake-20261011.json@615307670709d8429d8b74daafe8fe24b36960ea:new_candidates[90]"
+      ],
+      "co_named_archive_ids": [],
+      "F1": "CATALOG-SHA-PINNED-REF-DONOR_NOT_EXECUTED",
+      "F2": "HOLD_NOT_RUN",
+      "F3": "HOLD_DEDUP_UNPROVEN",
+      "F4": "NO_COORDINATE",
+      "ratified": false
+    },
+    {
+      "id": "d10.name.00899",
+      "name": "MAKE-STRING-OUTPUT-STREAM",
+      "law": "Create character output stream accumulating writes for later GET-OUTPUT-STREAM-STRING retrieval; initial buffer is empty.",
+      "positive_illustrative_claim": "Write A then B, extraction returns 'AB'.",
+      "negative_illustrative_claim": "Creation does not itself write characters and need not create a file.",
+      "archived_law_claims": [],
+      "archived_positive_claims": [
+        "[]"
+      ],
+      "archived_negative_claims": [],
+      "donor_claims": [
+        "knowledge/d10-clhs-streams-census-20261009.json@4c39efaf558dd654272a690e6a01c0ae1c1b262f"
+      ],
+      "source_records_sha_pinned": [
+        "knowledge/d10-historical-lisp-branch-candidate-intake-20261011.json@42362a46d7587e375ed19c156a0b67e40b86939a:candidates[168]",
+        "knowledge/d10-historical-lisp-branch-evidence-intake-20261011.json@615307670709d8429d8b74daafe8fe24b36960ea:new_candidates[91]"
+      ],
+      "co_named_archive_ids": [],
+      "F1": "CATALOG-SHA-PINNED-REF-DONOR_NOT_EXECUTED",
+      "F2": "HOLD_NOT_RUN",
+      "F3": "HOLD_DEDUP_UNPROVEN",
+      "F4": "NO_COORDINATE",
+      "ratified": false
+    },
+    {
+      "id": "d10.name.00855",
+      "name": "LISTEN",
+      "law": "Observe whether a character is immediately available from a character input stream without consuming it; EOF can return false.",
+      "positive_illustrative_claim": "Nonempty string input yields true and next READ-CHAR still sees the first character.",
+      "negative_illustrative_claim": "Never advance stream position or block waiting for unavailable future input.",
+      "archived_law_claims": [],
+      "archived_positive_claims": [
+        "[]"
+      ],
+      "archived_negative_claims": [],
+      "donor_claims": [
+        "knowledge/d10-clhs-streams-census-20261009.json@4c39efaf558dd654272a690e6a01c0ae1c1b262f"
+      ],
+      "source_records_sha_pinned": [
+        "knowledge/d10-historical-lisp-branch-candidate-intake-20261011.json@42362a46d7587e375ed19c156a0b67e40b86939a:candidates[157]",
+        "knowledge/d10-historical-lisp-branch-evidence-intake-20261011.json@615307670709d8429d8b74daafe8fe24b36960ea:new_candidates[70]"
+      ],
+      "co_named_archive_ids": [],
+      "F1": "CATALOG-SHA-PINNED-REF-DONOR_NOT_EXECUTED",
+      "F2": "HOLD_NOT_RUN",
+      "F3": "HOLD_DEDUP_UNPROVEN",
+      "F4": "NO_COORDINATE",
+      "ratified": false
+    },
+    {
+      "id": "d10.name.01083",
+      "name": "PEEK-CHAR",
+      "law": "Return the next matching input character without consuming it; optional peek-type may skip characters before the match and the specified EOF behavior applies.",
+      "positive_illustrative_claim": "PEEK-CHAR nil before 'ab' yields a and following READ-CHAR yields a.",
+      "negative_illustrative_claim": "Do not consume the observed matched character.",
+      "archived_law_claims": [],
+      "archived_positive_claims": [
+        "[]"
+      ],
+      "archived_negative_claims": [],
+      "donor_claims": [
+        "knowledge/d10-clhs-streams-census-20261009.json@4c39efaf558dd654272a690e6a01c0ae1c1b262f"
+      ],
+      "source_records_sha_pinned": [
+        "knowledge/d10-historical-lisp-branch-candidate-intake-20261011.json@42362a46d7587e375ed19c156a0b67e40b86939a:candidates[182]",
+        "knowledge/d10-historical-lisp-branch-evidence-intake-20261011.json@615307670709d8429d8b74daafe8fe24b36960ea:new_candidates[57]"
+      ],
+      "co_named_archive_ids": [],
+      "F1": "CATALOG-SHA-PINNED-REF-DONOR_NOT_EXECUTED",
+      "F2": "HOLD_NOT_RUN",
+      "F3": "HOLD_DEDUP_UNPROVEN",
+      "F4": "NO_COORDINATE",
+      "ratified": false
+    },
+    {
+      "id": "d10.name.01141",
+      "name": "READ-CHAR-NO-HANG",
+      "law": "Attempt a character read only if immediately available; distinguish no available input from EOF, with optional EOF policy.",
+      "positive_illustrative_claim": "For ready 'a' consumes and yields a; a temporarily unavailable stream yields NIL instead of waiting.",
+      "negative_illustrative_claim": "Do not report transient no-data as an actual EOF condition.",
+      "archived_law_claims": [],
+      "archived_positive_claims": [
+        "[]"
+      ],
+      "archived_negative_claims": [],
+      "donor_claims": [
+        "knowledge/d10-clhs-streams-census-20261009.json@4c39efaf558dd654272a690e6a01c0ae1c1b262f"
+      ],
+      "source_records_sha_pinned": [
+        "knowledge/d10-historical-lisp-branch-candidate-intake-20261011.json@42362a46d7587e375ed19c156a0b67e40b86939a:candidates[184]",
+        "knowledge/d10-historical-lisp-branch-evidence-intake-20261011.json@615307670709d8429d8b74daafe8fe24b36960ea:new_candidates[58]"
+      ],
+      "co_named_archive_ids": [],
+      "F1": "CATALOG-SHA-PINNED-REF-DONOR_NOT_EXECUTED",
+      "F2": "HOLD_NOT_RUN",
+      "F3": "HOLD_DEDUP_UNPROVEN",
+      "F4": "NO_COORDINATE",
+      "ratified": false
+    },
+    {
+      "id": "d10.name.01142",
+      "name": "READ-LINE",
+      "law": "Consume one line up to but not including newline and return text plus missing-newline flag; handle an EOF before any character under eof-error-p/eof-value policy.",
+      "positive_illustrative_claim": "Input 'a\\nb' yields first line 'a' with missing-newline false, second 'b' with true.",
+      "negative_illustrative_claim": "Never include terminating newline in the returned line text.",
+      "archived_law_claims": [],
+      "archived_positive_claims": [
+        "[]"
+      ],
+      "archived_negative_claims": [],
+      "donor_claims": [
+        "knowledge/d10-clhs-streams-census-20261009.json@4c39efaf558dd654272a690e6a01c0ae1c1b262f"
+      ],
+      "source_records_sha_pinned": [
+        "knowledge/d10-historical-lisp-branch-candidate-intake-20261011.json@42362a46d7587e375ed19c156a0b67e40b86939a:candidates[185]",
+        "knowledge/d10-historical-lisp-branch-evidence-intake-20261011.json@615307670709d8429d8b74daafe8fe24b36960ea:new_candidates[62]"
+      ],
+      "co_named_archive_ids": [],
+      "F1": "CATALOG-SHA-PINNED-REF-DONOR_NOT_EXECUTED",
+      "F2": "HOLD_NOT_RUN",
+      "F3": "HOLD_DEDUP_UNPROVEN",
+      "F4": "NO_COORDINATE",
+      "ratified": false
+    },
+    {
+      "id": "d10.name.01144",
+      "name": "READ-SEQUENCE",
+      "law": "Destructively fill specified sequence slice from stream elements; return the index of first element not updated when EOF intervenes.",
+      "positive_illustrative_claim": "Three-character input into a five-cell vector starting at index 1 updates three cells and returns index 4.",
+      "negative_illustrative_claim": "Do not overwrite sequence cells past end bound or assume full reads.",
+      "archived_law_claims": [],
+      "archived_positive_claims": [
+        "[]"
+      ],
+      "archived_negative_claims": [],
+      "donor_claims": [
+        "knowledge/d10-clhs-streams-census-20261009.json@4c39efaf558dd654272a690e6a01c0ae1c1b262f"
+      ],
+      "source_records_sha_pinned": [
+        "knowledge/d10-historical-lisp-branch-candidate-intake-20261011.json@42362a46d7587e375ed19c156a0b67e40b86939a:candidates[187]",
+        "knowledge/d10-historical-lisp-branch-evidence-intake-20261011.json@615307670709d8429d8b74daafe8fe24b36960ea:new_candidates[64]"
+      ],
+      "co_named_archive_ids": [],
+      "F1": "CATALOG-SHA-PINNED-REF-DONOR_NOT_EXECUTED",
+      "F2": "HOLD_NOT_RUN",
+      "F3": "HOLD_DEDUP_UNPROVEN",
+      "F4": "NO_COORDINATE",
+      "ratified": false
+    },
+    {
+      "id": "d10.name.01491",
+      "name": "WRITE-SEQUENCE",
+      "law": "Write successive elements from bounded sequence subsequence to output stream and return the sequence; preserve ordering and bounds.",
+      "positive_illustrative_claim": "Write [A,B,C] from [1,3) emits B,C.",
+      "negative_illustrative_claim": "Do not write elements before start or after end.",
+      "archived_law_claims": [],
+      "archived_positive_claims": [
+        "[]"
+      ],
+      "archived_negative_claims": [],
+      "donor_claims": [
+        "knowledge/d10-clhs-streams-census-20261009.json@4c39efaf558dd654272a690e6a01c0ae1c1b262f"
+      ],
+      "source_records_sha_pinned": [
+        "knowledge/d10-historical-lisp-branch-candidate-intake-20261011.json@42362a46d7587e375ed19c156a0b67e40b86939a:candidates[219]",
+        "knowledge/d10-historical-lisp-branch-evidence-intake-20261011.json@615307670709d8429d8b74daafe8fe24b36960ea:new_candidates[65]"
+      ],
+      "co_named_archive_ids": [],
+      "F1": "CATALOG-SHA-PINNED-REF-DONOR_NOT_EXECUTED",
+      "F2": "HOLD_NOT_RUN",
+      "F3": "HOLD_DEDUP_UNPROVEN",
+      "F4": "NO_COORDINATE",
+      "ratified": false
+    },
+    {
+      "id": "d10.name.00692",
+      "name": "FRESH-LINE",
+      "law": "Output newline only if output stream is not already at the beginning of a line; return whether newline was emitted.",
+      "positive_illustrative_claim": "After writing 'x', FRESH-LINE emits a newline; calling again at line start emits none.",
+      "negative_illustrative_claim": "Never insert repeated blank lines at an existing line boundary.",
+      "archived_law_claims": [],
+      "archived_positive_claims": [
+        "[]"
+      ],
+      "archived_negative_claims": [],
+      "donor_claims": [
+        "knowledge/d10-clhs-streams-census-20261009.json@4c39efaf558dd654272a690e6a01c0ae1c1b262f"
+      ],
+      "source_records_sha_pinned": [
+        "knowledge/d10-historical-lisp-branch-candidate-intake-20261011.json@42362a46d7587e375ed19c156a0b67e40b86939a:candidates[147]",
+        "knowledge/d10-historical-lisp-branch-evidence-intake-20261011.json@615307670709d8429d8b74daafe8fe24b36960ea:new_candidates[59]"
+      ],
+      "co_named_archive_ids": [],
+      "F1": "CATALOG-SHA-PINNED-REF-DONOR_NOT_EXECUTED",
+      "F2": "HOLD_NOT_RUN",
+      "F3": "HOLD_DEDUP_UNPROVEN",
+      "F4": "NO_COORDINATE",
+      "ratified": false
+    },
+    {
+      "id": "d10.name.00431",
+      "name": "CLEAR-INPUT",
+      "law": "Discard input already available in the buffer of an input stream; do not promise to drain future input.",
+      "positive_illustrative_claim": "A buffered unread character may be discarded by CLEAR-INPUT.",
+      "negative_illustrative_claim": "Do not block until the physical input source closes.",
+      "archived_law_claims": [],
+      "archived_positive_claims": [
+        "[]"
+      ],
+      "archived_negative_claims": [],
+      "donor_claims": [
+        "knowledge/d10-clhs-streams-census-20261009.json@4c39efaf558dd654272a690e6a01c0ae1c1b262f"
+      ],
+      "source_records_sha_pinned": [
+        "knowledge/d10-historical-lisp-branch-candidate-intake-20261011.json@42362a46d7587e375ed19c156a0b67e40b86939a:candidates[124]",
+        "knowledge/d10-historical-lisp-branch-evidence-intake-20261011.json@615307670709d8429d8b74daafe8fe24b36960ea:new_candidates[71]"
+      ],
+      "co_named_archive_ids": [],
+      "F1": "CATALOG-SHA-PINNED-REF-DONOR_NOT_EXECUTED",
+      "F2": "HOLD_NOT_RUN",
+      "F3": "HOLD_DEDUP_UNPROVEN",
+      "F4": "NO_COORDINATE",
+      "ratified": false
+    },
+    {
+      "id": "d10.name.00433",
+      "name": "CLEAR-OUTPUT",
+      "law": "Try to abort pending, not-yet-transmitted output for a stream; already delivered data remains delivered.",
+      "positive_illustrative_claim": "Pending buffered data may be discarded while previously flushed data remains visible.",
+      "negative_illustrative_claim": "Do not claim bytes already sent to a device can be recalled.",
+      "archived_law_claims": [],
+      "archived_positive_claims": [
+        "[]"
+      ],
+      "archived_negative_claims": [],
+      "donor_claims": [
+        "knowledge/d10-clhs-streams-census-20261009.json@4c39efaf558dd654272a690e6a01c0ae1c1b262f"
+      ],
+      "source_records_sha_pinned": [
+        "knowledge/d10-historical-lisp-branch-candidate-intake-20261011.json@42362a46d7587e375ed19c156a0b67e40b86939a:candidates[125]",
+        "knowledge/d10-historical-lisp-branch-evidence-intake-20261011.json@615307670709d8429d8b74daafe8fe24b36960ea:new_candidates[74]"
+      ],
+      "co_named_archive_ids": [],
+      "F1": "CATALOG-SHA-PINNED-REF-DONOR_NOT_EXECUTED",
+      "F2": "HOLD_NOT_RUN",
+      "F3": "HOLD_DEDUP_UNPROVEN",
+      "F4": "NO_COORDINATE",
+      "ratified": false
+    },
+    {
+      "id": "d10.name.00641",
+      "name": "FINISH-OUTPUT",
+      "law": "Force pending output transmission and wait until it is completed as specified by the stream; unlike FORCE-OUTPUT it waits.",
+      "positive_illustrative_claim": "Buffered output is pushed and completion observed before returning.",
+      "negative_illustrative_claim": "Do not treat return before completion as FINISH-OUTPUT.",
+      "archived_law_claims": [],
+      "archived_positive_claims": [
+        "[]"
+      ],
+      "archived_negative_claims": [],
+      "donor_claims": [
+        "knowledge/d10-clhs-streams-census-20261009.json@4c39efaf558dd654272a690e6a01c0ae1c1b262f"
+      ],
+      "source_records_sha_pinned": [
+        "knowledge/d10-historical-lisp-branch-candidate-intake-20261011.json@42362a46d7587e375ed19c156a0b67e40b86939a:candidates[143]",
+        "knowledge/d10-historical-lisp-branch-evidence-intake-20261011.json@615307670709d8429d8b74daafe8fe24b36960ea:new_candidates[72]"
+      ],
+      "co_named_archive_ids": [],
+      "F1": "CATALOG-SHA-PINNED-REF-DONOR_NOT_EXECUTED",
+      "F2": "HOLD_NOT_RUN",
+      "F3": "HOLD_DEDUP_UNPROVEN",
+      "F4": "NO_COORDINATE",
+      "ratified": false
+    },
+    {
+      "id": "d10.name.00685",
+      "name": "FORCE-OUTPUT",
+      "law": "Initiate transmission of buffered output without promising completion before return; unlike FINISH-OUTPUT waiting is not required.",
+      "positive_illustrative_claim": "A pending buffer is scheduled for delivery.",
+      "negative_illustrative_claim": "Do not require full completion before returning or discard the pending buffer.",
+      "archived_law_claims": [],
+      "archived_positive_claims": [
+        "[]"
+      ],
+      "archived_negative_claims": [],
+      "donor_claims": [
+        "knowledge/d10-clhs-streams-census-20261009.json@4c39efaf558dd654272a690e6a01c0ae1c1b262f"
+      ],
+      "source_records_sha_pinned": [
+        "knowledge/d10-historical-lisp-branch-candidate-intake-20261011.json@42362a46d7587e375ed19c156a0b67e40b86939a:candidates[146]",
+        "knowledge/d10-historical-lisp-branch-evidence-intake-20261011.json@615307670709d8429d8b74daafe8fe24b36960ea:new_candidates[73]"
+      ],
+      "co_named_archive_ids": [],
+      "F1": "CATALOG-SHA-PINNED-REF-DONOR_NOT_EXECUTED",
+      "F2": "HOLD_NOT_RUN",
+      "F3": "HOLD_DEDUP_UNPROVEN",
+      "F4": "NO_COORDINATE",
+      "ratified": false
+    },
+    {
+      "id": "d10.name.00629",
+      "name": "FILE-LENGTH",
+      "law": "For a file stream, return length in stream elements, or NIL when it cannot be determined; do not confuse character count with encoded bytes.",
+      "positive_illustrative_claim": "A known 3-element binary file reports 3.",
+      "negative_illustrative_claim": "Character translations do not guarantee one-byte-per-character length.",
+      "archived_law_claims": [],
+      "archived_positive_claims": [
+        "[]"
+      ],
+      "archived_negative_claims": [],
+      "donor_claims": [
+        "knowledge/d10-clhs-streams-census-20261009.json@4c39efaf558dd654272a690e6a01c0ae1c1b262f"
+      ],
+      "source_records_sha_pinned": [
+        "knowledge/d10-historical-lisp-branch-candidate-intake-20261011.json@42362a46d7587e375ed19c156a0b67e40b86939a:candidates[138]",
+        "knowledge/d10-historical-lisp-branch-evidence-intake-20261011.json@615307670709d8429d8b74daafe8fe24b36960ea:new_candidates[66]"
+      ],
+      "co_named_archive_ids": [],
+      "F1": "CATALOG-SHA-PINNED-REF-DONOR_NOT_EXECUTED",
+      "F2": "HOLD_NOT_RUN",
+      "F3": "HOLD_DEDUP_UNPROVEN",
+      "F4": "NO_COORDINATE",
+      "ratified": false
+    },
+    {
+      "id": "d10.name.00631",
+      "name": "FILE-POSITION",
+      "law": "Without second argument observe current file position or NIL if unknown; with position designator attempt seek and return success predicate; preserve stream element units.",
+      "positive_illustrative_claim": "For seekable file, save position p, read, seek back to p and reread same element.",
+      "negative_illustrative_claim": "Never assume character-stream positions increment one per character.",
+      "archived_law_claims": [],
+      "archived_positive_claims": [
+        "[]"
+      ],
+      "archived_negative_claims": [],
+      "donor_claims": [
+        "knowledge/d10-clhs-streams-census-20261009.json@4c39efaf558dd654272a690e6a01c0ae1c1b262f"
+      ],
+      "source_records_sha_pinned": [
+        "knowledge/d10-historical-lisp-branch-candidate-intake-20261011.json@42362a46d7587e375ed19c156a0b67e40b86939a:candidates[140]",
+        "knowledge/d10-historical-lisp-branch-evidence-intake-20261011.json@615307670709d8429d8b74daafe8fe24b36960ea:new_candidates[67]"
+      ],
+      "co_named_archive_ids": [],
+      "F1": "CATALOG-SHA-PINNED-REF-DONOR_NOT_EXECUTED",
+      "F2": "HOLD_NOT_RUN",
+      "F3": "HOLD_DEDUP_UNPROVEN",
+      "F4": "NO_COORDINATE",
+      "ratified": false
+    },
+    {
+      "id": "d10.name.00633",
+      "name": "FILE-STRING-LENGTH",
+      "law": "Return number of file position units output by writing given string or character to the designated character output file stream; result can depend on encoding.",
+      "positive_illustrative_claim": "One ASCII character on one-byte external format has encoded file length 1.",
+      "negative_illustrative_claim": "Do not equate Unicode codepoint count to all external-format lengths.",
+      "archived_law_claims": [],
+      "archived_positive_claims": [
+        "[]"
+      ],
+      "archived_negative_claims": [],
+      "donor_claims": [
+        "knowledge/d10-clhs-streams-census-20261009.json@4c39efaf558dd654272a690e6a01c0ae1c1b262f"
+      ],
+      "source_records_sha_pinned": [
+        "knowledge/d10-historical-lisp-branch-candidate-intake-20261011.json@42362a46d7587e375ed19c156a0b67e40b86939a:candidates[142]",
+        "knowledge/d10-historical-lisp-branch-evidence-intake-20261011.json@615307670709d8429d8b74daafe8fe24b36960ea:new_candidates[68]"
+      ],
+      "co_named_archive_ids": [],
+      "F1": "CATALOG-SHA-PINNED-REF-DONOR_NOT_EXECUTED",
+      "F2": "HOLD_NOT_RUN",
+      "F3": "HOLD_DEDUP_UNPROVEN",
+      "F4": "NO_COORDINATE",
+      "ratified": false
+    },
+    {
+      "id": "d10.name.01300",
+      "name": "STREAM-ELEMENT-TYPE",
+      "law": "Report a type specifier for elements a stream can read/write; permitted representations need not be uniquely normalized.",
+      "positive_illustrative_claim": "Character stream element-type admits characters; binary stream admits relevant integers.",
+      "negative_illustrative_claim": "Do not require exact textual equality of equivalent type specifiers.",
+      "archived_law_claims": [],
+      "archived_positive_claims": [
+        "[]"
+      ],
+      "archived_negative_claims": [],
+      "donor_claims": [
+        "knowledge/d10-clhs-streams-census-20261009.json@4c39efaf558dd654272a690e6a01c0ae1c1b262f"
+      ],
+      "source_records_sha_pinned": [
+        "knowledge/d10-historical-lisp-branch-candidate-intake-20261011.json@42362a46d7587e375ed19c156a0b67e40b86939a:candidates[195]",
+        "knowledge/d10-historical-lisp-branch-evidence-intake-20261011.json@615307670709d8429d8b74daafe8fe24b36960ea:new_candidates[55]"
+      ],
+      "co_named_archive_ids": [],
+      "F1": "CATALOG-SHA-PINNED-REF-DONOR_NOT_EXECUTED",
+      "F2": "HOLD_NOT_RUN",
+      "F3": "HOLD_DEDUP_UNPROVEN",
+      "F4": "NO_COORDINATE",
+      "ratified": false
+    },
+    {
+      "id": "d10.name.01303",
+      "name": "STREAM-EXTERNAL-FORMAT",
+      "law": "For a file stream report the implementation's external format designator, whose representation may be implementation-specific.",
+      "positive_illustrative_claim": "Character file opened with selected external format reports a corresponding designator.",
+      "negative_illustrative_claim": "Do not claim the reported designator is portable to every Lisp runtime.",
+      "archived_law_claims": [],
+      "archived_positive_claims": [
+        "[]"
+      ],
+      "archived_negative_claims": [],
+      "donor_claims": [
+        "knowledge/d10-clhs-streams-census-20261009.json@4c39efaf558dd654272a690e6a01c0ae1c1b262f"
+      ],
+      "source_records_sha_pinned": [
+        "knowledge/d10-historical-lisp-branch-candidate-intake-20261011.json@42362a46d7587e375ed19c156a0b67e40b86939a:candidates[198]",
+        "knowledge/d10-historical-lisp-branch-evidence-intake-20261011.json@615307670709d8429d8b74daafe8fe24b36960ea:new_candidates[69]"
+      ],
+      "co_named_archive_ids": [],
+      "F1": "CATALOG-SHA-PINNED-REF-DONOR_NOT_EXECUTED",
+      "F2": "HOLD_NOT_RUN",
+      "F3": "HOLD_DEDUP_UNPROVEN",
+      "F4": "NO_COORDINATE",
+      "ratified": false
+    },
+    {
+      "id": "d10.name.00771",
+      "name": "INPUT-STREAM-P",
+      "law": "Return generalized true iff object is an input-capable stream, including bidirectional composites.",
+      "positive_illustrative_claim": "Make-string-input-stream object yields true.",
+      "negative_illustrative_claim": "An output-only string stream must not be reported input-capable.",
+      "archived_law_claims": [],
+      "archived_positive_claims": [
+        "[]"
+      ],
+      "archived_negative_claims": [],
+      "donor_claims": [
+        "knowledge/d10-clhs-streams-census-20261009.json@4c39efaf558dd654272a690e6a01c0ae1c1b262f"
+      ],
+      "source_records_sha_pinned": [
+        "knowledge/d10-historical-lisp-branch-candidate-intake-20261011.json@42362a46d7587e375ed19c156a0b67e40b86939a:candidates[154]",
+        "knowledge/d10-historical-lisp-branch-evidence-intake-20261011.json@615307670709d8429d8b74daafe8fe24b36960ea:new_candidates[51]"
+      ],
+      "co_named_archive_ids": [],
+      "F1": "CATALOG-SHA-PINNED-REF-DONOR_NOT_EXECUTED",
+      "F2": "HOLD_NOT_RUN",
+      "F3": "HOLD_DEDUP_UNPROVEN",
+      "F4": "NO_COORDINATE",
+      "ratified": false
+    },
+    {
+      "id": "d10.name.01063",
+      "name": "OUTPUT-STREAM-P",
+      "law": "Return generalized true iff object is an output-capable stream, including bidirectional composites.",
+      "positive_illustrative_claim": "Make-string-output-stream object yields true.",
+      "negative_illustrative_claim": "An input-only string stream must not be reported output-capable.",
+      "archived_law_claims": [],
+      "archived_positive_claims": [
+        "[]"
+      ],
+      "archived_negative_claims": [],
+      "donor_claims": [
+        "knowledge/d10-clhs-streams-census-20261009.json@4c39efaf558dd654272a690e6a01c0ae1c1b262f"
+      ],
+      "source_records_sha_pinned": [
+        "knowledge/d10-historical-lisp-branch-candidate-intake-20261011.json@42362a46d7587e375ed19c156a0b67e40b86939a:candidates[172]",
+        "knowledge/d10-historical-lisp-branch-evidence-intake-20261011.json@615307670709d8429d8b74daafe8fe24b36960ea:new_candidates[52]"
+      ],
+      "co_named_archive_ids": [],
+      "F1": "CATALOG-SHA-PINNED-REF-DONOR_NOT_EXECUTED",
+      "F2": "HOLD_NOT_RUN",
+      "F3": "HOLD_DEDUP_UNPROVEN",
+      "F4": "NO_COORDINATE",
+      "ratified": false
+    },
+    {
+      "id": "d10.name.00776",
+      "name": "INTERACTIVE-STREAM-P",
+      "law": "Return generalized true for an interactive stream designating a human interaction source or sink, false for ordinary noninteractive streams.",
+      "positive_illustrative_claim": "An ordinary string input stream reports false.",
+      "negative_illustrative_claim": "Do not infer interactivity solely from input/output capability.",
+      "archived_law_claims": [],
+      "archived_positive_claims": [
+        "[]"
+      ],
+      "archived_negative_claims": [],
+      "donor_claims": [
+        "knowledge/d10-clhs-streams-census-20261009.json@4c39efaf558dd654272a690e6a01c0ae1c1b262f"
+      ],
+      "source_records_sha_pinned": [
+        "knowledge/d10-historical-lisp-branch-candidate-intake-20261011.json@42362a46d7587e375ed19c156a0b67e40b86939a:candidates[155]",
+        "knowledge/d10-historical-lisp-branch-evidence-intake-20261011.json@615307670709d8429d8b74daafe8fe24b36960ea:new_candidates[53]"
+      ],
+      "co_named_archive_ids": [],
+      "F1": "CATALOG-SHA-PINNED-REF-DONOR_NOT_EXECUTED",
+      "F2": "HOLD_NOT_RUN",
+      "F3": "HOLD_DEDUP_UNPROVEN",
+      "F4": "NO_COORDINATE",
+      "ratified": false
+    },
+    {
+      "id": "d10.name.01058",
+      "name": "OPEN-STREAM-P",
+      "law": "Report whether a stream is open; closing it changes this predicate without changing its identity.",
+      "positive_illustrative_claim": "An open output stream yields true, after CLOSE yields false.",
+      "negative_illustrative_claim": "Do not return true only because the stream object still exists.",
+      "archived_law_claims": [],
+      "archived_positive_claims": [
+        "[]"
+      ],
+      "archived_negative_claims": [],
+      "donor_claims": [
+        "knowledge/d10-clhs-streams-census-20261009.json@4c39efaf558dd654272a690e6a01c0ae1c1b262f"
+      ],
+      "source_records_sha_pinned": [
+        "knowledge/d10-historical-lisp-branch-candidate-intake-20261011.json@42362a46d7587e375ed19c156a0b67e40b86939a:candidates[171]",
+        "knowledge/d10-historical-lisp-branch-evidence-intake-20261011.json@615307670709d8429d8b74daafe8fe24b36960ea:new_candidates[54]"
+      ],
+      "co_named_archive_ids": [],
+      "F1": "CATALOG-SHA-PINNED-REF-DONOR_NOT_EXECUTED",
+      "F2": "HOLD_NOT_RUN",
+      "F3": "HOLD_DEDUP_UNPROVEN",
+      "F4": "NO_COORDINATE",
+      "ratified": false
+    },
+    {
+      "id": "d10.name.01304",
+      "name": "STREAMP",
+      "law": "Return generalized true exactly for stream objects, independent of current open/closed state.",
+      "positive_illustrative_claim": "A closed string stream remains a stream.",
+      "negative_illustrative_claim": "Do not test only open streams.",
+      "archived_law_claims": [],
+      "archived_positive_claims": [
+        "[]"
+      ],
+      "archived_negative_claims": [],
+      "donor_claims": [
+        "knowledge/d10-clhs-streams-census-20261009.json@4c39efaf558dd654272a690e6a01c0ae1c1b262f"
+      ],
+      "source_records_sha_pinned": [
+        "knowledge/d10-historical-lisp-branch-candidate-intake-20261011.json@42362a46d7587e375ed19c156a0b67e40b86939a:candidates[199]",
+        "knowledge/d10-historical-lisp-branch-evidence-intake-20261011.json@615307670709d8429d8b74daafe8fe24b36960ea:new_candidates[56]"
+      ],
+      "co_named_archive_ids": [],
+      "F1": "CATALOG-SHA-PINNED-REF-DONOR_NOT_EXECUTED",
+      "F2": "HOLD_NOT_RUN",
+      "F3": "HOLD_DEDUP_UNPROVEN",
+      "F4": "NO_COORDINATE",
+      "ratified": false
+    },
+    {
+      "id": "d10.name.00632",
+      "name": "FILE-STREAM",
+      "law": "Classify file-connected stream objects as file-stream class; do not treat an in-memory string stream as file-connected.",
+      "positive_illustrative_claim": "Stream obtained by opening a file is a file stream.",
+      "negative_illustrative_claim": "An ordinary string-output-stream is not a file-stream.",
+      "archived_law_claims": [],
+      "archived_positive_claims": [
+        "[]"
+      ],
+      "archived_negative_claims": [],
+      "donor_claims": [
+        "knowledge/d10-clhs-streams-census-20261009.json@4c39efaf558dd654272a690e6a01c0ae1c1b262f"
+      ],
+      "source_records_sha_pinned": [
+        "knowledge/d10-historical-lisp-branch-candidate-intake-20261011.json@42362a46d7587e375ed19c156a0b67e40b86939a:candidates[141]",
+        "knowledge/d10-historical-lisp-branch-evidence-intake-20261011.json@615307670709d8429d8b74daafe8fe24b36960ea:new_candidates[47]"
+      ],
+      "co_named_archive_ids": [],
+      "F1": "CATALOG-SHA-PINNED-REF-DONOR_NOT_EXECUTED",
+      "F2": "HOLD_NOT_RUN",
+      "F3": "HOLD_DEDUP_UNPROVEN",
+      "F4": "NO_COORDINATE",
+      "ratified": false
+    },
+    {
+      "id": "d10.name.00584",
+      "name": "END-OF-FILE",
+      "law": "Represent the standard end-of-file condition signaled by a read with eof-error-p true at actual EOF; not a successful EOF value.",
+      "positive_illustrative_claim": "Reading past exhausted input with eof-error-p true signals END-OF-FILE.",
+      "negative_illustrative_claim": "EOF-value return with eof-error-p false must not signal that condition.",
+      "archived_law_claims": [],
+      "archived_positive_claims": [
+        "[]"
+      ],
+      "archived_negative_claims": [],
+      "donor_claims": [
+        "knowledge/d10-clhs-streams-census-20261009.json@4c39efaf558dd654272a690e6a01c0ae1c1b262f"
+      ],
+      "source_records_sha_pinned": [
+        "knowledge/d10-historical-lisp-branch-candidate-intake-20261011.json@42362a46d7587e375ed19c156a0b67e40b86939a:candidates[137]",
+        "knowledge/d10-historical-lisp-branch-evidence-intake-20261011.json@615307670709d8429d8b74daafe8fe24b36960ea:new_candidates[104]"
+      ],
+      "co_named_archive_ids": [],
+      "F1": "CATALOG-SHA-PINNED-REF-DONOR_NOT_EXECUTED",
+      "F2": "HOLD_NOT_RUN",
+      "F3": "HOLD_DEDUP_UNPROVEN",
+      "F4": "NO_COORDINATE",
+      "ratified": false
+    },
+    {
+      "id": "d10.name.00892",
+      "name": "MAKE-PATHNAME",
+      "law": "Construct pathname from host/device/directory/name/type/version components and optional defaults, preserving unspecified components under documented merge/case rules.",
+      "positive_illustrative_claim": "Supplying name 'abc' and type 'lisp' produces pathname with matching NAME and TYPE.",
+      "negative_illustrative_claim": "Do not silently reinterpret explicit host or component case as a literal OS file open.",
+      "archived_law_claims": [],
+      "archived_positive_claims": [
+        "[]"
+      ],
+      "archived_negative_claims": [],
+      "donor_claims": [
+        "knowledge/d10-clhs-pathnames-census-20261009.json@f32d199c1325e7daebcd7598c5121b23312bfd57"
+      ],
+      "source_records_sha_pinned": [
+        "knowledge/d10-historical-lisp-branch-candidate-intake-20261011.json@42362a46d7587e375ed19c156a0b67e40b86939a:candidates[166]",
+        "knowledge/d10-historical-lisp-branch-evidence-intake-20261011.json@615307670709d8429d8b74daafe8fe24b36960ea:new_candidates[107]"
+      ],
+      "co_named_archive_ids": [],
+      "F1": "CATALOG-SHA-PINNED-REF-DONOR_NOT_EXECUTED",
+      "F2": "HOLD_NOT_RUN",
+      "F3": "HOLD_DEDUP_UNPROVEN",
+      "F4": "NO_COORDINATE",
+      "ratified": false
+    },
+    {
+      "id": "d10.name.01070",
+      "name": "PARSE-NAMESTRING",
+      "law": "Parse a bounded namestring into pathname and stopping index under host/default/junk-allowed rules, with filesystem-dependent component interpretation.",
+      "positive_illustrative_claim": "Parsing 'file.lisp' yields pathname designator plus consumed end index.",
+      "negative_illustrative_claim": "Do not claim a unique portable component representation for every host string.",
+      "archived_law_claims": [],
+      "archived_positive_claims": [
+        "[]"
+      ],
+      "archived_negative_claims": [],
+      "donor_claims": [
+        "knowledge/d10-clhs-pathnames-census-20261009.json@f32d199c1325e7daebcd7598c5121b23312bfd57"
+      ],
+      "source_records_sha_pinned": [
+        "knowledge/d10-historical-lisp-branch-candidate-intake-20261011.json@42362a46d7587e375ed19c156a0b67e40b86939a:candidates[173]",
+        "knowledge/d10-historical-lisp-branch-evidence-intake-20261011.json@615307670709d8429d8b74daafe8fe24b36960ea:new_candidates[123]"
+      ],
+      "co_named_archive_ids": [],
+      "F1": "CATALOG-SHA-PINNED-REF-DONOR_NOT_EXECUTED",
+      "F2": "HOLD_NOT_RUN",
+      "F3": "HOLD_DEDUP_UNPROVEN",
+      "F4": "NO_COORDINATE",
+      "ratified": false
+    },
+    {
+      "id": "d10.name.01073",
+      "name": "PATHNAME",
+      "law": "Coerce a pathname designator (pathname, string, file stream where allowed) to pathname object under implementation pathname syntax.",
+      "positive_illustrative_claim": "Applying PATHNAME to an existing pathname preserves pathname identity/equality.",
+      "negative_illustrative_claim": "Do not treat an arbitrary list as a pathname designator.",
+      "archived_law_claims": [],
+      "archived_positive_claims": [
+        "[]"
+      ],
+      "archived_negative_claims": [],
+      "donor_claims": [
+        "knowledge/d10-clhs-pathnames-census-20261009.json@f32d199c1325e7daebcd7598c5121b23312bfd57"
+      ],
+      "source_records_sha_pinned": [
+        "knowledge/d10-historical-lisp-branch-candidate-intake-20261011.json@42362a46d7587e375ed19c156a0b67e40b86939a:candidates[174]",
+        "knowledge/d10-historical-lisp-branch-evidence-intake-20261011.json@615307670709d8429d8b74daafe8fe24b36960ea:new_candidates[105]"
+      ],
+      "co_named_archive_ids": [],
+      "F1": "CATALOG-SHA-PINNED-REF-DONOR_NOT_EXECUTED",
+      "F2": "HOLD_NOT_RUN",
+      "F3": "HOLD_DEDUP_UNPROVEN",
+      "F4": "NO_COORDINATE",
+      "ratified": false
+    },
+    {
+      "id": "d10.name.01081",
+      "name": "PATHNAMEP",
+      "law": "Return generalized true exactly for pathname objects, irrespective of whether the named file exists.",
+      "positive_illustrative_claim": "MAKE-PATHNAME result yields true without touching file system.",
+      "negative_illustrative_claim": "A random string designating a file need not itself satisfy PATHNAMEP.",
+      "archived_law_claims": [],
+      "archived_positive_claims": [
+        "[]"
+      ],
+      "archived_negative_claims": [],
+      "donor_claims": [
+        "knowledge/d10-clhs-pathnames-census-20261009.json@f32d199c1325e7daebcd7598c5121b23312bfd57"
+      ],
+      "source_records_sha_pinned": [
+        "knowledge/d10-historical-lisp-branch-candidate-intake-20261011.json@42362a46d7587e375ed19c156a0b67e40b86939a:candidates[181]",
+        "knowledge/d10-historical-lisp-branch-evidence-intake-20261011.json@615307670709d8429d8b74daafe8fe24b36960ea:new_candidates[108]"
+      ],
+      "co_named_archive_ids": [],
+      "F1": "CATALOG-SHA-PINNED-REF-DONOR_NOT_EXECUTED",
+      "F2": "HOLD_NOT_RUN",
+      "F3": "HOLD_DEDUP_UNPROVEN",
+      "F4": "NO_COORDINATE",
+      "ratified": false
+    },
+    {
+      "id": "d10.name.01021",
+      "name": "NAMESTRING",
+      "law": "For a pathname represent its full pathname syntax as a namestring when a valid representation exists; result is subject to filesystem and host conventions.",
+      "positive_illustrative_claim": "A simple pathname on host supports a namestring that can be parsed on that host.",
+      "negative_illustrative_claim": "Do not treat pathname strings as universally identical across file systems.",
+      "archived_law_claims": [],
+      "archived_positive_claims": [
+        "[]"
+      ],
+      "archived_negative_claims": [],
+      "donor_claims": [
+        "knowledge/d10-clhs-pathnames-census-20261009.json@f32d199c1325e7daebcd7598c5121b23312bfd57"
+      ],
+      "source_records_sha_pinned": [
+        "knowledge/d10-historical-lisp-branch-candidate-intake-20261011.json@42362a46d7587e375ed19c156a0b67e40b86939a:candidates[170]",
+        "knowledge/d10-historical-lisp-branch-evidence-intake-20261011.json@615307670709d8429d8b74daafe8fe24b36960ea:new_candidates[118]"
+      ],
+      "co_named_archive_ids": [],
+      "F1": "CATALOG-SHA-PINNED-REF-DONOR_NOT_EXECUTED",
+      "F2": "HOLD_NOT_RUN",
+      "F3": "HOLD_DEDUP_UNPROVEN",
+      "F4": "NO_COORDINATE",
+      "ratified": false
+    },
+    {
+      "id": "d10.name.00756",
+      "name": "HOST-NAMESTRING",
+      "law": "Return the host-only namestring component for pathname without appending its directory, name or type.",
+      "positive_illustrative_claim": "A pathname with host H has host-only representation H under its host syntax.",
+      "negative_illustrative_claim": "Do not return the entire original file namestring.",
+      "archived_law_claims": [],
+      "archived_positive_claims": [
+        "[]"
+      ],
+      "archived_negative_claims": [],
+      "donor_claims": [
+        "knowledge/d10-clhs-pathnames-census-20261009.json@f32d199c1325e7daebcd7598c5121b23312bfd57"
+      ],
+      "source_records_sha_pinned": [
+        "knowledge/d10-historical-lisp-branch-candidate-intake-20261011.json@42362a46d7587e375ed19c156a0b67e40b86939a:candidates[153]",
+        "knowledge/d10-historical-lisp-branch-evidence-intake-20261011.json@615307670709d8429d8b74daafe8fe24b36960ea:new_candidates[121]"
+      ],
+      "co_named_archive_ids": [],
+      "F1": "CATALOG-SHA-PINNED-REF-DONOR_NOT_EXECUTED",
+      "F2": "HOLD_NOT_RUN",
+      "F3": "HOLD_DEDUP_UNPROVEN",
+      "F4": "NO_COORDINATE",
+      "ratified": false
+    },
+    {
+      "id": "d10.name.00565",
+      "name": "DIRECTORY-NAMESTRING",
+      "law": "Return a namestring representing only pathname directory components, with host-specific syntax and NIL/unrepresentable outcomes.",
+      "positive_illustrative_claim": "Directory /tmp/part in pathname yields directory representation without leaf file name.",
+      "negative_illustrative_claim": "Do not include the filename/type component in DIRECTORY-NAMESTRING.",
+      "archived_law_claims": [],
+      "archived_positive_claims": [
+        "[]"
+      ],
+      "archived_negative_claims": [],
+      "donor_claims": [
+        "knowledge/d10-clhs-pathnames-census-20261009.json@f32d199c1325e7daebcd7598c5121b23312bfd57"
+      ],
+      "source_records_sha_pinned": [
+        "knowledge/d10-historical-lisp-branch-candidate-intake-20261011.json@42362a46d7587e375ed19c156a0b67e40b86939a:candidates[132]",
+        "knowledge/d10-historical-lisp-branch-evidence-intake-20261011.json@615307670709d8429d8b74daafe8fe24b36960ea:new_candidates[120]"
+      ],
+      "co_named_archive_ids": [],
+      "F1": "CATALOG-SHA-PINNED-REF-DONOR_NOT_EXECUTED",
+      "F2": "HOLD_NOT_RUN",
+      "F3": "HOLD_DEDUP_UNPROVEN",
+      "F4": "NO_COORDINATE",
+      "ratified": false
+    },
+    {
+      "id": "d10.name.00630",
+      "name": "FILE-NAMESTRING",
+      "law": "Return the file portion of pathname namestring (name, type and version as supported), excluding host/device/directory.",
+      "positive_illustrative_claim": "For directory /tmp and leaf 'a.lisp', file namestring denotes 'a.lisp'.",
+      "negative_illustrative_claim": "Do not return directory prefix.",
+      "archived_law_claims": [],
+      "archived_positive_claims": [
+        "[]"
+      ],
+      "archived_negative_claims": [],
+      "donor_claims": [
+        "knowledge/d10-clhs-pathnames-census-20261009.json@f32d199c1325e7daebcd7598c5121b23312bfd57"
+      ],
+      "source_records_sha_pinned": [
+        "knowledge/d10-historical-lisp-branch-candidate-intake-20261011.json@42362a46d7587e375ed19c156a0b67e40b86939a:candidates[139]",
+        "knowledge/d10-historical-lisp-branch-evidence-intake-20261011.json@615307670709d8429d8b74daafe8fe24b36960ea:new_candidates[119]"
+      ],
+      "co_named_archive_ids": [],
+      "F1": "CATALOG-SHA-PINNED-REF-DONOR_NOT_EXECUTED",
+      "F2": "HOLD_NOT_RUN",
+      "F3": "HOLD_DEDUP_UNPROVEN",
+      "F4": "NO_COORDINATE",
+      "ratified": false
+    },
+    {
+      "id": "d10.name.01076",
+      "name": "PATHNAME-HOST",
+      "law": "Extract pathname host component with optional :case normalization; host is not inferred to equal device.",
+      "positive_illustrative_claim": "MAKE-PATHNAME with host H yields H under local case.",
+      "negative_illustrative_claim": "Do not return full namestring in place of host.",
+      "archived_law_claims": [],
+      "archived_positive_claims": [
+        "[]"
+      ],
+      "archived_negative_claims": [],
+      "donor_claims": [
+        "knowledge/d10-clhs-pathnames-census-20261009.json@f32d199c1325e7daebcd7598c5121b23312bfd57"
+      ],
+      "source_records_sha_pinned": [
+        "knowledge/d10-historical-lisp-branch-candidate-intake-20261011.json@42362a46d7587e375ed19c156a0b67e40b86939a:candidates[177]",
+        "knowledge/d10-historical-lisp-branch-evidence-intake-20261011.json@615307670709d8429d8b74daafe8fe24b36960ea:new_candidates[109]"
+      ],
+      "co_named_archive_ids": [],
+      "F1": "CATALOG-SHA-PINNED-REF-DONOR_NOT_EXECUTED",
+      "F2": "HOLD_NOT_RUN",
+      "F3": "HOLD_DEDUP_UNPROVEN",
+      "F4": "NO_COORDINATE",
+      "ratified": false
+    },
+    {
+      "id": "d10.name.01074",
+      "name": "PATHNAME-DEVICE",
+      "law": "Extract pathname device component with optional :case normalization; may be :UNSPECIFIC when host has no device concept.",
+      "positive_illustrative_claim": "A pathname created with explicit device D reports D under suitable host.",
+      "negative_illustrative_claim": "Do not mistake directory for device.",
+      "archived_law_claims": [],
+      "archived_positive_claims": [
+        "[]"
+      ],
+      "archived_negative_claims": [],
+      "donor_claims": [
+        "knowledge/d10-clhs-pathnames-census-20261009.json@f32d199c1325e7daebcd7598c5121b23312bfd57"
+      ],
+      "source_records_sha_pinned": [
+        "knowledge/d10-historical-lisp-branch-candidate-intake-20261011.json@42362a46d7587e375ed19c156a0b67e40b86939a:candidates[175]",
+        "knowledge/d10-historical-lisp-branch-evidence-intake-20261011.json@615307670709d8429d8b74daafe8fe24b36960ea:new_candidates[110]"
+      ],
+      "co_named_archive_ids": [],
+      "F1": "CATALOG-SHA-PINNED-REF-DONOR_NOT_EXECUTED",
+      "F2": "HOLD_NOT_RUN",
+      "F3": "HOLD_DEDUP_UNPROVEN",
+      "F4": "NO_COORDINATE",
+      "ratified": false
+    },
+    {
+      "id": "d10.name.01075",
+      "name": "PATHNAME-DIRECTORY",
+      "law": "Extract structured pathname directory component (absolute/relative marker plus segments where applicable) under host case convention.",
+      "positive_illustrative_claim": "Pathname /a/b/c.lisp on Unix-like host reports absolute directory a,b.",
+      "negative_illustrative_claim": "Do not return leaf filename or force Unix syntax on all hosts.",
+      "archived_law_claims": [],
+      "archived_positive_claims": [
+        "[]"
+      ],
+      "archived_negative_claims": [],
+      "donor_claims": [
+        "knowledge/d10-clhs-pathnames-census-20261009.json@f32d199c1325e7daebcd7598c5121b23312bfd57"
+      ],
+      "source_records_sha_pinned": [
+        "knowledge/d10-historical-lisp-branch-candidate-intake-20261011.json@42362a46d7587e375ed19c156a0b67e40b86939a:candidates[176]",
+        "knowledge/d10-historical-lisp-branch-evidence-intake-20261011.json@615307670709d8429d8b74daafe8fe24b36960ea:new_candidates[111]"
+      ],
+      "co_named_archive_ids": [],
+      "F1": "CATALOG-SHA-PINNED-REF-DONOR_NOT_EXECUTED",
+      "F2": "HOLD_NOT_RUN",
+      "F3": "HOLD_DEDUP_UNPROVEN",
+      "F4": "NO_COORDINATE",
+      "ratified": false
+    },
+    {
+      "id": "d10.name.01078",
+      "name": "PATHNAME-NAME",
+      "law": "Extract only pathname name component, not extension/type or directory, respecting :case.",
+      "positive_illustrative_claim": "On appropriate host, 'a.lisp' yields name 'a'.",
+      "negative_illustrative_claim": "Do not include '.lisp' type in the name.",
+      "archived_law_claims": [],
+      "archived_positive_claims": [
+        "[]"
+      ],
+      "archived_negative_claims": [],
+      "donor_claims": [
+        "knowledge/d10-clhs-pathnames-census-20261009.json@f32d199c1325e7daebcd7598c5121b23312bfd57"
+      ],
+      "source_records_sha_pinned": [
+        "knowledge/d10-historical-lisp-branch-candidate-intake-20261011.json@42362a46d7587e375ed19c156a0b67e40b86939a:candidates[178]",
+        "knowledge/d10-historical-lisp-branch-evidence-intake-20261011.json@615307670709d8429d8b74daafe8fe24b36960ea:new_candidates[112]"
+      ],
+      "co_named_archive_ids": [],
+      "F1": "CATALOG-SHA-PINNED-REF-DONOR_NOT_EXECUTED",
+      "F2": "HOLD_NOT_RUN",
+      "F3": "HOLD_DEDUP_UNPROVEN",
+      "F4": "NO_COORDINATE",
+      "ratified": false
+    },
+    {
+      "id": "d10.name.01079",
+      "name": "PATHNAME-TYPE",
+      "law": "Extract pathname type component (extension-like but host-defined), respecting :case, distinguishing NIL/:UNSPECIFIC where relevant.",
+      "positive_illustrative_claim": "On appropriate host, 'a.lisp' yields type 'lisp'.",
+      "negative_illustrative_claim": "Do not confuse empty string type with unspecified type.",
+      "archived_law_claims": [],
+      "archived_positive_claims": [
+        "[]"
+      ],
+      "archived_negative_claims": [],
+      "donor_claims": [
+        "knowledge/d10-clhs-pathnames-census-20261009.json@f32d199c1325e7daebcd7598c5121b23312bfd57"
+      ],
+      "source_records_sha_pinned": [
+        "knowledge/d10-historical-lisp-branch-candidate-intake-20261011.json@42362a46d7587e375ed19c156a0b67e40b86939a:candidates[179]",
+        "knowledge/d10-historical-lisp-branch-evidence-intake-20261011.json@615307670709d8429d8b74daafe8fe24b36960ea:new_candidates[113]"
+      ],
+      "co_named_archive_ids": [],
+      "F1": "CATALOG-SHA-PINNED-REF-DONOR_NOT_EXECUTED",
+      "F2": "HOLD_NOT_RUN",
+      "F3": "HOLD_DEDUP_UNPROVEN",
+      "F4": "NO_COORDINATE",
+      "ratified": false
+    },
+    {
+      "id": "d10.name.01080",
+      "name": "PATHNAME-VERSION",
+      "law": "Extract pathname version component where provided/supported; may be NIL or a special version keyword.",
+      "positive_illustrative_claim": "A pathname constructed with explicit version returns that version under its host conventions.",
+      "negative_illustrative_claim": "Do not conflate version with filename extension/type.",
+      "archived_law_claims": [],
+      "archived_positive_claims": [
+        "[]"
+      ],
+      "archived_negative_claims": [],
+      "donor_claims": [
+        "knowledge/d10-clhs-pathnames-census-20261009.json@f32d199c1325e7daebcd7598c5121b23312bfd57"
+      ],
+      "source_records_sha_pinned": [
+        "knowledge/d10-historical-lisp-branch-candidate-intake-20261011.json@42362a46d7587e375ed19c156a0b67e40b86939a:candidates[180]",
+        "knowledge/d10-historical-lisp-branch-evidence-intake-20261011.json@615307670709d8429d8b74daafe8fe24b36960ea:new_candidates[114]"
+      ],
+      "co_named_archive_ids": [],
+      "F1": "CATALOG-SHA-PINNED-REF-DONOR_NOT_EXECUTED",
+      "F2": "HOLD_NOT_RUN",
+      "F3": "HOLD_DEDUP_UNPROVEN",
+      "F4": "NO_COORDINATE",
+      "ratified": false
+    },
+    {
+      "id": "d10.name.00863",
+      "name": "LOGICAL-PATHNAME",
+      "law": "Coerce a valid logical pathname designator to a logical-pathname object using registered logical host syntax, not physical path resolution.",
+      "positive_illustrative_claim": "Valid logical host notation produces a logical pathname.",
+      "negative_illustrative_claim": "Unregistered logical host cannot silently become a physical pathname.",
+      "archived_law_claims": [],
+      "archived_positive_claims": [
+        "[]"
+      ],
+      "archived_negative_claims": [],
+      "donor_claims": [
+        "knowledge/d10-clhs-pathnames-census-20261009.json@f32d199c1325e7daebcd7598c5121b23312bfd57"
+      ],
+      "source_records_sha_pinned": [
+        "knowledge/d10-historical-lisp-branch-candidate-intake-20261011.json@42362a46d7587e375ed19c156a0b67e40b86939a:candidates[160]",
+        "knowledge/d10-historical-lisp-branch-evidence-intake-20261011.json@615307670709d8429d8b74daafe8fe24b36960ea:new_candidates[106]"
+      ],
+      "co_named_archive_ids": [],
+      "F1": "CATALOG-SHA-PINNED-REF-DONOR_NOT_EXECUTED",
+      "F2": "HOLD_NOT_RUN",
+      "F3": "HOLD_DEDUP_UNPROVEN",
+      "F4": "NO_COORDINATE",
+      "ratified": false
+    },
+    {
+      "id": "d10.name.00864",
+      "name": "LOGICAL-PATHNAME-TRANSLATIONS",
+      "law": "Read or set host-specific ordered translation patterns for logical pathname host; first applicable translation determines expansion.",
+      "positive_illustrative_claim": "Given an ordered translation table, translate-logical-pathname chooses first matching mapping.",
+      "negative_illustrative_claim": "Do not imply physical filesystem access when merely retrieving the table.",
+      "archived_law_claims": [],
+      "archived_positive_claims": [
+        "[]"
+      ],
+      "archived_negative_claims": [],
+      "donor_claims": [
+        "knowledge/d10-clhs-pathnames-census-20261009.json@f32d199c1325e7daebcd7598c5121b23312bfd57"
+      ],
+      "source_records_sha_pinned": [
+        "knowledge/d10-historical-lisp-branch-candidate-intake-20261011.json@42362a46d7587e375ed19c156a0b67e40b86939a:candidates[161]",
+        "knowledge/d10-historical-lisp-branch-evidence-intake-20261011.json@615307670709d8429d8b74daafe8fe24b36960ea:new_candidates[116]"
+      ],
+      "co_named_archive_ids": [],
+      "F1": "CATALOG-SHA-PINNED-REF-DONOR_NOT_EXECUTED",
+      "F2": "HOLD_NOT_RUN",
+      "F3": "HOLD_DEDUP_UNPROVEN",
+      "F4": "NO_COORDINATE",
+      "ratified": false
+    },
+    {
+      "id": "d10.name.00859",
+      "name": "LOAD-LOGICAL-PATHNAME-TRANSLATIONS",
+      "law": "Attempt to load translations for a named logical host, returning true if translations were loaded/available, or signal/return per specified host rules.",
+      "positive_illustrative_claim": "A configured logical host translation file enables subsequent logical resolution.",
+      "negative_illustrative_claim": "Do not report success when no host translations could be established.",
+      "archived_law_claims": [],
+      "archived_positive_claims": [
+        "[]"
+      ],
+      "archived_negative_claims": [],
+      "donor_claims": [
+        "knowledge/d10-clhs-pathnames-census-20261009.json@f32d199c1325e7daebcd7598c5121b23312bfd57"
+      ],
+      "source_records_sha_pinned": [
+        "knowledge/d10-historical-lisp-branch-candidate-intake-20261011.json@42362a46d7587e375ed19c156a0b67e40b86939a:candidates[158]",
+        "knowledge/d10-historical-lisp-branch-evidence-intake-20261011.json@615307670709d8429d8b74daafe8fe24b36960ea:new_candidates[115]"
+      ],
+      "co_named_archive_ids": [],
+      "F1": "CATALOG-SHA-PINNED-REF-DONOR_NOT_EXECUTED",
+      "F2": "HOLD_NOT_RUN",
+      "F3": "HOLD_DEDUP_UNPROVEN",
+      "F4": "NO_COORDINATE",
+      "ratified": false
+    },
+    {
+      "id": "d10.name.00746",
+      "name": "HASHTABLE-COPY",
+      "law": "R6RS HASHTABLE-COPY creates separate table with identical key-value associations and same key semantics; returned copy is immutable by default, mutable only when optional argument true.",
+      "positive_illustrative_claim": "Copy of table mapping a→1 maps a→1 but modifying original associations does not alter copy.",
+      "negative_illustrative_claim": "Default copy may not be treated as mutable; copying does not deep-copy each key/value.",
+      "archived_law_claims": [],
+      "archived_positive_claims": [
+        "[\"Copy of mutable {1↦one, 2↦two} with no second argument has both associations and hashtable-mutable? false; source stays mutable.\",\"Copy with explicit true has hashtable-mutable? true; set! copy[1]=changed leaves original[1]=one.\"]"
+      ],
+      "archived_negative_claims": [
+        "[\"A default copy accepts mutation or is reported mutable.\",\"Mutating explicit-mutable copy changes an original association or losing mappings during copy.\"]",
+        "копія за замовчуванням залишається змінною"
+      ],
+      "donor_claims": [
+        "99d3e1ba5f381df356fd0b335dfbf75c5027877d",
+        "knowledge/d10-historical-candidate-coordinate-queue-v1.json@131369263ac37c27798bb3c95521eb99e52b8f10",
+        "knowledge/d10-r6rs-copy-mutable-oracle-v1.json",
+        "knowledge/d10-r6rs-hashtable-hygiene-audit-v1.json@c6af11760a10a5944d9df286c52eb84e18bd3c96"
+      ],
+      "source_records_sha_pinned": [
+        "knowledge/d10-historical-candidate-coordinate-queue-v1.json@131369263ac37c27798bb3c95521eb99e52b8f10:candidates[43]",
+        "knowledge/d10-historical-lisp-all-source-consolidation-20261011.json@962208ecad6b4b4d8845ea7dedaf88c34e93e702:candidates[130]",
+        "knowledge/d10-historical-lisp-main-consolidation-20261011.json@8c8253e5dd78cdec25de95009e9200ff08af4cc7:ledger_rows[43]"
+      ],
+      "co_named_archive_ids": [
+        "d10.pending.HASHTABLE-COPY"
+      ],
+      "F1": "CATALOG-SHA-PINNED-REF-DONOR_NOT_EXECUTED",
+      "F2": "HOLD_NOT_RUN",
+      "F3": "HOLD_DEDUP_UNPROVEN",
+      "F4": "NO_COORDINATE",
+      "ratified": false
+    },
+    {
+      "id": "d10.name.00751",
+      "name": "HASHTABLE-MUTABLE?",
+      "law": "R6RS predicate returns true exactly when hashtable can be mutated through hash table updates, false for immutable copy.",
+      "positive_illustrative_claim": "Copy table without mutable flag yields false; copy with true flag yields true.",
+      "negative_illustrative_claim": "Do not infer mutability from size or presence of key associations.",
+      "archived_law_claims": [],
+      "archived_positive_claims": [
+        "[\"Fresh make-eqv-hashtable is mutable.\",\"Immutable default copy and explicit mutable copy have equal initial mappings, but mutability predicates return false versus true.\"]"
+      ],
+      "archived_negative_claims": [
+        "[\"Result is inferred exclusively from hashtable contents or size, so equal-association mutable/immutable instances are indistinguishable.\",\"A default immutable copy is reported mutable.\"]",
+        "копія default проголошена змінною"
+      ],
+      "donor_claims": [
+        "99d3e1ba5f381df356fd0b335dfbf75c5027877d",
+        "knowledge/d10-historical-candidate-coordinate-queue-v1.json@131369263ac37c27798bb3c95521eb99e52b8f10",
+        "knowledge/d10-r6rs-copy-mutable-oracle-v1.json",
+        "knowledge/d10-r6rs-hashtable-hygiene-audit-v1.json@c6af11760a10a5944d9df286c52eb84e18bd3c96"
+      ],
+      "source_records_sha_pinned": [
+        "knowledge/d10-historical-candidate-coordinate-queue-v1.json@131369263ac37c27798bb3c95521eb99e52b8f10:candidates[44]",
+        "knowledge/d10-historical-lisp-all-source-consolidation-20261011.json@962208ecad6b4b4d8845ea7dedaf88c34e93e702:candidates[134]",
+        "knowledge/d10-historical-lisp-main-consolidation-20261011.json@8c8253e5dd78cdec25de95009e9200ff08af4cc7:ledger_rows[44]"
+      ],
+      "co_named_archive_ids": [
+        "d10.pending.HASHTABLE-MUTABLE%3F"
+      ],
+      "F1": "CATALOG-SHA-PINNED-REF-DONOR_NOT_EXECUTED",
+      "F2": "HOLD_NOT_RUN",
+      "F3": "HOLD_DEDUP_UNPROVEN",
+      "F4": "NO_COORDINATE",
+      "ratified": false
+    },
+    {
+      "id": "d10.name.00421",
+      "name": "CLASS-DIRECT-SUBCLASSES",
+      "law": "CLOS MOP reader returns the class metaobjects whose direct superclasses include given class, excluding indirect descendants.",
+      "positive_illustrative_claim": "If B directly inherits A and C inherits B, A's direct-subclasses includes B not C.",
+      "negative_illustrative_claim": "Do not include all transitive descendants.",
+      "archived_law_claims": [
+        "Read specified metaobject state only; distinctness from already-selected D10 and source implementation representation NOT proved."
+      ],
+      "archived_positive_claims": [
+        "[]"
+      ],
+      "archived_negative_claims": [],
+      "donor_claims": [
+        "knowledge/d10-mop-metaobject-reader-census-20261009.json@a830d9b2e29293ebc3f95ba2c905b420c1a03368",
+        "knowledge/d10-mop-metaobject-reader-census-20261009.json@a830d9b2e29293ebc3f95ba2c905b420c1a03368:mop-reader-class_direct_subclasses"
+      ],
+      "source_records_sha_pinned": [
+        "knowledge/d10-historical-lisp-branch-candidate-intake-20261011.json@42362a46d7587e375ed19c156a0b67e40b86939a:candidates[53]",
+        "knowledge/d10-historical-lisp-branch-evidence-intake-20261011.json@615307670709d8429d8b74daafe8fe24b36960ea:new_candidates[33]"
+      ],
+      "co_named_archive_ids": [],
+      "F1": "CATALOG-SHA-PINNED-REF-DONOR_NOT_EXECUTED",
+      "F2": "HOLD_NOT_RUN",
+      "F3": "HOLD_DEDUP_UNPROVEN",
+      "F4": "NO_COORDINATE",
+      "ratified": false
+    },
+    {
+      "id": "d10.name.00422",
+      "name": "CLASS-DIRECT-SUPERCLASSES",
+      "law": "CLOS MOP reader yields direct superclass metaobjects of class in specified precedence; not entire transitive class precedence list.",
+      "positive_illustrative_claim": "Class C inheriting A and B directly returns [A,B].",
+      "negative_illustrative_claim": "Do not append T unless it was a direct superclass.",
+      "archived_law_claims": [
+        "Read specified metaobject state only; distinctness from already-selected D10 and source implementation representation NOT proved."
+      ],
+      "archived_positive_claims": [
+        "[]"
+      ],
+      "archived_negative_claims": [],
+      "donor_claims": [
+        "knowledge/d10-mop-metaobject-reader-census-20261009.json@a830d9b2e29293ebc3f95ba2c905b420c1a03368",
+        "knowledge/d10-mop-metaobject-reader-census-20261009.json@a830d9b2e29293ebc3f95ba2c905b420c1a03368:mop-reader-class_direct_superclasses"
+      ],
+      "source_records_sha_pinned": [
+        "knowledge/d10-historical-lisp-branch-candidate-intake-20261011.json@42362a46d7587e375ed19c156a0b67e40b86939a:candidates[54]",
+        "knowledge/d10-historical-lisp-branch-evidence-intake-20261011.json@615307670709d8429d8b74daafe8fe24b36960ea:new_candidates[32]"
+      ],
+      "co_named_archive_ids": [],
+      "F1": "CATALOG-SHA-PINNED-REF-DONOR_NOT_EXECUTED",
+      "F2": "HOLD_NOT_RUN",
+      "F3": "HOLD_DEDUP_UNPROVEN",
+      "F4": "NO_COORDINATE",
+      "ratified": false
+    },
+    {
+      "id": "d10.name.00418",
+      "name": "CLASS-DEFAULT-INITARGS",
+      "law": "For finalized class, return effective default initialization arguments computed from class precedence and inherited direct defaults; error on class not finalized.",
+      "positive_illustrative_claim": "Inherited superclass default initarg appears in finalized subclass effective list unless overridden.",
+      "negative_illustrative_claim": "Do not return only direct defaults or claim valid access before finalization.",
+      "archived_law_claims": [
+        "Read specified metaobject state only; distinctness from already-selected D10 and source implementation representation NOT proved."
+      ],
+      "archived_positive_claims": [
+        "[]"
+      ],
+      "archived_negative_claims": [],
+      "donor_claims": [
+        "knowledge/d10-mop-metaobject-reader-census-20261009.json@a830d9b2e29293ebc3f95ba2c905b420c1a03368",
+        "knowledge/d10-mop-metaobject-reader-census-20261009.json@a830d9b2e29293ebc3f95ba2c905b420c1a03368:mop-reader-class_default_initargs"
+      ],
+      "source_records_sha_pinned": [
+        "knowledge/d10-historical-lisp-branch-candidate-intake-20261011.json@42362a46d7587e375ed19c156a0b67e40b86939a:candidates[51]",
+        "knowledge/d10-historical-lisp-branch-evidence-intake-20261011.json@615307670709d8429d8b74daafe8fe24b36960ea:new_candidates[29]"
+      ],
+      "co_named_archive_ids": [],
+      "F1": "CATALOG-SHA-PINNED-REF-DONOR_NOT_EXECUTED",
+      "F2": "HOLD_NOT_RUN",
+      "F3": "HOLD_DEDUP_UNPROVEN",
+      "F4": "NO_COORDINATE",
+      "ratified": false
+    },
+    {
+      "id": "d10.name.00419",
+      "name": "CLASS-DIRECT-DEFAULT-INITARGS",
+      "law": "Return default initarg specifications declared directly by class, not inherited/effective defaults.",
+      "positive_illustrative_claim": "Class with no direct defaults yields empty list even if superclass declares one.",
+      "negative_illustrative_claim": "Do not return merged inherited defaults.",
+      "archived_law_claims": [
+        "Read specified metaobject state only; distinctness from already-selected D10 and source implementation representation NOT proved."
+      ],
+      "archived_positive_claims": [
+        "[]"
+      ],
+      "archived_negative_claims": [],
+      "donor_claims": [
+        "knowledge/d10-mop-metaobject-reader-census-20261009.json@a830d9b2e29293ebc3f95ba2c905b420c1a03368",
+        "knowledge/d10-mop-metaobject-reader-census-20261009.json@a830d9b2e29293ebc3f95ba2c905b420c1a03368:mop-reader-class_direct_default_initargs"
+      ],
+      "source_records_sha_pinned": [
+        "knowledge/d10-historical-lisp-branch-candidate-intake-20261011.json@42362a46d7587e375ed19c156a0b67e40b86939a:candidates[52]",
+        "knowledge/d10-historical-lisp-branch-evidence-intake-20261011.json@615307670709d8429d8b74daafe8fe24b36960ea:new_candidates[30]"
+      ],
+      "co_named_archive_ids": [],
+      "F1": "CATALOG-SHA-PINNED-REF-DONOR_NOT_EXECUTED",
+      "F2": "HOLD_NOT_RUN",
+      "F3": "HOLD_DEDUP_UNPROVEN",
+      "F4": "NO_COORDINATE",
+      "ratified": false
+    },
+    {
+      "id": "d10.name.00428",
+      "name": "CLASS-SLOTS",
+      "law": "For finalized class, return effective slot-definition metaobjects after inheritance/class slot merging; distinguish from class-direct-slots.",
+      "positive_illustrative_claim": "Subclass with inherited and direct slots yields both among effective slots.",
+      "negative_illustrative_claim": "Do not exclude inherited slot definitions.",
+      "archived_law_claims": [
+        "Read specified metaobject state only; distinctness from already-selected D10 and source implementation representation NOT proved."
+      ],
+      "archived_positive_claims": [
+        "[]"
+      ],
+      "archived_negative_claims": [],
+      "donor_claims": [
+        "knowledge/d10-mop-metaobject-reader-census-20261009.json@a830d9b2e29293ebc3f95ba2c905b420c1a03368",
+        "knowledge/d10-mop-metaobject-reader-census-20261009.json@a830d9b2e29293ebc3f95ba2c905b420c1a03368:mop-reader-class_slots"
+      ],
+      "source_records_sha_pinned": [
+        "knowledge/d10-historical-lisp-branch-candidate-intake-20261011.json@42362a46d7587e375ed19c156a0b67e40b86939a:candidates[57]",
+        "knowledge/d10-historical-lisp-branch-evidence-intake-20261011.json@615307670709d8429d8b74daafe8fe24b36960ea:new_candidates[27]"
+      ],
+      "co_named_archive_ids": [],
+      "F1": "CATALOG-SHA-PINNED-REF-DONOR_NOT_EXECUTED",
+      "F2": "HOLD_NOT_RUN",
+      "F3": "HOLD_DEDUP_UNPROVEN",
+      "F4": "NO_COORDINATE",
+      "ratified": false
+    },
+    {
+      "id": "d10.name.00423",
+      "name": "CLASS-FINALIZED-P",
+      "law": "Return true iff class finalization has occurred; return false for uninitialized or forward-referenced class.",
+      "positive_illustrative_claim": "A nonfinalized class returns false; after FINALIZE-INHERITANCE it returns true.",
+      "negative_illustrative_claim": "Do not equate merely allocated class metaobject with finalized.",
+      "archived_law_claims": [
+        "Read specified metaobject state only; distinctness from already-selected D10 and source implementation representation NOT proved."
+      ],
+      "archived_positive_claims": [
+        "[]"
+      ],
+      "archived_negative_claims": [],
+      "donor_claims": [
+        "knowledge/d10-mop-metaobject-reader-census-20261009.json@a830d9b2e29293ebc3f95ba2c905b420c1a03368",
+        "knowledge/d10-mop-metaobject-reader-census-20261009.json@a830d9b2e29293ebc3f95ba2c905b420c1a03368:mop-reader-class_finalized_p"
+      ],
+      "source_records_sha_pinned": [
+        "knowledge/d10-historical-lisp-branch-candidate-intake-20261011.json@42362a46d7587e375ed19c156a0b67e40b86939a:candidates[55]",
+        "knowledge/d10-historical-lisp-branch-evidence-intake-20261011.json@615307670709d8429d8b74daafe8fe24b36960ea:new_candidates[34]"
+      ],
+      "co_named_archive_ids": [],
+      "F1": "CATALOG-SHA-PINNED-REF-DONOR_NOT_EXECUTED",
+      "F2": "HOLD_NOT_RUN",
+      "F3": "HOLD_DEDUP_UNPROVEN",
+      "F4": "NO_COORDINATE",
+      "ratified": false
+    },
+    {
+      "id": "d10.name.00427",
+      "name": "CLASS-PROTOTYPE",
+      "law": "For finalized class return representative prototype instance; initialization state unspecified, and portable clients must not mutate prototype slots.",
+      "positive_illustrative_claim": "Prototype is instance of target finalized class.",
+      "negative_illustrative_claim": "Do not require initialized slots or mutate prototype as a regular user object.",
+      "archived_law_claims": [
+        "Read specified metaobject state only; distinctness from already-selected D10 and source implementation representation NOT proved."
+      ],
+      "archived_positive_claims": [
+        "[]"
+      ],
+      "archived_negative_claims": [],
+      "donor_claims": [
+        "knowledge/d10-mop-metaobject-reader-census-20261009.json@a830d9b2e29293ebc3f95ba2c905b420c1a03368",
+        "knowledge/d10-mop-metaobject-reader-census-20261009.json@a830d9b2e29293ebc3f95ba2c905b420c1a03368:mop-reader-class_prototype"
+      ],
+      "source_records_sha_pinned": [
+        "knowledge/d10-historical-lisp-branch-candidate-intake-20261011.json@42362a46d7587e375ed19c156a0b67e40b86939a:candidates[56]",
+        "knowledge/d10-historical-lisp-branch-evidence-intake-20261011.json@615307670709d8429d8b74daafe8fe24b36960ea:new_candidates[35]"
+      ],
+      "co_named_archive_ids": [],
+      "F1": "CATALOG-SHA-PINNED-REF-DONOR_NOT_EXECUTED",
+      "F2": "HOLD_NOT_RUN",
+      "F3": "HOLD_DEDUP_UNPROVEN",
+      "F4": "NO_COORDINATE",
+      "ratified": false
+    },
+    {
+      "id": "d10.name.00714",
+      "name": "GENERIC-FUNCTION-DECLARATIONS",
+      "law": "CLOS MOP reader returns the declaration specifications associated with generic-function metaobject; does not inspect method bodies.",
+      "positive_illustrative_claim": "A generic function created with declarations returns corresponding declaration list.",
+      "negative_illustrative_claim": "Do not mistake per-method declarations for generic-function declarations.",
+      "archived_law_claims": [
+        "Read specified metaobject state only; distinctness from already-selected D10 and source implementation representation NOT proved."
+      ],
+      "archived_positive_claims": [
+        "[]"
+      ],
+      "archived_negative_claims": [],
+      "donor_claims": [
+        "knowledge/d10-mop-metaobject-reader-census-20261009.json@a830d9b2e29293ebc3f95ba2c905b420c1a03368",
+        "knowledge/d10-mop-metaobject-reader-census-20261009.json@a830d9b2e29293ebc3f95ba2c905b420c1a03368:mop-reader-generic_function_declarations"
+      ],
+      "source_records_sha_pinned": [
+        "knowledge/d10-historical-lisp-branch-candidate-intake-20261011.json@42362a46d7587e375ed19c156a0b67e40b86939a:candidates[76]",
+        "knowledge/d10-historical-lisp-branch-evidence-intake-20261011.json@615307670709d8429d8b74daafe8fe24b36960ea:new_candidates[40]"
+      ],
+      "co_named_archive_ids": [],
+      "F1": "CATALOG-SHA-PINNED-REF-DONOR_NOT_EXECUTED",
+      "F2": "HOLD_NOT_RUN",
+      "F3": "HOLD_DEDUP_UNPROVEN",
+      "F4": "NO_COORDINATE",
+      "ratified": false
+    },
+    {
+      "id": "d10.name.00715",
+      "name": "GENERIC-FUNCTION-LAMBDA-LIST",
+      "law": "Return lambda-list associated with generic-function metaobject, not a particular method's differing implementation local parameter names.",
+      "positive_illustrative_claim": "A generic function requiring x,y has two required argument positions in its lambda list.",
+      "negative_illustrative_claim": "Do not return one chosen method's specialized lambda list.",
+      "archived_law_claims": [
+        "Read specified metaobject state only; distinctness from already-selected D10 and source implementation representation NOT proved."
+      ],
+      "archived_positive_claims": [
+        "[]"
+      ],
+      "archived_negative_claims": [],
+      "donor_claims": [
+        "knowledge/d10-mop-metaobject-reader-census-20261009.json@a830d9b2e29293ebc3f95ba2c905b420c1a03368",
+        "knowledge/d10-mop-metaobject-reader-census-20261009.json@a830d9b2e29293ebc3f95ba2c905b420c1a03368:mop-reader-generic_function_lambda_list"
+      ],
+      "source_records_sha_pinned": [
+        "knowledge/d10-historical-lisp-branch-candidate-intake-20261011.json@42362a46d7587e375ed19c156a0b67e40b86939a:candidates[77]",
+        "knowledge/d10-historical-lisp-branch-evidence-intake-20261011.json@615307670709d8429d8b74daafe8fe24b36960ea:new_candidates[38]"
+      ],
+      "co_named_archive_ids": [],
+      "F1": "CATALOG-SHA-PINNED-REF-DONOR_NOT_EXECUTED",
+      "F2": "HOLD_NOT_RUN",
+      "F3": "HOLD_DEDUP_UNPROVEN",
+      "F4": "NO_COORDINATE",
+      "ratified": false
+    },
+    {
+      "id": "d10.name.00716",
+      "name": "GENERIC-FUNCTION-METHOD-CLASS",
+      "law": "Return class metaobject designated to construct newly added method instances for generic function.",
+      "positive_illustrative_claim": "Generic function configured with method-class C reports C.",
+      "negative_illustrative_claim": "Do not confuse method class with class of the generic function itself.",
+      "archived_law_claims": [
+        "Read specified metaobject state only; distinctness from already-selected D10 and source implementation representation NOT proved."
+      ],
+      "archived_positive_claims": [
+        "[]"
+      ],
+      "archived_negative_claims": [],
+      "donor_claims": [
+        "knowledge/d10-mop-metaobject-reader-census-20261009.json@a830d9b2e29293ebc3f95ba2c905b420c1a03368",
+        "knowledge/d10-mop-metaobject-reader-census-20261009.json@a830d9b2e29293ebc3f95ba2c905b420c1a03368:mop-reader-generic_function_method_class"
+      ],
+      "source_records_sha_pinned": [
+        "knowledge/d10-historical-lisp-branch-candidate-intake-20261011.json@42362a46d7587e375ed19c156a0b67e40b86939a:candidates[78]",
+        "knowledge/d10-historical-lisp-branch-evidence-intake-20261011.json@615307670709d8429d8b74daafe8fe24b36960ea:new_candidates[41]"
+      ],
+      "co_named_archive_ids": [],
+      "F1": "CATALOG-SHA-PINNED-REF-DONOR_NOT_EXECUTED",
+      "F2": "HOLD_NOT_RUN",
+      "F3": "HOLD_DEDUP_UNPROVEN",
+      "F4": "NO_COORDINATE",
+      "ratified": false
+    },
+    {
+      "id": "d10.name.00717",
+      "name": "GENERIC-FUNCTION-METHOD-COMBINATION",
+      "law": "Return method-combination metaobject associated with generic function; this controls method combination but is not method list.",
+      "positive_illustrative_claim": "A configured :around/:before combination property is represented by the returned combination object.",
+      "negative_illustrative_claim": "Do not return set of methods instead of the combination metaobject.",
+      "archived_law_claims": [
+        "Read specified metaobject state only; distinctness from already-selected D10 and source implementation representation NOT proved."
+      ],
+      "archived_positive_claims": [
+        "[]"
+      ],
+      "archived_negative_claims": [],
+      "donor_claims": [
+        "knowledge/d10-mop-metaobject-reader-census-20261009.json@a830d9b2e29293ebc3f95ba2c905b420c1a03368",
+        "knowledge/d10-mop-metaobject-reader-census-20261009.json@a830d9b2e29293ebc3f95ba2c905b420c1a03368:mop-reader-generic_function_method_combination"
+      ],
+      "source_records_sha_pinned": [
+        "knowledge/d10-historical-lisp-branch-candidate-intake-20261011.json@42362a46d7587e375ed19c156a0b67e40b86939a:candidates[79]",
+        "knowledge/d10-historical-lisp-branch-evidence-intake-20261011.json@615307670709d8429d8b74daafe8fe24b36960ea:new_candidates[42]"
+      ],
+      "co_named_archive_ids": [],
+      "F1": "CATALOG-SHA-PINNED-REF-DONOR_NOT_EXECUTED",
+      "F2": "HOLD_NOT_RUN",
+      "F3": "HOLD_DEDUP_UNPROVEN",
+      "F4": "NO_COORDINATE",
+      "ratified": false
+    },
+    {
+      "id": "d10.name.00719",
+      "name": "GENERIC-FUNCTION-NAME",
+      "law": "Return name associated with generic-function metaobject, possibly NIL, independent of method names.",
+      "positive_illustrative_claim": "A named generic function's name reader returns its name.",
+      "negative_illustrative_claim": "Do not infer generic function name from a method qualifier.",
+      "archived_law_claims": [
+        "Read specified metaobject state only; distinctness from already-selected D10 and source implementation representation NOT proved."
+      ],
+      "archived_positive_claims": [
+        "[]"
+      ],
+      "archived_negative_claims": [],
+      "donor_claims": [
+        "knowledge/d10-mop-metaobject-reader-census-20261009.json@a830d9b2e29293ebc3f95ba2c905b420c1a03368",
+        "knowledge/d10-mop-metaobject-reader-census-20261009.json@a830d9b2e29293ebc3f95ba2c905b420c1a03368:mop-reader-generic_function_name"
+      ],
+      "source_records_sha_pinned": [
+        "knowledge/d10-historical-lisp-branch-candidate-intake-20261011.json@42362a46d7587e375ed19c156a0b67e40b86939a:candidates[80]",
+        "knowledge/d10-historical-lisp-branch-evidence-intake-20261011.json@615307670709d8429d8b74daafe8fe24b36960ea:new_candidates[36]"
+      ],
+      "co_named_archive_ids": [],
+      "F1": "CATALOG-SHA-PINNED-REF-DONOR_NOT_EXECUTED",
+      "F2": "HOLD_NOT_RUN",
+      "F3": "HOLD_DEDUP_UNPROVEN",
+      "F4": "NO_COORDINATE",
+      "ratified": false
+    },
+    {
+      "id": "d10.name.00511",
+      "name": "COS",
+      "law": "Compute cosine of numeric argument in radians; for complex inputs use analytic complex cosine; floating accuracy remains implementation-specific.",
+      "positive_illustrative_claim": "COS(0)=1 up to permitted numeric type/precision.",
+      "negative_illustrative_claim": "Do not treat numeric argument as degrees by default.",
+      "archived_law_claims": [],
+      "archived_positive_claims": [
+        "[]"
+      ],
+      "archived_negative_claims": [],
+      "donor_claims": [
+        "knowledge/d10-historical-maclisp-v2.json@912e2f6f5d379f4734a1d1746c6bf9db67b6af47"
+      ],
+      "source_records_sha_pinned": [
+        "knowledge/d10-historical-lisp-branch-candidate-intake-20261011.json@42362a46d7587e375ed19c156a0b67e40b86939a:candidates[128]",
+        "knowledge/d10-historical-lisp-branch-evidence-intake-20261011.json@615307670709d8429d8b74daafe8fe24b36960ea:new_candidates[146]",
+        "knowledge/d10-historical-lisp-residual-intake-20261011.json@d48b4e960945af7aa9b5683b0e4a1d2e443c588d:candidates[14]"
+      ],
+      "co_named_archive_ids": [],
+      "F1": "CATALOG-SHA-PINNED-REF-DONOR_NOT_EXECUTED",
+      "F2": "HOLD_NOT_RUN",
+      "F3": "HOLD_DEDUP_UNPROVEN",
+      "F4": "NO_COORDINATE",
+      "ratified": false
+    },
+    {
+      "id": "d10.name.01134",
+      "name": "RANDOM",
+      "law": "Generate pseudo-random value below positive bound n from random-state: for positive integer n result is integer in [0,n); for positive float bound result is nonnegative float below bound.",
+      "positive_illustrative_claim": "RANDOM(5) always yields integer among 0..4 under a valid state.",
+      "negative_illustrative_claim": "Do not return bound itself or treat successive results as a deterministic pure function of n alone.",
+      "archived_law_claims": [],
+      "archived_positive_claims": [
+        "[]"
+      ],
+      "archived_negative_claims": [],
+      "donor_claims": [
+        "knowledge/d10-historical-maclisp-v2.json@912e2f6f5d379f4734a1d1746c6bf9db67b6af47"
+      ],
+      "source_records_sha_pinned": [
+        "knowledge/d10-historical-lisp-branch-candidate-intake-20261011.json@42362a46d7587e375ed19c156a0b67e40b86939a:candidates[183]",
+        "knowledge/d10-historical-lisp-branch-evidence-intake-20261011.json@615307670709d8429d8b74daafe8fe24b36960ea:new_candidates[147]",
+        "knowledge/d10-historical-lisp-residual-intake-20261011.json@d48b4e960945af7aa9b5683b0e4a1d2e443c588d:candidates[57]"
+      ],
+      "co_named_archive_ids": [],
+      "F1": "CATALOG-SHA-PINNED-REF-DONOR_NOT_EXECUTED",
+      "F2": "HOLD_NOT_RUN",
+      "F3": "HOLD_DEDUP_UNPROVEN",
+      "F4": "NO_COORDINATE",
+      "ratified": false
+    },
+    {
+      "id": "d10.name.00680",
+      "name": "FLOATP",
+      "law": "Historical floating-point type predicate tests representation category (float), not integrality of mathematical value.",
+      "positive_illustrative_claim": "A float 1.0 satisfies FLOATP even when numerical value equals integer 1.",
+      "negative_illustrative_claim": "An exact integer 1 must not satisfy FLOATP.",
+      "archived_law_claims": [
+        "fixed/floating and logical-word observations tied to machine carrier"
+      ],
+      "archived_positive_claims": [
+        "[]"
+      ],
+      "archived_negative_claims": [],
+      "donor_claims": [
+        "knowledge/d10-historical-lisp15-reconciliation-20261009.json@da6f108e4f8553a150f0abed8f3758944193c49a",
+        "knowledge/d10-historical-maclisp-v2.json@912e2f6f5d379f4734a1d1746c6bf9db67b6af47"
+      ],
+      "source_records_sha_pinned": [
+        "knowledge/d10-historical-lisp-all-source-consolidation-20261011.json@962208ecad6b4b4d8845ea7dedaf88c34e93e702:candidates[115]",
+        "knowledge/d10-historical-lisp-branch-candidate-intake-20261011.json@42362a46d7587e375ed19c156a0b67e40b86939a:candidates[75]",
+        "knowledge/d10-historical-lisp-branch-evidence-intake-20261011.json@615307670709d8429d8b74daafe8fe24b36960ea:new_candidates[144]",
+        "knowledge/d10-historical-lisp-residual-intake-20261011.json@d48b4e960945af7aa9b5683b0e4a1d2e443c588d:candidates[31]"
+      ],
+      "co_named_archive_ids": [],
+      "F1": "CATALOG-SHA-PINNED-REF-DONOR_NOT_EXECUTED",
+      "F2": "HOLD_NOT_RUN",
+      "F3": "HOLD_DEDUP_UNPROVEN",
+      "F4": "NO_COORDINATE",
+      "ratified": false
+    },
+    {
+      "id": "d10.name.00675",
+      "name": "FIXP",
+      "law": "Historical FIXP tests whether object is implemented as machine fixed integer under donor implementation, not any arbitrary-precision integer.",
+      "positive_illustrative_claim": "A machine fixnum 3 yields true in a runtime supporting that historical type.",
+      "negative_illustrative_claim": "A bignum exceeding fixnum range does not satisfy FIXP even though NUMBERP may hold.",
+      "archived_law_claims": [
+        "fixed/floating and logical-word observations tied to machine carrier"
+      ],
+      "archived_positive_claims": [],
+      "archived_negative_claims": [],
+      "donor_claims": [
+        "knowledge/d10-historical-lisp15-reconciliation-20261009.json@da6f108e4f8553a150f0abed8f3758944193c49a"
+      ],
+      "source_records_sha_pinned": [
+        "knowledge/d10-historical-lisp-all-source-consolidation-20261011.json@962208ecad6b4b4d8845ea7dedaf88c34e93e702:candidates[113]",
+        "knowledge/d10-historical-lisp-branch-candidate-intake-20261011.json@42362a46d7587e375ed19c156a0b67e40b86939a:candidates[73]",
+        "knowledge/d10-historical-lisp-residual-intake-20261011.json@d48b4e960945af7aa9b5683b0e4a1d2e443c588d:candidates[29]"
+      ],
+      "co_named_archive_ids": [],
+      "F1": "CATALOG-SHA-PINNED-REF-DONOR_NOT_EXECUTED",
+      "F2": "HOLD_NOT_RUN",
+      "F3": "HOLD_DEDUP_UNPROVEN",
+      "F4": "NO_COORDINATE",
+      "ratified": false
+    },
+    {
+      "id": "d10.name.00846",
+      "name": "LEFTSHIFT",
+      "law": "On historical nonnegative finite machine integer x and nonnegative shift count n, shift bits left by n inserting zeros; overflow handling depends on donor word width.",
+      "positive_illustrative_claim": "Unsigned binary 0011 shifted left by 2 becomes 1100 where width permits.",
+      "negative_illustrative_claim": "Do not assume infinite precision if historical machine word overflow semantics apply.",
+      "archived_law_claims": [
+        "fixed/floating and logical-word observations tied to machine carrier"
+      ],
+      "archived_positive_claims": [],
+      "archived_negative_claims": [],
+      "donor_claims": [
+        "knowledge/d10-historical-lisp15-reconciliation-20261009.json@da6f108e4f8553a150f0abed8f3758944193c49a"
+      ],
+      "source_records_sha_pinned": [
+        "knowledge/d10-historical-lisp-all-source-consolidation-20261011.json@962208ecad6b4b4d8845ea7dedaf88c34e93e702:candidates[155]",
+        "knowledge/d10-historical-lisp-branch-candidate-intake-20261011.json@42362a46d7587e375ed19c156a0b67e40b86939a:candidates[82]",
+        "knowledge/d10-historical-lisp-residual-intake-20261011.json@d48b4e960945af7aa9b5683b0e4a1d2e443c588d:candidates[34]"
+      ],
+      "co_named_archive_ids": [],
+      "F1": "CATALOG-SHA-PINNED-REF-DONOR_NOT_EXECUTED",
+      "F2": "HOLD_NOT_RUN",
+      "F3": "HOLD_DEDUP_UNPROVEN",
+      "F4": "NO_COORDINATE",
+      "ratified": false
+    },
+    {
+      "id": "d10.name.00865",
+      "name": "LOGOR",
+      "law": "Bitwise inclusive OR on integer bit representations; a result bit is 1 iff at least one operand corresponding bit is 1, with donor sign-width conventions.",
+      "positive_illustrative_claim": "0101 LOGOR 0011 is 0111 at fixed 4-bit nonnegative width.",
+      "negative_illustrative_claim": "Do not apply logical short-circuit boolean OR to entire integer words.",
+      "archived_law_claims": [
+        "fixed/floating and logical-word observations tied to machine carrier"
+      ],
+      "archived_positive_claims": [],
+      "archived_negative_claims": [],
+      "donor_claims": [
+        "knowledge/d10-historical-lisp15-reconciliation-20261009.json@da6f108e4f8553a150f0abed8f3758944193c49a"
+      ],
+      "source_records_sha_pinned": [
+        "knowledge/d10-historical-lisp-all-source-consolidation-20261011.json@962208ecad6b4b4d8845ea7dedaf88c34e93e702:candidates[163]",
+        "knowledge/d10-historical-lisp-branch-candidate-intake-20261011.json@42362a46d7587e375ed19c156a0b67e40b86939a:candidates[84]",
+        "knowledge/d10-historical-lisp-residual-intake-20261011.json@d48b4e960945af7aa9b5683b0e4a1d2e443c588d:candidates[38]"
+      ],
+      "co_named_archive_ids": [],
+      "F1": "CATALOG-SHA-PINNED-REF-DONOR_NOT_EXECUTED",
+      "F2": "HOLD_NOT_RUN",
+      "F3": "HOLD_DEDUP_UNPROVEN",
+      "F4": "NO_COORDINATE",
+      "ratified": false
+    }
+  ]
+}

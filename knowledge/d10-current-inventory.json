@@ -1,12 +1,12 @@
 {
   "schema": "d10-current-inventory-pointer/v1",
-  "status": "OWNER-DIRECTED-PRELIMINARY-RESEARCH-SELECTION-827-UNRATIFIED",
+  "status": "OWNER-DIRECTED-PRELIMINARY-RESEARCH-SELECTION-897-UNRATIFIED",
   "canonical_current": {
-    "path": "knowledge/d10-v12-semantic-inventory.json",
-    "git_blob": "185ecb2d5c4d0f9410aede7d40fb038a3ac76e31",
-    "selected": 827,
+    "path": "knowledge/d10-v13-semantic-inventory.json",
+    "git_blob": "3cdfd2c7eed56c3148de4c386175d3ea991fb57f",
+    "selected": 897,
     "placed": 719,
-    "unplaced": 108,
+    "unplaced": 178,
     "ratified": 0
   },
   "historical_selection": {
@@ -20,9 +20,9 @@
     "role": "PINNED-GAUGE-ASSIGNMENT"
   },
   "policy": {
-    "description": "Research-only v12 appends four SHA-pinned historic identity and type laws, F2/F3 pending, no codewords or Core ratifications.",
-    "selected_only": "827 preliminary research descriptions; 719 placed, 108 unplaced; 197 remaining; 0 ratified.",
-    "ratification": "No D10 meaning has been ratified. D10 10-bit execution and physical T5 encoding are not authorized.",
+    "description": "v13 append-only 70 source-index-pinned historical standards DRAFT meanings with illustrative tests; F2/F3 not proven.",
+    "selected_only": "897 provisional research descriptions; 719 placed, 178 unplaced; 127 remaining.",
+    "ratification": "Whole-domain D10 ratification to follow fully populated 1024 inventory with reviewed proofs, not per-function ratification.",
     "next_step": "Execute positive/negative donor and SENS oracles, establish F3 semantic distinction vs D1–D9/D10, owner review before code assignment."
   },
   "branch_policy": "MAIN-ONLY; NO-NEW-BRANCHES",
@@ -304,5 +304,36 @@
     "ratified_added": 0,
     "oracle_parity": "NOT_EXECUTED",
     "dedup": "UNPROVEN"
+  },
+  "historical_v12_research_inventory": {
+    "path": "knowledge/d10-v12-semantic-inventory.json",
+    "git_blob": "185ecb2d5c4d0f9410aede7d40fb038a3ac76e31",
+    "selected": 827,
+    "placed": 719,
+    "unplaced": 108,
+    "ratified": 0,
+    "role": "FROZEN-PRE-V13-ARCHIVE"
+  },
+  "current_v13_standards_provisional_selection": {
+    "previous_inventory": "knowledge/d10-v12-semantic-inventory.json",
+    "manifest": {
+      "path": "knowledge/d10-v13-standards-provisional-intake-20261011.json",
+      "git_blob": "995ed646db4ca6e1f5001364337cf31d0e2f27b1"
+    },
+    "source": {
+      "path": "knowledge/d10-source-snapshots/d10-v9-unified-catalog-1809.tsv",
+      "git_blob": "1660a19ff9482f932fb9a40fa78ad1fa50134c31",
+      "rows": 1809
+    },
+    "authoring": {
+      "path": "knowledge/d10-standards-draft-laws-v13-20261011.json",
+      "git_blob": "b67b10310ad4be8bf497b124dd30d45fe54b06f0",
+      "proposals": 70
+    },
+    "selected_added": 70,
+    "coordinates_added": 0,
+    "ratified_added": 0,
+    "oracle_parity": "NOT_EXECUTED",
+    "F3_distinctness": "UNPROVEN"
   }
 }

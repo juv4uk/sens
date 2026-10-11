@@ -1,0 +1,22 @@
+name: D10 v13 70-source integrity check
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'knowledge/d10-current-inventory.json'
+      - 'knowledge/d10-v13-semantic-inventory.json'
+      - 'knowledge/d10-v13-standards-provisional-intake-20261011.json'
+      - 'scripts/check_d10_v13_archive_intake.py'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  verify-research-only:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: python3 scripts/check_d10_v13_archive_intake.py --self-test
+      - run: python3 -O scripts/check_d10_v13_archive_intake.py --self-test
