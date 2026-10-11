@@ -861,7 +861,7 @@ pub fn read_carrier(carrier: &Carrier) -> Result<Vec<String>, SencError> {
 /// Профіль D3Profile: підформи-голови заборонені. FullProfile: дозволені.
 pub fn is_canonical_form(words: &[String], profile: FormProfile) -> bool {
     let refs: Vec<&str> = words.iter().map(|s| s.as_str()).collect();
-    crate::canonical_form_capacity::is_canonical_form(&refs, profile)
+    canonical_form_capacity::is_canonical_form(&refs, profile)
 }
 
 /// Явний маршрут читання `.senc` за оголошеною міткою (без автовизначення
