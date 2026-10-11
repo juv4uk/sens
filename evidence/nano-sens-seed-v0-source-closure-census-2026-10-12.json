@@ -1,0 +1,555 @@
+{
+  "schema": "nano-sens-seed-v0-runtime-source-closure-census/1",
+  "status": "PARTIAL_LOWER_BOUND_NOT_A_MINIMUM_SEED_TOTAL",
+  "measured_at": "2026-10-12",
+  "pinned_source": {
+    "repository": "juv4uk/sens",
+    "commit": "d0787a40fcea36501747732aa61b6de19fe29c70",
+    "tree_sha": "d0787a40fcea36501747732aa61b6de19fe29c70",
+    "tree_entry_count": 8038
+  },
+  "reason_for_census": "The measured CML test runner invokes `cargo run --manifest-path external/sens/Cargo.toml -p xtask -- compiler-export` at runtime. Cargo therefore compiles the SENS xtask and SENS library from pinned checkout inputs. This census records a verifiable subset of those repository inputs; it is not the complete runtime closure.",
+  "known_input_subset": {
+    "file_count": 102,
+    "total_on_disk_source_bytes": 1145608,
+    "sum_is_lower_bound_only": true,
+    "categories": {
+      "rust_source_files_count": 71,
+      "rust_source_files_bytes": 1072899,
+      "workspace_cargo_manifests_count": 20,
+      "workspace_cargo_manifests_bytes": 7424,
+      "root_workspace_and_known_compiler_inputs_count": 11,
+      "root_workspace_and_known_compiler_inputs_bytes": 65285
+    },
+    "file_metrics": "Every listed input records exact Git blob SHA-1 and repository on-disk byte size at the pinned commit."
+  },
+  "closure_gaps": [
+    "Audit every include_str!/include_bytes!/include! in the 71 listed Rust source files and add every referenced data file exactly once.",
+    "Confirm the complete Cargo workspace package-metadata closure and distinguish build-only manifests from packages whose source is compiled.",
+    "Inventory all crates.io registry source dependencies needed by cargo run -p xtask; classify them under the explicit external dependency policy rather than silently omitting them.",
+    "Record the .git metadata required by xtask's `git rev-parse HEAD` call, or remove that runtime requirement in the K2 candidate by passing the pinned revision explicitly.",
+    "Verify which inputs are consumed at runtime versus only at build time with a clean, offline/controlled repro.",
+    "Do not publish a whole-chain seed byte total until this closure audit is complete and minimized."
+  ],
+  "external_toolchain_or_runtime_dependencies_separate": [
+    "rustc",
+    "cargo",
+    "GCC",
+    "GNU ld/linker",
+    "Git executable and repository metadata (currently used at runtime)",
+    "OS and shared libraries",
+    "Cargo registry crates needed to build xtask/SENS runtime (byte accounting/classification still pending)"
+  ],
+  "inputs": [
+    {
+      "path": ".cargo/config.toml",
+      "git_blob_sha1": "ae9cf46bf18b89c74c88462c29713601c7972f01",
+      "size_bytes": 136
+    },
+    {
+      "path": "Cargo.lock",
+      "git_blob_sha1": "293e933d0fdb78954386243eae431c2826b62a79",
+      "size_bytes": 20813
+    },
+    {
+      "path": "Cargo.toml",
+      "git_blob_sha1": "880cd66b98fd2fb9ea34fe428526f09a073fb8c3",
+      "size_bytes": 1492
+    },
+    {
+      "path": "contracts/bija3-l1-l5-ratification.lisp",
+      "git_blob_sha1": "2dff6997345baad3bedf989b8772ea97c2e7d46a",
+      "size_bytes": 1337
+    },
+    {
+      "path": "contracts/compiler-nucleus-identity-corpus-v1.tsv",
+      "git_blob_sha1": "c57b0df98f467ddcad067158dad1c97a349ad1bf",
+      "size_bytes": 426
+    },
+    {
+      "path": "contracts/d4-bootstrap-ratification.lisp",
+      "git_blob_sha1": "9f398d9b5fff4c724603f5339bbb248109ec3c34",
+      "size_bytes": 1566
+    },
+    {
+      "path": "crates/sens-cli/Cargo.toml",
+      "git_blob_sha1": "e0750b2287f964c3bb03ada4ae2fc86d27740c3e",
+      "size_bytes": 1200
+    },
+    {
+      "path": "crates/sens-embed/Cargo.toml",
+      "git_blob_sha1": "ec3a082113c1d0dc395f26a58e2257cf3a488778",
+      "size_bytes": 257
+    },
+    {
+      "path": "crates/sens-host/Cargo.toml",
+      "git_blob_sha1": "6bb74376492323b62afccfbd5d4fb2a795c3a4a4",
+      "size_bytes": 215
+    },
+    {
+      "path": "crates/sens-literate/Cargo.toml",
+      "git_blob_sha1": "b58a7f93f5cf7bd9b0e60446b12641b0fe418d4a",
+      "size_bytes": 241
+    },
+    {
+      "path": "crates/sens-lsp/Cargo.toml",
+      "git_blob_sha1": "7dd7435541612961f3acdfc64738928e68bf8b31",
+      "size_bytes": 415
+    },
+    {
+      "path": "crates/sens-semantic/Cargo.toml",
+      "git_blob_sha1": "48dd1d4e608212b101c061814328297ad9e1347c",
+      "size_bytes": 246
+    },
+    {
+      "path": "crates/sens-wasm/Cargo.toml",
+      "git_blob_sha1": "85714103f67b0b83a0437b3c4241fffec11120c9",
+      "size_bytes": 751
+    },
+    {
+      "path": "crates/sens/Cargo.toml",
+      "git_blob_sha1": "50b4c7a37ca3aa82993bea6b258b5de3b488820c",
+      "size_bytes": 777
+    },
+    {
+      "path": "crates/sens/src/bignum.rs",
+      "git_blob_sha1": "2b8d1fc867207b89555a38eede6a94b57827a850",
+      "size_bytes": 33577
+    },
+    {
+      "path": "crates/sens/src/binary_framing.rs",
+      "git_blob_sha1": "316e9ad143b62616968e854e3a07de7570737a69",
+      "size_bytes": 27563
+    },
+    {
+      "path": "crates/sens/src/binary_number.rs",
+      "git_blob_sha1": "2f3911bc1be663639b9de7c94296cbdd7a011e2f",
+      "size_bytes": 7784
+    },
+    {
+      "path": "crates/sens/src/bit9.rs",
+      "git_blob_sha1": "fcc49b433ad2b0ca87253321f66b308a48a25605",
+      "size_bytes": 1935
+    },
+    {
+      "path": "crates/sens/src/bits.rs",
+      "git_blob_sha1": "9d9dcd69b7fa076793a8fc26b8514fd8fea7b430",
+      "size_bytes": 8156
+    },
+    {
+      "path": "crates/sens/src/bootstrap_measurement.rs",
+      "git_blob_sha1": "6dd7c707c455935c32c038623ccfb48fde78556e",
+      "size_bytes": 3271
+    },
+    {
+      "path": "crates/sens/src/canonical_reader.rs",
+      "git_blob_sha1": "10858fedcb54b824966fef7393a532bd5f1f57ff",
+      "size_bytes": 13945
+    },
+    {
+      "path": "crates/sens/src/compilation_artifact_producer.rs",
+      "git_blob_sha1": "77a650752abf49762c8000261705e8c36343dc1c",
+      "size_bytes": 5258
+    },
+    {
+      "path": "crates/sens/src/compilation_artifact.rs",
+      "git_blob_sha1": "2f6e9224ebd6d6bf97f66ac25af0044693d7068e",
+      "size_bytes": 8664
+    },
+    {
+      "path": "crates/sens/src/compiler_bootstrap.rs",
+      "git_blob_sha1": "ae9cbfff75ba5a97384abcbbf81357554e64819d",
+      "size_bytes": 14972
+    },
+    {
+      "path": "crates/sens/src/compiler_language.rs",
+      "git_blob_sha1": "b15cee61eb8f0c40761a0d467c3818eeea89ca5f",
+      "size_bytes": 59607
+    },
+    {
+      "path": "crates/sens/src/compiler_role.rs",
+      "git_blob_sha1": "7c0653411401f94bd42f2195e36cf1074c93c612",
+      "size_bytes": 4108
+    },
+    {
+      "path": "crates/sens/src/conformance_oracle.rs",
+      "git_blob_sha1": "12260c97662bb0d4d8d1b30862d0f923b1f141cf",
+      "size_bytes": 7660
+    },
+    {
+      "path": "crates/sens/src/d5_definition_bindings_generated.rs",
+      "git_blob_sha1": "6a690e709a035c464c05c604dedec07081fd15c1",
+      "size_bytes": 730
+    },
+    {
+      "path": "crates/sens/src/domain_identity.rs",
+      "git_blob_sha1": "846184d845d71566854a3dfdfdc82397bb3eceb9",
+      "size_bytes": 15542
+    },
+    {
+      "path": "crates/sens/src/domain_surface_registry_generated.rs",
+      "git_blob_sha1": "c7bcf3883c3fa6195fb71f8cf4b68bff38e6d4b2",
+      "size_bytes": 13539
+    },
+    {
+      "path": "crates/sens/src/domain_words.rs",
+      "git_blob_sha1": "52a08e2760fcbaee0a2bf1dec3b3c51f3c6568f7",
+      "size_bytes": 8176
+    },
+    {
+      "path": "crates/sens/src/environment.rs",
+      "git_blob_sha1": "0ebc1840df50024f535d90b01180d2f66708275d",
+      "size_bytes": 24689
+    },
+    {
+      "path": "crates/sens/src/error.rs",
+      "git_blob_sha1": "5e8e49d0e6c84d8fa7202e06fd100780637a9053",
+      "size_bytes": 9861
+    },
+    {
+      "path": "crates/sens/src/eval/arithmetic.rs",
+      "git_blob_sha1": "a336bda3089c1404240dba88a07ff79483607ecc",
+      "size_bytes": 25390
+    },
+    {
+      "path": "crates/sens/src/eval/builtins.rs",
+      "git_blob_sha1": "915f6ce7cfb0c54fb914dd79e9fa26dda3b132d1",
+      "size_bytes": 26847
+    },
+    {
+      "path": "crates/sens/src/eval/canon.rs",
+      "git_blob_sha1": "4de1a10f3b65ae4913037a731fd7a8e4e5fe4c4b",
+      "size_bytes": 36504
+    },
+    {
+      "path": "crates/sens/src/eval/capabilities.rs",
+      "git_blob_sha1": "ecc08ce3d97bf2b8afc3b40a88de157e2f63a07d",
+      "size_bytes": 12455
+    },
+    {
+      "path": "crates/sens/src/eval/closures.rs",
+      "git_blob_sha1": "ca0a488984f29b5d9719ac2aa223ebdcf47c264b",
+      "size_bytes": 37283
+    },
+    {
+      "path": "crates/sens/src/eval/d5_arithmetic.rs",
+      "git_blob_sha1": "d4ff1515feb6209c31d6fa61cad658e2f9248e71",
+      "size_bytes": 6808
+    },
+    {
+      "path": "crates/sens/src/eval/d5_predicates.rs",
+      "git_blob_sha1": "b3ac227aa6ab6ec782df8869bcc8393708f8f85d",
+      "size_bytes": 5625
+    },
+    {
+      "path": "crates/sens/src/eval/d6_arithmetic.rs",
+      "git_blob_sha1": "2454887f9f8b895e7bd2b69c7f3552017e11fc15",
+      "size_bytes": 3393
+    },
+    {
+      "path": "crates/sens/src/eval/lower.rs",
+      "git_blob_sha1": "951a2946bc826adc35719a2a627dbfe8944cdaf0",
+      "size_bytes": 11945
+    },
+    {
+      "path": "crates/sens/src/eval/macro_substrate.rs",
+      "git_blob_sha1": "3c5f589f1fe2c3eec43f211425ffecebc6fbdb0f",
+      "size_bytes": 1430
+    },
+    {
+      "path": "crates/sens/src/eval/mod.rs",
+      "git_blob_sha1": "540207e8a8099a9593edf08fa5b0d61f87d15d2b",
+      "size_bytes": 26868
+    },
+    {
+      "path": "crates/sens/src/eval/necessary_forms_generated.rs",
+      "git_blob_sha1": "90fc82f70fa2f197a73f5f195a1e07d6c175a35b",
+      "size_bytes": 819
+    },
+    {
+      "path": "crates/sens/src/eval/necessary_forms.rs",
+      "git_blob_sha1": "60a0307ea103c4ad02c2188f6e13ea79bdbbec3f",
+      "size_bytes": 9254
+    },
+    {
+      "path": "crates/sens/src/eval/profile_mechanisms_generated.rs",
+      "git_blob_sha1": "290215dced15ca9dd13c3a2c61cb7d9f85f13401",
+      "size_bytes": 961
+    },
+    {
+      "path": "crates/sens/src/eval/selector_law.rs",
+      "git_blob_sha1": "e153ceac445bca3743c211e3d8b3aed1761e09c4",
+      "size_bytes": 9214
+    },
+    {
+      "path": "crates/sens/src/eval/special_forms.rs",
+      "git_blob_sha1": "6b0a4b9b072b30ff013664676548800776274a8c",
+      "size_bytes": 1045
+    },
+    {
+      "path": "crates/sens/src/eval/special_forms/codepoint.rs",
+      "git_blob_sha1": "b9cb075159f2da39d6cf42a975b9631d106b510f",
+      "size_bytes": 3799
+    },
+    {
+      "path": "crates/sens/src/eval/special_forms/core.rs",
+      "git_blob_sha1": "2c22f166b58b134199363df640f7b01eba0d0e78",
+      "size_bytes": 15368
+    },
+    {
+      "path": "crates/sens/src/eval/special_forms/digest.rs",
+      "git_blob_sha1": "374c2b42f38b5e64c15c9204728ed224b321c832",
+      "size_bytes": 5407
+    },
+    {
+      "path": "crates/sens/src/eval/special_forms/io.rs",
+      "git_blob_sha1": "41ebe5b89d666b5c91fa35e6128f050a96593583",
+      "size_bytes": 5343
+    },
+    {
+      "path": "crates/sens/src/eval/special_forms/json.rs",
+      "git_blob_sha1": "afdabedd33c00162abafed1e5c32172c29d61311",
+      "size_bytes": 11511
+    },
+    {
+      "path": "crates/sens/src/eval/special_forms/strings.rs",
+      "git_blob_sha1": "42dcd5e5769c47298b877f8f7bd6b0192a2473c2",
+      "size_bytes": 7992
+    },
+    {
+      "path": "crates/sens/src/fixpoint_checkpoint.rs",
+      "git_blob_sha1": "37406516f75e7878994ec009f19ef1db4c18fe80",
+      "size_bytes": 7850
+    },
+    {
+      "path": "crates/sens/src/function_signatures_generated.rs",
+      "git_blob_sha1": "84a73625584181ac60150a62422e2db2864e5f7b",
+      "size_bytes": 13353
+    },
+    {
+      "path": "crates/sens/src/gpu_admission.rs",
+      "git_blob_sha1": "a9a0fd88415205b24929e9a74044eaff56262eef",
+      "size_bytes": 8702
+    },
+    {
+      "path": "crates/sens/src/gpu_execution_packet.rs",
+      "git_blob_sha1": "e536eee179386c366f6dbb5d786a28e8ee1e6996",
+      "size_bytes": 15513
+    },
+    {
+      "path": "crates/sens/src/gpu_oracle_conformance.rs",
+      "git_blob_sha1": "b0b16bdbd5f9c0a7d77aac9c84535706723e45dd",
+      "size_bytes": 6523
+    },
+    {
+      "path": "crates/sens/src/gpu_oracle.rs",
+      "git_blob_sha1": "eb6f3369aa411202a0ed275f5d3ef4c6fc9b67fb",
+      "size_bytes": 13353
+    },
+    {
+      "path": "crates/sens/src/language_items.rs",
+      "git_blob_sha1": "26b2766d1721195ccc5d95aaa25e1359a8bd5942",
+      "size_bytes": 10539
+    },
+    {
+      "path": "crates/sens/src/lib.rs",
+      "git_blob_sha1": "386158468ec44c20433ddee8432c1c81f9907ef9",
+      "size_bytes": 27192
+    },
+    {
+      "path": "crates/sens/src/packed_bits.rs",
+      "git_blob_sha1": "01c41431839426c2a79d2da653c31fe2dcd40f3d",
+      "size_bytes": 16745
+    },
+    {
+      "path": "crates/sens/src/parser.rs",
+      "git_blob_sha1": "b0fe6d10b77256b0e614d81393e9fd044d9fd9cc",
+      "size_bytes": 42084
+    },
+    {
+      "path": "crates/sens/src/presentation.rs",
+      "git_blob_sha1": "caf9cd6154b655becbbbf38d8eb9107254dedd73",
+      "size_bytes": 23449
+    },
+    {
+      "path": "crates/sens/src/program_compiler.rs",
+      "git_blob_sha1": "ecda725e4499b8822f869cc4d0ac91c00e17a8af",
+      "size_bytes": 9192
+    },
+    {
+      "path": "crates/sens/src/program_data.rs",
+      "git_blob_sha1": "e3538ac5342549cc1bbe844fe931921a8d820cf2",
+      "size_bytes": 2761
+    },
+    {
+      "path": "crates/sens/src/selfhost_lineage.rs",
+      "git_blob_sha1": "cb5c64f26efb4c869ebc6a1f750313704fd85c49",
+      "size_bytes": 11203
+    },
+    {
+      "path": "crates/sens/src/semantic_registry_generated.rs",
+      "git_blob_sha1": "de639ee7dfd640497248ba057e2f6bdbeb660212",
+      "size_bytes": 61376
+    },
+    {
+      "path": "crates/sens/src/semantic_registry.rs",
+      "git_blob_sha1": "21197c63507f7a376271bfcc00f2089e55208bf9",
+      "size_bytes": 17931
+    },
+    {
+      "path": "crates/sens/src/sens.rs",
+      "git_blob_sha1": "d181ea640f4b2feedf8ac068eb779e51dee18223",
+      "size_bytes": 5335
+    },
+    {
+      "path": "crates/sens/src/sid.rs",
+      "git_blob_sha1": "aa2902282b6ddded95498deb5e9428e0b0a6ea09",
+      "size_bytes": 880
+    },
+    {
+      "path": "crates/sens/src/source_packing.rs",
+      "git_blob_sha1": "f01fb40581a534652265dfa5a37a5da128716286",
+      "size_bytes": 16056
+    },
+    {
+      "path": "crates/sens/src/source_words.rs",
+      "git_blob_sha1": "67848e9da1ea5904f48f7e1f9d8c9443bfeedfb4",
+      "size_bytes": 18499
+    },
+    {
+      "path": "crates/sens/src/syntax.rs",
+      "git_blob_sha1": "fa6c6cde596f289567f122361461cdb219d6a442",
+      "size_bytes": 46284
+    },
+    {
+      "path": "crates/sens/src/text7_projection_generated.rs",
+      "git_blob_sha1": "277e0070101f5e3a825c5e5c3743b56800283215",
+      "size_bytes": 16761
+    },
+    {
+      "path": "crates/sens/src/text7_projection.rs",
+      "git_blob_sha1": "a1934ced83ea57729b6dafeef051734b78221544",
+      "size_bytes": 7113
+    },
+    {
+      "path": "crates/sens/src/text7.rs",
+      "git_blob_sha1": "2719e7a7ecf22b5e5ed6a28177f3ddd5349e7a77",
+      "size_bytes": 12181
+    },
+    {
+      "path": "crates/sens/src/value.rs",
+      "git_blob_sha1": "e58fc221e5224756c0bdcaef8cbf01611b176c6b",
+      "size_bytes": 45868
+    },
+    {
+      "path": "crates/swarm-node/Cargo.toml",
+      "git_blob_sha1": "67c755f813d79ee4a491ef113313ce7d7b78f41a",
+      "size_bytes": 162
+    },
+    {
+      "path": "crates/wsm-clips-kernel/Cargo.toml",
+      "git_blob_sha1": "5c6b0bf134c30b379a03ce10a48606cb20021c59",
+      "size_bytes": 296
+    },
+    {
+      "path": "crates/wsm-common-lisp-kernel/Cargo.toml",
+      "git_blob_sha1": "3bc0bdc62bf14b1804a628df97457051d13d6da7",
+      "size_bytes": 267
+    },
+    {
+      "path": "crates/wsm-datalog-kernel/Cargo.toml",
+      "git_blob_sha1": "304b566af7078855de8781f2175bfd17938a37bf",
+      "size_bytes": 284
+    },
+    {
+      "path": "crates/wsm-guard-core/Cargo.toml",
+      "git_blob_sha1": "d227b862fb82e0d32901a40300fa33380fd8949f",
+      "size_bytes": 144
+    },
+    {
+      "path": "crates/wsm-guard-facts/Cargo.toml",
+      "git_blob_sha1": "06ccc703be492ffc1bebd37dc3be5fe009fe15ba",
+      "size_bytes": 164
+    },
+    {
+      "path": "crates/wsm-guard-slice/Cargo.toml",
+      "git_blob_sha1": "e49e465173554350e09560a3d12874a4afcfa85c",
+      "size_bytes": 165
+    },
+    {
+      "path": "crates/wsm-kernel-c-abi/Cargo.toml",
+      "git_blob_sha1": "09835b50cbe21e313ce9d975e24d9bdc5b462b4c",
+      "size_bytes": 253
+    },
+    {
+      "path": "crates/wsm-kernel-host/Cargo.toml",
+      "git_blob_sha1": "444669a2c61f40c1026ade2aeb1d9e123fa3b648",
+      "size_bytes": 271
+    },
+    {
+      "path": "crates/wsm-native-result-types/Cargo.toml",
+      "git_blob_sha1": "126202b41d6ff16045ac4f3940e815aa165a278e",
+      "size_bytes": 667
+    },
+    {
+      "path": "crates/wsm-prolog-kernel/Cargo.toml",
+      "git_blob_sha1": "897f380a8b271bfd20a3966bcc5abc458f07dc47",
+      "size_bytes": 267
+    },
+    {
+      "path": "crates/xtask/Cargo.toml",
+      "git_blob_sha1": "eed4c217f9d61b4db486b06df0fe80c163961a25",
+      "size_bytes": 382
+    },
+    {
+      "path": "crates/xtask/src/compiler_export.rs",
+      "git_blob_sha1": "8d8afb359f9f7adb35c4c76f662189226b5a332a",
+      "size_bytes": 10597
+    },
+    {
+      "path": "crates/xtask/src/encoder_coverage.rs",
+      "git_blob_sha1": "86629f052f8c5237d1c9bcc3ffcd79b63fcc005b",
+      "size_bytes": 14762
+    },
+    {
+      "path": "crates/xtask/src/external_oracle.rs",
+      "git_blob_sha1": "da8886ecef3561a886f356307a587c0b38ada74b",
+      "size_bytes": 28078
+    },
+    {
+      "path": "crates/xtask/src/main.rs",
+      "git_blob_sha1": "7b05ea47e12d35e702bd33b1969b1767ce0ddab8",
+      "size_bytes": 9240
+    },
+    {
+      "path": "crates/xtask/src/xed_import.rs",
+      "git_blob_sha1": "2d5eb020925f44599db8b3403deadac9c4d8752d",
+      "size_bytes": 19181
+    },
+    {
+      "path": "knowledge/bija3-l1-l5-structure-projection.json",
+      "git_blob_sha1": "05a48b0ce07a611a21e09c8ba274dab5fdeafb46",
+      "size_bytes": 851
+    },
+    {
+      "path": "knowledge/d4-bootstrap-compiler-structure-projection.json",
+      "git_blob_sha1": "361fc6c6d95a29756758e0879d90b82ec416efcf",
+      "size_bytes": 861
+    },
+    {
+      "path": "language-contract.lisp",
+      "git_blob_sha1": "6649ad418e75dd74a64b4c911a7f140a31979443",
+      "size_bytes": 12648
+    },
+    {
+      "path": "lib/compiler-nucleus.lisp",
+      "git_blob_sha1": "c81ff7341a3a18c7cb6ff8e77038318bb935b232",
+      "size_bytes": 24506
+    },
+    {
+      "path": "LICENSE",
+      "git_blob_sha1": "a49660652423dcc5352c11456f31bca8806c0d25",
+      "size_bytes": 649
+    }
+  ]
+}
