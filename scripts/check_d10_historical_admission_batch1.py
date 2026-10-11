@@ -79,9 +79,23 @@ def check(inv, batch, state, source, doc):
     assert state["target"]["unplaced_selected_candidates"] == len(inv["rows"])-256
     assert state["target"]["law_forced_coordinates"] == 256
     assert state["target"]["ratified_residents"] == 0
-    assert f"D10 selected              {len(inv['rows'])}/1024" in doc
-    assert f"unplaced                  {len(inv['rows'])-256}" in doc
-    assert f"remaining                 {1024-len(inv['rows'])}" in doc
+    # Historical v1/batch1 remains frozen; the architecture doc describes live D10.
+    # Validate its displayed counters against the SHA-pinned current inventory.
+    import hashlib
+    ptr = read(ROOT / "knowledge/d10-current-inventory.json")["canonical_current"]
+    live_path = Path(ptr["path"])
+    assert not live_path.is_absolute() and live_path.parts[:1] == ("knowledge",)
+    assert ".." not in live_path.parts
+    raw = (ROOT / live_path).read_bytes()
+    live_sha = hashlib.sha1(b"blob " + str(len(raw)).encode() + b"\0" + raw).hexdigest()
+    assert live_sha == ptr["git_blob"], "current D10 SHA mismatch"
+    live = json.loads(raw)
+    n = len(live["rows"])
+    unplaced = sum(r.get("coordinate") is None for r in live["rows"])
+    assert n <= live["capacity"] == 1024
+    assert f"D10 selected              {n}/1024" in doc
+    assert f"unplaced                  {unplaced}" in doc
+    assert f"remaining                 {1024-n}" in doc
     return True
 
 def model_dpb(newbyte, width, offset, target):
