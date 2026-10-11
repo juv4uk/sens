@@ -1,9 +1,9 @@
-//! Run the SENS-written whole-program compiler on canonical SW\x01 input.
+//! Run the SENS-written whole-program compiler from canonical SW1 or physical T5.
 //!
 //! Host work is deliberately limited to:
-//! - reading exact input bytes;
-//! - decoding/re-encoding the existing syntax-wire codec;
-//! - attaching source revision + raw wire digest provenance;
+//! - validating and round-tripping the selected wire/codec representation;
+//! - comparing same-stem source, physical T5 and visible-view projections;
+//! - attaching SENS revision and canonical program-wire digest provenance;
 //! - encoding the SENS-produced artifact into canonical evidence bytes.
 //!
 //! Traversal, role selection, source-shape policy and artifact composition execute
