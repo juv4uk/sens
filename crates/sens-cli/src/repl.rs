@@ -106,6 +106,10 @@ fn build_surface_layer(base: &Environment, surface: ReplSurface) -> Result<Envir
         for (name, source) in SURFACE_PREREQUISITES {
             (if *name == "time.lisp" {
                 sens::load_time_library(&mut session)
+            } else if matches!(*name, "forward.lisp" | "knowledge.lisp") {
+                sens::eval_pinned_reasoning_source(
+                    &format!("lib/{name}"), source, &mut session
+                )
             } else {
                 eval_program(source, &mut session)
             }).map_err(|error| {
