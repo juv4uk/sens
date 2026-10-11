@@ -84,3 +84,53 @@ jobs:
             ${{ runner.temp }}/sid8-domain-console.log
           if-no-files-found: warn
           retention-days: 7
+
+
+  sid8-legacy-projection:
+    name: Execute SID8 legacy to domain projection (isolated preview)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v5
+      - name: Execute conversion script on entire Lisp tree
+        shell: bash
+        run: |
+          set +e
+          python3 scripts/sens8-to-ladder.py . \
+            --root . --source-era legacy --write \
+            --out "$RUNNER_TEMP/sid8-legacy-domain-views" \
+            --report "$RUNNER_TEMP/sid8-legacy-projection.json" \
+            > "$RUNNER_TEMP/sid8-legacy-projection.log" 2>&1
+          result=$?
+          set -e
+          tail -n 12 "$RUNNER_TEMP/sid8-legacy-projection.log"
+          if [[ "$result" != 0 && "$result" != 2 ]]; then
+            echo "Unexpected SID8 execution status: $result" >&2
+            exit "$result"
+          fi
+          python3 - "$RUNNER_TEMP/sid8-legacy-projection.json" <<'PY'
+          import collections, json, pathlib, sys
+          r = json.loads(pathlib.Path(sys.argv[1]).read_text())
+          s = r["summary"]
+          assert r["source_era"] == "legacy"
+          assert r["mode"] == "audit-only-not-physical-sens"
+          assert s["total"] > 0 and s["eligible"] + s["blocked"] == s["total"]
+          assert s["converted_heads"] == sum(x.get("counts", {}).get("replaced", 0) for x in r["files"])
+          by_status = dict(collections.Counter(x["status"] for x in r["files"]))
+          reasons = collections.Counter(
+              b["reason"].split(":", 1)[0]
+              for x in r["files"] for b in x.get("blockers", []))
+          print("SID8_LEGACY_EXECUTION_SUMMARY", json.dumps(
+              {"summary": s, "status": by_status, "blockers": reasons.most_common(12)},
+              ensure_ascii=False))
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: sid8-legacy-projection-${{ github.sha }}
+          path: |
+            ${{ runner.temp }}/sid8-legacy-projection.json
+            ${{ runner.temp }}/sid8-legacy-projection.log
+            ${{ runner.temp }}/sid8-legacy-domain-views/
+          if-no-files-found: warn
+          retention-days: 7
