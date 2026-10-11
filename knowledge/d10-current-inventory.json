@@ -1,12 +1,12 @@
 {
   "schema": "d10-current-inventory-pointer/v1",
-  "status": "OWNER-DIRECTED-RESEARCH-SELECTION-970-UNRATIFIED",
+  "status": "FULL-1024-RESEARCH-DESCRIPTIONS-BUT-305-UNPLACED-NOT_RATIFIED",
   "canonical_current": {
-    "path": "knowledge/d10-v16-semantic-inventory.json",
-    "git_blob": "1aae83ecc5ad4db7b1a4e4a379ee9b204a529341",
-    "selected": 970,
+    "path": "knowledge/d10-v17-semantic-inventory.json",
+    "git_blob": "f841009b9e0c165c93abf451903a62ac701cfd7d",
+    "selected": 1024,
     "placed": 719,
-    "unplaced": 251,
+    "unplaced": 305,
     "ratified": 0
   },
   "historical_selection": {
@@ -20,10 +20,10 @@
     "role": "PINNED-GAUGE-ASSIGNMENT"
   },
   "policy": {
-    "description": "32 historical semantic law descriptions added to research v16, with text witnesses but no execution or behavioral dedup.",
-    "selected_only": "970 research descriptions selected / 1024. 719 placed; 251 without coordinates; 54 remaining. Whole-domain ratification deferred until domain completion.",
+    "description": "Research v17 reaches 1024 descriptions via 54 newly authored bounded exact-law drafts. No donor-verified F1, F2, F3 or F4 physical admission is claimed.",
+    "selected_only": "1024 research descriptions; 719 historic coordinates; 305 unplaced; 0 ratified. Additional 54 draft laws require executed oracles and semantic dedup; full selected count is NOT full admission.",
     "ratification": "Whole-domain D10 ratification to follow fully populated 1024 inventory with reviewed proofs, not per-function ratification.",
-    "next_step": "Collect missing 54 independent lawful semantics and verify F2 F3; only after fully filling all 1024 candidates pursue full-domain ratification."
+    "next_step": "Validate/replace research draft laws using executed independent oracles and D1-D9 / D10 equivalence proofs; place 305 remaining coordinate slots; ratify D10 as one domain after full verified completion."
   },
   "branch_policy": "MAIN-ONLY; NO-NEW-BRANCHES",
   "historical_v2_coordinate_inventory": {
@@ -412,5 +412,27 @@
     "ratified_added": 0,
     "F2": "NOT_RUN",
     "F3": "UNPROVEN"
+  },
+  "historical_v16_research_inventory": {
+    "path": "knowledge/d10-v16-semantic-inventory.json",
+    "git_blob": "1aae83ecc5ad4db7b1a4e4a379ee9b204a529341",
+    "selected": 970,
+    "placed": 719,
+    "unplaced": 251,
+    "ratified": 0,
+    "role": "FROZEN-PRE-V17-ARCHIVE"
+  },
+  "current_v17_mathematical_draft_selection": {
+    "previous_inventory": "knowledge/d10-v16-semantic-inventory.json",
+    "manifest": {
+      "path": "knowledge/d10-v17-exact-math-proposals-20261012.json",
+      "git_blob": "c0c98586b077a28accaf0966734bdaa8871478f8"
+    },
+    "new_research_laws": 54,
+    "independent_donors_verified": 0,
+    "executed_witnesses": 0,
+    "semantic_dedup_certs": 0,
+    "coordinates_added": 0,
+    "ratified_added": 0
   }
 }

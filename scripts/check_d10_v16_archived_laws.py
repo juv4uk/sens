@@ -76,7 +76,9 @@ def verify(prev,current,batch,source,foundation):
 def check(root=ROOT,self_test=False):
     root=root.resolve()
     ptr=json.loads((root/"knowledge/d10-current-inventory.json").read_text())
-    current=ptr["canonical_current"];old=ptr["historical_v15_research_inventory"]
+    active=ptr["canonical_current"]
+    current=ptr.get("historical_v16_research_inventory",active)
+    old=ptr["historical_v15_research_inventory"]
     selected=ptr["current_v16_archived_law_selection"]
     pin=selected["manifest"]
     need(pin["path"]==MANIFEST and
@@ -86,6 +88,9 @@ def check(root=ROOT,self_test=False):
          batch["source"]==selected["source"],"manifest pointer")
     prev=json.loads(pinned(root,old["path"],old["git_blob"]))
     live=json.loads(pinned(root,current["path"],current["git_blob"]))
+    active_rows=json.loads(pinned(root,active["path"],active["git_blob"]))["rows"]
+    need(len(active_rows)>=len(live["rows"]) and
+         active_rows[:len(live["rows"])]==live["rows"],"live rewrote frozen v16")
     source=json.loads(pinned(root,batch["source"]["path"],
                              batch["source"]["git_blob"]))
     foundation=json.loads(pinned(root,batch["foundation"]["path"],

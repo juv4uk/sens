@@ -556,6 +556,49 @@ def audit(root):
                 source_review_exceptions.update(row["semantic_name"].upper() for row in new16)
             else:
                 errors.append("D10-V16-SOURCE-BATCH-SHA-OR-LAW-DRIFT")
+        # v17: 54 new exact-law research DRAFTS are counted only while
+        # their complete text, manifest SHA and append-only v16 prefix match.
+        # No independent donor, executed F2, verified F3 or coordinate.
+        if len(rows) > 970:
+            hook17=ptr["current_v17_mathematical_draft_selection"]
+            pin17=hook17["manifest"]
+            raw17=(root/pin17["path"]).read_bytes()
+            spec17=json.loads(raw17)
+            old17=ptr["historical_v16_research_inventory"]
+            old17raw=(root/old17["path"]).read_bytes()
+            new17=rows[970:1024]
+            claims17=spec17["candidates"]
+            good17=(
+                pin17["git_blob"]==sha(raw17)
+                and old17["git_blob"]==sha(old17raw)
+                and hook17["previous_inventory"]==old17["path"]
+                and spec17["previous"]["git_blob"]==old17["git_blob"]
+                and len(new17)==len(claims17)==54
+                and spec17["policy"]["no_independent_donor_claim"] is True
+                and spec17["policy"]["no_f2_oracle_executed"] is True
+                and spec17["policy"]["no_f3_semantic_independence_proven"] is True
+                and preserves_archived_prefix(rows,json.loads(old17raw)["rows"])
+                and all(
+                    r["stable_id"]==x["id"]
+                    and r["semantic_name"]==x["semantic_name"]
+                    and r["behavior"]==x["semantic_law"]
+                    and r["source_path"]==pin17["path"]
+                    and r["source_git_blob"]==pin17["git_blob"]
+                    and r["positive_witness_claim"]==x["positive_illustrative_claim"]
+                    and r["negative_witness_claim"]==x["negative_illustrative_claim"]
+                    and r["coordinate"] is None
+                    and r["ratified_resident"] is False
+                    and r["physical_t5_authorized"] is False
+                    and r["witness_independence"]=="PENDING"
+                    and x["F1"]=="NEW_PROPOSED_LAW_NOT_DONOR_ATTESTED"
+                    and x["F2"]=="HOLD_NOT_EXECUTED"
+                    and x["F3"]=="HOLD_NOT_PROVED_DISTINCT"
+                    for r,x in zip(new17,claims17))
+            )
+            if good17:
+                source_review_exceptions.update(r["semantic_name"].upper() for r in new17)
+            else:
+                errors.append("D10-V17-DRAFT-BATCH-SHA-OR-LAW-DRIFT")
         if sources_good and legacy_ok and v5_good:
             research_allocated=len(placed)-256
             source_review_exceptions |= all_review_names | v5_source_names
