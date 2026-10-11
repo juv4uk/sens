@@ -1,0 +1,29 @@
+name: Universal Frame3 Rust proof
+on:
+  push:
+    paths:
+      - 'crates/sens/src/universal_frame3.rs'
+      - 'crates/sens/src/lib.rs'
+      - '.github/workflows/universal-frame3-rust.yml'
+  pull_request:
+    paths:
+      - 'crates/sens/src/universal_frame3.rs'
+      - 'crates/sens/src/lib.rs'
+      - '.github/workflows/universal-frame3-rust.yml'
+permissions:
+  contents: read
+jobs:
+  rust-proof:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: clippy, rustfmt
+      - name: Verify focused Rust codec
+        run: |
+          set -euo pipefail
+          rustfmt --edition 2021 --check crates/sens/src/universal_frame3.rs
+          cargo test -p sens universal_frame3 -- --nocapture
+          cargo clippy -p sens --lib -- -D warnings
