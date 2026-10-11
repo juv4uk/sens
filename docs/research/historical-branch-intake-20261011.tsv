@@ -97,7 +97,7 @@ agent/176-pclmulqdq	UNTRIAGED	-	-	BRANCH-NAME-ONLY
 agent/176-rdrand-rdseed	UNTRIAGED	-	-	BRANCH-NAME-ONLY
 agent/176-vex-grammar-base	UNTRIAGED	-	-	BRANCH-NAME-ONLY
 agent/384-workflow-inventory	ALREADY-IN-MAIN-ARCHIVED	8facaa1a04533de8c777d024ef8d8068f3cfd884	cda9060c53a24aed58662068211e457db859259a	Four workflow registry/checker paths archived under research/domain-archive/20261011/pr1040; snapshot covers old 26-workflow source era, not current live workflow set. PR #1040 was already closed, exact archive disposition recorded.
-agent/553-semantic-ownership-lisp	UNTRIAGED	-	-	BRANCH-NAME-ONLY
+agent/553-semantic-ownership-lisp	ALREADY-IN-MAIN-ARCHIVED	371c03fa6b6bd4a59c35d6e4b92bbc5db8892acc	09a65bd6f55358de8c9a4b023c3df5d1e555abaa	Four files archived under research/domain-archive/20261011/pr1066; current Python semantic-ownership checker remains active and Lisp parity was not proved. PR #1066 closed/retained as archive; no dual checker activated.
 agent/990-four-island-math-contract	UNTRIAGED	-	-	BRANCH-NAME-ONLY
 agent/990-island-math-evidence	UNTRIAGED	-	-	BRANCH-NAME-ONLY
 agent/990-island-math-evidence-replay	UNTRIAGED	-	-	BRANCH-NAME-ONLY
@@ -128,7 +128,7 @@ agent/1049-current-main	UNTRIAGED	-	-	BRANCH-NAME-ONLY
 agent/1049-semantic-authority-guard	UNTRIAGED	-	-	BRANCH-NAME-ONLY
 agent/1049-semantic-authority-guard-replay	UNTRIAGED	-	-	BRANCH-NAME-ONLY
 agent/1060-canon-authority-inventory	UNTRIAGED	-	-	BRANCH-NAME-ONLY
-agent/1061-projection-provenance	UNTRIAGED	-	-	BRANCH-NAME-ONLY
+agent/1061-projection-provenance	ALREADY-IN-MAIN-ARCHIVED	daa43d8886c45647e3565a6b145b7e447a5ffca6	69e36652f121fcb6670877fd83b05960fe14739b	Four files archived under research/domain-archive/20261011/pr1083; historical binary-8/u8 SID assumptions and old CI paths are not active main provenance. PR #1083 closed/retained as archive.
 agent/1076-blackbox-witness	UNTRIAGED	-	-	BRANCH-NAME-ONLY
 agent/1076-repl-canon-names	UNTRIAGED	-	-	BRANCH-NAME-ONLY
 agent/1091-authority-guard-fast-reject	UNTRIAGED	-	-	BRANCH-NAME-ONLY
@@ -547,7 +547,7 @@ ci/tooling-inventory-gates-self-hosted	UNTRIAGED	-	-	BRANCH-NAME-ONLY
 ci/triple-release-gate-20261009	UNTRIAGED	-	-	BRANCH-NAME-ONLY
 ci/106-cancel-stale-pr-bench	UNTRIAGED	-	-	BRANCH-NAME-ONLY
 ci/300-all-rust-one-way-valve	UNTRIAGED	-	-	BRANCH-NAME-ONLY
-ci/577-swarm-node-build-gate	UNTRIAGED	-	-	BRANCH-NAME-ONLY
+ci/577-swarm-node-build-gate	ALREADY-IN-MAIN-NEWER	7649512dbfe3d13b0477a26d842e3dbd25605922	44bfaf730bb8e47dc8705f5f829c47393645696c	Conditional cargo build -p swarm-node now exists in current .github/workflows/ci.yml. Exact main commit has zero Actions/status records at audit time; do not claim test green. Old CI branch not merged, PR #1068 already closed.
 ci/904-life-1-focused-gate	UNTRIAGED	-	-	BRANCH-NAME-ONLY
 ci/1427-private-core1-checkout	UNTRIAGED	-	-	BRANCH-NAME-ONLY
 ci/2306-paradigm-one-way	UNTRIAGED	-	-	BRANCH-NAME-ONLY
@@ -931,7 +931,7 @@ feat/507-compiled-encoder-bootstrap	UNTRIAGED	-	-	BRANCH-NAME-ONLY
 feat/508-native-coverage-ledger	UNTRIAGED	-	-	BRANCH-NAME-ONLY
 feat/604-lisp-coverage-authority-clean-20261007	UNTRIAGED	-	-	BRANCH-NAME-ONLY
 feat/604-lisp-coverage-authority-cutover-20261007	UNTRIAGED	-	-	BRANCH-NAME-ONLY
-feat/718-clips-datalog-bridge	UNTRIAGED	-	-	BRANCH-NAME-ONLY
+feat/718-clips-datalog-bridge	ALREADY-IN-MAIN-ARCHIVED	d8cd01a352e5a180fecb9c4f7cf4ca9fe2adedb9	1981c7acf6fb9003dc66332a6755da4bfb716a3e	All five branch-head files archived under research/domain-archive/20261011/pr1044 with source blobs; bounded projection idea retained but current CLIPS/Datalog consumer and native SENS oracle not established. PR #1044 closed archived.
 feat/719-native-result-refs	UNTRIAGED	-	-	BRANCH-NAME-ONLY
 feat/735-kernel-witness-map	UNTRIAGED	-	-	BRANCH-NAME-ONLY
 feat/735-sid-kernel-witness	UNTRIAGED	-	-	BRANCH-NAME-ONLY
@@ -2637,7 +2637,7 @@ refactor/xtask-uk-checks-to-sens	UNTRIAGED	-	-	BRANCH-NAME-ONLY
 refactor/xtask-verify-to-sens	UNTRIAGED	-	-	BRANCH-NAME-ONLY
 refactor/577-cli-module	UNTRIAGED	-	-	BRANCH-NAME-ONLY
 refactor/577-cli-v2	ALREADY-IN-MAIN-ARCHIVED	3ccb634e5871e0ae6cd0def1c2e4c283f1350ac7	50a06f95d03811fceb5049715e08cb32137c111d	Exact cli.rs + branch main.rs preserved under research/domain-archive/20261011/pr0987; current main main.rs materially evolved and lacks cli.rs, so old diff not safe as pure move. PR #987 closed archived.
-refactor/577-introspect	UNTRIAGED	-	-	BRANCH-NAME-ONLY
+refactor/577-introspect	ALREADY-IN-MAIN-ARCHIVED	472ae25eee4690d86388b4ae56fc148944af9862	abba5b1e9a05225a7806d85c60fca43f889e4264	All three files archived under research/domain-archive/20261011/pr1094. Historical main.rs is stale vs current main; only current swarm-node compile gate was ported separately in 7649512dbfe3d13b0477a26d842e3dbd25605922. PR #1094 closed archived.
 refactor/1004-function-table-retire-current	UNTRIAGED	-	-	BRANCH-NAME-ONLY
 refactor/1004-function-table-retire-current-main-2	UNTRIAGED	-	-	BRANCH-NAME-ONLY
 refactor/1004-function-table-retire-current-main-3b	UNTRIAGED	-	-	BRANCH-NAME-ONLY
