@@ -37,5 +37,9 @@ jobs:
           python3 scripts/check-numeric-domain-ratification.py
       - name: Exact-width Core semantic identity
         run: cargo test --locked -p sens --test domain_ladder --test domain_ast_value_identity --test domain_width_authority_test
+      - name: D3 old COND/ATOM/EQ regression tests
+        run: python3 -m unittest discover -s tests -p 'test_d3_legacy_logic_guard.py' -v
+      - name: D3 active source and evaluator semantics audit (fail closed)
+        run: python3 scripts/check_d3_legacy_logic.py --strict
       - name: Core source hygiene
         run: git diff --check
