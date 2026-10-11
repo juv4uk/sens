@@ -228,11 +228,11 @@ arch/contract-7-open-primitive-archipelago	UNTRIAGED	-	-	BRANCH-NAME-ONLY
 arch/793-life-2-pattern-catalog	UNTRIAGED	-	-	BRANCH-NAME-ONLY
 architecture/archipelago-v1	UNTRIAGED	-	-	BRANCH-NAME-ONLY
 archive/d8-3778-rejected-axis-20261011-gpt6	UNTRIAGED	-	-	BRANCH-NAME-ONLY
-archive/d10-canonical-topological-order-proof-20261011	UNTRIAGED	-	-	BRANCH-NAME-ONLY
-archive/domain-research-d3-d10-supplement-20261011	UNTRIAGED	-	-	BRANCH-NAME-ONLY
+archive/d10-canonical-topological-order-proof-20261011	ALREADY-IN-MAIN-ARCHIVED	-	-	research/domain-archive/20261011/d10-canonical-topological-order/provenance.json
+archive/domain-research-d3-d10-supplement-20261011	ALREADY-IN-MAIN-ANCESTOR	-	-	compare main...archive/domain-research-d3-d10-supplement-20261011 ahead=0
 archive/domain-research-migrator-remnants-20261011	UNTRIAGED	-	-	BRANCH-NAME-ONLY
-archive/pr616-core-cond-m1-20261011	UNTRIAGED	-	-	BRANCH-NAME-ONLY
-archive/ramka3-5326-5328-proof-history-20261011	UNTRIAGED	-	-	BRANCH-NAME-ONLY
+archive/pr616-core-cond-m1-20261011	ALREADY-IN-MAIN-ARCHIVED	-	-	research/domain-archive/20261011/extension-pr616-core-cond-m1-20261011.json
+archive/ramka3-5326-5328-proof-history-20261011	ALREADY-IN-MAIN-ARCHIVED	-	-	research/domain-archive/20261011/extension-ramka3-pr5326-5328-20261011.json
 archive/retired-rust-semantic-suites-20261009	UNTRIAGED	-	-	BRANCH-NAME-ONLY
 archive/3182-cond-workflow-20261011-gpt6	UNTRIAGED	-	-	BRANCH-NAME-ONLY
 assist/352-string-order-current-main	UNTRIAGED	-	-	BRANCH-NAME-ONLY
@@ -3135,7 +3135,7 @@ replay-d5-order-4022	UNTRIAGED	-	-	BRANCH-NAME-ONLY
 replay-d6-add1-sub1-4139	UNTRIAGED	-	-	BRANCH-NAME-ONLY
 replay-machine-effect-explicit-outputs-4381	UNTRIAGED	-	-	BRANCH-NAME-ONLY
 research/adaptyvnyi-enkoder-2026-10-10	UNTRIAGED	-	-	BRANCH-NAME-ONLY
-research/archive-bench-1995-20261011-gpt6	UNTRIAGED	-	-	BRANCH-NAME-ONLY
+research/archive-bench-1995-20261011-gpt6	ALREADY-IN-MAIN-ARCHIVED-NEWER	-	-	research/domain-archive/20261011/extension-benchmark-identity-carrier-1995-20261011.json
 research/archive-d6-nonprefix-2546-20261011-gpt6	UNTRIAGED	-	-	BRANCH-NAME-ONLY
 research/archive-pr3182-cond-proof-20261011	UNTRIAGED	-	-	BRANCH-NAME-ONLY
 research/archive-readfile-profile-pr347-pr379-20261011-gpt6	UNTRIAGED	-	-	BRANCH-NAME-ONLY
