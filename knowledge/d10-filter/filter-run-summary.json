@@ -16,7 +16,7 @@
     "rejected.tsv": "d4409686d398c81f19b5191ebaa290a69eff72514a2536ad89fbc63445ae3751"
   },
   "historical_catalog_reconciliation": {
-    "canonical_overlay_ids_added": 4,
+    "canonical_overlay_ids_added": 0,
     "colliding_spelling_groups_not_deduped": 276,
     "current_canonical_selected": 725,
     "current_inventory_git_blob": "f3d3aefd19e163a085ba6ce4f8e2ca2bef02028f",
@@ -26,7 +26,7 @@
     "historical_commit": "17ab25d65346a6a1bfc71f0ed6d64ee75fc6f22f",
     "historical_git_blob": "4afd4c6292db8c93b001cae3162a85bc4307cf41",
     "new_allocations": 0,
-    "new_candidate_ids_beyond_historical": 276,
+    "new_candidate_ids_beyond_historical": 280,
     "new_names_beyond_historical": 0,
     "new_ratifications": 0,
     "restored_old_only_candidate_ids": 0,
@@ -36,13 +36,13 @@
     "source_historical_names": 1495,
     "source_historical_records": 1495,
     "source_id_overlap": 1495,
-    "source_latest_ids": 1771,
+    "source_latest_ids": 1775,
     "source_latest_names": 1495,
-    "source_latest_records": 1771,
-    "source_union_candidate_ids": 1771
+    "source_latest_records": 1775,
+    "source_union_candidate_ids": 1775
   },
   "input_index": "knowledge/d10-filter/all-candidates.tsv",
-  "input_index_sha256": "063ee6ca99a65058bae8b91592ab45a1c5e23624af6f7428c5ca9f75d03b0e8c",
+  "input_index_sha256": "5ce712bf844a09d6ed045c97cb8825397e4aa535206381bf0a4247877e92e64a",
   "mechanical_partition": {
     "accepted": 0,
     "escalated": 0,
@@ -60,5 +60,5 @@
   },
   "physical_t5_authorized": false,
   "schema": "d10-unified-filter-run/v1",
-  "source_commit": "207f89f9f594cccb284d0993e9dca7d8c29281da"
+  "source_commit": "bea1291b1dd1770c6d63b94e7ed760b71fe36f01"
 }
