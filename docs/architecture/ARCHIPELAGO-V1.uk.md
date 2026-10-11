@@ -62,7 +62,7 @@ TOTAL                             87
 D10 selected              759/1024
 law-forced                256
 unplaced                   40
-remaining                 299
+remaining                 265
 ratified                    0
 ```
 <!-- D10-INVENTORY-COUNTS:END -->
