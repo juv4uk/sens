@@ -54,6 +54,36 @@ class CatalogRestoreTests(unittest.TestCase):
             for row in records:
                 fh.write("\t".join(row[k] for k in merge.INDEX_FIELDS) + "\n")
 
+    def test_find_name_line_matches_only_canonical_json_property(self):
+        canonical = (
+            '{\n'
+            '  "rows": [\n'
+            '    {\n'
+            '      "semantic_name": "ALPHA",\n'
+            '      "provenance": "BETA",\n'
+            '      "note": "ALPHA appears in this ordinary string"\n'
+            '    },\n'
+            '    {\n'
+            '      "semantic_name": "BETA"\n'
+            '    }\n'
+            '  ]\n'
+            '}\n'
+        )
+        self.assertEqual(4, merge.find_name_line(canonical, "ALPHA", True))
+        self.assertEqual(8, merge.find_name_line(canonical, "BETA", True))
+        self.assertIsNone(merge.find_name_line(canonical, "ALPH", True))
+        self.assertEqual(4, merge.find_name_line(canonical, "alpha", False))
+
+    def test_find_name_line_fails_closed_on_duplicate_canonical_rows(self):
+        canonical = (
+            '{\n'
+            '  "semantic_name": "ALPHA",\n'
+            '  "semantic_name": "ALPHA"\n'
+            '}\n'
+        )
+        with self.assertRaisesRegex(ValueError, "AMBIGUOUS_CANONICAL_SEMANTIC_NAME"):
+            merge.find_name_line(canonical, "ALPHA", True)
+
     def test_union_preserves_all_names_and_original_source_ids(self):
         report = merge.merge_catalog(self.root, self.old, self.current, self.output)
         self.assertEqual(3, report["source_historical_ids"])
