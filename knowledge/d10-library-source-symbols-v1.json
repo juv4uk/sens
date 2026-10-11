@@ -6,11 +6,11 @@
  "sources": [
   {
    "path": "lib/quantity.lisp",
-   "blob_sha": "c75e7d9b222cff34e80d29887bb6fbd7fc62e4ab"
+   "blob_sha": "40c38e6019beccddd8577aa7af5a0957f4932b89"
   },
   {
    "path": "lib/translation.lisp",
-   "blob_sha": "a78bab7648940bdb19b288d9e5667968cab409b1"
+   "blob_sha": "80cd225cba549a837097b1e633b6662c9434a148"
   },
   {
    "path": "lib/si.lisp",
@@ -18,14 +18,14 @@
   },
   {
    "path": "lib/reason.lisp",
-   "blob_sha": "7d81d7b5ecf367c4e1db2acc8007a69c6c392299"
+   "blob_sha": "fcc6d5828b5c3b883c427b0bcb567777404db184"
   }
  ],
  "count": 102,
  "candidates": [
   {
    "source": "lib/quantity.lisp",
-   "blob_sha": "c75e7d9b222cff34e80d29887bb6fbd7fc62e4ab",
+   "blob_sha": "40c38e6019beccddd8577aa7af5a0957f4932b89",
    "line": 18,
    "name": "*dimension-schema*",
    "kind": "library-defined",
@@ -33,7 +33,7 @@
   },
   {
    "source": "lib/quantity.lisp",
-   "blob_sha": "c75e7d9b222cff34e80d29887bb6fbd7fc62e4ab",
+   "blob_sha": "40c38e6019beccddd8577aa7af5a0957f4932b89",
    "line": 19,
    "name": "*unit-schema*",
    "kind": "library-defined",
@@ -41,7 +41,7 @@
   },
   {
    "source": "lib/quantity.lisp",
-   "blob_sha": "c75e7d9b222cff34e80d29887bb6fbd7fc62e4ab",
+   "blob_sha": "40c38e6019beccddd8577aa7af5a0957f4932b89",
    "line": 20,
    "name": "*quantity-schema*",
    "kind": "library-defined",
@@ -49,7 +49,7 @@
   },
   {
    "source": "lib/quantity.lisp",
-   "blob_sha": "c75e7d9b222cff34e80d29887bb6fbd7fc62e4ab",
+   "blob_sha": "40c38e6019beccddd8577aa7af5a0957f4932b89",
    "line": 21,
    "name": "*science-source-schema*",
    "kind": "library-defined",
@@ -57,7 +57,7 @@
   },
   {
    "source": "lib/quantity.lisp",
-   "blob_sha": "c75e7d9b222cff34e80d29887bb6fbd7fc62e4ab",
+   "blob_sha": "40c38e6019beccddd8577aa7af5a0957f4932b89",
    "line": 22,
    "name": "*scientific-constant-schema*",
    "kind": "library-defined",
@@ -65,7 +65,7 @@
   },
   {
    "source": "lib/quantity.lisp",
-   "blob_sha": "c75e7d9b222cff34e80d29887bb6fbd7fc62e4ab",
+   "blob_sha": "40c38e6019beccddd8577aa7af5a0957f4932b89",
    "line": 24,
    "name": "science-proper-list?",
    "kind": "library-defined",
@@ -73,7 +73,7 @@
   },
   {
    "source": "lib/quantity.lisp",
-   "blob_sha": "c75e7d9b222cff34e80d29887bb6fbd7fc62e4ab",
+   "blob_sha": "40c38e6019beccddd8577aa7af5a0957f4932b89",
    "line": 35,
    "name": "science-sixth",
    "kind": "library-defined",
@@ -81,7 +81,7 @@
   },
   {
    "source": "lib/quantity.lisp",
-   "blob_sha": "c75e7d9b222cff34e80d29887bb6fbd7fc62e4ab",
+   "blob_sha": "40c38e6019beccddd8577aa7af5a0957f4932b89",
    "line": 39,
    "name": "science-seventh",
    "kind": "library-defined",
@@ -89,7 +89,7 @@
   },
   {
    "source": "lib/quantity.lisp",
-   "blob_sha": "c75e7d9b222cff34e80d29887bb6fbd7fc62e4ab",
+   "blob_sha": "40c38e6019beccddd8577aa7af5a0957f4932b89",
    "line": 43,
    "name": "make-dimension",
    "kind": "library-defined",
@@ -97,7 +97,7 @@
   },
   {
    "source": "lib/quantity.lisp",
-   "blob_sha": "c75e7d9b222cff34e80d29887bb6fbd7fc62e4ab",
+   "blob_sha": "40c38e6019beccddd8577aa7af5a0957f4932b89",
    "line": 47,
    "name": "dimension?",
    "kind": "library-defined",
@@ -105,7 +105,7 @@
   },
   {
    "source": "lib/quantity.lisp",
-   "blob_sha": "c75e7d9b222cff34e80d29887bb6fbd7fc62e4ab",
+   "blob_sha": "40c38e6019beccddd8577aa7af5a0957f4932b89",
    "line": 62,
    "name": "dimension-base",
    "kind": "library-defined",
@@ -113,7 +113,7 @@
   },
   {
    "source": "lib/quantity.lisp",
-   "blob_sha": "c75e7d9b222cff34e80d29887bb6fbd7fc62e4ab",
+   "blob_sha": "40c38e6019beccddd8577aa7af5a0957f4932b89",
    "line": 65,
    "name": "dimension-exponent",
    "kind": "library-defined",
@@ -121,7 +121,7 @@
   },
   {
    "source": "lib/quantity.lisp",
-   "blob_sha": "c75e7d9b222cff34e80d29887bb6fbd7fc62e4ab",
+   "blob_sha": "40c38e6019beccddd8577aa7af5a0957f4932b89",
    "line": 68,
    "name": "science-dimensions-valid?",
    "kind": "library-defined",
@@ -129,239 +129,239 @@
   },
   {
    "source": "lib/quantity.lisp",
-   "blob_sha": "c75e7d9b222cff34e80d29887bb6fbd7fc62e4ab",
-   "line": 81,
+   "blob_sha": "40c38e6019beccddd8577aa7af5a0957f4932b89",
+   "line": 79,
    "name": "make-unit",
    "kind": "library-defined",
    "status": "research-unratified"
   },
   {
    "source": "lib/quantity.lisp",
-   "blob_sha": "c75e7d9b222cff34e80d29887bb6fbd7fc62e4ab",
-   "line": 85,
+   "blob_sha": "40c38e6019beccddd8577aa7af5a0957f4932b89",
+   "line": 83,
    "name": "unit?",
    "kind": "library-defined",
    "status": "research-unratified"
   },
   {
    "source": "lib/quantity.lisp",
-   "blob_sha": "c75e7d9b222cff34e80d29887bb6fbd7fc62e4ab",
-   "line": 95,
+   "blob_sha": "40c38e6019beccddd8577aa7af5a0957f4932b89",
+   "line": 93,
    "name": "unit-dimensions",
    "kind": "library-defined",
    "status": "research-unratified"
   },
   {
    "source": "lib/quantity.lisp",
-   "blob_sha": "c75e7d9b222cff34e80d29887bb6fbd7fc62e4ab",
-   "line": 98,
+   "blob_sha": "40c38e6019beccddd8577aa7af5a0957f4932b89",
+   "line": 96,
    "name": "make-quantity",
    "kind": "library-defined",
    "status": "research-unratified"
   },
   {
    "source": "lib/quantity.lisp",
-   "blob_sha": "c75e7d9b222cff34e80d29887bb6fbd7fc62e4ab",
-   "line": 102,
+   "blob_sha": "40c38e6019beccddd8577aa7af5a0957f4932b89",
+   "line": 100,
    "name": "quantity?",
    "kind": "library-defined",
    "status": "research-unratified"
   },
   {
    "source": "lib/quantity.lisp",
-   "blob_sha": "c75e7d9b222cff34e80d29887bb6fbd7fc62e4ab",
-   "line": 113,
+   "blob_sha": "40c38e6019beccddd8577aa7af5a0957f4932b89",
+   "line": 111,
    "name": "quantity-value",
    "kind": "library-defined",
    "status": "research-unratified"
   },
   {
    "source": "lib/quantity.lisp",
-   "blob_sha": "c75e7d9b222cff34e80d29887bb6fbd7fc62e4ab",
-   "line": 116,
+   "blob_sha": "40c38e6019beccddd8577aa7af5a0957f4932b89",
+   "line": 114,
    "name": "quantity-unit",
    "kind": "library-defined",
    "status": "research-unratified"
   },
   {
    "source": "lib/quantity.lisp",
-   "blob_sha": "c75e7d9b222cff34e80d29887bb6fbd7fc62e4ab",
-   "line": 122,
+   "blob_sha": "40c38e6019beccddd8577aa7af5a0957f4932b89",
+   "line": 120,
    "name": "science-add-dimension",
    "kind": "library-defined",
    "status": "research-unratified"
   },
   {
    "source": "lib/quantity.lisp",
-   "blob_sha": "c75e7d9b222cff34e80d29887bb6fbd7fc62e4ab",
-   "line": 147,
+   "blob_sha": "40c38e6019beccddd8577aa7af5a0957f4932b89",
+   "line": 143,
    "name": "science-merge-dimensions",
    "kind": "library-defined",
    "status": "research-unratified"
   },
   {
    "source": "lib/quantity.lisp",
-   "blob_sha": "c75e7d9b222cff34e80d29887bb6fbd7fc62e4ab",
-   "line": 157,
+   "blob_sha": "40c38e6019beccddd8577aa7af5a0957f4932b89",
+   "line": 153,
    "name": "science-negate-dimensions",
    "kind": "library-defined",
    "status": "research-unratified"
   },
   {
    "source": "lib/quantity.lisp",
-   "blob_sha": "c75e7d9b222cff34e80d29887bb6fbd7fc62e4ab",
-   "line": 169,
+   "blob_sha": "40c38e6019beccddd8577aa7af5a0957f4932b89",
+   "line": 165,
    "name": "unit-product",
    "kind": "library-defined",
    "status": "research-unratified"
   },
   {
    "source": "lib/quantity.lisp",
-   "blob_sha": "c75e7d9b222cff34e80d29887bb6fbd7fc62e4ab",
-   "line": 176,
+   "blob_sha": "40c38e6019beccddd8577aa7af5a0957f4932b89",
+   "line": 172,
    "name": "unit-quotient",
    "kind": "library-defined",
    "status": "research-unratified"
   },
   {
    "source": "lib/quantity.lisp",
-   "blob_sha": "c75e7d9b222cff34e80d29887bb6fbd7fc62e4ab",
-   "line": 183,
+   "blob_sha": "40c38e6019beccddd8577aa7af5a0957f4932b89",
+   "line": 179,
    "name": "quantity-product",
    "kind": "library-defined",
    "status": "research-unratified"
   },
   {
    "source": "lib/quantity.lisp",
-   "blob_sha": "c75e7d9b222cff34e80d29887bb6fbd7fc62e4ab",
-   "line": 189,
+   "blob_sha": "40c38e6019beccddd8577aa7af5a0957f4932b89",
+   "line": 185,
    "name": "quantity-quotient",
    "kind": "library-defined",
    "status": "research-unratified"
   },
   {
    "source": "lib/quantity.lisp",
-   "blob_sha": "c75e7d9b222cff34e80d29887bb6fbd7fc62e4ab",
-   "line": 195,
+   "blob_sha": "40c38e6019beccddd8577aa7af5a0957f4932b89",
+   "line": 191,
    "name": "make-science-source",
    "kind": "library-defined",
    "status": "research-unratified"
   },
   {
    "source": "lib/quantity.lisp",
-   "blob_sha": "c75e7d9b222cff34e80d29887bb6fbd7fc62e4ab",
-   "line": 199,
+   "blob_sha": "40c38e6019beccddd8577aa7af5a0957f4932b89",
+   "line": 195,
    "name": "science-source?",
    "kind": "library-defined",
    "status": "research-unratified"
   },
   {
    "source": "lib/quantity.lisp",
-   "blob_sha": "c75e7d9b222cff34e80d29887bb6fbd7fc62e4ab",
-   "line": 214,
+   "blob_sha": "40c38e6019beccddd8577aa7af5a0957f4932b89",
+   "line": 210,
    "name": "scientific-constant-status-valid?",
    "kind": "library-defined",
    "status": "research-unratified"
   },
   {
    "source": "lib/quantity.lisp",
-   "blob_sha": "c75e7d9b222cff34e80d29887bb6fbd7fc62e4ab",
-   "line": 222,
+   "blob_sha": "40c38e6019beccddd8577aa7af5a0957f4932b89",
+   "line": 218,
    "name": "scientific-constant-kind-valid?",
    "kind": "library-defined",
    "status": "research-unratified"
   },
   {
    "source": "lib/quantity.lisp",
-   "blob_sha": "c75e7d9b222cff34e80d29887bb6fbd7fc62e4ab",
-   "line": 231,
+   "blob_sha": "40c38e6019beccddd8577aa7af5a0957f4932b89",
+   "line": 227,
    "name": "make-scientific-constant",
    "kind": "library-defined",
    "status": "research-unratified"
   },
   {
    "source": "lib/quantity.lisp",
-   "blob_sha": "c75e7d9b222cff34e80d29887bb6fbd7fc62e4ab",
-   "line": 242,
+   "blob_sha": "40c38e6019beccddd8577aa7af5a0957f4932b89",
+   "line": 238,
    "name": "scientific-constant?",
    "kind": "library-defined",
    "status": "research-unratified"
   },
   {
    "source": "lib/quantity.lisp",
-   "blob_sha": "c75e7d9b222cff34e80d29887bb6fbd7fc62e4ab",
-   "line": 260,
+   "blob_sha": "40c38e6019beccddd8577aa7af5a0957f4932b89",
+   "line": 256,
    "name": "scientific-constant-name",
    "kind": "library-defined",
    "status": "research-unratified"
   },
   {
    "source": "lib/quantity.lisp",
-   "blob_sha": "c75e7d9b222cff34e80d29887bb6fbd7fc62e4ab",
-   "line": 263,
+   "blob_sha": "40c38e6019beccddd8577aa7af5a0957f4932b89",
+   "line": 259,
    "name": "scientific-constant-quantity",
    "kind": "library-defined",
    "status": "research-unratified"
   },
   {
    "source": "lib/quantity.lisp",
-   "blob_sha": "c75e7d9b222cff34e80d29887bb6fbd7fc62e4ab",
-   "line": 266,
+   "blob_sha": "40c38e6019beccddd8577aa7af5a0957f4932b89",
+   "line": 262,
    "name": "scientific-constant-value",
    "kind": "library-defined",
    "status": "research-unratified"
   },
   {
    "source": "lib/quantity.lisp",
-   "blob_sha": "c75e7d9b222cff34e80d29887bb6fbd7fc62e4ab",
-   "line": 270,
+   "blob_sha": "40c38e6019beccddd8577aa7af5a0957f4932b89",
+   "line": 266,
    "name": "scientific-constant-unit",
    "kind": "library-defined",
    "status": "research-unratified"
   },
   {
    "source": "lib/quantity.lisp",
-   "blob_sha": "c75e7d9b222cff34e80d29887bb6fbd7fc62e4ab",
-   "line": 274,
+   "blob_sha": "40c38e6019beccddd8577aa7af5a0957f4932b89",
+   "line": 270,
    "name": "scientific-constant-status",
    "kind": "library-defined",
    "status": "research-unratified"
   },
   {
    "source": "lib/quantity.lisp",
-   "blob_sha": "c75e7d9b222cff34e80d29887bb6fbd7fc62e4ab",
-   "line": 277,
+   "blob_sha": "40c38e6019beccddd8577aa7af5a0957f4932b89",
+   "line": 273,
    "name": "scientific-constant-kind",
    "kind": "library-defined",
    "status": "research-unratified"
   },
   {
    "source": "lib/quantity.lisp",
-   "blob_sha": "c75e7d9b222cff34e80d29887bb6fbd7fc62e4ab",
-   "line": 280,
+   "blob_sha": "40c38e6019beccddd8577aa7af5a0957f4932b89",
+   "line": 276,
    "name": "scientific-constant-system",
    "kind": "library-defined",
    "status": "research-unratified"
   },
   {
    "source": "lib/quantity.lisp",
-   "blob_sha": "c75e7d9b222cff34e80d29887bb6fbd7fc62e4ab",
-   "line": 283,
+   "blob_sha": "40c38e6019beccddd8577aa7af5a0957f4932b89",
+   "line": 279,
    "name": "scientific-constant-source",
    "kind": "library-defined",
    "status": "research-unratified"
   },
   {
    "source": "lib/quantity.lisp",
-   "blob_sha": "c75e7d9b222cff34e80d29887bb6fbd7fc62e4ab",
-   "line": 289,
+   "blob_sha": "40c38e6019beccddd8577aa7af5a0957f4932b89",
+   "line": 285,
    "name": "scientific-constant->clauses",
    "kind": "library-defined",
    "status": "research-unratified"
   },
   {
    "source": "lib/translation.lisp",
-   "blob_sha": "a78bab7648940bdb19b288d9e5667968cab409b1",
+   "blob_sha": "80cd225cba549a837097b1e633b6662c9434a148",
    "line": 35,
    "name": "*translation-schema*",
    "kind": "library-defined",
@@ -369,7 +369,7 @@
   },
   {
    "source": "lib/translation.lisp",
-   "blob_sha": "a78bab7648940bdb19b288d9e5667968cab409b1",
+   "blob_sha": "80cd225cba549a837097b1e633b6662c9434a148",
    "line": 36,
    "name": "*translation-review-schema*",
    "kind": "library-defined",
@@ -377,7 +377,7 @@
   },
   {
    "source": "lib/translation.lisp",
-   "blob_sha": "a78bab7648940bdb19b288d9e5667968cab409b1",
+   "blob_sha": "80cd225cba549a837097b1e633b6662c9434a148",
    "line": 37,
    "name": "*translation-evidence-schema*",
    "kind": "library-defined",
@@ -385,7 +385,7 @@
   },
   {
    "source": "lib/translation.lisp",
-   "blob_sha": "a78bab7648940bdb19b288d9e5667968cab409b1",
+   "blob_sha": "80cd225cba549a837097b1e633b6662c9434a148",
    "line": 38,
    "name": "*translation-evidence*",
    "kind": "library-defined",
@@ -393,7 +393,7 @@
   },
   {
    "source": "lib/translation.lisp",
-   "blob_sha": "a78bab7648940bdb19b288d9e5667968cab409b1",
+   "blob_sha": "80cd225cba549a837097b1e633b6662c9434a148",
    "line": 40,
    "name": "translation-status",
    "kind": "library-defined",
@@ -401,7 +401,7 @@
   },
   {
    "source": "lib/translation.lisp",
-   "blob_sha": "a78bab7648940bdb19b288d9e5667968cab409b1",
+   "blob_sha": "80cd225cba549a837097b1e633b6662c9434a148",
    "line": 43,
    "name": "translation-kind",
    "kind": "library-defined",
@@ -409,7 +409,7 @@
   },
   {
    "source": "lib/translation.lisp",
-   "blob_sha": "a78bab7648940bdb19b288d9e5667968cab409b1",
+   "blob_sha": "80cd225cba549a837097b1e633b6662c9434a148",
    "line": 46,
    "name": "translation-source",
    "kind": "library-defined",
@@ -417,7 +417,7 @@
   },
   {
    "source": "lib/translation.lisp",
-   "blob_sha": "a78bab7648940bdb19b288d9e5667968cab409b1",
+   "blob_sha": "80cd225cba549a837097b1e633b6662c9434a148",
    "line": 49,
    "name": "translation-payload",
    "kind": "library-defined",
@@ -425,7 +425,7 @@
   },
   {
    "source": "lib/translation.lisp",
-   "blob_sha": "a78bab7648940bdb19b288d9e5667968cab409b1",
+   "blob_sha": "80cd225cba549a837097b1e633b6662c9434a148",
    "line": 52,
    "name": "translation-status-valid?",
    "kind": "library-defined",
@@ -433,7 +433,7 @@
   },
   {
    "source": "lib/translation.lisp",
-   "blob_sha": "a78bab7648940bdb19b288d9e5667968cab409b1",
+   "blob_sha": "80cd225cba549a837097b1e633b6662c9434a148",
    "line": 61,
    "name": "translation-kind-valid?",
    "kind": "library-defined",
@@ -441,7 +441,7 @@
   },
   {
    "source": "lib/translation.lisp",
-   "blob_sha": "a78bab7648940bdb19b288d9e5667968cab409b1",
+   "blob_sha": "80cd225cba549a837097b1e633b6662c9434a148",
    "line": 74,
    "name": "translation-envelope-valid?",
    "kind": "library-defined",
@@ -449,7 +449,7 @@
   },
   {
    "source": "lib/translation.lisp",
-   "blob_sha": "a78bab7648940bdb19b288d9e5667968cab409b1",
+   "blob_sha": "80cd225cba549a837097b1e633b6662c9434a148",
    "line": 94,
    "name": "translation-batch-valid?",
    "kind": "library-defined",
@@ -457,7 +457,7 @@
   },
   {
    "source": "lib/translation.lisp",
-   "blob_sha": "a78bab7648940bdb19b288d9e5667968cab409b1",
+   "blob_sha": "80cd225cba549a837097b1e633b6662c9434a148",
    "line": 102,
    "name": "translation-candidate-payload-valid?",
    "kind": "library-defined",
@@ -465,7 +465,7 @@
   },
   {
    "source": "lib/translation.lisp",
-   "blob_sha": "a78bab7648940bdb19b288d9e5667968cab409b1",
+   "blob_sha": "80cd225cba549a837097b1e633b6662c9434a148",
    "line": 110,
    "name": "translation-alternatives-valid?",
    "kind": "library-defined",
@@ -473,7 +473,7 @@
   },
   {
    "source": "lib/translation.lisp",
-   "blob_sha": "a78bab7648940bdb19b288d9e5667968cab409b1",
+   "blob_sha": "80cd225cba549a837097b1e633b6662c9434a148",
    "line": 124,
    "name": "translation-ambiguity-valid?",
    "kind": "library-defined",
@@ -481,7 +481,7 @@
   },
   {
    "source": "lib/translation.lisp",
-   "blob_sha": "a78bab7648940bdb19b288d9e5667968cab409b1",
+   "blob_sha": "80cd225cba549a837097b1e633b6662c9434a148",
    "line": 134,
    "name": "make-translation-review",
    "kind": "library-defined",
@@ -489,7 +489,7 @@
   },
   {
    "source": "lib/translation.lisp",
-   "blob_sha": "a78bab7648940bdb19b288d9e5667968cab409b1",
+   "blob_sha": "80cd225cba549a837097b1e633b6662c9434a148",
    "line": 138,
    "name": "translation-review-status",
    "kind": "library-defined",
@@ -497,7 +497,7 @@
   },
   {
    "source": "lib/translation.lisp",
-   "blob_sha": "a78bab7648940bdb19b288d9e5667968cab409b1",
+   "blob_sha": "80cd225cba549a837097b1e633b6662c9434a148",
    "line": 141,
    "name": "translation-review-code",
    "kind": "library-defined",
@@ -505,7 +505,7 @@
   },
   {
    "source": "lib/translation.lisp",
-   "blob_sha": "a78bab7648940bdb19b288d9e5667968cab409b1",
+   "blob_sha": "80cd225cba549a837097b1e633b6662c9434a148",
    "line": 144,
    "name": "translation-review-proposal",
    "kind": "library-defined",
@@ -513,7 +513,7 @@
   },
   {
    "source": "lib/translation.lisp",
-   "blob_sha": "a78bab7648940bdb19b288d9e5667968cab409b1",
+   "blob_sha": "80cd225cba549a837097b1e633b6662c9434a148",
    "line": 147,
    "name": "translation-review-detail",
    "kind": "library-defined",
@@ -521,7 +521,7 @@
   },
   {
    "source": "lib/translation.lisp",
-   "blob_sha": "a78bab7648940bdb19b288d9e5667968cab409b1",
+   "blob_sha": "80cd225cba549a837097b1e633b6662c9434a148",
    "line": 150,
    "name": "translation-review-status-valid?",
    "kind": "library-defined",
@@ -529,7 +529,7 @@
   },
   {
    "source": "lib/translation.lisp",
-   "blob_sha": "a78bab7648940bdb19b288d9e5667968cab409b1",
+   "blob_sha": "80cd225cba549a837097b1e633b6662c9434a148",
    "line": 159,
    "name": "translation-review-valid?",
    "kind": "library-defined",
@@ -537,7 +537,7 @@
   },
   {
    "source": "lib/translation.lisp",
-   "blob_sha": "a78bab7648940bdb19b288d9e5667968cab409b1",
+   "blob_sha": "80cd225cba549a837097b1e633b6662c9434a148",
    "line": 176,
    "name": "translation-review-advice-decision",
    "kind": "library-defined",
@@ -545,64 +545,64 @@
   },
   {
    "source": "lib/translation.lisp",
-   "blob_sha": "a78bab7648940bdb19b288d9e5667968cab409b1",
-   "line": 199,
+   "blob_sha": "80cd225cba549a837097b1e633b6662c9434a148",
+   "line": 198,
    "name": "translation-review-candidate",
    "kind": "library-defined",
    "status": "research-unratified"
   },
   {
    "source": "lib/translation.lisp",
-   "blob_sha": "a78bab7648940bdb19b288d9e5667968cab409b1",
-   "line": 223,
+   "blob_sha": "80cd225cba549a837097b1e633b6662c9434a148",
+   "line": 222,
    "name": "translation-review",
    "kind": "library-defined",
    "status": "research-unratified"
   },
   {
    "source": "lib/translation.lisp",
-   "blob_sha": "a78bab7648940bdb19b288d9e5667968cab409b1",
-   "line": 262,
+   "blob_sha": "80cd225cba549a837097b1e633b6662c9434a148",
+   "line": 261,
    "name": "translation-admittable?",
    "kind": "library-defined",
    "status": "research-unratified"
   },
   {
    "source": "lib/translation.lisp",
-   "blob_sha": "a78bab7648940bdb19b288d9e5667968cab409b1",
-   "line": 278,
+   "blob_sha": "80cd225cba549a837097b1e633b6662c9434a148",
+   "line": 277,
    "name": "translation-admission-payload",
    "kind": "library-defined",
    "status": "research-unratified"
   },
   {
    "source": "lib/translation.lisp",
-   "blob_sha": "a78bab7648940bdb19b288d9e5667968cab409b1",
-   "line": 288,
+   "blob_sha": "80cd225cba549a837097b1e633b6662c9434a148",
+   "line": 287,
    "name": "translation-evidence-worthy?",
    "kind": "library-defined",
    "status": "research-unratified"
   },
   {
    "source": "lib/translation.lisp",
-   "blob_sha": "a78bab7648940bdb19b288d9e5667968cab409b1",
-   "line": 296,
+   "blob_sha": "80cd225cba549a837097b1e633b6662c9434a148",
+   "line": 295,
    "name": "translation-evidence-entry",
    "kind": "library-defined",
    "status": "research-unratified"
   },
   {
    "source": "lib/translation.lisp",
-   "blob_sha": "a78bab7648940bdb19b288d9e5667968cab409b1",
-   "line": 300,
+   "blob_sha": "80cd225cba549a837097b1e633b6662c9434a148",
+   "line": 299,
    "name": "translation-evidence-next",
    "kind": "library-defined",
    "status": "research-unratified"
   },
   {
    "source": "lib/translation.lisp",
-   "blob_sha": "a78bab7648940bdb19b288d9e5667968cab409b1",
-   "line": 307,
+   "blob_sha": "80cd225cba549a837097b1e633b6662c9434a148",
+   "line": 306,
    "name": "translation-review-with-evidence",
    "kind": "library-defined",
    "status": "research-unratified"
