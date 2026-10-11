@@ -2343,7 +2343,7 @@ integration/d10-hysteretic-main-ledger-20261009	UNTRIAGED	-	-	BRANCH-NAME-ONLY
 integration/d10-hysteretic-on-632-20261009	UNTRIAGED	-	-	BRANCH-NAME-ONLY
 integration/d10-mechanical-word-replay-on-ledger-main	UNTRIAGED	-	-	BRANCH-NAME-ONLY
 integration/life-strict-cond-on-1841	UNTRIAGED	-	-	BRANCH-NAME-ONLY
-integration/predicatebit-current-main-1907-1810	UNTRIAGED	-	-	BRANCH-NAME-ONLY
+integration/predicatebit-current-main-1907-1810	ALREADY-IN-MAIN-ARCHIVED	84186dc6e1bd27f353f195744e203271e453c37e	2c8c512ae8f5c5b99057beda6a3071062d6709d6	Full 20-path patch (+1329/-1309) archived at research/domain-archive/20261011/pr1909/predicatebit-current-main-review.patch with manifest and README; base is non-main replay branch, mixed semantic changes not safe wholesale. PR #1909 closed archive-only.
 integration/t5-air-stream-main-20261008	UNTRIAGED	-	-	BRANCH-NAME-ONLY
 integration/t5-migration-main-20261008	UNTRIAGED	-	-	BRANCH-NAME-ONLY
 integration/world-cond-hosted-runner-repair-20261009	UNTRIAGED	-	-	BRANCH-NAME-ONLY
