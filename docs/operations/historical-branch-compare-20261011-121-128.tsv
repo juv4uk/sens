@@ -1,0 +1,11 @@
+# Exact compare pin main SHA: 58aa8ebdf80f90dec440488b33c7ab63b894173d
+# Redundant island-lowering and semantic-authority-guard variants attached as history, not overlaid into live tree.
+branch	source_sha	compare_status	ahead_by	behind_by	reported_file_entries	classification
+agent/1048-island-lowering-current-honest	3a9c2e3956e0cbee6c550d478386b37b9f15d528	diverged	6	7901	5	HISTORY_ATTACHED_CONTENT_REVIEW_REQUIRED
+agent/1048-island-lowering-current-main	7ba538636fdc00eb78d7e7b2604e39264d51238c	diverged	3	8183	3	HISTORY_ATTACHED_CONTENT_REVIEW_REQUIRED
+agent/1048-island-lowering-on-1078	d0128482c6a031967bc41f31198dd537be1fa72d	diverged	1	8024	4	HISTORY_ATTACHED_CONTENT_REVIEW_REQUIRED
+agent/1048-island-lowering-replay-main3	35b8c65e6805723b95bdcd535721ca37314e7bc3	behind	0	7878	0	ALREADY_IN_MAIN_ANCESTRY
+agent/1049-current-main	f73db173365fdae429f1ef373488b46631929c07	diverged	13	8236	13	HISTORY_ATTACHED_CONTENT_REVIEW_REQUIRED
+agent/1049-semantic-authority-guard	3cff77b95cda18bd0d5773a5a7da4a0e51838fa8	diverged	30	8236	15	HISTORY_ATTACHED_CONTENT_REVIEW_REQUIRED
+agent/1049-semantic-authority-guard-replay	0697d3679aeba59ba7474ebfea7a0f3728986d32	diverged	20	8232	14	HISTORY_ATTACHED_CONTENT_REVIEW_REQUIRED
+agent/1060-canon-authority-inventory	0259de29fca6030e773c999bd8ec2f1aa7e20779	diverged	4	8236	4	HISTORY_ATTACHED_CONTENT_REVIEW_REQUIRED
