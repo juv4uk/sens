@@ -61,14 +61,17 @@ fn put_varint(mut n: usize, out: &mut Vec<u8>) {
 
 fn get_varint(input: &[u8], pos: &mut usize) -> Result<usize, Frame3Error> {
     let start = *pos;
-    let mut n = 0usize;
+    let mut n = 0u64;
     for step in 0..5 {
         let byte = *input.get(*pos).ok_or(Frame3Error::Truncated)?;
         *pos += 1;
-        n |= ((byte & 0x7f) as usize) << (7 * step);
+        n |= u64::from(byte & 0x7f) << (7 * step);
         if byte & 0x80 == 0 {
-            if *pos - start != varint_len(n) { return Err(Frame3Error::NonCanonical); }
-            return Ok(n);
+            let value = usize::try_from(n).map_err(|_| Frame3Error::TooLarge)?;
+            if *pos - start != varint_len(value) {
+                return Err(Frame3Error::NonCanonical);
+            }
+            return Ok(value);
         }
     }
     Err(Frame3Error::Malformed)
@@ -282,13 +285,19 @@ pub fn decode(bytes: &[u8]) -> Result<Vec<BinarySourceWord>, Frame3Error> {
 /// Bounded incremental accumulator: chunks may end at any byte boundary.
 /// Validation and D2-parse run at finish; this is NOT a streaming AST parser.
 #[derive(Default)]
-pub struct Frame3Decoder { buffer: Vec<u8> }
+pub struct Frame3Decoder {
+    buffer: Vec<u8>,
+    failed: bool,
+}
 
 impl Frame3Decoder {
     pub fn new() -> Self { Self::default() }
 
     pub fn push(&mut self, chunk: &[u8]) -> Result<(), Frame3Error> {
+        if self.failed { return Err(Frame3Error::TooLarge); }
         if chunk.len() > MAX_FILE_BYTES.saturating_sub(self.buffer.len()) {
+            // Помилка необоротна: finish не прийме попередній валідний префікс.
+            self.failed = true;
             return Err(Frame3Error::TooLarge);
         }
         self.buffer.extend_from_slice(chunk);
@@ -296,6 +305,7 @@ impl Frame3Decoder {
     }
 
     pub fn finish(self) -> Result<Vec<BinarySourceWord>, Frame3Error> {
+        if self.failed { return Err(Frame3Error::TooLarge); }
         decode(&self.buffer)
     }
 }
@@ -377,6 +387,38 @@ mod tests {
         assert_eq!(encode(&source("01")), Err(Frame3Error::InvalidD2));
         assert_eq!(encode(&source("10")), Err(Frame3Error::InvalidD2));
         assert_eq!(decode(b"T5 not a universal frame"), Err(Frame3Error::BadVersion));
+    }
+
+    #[test]
+    fn malformed_physical_aliases_rejected_even_with_matching_crc() {
+        fn framed(mut payload: Vec<u8>) -> Vec<u8> {
+            let crc = physical_crc32(&payload);
+            payload.extend_from_slice(&crc.to_be_bytes());
+            payload
+        }
+        // Той самий атом 0 у повторному режимі: неканонічний alias raw.
+        let alias = framed(vec![b'S', b'3', 1, 1, REPEAT, 1, 1, 0]);
+        assert_eq!(decode(&alias), Err(Frame3Error::NonCanonical));
+        // Довжина 1, записана двома байтами, заборонена.
+        let nonminimal = framed(vec![b'S', b'3', 1, 0x81, 0, RAW, 1, 0x10, 0]);
+        assert_eq!(decode(&nonminimal), Err(Frame3Error::NonCanonical));
+        // Додані padding bits є неканонічними, навіть із новим CRC.
+        let padding = framed(vec![b'S', b'3', 1, 1, RAW, 1, 0x10, 1]);
+        assert_eq!(decode(&padding), Err(Frame3Error::NonCanonical));
+        // Exact-width D2 CLOSE не може бути самостійним верхнім виразом.
+        let bad_d2 = framed(vec![b'S', b'3', 1, 1, RAW, 1, 0x20, 0x40]);
+        assert_eq!(decode(&bad_d2), Err(Frame3Error::InvalidD2));
+        let bad_tag = framed(vec![b'S', b'3', 1, 1, 0xff, 1, 0x10, 0]);
+        assert_eq!(decode(&bad_tag), Err(Frame3Error::Malformed));
+    }
+
+    #[test]
+    fn oversized_chunk_poisoned_stream() {
+        let valid = encode(&source("0")).unwrap();
+        let mut decoder = Frame3Decoder::new();
+        decoder.push(&valid).unwrap();
+        assert_eq!(decoder.push(&vec![0; MAX_FILE_BYTES]), Err(Frame3Error::TooLarge));
+        assert_eq!(decoder.finish(), Err(Frame3Error::TooLarge));
     }
 
     #[test]
