@@ -394,6 +394,16 @@ mod tests {
         let artifact = compiler_evidence_from_canonical_bytes(&bytes)
             .expect("canonical compiler evidence");
         assert_eq!(artifact_schema(&artifact).unwrap(), "compiler-compilation-artifact/1");
+        let parsed_view = parse_canonical_binary(
+            std::str::from_utf8(view).expect("ASCII canonical view"),
+        ).expect("parse compiled view");
+        let lowered_view = lower_program(&parsed_view);
+        let canonical_wire = wire_encode_program(&lowered_view);
+        verify_compiler_program_artifact_from_sens(
+            &artifact,
+            &sha256_hex(&canonical_wire),
+            revision,
+        ).expect("artifact provenance is pinned to canonical program wire, not mislabeled T5 bytes");
 
         assert!(compile_t5_triplet_bytes(
             source, &physical, b"10 100 00 000 01\n", revision,
