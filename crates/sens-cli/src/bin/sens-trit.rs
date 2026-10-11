@@ -86,7 +86,9 @@ fn eval_t5_bytes_core4(
         sens::T5ExecutionError::Language(error) =>
             format!("canonical packed SENS parser rejected: {error}"),
     })?;
-    let mut session = sens::Session::default();
+    // Physical D1–D9 evaluation starts from an empty root; the only way to
+    // load macro/Core4 mechanisms is the explicit eval-core4 mode below.
+    let mut session = sens::Session::bare();
     if bootstrap_core {
         sens::load_core_library(&mut session)
             .map_err(|e| format!("explicit Core4 bootstrap rejected: {e:?}"))?;
