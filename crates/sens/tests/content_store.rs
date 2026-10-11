@@ -9,8 +9,8 @@ fn eval_store(source: &str) -> String {
     sens::eval_pinned_reasoning_source("lib/knowledge.lisp", include_str!("../../../lib/knowledge.lisp"), &mut session).unwrap();
     sens::eval_pinned_reasoning_source("lib/persistent-map.lisp", include_str!("../../../lib/persistent-map.lisp"), &mut session).unwrap();
     sens::eval_pinned_reasoning_source("lib/world.lisp", include_str!("../../../lib/world.lisp"), &mut session).unwrap();
-    eval_program(include_str!("../../../lib/content-store.lisp"), &mut session).unwrap();
-    eval_program(include_str!("../../../lib/lisp-fs.lisp"), &mut session).unwrap();
+    sens::eval_pinned_reasoning_source("lib/content-store.lisp", include_str!("../../../lib/content-store.lisp"), &mut session).unwrap();
+    sens::eval_pinned_reasoning_source("lib/lisp-fs.lisp", include_str!("../../../lib/lisp-fs.lisp"), &mut session).unwrap();
     eval_program(source, &mut session)
         .unwrap()
         .value
@@ -26,8 +26,8 @@ fn eval_store_error(source: &str) -> String {
     sens::eval_pinned_reasoning_source("lib/knowledge.lisp", include_str!("../../../lib/knowledge.lisp"), &mut session).unwrap();
     sens::eval_pinned_reasoning_source("lib/persistent-map.lisp", include_str!("../../../lib/persistent-map.lisp"), &mut session).unwrap();
     sens::eval_pinned_reasoning_source("lib/world.lisp", include_str!("../../../lib/world.lisp"), &mut session).unwrap();
-    eval_program(include_str!("../../../lib/content-store.lisp"), &mut session).unwrap();
-    eval_program(include_str!("../../../lib/lisp-fs.lisp"), &mut session).unwrap();
+    sens::eval_pinned_reasoning_source("lib/content-store.lisp", include_str!("../../../lib/content-store.lisp"), &mut session).unwrap();
+    sens::eval_pinned_reasoning_source("lib/lisp-fs.lisp", include_str!("../../../lib/lisp-fs.lisp"), &mut session).unwrap();
     eval_program(source, &mut session)
         .expect_err("malformed serialized data must fail closed")
         .to_string()
