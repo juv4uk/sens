@@ -3,7 +3,7 @@
   "date": "2026-10-11",
   "branch_policy": "DIRECT-TO-MAIN-NO-NEW-GIT-BRANCHES",
   "authority": "CANDIDATE-CENSUS-RESEARCH-ONLY; no ratification, T5 or executable opcode authority",
-  "interpretation": "1024-cell source-pinned research census: 715 currently selected laws, 222 tentative research candidates without Core authority, 87 empty cells. Library-only and exact lower-domain names stay in the source census without occupying a D10 code.",
+  "interpretation": "Every 10-bit position has either an existing D10 semantic research candidate (715 selected and 222 unratified provisional), or a source-only name indexed for archival review (87). The source-only entries are NOT D10 candidates or opcode assignments: semantic_name is null. Canonical D10 remains 715/1024 selected and 0 ratified. D1-D9 and the codec are unchanged.",
   "sources": [
     {
       "path": "knowledge/d10-v5-semantic-inventory.json",
@@ -131,14 +131,19 @@
     "pending_evidence_for_formal_full_domain": 309,
     "verified_all_1024_assigned_to_semantics": false,
     "provisional_followup_new_source": 39,
-    "symbolic_ledger_candidate_names_preserved_without_core_admission": 176
+    "symbolic_ledger_candidate_names_preserved_without_core_admission": 176,
+    "source_name_census_assigned": 87,
+    "all_research_positions_named": 1024,
+    "source_name_index_only_not_semantic": 87,
+    "no_attested_semantic_candidate_positions": 87
   },
   "policies": [
     "Preserve v5 and ratified D1-D9 byte-for-byte; this artifact does not mutate the normative tables.",
     "Provisional positions must not enter executable codec, source-level 10-bit semantics or the ratified domain.",
     "Historical references, Lisp standard name inventories and lower-domain aliases do not independently prove Core laws.",
     "Do not count vacancy, duplicate names, IO substrate operations or host mechanisms as independent semantic residents.",
-    "Provisional name placements are noncanonical and may be changed after behavioral dedup, proofs and owner ratification."
+    "Provisional name placements are noncanonical and may be changed after behavioral dedup, proofs and owner ratification.",
+    "SOURCE-NAME-INDEXED positions preserve only names found in pinned earlier reference corpora; semantic_name stays null, these are not operations, candidate selections, or resident codes."
   ],
   "slots": [
     {
@@ -12566,438 +12571,1221 @@
     },
     {
       "coordinate": "1110101001",
-      "status": "NO-ATTESTED-D10-CANDIDATE",
-      "semantic_name": null
+      "status": "SOURCE-NAME-INDEXED-NOT-SEMANTIC-CANDIDATE",
+      "semantic_name": null,
+      "source_census_name": "STREAM",
+      "source_path": "knowledge/d10-clhs-streams-census-20261009.json",
+      "source_kind": "system-class",
+      "source_name_status": "HISTORICAL-STANDARD-NAME-CENSUS-OWNERSHIP-NOT-REVIEWED",
+      "selected": false,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "d10_core_authority": false,
+      "source_index_authority": "NONCANONICAL-REFERENCE-ONLY"
     },
     {
       "coordinate": "1110101010",
-      "status": "NO-ATTESTED-D10-CANDIDATE",
-      "semantic_name": null
+      "status": "SOURCE-NAME-INDEXED-NOT-SEMANTIC-CANDIDATE",
+      "semantic_name": null,
+      "source_census_name": "BROADCAST-STREAM",
+      "source_path": "knowledge/d10-clhs-streams-census-20261009.json",
+      "source_kind": "system-class",
+      "source_name_status": "HISTORICAL-STANDARD-NAME-CENSUS-OWNERSHIP-NOT-REVIEWED",
+      "selected": false,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "d10_core_authority": false,
+      "source_index_authority": "NONCANONICAL-REFERENCE-ONLY"
     },
     {
       "coordinate": "1110101011",
-      "status": "NO-ATTESTED-D10-CANDIDATE",
-      "semantic_name": null
+      "status": "SOURCE-NAME-INDEXED-NOT-SEMANTIC-CANDIDATE",
+      "semantic_name": null,
+      "source_census_name": "CONCATENATED-STREAM",
+      "source_path": "knowledge/d10-clhs-streams-census-20261009.json",
+      "source_kind": "system-class",
+      "source_name_status": "HISTORICAL-STANDARD-NAME-CENSUS-OWNERSHIP-NOT-REVIEWED",
+      "selected": false,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "d10_core_authority": false,
+      "source_index_authority": "NONCANONICAL-REFERENCE-ONLY"
     },
     {
       "coordinate": "1110101100",
-      "status": "NO-ATTESTED-D10-CANDIDATE",
-      "semantic_name": null
+      "status": "SOURCE-NAME-INDEXED-NOT-SEMANTIC-CANDIDATE",
+      "semantic_name": null,
+      "source_census_name": "ECHO-STREAM",
+      "source_path": "knowledge/d10-clhs-streams-census-20261009.json",
+      "source_kind": "system-class",
+      "source_name_status": "HISTORICAL-STANDARD-NAME-CENSUS-OWNERSHIP-NOT-REVIEWED",
+      "selected": false,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "d10_core_authority": false,
+      "source_index_authority": "NONCANONICAL-REFERENCE-ONLY"
     },
     {
       "coordinate": "1110101101",
-      "status": "NO-ATTESTED-D10-CANDIDATE",
-      "semantic_name": null
+      "status": "SOURCE-NAME-INDEXED-NOT-SEMANTIC-CANDIDATE",
+      "semantic_name": null,
+      "source_census_name": "FILE-STREAM",
+      "source_path": "knowledge/d10-clhs-streams-census-20261009.json",
+      "source_kind": "system-class",
+      "source_name_status": "HISTORICAL-STANDARD-NAME-CENSUS-OWNERSHIP-NOT-REVIEWED",
+      "selected": false,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "d10_core_authority": false,
+      "source_index_authority": "NONCANONICAL-REFERENCE-ONLY"
     },
     {
       "coordinate": "1110101110",
-      "status": "NO-ATTESTED-D10-CANDIDATE",
-      "semantic_name": null
+      "status": "SOURCE-NAME-INDEXED-NOT-SEMANTIC-CANDIDATE",
+      "semantic_name": null,
+      "source_census_name": "STRING-STREAM",
+      "source_path": "knowledge/d10-clhs-streams-census-20261009.json",
+      "source_kind": "system-class",
+      "source_name_status": "HISTORICAL-STANDARD-NAME-CENSUS-OWNERSHIP-NOT-REVIEWED",
+      "selected": false,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "d10_core_authority": false,
+      "source_index_authority": "NONCANONICAL-REFERENCE-ONLY"
     },
     {
       "coordinate": "1110101111",
-      "status": "NO-ATTESTED-D10-CANDIDATE",
-      "semantic_name": null
+      "status": "SOURCE-NAME-INDEXED-NOT-SEMANTIC-CANDIDATE",
+      "semantic_name": null,
+      "source_census_name": "SYNONYM-STREAM",
+      "source_path": "knowledge/d10-clhs-streams-census-20261009.json",
+      "source_kind": "system-class",
+      "source_name_status": "HISTORICAL-STANDARD-NAME-CENSUS-OWNERSHIP-NOT-REVIEWED",
+      "selected": false,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "d10_core_authority": false,
+      "source_index_authority": "NONCANONICAL-REFERENCE-ONLY"
     },
     {
       "coordinate": "1110110000",
-      "status": "NO-ATTESTED-D10-CANDIDATE",
-      "semantic_name": null
+      "status": "SOURCE-NAME-INDEXED-NOT-SEMANTIC-CANDIDATE",
+      "semantic_name": null,
+      "source_census_name": "TWO-WAY-STREAM",
+      "source_path": "knowledge/d10-clhs-streams-census-20261009.json",
+      "source_kind": "system-class",
+      "source_name_status": "HISTORICAL-STANDARD-NAME-CENSUS-OWNERSHIP-NOT-REVIEWED",
+      "selected": false,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "d10_core_authority": false,
+      "source_index_authority": "NONCANONICAL-REFERENCE-ONLY"
     },
     {
       "coordinate": "1110110001",
-      "status": "NO-ATTESTED-D10-CANDIDATE",
-      "semantic_name": null
+      "status": "SOURCE-NAME-INDEXED-NOT-SEMANTIC-CANDIDATE",
+      "semantic_name": null,
+      "source_census_name": "INPUT-STREAM-P",
+      "source_path": "knowledge/d10-clhs-streams-census-20261009.json",
+      "source_kind": "function",
+      "source_name_status": "HISTORICAL-STANDARD-NAME-CENSUS-OWNERSHIP-NOT-REVIEWED",
+      "selected": false,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "d10_core_authority": false,
+      "source_index_authority": "NONCANONICAL-REFERENCE-ONLY"
     },
     {
       "coordinate": "1110110010",
-      "status": "NO-ATTESTED-D10-CANDIDATE",
-      "semantic_name": null
+      "status": "SOURCE-NAME-INDEXED-NOT-SEMANTIC-CANDIDATE",
+      "semantic_name": null,
+      "source_census_name": "OUTPUT-STREAM-P",
+      "source_path": "knowledge/d10-clhs-streams-census-20261009.json",
+      "source_kind": "function",
+      "source_name_status": "HISTORICAL-STANDARD-NAME-CENSUS-OWNERSHIP-NOT-REVIEWED",
+      "selected": false,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "d10_core_authority": false,
+      "source_index_authority": "NONCANONICAL-REFERENCE-ONLY"
     },
     {
       "coordinate": "1110110011",
-      "status": "NO-ATTESTED-D10-CANDIDATE",
-      "semantic_name": null
+      "status": "SOURCE-NAME-INDEXED-NOT-SEMANTIC-CANDIDATE",
+      "semantic_name": null,
+      "source_census_name": "INTERACTIVE-STREAM-P",
+      "source_path": "knowledge/d10-clhs-streams-census-20261009.json",
+      "source_kind": "function",
+      "source_name_status": "HISTORICAL-STANDARD-NAME-CENSUS-OWNERSHIP-NOT-REVIEWED",
+      "selected": false,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "d10_core_authority": false,
+      "source_index_authority": "NONCANONICAL-REFERENCE-ONLY"
     },
     {
       "coordinate": "1110110100",
-      "status": "NO-ATTESTED-D10-CANDIDATE",
-      "semantic_name": null
+      "status": "SOURCE-NAME-INDEXED-NOT-SEMANTIC-CANDIDATE",
+      "semantic_name": null,
+      "source_census_name": "OPEN-STREAM-P",
+      "source_path": "knowledge/d10-clhs-streams-census-20261009.json",
+      "source_kind": "function",
+      "source_name_status": "HISTORICAL-STANDARD-NAME-CENSUS-OWNERSHIP-NOT-REVIEWED",
+      "selected": false,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "d10_core_authority": false,
+      "source_index_authority": "NONCANONICAL-REFERENCE-ONLY"
     },
     {
       "coordinate": "1110110101",
-      "status": "NO-ATTESTED-D10-CANDIDATE",
-      "semantic_name": null
+      "status": "SOURCE-NAME-INDEXED-NOT-SEMANTIC-CANDIDATE",
+      "semantic_name": null,
+      "source_census_name": "STREAM-ELEMENT-TYPE",
+      "source_path": "knowledge/d10-clhs-streams-census-20261009.json",
+      "source_kind": "function",
+      "source_name_status": "HISTORICAL-STANDARD-NAME-CENSUS-OWNERSHIP-NOT-REVIEWED",
+      "selected": false,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "d10_core_authority": false,
+      "source_index_authority": "NONCANONICAL-REFERENCE-ONLY"
     },
     {
       "coordinate": "1110110110",
-      "status": "NO-ATTESTED-D10-CANDIDATE",
-      "semantic_name": null
+      "status": "SOURCE-NAME-INDEXED-NOT-SEMANTIC-CANDIDATE",
+      "semantic_name": null,
+      "source_census_name": "STREAMP",
+      "source_path": "knowledge/d10-clhs-streams-census-20261009.json",
+      "source_kind": "function",
+      "source_name_status": "HISTORICAL-STANDARD-NAME-CENSUS-OWNERSHIP-NOT-REVIEWED",
+      "selected": false,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "d10_core_authority": false,
+      "source_index_authority": "NONCANONICAL-REFERENCE-ONLY"
     },
     {
       "coordinate": "1110110111",
-      "status": "NO-ATTESTED-D10-CANDIDATE",
-      "semantic_name": null
+      "status": "SOURCE-NAME-INDEXED-NOT-SEMANTIC-CANDIDATE",
+      "semantic_name": null,
+      "source_census_name": "PEEK-CHAR",
+      "source_path": "knowledge/d10-clhs-streams-census-20261009.json",
+      "source_kind": "function",
+      "source_name_status": "HISTORICAL-STANDARD-NAME-CENSUS-OWNERSHIP-NOT-REVIEWED",
+      "selected": false,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "d10_core_authority": false,
+      "source_index_authority": "NONCANONICAL-REFERENCE-ONLY"
     },
     {
       "coordinate": "1110111000",
-      "status": "NO-ATTESTED-D10-CANDIDATE",
-      "semantic_name": null
+      "status": "SOURCE-NAME-INDEXED-NOT-SEMANTIC-CANDIDATE",
+      "semantic_name": null,
+      "source_census_name": "READ-CHAR-NO-HANG",
+      "source_path": "knowledge/d10-clhs-streams-census-20261009.json",
+      "source_kind": "function",
+      "source_name_status": "HISTORICAL-STANDARD-NAME-CENSUS-OWNERSHIP-NOT-REVIEWED",
+      "selected": false,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "d10_core_authority": false,
+      "source_index_authority": "NONCANONICAL-REFERENCE-ONLY"
     },
     {
       "coordinate": "1110111001",
-      "status": "NO-ATTESTED-D10-CANDIDATE",
-      "semantic_name": null
+      "status": "SOURCE-NAME-INDEXED-NOT-SEMANTIC-CANDIDATE",
+      "semantic_name": null,
+      "source_census_name": "TERPRI",
+      "source_path": "knowledge/d10-clhs-streams-census-20261009.json",
+      "source_kind": "function",
+      "source_name_status": "HISTORICAL-STANDARD-NAME-CENSUS-OWNERSHIP-NOT-REVIEWED",
+      "selected": false,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "d10_core_authority": false,
+      "source_index_authority": "NONCANONICAL-REFERENCE-ONLY"
     },
     {
       "coordinate": "1110111010",
-      "status": "NO-ATTESTED-D10-CANDIDATE",
-      "semantic_name": null
+      "status": "SOURCE-NAME-INDEXED-NOT-SEMANTIC-CANDIDATE",
+      "semantic_name": null,
+      "source_census_name": "FRESH-LINE",
+      "source_path": "knowledge/d10-clhs-streams-census-20261009.json",
+      "source_kind": "function",
+      "source_name_status": "HISTORICAL-STANDARD-NAME-CENSUS-OWNERSHIP-NOT-REVIEWED",
+      "selected": false,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "d10_core_authority": false,
+      "source_index_authority": "NONCANONICAL-REFERENCE-ONLY"
     },
     {
       "coordinate": "1110111011",
-      "status": "NO-ATTESTED-D10-CANDIDATE",
-      "semantic_name": null
+      "status": "SOURCE-NAME-INDEXED-NOT-SEMANTIC-CANDIDATE",
+      "semantic_name": null,
+      "source_census_name": "UNREAD-CHAR",
+      "source_path": "knowledge/d10-clhs-streams-census-20261009.json",
+      "source_kind": "function",
+      "source_name_status": "HISTORICAL-STANDARD-NAME-CENSUS-OWNERSHIP-NOT-REVIEWED",
+      "selected": false,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "d10_core_authority": false,
+      "source_index_authority": "NONCANONICAL-REFERENCE-ONLY"
     },
     {
       "coordinate": "1110111100",
-      "status": "NO-ATTESTED-D10-CANDIDATE",
-      "semantic_name": null
+      "status": "SOURCE-NAME-INDEXED-NOT-SEMANTIC-CANDIDATE",
+      "semantic_name": null,
+      "source_census_name": "WRITE-CHAR",
+      "source_path": "knowledge/d10-clhs-streams-census-20261009.json",
+      "source_kind": "function",
+      "source_name_status": "HISTORICAL-STANDARD-NAME-CENSUS-OWNERSHIP-NOT-REVIEWED",
+      "selected": false,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "d10_core_authority": false,
+      "source_index_authority": "NONCANONICAL-REFERENCE-ONLY"
     },
     {
       "coordinate": "1110111101",
-      "status": "NO-ATTESTED-D10-CANDIDATE",
-      "semantic_name": null
+      "status": "SOURCE-NAME-INDEXED-NOT-SEMANTIC-CANDIDATE",
+      "semantic_name": null,
+      "source_census_name": "READ-LINE",
+      "source_path": "knowledge/d10-clhs-streams-census-20261009.json",
+      "source_kind": "function",
+      "source_name_status": "HISTORICAL-STANDARD-NAME-CENSUS-OWNERSHIP-NOT-REVIEWED",
+      "selected": false,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "d10_core_authority": false,
+      "source_index_authority": "NONCANONICAL-REFERENCE-ONLY"
     },
     {
       "coordinate": "1110111110",
-      "status": "NO-ATTESTED-D10-CANDIDATE",
-      "semantic_name": null
+      "status": "SOURCE-NAME-INDEXED-NOT-SEMANTIC-CANDIDATE",
+      "semantic_name": null,
+      "source_census_name": "WRITE-LINE",
+      "source_path": "knowledge/d10-clhs-streams-census-20261009.json",
+      "source_kind": "function",
+      "source_name_status": "HISTORICAL-STANDARD-NAME-CENSUS-OWNERSHIP-NOT-REVIEWED",
+      "selected": false,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "d10_core_authority": false,
+      "source_index_authority": "NONCANONICAL-REFERENCE-ONLY"
     },
     {
       "coordinate": "1110111111",
-      "status": "NO-ATTESTED-D10-CANDIDATE",
-      "semantic_name": null
+      "status": "SOURCE-NAME-INDEXED-NOT-SEMANTIC-CANDIDATE",
+      "semantic_name": null,
+      "source_census_name": "READ-SEQUENCE",
+      "source_path": "knowledge/d10-clhs-streams-census-20261009.json",
+      "source_kind": "function",
+      "source_name_status": "HISTORICAL-STANDARD-NAME-CENSUS-OWNERSHIP-NOT-REVIEWED",
+      "selected": false,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "d10_core_authority": false,
+      "source_index_authority": "NONCANONICAL-REFERENCE-ONLY"
     },
     {
       "coordinate": "1111000000",
-      "status": "NO-ATTESTED-D10-CANDIDATE",
-      "semantic_name": null
+      "status": "SOURCE-NAME-INDEXED-NOT-SEMANTIC-CANDIDATE",
+      "semantic_name": null,
+      "source_census_name": "WRITE-SEQUENCE",
+      "source_path": "knowledge/d10-clhs-streams-census-20261009.json",
+      "source_kind": "function",
+      "source_name_status": "HISTORICAL-STANDARD-NAME-CENSUS-OWNERSHIP-NOT-REVIEWED",
+      "selected": false,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "d10_core_authority": false,
+      "source_index_authority": "NONCANONICAL-REFERENCE-ONLY"
     },
     {
       "coordinate": "1111000001",
-      "status": "NO-ATTESTED-D10-CANDIDATE",
-      "semantic_name": null
+      "status": "SOURCE-NAME-INDEXED-NOT-SEMANTIC-CANDIDATE",
+      "semantic_name": null,
+      "source_census_name": "FILE-LENGTH",
+      "source_path": "knowledge/d10-clhs-streams-census-20261009.json",
+      "source_kind": "function",
+      "source_name_status": "HISTORICAL-STANDARD-NAME-CENSUS-OWNERSHIP-NOT-REVIEWED",
+      "selected": false,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "d10_core_authority": false,
+      "source_index_authority": "NONCANONICAL-REFERENCE-ONLY"
     },
     {
       "coordinate": "1111000010",
-      "status": "NO-ATTESTED-D10-CANDIDATE",
-      "semantic_name": null
+      "status": "SOURCE-NAME-INDEXED-NOT-SEMANTIC-CANDIDATE",
+      "semantic_name": null,
+      "source_census_name": "FILE-POSITION",
+      "source_path": "knowledge/d10-clhs-streams-census-20261009.json",
+      "source_kind": "function",
+      "source_name_status": "HISTORICAL-STANDARD-NAME-CENSUS-OWNERSHIP-NOT-REVIEWED",
+      "selected": false,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "d10_core_authority": false,
+      "source_index_authority": "NONCANONICAL-REFERENCE-ONLY"
     },
     {
       "coordinate": "1111000011",
-      "status": "NO-ATTESTED-D10-CANDIDATE",
-      "semantic_name": null
+      "status": "SOURCE-NAME-INDEXED-NOT-SEMANTIC-CANDIDATE",
+      "semantic_name": null,
+      "source_census_name": "FILE-STRING-LENGTH",
+      "source_path": "knowledge/d10-clhs-streams-census-20261009.json",
+      "source_kind": "function",
+      "source_name_status": "HISTORICAL-STANDARD-NAME-CENSUS-OWNERSHIP-NOT-REVIEWED",
+      "selected": false,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "d10_core_authority": false,
+      "source_index_authority": "NONCANONICAL-REFERENCE-ONLY"
     },
     {
       "coordinate": "1111000100",
-      "status": "NO-ATTESTED-D10-CANDIDATE",
-      "semantic_name": null
+      "status": "SOURCE-NAME-INDEXED-NOT-SEMANTIC-CANDIDATE",
+      "semantic_name": null,
+      "source_census_name": "OPEN",
+      "source_path": "knowledge/d10-clhs-streams-census-20261009.json",
+      "source_kind": "function",
+      "source_name_status": "HISTORICAL-STANDARD-NAME-CENSUS-OWNERSHIP-NOT-REVIEWED",
+      "selected": false,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "d10_core_authority": false,
+      "source_index_authority": "NONCANONICAL-REFERENCE-ONLY"
     },
     {
       "coordinate": "1111000101",
-      "status": "NO-ATTESTED-D10-CANDIDATE",
-      "semantic_name": null
+      "status": "SOURCE-NAME-INDEXED-NOT-SEMANTIC-CANDIDATE",
+      "semantic_name": null,
+      "source_census_name": "STREAM-EXTERNAL-FORMAT",
+      "source_path": "knowledge/d10-clhs-streams-census-20261009.json",
+      "source_kind": "function",
+      "source_name_status": "HISTORICAL-STANDARD-NAME-CENSUS-OWNERSHIP-NOT-REVIEWED",
+      "selected": false,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "d10_core_authority": false,
+      "source_index_authority": "NONCANONICAL-REFERENCE-ONLY"
     },
     {
       "coordinate": "1111000110",
-      "status": "NO-ATTESTED-D10-CANDIDATE",
-      "semantic_name": null
+      "status": "SOURCE-NAME-INDEXED-NOT-SEMANTIC-CANDIDATE",
+      "semantic_name": null,
+      "source_census_name": "CLOSE",
+      "source_path": "knowledge/d10-clhs-streams-census-20261009.json",
+      "source_kind": "function",
+      "source_name_status": "HISTORICAL-STANDARD-NAME-CENSUS-OWNERSHIP-NOT-REVIEWED",
+      "selected": false,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "d10_core_authority": false,
+      "source_index_authority": "NONCANONICAL-REFERENCE-ONLY"
     },
     {
       "coordinate": "1111000111",
-      "status": "NO-ATTESTED-D10-CANDIDATE",
-      "semantic_name": null
+      "status": "SOURCE-NAME-INDEXED-NOT-SEMANTIC-CANDIDATE",
+      "semantic_name": null,
+      "source_census_name": "LISTEN",
+      "source_path": "knowledge/d10-clhs-streams-census-20261009.json",
+      "source_kind": "function",
+      "source_name_status": "HISTORICAL-STANDARD-NAME-CENSUS-OWNERSHIP-NOT-REVIEWED",
+      "selected": false,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "d10_core_authority": false,
+      "source_index_authority": "NONCANONICAL-REFERENCE-ONLY"
     },
     {
       "coordinate": "1111001000",
-      "status": "NO-ATTESTED-D10-CANDIDATE",
-      "semantic_name": null
+      "status": "SOURCE-NAME-INDEXED-NOT-SEMANTIC-CANDIDATE",
+      "semantic_name": null,
+      "source_census_name": "CLEAR-INPUT",
+      "source_path": "knowledge/d10-clhs-streams-census-20261009.json",
+      "source_kind": "function",
+      "source_name_status": "HISTORICAL-STANDARD-NAME-CENSUS-OWNERSHIP-NOT-REVIEWED",
+      "selected": false,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "d10_core_authority": false,
+      "source_index_authority": "NONCANONICAL-REFERENCE-ONLY"
     },
     {
       "coordinate": "1111001001",
-      "status": "NO-ATTESTED-D10-CANDIDATE",
-      "semantic_name": null
+      "status": "SOURCE-NAME-INDEXED-NOT-SEMANTIC-CANDIDATE",
+      "semantic_name": null,
+      "source_census_name": "FINISH-OUTPUT",
+      "source_path": "knowledge/d10-clhs-streams-census-20261009.json",
+      "source_kind": "function",
+      "source_name_status": "HISTORICAL-STANDARD-NAME-CENSUS-OWNERSHIP-NOT-REVIEWED",
+      "selected": false,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "d10_core_authority": false,
+      "source_index_authority": "NONCANONICAL-REFERENCE-ONLY"
     },
     {
       "coordinate": "1111001010",
-      "status": "NO-ATTESTED-D10-CANDIDATE",
-      "semantic_name": null
+      "status": "SOURCE-NAME-INDEXED-NOT-SEMANTIC-CANDIDATE",
+      "semantic_name": null,
+      "source_census_name": "FORCE-OUTPUT",
+      "source_path": "knowledge/d10-clhs-streams-census-20261009.json",
+      "source_kind": "function",
+      "source_name_status": "HISTORICAL-STANDARD-NAME-CENSUS-OWNERSHIP-NOT-REVIEWED",
+      "selected": false,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "d10_core_authority": false,
+      "source_index_authority": "NONCANONICAL-REFERENCE-ONLY"
     },
     {
       "coordinate": "1111001011",
-      "status": "NO-ATTESTED-D10-CANDIDATE",
-      "semantic_name": null
+      "status": "SOURCE-NAME-INDEXED-NOT-SEMANTIC-CANDIDATE",
+      "semantic_name": null,
+      "source_census_name": "CLEAR-OUTPUT",
+      "source_path": "knowledge/d10-clhs-streams-census-20261009.json",
+      "source_kind": "function",
+      "source_name_status": "HISTORICAL-STANDARD-NAME-CENSUS-OWNERSHIP-NOT-REVIEWED",
+      "selected": false,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "d10_core_authority": false,
+      "source_index_authority": "NONCANONICAL-REFERENCE-ONLY"
     },
     {
       "coordinate": "1111001100",
-      "status": "NO-ATTESTED-D10-CANDIDATE",
-      "semantic_name": null
+      "status": "SOURCE-NAME-INDEXED-NOT-SEMANTIC-CANDIDATE",
+      "semantic_name": null,
+      "source_census_name": "Y-OR-N-P",
+      "source_path": "knowledge/d10-clhs-streams-census-20261009.json",
+      "source_kind": "function",
+      "source_name_status": "HISTORICAL-STANDARD-NAME-CENSUS-OWNERSHIP-NOT-REVIEWED",
+      "selected": false,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "d10_core_authority": false,
+      "source_index_authority": "NONCANONICAL-REFERENCE-ONLY"
     },
     {
       "coordinate": "1111001101",
-      "status": "NO-ATTESTED-D10-CANDIDATE",
-      "semantic_name": null
+      "status": "SOURCE-NAME-INDEXED-NOT-SEMANTIC-CANDIDATE",
+      "semantic_name": null,
+      "source_census_name": "YES-OR-NO-P",
+      "source_path": "knowledge/d10-clhs-streams-census-20261009.json",
+      "source_kind": "function",
+      "source_name_status": "HISTORICAL-STANDARD-NAME-CENSUS-OWNERSHIP-NOT-REVIEWED",
+      "selected": false,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "d10_core_authority": false,
+      "source_index_authority": "NONCANONICAL-REFERENCE-ONLY"
     },
     {
       "coordinate": "1111001110",
-      "status": "NO-ATTESTED-D10-CANDIDATE",
-      "semantic_name": null
+      "status": "SOURCE-NAME-INDEXED-NOT-SEMANTIC-CANDIDATE",
+      "semantic_name": null,
+      "source_census_name": "MAKE-SYNONYM-STREAM",
+      "source_path": "knowledge/d10-clhs-streams-census-20261009.json",
+      "source_kind": "function",
+      "source_name_status": "HISTORICAL-STANDARD-NAME-CENSUS-OWNERSHIP-NOT-REVIEWED",
+      "selected": false,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "d10_core_authority": false,
+      "source_index_authority": "NONCANONICAL-REFERENCE-ONLY"
     },
     {
       "coordinate": "1111001111",
-      "status": "NO-ATTESTED-D10-CANDIDATE",
-      "semantic_name": null
+      "status": "SOURCE-NAME-INDEXED-NOT-SEMANTIC-CANDIDATE",
+      "semantic_name": null,
+      "source_census_name": "SYNONYM-STREAM-SYMBOL",
+      "source_path": "knowledge/d10-clhs-streams-census-20261009.json",
+      "source_kind": "function",
+      "source_name_status": "HISTORICAL-STANDARD-NAME-CENSUS-OWNERSHIP-NOT-REVIEWED",
+      "selected": false,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "d10_core_authority": false,
+      "source_index_authority": "NONCANONICAL-REFERENCE-ONLY"
     },
     {
       "coordinate": "1111010000",
-      "status": "NO-ATTESTED-D10-CANDIDATE",
-      "semantic_name": null
+      "status": "SOURCE-NAME-INDEXED-NOT-SEMANTIC-CANDIDATE",
+      "semantic_name": null,
+      "source_census_name": "BROADCAST-STREAM-STREAMS",
+      "source_path": "knowledge/d10-clhs-streams-census-20261009.json",
+      "source_kind": "function",
+      "source_name_status": "HISTORICAL-STANDARD-NAME-CENSUS-OWNERSHIP-NOT-REVIEWED",
+      "selected": false,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "d10_core_authority": false,
+      "source_index_authority": "NONCANONICAL-REFERENCE-ONLY"
     },
     {
       "coordinate": "1111010001",
-      "status": "NO-ATTESTED-D10-CANDIDATE",
-      "semantic_name": null
+      "status": "SOURCE-NAME-INDEXED-NOT-SEMANTIC-CANDIDATE",
+      "semantic_name": null,
+      "source_census_name": "MAKE-BROADCAST-STREAM",
+      "source_path": "knowledge/d10-clhs-streams-census-20261009.json",
+      "source_kind": "function",
+      "source_name_status": "HISTORICAL-STANDARD-NAME-CENSUS-OWNERSHIP-NOT-REVIEWED",
+      "selected": false,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "d10_core_authority": false,
+      "source_index_authority": "NONCANONICAL-REFERENCE-ONLY"
     },
     {
       "coordinate": "1111010010",
-      "status": "NO-ATTESTED-D10-CANDIDATE",
-      "semantic_name": null
+      "status": "SOURCE-NAME-INDEXED-NOT-SEMANTIC-CANDIDATE",
+      "semantic_name": null,
+      "source_census_name": "MAKE-TWO-WAY-STREAM",
+      "source_path": "knowledge/d10-clhs-streams-census-20261009.json",
+      "source_kind": "function",
+      "source_name_status": "HISTORICAL-STANDARD-NAME-CENSUS-OWNERSHIP-NOT-REVIEWED",
+      "selected": false,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "d10_core_authority": false,
+      "source_index_authority": "NONCANONICAL-REFERENCE-ONLY"
     },
     {
       "coordinate": "1111010011",
-      "status": "NO-ATTESTED-D10-CANDIDATE",
-      "semantic_name": null
+      "status": "SOURCE-NAME-INDEXED-NOT-SEMANTIC-CANDIDATE",
+      "semantic_name": null,
+      "source_census_name": "TWO-WAY-STREAM-INPUT-STREAM",
+      "source_path": "knowledge/d10-clhs-streams-census-20261009.json",
+      "source_kind": "function",
+      "source_name_status": "HISTORICAL-STANDARD-NAME-CENSUS-OWNERSHIP-NOT-REVIEWED",
+      "selected": false,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "d10_core_authority": false,
+      "source_index_authority": "NONCANONICAL-REFERENCE-ONLY"
     },
     {
       "coordinate": "1111010100",
-      "status": "NO-ATTESTED-D10-CANDIDATE",
-      "semantic_name": null
+      "status": "SOURCE-NAME-INDEXED-NOT-SEMANTIC-CANDIDATE",
+      "semantic_name": null,
+      "source_census_name": "TWO-WAY-STREAM-OUTPUT-STREAM",
+      "source_path": "knowledge/d10-clhs-streams-census-20261009.json",
+      "source_kind": "function",
+      "source_name_status": "HISTORICAL-STANDARD-NAME-CENSUS-OWNERSHIP-NOT-REVIEWED",
+      "selected": false,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "d10_core_authority": false,
+      "source_index_authority": "NONCANONICAL-REFERENCE-ONLY"
     },
     {
       "coordinate": "1111010101",
-      "status": "NO-ATTESTED-D10-CANDIDATE",
-      "semantic_name": null
+      "status": "SOURCE-NAME-INDEXED-NOT-SEMANTIC-CANDIDATE",
+      "semantic_name": null,
+      "source_census_name": "ECHO-STREAM-INPUT-STREAM",
+      "source_path": "knowledge/d10-clhs-streams-census-20261009.json",
+      "source_kind": "function",
+      "source_name_status": "HISTORICAL-STANDARD-NAME-CENSUS-OWNERSHIP-NOT-REVIEWED",
+      "selected": false,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "d10_core_authority": false,
+      "source_index_authority": "NONCANONICAL-REFERENCE-ONLY"
     },
     {
       "coordinate": "1111010110",
-      "status": "NO-ATTESTED-D10-CANDIDATE",
-      "semantic_name": null
+      "status": "SOURCE-NAME-INDEXED-NOT-SEMANTIC-CANDIDATE",
+      "semantic_name": null,
+      "source_census_name": "ECHO-STREAM-OUTPUT-STREAM",
+      "source_path": "knowledge/d10-clhs-streams-census-20261009.json",
+      "source_kind": "function",
+      "source_name_status": "HISTORICAL-STANDARD-NAME-CENSUS-OWNERSHIP-NOT-REVIEWED",
+      "selected": false,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "d10_core_authority": false,
+      "source_index_authority": "NONCANONICAL-REFERENCE-ONLY"
     },
     {
       "coordinate": "1111010111",
-      "status": "NO-ATTESTED-D10-CANDIDATE",
-      "semantic_name": null
+      "status": "SOURCE-NAME-INDEXED-NOT-SEMANTIC-CANDIDATE",
+      "semantic_name": null,
+      "source_census_name": "MAKE-ECHO-STREAM",
+      "source_path": "knowledge/d10-clhs-streams-census-20261009.json",
+      "source_kind": "function",
+      "source_name_status": "HISTORICAL-STANDARD-NAME-CENSUS-OWNERSHIP-NOT-REVIEWED",
+      "selected": false,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "d10_core_authority": false,
+      "source_index_authority": "NONCANONICAL-REFERENCE-ONLY"
     },
     {
       "coordinate": "1111011000",
-      "status": "NO-ATTESTED-D10-CANDIDATE",
-      "semantic_name": null
+      "status": "SOURCE-NAME-INDEXED-NOT-SEMANTIC-CANDIDATE",
+      "semantic_name": null,
+      "source_census_name": "CONCATENATED-STREAM-STREAMS",
+      "source_path": "knowledge/d10-clhs-streams-census-20261009.json",
+      "source_kind": "function",
+      "source_name_status": "HISTORICAL-STANDARD-NAME-CENSUS-OWNERSHIP-NOT-REVIEWED",
+      "selected": false,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "d10_core_authority": false,
+      "source_index_authority": "NONCANONICAL-REFERENCE-ONLY"
     },
     {
       "coordinate": "1111011001",
-      "status": "NO-ATTESTED-D10-CANDIDATE",
-      "semantic_name": null
+      "status": "SOURCE-NAME-INDEXED-NOT-SEMANTIC-CANDIDATE",
+      "semantic_name": null,
+      "source_census_name": "MAKE-CONCATENATED-STREAM",
+      "source_path": "knowledge/d10-clhs-streams-census-20261009.json",
+      "source_kind": "function",
+      "source_name_status": "HISTORICAL-STANDARD-NAME-CENSUS-OWNERSHIP-NOT-REVIEWED",
+      "selected": false,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "d10_core_authority": false,
+      "source_index_authority": "NONCANONICAL-REFERENCE-ONLY"
     },
     {
       "coordinate": "1111011010",
-      "status": "NO-ATTESTED-D10-CANDIDATE",
-      "semantic_name": null
+      "status": "SOURCE-NAME-INDEXED-NOT-SEMANTIC-CANDIDATE",
+      "semantic_name": null,
+      "source_census_name": "GET-OUTPUT-STREAM-STRING",
+      "source_path": "knowledge/d10-clhs-streams-census-20261009.json",
+      "source_kind": "function",
+      "source_name_status": "HISTORICAL-STANDARD-NAME-CENSUS-OWNERSHIP-NOT-REVIEWED",
+      "selected": false,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "d10_core_authority": false,
+      "source_index_authority": "NONCANONICAL-REFERENCE-ONLY"
     },
     {
       "coordinate": "1111011011",
-      "status": "NO-ATTESTED-D10-CANDIDATE",
-      "semantic_name": null
+      "status": "SOURCE-NAME-INDEXED-NOT-SEMANTIC-CANDIDATE",
+      "semantic_name": null,
+      "source_census_name": "MAKE-STRING-INPUT-STREAM",
+      "source_path": "knowledge/d10-clhs-streams-census-20261009.json",
+      "source_kind": "function",
+      "source_name_status": "HISTORICAL-STANDARD-NAME-CENSUS-OWNERSHIP-NOT-REVIEWED",
+      "selected": false,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "d10_core_authority": false,
+      "source_index_authority": "NONCANONICAL-REFERENCE-ONLY"
     },
     {
       "coordinate": "1111011100",
-      "status": "NO-ATTESTED-D10-CANDIDATE",
-      "semantic_name": null
+      "status": "SOURCE-NAME-INDEXED-NOT-SEMANTIC-CANDIDATE",
+      "semantic_name": null,
+      "source_census_name": "MAKE-STRING-OUTPUT-STREAM",
+      "source_path": "knowledge/d10-clhs-streams-census-20261009.json",
+      "source_kind": "function",
+      "source_name_status": "HISTORICAL-STANDARD-NAME-CENSUS-OWNERSHIP-NOT-REVIEWED",
+      "selected": false,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "d10_core_authority": false,
+      "source_index_authority": "NONCANONICAL-REFERENCE-ONLY"
     },
     {
       "coordinate": "1111011101",
-      "status": "NO-ATTESTED-D10-CANDIDATE",
-      "semantic_name": null
+      "status": "SOURCE-NAME-INDEXED-NOT-SEMANTIC-CANDIDATE",
+      "semantic_name": null,
+      "source_census_name": "STREAM-ERROR-STREAM",
+      "source_path": "knowledge/d10-clhs-streams-census-20261009.json",
+      "source_kind": "function",
+      "source_name_status": "HISTORICAL-STANDARD-NAME-CENSUS-OWNERSHIP-NOT-REVIEWED",
+      "selected": false,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "d10_core_authority": false,
+      "source_index_authority": "NONCANONICAL-REFERENCE-ONLY"
     },
     {
       "coordinate": "1111011110",
-      "status": "NO-ATTESTED-D10-CANDIDATE",
-      "semantic_name": null
+      "status": "SOURCE-NAME-INDEXED-NOT-SEMANTIC-CANDIDATE",
+      "semantic_name": null,
+      "source_census_name": "WITH-OPEN-FILE",
+      "source_path": "knowledge/d10-clhs-streams-census-20261009.json",
+      "source_kind": "macro",
+      "source_name_status": "HISTORICAL-STANDARD-NAME-CENSUS-OWNERSHIP-NOT-REVIEWED",
+      "selected": false,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "d10_core_authority": false,
+      "source_index_authority": "NONCANONICAL-REFERENCE-ONLY"
     },
     {
       "coordinate": "1111011111",
-      "status": "NO-ATTESTED-D10-CANDIDATE",
-      "semantic_name": null
+      "status": "SOURCE-NAME-INDEXED-NOT-SEMANTIC-CANDIDATE",
+      "semantic_name": null,
+      "source_census_name": "WITH-OPEN-STREAM",
+      "source_path": "knowledge/d10-clhs-streams-census-20261009.json",
+      "source_kind": "macro",
+      "source_name_status": "HISTORICAL-STANDARD-NAME-CENSUS-OWNERSHIP-NOT-REVIEWED",
+      "selected": false,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "d10_core_authority": false,
+      "source_index_authority": "NONCANONICAL-REFERENCE-ONLY"
     },
     {
       "coordinate": "1111100000",
-      "status": "NO-ATTESTED-D10-CANDIDATE",
-      "semantic_name": null
+      "status": "SOURCE-NAME-INDEXED-NOT-SEMANTIC-CANDIDATE",
+      "semantic_name": null,
+      "source_census_name": "WITH-INPUT-FROM-STRING",
+      "source_path": "knowledge/d10-clhs-streams-census-20261009.json",
+      "source_kind": "macro",
+      "source_name_status": "HISTORICAL-STANDARD-NAME-CENSUS-OWNERSHIP-NOT-REVIEWED",
+      "selected": false,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "d10_core_authority": false,
+      "source_index_authority": "NONCANONICAL-REFERENCE-ONLY"
     },
     {
       "coordinate": "1111100001",
-      "status": "NO-ATTESTED-D10-CANDIDATE",
-      "semantic_name": null
+      "status": "SOURCE-NAME-INDEXED-NOT-SEMANTIC-CANDIDATE",
+      "semantic_name": null,
+      "source_census_name": "WITH-OUTPUT-TO-STRING",
+      "source_path": "knowledge/d10-clhs-streams-census-20261009.json",
+      "source_kind": "macro",
+      "source_name_status": "HISTORICAL-STANDARD-NAME-CENSUS-OWNERSHIP-NOT-REVIEWED",
+      "selected": false,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "d10_core_authority": false,
+      "source_index_authority": "NONCANONICAL-REFERENCE-ONLY"
     },
     {
       "coordinate": "1111100010",
-      "status": "NO-ATTESTED-D10-CANDIDATE",
-      "semantic_name": null
+      "status": "SOURCE-NAME-INDEXED-NOT-SEMANTIC-CANDIDATE",
+      "semantic_name": null,
+      "source_census_name": "*DEBUG-IO*",
+      "source_path": "knowledge/d10-clhs-streams-census-20261009.json",
+      "source_kind": "variable",
+      "source_name_status": "HISTORICAL-STANDARD-NAME-CENSUS-OWNERSHIP-NOT-REVIEWED",
+      "selected": false,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "d10_core_authority": false,
+      "source_index_authority": "NONCANONICAL-REFERENCE-ONLY"
     },
     {
       "coordinate": "1111100011",
-      "status": "NO-ATTESTED-D10-CANDIDATE",
-      "semantic_name": null
+      "status": "SOURCE-NAME-INDEXED-NOT-SEMANTIC-CANDIDATE",
+      "semantic_name": null,
+      "source_census_name": "*ERROR-OUTPUT*",
+      "source_path": "knowledge/d10-clhs-streams-census-20261009.json",
+      "source_kind": "variable",
+      "source_name_status": "HISTORICAL-STANDARD-NAME-CENSUS-OWNERSHIP-NOT-REVIEWED",
+      "selected": false,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "d10_core_authority": false,
+      "source_index_authority": "NONCANONICAL-REFERENCE-ONLY"
     },
     {
       "coordinate": "1111100100",
-      "status": "NO-ATTESTED-D10-CANDIDATE",
-      "semantic_name": null
+      "status": "SOURCE-NAME-INDEXED-NOT-SEMANTIC-CANDIDATE",
+      "semantic_name": null,
+      "source_census_name": "*QUERY-IO*",
+      "source_path": "knowledge/d10-clhs-streams-census-20261009.json",
+      "source_kind": "variable",
+      "source_name_status": "HISTORICAL-STANDARD-NAME-CENSUS-OWNERSHIP-NOT-REVIEWED",
+      "selected": false,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "d10_core_authority": false,
+      "source_index_authority": "NONCANONICAL-REFERENCE-ONLY"
     },
     {
       "coordinate": "1111100101",
-      "status": "NO-ATTESTED-D10-CANDIDATE",
-      "semantic_name": null
+      "status": "SOURCE-NAME-INDEXED-NOT-SEMANTIC-CANDIDATE",
+      "semantic_name": null,
+      "source_census_name": "*STANDARD-INPUT*",
+      "source_path": "knowledge/d10-clhs-streams-census-20261009.json",
+      "source_kind": "variable",
+      "source_name_status": "HISTORICAL-STANDARD-NAME-CENSUS-OWNERSHIP-NOT-REVIEWED",
+      "selected": false,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "d10_core_authority": false,
+      "source_index_authority": "NONCANONICAL-REFERENCE-ONLY"
     },
     {
       "coordinate": "1111100110",
-      "status": "NO-ATTESTED-D10-CANDIDATE",
-      "semantic_name": null
+      "status": "SOURCE-NAME-INDEXED-NOT-SEMANTIC-CANDIDATE",
+      "semantic_name": null,
+      "source_census_name": "*STANDARD-OUTPUT*",
+      "source_path": "knowledge/d10-clhs-streams-census-20261009.json",
+      "source_kind": "variable",
+      "source_name_status": "HISTORICAL-STANDARD-NAME-CENSUS-OWNERSHIP-NOT-REVIEWED",
+      "selected": false,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "d10_core_authority": false,
+      "source_index_authority": "NONCANONICAL-REFERENCE-ONLY"
     },
     {
       "coordinate": "1111100111",
-      "status": "NO-ATTESTED-D10-CANDIDATE",
-      "semantic_name": null
+      "status": "SOURCE-NAME-INDEXED-NOT-SEMANTIC-CANDIDATE",
+      "semantic_name": null,
+      "source_census_name": "*TRACE-OUTPUT*",
+      "source_path": "knowledge/d10-clhs-streams-census-20261009.json",
+      "source_kind": "variable",
+      "source_name_status": "HISTORICAL-STANDARD-NAME-CENSUS-OWNERSHIP-NOT-REVIEWED",
+      "selected": false,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "d10_core_authority": false,
+      "source_index_authority": "NONCANONICAL-REFERENCE-ONLY"
     },
     {
       "coordinate": "1111101000",
-      "status": "NO-ATTESTED-D10-CANDIDATE",
-      "semantic_name": null
+      "status": "SOURCE-NAME-INDEXED-NOT-SEMANTIC-CANDIDATE",
+      "semantic_name": null,
+      "source_census_name": "*TERMINAL-IO*",
+      "source_path": "knowledge/d10-clhs-streams-census-20261009.json",
+      "source_kind": "variable",
+      "source_name_status": "HISTORICAL-STANDARD-NAME-CENSUS-OWNERSHIP-NOT-REVIEWED",
+      "selected": false,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "d10_core_authority": false,
+      "source_index_authority": "NONCANONICAL-REFERENCE-ONLY"
     },
     {
       "coordinate": "1111101001",
-      "status": "NO-ATTESTED-D10-CANDIDATE",
-      "semantic_name": null
+      "status": "SOURCE-NAME-INDEXED-NOT-SEMANTIC-CANDIDATE",
+      "semantic_name": null,
+      "source_census_name": "STREAM-ERROR",
+      "source_path": "knowledge/d10-clhs-streams-census-20261009.json",
+      "source_kind": "condition-type",
+      "source_name_status": "HISTORICAL-STANDARD-NAME-CENSUS-OWNERSHIP-NOT-REVIEWED",
+      "selected": false,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "d10_core_authority": false,
+      "source_index_authority": "NONCANONICAL-REFERENCE-ONLY"
     },
     {
       "coordinate": "1111101010",
-      "status": "NO-ATTESTED-D10-CANDIDATE",
-      "semantic_name": null
+      "status": "SOURCE-NAME-INDEXED-NOT-SEMANTIC-CANDIDATE",
+      "semantic_name": null,
+      "source_census_name": "END-OF-FILE",
+      "source_path": "knowledge/d10-clhs-streams-census-20261009.json",
+      "source_kind": "condition-type",
+      "source_name_status": "HISTORICAL-STANDARD-NAME-CENSUS-OWNERSHIP-NOT-REVIEWED",
+      "selected": false,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "d10_core_authority": false,
+      "source_index_authority": "NONCANONICAL-REFERENCE-ONLY"
     },
     {
       "coordinate": "1111101011",
-      "status": "NO-ATTESTED-D10-CANDIDATE",
-      "semantic_name": null
+      "status": "SOURCE-NAME-INDEXED-NOT-SEMANTIC-CANDIDATE",
+      "semantic_name": null,
+      "source_census_name": "*reason-index-schema*",
+      "source_path": "knowledge/d10-reason-alternate-define-donor-v1.json",
+      "source_kind": "LIBRARY-IMPLEMENTATION-SYMBOL",
+      "source_name_status": "SOURCE-NAME-ONLY-NOT-AN-INDEPENDENT-CORE-LAW",
+      "selected": false,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "d10_core_authority": false,
+      "source_index_authority": "NONCANONICAL-REFERENCE-ONLY"
     },
     {
       "coordinate": "1111101100",
-      "status": "NO-ATTESTED-D10-CANDIDATE",
-      "semantic_name": null
+      "status": "SOURCE-NAME-INDEXED-NOT-SEMANTIC-CANDIDATE",
+      "semantic_name": null,
+      "source_census_name": "*reason-index-max-predicates*",
+      "source_path": "knowledge/d10-reason-alternate-define-donor-v1.json",
+      "source_kind": "LIBRARY-IMPLEMENTATION-SYMBOL",
+      "source_name_status": "SOURCE-NAME-ONLY-NOT-AN-INDEPENDENT-CORE-LAW",
+      "selected": false,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "d10_core_authority": false,
+      "source_index_authority": "NONCANONICAL-REFERENCE-ONLY"
     },
     {
       "coordinate": "1111101101",
-      "status": "NO-ATTESTED-D10-CANDIDATE",
-      "semantic_name": null
+      "status": "SOURCE-NAME-INDEXED-NOT-SEMANTIC-CANDIDATE",
+      "semantic_name": null,
+      "source_census_name": "reason-index-mode",
+      "source_path": "knowledge/d10-reason-alternate-define-donor-v1.json",
+      "source_kind": "LIBRARY-IMPLEMENTATION-SYMBOL",
+      "source_name_status": "SOURCE-NAME-ONLY-NOT-AN-INDEPENDENT-CORE-LAW",
+      "selected": false,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "d10_core_authority": false,
+      "source_index_authority": "NONCANONICAL-REFERENCE-ONLY"
     },
     {
       "coordinate": "1111101110",
-      "status": "NO-ATTESTED-D10-CANDIDATE",
-      "semantic_name": null
+      "status": "SOURCE-NAME-INDEXED-NOT-SEMANTIC-CANDIDATE",
+      "semantic_name": null,
+      "source_census_name": "reason-index-rules",
+      "source_path": "knowledge/d10-reason-alternate-define-donor-v1.json",
+      "source_kind": "LIBRARY-IMPLEMENTATION-SYMBOL",
+      "source_name_status": "SOURCE-NAME-ONLY-NOT-AN-INDEPENDENT-CORE-LAW",
+      "selected": false,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "d10_core_authority": false,
+      "source_index_authority": "NONCANONICAL-REFERENCE-ONLY"
     },
     {
       "coordinate": "1111101111",
-      "status": "NO-ATTESTED-D10-CANDIDATE",
-      "semantic_name": null
+      "status": "SOURCE-NAME-INDEXED-NOT-SEMANTIC-CANDIDATE",
+      "semantic_name": null,
+      "source_census_name": "reason-index-buckets",
+      "source_path": "knowledge/d10-reason-alternate-define-donor-v1.json",
+      "source_kind": "LIBRARY-IMPLEMENTATION-SYMBOL",
+      "source_name_status": "SOURCE-NAME-ONLY-NOT-AN-INDEPENDENT-CORE-LAW",
+      "selected": false,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "d10_core_authority": false,
+      "source_index_authority": "NONCANONICAL-REFERENCE-ONLY"
     },
     {
       "coordinate": "1111110000",
-      "status": "NO-ATTESTED-D10-CANDIDATE",
-      "semantic_name": null
+      "status": "SOURCE-NAME-INDEXED-NOT-SEMANTIC-CANDIDATE",
+      "semantic_name": null,
+      "source_census_name": "reason-index?",
+      "source_path": "knowledge/d10-reason-alternate-define-donor-v1.json",
+      "source_kind": "LIBRARY-IMPLEMENTATION-SYMBOL",
+      "source_name_status": "SOURCE-NAME-ONLY-NOT-AN-INDEPENDENT-CORE-LAW",
+      "selected": false,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "d10_core_authority": false,
+      "source_index_authority": "NONCANONICAL-REFERENCE-ONLY"
     },
     {
       "coordinate": "1111110001",
-      "status": "NO-ATTESTED-D10-CANDIDATE",
-      "semantic_name": null
+      "status": "SOURCE-NAME-INDEXED-NOT-SEMANTIC-CANDIDATE",
+      "semantic_name": null,
+      "source_census_name": "reason-index-linear",
+      "source_path": "knowledge/d10-reason-alternate-define-donor-v1.json",
+      "source_kind": "LIBRARY-IMPLEMENTATION-SYMBOL",
+      "source_name_status": "SOURCE-NAME-ONLY-NOT-AN-INDEPENDENT-CORE-LAW",
+      "selected": false,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "d10_core_authority": false,
+      "source_index_authority": "NONCANONICAL-REFERENCE-ONLY"
     },
     {
       "coordinate": "1111110010",
-      "status": "NO-ATTESTED-D10-CANDIDATE",
-      "semantic_name": null
+      "status": "SOURCE-NAME-INDEXED-NOT-SEMANTIC-CANDIDATE",
+      "semantic_name": null,
+      "source_census_name": "reason-term-predicate",
+      "source_path": "knowledge/d10-reason-alternate-define-donor-v1.json",
+      "source_kind": "LIBRARY-IMPLEMENTATION-SYMBOL",
+      "source_name_status": "SOURCE-NAME-ONLY-NOT-AN-INDEPENDENT-CORE-LAW",
+      "selected": false,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "d10_core_authority": false,
+      "source_index_authority": "NONCANONICAL-REFERENCE-ONLY"
     },
     {
       "coordinate": "1111110011",
-      "status": "NO-ATTESTED-D10-CANDIDATE",
-      "semantic_name": null
+      "status": "SOURCE-NAME-INDEXED-NOT-SEMANTIC-CANDIDATE",
+      "semantic_name": null,
+      "source_census_name": "reason-rule-predicate",
+      "source_path": "knowledge/d10-reason-alternate-define-donor-v1.json",
+      "source_kind": "LIBRARY-IMPLEMENTATION-SYMBOL",
+      "source_name_status": "SOURCE-NAME-ONLY-NOT-AN-INDEPENDENT-CORE-LAW",
+      "selected": false,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "d10_core_authority": false,
+      "source_index_authority": "NONCANONICAL-REFERENCE-ONLY"
     },
     {
       "coordinate": "1111110100",
-      "status": "NO-ATTESTED-D10-CANDIDATE",
-      "semantic_name": null
+      "status": "SOURCE-NAME-INDEXED-NOT-SEMANTIC-CANDIDATE",
+      "semantic_name": null,
+      "source_census_name": "reason-index-add-reversed",
+      "source_path": "knowledge/d10-reason-alternate-define-donor-v1.json",
+      "source_kind": "LIBRARY-IMPLEMENTATION-SYMBOL",
+      "source_name_status": "SOURCE-NAME-ONLY-NOT-AN-INDEPENDENT-CORE-LAW",
+      "selected": false,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "d10_core_authority": false,
+      "source_index_authority": "NONCANONICAL-REFERENCE-ONLY"
     },
     {
       "coordinate": "1111110101",
-      "status": "NO-ATTESTED-D10-CANDIDATE",
-      "semantic_name": null
+      "status": "SOURCE-NAME-INDEXED-NOT-SEMANTIC-CANDIDATE",
+      "semantic_name": null,
+      "source_census_name": "reason-index-normalize-buckets",
+      "source_path": "knowledge/d10-reason-alternate-define-donor-v1.json",
+      "source_kind": "LIBRARY-IMPLEMENTATION-SYMBOL",
+      "source_name_status": "SOURCE-NAME-ONLY-NOT-AN-INDEPENDENT-CORE-LAW",
+      "selected": false,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "d10_core_authority": false,
+      "source_index_authority": "NONCANONICAL-REFERENCE-ONLY"
     },
     {
       "coordinate": "1111110110",
-      "status": "NO-ATTESTED-D10-CANDIDATE",
-      "semantic_name": null
+      "status": "SOURCE-NAME-INDEXED-NOT-SEMANTIC-CANDIDATE",
+      "semantic_name": null,
+      "source_census_name": "reason-index-build-scan",
+      "source_path": "knowledge/d10-reason-alternate-define-donor-v1.json",
+      "source_kind": "LIBRARY-IMPLEMENTATION-SYMBOL",
+      "source_name_status": "SOURCE-NAME-ONLY-NOT-AN-INDEPENDENT-CORE-LAW",
+      "selected": false,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "d10_core_authority": false,
+      "source_index_authority": "NONCANONICAL-REFERENCE-ONLY"
     },
     {
       "coordinate": "1111110111",
-      "status": "NO-ATTESTED-D10-CANDIDATE",
-      "semantic_name": null
+      "status": "SOURCE-NAME-INDEXED-NOT-SEMANTIC-CANDIDATE",
+      "semantic_name": null,
+      "source_census_name": "reason-make-index",
+      "source_path": "knowledge/d10-reason-alternate-define-donor-v1.json",
+      "source_kind": "LIBRARY-IMPLEMENTATION-SYMBOL",
+      "source_name_status": "SOURCE-NAME-ONLY-NOT-AN-INDEPENDENT-CORE-LAW",
+      "selected": false,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "d10_core_authority": false,
+      "source_index_authority": "NONCANONICAL-REFERENCE-ONLY"
     },
     {
       "coordinate": "1111111000",
-      "status": "NO-ATTESTED-D10-CANDIDATE",
-      "semantic_name": null
+      "status": "SOURCE-NAME-INDEXED-NOT-SEMANTIC-CANDIDATE",
+      "semantic_name": null,
+      "source_census_name": "reason-ensure-index",
+      "source_path": "knowledge/d10-reason-alternate-define-donor-v1.json",
+      "source_kind": "LIBRARY-IMPLEMENTATION-SYMBOL",
+      "source_name_status": "SOURCE-NAME-ONLY-NOT-AN-INDEPENDENT-CORE-LAW",
+      "selected": false,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "d10_core_authority": false,
+      "source_index_authority": "NONCANONICAL-REFERENCE-ONLY"
     },
     {
       "coordinate": "1111111001",
-      "status": "NO-ATTESTED-D10-CANDIDATE",
-      "semantic_name": null
+      "status": "SOURCE-NAME-INDEXED-NOT-SEMANTIC-CANDIDATE",
+      "semantic_name": null,
+      "source_census_name": "reason-index-candidates",
+      "source_path": "knowledge/d10-reason-alternate-define-donor-v1.json",
+      "source_kind": "LIBRARY-IMPLEMENTATION-SYMBOL",
+      "source_name_status": "SOURCE-NAME-ONLY-NOT-AN-INDEPENDENT-CORE-LAW",
+      "selected": false,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "d10_core_authority": false,
+      "source_index_authority": "NONCANONICAL-REFERENCE-ONLY"
     },
     {
       "coordinate": "1111111010",
-      "status": "NO-ATTESTED-D10-CANDIDATE",
-      "semantic_name": null
+      "status": "SOURCE-NAME-INDEXED-NOT-SEMANTIC-CANDIDATE",
+      "semantic_name": null,
+      "source_census_name": "reason",
+      "source_path": "knowledge/d10-reason-alternate-define-donor-v1.json",
+      "source_kind": "LIBRARY-IMPLEMENTATION-SYMBOL",
+      "source_name_status": "SOURCE-NAME-ONLY-NOT-AN-INDEPENDENT-CORE-LAW",
+      "selected": false,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "d10_core_authority": false,
+      "source_index_authority": "NONCANONICAL-REFERENCE-ONLY"
     },
     {
       "coordinate": "1111111011",
-      "status": "NO-ATTESTED-D10-CANDIDATE",
-      "semantic_name": null
+      "status": "SOURCE-NAME-INDEXED-NOT-SEMANTIC-CANDIDATE",
+      "semantic_name": null,
+      "source_census_name": "prove-goal-accumulate",
+      "source_path": "knowledge/d10-reason-alternate-define-donor-v1.json",
+      "source_kind": "LIBRARY-IMPLEMENTATION-SYMBOL",
+      "source_name_status": "SOURCE-NAME-ONLY-NOT-AN-INDEPENDENT-CORE-LAW",
+      "selected": false,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "d10_core_authority": false,
+      "source_index_authority": "NONCANONICAL-REFERENCE-ONLY"
     },
     {
       "coordinate": "1111111100",
-      "status": "NO-ATTESTED-D10-CANDIDATE",
-      "semantic_name": null
+      "status": "SOURCE-NAME-INDEXED-NOT-SEMANTIC-CANDIDATE",
+      "semantic_name": null,
+      "source_census_name": "prove-goal",
+      "source_path": "knowledge/d10-reason-alternate-define-donor-v1.json",
+      "source_kind": "LIBRARY-IMPLEMENTATION-SYMBOL",
+      "source_name_status": "SOURCE-NAME-ONLY-NOT-AN-INDEPENDENT-CORE-LAW",
+      "selected": false,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "d10_core_authority": false,
+      "source_index_authority": "NONCANONICAL-REFERENCE-ONLY"
     },
     {
       "coordinate": "1111111101",
-      "status": "NO-ATTESTED-D10-CANDIDATE",
-      "semantic_name": null
+      "status": "SOURCE-NAME-INDEXED-NOT-SEMANTIC-CANDIDATE",
+      "semantic_name": null,
+      "source_census_name": "prove-goal-scan",
+      "source_path": "knowledge/d10-reason-alternate-define-donor-v1.json",
+      "source_kind": "LIBRARY-IMPLEMENTATION-SYMBOL",
+      "source_name_status": "SOURCE-NAME-ONLY-NOT-AN-INDEPENDENT-CORE-LAW",
+      "selected": false,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "d10_core_authority": false,
+      "source_index_authority": "NONCANONICAL-REFERENCE-ONLY"
     },
     {
       "coordinate": "1111111110",
-      "status": "NO-ATTESTED-D10-CANDIDATE",
-      "semantic_name": null
+      "status": "SOURCE-NAME-INDEXED-NOT-SEMANTIC-CANDIDATE",
+      "semantic_name": null,
+      "source_census_name": "map-proofs",
+      "source_path": "knowledge/d10-reason-alternate-define-donor-v1.json",
+      "source_kind": "LIBRARY-IMPLEMENTATION-SYMBOL",
+      "source_name_status": "SOURCE-NAME-ONLY-NOT-AN-INDEPENDENT-CORE-LAW",
+      "selected": false,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "d10_core_authority": false,
+      "source_index_authority": "NONCANONICAL-REFERENCE-ONLY"
     },
     {
       "coordinate": "1111111111",
-      "status": "NO-ATTESTED-D10-CANDIDATE",
-      "semantic_name": null
+      "status": "SOURCE-NAME-INDEXED-NOT-SEMANTIC-CANDIDATE",
+      "semantic_name": null,
+      "source_census_name": "prove-goals",
+      "source_path": "knowledge/d10-reason-alternate-define-donor-v1.json",
+      "source_kind": "LIBRARY-IMPLEMENTATION-SYMBOL",
+      "source_name_status": "SOURCE-NAME-ONLY-NOT-AN-INDEPENDENT-CORE-LAW",
+      "selected": false,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "d10_core_authority": false,
+      "source_index_authority": "NONCANONICAL-REFERENCE-ONLY"
     }
   ],
   "lower_domain_exact_name_conflicts": [
@@ -13881,609 +14669,870 @@
       "source_path": "knowledge/d10-clhs-streams-census-20261009.json",
       "kind": "system-class",
       "status": "HISTORICAL-STANDARD-NAME-CENSUS-OWNERSHIP-NOT-REVIEWED",
-      "coordinate": null
+      "coordinate": null,
+      "research_name_index_coordinate": "1110101001",
+      "d10_semantic_coordinate": null,
+      "index_only": true
     },
     {
       "semantic_name": "BROADCAST-STREAM",
       "source_path": "knowledge/d10-clhs-streams-census-20261009.json",
       "kind": "system-class",
       "status": "HISTORICAL-STANDARD-NAME-CENSUS-OWNERSHIP-NOT-REVIEWED",
-      "coordinate": null
+      "coordinate": null,
+      "research_name_index_coordinate": "1110101010",
+      "d10_semantic_coordinate": null,
+      "index_only": true
     },
     {
       "semantic_name": "CONCATENATED-STREAM",
       "source_path": "knowledge/d10-clhs-streams-census-20261009.json",
       "kind": "system-class",
       "status": "HISTORICAL-STANDARD-NAME-CENSUS-OWNERSHIP-NOT-REVIEWED",
-      "coordinate": null
+      "coordinate": null,
+      "research_name_index_coordinate": "1110101011",
+      "d10_semantic_coordinate": null,
+      "index_only": true
     },
     {
       "semantic_name": "ECHO-STREAM",
       "source_path": "knowledge/d10-clhs-streams-census-20261009.json",
       "kind": "system-class",
       "status": "HISTORICAL-STANDARD-NAME-CENSUS-OWNERSHIP-NOT-REVIEWED",
-      "coordinate": null
+      "coordinate": null,
+      "research_name_index_coordinate": "1110101100",
+      "d10_semantic_coordinate": null,
+      "index_only": true
     },
     {
       "semantic_name": "FILE-STREAM",
       "source_path": "knowledge/d10-clhs-streams-census-20261009.json",
       "kind": "system-class",
       "status": "HISTORICAL-STANDARD-NAME-CENSUS-OWNERSHIP-NOT-REVIEWED",
-      "coordinate": null
+      "coordinate": null,
+      "research_name_index_coordinate": "1110101101",
+      "d10_semantic_coordinate": null,
+      "index_only": true
     },
     {
       "semantic_name": "STRING-STREAM",
       "source_path": "knowledge/d10-clhs-streams-census-20261009.json",
       "kind": "system-class",
       "status": "HISTORICAL-STANDARD-NAME-CENSUS-OWNERSHIP-NOT-REVIEWED",
-      "coordinate": null
+      "coordinate": null,
+      "research_name_index_coordinate": "1110101110",
+      "d10_semantic_coordinate": null,
+      "index_only": true
     },
     {
       "semantic_name": "SYNONYM-STREAM",
       "source_path": "knowledge/d10-clhs-streams-census-20261009.json",
       "kind": "system-class",
       "status": "HISTORICAL-STANDARD-NAME-CENSUS-OWNERSHIP-NOT-REVIEWED",
-      "coordinate": null
+      "coordinate": null,
+      "research_name_index_coordinate": "1110101111",
+      "d10_semantic_coordinate": null,
+      "index_only": true
     },
     {
       "semantic_name": "TWO-WAY-STREAM",
       "source_path": "knowledge/d10-clhs-streams-census-20261009.json",
       "kind": "system-class",
       "status": "HISTORICAL-STANDARD-NAME-CENSUS-OWNERSHIP-NOT-REVIEWED",
-      "coordinate": null
+      "coordinate": null,
+      "research_name_index_coordinate": "1110110000",
+      "d10_semantic_coordinate": null,
+      "index_only": true
     },
     {
       "semantic_name": "INPUT-STREAM-P",
       "source_path": "knowledge/d10-clhs-streams-census-20261009.json",
       "kind": "function",
       "status": "HISTORICAL-STANDARD-NAME-CENSUS-OWNERSHIP-NOT-REVIEWED",
-      "coordinate": null
+      "coordinate": null,
+      "research_name_index_coordinate": "1110110001",
+      "d10_semantic_coordinate": null,
+      "index_only": true
     },
     {
       "semantic_name": "OUTPUT-STREAM-P",
       "source_path": "knowledge/d10-clhs-streams-census-20261009.json",
       "kind": "function",
       "status": "HISTORICAL-STANDARD-NAME-CENSUS-OWNERSHIP-NOT-REVIEWED",
-      "coordinate": null
+      "coordinate": null,
+      "research_name_index_coordinate": "1110110010",
+      "d10_semantic_coordinate": null,
+      "index_only": true
     },
     {
       "semantic_name": "INTERACTIVE-STREAM-P",
       "source_path": "knowledge/d10-clhs-streams-census-20261009.json",
       "kind": "function",
       "status": "HISTORICAL-STANDARD-NAME-CENSUS-OWNERSHIP-NOT-REVIEWED",
-      "coordinate": null
+      "coordinate": null,
+      "research_name_index_coordinate": "1110110011",
+      "d10_semantic_coordinate": null,
+      "index_only": true
     },
     {
       "semantic_name": "OPEN-STREAM-P",
       "source_path": "knowledge/d10-clhs-streams-census-20261009.json",
       "kind": "function",
       "status": "HISTORICAL-STANDARD-NAME-CENSUS-OWNERSHIP-NOT-REVIEWED",
-      "coordinate": null
+      "coordinate": null,
+      "research_name_index_coordinate": "1110110100",
+      "d10_semantic_coordinate": null,
+      "index_only": true
     },
     {
       "semantic_name": "STREAM-ELEMENT-TYPE",
       "source_path": "knowledge/d10-clhs-streams-census-20261009.json",
       "kind": "function",
       "status": "HISTORICAL-STANDARD-NAME-CENSUS-OWNERSHIP-NOT-REVIEWED",
-      "coordinate": null
+      "coordinate": null,
+      "research_name_index_coordinate": "1110110101",
+      "d10_semantic_coordinate": null,
+      "index_only": true
     },
     {
       "semantic_name": "STREAMP",
       "source_path": "knowledge/d10-clhs-streams-census-20261009.json",
       "kind": "function",
       "status": "HISTORICAL-STANDARD-NAME-CENSUS-OWNERSHIP-NOT-REVIEWED",
-      "coordinate": null
+      "coordinate": null,
+      "research_name_index_coordinate": "1110110110",
+      "d10_semantic_coordinate": null,
+      "index_only": true
     },
     {
       "semantic_name": "PEEK-CHAR",
       "source_path": "knowledge/d10-clhs-streams-census-20261009.json",
       "kind": "function",
       "status": "HISTORICAL-STANDARD-NAME-CENSUS-OWNERSHIP-NOT-REVIEWED",
-      "coordinate": null
+      "coordinate": null,
+      "research_name_index_coordinate": "1110110111",
+      "d10_semantic_coordinate": null,
+      "index_only": true
     },
     {
       "semantic_name": "READ-CHAR-NO-HANG",
       "source_path": "knowledge/d10-clhs-streams-census-20261009.json",
       "kind": "function",
       "status": "HISTORICAL-STANDARD-NAME-CENSUS-OWNERSHIP-NOT-REVIEWED",
-      "coordinate": null
+      "coordinate": null,
+      "research_name_index_coordinate": "1110111000",
+      "d10_semantic_coordinate": null,
+      "index_only": true
     },
     {
       "semantic_name": "TERPRI",
       "source_path": "knowledge/d10-clhs-streams-census-20261009.json",
       "kind": "function",
       "status": "HISTORICAL-STANDARD-NAME-CENSUS-OWNERSHIP-NOT-REVIEWED",
-      "coordinate": null
+      "coordinate": null,
+      "research_name_index_coordinate": "1110111001",
+      "d10_semantic_coordinate": null,
+      "index_only": true
     },
     {
       "semantic_name": "FRESH-LINE",
       "source_path": "knowledge/d10-clhs-streams-census-20261009.json",
       "kind": "function",
       "status": "HISTORICAL-STANDARD-NAME-CENSUS-OWNERSHIP-NOT-REVIEWED",
-      "coordinate": null
+      "coordinate": null,
+      "research_name_index_coordinate": "1110111010",
+      "d10_semantic_coordinate": null,
+      "index_only": true
     },
     {
       "semantic_name": "UNREAD-CHAR",
       "source_path": "knowledge/d10-clhs-streams-census-20261009.json",
       "kind": "function",
       "status": "HISTORICAL-STANDARD-NAME-CENSUS-OWNERSHIP-NOT-REVIEWED",
-      "coordinate": null
+      "coordinate": null,
+      "research_name_index_coordinate": "1110111011",
+      "d10_semantic_coordinate": null,
+      "index_only": true
     },
     {
       "semantic_name": "WRITE-CHAR",
       "source_path": "knowledge/d10-clhs-streams-census-20261009.json",
       "kind": "function",
       "status": "HISTORICAL-STANDARD-NAME-CENSUS-OWNERSHIP-NOT-REVIEWED",
-      "coordinate": null
+      "coordinate": null,
+      "research_name_index_coordinate": "1110111100",
+      "d10_semantic_coordinate": null,
+      "index_only": true
     },
     {
       "semantic_name": "READ-LINE",
       "source_path": "knowledge/d10-clhs-streams-census-20261009.json",
       "kind": "function",
       "status": "HISTORICAL-STANDARD-NAME-CENSUS-OWNERSHIP-NOT-REVIEWED",
-      "coordinate": null
+      "coordinate": null,
+      "research_name_index_coordinate": "1110111101",
+      "d10_semantic_coordinate": null,
+      "index_only": true
     },
     {
       "semantic_name": "WRITE-LINE",
       "source_path": "knowledge/d10-clhs-streams-census-20261009.json",
       "kind": "function",
       "status": "HISTORICAL-STANDARD-NAME-CENSUS-OWNERSHIP-NOT-REVIEWED",
-      "coordinate": null
+      "coordinate": null,
+      "research_name_index_coordinate": "1110111110",
+      "d10_semantic_coordinate": null,
+      "index_only": true
     },
     {
       "semantic_name": "READ-SEQUENCE",
       "source_path": "knowledge/d10-clhs-streams-census-20261009.json",
       "kind": "function",
       "status": "HISTORICAL-STANDARD-NAME-CENSUS-OWNERSHIP-NOT-REVIEWED",
-      "coordinate": null
+      "coordinate": null,
+      "research_name_index_coordinate": "1110111111",
+      "d10_semantic_coordinate": null,
+      "index_only": true
     },
     {
       "semantic_name": "WRITE-SEQUENCE",
       "source_path": "knowledge/d10-clhs-streams-census-20261009.json",
       "kind": "function",
       "status": "HISTORICAL-STANDARD-NAME-CENSUS-OWNERSHIP-NOT-REVIEWED",
-      "coordinate": null
+      "coordinate": null,
+      "research_name_index_coordinate": "1111000000",
+      "d10_semantic_coordinate": null,
+      "index_only": true
     },
     {
       "semantic_name": "FILE-LENGTH",
       "source_path": "knowledge/d10-clhs-streams-census-20261009.json",
       "kind": "function",
       "status": "HISTORICAL-STANDARD-NAME-CENSUS-OWNERSHIP-NOT-REVIEWED",
-      "coordinate": null
+      "coordinate": null,
+      "research_name_index_coordinate": "1111000001",
+      "d10_semantic_coordinate": null,
+      "index_only": true
     },
     {
       "semantic_name": "FILE-POSITION",
       "source_path": "knowledge/d10-clhs-streams-census-20261009.json",
       "kind": "function",
       "status": "HISTORICAL-STANDARD-NAME-CENSUS-OWNERSHIP-NOT-REVIEWED",
-      "coordinate": null
+      "coordinate": null,
+      "research_name_index_coordinate": "1111000010",
+      "d10_semantic_coordinate": null,
+      "index_only": true
     },
     {
       "semantic_name": "FILE-STRING-LENGTH",
       "source_path": "knowledge/d10-clhs-streams-census-20261009.json",
       "kind": "function",
       "status": "HISTORICAL-STANDARD-NAME-CENSUS-OWNERSHIP-NOT-REVIEWED",
-      "coordinate": null
+      "coordinate": null,
+      "research_name_index_coordinate": "1111000011",
+      "d10_semantic_coordinate": null,
+      "index_only": true
     },
     {
       "semantic_name": "OPEN",
       "source_path": "knowledge/d10-clhs-streams-census-20261009.json",
       "kind": "function",
       "status": "HISTORICAL-STANDARD-NAME-CENSUS-OWNERSHIP-NOT-REVIEWED",
-      "coordinate": null
+      "coordinate": null,
+      "research_name_index_coordinate": "1111000100",
+      "d10_semantic_coordinate": null,
+      "index_only": true
     },
     {
       "semantic_name": "STREAM-EXTERNAL-FORMAT",
       "source_path": "knowledge/d10-clhs-streams-census-20261009.json",
       "kind": "function",
       "status": "HISTORICAL-STANDARD-NAME-CENSUS-OWNERSHIP-NOT-REVIEWED",
-      "coordinate": null
+      "coordinate": null,
+      "research_name_index_coordinate": "1111000101",
+      "d10_semantic_coordinate": null,
+      "index_only": true
     },
     {
       "semantic_name": "CLOSE",
       "source_path": "knowledge/d10-clhs-streams-census-20261009.json",
       "kind": "function",
       "status": "HISTORICAL-STANDARD-NAME-CENSUS-OWNERSHIP-NOT-REVIEWED",
-      "coordinate": null
+      "coordinate": null,
+      "research_name_index_coordinate": "1111000110",
+      "d10_semantic_coordinate": null,
+      "index_only": true
     },
     {
       "semantic_name": "LISTEN",
       "source_path": "knowledge/d10-clhs-streams-census-20261009.json",
       "kind": "function",
       "status": "HISTORICAL-STANDARD-NAME-CENSUS-OWNERSHIP-NOT-REVIEWED",
-      "coordinate": null
+      "coordinate": null,
+      "research_name_index_coordinate": "1111000111",
+      "d10_semantic_coordinate": null,
+      "index_only": true
     },
     {
       "semantic_name": "CLEAR-INPUT",
       "source_path": "knowledge/d10-clhs-streams-census-20261009.json",
       "kind": "function",
       "status": "HISTORICAL-STANDARD-NAME-CENSUS-OWNERSHIP-NOT-REVIEWED",
-      "coordinate": null
+      "coordinate": null,
+      "research_name_index_coordinate": "1111001000",
+      "d10_semantic_coordinate": null,
+      "index_only": true
     },
     {
       "semantic_name": "FINISH-OUTPUT",
       "source_path": "knowledge/d10-clhs-streams-census-20261009.json",
       "kind": "function",
       "status": "HISTORICAL-STANDARD-NAME-CENSUS-OWNERSHIP-NOT-REVIEWED",
-      "coordinate": null
+      "coordinate": null,
+      "research_name_index_coordinate": "1111001001",
+      "d10_semantic_coordinate": null,
+      "index_only": true
     },
     {
       "semantic_name": "FORCE-OUTPUT",
       "source_path": "knowledge/d10-clhs-streams-census-20261009.json",
       "kind": "function",
       "status": "HISTORICAL-STANDARD-NAME-CENSUS-OWNERSHIP-NOT-REVIEWED",
-      "coordinate": null
+      "coordinate": null,
+      "research_name_index_coordinate": "1111001010",
+      "d10_semantic_coordinate": null,
+      "index_only": true
     },
     {
       "semantic_name": "CLEAR-OUTPUT",
       "source_path": "knowledge/d10-clhs-streams-census-20261009.json",
       "kind": "function",
       "status": "HISTORICAL-STANDARD-NAME-CENSUS-OWNERSHIP-NOT-REVIEWED",
-      "coordinate": null
+      "coordinate": null,
+      "research_name_index_coordinate": "1111001011",
+      "d10_semantic_coordinate": null,
+      "index_only": true
     },
     {
       "semantic_name": "Y-OR-N-P",
       "source_path": "knowledge/d10-clhs-streams-census-20261009.json",
       "kind": "function",
       "status": "HISTORICAL-STANDARD-NAME-CENSUS-OWNERSHIP-NOT-REVIEWED",
-      "coordinate": null
+      "coordinate": null,
+      "research_name_index_coordinate": "1111001100",
+      "d10_semantic_coordinate": null,
+      "index_only": true
     },
     {
       "semantic_name": "YES-OR-NO-P",
       "source_path": "knowledge/d10-clhs-streams-census-20261009.json",
       "kind": "function",
       "status": "HISTORICAL-STANDARD-NAME-CENSUS-OWNERSHIP-NOT-REVIEWED",
-      "coordinate": null
+      "coordinate": null,
+      "research_name_index_coordinate": "1111001101",
+      "d10_semantic_coordinate": null,
+      "index_only": true
     },
     {
       "semantic_name": "MAKE-SYNONYM-STREAM",
       "source_path": "knowledge/d10-clhs-streams-census-20261009.json",
       "kind": "function",
       "status": "HISTORICAL-STANDARD-NAME-CENSUS-OWNERSHIP-NOT-REVIEWED",
-      "coordinate": null
+      "coordinate": null,
+      "research_name_index_coordinate": "1111001110",
+      "d10_semantic_coordinate": null,
+      "index_only": true
     },
     {
       "semantic_name": "SYNONYM-STREAM-SYMBOL",
       "source_path": "knowledge/d10-clhs-streams-census-20261009.json",
       "kind": "function",
       "status": "HISTORICAL-STANDARD-NAME-CENSUS-OWNERSHIP-NOT-REVIEWED",
-      "coordinate": null
+      "coordinate": null,
+      "research_name_index_coordinate": "1111001111",
+      "d10_semantic_coordinate": null,
+      "index_only": true
     },
     {
       "semantic_name": "BROADCAST-STREAM-STREAMS",
       "source_path": "knowledge/d10-clhs-streams-census-20261009.json",
       "kind": "function",
       "status": "HISTORICAL-STANDARD-NAME-CENSUS-OWNERSHIP-NOT-REVIEWED",
-      "coordinate": null
+      "coordinate": null,
+      "research_name_index_coordinate": "1111010000",
+      "d10_semantic_coordinate": null,
+      "index_only": true
     },
     {
       "semantic_name": "MAKE-BROADCAST-STREAM",
       "source_path": "knowledge/d10-clhs-streams-census-20261009.json",
       "kind": "function",
       "status": "HISTORICAL-STANDARD-NAME-CENSUS-OWNERSHIP-NOT-REVIEWED",
-      "coordinate": null
+      "coordinate": null,
+      "research_name_index_coordinate": "1111010001",
+      "d10_semantic_coordinate": null,
+      "index_only": true
     },
     {
       "semantic_name": "MAKE-TWO-WAY-STREAM",
       "source_path": "knowledge/d10-clhs-streams-census-20261009.json",
       "kind": "function",
       "status": "HISTORICAL-STANDARD-NAME-CENSUS-OWNERSHIP-NOT-REVIEWED",
-      "coordinate": null
+      "coordinate": null,
+      "research_name_index_coordinate": "1111010010",
+      "d10_semantic_coordinate": null,
+      "index_only": true
     },
     {
       "semantic_name": "TWO-WAY-STREAM-INPUT-STREAM",
       "source_path": "knowledge/d10-clhs-streams-census-20261009.json",
       "kind": "function",
       "status": "HISTORICAL-STANDARD-NAME-CENSUS-OWNERSHIP-NOT-REVIEWED",
-      "coordinate": null
+      "coordinate": null,
+      "research_name_index_coordinate": "1111010011",
+      "d10_semantic_coordinate": null,
+      "index_only": true
     },
     {
       "semantic_name": "TWO-WAY-STREAM-OUTPUT-STREAM",
       "source_path": "knowledge/d10-clhs-streams-census-20261009.json",
       "kind": "function",
       "status": "HISTORICAL-STANDARD-NAME-CENSUS-OWNERSHIP-NOT-REVIEWED",
-      "coordinate": null
+      "coordinate": null,
+      "research_name_index_coordinate": "1111010100",
+      "d10_semantic_coordinate": null,
+      "index_only": true
     },
     {
       "semantic_name": "ECHO-STREAM-INPUT-STREAM",
       "source_path": "knowledge/d10-clhs-streams-census-20261009.json",
       "kind": "function",
       "status": "HISTORICAL-STANDARD-NAME-CENSUS-OWNERSHIP-NOT-REVIEWED",
-      "coordinate": null
+      "coordinate": null,
+      "research_name_index_coordinate": "1111010101",
+      "d10_semantic_coordinate": null,
+      "index_only": true
     },
     {
       "semantic_name": "ECHO-STREAM-OUTPUT-STREAM",
       "source_path": "knowledge/d10-clhs-streams-census-20261009.json",
       "kind": "function",
       "status": "HISTORICAL-STANDARD-NAME-CENSUS-OWNERSHIP-NOT-REVIEWED",
-      "coordinate": null
+      "coordinate": null,
+      "research_name_index_coordinate": "1111010110",
+      "d10_semantic_coordinate": null,
+      "index_only": true
     },
     {
       "semantic_name": "MAKE-ECHO-STREAM",
       "source_path": "knowledge/d10-clhs-streams-census-20261009.json",
       "kind": "function",
       "status": "HISTORICAL-STANDARD-NAME-CENSUS-OWNERSHIP-NOT-REVIEWED",
-      "coordinate": null
+      "coordinate": null,
+      "research_name_index_coordinate": "1111010111",
+      "d10_semantic_coordinate": null,
+      "index_only": true
     },
     {
       "semantic_name": "CONCATENATED-STREAM-STREAMS",
       "source_path": "knowledge/d10-clhs-streams-census-20261009.json",
       "kind": "function",
       "status": "HISTORICAL-STANDARD-NAME-CENSUS-OWNERSHIP-NOT-REVIEWED",
-      "coordinate": null
+      "coordinate": null,
+      "research_name_index_coordinate": "1111011000",
+      "d10_semantic_coordinate": null,
+      "index_only": true
     },
     {
       "semantic_name": "MAKE-CONCATENATED-STREAM",
       "source_path": "knowledge/d10-clhs-streams-census-20261009.json",
       "kind": "function",
       "status": "HISTORICAL-STANDARD-NAME-CENSUS-OWNERSHIP-NOT-REVIEWED",
-      "coordinate": null
+      "coordinate": null,
+      "research_name_index_coordinate": "1111011001",
+      "d10_semantic_coordinate": null,
+      "index_only": true
     },
     {
       "semantic_name": "GET-OUTPUT-STREAM-STRING",
       "source_path": "knowledge/d10-clhs-streams-census-20261009.json",
       "kind": "function",
       "status": "HISTORICAL-STANDARD-NAME-CENSUS-OWNERSHIP-NOT-REVIEWED",
-      "coordinate": null
+      "coordinate": null,
+      "research_name_index_coordinate": "1111011010",
+      "d10_semantic_coordinate": null,
+      "index_only": true
     },
     {
       "semantic_name": "MAKE-STRING-INPUT-STREAM",
       "source_path": "knowledge/d10-clhs-streams-census-20261009.json",
       "kind": "function",
       "status": "HISTORICAL-STANDARD-NAME-CENSUS-OWNERSHIP-NOT-REVIEWED",
-      "coordinate": null
+      "coordinate": null,
+      "research_name_index_coordinate": "1111011011",
+      "d10_semantic_coordinate": null,
+      "index_only": true
     },
     {
       "semantic_name": "MAKE-STRING-OUTPUT-STREAM",
       "source_path": "knowledge/d10-clhs-streams-census-20261009.json",
       "kind": "function",
       "status": "HISTORICAL-STANDARD-NAME-CENSUS-OWNERSHIP-NOT-REVIEWED",
-      "coordinate": null
+      "coordinate": null,
+      "research_name_index_coordinate": "1111011100",
+      "d10_semantic_coordinate": null,
+      "index_only": true
     },
     {
       "semantic_name": "STREAM-ERROR-STREAM",
       "source_path": "knowledge/d10-clhs-streams-census-20261009.json",
       "kind": "function",
       "status": "HISTORICAL-STANDARD-NAME-CENSUS-OWNERSHIP-NOT-REVIEWED",
-      "coordinate": null
+      "coordinate": null,
+      "research_name_index_coordinate": "1111011101",
+      "d10_semantic_coordinate": null,
+      "index_only": true
     },
     {
       "semantic_name": "WITH-OPEN-FILE",
       "source_path": "knowledge/d10-clhs-streams-census-20261009.json",
       "kind": "macro",
       "status": "HISTORICAL-STANDARD-NAME-CENSUS-OWNERSHIP-NOT-REVIEWED",
-      "coordinate": null
+      "coordinate": null,
+      "research_name_index_coordinate": "1111011110",
+      "d10_semantic_coordinate": null,
+      "index_only": true
     },
     {
       "semantic_name": "WITH-OPEN-STREAM",
       "source_path": "knowledge/d10-clhs-streams-census-20261009.json",
       "kind": "macro",
       "status": "HISTORICAL-STANDARD-NAME-CENSUS-OWNERSHIP-NOT-REVIEWED",
-      "coordinate": null
+      "coordinate": null,
+      "research_name_index_coordinate": "1111011111",
+      "d10_semantic_coordinate": null,
+      "index_only": true
     },
     {
       "semantic_name": "WITH-INPUT-FROM-STRING",
       "source_path": "knowledge/d10-clhs-streams-census-20261009.json",
       "kind": "macro",
       "status": "HISTORICAL-STANDARD-NAME-CENSUS-OWNERSHIP-NOT-REVIEWED",
-      "coordinate": null
+      "coordinate": null,
+      "research_name_index_coordinate": "1111100000",
+      "d10_semantic_coordinate": null,
+      "index_only": true
     },
     {
       "semantic_name": "WITH-OUTPUT-TO-STRING",
       "source_path": "knowledge/d10-clhs-streams-census-20261009.json",
       "kind": "macro",
       "status": "HISTORICAL-STANDARD-NAME-CENSUS-OWNERSHIP-NOT-REVIEWED",
-      "coordinate": null
+      "coordinate": null,
+      "research_name_index_coordinate": "1111100001",
+      "d10_semantic_coordinate": null,
+      "index_only": true
     },
     {
       "semantic_name": "*DEBUG-IO*",
       "source_path": "knowledge/d10-clhs-streams-census-20261009.json",
       "kind": "variable",
       "status": "HISTORICAL-STANDARD-NAME-CENSUS-OWNERSHIP-NOT-REVIEWED",
-      "coordinate": null
+      "coordinate": null,
+      "research_name_index_coordinate": "1111100010",
+      "d10_semantic_coordinate": null,
+      "index_only": true
     },
     {
       "semantic_name": "*ERROR-OUTPUT*",
       "source_path": "knowledge/d10-clhs-streams-census-20261009.json",
       "kind": "variable",
       "status": "HISTORICAL-STANDARD-NAME-CENSUS-OWNERSHIP-NOT-REVIEWED",
-      "coordinate": null
+      "coordinate": null,
+      "research_name_index_coordinate": "1111100011",
+      "d10_semantic_coordinate": null,
+      "index_only": true
     },
     {
       "semantic_name": "*QUERY-IO*",
       "source_path": "knowledge/d10-clhs-streams-census-20261009.json",
       "kind": "variable",
       "status": "HISTORICAL-STANDARD-NAME-CENSUS-OWNERSHIP-NOT-REVIEWED",
-      "coordinate": null
+      "coordinate": null,
+      "research_name_index_coordinate": "1111100100",
+      "d10_semantic_coordinate": null,
+      "index_only": true
     },
     {
       "semantic_name": "*STANDARD-INPUT*",
       "source_path": "knowledge/d10-clhs-streams-census-20261009.json",
       "kind": "variable",
       "status": "HISTORICAL-STANDARD-NAME-CENSUS-OWNERSHIP-NOT-REVIEWED",
-      "coordinate": null
+      "coordinate": null,
+      "research_name_index_coordinate": "1111100101",
+      "d10_semantic_coordinate": null,
+      "index_only": true
     },
     {
       "semantic_name": "*STANDARD-OUTPUT*",
       "source_path": "knowledge/d10-clhs-streams-census-20261009.json",
       "kind": "variable",
       "status": "HISTORICAL-STANDARD-NAME-CENSUS-OWNERSHIP-NOT-REVIEWED",
-      "coordinate": null
+      "coordinate": null,
+      "research_name_index_coordinate": "1111100110",
+      "d10_semantic_coordinate": null,
+      "index_only": true
     },
     {
       "semantic_name": "*TRACE-OUTPUT*",
       "source_path": "knowledge/d10-clhs-streams-census-20261009.json",
       "kind": "variable",
       "status": "HISTORICAL-STANDARD-NAME-CENSUS-OWNERSHIP-NOT-REVIEWED",
-      "coordinate": null
+      "coordinate": null,
+      "research_name_index_coordinate": "1111100111",
+      "d10_semantic_coordinate": null,
+      "index_only": true
     },
     {
       "semantic_name": "*TERMINAL-IO*",
       "source_path": "knowledge/d10-clhs-streams-census-20261009.json",
       "kind": "variable",
       "status": "HISTORICAL-STANDARD-NAME-CENSUS-OWNERSHIP-NOT-REVIEWED",
-      "coordinate": null
+      "coordinate": null,
+      "research_name_index_coordinate": "1111101000",
+      "d10_semantic_coordinate": null,
+      "index_only": true
     },
     {
       "semantic_name": "STREAM-ERROR",
       "source_path": "knowledge/d10-clhs-streams-census-20261009.json",
       "kind": "condition-type",
       "status": "HISTORICAL-STANDARD-NAME-CENSUS-OWNERSHIP-NOT-REVIEWED",
-      "coordinate": null
+      "coordinate": null,
+      "research_name_index_coordinate": "1111101001",
+      "d10_semantic_coordinate": null,
+      "index_only": true
     },
     {
       "semantic_name": "END-OF-FILE",
       "source_path": "knowledge/d10-clhs-streams-census-20261009.json",
       "kind": "condition-type",
       "status": "HISTORICAL-STANDARD-NAME-CENSUS-OWNERSHIP-NOT-REVIEWED",
-      "coordinate": null
+      "coordinate": null,
+      "research_name_index_coordinate": "1111101010",
+      "d10_semantic_coordinate": null,
+      "index_only": true
     },
     {
       "semantic_name": "*reason-index-schema*",
       "source_path": "knowledge/d10-reason-alternate-define-donor-v1.json",
       "kind": "LIBRARY-IMPLEMENTATION-SYMBOL",
       "status": "SOURCE-NAME-ONLY-NOT-AN-INDEPENDENT-CORE-LAW",
-      "coordinate": null
+      "coordinate": null,
+      "research_name_index_coordinate": "1111101011",
+      "d10_semantic_coordinate": null,
+      "index_only": true
     },
     {
       "semantic_name": "*reason-index-max-predicates*",
       "source_path": "knowledge/d10-reason-alternate-define-donor-v1.json",
       "kind": "LIBRARY-IMPLEMENTATION-SYMBOL",
       "status": "SOURCE-NAME-ONLY-NOT-AN-INDEPENDENT-CORE-LAW",
-      "coordinate": null
+      "coordinate": null,
+      "research_name_index_coordinate": "1111101100",
+      "d10_semantic_coordinate": null,
+      "index_only": true
     },
     {
       "semantic_name": "reason-index-mode",
       "source_path": "knowledge/d10-reason-alternate-define-donor-v1.json",
       "kind": "LIBRARY-IMPLEMENTATION-SYMBOL",
       "status": "SOURCE-NAME-ONLY-NOT-AN-INDEPENDENT-CORE-LAW",
-      "coordinate": null
+      "coordinate": null,
+      "research_name_index_coordinate": "1111101101",
+      "d10_semantic_coordinate": null,
+      "index_only": true
     },
     {
       "semantic_name": "reason-index-rules",
       "source_path": "knowledge/d10-reason-alternate-define-donor-v1.json",
       "kind": "LIBRARY-IMPLEMENTATION-SYMBOL",
       "status": "SOURCE-NAME-ONLY-NOT-AN-INDEPENDENT-CORE-LAW",
-      "coordinate": null
+      "coordinate": null,
+      "research_name_index_coordinate": "1111101110",
+      "d10_semantic_coordinate": null,
+      "index_only": true
     },
     {
       "semantic_name": "reason-index-buckets",
       "source_path": "knowledge/d10-reason-alternate-define-donor-v1.json",
       "kind": "LIBRARY-IMPLEMENTATION-SYMBOL",
       "status": "SOURCE-NAME-ONLY-NOT-AN-INDEPENDENT-CORE-LAW",
-      "coordinate": null
+      "coordinate": null,
+      "research_name_index_coordinate": "1111101111",
+      "d10_semantic_coordinate": null,
+      "index_only": true
     },
     {
       "semantic_name": "reason-index?",
       "source_path": "knowledge/d10-reason-alternate-define-donor-v1.json",
       "kind": "LIBRARY-IMPLEMENTATION-SYMBOL",
       "status": "SOURCE-NAME-ONLY-NOT-AN-INDEPENDENT-CORE-LAW",
-      "coordinate": null
+      "coordinate": null,
+      "research_name_index_coordinate": "1111110000",
+      "d10_semantic_coordinate": null,
+      "index_only": true
     },
     {
       "semantic_name": "reason-index-linear",
       "source_path": "knowledge/d10-reason-alternate-define-donor-v1.json",
       "kind": "LIBRARY-IMPLEMENTATION-SYMBOL",
       "status": "SOURCE-NAME-ONLY-NOT-AN-INDEPENDENT-CORE-LAW",
-      "coordinate": null
+      "coordinate": null,
+      "research_name_index_coordinate": "1111110001",
+      "d10_semantic_coordinate": null,
+      "index_only": true
     },
     {
       "semantic_name": "reason-term-predicate",
       "source_path": "knowledge/d10-reason-alternate-define-donor-v1.json",
       "kind": "LIBRARY-IMPLEMENTATION-SYMBOL",
       "status": "SOURCE-NAME-ONLY-NOT-AN-INDEPENDENT-CORE-LAW",
-      "coordinate": null
+      "coordinate": null,
+      "research_name_index_coordinate": "1111110010",
+      "d10_semantic_coordinate": null,
+      "index_only": true
     },
     {
       "semantic_name": "reason-rule-predicate",
       "source_path": "knowledge/d10-reason-alternate-define-donor-v1.json",
       "kind": "LIBRARY-IMPLEMENTATION-SYMBOL",
       "status": "SOURCE-NAME-ONLY-NOT-AN-INDEPENDENT-CORE-LAW",
-      "coordinate": null
+      "coordinate": null,
+      "research_name_index_coordinate": "1111110011",
+      "d10_semantic_coordinate": null,
+      "index_only": true
     },
     {
       "semantic_name": "reason-index-add-reversed",
       "source_path": "knowledge/d10-reason-alternate-define-donor-v1.json",
       "kind": "LIBRARY-IMPLEMENTATION-SYMBOL",
       "status": "SOURCE-NAME-ONLY-NOT-AN-INDEPENDENT-CORE-LAW",
-      "coordinate": null
+      "coordinate": null,
+      "research_name_index_coordinate": "1111110100",
+      "d10_semantic_coordinate": null,
+      "index_only": true
     },
     {
       "semantic_name": "reason-index-normalize-buckets",
       "source_path": "knowledge/d10-reason-alternate-define-donor-v1.json",
       "kind": "LIBRARY-IMPLEMENTATION-SYMBOL",
       "status": "SOURCE-NAME-ONLY-NOT-AN-INDEPENDENT-CORE-LAW",
-      "coordinate": null
+      "coordinate": null,
+      "research_name_index_coordinate": "1111110101",
+      "d10_semantic_coordinate": null,
+      "index_only": true
     },
     {
       "semantic_name": "reason-index-build-scan",
       "source_path": "knowledge/d10-reason-alternate-define-donor-v1.json",
       "kind": "LIBRARY-IMPLEMENTATION-SYMBOL",
       "status": "SOURCE-NAME-ONLY-NOT-AN-INDEPENDENT-CORE-LAW",
-      "coordinate": null
+      "coordinate": null,
+      "research_name_index_coordinate": "1111110110",
+      "d10_semantic_coordinate": null,
+      "index_only": true
     },
     {
       "semantic_name": "reason-make-index",
       "source_path": "knowledge/d10-reason-alternate-define-donor-v1.json",
       "kind": "LIBRARY-IMPLEMENTATION-SYMBOL",
       "status": "SOURCE-NAME-ONLY-NOT-AN-INDEPENDENT-CORE-LAW",
-      "coordinate": null
+      "coordinate": null,
+      "research_name_index_coordinate": "1111110111",
+      "d10_semantic_coordinate": null,
+      "index_only": true
     },
     {
       "semantic_name": "reason-ensure-index",
       "source_path": "knowledge/d10-reason-alternate-define-donor-v1.json",
       "kind": "LIBRARY-IMPLEMENTATION-SYMBOL",
       "status": "SOURCE-NAME-ONLY-NOT-AN-INDEPENDENT-CORE-LAW",
-      "coordinate": null
+      "coordinate": null,
+      "research_name_index_coordinate": "1111111000",
+      "d10_semantic_coordinate": null,
+      "index_only": true
     },
     {
       "semantic_name": "reason-index-candidates",
       "source_path": "knowledge/d10-reason-alternate-define-donor-v1.json",
       "kind": "LIBRARY-IMPLEMENTATION-SYMBOL",
       "status": "SOURCE-NAME-ONLY-NOT-AN-INDEPENDENT-CORE-LAW",
-      "coordinate": null
+      "coordinate": null,
+      "research_name_index_coordinate": "1111111001",
+      "d10_semantic_coordinate": null,
+      "index_only": true
     },
     {
       "semantic_name": "reason",
       "source_path": "knowledge/d10-reason-alternate-define-donor-v1.json",
       "kind": "LIBRARY-IMPLEMENTATION-SYMBOL",
       "status": "SOURCE-NAME-ONLY-NOT-AN-INDEPENDENT-CORE-LAW",
-      "coordinate": null
+      "coordinate": null,
+      "research_name_index_coordinate": "1111111010",
+      "d10_semantic_coordinate": null,
+      "index_only": true
     },
     {
       "semantic_name": "prove-goal-accumulate",
       "source_path": "knowledge/d10-reason-alternate-define-donor-v1.json",
       "kind": "LIBRARY-IMPLEMENTATION-SYMBOL",
       "status": "SOURCE-NAME-ONLY-NOT-AN-INDEPENDENT-CORE-LAW",
-      "coordinate": null
+      "coordinate": null,
+      "research_name_index_coordinate": "1111111011",
+      "d10_semantic_coordinate": null,
+      "index_only": true
     },
     {
       "semantic_name": "prove-goal",
       "source_path": "knowledge/d10-reason-alternate-define-donor-v1.json",
       "kind": "LIBRARY-IMPLEMENTATION-SYMBOL",
       "status": "SOURCE-NAME-ONLY-NOT-AN-INDEPENDENT-CORE-LAW",
-      "coordinate": null
+      "coordinate": null,
+      "research_name_index_coordinate": "1111111100",
+      "d10_semantic_coordinate": null,
+      "index_only": true
     },
     {
       "semantic_name": "prove-goal-scan",
       "source_path": "knowledge/d10-reason-alternate-define-donor-v1.json",
       "kind": "LIBRARY-IMPLEMENTATION-SYMBOL",
       "status": "SOURCE-NAME-ONLY-NOT-AN-INDEPENDENT-CORE-LAW",
-      "coordinate": null
+      "coordinate": null,
+      "research_name_index_coordinate": "1111111101",
+      "d10_semantic_coordinate": null,
+      "index_only": true
     },
     {
       "semantic_name": "map-proofs",
       "source_path": "knowledge/d10-reason-alternate-define-donor-v1.json",
       "kind": "LIBRARY-IMPLEMENTATION-SYMBOL",
       "status": "SOURCE-NAME-ONLY-NOT-AN-INDEPENDENT-CORE-LAW",
-      "coordinate": null
+      "coordinate": null,
+      "research_name_index_coordinate": "1111111110",
+      "d10_semantic_coordinate": null,
+      "index_only": true
     },
     {
       "semantic_name": "prove-goals",
       "source_path": "knowledge/d10-reason-alternate-define-donor-v1.json",
       "kind": "LIBRARY-IMPLEMENTATION-SYMBOL",
       "status": "SOURCE-NAME-ONLY-NOT-AN-INDEPENDENT-CORE-LAW",
-      "coordinate": null
+      "coordinate": null,
+      "research_name_index_coordinate": "1111111111",
+      "d10_semantic_coordinate": null,
+      "index_only": true
     },
     {
       "semantic_name": "explain-proof",
@@ -16316,5 +17365,6 @@
       "coordinate": null
     }
   ],
-  "census_integrity_note": "The symbolic-v3 proposal ledger includes implementation helpers, variable names, CLIPS import functions and device/host hooks. These are source names only, not evidence of independent primitive semantics. Preserve provenance without assigning Core addresses."
+  "census_integrity_note": "The symbolic-v3 proposal ledger includes implementation helpers, variable names, CLIPS import functions and device/host hooks. These are source names only, not evidence of independent primitive semantics. Preserve provenance without assigning Core addresses.",
+  "status": "COMPLETE-1024-SOURCE-INDEX-SEMANTICS-PARTIAL"
 }
