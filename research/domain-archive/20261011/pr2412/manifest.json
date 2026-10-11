@@ -1,0 +1,42 @@
+{
+  "schema": "sens-historical-branch-archive/v1",
+  "archived_at": "2026-10-11",
+  "source": {
+    "repo": "juv4uk/sens",
+    "pr": 2412,
+    "title": "bench(2370): replay generation accounting on current main",
+    "branch": "replay/2370-generation-accounting-current-main",
+    "head_sha": "17ddba20c91249ec3d56aa8c539159729ec37e49",
+    "base": "main",
+    "base_sha": "42e3945c5e8f27902ade6fedf52f54786c56f914"
+  },
+  "files": [
+    {
+      "path": ".github/workflows/generation-accounting.yml",
+      "patch_present": true,
+      "patch_chars": 3111
+    },
+    {
+      "path": "benchmarks/generation-accounting/run.py",
+      "patch_present": true,
+      "patch_chars": 20980
+    }
+  ],
+  "benchmark_claims_from_original_pr_body": {
+    "active_rows": 30,
+    "selector_descendants": 12,
+    "unknown": 18,
+    "flat_semantic_fact_interval": [
+      0,
+      15
+    ],
+    "root_law_interval": [
+      0,
+      5
+    ],
+    "upper_bound_narrows_by": 10,
+    "limitation": "Bounds are historical accounting, not runtime performance. Self-framed certificate storage exceeds flat coordinates, and hidden per-row map compression was rejected."
+  },
+  "current_status": "HISTORICAL-RESEARCH-ONLY / exact current-main replay not performed",
+  "disposition": "ARCHIVE-ONLY / source and methodology preserved"
+}
