@@ -270,7 +270,7 @@ pub fn decode(bytes: &[u8]) -> Result<Vec<BinarySourceWord>, Frame3Error> {
         let restored = bytes_to_words(&widths, &bytes[pos..end])?;
         pos = end;
         if mode == REPEAT {
-            words.extend(std::iter::repeat(restored[0]).take(count));
+            words.resize(words.len() + count, restored[0]);
         } else {
             words.extend(restored);
         }
