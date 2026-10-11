@@ -894,7 +894,7 @@ feat/115-authority-guard	UNTRIAGED	-	-	BRANCH-NAME-ONLY
 feat/115-authority-guard-main	UNTRIAGED	-	-	BRANCH-NAME-ONLY
 feat/115-lisp-authority-policy	UNTRIAGED	-	-	BRANCH-NAME-ONLY
 feat/115-lisp-authority-policy-green	UNTRIAGED	-	-	BRANCH-NAME-ONLY
-feat/116-portable-witness-adapters	ALREADY-IN-MAIN-ARCHIVED	(manifest/readme in archive)	7f35d6a8d78d0ad6afe9385609998fab8039b02d	Exact RED-only backend adapter contract test + manifest archived under research/domain-archive/20261011/pr0164; no active manifest/test in main and branch uses crates/my-lisp. PR #164 closed archived.
+feat/116-portable-witness-adapters	ALREADY-IN-MAIN-ARCHIVED	a44fa7d05cd2baf6ff5aa96c751991638cb7c0d2	7f35d6a8d78d0ad6afe9385609998fab8039b02d	Exact RED-only backend adapter contract test + manifest archived under research/domain-archive/20261011/pr0164; no active manifest/test in main and branch uses crates/my-lisp. PR #164 closed archived.
 feat/116-portable-witness-main	UNTRIAGED	-	-	BRANCH-NAME-ONLY
 feat/150-machine-noninterference-green	UNTRIAGED	-	-	BRANCH-NAME-ONLY
 feat/177-machine-block-roundtrip	UNTRIAGED	-	-	BRANCH-NAME-ONLY
