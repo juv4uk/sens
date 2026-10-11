@@ -54,6 +54,12 @@ def source_queue(knowledge, selected, proposed):
             "repeated_across_sources": sum(len(donor[n]) > 1 for n in waiting),
             "queue": [{"semantic_name": n, "sources": donor[n]} for n in waiting]}
 
+def preserves_archived_prefix(current_rows, archived_rows):
+    """New semantic residents may append, never rewrite frozen D10 research."""
+    return (len(current_rows) >= len(archived_rows)
+            and current_rows[:len(archived_rows)] == archived_rows)
+
+
 def audit(root):
     k = root / "knowledge"
     data = (k / "d10-v1-semantic-inventory.json").read_bytes()
@@ -98,7 +104,8 @@ def audit(root):
         v4raw = (k/"d10-v4-semantic-inventory.json").read_bytes()
         v5raw = (k/"d10-v5-semantic-inventory.json").read_bytes()
         v6raw = (k/"d10-v6-semantic-inventory.json").read_bytes()
-        v2, v3, v4, v5, v6 = json.loads(v2raw), json.loads(v3raw), json.loads(v4raw), json.loads(v5raw), json.loads(v6raw)
+        v7raw = (k/"d10-v7-semantic-inventory.json").read_bytes()
+        v2, v3, v4, v5, v6, v7 = json.loads(v2raw), json.loads(v3raw), json.loads(v4raw), json.loads(v5raw), json.loads(v6raw), json.loads(v7raw)
         archive = ptr["current_archival_candidate_selection"]
         donor_raw = (root/archive["source_path"]).read_bytes()
         historical = json.loads(donor_raw)
@@ -142,7 +149,12 @@ def audit(root):
             and ptr["historical_selection"]["git_blob"]==sha(data)
             and archive["source_git_blob"]==sha(donor_raw)
             and len(v2["rows"])==675 and len(v3["rows"])==698 and len(v4["rows"])==707 and len(v5["rows"])==715 and len(v6["rows"])==719
-            and len(rows)==721 and rows[:719]==v6["rows"]
+            and ptr["historical_v7_research_inventory"]["path"] == "knowledge/d10-v7-semantic-inventory.json"
+            and ptr["historical_v7_research_inventory"]["git_blob"] == sha(v7raw)
+            and sha(v7raw) == "6a45275241717dafa6a6c9ccafae1e9ad819b306"
+            and len(v7["rows"]) == 721
+            and preserves_archived_prefix(v7["rows"], v6["rows"])
+            and preserves_archived_prefix(rows, v7["rows"])
             and v6["rows"][:715]==v5["rows"]
             and v5["rows"][:707]==v4["rows"]
             and v4["rows"][:698]==v3["rows"]
@@ -214,7 +226,9 @@ def audit(root):
             "ready_to_start_d11": inventory_full and placement_full and ratified == capacity and not errors,
             "source_queue": source_queue(k, set(names), proposed),
             "blocking_errors": errors,
-            "caution": "721 research-selected meanings; 719 are placed and 2 historical Common Lisp stream laws are unplaced pending semantic dedup and Core-vs-library review. 303 positions remain; none ratified."}
+            "caution": f"{len(rows)} research-selected meanings; {len(placed)} placed, "
+                       f"{len(rows)-len(placed)} unplaced, {capacity-len(rows)} gaps, "
+                       f"{ratified} ratified. Selection is not ratification."}
 
 def main():
     p = argparse.ArgumentParser(description=__doc__)
