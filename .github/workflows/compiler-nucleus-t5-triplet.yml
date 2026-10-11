@@ -40,6 +40,11 @@ jobs:
         with:
           python-version: "3.11"
 
+      - name: Regression test compiler source admits all scoped identifiers
+        run: >-
+          python3 tests/test_migrate_t5_batch.py
+          RealBatchTest.test_compiler_ukrainian_define_heads_bind_global_calls_before_t5
+
       - name: Migrate the compiler source with the canonical three-pass converter
         id: generate
         shell: bash
