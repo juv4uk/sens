@@ -24,6 +24,348 @@
       "original_path": "knowledge/d6-mechanism-ledger.json",
       "original_blob_sha": "99cd2d0b1ee5555b675f325b646117995260bf2e",
       "archive_path": "research/domain-archive/20261011/alltime-branch-recovery/impl__3394-d6-selectors-on-3530/knowledge/d6-mechanism-ledger.json.source.txt"
+    },
+    {
+      "origin_branch": "agent/chatgpt/4349-structural-effect",
+      "origin_commit": "a084021e31dd548fe6055d374bb94846345accae",
+      "original_path": ".github/workflows/machine-exact-domain-cpu.yml",
+      "original_blob_sha": "ccf18ab9e2ec8deaa7457e14410255d36ecffe29",
+      "archive_path": "research/domain-archive/20261011/alltime-branch-recovery/cohort-033-040/blobs/ccf18ab9e2ec8deaa7457e14410255d36ecffe29/github__workflows__machine-exact-domain-cpu.yml.source.txt",
+      "comparison_main_sha": "3298dbc64b123849fdd51b0d02c7005b3a45a115",
+      "admission": "ARCHIVED_SOURCE_ONLY; NOT EXECUTABLE; NO CI OR SEMANTIC RATIFICATION"
+    },
+    {
+      "origin_branch": "agent/chatgpt/4349-structural-effect",
+      "origin_commit": "a084021e31dd548fe6055d374bb94846345accae",
+      "original_path": "crates/sens-host/tests/machine_effect_structural.rs",
+      "original_blob_sha": "71fc113614f10d679c0ad2d2060a327ac89d9ad8",
+      "archive_path": "research/domain-archive/20261011/alltime-branch-recovery/cohort-033-040/blobs/71fc113614f10d679c0ad2d2060a327ac89d9ad8/crates__sens-host__tests__machine_effect_structural.rs.source.txt",
+      "comparison_main_sha": "3298dbc64b123849fdd51b0d02c7005b3a45a115",
+      "admission": "ARCHIVED_SOURCE_ONLY; NOT EXECUTABLE; NO CI OR SEMANTIC RATIFICATION"
+    },
+    {
+      "origin_branch": "agent/chatgpt/4349-structural-effect",
+      "origin_commit": "a084021e31dd548fe6055d374bb94846345accae",
+      "original_path": "crates/sens/tests/machine_effect_structural_projection.rs",
+      "original_blob_sha": "1e31c9f4b200a4140aa3c0473c855f4ab4ae2d03",
+      "archive_path": "research/domain-archive/20261011/alltime-branch-recovery/cohort-033-040/blobs/1e31c9f4b200a4140aa3c0473c855f4ab4ae2d03/crates__sens__tests__machine_effect_structural_projection.rs.source.txt",
+      "comparison_main_sha": "3298dbc64b123849fdd51b0d02c7005b3a45a115",
+      "admission": "ARCHIVED_SOURCE_ONLY; NOT EXECUTABLE; NO CI OR SEMANTIC RATIFICATION"
+    },
+    {
+      "origin_branch": "agent/chatgpt/4349-structural-effect",
+      "origin_commit": "a084021e31dd548fe6055d374fc468a",
+      "original_path": "lib/machine/effects/structural.lisp",
+      "original_blob_sha": "88e8db2067c21b92aff09fa302e780295798819c",
+      "archive_path": "research/domain-archive/20261011/alltime-branch-recovery/cohort-033-040/blobs/88e8db2067c21b92aff09fa302e780295798819c/lib__machine__effects__structural.lisp.source.txt",
+      "comparison_main_sha": "3298dbc64b123849fdd51b0d02c7005b3a45a115",
+      "admission": "ARCHIVED_SOURCE_ONLY; NOT EXECUTABLE; NO CI OR SEMANTIC RATIFICATION"
+    },
+    {
+      "origin_branch": "agent/chatgpt/4349-structural-effect",
+      "origin_commit": "a084021e31dd548fe6055d374bb94846345accae",
+      "original_path": "lib/machine/effects/u64.lisp",
+      "original_blob_sha": "e502538bfc206dfad3799a109003d7ed436d84a3",
+      "archive_path": "research/domain-archive/20261011/alltime-branch-recovery/cohort-033-040/blobs/e502538bfc206dfad3799a109003d7ed436d84a3/lib__machine__effects__u64.lisp.source.txt",
+      "comparison_main_sha": "3298dbc64b123849fdd51b0d02c7005b3a45a115",
+      "admission": "ARCHIVED_SOURCE_ONLY; NOT EXECUTABLE; NO CI OR SEMANTIC RATIFICATION"
+    },
+    {
+      "origin_branch": "agent/chatgpt/4349-structural-effect",
+      "origin_commit": "a084021e31dd548fe6055d374bb94846345accae",
+      "original_path": "lib/machine/projection/x86-64.lisp",
+      "original_blob_sha": "546040dab770483f93445283f2da642bccc91543",
+      "archive_path": "research/domain-archive/20261011/alltime-branch-recovery/cohort-033-040/blobs/546040dab770483f93445283f2da642bccc91543/lib__machine__projection__x86-64.lisp.source.txt",
+      "comparison_main_sha": "3298dbc64b123849fdd51b0d02c7005b3a45a115",
+      "admission": "ARCHIVED_SOURCE_ONLY; NOT EXECUTABLE; NO CI OR SEMANTIC RATIFICATION"
+    },
+    {
+      "origin_branch": "agent/chatgpt/4349-structural-effect-v2",
+      "origin_commit": "6e227878831696183775e270fcabef4c83802893",
+      "original_path": ".github/workflows/machine-exact-domain-cpu.yml",
+      "original_blob_sha": "ccf18ab9e2ec8deaa7457e14410255d36ecffe29",
+      "archive_path": "research/domain-archive/20261011/alltime-branch-recovery/cohort-033-040/blobs/ccf18ab9e2ec8deaa7457e14410255d36ecffe29/github__workflows__machine-exact-domain-cpu.yml.source.txt",
+      "comparison_main_sha": "3298dbc64b123849fdd51b0d02c7005b3a45a115",
+      "admission": "ARCHIVED_SOURCE_ONLY; NOT EXECUTABLE; NO CI OR SEMANTIC RATIFICATION"
+    },
+    {
+      "origin_branch": "agent/chatgpt/4349-structural-effect-v2",
+      "origin_commit": "6e227878831696183775e270fcabef4c83802893",
+      "original_path": "crates/sens-host/tests/machine_effect_structural.rs",
+      "original_blob_sha": "71fc113614f10d679c0ad2d2060a327ac89d9ad8",
+      "archive_path": "research/domain-archive/20261011/alltime-branch-recovery/cohort-033-040/blobs/71fc113614f10d679c0ad2d2060a327ac89d9ad8/crates__sens-host__tests__machine_effect_structural.rs.source.txt",
+      "comparison_main_sha": "3298dbc64b123849fdd51b0d02c7005b3a45a115",
+      "admission": "ARCHIVED_SOURCE_ONLY; NOT EXECUTABLE; NO CI OR SEMANTIC RATIFICATION"
+    },
+    {
+      "origin_branch": "agent/chatgpt/4349-structural-effect-v2",
+      "origin_commit": "6e227878831696183775e270fcabef4c83802893",
+      "original_path": "crates/sens/tests/machine_effect_structural_projection.rs",
+      "original_blob_sha": "1e31c9f4b200a4140aa3c0473c855f4ab4ae2d03",
+      "archive_path": "research/domain-archive/20261011/alltime-branch-recovery/cohort-033-040/blobs/1e31c9f4b200a4140aa3c0473c855f4ab4ae2d03/crates__sens__tests__machine_effect_structural_projection.rs.source.txt",
+      "comparison_main_sha": "3298dbc64b123849fdd51b0d02c7005b3a45a115",
+      "admission": "ARCHIVED_SOURCE_ONLY; NOT EXECUTABLE; NO CI OR SEMANTIC RATIFICATION"
+    },
+    {
+      "origin_branch": "agent/chatgpt/4349-structural-effect-v2",
+      "origin_commit": "6e227878831696183775e270fcabef4c83802893",
+      "original_path": "lib/machine/effects/structural.lisp",
+      "original_blob_sha": "88e8db2067c21b92aff09fa302e780295798819c",
+      "archive_path": "research/domain-archive/20261011/alltime-branch-recovery/cohort-033-040/blobs/88e8db2067c21b92aff09fa302e780295798819c/lib__machine__effects__structural.lisp.source.txt",
+      "comparison_main_sha": "3298dbc64b123849fdd51b0d02c7005b3a45a115",
+      "admission": "ARCHIVED_SOURCE_ONLY; NOT EXECUTABLE; NO CI OR SEMANTIC RATIFICATION"
+    },
+    {
+      "origin_branch": "agent/chatgpt/4349-structural-effect-v2",
+      "origin_commit": "6e227878831696183775e270fcabef4c83802893",
+      "original_path": "lib/machine/projection/x86-64.lisp",
+      "original_blob_sha": "546040dab770483f93445283f2da642bccc91543",
+      "archive_path": "research/domain-archive/20261011/alltime-branch-recovery/cohort-033-040/blobs/546040dab770483f93445283f2da642bccc91543/lib__machine__projection__x86-64.lisp.source.txt",
+      "comparison_main_sha": "3298dbc64b123849fdd51b0d02c7005b3a45a115",
+      "admission": "ARCHIVED_SOURCE_ONLY; NOT EXECUTABLE; NO CI OR SEMANTIC RATIFICATION"
+    },
+    {
+      "origin_branch": "agent/chatgpt/4349-structural-effects-clean",
+      "origin_commit": "c2f8420d225ec40d2a63cced0749f2d1adfc9740",
+      "original_path": ".github/workflows/machine-exact-domain-cpu.yml",
+      "original_blob_sha": "f692aa02f64461a380349ac26a56376ca45021ff",
+      "archive_path": "research/domain-archive/20261011/alltime-branch-recovery/cohort-033-040/blobs/f692aa02f64461a380349ac26a56376ca45021ff/github__workflows__machine-exact-domain-cpu.yml.source.txt",
+      "comparison_main_sha": "3298dbc64b123849fdd51b0d02c7005b3a45a115",
+      "admission": "ARCHIVED_SOURCE_ONLY; NOT EXECUTABLE; NO CI OR SEMANTIC RATIFICATION"
+    },
+    {
+      "origin_branch": "agent/chatgpt/4349-structural-effects-clean",
+      "origin_commit": "c2f8420d225ec40d2a63cced0749f2d1adfc9740",
+      "original_path": ".github/workflows/machine-semantic-effect-lowering.yml",
+      "original_blob_sha": "663d118e385856d717ed748a46171dc65f8a634d",
+      "archive_path": "research/domain-archive/20261011/alltime-branch-recovery/cohort-033-040/blobs/663d118e385856d717ed748a46171dc65f8a634d/github__workflows__machine-semantic-effect-lowering.yml.source.txt",
+      "comparison_main_sha": "3298dbc64b123849fdd51b0d02c7005b3a45a115",
+      "admission": "ARCHIVED_SOURCE_ONLY; NOT EXECUTABLE; NO CI OR SEMANTIC RATIFICATION"
+    },
+    {
+      "origin_branch": "agent/chatgpt/4349-structural-effects-clean",
+      "origin_commit": "c2f8420d225ec40d2a63cced0749f2d1adfc9740",
+      "original_path": "crates/sens-host/tests/machine_effect_structural.rs",
+      "original_blob_sha": "cdff607050da9ecd81dceb3da64fbbc5de643fa4",
+      "archive_path": "research/domain-archive/20261011/alltime-branch-recovery/cohort-033-040/blobs/cdff607050da9ecd81dceb3da64fbbc5de643fa4/crates__sens-host__tests__machine_effect_structural.rs.source.txt",
+      "comparison_main_sha": "3298dbc64b123849fdd51b0d02c7005b3a45a115",
+      "admission": "ARCHIVED_SOURCE_ONLY; NOT EXECUTABLE; NO CI OR SEMANTIC RATIFICATION"
+    },
+    {
+      "origin_branch": "agent/chatgpt/4349-structural-effects-clean",
+      "origin_commit": "c2f8420d225ec40d2a63cced0749f2d1adfc9740",
+      "original_path": "crates/sens/tests/machine_effect_structural_projection.rs",
+      "original_blob_sha": "7558ca58888eb6801999643180c33249ef1a193f",
+      "archive_path": "research/domain-archive/20261011/alltime-branch-recovery/cohort-033-040/blobs/7558ca58888eb6801999643180c33249ef1a193f/crates__sens__tests__machine_effect_structural_projection.rs.source.txt",
+      "comparison_main_sha": "3298dbc64b123849fdd51b0d02c7005b3a45a115",
+      "admission": "ARCHIVED_SOURCE_ONLY; NOT EXECUTABLE; NO CI OR SEMANTIC RATIFICATION"
+    },
+    {
+      "origin_branch": "agent/chatgpt/4349-structural-effects-clean",
+      "origin_commit": "c2f8420d225ec40d2a63cced0749f2d1adfc9740",
+      "original_path": "lib/machine/effects/structural.lisp",
+      "original_blob_sha": "8b45d4f42e4ff36fa5691ee58704454591685247",
+      "archive_path": "research/domain-archive/20261011/alltime-branch-recovery/cohort-033-040/blobs/8b45d4f42e4ff36fa5691ee58704454591685247/lib__machine__effects__structural.lisp.source.txt",
+      "comparison_main_sha": "3298dbc64b123849fdd51b0d02c7005b3a45a115",
+      "admission": "ARCHIVED_SOURCE_ONLY; NOT EXECUTABLE; NO CI OR SEMANTIC RATIFICATION"
+    },
+    {
+      "origin_branch": "agent/chatgpt/4349-structural-effects-clean",
+      "origin_commit": "c2f8420d225ec40d2a63cced0749f2d1adfc9740",
+      "original_path": "lib/machine/effects/u64.lisp",
+      "original_blob_sha": "3f715400af3a2daf3ef80419b6c69a5857231ac5",
+      "archive_path": "research/domain-archive/20261011/alltime-branch-recovery/cohort-033-040/blobs/3f715400af3a2daf3ef80419b6c69a5857231ac5/lib__machine__effects__u64.lisp.source.txt",
+      "comparison_main_sha": "3298dbc64b123849fdd51b0d02c7005b3a45a115",
+      "admission": "ARCHIVED_SOURCE_ONLY; NOT EXECUTABLE; NO CI OR SEMANTIC RATIFICATION"
+    },
+    {
+      "origin_branch": "agent/chatgpt/4349-structural-effects-clean",
+      "origin_commit": "c2f8420d225ec40d2a63cced0749f2d1adfc9740",
+      "original_path": "lib/machine/projection/x86-64.lisp",
+      "original_blob_sha": "27372ca23f114faf95b028fd6747bfb7dd3767ee",
+      "archive_path": "research/domain-archive/20261011/alltime-branch-recovery/cohort-033-040/blobs/27372ca23f114faf95b028fd6747bfb7dd3767ee/lib__machine__projection__x86-64.lisp.source.txt",
+      "comparison_main_sha": "3298dbc64b123849fdd51b0d02c7005b3a45a115",
+      "admission": "ARCHIVED_SOURCE_ONLY; NOT EXECUTABLE; NO CI OR SEMANTIC RATIFICATION"
+    },
+    {
+      "origin_branch": "agent/chatgpt/4349-structural-effects-current-main",
+      "origin_commit": "cd00228fa3460899991c3ad0ab7a7eb7158d190b",
+      "original_path": ".github/workflows/machine-exact-domain-cpu.yml",
+      "original_blob_sha": "34c3b756dd40a310ee08d58d3be8edf2c4a47aab",
+      "archive_path": "research/domain-archive/20261011/alltime-branch-recovery/cohort-033-040/blobs/34c3b756dd40a310ee08d58d3be8edf2c4a47aab/github__workflows__machine-exact-domain-cpu.yml.source.txt",
+      "comparison_main_sha": "3298dbc64b123849fdd51b0d02c7005b3a45a115",
+      "admission": "ARCHIVED_SOURCE_ONLY; NOT EXECUTABLE; NO CI OR SEMANTIC RATIFICATION"
+    },
+    {
+      "origin_branch": "agent/chatgpt/4349-structural-effects-current-main",
+      "origin_commit": "cd00228fa3460899991c3ad0ab7a7eb7158d190b",
+      "original_path": "crates/sens-host/tests/machine_effect_structural.rs",
+      "original_blob_sha": "cdff607050da9ecd81dceb3da64fbbc5de643fa4",
+      "archive_path": "research/domain-archive/20261011/alltime-branch-recovery/cohort-033-040/blobs/cdff607050da9ecd81dceb3da64fbbc5de643fa4/crates__sens-host__tests__machine_effect_structural.rs.source.txt",
+      "comparison_main_sha": "3298dbc64b123849fdd51b0d02c7005b3a45a115",
+      "admission": "ARCHIVED_SOURCE_ONLY; NOT EXECUTABLE; NO CI OR SEMANTIC RATIFICATION"
+    },
+    {
+      "origin_branch": "agent/chatgpt/4349-structural-effects-current-main",
+      "origin_commit": "cd00228fa3460899991c3ad0ab7a7eb7158d190b",
+      "original_path": "crates/sens/tests/machine_effect_structural_projection.rs",
+      "original_blob_sha": "7558ca58888eb6801999643180c33249ef1a193f",
+      "archive_path": "research/domain-archive/20261011/alltime-branch-recovery/cohort-033-040/blobs/7558ca58888eb6801999643180c33249ef1a193f/crates__sens__tests__machine_effect_structural_projection.rs.source.txt",
+      "comparison_main_sha": "3298dbc64b123849fdd51b0d02c7005b3a45a115",
+      "admission": "ARCHIVED_SOURCE_ONLY; NOT EXECUTABLE; NO CI OR SEMANTIC RATIFICATION"
+    },
+    {
+      "origin_branch": "agent/chatgpt/4349-structural-effects-current-main",
+      "origin_commit": "cd00228fa3460899991c3ad0ab7a7eb7158d190b",
+      "original_path": "lib/machine/effects/structural.lisp",
+      "original_blob_sha": "d28d749efcc23faafdb7d218ed6fcefe496183bc",
+      "archive_path": "research/domain-archive/20261011/alltime-branch-recovery/cohort-033-040/blobs/d28d749efcc23faafdb7d218ed6fcefe496183bc/lib__machine__effects__structural.lisp.source.txt",
+      "comparison_main_sha": "3298dbc64b123849fdd51b0d02c7005b3a45a115",
+      "admission": "ARCHIVED_SOURCE_ONLY; NOT EXECUTABLE; NO CI OR SEMANTIC RATIFICATION"
+    },
+    {
+      "origin_branch": "agent/chatgpt/4349-structural-effects-current-main",
+      "origin_commit": "cd00228fa3460899991c3ad0ab7a7eb7158d190b",
+      "original_path": "lib/machine/effects/u64.lisp",
+      "original_blob_sha": "3f715400af3a2daf3ef80419b6c69a5857231ac5",
+      "archive_path": "research/domain-archive/20261011/alltime-branch-recovery/cohort-033-040/blobs/3f715400af3a2daf3ef80419b6c69a5857231ac5/lib__machine__effects__u64.lisp.source.txt",
+      "comparison_main_sha": "3298dbc64b123849fdd51b0d02c7005b3a45a115",
+      "admission": "ARCHIVED_SOURCE_ONLY; NOT EXECUTABLE; NO CI OR SEMANTIC RATIFICATION"
+    },
+    {
+      "origin_branch": "agent/chatgpt/4349-structural-effects-current-main",
+      "origin_commit": "cd00228fa3460899991c3ad0ab7a7eb7158d190b",
+      "original_path": "lib/machine/projection/x86-64.lisp",
+      "original_blob_sha": "ccf17c187c4ea2b1583f198b22f22fa591e825bc",
+      "archive_path": "research/domain-archive/20261011/alltime-branch-recovery/cohort-033-040/blobs/ccf17c187c4ea2b1583f198b22f22fa591e825bc/lib__machine__projection__x86-64.lisp.source.txt",
+      "comparison_main_sha": "3298dbc64b123849fdd51b0d02c7005b3a45a115",
+      "admission": "ARCHIVED_SOURCE_ONLY; NOT EXECUTABLE; NO CI OR SEMANTIC RATIFICATION"
+    },
+    {
+      "origin_branch": "agent/chatgpt/4358-d5-arith-effects",
+      "origin_commit": "20e399ced06d9f20f84b35c558bbc0ac50d92adb",
+      "original_path": ".github/workflows/machine-exact-domain-cpu.yml",
+      "original_blob_sha": "0bd2b01425cdfebaaed10db30d474cc56315f351",
+      "archive_path": "research/domain-archive/20261011/alltime-branch-recovery/cohort-033-040/blobs/0bd2b01425cdfebaaed10db30d474cc56315f351/github__workflows__machine-exact-domain-cpu.yml.source.txt",
+      "comparison_main_sha": "3298dbc64b123849fdd51b0d02c7005b3a45a115",
+      "admission": "ARCHIVED_SOURCE_ONLY; NOT EXECUTABLE; NO CI OR SEMANTIC RATIFICATION"
+    },
+    {
+      "origin_branch": "agent/chatgpt/4358-d5-arith-effects",
+      "origin_commit": "20e399ced06d9f20f84b35c558bbc0ac50d92adb",
+      "original_path": "crates/sens-host/tests/machine_effect_structural.rs",
+      "original_blob_sha": "71fc113614f10d679c0ad2d2060a327ac89d9ad8",
+      "archive_path": "research/domain-archive/20261011/alltime-branch-recovery/cohort-033-040/blobs/71fc113614f10d679c0ad2d2060a327ac89d9ad8/crates__sens-host__tests__machine_effect_structural.rs.source.txt",
+      "comparison_main_sha": "3298dbc64b123849fdd51b0d02c7005b3a45a115",
+      "admission": "ARCHIVED_SOURCE_ONLY; NOT EXECUTABLE; NO CI OR SEMANTIC RATIFICATION"
+    },
+    {
+      "origin_branch": "agent/chatgpt/4358-d5-arith-effects",
+      "origin_commit": "20e399ced06d9f20f84b35c558bbc0ac50d92adb",
+      "original_path": "crates/sens/tests/machine_effect_d5_arithmetic_projection.rs",
+      "original_blob_sha": "053c4ae78d96b7d1186e9e19737ebf0df074d048",
+      "archive_path": "research/domain-archive/20261011/alltime-branch-recovery/cohort-033-040/blobs/053c4ae78d96b7d1186e9e19737ebf0df074d048/crates__sens__tests__machine_effect_d5_arithmetic_projection.rs.source.txt",
+      "comparison_main_sha": "3298dbc64b123849fdd51b0d02c7005b3a45a115",
+      "admission": "ARCHIVED_SOURCE_ONLY; NOT EXECUTABLE; NO CI OR SEMANTIC RATIFICATION"
+    },
+    {
+      "origin_branch": "agent/chatgpt/4358-d5-arith-effects",
+      "origin_commit": "20e399ced06d9f20f84b35c558bbc0ac50d92adb",
+      "original_path": "crates/sens/tests/machine_effect_structural_projection.rs",
+      "original_blob_sha": "1e31c9f4b200a4140aa3c0473c855f4ab4ae2d03",
+      "archive_path": "research/domain-archive/20261011/alltime-branch-recovery/cohort-033-040/blobs/1e31c9f4b200a4140aa3c0473c855f4ab4ae2d03/crates__sens__tests__machine_effect_structural_projection.rs.source.txt",
+      "comparison_main_sha": "3298dbc64b123849fdd51b0d02c7005b3a45a115",
+      "admission": "ARCHIVED_SOURCE_ONLY; NOT EXECUTABLE; NO CI OR SEMANTIC RATIFICATION"
+    },
+    {
+      "origin_branch": "agent/chatgpt/4358-d5-arith-effects",
+      "origin_commit": "20e399ced06d9f20f84b35c558bbc0ac50d92adb",
+      "original_path": "lib/machine/effects/structural.lisp",
+      "original_blob_sha": "88e8db2067c21b92aff09fa302e780295798819c",
+      "archive_path": "research/domain-archive/20261011/alltime-branch-recovery/cohort-033-040/blobs/88e8db2067c21b92aff09fa302e780295798819c/lib__machine__effects__structural.lisp.source.txt",
+      "comparison_main_sha": "3298dbc64b123849fdd51b0d02c7005b3a45a115",
+      "admission": "ARCHIVED_SOURCE_ONLY; NOT EXECUTABLE; NO CI OR SEMANTIC RATIFICATION"
+    },
+    {
+      "origin_branch": "agent/chatgpt/4358-d5-arith-effects",
+      "origin_commit": "20e399ced06d9f20f84b35c558bbc0ac50d92adb",
+      "original_path": "lib/machine/effects/u64.lisp",
+      "original_blob_sha": "edf8b51215f15e91efc1ac2afa69c29bf9671007",
+      "archive_path": "research/domain-archive/20261011/alltime-branch-recovery/cohort-033-040/blobs/edf8b51215f15e91efc1ac2afa69c29bf9671007/lib__machine__effects__u64.lisp.source.txt",
+      "comparison_main_sha": "3298dbc64b123849fdd51b0d02c7005b3a45a115",
+      "admission": "ARCHIVED_SOURCE_ONLY; NOT EXECUTABLE; NO CI OR SEMANTIC RATIFICATION"
+    },
+    {
+      "origin_branch": "agent/chatgpt/4358-d5-arith-effects",
+      "origin_commit": "20e399ced06d9f20f84b35c558bbc0ac50d92adb",
+      "original_path": "lib/machine/projection/x86-64.lisp",
+      "original_blob_sha": "35f83527e89fdd67f6f0f3b27d8cc2f1b31859c6",
+      "archive_path": "research/domain-archive/20261011/alltime-branch-recovery/cohort-033-040/blobs/35f83527e89fdd67f6f0f3b27d8cc2f1b31859c6/lib__machine__projection__x86-64.lisp.source.txt",
+      "comparison_main_sha": "3298dbc64b123849fdd51b0d02c7005b3a45a115",
+      "admission": "ARCHIVED_SOURCE_ONLY; NOT EXECUTABLE; NO CI OR SEMANTIC RATIFICATION"
+    },
+    {
+      "origin_branch": "agent/chatgpt/4359-aes-pclmul-differential",
+      "origin_commit": "b30d5617edf5ec0f9f7c09f38a1f8bd69d04f369",
+      "original_path": "crates/sens/tests/machine_asm_differential.rs",
+      "original_blob_sha": "0c84551d2ec6631d66134112891d3b08b9e9b10a",
+      "archive_path": "research/domain-archive/20261011/alltime-branch-recovery/cohort-033-040/blobs/0c84551d2ec6631d66134112891d3b08b9e9b10a/crates__sens__tests__machine_asm_differential.rs.source.txt",
+      "comparison_main_sha": "3298dbc64b123849fdd51b0d02c7005b3a45a115",
+      "admission": "ARCHIVED_SOURCE_ONLY; NOT EXECUTABLE; NO CI OR SEMANTIC RATIFICATION"
+    },
+    {
+      "origin_branch": "agent/chatgpt/4359-aes-pclmul-differential",
+      "origin_commit": "b30d5617edf5ec0f9f7c09f38a1f8bd69d04f369",
+      "original_path": "tests/authority-inventory.tsv",
+      "original_blob_sha": "0d95f7f2ebc05a75a039a7f053e8167ed742e46c",
+      "archive_path": "research/domain-archive/20261011/alltime-branch-recovery/cohort-033-040/blobs/0d95f7f2ebc05a75a039a7f053e8167ed742e46c/tests__authority-inventory.tsv.source.txt",
+      "comparison_main_sha": "3298dbc64b123849fdd51b0d02c7005b3a45a115",
+      "admission": "ARCHIVED_SOURCE_ONLY; NOT EXECUTABLE; NO CI OR SEMANTIC RATIFICATION"
+    },
+    {
+      "origin_branch": "agent/chatgpt/4365-semantic-effect-lowering",
+      "origin_commit": "255a6d72b6b6ebbb2cc6bbb7ea3ec69fc5a03e44",
+      "original_path": ".github/workflows/machine-exact-domain-cpu.yml",
+      "original_blob_sha": "8b6e99a48d3ca2b3c63332e1ad7edce455e7cb09",
+      "archive_path": "research/domain-archive/20261011/alltime-branch-recovery/cohort-033-040/blobs/8b6e99a48d3ca2b3c63332e1ad7edce455e7cb09/github__workflows__machine-exact-domain-cpu.yml.source.txt",
+      "comparison_main_sha": "3298dbc64b123849fdd51b0d02c7005b3a45a115",
+      "admission": "ARCHIVED_SOURCE_ONLY; NOT EXECUTABLE; NO CI OR SEMANTIC RATIFICATION"
+    },
+    {
+      "origin_branch": "agent/chatgpt/4365-semantic-effect-lowering",
+      "origin_commit": "255a6d72b6b6ebbb2cc6bbb7ea3ec69fc5a03e44",
+      "original_path": "crates/sens/tests/machine_semantic_effect_lowering.rs",
+      "original_blob_sha": "d8a842f39f9efce8d40191aecb80b918b0116a9f",
+      "archive_path": "research/domain-archive/20261011/alltime-branch-recovery/cohort-033-040/blobs/d8a842f39f9efce8d40191aecb80b918b0116a9f/crates__sens__tests__machine_semantic_effect_lowering.rs.source.txt",
+      "comparison_main_sha": "3298dbc64b123849fdd51b0d02c7005b3a45a115",
+      "admission": "ARCHIVED_SOURCE_ONLY; NOT EXECUTABLE; NO CI OR SEMANTIC RATIFICATION"
+    },
+    {
+      "origin_branch": "agent/chatgpt/4365-semantic-effect-lowering",
+      "origin_commit": "255a6d72b6b6ebbb2cc6bbb7ea3ec69fc5a03e44",
+      "original_path": "lib/machine/lowering/semantic-effects.lisp",
+      "original_blob_sha": "23cc782616e1ec164dbb8536aecf06f03f4dc73c",
+      "archive_path": "research/domain-archive/20261011/alltime-branch-recovery/cohort-033-040/blobs/23cc782616e1ec164dbb8536aecf06f03f4dc73c/lib__machine__lowering__semantic-effects.lisp.source.txt",
+      "comparison_main_sha": "3298dbc64b123849fdd51b0d02c7005b3a45a115",
+      "admission": "ARCHIVED_SOURCE_ONLY; NOT EXECUTABLE; NO CI OR SEMANTIC RATIFICATION"
+    },
+    {
+      "origin_branch": "agent/chatgpt/4365-semantic-effect-lowering",
+      "origin_commit": "255a6d72b6b6ebbb2cc6bbb7ea3ec69fc5a03e44",
+      "original_path": "tests/authority-inventory.lisp",
+      "original_blob_sha": "0e29a1637b35ef1a62dad87b70de159615f958f8",
+      "archive_path": "research/domain-archive/20261011/alltime-branch-recovery/cohort-033-040/blobs/0e29a1637b35ef1a62dad87b70de159615f958f8/tests__authority-inventory.lisp.source.txt",
+      "comparison_main_sha": "3298dbc64b123849fdd51b0d02c7005b3a45a115",
+      "admission": "ARCHIVED_SOURCE_ONLY; NOT EXECUTABLE; NO CI OR SEMANTIC RATIFICATION"
+    },
+    {
+      "origin_branch": "agent/chatgpt/4365-semantic-effect-lowering",
+      "origin_commit": "255a6d72b6b6ebbb2cc6bbb7ea3ec69fc5a03e44",
+      "original_path": "tests/authority-inventory.tsv",
+      "original_blob_sha": "b95cc2b45a0451d27c9a88d29f328d6b9eef74f4",
+      "archive_path": "research/domain-archive/20261011/alltime-branch-recovery/cohort-033-040/blobs/b95cc2b45a0451d27c9a88d29f328d6b9eef74f4/tests__authority-inventory.tsv.source.txt",
+      "comparison_main_sha": "3298dbc64b123849fdd51b0d02c7005b3a45a115",
+      "admission": "ARCHIVED_SOURCE_ONLY; NOT EXECUTABLE; NO CI OR SEMANTIC RATIFICATION"
     }
   ]
 }

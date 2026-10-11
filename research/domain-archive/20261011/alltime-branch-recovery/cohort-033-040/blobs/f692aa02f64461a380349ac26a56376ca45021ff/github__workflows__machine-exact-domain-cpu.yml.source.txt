@@ -1,0 +1,171 @@
+# CI retrigger: canonical-COND structural-effect repair
+name: machine-exact-domain-cpu
+
+concurrency:
+  group: machine-exact-domain-cpu-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+on:
+  pull_request:
+    paths:
+      - "lib/machine/**"
+      - "crates/sens/tests/machine_exact_domain_cpu.rs"
+      - "crates/sens/tests/machine_effect_add_projection.rs"
+      - "crates/sens-host/tests/machine_effect_structural.rs"
+      - "crates/sens/tests/machine_effect_structural_projection.rs"
+      - "crates/sens/tests/machine_semantic_effect_lowering.rs"
+      - "crates/sens/src/program_data.rs"
+      - "crates/sens/tests/native_first_exact_domain.rs"
+      - "crates/sens/tests/machine_exact_d3_structural.rs"
+      - "crates/sens/tests/machine_exact_d3_eq_cond.rs"
+      - "crates/sens/tests/machine_exact_d5_arithmetic.rs"
+      - "crates/sens/tests/machine_exact_d5_quotient.rs"
+      - "crates/sens/tests/machine_exact_d5_order.rs"
+      - "crates/sens/tests/machine_exact_d5_zerop.rs"
+      - "crates/sens/tests/machine_exact_d6_add1_sub1.rs"
+      - "crates/sens/tests/machine_capability_axis.rs"
+      - "crates/sens/tests/i5_6400_machine_profile.rs"
+      - "crates/sens/tests/semantic_coordinate_join_2.rs"
+      - "crates/sens/tests/semantic_coordinate_join.rs"
+      - "crates/sens/tests/machine_noninterference_contract.rs"
+      - "crates/sens/tests/machine_lowering_boundary.rs"
+      - "crates/sens/tests/x86_64_lisp_encoder.rs"
+      - "crates/sens-host/tests/real_silicon_sweep.rs"
+      - "crates/sens-host/src/native_exec.rs"
+      - "crates/sens-host/tests/native_lisp_bytes.rs"
+      - "scripts/generate-encoder-coverage-input.py"
+      - "scripts/silicon-census.py"
+      - "scripts/silicon-coverage.py"
+      - ".github/workflows/machine-exact-domain-cpu.yml"
+  push:
+    branches: [main]
+    paths:
+      - "lib/machine/**"
+      - "crates/sens/tests/machine_exact_domain_cpu.rs"
+      - "crates/sens/tests/machine_effect_add_projection.rs"
+      - "crates/sens/tests/machine_semantic_effect_lowering.rs"
+      - "crates/sens/tests/native_first_exact_domain.rs"
+      - "crates/sens/src/program_data.rs"
+      - "crates/sens/tests/machine_exact_d3_structural.rs"
+      - "crates/sens/tests/machine_exact_d3_eq_cond.rs"
+      - "crates/sens/tests/machine_exact_d5_arithmetic.rs"
+      - "crates/sens/tests/machine_exact_d5_quotient.rs"
+      - "crates/sens/tests/machine_exact_d5_order.rs"
+      - "crates/sens/tests/machine_exact_d5_zerop.rs"
+      - "crates/sens/tests/machine_exact_d6_add1_sub1.rs"
+      - "crates/sens/tests/machine_capability_axis.rs"
+      - "crates/sens/tests/i5_6400_machine_profile.rs"
+      - "crates/sens/tests/semantic_coordinate_join_2.rs"
+      - "crates/sens/tests/semantic_coordinate_join.rs"
+      - "crates/sens/tests/machine_noninterference_contract.rs"
+      - "crates/sens/tests/machine_lowering_boundary.rs"
+      - "crates/sens/tests/x86_64_lisp_encoder.rs"
+      - "crates/sens-host/tests/real_silicon_sweep.rs"
+      - "crates/sens-host/src/native_exec.rs"
+      - "crates/sens-host/tests/native_lisp_bytes.rs"
+      - "scripts/generate-encoder-coverage-input.py"
+      - "scripts/silicon-census.py"
+      - "scripts/silicon-coverage.py"
+      - ".github/workflows/machine-exact-domain-cpu.yml"
+
+jobs:
+  real-silicon-harness-build:
+    name: Compile real-silicon harness only
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v5
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Compile without executing owner-silicon witness
+        run: cargo test -p sens-host --test real_silicon_sweep --no-run
+
+  exact-domain-x86:
+    name: Exact-domain x86 portable witness
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v5
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Exact-domain CPU bridge
+        run: |
+          cargo test -p sens --test machine_exact_domain_cpu -- --nocapture
+          cargo test -p sens --test machine_effect_add_projection -- --nocapture
+          cargo test -p sens --test machine_semantic_effect_lowering -- --nocapture
+          cargo test -p sens --test machine_effect_structural_projection -- --nocapture
+          # Exact lowered DomainCall data must select native CAR(CONS ...) without spelling/SID authority.
+          cargo test -p sens --test native_first_exact_domain -- --nocapture
+          cargo test -p sens --test machine_exact_d3_structural -- --nocapture
+          cargo test -p sens --test machine_exact_d3_eq_cond -- --nocapture
+          cargo test -p sens --test machine_exact_d5_arithmetic -- --nocapture
+          cargo test -p sens --test machine_exact_d5_quotient -- --nocapture
+          cargo test -p sens --test machine_exact_d5_order -- --nocapture
+          cargo test -p sens --test machine_exact_d5_zerop -- --nocapture
+          cargo test -p sens --test machine_exact_d6_add1_sub1 -- --nocapture
+          cargo test -p sens --test machine_capability_axis -- --nocapture
+          cargo test -p sens --test semantic_coordinate_join -- --nocapture
+          cargo test -p sens --test semantic_coordinate_join_2 -- --nocapture
+          cargo test -p sens --test machine_noninterference_contract -- --nocapture
+      - name: Derived machine coverage inputs
+        run: python3 scripts/generate-encoder-coverage-input.py --check
+      - name: Full silicon census projection
+        run: |
+          python3 scripts/silicon-census.py --self-test
+          python3 scripts/silicon-census.py --output target/silicon-census-hosted.json
+          python3 scripts/silicon-coverage.py target/silicon-census-hosted.json \
+            --output target/silicon-coverage-hosted.json
+      - name: Existing x86 lowering boundary
+        run: cargo test -p sens --test machine_lowering_boundary -- --nocapture
+      - name: Lisp-owned x86 encoder bytes
+        run: cargo test -p sens --test x86_64_lisp_encoder -- --nocapture
+      - name: Native machine-byte boundary
+        run: |
+          cargo test -p sens-host --test native_lisp_bytes -- --nocapture
+          cargo test -p sens-host --test machine_effect_structural -- --nocapture
+      - name: Compile owner-silicon witness without claiming hosted hardware evidence
+        run: cargo test -p sens-host --test real_silicon_sweep --no-run
+
+  d6-add1-sub1-gpu-witness:
+    name: D6 ADD1/SUB1 GPU-runner witness
+    if: vars.LOCAL_HARDWARE_RUNNERS == 'true'
+    runs-on: [self-hosted, Linux, X64, gpu, gtx-1050-ti, cuda-12.6]
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v5
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Exact D6 ADD1/SUB1 machine witness
+        run: cargo test -p sens --test machine_exact_d6_add1_sub1 -- --nocapture
+
+  owner-i5-6400-real-silicon:
+    name: Owner i5-6400 real-silicon witness
+    if: vars.LOCAL_HARDWARE_RUNNERS == 'true'
+    runs-on: [self-hosted, Linux, X64, gpu, gtx-1050-ti, cuda-12.6]
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v5
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Exact D6 ADD1/SUB1 machine witness
+        run: cargo test -p sens --test machine_exact_d6_add1_sub1 -- --nocapture
+      - name: Owner i5-6400 profile
+        run: cargo test -p sens --test i5_6400_machine_profile -- --nocapture
+      - name: Owner i5-6400 real-silicon sweep
+        env:
+          SENS_REAL_SILICON_ARTIFACT: ${{ github.workspace }}/real-silicon-sweep.json
+        run: cargo test -p sens-host --test real_silicon_sweep -- --nocapture
+      - name: Derive full silicon census from the same ledger
+        run: |
+          python3 scripts/silicon-census.py \
+            --ledger real-silicon-sweep.json \
+            --output real-silicon-census.json
+      - name: Derive silicon coverage from the full census
+        run: |
+          python3 scripts/silicon-coverage.py real-silicon-census.json \
+            --output real-silicon-coverage.json
+      - name: Upload real-silicon evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: real-silicon-sweep-${{ github.sha }}
+          path: |
+            real-silicon-sweep.json
+            real-silicon-census.json
+            real-silicon-coverage.json
+          if-no-files-found: error
