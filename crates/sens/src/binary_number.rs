@@ -143,6 +143,81 @@ impl BinaryNumber {
         Self::from_numeric_domain_bits(out_width, &out_bits)
     }
 
+    /// Same-Dn *natural* multiplication. The exact product of two n-bit
+    /// magnitudes needs at most 2n bits, so Dn or its ratified successor
+    /// D(2n) always has enough capacity. No modulo or host integer fallback.
+    /// This is a mechanism for the Dn arithmetic contract, not an invented
+    /// independent Number domain or signed/rational opcode.
+    pub fn mul_admitted_numeric(&self, other: &Self) -> Option<Self> {
+        let width = self.numeric_domain_width?;
+        if other.numeric_domain_width != Some(width) {
+            return None;
+        }
+        let product = Self::normalize(self.bits.clone())
+            .mul(&Self::normalize(other.bits.clone()));
+        let selected = if product.width() > width {
+            width.checked_mul(2)?
+        } else {
+            width
+        };
+        if !Self::is_numeric_domain_width(selected) || product.width() > selected {
+            return None;
+        }
+        let mut word = vec![0; selected - product.width()];
+        word.extend_from_slice(product.as_bits());
+        Self::from_numeric_domain_bits(selected, &word)
+    }
+
+    /// Same-Dn exact natural subtraction. A negative answer requires a
+    /// signed NEG composition: return None instead of wrapping around n bits.
+    /// Exact zero and nonnegative difference remain members of the input Dn.
+    pub fn checked_sub_admitted_numeric(&self, other: &Self) -> Option<Self> {
+        let width = self.numeric_domain_width?;
+        if other.numeric_domain_width != Some(width) {
+            return None;
+        }
+        let difference = Self::normalize(self.bits.clone())
+            .checked_sub(&Self::normalize(other.bits.clone()))?;
+        let mut word = vec![0; width.checked_sub(difference.width())?];
+        word.extend_from_slice(difference.as_bits());
+        Self::from_numeric_domain_bits(width, &word)
+    }
+
+    /// Dn exact Euclidean quotient + remainder, each remaining a Dn
+    /// natural. A fractional quotient still needs a canonical RATIO
+    /// composition before it can be returned as a language Value.
+    pub fn div_rem_admitted_numeric(&self, other: &Self) -> Option<(Self, Self)> {
+        let width = self.numeric_domain_width?;
+        if other.numeric_domain_width != Some(width) || other.is_zero() {
+            return None;
+        }
+        // Raw div_rem is intentionally a magnitude mechanism. Explicitly
+        // strip tags only inside this private calculation and RE-ADMIT both
+        // results into their original Dn at its boundary.
+        let (quotient, remainder) = Self::normalize(self.bits.clone())
+            .div_rem(&Self::normalize(other.bits.clone()))?;
+        let admit = |value: Self| -> Option<Self> {
+            let mut word = vec![0; width.checked_sub(value.width())?];
+            word.extend_from_slice(value.as_bits());
+            Self::from_numeric_domain_bits(width, &word)
+        };
+        Some((admit(quotient)?, admit(remainder)?))
+    }
+
+    /// A mathematically valid negative difference is a NEG law composition
+    /// of this exact admitted nonzero magnitude. Sign is returned only as
+    /// mechanism metadata: never reinterpret one Dn atom bit as a sign bit.
+    pub fn signed_difference_parts_admitted_numeric(&self, other: &Self) -> Option<(bool, Self)> {
+        let width = self.numeric_domain_width?;
+        if other.numeric_domain_width != Some(width) {
+            return None;
+        }
+        match Self::normalize(self.bits.clone()).cmp(&Self::normalize(other.bits.clone())) {
+            Ordering::Less => Some((true, other.checked_sub_admitted_numeric(self)?)),
+            _ => Some((false, self.checked_sub_admitted_numeric(other)?)),
+        }
+    }
+
     pub fn as_bits(&self) -> &[u8] {
         &self.bits
     }
@@ -597,6 +672,91 @@ mod tests {
         assert!(full.add_admitted_numeric(&BinaryNumber::one()).is_none());
         let another_domain = BinaryNumber::from_numeric_domain_bits(48, &vec![0; 48]).unwrap();
         assert!(full.add_admitted_numeric(&another_domain).is_none());
+    }
+
+    #[test]
+    fn d24_plus_same_domain_mul_sub_div_are_exact_and_closed() {
+        let admitted = |width: usize, value: u64| {
+            let mut word = vec![0; width];
+            for i in 0..width.min(64) {
+                word[width - 1 - i] = ((value >> i) & 1) as u8;
+            }
+            BinaryNumber::from_numeric_domain_bits(width, &word).unwrap()
+        };
+        for width in [24, 48, 96, 192, 384] {
+            let z = admitted(width, 0);
+            let one = admitted(width, 1);
+            let six = admitted(width, 6);
+            let two = admitted(width, 2);
+            assert_eq!(six.mul_admitted_numeric(&two).unwrap(), admitted(width, 12));
+            assert_eq!(six.checked_sub_admitted_numeric(&two).unwrap(), admitted(width, 4));
+            assert_eq!(six.checked_sub_admitted_numeric(&six).unwrap(), z);
+            assert!(two.checked_sub_admitted_numeric(&six).is_none());
+            assert_eq!(six.div_rem_admitted_numeric(&two).unwrap(), (admitted(width, 3), z.clone()));
+            assert_eq!(one.div_rem_admitted_numeric(&six).unwrap(), (z.clone(), one.clone()));
+            assert!(six.div_rem_admitted_numeric(&z).is_none());
+            assert_eq!(six.signed_difference_parts_admitted_numeric(&two).unwrap(), (false, admitted(width,4)));
+            assert_eq!(two.signed_difference_parts_admitted_numeric(&six).unwrap(), (true, admitted(width,4)));
+            assert_eq!(one.signed_difference_parts_admitted_numeric(&one).unwrap(), (false, z.clone()));
+            assert!(!z.can_be_negated_in_numeric_domain());
+        }
+        let a24 = admitted(24, 12);
+        let b48 = admitted(48, 2);
+        assert!(a24.mul_admitted_numeric(&b48).is_none());
+        assert!(a24.checked_sub_admitted_numeric(&b48).is_none());
+        assert!(a24.div_rem_admitted_numeric(&b48).is_none());
+        assert!(a24.signed_difference_parts_admitted_numeric(&b48).is_none());
+        assert!(a24.mul_admitted_numeric(&BinaryNumber::one()).is_none());
+    }
+
+    #[test]
+    fn full_d24_plus_multiplication_promotes_to_exact_double_width() {
+        for width in [24, 48, 96, 192, 384] {
+            let max = BinaryNumber::from_numeric_domain_bits(width, &vec![1; width]).unwrap();
+            let product = max.mul_admitted_numeric(&max).unwrap();
+            assert_eq!(product.numeric_domain_width(), Some(2*width));
+            assert_eq!(product.width(), 2*width);
+            let product_word = product.exact_numeric_domain_bits().unwrap();
+            assert_eq!(product_word.len(), 2*width);
+            // (2^n-1)^2 = 2^(2n) - 2^(n+1) + 1
+            let mut expected = vec![1u8; 2*width];
+            expected[width-1] = 0;
+            expected[width] = 0;
+            expected[2*width-1] = 1;
+            assert_eq!(product_word, expected);
+            let zero = BinaryNumber::from_numeric_domain_bits(width, &vec![0; width]).unwrap();
+            assert_eq!(max.mul_admitted_numeric(&zero).unwrap().numeric_domain_width(), Some(width));
+        }
+    }
+
+    #[test]
+    fn d24_plus_arithmetic_matches_independent_small_integer_oracle() {
+        let make = |n: u32| {
+            let mut bits = vec![0u8;24];
+            for i in 0..24 { bits[23-i] = ((n >> i)&1) as u8; }
+            BinaryNumber::from_numeric_domain_bits(24,&bits).unwrap()
+        };
+        for a in 0u32..64 {
+            for b in 0u32..64 {
+                let left = make(a);
+                let right = make(b);
+                let product = left.mul_admitted_numeric(&right).unwrap();
+                assert_eq!(product.to_decimal_string(), (a*b).to_string());
+                assert_eq!(product.numeric_domain_width(), Some(24));
+                assert_eq!(left.checked_sub_admitted_numeric(&right).map(|n|n.to_decimal_string()),
+                    a.checked_sub(b).map(|n|n.to_string()));
+                assert_eq!(left.signed_difference_parts_admitted_numeric(&right)
+                    .map(|(negative,n)|(negative,n.to_decimal_string())),
+                    Some((a<b,a.abs_diff(b).to_string())));
+                if b == 0 {
+                    assert!(left.div_rem_admitted_numeric(&right).is_none());
+                } else {
+                    let (q,r) = left.div_rem_admitted_numeric(&right).unwrap();
+                    assert_eq!((q.to_decimal_string(),r.to_decimal_string()),
+                        ((a/b).to_string(),(a%b).to_string()));
+                }
+            }
+        }
     }
 
     #[test]
