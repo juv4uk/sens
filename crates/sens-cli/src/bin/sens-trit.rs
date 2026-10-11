@@ -12,7 +12,7 @@
 use std::{env, fs, fs::OpenOptions, io::Write, path::Path, process};
 
 const USAGE: &str =
-    "usage: sens-trit (encode path.lisp | open path.sens | view path.sens | decode path.sens | explain path.sens | eval path.sens | eval-core4 path.sens | verify path.lisp | encode-f3 path.sens | open-f3 path.senc | decode-f3 path.senc | eval-f3 path.senc)\n       sens-trit path.sens  # open only; never execute implicitly";
+    "usage: sens-trit (encode path.lisp | open path.sens | view path.sens | decode path.sens | explain path.sens | eval path.sens | eval-core4 path.sens | verify path.lisp | encode-f3 path.sens | open-f3 path.senc | decode-f3 path.senc | eval-f3 path.senc | verify-f3-sha256 path.senc SHA256 | eval-f3-sha256 path.senc SHA256)\n       sens-trit path.sens  # open only; never execute implicitly";
 
 fn sibling_sens(path: &Path) -> Result<std::path::PathBuf, String> {
     if path.extension().and_then(|ext| ext.to_str()) != Some("lisp") {
@@ -40,6 +40,35 @@ fn read_explicit_f3(path: &Path) -> Result<Vec<u8>, String> {
         .map_err(|e| format!("explicit small F3 rejected: {e:?}"))
 }
 
+
+
+/// Require a trusted *external* 64-hex-character SHA-256 of the RAW F3 file
+/// before returning any decoded program. Hash is an integrity check only:
+/// its provenance must be trusted (e.g. pinned manifest or publisher sig).
+/// Read the file just once so a racing file replacement cannot bypass hashing.
+fn read_explicit_f3_sha256(path: &Path, expected_hex: &str) -> Result<Vec<u8>, String> {
+    if path.extension().and_then(|ext| ext.to_str()) != Some("senc") {
+        return Err("sha256-verified F3 requires explicit .senc".into());
+    }
+    if expected_hex.len() != 64 ||
+        !expected_hex.bytes().all(|b| b.is_ascii_digit() || (b'a'..=b'f').contains(&b))
+    {
+        return Err("expected SHA-256 must be exactly 64 lowercase hex characters".into());
+    }
+    let mut expected = [0u8; 32];
+    for (i, slot) in expected.iter_mut().enumerate() {
+        *slot = u8::from_str_radix(&expected_hex[i * 2..i * 2 + 2], 16)
+            .map_err(|_| "invalid SHA-256 hex")?;
+    }
+    let bytes = fs::read(path).map_err(|e| format!("read F3 for SHA-256 verification: {e}"))?;
+    let actual = sens::sha256_source(&bytes);
+    let mismatch = actual.iter().zip(expected.iter()).fold(0u8, |acc, (a, b)| acc | (a ^ b));
+    if mismatch != 0 {
+        return Err("F3 SHA-256 mismatch: no decoding or execution permitted".into());
+    }
+    sens::frame3_small::decode_explicit_small_f3(&bytes)
+        .map_err(|e| format!("SHA-256 verified but F3 canonical decode rejected: {e:?}"))
+}
 
 fn write_explicit_small_f3(path: &Path) -> Result<(), String> {
     // Operator-requested only: never change the normal T5 .sens source.
@@ -170,9 +199,12 @@ fn execute() -> Result<(), String> {
     let args = env::args().skip(1).collect::<Vec<_>>();
     // У разі передавання одного файла .sens читаємо його як людина,
     // а не показуємо на екран внутрішні трити чи сирі байти.
-    let (command, file) = match args.as_slice() {
-        [path] if path.ends_with(".sens") => ("open", path.as_str()),
-        [command, path] => (command.as_str(), path.as_str()),
+    let (command, file, trusted_hash) = match args.as_slice() {
+        [path] if path.ends_with(".sens") => ("open", path.as_str(), None),
+        [command, path] => (command.as_str(), path.as_str(), None),
+        [command, path, expected]
+            if matches!(command.as_str(), "verify-f3-sha256" | "eval-f3-sha256") =>
+                (command.as_str(), path.as_str(), Some(expected.as_str())),
         _ => return Err(USAGE.into()),
     };
     let path = Path::new(file);
@@ -230,6 +262,27 @@ fn execute() -> Result<(), String> {
             Ok(())
         }
         "encode-f3" => write_explicit_small_f3(path),
+        "verify-f3-sha256" => {
+            let restored = read_explicit_f3_sha256(
+                path,
+                trusted_hash.ok_or("missing trusted F3 SHA-256")?
+            )?;
+            println!("F3_SHA256_VERIFIED canonical_t5_bytes={}", restored.len());
+            Ok(())
+        }
+        "eval-f3-sha256" => {
+            let restored = read_explicit_f3_sha256(
+                path,
+                trusted_hash.ok_or("missing trusted F3 SHA-256")?
+            )?;
+            let result = eval_t5_bytes(&restored)?;
+            for output in result.output {
+                println!("{output}");
+            }
+            println!("{}", result.value);
+            Ok(())
+        }
+
         "open-f3" => {
             let canonical_t5 = read_explicit_f3(path)?;
             let human = sens::open_ternary_program(&canonical_t5)
@@ -295,6 +348,22 @@ mod eval_tests {
         assert!(sens::decode_ternary_program(&bytes).is_err());
         assert!(USAGE.contains("eval-f3 path.senc"));
         assert!(USAGE.contains("encode-f3 path.sens"));
+    }
+
+    #[test]
+    fn sha256_integrity_verdict_requires_trusted_exact_physical_f3_bytes() {
+        let good = [0xf3, 0x40, 0x60];
+        let trusted = "19b495e17cd0522c1af4863704b92751df5e5769ee0bfe3c9844aedbc0a57406";
+        assert_eq!(
+            sens::sha256_source(&good)
+                .iter()
+                .map(|byte| format!("{byte:02x}"))
+                .collect::<String>(),
+            trusted
+        );
+        // The digest attests to the actual physical carrier, not decoded T5.
+        assert_ne!(sens::sha256_source(&good), sens::sha256_source(&[0x63, 0x89, 0x06, 0xa1]));
+        assert!(USAGE.contains("eval-f3-sha256 path.senc SHA256"));
     }
 
     #[test]
