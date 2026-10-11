@@ -376,8 +376,8 @@ mod tests {
 
     #[test]
     fn canonical_t5_triplet_compiles_only_when_all_three_projections_match() {
-        let source = "(як-є ())\\n".as_bytes();
-        let view = b"10 001 00 000 01\\n";
+        let source = "(як-є ())\n".as_bytes();
+        let view = b"10 001 00 000 01\n";
         let physical = encode_binary_projection_ternary(
             std::str::from_utf8(view).expect("ASCII canonical view"),
         ).expect("existing SENS T5 codec");
@@ -392,10 +392,10 @@ mod tests {
         assert_eq!(artifact_schema(&artifact).unwrap(), "compiler-compilation-artifact/1");
 
         assert!(compile_t5_triplet_bytes(
-            source, &physical, b"10 100 00 000 01\\n", revision,
+            source, &physical, b"10 100 00 000 01\n", revision,
         ).is_err(), "a mismatched extensionless view must block");
         assert!(compile_t5_triplet_bytes(
-            b"(інакше ())\\n", &physical, view, revision,
+            b"(інакше ())\n", &physical, view, revision,
         ).is_err(), "a source that lowers to a different exact program must block");
     }
 
