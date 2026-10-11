@@ -4090,7 +4090,7 @@ work/chatgpt-469-postcore-peers	UNTRIAGED	-	-	BRANCH-NAME-ONLY
 work/chatgpt-469-registry-derived-postcore-projection	UNTRIAGED	-	-	BRANCH-NAME-ONLY
 work/chatgpt-469-registry-derived-postcore-projection-main	UNTRIAGED	-	-	BRANCH-NAME-ONLY
 work/chatgpt-469-registry-derived-postcore-projection-main2	UNTRIAGED	-	-	BRANCH-NAME-ONLY
-work/chatgpt-606-generated-postcore-cache	UNTRIAGED	-	-	BRANCH-NAME-ONLY
+work/chatgpt-606-generated-postcore-cache	ALREADY-IN-MAIN-ARCHIVED	86fef49e3ded9092ffd8b8869d85aa5a57e80290	1894dcf0c599e35f14aa594453aacc64cfbaa949	All 7 PR diffs archived in research/domain-archive/20261011/pr0623, plus exact branch FASL Base64 and blob manifest. Active generator not merged: current time/process sources retire old per-file materializer; live architecture verdict remains in issue #606. PR #623 closed archived.
 work/chatgpt-uk-file-io-1151-1152-replay	UNTRIAGED	-	-	BRANCH-NAME-ONLY
 work/chatgpt-uk-file-io-1151-1152	UNTRIAGED	-	-	BRANCH-NAME-ONLY
 work/chatgpt-uk-fill-1147-1152-candidates	UNTRIAGED	-	-	BRANCH-NAME-ONLY
