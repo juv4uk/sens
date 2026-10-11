@@ -21,5 +21,9 @@ jobs:
       - uses: dtolnay/rust-toolchain@stable
       - name: Compile canonical SENS Core
         run: cargo check --locked -p sens --lib
+      - name: Ratified numeric D24/D48/... peer domains (Core-only)
+        run: |
+          python3 scripts/check-numeric-domain-ratification.py --self-test
+          python3 scripts/check-numeric-domain-ratification.py
       - name: Verify Core domain and ownership boundaries
         run: cargo test --locked -p sens --test domain_ladder --test domain_ladder_only_kernel --test domain_ast_value_identity
