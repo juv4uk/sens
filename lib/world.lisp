@@ -16,83 +16,83 @@
 ;; Vorgänger, und das neue Journal teilt das vollständige alte Journal als
 ;; Cons-Ende. Kein veränderliches Hostobjekt und kein Rust-Primitiv ist nötig.
 
-(00001001 make-world
-  (00001000 (parent journal metadata)
-    (00100111 (00000001 world) parent journal metadata)))
+(0011 make-world
+  (0010 (parent journal metadata)
+    (1110 (001 world) parent journal metadata)))
 
-(00001001 empty-world
-  (00001000 ()
-    (make-world (00000001 ()) (00000001 ()) (00000001 ()))))
+(0011 empty-world
+  (0010 ()
+    (make-world (001 ()) (001 ()) (001 ()))))
 
-(00001001 world?
-  (00001000 (value)
+(0011 world?
+  (0010 (value)
     (110
       
-      ((010 value)  (00000001 ()))
-      ((101 (00000101 value) (00000001 world)) t)
+      ((010 value)  (001 ()))
+      ((101 (100 value) (001 world)) t)
       )))
 
-(00001001 world-parent (00001000 (world) (00101111 world)))
-(00001001 world-journal (00001000 (world) (00110000 world)))
-(00001001 world-metadata (00001000 (world) (00110001 world)))
+(0011 world-parent (0010 (world) (1001 world)))
+(0011 world-journal (0010 (world) (10011 world)))
+(0011 world-metadata (0010 (world) (100111 world)))
 
 ;; Events intentionally have the same data shape as `lib/knowledge.lisp`'s
 ;; journal, so a later migration can reuse packages and projections unchanged.
 ;; Події навмисно мають ту саму форму, що й журнал `lib/knowledge.lisp`.
 ;; Ereignisse haben absichtlich dieselbe Form wie in `lib/knowledge.lisp`.
-(00001001 world-record
-  (00001000 (world event)
+(0011 world-record
+  (0010 (world event)
     (make-world world
-                (00000100 event (world-journal world))
+                (111 event (world-journal world))
                 (world-metadata world))))
 
-(00001001 world-tell
-  (00001000 (world module-name clause)
-    (world-record world (00100111 (00000001 tell) module-name clause))))
+(0011 world-tell
+  (0010 (world module-name clause)
+    (world-record world (1110 (001 tell) module-name clause))))
 
-(00001001 world-retract
-  (00001000 (world module-name clause)
-    (world-record world (00100111 (00000001 retract) module-name clause))))
+(0011 world-retract
+  (0010 (world module-name clause)
+    (world-record world (1110 (001 retract) module-name clause))))
 
-(00001001 world-module-events
-  (00001000 (world module-name)
-    (00111000 (00001000 (event) (00100010 (00101111 event) module-name))
+(0011 world-module-events
+  (0010 (world module-name)
+    (101001 (0010 (event) (11110111 (1001 event) module-name))
             (world-journal world))))
 
-(00001001 world-remove-first
-  (00001000 (value values)
+(0011 world-remove-first
+  (0010 (value values)
     (110
       
-      ((010 values)  (00000001 ()))
-      ((00100010 value (00000101 values)) (00000110 values))
-      ((00100010
-        (00100010 value (00000101 values))
-        (00100010 (00000001 d1-no-left) (00000001 d1-no-right)))
-       (00000100 (00000101 values) (world-remove-first value (00000110 values)))))))
+      ((010 values)  (001 ()))
+      ((11110111 value (100 values)) (011 values))
+      ((11110111
+        (11110111 value (100 values))
+        (11110111 (001 d1-no-left) (001 d1-no-right)))
+       (111 (100 values) (world-remove-first value (011 values)))))))
 
-(00001001 world-apply-event
-  (00001000 (clauses event)
+(0011 world-apply-event
+  (0010 (clauses event)
     (110
-      ((101 (00000101 event) (00000001 tell)) (00000100 (00110000 event) clauses))
-      ((101 (00000101 event) (00000001 retract))
-       (world-remove-first (00110000 event) clauses))
-      ((00100010
-        (101 (00000101 event) (00000001 retract))
-        (00100010 (00000001 d1-no-left) (00000001 d1-no-right)))
+      ((101 (100 event) (001 tell)) (111 (10011 event) clauses))
+      ((101 (100 event) (001 retract))
+       (world-remove-first (10011 event) clauses))
+      ((11110111
+        (101 (100 event) (001 retract))
+        (11110111 (001 d1-no-left) (001 d1-no-right)))
        clauses))))
 
-(00001001 world-module-known?
-  (00001000 (world module-name)
-    (00000100 (010 (world-module-events world module-name)))))
+(0011 world-module-known?
+  (0010 (world module-name)
+    (111 (010 (world-module-events world module-name)))))
 
-(00001001 world-module-missing?
-  (00001000 (world module-name)
+(0011 world-module-missing?
+  (0010 (world module-name)
     (010 (world-module-events world module-name))))
 
-(00001001 world-clauses
-  (00001000 (world module-name)
-    (00111001 world-apply-event (00000001 ())
-            (00101010 (world-module-events world module-name)))))
+(0011 world-clauses
+  (0010 (world module-name)
+    (101110 world-apply-event (001 ())
+            (10100 (world-module-events world module-name)))))
 
 ;; Pure reasoning adapters: the answer depends only on the explicit world,
 ;; module, and goal. They deliberately do not inspect `*knowledge-journal*`.
@@ -100,53 +100,53 @@
 ;; модуля й цілі; глобальний `*knowledge-journal*` вони не читають.
 ;; Reine Schlussfolgerungsadapter: Die Antwort hängt nur von der expliziten
 ;; Welt, dem Modul und dem Ziel ab; `*knowledge-journal*` wird nicht gelesen.
-(00001001 reason-in-world
-  (00001000 (world module-name goal)
+(0011 reason-in-world
+  (0010 (world module-name goal)
     (110
       ((world-module-known? world module-name)
-       (10000101 goal (world-clauses world module-name)))
+       (101001110 goal (world-clauses world module-name)))
       ((world-module-missing? world module-name)
-       (00000001 Module-not-found)))))
+       (001 Module-not-found)))))
 
-(00001001 forward-in-world
-  (00001000 (world module-name)
+(0011 forward-in-world
+  (0010 (world module-name)
     (110
       ((world-module-known? world module-name)
-       (run-multi (world-clauses world module-name) (00000001 ())))
+       (run-multi (world-clauses world module-name) (001 ())))
       ((world-module-missing? world module-name)
-       (00000001 Module-not-found)))))
+       (001 Module-not-found)))))
 
-(00001001 advice-decision-in-world
-  (00001000 (world module-name clause)
+(0011 advice-decision-in-world
+  (0010 (world module-name clause)
     (110
-      ((101 (00100011 module-name) (00000001 ()))
-       (00100111 (00000001 rejected) (00100111 (00000001 reason) (00000001 invalid-module)) (00100111 (00000001 input) clause)))
-      ((101 (knowledge-clause-valid? clause) (00000001 ()))
-       (00100111 (00000001 rejected) (00100111 (00000001 reason) (00000001 invalid-clause)) (00100111 (00000001 input) clause)))
+      ((101 (110101100 module-name) (001 ()))
+       (1110 (001 rejected) (1110 (001 reason) (001 invalid-module)) (1110 (001 input) clause)))
+      ((101 (knowledge-clause-valid? clause) (001 ()))
+       (1110 (001 rejected) (1110 (001 reason) (001 invalid-clause)) (1110 (001 input) clause)))
       ((010 ())
-       (10011100 ((opposite (opposite-knowledge-head (00000101 clause))))
-         (10011100 ((proofs (110
+       (001000 ((opposite (opposite-knowledge-head (100 clause))))
+         (001000 ((proofs (110
                          ((world-module-known? world module-name)
                           (reason-in-world world module-name opposite))
                          )))
            (110
              
-             ((010 proofs)  (00100111 (00000001 accepted)
-                    (00100111 (00000001 module) module-name)
-                    (00100111 (00000001 knowledge) clause)))
+             ((010 proofs)  (1110 (001 accepted)
+                    (1110 (001 module) module-name)
+                    (1110 (001 knowledge) clause)))
              ((010 ())
-              (00100111 (00000001 conflict)
-                    (00100111 (00000001 new) clause)
-                    (00100111 (00000001 existing) opposite)
-                    (00100111 (00000001 proof) (00000101 proofs)))))))))))
+              (1110 (001 conflict)
+                    (1110 (001 new) clause)
+                    (1110 (001 existing) opposite)
+                    (1110 (001 proof) (100 proofs)))))))))))
 
-(00001001 advise-world
-  (00001000 (world module-name clause)
-    (10011100 ((decision (advice-decision-in-world world module-name clause)))
+(0011 advise-world
+  (0010 (world module-name clause)
+    (001000 ((decision (advice-decision-in-world world module-name clause)))
       (110
-        ((101 (00000101 decision) (00000001 accepted))
-         (00100111 decision (world-tell world module-name clause)))
-        ((010 ()) (00100111 decision world))))))
+        ((101 (100 decision) (001 accepted))
+         (1110 decision (world-tell world module-name clause)))
+        ((010 ()) (1110 decision world))))))
 
 ;; The batch form creates exactly one child world after the whole proposed
 ;; knowledge set validates and proves conflict-free. Proposed rules can support
@@ -155,39 +155,39 @@
 ;; набору й перевірки конфліктів; жоден префікс не просочується при помилці.
 ;; Die Stapelform erzeugt genau eine Kindwelt erst nach vollständiger Prüfung;
 ;; bei einem Fehler kann kein Präfix des Pakets durchsickern.
-(00001001 advice-all-decision-in-world
-  (00001000 (world module-name clauses)
+(0011 advice-all-decision-in-world
+  (0010 (world module-name clauses)
     (110
-      ((101 (00100011 module-name) (00000001 ()))
-       (00100111 (00000001 rejected) (00100111 (00000001 reason) (00000001 invalid-module)) (00100111 (00000001 input) clauses)))
+      ((101 (110101100 module-name) (001 ()))
+       (1110 (001 rejected) (1110 (001 reason) (001 invalid-module)) (1110 (001 input) clauses)))
       
-      ((010 clauses)  (00100111 (00000001 rejected) (00100111 (00000001 reason) (00000001 invalid-batch)) (00100111 (00000001 input) clauses)))
-      ((101 (knowledge-proper-list? clauses) (00000001 ()))
-       (00100111 (00000001 rejected) (00100111 (00000001 reason) (00000001 invalid-batch)) (00100111 (00000001 input) clauses)))
-      ((101 (knowledge-clauses-valid? clauses) (00000001 ()))
-       (00100111 (00000001 rejected) (00100111 (00000001 reason) (00000001 invalid-clause)) (00100111 (00000001 input) clauses)))
+      ((010 clauses)  (1110 (001 rejected) (1110 (001 reason) (001 invalid-batch)) (1110 (001 input) clauses)))
+      ((101 (knowledge-proper-list? clauses) (001 ()))
+       (1110 (001 rejected) (1110 (001 reason) (001 invalid-batch)) (1110 (001 input) clauses)))
+      ((101 (knowledge-clauses-valid? clauses) (001 ()))
+       (1110 (001 rejected) (1110 (001 reason) (001 invalid-clause)) (1110 (001 input) clauses)))
       ((010 ())
-       (10011100 ((existing (110
+       (001000 ((existing (110
                          ((world-module-known? world module-name)
                           (world-clauses world module-name))
                          )))
-         (10011100 ((conflict (advice-batch-conflict
-                           clauses clauses (00101001 clauses existing))))
+         (001000 ((conflict (advice-batch-conflict
+                           clauses clauses (1111 clauses existing))))
            (110
              
-             ((010 conflict)  (00100111 (00000001 accepted)
-                    (00100111 (00000001 module) module-name)
-                    (00100111 (00000001 knowledge) clauses)))
+             ((010 conflict)  (1110 (001 accepted)
+                    (1110 (001 module) module-name)
+                    (1110 (001 knowledge) clauses)))
              ((010 ())
-              (00100111 (00000001 conflict)
-                    (00100111 (00000001 new) (00000101 conflict))
-                    (00100111 (00000001 existing) (00101111 conflict))
-                    (00100111 (00000001 proof) (00110000 conflict)))))))))))
+              (1110 (001 conflict)
+                    (1110 (001 new) (100 conflict))
+                    (1110 (001 existing) (1001 conflict))
+                    (1110 (001 proof) (10011 conflict)))))))))))
 
-(00001001 world-tell-all
-  (00001000 (world module-name clauses)
+(0011 world-tell-all
+  (0010 (world module-name clauses)
     (make-world world
-                (00101001 (clauses->tell-events module-name clauses)
+                (1111 (clauses->tell-events module-name clauses)
                         (world-journal world))
                 (world-metadata world))))
 
@@ -211,11 +211,11 @@
 ;; `world-tell-all` die einzige Schreibsemantik liefert. Nach der Migration der
 ;; übrigen globalen Writer kann diese Hülle entfallen.
 (00001010 defmodule (name rules)
-  (00100111 (00000001 def) (00000001 *knowledge-journal*)
-        (00100111 (00000001 world-journal)
-              (00100111 (00000001 world-tell-all)
-                    (00100111 (00000001 make-world) (00000001 ()) (00000001 *knowledge-journal*) (00000001 ()))
-                    (00100111 (00000001 quote) name)
+  (1110 (001 def) (001 *knowledge-journal*)
+        (1110 (001 world-journal)
+              (1110 (001 world-tell-all)
+                    (1110 (001 make-world) (001 ()) (001 *knowledge-journal*) (001 ()))
+                    (1110 (001 quote) name)
                     rules))))
 
 ;; The other two legacy journal macros follow the same bridge. `tell-knowledge`
@@ -236,32 +236,32 @@
 ;; bedingungslos, weil Wissensentzug keinen Widerspruch erzeugen kann. Beide
 ;; gewinnen das Kompatibilitätsjournal aus einer unveränderlichen World zurück.
 (00001010 tell-knowledge (module-name rules)
-  (00100111 (00000001 cond)
-        (00100111 (00100111 (00000001 check-conflict) (00100111 (00000001 quote) module-name) rules)
-              (00100111 (00000001 quote) (00000001 Conflict-detected)))
-        (00100111 (00000001 t)
-              (00100111 (00000001 def) (00000001 *knowledge-journal*)
-                    (00100111 (00000001 world-journal)
-                          (00100111 (00000001 world-tell-all)
-                                (00100111 (00000001 make-world) (00000001 ()) (00000001 *knowledge-journal*) (00000001 ()))
-                                (00100111 (00000001 quote) module-name)
+  (1110 (001 cond)
+        (1110 (1110 (001 check-conflict) (1110 (001 quote) module-name) rules)
+              (1110 (001 quote) (001 Conflict-detected)))
+        (1110 (001 t)
+              (1110 (001 def) (001 *knowledge-journal*)
+                    (1110 (001 world-journal)
+                          (1110 (001 world-tell-all)
+                                (1110 (001 make-world) (001 ()) (001 *knowledge-journal*) (001 ()))
+                                (1110 (001 quote) module-name)
                                 rules))))))
 
 (00001010 retract-knowledge (module-name clause)
-  (00100111 (00000001 def) (00000001 *knowledge-journal*)
-        (00100111 (00000001 world-journal)
-              (00100111 (00000001 world-retract)
-                    (00100111 (00000001 make-world) (00000001 ()) (00000001 *knowledge-journal*) (00000001 ()))
-                    (00100111 (00000001 quote) module-name)
+  (1110 (001 def) (001 *knowledge-journal*)
+        (1110 (001 world-journal)
+              (1110 (001 world-retract)
+                    (1110 (001 make-world) (001 ()) (001 *knowledge-journal*) (001 ()))
+                    (1110 (001 quote) module-name)
                     clause))))
 
-(00001001 advise-all-world
-  (00001000 (world module-name clauses)
-    (10011100 ((decision (advice-all-decision-in-world world module-name clauses)))
+(0011 advise-all-world
+  (0010 (world module-name clauses)
+    (001000 ((decision (advice-all-decision-in-world world module-name clauses)))
       (110
-        ((101 (00000101 decision) (00000001 accepted))
-         (00100111 decision (world-tell-all world module-name clauses)))
-        ((010 ()) (00100111 decision world))))))
+        ((101 (100 decision) (001 accepted))
+         (1110 decision (world-tell-all world module-name clauses)))
+        ((010 ()) (1110 decision world))))))
 
 ;; A guarded compatibility transition must be evaluated exactly once. `let`
 ;; cannot hold it because `def` would then update a disposable lambda frame, so
@@ -273,39 +273,39 @@
 ;; Ein geschützter Kompatibilitätsübergang wird genau einmal ausgewertet. `let`
 ;; eignet sich nicht, da `def` sonst einen temporären Lambda-Frame ändert; diese
 ;; Expansion nutzt daher eine ausdrückliche Top-Level-Zwischenbindung.
-(00001001 legacy-world-transition-expansion
-  (00001000 (transition)
-    (00100111 (00000001 second)
-          (00100111 (00000001 list)
-                (00100111 (00000001 def) (00000001 *legacy-knowledge-transition*) transition)
-                (00100111 (00000001 cond)
-                      (00100111
-                        (00100111 (00000001 equal?)
-                              (00100111 (00000001 00000101)
-                                    (00100111 (00000001 00000101) (00000001 *legacy-knowledge-transition*)))
-                              (00100111 (00000001 quote) (00000001 accepted)))
-                        (00100111 (00000001 second)
-                              (00100111 (00000001 list)
-                                    (00100111 (00000001 def) (00000001 *knowledge-journal*)
-                                          (00100111 (00000001 world-journal)
-                                                (00100111 (00000001 second)
-                                                      (00000001 *legacy-knowledge-transition*))))
-                                    (00100111 (00000001 00000101) (00000001 *legacy-knowledge-transition*)))))
-                      (00100111 (00000001 t)
-                            (00100111 (00000001 00000101) (00000001 *legacy-knowledge-transition*))))))))
+(0011 legacy-world-transition-expansion
+  (0010 (transition)
+    (1110 (001 second)
+          (1110 (001 list)
+                (1110 (001 def) (001 *legacy-knowledge-transition*) transition)
+                (1110 (001 cond)
+                      (1110
+                        (1110 (001 equal?)
+                              (1110 (001 00000101)
+                                    (1110 (001 00000101) (001 *legacy-knowledge-transition*)))
+                              (1110 (001 quote) (001 accepted)))
+                        (1110 (001 second)
+                              (1110 (001 list)
+                                    (1110 (001 def) (001 *knowledge-journal*)
+                                          (1110 (001 world-journal)
+                                                (1110 (001 second)
+                                                      (001 *legacy-knowledge-transition*))))
+                                    (1110 (001 00000101) (001 *legacy-knowledge-transition*)))))
+                      (1110 (001 t)
+                            (1110 (001 00000101) (001 *legacy-knowledge-transition*))))))))
 
 (00001010 advise (module-name clause)
   (legacy-world-transition-expansion
-    (00100111 (00000001 advise-world)
-          (00100111 (00000001 make-world) (00000001 ()) (00000001 *knowledge-journal*) (00000001 ()))
-          (00100111 (00000001 quote) module-name)
+    (1110 (001 advise-world)
+          (1110 (001 make-world) (001 ()) (001 *knowledge-journal*) (001 ()))
+          (1110 (001 quote) module-name)
           clause)))
 
 (00001010 advise-all (module-name clauses)
   (legacy-world-transition-expansion
-    (00100111 (00000001 advise-all-world)
-          (00100111 (00000001 make-world) (00000001 ()) (00000001 *knowledge-journal*) (00000001 ()))
-          (00100111 (00000001 quote) module-name)
+    (1110 (001 advise-all-world)
+          (1110 (001 make-world) (001 ()) (001 *knowledge-journal*) (001 ()))
+          (1110 (001 quote) module-name)
           clauses)))
 
 ;; World interchange reuses the established, versioned `my-lisp-knowledge`
@@ -318,55 +318,55 @@
 ;; Der World-Austausch nutzt die bestehende versionierte Hülle
 ;; `my-lisp-knowledge`. Export liest einen expliziten Schnappschuss, Import
 ;; delegiert den einzigen Übergang an `advise-all-world`; Daten werden nie evaluiert.
-(00001001 make-world-knowledge-package
-  (00001000 (world module-name)
+(0011 make-world-knowledge-package
+  (0010 (world module-name)
     (110
-      ((101 (00100011 module-name) (00000001 ()))
-       (00100111 (00000001 rejected) (00100111 (00000001 reason) (00000001 invalid-module)) (00100111 (00000001 input) module-name)))
+      ((101 (110101100 module-name) (001 ()))
+       (1110 (001 rejected) (1110 (001 reason) (001 invalid-module)) (1110 (001 input) module-name)))
       ((world-module-missing? world module-name)
-       (00100111 (00000001 rejected) (00100111 (00000001 reason) (00000001 Module-not-found)) (00100111 (00000001 input) module-name)))
+       (1110 (001 rejected) (1110 (001 reason) (001 Module-not-found)) (1110 (001 input) module-name)))
       ((world-module-known? world module-name)
-       (10011100 ((clauses (world-clauses world module-name)))
+       (001000 ((clauses (world-clauses world module-name)))
          (110
            
-           ((010 clauses)  (00100111 (00000001 rejected) (00100111 (00000001 reason) (00000001 invalid-batch)) (00100111 (00000001 input) clauses)))
+           ((010 clauses)  (1110 (001 rejected) (1110 (001 reason) (001 invalid-batch)) (1110 (001 input) clauses)))
            ((010 ()) (make-knowledge-package module-name clauses))))))))
 
-(00001001 import-knowledge-package-world
-  (00001000 (world package)
+(0011 import-knowledge-package-world
+  (0010 (world package)
     (110
       
-      ((010 package)  (00100111 (00100111 (00000001 rejected)
-                   (00100111 (00000001 reason) (00000001 invalid-package))
-                   (00100111 (00000001 input) package))
+      ((010 package)  (1110 (1110 (001 rejected)
+                   (1110 (001 reason) (001 invalid-package))
+                   (1110 (001 input) package))
              world))
-      ((101 (knowledge-proper-list? package) (00000001 ()))
-       (00100111 (00100111 (00000001 rejected)
-                   (00100111 (00000001 reason) (00000001 invalid-package))
-                   (00100111 (00000001 input) package))
+      ((101 (knowledge-proper-list? package) (001 ()))
+       (1110 (1110 (001 rejected)
+                   (1110 (001 reason) (001 invalid-package))
+                   (1110 (001 input) package))
              world))
-      ((101 (knowledge-package-entries-valid? package) (00000001 ()))
-       (00100111 (00100111 (00000001 rejected)
-                   (00100111 (00000001 reason) (00000001 invalid-package))
-                   (00100111 (00000001 input) package))
+      ((101 (knowledge-package-entries-valid? package) (001 ()))
+       (1110 (1110 (001 rejected)
+                   (1110 (001 reason) (001 invalid-package))
+                   (1110 (001 input) package))
              world))
-      ((101 (knowledge-package-field (00000001 format) package) (00000001 my-lisp-knowledge))
+      ((101 (knowledge-package-field (001 format) package) (001 my-lisp-knowledge))
        (110
-         ((00100010 (knowledge-package-field (00000001 version) package)
+         ((11110111 (knowledge-package-field (001 version) package)
                   *knowledge-package-version*)
           (advise-all-world world
-                            (knowledge-package-field (00000001 module) package)
-                            (knowledge-package-field (00000001 clauses) package)))
+                            (knowledge-package-field (001 module) package)
+                            (knowledge-package-field (001 clauses) package)))
          ((010 ())
-          (00100111 (00100111 (00000001 rejected)
-                      (00100111 (00000001 reason) (00000001 unsupported-version))
-                      (00100111 (00000001 version)
-                            (knowledge-package-field (00000001 version) package)))
+          (1110 (1110 (001 rejected)
+                      (1110 (001 reason) (001 unsupported-version))
+                      (1110 (001 version)
+                            (knowledge-package-field (001 version) package)))
                 world))))
       ((010 ())
-       (00100111 (00100111 (00000001 rejected)
-                   (00100111 (00000001 reason) (00000001 invalid-package))
-                   (00100111 (00000001 input) package))
+       (1110 (1110 (001 rejected)
+                   (1110 (001 reason) (001 invalid-package))
+                   (1110 (001 input) package))
              world)))))
 
 ;; Package import completes the writer migration. The legacy macro delegates
@@ -380,8 +380,8 @@
 ;; ein akzeptiertes Ergebnis bindet das Journal neu.
 (00001010 import-knowledge-package (package)
   (legacy-world-transition-expansion
-    (00100111 (00000001 import-knowledge-package-world)
-          (00100111 (00000001 make-world) (00000001 ()) (00000001 *knowledge-journal*) (00000001 ()))
+    (1110 (001 import-knowledge-package-world)
+          (1110 (001 make-world) (001 ()) (001 *knowledge-journal*) (001 ()))
           package)))
 
 ;; History navigation is derived from parent links, not timestamps. Depth is
@@ -398,67 +398,67 @@
 ;; absolut ab der Wurzel (`empty-world` = 0). `world-diff from to` liefert
 ;; chronologische Ereignisse nur für einen Vorfahren; getrennte Zweige ergeben
 ;; `World-not-ancestor`, bis ein ausdrückliches Merge-Gesetz definiert ist.
-(00001001 world-depth
-  (00001000 (world)
+(0011 world-depth
+  (0010 (world)
     (110
       
       ((010 (world-parent world))  0)
-      ((010 ()) (00001100 1 (world-depth (world-parent world)))))))
+      ((010 ()) (01010 1 (world-depth (world-parent world)))))))
 
-(00001001 world-at-depth-from
-  (00001000 (world current-depth target-depth)
+(0011 world-at-depth-from
+  (0010 (world current-depth target-depth)
     (110
-      ((00011100 current-depth target-depth)  world)
-      ((010 ()) (00000001 World-not-found))
+      ((11110111 current-depth target-depth)  world)
+      ((010 ()) (001 World-not-found))
       
-      ((010 (world-parent world))  (00000001 World-not-found))
+      ((010 (world-parent world))  (001 World-not-found))
       ((010 ()) (world-at-depth-from (world-parent world)
-                              (00001101 current-depth 1)
+                              (01011 current-depth 1)
                               target-depth)))))
 
-(00001001 world-at-depth
-  (00001000 (world target-depth)
+(0011 world-at-depth
+  (0010 (world target-depth)
     (110
-      ((00011010 target-depth 0)  (00000001 World-not-found))
+      ((11010 target-depth 0)  (001 World-not-found))
       ((010 ()) (world-at-depth-from world (world-depth world) target-depth)))))
 
-(00001001 world-journal-prefix
-  (00001000 (journal old-journal)
+(0011 world-journal-prefix
+  (0010 (journal old-journal)
     (110
-      ((00100010 journal old-journal) (00000001 ()))
+      ((11110111 journal old-journal) (001 ()))
       
-      ((010 journal)  (00000001 World-not-ancestor))
+      ((010 journal)  (001 World-not-ancestor))
       ((010 ())
-       (10011100 ((rest (world-journal-prefix (00000110 journal) old-journal)))
+       (001000 ((rest (world-journal-prefix (011 journal) old-journal)))
          (110
            ((world-not-ancestor? rest) rest)
-           ((010 ()) (00000100 (00000101 journal) rest))))))))
+           ((010 ()) (111 (100 journal) rest))))))))
 
-(00001001 world-not-ancestor?
-  (00001000 (value)
+(0011 world-not-ancestor?
+  (0010 (value)
     (110
       
-      ((010 value)  (101 value (00000001 World-not-ancestor)))
+      ((010 value)  (101 value (001 World-not-ancestor)))
       )))
 
-(00001001 world-diff
-  (00001000 (from to)
+(0011 world-diff
+  (0010 (from to)
     (110
-      ((00100010 from to) (00000001 ()))
+      ((11110111 from to) (001 ()))
       
-      ((010 (world-parent to))  (00000001 World-not-ancestor))
+      ((010 (world-parent to))  (001 World-not-ancestor))
       ((010 ())
-       (10011100 ((earlier (world-diff from (world-parent to))))
+       (001000 ((earlier (world-diff from (world-parent to))))
          (110
            ((world-not-ancestor? earlier) earlier)
            ((010 ())
-            (10011100 ((transition
+            (001000 ((transition
                     (world-journal-prefix
                       (world-journal to)
                       (world-journal (world-parent to)))))
               (110
                 ((world-not-ancestor? transition) transition)
-                ((010 ()) (00101001 earlier transition)))))))))))
+                ((010 ()) (1111 earlier transition)))))))))))
 
 ;; Branch comparison stops before merge policy. First align both histories to
 ;; the same absolute depth, then walk parents together until their values are
@@ -475,52 +475,52 @@
 ;; auf gleiche Tiefe gebracht und gemeinsam bis zum gleichen Vorfahren verfolgt.
 ;; Bei unveränderlichen Werten sind strukturell gleiche Geschichten dieselbe
 ;; semantische Welt. `world-branch-diff` zeigt Basis und beide Zeitdeltas.
-(00001001 world-climb-to-depth
-  (00001000 (world current-depth target-depth)
+(0011 world-climb-to-depth
+  (0010 (world current-depth target-depth)
     (110
-      ((00011100 current-depth target-depth)  world)
+      ((11110111 current-depth target-depth)  world)
       ((010 ()) (world-climb-to-depth (world-parent world)
-                               (00001101 current-depth 1)
+                               (01011 current-depth 1)
                                target-depth)))))
 
-(00001001 world-common-ancestor-aligned
-  (00001000 (left right)
+(0011 world-common-ancestor-aligned
+  (0010 (left right)
     (110
-      ((00100010 left right) left)
+      ((11110111 left right) left)
       
-      ((010 ()) (00000001 World-no-common-ancestor))
+      ((010 ()) (001 World-no-common-ancestor))
       
-      ((010 (world-parent right))  (00000001 World-no-common-ancestor))
+      ((010 (world-parent right))  (001 World-no-common-ancestor))
       ((010 ()) (world-common-ancestor-aligned (world-parent left)
                                         (world-parent right))))))
 
-(00001001 world-common-ancestor
-  (00001000 (left right)
-    (10011100 ((left-depth (world-depth left))
+(0011 world-common-ancestor
+  (0010 (left right)
+    (001000 ((left-depth (world-depth left))
           (right-depth (world-depth right)))
-      (10011100 ((target-depth (110
-                            ((00011010 left-depth right-depth)  left-depth)
+      (001000 ((target-depth (110
+                            ((11010 left-depth right-depth)  left-depth)
                             ((010 ()) right-depth))))
         (world-common-ancestor-aligned
           (world-climb-to-depth left left-depth target-depth)
           (world-climb-to-depth right right-depth target-depth))))))
 
-(00001001 world-no-common-ancestor?
-  (00001000 (value)
+(0011 world-no-common-ancestor?
+  (0010 (value)
     (110
       
-      ((010 value)  (101 value (00000001 World-no-common-ancestor)))
+      ((010 value)  (101 value (001 World-no-common-ancestor)))
       )))
 
-(00001001 world-branch-diff
-  (00001000 (left right)
-    (10011100 ((base (world-common-ancestor left right)))
+(0011 world-branch-diff
+  (0010 (left right)
+    (001000 ((base (world-common-ancestor left right)))
       (110
         ((world-no-common-ancestor? base) base)
         ((010 ())
-         (00100111 (00100111 (00000001 base) base)
-               (00100111 (00000001 left) (world-diff base left))
-               (00100111 (00000001 right) (world-diff base right))))))))
+         (1110 (1110 (001 base) base)
+               (1110 (001 left) (world-diff base left))
+               (1110 (001 right) (world-diff base right))))))))
 
 ;; Content identity starts with a canonical address, not a premature hash
 ;; primitive. `write-to-string` is deterministic and read-back-safe, so equal
@@ -543,16 +543,16 @@
 ;; dieselbe Adresse. Die Weltadresse umfasst Journal und Metadaten; der
 ;; Vorgänger wird nicht rekursiv dupliziert. Dies ist ein exakter Schlüssel,
 ;; kein kryptographischer Digest; ein späteres SHA kann diesen Schlüssel kürzen.
-(00001001 knowledge-content-address
-  (00001000 (knowledge)
-    (01001100 knowledge)))
+(0011 knowledge-content-address
+  (0010 (knowledge)
+    (11110100 knowledge)))
 
-(00001001 world-address-content
-  (00001000 (world)
-    (00100111 (00000001 world-history)
+(0011 world-address-content
+  (0010 (world)
+    (1110 (001 world-history)
           (world-journal world)
           (world-metadata world))))
 
-(00001001 world-content-address
-  (00001000 (world)
+(0011 world-content-address
+  (0010 (world)
     (knowledge-content-address (world-address-content world))))
