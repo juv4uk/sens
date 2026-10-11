@@ -130,7 +130,7 @@ fn bytes_to_words(
 ) -> Result<Vec<BinarySourceWord>, Frame3Error> {
     let nbits: usize = widths.iter().sum();
     if bytes.len() != nbits.div_ceil(8) { return Err(Frame3Error::Malformed); }
-    if nbits % 8 != 0 && !bytes.is_empty() {
+    if !nbits.is_multiple_of(8) && !bytes.is_empty() {
         let mask = (1u8 << (8 - nbits % 8)) - 1;
         if bytes[bytes.len() - 1] & mask != 0 { return Err(Frame3Error::NonCanonical); }
     }
