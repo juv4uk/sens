@@ -4,6 +4,10 @@ on:
   pull_request:
     paths:
       - "scripts/verify_uk_t5_triplet.py"
+      - "scripts/stage-two-projections.py"
+      - "tests/test_stage_two_projections.py"
+      - "tests/test_migrated_two_projections.py"
+      - "examples/migrated/**"
       - "scripts/publish_verified_uk_triplets.py"
       - "tests/test_publish_verified_uk_triplets.py"
       - "tests/test_verify_uk_t5_triplet.py"
@@ -23,6 +27,10 @@ on:
     branches: [main]
     paths:
       - "scripts/verify_uk_t5_triplet.py"
+      - "scripts/stage-two-projections.py"
+      - "tests/test_stage_two_projections.py"
+      - "tests/test_migrated_two_projections.py"
+      - "examples/migrated/**"
       - "scripts/publish_verified_uk_triplets.py"
       - "tests/test_publish_verified_uk_triplets.py"
       - "tests/test_verify_uk_t5_triplet.py"
@@ -50,6 +58,10 @@ jobs:
     steps:
       - uses: actions/checkout@v5
       - uses: dtolnay/rust-toolchain@stable
+      - name: Two-file pre-codec migration regression
+        run: |
+          python3 -m unittest discover -s tests -p 'test_stage_two_projections.py' -v
+          python3 -m unittest discover -s tests -p 'test_migrated_two_projections.py' -v
       - name: No-clobber atomic exporter of verified Ukrainian T5 triplets
         run: python3 -m unittest discover -s tests -p 'test_publish_verified_uk_triplets.py' -v
       - name: Reproduce two known canonical uk → T5 → spaced-view canaries
