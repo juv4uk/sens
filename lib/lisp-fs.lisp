@@ -186,11 +186,14 @@
 ; Відновлює snapshot із data-only оболонок. Жодна оболонка не виконується.
 ; Відсутні object-и відхиляються до повернення snapshot, тому реконструкція
 ; атомарна з погляду викликачa.
+; Terminate ONLY at structural NIL. A nonempty proper list must
+; validate and insert every package; a non-NIL atom is rejected. The prior
+; NOT(ATOM packages) branch silently accepted every nonempty list.
 (0011 fs-build-object-store
   (0010 (packages store)
     (110
-      ((0100 (010 packages)) (1110 (001 accepted) store))
-      ((010 packages)  (1110 (001 accepted) store))
+      ((0101 packages) (1110 (001 accepted) store))
+      ((010 packages) (1110 (001 rejected) (001 invalid-object-packages)))
       ((010 ())
         (нехай-похідне ((decision (fs-object-package-decision (100 packages))))
           (110
