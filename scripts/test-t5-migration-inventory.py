@@ -101,6 +101,27 @@ class TestT5MigrationInventory(unittest.TestCase):
         finally:
             Path(tmp).unlink()
 
+
+    def test_archived_donor_cannot_acquire_active_codec_authority(self):
+        """Архів незмінних донорів не є активним кодеком; живі досліди лишаються видимими."""
+        with tempfile.TemporaryDirectory() as d:
+            root = Path(d)
+            archived = ("research/domain-archive/20261011/pr1/"
+                        "crates/sens/src/legacy_reader.rs")
+            p = root / archived
+            p.parent.mkdir(parents=True)
+            p.write_text("pub fn encode() { /* physical T5 .sens */ }\\n",
+                         encoding="utf-8")
+            self.assertFalse(GEN.is_candidate(archived, root),
+                             "immutable evidence was misclassified as an active producer")
+            active = "research/framed3/adaptive_encoder.py"
+            q = root / active
+            q.parent.mkdir(parents=True)
+            q.write_text("# active experimental .senc encoder\\n",
+                         encoding="utf-8")
+            self.assertTrue(GEN.is_candidate(active, root),
+                            "live codec research must remain discoverable")
+
     def test_new_sens_link_is_discovered(self):
         """Нова ланка, що згадує .sens, потрапляє у вибірку (не губиться)."""
         with tempfile.TemporaryDirectory() as d:

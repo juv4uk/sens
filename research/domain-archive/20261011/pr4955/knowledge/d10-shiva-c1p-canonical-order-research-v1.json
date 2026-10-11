@@ -1,0 +1,106 @@
+{
+  "schema": "d10-finite-c1p-research/v1",
+  "status": "HOLD-CORE-LIBRARY-REVIEW",
+  "baseline": {
+    "selected": 634,
+    "inventory_sha": "65014431ac3e64633cd0be3630cfafc5e7a9aea3"
+  },
+  "sources": [
+    [
+      "juv4uk/shiva-sutras",
+      "docs/hakardvitva-c1p-topological-necessity.md",
+      "bd7c3378c44c07e09ae7dbf33a2fc91bb7212ae9"
+    ],
+    [
+      "juv4uk/shiva-sutras",
+      "prototype/verify_hakardvitva_c1p.py",
+      "87c33e5bb6b38807e4751f413f95491f33b6a93e"
+    ],
+    [
+      "juv4uk/shiva-sutras",
+      "docs/research-index.md",
+      "d62a09b2872a505770c440755998aaefdbc7882d"
+    ]
+  ],
+  "primary": [
+    "https://doi.org/10.1016/S0022-0000(76)80045-1",
+    "https://doi.org/10.1016/0095-8956(72)90019-6"
+  ],
+  "identity": "FINITE-C1P-CANONICAL-ORDER",
+  "stable_id": "d10.hobby.shiva.c1p-canonical-order.v1",
+  "surface_uk": "впорядкувати-суцільні-одиниці",
+  "surface_ukr": "канонічний-порядок-стовпців",
+  "behavior": "Given n>=0 and a list of integer bit masks in [0,2^n), return lexicographically smallest permutation of columns [0..n-1] where 1-bits of every row occupy one contiguous interval, else explicit NO-SOLUTION. Empty/one-bit rows vacuously valid. Input outside domain BLOCK; n=0 yields [] when valid.",
+  "positive": [
+    {
+      "n": 3,
+      "rows": [
+        3,
+        6
+      ],
+      "expect": [
+        0,
+        1,
+        2
+      ]
+    },
+    {
+      "n": 3,
+      "rows": [
+        3,
+        5
+      ],
+      "expect": [
+        1,
+        0,
+        2
+      ]
+    },
+    {
+      "n": 3,
+      "rows": [
+        3,
+        6,
+        5
+      ],
+      "expect": "NO-SOLUTION"
+    },
+    {
+      "n": 0,
+      "rows": [
+        0
+      ],
+      "expect": []
+    },
+    {
+      "n": 4,
+      "rows": [],
+      "expect": [
+        0,
+        1,
+        2,
+        3
+      ]
+    }
+  ],
+  "falsifiers": [
+    "wrong lexicographic tie",
+    "3-edge triangle wrongly accepted",
+    "transpose row/column wrongly",
+    "truncated illegal mask",
+    "no-solution confused with empty valid order",
+    "falsely assumes unique canonical Sanskrit order"
+  ],
+  "coordinate": null,
+  "ratified": false,
+  "selected": false,
+  "physical_t5_authorized": false,
+  "owner_review": "pending",
+  "distinctions": "Original shiva-sutras 39/43 and dual-ha 43/43 are model-specific. Earlier uniqueness hypothesis was falsified. Booth-Lueker proves C1P recognition, not lex-min. Candidate likely reducible to finite permutation search; Core-vs-library HOLD.",
+  "applications": [
+    "Panini classes",
+    "FPGA bit-mask layouts",
+    "Lisp dependency graph constraints",
+    "finite interval graph restrictions"
+  ]
+}

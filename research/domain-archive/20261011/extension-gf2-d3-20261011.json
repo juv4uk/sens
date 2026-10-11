@@ -1,0 +1,42 @@
+{
+  "schema": "sens.domain-research-archive-extension/v1",
+  "date": "2026-10-11",
+  "status": "ARCHIVE-EVIDENCE-ONLY",
+  "foundation_sha": "62fc0f35db0e511e7d5370dfefaec94861243bc0",
+  "file_count": 4,
+  "records": [
+    {
+      "pr": 2350,
+      "source_commit": "3d81fa1392b00678a7f46f02cb19246effd17f1a",
+      "original_path": "scripts/bench-2346-gf2-affine-certificate-economy.py",
+      "archived_path": "research/domain-archive/20261011/pr2350/scripts/bench-2346-gf2-affine-certificate-economy.py.source.txt",
+      "exact_git_blob": "6243167764df55dd5f3ae033bd3c086a47492107",
+      "description": "GF(2) сертифікати мінімальності"
+    },
+    {
+      "pr": 2327,
+      "source_commit": "6e2d11d36192e460f1e098938c9189c92390e8a4",
+      "original_path": "scripts/bench-2325-gf2-affine-compose.py",
+      "archived_path": "research/domain-archive/20261011/pr2327/scripts/bench-2325-gf2-affine-compose.py.source.txt",
+      "exact_git_blob": "f2f90a7cf4728655a2bd424415f68ac6ee51c9d0",
+      "description": "GF(2) афінна композиція"
+    },
+    {
+      "pr": 3251,
+      "source_commit": "a754a8542e8ac9fbdb205665c09f87b441356594",
+      "original_path": "crates/sens/src/eval/canon.rs",
+      "archived_path": "research/domain-archive/20261011/pr3251/crates/sens/src/eval/canon.rs.source.txt",
+      "exact_git_blob": "16a2c0cd20fd69fa54c36e994d29cdea6c41911f",
+      "description": "історичний типізований D3 EMPTY, не runtime"
+    },
+    {
+      "pr": 2873,
+      "source_commit": "ee61ad0bb1e194f93da9bf444bbef4e908640e3f",
+      "original_path": "crates/sens/src/presentation.rs",
+      "archived_path": "research/domain-archive/20261011/pr2873/crates/sens/src/presentation.rs.source.txt",
+      "exact_git_blob": "ac97ebb2ee87bd5341ed9a750340c468e6c9e2ac",
+      "description": "точнодоменне представлення, історичний Rust"
+    }
+  ],
+  "limits": "No normative use, no ratification, no revival of old D3 truth or legacy codec semantics. Semantic law+oracle+dedup+current CI required to promote."
+}

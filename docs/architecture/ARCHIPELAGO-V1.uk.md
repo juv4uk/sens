@@ -59,10 +59,10 @@ TOTAL                             87
 
 <!-- D10-INVENTORY-COUNTS:BEGIN -->
 ```text
-D10 selected              647/1024
+D10 selected              675/1024
 law-forced                256
-unplaced                  391
-remaining                 377
+unplaced                  419
+remaining                 349
 ratified                    0
 ```
 <!-- D10-INVENTORY-COUNTS:END -->

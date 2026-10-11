@@ -1,0 +1,92 @@
+{
+  "schema": "d10-affine-correlated-uncertainty-research/v1",
+  "status": "RESEARCH-UNRATIFIED-NOT-IN-INVENTORY",
+  "date": "2026-10-09",
+  "coordination": [
+    "#4013",
+    "#4463",
+    "#4182"
+  ],
+  "snapshot": {
+    "selected_baseline": 630,
+    "remaining_baseline": 394,
+    "ratified_baseline": 0,
+    "canonical_inventory_mutated": false,
+    "inventory_blob_at_review": "a55f307c27f17091795d75ebfcd7d051547d80bc",
+    "foundation_blob_at_review": "09d1d71c39d1484dfd005a5068dbb18b76f0f0d4"
+  },
+  "primary_sources": [
+    "https://doi.org/10.5540/tema.2003.04.03.0297",
+    "https://pmc.ncbi.nlm.nih.gov/articles/PMC6044317/",
+    "https://mitpress.mit.edu/9780262130110/lisp-1-5-programmers-manual/"
+  ],
+  "historical_note": "LISP 1.5 mathematical symbolic computing (1962); affine arithmetic published 2003. Do NOT claim these functions existed in 1962.",
+  "cross_hobby": [
+    "radio electronics and SDR",
+    "analogue computation",
+    "FPGA/ESP32 ADC",
+    "astrophysics",
+    "horology",
+    "music acoustics",
+    "exact rational arithmetic"
+  ],
+  "not_new_roots": [
+    "FINITE-CONVOLUTION #4888",
+    "PHASE-UNWRAP #4888",
+    "BEST-BOUNDED-RATIONAL #4892",
+    "COVARIANCE-TRANSPORT #4890",
+    "RATIONAL-RESAMPLE #4890"
+  ],
+  "rows": [
+    {
+      "status": "HOLD-CORE-MATH-DERIVABILITY",
+      "coordinate": null,
+      "ratified_resident": false,
+      "selected_in_canonical_inventory": false,
+      "physical_t5_authorized": false,
+      "owner": "CORE-MATH-LIBRARY-REVIEW",
+      "provenance_class": "ACADEMIC_MATH_LAW_NOT_SENS_EXECUTABLE",
+      "id": "D10-AFFINE-RESEARCH-001",
+      "semantic_name": "CORRELATED-AFFINE-COMBINATION",
+      "surface_uk": "кор-аф",
+      "surface_ukr": "поєднати-корельовані-афінні-форми",
+      "signature": "(op:{ADD,SUB}, x:Affine<Q,noise-id>, y:Affine<Q,noise-id>) -> Affine<Q,noise-id>",
+      "law": "Combine affine forms coefficientwise by exact shared-noise identity; the exact same x minus x is zero, different noise IDs are not equated.",
+      "primary_source": "https://doi.org/10.5540/tema.2003.04.03.0297",
+      "positive_witnesses": [
+        "x=10+a => x-x = [0,0]",
+        "x=10+a, y=10+b => x-y = [-2,2]",
+        "(3+2a+b)-(2+2a-b)=1+2b"
+      ],
+      "falsifiers": [
+        "Standard intervals give [-2,2] for x-x: incorrect for repeated same observation",
+        "Merging a and b due to equal magnitudes gives false cancellation"
+      ]
+    },
+    {
+      "status": "HOLD-CORE-MATH-DERIVABILITY",
+      "coordinate": null,
+      "ratified_resident": false,
+      "selected_in_canonical_inventory": false,
+      "physical_t5_authorized": false,
+      "owner": "CORE-MATH-LIBRARY-REVIEW",
+      "provenance_class": "ACADEMIC_MATH_LAW_NOT_SENS_EXECUTABLE",
+      "id": "D10-AFFINE-RESEARCH-002",
+      "semantic_name": "SOUND-AFFINE-PRODUCT-ENCLOSURE",
+      "surface_uk": "аф-пох",
+      "surface_ukr": "обмежити-добуток-афінних-форм",
+      "signature": "(x:Affine<Q,noise-id>, y:Affine<Q,noise-id>, fresh-id:Symbol) -> Affine<Q,noise-id> or BLOCK",
+      "law": "Compute linearized product with exact coefficients x0*yi+y0*xi; residual is conservatively enclosed by an explicit fresh noise coefficient (Σ|xi|)(Σ|yi|). Does not assert probabilistic independence or optimal tightness.",
+      "primary_source": "https://pmc.ncbi.nlm.nih.gov/articles/PMC6044317/",
+      "positive_witnesses": [
+        "(1+a)*(1-a): actual [0,1], safe [0,2]",
+        "2*(3+4a)=6+8a with no fresh error",
+        "a*a: actual [0,1], safe [-1,1]"
+      ],
+      "falsifiers": [
+        "Reused fresh ID collides with existing IDs and must BLOCK",
+        "Any exact product outside claimed range refutes soundness"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,63 @@
+{
+  "schema": "d10-cnf-unit-fixpoint-selection/v1",
+  "date": "2026-10-11",
+  "status": "RESEARCH-SELECTION-ONLY-UNRATIFIED",
+  "authority": [
+    "#4013",
+    "#4463",
+    "#4896"
+  ],
+  "current_inventory_before_selection": {
+    "git_blob": "7e13e929338baeef9b16c2139d24b78e23ea1e03",
+    "selected": 647
+  },
+  "source_dossier": "knowledge/d10-dll1962-unit-closure-research-v1.json",
+  "historical_primary": {
+    "paper": "Davis, Logemann, Loveland (1962), A machine program for theorem-proving",
+    "doi": "10.1145/368273.368557",
+    "note": "Historical algorithmic provenance, not an exact SENS interface"
+  },
+  "current_reference": {
+    "name": "PySAT Glucose3 propagate",
+    "documentation": "https://pysathq.github.io/docs/html/api/solvers.html",
+    "pinned_source": "pysathq/pysat@152884a6d1889f56a61049aaa773be23f0a8d8c1:pysat/solvers.py:4330",
+    "note": "The pinned Git source and previous hosted runtime distribution were not asserted byte-identical; no 2026 version parity inferred"
+  },
+  "existing_evidence": {
+    "file": "knowledge/d10-dll1962-glucose3-oracle-evidence-v1.json",
+    "math_cases": 2304,
+    "real_pysat_cases": 600,
+    "claimed_by_prior_snapshot": true,
+    "new_exact_head_ci_not_yet_run": true
+  },
+  "observable_law": {
+    "input": "(canonical finite CNF of signed exact nonzero integer literals, canonical sorted consistent assumptions)",
+    "output": "CONTRADICTION(forced) or QUIESCENT(forced,all_satisfied); QUIESCENT never means SAT",
+    "behavior": "For a finite canonical CNF, repeatedly add literals forced by clauses with exactly one not-yet-false literal until no new literal is forced or a clause is falsified. With no conflict, the set of forced literals is the unique least fixed point regardless of clause scheduling. A CONTRADICTION status does not certify any particular partial forced-literal set. Reject malformed/tautological/noncanonical clauses. Do not branch or claim SAT on an undecided fixed point.",
+    "witnesses": [
+      "CNF [[1],[-1,2],[-2,3]] with no assumptions -> QUIESCENT forced [1,2,3], all_satisfied=true",
+      "CNF [[-1],[1]] -> CONTRADICTION; never QUIESCENT/SAT",
+      "CNF [[-2,1],[1,3]] with assumption [2] -> QUIESCENT forced [1,2], all_satisfied=true",
+      "CNF [[-2,-1],[-2,1],[2,-1],[1,2]] with no units -> QUIESCENT with no forced literals, all_satisfied=false; no unjustified SAT conclusion"
+    ],
+    "falsifiers": [
+      "Stop before transitive unit consequences",
+      "Report SAT for unit-free but unsatisfiable CNF",
+      "Claim conflict-free quiescence proves satisfiable",
+      "Conflate host SAT solver internals with D10 identity",
+      "Silently accept bool, zero literal, duplicate, unsorted or tautological CNF"
+    ]
+  },
+  "dedup_analysis": {
+    "exact_name_in_d1_d9": false,
+    "exact_name_in_d10_before_append": false,
+    "d1_d9_blob": "09d1d71c39d1484dfd005a5068dbb18b76f0f0d4",
+    "d10_prior_blob": "7e13e929338baeef9b16c2139d24b78e23ea1e03",
+    "behavioral_claim": "No inspected current D1–D9 and D10 row exposes the same CNF forced-literal least fixed-point with explicit QUIESCENT-not-SAT distinction; derivability and ratification pending"
+  },
+  "limitation": "A semantically distinct research candidate can be implemented as a derived library function. No owner ratification, binary coordinate, .sens execution, or new codec permission.",
+  "research_selected": true,
+  "ratified": false,
+  "coordinate": null,
+  "physical_sens_authorized": false
+}

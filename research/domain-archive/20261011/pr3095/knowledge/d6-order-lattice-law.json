@@ -1,0 +1,153 @@
+{
+  "cross_domain_falsifier": {
+    "anti_collapse_law": "equal lattice equations do not identify numeric MIN/MAX with set INTERSECTION/UNION",
+    "control": {
+      "carrier": "finite powerset over 3 opaque elements",
+      "checks": {
+        "absorption_join": true,
+        "absorption_meet": true,
+        "join_associativity": true,
+        "join_commutativity": true,
+        "join_idempotence": true,
+        "meet_associativity": true,
+        "meet_commutativity": true,
+        "meet_idempotence": true
+      },
+      "conclusion": "same abstract lattice signature as numeric MIN/MAX; carrier/domain identity must remain distinct",
+      "pair_count": 64,
+      "triple_count": 512,
+      "value_count": 8
+    },
+    "geometry_status": "NO-GEOMETRY-CLAIM",
+    "issue": "#3085",
+    "solver_credit": 0
+  },
+  "geometry_conclusion": {
+    "current_adjacency_used": false,
+    "neighborhood_bonus_allowed": false,
+    "one_bit_axis_proved": false,
+    "prefix_generator_proved": false,
+    "reason": "semantic equations are proved in the oracle, but no coordinate economy theorem distinguishes a bit placement",
+    "status": "RELATION-ONLY"
+  },
+  "issue": "#3084",
+  "numeric_oracle": {
+    "checks": {
+      "absorption_max": true,
+      "absorption_min": true,
+      "geq_leq_duality": true,
+      "geq_recovery_max": true,
+      "geq_recovery_min": true,
+      "leq_recovery_max": true,
+      "leq_recovery_min": true,
+      "max_associativity": true,
+      "max_commutativity": true,
+      "max_idempotence": true,
+      "max_monotonicity": true,
+      "min_associativity": true,
+      "min_commutativity": true,
+      "min_idempotence": true,
+      "min_monotonicity": true
+    },
+    "generator": {
+      "deduplicate_reduced_values": true,
+      "denominator_max": 6,
+      "denominator_min": 1,
+      "numerator_max": 12,
+      "numerator_min": -12
+    },
+    "max_value": "12",
+    "min_value": "-12",
+    "oracle": "python.fractions.Fraction exact Q",
+    "pair_count": 8649,
+    "triple_count": 804357,
+    "value_count": 93
+  },
+  "parent_atlas": "#3077",
+  "relations": [
+    {
+      "carrier": "exact Number / Q",
+      "equation": "GEQ(a,b) = LEQ(b,a)",
+      "geometry_status": "RELATION-ONLY",
+      "law_id": "D6-ORDER-DUALITY-LEQ-GEQ",
+      "relation_type": "DUALITY",
+      "result_domain": "D1",
+      "solver_credit": 0,
+      "stable_resident_ids": [
+        "sr-yrkaryqscnkp",
+        "sr-wtfwqasswbym"
+      ]
+    },
+    {
+      "carrier": "exact Number / Q",
+      "equations": [
+        "MIN is commutative, associative, idempotent",
+        "MAX is commutative, associative, idempotent",
+        "MIN(a,MAX(a,b)) = a",
+        "MAX(a,MIN(a,b)) = a",
+        "MIN and MAX are monotone in the total numeric order"
+      ],
+      "geometry_status": "RELATION-ONLY",
+      "law_id": "D6-NUMERIC-MEET-JOIN",
+      "relation_type": "LATTICE",
+      "solver_credit": 0,
+      "stable_resident_ids": [
+        "sr-bbzkrkjhkqts",
+        "sr-xpftsrbepvhk"
+      ]
+    },
+    {
+      "carrier": "exact Number / Q",
+      "equations": [
+        "LEQ(a,b) iff MIN(a,b)=a iff MAX(a,b)=b",
+        "GEQ(a,b) iff MIN(a,b)=b iff MAX(a,b)=a"
+      ],
+      "geometry_status": "RELATION-ONLY",
+      "law_id": "D6-ORDER-RECOVERED-FROM-EXTREMA",
+      "relation_type": "ENTAILMENT",
+      "result_domain": "D1 for LEQ/GEQ",
+      "solver_credit": 0,
+      "stable_resident_ids": [
+        "sr-yrkaryqscnkp",
+        "sr-wtfwqasswbym",
+        "sr-bbzkrkjhkqts",
+        "sr-xpftsrbepvhk"
+      ]
+    }
+  ],
+  "residents": {
+    "GEQ": {
+      "semantic_role": "predicate",
+      "stable_resident_id": "sr-wtfwqasswbym",
+      "typed_behavior": "non-strict greater-than-or-equal (>=)"
+    },
+    "LEQ": {
+      "semantic_role": "predicate",
+      "stable_resident_id": "sr-yrkaryqscnkp",
+      "typed_behavior": "non-strict less-than-or-equal (<=)"
+    },
+    "MAX": {
+      "semantic_role": "arithmetic",
+      "stable_resident_id": "sr-xpftsrbepvhk",
+      "typed_behavior": "extremum maximum of numbers"
+    },
+    "MIN": {
+      "semantic_role": "arithmetic",
+      "stable_resident_id": "sr-bbzkrkjhkqts",
+      "typed_behavior": "extremum minimum of numbers"
+    }
+  },
+  "runtime_status": {
+    "d6_runtime_witness": "NOT-AUDITED",
+    "exact_number_runtime_oracle": "PENDING-D6-ADMISSION",
+    "predicate_result_domain_expected": "D1",
+    "predicate_value_bridge": "#3076-MERGED"
+  },
+  "schema": "d6-order-lattice-law/v1",
+  "stable_corpus": {
+    "corpus_hash": "sha256:4cb258dbe135e2de93c49916a5b68b192cc6c04e625c87c72675891cfaf035bc",
+    "current_coordinates_used_as_evidence": false,
+    "schema": "d3-d8-stable-resident-corpus/v1",
+    "stable_ids_are_research_handles_only": true
+  }
+}

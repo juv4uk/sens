@@ -5,8 +5,8 @@
   "selected_main_snapshot": 625,
   "ratified_d10_snapshot": 0,
   "donors": [
-    {"path": "lib/persistent-vector.lisp", "git_blob_sha": "80d071b32e4e51ccf354226fabd95c6e4b253e22"},
-    {"path": "lib/unify.lisp", "git_blob_sha": "8dad35ae22e6a40189b03fe801eae8e7af148261"}
+    {"path": "lib/persistent-vector.lisp", "git_blob_sha": "9ae30559eb6d5d265c17c234cee8bb32e9cc5acf"},
+    {"path": "lib/unify.lisp", "git_blob_sha": "e5c7399959eab0746930aea6b3e20f047e81c7ae"}
   ],
   "d9_existing": [
     {"semantic_name":"VEC-EMPTY", "coordinate":"101101101", "donor":"lib/persistent-vector.lisp", "line":51, "source_name":"vec-empty", "conclusion":"EXISTING-D9", "law":"Empty persistent vector value, represented as count 0 and empty tree"},

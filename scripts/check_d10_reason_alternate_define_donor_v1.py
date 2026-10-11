@@ -9,7 +9,9 @@ import re
 
 ROOT = Path(__file__).resolve().parents[1]
 LEDGER = ROOT / "knowledge/d10-reason-alternate-define-donor-v1.json"
-SOURCE = ROOT / "lib/reason.lisp"
+# Historical source must be verified against its immutable archived Git blob, not
+# the actively evolving lib/reason.lisp. This is donor research, not runtime parity.
+SOURCE = ROOT / "research/domain-archive/20261011/historical-source/lib/reason.lisp"
 INVENTORY = ROOT / "knowledge/d10-v1-semantic-inventory.json"
 D9 = ROOT / "knowledge/d9-ratified.json"
 STATE = ROOT / "knowledge/d10-fill-v1-state.json"
@@ -153,7 +155,12 @@ def read(path: Path) -> dict:
 
 
 def run() -> dict:
-    return verify(read(LEDGER), SOURCE.read_bytes(), read(INVENTORY), read(STATE),
+    ledger = read(LEDGER)
+    pin = ledger.get("source", {}).get("git_blob_sha1")
+    if not isinstance(pin, str) or not re.fullmatch(r"[0-9a-f]{40}", pin):
+        raise ValueError("invalid historical reason Git source pin")
+    snapshot = ROOT / "knowledge/d10-source-snapshots" / f"{pin}.lisp"
+    return verify(ledger, snapshot.read_bytes(), read(INVENTORY), read(STATE),
                   read(CANONICAL), read(RAW_EXISTING), read(D9))
 
 

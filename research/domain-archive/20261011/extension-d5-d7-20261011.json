@@ -1,0 +1,142 @@
+{
+  "schema": "sens.domain-research-archive-extension/v1",
+  "date": "2026-10-11",
+  "status": "RESEARCH-EVIDENCE-ONLY-NOT-RATIFIED",
+  "reason": "Preserve historical domain research before semantic promotion; never place archive paths in active compiler, parser or codec inventory",
+  "original_sources": [
+    "https://github.com/juv4uk/sens/pull/3095",
+    "https://github.com/juv4uk/sens/pull/3119",
+    "https://github.com/juv4uk/sens/pull/5116",
+    "https://github.com/juv4uk/sens/pull/3723",
+    "https://github.com/juv4uk/sens/pull/4799",
+    "https://github.com/juv4uk/sens/pull/4443",
+    "https://github.com/juv4uk/sens/pull/2813",
+    "https://github.com/juv4uk/sens/pull/2801"
+  ],
+  "file_count": 20,
+  "records": [
+    {
+      "pr": 3095,
+      "original_path": "knowledge/d6-order-lattice-law.json",
+      "archived_path": "research/domain-archive/20261011/pr3095/knowledge/d6-order-lattice-law.json",
+      "exact_git_blob": "f4efab2202cc364aa38cd1281f75a4d17d7f4637"
+    },
+    {
+      "pr": 3095,
+      "original_path": "knowledge/d6-order-reversal-law.json",
+      "archived_path": "research/domain-archive/20261011/pr3095/knowledge/d6-order-reversal-law.json",
+      "exact_git_blob": "f0143919c378f0055b09a977da7f5228e8e0a62b"
+    },
+    {
+      "pr": 3095,
+      "original_path": "scripts/research-3084-d6-order-lattice.py",
+      "archived_path": "research/domain-archive/20261011/pr3095/scripts/research-3084-d6-order-lattice.py.source.txt",
+      "exact_git_blob": "a69d6a62ad29a8d8cd1b484e1ea3027ffa53bdf9"
+    },
+    {
+      "pr": 3095,
+      "original_path": "scripts/research-3105-d6-order-reversal.py",
+      "archived_path": "research/domain-archive/20261011/pr3095/scripts/research-3105-d6-order-reversal.py.source.txt",
+      "exact_git_blob": "8eeed53fea3059abb575ee6f8d49b60925b997a7"
+    },
+    {
+      "pr": 3119,
+      "original_path": "knowledge/d6-multilaw-atlas.json",
+      "archived_path": "research/domain-archive/20261011/pr3119/knowledge/d6-multilaw-atlas.json",
+      "exact_git_blob": "8d031ae2484023b083301a7fc8d3ecdfad50fdec"
+    },
+    {
+      "pr": 3119,
+      "original_path": "scripts/check-3077-d6-multilaw-atlas.py",
+      "archived_path": "research/domain-archive/20261011/pr3119/scripts/check-3077-d6-multilaw-atlas.py.source.txt",
+      "exact_git_blob": "b7fb46c92d78443ea2117a18fcf937292597c307"
+    },
+    {
+      "pr": 5116,
+      "original_path": "benchmarks/axiom-corpus-function-description/README.md",
+      "archived_path": "research/domain-archive/20261011/pr5116/benchmarks/axiom-corpus-function-description/README.md",
+      "exact_git_blob": "9cb5acdcefa78c6ea93c894c705f6197a1ac1ae7"
+    },
+    {
+      "pr": 5116,
+      "original_path": "benchmarks/axiom-corpus-function-description/bench.json",
+      "archived_path": "research/domain-archive/20261011/pr5116/benchmarks/axiom-corpus-function-description/bench.json",
+      "exact_git_blob": "e95d2b328b6a84df5655467c35df83add04ff2e2"
+    },
+    {
+      "pr": 5116,
+      "original_path": "crates/sens/tests/axiom_corpus_function_description.rs",
+      "archived_path": "research/domain-archive/20261011/pr5116/crates/sens/tests/axiom_corpus_function_description.rs.source.txt",
+      "exact_git_blob": "7a9d0d94962620c2713234eafbc0cb1328080ea7"
+    },
+    {
+      "pr": 3723,
+      "original_path": "knowledge/d6-mechanism-ledger.json",
+      "archived_path": "research/domain-archive/20261011/pr3723/knowledge/d6-mechanism-ledger.json",
+      "exact_git_blob": "8ea3ae19b5c7fbc5e690f53c765c1dd0bfd536bc"
+    },
+    {
+      "pr": 3723,
+      "original_path": "scripts/check-d6-mechanism-ledger.py",
+      "archived_path": "research/domain-archive/20261011/pr3723/scripts/check-d6-mechanism-ledger.py.source.txt",
+      "exact_git_blob": "933a88ac0db1a5dbf2d6d17c7a37caeb4101d3e5"
+    },
+    {
+      "pr": 3723,
+      "original_path": "crates/sens/tests/d6_selector_runtime.rs",
+      "archived_path": "research/domain-archive/20261011/pr3723/crates/sens/tests/d6_selector_runtime.rs.source.txt",
+      "exact_git_blob": "665bd76bae4075fd030c2d50462e1978a1c140ff"
+    },
+    {
+      "pr": 3723,
+      "original_path": "crates/sens/tests/domain_ast_value_identity.rs",
+      "archived_path": "research/domain-archive/20261011/pr3723/crates/sens/tests/domain_ast_value_identity.rs.source.txt",
+      "exact_git_blob": "f22d16426412be3b837ffba3c65a684d5a5b0f73"
+    },
+    {
+      "pr": 4799,
+      "original_path": "crates/sens/tests/text7_contextual_binding.rs",
+      "archived_path": "research/domain-archive/20261011/pr4799/crates/sens/tests/text7_contextual_binding.rs.source.txt",
+      "exact_git_blob": "280e9ef48d4b3f0f8e38d5a7a731954c646d5153"
+    },
+    {
+      "pr": 4443,
+      "original_path": "docs/research/SENS-EXTENSION-WIRE-SPEC-2026-10-08.uk.md",
+      "archived_path": "research/domain-archive/20261011/pr4443/docs/research/SENS-EXTENSION-WIRE-SPEC-2026-10-08.uk.md",
+      "exact_git_blob": "3ea3da45344745b64e1aa1f2351e5be96daa1cc5"
+    },
+    {
+      "pr": 4443,
+      "original_path": "docs/research/sens-binary-physical-delimiter.uk.md",
+      "archived_path": "research/domain-archive/20261011/pr4443/docs/research/sens-binary-physical-delimiter.uk.md",
+      "exact_git_blob": "1608bdf633c86de0857964f6153d431e1a2dd83e"
+    },
+    {
+      "pr": 4443,
+      "original_path": "docs/research/sens-ternary-transport.uk.md",
+      "archived_path": "research/domain-archive/20261011/pr4443/docs/research/sens-ternary-transport.uk.md",
+      "exact_git_blob": "f15872a9e83b9397b4e990e676b42ef1987bf159"
+    },
+    {
+      "pr": 4443,
+      "original_path": "crates/sens/src/ternary_transport.rs",
+      "archived_path": "research/domain-archive/20261011/pr4443/crates/sens/src/ternary_transport.rs.source.txt",
+      "exact_git_blob": "51734bade142d14d58a431ad9844c8f321526f3f"
+    },
+    {
+      "pr": 2813,
+      "original_path": "crates/sens/tests/d5_source_boundary.rs",
+      "archived_path": "research/domain-archive/20261011/pr2813/crates/sens/tests/d5_source_boundary.rs.source.txt",
+      "exact_git_blob": "1053090aec53df9b4bda0212ea886772f71bd738"
+    },
+    {
+      "pr": 2801,
+      "original_path": "crates/sens/tests/d5_ast_identity.rs",
+      "archived_path": "research/domain-archive/20261011/pr2801/crates/sens/tests/d5_ast_identity.rs.source.txt",
+      "exact_git_blob": "8ccc76c797a5d5d969cb6b4a28a966c84650b29f"
+    }
+  ],
+  "admission_rule": "Exact-semantic dedup, oracle/source validation, owner review and canonical append-only domain ledger separately; archived code is non-executable evidence",
+  "physical_binary_authority": "NONE",
+  "domain_ratification": "UNCHANGED"
+}

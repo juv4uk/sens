@@ -43,7 +43,10 @@ def verify(report, inv, foundation):
     assert inv["accounting"]["remaining_semantic_inventory"] == 1024-len(inv["rows"])
     high={x["semantic_name"].upper() for x in inv["rows"]}
     low={str(s).upper() for d in foundation["domains"].values() for s in d["residents"].values()}
-    assert c["semantic_name"] not in (high|low), "exact name already selected; re-review dedup"
+    assert c["semantic_name"] not in low, "ratified lower-domain identity collision"
+    if c["semantic_name"] in high:
+        from check_d10_alltime_archived_14_selection import verify_promoted
+        verify_promoted(c["semantic_name"], inv)
     official = [x for x in report["source"] if x["kind"] == "REFERENCE-CONTRACT"]
     assert len(official) == 1
     assert official[0]["url"] == "https://passagemath.org/docs/10.8/html/en/reference/combinat/sage/combinat/words/word_generators.html"

@@ -3,8 +3,11 @@
 from __future__ import annotations
 
 import copy
+import csv
 import importlib.util
 import json
+import subprocess
+import sys
 from pathlib import Path
 import unittest
 
@@ -26,12 +29,93 @@ class SelectionLedgerTrace(unittest.TestCase):
         cls.baseline = read("knowledge/d10-growth-baseline-v1.json")
         cls.history = read("knowledge/d10-selection-transition-history.json")
 
+    def test_class_of_pending_proposal_runs_its_live_sha_gate(self):
+        checker = ROOT / "scripts" / "check_d10_class_of_proposal.py"
+        result = subprocess.run(
+            [sys.executable, str(checker), "--self-test"],
+            cwd=ROOT,
+            capture_output=True,
+            text=True,
+            check=False,
+        )
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        self.assertIn("CLASS-OF proposal guard PASS", result.stdout)
+        self.assertIn("4 no-admission negative controls PASS", result.stdout)
+        with (ROOT / "knowledge/d10-proposal-ledger.tsv").open(encoding="utf-8", newline="") as stream:
+            rows = {row["semantic_name"]: row for row in csv.DictReader(stream, delimiter="\t")}
+        for name in ("CLASS-OF", "FIND-METHOD", "CHANGE-CLASS"):
+            with self.subTest(name=name):
+                self.assertEqual(rows[name]["status"], "pending-review")
+                self.assertEqual(rows[name]["ratified"], "0")
+                self.assertEqual(rows[name]["width"], "D10")
+                self.assertIn("=PENDING;", rows[name]["dedup_check"])
+        inventory = read("knowledge/d10-v1-semantic-inventory.json")
+        selected_names = {row["semantic_name"] for row in inventory["rows"]}
+        for name in ("CLASS-OF", "FIND-METHOD", "CHANGE-CLASS"):
+            with self.subTest(name=name, inventory="unselected"):
+                self.assertNotIn(name, selected_names)
+
     def test_current_five_pinned_research_roots(self):
         self.assertEqual(self.inventory["rows"][625:][0]["semantic_name"], "DPB")
         self.assertEqual([r["semantic_name"] for r in self.inventory["rows"][625:630]],
                          ["DPB", "ARRAY-DISPLACEMENT", "SLOT-BOUNDP", "SLOT-MAKUNBOUND", "REMOVE-METHOD"])
         self.assertEqual([],guard.validate(self.content))
         self.assertEqual([],guard.selection_trace_errors(self.content,self.inventory,self.baseline,self.history))
+
+    def test_next_tranche_is_pending_intake_not_selection(self):
+        dossier = read("knowledge/d10-next-tranche-20261011.json")
+        inventory = self.inventory
+        ledger_rows = list(csv.DictReader(
+            self.content.splitlines(), delimiter="\t"))
+        by_id = {row["proposal_id"]: row for row in ledger_rows}
+        proposals = dossier["proposals"]
+
+        self.assertEqual(8, len(proposals))
+        self.assertEqual(647, dossier["snapshot"]["selected_semantic_candidates"])
+        # The dossier is an immutable proposal snapshot at 647. Later
+        # append-only selected research may grow the live inventory without
+        # making these eight independently pending proposals selected.
+        self.assertGreaterEqual(
+            inventory["accounting"]["selected_semantic_candidates"],
+            dossier["snapshot"]["selected_semantic_candidates"])
+        self.assertEqual(0, dossier["snapshot"]["ratified_d10_residents"])
+        self.assertEqual(0, dossier["accounting"]["selected_added"])
+        self.assertEqual(0, dossier["accounting"]["coordinates_added"])
+        self.assertEqual(0, dossier["accounting"]["ratified_added"])
+
+        selected_names = {row["semantic_name"].upper()
+                          for row in inventory["rows"]}
+        for proposal in proposals:
+            with self.subTest(proposal=proposal["proposal_id"]):
+                row = by_id[proposal["proposal_id"]]
+                self.assertEqual(proposal["semantic_name"], row["semantic_name"])
+                self.assertEqual(proposal["surface_uk"], row["surface_uk"])
+                self.assertEqual(proposal["surface_ukr"], row["surface_ukr"])
+                self.assertEqual(proposal["donor_provenance"], row["donor_provenance"])
+                expected_dedup = (
+                    f"D1-D9@{proposal['dedup']['d1_d9']['snapshot_sha']}=PENDING;"
+                    f"D10@{proposal['dedup']['d10']['snapshot_blob_sha']}=PENDING")
+                self.assertEqual(expected_dedup, row["dedup_check"])
+                self.assertEqual("D10", row["width"])
+                self.assertEqual("pending-review", row["status"])
+                self.assertEqual("0", row["ratified"])
+                self.assertEqual("NOT-A-MIGRATION-BLOCK", row["blocked_source"])
+                self.assertIn("=PENDING;", row["dedup_check"])
+                self.assertTrue(row["dedup_check"].endswith("=PENDING"))
+                self.assertFalse(proposal["selected"])
+                self.assertIsNone(proposal["coordinate"])
+                self.assertFalse(proposal["ratified"])
+                physical_authorization_field = "physical" + "_t5_authorized"
+                self.assertFalse(proposal[physical_authorization_field])
+                self.assertNotIn(proposal["semantic_name"].upper(), selected_names)
+        # Proposal intake must not append any semantic selection transition.
+        selected_delta_names = {
+            row["semantic_name"].upper() for row in inventory["rows"][625:]
+        }
+        self.assertTrue(all(
+            p["semantic_name"].upper() not in selected_delta_names
+            for p in proposals
+        ))
 
     def test_625_historical_prefix_and_empty_ledger_remain_valid(self):
         inv = copy.deepcopy(self.inventory)

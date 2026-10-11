@@ -1,0 +1,121 @@
+{
+  "schema": "d10-existing-evidence-harvest/v1",
+  "date": "2026-10-11",
+  "status": "RESEARCH-SELECTED-NOT-RATIFIED",
+  "baseline": {
+    "selected": 658,
+    "inventory_blob": "404ac2a9cfdc817ed676d8137522981cd837ce3e"
+  },
+  "new_selected": 11,
+  "selected_total": 669,
+  "remaining": 355,
+  "coordinates_added": 0,
+  "ratified_added": 0,
+  "source_policy": "Only already existing, source-pinned donor files",
+  "items": [
+    {
+      "semantic_name": "CIRCULAR-HALF-OPEN-CONTAINS",
+      "stable_id": "d10.harvest.existing.circular-half-open-contains.20261011",
+      "proposal_id": "D10P-601201",
+      "source_path": "knowledge/d10-forth-circular-arc-v1.json",
+      "source_blob": "04c4b30672c4bfefc096c28933b3469b0832fd9b",
+      "positive_witnesses": 4,
+      "falsifiers": 6
+    },
+    {
+      "semantic_name": "GROUND-CONGRUENCE-CLOSURE-PARTITION",
+      "stable_id": "d10.harvest.existing.ground-congruence-closure-partition.20261011",
+      "proposal_id": "D10P-601202",
+      "source_path": "knowledge/d10-ground-congruence-closure-research-20261009.json",
+      "source_blob": "8144d5cd76d8b2e6099bba074fe96e910ca53156",
+      "positive_witnesses": 5,
+      "falsifiers": 6
+    },
+    {
+      "semantic_name": "PINHOLE-IMAGE-PROJECT",
+      "stable_id": "d10.harvest.existing.pinhole-image-project.20261011",
+      "proposal_id": "D10P-601203",
+      "source_path": "knowledge/d10-astrophoto-exact-pinhole-research-20261009.json",
+      "source_blob": "cb5f6eb6a9d481c7801d0b71e75cd44ebda1a0de",
+      "positive_witnesses": 2,
+      "falsifiers": 3
+    },
+    {
+      "semantic_name": "PIXEL-TO-CAMERA-RAY",
+      "stable_id": "d10.harvest.existing.pixel-to-camera-ray.20261011",
+      "proposal_id": "D10P-601204",
+      "source_path": "knowledge/d10-astrophoto-exact-pinhole-research-20261009.json",
+      "source_blob": "cb5f6eb6a9d481c7801d0b71e75cd44ebda1a0de",
+      "positive_witnesses": 2,
+      "falsifiers": 3
+    },
+    {
+      "semantic_name": "ALTERNATING-ZERO-SUM-BACKUP",
+      "stable_id": "d10.harvest.existing.alternating-zero-sum-backup.20261011",
+      "proposal_id": "D10P-601205",
+      "source_path": "knowledge/d10-crossrepo-chess-law-proposals-20261009.json",
+      "source_blob": "c61a467f9265a9342b0729b8c1d725f45f445394",
+      "positive_witnesses": 2,
+      "falsifiers": 3
+    },
+    {
+      "semantic_name": "CHESS-CASTLING-RIGHTS-TRANSITION",
+      "stable_id": "d10.harvest.existing.chess-castling-rights-transition.20261011",
+      "proposal_id": "D10P-601206",
+      "source_path": "knowledge/d10-crossrepo-chess-law-proposals-20261009.json",
+      "source_blob": "c61a467f9265a9342b0729b8c1d725f45f445394",
+      "positive_witnesses": 2,
+      "falsifiers": 4
+    },
+    {
+      "semantic_name": "STRESS-SYLLABLE-TRANSFER",
+      "stable_id": "d10.harvest.existing.stress-syllable-transfer.20261011",
+      "proposal_id": "D10P-601207",
+      "source_path": "knowledge/d10-linguistic-law-intake-20261009.json",
+      "source_blob": "b484ad4dc4dfa1089b0fcf1acfd6d70d724eda85",
+      "positive_witnesses": 2,
+      "falsifiers": 1
+    },
+    {
+      "semantic_name": "CONTEXTUAL-LONGEST-TRANSLITERATE",
+      "stable_id": "d10.harvest.existing.contextual-longest-transliterate.20261011",
+      "proposal_id": "D10P-601208",
+      "source_path": "knowledge/d10-linguistic-law-intake-20261009.json",
+      "source_blob": "b484ad4dc4dfa1089b0fcf1acfd6d70d724eda85",
+      "positive_witnesses": 2,
+      "falsifiers": 1
+    },
+    {
+      "semantic_name": "ENHARMONIC-SPELLING-DISTINCT?",
+      "stable_id": "d10.hobby.music.enharmonic-spelling-distinct.v1",
+      "proposal_id": "D10P-601209",
+      "source_path": "knowledge/d10-music-enharmonic-primary-review-v1.json",
+      "source_blob": "9c9a29355f8d7ef8449cd080ed80636b48200230",
+      "positive_witnesses": 3,
+      "falsifiers": 4
+    },
+    {
+      "semantic_name": "NOTATED-CHROMATIC-INTERVAL",
+      "stable_id": "d10.hobby.music.notated-chromatic-interval.v1",
+      "proposal_id": "D10P-601210",
+      "source_path": "knowledge/d10-music-enharmonic-primary-review-v1.json",
+      "source_blob": "9c9a29355f8d7ef8449cd080ed80636b48200230",
+      "positive_witnesses": 3,
+      "falsifiers": 3
+    },
+    {
+      "semantic_name": "UNIQUE-SURFACE-CORRECTION-SUGGESTION",
+      "stable_id": "d10.harvest.existing.unique-surface-correction-suggestion.20261011",
+      "proposal_id": "D10P-601211",
+      "source_path": "knowledge/d10-interlisp-dwim-safe-suggestion-v1.json",
+      "source_blob": "4e6b872ba9f8cd88c352d7ba567692c5381a70f2",
+      "positive_witnesses": 5,
+      "falsifiers": 7
+    }
+  ],
+  "limits": [
+    "No runtime SENS opcode or .sens admission",
+    "External oracle results are historical snapshots and not automatically HEAD proof",
+    "Named derived composite does not imply primitive necessity"
+  ]
+}

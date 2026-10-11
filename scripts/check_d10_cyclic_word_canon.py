@@ -123,7 +123,9 @@ def check_dossier(doc,inventory,foundation):
     assert len(inventory["rows"])==inventory["accounting"]["selected_semantic_candidates"]
     names={r["semantic_name"] for r in inventory["rows"]}
     assert "PRIMITIVE-BINARY-WORD-ROOT" in names
-    assert NAME not in names, "selected separately: update this research gate"
+    if NAME in names:
+        from check_d10_alltime_archived_14_selection import verify_promoted
+        verify_promoted(NAME, inventory)
     assert foundation["status"]=="owner-ratified"
     low={str(n).upper() for d in foundation["domains"].values()
          for n in d["residents"].values()}

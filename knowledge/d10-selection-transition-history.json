@@ -351,6 +351,266 @@
         "scripts/check-d10-proposal-ledger.py",
         "tests/test_d10_proposal_ledger_growth.py"
       ]
+    },
+    {
+      "id": "d10.archive.selected4.20261011",
+      "authority": "#4013 #4463",
+      "evidence": [
+        "knowledge/d10-exact-barycentric-interpolation-research-v1.json",
+        "knowledge/d10-finite-temporal-constraint-closure-v1.json",
+        "knowledge/d10-quine-prime-implicants-20261009.json",
+        "knowledge/d10-symbolic-ai-arc-support-20261009.json"
+      ],
+      "previous_inventory_blob_sha": "7e13e929338baeef9b16c2139d24b78e23ea1e03",
+      "resulting_inventory_blob_sha": "9e053a51b3b49741e3245ef02e3e366d16acb261",
+      "added_stable_ids": [
+        "d10.math.exact-barycentric-interpolate.20261011",
+        "d10.ai.finite-simple-temporal-closure.20261011",
+        "d10.logic.exact-boolean-prime-implicants.20261011",
+        "d10.ai.binary-constraint-support-projection.20261011"
+      ],
+      "appended_sources": [
+        "knowledge/d10-archive-admission-20261011.uk.md"
+      ],
+      "coordinates_added": 0,
+      "ratified_added": 0,
+      "delta_selected": 4,
+      "previous_selected": 647,
+      "resulting_selected": 651,
+      "decision": "selected research only; pending owner ratification",
+      "tests": [
+        "scripts/check_d10_selection_transition_history.py",
+        "scripts/check-d10-proposal-ledger.py"
+      ]
+    },
+    {
+      "id": "d10.math.unique-bounded-modular-lift.replay-651.20261011",
+      "authority": "#4013 #4463 — актуальне перенесення перевіреного архівного закону",
+      "evidence": [
+        "knowledge/d10-unique-bounded-modular-lift-20261009.json",
+        "docs/research/d10-bounded-modular-lift-20261009.uk.md",
+        "tests/oracles/d10_unique_bounded_modular_lift_chez.ss",
+        "tests/test_d10_unique_bounded_modular_lift.py"
+      ],
+      "previous_inventory_blob_sha": "9e053a51b3b49741e3245ef02e3e366d16acb261",
+      "resulting_inventory_blob_sha": "79007165e5124dc48b1ca91be6df91d2a857c727",
+      "added_stable_ids": [
+        "d10.math.unique-bounded-modular-lift.20261011"
+      ],
+      "appended_sources": [],
+      "coordinates_added": 0,
+      "ratified_added": 0,
+      "delta_selected": 1,
+      "previous_selected": 651,
+      "resulting_selected": 652,
+      "decision": "RESEARCH selection only, owner ratification and Core-vs-derived review pending; no coordinates, no physical T5 authorization",
+      "tests": [
+        "scripts/check_d10_selection_transition_history.py --self-test",
+        "scripts/check-d10-proposal-ledger.py --self-test",
+        "scripts/check_d10_unique_bounded_modular_lift.py"
+      ],
+      "source_provenance_note": "The selected semantic law is evidenced in evidence[]; historical canonical inventory.sources was unchanged across this append. No source was appended to inventory.sources in this transition; preserve immutable resulting Git blob SHA."
+    },
+    {
+      "id": "d10.math.prefix-free-kraft-certificate.current-main.20261011",
+      "authority": "#4013 #4463 #5041; isolated exact binary-codebook certificate",
+      "evidence": [
+        "knowledge/d10-prefix-free-kraft-certificate-20261011.json",
+        "docs/research/d10-prefix-free-kraft-certificate.uk.md",
+        "scripts/check_d10_prefix_free_kraft_certificate.py"
+      ],
+      "previous_inventory_blob_sha": "79007165e5124dc48b1ca91be6df91d2a857c727",
+      "resulting_inventory_blob_sha": "3c02b877815506ebe6a4c8db5dfa1c2a9fbadd3b",
+      "added_stable_ids": [
+        "d10.math.prefix-free-kraft-certificate.20261011"
+      ],
+      "appended_sources": [],
+      "coordinates_added": 0,
+      "ratified_added": 0,
+      "delta_selected": 1,
+      "previous_selected": 652,
+      "resulting_selected": 653,
+      "decision": "selected research only; no ratification, coordinate, runtime or physical codec authority; owner review of Core-vs-derived pending",
+      "tests": [
+        "python3 scripts/check_d10_prefix_free_kraft_certificate.py",
+        "python3 -O scripts/check_d10_prefix_free_kraft_certificate.py",
+        "scripts/check_d10_selection_transition_history.py --self-test",
+        "scripts/check-d10-proposal-ledger.py --self-test"
+      ],
+      "source_provenance_note": "The selected semantic law is evidenced in evidence[]; historical canonical inventory.sources was unchanged across this append. No source was appended to inventory.sources in this transition; preserve immutable resulting Git blob SHA."
+    },
+    {
+      "id": "d10.math.finite-code-unique-decipherability.after-653.20261011",
+      "authority": "#4013 #4463 #5041; research-only selection",
+      "evidence": [
+        "knowledge/d10-unique-decipherability-selected-20261011.json",
+        "knowledge/d10-unique-decipherability-historical-20261009.json",
+        "scripts/check_d10_unique_decipherability.py"
+      ],
+      "previous_inventory_blob_sha": "3c02b877815506ebe6a4c8db5dfa1c2a9fbadd3b",
+      "resulting_inventory_blob_sha": "184063ce850bafcb13d585336e1c6ee5f58c5f28",
+      "added_stable_ids": [
+        "d10.math.finite-code-unique-decipherability.20261011"
+      ],
+      "appended_sources": [
+        "knowledge/d10-unique-decipherability-selected-20261011.json"
+      ],
+      "coordinates_added": 0,
+      "ratified_added": 0,
+      "delta_selected": 1,
+      "previous_selected": 653,
+      "resulting_selected": 654,
+      "decision": "selected research only; explicit owner ratification, coordinate and Core-vs-derived review pending",
+      "tests": [
+        "python3 scripts/check_d10_unique_decipherability.py",
+        "python3 -O scripts/check_d10_unique_decipherability.py",
+        "python3 scripts/check_d10_selection_transition_history.py --self-test",
+        "python3 scripts/check-d10-proposal-ledger.py"
+      ]
+    },
+    {
+      "id": "d10.math.generalized-congruence-merge.after-654.20261011",
+      "authority": "#4013 #4463 #5041; research selection only",
+      "evidence": [
+        "knowledge/d10-generalized-crt-selection-20261011.json",
+        "knowledge/d10-generalized-congruence-research-v1.json",
+        "tests/test_d10_generalized_crt.py"
+      ],
+      "previous_inventory_blob_sha": "184063ce850bafcb13d585336e1c6ee5f58c5f28",
+      "resulting_inventory_blob_sha": "7d8745cb6f183cf0c015812359a6c0f87c4c2ffb",
+      "added_stable_ids": [
+        "d10.math.generalized-congruence-merge.20261011"
+      ],
+      "appended_sources": [
+        "knowledge/d10-generalized-crt-selection-20261011.json"
+      ],
+      "coordinates_added": 0,
+      "ratified_added": 0,
+      "delta_selected": 1,
+      "previous_selected": 654,
+      "resulting_selected": 655,
+      "decision": "selected research only; source-backed 13689-case SymPy 1.14.0 previous donor witness, owner Core-vs-derived still pending",
+      "tests": [
+        "python3 -m unittest tests.test_d10_generalized_crt -v",
+        "python3 scripts/check_d10_selection_transition_history.py --self-test",
+        "python3 scripts/check-d10-proposal-ledger.py"
+      ]
+    },
+    {
+      "id": "d10.exact-math-signal.from-existing-evidence.after-655.20261011",
+      "authority": "#4013 #4463 #5041; research selection, owner ratification pending",
+      "evidence": [
+        "knowledge/d10-existing-math-signal-selected-20261011.json",
+        "knowledge/d10-hadamard-variance-proposal-20261009.json",
+        "knowledge/d10-crossdomain-math-signal-research-v1.json",
+        "tests/test_d10_crossdomain_math_laws.py",
+        "tests/oracles/d10_hadamard_chez.ss"
+      ],
+      "previous_inventory_blob_sha": "7d8745cb6f183cf0c015812359a6c0f87c4c2ffb",
+      "resulting_inventory_blob_sha": "d3d913ea48730f21764903860444f437b4e111be",
+      "added_stable_ids": [
+        "d10.measure.hadamard-variance.20261011",
+        "d10.math.finite-convolution.20261011",
+        "d10.signal.phase-unwrap.20261011"
+      ],
+      "appended_sources": [
+        "knowledge/d10-existing-math-signal-selected-20261011.json"
+      ],
+      "coordinates_added": 0,
+      "ratified_added": 0,
+      "delta_selected": 3,
+      "previous_selected": 655,
+      "resulting_selected": 658,
+      "decision": "reuse existing NIST/Chez and source-pinned exact Fraction corpus. Three non-equivalent observable operations; Core-vs-derived and ratification pending.",
+      "tests": [
+        "python3 scripts/check_d10_existing_math_signal_selected.py --self-test",
+        "python3 scripts/check_d10_crossdomain_math_signal.py",
+        "python3 scripts/check_d10_hadamard_proposal_v1.py",
+        "python3 scripts/check_d10_selection_transition_history.py --self-test"
+      ]
+    },
+    {
+      "id": "d10.math.word-fractions.existing-archive.after-658.20261011",
+      "authority": "#4013 #4463 #5041; research selection, owner ratification pending",
+      "evidence": [
+        "knowledge/d10-existing-combinatorial-laws-selected-20261011.json",
+        "knowledge/d10-debruijn-binary-cycle-research-v1.json",
+        "knowledge/d10-binary-lyndon-factorization-v1.json",
+        "knowledge/d10-stern-brocot-run-path-20261009.json"
+      ],
+      "previous_inventory_blob_sha": "d3d913ea48730f21764903860444f437b4e111be",
+      "resulting_inventory_blob_sha": "415f3516d599eb0aa6b3f50fb659a022ba0d758e",
+      "added_stable_ids": [
+        "d10.words.debruijn-binary-cycle.20261011",
+        "d10.words.binary-lyndon-factorization.20261011",
+        "d10.math.stern-brocot-run-path.20261011"
+      ],
+      "appended_sources": [
+        "knowledge/d10-existing-combinatorial-laws-selected-20261011.json"
+      ],
+      "coordinates_added": 0,
+      "ratified_added": 0,
+      "delta_selected": 3,
+      "previous_selected": 658,
+      "resulting_selected": 661,
+      "decision": "source-backed three independent observable finite combinatorial laws; unchanged historical HOLD snapshots; owner Core-vs-derived decision pending",
+      "tests": [
+        "python3 scripts/check_d10_existing_combinatorial_laws_selected.py --self-test",
+        "python3 scripts/check_d10_debruijn_binary_cycle.py --self-test",
+        "python3 scripts/check_d10_binary_lyndon_factorization.py",
+        "python3 scripts/check_d10_stern_brocot_runs.py --self-test"
+      ]
+    },
+    {
+      "id": "d10.alltime.archive-verified-14.after-661.20261011",
+      "authority": "#4013 #4463 #5041 — owner mandate fill existing D10 research, selection only",
+      "evidence": [
+        "research/d10/staging-20261011/d10-existing-research-batch-replay-20261011.json",
+        "knowledge/d10-alltime-existing-research-selected-batch14-20261011.json",
+        "knowledge/d10-abductive-minimal-explanations-v1.json",
+        "knowledge/d10-affine-correlated-uncertainty-v1.json",
+        "knowledge/d10-allen-atms-research-20261009.json",
+        "knowledge/d10-astrophoto-exact-pinhole-research-20261009.json",
+        "knowledge/d10-critical-pairs-confluence-20261009.json",
+        "knowledge/d10-first-order-lgg-research-v1.json",
+        "knowledge/d10-rosenblatt-novikoff-exact-step-20261009.json",
+        "knowledge/d10-lower-mechanical-word-research-v1.json",
+        "knowledge/d10-affine-quantity-point-delta-20261009.json",
+        "knowledge/d10-ground-congruence-closure-research-20261009.json",
+        "knowledge/d10-cyclic-word-canon-20261009.json"
+      ],
+      "previous_inventory_blob_sha": "415f3516d599eb0aa6b3f50fb659a022ba0d758e",
+      "resulting_inventory_blob_sha": "4c803abf0f22582ef8234d9ba60ca4796d433eb5",
+      "added_stable_ids": [
+        "d10.archive.minimal-abductive-explanations.20261011",
+        "d10.archive.correlated-affine-combination.20261011",
+        "d10.archive.sound-affine-product-enclosure.20261011",
+        "d10.archive.allen-interval-relation.20261011",
+        "d10.archive.atms-consistent-label-join.20261011",
+        "d10.archive.pinhole-image-project.20261011",
+        "d10.archive.pixel-to-camera-ray.20261011",
+        "d10.archive.finite-string-critical-pair-confluence.20261011",
+        "d10.archive.first-order-least-general-generalization.20261011",
+        "d10.archive.exact-perceptron-mistake-step.20261011",
+        "d10.archive.lower-mechanical-word.20261011",
+        "d10.archive.affine-quantity-transport.20261011",
+        "d10.archive.ground-congruence-closure-partition.20261011",
+        "d10.archive.cyclic-binary-word-canon.20261011"
+      ],
+      "appended_sources": [
+        "knowledge/d10-alltime-existing-research-selected-batch14-20261011.json"
+      ],
+      "delta_selected": 14,
+      "previous_selected": 661,
+      "resulting_selected": 675,
+      "coordinates_added": 0,
+      "ratified_added": 0,
+      "decision": "Select 14 source-pinned already researched observable laws. Historical HOLD preserved; Core-vs-derived awaits owner's D10 ratification; no coordinate or physical T5 authority.",
+      "tests": [
+        "python3 scripts/check_d10_alltime_archived_14_selection.py --self-test",
+        "python3 scripts/check_d10_selection_transition_history.py --self-test",
+        "python3 scripts/check-d10-proposal-ledger.py --self-test"
+      ]
     }
   ]
 }

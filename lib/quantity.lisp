@@ -24,13 +24,22 @@
 (00001001 science-proper-list?
   (00001000 (x)
     (00000111
-      ; Pair cells recurse through CDR; never pass a compound value to EQ.
-      ((тотожне? (00000010 x) ні)
-       (science-proper-list? (00000110 x)))
-      ; EQ is atom-only. This branch runs only when X itself is an atom.
-      ((00000010 x) 
+      ; Атом: порожній хвіст завершує правильний список; інший атом — ні.
+      ((00000010 x)
        (00000011 x (00000001 ())))
-      )))
+      ; Пара: точний D1-предикат забезпечує рекурсію без невідомого імені.
+      ((00000010 (00000001 ()))
+       (science-proper-list? (00000110 x))))))
+
+; Exact Lisp-owned length predicate. The caller separately rejects dotted tails.
+; D1 ATOM ends an empty tail; the remaining counter must reach zero there.
+(00001001 science-list-length-equals?
+  (00001000 (items remaining)
+    (00000111
+      ((00000010 items) (00000011 remaining 0))
+      ((00000011 remaining 0) (00000011 1 0))
+      ((00000010 (00000001 ()))
+       (science-list-length-equals? (00000110 items) (00001101 remaining 1))))))
 
 (00001001 science-sixth
   (00001000 (values)
@@ -50,12 +59,12 @@
       
       ((00000010 x)  (00000001 ()))
       ((00000011 (science-proper-list? x) (00000001 ())) (00000001 ()))
-      ((00000011 (00011100 (00101000 x) 3) (00000001 ())) (00000001 ()))
+      ((00000011 (science-list-length-equals? x 3) (00000011 1 0)) (00000001 ()))
       ((00000011 (00000101 x) *dimension-schema*)
        (00000111
          ((00000011 (00100011 (00101111 x)) (00000001 ())) (00000001 ()))
          
-         ((00000010 (00110000 x))  t)
+         ((00000010 (00110000 x))  (00000010 (00000001 ())))
          ))
       )))
 
@@ -70,7 +79,7 @@
     (00000111
       
       ((00000010 dimensions)  (00000111
-         ((00000011 dimensions (00000001 ())) t)
+         ((00000011 dimensions (00000001 ())) (00000010 (00000001 ())))
          ))
       ((dimension? (00000101 dimensions))
        (science-dimensions-valid? (00000110 dimensions)))
@@ -103,7 +112,7 @@
       
       ((00000010 x)  (00000001 ()))
       ((00000011 (science-proper-list? x) (00000001 ())) (00000001 ()))
-      ((00000011 (00011100 (00101000 x) 3) (00000001 ())) (00000001 ()))
+      ((00000011 (science-list-length-equals? x 3) (00000011 1 0)) (00000001 ()))
       ((00000011 (00000101 x) *quantity-schema*)
        (unit? (00110000 x)))
       )))
@@ -198,30 +207,30 @@
       
       ((00000010 x)  (00000001 ()))
       ((00000011 (science-proper-list? x) (00000001 ())) (00000001 ()))
-      ((00000011 (00011100 (00101000 x) 3) (00000001 ())) (00000001 ()))
+      ((00000011 (science-list-length-equals? x 3) (00000011 1 0)) (00000001 ()))
       ((00000011 (00000101 x) *science-source-schema*)
        (00000111
          ((00000011 (00100011 (00101111 x)) (00000001 ())) (00000001 ()))
          
-         ((00000010 (00110000 x))  t)
+         ((00000010 (00110000 x))  (00000010 (00000001 ())))
          ))
       )))
 
 (00001001 scientific-constant-status-valid?
   (00001000 (status)
     (00000111
-      ((00000011 status (00000001 exact-by-definition)) t)
-      ((00000011 status (00000001 exact-derived)) t)
-      ((00000011 status (00000001 measured)) t)
+      ((00000011 status (00000001 exact-by-definition)) (00000010 (00000001 ())))
+      ((00000011 status (00000001 exact-derived)) (00000010 (00000001 ())))
+      ((00000011 status (00000001 measured)) (00000010 (00000001 ())))
       )))
 
 (00001001 scientific-constant-kind-valid?
   (00001000 (kind)
     (00000111
-      ((00000011 kind (00000001 physical-defining)) t)
-      ((00000011 kind (00000001 physical-derived)) t)
-      ((00000011 kind (00000001 physical-measured)) t)
-      ((00000011 kind (00000001 mathematical)) t)
+      ((00000011 kind (00000001 physical-defining)) (00000010 (00000001 ())))
+      ((00000011 kind (00000001 physical-derived)) (00000010 (00000001 ())))
+      ((00000011 kind (00000001 physical-measured)) (00000010 (00000001 ())))
+      ((00000011 kind (00000001 mathematical)) (00000010 (00000001 ())))
       )))
 
 (00001001 make-scientific-constant
@@ -238,10 +247,11 @@
 (00001001 scientific-constant?
   (00001000 (x)
     (00000111
-      
-      ((00000010 ()) (00000001 ()))
+
+      ((00000010 x) (00000001 ()))
       ((00000011 (science-proper-list? x) (00000001 ())) (00000001 ()))
-      
+      ; Короткі записи відхиляються до CAR/CDR-зчитування полів.
+      ((00000011 (science-list-length-equals? x 7) (00000011 1 0)) (00000001 ()))
       ((00000011 (00000101 x) *scientific-constant-schema*)
        (00000111
          ((00000011 (00100011 (00101111 x)) (00000001 ())) (00000001 ()))
@@ -250,7 +260,7 @@
          ((00000011 (scientific-constant-kind-valid? (00110010 x)) (00000001 ())) (00000001 ()))
          ((00000011 (00100011 (science-sixth x)) (00000001 ())) (00000001 ()))
          ((00000011 (science-source? (science-seventh x)) (00000001 ())) (00000001 ()))
-         ((00000010 ()) t)))
+         ((00000010 ()) (00000010 (00000001 ())))))
       )))
 
 (00001001 scientific-constant-name

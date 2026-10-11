@@ -1,0 +1,133 @@
+{
+  "schema": "sens.domain-archive-supplement/v1",
+  "date": "2026-10-11",
+  "status": "IMMUTABLE-RESEARCH-EVIDENCE-NOT-SEMANTIC-ADMISSION",
+  "original_file_count": 14,
+  "source_prs": [
+    2696,
+    3182,
+    4437,
+    5139,
+    5323
+  ],
+  "rules": [
+    "archived bytes match original Git blobs (14/14 checked on integration branch)",
+    "historical source is not a production executable or canonical D1-D10 semantic selection",
+    "for .py sources archive path uses suffix .source.txt to prevent automatic discovery as active code",
+    "none of inventory, proposal ledger, append SHA transition history or ratification authority changed"
+  ],
+  "entries": [
+    {
+      "source_pr": 3182,
+      "original_path": "scripts/cond-three-part-inventory.py",
+      "original_git_blob_sha": "59b6db7a1b153293cc487844585d337f81d5cabe",
+      "archive_path": "research/domain-archive/20261011/pr3182/scripts/cond-three-part-inventory.py.source.txt",
+      "archive_blob_sha": "59b6db7a1b153293cc487844585d337f81d5cabe",
+      "executable": false
+    },
+    {
+      "source_pr": 4437,
+      "original_path": "scripts/domain_word_carrier.py",
+      "original_git_blob_sha": "71631b37412cbf616699ad466966896365524c89",
+      "archive_path": "research/domain-archive/20261011/pr4437/scripts/domain_word_carrier.py.source.txt",
+      "archive_blob_sha": "71631b37412cbf616699ad466966896365524c89",
+      "executable": false
+    },
+    {
+      "source_pr": 4437,
+      "original_path": "scripts/migrate-three-pass.py",
+      "original_git_blob_sha": "63a8be5902717ca9e3aab9c04cffcf931c79b977",
+      "archive_path": "research/domain-archive/20261011/pr4437/scripts/migrate-three-pass.py.source.txt",
+      "archive_blob_sha": "63a8be5902717ca9e3aab9c04cffcf931c79b977",
+      "executable": false
+    },
+    {
+      "source_pr": 4437,
+      "original_path": "tests/test_domain_word_carrier.py",
+      "original_git_blob_sha": "2450bebd2bd8c16898d8b4c96d374e7eb89a8c5b",
+      "archive_path": "research/domain-archive/20261011/pr4437/tests/test_domain_word_carrier.py.source.txt",
+      "archive_blob_sha": "2450bebd2bd8c16898d8b4c96d374e7eb89a8c5b",
+      "executable": false
+    },
+    {
+      "source_pr": 4437,
+      "original_path": "tests/test_migrator_ladder_authority.py",
+      "original_git_blob_sha": "fd3ea6ed6db5fee96a14891f5917154ca1d25b27",
+      "archive_path": "research/domain-archive/20261011/pr4437/tests/test_migrator_ladder_authority.py.source.txt",
+      "archive_blob_sha": "fd3ea6ed6db5fee96a14891f5917154ca1d25b27",
+      "executable": false
+    },
+    {
+      "source_pr": 4437,
+      "original_path": "docs/sens-code-migration.md",
+      "original_git_blob_sha": "0e2b7e7fe1627e020e531475bba7b42e857184f6",
+      "archive_path": "research/domain-archive/20261011/pr4437/docs/sens-code-migration.md",
+      "archive_blob_sha": "0e2b7e7fe1627e020e531475bba7b42e857184f6",
+      "executable": false
+    },
+    {
+      "source_pr": 5323,
+      "original_path": "benchmarks/microcpu/README.uk.md",
+      "original_git_blob_sha": "ff5966935d3d3ee5aab0460873abebf1f6b2ec2b",
+      "archive_path": "research/domain-archive/20261011/pr5323/benchmarks/microcpu/README.uk.md",
+      "archive_blob_sha": "ff5966935d3d3ee5aab0460873abebf1f6b2ec2b",
+      "executable": false
+    },
+    {
+      "source_pr": 5323,
+      "original_path": "benchmarks/microcpu/bench.py",
+      "original_git_blob_sha": "94910bd3fe9efd2a73fce9e198dde300490da45c",
+      "archive_path": "research/domain-archive/20261011/pr5323/benchmarks/microcpu/bench.py.source.txt",
+      "archive_blob_sha": "94910bd3fe9efd2a73fce9e198dde300490da45c",
+      "executable": false
+    },
+    {
+      "source_pr": 5323,
+      "original_path": "tests/test_microcpu_stats.py",
+      "original_git_blob_sha": "e22ecdca282ffbc32effb7f419d49b3fc9da8964",
+      "archive_path": "research/domain-archive/20261011/pr5323/tests/test_microcpu_stats.py.source.txt",
+      "archive_blob_sha": "e22ecdca282ffbc32effb7f419d49b3fc9da8964",
+      "executable": false
+    },
+    {
+      "source_pr": 5323,
+      "original_path": "scripts/check-d10-yantra-library-harvest-v1.py",
+      "original_git_blob_sha": "f1cbb242825ba6e3921220a900da725ff3b9e5bd",
+      "archive_path": "research/domain-archive/20261011/pr5323/scripts/check-d10-yantra-library-harvest-v1.py.source.txt",
+      "archive_blob_sha": "f1cbb242825ba6e3921220a900da725ff3b9e5bd",
+      "executable": false
+    },
+    {
+      "source_pr": 5139,
+      "original_path": "docs/audit/safe-branch-sweep-20261009-triage.tsv",
+      "original_git_blob_sha": "daea3d57a929853e04fa4c03838e7494ba0395df",
+      "archive_path": "research/domain-archive/20261011/pr5139/docs/audit/safe-branch-sweep-20261009-triage.tsv",
+      "archive_blob_sha": "daea3d57a929853e04fa4c03838e7494ba0395df",
+      "executable": false
+    },
+    {
+      "source_pr": 5139,
+      "original_path": "docs/research/branch-sweep-triage-20261009.md",
+      "original_git_blob_sha": "a14d4092f404e9b535c3fee74462c202d32fe7ce",
+      "archive_path": "research/domain-archive/20261011/pr5139/docs/research/branch-sweep-triage-20261009.md",
+      "archive_blob_sha": "a14d4092f404e9b535c3fee74462c202d32fe7ce",
+      "executable": false
+    },
+    {
+      "source_pr": 2696,
+      "original_path": "docs/current-binary-domain-architecture.md",
+      "original_git_blob_sha": "6f1ca0274176c71b800dafaa212e3e16c5e7646f",
+      "archive_path": "research/domain-archive/20261011/pr2696/docs/current-binary-domain-architecture.md",
+      "archive_blob_sha": "6f1ca0274176c71b800dafaa212e3e16c5e7646f",
+      "executable": false
+    },
+    {
+      "source_pr": 2696,
+      "original_path": "docs/semantic-authority-map.uk.md",
+      "original_git_blob_sha": "f90f6bc81e41d8d7fb3c4c095154d3892069757b",
+      "archive_path": "research/domain-archive/20261011/pr2696/docs/semantic-authority-map.uk.md",
+      "archive_blob_sha": "f90f6bc81e41d8d7fb3c4c095154d3892069757b",
+      "executable": false
+    }
+  ]
+}

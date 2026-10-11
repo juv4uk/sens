@@ -1,0 +1,294 @@
+{
+  "schema": "d10.replay-proposals-from-existing-research/v1",
+  "date": "2026-10-11",
+  "baseline_main_sha": "78cee7cd01c74bc3aea1b6ca5d747de21ef80508",
+  "baseline_ledger_blob": "b07fdef885845cf0e7ae26c7d4cc3ee1da251d84",
+  "baseline_d10_inventory_blob": "7e13e929338baeef9b16c2139d24b78e23ea1e03",
+  "chosen_source_order": [
+    {
+      "pr": 5536,
+      "sha": "0f59df543bd834578e786a4f26885f0888754bf9"
+    },
+    {
+      "pr": 5537,
+      "sha": "bf7f54103a9c0c641b2ea1d7434337f08b78430e"
+    },
+    {
+      "pr": 5531,
+      "sha": "16257dab945145403ca6ad6a9e34452b0d27f1d1"
+    },
+    {
+      "pr": 5529,
+      "sha": "7361bd516f07847912ebf0eb3bb3694f47299e29"
+    },
+    {
+      "pr": 5532,
+      "sha": "d1f11ab398ddd0af8ed101b3df9d9cca3bb8a3ae"
+    }
+  ],
+  "added_pending_only": 32,
+  "selected_delta": 0,
+  "coordinates_delta": 0,
+  "ratified_delta": 0,
+  "policy": "No automatic D10 selection or NO-MATCH proof. All incoming donor laws recorded as PENDING: behavioral dedup, source-HOLD, independent oracle and owner review mandatory. Canonical inventory and historical SHA chain remain unchanged.",
+  "items": [
+    {
+      "pr": 5536,
+      "source_ref": "0f59df543bd834578e786a4f26885f0888754bf9",
+      "original_id": "D10P-6101",
+      "proposal_id": "D10P-6101",
+      "semantic_name": "BINARY-CONSTRAINT-SUPPORT-PROJECTION",
+      "donor": "juv4uk/sens@c67db6cdd820dea8d3a110caed359507c0a2d7a4:knowledge/d10-symbolic-ai-arc-support-20261009.json:1"
+    },
+    {
+      "pr": 5536,
+      "source_ref": "0f59df543bd834578e786a4f26885f0888754bf9",
+      "original_id": "D10P-6102",
+      "proposal_id": "D10P-6102",
+      "semantic_name": "FINITE-BINARY-ARC-CONSISTENCY-FIXPOINT",
+      "donor": "juv4uk/sens@c67db6cdd820dea8d3a110caed359507c0a2d7a4:scripts/research_d10_finite_arc_consistency.py:1"
+    },
+    {
+      "pr": 5536,
+      "source_ref": "0f59df543bd834578e786a4f26885f0888754bf9",
+      "original_id": "D10P-6103",
+      "proposal_id": "D10P-6103",
+      "semantic_name": "GROUND-CONGRUENCE-CLOSURE-PARTITION",
+      "donor": "juv4uk/sens@c67db6cdd820dea8d3a110caed359507c0a2d7a4:knowledge/d10-ground-congruence-closure-research-20261009.json:1"
+    },
+    {
+      "pr": 5536,
+      "source_ref": "0f59df543bd834578e786a4f26885f0888754bf9",
+      "original_id": "D10P-6104",
+      "proposal_id": "D10P-6104",
+      "semantic_name": "EXACT-BARYCENTRIC-INTERPOLATE",
+      "donor": "juv4uk/sens@c67db6cdd820dea8d3a110caed359507c0a2d7a4:knowledge/d10-exact-barycentric-interpolation-research-v1.json:1"
+    },
+    {
+      "pr": 5536,
+      "source_ref": "0f59df543bd834578e786a4f26885f0888754bf9",
+      "original_id": "D10P-6105",
+      "proposal_id": "D10P-6105",
+      "semantic_name": "DE-BRUIJN-BINARY-CYCLE?",
+      "donor": "juv4uk/sens@c67db6cdd820dea8d3a110caed359507c0a2d7a4:knowledge/d10-debruijn-binary-cycle-research-v1.json:1"
+    },
+    {
+      "pr": 5536,
+      "source_ref": "0f59df543bd834578e786a4f26885f0888754bf9",
+      "original_id": "D10P-6106",
+      "proposal_id": "D10P-6106",
+      "semantic_name": "UNIQUE-BOUNDED-MODULAR-LIFT",
+      "donor": "juv4uk/sens@c67db6cdd820dea8d3a110caed359507c0a2d7a4:knowledge/d10-unique-bounded-modular-lift-20261009.json:1"
+    },
+    {
+      "pr": 5537,
+      "source_ref": "bf7f54103a9c0c641b2ea1d7434337f08b78430e",
+      "original_id": "D10P-2026101102",
+      "proposal_id": "D10P-2026101102",
+      "semantic_name": "FINITE-SIMPLE-TEMPORAL-CLOSURE",
+      "donor": "juv4uk/sens@c67db6cdd820dea8d3a110caed359507c0a2d7a4:knowledge/d10-finite-temporal-constraint-closure-v1.json:1"
+    },
+    {
+      "pr": 5537,
+      "source_ref": "bf7f54103a9c0c641b2ea1d7434337f08b78430e",
+      "original_id": "D10P-2026101103",
+      "proposal_id": "D10P-2026101103",
+      "semantic_name": "EXACT-BOOLEAN-PRIME-IMPLICANTS",
+      "donor": "juv4uk/sens@c67db6cdd820dea8d3a110caed359507c0a2d7a4:knowledge/d10-quine-prime-implicants-20261009.json:1"
+    },
+    {
+      "pr": 5531,
+      "source_ref": "16257dab945145403ca6ad6a9e34452b0d27f1d1",
+      "original_id": "D10P-0910",
+      "proposal_id": "D10P-0910",
+      "semantic_name": "PREFIX-FREE-KRAFT-CERTIFICATE",
+      "donor": "juv4uk/sens@81c805e22b1ed528869e49e7dc5e02a744ee8751:knowledge/d10-prefix-free-kraft-certificate-20261011.json:1"
+    },
+    {
+      "pr": 5531,
+      "source_ref": "16257dab945145403ca6ad6a9e34452b0d27f1d1",
+      "original_id": "D10P-8001",
+      "proposal_id": "D10P-8001",
+      "semantic_name": "MINIMAL-ABDUCTIVE-EXPLANATIONS",
+      "donor": "juv4uk/sens@c67db6cdd820dea8d3a110caed359507c0a2d7a4:knowledge/d10-abductive-minimal-explanations-v1.json:1"
+    },
+    {
+      "pr": 5531,
+      "source_ref": "16257dab945145403ca6ad6a9e34452b0d27f1d1",
+      "original_id": "D10P-8002",
+      "proposal_id": "D10P-8002",
+      "semantic_name": "CORRELATED-AFFINE-COMBINATION",
+      "donor": "juv4uk/sens@c67db6cdd820dea8d3a110caed359507c0a2d7a4:knowledge/d10-affine-correlated-uncertainty-v1.json:1"
+    },
+    {
+      "pr": 5531,
+      "source_ref": "16257dab945145403ca6ad6a9e34452b0d27f1d1",
+      "original_id": "D10P-8003",
+      "proposal_id": "D10P-8003",
+      "semantic_name": "SOUND-AFFINE-PRODUCT-ENCLOSURE",
+      "donor": "juv4uk/sens@c67db6cdd820dea8d3a110caed359507c0a2d7a4:knowledge/d10-affine-correlated-uncertainty-v1.json:1"
+    },
+    {
+      "pr": 5531,
+      "source_ref": "16257dab945145403ca6ad6a9e34452b0d27f1d1",
+      "original_id": "D10P-8006",
+      "proposal_id": "D10P-8006",
+      "semantic_name": "PINHOLE-IMAGE-PROJECT",
+      "donor": "juv4uk/sens@c67db6cdd820dea8d3a110caed359507c0a2d7a4:knowledge/d10-astrophoto-exact-pinhole-research-20261009.json:1"
+    },
+    {
+      "pr": 5531,
+      "source_ref": "16257dab945145403ca6ad6a9e34452b0d27f1d1",
+      "original_id": "D10P-8007",
+      "proposal_id": "D10P-8007",
+      "semantic_name": "PIXEL-TO-CAMERA-RAY",
+      "donor": "juv4uk/sens@c67db6cdd820dea8d3a110caed359507c0a2d7a4:knowledge/d10-astrophoto-exact-pinhole-research-20261009.json:1"
+    },
+    {
+      "pr": 5531,
+      "source_ref": "16257dab945145403ca6ad6a9e34452b0d27f1d1",
+      "original_id": "D10P-8008",
+      "proposal_id": "D10P-8008",
+      "semantic_name": "BINARY-LYNDON-FACTORIZATION",
+      "donor": "juv4uk/sens@c67db6cdd820dea8d3a110caed359507c0a2d7a4:knowledge/d10-binary-lyndon-factorization-v1.json:1"
+    },
+    {
+      "pr": 5531,
+      "source_ref": "16257dab945145403ca6ad6a9e34452b0d27f1d1",
+      "original_id": "D10P-8009",
+      "proposal_id": "D10P-8009",
+      "semantic_name": "FINITE-STRING-CRITICAL-PAIR-CONFLUENCE",
+      "donor": "juv4uk/sens@c67db6cdd820dea8d3a110caed359507c0a2d7a4:knowledge/d10-critical-pairs-confluence-20261009.json:1"
+    },
+    {
+      "pr": 5531,
+      "source_ref": "16257dab945145403ca6ad6a9e34452b0d27f1d1",
+      "original_id": "D10P-8013",
+      "proposal_id": "D10P-8013",
+      "semantic_name": "FIRST-ORDER-LEAST-GENERAL-GENERALIZATION",
+      "donor": "juv4uk/sens@c67db6cdd820dea8d3a110caed359507c0a2d7a4:knowledge/d10-first-order-lgg-research-v1.json:1"
+    },
+    {
+      "pr": 5531,
+      "source_ref": "16257dab945145403ca6ad6a9e34452b0d27f1d1",
+      "original_id": "D10P-8014",
+      "proposal_id": "D10P-8014",
+      "semantic_name": "EXACT-PERCEPTRON-MISTAKE-STEP",
+      "donor": "juv4uk/sens@c67db6cdd820dea8d3a110caed359507c0a2d7a4:knowledge/d10-rosenblatt-novikoff-exact-step-20261009.json:1"
+    },
+    {
+      "pr": 5531,
+      "source_ref": "16257dab945145403ca6ad6a9e34452b0d27f1d1",
+      "original_id": "D10P-8016",
+      "proposal_id": "D10P-8016",
+      "semantic_name": "LOWER-MECHANICAL-WORD",
+      "donor": "juv4uk/sens@c67db6cdd820dea8d3a110caed359507c0a2d7a4:knowledge/d10-lower-mechanical-word-research-v1.json:1"
+    },
+    {
+      "pr": 5531,
+      "source_ref": "16257dab945145403ca6ad6a9e34452b0d27f1d1",
+      "original_id": "D10P-8017",
+      "proposal_id": "D10P-8017",
+      "semantic_name": "AFFINE-QUANTITY-TRANSPORT",
+      "donor": "juv4uk/sens@c67db6cdd820dea8d3a110caed359507c0a2d7a4:knowledge/d10-affine-quantity-point-delta-20261009.json:1"
+    },
+    {
+      "pr": 5531,
+      "source_ref": "16257dab945145403ca6ad6a9e34452b0d27f1d1",
+      "original_id": "D10P-8019",
+      "proposal_id": "D10P-8019",
+      "semantic_name": "CYCLIC-BINARY-WORD-CANON",
+      "donor": "juv4uk/sens@c67db6cdd820dea8d3a110caed359507c0a2d7a4:knowledge/d10-cyclic-word-canon-20261009.json:1"
+    },
+    {
+      "pr": 5529,
+      "source_ref": "7361bd516f07847912ebf0eb3bb3694f47299e29",
+      "original_id": "D10P-0917",
+      "proposal_id": "D10P-0917",
+      "semantic_name": "FINITE-CNF-UNIT-FIXPOINT",
+      "donor": "pysathq/pysat@152884a6d1889f56a61049aaa773be23f0a8d8c1:pysat/solvers.py:4330"
+    },
+    {
+      "pr": 5529,
+      "source_ref": "7361bd516f07847912ebf0eb3bb3694f47299e29",
+      "original_id": "D10P-601103",
+      "proposal_id": "D10P-601103",
+      "semantic_name": "FINITE-STATE-SHORTEST-DISTINGUISHER",
+      "donor": "juv4uk/sens@c67db6cdd820dea8d3a110caed359507c0a2d7a4:knowledge/d10-finite-state-distinguishing-suffix-research-v1.json:1"
+    },
+    {
+      "pr": 5529,
+      "source_ref": "7361bd516f07847912ebf0eb3bb3694f47299e29",
+      "original_id": "D10P-601106",
+      "proposal_id": "D10P-601106",
+      "semantic_name": "STERN-BROCOT-RUN-PATH",
+      "donor": "juv4uk/sens@c67db6cdd820dea8d3a110caed359507c0a2d7a4:knowledge/d10-stern-brocot-run-path-20261009.json:1"
+    },
+    {
+      "pr": 5529,
+      "source_ref": "7361bd516f07847912ebf0eb3bb3694f47299e29",
+      "original_id": "D10P-601201",
+      "proposal_id": "D10P-601201",
+      "semantic_name": "CIRCULAR-HALF-OPEN-CONTAINS",
+      "donor": "juv4uk/sens@c67db6cdd820dea8d3a110caed359507c0a2d7a4:knowledge/d10-forth-circular-arc-v1.json:1"
+    },
+    {
+      "pr": 5529,
+      "source_ref": "7361bd516f07847912ebf0eb3bb3694f47299e29",
+      "original_id": "D10P-601205",
+      "proposal_id": "D10P-601205",
+      "semantic_name": "ALTERNATING-ZERO-SUM-BACKUP",
+      "donor": "juv4uk/sens@c67db6cdd820dea8d3a110caed359507c0a2d7a4:knowledge/d10-crossrepo-chess-law-proposals-20261009.json:1"
+    },
+    {
+      "pr": 5529,
+      "source_ref": "7361bd516f07847912ebf0eb3bb3694f47299e29",
+      "original_id": "D10P-601206",
+      "proposal_id": "D10P-601206",
+      "semantic_name": "CHESS-CASTLING-RIGHTS-TRANSITION",
+      "donor": "juv4uk/sens@c67db6cdd820dea8d3a110caed359507c0a2d7a4:knowledge/d10-crossrepo-chess-law-proposals-20261009.json:1"
+    },
+    {
+      "pr": 5529,
+      "source_ref": "7361bd516f07847912ebf0eb3bb3694f47299e29",
+      "original_id": "D10P-601207",
+      "proposal_id": "D10P-601207",
+      "semantic_name": "STRESS-SYLLABLE-TRANSFER",
+      "donor": "juv4uk/sens@c67db6cdd820dea8d3a110caed359507c0a2d7a4:knowledge/d10-linguistic-law-intake-20261009.json:1"
+    },
+    {
+      "pr": 5529,
+      "source_ref": "7361bd516f07847912ebf0eb3bb3694f47299e29",
+      "original_id": "D10P-601208",
+      "proposal_id": "D10P-601208",
+      "semantic_name": "CONTEXTUAL-LONGEST-TRANSLITERATE",
+      "donor": "juv4uk/sens@c67db6cdd820dea8d3a110caed359507c0a2d7a4:knowledge/d10-linguistic-law-intake-20261009.json:1"
+    },
+    {
+      "pr": 5529,
+      "source_ref": "7361bd516f07847912ebf0eb3bb3694f47299e29",
+      "original_id": "D10P-601209",
+      "proposal_id": "D10P-601209",
+      "semantic_name": "ENHARMONIC-SPELLING-DISTINCT?",
+      "donor": "juv4uk/sens@c67db6cdd820dea8d3a110caed359507c0a2d7a4:knowledge/d10-music-enharmonic-primary-review-v1.json:1"
+    },
+    {
+      "pr": 5529,
+      "source_ref": "7361bd516f07847912ebf0eb3bb3694f47299e29",
+      "original_id": "D10P-601210",
+      "proposal_id": "D10P-601210",
+      "semantic_name": "NOTATED-CHROMATIC-INTERVAL",
+      "donor": "juv4uk/sens@c67db6cdd820dea8d3a110caed359507c0a2d7a4:knowledge/d10-music-enharmonic-primary-review-v1.json:1"
+    },
+    {
+      "pr": 5529,
+      "source_ref": "7361bd516f07847912ebf0eb3bb3694f47299e29",
+      "original_id": "D10P-601211",
+      "proposal_id": "D10P-601211",
+      "semantic_name": "UNIQUE-SURFACE-CORRECTION-SUGGESTION",
+      "donor": "juv4uk/sens@c67db6cdd820dea8d3a110caed359507c0a2d7a4:knowledge/d10-interlisp-dwim-safe-suggestion-v1.json:1"
+    }
+  ],
+  "skipped_duplicate_count": 446,
+  "skipped_new_names": []
+}

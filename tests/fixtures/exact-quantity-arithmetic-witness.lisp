@@ -75,7 +75,7 @@
                              (scientific-constant-value si:defining-avogadro-constant))
                           (00011100 si:luminous-efficacy
                              (scientific-constant-value si:defining-luminous-efficacy)))
-                        (00000001 (1 1 1 1 1 1 1)))
+                        (00100111 (тотожне? 1 1) (тотожне? 1 1) (тотожне? 1 1) (тотожне? 1 1) (тотожне? 1 1) (тотожне? 1 1) (тотожне? 1 1)))
                       (00100111
                         (00000001 speed-constant-knowledge-projection)
                         (scientific-constant->clauses si:defining-speed-of-light)
@@ -121,6 +121,18 @@
     (scientific-constant-quantity si:defining-cesium-frequency)))
   (scientific-constant-quantity si:defining-planck-constant))))
 
+(00001001 exact-quantity-structural-equal?
+  (00001000 (left right)
+    (00000111
+      ((атом? left)
+       (00000111
+         ((атом? right) (тотожне? left right))
+         ((атом? ()) (тотожне? 1 0))))
+      ((атом? right) (тотожне? 1 0))
+      ((exact-quantity-structural-equal? (перше left) (перше right))
+       (exact-quantity-structural-equal? (решта left) (решта right)))
+      ((атом? ()) (тотожне? 1 0)))))
+
 (00001001 exact-quantity-arithmetic-check
   (00001000 (rows)
     ; D3 COND має рівно двопольові гілки; D1 1/0 — не третє поле.
@@ -129,18 +141,18 @@
        (00000111
          ((00000011 rows (00000001 ()))
           (00000001 (exact-quantity-arithmetic-witness (status pass))))
-         (1
+         ((атом? ())
           (00100111
             (00000001 exact-quantity-arithmetic-witness)
             (00100111 (00000001 status) (00000001 fail))
             (00100111 (00000001 case) (00000001 malformed-row-tail))
             (00100111 (00000001 actual) rows)))))
-      (1
+      ((атом? ())
        (нехай ((row (00000101 rows)))
          (00000111
-           ((00100010 (00101111 row) (00110000 row))
+           ((exact-quantity-structural-equal? (00101111 row) (00110000 row))
             (exact-quantity-arithmetic-check (00000110 rows)))
-           (1
+           ((атом? ())
             (00100111
               (00000001 exact-quantity-arithmetic-witness)
               (00100111 (00000001 status) (00000001 fail))

@@ -1,0 +1,111 @@
+{
+  "schema": "sens.domain-archive-supplement/v1",
+  "date": "2026-10-11",
+  "original_file_count": 14,
+  "status": "IMMUTABLE-RESEARCH-NOT-RUNTIME",
+  "verified_blob_count": 14,
+  "canonical_d10_selected_delta": 0,
+  "ratified_delta": 0,
+  "entries": [
+    {
+      "source_pr": 4437,
+      "original_path": ".github/workflows/si-derived-migrator-probe.yml",
+      "archive_path": "research/domain-archive/20261011/pr4437/.github/workflows/si-derived-migrator-probe.yml.source.txt",
+      "original_blob_sha": "efdfc45585fd8d895aea4ad482626b652274304d",
+      "archived_blob_sha": "efdfc45585fd8d895aea4ad482626b652274304d"
+    },
+    {
+      "source_pr": 4437,
+      "original_path": "scripts/domain_tables.py",
+      "archive_path": "research/domain-archive/20261011/pr4437/scripts/domain_tables.py.source.txt",
+      "original_blob_sha": "8012da30435d39e990c4f4ae687ff1e2d449f10e",
+      "archived_blob_sha": "8012da30435d39e990c4f4ae687ff1e2d449f10e"
+    },
+    {
+      "source_pr": 4437,
+      "original_path": "scripts/migrate-to-sens-codes.py",
+      "archive_path": "research/domain-archive/20261011/pr4437/scripts/migrate-to-sens-codes.py.source.txt",
+      "original_blob_sha": "e3ef7041937f34cb57f73b57cf4a8522167d8f48",
+      "archived_blob_sha": "e3ef7041937f34cb57f73b57cf4a8522167d8f48"
+    },
+    {
+      "source_pr": 4437,
+      "original_path": "tests/test_actual_si_derived_library_migration.py",
+      "archive_path": "research/domain-archive/20261011/pr4437/tests/test_actual_si_derived_library_migration.py.source.txt",
+      "original_blob_sha": "fc35cec70019ef1b49ec5d5d250ae6183aa09195",
+      "archived_blob_sha": "fc35cec70019ef1b49ec5d5d250ae6183aa09195"
+    },
+    {
+      "source_pr": 4437,
+      "original_path": "tests/test_sens_code_migration.py",
+      "archive_path": "research/domain-archive/20261011/pr4437/tests/test_sens_code_migration.py.source.txt",
+      "original_blob_sha": "0121ab8cb42f87b6eec3b44ca3227da0120dc667",
+      "archived_blob_sha": "0121ab8cb42f87b6eec3b44ca3227da0120dc667"
+    },
+    {
+      "source_pr": 4437,
+      "original_path": "tests/test_three_pass_migration.py",
+      "archive_path": "research/domain-archive/20261011/pr4437/tests/test_three_pass_migration.py.source.txt",
+      "original_blob_sha": "a330f3895eaa69dd572dcbfa4b7e432b1fff67ae",
+      "archived_blob_sha": "a330f3895eaa69dd572dcbfa4b7e432b1fff67ae"
+    },
+    {
+      "source_pr": 5323,
+      "original_path": ".github/workflows/microcpu-d1-d3.yml",
+      "archive_path": "research/domain-archive/20261011/pr5323/.github/workflows/microcpu-d1-d3.yml.source.txt",
+      "original_blob_sha": "bd86d9dcfd662af42cd7a9f1b49effaf94c1b68f",
+      "archived_blob_sha": "bd86d9dcfd662af42cd7a9f1b49effaf94c1b68f"
+    },
+    {
+      "source_pr": 5323,
+      "original_path": ".github/workflows/ramka3-doslid.yml",
+      "archive_path": "research/domain-archive/20261011/pr5323/.github/workflows/ramka3-doslid.yml.source.txt",
+      "original_blob_sha": "f6e327a5e10ec0ccf13d21b2db337068743146e1",
+      "archived_blob_sha": "f6e327a5e10ec0ccf13d21b2db337068743146e1"
+    },
+    {
+      "source_pr": 5323,
+      "original_path": "tests/test_d10_yantra_donor_provenance.py",
+      "archive_path": "research/domain-archive/20261011/pr5323/tests/test_d10_yantra_donor_provenance.py.source.txt",
+      "original_blob_sha": "5cdb5c24b784e24d505de50a0ad8c2ebff4a79f4",
+      "archived_blob_sha": "5cdb5c24b784e24d505de50a0ad8c2ebff4a79f4"
+    },
+    {
+      "source_pr": 3182,
+      "original_path": "knowledge/repo-tooling-inventory.lisp",
+      "archive_path": "research/domain-archive/20261011/pr3182/knowledge/repo-tooling-inventory.lisp.source.txt",
+      "original_blob_sha": "7450a68567e8d0dd02ba9561d9a5b5d0ffb8f22e",
+      "archived_blob_sha": "7450a68567e8d0dd02ba9561d9a5b5d0ffb8f22e"
+    },
+    {
+      "source_pr": 2696,
+      "original_path": "docs/semantic-authority-map.md",
+      "archive_path": "research/domain-archive/20261011/pr2696/docs/semantic-authority-map.md",
+      "original_blob_sha": "eae2fddb33e06f9f5162e84755eb781cf3139090",
+      "archived_blob_sha": "eae2fddb33e06f9f5162e84755eb781cf3139090"
+    },
+    {
+      "source_pr": 2696,
+      "original_path": "docs/language-core-axioms.md",
+      "archive_path": "research/domain-archive/20261011/pr2696/docs/language-core-axioms.md",
+      "original_blob_sha": "2acf23cf28c4bf358dc4f6711989f87d1f2e4494",
+      "archived_blob_sha": "2acf23cf28c4bf358dc4f6711989f87d1f2e4494"
+    },
+    {
+      "source_pr": 2696,
+      "original_path": "docs/canonical-serialization.md",
+      "archive_path": "research/domain-archive/20261011/pr2696/docs/canonical-serialization.md",
+      "original_blob_sha": "0adf120b0f11ba202978541c105bc5ae196734dc",
+      "archived_blob_sha": "0adf120b0f11ba202978541c105bc5ae196734dc"
+    },
+    {
+      "source_pr": 3182,
+      "original_path": ".github/workflows/cond-three-part-inventory.yml",
+      "archive_path": "research/domain-archive/20261011/pr3182/.github/workflows/cond-three-part-inventory.yml.source.txt",
+      "original_blob_sha": "31c87f66cb5d8ecec23482057251f62df6d2d15f",
+      "archived_blob_sha": "31c87f66cb5d8ecec23482057251f62df6d2d15f"
+    }
+  ],
+  "not_archived": [],
+  "policy": "Research snapshots remain inert; proof/CI required for canonical admission"
+}
