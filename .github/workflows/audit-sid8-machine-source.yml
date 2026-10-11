@@ -1,0 +1,30 @@
+name: Audit SID8 in-place machine Lisp cutover
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - lib/machine/admission/x86-64.lisp
+      - lib/machine/atoms/x86-64.lisp
+      - lib/machine/encoding/x86-64.lisp
+      - lib/machine/operands/x86-64.lisp
+      - lib/machine/profile/minimal-runtime-x86-64.lisp
+      - lib/machine/projection/x86-64.lisp
+      - tests/test_sid8_machine_source_cutover.py
+      - .github/workflows/audit-sid8-machine-source.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  source-witness:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Guard six original Lisp machine modules and generated-input boundaries
+        run: python3 -m unittest discover -s tests -p test_sid8_machine_source_cutover.py -v
