@@ -393,8 +393,10 @@ mod tests {
     #[test]
     fn unratified_outer_n_path_cannot_strip_d24_numeric_identity() {
         let domain_number = BinaryNumber::from_numeric_domain_bits(24, &vec![0; 24]).unwrap();
-        let err = encode_outer_records(&[OuterRecord::N(domain_number)]).unwrap_err();
-        assert!(matches!(err, OuterEnvelopeError::InvalidNumber { .. }));
+        assert!(matches!(
+            encode_outer_records(&[OuterRecord::N(domain_number)]),
+            Err(OuterEnvelopeError::InvalidNumber { .. })
+        ));
     }
 
     #[test]
