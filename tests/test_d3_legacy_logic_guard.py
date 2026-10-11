@@ -64,6 +64,14 @@ class LegacyD3GuardTests(unittest.TestCase):
           (110 (1 1))"""
         self.assertEqual(self.rules(source), [])
 
+    def test_guard_runtime_policy_uses_exact_d3_and_d1_fallback(self):
+        source = (ROOT / "knowledge" / "guard-runtime-policy.lisp").read_text(encoding="utf-8")
+        self.assertEqual(MODULE.scan_lisp(source, "knowledge/guard-runtime-policy.lisp"), [])
+        self.assertIn("(1 (guard-unknown subject", source)
+        corrupted = source.replace("(1 (guard-unknown subject", "(t (guard-unknown subject", 1)
+        self.assertIn("COND_HOST_TRUTH", [f.rule for f in MODULE.scan_lisp(
+            corrupted, "knowledge/guard-runtime-policy.lisp")])
+
     def test_invalid_lisp_is_incomplete_not_green(self):
         for source in ("(110 (1 1)", "(110 (1 1)))", '"unclosed'):
             with self.subTest(source=source), self.assertRaises(MODULE.Unscannable):
