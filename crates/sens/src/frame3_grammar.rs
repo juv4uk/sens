@@ -12,6 +12,7 @@
 //! list is executable: ((ATOM)) as code needs semantic rejection, whereas
 //! (QUOTE ((ATOM))) needs to remain representable as data.
 
+use std::cell::RefCell;
 use std::collections::HashMap;
 
 pub const MAX_INNER_BITS: usize = 20;
@@ -146,6 +147,20 @@ fn accepts(stack: &[u8]) -> bool {
 
 type Memo = HashMap<(usize, Vec<u8>), u128>;
 
+// Only proven small D2 state/count tables (at most 20 inner bits) are
+// retained. Thread-local memoization avoids mutex contention in codecs and
+// repeats neither DP enumeration nor host-side runtime capabilities.
+thread_local! {
+    static GRAMMAR_COUNTS: RefCell<Memo> = RefCell::new(HashMap::new());
+}
+
+fn cached_count_suffix(remaining: usize, stack: &[u8]) -> u128 {
+    GRAMMAR_COUNTS.with(|memo| {
+        count_suffix(remaining, stack, &mut memo.borrow_mut())
+    })
+}
+
+
 fn count_suffix(remaining: usize, stack: &[u8], memo: &mut Memo) -> u128 {
     if remaining == 0 {
         return u128::from(accepts(stack));
@@ -207,7 +222,7 @@ pub fn count_inner(inner_bits: usize) -> Result<u128, GrammarRankError> {
     if inner_bits > MAX_INNER_BITS {
         return Err(GrammarRankError::TooLarge);
     }
-    Ok(count_suffix(inner_bits, &root(), &mut Memo::new()))
+    Ok(cached_count_suffix(inner_bits, &root()))
 }
 
 /// Reversible 0-based ordinal of one complete D2 root and its exact words.
@@ -226,7 +241,6 @@ pub fn rank_single_root(words: &[ExactWord]) -> Result<GrammarRank, GrammarRankE
     let capacity = count_inner(bits)?;
     let mut remaining = bits;
     let mut state = root();
-    let mut memo = Memo::new();
     let mut ordinal = 0u128;
 
     for word in inner {
@@ -239,7 +253,7 @@ pub fn rank_single_root(words: &[ExactWord]) -> Result<GrammarRank, GrammarRankE
                     let Some(next) = advance(&state, candidate) else {
                         continue;
                     };
-                    let suffixes = count_suffix(remaining - width, &next, &mut memo);
+                    let suffixes = cached_count_suffix(remaining - width, &next);
                     if suffixes == 0 {
                         continue;
                     }
@@ -259,7 +273,7 @@ pub fn rank_single_root(words: &[ExactWord]) -> Result<GrammarRank, GrammarRankE
                 let Some(next) = advance(&state, representative) else {
                     continue;
                 };
-                let suffixes = count_suffix(remaining - width, &next, &mut memo);
+                let suffixes = cached_count_suffix(remaining - width, &next);
                 if suffixes == 0 {
                     continue;
                 }
@@ -296,7 +310,6 @@ pub fn unrank_single_root(
     }
     let mut remaining = inner_bits;
     let mut state = root();
-    let mut memo = Memo::new();
     let mut words = vec![ExactWord { width: 2, bits: 2 }];
 
     while remaining > 0 {
@@ -308,7 +321,7 @@ pub fn unrank_single_root(
                     let Some(next) = advance(&state, candidate) else {
                         continue;
                     };
-                    let suffixes = count_suffix(remaining - width, &next, &mut memo);
+                    let suffixes = cached_count_suffix(remaining - width, &next);
                     if suffixes == 0 {
                         continue;
                     }
@@ -326,7 +339,7 @@ pub fn unrank_single_root(
                 let Some(next) = advance(&state, representative) else {
                     continue;
                 };
-                let suffixes = count_suffix(remaining - width, &next, &mut memo);
+                let suffixes = cached_count_suffix(remaining - width, &next);
                 if suffixes == 0 {
                     continue;
                 }
