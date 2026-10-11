@@ -95,6 +95,8 @@ cargo run --manifest-path external/sens/Cargo.toml -p xtask -- compiler-export
 
 Отже, `seed-v0-c0-runner.bin` (34,580,696 Б у первинному прогоні) — виміряний ELF-компонент, але не єдиний runtime-вхід. Ланцюгу також потрібні pinned SENS checkout/ Cargo workspace inputs для побудови `xtask` і SENS runtime. Це не toolchain/linker/ОС: кодові файли й compiler nucleus не можна непомітно переносити в «external dependencies» і виключати з seed-total.
 
+Проміжний машинозчитуваний census: [`evidence/nano-sens-seed-v0-source-closure-census-2026-10-12.json`](../evidence/nano-sens-seed-v0-source-closure-census-2026-10-12.json). Він закріплює **102 файли / 1,145,608 байтів** у відомому source-and-manifest subset (71 Rust source, 20 Cargo package manifests, 11 root/authority inputs). Це лише нижня межа потрібних repository inputs, не повний closure і не число seed.
+
 Відомі точні pinned вузли ланцюга на SENS SHA `d0787a40fcea36501747732aa61b6de19fe29c70`:
 
 | Файл | Git blob SHA | Bytes |
