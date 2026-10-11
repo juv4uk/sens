@@ -132,7 +132,7 @@ class CatalogRestoreTests(unittest.TestCase):
     def test_duplicate_candidate_id_in_one_source_blocks(self):
         self.current_rows[1]["candidate_id"] = self.current_rows[0]["candidate_id"]
         self.write(self.current, self.current_rows)
-        with self.assertRaisesRegex(ValueError, "DUPLICATE_CANDIDATE_ID_CONFLICT"):
+        with self.assertRaisesRegex(ValueError, "DUPLICATE_OR_EMPTY_SOURCE_IDENTITY"):
             merge.merge_catalog(self.root, self.old, self.current, self.output)
         self.assertFalse(self.output.exists())
 
