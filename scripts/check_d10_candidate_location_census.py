@@ -34,7 +34,7 @@ def require(condition, message):
 
 def source_blob(path):
     data = path.read_bytes()
-    return hashlib.sha1(b"blob " + str(len(data)).encode("ascii") + b"\\0" + data).hexdigest()
+    return hashlib.sha1(b"blob " + str(len(data)).encode("ascii") + b"\0" + data).hexdigest()
 
 
 def load(root, relative):
@@ -53,7 +53,7 @@ def report(root=ROOT):
     with (root / "knowledge/d10-proposal-ledger.tsv").open(
         "r", encoding="utf-8", newline=""
     ) as handle:
-        reader = csv.DictReader(handle, delimiter="\\t")
+        reader = csv.DictReader(handle, delimiter="\t")
         require(tuple(reader.fieldnames or ()) == LEDGER_FIELDS, "ledger header drift")
         ledger = list(reader)
     selected = {}
@@ -115,7 +115,7 @@ def report(root=ROOT):
         })
     classes = dict(Counter(p["classification"] for p in requires))
     require(len(requires) == len(proposal_names), "proposal name collision")
-    require(set(inv["accounting"]["selected_semantic_candidates"] for _ in range(1)) == {len(selected)}, "canonical selected accounting drift")
+    require(inv["accounting"]["selected_semantic_candidates"] == len(selected), "canonical selected accounting drift")
     other_staged = sorted(set(staging_index) - proposal_names - set(selected))
     return {
         "schema": "d10-all-candidate-location-census/v1",
@@ -178,7 +178,7 @@ def main():
     if args.self_test:
         result["self_test_checks_passed"] = self_test(result)
     if args.output:
-        args.output.write_text(json.dumps(result, ensure_ascii=False, indent=2) + "\\n",
+        args.output.write_text(json.dumps(result, ensure_ascii=False, indent=2) + "\n",
                                encoding="utf-8")
     print(json.dumps(result["counts"], sort_keys=True, ensure_ascii=False))
 
