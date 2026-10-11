@@ -3,7 +3,7 @@
   "date": "2026-10-11",
   "branch_policy": "DIRECT-TO-MAIN-NO-NEW-GIT-BRANCHES",
   "authority": "CANDIDATE-CENSUS-RESEARCH-ONLY; no ratification, T5 or executable opcode authority",
-  "interpretation": "A full 1024-cell research coordinate census from pinned existing sources. Only 715 records are selected semantic candidates; 183 additional coordinates are tentative name reservations, not adopted Core laws. Missing cells remain vacant rather than fabricated.",
+  "interpretation": "A 1024-cell research census from pinned existing sources. 715 records remain selected semantic candidates; 212 additional occupied coordinates are only provisional name reservations (including 36 source-dossier followups), not adopted Core laws. Missing cells remain vacant instead of fabricated.",
   "sources": [
     {
       "path": "knowledge/d10-v5-semantic-inventory.json",
@@ -56,24 +56,65 @@
     {
       "path": "knowledge/d10-clhs-pathnames-census-20261009.json",
       "git_blob": "f32d199c1325e7daebcd7598c5121b23312bfd57"
+    },
+    {
+      "path": "knowledge/d10-finite-transducer-cross-hobby-v1.json",
+      "git_blob": "6337398217818c86ac27dc164ce8af4239704d95"
+    },
+    {
+      "path": "knowledge/d10-symbolic-ai-one-sided-subsumption-v1.json",
+      "git_blob": "eec53cf69ec9c9881354c7f423745cb121ef2344"
+    },
+    {
+      "path": "knowledge/d10-wsm24-exact-chamfer-hobbies-v1.json",
+      "git_blob": "37bfcf9bffaf9daf519a3c63dbce3bcbe6f422c6"
+    },
+    {
+      "path": "knowledge/d10-exact-radix-normalization-v1.json",
+      "git_blob": "e9fe82c0f589ca0de39ede3b3543e002d8924e28"
+    },
+    {
+      "path": "knowledge/d10-unique-decipherability-historical-20261009.json",
+      "git_blob": "ba024956e114eb7622dd5aa48b71d5910abdadf9"
+    },
+    {
+      "path": "knowledge/d10-hobbies-source-laws-v1.json",
+      "git_blob": "fecd72417f556024fa20d5e6f1340960c5b82c7b"
+    },
+    {
+      "path": "knowledge/d10-cross-hobby-law-intake-20261009.json",
+      "git_blob": "c0e35c9a9d9a4438be2eb71dd407c8065d558a1b"
+    },
+    {
+      "path": "knowledge/d10-babbage-reiter-hobby-selected-20261009.json",
+      "git_blob": "4cf8359f34924015f2efca3ddba2df567b5b43db"
+    },
+    {
+      "path": "knowledge/d10-historical-primary-manual-reconciliation-20261009.json",
+      "git_blob": "37e10ef9a953ea62beb5e4b46ef20f21cbfb3ee4"
+    },
+    {
+      "path": "knowledge/d10-reason-alternate-define-donor-v1.json",
+      "git_blob": "2534d44e679f2c3d5fd9e8c34416cb08f1150d4d"
     }
   ],
   "accounting": {
     "canonical_selected": 715,
     "provisional_source": 96,
     "provisional_historical": 80,
-    "provisional_new_source": 7,
+    "provisional_new_source": 36,
     "lower_overlap_excluded": 97,
-    "additional_source_names_unallocated": 66,
-    "unallocated": 126,
+    "additional_source_names_unallocated": 97,
+    "unallocated": 97,
     "ratified": 0,
-    "candidate_names_with_10bit_research_coordinates": 898,
-    "accounted_names_including_lower_overlaps_and_unallocated_source_census": 1061,
+    "candidate_names_with_10bit_research_coordinates": 927,
+    "accounted_names_including_lower_overlaps_and_unallocated_source_census": 1121,
     "capacity": 1024,
     "selected_semantic_candidates": 715,
     "ratified_d10_residents": 0,
     "pending_evidence_for_formal_full_domain": 309,
-    "verified_all_1024_assigned_to_semantics": false
+    "verified_all_1024_assigned_to_semantics": false,
+    "provisional_followup_new_source": 29
   },
   "policies": [
     "Preserve v5 and ratified D1-D9 byte-for-byte; this artifact does not mutate the normative tables.",
@@ -11827,148 +11868,351 @@
     },
     {
       "coordinate": "1110000010",
-      "status": "NO-ATTESTED-D10-CANDIDATE",
-      "semantic_name": null
+      "status": "PROVISIONAL-SOURCE-RESEARCH-HOLD-NOT-SELECTED",
+      "semantic_name": "FINITE-MEALY-RUN",
+      "source_path": "knowledge/d10-finite-transducer-cross-hobby-v1.json",
+      "source_git_blob": "6337398217818c86ac27dc164ce8af4239704d95",
+      "source_status": "HOLD-RESEARCH-UNRATIFIED",
+      "coordinate_basis": "NEXT-FREE-NONCANONICAL-RESEARCH-NAME-RESERVATION",
+      "selected": false,
+      "ratified": false,
+      "physical_t5_authorized": false
     },
     {
       "coordinate": "1110000011",
-      "status": "NO-ATTESTED-D10-CANDIDATE",
-      "semantic_name": null
+      "status": "PROVISIONAL-SOURCE-RESEARCH-HOLD-NOT-SELECTED",
+      "semantic_name": "FINITE-TRANSDUCER-COMPOSE",
+      "source_path": "knowledge/d10-finite-transducer-cross-hobby-v1.json",
+      "source_git_blob": "6337398217818c86ac27dc164ce8af4239704d95",
+      "source_status": "HOLD-RESEARCH-UNRATIFIED",
+      "coordinate_basis": "NEXT-FREE-NONCANONICAL-RESEARCH-NAME-RESERVATION",
+      "selected": false,
+      "ratified": false,
+      "physical_t5_authorized": false
     },
     {
       "coordinate": "1110000100",
-      "status": "NO-ATTESTED-D10-CANDIDATE",
-      "semantic_name": null
+      "status": "PROVISIONAL-SOURCE-RESEARCH-HOLD-NOT-SELECTED",
+      "semantic_name": "FINITE-TERM-SUBSUMES",
+      "source_path": "knowledge/d10-symbolic-ai-one-sided-subsumption-v1.json",
+      "source_git_blob": "eec53cf69ec9c9881354c7f423745cb121ef2344",
+      "source_status": "RESEARCH-HOLD-OWNER-REVIEW-NO-ADMISSION",
+      "coordinate_basis": "NEXT-FREE-NONCANONICAL-RESEARCH-NAME-RESERVATION",
+      "selected": false,
+      "ratified": false,
+      "physical_t5_authorized": false
     },
     {
       "coordinate": "1110000101",
-      "status": "NO-ATTESTED-D10-CANDIDATE",
-      "semantic_name": null
+      "status": "PROVISIONAL-SOURCE-RESEARCH-HOLD-NOT-SELECTED",
+      "semantic_name": "EXACT-SYMMETRIC-SQUARED-CHAMFER",
+      "source_path": "knowledge/d10-wsm24-exact-chamfer-hobbies-v1.json",
+      "source_git_blob": "37bfcf9bffaf9daf519a3c63dbce3bcbe6f422c6",
+      "source_status": "PROPOSAL-HOLD-CORE-MATH-REVIEW",
+      "coordinate_basis": "NEXT-FREE-NONCANONICAL-RESEARCH-NAME-RESERVATION",
+      "selected": false,
+      "ratified": false,
+      "physical_t5_authorized": false
     },
     {
       "coordinate": "1110000110",
-      "status": "NO-ATTESTED-D10-CANDIDATE",
-      "semantic_name": null
+      "status": "PROVISIONAL-SOURCE-RESEARCH-HOLD-NOT-SELECTED",
+      "semantic_name": "RADIX-NORMALIZE-EXACT",
+      "source_path": "knowledge/d10-exact-radix-normalization-v1.json",
+      "source_git_blob": "e9fe82c0f589ca0de39ede3b3543e002d8924e28",
+      "source_status": "SOURCE-MOTIVATED-RESEARCH-NOT-SELECTED",
+      "coordinate_basis": "NEXT-FREE-NONCANONICAL-RESEARCH-NAME-RESERVATION",
+      "selected": false,
+      "ratified": false,
+      "physical_t5_authorized": false
     },
     {
       "coordinate": "1110000111",
-      "status": "NO-ATTESTED-D10-CANDIDATE",
-      "semantic_name": null
+      "status": "PROVISIONAL-SOURCE-RESEARCH-HOLD-NOT-SELECTED",
+      "semantic_name": "FINITE-CODE-AMBIGUITY-WITNESS",
+      "source_path": "knowledge/d10-unique-decipherability-historical-20261009.json",
+      "source_git_blob": "ba024956e114eb7622dd5aa48b71d5910abdadf9",
+      "source_status": null,
+      "coordinate_basis": "NEXT-FREE-NONCANONICAL-RESEARCH-NAME-RESERVATION",
+      "selected": false,
+      "ratified": false,
+      "physical_t5_authorized": false
     },
     {
       "coordinate": "1110001000",
-      "status": "NO-ATTESTED-D10-CANDIDATE",
-      "semantic_name": null
+      "status": "PROVISIONAL-SOURCE-RESEARCH-HOLD-NOT-SELECTED",
+      "semantic_name": "CALENDAR-TO-JULIAN-DAY",
+      "source_path": "knowledge/d10-hobbies-source-laws-v1.json",
+      "source_git_blob": "fecd72417f556024fa20d5e6f1340960c5b82c7b",
+      "source_status": null,
+      "coordinate_basis": "NEXT-FREE-NONCANONICAL-RESEARCH-NAME-RESERVATION",
+      "selected": false,
+      "ratified": false,
+      "physical_t5_authorized": false
     },
     {
       "coordinate": "1110001001",
-      "status": "NO-ATTESTED-D10-CANDIDATE",
-      "semantic_name": null
+      "status": "PROVISIONAL-SOURCE-RESEARCH-HOLD-NOT-SELECTED",
+      "semantic_name": "JULIAN-DAY-TO-CALENDAR",
+      "source_path": "knowledge/d10-hobbies-source-laws-v1.json",
+      "source_git_blob": "fecd72417f556024fa20d5e6f1340960c5b82c7b",
+      "source_status": null,
+      "coordinate_basis": "NEXT-FREE-NONCANONICAL-RESEARCH-NAME-RESERVATION",
+      "selected": false,
+      "ratified": false,
+      "physical_t5_authorized": false
     },
     {
       "coordinate": "1110001010",
-      "status": "NO-ATTESTED-D10-CANDIDATE",
-      "semantic_name": null
+      "status": "PROVISIONAL-SOURCE-RESEARCH-HOLD-NOT-SELECTED",
+      "semantic_name": "LEAPFROG-SNAPSHOT-STEP",
+      "source_path": "knowledge/d10-hobbies-source-laws-v1.json",
+      "source_git_blob": "fecd72417f556024fa20d5e6f1340960c5b82c7b",
+      "source_status": null,
+      "coordinate_basis": "NEXT-FREE-NONCANONICAL-RESEARCH-NAME-RESERVATION",
+      "selected": false,
+      "ratified": false,
+      "physical_t5_authorized": false
     },
     {
       "coordinate": "1110001011",
-      "status": "NO-ATTESTED-D10-CANDIDATE",
-      "semantic_name": null
+      "status": "PROVISIONAL-SOURCE-RESEARCH-HOLD-NOT-SELECTED",
+      "semantic_name": "WINDOWED-SPECTRAL-FRAME",
+      "source_path": "knowledge/d10-hobbies-source-laws-v1.json",
+      "source_git_blob": "fecd72417f556024fa20d5e6f1340960c5b82c7b",
+      "source_status": null,
+      "coordinate_basis": "NEXT-FREE-NONCANONICAL-RESEARCH-NAME-RESERVATION",
+      "selected": false,
+      "ratified": false,
+      "physical_t5_authorized": false
     },
     {
       "coordinate": "1110001100",
-      "status": "NO-ATTESTED-D10-CANDIDATE",
-      "semantic_name": null
+      "status": "PROVISIONAL-SOURCE-RESEARCH-HOLD-NOT-SELECTED",
+      "semantic_name": "COHERENT-PHASE-BIT-DECISION",
+      "source_path": "knowledge/d10-hobbies-source-laws-v1.json",
+      "source_git_blob": "fecd72417f556024fa20d5e6f1340960c5b82c7b",
+      "source_status": null,
+      "coordinate_basis": "NEXT-FREE-NONCANONICAL-RESEARCH-NAME-RESERVATION",
+      "selected": false,
+      "ratified": false,
+      "physical_t5_authorized": false
     },
     {
       "coordinate": "1110001101",
-      "status": "NO-ATTESTED-D10-CANDIDATE",
-      "semantic_name": null
+      "status": "PROVISIONAL-SOURCE-RESEARCH-HOLD-NOT-SELECTED",
+      "semantic_name": "PHASE-CONTINUOUS-TONE-SEQUENCE",
+      "source_path": "knowledge/d10-hobbies-source-laws-v1.json",
+      "source_git_blob": "fecd72417f556024fa20d5e6f1340960c5b82c7b",
+      "source_status": null,
+      "coordinate_basis": "NEXT-FREE-NONCANONICAL-RESEARCH-NAME-RESERVATION",
+      "selected": false,
+      "ratified": false,
+      "physical_t5_authorized": false
     },
     {
       "coordinate": "1110001110",
-      "status": "NO-ATTESTED-D10-CANDIDATE",
-      "semantic_name": null
+      "status": "PROVISIONAL-SOURCE-RESEARCH-HOLD-NOT-SELECTED",
+      "semantic_name": "PENDULUM-PERIOD-FROM-DIRECTIONAL-CROSSINGS",
+      "source_path": "knowledge/d10-hobbies-source-laws-v1.json",
+      "source_git_blob": "fecd72417f556024fa20d5e6f1340960c5b82c7b",
+      "source_status": null,
+      "coordinate_basis": "NEXT-FREE-NONCANONICAL-RESEARCH-NAME-RESERVATION",
+      "selected": false,
+      "ratified": false,
+      "physical_t5_authorized": false
     },
     {
       "coordinate": "1110001111",
-      "status": "NO-ATTESTED-D10-CANDIDATE",
-      "semantic_name": null
+      "status": "PROVISIONAL-SOURCE-RESEARCH-HOLD-NOT-SELECTED",
+      "semantic_name": "RADIO-FRAME-UNIQUE-ACQUISITION",
+      "source_path": "knowledge/d10-hobbies-source-laws-v1.json",
+      "source_git_blob": "fecd72417f556024fa20d5e6f1340960c5b82c7b",
+      "source_status": null,
+      "coordinate_basis": "NEXT-FREE-NONCANONICAL-RESEARCH-NAME-RESERVATION",
+      "selected": false,
+      "ratified": false,
+      "physical_t5_authorized": false
     },
     {
       "coordinate": "1110010000",
-      "status": "NO-ATTESTED-D10-CANDIDATE",
-      "semantic_name": null
+      "status": "PROVISIONAL-SOURCE-RESEARCH-HOLD-NOT-SELECTED",
+      "semantic_name": "JULIAN-CENTURIES-FROM-JD",
+      "source_path": "knowledge/d10-hobbies-source-laws-v1.json",
+      "source_git_blob": "fecd72417f556024fa20d5e6f1340960c5b82c7b",
+      "source_status": null,
+      "coordinate_basis": "NEXT-FREE-NONCANONICAL-RESEARCH-NAME-RESERVATION",
+      "selected": false,
+      "ratified": false,
+      "physical_t5_authorized": false
     },
     {
       "coordinate": "1110010001",
-      "status": "NO-ATTESTED-D10-CANDIDATE",
-      "semantic_name": null
+      "status": "PROVISIONAL-SOURCE-RESEARCH-HOLD-NOT-SELECTED",
+      "semantic_name": "CARTESIAN-TO-LAT-LON-RADIUS-3D",
+      "source_path": "knowledge/d10-cross-hobby-law-intake-20261009.json",
+      "source_git_blob": "c0e35c9a9d9a4438be2eb71dd407c8065d558a1b",
+      "source_status": "RESEARCH-PENDING-OWNER-REVIEW",
+      "coordinate_basis": "NEXT-FREE-NONCANONICAL-RESEARCH-NAME-RESERVATION",
+      "selected": false,
+      "ratified": false,
+      "physical_t5_authorized": false
     },
     {
       "coordinate": "1110010010",
-      "status": "NO-ATTESTED-D10-CANDIDATE",
-      "semantic_name": null
+      "status": "PROVISIONAL-SOURCE-RESEARCH-HOLD-NOT-SELECTED",
+      "semantic_name": "DISCRETE-TONE-ENERGY",
+      "source_path": "knowledge/d10-cross-hobby-law-intake-20261009.json",
+      "source_git_blob": "c0e35c9a9d9a4438be2eb71dd407c8065d558a1b",
+      "source_status": "RESEARCH-PENDING-OWNER-REVIEW",
+      "coordinate_basis": "NEXT-FREE-NONCANONICAL-RESEARCH-NAME-RESERVATION",
+      "selected": false,
+      "ratified": false,
+      "physical_t5_authorized": false
     },
     {
       "coordinate": "1110010011",
-      "status": "NO-ATTESTED-D10-CANDIDATE",
-      "semantic_name": null
+      "status": "PROVISIONAL-SOURCE-RESEARCH-HOLD-NOT-SELECTED",
+      "semantic_name": "GREGORIAN-UT-TO-JULIAN-DAY",
+      "source_path": "knowledge/d10-cross-hobby-law-intake-20261009.json",
+      "source_git_blob": "c0e35c9a9d9a4438be2eb71dd407c8065d558a1b",
+      "source_status": "RESEARCH-PENDING-OWNER-REVIEW",
+      "coordinate_basis": "NEXT-FREE-NONCANONICAL-RESEARCH-NAME-RESERVATION",
+      "selected": false,
+      "ratified": false,
+      "physical_t5_authorized": false
     },
     {
       "coordinate": "1110010100",
-      "status": "NO-ATTESTED-D10-CANDIDATE",
-      "semantic_name": null
+      "status": "PROVISIONAL-SOURCE-RESEARCH-HOLD-NOT-SELECTED",
+      "semantic_name": "MINIMAL-CONFLICT-DIAGNOSES",
+      "source_path": "knowledge/d10-babbage-reiter-hobby-selected-20261009.json",
+      "source_git_blob": "4cf8359f34924015f2efca3ddba2df567b5b43db",
+      "source_status": "SELECTED-RESEARCH-CANDIDATES-UNRATIFIED",
+      "coordinate_basis": "NEXT-FREE-NONCANONICAL-RESEARCH-NAME-RESERVATION",
+      "selected": false,
+      "ratified": false,
+      "physical_t5_authorized": false
     },
     {
       "coordinate": "1110010101",
-      "status": "NO-ATTESTED-D10-CANDIDATE",
-      "semantic_name": null
+      "status": "PROVISIONAL-SOURCE-RESEARCH-HOLD-NOT-SELECTED",
+      "semantic_name": "LOCF",
+      "source_path": "knowledge/d10-historical-primary-manual-reconciliation-20261009.json",
+      "source_git_blob": "37e10ef9a953ea62beb5e4b46ef20f21cbfb3ee4",
+      "source_status": "RESEARCH-ONLY-NO-RESIDENTS",
+      "coordinate_basis": "NEXT-FREE-NONCANONICAL-RESEARCH-NAME-RESERVATION",
+      "selected": false,
+      "ratified": false,
+      "physical_t5_authorized": false
     },
     {
       "coordinate": "1110010110",
-      "status": "NO-ATTESTED-D10-CANDIDATE",
-      "semantic_name": null
+      "status": "PROVISIONAL-SOURCE-RESEARCH-HOLD-NOT-SELECTED",
+      "semantic_name": "MULTIPLE-VALUE-PROG1",
+      "source_path": "knowledge/d10-historical-primary-manual-reconciliation-20261009.json",
+      "source_git_blob": "37e10ef9a953ea62beb5e4b46ef20f21cbfb3ee4",
+      "source_status": "RESEARCH-ONLY-NO-RESIDENTS",
+      "coordinate_basis": "NEXT-FREE-NONCANONICAL-RESEARCH-NAME-RESERVATION",
+      "selected": false,
+      "ratified": false,
+      "physical_t5_authorized": false
     },
     {
       "coordinate": "1110010111",
-      "status": "NO-ATTESTED-D10-CANDIDATE",
-      "semantic_name": null
+      "status": "PROVISIONAL-SOURCE-RESEARCH-HOLD-NOT-SELECTED",
+      "semantic_name": "MAKNUM",
+      "source_path": "knowledge/d10-historical-primary-manual-reconciliation-20261009.json",
+      "source_git_blob": "37e10ef9a953ea62beb5e4b46ef20f21cbfb3ee4",
+      "source_status": "RESEARCH-ONLY-NO-RESIDENTS",
+      "coordinate_basis": "NEXT-FREE-NONCANONICAL-RESEARCH-NAME-RESERVATION",
+      "selected": false,
+      "ratified": false,
+      "physical_t5_authorized": false
     },
     {
       "coordinate": "1110011000",
-      "status": "NO-ATTESTED-D10-CANDIDATE",
-      "semantic_name": null
+      "status": "PROVISIONAL-SOURCE-RESEARCH-HOLD-NOT-SELECTED",
+      "semantic_name": "MUNKAM",
+      "source_path": "knowledge/d10-historical-primary-manual-reconciliation-20261009.json",
+      "source_git_blob": "37e10ef9a953ea62beb5e4b46ef20f21cbfb3ee4",
+      "source_status": "RESEARCH-ONLY-NO-RESIDENTS",
+      "coordinate_basis": "NEXT-FREE-NONCANONICAL-RESEARCH-NAME-RESERVATION",
+      "selected": false,
+      "ratified": false,
+      "physical_t5_authorized": false
     },
     {
       "coordinate": "1110011001",
-      "status": "NO-ATTESTED-D10-CANDIDATE",
-      "semantic_name": null
+      "status": "PROVISIONAL-SOURCE-RESEARCH-HOLD-NOT-SELECTED",
+      "semantic_name": "THE",
+      "source_path": "knowledge/d10-historical-primary-manual-reconciliation-20261009.json",
+      "source_git_blob": "37e10ef9a953ea62beb5e4b46ef20f21cbfb3ee4",
+      "source_status": "RESEARCH-ONLY-NO-RESIDENTS",
+      "coordinate_basis": "NEXT-FREE-NONCANONICAL-RESEARCH-NAME-RESERVATION",
+      "selected": false,
+      "ratified": false,
+      "physical_t5_authorized": false
     },
     {
       "coordinate": "1110011010",
-      "status": "NO-ATTESTED-D10-CANDIDATE",
-      "semantic_name": null
+      "status": "PROVISIONAL-SOURCE-RESEARCH-HOLD-NOT-SELECTED",
+      "semantic_name": "COUNT-LEADING-ZEROS",
+      "source_path": "knowledge/d10-historical-primary-manual-reconciliation-20261009.json",
+      "source_git_blob": "37e10ef9a953ea62beb5e4b46ef20f21cbfb3ee4",
+      "source_status": "RESEARCH-ONLY-NO-RESIDENTS",
+      "coordinate_basis": "NEXT-FREE-NONCANONICAL-RESEARCH-NAME-RESERVATION",
+      "selected": false,
+      "ratified": false,
+      "physical_t5_authorized": false
     },
     {
       "coordinate": "1110011011",
-      "status": "NO-ATTESTED-D10-CANDIDATE",
-      "semantic_name": null
+      "status": "PROVISIONAL-SOURCE-RESEARCH-HOLD-NOT-SELECTED",
+      "semantic_name": "TABLESPACE",
+      "source_path": "knowledge/d10-historical-primary-manual-reconciliation-20261009.json",
+      "source_git_blob": "37e10ef9a953ea62beb5e4b46ef20f21cbfb3ee4",
+      "source_status": "RESEARCH-ONLY-NO-RESIDENTS",
+      "coordinate_basis": "NEXT-FREE-NONCANONICAL-RESEARCH-NAME-RESERVATION",
+      "selected": false,
+      "ratified": false,
+      "physical_t5_authorized": false
     },
     {
       "coordinate": "1110011100",
-      "status": "NO-ATTESTED-D10-CANDIDATE",
-      "semantic_name": null
+      "status": "PROVISIONAL-SOURCE-RESEARCH-HOLD-NOT-SELECTED",
+      "semantic_name": "GENERATE-EXPANSION",
+      "source_path": "knowledge/d10-historical-primary-manual-reconciliation-20261009.json",
+      "source_git_blob": "37e10ef9a953ea62beb5e4b46ef20f21cbfb3ee4",
+      "source_status": "RESEARCH-ONLY-NO-RESIDENTS",
+      "coordinate_basis": "NEXT-FREE-NONCANONICAL-RESEARCH-NAME-RESERVATION",
+      "selected": false,
+      "ratified": false,
+      "physical_t5_authorized": false
     },
     {
       "coordinate": "1110011101",
-      "status": "NO-ATTESTED-D10-CANDIDATE",
-      "semantic_name": null
+      "status": "PROVISIONAL-SOURCE-RESEARCH-HOLD-NOT-SELECTED",
+      "semantic_name": "BACKQUANTIZE",
+      "source_path": "knowledge/d10-historical-primary-manual-reconciliation-20261009.json",
+      "source_git_blob": "37e10ef9a953ea62beb5e4b46ef20f21cbfb3ee4",
+      "source_status": "RESEARCH-ONLY-NO-RESIDENTS",
+      "coordinate_basis": "NEXT-FREE-NONCANONICAL-RESEARCH-NAME-RESERVATION",
+      "selected": false,
+      "ratified": false,
+      "physical_t5_authorized": false
     },
     {
       "coordinate": "1110011110",
-      "status": "NO-ATTESTED-D10-CANDIDATE",
-      "semantic_name": null
+      "status": "PROVISIONAL-SOURCE-RESEARCH-HOLD-NOT-SELECTED",
+      "semantic_name": "COLLECTION",
+      "source_path": "knowledge/d10-historical-primary-manual-reconciliation-20261009.json",
+      "source_git_blob": "37e10ef9a953ea62beb5e4b46ef20f21cbfb3ee4",
+      "source_status": "RESEARCH-ONLY-NO-RESIDENTS",
+      "coordinate_basis": "NEXT-FREE-NONCANONICAL-RESEARCH-NAME-RESERVATION",
+      "selected": false,
+      "ratified": false,
+      "physical_t5_authorized": false
     },
     {
       "coordinate": "1110011111",
@@ -13792,6 +14036,223 @@
       "source_path": "knowledge/d10-clhs-streams-census-20261009.json",
       "kind": "condition-type",
       "status": "HISTORICAL-STANDARD-NAME-CENSUS-OWNERSHIP-NOT-REVIEWED",
+      "coordinate": null
+    },
+    {
+      "semantic_name": "*reason-index-schema*",
+      "source_path": "knowledge/d10-reason-alternate-define-donor-v1.json",
+      "kind": "LIBRARY-IMPLEMENTATION-SYMBOL",
+      "status": "SOURCE-NAME-ONLY-NOT-AN-INDEPENDENT-CORE-LAW",
+      "coordinate": null
+    },
+    {
+      "semantic_name": "*reason-index-max-predicates*",
+      "source_path": "knowledge/d10-reason-alternate-define-donor-v1.json",
+      "kind": "LIBRARY-IMPLEMENTATION-SYMBOL",
+      "status": "SOURCE-NAME-ONLY-NOT-AN-INDEPENDENT-CORE-LAW",
+      "coordinate": null
+    },
+    {
+      "semantic_name": "reason-index-mode",
+      "source_path": "knowledge/d10-reason-alternate-define-donor-v1.json",
+      "kind": "LIBRARY-IMPLEMENTATION-SYMBOL",
+      "status": "SOURCE-NAME-ONLY-NOT-AN-INDEPENDENT-CORE-LAW",
+      "coordinate": null
+    },
+    {
+      "semantic_name": "reason-index-rules",
+      "source_path": "knowledge/d10-reason-alternate-define-donor-v1.json",
+      "kind": "LIBRARY-IMPLEMENTATION-SYMBOL",
+      "status": "SOURCE-NAME-ONLY-NOT-AN-INDEPENDENT-CORE-LAW",
+      "coordinate": null
+    },
+    {
+      "semantic_name": "reason-index-buckets",
+      "source_path": "knowledge/d10-reason-alternate-define-donor-v1.json",
+      "kind": "LIBRARY-IMPLEMENTATION-SYMBOL",
+      "status": "SOURCE-NAME-ONLY-NOT-AN-INDEPENDENT-CORE-LAW",
+      "coordinate": null
+    },
+    {
+      "semantic_name": "reason-index?",
+      "source_path": "knowledge/d10-reason-alternate-define-donor-v1.json",
+      "kind": "LIBRARY-IMPLEMENTATION-SYMBOL",
+      "status": "SOURCE-NAME-ONLY-NOT-AN-INDEPENDENT-CORE-LAW",
+      "coordinate": null
+    },
+    {
+      "semantic_name": "reason-index-linear",
+      "source_path": "knowledge/d10-reason-alternate-define-donor-v1.json",
+      "kind": "LIBRARY-IMPLEMENTATION-SYMBOL",
+      "status": "SOURCE-NAME-ONLY-NOT-AN-INDEPENDENT-CORE-LAW",
+      "coordinate": null
+    },
+    {
+      "semantic_name": "reason-term-predicate",
+      "source_path": "knowledge/d10-reason-alternate-define-donor-v1.json",
+      "kind": "LIBRARY-IMPLEMENTATION-SYMBOL",
+      "status": "SOURCE-NAME-ONLY-NOT-AN-INDEPENDENT-CORE-LAW",
+      "coordinate": null
+    },
+    {
+      "semantic_name": "reason-rule-predicate",
+      "source_path": "knowledge/d10-reason-alternate-define-donor-v1.json",
+      "kind": "LIBRARY-IMPLEMENTATION-SYMBOL",
+      "status": "SOURCE-NAME-ONLY-NOT-AN-INDEPENDENT-CORE-LAW",
+      "coordinate": null
+    },
+    {
+      "semantic_name": "reason-index-add-reversed",
+      "source_path": "knowledge/d10-reason-alternate-define-donor-v1.json",
+      "kind": "LIBRARY-IMPLEMENTATION-SYMBOL",
+      "status": "SOURCE-NAME-ONLY-NOT-AN-INDEPENDENT-CORE-LAW",
+      "coordinate": null
+    },
+    {
+      "semantic_name": "reason-index-normalize-buckets",
+      "source_path": "knowledge/d10-reason-alternate-define-donor-v1.json",
+      "kind": "LIBRARY-IMPLEMENTATION-SYMBOL",
+      "status": "SOURCE-NAME-ONLY-NOT-AN-INDEPENDENT-CORE-LAW",
+      "coordinate": null
+    },
+    {
+      "semantic_name": "reason-index-build-scan",
+      "source_path": "knowledge/d10-reason-alternate-define-donor-v1.json",
+      "kind": "LIBRARY-IMPLEMENTATION-SYMBOL",
+      "status": "SOURCE-NAME-ONLY-NOT-AN-INDEPENDENT-CORE-LAW",
+      "coordinate": null
+    },
+    {
+      "semantic_name": "reason-make-index",
+      "source_path": "knowledge/d10-reason-alternate-define-donor-v1.json",
+      "kind": "LIBRARY-IMPLEMENTATION-SYMBOL",
+      "status": "SOURCE-NAME-ONLY-NOT-AN-INDEPENDENT-CORE-LAW",
+      "coordinate": null
+    },
+    {
+      "semantic_name": "reason-ensure-index",
+      "source_path": "knowledge/d10-reason-alternate-define-donor-v1.json",
+      "kind": "LIBRARY-IMPLEMENTATION-SYMBOL",
+      "status": "SOURCE-NAME-ONLY-NOT-AN-INDEPENDENT-CORE-LAW",
+      "coordinate": null
+    },
+    {
+      "semantic_name": "reason-index-candidates",
+      "source_path": "knowledge/d10-reason-alternate-define-donor-v1.json",
+      "kind": "LIBRARY-IMPLEMENTATION-SYMBOL",
+      "status": "SOURCE-NAME-ONLY-NOT-AN-INDEPENDENT-CORE-LAW",
+      "coordinate": null
+    },
+    {
+      "semantic_name": "reason",
+      "source_path": "knowledge/d10-reason-alternate-define-donor-v1.json",
+      "kind": "LIBRARY-IMPLEMENTATION-SYMBOL",
+      "status": "SOURCE-NAME-ONLY-NOT-AN-INDEPENDENT-CORE-LAW",
+      "coordinate": null
+    },
+    {
+      "semantic_name": "prove-goal-accumulate",
+      "source_path": "knowledge/d10-reason-alternate-define-donor-v1.json",
+      "kind": "LIBRARY-IMPLEMENTATION-SYMBOL",
+      "status": "SOURCE-NAME-ONLY-NOT-AN-INDEPENDENT-CORE-LAW",
+      "coordinate": null
+    },
+    {
+      "semantic_name": "prove-goal",
+      "source_path": "knowledge/d10-reason-alternate-define-donor-v1.json",
+      "kind": "LIBRARY-IMPLEMENTATION-SYMBOL",
+      "status": "SOURCE-NAME-ONLY-NOT-AN-INDEPENDENT-CORE-LAW",
+      "coordinate": null
+    },
+    {
+      "semantic_name": "prove-goal-scan",
+      "source_path": "knowledge/d10-reason-alternate-define-donor-v1.json",
+      "kind": "LIBRARY-IMPLEMENTATION-SYMBOL",
+      "status": "SOURCE-NAME-ONLY-NOT-AN-INDEPENDENT-CORE-LAW",
+      "coordinate": null
+    },
+    {
+      "semantic_name": "map-proofs",
+      "source_path": "knowledge/d10-reason-alternate-define-donor-v1.json",
+      "kind": "LIBRARY-IMPLEMENTATION-SYMBOL",
+      "status": "SOURCE-NAME-ONLY-NOT-AN-INDEPENDENT-CORE-LAW",
+      "coordinate": null
+    },
+    {
+      "semantic_name": "prove-goals",
+      "source_path": "knowledge/d10-reason-alternate-define-donor-v1.json",
+      "kind": "LIBRARY-IMPLEMENTATION-SYMBOL",
+      "status": "SOURCE-NAME-ONLY-NOT-AN-INDEPENDENT-CORE-LAW",
+      "coordinate": null
+    },
+    {
+      "semantic_name": "explain-proof",
+      "source_path": "knowledge/d10-reason-alternate-define-donor-v1.json",
+      "kind": "LIBRARY-IMPLEMENTATION-SYMBOL",
+      "status": "SOURCE-NAME-ONLY-NOT-AN-INDEPENDENT-CORE-LAW",
+      "coordinate": null
+    },
+    {
+      "semantic_name": "explain-proof-node",
+      "source_path": "knowledge/d10-reason-alternate-define-donor-v1.json",
+      "kind": "LIBRARY-IMPLEMENTATION-SYMBOL",
+      "status": "SOURCE-NAME-ONLY-NOT-AN-INDEPENDENT-CORE-LAW",
+      "coordinate": null
+    },
+    {
+      "semantic_name": "explain-proof-list",
+      "source_path": "knowledge/d10-reason-alternate-define-donor-v1.json",
+      "kind": "LIBRARY-IMPLEMENTATION-SYMBOL",
+      "status": "SOURCE-NAME-ONLY-NOT-AN-INDEPENDENT-CORE-LAW",
+      "coordinate": null
+    },
+    {
+      "semantic_name": "print-indent",
+      "source_path": "knowledge/d10-reason-alternate-define-donor-v1.json",
+      "kind": "LIBRARY-IMPLEMENTATION-SYMBOL",
+      "status": "SOURCE-NAME-ONLY-NOT-AN-INDEPENDENT-CORE-LAW",
+      "coordinate": null
+    },
+    {
+      "semantic_name": "reason-explain",
+      "source_path": "knowledge/d10-reason-alternate-define-donor-v1.json",
+      "kind": "LIBRARY-IMPLEMENTATION-SYMBOL",
+      "status": "SOURCE-NAME-ONLY-NOT-AN-INDEPENDENT-CORE-LAW",
+      "coordinate": null
+    },
+    {
+      "semantic_name": "add-usage",
+      "source_path": "knowledge/d10-reason-alternate-define-donor-v1.json",
+      "kind": "LIBRARY-IMPLEMENTATION-SYMBOL",
+      "status": "SOURCE-NAME-ONLY-NOT-AN-INDEPENDENT-CORE-LAW",
+      "coordinate": null
+    },
+    {
+      "semantic_name": "count-usage-list",
+      "source_path": "knowledge/d10-reason-alternate-define-donor-v1.json",
+      "kind": "LIBRARY-IMPLEMENTATION-SYMBOL",
+      "status": "SOURCE-NAME-ONLY-NOT-AN-INDEPENDENT-CORE-LAW",
+      "coordinate": null
+    },
+    {
+      "semantic_name": "source-of",
+      "source_path": "knowledge/d10-reason-alternate-define-donor-v1.json",
+      "kind": "LIBRARY-IMPLEMENTATION-SYMBOL",
+      "status": "SOURCE-NAME-ONLY-NOT-AN-INDEPENDENT-CORE-LAW",
+      "coordinate": null
+    },
+    {
+      "semantic_name": "provenance",
+      "source_path": "knowledge/d10-reason-alternate-define-donor-v1.json",
+      "kind": "LIBRARY-IMPLEMENTATION-SYMBOL",
+      "status": "SOURCE-NAME-ONLY-NOT-AN-INDEPENDENT-CORE-LAW",
+      "coordinate": null
+    },
+    {
+      "semantic_name": "provenance-list",
+      "source_path": "knowledge/d10-reason-alternate-define-donor-v1.json",
+      "kind": "LIBRARY-IMPLEMENTATION-SYMBOL",
+      "status": "SOURCE-NAME-ONLY-NOT-AN-INDEPENDENT-CORE-LAW",
       "coordinate": null
     }
   ]
