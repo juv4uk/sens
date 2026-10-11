@@ -1,0 +1,299 @@
+{
+  "schema": "sens.domain-research-archive-extension/v1",
+  "status": "HISTORICAL-SOURCE-EVIDENCE-NOT-RATIFIED",
+  "date": "2026-10-11",
+  "count": 40,
+  "source_prs": [
+    4955,
+    4961,
+    4965,
+    4880,
+    4883,
+    5022,
+    5530,
+    5533
+  ],
+  "records": [
+    {
+      "pr": 4955,
+      "path": "docs/research/d10-shiva-c1p-canonical-order.uk.md",
+      "sha": "c612c227047463217c72463c85d4001c158a7255",
+      "archived": "research/domain-archive/20261011/pr4955/docs/research/d10-shiva-c1p-canonical-order.uk.md",
+      "url": "https://github.com/juv4uk/sens/pull/4955"
+    },
+    {
+      "pr": 4955,
+      "path": "knowledge/d10-shiva-c1p-canonical-order-research-v1.json",
+      "sha": "e93af7eaf41b3fbecb9f894c4451bcd38d471f8e",
+      "archived": "research/domain-archive/20261011/pr4955/knowledge/d10-shiva-c1p-canonical-order-research-v1.json",
+      "url": "https://github.com/juv4uk/sens/pull/4955"
+    },
+    {
+      "pr": 4955,
+      "path": "scripts/check_d10_shiva_c1p_research.py",
+      "sha": "388d0f7da65286ed325f478b71a6160a01c895c9",
+      "archived": "research/domain-archive/20261011/pr4955/scripts/check_d10_shiva_c1p_research.py.source.txt",
+      "url": "https://github.com/juv4uk/sens/pull/4955"
+    },
+    {
+      "pr": 4961,
+      "path": "docs/research/d10-stern-brocot-runs.uk.md",
+      "sha": "f0c1337d3f8740a9edea3a80831e83b8110e8482",
+      "archived": "research/domain-archive/20261011/pr4961/docs/research/d10-stern-brocot-runs.uk.md",
+      "url": "https://github.com/juv4uk/sens/pull/4961"
+    },
+    {
+      "pr": 4961,
+      "path": "knowledge/d10-proposal-ledger.tsv",
+      "sha": "811988a864a3b16c763d71e3fadbd856d06ac395",
+      "archived": "research/domain-archive/20261011/pr4961/knowledge/d10-proposal-ledger.tsv",
+      "url": "https://github.com/juv4uk/sens/pull/4961"
+    },
+    {
+      "pr": 4961,
+      "path": "knowledge/d10-stern-brocot-run-path-20261009.json",
+      "sha": "37cd7d1e77881d0818641d04c8d8b2ac4a605892",
+      "archived": "research/domain-archive/20261011/pr4961/knowledge/d10-stern-brocot-run-path-20261009.json",
+      "url": "https://github.com/juv4uk/sens/pull/4961"
+    },
+    {
+      "pr": 4961,
+      "path": "scripts/check_d10_stern_brocot_runs.py",
+      "sha": "600c63027faa2f4101ee0032abdf9128846cf5f4",
+      "archived": "research/domain-archive/20261011/pr4961/scripts/check_d10_stern_brocot_runs.py.source.txt",
+      "url": "https://github.com/juv4uk/sens/pull/4961"
+    },
+    {
+      "pr": 4961,
+      "path": "tests/oracles/d10_stern_brocot_runs_sbcl.lisp",
+      "sha": "a5ef1d7c1254567b4bddd34104dfbb523d787b0d",
+      "archived": "research/domain-archive/20261011/pr4961/tests/oracles/d10_stern_brocot_runs_sbcl.lisp.source.txt",
+      "url": "https://github.com/juv4uk/sens/pull/4961"
+    },
+    {
+      "pr": 4965,
+      "path": "docs/research/d10-abductive-minimal-explanations.uk.md",
+      "sha": "72df58689260dbe5b453701376fc91d3fa29e946",
+      "archived": "research/domain-archive/20261011/pr4965/docs/research/d10-abductive-minimal-explanations.uk.md",
+      "url": "https://github.com/juv4uk/sens/pull/4965"
+    },
+    {
+      "pr": 4965,
+      "path": "knowledge/d10-abductive-minimal-explanations-v1.json",
+      "sha": "5e7dc4fc9f31c7a702233f92398ea9d0e643dac1",
+      "archived": "research/domain-archive/20261011/pr4965/knowledge/d10-abductive-minimal-explanations-v1.json",
+      "url": "https://github.com/juv4uk/sens/pull/4965"
+    },
+    {
+      "pr": 4965,
+      "path": "scripts/check_d10_abductive_minimal_explanations.py",
+      "sha": "36945d51011dcf7b3bf58f7fc8a219495331168b",
+      "archived": "research/domain-archive/20261011/pr4965/scripts/check_d10_abductive_minimal_explanations.py.source.txt",
+      "url": "https://github.com/juv4uk/sens/pull/4965"
+    },
+    {
+      "pr": 4965,
+      "path": "tests/oracles/d10_abductive_minimal_explanations.pl",
+      "sha": "ea1290e0197b57c261459c0e2560dd489afbe176",
+      "archived": "research/domain-archive/20261011/pr4965/tests/oracles/d10_abductive_minimal_explanations.pl",
+      "url": "https://github.com/juv4uk/sens/pull/4965"
+    },
+    {
+      "pr": 4965,
+      "path": "tests/test_d10_abductive_atms_reduction.py",
+      "sha": "1743f79b3e994b4b4de283f40cedb75ffb6f8245",
+      "archived": "research/domain-archive/20261011/pr4965/tests/test_d10_abductive_atms_reduction.py.source.txt",
+      "url": "https://github.com/juv4uk/sens/pull/4965"
+    },
+    {
+      "pr": 4880,
+      "path": "docs/research/d10-r6rs-hashtable-copy-mutable.uk.md",
+      "sha": "1592a77d7bc8190a424c05eab2c3cfbf504df7dc",
+      "archived": "research/domain-archive/20261011/pr4880/docs/research/d10-r6rs-hashtable-copy-mutable.uk.md",
+      "url": "https://github.com/juv4uk/sens/pull/4880"
+    },
+    {
+      "pr": 4880,
+      "path": "knowledge/d10-r6rs-copy-mutable-oracle-v1.json",
+      "sha": "99d3e1ba5f381df356fd0b335dfbf75c5027877d",
+      "archived": "research/domain-archive/20261011/pr4880/knowledge/d10-r6rs-copy-mutable-oracle-v1.json",
+      "url": "https://github.com/juv4uk/sens/pull/4880"
+    },
+    {
+      "pr": 4880,
+      "path": "scripts/check_d10_r6rs_copy_mutable_oracle.py",
+      "sha": "2d45ed333c0df5dc6af957c2e2f3181a98c597e5",
+      "archived": "research/domain-archive/20261011/pr4880/scripts/check_d10_r6rs_copy_mutable_oracle.py.source.txt",
+      "url": "https://github.com/juv4uk/sens/pull/4880"
+    },
+    {
+      "pr": 4880,
+      "path": "tests/d10_r6rs_hashtable_copy_mutable.ss",
+      "sha": "64f7f06543bf4748727b36463f2666d171fe00fb",
+      "archived": "research/domain-archive/20261011/pr4880/tests/d10_r6rs_hashtable_copy_mutable.ss",
+      "url": "https://github.com/juv4uk/sens/pull/4880"
+    },
+    {
+      "pr": 4883,
+      "path": "docs/architecture/ARCHIPELAGO-V1.uk.md",
+      "sha": "fce3c35f767861baa0e6577998630de1931a3ea7",
+      "archived": "research/domain-archive/20261011/pr4883/docs/architecture/ARCHIPELAGO-V1.uk.md",
+      "url": "https://github.com/juv4uk/sens/pull/4883"
+    },
+    {
+      "pr": 4883,
+      "path": "docs/research/d10-loops-active-values.uk.md",
+      "sha": "e8d85068648f156e33517614dca336ae140fcf54",
+      "archived": "research/domain-archive/20261011/pr4883/docs/research/d10-loops-active-values.uk.md",
+      "url": "https://github.com/juv4uk/sens/pull/4883"
+    },
+    {
+      "pr": 4883,
+      "path": "knowledge/d10-fill-v1-state.json",
+      "sha": "aac3c779e5ff075bec4af23c61a60e9a78d3e85a",
+      "archived": "research/domain-archive/20261011/pr4883/knowledge/d10-fill-v1-state.json",
+      "url": "https://github.com/juv4uk/sens/pull/4883"
+    },
+    {
+      "pr": 4883,
+      "path": "knowledge/d10-loops-active-values-intake-v1.json",
+      "sha": "f88711aa939c84f55e61038cf4d362731d8f4597",
+      "archived": "research/domain-archive/20261011/pr4883/knowledge/d10-loops-active-values-intake-v1.json",
+      "url": "https://github.com/juv4uk/sens/pull/4883"
+    },
+    {
+      "pr": 4883,
+      "path": "knowledge/d10-selection-transition-history.json",
+      "sha": "be77c81872e51bf02c76f63472df2f6d4b73241a",
+      "archived": "research/domain-archive/20261011/pr4883/knowledge/d10-selection-transition-history.json",
+      "url": "https://github.com/juv4uk/sens/pull/4883"
+    },
+    {
+      "pr": 4883,
+      "path": "knowledge/d10-v1-semantic-inventory.json",
+      "sha": "bc1adf570bf3b9486735419d6b4f11f818bede93",
+      "archived": "research/domain-archive/20261011/pr4883/knowledge/d10-v1-semantic-inventory.json",
+      "url": "https://github.com/juv4uk/sens/pull/4883"
+    },
+    {
+      "pr": 4883,
+      "path": "scripts/check_d10_clos_roots_selection.py",
+      "sha": "e2e11d510433333a6932de6d0858be06e9359b72",
+      "archived": "research/domain-archive/20261011/pr4883/scripts/check_d10_clos_roots_selection.py.source.txt",
+      "url": "https://github.com/juv4uk/sens/pull/4883"
+    },
+    {
+      "pr": 4883,
+      "path": "scripts/check_d10_loops_active_values.py",
+      "sha": "ee404956760d398497852c752d22b82264205db3",
+      "archived": "research/domain-archive/20261011/pr4883/scripts/check_d10_loops_active_values.py.source.txt",
+      "url": "https://github.com/juv4uk/sens/pull/4883"
+    },
+    {
+      "pr": 4883,
+      "path": "tests/d10_loops_closure_derivability.lisp",
+      "sha": "71c41b740cfbe2c496e1efd275d9499c4e0d3972",
+      "archived": "research/domain-archive/20261011/pr4883/tests/d10_loops_closure_derivability.lisp.source.txt",
+      "url": "https://github.com/juv4uk/sens/pull/4883"
+    },
+    {
+      "pr": 5022,
+      "path": "docs/architecture/ARCHIPELAGO-V1.uk.md",
+      "sha": "c42cb75545c3d7498a55f43a2429e7966017845d",
+      "archived": "research/domain-archive/20261011/pr5022/docs/architecture/ARCHIPELAGO-V1.uk.md",
+      "url": "https://github.com/juv4uk/sens/pull/5022"
+    },
+    {
+      "pr": 5022,
+      "path": "knowledge/d10-ai-interest-proposal-v1.json",
+      "sha": "36d328d387371983891c12217a508472abc41ff1",
+      "archived": "research/domain-archive/20261011/pr5022/knowledge/d10-ai-interest-proposal-v1.json",
+      "url": "https://github.com/juv4uk/sens/pull/5022"
+    },
+    {
+      "pr": 5022,
+      "path": "knowledge/d10-fill-v1-state.json",
+      "sha": "427119bdb98febeb81fe02d3b07a0755a782dc82",
+      "archived": "research/domain-archive/20261011/pr5022/knowledge/d10-fill-v1-state.json",
+      "url": "https://github.com/juv4uk/sens/pull/5022"
+    },
+    {
+      "pr": 5022,
+      "path": "knowledge/d10-proposal-ledger.tsv",
+      "sha": "280d2a52225b356c7eb1359d7913291224b20d99",
+      "archived": "research/domain-archive/20261011/pr5022/knowledge/d10-proposal-ledger.tsv",
+      "url": "https://github.com/juv4uk/sens/pull/5022"
+    },
+    {
+      "pr": 5022,
+      "path": "knowledge/d10-selection-transition-history.json",
+      "sha": "781a8611c18722de0ea5a718977b750e1f3acf30",
+      "archived": "research/domain-archive/20261011/pr5022/knowledge/d10-selection-transition-history.json",
+      "url": "https://github.com/juv4uk/sens/pull/5022"
+    },
+    {
+      "pr": 5022,
+      "path": "knowledge/d10-v1-semantic-inventory.json",
+      "sha": "5458cb72ac1584d7e37fe16174ebc306947c2c88",
+      "archived": "research/domain-archive/20261011/pr5022/knowledge/d10-v1-semantic-inventory.json",
+      "url": "https://github.com/juv4uk/sens/pull/5022"
+    },
+    {
+      "pr": 5530,
+      "path": "knowledge/d10-mealy-distinguishing-20261011.uk.md",
+      "sha": "e7569049880331eef5b42cc28d328561df6f77f8",
+      "archived": "research/domain-archive/20261011/pr5530/knowledge/d10-mealy-distinguishing-20261011.uk.md",
+      "url": "https://github.com/juv4uk/sens/pull/5530"
+    },
+    {
+      "pr": 5530,
+      "path": "knowledge/d10-proposal-ledger.tsv",
+      "sha": "bbcd1e8363e3dbc61bd1ef7e3a422a25ff89d869",
+      "archived": "research/domain-archive/20261011/pr5530/knowledge/d10-proposal-ledger.tsv",
+      "url": "https://github.com/juv4uk/sens/pull/5530"
+    },
+    {
+      "pr": 5530,
+      "path": "research/d10/mealy_distinguishing_word.py",
+      "sha": "cecf979d55f802b63c4c33e25e126f6e5ca7ec8f",
+      "archived": "research/domain-archive/20261011/pr5530/research/d10/mealy_distinguishing_word.py.source.txt",
+      "url": "https://github.com/juv4uk/sens/pull/5530"
+    },
+    {
+      "pr": 5533,
+      "path": "docs/research/d10-class-of-proposal-20261009.uk.md",
+      "sha": "5ba4cfe4352eff3788dfa56a3f9e36311b74233b",
+      "archived": "research/domain-archive/20261011/pr5533/docs/research/d10-class-of-proposal-20261009.uk.md",
+      "url": "https://github.com/juv4uk/sens/pull/5533"
+    },
+    {
+      "pr": 5533,
+      "path": "knowledge/d10-class-of-proposal-v1.json",
+      "sha": "1ef338da0c7c525eaf31b65a5f2ced8074257c31",
+      "archived": "research/domain-archive/20261011/pr5533/knowledge/d10-class-of-proposal-v1.json",
+      "url": "https://github.com/juv4uk/sens/pull/5533"
+    },
+    {
+      "pr": 5533,
+      "path": "knowledge/d10-proposal-ledger.tsv",
+      "sha": "ee3dad1d9bbcf94504840e80e334b734a6882e18",
+      "archived": "research/domain-archive/20261011/pr5533/knowledge/d10-proposal-ledger.tsv",
+      "url": "https://github.com/juv4uk/sens/pull/5533"
+    },
+    {
+      "pr": 5533,
+      "path": "scripts/check_d10_class_of_proposal.py",
+      "sha": "0eaded0b4d3fb9d061eea6cdbf0264f45bc62599",
+      "archived": "research/domain-archive/20261011/pr5533/scripts/check_d10_class_of_proposal.py.source.txt",
+      "url": "https://github.com/juv4uk/sens/pull/5533"
+    },
+    {
+      "pr": 5533,
+      "path": "tests/test_d10_proposal_ledger_growth.py",
+      "sha": "a2f805ab6f34baec88be14517aec46756b65f19b",
+      "archived": "research/domain-archive/20261011/pr5533/tests/test_d10_proposal_ledger_growth.py.source.txt",
+      "url": "https://github.com/juv4uk/sens/pull/5533"
+    }
+  ],
+  "semantic_policy": "Historical copies only; D10 selected/ratified inventories unchanged; guard and executable code unchanged."
+}
