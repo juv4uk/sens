@@ -3,8 +3,9 @@
 **Рішення власника 11.10.2026 новіше за попереднє правило про один універсальний кодек.**
 Утримуємо два фізичні кодеки: чинний T5 з явним розширенням .sens і
 авторську Рамку-3 (F3) з явним розширенням .senc та міткою 0xF3.
-**Введення .senc у production loader НЕ відбулося**; чинні .sens
-не переписувати, не перейменовувати та не декодувати за схожістю.
+**Явний маленький F3 reader у SENS Core / CLI вже є**: open-f3, decode-f3,
+eval-f3, без автоматичного визначення. Чинні .sens не переписувати
+і не перейменовувати; звичайні команди залишилися на T5.
 Дослідний профіль .f3m — не третій виробничий кодек.
 
 ## Етапи
@@ -19,13 +20,12 @@
    з оригіналом. Перевірити source SHA, staged SHA, source HEAD,
    кількість файлів, відсутність зайвих payload, заборону symlink.
    Пошкодження, невідомий профіль або обрив → FAIL.
-4. **M3 — explicit production codec API (BLOCKED):**
-   [#5439](https://github.com/juv4uk/sens/issues/5439) має
-   виправити Rust↔Python F3 parity, надати окремий явний decoder.
-   [#5445](https://github.com/juv4uk/sens/issues/5445) інтегрує
-   тільки opt-in F3 CLI маршрут з fail-closed guards.
-   [#5442](https://github.com/juv4uk/sens/issues/5442) підтвердить
-   production gate на точному HEAD.
+4. **M3 — ЯВНИЙ TINY F3 CORE/CLI: GREEN на перевіреному SHA.**
+   Незалежний [Rust↔Python parity #38169848649](https://github.com/juv4uk/sens/actions/runs/38169848649)
+   розділяє фізичний transport і D3 code admission, 0 failures.
+   [Реальний CLI #38170264184](https://github.com/juv4uk/sens/actions/runs/38170264184)
+   виконує open/decode/eval parity для всіх 9 допустимих F3,
+   не змінюючи T5 default. Міжрепозиторна апаратна parity — окремо.
 5. **M4 — вибіркове розгортання (НЕ РОЗПОЧАТО):**
    тільки після M3 переводити короткі програми в .senc;
    T5 лишається загальним форматом, вихідні .sens зберігаємо
@@ -88,6 +88,23 @@ codec, selected_bytes, staged_file, staged_sha256.
 НЕнульовий status і після відновлення повторює весь аудит.
 Статус CI слід перевіряти для актуального SHA, не вгадувати.
 
+## Як користуватися готовим явним F3-маршрутом
+
+~~~sh
+cargo build --locked --release -p sens-cli --bin sens-trit
+target/release/sens-trit open-f3 /tmp/short.senc
+target/release/sens-trit decode-f3 /tmp/short.senc
+target/release/sens-trit eval-f3 /tmp/short.senc
+
+# Шлях стандартного .sens не змінювався
+target/release/sens-trit open tests/fixtures/migration-quote-cohort-main/quote-legacy.sens
+~~~
+
+Це працює тільки для файлів, створених за перевіреним правилом tiny F3:
+фізичний F3 коротший, T5-основа не більше 16 байтів, D3 code admission і
+одна канонічна форма. Не вмикати жодного autodetect за байтами.
+[Повний інструмент випробування 9 файлів](../.github/workflows/two-codec-explicit-cli.yml).
+
 ## Власники й статуси суміжних компонентів
 
 [Машиночитаний інвентар споживачів](migration-two-codec-consumers-2026-10-11.tsv)
@@ -102,12 +119,17 @@ codec, selected_bytes, staged_file, staged_sha256.
 14 T5, **443 → 434 байти**. Це 2,03% лише на малому корпусі
 з повторюваними fixtures.
 
-Перед міграцією production:
-- 1062/1703 старих Rust↔Python F3 parity-розбіжностей;
-- немає explicit production F3 reader у sens-trit;
-- необхідні всі required CI на одному актуальному SHA;
-- зовнішні CPU/GPU/FPGA/GraalVM споживачі не перевірені;
-- історичні red #5406/#5408 не маскувати або вимикати.
+**Оновлення:** колишні 1062/1703 розбіжностей були наслідком змішування
+структурного фізичного transport-паритету та виконавчого D3 допуску;
+ці рівні тепер перевіряються окремо, без відключення негативних тестів.
+Явний production CLI tiny F3 реалізовано, 9/9 порівнянь open/decode/eval GREEN.
+
+**Що лишається поза цією завершеною SENS CLI ланкою:**
+- Підтвердити глобальні required checks і всі незалежні зміни на актуальному final SHA;
+- Перевірити CML, GPU/Futhark, FPGA та GraalVM на їхньому обладнанні;
+- На F3 немає CRC/MAC; для публікації потрібні довірені hashes/підписи
+  маніфесту, бо зміна на інший допустимий короткий F3 може лишитися непоміченою;
+- Історичні red #5406/#5408 не маскувати або вимикати.
 
 Координація: Rust #5439, міграція #5440, CLI #5445,
 CI #5442, один merge-writer #5041. **Нові гілки заборонені.**
