@@ -86,7 +86,6 @@ jobs:
           sources = {
               "current": "(define identity (lambda (value) value)) (identity ())",
               "historical": "(00001001 identity (00001000 (value) value)) (identity ())",
-              "set-target": "(00001001 binary (00001000 (width) (00100111 (00000001 binary) width))) (binary ())",
           }
           for label, original in sources.items():
               projected, hits, shadowed = migration.binary_rewrite(
@@ -99,7 +98,8 @@ jobs:
                   projected, encoding="ascii"
               )
           for invalid in ('(define x "unratified string")',
-                          "(define x 261)", "(quote unbound)"):
+                          "(define x 261)", "(quote unbound)",
+                          "(00001001 binary (00001000 (width) (00100111 (00000001 binary) width)))"):
               try:
                   migration.binary_rewrite(invalid, code_map, glyphs, resolver=resolver)
               except migration.BinaryMigrationError:
@@ -108,7 +108,7 @@ jobs:
                   raise AssertionError("unadmitted source silently passed: " + invalid)
           print("D2_D7_BINDING_MIGRATION_READY canonical binary words")
           PY
-          for label in current historical set-target; do
+          for label in current historical; do
             target/debug/sens-trit encode "$RUNNER_TEMP/d2-d7-$label.lisp"
             target/debug/sens-trit open "$RUNNER_TEMP/d2-d7-$label.sens" \
               > "$RUNNER_TEMP/d2-d7-$label.reopened.words"
