@@ -1,0 +1,4151 @@
+{
+  "schema": "d10-provisional-candidate-coordinate-queue/v1",
+  "date": "2026-10-11",
+  "status": "RESEARCH-NAME-RESERVATIONS-NOT-CANONICAL-CORE",
+  "source_inventory": {
+    "path": "knowledge/d10-v5-semantic-inventory.json",
+    "git_blob": "c8a23d0db0eebca0c8d780cc93bc1fda78425c44",
+    "selected": 715
+  },
+  "source_universe": {
+    "path": "knowledge/d10-source-universe-891-20261011.json",
+    "git_blob": "32289bf6a9da5f3a3c5bb4d40a12fa91d32eba52",
+    "source_name_count": 891
+  },
+  "source_foundation": {
+    "path": "knowledge/d1-d9-foundation.json",
+    "git_blob": "09d1d71c39d1484dfd005a5068dbb18b76f0f0d4"
+  },
+  "accounting": {
+    "canonical_selected": 715,
+    "canonical_remaining": 309,
+    "universe_unselected_names": 193,
+    "exact_name_overlap_lower_domains": 97,
+    "unique_unselected_name_candidates": 96,
+    "provisional_coordinates_assigned": 96,
+    "available_after_reservations": 213,
+    "ratified_by_this_registry": 0,
+    "canonical_inventory_added_by_this_registry": 0
+  },
+  "policy": {
+    "candidate_identity": "Research source name + provenance only. Not semantic proof. No T5 or Core residency.",
+    "coordinates": "Coordinates are PROVISIONAL research name reservations, may be revised after source-grade semantic proof; no runtime/codec effects.",
+    "lower_domains": "No new D10 code is assigned to exact names already present in ratified D1–D9; behavioral distinctions require a separate proof.",
+    "core_admission": "Only independent language-visible laws, not aliases/data/constants/host IO, can become canonically selected.",
+    "capacity": "D10 has 1024 codes. Current canonical 715; reservations 96 do not change canonical occupancy."
+  },
+  "provisional_candidates": [
+    {
+      "semantic_name": "fact",
+      "provisional_coordinate": "1011001011",
+      "coordinate_basis": "NONCANONICAL-NAME-QUEUE-RESERVATION",
+      "status": "PENDING-SOURCE-LAW-AND-DEDUPE",
+      "source_priority": "PROPOSED-HAS-LAW-NOT-SELECTED",
+      "provenance": [
+        {
+          "kind": "pending-proposal",
+          "id": "D10P-0024",
+          "path": "knowledge/d10-proposal-ledger.tsv",
+          "source": "juv4uk/sens@3335d09015cb8c96d4e2ed96f8d1339b4eb4f984:lib/forward.lisp:318",
+          "dedup": "D1-D9@09d1d71c39d1484dfd005a5068dbb18b76f0f0d4=NO-MATCH;D10@73dd518469f972c55411e004b70b054ba8b3ec86=NO-MATCH",
+          "semantic_law": "Поведінка визначена джерелом forward.lisp:318 (fact)."
+        }
+      ],
+      "ratified_resident": false,
+      "selected_in_d10": false,
+      "physical_t5_authorized": false
+    },
+    {
+      "semantic_name": "find-entry",
+      "provisional_coordinate": "1011001100",
+      "coordinate_basis": "NONCANONICAL-NAME-QUEUE-RESERVATION",
+      "status": "PENDING-SOURCE-LAW-AND-DEDUPE",
+      "source_priority": "PROPOSED-HAS-LAW-NOT-SELECTED",
+      "provenance": [
+        {
+          "kind": "pending-proposal",
+          "id": "D10P-0046",
+          "path": "knowledge/d10-proposal-ledger.tsv",
+          "source": "juv4uk/sens@3335d09015cb8c96d4e2ed96f8d1339b4eb4f984:lib/forward.lisp:512",
+          "dedup": "D1-D9@09d1d71c39d1484dfd005a5068dbb18b76f0f0d4=NO-MATCH;D10@73dd518469f972c55411e004b70b054ba8b3ec86=NO-MATCH",
+          "semantic_law": "Поведінка визначена джерелом forward.lisp:512 (find-entry)."
+        }
+      ],
+      "ratified_resident": false,
+      "selected_in_d10": false,
+      "physical_t5_authorized": false
+    },
+    {
+      "semantic_name": "new-entries",
+      "provisional_coordinate": "1011001101",
+      "coordinate_basis": "NONCANONICAL-NAME-QUEUE-RESERVATION",
+      "status": "PENDING-SOURCE-LAW-AND-DEDUPE",
+      "source_priority": "PROPOSED-HAS-LAW-NOT-SELECTED",
+      "provenance": [
+        {
+          "kind": "pending-proposal",
+          "id": "D10P-0050",
+          "path": "knowledge/d10-proposal-ledger.tsv",
+          "source": "juv4uk/sens@3335d09015cb8c96d4e2ed96f8d1339b4eb4f984:lib/forward.lisp:548",
+          "dedup": "D1-D9@09d1d71c39d1484dfd005a5068dbb18b76f0f0d4=NO-MATCH;D10@73dd518469f972c55411e004b70b054ba8b3ec86=NO-MATCH",
+          "semantic_law": "Поведінка визначена джерелом forward.lisp:548 (new-entries)."
+        }
+      ],
+      "ratified_resident": false,
+      "selected_in_d10": false,
+      "physical_t5_authorized": false
+    },
+    {
+      "semantic_name": "map-apply-head-jtms",
+      "provisional_coordinate": "1011001110",
+      "coordinate_basis": "NONCANONICAL-NAME-QUEUE-RESERVATION",
+      "status": "PENDING-SOURCE-LAW-AND-DEDUPE",
+      "source_priority": "PROPOSED-HAS-LAW-NOT-SELECTED",
+      "provenance": [
+        {
+          "kind": "pending-proposal",
+          "id": "D10P-0054",
+          "path": "knowledge/d10-proposal-ledger.tsv",
+          "source": "juv4uk/sens@3335d09015cb8c96d4e2ed96f8d1339b4eb4f984:lib/forward.lisp:690",
+          "dedup": "D1-D9@09d1d71c39d1484dfd005a5068dbb18b76f0f0d4=NO-MATCH;D10@73dd518469f972c55411e004b70b054ba8b3ec86=NO-MATCH",
+          "semantic_law": "Поведінка визначена джерелом forward.lisp:690 (map-apply-head-jtms)."
+        }
+      ],
+      "ratified_resident": false,
+      "selected_in_d10": false,
+      "physical_t5_authorized": false
+    },
+    {
+      "semantic_name": "bindings",
+      "provisional_coordinate": "1011001111",
+      "coordinate_basis": "NONCANONICAL-NAME-QUEUE-RESERVATION",
+      "status": "PENDING-SOURCE-LAW-AND-DEDUPE",
+      "source_priority": "PROPOSED-HAS-LAW-NOT-SELECTED",
+      "provenance": [
+        {
+          "kind": "pending-proposal",
+          "id": "D10P-0067",
+          "path": "knowledge/d10-proposal-ledger.tsv",
+          "source": "juv4uk/sens@3335d09015cb8c96d4e2ed96f8d1339b4eb4f984:lib/forward.lisp:1086",
+          "dedup": "D1-D9@09d1d71c39d1484dfd005a5068dbb18b76f0f0d4=NO-MATCH;D10@73dd518469f972c55411e004b70b054ba8b3ec86=NO-MATCH",
+          "semantic_law": "Поведінка визначена джерелом forward.lisp:1086 (bindings)."
+        }
+      ],
+      "ratified_resident": false,
+      "selected_in_d10": false,
+      "physical_t5_authorized": false
+    },
+    {
+      "semantic_name": "map-apply-head",
+      "provisional_coordinate": "1011010000",
+      "coordinate_basis": "NONCANONICAL-NAME-QUEUE-RESERVATION",
+      "status": "PENDING-SOURCE-LAW-AND-DEDUPE",
+      "source_priority": "PROPOSED-HAS-LAW-NOT-SELECTED",
+      "provenance": [
+        {
+          "kind": "pending-proposal",
+          "id": "D10P-0069",
+          "path": "knowledge/d10-proposal-ledger.tsv",
+          "source": "juv4uk/sens@3335d09015cb8c96d4e2ed96f8d1339b4eb4f984:lib/forward.lisp:1245",
+          "dedup": "D1-D9@09d1d71c39d1484dfd005a5068dbb18b76f0f0d4=NO-MATCH;D10@73dd518469f972c55411e004b70b054ba8b3ec86=NO-MATCH",
+          "semantic_law": "Поведінка визначена джерелом forward.lisp:1245 (map-apply-head)."
+        }
+      ],
+      "ratified_resident": false,
+      "selected_in_d10": false,
+      "physical_t5_authorized": false
+    },
+    {
+      "semantic_name": "*dimension-schema*",
+      "provisional_coordinate": "1011010001",
+      "coordinate_basis": "NONCANONICAL-NAME-QUEUE-RESERVATION",
+      "status": "PENDING-LIBRARY-VS-CORE-REVIEW",
+      "source_priority": "LIBRARY-DEFINED-REQUIRES-INDEPENDENCE",
+      "provenance": [
+        {
+          "kind": "library-definition",
+          "file": "lib/quantity.lisp",
+          "source_blob": "40c38e6019beccddd8577aa7af5a0957f4932b89",
+          "line": 18,
+          "definition_kind": "library-defined"
+        }
+      ],
+      "ratified_resident": false,
+      "selected_in_d10": false,
+      "physical_t5_authorized": false
+    },
+    {
+      "semantic_name": "*unit-schema*",
+      "provisional_coordinate": "1011010010",
+      "coordinate_basis": "NONCANONICAL-NAME-QUEUE-RESERVATION",
+      "status": "PENDING-LIBRARY-VS-CORE-REVIEW",
+      "source_priority": "LIBRARY-DEFINED-REQUIRES-INDEPENDENCE",
+      "provenance": [
+        {
+          "kind": "library-definition",
+          "file": "lib/quantity.lisp",
+          "source_blob": "40c38e6019beccddd8577aa7af5a0957f4932b89",
+          "line": 19,
+          "definition_kind": "library-defined"
+        }
+      ],
+      "ratified_resident": false,
+      "selected_in_d10": false,
+      "physical_t5_authorized": false
+    },
+    {
+      "semantic_name": "*quantity-schema*",
+      "provisional_coordinate": "1011010011",
+      "coordinate_basis": "NONCANONICAL-NAME-QUEUE-RESERVATION",
+      "status": "PENDING-LIBRARY-VS-CORE-REVIEW",
+      "source_priority": "LIBRARY-DEFINED-REQUIRES-INDEPENDENCE",
+      "provenance": [
+        {
+          "kind": "library-definition",
+          "file": "lib/quantity.lisp",
+          "source_blob": "40c38e6019beccddd8577aa7af5a0957f4932b89",
+          "line": 20,
+          "definition_kind": "library-defined"
+        }
+      ],
+      "ratified_resident": false,
+      "selected_in_d10": false,
+      "physical_t5_authorized": false
+    },
+    {
+      "semantic_name": "*science-source-schema*",
+      "provisional_coordinate": "1011010100",
+      "coordinate_basis": "NONCANONICAL-NAME-QUEUE-RESERVATION",
+      "status": "PENDING-LIBRARY-VS-CORE-REVIEW",
+      "source_priority": "LIBRARY-DEFINED-REQUIRES-INDEPENDENCE",
+      "provenance": [
+        {
+          "kind": "library-definition",
+          "file": "lib/quantity.lisp",
+          "source_blob": "40c38e6019beccddd8577aa7af5a0957f4932b89",
+          "line": 21,
+          "definition_kind": "library-defined"
+        }
+      ],
+      "ratified_resident": false,
+      "selected_in_d10": false,
+      "physical_t5_authorized": false
+    },
+    {
+      "semantic_name": "*scientific-constant-schema*",
+      "provisional_coordinate": "1011010101",
+      "coordinate_basis": "NONCANONICAL-NAME-QUEUE-RESERVATION",
+      "status": "PENDING-LIBRARY-VS-CORE-REVIEW",
+      "source_priority": "LIBRARY-DEFINED-REQUIRES-INDEPENDENCE",
+      "provenance": [
+        {
+          "kind": "library-definition",
+          "file": "lib/quantity.lisp",
+          "source_blob": "40c38e6019beccddd8577aa7af5a0957f4932b89",
+          "line": 22,
+          "definition_kind": "library-defined"
+        }
+      ],
+      "ratified_resident": false,
+      "selected_in_d10": false,
+      "physical_t5_authorized": false
+    },
+    {
+      "semantic_name": "science-proper-list?",
+      "provisional_coordinate": "1011010110",
+      "coordinate_basis": "NONCANONICAL-NAME-QUEUE-RESERVATION",
+      "status": "PENDING-LIBRARY-VS-CORE-REVIEW",
+      "source_priority": "LIBRARY-DEFINED-REQUIRES-INDEPENDENCE",
+      "provenance": [
+        {
+          "kind": "library-definition",
+          "file": "lib/quantity.lisp",
+          "source_blob": "40c38e6019beccddd8577aa7af5a0957f4932b89",
+          "line": 24,
+          "definition_kind": "library-defined"
+        }
+      ],
+      "ratified_resident": false,
+      "selected_in_d10": false,
+      "physical_t5_authorized": false
+    },
+    {
+      "semantic_name": "science-sixth",
+      "provisional_coordinate": "1011010111",
+      "coordinate_basis": "NONCANONICAL-NAME-QUEUE-RESERVATION",
+      "status": "PENDING-LIBRARY-VS-CORE-REVIEW",
+      "source_priority": "LIBRARY-DEFINED-REQUIRES-INDEPENDENCE",
+      "provenance": [
+        {
+          "kind": "library-definition",
+          "file": "lib/quantity.lisp",
+          "source_blob": "40c38e6019beccddd8577aa7af5a0957f4932b89",
+          "line": 35,
+          "definition_kind": "library-defined"
+        }
+      ],
+      "ratified_resident": false,
+      "selected_in_d10": false,
+      "physical_t5_authorized": false
+    },
+    {
+      "semantic_name": "science-seventh",
+      "provisional_coordinate": "1011011000",
+      "coordinate_basis": "NONCANONICAL-NAME-QUEUE-RESERVATION",
+      "status": "PENDING-LIBRARY-VS-CORE-REVIEW",
+      "source_priority": "LIBRARY-DEFINED-REQUIRES-INDEPENDENCE",
+      "provenance": [
+        {
+          "kind": "library-definition",
+          "file": "lib/quantity.lisp",
+          "source_blob": "40c38e6019beccddd8577aa7af5a0957f4932b89",
+          "line": 39,
+          "definition_kind": "library-defined"
+        }
+      ],
+      "ratified_resident": false,
+      "selected_in_d10": false,
+      "physical_t5_authorized": false
+    },
+    {
+      "semantic_name": "*translation-schema*",
+      "provisional_coordinate": "1011011001",
+      "coordinate_basis": "NONCANONICAL-NAME-QUEUE-RESERVATION",
+      "status": "PENDING-LIBRARY-VS-CORE-REVIEW",
+      "source_priority": "LIBRARY-DEFINED-REQUIRES-INDEPENDENCE",
+      "provenance": [
+        {
+          "kind": "library-definition",
+          "file": "lib/translation.lisp",
+          "source_blob": "80cd225cba549a837097b1e633b6662c9434a148",
+          "line": 35,
+          "definition_kind": "library-defined"
+        }
+      ],
+      "ratified_resident": false,
+      "selected_in_d10": false,
+      "physical_t5_authorized": false
+    },
+    {
+      "semantic_name": "*translation-review-schema*",
+      "provisional_coordinate": "1011011010",
+      "coordinate_basis": "NONCANONICAL-NAME-QUEUE-RESERVATION",
+      "status": "PENDING-LIBRARY-VS-CORE-REVIEW",
+      "source_priority": "LIBRARY-DEFINED-REQUIRES-INDEPENDENCE",
+      "provenance": [
+        {
+          "kind": "library-definition",
+          "file": "lib/translation.lisp",
+          "source_blob": "80cd225cba549a837097b1e633b6662c9434a148",
+          "line": 36,
+          "definition_kind": "library-defined"
+        }
+      ],
+      "ratified_resident": false,
+      "selected_in_d10": false,
+      "physical_t5_authorized": false
+    },
+    {
+      "semantic_name": "*translation-evidence-schema*",
+      "provisional_coordinate": "1011011011",
+      "coordinate_basis": "NONCANONICAL-NAME-QUEUE-RESERVATION",
+      "status": "PENDING-LIBRARY-VS-CORE-REVIEW",
+      "source_priority": "LIBRARY-DEFINED-REQUIRES-INDEPENDENCE",
+      "provenance": [
+        {
+          "kind": "library-definition",
+          "file": "lib/translation.lisp",
+          "source_blob": "80cd225cba549a837097b1e633b6662c9434a148",
+          "line": 37,
+          "definition_kind": "library-defined"
+        }
+      ],
+      "ratified_resident": false,
+      "selected_in_d10": false,
+      "physical_t5_authorized": false
+    },
+    {
+      "semantic_name": "*translation-evidence*",
+      "provisional_coordinate": "1011011100",
+      "coordinate_basis": "NONCANONICAL-NAME-QUEUE-RESERVATION",
+      "status": "PENDING-LIBRARY-VS-CORE-REVIEW",
+      "source_priority": "LIBRARY-DEFINED-REQUIRES-INDEPENDENCE",
+      "provenance": [
+        {
+          "kind": "library-definition",
+          "file": "lib/translation.lisp",
+          "source_blob": "80cd225cba549a837097b1e633b6662c9434a148",
+          "line": 38,
+          "definition_kind": "library-defined"
+        }
+      ],
+      "ratified_resident": false,
+      "selected_in_d10": false,
+      "physical_t5_authorized": false
+    },
+    {
+      "semantic_name": "si:defining-cesium-frequency",
+      "provisional_coordinate": "1011011101",
+      "coordinate_basis": "NONCANONICAL-NAME-QUEUE-RESERVATION",
+      "status": "PENDING-LIBRARY-VS-CORE-REVIEW",
+      "source_priority": "LIBRARY-DEFINED-REQUIRES-INDEPENDENCE",
+      "provenance": [
+        {
+          "kind": "library-definition",
+          "file": "lib/si.lisp",
+          "source_blob": "2b94f1ea6d2fb05c084c3a0d863c14119a5ba11f",
+          "line": 25,
+          "definition_kind": "library-defined"
+        }
+      ],
+      "ratified_resident": false,
+      "selected_in_d10": false,
+      "physical_t5_authorized": false
+    },
+    {
+      "semantic_name": "si:defining-speed-of-light",
+      "provisional_coordinate": "1011011110",
+      "coordinate_basis": "NONCANONICAL-NAME-QUEUE-RESERVATION",
+      "status": "PENDING-LIBRARY-VS-CORE-REVIEW",
+      "source_priority": "LIBRARY-DEFINED-REQUIRES-INDEPENDENCE",
+      "provenance": [
+        {
+          "kind": "library-definition",
+          "file": "lib/si.lisp",
+          "source_blob": "2b94f1ea6d2fb05c084c3a0d863c14119a5ba11f",
+          "line": 34,
+          "definition_kind": "library-defined"
+        }
+      ],
+      "ratified_resident": false,
+      "selected_in_d10": false,
+      "physical_t5_authorized": false
+    },
+    {
+      "semantic_name": "si:defining-planck-constant",
+      "provisional_coordinate": "1011011111",
+      "coordinate_basis": "NONCANONICAL-NAME-QUEUE-RESERVATION",
+      "status": "PENDING-LIBRARY-VS-CORE-REVIEW",
+      "source_priority": "LIBRARY-DEFINED-REQUIRES-INDEPENDENCE",
+      "provenance": [
+        {
+          "kind": "library-definition",
+          "file": "lib/si.lisp",
+          "source_blob": "2b94f1ea6d2fb05c084c3a0d863c14119a5ba11f",
+          "line": 44,
+          "definition_kind": "library-defined"
+        }
+      ],
+      "ratified_resident": false,
+      "selected_in_d10": false,
+      "physical_t5_authorized": false
+    },
+    {
+      "semantic_name": "si:defining-elementary-charge",
+      "provisional_coordinate": "1011100000",
+      "coordinate_basis": "NONCANONICAL-NAME-QUEUE-RESERVATION",
+      "status": "PENDING-LIBRARY-VS-CORE-REVIEW",
+      "source_priority": "LIBRARY-DEFINED-REQUIRES-INDEPENDENCE",
+      "provenance": [
+        {
+          "kind": "library-definition",
+          "file": "lib/si.lisp",
+          "source_blob": "2b94f1ea6d2fb05c084c3a0d863c14119a5ba11f",
+          "line": 56,
+          "definition_kind": "library-defined"
+        }
+      ],
+      "ratified_resident": false,
+      "selected_in_d10": false,
+      "physical_t5_authorized": false
+    },
+    {
+      "semantic_name": "si:defining-boltzmann-constant",
+      "provisional_coordinate": "1011100001",
+      "coordinate_basis": "NONCANONICAL-NAME-QUEUE-RESERVATION",
+      "status": "PENDING-LIBRARY-VS-CORE-REVIEW",
+      "source_priority": "LIBRARY-DEFINED-REQUIRES-INDEPENDENCE",
+      "provenance": [
+        {
+          "kind": "library-definition",
+          "file": "lib/si.lisp",
+          "source_blob": "2b94f1ea6d2fb05c084c3a0d863c14119a5ba11f",
+          "line": 67,
+          "definition_kind": "library-defined"
+        }
+      ],
+      "ratified_resident": false,
+      "selected_in_d10": false,
+      "physical_t5_authorized": false
+    },
+    {
+      "semantic_name": "si:defining-avogadro-constant",
+      "provisional_coordinate": "1011100010",
+      "coordinate_basis": "NONCANONICAL-NAME-QUEUE-RESERVATION",
+      "status": "PENDING-LIBRARY-VS-CORE-REVIEW",
+      "source_priority": "LIBRARY-DEFINED-REQUIRES-INDEPENDENCE",
+      "provenance": [
+        {
+          "kind": "library-definition",
+          "file": "lib/si.lisp",
+          "source_blob": "2b94f1ea6d2fb05c084c3a0d863c14119a5ba11f",
+          "line": 80,
+          "definition_kind": "library-defined"
+        }
+      ],
+      "ratified_resident": false,
+      "selected_in_d10": false,
+      "physical_t5_authorized": false
+    },
+    {
+      "semantic_name": "si:defining-luminous-efficacy",
+      "provisional_coordinate": "1011100011",
+      "coordinate_basis": "NONCANONICAL-NAME-QUEUE-RESERVATION",
+      "status": "PENDING-LIBRARY-VS-CORE-REVIEW",
+      "source_priority": "LIBRARY-DEFINED-REQUIRES-INDEPENDENCE",
+      "provenance": [
+        {
+          "kind": "library-definition",
+          "file": "lib/si.lisp",
+          "source_blob": "2b94f1ea6d2fb05c084c3a0d863c14119a5ba11f",
+          "line": 89,
+          "definition_kind": "library-defined"
+        }
+      ],
+      "ratified_resident": false,
+      "selected_in_d10": false,
+      "physical_t5_authorized": false
+    },
+    {
+      "semantic_name": "si:constant-value",
+      "provisional_coordinate": "1011100100",
+      "coordinate_basis": "NONCANONICAL-NAME-QUEUE-RESERVATION",
+      "status": "PENDING-LIBRARY-VS-CORE-REVIEW",
+      "source_priority": "LIBRARY-DEFINED-REQUIRES-INDEPENDENCE",
+      "provenance": [
+        {
+          "kind": "library-definition",
+          "file": "lib/si.lisp",
+          "source_blob": "2b94f1ea6d2fb05c084c3a0d863c14119a5ba11f",
+          "line": 103,
+          "definition_kind": "library-defined"
+        }
+      ],
+      "ratified_resident": false,
+      "selected_in_d10": false,
+      "physical_t5_authorized": false
+    },
+    {
+      "semantic_name": "si:cesium-frequency",
+      "provisional_coordinate": "1011100101",
+      "coordinate_basis": "NONCANONICAL-NAME-QUEUE-RESERVATION",
+      "status": "PENDING-LIBRARY-VS-CORE-REVIEW",
+      "source_priority": "LIBRARY-DEFINED-REQUIRES-INDEPENDENCE",
+      "provenance": [
+        {
+          "kind": "library-definition",
+          "file": "lib/si.lisp",
+          "source_blob": "2b94f1ea6d2fb05c084c3a0d863c14119a5ba11f",
+          "line": 108,
+          "definition_kind": "library-defined"
+        }
+      ],
+      "ratified_resident": false,
+      "selected_in_d10": false,
+      "physical_t5_authorized": false
+    },
+    {
+      "semantic_name": "si:speed-of-light",
+      "provisional_coordinate": "1011100110",
+      "coordinate_basis": "NONCANONICAL-NAME-QUEUE-RESERVATION",
+      "status": "PENDING-LIBRARY-VS-CORE-REVIEW",
+      "source_priority": "LIBRARY-DEFINED-REQUIRES-INDEPENDENCE",
+      "provenance": [
+        {
+          "kind": "library-definition",
+          "file": "lib/si.lisp",
+          "source_blob": "2b94f1ea6d2fb05c084c3a0d863c14119a5ba11f",
+          "line": 109,
+          "definition_kind": "library-defined"
+        }
+      ],
+      "ratified_resident": false,
+      "selected_in_d10": false,
+      "physical_t5_authorized": false
+    },
+    {
+      "semantic_name": "si:planck-constant",
+      "provisional_coordinate": "1011100111",
+      "coordinate_basis": "NONCANONICAL-NAME-QUEUE-RESERVATION",
+      "status": "PENDING-LIBRARY-VS-CORE-REVIEW",
+      "source_priority": "LIBRARY-DEFINED-REQUIRES-INDEPENDENCE",
+      "provenance": [
+        {
+          "kind": "library-definition",
+          "file": "lib/si.lisp",
+          "source_blob": "2b94f1ea6d2fb05c084c3a0d863c14119a5ba11f",
+          "line": 110,
+          "definition_kind": "library-defined"
+        }
+      ],
+      "ratified_resident": false,
+      "selected_in_d10": false,
+      "physical_t5_authorized": false
+    },
+    {
+      "semantic_name": "si:elementary-charge",
+      "provisional_coordinate": "1011101000",
+      "coordinate_basis": "NONCANONICAL-NAME-QUEUE-RESERVATION",
+      "status": "PENDING-LIBRARY-VS-CORE-REVIEW",
+      "source_priority": "LIBRARY-DEFINED-REQUIRES-INDEPENDENCE",
+      "provenance": [
+        {
+          "kind": "library-definition",
+          "file": "lib/si.lisp",
+          "source_blob": "2b94f1ea6d2fb05c084c3a0d863c14119a5ba11f",
+          "line": 111,
+          "definition_kind": "library-defined"
+        }
+      ],
+      "ratified_resident": false,
+      "selected_in_d10": false,
+      "physical_t5_authorized": false
+    },
+    {
+      "semantic_name": "si:boltzmann-constant",
+      "provisional_coordinate": "1011101001",
+      "coordinate_basis": "NONCANONICAL-NAME-QUEUE-RESERVATION",
+      "status": "PENDING-LIBRARY-VS-CORE-REVIEW",
+      "source_priority": "LIBRARY-DEFINED-REQUIRES-INDEPENDENCE",
+      "provenance": [
+        {
+          "kind": "library-definition",
+          "file": "lib/si.lisp",
+          "source_blob": "2b94f1ea6d2fb05c084c3a0d863c14119a5ba11f",
+          "line": 112,
+          "definition_kind": "library-defined"
+        }
+      ],
+      "ratified_resident": false,
+      "selected_in_d10": false,
+      "physical_t5_authorized": false
+    },
+    {
+      "semantic_name": "si:avogadro-constant",
+      "provisional_coordinate": "1011101010",
+      "coordinate_basis": "NONCANONICAL-NAME-QUEUE-RESERVATION",
+      "status": "PENDING-LIBRARY-VS-CORE-REVIEW",
+      "source_priority": "LIBRARY-DEFINED-REQUIRES-INDEPENDENCE",
+      "provenance": [
+        {
+          "kind": "library-definition",
+          "file": "lib/si.lisp",
+          "source_blob": "2b94f1ea6d2fb05c084c3a0d863c14119a5ba11f",
+          "line": 113,
+          "definition_kind": "library-defined"
+        }
+      ],
+      "ratified_resident": false,
+      "selected_in_d10": false,
+      "physical_t5_authorized": false
+    },
+    {
+      "semantic_name": "si:luminous-efficacy",
+      "provisional_coordinate": "1011101011",
+      "coordinate_basis": "NONCANONICAL-NAME-QUEUE-RESERVATION",
+      "status": "PENDING-LIBRARY-VS-CORE-REVIEW",
+      "source_priority": "LIBRARY-DEFINED-REQUIRES-INDEPENDENCE",
+      "provenance": [
+        {
+          "kind": "library-definition",
+          "file": "lib/si.lisp",
+          "source_blob": "2b94f1ea6d2fb05c084c3a0d863c14119a5ba11f",
+          "line": 114,
+          "definition_kind": "library-defined"
+        }
+      ],
+      "ratified_resident": false,
+      "selected_in_d10": false,
+      "physical_t5_authorized": false
+    },
+    {
+      "semantic_name": "delta-nu-cs",
+      "provisional_coordinate": "1011101100",
+      "coordinate_basis": "NONCANONICAL-NAME-QUEUE-RESERVATION",
+      "status": "PENDING-LIBRARY-VS-CORE-REVIEW",
+      "source_priority": "LIBRARY-DEFINED-REQUIRES-INDEPENDENCE",
+      "provenance": [
+        {
+          "kind": "library-definition",
+          "file": "lib/si.lisp",
+          "source_blob": "2b94f1ea6d2fb05c084c3a0d863c14119a5ba11f",
+          "line": 118,
+          "definition_kind": "library-defined"
+        }
+      ],
+      "ratified_resident": false,
+      "selected_in_d10": false,
+      "physical_t5_authorized": false
+    },
+    {
+      "semantic_name": "c",
+      "provisional_coordinate": "1011101101",
+      "coordinate_basis": "NONCANONICAL-NAME-QUEUE-RESERVATION",
+      "status": "PENDING-LIBRARY-VS-CORE-REVIEW",
+      "source_priority": "LIBRARY-DEFINED-REQUIRES-INDEPENDENCE",
+      "provenance": [
+        {
+          "kind": "library-definition",
+          "file": "lib/si.lisp",
+          "source_blob": "2b94f1ea6d2fb05c084c3a0d863c14119a5ba11f",
+          "line": 119,
+          "definition_kind": "library-defined"
+        }
+      ],
+      "ratified_resident": false,
+      "selected_in_d10": false,
+      "physical_t5_authorized": false
+    },
+    {
+      "semantic_name": "h",
+      "provisional_coordinate": "1011101110",
+      "coordinate_basis": "NONCANONICAL-NAME-QUEUE-RESERVATION",
+      "status": "PENDING-LIBRARY-VS-CORE-REVIEW",
+      "source_priority": "LIBRARY-DEFINED-REQUIRES-INDEPENDENCE",
+      "provenance": [
+        {
+          "kind": "library-definition",
+          "file": "lib/si.lisp",
+          "source_blob": "2b94f1ea6d2fb05c084c3a0d863c14119a5ba11f",
+          "line": 120,
+          "definition_kind": "library-defined"
+        }
+      ],
+      "ratified_resident": false,
+      "selected_in_d10": false,
+      "physical_t5_authorized": false
+    },
+    {
+      "semantic_name": "e",
+      "provisional_coordinate": "1011101111",
+      "coordinate_basis": "NONCANONICAL-NAME-QUEUE-RESERVATION",
+      "status": "PENDING-LIBRARY-VS-CORE-REVIEW",
+      "source_priority": "LIBRARY-DEFINED-REQUIRES-INDEPENDENCE",
+      "provenance": [
+        {
+          "kind": "library-definition",
+          "file": "lib/si.lisp",
+          "source_blob": "2b94f1ea6d2fb05c084c3a0d863c14119a5ba11f",
+          "line": 121,
+          "definition_kind": "library-defined"
+        }
+      ],
+      "ratified_resident": false,
+      "selected_in_d10": false,
+      "physical_t5_authorized": false
+    },
+    {
+      "semantic_name": "k",
+      "provisional_coordinate": "1011110000",
+      "coordinate_basis": "NONCANONICAL-NAME-QUEUE-RESERVATION",
+      "status": "PENDING-LIBRARY-VS-CORE-REVIEW",
+      "source_priority": "LIBRARY-DEFINED-REQUIRES-INDEPENDENCE",
+      "provenance": [
+        {
+          "kind": "library-definition",
+          "file": "lib/si.lisp",
+          "source_blob": "2b94f1ea6d2fb05c084c3a0d863c14119a5ba11f",
+          "line": 122,
+          "definition_kind": "library-defined"
+        }
+      ],
+      "ratified_resident": false,
+      "selected_in_d10": false,
+      "physical_t5_authorized": false
+    },
+    {
+      "semantic_name": "n-a",
+      "provisional_coordinate": "1011110001",
+      "coordinate_basis": "NONCANONICAL-NAME-QUEUE-RESERVATION",
+      "status": "PENDING-LIBRARY-VS-CORE-REVIEW",
+      "source_priority": "LIBRARY-DEFINED-REQUIRES-INDEPENDENCE",
+      "provenance": [
+        {
+          "kind": "library-definition",
+          "file": "lib/si.lisp",
+          "source_blob": "2b94f1ea6d2fb05c084c3a0d863c14119a5ba11f",
+          "line": 123,
+          "definition_kind": "library-defined"
+        }
+      ],
+      "ratified_resident": false,
+      "selected_in_d10": false,
+      "physical_t5_authorized": false
+    },
+    {
+      "semantic_name": "k-cd",
+      "provisional_coordinate": "1011110010",
+      "coordinate_basis": "NONCANONICAL-NAME-QUEUE-RESERVATION",
+      "status": "PENDING-LIBRARY-VS-CORE-REVIEW",
+      "source_priority": "LIBRARY-DEFINED-REQUIRES-INDEPENDENCE",
+      "provenance": [
+        {
+          "kind": "library-definition",
+          "file": "lib/si.lisp",
+          "source_blob": "2b94f1ea6d2fb05c084c3a0d863c14119a5ba11f",
+          "line": 124,
+          "definition_kind": "library-defined"
+        }
+      ],
+      "ratified_resident": false,
+      "selected_in_d10": false,
+      "physical_t5_authorized": false
+    },
+    {
+      "semantic_name": "si:delta-nu-cs",
+      "provisional_coordinate": "1011110011",
+      "coordinate_basis": "NONCANONICAL-NAME-QUEUE-RESERVATION",
+      "status": "PENDING-LIBRARY-VS-CORE-REVIEW",
+      "source_priority": "LIBRARY-DEFINED-REQUIRES-INDEPENDENCE",
+      "provenance": [
+        {
+          "kind": "library-definition",
+          "file": "lib/si.lisp",
+          "source_blob": "2b94f1ea6d2fb05c084c3a0d863c14119a5ba11f",
+          "line": 125,
+          "definition_kind": "library-defined"
+        }
+      ],
+      "ratified_resident": false,
+      "selected_in_d10": false,
+      "physical_t5_authorized": false
+    },
+    {
+      "semantic_name": "si:c",
+      "provisional_coordinate": "1011110100",
+      "coordinate_basis": "NONCANONICAL-NAME-QUEUE-RESERVATION",
+      "status": "PENDING-LIBRARY-VS-CORE-REVIEW",
+      "source_priority": "LIBRARY-DEFINED-REQUIRES-INDEPENDENCE",
+      "provenance": [
+        {
+          "kind": "library-definition",
+          "file": "lib/si.lisp",
+          "source_blob": "2b94f1ea6d2fb05c084c3a0d863c14119a5ba11f",
+          "line": 126,
+          "definition_kind": "library-defined"
+        }
+      ],
+      "ratified_resident": false,
+      "selected_in_d10": false,
+      "physical_t5_authorized": false
+    },
+    {
+      "semantic_name": "si:h",
+      "provisional_coordinate": "1011110101",
+      "coordinate_basis": "NONCANONICAL-NAME-QUEUE-RESERVATION",
+      "status": "PENDING-LIBRARY-VS-CORE-REVIEW",
+      "source_priority": "LIBRARY-DEFINED-REQUIRES-INDEPENDENCE",
+      "provenance": [
+        {
+          "kind": "library-definition",
+          "file": "lib/si.lisp",
+          "source_blob": "2b94f1ea6d2fb05c084c3a0d863c14119a5ba11f",
+          "line": 127,
+          "definition_kind": "library-defined"
+        }
+      ],
+      "ratified_resident": false,
+      "selected_in_d10": false,
+      "physical_t5_authorized": false
+    },
+    {
+      "semantic_name": "si:e",
+      "provisional_coordinate": "1011110110",
+      "coordinate_basis": "NONCANONICAL-NAME-QUEUE-RESERVATION",
+      "status": "PENDING-LIBRARY-VS-CORE-REVIEW",
+      "source_priority": "LIBRARY-DEFINED-REQUIRES-INDEPENDENCE",
+      "provenance": [
+        {
+          "kind": "library-definition",
+          "file": "lib/si.lisp",
+          "source_blob": "2b94f1ea6d2fb05c084c3a0d863c14119a5ba11f",
+          "line": 128,
+          "definition_kind": "library-defined"
+        }
+      ],
+      "ratified_resident": false,
+      "selected_in_d10": false,
+      "physical_t5_authorized": false
+    },
+    {
+      "semantic_name": "si:k",
+      "provisional_coordinate": "1011110111",
+      "coordinate_basis": "NONCANONICAL-NAME-QUEUE-RESERVATION",
+      "status": "PENDING-LIBRARY-VS-CORE-REVIEW",
+      "source_priority": "LIBRARY-DEFINED-REQUIRES-INDEPENDENCE",
+      "provenance": [
+        {
+          "kind": "library-definition",
+          "file": "lib/si.lisp",
+          "source_blob": "2b94f1ea6d2fb05c084c3a0d863c14119a5ba11f",
+          "line": 129,
+          "definition_kind": "library-defined"
+        }
+      ],
+      "ratified_resident": false,
+      "selected_in_d10": false,
+      "physical_t5_authorized": false
+    },
+    {
+      "semantic_name": "si:n-a",
+      "provisional_coordinate": "1011111000",
+      "coordinate_basis": "NONCANONICAL-NAME-QUEUE-RESERVATION",
+      "status": "PENDING-LIBRARY-VS-CORE-REVIEW",
+      "source_priority": "LIBRARY-DEFINED-REQUIRES-INDEPENDENCE",
+      "provenance": [
+        {
+          "kind": "library-definition",
+          "file": "lib/si.lisp",
+          "source_blob": "2b94f1ea6d2fb05c084c3a0d863c14119a5ba11f",
+          "line": 130,
+          "definition_kind": "library-defined"
+        }
+      ],
+      "ratified_resident": false,
+      "selected_in_d10": false,
+      "physical_t5_authorized": false
+    },
+    {
+      "semantic_name": "si:k-cd",
+      "provisional_coordinate": "1011111001",
+      "coordinate_basis": "NONCANONICAL-NAME-QUEUE-RESERVATION",
+      "status": "PENDING-LIBRARY-VS-CORE-REVIEW",
+      "source_priority": "LIBRARY-DEFINED-REQUIRES-INDEPENDENCE",
+      "provenance": [
+        {
+          "kind": "library-definition",
+          "file": "lib/si.lisp",
+          "source_blob": "2b94f1ea6d2fb05c084c3a0d863c14119a5ba11f",
+          "line": 131,
+          "definition_kind": "library-defined"
+        }
+      ],
+      "ratified_resident": false,
+      "selected_in_d10": false,
+      "physical_t5_authorized": false
+    },
+    {
+      "semantic_name": "board-from-fen",
+      "provisional_coordinate": "1011111010",
+      "coordinate_basis": "NONCANONICAL-NAME-QUEUE-RESERVATION",
+      "status": "NAME-ONLY-NO-SEMANTIC-EVIDENCE",
+      "source_priority": "INTEREST-ONLY-NO-SEMANTIC-EVIDENCE",
+      "provenance": [
+        {
+          "kind": "owner-interest",
+          "family": "chess",
+          "donor_repos": [
+            "juv4uk/chess",
+            "juv4uk/lisp-chess-engine",
+            "juv4uk/simple-lisp-chess-engine",
+            "juv4uk/chess-lisp-zero",
+            "juv4uk/chess-tauri-zero",
+            "juv4uk/hsChess",
+            "juv4uk/alpha-zero-general",
+            "juv4uk/lc0"
+          ]
+        }
+      ],
+      "ratified_resident": false,
+      "selected_in_d10": false,
+      "physical_t5_authorized": false
+    },
+    {
+      "semantic_name": "fen-from-board",
+      "provisional_coordinate": "1011111011",
+      "coordinate_basis": "NONCANONICAL-NAME-QUEUE-RESERVATION",
+      "status": "NAME-ONLY-NO-SEMANTIC-EVIDENCE",
+      "source_priority": "INTEREST-ONLY-NO-SEMANTIC-EVIDENCE",
+      "provenance": [
+        {
+          "kind": "owner-interest",
+          "family": "chess",
+          "donor_repos": [
+            "juv4uk/chess",
+            "juv4uk/lisp-chess-engine",
+            "juv4uk/simple-lisp-chess-engine",
+            "juv4uk/chess-lisp-zero",
+            "juv4uk/chess-tauri-zero",
+            "juv4uk/hsChess",
+            "juv4uk/alpha-zero-general",
+            "juv4uk/lc0"
+          ]
+        }
+      ],
+      "ratified_resident": false,
+      "selected_in_d10": false,
+      "physical_t5_authorized": false
+    },
+    {
+      "semantic_name": "piece-at",
+      "provisional_coordinate": "1011111100",
+      "coordinate_basis": "NONCANONICAL-NAME-QUEUE-RESERVATION",
+      "status": "NAME-ONLY-NO-SEMANTIC-EVIDENCE",
+      "source_priority": "INTEREST-ONLY-NO-SEMANTIC-EVIDENCE",
+      "provenance": [
+        {
+          "kind": "owner-interest",
+          "family": "chess",
+          "donor_repos": [
+            "juv4uk/chess",
+            "juv4uk/lisp-chess-engine",
+            "juv4uk/simple-lisp-chess-engine",
+            "juv4uk/chess-lisp-zero",
+            "juv4uk/chess-tauri-zero",
+            "juv4uk/hsChess",
+            "juv4uk/alpha-zero-general",
+            "juv4uk/lc0"
+          ]
+        }
+      ],
+      "ratified_resident": false,
+      "selected_in_d10": false,
+      "physical_t5_authorized": false
+    },
+    {
+      "semantic_name": "generate-moves",
+      "provisional_coordinate": "1011111101",
+      "coordinate_basis": "NONCANONICAL-NAME-QUEUE-RESERVATION",
+      "status": "NAME-ONLY-NO-SEMANTIC-EVIDENCE",
+      "source_priority": "INTEREST-ONLY-NO-SEMANTIC-EVIDENCE",
+      "provenance": [
+        {
+          "kind": "owner-interest",
+          "family": "chess",
+          "donor_repos": [
+            "juv4uk/chess",
+            "juv4uk/lisp-chess-engine",
+            "juv4uk/simple-lisp-chess-engine",
+            "juv4uk/chess-lisp-zero",
+            "juv4uk/chess-tauri-zero",
+            "juv4uk/hsChess",
+            "juv4uk/alpha-zero-general",
+            "juv4uk/lc0"
+          ]
+        }
+      ],
+      "ratified_resident": false,
+      "selected_in_d10": false,
+      "physical_t5_authorized": false
+    },
+    {
+      "semantic_name": "legal-moves?",
+      "provisional_coordinate": "1011111110",
+      "coordinate_basis": "NONCANONICAL-NAME-QUEUE-RESERVATION",
+      "status": "NAME-ONLY-NO-SEMANTIC-EVIDENCE",
+      "source_priority": "INTEREST-ONLY-NO-SEMANTIC-EVIDENCE",
+      "provenance": [
+        {
+          "kind": "owner-interest",
+          "family": "chess",
+          "donor_repos": [
+            "juv4uk/chess",
+            "juv4uk/lisp-chess-engine",
+            "juv4uk/simple-lisp-chess-engine",
+            "juv4uk/chess-lisp-zero",
+            "juv4uk/chess-tauri-zero",
+            "juv4uk/hsChess",
+            "juv4uk/alpha-zero-general",
+            "juv4uk/lc0"
+          ]
+        }
+      ],
+      "ratified_resident": false,
+      "selected_in_d10": false,
+      "physical_t5_authorized": false
+    },
+    {
+      "semantic_name": "apply-move",
+      "provisional_coordinate": "1011111111",
+      "coordinate_basis": "NONCANONICAL-NAME-QUEUE-RESERVATION",
+      "status": "NAME-ONLY-NO-SEMANTIC-EVIDENCE",
+      "source_priority": "INTEREST-ONLY-NO-SEMANTIC-EVIDENCE",
+      "provenance": [
+        {
+          "kind": "owner-interest",
+          "family": "chess",
+          "donor_repos": [
+            "juv4uk/chess",
+            "juv4uk/lisp-chess-engine",
+            "juv4uk/simple-lisp-chess-engine",
+            "juv4uk/chess-lisp-zero",
+            "juv4uk/chess-tauri-zero",
+            "juv4uk/hsChess",
+            "juv4uk/alpha-zero-general",
+            "juv4uk/lc0"
+          ]
+        }
+      ],
+      "ratified_resident": false,
+      "selected_in_d10": false,
+      "physical_t5_authorized": false
+    },
+    {
+      "semantic_name": "is-check?",
+      "provisional_coordinate": "1100000000",
+      "coordinate_basis": "NONCANONICAL-NAME-QUEUE-RESERVATION",
+      "status": "NAME-ONLY-NO-SEMANTIC-EVIDENCE",
+      "source_priority": "INTEREST-ONLY-NO-SEMANTIC-EVIDENCE",
+      "provenance": [
+        {
+          "kind": "owner-interest",
+          "family": "chess",
+          "donor_repos": [
+            "juv4uk/chess",
+            "juv4uk/lisp-chess-engine",
+            "juv4uk/simple-lisp-chess-engine",
+            "juv4uk/chess-lisp-zero",
+            "juv4uk/chess-tauri-zero",
+            "juv4uk/hsChess",
+            "juv4uk/alpha-zero-general",
+            "juv4uk/lc0"
+          ]
+        }
+      ],
+      "ratified_resident": false,
+      "selected_in_d10": false,
+      "physical_t5_authorized": false
+    },
+    {
+      "semantic_name": "is-mate?",
+      "provisional_coordinate": "1100000001",
+      "coordinate_basis": "NONCANONICAL-NAME-QUEUE-RESERVATION",
+      "status": "NAME-ONLY-NO-SEMANTIC-EVIDENCE",
+      "source_priority": "INTEREST-ONLY-NO-SEMANTIC-EVIDENCE",
+      "provenance": [
+        {
+          "kind": "owner-interest",
+          "family": "chess",
+          "donor_repos": [
+            "juv4uk/chess",
+            "juv4uk/lisp-chess-engine",
+            "juv4uk/simple-lisp-chess-engine",
+            "juv4uk/chess-lisp-zero",
+            "juv4uk/chess-tauri-zero",
+            "juv4uk/hsChess",
+            "juv4uk/alpha-zero-general",
+            "juv4uk/lc0"
+          ]
+        }
+      ],
+      "ratified_resident": false,
+      "selected_in_d10": false,
+      "physical_t5_authorized": false
+    },
+    {
+      "semantic_name": "is-stalemate?",
+      "provisional_coordinate": "1100000010",
+      "coordinate_basis": "NONCANONICAL-NAME-QUEUE-RESERVATION",
+      "status": "NAME-ONLY-NO-SEMANTIC-EVIDENCE",
+      "source_priority": "INTEREST-ONLY-NO-SEMANTIC-EVIDENCE",
+      "provenance": [
+        {
+          "kind": "owner-interest",
+          "family": "chess",
+          "donor_repos": [
+            "juv4uk/chess",
+            "juv4uk/lisp-chess-engine",
+            "juv4uk/simple-lisp-chess-engine",
+            "juv4uk/chess-lisp-zero",
+            "juv4uk/chess-tauri-zero",
+            "juv4uk/hsChess",
+            "juv4uk/alpha-zero-general",
+            "juv4uk/lc0"
+          ]
+        }
+      ],
+      "ratified_resident": false,
+      "selected_in_d10": false,
+      "physical_t5_authorized": false
+    },
+    {
+      "semantic_name": "perft",
+      "provisional_coordinate": "1100000011",
+      "coordinate_basis": "NONCANONICAL-NAME-QUEUE-RESERVATION",
+      "status": "NAME-ONLY-NO-SEMANTIC-EVIDENCE",
+      "source_priority": "INTEREST-ONLY-NO-SEMANTIC-EVIDENCE",
+      "provenance": [
+        {
+          "kind": "owner-interest",
+          "family": "chess",
+          "donor_repos": [
+            "juv4uk/chess",
+            "juv4uk/lisp-chess-engine",
+            "juv4uk/simple-lisp-chess-engine",
+            "juv4uk/chess-lisp-zero",
+            "juv4uk/chess-tauri-zero",
+            "juv4uk/hsChess",
+            "juv4uk/alpha-zero-general",
+            "juv4uk/lc0"
+          ]
+        }
+      ],
+      "ratified_resident": false,
+      "selected_in_d10": false,
+      "physical_t5_authorized": false
+    },
+    {
+      "semantic_name": "evaluate-position",
+      "provisional_coordinate": "1100000100",
+      "coordinate_basis": "NONCANONICAL-NAME-QUEUE-RESERVATION",
+      "status": "NAME-ONLY-NO-SEMANTIC-EVIDENCE",
+      "source_priority": "INTEREST-ONLY-NO-SEMANTIC-EVIDENCE",
+      "provenance": [
+        {
+          "kind": "owner-interest",
+          "family": "chess",
+          "donor_repos": [
+            "juv4uk/chess",
+            "juv4uk/lisp-chess-engine",
+            "juv4uk/simple-lisp-chess-engine",
+            "juv4uk/chess-lisp-zero",
+            "juv4uk/chess-tauri-zero",
+            "juv4uk/hsChess",
+            "juv4uk/alpha-zero-general",
+            "juv4uk/lc0"
+          ]
+        }
+      ],
+      "ratified_resident": false,
+      "selected_in_d10": false,
+      "physical_t5_authorized": false
+    },
+    {
+      "semantic_name": "alpha-beta-search",
+      "provisional_coordinate": "1100000101",
+      "coordinate_basis": "NONCANONICAL-NAME-QUEUE-RESERVATION",
+      "status": "NAME-ONLY-NO-SEMANTIC-EVIDENCE",
+      "source_priority": "INTEREST-ONLY-NO-SEMANTIC-EVIDENCE",
+      "provenance": [
+        {
+          "kind": "owner-interest",
+          "family": "chess",
+          "donor_repos": [
+            "juv4uk/chess",
+            "juv4uk/lisp-chess-engine",
+            "juv4uk/simple-lisp-chess-engine",
+            "juv4uk/chess-lisp-zero",
+            "juv4uk/chess-tauri-zero",
+            "juv4uk/hsChess",
+            "juv4uk/alpha-zero-general",
+            "juv4uk/lc0"
+          ]
+        }
+      ],
+      "ratified_resident": false,
+      "selected_in_d10": false,
+      "physical_t5_authorized": false
+    },
+    {
+      "semantic_name": "mcts-select",
+      "provisional_coordinate": "1100000110",
+      "coordinate_basis": "NONCANONICAL-NAME-QUEUE-RESERVATION",
+      "status": "NAME-ONLY-NO-SEMANTIC-EVIDENCE",
+      "source_priority": "INTEREST-ONLY-NO-SEMANTIC-EVIDENCE",
+      "provenance": [
+        {
+          "kind": "owner-interest",
+          "family": "chess",
+          "donor_repos": [
+            "juv4uk/chess",
+            "juv4uk/lisp-chess-engine",
+            "juv4uk/simple-lisp-chess-engine",
+            "juv4uk/chess-lisp-zero",
+            "juv4uk/chess-tauri-zero",
+            "juv4uk/hsChess",
+            "juv4uk/alpha-zero-general",
+            "juv4uk/lc0"
+          ]
+        }
+      ],
+      "ratified_resident": false,
+      "selected_in_d10": false,
+      "physical_t5_authorized": false
+    },
+    {
+      "semantic_name": "mcts-backpropagate",
+      "provisional_coordinate": "1100000111",
+      "coordinate_basis": "NONCANONICAL-NAME-QUEUE-RESERVATION",
+      "status": "NAME-ONLY-NO-SEMANTIC-EVIDENCE",
+      "source_priority": "INTEREST-ONLY-NO-SEMANTIC-EVIDENCE",
+      "provenance": [
+        {
+          "kind": "owner-interest",
+          "family": "chess",
+          "donor_repos": [
+            "juv4uk/chess",
+            "juv4uk/lisp-chess-engine",
+            "juv4uk/simple-lisp-chess-engine",
+            "juv4uk/chess-lisp-zero",
+            "juv4uk/chess-tauri-zero",
+            "juv4uk/hsChess",
+            "juv4uk/alpha-zero-general",
+            "juv4uk/lc0"
+          ]
+        }
+      ],
+      "ratified_resident": false,
+      "selected_in_d10": false,
+      "physical_t5_authorized": false
+    },
+    {
+      "semantic_name": "uci-parse",
+      "provisional_coordinate": "1100001000",
+      "coordinate_basis": "NONCANONICAL-NAME-QUEUE-RESERVATION",
+      "status": "NAME-ONLY-NO-SEMANTIC-EVIDENCE",
+      "source_priority": "INTEREST-ONLY-NO-SEMANTIC-EVIDENCE",
+      "provenance": [
+        {
+          "kind": "owner-interest",
+          "family": "chess",
+          "donor_repos": [
+            "juv4uk/chess",
+            "juv4uk/lisp-chess-engine",
+            "juv4uk/simple-lisp-chess-engine",
+            "juv4uk/chess-lisp-zero",
+            "juv4uk/chess-tauri-zero",
+            "juv4uk/hsChess",
+            "juv4uk/alpha-zero-general",
+            "juv4uk/lc0"
+          ]
+        }
+      ],
+      "ratified_resident": false,
+      "selected_in_d10": false,
+      "physical_t5_authorized": false
+    },
+    {
+      "semantic_name": "pgn-parse",
+      "provisional_coordinate": "1100001001",
+      "coordinate_basis": "NONCANONICAL-NAME-QUEUE-RESERVATION",
+      "status": "NAME-ONLY-NO-SEMANTIC-EVIDENCE",
+      "source_priority": "INTEREST-ONLY-NO-SEMANTIC-EVIDENCE",
+      "provenance": [
+        {
+          "kind": "owner-interest",
+          "family": "chess",
+          "donor_repos": [
+            "juv4uk/chess",
+            "juv4uk/lisp-chess-engine",
+            "juv4uk/simple-lisp-chess-engine",
+            "juv4uk/chess-lisp-zero",
+            "juv4uk/chess-tauri-zero",
+            "juv4uk/hsChess",
+            "juv4uk/alpha-zero-general",
+            "juv4uk/lc0"
+          ]
+        }
+      ],
+      "ratified_resident": false,
+      "selected_in_d10": false,
+      "physical_t5_authorized": false
+    },
+    {
+      "semantic_name": "julian-date",
+      "provisional_coordinate": "1100001010",
+      "coordinate_basis": "NONCANONICAL-NAME-QUEUE-RESERVATION",
+      "status": "NAME-ONLY-NO-SEMANTIC-EVIDENCE",
+      "source_priority": "INTEREST-ONLY-NO-SEMANTIC-EVIDENCE",
+      "provenance": [
+        {
+          "kind": "owner-interest",
+          "family": "astronomy",
+          "donor_repos": [
+            "juv4uk/vsop2013",
+            "juv4uk/VedicAstro"
+          ]
+        }
+      ],
+      "ratified_resident": false,
+      "selected_in_d10": false,
+      "physical_t5_authorized": false
+    },
+    {
+      "semantic_name": "heliocentric-position",
+      "provisional_coordinate": "1100001011",
+      "coordinate_basis": "NONCANONICAL-NAME-QUEUE-RESERVATION",
+      "status": "NAME-ONLY-NO-SEMANTIC-EVIDENCE",
+      "source_priority": "INTEREST-ONLY-NO-SEMANTIC-EVIDENCE",
+      "provenance": [
+        {
+          "kind": "owner-interest",
+          "family": "astronomy",
+          "donor_repos": [
+            "juv4uk/vsop2013",
+            "juv4uk/VedicAstro"
+          ]
+        }
+      ],
+      "ratified_resident": false,
+      "selected_in_d10": false,
+      "physical_t5_authorized": false
+    },
+    {
+      "semantic_name": "orbital-elements",
+      "provisional_coordinate": "1100001100",
+      "coordinate_basis": "NONCANONICAL-NAME-QUEUE-RESERVATION",
+      "status": "NAME-ONLY-NO-SEMANTIC-EVIDENCE",
+      "source_priority": "INTEREST-ONLY-NO-SEMANTIC-EVIDENCE",
+      "provenance": [
+        {
+          "kind": "owner-interest",
+          "family": "astronomy",
+          "donor_repos": [
+            "juv4uk/vsop2013",
+            "juv4uk/VedicAstro"
+          ]
+        }
+      ],
+      "ratified_resident": false,
+      "selected_in_d10": false,
+      "physical_t5_authorized": false
+    },
+    {
+      "semantic_name": "ecliptic-to-equatorial",
+      "provisional_coordinate": "1100001101",
+      "coordinate_basis": "NONCANONICAL-NAME-QUEUE-RESERVATION",
+      "status": "NAME-ONLY-NO-SEMANTIC-EVIDENCE",
+      "source_priority": "INTEREST-ONLY-NO-SEMANTIC-EVIDENCE",
+      "provenance": [
+        {
+          "kind": "owner-interest",
+          "family": "astronomy",
+          "donor_repos": [
+            "juv4uk/vsop2013",
+            "juv4uk/VedicAstro"
+          ]
+        }
+      ],
+      "ratified_resident": false,
+      "selected_in_d10": false,
+      "physical_t5_authorized": false
+    },
+    {
+      "semantic_name": "rise-set",
+      "provisional_coordinate": "1100001110",
+      "coordinate_basis": "NONCANONICAL-NAME-QUEUE-RESERVATION",
+      "status": "NAME-ONLY-NO-SEMANTIC-EVIDENCE",
+      "source_priority": "INTEREST-ONLY-NO-SEMANTIC-EVIDENCE",
+      "provenance": [
+        {
+          "kind": "owner-interest",
+          "family": "astronomy",
+          "donor_repos": [
+            "juv4uk/vsop2013",
+            "juv4uk/VedicAstro"
+          ]
+        }
+      ],
+      "ratified_resident": false,
+      "selected_in_d10": false,
+      "physical_t5_authorized": false
+    },
+    {
+      "semantic_name": "planet-longitude",
+      "provisional_coordinate": "1100001111",
+      "coordinate_basis": "NONCANONICAL-NAME-QUEUE-RESERVATION",
+      "status": "NAME-ONLY-NO-SEMANTIC-EVIDENCE",
+      "source_priority": "INTEREST-ONLY-NO-SEMANTIC-EVIDENCE",
+      "provenance": [
+        {
+          "kind": "owner-interest",
+          "family": "astronomy",
+          "donor_repos": [
+            "juv4uk/vsop2013",
+            "juv4uk/VedicAstro"
+          ]
+        }
+      ],
+      "ratified_resident": false,
+      "selected_in_d10": false,
+      "physical_t5_authorized": false
+    },
+    {
+      "semantic_name": "ayanamsa",
+      "provisional_coordinate": "1100010000",
+      "coordinate_basis": "NONCANONICAL-NAME-QUEUE-RESERVATION",
+      "status": "NAME-ONLY-NO-SEMANTIC-EVIDENCE",
+      "source_priority": "INTEREST-ONLY-NO-SEMANTIC-EVIDENCE",
+      "provenance": [
+        {
+          "kind": "owner-interest",
+          "family": "astronomy",
+          "donor_repos": [
+            "juv4uk/vsop2013",
+            "juv4uk/VedicAstro"
+          ]
+        }
+      ],
+      "ratified_resident": false,
+      "selected_in_d10": false,
+      "physical_t5_authorized": false
+    },
+    {
+      "semantic_name": "nakshatra-of",
+      "provisional_coordinate": "1100010001",
+      "coordinate_basis": "NONCANONICAL-NAME-QUEUE-RESERVATION",
+      "status": "NAME-ONLY-NO-SEMANTIC-EVIDENCE",
+      "source_priority": "INTEREST-ONLY-NO-SEMANTIC-EVIDENCE",
+      "provenance": [
+        {
+          "kind": "owner-interest",
+          "family": "astronomy",
+          "donor_repos": [
+            "juv4uk/vsop2013",
+            "juv4uk/VedicAstro"
+          ]
+        }
+      ],
+      "ratified_resident": false,
+      "selected_in_d10": false,
+      "physical_t5_authorized": false
+    },
+    {
+      "semantic_name": "tithi-of",
+      "provisional_coordinate": "1100010010",
+      "coordinate_basis": "NONCANONICAL-NAME-QUEUE-RESERVATION",
+      "status": "NAME-ONLY-NO-SEMANTIC-EVIDENCE",
+      "source_priority": "INTEREST-ONLY-NO-SEMANTIC-EVIDENCE",
+      "provenance": [
+        {
+          "kind": "owner-interest",
+          "family": "astronomy",
+          "donor_repos": [
+            "juv4uk/vsop2013",
+            "juv4uk/VedicAstro"
+          ]
+        }
+      ],
+      "ratified_resident": false,
+      "selected_in_d10": false,
+      "physical_t5_authorized": false
+    },
+    {
+      "semantic_name": "aspect-angle",
+      "provisional_coordinate": "1100010011",
+      "coordinate_basis": "NONCANONICAL-NAME-QUEUE-RESERVATION",
+      "status": "NAME-ONLY-NO-SEMANTIC-EVIDENCE",
+      "source_priority": "INTEREST-ONLY-NO-SEMANTIC-EVIDENCE",
+      "provenance": [
+        {
+          "kind": "owner-interest",
+          "family": "astronomy",
+          "donor_repos": [
+            "juv4uk/vsop2013",
+            "juv4uk/VedicAstro"
+          ]
+        }
+      ],
+      "ratified_resident": false,
+      "selected_in_d10": false,
+      "physical_t5_authorized": false
+    },
+    {
+      "semantic_name": "pratyahara-members",
+      "provisional_coordinate": "1100010100",
+      "coordinate_basis": "NONCANONICAL-NAME-QUEUE-RESERVATION",
+      "status": "NAME-ONLY-NO-SEMANTIC-EVIDENCE",
+      "source_priority": "INTEREST-ONLY-NO-SEMANTIC-EVIDENCE",
+      "provenance": [
+        {
+          "kind": "owner-interest",
+          "family": "sanskrit",
+          "donor_repos": [
+            "juv4uk/shiva-sutras",
+            "juv4uk/vidyut",
+            "juv4uk/spanda",
+            "juv4uk/sanskritworld_texts",
+            "juv4uk/panca-vac"
+          ]
+        }
+      ],
+      "ratified_resident": false,
+      "selected_in_d10": false,
+      "physical_t5_authorized": false
+    },
+    {
+      "semantic_name": "guna-of",
+      "provisional_coordinate": "1100010101",
+      "coordinate_basis": "NONCANONICAL-NAME-QUEUE-RESERVATION",
+      "status": "NAME-ONLY-NO-SEMANTIC-EVIDENCE",
+      "source_priority": "INTEREST-ONLY-NO-SEMANTIC-EVIDENCE",
+      "provenance": [
+        {
+          "kind": "owner-interest",
+          "family": "sanskrit",
+          "donor_repos": [
+            "juv4uk/shiva-sutras",
+            "juv4uk/vidyut",
+            "juv4uk/spanda",
+            "juv4uk/sanskritworld_texts",
+            "juv4uk/panca-vac"
+          ]
+        }
+      ],
+      "ratified_resident": false,
+      "selected_in_d10": false,
+      "physical_t5_authorized": false
+    },
+    {
+      "semantic_name": "vrddhi-of",
+      "provisional_coordinate": "1100010110",
+      "coordinate_basis": "NONCANONICAL-NAME-QUEUE-RESERVATION",
+      "status": "NAME-ONLY-NO-SEMANTIC-EVIDENCE",
+      "source_priority": "INTEREST-ONLY-NO-SEMANTIC-EVIDENCE",
+      "provenance": [
+        {
+          "kind": "owner-interest",
+          "family": "sanskrit",
+          "donor_repos": [
+            "juv4uk/shiva-sutras",
+            "juv4uk/vidyut",
+            "juv4uk/spanda",
+            "juv4uk/sanskritworld_texts",
+            "juv4uk/panca-vac"
+          ]
+        }
+      ],
+      "ratified_resident": false,
+      "selected_in_d10": false,
+      "physical_t5_authorized": false
+    },
+    {
+      "semantic_name": "derive-lakara",
+      "provisional_coordinate": "1100010111",
+      "coordinate_basis": "NONCANONICAL-NAME-QUEUE-RESERVATION",
+      "status": "NAME-ONLY-NO-SEMANTIC-EVIDENCE",
+      "source_priority": "INTEREST-ONLY-NO-SEMANTIC-EVIDENCE",
+      "provenance": [
+        {
+          "kind": "owner-interest",
+          "family": "sanskrit",
+          "donor_repos": [
+            "juv4uk/shiva-sutras",
+            "juv4uk/vidyut",
+            "juv4uk/spanda",
+            "juv4uk/sanskritworld_texts",
+            "juv4uk/panca-vac"
+          ]
+        }
+      ],
+      "ratified_resident": false,
+      "selected_in_d10": false,
+      "physical_t5_authorized": false
+    },
+    {
+      "semantic_name": "tokenize-uk",
+      "provisional_coordinate": "1100011000",
+      "coordinate_basis": "NONCANONICAL-NAME-QUEUE-RESERVATION",
+      "status": "NAME-ONLY-NO-SEMANTIC-EVIDENCE",
+      "source_priority": "INTEREST-ONLY-NO-SEMANTIC-EVIDENCE",
+      "provenance": [
+        {
+          "kind": "owner-interest",
+          "family": "ukrainian-nlp",
+          "donor_repos": [
+            "juv4uk/dict_uk",
+            "juv4uk/nlp_uk",
+            "juv4uk/latynka",
+            "juv4uk/pravda",
+            "juv4uk/word2vec",
+            "juv4uk/Ucuddle-Search-Engine"
+          ]
+        }
+      ],
+      "ratified_resident": false,
+      "selected_in_d10": false,
+      "physical_t5_authorized": false
+    },
+    {
+      "semantic_name": "lemmatize-uk",
+      "provisional_coordinate": "1100011001",
+      "coordinate_basis": "NONCANONICAL-NAME-QUEUE-RESERVATION",
+      "status": "NAME-ONLY-NO-SEMANTIC-EVIDENCE",
+      "source_priority": "INTEREST-ONLY-NO-SEMANTIC-EVIDENCE",
+      "provenance": [
+        {
+          "kind": "owner-interest",
+          "family": "ukrainian-nlp",
+          "donor_repos": [
+            "juv4uk/dict_uk",
+            "juv4uk/nlp_uk",
+            "juv4uk/latynka",
+            "juv4uk/pravda",
+            "juv4uk/word2vec",
+            "juv4uk/Ucuddle-Search-Engine"
+          ]
+        }
+      ],
+      "ratified_resident": false,
+      "selected_in_d10": false,
+      "physical_t5_authorized": false
+    },
+    {
+      "semantic_name": "translit-latynka",
+      "provisional_coordinate": "1100011010",
+      "coordinate_basis": "NONCANONICAL-NAME-QUEUE-RESERVATION",
+      "status": "NAME-ONLY-NO-SEMANTIC-EVIDENCE",
+      "source_priority": "INTEREST-ONLY-NO-SEMANTIC-EVIDENCE",
+      "provenance": [
+        {
+          "kind": "owner-interest",
+          "family": "ukrainian-nlp",
+          "donor_repos": [
+            "juv4uk/dict_uk",
+            "juv4uk/nlp_uk",
+            "juv4uk/latynka",
+            "juv4uk/pravda",
+            "juv4uk/word2vec",
+            "juv4uk/Ucuddle-Search-Engine"
+          ]
+        }
+      ],
+      "ratified_resident": false,
+      "selected_in_d10": false,
+      "physical_t5_authorized": false
+    },
+    {
+      "semantic_name": "detranslit-latynka",
+      "provisional_coordinate": "1100011011",
+      "coordinate_basis": "NONCANONICAL-NAME-QUEUE-RESERVATION",
+      "status": "NAME-ONLY-NO-SEMANTIC-EVIDENCE",
+      "source_priority": "INTEREST-ONLY-NO-SEMANTIC-EVIDENCE",
+      "provenance": [
+        {
+          "kind": "owner-interest",
+          "family": "ukrainian-nlp",
+          "donor_repos": [
+            "juv4uk/dict_uk",
+            "juv4uk/nlp_uk",
+            "juv4uk/latynka",
+            "juv4uk/pravda",
+            "juv4uk/word2vec",
+            "juv4uk/Ucuddle-Search-Engine"
+          ]
+        }
+      ],
+      "ratified_resident": false,
+      "selected_in_d10": false,
+      "physical_t5_authorized": false
+    },
+    {
+      "semantic_name": "stem-uk",
+      "provisional_coordinate": "1100011100",
+      "coordinate_basis": "NONCANONICAL-NAME-QUEUE-RESERVATION",
+      "status": "NAME-ONLY-NO-SEMANTIC-EVIDENCE",
+      "source_priority": "INTEREST-ONLY-NO-SEMANTIC-EVIDENCE",
+      "provenance": [
+        {
+          "kind": "owner-interest",
+          "family": "ukrainian-nlp",
+          "donor_repos": [
+            "juv4uk/dict_uk",
+            "juv4uk/nlp_uk",
+            "juv4uk/latynka",
+            "juv4uk/pravda",
+            "juv4uk/word2vec",
+            "juv4uk/Ucuddle-Search-Engine"
+          ]
+        }
+      ],
+      "ratified_resident": false,
+      "selected_in_d10": false,
+      "physical_t5_authorized": false
+    },
+    {
+      "semantic_name": "word-embedding",
+      "provisional_coordinate": "1100011101",
+      "coordinate_basis": "NONCANONICAL-NAME-QUEUE-RESERVATION",
+      "status": "NAME-ONLY-NO-SEMANTIC-EVIDENCE",
+      "source_priority": "INTEREST-ONLY-NO-SEMANTIC-EVIDENCE",
+      "provenance": [
+        {
+          "kind": "owner-interest",
+          "family": "ukrainian-nlp",
+          "donor_repos": [
+            "juv4uk/dict_uk",
+            "juv4uk/nlp_uk",
+            "juv4uk/latynka",
+            "juv4uk/pravda",
+            "juv4uk/word2vec",
+            "juv4uk/Ucuddle-Search-Engine"
+          ]
+        }
+      ],
+      "ratified_resident": false,
+      "selected_in_d10": false,
+      "physical_t5_authorized": false
+    },
+    {
+      "semantic_name": "add-edge",
+      "provisional_coordinate": "1100011110",
+      "coordinate_basis": "NONCANONICAL-NAME-QUEUE-RESERVATION",
+      "status": "NAME-ONLY-NO-SEMANTIC-EVIDENCE",
+      "source_priority": "INTEREST-ONLY-NO-SEMANTIC-EVIDENCE",
+      "provenance": [
+        {
+          "kind": "owner-interest",
+          "family": "graph",
+          "donor_repos": [
+            "juv4uk/basalt",
+            "juv4uk/graph-heavy-basalt",
+            "juv4uk/knowledge-graph-basalt"
+          ]
+        }
+      ],
+      "ratified_resident": false,
+      "selected_in_d10": false,
+      "physical_t5_authorized": false
+    },
+    {
+      "semantic_name": "neighbors-of",
+      "provisional_coordinate": "1100011111",
+      "coordinate_basis": "NONCANONICAL-NAME-QUEUE-RESERVATION",
+      "status": "NAME-ONLY-NO-SEMANTIC-EVIDENCE",
+      "source_priority": "INTEREST-ONLY-NO-SEMANTIC-EVIDENCE",
+      "provenance": [
+        {
+          "kind": "owner-interest",
+          "family": "graph",
+          "donor_repos": [
+            "juv4uk/basalt",
+            "juv4uk/graph-heavy-basalt",
+            "juv4uk/knowledge-graph-basalt"
+          ]
+        }
+      ],
+      "ratified_resident": false,
+      "selected_in_d10": false,
+      "physical_t5_authorized": false
+    },
+    {
+      "semantic_name": "shortest-path",
+      "provisional_coordinate": "1100100000",
+      "coordinate_basis": "NONCANONICAL-NAME-QUEUE-RESERVATION",
+      "status": "NAME-ONLY-NO-SEMANTIC-EVIDENCE",
+      "source_priority": "INTEREST-ONLY-NO-SEMANTIC-EVIDENCE",
+      "provenance": [
+        {
+          "kind": "owner-interest",
+          "family": "graph",
+          "donor_repos": [
+            "juv4uk/basalt",
+            "juv4uk/graph-heavy-basalt",
+            "juv4uk/knowledge-graph-basalt"
+          ]
+        }
+      ],
+      "ratified_resident": false,
+      "selected_in_d10": false,
+      "physical_t5_authorized": false
+    },
+    {
+      "semantic_name": "topological-sort",
+      "provisional_coordinate": "1100100001",
+      "coordinate_basis": "NONCANONICAL-NAME-QUEUE-RESERVATION",
+      "status": "NAME-ONLY-NO-SEMANTIC-EVIDENCE",
+      "source_priority": "INTEREST-ONLY-NO-SEMANTIC-EVIDENCE",
+      "provenance": [
+        {
+          "kind": "owner-interest",
+          "family": "graph",
+          "donor_repos": [
+            "juv4uk/basalt",
+            "juv4uk/graph-heavy-basalt",
+            "juv4uk/knowledge-graph-basalt"
+          ]
+        }
+      ],
+      "ratified_resident": false,
+      "selected_in_d10": false,
+      "physical_t5_authorized": false
+    },
+    {
+      "semantic_name": "connected-components?",
+      "provisional_coordinate": "1100100010",
+      "coordinate_basis": "NONCANONICAL-NAME-QUEUE-RESERVATION",
+      "status": "NAME-ONLY-NO-SEMANTIC-EVIDENCE",
+      "source_priority": "INTEREST-ONLY-NO-SEMANTIC-EVIDENCE",
+      "provenance": [
+        {
+          "kind": "owner-interest",
+          "family": "graph",
+          "donor_repos": [
+            "juv4uk/basalt",
+            "juv4uk/graph-heavy-basalt",
+            "juv4uk/knowledge-graph-basalt"
+          ]
+        }
+      ],
+      "ratified_resident": false,
+      "selected_in_d10": false,
+      "physical_t5_authorized": false
+    },
+    {
+      "semantic_name": "subgraph-of",
+      "provisional_coordinate": "1100100011",
+      "coordinate_basis": "NONCANONICAL-NAME-QUEUE-RESERVATION",
+      "status": "NAME-ONLY-NO-SEMANTIC-EVIDENCE",
+      "source_priority": "INTEREST-ONLY-NO-SEMANTIC-EVIDENCE",
+      "provenance": [
+        {
+          "kind": "owner-interest",
+          "family": "graph",
+          "donor_repos": [
+            "juv4uk/basalt",
+            "juv4uk/graph-heavy-basalt",
+            "juv4uk/knowledge-graph-basalt"
+          ]
+        }
+      ],
+      "ratified_resident": false,
+      "selected_in_d10": false,
+      "physical_t5_authorized": false
+    },
+    {
+      "semantic_name": "pendulum-step",
+      "provisional_coordinate": "1100100100",
+      "coordinate_basis": "NONCANONICAL-NAME-QUEUE-RESERVATION",
+      "status": "NAME-ONLY-NO-SEMANTIC-EVIDENCE",
+      "source_priority": "INTEREST-ONLY-NO-SEMANTIC-EVIDENCE",
+      "provenance": [
+        {
+          "kind": "owner-interest",
+          "family": "physics",
+          "donor_repos": [
+            "juv4uk/esp32-pendulum"
+          ]
+        }
+      ],
+      "ratified_resident": false,
+      "selected_in_d10": false,
+      "physical_t5_authorized": false
+    },
+    {
+      "semantic_name": "pendulum-period",
+      "provisional_coordinate": "1100100101",
+      "coordinate_basis": "NONCANONICAL-NAME-QUEUE-RESERVATION",
+      "status": "NAME-ONLY-NO-SEMANTIC-EVIDENCE",
+      "source_priority": "INTEREST-ONLY-NO-SEMANTIC-EVIDENCE",
+      "provenance": [
+        {
+          "kind": "owner-interest",
+          "family": "physics",
+          "donor_repos": [
+            "juv4uk/esp32-pendulum"
+          ]
+        }
+      ],
+      "ratified_resident": false,
+      "selected_in_d10": false,
+      "physical_t5_authorized": false
+    },
+    {
+      "semantic_name": "energy-of",
+      "provisional_coordinate": "1100100110",
+      "coordinate_basis": "NONCANONICAL-NAME-QUEUE-RESERVATION",
+      "status": "NAME-ONLY-NO-SEMANTIC-EVIDENCE",
+      "source_priority": "INTEREST-ONLY-NO-SEMANTIC-EVIDENCE",
+      "provenance": [
+        {
+          "kind": "owner-interest",
+          "family": "physics",
+          "donor_repos": [
+            "juv4uk/esp32-pendulum"
+          ]
+        }
+      ],
+      "ratified_resident": false,
+      "selected_in_d10": false,
+      "physical_t5_authorized": false
+    },
+    {
+      "semantic_name": "memory-map-of",
+      "provisional_coordinate": "1100100111",
+      "coordinate_basis": "NONCANONICAL-NAME-QUEUE-RESERVATION",
+      "status": "NAME-ONLY-NO-SEMANTIC-EVIDENCE",
+      "source_priority": "INTEREST-ONLY-NO-SEMANTIC-EVIDENCE",
+      "provenance": [
+        {
+          "kind": "owner-interest",
+          "family": "retro-os",
+          "donor_repos": [
+            "juv4uk/coreboot",
+            "juv4uk/minix",
+            "juv4uk/me_cleaner",
+            "juv4uk/fpga-lisp"
+          ]
+        }
+      ],
+      "ratified_resident": false,
+      "selected_in_d10": false,
+      "physical_t5_authorized": false
+    },
+    {
+      "semantic_name": "io-port-read",
+      "provisional_coordinate": "1100101000",
+      "coordinate_basis": "NONCANONICAL-NAME-QUEUE-RESERVATION",
+      "status": "NAME-ONLY-NO-SEMANTIC-EVIDENCE",
+      "source_priority": "INTEREST-ONLY-NO-SEMANTIC-EVIDENCE",
+      "provenance": [
+        {
+          "kind": "owner-interest",
+          "family": "retro-os",
+          "donor_repos": [
+            "juv4uk/coreboot",
+            "juv4uk/minix",
+            "juv4uk/me_cleaner",
+            "juv4uk/fpga-lisp"
+          ]
+        }
+      ],
+      "ratified_resident": false,
+      "selected_in_d10": false,
+      "physical_t5_authorized": false
+    },
+    {
+      "semantic_name": "io-port-write",
+      "provisional_coordinate": "1100101001",
+      "coordinate_basis": "NONCANONICAL-NAME-QUEUE-RESERVATION",
+      "status": "NAME-ONLY-NO-SEMANTIC-EVIDENCE",
+      "source_priority": "INTEREST-ONLY-NO-SEMANTIC-EVIDENCE",
+      "provenance": [
+        {
+          "kind": "owner-interest",
+          "family": "retro-os",
+          "donor_repos": [
+            "juv4uk/coreboot",
+            "juv4uk/minix",
+            "juv4uk/me_cleaner",
+            "juv4uk/fpga-lisp"
+          ]
+        }
+      ],
+      "ratified_resident": false,
+      "selected_in_d10": false,
+      "physical_t5_authorized": false
+    },
+    {
+      "semantic_name": "device-descriptor",
+      "provisional_coordinate": "1100101010",
+      "coordinate_basis": "NONCANONICAL-NAME-QUEUE-RESERVATION",
+      "status": "NAME-ONLY-NO-SEMANTIC-EVIDENCE",
+      "source_priority": "INTEREST-ONLY-NO-SEMANTIC-EVIDENCE",
+      "provenance": [
+        {
+          "kind": "owner-interest",
+          "family": "retro-os",
+          "donor_repos": [
+            "juv4uk/coreboot",
+            "juv4uk/minix",
+            "juv4uk/me_cleaner",
+            "juv4uk/fpga-lisp"
+          ]
+        }
+      ],
+      "ratified_resident": false,
+      "selected_in_d10": false,
+      "physical_t5_authorized": false
+    }
+  ],
+  "lower_name_overlap_review": [
+    {
+      "semantic_name": "assert-fact!",
+      "status": "EXACT-NAME-OVERLAP-WITH-RATIFIED-LOWER-DOMAIN",
+      "lower_domain_matches": [
+        {
+          "domain": "D9",
+          "coordinate": "001101111"
+        }
+      ],
+      "source_priority": "PROPOSED-HAS-LAW-NOT-SELECTED",
+      "provenance": [
+        {
+          "kind": "pending-proposal",
+          "id": "D10P-0012",
+          "path": "knowledge/d10-proposal-ledger.tsv",
+          "source": "juv4uk/sens@3335d09015cb8c96d4e2ed96f8d1339b4eb4f984:lib/forward.lisp:62",
+          "dedup": "D1-D9@09d1d71c39d1484dfd005a5068dbb18b76f0f0d4=NO-MATCH;D10@73dd518469f972c55411e004b70b054ba8b3ec86=NO-MATCH",
+          "semantic_law": "Поведінка визначена джерелом forward.lisp:62 (assert-fact!)."
+        }
+      ],
+      "reason": "Not an independent D10 operation by name alone; requires behavioral identity adjudication before any new D10 address."
+    },
+    {
+      "semantic_name": "fire-rule",
+      "status": "EXACT-NAME-OVERLAP-WITH-RATIFIED-LOWER-DOMAIN",
+      "lower_domain_matches": [
+        {
+          "domain": "D9",
+          "coordinate": "101001000"
+        }
+      ],
+      "source_priority": "PROPOSED-HAS-LAW-NOT-SELECTED",
+      "provenance": [
+        {
+          "kind": "pending-proposal",
+          "id": "D10P-0013",
+          "path": "knowledge/d10-proposal-ledger.tsv",
+          "source": "juv4uk/sens@3335d09015cb8c96d4e2ed96f8d1339b4eb4f984:lib/forward.lisp:70",
+          "dedup": "D1-D9@09d1d71c39d1484dfd005a5068dbb18b76f0f0d4=NO-MATCH;D10@73dd518469f972c55411e004b70b054ba8b3ec86=NO-MATCH",
+          "semantic_law": "Поведінка визначена джерелом forward.lisp:70 (fire-rule)."
+        }
+      ],
+      "reason": "Not an independent D10 operation by name alone; requires behavioral identity adjudication before any new D10 address."
+    },
+    {
+      "semantic_name": "fire-rule-on-facts",
+      "status": "EXACT-NAME-OVERLAP-WITH-RATIFIED-LOWER-DOMAIN",
+      "lower_domain_matches": [
+        {
+          "domain": "D9",
+          "coordinate": "010110000"
+        }
+      ],
+      "source_priority": "PROPOSED-HAS-LAW-NOT-SELECTED",
+      "provenance": [
+        {
+          "kind": "pending-proposal",
+          "id": "D10P-0014",
+          "path": "knowledge/d10-proposal-ledger.tsv",
+          "source": "juv4uk/sens@3335d09015cb8c96d4e2ed96f8d1339b4eb4f984:lib/forward.lisp:107",
+          "dedup": "D1-D9@09d1d71c39d1484dfd005a5068dbb18b76f0f0d4=NO-MATCH;D10@73dd518469f972c55411e004b70b054ba8b3ec86=NO-MATCH",
+          "semantic_law": "Поведінка визначена джерелом forward.lisp:107 (fire-rule-on-facts)."
+        }
+      ],
+      "reason": "Not an independent D10 operation by name alone; requires behavioral identity adjudication before any new D10 address."
+    },
+    {
+      "semantic_name": "fire-rule-on-working-memory",
+      "status": "EXACT-NAME-OVERLAP-WITH-RATIFIED-LOWER-DOMAIN",
+      "lower_domain_matches": [
+        {
+          "domain": "D9",
+          "coordinate": "001011101"
+        }
+      ],
+      "source_priority": "PROPOSED-HAS-LAW-NOT-SELECTED",
+      "provenance": [
+        {
+          "kind": "pending-proposal",
+          "id": "D10P-0015",
+          "path": "knowledge/d10-proposal-ledger.tsv",
+          "source": "juv4uk/sens@3335d09015cb8c96d4e2ed96f8d1339b4eb4f984:lib/forward.lisp:124",
+          "dedup": "D1-D9@09d1d71c39d1484dfd005a5068dbb18b76f0f0d4=NO-MATCH;D10@73dd518469f972c55411e004b70b054ba8b3ec86=NO-MATCH",
+          "semantic_law": "Поведінка визначена джерелом forward.lisp:124 (fire-rule-on-working-memory)."
+        }
+      ],
+      "reason": "Not an independent D10 operation by name alone; requires behavioral identity adjudication before any new D10 address."
+    },
+    {
+      "semantic_name": "fire-rules-on-facts",
+      "status": "EXACT-NAME-OVERLAP-WITH-RATIFIED-LOWER-DOMAIN",
+      "lower_domain_matches": [
+        {
+          "domain": "D9",
+          "coordinate": "010101010"
+        }
+      ],
+      "source_priority": "PROPOSED-HAS-LAW-NOT-SELECTED",
+      "provenance": [
+        {
+          "kind": "pending-proposal",
+          "id": "D10P-0016",
+          "path": "knowledge/d10-proposal-ledger.tsv",
+          "source": "juv4uk/sens@3335d09015cb8c96d4e2ed96f8d1339b4eb4f984:lib/forward.lisp:146",
+          "dedup": "D1-D9@09d1d71c39d1484dfd005a5068dbb18b76f0f0d4=NO-MATCH;D10@73dd518469f972c55411e004b70b054ba8b3ec86=NO-MATCH",
+          "semantic_law": "Поведінка визначена джерелом forward.lisp:146 (fire-rules-on-facts)."
+        }
+      ],
+      "reason": "Not an independent D10 operation by name alone; requires behavioral identity adjudication before any new D10 address."
+    },
+    {
+      "semantic_name": "fire-rules-on-working-memory",
+      "status": "EXACT-NAME-OVERLAP-WITH-RATIFIED-LOWER-DOMAIN",
+      "lower_domain_matches": [
+        {
+          "domain": "D9",
+          "coordinate": "001001100"
+        }
+      ],
+      "source_priority": "PROPOSED-HAS-LAW-NOT-SELECTED",
+      "provenance": [
+        {
+          "kind": "pending-proposal",
+          "id": "D10P-0017",
+          "path": "knowledge/d10-proposal-ledger.tsv",
+          "source": "juv4uk/sens@3335d09015cb8c96d4e2ed96f8d1339b4eb4f984:lib/forward.lisp:154",
+          "dedup": "D1-D9@09d1d71c39d1484dfd005a5068dbb18b76f0f0d4=NO-MATCH;D10@73dd518469f972c55411e004b70b054ba8b3ec86=NO-MATCH",
+          "semantic_law": "Поведінка визначена джерелом forward.lisp:154 (fire-rules-on-working-memory)."
+        }
+      ],
+      "reason": "Not an independent D10 operation by name alone; requires behavioral identity adjudication before any new D10 address."
+    },
+    {
+      "semantic_name": "append-new",
+      "status": "EXACT-NAME-OVERLAP-WITH-RATIFIED-LOWER-DOMAIN",
+      "lower_domain_matches": [
+        {
+          "domain": "D9",
+          "coordinate": "001000101"
+        }
+      ],
+      "source_priority": "PROPOSED-HAS-LAW-NOT-SELECTED",
+      "provenance": [
+        {
+          "kind": "pending-proposal",
+          "id": "D10P-0018",
+          "path": "knowledge/d10-proposal-ledger.tsv",
+          "source": "juv4uk/sens@3335d09015cb8c96d4e2ed96f8d1339b4eb4f984:lib/forward.lisp:198",
+          "dedup": "D1-D9@09d1d71c39d1484dfd005a5068dbb18b76f0f0d4=NO-MATCH;D10@73dd518469f972c55411e004b70b054ba8b3ec86=NO-MATCH",
+          "semantic_law": "Поведінка визначена джерелом forward.lisp:198 (append-new)."
+        }
+      ],
+      "reason": "Not an independent D10 operation by name alone; requires behavioral identity adjudication before any new D10 address."
+    },
+    {
+      "semantic_name": "run",
+      "status": "EXACT-NAME-OVERLAP-WITH-RATIFIED-LOWER-DOMAIN",
+      "lower_domain_matches": [
+        {
+          "domain": "D9",
+          "coordinate": "010001011"
+        }
+      ],
+      "source_priority": "PROPOSED-HAS-LAW-NOT-SELECTED",
+      "provenance": [
+        {
+          "kind": "pending-proposal",
+          "id": "D10P-0019",
+          "path": "knowledge/d10-proposal-ledger.tsv",
+          "source": "juv4uk/sens@3335d09015cb8c96d4e2ed96f8d1339b4eb4f984:lib/forward.lisp:206",
+          "dedup": "D1-D9@09d1d71c39d1484dfd005a5068dbb18b76f0f0d4=NO-MATCH;D10@73dd518469f972c55411e004b70b054ba8b3ec86=NO-MATCH",
+          "semantic_law": "Поведінка визначена джерелом forward.lisp:206 (run)."
+        }
+      ],
+      "reason": "Not an independent D10 operation by name alone; requires behavioral identity adjudication before any new D10 address."
+    },
+    {
+      "semantic_name": "assert-facts!",
+      "status": "EXACT-NAME-OVERLAP-WITH-RATIFIED-LOWER-DOMAIN",
+      "lower_domain_matches": [
+        {
+          "domain": "D9",
+          "coordinate": "001111101"
+        }
+      ],
+      "source_priority": "PROPOSED-HAS-LAW-NOT-SELECTED",
+      "provenance": [
+        {
+          "kind": "pending-proposal",
+          "id": "D10P-0020",
+          "path": "knowledge/d10-proposal-ledger.tsv",
+          "source": "juv4uk/sens@3335d09015cb8c96d4e2ed96f8d1339b4eb4f984:lib/forward.lisp:213",
+          "dedup": "D1-D9@09d1d71c39d1484dfd005a5068dbb18b76f0f0d4=NO-MATCH;D10@73dd518469f972c55411e004b70b054ba8b3ec86=NO-MATCH",
+          "semantic_law": "Поведінка визначена джерелом forward.lisp:213 (assert-facts!)."
+        }
+      ],
+      "reason": "Not an independent D10 operation by name alone; requires behavioral identity adjudication before any new D10 address."
+    },
+    {
+      "semantic_name": "retract-fact",
+      "status": "EXACT-NAME-OVERLAP-WITH-RATIFIED-LOWER-DOMAIN",
+      "lower_domain_matches": [
+        {
+          "domain": "D9",
+          "coordinate": "001001000"
+        }
+      ],
+      "source_priority": "PROPOSED-HAS-LAW-NOT-SELECTED",
+      "provenance": [
+        {
+          "kind": "pending-proposal",
+          "id": "D10P-0021",
+          "path": "knowledge/d10-proposal-ledger.tsv",
+          "source": "juv4uk/sens@3335d09015cb8c96d4e2ed96f8d1339b4eb4f984:lib/forward.lisp:246",
+          "dedup": "D1-D9@09d1d71c39d1484dfd005a5068dbb18b76f0f0d4=NO-MATCH;D10@73dd518469f972c55411e004b70b054ba8b3ec86=NO-MATCH",
+          "semantic_law": "Поведінка визначена джерелом forward.lisp:246 (retract-fact)."
+        }
+      ],
+      "reason": "Not an independent D10 operation by name alone; requires behavioral identity adjudication before any new D10 address."
+    },
+    {
+      "semantic_name": "retract-fact!",
+      "status": "EXACT-NAME-OVERLAP-WITH-RATIFIED-LOWER-DOMAIN",
+      "lower_domain_matches": [
+        {
+          "domain": "D9",
+          "coordinate": "010011110"
+        }
+      ],
+      "source_priority": "PROPOSED-HAS-LAW-NOT-SELECTED",
+      "provenance": [
+        {
+          "kind": "pending-proposal",
+          "id": "D10P-0022",
+          "path": "knowledge/d10-proposal-ledger.tsv",
+          "source": "juv4uk/sens@3335d09015cb8c96d4e2ed96f8d1339b4eb4f984:lib/forward.lisp:254",
+          "dedup": "D1-D9@09d1d71c39d1484dfd005a5068dbb18b76f0f0d4=NO-MATCH;D10@73dd518469f972c55411e004b70b054ba8b3ec86=NO-MATCH",
+          "semantic_law": "Поведінка визначена джерелом forward.lisp:254 (retract-fact!)."
+        }
+      ],
+      "reason": "Not an independent D10 operation by name alone; requires behavioral identity adjudication before any new D10 address."
+    },
+    {
+      "semantic_name": "make-justified",
+      "status": "EXACT-NAME-OVERLAP-WITH-RATIFIED-LOWER-DOMAIN",
+      "lower_domain_matches": [
+        {
+          "domain": "D9",
+          "coordinate": "001111010"
+        }
+      ],
+      "source_priority": "PROPOSED-HAS-LAW-NOT-SELECTED",
+      "provenance": [
+        {
+          "kind": "pending-proposal",
+          "id": "D10P-0023",
+          "path": "knowledge/d10-proposal-ledger.tsv",
+          "source": "juv4uk/sens@3335d09015cb8c96d4e2ed96f8d1339b4eb4f984:lib/forward.lisp:316",
+          "dedup": "D1-D9@09d1d71c39d1484dfd005a5068dbb18b76f0f0d4=NO-MATCH;D10@73dd518469f972c55411e004b70b054ba8b3ec86=NO-MATCH",
+          "semantic_law": "Поведінка визначена джерелом forward.lisp:316 (make-justified)."
+        }
+      ],
+      "reason": "Not an independent D10 operation by name alone; requires behavioral identity adjudication before any new D10 address."
+    },
+    {
+      "semantic_name": "fact-of",
+      "status": "EXACT-NAME-OVERLAP-WITH-RATIFIED-LOWER-DOMAIN",
+      "lower_domain_matches": [
+        {
+          "domain": "D9",
+          "coordinate": "010101011"
+        }
+      ],
+      "source_priority": "PROPOSED-HAS-LAW-NOT-SELECTED",
+      "provenance": [
+        {
+          "kind": "pending-proposal",
+          "id": "D10P-0025",
+          "path": "knowledge/d10-proposal-ledger.tsv",
+          "source": "juv4uk/sens@3335d09015cb8c96d4e2ed96f8d1339b4eb4f984:lib/forward.lisp:320",
+          "dedup": "D1-D9@09d1d71c39d1484dfd005a5068dbb18b76f0f0d4=NO-MATCH;D10@73dd518469f972c55411e004b70b054ba8b3ec86=NO-MATCH",
+          "semantic_law": "Поведінка визначена джерелом forward.lisp:320 (fact-of)."
+        }
+      ],
+      "reason": "Not an independent D10 operation by name alone; requires behavioral identity adjudication before any new D10 address."
+    },
+    {
+      "semantic_name": "supports-of",
+      "status": "EXACT-NAME-OVERLAP-WITH-RATIFIED-LOWER-DOMAIN",
+      "lower_domain_matches": [
+        {
+          "domain": "D9",
+          "coordinate": "010001010"
+        }
+      ],
+      "source_priority": "PROPOSED-HAS-LAW-NOT-SELECTED",
+      "provenance": [
+        {
+          "kind": "pending-proposal",
+          "id": "D10P-0026",
+          "path": "knowledge/d10-proposal-ledger.tsv",
+          "source": "juv4uk/sens@3335d09015cb8c96d4e2ed96f8d1339b4eb4f984:lib/forward.lisp:321",
+          "dedup": "D1-D9@09d1d71c39d1484dfd005a5068dbb18b76f0f0d4=NO-MATCH;D10@73dd518469f972c55411e004b70b054ba8b3ec86=NO-MATCH",
+          "semantic_law": "Поведінка визначена джерелом forward.lisp:321 (supports-of)."
+        }
+      ],
+      "reason": "Not an independent D10 operation by name alone; requires behavioral identity adjudication before any new D10 address."
+    },
+    {
+      "semantic_name": "axiom",
+      "status": "EXACT-NAME-OVERLAP-WITH-RATIFIED-LOWER-DOMAIN",
+      "lower_domain_matches": [
+        {
+          "domain": "D9",
+          "coordinate": "001111011"
+        }
+      ],
+      "source_priority": "PROPOSED-HAS-LAW-NOT-SELECTED",
+      "provenance": [
+        {
+          "kind": "pending-proposal",
+          "id": "D10P-0027",
+          "path": "knowledge/d10-proposal-ledger.tsv",
+          "source": "juv4uk/sens@3335d09015cb8c96d4e2ed96f8d1339b4eb4f984:lib/forward.lisp:322",
+          "dedup": "D1-D9@09d1d71c39d1484dfd005a5068dbb18b76f0f0d4=NO-MATCH;D10@73dd518469f972c55411e004b70b054ba8b3ec86=NO-MATCH",
+          "semantic_law": "Поведінка визначена джерелом forward.lisp:322 (axiom)."
+        }
+      ],
+      "reason": "Not an independent D10 operation by name alone; requires behavioral identity adjudication before any new D10 address."
+    },
+    {
+      "semantic_name": "map-fact-of",
+      "status": "EXACT-NAME-OVERLAP-WITH-RATIFIED-LOWER-DOMAIN",
+      "lower_domain_matches": [
+        {
+          "domain": "D9",
+          "coordinate": "010011001"
+        }
+      ],
+      "source_priority": "PROPOSED-HAS-LAW-NOT-SELECTED",
+      "provenance": [
+        {
+          "kind": "pending-proposal",
+          "id": "D10P-0028",
+          "path": "knowledge/d10-proposal-ledger.tsv",
+          "source": "juv4uk/sens@3335d09015cb8c96d4e2ed96f8d1339b4eb4f984:lib/forward.lisp:324",
+          "dedup": "D1-D9@09d1d71c39d1484dfd005a5068dbb18b76f0f0d4=NO-MATCH;D10@73dd518469f972c55411e004b70b054ba8b3ec86=NO-MATCH",
+          "semantic_law": "Поведінка визначена джерелом forward.lisp:324 (map-fact-of)."
+        }
+      ],
+      "reason": "Not an independent D10 operation by name alone; requires behavioral identity adjudication before any new D10 address."
+    },
+    {
+      "semantic_name": "fire-rule-tms",
+      "status": "EXACT-NAME-OVERLAP-WITH-RATIFIED-LOWER-DOMAIN",
+      "lower_domain_matches": [
+        {
+          "domain": "D9",
+          "coordinate": "010011111"
+        }
+      ],
+      "source_priority": "PROPOSED-HAS-LAW-NOT-SELECTED",
+      "provenance": [
+        {
+          "kind": "pending-proposal",
+          "id": "D10P-0029",
+          "path": "knowledge/d10-proposal-ledger.tsv",
+          "source": "juv4uk/sens@3335d09015cb8c96d4e2ed96f8d1339b4eb4f984:lib/forward.lisp:333",
+          "dedup": "D1-D9@09d1d71c39d1484dfd005a5068dbb18b76f0f0d4=NO-MATCH;D10@73dd518469f972c55411e004b70b054ba8b3ec86=NO-MATCH",
+          "semantic_law": "Поведінка визначена джерелом forward.lisp:333 (fire-rule-tms)."
+        }
+      ],
+      "reason": "Not an independent D10 operation by name alone; requires behavioral identity adjudication before any new D10 address."
+    },
+    {
+      "semantic_name": "fire-rule-on-facts-tms",
+      "status": "EXACT-NAME-OVERLAP-WITH-RATIFIED-LOWER-DOMAIN",
+      "lower_domain_matches": [
+        {
+          "domain": "D9",
+          "coordinate": "010110101"
+        }
+      ],
+      "source_priority": "PROPOSED-HAS-LAW-NOT-SELECTED",
+      "provenance": [
+        {
+          "kind": "pending-proposal",
+          "id": "D10P-0030",
+          "path": "knowledge/d10-proposal-ledger.tsv",
+          "source": "juv4uk/sens@3335d09015cb8c96d4e2ed96f8d1339b4eb4f984:lib/forward.lisp:345",
+          "dedup": "D1-D9@09d1d71c39d1484dfd005a5068dbb18b76f0f0d4=NO-MATCH;D10@73dd518469f972c55411e004b70b054ba8b3ec86=NO-MATCH",
+          "semantic_law": "Поведінка визначена джерелом forward.lisp:345 (fire-rule-on-facts-tms)."
+        }
+      ],
+      "reason": "Not an independent D10 operation by name alone; requires behavioral identity adjudication before any new D10 address."
+    },
+    {
+      "semantic_name": "fire-rules-on-facts-tms",
+      "status": "EXACT-NAME-OVERLAP-WITH-RATIFIED-LOWER-DOMAIN",
+      "lower_domain_matches": [
+        {
+          "domain": "D9",
+          "coordinate": "101000010"
+        }
+      ],
+      "source_priority": "PROPOSED-HAS-LAW-NOT-SELECTED",
+      "provenance": [
+        {
+          "kind": "pending-proposal",
+          "id": "D10P-0031",
+          "path": "knowledge/d10-proposal-ledger.tsv",
+          "source": "juv4uk/sens@3335d09015cb8c96d4e2ed96f8d1339b4eb4f984:lib/forward.lisp:356",
+          "dedup": "D1-D9@09d1d71c39d1484dfd005a5068dbb18b76f0f0d4=NO-MATCH;D10@73dd518469f972c55411e004b70b054ba8b3ec86=NO-MATCH",
+          "semantic_law": "Поведінка визначена джерелом forward.lisp:356 (fire-rules-on-facts-tms)."
+        }
+      ],
+      "reason": "Not an independent D10 operation by name alone; requires behavioral identity adjudication before any new D10 address."
+    },
+    {
+      "semantic_name": "justified-member?",
+      "status": "EXACT-NAME-OVERLAP-WITH-RATIFIED-LOWER-DOMAIN",
+      "lower_domain_matches": [
+        {
+          "domain": "D9",
+          "coordinate": "010011101"
+        }
+      ],
+      "source_priority": "PROPOSED-HAS-LAW-NOT-SELECTED",
+      "provenance": [
+        {
+          "kind": "pending-proposal",
+          "id": "D10P-0032",
+          "path": "knowledge/d10-proposal-ledger.tsv",
+          "source": "juv4uk/sens@3335d09015cb8c96d4e2ed96f8d1339b4eb4f984:lib/forward.lisp:364",
+          "dedup": "D1-D9@09d1d71c39d1484dfd005a5068dbb18b76f0f0d4=NO-MATCH;D10@73dd518469f972c55411e004b70b054ba8b3ec86=NO-MATCH",
+          "semantic_law": "Поведінка визначена джерелом forward.lisp:364 (justified-member?)."
+        }
+      ],
+      "reason": "Not an independent D10 operation by name alone; requires behavioral identity adjudication before any new D10 address."
+    },
+    {
+      "semantic_name": "add-new-justified",
+      "status": "EXACT-NAME-OVERLAP-WITH-RATIFIED-LOWER-DOMAIN",
+      "lower_domain_matches": [
+        {
+          "domain": "D9",
+          "coordinate": "010010001"
+        }
+      ],
+      "source_priority": "PROPOSED-HAS-LAW-NOT-SELECTED",
+      "provenance": [
+        {
+          "kind": "pending-proposal",
+          "id": "D10P-0033",
+          "path": "knowledge/d10-proposal-ledger.tsv",
+          "source": "juv4uk/sens@3335d09015cb8c96d4e2ed96f8d1339b4eb4f984:lib/forward.lisp:372",
+          "dedup": "D1-D9@09d1d71c39d1484dfd005a5068dbb18b76f0f0d4=NO-MATCH;D10@73dd518469f972c55411e004b70b054ba8b3ec86=NO-MATCH",
+          "semantic_law": "Поведінка визначена джерелом forward.lisp:372 (add-new-justified)."
+        }
+      ],
+      "reason": "Not an independent D10 operation by name alone; requires behavioral identity adjudication before any new D10 address."
+    },
+    {
+      "semantic_name": "run-tms",
+      "status": "EXACT-NAME-OVERLAP-WITH-RATIFIED-LOWER-DOMAIN",
+      "lower_domain_matches": [
+        {
+          "domain": "D9",
+          "coordinate": "001101000"
+        }
+      ],
+      "source_priority": "PROPOSED-HAS-LAW-NOT-SELECTED",
+      "provenance": [
+        {
+          "kind": "pending-proposal",
+          "id": "D10P-0034",
+          "path": "knowledge/d10-proposal-ledger.tsv",
+          "source": "juv4uk/sens@3335d09015cb8c96d4e2ed96f8d1339b4eb4f984:lib/forward.lisp:382",
+          "dedup": "D1-D9@09d1d71c39d1484dfd005a5068dbb18b76f0f0d4=NO-MATCH;D10@73dd518469f972c55411e004b70b054ba8b3ec86=NO-MATCH",
+          "semantic_law": "Поведінка визначена джерелом forward.lisp:382 (run-tms)."
+        }
+      ],
+      "reason": "Not an independent D10 operation by name alone; requires behavioral identity adjudication before any new D10 address."
+    },
+    {
+      "semantic_name": "assert-fact-tms!",
+      "status": "EXACT-NAME-OVERLAP-WITH-RATIFIED-LOWER-DOMAIN",
+      "lower_domain_matches": [
+        {
+          "domain": "D9",
+          "coordinate": "101000011"
+        }
+      ],
+      "source_priority": "PROPOSED-HAS-LAW-NOT-SELECTED",
+      "provenance": [
+        {
+          "kind": "pending-proposal",
+          "id": "D10P-0035",
+          "path": "knowledge/d10-proposal-ledger.tsv",
+          "source": "juv4uk/sens@3335d09015cb8c96d4e2ed96f8d1339b4eb4f984:lib/forward.lisp:392",
+          "dedup": "D1-D9@09d1d71c39d1484dfd005a5068dbb18b76f0f0d4=NO-MATCH;D10@73dd518469f972c55411e004b70b054ba8b3ec86=NO-MATCH",
+          "semantic_law": "Поведінка визначена джерелом forward.lisp:392 (assert-fact-tms!)."
+        }
+      ],
+      "reason": "Not an independent D10 operation by name alone; requires behavioral identity adjudication before any new D10 address."
+    },
+    {
+      "semantic_name": "run-tms!",
+      "status": "EXACT-NAME-OVERLAP-WITH-RATIFIED-LOWER-DOMAIN",
+      "lower_domain_matches": [
+        {
+          "domain": "D9",
+          "coordinate": "010100101"
+        }
+      ],
+      "source_priority": "PROPOSED-HAS-LAW-NOT-SELECTED",
+      "provenance": [
+        {
+          "kind": "pending-proposal",
+          "id": "D10P-0036",
+          "path": "knowledge/d10-proposal-ledger.tsv",
+          "source": "juv4uk/sens@3335d09015cb8c96d4e2ed96f8d1339b4eb4f984:lib/forward.lisp:395",
+          "dedup": "D1-D9@09d1d71c39d1484dfd005a5068dbb18b76f0f0d4=NO-MATCH;D10@73dd518469f972c55411e004b70b054ba8b3ec86=NO-MATCH",
+          "semantic_law": "Поведінка визначена джерелом forward.lisp:395 (run-tms!)."
+        }
+      ],
+      "reason": "Not an independent D10 operation by name alone; requires behavioral identity adjudication before any new D10 address."
+    },
+    {
+      "semantic_name": "remove-justified",
+      "status": "EXACT-NAME-OVERLAP-WITH-RATIFIED-LOWER-DOMAIN",
+      "lower_domain_matches": [
+        {
+          "domain": "D9",
+          "coordinate": "010101001"
+        }
+      ],
+      "source_priority": "PROPOSED-HAS-LAW-NOT-SELECTED",
+      "provenance": [
+        {
+          "kind": "pending-proposal",
+          "id": "D10P-0037",
+          "path": "knowledge/d10-proposal-ledger.tsv",
+          "source": "juv4uk/sens@3335d09015cb8c96d4e2ed96f8d1339b4eb4f984:lib/forward.lisp:398",
+          "dedup": "D1-D9@09d1d71c39d1484dfd005a5068dbb18b76f0f0d4=NO-MATCH;D10@73dd518469f972c55411e004b70b054ba8b3ec86=NO-MATCH",
+          "semantic_law": "Поведінка визначена джерелом forward.lisp:398 (remove-justified)."
+        }
+      ],
+      "reason": "Not an independent D10 operation by name alone; requires behavioral identity adjudication before any new D10 address."
+    },
+    {
+      "semantic_name": "dependents-of",
+      "status": "EXACT-NAME-OVERLAP-WITH-RATIFIED-LOWER-DOMAIN",
+      "lower_domain_matches": [
+        {
+          "domain": "D9",
+          "coordinate": "001011100"
+        }
+      ],
+      "source_priority": "PROPOSED-HAS-LAW-NOT-SELECTED",
+      "provenance": [
+        {
+          "kind": "pending-proposal",
+          "id": "D10P-0038",
+          "path": "knowledge/d10-proposal-ledger.tsv",
+          "source": "juv4uk/sens@3335d09015cb8c96d4e2ed96f8d1339b4eb4f984:lib/forward.lisp:406",
+          "dedup": "D1-D9@09d1d71c39d1484dfd005a5068dbb18b76f0f0d4=NO-MATCH;D10@73dd518469f972c55411e004b70b054ba8b3ec86=NO-MATCH",
+          "semantic_law": "Поведінка визначена джерелом forward.lisp:406 (dependents-of)."
+        }
+      ],
+      "reason": "Not an independent D10 operation by name alone; requires behavioral identity adjudication before any new D10 address."
+    },
+    {
+      "semantic_name": "retract-fact-tms",
+      "status": "EXACT-NAME-OVERLAP-WITH-RATIFIED-LOWER-DOMAIN",
+      "lower_domain_matches": [
+        {
+          "domain": "D9",
+          "coordinate": "010100111"
+        }
+      ],
+      "source_priority": "PROPOSED-HAS-LAW-NOT-SELECTED",
+      "provenance": [
+        {
+          "kind": "pending-proposal",
+          "id": "D10P-0039",
+          "path": "knowledge/d10-proposal-ledger.tsv",
+          "source": "juv4uk/sens@3335d09015cb8c96d4e2ed96f8d1339b4eb4f984:lib/forward.lisp:417",
+          "dedup": "D1-D9@09d1d71c39d1484dfd005a5068dbb18b76f0f0d4=NO-MATCH;D10@73dd518469f972c55411e004b70b054ba8b3ec86=NO-MATCH",
+          "semantic_law": "Поведінка визначена джерелом forward.lisp:417 (retract-fact-tms)."
+        }
+      ],
+      "reason": "Not an independent D10 operation by name alone; requires behavioral identity adjudication before any new D10 address."
+    },
+    {
+      "semantic_name": "retract-facts-tms",
+      "status": "EXACT-NAME-OVERLAP-WITH-RATIFIED-LOWER-DOMAIN",
+      "lower_domain_matches": [
+        {
+          "domain": "D9",
+          "coordinate": "001101100"
+        }
+      ],
+      "source_priority": "PROPOSED-HAS-LAW-NOT-SELECTED",
+      "provenance": [
+        {
+          "kind": "pending-proposal",
+          "id": "D10P-0040",
+          "path": "knowledge/d10-proposal-ledger.tsv",
+          "source": "juv4uk/sens@3335d09015cb8c96d4e2ed96f8d1339b4eb4f984:lib/forward.lisp:421",
+          "dedup": "D1-D9@09d1d71c39d1484dfd005a5068dbb18b76f0f0d4=NO-MATCH;D10@73dd518469f972c55411e004b70b054ba8b3ec86=NO-MATCH",
+          "semantic_law": "Поведінка визначена джерелом forward.lisp:421 (retract-facts-tms)."
+        }
+      ],
+      "reason": "Not an independent D10 operation by name alone; requires behavioral identity adjudication before any new D10 address."
+    },
+    {
+      "semantic_name": "retract-fact-tms!",
+      "status": "EXACT-NAME-OVERLAP-WITH-RATIFIED-LOWER-DOMAIN",
+      "lower_domain_matches": [
+        {
+          "domain": "D9",
+          "coordinate": "001001011"
+        }
+      ],
+      "source_priority": "PROPOSED-HAS-LAW-NOT-SELECTED",
+      "provenance": [
+        {
+          "kind": "pending-proposal",
+          "id": "D10P-0041",
+          "path": "knowledge/d10-proposal-ledger.tsv",
+          "source": "juv4uk/sens@3335d09015cb8c96d4e2ed96f8d1339b4eb4f984:lib/forward.lisp:428",
+          "dedup": "D1-D9@09d1d71c39d1484dfd005a5068dbb18b76f0f0d4=NO-MATCH;D10@73dd518469f972c55411e004b70b054ba8b3ec86=NO-MATCH",
+          "semantic_law": "Поведінка визначена джерелом forward.lisp:428 (retract-fact-tms!)."
+        }
+      ],
+      "reason": "Not an independent D10 operation by name alone; requires behavioral identity adjudication before any new D10 address."
+    },
+    {
+      "semantic_name": "justifications-of",
+      "status": "EXACT-NAME-OVERLAP-WITH-RATIFIED-LOWER-DOMAIN",
+      "lower_domain_matches": [
+        {
+          "domain": "D9",
+          "coordinate": "010010011"
+        }
+      ],
+      "source_priority": "PROPOSED-HAS-LAW-NOT-SELECTED",
+      "provenance": [
+        {
+          "kind": "pending-proposal",
+          "id": "D10P-0042",
+          "path": "knowledge/d10-proposal-ledger.tsv",
+          "source": "juv4uk/sens@3335d09015cb8c96d4e2ed96f8d1339b4eb4f984:lib/forward.lisp:479",
+          "dedup": "D1-D9@09d1d71c39d1484dfd005a5068dbb18b76f0f0d4=NO-MATCH;D10@73dd518469f972c55411e004b70b054ba8b3ec86=NO-MATCH",
+          "semantic_law": "Поведінка визначена джерелом forward.lisp:479 (justifications-of)."
+        }
+      ],
+      "reason": "Not an independent D10 operation by name alone; requires behavioral identity adjudication before any new D10 address."
+    },
+    {
+      "semantic_name": "fire-rule-jtms",
+      "status": "EXACT-NAME-OVERLAP-WITH-RATIFIED-LOWER-DOMAIN",
+      "lower_domain_matches": [
+        {
+          "domain": "D9",
+          "coordinate": "101001001"
+        }
+      ],
+      "source_priority": "PROPOSED-HAS-LAW-NOT-SELECTED",
+      "provenance": [
+        {
+          "kind": "pending-proposal",
+          "id": "D10P-0043",
+          "path": "knowledge/d10-proposal-ledger.tsv",
+          "source": "juv4uk/sens@3335d09015cb8c96d4e2ed96f8d1339b4eb4f984:lib/forward.lisp:481",
+          "dedup": "D1-D9@09d1d71c39d1484dfd005a5068dbb18b76f0f0d4=NO-MATCH;D10@73dd518469f972c55411e004b70b054ba8b3ec86=NO-MATCH",
+          "semantic_law": "Поведінка визначена джерелом forward.lisp:481 (fire-rule-jtms)."
+        }
+      ],
+      "reason": "Not an independent D10 operation by name alone; requires behavioral identity adjudication before any new D10 address."
+    },
+    {
+      "semantic_name": "fire-rule-on-facts-jtms",
+      "status": "EXACT-NAME-OVERLAP-WITH-RATIFIED-LOWER-DOMAIN",
+      "lower_domain_matches": [
+        {
+          "domain": "D9",
+          "coordinate": "001111110"
+        }
+      ],
+      "source_priority": "PROPOSED-HAS-LAW-NOT-SELECTED",
+      "provenance": [
+        {
+          "kind": "pending-proposal",
+          "id": "D10P-0044",
+          "path": "knowledge/d10-proposal-ledger.tsv",
+          "source": "juv4uk/sens@3335d09015cb8c96d4e2ed96f8d1339b4eb4f984:lib/forward.lisp:493",
+          "dedup": "D1-D9@09d1d71c39d1484dfd005a5068dbb18b76f0f0d4=NO-MATCH;D10@73dd518469f972c55411e004b70b054ba8b3ec86=NO-MATCH",
+          "semantic_law": "Поведінка визначена джерелом forward.lisp:493 (fire-rule-on-facts-jtms)."
+        }
+      ],
+      "reason": "Not an independent D10 operation by name alone; requires behavioral identity adjudication before any new D10 address."
+    },
+    {
+      "semantic_name": "fire-rules-on-facts-jtms",
+      "status": "EXACT-NAME-OVERLAP-WITH-RATIFIED-LOWER-DOMAIN",
+      "lower_domain_matches": [
+        {
+          "domain": "D9",
+          "coordinate": "001001110"
+        }
+      ],
+      "source_priority": "PROPOSED-HAS-LAW-NOT-SELECTED",
+      "provenance": [
+        {
+          "kind": "pending-proposal",
+          "id": "D10P-0045",
+          "path": "knowledge/d10-proposal-ledger.tsv",
+          "source": "juv4uk/sens@3335d09015cb8c96d4e2ed96f8d1339b4eb4f984:lib/forward.lisp:504",
+          "dedup": "D1-D9@09d1d71c39d1484dfd005a5068dbb18b76f0f0d4=NO-MATCH;D10@73dd518469f972c55411e004b70b054ba8b3ec86=NO-MATCH",
+          "semantic_law": "Поведінка визначена джерелом forward.lisp:504 (fire-rules-on-facts-jtms)."
+        }
+      ],
+      "reason": "Not an independent D10 operation by name alone; requires behavioral identity adjudication before any new D10 address."
+    },
+    {
+      "semantic_name": "remove-entry-jtms",
+      "status": "EXACT-NAME-OVERLAP-WITH-RATIFIED-LOWER-DOMAIN",
+      "lower_domain_matches": [
+        {
+          "domain": "D9",
+          "coordinate": "001101110"
+        }
+      ],
+      "source_priority": "PROPOSED-HAS-LAW-NOT-SELECTED",
+      "provenance": [
+        {
+          "kind": "pending-proposal",
+          "id": "D10P-0047",
+          "path": "knowledge/d10-proposal-ledger.tsv",
+          "source": "juv4uk/sens@3335d09015cb8c96d4e2ed96f8d1339b4eb4f984:lib/forward.lisp:520",
+          "dedup": "D1-D9@09d1d71c39d1484dfd005a5068dbb18b76f0f0d4=NO-MATCH;D10@73dd518469f972c55411e004b70b054ba8b3ec86=NO-MATCH",
+          "semantic_law": "Поведінка визначена джерелом forward.lisp:520 (remove-entry-jtms)."
+        }
+      ],
+      "reason": "Not an independent D10 operation by name alone; requires behavioral identity adjudication before any new D10 address."
+    },
+    {
+      "semantic_name": "add-justification",
+      "status": "EXACT-NAME-OVERLAP-WITH-RATIFIED-LOWER-DOMAIN",
+      "lower_domain_matches": [
+        {
+          "domain": "D9",
+          "coordinate": "101000000"
+        }
+      ],
+      "source_priority": "PROPOSED-HAS-LAW-NOT-SELECTED",
+      "provenance": [
+        {
+          "kind": "pending-proposal",
+          "id": "D10P-0048",
+          "path": "knowledge/d10-proposal-ledger.tsv",
+          "source": "juv4uk/sens@3335d09015cb8c96d4e2ed96f8d1339b4eb4f984:lib/forward.lisp:532",
+          "dedup": "D1-D9@09d1d71c39d1484dfd005a5068dbb18b76f0f0d4=NO-MATCH;D10@73dd518469f972c55411e004b70b054ba8b3ec86=NO-MATCH",
+          "semantic_law": "Поведінка визначена джерелом forward.lisp:532 (add-justification)."
+        }
+      ],
+      "reason": "Not an independent D10 operation by name alone; requires behavioral identity adjudication before any new D10 address."
+    },
+    {
+      "semantic_name": "add-new-entries-jtms",
+      "status": "EXACT-NAME-OVERLAP-WITH-RATIFIED-LOWER-DOMAIN",
+      "lower_domain_matches": [
+        {
+          "domain": "D9",
+          "coordinate": "001100010"
+        }
+      ],
+      "source_priority": "PROPOSED-HAS-LAW-NOT-SELECTED",
+      "provenance": [
+        {
+          "kind": "pending-proposal",
+          "id": "D10P-0049",
+          "path": "knowledge/d10-proposal-ledger.tsv",
+          "source": "juv4uk/sens@3335d09015cb8c96d4e2ed96f8d1339b4eb4f984:lib/forward.lisp:542",
+          "dedup": "D1-D9@09d1d71c39d1484dfd005a5068dbb18b76f0f0d4=NO-MATCH;D10@73dd518469f972c55411e004b70b054ba8b3ec86=NO-MATCH",
+          "semantic_law": "Поведінка визначена джерелом forward.lisp:542 (add-new-entries-jtms)."
+        }
+      ],
+      "reason": "Not an independent D10 operation by name alone; requires behavioral identity adjudication before any new D10 address."
+    },
+    {
+      "semantic_name": "run-jtms",
+      "status": "EXACT-NAME-OVERLAP-WITH-RATIFIED-LOWER-DOMAIN",
+      "lower_domain_matches": [
+        {
+          "domain": "D9",
+          "coordinate": "010000100"
+        }
+      ],
+      "source_priority": "PROPOSED-HAS-LAW-NOT-SELECTED",
+      "provenance": [
+        {
+          "kind": "pending-proposal",
+          "id": "D10P-0051",
+          "path": "knowledge/d10-proposal-ledger.tsv",
+          "source": "juv4uk/sens@3335d09015cb8c96d4e2ed96f8d1339b4eb4f984:lib/forward.lisp:556",
+          "dedup": "D1-D9@09d1d71c39d1484dfd005a5068dbb18b76f0f0d4=NO-MATCH;D10@73dd518469f972c55411e004b70b054ba8b3ec86=NO-MATCH",
+          "semantic_law": "Поведінка визначена джерелом forward.lisp:556 (run-jtms)."
+        }
+      ],
+      "reason": "Not an independent D10 operation by name alone; requires behavioral identity adjudication before any new D10 address."
+    },
+    {
+      "semantic_name": "assert-fact-jtms!",
+      "status": "EXACT-NAME-OVERLAP-WITH-RATIFIED-LOWER-DOMAIN",
+      "lower_domain_matches": [
+        {
+          "domain": "D9",
+          "coordinate": "001010010"
+        }
+      ],
+      "source_priority": "PROPOSED-HAS-LAW-NOT-SELECTED",
+      "provenance": [
+        {
+          "kind": "pending-proposal",
+          "id": "D10P-0052",
+          "path": "knowledge/d10-proposal-ledger.tsv",
+          "source": "juv4uk/sens@3335d09015cb8c96d4e2ed96f8d1339b4eb4f984:lib/forward.lisp:565",
+          "dedup": "D1-D9@09d1d71c39d1484dfd005a5068dbb18b76f0f0d4=NO-MATCH;D10@73dd518469f972c55411e004b70b054ba8b3ec86=NO-MATCH",
+          "semantic_law": "Поведінка визначена джерелом forward.lisp:565 (assert-fact-jtms!)."
+        }
+      ],
+      "reason": "Not an independent D10 operation by name alone; requires behavioral identity adjudication before any new D10 address."
+    },
+    {
+      "semantic_name": "run-jtms!",
+      "status": "EXACT-NAME-OVERLAP-WITH-RATIFIED-LOWER-DOMAIN",
+      "lower_domain_matches": [
+        {
+          "domain": "D9",
+          "coordinate": "001001101"
+        }
+      ],
+      "source_priority": "PROPOSED-HAS-LAW-NOT-SELECTED",
+      "provenance": [
+        {
+          "kind": "pending-proposal",
+          "id": "D10P-0053",
+          "path": "knowledge/d10-proposal-ledger.tsv",
+          "source": "juv4uk/sens@3335d09015cb8c96d4e2ed96f8d1339b4eb4f984:lib/forward.lisp:568",
+          "dedup": "D1-D9@09d1d71c39d1484dfd005a5068dbb18b76f0f0d4=NO-MATCH;D10@73dd518469f972c55411e004b70b054ba8b3ec86=NO-MATCH",
+          "semantic_law": "Поведінка визначена джерелом forward.lisp:568 (run-jtms!)."
+        }
+      ],
+      "reason": "Not an independent D10 operation by name alone; requires behavioral identity adjudication before any new D10 address."
+    },
+    {
+      "semantic_name": "fire-rule-jtms-multi",
+      "status": "EXACT-NAME-OVERLAP-WITH-RATIFIED-LOWER-DOMAIN",
+      "lower_domain_matches": [
+        {
+          "domain": "D9",
+          "coordinate": "010000101"
+        }
+      ],
+      "source_priority": "PROPOSED-HAS-LAW-NOT-SELECTED",
+      "provenance": [
+        {
+          "kind": "pending-proposal",
+          "id": "D10P-0055",
+          "path": "knowledge/d10-proposal-ledger.tsv",
+          "source": "juv4uk/sens@3335d09015cb8c96d4e2ed96f8d1339b4eb4f984:lib/forward.lisp:698",
+          "dedup": "D1-D9@09d1d71c39d1484dfd005a5068dbb18b76f0f0d4=NO-MATCH;D10@73dd518469f972c55411e004b70b054ba8b3ec86=NO-MATCH",
+          "semantic_law": "Поведінка визначена джерелом forward.lisp:698 (fire-rule-jtms-multi)."
+        }
+      ],
+      "reason": "Not an independent D10 operation by name alone; requires behavioral identity adjudication before any new D10 address."
+    },
+    {
+      "semantic_name": "fire-rules-jtms-multi",
+      "status": "EXACT-NAME-OVERLAP-WITH-RATIFIED-LOWER-DOMAIN",
+      "lower_domain_matches": [
+        {
+          "domain": "D9",
+          "coordinate": "001001111"
+        }
+      ],
+      "source_priority": "PROPOSED-HAS-LAW-NOT-SELECTED",
+      "provenance": [
+        {
+          "kind": "pending-proposal",
+          "id": "D10P-0056",
+          "path": "knowledge/d10-proposal-ledger.tsv",
+          "source": "juv4uk/sens@3335d09015cb8c96d4e2ed96f8d1339b4eb4f984:lib/forward.lisp:702",
+          "dedup": "D1-D9@09d1d71c39d1484dfd005a5068dbb18b76f0f0d4=NO-MATCH;D10@73dd518469f972c55411e004b70b054ba8b3ec86=NO-MATCH",
+          "semantic_law": "Поведінка визначена джерелом forward.lisp:702 (fire-rules-jtms-multi)."
+        }
+      ],
+      "reason": "Not an independent D10 operation by name alone; requires behavioral identity adjudication before any new D10 address."
+    },
+    {
+      "semantic_name": "run-jtms-multi",
+      "status": "EXACT-NAME-OVERLAP-WITH-RATIFIED-LOWER-DOMAIN",
+      "lower_domain_matches": [
+        {
+          "domain": "D9",
+          "coordinate": "010110010"
+        }
+      ],
+      "source_priority": "PROPOSED-HAS-LAW-NOT-SELECTED",
+      "provenance": [
+        {
+          "kind": "pending-proposal",
+          "id": "D10P-0057",
+          "path": "knowledge/d10-proposal-ledger.tsv",
+          "source": "juv4uk/sens@3335d09015cb8c96d4e2ed96f8d1339b4eb4f984:lib/forward.lisp:710",
+          "dedup": "D1-D9@09d1d71c39d1484dfd005a5068dbb18b76f0f0d4=NO-MATCH;D10@73dd518469f972c55411e004b70b054ba8b3ec86=NO-MATCH",
+          "semantic_law": "Поведінка визначена джерелом forward.lisp:710 (run-jtms-multi)."
+        }
+      ],
+      "reason": "Not an independent D10 operation by name alone; requires behavioral identity adjudication before any new D10 address."
+    },
+    {
+      "semantic_name": "run-jtms-multi!",
+      "status": "EXACT-NAME-OVERLAP-WITH-RATIFIED-LOWER-DOMAIN",
+      "lower_domain_matches": [
+        {
+          "domain": "D9",
+          "coordinate": "001101101"
+        }
+      ],
+      "source_priority": "PROPOSED-HAS-LAW-NOT-SELECTED",
+      "provenance": [
+        {
+          "kind": "pending-proposal",
+          "id": "D10P-0058",
+          "path": "knowledge/d10-proposal-ledger.tsv",
+          "source": "juv4uk/sens@3335d09015cb8c96d4e2ed96f8d1339b4eb4f984:lib/forward.lisp:717",
+          "dedup": "D1-D9@09d1d71c39d1484dfd005a5068dbb18b76f0f0d4=NO-MATCH;D10@73dd518469f972c55411e004b70b054ba8b3ec86=NO-MATCH",
+          "semantic_law": "Поведінка визначена джерелом forward.lisp:717 (run-jtms-multi!)."
+        }
+      ],
+      "reason": "Not an independent D10 operation by name alone; requires behavioral identity adjudication before any new D10 address."
+    },
+    {
+      "semantic_name": "prune-justifications",
+      "status": "EXACT-NAME-OVERLAP-WITH-RATIFIED-LOWER-DOMAIN",
+      "lower_domain_matches": [
+        {
+          "domain": "D9",
+          "coordinate": "001110000"
+        }
+      ],
+      "source_priority": "PROPOSED-HAS-LAW-NOT-SELECTED",
+      "provenance": [
+        {
+          "kind": "pending-proposal",
+          "id": "D10P-0059",
+          "path": "knowledge/d10-proposal-ledger.tsv",
+          "source": "juv4uk/sens@3335d09015cb8c96d4e2ed96f8d1339b4eb4f984:lib/forward.lisp:720",
+          "dedup": "D1-D9@09d1d71c39d1484dfd005a5068dbb18b76f0f0d4=NO-MATCH;D10@73dd518469f972c55411e004b70b054ba8b3ec86=NO-MATCH",
+          "semantic_law": "Поведінка визначена джерелом forward.lisp:720 (prune-justifications)."
+        }
+      ],
+      "reason": "Not an independent D10 operation by name alone; requires behavioral identity adjudication before any new D10 address."
+    },
+    {
+      "semantic_name": "prune-entry",
+      "status": "EXACT-NAME-OVERLAP-WITH-RATIFIED-LOWER-DOMAIN",
+      "lower_domain_matches": [
+        {
+          "domain": "D9",
+          "coordinate": "010000011"
+        }
+      ],
+      "source_priority": "PROPOSED-HAS-LAW-NOT-SELECTED",
+      "provenance": [
+        {
+          "kind": "pending-proposal",
+          "id": "D10P-0060",
+          "path": "knowledge/d10-proposal-ledger.tsv",
+          "source": "juv4uk/sens@3335d09015cb8c96d4e2ed96f8d1339b4eb4f984:lib/forward.lisp:728",
+          "dedup": "D1-D9@09d1d71c39d1484dfd005a5068dbb18b76f0f0d4=NO-MATCH;D10@73dd518469f972c55411e004b70b054ba8b3ec86=NO-MATCH",
+          "semantic_law": "Поведінка визначена джерелом forward.lisp:728 (prune-entry)."
+        }
+      ],
+      "reason": "Not an independent D10 operation by name alone; requires behavioral identity adjudication before any new D10 address."
+    },
+    {
+      "semantic_name": "prune-all-entries",
+      "status": "EXACT-NAME-OVERLAP-WITH-RATIFIED-LOWER-DOMAIN",
+      "lower_domain_matches": [
+        {
+          "domain": "D9",
+          "coordinate": "010100011"
+        }
+      ],
+      "source_priority": "PROPOSED-HAS-LAW-NOT-SELECTED",
+      "provenance": [
+        {
+          "kind": "pending-proposal",
+          "id": "D10P-0061",
+          "path": "knowledge/d10-proposal-ledger.tsv",
+          "source": "juv4uk/sens@3335d09015cb8c96d4e2ed96f8d1339b4eb4f984:lib/forward.lisp:732",
+          "dedup": "D1-D9@09d1d71c39d1484dfd005a5068dbb18b76f0f0d4=NO-MATCH;D10@73dd518469f972c55411e004b70b054ba8b3ec86=NO-MATCH",
+          "semantic_law": "Поведінка визначена джерелом forward.lisp:732 (prune-all-entries)."
+        }
+      ],
+      "reason": "Not an independent D10 operation by name alone; requires behavioral identity adjudication before any new D10 address."
+    },
+    {
+      "semantic_name": "unsupported-facts",
+      "status": "EXACT-NAME-OVERLAP-WITH-RATIFIED-LOWER-DOMAIN",
+      "lower_domain_matches": [
+        {
+          "domain": "D9",
+          "coordinate": "010101101"
+        }
+      ],
+      "source_priority": "PROPOSED-HAS-LAW-NOT-SELECTED",
+      "provenance": [
+        {
+          "kind": "pending-proposal",
+          "id": "D10P-0062",
+          "path": "knowledge/d10-proposal-ledger.tsv",
+          "source": "juv4uk/sens@3335d09015cb8c96d4e2ed96f8d1339b4eb4f984:lib/forward.lisp:739",
+          "dedup": "D1-D9@09d1d71c39d1484dfd005a5068dbb18b76f0f0d4=NO-MATCH;D10@73dd518469f972c55411e004b70b054ba8b3ec86=NO-MATCH",
+          "semantic_law": "Поведінка визначена джерелом forward.lisp:739 (unsupported-facts)."
+        }
+      ],
+      "reason": "Not an independent D10 operation by name alone; requires behavioral identity adjudication before any new D10 address."
+    },
+    {
+      "semantic_name": "drop-unsupported",
+      "status": "EXACT-NAME-OVERLAP-WITH-RATIFIED-LOWER-DOMAIN",
+      "lower_domain_matches": [
+        {
+          "domain": "D9",
+          "coordinate": "010101110"
+        }
+      ],
+      "source_priority": "PROPOSED-HAS-LAW-NOT-SELECTED",
+      "provenance": [
+        {
+          "kind": "pending-proposal",
+          "id": "D10P-0063",
+          "path": "knowledge/d10-proposal-ledger.tsv",
+          "source": "juv4uk/sens@3335d09015cb8c96d4e2ed96f8d1339b4eb4f984:lib/forward.lisp:748",
+          "dedup": "D1-D9@09d1d71c39d1484dfd005a5068dbb18b76f0f0d4=NO-MATCH;D10@73dd518469f972c55411e004b70b054ba8b3ec86=NO-MATCH",
+          "semantic_law": "Поведінка визначена джерелом forward.lisp:748 (drop-unsupported)."
+        }
+      ],
+      "reason": "Not an independent D10 operation by name alone; requires behavioral identity adjudication before any new D10 address."
+    },
+    {
+      "semantic_name": "retract-fact-jtms",
+      "status": "EXACT-NAME-OVERLAP-WITH-RATIFIED-LOWER-DOMAIN",
+      "lower_domain_matches": [
+        {
+          "domain": "D9",
+          "coordinate": "010111001"
+        }
+      ],
+      "source_priority": "PROPOSED-HAS-LAW-NOT-SELECTED",
+      "provenance": [
+        {
+          "kind": "pending-proposal",
+          "id": "D10P-0064",
+          "path": "knowledge/d10-proposal-ledger.tsv",
+          "source": "juv4uk/sens@3335d09015cb8c96d4e2ed96f8d1339b4eb4f984:lib/forward.lisp:762",
+          "dedup": "D1-D9@09d1d71c39d1484dfd005a5068dbb18b76f0f0d4=NO-MATCH;D10@73dd518469f972c55411e004b70b054ba8b3ec86=NO-MATCH",
+          "semantic_law": "Поведінка визначена джерелом forward.lisp:762 (retract-fact-jtms)."
+        }
+      ],
+      "reason": "Not an independent D10 operation by name alone; requires behavioral identity adjudication before any new D10 address."
+    },
+    {
+      "semantic_name": "retract-facts-jtms",
+      "status": "EXACT-NAME-OVERLAP-WITH-RATIFIED-LOWER-DOMAIN",
+      "lower_domain_matches": [
+        {
+          "domain": "D9",
+          "coordinate": "001011010"
+        }
+      ],
+      "source_priority": "PROPOSED-HAS-LAW-NOT-SELECTED",
+      "provenance": [
+        {
+          "kind": "pending-proposal",
+          "id": "D10P-0065",
+          "path": "knowledge/d10-proposal-ledger.tsv",
+          "source": "juv4uk/sens@3335d09015cb8c96d4e2ed96f8d1339b4eb4f984:lib/forward.lisp:772",
+          "dedup": "D1-D9@09d1d71c39d1484dfd005a5068dbb18b76f0f0d4=NO-MATCH;D10@73dd518469f972c55411e004b70b054ba8b3ec86=NO-MATCH",
+          "semantic_law": "Поведінка визначена джерелом forward.lisp:772 (retract-facts-jtms)."
+        }
+      ],
+      "reason": "Not an independent D10 operation by name alone; requires behavioral identity adjudication before any new D10 address."
+    },
+    {
+      "semantic_name": "retract-fact-jtms!",
+      "status": "EXACT-NAME-OVERLAP-WITH-RATIFIED-LOWER-DOMAIN",
+      "lower_domain_matches": [
+        {
+          "domain": "D9",
+          "coordinate": "010111101"
+        }
+      ],
+      "source_priority": "PROPOSED-HAS-LAW-NOT-SELECTED",
+      "provenance": [
+        {
+          "kind": "pending-proposal",
+          "id": "D10P-0066",
+          "path": "knowledge/d10-proposal-ledger.tsv",
+          "source": "juv4uk/sens@3335d09015cb8c96d4e2ed96f8d1339b4eb4f984:lib/forward.lisp:779",
+          "dedup": "D1-D9@09d1d71c39d1484dfd005a5068dbb18b76f0f0d4=NO-MATCH;D10@73dd518469f972c55411e004b70b054ba8b3ec86=NO-MATCH",
+          "semantic_law": "Поведінка визначена джерелом forward.lisp:779 (retract-fact-jtms!)."
+        }
+      ],
+      "reason": "Not an independent D10 operation by name alone; requires behavioral identity adjudication before any new D10 address."
+    },
+    {
+      "semantic_name": "make-dimension",
+      "status": "EXACT-NAME-OVERLAP-WITH-RATIFIED-LOWER-DOMAIN",
+      "lower_domain_matches": [
+        {
+          "domain": "D9",
+          "coordinate": "111001100"
+        }
+      ],
+      "source_priority": "LIBRARY-DEFINED-REQUIRES-INDEPENDENCE",
+      "provenance": [
+        {
+          "kind": "library-definition",
+          "file": "lib/quantity.lisp",
+          "source_blob": "40c38e6019beccddd8577aa7af5a0957f4932b89",
+          "line": 43,
+          "definition_kind": "library-defined"
+        }
+      ],
+      "reason": "Not an independent D10 operation by name alone; requires behavioral identity adjudication before any new D10 address."
+    },
+    {
+      "semantic_name": "dimension?",
+      "status": "EXACT-NAME-OVERLAP-WITH-RATIFIED-LOWER-DOMAIN",
+      "lower_domain_matches": [
+        {
+          "domain": "D9",
+          "coordinate": "111010000"
+        }
+      ],
+      "source_priority": "LIBRARY-DEFINED-REQUIRES-INDEPENDENCE",
+      "provenance": [
+        {
+          "kind": "library-definition",
+          "file": "lib/quantity.lisp",
+          "source_blob": "40c38e6019beccddd8577aa7af5a0957f4932b89",
+          "line": 47,
+          "definition_kind": "library-defined"
+        }
+      ],
+      "reason": "Not an independent D10 operation by name alone; requires behavioral identity adjudication before any new D10 address."
+    },
+    {
+      "semantic_name": "dimension-base",
+      "status": "EXACT-NAME-OVERLAP-WITH-RATIFIED-LOWER-DOMAIN",
+      "lower_domain_matches": [
+        {
+          "domain": "D9",
+          "coordinate": "111101100"
+        }
+      ],
+      "source_priority": "LIBRARY-DEFINED-REQUIRES-INDEPENDENCE",
+      "provenance": [
+        {
+          "kind": "library-definition",
+          "file": "lib/quantity.lisp",
+          "source_blob": "40c38e6019beccddd8577aa7af5a0957f4932b89",
+          "line": 62,
+          "definition_kind": "library-defined"
+        }
+      ],
+      "reason": "Not an independent D10 operation by name alone; requires behavioral identity adjudication before any new D10 address."
+    },
+    {
+      "semantic_name": "dimension-exponent",
+      "status": "EXACT-NAME-OVERLAP-WITH-RATIFIED-LOWER-DOMAIN",
+      "lower_domain_matches": [
+        {
+          "domain": "D9",
+          "coordinate": "111001101"
+        }
+      ],
+      "source_priority": "LIBRARY-DEFINED-REQUIRES-INDEPENDENCE",
+      "provenance": [
+        {
+          "kind": "library-definition",
+          "file": "lib/quantity.lisp",
+          "source_blob": "40c38e6019beccddd8577aa7af5a0957f4932b89",
+          "line": 65,
+          "definition_kind": "library-defined"
+        }
+      ],
+      "reason": "Not an independent D10 operation by name alone; requires behavioral identity adjudication before any new D10 address."
+    },
+    {
+      "semantic_name": "make-unit",
+      "status": "EXACT-NAME-OVERLAP-WITH-RATIFIED-LOWER-DOMAIN",
+      "lower_domain_matches": [
+        {
+          "domain": "D9",
+          "coordinate": "111010001"
+        }
+      ],
+      "source_priority": "LIBRARY-DEFINED-REQUIRES-INDEPENDENCE",
+      "provenance": [
+        {
+          "kind": "library-definition",
+          "file": "lib/quantity.lisp",
+          "source_blob": "40c38e6019beccddd8577aa7af5a0957f4932b89",
+          "line": 79,
+          "definition_kind": "library-defined"
+        }
+      ],
+      "reason": "Not an independent D10 operation by name alone; requires behavioral identity adjudication before any new D10 address."
+    },
+    {
+      "semantic_name": "unit?",
+      "status": "EXACT-NAME-OVERLAP-WITH-RATIFIED-LOWER-DOMAIN",
+      "lower_domain_matches": [
+        {
+          "domain": "D9",
+          "coordinate": "111000011"
+        }
+      ],
+      "source_priority": "LIBRARY-DEFINED-REQUIRES-INDEPENDENCE",
+      "provenance": [
+        {
+          "kind": "library-definition",
+          "file": "lib/quantity.lisp",
+          "source_blob": "40c38e6019beccddd8577aa7af5a0957f4932b89",
+          "line": 83,
+          "definition_kind": "library-defined"
+        }
+      ],
+      "reason": "Not an independent D10 operation by name alone; requires behavioral identity adjudication before any new D10 address."
+    },
+    {
+      "semantic_name": "unit-dimensions",
+      "status": "EXACT-NAME-OVERLAP-WITH-RATIFIED-LOWER-DOMAIN",
+      "lower_domain_matches": [
+        {
+          "domain": "D9",
+          "coordinate": "111011100"
+        }
+      ],
+      "source_priority": "LIBRARY-DEFINED-REQUIRES-INDEPENDENCE",
+      "provenance": [
+        {
+          "kind": "library-definition",
+          "file": "lib/quantity.lisp",
+          "source_blob": "40c38e6019beccddd8577aa7af5a0957f4932b89",
+          "line": 93,
+          "definition_kind": "library-defined"
+        }
+      ],
+      "reason": "Not an independent D10 operation by name alone; requires behavioral identity adjudication before any new D10 address."
+    },
+    {
+      "semantic_name": "make-quantity",
+      "status": "EXACT-NAME-OVERLAP-WITH-RATIFIED-LOWER-DOMAIN",
+      "lower_domain_matches": [
+        {
+          "domain": "D9",
+          "coordinate": "111001111"
+        }
+      ],
+      "source_priority": "LIBRARY-DEFINED-REQUIRES-INDEPENDENCE",
+      "provenance": [
+        {
+          "kind": "library-definition",
+          "file": "lib/quantity.lisp",
+          "source_blob": "40c38e6019beccddd8577aa7af5a0957f4932b89",
+          "line": 96,
+          "definition_kind": "library-defined"
+        }
+      ],
+      "reason": "Not an independent D10 operation by name alone; requires behavioral identity adjudication before any new D10 address."
+    },
+    {
+      "semantic_name": "quantity?",
+      "status": "EXACT-NAME-OVERLAP-WITH-RATIFIED-LOWER-DOMAIN",
+      "lower_domain_matches": [
+        {
+          "domain": "D9",
+          "coordinate": "111000101"
+        }
+      ],
+      "source_priority": "LIBRARY-DEFINED-REQUIRES-INDEPENDENCE",
+      "provenance": [
+        {
+          "kind": "library-definition",
+          "file": "lib/quantity.lisp",
+          "source_blob": "40c38e6019beccddd8577aa7af5a0957f4932b89",
+          "line": 100,
+          "definition_kind": "library-defined"
+        }
+      ],
+      "reason": "Not an independent D10 operation by name alone; requires behavioral identity adjudication before any new D10 address."
+    },
+    {
+      "semantic_name": "quantity-value",
+      "status": "EXACT-NAME-OVERLAP-WITH-RATIFIED-LOWER-DOMAIN",
+      "lower_domain_matches": [
+        {
+          "domain": "D9",
+          "coordinate": "111101000"
+        }
+      ],
+      "source_priority": "LIBRARY-DEFINED-REQUIRES-INDEPENDENCE",
+      "provenance": [
+        {
+          "kind": "library-definition",
+          "file": "lib/quantity.lisp",
+          "source_blob": "40c38e6019beccddd8577aa7af5a0957f4932b89",
+          "line": 111,
+          "definition_kind": "library-defined"
+        }
+      ],
+      "reason": "Not an independent D10 operation by name alone; requires behavioral identity adjudication before any new D10 address."
+    },
+    {
+      "semantic_name": "quantity-unit",
+      "status": "EXACT-NAME-OVERLAP-WITH-RATIFIED-LOWER-DOMAIN",
+      "lower_domain_matches": [
+        {
+          "domain": "D9",
+          "coordinate": "111111001"
+        }
+      ],
+      "source_priority": "LIBRARY-DEFINED-REQUIRES-INDEPENDENCE",
+      "provenance": [
+        {
+          "kind": "library-definition",
+          "file": "lib/quantity.lisp",
+          "source_blob": "40c38e6019beccddd8577aa7af5a0957f4932b89",
+          "line": 114,
+          "definition_kind": "library-defined"
+        }
+      ],
+      "reason": "Not an independent D10 operation by name alone; requires behavioral identity adjudication before any new D10 address."
+    },
+    {
+      "semantic_name": "unit-product",
+      "status": "EXACT-NAME-OVERLAP-WITH-RATIFIED-LOWER-DOMAIN",
+      "lower_domain_matches": [
+        {
+          "domain": "D9",
+          "coordinate": "111000100"
+        }
+      ],
+      "source_priority": "LIBRARY-DEFINED-REQUIRES-INDEPENDENCE",
+      "provenance": [
+        {
+          "kind": "library-definition",
+          "file": "lib/quantity.lisp",
+          "source_blob": "40c38e6019beccddd8577aa7af5a0957f4932b89",
+          "line": 165,
+          "definition_kind": "library-defined"
+        }
+      ],
+      "reason": "Not an independent D10 operation by name alone; requires behavioral identity adjudication before any new D10 address."
+    },
+    {
+      "semantic_name": "unit-quotient",
+      "status": "EXACT-NAME-OVERLAP-WITH-RATIFIED-LOWER-DOMAIN",
+      "lower_domain_matches": [
+        {
+          "domain": "D9",
+          "coordinate": "111001110"
+        }
+      ],
+      "source_priority": "LIBRARY-DEFINED-REQUIRES-INDEPENDENCE",
+      "provenance": [
+        {
+          "kind": "library-definition",
+          "file": "lib/quantity.lisp",
+          "source_blob": "40c38e6019beccddd8577aa7af5a0957f4932b89",
+          "line": 172,
+          "definition_kind": "library-defined"
+        }
+      ],
+      "reason": "Not an independent D10 operation by name alone; requires behavioral identity adjudication before any new D10 address."
+    },
+    {
+      "semantic_name": "quantity-product",
+      "status": "EXACT-NAME-OVERLAP-WITH-RATIFIED-LOWER-DOMAIN",
+      "lower_domain_matches": [
+        {
+          "domain": "D9",
+          "coordinate": "111010011"
+        }
+      ],
+      "source_priority": "LIBRARY-DEFINED-REQUIRES-INDEPENDENCE",
+      "provenance": [
+        {
+          "kind": "library-definition",
+          "file": "lib/quantity.lisp",
+          "source_blob": "40c38e6019beccddd8577aa7af5a0957f4932b89",
+          "line": 179,
+          "definition_kind": "library-defined"
+        }
+      ],
+      "reason": "Not an independent D10 operation by name alone; requires behavioral identity adjudication before any new D10 address."
+    },
+    {
+      "semantic_name": "quantity-quotient",
+      "status": "EXACT-NAME-OVERLAP-WITH-RATIFIED-LOWER-DOMAIN",
+      "lower_domain_matches": [
+        {
+          "domain": "D9",
+          "coordinate": "111100011"
+        }
+      ],
+      "source_priority": "LIBRARY-DEFINED-REQUIRES-INDEPENDENCE",
+      "provenance": [
+        {
+          "kind": "library-definition",
+          "file": "lib/quantity.lisp",
+          "source_blob": "40c38e6019beccddd8577aa7af5a0957f4932b89",
+          "line": 185,
+          "definition_kind": "library-defined"
+        }
+      ],
+      "reason": "Not an independent D10 operation by name alone; requires behavioral identity adjudication before any new D10 address."
+    },
+    {
+      "semantic_name": "make-science-source",
+      "status": "EXACT-NAME-OVERLAP-WITH-RATIFIED-LOWER-DOMAIN",
+      "lower_domain_matches": [
+        {
+          "domain": "D9",
+          "coordinate": "111110101"
+        }
+      ],
+      "source_priority": "LIBRARY-DEFINED-REQUIRES-INDEPENDENCE",
+      "provenance": [
+        {
+          "kind": "library-definition",
+          "file": "lib/quantity.lisp",
+          "source_blob": "40c38e6019beccddd8577aa7af5a0957f4932b89",
+          "line": 191,
+          "definition_kind": "library-defined"
+        }
+      ],
+      "reason": "Not an independent D10 operation by name alone; requires behavioral identity adjudication before any new D10 address."
+    },
+    {
+      "semantic_name": "science-source?",
+      "status": "EXACT-NAME-OVERLAP-WITH-RATIFIED-LOWER-DOMAIN",
+      "lower_domain_matches": [
+        {
+          "domain": "D9",
+          "coordinate": "111011101"
+        }
+      ],
+      "source_priority": "LIBRARY-DEFINED-REQUIRES-INDEPENDENCE",
+      "provenance": [
+        {
+          "kind": "library-definition",
+          "file": "lib/quantity.lisp",
+          "source_blob": "40c38e6019beccddd8577aa7af5a0957f4932b89",
+          "line": 195,
+          "definition_kind": "library-defined"
+        }
+      ],
+      "reason": "Not an independent D10 operation by name alone; requires behavioral identity adjudication before any new D10 address."
+    },
+    {
+      "semantic_name": "scientific-constant-status-valid?",
+      "status": "EXACT-NAME-OVERLAP-WITH-RATIFIED-LOWER-DOMAIN",
+      "lower_domain_matches": [
+        {
+          "domain": "D9",
+          "coordinate": "111110010"
+        }
+      ],
+      "source_priority": "LIBRARY-DEFINED-REQUIRES-INDEPENDENCE",
+      "provenance": [
+        {
+          "kind": "library-definition",
+          "file": "lib/quantity.lisp",
+          "source_blob": "40c38e6019beccddd8577aa7af5a0957f4932b89",
+          "line": 210,
+          "definition_kind": "library-defined"
+        }
+      ],
+      "reason": "Not an independent D10 operation by name alone; requires behavioral identity adjudication before any new D10 address."
+    },
+    {
+      "semantic_name": "scientific-constant-kind-valid?",
+      "status": "EXACT-NAME-OVERLAP-WITH-RATIFIED-LOWER-DOMAIN",
+      "lower_domain_matches": [
+        {
+          "domain": "D9",
+          "coordinate": "111101111"
+        }
+      ],
+      "source_priority": "LIBRARY-DEFINED-REQUIRES-INDEPENDENCE",
+      "provenance": [
+        {
+          "kind": "library-definition",
+          "file": "lib/quantity.lisp",
+          "source_blob": "40c38e6019beccddd8577aa7af5a0957f4932b89",
+          "line": 218,
+          "definition_kind": "library-defined"
+        }
+      ],
+      "reason": "Not an independent D10 operation by name alone; requires behavioral identity adjudication before any new D10 address."
+    },
+    {
+      "semantic_name": "make-scientific-constant",
+      "status": "EXACT-NAME-OVERLAP-WITH-RATIFIED-LOWER-DOMAIN",
+      "lower_domain_matches": [
+        {
+          "domain": "D9",
+          "coordinate": "111101110"
+        }
+      ],
+      "source_priority": "LIBRARY-DEFINED-REQUIRES-INDEPENDENCE",
+      "provenance": [
+        {
+          "kind": "library-definition",
+          "file": "lib/quantity.lisp",
+          "source_blob": "40c38e6019beccddd8577aa7af5a0957f4932b89",
+          "line": 227,
+          "definition_kind": "library-defined"
+        }
+      ],
+      "reason": "Not an independent D10 operation by name alone; requires behavioral identity adjudication before any new D10 address."
+    },
+    {
+      "semantic_name": "scientific-constant?",
+      "status": "EXACT-NAME-OVERLAP-WITH-RATIFIED-LOWER-DOMAIN",
+      "lower_domain_matches": [
+        {
+          "domain": "D9",
+          "coordinate": "111111110"
+        }
+      ],
+      "source_priority": "LIBRARY-DEFINED-REQUIRES-INDEPENDENCE",
+      "provenance": [
+        {
+          "kind": "library-definition",
+          "file": "lib/quantity.lisp",
+          "source_blob": "40c38e6019beccddd8577aa7af5a0957f4932b89",
+          "line": 238,
+          "definition_kind": "library-defined"
+        }
+      ],
+      "reason": "Not an independent D10 operation by name alone; requires behavioral identity adjudication before any new D10 address."
+    },
+    {
+      "semantic_name": "scientific-constant-name",
+      "status": "EXACT-NAME-OVERLAP-WITH-RATIFIED-LOWER-DOMAIN",
+      "lower_domain_matches": [
+        {
+          "domain": "D9",
+          "coordinate": "111000010"
+        }
+      ],
+      "source_priority": "LIBRARY-DEFINED-REQUIRES-INDEPENDENCE",
+      "provenance": [
+        {
+          "kind": "library-definition",
+          "file": "lib/quantity.lisp",
+          "source_blob": "40c38e6019beccddd8577aa7af5a0957f4932b89",
+          "line": 256,
+          "definition_kind": "library-defined"
+        }
+      ],
+      "reason": "Not an independent D10 operation by name alone; requires behavioral identity adjudication before any new D10 address."
+    },
+    {
+      "semantic_name": "scientific-constant-quantity",
+      "status": "EXACT-NAME-OVERLAP-WITH-RATIFIED-LOWER-DOMAIN",
+      "lower_domain_matches": [
+        {
+          "domain": "D9",
+          "coordinate": "111101101"
+        }
+      ],
+      "source_priority": "LIBRARY-DEFINED-REQUIRES-INDEPENDENCE",
+      "provenance": [
+        {
+          "kind": "library-definition",
+          "file": "lib/quantity.lisp",
+          "source_blob": "40c38e6019beccddd8577aa7af5a0957f4932b89",
+          "line": 259,
+          "definition_kind": "library-defined"
+        }
+      ],
+      "reason": "Not an independent D10 operation by name alone; requires behavioral identity adjudication before any new D10 address."
+    },
+    {
+      "semantic_name": "scientific-constant-value",
+      "status": "EXACT-NAME-OVERLAP-WITH-RATIFIED-LOWER-DOMAIN",
+      "lower_domain_matches": [
+        {
+          "domain": "D9",
+          "coordinate": "111010111"
+        }
+      ],
+      "source_priority": "LIBRARY-DEFINED-REQUIRES-INDEPENDENCE",
+      "provenance": [
+        {
+          "kind": "library-definition",
+          "file": "lib/quantity.lisp",
+          "source_blob": "40c38e6019beccddd8577aa7af5a0957f4932b89",
+          "line": 262,
+          "definition_kind": "library-defined"
+        }
+      ],
+      "reason": "Not an independent D10 operation by name alone; requires behavioral identity adjudication before any new D10 address."
+    },
+    {
+      "semantic_name": "scientific-constant-unit",
+      "status": "EXACT-NAME-OVERLAP-WITH-RATIFIED-LOWER-DOMAIN",
+      "lower_domain_matches": [
+        {
+          "domain": "D9",
+          "coordinate": "111011001"
+        }
+      ],
+      "source_priority": "LIBRARY-DEFINED-REQUIRES-INDEPENDENCE",
+      "provenance": [
+        {
+          "kind": "library-definition",
+          "file": "lib/quantity.lisp",
+          "source_blob": "40c38e6019beccddd8577aa7af5a0957f4932b89",
+          "line": 266,
+          "definition_kind": "library-defined"
+        }
+      ],
+      "reason": "Not an independent D10 operation by name alone; requires behavioral identity adjudication before any new D10 address."
+    },
+    {
+      "semantic_name": "scientific-constant-status",
+      "status": "EXACT-NAME-OVERLAP-WITH-RATIFIED-LOWER-DOMAIN",
+      "lower_domain_matches": [
+        {
+          "domain": "D9",
+          "coordinate": "111010010"
+        }
+      ],
+      "source_priority": "LIBRARY-DEFINED-REQUIRES-INDEPENDENCE",
+      "provenance": [
+        {
+          "kind": "library-definition",
+          "file": "lib/quantity.lisp",
+          "source_blob": "40c38e6019beccddd8577aa7af5a0957f4932b89",
+          "line": 270,
+          "definition_kind": "library-defined"
+        }
+      ],
+      "reason": "Not an independent D10 operation by name alone; requires behavioral identity adjudication before any new D10 address."
+    },
+    {
+      "semantic_name": "scientific-constant-kind",
+      "status": "EXACT-NAME-OVERLAP-WITH-RATIFIED-LOWER-DOMAIN",
+      "lower_domain_matches": [
+        {
+          "domain": "D9",
+          "coordinate": "111001001"
+        }
+      ],
+      "source_priority": "LIBRARY-DEFINED-REQUIRES-INDEPENDENCE",
+      "provenance": [
+        {
+          "kind": "library-definition",
+          "file": "lib/quantity.lisp",
+          "source_blob": "40c38e6019beccddd8577aa7af5a0957f4932b89",
+          "line": 273,
+          "definition_kind": "library-defined"
+        }
+      ],
+      "reason": "Not an independent D10 operation by name alone; requires behavioral identity adjudication before any new D10 address."
+    },
+    {
+      "semantic_name": "scientific-constant-system",
+      "status": "EXACT-NAME-OVERLAP-WITH-RATIFIED-LOWER-DOMAIN",
+      "lower_domain_matches": [
+        {
+          "domain": "D9",
+          "coordinate": "111111101"
+        }
+      ],
+      "source_priority": "LIBRARY-DEFINED-REQUIRES-INDEPENDENCE",
+      "provenance": [
+        {
+          "kind": "library-definition",
+          "file": "lib/quantity.lisp",
+          "source_blob": "40c38e6019beccddd8577aa7af5a0957f4932b89",
+          "line": 276,
+          "definition_kind": "library-defined"
+        }
+      ],
+      "reason": "Not an independent D10 operation by name alone; requires behavioral identity adjudication before any new D10 address."
+    },
+    {
+      "semantic_name": "scientific-constant-source",
+      "status": "EXACT-NAME-OVERLAP-WITH-RATIFIED-LOWER-DOMAIN",
+      "lower_domain_matches": [
+        {
+          "domain": "D9",
+          "coordinate": "111110110"
+        }
+      ],
+      "source_priority": "LIBRARY-DEFINED-REQUIRES-INDEPENDENCE",
+      "provenance": [
+        {
+          "kind": "library-definition",
+          "file": "lib/quantity.lisp",
+          "source_blob": "40c38e6019beccddd8577aa7af5a0957f4932b89",
+          "line": 279,
+          "definition_kind": "library-defined"
+        }
+      ],
+      "reason": "Not an independent D10 operation by name alone; requires behavioral identity adjudication before any new D10 address."
+    },
+    {
+      "semantic_name": "scientific-constant->clauses",
+      "status": "EXACT-NAME-OVERLAP-WITH-RATIFIED-LOWER-DOMAIN",
+      "lower_domain_matches": [
+        {
+          "domain": "D9",
+          "coordinate": "111100111"
+        }
+      ],
+      "source_priority": "LIBRARY-DEFINED-REQUIRES-INDEPENDENCE",
+      "provenance": [
+        {
+          "kind": "library-definition",
+          "file": "lib/quantity.lisp",
+          "source_blob": "40c38e6019beccddd8577aa7af5a0957f4932b89",
+          "line": 285,
+          "definition_kind": "library-defined"
+        }
+      ],
+      "reason": "Not an independent D10 operation by name alone; requires behavioral identity adjudication before any new D10 address."
+    },
+    {
+      "semantic_name": "translation-status",
+      "status": "EXACT-NAME-OVERLAP-WITH-RATIFIED-LOWER-DOMAIN",
+      "lower_domain_matches": [
+        {
+          "domain": "D9",
+          "coordinate": "000000101"
+        }
+      ],
+      "source_priority": "LIBRARY-DEFINED-REQUIRES-INDEPENDENCE",
+      "provenance": [
+        {
+          "kind": "library-definition",
+          "file": "lib/translation.lisp",
+          "source_blob": "80cd225cba549a837097b1e633b6662c9434a148",
+          "line": 40,
+          "definition_kind": "library-defined"
+        }
+      ],
+      "reason": "Not an independent D10 operation by name alone; requires behavioral identity adjudication before any new D10 address."
+    },
+    {
+      "semantic_name": "translation-kind",
+      "status": "EXACT-NAME-OVERLAP-WITH-RATIFIED-LOWER-DOMAIN",
+      "lower_domain_matches": [
+        {
+          "domain": "D9",
+          "coordinate": "000101100"
+        }
+      ],
+      "source_priority": "LIBRARY-DEFINED-REQUIRES-INDEPENDENCE",
+      "provenance": [
+        {
+          "kind": "library-definition",
+          "file": "lib/translation.lisp",
+          "source_blob": "80cd225cba549a837097b1e633b6662c9434a148",
+          "line": 43,
+          "definition_kind": "library-defined"
+        }
+      ],
+      "reason": "Not an independent D10 operation by name alone; requires behavioral identity adjudication before any new D10 address."
+    },
+    {
+      "semantic_name": "translation-source",
+      "status": "EXACT-NAME-OVERLAP-WITH-RATIFIED-LOWER-DOMAIN",
+      "lower_domain_matches": [
+        {
+          "domain": "D9",
+          "coordinate": "000010100"
+        }
+      ],
+      "source_priority": "LIBRARY-DEFINED-REQUIRES-INDEPENDENCE",
+      "provenance": [
+        {
+          "kind": "library-definition",
+          "file": "lib/translation.lisp",
+          "source_blob": "80cd225cba549a837097b1e633b6662c9434a148",
+          "line": 46,
+          "definition_kind": "library-defined"
+        }
+      ],
+      "reason": "Not an independent D10 operation by name alone; requires behavioral identity adjudication before any new D10 address."
+    },
+    {
+      "semantic_name": "translation-payload",
+      "status": "EXACT-NAME-OVERLAP-WITH-RATIFIED-LOWER-DOMAIN",
+      "lower_domain_matches": [
+        {
+          "domain": "D9",
+          "coordinate": "000101110"
+        }
+      ],
+      "source_priority": "LIBRARY-DEFINED-REQUIRES-INDEPENDENCE",
+      "provenance": [
+        {
+          "kind": "library-definition",
+          "file": "lib/translation.lisp",
+          "source_blob": "80cd225cba549a837097b1e633b6662c9434a148",
+          "line": 49,
+          "definition_kind": "library-defined"
+        }
+      ],
+      "reason": "Not an independent D10 operation by name alone; requires behavioral identity adjudication before any new D10 address."
+    },
+    {
+      "semantic_name": "make-translation-review",
+      "status": "EXACT-NAME-OVERLAP-WITH-RATIFIED-LOWER-DOMAIN",
+      "lower_domain_matches": [
+        {
+          "domain": "D9",
+          "coordinate": "000011010"
+        }
+      ],
+      "source_priority": "LIBRARY-DEFINED-REQUIRES-INDEPENDENCE",
+      "provenance": [
+        {
+          "kind": "library-definition",
+          "file": "lib/translation.lisp",
+          "source_blob": "80cd225cba549a837097b1e633b6662c9434a148",
+          "line": 134,
+          "definition_kind": "library-defined"
+        }
+      ],
+      "reason": "Not an independent D10 operation by name alone; requires behavioral identity adjudication before any new D10 address."
+    },
+    {
+      "semantic_name": "translation-review-status",
+      "status": "EXACT-NAME-OVERLAP-WITH-RATIFIED-LOWER-DOMAIN",
+      "lower_domain_matches": [
+        {
+          "domain": "D9",
+          "coordinate": "000111100"
+        }
+      ],
+      "source_priority": "LIBRARY-DEFINED-REQUIRES-INDEPENDENCE",
+      "provenance": [
+        {
+          "kind": "library-definition",
+          "file": "lib/translation.lisp",
+          "source_blob": "80cd225cba549a837097b1e633b6662c9434a148",
+          "line": 138,
+          "definition_kind": "library-defined"
+        }
+      ],
+      "reason": "Not an independent D10 operation by name alone; requires behavioral identity adjudication before any new D10 address."
+    },
+    {
+      "semantic_name": "translation-review-code",
+      "status": "EXACT-NAME-OVERLAP-WITH-RATIFIED-LOWER-DOMAIN",
+      "lower_domain_matches": [
+        {
+          "domain": "D9",
+          "coordinate": "000100011"
+        }
+      ],
+      "source_priority": "LIBRARY-DEFINED-REQUIRES-INDEPENDENCE",
+      "provenance": [
+        {
+          "kind": "library-definition",
+          "file": "lib/translation.lisp",
+          "source_blob": "80cd225cba549a837097b1e633b6662c9434a148",
+          "line": 141,
+          "definition_kind": "library-defined"
+        }
+      ],
+      "reason": "Not an independent D10 operation by name alone; requires behavioral identity adjudication before any new D10 address."
+    },
+    {
+      "semantic_name": "translation-review-proposal",
+      "status": "EXACT-NAME-OVERLAP-WITH-RATIFIED-LOWER-DOMAIN",
+      "lower_domain_matches": [
+        {
+          "domain": "D9",
+          "coordinate": "000100101"
+        }
+      ],
+      "source_priority": "LIBRARY-DEFINED-REQUIRES-INDEPENDENCE",
+      "provenance": [
+        {
+          "kind": "library-definition",
+          "file": "lib/translation.lisp",
+          "source_blob": "80cd225cba549a837097b1e633b6662c9434a148",
+          "line": 144,
+          "definition_kind": "library-defined"
+        }
+      ],
+      "reason": "Not an independent D10 operation by name alone; requires behavioral identity adjudication before any new D10 address."
+    },
+    {
+      "semantic_name": "translation-review-detail",
+      "status": "EXACT-NAME-OVERLAP-WITH-RATIFIED-LOWER-DOMAIN",
+      "lower_domain_matches": [
+        {
+          "domain": "D9",
+          "coordinate": "000101111"
+        }
+      ],
+      "source_priority": "LIBRARY-DEFINED-REQUIRES-INDEPENDENCE",
+      "provenance": [
+        {
+          "kind": "library-definition",
+          "file": "lib/translation.lisp",
+          "source_blob": "80cd225cba549a837097b1e633b6662c9434a148",
+          "line": 147,
+          "definition_kind": "library-defined"
+        }
+      ],
+      "reason": "Not an independent D10 operation by name alone; requires behavioral identity adjudication before any new D10 address."
+    },
+    {
+      "semantic_name": "translation-review",
+      "status": "EXACT-NAME-OVERLAP-WITH-RATIFIED-LOWER-DOMAIN",
+      "lower_domain_matches": [
+        {
+          "domain": "D9",
+          "coordinate": "000101000"
+        }
+      ],
+      "source_priority": "LIBRARY-DEFINED-REQUIRES-INDEPENDENCE",
+      "provenance": [
+        {
+          "kind": "library-definition",
+          "file": "lib/translation.lisp",
+          "source_blob": "80cd225cba549a837097b1e633b6662c9434a148",
+          "line": 222,
+          "definition_kind": "library-defined"
+        }
+      ],
+      "reason": "Not an independent D10 operation by name alone; requires behavioral identity adjudication before any new D10 address."
+    },
+    {
+      "semantic_name": "translation-admittable?",
+      "status": "EXACT-NAME-OVERLAP-WITH-RATIFIED-LOWER-DOMAIN",
+      "lower_domain_matches": [
+        {
+          "domain": "D9",
+          "coordinate": "000110111"
+        }
+      ],
+      "source_priority": "LIBRARY-DEFINED-REQUIRES-INDEPENDENCE",
+      "provenance": [
+        {
+          "kind": "library-definition",
+          "file": "lib/translation.lisp",
+          "source_blob": "80cd225cba549a837097b1e633b6662c9434a148",
+          "line": 261,
+          "definition_kind": "library-defined"
+        }
+      ],
+      "reason": "Not an independent D10 operation by name alone; requires behavioral identity adjudication before any new D10 address."
+    },
+    {
+      "semantic_name": "translation-admission-payload",
+      "status": "EXACT-NAME-OVERLAP-WITH-RATIFIED-LOWER-DOMAIN",
+      "lower_domain_matches": [
+        {
+          "domain": "D9",
+          "coordinate": "000000010"
+        }
+      ],
+      "source_priority": "LIBRARY-DEFINED-REQUIRES-INDEPENDENCE",
+      "provenance": [
+        {
+          "kind": "library-definition",
+          "file": "lib/translation.lisp",
+          "source_blob": "80cd225cba549a837097b1e633b6662c9434a148",
+          "line": 277,
+          "definition_kind": "library-defined"
+        }
+      ],
+      "reason": "Not an independent D10 operation by name alone; requires behavioral identity adjudication before any new D10 address."
+    },
+    {
+      "semantic_name": "translation-evidence-worthy?",
+      "status": "EXACT-NAME-OVERLAP-WITH-RATIFIED-LOWER-DOMAIN",
+      "lower_domain_matches": [
+        {
+          "domain": "D9",
+          "coordinate": "000111011"
+        }
+      ],
+      "source_priority": "LIBRARY-DEFINED-REQUIRES-INDEPENDENCE",
+      "provenance": [
+        {
+          "kind": "library-definition",
+          "file": "lib/translation.lisp",
+          "source_blob": "80cd225cba549a837097b1e633b6662c9434a148",
+          "line": 287,
+          "definition_kind": "library-defined"
+        }
+      ],
+      "reason": "Not an independent D10 operation by name alone; requires behavioral identity adjudication before any new D10 address."
+    },
+    {
+      "semantic_name": "translation-evidence-entry",
+      "status": "EXACT-NAME-OVERLAP-WITH-RATIFIED-LOWER-DOMAIN",
+      "lower_domain_matches": [
+        {
+          "domain": "D9",
+          "coordinate": "000000011"
+        }
+      ],
+      "source_priority": "LIBRARY-DEFINED-REQUIRES-INDEPENDENCE",
+      "provenance": [
+        {
+          "kind": "library-definition",
+          "file": "lib/translation.lisp",
+          "source_blob": "80cd225cba549a837097b1e633b6662c9434a148",
+          "line": 295,
+          "definition_kind": "library-defined"
+        }
+      ],
+      "reason": "Not an independent D10 operation by name alone; requires behavioral identity adjudication before any new D10 address."
+    },
+    {
+      "semantic_name": "translation-evidence-next",
+      "status": "EXACT-NAME-OVERLAP-WITH-RATIFIED-LOWER-DOMAIN",
+      "lower_domain_matches": [
+        {
+          "domain": "D9",
+          "coordinate": "000001110"
+        }
+      ],
+      "source_priority": "LIBRARY-DEFINED-REQUIRES-INDEPENDENCE",
+      "provenance": [
+        {
+          "kind": "library-definition",
+          "file": "lib/translation.lisp",
+          "source_blob": "80cd225cba549a837097b1e633b6662c9434a148",
+          "line": 299,
+          "definition_kind": "library-defined"
+        }
+      ],
+      "reason": "Not an independent D10 operation by name alone; requires behavioral identity adjudication before any new D10 address."
+    },
+    {
+      "semantic_name": "translation-review-with-evidence",
+      "status": "EXACT-NAME-OVERLAP-WITH-RATIFIED-LOWER-DOMAIN",
+      "lower_domain_matches": [
+        {
+          "domain": "D9",
+          "coordinate": "000010010"
+        }
+      ],
+      "source_priority": "LIBRARY-DEFINED-REQUIRES-INDEPENDENCE",
+      "provenance": [
+        {
+          "kind": "library-definition",
+          "file": "lib/translation.lisp",
+          "source_blob": "80cd225cba549a837097b1e633b6662c9434a148",
+          "line": 306,
+          "definition_kind": "library-defined"
+        }
+      ],
+      "reason": "Not an independent D10 operation by name alone; requires behavioral identity adjudication before any new D10 address."
+    }
+  ]
+}
