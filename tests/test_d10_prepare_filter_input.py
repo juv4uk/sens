@@ -61,8 +61,8 @@ class PrepareTests(unittest.TestCase):
 
     def test_pinned_source_and_lagging_canonical_overlay(self):
         counts = adapter.prepare(self.root, self.input, self.output)
-        self.assertEqual(1, counts["canonical_overlay_added"])
-        self.assertEqual(2, counts["filter_input_rows"] if "filter_input_rows" in counts else counts["filter_input_rows"])
+        self.assertEqual(1, counts["new_selected_since_index"])
+        self.assertEqual(2, counts["filter_input_rows"])
         rows = {row["candidate_id"]: row for row in self.read_prepared()}
         self.assertEqual("knowledge/donor.json:2", rows["d10.new"]["donor_provenance"])
         self.assertEqual(self.pin, rows["d10.new"]["source_pin"])
