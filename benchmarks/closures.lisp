@@ -1,6 +1,6 @@
 ; Closure benchmark · Benchmark замикань · Closure-Benchmark
-(00001001 make-pair
-  (00001000 (left)
-    (00001000 (right)
-      (00000100 left (00000100 right (00000001 ()))))))
-((make-pair (00000001 radio)) (00000001 antenna))
+(0011 make-pair
+  (0010 (left)
+    (0010 (right)
+      (111 left (111 right (001 ()))))))
+((make-pair (001 radio)) (001 antenna))
