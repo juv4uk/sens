@@ -231,26 +231,46 @@ pub fn rank_single_root(words: &[ExactWord]) -> Result<GrammarRank, GrammarRankE
 
     for word in inner {
         let mut found = false;
-        'candidate: for width in 1..=remaining.min(9) {
-            for value in 0..(1u16 << width) {
-                let candidate = ExactWord {
-                    width: width as u8,
-                    bits: value,
-                };
-                let Some(next) = advance(&state, candidate) else {
+        'widths: for width in 1..=remaining.min(9) {
+            if width == 2 {
+                // All D2 words are distinct structural transitions.
+                for value in 0..4 {
+                    let candidate = ExactWord { width: 2, bits: value };
+                    let Some(next) = advance(&state, candidate) else {
+                        continue;
+                    };
+                    let suffixes = count_suffix(remaining - width, &next, &mut memo);
+                    if suffixes == 0 {
+                        continue;
+                    }
+                    if candidate == *word {
+                        state = next;
+                        remaining -= width;
+                        found = true;
+                        break 'widths;
+                    }
+                    ordinal += suffixes;
+                }
+            } else {
+                // All 2^width non-D2 values have the SAME successor and
+                // completion count. Count the earlier numeric coordinates
+                // algebraically instead of enumerating up to 512 choices.
+                let representative = ExactWord { width: width as u8, bits: 0 };
+                let Some(next) = advance(&state, representative) else {
                     continue;
                 };
                 let suffixes = count_suffix(remaining - width, &next, &mut memo);
                 if suffixes == 0 {
                     continue;
                 }
-                if candidate == *word {
+                if word.width == width as u8 {
+                    ordinal += u128::from(word.bits) * suffixes;
                     state = next;
                     remaining -= width;
                     found = true;
-                    break 'candidate;
+                    break 'widths;
                 }
-                ordinal += suffixes;
+                ordinal += (1u128 << width) * suffixes;
             }
         }
         if !found {
@@ -281,27 +301,46 @@ pub fn unrank_single_root(
 
     while remaining > 0 {
         let mut found = false;
-        'candidate: for width in 1..=remaining.min(9) {
-            for value in 0..(1u16 << width) {
-                let candidate = ExactWord {
-                    width: width as u8,
-                    bits: value,
-                };
-                let Some(next) = advance(&state, candidate) else {
+        'widths: for width in 1..=remaining.min(9) {
+            if width == 2 {
+                for value in 0..4 {
+                    let candidate = ExactWord { width: 2, bits: value };
+                    let Some(next) = advance(&state, candidate) else {
+                        continue;
+                    };
+                    let suffixes = count_suffix(remaining - width, &next, &mut memo);
+                    if suffixes == 0 {
+                        continue;
+                    }
+                    if ordinal < suffixes {
+                        words.push(candidate);
+                        state = next;
+                        remaining -= width;
+                        found = true;
+                        break 'widths;
+                    }
+                    ordinal -= suffixes;
+                }
+            } else {
+                let representative = ExactWord { width: width as u8, bits: 0 };
+                let Some(next) = advance(&state, representative) else {
                     continue;
                 };
                 let suffixes = count_suffix(remaining - width, &next, &mut memo);
                 if suffixes == 0 {
                     continue;
                 }
-                if ordinal < suffixes {
-                    words.push(candidate);
+                let group = (1u128 << width) * suffixes;
+                if ordinal < group {
+                    let value = (ordinal / suffixes) as u16;
+                    ordinal %= suffixes;
+                    words.push(ExactWord { width: width as u8, bits: value });
                     state = next;
                     remaining -= width;
                     found = true;
-                    break 'candidate;
+                    break 'widths;
                 }
-                ordinal -= suffixes;
+                ordinal -= group;
             }
         }
         if !found {
