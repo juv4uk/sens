@@ -30,8 +30,10 @@ jobs:
           needle="(101 (100 left) (100 right))"
           if needle not in source:
               raise SystemExit("BLOCK: exact D3 equality no longer used by bit-list law")
-          if "(101 left (001 ()))" not in source or "(101 right (001 ()))" not in source:
-              raise SystemExit("BLOCK: binary list nil equality replaced or lost")
+          if "(101 left (001 ()))" in source or "(101 right (001 ()))" in source:
+              raise SystemExit("BLOCK: non-atomic list-vs-nil sent to exact D3 EQ")
+          if "((010 left) (010 right))" not in source or "((010 right) ())" not in source:
+              raise SystemExit("BLOCK: proper-bit-list NIL boundary must use D3 ATOM")
           print("COMPILER_NUCLEUS_D3_EQ_STATIC_PASS")
           PY
       - name: Prove semantic compiler export of all current D3-D4 roles
