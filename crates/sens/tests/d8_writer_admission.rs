@@ -54,6 +54,24 @@ fn d8_read_write_round_trip_uses_only_exact_ratified_d8_coordinates() {
 }
 
 #[test]
+fn d8_string_to_symbol_is_exact_and_rejects_non_strings() {
+    let mut session = Session::default();
+    let parsed = parse_mixed_exact_domain_legacy_core_source("lib/core.lisp", "(11101101 \"zoo\")")
+        .expect("D8 scalar conversion must parse by exact binary head");
+    let result = eval_parsed_expressions(&parsed, &mut session)
+        .expect("ratified D8 symbol conversion");
+    assert_eq!(result.value.to_string(), "zoo");
+
+    let bad = parse_mixed_exact_domain_legacy_core_source("lib/core.lisp", "(11101101 7)")
+        .expect("invalid argument is a runtime type failure, not parser rewriting");
+    assert_eq!(
+        eval_parsed_expressions(&bad, &mut session)
+            .expect_err("a number is not a text carrier").kind,
+        sens::ErrorKind::Type
+    );
+}
+
+#[test]
 fn d8_read_rejects_excess_arguments() {
     let mut session = Session::default();
     let parsed = parse_mixed_exact_domain_legacy_core_source("lib/core.lisp", "(11101010 \"a\" \"b\")")
