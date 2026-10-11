@@ -1,0 +1,66 @@
+{
+  "schema": "sens-source-archive/v1",
+  "archive_date": "2026-10-11",
+  "original_window": "2026-10-06..2026-10-11",
+  "integration_method": "reused original Git blob as inert source; no new branch",
+  "status": "ARCHIVED_ONLY_NOT_ACTIVATED",
+  "notes": "Records may contain stale implementation contracts, red CI or incomplete proofs. Not adopted as executable code, not a D10 ratification, not proof of physical codec cutover. Current main tests and domain contract remain authority.",
+  "sources": [
+    {
+      "origin_pr": 5476,
+      "origin_sha": "a7073f3105a3be281120821b6a73e46aa4fb92e8",
+      "original_path": "tests/test_three_pass_migration.py",
+      "original_blob_sha": "ab218580e943a35d8790c7935e821cca88833157",
+      "archive_path": "research/domain-archive/20261011/pr5476/tests/test_three_pass_migration.py.source.txt"
+    },
+    {
+      "origin_pr": 5476,
+      "origin_sha": "a7073f3105a3be281120821b6a73e46aa4fb92e8",
+      "original_path": "tests/test_migrate_approved_t5.py",
+      "original_blob_sha": "602310aa79759f04017c590f8fdd69243ba5a1a0",
+      "archive_path": "research/domain-archive/20261011/pr5476/tests/test_migrate_approved_t5.py.source.txt"
+    },
+    {
+      "origin_pr": 5457,
+      "origin_sha": "4b0918a1ab0c7fdee7ba6351abc6c35c391bbd1e",
+      "original_path": "crates/sens/tests/t5_exact_word_d2_admission.rs",
+      "original_blob_sha": "bcb269c3fe6adaaa739de78dc7783e9565f488af",
+      "archive_path": "research/domain-archive/20261011/pr5457/crates/sens/tests/t5_exact_word_d2_admission.rs.source.txt"
+    },
+    {
+      "origin_pr": 5214,
+      "origin_sha": "822524bf20d0ab12830c554ed283554f23c008dc",
+      "original_path": "crates/sens/examples/t5_view_ab.rs",
+      "original_blob_sha": "26ee41c1a71530a269e3b8962e81873821bd8b5e",
+      "archive_path": "research/domain-archive/20261011/pr5214/crates/sens/examples/t5_view_ab.rs.source.txt"
+    },
+    {
+      "origin_pr": 5214,
+      "origin_sha": "822524bf20d0ab12830c554ed283554f23c008dc",
+      "original_path": "crates/sens/src/ternary_transport.rs",
+      "original_blob_sha": "4e0b99514c1b97e284cc8de0d1427a07fe16c220",
+      "archive_path": "research/domain-archive/20261011/pr5214/crates/sens/src/ternary_transport.rs.source.txt"
+    },
+    {
+      "origin_pr": 5451,
+      "origin_sha": "c7f0ae92c5a97e6c35327aa8400f99d4eda44c95",
+      "original_path": "scripts/check-encoder-swarm-contract.py",
+      "original_blob_sha": "25bb32d3c5faa9d0352d479f9be6879edabc9fc8",
+      "archive_path": "research/domain-archive/20261011/pr5451/scripts/check-encoder-swarm-contract.py.source.txt"
+    },
+    {
+      "origin_pr": 5258,
+      "origin_sha": "7fc20c8eecb2c3214a020512370a794f23bb6afe",
+      "original_path": "lib/time.lisp",
+      "original_blob_sha": "a8f59990f5d5e862a4a95095aeca61c7c0695e78",
+      "archive_path": "research/domain-archive/20261011/pr5258/lib/time.lisp.source.txt"
+    },
+    {
+      "origin_pr": 5277,
+      "origin_sha": "95008d662915ab2c514ee1603ab0125f81ae6bcc",
+      "original_path": "tests/test_migration_pair_cohort.py",
+      "original_blob_sha": "9b1551535c39b1bcf0d5c379c5f5ed1ac69353eb",
+      "archive_path": "research/domain-archive/20261011/pr5277/tests/test_migration_pair_cohort.py.source.txt"
+    }
+  ]
+}
