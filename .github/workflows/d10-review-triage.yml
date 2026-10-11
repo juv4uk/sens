@@ -1,0 +1,32 @@
+name: D10 candidate triage preserves source identities
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'knowledge/d10-filter/all-candidates.tsv'
+      - 'knowledge/d10-filter/all-source-occurrences.tsv'
+      - 'knowledge/d10-filter/source-occurrence-manifest.json'
+      - 'knowledge/d10-filter/candidate-review-queue.tsv'
+      - 'knowledge/d10-filter/review-triage-manifest.json'
+      - 'knowledge/d10-current-inventory.json'
+      - 'knowledge/d10-v9-semantic-inventory.json'
+      - 'scripts/d10_sort_review_queue.py'
+      - 'tests/test_d10_review_queue.py'
+      - '.github/workflows/d10-review-triage.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  check-lossless-triage:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Verify original 7396 immutable source appearances
+        run: python3 scripts/d10_restore_source_occurrences.py
+      - name: Regenerate and compare sorted queue, all 1809 identities
+        run: python3 scripts/d10_sort_review_queue.py
+      - name: Fail-closed regression tests
+        run: python3 -m unittest discover -s tests -p 'test_d10_review_queue.py' -v

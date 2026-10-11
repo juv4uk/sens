@@ -1,0 +1,42 @@
+{
+  "schema": "d10-candidate-evidence-triage/v1",
+  "date": "2026-10-11",
+  "authority": "RESEARCH_WORKLIST_NO_CORE_ADMISSION",
+  "input": {
+    "path": "knowledge/d10-filter/all-candidates.tsv",
+    "git_blob": "1660a19ff9482f932fb9a40fa78ad1fa50134c31"
+  },
+  "preserved_archive_git_blob": "101a8e59146f95ec35ed60e2281da32476037984",
+  "canonical_inventory_git_blob": "b77c5b4aae35bcf377e8406f59328e6d82808a45",
+  "output": {
+    "path": "knowledge/d10-filter/candidate-review-queue.tsv",
+    "git_blob": "9331856279966ef701a48584c766f3042756a96b"
+  },
+  "total_candidate_identities": 1809,
+  "research_selected_kept_separate": 759,
+  "unselected_to_review": 1050,
+  "source_occurrences_preserved": 7396,
+  "distinct_source_refs_preserved": 6949,
+  "tiers": {
+    "ARCHIVE_ALREADY_RESEARCH_SELECTED": 759,
+    "P0_REPLAY_BOTH_WITNESSES": 78,
+    "P1_ADD_NEGATIVE_WITNESSES": 22,
+    "P1_ADD_POSITIVE_WITNESSES": 11,
+    "P2_SPECIFY_BOTH_WITNESSES": 388,
+    "P3_VERIFY_DONOR_AND_WRITE_TESTS": 63,
+    "P3_SPECIFY_OBSERVABLE_LAW": 429,
+    "P4_RESEARCH_MISSING_LAW_AND_DONOR": 59
+  },
+  "facts": {
+    "no_candidate_id_dropped": true,
+    "name_collisions_are_review_flags_not_duplicates": true,
+    "f1_source_reference_claims_not_source_semantics_verified": true,
+    "f2_executed_witness_proofs_attached": false,
+    "f3_independent_semantic_proofs_attached": false,
+    "d10_newly_selected": 0,
+    "d10_new_coordinates": 0,
+    "d10_new_ratifications": 0,
+    "historical_branches_completely_censused": false
+  },
+  "policy": "P0 indicates four textual claim types are present, not that their witnesses were executed. F1-F4 require separate verified records before owner approval. Repeated source occurrences are preserved, not new semantic values."
+}
