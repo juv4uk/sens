@@ -1,0 +1,11 @@
+# Exact compare pin main SHA: 9c858fa5902b82e17cb97b07497938e746832c46
+# This is commit-ancestry triage; do not claim semantic merge or adopt obsolete behavior.
+branch	source_sha	compare_status	ahead_by	behind_by	classification
+agent/chatgpt/fix-5126-benchmark-registry-20261009	7f4b978c1a6f973335158eb4302aa725eb00d017	diverged	2	1448	NEEDS_CONTENT_REVIEW
+agent/chatgpt/owner-l1-l7-normalizer-20261009	479eab04bbd7e1dfd4562143c54e069429bc750a	diverged	3	1445	NEEDS_CONTENT_REVIEW
+agent/chatgpt/physical-d3-car-cons-20261010	89d5bcb86c3bdbb6d9432265964259faaf0264a8	diverged	1	920	NEEDS_CONTENT_REVIEW
+agent/chatgpt/public-api-inventory-20261010	6417ff87915076a7ac9135d3dc3f2503b13b70f6	diverged	89	924	NEEDS_CONTENT_REVIEW
+agent/chatgpt/replay-2000-unbounded-width-20261009	e1b55ce2e14ce9658dba0b7317e292625376a5b2	diverged	2	1451	NEEDS_CONTENT_REVIEW
+agent/chatgpt/sweep-triage-addendum-20261009	5dba2ce7cee6f0c6aa272d9cd70a9651605ca825	diverged	7	1447	NEEDS_CONTENT_REVIEW
+agent/chatgpt/sweep-triage-ledger-20261009	21c4f4726c751f7b342d45a0cc4e91bd65fd8189	diverged	4	1447	NEEDS_CONTENT_REVIEW
+agent/chatgpt/2372-vex3-current-main	5fca2c7f90b9aa573534492ed8bf1a9fc783f532	behind	0	5444	NO_UNMERGED_COMMITS
