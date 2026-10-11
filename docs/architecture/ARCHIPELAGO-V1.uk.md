@@ -2,7 +2,7 @@
 
 **Статус:** execution-island architecture; попередню семантичну ownership-модель скасовано рішенням [#4162](https://github.com/juv4uk/sens/issues/4162).  
 **Семантична влада:** Contract 11.8, D1–D9 owner-ratified; D10 — **єдиний 10-бітний research/unratified потік**.  
-**Лічильник D10:** виключно `knowledge/d10-v1-semantic-inventory.json`, не історична карта `knowledge/archipelago-map-v1.json`.
+**Лічильник D10:** виключно SHA-закріплений `canonical_current` із `knowledge/d10-current-inventory.json`, не історичні `knowledge/d10-v1-semantic-inventory.json` чи `knowledge/archipelago-map-v1.json`.
 
 ## Один D10, багато донорів
 
