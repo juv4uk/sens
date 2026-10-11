@@ -122,6 +122,7 @@ def eligible(src):
                 if (len(a) == 3 and len(b) == 3 and len(c) == 2
                     and c[0].get("value") == "t"
                     and a[0]["kind"] == "l"
+                    and bool(a[0]["children"])
                     and a[0]["children"][0].get("value") == "010"
                     and len(a[0]["children"]) == 2
                     and serialize(a[0]) == serialize(b[0])
