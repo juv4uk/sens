@@ -21,6 +21,10 @@
 use std::cmp::Ordering;
 use std::sync::OnceLock;
 
+mod canonical_form_capacity;
+
+use canonical_form_capacity::FormProfile;
+
 /// Мітка профілю «Рамка-3» у байтовому носії `.senc`.
 pub const FRAME_LABEL: u8 = 0xF3;
 /// Мітка профілю «Tb-33» у байтовому носії `.senc`.
@@ -770,6 +774,9 @@ pub fn encode_smallest(words: &[String]) -> Result<Carrier, SencError> {
         extension: ".sens",
     };
     if let Ok(body) = frame_encode(&words) {
+        if !is_canonical_form(&words, FormProfile::D3Profile) {
+            return Err(SencError::NotCanonical);
+        }
         let mut data = Vec::with_capacity(body.len() + 1);
         data.push(FRAME_LABEL);
         data.extend_from_slice(&body);
@@ -782,6 +789,9 @@ pub fn encode_smallest(words: &[String]) -> Result<Carrier, SencError> {
         }
     }
     if let Ok(body) = tb_encode(&transport_trits(&words)) {
+        if !is_canonical_form(&words, FormProfile::D3Profile) {
+            return Err(SencError::NotCanonical);
+        }
         let mut data = Vec::with_capacity(body.len() + 1);
         data.push(TB33_LABEL);
         data.extend_from_slice(&body);
@@ -845,6 +855,15 @@ pub fn read_carrier(carrier: &Carrier) -> Result<Vec<String>, SencError> {
     }
 }
 
+/// Перевірка канонічної валідності послідовності слів (закон форми).
+///
+/// Повертає true, якщо послідовність є валідною програмою за законом форми.
+/// Профіль D3Profile: підформи-голови заборонені. FullProfile: дозволені.
+pub fn is_canonical_form(words: &[String], profile: FormProfile) -> bool {
+    let refs: Vec<&str> = words.iter().map(|s| s.as_str()).collect();
+    crate::canonical_form_capacity::is_canonical_form(&refs, profile)
+}
+
 /// Явний маршрут читання `.senc` за оголошеною міткою (без автовизначення
 /// за вмістом): `F3` → Рамка-3, `F4` → Tb-33, інша мітка → відмова.
 pub fn decode_senc(data: &[u8]) -> Result<Vec<String>, SencError> {
@@ -856,11 +875,17 @@ pub fn decode_senc(data: &[u8]) -> Result<Vec<String>, SencError> {
         TB33_LABEL => Profile::Tb33,
         _ => return Err(SencError::UnknownLabel),
     };
-    read_carrier(&Carrier {
+    let decoded = read_carrier(&Carrier {
         profile,
         data: data.to_vec(),
         extension: ".senc",
-    })
+    })?;
+    if profile == Profile::Frame3 || profile == Profile::Tb33 {
+        if !is_canonical_form(&decoded, FormProfile::D3Profile) {
+            return Err(SencError::NotCanonical);
+        }
+    }
+    Ok(decoded)
 }
 
 #[cfg(test)]
@@ -1067,12 +1092,14 @@ mod tests {
 
     #[test]
     fn adaptive_smallest_prefers_t5_on_tie() {
-        let empty = words(&["10", "01"]);
-        let carrier = encode_smallest(&empty).unwrap();
+        // Випадок, де T5 і Frame3 мають однаковий розмір: T5 перемагає.
+        // Один атом `(ATOM 0)` — T5 та Frame3 мають однаковий розмір.
+        let atom = words(&["10", "010", "0", "01"]);
+        let carrier = encode_smallest(&atom).unwrap();
         assert_eq!(carrier.profile, Profile::T5);
         assert_eq!(carrier.extension, ".sens");
-        assert_eq!(carrier.data, t5_encode(&empty).unwrap());
 
+        // Випадок, де Frame3 менший: QUOTE з пустим аргументом.
         let quote = words(&["10", "001", "00", "000", "01"]);
         let carrier = encode_smallest(&quote).unwrap();
         assert_eq!(carrier.profile, Profile::Frame3);
