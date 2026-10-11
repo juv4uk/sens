@@ -40,10 +40,7 @@
 
 (0011 collect-all-symbols
   (0010 (forms acc)
-    (110
-      ((010 forms) () acc)
-      ((010 forms) (1) acc)
-      (t (collect-all-symbols (011 forms) (collect-symbols-onto (100 forms) acc))))))
+    (110 ((010 forms) acc) ((010 (001 ())) (collect-all-symbols (011 forms) (collect-symbols-onto (100 forms) acc))))))
 
 ; Tail-recursive on purpose, not the more obvious `(cons (car sorted)
 ; (insert-sorted sym (cdr sorted)))`: that shape's real Rust-stack depth
@@ -73,10 +70,7 @@
 
 (0011 sort-symbols-onto
   (0010 (remaining sorted)
-    (110
-      ((010 remaining) () sorted)
-      ((010 remaining) (1) sorted)
-      (t (sort-symbols-onto (011 remaining) (insert-sorted (100 remaining) sorted))))))
+    (110 ((010 remaining) sorted) ((010 (001 ())) (sort-symbols-onto (011 remaining) (insert-sorted (100 remaining) sorted))))))
 
 (0011 sort-symbols
   (0010 (symbols)
@@ -84,10 +78,7 @@
 
 (0011 print-table-onto
   (0010 (symbols id)
-    (110
-      ((010 symbols) () (001 ()))
-      ((010 symbols) (1) (001 ()))
-      (t ((0010 ()
+    (110 ((010 symbols) (001 ())) ((010 (001 ())) ((0010 ()
             (11011011 (111 (11101110 (100 symbols)) id))
             (print-table-onto (011 symbols) (01010 id 1))))))))
 
