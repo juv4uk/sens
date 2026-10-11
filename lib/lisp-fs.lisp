@@ -363,6 +363,22 @@
       (fs-bindings-without (внутрішня-мапа-список (fs-bindings fs)) name map-empty)
       (01010 1 (fs-revision fs)))))
 
+; Root-commit equivalence over immutable trees, derived from D3
+; ATOM/EQ/CAR/CDR and D4 NULL; returns exact D1 at every recursion level.
+(0011 внутрішня-рівність-структур
+  (0010 (left right)
+    (110
+      ((0101 left) (0101 right))
+      ((0101 right) (0101 (001 (0))))
+      ((010 left)
+       (110
+         ((010 right) (101 left right))
+         ((010 ()) (0101 (001 (0))))))
+      ((010 right) (0101 (001 (0))))
+      ((внутрішня-рівність-структур (100 left) (100 right))
+       (внутрішня-рівність-структур (011 left) (011 right)))
+      ((010 ()) (0101 (001 (0)))))))
+
 (0011 fs-journal-replay-event
   (0010 (fs event)
     (нехай-похідне ((decision (fs-journal-event-decision event)))
@@ -395,8 +411,8 @@
                      (fs-unbind fs (fs-package-field (001 name) event))))
               ((101 op (001 root-commit))
                (110
-                 ((11110111 (fs-root-package fs)
-                          (fs-package-field (001 root) event))
+                 ((внутрішня-рівність-структур (fs-root-package fs)
+                           (fs-package-field (001 root) event))
                   (1110 (001 accepted) fs))
                  ((010 ()) (1110 (001 rejected) (001 root-mismatch)))))
               ((010 ()) (1110 (001 rejected) (001 unknown-event))))))))))
