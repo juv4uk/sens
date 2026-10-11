@@ -23,6 +23,19 @@ SKIP = ("lib/domains/", "lib/generated/", "lib/surface/", "knowledge/archive/",
         "knowledge/d10-source-snapshots/", "research/", "docs/", "tests/")
 HOLDS = {"lib/macro.lisp", "lib/machine/block.lisp"}
 
+# The five pinned service/policy sources were migrated only at D4 DEFINE/LAMBDA
+# heads. Their surviving 8-bit D3 COND forms remain HISTORICAL, not current D8.
+# Do not let removal of the old D4 definition head hide legacy blockers from
+# the fail-closed inventory. Revisit this pin only after executable D3 parity.
+PARTIAL_D4_WITH_LEGACY_D3 = {
+    "knowledge/guard-reference.lisp",
+    "knowledge/guard-fact-policy.lisp",
+    "scripts/enforce-function-table-mechanisms.lisp",
+    "scripts/enforce-island-math-evidence.lisp",
+    "scripts/semantic-authority-guard-enforce.lisp",
+}
+
+
 def authority(root):
     a = json.loads((root / "knowledge/sens8-current-coverage-v1.json").read_text())
     f = json.loads((root / "knowledge/d1-d9-foundation.json").read_text())
@@ -173,7 +186,13 @@ def run(root, write=False, selected=None):
         original = file.read_text(encoding="utf-8")
         # A modern D8 head or a record key is never proof of old SID8 source.
         # Require an actual historical definition, otherwise fail closed.
-        if not re.search(r"\(\s*(?:00001001|00001011)(?=[\s)])", original):
+        has_legacy_definition = bool(re.search(
+            r"\(\s*(?:00001001|00001011)(?=[\s)])", original))
+        has_pinned_legacy_d3 = (
+            path in PARTIAL_D4_WITH_LEGACY_D3
+            and bool(re.search(r"\(\s*00000111(?=[\s)])", original))
+        )
+        if not (has_legacy_definition or has_pinned_legacy_d3):
             report.append({"path": path, "status": "source-era-unproved",
                            "potential_heads": 0,
                            "reasons": ["no historical DEFINE/DEF call head"]})
