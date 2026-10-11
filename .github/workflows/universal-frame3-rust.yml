@@ -42,6 +42,24 @@ jobs:
           cargo test -p sens universal_frame3 -- --nocapture
           cargo test -p sens --test frame3_grammar_rank -- --nocapture
           cargo clippy -p sens --lib -- -D warnings
+      - name: Frame3 v2 full physical benchmark against T5 and v1
+        shell: bash
+        run: |
+          set -euo pipefail
+          {
+            echo "# benchmark SHA: ${GITHUB_SHA}"
+            echo "# runner OS: $(uname -srm)"
+            echo "# rustc: $(rustc --version)"
+            echo "# CPU: $(grep -m1 'model name' /proc/cpuinfo || true)"
+            cargo run --locked --release -p sens --example frame3_v2_bench --quiet
+          } | tee "$RUNNER_TEMP/frame3-v2-physical.tsv"
+      - name: Upload source-SHA full-file byte and encode/decode timing evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: frame3-v2-physical-${{ github.sha }}
+          path: ${{ runner.temp }}/frame3-v2-physical.tsv
+          if-no-files-found: error
+          retention-days: 21
       - name: Prove no coordinates for impossible D3 calls, keep QUOTE data
         run: |
           set -euo pipefail
