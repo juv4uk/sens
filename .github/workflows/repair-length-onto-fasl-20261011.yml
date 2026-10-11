@@ -1,0 +1,44 @@
+name: temporary Core4 FASL regeneration for exact-width length-onto
+
+on:
+  push:
+    branches:
+      - fix/5408-length-onto-exact-d3-20261011
+
+permissions:
+  contents: write
+
+concurrency:
+  group: sens-core4-fasl-regeneration-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  regenerate:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          persist-credentials: true
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Regenerate FASL from the exact Core4 source
+        shell: bash
+        run: |
+          set -euo pipefail
+          output="$RUNNER_TEMP/core4.lisp.fasl"
+          cargo run --locked --release -p sens-cli --bin gen-fasl -- lib/core4.lisp "$output"
+          test -s "$output"
+          cp "$output" lib/core4.lisp.fasl
+      - name: Commit generated FASL only to this review branch
+        shell: bash
+        run: |
+          set -euo pipefail
+          if git diff --quiet -- lib/core4.lisp.fasl; then
+            echo "Core4 FASL already matches the generated source."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add lib/core4.lisp.fasl
+          git commit -m "build(core4): regenerate FASL for exact-width length-onto"
+          git push origin "HEAD:$GITHUB_REF_NAME"
