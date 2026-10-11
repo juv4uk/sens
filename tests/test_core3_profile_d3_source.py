@@ -53,5 +53,35 @@ class Core3SourceCutover(unittest.TestCase):
             "lib/corrupted.lisp")})
 
 
+class Core4ObserverSourceCutover(unittest.TestCase):
+    CASES = {
+        "scripts/check-core4-predicate-answer-scale.lisp":
+            ("cbc2f3e50b28b7d78b52453c7434e9319095efd1", "pas"),
+        "experiments/core4-predicate-answer-carrier-matrix.lisp":
+            ("84bfc7effc2d378fad201a568763ca1401fe0fb7", "cam"),
+    }
+
+    def test_two_observers_have_pinned_bit_predicate_and_literal_d1_fallback(self):
+        for path, (blob, prefix) in self.CASES.items():
+            with self.subTest(path=path):
+                original = subprocess.run(
+                    ["git", "cat-file", "blob", blob], cwd=ROOT,
+                    capture_output=True, check=True
+                ).stdout.decode("utf-8")
+                first = (
+                    f"((11110111 {prefix}-observed {prefix}-expected)\n"
+                    "   (1)\n"
+                )
+                second = "((11110111 1 1) 1\n"
+                self.assertEqual(original.count(first), 1)
+                self.assertEqual(original.count(second), 1)
+                expected = (original.replace(first, first.replace("   (1)\n", ""))
+                            .replace(second, "((010 (001 ()))\n"))
+                current = (ROOT / path).read_text(encoding="utf-8")
+                self.assertEqual(current, expected)
+                self.assertEqual(mod.scan_lisp(current, path), [],
+                                 "two-field D3 with exact D1 branch bits")
+
+
 if __name__ == "__main__":
     unittest.main()
