@@ -1,0 +1,11 @@
+# Exact compare pin main SHA: e08265f71527fb630267ea22bd3584360af40571
+# Compiler artifact/program-data/traversal/whole-artifact heads overlap compiler_language.rs, lib.rs and compiler-nucleus.lisp; keep alternate implementations in history until replay-tested.
+branch	source_sha	compare_status	ahead_by	behind_by	reported_file_entries	classification
+agent/3835-compilation-artifact	9bc1abfffca5624f2b014309e9d4828b26b9f87d	diverged	2	6582	3	HISTORY_ATTACHED_CONTENT_REVIEW_REQUIRED
+agent/3837-program-traversal	ccaa40501451640d0d637353de66abb5a0e6539f	diverged	13	6598	5	HISTORY_ATTACHED_CONTENT_REVIEW_REQUIRED
+agent/3837-program-traversal-v2	154aa6a768947d7818953b81d341e2a4a6ef4536	behind	0	6582	0	ALREADY_IN_MAIN_ANCESTRY
+agent/3837-whole-program-compiler	c3b2af8bc3e0306401d01749e50ec27c6355bd1c	diverged	4	6598	3	HISTORY_ATTACHED_CONTENT_REVIEW_REQUIRED
+agent/3838-program-data	fb9c20dc27ef8cac74015fa35b50cdf07905585a	diverged	6	6598	3	HISTORY_ATTACHED_CONTENT_REVIEW_REQUIRED
+agent/3839-lambda-variadic-fix	1c052b75a63a640ded2283a9bc7a164c3eefb114	behind	0	6560	0	ALREADY_IN_MAIN_ANCESTRY
+agent/3839-program-compile	afe353969a66d6cba56eafb4c4f0d3972e38fd1d	diverged	2	6571	2	HISTORY_ATTACHED_CONTENT_REVIEW_REQUIRED
+agent/3839-whole-artifact	7d5232b626b3ea57f2e48a24db9a507e0bfd384c	diverged	3	6573	5	HISTORY_ATTACHED_CONTENT_REVIEW_REQUIRED
