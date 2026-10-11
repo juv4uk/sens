@@ -45,6 +45,23 @@ pub fn parse_mixed_exact_domain_machine_source(
     parse_mixed_source(source, true)
 }
 
+/// Migrate only the three pinned reasoning modules. W8 syntax containers
+/// remain compatible while their executable D3 call heads retain exact width.
+/// This is NOT a general license to reinterpret W8 data or older Lisp files.
+pub fn parse_mixed_exact_domain_reasoning_source(
+    path: &str,
+    source: &str,
+) -> Result<Vec<Expr>, LanguageError> {
+    if !matches!(path, "lib/world.lisp" | "lib/forward.lisp" | "lib/knowledge.lisp") {
+        return Err(LanguageError::new(
+            ErrorKind::Parse,
+            "reasoning-source exact-domain reader requires a pinned source path",
+            Span::default(),
+        ));
+    }
+    parse_mixed_source(source, true)
+}
+
 /// Parse only the language-owned time module with exact-width D3 call heads.
 /// Its W8 DEFINE/LAMBDA wrappers remain bootstrap syntax; no general source
 /// inference or W8-to-D8 promotion is authorized.
@@ -506,6 +523,22 @@ mod tests {
     fn only(mut expressions: Vec<Expr>) -> Expr {
         assert_eq!(expressions.len(), 1);
         expressions.remove(0)
+    }
+
+    #[test]
+    fn reasoning_source_is_path_bound_and_preserves_w8_macro_data() {
+        let src = "(00001010 preserve (x) (110 ((010 x) (001 (101 x x)))))";
+        for path in ["lib/world.lisp", "lib/forward.lisp", "lib/knowledge.lisp"] {
+            let tree = parse_mixed_exact_domain_reasoning_source(path, src)
+                .expect("one of three authorized reasoning source files");
+            let ExprKind::List(parts) = &tree[0].kind else { panic!("macro"); };
+            let ExprKind::List(cond) = &parts[3].kind else { panic!("body"); };
+            assert!(matches!(&cond[0].kind, ExprKind::DomainIdentity(id)
+                if id.width() == 3 && id.packed_bits() == 0b110));
+        }
+        for path in ["lib/core4.lisp", "lib/unify.lisp", "../world.lisp"] {
+            assert!(parse_mixed_exact_domain_reasoning_source(path, src).is_err());
+        }
     }
 
     #[test]
