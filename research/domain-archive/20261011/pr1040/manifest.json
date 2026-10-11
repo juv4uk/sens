@@ -1,0 +1,41 @@
+{
+  "schema": "sens-historical-branch-archive/v1",
+  "archived_at": "2026-10-11",
+  "source": {
+    "repo": "juv4uk/sens",
+    "pr": 1040,
+    "title": "docs(#384): inventory active GitHub Actions workflows",
+    "branch": "agent/384-workflow-inventory",
+    "head_sha": "cda9060c53a24aed58662068211e457db859259a",
+    "base": "main",
+    "base_sha": "42e3945c5e8f27902ade6fedf52f54786c56f914",
+    "reason": "Historical inventory of 26 workflows plus a Lisp checker; current main uses an evolved CI workflow, while the snapshot's workflow set and tooling registry are stale. Preserve full source; revalidate each workflow against current `.github/workflows` before any current-main activation."
+  },
+  "files": [
+    {
+      "original_path": ".github/workflows/ci.yml",
+      "archived_path": "research/domain-archive/20261011/pr1040/source/.github/workflows/ci.yml",
+      "git_blob_sha": "5b3eb529d1796400ebf6f889f494971b9f1ae629",
+      "bytes": 18037
+    },
+    {
+      "original_path": "knowledge/repo-tooling-inventory.lisp",
+      "archived_path": "research/domain-archive/20261011/pr1040/source/knowledge/repo-tooling-inventory.lisp",
+      "git_blob_sha": "60ab44211cc47b80097eb4ee9f9c8523d324a318",
+      "bytes": 13607
+    },
+    {
+      "original_path": "knowledge/workflow-inventory.lisp",
+      "archived_path": "research/domain-archive/20261011/pr1040/source/knowledge/workflow-inventory.lisp",
+      "git_blob_sha": "cada6b8b694a18a1193fe903f6b16fd18ac6952f",
+      "bytes": 15010
+    },
+    {
+      "original_path": "scripts/check-workflow-inventory.lisp",
+      "archived_path": "research/domain-archive/20261011/pr1040/source/scripts/check-workflow-inventory.lisp",
+      "git_blob_sha": "d26da2c547bbc328493b0bf63dea149b5f9db0a5",
+      "bytes": 7695
+    }
+  ],
+  "disposition": "ARCHIVE-ONLY / current workflow inventory must be regenerated from current repo before activation"
+}
