@@ -107,7 +107,8 @@ def verify(previous,current,manifest,source,foundation):
 def check(root=ROOT,self_test=False):
     root=root.resolve()
     ptr=json.loads((root/"knowledge/d10-current-inventory.json").read_text())
-    live=ptr["canonical_current"]
+    live=ptr.get("historical_v15_research_inventory",ptr["canonical_current"])
+    active=ptr["canonical_current"]
     frozen=ptr["historical_v14_research_inventory"]
     intake=ptr["current_v15_source_law_selection"]
     pin=intake["manifest"]
@@ -118,6 +119,10 @@ def check(root=ROOT,self_test=False):
             intake["source"]["path"]==m["source"]["path"],"index pin drift")
     prior=json.loads(pinned(root,frozen["path"],frozen["git_blob"]))
     current=json.loads(pinned(root,live["path"],live["git_blob"]))
+    active_rows=json.loads(pinned(root,active["path"],active["git_blob"]))["rows"]
+    require(len(active_rows)>=len(current["rows"]) and
+            active_rows[:len(current["rows"])]==current["rows"],
+            "live D10 rewrote archived v15")
     source=json.loads(pinned(root,m["source"]["path"],m["source"]["git_blob"]))
     f=m["foundation"]
     foundation=json.loads(pinned(root,f["path"],f["git_blob"]))
