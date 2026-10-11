@@ -378,9 +378,9 @@ bench/1988-d6-generator-vs-flat16	UNTRIAGED	-	-	BRANCH-NAME-ONLY
 bench/1988-generator-flat16-on-3624	UNTRIAGED	-	-	BRANCH-NAME-ONLY
 bench/1988-selector-exec-sonnet	UNTRIAGED	-	-	BRANCH-NAME-ONLY
 bench/1988-semantic-tree-exec	UNTRIAGED	-	-	BRANCH-NAME-ONLY
-bench/1989-identity-carrier	UNTRIAGED	-	-	BRANCH-NAME-ONLY
+bench/1989-identity-carrier	ALREADY-IN-MAIN-ARCHIVED	6d185f7d0c1b4d3db1123bd6bbd68b3468acd91c	470515d4b15f70fa6d01136281ea23b2b5339249	All four original benchmark artifacts preserved/verified by archive extension manifest ee8283633a0efe34dafe034c30598bd0a907a12f under research/domain-archive/20261011/pr1995; historical Cachegrind evidence only, source code preserved as .source.txt. PR #1995 closed archived.
 bench/1993-framing-decode	UNTRIAGED	-	-	BRANCH-NAME-ONLY
-bench/2000-unbounded-width	UNTRIAGED	-	-	BRANCH-NAME-ONLY
+bench/2000-unbounded-width	ALREADY-IN-MAIN-ARCHIVED	d684d4e008e28b15d99b91aa8fb9581add9158bd	4bce46edc100b0a2d81e31b3cc1cd0ea5906b08c	Unbounded-width source, reports, and raw TSV preserved under research/domain-archive/20261011/pr2005 and docs/research/benchmark-history-20261011/pr2005; benchmark registry marks HISTORICAL-RESEARCH-ONLY, not production winner. PR #2005 closed archived.
 bench/2001-generator-economy	UNTRIAGED	-	-	BRANCH-NAME-ONLY
 bench/2002-semantic-invariance-stress	UNTRIAGED	-	-	BRANCH-NAME-ONLY
 bench/2003-whole-program-domains	UNTRIAGED	-	-	BRANCH-NAME-ONLY
