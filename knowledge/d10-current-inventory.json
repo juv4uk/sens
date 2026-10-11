@@ -139,6 +139,15 @@
     "ratified": 0,
     "role": "FROZEN-PRE-V7-ARCHIVE"
   },
+  "historical_v7_research_inventory": {
+    "path": "knowledge/d10-v7-semantic-inventory.json",
+    "git_blob": "6a45275241717dafa6a6c9ccafae1e9ad819b306",
+    "selected": 721,
+    "placed": 719,
+    "unplaced": 2,
+    "ratified": 0,
+    "role": "FROZEN-PRE-V8-ARCHIVE"
+  },
   "current_v7_historical_lisp_selection": {
     "previous_inventory": "knowledge/d10-v6-semantic-inventory.json",
     "previous_inventory_git_blob": "db13680e3a8786faf5dec74c7f8792ace7c6fd5f",
