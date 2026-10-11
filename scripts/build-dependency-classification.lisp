@@ -90,10 +90,7 @@
 
 (0011 top-level-def-names
   (0010 (forms)
-    (110
-      ((010 forms) () (001 ()))
-      ((010 forms) (1) (001 ()))
-      (t (001001 ((form (100 forms))
+    (110 ((010 forms) (001 ())) ((010 (001 ())) (001001 ((form (100 forms))
                 (rest (top-level-def-names (011 forms))))
            (110
              ((010 form) () rest)
@@ -139,11 +136,9 @@
 ; below that assumes a minimum shape uses these instead of raw car/cdr,
 ; degrading a missing piece to () rather than erroring.
 (0011 safe-car
-  (0010 (lst) (110 ((010 lst) () (001 ()))
-                      ((010 lst) (1) (001 ())) (t (100 lst)))))
+  (0010 (lst) (110 ((010 lst) (001 ())) ((010 (001 ())) (100 lst)))))
 (0011 safe-cdr
-  (0010 (lst) (110 ((010 lst) () (001 ()))
-                      ((010 lst) (1) (001 ())) (t (011 lst)))))
+  (0010 (lst) (110 ((010 lst) (001 ())) ((010 (001 ())) (011 lst)))))
 
 (0011 collect-symbols-leaf
   (0010 (form)
@@ -155,18 +150,12 @@
 
 (0011 collect-heads-each
   (0010 (forms bound)
-    (110
-      ((010 forms) () (001 ()))
-      ((010 forms) (1) (001 ()))
-      (t (1111 (collect-heads (100 forms) bound)
+    (110 ((010 forms) (001 ())) ((010 (001 ())) (1111 (collect-heads (100 forms) bound)
                  (collect-heads-each (011 forms) bound))))))
 
 (0011 collect-heads-cond-clauses
   (0010 (clauses bound)
-    (110
-      ((010 clauses) () (001 ()))
-      ((010 clauses) (1) (001 ()))
-      (t (001001 ((clause (100 clauses))
+    (110 ((010 clauses) (001 ())) ((010 (001 ())) (001001 ((clause (100 clauses))
                 (test-form (safe-car clause))
                 (body-form (safe-car (safe-cdr clause)))
                 (test-deps (collect-heads test-form bound))
@@ -176,10 +165,7 @@
 
 (0011 collect-heads-let*-seq
   (0010 (bindings body bound)
-    (110
-      ((010 bindings) () (collect-heads body bound))
-      ((010 bindings) (1) (collect-heads body bound))
-      (t (001001 ((binding (100 bindings))
+    (110 ((010 bindings) (collect-heads body bound)) ((010 (001 ())) (001001 ((binding (100 bindings))
                 (name (safe-car binding))
                 (value-form (safe-car (safe-cdr binding)))
                 (value-deps (collect-heads value-form bound))
@@ -243,8 +229,7 @@
                                   ((0100 (110101100 head)) (001 ()))
                                   ((11101 head bound) (001 ()))
                                   (t (1110 head))))
-                     (head-recurse (110 ((010 head) () (001 ()))
-                                         ((010 head) (1) (001 ())) (t (collect-heads head bound))))
+                     (head-recurse (110 ((010 head) (001 ())) ((010 (001 ())) (collect-heads head bound))))
                      (args-deps (collect-heads-each (011 form) bound)))
                 (1111 head-dep (1111 head-recurse args-deps))))))))))
 
@@ -262,10 +247,7 @@
 ; evaluated in one shared environment.
 (0011 collect-deps-top-seq
   (0010 (forms bound)
-    (110
-      ((010 forms) () (001 ()))
-      ((010 forms) (1) (001 ()))
-      (t (001001 ((form (100 forms))
+    (110 ((010 forms) (001 ())) ((010 (001 ())) (001001 ((form (100 forms))
                 (deps (collect-deps-one form bound))
                 (new-bound (110
                              ((010 form) () bound)
@@ -416,8 +398,7 @@
                 (conff (100 conformance-remaining))
                 (expr-str (011 (11100 (001 expr) conff)))
                 (axioms-entry (11100 (001 axioms) conff))
-                (axioms-list (110 ((010 axioms-entry) () (001 ()))
-                                   ((010 axioms-entry) (1) (001 ())) (t (011 axioms-entry))))
+                (axioms-list (110 ((010 axioms-entry) (001 ())) ((010 (001 ())) (011 axioms-entry))))
                 (record (classify-fixture id expr-str axioms-list other-tables))
                 (emitted (11011011 record)))
            (process-pair (011 inventory-remaining) (011 conformance-remaining) other-tables))))))
