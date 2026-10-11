@@ -291,18 +291,20 @@
 ; Role meaning comes only from compiler-role-from-l1-l5 above.  The host may
 ; transport LAW/proof/provenance values, but it does not select the role.
 
+; Empty role means the law did not admit this identity. Do not emit a
+; malformed request carrying (), especially for a wrong-width domain.
 (0011 compiler-request-from-role
   (0010 (seed ідентичність role proof-ref походження)
     (110
-      
-      ((compiler-true seed)
+      ((010 role)
        (111
          ідентичність
          (111
            role
            (111
              proof-ref
-             (111 походження ()))))))))
+             (111 походження ())))))
+      ((compiler-true seed) ()))))
 
 (0011 compiler-request-from-l1-l5
   (0010 (decompose ідентичність law proof-ref походження)
