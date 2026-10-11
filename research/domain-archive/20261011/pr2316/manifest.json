@@ -1,0 +1,38 @@
+{
+  "schema": "sens-historical-branch-archive/v1",
+  "archived_at": "2026-10-11",
+  "source": {
+    "repo": "juv4uk/sens",
+    "pr": 2316,
+    "title": "fix(2295): migrate reduce to strict PredicateBit",
+    "branch": "fix/2295-reduce-strict-d1-v2",
+    "head_sha": "0c023acf29a92793e1ce067fc3c492401dbb47fa",
+    "base": "fix/2298-core-length-cond2",
+    "base_sha": "9d2473826d06f0d885eddece5d7ffa7cd55f4431",
+    "reason": "Strict D1 reduce-state correction with matching core/core4 source and regenerated FASL; current main source has a different branch-era base and FASL must be regenerated against current source, not replaced from this stale branch."
+  },
+  "files": [
+    {
+      "original_path": "lib/core.lisp",
+      "archived_path": "research/domain-archive/20261011/pr2316/source/lib/core.lisp.source.txt",
+      "original_git_blob_sha": "365b8dd3c38ccff35053cf290e798568d1f2f77b",
+      "encoding": "utf-8",
+      "stored_chars": 47938
+    },
+    {
+      "original_path": "lib/core4.lisp",
+      "archived_path": "research/domain-archive/20261011/pr2316/source/lib/core4.lisp.source.txt",
+      "original_git_blob_sha": "365b8dd3c38ccff35053cf290e798568d1f2f77b",
+      "encoding": "utf-8",
+      "stored_chars": 47938
+    },
+    {
+      "original_path": "lib/core4.lisp.fasl",
+      "archived_path": "research/domain-archive/20261011/pr2316/lib/core4.lisp.fasl.base64.txt",
+      "original_git_blob_sha": "7007fbea0438cd470b3a54502f6b7a66e0cdee72",
+      "encoding": "base64",
+      "stored_chars": 24405
+    }
+  ],
+  "disposition": "BLOCKER PRESERVED / CURRENT-MAIN REPLAY REQUIRED / DO NOT REPLACE FASL WHOLESALE"
+}
