@@ -16,13 +16,13 @@
 (DEFINE C1-SID-VALUEP
   (LAMBDA (VALUE)
     (COND
-      ((EQ VALUE 00000010) T)
-      ((EQ VALUE 00000011) T)
-      ((EQ VALUE 00000100) T)
-      ((EQ VALUE 00000101) T)
-      ((EQ VALUE 00000110) T)
-      ((EQ VALUE 00001100) T)
-      ((EQ VALUE 00001101) T)
+      ((EQ VALUE 010) T)
+      ((EQ VALUE 101) T)
+      ((EQ VALUE 111) T)
+      ((EQ VALUE 100) T)
+      ((EQ VALUE 011) T)
+      ((EQ VALUE 01010) T)
+      ((EQ VALUE 01011) T)
       (T NIL))))
 
 ; Bootstrap-only replacement for C1-EVAL.  It is byte-for-byte the current
