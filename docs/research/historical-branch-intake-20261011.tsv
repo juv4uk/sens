@@ -96,7 +96,7 @@ agent/176-aesni-mem-disp8	UNTRIAGED	-	-	BRANCH-NAME-ONLY
 agent/176-pclmulqdq	UNTRIAGED	-	-	BRANCH-NAME-ONLY
 agent/176-rdrand-rdseed	UNTRIAGED	-	-	BRANCH-NAME-ONLY
 agent/176-vex-grammar-base	UNTRIAGED	-	-	BRANCH-NAME-ONLY
-agent/384-workflow-inventory	UNTRIAGED	-	-	BRANCH-NAME-ONLY
+agent/384-workflow-inventory	ALREADY-IN-MAIN-ARCHIVED	8facaa1a04533de8c777d024ef8d8068f3cfd884	cda9060c53a24aed58662068211e457db859259a	Four workflow registry/checker paths archived under research/domain-archive/20261011/pr1040; snapshot covers old 26-workflow source era, not current live workflow set. PR #1040 was already closed, exact archive disposition recorded.
 agent/553-semantic-ownership-lisp	UNTRIAGED	-	-	BRANCH-NAME-ONLY
 agent/990-four-island-math-contract	UNTRIAGED	-	-	BRANCH-NAME-ONLY
 agent/990-island-math-evidence	UNTRIAGED	-	-	BRANCH-NAME-ONLY
@@ -996,8 +996,8 @@ feat/1006-sens-mechanism-seam	UNTRIAGED	-	-	BRANCH-NAME-ONLY
 feat/1010-ukr-repl-surface	UNTRIAGED	-	-	BRANCH-NAME-ONLY
 feat/1022-uk-ukr-surface-cyrillic	UNTRIAGED	-	-	BRANCH-NAME-ONLY
 feat/1022-ukr-cyrillic-namespaces	UNTRIAGED	-	-	BRANCH-NAME-ONLY
-feat/1030-nonscript-tooling-inventory	UNTRIAGED	-	-	BRANCH-NAME-ONLY
-feat/1036-cml-bootstrap-envelope	UNTRIAGED	-	-	BRANCH-NAME-ONLY
+feat/1030-nonscript-tooling-inventory	ALREADY-IN-MAIN-ARCHIVED	e4cf8f69ad9071eba502d29c25b2528344036fe3	e9334e097cf312ca7b2edf1c13a521b7e7f958ff	Branch inventory/checker preserved under research/domain-archive/20261011/pr1033; current main has both target entrypoints but expanded checker/inventory is script-scoped; non-script validation needs a current-main test. PR #1033 closed archived.
+feat/1036-cml-bootstrap-envelope	ALREADY-IN-MAIN-ARCHIVED	e3cffff3f1639a9e9d484f80b4bab3831dae22	c5bf3888bad91ac427f9d15e8e995766d563bd7e	All five source files preserved under research/domain-archive/20261011/pr1038; Lisp frontend envelope lacks confirmed current crates/sens/CML consumer parity and observer uses crates/my-lisp. PR #1038 closed archived.
 feat/1036-cml-bootstrap-frontend	UNTRIAGED	-	-	BRANCH-NAME-ONLY
 feat/1096-bare-sid-literals	UNTRIAGED	-	-	BRANCH-NAME-ONLY
 feat/1098-sid-binary-identity	UNTRIAGED	-	-	BRANCH-NAME-ONLY
@@ -2636,7 +2636,7 @@ refactor/xtask-to-sens	UNTRIAGED	-	-	BRANCH-NAME-ONLY
 refactor/xtask-uk-checks-to-sens	UNTRIAGED	-	-	BRANCH-NAME-ONLY
 refactor/xtask-verify-to-sens	UNTRIAGED	-	-	BRANCH-NAME-ONLY
 refactor/577-cli-module	UNTRIAGED	-	-	BRANCH-NAME-ONLY
-refactor/577-cli-v2	UNTRIAGED	-	-	BRANCH-NAME-ONLY
+refactor/577-cli-v2	ALREADY-IN-MAIN-ARCHIVED	3ccb634e5871e0ae6cd0def1c2e4c283f1350ac7	50a06f95d03811fceb5049715e08cb32137c111d	Exact cli.rs + branch main.rs preserved under research/domain-archive/20261011/pr0987; current main main.rs materially evolved and lacks cli.rs, so old diff not safe as pure move. PR #987 closed archived.
 refactor/577-introspect	UNTRIAGED	-	-	BRANCH-NAME-ONLY
 refactor/1004-function-table-retire-current	UNTRIAGED	-	-	BRANCH-NAME-ONLY
 refactor/1004-function-table-retire-current-main-2	UNTRIAGED	-	-	BRANCH-NAME-ONLY
