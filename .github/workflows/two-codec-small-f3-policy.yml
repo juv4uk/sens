@@ -1,0 +1,72 @@
+name: Two explicit SENS codecs - T5 default, F3 tiny
+on:
+  push:
+    paths:
+      - 'crates/sens/examples/two_codec_small_programs.rs'
+      - 'research/framed3/rust_codec/senc.rs'
+      - 'docs/codec-two-routes-t5-f3-2026-10-11.uk.md'
+      - '.github/workflows/two-codec-small-f3-policy.yml'
+  pull_request:
+    paths:
+      - 'crates/sens/examples/two_codec_small_programs.rs'
+      - 'research/framed3/rust_codec/senc.rs'
+      - 'docs/codec-two-routes-t5-f3-2026-10-11.uk.md'
+      - '.github/workflows/two-codec-small-f3-policy.yml'
+permissions:
+  contents: read
+jobs:
+  explicit-two-codecs:
+    name: Small original F3 or production T5, exact physical proof
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Check two explicit codecs and fail-closed negative carriers
+        shell: bash
+        run: |
+          set -euo pipefail
+          cargo run --locked --release --quiet -p sens --example two_codec_small_programs -- --self-test
+      - name: Verify selection on ALL real Git-tracked canonical physical files
+        shell: bash
+        run: |
+          set -euo pipefail
+          {
+            echo "# sha=$GITHUB_SHA"
+            echo "# rustc=$(rustc --version)"
+            echo "# cpu=$(grep -m1 'model name' /proc/cpuinfo || true)"
+            cargo run --locked --release --quiet -p sens --example two_codec_small_programs -- --report
+          } | tee "$RUNNER_TEMP/two-codec-real-files.tsv"
+          awk -F '\t' '
+            $3 == "F3" && $5 == ".senc" && $4 < $2 { f3++ }
+            $3 == "T5" && $5 == ".sens" && $4 == $2 { t5++ }
+            END { exit !(f3 > 0 && t5 > 0) }
+          ' "$RUNNER_TEMP/two-codec-real-files.tsv"
+      - name: Produce actual small F3 file and larger T5 file
+        shell: bash
+        run: |
+          set -euo pipefail
+          cargo run --locked --release --quiet -p sens --example two_codec_small_programs -- --convert \
+            tests/fixtures/migration-quote-cohort/quote-legacy.sens "$RUNNER_TEMP/short"
+          test -s "$RUNNER_TEMP/short.senc"
+          test "$(od -An -tx1 -N1 "$RUNNER_TEMP/short.senc" | tr -d ' \n')" = f3
+          cargo run --locked --release --quiet -p sens --example two_codec_small_programs -- --convert \
+            tests/fixtures/core1-domain-canary/second.sens "$RUNNER_TEMP/large"
+          cmp tests/fixtures/core1-domain-canary/second.sens "$RUNNER_TEMP/large.sens"
+          # Never silently clobber the already written output file.
+          if cargo run --locked --release --quiet -p sens --example two_codec_small_programs -- --convert \
+              tests/fixtures/core1-domain-canary/second.sens "$RUNNER_TEMP/large"; then
+            echo "TWO_CODEC_BLOCKED: existing output was overwritten" >&2
+            exit 1
+          fi
+      - name: Preserve raw matrix and real physical carriers
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: two-codec-t5-f3-${{ github.sha }}
+          path: |
+            ${{ runner.temp }}/two-codec-real-files.tsv
+            ${{ runner.temp }}/short.senc
+            ${{ runner.temp }}/large.sens
+          if-no-files-found: warn
+          retention-days: 30
