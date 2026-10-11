@@ -1,9 +1,9 @@
-(00001001 verdicts
+(0011 verdicts
   (01001011 (10100110 "tests/semantic-authority-verdict.lisp")))
 
-(00001001 verdict (00000101 verdicts))
+(0011 verdict (00000101 verdicts))
 
-(00001001 verdict-tag
+(0011 verdict-tag
   (00000111
     ((00000010 verdict) (1) verdict)
     ((00000010 verdict) (0) (00000101 verdict))
