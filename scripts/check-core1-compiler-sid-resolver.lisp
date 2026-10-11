@@ -5,8 +5,8 @@
 
 (0011 c1r-expected-resolver-form
   (001
-    (00001001 C1-COMPILER-SID-FOR-SURFACE
-      (00001000 (NAME)
+    (0011 C1-COMPILER-SID-FOR-SURFACE
+      (0010 (NAME)
         (C1-PRIMITIVE-IDENTITY NAME)))))
 
 (0011 c1r-find-section
