@@ -34,84 +34,84 @@
 ; Registry surfaces are fixed two-element rows: (namespace spelling-or-()).
 ; Reader-sensitive spellings such as apostrophe are serialized as strings, so the
 ; registry remains ordinary re-readable Lisp data without a special reconstruction path.
-(00001001 registry-form (00000101 (01001011 (10100110 "lib/surface/semantic-registry.lisp"))))
-(00001001 registry-rows registry-form)
+(0011 registry-form (100 (110101001 (110110111 "lib/surface/semantic-registry.lisp"))))
+(0011 registry-rows registry-form)
 ; Historical rows are retained only for migration/provenance consumers.
 ; Their eight-bit coordinates do not create canonical language identity.
-(00001001 entries registry-rows)
+(0011 entries registry-rows)
 
 ; Processor realization projection. Its rows never create an identity: they
 ; may only annotate IDs that already exist in `entries` above.
-(00001001 machine-profile-form
-  (00000101 (01001011 (10100110 "lib/machine/intel-core-i5-6400.lisp"))))
+(0011 machine-profile-form
+  (100 (110101001 (110110111 "lib/machine/intel-core-i5-6400.lisp"))))
 
-(00001001 find-section
-  (00001000 (name sections)
-    (00000111
-      ((00000010 sections) () (00000001 ()))
-      ((00000010 sections) (1) (00000001 ()))
-      ((00000011 (00000101 (00000101 sections)) name) (00000101 sections))
-      (t (find-section name (00000110 sections))))))
+(0011 find-section
+  (0010 (name sections)
+    (110
+      ((010 sections) () (001 ()))
+      ((010 sections) (1) (001 ()))
+      ((101 (100 (100 sections)) name) (100 sections))
+      (t (find-section name (011 sections))))))
 
-(00001001 machine-rows
-  (00000110 (find-section (00000001 rows) (00000110 machine-profile-form))))
+(0011 machine-rows
+  (011 (find-section (001 rows) (011 machine-profile-form))))
 
-(00001001 find-machine-row
-  (00001000 (sid rows)
-    (00000111
-      ((00000010 rows) () (00000001 ()))
-      ((00000010 rows) (1) (00000001 ()))
-      ((00100010 (00000101 (00000101 rows)) sid) (00000101 rows))
-      (t (find-machine-row sid (00000110 rows))))))
+(0011 find-machine-row
+  (0010 (sid rows)
+    (110
+      ((010 rows) () (001 ()))
+      ((010 rows) (1) (001 ()))
+      ((11110111 (100 (100 rows)) sid) (100 rows))
+      (t (find-machine-row sid (011 rows))))))
 
-(00001001 machine-path
-  (00001000 (sid)
-    (10011100 ((row (find-machine-row sid machine-rows)))
-      (00000111
-        ((00000010 row) () "()")
-        ((00000010 row) (1) "()")
-        (t (00110000 row))))))
+(0011 machine-path
+  (0010 (sid)
+    (001000 ((row (find-machine-row sid machine-rows)))
+      (110
+        ((010 row) () "()")
+        ((010 row) (1) "()")
+        (t (10011 row))))))
 
 ; Historical (McCarthy 1960 / Lisp 1.5) realization projection. Its rows
 ; never create an identity: they may only annotate IDs that already exist
 ; in `entries` above. Reverse-authority is forbidden by the contract file
 ; itself -- a historical name never mints a new my-lisp SID.
-(00001001 historical-profile-form
-  (00000101 (01001011 (10100110 "contracts/core1-historical-sid-map.lisp"))))
+(0011 historical-profile-form
+  (100 (110101001 (110110111 "contracts/core1-historical-sid-map.lisp"))))
 
-(00001001 historical-rows
-  (00000110 (find-section (00000001 rows) (00000110 historical-profile-form))))
+(0011 historical-rows
+  (011 (find-section (001 rows) (011 historical-profile-form))))
 
-(00001001 find-historical-row
-  (00001000 (sid rows)
-    (00000111
-      ((00000010 rows) () (00000001 ()))
-      ((00000010 rows) (1) (00000001 ()))
-      ((00100010 (00101111 (00000101 rows)) sid) (00000101 rows))
-      (t (find-historical-row sid (00000110 rows))))))
+(0011 find-historical-row
+  (0010 (sid rows)
+    (110
+      ((010 rows) () (001 ()))
+      ((010 rows) (1) (001 ()))
+      ((11110111 (1001 (100 rows)) sid) (100 rows))
+      (t (find-historical-row sid (011 rows))))))
 
-(00001001 mccarthy-label
-  (00001000 (sid)
-    (10011100 ((row (find-historical-row sid historical-rows)))
-      (00000111
-        ((00000010 row) () "()")
-        ((00000010 row) (1) "()")
-        (t (str+ (01001100 (00110001 row)) " (" (01001100 (00110010 row)) ")"))))))
+(0011 mccarthy-label
+  (0010 (sid)
+    (001000 ((row (find-historical-row sid historical-rows)))
+      (110
+        ((010 row) () "()")
+        ((010 row) (1) "()")
+        (t (str+ (11110100 (100111 row)) " (" (11110100 (110110101 row)) ")"))))))
 
 ; A surface word is usually a symbol (write-to-string strips the
 ; Lisp-level Symbol wrapping down to bare text); the reconstructed
 ; apostrophe case above is already a plain string. For prose contexts
 ; (the human .md table) the bare apostrophe is fine either way.
-(00001001 surface-word-text
-  (00001000 (word)
-    (00000111
-      ((00100010 word (00000001 ())) "()")
+(0011 surface-word-text
+  (0010 (word)
+    (110
+      ((11110111 word (001 ())) "()")
       ((string-membership-helper word)
        (class-membership string member)
        word)
       ((string-membership-helper word)
        (class-membership string nonmember)
-       (01001100 word)))))
+       (11110100 word)))))
 
 ; For the machine-readable .lisp output specifically, a bare apostrophe
 ; word must NOT be re-embedded unquoted: a future reader of this
@@ -120,61 +120,61 @@
 ; already does exactly the right thing per Value type -- a String gets
 ; quoted/escaped (read-back-safe), a Symbol stays bare -- so this is
 ; just write-to-string directly, named for what it's used for here.
-(00001001 surface-word-wsm-text write-to-string)
+(0011 surface-word-wsm-text write-to-string)
 
 ; --- string-append is exactly binary; this repo's scripts routinely need
 ; more pieces joined than that, so a small variadic wrapper over reduce.
-(00001001 str+
-  (00001000 args (00111001 (00001000 (acc s) (00111010 acc s)) "" args)))
+(0011 str+
+  (0010 args (101110 (0010 (acc s) (110011110 acc s)) "" args)))
 
 ; SID already arrives from the registry as an exact 8-bit string. This generator
 ; must preserve it verbatim; formatting identity is owned by the registry.
 
 ; --- surfaces are fixed (lang word) slots; word is spelling or () ---
-(00001001 find-surface
-  (00001000 (lang surfaces)
-    (00000111
-      ((00000010 surfaces) () (00000001 ()))
-      ((00000010 surfaces) (1) (00000001 ()))
-      ((00000011 (00000101 (00000101 surfaces)) lang) (00000101 surfaces))
-      (t (find-surface lang (00000110 surfaces))))))
+(0011 find-surface
+  (0010 (lang surfaces)
+    (110
+      ((010 surfaces) () (001 ()))
+      ((010 surfaces) (1) (001 ()))
+      ((101 (100 (100 surfaces)) lang) (100 surfaces))
+      (t (find-surface lang (011 surfaces))))))
 
-(00001001 surface-word
-  (00001000 (surface-entry)
-    (00000111
-      ((00000010 surface-entry) () (00000001 ()))
-      ((00000010 surface-entry) (1) (00000001 ()))
-      (t (00000101 (00000110 surface-entry))))))
+(0011 surface-word
+  (0010 (surface-entry)
+    (110
+      ((010 surface-entry) () (001 ()))
+      ((010 surface-entry) (1) (001 ()))
+      (t (100 (011 surface-entry))))))
 
-(00001001 get-surface
-  (00001000 (lang surfaces)
+(0011 get-surface
+  (0010 (lang surfaces)
     (surface-word (find-surface lang surfaces))))
 
-(00001001 surface-usable?
-  (00001000 (word)
-    (00100001 (00100010 word (00000001 ())))))
+(0011 surface-usable?
+  (0010 (word)
+    (0100 (11110111 word (001 ())))))
 
 ; --- formal identity stub: first present name among en/ук/sa, else bare id ---
 ; SID is already a first-class exact eight-bit identity. Its canonical printer
 ; preserves the exact spelling including leading zeroes; do not reinterpret it
 ; as arithmetic data merely to reconstruct the same source identity.
-(00001001 sid-bits
-  (00001000 (sid)
-    (01001100 sid)))
+(0011 sid-bits
+  (0010 (sid)
+    (11110100 sid)))
 
-(00001001 formal-stub
-  (00001000 (sid surfaces)
-    (10011101 ((en (get-surface (00000001 en) surfaces))
-           (ук (get-surface (00000001 ук) surfaces))
-           (sa (get-surface (00000001 sa) surfaces)))
-      (00000111
+(0011 formal-stub
+  (0010 (sid surfaces)
+    (001001 ((en (get-surface (001 en) surfaces))
+           (ук (get-surface (001 ук) surfaces))
+           (sa (get-surface (001 sa) surfaces)))
+      (110
         ((surface-usable? en)
          (str+ "identity:" (sid-bits sid) "/surface:" (surface-word-text en)))
         ((surface-usable? ук)
          (str+ "identity:" (sid-bits sid) "/surface:" (surface-word-text ук)))
         ((surface-usable? sa)
          (str+ "identity:" (sid-bits sid) "/surface:" (surface-word-text sa)))
-        (t (00111010 "identity:" (sid-bits sid)))))))
+        (t (110011110 "identity:" (sid-bits sid)))))))
 
 ; Historical projection intentionally has no 256-row completeness law.
 ; Exact domains grow under their own widths, occupancy maps, and admitted laws.
@@ -185,26 +185,26 @@
 ; is not tail-recursive (the recursive call sits inside str+'s argument
 ; list, not in tail position) and overflows the host stack well before
 ; this registry's complete row set.
-(00001001 join-newline-onto
-  (00001000 (strings acc)
-    (00000111
-      ((00000010 strings) () acc)
-      ((00000010 strings) (1) acc)
-      ((00000011 acc "") (join-newline-onto (00000110 strings) (00000101 strings)))
-      (t (join-newline-onto (00000110 strings) (str+ acc "
-" (00000101 strings)))))))
+(0011 join-newline-onto
+  (0010 (strings acc)
+    (110
+      ((010 strings) () acc)
+      ((010 strings) (1) acc)
+      ((101 acc "") (join-newline-onto (011 strings) (100 strings)))
+      (t (join-newline-onto (011 strings) (str+ acc "
+" (100 strings)))))))
 
-(00001001 join-newline (00001000 (strings) (join-newline-onto strings "")))
+(0011 join-newline (0010 (strings) (join-newline-onto strings "")))
 
-(00001001 render-wsm-row
-  (00001000 (entry)
-    (10011101 ((sid (00000101 entry))
-           (surfaces (00000110 entry))
-           (ук (get-surface (00000001 ук) surfaces))
-           (укр (get-surface (00000001 укр) surfaces))
-           (en (get-surface (00000001 en) surfaces))
-           (sa (get-surface (00000001 sa) surfaces))
-           (sym (get-surface (00000001 sym) surfaces))
+(0011 render-wsm-row
+  (0010 (entry)
+    (001001 ((sid (100 entry))
+           (surfaces (011 entry))
+           (ук (get-surface (001 ук) surfaces))
+           (укр (get-surface (001 укр) surfaces))
+           (en (get-surface (001 en) surfaces))
+           (sa (get-surface (001 sa) surfaces))
+           (sym (get-surface (001 sym) surfaces))
            (formal (formal-stub sid surfaces)))
       (str+
         "  (" (sid-bits sid) " " formal
@@ -215,15 +215,15 @@
         " (sym " (surface-word-wsm-text sym) ")"
         " my-lisp)"))))
 
-(00001001 render-md-row
-  (00001000 (entry)
-    (10011101 ((sid (00000101 entry))
-           (surfaces (00000110 entry))
-           (ук (get-surface (00000001 ук) surfaces))
-           (укр (get-surface (00000001 укр) surfaces))
-           (en (get-surface (00000001 en) surfaces))
-           (sa (get-surface (00000001 sa) surfaces))
-           (sym (get-surface (00000001 sym) surfaces)))
+(0011 render-md-row
+  (0010 (entry)
+    (001001 ((sid (100 entry))
+           (surfaces (011 entry))
+           (ук (get-surface (001 ук) surfaces))
+           (укр (get-surface (001 укр) surfaces))
+           (en (get-surface (001 en) surfaces))
+           (sa (get-surface (001 sa) surfaces))
+           (sym (get-surface (001 sym) surfaces)))
       (str+
         "| `" (sid-bits sid) "` | " (surface-word-text ук)
         " | " (surface-word-text укр)
@@ -233,8 +233,8 @@
         " | " (machine-path sid)
         " | " (mccarthy-label sid) " |"))))
 
-(00001001 wsm-header
-  (00100111
+(0011 wsm-header
+  (1110
     "; GENERATED — DO NOT EDIT BY HAND"
     "; HISTORICAL MIGRATION PROJECTION — NOT SEMANTIC AUTHORITY"
     "; Donor: lib/surface/semantic-registry.lisp"
@@ -246,13 +246,13 @@
     ""
     "(ft/2"))
 
-(00001001 wsm-body (join-newline (00101001 wsm-header (00110111 render-wsm-row entries))))
-(00001001 wsm-output (00111010 wsm-body "
+(0011 wsm-body (join-newline (1111 wsm-header (101000 render-wsm-row entries))))
+(0011 wsm-output (110011110 wsm-body "
 )
 "))
 
-(00001001 md-header
-  (00100111
+(0011 md-header
+  (1110
     "# Function table (generated projection)"
     ""
     "**Status:** historical migration projection. Canonical identity comes from exact domains and admitted laws, not this flat table."
@@ -266,56 +266,56 @@
     "| ID | ук | укр | English | Sanskrit | Symbol | Intel Core i5-6400 / Skylake | McCarthy 1960 / Lisp 1.5 (Core1) |"
     "|----|----|-----|---------|----------|--------|------------------------------|-----------------------------------|"))
 
-(00001001 md-body (join-newline (00101001 md-header (00110111 render-md-row entries))))
-(00001001 md-output (00111010 md-body "
+(0011 md-body (join-newline (1111 md-header (101000 render-md-row entries))))
+(0011 md-output (110011110 md-body "
 "))
 
-(00001001 wsm-output-path "lib/generated/function-table.lisp")
-(00001001 md-output-path "docs/generated/function-table.md")
+(0011 wsm-output-path "lib/generated/function-table.lisp")
+(0011 md-output-path "docs/generated/function-table.md")
 
-(00001001 write-projections
-  (00001000 ()
-    (00101111
-      (00100111
-        (10100111 wsm-output-path wsm-output)
-        (10100111 md-output-path md-output)
-        (01001000
+(0011 write-projections
+  (0010 ()
+    (1001
+      (1110
+        (110111100 wsm-output-path wsm-output)
+        (110111100 md-output-path md-output)
+        (11011011
           (str+
             "function-table: "
-            (01000110 (00101000 entries))
+            (110111001 (000000 entries))
             " historical projection rows written"))))))
 
-(00001001 check-projections
-  (00001000 ()
-    (10011100 ((current-wsm (10100110 wsm-output-path))
-          (current-md (10100110 md-output-path)))
-      (00000111
-        ((00100010 current-wsm wsm-output)
+(0011 check-projections
+  (0010 ()
+    (001000 ((current-wsm (110110111 wsm-output-path))
+          (current-md (110110111 md-output-path)))
+      (110
+        ((11110111 current-wsm wsm-output)
          (1)
-         (00000111
-           ((00100010 current-md md-output)
+         (110
+           ((11110111 current-md md-output)
             (1)
-            (01001000
+            (11011011
               (str+
                 "function-table: "
-                (01000110 (00101000 entries))
+                (110111001 (000000 entries))
                 " historical projection rows current")))
            (t
-            (00101111
-              (00100111
-                (01001000 "function-table markdown projection is stale")
-                (00000101 (00000001 ())))))))
+            (1001
+              (1110
+                (11011011 "function-table markdown projection is stale")
+                (100 (001 ())))))))
         (t
-         (00101111
-           (00100111
-             (01001000 "function-table Lisp projection is stale")
-             (00000101 (00000001 ())))))))))
+         (1001
+           (1110
+             (11011011 "function-table Lisp projection is stale")
+             (100 (001 ())))))))))
 
-(00000111
-  ((00000010 *argv*)
+(110
+  ((010 *argv*)
    ()
    (write-projections))
-  ((00100010 (00000101 *argv*) "--check")
+  ((11110111 (100 *argv*) "--check")
    (1)
    (check-projections))
   (t
