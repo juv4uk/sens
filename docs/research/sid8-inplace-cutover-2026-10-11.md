@@ -4,7 +4,7 @@ This is an execution and blocker ledger, not a claim that the repository is full
 
 ## Exact completed changes
 
-- **7551 SID8 occurrences replaced** in **36 existing `.lisp` library files**, on **main**.
+- **11,356 audited SID8 occurrences replaced** in **68 existing `.lisp` files** (library, executable experiments, benchmarks and service programs), on **main**.
 - No new Git branches and no `.sens` creation.
 - Baseline legacy correspondence: `knowledge/sens8-current-coverage-v1.json` (256 historic cells).
 - Only the 171 unambiguous, ratified current targets were used automatically.
@@ -25,7 +25,15 @@ This is an execution and blocker ledger, not a claim that the repository is full
 | core1-compiler-prelude, core1-compiler-sid-resolver, core1-sid8-bootstrap-overlay | 16 |
 | `lib/yantra.lisp` — including 4 source-proven one-list D6 MAP calls | 439 |
 | `lib/linter.lisp` — including 8 source-proven one-list D6 MAP calls | 407 |
-| **Total** | **7551** |
+| Five active benchmark programs: arithmetic, closures, lists, parser, recursion | 35 |
+| `lib/bridge/prolog-to-datalog.lisp` | 64 |
+| Three executable experiments: Core4 logic, predicate carrier, function genealogy | 546 |
+| Five scripts: fixtures-for-tier, gen-functions, build-constitution, build-inventory, check-domain-table-readable | 497 |
+| Five scripts: check-core1-compiler-sid-resolver, check-core3-profile-contract, check-function-table-mechanisms, check-island-math-evidence, check-kernel-abi-transport-boundary | 804 |
+| Five scripts: check-repo-tooling-inventory, generate-meta-semantic-registry, generate-rust-evaluator-dispatch, generate-rust-function-signatures, generate-rust-profile-mechanism-routes | 903 |
+| Five scripts: generate-rust-semantic-registry, oracle-batch, machine-authority-guard, program-symbol-table, release | 616 |
+| Three scripts: semantic-authority-guard, symbol-table, перевірити-український-профіль | 340 |
+| **Total** | **11356** |
 
 ## Known fail-closed blockers
 
@@ -42,6 +50,15 @@ This is an execution and blocker ledger, not a claim that the repository is full
 - Eight historical MAP calls in `lib/linter.lisp` map one `bindings` or `params` list through a lambda ⇒ D6:101000. Commit [`7000e91`](https://github.com/juv4uk/sens/commit/7000e9122341cacecdcde9f7f1fa11baf9a450d2), 407 substitutions. Hosted CI, parentheses and safe-batch checks PASS on that commit. Historical `head 00001010` DEFMACRO datum deliberately retained; this is data, not a function call head.
 - Source-local assertions: `tests/test_sid8_d6_map_source_cutover.py`. The audited old `00110111` globally still has two same-named D6/D8 successors, so **do not edit the normative old-coverage mapping to one successor**.
 - This is **source-level replacement only**; 12 green MAP source sites do not independently prove cross-oracle runtime equivalence or full physical file admission.
+
+## 2026-10-11 expanded source migration cohort (32 more files)
+
+- Directly on `main`: 32 source files beyond the earlier 36, 3,805 further historical SID8 executable-head substitutions; verified via GitHub compare against main commit `768b8d6` through `394ba53` showing exactly **32 changed `.lisp` files** and 32 atomic source commits.
+- Changed categories: 5 active small benchmarks; 1 `lib/bridge` executable; 3 executable research experiments (non-archived); 23 Lisp tooling, guard, code-generation, release and verification scripts.
+- Historical source code used as **data** is intentionally not modified by the head-only migrator. Examples of preserved historical data: `experiments/function-genealogy.lisp` and `scripts/check-core1-compiler-sid-resolver.lisp`. Never treat those literal old IDs as callable heads without semantic evidence.
+- **Does not touch** `benchmarks/sens-surface/results/`, archived source snapshots, ratification contracts or versioned historical proof fixtures; changing them would falsify earlier evidence.
+- Last source cohort [Hosted CI PASS](https://github.com/juv4uk/sens/actions/runs/38166695598) on commit `394ba53`. Pre-existing independent [T5 inventory M0 FAIL](https://github.com/juv4uk/sens/actions/runs/38166695668) records a live/manifest drift; no claim of overall green CI or all-oracle executable semantic parity.
+- No `.sens` outputs, branch creation, or retrospective historical rewriting was performed.
 
 ## Safety of completion claims
 
