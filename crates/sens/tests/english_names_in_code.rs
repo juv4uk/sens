@@ -104,6 +104,7 @@ fn is_table_source(rel: &str) -> bool {
         || rel == "contracts/compiler-gpu-execution-packet-v1.lisp"
         || rel == "contracts/d8-ratification.lisp"
         || rel == "contracts/d9-ratification.lisp"
+        || rel == "contracts/structural-observation-contract.lisp"
         || rel.starts_with("lib/generated/")
         || rel.ends_with("_generated.rs")
         || rel.starts_with("crates/sens/tests/data/")
@@ -111,6 +112,39 @@ fn is_table_source(rel: &str) -> bool {
         || is_historical_benchmark_data(rel)
         // Сам цей тест: імена в його перевірках сканера — вхідні дані.
         || rel == "crates/sens/tests/english_names_in_code.rs"
+}
+
+
+/// Research snapshots are retained as historical evidence, not loaded as the
+/// current SENS program. Keep the allow-list narrow: active source under
+/// scripts/, knowledge/, lib/, and ordinary docs/research/ remains ratcheted.
+/// Snapshot roots are named, immutable archive lanes; exact standalone RED
+/// probes and evidence tables are individually enumerated below.
+fn is_historical_research_evidence(rel: &str) -> bool {
+    const PINNED_ARCHIVE_ROOTS: &[&str] = &[
+        "research/domain-archive/20261011/",
+        "docs/research/archive-domains-20261011/",
+        "docs/research/archive-d10-20261011/",
+        "knowledge/d10-source-snapshots/",
+    ];
+    const PINNED_RESEARCH_FILES: &[&str] = &[
+        "docs/research/432/church-pair-car-red.lisp",
+        "docs/research/432/church-pair-cdr-red.lisp",
+        "docs/research/432/eq-pair-red.lisp",
+        "docs/research/432/fresh-atom-fixed-point.lisp",
+        "docs/research/432/lower-basis-runtime-witness.lisp",
+        "docs/research/canon-sculpt-probes/quote-ordinary-function-red.lisp",
+        "docs/research/canon-sculpt-probes/selective-evaluation-ordinary-function-red.lisp",
+        "docs/research/canon-sculpt-probes/verify-432-run-contract.lisp",
+        "docs/research/canon-sculpt-structural-basis.lisp",
+        "knowledge/canon-sculpt-audit.lisp",
+        "knowledge/canon-sculpt-backend-evidence.lisp",
+        "knowledge/canon-sculpt-consumer-map.lisp",
+        "knowledge/blackboard-research-790.lisp",
+        "research/many-valued/belnap-four-data.lisp",
+    ];
+    PINNED_ARCHIVE_ROOTS.iter().any(|prefix| rel.starts_with(prefix))
+        || PINNED_RESEARCH_FILES.contains(&rel)
 }
 
 fn explicit_nonsemantic_lisp_evidence(text: &str) -> bool {
@@ -158,7 +192,9 @@ fn classified_kind(rel: &str, text: &str, base_kind: &'static str) -> &'static s
         return "rust-test-instrument";
     }
     if !rel.ends_with(".rs")
-        && (explicit_nonsemantic_lisp_evidence(text) || is_operational_doctrine_data(rel, text))
+        && (explicit_nonsemantic_lisp_evidence(text)
+            || is_operational_doctrine_data(rel, text)
+            || is_historical_research_evidence(rel))
     {
         return "lisp-evidence";
     }
@@ -197,7 +233,7 @@ fn rust_nonsemantic_data_kind(
     // match arm; an ordinary Rust `"eval"` elsewhere remains ratchet debt.
     if rel == "crates/sens-cli/src/bin/sens-trit.rs"
         && literal == "eval"
-        && line_text.trim() == "\"eval\" => {"
+        && line_text.trim() == "\"eval\" | \"eval-core4\" => {"
     {
         return Some("rust-cli-surface");
     }
@@ -609,7 +645,7 @@ fn human_cli_eval_dispatch_cannot_mint_an_english_function_exemption() {
     let source = fs::read_to_string(repo_root().join(relative))
         .expect("read exact real CLI");
     let arms: Vec<_> = source.lines()
-        .filter(|line| line.trim() == "\"eval\" => {")
+        .filter(|line| line.trim() == "\"eval\" | \"eval-core4\" => {")
         .collect();
     assert_eq!(arms.len(), 1, "the reviewed CLI dispatch shape must not drift");
     assert!(english_names().contains("eval"), "keep the real semantic name scanned");
