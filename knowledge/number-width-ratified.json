@@ -1,11 +1,12 @@
 {
   "schema": "sens-number-width-ladder/v1",
   "status": "owner-ratified",
-  "authority": "#2490 owner override 2026-10-06",
-  "date": "2026-10-06",
+  "authority": "2026-10-11 owner direct ratification: D24/D48/D96/D192/... are peers of D1-D9 (supersedes Number-only storage-tier interpretation of #2490)",
+  "date": "2026-10-11",
   "semantic_space": "Number",
   "separate_from": [
     "D1-D8",
+    "D9",
     "Predicate1",
     "Structure2",
     "Text7",
@@ -20,12 +21,12 @@
     192
   ],
   "rules": [
-    "Number starts at 24 bits.",
-    "Each next canonical Number tier doubles the previous width.",
-    "Numeric source tokens are Number values, never Text7 digit sequences.",
-    "D7 text digits remain text encoding only and do not carry arithmetic Number identity.",
-    "Number width is language-level semantic framing, not a D1-D8 function-domain coordinate.",
-    "Migration must fail closed when a numeric literal cannot yet be encoded into a ratified Number tier."
+    "D24, D48, D96, D192, ... are first-class numeric DOMAINS with the same ontology rank as D1-D9.",
+    "The domain law is D(24 * 2^n), n >= 0; first width 24 and subsequent widths double.",
+    "A numeric object is exact bits + explicit numeric domain + admitted domain law, never an unqualified Number24 tier.",
+    "Equality of bit payload or mathematical magnitude cannot implicitly identify different domains; bridges require an independent law.",
+    "Numeric source literals and Text7 digits are optional surface projections, not semantic requirements.",
+    "Domain rank/existence/width is admitted now; full resident allocation, arithmetic execution, signedness, rational layout, overflow and automatic widening are not ratified."
   ],
   "not_yet_ratified": [
     "signedness",
@@ -33,5 +34,17 @@
     "integer versus rational field layout",
     "overflow versus automatic widening semantics",
     "decimal literal lowering law"
-  ]
+  ],
+  "domain_family": "numeric",
+  "domain_rank": "same-semantic-domain-rank-as-D1-D9",
+  "domain_name_law": "D(24 * 2^n), n >= 0",
+  "ratified_domains": [
+    "D24",
+    "D48",
+    "D96",
+    "D192"
+  ],
+  "semantic_identity": "exact numeric domain D(24*2^n) + exact binary domain word + admitted domain law",
+  "domain_residency_scope": "numeric domains are owner-ratified as peers; complete occupancy, sign/rationals, width bridges, overflow and runtime admission remain separate",
+  "no_literal_dependency": true
 }
