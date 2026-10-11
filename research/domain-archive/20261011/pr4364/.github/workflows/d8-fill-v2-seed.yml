@@ -1,0 +1,30 @@
+name: D8 dense fill seed
+
+on:
+  pull_request:
+    paths:
+      - "knowledge/d8-fill-v2-state.json"
+      - "knowledge/d8-donor-2934-historical-full-map.json"
+      - "knowledge/d8-recovery-candidate-map.json"
+      - "knowledge/d1-d7-foundation.json"
+      - "scripts/check-d8-fill-v2-seed.py"
+      - ".github/workflows/d8-fill-v2-seed.yml"
+  push:
+    branches: [main]
+    paths:
+      - "knowledge/d8-fill-v2-state.json"
+      - "knowledge/d8-donor-2934-historical-full-map.json"
+      - "knowledge/d8-recovery-candidate-map.json"
+      - "knowledge/d1-d7-foundation.json"
+      - "scripts/check-d8-fill-v2-seed.py"
+      - ".github/workflows/d8-fill-v2-seed.yml"
+  workflow_dispatch:
+
+jobs:
+  seed-guard:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v5
+      - name: Verify dense D8 fill seed
+        run: python3 scripts/check-d8-fill-v2-seed.py

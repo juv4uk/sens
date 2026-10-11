@@ -1,0 +1,22 @@
+name: D3 L1-L5 structural projection
+
+on:
+  pull_request:
+    paths:
+      - "contracts/bija3-l1-l5-ratification.lisp"
+      - "scripts/generate-bija3-l1-l5-structure.py"
+      - "knowledge/bija3-l1-l5-structure-projection.json"
+      - ".github/workflows/d3-l1-l5-structure-projection.yml"
+  push:
+    branches: [main]
+    paths:
+      - "contracts/bija3-l1-l5-ratification.lisp"
+      - "scripts/generate-bija3-l1-l5-structure.py"
+      - "knowledge/bija3-l1-l5-structure-projection.json"
+
+jobs:
+  projection:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - run: python3 scripts/generate-bija3-l1-l5-structure.py --check
