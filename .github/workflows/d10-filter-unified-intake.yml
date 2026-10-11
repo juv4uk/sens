@@ -225,7 +225,7 @@ jobs:
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: d10-full-history-proof-batches
+          name: d10-indexed-census-proof-batches
           path: |
             ${{ runner.temp }}/d10-full-batches/full-work.tsv
             ${{ runner.temp }}/d10-full-batches/full-batch-*.tsv
