@@ -12,64 +12,64 @@
 ; proved by the current exact-D5 PLUS native donor. It guarantees the mathematical
 ; sum fits u64 without making this effect a new arithmetic semantic primitive.
 
-(00001001 machine-effect-wire-denominator-one?
-  (00001000 (text)
-    (00000111
-      ((00111100 text) (00000010 (00000001 (00000000))))
-      ((тотожне? (00111111 text) "/")
-       (10011100 ((rest (01000000 text)))
-         (00000111
-           ((00111100 rest) (00000010 (00000001 (00000000))))
-           ((тотожне? (00111111 rest) "1")
-            (00000111
-              ((00111100 (01000000 rest)) (00000010 (00000001 ())))
-              ((00000010 (00000001 ())) (00000010 (00000001 (00000000))))))
-           ((00000010 (00000001 ())) (00000010 (00000001 (00000000)))))))
-      ((00000010 (00000001 ()))
-       (machine-effect-wire-denominator-one? (01000000 text))))))
+(0011 machine-effect-wire-denominator-one?
+  (0010 (text)
+    (110
+      ((110011100 text) (010 (001 (00000000))))
+      ((тотожне? (110101011 text) "/")
+       (001000 ((rest (110011101 text)))
+         (110
+           ((110011100 rest) (010 (001 (00000000))))
+           ((тотожне? (110101011 rest) "1")
+            (110
+              ((110011100 (110011101 rest)) (010 (001 ())))
+              ((010 (001 ())) (010 (001 (00000000))))))
+           ((010 (001 ())) (010 (001 (00000000)))))))
+      ((010 (001 ()))
+       (machine-effect-wire-denominator-one? (110011101 text))))))
 
-(00001001 machine-effect-exact-integer?
-  (00001000 (value)
-    (10011100 ((wire (01001100 value)))
-      (00000111
-        ((00111101 "#q2:" wire)
+(0011 machine-effect-exact-integer?
+  (0010 (value)
+    (001000 ((wire (11110100 value)))
+      (110
+        ((110101010 "#q2:" wire)
          (machine-effect-wire-denominator-one? wire))
-        ((00000010 (00000001 ())) (00000010 (00000001 (00000000))))))))
+        ((010 (001 ())) (010 (001 (00000000))))))))
 
-(00001001 machine-effect-within-inclusive-integer-range?
-  (00001000 (value lower upper)
-    (00000111
+(0011 machine-effect-within-inclusive-integer-range?
+  (0010 (value lower upper)
+    (110
       ((менше? value lower) (менше? 1 0))
       ((менше? upper value) (менше? 1 0))
       ((атом? ()) (менше? 0 1)))))
 
-(00001001 machine-effect-u32-carrier?
-  (00001000 (value)
-    (00000111
+(0011 machine-effect-u32-carrier?
+  (0010 (value)
+    (110
       ((machine-effect-exact-integer? value)
        (machine-effect-within-inclusive-integer-range?
          value 0 4294967295))
-      ((00000010 (00000001 ()))
-       (00000010 (00000001 (00000000)))))))
+      ((010 (001 ()))
+       (010 (001 (00000000)))))))
 
-(00001001 machine-effect-bounded-u64-add-form?
-  (00001000 (effect)
-    (00000111
-      ((00000010 effect) (00000010 (00000001 (00000000))))
-      ((тотожне? (00101000 effect) 3)
-       (тотожне? (00000101 effect) (00000001 bounded-u64-add)))
-      ((00000010 (00000001 ()))
-       (00000010 (00000001 (00000000)))))))
+(0011 machine-effect-bounded-u64-add-form?
+  (0010 (effect)
+    (110
+      ((010 effect) (010 (001 (00000000))))
+      ((тотожне? (000000 effect) 3)
+       (тотожне? (100 effect) (001 bounded-u64-add)))
+      ((010 (001 ()))
+       (010 (001 (00000000)))))))
 
-(00001001 machine-effect-bounded-u64-add
-  (00001000 (left right)
-    (00000111
+(0011 machine-effect-bounded-u64-add
+  (0010 (left right)
+    (110
       ((machine-effect-u32-carrier? left)
-       (00000111
+       (110
          ((machine-effect-u32-carrier? right)
-          (00100111 (00000001 bounded-u64-add) left right))
-         ((00000010 (00000001 ())) (00000001 machine-effect-rejected))))
-      ((00000010 (00000001 ())) (00000001 machine-effect-rejected)))))
+          (1110 (001 bounded-u64-add) left right))
+         ((010 (001 ())) (001 machine-effect-rejected))))
+      ((010 (001 ())) (001 machine-effect-rejected)))))
 
 ; #4358 replay — target-neutral bounded DIFFERENCE/TIMES mechanism requests.
 ;
@@ -80,56 +80,56 @@
 ; No target, ISA, register, flag, encoding, surface spelling, or domain
 ; coordinate belongs in this generic effect-definition module.
 
-(00001001 machine-effect-u64-carrier?
-  (00001000 (value)
-    (00000111
+(0011 machine-effect-u64-carrier?
+  (0010 (value)
+    (110
       ((machine-effect-exact-integer? value)
        (machine-effect-within-inclusive-integer-range?
          value 0 18446744073709551615))
-      ((00000010 (00000001 ()))
-       (00000010 (00000001 (00000000)))))))
+      ((010 (001 ()))
+       (010 (001 (00000000)))))))
 
-(00001001 machine-effect-bounded-u64-sub-form?
-  (00001000 (effect)
-    (00000111
-      ((00000010 effect) (00000010 (00000001 (00000000))))
-      ((тотожне? (00101000 effect) 3)
-       (тотожне? (00000101 effect) (00000001 bounded-u64-sub)))
-      ((00000010 (00000001 ()))
-       (00000010 (00000001 (00000000)))))))
+(0011 machine-effect-bounded-u64-sub-form?
+  (0010 (effect)
+    (110
+      ((010 effect) (010 (001 (00000000))))
+      ((тотожне? (000000 effect) 3)
+       (тотожне? (100 effect) (001 bounded-u64-sub)))
+      ((010 (001 ()))
+       (010 (001 (00000000)))))))
 
-(00001001 machine-effect-bounded-u64-mul-form?
-  (00001000 (effect)
-    (00000111
-      ((00000010 effect) (00000010 (00000001 (00000000))))
-      ((тотожне? (00101000 effect) 3)
-       (тотожне? (00000101 effect) (00000001 bounded-u64-mul)))
-      ((00000010 (00000001 ()))
-       (00000010 (00000001 (00000000)))))))
+(0011 machine-effect-bounded-u64-mul-form?
+  (0010 (effect)
+    (110
+      ((010 effect) (010 (001 (00000000))))
+      ((тотожне? (000000 effect) 3)
+       (тотожне? (100 effect) (001 bounded-u64-mul)))
+      ((010 (001 ()))
+       (010 (001 (00000000)))))))
 
 ; Застосовувати лише точні предикати D5/D6 як тести D3 COND.
 ; Історичні W8 числові порівняння не є D1 PredicateBit.
-(00001001 machine-effect-bounded-u64-sub
-  (00001000 (left right)
-    (00000111
+(0011 machine-effect-bounded-u64-sub
+  (0010 (left right)
+    (110
       ((machine-effect-u64-carrier? left)
-       (00000111
+       (110
          ((machine-effect-u64-carrier? right)
-          (00000111
+          (110
             ((менше? left right)
-             (00000001 machine-effect-rejected))
+             (001 machine-effect-rejected))
             ((атом? ())
-             (00100111 (00000001 bounded-u64-sub) left right))))
-         ((00000010 (00000001 ())) (00000001 machine-effect-rejected))))
-      ((00000010 (00000001 ())) (00000001 machine-effect-rejected)))))
+             (1110 (001 bounded-u64-sub) left right))))
+         ((010 (001 ())) (001 machine-effect-rejected))))
+      ((010 (001 ())) (001 machine-effect-rejected)))))
 
-(00001001 machine-effect-bounded-u64-mul
-  (00001000 (left right)
-    (00000111
+(0011 machine-effect-bounded-u64-mul
+  (0010 (left right)
+    (110
       ((machine-effect-u32-carrier? left)
-       (00000111
+       (110
          ((machine-effect-u32-carrier? right)
-          (00100111 (00000001 bounded-u64-mul) left right))
-         ((00000010 (00000001 ())) (00000001 machine-effect-rejected))))
-      ((00000010 (00000001 ())) (00000001 machine-effect-rejected)))))
+          (1110 (001 bounded-u64-mul) left right))
+         ((010 (001 ())) (001 machine-effect-rejected))))
+      ((010 (001 ())) (001 machine-effect-rejected)))))
 
