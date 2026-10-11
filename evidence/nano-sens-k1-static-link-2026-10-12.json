@@ -41,7 +41,8 @@
     "wsm_my_lisp_witness_sha": "a6bd9747196f2d676ab6883cbb4b84c7fcfc6947",
     "compiler_nucleus_sha256": "34863f297e0f4f6f21c30dffc34a8bb85822015a89d13028c700b5a679f61b7e",
     "language_contract_sha256": "177d532d24c1f0738a934152f65c7f01f90b5593c8dbfe519e31148c0aa80c40",
-    "structural_law_projection_sha256": "3ce5bb4e042bfec446199a9c77787d0a022109e9a6d6442a4f93b50f68e34e9a"
+    "structural_law_projection_sha256": "3ce5bb4e042bfec446199a9c77787d0a022109e9a6d6442a4f93b50f68e34e9a",
+    "wsm_nucleus_asm_sha256": "3af40212271f43462182348687e8fed334863b9c468ecb5e700382698b4e90b8"
   },
   "size_comparison": {
     "metrics": [
@@ -85,14 +86,9 @@
     "baseline_c1_output_sha256": "303d96cd1467fae319fb2dcf2c12e1a73c840bb0a0ecab67f3609ffde411d79a",
     "byte_identical_output": true,
     "c1_c2_executable_sha256": "27b8fbf096cddbb77be2b4bf57cc58bf8b4fac4accc42adbcfbc10d6cd95f375",
-    "lineage_criterion": "byte-identical-artifact"
-  },
-  "decision": {
-    "gate_status": "PASS_MEASURED",
-    "size_reduction": false,
-    "verdict": "Do not adopt K1 as a seed-size reduction. Static-linking the already stripped C1 preserves output but expands every recorded size metric substantially.",
-    "caveat": "Shared-library dependency bytes are outside the defined seed-byte count and remain unmeasured; no reduction claim may be made by moving dependencies outside the metric.",
-    "next_campaign": "K2, one Rust-owned bootstrap/compiler component replaced at a time; track trusted-seed bytes and independence-index separately."
+    "lineage_criterion": "byte-identical-artifact",
+    "all_library_test_corpus_passed": true,
+    "malformed_input_fail_closed": true
   },
   "excluded_from_seed_bytes": {
     "toolchain": [
@@ -105,5 +101,15 @@
     "os": "ubuntu-latest",
     "wsm_my_lisp_assembly": "external test witness fixture; pinned but not included in seed_artifact.file_bytes",
     "shared_library_dependency_bytes": "not added to the seed byte metric"
+  },
+  "interpretation": {
+    "gate_status": "PASS_MEASURED",
+    "size_reduction": false,
+    "verdict": "Do not adopt K1 as a seed-size reduction. Static-linking the already stripped C1 preserves output but expands all recorded size metrics substantially.",
+    "important_scope_note": "This K1 run measures an instrumented CML test-runner whose size differs from the frozen seed-v0 baseline because the harness source changed. Do not use the K1 runner file_bytes value as the frozen seed-v0 baseline or as a direct baseline size delta.",
+    "dependencies_note": "External toolchain and OS bytes remain excluded. Shared-library dependency bytes are outside the seed file metric and remain separately unmeasured; no savings claim may be made by silently moving dependencies out of scope.",
+    "full_gas_nasm_corpus": "not yet run",
+    "minimum_seed_size": "not established",
+    "next_campaign": "K2: one Rust-owned bootstrap/compiler component replaced at a time; trusted-seed bytes and a precisely defined independence-index are separate metrics."
   }
 }
