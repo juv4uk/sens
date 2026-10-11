@@ -35,6 +35,10 @@ class AuditAllLispSources(unittest.TestCase):
         self.assertEqual(module.scope("lib/domains/d3.lisp"),
                          "CONTRACT_OR_DATA_REVIEW")
         self.assertEqual(module.scope("lib/reason.lisp"), "LIVE_CANDIDATE")
+        self.assertEqual(module.scope("lib/function-table-mechanisms.lisp"), "CONTRACT_OR_DATA_REVIEW")
+        self.assertEqual(module.scope("lib/machine/encoding/admitted-iclass-index.lisp"), "CONTRACT_OR_DATA_REVIEW")
+        self.assertEqual(module.scope("lib/machine/intel-core-i5-6400.lisp"), "PRESERVE_HISTORICAL")
+        self.assertEqual(module.scope("mylisp-cml-export.lisp"), "CONTRACT_OR_DATA_REVIEW")
 
     def test_old_executable_vs_quoted_data_and_comments(self):
         src = (
