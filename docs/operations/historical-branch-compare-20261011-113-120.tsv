@@ -1,0 +1,11 @@
+# Exact compare pin main SHA: 0ec34afd04bcebe518adc7b17b2c966b79ac3fcb
+# Duplicate mechanism-selector and island-lowering variants intentionally attached as history, not overlaid into live tree.
+branch	source_sha	compare_status	ahead_by	behind_by	reported_file_entries	classification
+agent/1047-mechanism-selector-current-20260923	b5cf76cb46acb98b72d039fb9cadd701d143dec0	behind	0	7905	0	ALREADY_IN_MAIN_ANCESTRY
+agent/1047-mechanism-selector-current-main	ab37fb6ccb5ce4863f38ec621ed7996386ac1996	diverged	3	8154	3	HISTORY_ATTACHED_CONTENT_REVIEW_REQUIRED
+agent/1047-mechanism-selector-final	41bab8202d568d52da00bb140036774e3eb03c51	diverged	1	7993	4	HISTORY_ATTACHED_CONTENT_REVIEW_REQUIRED
+agent/1047-mechanism-selector-replay	130bcb5a6b7561496ae145b89146e7e9ac32b31b	diverged	4	8160	4	HISTORY_ATTACHED_CONTENT_REVIEW_REQUIRED
+agent/1048-clips-lowering-4of4	ee48ec888719d2e922c583b6fd874432274159ef	diverged	5	7837	4	HISTORY_ATTACHED_CONTENT_REVIEW_REQUIRED
+agent/1048-clips-lowering-current-main	74c2a55c24f0b4694197c342687a118080bf4c99	behind	0	7835	0	ALREADY_IN_MAIN_ANCESTRY
+agent/1048-clips-lowering-final	9d1a9b0f32f3a2b6874d0c8dd322edbe30eddb41	diverged	4	7834	4	HISTORY_ATTACHED_CONTENT_REVIEW_REQUIRED
+agent/1048-island-lowering	774d15a7efcd9e7f183bad9c94a8bac9789d3799	diverged	6	8184	4	HISTORY_ATTACHED_CONTENT_REVIEW_REQUIRED
