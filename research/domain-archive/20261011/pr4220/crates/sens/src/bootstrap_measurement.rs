@@ -1,0 +1,124 @@
+//! Test-only internal bootstrap decomposition for #3648.
+//!
+//! One ignored dispatch test is reused for every stage. The stage arrives via
+//! SENS_BOOTSTRAP_MEASURE_STAGE, so the Rust test-harness/filter overhead is
+//! identical across Cachegrind runs.
+//!
+//! This module deliberately lives behind cfg(test) so private bootstrap
+//! mechanisms stay private.
+
+use super::*;
+use std::hint::black_box;
+
+fn root_session() -> Session {
+    Session {
+        environment: Environment::root(),
+    }
+}
+
+fn prepare_profile(session: &mut Session) {
+    session.environment.select_core_profile(CoreProfile::Core4);
+    session
+        .environment
+        .set_cond_clause_mode(environment::CondClauseMode::CurrentMigration);
+}
+
+fn load_first_macro(session: &mut Session) {
+    load_macro_library(session).expect("macro library must load");
+}
+
+fn decode_current_core() -> Vec<Expr> {
+    let (expressions, source_hash) =
+        fasl_decode_program(CORE_LIBRARY_FASL).expect("embedded Core FASL must decode");
+    assert_eq!(
+        source_hash,
+        sha256_source(CORE_LIBRARY_SOURCE.as_bytes()),
+        "embedded Core FASL must match embedded Core source"
+    );
+    expressions
+}
+
+fn prepare_through_decode() -> (Session, Vec<Expr>) {
+    let mut session = root_session();
+    prepare_profile(&mut session);
+    load_first_macro(&mut session);
+    let expressions = decode_current_core();
+    (session, expressions)
+}
+
+fn prepare_through_lower() -> (Session, Vec<Expr>) {
+    let (session, expressions) = prepare_through_decode();
+    let lowered = eval::lower::lower_program(&expressions);
+    (session, lowered)
+}
+
+#[test]
+#[ignore = "diagnostic benchmark for #3648"]
+fn bootstrap_measure_dispatch() {
+    let stage = std::env::var("SENS_BOOTSTRAP_MEASURE_STAGE")
+        .expect("SENS_BOOTSTRAP_MEASURE_STAGE must select a diagnostic stage");
+
+    match stage.as_str() {
+        "root" => {
+            black_box(root_session());
+        }
+        "profile" => {
+            let mut session = root_session();
+            prepare_profile(&mut session);
+            black_box(session);
+        }
+        "macro" => {
+            let mut session = root_session();
+            prepare_profile(&mut session);
+            load_first_macro(&mut session);
+            black_box(session);
+        }
+        "decode" => {
+            let (session, expressions) = prepare_through_decode();
+            black_box(session);
+            black_box(expressions);
+        }
+        "lower" => {
+            let (session, lowered) = prepare_through_lower();
+            black_box(session);
+            black_box(lowered);
+        }
+        "eval-lowered-no-peers" => {
+            let (mut session, lowered) = prepare_through_lower();
+            let result = eval_lowered_expressions(&lowered, &mut session)
+                .expect("lowered decoded Core must evaluate");
+            black_box(result);
+            black_box(session);
+        }
+        "eval-lowered-with-peers" => {
+            let (mut session, lowered) = prepare_through_lower();
+            let result = eval_lowered_expressions(&lowered, &mut session)
+                .expect("lowered decoded Core must evaluate");
+            bind_missing_stable_surface_peers(&session.environment);
+            black_box(result);
+            black_box(session);
+        }
+        "eval-no-peers" => {
+            let (mut session, expressions) = prepare_through_decode();
+            let result = eval_parsed_expressions(&expressions, &mut session)
+                .expect("decoded Core must evaluate");
+            black_box(result);
+            black_box(session);
+        }
+        "eval-with-peers" => {
+            let (mut session, expressions) = prepare_through_decode();
+            let result = eval_parsed_expressions(&expressions, &mut session)
+                .expect("decoded Core must evaluate");
+            bind_missing_stable_surface_peers(&session.environment);
+            black_box(result);
+            black_box(session);
+        }
+        "full-loader" => {
+            let mut session = root_session();
+            let result = load_core_library(&mut session).expect("full Core loader must succeed");
+            black_box(result);
+            black_box(session);
+        }
+        other => panic!("unknown SENS_BOOTSTRAP_MEASURE_STAGE={other}"),
+    }
+}
