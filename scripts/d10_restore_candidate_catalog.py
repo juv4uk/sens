@@ -126,7 +126,7 @@ def find_name_line(canonical_text, name, case_sensitive=True):
 HISTORICAL_LEDGER_BLOB = "f10c545598b6aaf90f8f5caf8f49683448ff420f"
 HISTORICAL_LEDGER_PATH = "knowledge/d10-proposal-ledger.tsv"
 HISTORICAL_LEDGER_ARCHIVE = (
-    "knowledge/d10-source-snapshots/d10-proposal-ledger-f10c545598b6aaf6.tsv"
+    "knowledge/d10-source-snapshots/d10-proposal-ledger-f10c545598b6a6af.tsv"
 )
 
 
