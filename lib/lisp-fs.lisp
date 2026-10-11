@@ -285,33 +285,66 @@
   (0010 (journal event)
     (1111 journal (1110 event))))
 
+; Journal validation is a D1-controlled Lisp derivation, not borrowed D8
+; EQUAL/AND/OR. Field existence is checked separately from field value so
+; storing literal EMPTY does not turn a valid WRITE into a missing field.
+(0011 fs-package-has-field?
+  (0010 (name package)
+    (110
+      ((0101 package) (0101 (001 (0))))
+      ((010 package) (0101 (001 (0))))
+      ((101 name (100 (100 package))) (0101 (001 ())))
+      ((010 ()) (fs-package-has-field? name (011 package))))))
+
+; F3 uses exactly the two-element atomic version (0 1). The tests are
+; shape-bounded before CAR/CDR and every branch returns an exact D1 bit.
+(0011 fs-journal-version-current?
+  (0010 (candidate)
+    (110
+      ((010 candidate) (0101 (001 (0))))
+      ((010 (011 candidate)) (0101 (001 (0))))
+      ((0101 (011 (011 candidate)))
+       (110
+         ((101 (100 candidate) (001 0))
+          (101 (100 (011 candidate)) (001 1)))
+         ((010 ()) (0101 (001 (0))))))
+      ((010 ()) (0101 (001 (0)))))))
+
 (0011 fs-journal-event-decision
   (0010 (event)
     (110
-      ((0101 event) (1110 (001 rejected) (001 invalid-event)))
-      ((010 event)  (1110 (001 rejected) (001 invalid-event)))
+      ((010 event) (1110 (001 rejected) (001 invalid-event)))
       ((0100 (101 (fs-package-field (001 format) event) (001 wsm-fs-event)))
        (1110 (001 rejected) (001 invalid-format)))
-      ((0100 (11110111 (fs-package-field (001 version) event) *fs-journal-version*))
+      ((0100 (fs-journal-version-current? (fs-package-field (001 version) event)))
        (1110 (001 rejected) (001 unsupported-version)))
-      ((101 (fs-package-field (001 op) event) (001 ()))
+      ((0101 (fs-package-field (001 op) event))
        (1110 (001 rejected) (001 missing-operation)))
-      ((11110101 (101 (fs-package-field (001 op) event) (001 write))
-            (11111100 (0100 (0100 (010 (11100 (001 name) event))))
-                (0100 (0100 (010 (11100 (001 value) event))))))
-       (1110 (001 rejected) (001 incomplete-write)))
-      ((11110101 (101 (fs-package-field (001 op) event) (001 bind))
-            (11111100 (0100 (0100 (010 (11100 (001 name) event))))
-                (0100 (0100 (010 (11100 (001 address) event))))))
-       (1110 (001 rejected) (001 incomplete-bind)))
-      ((11110101 (101 (fs-package-field (001 op) event) (001 unbind))
-            (0100 (0100 (010 (11100 (001 name) event)))))
-       (1110 (001 rejected) (001 incomplete-unbind)))
-      ((11110101 (101 (fs-package-field (001 op) event) (001 root-commit))
-            (0100 (0100 (010 (11100 (001 root) event)))))
-       (1110 (001 rejected) (001 incomplete-root-commit)))
-      ((010 ()) (1110 (001 accepted) event)))))
-
+      ((101 (fs-package-field (001 op) event) (001 write))
+       (110
+         ((0100 (fs-package-has-field? (001 name) event))
+          (1110 (001 rejected) (001 incomplete-write)))
+         ((0100 (fs-package-has-field? (001 value) event))
+          (1110 (001 rejected) (001 incomplete-write)))
+         ((010 ()) (1110 (001 accepted) event))))
+      ((101 (fs-package-field (001 op) event) (001 bind))
+       (110
+         ((0100 (fs-package-has-field? (001 name) event))
+          (1110 (001 rejected) (001 incomplete-bind)))
+         ((0100 (fs-package-has-field? (001 address) event))
+          (1110 (001 rejected) (001 incomplete-bind)))
+         ((010 ()) (1110 (001 accepted) event))))
+      ((101 (fs-package-field (001 op) event) (001 unbind))
+       (110
+         ((0100 (fs-package-has-field? (001 name) event))
+          (1110 (001 rejected) (001 incomplete-unbind)))
+         ((010 ()) (1110 (001 accepted) event))))
+      ((101 (fs-package-field (001 op) event) (001 root-commit))
+       (110
+         ((0100 (fs-package-has-field? (001 root) event))
+          (1110 (001 rejected) (001 incomplete-root-commit)))
+         ((010 ()) (1110 (001 accepted) event))))
+      ((010 ()) (1110 (001 rejected) (001 unknown-event))))))
 (0011 fs-bindings-without
   (0010 (entries name result)
     (110
