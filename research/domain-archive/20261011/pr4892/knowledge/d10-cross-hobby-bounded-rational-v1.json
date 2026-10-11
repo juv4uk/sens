@@ -1,0 +1,154 @@
+{
+  "schema": "d10-spanda-bounded-rational-proposal/v1",
+  "date": "2026-10-09",
+  "status": "RESEARCH-PENDING-OWNER-REVIEW",
+  "authority": [
+    "#4013",
+    "#4162",
+    "#4182",
+    "#4301",
+    "#4463"
+  ],
+  "selected_inventory_effect": 0,
+  "coordinate_effect": 0,
+  "ratification_effect": 0,
+  "baseline": {
+    "repository": "juv4uk/sens",
+    "inventory_blob_sha": "a55f307c27f17091795d75ebfcd7d051547d80bc",
+    "selected": 630,
+    "capacity": 1024,
+    "ratified": 0,
+    "note": "immutable 630 snapshot; current inventory may grow in other branches without changing this research-only record"
+  },
+  "donor": {
+    "owner_project": "juv4uk/spanda",
+    "path": "README.md",
+    "blob_sha": "d339363e03798941280d7394fb6b24a76ff43dd3",
+    "lines": "19-38",
+    "url": "https://github.com/juv4uk/spanda/blob/master/README.md#L19-L38",
+    "attestation": "The E-P Dance architecture SENS p/q -> FPGA switch mask -> analog voltage -> sampled quantity -> Stern–Brocot/continued-fraction rational reconstruction. This identifies the user's motivating context, not a complete pre-existing implementation or historical mathematical proof."
+  },
+  "algorithm_reference": {
+    "title": "CPython fractions.Fraction.limit_denominator documentation and implementation",
+    "docs_url": "https://docs.python.org/3/library/fractions.html#fractions.Fraction.limit_denominator",
+    "source_url": "https://github.com/python/cpython/blob/main/Lib/fractions.py",
+    "exact_property": "closest rational with denominator not exceeding M; tie smaller denominator, then lower rational if both denominators equal",
+    "note": "The standalone witness also independently verifies the optimum by enumerating all denominators in bounded cases, not merely testing an equivalent implementation against itself."
+  },
+  "candidate": {
+    "id": "spanda-exact-rational-denominator-optimum-v1",
+    "semantic_name": "BEST-BOUNDED-RATIONAL",
+    "surface_uk": "ндрм",
+    "surface_ukr": "найближчий-дріб-у-межі-знаменника",
+    "width": 10,
+    "coordinate": null,
+    "ratified": false,
+    "selected": false,
+    "status": "pending-review",
+    "source_class": "EXACT-RATIONAL-APPROXIMATION",
+    "kind": "pure deterministic relation over exact rational values",
+    "args": [
+      "x: exact rational with reduced signed numerator and positive denominator",
+      "M: exact integer >= 1"
+    ],
+    "result": "Reduced signed numerator and positive denominator p/q with 1 <= q <= M",
+    "law": "Choose the closest rational p/q to x under denominator <= M, with exact absolute-rational error comparison. Tie: smallest denominator; if still tied, numerically smaller rational. Invalid M<1 rejects; input is exact rational, not an untyped ADC float.",
+    "positivity": [
+      {
+        "x": "3/2",
+        "M": 1,
+        "result": "1/1",
+        "why": "equal-error integer tie: choose lower"
+      },
+      {
+        "x": "355/113",
+        "M": 1000,
+        "result": "355/113",
+        "why": "identity under denominator bound"
+      },
+      {
+        "x": "31415926535897932/10000000000000000",
+        "M": 1000,
+        "result": "355/113",
+        "why": "Pi decimal entered as exact rational, not an assumed transcendental exact Pi"
+      },
+      {
+        "x": "-1/2",
+        "M": 1,
+        "result": "-1/1",
+        "why": "negative integer halfway tie"
+      },
+      {
+        "x": "2/7",
+        "M": 3,
+        "result": "1/3",
+        "why": "bounded nontrivial closest"
+      }
+    ],
+    "falsifiers": [
+      "Returning 3/2 when M=1 must fail, even though exact source denominator is 2.",
+      "For x=1/2, M=1, returning 1 instead of 0 must fail (halfway integer tie).",
+      "Using floating point to compare candidate errors may reverse sufficiently close rational order; only exact rational comparison is accepted.",
+      "Returning a nonreduced or negative-denominator result violates the canonical output contract."
+    ],
+    "neighbors_ratified": [
+      "D6 RATIONALP",
+      "D8 RATIONAL",
+      "D8 RATIONALIZE",
+      "D8 FLOOR",
+      "D8 CEILING",
+      "D8 ROUND"
+    ],
+    "nearest_D10_selected": [
+      "none by exact semantic name in snapshot a55f307c27f17091795d75ebfcd7d051547d80bc"
+    ],
+    "semantic_distinction": "D8 RATIONALIZE does not specify a user-supplied maximum denominator nor exact optimized nearest fraction under that bound; however this operation is algorithmically derived from arithmetic/continued fractions, so it is not yet proven a new irreducible primitive.",
+    "uncertainty": "Need owner decision if the derived but useful deterministic mathematical procedure deserves a D10 resident; avoid claiming a new mathematical axiom or hardware feature.",
+    "unblock_fanout": [
+      "spanda analog-to-exact reconstruction",
+      "bounded-rational oscillator controls on FPGA",
+      "horology tick ratios",
+      "music interval tuning approximations",
+      "astronomical period resonances"
+    ],
+    "expressibility_gap": "The extra input M and deterministic exact optimum/tie behavior is a compact language-visible higher-order relation not identical to plain RATIONALIZE; primitive independence is unproved."
+  },
+  "holds": [
+    {
+      "name": "CERTIFIED-APPROXIMATION-ERROR",
+      "status": "HOLD-DERIVABLE",
+      "law": "Return exact |x-p/q| with a provenance witness; likely just subtraction and absolute value, unless a proof-carrying certificate law is distinguished."
+    },
+    {
+      "name": "PITCH-INTERVAL-RATIO",
+      "status": "HOLD-DERIVABLE",
+      "law": "Use exact rational frequency ratios to compare musical intervals. Avoid logarithm/cents as exact-rational identity; needs separate acoustic tuning convention."
+    },
+    {
+      "name": "CONTINUOUS-ANGLE-UNWRAP",
+      "status": "HOLD-CONFLICT-REVIEW",
+      "law": "Bounded angular sample deltas and explicit half-period ambiguity from AS5600 sensor; #4301/#4887 physical donor agents already cover this area."
+    },
+    {
+      "name": "PANINI-PROVENANCE-PROOF",
+      "status": "HOLD-ALREADY-COVERED",
+      "law": "Do not reselect Panini derivation/provenance functions from ratified or selected D1–D10; separate canonical source from computational hypothesis."
+    },
+    {
+      "name": "DSP-OSCILLATOR-PHASE",
+      "status": "HOLD-CONFLICT-REVIEW",
+      "law": "Physical oscillator/PLL or GPU/FPGA transport not a standalone SENS language instruction; coordinate with the already claimed radio/audio lane #4887."
+    }
+  ],
+  "limitations": [
+    "No change to canonical D10 selected inventory before owner review and serialized no-overlap selection.",
+    "No D2 control, D7 Text7, hardware registers, physical T5, migration or released Core authority.",
+    "No invented Sanskrit operation name; source spelling is user-authored labels for pending proposal only.",
+    "The CPython implementation is a comparison oracle, not an implementation of a new SENS resident."
+  ],
+  "paths": {
+    "checker": "scripts/check_d10_bounded_rational.py",
+    "documentation": "docs/research/d10-bounded-rational-hobbies.uk.md",
+    "workflow": ".github/workflows/d10-bounded-rational-hobbies.yml"
+  }
+}

@@ -1,0 +1,134 @@
+{
+  "schema": "sens.domain-research-archive-extension/v1",
+  "status": "EVIDENCE-NONNORMATIVE",
+  "date": "2026-10-11",
+  "file_count": 17,
+  "source_prs": [
+    4891,
+    4892,
+    4910,
+    4921
+  ],
+  "records": [
+    {
+      "pr": 4891,
+      "original": "docs/architecture/ARCHIPELAGO-V1.uk.md",
+      "archive": "research/domain-archive/20261011/pr4891/docs/architecture/ARCHIPELAGO-V1.uk.md",
+      "sha": "0b78924dae40d2f5c50f2a8682d7eb8264732cef",
+      "url": "https://github.com/juv4uk/sens/pull/4891"
+    },
+    {
+      "pr": 4891,
+      "original": "docs/research/d10-author-interests-exact-rational-20261009.uk.md",
+      "archive": "research/domain-archive/20261011/pr4891/docs/research/d10-author-interests-exact-rational-20261009.uk.md",
+      "sha": "07a5e6947cf9b996c22cc7f0cfea085eaddebefc",
+      "url": "https://github.com/juv4uk/sens/pull/4891"
+    },
+    {
+      "pr": 4891,
+      "original": "knowledge/d10-fill-v1-state.json",
+      "archive": "research/domain-archive/20261011/pr4891/knowledge/d10-fill-v1-state.json",
+      "sha": "d613f712fb3cc48b5f94afe2aa1a501b3c7a3ec9",
+      "url": "https://github.com/juv4uk/sens/pull/4891"
+    },
+    {
+      "pr": 4891,
+      "original": "knowledge/d10-hobby-exact-measurement-intake-v1.json",
+      "archive": "research/domain-archive/20261011/pr4891/knowledge/d10-hobby-exact-measurement-intake-v1.json",
+      "sha": "97b182129609c27ad9796f8756176db7928fc9ac",
+      "url": "https://github.com/juv4uk/sens/pull/4891"
+    },
+    {
+      "pr": 4891,
+      "original": "knowledge/d10-selection-transition-history.json",
+      "archive": "research/domain-archive/20261011/pr4891/knowledge/d10-selection-transition-history.json",
+      "sha": "8b3b24fc31dbc69f30c3ade27301a2202b990676",
+      "url": "https://github.com/juv4uk/sens/pull/4891"
+    },
+    {
+      "pr": 4891,
+      "original": "knowledge/d10-v1-semantic-inventory.json",
+      "archive": "research/domain-archive/20261011/pr4891/knowledge/d10-v1-semantic-inventory.json",
+      "sha": "34efd273000e3de8510441764cb59acbb5ab284b",
+      "url": "https://github.com/juv4uk/sens/pull/4891"
+    },
+    {
+      "pr": 4891,
+      "original": "scripts/check_d10_clos_roots_selection.py",
+      "archive": "research/domain-archive/20261011/pr4891/scripts/check_d10_clos_roots_selection.py.source.txt",
+      "sha": "67cbc37a98252c4ca36b3fa1cdd5a4d3be917aed",
+      "url": "https://github.com/juv4uk/sens/pull/4891"
+    },
+    {
+      "pr": 4891,
+      "original": "scripts/check_d10_hobby_bounded_rational.py",
+      "archive": "research/domain-archive/20261011/pr4891/scripts/check_d10_hobby_bounded_rational.py.source.txt",
+      "sha": "6760a9d27d1a21f017477a5417e28bf5dcc326d1",
+      "url": "https://github.com/juv4uk/sens/pull/4891"
+    },
+    {
+      "pr": 4892,
+      "original": "docs/research/d10-bounded-rational-hobbies.uk.md",
+      "archive": "research/domain-archive/20261011/pr4892/docs/research/d10-bounded-rational-hobbies.uk.md",
+      "sha": "ec80aca5b425ce74285f8beb9587cb6692573fb7",
+      "url": "https://github.com/juv4uk/sens/pull/4892"
+    },
+    {
+      "pr": 4892,
+      "original": "knowledge/d10-cross-hobby-bounded-rational-v1.json",
+      "archive": "research/domain-archive/20261011/pr4892/knowledge/d10-cross-hobby-bounded-rational-v1.json",
+      "sha": "b93217e9b45c1339f09146a1daf4aa323e611ea9",
+      "url": "https://github.com/juv4uk/sens/pull/4892"
+    },
+    {
+      "pr": 4892,
+      "original": "scripts/check_d10_bounded_rational.py",
+      "archive": "research/domain-archive/20261011/pr4892/scripts/check_d10_bounded_rational.py.source.txt",
+      "sha": "edd2f415ac16f76c7093e6cddd59f4a1f02fe344",
+      "url": "https://github.com/juv4uk/sens/pull/4892"
+    },
+    {
+      "pr": 4910,
+      "original": "docs/research/d10-affine-correlated-uncertainty.uk.md",
+      "archive": "research/domain-archive/20261011/pr4910/docs/research/d10-affine-correlated-uncertainty.uk.md",
+      "sha": "dacea7df4fe37df04785166a28e62506f191ec70",
+      "url": "https://github.com/juv4uk/sens/pull/4910"
+    },
+    {
+      "pr": 4910,
+      "original": "knowledge/d10-affine-correlated-uncertainty-v1.json",
+      "archive": "research/domain-archive/20261011/pr4910/knowledge/d10-affine-correlated-uncertainty-v1.json",
+      "sha": "bda21a562e114da055d91321eb96fcddabc92f8b",
+      "url": "https://github.com/juv4uk/sens/pull/4910"
+    },
+    {
+      "pr": 4910,
+      "original": "scripts/check_d10_affine_uncertainty.py",
+      "archive": "research/domain-archive/20261011/pr4910/scripts/check_d10_affine_uncertainty.py.source.txt",
+      "sha": "3968c51da98b102458b2f908f8c9937458b99e6c",
+      "url": "https://github.com/juv4uk/sens/pull/4910"
+    },
+    {
+      "pr": 4910,
+      "original": "tests/test_d10_affine_uncertainty.py",
+      "archive": "research/domain-archive/20261011/pr4910/tests/test_d10_affine_uncertainty.py.source.txt",
+      "sha": "85babed83e4dba3fa78b516732153e535ad51964",
+      "url": "https://github.com/juv4uk/sens/pull/4910"
+    },
+    {
+      "pr": 4921,
+      "original": "knowledge/d10-linguistic-law-intake-20261009.json",
+      "archive": "research/domain-archive/20261011/pr4921/knowledge/d10-linguistic-law-intake-20261009.json",
+      "sha": "b484ad4dc4dfa1089b0fcf1acfd6d70d724eda85",
+      "url": "https://github.com/juv4uk/sens/pull/4921"
+    },
+    {
+      "pr": 4921,
+      "original": "tests/test_d10_linguistic_laws.py",
+      "archive": "research/domain-archive/20261011/pr4921/tests/test_d10_linguistic_laws.py.source.txt",
+      "sha": "0bd4c497f5a08529795a56d7cfaef566e28a055a",
+      "url": "https://github.com/juv4uk/sens/pull/4921"
+    }
+  ],
+  "invariants": "D1-D9 ratified unchanged; D10 ledger/inventory unchanged; zero new ratification; original Git blob SHAs preserved."
+}
