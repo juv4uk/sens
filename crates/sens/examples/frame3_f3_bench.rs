@@ -67,7 +67,18 @@ fn run_case(name: &str, source: &str) {
             return;
         }
     };
-    let f3_decoded = senc::decode_senc(&f3).expect("F3 decode");
+    let f3_decoded = match senc::decode_senc(&f3) {
+        Ok(decoded) => decoded,
+        Err(senc::SencError::NotCanonical) => {
+            eprintln!("# F3_REJECTED_NONCANONICAL\t{name}\tcurrent canonical form law");
+            println!(
+                "{}\t{}\t{}\t{}\t{}\t{}\tNA",
+                name, words.len(), t5.len(), v1.len(), v2.len(), v3.len()
+            );
+            return;
+        }
+        Err(error) => panic!("F3 decoder rejected admissible source unexpectedly: {error:?}"),
+    };
     assert_eq!(f3_decoded, word_strings);
 
     let (t5_en_p50, t5_en_p95) = timings(|| {
