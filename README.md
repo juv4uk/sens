@@ -19,6 +19,8 @@
 
 ---
 
+Current authority: Contract 11.9 · D1–D10 owner-ratified (D10 whole-domain) · D24+ numeric owner-ratified · D10 F1/F2/F3/T5 pending
+
 ## SENS у двох словах
 
 SENS — це не «звичайна мова з бітовими opcode».
@@ -33,7 +35,7 @@ D1 1  ≠  D2 01  ≠  D3 001  ≠  D4 0001
 
 І так само байт, u8, FPGA-комірка чи інший carrier не визначає meaning.
 
-Поточна нормативна база — **Contract 11.8, D1–D9**. Перехід самого `language-contract.lisp` до canonical visible-binary source ще триває в **#4248**; цей README описує цільову binary-source модель, а не оголошує незавершений cutover завершеним.
+Поточна нормативна база — **Contract 11.9**: ратифіковані D1–D9, цілісний домен **D10 1024/1024** (акт 12.10.2026), а також окреме числове сімейство **D24/D48/D96/…**. Докази F1/F2/F3 для резидентів D10 і фізичне T5-виконання ще не допущені. Перехід самого `language-contract.lisp` до canonical visible-binary source ще триває в **#4248**; цей README описує цільову binary-source модель, а не оголошує незавершений cutover завершеним.
 
 ---
 
@@ -320,7 +322,7 @@ semantic width  ≠  physical carrier width
 
 ---
 
-## D1–D9
+## D1–D10 та D24+
 
 SENS будує не одну плоску таблицю opcode, а **драбину доменів**.
 
@@ -335,6 +337,8 @@ SENS будує не одну плоску таблицю opcode, а **драб�
 | D7 | 7 | Sound7/Text7 та окремі role laws |
 | D8 | 8 | повний owner-ratified domain |
 | D9 | 9 | повний owner-ratified domain |
+| D10 | 10 | весь каталог 1024/1024 ратифіковано; F1/F2/F3/T5 залишаються відкритими |
+| D24+ | 24·2^n | ратифіковані числові домени D24/D48/D96/D192/… |
 
 Поточна owner-ratified картина:
 
@@ -342,6 +346,8 @@ SENS будує не одну плоску таблицю opcode, а **драб�
 D7 = 126/128 admitted; 2 координати reserved
 D8 = 256/256
 D9 = 512/512
+D10 = 1024/1024, whole-domain owner-ratified, T5 not admitted
+D24+ = owner-ratified numeric ladder
 ~~~
 
 D9 має окремий runtime-carrier ланцюг. Це механізм розміщення, а не привід звести D9 назад до D8/SID8.
@@ -686,7 +692,7 @@ exact bits + exact domain + proved/ratified law
 
 Width is part of identity. A byte or u8 carrier is only storage.
 
-Current Contract 11.8 ratifies D1–D9. D2 owns source structure; D3 and higher domains own semantic residents according to their own laws.
+Current Contract 11.9 preserves D1–D9, owner-ratifies D10 as a single 1024-code domain and keeps separately ratified D24+ numeric domains. Per-row D10 evidence and physical T5 admission remain pending. D2 owns source structure; D3 and higher domains own semantic residents according to their own laws.
 
 Canonical binary source is visible binary, not decimal IDs, #b..., quoted binary strings, or host opcode wrappers.
 

@@ -1,6 +1,6 @@
 ; language-contract.lisp — current machine-readable Level 1/2 contract.
 ;
-; Contract 11.8 — owner-ratified D1–D9 foundation.
+; Contract 11.9 — owner-ratified whole D10 catalogue, preserving Contract 11.8 D1–D9 and D24+ numeric law.
 ; Owner paradigm: #2490. Implementation cutover: #2817 / #2822.
 ;
 ; Contract 11 preserves the observable PredicateBit / ATOM / EQ / COND law
@@ -19,11 +19,11 @@
 ; bounded compatibility / transport / backend projection during migration.
 ; It cannot mint or redefine canonical semantic identity.
 
-((major . #d11) (minor . 8)
+((major . #d11) (minor . 9)
  (status . current-domain-qualified-authority)
  (supersedes . "Contract 10.0 flat Function8 identity authority")
  (historical-snapshot . "docs/archive/historical/language-contract-10.0.lisp")
- (note . "Contract 11.8 owner-ratifies D1–D9 as the current foundation chain. D1–D8 retain their prior authorities; D9 is owner-ratified 512/512 in #4008 over the full #4007 v1 map. D9 residency is semantic authority, while callable/mechanism admission remains separate and may fail closed. Historical Sens8/Sid8/Function8, semantic-registry source codes and pre-ratification D9 placement evidence remain provenance only.")
+ (note . "Contract 11.8 owner-ratifies D1–D9 as the current foundation chain. D1–D8 retain their prior authorities; D9 is owner-ratified 512/512 in #4008 over the full #4007 v1 map. D9 residency is semantic authority, while callable/mechanism admission remains separate and may fail closed. Historical Sens8/Sid8/Function8, semantic-registry source codes and pre-ratification D9 placement evidence remain provenance only. Contract 11.9 adds D10 whole-domain owner ratification, but not individual proof or physical code execution.")
  (covers . (G1 G2 G3 G4 G5 G6 G7 G8 S1 S2 S3))
  (invariants
    . ((binary-domain-identity
@@ -68,8 +68,12 @@
        . "Core.D8 is OWNER-RATIFIED 256/256 under #3960. Its exact resident map is normative in contracts/d8-ratification.lisp and knowledge/d8-ratified.json. The #3959 selector/product/gauge coordinate assignment is now normative by owner decision, while proof-fixed, orbit-gauge and S4-gauge provenance remain distinguished. Ratified D8 residency does not imply callable mechanism; missing mechanisms fail closed. Historical Sens8/Sid8/Function8 and #2934 donor coordinates remain non-authoritative.")
       (d9-ratified-status
        . "Core.D9 is OWNER-RATIFIED 512/512 under #4008. Its exact resident map is normative in contracts/d9-ratification.lisp and knowledge/d9-ratified.json. The #4007 map has 128 theorem-forced selector coordinates and 384 owner-ratified S4 gauge choices; both are normative identity while their proof provenance remains distinct. Ratified D9 residency does not imply callable mechanism; missing mechanisms fail closed. Historical Sens8/Sid8/Function8, semantic-registry source codes and pre-ratification D9 placement evidence remain non-authoritative.")
+      (d10-whole-domain-ratified
+       . "Owner 2026-10-12 ratified D10 as ONE complete exact 10-bit semantic codebook with 1024 unique coordinates 0000000000..1111111111, stable identities and declared laws. Act: knowledge/d10-owner-whole-domain-ratification-20261012.json, canonical pointer: knowledge/d10-current-inventory.json, pinned inventory: knowledge/d10-v18-semantic-inventory.json. This whole-domain authority is NOT a claim of 1024 individually independently proved meanings and NOT physical T5 opcode or program-reader permission.")
+      (d10-proof-and-execution-separation
+       . "D10 domain-level ratified=true and selected=placed=1024 do NOT alter per-row ratified_resident=0. F1 donor provenance, F2 independent positive and negative witnesses, F3 behavioural dedup against D1-D9/D10, and F4 physical T5 execution remain separately gated. No inference from codebook occupancy, no fabricated PASS, no bypass of failed or pending evidence, and no change to ratified D1-D9, D2 or physical SENS without independent admission.")
       (cross-domain-non-collapse
-       . "The same packed numeric payload may coexist in D1, D2, D3, D4, D5, D6, D7, D8, D9, D24, D48, D96, D192 and higher ratified numeric domains without semantic equality. Numeric domains have equal ontology rank to D1-D9, not identical resident laws. Cross-domain reuse requires an explicit independently proved bridge law.")
+       . "The same packed numeric payload may coexist in D1, D2, D3, D4, D5, D6, D7, D8, D9, D10, D24, D48, D96, D192 and higher ratified numeric domains without semantic equality. Numeric domains have equal ontology rank to D1-D9, not identical resident laws. Cross-domain reuse requires an explicit independently proved bridge law.")
       (atom-one-bit-core1-4
        . "Core.D3 010 ATOM has one law across Core1/Core2/Core3/Core4: structural empty () and every admitted non-pair value answer PredicateBit 1; pair answers PredicateBit 0. Structural () is an ATOM-yes subject, not a truth value. Historical Function8 00000010 is compatibility projection only.")
       (eq-one-bit-core1-4

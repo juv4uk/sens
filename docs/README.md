@@ -5,7 +5,7 @@
 ## Почати звідси
 
 1. [`../README.md`](../README.md) — огляд проєкту.
-2. [`../language-contract.lisp`](../language-contract.lisp) — машинна конституція, Contract 11.8.
+2. [`../language-contract.lisp`](../language-contract.lisp) — машинна конституція, Contract 11.9 (D10 whole-domain ratified; D24+ numeric ratified; D10 T5 gated).
 3. [`domain-paradigm.uk.md`](domain-paradigm.uk.md) — домени, закони й генеративний ріст.
 4. [`language-core.md`](language-core.md) — технічна exact-domain модель.
 5. [`semantic-authority-map.md`](semantic-authority-map.md) — що має семантичну владу.

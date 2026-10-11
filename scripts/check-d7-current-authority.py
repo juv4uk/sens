@@ -119,7 +119,7 @@ assert "(d7-coordinate-law . " in contract
 assert "(identity . " not in contract
 assert '(owner-reserved-pinned . ("0100001" "0101010"))' in contract
 assert '(candidate-occupancy . #d124)' in contract
-assert "(minor . 8)" in lang
+assert "(minor . 9)" in lang
 assert "Contract 11.8" in lang
 assert "Core.D7 is OWNER-RATIFIED 126/128 under #3572" in lang
 assert "D7  owner-ratified 126/128" in current

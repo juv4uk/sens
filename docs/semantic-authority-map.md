@@ -2,6 +2,8 @@
 
 Status: CURRENT ARCHITECTURE MAP. This file does not create new language semantics. It records where a current claim must be checked before prose is trusted.
 
+Contract 11.9 (2026-10-12) adds whole-domain owner ratification of D10 1024/1024 over the unchanged D1–D9 foundation. This does not admit each D10 resident individually, prove F1/F2/F3, or authorize T5 execution. See `knowledge/d10-owner-whole-domain-ratification-20261012.json` and `knowledge/d10-current-inventory.json`. D24+ numeric domains remain independently ratified under `contracts/numeric-domains-ratification.lisp`.
+
 ## One rule
 
 > The language owns meaning and domain-qualified semantic identity; runtimes provide mechanisms and conformance evidence.

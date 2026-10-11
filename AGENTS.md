@@ -1,3 +1,10 @@
+<!-- CONTRACT-11-9-20261012:BEGIN -->
+## Поточний Contract 11.9 — D10 owner-ratified, D24+ numeric ratified
+
+Актом 12.10.2026 власник ратифікував увесь D10 як каталог 1024/1024 за один раз (`knowledge/d10-owner-whole-domain-ratification-20261012.json`). Це не свідчить про незалежний доказ усіх 1024 законів і НЕ надає F1/F2/F3/T5 runtime authority; незавершені перевірки залишаються fail-closed. Окремі D24/D48/D96/... ратифіковано 11.10.2026. Верхня нормативна версія — `language-contract.lisp` 11.9, D1–D9 залишаються незмінними. Старі датовані приписи нижче про "D10 research/unratified" є історичними зрізами. Тільки `main`, без нових гілок.
+
+<!-- CONTRACT-11-9-20261012:END -->
+
 <!-- OWNER-D24-EXACT-NUMERIC-FRAME-20261011:BEGIN -->
 ## Core NEG/RATIO: двійкове обрамлення та упаковані байти вже перевірені
 

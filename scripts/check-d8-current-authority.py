@@ -52,7 +52,7 @@ assert "(occupancy . #d256)" in contract
 assert "(distinct-residents . #d256)" in contract
 assert "(current-domains . (D1 D2 D3 D4 D5 D6 D7 D8 D9))" in foundation_contract
 
-assert "(minor . 8)" in lang
+assert "(minor . 9)" in lang
 assert "Contract 11.8" in lang
 assert "Core.D8 is OWNER-RATIFIED 256/256 under #3960" in lang
 assert "D8  full compact 256/256" in current

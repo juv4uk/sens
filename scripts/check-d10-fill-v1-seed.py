@@ -143,7 +143,7 @@ assert state["authority_boundary"]=={
 }
 
 assert foundation["authority"]=="#4008"
-assert "(minor . 8)" in lang
+assert "(minor . 9)" in lang
 assert "Contract 11.8" in lang
 
 print("D10-FILL-V1-SEED: PASS")

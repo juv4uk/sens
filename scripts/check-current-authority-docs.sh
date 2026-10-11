@@ -62,20 +62,19 @@ test -f language-contract.lisp || {
 
 contract_major="$(sed -n 's/.*(major \. #d\([0-9][0-9]*\)).*/\1/p' language-contract.lisp | head -n1)"
 contract_minor="$(sed -n 's/.*(minor \. \([0-9][0-9]*\)).*/\1/p' language-contract.lisp | head -n1)"
-foundation="$(grep -oE 'current ratified semantic Core domains are D1–D[0-9]+' CURRENT.md | head -n1 | sed 's/.* are //')"
-research_domain="$(grep -oE 'D[0-9]+ remains research/unratified' CURRENT.md | head -n1 | awk '{print $1}')"
-
-test -n "$contract_major" && test -n "$contract_minor" && test -n "$foundation" && test -n "$research_domain" || {
+test -n "$contract_major" && test -n "$contract_minor" || {
   printf 'current-authority-generation-unreadable\n' >&2
   exit 1
 }
 
-generation_banner="Current authority: Contract ${contract_major}.${contract_minor} · ${foundation} · ${research_domain} research/unratified"
+generation_banner="Current authority: Contract ${contract_major}.${contract_minor} · D1–D10 owner-ratified (D10 whole-domain) · D24+ numeric owner-ratified · D10 F1/F2/F3/T5 pending"
 require_literal README.md "$generation_banner"
-require_literal CURRENT.md "$research_domain remains research/unratified"
+require_literal CURRENT.md 'D10  whole-domain owner-ratified 1024/1024'
+require_literal language-contract.lisp 'd10-whole-domain-ratified'
+require_literal language-contract.lisp 'd10-proof-and-execution-separation'
 
 # Contract/domain status and canonical human table entry-points.
-require_literal README.md 'Contract **11.8**'
+require_literal README.md 'Contract 11.9'
 require_literal README.md 'owner-ratified #4008'
 require_literal README.md 'lib/domains/d1.lisp'
 require_literal README.md 'lib/domains/d8.lisp'
@@ -123,4 +122,6 @@ require_literal docs/semantic-authority-map.uk.md 'Core1'
 require_literal README.md 'робочою назвою `my-lisp`'
 forbid_literal README.md 'робочою назвою `sens`'
 
+python3 scripts/check_d10_owner_whole_domain_ratification.py
+python3 scripts/check-numeric-domain-ratification.py
 printf 'current-authority-docs-ok\n'
