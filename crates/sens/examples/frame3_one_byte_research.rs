@@ -99,12 +99,86 @@ fn verify_one(code: u8) -> Result<(usize, String), String> {
     Ok((t5.len(), format!("{:?}", actual.value)))
 }
 
+
+fn bench_speed_one(
+    label: &str,
+    mut operation: impl FnMut(),
+    samples: usize,
+    inner: usize,
+) {
+    use std::{hint::black_box, time::Instant};
+    for _ in 0..inner { operation(); }
+    let mut observations = Vec::with_capacity(samples);
+    for _ in 0..samples {
+        let start = Instant::now();
+        for _ in 0..inner { operation(); }
+        let elapsed = start.elapsed().as_nanos();
+        black_box(elapsed);
+        observations.push(elapsed as f64 / inner as f64);
+    }
+    observations.sort_by(f64::total_cmp);
+    let p50 = observations[samples / 2];
+    let p95 = observations[(samples * 95).div_ceil(100).saturating_sub(1)];
+    println!("{label}\t{p50:.2}\t{p95:.2}");
+}
+
+fn bench_speed() -> Result<(), Box<dyn std::error::Error>> {
+    use std::hint::black_box;
+    const SAMPLES: usize = 19;
+    const INNER: usize = 300;
+    let one_byte = [0x45];
+    let exact = decode(&one_byte)?;
+    let visible = exact.join(" ");
+    let tokens = parse_binary_source_words(&visible)?;
+    let typed: Vec<_> = tokens.iter().map(|t| t.word).collect();
+    let full_t5 = encode_ternary_words(&typed)?;
+    if full_t5.len() != 5 || exact.len() != 8 || encode(&exact)? != one_byte {
+        return Err("wrong physical size or broken roundtrip".into());
+    }
+    let expected = eval_parsed_expressions(
+        &parse_canonical_binary(&visible)?, &mut Session::default()
+    )?;
+    let t5_value = PhysicalT5Program::decode(&full_t5)?.execute(&mut Session::default())?;
+    if expected != t5_value { return Err("real evaluator mismatch".into()); }
+    println!("# exact_program=CAR(CONS(1,NIL)), same D1/D2/D3 typed word sequence");
+    println!("# profile=.f3m externally selected; 1 byte excludes decoder/profile selector");
+    println!("# physical_bytes_f3m=1 physical_bytes_t5=5");
+    println!("# machine=Github hosted runner, rust --release, buffer-only, no file I/O");
+    println!("# samples={SAMPLES}, inner={INNER}, warmup={INNER}, units=ns/op; p95 nearest rank");
+    println!("operation\tp50_ns\tp95_ns");
+    bench_speed_one("f3m_encode_exact_words", || {
+        black_box(encode(black_box(&exact)).unwrap());
+    }, SAMPLES, INNER);
+    bench_speed_one("t5_encode_typed_words", || {
+        black_box(encode_ternary_words(black_box(&typed)).unwrap());
+    }, SAMPLES, INNER);
+    bench_speed_one("f3m_decode_1b_to_exact_words", || {
+        black_box(decode(black_box(&one_byte)).unwrap());
+    }, SAMPLES, INNER);
+    bench_speed_one("t5_decode_5b_to_typed_words", || {
+        black_box(sens::decode_ternary_words(black_box(&full_t5)).unwrap());
+    }, SAMPLES, INNER);
+    bench_speed_one("f3m_decode_parse_execute", || {
+        let source = decode(black_box(&one_byte)).unwrap().join(" ");
+        let parsed = parse_canonical_binary(&source).unwrap();
+        black_box(eval_parsed_expressions(&parsed, &mut Session::default()).unwrap());
+    }, SAMPLES, INNER);
+    bench_speed_one("t5_decode_parse_execute", || {
+        let program = PhysicalT5Program::decode(black_box(&full_t5)).unwrap();
+        black_box(program.execute(&mut Session::default()).unwrap());
+    }, SAMPLES, INNER);
+    Ok(())
+}
+
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     // A real tracked Git blob, not a hex string or a benchmark counter.
     const TRACKED_ONE_BYTE_FILE: &[u8] =
         include_bytes!("../../../research/framed3/fixtures/car-cons-one-nil.f3m");
     if TRACKED_ONE_BYTE_FILE != [0x45] {
         return Err("Git-tracked physical .f3m file is not exactly byte 0x45".into());
+    }
+    if std::env::args().nth(1).as_deref() == Some("--speed") {
+        return bench_speed();
     }
     let codes: Vec<u8> = (0u8..=255).filter(|&b| decode(&[b]).is_ok()).collect();
     // 3 literals + 3 ATOM + 9 CONS + 9 CAR.CONS + 9 CDR.CONS
