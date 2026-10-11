@@ -622,14 +622,24 @@ def encode_text7_identifier(spelling: str,text7,tok: Tok):
     return frame_text7(text7_encode(spelling,text7,tok), tok)
 
 
-def collect_global_bindings(forms):
+def collect_global_bindings(forms,resolver=None):
+    # Do not maintain a second spelling authority for DEFINE. The canonical
+    # Ukrainian surface "визначити" (and any future alias) must be recognized
+    # through the same owner-ratified D4 identity used by Resolver.head().
+    define_heads={"00001001","0011","define","def"}
+    if resolver is not None:
+        for table in (resolver.my,resolver.legacy,resolver.upper):
+            for spelling,identity in table.items():
+                if (isinstance(identity,tuple) and len(identity)>=2
+                        and identity[0]=="0011" and identity[1]=="D4"):
+                    define_heads.add(spelling)
     bindings=[]
     seen=set()
     for form in forms:
         if not isinstance(form,ListNode) or form.tail is not None or len(form.items)<2:
             continue
         head=form.items[0]
-        if not isinstance(head,Atom) or head.tok.text not in {"00001001","0011","define","def"}:
+        if not isinstance(head,Atom) or head.tok.text not in define_heads:
             continue
         target=form.items[1]
         if isinstance(target,Atom):
@@ -883,7 +893,7 @@ def migrate_file(source: str,resolver,text7):
     stripped=strip_comments(source)
     tokens=tokenize(stripped)
     forms=Parser(tokens).parse_program()
-    resolver.set_global_bindings(collect_global_bindings(forms), text7)
+    resolver.set_global_bindings(collect_global_bindings(forms, resolver), text7)
     all_words=[]
     for i,form in enumerate(forms):
         if i: all_words.append(D2_SEP)

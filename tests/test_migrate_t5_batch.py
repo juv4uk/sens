@@ -36,6 +36,36 @@ class RealBatchTest(unittest.TestCase):
             *(["--write"] if write else []),
         ], text=True, capture_output=True)
 
+    def test_compiler_ukrainian_define_heads_bind_global_calls_before_t5(self):
+        source = REPO / "lib" / "compiler-nucleus.lisp"
+        before = source.read_bytes()
+        output = self.base / "compiler-nucleus-candidate"
+        report_path = self.base / "compiler-nucleus-report.json"
+        result = subprocess.run([
+            sys.executable, str(REPO / "scripts" / "migrate-three-pass.py"),
+            str(source), "--out", str(output), "--report", str(report_path),
+        ], cwd=REPO, text=True, capture_output=True)
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        report = json.loads(report_path.read_text(encoding="utf-8"))
+        self.assertEqual(report["summary"]["files_seen"], 1)
+        self.assertEqual(report["summary"]["files_written"], 1)
+        self.assertEqual(report["summary"]["files_blocked"], 0)
+        passes = report["files"][0]["passes"]
+        self.assertGreater(passes["pass4-text7-global"], 0)
+        self.assertEqual(passes["passthrough-head"], 0)
+        physical = output / "compiler-nucleus.sens"
+        self.assertTrue(physical.is_file())
+        spec = importlib.util.spec_from_file_location(
+            "sens_three_pass_compiler_regression",
+            REPO / "scripts" / "migrate-three-pass.py",
+        )
+        self.assertIsNotNone(spec)
+        migrator = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(migrator)
+        words = migrator.decode_bytes(physical.read_bytes())
+        self.assertEqual(migrator.encode_words(words), physical.read_bytes())
+        self.assertEqual(source.read_bytes(), before, "migration must keep canonical source byte-exact")
+
     def test_audited_d9_sid8_maps_to_exact_d9_without_reusing_legacy_bits(self):
         source = self.root / "lib/legacy-d9.lisp"
         source.write_text("(01001011 ())" + chr(10), encoding="utf-8")
