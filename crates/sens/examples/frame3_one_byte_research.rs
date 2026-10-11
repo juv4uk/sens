@@ -100,6 +100,12 @@ fn verify_one(code: u8) -> Result<(usize, String), String> {
 }
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
+    // A real tracked Git blob, not a hex string or a benchmark counter.
+    const TRACKED_ONE_BYTE_FILE: &[u8] =
+        include_bytes!("../../../research/framed3/fixtures/car-cons-one-nil.f3m");
+    if TRACKED_ONE_BYTE_FILE != [0x45] {
+        return Err("Git-tracked physical .f3m file is not exactly byte 0x45".into());
+    }
     let codes: Vec<u8> = (0u8..=255).filter(|&b| decode(&[b]).is_ok()).collect();
     // 3 literals + 3 ATOM + 9 CONS + 9 CAR.CONS + 9 CDR.CONS
     // + 9 EQ + 3 QUOTE = exactly 45 grammar-generated programs.
