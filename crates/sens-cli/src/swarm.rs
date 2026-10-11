@@ -569,7 +569,16 @@ fn handle_sexpr_connection(
     let environment = Environment::root().with_process_allowlist(allowed.to_vec());
     let mut session = Session { environment };
     if let Ok(core_ast) = parse(core_lib) {
-        let _ = eval_parsed_expressions(&core_ast, &mut session);
+        if eval_parsed_expressions(&core_ast, &mut session).is_err() {
+            return;
+        }
+    } else {
+        return;
+    }
+    // The time library uses an owner-pinned exact-D3 parser, not the ordinary
+    // composite string reader (which would treat W3 heads as decimal tokens).
+    if sens::load_time_library(&mut session).is_err() {
+        return;
     }
 
     let mut reader = BufReader::new(stream.try_clone().expect("clone TCP stream"));
