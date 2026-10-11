@@ -1,6 +1,7 @@
 //! Regression for the legacy Core macro MAP head (D6 101000).
-//! Ordinary Lisp parse interprets 101000 as a number; the pinned reader
-//! must preserve the callable exact-domain identity without numeric fallback.
+//! D6:101000 is a ratified coordinate without an admitted evaluator mechanism.
+//! The legacy let macro must use its existing Lisp-defined map closure while
+//! both ordinary and typed readers continue to refuse invented D6 dispatch.
 use sens::{
     eval_parsed_expressions, eval_program, parse_mixed_exact_domain_legacy_core_source,
     Session,
@@ -19,18 +20,37 @@ fn legacy_core_reader_is_explicitly_path_bound() {
 }
 
 #[test]
-fn legacy_core_let_macro_calls_exact_d6_map_not_decimal_101000() {
+fn legacy_core_let_uses_lisp_owned_map_without_unadmitted_d6_dispatch() {
+    for typed in [false, true] {
+        let mut session = Session::default();
+        if typed {
+            let parsed = parse_mixed_exact_domain_legacy_core_source("lib/core.lisp", SOURCE)
+                .expect("legacy core source must parse");
+            eval_parsed_expressions(&parsed, &mut session)
+                .expect("typed legacy bootstrap must load");
+        } else {
+            eval_program(SOURCE, &mut session).expect("ordinary legacy bootstrap must load");
+        }
+        for (program, expected) in [
+            ("(let ((x 7)) x)", "7"),
+            ("(let ((x 7) (y 9)) (list x y))", "(7 9)"),
+        ] {
+            let result = eval_program(program, &mut session)
+                .unwrap_or_else(|e| panic!("Lisp-owned MAP must work in {program}, typed={typed}: {e:?}"));
+            assert_eq!(result.value.to_string(), expected);
+        }
+    }
+}
+
+#[test]
+fn unadmitted_d6_map_does_not_silently_fall_back_to_historical_byte() {
     let mut session = Session::default();
     let parsed = parse_mixed_exact_domain_legacy_core_source("lib/core.lisp", SOURCE)
-        .expect("historical core source should parse with exact D6 call heads");
-    eval_parsed_expressions(&parsed, &mut session)
-        .expect("legacy core bootstrap with D3-D6 typed calls");
-    for (program, expected) in [
-        ("(let ((x 7)) x)", "7"),
-        ("(let ((x 7) (y 9)) (list x y))", "(7 9)"),
-    ] {
-        let result = eval_program(program, &mut session)
-            .unwrap_or_else(|e| panic!("let macro must execute via D6 MAP in {program}: {e:?}"));
-        assert_eq!(result.value.to_string(), expected);
-    }
+        .expect("core reader must parse");
+    eval_parsed_expressions(&parsed, &mut session).expect("core bootstrap");
+    let attempt = sens::parse_mixed_exact_domain("(101000 (0010 (x) x) (001 (a)))")
+        .expect("current exact-domain source parses");
+    let failure = eval_parsed_expressions(&attempt, &mut session)
+        .expect_err("D6 MAP cannot acquire unproven evaluator meaning by accident");
+    assert!(failure.message.contains("domain identity is not callable"), "{failure:?}");
 }
