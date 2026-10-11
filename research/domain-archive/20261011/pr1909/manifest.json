@@ -1,0 +1,102 @@
+{
+  "schema": "sens-historical-branch-archive/v1",
+  "archived_at": "2026-10-11",
+  "source": {
+    "repo": "juv4uk/sens",
+    "pr": 1909,
+    "title": "integration: replay current #1810 source onto fresh PredicateBit runtime",
+    "branch": "integration/predicatebit-current-main-1907-1810",
+    "head_sha": "2c8c512ae8f5c5b99057beda6a3071062d6709d6",
+    "base": "replay/1807-predicate-runtime-20260930",
+    "base_sha": "d1055a90c6dcf06b5d49df57eccc39e6a3b0ee01",
+    "mergeable": true
+  },
+  "files": [
+    {
+      "path": "benchmarks/sens-surface/run.py",
+      "patch_returned": true
+    },
+    {
+      "path": "crates/sens/src/eval/special_forms/io.rs",
+      "patch_returned": true
+    },
+    {
+      "path": "crates/sens/tests/string_order_predicatebit.rs",
+      "patch_returned": true
+    },
+    {
+      "path": "lib/bridge/prolog-to-datalog.lisp",
+      "patch_returned": true
+    },
+    {
+      "path": "lib/core.lisp",
+      "patch_returned": true
+    },
+    {
+      "path": "lib/core4.lisp",
+      "patch_returned": true
+    },
+    {
+      "path": "lib/life-1-scheduler.lisp",
+      "patch_returned": true
+    },
+    {
+      "path": "lib/macro.lisp",
+      "patch_returned": true
+    },
+    {
+      "path": "my-lisp-constitution.lisp",
+      "patch_returned": true
+    },
+    {
+      "path": "scripts/build-constitution.lisp",
+      "patch_returned": true
+    },
+    {
+      "path": "scripts/check-function-table-mechanisms.lisp",
+      "patch_returned": true
+    },
+    {
+      "path": "scripts/check-island-math-evidence.lisp",
+      "patch_returned": true
+    },
+    {
+      "path": "scripts/check-repo-tooling-inventory.lisp",
+      "patch_returned": true
+    },
+    {
+      "path": "scripts/enforce-function-table-mechanisms.lisp",
+      "patch_returned": true
+    },
+    {
+      "path": "scripts/enforce-island-math-evidence.lisp",
+      "patch_returned": true
+    },
+    {
+      "path": "scripts/machine-authority-guard.lisp",
+      "patch_returned": true
+    },
+    {
+      "path": "scripts/semantic-authority-guard-enforce.lisp",
+      "patch_returned": true
+    },
+    {
+      "path": "scripts/semantic-authority-guard.lisp",
+      "patch_returned": true
+    },
+    {
+      "path": "tests/fixtures/life-1-scheduler-witness.lisp",
+      "patch_returned": true
+    },
+    {
+      "path": "tests/fixtures/machine-representation-independence-witness.lisp",
+      "patch_returned": true
+    }
+  ],
+  "limits": [
+    "This PR is a 20-file cross-era integration branch based on a non-main replay branch; it is not safe to merge wholesale onto current main.",
+    "Current main may contain newer content for these paths; the patch preserves the historical delta, not current file authority.",
+    "The string-order PredicateBit witness and Lisp edits require per-file current-main behavior review before any active replay."
+  ],
+  "disposition": "ARCHIVE-ONLY / CURRENT-MAIN RECONCILIATION REQUIRED"
+}
