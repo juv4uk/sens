@@ -297,7 +297,7 @@
 ; Do not depend on legacy list/map helpers whose predicates may return (1)/(0)
 ; while executing under strict D3:110 COND.
 (00001001 core4-let-parameters
-  (00001000 (bindings)
+  (0010 (bindings)
     (110
       ((010 bindings) (001 ()))
       ((010 (001 ()))
@@ -306,7 +306,7 @@
          (core4-let-parameters (011 bindings)))))))
 
 (00001001 core4-let-values
-  (00001000 (bindings)
+  (0010 (bindings)
     (110
       ((010 bindings) (001 ()))
       ((010 (001 ()))
@@ -481,7 +481,7 @@
 ; call left inside the returned body would be evaluated as ordinary data-call;
 ; recurse here while the raw binding forms are still available.
 (00001001 core4-let*-expansion
-  (00001000 (bindings body)
+  (0010 (bindings body)
     (00000111
       ((00000010 bindings) body)
       ((00000010 (00000001 ()))
