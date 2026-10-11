@@ -1,0 +1,30 @@
+{
+  "schema": "sens-full-branch-main-audit/v1",
+  "status": "OBSERVED-HOSTED-GIT-ANCESTRY",
+  "date": "2026-10-11",
+  "repository": "juv4uk/sens",
+  "main_sha": "d466b9a6e53b0f3bbe0af96ff8a17c7f10744b96",
+  "source_run": "https://github.com/juv4uk/sens/actions/runs/38104819824",
+  "source_artifact": "https://github.com/juv4uk/sens/actions/runs/38104819824/artifacts/11689705968",
+  "script": "scripts/audit_historical_branches.py",
+  "available_refs": 4133,
+  "scanned_refs": 4133,
+  "distinct_branch_heads": 4034,
+  "statuses": {
+    "ALREADY_ANCESTOR": 1256,
+    "UNMERGED": 2877,
+    "TREE_IDENTICAL": 0,
+    "ERROR": 0
+  },
+  "inventories": [
+    "knowledge/history/branch-heads-20261011-p01-14.jsonl",
+    "knowledge/history/branch-heads-20261011-p15-28.jsonl",
+    "knowledge/history/branch-heads-20261011-p29-42.jsonl"
+  ],
+  "meaning": "Ancestry census only; unmerged refs need semantic dedup and current-contract oracles; no bulk merge, no new refs",
+  "limitations": [
+    "Deleted refs and closed unmerged PRs are separate source-discovery tasks",
+    "Counts scoped to scanned snapshot SHA; main evolves",
+    "Raw per-branch audit available as expiring Actions artifact and must be preserved or regenerated"
+  ]
+}
