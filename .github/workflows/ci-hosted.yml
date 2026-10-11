@@ -37,3 +37,50 @@ jobs:
           python3 scripts/check-numeric-domain-ratification.py
       - name: Verify Core domain and ownership boundaries
         run: cargo test --locked -p sens --test domain_ladder --test domain_ladder_only_kernel --test domain_ast_value_identity
+
+
+  sid8-projection-audit:
+    name: SID8/SENS8 to ratified-domain dry-run audit
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v5
+      - name: Regression tests (no source writes)
+        run: python3 -m unittest discover -s tests -p test_sid8_to_ladder.py -v
+      - name: Audit all Lisp sources (no physical SENS publication)
+        shell: bash
+        run: |
+          set +e
+          python3 scripts/sens8-to-ladder.py . \
+            --root . --source-era auto \
+            --report "$RUNNER_TEMP/sid8-domain-audit.json" \
+            > "$RUNNER_TEMP/sid8-domain-console.log" 2>&1
+          status=$?
+          set -e
+          tail -n 15 "$RUNNER_TEMP/sid8-domain-console.log"
+          if [[ "$status" != 0 && "$status" != 2 ]]; then
+            echo "Unexpected SID8 scan status: $status" >&2
+            exit "$status"
+          fi
+          python3 - "$RUNNER_TEMP/sid8-domain-audit.json" <<'PY'
+          import json, pathlib, sys
+          report = json.loads(pathlib.Path(sys.argv[1]).read_text())
+          s = report["summary"]
+          rows = report["files"]
+          assert s["total"] > 0, "empty repository scan"
+          assert len(rows) == s["total"], "incomplete audit"
+          assert s["eligible"] + s["blocked"] == s["total"], "invalid accounting"
+          assert s["blocked"] == sum(x["status"] == "blocked" for x in rows)
+          assert report["mode"] == "audit-only-not-physical-sens"
+          assert report["eligible_single_word_mappings"] >= 1
+          print("SID8 AUDIT", s)
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: sid8-domain-dry-run-${{ github.sha }}
+          path: |
+            ${{ runner.temp }}/sid8-domain-audit.json
+            ${{ runner.temp }}/sid8-domain-console.log
+          if-no-files-found: warn
+          retention-days: 7
