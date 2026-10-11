@@ -669,7 +669,7 @@
        (1110 (001 rejected) (1110 (001 reason) (001 invalid-clause)) (1110 (001 input) clauses)))
       ((010 ())
        (10011100 ((package (make-knowledge-package module-name clauses)))
-         (1001 (1110 (110111100 path (11110100 package)) package)))))))
+         (1001 (1110 (110111100 path (значення-у-текст package)) package)))))))
 
 ;; TCP transport uses one package per connection and EOF as the frame boundary.
 ;; TCP may split one write into many reads, so the receiver drains every chunk
@@ -698,7 +698,7 @@
        (1110 (001 rejected) (1110 (001 reason) (001 invalid-clause)) (1110 (001 input) clauses)))
       ((010 ())
        (10011100 ((package (make-knowledge-package module-name clauses)))
-         (10011 (1110 (110110011 connection (11110100 package))
+         (10011 (1110 (110110011 connection (значення-у-текст package))
                       (tcp-close connection)
                       package)))))))
 
@@ -754,7 +754,7 @@
          (10011
            (1110
              (110110011 connection
-                        (110011110 (11110100 package) "\n"))
+                        (110011110 (значення-у-текст package) "\n"))
              (0011 *knowledge-receipt-text* (tcp-read-frame connection ""))
              (10011100 ((receipt (11101010 *knowledge-receipt-text*)))
                (1001 (1110 (tcp-close connection) receipt))))))))))
