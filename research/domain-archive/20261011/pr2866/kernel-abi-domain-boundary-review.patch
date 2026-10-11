@@ -1,0 +1,90 @@
+# Historical source patch for SENS PR #2866
+# Original head: 009679530f06263ba527c2046181a84267d8c059
+# Branch: fix/2864-kernel-abi-domain-boundary
+# Base: main @ 42e3945c5e8f27902ade6fedf52f54786c56f914
+# Captured via GitHub PR patch API on 2026-10-11.
+# Current main already carries a stricter legacy ABI wrapper contract.
+
+===== FILE .github/workflows/kernel-abi-transport-boundary.yml =====
+@@ -46,7 +46,7 @@ jobs:
+           set -euo pipefail
+           got="$(./target/debug/sens scripts/check-kernel-abi-transport-boundary.lisp)"
+           printf '%s\n' "$got"
+-          test "$got" = "(kernel-abi-transport-boundary-ok (kernels 4) (language-type Sens8) (abi-wrapper SemanticId))"
++          test "$got" = "(kernel-abi-transport-boundary-ok (kernels 4) (language-type CoreDomainIdentity) (abi-wrapper SemanticId))"
+       - name: Verify mechanical transport boundary in host sources
+         shell: bash
+         run: |
+
+===== FILE contracts/kernel-abi-transport-boundary.lisp =====
+@@ -1,15 +1,19 @@
+-; #1117 — language Sens8 vs kernel ABI coordinate boundary.
++; #1117 / #2864 — domain-qualified language identity vs kernel ABI coordinate boundary.
+ ;
+-; The language owns exact SID identity. External kernels may preserve one
+-; transport byte as an observation/ABI coordinate, but that wrapper is not
+-; the language's Sens8 type and may not become a reverse semantic authority.
++; The language owns exact domain-qualified identity. External kernels may
++; preserve one transport byte only as an explicitly projected legacy/backend
++; coordinate. Fitting in u8 does not grant a D3/D4/D5/D6 identity ABI access,
++; and the wrapper may never become reverse semantic authority.
+ 
+ (kernel-abi-transport-boundary/1
+   (owner sens)
+-  (language-identity-type Sens8)
++  (language-identity-type CoreDomainIdentity)
+   (shared-abi-type WsmKernelRequest)
+   (shared-abi-field semantic_id)
+   (shared-abi-storage opaque-u8)
++  (shared-abi-identity-scope legacy-backend-anchor-only)
++  (domain-to-kernel-transport explicit-projection-required)
++  (domain-width-fit-implies-abi-admission forbidden)
+ 
+   (kernel-wrapper-type SemanticId)
+   (kernel-wrapper-role transport-coordinate-only)
+@@ -36,7 +40,7 @@
+     "crates/wsm-datalog-kernel/src/lib.rs"
+     "crates/wsm-datalog-kernel/Cargo.toml")
+ 
+-  (allowed-direction language-sid8-to-kernel-transport)
++  (allowed-direction explicit-legacy-backend-projection-to-kernel-transport)
+   (reverse-direction kernel-transport-to-language-meaning forbidden)
+   (native-result-role observation-only)
+   (diagnostic kernel-abi-transport-boundary-violation))
+\ No newline at end of file
+
+===== FILE scripts/check-kernel-abi-transport-boundary.lisp =====
+@@ -100,7 +100,7 @@
+                   (00000001 (owner sens)))
+                 (kab-row-check
+                   (00000001 language-identity-type)
+-                  (00000001 (language-identity-type Sens8)))
++                  (00000001 (language-identity-type CoreDomainIdentity)))
+                 (kab-row-check
+                   (00000001 shared-abi-type)
+                   (00000001 (shared-abi-type WsmKernelRequest)))
+@@ -110,6 +110,15 @@
+                 (kab-row-check
+                   (00000001 shared-abi-storage)
+                   (00000001 (shared-abi-storage opaque-u8)))
++                (kab-row-check
++                  (00000001 shared-abi-identity-scope)
++                  (00000001 (shared-abi-identity-scope legacy-backend-anchor-only)))
++                (kab-row-check
++                  (00000001 domain-to-kernel-transport)
++                  (00000001 (domain-to-kernel-transport explicit-projection-required)))
++                (kab-row-check
++                  (00000001 domain-width-fit-implies-abi-admission)
++                  (00000001 (domain-width-fit-implies-abi-admission forbidden)))
+                 (kab-row-check
+                   (00000001 kernel-wrapper-type)
+                   (00000001 (kernel-wrapper-type SemanticId)))
+@@ -176,7 +185,7 @@
+          (00000001
+            (kernel-abi-transport-boundary-ok
+              (kernels 4)
+-             (language-type Sens8)
++             (language-type CoreDomainIdentity)
+              (abi-wrapper SemanticId))))
+         ((00000010 failure)
+          (0)
