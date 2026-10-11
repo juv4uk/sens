@@ -43,6 +43,8 @@ jobs:
         run: cargo test --locked -p sens --test reasoning_world_d3_migration
       - name: Forward and knowledge D3 candidates differential oracle
         run: cargo test --locked -p sens --test reasoning_forward_knowledge_d3_migration
+      - name: Legacy core D6 MAP reader execution
+        run: cargo test --locked -p sens --test legacy_core_d6_map_reader
       - name: World D3 complete CLI binary compilation
         run: cargo check --locked -p sens-cli --bins
       - name: World D3 content-store integration
