@@ -1,0 +1,79 @@
+"""Regression tests for provisional SENS name.lisp + name staging (no name.sens)."""
+from __future__ import annotations
+
+import importlib.util
+from pathlib import Path
+import tempfile
+import unittest
+
+ROOT = Path(__file__).resolve().parents[1]
+IMPL = ROOT / "scripts/stage-two-projections.py"
+SPEC = importlib.util.spec_from_file_location("stage_two_projections", IMPL)
+assert SPEC and SPEC.loader
+pair = importlib.util.module_from_spec(SPEC)
+SPEC.loader.exec_module(pair)
+
+
+class StageTwoProjectionsTests(unittest.TestCase):
+    BRANCH = "tests/fixtures/migration-d1-cond-cohort/branch.lisp"
+
+    def test_existing_uk_fixture_roundtrips_without_packing(self):
+        with tempfile.TemporaryDirectory(prefix="sens-two-test-") as td:
+            mirror = Path(td) / "mirror"
+            result = pair.stage(ROOT, mirror, [self.BRANCH], "auto", True)
+            self.assertEqual(result["summary"]["files_created"], 2)
+            self.assertEqual(result["semantic_oracle"], "NOT_VERIFIED")
+            self.assertFalse(result["physical_codec_invoked"])
+            self.assertFalse(list(mirror.rglob("*.sens")))
+            source = ROOT / self.BRANCH
+            uk = mirror / self.BRANCH
+            view = uk.with_suffix("")
+            self.assertEqual(uk.read_bytes(), source.read_bytes())
+            self.assertEqual(
+                view.read_bytes(),
+                (source.with_suffix("").read_bytes()),
+            )
+            self.assertTrue(view.read_bytes().endswith(b"\n"))
+            self.assertNotIn(b"2", view.read_bytes())
+
+    def test_preview_creates_nothing(self):
+        with tempfile.TemporaryDirectory(prefix="sens-two-test-") as td:
+            mirror = Path(td) / "mirror"
+            result = pair.stage(ROOT, mirror, [self.BRANCH], "auto", False)
+            self.assertEqual(result["summary"]["files_created"], 0)
+            self.assertEqual(result["summary"]["would_create"], 2)
+            self.assertFalse(mirror.exists())
+
+    def test_repeated_stage_refuses_to_clobber_both_files(self):
+        with tempfile.TemporaryDirectory(prefix="sens-two-test-") as td:
+            mirror = Path(td) / "mirror"
+            pair.stage(ROOT, mirror, [self.BRANCH], "auto", True)
+            original = (mirror / self.BRANCH).read_bytes()
+            with self.assertRaises(pair.ProjectionBlocked):
+                pair.stage(ROOT, mirror, [self.BRANCH], "auto", True)
+            self.assertEqual((mirror / self.BRANCH).read_bytes(), original)
+
+    def test_path_traversal_and_duplicate_sources_are_rejected(self):
+        with tempfile.TemporaryDirectory(prefix="sens-two-test-") as td:
+            mirror = Path(td) / "mirror"
+            with self.assertRaises(pair.ProjectionBlocked):
+                pair.stage(ROOT, mirror, ["../outside.lisp"], "auto", True)
+            with self.assertRaises(pair.ProjectionBlocked):
+                pair.stage(ROOT, mirror, [self.BRANCH, self.BRANCH], "auto", True)
+            self.assertFalse(list(mirror.rglob("*"))) if mirror.exists() else None
+
+    def test_invalid_program_does_not_claim_migration(self):
+        # The bounded Ukrainian renderer must not make up a source-level
+        # mapping for arbitrary arithmetic, a binder or unresolved call.
+        with tempfile.TemporaryDirectory(prefix="sens-two-test-") as td:
+            root = Path(td) / "input"
+            root.mkdir()
+            (root / "invalid.lisp").write_text("(unknown-fn 17)\n", encoding="utf-8")
+            mirror = Path(td) / "mirror"
+            with self.assertRaises(pair.ProjectionBlocked):
+                pair.stage(root, mirror, ["invalid.lisp"], "auto", True)
+            self.assertFalse(list(mirror.rglob("*"))) if mirror.exists() else None
+
+
+if __name__ == "__main__":
+    unittest.main()
