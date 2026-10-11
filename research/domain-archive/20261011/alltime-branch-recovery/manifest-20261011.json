@@ -564,6 +564,87 @@
       "archive_path": "research/domain-archive/20261011/alltime-branch-recovery/cohort-049-056/blobs/a50ab9a32810473fea2ae65d23dbed4ccece7de4/crates__sens__src__domain_words.rs.source.txt",
       "comparison_main_sha": "8a5996052f22a46183ff77090ce2ccb677e73823",
       "admission": "ARCHIVED_SOURCE_ONLY; NOT EXECUTABLE; NO CI OR SEMANTIC RATIFICATION"
+    },
+    {
+      "origin_branch": "agent/datalog-math-1001",
+      "origin_commit": "74ae3be6b062e854d9809cc64e935b9aefee1944",
+      "original_path": "contracts/datalog-math-capability-1001.lisp",
+      "original_blob_sha": "c715141197ee107deeb7f392c13c5396b639bd03",
+      "archive_path": "research/domain-archive/20261011/alltime-branch-recovery/cohort-057-064/blobs/c715141197ee107deeb7f392c13c5396b639bd03/contracts__datalog-math-capability-1001.lisp.source.txt",
+      "comparison_main_sha": "da441de4a24c1d48123a362aa65dea59c63fa2c4",
+      "admission": "ARCHIVED_SOURCE_ONLY; NOT EXECUTABLE; NO CI OR SEMANTIC RATIFICATION"
+    },
+    {
+      "origin_branch": "agent/datalog-math-1001",
+      "origin_commit": "74ae3be6b062e854d9809cc64e935b9aefee1944",
+      "original_path": "crates/wsm-datalog-kernel/src/arithmetic.rs",
+      "original_blob_sha": "fddd53e2583eeae19f709b57ef1c722ab4a5d9ae",
+      "archive_path": "research/domain-archive/20261011/alltime-branch-recovery/cohort-057-064/blobs/fddd53e2583eeae19f709b57ef1c722ab4a5d9ae/crates__wsm-datalog-kernel__src__arithmetic.rs.source.txt",
+      "comparison_main_sha": "da441de4a24c1d48123a362aa65dea59c63fa2c4",
+      "admission": "ARCHIVED_SOURCE_ONLY; NOT EXECUTABLE; NO CI OR SEMANTIC RATIFICATION"
+    },
+    {
+      "origin_branch": "agent/datalog-math-1001",
+      "origin_commit": "74ae3be6b062e854d9809cc64e935b9aefee1944",
+      "original_path": "crates/wsm-datalog-kernel/src/lib.rs",
+      "original_blob_sha": "5590c3bfeaffbcf61484a708c38196a21f5f598c",
+      "archive_path": "research/domain-archive/20261011/alltime-branch-recovery/cohort-057-064/blobs/5590c3bfeaffbcf61484a708c38196a21f5f598c/crates__wsm-datalog-kernel__src__lib.rs.source.txt",
+      "comparison_main_sha": "da441de4a24c1d48123a362aa65dea59c63fa2c4",
+      "admission": "ARCHIVED_SOURCE_ONLY; NOT EXECUTABLE; NO CI OR SEMANTIC RATIFICATION"
+    },
+    {
+      "origin_branch": "agent/datalog-math-1001",
+      "origin_commit": "74ae3be6b062e854d9809cc64e935b9aefee1944",
+      "original_path": "crates/wsm-datalog-kernel/tests/arithmetic_execution_1001.rs",
+      "original_blob_sha": "46d2c6028359ade16e9ad72eae3cdffcb5168ce1",
+      "archive_path": "research/domain-archive/20261011/alltime-branch-recovery/cohort-057-064/blobs/46d2c6028359ade16e9ad72eae3cdffcb5168ce1/crates__wsm-datalog-kernel__tests__arithmetic_execution_1001.rs.source.txt",
+      "comparison_main_sha": "da441de4a24c1d48123a362aa65dea59c63fa2c4",
+      "admission": "ARCHIVED_SOURCE_ONLY; NOT EXECUTABLE; NO CI OR SEMANTIC RATIFICATION"
+    },
+    {
+      "origin_branch": "agent/datalog-math-1001",
+      "origin_commit": "74ae3be6b062e854d9809cc64e935b9aefee1944",
+      "original_path": "tests/authority-inventory.lisp",
+      "original_blob_sha": "fabee5fa1cb831191343408399e9bf3c7c4273f7",
+      "archive_path": "research/domain-archive/20261011/alltime-branch-recovery/cohort-057-064/blobs/fabee5fa1cb831191343408399e9bf3c7c4273f7/tests__authority-inventory.lisp.source.txt",
+      "comparison_main_sha": "da441de4a24c1d48123a362aa65dea59c63fa2c4",
+      "admission": "ARCHIVED_SOURCE_ONLY; NOT EXECUTABLE; NO CI OR SEMANTIC RATIFICATION"
+    },
+    {
+      "origin_branch": "agent/diag-native-encoder-first-type-failure-20261010",
+      "origin_commit": "da0ffd77a3d7d0bb74b81fdc3b25ac52db5095cd",
+      "original_path": "crates/sens-host/tests/native_lisp_bytes.rs",
+      "original_blob_sha": "1234aaa01abef4e752975db492bd45e215f6fd90",
+      "archive_path": "research/domain-archive/20261011/alltime-branch-recovery/cohort-057-064/blobs/1234aaa01abef4e752975db492bd45e215f6fd90/crates__sens-host__tests__native_lisp_bytes.rs.source.txt",
+      "comparison_main_sha": "da441de4a24c1d48123a362aa65dea59c63fa2c4",
+      "admission": "ARCHIVED_SOURCE_ONLY; NOT EXECUTABLE; NO CI OR SEMANTIC RATIFICATION"
+    },
+    {
+      "origin_branch": "agent/fix-845-exact-domain-machine-axis",
+      "origin_commit": "d40e4f65098d7dde8c119a4f33864bffd846ac62",
+      "original_path": "crates/sens/tests/semantic_coordinate_matrix_845.rs",
+      "original_blob_sha": "2b2905e8faf2f45d6dcfbacf74480d3eebf6182c",
+      "archive_path": "research/domain-archive/20261011/alltime-branch-recovery/cohort-057-064/blobs/2b2905e8faf2f45d6dcfbacf74480d3eebf6182c/crates__sens__tests__semantic_coordinate_matrix_845.rs.source.txt",
+      "comparison_main_sha": "da441de4a24c1d48123a362aa65dea59c63fa2c4",
+      "admission": "ARCHIVED_SOURCE_ONLY; NOT EXECUTABLE; NO CI OR SEMANTIC RATIFICATION"
+    },
+    {
+      "origin_branch": "agent/fix-admission-range-exact-d1-20261010",
+      "origin_commit": "ea19bae11c14f395b2d42c81a40b8cd3d0301eba",
+      "original_path": "lib/machine/admission/x86-64.lisp",
+      "original_blob_sha": "8b56c5c03d34ce9edea9190c60c77f322f07f2a0",
+      "archive_path": "research/domain-archive/20261011/alltime-branch-recovery/cohort-057-064/blobs/8b56c5c03d34ce9edea9190c60c77f322f07f2a0/lib__machine__admission__x86-64.lisp.source.txt",
+      "comparison_main_sha": "da441de4a24c1d48123a362aa65dea59c63fa2c4",
+      "admission": "ARCHIVED_SOURCE_ONLY; NOT EXECUTABLE; NO CI OR SEMANTIC RATIFICATION"
+    },
+    {
+      "origin_branch": "agent/fix-early-sid-contract8-cond",
+      "origin_commit": "4151b2f2fdd56920a61dac751de01723724ceaec",
+      "original_path": "tests/fixtures/early-sid-lowering-witness.lisp",
+      "original_blob_sha": "89f7dc3602c2cbc1aab9dae5f4f0b316dff7a40e",
+      "archive_path": "research/domain-archive/20261011/alltime-branch-recovery/cohort-057-064/blobs/89f7dc3602c2cbc1aab9dae5f4f0b316dff7a40e/tests__fixtures__early-sid-lowering-witness.lisp.source.txt",
+      "comparison_main_sha": "da441de4a24c1d48123a362aa65dea59c63fa2c4",
+      "admission": "ARCHIVED_SOURCE_ONLY; NOT EXECUTABLE; NO CI OR SEMANTIC RATIFICATION"
     }
   ]
 }

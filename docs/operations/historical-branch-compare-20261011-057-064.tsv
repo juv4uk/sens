@@ -1,0 +1,11 @@
+# Exact compare pin main SHA: da441de4a24c1d48123a362aa65dea59c63fa2c4
+# Ancestry only; no semantic acceptance. Source blobs for five diverged refs are preserved separately.
+branch	source_sha	compare_status	ahead_by	behind_by	classification
+agent/datalog-math-1001	74ae3be6b062e854d9809cc64e935b9aefee1944	diverged	8	7854	NEEDS_CONTENT_REVIEW
+agent/diag-native-encoder-first-type-failure-20261010	da0ffd77a3d7d0bb74b81fdc3b25ac52db5095cd	diverged	1	602	NEEDS_CONTENT_REVIEW
+agent/domain-decompose-3808	f265749e4d3aa410414fca48e47478d04809d557	behind	0	6011	NO_UNMERGED_COMMITS
+agent/fix-845-exact-domain-machine-axis	d40e4f65098d7dde8c119a4f33864bffd846ac62	diverged	1	5767	NEEDS_CONTENT_REVIEW
+agent/fix-admission-d3-eq-predicatebit-20261010	c4adb8fa8a2e0fad9c2773a9b62f2fea9c3f67f4	behind	0	663	NO_UNMERGED_COMMITS
+agent/fix-admission-range-exact-d1-20261010	ea19bae11c14f395b2d42c81a40b8cd3d0301eba	diverged	1	628	NEEDS_CONTENT_REVIEW
+agent/fix-early-sid-contract8-cond	4151b2f2fdd56920a61dac751de01723724ceaec	diverged	3	7454	NEEDS_CONTENT_REVIEW
+agent/fix-machine-car-cdr-heads-20261010	ad963883995a6706e8eb318dbd106c456fdf8f2b	behind	0	685	NO_UNMERGED_COMMITS
