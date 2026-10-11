@@ -474,9 +474,11 @@
 (00001001 pairlis спарувати)
 
 (00001010 let* (bindings body)
+  ; D3 ATOM повертає точний D1:1 для порожнього списку прив'язок.
+  ; Непорожні прив'язки переходять до рекурсивного LET через D1:1 за замовчуванням.
   (00000111
-    ((0100 (00000010 bindings)) body)
-    ((00000010 bindings) 
+    ((00000010 bindings) body)
+    ((00000010 (00000001 ())) 
      ; Build the recursive expansion from the primitive tree substrate only.
      ; This keeps let* semantics in Lisp while allowing generic macro
      ; frontends to execute the law without importing the higher-level list
@@ -598,7 +600,7 @@
       ((00000010 value) 
        (00000111
          ((00000011 value (01000011 (01001100 value)))
-           t)
+           (00000010 (00000001 ())))
          ))
       ((00000010 value)  (00000001 ())))))
 
