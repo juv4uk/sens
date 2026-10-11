@@ -32,7 +32,7 @@ def blob(raw):
 
 def load(root=ROOT):
     ptr=json.loads((root/"knowledge/d10-current-inventory.json").read_text(encoding="utf-8"))
-    if ptr.get("canonical_current", {}).get("path") in ("knowledge/d10-v5-semantic-inventory.json", "knowledge/d10-v6-semantic-inventory.json", "knowledge/d10-v7-semantic-inventory.json"):
+    if ptr.get("canonical_current", {}).get("path") in ("knowledge/d10-v5-semantic-inventory.json", "knowledge/d10-v6-semantic-inventory.json", "knowledge/d10-v7-semantic-inventory.json", "knowledge/d10-v8-semantic-inventory.json"):
         ptr["canonical_current"] = ptr["historical_v4_research_inventory"]
         ptr["status"] = "OWNER-DIRECTED-RESEARCH-SELECTION-707-UNRATIFIED"
     records=[ptr["canonical_current"],ptr["historical_v3_research_inventory"]]
