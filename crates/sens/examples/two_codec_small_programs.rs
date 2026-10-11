@@ -14,8 +14,9 @@ use std::{
 };
 
 use sens::{
-    decode_ternary_words, encode_ternary_words, parse_binary_source_words,
-    parse_canonical_word_sequence, PhysicalT5Program,
+    decode_ternary_words, encode_ternary_words, eval_parsed_expressions,
+    parse_binary_source_words, parse_canonical_binary, parse_canonical_word_sequence,
+    PhysicalT5Program, Session,
 };
 
 #[path = "../../../research/framed3/rust_codec/senc.rs"]
@@ -178,6 +179,20 @@ fn self_test() -> Result<(), String> {
         .map_err(|e| format!("self-test T5: {e:?}"))?;
     let chosen = select_from_t5(&raw)?;
     verify_roundtrip(&raw, &chosen)?;
+    // Prove this is executable SENS code, not merely a balanced D2 tree.
+    // Execute the same admitted QUOTE program independently after both routes.
+    let parsed = parse_canonical_binary(sample)
+        .map_err(|e| format!("SENS AST: {e:?}"))?;
+    let expected = eval_parsed_expressions(&parsed, &mut Session::default())
+        .map_err(|e| format!("direct SENS oracle: {e:?}"))?;
+    let recovered = explicit_decode(&chosen.physical, "senc")?;
+    let physical_program = PhysicalT5Program::decode(&recovered)
+        .map_err(|e| format!("recovered physical SENS program: {e:?}"))?;
+    let actual = physical_program.execute(&mut Session::default())
+        .map_err(|e| format!("recovered SENS execution: {e:?}"))?;
+    if expected.value != actual.value || expected.output != actual.output {
+        return Err("F3 decoded program evaluation differs from canonical SENS oracle".into());
+    }
     if chosen.codec != Codec::OriginalFrame3 {
         return Err(format!("small F3 proof was not selected: {}", chosen.reason));
     }
