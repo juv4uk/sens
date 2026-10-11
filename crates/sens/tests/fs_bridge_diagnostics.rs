@@ -57,6 +57,41 @@ fn object_package_and_nonempty_map_addresses_are_structurally_consistent() {
 }
 
 #[test]
+fn referenced_root_can_project_its_real_object_and_binding_lists() {
+    let mut session = session();
+    let prefix = "(let* ((value (quote (hello world))) (written (fs-write (fs-empty) \"notes/today\" value)) (fs (car written)) (root (fs-root-package fs)))";
+    let source = format!("{prefix} (list (fs-package-field (quote objects) root) (fs-package-field (quote bindings) root)))");
+    assert_eq!(
+        observe(&mut session, &source),
+        "((\"(hello world)\") ((\"notes/today\" . \"(hello world)\")))"
+    );
+}
+
+#[test]
+fn referenced_root_has_both_address_lists_in_its_supplied_store() {
+    let mut session = session();
+    let prefix = "(let* ((value (quote (hello world))) (written (fs-write (fs-empty) \"notes/today\" value)) (fs (car written)) (root (fs-root-package fs)))";
+    let source = format!("{prefix} (list (fs-all-addresses-present? (fs-package-field (quote objects) root) (fs-objects fs)) (fs-binding-addresses-present? (fs-package-field (quote bindings) root) (fs-objects fs))))");
+    let result = eval_program(&source, &mut session)
+        .unwrap_or_else(|e| panic!("referenced root D1 validators {source}: {e:?}")).value.to_string();
+    assert_eq!(result, "(1 1)");
+}
+
+#[test]
+fn referenced_root_rebuilds_its_binding_map_without_nil_tail_access() {
+    let mut session = session();
+    let source = "(let* ((value (quote (hello world))) (written (fs-write (fs-empty) \"notes/today\" value)) (root (fs-root-package (car written)))) (внутрішня-мапа-отримати \"notes/today\" (fs-bindings-from-list (fs-package-field (quote bindings) root) map-empty)))";
+    assert_eq!(observe(&mut session, source), "(\"(hello world)\")");
+}
+
+#[test]
+fn referenced_root_rebuild_is_a_separate_atomic_witness() {
+    let mut session = session();
+    let source = "(let* ((value (quote (hello world))) (written (fs-write (fs-empty) \"notes/today\" value)) (fs (car written)) (root (fs-root-package fs)) (object (fs-object-package value))) (car (fs-reconstruct-root root (list object))))";
+    assert_eq!(observe(&mut session, source), "accepted");
+}
+
+#[test]
 fn one_object_store_has_a_bounded_reconstruction_witness() {
     let mut session = session();
     assert_eq!(
