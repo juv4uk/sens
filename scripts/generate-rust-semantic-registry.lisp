@@ -10,79 +10,79 @@
 ;   cargo run -p my-lisp-cli -- scripts/generate-rust-semantic-registry.lisp
 ;   cargo run -p my-lisp-cli -- scripts/generate-rust-semantic-registry.lisp --check
 
-(00001001 source-path "lib/surface/semantic-registry.lisp")
-(00001001 output-path "crates/sens/src/semantic_registry_generated.rs")
+(0011 source-path "lib/surface/semantic-registry.lisp")
+(0011 output-path "crates/sens/src/semantic_registry_generated.rs")
 
-(00001001 str+
-  (00001000 args
-    (00111001 (00001000 (acc s) (00111010 acc s)) "" args)))
+(0011 str+
+  (0010 args
+    (101110 (0010 (acc s) (110011110 acc s)) "" args)))
 
-(00001001 registry-form
-  (00000101 (01001011 (10100110 source-path))))
+(0011 registry-form
+  (100 (110101001 (110110111 source-path))))
 
-(00001001 rows registry-form)
+(0011 rows registry-form)
 
-(00001001 rust-string
-  (00001000 (value)
-    (00000111
+(0011 rust-string
+  (0010 (value)
+    (110
       ((string-membership-helper value)
        (class-membership string member)
-       (01001100 value))
+       (11110100 value))
       ((string-membership-helper value)
        (class-membership string nonmember)
-       (01001100 (01000010 value))))))
+       (11110100 (11101110 value))))))
 
 
-(00001001 render-surface
-  (00001000 (entry)
-    (10011100 ((name (00101111 entry)))
-      (00000111
-        ((00100010 name (00000001 ()))
+(0011 render-surface
+  (0010 (entry)
+    (001000 ((name (1001 entry)))
+      (110
+        ((11110111 name (001 ()))
          (1)
          "")
-        ((00100010 name (00000001 ()))
+        ((11110111 name (001 ()))
          (0)
          (str+
            "SemanticSurface { namespace: "
-           (rust-string (00000101 entry))
+           (rust-string (100 entry))
            ", name: "
            (rust-string name)
            " }, "))))))
 
-(00001001 render-surfaces
-  (00001000 (surfaces)
-    (00000111
-      ((00000010 surfaces)
+(0011 render-surfaces
+  (0010 (surfaces)
+    (110
+      ((010 surfaces)
        ()
        "")
-      ((00000010 surfaces)
+      ((010 surfaces)
        (0)
        (str+
-         (render-surface (00000101 surfaces))
-         (render-surfaces (00000110 surfaces)))))))
+         (render-surface (100 surfaces))
+         (render-surfaces (011 surfaces)))))))
 
-(00001001 render-row
-  (00001000 (row)
+(0011 render-row
+  (0010 (row)
     (str+
       "    SemanticRow { semantic_id: 0b"
-      (01001100 (00000101 row))
+      (11110100 (100 row))
       ", surfaces: &["
-      (render-surfaces (00000110 row))
+      (render-surfaces (011 row))
       "] },\n")))
 
-(00001001 render-rows
-  (00001000 (remaining)
-    (00000111
-      ((00000010 remaining)
+(0011 render-rows
+  (0010 (remaining)
+    (110
+      ((010 remaining)
        ()
        "")
-      ((00000010 remaining)
+      ((010 remaining)
        (0)
        (str+
-         (render-row (00000101 remaining))
-         (render-rows (00000110 remaining)))))))
+         (render-row (100 remaining))
+         (render-rows (011 remaining)))))))
 
-(00001001 header
+(0011 header
   (str+
     "// GENERATED — DO NOT EDIT BY HAND.\n"
     "// Authority: lib/surface/semantic-registry.lisp\n"
@@ -105,32 +105,32 @@
     "\n"
     "pub(super) const SEMANTIC_ROWS: &[SemanticRow] = &[\n"))
 
-(00001001 generated
+(0011 generated
   (str+ header (render-rows rows) "];\n"))
 
-(00000111
-  ((00000010 *argv*)
+(110
+  ((010 *argv*)
    ()
-   (00101111
-     (00100111
-       (10100111 output-path generated)
-       (01001000 "Rust semantic registry projection written"))))
-  ((00100010 (00000101 *argv*) "--check")
+   (1001
+     (1110
+       (110111100 output-path generated)
+       (11011011 "Rust semantic registry projection written"))))
+  ((11110111 (100 *argv*) "--check")
    (1)
-   (10011100 ((current (10100110 output-path)))
-     (00000111
-       ((00100010 current generated)
+   (001000 ((current (110110111 output-path)))
+     (110
+       ((11110111 current generated)
         (1)
-        (01001000 "Rust semantic registry projection is current"))
-       ((00100010 current generated)
+        (11011011 "Rust semantic registry projection is current"))
+       ((11110111 current generated)
         (0)
-        (00101111
-          (00100111
-            (01001000 "Rust semantic registry projection is stale")
-            (00000101 (00000001 ()))))))))
-  ((00000001 write-projection)
+        (1001
+          (1110
+            (11011011 "Rust semantic registry projection is stale")
+            (100 (001 ()))))))))
+  ((001 write-projection)
    write-projection
-   (00101111
-     (00100111
-       (10100111 output-path generated)
-       (01001000 "Rust semantic registry projection written")))))
+   (1001
+     (1110
+       (110111100 output-path generated)
+       (11011011 "Rust semantic registry projection written")))))
