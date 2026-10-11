@@ -1,0 +1,31 @@
+name: Audit SID8 broad in-place Lisp source cutover
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - scripts/build-dependency-classification.lisp
+      - scripts/check-core4-predicate-answer-scale.lisp
+      - scripts/check-core4-predicate-answer-boundary.lisp
+      - experiments/probabilistic-decision-jev-like.lisp
+      - scripts/generate-function-table.lisp
+      - scripts/generate-uk-surface-audit.lisp
+      - scripts/verify-repo.lisp
+      - tests/test_sid8_broad_source_cutover.py
+      - .github/workflows/audit-sid8-broad-source.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  regression:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Verify exact D6 MAP single-list sites and original Lisp source integrity
+        run: python3 -m unittest discover -s tests -p test_sid8_broad_source_cutover.py -v
