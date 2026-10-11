@@ -60,20 +60,24 @@ fn internal_map_facade_is_not_d9_auto_dispatch() {
 }
 
 #[test]
-fn historical_string_order_surface_has_explicit_result_shape() {
+fn private_codepoint_order_returns_exact_d1_bits() {
     let mut session = session();
-    let forward = eval_program("(string<? \"a\" \"b\")", &mut session)
-        .expect("historical Lisp comparator should evaluate as a closure");
-    let backward = eval_program("(string<? \"b\" \"a\")", &mut session)
-        .expect("reverse lexical ordering should evaluate");
-    assert_eq!(
-        forward.value.to_string(), "t",
-        "the only positive legacy marker approved for an explicit D1 bridge"
-    );
-    assert_eq!(
-        backward.value.to_string(), "()",
-        "the only negative legacy marker approved for an explicit D1 bridge"
-    );
+    for (left, right, expected) in [
+        ("a", "b", true),
+        ("b", "a", false),
+        ("a", "a", false),
+        ("", "a", true),
+        ("a", "", false),
+        ("", "", false),
+        ("а", "б", true),
+    ] {
+        let source = format!("(внутрішній-текст-передує? \"{left}\" \"{right}\")");
+        let actual = eval_program(&source, &mut session)
+            .unwrap_or_else(|e| panic!("strict D1 string order {source}: {e:?}"))
+            .value;
+        assert_eq!(actual.as_predicate_bit(), Some(expected),
+            "string order must project only exact D1 YES/NO: {source}");
+    }
 }
 
 #[test]
