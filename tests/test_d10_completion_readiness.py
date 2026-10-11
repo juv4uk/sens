@@ -11,22 +11,35 @@ gate = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(gate)
 
 class Readiness(unittest.TestCase):
-    def test_current_is_not_d11(self):
+    def test_current_d11_gate_is_derived_from_live_inventory(self):
         r = gate.audit(ROOT)
         self.assertEqual(1024, r["capacity"])
         self.assertEqual(1024, r["selected"]+r["remaining"])
-        self.assertFalse(r["ready_to_start_d11"])
+        self.assertEqual(r["inventory_full"] and r["placement_full"] and
+                         r["ratified"] == r["capacity"] and not r["blocking_errors"],
+                         r["ready_to_start_d11"])
 
-    def test_current_v7_preserves_v6_and_leaves_stream_laws_unplaced(self):
+    def test_current_preserves_v7_archive_and_live_accounting(self):
         report = gate.audit(ROOT)
-        self.assertEqual(721, report["selected"])
-        self.assertEqual(719, report["placed"])
-        self.assertEqual(2, report["unplaced"])
-        self.assertEqual(463, report["research_gauge_allocated"])
+        pointer = json.loads((ROOT / "knowledge/d10-current-inventory.json").read_text())
+        state = pointer["canonical_current"]
+        self.assertEqual(state["selected"], report["selected"])
+        self.assertEqual(state["placed"], report["placed"])
+        self.assertEqual(state["unplaced"], report["unplaced"])
+        self.assertEqual(state["ratified"], report["ratified"])
+        self.assertEqual(1024, report["selected"] + report["remaining"])
+        self.assertGreaterEqual(report["selected"], 721)
         self.assertTrue(report["current_map_is_canonical_research"])
-        self.assertEqual(303, report["remaining"])
-        self.assertEqual(0, report["ratified"])
         self.assertFalse(report["blocking_errors"])
+
+    def test_append_only_growth_preserves_frozen_v7_prefix(self):
+        archived = [{"stable_id": "v7.one"}, {"stable_id": "v7.two"}]
+        extended = archived + [{"stable_id": "future.722"}]
+        self.assertTrue(gate.preserves_archived_prefix(archived, archived))
+        self.assertTrue(gate.preserves_archived_prefix(extended, archived))
+        self.assertFalse(gate.preserves_archived_prefix(archived[:-1], archived))
+        self.assertFalse(gate.preserves_archived_prefix(
+            [{"stable_id": "rewritten"}] + archived[1:], archived))
 
     def test_same_donor_twice_is_one_candidate(self):
         with tempfile.TemporaryDirectory() as td:
