@@ -1,0 +1,25 @@
+{
+  "schema": "sens-benchmark-manifest/v1",
+  "stand": "native-zero",
+  "wing": "Binary-first SENS / Core4-free physical T5 execution",
+  "roles": [
+    "MEASUREMENT",
+    "CONFORMANCE",
+    "FALSIFIER"
+  ],
+  "question": "How does real physically validated T5 execute on a bare SENS runtime, and what repeated-work cost is avoided by one-time preparation?",
+  "claim": "Measures same-code exact D1/D3 parity for physical and visible D2 execution plus a separate one-time-validated immutable T5 program reused across sessions. Raw paired samples and prepare-once cost are reported. Reuse is not equal-work decoder speedup; no Core4 bootstrap, AOT, GPU/FPGA or cross-language claim.",
+  "witness": [
+    "../../crates/sens/examples/sens_native_zero_bench.rs",
+    "../../crates/sens/examples/sens_native_zero_prepared_bench.rs",
+    "../../crates/sens/src/binary_execution.rs",
+    "verify_prepared_report.py",
+    "verify_report.py",
+    "README.md",
+    "../../.github/workflows/sens-native-zero.yml"
+  ],
+  "status": "ACTIVE-MEASUREMENT",
+  "generation": "contract-11-8-exact-domain; 2026-10-10",
+  "axis": "binary-first/physical-t5/bare-native-zero-execution",
+  "reproduce": "cargo run --locked --release -p sens --example sens_native_zero_bench -- --samples 9 --iterations 128"
+}
