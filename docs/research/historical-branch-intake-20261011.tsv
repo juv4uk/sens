@@ -1,4 +1,4 @@
-# SENS GitHub branch census; source GitHub search_branches query empty; snapshot 2026-10-11; branch heads and statuses NOT yet independently verified
+# SENS GitHub branch census; snapshot 2026-10-11; global inventory remains incomplete; D10 historical subset below individually compared with main@f8dad0b095961c13c023661f65137274c0e6b6c6.
 # branch_name	decision	main_commit	origin_commit	provenance_status
 604-lisp-coverage-binary-clean	UNTRIAGED	-	-	BRANCH-NAME-ONLY
 1413	UNTRIAGED	-	-	BRANCH-NAME-ONLY
@@ -3253,9 +3253,9 @@ research/d10-clhs-pathnames-dictionary-20261009	UNTRIAGED	-	-	BRANCH-NAME-ONLY
 research/d10-clhs-streams-census-20261009	UNTRIAGED	-	-	BRANCH-NAME-ONLY
 research/d10-clips-library-harvest-20261009	UNTRIAGED	-	-	BRANCH-NAME-ONLY
 research/d10-clojure-reference-reclassification	UNTRIAGED	-	-	BRANCH-NAME-ONLY
-research/d10-clos-interlisp-residual-proof-20261009	UNTRIAGED	-	-	BRANCH-NAME-ONLY
-research/d10-clos-method-class-independent-oracle-20261009	UNTRIAGED	-	-	BRANCH-NAME-ONLY
-research/d10-clos-slot-sbcl-oracle-20261009	UNTRIAGED	-	-	BRANCH-NAME-ONLY
+research/d10-clos-interlisp-residual-proof-20261009	ALREADY-IN-MAIN-ARCHIVED	f8dad0b095961c13c023661f65137274c0e6b6c6	4055ed095995f5aa8aa5dc4a3243bc3cd6edfb06	ahead=0; exact branch head is an ancestor of main; CLOS/Interlisp proof dossier is already present; no branch replay needed.
+research/d10-clos-method-class-independent-oracle-20261009	ALREADY-IN-MAIN-ARCHIVED	f8dad0b095961c13c023661f65137274c0e6b6c6	bd6b21febe9d2c4ad849e0a6e0048492f4a3e7ae	ahead=0; exact branch head is an ancestor of main; CLOS method/class independent-oracle artifacts are already in main; no semantic promotion implied.
+research/d10-clos-slot-sbcl-oracle-20261009	ALREADY-IN-MAIN-ARCHIVED	f8dad0b095961c13c023661f65137274c0e6b6c6	315748a3e80fef1aef46932240c662867100ffea	ahead=4 from merge base, but workflow and evidence JSON blobs are identical to main; current main validator adds inventory anti-dup/admission checks and Lisp oracle adds research-only authority-boundary comments; main supersedes branch, no unique semantic delta.
 research/d10-clos-three-roots-selection-20261009	UNTRIAGED	-	-	BRANCH-NAME-ONLY
 research/d10-clos-three-roots-stacked-627-to-630-20261009	UNTRIAGED	-	-	BRANCH-NAME-ONLY
 research/d10-closhistory-627-to630-current-main-20261009	UNTRIAGED	-	-	BRANCH-NAME-ONLY
@@ -3266,7 +3266,7 @@ research/d10-conditions-finish-rebase-20261009	UNTRIAGED	-	-	BRANCH-NAME-ONLY
 research/d10-correct-method-precedence-and-dynamic-restart-20261009	UNTRIAGED	-	-	BRANCH-NAME-ONLY
 research/d10-cross-hobby-law-donors-20261009	UNTRIAGED	-	-	BRANCH-NAME-ONLY
 research/d10-crossrepo-control-1	UNTRIAGED	-	-	BRANCH-NAME-ONLY
-research/d10-crossrepo-early-lisp-1	UNTRIAGED	-	-	BRANCH-NAME-ONLY
+research/d10-crossrepo-early-lisp-1	ALREADY-IN-MAIN-ARCHIVED	f8dad0b095961c13c023661f65137274c0e6b6c6	829d3c68ff54981ab83557896d0650de5a0c2fb6	ahead=0; exact branch head is an ancestor of main; source research is already in main ancestry; no replay or new branch required.
 research/d10-crossrepo-golisp-pascal-1	UNTRIAGED	-	-	BRANCH-NAME-ONLY
 research/d10-crossrepo-lisp-koans-1	UNTRIAGED	-	-	BRANCH-NAME-ONLY
 research/d10-crossrepo-mal-1	UNTRIAGED	-	-	BRANCH-NAME-ONLY
@@ -3316,11 +3316,11 @@ research/d10-hadamard-preselection-0008-after-632-20261009	UNTRIAGED	-	-	BRANCH-
 research/d10-hardware-law-triage-20261009	UNTRIAGED	-	-	BRANCH-NAME-ONLY
 research/d10-harvest-admission-20261011	UNTRIAGED	-	-	BRANCH-NAME-ONLY
 research/d10-historical-admission-batch1-20261009	UNTRIAGED	-	-	BRANCH-NAME-ONLY
-research/d10-historical-clos-instance-lifecycle-residual-20261009	UNTRIAGED	-	-	BRANCH-NAME-ONLY
-research/d10-historical-clos-slot-state-20261009	UNTRIAGED	-	-	BRANCH-NAME-ONLY
+research/d10-historical-clos-instance-lifecycle-residual-20261009	ALREADY-IN-MAIN-ARCHIVED	f8dad0b095961c13c023661f65137274c0e6b6c6	90b96ca7224e953f04193ab79b8b35acaa3f3a06	ahead=0; exact branch head is an ancestor of main; lifecycle dossier is in main; MAKE-INSTANCES-OBSOLETE and FUNCTION-KEYWORDS already appear in current v5, remaining entries retain HOLD.
+research/d10-historical-clos-slot-state-20261009	ALREADY-IN-MAIN-ARCHIVED	f8dad0b095961c13c023661f65137274c0e6b6c6	5e0dbf1cb0ac4470a7eef3ed784b7f30187bda79	ahead=0; exact branch head is an ancestor of main; slot state source dossier is already in main; SLOT-EXISTS-P already selected and other entries retain HOLD review.
 research/d10-historical-coverage-gaps-20261009	UNTRIAGED	-	-	BRANCH-NAME-ONLY
-research/d10-historical-maclisp-1	UNTRIAGED	-	-	BRANCH-NAME-ONLY
-research/d10-historical-maclisp-2	UNTRIAGED	-	-	BRANCH-NAME-ONLY
+research/d10-historical-maclisp-1	ALREADY-IN-MAIN-ARCHIVED	f8dad0b095961c13c023661f65137274c0e6b6c6	cc27c0e4f73919a50c595b7aac5effd7e129ae9d	ahead=0; exact branch head is an ancestor of main; its 21-row MacLisp tranche is represented in current D10 v5 by semantic name; no replay required.
+research/d10-historical-maclisp-2	ALREADY-IN-MAIN-ARCHIVED	f8dad0b095961c13c023661f65137274c0e6b6c6	60a0aa87cf14eacac5d37f096e91da389e864280	ahead=0; exact branch head is an ancestor of main; its 12-row MacLisp tranche is represented in current D10 v5 by semantic name; 9 projection and 11 hold records stay as research evidence; no replay required.
 research/d10-historical-primary-manual-reconcile-20261009	UNTRIAGED	-	-	BRANCH-NAME-ONLY
 research/d10-historical-selection-4-20261009	UNTRIAGED	-	-	BRANCH-NAME-ONLY
 research/d10-hobbies-clock-sdr-exact-630to634-20261009	UNTRIAGED	-	-	BRANCH-NAME-ONLY
@@ -3328,7 +3328,7 @@ research/d10-hobbies-source-laws-20261009	UNTRIAGED	-	-	BRANCH-NAME-ONLY
 research/d10-hysteretic-selected-631-20261009	UNTRIAGED	-	-	BRANCH-NAME-ONLY
 research/d10-hysteretic-state-universal-20261009	UNTRIAGED	-	-	BRANCH-NAME-ONLY
 research/d10-interdisciplinary-science-first-20261009	UNTRIAGED	-	-	BRANCH-NAME-ONLY
-research/d10-interlisp-dwim-safe-suggestion-20261009	UNTRIAGED	-	-	BRANCH-NAME-ONLY
+research/d10-interlisp-dwim-safe-suggestion-20261009	ALREADY-IN-MAIN-ARCHIVED	f8dad0b095961c13c023661f65137274c0e6b6c6	09a6ca9964e8699a44f5ef12a03fbeca50c8c2cc	ahead=0; exact branch head is an ancestor of main; the safe, non-executing DWIM suggestion proposal is already in ledger/dossier; stays pending owner Core-vs-library review.
 research/d10-island-bridge-v1-clean	UNTRIAGED	-	-	BRANCH-NAME-ONLY
 research/d10-island-bridge-v1-rebased	UNTRIAGED	-	-	BRANCH-NAME-ONLY
 research/d10-island-bridge-v1	UNTRIAGED	-	-	BRANCH-NAME-ONLY
@@ -3337,8 +3337,8 @@ research/d10-knowledge-tooling-v1	UNTRIAGED	-	-	BRANCH-NAME-ONLY
 research/d10-kraft-certificate-20261011	UNTRIAGED	-	-	BRANCH-NAME-ONLY
 research/d10-library-harvest-1	UNTRIAGED	-	-	BRANCH-NAME-ONLY
 research/d10-linguistic-v1	UNTRIAGED	-	-	BRANCH-NAME-ONLY
-research/d10-lisp15-appendix-reconcile-20261009	UNTRIAGED	-	-	BRANCH-NAME-ONLY
-research/d10-lisp-machine-evaluator-harvest-20261009	UNTRIAGED	-	-	BRANCH-NAME-ONLY
+research/d10-lisp15-appendix-reconcile-20261009	ALREADY-IN-MAIN-ARCHIVED	f8dad0b095961c13c023661f65137274c0e6b6c6	022c4b9d6bf0697e50125af5cc3d5e58f58b19af	ahead=0; exact branch head is an ancestor of main; keep its 30-family history as provenance/reconciliation only, with old D8 coordinates non-authoritative.
+research/d10-lisp-machine-evaluator-harvest-20261009	ALREADY-IN-MAIN-ARCHIVED	f8dad0b095961c13c023661f65137274c0e6b6c6	ce869a46d2b5d7624c0ce97d3b6b9a43c71e0b24	ahead=0; exact branch head is an ancestor of main; 31-row source dossier and checks are already in main; owner/runtime review is not ratification.
 research/d10-loops-active-values-current-main-630-to-632-20261009	UNTRIAGED	-	-	BRANCH-NAME-ONLY
 research/d10-loops-active-values-intake-20261009	UNTRIAGED	-	-	BRANCH-NAME-ONLY
 research/d10-loops-active-values-stacked-630-to-632-20261009	UNTRIAGED	-	-	BRANCH-NAME-ONLY
@@ -3362,8 +3362,8 @@ research/d10-portable-control-residual-v1	UNTRIAGED	-	-	BRANCH-NAME-ONLY
 research/d10-primitive-binary-word-root-631	UNTRIAGED	-	-	BRANCH-NAME-ONLY
 research/d10-primitive-binary-word-root-632-current-main-20261009	UNTRIAGED	-	-	BRANCH-NAME-ONLY
 research/d10-prolog-constraint-hobbies-20261009	UNTRIAGED	-	-	BRANCH-NAME-ONLY
-research/d10-psl-interlisp-historical-20261009	UNTRIAGED	-	-	BRANCH-NAME-ONLY
-research/d10-psl-interlisp-lispm-residual-20261009	UNTRIAGED	-	-	BRANCH-NAME-ONLY
+research/d10-psl-interlisp-historical-20261009	ALREADY-IN-MAIN-ARCHIVED	f8dad0b095961c13c023661f65137274c0e6b6c6	636528289f85d89d966c792b968d4fca729540ac	ahead=0; exact branch head is an ancestor of main; existing PSL/Interlisp source dossier is available in main; preserve D2 and mechanism HOLDs.
+research/d10-psl-interlisp-lispm-residual-20261009	ALREADY-IN-MAIN-ARCHIVED	f8dad0b095961c13c023661f65137274c0e6b6c6	6a0897e4077c02a93cd5a0f8fb5547994ab7378f	ahead=0; exact branch head is an ancestor of main; 21-row residual dossier is in main; 19 absent-from-ledger names remain HOLD, not selected residents.
 research/d10-quantity-derived-dedup-20261009	UNTRIAGED	-	-	BRANCH-NAME-ONLY
 research/d10-quine-prime-implicants-20261009	UNTRIAGED	-	-	BRANCH-NAME-ONLY
 research/d10-r6rs-hashtable-copy-mutable-oracle-20261009	UNTRIAGED	-	-	BRANCH-NAME-ONLY
