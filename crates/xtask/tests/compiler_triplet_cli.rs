@@ -167,7 +167,7 @@ fn missing_final_lf_is_rejected_as_noncanonical_file_projection() {
 fn source_and_machine_view_must_lower_to_the_same_exact_program() {
     let tree = TempTree::new();
     let triplet = publish_triplet(&tree, SOURCE_RELATIVE);
-    fs::write(&triplet.lisp, b"(атом? ())\n").expect("tamper source projection");
+    fs::write(&triplet.lisp, "(атом? ())\n".as_bytes()).expect("tamper source projection");
     let artifact = tree.path().join("must-not-exist.bin");
 
     let output = compiler_triplet(&triplet.sens, &artifact);
