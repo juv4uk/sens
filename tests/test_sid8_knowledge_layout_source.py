@@ -16,10 +16,12 @@ class KnowledgeLayoutSourceTests(unittest.TestCase):
                 self.assertRegex(source, r"\(defmodule\s+\S+\s+\(001\s+\(")
                 self.assertNotRegex(source, r"\(00000001(?=\s|\))")
 
-    def test_guard_reference_domain_definitions(self):
+    def test_guard_reference_legacy_cond_is_explicitly_held(self):
         source = (ROOT / "knowledge/guard-reference.lisp").read_text()
-        self.assertIn("(0011 *guard-reference-directory*", source)
-        self.assertNotIn("(00001001 *guard-reference-directory*", source)
+        # The old three-field COND form needs a semantic migration before D3.
+        self.assertIn("(00001001 *guard-reference-directory*", source)
+        self.assertNotIn("(0011 *guard-reference-directory*", source)
+        self.assertIn("(00000111", source)
         self.assertIn("reference", source)
         self.assertIn("language-policy", source)
 
