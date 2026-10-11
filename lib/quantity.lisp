@@ -234,6 +234,16 @@
       system
       source)))
 
+; Exact seven-cell guard owned by Lisp, independent of legacy list-length aliases.
+; The preceding science-proper-list? gate already rejects dotted tails.
+(00001001 science-list-length-equals?
+  (00001000 (items remaining)
+    (00000111
+      ((00000010 items) (00011100 remaining 0))
+      ((00011100 remaining 0) (00011100 1 0))
+      ((00000010 (00000001 ()))
+       (science-list-length-equals? (00000110 items) (00001101 remaining 1))))))
+
 (00001001 scientific-constant?
   (00001000 (x)
     (00000111
@@ -241,7 +251,7 @@
       ((00000010 x) (00000001 ()))
       ((00000011 (science-proper-list? x) (00000001 ())) (00000001 ()))
       ; Короткі записи відхиляються до CAR/CDR-зчитування полів.
-      ((00000011 (00011100 (00101000 x) 7) (00011100 1 0)) (00000001 ()))
+      ((00000011 (science-list-length-equals? x 7) (00011100 1 0)) (00000001 ()))
       ((00000011 (00000101 x) *scientific-constant-schema*)
        (00000111
          ((00000011 (00100011 (00101111 x)) (00000001 ())) (00000001 ()))
