@@ -4,7 +4,7 @@ import json,hashlib,re,copy,sys
 from pathlib import Path
 K=Path(__file__).resolve().parents[1]/"knowledge"
 S=[("d10-crossrepo-linguistic-v1.json",["TOKENIZE-SENTENCES","TOKENIZE-WORDS","LEMMATIZE-TEXT","INFLECT-WORD","MORPHO-SYNTACTIC-TAG"]),("d10-clos-slot-state-historical-review-v1.json",["SLOT-EXISTS-P"]),("d10-clos-instance-lifecycle-residual-v1.json",["MAKE-INSTANCES-OBSOLETE","FUNCTION-KEYWORDS"])]
-def sha(b):return hashlib.sha1(b"blob "+str(len(b)).encode()+b"\\0"+b).hexdigest()
+def sha(b):return hashlib.sha1(b"blob "+str(len(b)).encode()+b"\0"+b).hexdigest()
 def read(f):return json.loads((K/f).read_text(encoding="utf-8"))
 def check():
  p=read("d10-current-inventory.json");v5=read("d10-v5-semantic-inventory.json");v4=read("d10-v4-semantic-inventory.json")
