@@ -61,7 +61,7 @@ TOTAL                             87
 ```text
 D10 selected              725/1024
 law-forced                256
-unplaced                    2
+unplaced                    6
 remaining                 303
 ratified                    0
 ```
