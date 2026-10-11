@@ -327,8 +327,7 @@ mod tests {
     use super::*;
     use sens::{
         encode_binary_projection_ternary, parse_mixed_exact_domain, lower_program,
-        verify_compiler_program_artifact_from_sens, CoreD8, Bit8, DomainIdentity, Expr,
-        ExprKind, Span, CompilerLoweringRole,
+        CoreD8, Bit8, DomainIdentity, Expr, ExprKind, Span, CompilerLoweringRole,
     };
     use std::rc::Rc;
 
