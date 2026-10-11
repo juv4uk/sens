@@ -17,8 +17,8 @@
 ;     [(effect <effect-class>)]
 ;     [(error <error-class>)])
 
-(00001001 native-first-coverage-ledger
-  (00000001
+(0011 native-first-coverage-ledger
+  (001
     ((native-coverage
        (class car-cons-u64-literals)
        (representative (car (cons 2 3)))
