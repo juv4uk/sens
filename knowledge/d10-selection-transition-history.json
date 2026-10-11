@@ -611,6 +611,73 @@
         "python3 scripts/check_d10_selection_transition_history.py --self-test",
         "python3 scripts/check-d10-proposal-ledger.py --self-test"
       ]
+    },
+    {
+      "id": "d10.existing-ledger-evidence.tranche23.after-675.20261011",
+      "authority": "#4013 #4463 #5041 — source-pinned research selection; owner ratification pending",
+      "evidence": [
+        "knowledge/d10-existing-ledger-semantic-tranche23-20261011.json",
+        "knowledge/d10-proposal-ledger.tsv",
+        "knowledge/d10-maling-symbolic-differentiation-1959-v1.json",
+        "knowledge/d10-mccarthy-finite-circumscription-20261009.json",
+        "knowledge/d10-floyd-hoare-finite-inductiveness-20261009.json",
+        "knowledge/d10-dung-grounded-argumentation-20261009.json",
+        "knowledge/d10-reiter-minimal-diagnoses-20261009.json",
+        "knowledge/d10-adjust-array-rearray-differential-v1.json",
+        "knowledge/d10-psl-interlisp-lispm-unmerged-residual-v1.json",
+        "research/d10/mealy_distinguishing_word.py",
+        "knowledge/d10-class-of-proposal-v1.json",
+        "knowledge/d10-historical-clos-interlisp-residual-review-v1.json",
+        "scripts/research_d10_finite_arc_consistency.py",
+        "knowledge/d10-dll1962-unit-closure-research-v1.json",
+        "knowledge/d10-finite-state-distinguishing-suffix-research-v1.json",
+        "knowledge/d10-forth-circular-arc-v1.json",
+        "knowledge/d10-crossrepo-chess-law-proposals-20261009.json",
+        "knowledge/d10-linguistic-law-intake-20261009.json",
+        "knowledge/d10-music-enharmonic-primary-review-v1.json",
+        "knowledge/d10-interlisp-dwim-safe-suggestion-v1.json"
+      ],
+      "previous_inventory_blob_sha": "4c803abf0f22582ef8234d9ba60ca4796d433eb5",
+      "resulting_inventory_blob_sha": "96f9a5e464c4a0f689065bf88b6d9aee48ad6d49",
+      "added_stable_ids": [
+        "d10.archived-candidate.finite-symbolic-differentiation.20261011",
+        "d10.archived-candidate.finite-predicate-circumscription.20261011",
+        "d10.archived-candidate.finite-inductive-safety-witness.20261011",
+        "d10.archived-candidate.grounded-argument-labeling.20261011",
+        "d10.archived-candidate.finite-minimal-diagnoses.20261011",
+        "d10.archived-candidate.adjust-array.20261011",
+        "d10.archived-candidate.wrap.20261011",
+        "d10.archived-candidate.remove-wrapper.20261011",
+        "d10.archived-candidate.finite-mealy-distinguishing-word.20261011",
+        "d10.archived-candidate.class-of.20261011",
+        "d10.archived-candidate.find-method.20261011",
+        "d10.archived-candidate.change-class.20261011",
+        "d10.archived-candidate.finite-binary-arc-consistency-fixpoint.20261011",
+        "d10.archived-candidate.finite-cnf-unit-fixpoint.20261011",
+        "d10.archived-candidate.finite-state-shortest-distinguisher.20261011",
+        "d10.archived-candidate.circular-half-open-contains.20261011",
+        "d10.archived-candidate.alternating-zero-sum-backup.20261011",
+        "d10.archived-candidate.chess-castling-rights-transition.20261011",
+        "d10.archived-candidate.stress-syllable-transfer.20261011",
+        "d10.archived-candidate.contextual-longest-transliterate.20261011",
+        "d10.archived-candidate.enharmonic-spelling-distinct.20261011",
+        "d10.archived-candidate.notated-chromatic-interval.20261011",
+        "d10.archived-candidate.unique-surface-correction-suggestion.20261011"
+      ],
+      "appended_sources": [
+        "knowledge/d10-existing-ledger-semantic-tranche23-20261011.json"
+      ],
+      "previous_selected": 675,
+      "resulting_selected": 698,
+      "delta_selected": 23,
+      "coordinates_added": 0,
+      "ratified_added": 0,
+      "decision": "23 source-pinned prior research proposals appended as unplaced, unratified research candidates. Native SENS oracle and Core-vs-library review not asserted.",
+      "tests": [
+        "python3 scripts/check_d10_existing_ledger_tranche23.py --self-test",
+        "python3 scripts/check_d10_selection_transition_history.py --self-test",
+        "python3 scripts/check-d10-proposal-ledger.py --self-test"
+      ]
     }
   ]
 }
