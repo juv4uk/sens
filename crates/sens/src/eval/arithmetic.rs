@@ -637,7 +637,7 @@ mod qualified_numeric_domain_value_tests {
         let env = Environment::root();
         let sum = arithmetic_on_values("+", &[max.clone(), max.clone()], &env, Span::default())
             .expect("same-domain natural ADD");
-        let Value::BinaryNumber(sum_bits) = sum else {
+        let Value::BinaryNumber(ref sum_bits) = sum else {
             panic!("must return an exact domain-qualified numeric Value")
         };
         assert_eq!(sum_bits.numeric_domain_width(), Some(48));
@@ -649,7 +649,7 @@ mod qualified_numeric_domain_value_tests {
         let zero = in_domain(24, vec![0; 24]);
         let result = arithmetic_on_values("+", &[zero.clone(), zero], &env, Span::default())
             .unwrap();
-        let Value::BinaryNumber(same) = result else { panic!("D24 result") };
+        let Value::BinaryNumber(ref same) = result else { panic!("D24 result") };
         assert_eq!(same.numeric_domain_width(), Some(24));
         assert_eq!(same.exact_numeric_domain_bits(), Some(vec![0; 24]));
     }
@@ -664,7 +664,7 @@ mod qualified_numeric_domain_value_tests {
         session.environment.define("b", max);
         let result = crate::eval_program("(+ a b)", &mut session)
             .expect("Core addition over domain-qualified values").value;
-        let Value::BinaryNumber(value) = result else {
+        let Value::BinaryNumber(ref value) = result else {
             panic!("domain-qualified Value expected")
         };
         assert_eq!(value.numeric_domain_width(), Some(48));
