@@ -17454,14 +17454,23 @@
       "ratified": false,
       "physical_t5_authorized": false,
       "proof_readiness": {
-        "status": "INCOMPLETE-SOURCE-SEMANTICS",
-        "missing": [
-          "positive-witness",
-          "negative-falsifier"
-        ],
+        "status": "SOURCE-LAW-WITNESSES-PRESENT-UNVERIFIED",
+        "missing": [],
         "selection": false,
         "ratification": false,
-        "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+        "next_gate": "D1-D9-DEDUPE-CORE-VS-LIBRARY-AND-INDEPENDENT-ORACLE"
+      },
+      "source_evidence": {
+        "status": "SRC-OR-REFERENCE-REVIEW-PROFILE-NOT-CANONICAL",
+        "source_path": "juv4uk/nodum:back/app/services/search_service.py",
+        "source_git_blob": "bf28630aa4ed0f06f14b4e9a60bc2793e9fd9fca",
+        "law": "In the pinned nodum implementation, for a user-authorized vault search, parse text plus path/file/tag/created/updated operators; apply operator predicates and full-text websearch_to_tsquery over that vault's notes; order by requested key or text rank/updated desc, return snippets, results and window total. Empty q/no operators returns results=[] and total=0.",
+        "positive": "When q='' and no operators, search_notes returns results=[] with total=0. When q='path:docs' text-query part is empty and the candidate base is filtered to path containing docs; default sort then uses updated descending.",
+        "negative": "Search must not return a note from another vault or ignore a supplied path: filter; when caller has no access to vault, donor returns not_found rather than an unrestricted search.",
+        "witness_origin": "PINNED-CODE-STATIC-REVIEW-TEST-SPEC",
+        "runtime_sens_oracle": "NOT-RUN",
+        "core_vs_library": "DERIVED-APPLICATION-QUERY-COMPOSITE; HOST-DB EFFECT",
+        "owner_ratification": false
       }
     },
     {
@@ -17476,14 +17485,23 @@
       "ratified": false,
       "physical_t5_authorized": false,
       "proof_readiness": {
-        "status": "INCOMPLETE-SOURCE-SEMANTICS",
-        "missing": [
-          "positive-witness",
-          "negative-falsifier"
-        ],
+        "status": "SOURCE-LAW-WITNESSES-PRESENT-UNVERIFIED",
+        "missing": [],
         "selection": false,
         "ratification": false,
-        "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+        "next_gate": "D1-D9-DEDUPE-CORE-VS-LIBRARY-AND-INDEPENDENT-ORACLE"
+      },
+      "source_evidence": {
+        "status": "SRC-OR-REFERENCE-REVIEW-PROFILE-NOT-CANONICAL",
+        "source_path": "juv4uk/nodum:back/app/services/search_service.py",
+        "source_git_blob": "bf28630aa4ed0f06f14b4e9a60bc2793e9fd9fca",
+        "law": "Pinned quick_switch implements authorized-vault fuzzy title/path/alias search: empty query yields at most limit most-recently-updated notes; nonempty query matches icontains or pg_trgm similarity>0.15, sorts title-prefix first, then similarity, then updated timestamp. Matching aliases are appended without duplicating the already-present note IDs.",
+        "positive": "For empty q='', with limit=10, results are at most 10 owned-vault notes ordered by updated DESC with score 0. A note already selected via title matches is not appended a second time merely because its alias also matches.",
+        "negative": "Repeating a note in output when both title and alias match violates seen_ids deduplication; serving notes of unowned vault violates donor access boundary; sorting a non-prefix above a matching title prefix contradicts primary ordering.",
+        "witness_origin": "PINNED-CODE-STATIC-REVIEW-TEST-SPEC",
+        "runtime_sens_oracle": "NOT-RUN",
+        "core_vs_library": "DERIVED-APPLICATION-TEXT-SEARCH; HOST-DB EFFECT",
+        "owner_ratification": false
       }
     },
     {
@@ -17564,14 +17582,23 @@
       "ratified": false,
       "physical_t5_authorized": false,
       "proof_readiness": {
-        "status": "INCOMPLETE-SOURCE-SEMANTICS",
-        "missing": [
-          "positive-witness",
-          "negative-falsifier"
-        ],
+        "status": "SOURCE-LAW-WITNESSES-PRESENT-UNVERIFIED",
+        "missing": [],
         "selection": false,
         "ratification": false,
-        "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+        "next_gate": "D1-D9-DEDUPE-CORE-VS-LIBRARY-AND-INDEPENDENT-ORACLE"
+      },
+      "source_evidence": {
+        "status": "SRC-OR-REFERENCE-REVIEW-PROFILE-NOT-CANONICAL",
+        "source_path": "juv4uk/vsop2013:CelestialObjects.pas",
+        "source_git_blob": "811c574c7a3de7873951de8db7eebd8960b4e27a",
+        "law": "Pinned donor splits ephemeris calculation and commit: PositionObjectsUsingEphemeris(JDE) updates vJDE/vPos/vSpd only on successfully computed planet coordinates; active Posit/Spd are NOT changed there. copyVSOP2013ephemerisToCurrent then copies ephemeris fields to current position/velocity only for objects with vJDE>0.",
+        "positive": "For a planet whose calculation succeeds at JDE>0 with computed (vPos,vSpd), after the calculation only v* fields change; after copyVSOP2013ephemerisToCurrent, current (fJDE,Posit,Spd)=(vJDE,vPos,vSpd).",
+        "negative": "Changing active Posit/Spd already during PositionObjectsUsingEphemeris, or copying v* into active state when vJDE=0, violates the split source phases. Source is double-precision ephemeris machinery, not an exact-rational SENS oracle.",
+        "witness_origin": "PINNED-CODE-STATIC-REVIEW-TEST-SPEC",
+        "runtime_sens_oracle": "NOT-RUN",
+        "core_vs_library": "ASTRONOMICAL-APPLICATION-SOURCE-COMPOSITE; NOT-PURE-CORE",
+        "owner_ratification": false
       }
     },
     {
@@ -19516,7 +19543,9 @@
       "proof_readiness": {
         "status": "INCOMPLETE-SOURCE-SEMANTICS",
         "missing": [
-          "semantic-law"
+          "semantic-law",
+          "positive-witness",
+          "negative-falsifier"
         ],
         "selection": false,
         "ratification": false,
@@ -19596,13 +19625,23 @@
       "falsifiers": [],
       "independent_oracle": "NO-EVIDENCE-HELD",
       "proof_readiness": {
-        "status": "INCOMPLETE-SOURCE-SEMANTICS",
-        "missing": [
-          "semantic-law"
-        ],
+        "status": "SOURCE-LAW-WITNESSES-PRESENT-UNVERIFIED",
+        "missing": [],
         "selection": false,
         "ratification": false,
-        "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+        "next_gate": "D1-D9-DEDUPE-CORE-VS-LIBRARY-AND-INDEPENDENT-ORACLE"
+      },
+      "source_evidence": {
+        "status": "SRC-OR-REFERENCE-REVIEW-PROFILE-NOT-CANONICAL",
+        "source_path": "knowledge/d10-interdisciplinary-science-proposals-20261009.json",
+        "source_git_blob": "80bb9e97bfbfe8f3afe96f25bf07b5c8905233ed",
+        "law": "Explicit ideal uniform unsigned 8-bit quantizer REVIEW PROFILE only: for normalized finite real input x, clamp x to [0,1], then output nearest integer to 255*x with half-integer ties rounded up. 0<=code<=255. This is not an ESP32/physical ADC calibration law, linearity guarantee or analog sampling operation.",
+        "positive": "Reference bounded arithmetic: x=0 -> 0, x=1/2 -> 128, x=1 -> 255, x=-1/4 -> 0, x=5/4 -> 255.",
+        "negative": "x=1/2 ->127 violates declared half-up tie rule; x=5/4 ->319 violates saturation; claiming this model reproduces nonlinear measured ADC characteristics is unsupported.",
+        "witness_origin": "SCOPED-BITWISE-OR-ARITHMETIC-REFERENCE-CHECKED-IN-JS",
+        "runtime_sens_oracle": "NOT-RUN",
+        "core_vs_library": "DERIVED-ROUNDING-AND-SATURATION-LIBRARY; IDEAL-MATH-MODEL",
+        "owner_ratification": false
       }
     },
     {
@@ -19623,13 +19662,23 @@
       "falsifiers": [],
       "independent_oracle": "NO-EVIDENCE-HELD",
       "proof_readiness": {
-        "status": "INCOMPLETE-SOURCE-SEMANTICS",
-        "missing": [
-          "semantic-law"
-        ],
+        "status": "SOURCE-LAW-WITNESSES-PRESENT-UNVERIFIED",
+        "missing": [],
         "selection": false,
         "ratification": false,
-        "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+        "next_gate": "D1-D9-DEDUPE-CORE-VS-LIBRARY-AND-INDEPENDENT-ORACLE"
+      },
+      "source_evidence": {
+        "status": "SRC-OR-REFERENCE-REVIEW-PROFILE-NOT-CANONICAL",
+        "source_path": "knowledge/d10-interdisciplinary-science-proposals-20261009.json",
+        "source_git_blob": "80bb9e97bfbfe8f3afe96f25bf07b5c8905233ed",
+        "law": "Explicit review profile CRC-8/ATM: register width=8, polynomial 0x07, init=0, no input/output reflection or final xor. For each input octet, xor into 8-bit register and shift most significant bit first for 8 rounds, conditionally xor 0x07 on outgoing high bit. Caller may choose other parameters but those variants are NOT proven here.",
+        "positive": "Independent 8-bit bitwise reference recurrence checks ASCII '123456789' -> CRC 0xF4; empty input with init 0 returns 0x00.",
+        "negative": "Changing bit orientation, silently using reflected polynomial or including implicit final xor changes the checksum and violates declared CRC-8/ATM profile; do not conflate any CRC transport frame with D2 syntax.",
+        "witness_origin": "SCOPED-BITWISE-OR-ARITHMETIC-REFERENCE-CHECKED-IN-JS",
+        "runtime_sens_oracle": "NOT-RUN",
+        "core_vs_library": "DERIVED-BITWISE-LFSR-ALGORITHM; PROFILE-NOT-CORE-OWNERSHIP",
+        "owner_ratification": false
       }
     },
     {
@@ -25903,7 +25952,7 @@
         "rows": 9
       }
     ],
-    "total_passports": 125,
+    "total_passports": 130,
     "latest_sources": [
       {
         "path": "knowledge/d10-general-congruence-merge-hobbies-v1.json",
@@ -25951,7 +26000,7 @@
         "rows": 3
       }
     ],
-    "latest_source_pass": 2,
+    "latest_source_pass": 5,
     "source_verified_at": "b3cd6dbe9a8094e3794c1421e91f3d5b4c5247b6",
     "latest_model_review_specs": [
       "CALL-NEXT-METHOD",
@@ -25998,7 +26047,17 @@
     "latest_chess_puct_contracts": [
       "mcts-select",
       "mcts-backpropagate"
-    ]
+    ],
+    "latest_crossbranch_source_profiles": [
+      "RANKED-FULLTEXT-SEARCH",
+      "FUZZY-TITLE-MATCH",
+      "EPHEMERIS-TO-STATE-TRANSFORM",
+      "ADC-QUANTIZE",
+      "CRC-UPDATE"
+    ],
+    "source_profile_crcs": {
+      "crc8atm_123456789": 244
+    }
   },
   "evidence_gate": {
     "date": "2026-10-11",
@@ -26008,13 +26067,13 @@
     "formal_ratified": 0,
     "semantic_source_audit": {
       "total": 309,
-      "has_law": 233,
-      "has_positive": 218,
-      "has_negative": 218,
-      "law_and_witnesses": 215,
-      "missing_law": 76,
-      "missing_positive": 91,
-      "missing_negative": 91
+      "has_law": 235,
+      "has_positive": 220,
+      "has_negative": 220,
+      "law_and_witnesses": 220,
+      "missing_law": 74,
+      "missing_positive": 89,
+      "missing_negative": 89
     },
     "note": "Source-derived witnesses and selected-neighbor aliases are research-only; no D10 ratification or new independent Core function.",
     "uncorroborated_source_name_census": 96,
