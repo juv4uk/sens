@@ -514,6 +514,48 @@ def audit(root):
                 )
             else:
                 errors.append("D10-V15-SOURCE-BATCH-SHA-OR-LAW-DRIFT")
+        # v16: separately pin 32 historical law descriptions, with only textual
+        # witnesses. No F2/F3 proof or physical placement is asserted.
+        if len(rows) > 938:
+            ref16=ptr["current_v16_archived_law_selection"]
+            pin16=ref16["manifest"]
+            raw16=(root/pin16["path"]).read_bytes()
+            spec16=json.loads(raw16)
+            src16=spec16["source"]
+            rawsrc16=(root/src16["path"]).read_bytes()
+            prev16=ptr["historical_v15_research_inventory"]
+            rawprev16=(root/prev16["path"]).read_bytes()
+            new16=rows[938:970]
+            proofs16=spec16["candidates"]
+            good16=(
+                pin16["git_blob"]==sha(raw16)
+                and ref16["previous_inventory"]==prev16["path"]
+                and prev16["git_blob"]==sha(rawprev16)
+                and spec16["previous"]["git_blob"]==sha(rawprev16)
+                and ref16["source"]==src16
+                and sha(rawsrc16)==src16["git_blob"]
+                and len(new16)==len(proofs16)==32
+                and all(
+                    row["stable_id"]==proof["id"]
+                    and row["semantic_name"]==proof["name"]
+                    and row["behavior"]==proof["law"]
+                    and row["source_path"]==src16["path"]
+                    and row["source_git_blob"]==src16["git_blob"]
+                    and row["source_slot_index"]==proof["source_slot_index"]
+                    and row["positive_witness_claim"]==proof["positive_illustrative_claim"]
+                    and row["negative_witness_claim"]==proof["negative_illustrative_claim"]
+                    and row["coordinate"] is None
+                    and row["ratified_resident"] is False
+                    and row["physical_t5_authorized"] is False
+                    and row["witness_independence"]=="PENDING"
+                    and proof["F2"]=="HOLD_DONOR_NOT_RUN"
+                    and proof["F3"]=="HOLD_DISTINCTNESS_UNPROVEN"
+                    for row,proof in zip(new16,proofs16))
+            )
+            if good16:
+                source_review_exceptions.update(row["semantic_name"].upper() for row in new16)
+            else:
+                errors.append("D10-V16-SOURCE-BATCH-SHA-OR-LAW-DRIFT")
         if sources_good and legacy_ok and v5_good:
             research_allocated=len(placed)-256
             source_review_exceptions |= all_review_names | v5_source_names

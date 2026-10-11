@@ -18,6 +18,8 @@ on:
       - 'knowledge/d10-v13-semantic-inventory.json'
       - 'knowledge/d10-v14-semantic-inventory.json'
       - 'knowledge/d10-v15-semantic-inventory.json'
+      - 'knowledge/d10-v16-semantic-inventory.json'
+      - 'knowledge/d10-v16-archived-source-law-review-20261012.json'
       - 'knowledge/d10-v15-source-law-intake-20261012.json'
       - 'knowledge/d10-v14-source-law-intake-20261011.json'
       - 'knowledge/d10-candidate-coordinate-unification-20261011.json'
@@ -60,6 +62,7 @@ on:
       - 'tests/test_d10_v4_research_candidates.py'
       - 'tests/test_d10_completion_readiness.py'
       - 'scripts/check_d10_completion_readiness.py'
+      - 'scripts/check_d10_v16_archived_laws.py'
       - '.github/workflows/d10-completion-readiness.yml'
   pull_request:
     paths:
@@ -133,6 +136,10 @@ jobs:
         run: |
           python3 scripts/check_d10_v15_source_laws.py --self-test
           python3 -O scripts/check_d10_v15_source_laws.py --self-test
+      - name: D10 v16 check 32 historical law claims and 3 negative mutations
+        run: |
+          python3 scripts/check_d10_v16_archived_laws.py --self-test
+          python3 -O scripts/check_d10_v16_archived_laws.py --self-test
       - name: Порахувати реальний запас D10
         run: |
           python3 scripts/check_d10_completion_readiness.py >"$RUNNER_TEMP/d10-readiness.json"

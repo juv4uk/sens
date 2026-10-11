@@ -1,12 +1,12 @@
 {
   "schema": "d10-current-inventory-pointer/v1",
-  "status": "OWNER-DIRECTED-RESEARCH-SELECTION-938-UNRATIFIED",
+  "status": "OWNER-DIRECTED-RESEARCH-SELECTION-970-UNRATIFIED",
   "canonical_current": {
-    "path": "knowledge/d10-v15-semantic-inventory.json",
-    "git_blob": "f004b8c57ade5faf8e55e95129727ce3eea14c6d",
-    "selected": 938,
+    "path": "knowledge/d10-v16-semantic-inventory.json",
+    "git_blob": "1aae83ecc5ad4db7b1a4e4a379ee9b204a529341",
+    "selected": 970,
     "placed": 719,
-    "unplaced": 219,
+    "unplaced": 251,
     "ratified": 0
   },
   "historical_selection": {
@@ -20,10 +20,10 @@
     "role": "PINNED-GAUGE-ASSIGNMENT"
   },
   "policy": {
-    "description": "v15: 19 archived laws with illustrative positive and negative review examples appended; independent F2/F3 proofs pending; preserve v14 919-row prefix.",
-    "selected_only": "938 research descriptions; 719 placed, 219 unplaced, 86 remaining. Ratification only once domain and proofs complete.",
+    "description": "32 historical semantic law descriptions added to research v16, with text witnesses but no execution or behavioral dedup.",
+    "selected_only": "970 research descriptions selected / 1024. 719 placed; 251 without coordinates; 54 remaining. Whole-domain ratification deferred until domain completion.",
     "ratification": "Whole-domain D10 ratification to follow fully populated 1024 inventory with reviewed proofs, not per-function ratification.",
-    "next_step": "Find 86 more independent laws, verify F2/F3, then place codes prior to whole-domain ratification."
+    "next_step": "Collect missing 54 independent lawful semantics and verify F2 F3; only after fully filling all 1024 candidates pursue full-domain ratification."
   },
   "branch_policy": "MAIN-ONLY; NO-NEW-BRANCHES",
   "historical_v2_coordinate_inventory": {
@@ -382,6 +382,32 @@
       "original_research_slots": 1024
     },
     "research_added": 19,
+    "coordinates_added": 0,
+    "ratified_added": 0,
+    "F2": "NOT_RUN",
+    "F3": "UNPROVEN"
+  },
+  "historical_v15_research_inventory": {
+    "path": "knowledge/d10-v15-semantic-inventory.json",
+    "git_blob": "f004b8c57ade5faf8e55e95129727ce3eea14c6d",
+    "selected": 938,
+    "placed": 719,
+    "unplaced": 219,
+    "ratified": 0,
+    "role": "FROZEN-PRE-V16-ARCHIVE"
+  },
+  "current_v16_archived_law_selection": {
+    "previous_inventory": "knowledge/d10-v15-semantic-inventory.json",
+    "manifest": {
+      "path": "knowledge/d10-v16-archived-source-law-review-20261012.json",
+      "git_blob": "ec2f53367b2723dd7d5e4f2ac8eaf6c88f78f8d5"
+    },
+    "source": {
+      "path": "knowledge/d10-candidate-coordinate-unification-20261011.json",
+      "git_blob": "e14a3301c24bf3e9af9b5568aaf5ecf720eed17e",
+      "slots": 1024
+    },
+    "research_added": 32,
     "coordinates_added": 0,
     "ratified_added": 0,
     "F2": "NOT_RUN",
