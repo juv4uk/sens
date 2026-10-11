@@ -13,7 +13,10 @@ fn store_session() -> Session {
         ("lib/content-store.lisp", include_str!("../../../lib/content-store.lisp")),
         ("lib/lisp-fs.lisp", include_str!("../../../lib/lisp-fs.lisp")),
     ] {
-        if matches!(path, "lib/unify.lisp" | "lib/reason.lisp" | "lib/forward.lisp" | "lib/knowledge.lisp" | "lib/world.lisp" | "lib/persistent-map.lisp" | "lib/content-store.lisp" | "lib/lisp-fs.lisp") {
+        if path == "lib/core.lisp" {
+            sens::eval_pinned_legacy_core_source(path, source, &mut session)
+                .expect("pinned historical core must load");
+        } else if matches!(path, "lib/unify.lisp" | "lib/reason.lisp" | "lib/forward.lisp" | "lib/knowledge.lisp" | "lib/world.lisp" | "lib/persistent-map.lisp" | "lib/content-store.lisp" | "lib/lisp-fs.lisp") {
             sens::eval_pinned_reasoning_source(path, source, &mut session)
                 .expect("pinned reasoning dependency must load");
         } else {
