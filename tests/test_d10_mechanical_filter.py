@@ -80,7 +80,7 @@ class FilterTests(unittest.TestCase):
         self.row['semantic_law'] = ''
         self.row['source_pin'] = 'f' * 40
         result = self.result()
-        self.assertEqual(('escalated', 'HOLD_UNVERIFIED_PIN'),
+        self.assertEqual(('rejected', 'HOLD_UNVERIFIED_PIN'),
                          (result['decision'], result['reason']))
 
     def test_absent_source_is_still_no_provenance_even_without_law(self):
@@ -161,7 +161,7 @@ class FilterTests(unittest.TestCase):
         self.pin_historical_donor()
         self.row['source_pin'] = 'f' * 40
         result = self.result()
-        self.assertEqual(('escalated', 'HOLD_UNVERIFIED_PIN'),
+        self.assertEqual(('rejected', 'HOLD_UNVERIFIED_PIN'),
                          (result['decision'], result['reason']))
 
     def test_nonexistent_commit_and_invalid_line_are_hold_not_no_provenance(self):
@@ -181,7 +181,7 @@ class FilterTests(unittest.TestCase):
             f"juv4uk/spanda@{commit}:README.md:1"
         )
         result = self.result()
-        self.assertEqual(('escalated', 'HOLD_UNVERIFIED_PIN'),
+        self.assertEqual(('rejected', 'HOLD_UNVERIFIED_PIN'),
                          (result['decision'], result['reason']))
 
     def test_pinned_git_path_traversal_never_reads_outside_donor(self):
