@@ -1,0 +1,33 @@
+{
+  "schema": "sens-historical-branch-archive/v1",
+  "archived_at": "2026-10-11",
+  "source": {
+    "repo": "juv4uk/sens",
+    "pr": 164,
+    "title": "test(witness): RED portable backend adapter contract (#116)",
+    "branch": "feat/116-portable-witness-adapters",
+    "head_sha": "7f35d6a8d78d0ad6afe9385609998fab8039b02d",
+    "base": "feat/114-authority-inventory",
+    "base_sha": "969e46bc5ac14d7f38f60fb06dc14266d37a62c2",
+    "reason": "RED-only portable adapter contract experiment; old crates/my-lisp path; manifest deliberately missing so this PR's test expects failure. Preserve as evidence, not active test."
+  },
+  "files": [
+    {
+      "original_path": "crates/my-lisp/tests/portable_witness_contract.rs",
+      "archived_path": "research/domain-archive/20261011/pr0164/source/crates/my-lisp/tests/portable_witness_contract.rs",
+      "git_blob_sha": "c0332eaf90299f613b4d9a2112abd2d137ccd1a8",
+      "bytes": 1109
+    },
+    {
+      "original_path": "tests/fixtures/backend-adapters.lisp",
+      "archived_path": "research/domain-archive/20261011/pr0164/source/tests/fixtures/backend-adapters.lisp",
+      "git_blob_sha": "067c09efe8b1a20428dbb379a1f36f981910a1e3",
+      "bytes": 488
+    }
+  ],
+  "disposition": "ARCHIVE-ONLY / superseded path-era / do not activate as CI test without current SENS-native adapter design",
+  "current_main_check": {
+    "manifest_present": false,
+    "test_present": false
+  }
+}
