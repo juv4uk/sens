@@ -1,0 +1,20 @@
+{
+  "schema": "sens.d10.archive-source-only/v1",
+  "date": "2026-10-11",
+  "status": "EVIDENCE-PRESERVED-NONNORMATIVE",
+  "origin_pr": "https://github.com/juv4uk/sens/pull/5600",
+  "origin_commit": "0b9d5a49675317db9bee3d0594e6e73bf37803da",
+  "origin_path": "knowledge/d10-existing-ledger-semantic-tranche23-20261011.json",
+  "origin_blob_sha": "0dc1aa7240ffabfac6c84de45eed2014743a3fde",
+  "archive_path": "research/domain-archive/20261011/pr5600/knowledge/d10-existing-ledger-semantic-tranche23-20261011.json",
+  "records": 23,
+  "source_blob_count": 18,
+  "verified_source_blobs": 18,
+  "verification_note": "All 18 source files were fetched from main and matched dossier SHA at time of review.",
+  "source_inventory_selected_before": 675,
+  "source_pr_proposes_selected_after": 698,
+  "selected_by_this_archive": 0,
+  "ratified_by_this_archive": 0,
+  "coordinates_assigned_by_this_archive": 0,
+  "warning": "This is a byte-identical historical proposal, NOT a selection transition. The canonical D10 inventory/ledger/transition history and runtime remain unchanged. Exact-current-main dedup, independent oracle and CI are required before any research-selection admission."
+}
