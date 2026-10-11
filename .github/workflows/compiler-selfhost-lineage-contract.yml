@@ -6,6 +6,7 @@ on:
     paths:
       - "contracts/compiler-selfhost-lineage-v1.lisp"
       - "scripts/validate-compiler-selfhost-lineage.py"
+      - "scripts/measure-nano-sens-size.py"
       - "evidence/compiler-selfhost-lineage-*.json"
       - ".github/workflows/compiler-selfhost-lineage-contract.yml"
   push:
@@ -13,6 +14,7 @@ on:
     paths:
       - "contracts/compiler-selfhost-lineage-v1.lisp"
       - "scripts/validate-compiler-selfhost-lineage.py"
+      - "scripts/measure-nano-sens-size.py"
       - "evidence/compiler-selfhost-lineage-*.json"
       - ".github/workflows/compiler-selfhost-lineage-contract.yml"
 
@@ -31,6 +33,9 @@ jobs:
 
       - name: Validate lineage contract falsifiers
         run: python3 scripts/validate-compiler-selfhost-lineage.py --self-test
+
+      - name: Validate Nano-SENS size measurement guards
+        run: python3 scripts/measure-nano-sens-size.py --self-test
 
       - name: Validate executable fixed-point report
         run: >-
