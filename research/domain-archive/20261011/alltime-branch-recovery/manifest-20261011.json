@@ -645,6 +645,150 @@
       "archive_path": "research/domain-archive/20261011/alltime-branch-recovery/cohort-057-064/blobs/89f7dc3602c2cbc1aab9dae5f4f0b316dff7a40e/tests__fixtures__early-sid-lowering-witness.lisp.source.txt",
       "comparison_main_sha": "da441de4a24c1d48123a362aa65dea59c63fa2c4",
       "admission": "ARCHIVED_SOURCE_ONLY; NOT EXECUTABLE; NO CI OR SEMANTIC RATIFICATION"
+    },
+    {
+      "origin_branch": "agent/fix-public-api-discovery-current-main",
+      "origin_commit": "9c88630eea6d3eca13e0249be974c281ca1ad3a4",
+      "original_path": "docs/generated/public-api-discovery.md",
+      "original_blob_sha": "5dfd03c95d0d901104a15267c33e338fdaa8f4a2",
+      "archive_path": "research/domain-archive/20261011/alltime-branch-recovery/cohort-065-072/blobs/5dfd03c95d0d901104a15267c33e338fdaa8f4a2/docs__generated__public-api-discovery.md.source.txt",
+      "comparison_main_sha": "60a1bcc6390d412617d922acec651b70d2e3666e",
+      "admission": "ARCHIVED_SOURCE_ONLY; NOT EXECUTABLE; NO CI OR SEMANTIC RATIFICATION"
+    },
+    {
+      "origin_branch": "agent/fix-rdrand-witness-carriers",
+      "origin_commit": "7b6f3be6fc81b423a3a4ab6ae00985a0da27fc7c",
+      "original_path": "tests/fixtures/x86-64-instruction-set-witness.lisp",
+      "original_blob_sha": "153add849882cbdc5bcd86668db2237b4b2cd96e",
+      "archive_path": "research/domain-archive/20261011/alltime-branch-recovery/cohort-065-072/blobs/153add849882cbdc5bcd86668db2237b4b2cd96e/tests__fixtures__x86-64-instruction-set-witness.lisp.source.txt",
+      "comparison_main_sha": "60a1bcc6390d412617d922acec651b70d2e3666e",
+      "admission": "ARCHIVED_SOURCE_ONLY; NOT EXECUTABLE; NO CI OR SEMANTIC RATIFICATION"
+    },
+    {
+      "origin_branch": "agent/invoke-repl-1006",
+      "origin_commit": "95c63b7c11083946e852b9f0613b354688a78c1b",
+      "original_path": "Cargo.lock",
+      "original_blob_sha": "e7a5e2a9d2f32cc8cd3d3b031174aac6e916c4fc",
+      "archive_path": "research/domain-archive/20261011/alltime-branch-recovery/cohort-065-072/blobs/e7a5e2a9d2f32cc8cd3d3b031174aac6e916c4fc/Cargo.lock.source.txt",
+      "comparison_main_sha": "60a1bcc6390d412617d922acec651b70d2e3666e",
+      "admission": "ARCHIVED_SOURCE_ONLY; NOT EXECUTABLE; NO CI OR SEMANTIC RATIFICATION"
+    },
+    {
+      "origin_branch": "agent/invoke-repl-1006",
+      "origin_commit": "95c63b7c11083946e852b9f0613b354688a78c1b",
+      "original_path": "crates/my-lisp-cli/Cargo.toml",
+      "original_blob_sha": "553e050e341aab3792a7ee8d8d3eea8b328be1e9",
+      "archive_path": "research/domain-archive/20261011/alltime-branch-recovery/cohort-065-072/blobs/553e050e341aab3792a7ee8d8d3eea8b328be1e9/crates__my-lisp-cli__Cargo.toml.source.txt",
+      "comparison_main_sha": "60a1bcc6390d412617d922acec651b70d2e3666e",
+      "admission": "ARCHIVED_SOURCE_ONLY; NOT EXECUTABLE; NO CI OR SEMANTIC RATIFICATION"
+    },
+    {
+      "origin_branch": "agent/invoke-repl-1006",
+      "origin_commit": "95c63b7c11083946e852b9f0613b354688a78c1b",
+      "original_path": "crates/my-lisp-cli/src/island_invoke.rs",
+      "original_blob_sha": "6c034291a073eb817e13b855279c7f64819d27e1",
+      "archive_path": "research/domain-archive/20261011/alltime-branch-recovery/cohort-065-072/blobs/6c034291a073eb817e13b855279c7f64819d27e1/crates__my-lisp-cli__src__island_invoke.rs.source.txt",
+      "comparison_main_sha": "60a1bcc6390d412617d922acec651b70d2e3666e",
+      "admission": "ARCHIVED_SOURCE_ONLY; NOT EXECUTABLE; NO CI OR SEMANTIC RATIFICATION"
+    },
+    {
+      "origin_branch": "agent/invoke-repl-1006",
+      "origin_commit": "95c63b7c11083946e852b9f0613b354688a78c1b",
+      "original_path": "crates/my-lisp-cli/src/main.rs",
+      "original_blob_sha": "171715ec7cc315e654486e1410cf2710c209d4b4",
+      "archive_path": "research/domain-archive/20261011/alltime-branch-recovery/cohort-065-072/blobs/171715ec7cc315e654486e1410cf2710c209d4b4/crates__my-lisp-cli__src__main.rs.source.txt",
+      "comparison_main_sha": "60a1bcc6390d412617d922acec651b70d2e3666e",
+      "admission": "ARCHIVED_SOURCE_ONLY; NOT EXECUTABLE; NO CI OR SEMANTIC RATIFICATION"
+    },
+    {
+      "origin_branch": "agent/invoke-repl-1006",
+      "origin_commit": "95c63b7c11083946e852b9f0613b354688a78c1b",
+      "original_path": "crates/my-lisp-cli/tests/invoke_repl.rs",
+      "original_blob_sha": "e8f63fa8665346c6e88a4c8aad4a64cb19f70ffe",
+      "archive_path": "research/domain-archive/20261011/alltime-branch-recovery/cohort-065-072/blobs/e8f63fa8665346c6e88a4c8aad4a64cb19f70ffe/crates__my-lisp-cli__tests__invoke_repl.rs.source.txt",
+      "comparison_main_sha": "60a1bcc6390d412617d922acec651b70d2e3666e",
+      "admission": "ARCHIVED_SOURCE_ONLY; NOT EXECUTABLE; NO CI OR SEMANTIC RATIFICATION"
+    },
+    {
+      "origin_branch": "agent/invoke-repl-1006",
+      "origin_commit": "95c63b7c11083946e852b9f0613b354688a78c1b",
+      "original_path": "crates/my-lisp/src/eval/capabilities.rs",
+      "original_blob_sha": "5974ea41b5c9d6ed87cb79e59337a172fbbd92e4",
+      "archive_path": "research/domain-archive/20261011/alltime-branch-recovery/cohort-065-072/blobs/5974ea41b5c9d6ed87cb79e59337a172fbbd92e4/crates__my-lisp__src__eval__capabilities.rs.source.txt",
+      "comparison_main_sha": "60a1bcc6390d412617d922acec651b70d2e3666e",
+      "admission": "ARCHIVED_SOURCE_ONLY; NOT EXECUTABLE; NO CI OR SEMANTIC RATIFICATION"
+    },
+    {
+      "origin_branch": "agent/invoke-repl-1006",
+      "origin_commit": "95c63b7c11083946e852b9f0613b354688a78c1b",
+      "original_path": "crates/my-lisp/src/eval/mod.rs",
+      "original_blob_sha": "182ac5b7c8c09f99e84b0bd843da64b384fc92b4",
+      "archive_path": "research/domain-archive/20261011/alltime-branch-recovery/cohort-065-072/blobs/182ac5b7c8c09f99e84b0bd843da64b384fc92b4/crates__my-lisp__src__eval__mod.rs.source.txt",
+      "comparison_main_sha": "60a1bcc6390d412617d922acec651b70d2e3666e",
+      "admission": "ARCHIVED_SOURCE_ONLY; NOT EXECUTABLE; NO CI OR SEMANTIC RATIFICATION"
+    },
+    {
+      "origin_branch": "agent/invoke-repl-1006",
+      "origin_commit": "95c63b7c11083946e852b9f0613b354688a78c1b",
+      "original_path": "crates/my-lisp/src/lib.rs",
+      "original_blob_sha": "3f68472a9599b016ab920bc9fea01a7e73b5f1d2",
+      "archive_path": "research/domain-archive/20261011/alltime-branch-recovery/cohort-065-072/blobs/3f68472a9599b016ab920bc9fea01a7e73b5f1d2/crates__my-lisp__src__lib.rs.source.txt",
+      "comparison_main_sha": "60a1bcc6390d412617d922acec651b70d2e3666e",
+      "admission": "ARCHIVED_SOURCE_ONLY; NOT EXECUTABLE; NO CI OR SEMANTIC RATIFICATION"
+    },
+    {
+      "origin_branch": "agent/island-math-988",
+      "origin_commit": "d58145b9a896115268abb9b40f514bece6d36a8e",
+      "original_path": "contracts/island-math-intersection-988.lisp",
+      "original_blob_sha": "ba1c5f1fa2417a38d259a7ea28bd939ce25e86ad",
+      "archive_path": "research/domain-archive/20261011/alltime-branch-recovery/cohort-065-072/blobs/ba1c5f1fa2417a38d259a7ea28bd939ce25e86ad/contracts__island-math-intersection-988.lisp.source.txt",
+      "comparison_main_sha": "60a1bcc6390d412617d922acec651b70d2e3666e",
+      "admission": "ARCHIVED_SOURCE_ONLY; NOT EXECUTABLE; NO CI OR SEMANTIC RATIFICATION"
+    },
+    {
+      "origin_branch": "agent/island-math-988",
+      "origin_commit": "d58145b9a896115268abb9b40f514bece6d36a8e",
+      "original_path": "crates/my-lisp/tests/island_math_intersection_988.rs",
+      "original_blob_sha": "48a9a528a8f1934b1e243edc6cef0b97679e937c",
+      "archive_path": "research/domain-archive/20261011/alltime-branch-recovery/cohort-065-072/blobs/48a9a528a8f1934b1e243edc6cef0b97679e937c/crates__my-lisp__tests__island_math_intersection_988.rs.source.txt",
+      "comparison_main_sha": "60a1bcc6390d412617d922acec651b70d2e3666e",
+      "admission": "ARCHIVED_SOURCE_ONLY; NOT EXECUTABLE; NO CI OR SEMANTIC RATIFICATION"
+    },
+    {
+      "origin_branch": "agent/island-math-988",
+      "origin_commit": "d58145b9a896115268abb9b40f514bece6d36a8e",
+      "original_path": "tests/authority-inventory.lisp",
+      "original_blob_sha": "1a88f5b8ebb0da2d38643a09d665f4ea9aeb304d",
+      "archive_path": "research/domain-archive/20261011/alltime-branch-recovery/cohort-065-072/blobs/1a88f5b8ebb0da2d38643a09d665f4ea9aeb304d/tests__authority-inventory.lisp.source.txt",
+      "comparison_main_sha": "60a1bcc6390d412617d922acec651b70d2e3666e",
+      "admission": "ARCHIVED_SOURCE_ONLY; NOT EXECUTABLE; NO CI OR SEMANTIC RATIFICATION"
+    },
+    {
+      "origin_branch": "agent/island-math-datalog-989",
+      "origin_commit": "66788add94fb79958aa2a95aa1ad924127020d3f",
+      "original_path": "contracts/datalog-math-capability-989.lisp",
+      "original_blob_sha": "e54c92847d996064911473101401702f38866cfd",
+      "archive_path": "research/domain-archive/20261011/alltime-branch-recovery/cohort-065-072/blobs/e54c92847d996064911473101401702f38866cfd/contracts__datalog-math-capability-989.lisp.source.txt",
+      "comparison_main_sha": "60a1bcc6390d412617d922acec651b70d2e3666e",
+      "admission": "ARCHIVED_SOURCE_ONLY; NOT EXECUTABLE; NO CI OR SEMANTIC RATIFICATION"
+    },
+    {
+      "origin_branch": "agent/island-math-datalog-989",
+      "origin_commit": "66788add94fb79958aa2a95aa1ad924127020d3f",
+      "original_path": "crates/wsm-datalog-kernel/tests/arithmetic_capability_989.rs",
+      "original_blob_sha": "9b8794e5ad74db4f1b1dd90e3afdcc33e298c39c",
+      "archive_path": "research/domain-archive/20261011/alltime-branch-recovery/cohort-065-072/blobs/9b8794e5ad74db4f1b1dd90e3afdcc33e298c39c/crates__wsm-datalog-kernel__tests__arithmetic_capability_989.rs.source.txt",
+      "comparison_main_sha": "60a1bcc6390d412617d922acec651b70d2e3666e",
+      "admission": "ARCHIVED_SOURCE_ONLY; NOT EXECUTABLE; NO CI OR SEMANTIC RATIFICATION"
+    },
+    {
+      "origin_branch": "agent/island-math-datalog-989",
+      "origin_commit": "66788add94fb79958aa2a95aa1ad924127020d3f",
+      "original_path": "tests/authority-inventory.lisp",
+      "original_blob_sha": "ebd770d9a3e189cb5f2fd6aaa42bf576acb73bba",
+      "archive_path": "research/domain-archive/20261011/alltime-branch-recovery/cohort-065-072/blobs/ebd770d9a3e189cb5f2fd6aaa42bf576acb73bba/tests__authority-inventory.lisp.source.txt",
+      "comparison_main_sha": "60a1bcc6390d412617d922acec651b70d2e3666e",
+      "admission": "ARCHIVED_SOURCE_ONLY; NOT EXECUTABLE; NO CI OR SEMANTIC RATIFICATION"
     }
   ]
 }

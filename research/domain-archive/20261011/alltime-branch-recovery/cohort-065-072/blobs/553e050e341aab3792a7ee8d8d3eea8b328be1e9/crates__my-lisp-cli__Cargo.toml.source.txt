@@ -1,0 +1,42 @@
+[package]
+name = "my-lisp-cli"
+version = "0.40.1"
+edition = "2021"
+license-file = "../../LICENSE"
+
+[[bin]]
+name = "my-lisp"
+path = "src/main.rs"
+
+[[bin]]
+name = "guard-reference"
+path = "src/bin/guard-reference.rs"
+
+[[bin]]
+name = "guard-reference-schema-check"
+path = "src/bin/guard-reference-schema-check.rs"
+
+[[bin]]
+name = "wsm-fs-record-producer"
+path = "src/bin/wsm-fs-record-producer.rs"
+
+[[bin]]
+name = "wsm-fs-record-consumer"
+path = "src/bin/wsm-fs-record-consumer.rs"
+
+[[bin]]
+name = "cml-export"
+path = "src/bin/cml-export.rs"
+
+[dependencies]
+my-lisp = { path = "../my-lisp" }
+my-lisp-host = { path = "../my-lisp-host" }
+my-lisp-lsp = { path = "../my-lisp-lsp" }
+wsm-guard-core = { path = "../wsm-guard-core" }
+wsm-common-lisp-kernel = { path = "../wsm-common-lisp-kernel" }
+wsm-prolog-kernel = { path = "../wsm-prolog-kernel" }
+wsm-clips-kernel = { path = "../wsm-clips-kernel", features = ["native-clips"] }
+wsm-datalog-kernel = { path = "../wsm-datalog-kernel" }
+rustyline = { version = "14.0.0", features = ["with-file-history"] }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"

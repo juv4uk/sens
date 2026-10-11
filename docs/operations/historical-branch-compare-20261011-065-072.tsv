@@ -1,0 +1,11 @@
+# Exact compare pin main SHA: 60a1bcc6390d412617d922acec651b70d2e3666e
+# Ancestry only. No semantic acceptance. Diverged source trees are archived inertly; reader-nested commit has no tree delta from parent.
+branch	source_sha	compare_status	ahead_by	behind_by	classification
+agent/fix-public-api-discovery-current-main	9c88630eea6d3eca13e0249be974c281ca1ad3a4	diverged	4	7467	NEEDS_CONTENT_REVIEW
+agent/fix-rdrand-witness-carriers	7b6f3be6fc81b423a3a4ab6ae00985a0da27fc7c	diverged	1	5769	NEEDS_CONTENT_REVIEW
+agent/fix-reader-nested-call-regression-test-20261010	9c1d9b55e610c4c203979b5747a8e90f92d31d49	diverged	1	637	EMPTY_TREE_DELTA
+agent/fix-reader-nested-machine-call-head-20261010	eb665aea3c29f7fed783468cfb3a850e13ac22ae	behind	0	653	NO_UNMERGED_COMMITS
+agent/fix-x86-program-empty-list-termination-20261010	360f8eb351d25b92203e8385fb952d2756c4c948	behind	0	595	NO_UNMERGED_COMMITS
+agent/invoke-repl-1006	95c63b7c11083946e852b9f0613b354688a78c1b	diverged	10	7837	NEEDS_CONTENT_REVIEW
+agent/island-math-988	d58145b9a896115268abb9b40f514bece6d36a8e	diverged	6	7862	NEEDS_CONTENT_REVIEW
+agent/island-math-datalog-989	66788add94fb79958aa2a95aa1ad924127020d3f	diverged	3	7858	NEEDS_CONTENT_REVIEW
