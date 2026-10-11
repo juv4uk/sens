@@ -44,6 +44,20 @@
 
 Машиночитний звіт варто версіонувати як `nano-sens-size-report/1` і зберігати поруч із lineage evidence. Це **нова форма спостереження про розмір**, а не нове джерело семантичної влади.
 
+## Вимірювальний інструмент додано
+
+У `main` додано `scripts/measure-nano-sens-size.py`. Він:
+- рахує точні file bytes та SHA-256 окремо для явно названого seed і C1 executable;
+- приймає лише `compiler-selfhost-lineage-report/1` зі статусом `pass`, перевіряє pinned SENS revision, покоління C1/C2, fresh-bootstrap прапорці, C1 SHA та розмір проти lineage report;
+- відмовляється створювати звіт, якщо provenance/розмір не збігаються;
+- позначає секції ELF/PE, loadable segments, залежності toolchain, мінімальність і повний GAS/NASM паритет як невиміряні, доки для них немає окремих спостережень.
+
+Локально перевірено `python3 scripts/measure-nano-sens-size.py --self-test`: **PASS**, три позитивні твердження й два негативні контролі (підміна розміру, читання попереднього C1). Також пройшов `python3 -m py_compile`. Це перевірки самого вимірювального інструмента, не новий запуск компілятора.
+
+Існуючий workflow `.github/workflows/compiler-selfhost-lineage-contract.yml` тепер має запускати цю перевірку для змін інструмента та контракту лінії доказів. Статус віддаленого Actions-run ще не підтверджений.
+
+Вимір seed поки **BLOCKED** на визначенні й отриманні точного файлу C0/seed і C1 executable відповідного pinned lineage. Старий звіт має C1 hash/розмір, але немає доступного workflow artifact у збережених артефактах зазначеного run; не підміняти бінарний файл даними з JSON і не називати виміряним seed рядок у source.
+
 ## Acceptance gates
 
 - [ ] З чистого checkout і без читання заздалегідь зібраного C1/C2 повторно запустити чинний self-host lineage flow.
