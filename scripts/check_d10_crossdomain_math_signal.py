@@ -16,10 +16,29 @@ def check(doc, inv, foundation):
     assert inv["accounting"]["ratified_d10_residents"] == 0
     assert doc["admission"] == {"selected_added":0,"coordinates_added":0,"ratified_added":0,"oracle_source":"tests/test_d10_crossdomain_math_laws.py","owner_gate":"#4013, #4463; exclusive canonical selection writer required; derivability and donor admissibility remain OPEN"}
     low = {str(v).upper() for d in foundation["domains"].values() for v in d["residents"].values()}
-    high = {x["semantic_name"].upper() for x in inv["rows"]}
+    high = {x["semantic_name"].upper(): x for x in inv["rows"]}
+    proof = get("knowledge/d10-existing-math-signal-selected-20261011.json") if (
+        {"FINITE-CONVOLUTION", "PHASE-UNWRAP"} & set(high)) else None
     assert {x["semantic_name"] for x in doc["candidates"]} == {"FINITE-CONVOLUTION","PHASE-UNWRAP"}
+    if proof is not None:
+        assert proof["status"] == "SELECTED-RESEARCH-BATCH-NO-RATIFICATION"
+        assert proof["source_d10_preselection"].endswith("@7d8745cb6f183cf0c015812359a6c0f87c4c2ffb")
+        assert "be9a340b28123d81b4203ccfbe3d1b20e707bbae" in {
+            p["blob"] for p in proof["premises"]}
     for x in doc["candidates"]:
-        assert x["semantic_name"] not in low | high
+        assert x["semantic_name"] not in low
+        live = high.get(x["semantic_name"])
+        if live is not None:
+            # A source-era HOLD stays immutable; only an independently appended
+            # source-pinned selection may change the *current* canonical inventory.
+            assert proof is not None
+            witness = [p for p in proof["selected"] if p["semantic_name"] == x["semantic_name"]]
+            assert len(witness) == 1 and witness[0]["law"] == x["law"]
+            assert live["stable_id"] == witness[0]["stable_id"]
+            assert live["behavior"] == witness[0]["law"]
+            assert live["status"] == "SELECTED-RESEARCH-CANDIDATE"
+            assert live.get("coordinate") is None and live.get("ratified_resident") is False
+            assert "knowledge/d10-existing-math-signal-selected-20261011.json" in live["provenance"]
         assert x["role"] == "RESEARCH-UNSELECTED"
         assert x["selection"] is False and x["coordinate"] is None and x["ratified"] is False
         assert x["physical_t5_authorized"] is False
@@ -45,7 +64,7 @@ def main():
         try: check(b,i,f)
         except AssertionError: continue
         raise AssertionError("negative control accepted: "+key)
-    print("D10 CROSSDOMAIN MATH SOURCE PASS: 2 source-backed HOLD, 5 negative controls, 0 selected")
+    print("D10 CROSSDOMAIN MATH SOURCE PASS: 2 historical HOLD donors, current selections separately source-pinned, 5 negative controls")
 
 if __name__ == "__main__":
     main()
