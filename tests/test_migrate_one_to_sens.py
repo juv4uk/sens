@@ -82,23 +82,27 @@ class CanonicalOneFileMigration(unittest.TestCase):
         self.assertIn("in-repository publication needs independent", result.stderr)
         self.assertFalse(target.exists())
 
-    def test_peer_identity_acceptance_uses_full_current_surface_set(self):
+    def test_peer_identity_requires_loaded_surface_environment(self):
+        """A single-file staging tool must not invent imports from core/uk.lisp.
+
+        This historical witness explicitly requires the peer bindings to be
+        loaded before evaluating it.  The current D1-D9 word migrator cannot
+        attest that `модуль` and `abs` refer to one executable identity.
+        A missing environment is a real BLOCK, never physical admission.
+        """
         source = ROOT / "lib" / "surface" / "peer-identity-acceptance.lisp"
-        result = subprocess.run(
-            [sys.executable, str(SCRIPT), str(source), "--dry-run"],
-            cwd=ROOT,
-            capture_output=True,
-            text=True,
-        )
-        self.assertEqual(result.returncode, 0, result.stderr + result.stdout)
+        target = source.with_suffix(".sens")
+        original_source = source.read_bytes()
+        result = invoke(source, "--dry-run")
+        self.assertEqual(result.returncode, 2, result.stderr + result.stdout)
         report = json.loads(result.stdout)
-        self.assertEqual(report["status"], "would-write")
-        self.assertEqual(
-            report["output"].replace("\\", "/"),
-            "lib/surface/peer-identity-acceptance.sens",
-        )
-        self.assertGreater(report["bytes"], 0)
-        self.assertGreater(len(report["words"]), 0)
+        self.assertEqual(report["status"], "blocked")
+        self.assertEqual(report["source_era"], "auto")
+        self.assertEqual(report["output"], "lib/surface/peer-identity-acceptance.sens")
+        self.assertIn("requires exact D1..D9 0/1 word", report["reason"])
+        self.assertIn("модуль", report["reason"])
+        self.assertFalse(target.exists(), "blocked staging must not emit physical SENS")
+        self.assertEqual(source.read_bytes(), original_source)
 
     def test_source_outside_repository_is_blocked(self):
         with tempfile.TemporaryDirectory() as td:
