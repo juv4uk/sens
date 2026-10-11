@@ -54,3 +54,32 @@ Baseline gate зелений; дослідницькі кампанії можу
 - Нових гілок, доменів або семантичних таблиць для Nano-SENS не створювати.
 
 **Висновок першого етапу:** метрика більше не BLOCKED. Seed-v0 = 34,580,696 bytes on-disk; обидва незалежні чисті звіти збігаються байт у байт. Оптимізація не входила до цього baseline.
+
+
+## K1 — static-link + strip C1: вимір завершено, виграшу розміру немає
+
+Дата: 2026-10-12. Рішення: **PASS_MEASURED / NO SIZE WIN**. Повний доказ: [evidence/nano-sens-k1-static-link-2026-10-12.json](../evidence/nano-sens-k1-static-link-2026-10-12.json). [CML Actions run](https://github.com/juv4uk/cml/actions/runs/38183052531).
+
+Два незалежні чисті запуски пройшли повний CML library corpus: **189 passed / 0 failed у кожному**. У кожному запуску статично зібраний C1 відтворив baseline-вихід побайтно; malformed SW1 input було відхилено. Lineage C1/C2 залишився byte-identical. Порівняльний job підтвердив, що два `nano-sens-size-report/1` однакові байт у байт, SHA-256 `ad41654be6b742816566c3f542b9e1712677e8be63880cc5c12e42ce583f519d`. Докази з retention 30 днів: [two-clean-runs ZIP](https://github.com/juv4uk/cml/actions/runs/38183052531/artifacts/11718651632), expiry 2026-11-10 UTC.
+
+| C1 variant | On-disk | Loadable PT_LOAD file bytes | Executable code-section bytes |
+|---|---:|---:|---:|
+| Baseline dynamic C1 (`-s`, no build ID) | 92,248 | 85,685 | 70,655 |
+| K1 static-link + strip (`-static -s`, no build ID) | 792,544 | 775,255 | 586,312 |
+| K1 minus baseline | **+700,296** | **+689,570** | **+515,657** |
+
+Static variant has the same output SHA-256 as baseline: `303d96cd1467fae319fb2dcf2c12e1a73c840bb0a0ecab67f3609ffde411d79a`. But it is 759.14% larger on disk, 804.77% larger in loadable file bytes, and 729.82% larger in executable code-section bytes. Therefore **K1 is not adopted as a size-reduction strategy**. This is a measured negative result, not a failed correctness witness.
+
+Scope warning: the CML test-runner inside this K1 run is instrumented by new test code and therefore has a different file size from the frozen seed-v0 run. Do not report that runner size as a new seed-v0 baseline or compare it directly with the original 34,580,696-byte baseline. This K1 comparison concerns the unchanged baseline C1 versus its static-linked variant only.
+
+The full GAS/NASM golden-corpus parity and total shared-library/toolchain dependency bytes remain unmeasured. Neither can be inferred from these results.
+
+## Next: K2 readiness, before changing the seed
+
+K2 starts with **one Rust-owned component at a time**, not wholesale substitution of the compiler. The first candidate-selection pass should map the current seed-v0 call chain to exact files and pinned SHAs, then select the smallest self-contained Rust-owned orchestration/serialization component whose contract already has a positive and negative witness. Do not replace semantic authority, do not move hidden dependencies outside the byte count, and do not alter the C1/C2 equivalence gate.
+
+K2 must publish two separate series:
+- **trusted-seed bytes**: exact operational seed artifact bytes, measured with the same on-disk/loadable/code-section rules and the same declared dependency boundary;
+- **independence-index**: publish the formula and explicit inventory of which required executable components are authored in SENS versus Rust/host tools. It must not be an arbitrary scalar: report the numerator/denominator or component ledger, with each component pinned and each classification supported by evidence.
+
+A replacement only counts if the complete positive corpus, fail-closed negative corpus, lineage, and two clean runs all pass. If trusted-seed bytes fall while the independence measure does not improve (or vice versa), record that tradeoff rather than declaring an overall win. K3 and K4 remain behind their own gates; this K1 result is not permission to combine campaigns.
