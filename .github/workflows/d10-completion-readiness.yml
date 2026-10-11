@@ -6,6 +6,11 @@ on:
       - 'knowledge/d10-v2-semantic-inventory.json'
       - 'knowledge/d10-v3-semantic-inventory.json'
       - 'knowledge/d10-v4-semantic-inventory.json'
+      - 'knowledge/d10-v5-semantic-inventory.json'
+      - 'knowledge/d10-provisional-candidate-coordinate-queue-v1.json'
+      - 'knowledge/d10-crossrepo-linguistic-v1.json'
+      - 'knowledge/d10-clos-slot-state-historical-review-v1.json'
+      - 'knowledge/d10-clos-instance-lifecycle-residual-v1.json'
       - 'knowledge/d10-flavors-restarts-research-v1.json'
       - 'knowledge/d10-time-law-review-v2.json'
       - 'knowledge/d10-current-inventory.json'
@@ -13,6 +18,8 @@ on:
       - 'scripts/check_d10_v2_current_placement.py'
       - 'scripts/check_d10_v3_archived_candidates.py'
       - 'scripts/check_d10_v4_research_candidates.py'
+      - 'scripts/check_d10_v5_research_candidates.py'
+      - 'scripts/check_d10_candidate_coordinate_queue.py'
       - 'tests/test_d10_v2_current_placement.py'
       - 'tests/test_d10_v3_archived_candidates.py'
       - 'tests/test_d10_v4_research_candidates.py'
@@ -52,6 +59,10 @@ jobs:
         run: |
           python3 scripts/check_d10_v4_research_candidates.py --self-test
           python3 -m unittest discover -s tests -p test_d10_v4_research_candidates.py -v
+      - name: Перевірити 8 нових D10 v5 семантик і 96 резервів кандидатів
+        run: |
+          python3 scripts/check_d10_v5_research_candidates.py
+          python3 scripts/check_d10_candidate_coordinate_queue.py
       - name: Порахувати реальний запас D10
         run: |
           python3 scripts/check_d10_completion_readiness.py >"$RUNNER_TEMP/d10-readiness.json"
