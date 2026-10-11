@@ -34,7 +34,9 @@
 
 (0011 world-parent (0010 (world) (1001 world)))
 (0011 world-journal (0010 (world) (10011 world)))
-(0011 world-metadata (0010 (world) (100111 world)))
+; D6:100111 CADDDR has no admitted evaluator mechanism; derive the
+; same fourth-field projection from three ratified D3 CDRs and D3 CAR.
+(0011 world-metadata (0010 (world) (100 (011 (011 (011 world))))))
 
 ;; Events intentionally have the same data shape as `lib/knowledge.lisp`'s
 ;; journal, so a later migration can reuse packages and projections unchanged.
