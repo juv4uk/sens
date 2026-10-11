@@ -38,6 +38,32 @@ fn pinned_d8_writer_survives_d4_and_legacy_wrapped_closures() {
 }
 
 #[test]
+fn d8_read_write_round_trip_uses_only_exact_ratified_d8_coordinates() {
+    let mut session = Session::default();
+    for (source, expected) in [
+        ("(11101010 \"(a b)\")", "(a b)"),
+        ("(11101010 (11110100 (001 (a b))))", "(a b)"),
+        ("(11101010 (11110100 7))", "7"),
+    ] {
+        let parsed = parse_mixed_exact_domain_legacy_core_source("lib/core.lisp", source)
+            .expect("path-bound D8 READ/WRITE must parse");
+        let result = eval_parsed_expressions(&parsed, &mut session)
+            .unwrap_or_else(|e| panic!("D8 READ/WRITE {source}: {e:?}"));
+        assert_eq!(result.value.to_string(), expected, "D8 wire round trip");
+    }
+}
+
+#[test]
+fn d8_read_rejects_excess_arguments() {
+    let mut session = Session::default();
+    let parsed = parse_mixed_exact_domain_legacy_core_source("lib/core.lisp", "(11101010 \"a\" \"b\")")
+        .expect("exact D8 READ expression parses");
+    let error = eval_parsed_expressions(&parsed, &mut session)
+        .expect_err("D8 READ cannot accept two inputs");
+    assert_eq!(error.kind, sens::ErrorKind::Arity);
+}
+
+#[test]
 fn d8_writer_rejects_incorrect_arity() {
     let mut session = Session::default();
     let parsed = parse_mixed_exact_domain_legacy_core_source("lib/core.lisp", "(11110100 1 2)")
