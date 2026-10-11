@@ -73,6 +73,14 @@ def validate(policy, ratification, lang):
         need(biggest-biggest == 0, "exact subtraction")
         need(biggest == (biggest//3)*3 + (biggest%3), "Euclidean quotient remainder")
 
+    transport = policy.get("numeric_composition_transport", {})
+    need("Core-only" in transport.get("status", ""), "transport is Core-only")
+    need(transport.get("confirmed_domains") == [24,48,96,192,384], "numeric frame tested domains")
+    need(transport.get("old_natural_frame_stable") is True, "legacy natural frame stability")
+    need(transport.get("legacy_unqualified_number_not_implicitly_admitted") is True, "unqualified numeric no admission")
+    need("deferred" in transport.get("physical_t5_program_numeric_composites", ""), "T5 physical composition boundary")
+    need("deferred" in transport.get("ast_fasl_wire_expression_composites", ""), "FASL/AST numeric composition boundary")
+    need("PackedBitstream" in transport.get("physical_bytes", ""), "existing packed byte transport")
     addition = policy.get("addition_widening", {})
     need(addition.get("status") == "owner-ratified", "addition promotion status")
     need(addition.get("required_successor") == "D(2n)", "addition successor")
@@ -136,6 +144,8 @@ def selftest(policy, ratification, lang):
         ({"natural_arithmetic": dict(policy["natural_arithmetic"], signed_and_rational_runtime="disabled")}, "signed/rational Core Value must execute"),
         ({"numeric_composition_runtime": dict(policy["numeric_composition_runtime"], physical_composite_codec="complete")}, "physical composite codec remains deferred"),
         ({"numeric_composition_runtime": dict(policy["numeric_composition_runtime"], float_rounding=True)}, "exact rational no floats"),
+        ({"numeric_composition_transport": dict(policy["numeric_composition_transport"], physical_t5_program_numeric_composites="complete")}, "T5 physical composition boundary"),
+        ({"numeric_composition_transport": dict(policy["numeric_composition_transport"], old_natural_frame_stable=False)}, "legacy natural frame stability"),
         ({"numeric_composition_runtime": dict(policy["numeric_composition_runtime"], status="research")}, "composite Core runtime status"),
         ({"extended_number_laws": dict(policy["extended_number_laws"], callability_and_signed_rational_arithmetic="deferred")}, "signed/rational Core runtime must execute"),
     ]
