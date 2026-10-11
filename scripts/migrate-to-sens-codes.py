@@ -652,24 +652,36 @@ def binary_rewrite(
     i = 0
     pending_quote = False
     top_has_item = False
+    # Only names introduced by an admitted DEFINE or D4 LAMBDA parameter
+    # become contextual D2-framed D7 identifiers. Never guess that an
+    # arbitrary quoted/data D7 list is a source symbol or String.
+    global_bindings: set[str] = set()
+
+    def is_bound(name: str) -> bool:
+        return name in global_bindings or any(
+            name in entry["bindings"] for entry in frames
+        )
 
     def current_quoted():
         if pending_quote:
             return True
         return bool(frames and (frames[-1]["quoted"] or frames[-1]["quote_children"]))
 
-    def emit_text7_atom(token: str):
-        # A Lisp atom is ONE D2 term, not a naked run of D7 glyph cells.
-        # Text7 characters do not establish an owner-ratified token-length or
-        # binder identity law. The legacy converter used to silently flatten
-        # machine-block/forms into consecutive 7-bit words and falsely call
-        # the packed T5 "migrated", although real Rust D2 rejects it.
+    def emit_text7_atom(token: str, *, role: str):
+        # Rust canonical_reader::text7_binding_key now owns this exact
+        # D2/W7 form in binder, variable-reference and executable call-head
+        # contexts. No global D7->symbol reinterpretation is permitted.
+        if role not in {"binder", "reference", "call-head"}:
+            raise BinaryMigrationError(f"UNADMITTED_TEXT7_ROLE {role}: {token!r}")
         cells = encode_text7_spelling(token, text7_candidates)
-        raise BinaryMigrationError(
-            f"UNFRAMED_TEXT7_ATOM {token!r}: {len(cells)} D7 cells have no "
-            "ratified D2 Text7 atom/binder frame; current executable oracle "
-            "and positional binding law are required"
-        )
+        if not cells:
+            raise BinaryMigrationError(f"EMPTY_TEXT7_BINDING {token!r}")
+        out.append(D2_OPEN)
+        for n, word in enumerate(cells):
+            if n:
+                out.append(D2_SEPARATOR)
+            out.append(word)
+        out.append(D2_CLOSE)
 
     def begin_item():
         nonlocal top_has_item
@@ -711,6 +723,15 @@ def binary_rewrite(
             parent_data_slot = bool(parent and parent["data_slots"] > 0)
             if parent is not None and parent["head"]:
                 parent["head"] = False
+            # A lambda's parameter *list* is structural D2 data, but
+            # individual names are bound via exact D2/W7 contextual keys.
+            # The parameter frame records its owner (the active LAMBDA), so
+            # its names remain visible in the lambda body after it closes.
+            parameter_owner = (
+                parent if parent is not None
+                and parent.get("resolved_head") == "LAMBDA"
+                and parent["data_slots"] > 0 else None
+            )
             frames.append({
                 "quoted": parent_quoted or pending_quote or parent_data_slot,
                 "head": True,
@@ -718,6 +739,9 @@ def binary_rewrite(
                 "items": 0,
                 "data_slots": 0,
                 "parent_data_slot": parent_data_slot,
+                "parameter_owner": parameter_owner,
+                "resolved_head": None,
+                "bindings": set(),
             })
             out.append(D2_OPEN)
             i += 1
@@ -750,7 +774,10 @@ def binary_rewrite(
             else:
                 raise BinaryMigrationError("unterminated string")
             token = source[start:i]
-            emit_text7_atom(token)
+            raise BinaryMigrationError(
+                f"UNADMITTED_STRING_VALUE {token!r}: D7 binding words are not "
+                "an executable String Value or a source-string codec"
+            )
             if frames and frames[-1]["head"]:
                 frames[-1]["head"] = False
             elif frames and frames[-1]["data_slots"] > 0:
@@ -761,20 +788,20 @@ def binary_rewrite(
         # Reader abbreviations stay spelling, but are now D7 cells.
         if source.startswith("#'", i):
             begin_item()
-            emit_text7_atom("#'")
+            raise BinaryMigrationError("UNADMITTED_READER_QUOTE: #' is not a D2/D7 binder")
             i += 2
             pending_quote = True
             continue
         if ch in ("'", "`"):
             begin_item()
-            emit_text7_atom(ch)
+            raise BinaryMigrationError("UNADMITTED_READER_QUOTE: bare quote/backquote needs a proven D3 QUOTE rewrite")
             i += 1
             pending_quote = True
             continue
         if ch == ",":
             begin_item()
             token = ",@" if i + 1 < len(source) and source[i + 1] == "@" else ","
-            emit_text7_atom(token)
+            raise BinaryMigrationError("UNADMITTED_READER_QUOTE: splice needs canonical executable semantics")
             i += len(token)
             pending_quote = True
             continue
@@ -814,32 +841,33 @@ def binary_rewrite(
                     "history-aware SourceResolver is required for binary migration"
                 )
             resolution = resolver.resolve_head(token)
-            if not resolution.resolved:
+            if resolution.resolved:
+                identity = resolution.current
+                assert identity is not None
+                if identity.label == "EMPTY":
+                    raise BinaryMigrationError(
+                        "structural EMPTY/000 cannot be used as a callable head"
+                    )
+                out.append(identity.bits)
+                resolved_label = identity.label
+                line, col = line_col(source, start)
+                hits.append(Hit(
+                    line, col, identity.label, identity.bits, identity.domain,
+                ))
+            elif not resolution.ambiguous and is_bound(token):
+                # Existing Rust Core dispatch checks the D2/W7 key in the
+                # environment in executable call-head position.
+                emit_text7_atom(token, role="call-head")
+            else:
                 detail = (
                     ", ".join(resolution.ambiguous)
                     if resolution.ambiguous
-                    else "no proven current exact-domain identity"
+                    else "no proven current exact-domain identity or bound D2/D7 name"
                 )
                 raise BinaryMigrationError(
                     f"unresolved executable head {token!r}: "
                     f"{resolution.kind}; {detail}"
                 )
-            identity = resolution.current
-            assert identity is not None
-            if identity.label == "EMPTY":
-                raise BinaryMigrationError(
-                    "structural EMPTY/000 cannot be used as a callable head"
-                )
-            out.append(identity.bits)
-            resolved_label = identity.label
-            line, col = line_col(source, start)
-            hits.append(Hit(
-                line,
-                col,
-                identity.label,
-                identity.bits,
-                identity.domain,
-            ))
         else:
             # Explicit legacy SID values are semantic identities even outside a
             # call head; migrate them by named historical evidence rather than
@@ -872,10 +900,30 @@ def binary_rewrite(
                     "numeric lowering is not yet supplied by this migration"
                 )
             else:
-                emit_text7_atom(token)
+                defining = bool(
+                    frame and is_data_slot
+                    and frame.get("resolved_head") == "DEFINE"
+                )
+                parameter_owner = frame.get("parameter_owner") if frame else None
+                if defining:
+                    emit_text7_atom(token, role="binder")
+                    global_bindings.add(token)
+                elif parameter_owner is not None:
+                    emit_text7_atom(token, role="binder")
+                    parameter_owner["bindings"].add(token)
+                elif not quoted and is_bound(token):
+                    emit_text7_atom(token, role="reference")
+                else:
+                    raise BinaryMigrationError(
+                        f"UNADMITTED_TEXT7_CONTEXT {token!r}: source atom is "
+                        "neither an admitted D4 DEFINE/LAMBDA binder nor a "
+                        "previously bound executable reference; quoted data "
+                        "and String values require distinct exact runtime law"
+                    )
 
         if frame and frame["head"]:
             frame["head"] = False
+            frame["resolved_head"] = resolved_label
             if resolved_label == "QUOTE":
                 frame["quote_children"] = True
             elif resolved_label in {"LAMBDA", "DEFINE"}:
