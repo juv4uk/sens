@@ -7,11 +7,11 @@
 ; Результат фіксує видимість старого кореня, явний not-found, збережений nil,
 ; дедуплікацію вмісту та логічні ревізії як спостереження.
 
-(001000 ((empty (fs-empty)))
-  (001000 ((first-write (fs-write empty "notes/today" (001 (hello world)))))
-    (001000 ((old (100 first-write))
+(нехай-похідне ((empty (fs-empty)))
+  (нехай-похідне ((first-write (fs-write empty "notes/today" (001 (hello world)))))
+    (нехай-похідне ((old (100 first-write))
           (second-write (fs-write (100 first-write) "notes/empty" (001 ()))))
-      (001000 ((new (100 second-write)))
+      (нехай-похідне ((new (100 second-write)))
         (1110
           (fs-read old "notes/today")
           (fs-read old "notes/empty")
