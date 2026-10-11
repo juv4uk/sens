@@ -332,6 +332,22 @@
            ((010 clauses)  (1110 (001 rejected) (1110 (001 reason) (001 invalid-batch)) (1110 (001 input) clauses)))
            ((010 ()) (make-knowledge-package module-name clauses))))))))
 
+; The knowledge package version is structured data (0 1), not an
+; atom. Compare recursively with exact D1 results, never W8 EQUAL on pairs.
+(0011 внутрішня-рівність-версій
+  (0010 (left right)
+    (110
+      ((0101 left) (0101 right))
+      ((0101 right) (0101 (001 (0))))
+      ((010 left)
+       (110
+         ((010 right) (101 left right))
+         ((010 ()) (0101 (001 (0))))))
+      ((010 right) (0101 (001 (0))))
+      ((внутрішня-рівність-версій (100 left) (100 right))
+       (внутрішня-рівність-версій (011 left) (011 right)))
+      ((010 ()) (0101 (001 (0)))))))
+
 (0011 import-knowledge-package-world
   (0010 (world package)
     (110
@@ -352,7 +368,7 @@
              world))
       ((101 (knowledge-package-field (001 format) package) (001 my-lisp-knowledge))
        (110
-         ((11110111 (knowledge-package-field (001 version) package)
+         ((внутрішня-рівність-версій (knowledge-package-field (001 version) package)
                   *knowledge-package-version*)
           (advise-all-world world
                             (knowledge-package-field (001 module) package)
