@@ -8,73 +8,73 @@
 ;   cargo run -p sens-cli -- scripts/generate-rust-profile-mechanism-routes.lisp
 ;   cargo run -p sens-cli -- scripts/generate-rust-profile-mechanism-routes.lisp --check
 
-(00001001 source-path "lib/function-table-mechanisms.lisp")
-(00001001 output-path "crates/sens/src/eval/profile_mechanisms_generated.rs")
+(0011 source-path "lib/function-table-mechanisms.lisp")
+(0011 output-path "crates/sens/src/eval/profile_mechanisms_generated.rs")
 
-(00001001 str+
-  (00001000 args
-    (00111001 (00001000 (acc s) (00111010 acc s)) "" args)))
+(0011 str+
+  (0010 args
+    (101110 (0010 (acc s) (110011110 acc s)) "" args)))
 
-(00001001 metadata
-  (00000101 (01001011 (10100110 source-path))))
+(0011 metadata
+  (100 (110101001 (110110111 source-path))))
 
-(00001001 find-section
-  (00001000 (name sections)
-    (00000111
-      ((00000010 sections) () (00000001 ()))
-      ((00000010 sections) (0)
-       (00000111
-         ((00000011 (00000101 (00000101 sections)) name) (1)
-          (00000101 sections))
-         ((00000011 (00000101 (00000101 sections)) name) (0)
-          (find-section name (00000110 sections))))))))
+(0011 find-section
+  (0010 (name sections)
+    (110
+      ((010 sections) () (001 ()))
+      ((010 sections) (0)
+       (110
+         ((101 (100 (100 sections)) name) (1)
+          (100 sections))
+         ((101 (100 (100 sections)) name) (0)
+          (find-section name (011 sections))))))))
 
-(00001001 profile-rows
-  (00000110 (find-section (00000001 profile-routes) metadata)))
+(0011 profile-rows
+  (011 (find-section (001 profile-routes) metadata)))
 
-(00001001 rust-profile
-  (00001000 (profile)
-    (00000111
-      ((00000011 profile (00000001 core3))
+(0011 rust-profile
+  (0010 (profile)
+    (110
+      ((101 profile (001 core3))
        (1)
        "CoreProfile::Core3")
-      (t (00000101 (00000001 ()))))))
+      (t (100 (001 ()))))))
 
-(00001001 rust-route-kind
-  (00001000 (mechanism)
-    (00000111
-      ((00000011 mechanism (00000001 registered-host-mechanism))
+(0011 rust-route-kind
+  (0010 (mechanism)
+    (110
+      ((101 mechanism (001 registered-host-mechanism))
        (1)
        "ProfileMechanismRouteKind::RegisteredHostMechanism")
-      (t (00000101 (00000001 ()))))))
+      (t (100 (001 ()))))))
 
-(00001001 render-row
-  (00001000 (row)
-    (10011101 ((profile (rust-profile (00000101 row)))
-           (sid (00101111 row))
-           (kind (rust-route-kind (00110000 row))))
-      (00000111
-        ((00000010 profile) () "")
-        ((00000010 kind) () "")
+(0011 render-row
+  (0010 (row)
+    (001001 ((profile (rust-profile (100 row)))
+           (sid (1001 row))
+           (kind (rust-route-kind (10011 row))))
+      (110
+        ((010 profile) () "")
+        ((010 kind) () "")
         (t
          (str+
            "    ProfileMechanismRoute { profile: "
            profile
            ", sens: crate::sens!("
-           (01001100 sid)
+           (11110100 sid)
            "), kind: "
            kind
            " },\n"))))))
 
-(00001001 render-rows
-  (00001000 (rows)
-    (00000111
-      ((00000010 rows) () "")
-      ((00000010 rows) (0)
-       (str+ (render-row (00000101 rows))
-             (render-rows (00000110 rows)))))))
+(0011 render-rows
+  (0010 (rows)
+    (110
+      ((010 rows) () "")
+      ((010 rows) (0)
+       (str+ (render-row (100 rows))
+             (render-rows (011 rows)))))))
 
-(00001001 header
+(0011 header
   (str+
     "// GENERATED — DO NOT EDIT BY HAND.\n"
     "// Authority: lib/function-table-mechanisms.lisp (profile-routes)\n"
@@ -92,7 +92,7 @@
     "}\n\n"
     "const PROFILE_MECHANISM_ROUTES: &[ProfileMechanismRoute] = &[\n"))
 
-(00001001 footer
+(0011 footer
   (str+
     "];\n\n"
     "pub(crate) fn profile_mechanism_route(\n"
@@ -105,32 +105,32 @@
     "        .map(|row| row.kind)\n"
     "}\n"))
 
-(00001001 generated
+(0011 generated
   (str+ header (render-rows profile-rows) footer))
 
-(00000111
-  ((00000010 *argv*)
+(110
+  ((010 *argv*)
    ()
-   (00101111
-     (00100111
-       (10100111 output-path generated)
-       (01001000 "Rust profile mechanism projection written"))))
-  ((00100010 (00000101 *argv*) "--check")
+   (1001
+     (1110
+       (110111100 output-path generated)
+       (11011011 "Rust profile mechanism projection written"))))
+  ((11110111 (100 *argv*) "--check")
    (1)
-   (10011100 ((current (10100110 output-path)))
-     (00000111
-       ((00100010 current generated)
+   (001000 ((current (110110111 output-path)))
+     (110
+       ((11110111 current generated)
         (1)
-        (01001000 "Rust profile mechanism projection is current"))
-       ((00100010 current generated)
+        (11011011 "Rust profile mechanism projection is current"))
+       ((11110111 current generated)
         (0)
-        (00101111
-          (00100111
-            (01001000 "Rust profile mechanism projection is stale")
-            (00000101 (00000001 ()))))))))
-  ((00000001 write-projection)
+        (1001
+          (1110
+            (11011011 "Rust profile mechanism projection is stale")
+            (100 (001 ()))))))))
+  ((001 write-projection)
    write-projection
-   (00101111
-     (00100111
-       (10100111 output-path generated)
-       (01001000 "Rust profile mechanism projection written")))))
+   (1001
+     (1110
+       (110111100 output-path generated)
+       (11011011 "Rust profile mechanism projection written")))))
