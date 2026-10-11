@@ -3,25 +3,25 @@
   "authority": "RESEARCH-HOLD-F1-F4-NO-RATIFICATION",
   "complete_historical_branches_claimed": false,
   "current_inventory": {
-    "git_blob": "f3d3aefd19e163a085ba6ce4f8e2ca2bef02028f",
-    "path": "knowledge/d10-v8-semantic-inventory.json",
+    "git_blob": "328d4babc0bef534eedaefe8b541373c326cf5da",
+    "path": "knowledge/d10-v9-semantic-inventory.json",
     "placed": 719,
     "ratified": 0,
-    "selected": 725,
-    "unplaced": 6
+    "selected": 759,
+    "unplaced": 40
   },
   "files_sha256": {
     "accepted-queue.tsv": "26e71d70821778bfe7e871c470ac0d54b36eb9465685137a4fe4fe84739d44b8",
     "escalated.tsv": "26e71d70821778bfe7e871c470ac0d54b36eb9465685137a4fe4fe84739d44b8",
-    "rejected.tsv": "d4409686d398c81f19b5191ebaa290a69eff72514a2536ad89fbc63445ae3751"
+    "rejected.tsv": "4850b21fc4bd7eba6d1fa72ae9c1d8532fc67f9555f0ff1dd6a0d56b8aca086c"
   },
   "historical_catalog_reconciliation": {
-    "canonical_overlay_ids_added": 0,
-    "colliding_spelling_groups_not_deduped": 276,
-    "current_canonical_selected": 725,
-    "current_inventory_git_blob": "f3d3aefd19e163a085ba6ce4f8e2ca2bef02028f",
-    "full_union_candidate_ids": 1775,
-    "full_union_ids": 1775,
+    "canonical_overlay_ids_added": 34,
+    "colliding_spelling_groups_not_deduped": 287,
+    "current_canonical_selected": 759,
+    "current_inventory_git_blob": "328d4babc0bef534eedaefe8b541373c326cf5da",
+    "full_union_candidate_ids": 1809,
+    "full_union_ids": 1809,
     "full_union_names": 1495,
     "historical_commit": "17ab25d65346a6a1bfc71f0ed6d64ee75fc6f22f",
     "historical_git_blob": "4afd4c6292db8c93b001cae3162a85bc4307cf41",
@@ -42,23 +42,23 @@
     "source_union_candidate_ids": 1775
   },
   "input_index": "knowledge/d10-filter/all-candidates.tsv",
-  "input_index_sha256": "5ce712bf844a09d6ed045c97cb8825397e4aa535206381bf0a4247877e92e64a",
+  "input_index_sha256": "9b153953d1129715ec29c793c6624a7f65e50e8e90d5eeaf0c84fc29d5990061",
   "mechanical_partition": {
     "accepted": 0,
     "escalated": 0,
-    "rejected": 1775
+    "rejected": 1809
   },
   "name_index": {
-    "canonical_selected": 725,
+    "canonical_selected": 759,
     "executed_witnesses_supplied": 0,
-    "filter_input_rows": 1775,
-    "index_rows": 1775,
-    "name_collisions_not_deduped": 280,
+    "filter_input_rows": 1809,
+    "index_rows": 1809,
+    "name_collisions_not_deduped": 314,
     "new_selected_since_index": 0,
     "semantic_dedup_certificates_supplied": 0,
-    "source_file_pin_verified": 1775
+    "source_file_pin_verified": 1809
   },
   "physical_t5_authorized": false,
   "schema": "d10-unified-filter-run/v1",
-  "source_commit": "3e8de51c62478ba10cd0e45f5590b17dc91430c3"
+  "source_commit": "509b7b1694735849b9c7cb6dd72a89739e68c76f"
 }
