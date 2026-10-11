@@ -1,0 +1,38 @@
+{
+  "schema": "sens-historical-branch-archive/v1",
+  "archived_at": "2026-10-11",
+  "source": {
+    "repo": "juv4uk/sens",
+    "pr": 256,
+    "branch": "feat/216-activate-exact-q-current",
+    "head_sha": "68732bd1f4b61a718b6b5bedf05b023ff87437ac",
+    "base_sha": "42e3945c5e8f27902ade6fedf52f54786c56f914",
+    "title": "test(#216): activate exact-Q runtime semantics after explicit control"
+  },
+  "files": [
+    {
+      "path": "contracts/exact-q-binary-contract.lisp",
+      "sha": "f42fedbb38eab622024b0de24232472820a1aee2"
+    },
+    {
+      "path": "crates/my-lisp/src/eval/arithmetic.rs",
+      "sha": "401ce7d79238fb2bf22246c5093a1b648e189381"
+    },
+    {
+      "path": "crates/my-lisp/tests/exact_q_binary_contract.rs",
+      "sha": "(see PR head tree)"
+    },
+    {
+      "path": "tests/fixtures/exact-q-binary-v1.lisp",
+      "sha": "1372a70ab5c1b88cd5fde43bc9113238850a033e"
+    }
+  ],
+  "current_main": {
+    "contract_blob": "8adcc286807286afaee57e5875677a23bf2b75ac",
+    "fixture_before_additive_replay": "6189e79606c8b0c925edfb75f36300e2d1982498",
+    "test_blob": "1eba713b1e12de9eeebeb9c52d90a545c647eea4",
+    "main_commit_preserving_two_valid_rows": "309813e3ead48b616dd41ba776deb2c68fbd38e6"
+  },
+  "disposition": "ARCHIVE-ONLY for obsolete runtime implementation; two valid exact-Q witnesses replayed into current fixture with current schema",
+  "patch_path": "research/domain-archive/20261011/pr0256/exact-q-branch-review.patch"
+}
