@@ -1,0 +1,11 @@
+# Exact compare pin main SHA: 139c4f77e0cf52f7a318233b33894744d6092c31
+# Full branch heads are added as parents to preserve history; working tree remains main-authored, no source-tree activation.
+branch	source_sha	compare_status	ahead_by	behind_by	changed_paths	classification
+agent/l1-l7-ratified-normalizer-20261009	432391fcc75588089528b9ddcf0ac49cbdf32726	diverged	4	1854	4	HISTORY_ATTACHED_CONTENT_REVIEW_REQUIRED
+agent/mccarthy-domain-ladder-no-legacy-parse-20261009	50a6459d0c809051bd008b41f7e39c3659336dc0	diverged	1	1806	1	HISTORY_ATTACHED_CONTENT_REVIEW_REQUIRED
+agent/migrate-d3-primitives-physical-t5-20261010	f37d3b799f7a6eb2c9a8ae3fab1c1f67360909c0	diverged	8	1324	22	HISTORY_ATTACHED_CONTENT_REVIEW_REQUIRED
+agent/ratchet-domain-and-machine-evidence	667da769eb4a49c23588bfdf40f3aa1cf339b6bf	diverged	7	5921	6	HISTORY_ATTACHED_CONTENT_REVIEW_REQUIRED
+agent/remove-old-cond-rust-checks-20261009	f4ecad5771bc8bd9dc2c8fc19c94b6b0e82e5749	behind	0	1851	0	ALREADY_IN_MAIN_ANCESTRY
+agent/replay-public-api-current-main-1166	e16c7a48526ce6e522e0abc5964b6bd2a4b589d6	behind	0	7621	0	ALREADY_IN_MAIN_ANCESTRY
+agent/retire-function8-rust-legacy-20261009	b3e0a84ef9efb8f70ec8e07b273d35b83aec39c4	diverged	2	1841	2	HISTORY_ATTACHED_CONTENT_REVIEW_REQUIRED
+agent/retire-rust-eq-cond-oracles-20261009	5dd9b2abcc3904ed45442f2d48a836c8644cd712	behind	0	1745	0	ALREADY_IN_MAIN_ANCESTRY
