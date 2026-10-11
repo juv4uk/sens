@@ -1,0 +1,28 @@
+name: D10 existing ledger 23 source admission
+on:
+  pull_request:
+    paths:
+      - 'knowledge/d10-existing-ledger-semantic-tranche23-20261011.json'
+      - 'knowledge/d10-v1-semantic-inventory.json'
+      - 'knowledge/d10-proposal-ledger.tsv'
+      - 'knowledge/d10-selection-transition-history.json'
+      - 'scripts/check_d10_existing_ledger_tranche23.py'
+      - '.github/workflows/d10-ledger-tranche23.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  validate-research-source-only:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: Pin 18 donor Git blobs, 23 old laws and 9 hostile mutants
+        run: |
+          set -euo pipefail
+          python3 scripts/check_d10_existing_ledger_tranche23.py --self-test
+          python3 -O scripts/check_d10_existing_ledger_tranche23.py --self-test
+      - name: Verify canonical append-only history and proposal ledger
+        run: |
+          set -euo pipefail
+          python3 scripts/check_d10_selection_transition_history.py --self-test
+          python3 scripts/check-d10-proposal-ledger.py --self-test
