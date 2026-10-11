@@ -125,15 +125,15 @@
          ((00000010 ()) (00100111 dimension))))
       ((00000011 (dimension-base dimension)
            (dimension-base (00000101 dimensions)))
-       (10011100 ((sum
-               (00001100 (dimension-exponent dimension)
-                  (dimension-exponent (00000101 dimensions)))))
+       ((00001000 (sum)
          (00000111
            ((00011100 sum 0)  (00000110 dimensions))
            ((00000010 ())
             (00000100
               (make-dimension (dimension-base dimension) sum)
-              (00000110 dimensions))))))
+              (00000110 dimensions)))))
+        (00001100 (dimension-exponent dimension)
+                   (dimension-exponent (00000101 dimensions)))))
       ((00000010 ())
        (00000100
          (00000101 dimensions)
