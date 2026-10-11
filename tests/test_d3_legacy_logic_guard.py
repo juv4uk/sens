@@ -48,6 +48,12 @@ class LegacyD3GuardTests(unittest.TestCase):
         self.assertEqual(self.rules("(010 0 1) (101 1)"),
                          ["D3_WRONG_ARITY", "D3_WRONG_ARITY"])
 
+    def test_apostrophe_inside_ukrainian_identifier_is_not_a_quote(self):
+        source = "(101 (100 (100 секції)) ім'я)"
+        self.assertEqual(self.rules(source), [])
+        # A quote at token start still marks the following form as data.
+        self.assertEqual(self.rules("'(101 x y z)"), [])
+
     def test_comments_strings_and_quoted_forms_not_execution(self):
         source = """; (00000010 ())
           "(00000011 x y)"
