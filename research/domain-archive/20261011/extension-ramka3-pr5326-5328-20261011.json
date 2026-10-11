@@ -1,0 +1,80 @@
+{
+  "schema": "sens.domain-research-archive-extension/v1",
+  "date": "2026-10-11",
+  "source_prs": [
+    5326,
+    5327,
+    5328
+  ],
+  "status": "HISTORICAL-RESEARCH-ONLY-NONNORMATIVE",
+  "source_pr_states": {
+    "5326": "closed-without-merge",
+    "5327": "open-draft",
+    "5328": "open-draft"
+  },
+  "source_heads": {
+    "5326": "918d72afd1bc01dbc4c1eaf0b0745bfddf7d2b72",
+    "5327": "64075ee443592d8fab1ad87a4362c09d53cacc87",
+    "5328": "1052dc5ab820f49d603da65b174fe6011b715e4c"
+  },
+  "file_count": 8,
+  "records": [
+    {
+      "pr": 5326,
+      "source": "https://github.com/juv4uk/sens/pull/5326",
+      "original_path": "дослідження/рамка3/СВІДЧЕННЯ-12.md",
+      "archived_path": "research/domain-archive/20261011/pr5326/дослідження/рамка3/СВІДЧЕННЯ-12.md",
+      "exact_git_blob": "460762655e9a89ae29bf9e417fddb3b0dd393477"
+    },
+    {
+      "pr": 5326,
+      "source": "https://github.com/juv4uk/sens/pull/5326",
+      "original_path": "дослідження/рамка3/перевірка_носія.py",
+      "archived_path": "research/domain-archive/20261011/pr5326/дослідження/рамка3/перевірка_носія.py.source.txt",
+      "exact_git_blob": "27b342d6d2a337be4208baaf5b7df6da19b36030"
+    },
+    {
+      "pr": 5327,
+      "source": "https://github.com/juv4uk/sens/pull/5327",
+      "original_path": "дослідження/рамка3/доказ_12.json",
+      "archived_path": "research/domain-archive/20261011/pr5327/дослідження/рамка3/доказ_12.json",
+      "exact_git_blob": "01111071915565cb44b9a24aebd75a267ac6dd7d"
+    },
+    {
+      "pr": 5327,
+      "source": "https://github.com/juv4uk/sens/pull/5327",
+      "original_path": "дослідження/рамка3/перевірка_носія.py",
+      "archived_path": "research/domain-archive/20261011/pr5327/дослідження/рамка3/перевірка_носія.py.source.txt",
+      "exact_git_blob": "b1bd796519cbf2a0a41d38c916ea9b067a83e7c2"
+    },
+    {
+      "pr": 5328,
+      "source": "https://github.com/juv4uk/sens/pull/5328",
+      "original_path": ".github/workflows/ramka3-doslid.yml",
+      "archived_path": "research/domain-archive/20261011/pr5328/.github/workflows/ramka3-doslid.yml.source.txt",
+      "exact_git_blob": "b932d8c9a28a766a9adcce862cdf082a1ec7d686"
+    },
+    {
+      "pr": 5328,
+      "source": "https://github.com/juv4uk/sens/pull/5328",
+      "original_path": "дослідження/рамка3/ОПИС.md",
+      "archived_path": "research/domain-archive/20261011/pr5328/дослідження/рамка3/ОПИС.md",
+      "exact_git_blob": "63178203b5e91fbf2b83936defda8cd05d46fdab"
+    },
+    {
+      "pr": 5328,
+      "source": "https://github.com/juv4uk/sens/pull/5328",
+      "original_path": "дослідження/рамка3/вичерпність_до12.py",
+      "archived_path": "research/domain-archive/20261011/pr5328/дослідження/рамка3/вичерпність_до12.py.source.txt",
+      "exact_git_blob": "fd31c8c27c23764bdf781d8b241b59f0655df442"
+    },
+    {
+      "pr": 5328,
+      "source": "https://github.com/juv4uk/sens/pull/5328",
+      "original_path": "дослідження/рамка3/свідчення_до12.json",
+      "archived_path": "research/domain-archive/20261011/pr5328/дослідження/рамка3/свідчення_до12.json",
+      "exact_git_blob": "5414a1134bfea1f47a69cdefe2461c15f9e72f96"
+    }
+  ],
+  "policy": "Exact Git blobs are preserved without activation. Scripts and workflow YAML use .source.txt; no canonical D1-D9, physical codec, active CI, D10 selection, ratification, or quantitative performance claim changes."
+}

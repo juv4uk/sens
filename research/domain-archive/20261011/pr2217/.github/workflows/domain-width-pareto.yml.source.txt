@@ -1,0 +1,30 @@
+name: Domain width Pareto
+
+on:
+  pull_request:
+    paths:
+      - "scripts/bench-2214-domain-width-pareto.py"
+      - "docs/research/2214-domain-width-pareto.md"
+      - "docs/research/2214-domain-width-pareto.uk.md"
+      - ".github/workflows/domain-width-pareto.yml"
+      - "knowledge/repo-tooling-inventory.lisp"
+  push:
+    branches:
+      - main
+    paths:
+      - "scripts/bench-2214-domain-width-pareto.py"
+      - "docs/research/2214-domain-width-pareto.md"
+      - "docs/research/2214-domain-width-pareto.uk.md"
+      - ".github/workflows/domain-width-pareto.yml"
+      - "knowledge/repo-tooling-inventory.lisp"
+
+jobs:
+  domain-width-pareto:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - name: Run exact-width Pareto witness
+        run: python3 scripts/bench-2214-domain-width-pareto.py
+      - name: Publish result
+        run: |
+          python3 scripts/bench-2214-domain-width-pareto.py >> "$GITHUB_STEP_SUMMARY"

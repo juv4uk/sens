@@ -20,5 +20,5 @@
   "status": "IMPLEMENTATION-PILOT-NO-PERFORMANCE-CLAIM",
   "generation": "Contract 11.8 exact domain, issue #5227",
   "axis": "measurement/instructions-walltime-statistical-verdict",
-  "reproduce": "python3 -m unittest discover -s benchmarks/measurement-triad -p 'test_*.py' && cargo test --manifest-path benchmarks/measurement-triad/Cargo.toml"
+  "reproduce": "repo_root=\"$(pwd)\" && python3 -m unittest discover -s benchmarks/measurement-triad -p 'test_*.py' && (cd /tmp && cargo test --manifest-path \"$repo_root/benchmarks/measurement-triad/Cargo.toml\")"
 }

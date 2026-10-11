@@ -1,0 +1,1674 @@
+{
+ "schema": "sens/benchmark-historical-pr-index/v1",
+ "generated": "2026-10-11",
+ "selection": "GitHub PR title bench/perf/speed/профіль; source-file audit required for other names",
+ "total_matches": 208,
+ "merged": 93,
+ "nonmerged": 115,
+ "entries": [
+  {
+   "n": 326,
+   "t": "#74: speed up Lisp-owned UTF-8 string materialization",
+   "c": "2026-09-17T17:51:27Z",
+   "u": "2026-09-17T18:27:45Z",
+   "m": null,
+   "s": "closed"
+  },
+  {
+   "n": 347,
+   "t": "perf(#333): profile Lisp-owned read-file stages",
+   "c": "2026-09-17T18:59:55Z",
+   "u": "2026-09-17T19:26:13Z",
+   "m": null,
+   "s": "closed"
+  },
+  {
+   "n": 379,
+   "t": "perf(#333): profile read-file stages on current main",
+   "c": "2026-09-17T19:48:23Z",
+   "u": "2026-09-17T20:00:09Z",
+   "m": null,
+   "s": "closed"
+  },
+  {
+   "n": 388,
+   "t": "perf(#362): fuse Lisp UTF-8 validation and decode",
+   "c": "2026-09-17T19:59:39Z",
+   "u": "2026-09-17T20:16:17Z",
+   "m": null,
+   "s": "closed"
+  },
+  {
+   "n": 398,
+   "t": "perf(#333): trust proven byte domain in read-file",
+   "c": "2026-09-17T20:17:47Z",
+   "u": "2026-09-17T20:44:43Z",
+   "m": null,
+   "s": "closed"
+  },
+  {
+   "n": 402,
+   "t": "perf(#362): skip redundant byte-domain proof in read-file",
+   "c": "2026-09-17T20:39:15Z",
+   "u": "2026-09-22T10:43:46Z",
+   "m": null,
+   "s": "closed"
+  },
+  {
+   "n": 404,
+   "t": "perf(#333): replay proven byte-domain read-file after authority cleanup",
+   "c": "2026-09-17T20:42:36Z",
+   "u": "2026-09-17T20:43:25Z",
+   "m": null,
+   "s": "closed"
+  },
+  {
+   "n": 405,
+   "t": "perf(#333): trust proven byte domain in read-file on current main",
+   "c": "2026-09-17T20:44:24Z",
+   "u": "2026-09-17T21:16:59Z",
+   "m": null,
+   "s": "closed"
+  },
+  {
+   "n": 412,
+   "t": "perf(#362): trust proven byte domain at read-file boundary",
+   "c": "2026-09-17T21:12:21Z",
+   "u": "2026-09-17T21:36:06Z",
+   "m": null,
+   "s": "closed"
+  },
+  {
+   "n": 565,
+   "t": "perf(#362): replay proven-byte read-file fast path on current main",
+   "c": "2026-09-18T01:31:29Z",
+   "u": "2026-09-18T02:17:33Z",
+   "m": null,
+   "s": "closed"
+  },
+  {
+   "n": 596,
+   "t": "perf(#362): replay proven-byte read-file fast path after semantic cleanup",
+   "c": "2026-09-18T02:17:19Z",
+   "u": "2026-09-18T17:55:18Z",
+   "m": null,
+   "s": "closed"
+  },
+  {
+   "n": 649,
+   "t": "perf(#596): replay proven-byte read-file fast path on current main",
+   "c": "2026-09-18T17:54:44Z",
+   "u": "2026-09-18T18:17:35Z",
+   "m": null,
+   "s": "closed"
+  },
+  {
+   "n": 657,
+   "t": "perf(#596): replay proven-byte read-file fast path after #648",
+   "c": "2026-09-18T18:17:28Z",
+   "u": "2026-09-29T20:30:44Z",
+   "m": null,
+   "s": "closed"
+  },
+  {
+   "n": 833,
+   "t": "perf(#812): replay balanced Unicode materialization on current main",
+   "c": "2026-09-19T22:01:45Z",
+   "u": "2026-09-19T22:13:11Z",
+   "m": null,
+   "s": "closed"
+  },
+  {
+   "n": 1125,
+   "t": "perf(#362): replay proven-byte read-file optimization on current main",
+   "c": "2026-09-22T10:43:13Z",
+   "u": "2026-09-24T12:57:58Z",
+   "m": null,
+   "s": "closed"
+  },
+  {
+   "n": 1437,
+   "t": "perf(arith): швидкий шлях точних раціональних чисел (без BigInt)",
+   "c": "2026-09-25T23:33:05Z",
+   "u": "2026-09-25T23:34:56Z",
+   "m": "2026-09-25T23:34:56Z",
+   "s": "closed"
+  },
+  {
+   "n": 1501,
+   "t": "perf: string-length/empty?/prefix?/contains? — примітиви за кодом СЕНС",
+   "c": "2026-09-26T17:07:00Z",
+   "u": "2026-09-26T17:07:21Z",
+   "m": "2026-09-26T17:07:21Z",
+   "s": "closed"
+  },
+  {
+   "n": 1530,
+   "t": "bench: кінець списку — канонічна клауза під логіку з 15 станів",
+   "c": "2026-09-26T22:49:29Z",
+   "u": "2026-09-26T22:49:38Z",
+   "m": "2026-09-26T22:49:37Z",
+   "s": "closed"
+  },
+  {
+   "n": 1538,
+   "t": "sens: таблиця функцій, профіль, аудит — SENS як голі 8 біт",
+   "c": "2026-09-27T09:21:40Z",
+   "u": "2026-09-27T09:21:50Z",
+   "m": "2026-09-27T09:21:50Z",
+   "s": "closed"
+  },
+  {
+   "n": 1543,
+   "t": "bench: три сторони (old-English, new-English, new-SENS) і зріз за шарами",
+   "c": "2026-09-27T10:16:45Z",
+   "u": "2026-09-27T11:03:21Z",
+   "m": "2026-09-27T11:03:21Z",
+   "s": "closed"
+  },
+  {
+   "n": 1545,
+   "t": "bench: англійський Lisp (текст) проти SENS (1 байт) — на одному коміті",
+   "c": "2026-09-27T11:17:30Z",
+   "u": "2026-09-27T11:26:26Z",
+   "m": "2026-09-27T11:26:26Z",
+   "s": "closed"
+  },
+  {
+   "n": 1550,
+   "t": "bench(#1546): SENS ↔ CPython на спільному корпусі",
+   "c": "2026-09-27T11:48:33Z",
+   "u": "2026-09-28T13:42:36Z",
+   "m": "2026-09-28T13:42:35Z",
+   "s": "closed"
+  },
+  {
+   "n": 1558,
+   "t": "perf(env): пошук імені й знищення оточення без виділення пам'яті (×1.85)",
+   "c": "2026-09-27T12:10:19Z",
+   "u": "2026-09-27T17:13:31Z",
+   "m": "2026-09-27T17:13:30Z",
+   "s": "closed"
+  },
+  {
+   "n": 1569,
+   "t": "bench: агентські повідомлення — SENS проти CPython у ніші агентів",
+   "c": "2026-09-27T19:46:24Z",
+   "u": "2026-09-27T21:00:08Z",
+   "m": "2026-09-27T21:00:08Z",
+   "s": "closed"
+  },
+  {
+   "n": 1571,
+   "t": "perf(eval): параметри замикання за номером слота — SENS +24…45%",
+   "c": "2026-09-27T20:56:53Z",
+   "u": "2026-09-27T21:58:45Z",
+   "m": "2026-09-27T21:58:44Z",
+   "s": "closed"
+  },
+  {
+   "n": 1591,
+   "t": "bench(#1586 #1587): названий load-контекст замірів + розмір у кожному рядку бенчмарку",
+   "c": "2026-09-28T13:00:17Z",
+   "u": "2026-09-28T13:24:05Z",
+   "m": "2026-09-28T13:24:04Z",
+   "s": "closed"
+  },
+  {
+   "n": 1666,
+   "t": "bench: pin binary-trees N=10 reference oracle",
+   "c": "2026-09-28T20:00:58Z",
+   "u": "2026-09-28T20:05:28Z",
+   "m": "2026-09-28T20:05:28Z",
+   "s": "closed"
+  },
+  {
+   "n": 1667,
+   "t": "bench(#1665 #1567): add post-M8 and numeric SENS evidence",
+   "c": "2026-09-28T20:04:15Z",
+   "u": "2026-09-28T20:18:53Z",
+   "m": "2026-09-28T20:18:50Z",
+   "s": "closed"
+  },
+  {
+   "n": 1669,
+   "t": "[DONOR][SUPERSEDED-MERGE-PATH] bench(#1547): Lua 5.4 adapter for old cross-language baseline",
+   "c": "2026-09-28T20:16:06Z",
+   "u": "2026-10-09T15:04:58Z",
+   "m": "2026-10-09T15:04:58Z",
+   "s": "closed"
+  },
+  {
+   "n": 1670,
+   "t": "[DONOR][SUPERSEDED-MERGE-PATH] bench(#1548): Racket CS adapter stacked on old Lua baseline",
+   "c": "2026-09-28T20:28:15Z",
+   "u": "2026-10-09T16:56:08Z",
+   "m": "2026-10-09T16:56:07Z",
+   "s": "closed"
+  },
+  {
+   "n": 1803,
+   "t": "fix(ci): cross-language-bench workflow file is invalid (with: on run step)",
+   "c": "2026-09-29T20:00:39Z",
+   "u": "2026-09-29T20:13:29Z",
+   "m": "2026-09-29T20:13:28Z",
+   "s": "closed"
+  },
+  {
+   "n": 1837,
+   "t": "bench: migrate workloads to Predicate1 two-part COND",
+   "c": "2026-09-29T20:50:29Z",
+   "u": "2026-09-30T19:39:11Z",
+   "m": null,
+   "s": "closed"
+  },
+  {
+   "n": 1847,
+   "t": "bench(#1845): partial message-lane measure + README lane link",
+   "c": "2026-09-30T06:43:33Z",
+   "u": "2026-09-30T06:43:38Z",
+   "m": "2026-09-30T06:43:38Z",
+   "s": "closed"
+  },
+  {
+   "n": 1862,
+   "t": "bench(#1845): full agent-messages remeasure on main 86e836be",
+   "c": "2026-09-30T16:08:00Z",
+   "u": "2026-09-30T16:08:05Z",
+   "m": "2026-09-30T16:08:05Z",
+   "s": "closed"
+  },
+  {
+   "n": 1865,
+   "t": "bench(#1845): P1 wire vs JSON as agent transport analysis",
+   "c": "2026-09-30T16:16:55Z",
+   "u": "2026-09-30T16:17:02Z",
+   "m": "2026-09-30T16:17:02Z",
+   "s": "closed"
+  },
+  {
+   "n": 1880,
+   "t": "bench(#1845): P2 research — agent-bus binary envelope",
+   "c": "2026-09-30T17:23:09Z",
+   "u": "2026-09-30T17:23:19Z",
+   "m": "2026-09-30T17:23:19Z",
+   "s": "closed"
+  },
+  {
+   "n": 1937,
+   "t": "bench: replay strict PredicateBit workloads on #1909",
+   "c": "2026-09-30T19:36:40Z",
+   "u": "2026-09-30T19:41:31Z",
+   "m": "2026-09-30T19:41:30Z",
+   "s": "closed"
+  },
+  {
+   "n": 1939,
+   "t": "bench(#1836): replay Predicate1 workloads on strict stack",
+   "c": "2026-09-30T19:38:59Z",
+   "u": "2026-09-30T19:42:58Z",
+   "m": "2026-09-30T19:42:58Z",
+   "s": "closed"
+  },
+  {
+   "n": 1951,
+   "t": "bench(#1665): post-M8 three-way — EN≈SENS execute, FASL load ×4.3",
+   "c": "2026-09-30T20:01:01Z",
+   "u": "2026-09-30T20:01:09Z",
+   "m": "2026-09-30T20:01:09Z",
+   "s": "closed"
+  },
+  {
+   "n": 1991,
+   "t": "bench(1988): measure semantic-tree execution routes",
+   "c": "2026-10-01T16:45:30Z",
+   "u": "2026-10-01T18:36:50Z",
+   "m": "2026-10-01T18:36:50Z",
+   "s": "closed"
+  },
+  {
+   "n": 1992,
+   "t": "bench(1988): root+suffix vs flat vs cached vs hybrid, Cachegrind I refs (selector family)",
+   "c": "2026-10-01T16:46:09Z",
+   "u": "2026-10-01T21:56:23Z",
+   "m": null,
+   "s": "closed"
+  },
+  {
+   "n": 1995,
+   "t": "bench(1989): first Cachegrind identity-carrier cost matrix",
+   "c": "2026-10-01T16:51:19Z",
+   "u": "2026-10-01T16:51:19Z",
+   "m": null,
+   "s": "open"
+  },
+  {
+   "n": 1998,
+   "t": "bench(1993): measure variable-width framing decode cost",
+   "c": "2026-10-01T16:59:04Z",
+   "u": "2026-10-09T15:06:09Z",
+   "m": "2026-10-09T15:06:09Z",
+   "s": "closed"
+  },
+  {
+   "n": 1999,
+   "t": "bench(#1973): Pareto join of domain benches + generator-economy ledger",
+   "c": "2026-10-01T17:03:49Z",
+   "u": "2026-10-01T17:03:55Z",
+   "m": "2026-10-01T17:03:55Z",
+   "s": "closed"
+  },
+  {
+   "n": 2005,
+   "t": "bench(2000): first no-width-ceiling Cachegrind smoke",
+   "c": "2026-10-01T17:16:44Z",
+   "u": "2026-10-09T16:42:01Z",
+   "m": null,
+   "s": "open"
+  },
+  {
+   "n": 2006,
+   "t": "bench(2002): semantic-invariance stress — refactors must not remint meaning",
+   "c": "2026-10-01T17:16:51Z",
+   "u": "2026-10-01T17:57:39Z",
+   "m": "2026-10-01T17:57:39Z",
+   "s": "closed"
+  },
+  {
+   "n": 2008,
+   "t": "bench(#1961): graph-theory metrics — SCC, Hamming≠prefix, compression",
+   "c": "2026-10-01T17:17:21Z",
+   "u": "2026-10-01T17:18:08Z",
+   "m": "2026-10-01T17:18:08Z",
+   "s": "closed"
+  },
+  {
+   "n": 2010,
+   "t": "bench(#2009): measure semantic-path locality and cache sensitivity",
+   "c": "2026-10-01T17:23:29Z",
+   "u": "2026-10-09T15:06:20Z",
+   "m": "2026-10-09T15:06:20Z",
+   "s": "closed"
+  },
+  {
+   "n": 2032,
+   "t": "bench(2001): generator economy — when does a local law earn a prefix child",
+   "c": "2026-10-01T17:43:58Z",
+   "u": "2026-10-01T17:57:48Z",
+   "m": "2026-10-01T17:57:48Z",
+   "s": "closed"
+  },
+  {
+   "n": 2035,
+   "t": "bench(#2019): pure-graph bīja3 support-pressure (independent of corpus)",
+   "c": "2026-10-01T17:45:21Z",
+   "u": "2026-10-01T17:45:38Z",
+   "m": "2026-10-01T17:45:38Z",
+   "s": "closed"
+  },
+  {
+   "n": 2040,
+   "t": "bench(2003): whole-program domains — do microbench wins survive composition",
+   "c": "2026-10-01T17:48:24Z",
+   "u": "2026-10-01T17:57:57Z",
+   "m": "2026-10-01T17:57:56Z",
+   "s": "closed"
+  },
+  {
+   "n": 2047,
+   "t": "bench(2045): Cachegrind join — merge pinned instruction counts onto lane rows",
+   "c": "2026-10-01T17:52:06Z",
+   "u": "2026-10-01T17:58:06Z",
+   "m": "2026-10-01T17:58:05Z",
+   "s": "closed"
+  },
+  {
+   "n": 2068,
+   "t": "bench(2027): compare flat, certificate, graph and hybrid self-description",
+   "c": "2026-10-01T18:02:18Z",
+   "u": "2026-10-01T18:57:13Z",
+   "m": "2026-10-01T18:57:13Z",
+   "s": "closed"
+  },
+  {
+   "n": 2119,
+   "t": "bench(#2115): foundation cost ladder with semantic-parity gate",
+   "c": "2026-10-01T18:33:46Z",
+   "u": "2026-10-01T18:41:18Z",
+   "m": null,
+   "s": "closed"
+  },
+  {
+   "n": 2121,
+   "t": "bench(#2111): measure foundation cost ladder",
+   "c": "2026-10-01T18:34:43Z",
+   "u": "2026-10-01T19:00:12Z",
+   "m": "2026-10-01T19:00:12Z",
+   "s": "closed"
+  },
+  {
+   "n": 2125,
+   "t": "research(#2019): H-NIL corpus scan — 0 callable NIL; foundation bench snapshot",
+   "c": "2026-10-01T18:36:02Z",
+   "u": "2026-10-01T18:36:59Z",
+   "m": "2026-10-01T18:36:59Z",
+   "s": "closed"
+  },
+  {
+   "n": 2126,
+   "t": "bench(#2113): measure compatibility reconstruction cost and information loss",
+   "c": "2026-10-01T18:36:04Z",
+   "u": "2026-10-01T18:57:40Z",
+   "m": "2026-10-01T18:57:40Z",
+   "s": "closed"
+  },
+  {
+   "n": 2127,
+   "t": "bench(#2122): Γ carrier capability and invalidation benchmark",
+   "c": "2026-10-01T18:39:40Z",
+   "u": "2026-10-09T15:06:34Z",
+   "m": "2026-10-09T15:06:34Z",
+   "s": "closed"
+  },
+  {
+   "n": 2131,
+   "t": "bench(#2123): compare consequence-kernel proof machinery",
+   "c": "2026-10-01T18:44:11Z",
+   "u": "2026-10-09T15:06:36Z",
+   "m": "2026-10-09T15:06:36Z",
+   "s": "closed"
+  },
+  {
+   "n": 2137,
+   "t": "bench(#1973): Pareto ingest H-NIL corpus + Layer-0 + packaging scoreboard",
+   "c": "2026-10-01T18:49:47Z",
+   "u": "2026-10-01T18:49:53Z",
+   "m": "2026-10-01T18:49:52Z",
+   "s": "closed"
+  },
+  {
+   "n": 2142,
+   "t": "bench(agent-messages): size-by-kind matrix (B1 slice)",
+   "c": "2026-10-01T18:52:53Z",
+   "u": "2026-10-01T18:52:58Z",
+   "m": "2026-10-01T18:52:58Z",
+   "s": "closed"
+  },
+  {
+   "n": 2143,
+   "t": "bench(#2138): independent semantic reconstruction without shared IDs",
+   "c": "2026-10-01T18:55:11Z",
+   "u": "2026-10-09T15:06:39Z",
+   "m": "2026-10-09T15:06:38Z",
+   "s": "closed"
+  },
+  {
+   "n": 2148,
+   "t": "bench(agent-messages): wall-clock throughput for CPython forms",
+   "c": "2026-10-01T19:22:45Z",
+   "u": "2026-10-01T19:22:49Z",
+   "m": "2026-10-01T19:22:49Z",
+   "s": "closed"
+  },
+  {
+   "n": 2192,
+   "t": "bench(2157): make ratified D1-D4 the active benchmark baseline",
+   "c": "2026-10-01T20:52:46Z",
+   "u": "2026-10-01T21:00:43Z",
+   "m": "2026-10-01T21:00:43Z",
+   "s": "closed"
+  },
+  {
+   "n": 2216,
+   "t": "bench(2209): compare u8 flat dispatch with ratified D3/D4 prefix",
+   "c": "2026-10-01T21:19:06Z",
+   "u": "2026-10-01T21:33:54Z",
+   "m": "2026-10-01T21:33:54Z",
+   "s": "closed"
+  },
+  {
+   "n": 2217,
+   "t": "bench(2214): compare D4 free slots with D5 transformer placement",
+   "c": "2026-10-01T21:22:35Z",
+   "u": "2026-10-10T18:14:50Z",
+   "m": null,
+   "s": "open"
+  },
+  {
+   "n": 2219,
+   "t": "bench(2209): u8 flat-slot vs D3/D4 prefix dispatch vs direct chains on the same selector AST",
+   "c": "2026-10-01T21:23:37Z",
+   "u": "2026-10-01T21:56:20Z",
+   "m": null,
+   "s": "closed"
+  },
+  {
+   "n": 2222,
+   "t": "ci(bench): add semantic-tree and self-description smoke lanes",
+   "c": "2026-10-01T21:30:20Z",
+   "u": "2026-10-01T22:07:26Z",
+   "m": null,
+   "s": "closed"
+  },
+  {
+   "n": 2229,
+   "t": "ci(bench): replay research benchmark smoke on current main",
+   "c": "2026-10-01T22:07:17Z",
+   "u": "2026-10-01T22:11:08Z",
+   "m": "2026-10-01T22:11:08Z",
+   "s": "closed"
+  },
+  {
+   "n": 2230,
+   "t": "bench(1546): add CPython .pyc load control and raw evidence",
+   "c": "2026-10-01T22:07:50Z",
+   "u": "2026-10-01T22:16:59Z",
+   "m": "2026-10-01T22:16:59Z",
+   "s": "closed"
+  },
+  {
+   "n": 2247,
+   "t": "bench(2190): measure dense packing CPU/density tradeoff",
+   "c": "2026-10-02T09:24:01Z",
+   "u": "2026-10-02T09:27:25Z",
+   "m": "2026-10-02T09:27:25Z",
+   "s": "closed"
+  },
+  {
+   "n": 2255,
+   "t": "bench(2190): measure dense byte packing cost on production API",
+   "c": "2026-10-02T09:28:24Z",
+   "u": "2026-10-02T09:32:33Z",
+   "m": null,
+   "s": "closed"
+  },
+  {
+   "n": 2262,
+   "t": "perf(2257): replace bit-by-bit packed read with two-byte window",
+   "c": "2026-10-02T09:34:49Z",
+   "u": "2026-10-09T16:16:57Z",
+   "m": "2026-10-09T16:16:56Z",
+   "s": "closed"
+  },
+  {
+   "n": 2264,
+   "t": "bench(2190): add random-access and 1M packing scale evidence",
+   "c": "2026-10-02T09:38:16Z",
+   "u": "2026-10-02T09:45:56Z",
+   "m": "2026-10-02T09:45:56Z",
+   "s": "closed"
+  },
+  {
+   "n": 2266,
+   "t": "bench(2265): tournament compact mixed-boundary indexes",
+   "c": "2026-10-02T09:51:34Z",
+   "u": "2026-10-02T14:06:36Z",
+   "m": "2026-10-02T14:06:36Z",
+   "s": "closed"
+  },
+  {
+   "n": 2272,
+   "t": "bench(2269): add two-bit D1-D4 width checkpoint index",
+   "c": "2026-10-02T14:10:18Z",
+   "u": "2026-10-02T14:27:52Z",
+   "m": "2026-10-02T14:27:52Z",
+   "s": "closed"
+  },
+  {
+   "n": 2305,
+   "t": "bench(2303): add O(1) two-level D1-D4 boundary descriptor",
+   "c": "2026-10-02T14:59:46Z",
+   "u": "2026-10-02T15:02:35Z",
+   "m": "2026-10-02T15:02:34Z",
+   "s": "closed"
+  },
+  {
+   "n": 2311,
+   "t": "bench(2303): add succinct boundary-bitvector select index",
+   "c": "2026-10-02T15:05:43Z",
+   "u": "2026-10-08T10:20:12Z",
+   "m": "2026-10-08T10:20:11Z",
+   "s": "closed"
+  },
+  {
+   "n": 2327,
+   "t": "bench(gf2): coordinate composition vs flat relation",
+   "c": "2026-10-02T15:25:28Z",
+   "u": "2026-10-10T18:14:50Z",
+   "m": null,
+   "s": "open"
+  },
+  {
+   "n": 2350,
+   "t": "bench(gf2): shortest generator certificates vs direct coordinates",
+   "c": "2026-10-02T15:47:23Z",
+   "u": "2026-10-10T18:14:50Z",
+   "m": null,
+   "s": "open"
+  },
+  {
+   "n": 2379,
+   "t": "bench(2370): account generated rows with certificate and fact-ledger costs",
+   "c": "2026-10-02T16:34:45Z",
+   "u": "2026-10-02T16:47:12Z",
+   "m": null,
+   "s": "closed"
+  },
+  {
+   "n": 2388,
+   "t": "bench(2370): account generated rows with certificate and fact-ledger costs",
+   "c": "2026-10-02T16:46:56Z",
+   "u": "2026-10-02T16:55:07Z",
+   "m": null,
+   "s": "closed"
+  },
+  {
+   "n": 2391,
+   "t": "bench(2370): account generated rows with semantic-fact intervals",
+   "c": "2026-10-02T16:54:57Z",
+   "u": "2026-10-02T17:19:38Z",
+   "m": null,
+   "s": "closed"
+  },
+  {
+   "n": 2412,
+   "t": "bench(2370): replay generation accounting on current main",
+   "c": "2026-10-02T17:19:26Z",
+   "u": "2026-10-10T18:14:50Z",
+   "m": null,
+   "s": "open"
+  },
+  {
+   "n": 2465,
+   "t": "bench(2463): measure autonomous Core-Math closure scaling",
+   "c": "2026-10-02T18:17:33Z",
+   "u": "2026-10-09T16:55:10Z",
+   "m": "2026-10-09T16:55:10Z",
+   "s": "closed"
+  },
+  {
+   "n": 3036,
+   "t": "bench(3001): establish D1-D8 exact-domain carrier baseline",
+   "c": "2026-10-04T07:30:50Z",
+   "u": "2026-10-04T07:44:01Z",
+   "m": "2026-10-04T07:44:01Z",
+   "s": "closed"
+  },
+  {
+   "n": 3074,
+   "t": "[SUPERSEDED] bench(3045): original FPGA exact-width evidence lane",
+   "c": "2026-10-04T08:39:30Z",
+   "u": "2026-10-04T10:08:15Z",
+   "m": null,
+   "s": "closed"
+  },
+  {
+   "n": 3098,
+   "t": "bench(3045): replay FPGA evidence lane on current main",
+   "c": "2026-10-04T09:18:20Z",
+   "u": "2026-10-04T09:54:01Z",
+   "m": "2026-10-04T09:54:01Z",
+   "s": "closed"
+  },
+  {
+   "n": 3116,
+   "t": "bench(3088): enforce paired current English-vs-D1-D8 evidence",
+   "c": "2026-10-04T10:41:11Z",
+   "u": "2026-10-04T11:25:19Z",
+   "m": "2026-10-04T11:25:19Z",
+   "s": "closed"
+  },
+  {
+   "n": 3120,
+   "t": "[DONOR][SUPERSEDED] bench(3113): English vs D1-D8 preflight",
+   "c": "2026-10-04T10:45:21Z",
+   "u": "2026-10-04T11:14:03Z",
+   "m": null,
+   "s": "closed"
+  },
+  {
+   "n": 3128,
+   "t": "bench(1413): add D1-D8-era CPython/Lua/Racket controls",
+   "c": "2026-10-04T10:48:54Z",
+   "u": "2026-10-05T00:04:55Z",
+   "m": null,
+   "s": "closed"
+  },
+  {
+   "n": 3132,
+   "t": "bench(3113): add fail-closed paired CPU phase harness",
+   "c": "2026-10-04T10:56:27Z",
+   "u": "2026-10-04T11:26:44Z",
+   "m": "2026-10-04T11:26:44Z",
+   "s": "closed"
+  },
+  {
+   "n": 3149,
+   "t": "bench(3137): add current D1-D8 transport accounting preflight",
+   "c": "2026-10-04T11:31:11Z",
+   "u": "2026-10-09T12:31:32Z",
+   "m": "2026-10-09T12:31:32Z",
+   "s": "closed"
+  },
+  {
+   "n": 3153,
+   "t": "bench(3138): add paired D3 peak-RSS preflight",
+   "c": "2026-10-04T11:39:20Z",
+   "u": "2026-10-09T10:12:42Z",
+   "m": "2026-10-09T10:11:34Z",
+   "s": "closed"
+  },
+  {
+   "n": 3185,
+   "t": "bench: direct Rust serde_json vs SENS wire decode",
+   "c": "2026-10-04T13:12:34Z",
+   "u": "2026-10-10T20:06:03Z",
+   "m": null,
+   "s": "closed"
+  },
+  {
+   "n": 3191,
+   "t": "bench: refresh current hot-path evidence",
+   "c": "2026-10-04T13:53:48Z",
+   "u": "2026-10-08T10:20:29Z",
+   "m": "2026-10-08T10:20:29Z",
+   "s": "closed"
+  },
+  {
+   "n": 3193,
+   "t": "perf: block-pack SENS-7 cells eight-at-a-time",
+   "c": "2026-10-04T14:29:06Z",
+   "u": "2026-10-04T14:43:13Z",
+   "m": null,
+   "s": "closed"
+  },
+  {
+   "n": 3416,
+   "t": "bench(1413): Contract 11.5 external controls — Python/Lua/Racket/SBCL/Rust",
+   "c": "2026-10-05T00:04:28Z",
+   "u": "2026-10-05T04:35:45Z",
+   "m": null,
+   "s": "closed"
+  },
+  {
+   "n": 3437,
+   "t": "bench(3417): prove current exact-domain SENS shared corpus",
+   "c": "2026-10-05T00:22:00Z",
+   "u": "2026-10-05T04:35:40Z",
+   "m": null,
+   "s": "closed"
+  },
+  {
+   "n": 3444,
+   "t": "bench(3417): same-machine SENS vs Python/Lua/Racket/SBCL/Rust",
+   "c": "2026-10-05T00:35:30Z",
+   "u": "2026-10-05T00:39:12Z",
+   "m": null,
+   "s": "closed"
+  },
+  {
+   "n": 3446,
+   "t": "bench(3417): same-machine current SENS vs Python/Lua/Racket/SBCL/Rust",
+   "c": "2026-10-05T00:38:57Z",
+   "u": "2026-10-05T04:35:35Z",
+   "m": null,
+   "s": "closed"
+  },
+  {
+   "n": 3477,
+   "t": "bench(3417): clean same-machine SENS vs external controls on current spine",
+   "c": "2026-10-05T04:35:13Z",
+   "u": "2026-10-05T04:56:14Z",
+   "m": null,
+   "s": "closed"
+  },
+  {
+   "n": 3493,
+   "t": "bench(3490): decompose exact-domain SENS startup/load/parse/lower/steady",
+   "c": "2026-10-05T04:42:09Z",
+   "u": "2026-10-05T05:32:53Z",
+   "m": null,
+   "s": "closed"
+  },
+  {
+   "n": 3511,
+   "t": "bench(3417): paired exact-domain SENS benchmark on clean source spine",
+   "c": "2026-10-05T04:55:56Z",
+   "u": "2026-10-05T05:32:24Z",
+   "m": null,
+   "s": "closed"
+  },
+  {
+   "n": 3512,
+   "t": "bench(3417): clean same-machine exact-domain SENS vs external controls",
+   "c": "2026-10-05T04:56:05Z",
+   "u": "2026-10-05T05:15:16Z",
+   "m": null,
+   "s": "closed"
+  },
+  {
+   "n": 3520,
+   "t": "bench(1988): current D6 generator vs flat16 control",
+   "c": "2026-10-05T05:04:55Z",
+   "u": "2026-10-05T05:15:26Z",
+   "m": null,
+   "s": "closed"
+  },
+  {
+   "n": 3521,
+   "t": "bench(3519): align D1-D8 carrier benchmark with Contract 11.5",
+   "c": "2026-10-05T05:05:48Z",
+   "u": "2026-10-05T05:22:25Z",
+   "m": "2026-10-05T05:22:03Z",
+   "s": "closed"
+  },
+  {
+   "n": 3525,
+   "t": "bench(3513): warm resident-Core program loading on clean benchmark spine",
+   "c": "2026-10-05T05:08:06Z",
+   "u": "2026-10-05T05:32:34Z",
+   "m": null,
+   "s": "closed"
+  },
+  {
+   "n": 3526,
+   "t": "bench(1973): current selector closure and law-economics curve",
+   "c": "2026-10-05T05:08:15Z",
+   "u": "2026-10-05T05:15:30Z",
+   "m": null,
+   "s": "closed"
+  },
+  {
+   "n": 3535,
+   "t": "bench(1988): clean current D6 generator vs flat16 control",
+   "c": "2026-10-05T05:13:04Z",
+   "u": "2026-10-05T05:33:07Z",
+   "m": null,
+   "s": "closed"
+  },
+  {
+   "n": 3538,
+   "t": "bench(1973): clean current selector closure economics",
+   "c": "2026-10-05T05:13:52Z",
+   "u": "2026-10-05T05:33:12Z",
+   "m": null,
+   "s": "closed"
+  },
+  {
+   "n": 3539,
+   "t": "[SUPERSEDED-STACK] bench(3417): paired exact-domain benchmark on old mixed-source spine",
+   "c": "2026-10-05T05:14:25Z",
+   "u": "2026-10-05T05:32:29Z",
+   "m": null,
+   "s": "closed"
+  },
+  {
+   "n": 3544,
+   "t": "bench(3513): Core-load and warm-program profiler on canonical benchmark spine",
+   "c": "2026-10-05T05:15:56Z",
+   "u": "2026-10-05T05:32:43Z",
+   "m": null,
+   "s": "closed"
+  },
+  {
+   "n": 3546,
+   "t": "bench(1988): D6 generator vs flat16 on canonical selector stack",
+   "c": "2026-10-05T05:18:07Z",
+   "u": "2026-10-05T05:30:59Z",
+   "m": null,
+   "s": "closed"
+  },
+  {
+   "n": 3549,
+   "t": "bench(3527): add paired runtime-footprint evidence",
+   "c": "2026-10-05T05:18:38Z",
+   "u": "2026-10-05T05:31:20Z",
+   "m": null,
+   "s": "closed"
+  },
+  {
+   "n": 3550,
+   "t": "bench(1973): selector closure economics on canonical benchmark stack",
+   "c": "2026-10-05T05:18:39Z",
+   "u": "2026-10-05T05:31:11Z",
+   "m": null,
+   "s": "closed"
+  },
+  {
+   "n": 3552,
+   "t": "bench(3417): paired exact-domain benchmark on clean #3548 source spine",
+   "c": "2026-10-05T05:19:32Z",
+   "u": "2026-10-05T05:30:44Z",
+   "m": null,
+   "s": "closed"
+  },
+  {
+   "n": 3555,
+   "t": "bench(3513): Core-load and warm-program profiler on clean #3552 spine",
+   "c": "2026-10-05T05:20:41Z",
+   "u": "2026-10-05T05:30:49Z",
+   "m": null,
+   "s": "closed"
+  },
+  {
+   "n": 3556,
+   "t": "bench(1988): D6 generator vs flat16 on fresh #3545 selector stack",
+   "c": "2026-10-05T05:21:47Z",
+   "u": "2026-10-05T05:31:06Z",
+   "m": null,
+   "s": "closed"
+  },
+  {
+   "n": 3557,
+   "t": "bench(3417): paired exact-domain SENS benchmark after canonical mixed source",
+   "c": "2026-10-05T05:21:48Z",
+   "u": "2026-10-05T06:13:46Z",
+   "m": null,
+   "s": "closed"
+  },
+  {
+   "n": 3558,
+   "t": "bench(1973): selector closure economics on fresh #3556 stack",
+   "c": "2026-10-05T05:22:28Z",
+   "u": "2026-10-05T05:31:13Z",
+   "m": null,
+   "s": "closed"
+  },
+  {
+   "n": 3559,
+   "t": "bench(3528): join execution and footprint into Pareto fronts",
+   "c": "2026-10-05T05:22:29Z",
+   "u": "2026-10-05T05:32:22Z",
+   "m": null,
+   "s": "closed"
+  },
+  {
+   "n": 3562,
+   "t": "bench(1546): current exact-domain SENS vs CPython load/ready phases",
+   "c": "2026-10-05T05:25:16Z",
+   "u": "2026-10-05T05:36:37Z",
+   "m": null,
+   "s": "closed"
+  },
+  {
+   "n": 3563,
+   "t": "bench(3513): warm/Core-load profiler after canonical #3557 benchmark",
+   "c": "2026-10-05T05:25:42Z",
+   "u": "2026-10-05T06:15:38Z",
+   "m": null,
+   "s": "closed"
+  },
+  {
+   "n": 3564,
+   "t": "bench(1988): D6 generator vs flat16 after canonical selector replay",
+   "c": "2026-10-05T05:25:48Z",
+   "u": "2026-10-05T05:31:02Z",
+   "m": null,
+   "s": "closed"
+  },
+  {
+   "n": 3565,
+   "t": "bench(1973): selector closure economics after canonical D6 microbench",
+   "c": "2026-10-05T05:26:39Z",
+   "u": "2026-10-05T06:11:09Z",
+   "m": null,
+   "s": "closed"
+  },
+  {
+   "n": 3566,
+   "t": "bench(1988): corrected D6 generator-vs-flat16 on canonical #3553 stack",
+   "c": "2026-10-05T05:27:20Z",
+   "u": "2026-10-05T06:08:49Z",
+   "m": null,
+   "s": "closed"
+  },
+  {
+   "n": 3567,
+   "t": "bench(1973): selector closure economics on canonical #3566 stack",
+   "c": "2026-10-05T05:28:04Z",
+   "u": "2026-10-05T06:08:54Z",
+   "m": null,
+   "s": "closed"
+  },
+  {
+   "n": 3568,
+   "t": "bench(1988): replay D6 generator vs flat16 on current selector runtime",
+   "c": "2026-10-05T05:29:07Z",
+   "u": "2026-10-05T06:11:01Z",
+   "m": null,
+   "s": "closed"
+  },
+  {
+   "n": 3569,
+   "t": "bench(3527): runtime-footprint evidence on canonical #3557 benchmark",
+   "c": "2026-10-05T05:29:28Z",
+   "u": "2026-10-05T06:13:52Z",
+   "m": null,
+   "s": "closed"
+  },
+  {
+   "n": 3570,
+   "t": "bench(1547): current SENS vs Lua 5.4 source/bytecode load phases",
+   "c": "2026-10-05T05:30:00Z",
+   "u": "2026-10-05T05:37:16Z",
+   "m": null,
+   "s": "closed"
+  },
+  {
+   "n": 3571,
+   "t": "bench(3528): Pareto report on canonical #3569 footprint stack",
+   "c": "2026-10-05T05:30:01Z",
+   "u": "2026-10-05T06:13:56Z",
+   "m": null,
+   "s": "closed"
+  },
+  {
+   "n": 3573,
+   "t": "bench(1548): current SENS vs Racket CS compile/ready phases",
+   "c": "2026-10-05T05:31:51Z",
+   "u": "2026-10-05T05:37:55Z",
+   "m": null,
+   "s": "closed"
+  },
+  {
+   "n": 3574,
+   "t": "bench(3410): current SENS vs SBCL source/FASL ready phases",
+   "c": "2026-10-05T05:33:31Z",
+   "u": "2026-10-05T05:38:32Z",
+   "m": null,
+   "s": "closed"
+  },
+  {
+   "n": 3576,
+   "t": "bench(1546): current exact-domain load phases on canonical profiler",
+   "c": "2026-10-05T05:36:25Z",
+   "u": "2026-10-05T06:15:55Z",
+   "m": null,
+   "s": "closed"
+  },
+  {
+   "n": 3577,
+   "t": "bench(1547): Lua 5.4 load phases on canonical current SENS stack",
+   "c": "2026-10-05T05:37:11Z",
+   "u": "2026-10-05T06:16:07Z",
+   "m": null,
+   "s": "closed"
+  },
+  {
+   "n": 3578,
+   "t": "bench(1548): Racket CS load phases on canonical current SENS stack",
+   "c": "2026-10-05T05:37:51Z",
+   "u": "2026-10-05T06:16:16Z",
+   "m": null,
+   "s": "closed"
+  },
+  {
+   "n": 3579,
+   "t": "bench(3410): SBCL source/FASL ready phases on canonical current SENS stack",
+   "c": "2026-10-05T05:38:25Z",
+   "u": "2026-10-05T06:16:28Z",
+   "m": null,
+   "s": "closed"
+  },
+  {
+   "n": 3584,
+   "t": "bench(3528): export family-scoped semantic vector from #1973 closure",
+   "c": "2026-10-05T05:47:45Z",
+   "u": "2026-10-05T06:17:00Z",
+   "m": null,
+   "s": "closed"
+  },
+  {
+   "n": 3585,
+   "t": "bench(3582): mode-specialized D6 selector code size",
+   "c": "2026-10-05T05:48:00Z",
+   "u": "2026-10-05T06:08:59Z",
+   "m": null,
+   "s": "closed"
+  },
+  {
+   "n": 3590,
+   "t": "bench(3583): replay D6 selectors through the real evaluator",
+   "c": "2026-10-05T05:54:47Z",
+   "u": "2026-10-05T06:09:06Z",
+   "m": null,
+   "s": "closed"
+  },
+  {
+   "n": 3591,
+   "t": "[SUPERSEDED] bench(3417): Contract 11.5/D6-stack paired benchmark donor",
+   "c": "2026-10-05T05:55:02Z",
+   "u": "2026-10-05T06:27:25Z",
+   "m": null,
+   "s": "closed"
+  },
+  {
+   "n": 3597,
+   "t": "bench(1988): D6 generator-vs-flat16 on current #3588 stack",
+   "c": "2026-10-05T06:06:09Z",
+   "u": "2026-10-05T08:16:11Z",
+   "m": null,
+   "s": "closed"
+  },
+  {
+   "n": 3598,
+   "t": "bench(1973): selector closure economics on current #3597 stack",
+   "c": "2026-10-05T06:07:07Z",
+   "u": "2026-10-05T08:16:17Z",
+   "m": null,
+   "s": "closed"
+  },
+  {
+   "n": 3599,
+   "t": "bench(3582): D6 selector code size on current #3597 stack",
+   "c": "2026-10-05T06:07:44Z",
+   "u": "2026-10-05T08:16:23Z",
+   "m": null,
+   "s": "closed"
+  },
+  {
+   "n": 3600,
+   "t": "bench(3583): D6 selector real-evaluator replay on current #3597 stack",
+   "c": "2026-10-05T06:08:24Z",
+   "u": "2026-10-05T08:16:29Z",
+   "m": null,
+   "s": "closed"
+  },
+  {
+   "n": 3601,
+   "t": "bench(3417): replay paired cross-language benchmark on Contract 11.6",
+   "c": "2026-10-05T06:11:12Z",
+   "u": "2026-10-09T15:45:16Z",
+   "m": "2026-10-09T15:45:13Z",
+   "s": "closed"
+  },
+  {
+   "n": 3602,
+   "t": "bench(3527): Contract 11.6 runtime/workload footprint on #3601",
+   "c": "2026-10-05T06:12:09Z",
+   "u": "2026-10-05T06:23:03Z",
+   "m": null,
+   "s": "closed"
+  },
+  {
+   "n": 3603,
+   "t": "bench(3528): Contract 11.6 Pareto join on #3602 footprint",
+   "c": "2026-10-05T06:13:09Z",
+   "u": "2026-10-05T06:24:00Z",
+   "m": null,
+   "s": "closed"
+  },
+  {
+   "n": 3604,
+   "t": "bench(3528): export Contract 11.6 family-scoped semantic vector",
+   "c": "2026-10-05T06:15:14Z",
+   "u": "2026-10-09T15:43:48Z",
+   "m": "2026-10-09T15:43:46Z",
+   "s": "closed"
+  },
+  {
+   "n": 3605,
+   "t": "bench: add STORE -> AIR -> LOAD exact-bit evidence schema",
+   "c": "2026-10-05T06:16:34Z",
+   "u": "2026-10-05T08:01:49Z",
+   "m": null,
+   "s": "closed"
+  },
+  {
+   "n": 3607,
+   "t": "bench(3527): clean Contract 11.6 footprint replay on current #3601",
+   "c": "2026-10-05T06:22:59Z",
+   "u": "2026-10-09T15:45:15Z",
+   "m": null,
+   "s": "closed"
+  },
+  {
+   "n": 3608,
+   "t": "bench(3528): clean Contract 11.6 Pareto replay on #3607",
+   "c": "2026-10-05T06:23:56Z",
+   "u": "2026-10-09T15:42:23Z",
+   "m": "2026-10-09T15:42:21Z",
+   "s": "closed"
+  },
+  {
+   "n": 3627,
+   "t": "bench: STORE -> AIR -> LOAD exact-bit evidence (main-sync)",
+   "c": "2026-10-05T07:42:53Z",
+   "u": "2026-10-05T08:01:21Z",
+   "m": "2026-10-05T08:01:21Z",
+   "s": "closed"
+  },
+  {
+   "n": 3633,
+   "t": "bench(3629): split bare root from default Core bootstrap",
+   "c": "2026-10-05T08:02:28Z",
+   "u": "2026-10-05T08:17:27Z",
+   "m": "2026-10-05T08:17:27Z",
+   "s": "closed"
+  },
+  {
+   "n": 3647,
+   "t": "bench(1988): clean D6 generator-vs-flat16 on #3624",
+   "c": "2026-10-05T08:11:35Z",
+   "u": "2026-10-09T10:13:18Z",
+   "m": null,
+   "s": "open"
+  },
+  {
+   "n": 3649,
+   "t": "bench(1973): clean selector closure economics on #3647",
+   "c": "2026-10-05T08:12:43Z",
+   "u": "2026-10-05T08:20:59Z",
+   "m": null,
+   "s": "open"
+  },
+  {
+   "n": 3650,
+   "t": "bench(3582): clean D6 selector code size on #3647",
+   "c": "2026-10-05T08:13:48Z",
+   "u": "2026-10-09T10:14:23Z",
+   "m": "2026-10-09T10:13:16Z",
+   "s": "closed"
+  },
+  {
+   "n": 3653,
+   "t": "bench(3583): clean D6 real-evaluator replay on #3647",
+   "c": "2026-10-05T08:15:24Z",
+   "u": "2026-10-05T08:21:13Z",
+   "m": null,
+   "s": "open"
+  },
+  {
+   "n": 3654,
+   "t": "bench(3648): split decoded Core eval from peer projection",
+   "c": "2026-10-05T08:16:52Z",
+   "u": "2026-10-07T16:03:04Z",
+   "m": null,
+   "s": "closed"
+  },
+  {
+   "n": 3690,
+   "t": "bench: reality-matrix shared protocol and result schema (#3680)",
+   "c": "2026-10-05T09:28:04Z",
+   "u": "2026-10-09T12:30:40Z",
+   "m": "2026-10-09T12:30:40Z",
+   "s": "closed"
+  },
+  {
+   "n": 3791,
+   "t": "bench: align D3/D4 dispatch benchmark with current selector roots",
+   "c": "2026-10-05T20:34:13Z",
+   "u": "2026-10-05T20:50:36Z",
+   "m": null,
+   "s": "closed"
+  },
+  {
+   "n": 4130,
+   "t": "docs(bench): mark Contract 11.8 / D1–D9 replay authority (#4129)",
+   "c": "2026-10-07T09:56:17Z",
+   "u": "2026-10-07T09:56:51Z",
+   "m": "2026-10-07T09:56:50Z",
+   "s": "closed"
+  },
+  {
+   "n": 4132,
+   "t": "bench(4129): replay W1–W8 carrier under Contract 11.8; block D9 honestly",
+   "c": "2026-10-07T10:00:52Z",
+   "u": "2026-10-07T14:25:13Z",
+   "m": "2026-10-07T14:25:12Z",
+   "s": "closed"
+  },
+  {
+   "n": 4152,
+   "t": "bench(4144): replay execution-ladder conformance on Contract 11.8",
+   "c": "2026-10-07T14:49:41Z",
+   "u": "2026-10-07T15:24:04Z",
+   "m": null,
+   "s": "closed"
+  },
+  {
+   "n": 4179,
+   "t": "bench(4144): replay execution-ladder conformance on Contract 11.8",
+   "c": "2026-10-07T15:23:44Z",
+   "u": "2026-10-07T15:27:54Z",
+   "m": "2026-10-07T15:27:53Z",
+   "s": "closed"
+  },
+  {
+   "n": 4183,
+   "t": "bench: make laboratory discovery self-describing",
+   "c": "2026-10-07T15:26:09Z",
+   "u": "2026-10-09T12:29:48Z",
+   "m": "2026-10-09T12:29:48Z",
+   "s": "closed"
+  },
+  {
+   "n": 4185,
+   "t": "bench(3580): replay STORE→AIR→LOAD under Contract 11.8",
+   "c": "2026-10-07T15:28:20Z",
+   "u": "2026-10-07T15:32:33Z",
+   "m": "2026-10-07T15:32:33Z",
+   "s": "closed"
+  },
+  {
+   "n": 4190,
+   "t": "bench: make AIR a transport-neutral adapter boundary",
+   "c": "2026-10-07T15:36:59Z",
+   "u": "2026-10-09T12:29:46Z",
+   "m": "2026-10-09T12:29:46Z",
+   "s": "closed"
+  },
+  {
+   "n": 4194,
+   "t": "bench(3490): replay current phase decomposition on Contract 11.8",
+   "c": "2026-10-07T15:39:57Z",
+   "u": "2026-10-07T15:44:00Z",
+   "m": null,
+   "s": "closed"
+  },
+  {
+   "n": 4199,
+   "t": "bench(3490): replay current phase decomposition on Contract 11.8",
+   "c": "2026-10-07T15:43:55Z",
+   "u": "2026-10-07T15:54:36Z",
+   "m": "2026-10-07T15:54:36Z",
+   "s": "closed"
+  },
+  {
+   "n": 4206,
+   "t": "bench(3648): replay Core4 internal bootstrap split on Contract 11.8",
+   "c": "2026-10-07T15:51:39Z",
+   "u": "2026-10-07T15:57:18Z",
+   "m": "2026-10-07T15:57:18Z",
+   "s": "closed"
+  },
+  {
+   "n": 4220,
+   "t": "bench(4217): split decoded Core lowering from lowered evaluation",
+   "c": "2026-10-07T16:05:33Z",
+   "u": "2026-10-10T18:14:49Z",
+   "m": null,
+   "s": "open"
+  },
+  {
+   "n": 4402,
+   "t": "bench(4398): add domain-altitude economy Pareto consumer",
+   "c": "2026-10-08T09:46:45Z",
+   "u": "2026-10-10T18:14:49Z",
+   "m": null,
+   "s": "open"
+  },
+  {
+   "n": 5191,
+   "t": "bench(binary): вимірювати справжній фізичний SENS/T5 на GitHub runners",
+   "c": "2026-10-09T18:35:04Z",
+   "u": "2026-10-09T18:55:06Z",
+   "m": "2026-10-09T18:55:06Z",
+   "s": "closed"
+  },
+  {
+   "n": 5192,
+   "t": "perf(binary): benchmark packed bytes against visible D2 source on GitHub-hosted CPU",
+   "c": "2026-10-09T18:35:23Z",
+   "u": "2026-10-09T18:40:56Z",
+   "m": null,
+   "s": "closed"
+  },
+  {
+   "n": 5194,
+   "t": "perf(binary): run real hosted packed-vs-visible performance benchmarks",
+   "c": "2026-10-09T18:37:16Z",
+   "u": "2026-10-09T18:39:45Z",
+   "m": "2026-10-09T18:39:45Z",
+   "s": "closed"
+  },
+  {
+   "n": 5201,
+   "t": "perf(binary): measure actual D1/D3 evaluation with warm and fresh sessions",
+   "c": "2026-10-09T18:54:41Z",
+   "u": "2026-10-09T18:55:08Z",
+   "m": "2026-10-09T18:55:07Z",
+   "s": "closed"
+  },
+  {
+   "n": 5203,
+   "t": "bench(t5): independent canonical T5 parity before physical timing",
+   "c": "2026-10-09T19:10:43Z",
+   "u": "2026-10-10T19:16:31Z",
+   "m": "2026-10-10T19:16:31Z",
+   "s": "closed"
+  },
+  {
+   "n": 5204,
+   "t": "perf(startup): measure new-process SENS boot, bare Session and Lisp-owned Core4",
+   "c": "2026-10-09T19:11:59Z",
+   "u": "2026-10-09T19:13:33Z",
+   "m": "2026-10-09T19:13:33Z",
+   "s": "closed"
+  },
+  {
+   "n": 5205,
+   "t": "bench(t5): зберегти доведений перший прямий T5→D2 benchmark",
+   "c": "2026-10-09T19:13:10Z",
+   "u": "2026-10-10T19:17:49Z",
+   "m": "2026-10-10T19:17:49Z",
+   "s": "closed"
+  },
+  {
+   "n": 5206,
+   "t": "perf(binary): explicit macro-free bare Session for exact-domain programs",
+   "c": "2026-10-09T19:18:37Z",
+   "u": "2026-10-09T19:19:43Z",
+   "m": "2026-10-09T19:19:43Z",
+   "s": "closed"
+  },
+  {
+   "n": 5207,
+   "t": "perf(t5): прибрати проміжний масив тритів із декодера двійкового SENS",
+   "c": "2026-10-09T19:21:14Z",
+   "u": "2026-10-10T18:14:48Z",
+   "m": null,
+   "s": "open"
+  },
+  {
+   "n": 5208,
+   "t": "perf(Core4): cache verified embedded FASL decoding/lowering, not Lisp semantics",
+   "c": "2026-10-09T19:33:13Z",
+   "u": "2026-10-09T19:34:42Z",
+   "m": "2026-10-09T19:34:42Z",
+   "s": "closed"
+  },
+  {
+   "n": 5210,
+   "t": "fix(bench-ci): restore exact-width mechanical strict-Clippy compatibility",
+   "c": "2026-10-09T19:35:24Z",
+   "u": "2026-10-10T18:14:48Z",
+   "m": null,
+   "s": "open"
+  },
+  {
+   "n": 5214,
+   "t": "perf(t5): emit exact D1–D9 binary views without per-word allocations",
+   "c": "2026-10-09T20:18:18Z",
+   "u": "2026-10-10T19:14:00Z",
+   "m": null,
+   "s": "open"
+  },
+  {
+   "n": 5216,
+   "t": "perf(t5): одна алокація для видимої двійкової проєкції + парні бенчмарки",
+   "c": "2026-10-09T20:21:03Z",
+   "u": "2026-10-09T20:22:19Z",
+   "m": null,
+   "s": "closed"
+  },
+  {
+   "n": 5217,
+   "t": "perf(Core4): isolate verified FASL cache with controlled full-bootstrap A/B",
+   "c": "2026-10-09T20:21:31Z",
+   "u": "2026-10-09T20:22:57Z",
+   "m": "2026-10-09T20:22:57Z",
+   "s": "closed"
+  },
+  {
+   "n": 5221,
+   "t": "perf(t5): remove redundant decoder re-encode; benchmark real hot path",
+   "c": "2026-10-09T20:23:46Z",
+   "u": "2026-10-10T18:14:48Z",
+   "m": null,
+   "s": "open"
+  },
+  {
+   "n": 5222,
+   "t": "docs(bench): summarize verified T5 and occupancy gains without overstating CI",
+   "c": "2026-10-09T20:36:08Z",
+   "u": "2026-10-10T19:44:38Z",
+   "m": null,
+   "s": "closed"
+  },
+  {
+   "n": 5228,
+   "t": "bench(method): SHA-bound randomized A/B wall evidence with honest exploratory intervals",
+   "c": "2026-10-09T21:01:16Z",
+   "u": "2026-10-10T18:14:48Z",
+   "m": null,
+   "s": "open"
+  },
+  {
+   "n": 5229,
+   "t": "[HOLD until L0 green] bench(stats): fail-closed paired effect intervals, next-stage iai/criterion plan",
+   "c": "2026-10-09T21:01:18Z",
+   "u": "2026-10-10T18:14:48Z",
+   "m": null,
+   "s": "open"
+  },
+  {
+   "n": 5230,
+   "t": "bench: establish independent I-refs, Criterion and paired-verdict pilot (#5227)",
+   "c": "2026-10-09T21:01:20Z",
+   "u": "2026-10-10T18:14:48Z",
+   "m": null,
+   "s": "open"
+  },
+  {
+   "n": 5231,
+   "t": "research(bench): paired wall-time effect intervals with fail-closed evidence",
+   "c": "2026-10-09T21:01:41Z",
+   "u": "2026-10-10T18:14:48Z",
+   "m": null,
+   "s": "open"
+  },
+  {
+   "n": 5278,
+   "t": "bench(native-zero): measure direct physical T5 bare execution with raw CPU evidence",
+   "c": "2026-10-10T02:32:34Z",
+   "u": "2026-10-10T18:14:48Z",
+   "m": null,
+   "s": "open"
+  },
+  {
+   "n": 5280,
+   "t": "bench(native): Native Machine №1 — real x86 route, T5 measurements, fail-closed parity",
+   "c": "2026-10-10T02:39:11Z",
+   "u": "2026-10-10T18:14:48Z",
+   "m": null,
+   "s": "open"
+  },
+  {
+   "n": 5281,
+   "t": "research(microcpu): physical T5 to bounded D1–D3 slot execution with CPU benches",
+   "c": "2026-10-10T02:40:01Z",
+   "u": "2026-10-10T11:27:53Z",
+   "m": "2026-10-10T11:05:59Z",
+   "s": "closed"
+  },
+  {
+   "n": 5282,
+   "t": "bench(t5): isolate real SENS decode, D2 parse and hot eval within one process",
+   "c": "2026-10-10T02:40:11Z",
+   "u": "2026-10-10T11:05:57Z",
+   "m": "2026-10-10T11:05:57Z",
+   "s": "closed"
+  },
+  {
+   "n": 5284,
+   "t": "bench(evidence): independently attest real physical T5 bytes and measured timing samples",
+   "c": "2026-10-10T02:44:06Z",
+   "u": "2026-10-10T11:05:56Z",
+   "m": "2026-10-10T11:05:56Z",
+   "s": "closed"
+  },
+  {
+   "n": 5289,
+   "t": "perf(t5): bypass implicit Lisp macro bootstrap for pure physical SENS only",
+   "c": "2026-10-10T02:50:15Z",
+   "u": "2026-10-10T11:05:38Z",
+   "m": "2026-10-10T11:05:38Z",
+   "s": "closed"
+  },
+  {
+   "n": 5487,
+   "t": "test(bench): replay fail-closed direct T5 timing guard on current main",
+   "c": "2026-10-10T19:33:31Z",
+   "u": "2026-10-10T19:40:31Z",
+   "m": null,
+   "s": "closed"
+  },
+  {
+   "n": 5491,
+   "t": "test(bench): повторити fail-closed контроль T5-таймінгів на актуальному main",
+   "c": "2026-10-10T19:40:18Z",
+   "u": "2026-10-10T19:42:18Z",
+   "m": null,
+   "s": "closed"
+  },
+  {
+   "n": 5493,
+   "t": "docs(bench): показати перевірені T5 та occupancy виміри",
+   "c": "2026-10-10T19:44:25Z",
+   "u": "2026-10-10T19:45:16Z",
+   "m": "2026-10-10T19:45:16Z",
+   "s": "closed"
+  },
+  {
+   "n": 5495,
+   "t": "bench(rust): replay direct SENS wire vs serde_json decode on current main",
+   "c": "2026-10-10T19:58:55Z",
+   "u": "2026-10-10T20:05:52Z",
+   "m": "2026-10-10T20:05:52Z",
+   "s": "closed"
+  },
+  {
+   "n": 5500,
+   "t": "bench: run all 41 registered benchmarks for codec migration",
+   "c": "2026-10-10T20:41:44Z",
+   "u": "2026-10-10T20:53:13Z",
+   "m": null,
+   "s": "closed"
+  },
+  {
+   "n": 5508,
+   "t": "bench: fix D6 parity and current execution-ladder reproduction",
+   "c": "2026-10-10T20:44:07Z",
+   "u": "2026-10-10T20:53:20Z",
+   "m": null,
+   "s": "closed"
+  },
+  {
+   "n": 5514,
+   "t": "bench: full registered sweep on latest main with exact reproduction fixes",
+   "c": "2026-10-10T20:48:47Z",
+   "u": "2026-10-10T20:57:11Z",
+   "m": null,
+   "s": "closed"
+  },
+  {
+   "n": 5517,
+   "t": "bench: audit all codec-migration benchmarks on latest main",
+   "c": "2026-10-10T20:57:03Z",
+   "u": "2026-10-10T20:57:54Z",
+   "m": null,
+   "s": "closed"
+  }
+ ]
+}
