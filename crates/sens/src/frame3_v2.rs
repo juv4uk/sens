@@ -143,8 +143,7 @@ fn any_possible_grammar_block(words: &[BinarySourceWord]) -> bool {
             continue;
         }
         let mut inner_bits = 0usize;
-        for end in (start + 1)..words.len().min(start + MAX_BLOCK_WORDS) {
-            let word = words[end];
+        for &word in words.iter().skip(start + 1).take(MAX_BLOCK_WORDS - 1) {
             if word.width() == 2 && word.packed_bits() == 0b01 && inner_bits <= MAX_INNER_BITS {
                 return true;
             }
