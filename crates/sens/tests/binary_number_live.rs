@@ -289,6 +289,14 @@ fn numeric_domain_ast_formats_reject_invalid_width_and_truncation() {
     wrong_fasl[f_tag + 1] = 25;
     assert!(fasl_decode_program(&wrong_fasl).is_none());
 
+    let mut overlong_wire = original_wire.clone();
+    let tag = overlong_wire.windows(2).position(|seq| seq == [0x5B, 24])
+        .expect("qualified numeric wire header");
+    overlong_wire[tag + 1] = 0x80 | 24;
+    overlong_wire.insert(tag + 2, 0);
+    assert!(wire_decode_program(&overlong_wire).is_none(),
+        "multiple byte spellings of one D24 domain width must be rejected");
+
     let mut wrong_wire = original_wire;
     let w_tag = wrong_wire.windows(2).position(|seq| seq == [0x5B, 24])
         .expect("additive numeric wire domain tag and width");
