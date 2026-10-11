@@ -16,5 +16,31 @@
   "selected_by_this_archive": 0,
   "ratified_by_this_archive": 0,
   "coordinates_assigned_by_this_archive": 0,
-  "warning": "This is a byte-identical historical proposal, NOT a selection transition. The canonical D10 inventory/ledger/transition history and runtime remain unchanged. Exact-current-main dedup, independent oracle and CI are required before any research-selection admission."
+  "warning": "This is a byte-identical historical proposal, NOT a selection transition. The canonical D10 inventory/ledger/transition history and runtime remain unchanged. Exact-current-main dedup, independent oracle and CI are required before any research-selection admission.",
+  "additional_preserved_sources": [
+    {
+      "original_path": "scripts/check_d10_existing_ledger_tranche23.py",
+      "archived_path": "research/domain-archive/20261011/pr5600/scripts/check_d10_existing_ledger_tranche23.py.source.txt",
+      "exact_blob_sha": "5ef99126ccc1ca641bf4b1d7a09ee3eb5e3c508f",
+      "status": "INERT-SOURCE-NOT-EXECUTED"
+    },
+    {
+      "original_path": ".github/workflows/d10-ledger-tranche23.yml",
+      "archived_path": "research/domain-archive/20261011/pr5600/.github/workflows/d10-ledger-tranche23.yml.source.txt",
+      "exact_blob_sha": "6f3518eef704e6f5f4b31139bc2ab053ef75ac9b",
+      "status": "INERT-WORKFLOW-NOT-ACTIVE"
+    },
+    {
+      "original_path": "knowledge/d10-complete-existing-candidate-name-census-20261011.json",
+      "archived_path": "research/domain-archive/20261011/pr5600/knowledge/d10-complete-existing-candidate-name-census-20261011.json",
+      "exact_blob_sha": "b82aba4d71b35db869d68c7dbf4d5e3e9f0d6616",
+      "status": "LEXICAL-CENSUS-NO-SEMANTIC-AUTHORITY"
+    },
+    {
+      "original_path": "scripts/check_d10_candidate_names_census.py",
+      "archived_path": "research/domain-archive/20261011/pr5600/scripts/check_d10_candidate_names_census.py.source.txt",
+      "exact_blob_sha": "288a7dc35976068e38fb2659fecb0a11441ed553",
+      "status": "INERT-SOURCE-NOT-EXECUTED"
+    }
+  ]
 }
