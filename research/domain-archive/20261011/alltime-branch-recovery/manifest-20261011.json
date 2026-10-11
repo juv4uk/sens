@@ -429,6 +429,141 @@
       "archive_path": "research/domain-archive/20261011/alltime-branch-recovery/cohort-041-048/blobs/462e6d62bcc3b11b3e7d4f9a688147a66287defa/crates__xtask__src__compiler_export.rs.source.txt",
       "comparison_main_sha": "69f6bd1b73bad7f98599c7999fec918985231873",
       "admission": "ARCHIVED_SOURCE_ONLY; NOT EXECUTABLE; NO CI OR SEMANTIC RATIFICATION"
+    },
+    {
+      "origin_branch": "agent/d1-d3-uk-sa-surface",
+      "origin_commit": "912547e31cb9c494e55ba9253c73e14125f35525",
+      "original_path": ".github/workflows/956-semreg-targeted.yml",
+      "original_blob_sha": "e538a498cca52d6bf475367cc4cb6c82a8544217",
+      "archive_path": "research/domain-archive/20261011/alltime-branch-recovery/cohort-049-056/blobs/e538a498cca52d6bf475367cc4cb6c82a8544217/github__workflows__956-semreg-targeted.yml.source.txt",
+      "comparison_main_sha": "8a5996052f22a46183ff77090ce2ccb677e73823",
+      "admission": "ARCHIVED_SOURCE_ONLY; NOT EXECUTABLE; NO CI OR SEMANTIC RATIFICATION"
+    },
+    {
+      "origin_branch": "agent/d1-d3-uk-sa-surface",
+      "origin_commit": "912547e31cb9c494e55ba9253c73e14125f35525",
+      "original_path": "README.md",
+      "original_blob_sha": "ef32bb66aee85ea4b6f271423e754d4143b8115a",
+      "archive_path": "research/domain-archive/20261011/alltime-branch-recovery/cohort-049-056/blobs/ef32bb66aee85ea4b6f271423e754d4143b8115a/README.md.source.txt",
+      "comparison_main_sha": "8a5996052f22a46183ff77090ce2ccb677e73823",
+      "admission": "ARCHIVED_SOURCE_ONLY; NOT EXECUTABLE; NO CI OR SEMANTIC RATIFICATION"
+    },
+    {
+      "origin_branch": "agent/d1-d3-uk-sa-surface",
+      "origin_commit": "912547e31cb9c494e55ba9253c73e14125f35525",
+      "original_path": "crates/sens/src/domain_surface_registry_generated.rs",
+      "original_blob_sha": "50c0eca1897f0313eda14f515b4c178f187928a5",
+      "archive_path": "research/domain-archive/20261011/alltime-branch-recovery/cohort-049-056/blobs/50c0eca1897f0313eda14f515b4c178f187928a5/crates__sens__src__domain_surface_registry_generated.rs.source.txt",
+      "comparison_main_sha": "8a5996052f22a46183ff77090ce2ccb677e73823",
+      "admission": "ARCHIVED_SOURCE_ONLY; NOT EXECUTABLE; NO CI OR SEMANTIC RATIFICATION"
+    },
+    {
+      "origin_branch": "agent/d1-d3-uk-sa-surface",
+      "origin_commit": "912547e31cb9c494e55ba9253c73e14125f35525",
+      "original_path": "crates/sens/src/eval/lower.rs",
+      "original_blob_sha": "2871acb638f7b864fddabb946bf481e609f33289",
+      "archive_path": "research/domain-archive/20261011/alltime-branch-recovery/cohort-049-056/blobs/2871acb638f7b864fddabb946bf481e609f33289/crates__sens__src__eval__lower.rs.source.txt",
+      "comparison_main_sha": "8a5996052f22a46183ff77090ce2ccb677e73823",
+      "admission": "ARCHIVED_SOURCE_ONLY; NOT EXECUTABLE; NO CI OR SEMANTIC RATIFICATION"
+    },
+    {
+      "origin_branch": "agent/d1-d3-uk-sa-surface",
+      "origin_commit": "912547e31cb9c494e55ba9253c73e14125f35525",
+      "original_path": "crates/sens/src/human_surface.rs",
+      "original_blob_sha": "3a839fc5c46a638d7b7791d0750ac332df48edcf",
+      "archive_path": "research/domain-archive/20261011/alltime-branch-recovery/cohort-049-056/blobs/3a839fc5c46a638d7b7791d0750ac332df48edcf/crates__sens__src__human_surface.rs.source.txt",
+      "comparison_main_sha": "8a5996052f22a46183ff77090ce2ccb677e73823",
+      "admission": "ARCHIVED_SOURCE_ONLY; NOT EXECUTABLE; NO CI OR SEMANTIC RATIFICATION"
+    },
+    {
+      "origin_branch": "agent/d1-d3-uk-sa-surface",
+      "origin_commit": "912547e31cb9c494e55ba9253c73e14125f35525",
+      "original_path": "crates/sens/src/lib.rs",
+      "original_blob_sha": "43da35cde7489430bda4d1f290c37467fecc7eb6",
+      "archive_path": "research/domain-archive/20261011/alltime-branch-recovery/cohort-049-056/blobs/43da35cde7489430bda4d1f290c37467fecc7eb6/crates__sens__src__lib.rs.source.txt",
+      "comparison_main_sha": "8a5996052f22a46183ff77090ce2ccb677e73823",
+      "admission": "ARCHIVED_SOURCE_ONLY; NOT EXECUTABLE; NO CI OR SEMANTIC RATIFICATION"
+    },
+    {
+      "origin_branch": "agent/d1-d3-uk-sa-surface",
+      "origin_commit": "912547e31cb9c494e55ba9253c73e14125f35525",
+      "original_path": "crates/sens/tests/current_human_surface.rs",
+      "original_blob_sha": "f3a9655a67834f5e21bc4574f8c2f4c342223734",
+      "archive_path": "research/domain-archive/20261011/alltime-branch-recovery/cohort-049-056/blobs/f3a9655a67834f5e21bc4574f8c2f4c342223734/crates__sens__tests__current_human_surface.rs.source.txt",
+      "comparison_main_sha": "8a5996052f22a46183ff77090ce2ccb677e73823",
+      "admission": "ARCHIVED_SOURCE_ONLY; NOT EXECUTABLE; NO CI OR SEMANTIC RATIFICATION"
+    },
+    {
+      "origin_branch": "agent/d1-d3-uk-sa-surface",
+      "origin_commit": "912547e31cb9c494e55ba9253c73e14125f35525",
+      "original_path": "knowledge/domain-surface-registry.lisp",
+      "original_blob_sha": "45557825158e784922ab1beef3c7c7d6b1286017",
+      "archive_path": "research/domain-archive/20261011/alltime-branch-recovery/cohort-049-056/blobs/45557825158e784922ab1beef3c7c7d6b1286017/knowledge__domain-surface-registry.lisp.source.txt",
+      "comparison_main_sha": "8a5996052f22a46183ff77090ce2ccb677e73823",
+      "admission": "ARCHIVED_SOURCE_ONLY; NOT EXECUTABLE; NO CI OR SEMANTIC RATIFICATION"
+    },
+    {
+      "origin_branch": "agent/d1-d3-uk-sa-surface",
+      "origin_commit": "912547e31cb9c494e55ba9253c73e14125f35525",
+      "original_path": "knowledge/repo-tooling-inventory.lisp",
+      "original_blob_sha": "00a610c940c8e6ad5c39efdfe021ec5e2ff76d0c",
+      "archive_path": "research/domain-archive/20261011/alltime-branch-recovery/cohort-049-056/blobs/00a610c940c8e6ad5c39efdfe021ec5e2ff76d0c/knowledge__repo-tooling-inventory.lisp.source.txt",
+      "comparison_main_sha": "8a5996052f22a46183ff77090ce2ccb677e73823",
+      "admission": "ARCHIVED_SOURCE_ONLY; NOT EXECUTABLE; NO CI OR SEMANTIC RATIFICATION"
+    },
+    {
+      "origin_branch": "agent/d1-d3-uk-sa-surface",
+      "origin_commit": "912547e31cb9c494e55ba9253c73e14125f35525",
+      "original_path": "scripts/generate-rust-domain-registry.lisp",
+      "original_blob_sha": "023e8842cf19d0015dcfb2a8d2eaeb7d531b897d",
+      "archive_path": "research/domain-archive/20261011/alltime-branch-recovery/cohort-049-056/blobs/023e8842cf19d0015dcfb2a8d2eaeb7d531b897d/scripts__generate-rust-domain-registry.lisp.source.txt",
+      "comparison_main_sha": "8a5996052f22a46183ff77090ce2ccb677e73823",
+      "admission": "ARCHIVED_SOURCE_ONLY; NOT EXECUTABLE; NO CI OR SEMANTIC RATIFICATION"
+    },
+    {
+      "origin_branch": "agent/d3-l1-l5-compiler-law-3809",
+      "origin_commit": "c940d220170c1dddf482f03c7467b0aa9602c2c6",
+      "original_path": "crates/sens/tests/compiler_l1_l5_role.rs",
+      "original_blob_sha": "f556c9f2bca9a96d8ab3ac98d70bb4aef660f95e",
+      "archive_path": "research/domain-archive/20261011/alltime-branch-recovery/cohort-049-056/blobs/f556c9f2bca9a96d8ab3ac98d70bb4aef660f95e/crates__sens__tests__compiler_l1_l5_role.rs.source.txt",
+      "comparison_main_sha": "8a5996052f22a46183ff77090ce2ccb677e73823",
+      "admission": "ARCHIVED_SOURCE_ONLY; NOT EXECUTABLE; NO CI OR SEMANTIC RATIFICATION"
+    },
+    {
+      "origin_branch": "agent/d3-l1-l5-compiler-law-3809",
+      "origin_commit": "c940d220170c1dddf482f03c7467b0aa9602c2c6",
+      "original_path": "crates/sens/tests/compiler_nucleus_sens.rs",
+      "original_blob_sha": "c04aaf642d5b02aa6fd8a411cf9200b1e0aee940",
+      "archive_path": "research/domain-archive/20261011/alltime-branch-recovery/cohort-049-056/blobs/c04aaf642d5b02aa6fd8a411cf9200b1e0aee940/crates__sens__tests__compiler_nucleus_sens.rs.source.txt",
+      "comparison_main_sha": "8a5996052f22a46183ff77090ce2ccb677e73823",
+      "admission": "ARCHIVED_SOURCE_ONLY; NOT EXECUTABLE; NO CI OR SEMANTIC RATIFICATION"
+    },
+    {
+      "origin_branch": "agent/d3-l1-l5-compiler-law-3809",
+      "origin_commit": "c940d220170c1dddf482f03c7467b0aa9602c2c6",
+      "original_path": "lib/compiler-nucleus.lisp",
+      "original_blob_sha": "79c6e7400670127fabd7ec2cc9bb1e7ef1a05673",
+      "archive_path": "research/domain-archive/20261011/alltime-branch-recovery/cohort-049-056/blobs/79c6e7400670127fabd7ec2cc9bb1e7ef1a05673/lib__compiler-nucleus.lisp.source.txt",
+      "comparison_main_sha": "8a5996052f22a46183ff77090ce2ccb677e73823",
+      "admission": "ARCHIVED_SOURCE_ONLY; NOT EXECUTABLE; NO CI OR SEMANTIC RATIFICATION"
+    },
+    {
+      "origin_branch": "agent/d6-authority-drift-3763",
+      "origin_commit": "ea840163618b1f19645c52b8da864eab7c684d6e",
+      "original_path": "crates/sens/src/domain_identity.rs",
+      "original_blob_sha": "2baa2203424dc61d69e2b4b93da548c49dea8b53",
+      "archive_path": "research/domain-archive/20261011/alltime-branch-recovery/cohort-049-056/blobs/2baa2203424dc61d69e2b4b93da548c49dea8b53/crates__sens__src__domain_identity.rs.source.txt",
+      "comparison_main_sha": "8a5996052f22a46183ff77090ce2ccb677e73823",
+      "admission": "ARCHIVED_SOURCE_ONLY; NOT EXECUTABLE; NO CI OR SEMANTIC RATIFICATION"
+    },
+    {
+      "origin_branch": "agent/d6-authority-drift-3763",
+      "origin_commit": "ea840163618b1f19645c52b8da864eab7c684d6e",
+      "original_path": "crates/sens/src/domain_words.rs",
+      "original_blob_sha": "a50ab9a32810473fea2ae65d23dbed4ccece7de4",
+      "archive_path": "research/domain-archive/20261011/alltime-branch-recovery/cohort-049-056/blobs/a50ab9a32810473fea2ae65d23dbed4ccece7de4/crates__sens__src__domain_words.rs.source.txt",
+      "comparison_main_sha": "8a5996052f22a46183ff77090ce2ccb677e73823",
+      "admission": "ARCHIVED_SOURCE_ONLY; NOT EXECUTABLE; NO CI OR SEMANTIC RATIFICATION"
     }
   ]
 }
