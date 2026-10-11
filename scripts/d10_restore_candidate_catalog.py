@@ -41,6 +41,13 @@ def literal_tsv(path):
             parse_array(record[column])
         previous = rows.get(ident)
         if previous is not None:
+            previous_name = previous.get("semantic_name", "").strip()
+            current_name = record.get("semantic_name", "").strip()
+            if previous_name.casefold() != current_name.casefold():
+                raise ValueError(
+                    f"DUPLICATE_CANDIDATE_ID_CONFLICT:{number}:{ident}:"
+                    f"{previous_name!r}!={current_name!r}"
+                )
             raise ValueError(f"DUPLICATE_OR_EMPTY_SOURCE_IDENTITY:{number}:{ident}")
         rows[ident] = record
 
