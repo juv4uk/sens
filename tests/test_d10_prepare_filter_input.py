@@ -75,6 +75,31 @@ class PrepareTests(unittest.TestCase):
                                   occupied)
         self.assertEqual("EXCLUDE_NO_WITNESS", decision["reason"])
 
+    def test_current_csv_quoted_json_cells_and_raw_tsv_are_semantically_equal(self):
+        self.write_index()
+        raw_result = adapter.prepare(self.root, self.input, self.output)
+        with self.output.open(encoding="utf-8", newline="") as stream:
+            raw_rows = list(csv.DictReader(stream, delimiter="\t"))
+        # The producer now serializes TSV through a CSV writer. Quote escaping
+        # must not turn a pinned donor into a missing/unverified source.
+        with self.input.open("w", newline="", encoding="utf-8") as stream:
+            writer = csv.DictWriter(stream, fieldnames=adapter.INDEX_FIELDS,
+                                    delimiter="\t", lineterminator="\n")
+            writer.writeheader()
+            writer.writerow(self.row)
+        quoted_result = adapter.prepare(self.root, self.input, self.output)
+        with self.output.open(encoding="utf-8", newline="") as stream:
+            quoted_rows = list(csv.DictReader(stream, delimiter="\t"))
+        self.assertEqual(raw_result, quoted_result)
+        self.assertEqual(raw_rows, quoted_rows)
+        self.assertEqual(1, quoted_result["source_file_pin_verified"])
+
+    def test_malformed_csv_quoted_list_fails_closed(self):
+        self.row["semantic_law_variants"] = '"not an array"'
+        self.write_index()
+        with self.assertRaisesRegex(ValueError, "INVALID_INDEX_JSON_ARRAY"):
+            adapter.prepare(self.root, self.input, self.output)
+
     def test_fake_source_sha_cannot_be_accepted(self):
         self.row["source_records_sha_pinned"] = json.dumps(
             ["knowledge/donor.json@" + "0"*40 + ":candidates[0]"])

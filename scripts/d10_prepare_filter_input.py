@@ -27,10 +27,20 @@ SOURCE_NAME = re.compile(r'"(?:semantic_name|proposed_semantic_name|source_name)
 
 
 def json_list(raw):
+    # Historical index used literal TSV JSON. The current publisher may use
+    # csv.DictWriter, yielding RFC-style outer quotes and doubled inner quotes.
+    # Both forms must decode to the SAME JSON string array. No guessing of
+    # missing witnesses, donor SHA, or semantic dedup certificates is allowed.
     try:
         values = json.loads(raw)
-    except (ValueError, TypeError) as exc:
-        raise ValueError("INVALID_INDEX_JSON_ARRAY") from exc
+    except (ValueError, TypeError):
+        if not (isinstance(raw, str) and len(raw) >= 2
+                and raw[0] == '"' and raw[-1] == '"'):
+            raise ValueError("INVALID_INDEX_JSON_ARRAY")
+        try:
+            values = json.loads(raw[1:-1].replace('""', '"'))
+        except (ValueError, TypeError) as exc:
+            raise ValueError("INVALID_INDEX_JSON_ARRAY") from exc
     if not isinstance(values, list) or any(not isinstance(x, str) for x in values):
         raise ValueError("INVALID_INDEX_JSON_ARRAY")
     return values
