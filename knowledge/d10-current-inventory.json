@@ -1,11 +1,11 @@
 {
   "schema": "d10-current-inventory-pointer/v1",
-  "status": "OWNER-DIRECTED-RESEARCH-SELECTION-715-UNRATIFIED",
+  "status": "OWNER-DIRECTED-RESEARCH-SELECTION-719-UNRATIFIED",
   "canonical_current": {
-    "path": "knowledge/d10-v5-semantic-inventory.json",
-    "git_blob": "c8a23d0db0eebca0c8d780cc93bc1fda78425c44",
-    "selected": 715,
-    "placed": 715,
+    "path": "knowledge/d10-v6-semantic-inventory.json",
+    "git_blob": "db13680e3a8786faf5dec74c7f8792ace7c6fd5f",
+    "selected": 719,
+    "placed": 719,
     "unplaced": 0,
     "ratified": 0
   },
@@ -20,10 +20,10 @@
     "role": "PINNED-GAUGE-ASSIGNMENT"
   },
   "policy": {
-    "description": "Current v4 has 707 research-selected D10 meanings; latest nine selected by owner direction from existing source-grade observable-law reviews; historical v1,v2,v3 immutably pinned.",
-    "selected_only": "715 researched candidates allocated, 309 unselected, none ratified.",
+    "description": "v6 preserves v1-v5 and adds four source-pinned historical CLOS research candidates.",
+    "selected_only": "719 selected research laws; 305 left; 0 ratified.",
     "ratification": "No D10 meaning has been ratified, and D10 10-bit execution / physical T5 encoding is not authorized.",
-    "next_step": "Finish independent-source semantic Core/D2/library adjudication before ratification; continue evidence-based admission of missing 317."
+    "next_step": "Review CLOS candidate derivability and obtain independent semantic oracles before D10 ratification."
   },
   "branch_policy": "MAIN-ONLY; NO-NEW-BRANCHES",
   "historical_v2_coordinate_inventory": {
@@ -115,5 +115,19 @@
     "selected_added": 0,
     "ratified_added": 0,
     "role": "UNCANONICAL-RESEARCH-INTAKE-NOT-CORE"
+  },
+  "historical_v5_research_inventory": {
+    "path": "knowledge/d10-v5-semantic-inventory.json",
+    "git_blob": "c8a23d0db0eebca0c8d780cc93bc1fda78425c44",
+    "selected": 715,
+    "placed": 715,
+    "unplaced": 0,
+    "ratified": 0
+  },
+  "current_v6_candidate_selection": {
+    "selected_added": 4,
+    "source_queue_git_blob": "131369263ac37c27798bb3c95521eb99e52b8f10",
+    "owner_review": "CORE-VS-DERIVED-PENDING",
+    "independent_oracle": "NOT-EXECUTED-FOR-SENS"
   }
 }

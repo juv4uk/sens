@@ -1,0 +1,57 @@
+{
+  "schema": "d10-v6-historical-clos-selection/v1",
+  "date": "2026-10-11",
+  "status": "RESEARCH-SELECTED-WITH-SOURCE-HOLDS-NOT-RATIFIED",
+  "v5_source_blob": "c8a23d0db0eebca0c8d780cc93bc1fda78425c44",
+  "historical_queue_blob": "131369263ac37c27798bb3c95521eb99e52b8f10",
+  "selected_before": 715,
+  "selected_after": 719,
+  "ratified": 0,
+  "candidates": [
+    {
+      "name": "ALLOCATE-INSTANCE",
+      "source_path": "knowledge/d10-historical-clos-interlisp-residual-review-v1.json",
+      "source_blob": "df8ed73011df39f9ec689046ce6936cc00892215",
+      "source_hold_status": "HOLD-CONSTRUCTOR-DERIVED",
+      "law": "Create a fresh instance of a class without standard MAKE-INSTANCE initialization; standard-class slots are initially unbound.",
+      "positive": "Allocate then inspect slot-boundness: slots are unbound, whereas make-instance may apply initform/initargs.",
+      "falsifier": "Confusing allocated instance with fully initialized MAKE-INSTANCE result is a semantic failure.",
+      "coordinate": "1101010010",
+      "owner_core_vs_derived": "PENDING"
+    },
+    {
+      "name": "REINITIALIZE-INSTANCE",
+      "source_path": "knowledge/d10-clos-instance-lifecycle-residual-v1.json",
+      "source_blob": "3c6e85d94e78cdd5fe9b9b645095b48335f768e5",
+      "source_hold_status": "HOLD-D9-STATE-DERIVABILITY",
+      "law": "Changes existing instance slot values according to valid initargs without adding/removing slots and without re-running omitted initforms.",
+      "positive": "Instance a=1,b=2 reinit a=3 => same instance with a=3,b=2.",
+      "falsifier": "Fail if b resets to initform or the instance layout changes.",
+      "coordinate": "1101000011",
+      "owner_core_vs_derived": "PENDING"
+    },
+    {
+      "name": "ADD-METHOD",
+      "source_path": "knowledge/d10-historical-clos-interlisp-residual-review-v1.json",
+      "source_blob": "df8ed73011df39f9ec689046ce6936cc00892215",
+      "source_hold_status": "HOLD-DERIVABILITY",
+      "law": "Attach an existing method object to a generic function, updating dispatch membership under agreement rules; assess whether action is derivable from already selected DEFMETHOD or a new effect law.",
+      "positive": "After adding a :before method its descriptor can be found; unaffected primary methods still exist.",
+      "falsifier": "Registering a method under a different generic function or duplicating agreeing signatures without replacement policy is invalid.",
+      "coordinate": "1101010000",
+      "owner_core_vs_derived": "PENDING"
+    },
+    {
+      "name": "ENSURE-GENERIC-FUNCTION",
+      "source_path": "knowledge/d10-clos-instance-lifecycle-residual-v1.json",
+      "source_blob": "3c6e85d94e78cdd5fe9b9b645095b48335f768e5",
+      "source_hold_status": "HOLD-DEFGENERIC-DERIVABILITY",
+      "law": "Creates a new generic function for an unbound global function name or returns/modifies an existing generic descriptor; rejects ordinary-function/macro collision.",
+      "positive": "Repeated ensure on an existing generic reuses its identity and leaves unrelated methods intact.",
+      "falsifier": "Fail if existing ordinary function is silently overwritten or unrelated methods vanish.",
+      "coordinate": "1101000010",
+      "owner_core_vs_derived": "PENDING"
+    }
+  ],
+  "scope": "Only four candidates in this tranche. All branch research is not claimed to be exhausted."
+}

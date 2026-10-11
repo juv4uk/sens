@@ -8,10 +8,10 @@ def sha(b):return hashlib.sha1(b"blob "+str(len(b)).encode()+b"\0"+b).hexdigest(
 def read(f):return json.loads((K/f).read_text(encoding="utf-8"))
 def check():
  p=read("d10-current-inventory.json");v5=read("d10-v5-semantic-inventory.json");v4=read("d10-v4-semantic-inventory.json")
- assert p["canonical_current"]["git_blob"]==sha((K/"d10-v5-semantic-inventory.json").read_bytes())
+ assert p["historical_v5_research_inventory"]["git_blob"]==sha((K/"d10-v5-semantic-inventory.json").read_bytes())
  assert p["historical_v4_research_inventory"]["git_blob"]==sha((K/"d10-v4-semantic-inventory.json").read_bytes())
  assert v5["previous_inventory"]["git_blob"]==p["historical_v4_research_inventory"]["git_blob"]
- assert p["status"]=="OWNER-DIRECTED-RESEARCH-SELECTION-715-UNRATIFIED"
+ assert p["historical_v5_research_inventory"]["selected"]==715
  assert v5["schema"]=="d10-v5-semantic-inventory/v1" and v5["status"]=="RESEARCH-UNRATIFIED-PARTIAL"
  assert len(v4["rows"])==707 and len(v5["rows"])==715 and v5["rows"][:707]==v4["rows"]
  assert v5["accounting"]["selected_semantic_candidates"]==715 and v5["accounting"]["remaining_semantic_inventory"]==309
