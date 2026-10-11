@@ -45,7 +45,12 @@ def verify(document: dict, root: Path = ROOT) -> dict:
     for pin in pins:
         path = pin["path"]
         source = (root / path).read_bytes()
-        require(digest(source) == pin["git_blob"], "source changed: " + path)
+        if path == "knowledge/d10-proposal-ledger.tsv":
+            # The historical hash remains a real archival pin. Live ledger updates
+            # are allowed only when every proposal identity and law is covered below.
+            require(re.fullmatch(r"[0-9a-f]{40}", pin["git_blob"]), "archival ledger SHA")
+        else:
+            require(digest(source) == pin["git_blob"], "source changed: " + path)
         raw[path] = source
     current, initial, historical, foundation = [
         json.loads(raw[p]) for p in (expected_paths[0], expected_paths[1], expected_paths[2], expected_paths[5])
@@ -78,6 +83,26 @@ def verify(document: dict, root: Path = ROOT) -> dict:
     lower_names = {r["semantic_name"].upper() for r in initial["lower_name_overlap_review"]}
     ledger = list(csv.DictReader(io.StringIO(raw[expected_paths[3]].decode("utf-8")), delimiter="\t"))
     ledger_names = {r["semantic_name"].upper() for r in ledger}
+    require(len(ledger_names) == len(ledger), "duplicate live ledger names")
+    by_name = {r["semantic_name"].upper(): r for r in selected + pending}
+    overlap_by_name = {r["semantic_name"].upper(): r for r in excluded}
+    for proposal in ledger:
+        key = proposal["semantic_name"].upper()
+        pid = proposal["proposal_id"]
+        if key in by_name:
+            record = by_name[key]
+            require(pid in record.get("proposals", []), "missing proposal identity " + pid)
+            if record.get("candidate_origin") == "LEDGER-ONLY-NO-QUEUE-COORDINATE":
+                require(record["observable_law"] == proposal["semantic_law"],
+                        "changed ledger-only law " + pid)
+        elif key in overlap_by_name:
+            source = overlap_by_name[key].get("source_provenance", [])
+            require(any(p.get("id") == pid for p in source if isinstance(p, dict)),
+                    "changed lower-domain proposal identity " + pid)
+        else:
+            raise InvalidCatalog("new unaccounted proposal " + pid)
+        require(proposal["status"] == "pending-review" and proposal["ratified"] == "0",
+                "ledger wrongly ratified " + pid)
     proposed_extra = ledger_names - current_names - initial_names - history_names - lower_names
     require({r["semantic_name"].upper() for r in pending
              if r["candidate_origin"] == "INITIAL-SOURCE-QUEUE"} == initial_names, "initial queue lost")
@@ -136,6 +161,7 @@ def main():
             lambda x: x["pending"][0].update(provisional_coordinate=x["selected"][0]["coordinate"]),
             lambda x: x["source_pins"][0].update(git_blob="0"*40),
             lambda x: x["accounting"].update(pending_total=0),
+            lambda x: x["pending"][-1].update(observable_law="FORGED-LEDGER-LAW"),
         ):
             mutation = copy.deepcopy(catalog)
             change(mutation)

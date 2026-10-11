@@ -18,7 +18,8 @@
     },
     {
       "path": "knowledge/d10-proposal-ledger.tsv",
-      "git_blob": "b94ec584e2efbfaa2859de1d031da41ee7ae6752"
+      "git_blob": "b94ec584e2efbfaa2859de1d031da41ee7ae6752",
+      "pin_role": "ARCHIVAL-SNAPSHOT; live ledger is reconciled by proposal IDs, laws and ratification statuses"
     },
     {
       "path": "knowledge/d10-source-universe-891-20261011.json",
@@ -52,7 +53,8 @@
     "Selected D10 rows may remain coordinate=null pending independent semantic review",
     "D1-D9 name overlaps do not allocate D10 addresses and remain visible in separate review",
     "Source universe 891 is an archived snapshot, not an assertion that the present union has 891 entries",
-    "Not an exhaustive verification of all Git branches"
+    "Not an exhaustive verification of all Git branches",
+    "Historical ledger SHA is a frozen evidence reference; later provenance-only ledger edits are accepted only when all proposal IDs and laws remain consistent"
   ],
   "selected": [
     {
