@@ -1,0 +1,47 @@
+{
+  "schema": "sens-historical-branch-archive/v1",
+  "archived_at": "2026-10-11",
+  "source": {
+    "repo": "juv4uk/sens",
+    "pr": 1038,
+    "title": "feat(#1036): add Lisp-authored CML bootstrap envelope",
+    "branch": "feat/1036-cml-bootstrap-envelope",
+    "head_sha": "c5bf3888bad91ac427f9d15e8e995766d563bd7e",
+    "base": "main",
+    "base_sha": "42e3945c5e8f27902ade6fedf52f54786c56f914",
+    "reason": "Lisp-authored CML bootstrap envelope was authored against old my-lisp paths and old two-part COND/reader-era semantics. Current main uses crates/sens; do not merge old observer/authority inventory rows without current-SENS port and real CML consumer parity."
+  },
+  "files": [
+    {
+      "original_path": "crates/my-lisp/tests/cml_bootstrap_envelope.rs",
+      "archived_path": "research/domain-archive/20261011/pr1038/source/crates/my-lisp/tests/cml_bootstrap_envelope.rs",
+      "git_blob_sha": "335048f0c5f224faad37b2d43146590314820969",
+      "bytes": 1369
+    },
+    {
+      "original_path": "lib/compiler/cml-bootstrap.lisp",
+      "archived_path": "research/domain-archive/20261011/pr1038/source/lib/compiler/cml-bootstrap.lisp",
+      "git_blob_sha": "26ace520835351e3eb1e431372127dc633a8804c",
+      "bytes": 2376
+    },
+    {
+      "original_path": "tests/authority-inventory.lisp",
+      "archived_path": "research/domain-archive/20261011/pr1038/source/tests/authority-inventory.lisp",
+      "git_blob_sha": "f222a5482314fb29cdcb2746e1bca952e8a057ec",
+      "bytes": 5948
+    },
+    {
+      "original_path": "tests/authority-inventory.tsv",
+      "archived_path": "research/domain-archive/20261011/pr1038/source/tests/authority-inventory.tsv",
+      "git_blob_sha": "cf3ccd3b0c984462c149461d8aac5c4d7bd0f80c",
+      "bytes": 28618
+    },
+    {
+      "original_path": "tests/fixtures/cml-bootstrap-envelope-witness.lisp",
+      "archived_path": "research/domain-archive/20261011/pr1038/source/tests/fixtures/cml-bootstrap-envelope-witness.lisp",
+      "git_blob_sha": "67c0dbe58cea553dd014b99f9213c9ab6f8acf85",
+      "bytes": 243
+    }
+  ],
+  "disposition": "ARCHIVE-ONLY / CML integration and current SENS port require review"
+}
