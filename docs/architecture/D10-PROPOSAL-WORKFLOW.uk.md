@@ -11,8 +11,14 @@ issue/PR/branch, не зміна семантики Core або ратифіка
 **Вхід:** один консолідований TSV з УСІХ відомих історичних джерел:
 відкриті/закриті/злиті PR, чинні й історичні гілки, коміти, архівні
 рядки, `knowledge/d10-proposal-ledger.tsv`, результати старих дослідних
-ланок, донорські репозиторії та чинний
-`knowledge/d10-v1-semantic-inventory.json`. Кожен source-ref фіксувати
+ланок, донорські репозиторії та **канонічний поточний інвентар**,
+визначений `knowledge/d10-current-inventory.json` → `canonical_current.path`.
+Перевіряти фактичний Git blob SHA цільового файла проти `canonical_current.git_blob`
+і фіксувати поточний `main@SHA` у manifest кожного запуску. Історичний
+`knowledge/d10-v1-semantic-inventory.json` має роль
+`FROZEN-PREPLACEMENT-ARCHIVE`: його не можна використовувати як чинну
+базу Ф3, selected-лічильника чи D10-координат. Якщо pointer та його
+цільовий blob не збігаються, завершувати перевірку BLOCK без accepted. Кожен source-ref фіксувати
 точно (`repo@commit:path:line`, blob SHA, issue/PR URL); обов'язково
 завершити пагінацію, не видавати неповний набір за «усі кандидати».
 Об'єднувати *ідентичні свідчення*, а не губити їх; стабільний semantic ID
