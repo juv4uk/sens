@@ -86,7 +86,8 @@
        (110
          (right (compiler-false seed))
          ((compiler-true seed) (compiler-true seed))))
-      ((110
+      ((compiler-true seed)
+       (110
          (right (compiler-true seed))
          ((compiler-true seed) (compiler-false seed)))))))
 
