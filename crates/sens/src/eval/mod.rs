@@ -359,7 +359,26 @@ fn evaluate_d5_set_family(
     let label = if is_set { "D5:00110" } else { "D5:00111" };
     special_forms::exact_arity(label, arguments, 2, span)?;
 
-    let target = if is_set {
+    // D2/W7 is a contextual binder already admitted for DEFINE/LAMBDA/
+    // LABEL. Extend only the exact SET/SETQ target context. Ordinary QUOTE
+    // of D2/W7 data remains a list; it must NOT globally become Symbol.
+    let direct_key = if is_setq {
+        text7_binding_key(&arguments[0])
+    } else {
+        match &arguments[0].kind {
+            ExprKind::List(items) if items.len() == 2
+                && binary_head_domain_identity(&items[0])
+                    .is_some_and(|head| is_d3(head, 0b001)) =>
+            {
+                text7_binding_key(&items[1])
+            }
+            _ => None,
+        }
+    };
+    let target = if let Some(key) = direct_key {
+        canon::ensure_bindable(&key, arguments[0].span)?;
+        key
+    } else if is_set {
         match evaluate(&arguments[0], environment)? {
             Value::Symbol(ref name) => name.clone(),
             _ => {
@@ -376,7 +395,7 @@ fn evaluate_d5_set_family(
             _ => {
                 return Err(LanguageError::new(
                     ErrorKind::Type,
-                    format!("{label} target must be a literal symbol"),
+                    format!("{label} target must be a literal symbol or D2/W7 binder"),
                     arguments[0].span,
                 ));
             }
