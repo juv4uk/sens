@@ -4,7 +4,7 @@
   "authority": "RESEARCH-PRELIMINARY-NO-CORE-OR-PHYSICAL-AUTHORITY",
   "decision_rule": "Identical semantic law across source identities, SHA-pinned source F1 previously verified; excludes exact surface collisions with D1-D9/current D10 and rejects conflicting law texts. F2 executed witness and F3 behavioral distinctness NOT ESTABLISHED.",
   "source_filter": {
-    "path": "knowledge/d10-filter/rejected.tsv",
+    "path": "knowledge/d10-source-snapshots/d10-v9-f1-rejected-992fe91211b57965.tsv",
     "git_blob": "992fe91211b57965f3a650e3e84c7e366e1028ba",
     "count": 1775,
     "verified_provenance": true,
