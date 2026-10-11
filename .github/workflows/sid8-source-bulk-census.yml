@@ -6,6 +6,8 @@ on:
     paths:
       - scripts/migrate-sid8-source-batch.py
       - tests/test_migrate_sid8_source_batch.py
+      - knowledge/guard-fact-policy.lisp
+      - knowledge/guard-reference.lisp
       - .github/workflows/sid8-source-bulk-census.yml
   workflow_dispatch:
 
