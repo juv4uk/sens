@@ -46,7 +46,6 @@ mod binary_execution;
 #[cfg(test)]
 mod bootstrap_measurement;
 pub mod sens;
-mod sid;
 /// Deliberately thin, crate-external view onto `semantic_registry` — exposes
 /// exactly the (namespace, spelling) pairs a consumer like the CML semantic
 /// export needs, without making the internal parsing/index machinery public.
@@ -196,8 +195,6 @@ pub use gpu_execution_packet::{
 pub use environment::{CoreProfile, Environment, Session};
 pub use error::{Classification, ErrorKind, LanguageError};
 pub use language_items::{language_items, Arity, LanguageItem, LanguageItemKind};
-#[allow(deprecated)]
-pub use sid::Sid8;
 pub use sens::{Sens, Sens8};
 pub use source_words::{
     parse_binary_source_words, BinarySourceToken, BinarySourceWord, CANONICAL_SOURCE_EXTENSION,
@@ -366,7 +363,7 @@ pub fn load_macro_library(session: &mut Session) -> Result<EvalResult, LanguageE
 fn bind_missing_stable_surface_peers(environment: &Environment) {
     let snapshot = environment.snapshot();
     // HashMap, not BTreeMap: Sens8 is deliberately not Ord (identity
-    // comparison/hashing only, no ordering -- see sid.rs's own header).
+    // comparison/hashing only, no ordering).
     // Iteration order here is irrelevant; this is a lookup table.
     let mut values_by_semantic_id = std::collections::HashMap::new();
 

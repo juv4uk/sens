@@ -9,7 +9,7 @@
 //! - Semantic residency і callable/mechanism admission лишаються окремими фактами;
 //!   відсутній механізм може fail-closed навіть для ратифікованого resident.
 //! - D7 is Sound7/local-ordinal identity and never enters callable routing by width.
-//! - D8 exact identity is current; historical Sens8/Sid8 remains compatibility/provenance only.
+//! - D8 exact identity is current; a packed transport byte never establishes its domain.
 
 use crate::{
     Bija3, BinarySourceWord, CoreD4, CoreD5, CoreD6, CoreD8, CoreD9, PredicateBit, Racana2, SoundD7,
