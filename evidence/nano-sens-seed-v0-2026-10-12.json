@@ -175,20 +175,27 @@
     "partial_census": {
       "file": "evidence/nano-sens-seed-v0-source-closure-census-2026-10-12.json",
       "pinned_sens_commit": "d0787a40fcea36501747732aa61b6de19fe29c70",
-      "source_and_manifest_file_count": 114,
-      "known_subset_on_disk_bytes": 1397243,
+      "source_and_manifest_file_count": 117,
+      "known_subset_on_disk_bytes": 1432402,
       "status": "VERIFIED_SUBSET_NOT_SEED_TOTAL",
       "includes_counts": {
         "production_rust_source_files": 70,
         "workspace_package_manifests": 20,
-        "root_authority_and_embedded_inputs": 24
+        "root_authority_and_embedded_inputs": 27
       },
       "corrections": [
         "excluded cfg(test)-only crates/sens/src/bootstrap_measurement.rs (3271 bytes)",
         "added 12 compile-time included lib/ source/data files (195605 bytes)",
         "listed 7 exact crates.io package versions/checksums in the external dependency ledger",
-        "added lib/core.lisp (59,301 bytes), statically embedded by gpu_oracle_conformance.rs"
-      ]
+        "added lib/core.lisp (59,301 bytes), statically embedded by gpu_oracle_conformance.rs",
+        "added CML-consumed SENS inputs: lib/surface/semantic-registry.lisp (26,904 bytes), contracts/compiler-semantic-input-v1.lisp (5,727 bytes), lib/machine/cpu/intel-core-i5-6400.lisp (2,528 bytes)"
+      ],
+      "cml_consumer_census": "https://github.com/juv4uk/cml/blob/master/evidence/nano-sens-cml-runner-input-census-2026-10-12.json",
+      "cml_known_source_subset": {
+        "file_count": 70,
+        "on_disk_bytes": 1320729,
+        "scope": "CML module source + tracked build metadata only; separate subtotal, not added to SENS subtotal"
+      }
     },
     "external_dependency_ledger": "evidence/nano-sens-seed-v0-source-closure-census-2026-10-12.json :: external_build_dependency_inventory"
   },
@@ -196,6 +203,7 @@
     "Metric integrity correction (2026-10-12): the earlier 34,580,696-byte value remains a valid on-disk measurement of one ELF runner component. Code inspection shows this runner invokes cargo run -p xtask -- compiler-export at runtime, so the runner alone does not represent the complete seed input closure. The full-chain seed total is NOT MEASURED until every required non-toolchain input file is enumerated, pinned and counted.",
     "Follow-up closure census records 102 pinned files (1,145,608 bytes) for a source/manifest lower-bound subset. This is not a seed total: include macro dependencies, full Cargo build/runtime closure, registry source packages and current Git metadata dependency are not yet minimized or fully classified.",
     "Census correction (2026-10-12): the prior 102-file/1,145,608-byte tally was not a reliable production-input subset because it included cfg(test)-only bootstrap_measurement.rs and omitted 12 lib.rs compile-time includes. The corrected verified subset contains 113 pinned paths/1,337,942 bytes. It remains incomplete and is not the seed total.",
-    "Include-edge scan correction (2026-10-12): crates/sens/src/gpu_oracle_conformance.rs additionally includes lib/core.lisp (59,301 bytes). The corrected verified subset is now 114 pinned paths / 1,397,243 bytes; this remains a partial subset, not the whole seed-total."
+    "Include-edge scan correction (2026-10-12): crates/sens/src/gpu_oracle_conformance.rs additionally includes lib/core.lisp (59,301 bytes). The corrected verified subset is now 114 pinned paths / 1,397,243 bytes; this remains a partial subset, not the whole seed-total.",
+    "Cross-repository closure update (2026-10-12): recorded the pinned CML K1 runner build/test source subset separately: 70 CML module/metadata files totaling 1,320,729 bytes. The SENS verified subset now includes three previously omitted SENS files consumed by the CML runner/build process, reaching 117 paths / 1,432,402 bytes. The two subtotals have distinct scopes and are not a full seed total."
   ]
 }
