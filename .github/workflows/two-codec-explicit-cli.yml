@@ -111,6 +111,40 @@ jobs:
               raise SystemExit(f"tiny real F3 coverage dropped to {f3}")
           print(f"TWO_CODEC_ALL_TINY_CLI_PARITY_PASS f3={f3} total={manifest['source_files']}")
           PY
+      - name: SHA-256 integrity gate runs BEFORE decoding or executing tiny F3
+        shell: bash
+        run: |
+          set -euo pipefail
+          bin=target/release/sens-trit
+          trusted=19b495e17cd0522c1af4863704b92751df5e5769ee0bfe3c9844aedbc0a57406
+          actual=$(sha256sum "$RUNNER_TEMP/small.senc" | cut -d' ' -f1)
+          test "$actual" = "$trusted"
+          "$bin" verify-f3-sha256 "$RUNNER_TEMP/small.senc" "$trusted" \
+            | tee "$RUNNER_TEMP/f3-verified.txt"
+          grep -q 'F3_SHA256_VERIFIED canonical_t5_bytes=4' "$RUNNER_TEMP/f3-verified.txt"
+          "$bin" eval-f3-sha256 "$RUNNER_TEMP/small.senc" "$trusted" \
+            > "$RUNNER_TEMP/f3-checked-eval.txt"
+          cmp "$RUNNER_TEMP/f3-checked-eval.txt" "$RUNNER_TEMP/t5-eval.txt"
+          cp "$RUNNER_TEMP/small.senc" "$RUNNER_TEMP/mutated.senc"
+          python3 - "$RUNNER_TEMP/mutated.senc" <<'PY'
+          from pathlib import Path
+          import sys
+          p=Path(sys.argv[1]); content=bytearray(p.read_bytes())
+          content[-1]^=1
+          p.write_bytes(content)
+          PY
+          if "$bin" verify-f3-sha256 "$RUNNER_TEMP/mutated.senc" "$trusted" >/dev/null 2>&1; then
+            echo "F3 physical corruption ignored by trusted hash" >&2
+            exit 1
+          fi
+          if "$bin" eval-f3-sha256 "$RUNNER_TEMP/mutated.senc" "$trusted" >/dev/null 2>&1; then
+            echo "F3 corrupt carrier executed despite mismatched trusted hash" >&2
+            exit 1
+          fi
+          if "$bin" eval-f3-sha256 "$RUNNER_TEMP/small.senc" bad >/dev/null 2>&1; then exit 1; fi
+          if "$bin" eval-f3-sha256 "$RUNNER_TEMP/small.senc" "$(printf '0%.0s' {1..64})" >/dev/null 2>&1; then exit 1; fi
+          if "$bin" verify-f3-sha256 tests/fixtures/migration-quote-cohort-main/quote-legacy.sens "$trusted" >/dev/null 2>&1; then exit 1; fi
+          echo F3_SHA256_FAIL_CLOSED_PASS
       - name: The wrong extension and malformed frame MUST fail with no fallback
         shell: bash
         run: |
@@ -137,6 +171,8 @@ jobs:
             ${{ runner.temp }}/f3-words.txt
             ${{ runner.temp }}/t5-words.txt
             ${{ runner.temp }}/f3-eval.txt
+            ${{ runner.temp }}/f3-verified.txt
+            ${{ runner.temp }}/f3-checked-eval.txt
             ${{ runner.temp }}/t5-eval.txt
           if-no-files-found: error
           retention-days: 30
