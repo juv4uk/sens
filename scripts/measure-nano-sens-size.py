@@ -13,6 +13,7 @@ import json
 import re
 import sys
 import tempfile
+import subprocess
 from pathlib import Path
 from typing import Any
 
@@ -53,6 +54,75 @@ def load_json(path: Path, label: str) -> dict[str, Any]:
         raise MeasurementError(f"cannot read {label} JSON: {error}") from error
     require(isinstance(value, dict), f"{label} JSON root must be an object")
     return value
+
+
+def elf_size_breakdown(path: Path) -> dict[str, Any]:
+    """Report physical, PT_LOAD file, and executable-section bytes without stripping."""
+    result: dict[str, Any] = {
+        "on_disk_file_bytes": path.stat().st_size,
+        "loadable_segment_file_bytes": None,
+        "loadable_segment_status": "NOT_MEASURED",
+        "loadable_segment_reason": None,
+        "code_section_bytes": None,
+        "code_section_status": "NOT_MEASURED",
+        "code_section_reason": None,
+        "format": "unknown",
+        "measurement_tool": "GNU readelf -W -l/-S",
+    }
+    try:
+        program_headers = subprocess.run(
+            ["readelf", "-W", "-l", str(path)],
+            check=True, capture_output=True, text=True,
+        ).stdout
+        load_sizes: list[int] = []
+        for line in program_headers.splitlines():
+            columns = line.split()
+            if len(columns) >= 5 and columns[0] == "LOAD":
+                load_sizes.append(int(columns[4], 16))
+        require(bool(load_sizes), "ELF has no readable PT_LOAD program headers")
+        result["loadable_segment_file_bytes"] = sum(load_sizes)
+        result["loadable_segment_status"] = "MEASURED"
+        result["format"] = "ELF"
+    except (OSError, subprocess.SubprocessError, ValueError, MeasurementError) as error:
+        result["loadable_segment_reason"] = str(error)
+
+    try:
+        section_headers = subprocess.run(
+            ["readelf", "-W", "-S", str(path)],
+            check=True, capture_output=True, text=True,
+        ).stdout
+        executable_section_sizes: list[int] = []
+        section_rows = 0
+        for line in section_headers.splitlines():
+            columns = line.split()
+            if not columns or not columns[0].startswith("["):
+                continue
+            # GNU readelf prints either "[ 1]" or "[10]" depending on index width.
+            if columns[0] == "[":
+                if len(columns) < 9 or not columns[1].endswith("]"):
+                    continue
+                name_i, type_i, size_i, flags_i = 2, 3, 6, 8
+            else:
+                if len(columns) < 8:
+                    continue
+                name_i, type_i, size_i, flags_i = 1, 2, 5, 7
+            try:
+                section_type = columns[type_i]
+                section_size = int(columns[size_i], 16)
+                flags = columns[flags_i]
+            except (IndexError, ValueError):
+                continue
+            section_rows += 1
+            # NOBITS sections have memory size but consume no file bytes.
+            if "X" in flags and section_type != "NOBITS":
+                executable_section_sizes.append(section_size)
+        require(section_rows > 0, "ELF section headers could not be parsed")
+        result["code_section_bytes"] = sum(executable_section_sizes)
+        result["code_section_status"] = "MEASURED"
+        result["format"] = "ELF"
+    except (OSError, subprocess.SubprocessError, ValueError, MeasurementError) as error:
+        result["code_section_reason"] = str(error)
+    return result
 
 
 def make_report(args: argparse.Namespace) -> dict[str, Any]:
@@ -152,12 +222,14 @@ def make_report(args: argparse.Namespace) -> dict[str, Any]:
             "file_name": seed.name,
             "file_bytes": seed.stat().st_size,
             "sha256": sha256_file(seed),
+            "size_breakdown": elf_size_breakdown(seed),
         },
         "c1_executable": {
             "file_name": c1.name,
             "file_bytes": c1_size,
             "sha256": c1_sha,
             "matches_pinned_lineage": True,
+            "size_breakdown": elf_size_breakdown(c1),
         },
         "c1_c2_lineage": {
             "status": "pass",
@@ -172,10 +244,9 @@ def make_report(args: argparse.Namespace) -> dict[str, Any]:
             "file_bytes": c2_size,
             "sha256": c2_sha,
             "matches_pinned_lineage": True,
+            "size_breakdown": elf_size_breakdown(c2),
         } if c2 is not None else None),
         "not_measured": [
-            "ELF/PE section sizes",
-            "loadable-segment bytes",
             "shared-library/toolchain dependency bytes",
             "minimum possible seed size",
             "GAS/NASM golden-corpus parity",
@@ -185,6 +256,8 @@ def make_report(args: argparse.Namespace) -> dict[str, Any]:
             "Seed identity is operator-declared and must be reviewed separately.",
             "This tool validates supplied lineage evidence; it does not rerun C0/C1/C2.",
             "Without --c2-executable, C2 file bytes are not independently remeasured.",
+            "On-disk bytes are always reported; PT_LOAD and executable-section bytes are measured separately when GNU readelf can parse the file, otherwise each metric is explicitly NOT_MEASURED with a reason.",
+            "Loadable-segment file bytes may differ from on-disk bytes; executable-section bytes are a section-header sum and are not interchangeable with loadable bytes.",
         ],
     }
 
