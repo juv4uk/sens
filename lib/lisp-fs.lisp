@@ -143,6 +143,8 @@
   (0010 (text)
     (fs-object-package-decision (11101010 text))))
 
+; F2 root envelopes validate their own format/version/revision/bindings/objects.
+; Object-envelope address/value fields do not exist in a root envelope.
 (0011 fs-root-package-decision
   (0010 (package)
     (110
@@ -154,10 +156,6 @@
       ((fs-d1-no?
          (fs-journal-version-current? (fs-package-field (001 version) package)))
        (1110 (001 rejected) (001 unsupported-version)))
-      ((fs-d1-no?
-         (101 (fs-package-field (001 address) package)
-                   (knowledge-content-address (fs-package-field (001 value) package))))
-       (1110 (001 rejected) (001 address-mismatch)))
       ((fs-d1-no? (knowledge-proper-list? (fs-package-field (001 bindings) package)))
        (1110 (001 rejected) (001 invalid-bindings)))
       ((fs-d1-no? (knowledge-proper-list? (fs-package-field (001 objects) package)))
