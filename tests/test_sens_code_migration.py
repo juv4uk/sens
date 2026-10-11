@@ -116,22 +116,24 @@ class SensCodeMigrationTests(unittest.TestCase):
             self.assertTrue(converted.startswith(f"10 {bits} 00 "), (surface, converted))
             self.assertTrue(hits, surface)
 
-    def test_unframed_lexical_binder_blocks_old_false_binary_success(self):
-        source = "(00001001 machine-block (00001000 (forms) forms))\n"
-        with self.assertRaisesRegex(mod.BinaryMigrationError, "UNFRAMED_TEXT7_ATOM"):
-            self.binary(source)
-        # A true original lib source, not a synthetic canary, must not be
-        # advertised as an executable packed SENS until a D7 binder term law.
-        original = (ROOT / "lib/machine/block.lisp").read_text(encoding="utf-8")
-        with self.assertRaisesRegex(
-            mod.BinaryMigrationError, r"UNFRAMED_TEXT7_ATOM 'machine-block'"
-        ):
-            self.binary(original)
+    def test_admitted_contextual_text7_binder_is_physical_t5_roundtrip(self):
+        # A named DEFINE and LAMBDA parameter use contextual D2/W7 keys;
+        # the standalone W7 payload remains data, never an implicit symbol.
+        from sens_t5_codec import decode_bytes, encode_projection, parse_words
+        original = "(00001001 machine-block (00001000 (forms) forms))\n"
+        projected, hits, shadowed = self.binary(original)
+        self.assertTrue(projected.startswith("10 0011 00 10 "), projected)
+        self.assertRegex(projected, r"^[01\s]+$")
+        self.assertNotIn("machine-block", projected)
+        self.assertFalse(shadowed)
+        self.assertTrue(hits)
+        self.assertEqual(decode_bytes(encode_projection(projected)), parse_words(projected))
+
 
     def test_single_cell_text7_atom_is_not_a_bare_d7_codepoint(self):
         # A bare one-cell W7 value is D7 data, not a Lisp identifier.
-        # No D2 Text7 atom/binder framing law has been ratified yet.
-        with self.assertRaisesRegex(mod.BinaryMigrationError, "UNFRAMED_TEXT7_ATOM"):
+        # Contextual D2/W7 bindings exist, but unbound names cannot become data.
+        with self.assertRaisesRegex(mod.BinaryMigrationError, "UNADMITTED_TEXT7_CONTEXT"):
             self.binary("(CONS a ())\n")
 
     def test_binary_source_uses_d2_structure_and_exact_function_words(self):
@@ -166,7 +168,7 @@ class SensCodeMigrationTests(unittest.TestCase):
         self.assertEqual(hits[0].label, "CAR")
 
     def test_unknown_user_call_head_is_blocker_not_text7(self):
-        with self.assertRaisesRegex(mod.BinaryMigrationError, "dynamic-symbol-head"):
+        with self.assertRaisesRegex(mod.BinaryMigrationError, "unresolved executable head"):
             self.binary("(sqrt-iter x n)\n")
 
     def test_number_width_ladder_is_owner_ratified_24_48_96(self):
@@ -202,19 +204,19 @@ class SensCodeMigrationTests(unittest.TestCase):
         cleaned = mod.strip_comments(source)
         self.assertIn('";not-comment"', cleaned)
         self.assertIn('"#|not-comment|#"', cleaned)
-        with self.assertRaisesRegex(mod.BinaryMigrationError, "UNFRAMED_TEXT7_ATOM"):
+        with self.assertRaisesRegex(mod.BinaryMigrationError, "UNADMITTED_STRING_VALUE"):
             self.binary(source)
 
     def test_quoted_multicell_function_name_cannot_impersonate_one_atom(self):
-        # No current atom framing law means quoted CAR is three D7 cells,
+        # Quote syntax has no admitted canonical lowering; quoted CAR must not
         # NOT a canonical standalone Lisp atom or executable head.
-        with self.assertRaisesRegex(mod.BinaryMigrationError, "UNFRAMED_TEXT7_ATOM"):
+        with self.assertRaisesRegex(mod.BinaryMigrationError, "UNADMITTED_READER_QUOTE"):
             self.binary("'(CAR x)\n")
 
     def test_dot_is_d2_only_when_standalone_multi_cell_symbol_blocks(self):
         dotted, _, _ = self.binary("(LIST () . ())\n")
         self.assertIn(" 11 ", dotted)
-        with self.assertRaisesRegex(mod.BinaryMigrationError, "UNFRAMED_TEXT7_ATOM"):
+        with self.assertRaisesRegex(mod.BinaryMigrationError, "UNADMITTED_TEXT7_CONTEXT"):
             self.binary("(LIST a.b)\n")
 
     def test_unencodable_data_character_fails_closed(self):
@@ -226,17 +228,18 @@ class SensCodeMigrationTests(unittest.TestCase):
         self.assertRegex(converted, r"^[01\s]+$")
         converted.encode("ascii")
 
-    def test_multi_cell_ukrainian_and_english_strings_require_ratified_term(self):
-        for source in (
-            '(CONS "привіт" x)\n',
-            '(CONS test-name x)\n',
-            '(CONS ім’я x)\n',
-        ):
+    def test_string_data_and_unbound_text7_sources_remain_blocked(self):
+        sources = (
+            ('(CONS "привіт" x)\n', "UNADMITTED_STRING_VALUE"),
+            ('(CONS test-name x)\n', "UNADMITTED_TEXT7_CONTEXT"),
+            ('(CONS ім’я x)\n', "UNADMITTED_TEXT7_CONTEXT"),
+            ('(QUOTE binary)\n', "UNADMITTED_TEXT7_CONTEXT"),
+        )
+        for source, reason in sources:
             with self.subTest(source=source):
-                with self.assertRaisesRegex(
-                    mod.BinaryMigrationError, "UNFRAMED_TEXT7_ATOM"
-                ):
+                with self.assertRaisesRegex(mod.BinaryMigrationError, reason):
                     self.binary(source)
+
 
     def test_new_sens_mirror_is_actual_physical_file_and_no_extensionless(self):
         with tempfile.TemporaryDirectory() as td:
