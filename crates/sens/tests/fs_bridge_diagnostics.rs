@@ -42,6 +42,24 @@ fn journal_event_fields_are_retrieved_from_a_real_alist() {
 }
 
 #[test]
+fn referenced_address_checks_are_d1_and_fail_closed() {
+    let mut session = session();
+    for (source, expected) in [
+        ("(fs-all-addresses-present? (quote ()) (empty-content-store))", true),
+        ("(fs-all-addresses-present? (quote missing) (empty-content-store))", false),
+        ("(fs-all-addresses-present? (quote (missing)) (empty-content-store))", false),
+        ("(fs-binding-addresses-present? (quote ()) (empty-content-store))", true),
+        ("(fs-binding-addresses-present? (quote ((a . missing))) (empty-content-store))", false),
+    ] {
+        let actual = eval_program(source, &mut session)
+            .unwrap_or_else(|e| panic!("D1 address validation {source}: {e:?}"))
+            .value;
+        assert_eq!(actual.as_predicate_bit(), Some(expected),
+            "the filesystem must never use host T/NIL as a D1 result");
+    }
+}
+
+#[test]
 fn root_proper_list_validation_is_exact_d1_and_rejects_dotted_tails() {
     let mut session = session();
     for (value, expected) in [
