@@ -128,18 +128,33 @@ pub fn encode_binary_frame(frame: &BinaryFrame) -> Result<Vec<u8>, BinaryFrameEr
             }
         }
         BinaryFrame::BinaryNumber(number) => {
-            // The legacy BinaryNumber extension only stores normalized bits,
-            // not the newly-ratified D24/D48/... domain. Until a separate
-            // transport admission exists, do NOT serialize and silently
-            // re-read a Dn value as an unqualified Number.
-            if let Some(width) = number.numeric_domain_width() {
-                return Err(BinaryFrameError::UnsupportedDomainWidth { index: 0, width });
-            }
             out.extend_from_slice(&CONTROL_ESCAPE);
             out.extend_from_slice(&TYPE_EXTENSION);
             out.extend_from_slice(&EXT_BINARY_NUMBER);
-            encode_len_into(number.width(), &mut out)?;
-            out.extend_from_slice(number.as_bits());
+            match number.numeric_domain_width() {
+                None => {
+                    // Historical normalized/UNQUALIFIED natural Number framing:
+                    // preserve the exact old bytes for all existing values.
+                    encode_len_into(number.width(), &mut out)?;
+                    out.extend_from_slice(number.as_bits());
+                }
+                Some(domain_width) => {
+                    // The old gamma0(count=0) was invalid. It is now a
+                    // disjoint mechanical subtype marker for a Dn-qualified
+                    // number. The domain width is explicitly encoded; raw
+                    // payload length or its leading bits never infer Dn.
+                    // [frame extension][gamma0(0)][gamma0(Dn width)][Dn bits]
+                    encode_len_into(0, &mut out)?;
+                    encode_len_into(domain_width, &mut out)?;
+                    let exact = number.exact_numeric_domain_bits().ok_or(
+                        BinaryFrameError::InvalidNumber { index: 0 },
+                    )?;
+                    if exact.len() != domain_width {
+                        return Err(BinaryFrameError::InvalidNumber { index: 0 });
+                    }
+                    out.extend_from_slice(&exact);
+                }
+            }
         }
         BinaryFrame::Text(text) => {
             out.extend_from_slice(&CONTROL_ESCAPE);
@@ -303,7 +318,23 @@ fn decode_binary_number(
 ) -> Result<BinaryFrame, BinaryFrameError> {
     let count = reader.read_len()?;
     if count == 0 {
-        return Err(BinaryFrameError::NonCanonicalNumber { index: frame_start });
+        // A zero *legacy* magnitude length was previously prohibited.
+        // Reuse that unassigned subcase, not a D2 syntactic control code,
+        // for an explicit D24/D48/... domain width and full-width word.
+        let domain_width = reader.read_len()?;
+        if !BinaryNumber::is_numeric_domain_width(domain_width) {
+            return Err(BinaryFrameError::UnsupportedDomainWidth {
+                index: frame_start, width: domain_width,
+            });
+        }
+        // Read only after validating width: avoids allocating for arbitrary
+        // attacker-supplied lengths not belonging to the numeric ladder.
+        let bits = reader.read_bit_string(domain_width)?;
+        let word = bits.bytes().map(|c| if c == b'1' { 1 } else { 0 })
+            .collect::<Vec<_>>();
+        let number = BinaryNumber::from_numeric_domain_bits(domain_width, &word)
+            .ok_or(BinaryFrameError::InvalidNumber { index: frame_start })?;
+        return Ok(BinaryFrame::BinaryNumber(number));
     }
     let bits = reader.read_bit_string(count)?;
     if bits.len() > 1 && bits.starts_with('0') {
@@ -783,18 +814,51 @@ mod tests {
         ));
     }
     #[test]
-    fn d24_numeric_value_rejects_legacy_domain_erasing_frame_encoding() {
-        let qualified = BinaryNumber::from_numeric_domain_bits(24, &vec![1; 24])
-            .expect("direct admitted D24 word");
-        assert!(matches!(
-            encode_binary_frame(&BinaryFrame::BinaryNumber(qualified)),
-            Err(BinaryFrameError::UnsupportedDomainWidth { width: 24, .. })
-        ));
-        // The historic unqualified path remains round-trippable as before.
-        let unqualified = BinaryNumber::from_bits([1, 0, 1]).unwrap();
-        let frame = BinaryFrame::BinaryNumber(unqualified);
-        let wire = encode_binary_frame(&frame).unwrap();
-        assert_eq!(decode_binary_frame(&wire).unwrap().0, frame);
+    fn d24_numeric_value_framing_preserves_exact_domain() {
+        // Not a new language source literal: only mechanical framing metadata.
+        let plain = BinaryFrame::BinaryNumber(BinaryNumber::one());
+        let old = encode_binary_frame(&plain).unwrap();
+        assert_eq!(old, [1, 1, 1, 1, 0, 1, 0, 1, 1]); // 6-bit tag, gamma0(1), 1
+        assert_eq!(decode_binary_frame(&old).unwrap().0, plain);
+        for width in [24usize, 48, 96, 192, 384] {
+            for word in [vec![0; width], vec![1; width]] {
+                let number = BinaryNumber::from_numeric_domain_bits(width, &word).unwrap();
+                let frame = BinaryFrame::BinaryNumber(number);
+                let encoded = encode_binary_frame(&frame).unwrap();
+                assert_eq!(&encoded[..7], &[1, 1, 1, 1, 0, 1, 1]);
+                assert_ne!(encoded, old);
+                let (decoded, consumed) = decode_binary_frame(&encoded).unwrap();
+                assert_eq!(decoded, frame);
+                assert_eq!(consumed, encoded.len());
+                let BinaryFrame::BinaryNumber(decoded_number) = decoded else { unreachable!() };
+                assert_eq!(decoded_number.numeric_domain_width(), Some(width));
+                assert_eq!(decoded_number.exact_numeric_domain_bits(), Some(word));
+                // Removing one bit must never silently re-interpret a
+                // truncated domain word as a smaller valid numeric frame.
+                let mut truncated = encoded;
+                truncated.pop();
+                assert!(decode_binary_frame(&truncated).is_err());
+            }
+        }
+        let d24 = BinaryFrame::BinaryNumber(
+            BinaryNumber::from_numeric_domain_bits(24, &vec![0; 24]).unwrap());
+        let d48 = BinaryFrame::BinaryNumber(
+            BinaryNumber::from_numeric_domain_bits(48, &vec![0; 48]).unwrap());
+        assert_ne!(encode_binary_frame(&d24).unwrap(), encode_binary_frame(&d48).unwrap());
+    }
+
+    #[test]
+    fn d24_numeric_frame_rejects_invalid_domain_and_payload() {
+        let mut header = Vec::from([1, 1, 1, 1, 0, 1, 1]); // ext + gamma0(0)
+        encode_len_into(25, &mut header).unwrap();
+        assert!(matches!(decode_binary_frame(&header), Err(BinaryFrameError::UnsupportedDomainWidth { width: 25, .. })));
+        let mut incomplete = Vec::from([1, 1, 1, 1, 0, 1, 1]);
+        encode_len_into(24, &mut incomplete).unwrap();
+        incomplete.extend_from_slice(&vec![0; 23]);
+        assert!(matches!(decode_binary_frame(&incomplete), Err(BinaryFrameError::UnexpectedEnd { .. })));
+        let unqualified = BinaryFrame::BinaryNumber(BinaryNumber::from_bits([1,0,1]).unwrap());
+        let encoded = encode_binary_frame(&unqualified).unwrap();
+        assert_eq!(decode_binary_frame(&encoded).unwrap().0, unqualified);
     }
 
 }
