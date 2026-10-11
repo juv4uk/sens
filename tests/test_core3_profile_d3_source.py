@@ -47,7 +47,7 @@ class Core3SourceCutover(unittest.TestCase):
     def test_negative_controls_detect_host_truth_and_three_field(self):
         good = TARGET.read_text(encoding="utf-8")
         self.assertIn("COND_HOST_TRUTH", {f.rule for f in mod.scan_lisp(
-            good.replace("((010 (001 ()))", "((t", 1), "lib/corrupted.lisp")})
+            good.replace("((010 (001 ()))", "(t", 1), "lib/corrupted.lisp")})
         self.assertIn("COND_NOT_TWO_FIELDS", {f.rule for f in mod.scan_lisp(
             good.replace("((010 (001 ()))", "((010 (001 ())) (0)", 1),
             "lib/corrupted.lisp")})
