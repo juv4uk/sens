@@ -1,0 +1,545 @@
+{
+  "schema": "sens.git-branch-heads-part/v1",
+  "repo": "juv4uk/sens",
+  "date": "2026-10-11",
+  "pages": [
+    41,
+    42
+  ],
+  "count": 133,
+  "scope": "live refs at fetch, not merged nor deleted refs",
+  "branches": [
+    {
+      "name": "verify/core-fasl-freshness-baseline-b5a128",
+      "sha": "ac85016a1778aa8e58c9f7dc3523641589c18954"
+    },
+    {
+      "name": "verify/full-package-06b711",
+      "sha": "43b13cd9daaa5003c5e34b3a5a04c61ea89082ad"
+    },
+    {
+      "name": "verify/post-truth-sentinel-focus-06b711",
+      "sha": "9a091c2600b7fb22622fdd61025a3dd824e76af3"
+    },
+    {
+      "name": "verify/275-full-package-e4405adb",
+      "sha": "2010839a37657028ff3fb257e2b5f118eba41645"
+    },
+    {
+      "name": "verify/287-full-package-d735",
+      "sha": "8b173d0536169f4e88007480e6ad00cc5afcad22"
+    },
+    {
+      "name": "verify/305-empty-meta-full-package-330",
+      "sha": "5399bdf5d72f05600bdc562432f93d31b1f9a1ac"
+    },
+    {
+      "name": "verify/305-full-package-8354812",
+      "sha": "712d1228373a36e7d37bce974243f647f2ac514b"
+    },
+    {
+      "name": "verify/305-meta-registry-full-package-338",
+      "sha": "88b72ca37a41d9e4dd9ecef4a796a7e4fa72963e"
+    },
+    {
+      "name": "verify/305-missing-module-oracle-retirement",
+      "sha": "70c4f3885747352e8f028adc525c2325e318a219"
+    },
+    {
+      "name": "verify/305-narrate-outcome-full-package-359",
+      "sha": "d020a3888f11b32ceb9e98671c90578d82c0db4c"
+    },
+    {
+      "name": "verify/305-narrate-unknown-full-fc615",
+      "sha": "c76b5cab90b774a1a15b68af92698dd962e33a3f"
+    },
+    {
+      "name": "verify/305-narrate-unknown-preservation-fabf",
+      "sha": "fabf573add1342792de27182e82553a5e3113fd1"
+    },
+    {
+      "name": "verify/305-reason-after-naf-retirement",
+      "sha": "1ff8f1157c0ba0a3406ed96a46dc33167be20dea"
+    },
+    {
+      "name": "verify/310-vector-targeted",
+      "sha": "f996be6e021d788ce837ec3b42871a89ddb5a22c"
+    },
+    {
+      "name": "verify/318-full-package",
+      "sha": "5187e532aad31f80c54155d3672884dbef87cd16"
+    },
+    {
+      "name": "verify/333-proven-byte-readfile-benchmark",
+      "sha": "a51b2ec02e1234bc0148b38598a6511c268ce3ac"
+    },
+    {
+      "name": "verify/333-readfile-proven-byte-domain",
+      "sha": "e48c01ea24acbe8be0b74a88468c83ac40d4404c"
+    },
+    {
+      "name": "verify/343-final-xtask-a754",
+      "sha": "f2afbe5a44903f467749f9f034ac04305659afcd"
+    },
+    {
+      "name": "verify/343-xtask-698868",
+      "sha": "ffe17d584915915b016f0a6fe2d6b8db14a6d910"
+    },
+    {
+      "name": "verify/343-xtask-a754-final",
+      "sha": "64a2bec38d5a753687fa56aa3605cdd933878431"
+    },
+    {
+      "name": "verify/343-xtask-a754",
+      "sha": "f9375ec7aaa4f5c2c8c7f446f3fd27ccee30fc80"
+    },
+    {
+      "name": "verify/343-xtask-a754465",
+      "sha": "a983c3f4746c9b82b23d0f870dfdce51da51c75f"
+    },
+    {
+      "name": "verify/343-xtask-over-evidence-map",
+      "sha": "66e0fdb3c50c98444663cd95b03ade3b8014246e"
+    },
+    {
+      "name": "verify/362-1078-readfile-timeout-on-1125",
+      "sha": "8205e7a2be372e38094129bf81279c65f59dccf1"
+    },
+    {
+      "name": "verify/362-fused-utf8-benchmark",
+      "sha": "6d96068f94ff8df9fee98e794f529aeb06ca2f14"
+    },
+    {
+      "name": "verify/362-production-readfile-benchmark",
+      "sha": "f94f3ed34da4072f363a47f9386c27c8f00729c5"
+    },
+    {
+      "name": "verify/362-proven-byte-read-file-17d3629",
+      "sha": "17170ae08aa0108eccf1811e4b8d6806d4151b75"
+    },
+    {
+      "name": "verify/362-readfile-current-main-benchmark",
+      "sha": "09753b8490f986bde746f234268480a7a67a1d9c"
+    },
+    {
+      "name": "verify/369-clips-symbol-preservation",
+      "sha": "f23670201f2f67a51b3fd4a8f979a3bf5d5e95e5"
+    },
+    {
+      "name": "verify/369-result-status-consumer-cutover",
+      "sha": "767352a33f95319bc02eb7cb39e180530b619036"
+    },
+    {
+      "name": "verify/369-result-status-preservation",
+      "sha": "82506d218d8e0029baff7ad5df0f79a3e54c1122"
+    },
+    {
+      "name": "verify/369-symbol-runtime-red",
+      "sha": "181a09560f88e9945de2be4891d5ca94a6dc7b3a"
+    },
+    {
+      "name": "verify/369-translation-symbol-consumer-cutover",
+      "sha": "ea5cb7230ba66ca4f4870883bed30473a479ddca"
+    },
+    {
+      "name": "verify/371-canonical-structural-buffer-identity",
+      "sha": "b6ec1c2261024e58c7a82a4c48249f5e9ee195c6"
+    },
+    {
+      "name": "verify/371-structural-numeric-buffer-preservation",
+      "sha": "2ea8527206b399628808aae047a2ee23d190a1c1"
+    },
+    {
+      "name": "verify/371-structural-observation-preservation",
+      "sha": "3e596aeba808086441361a676e5ac8d54705fd19"
+    },
+    {
+      "name": "verify/408-424-full-package",
+      "sha": "8db9629c4f8fdd7c4afe646532076e2a0b4c2305"
+    },
+    {
+      "name": "verify/408-full-package",
+      "sha": "ef23f540072cbf192cc1d6c2e728f0716b6ee1a7"
+    },
+    {
+      "name": "verify/419-canon-sculpt-research",
+      "sha": "a972794efeb7a5fc548e8ee92c9b0ee461c24eb5"
+    },
+    {
+      "name": "verify/419-canon-sculpt-research-2",
+      "sha": "1da30a377ce1750a3f98d05d364033ce2744a296"
+    },
+    {
+      "name": "verify/425-result-status-full-package",
+      "sha": "9ebfb811fd5aa09ad99570e4e68f1cf53737c7f2"
+    },
+    {
+      "name": "verify/432-car-cdr-bounded-basis",
+      "sha": "3bf04caa5be0d69c5f2c0a16a0e5e48122d5830b"
+    },
+    {
+      "name": "verify/432-car-cdr-research",
+      "sha": "e55317ec78b7b7f3452688143faa1aacfceabf3f"
+    },
+    {
+      "name": "verify/447-pair-elim-basis",
+      "sha": "026b48d5321df2fcada4c1f4fb9557d276b3e533"
+    },
+    {
+      "name": "verify/452-pair-elim-cons-budget",
+      "sha": "dffb0f0bc44a6cbead94cb4676e5236f7f7f0cc8"
+    },
+    {
+      "name": "verify/452-pair-elim-effects",
+      "sha": "d1f3b0ade20fb8d6deadcc0202425f5a79296af8"
+    },
+    {
+      "name": "verify/452-pair-elim-exact-order",
+      "sha": "0b5602e4d5ffc6b61591ce19edc553d66e249f55"
+    },
+    {
+      "name": "verify/470-atom-basis",
+      "sha": "552ed964711cca0d8a11c56f0ea454b70ac022c9"
+    },
+    {
+      "name": "verify/471-eq-cond-static",
+      "sha": "692f5f4bee9d15940e57b9509a63079830d64b58"
+    },
+    {
+      "name": "verify/483-current-green",
+      "sha": "845128e0adf22368ffa20fde3cdd111d86aea332"
+    },
+    {
+      "name": "verify/484-immediate-branch-green",
+      "sha": "9941bacad7afba8574bea133219b0b7ad28a3aaa"
+    },
+    {
+      "name": "verify/493-eq-serialization-collision",
+      "sha": "96c50d864f32b8b4da2a2358fc6e37a16946eba3"
+    },
+    {
+      "name": "verify/498-eq-closure-observability",
+      "sha": "72b90848dc4484a4eca97d2067435387e373ef06"
+    },
+    {
+      "name": "verify/505-native-first-green",
+      "sha": "6864398a43b493b32d5af4508a04a3424ba5f0f4"
+    },
+    {
+      "name": "verify/505-native-first-red",
+      "sha": "dfaac69b59240574ba74b9c83a9bf79d91cbf707"
+    },
+    {
+      "name": "verify/506-native-first-green",
+      "sha": "50a2a8660f527e7efc38218ea23c8e5ff8bbfc3c"
+    },
+    {
+      "name": "verify/506-native-first-red",
+      "sha": "20edefa95efbdafba9f118920d98d4a2899e0917"
+    },
+    {
+      "name": "verify/507-compiled-encoder-current",
+      "sha": "421dbec3626ffd153e0dade9a7df7273c351bc94"
+    },
+    {
+      "name": "verify/507-compiled-encoder-post-exactqlt",
+      "sha": "4c52e71803beea0f744f9b603a0f5fb6f355b3aa"
+    },
+    {
+      "name": "verify/507-encoder-cml-host-build",
+      "sha": "8c462430901a86b57657f4530fa16bbba58f18ef"
+    },
+    {
+      "name": "verify/507-encoder-cml-whole-file-red",
+      "sha": "21fb085e9aa95f1a7c05d6dd5cbd328bfa85000f"
+    },
+    {
+      "name": "verify/509-parity-replay-green",
+      "sha": "6b737f1a39b5219d98e5da4a535a6669a86dc4d1"
+    },
+    {
+      "name": "verify/509-parity-replay-red",
+      "sha": "064cabf974c3fd1aea7e22f2e21abbbc9bca0cc0"
+    },
+    {
+      "name": "verify/524-d295-cli-baseline",
+      "sha": "e9d7d27f6da1df7df8de4711a2a67fa53716066a"
+    },
+    {
+      "name": "verify/524-fasl-cli-post-527",
+      "sha": "d846618d9402cc0bb8254419af5eaa0256fe6ea2"
+    },
+    {
+      "name": "verify/524-fasl-cli-post-ece",
+      "sha": "85ebaee8b0b250fa83621894b77e4572afae4e4a"
+    },
+    {
+      "name": "verify/536-runtime-peer-topology-green",
+      "sha": "f6a4e2a41f7aa467a8903cf1bfded1b833df2ac3"
+    },
+    {
+      "name": "verify/536-runtime-peer-topology-red",
+      "sha": "ce5bdd3f20166f50dab2e05126d2670b1dcf362a"
+    },
+    {
+      "name": "verify/557-536-full-package",
+      "sha": "2e8a24f3e7144a4ccf7f10094cf3ccb5f05cccbb"
+    },
+    {
+      "name": "verify/557-result-status-target",
+      "sha": "280644a4f84d74210108e3c48a84a0120f57536f"
+    },
+    {
+      "name": "verify/560-result-status-target",
+      "sha": "c86fe866f95438fcb69eb2b1d7a1b27403debdab"
+    },
+    {
+      "name": "verify/575-quantity-root-cause",
+      "sha": "2e27fd35222fdd802ef4b9bd88684474283f0514"
+    },
+    {
+      "name": "verify/584-runtime-peer-target",
+      "sha": "422736832c05db7b0c9ed99e0042f4a4a38ec9ab"
+    },
+    {
+      "name": "verify/590-current-semantic-slice",
+      "sha": "7962539315bec1a0c9ffc07485efcad1a0724c82"
+    },
+    {
+      "name": "verify/596-readfile-benchmark",
+      "sha": "fd42bdf89a707712a0ed378c21d78343d2eca0e5"
+    },
+    {
+      "name": "verify/600-exact-q-source-spellings",
+      "sha": "bbd7e1ab5141c1d1fef569791bcd8584e13f9e66"
+    },
+    {
+      "name": "verify/603-scientific-preservation",
+      "sha": "20346191f355e03863c93364a8fd253a266da666"
+    },
+    {
+      "name": "verify/648-649-full-package",
+      "sha": "a7baaa9dbcb180f76840bdff9f45a3b920bc1e65"
+    },
+    {
+      "name": "verify/651-clock",
+      "sha": "5e124468aba5e21e98e7e488f63f2467cee0d079"
+    },
+    {
+      "name": "verify/949-embedded-datalog-targeted",
+      "sha": "0df38ec1be0d510697f20041d1a40622970f8386"
+    },
+    {
+      "name": "verify/3212-d4-prefix-main",
+      "sha": "8c05ab90523ab9bd3aba3cd2b9460861c007461f"
+    },
+    {
+      "name": "verify/3212-d4-prefix-on-3215",
+      "sha": "58e8e2d80b7f951f0e1ff665e8931827711cbf8a"
+    },
+    {
+      "name": "w9-r3-4256",
+      "sha": "95c96e1146c2411cf86b78c9e0b288ba778b6b91"
+    },
+    {
+      "name": "w9-runtime-carrier-4038",
+      "sha": "2298cc03f04f5fd82c1ccdb348be7f53ae8b59ba"
+    },
+    {
+      "name": "witness/1464-early-sens-atom-question",
+      "sha": "80e4bf01605fc406f464ffbc24324a54ace978e2"
+    },
+    {
+      "name": "witness/1464-early-sens-atom-surface",
+      "sha": "03ae31808d749260dbf828760844cd605f0c88eb"
+    },
+    {
+      "name": "work/chatgpt-469-postcore-peers",
+      "sha": "bcf3223fab7982c7b03777cde960544e83a464e8"
+    },
+    {
+      "name": "work/chatgpt-469-registry-derived-postcore-projection",
+      "sha": "c3160df56b3f8ddd606a171584a4dedce2fe1796"
+    },
+    {
+      "name": "work/chatgpt-469-registry-derived-postcore-projection-main",
+      "sha": "bf2015a9b13e95183d6325ee74a82c56d7957164"
+    },
+    {
+      "name": "work/chatgpt-469-registry-derived-postcore-projection-main2",
+      "sha": "d4d924ba6fd25015ca90c3e1efdd2636091d2a76"
+    },
+    {
+      "name": "work/chatgpt-606-generated-postcore-cache",
+      "sha": "1894dcf0c599e35f14aa594453aacc64cfbaa949"
+    },
+    {
+      "name": "work/chatgpt-uk-file-io-1151-1152-replay",
+      "sha": "0ab7afddbe58d2dfb9133a5f182264dc2bf78a69"
+    },
+    {
+      "name": "work/chatgpt-uk-file-io-1151-1152",
+      "sha": "3b0dbf33cc645fb7c4369e269737d4691bbf7d29"
+    },
+    {
+      "name": "work/chatgpt-uk-fill-1147-1152-candidates",
+      "sha": "271869b2062d6408007ec195e67d5f2d2ba97528"
+    },
+    {
+      "name": "work/chatgpt-uk-peer-1043-1044-replay",
+      "sha": "746cb40dc9cbf5eebb242e3299c71009d6d2bf37"
+    },
+    {
+      "name": "work/chatgpt-uk-peer-1044",
+      "sha": "7593727e32f00aa2b49a337ea5f8640ce3d1c85a"
+    },
+    {
+      "name": "work/chatgpt-uk-peer-1045-main",
+      "sha": "90c60ff22c9cb5373c493b21263a642df2201e18"
+    },
+    {
+      "name": "work/chatgpt-uk-peer-1045",
+      "sha": "8ff7f77760423d6c223f9acc3a80386c06ee8556"
+    },
+    {
+      "name": "work/chatgpt-uk-peer-1046",
+      "sha": "bc5d91e7ece5599e36c36d43c0b539ee9224e440"
+    },
+    {
+      "name": "work/chatgpt-uk-peer-1047-main",
+      "sha": "4f2c24c4490bff4f21ebd14dec708f15313798ee"
+    },
+    {
+      "name": "work/chatgpt-uk-peer-1047",
+      "sha": "7ea81131a8eba670092f9cf70b1af705c3b9e011"
+    },
+    {
+      "name": "work/chatgpt-uk-peer-1048",
+      "sha": "6e451d0bc151d0e4741d07136660ec2fddf592c3"
+    },
+    {
+      "name": "work/chatgpt-uk-peer-1049",
+      "sha": "063ac670c46e8a5048374886ed8f7017d28fcfa4"
+    },
+    {
+      "name": "work/chatgpt-uk-peer-1050",
+      "sha": "13067e5c03cd9ac3b418489dabb52fb20632eb39"
+    },
+    {
+      "name": "work/chatgpt-uk-peer-1051",
+      "sha": "b94b4b4a933324bff743ab85e02fe10a86e9b499"
+    },
+    {
+      "name": "work/chatgpt-uk-peer-1052",
+      "sha": "ce73332eb43b990e39d44de6a2550e5e724c53e9"
+    },
+    {
+      "name": "work/chatgpt-uk-peer-1053",
+      "sha": "c380d9300b21d4085f92497b662525de7e51bbf9"
+    },
+    {
+      "name": "work/chatgpt-uk-peer-1054",
+      "sha": "78e9d9f4cbcc4b32a8e7052a821950518f9137e9"
+    },
+    {
+      "name": "work/chatgpt-uk-peer-1055",
+      "sha": "54bb6ddbf21719b983d8b84db54639c97ed98ef9"
+    },
+    {
+      "name": "work/chatgpt-uk-peer-1057",
+      "sha": "7021cc8c9bb8b2bbcbaa1ef050cbb62cddff3bf3"
+    },
+    {
+      "name": "work/chatgpt-uk-peer-1058",
+      "sha": "50ed500fcc4aa1800349ad109bfabde03c2e72c4"
+    },
+    {
+      "name": "work/chatgpt-uk-peer-1059",
+      "sha": "9ec6e7cc661150319dfa3caf3c98a74219c2ed2b"
+    },
+    {
+      "name": "work/chatgpt-uk-peer-1060",
+      "sha": "4229814acd4f42034fd37561b7f0a56a6386ed30"
+    },
+    {
+      "name": "work/chatgpt-uk-peer-1061",
+      "sha": "7df411d5e61cfe01cb31ecee260b0ba7499fac70"
+    },
+    {
+      "name": "work/chatgpt-uk-peer-slice",
+      "sha": "17ea45383ba3aee5a38964a49ec4c741878539a3"
+    },
+    {
+      "name": "work/1623-wire",
+      "sha": "bd5cf33fc1725070e0d6a4289a5fd3e039aa2e22"
+    },
+    {
+      "name": "work/1623-wire-current",
+      "sha": "7206e2be4104173651a2c0fab0f639c14a4f2e26"
+    },
+    {
+      "name": "work/4991-arc-consistency-execution-20261009",
+      "sha": "2332b49503b41ec583a04fe7799bf6963b7d420a"
+    },
+    {
+      "name": "world-axiom-cutover-3386",
+      "sha": "8e799ee241611ee6cfe3c321b48ad0ffae74b47d"
+    },
+    {
+      "name": "world-knowledge-authority-3402",
+      "sha": "d31404d53f383746e79d45221408f2717b7d5a4a"
+    },
+    {
+      "name": "world-model-laws-3402",
+      "sha": "5c00b9a3a81249e9a55f1281867ce475ee5af0e5"
+    },
+    {
+      "name": "виправлення/м0-реєстр-рамка3-після-дослідів",
+      "sha": "347a3092110cac0faf5b2ed7f6f2d0723bab516f"
+    },
+    {
+      "name": "дослід/рамка3-точна-граматика-5296-20261011",
+      "sha": "4fca8c83c02edadae074dbf7cb32d2a673f42c71"
+    },
+    {
+      "name": "дослід/рамка3-вичерпність-12-20261010",
+      "sha": "64075ee443592d8fab1ad87a4362c09d53cacc87"
+    },
+    {
+      "name": "дослід/рамка3-вичерпність-до12-20261010",
+      "sha": "fd7f9c8a7411bbf09d4434671036d242aaef9962"
+    },
+    {
+      "name": "дослід/рамка3-797161-вичерпний-свідок-20261010",
+      "sha": "1052dc5ab820f49d603da65b174fe6011b715e4c"
+    },
+    {
+      "name": "дослід/5294-спільна-матриця-кодеків-20261010",
+      "sha": "8c734aeb9a6b1663c43de5c065676da33f2a3a6d"
+    },
+    {
+      "name": "дослід/5442-негативний-контроль-t5-таймінгів",
+      "sha": "b2450133098bdf285ce95e99113eb2a7fa804b2e"
+    },
+    {
+      "name": "дослід/5442-t5-таймінги-від-актуального-main",
+      "sha": "75879292d930fd1ef435d326abe9bfe7435fa263"
+    },
+    {
+      "name": "виправлення/5444-облік-lisp-споживачів-t5",
+      "sha": "5ad80ab386aaffb3457bab71d479e53a96060813"
+    },
+    {
+      "name": "дослід/5494-тріада-від-нового-main-20261011",
+      "sha": "8a1472f4e79de5d7105a7716d9a77e479b120c55"
+    },
+    {
+      "name": "виправлення/5497-повні-артефакти-бенчмарків-20261010",
+      "sha": "1b2b27ec4628e67177e0685afae99f60d44c3f7c"
+    },
+    {
+      "name": "виправлення/5510-бенчмарк-артефакти-обовязкові-20261011",
+      "sha": "bf3a123754d015871e5eddab72be5ca1792c8ac3"
+    }
+  ]
+}
