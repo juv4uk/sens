@@ -203,7 +203,7 @@
   (0011000001 (ук фс-відновити-корінь-пакет) (укр фс-відновити-корінь-пакет) (san fs-punaruddhāra-mūla-puṭa) (en fs-recover-root-package) (LISP FS-RECOVER-ROOT-PACKAGE) (sym ()))
   (0011000010 (ук порожній-черга?) (укр порожній-черга?) (san śūnya-krama) (en empty-queue?) (LISP EMPTY-QUEUE?) (sym ()))
   (0011000011 (ук пам'ятка) (укр пам'ятка) (san smaraṇa) (en memo) (LISP MEMO) (sym ()))
-  (0011000100 (ук початок) (укр початок) (san ādi) (en front) (LISP FRONT) (sym ()))
+  (0011000100 (ук початок) (укр початок) (san krama-ādi) (en front) (LISP FRONT) (sym ()))
   (0011000101 (ук один-раз-лише) (укр один-раз-лише) (san sakṛt-kevala) (en once-only) (LISP ONCE-ONLY) (sym ()))
   (0011000110 (ук додати-до-черги) (укр додати-до-черги) (san krama-yojana) (en enqueue) (LISP ENQUEUE) (sym ()))
   (0011000111 (ук взяти-з-черги) (укр взяти-з-черги) (san krama-grahaṇa) (en dequeue) (LISP DEQUEUE) (sym ()))
