@@ -1,0 +1,29 @@
+{
+  "schema": "d10-current-inventory-pointer/v1",
+  "status": "OWNER-DIRECTED-PLACED-RESEARCH-UNRATIFIED",
+  "canonical_current": {
+    "path": "knowledge/d10-v2-semantic-inventory.json",
+    "git_blob": "efc0eda431b8736dffe43e32a2dbca7a528e516e",
+    "selected": 675,
+    "placed": 675,
+    "unplaced": 0,
+    "ratified": 0
+  },
+  "historical_selection": {
+    "path": "knowledge/d10-v1-semantic-inventory.json",
+    "git_blob": "4c803abf0f22582ef8234d9ba60ca4796d433eb5",
+    "role": "FROZEN-PREPLACEMENT-ARCHIVE"
+  },
+  "historical_address_allocation": {
+    "path": "knowledge/d10-selected-coordinate-allocation-v1.json",
+    "git_blob": "f80c2ccbd261452bebdaa9d9f52b47f3f3dadcf2",
+    "role": "PINNED-GAUGE-ASSIGNMENT"
+  },
+  "policy": {
+    "description": "The owner directed placement of all 419 previously selected D10 candidates. The semantic inventory v2 is the authoritative current research selection+coordinate map; historical v1 remains the sole archival subject of the existing source-selection transition ledger.",
+    "selected_only": "675 selected meanings have unique 10-bit addresses. Remaining 349 capacity slots are not invented or assigned.",
+    "ratification": "No D10 meaning has been ratified, and D10 10-bit execution / physical T5 encoding is not authorized.",
+    "next_step": "New D10 semantic selections require new append-only selection and current-placement transitions, with SHA pins updated only after validated changes."
+  },
+  "branch_policy": "MAIN-ONLY; NO-NEW-BRANCHES"
+}
