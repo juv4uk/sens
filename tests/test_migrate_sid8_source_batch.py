@@ -72,16 +72,22 @@ class BatchSourceTests(unittest.TestCase):
         # Fail closed until a source-specific two-branch D1/D3 oracle exists.
         paths = (
             "knowledge/guard-fact-policy.lisp",
+            "knowledge/guard-reference.lisp",
             "scripts/enforce-function-table-mechanisms.lisp",
             "scripts/enforce-island-math-evidence.lisp",
+            "scripts/semantic-authority-guard-enforce.lisp",
         )
         for path in paths:
             with self.subTest(path=path):
                 report = MOD.run(ROOT, False, {path})
                 self.assertEqual(report["summary"]["admitted_files"], 0)
                 self.assertEqual(report["summary"]["blocked_files"], 1)
-                row = report["files"][0]
+                # Exact D4 heads have been substituted, but the old
+                # three-field/host-truth D3 semantics are intentionally
+                # still present, and never declared fully migrated.
+                self.assertIn(path, MOD.PARTIAL_D4_WITH_LEGACY_D3)
                 self.assertEqual(row["status"], "blocked")
+                row = report["files"][0]
                 self.assertTrue(
                     any("COND_HOST_TRUTH" in reason
                         or "COND_NOT_TWO_FIELDS" in reason
