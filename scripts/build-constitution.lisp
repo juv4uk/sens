@@ -64,9 +64,8 @@
 (0011 print-fixtures
   (0010 (remaining)
     (110
-      ((010 remaining) () (001 ()))
-      ((010 remaining) (1) (001 ()))
-      (t ((0010 ()
+      ((010 remaining) (001 ()))
+      ((010 (001 ())) ((0010 ()
             (print-fixture (100 remaining))
             (print-fixtures (011 remaining))))))))
 
