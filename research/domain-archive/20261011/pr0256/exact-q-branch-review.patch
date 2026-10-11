@@ -1,0 +1,212 @@
+# Historical source patch for SENS PR #256
+# Original head: 68732bd1f4b61a718b6b5bedf05b023ff87437ac
+# Base main recorded by the PR: 42e3945c5e8f27902ade6fedf52f54786c56f914
+# Captured via GitHub PR patch API on 2026-10-11.
+
+===== FILE contracts/exact-q-binary-contract.lisp =====
+@@ -1,4 +1,5 @@
+ ; exact-q-binary-contract.lisp — Lisp-owned mathematical binary domain for #216.
++; Runtime activation is now admitted after #217 explicit dispatch and #229 Canon V2.
+ ;
+ ; This is not universal truth. It is the answer algebra of one narrow domain:
+ ; comparisons whose required operands are all established exactly in Q.
+
+===== FILE crates/my-lisp/src/eval/arithmetic.rs =====
+@@ -317,21 +317,21 @@ pub(super) fn comparison_on_values(
+         .map(|value| numeric_value(value.clone(), span))
+         .collect::<Result<Vec<_>, _>>()?;
+ 
+-    let holds = if numerics
++    // #216 absolute binary authority is deliberately narrower than numeric
++    // comparability in the host. If any required operand is inexact, this
++    // layer has no answer; `()` is Canon 0 / no specialization, never NO.
++    if numerics
+         .iter()
+         .any(|value| matches!(value, Numeric::Inexact(_)))
+     {
+-        numerics
+-            .windows(2)
+-            .all(|pair| compare(operator, pair[0].as_f64(), pair[1].as_f64()))
+-    } else {
+-        numerics
+-            .windows(2)
+-            .all(|pair| compare(operator, pair[0].to_exact(), pair[1].to_exact()))
+-    };
+-    // CORE predicate result: canonical WSM t/() (Value::truth), not a
+-    // hidden Rust-only Bool. `<`/`=`/`>` are registered directly on this
+-    // function's return value (eval/builtins.rs), so this is the actual
+-    // Lisp-visible result of a comparison, not an internal detail.
+-    Ok(Value::truth(holds))
++        return Ok(Value::Nil);
++    }
++
++    let holds = numerics
++        .windows(2)
++        .all(|pair| compare(operator, pair[0].to_exact(), pair[1].to_exact()));
++
++    // The exact-Q decision domain owns exactly two outcomes. They are
++    // ordinary exact rational values, not host Bool and not universal truth.
++    Ok(exact_value(Rational::integer(if holds { 1 } else { 0 })))
+ }
+
+===== FILE crates/my-lisp/tests/exact_q_binary_contract.rs =====
+@@ -1,5 +1,5 @@
+ //! #216 observer for the Lisp-owned exact-Q binary contract.
+-//! Rust transports contract bytes and checks migration bookkeeping only.
++//! Rust transports/evaluates rows; expected language results live in Lisp data.
+ 
+ use std::fs;
+ use std::path::PathBuf;
+@@ -10,7 +10,6 @@ use my_lisp::{eval_program, load_core_library, parse, Expr, ExprKind, Session};
+ struct Row {
+     expr: String,
+     expected: String,
+-    blocked_by: Option<String>,
+ }
+ 
+ fn repo_file(relative: &str) -> PathBuf {
+@@ -37,24 +36,6 @@ fn alist_str<'a>(entries: &'a [Expr], key: &str) -> Option<&'a str> {
+     })
+ }
+ 
+-fn alist_symbol<'a>(entries: &'a [Expr], key: &str) -> Option<&'a str> {
+-    entries.iter().find_map(|entry| {
+-        let ExprKind::Pair(k, v) = &entry.kind else {
+-            return None;
+-        };
+-        let ExprKind::Symbol(name) = &k.kind else {
+-            return None;
+-        };
+-        if &**name != key {
+-            return None;
+-        }
+-        match &v.kind {
+-            ExprKind::Symbol(value) => Some(value.as_ref()),
+-            _ => None,
+-        }
+-    })
+-}
+-
+ fn rows() -> Vec<Row> {
+     let source = include_str!("../../../tests/fixtures/exact-q-binary-v1.lisp");
+     parse(source)
+@@ -67,7 +48,6 @@ fn rows() -> Vec<Row> {
+             Some(Row {
+                 expr: alist_str(entries, "expr")?.to_string(),
+                 expected: alist_str(entries, "expected")?.to_string(),
+-                blocked_by: alist_symbol(entries, "blocked-by").map(str::to_string),
+             })
+         })
+         .collect()
+@@ -108,24 +88,25 @@ fn lisp_owned_exact_q_binary_contract_is_self_consistent() {
+ }
+ 
+ #[test]
+-fn proven_exact_q_runtime_targets_stay_blocked_only_by_control_migration() {
++fn exact_q_runtime_matches_lisp_owned_rows() {
+     let rows = rows();
+-    assert_eq!(rows.len(), 5, "#216 first slice must retain all five exact-Q targets");
+-    assert!(
+-        rows.iter()
+-            .all(|row| row.blocked_by.as_deref() == Some("control-logic-217")),
+-        "every exact-Q result target must name #217 as its sole current blocker"
+-    );
+-    assert!(
+-        rows.iter().any(|row| row.expected == "0"),
+-        "#216 blocked target corpus must retain an exact mathematical NO (0/1)"
+-    );
+-    assert!(
+-        rows.iter().any(|row| row.expected == "1"),
+-        "#216 blocked target corpus must retain an exact mathematical YES (1/1)"
+-    );
+-    assert!(
+-        rows.iter().all(|row| !row.expr.trim().is_empty()),
+-        "#216 blocked targets must remain executable expressions, not prose-only debt"
+-    );
++    assert_eq!(rows.len(), 5, "#216 first active runtime slice must retain five targets");
++    assert!(rows.iter().any(|row| row.expected == "0"));
++    assert!(rows.iter().any(|row| row.expected == "1"));
++    assert!(rows.iter().any(|row| row.expected == "()"));
++
++    let mut session = Session::default();
++    load_core_library(&mut session).expect("core library");
++
++    for row in rows {
++        let actual = eval_program(&row.expr, &mut session)
++            .unwrap_or_else(|error| panic!("#216 expression {} failed: {error}", row.expr))
++            .value
++            .to_string();
++        assert_eq!(
++            actual, row.expected,
++            "#216 runtime disagrees with Lisp-owned exact-Q row for {}",
++            row.expr
++        );
++    }
+ }
+
+===== FILE tests/fixtures/exact-q-binary-v1.lisp =====
+@@ -1,41 +1,44 @@
+-; #216 — executable exact-Q binary targets.
+-; `expected` is the canonical writer form of the exact rational result:
+-; 1 means mathematical 1/1 (YES), 0 means mathematical 0/1 (NO).
++; #216 — executable exact-Q binary runtime targets.
++; First runtime activation slice after #217/#229: primitive <, >, = only.
+ ;
+-; RED was proven in CI #2224: the Lisp-owned contract self-check passed while
+-; the current runtime returned historical `t` for (= 1/3 2/6), where this
+-; corpus requires the exact rational decision 1/1 (canonical write "1").
++; `expected` is the canonical writer form of the language-owned result:
++;   1 = mathematical 1/1 (YES)
++;   0 = mathematical 0/1 (NO)
+ ;
+-; These result rows now stay executable design targets but are blocked by
+-; #217. Switching comparison results before canonical control stops consuming
+-; generic truthiness would break old cond/bootstrap semantics.
++; IMPORTANT: every finite decimal/scientific source literal in current my-lisp
++; is exact by axiom S1. Therefore 3.0, 0.5, 1.0 are exact rationals here, not
++; approximations. Runtime-created `Exactness::Inexact` values remain outside
++; exact-Q authority and must yield Canon 0, but source syntax cannot currently
++; construct such a value; that negative runtime witness waits for the ratified
++; explicit inexact constructor/boundary instead of fabricating one in a host test.
++;
++; <= and >= remain ratified by contracts/exact-q-binary-contract.lisp but are
++; intentionally deferred to the next slice: their current Lisp definitions
++; still contain migration-era two-part cond consumers and must be migrated
++; explicitly rather than teaching generic control that numeric 0 means false.
+ 
+ ((expr . "(= 1/3 2/6)")
+  (expected . "1")
+- (blocked-by . control-logic-217)
+  (identity . "1016")
+  (case . rational-equality-yes))
+ 
+ ((expr . "(< 2/3 3/4)")
+  (expected . "1")
+- (blocked-by . control-logic-217)
+  (identity . "1014")
+  (case . rational-less-yes))
+ 
+ ((expr . "(> 2/3 3/4)")
+  (expected . "0")
+- (blocked-by . control-logic-217)
+  (identity . "1015")
+  (case . rational-greater-no))
+ 
+-((expr . "(<= 1/3 1/3 2/3)")
++; Decimal spelling does not imply inexactness in my-lisp.
++((expr . "(= 3.0 3.0)")
+  (expected . "1")
+- (blocked-by . control-logic-217)
+- (identity . "1017")
+- (case . rational-nondecreasing-yes))
++ (identity . "1016")
++ (case . exact-decimal-equality-yes))
+ 
+-((expr . "(>= 3/4 2/3 2/3)")
++((expr . "(< 0.5 1.0)")
+  (expected . "1")
+- (blocked-by . control-logic-217)
+- (identity . "1018")
+- (case . rational-nonincreasing-yes))
++ (identity . "1014")
++ (case . exact-decimal-order-yes))
