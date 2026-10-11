@@ -26,7 +26,7 @@ def sha(raw):
 
 def load(root=ROOT):
     info=json.loads((root / POINTER).read_text(encoding="utf-8"))
-    if info.get("canonical_current", {}).get("path") in ("knowledge/d10-v4-semantic-inventory.json", "knowledge/d10-v5-semantic-inventory.json", "knowledge/d10-v6-semantic-inventory.json", "knowledge/d10-v7-semantic-inventory.json", "knowledge/d10-v8-semantic-inventory.json", "knowledge/d10-v9-semantic-inventory.json"):
+    if info.get("canonical_current", {}).get("path") in ("knowledge/d10-v4-semantic-inventory.json", "knowledge/d10-v5-semantic-inventory.json", "knowledge/d10-v6-semantic-inventory.json", "knowledge/d10-v7-semantic-inventory.json", "knowledge/d10-v8-semantic-inventory.json", "knowledge/d10-v9-semantic-inventory.json", "knowledge/d10-v10-semantic-inventory.json"):
         info["canonical_current"] = info["historical_v3_research_inventory"]
         info["status"] = "OWNER-DIRECTED-ARCHIVAL-RESEARCH-SELECTION-698-UNRATIFIED"
     current_ref=info["canonical_current"]
