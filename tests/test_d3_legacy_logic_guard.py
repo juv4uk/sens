@@ -126,6 +126,18 @@ class LegacyD3GuardTests(unittest.TestCase):
             "COND_NOT_TWO_FIELDS", "COND_HOST_TRUTH")]
         self.assertEqual(rejected, [], "Time loader now uses a path-bound exact D3 reader")
 
+    def test_live_world_library_uses_exact_d3_and_preserves_quote_data(self):
+        source = (ROOT / "lib/world.lisp").read_text(encoding="utf-8")
+        findings = MODULE.scan_lisp(source, "lib/world.lisp")
+        self.assertEqual(
+            [item for item in findings if item.rule in
+             ("LEGACY_W8_CALL", "D3_WRONG_ARITY",
+              "COND_NOT_TWO_FIELDS", "COND_HOST_TRUTH")], [],
+            "World was cut over to path-bound exact D3; no W8 regression admitted"
+        )
+        old = (ROOT / "tests/fixtures/world-d3-before.lisp").read_text(encoding="utf-8")
+        self.assertNotEqual(old, source, "world must not silently regress to old W8 source")
+
     def test_git_audit_reports_files_and_strict_exit(self):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
