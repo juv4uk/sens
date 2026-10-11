@@ -16887,15 +16887,25 @@
       "falsifiers": [],
       "independent_oracle": "NO-EVIDENCE-HELD",
       "proof_readiness": {
-        "status": "INCOMPLETE-SOURCE-SEMANTICS",
-        "missing": [
-          "semantic-law",
-          "positive-witness",
-          "negative-falsifier"
-        ],
+        "status": "SOURCE-LAW-WITNESSES-PRESENT-UNVERIFIED",
+        "missing": [],
         "selection": false,
         "ratification": false,
-        "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+        "next_gate": "D1-D9-DEDUPE-CORE-VS-LIBRARY-AND-INDEPENDENT-ORACLE"
+      },
+      "source_evidence": {
+        "status": "SCOPED-MATH-LAW-REVIEW-NOT-SELECTED",
+        "source_git_blob": "80bb9e97bfbfe8f3afe96f25bf07b5c8905233ed",
+        "source_path": "knowledge/d10-interdisciplinary-science-proposals-20261009.json",
+        "primary_reference": "https://fftw.org/doc/The-1d-Discrete-Fourier-Transform-_0028DFT_0029.html",
+        "law": "Review variant: on finite sequence x of length N>0 of exact complex algebraic numbers, return unnormalized forward DFT X[k]=sum(j=0..N-1,x[j]*exp(-2*pi*i*j*k/N)). Order k=0..N-1. This is an exactly defined library-composite mathematical transformation, not automatic primitive residency or floating-point execution.",
+        "positive": "DFT([1,2])=[3,-1]; DFT([1,1,1,1])=[4,0,0,0]. n=0 rejected by this scoped review variant.",
+        "negative": "For x=[0,1,0,0], X[1]=-i, not +i; using positive-exponent sign for forward transform violates FFTW forward convention. DFT([1,2])=[3,-1] must not be normalized to [3/2,-1/2].",
+        "core_vs_library": "DERIVED-MATH-LIBRARY; exact roots of unity need representation",
+        "review_profile": "EXPLICITLY-SCOPED-NONCANONICAL",
+        "independent_oracle": "REFERENCE-CALCULATION-ONLY",
+        "physical_t5_authorized": false,
+        "ratification": false
       }
     },
     {
@@ -16916,15 +16926,25 @@
       "falsifiers": [],
       "independent_oracle": "NO-EVIDENCE-HELD",
       "proof_readiness": {
-        "status": "INCOMPLETE-SOURCE-SEMANTICS",
-        "missing": [
-          "semantic-law",
-          "positive-witness",
-          "negative-falsifier"
-        ],
+        "status": "SOURCE-LAW-WITNESSES-PRESENT-UNVERIFIED",
+        "missing": [],
         "selection": false,
         "ratification": false,
-        "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+        "next_gate": "D1-D9-DEDUPE-CORE-VS-LIBRARY-AND-INDEPENDENT-ORACLE"
+      },
+      "source_evidence": {
+        "status": "SCOPED-MATH-LAW-REVIEW-NOT-SELECTED",
+        "source_git_blob": "80bb9e97bfbfe8f3afe96f25bf07b5c8905233ed",
+        "source_path": "knowledge/d10-interdisciplinary-science-proposals-20261009.json",
+        "primary_reference": "https://doc.rust-lang.org/std/primitive.i32.html#method.saturating_add",
+        "law": "Review variant: for explicit integer width w>=1, signedness and x,y representable in that type, sum with mathematical infinite-precision integers, then clamp to representable [min,max]; unlike modular addition, no wraparound. The bounds are fixed by width and signedness.",
+        "positive": "Signed8 saturating_add(127,1)=127; signed8 saturating_add(-128,-1)=-128; unsigned8 saturating_add(254,3)=255; signed8 saturating_add(2,3)=5.",
+        "negative": "Signed8 saturating_add(127,1) returning -128 is WRAP not SATURATION; unsigned8(254,3)=1 is wrong; values outside operand type domain must not silently masquerade as valid inputs.",
+        "core_vs_library": "DERIVED-INTEGER-BOUNDS-AND-ARITHMETIC",
+        "review_profile": "EXPLICITLY-SCOPED-NONCANONICAL",
+        "independent_oracle": "REFERENCE-CALCULATION-ONLY",
+        "physical_t5_authorized": false,
+        "ratification": false
       }
     },
     {
@@ -16947,9 +16967,7 @@
       "proof_readiness": {
         "status": "INCOMPLETE-SOURCE-SEMANTICS",
         "missing": [
-          "semantic-law",
-          "positive-witness",
-          "negative-falsifier"
+          "semantic-law"
         ],
         "selection": false,
         "ratification": false,
@@ -16976,9 +16994,7 @@
       "proof_readiness": {
         "status": "INCOMPLETE-SOURCE-SEMANTICS",
         "missing": [
-          "semantic-law",
-          "positive-witness",
-          "negative-falsifier"
+          "semantic-law"
         ],
         "selection": false,
         "ratification": false,
@@ -17003,15 +17019,25 @@
       "falsifiers": [],
       "independent_oracle": "NO-EVIDENCE-HELD",
       "proof_readiness": {
-        "status": "INCOMPLETE-SOURCE-SEMANTICS",
-        "missing": [
-          "semantic-law",
-          "positive-witness",
-          "negative-falsifier"
-        ],
+        "status": "SOURCE-LAW-WITNESSES-PRESENT-UNVERIFIED",
+        "missing": [],
         "selection": false,
         "ratification": false,
-        "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+        "next_gate": "D1-D9-DEDUPE-CORE-VS-LIBRARY-AND-INDEPENDENT-ORACLE"
+      },
+      "source_evidence": {
+        "status": "SCOPED-MATH-LAW-REVIEW-NOT-SELECTED",
+        "source_git_blob": "80bb9e97bfbfe8f3afe96f25bf07b5c8905233ed",
+        "source_path": "knowledge/d10-interdisciplinary-science-proposals-20261009.json",
+        "primary_reference": "https://wiki.gnuradio.org/index.php/Signal_Source",
+        "law": "Review variant: pure normalized exact phase p in [0,1), exact rational increment delta, yield p'=(p+delta) modulo 1 in [0,1); this is a phase accumulator step only, without amplitude, frequency calibration, truncation, analog time or sampling output.",
+        "positive": "p=3/4, delta=1/2 -> p'=1/4; p=1/2, delta=-3/4 -> p'=3/4; delta=0 leaves phase unchanged.",
+        "negative": "Returning 5/4 for 3/4+1/2 violates normalized range; using a signed-remainder operation returning -1/4 for 1/2-3/4 violates phase normalization.",
+        "core_vs_library": "DERIVED-RATIONAL-MODULO-SCAN; NO HARDWARE CLAIM",
+        "review_profile": "EXPLICITLY-SCOPED-NONCANONICAL",
+        "independent_oracle": "REFERENCE-CALCULATION-ONLY",
+        "physical_t5_authorized": false,
+        "ratification": false
       }
     },
     {
@@ -17034,9 +17060,7 @@
       "proof_readiness": {
         "status": "INCOMPLETE-SOURCE-SEMANTICS",
         "missing": [
-          "semantic-law",
-          "positive-witness",
-          "negative-falsifier"
+          "semantic-law"
         ],
         "selection": false,
         "ratification": false,
@@ -17063,9 +17087,7 @@
       "proof_readiness": {
         "status": "INCOMPLETE-SOURCE-SEMANTICS",
         "missing": [
-          "semantic-law",
-          "positive-witness",
-          "negative-falsifier"
+          "semantic-law"
         ],
         "selection": false,
         "ratification": false,
@@ -23343,7 +23365,7 @@
         "rows": 9
       }
     ],
-    "total_passports": 102,
+    "total_passports": 105,
     "latest_sources": [
       {
         "path": "knowledge/d10-general-congruence-merge-hobbies-v1.json",
@@ -23391,7 +23413,7 @@
         "rows": 3
       }
     ],
-    "latest_source_pass": 4,
+    "latest_source_pass": 3,
     "source_verified_at": "b3cd6dbe9a8094e3794c1421e91f3d5b4c5247b6",
     "latest_model_review_specs": [
       "CALL-NEXT-METHOD",
@@ -23403,7 +23425,12 @@
     ],
     "latest_exact_si_data_records": 28,
     "si_source_git_blob": "2b94f1ea6d2fb05c084c3a0d863c14119a5ba11f",
-    "quantity_source_git_blob": "8eb1e12611f180a6131affc6e9f618a7cdea3449"
+    "quantity_source_git_blob": "8eb1e12611f180a6131affc6e9f618a7cdea3449",
+    "latest_math_review_profiles": [
+      "FOURIER-TRANSFORM",
+      "SATURATING-ADD",
+      "OSCILLATOR-PHASE-STEP"
+    ]
   },
   "evidence_gate": {
     "date": "2026-10-11",
@@ -23413,13 +23440,13 @@
     "formal_ratified": 0,
     "semantic_source_audit": {
       "total": 309,
-      "has_law": 213,
-      "has_positive": 192,
-      "has_negative": 192,
-      "law_and_witnesses": 192,
-      "missing_law": 96,
-      "missing_positive": 117,
-      "missing_negative": 117
+      "has_law": 216,
+      "has_positive": 199,
+      "has_negative": 199,
+      "law_and_witnesses": 195,
+      "missing_law": 93,
+      "missing_positive": 110,
+      "missing_negative": 110
     },
     "note": "All 28 SI names denote seven constants as data, not twenty-eight independent D10 residents; other source witness records are research-only.",
     "uncorroborated_source_name_census": 96,
