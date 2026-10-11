@@ -127,6 +127,37 @@ class PrepareTests(unittest.TestCase):
             adapter.prepare(self.root, self.input, self.output)
         self.assertFalse(self.output.exists())
 
+    def test_rfc4180_quoted_index_keeps_json_and_unverified_witness(self):
+        # New historical batches use csv.DictWriter's RFC4180 quoting.
+        # JSON array quotes must survive TSV decoding unchanged, and claims
+        # never imply a successfully executed witness.
+        self.row["semantic_law_variants"] = json.dumps(
+            ["first law with \\"quotes\\"", "independent second law"]
+        )
+        with self.input.open("w", newline="", encoding="utf-8") as stream:
+            writer = csv.DictWriter(
+                stream, fieldnames=adapter.INDEX_FIELDS,
+                delimiter="\\t", lineterminator="\\n",
+            )
+            writer.writeheader()
+            writer.writerow(self.row)
+        counts = adapter.prepare(self.root, self.input, self.output)
+        self.assertEqual(2, counts["filter_input_rows"])
+        self.assertEqual(0, counts["executed_witnesses_supplied"])
+        rows = {r["candidate_id"]: r for r in self.read_prepared()}
+        self.assertEqual('first law with "quotes"', rows["d10.new"]["semantic_law"])
+        self.assertEqual(self.pin, rows["d10.new"]["source_pin"])
+        self.assertEqual("", rows["d10.new"]["witness_verdict"])
+
+    def test_unterminated_rfc4180_field_blocks_without_output(self):
+        # Do not rescue a genuinely truncated or malformed CSV field by
+        # blindly stripping quotes to fabricate a JSON law.
+        self.row["semantic_law_variants"] = '"[""broken""'
+        self.write_index()
+        with self.assertRaisesRegex(ValueError, "MALFORMED_UNIFIED_INDEX_CSV"):
+            adapter.prepare(self.root, self.input, self.output)
+        self.assertFalse(self.output.exists())
+
     def test_fake_source_sha_cannot_be_accepted(self):
         self.row["source_records_sha_pinned"] = json.dumps(
             ["knowledge/donor.json@" + "0"*40 + ":candidates[0]"])
