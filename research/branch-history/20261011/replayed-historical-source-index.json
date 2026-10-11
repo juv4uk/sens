@@ -1,0 +1,29 @@
+{
+  "schema": "sens.branch-original-source-replay/v1",
+  "date": "2026-10-11",
+  "scope": "Verified original source blobs, not automatic active-contract merge",
+  "content_admitted": 2,
+  "entries": [
+    {
+      "source_pr": 4218,
+      "branch": "fix/975-release-preflight-current-main",
+      "origin_commit": "bdb376f0d6a1bb971f3c040f56d42d65fa3ff651",
+      "original_path": ".github/workflows/release-preflight.yml",
+      "source_git_blob": "aaa5d7393011b79d4be70eb786dcd7a7045f66a5",
+      "preserved_path": "research/branch-history/20261011/unique-source-pr4218/release-preflight.yml.source.txt",
+      "main_commit": "14fda06b797d700e43054a32d44ea2d807774317",
+      "status": "ORIGINAL_CONTENT_IN_MAIN_ARCHIVE-NOT_ACTIVE_WORKFLOW"
+    },
+    {
+      "source_pr": 651,
+      "branch": "fix/613-time-explicit-q-cond",
+      "origin_commit": "f8dffe7ce7896fbad7909fa3df0c915226e8543d",
+      "original_path": "lib/time.lisp",
+      "source_git_blob": "6957caf2e6fe1bbf90c8ced43b984039fd9cf84b",
+      "preserved_path": "research/branch-history/20261011/unique-source-pr0651/time.lisp.source.txt",
+      "main_commit": "86f1a93b2da8b6a56dea2ca70be9bad1a195d0e7",
+      "status": "ORIGINAL_CONTENT_IN_MAIN_ARCHIVE-NOT_ACTIVE_TIME_LIBRARY"
+    }
+  ],
+  "warning": "These files are inactive research archives and preserve original bytes. They do not prove safe contemporary behavior nor global completion of all branch sources."
+}
