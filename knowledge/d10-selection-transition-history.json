@@ -530,6 +530,38 @@
         "python3 scripts/check_d10_hadamard_proposal_v1.py",
         "python3 scripts/check_d10_selection_transition_history.py --self-test"
       ]
+    },
+    {
+      "id": "d10.math.word-fractions.existing-archive.after-658.20261011",
+      "authority": "#4013 #4463 #5041; research selection, owner ratification pending",
+      "evidence": [
+        "knowledge/d10-existing-combinatorial-laws-selected-20261011.json",
+        "knowledge/d10-debruijn-binary-cycle-research-v1.json",
+        "knowledge/d10-binary-lyndon-factorization-v1.json",
+        "knowledge/d10-stern-brocot-run-path-20261009.json"
+      ],
+      "previous_inventory_blob_sha": "d3d913ea48730f21764903860444f437b4e111be",
+      "resulting_inventory_blob_sha": "415f3516d599eb0aa6b3f50fb659a022ba0d758e",
+      "added_stable_ids": [
+        "d10.words.debruijn-binary-cycle.20261011",
+        "d10.words.binary-lyndon-factorization.20261011",
+        "d10.math.stern-brocot-run-path.20261011"
+      ],
+      "appended_sources": [
+        "knowledge/d10-existing-combinatorial-laws-selected-20261011.json"
+      ],
+      "coordinates_added": 0,
+      "ratified_added": 0,
+      "delta_selected": 3,
+      "previous_selected": 658,
+      "resulting_selected": 661,
+      "decision": "source-backed three independent observable finite combinatorial laws; unchanged historical HOLD snapshots; owner Core-vs-derived decision pending",
+      "tests": [
+        "python3 scripts/check_d10_existing_combinatorial_laws_selected.py --self-test",
+        "python3 scripts/check_d10_debruijn_binary_cycle.py --self-test",
+        "python3 scripts/check_d10_binary_lyndon_factorization.py",
+        "python3 scripts/check_d10_stern_brocot_runs.py --self-test"
+      ]
     }
   ]
 }
