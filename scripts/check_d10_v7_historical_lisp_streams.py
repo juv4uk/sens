@@ -32,9 +32,22 @@ def check():
     manifest_raw=raw("d10-historical-lisp-streams-selected-v7-20261011.json")
     manifest=json.loads(manifest_raw)
     foundation=json.loads(foundation_raw)
-    need(ptr["canonical_current"]["path"]=="knowledge/d10-v7-semantic-inventory.json","pointer path")
-    need(ptr["canonical_current"]["git_blob"]==sha(raw7),"v7 pointer blob")
-    need((ptr["canonical_current"]["selected"],ptr["canonical_current"]["placed"],ptr["canonical_current"]["unplaced"],ptr["canonical_current"]["ratified"])==(721,719,2,0),"pointer counts")
+    frozen=ptr["historical_v7_research_inventory"]
+    need(frozen["path"]=="knowledge/d10-v7-semantic-inventory.json"
+         and frozen["git_blob"]==sha(raw7)
+         and sha(raw7)=="6a45275241717dafa6a6c9ccafae1e9ad819b306","frozen v7 pin")
+    current=ptr["canonical_current"]
+    current_path=ROOT/current["path"]
+    live_raw=current_path.read_bytes()
+    need(current["git_blob"]==sha(live_raw),"live D10 pointer blob")
+    live=json.loads(live_raw)
+    live_rows=live["rows"]
+    need(len(live_rows)>=721 and live_rows[:721]==v7["rows"],"live D10 must extend archived v7")
+    live_coords=[r["coordinate"] for r in live_rows if r.get("coordinate") is not None]
+    live_ratified=sum(r.get("ratified_resident") is True for r in live_rows)
+    need((current["selected"],current["placed"],current["unplaced"],current["ratified"])==
+         (len(live_rows),len(live_coords),len(live_rows)-len(live_coords),live_ratified),
+         "live D10 pointer counts")
     need(ptr["historical_v6_research_inventory"]["path"]=="knowledge/d10-v6-semantic-inventory.json" and ptr["historical_v6_research_inventory"]["git_blob"]==sha(raw6),"frozen v6 pin")
     need(ptr["historical_v5_research_inventory"]["git_blob"]==sha(raw5),"frozen v5 pin")
     need(v6["schema"]=="d10-v6-semantic-inventory/v1" and len(v6["rows"])==719 and v5["rows"]==v6["rows"][:715],"v5-v6 archive chain")
