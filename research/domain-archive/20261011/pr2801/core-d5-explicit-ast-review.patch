@@ -1,0 +1,243 @@
+# Historical source patch for SENS PR #2801
+# Original head: a5fee8f970de2eb2afcd36d40be209f458e8365e
+# Base: main @ 42e3945c5e8f27902ade6fedf52f54786c56f914
+
+===== FILE crates/sens/src/domain_words.rs =====
+@@ -21,7 +21,7 @@
+ //! let _: PredicateBit = true;
+ //! ```
+ 
+-use crate::bits::{Bit1, Bit2, Bit3};
++use crate::bits::{Bit1, Bit2, Bit3, Bit5, Bit6};
+ 
+ /// Exact one-bit carrier for the SENS predicate-result domain.
+ ///
+@@ -81,6 +81,47 @@ impl Bija3 {
+     }
+ }
+ 
++
++/// Exact five-bit carrier for the ratified Core.D5 domain.
++///
++/// This proves domain membership only. Individual D5 coordinate meanings are
++/// owned by the SENS owner map/laws, not by this Rust representation type.
++#[repr(transparent)]
++#[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
++pub struct CoreD5(Bit5);
++
++impl CoreD5 {
++    /// Wrap an already validated five-bit word as a Core.D5 member.
++    pub const fn from_word(word: Bit5) -> Self {
++        Self(word)
++    }
++
++    /// Recover the mechanical five-bit word without interpreting it.
++    pub const fn word(self) -> Bit5 {
++        self.0
++    }
++}
++
++/// Exact six-bit carrier for the ratified Core.D6 domain.
++///
++/// This proves domain membership only. It deliberately has no implicit
++/// relationship to Core.D5 or Sens8 identity.
++#[repr(transparent)]
++#[derive(Clone, Copy, Eq, Hash, PartialEq)]
++pub struct CoreD6(Bit6);
++
++impl CoreD6 {
++    /// Wrap an already validated six-bit word as a Core.D6 member.
++    pub const fn from_word(word: Bit6) -> Self {
++        Self(word)
++    }
++
++    /// Recover the mechanical six-bit word without interpreting it.
++    pub const fn word(self) -> Bit6 {
++        self.0
++    }
++}
++
+ #[cfg(test)]
+ mod tests {
+     use super::*;
+@@ -102,12 +143,24 @@ mod tests {
+             let word = Bit3::new(raw).unwrap();
+             assert!(Bija3::from_word(word).word() == word);
+         }
++
++        for raw in 0..=31 {
++            let word = Bit5::new(raw).unwrap();
++            assert!(CoreD5::from_word(word).word() == word);
++        }
++
++        for raw in 0..=63 {
++            let word = Bit6::new(raw).unwrap();
++            assert!(CoreD6::from_word(word).word() == word);
++        }
+     }
+ 
+     #[test]
+     fn domain_carriers_remain_one_host_byte() {
+         assert_eq!(size_of::<PredicateBit>(), 1);
+         assert_eq!(size_of::<Racana2>(), 1);
+         assert_eq!(size_of::<Bija3>(), 1);
++        assert_eq!(size_of::<CoreD5>(), 1);
++        assert_eq!(size_of::<CoreD6>(), 1);
+     }
+ }
+
+===== FILE crates/sens/src/lib.rs =====
+@@ -119,7 +119,7 @@ mod text7_projection_generated;
+ mod value;
+ 
+ pub use bits::{Bit1, Bit2, Bit3, Bit4, Bit5, Bit6, Bit7, Bit8, Bits};
+-pub use domain_words::{Bija3, PredicateBit, Racana2};
++pub use domain_words::{Bija3, CoreD5, CoreD6, PredicateBit, Racana2};
+ pub use packed_bits::{BitPacker, PackedBitstream};
+ pub use binary_framing::{
+     decode_binary_frame, decode_binary_program, encode_binary_frame, encode_binary_program,
+
+===== FILE crates/sens/src/syntax.rs =====
+@@ -1,5 +1,5 @@
+ use crate::value::{NumericBuffer, Rational};
+-use crate::Sens8;
++use crate::{CoreD5, Sens8};
+ use std::rc::Rc;
+ 
+ /// Byte range in the original UTF-8 source.
+@@ -50,6 +50,9 @@ pub enum ExprKind {
+     Rational(Rational),
+     NumericBuffer(NumericBuffer),
+     Sid(Sens8),
++    /// Already-typed Core.D5 identity. The ordinary reader does not construct
++    /// this variant yet; source-to-domain admission is a separate step.
++    CoreD5(CoreD5),
+     String(Rc<str>),
+     Symbol(Rc<str>),
+     List(Rc<[Expr]>),
+@@ -128,6 +131,7 @@ pub(crate) mod fasl {
+     const TAG_F32_BUFFER: u8 = 9;
+     // #1697: числові координати локальної змінної; ім'я не записується.
+     const TAG_LOCAL: u8 = 10;
++    const TAG_CORE_D5: u8 = 11;
+ 
+     fn put_u32(out: &mut Vec<u8>, v: u32) {
+         out.extend_from_slice(&v.to_le_bytes());
+@@ -166,6 +170,10 @@ pub(crate) mod fasl {
+                 out.push(TAG_BINARY);
+                 out.push(sid.packed_byte());
+             }
++            ExprKind::CoreD5(word) => {
++                out.push(TAG_CORE_D5);
++                out.push(word.word().packed_bits());
++            }
+             ExprKind::String(value) => {
+                 out.push(TAG_STRING);
+                 put_str(out, value);
+@@ -239,6 +247,11 @@ pub(crate) mod fasl {
+                 *pos += 1;
+                 ExprKind::Sid(crate::Sens8::from_packed_byte(value))
+             }
++            TAG_CORE_D5 => {
++                let value = *bytes.get(*pos)?;
++                *pos += 1;
++                ExprKind::CoreD5(crate::CoreD5::from_word(crate::Bit5::new(value)?))
++            }
+             TAG_STRING => ExprKind::String(get_str(bytes, pos)?.into()),
+             TAG_SYMBOL => ExprKind::Symbol(get_str(bytes, pos)?.into()),
+             TAG_LOCAL => {
+@@ -362,6 +375,7 @@ pub(crate) mod wire {
+     const TAG_SYMBOL: u8 = 0x56;
+     const TAG_PAIR: u8 = 0x57;
+     const TAG_LOCAL: u8 = 0x58;
++    const TAG_CORE_D5: u8 = 0x59;
+     /// Точні цілі поза цим діапазоном ідуть як f64, щоб не втратити точність.
+     const EXACT_INTEGER_LIMIT: f64 = 9_007_199_254_740_992.0;
+ 
+@@ -441,6 +455,10 @@ pub(crate) mod wire {
+                 out.push(TAG_BINARY);
+                 out.push(sid.packed_byte());
+             }
++            ExprKind::CoreD5(word) => {
++                out.push(TAG_CORE_D5);
++                out.push(word.word().packed_bits());
++            }
+             ExprKind::String(value) => put_text(out, TAG_STRING, value),
+             ExprKind::Symbol(symbol) => put_text(out, TAG_SYMBOL, symbol),
+             ExprKind::Local { depth, index } => {
+@@ -568,6 +586,11 @@ pub(crate) mod wire {
+                 *pos += 1;
+                 ExprKind::Sid(crate::Sens8::from_packed_byte(value))
+             }
++            TAG_CORE_D5 => {
++                let value = *bytes.get(*pos)?;
++                *pos += 1;
++                ExprKind::CoreD5(crate::CoreD5::from_word(crate::Bit5::new(value)?))
++            }
+             TAG_LOCAL => {
+                 let depth = u32::try_from(get_varint(bytes, pos)?).ok()?;
+                 let index = u32::try_from(get_varint(bytes, pos)?).ok()?;
+
+===== FILE crates/sens/tests/d5_ast_identity.rs =====
+@@ -0,0 +1,61 @@
++//! #2782 — production Core.D5 AST identity witness.
++//!
++//! The AST may carry an already-typed Core.D5 object. The ordinary parser does
++//! not gain authority to mint Core.D5 solely from a five-bit token.
++
++use sens::{
++    fasl_decode_program, fasl_encode_program, wire_decode_program, wire_encode_program,
++    Bit5, CoreD5, Expr, ExprKind, Span,
++};
++
++fn d5_expr(raw: u8) -> Expr {
++    Expr {
++        kind: ExprKind::CoreD5(CoreD5::from_word(Bit5::new(raw).unwrap())),
++        span: Span { start: 0, end: 0 },
++    }
++}
++
++#[test]
++fn every_core_d5_word_round_trips_through_ast_identity() {
++    for raw in 0u8..32 {
++        let expr = d5_expr(raw);
++        let ExprKind::CoreD5(identity) = expr.kind.clone() else {
++            panic!("Core.D5 AST variant changed");
++        };
++        assert_eq!(identity.word().packed_bits(), raw);
++        assert_eq!(expr.kind, ExprKind::CoreD5(identity));
++        assert!(format!("{:?}", expr.kind).contains("CoreD5"));
++    }
++}
++
++#[test]
++fn core_d5_fasl_roundtrip_preserves_exact_identity() {
++    for raw in 0u8..32 {
++        let expr = d5_expr(raw);
++        let hash = [raw; 32];
++        let encoded = fasl_encode_program(&[expr.clone()], &hash);
++        let (decoded, decoded_hash) = fasl_decode_program(&encoded).expect("D5 FASL");
++        assert_eq!(decoded_hash, hash);
++        assert_eq!(decoded.len(), 1);
++        assert_eq!(decoded[0].kind, expr.kind);
++        let ExprKind::CoreD5(identity) = decoded[0].kind else {
++            panic!("D5 FASL widened identity");
++        };
++        assert_eq!(identity.word().packed_bits(), raw);
++    }
++}
++
++#[test]
++fn core_d5_wire_roundtrip_preserves_exact_identity() {
++    for raw in 0u8..32 {
++        let expr = d5_expr(raw);
++        let encoded = wire_encode_program(&[expr.clone()]);
++        let decoded = wire_decode_program(&encoded).expect("D5 wire");
++        assert_eq!(decoded.len(), 1);
++        assert_eq!(decoded[0].kind, expr.kind);
++        let ExprKind::CoreD5(identity) = decoded[0].kind else {
++            panic!("D5 wire widened identity");
++        };
++        assert_eq!(identity.word().packed_bits(), raw);
++    }
++}
