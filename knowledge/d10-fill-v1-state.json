@@ -28,10 +28,10 @@
     "width": 10,
     "capacity": 1024,
     "dense_target": 1024,
-    "selected_semantic_candidates": 652,
-    "remaining_semantic_candidates": 372,
+    "selected_semantic_candidates": 653,
+    "remaining_semantic_candidates": 371,
     "law_forced_coordinates": 256,
-    "unplaced_selected_candidates": 396,
+    "unplaced_selected_candidates": 397,
     "ratified_residents": 0
   },
   "first_tranche": {
@@ -436,5 +436,12 @@
     "ratified_added": 0,
     "status": "RESEARCH-UNRATIFIED",
     "derivability": "PENDING-OWNER-REVIEW"
+  },
+  "prefix_free_kraft_current_main": {
+    "artifact": "knowledge/d10-prefix-free-kraft-certificate-20261011.json",
+    "selected": 1,
+    "coordinates_added": 0,
+    "ratified_added": 0,
+    "oracle": "two independent exhaustive methods, 3616 finite ordered codebooks"
   }
 }
