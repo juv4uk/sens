@@ -1,0 +1,31 @@
+"""Migration of four original canonical-binary smoke programs without a physical codec."""
+from pathlib import Path
+import sys
+import unittest
+
+ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(ROOT / "scripts"))
+from verify_uk_t5_triplet import canonical_uk_from_words, project_current_uk
+
+NAMES = ("smoke-quote", "smoke-atom", "smoke-cond", "smoke-nested")
+
+
+class TwoProjectionMigrationTests(unittest.TestCase):
+    def test_pinned_source_and_canonical_pairs(self):
+        original = ROOT / "tests/fixtures/canonical-binary-smoke.lisp"
+        source_lines = original.read_text(encoding="ascii").splitlines()
+        self.assertEqual(len(source_lines), 4)
+        for name, source_line in zip(NAMES, source_lines):
+            with self.subTest(name=name):
+                root = ROOT / "examples/migrated"
+                uk = (root / (name + ".lisp")).read_text(encoding="utf-8")
+                view = (root / name).read_text(encoding="ascii")
+                words = source_line.split()
+                self.assertFalse((root / (name + ".sens")).exists())
+                self.assertEqual(view, " ".join(words) + "\n")
+                self.assertEqual(uk, canonical_uk_from_words(words))
+                self.assertEqual(project_current_uk(uk), words)
+
+
+if __name__ == "__main__":
+    unittest.main()
