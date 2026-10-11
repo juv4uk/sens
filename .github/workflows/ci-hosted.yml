@@ -37,5 +37,9 @@ jobs:
           python3 scripts/check-numeric-domain-ratification.py
       - name: Verify Core domain and ownership boundaries
         run: cargo test --locked -p sens --test domain_ladder --test domain_ladder_only_kernel --test domain_ast_value_identity
+      - name: D3 obsolete COND/ATOM/EQ scanner regression tests
+        run: python3 -m unittest discover -s tests -p 'test_d3_legacy_logic_guard.py' -v
+      - name: D3 stale core-logic audit (fail closed)
+        run: python3 scripts/check_d3_legacy_logic.py --strict
       - name: Verify migrated user demo sources run through canonical Core
         run: cargo test --locked -p sens --test exact_domain_migrated_demos
