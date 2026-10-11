@@ -142,7 +142,7 @@ class SensCodeMigrationTests(unittest.TestCase):
         # Better diagnostics must NOT cause a fake physical .sens admission.
         with self.assertRaisesRegex(
             mod.BinaryMigrationError,
-            r"UNADMITTED_TEXT7_CONTEXT 'binary' at 2:3 \\(quoted-data\\)",
+            r"UNADMITTED_TEXT7_CONTEXT 'binary' at 2:3 \(quoted-data\)",
         ):
             self.binary("(QUOTE\n  binary)\n")
 
