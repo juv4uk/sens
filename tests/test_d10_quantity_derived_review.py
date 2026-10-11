@@ -75,7 +75,7 @@ class D10QuantityDerivedReview(unittest.TestCase):
             )
             # Чинний код може додавати рядки, але не втрачати сам закон.
             live = (ROOT / row["source_path"]).read_text(encoding="utf-8")
-            pattern = r"(?m)^\\s*\\(00001001\\s+" + re.escape(expected) + r"(?=\\s|\\))"
+            pattern = r"(?m)^\s*\(00001001\s+" + re.escape(expected) + r"(?=\s|\))"
             self.assertRegex(live, pattern, f"current library lost {expected}")
 
 if __name__ == "__main__":
