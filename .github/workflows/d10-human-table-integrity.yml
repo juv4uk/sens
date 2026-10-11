@@ -1,0 +1,25 @@
+name: D10 human-domain table integrity
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'lib/domains/d*.lisp'
+      - 'scripts/domain_tables.py'
+      - 'scripts/check-d10-domain-table.py'
+      - 'knowledge/d10-owner-whole-domain-ratification-20261012.json'
+      - 'knowledge/d10-current-inventory.json'
+      - 'knowledge/d10-v18-semantic-inventory.json'
+      - '.github/workflows/d10-human-table-integrity.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  check-d10-lisp-table:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check all 1024 ten-bit identities and cross-domain human surfaces
+        run: |
+          python3 scripts/check-d10-domain-table.py --self-test
+          python3 -O scripts/check-d10-domain-table.py --self-test
