@@ -14653,13 +14653,24 @@
       "proof_readiness": {
         "status": "INCOMPLETE-SOURCE-SEMANTICS",
         "missing": [
-          "semantic-law",
           "positive-witness",
           "negative-falsifier"
         ],
         "selection": false,
         "ratification": false,
         "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+      },
+      "source_behavior_claim": {
+        "status": "DONOR-RESEARCH-CLAIM-NOT-CORE-LAW",
+        "source_git_blob": "564cfb6990a8dac36ad02f845ec9d556bd501ec5",
+        "source_name": "PENDULUM-PHYSICS-PIPELINE",
+        "claim": "Wrapped angle -> unwrap -> velocity -> period -> peaks/Q -> gravity is a documented measurement pipeline.",
+        "donor_decision": "HOLD",
+        "duplicate_target": null,
+        "witnesses": "NOT-SUPPLIED",
+        "source_implementation_verification": "NOT-RUN",
+        "owner_review": "PENDING",
+        "ratification": false
       }
     },
     {
@@ -14676,13 +14687,24 @@
       "proof_readiness": {
         "status": "INCOMPLETE-SOURCE-SEMANTICS",
         "missing": [
-          "semantic-law",
           "positive-witness",
           "negative-falsifier"
         ],
         "selection": false,
         "ratification": false,
         "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+      },
+      "source_behavior_claim": {
+        "status": "DONOR-RESEARCH-CLAIM-NOT-CORE-LAW",
+        "source_git_blob": "564cfb6990a8dac36ad02f845ec9d556bd501ec5",
+        "source_name": "EXACT-RATIONAL-PHYSICS-CARRIER",
+        "claim": "Pipeline arithmetic is constrained to Rational32/Rational64, with floating-point only for console output.",
+        "donor_decision": "PROJECTION",
+        "duplicate_target": null,
+        "witnesses": "NOT-SUPPLIED",
+        "source_implementation_verification": "NOT-RUN",
+        "owner_review": "PENDING",
+        "ratification": false
       }
     },
     {
@@ -14699,13 +14721,24 @@
       "proof_readiness": {
         "status": "INCOMPLETE-SOURCE-SEMANTICS",
         "missing": [
-          "semantic-law",
           "positive-witness",
           "negative-falsifier"
         ],
         "selection": false,
         "ratification": false,
         "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+      },
+      "source_behavior_claim": {
+        "status": "DONOR-RESEARCH-CLAIM-NOT-CORE-LAW",
+        "source_git_blob": "564cfb6990a8dac36ad02f845ec9d556bd501ec5",
+        "source_name": "BOUNDED-PATH-SEARCH",
+        "claim": "Path query maps start/destination relations to a path or no result and may transform world coordinates into local search space.",
+        "donor_decision": "HOLD",
+        "duplicate_target": null,
+        "witnesses": "NOT-SUPPLIED",
+        "source_implementation_verification": "NOT-RUN",
+        "owner_review": "PENDING",
+        "ratification": false
       }
     },
     {
@@ -14722,13 +14755,24 @@
       "proof_readiness": {
         "status": "INCOMPLETE-SOURCE-SEMANTICS",
         "missing": [
-          "semantic-law",
           "positive-witness",
           "negative-falsifier"
         ],
         "selection": false,
         "ratification": false,
         "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+      },
+      "source_behavior_claim": {
+        "status": "DONOR-RESEARCH-CLAIM-NOT-CORE-LAW",
+        "source_git_blob": "564cfb6990a8dac36ad02f845ec9d556bd501ec5",
+        "source_name": "GEOMETRIC-COORDINATE-TRANSFORM",
+        "claim": "Vectors/points are transformed between coordinate frames; world/screen and spherical/cartesian transforms are explicit.",
+        "donor_decision": "HOLD",
+        "duplicate_target": null,
+        "witnesses": "NOT-SUPPLIED",
+        "source_implementation_verification": "NOT-RUN",
+        "owner_review": "PENDING",
+        "ratification": false
       }
     },
     {
@@ -14745,13 +14789,24 @@
       "proof_readiness": {
         "status": "INCOMPLETE-SOURCE-SEMANTICS",
         "missing": [
-          "semantic-law",
           "positive-witness",
           "negative-falsifier"
         ],
         "selection": false,
         "ratification": false,
         "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+      },
+      "source_behavior_claim": {
+        "status": "DONOR-RESEARCH-CLAIM-NOT-CORE-LAW",
+        "source_git_blob": "564cfb6990a8dac36ad02f845ec9d556bd501ec5",
+        "source_name": "CALLSIGN-NORMALIZATION",
+        "claim": "A station callsign is normalized to uppercase before entering the log model.",
+        "donor_decision": "HOLD",
+        "duplicate_target": null,
+        "witnesses": "NOT-SUPPLIED",
+        "source_implementation_verification": "NOT-RUN",
+        "owner_review": "PENDING",
+        "ratification": false
       }
     },
     {
@@ -14768,13 +14823,24 @@
       "proof_readiness": {
         "status": "INCOMPLETE-SOURCE-SEMANTICS",
         "missing": [
-          "semantic-law",
           "positive-witness",
           "negative-falsifier"
         ],
         "selection": false,
         "ratification": false,
         "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+      },
+      "source_behavior_claim": {
+        "status": "DONOR-RESEARCH-CLAIM-NOT-CORE-LAW",
+        "source_git_blob": "564cfb6990a8dac36ad02f845ec9d556bd501ec5",
+        "source_name": "POWER-RANGE-CLASSIFICATION",
+        "claim": "Transmit power is classified as QRPp below 1 W and QRP from 1 through 5 W while exact power remains preserved.",
+        "donor_decision": "HOLD",
+        "duplicate_target": null,
+        "witnesses": "NOT-SUPPLIED",
+        "source_implementation_verification": "NOT-RUN",
+        "owner_review": "PENDING",
+        "ratification": false
       }
     },
     {
@@ -14791,13 +14857,24 @@
       "proof_readiness": {
         "status": "INCOMPLETE-SOURCE-SEMANTICS",
         "missing": [
-          "semantic-law",
           "positive-witness",
           "negative-falsifier"
         ],
         "selection": false,
         "ratification": false,
         "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+      },
+      "source_behavior_claim": {
+        "status": "DONOR-RESEARCH-CLAIM-NOT-CORE-LAW",
+        "source_git_blob": "564cfb6990a8dac36ad02f845ec9d556bd501ec5",
+        "source_name": "ASTROLOGICAL-CHART-DERIVATION",
+        "claim": "Time/location input is transformed into chart state, planetary/house tables, significators and Vimshottari Dasa relations.",
+        "donor_decision": "HOLD",
+        "duplicate_target": null,
+        "witnesses": "NOT-SUPPLIED",
+        "source_implementation_verification": "NOT-RUN",
+        "owner_review": "PENDING",
+        "ratification": false
       }
     },
     {
@@ -14814,13 +14891,24 @@
       "proof_readiness": {
         "status": "INCOMPLETE-SOURCE-SEMANTICS",
         "missing": [
-          "semantic-law",
           "positive-witness",
           "negative-falsifier"
         ],
         "selection": false,
         "ratification": false,
         "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+      },
+      "source_behavior_claim": {
+        "status": "DONOR-RESEARCH-CLAIM-NOT-CORE-LAW",
+        "source_git_blob": "564cfb6990a8dac36ad02f845ec9d556bd501ec5",
+        "source_name": "SPEAKER-SEGMENTATION-AND-CLUSTERING",
+        "claim": "Audio is segmented into speech turns and grouped/resegmented by speaker identity.",
+        "donor_decision": "HOLD",
+        "duplicate_target": null,
+        "witnesses": "NOT-SUPPLIED",
+        "source_implementation_verification": "NOT-RUN",
+        "owner_review": "PENDING",
+        "ratification": false
       }
     },
     {
@@ -14837,13 +14925,24 @@
       "proof_readiness": {
         "status": "INCOMPLETE-SOURCE-SEMANTICS",
         "missing": [
-          "semantic-law",
           "positive-witness",
           "negative-falsifier"
         ],
         "selection": false,
         "ratification": false,
         "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+      },
+      "source_behavior_claim": {
+        "status": "DONOR-RESEARCH-CLAIM-NOT-CORE-LAW",
+        "source_git_blob": "564cfb6990a8dac36ad02f845ec9d556bd501ec5",
+        "source_name": "TIME-LONGITUDE-POLAR-PROJECTION",
+        "claim": "24-hour circular time is modeled as a 360° longitude projection with explicit coordinate transformations.",
+        "donor_decision": "HOLD",
+        "duplicate_target": null,
+        "witnesses": "NOT-SUPPLIED",
+        "source_implementation_verification": "NOT-RUN",
+        "owner_review": "PENDING",
+        "ratification": false
       }
     },
     {
@@ -14860,13 +14959,24 @@
       "proof_readiness": {
         "status": "INCOMPLETE-SOURCE-SEMANTICS",
         "missing": [
-          "semantic-law",
           "positive-witness",
           "negative-falsifier"
         ],
         "selection": false,
         "ratification": false,
         "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+      },
+      "source_behavior_claim": {
+        "status": "DONOR-RESEARCH-CLAIM-NOT-CORE-LAW",
+        "source_git_blob": "564cfb6990a8dac36ad02f845ec9d556bd501ec5",
+        "source_name": "RATIONAL-TO-MASK-AND-BACK",
+        "claim": "Exact p/q is intended to cross a discrete FPGA mask boundary and return from analog measurement via closest-rational approximation.",
+        "donor_decision": "HOLD",
+        "duplicate_target": null,
+        "witnesses": "NOT-SUPPLIED",
+        "source_implementation_verification": "NOT-RUN",
+        "owner_review": "PENDING",
+        "ratification": false
       }
     },
     {
@@ -14883,13 +14993,24 @@
       "proof_readiness": {
         "status": "INCOMPLETE-SOURCE-SEMANTICS",
         "missing": [
-          "semantic-law",
           "positive-witness",
           "negative-falsifier"
         ],
         "selection": false,
         "ratification": false,
         "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+      },
+      "source_behavior_claim": {
+        "status": "DONOR-RESEARCH-CLAIM-NOT-CORE-LAW",
+        "source_git_blob": "564cfb6990a8dac36ad02f845ec9d556bd501ec5",
+        "source_name": "BOUNDED-AUTHORITY-RECIPROCITY",
+        "claim": "Authority is constrained by reciprocal recognition of another participant's will; unilateral power over the other is rejected.",
+        "donor_decision": "HOLD",
+        "duplicate_target": null,
+        "witnesses": "NOT-SUPPLIED",
+        "source_implementation_verification": "NOT-RUN",
+        "owner_review": "PENDING",
+        "ratification": false
       }
     },
     {
@@ -22813,15 +22934,15 @@
     "formal_ratified": 0,
     "semantic_source_audit": {
       "total": 309,
-      "has_law": 198,
+      "has_law": 209,
       "has_positive": 188,
       "has_negative": 188,
       "law_and_witnesses": 188,
-      "missing_law": 111,
+      "missing_law": 100,
       "missing_positive": 121,
       "missing_negative": 121
     },
-    "note": "Review witnesses are source-grounded proposals, NOT executed SENS oracles or independent Core residency.",
+    "note": "11 source donor summaries are NOT unique D10 semantics; no witnesses or D10 residency granted.",
     "uncorroborated_source_name_census": 96,
     "source_census_triage": {
       "SOURCE-VARIABLE-NOT-A-FIRST-CLASS-FUNCTION": 3,
@@ -22829,6 +22950,7 @@
       "LIBRARY-SCHEMA-OR-BINDING-NOT-A-FIRST-CLASS-FUNCTION": 9,
       "LIBRARY-DEFINITION-CORE-VS-DERIVED-UNREVIEWED": 32,
       "USER-INTEREST-NAME-ONLY-NO-SOURCE-OPERATION": 49
-    }
+    },
+    "source_behavior_claims_for_projection": 11
   }
 }
