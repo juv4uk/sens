@@ -62,6 +62,25 @@ pub fn parse_mixed_exact_domain_reasoning_source(
     parse_mixed_source(source, true)
 }
 
+/// Exact D3/D4 call heads are intentionally present in this single
+/// deterministic filesystem regression fixture. The fixture uses the
+/// Lisp-derived ЛІХТАР syntax for LET; it must not ask the runtime to
+/// guess function identities from numbers in arbitrary user programs.
+/// W8 bootstrap wrappers remain compatibility syntax; quoted data is opaque.
+pub fn parse_mixed_exact_domain_fs_fixture_source(
+    path: &str,
+    source: &str,
+) -> Result<Vec<Expr>, LanguageError> {
+    if path != "tests/fixtures/lisp-fs-conformance.lisp" {
+        return Err(LanguageError::new(
+            ErrorKind::Parse,
+            "filesystem fixture exact-width reader requires its pinned fixture path",
+            Span::default(),
+        ));
+    }
+    parse_mixed_source(source, true)
+}
+
 /// Read only the frozen legacy library core with exact D3-D6 callable heads.
 /// This library (lib/core.lisp) is distinct from the canonical Core4/FASL
 /// bootstrap. W8 macro/define syntax and quoted templates remain data.
