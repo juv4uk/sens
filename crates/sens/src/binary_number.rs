@@ -154,6 +154,51 @@ impl BinaryNumber {
             .collect()
     }
 
+    /// Dn mathematical NEG composition can only wrap a NONZERO, explicitly
+    /// domain-qualified natural magnitude. This does not introduce a sign bit,
+    /// new numeric domain, NEG opcode or runtime signed Number representation.
+    pub fn can_be_negated_in_numeric_domain(&self) -> bool {
+        self.numeric_domain_width.is_some() && !self.is_zero()
+    }
+
+    /// Normalize *components* for the domain-relative exact RATIO(p,q) law.
+    /// Both arguments must already be qualified D24/D48/... natural atoms;
+    /// q=0 is rejected. gcd(p,q)=1 is enforced by exact binary div_rem.
+    ///
+    /// This returns mechanism-level existing BinaryNumber constituents, NOT
+    /// a new host semantic Rational, a language expression, binary opcode or
+    /// evidence of callable signed/rational arithmetic. Caller must collapse
+    /// p=0 to numeric zero and q=1 to an integer under the ratified law.
+    /// Input domain identities remain untouched (including mixed D24/D48).
+    pub fn reduce_numeric_domain_ratio_parts(
+        numerator: &Self,
+        denominator: &Self,
+    ) -> Option<(Self, Self)> {
+        let n_width = numerator.numeric_domain_width?;
+        let d_width = denominator.numeric_domain_width?;
+        if denominator.is_zero() {
+            return None;
+        }
+
+        // Existing bit algorithms compare unqualified magnitudes. Their
+        // temporary normalized carriers are strictly private mechanisms:
+        // comparing qualified D24 and D48 identities is not magnitude order.
+        let n = Self::normalize(numerator.bits.clone());
+        let d = Self::normalize(denominator.bits.clone());
+        let divisor = n.gcd(&d);
+        let (n_reduced, n_rem) = n.div_rem(&divisor)?;
+        let (d_reduced, d_rem) = d.div_rem(&divisor)?;
+        if !n_rem.is_zero() || !d_rem.is_zero() {
+            return None;
+        }
+        let fill = |number: Self, domain_width: usize| -> Option<Self> {
+            let mut exact = vec![0; domain_width.checked_sub(number.width())?];
+            exact.extend_from_slice(number.as_bits());
+            Self::from_numeric_domain_bits(domain_width, &exact)
+        };
+        Some((fill(n_reduced, n_width)?, fill(d_reduced, d_width)?))
+    }
+
     /// Exact arbitrary-width binary addition. No host numeric value is used.
     pub fn add(&self, other: &Self) -> Self {
         let mut out_rev = Vec::with_capacity(self.width().max(other.width()) + 1);
@@ -552,6 +597,86 @@ mod tests {
         assert!(full.add_admitted_numeric(&BinaryNumber::one()).is_none());
         let another_domain = BinaryNumber::from_numeric_domain_bits(48, &vec![0; 48]).unwrap();
         assert!(full.add_admitted_numeric(&another_domain).is_none());
+    }
+
+    #[test]
+    fn d24_plus_signed_and_rational_composition_laws_preserve_all_natural_bits() {
+        for width in [24, 48, 96, 192, 384] {
+            let mut largest = vec![1; width];
+            let full = BinaryNumber::from_numeric_domain_bits(width, &largest).unwrap();
+            assert!(full.can_be_negated_in_numeric_domain());
+            assert_eq!(full.exact_numeric_domain_bits(), Some(std::mem::take(&mut largest)));
+            let zero = BinaryNumber::from_numeric_domain_bits(width, &vec![0; width]).unwrap();
+            assert!(!zero.can_be_negated_in_numeric_domain(),
+                "negative zero must canonicalize, not persist as an identity");
+        }
+        assert!(!BinaryNumber::one().can_be_negated_in_numeric_domain(),
+            "unqualified historic Number cannot claim D24 NEG law");
+    }
+
+    #[test]
+    fn d24_plus_rational_parts_are_gcd_reduced_and_keep_component_domains() {
+        let admitted = |width, n: u64| {
+            let mut bits = vec![0; width];
+            for index in 0..width.min(64) {
+                bits[width - index - 1] = ((n >> index) & 1) as u8;
+            }
+            BinaryNumber::from_numeric_domain_bits(width, &bits).unwrap()
+        };
+        let two = admitted(24, 2);
+        let four = admitted(48, 4);
+        let (n, d) = BinaryNumber::reduce_numeric_domain_ratio_parts(&two, &four).unwrap();
+        assert_eq!(n.to_decimal_string(), "1");
+        assert_eq!(d.to_decimal_string(), "2");
+        assert_eq!(n.numeric_domain_width(), Some(24));
+        assert_eq!(d.numeric_domain_width(), Some(48));
+        assert_eq!(n.exact_numeric_domain_bits().unwrap().len(), 24);
+        assert_eq!(d.exact_numeric_domain_bits().unwrap().len(), 48);
+        assert_eq!(n, admitted(24, 1));
+        assert_eq!(d, admitted(48, 2));
+
+        let zero = admitted(24, 0);
+        let five = admitted(48, 5);
+        let (zn, zd) = BinaryNumber::reduce_numeric_domain_ratio_parts(&zero, &five).unwrap();
+        assert!(zn.is_zero());
+        assert_eq!(zd, admitted(48, 1)); // zero ratio collapses to zn in D24.
+        let (an, ad) = BinaryNumber::reduce_numeric_domain_ratio_parts(
+            &admitted(24, 15), &admitted(48, 3)).unwrap();
+        assert_eq!(an, admitted(24, 5));
+        assert_eq!(ad, admitted(48, 1)); // unit denominator collapses to integer.
+        assert!(BinaryNumber::reduce_numeric_domain_ratio_parts(&two, &admitted(24, 0)).is_none());
+        assert!(BinaryNumber::reduce_numeric_domain_ratio_parts(
+            &BinaryNumber::parse("10").unwrap(), &four).is_none());
+        assert!(BinaryNumber::reduce_numeric_domain_ratio_parts(
+            &two, &BinaryNumber::parse("100").unwrap()).is_none());
+    }
+
+    #[test]
+    fn d24_plus_ratio_reduction_matches_independent_small_integer_oracle() {
+        let admitted = |n: u32| {
+            let mut word = vec![0u8; 24];
+            for index in 0..24 {
+                word[23 - index] = ((n >> index) & 1) as u8;
+            }
+            BinaryNumber::from_numeric_domain_bits(24, &word).unwrap()
+        };
+        let gcd = |mut a: u32, mut b: u32| -> u32 {
+            while b != 0 {
+                (a, b) = (b, a % b);
+            }
+            a
+        };
+        for numerator in 0..32 {
+            for denominator in 1..32 {
+                let (n,d) = BinaryNumber::reduce_numeric_domain_ratio_parts(
+                    &admitted(numerator), &admitted(denominator)).unwrap();
+                let divisor = gcd(numerator, denominator);
+                assert_eq!(n.to_decimal_string(), (numerator / divisor).to_string());
+                assert_eq!(d.to_decimal_string(), (denominator / divisor).to_string());
+                assert_eq!(n.numeric_domain_width(), Some(24));
+                assert_eq!(d.numeric_domain_width(), Some(24));
+            }
+        }
     }
 
     #[test]
