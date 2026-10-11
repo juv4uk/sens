@@ -47,48 +47,48 @@
 ; JSON encoding (pure .lisp; decode is the host primitive, encode never was)
 ; ---------------------------------------------------------------------------
 
-(00001001 json-escape-char
-  (00001000 (ch)
-    (00000111
-      ((00000011 ch "\"") "\\\"")
-      ((00000011 ch "\\") "\\\\")
-      ((00000011 ch "\n") "\\n")
-      ((00000011 ch "\r") "\\r")
-      ((00000011 ch "\t") "\\t")
-      ((00000010 ()) ch))))
+(0011 json-escape-char
+  (0010 (ch)
+    (110
+      ((101 ch "\"") "\\\"")
+      ((101 ch "\\") "\\\\")
+      ((101 ch "\n") "\\n")
+      ((101 ch "\r") "\\r")
+      ((101 ch "\t") "\\t")
+      ((010 ()) ch))))
 
-(00001001 json-escape-onto
-  (00001000 (s acc)
-    (00000111
-      ((00111100 s) acc)
-      ((00000010 ()) (json-escape-onto (01000000 s)
-                           (00111010 acc (json-escape-char (00111111 s))))))))
+(0011 json-escape-onto
+  (0010 (s acc)
+    (110
+      ((110011100 s) acc)
+      ((010 ()) (json-escape-onto (110011101 s)
+                           (110011110 acc (json-escape-char (110101011 s))))))))
 
-(00001001 json-escape
-  (00001000 (s) (json-escape-onto s "")))
+(0011 json-escape
+  (0010 (s) (json-escape-onto s "")))
 
 ; The kernel's string-append is strictly binary AND a special form, so it
 ; cannot be passed as a function value to reduce — fold over rest args
 ; directly instead. Derived here, no new primitive.
-(00001001 strcat-onto
-  (00001000 (items acc)
-    (00000111
+(0011 strcat-onto
+  (0010 (items acc)
+    (110
       
-      ((00000010 items)  acc)
-      ((00000010 ()) (strcat-onto (00000110 items) (00111010 acc (00000101 items)))))))
+      ((010 items)  acc)
+      ((010 ()) (strcat-onto (011 items) (110011110 acc (100 items)))))))
 
-(00001001 strcat
-  (00001000 args
+(0011 strcat
+  (0010 args
     (strcat-onto args "")))
 
-(00001001 json-encode-string
-  (00001000 (s) (00111010 "\"" (00111010 (json-escape s) "\""))))
+(0011 json-encode-string
+  (0010 (s) (110011110 "\"" (110011110 (json-escape s) "\""))))
 
-(00001001 json-encode-key
-  (00001000 (k)
-    (00000111
-      ((00100011 k) (json-encode-string (01000010 k)))
-      ((00000010 ()) (json-encode-string k)))))
+(0011 json-encode-key
+  (0010 (k)
+    (110
+      ((110101100 k) (json-encode-string (11101110 k)))
+      ((010 ()) (json-encode-string k)))))
 
 ; Objects are alists (lists of dotted pairs), arrays are proper lists.
 ; Disambiguation for this protocol's data: a list is an OBJECT iff its
@@ -96,67 +96,67 @@
 ; contain either scalars or nested structures (whose car is itself a
 ; pair). This survives nested-object values like ("cmd" . (("type" . ...))),
 ; which a naive "cdr of first entry is atom" test misclassifies as array.
-(00001001 json-object?
-  (00001000 (v)
-    (00000111
+(0011 json-object?
+  (0010 (v)
+    (110
       
-      ((00000010 ()) (00000001 ()))
+      ((010 ()) (001 ()))
       
-      ((00000010 (00000101 v))  (00000001 ()))
+      ((010 (100 v))  (001 ()))
       
-      ((00000010 (00000101 (00000101 v)))  t)
+      ((010 (100 (100 v)))  t)
       )))
 
-(00001001 json-encode-value
-  (00001000 (v)
-    (00000111
+(0011 json-encode-value
+  (0010 (v)
+    (110
       
-      ((00000010 v)  (00000111
-         ((00000011 v t) "true")
-         ((00000011 v (00000001 ())) "null")
+      ((010 v)  (110
+         ((101 v t) "true")
+         ((101 v (001 ())) "null")
          ((string-membership-helper v)
           
           (json-encode-string v))
-         ((00000010 ()) (01001100 v))))
+         ((010 ()) (11110100 v))))
       ((json-object? v) (json-encode-object v))
-      ((00000010 ()) (json-encode-array v)))))
+      ((010 ()) (json-encode-array v)))))
 
-(00001001 json-encode-object-entries
-  (00001000 (entries acc)
-    (00000111
+(0011 json-encode-object-entries
+  (0010 (entries acc)
+    (110
       
-      ((00000010 entries)  acc)
-      ((00000010 ()) (10011100 ((entry (00000101 entries)))
+      ((010 entries)  acc)
+      ((010 ()) (001000 ((entry (100 entries)))
            (json-encode-object-entries
-            (00000110 entries)
+            (011 entries)
             (strcat acc
-                    (00000111 ((00111100 acc) "")
-                          ((00000010 ()) ","))
-                    (json-encode-key (00000101 entry))
+                    (110 ((110011100 acc) "")
+                          ((010 ()) ","))
+                    (json-encode-key (100 entry))
                     ":"
-                    (json-encode-value (00000110 entry)))))))))
+                    (json-encode-value (011 entry)))))))))
 
-(00001001 json-encode-object
-  (00001000 (alist)
+(0011 json-encode-object
+  (0010 (alist)
     (strcat "{" (json-encode-object-entries alist "") "}")))
 
-(00001001 json-encode-array-items
-  (00001000 (items acc)
-    (00000111
+(0011 json-encode-array-items
+  (0010 (items acc)
+    (110
       
-      ((00000010 items)  acc)
-      ((00000010 ()) (json-encode-array-items
-          (00000110 items)
+      ((010 items)  acc)
+      ((010 ()) (json-encode-array-items
+          (011 items)
           (strcat acc
-                  (00000111 ((00111100 acc) "")
-                        ((00000010 ()) ","))
-                  (json-encode-value (00000101 items))))))))
+                  (110 ((110011100 acc) "")
+                        ((010 ()) ","))
+                  (json-encode-value (100 items))))))))
 
-(00001001 json-encode-array
-  (00001000 (items)
+(0011 json-encode-array
+  (0010 (items)
     (strcat "[" (json-encode-array-items items "") "]")))
 
-(00001001 json-encode json-encode-value)
+(0011 json-encode json-encode-value)
 
 ; ---------------------------------------------------------------------------
 ; Message / tool-call accessors and JSON -> internal conversion
@@ -166,94 +166,94 @@
 ; kernel's cdr fails named on (), so every read goes through this guard.
 ; A genuinely absent key and an explicit nil value both read as () — the
 ; loop below only ever distinguishes present-nonempty from everything else.
-(00001001 alist-ref
-  (00001000 (key alist)
-    (00000111
-      ((00101101 key alist) (00000110 (00101101 key alist)))
+(0011 alist-ref
+  (0010 (key alist)
+    (110
+      ((11100 key alist) (011 (11100 key alist)))
       )))
 
-(00001001 msg-role (00001000 (m) (alist-ref (00000001 role) m)))
-(00001001 msg-content (00001000 (m) (alist-ref (00000001 content) m)))
-(00001001 msg-tool-calls (00001000 (m) (alist-ref (00000001 tool-calls) m)))
-(00001001 msg-tool-call-id (00001000 (m) (alist-ref (00000001 tool-call-id) m)))
+(0011 msg-role (0010 (m) (alist-ref (001 role) m)))
+(0011 msg-content (0010 (m) (alist-ref (001 content) m)))
+(0011 msg-tool-calls (0010 (m) (alist-ref (001 tool-calls) m)))
+(0011 msg-tool-call-id (0010 (m) (alist-ref (001 tool-call-id) m)))
 
-(00001001 tc-id (00001000 (tc) (alist-ref (00000001 id) tc)))
-(00001001 tc-name (00001000 (tc) (alist-ref (00000001 name) tc)))
-(00001001 tc-arguments (00001000 (tc) (alist-ref (00000001 arguments) tc)))
+(0011 tc-id (0010 (tc) (alist-ref (001 id) tc)))
+(0011 tc-name (0010 (tc) (alist-ref (001 name) tc)))
+(0011 tc-arguments (0010 (tc) (alist-ref (001 arguments) tc)))
 
 ; OpenAI's content field is null when the assistant emits only tool calls.
-(00001001 json-message-content
-  (00001000 (jm)
-    (10011100 ((c (alist-ref "content" jm)))
-      (00000111
-        ((00000011 c (00000001 ())) "")
-        ((00000010 ()) c)))))
+(0011 json-message-content
+  (0010 (jm)
+    (001000 ((c (alist-ref "content" jm)))
+      (110
+        ((101 c (001 ())) "")
+        ((010 ()) c)))))
 
-(00001001 json->tool-call
-  (00001000 (jtc)
-    (10011100 ((fn (alist-ref "function" jtc)))
-      (00100111 (00000100 (00000001 id) (alist-ref "id" jtc))
-            (00000100 (00000001 name) (alist-ref "name" fn))
-            (00000100 (00000001 arguments) (alist-ref "arguments" fn))))))
+(0011 json->tool-call
+  (0010 (jtc)
+    (001000 ((fn (alist-ref "function" jtc)))
+      (1110 (111 (001 id) (alist-ref "id" jtc))
+            (111 (001 name) (alist-ref "name" fn))
+            (111 (001 arguments) (alist-ref "arguments" fn))))))
 
-(00001001 json->message
-  (00001000 (jm)
-    (10011100 ((tcs (alist-ref "tool_calls" jm)))
-      (00101001 (00100111 (00000100 (00000001 role) (alist-ref "role" jm))
-                    (00000100 (00000001 content) (json-message-content jm)))
-              (00000111
-                (tcs (00100111 (00000100 (00000001 tool-calls) (00110111 json->tool-call tcs))))
+(0011 json->message
+  (0010 (jm)
+    (001000 ((tcs (alist-ref "tool_calls" jm)))
+      (1111 (1110 (111 (001 role) (alist-ref "role" jm))
+                    (111 (001 content) (json-message-content jm)))
+              (110
+                (tcs (1110 (111 (001 tool-calls) (101000 json->tool-call tcs))))
                 )))))
 
-(00001001 extract-assistant-message
-  (00001000 (response-json)
-    (10011101 ((choices (alist-ref "choices" response-json))
-           (choice (00000101 choices)))
+(0011 extract-assistant-message
+  (0010 (response-json)
+    (001001 ((choices (alist-ref "choices" response-json))
+           (choice (100 choices)))
       (alist-ref "message" choice))))
 
 ; ---------------------------------------------------------------------------
 ; Request encoding (raw-data builders; one json-encode at the leaf)
 ; ---------------------------------------------------------------------------
 
-(00001001 encode-tool-call
-  (00001000 (tc)
-    (00100111 (00000100 "id" (tc-id tc))
-          (00000100 "type" "function")
-          (00000100 "function" (00100111 (00000100 "name" (tc-name tc))
-                                 (00000100 "arguments" (tc-arguments tc)))))))
+(0011 encode-tool-call
+  (0010 (tc)
+    (1110 (111 "id" (tc-id tc))
+          (111 "type" "function")
+          (111 "function" (1110 (111 "name" (tc-name tc))
+                                 (111 "arguments" (tc-arguments tc)))))))
 
-(00001001 encode-message
-  (00001000 (m)
-    (00000111
-      ((00100010 (msg-role m) "tool")
-       (00100111 (00000100 "role" "tool")
-             (00000100 "tool_call_id" (msg-tool-call-id m))
-             (00000100 "content" (msg-content m))))
-      ((00000010 ()) (10011100 ((tcs (msg-tool-calls m)))
-           (00101001 (00100111 (00000100 "role" (msg-role m))
-                         (00000100 "content" (msg-content m)))
-                   (00000111 (tcs (00100111 (00000100 "tool_calls" (00110111 encode-tool-call tcs))))
+(0011 encode-message
+  (0010 (m)
+    (110
+      ((11110111 (msg-role m) "tool")
+       (1110 (111 "role" "tool")
+             (111 "tool_call_id" (msg-tool-call-id m))
+             (111 "content" (msg-content m))))
+      ((010 ()) (001000 ((tcs (msg-tool-calls m)))
+           (1111 (1110 (111 "role" (msg-role m))
+                         (111 "content" (msg-content m)))
+                   (110 (tcs (1110 (111 "tool_calls" (101000 encode-tool-call tcs))))
                          )))))))
 
-(00001001 bash-tool-schema
-  (00001000 ()
-    (00100111 (00000100 "type" "function")
-          (00000100 "function"
-                (00100111 (00000100 "name" "bash")
-                      (00000100 "description" "Run one bash command; returns combined stdout and stderr.")
-                      (00000100 "parameters"
-                            (00100111 (00000100 "type" "object")
-                                  (00000100 "properties"
-                                        (00100111 (00000100 "cmd" (00100111 (00000100 "type" "string")
-                                                                (00000100 "description" "The bash command to execute")))))
-                                  (00000100 "required" (00100111 "cmd")))))))))
+(0011 bash-tool-schema
+  (0010 ()
+    (1110 (111 "type" "function")
+          (111 "function"
+                (1110 (111 "name" "bash")
+                      (111 "description" "Run one bash command; returns combined stdout and stderr.")
+                      (111 "parameters"
+                            (1110 (111 "type" "object")
+                                  (111 "properties"
+                                        (1110 (111 "cmd" (1110 (111 "type" "string")
+                                                                (111 "description" "The bash command to execute")))))
+                                  (111 "required" (1110 "cmd")))))))))
 
-(00001001 build-request-body
-  (00001000 (model messages)
+(0011 build-request-body
+  (0010 (model messages)
     (json-encode
-     (00100111 (00000100 "model" model)
-           (00000100 "messages" (00110111 encode-message messages))
-           (00000100 "tools" (00100111 (bash-tool-schema)))))))
+     (1110 (111 "model" model)
+           (111 "messages" (101000 encode-message messages))
+           (111 "tools" (1110 (bash-tool-schema)))))))
 
 ; ---------------------------------------------------------------------------
 ; Host transport: HTTP POST via the existing allowlisted process-run +
@@ -261,8 +261,8 @@
 ; native http-post primitive is ever adopted.
 ; ---------------------------------------------------------------------------
 
-(00001001 http-post-json
-  (00001000 (url body)
+(0011 http-post-json
+  (0010 (url body)
     ;; --fail: non-2xx yields non-zero exit instead of an error body that
     ;; would be fed to json-parse; --max-time: never hang the agent loop
     ;; on a stuck server; --show-error keeps the reason on stderr.
@@ -271,13 +271,13 @@
     ;; opaque json-parse("") crash downstream — the same evidence-losing
     ;; class already fixed in execute-bash. The full triple now flows to
     ;; ollama-complete, which decides.
-    (10011100 ((result (10100010 "curl"
-                               (00100111 "-s" "-S" "--fail" "--show-error"
+    (001000 ((result (110101111 "curl"
+                               (1110 "-s" "-S" "--fail" "--show-error"
                                      "--max-time" "120"
                                      "-X" "POST"
                                      "-H" "Content-Type: application/json"
                                      "-d" body url))))
-      (00100111 (00101011 0 result) (00101011 1 result) (00101011 2 result)))))
+      (1110 (000100 0 result) (000100 1 result) (000100 2 result)))))
 
 ;; Transport result contract: (exit-code stdout stderr). Exit 0 = body is
 ;; the JSON payload; anything else = a BLOCKED result per the unknown-
@@ -285,9 +285,9 @@
 ;; yantra stays standalone): (blocked "curl exit N[\\nstderr]"). Callers
 ;; must branch on this — feeding a blocked result to json-parse was the
 ;; original bug.
-(00001001 http-transport-exit (00001000 (r) (00000101 r)))
-(00001001 http-transport-body (00001000 (r) (00000101 (00000110 r))))
-(00001001 http-transport-stderr (00001000 (r) (00000101 (00000110 (00000110 r)))))
+(0011 http-transport-exit (0010 (r) (100 r)))
+(0011 http-transport-body (0010 (r) (100 (011 r))))
+(0011 http-transport-stderr (0010 (r) (100 (011 (011 r)))))
 
 ; ---------------------------------------------------------------------------
 ; Tool dispatch — one tool: bash. Real execution only.
@@ -296,78 +296,78 @@
 ; The tool result is structured: the exit status is evidence, not a
 ; detail to drop - a command that failed with 127 must not read the same
 ; as one that succeeded. Text shape stays LLM-friendly.
-(00001001 execute-bash
-  (00001000 (arguments-json)
-    (10011101 ((args (10100000 arguments-json))
+(0011 execute-bash
+  (0010 (arguments-json)
+    (001001 ((args (110100100 arguments-json))
            (cmd (alist-ref "cmd" args))
-           (result (10100010 "bash" (00100111 "-c" cmd)))
-           (exit-code (00101011 0 result))
-           (stdout (00101011 1 result))
-           (stderr (00101011 2 result)))
-      (strcat "[exit-code " (01000110 exit-code)
+           (result (110101111 "bash" (1110 "-c" cmd)))
+           (exit-code (000100 0 result))
+           (stdout (000100 1 result))
+           (stderr (000100 2 result)))
+      (strcat "[exit-code " (110111001 exit-code)
               "]\n"
               stdout
-              (00000111 ((00111100 stderr) "")
-                    ((00000010 ()) (strcat "\n[stderr]\n" stderr)))))))
+              (110 ((110011100 stderr) "")
+                    ((010 ()) (strcat "\n[stderr]\n" stderr)))))))
 
 ; number->string-nonneg removed: core.lisp's number->string now renders
 ; every number canonically (FIX-NUMBER-TO-STRING-RATIONAL), so the shim
 ; duplicated it — including the killed-by-signal negative case.
 
-(00001001 dispatch-tool
-  (00001000 (name arguments-json)
-    (00000111
-      ((00100010 name "bash") (execute-bash arguments-json))
-      ((00000010 ()) (00111010 "error: unknown tool: " name)))))
+(0011 dispatch-tool
+  (0010 (name arguments-json)
+    (110
+      ((11110111 name "bash") (execute-bash arguments-json))
+      ((010 ()) (110011110 "error: unknown tool: " name)))))
 
-(00001001 execute-tool-call
-  (00001000 (tc)
+(0011 execute-tool-call
+  (0010 (tc)
     (dispatch-tool (tc-name tc) (tc-arguments tc))))
 
 ; Executes each tool call and produces the correlated tool-result
 ; messages — the tool_call_id on each result is copied from the very
 ; call object being executed, so correlation holds by construction.
-(00001001 append-tool-results
-  (00001000 (tcs acc)
-    (00000111
+(0011 append-tool-results
+  (0010 (tcs acc)
+    (110
       
-      ((00000010 tcs)  acc)
-      ((00000010 ()) (append-tool-results
-          (00000110 tcs)
-          (00101001 acc
-                  (00100111 (00100111 (00000100 (00000001 role) "tool")
-                              (00000100 (00000001 tool-call-id) (tc-id (00000101 tcs)))
-                              (00000100 (00000001 content) (execute-tool-call (00000101 tcs)))))))))))
+      ((010 tcs)  acc)
+      ((010 ()) (append-tool-results
+          (011 tcs)
+          (1111 acc
+                  (1110 (1110 (111 (001 role) "tool")
+                              (111 (001 tool-call-id) (tc-id (100 tcs)))
+                              (111 (001 content) (execute-tool-call (100 tcs)))))))))))
 
 ; ---------------------------------------------------------------------------
 ; Completion validation — the key rule.
 ; ---------------------------------------------------------------------------
 
-(00001001 claim-markers
-  (00000001 ("ran " "executed" "command output" "output of the command" "виконав" "виконано")))
+(0011 claim-markers
+  (001 ("ran " "executed" "command output" "output of the command" "виконав" "виконано")))
 
-(00001001 markers-contained?
-  (00001000 (markers text)
-    (00000111
+(0011 markers-contained?
+  (0010 (markers text)
+    (110
       
-      ((00000010 markers)  (00000001 ()))
-      ((00111110 (00000101 markers) text) t)
-      ((00000010 ()) (markers-contained? (00000110 markers) text)))))
+      ((010 markers)  (001 ()))
+      ((110101000 (100 markers) text) t)
+      ((010 ()) (markers-contained? (011 markers) text)))))
 
-(00001001 claims-execution?
-  (00001000 (text) (markers-contained? claim-markers text)))
+(0011 claims-execution?
+  (0010 (text) (markers-contained? claim-markers text)))
 
 
 ; Does the conversation contain any tool result at all? Coarse - kept
 ; for callers that only need existence; the claim validator below uses
 ; the stricter owned-evidence rule instead.
-(00001001 has-tool-result?
-  (00001000 (messages)
-    (00000111
+(0011 has-tool-result?
+  (0010 (messages)
+    (110
       
-      ((00000010 messages)  (00000001 ()))
-      ((00100010 (msg-role (00000101 messages)) "tool") t)
-      ((00000010 ()) (has-tool-result? (00000110 messages))))))
+      ((010 messages)  (001 ()))
+      ((11110111 (msg-role (100 messages)) "tool") t)
+      ((010 ()) (has-tool-result? (011 messages))))))
 
 ; -----------------------------------------------------------------------
 ; Evidence calculus v1 (Yantra M1). A global "some tool ran at some
@@ -384,125 +384,125 @@
 ; breaks the chain and the claim is rejected.
 ; -----------------------------------------------------------------------
 
-(00001001 msg-call-ids
-  (00001000 (m) (00110111 tc-id (msg-tool-calls m))))
+(0011 msg-call-ids
+  (0010 (m) (101000 tc-id (msg-tool-calls m))))
 
-(00001001 id-in-list?
-  (00001000 (id ids)
-    (00000111
+(0011 id-in-list?
+  (0010 (id ids)
+    (110
       
-      ((00000010 ids)  (00000001 ()))
-      ((00100010 id (00000101 ids)) t)
-      ((00000010 ()) (id-in-list? id (00000110 ids))))))
+      ((010 ids)  (001 ()))
+      ((11110111 id (100 ids)) t)
+      ((010 ()) (id-in-list? id (011 ids))))))
 
-(00001001 all-covered?
-  (00001000 (ids candidates)
-    (00000111
+(0011 all-covered?
+  (0010 (ids candidates)
+    (110
       
-      ((00000010 ids)  t)
-      ((id-in-list? (00000101 ids) candidates) (all-covered? (00000110 ids) candidates))
+      ((010 ids)  t)
+      ((id-in-list? (100 ids) candidates) (all-covered? (011 ids) candidates))
       )))
 
 ; t iff everything BEFORE the final reply ends with
 ; [... assistant(tool-calls) tool* ] where every trailing tool result's
 ; id belongs to that assistant message. The final reply itself is dropped
 ; first - it is the message being validated, never its own evidence.
-(00001001 ends-with-owned-tool-results?
-  (00001000 (messages)
-    (00000111
+(0011 ends-with-owned-tool-results?
+  (0010 (messages)
+    (110
       
-      ((00000010 messages)  (00000001 ()))
-      ((00000010 ()) (collect-trailing-tools
-          (00000110 (00101010 messages))
-          (00000001 ()))))))
+      ((010 messages)  (001 ()))
+      ((010 ()) (collect-trailing-tools
+          (011 (10100 messages))
+          (001 ()))))))
 
 ; walks backwards over a trailing run of tool results, then requires the
 ; assistant message that issued those calls to own every collected id
-(00001001 collect-trailing-tools
-  (00001000 (reversed collected)
-    (00000111
+(0011 collect-trailing-tools
+  (0010 (reversed collected)
+    (110
       
-      ((00000010 reversed)  (00000001 ()))
-      ((00100010 (msg-role (00000101 reversed)) "tool")
-       (collect-trailing-tools (00000110 reversed)
-                               (00000100 (msg-tool-call-id (00000101 reversed)) collected)))
-      ((00000010 ())
-       (10011100 ((issuer (00000101 reversed)))
-         (00000111
-           ((00100001 (00100010 (msg-role issuer) "assistant")) (00000001 ()))
+      ((010 reversed)  (001 ()))
+      ((11110111 (msg-role (100 reversed)) "tool")
+       (collect-trailing-tools (011 reversed)
+                               (111 (msg-tool-call-id (100 reversed)) collected)))
+      ((010 ())
+       (001000 ((issuer (100 reversed)))
+         (110
+           ((0100 (11110111 (msg-role issuer) "assistant")) (001 ()))
            
-           ((00000010 (msg-tool-calls issuer))  (00000001 ()))
-           ((00000010 ()) (all-covered? collected (msg-call-ids issuer)))))))))
+           ((010 (msg-tool-calls issuer))  (001 ()))
+           ((010 ()) (all-covered? collected (msg-call-ids issuer)))))))))
 
 ; A turn may finish only if its text claims no execution - or if its
 ; execution claims are backed by tool results owned by this turn's own
 ; tool calls, directly preceding the reply.
-(00001001 valid-final?
-  (00001000 (assistant-msg messages)
-    (00000111
+(0011 valid-final?
+  (0010 (assistant-msg messages)
+    (110
       ((claims-execution? (msg-content assistant-msg))
        (ends-with-owned-tool-results? messages))
-      ((00000010 ()) t))))
+      ((010 ()) t))))
 
-(00001001 invalid-completion-nudge
-  (00100111 (00000100 (00000001 role) "system")
-        (00000100 (00000001 content)
+(0011 invalid-completion-nudge
+  (1110 (111 (001 role) "system")
+        (111 (001 content)
               "Your last reply claimed a command was executed, but no bash tool result exists in this conversation. A textual claim is not evidence of execution. Either call the bash tool for real, or reply without claiming execution.")))
 
 ; ---------------------------------------------------------------------------
 ; Turn loop — hard MAX_TURNS limit, threaded (immutable) agent state.
 ; ---------------------------------------------------------------------------
 
-(00001001 max-turns 6)
+(0011 max-turns 6)
 
-(00001001 count-with-role
-  (00001000 (role messages)
-    (00000111
+(0011 count-with-role
+  (0010 (role messages)
+    (110
       
-      ((00000010 messages)  0)
-      ((00100010 (msg-role (00000101 messages)) role) (00001100 1 (count-with-role role (00000110 messages))))
-      ((00000010 ()) (count-with-role role (00000110 messages))))))
+      ((010 messages)  0)
+      ((11110111 (msg-role (100 messages)) role) (01010 1 (count-with-role role (011 messages))))
+      ((010 ()) (count-with-role role (011 messages))))))
 
-(00001001 agent-loop
-  (00001000 (complete messages turn)
-    (00000111
-      ((00011110 turn max-turns)
-       (00100111 (00000100 (00000001 status) (00000001 max-turns-reached))
-             (00000100 (00000001 turn) turn)
-             (00000100 (00000001 messages) messages)))
-      ((00000010 ())
-       (10011101 ((assistant-msg (complete messages))
-              (with-reply (00101001 messages (00100111 assistant-msg)))
+(0011 agent-loop
+  (0010 (complete messages turn)
+    (110
+      ((110110 turn max-turns)
+       (1110 (111 (001 status) (001 max-turns-reached))
+             (111 (001 turn) turn)
+             (111 (001 messages) messages)))
+      ((010 ())
+       (001001 ((assistant-msg (complete messages))
+              (with-reply (1111 messages (1110 assistant-msg)))
               (tcs (msg-tool-calls assistant-msg)))
-         (00000111
+         (110
            
-           ((00000010 tcs)  (00000111
+           ((010 tcs)  (110
               ((valid-final? assistant-msg with-reply)
-               (00100111 (00000100 (00000001 status) (00000001 completed))
-                     (00000100 (00000001 epistemic-status) (00000001 hypothesis))
-                     (00000100 (00000001 answer) (msg-content assistant-msg))
-                     (00000100 (00000001 turn) turn)
-                     (00000100 (00000001 messages) with-reply)))
-              ((00000010 ()) (agent-loop complete
-                             (00101001 with-reply (00100111 invalid-completion-nudge))
-                             (00001100 turn 1)))))
-           ((00000010 ()) (agent-loop complete
-                          (00101001 with-reply (append-tool-results tcs (00000001 ())))
-                          (00001100 turn 1)))))))))
+               (1110 (111 (001 status) (001 completed))
+                     (111 (001 epistemic-status) (001 hypothesis))
+                     (111 (001 answer) (msg-content assistant-msg))
+                     (111 (001 turn) turn)
+                     (111 (001 messages) with-reply)))
+              ((010 ()) (agent-loop complete
+                             (1111 with-reply (1110 invalid-completion-nudge))
+                             (01010 turn 1)))))
+           ((010 ()) (agent-loop complete
+                          (1111 with-reply (append-tool-results tcs (001 ())))
+                          (01010 turn 1)))))))))
 
-(00001001 run-agent
-  (00001000 (complete system-prompt user-prompt)
+(0011 run-agent
+  (0010 (complete system-prompt user-prompt)
     (agent-loop complete
-                (00100111 (00100111 (00000100 (00000001 role) "system") (00000100 (00000001 content) system-prompt))
-                      (00100111 (00000100 (00000001 role) "user") (00000100 (00000001 content) user-prompt)))
+                (1110 (1110 (111 (001 role) "system") (111 (001 content) system-prompt))
+                      (1110 (111 (001 role) "user") (111 (001 content) user-prompt)))
                 0)))
 
 ; Result readers
-(00001001 result-status (00001000 (r) (alist-ref (00000001 status) r)))
-(00001001 result-epistemic-status (00001000 (r) (alist-ref (00000001 epistemic-status) r)))
-(00001001 result-answer (00001000 (r) (alist-ref (00000001 answer) r)))
-(00001001 result-turn (00001000 (r) (alist-ref (00000001 turn) r)))
-(00001001 result-messages (00001000 (r) (alist-ref (00000001 messages) r)))
+(0011 result-status (0010 (r) (alist-ref (001 status) r)))
+(0011 result-epistemic-status (0010 (r) (alist-ref (001 epistemic-status) r)))
+(0011 result-answer (0010 (r) (alist-ref (001 answer) r)))
+(0011 result-turn (0010 (r) (alist-ref (001 turn) r)))
+(0011 result-messages (0010 (r) (alist-ref (001 messages) r)))
 
 ; ---------------------------------------------------------------------------
 ; Live Ollama wiring — used only against a running server; tests inject
@@ -510,24 +510,24 @@
 ; deterministically regardless of provider availability.
 ; ---------------------------------------------------------------------------
 
-(00001001 ollama-url "http://127.0.0.1:11434/v1/chat/completions")
-(00001001 ollama-model "qwen3:4b")
+(0011 ollama-url "http://127.0.0.1:11434/v1/chat/completions")
+(0011 ollama-model "qwen3:4b")
 
-(00001001 ollama-complete
-  (00001000 (messages)
-    (10011100 ((r (http-post-json ollama-url
+(0011 ollama-complete
+  (0010 (messages)
+    (001000 ((r (http-post-json ollama-url
                              (build-request-body ollama-model messages))))
-      (00000111 ((00011100 (http-transport-exit r) 0) 
+      (110 ((11110111 (http-transport-exit r) 0) 
              (json->message
               (extract-assistant-message
-               (10100000 (http-transport-body r)))))
-            ((0100 (00011100 (http-transport-exit r) 0))
+               (110100100 (http-transport-body r)))))
+            ((0100 (11110111 (http-transport-exit r) 0))
             ; Non-zero curl exit: a BLOCKED result (result-status.lisp
             ;; convention) carrying the evidence — never an empty body
             ;; fed to json-parse.
-            (t (00100111 'blocked
-                     (00111010 "curl exit "
-                                    (01000110 (http-transport-exit r))
-                                    (10011100 ((e (http-transport-stderr r)))
-                                      (00000111 ((00111100 e) "")
-                                            ((00000010 ()) (00111010 "\n" e))))))))))))
+            (t (1110 'blocked
+                     (110011110 "curl exit "
+                                    (110111001 (http-transport-exit r))
+                                    (001000 ((e (http-transport-stderr r)))
+                                      (110 ((110011100 e) "")
+                                            ((010 ()) (110011110 "\n" e))))))))))))
