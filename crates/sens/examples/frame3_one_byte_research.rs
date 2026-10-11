@@ -17,6 +17,13 @@ const OPERANDS: [&str; 3] = ["0", "1", "000"];
 #[derive(Debug, Clone, Copy, Eq, PartialEq)]
 enum ProofError { Reserved, InvalidWidth, Unmapped }
 
+impl std::fmt::Display for ProofError {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{self:?}")
+    }
+}
+impl std::error::Error for ProofError {}
+
 fn list_parts(parts: &[&str]) -> Vec<String> {
     parts.iter().map(|s| (*s).to_owned()).collect()
 }
