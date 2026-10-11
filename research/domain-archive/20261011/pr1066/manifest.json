@@ -1,0 +1,41 @@
+{
+  "schema": "sens-historical-branch-archive/v1",
+  "archived_at": "2026-10-11",
+  "source": {
+    "repo": "juv4uk/sens",
+    "pr": 1066,
+    "title": "feat(#553): reproduce semantic ownership checker in Lisp",
+    "branch": "agent/553-semantic-ownership-lisp",
+    "head_sha": "09a65bd6f55358de8c9a4b023c3df5d1e555abaa",
+    "base": "main",
+    "base_sha": "42e3945c5e8f27902ade6fedf52f54786c56f914",
+    "reason": "Lisp reimplementation candidate for semantic-ownership.py. Existing Python checker remains current and the branch introduces a temporary differential workflow with old my-lisp runner assumptions. Preserve full source for later parity review; do not activate a dual checker or replace current owner workflow without demonstrated parity."
+  },
+  "files": [
+    {
+      "original_path": ".github/workflows/ci.yml",
+      "archived_path": "research/domain-archive/20261011/pr1066/source/.github/workflows/ci.yml",
+      "git_blob_sha": "20a70177b06a349d54b982d393ff259cb2169750",
+      "bytes": 18226
+    },
+    {
+      "original_path": ".github/workflows/semantic-ownership-parity.yml",
+      "archived_path": "research/domain-archive/20261011/pr1066/source/.github/workflows/semantic-ownership-parity.yml",
+      "git_blob_sha": "d5af1b394831d2e7ce729f08e773ba6f2845528d",
+      "bytes": 1225
+    },
+    {
+      "original_path": "knowledge/repo-tooling-inventory.lisp",
+      "archived_path": "research/domain-archive/20261011/pr1066/source/knowledge/repo-tooling-inventory.lisp",
+      "git_blob_sha": "a198841403a4f3c3df2b064a58fc66e90d098b02",
+      "bytes": 13792
+    },
+    {
+      "original_path": "scripts/semantic-ownership.lisp",
+      "archived_path": "research/domain-archive/20261011/pr1066/source/scripts/semantic-ownership.lisp",
+      "git_blob_sha": "c2e6d2da18b967588d5bddf8e3c88937b0ba1419",
+      "bytes": 34503
+    }
+  ],
+  "disposition": "ARCHIVE-ONLY / PARITY-FIRST / NOT ACTIVE"
+}
