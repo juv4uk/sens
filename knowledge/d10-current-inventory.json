@@ -243,7 +243,7 @@
     "previous_inventory": "knowledge/d10-v9-semantic-inventory.json",
     "manifest": {
       "path": "knowledge/d10-p0-research-intake-v10-20261011.json",
-      "git_blob": "c642d3af06c6e37d72ef1d4911903f8f17180fbd"
+      "git_blob": "4d6c9730aaf29e8b422fcf263220d7685a7d2fba"
     },
     "source_catalog": {
       "path": "knowledge/d10-source-snapshots/d10-v9-unified-catalog-1809.tsv",
