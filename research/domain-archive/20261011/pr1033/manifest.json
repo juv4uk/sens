@@ -1,0 +1,39 @@
+{
+  "schema": "sens-historical-branch-archive/v1",
+  "archived_at": "2026-10-11",
+  "source": {
+    "repo": "juv4uk/sens",
+    "pr": 1033,
+    "title": "feat(#1030): inventory explicit non-script tooling entrypoints",
+    "branch": "feat/1030-nonscript-tooling-inventory",
+    "head_sha": "e9334e097cf312ca7b2edf1c13a521b7e7f958ff",
+    "base": "main",
+    "base_sha": "42e3945c5e8f27902ade6fedf52f54786c56f914",
+    "reason": "Bounded non-script tooling inventory extension. Current main contains both entrypoint files but its expanded tooling inventory/checker remains explicitly script-scoped; old branch inventory is much smaller and cannot replace current inventory wholesale."
+  },
+  "current_main_entrypoints": [
+    {
+      "path": "crates/xtask/src/main.rs",
+      "git_blob_sha": "7b05ea47e12d35e702bd33b1969b1767ce0ddab8"
+    },
+    {
+      "path": "githooks/pre-commit",
+      "git_blob_sha": "13f2413b641abcea326ea8f22a8ec533c13a6634"
+    }
+  ],
+  "files": [
+    {
+      "original_path": "knowledge/repo-tooling-inventory.lisp",
+      "archived_path": "research/domain-archive/20261011/pr1033/source/knowledge/repo-tooling-inventory.lisp",
+      "git_blob_sha": "51063328ae635aee0b5f03e17cfab6290612ed50",
+      "bytes": 14021
+    },
+    {
+      "original_path": "scripts/check-repo-tooling-inventory.lisp",
+      "archived_path": "research/domain-archive/20261011/pr1033/source/scripts/check-repo-tooling-inventory.lisp",
+      "git_blob_sha": "4ecefafaca6b1b6a06d0fa0b5d28e014286cfec0",
+      "bytes": 28227
+    }
+  ],
+  "disposition": "ARCHIVE-ONLY / unique non-script inventory idea preserved; current checker extension needs a current-main test"
+}
