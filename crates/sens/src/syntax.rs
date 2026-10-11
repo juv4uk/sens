@@ -787,7 +787,13 @@ pub(crate) mod wire {
                 ExprKind::BinaryNumber(BinaryNumber::from_canonical_bits(raw).ok()?)
             }
             TAG_NUMERIC_DOMAIN_NUMBER => {
+                let len_start = *pos;
                 let domain_width = usize::try_from(get_varint(bytes, pos)?).ok()?;
+                // Canonical width field: reject redundant varint continuation
+                // bytes such as 0x98 0x00 for D24 (the unique spelling is 0x18).
+                if *pos - len_start > 1 && bytes.get(*pos - 1) == Some(&0) {
+                    return None;
+                }
                 if !BinaryNumber::is_numeric_domain_width(domain_width) {
                     return None;
                 }
