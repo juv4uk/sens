@@ -27,7 +27,7 @@ def source_queue(knowledge, selected, proposed):
     donor = defaultdict(list)
     ignored = {"d10-v1-semantic-inventory.json", "d10-v2-semantic-inventory.json",
                "d10-current-inventory.json", "d10-selected-coordinate-allocation-v1.json",
-               "d10-v3-semantic-inventory.json", "d10-v4-semantic-inventory.json", "d10-fill-v1-state.json",
+               "d10-v3-semantic-inventory.json", "d10-v4-semantic-inventory.json", "d10-v5-semantic-inventory.json", "d10-fill-v1-state.json",
                "d10-growth-baseline-v1.json", "d10-selection-transition-history.json",
                "d10-selector-seed.json"}
     for p in sorted(knowledge.glob("d10-*.json")):
@@ -57,7 +57,7 @@ def source_queue(knowledge, selected, proposed):
 def audit(root):
     k = root / "knowledge"
     data = (k / "d10-v1-semantic-inventory.json").read_bytes()
-    current_bytes = (k / "d10-v4-semantic-inventory.json").read_bytes()
+    current_bytes = (k / "d10-v5-semantic-inventory.json").read_bytes()
     inv = json.loads(current_bytes)
     hist = json.loads((k / "d10-selection-transition-history.json").read_text())
     with (k / "d10-proposal-ledger.tsv").open(newline="", encoding="utf-8") as f:
@@ -93,13 +93,14 @@ def audit(root):
         ptr = json.loads((k/"d10-current-inventory.json").read_text(encoding="utf-8"))
         v2raw = (k/"d10-v2-semantic-inventory.json").read_bytes()
         v3raw = (k/"d10-v3-semantic-inventory.json").read_bytes()
-        v2, v3 = json.loads(v2raw), json.loads(v3raw)
+        v4raw = (k/"d10-v4-semantic-inventory.json").read_bytes()
+        v2, v3, v4 = json.loads(v2raw), json.loads(v3raw), json.loads(v4raw)
         archive = ptr["current_archival_candidate_selection"]
         donor_raw = (root/archive["source_path"]).read_bytes()
         historical = json.loads(donor_raw)
         added = historical["records"]
         source_items = ptr["current_research_candidate_selection"]["source_pins"]
-        recent = rows[698:]
+        recent = v4["rows"][698:]
         sources_good = len(source_items)==2 and len(recent)==9
         all_review_names=set()
         for pin in source_items:
@@ -127,13 +128,15 @@ def audit(root):
         sources_good = sources_good and len(all_review_names)==9
         legacy_ok = (
             ptr["canonical_current"]["git_blob"] == sha(current_bytes)
-            and ptr["canonical_current"]["path"] == "knowledge/d10-v4-semantic-inventory.json"
+            and ptr["canonical_current"]["path"] == "knowledge/d10-v5-semantic-inventory.json"
+            and ptr["historical_v4_research_inventory"]["git_blob"]==sha(v4raw)
             and ptr["historical_v3_research_inventory"]["git_blob"]==sha(v3raw)
             and ptr["historical_v2_coordinate_inventory"]["git_blob"]==sha(v2raw)
             and ptr["historical_selection"]["git_blob"]==sha(data)
             and archive["source_git_blob"]==sha(donor_raw)
-            and len(v2["rows"])==675 and len(v3["rows"])==698
-            and rows[:698]==v3["rows"]
+            and len(v2["rows"])==675 and len(v3["rows"])==698 and len(v4["rows"])==707
+            and rows[:707]==v4["rows"]
+            and v4["rows"][:698]==v3["rows"]
             and v3["rows"][:675]==v2["rows"]
             and len(added)==23
             and all(r["stable_id"]==d["stable_id"]
@@ -141,9 +144,40 @@ def audit(root):
                     and r["behavior"]==d["observable_law"]
                     for r,d in zip(v3["rows"][675:],added))
         )
-        if sources_good and legacy_ok:
-            research_allocated=451
-            source_review_exceptions=all_review_names
+        v5_good=True
+        v5_source_names=set()
+        new_pins=ptr["current_v5_candidate_selection"]["source_pins"]
+        if len(new_pins)!=3 or len(rows[707:])!=8:
+            v5_good=False
+        for pin in new_pins:
+            path=pin["path"]
+            if path not in ("knowledge/d10-crossrepo-linguistic-v1.json",
+                            "knowledge/d10-clos-slot-state-historical-review-v1.json",
+                            "knowledge/d10-clos-instance-lifecycle-residual-v1.json"):
+                v5_good=False
+                continue
+            raw=(root/path).read_bytes()
+            if sha(raw)!=pin["git_blob"]:
+                v5_good=False
+                continue
+            dossier=json.loads(raw)
+            for name in pin["names"]:
+                row=next((r for r in rows[707:] if r["semantic_name"]==name),None)
+                donor=next((d for d in dossier["rows"]
+                            if (d.get("semantic_name") or d.get("historical_name"))==name),None)
+                if (row is None or donor is None
+                    or row["source_git_blob"]!=pin["git_blob"]
+                    or row["source_path"]!=path
+                    or row["behavior"]!=(donor.get("behavior") or donor.get("observable_law"))
+                    or row["ratified_resident"] is not False
+                    or row["physical_t5_authorized"] is not False):
+                    v5_good=False
+                else:
+                    v5_source_names.add(name.upper())
+        v5_good=v5_good and len(v5_source_names)==8
+        if sources_good and legacy_ok and v5_good:
+            research_allocated=459
+            source_review_exceptions=all_review_names | v5_source_names
         else:
             errors.append("CURRENT-D10-RESEARCH-REVIEW-SHA-OR-LAW-DRIFT")
     except (OSError,ValueError,KeyError,TypeError):
@@ -157,7 +191,7 @@ def audit(root):
     placement_full = len(placed) == capacity
     return {"schema": "d10-completion-readiness/v1",
             "inventory_blob": sha(current_bytes), "historical_inventory_blob": sha(data),
-            "current_inventory_path": "knowledge/d10-v4-semantic-inventory.json", "capacity": capacity,
+            "current_inventory_path": "knowledge/d10-v5-semantic-inventory.json", "capacity": capacity,
             "selected": len(rows), "remaining": capacity-len(rows),
             "placed": len(placed), "unplaced": len(rows)-len(placed),
             "ratified": ratified, "inventory_full": inventory_full,
@@ -171,7 +205,7 @@ def audit(root):
             "ready_to_start_d11": inventory_full and placement_full and ratified == capacity and not errors,
             "source_queue": source_queue(k, set(names), proposed),
             "blocking_errors": errors,
-            "caution": "707 selected research meanings have 10-bit coordinates; 317 absent. Last nine still require independent executable oracle and owner Core/D2/library review; D10 ratification remains zero."}
+            "caution": "715 research-selected meanings have unique coordinates, 309 remain. 96 more source-only names have provisional review coordinates and 97 exact lower-domain name matches do not acquire a D10 identity. None ratified."}
 
 def main():
     p = argparse.ArgumentParser(description=__doc__)
