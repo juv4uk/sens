@@ -240,6 +240,47 @@ def audit(root):
             )
         else:
             errors.append("D10-V9-SOURCE-BATCH-SHA-OR-LAW-DRIFT")
+        # v10 is an append-only, text-evidence research selection, not
+        # an F2/F3 oracle result or owner ratification. Verify its exact
+        # archived source and manifest before exempting 40 new names from
+        # the old proposal-ledger requirement.
+        if len(rows) > len(v9["rows"]):
+            v10_ref = ptr.get("current_v10_p0_text_witness_selection", {})
+            v10_manifest_pin = v10_ref.get("manifest", {})
+            v10_manifest_raw = (root / v10_manifest_pin["path"]).read_bytes()
+            v10_manifest = json.loads(v10_manifest_raw)
+            v10_source_pin = v10_manifest["candidate_index"]
+            v10_source = (root / v10_source_pin["path"]).read_bytes()
+            v10_new = rows[len(v9["rows"]):]
+            v10_proofs = v10_manifest["candidates"]
+            v10_good = (
+                ptr.get("historical_v9_research_inventory", {}).get("git_blob") == sha(v9raw)
+                and v10_ref.get("previous_inventory") == "knowledge/d10-v9-semantic-inventory.json"
+                and v10_manifest_pin.get("git_blob") == sha(v10_manifest_raw)
+                and v10_source_pin == v10_ref.get("source_catalog")
+                and sha(v10_source) == v10_source_pin["git_blob"]
+                and len(v10_new) == len(v10_proofs) == 40
+                and all(
+                    r["stable_id"] == p["id"]
+                    and r["semantic_name"] == p["name"]
+                    and r["behavior"] == p["law"]
+                    and r["source_path"] == v10_source_pin["path"]
+                    and r["source_git_blob"] == v10_source_pin["git_blob"]
+                    and r["coordinate"] is None
+                    and r["ratified_resident"] is False
+                    and r["physical_t5_authorized"] is False
+                    and r["witness_independence"] == "PENDING"
+                    and p["F2"] == "HOLD_NOT_RUN"
+                    and p["F3"] == "HOLD_BEHAVIORAL_DEDUP_UNPROVEN"
+                    for r, p in zip(v10_new, v10_proofs)
+                )
+            )
+            if v10_good:
+                source_review_exceptions.update(
+                    r["semantic_name"].upper() for r in v10_new
+                )
+            else:
+                errors.append("D10-V10-SOURCE-BATCH-SHA-OR-LAW-DRIFT")
         if sources_good and legacy_ok and v5_good:
             research_allocated=len(placed)-256
             source_review_exceptions |= all_review_names | v5_source_names

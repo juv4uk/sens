@@ -3,7 +3,7 @@
   "status": "OWNER-DIRECTED-RESEARCH-SELECTION-799-UNRATIFIED",
   "canonical_current": {
     "path": "knowledge/d10-v10-semantic-inventory.json",
-    "git_blob": "e1855199bbc70d21046c673679ab3c77d8436b65",
+    "git_blob": "66b6789cbab5b70fea4e69b775f5cabc3a42a01f",
     "selected": 799,
     "placed": 719,
     "unplaced": 80,
