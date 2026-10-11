@@ -48,12 +48,12 @@ class PrepareTests(unittest.TestCase):
         self.write_index()
 
     def write_index(self, extra=()):
+        # The historical unified index was assembled as raw tab-delimited
+        # fields with JSON quotes inside values, not RFC CSV quoting.
         with self.input.open("w", newline="", encoding="utf-8") as stream:
-            writer = csv.DictWriter(stream, fieldnames=adapter.INDEX_FIELDS,
-                                    delimiter="\t", lineterminator="\n")
-            writer.writeheader()
-            writer.writerow(self.row)
-            writer.writerows(extra)
+            stream.write("\t".join(adapter.INDEX_FIELDS) + "\n")
+            for row in [self.row, *extra]:
+                stream.write("\t".join(row[name] for name in adapter.INDEX_FIELDS) + "\n")
 
     def read_prepared(self):
         with self.output.open(encoding="utf-8", newline="") as stream:
