@@ -1,0 +1,29 @@
+{
+  "schema": "sens-alltime-source-recovery/v1",
+  "date": "2026-10-11",
+  "reason": "Preserve unmerged historical unique or diverged candidate blobs without creating a new branch or activating obsolete semantics",
+  "admission": "ARCHIVED_IN_MAIN_SOURCE_ONLY; NO PRODUCTION MERGE/CI OR DOMAIN RATIFICATION",
+  "sources": [
+    {
+      "origin_branch": "research/2036-rewrite-normal-form",
+      "origin_commit": "06df43081e13caae30f115b2908c8d75b90b8607",
+      "original_path": "scripts/research-2036-rewrite-normal-form.py",
+      "original_blob_sha": "cb8a37136c68005e89d21138de8960194b74db9e",
+      "archive_path": "research/domain-archive/20261011/alltime-branch-recovery/research__2036-rewrite-normal-form/scripts/research-2036-rewrite-normal-form.py.source.txt"
+    },
+    {
+      "origin_branch": "impl/3394-d6-selectors-on-3530",
+      "origin_commit": "340a3cb059ac95078e1531203aa97feb3ca2b53f",
+      "original_path": "crates/sens/tests/d6_selector_runtime.rs",
+      "original_blob_sha": "581d1126e0b23375c445d3b9dff205c7b74a9cc4",
+      "archive_path": "research/domain-archive/20261011/alltime-branch-recovery/impl__3394-d6-selectors-on-3530/crates/sens/tests/d6_selector_runtime.rs.source.txt"
+    },
+    {
+      "origin_branch": "impl/3394-d6-selectors-on-3530",
+      "origin_commit": "340a3cb059ac95078e1531203aa97feb3ca2b53f",
+      "original_path": "knowledge/d6-mechanism-ledger.json",
+      "original_blob_sha": "99cd2d0b1ee5555b675f325b646117995260bf2e",
+      "archive_path": "research/domain-archive/20261011/alltime-branch-recovery/impl__3394-d6-selectors-on-3530/knowledge/d6-mechanism-ledger.json.source.txt"
+    }
+  ]
+}
