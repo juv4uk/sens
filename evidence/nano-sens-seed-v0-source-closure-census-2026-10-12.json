@@ -8,28 +8,28 @@
     "tree_sha": "d0787a40fcea36501747732aa61b6de19fe29c70",
     "tree_entry_count": 8038
   },
-  "reason_for_census": "The measured CML runner invokes `cargo run --manifest-path external/sens/Cargo.toml -p xtask -- compiler-export` at runtime. Cargo compiles `xtask` and the SENS library from the pinned checkout; source modules contain compile-time includes for compiler laws, contracts, authority projections, several Lisp libraries, and cached Core4 data. The census excludes a cfg(test)-only Rust source and adds 13 directly observed lib.rs/compiler-related compile-time inputs. It remains a verified subset, not the complete runtime closure or minimum seed total.",
+  "reason_for_census": "The measured CML runner invokes `cargo run --manifest-path external/sens/Cargo.toml -p xtask -- compiler-export` at runtime. Cargo compiles `xtask` and the SENS library from the pinned checkout. This census includes 70 production Rust source files (excluding cfg(test)-only Rust source), workspace manifests, authority/compiler inputs, direct compile-time library includes, and SENS files consumed by the pinned CML build/test runner. It remains a verified subset, not the complete runtime closure or minimum seed total.",
   "known_input_subset": {
-    "file_count": 114,
-    "total_on_disk_source_bytes": 1397243,
+    "file_count": 117,
+    "total_on_disk_source_bytes": 1432402,
     "sum_is_lower_bound_only": true,
     "categories": {
       "rust_source_files_count": 70,
       "rust_source_files_bytes": 1069628,
       "workspace_cargo_manifests_count": 20,
       "workspace_cargo_manifests_bytes": 7424,
-      "root_workspace_and_known_compiler_inputs_count": 24,
-      "root_workspace_and_known_compiler_inputs_bytes": 320191
+      "root_workspace_and_known_compiler_inputs_count": 27,
+      "root_workspace_and_known_compiler_inputs_bytes": 355350
     },
-    "file_metrics": "70 production Rust source files across crates/sens/src/** and crates/xtask/src/**; 20 Cargo package manifests; 24 root, contract, authority, and compile-time included source/data files. The cfg(test)-only bootstrap_measurement.rs is explicitly excluded. This is a pinned, verified subset; closure is not complete."
+    "file_metrics": "70 production Rust source files across crates/sens/src/** and crates/xtask/src/**; 20 Cargo package manifests; 27 root, contract, authority, embedded-source, and cross-repository SENS inputs verified at the pinned commit. The cfg(test)-only bootstrap_measurement.rs is explicitly excluded. This is a verified subset, not the complete closure or a minimum seed total."
   },
   "closure_gaps": [
-    "Finish a path-by-path production module graph/cfg scan for all 70 listed Rust sources and verify every compile-time include edge; current include edge list records all direct edges inspected so far, not a completed automated exhaustive scan.",
-    "Inventory build scripts, proc-macro build-time inputs, and any environment variables that affect deterministic compilation.",
-    "Record the `.git` metadata required by xtask's runtime `git rev-parse HEAD`, or remove that runtime requirement in K2 by passing the pinned source revision explicitly.",
-    "Audit Cargo registry source/index/cache availability under a clean offline reproduction; the exact required crate versions/checksums are listed, but crate source byte sizes/cache bytes are not.",
-    "Verify runtime versus build-only data inputs with a clean controlled reproduction and determine the minimal operational closure without silently moving required files outside the boundary.",
-    "Do not publish a whole-chain seed byte total until closure is complete, external dependency policy is explicit, and the minimal input set is verified."
+    "Finish automated production module/cfg graph and compile-time include closure verification across both CML and SENS repositories; this report now records known direct edges but is not a complete transitive file-read proof.",
+    "Inventory build scripts, proc-macro build-time inputs and environment variables that affect deterministic compilation.",
+    "Record the .git metadata required by xtask runtime `git rev-parse HEAD` and CML authority tests, or remove those runtime requirements without weakening revision verification.",
+    "Inventory all active Cargo build/test dependency source inputs (including pinned wsm-os-target and registry caches); exact versions/checksums are declared, but package source/cache bytes and availability are not measured.",
+    "Verify runtime versus build-only inputs with a clean controlled reproduction and determine the minimum operational closure.",
+    "Do not publish a whole-chain seed byte total until the full closure is complete and the dependency boundary is explicit."
   ],
   "external_toolchain_or_runtime_dependencies_separate": [
     "rustc",
@@ -65,6 +65,12 @@
       "path": "contracts/compiler-nucleus-identity-corpus-v1.tsv",
       "git_blob_sha1": "c57b0df98f467ddcad067158dad1c97a349ad1bf",
       "size_bytes": 426
+    },
+    {
+      "path": "contracts/compiler-semantic-input-v1.lisp",
+      "git_blob_sha1": "c74cffd50d251d5f1b9ddd9709aeee6b9855b689",
+      "size_bytes": 5727,
+      "discovery": "CML src/sens_domain_bridge.rs embeds this SENS authority contract"
     },
     {
       "path": "contracts/d4-bootstrap-ratification.lisp",
@@ -584,6 +590,12 @@
       "discovery": "compile-time include observed in crates/sens/src/lib.rs"
     },
     {
+      "path": "lib/machine/cpu/intel-core-i5-6400.lisp",
+      "git_blob_sha1": "1b4f98e86f8e9fac14dcc74862bf82afd536c8a3",
+      "size_bytes": 2528,
+      "discovery": "CML src/cpu_profile.rs embeds this SENS CPU profile"
+    },
+    {
       "path": "lib/macro.lisp",
       "git_blob_sha1": "eb2da1efd301896063a4d3abc2668f1e4b04fc14",
       "size_bytes": 1547,
@@ -600,6 +612,12 @@
       "git_blob_sha1": "afa338881007106bc961c0eaf5598deda979a48e",
       "size_bytes": 3498,
       "discovery": "compile-time include observed in crates/sens/src/lib.rs"
+    },
+    {
+      "path": "lib/surface/semantic-registry.lisp",
+      "git_blob_sha1": "ed267a5a21de8c59842469b2e8927ff475bae6be",
+      "size_bytes": 26904,
+      "discovery": "CML build.rs reads this exact SENS registry while generating canon spellings and CML operation data"
     },
     {
       "path": "lib/tcp.lisp",
@@ -783,6 +801,30 @@
         "generated machine evidence output"
       ],
       "condition": "Read/write only by the separate `import-xed-evidence` subcommand, not by `compiler-export`."
+    }
+  ],
+  "cross_repository_consumers": [
+    {
+      "repository": "juv4uk/cml",
+      "commit": "3320fe3b00a4a099ecb9ff06e22e0be2b1fee499",
+      "evidence": "https://github.com/juv4uk/cml/blob/master/evidence/nano-sens-cml-runner-input-census-2026-10-12.json",
+      "known_cml_source_subset": {
+        "file_count": 70,
+        "on_disk_bytes": 1320729,
+        "role": "CML code + tracked build metadata subset; not added to this SENS-only byte subtotal"
+      },
+      "required_sens_inputs": [
+        "lib/surface/semantic-registry.lisp",
+        "contracts/compiler-nucleus-identity-corpus-v1.tsv",
+        "language-contract.lisp",
+        "lib/compiler-nucleus.lisp",
+        "contracts/compiler-semantic-input-v1.lisp",
+        "contracts/bija3-l1-l5-ratification.lisp",
+        "contracts/d4-bootstrap-ratification.lisp",
+        "knowledge/bija3-l1-l5-structure-projection.json",
+        "knowledge/d4-bootstrap-compiler-structure-projection.json",
+        "lib/machine/cpu/intel-core-i5-6400.lisp"
+      ]
     }
   ]
 }
