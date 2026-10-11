@@ -274,6 +274,7 @@ fn prim_01001101(
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub(crate) enum DomainPrimitiveKind {
+    StringToSymbol,
     Read,
     WriteToString,
     Equal,
@@ -299,6 +300,7 @@ pub(crate) fn domain_primitive_kind(
             _ => None, // QUOTE/COND are syntax routes, 000 is structural empty
         },
         CoreDomainIdentity::D8(word) => match word.word().packed_bits() {
+            0b11101101 => Some(DomainPrimitiveKind::StringToSymbol),
             0b11101010 => Some(DomainPrimitiveKind::Read),
             0b11110100 => Some(DomainPrimitiveKind::WriteToString),
             0b11110111 => Some(DomainPrimitiveKind::Equal),
@@ -320,6 +322,7 @@ fn invoke_domain_primitive(
     let kind = domain_primitive_kind(identity)?;
     Some((|| {
         let expected = match kind {
+            DomainPrimitiveKind::StringToSymbol => 1,
             DomainPrimitiveKind::Read => args.len(),
             DomainPrimitiveKind::WriteToString => 1,
             DomainPrimitiveKind::AtomPredicate => 1,
@@ -355,6 +358,10 @@ fn invoke_domain_primitive(
                 special_forms::cons_values(args[0].clone(), args[1].clone(), environment, span)
             }
             DomainPrimitiveKind::Equal => Ok(Value::predicate_bit(args[0] == args[1])),
+            DomainPrimitiveKind::StringToSymbol => {
+                // D8:11101101, direct scalar/string mechanism, no byte fallback.
+                special_forms::string_to_symbol_values(args, span)
+            }
             DomainPrimitiveKind::Read => {
                 // D8:11101010 owns canonical READ, not the historical SID.
                 special_forms::read_values(args, environment, span)
