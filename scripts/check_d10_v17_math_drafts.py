@@ -97,7 +97,7 @@ def check(root=ROOT,self_test=False):
     root=root.resolve()
     ptr=json.loads((root/"knowledge/d10-current-inventory.json").read_text())
     old=ptr["historical_v16_research_inventory"]
-    cur=ptr["canonical_current"]
+    cur=ptr.get("historical_v17_research_inventory",ptr["canonical_current"])
     meta=ptr["current_v17_mathematical_draft_selection"]
     need(cur["path"]=="knowledge/d10-v17-semantic-inventory.json" and
          old["path"]=="knowledge/d10-v16-semantic-inventory.json",

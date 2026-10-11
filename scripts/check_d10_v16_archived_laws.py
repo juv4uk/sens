@@ -76,7 +76,7 @@ def verify(prev,current,batch,source,foundation):
 def check(root=ROOT,self_test=False):
     root=root.resolve()
     ptr=json.loads((root/"knowledge/d10-current-inventory.json").read_text())
-    active=ptr["canonical_current"]
+    active=ptr.get("historical_v17_research_inventory",ptr["canonical_current"])
     current=ptr.get("historical_v16_research_inventory",active)
     old=ptr["historical_v15_research_inventory"]
     selected=ptr["current_v16_archived_law_selection"]

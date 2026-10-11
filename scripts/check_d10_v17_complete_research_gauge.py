@@ -35,9 +35,11 @@ def verify(source, gauge, pointer):
     require(gauge["schema"] == "d10-v17-complete-research-coordinate-gauge/v1", "schema")
     require(gauge["authority"] == "RESEARCH-ONLY-COORDINATE-PROPOSAL-NOT-RATIFICATION",
             "no ratification authority")
-    require(pointer["canonical_current"]["path"] == EXPECTED_SOURCE
-            and pointer["canonical_current"]["git_blob"] == origin["git_blob"],
-            "live inventory diverged from frozen research gauge")
+    source_pointer = pointer.get("historical_v17_research_inventory",
+                                 pointer["canonical_current"])
+    require(source_pointer["path"] == EXPECTED_SOURCE
+            and source_pointer["git_blob"] == origin["git_blob"],
+            "frozen source inventory diverged from pinned research gauge")
     require(source["schema"] == "d10-v17-semantic-inventory/v1", "source schema")
     require(source["domain"] == "D10" and source["capacity"] == 1024 and
             source["width"] == 10, "D10 bit-width or capacity")

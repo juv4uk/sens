@@ -20,6 +20,9 @@ on:
       - 'knowledge/d10-v15-semantic-inventory.json'
       - 'knowledge/d10-v16-semantic-inventory.json'
       - 'knowledge/d10-v17-semantic-inventory.json'
+      - 'knowledge/d10-v18-semantic-inventory.json'
+      - 'knowledge/d10-v18-coordinate-transfer-20261012.json'
+      - 'knowledge/d10-v17-complete-research-gauge-20261012.json'
       - 'knowledge/d10-v17-exact-math-proposals-20261012.json'
       - 'knowledge/d10-v16-archived-source-law-review-20261012.json'
       - 'knowledge/d10-v15-source-law-intake-20261012.json'
@@ -66,6 +69,7 @@ on:
       - 'scripts/check_d10_completion_readiness.py'
       - 'scripts/check_d10_v16_archived_laws.py'
       - 'scripts/check_d10_v17_math_drafts.py'
+      - 'scripts/check_d10_v18_research_placement.py'
       - '.github/workflows/d10-completion-readiness.yml'
   pull_request:
     paths:
@@ -147,6 +151,10 @@ jobs:
         run: |
           python3 scripts/check_d10_v17_math_drafts.py --self-test
           python3 -O scripts/check_d10_v17_math_drafts.py --self-test
+      - name: Validate D10 v18 full canonical research coordinate bijection, 305 transfers, 719 preserved
+        run: |
+          python3 scripts/check_d10_v18_research_placement.py --self-test
+          python3 -O scripts/check_d10_v18_research_placement.py --self-test
       - name: Порахувати реальний запас D10
         run: |
           python3 scripts/check_d10_completion_readiness.py >"$RUNNER_TEMP/d10-readiness.json"

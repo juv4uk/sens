@@ -126,7 +126,11 @@ def check(root=ROOT, self_test=False):
     need((frozen["selected"],frozen["placed"],frozen["unplaced"],frozen["ratified"]) ==
          (823,719,104,0), "frozen v11 accounting")
     latest = json.loads(pinned(root,live["path"],live["git_blob"]))
-    need(len(latest["rows"]) >= 823 and latest["rows"][:823] == v11["rows"],
+    comparison=latest
+    if live["path"] == "knowledge/d10-v18-semantic-inventory.json":
+        archived=ptr["historical_v17_research_inventory"]
+        comparison=json.loads(pinned(root,archived["path"],archived["git_blob"]))
+    need(len(comparison["rows"]) >= 823 and comparison["rows"][:823] == v11["rows"],
          "frozen v11 prefix rewritten")
     coords = [r["coordinate"] for r in latest["rows"] if r.get("coordinate") is not None]
     need((live["selected"],live["placed"],live["unplaced"],live["ratified"]) ==

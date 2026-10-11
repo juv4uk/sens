@@ -121,7 +121,11 @@ def check(root=ROOT):
          == (759, 719, 40, 0), "frozen v9 pointer accounting")
     raw_live = pinned(root, live["path"], live["git_blob"])
     current = json.loads(raw_live)
-    need(len(current["rows"]) >= 759 and current["rows"][:759] == json.loads(raw9)["rows"],
+    comparison = current
+    if live["path"] == "knowledge/d10-v18-semantic-inventory.json":
+        archived = pointer["historical_v17_research_inventory"]
+        comparison = json.loads(pinned(root, archived["path"], archived["git_blob"]))
+    need(len(comparison["rows"]) >= 759 and comparison["rows"][:759] == json.loads(raw9)["rows"],
          "current inventory rewrote frozen v9")
     coords = [r["coordinate"] for r in current["rows"] if r.get("coordinate") is not None]
     ratified = sum(r.get("ratified_resident") is True for r in current["rows"])

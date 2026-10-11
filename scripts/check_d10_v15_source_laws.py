@@ -108,7 +108,7 @@ def check(root=ROOT,self_test=False):
     root=root.resolve()
     ptr=json.loads((root/"knowledge/d10-current-inventory.json").read_text())
     live=ptr.get("historical_v15_research_inventory",ptr["canonical_current"])
-    active=ptr["canonical_current"]
+    active=ptr.get("historical_v17_research_inventory",ptr["canonical_current"])
     frozen=ptr["historical_v14_research_inventory"]
     intake=ptr["current_v15_source_law_selection"]
     pin=intake["manifest"]

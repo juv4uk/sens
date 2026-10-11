@@ -1,12 +1,12 @@
 {
   "schema": "d10-current-inventory-pointer/v1",
-  "status": "FULL-1024-RESEARCH-DESCRIPTIONS-BUT-305-UNPLACED-NOT_RATIFIED",
+  "status": "OWNER-DIRECTED-RESEARCH-SELECTION-1024-COORDINATE-GAUGE-UNRATIFIED",
   "canonical_current": {
-    "path": "knowledge/d10-v17-semantic-inventory.json",
-    "git_blob": "f841009b9e0c165c93abf451903a62ac701cfd7d",
+    "path": "knowledge/d10-v18-semantic-inventory.json",
+    "git_blob": "7e6acb2531308ae5f63600d4e0042111cc3ec59c",
     "selected": 1024,
-    "placed": 719,
-    "unplaced": 305,
+    "placed": 1024,
+    "unplaced": 0,
     "ratified": 0
   },
   "historical_selection": {
@@ -20,10 +20,10 @@
     "role": "PINNED-GAUGE-ASSIGNMENT"
   },
   "policy": {
-    "description": "Research v17 reaches 1024 descriptions via 54 newly authored bounded exact-law drafts. No donor-verified F1, F2, F3 or F4 physical admission is claimed.",
-    "selected_only": "1024 research descriptions; 719 historic coordinates; 305 unplaced; 0 ratified. Additional 54 draft laws require executed oracles and semantic dedup; full selected count is NOT full admission.",
+    "description": "D10 research inventory full (1024 rows) with full 10-bit research-only canonical gauge, preserving 719 old and transferring 305 from pinned existing v17 gauge. F2/F3 and F1 gaps remain.",
+    "selected_only": "1024 research candidates and 1024 unique coordinate labels; full layout NOT proof of semantic independence, not instruction admission, no T5 execution permission.",
     "ratification": "Whole-domain D10 ratification to follow fully populated 1024 inventory with reviewed proofs, not per-function ratification.",
-    "next_step": "Validate/replace research draft laws using executed independent oracles and D1-D9 / D10 equivalence proofs; place 305 remaining coordinate slots; ratify D10 as one domain after full verified completion."
+    "next_step": "Perform F1/F2/F3 evidence review of all 1024 claims; owner will ratify whole D10 as one domain after proof and consistency checks."
   },
   "branch_policy": "MAIN-ONLY; NO-NEW-BRANCHES",
   "historical_v2_coordinate_inventory": {
@@ -434,5 +434,29 @@
     "semantic_dedup_certs": 0,
     "coordinates_added": 0,
     "ratified_added": 0
+  },
+  "historical_v17_research_inventory": {
+    "path": "knowledge/d10-v17-semantic-inventory.json",
+    "git_blob": "f841009b9e0c165c93abf451903a62ac701cfd7d",
+    "selected": 1024,
+    "placed": 719,
+    "unplaced": 305,
+    "ratified": 0,
+    "role": "FROZEN-SEMANTIC-SOURCE-PRE-V18-PLACEMENT"
+  },
+  "current_v18_research_coordinate_placement": {
+    "previous_inventory": "knowledge/d10-v17-semantic-inventory.json",
+    "manifest": {
+      "path": "knowledge/d10-v18-coordinate-transfer-20261012.json",
+      "git_blob": "6c9499dabe8a1c221557cf73d87bf482e17db0c4"
+    },
+    "research_gauge": {
+      "path": "knowledge/d10-v17-complete-research-gauge-20261012.json",
+      "git_blob": "d923c115fae39fc2b63c9d8d9d06f2b0c39065ed"
+    },
+    "codes_added": 305,
+    "old_codes_preserved": 719,
+    "ratified_added": 0,
+    "physical_execution_authorized": false
   }
 }

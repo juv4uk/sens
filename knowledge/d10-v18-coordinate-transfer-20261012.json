@@ -1,0 +1,1879 @@
+{
+  "schema": "d10-v18-research-placement-migration/v1",
+  "date": "2026-10-12",
+  "authority": "OWNER-DIRECTED-CANONICAL-RESEARCH-COORDINATES-NOT-RATIFICATION",
+  "source_inventory": {
+    "path": "knowledge/d10-v17-semantic-inventory.json",
+    "git_blob": "f841009b9e0c165c93abf451903a62ac701cfd7d"
+  },
+  "proposed_research_gauge": {
+    "path": "knowledge/d10-v17-complete-research-gauge-20261012.json",
+    "git_blob": "d923c115fae39fc2b63c9d8d9d06f2b0c39065ed"
+  },
+  "destination_inventory_path": "knowledge/d10-v18-semantic-inventory.json",
+  "algorithm": "preserve existing 719 verbatim; for each prior null coordinate, use SHA-pinned research gauge row of same index/name/ID, no alteration to semantics",
+  "counts": {
+    "selected": 1024,
+    "preserved_old_codes": 719,
+    "transferred_new_codes": 305,
+    "total_placed": 1024,
+    "unplaced": 0,
+    "unique_10_bit_codes": 1024,
+    "ratified": 0,
+    "physical_authorized_new": 0,
+    "independent_oracle_attestations_added": 0,
+    "semantic_distinctness_certificates_added": 0
+  },
+  "policy": {
+    "immutable_v17": true,
+    "all_10bit_codes_used_once": true,
+    "selected_meanings_unchanged": true,
+    "d10_ratification_after_proof_review": true,
+    "no_runtime_opcode_authority": true,
+    "no_new_branches": true
+  },
+  "first_new_coordinate": {
+    "index": 719,
+    "stable_id": "d10.historical.clhs.get-output-stream-string.20261011",
+    "semantic_name": "GET-OUTPUT-STREAM-STRING",
+    "coordinate": "1011001011"
+  },
+  "last_new_coordinate": {
+    "index": 1023,
+    "stable_id": "d10.research.v17.054.binary-canonical-unpack-msb",
+    "semantic_name": "BINARY-CANONICAL-UNPACK-MSB",
+    "coordinate": "1111111111"
+  },
+  "new_placements": [
+    {
+      "index": 719,
+      "stable_id": "d10.historical.clhs.get-output-stream-string.20261011",
+      "semantic_name": "GET-OUTPUT-STREAM-STRING",
+      "coordinate": "1011001011"
+    },
+    {
+      "index": 720,
+      "stable_id": "d10.historical.clhs.make-concatenated-stream.20261011",
+      "semantic_name": "MAKE-CONCATENATED-STREAM",
+      "coordinate": "1011001100"
+    },
+    {
+      "index": 721,
+      "stable_id": "d10.research.mop.class-direct-slots.20261011",
+      "semantic_name": "CLASS-DIRECT-SLOTS",
+      "coordinate": "1011001101"
+    },
+    {
+      "index": 722,
+      "stable_id": "d10.research.mop.class-precedence-list.20261011",
+      "semantic_name": "CLASS-PRECEDENCE-LIST",
+      "coordinate": "1011001110"
+    },
+    {
+      "index": 723,
+      "stable_id": "d10.research.mop.generic-function-methods.20261011",
+      "semantic_name": "GENERIC-FUNCTION-METHODS",
+      "coordinate": "1011001111"
+    },
+    {
+      "index": 724,
+      "stable_id": "d10.research.mop.generic-function-argument-precedence-order.20261011",
+      "semantic_name": "GENERIC-FUNCTION-ARGUMENT-PRECEDENCE-ORDER",
+      "coordinate": "1011010000"
+    },
+    {
+      "index": 725,
+      "stable_id": "d10.research.v9.001.bytevector-copy",
+      "semantic_name": "BYTEVECTOR-COPY!",
+      "coordinate": "1011010001"
+    },
+    {
+      "index": 726,
+      "stable_id": "d10.research.v9.002.canonical-unicode-normalize",
+      "semantic_name": "CANONICAL-UNICODE-NORMALIZE",
+      "coordinate": "1011010010"
+    },
+    {
+      "index": 727,
+      "stable_id": "d10.research.v9.003.clear-resource",
+      "semantic_name": "CLEAR-RESOURCE",
+      "coordinate": "1011010011"
+    },
+    {
+      "index": 728,
+      "stable_id": "d10.research.v9.004.count-leading-zeros",
+      "semantic_name": "COUNT-LEADING-ZEROS",
+      "coordinate": "1011010100"
+    },
+    {
+      "index": 729,
+      "stable_id": "d10.research.v9.005.define-record-type",
+      "semantic_name": "DEFINE-RECORD-TYPE",
+      "coordinate": "1011010101"
+    },
+    {
+      "index": 730,
+      "stable_id": "d10.research.v9.006.delayed-term-disequality",
+      "semantic_name": "DELAYED-TERM-DISEQUALITY",
+      "coordinate": "1011010110"
+    },
+    {
+      "index": 731,
+      "stable_id": "d10.research.v9.007.enough-namestring",
+      "semantic_name": "ENOUGH-NAMESTRING",
+      "coordinate": "1011010111"
+    },
+    {
+      "index": 732,
+      "stable_id": "d10.research.v9.008.hashtable-update",
+      "semantic_name": "HASHTABLE-UPDATE!",
+      "coordinate": "1011011000"
+    },
+    {
+      "index": 733,
+      "stable_id": "d10.research.v9.009.make-hashtable",
+      "semantic_name": "MAKE-HASHTABLE",
+      "coordinate": "1011011001"
+    },
+    {
+      "index": 734,
+      "stable_id": "d10.research.v9.010.make-promise",
+      "semantic_name": "MAKE-PROMISE",
+      "coordinate": "1011011010"
+    },
+    {
+      "index": 735,
+      "stable_id": "d10.research.v9.011.merge-pathnames",
+      "semantic_name": "MERGE-PATHNAMES",
+      "coordinate": "1011011011"
+    },
+    {
+      "index": 736,
+      "stable_id": "d10.research.v9.012.pathname-match-p",
+      "semantic_name": "PATHNAME-MATCH-P",
+      "coordinate": "1011011100"
+    },
+    {
+      "index": 737,
+      "stable_id": "d10.research.v9.013.provenance-chain",
+      "semantic_name": "PROVENANCE-CHAIN",
+      "coordinate": "1011011101"
+    },
+    {
+      "index": 738,
+      "stable_id": "d10.research.v9.014.ranked-fulltext-search",
+      "semantic_name": "RANKED-FULLTEXT-SEARCH",
+      "coordinate": "1011011110"
+    },
+    {
+      "index": 739,
+      "stable_id": "d10.research.v9.015.longest-match-text-mapping",
+      "semantic_name": "LONGEST-MATCH-TEXT-MAPPING",
+      "coordinate": "1011011111"
+    },
+    {
+      "index": 740,
+      "stable_id": "d10.research.v9.016.contextual-text-rewrite",
+      "semantic_name": "CONTEXTUAL-TEXT-REWRITE",
+      "coordinate": "1011100000"
+    },
+    {
+      "index": 741,
+      "stable_id": "d10.research.v9.017.affix-rule-wordform-generation",
+      "semantic_name": "AFFIX-RULE-WORDFORM-GENERATION",
+      "coordinate": "1011100001"
+    },
+    {
+      "index": 742,
+      "stable_id": "d10.research.v9.018.ephemeris-to-state-transform",
+      "semantic_name": "EPHEMERIS-TO-STATE-TRANSFORM",
+      "coordinate": "1011100010"
+    },
+    {
+      "index": 743,
+      "stable_id": "d10.research.v9.019.leapfrog-state-update",
+      "semantic_name": "LEAPFROG-STATE-UPDATE",
+      "coordinate": "1011100011"
+    },
+    {
+      "index": 744,
+      "stable_id": "d10.research.v9.020.unify-with-occurs-check",
+      "semantic_name": "UNIFY-WITH-OCCURS-CHECK",
+      "coordinate": "1011100100"
+    },
+    {
+      "index": 745,
+      "stable_id": "d10.research.v9.021.allocate-resource",
+      "semantic_name": "ALLOCATE-RESOURCE",
+      "coordinate": "1011100101"
+    },
+    {
+      "index": 746,
+      "stable_id": "d10.research.v9.022.deallocate-resource",
+      "semantic_name": "DEALLOCATE-RESOURCE",
+      "coordinate": "1011100110"
+    },
+    {
+      "index": 747,
+      "stable_id": "d10.research.v9.023.defresource",
+      "semantic_name": "DEFRESOURCE",
+      "coordinate": "1011100111"
+    },
+    {
+      "index": 748,
+      "stable_id": "d10.research.v9.024.method-qualifiers",
+      "semantic_name": "METHOD-QUALIFIERS",
+      "coordinate": "1011101000"
+    },
+    {
+      "index": 749,
+      "stable_id": "d10.research.v9.025.interlisp-record-field-resolve",
+      "semantic_name": "INTERLISP-RECORD-FIELD-RESOLVE",
+      "coordinate": "1011101001"
+    },
+    {
+      "index": 750,
+      "stable_id": "d10.research.v9.026.internet-time-mode-valid",
+      "semantic_name": "INTERNET-TIME-MODE-VALID?",
+      "coordinate": "1011101010"
+    },
+    {
+      "index": 751,
+      "stable_id": "d10.research.v9.027.internet-time-stratum-valid",
+      "semantic_name": "INTERNET-TIME-STRATUM-VALID?",
+      "coordinate": "1011101011"
+    },
+    {
+      "index": 752,
+      "stable_id": "d10.research.v9.028.copy-residual-constraints",
+      "semantic_name": "COPY-RESIDUAL-CONSTRAINTS",
+      "coordinate": "1011101100"
+    },
+    {
+      "index": 753,
+      "stable_id": "d10.research.v9.029.class-name",
+      "semantic_name": "CLASS-NAME",
+      "coordinate": "1011101101"
+    },
+    {
+      "index": 754,
+      "stable_id": "d10.research.v9.030.function-basic-definition",
+      "semantic_name": "FUNCTION-BASIC-DEFINITION",
+      "coordinate": "1011101110"
+    },
+    {
+      "index": 755,
+      "stable_id": "d10.research.v9.031.collect-free-vars-let",
+      "semantic_name": "COLLECT-FREE-VARS-LET*",
+      "coordinate": "1011101111"
+    },
+    {
+      "index": 756,
+      "stable_id": "d10.research.v9.032.collect-free-vars-letrec",
+      "semantic_name": "COLLECT-FREE-VARS-LETREC",
+      "coordinate": "1011110000"
+    },
+    {
+      "index": 757,
+      "stable_id": "d10.research.v9.033.multiple-value-prog1",
+      "semantic_name": "MULTIPLE-VALUE-PROG1",
+      "coordinate": "1011110001"
+    },
+    {
+      "index": 758,
+      "stable_id": "d10.research.v9.034.delay-force",
+      "semantic_name": "DELAY-FORCE",
+      "coordinate": "1011110010"
+    },
+    {
+      "index": 759,
+      "stable_id": "d10.name.00127",
+      "semantic_name": "BOUND-IDENTIFIER=?",
+      "coordinate": "1011110011"
+    },
+    {
+      "index": 760,
+      "stable_id": "d10.name.00266",
+      "semantic_name": "CALL-WITH-PORT",
+      "coordinate": "1011110100"
+    },
+    {
+      "index": 761,
+      "stable_id": "d10.name.00272",
+      "semantic_name": "CASE-LAMBDA",
+      "coordinate": "1011110101"
+    },
+    {
+      "index": 762,
+      "stable_id": "d10.name.00274",
+      "semantic_name": "CATCH-ALL",
+      "coordinate": "1011110110"
+    },
+    {
+      "index": 763,
+      "stable_id": "d10.name.00522",
+      "semantic_name": "DATUM->SYNTAX",
+      "coordinate": "1011110111"
+    },
+    {
+      "index": 764,
+      "stable_id": "d10.name.00534",
+      "semantic_name": "DEFINE-VALUES",
+      "coordinate": "1011111000"
+    },
+    {
+      "index": 765,
+      "stable_id": "d10.name.00573",
+      "semantic_name": "DYNAMIC-WIND",
+      "coordinate": "1011111001"
+    },
+    {
+      "index": 766,
+      "stable_id": "d10.name.00600",
+      "semantic_name": "EQUAL-HASH",
+      "coordinate": "1011111010"
+    },
+    {
+      "index": 767,
+      "stable_id": "d10.name.00636",
+      "semantic_name": "FIND-CLASS",
+      "coordinate": "1011111011"
+    },
+    {
+      "index": 768,
+      "stable_id": "d10.name.00691",
+      "semantic_name": "FREE-IDENTIFIER=?",
+      "coordinate": "1011111100"
+    },
+    {
+      "index": 769,
+      "stable_id": "d10.name.00706",
+      "semantic_name": "FUNCTION-LAMBDA-LIST",
+      "coordinate": "1011111101"
+    },
+    {
+      "index": 770,
+      "stable_id": "d10.name.00748",
+      "semantic_name": "HASHTABLE-EQUIVALENCE-FUNCTION",
+      "coordinate": "1011111110"
+    },
+    {
+      "index": 771,
+      "stable_id": "d10.name.00749",
+      "semantic_name": "HASHTABLE-HASH-FUNCTION",
+      "coordinate": "1011111111"
+    },
+    {
+      "index": 772,
+      "stable_id": "d10.name.00750",
+      "semantic_name": "HASHTABLE-KEYS",
+      "coordinate": "1100000000"
+    },
+    {
+      "index": 773,
+      "stable_id": "d10.name.00752",
+      "semantic_name": "HASHTABLE-REF",
+      "coordinate": "1100000001"
+    },
+    {
+      "index": 774,
+      "stable_id": "d10.name.00763",
+      "semantic_name": "IDENTIFIER?",
+      "coordinate": "1100000010"
+    },
+    {
+      "index": 775,
+      "stable_id": "d10.name.00880",
+      "semantic_name": "MAKE-EQ-HASHTABLE",
+      "coordinate": "1100000011"
+    },
+    {
+      "index": 776,
+      "stable_id": "d10.name.00881",
+      "semantic_name": "MAKE-EQV-HASHTABLE",
+      "coordinate": "1100000100"
+    },
+    {
+      "index": 777,
+      "stable_id": "d10.name.00900",
+      "semantic_name": "MAKE-SYNONYM-STREAM",
+      "coordinate": "1100000101"
+    },
+    {
+      "index": 778,
+      "stable_id": "d10.name.00904",
+      "semantic_name": "MAKE-VARIABLE-TRANSFORMER",
+      "coordinate": "1100000110"
+    },
+    {
+      "index": 779,
+      "stable_id": "d10.name.00920",
+      "semantic_name": "MAP-RESOURCE",
+      "coordinate": "1100000111"
+    },
+    {
+      "index": 780,
+      "stable_id": "d10.name.01038",
+      "semantic_name": "NO-APPLICABLE-METHOD",
+      "coordinate": "1100001000"
+    },
+    {
+      "index": 781,
+      "stable_id": "d10.name.01039",
+      "semantic_name": "NO-NEXT-METHOD",
+      "coordinate": "1100001001"
+    },
+    {
+      "index": 782,
+      "stable_id": "d10.name.01133",
+      "semantic_name": "RAISE-CONTINUABLE",
+      "coordinate": "1100001010"
+    },
+    {
+      "index": 783,
+      "stable_id": "d10.name.01170",
+      "semantic_name": "RESETFORM",
+      "coordinate": "1100001011"
+    },
+    {
+      "index": 784,
+      "stable_id": "d10.name.01171",
+      "semantic_name": "RESETLST",
+      "coordinate": "1100001100"
+    },
+    {
+      "index": 785,
+      "stable_id": "d10.name.01172",
+      "semantic_name": "RESETSAVE",
+      "coordinate": "1100001101"
+    },
+    {
+      "index": 786,
+      "stable_id": "d10.name.01173",
+      "semantic_name": "RESETVAR",
+      "coordinate": "1100001110"
+    },
+    {
+      "index": 787,
+      "stable_id": "d10.name.01174",
+      "semantic_name": "RESETVARS",
+      "coordinate": "1100001111"
+    },
+    {
+      "index": 788,
+      "stable_id": "d10.name.01276",
+      "semantic_name": "SLOT-MISSING",
+      "coordinate": "1100010000"
+    },
+    {
+      "index": 789,
+      "stable_id": "d10.name.01277",
+      "semantic_name": "SLOT-UNBOUND",
+      "coordinate": "1100010001"
+    },
+    {
+      "index": 790,
+      "stable_id": "d10.name.01309",
+      "semantic_name": "STRING-CI-HASH",
+      "coordinate": "1100010010"
+    },
+    {
+      "index": 791,
+      "stable_id": "d10.name.01329",
+      "semantic_name": "SYNTAX->DATUM",
+      "coordinate": "1100010011"
+    },
+    {
+      "index": 792,
+      "stable_id": "d10.name.01422",
+      "semantic_name": "UNWIND-ALL",
+      "coordinate": "1100010100"
+    },
+    {
+      "index": 793,
+      "stable_id": "d10.name.01423",
+      "semantic_name": "UPDATE-INSTANCE-FOR-DIFFERENT-CLASS",
+      "coordinate": "1100010101"
+    },
+    {
+      "index": 794,
+      "stable_id": "d10.name.01424",
+      "semantic_name": "UPDATE-INSTANCE-FOR-REDEFINED-CLASS",
+      "coordinate": "1100010110"
+    },
+    {
+      "index": 795,
+      "stable_id": "d10.name.01450",
+      "semantic_name": "WITH-EXCEPTION-HANDLER",
+      "coordinate": "1100010111"
+    },
+    {
+      "index": 796,
+      "stable_id": "d10.name.01484",
+      "semantic_name": "WRAPPED?",
+      "coordinate": "1100011000"
+    },
+    {
+      "index": 797,
+      "stable_id": "d10.name.01485",
+      "semantic_name": "WRAPPER-OF-TYPE?",
+      "coordinate": "1100011001"
+    },
+    {
+      "index": 798,
+      "stable_id": "d10.name.01486",
+      "semantic_name": "WRAPPER-TYPES",
+      "coordinate": "1100011010"
+    },
+    {
+      "index": 799,
+      "stable_id": "d10.name.00265",
+      "semantic_name": "CALL-NEXT-METHOD",
+      "coordinate": "1100011011"
+    },
+    {
+      "index": 800,
+      "stable_id": "d10.name.00525",
+      "semantic_name": "DEALLOCATE-WHOLE-RESOURCE",
+      "coordinate": "1100011100"
+    },
+    {
+      "index": 801,
+      "stable_id": "d10.name.00533",
+      "semantic_name": "DEFINE-SYNTAX",
+      "coordinate": "1100011101"
+    },
+    {
+      "index": 802,
+      "stable_id": "d10.name.00593",
+      "semantic_name": "ENV",
+      "coordinate": "1100011110"
+    },
+    {
+      "index": 803,
+      "stable_id": "d10.name.00625",
+      "semantic_name": "FAILED-SUBST?",
+      "coordinate": "1100011111"
+    },
+    {
+      "index": 804,
+      "stable_id": "d10.name.00738",
+      "semantic_name": "GUARD",
+      "coordinate": "1100100000"
+    },
+    {
+      "index": 805,
+      "stable_id": "d10.name.00783",
+      "semantic_name": "INTERNET-TIME-RAW->OBSERVATION",
+      "coordinate": "1100100001"
+    },
+    {
+      "index": 806,
+      "stable_id": "d10.name.00788",
+      "semantic_name": "INVOKE-RESTART",
+      "coordinate": "1100100010"
+    },
+    {
+      "index": 807,
+      "stable_id": "d10.name.00861",
+      "semantic_name": "LOCF",
+      "coordinate": "1100100011"
+    },
+    {
+      "index": 808,
+      "stable_id": "d10.name.00868",
+      "semantic_name": "LOOKUP-SUBST",
+      "coordinate": "1100100100"
+    },
+    {
+      "index": 809,
+      "stable_id": "d10.name.00891",
+      "semantic_name": "MAKE-PARAMETER",
+      "coordinate": "1100100101"
+    },
+    {
+      "index": 810,
+      "stable_id": "d10.name.00954",
+      "semantic_name": "MESSAGE-UNHANDLED",
+      "coordinate": "1100100110"
+    },
+    {
+      "index": 811,
+      "stable_id": "d10.name.01049",
+      "semantic_name": "OBLIST",
+      "coordinate": "1100100111"
+    },
+    {
+      "index": 812,
+      "stable_id": "d10.name.01069",
+      "semantic_name": "PARAMETERIZE",
+      "coordinate": "1100101000"
+    },
+    {
+      "index": 813,
+      "stable_id": "d10.name.01111",
+      "semantic_name": "PROMISE?",
+      "coordinate": "1100101001"
+    },
+    {
+      "index": 814,
+      "stable_id": "d10.name.01271",
+      "semantic_name": "SIGNAL-CONDITION",
+      "coordinate": "1100101010"
+    },
+    {
+      "index": 815,
+      "stable_id": "d10.name.01330",
+      "semantic_name": "SYNTAX-CASE",
+      "coordinate": "1100101011"
+    },
+    {
+      "index": 816,
+      "stable_id": "d10.name.01331",
+      "semantic_name": "SYNTAX-RULES",
+      "coordinate": "1100101100"
+    },
+    {
+      "index": 817,
+      "stable_id": "d10.name.01344",
+      "semantic_name": "THREAD-CONJUNCTION",
+      "coordinate": "1100101101"
+    },
+    {
+      "index": 818,
+      "stable_id": "d10.name.01352",
+      "semantic_name": "TIMEZONE-RAW->OBSERVATION",
+      "coordinate": "1100101110"
+    },
+    {
+      "index": 819,
+      "stable_id": "d10.name.01402",
+      "semantic_name": "UNIFY-VAR",
+      "coordinate": "1100101111"
+    },
+    {
+      "index": 820,
+      "stable_id": "d10.name.01403",
+      "semantic_name": "UNIFY-WALKED",
+      "coordinate": "1100110000"
+    },
+    {
+      "index": 821,
+      "stable_id": "d10.name.01426",
+      "semantic_name": "USING-RESOURCE",
+      "coordinate": "1100110001"
+    },
+    {
+      "index": 822,
+      "stable_id": "d10.name.01446",
+      "semantic_name": "WALK-RESOLVED",
+      "coordinate": "1100110010"
+    },
+    {
+      "index": 823,
+      "stable_id": "d10.name.00909",
+      "semantic_name": "MAKNUM",
+      "coordinate": "1100110011"
+    },
+    {
+      "index": 824,
+      "stable_id": "d10.name.00978",
+      "semantic_name": "MUNKAM",
+      "coordinate": "1100110100"
+    },
+    {
+      "index": 825,
+      "stable_id": "d10.name.01287",
+      "semantic_name": "SPECIAL-BINDING",
+      "coordinate": "1100110101"
+    },
+    {
+      "index": 826,
+      "stable_id": "d10.name.01343",
+      "semantic_name": "THE",
+      "coordinate": "1100110110"
+    },
+    {
+      "index": 827,
+      "stable_id": "d10.name.00874",
+      "semantic_name": "MAKE-BROADCAST-STREAM",
+      "coordinate": "1100110111"
+    },
+    {
+      "index": 828,
+      "stable_id": "d10.name.00133",
+      "semantic_name": "BROADCAST-STREAM-STREAMS",
+      "coordinate": "1100111000"
+    },
+    {
+      "index": 829,
+      "stable_id": "d10.name.00879",
+      "semantic_name": "MAKE-ECHO-STREAM",
+      "coordinate": "1100111001"
+    },
+    {
+      "index": 830,
+      "stable_id": "d10.name.00576",
+      "semantic_name": "ECHO-STREAM-INPUT-STREAM",
+      "coordinate": "1100111010"
+    },
+    {
+      "index": 831,
+      "stable_id": "d10.name.00577",
+      "semantic_name": "ECHO-STREAM-OUTPUT-STREAM",
+      "coordinate": "1100111011"
+    },
+    {
+      "index": 832,
+      "stable_id": "d10.name.00902",
+      "semantic_name": "MAKE-TWO-WAY-STREAM",
+      "coordinate": "1100111100"
+    },
+    {
+      "index": 833,
+      "stable_id": "d10.name.01393",
+      "semantic_name": "TWO-WAY-STREAM-INPUT-STREAM",
+      "coordinate": "1100111101"
+    },
+    {
+      "index": 834,
+      "stable_id": "d10.name.01394",
+      "semantic_name": "TWO-WAY-STREAM-OUTPUT-STREAM",
+      "coordinate": "1100111110"
+    },
+    {
+      "index": 835,
+      "stable_id": "d10.name.00898",
+      "semantic_name": "MAKE-STRING-INPUT-STREAM",
+      "coordinate": "1100111111"
+    },
+    {
+      "index": 836,
+      "stable_id": "d10.name.00899",
+      "semantic_name": "MAKE-STRING-OUTPUT-STREAM",
+      "coordinate": "1101000000"
+    },
+    {
+      "index": 837,
+      "stable_id": "d10.name.00855",
+      "semantic_name": "LISTEN",
+      "coordinate": "1101000001"
+    },
+    {
+      "index": 838,
+      "stable_id": "d10.name.01083",
+      "semantic_name": "PEEK-CHAR",
+      "coordinate": "1101000100"
+    },
+    {
+      "index": 839,
+      "stable_id": "d10.name.01141",
+      "semantic_name": "READ-CHAR-NO-HANG",
+      "coordinate": "1101000101"
+    },
+    {
+      "index": 840,
+      "stable_id": "d10.name.01142",
+      "semantic_name": "READ-LINE",
+      "coordinate": "1101000110"
+    },
+    {
+      "index": 841,
+      "stable_id": "d10.name.01144",
+      "semantic_name": "READ-SEQUENCE",
+      "coordinate": "1101000111"
+    },
+    {
+      "index": 842,
+      "stable_id": "d10.name.01491",
+      "semantic_name": "WRITE-SEQUENCE",
+      "coordinate": "1101001000"
+    },
+    {
+      "index": 843,
+      "stable_id": "d10.name.00692",
+      "semantic_name": "FRESH-LINE",
+      "coordinate": "1101001001"
+    },
+    {
+      "index": 844,
+      "stable_id": "d10.name.00431",
+      "semantic_name": "CLEAR-INPUT",
+      "coordinate": "1101001010"
+    },
+    {
+      "index": 845,
+      "stable_id": "d10.name.00433",
+      "semantic_name": "CLEAR-OUTPUT",
+      "coordinate": "1101001011"
+    },
+    {
+      "index": 846,
+      "stable_id": "d10.name.00641",
+      "semantic_name": "FINISH-OUTPUT",
+      "coordinate": "1101001100"
+    },
+    {
+      "index": 847,
+      "stable_id": "d10.name.00685",
+      "semantic_name": "FORCE-OUTPUT",
+      "coordinate": "1101001101"
+    },
+    {
+      "index": 848,
+      "stable_id": "d10.name.00629",
+      "semantic_name": "FILE-LENGTH",
+      "coordinate": "1101001110"
+    },
+    {
+      "index": 849,
+      "stable_id": "d10.name.00631",
+      "semantic_name": "FILE-POSITION",
+      "coordinate": "1101001111"
+    },
+    {
+      "index": 850,
+      "stable_id": "d10.name.00633",
+      "semantic_name": "FILE-STRING-LENGTH",
+      "coordinate": "1101010001"
+    },
+    {
+      "index": 851,
+      "stable_id": "d10.name.01300",
+      "semantic_name": "STREAM-ELEMENT-TYPE",
+      "coordinate": "1101010011"
+    },
+    {
+      "index": 852,
+      "stable_id": "d10.name.01303",
+      "semantic_name": "STREAM-EXTERNAL-FORMAT",
+      "coordinate": "1101010100"
+    },
+    {
+      "index": 853,
+      "stable_id": "d10.name.00771",
+      "semantic_name": "INPUT-STREAM-P",
+      "coordinate": "1101010101"
+    },
+    {
+      "index": 854,
+      "stable_id": "d10.name.01063",
+      "semantic_name": "OUTPUT-STREAM-P",
+      "coordinate": "1101010110"
+    },
+    {
+      "index": 855,
+      "stable_id": "d10.name.00776",
+      "semantic_name": "INTERACTIVE-STREAM-P",
+      "coordinate": "1101010111"
+    },
+    {
+      "index": 856,
+      "stable_id": "d10.name.01058",
+      "semantic_name": "OPEN-STREAM-P",
+      "coordinate": "1101011000"
+    },
+    {
+      "index": 857,
+      "stable_id": "d10.name.01304",
+      "semantic_name": "STREAMP",
+      "coordinate": "1101011001"
+    },
+    {
+      "index": 858,
+      "stable_id": "d10.name.00632",
+      "semantic_name": "FILE-STREAM",
+      "coordinate": "1101011010"
+    },
+    {
+      "index": 859,
+      "stable_id": "d10.name.00584",
+      "semantic_name": "END-OF-FILE",
+      "coordinate": "1101011011"
+    },
+    {
+      "index": 860,
+      "stable_id": "d10.name.00892",
+      "semantic_name": "MAKE-PATHNAME",
+      "coordinate": "1101011100"
+    },
+    {
+      "index": 861,
+      "stable_id": "d10.name.01070",
+      "semantic_name": "PARSE-NAMESTRING",
+      "coordinate": "1101011101"
+    },
+    {
+      "index": 862,
+      "stable_id": "d10.name.01073",
+      "semantic_name": "PATHNAME",
+      "coordinate": "1101011110"
+    },
+    {
+      "index": 863,
+      "stable_id": "d10.name.01081",
+      "semantic_name": "PATHNAMEP",
+      "coordinate": "1101011111"
+    },
+    {
+      "index": 864,
+      "stable_id": "d10.name.01021",
+      "semantic_name": "NAMESTRING",
+      "coordinate": "1101100000"
+    },
+    {
+      "index": 865,
+      "stable_id": "d10.name.00756",
+      "semantic_name": "HOST-NAMESTRING",
+      "coordinate": "1101100001"
+    },
+    {
+      "index": 866,
+      "stable_id": "d10.name.00565",
+      "semantic_name": "DIRECTORY-NAMESTRING",
+      "coordinate": "1101100010"
+    },
+    {
+      "index": 867,
+      "stable_id": "d10.name.00630",
+      "semantic_name": "FILE-NAMESTRING",
+      "coordinate": "1101100011"
+    },
+    {
+      "index": 868,
+      "stable_id": "d10.name.01076",
+      "semantic_name": "PATHNAME-HOST",
+      "coordinate": "1101100100"
+    },
+    {
+      "index": 869,
+      "stable_id": "d10.name.01074",
+      "semantic_name": "PATHNAME-DEVICE",
+      "coordinate": "1101100101"
+    },
+    {
+      "index": 870,
+      "stable_id": "d10.name.01075",
+      "semantic_name": "PATHNAME-DIRECTORY",
+      "coordinate": "1101100110"
+    },
+    {
+      "index": 871,
+      "stable_id": "d10.name.01078",
+      "semantic_name": "PATHNAME-NAME",
+      "coordinate": "1101100111"
+    },
+    {
+      "index": 872,
+      "stable_id": "d10.name.01079",
+      "semantic_name": "PATHNAME-TYPE",
+      "coordinate": "1101101000"
+    },
+    {
+      "index": 873,
+      "stable_id": "d10.name.01080",
+      "semantic_name": "PATHNAME-VERSION",
+      "coordinate": "1101101001"
+    },
+    {
+      "index": 874,
+      "stable_id": "d10.name.00863",
+      "semantic_name": "LOGICAL-PATHNAME",
+      "coordinate": "1101101010"
+    },
+    {
+      "index": 875,
+      "stable_id": "d10.name.00864",
+      "semantic_name": "LOGICAL-PATHNAME-TRANSLATIONS",
+      "coordinate": "1101101011"
+    },
+    {
+      "index": 876,
+      "stable_id": "d10.name.00859",
+      "semantic_name": "LOAD-LOGICAL-PATHNAME-TRANSLATIONS",
+      "coordinate": "1101101100"
+    },
+    {
+      "index": 877,
+      "stable_id": "d10.name.00746",
+      "semantic_name": "HASHTABLE-COPY",
+      "coordinate": "1101101101"
+    },
+    {
+      "index": 878,
+      "stable_id": "d10.name.00751",
+      "semantic_name": "HASHTABLE-MUTABLE?",
+      "coordinate": "1101101110"
+    },
+    {
+      "index": 879,
+      "stable_id": "d10.name.00421",
+      "semantic_name": "CLASS-DIRECT-SUBCLASSES",
+      "coordinate": "1101101111"
+    },
+    {
+      "index": 880,
+      "stable_id": "d10.name.00422",
+      "semantic_name": "CLASS-DIRECT-SUPERCLASSES",
+      "coordinate": "1101110000"
+    },
+    {
+      "index": 881,
+      "stable_id": "d10.name.00418",
+      "semantic_name": "CLASS-DEFAULT-INITARGS",
+      "coordinate": "1101110001"
+    },
+    {
+      "index": 882,
+      "stable_id": "d10.name.00419",
+      "semantic_name": "CLASS-DIRECT-DEFAULT-INITARGS",
+      "coordinate": "1101110010"
+    },
+    {
+      "index": 883,
+      "stable_id": "d10.name.00428",
+      "semantic_name": "CLASS-SLOTS",
+      "coordinate": "1101110011"
+    },
+    {
+      "index": 884,
+      "stable_id": "d10.name.00423",
+      "semantic_name": "CLASS-FINALIZED-P",
+      "coordinate": "1101110100"
+    },
+    {
+      "index": 885,
+      "stable_id": "d10.name.00427",
+      "semantic_name": "CLASS-PROTOTYPE",
+      "coordinate": "1101110101"
+    },
+    {
+      "index": 886,
+      "stable_id": "d10.name.00714",
+      "semantic_name": "GENERIC-FUNCTION-DECLARATIONS",
+      "coordinate": "1101110110"
+    },
+    {
+      "index": 887,
+      "stable_id": "d10.name.00715",
+      "semantic_name": "GENERIC-FUNCTION-LAMBDA-LIST",
+      "coordinate": "1101110111"
+    },
+    {
+      "index": 888,
+      "stable_id": "d10.name.00716",
+      "semantic_name": "GENERIC-FUNCTION-METHOD-CLASS",
+      "coordinate": "1101111000"
+    },
+    {
+      "index": 889,
+      "stable_id": "d10.name.00717",
+      "semantic_name": "GENERIC-FUNCTION-METHOD-COMBINATION",
+      "coordinate": "1101111001"
+    },
+    {
+      "index": 890,
+      "stable_id": "d10.name.00719",
+      "semantic_name": "GENERIC-FUNCTION-NAME",
+      "coordinate": "1101111010"
+    },
+    {
+      "index": 891,
+      "stable_id": "d10.name.00511",
+      "semantic_name": "COS",
+      "coordinate": "1101111011"
+    },
+    {
+      "index": 892,
+      "stable_id": "d10.name.01134",
+      "semantic_name": "RANDOM",
+      "coordinate": "1101111100"
+    },
+    {
+      "index": 893,
+      "stable_id": "d10.name.00680",
+      "semantic_name": "FLOATP",
+      "coordinate": "1101111101"
+    },
+    {
+      "index": 894,
+      "stable_id": "d10.name.00675",
+      "semantic_name": "FIXP",
+      "coordinate": "1101111110"
+    },
+    {
+      "index": 895,
+      "stable_id": "d10.name.00846",
+      "semantic_name": "LEFTSHIFT",
+      "coordinate": "1101111111"
+    },
+    {
+      "index": 896,
+      "stable_id": "d10.name.00865",
+      "semantic_name": "LOGOR",
+      "coordinate": "1110000000"
+    },
+    {
+      "index": 897,
+      "stable_id": "d10.research.source.v14.best-bounded-rational",
+      "semantic_name": "BEST-BOUNDED-RATIONAL",
+      "coordinate": "1110000001"
+    },
+    {
+      "index": 898,
+      "stable_id": "d10.research.source.v14.calendar-to-julian-day",
+      "semantic_name": "CALENDAR-TO-JULIAN-DAY",
+      "coordinate": "1110000010"
+    },
+    {
+      "index": 899,
+      "stable_id": "d10.research.source.v14.canonical-directed-cycle-witness",
+      "semantic_name": "CANONICAL-DIRECTED-CYCLE-WITNESS",
+      "coordinate": "1110000011"
+    },
+    {
+      "index": 900,
+      "stable_id": "d10.research.source.v14.canonical-version-space-boundaries",
+      "semantic_name": "CANONICAL-VERSION-SPACE-BOUNDARIES",
+      "coordinate": "1110000100"
+    },
+    {
+      "index": 901,
+      "stable_id": "d10.research.source.v14.coherent-phase-bit-decision",
+      "semantic_name": "COHERENT-PHASE-BIT-DECISION",
+      "coordinate": "1110000101"
+    },
+    {
+      "index": 902,
+      "stable_id": "d10.research.source.v14.discrete-tone-energy",
+      "semantic_name": "DISCRETE-TONE-ENERGY",
+      "coordinate": "1110000110"
+    },
+    {
+      "index": 903,
+      "stable_id": "d10.research.source.v14.exact-symmetric-squared-chamfer",
+      "semantic_name": "EXACT-SYMMETRIC-SQUARED-CHAMFER",
+      "coordinate": "1110000111"
+    },
+    {
+      "index": 904,
+      "stable_id": "d10.research.source.v14.finite-code-ambiguity-witness",
+      "semantic_name": "FINITE-CODE-AMBIGUITY-WITNESS",
+      "coordinate": "1110001000"
+    },
+    {
+      "index": 905,
+      "stable_id": "d10.research.source.v14.finite-mealy-run",
+      "semantic_name": "FINITE-MEALY-RUN",
+      "coordinate": "1110001001"
+    },
+    {
+      "index": 906,
+      "stable_id": "d10.research.source.v14.finite-term-subsumes",
+      "semantic_name": "FINITE-TERM-SUBSUMES",
+      "coordinate": "1110001010"
+    },
+    {
+      "index": 907,
+      "stable_id": "d10.research.source.v14.finite-transducer-compose",
+      "semantic_name": "FINITE-TRANSDUCER-COMPOSE",
+      "coordinate": "1110001011"
+    },
+    {
+      "index": 908,
+      "stable_id": "d10.research.source.v14.julian-centuries-from-jd",
+      "semantic_name": "JULIAN-CENTURIES-FROM-JD",
+      "coordinate": "1110001100"
+    },
+    {
+      "index": 909,
+      "stable_id": "d10.research.source.v14.julian-day-to-calendar",
+      "semantic_name": "JULIAN-DAY-TO-CALENDAR",
+      "coordinate": "1110001101"
+    },
+    {
+      "index": 910,
+      "stable_id": "d10.research.source.v14.leapfrog-snapshot-step",
+      "semantic_name": "LEAPFROG-SNAPSHOT-STEP",
+      "coordinate": "1110001110"
+    },
+    {
+      "index": 911,
+      "stable_id": "d10.research.source.v14.merge-congruence-constraints",
+      "semantic_name": "MERGE-CONGRUENCE-CONSTRAINTS",
+      "coordinate": "1110001111"
+    },
+    {
+      "index": 912,
+      "stable_id": "d10.research.source.v14.pendulum-period-from-directional-crossings",
+      "semantic_name": "PENDULUM-PERIOD-FROM-DIRECTIONAL-CROSSINGS",
+      "coordinate": "1110010000"
+    },
+    {
+      "index": 913,
+      "stable_id": "d10.research.source.v14.phase-continuous-tone-sequence",
+      "semantic_name": "PHASE-CONTINUOUS-TONE-SEQUENCE",
+      "coordinate": "1110010001"
+    },
+    {
+      "index": 914,
+      "stable_id": "d10.research.source.v14.radio-frame-unique-acquisition",
+      "semantic_name": "RADIO-FRAME-UNIQUE-ACQUISITION",
+      "coordinate": "1110010010"
+    },
+    {
+      "index": 915,
+      "stable_id": "d10.research.source.v14.radix-normalize-exact",
+      "semantic_name": "RADIX-NORMALIZE-EXACT",
+      "coordinate": "1110010011"
+    },
+    {
+      "index": 916,
+      "stable_id": "d10.research.source.v14.regular-language-derivative",
+      "semantic_name": "REGULAR-LANGUAGE-DERIVATIVE",
+      "coordinate": "1110010100"
+    },
+    {
+      "index": 917,
+      "stable_id": "d10.research.source.v14.topological-sort",
+      "semantic_name": "topological-sort",
+      "coordinate": "1110010101"
+    },
+    {
+      "index": 918,
+      "stable_id": "d10.research.source.v14.windowed-spectral-frame",
+      "semantic_name": "WINDOWED-SPECTRAL-FRAME",
+      "coordinate": "1110010110"
+    },
+    {
+      "index": 919,
+      "stable_id": "d10.research.source.v15.board-from-fen",
+      "semantic_name": "board-from-fen",
+      "coordinate": "1110010111"
+    },
+    {
+      "index": 920,
+      "stable_id": "d10.research.source.v15.fen-from-board",
+      "semantic_name": "fen-from-board",
+      "coordinate": "1110011000"
+    },
+    {
+      "index": 921,
+      "stable_id": "d10.research.source.v15.piece-at",
+      "semantic_name": "piece-at",
+      "coordinate": "1110011001"
+    },
+    {
+      "index": 922,
+      "stable_id": "d10.research.source.v15.generate-moves",
+      "semantic_name": "generate-moves",
+      "coordinate": "1110011010"
+    },
+    {
+      "index": 923,
+      "stable_id": "d10.research.source.v15.legal-moves",
+      "semantic_name": "legal-moves?",
+      "coordinate": "1110011011"
+    },
+    {
+      "index": 924,
+      "stable_id": "d10.research.source.v15.apply-move",
+      "semantic_name": "apply-move",
+      "coordinate": "1110011100"
+    },
+    {
+      "index": 925,
+      "stable_id": "d10.research.source.v15.is-check",
+      "semantic_name": "is-check?",
+      "coordinate": "1110011101"
+    },
+    {
+      "index": 926,
+      "stable_id": "d10.research.source.v15.is-mate",
+      "semantic_name": "is-mate?",
+      "coordinate": "1110011110"
+    },
+    {
+      "index": 927,
+      "stable_id": "d10.research.source.v15.is-stalemate",
+      "semantic_name": "is-stalemate?",
+      "coordinate": "1110011111"
+    },
+    {
+      "index": 928,
+      "stable_id": "d10.research.source.v15.perft",
+      "semantic_name": "perft",
+      "coordinate": "1110100000"
+    },
+    {
+      "index": 929,
+      "stable_id": "d10.research.source.v15.mcts-select",
+      "semantic_name": "mcts-select",
+      "coordinate": "1110100001"
+    },
+    {
+      "index": 930,
+      "stable_id": "d10.research.source.v15.cartesian-to-lat-lon-radius-3d",
+      "semantic_name": "CARTESIAN-TO-LAT-LON-RADIUS-3D",
+      "coordinate": "1110100010"
+    },
+    {
+      "index": 931,
+      "stable_id": "d10.research.source.v15.fourier-transform",
+      "semantic_name": "FOURIER-TRANSFORM",
+      "coordinate": "1110100011"
+    },
+    {
+      "index": 932,
+      "stable_id": "d10.research.source.v15.saturating-add",
+      "semantic_name": "SATURATING-ADD",
+      "coordinate": "1110100100"
+    },
+    {
+      "index": 933,
+      "stable_id": "d10.research.source.v15.time-scale-convert",
+      "semantic_name": "TIME-SCALE-CONVERT",
+      "coordinate": "1110100101"
+    },
+    {
+      "index": 934,
+      "stable_id": "d10.research.source.v15.oscillator-phase-step",
+      "semantic_name": "OSCILLATOR-PHASE-STEP",
+      "coordinate": "1110100110"
+    },
+    {
+      "index": 935,
+      "stable_id": "d10.research.source.v15.adc-quantize",
+      "semantic_name": "ADC-QUANTIZE",
+      "coordinate": "1110100111"
+    },
+    {
+      "index": 936,
+      "stable_id": "d10.research.source.v15.crc-update",
+      "semantic_name": "CRC-UPDATE",
+      "coordinate": "1110101000"
+    },
+    {
+      "index": 937,
+      "stable_id": "d10.research.source.v15.thread-conjunction-branches",
+      "semantic_name": "THREAD-CONJUNCTION-BRANCHES",
+      "coordinate": "1110101001"
+    },
+    {
+      "index": 938,
+      "stable_id": "d10.research.source.v16.wild-pathname-p",
+      "semantic_name": "WILD-PATHNAME-P",
+      "coordinate": "1110101010"
+    },
+    {
+      "index": 939,
+      "stable_id": "d10.research.source.v16.concatenated-stream-streams",
+      "semantic_name": "CONCATENATED-STREAM-STREAMS",
+      "coordinate": "1110101011"
+    },
+    {
+      "index": 940,
+      "stable_id": "d10.research.source.v16.translate-logical-pathname",
+      "semantic_name": "TRANSLATE-LOGICAL-PATHNAME",
+      "coordinate": "1110101100"
+    },
+    {
+      "index": 941,
+      "stable_id": "d10.research.source.v16.translate-pathname",
+      "semantic_name": "TRANSLATE-PATHNAME",
+      "coordinate": "1110101101"
+    },
+    {
+      "index": 942,
+      "stable_id": "d10.research.source.v16.stream-error-stream",
+      "semantic_name": "STREAM-ERROR-STREAM",
+      "coordinate": "1110101110"
+    },
+    {
+      "index": 943,
+      "stable_id": "d10.research.source.v16.export",
+      "semantic_name": "EXPORT",
+      "coordinate": "1110101111"
+    },
+    {
+      "index": 944,
+      "stable_id": "d10.research.source.v16.find-symbol",
+      "semantic_name": "FIND-SYMBOL",
+      "coordinate": "1110110000"
+    },
+    {
+      "index": 945,
+      "stable_id": "d10.research.source.v16.find-package",
+      "semantic_name": "FIND-PACKAGE",
+      "coordinate": "1110110001"
+    },
+    {
+      "index": 946,
+      "stable_id": "d10.research.source.v16.find-all-symbols",
+      "semantic_name": "FIND-ALL-SYMBOLS",
+      "coordinate": "1110110010"
+    },
+    {
+      "index": 947,
+      "stable_id": "d10.research.source.v16.import",
+      "semantic_name": "IMPORT",
+      "coordinate": "1110110011"
+    },
+    {
+      "index": 948,
+      "stable_id": "d10.research.source.v16.list-all-packages",
+      "semantic_name": "LIST-ALL-PACKAGES",
+      "coordinate": "1110110100"
+    },
+    {
+      "index": 949,
+      "stable_id": "d10.research.source.v16.rename-package",
+      "semantic_name": "RENAME-PACKAGE",
+      "coordinate": "1110110101"
+    },
+    {
+      "index": 950,
+      "stable_id": "d10.research.source.v16.shadow",
+      "semantic_name": "SHADOW",
+      "coordinate": "1110110110"
+    },
+    {
+      "index": 951,
+      "stable_id": "d10.research.source.v16.shadowing-import",
+      "semantic_name": "SHADOWING-IMPORT",
+      "coordinate": "1110110111"
+    },
+    {
+      "index": 952,
+      "stable_id": "d10.research.source.v16.delete-package",
+      "semantic_name": "DELETE-PACKAGE",
+      "coordinate": "1110111000"
+    },
+    {
+      "index": 953,
+      "stable_id": "d10.research.source.v16.make-package",
+      "semantic_name": "MAKE-PACKAGE",
+      "coordinate": "1110111001"
+    },
+    {
+      "index": 954,
+      "stable_id": "d10.research.source.v16.unexport",
+      "semantic_name": "UNEXPORT",
+      "coordinate": "1110111010"
+    },
+    {
+      "index": 955,
+      "stable_id": "d10.research.source.v16.unintern",
+      "semantic_name": "UNINTERN",
+      "coordinate": "1110111011"
+    },
+    {
+      "index": 956,
+      "stable_id": "d10.research.source.v16.unuse-package",
+      "semantic_name": "UNUSE-PACKAGE",
+      "coordinate": "1110111100"
+    },
+    {
+      "index": 957,
+      "stable_id": "d10.research.source.v16.use-package",
+      "semantic_name": "USE-PACKAGE",
+      "coordinate": "1110111101"
+    },
+    {
+      "index": 958,
+      "stable_id": "d10.research.source.v16.package-name",
+      "semantic_name": "PACKAGE-NAME",
+      "coordinate": "1110111110"
+    },
+    {
+      "index": 959,
+      "stable_id": "d10.research.source.v16.package-nicknames",
+      "semantic_name": "PACKAGE-NICKNAMES",
+      "coordinate": "1110111111"
+    },
+    {
+      "index": 960,
+      "stable_id": "d10.research.source.v16.package-shadowing-symbols",
+      "semantic_name": "PACKAGE-SHADOWING-SYMBOLS",
+      "coordinate": "1111000000"
+    },
+    {
+      "index": 961,
+      "stable_id": "d10.research.source.v16.package-use-list",
+      "semantic_name": "PACKAGE-USE-LIST",
+      "coordinate": "1111000001"
+    },
+    {
+      "index": 962,
+      "stable_id": "d10.research.source.v16.package-used-by-list",
+      "semantic_name": "PACKAGE-USED-BY-LIST",
+      "coordinate": "1111000010"
+    },
+    {
+      "index": 963,
+      "stable_id": "d10.research.source.v16.packagep",
+      "semantic_name": "PACKAGEP",
+      "coordinate": "1111000011"
+    },
+    {
+      "index": 964,
+      "stable_id": "d10.research.source.v16.package-error-package",
+      "semantic_name": "PACKAGE-ERROR-PACKAGE",
+      "coordinate": "1111000100"
+    },
+    {
+      "index": 965,
+      "stable_id": "d10.research.source.v16.copy-readtable",
+      "semantic_name": "COPY-READTABLE",
+      "coordinate": "1111000101"
+    },
+    {
+      "index": 966,
+      "stable_id": "d10.research.source.v16.readtablep",
+      "semantic_name": "READTABLEP",
+      "coordinate": "1111000110"
+    },
+    {
+      "index": 967,
+      "stable_id": "d10.research.source.v16.readtable-case",
+      "semantic_name": "READTABLE-CASE",
+      "coordinate": "1111000111"
+    },
+    {
+      "index": 968,
+      "stable_id": "d10.research.source.v16.get-macro-character",
+      "semantic_name": "GET-MACRO-CHARACTER",
+      "coordinate": "1111001000"
+    },
+    {
+      "index": 969,
+      "stable_id": "d10.research.source.v16.get-dispatch-macro-character",
+      "semantic_name": "GET-DISPATCH-MACRO-CHARACTER",
+      "coordinate": "1111001001"
+    },
+    {
+      "index": 970,
+      "stable_id": "d10.research.v17.001.trit-fixed-width-rank",
+      "semantic_name": "TRIT-FIXED-WIDTH-RANK",
+      "coordinate": "1111001010"
+    },
+    {
+      "index": 971,
+      "stable_id": "d10.research.v17.002.trit-fixed-width-unrank",
+      "semantic_name": "TRIT-FIXED-WIDTH-UNRANK",
+      "coordinate": "1111001011"
+    },
+    {
+      "index": 972,
+      "stable_id": "d10.research.v17.003.trit-prefix-rank-interval",
+      "semantic_name": "TRIT-PREFIX-RANK-INTERVAL",
+      "coordinate": "1111001100"
+    },
+    {
+      "index": 973,
+      "stable_id": "d10.research.v17.004.trit-hamming-count",
+      "semantic_name": "TRIT-HAMMING-COUNT",
+      "coordinate": "1111001101"
+    },
+    {
+      "index": 974,
+      "stable_id": "d10.research.v17.005.trit-digit-complement",
+      "semantic_name": "TRIT-DIGIT-COMPLEMENT",
+      "coordinate": "1111001110"
+    },
+    {
+      "index": 975,
+      "stable_id": "d10.research.v17.006.trit-weighted-checksum",
+      "semantic_name": "TRIT-WEIGHTED-CHECKSUM",
+      "coordinate": "1111001111"
+    },
+    {
+      "index": 976,
+      "stable_id": "d10.research.v17.007.trit-cyclic-rank-min",
+      "semantic_name": "TRIT-CYCLIC-RANK-MIN",
+      "coordinate": "1111010000"
+    },
+    {
+      "index": 977,
+      "stable_id": "d10.research.v17.008.trit-repeat-block",
+      "semantic_name": "TRIT-REPEAT-BLOCK",
+      "coordinate": "1111010001"
+    },
+    {
+      "index": 978,
+      "stable_id": "d10.research.v17.009.trit-block-partition-exact",
+      "semantic_name": "TRIT-BLOCK-PARTITION-EXACT",
+      "coordinate": "1111010010"
+    },
+    {
+      "index": 979,
+      "stable_id": "d10.research.v17.010.trit-prefix-reject-strip",
+      "semantic_name": "TRIT-PREFIX-REJECT-STRIP",
+      "coordinate": "1111010011"
+    },
+    {
+      "index": 980,
+      "stable_id": "d10.research.v17.011.trit-suffix-reject-strip",
+      "semantic_name": "TRIT-SUFFIX-REJECT-STRIP",
+      "coordinate": "1111010100"
+    },
+    {
+      "index": 981,
+      "stable_id": "d10.research.v17.012.finite-segmented-sum",
+      "semantic_name": "FINITE-SEGMENTED-SUM",
+      "coordinate": "1111010101"
+    },
+    {
+      "index": 982,
+      "stable_id": "d10.research.v17.013.finite-segmented-prefix-sum",
+      "semantic_name": "FINITE-SEGMENTED-PREFIX-SUM",
+      "coordinate": "1111010110"
+    },
+    {
+      "index": 983,
+      "stable_id": "d10.research.v17.014.rational-sparse-matvec",
+      "semantic_name": "RATIONAL-SPARSE-MATVEC",
+      "coordinate": "1111010111"
+    },
+    {
+      "index": 984,
+      "stable_id": "d10.research.v17.015.rational-coo-coalesce",
+      "semantic_name": "RATIONAL-COO-COALESCE",
+      "coordinate": "1111011000"
+    },
+    {
+      "index": 985,
+      "stable_id": "d10.research.v17.016.rational-sparse-transpose",
+      "semantic_name": "RATIONAL-SPARSE-TRANSPOSE",
+      "coordinate": "1111011001"
+    },
+    {
+      "index": 986,
+      "stable_id": "d10.research.v17.017.ieee-finite-exact-sum",
+      "semantic_name": "IEEE-FINITE-EXACT-SUM",
+      "coordinate": "1111011010"
+    },
+    {
+      "index": 987,
+      "stable_id": "d10.research.v17.018.ieee-finite-nextup",
+      "semantic_name": "IEEE-FINITE-NEXTUP",
+      "coordinate": "1111011011"
+    },
+    {
+      "index": 988,
+      "stable_id": "d10.research.v17.019.finite-tile-disjoint-check",
+      "semantic_name": "FINITE-TILE-DISJOINT-CHECK",
+      "coordinate": "1111011100"
+    },
+    {
+      "index": 989,
+      "stable_id": "d10.research.v17.020.finite-stable-topk-indices",
+      "semantic_name": "FINITE-STABLE-TOPK-INDICES",
+      "coordinate": "1111011101"
+    },
+    {
+      "index": 990,
+      "stable_id": "d10.research.v17.021.signed-integer-saturating-narrow",
+      "semantic_name": "SIGNED-INTEGER-SATURATING-NARROW",
+      "coordinate": "1111011110"
+    },
+    {
+      "index": 991,
+      "stable_id": "d10.research.v17.022.finite-permutation-gather",
+      "semantic_name": "FINITE-PERMUTATION-GATHER",
+      "coordinate": "1111011111"
+    },
+    {
+      "index": 992,
+      "stable_id": "d10.research.v17.023.cnf-unit-closure",
+      "semantic_name": "CNF-UNIT-CLOSURE",
+      "coordinate": "1111100000"
+    },
+    {
+      "index": 993,
+      "stable_id": "d10.research.v17.024.cnf-single-pivot-resolvent",
+      "semantic_name": "CNF-SINGLE-PIVOT-RESOLVENT",
+      "coordinate": "1111100001"
+    },
+    {
+      "index": 994,
+      "stable_id": "d10.research.v17.025.finite-minimal-hitting-sets",
+      "semantic_name": "FINITE-MINIMAL-HITTING-SETS",
+      "coordinate": "1111100010"
+    },
+    {
+      "index": 995,
+      "stable_id": "d10.research.v17.026.finite-dag-transitive-reduction",
+      "semantic_name": "FINITE-DAG-TRANSITIVE-REDUCTION",
+      "coordinate": "1111100011"
+    },
+    {
+      "index": 996,
+      "stable_id": "d10.research.v17.027.finite-boolean-truth-index",
+      "semantic_name": "FINITE-BOOLEAN-TRUTH-INDEX",
+      "coordinate": "1111100100"
+    },
+    {
+      "index": 997,
+      "stable_id": "d10.research.v17.028.finite-relation-backward-image",
+      "semantic_name": "FINITE-RELATION-BACKWARD-IMAGE",
+      "coordinate": "1111100101"
+    },
+    {
+      "index": 998,
+      "stable_id": "d10.research.v17.029.finite-relation-forward-image",
+      "semantic_name": "FINITE-RELATION-FORWARD-IMAGE",
+      "coordinate": "1111100110"
+    },
+    {
+      "index": 999,
+      "stable_id": "d10.research.v17.030.finite-minimal-unsat-subsets",
+      "semantic_name": "FINITE-MINIMAL-UNSAT-SUBSETS",
+      "coordinate": "1111100111"
+    },
+    {
+      "index": 1000,
+      "stable_id": "d10.research.v17.031.finite-trace-first-fail",
+      "semantic_name": "FINITE-TRACE-FIRST-FAIL",
+      "coordinate": "1111101000"
+    },
+    {
+      "index": 1001,
+      "stable_id": "d10.research.v17.032.finite-trace-stutter-normalize",
+      "semantic_name": "FINITE-TRACE-STUTTER-NORMALIZE",
+      "coordinate": "1111101001"
+    },
+    {
+      "index": 1002,
+      "stable_id": "d10.research.v17.033.finite-dnf-absorption-antichain",
+      "semantic_name": "FINITE-DNF-ABSORPTION-ANTICHAIN",
+      "coordinate": "1111101010"
+    },
+    {
+      "index": 1003,
+      "stable_id": "d10.research.v17.034.rational-fir-convolution",
+      "semantic_name": "RATIONAL-FIR-CONVOLUTION",
+      "coordinate": "1111101011"
+    },
+    {
+      "index": 1004,
+      "stable_id": "d10.research.v17.035.rational-autocorrelation-aperiodic",
+      "semantic_name": "RATIONAL-AUTOCORRELATION-APERIODIC",
+      "coordinate": "1111101100"
+    },
+    {
+      "index": 1005,
+      "stable_id": "d10.research.v17.036.rational-circular-correlation",
+      "semantic_name": "RATIONAL-CIRCULAR-CORRELATION",
+      "coordinate": "1111101101"
+    },
+    {
+      "index": 1006,
+      "stable_id": "d10.research.v17.037.gf2-polynomial-remainder",
+      "semantic_name": "GF2-POLYNOMIAL-REMAINDER",
+      "coordinate": "1111101110"
+    },
+    {
+      "index": 1007,
+      "stable_id": "d10.research.v17.038.gf2-bitmatrix-rank",
+      "semantic_name": "GF2-BITMATRIX-RANK",
+      "coordinate": "1111101111"
+    },
+    {
+      "index": 1008,
+      "stable_id": "d10.research.v17.039.gf2-lfsr-step-with-taps",
+      "semantic_name": "GF2-LFSR-STEP-WITH-TAPS",
+      "coordinate": "1111110000"
+    },
+    {
+      "index": 1009,
+      "stable_id": "d10.research.v17.040.gf2-parity-check-syndrome",
+      "semantic_name": "GF2-PARITY-CHECK-SYNDROME",
+      "coordinate": "1111110001"
+    },
+    {
+      "index": 1010,
+      "stable_id": "d10.research.v17.041.rational-phase-mod-one",
+      "semantic_name": "RATIONAL-PHASE-MOD-ONE",
+      "coordinate": "1111110010"
+    },
+    {
+      "index": 1011,
+      "stable_id": "d10.research.v17.042.rational-resample-zero-order",
+      "semantic_name": "RATIONAL-RESAMPLE-ZERO-ORDER",
+      "coordinate": "1111110011"
+    },
+    {
+      "index": 1012,
+      "stable_id": "d10.research.v17.043.rational-piecewise-linear-sample",
+      "semantic_name": "RATIONAL-PIECEWISE-LINEAR-SAMPLE",
+      "coordinate": "1111110100"
+    },
+    {
+      "index": 1013,
+      "stable_id": "d10.research.v17.044.rational-histogram-bin-counts",
+      "semantic_name": "RATIONAL-HISTOGRAM-BIN-COUNTS",
+      "coordinate": "1111110101"
+    },
+    {
+      "index": 1014,
+      "stable_id": "d10.research.v17.045.debruijn-free-index-shift",
+      "semantic_name": "DEBRUIJN-FREE-INDEX-SHIFT",
+      "coordinate": "1111110110"
+    },
+    {
+      "index": 1015,
+      "stable_id": "d10.research.v17.046.debruijn-closed-substitute",
+      "semantic_name": "DEBRUIJN-CLOSED-SUBSTITUTE",
+      "coordinate": "1111110111"
+    },
+    {
+      "index": 1016,
+      "stable_id": "d10.research.v17.047.alpha-equivalence-debruijn",
+      "semantic_name": "ALPHA-EQUIVALENCE-DEBRUIJN",
+      "coordinate": "1111111000"
+    },
+    {
+      "index": 1017,
+      "stable_id": "d10.research.v17.048.finite-dfa-equivalence-witness",
+      "semantic_name": "FINITE-DFA-EQUIVALENCE-WITNESS",
+      "coordinate": "1111111001"
+    },
+    {
+      "index": 1018,
+      "stable_id": "d10.research.v17.049.finite-dfa-reachability-prune",
+      "semantic_name": "FINITE-DFA-REACHABILITY-PRUNE",
+      "coordinate": "1111111010"
+    },
+    {
+      "index": 1019,
+      "stable_id": "d10.research.v17.050.finite-grammar-first-terminals",
+      "semantic_name": "FINITE-GRAMMAR-FIRST-TERMINALS",
+      "coordinate": "1111111011"
+    },
+    {
+      "index": 1020,
+      "stable_id": "d10.research.v17.051.prefix-free-decoder-check",
+      "semantic_name": "PREFIX-FREE-DECODER-CHECK",
+      "coordinate": "1111111100"
+    },
+    {
+      "index": 1021,
+      "stable_id": "d10.research.v17.052.kraft-dyadic-sum",
+      "semantic_name": "KRAFT-DYADIC-SUM",
+      "coordinate": "1111111101"
+    },
+    {
+      "index": 1022,
+      "stable_id": "d10.research.v17.053.binary-canonical-pack-msb",
+      "semantic_name": "BINARY-CANONICAL-PACK-MSB",
+      "coordinate": "1111111110"
+    },
+    {
+      "index": 1023,
+      "stable_id": "d10.research.v17.054.binary-canonical-unpack-msb",
+      "semantic_name": "BINARY-CANONICAL-UNPACK-MSB",
+      "coordinate": "1111111111"
+    }
+  ]
+}

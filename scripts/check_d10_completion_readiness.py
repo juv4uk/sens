@@ -97,8 +97,20 @@ def audit(root):
     # and v4 nine independent review records have distinct SHA-pinned roles.
     research_allocated = 0
     source_review_exceptions = set()
+    # The v18 owner-ordered research gauge changes only coordinates, not laws.
+    # Review historical source claims against SHA-pinned v17 semantics; the
+    # separate v18 verifier fail-closes on any illicit other field mutation.
+    live_rows = rows
     try:
         ptr = json.loads((k/"d10-current-inventory.json").read_text(encoding="utf-8"))
+        if ptr["canonical_current"]["path"] == "knowledge/d10-v18-semantic-inventory.json":
+            from check_d10_v18_research_placement import check as verify_v18_gauge
+            verify_v18_gauge(root)
+            frozen = ptr["historical_v17_research_inventory"]
+            snapshot_raw = (root / frozen["path"]).read_bytes()
+            if sha(snapshot_raw) != frozen["git_blob"]:
+                raise ValueError("frozen v17 drift")
+            rows = json.loads(snapshot_raw)["rows"]
         v2raw = (k/"d10-v2-semantic-inventory.json").read_bytes()
         v3raw = (k/"d10-v3-semantic-inventory.json").read_bytes()
         v4raw = (k/"d10-v4-semantic-inventory.json").read_bytes()
@@ -606,6 +618,7 @@ def audit(root):
             errors.append("CURRENT-D10-RESEARCH-REVIEW-SHA-OR-LAW-DRIFT")
     except (OSError,ValueError,KeyError,TypeError):
         errors.append("CURRENT-D10-RESEARCH-REVIEW-INVALID")
+    rows = live_rows
     missing = [r["semantic_name"] for r in rows[625:]
                if r["semantic_name"].upper() not in proposed
                and r["semantic_name"].upper() not in source_review_exceptions]

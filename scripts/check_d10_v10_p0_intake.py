@@ -111,7 +111,8 @@ def check(root=ROOT,self_test=False):
     result=verify(v9,v10,m,source,foundation)
     fail((cur["selected"],cur["placed"],cur["unplaced"],cur["ratified"])==
          (799,719,80,0),"live pointer counts")
-    live_rows=json.loads(pinned(root,live["path"],live["git_blob"]))["rows"]
+    review_live=pointer.get("historical_v17_research_inventory",live)
+    live_rows=json.loads(pinned(root,review_live["path"],review_live["git_blob"]))["rows"]
     fail(len(live_rows)>=799 and live_rows[:799]==v10["rows"],"frozen v10 archive rewritten")
     if self_test:
         for field,bad in [("coordinate","0000000000"),("behavior","FAKE"),
