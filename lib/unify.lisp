@@ -58,9 +58,9 @@
 ; unendlicher Strukturen und erhält die Stabilität der Engine bei komplexer
 ; logischer Inferenz.
 
-(00001011 logic-var
-  (00001000 (name)
-    (00100111 (00000001 var) name)))
+(0011 logic-var
+  (0010 (name)
+    (1110 (001 var) name)))
 
 ; Guards the `eq` with `(atom (car term))` first: `term` reaching the final
 ; branch is already known non-atom, but its `car` can itself be a compound
@@ -78,48 +78,48 @@
 ; Unifikation verschachtelter Strukturen in Teile wie `((var x) bob)`,
 ; dessen `car` `(var x)` ist — eine Liste, kein Symbol) — `eq` würde dabei
 ; einen Fehler werfen statt einfach korrekt "keine Variable" zu antworten.
-(00001011 var?
-  (00001000 (term)
-    (00000111
+(0011 var?
+  (0010 (term)
+    (110
       
-      ((00000010 term)  (00000001 ()))
+      ((010 term)  (001 ()))
       
-      ((00000010 (00000101 term))  (00000011 (00000101 term) (00000001 var)))
+      ((010 (100 term))  (101 (100 term) (001 var)))
       )))
 
 ; subst is an alist of (name . term) pairs, keyed by the variable's
 ; name — never by the `(var name)` pair itself. We use `equal?` instead
 ; of `eq` because names can be structures like `(x . 3)` from renaming.
-(00001011 lookup-subst
-  (00001000 (variable bindings)
-    (00000111
+(0011 lookup-subst
+  (0010 (variable bindings)
+    (110
       
-      ((00000010 bindings)  variable)
-      ((00100010 (00000101 (00000101 bindings)) (00101111 variable)) (00000110 (00000101 bindings)))
-      ((00000010 ()) (lookup-subst variable (00000110 bindings))))))
+      ((010 bindings)  variable)
+      ((11110111 (100 (100 bindings)) (1001 variable)) (011 (100 bindings)))
+      ((010 ()) (lookup-subst variable (011 bindings))))))
 
-(00001011 extend-subst
-  (00001000 (variable term bindings)
-    (00000100 (00000100 (00101111 variable) term) bindings)))
+(0011 extend-subst
+  (0010 (variable term bindings)
+    (111 (111 (1001 variable) term) bindings)))
 
 ; One-level dereference: if `term` is a bound variable, follow exactly one
 ; binding; anything else (including a still-unbound variable, or a
 ; compound term) is returned as-is. `unify` and `apply-subst` each do their
 ; own recursion into compound terms, so `walk` doesn't need to go deeper.
-(00001011 walk
-  (00001000 (term bindings)
-    (00000111
-      ((10001001 term) (walk-resolved term (lookup-subst term bindings) bindings))
-      ((00000010 ()) term))))
+(0011 walk
+  (0010 (term bindings)
+    (110
+      ((101100100 term) (walk-resolved term (lookup-subst term bindings) bindings))
+      ((010 ()) term))))
 
-(00001011 walk-resolved
-  (00001000 (term resolved bindings)
-    (00000111
-      ((10001001 resolved)
-       (00000111
-         ((00100010 (00101111 resolved) (00101111 term)) term)
-         ((00000010 ()) (10001011 resolved bindings))))
-      ((00000010 ()) resolved))))
+(0011 walk-resolved
+  (0010 (term resolved bindings)
+    (110
+      ((101100100 resolved)
+       (110
+         ((11110111 (1001 resolved) (1001 term)) term)
+         ((010 ()) (101110100 resolved bindings))))
+      ((010 ()) resolved))))
 
 ; Same guard shape as `var?`: once `subst` gains bindings it's a non-empty
 ; alist — a list, not an atom — so `(eq subst 'fail)` would itself error
@@ -131,68 +131,68 @@
 ; es eine nichtleere Alist — eine Liste, kein Atom — daher würde
 ; `(eq subst 'fail)` selbst einen Fehler werfen statt einfach korrekt
 ; "nein, es ist nicht das fail-Atom" zu antworten.
-(00001011 unify
-  (00001000 (a b bindings)
-    (00000111
-      ((failed-subst? bindings) (00000001 fail))
-      ((00000010 ()) (unify-walked (10001011 a bindings) (10001011 b bindings) bindings)))))
+(0011 unify
+  (0010 (a b bindings)
+    (110
+      ((failed-subst? bindings) (001 fail))
+      ((010 ()) (unify-walked (101110100 a bindings) (101110100 b bindings) bindings)))))
 
-(00001011 failed-subst?
-  (00001000 (bindings)
-    (00000111
+(0011 failed-subst?
+  (0010 (bindings)
+    (110
       
-      ((00000010 bindings)  (00000011 bindings (00000001 fail)))
+      ((010 bindings)  (101 bindings (001 fail)))
       )))
 
-(00001011 unify-walked
-  (00001000 (a b bindings)
-    (00000111
-      ((10001001 a) (unify-var a b bindings))
-      ((10001001 b) (unify-var b a bindings))
+(0011 unify-walked
+  (0010 (a b bindings)
+    (110
+      ((101100100 a) (unify-var a b bindings))
+      ((101100100 b) (unify-var b a bindings))
       
-      ((00000010 a)  (00000111 
-                                  ((00000010 b)  (00000111 ((00000011 a b) bindings) ((00000010 ()) (00000001 fail)))) ((00000010 ()) (00000001 fail))))
+      ((010 a)  (110 
+                                  ((010 b)  (110 ((101 a b) bindings) ((010 ()) (001 fail)))) ((010 ()) (001 fail))))
       
-      ((00000010 b)  (00000001 fail))
-      ((00000010 ()) (10000111 (00000110 a) (00000110 b) (10000111 (00000101 a) (00000101 b) bindings))))))
+      ((010 b)  (001 fail))
+      ((010 ()) (101010000 (011 a) (011 b) (101010000 (100 a) (100 b) bindings))))))
 
-(00001011 occurs-check?
-  (00001000 (variable term bindings)
-    (10011100 ((resolved (10001011 term bindings)))
-      (00000111
-        ((10001001 resolved) (00100010 (00101111 variable) (00101111 resolved)))
+(0011 occurs-check?
+  (0010 (variable term bindings)
+    (001000 ((resolved (101110100 term bindings)))
+      (110
+        ((101100100 resolved) (11110111 (1001 variable) (1001 resolved)))
         
-        ((00000010 resolved)  (00000001 ()))
-        ((00000010 ()) (00000111
-             ((10001100 variable (00000101 resolved) bindings) t)
-             ((00000010 ()) (10001100 variable (00000110 resolved) bindings))))))))
+        ((010 resolved)  (001 ()))
+        ((010 ()) (110
+             ((101110101 variable (100 resolved) bindings) t)
+             ((010 ()) (101110101 variable (011 resolved) bindings))))))))
 
-(00001011 occurs-check occurs-check?)
+(0011 occurs-check occurs-check?)
 
-(00001011 unify-var
-  (00001000 (variable term bindings)
-    (00000111
-      ((10001001 term)
-       (00000111
-         ((00100010 (00101111 variable) (00101111 term)) bindings)
-         ((00000010 ()) (extend-subst variable term bindings))))
-      ((10001100 variable term bindings) (00000001 fail))
-      ((00000010 ()) (extend-subst variable term bindings)))))
+(0011 unify-var
+  (0010 (variable term bindings)
+    (110
+      ((101100100 term)
+       (110
+         ((11110111 (1001 variable) (1001 term)) bindings)
+         ((010 ()) (extend-subst variable term bindings))))
+      ((101110101 variable term bindings) (001 fail))
+      ((010 ()) (extend-subst variable term bindings)))))
 
 ; Fully resolves every variable in `term` (recursively, through chained
 ; bindings and into nested lists) against `subst` — what you call once
 ; unification succeeds, to read out a readable answer instead of raw
 ; `(var ...)` markers and substitution internals.
-(00001011 apply-subst
-  (00001000 (term bindings)
-    (apply-subst-walked (10001011 term bindings) bindings)))
+(0011 apply-subst
+  (0010 (term bindings)
+    (apply-subst-walked (101110100 term bindings) bindings)))
 
-(00001011 apply-subst-walked
-  (00001000 (term bindings)
-    (00000111
+(0011 apply-subst-walked
+  (0010 (term bindings)
+    (110
       
-      ((00000010 term)  term)
-      ((00000010 ()) (00000100 (10001010 (00000101 term) bindings) (10001010 (00000110 term) bindings))))))
+      ((010 term)  term)
+      ((010 ()) (111 (101101001 (100 term) bindings) (101101001 (011 term) bindings))))))
 
 ; The shared kernel behind proving/matching a *conjunction* of conditions:
 ; process one condition at a time, threading a `state` value (usually a
@@ -245,17 +245,17 @@
 ; der Teil, den sie teilen; `try-one` ist das Einzige, das sich
 ; unterscheidet, als gewöhnliches Funktionsargument übergeben statt als
 ; duplizierte Konjunktions-Durchlauflogik in jeder Datei.
-(00001011 thread-conjunction
-  (00001000 (conditions state try-one)
-    (00000111
+(0011 thread-conjunction
+  (0010 (conditions state try-one)
+    (110
       
-      ((00000010 conditions)  (00100111 state))
-      ((00000010 ()) (thread-conjunction-branches (00000110 conditions) try-one (try-one (00000101 conditions) state))))))
+      ((010 conditions)  (1110 state))
+      ((010 ()) (thread-conjunction-branches (011 conditions) try-one (try-one (100 conditions) state))))))
 
-(00001011 thread-conjunction-branches
-  (00001000 (remaining try-one states)
-    (00000111
+(0011 thread-conjunction-branches
+  (0010 (remaining try-one states)
+    (110
       
-      ((00000010 states)  (00000001 ()))
-      ((00000010 ()) (00101001 (thread-conjunction remaining (00000101 states) try-one)
-                 (thread-conjunction-branches remaining try-one (00000110 states)))))))
+      ((010 states)  (001 ()))
+      ((010 ()) (1111 (thread-conjunction remaining (100 states) try-one)
+                 (thread-conjunction-branches remaining try-one (011 states)))))))
