@@ -107,7 +107,7 @@ def verify(previous,current,manifest,source,foundation):
 def check(root=ROOT,self_test=False):
     root=root.resolve()
     ptr=json.loads((root/"knowledge/d10-current-inventory.json").read_text())
-    live=ptr["canonical_current"]
+    live=ptr.get("historical_v14_research_inventory",ptr["canonical_current"])
     frozen=ptr["historical_v13_research_inventory"]
     intake=ptr["current_v14_source_law_selection"]
     pin=intake["manifest"]

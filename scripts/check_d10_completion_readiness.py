@@ -470,6 +470,50 @@ def audit(root):
                 )
             else:
                 errors.append("D10-V14-SOURCE-BATCH-SHA-OR-LAW-DRIFT")
+        # v15 append-only review of 19 descriptive source laws; F2/F3 remain HOLD.
+        if len(rows) > 919:
+            archived_v14 = ptr["historical_v14_research_inventory"]
+            v14_raw_fixed = (root / archived_v14["path"]).read_bytes()
+            ref15 = ptr["current_v15_source_law_selection"]
+            pin15 = ref15["manifest"]
+            raw15 = (root / pin15["path"]).read_bytes()
+            batch15 = json.loads(raw15)
+            source15 = batch15["source"]
+            raw_source15 = (root / source15["path"]).read_bytes()
+            new15 = rows[919:938]
+            proposals15 = batch15["candidates"]
+            good15 = (
+                archived_v14["git_blob"] == sha(v14_raw_fixed)
+                and pin15["git_blob"] == sha(raw15)
+                and batch15["previous"]["git_blob"] == sha(v14_raw_fixed)
+                and batch15["previous"]["path"] == archived_v14["path"]
+                and ref15["previous_inventory"] == archived_v14["path"]
+                and ref15["source"] == source15
+                and source15["git_blob"] == sha(raw_source15)
+                and len(new15) == len(proposals15) == 19
+                and all(
+                    r["stable_id"] == m["id"]
+                    and r["semantic_name"] == m["name"]
+                    and r["behavior"] == m["law"]
+                    and r["source_path"] == source15["path"]
+                    and r["source_git_blob"] == source15["git_blob"]
+                    and r["positive_witness_claim"] == m["positive_illustrative_claim"]
+                    and r["negative_witness_claim"] == m["negative_illustrative_claim"]
+                    and r["coordinate"] is None
+                    and r["ratified_resident"] is False
+                    and r["physical_t5_authorized"] is False
+                    and r["witness_independence"] == "PENDING"
+                    and m["F2"] == "HOLD_DONOR_NOT_RUN"
+                    and m["F3"] == "HOLD_DISTINCTNESS_UNPROVEN"
+                    for r,m in zip(new15,proposals15)
+                )
+            )
+            if good15:
+                source_review_exceptions.update(
+                    x["semantic_name"].upper() for x in new15
+                )
+            else:
+                errors.append("D10-V15-SOURCE-BATCH-SHA-OR-LAW-DRIFT")
         if sources_good and legacy_ok and v5_good:
             research_allocated=len(placed)-256
             source_review_exceptions |= all_review_names | v5_source_names

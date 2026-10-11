@@ -1,12 +1,12 @@
 {
   "schema": "d10-current-inventory-pointer/v1",
-  "status": "OWNER-DIRECTED-RESEARCH-SELECTION-919-UNRATIFIED",
+  "status": "OWNER-DIRECTED-RESEARCH-SELECTION-938-UNRATIFIED",
   "canonical_current": {
-    "path": "knowledge/d10-v14-semantic-inventory.json",
-    "git_blob": "d8109f3cf17a826ecc45dd045fcad41a2a491640",
-    "selected": 919,
+    "path": "knowledge/d10-v15-semantic-inventory.json",
+    "git_blob": "f004b8c57ade5faf8e55e95129727ce3eea14c6d",
+    "selected": 938,
     "placed": 719,
-    "unplaced": 200,
+    "unplaced": 219,
     "ratified": 0
   },
   "historical_selection": {
@@ -20,10 +20,10 @@
     "role": "PINNED-GAUGE-ASSIGNMENT"
   },
   "policy": {
-    "description": "v14: 22 documented archival source-law candidate descriptions appended, all without F2/F3 or coordinates; preserve v13 prefix.",
-    "selected_only": "919 research descriptions; 719 placed, 200 unplaced, 105 remaining; full-domain ratification only after 1024 meaningful laws and coordinates.",
+    "description": "v15: 19 archived laws with illustrative positive and negative review examples appended; independent F2/F3 proofs pending; preserve v14 919-row prefix.",
+    "selected_only": "938 research descriptions; 719 placed, 219 unplaced, 86 remaining. Ratification only once domain and proofs complete.",
     "ratification": "Whole-domain D10 ratification to follow fully populated 1024 inventory with reviewed proofs, not per-function ratification.",
-    "next_step": "Execute positive/negative donor and SENS oracles, establish F3 semantic distinction vs D1–D9/D10, owner review before code assignment."
+    "next_step": "Find 86 more independent laws, verify F2/F3, then place codes prior to whole-domain ratification."
   },
   "branch_policy": "MAIN-ONLY; NO-NEW-BRANCHES",
   "historical_v2_coordinate_inventory": {
@@ -356,6 +356,32 @@
       "git_blob": "e14a3301c24bf3e9af9b5568aaf5ecf720eed17e"
     },
     "research_added": 22,
+    "coordinates_added": 0,
+    "ratified_added": 0,
+    "F2": "NOT_RUN",
+    "F3": "UNPROVEN"
+  },
+  "historical_v14_research_inventory": {
+    "path": "knowledge/d10-v14-semantic-inventory.json",
+    "git_blob": "d8109f3cf17a826ecc45dd045fcad41a2a491640",
+    "selected": 919,
+    "placed": 719,
+    "unplaced": 200,
+    "ratified": 0,
+    "role": "FROZEN-PRE-V15-ARCHIVE"
+  },
+  "current_v15_source_law_selection": {
+    "previous_inventory": "knowledge/d10-v14-semantic-inventory.json",
+    "manifest": {
+      "path": "knowledge/d10-v15-source-law-intake-20261012.json",
+      "git_blob": "34869ebaf7d185d5bc7a90c9033ddac37a769a32"
+    },
+    "source": {
+      "path": "knowledge/d10-candidate-coordinate-unification-20261011.json",
+      "git_blob": "e14a3301c24bf3e9af9b5568aaf5ecf720eed17e",
+      "original_research_slots": 1024
+    },
+    "research_added": 19,
     "coordinates_added": 0,
     "ratified_added": 0,
     "F2": "NOT_RUN",
