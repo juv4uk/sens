@@ -203,6 +203,10 @@
       ((0100 (010 values))
        (зворот-до (011 values) (111 (100 values) acc))))))
 
+; Internal derived closure for D6:000000 LENGTH when no admitted D6
+; evaluator mechanism exists. This is a Lisp binding, not D6 dispatch.
+(00001001 внутрішня-довжина length)
+
 (00001001 reverse-onto зворот-до)
 
 (00001001 reverse
