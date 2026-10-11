@@ -41,7 +41,7 @@ This is an execution and blocker ledger, not a claim that the repository is full
 ## Known fail-closed blockers
 
 1. `00001010` historical DEFMACRO: owner-audited composite `D5:00011 MACRO + D4:0011 DEFINE`; no proven general one-word rewrite. Seen in `lib/forward.lisp`, `lib/world.lisp`, `lib/knowledge.lisp`, `lib/core.lisp`, and `lib/core4.lisp`.
-2. `00110111` MAP has two current matches, D6:101000 and D8:11000101. Still unresolved in other sources including `lib/knowledge.lisp` and `lib/core.lisp`. All 12 occurrences in `lib/yantra.lisp` and `lib/linter.lisp` have been source-proven as one-list MAP and migrated to D6:101000; D8 MAP remains distinct.
+2. `00110111` MAP has two current matches, D6:101000 and D8:11000101; the global legacy mapping remains unresolved. Source-local one-list proofs now migrate 15 calls to D6:101000: 4 in `lib/yantra.lisp`, 8 in `lib/linter.lisp`, 1 in `lib/knowledge.lisp`, and 2 inside `lib/core.lisp`'s `let` expansion. Regression: `tests/test_sid8_d6_map_source_cutover.py`. D8 MAP remains distinct; do not change the normative historical map.
 3. Internal helper cells 00011001, 00011111, 00100000, 01000111 have no ratified semantic residents; seen in `lib/core.lisp` / `lib/core4.lisp`.
 4. Historical MONO-NS, UNIX-TIME-NOW, NTP-QUERY-RAW await D10 successor authority, including in `lib/time.lisp`.
 5. Embedded `lib/macro.lisp` **must not** be mechanically rewritten: Hosted CI `38163596334` confirmed runtime error `expression is not callable` after replacement; file was restored on main in commit `c5253cf7`. Fix the interpreter/domain callable dispatch with an executable witness before retrying that file.
