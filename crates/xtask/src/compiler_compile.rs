@@ -11,8 +11,9 @@
 
 use sens::{
     compiler_evidence_canonical_bytes, compiler_evidence_from_canonical_bytes,
-    compiler_program_artifact_from_sens, sha256_source, wire_decode_program, wire_encode_program,
-    lowered_program_to_exact_data, Value,
+    compiler_program_artifact_from_sens, encode_binary_projection_ternary, lower_program,
+    lowered_program_to_exact_data, open_ternary_program, parse_canonical_binary,
+    parse_mixed_exact_domain, sha256_source, wire_decode_program, wire_encode_program, Value,
 };
 use std::fs::{self, OpenOptions};
 use std::io::{self, Write};
@@ -73,6 +74,92 @@ fn artifact_schema(value: &Value) -> Result<&str, String> {
     }
 }
 
+/// Keep artifact construction and canonical evidence verification shared by
+/// the explicit SW1 bootstrap route and the physical-T5 triplet route.
+fn compile_program_data(
+    program: Value,
+    source_digest: &str,
+    sens_revision: &str,
+) -> Result<(Vec<u8>, bool), String> {
+    // This is the language compiler entry point. Do not replace it with a Rust
+    // walk over expressions or per-node host identity->role lookups.
+    let artifact = compiler_program_artifact_from_sens(program, source_digest, sens_revision)
+        .map_err(|error| format!("SENS compiler invocation failed: {error}"))?;
+    let schema = artifact_schema(&artifact)?;
+    let accepted = schema == "compiler-compilation-artifact/1";
+    let canonical_bytes = compiler_evidence_canonical_bytes(&artifact)
+        .map_err(|error| format!("cannot encode SENS artifact as canonical evidence bytes: {error}"))?;
+
+    // Defend the producer boundary as well: the exact bytes we emit must decode
+    // and re-encode identically through the existing canonical evidence codec.
+    let decoded = compiler_evidence_from_canonical_bytes(&canonical_bytes)
+        .map_err(|error| format!("emitted artifact failed canonical evidence decode: {error}"))?;
+    let reencoded_artifact = compiler_evidence_canonical_bytes(&decoded)
+        .map_err(|error| format!("emitted artifact failed canonical evidence re-encode: {error}"))?;
+    if reencoded_artifact != canonical_bytes {
+        return Err("emitted compiler artifact is not byte-canonical".into());
+    }
+    if artifact_schema(&decoded)? != schema {
+        return Err("compiler artifact schema changed across canonical byte round-trip".into());
+    }
+
+    Ok((canonical_bytes, accepted))
+}
+
+/// Compile one three-file source projection: same-stem SENS source, physical
+/// T5 and extensionless exact-width binary view. The T5 reader owns word
+/// decoding and D2 syntax; all projections must agree after SENS lowering.
+fn compile_t5_triplet_bytes(
+    lisp_source: &[u8],
+    physical_t5: &[u8],
+    visible_view: &[u8],
+    sens_revision: &str,
+) -> Result<(Vec<u8>, bool), String> {
+    for (name, bytes) in [
+        ("Lisp source", lisp_source),
+        ("physical T5", physical_t5),
+        ("visible word view", visible_view),
+    ] {
+        if bytes.is_empty() {
+            return Err(format!("{name} input is empty"));
+        }
+        if bytes.len() as u64 > MAX_INPUT_BYTES {
+            return Err(format!("{name} input exceeds the {}-byte resource cap", MAX_INPUT_BYTES));
+        }
+    }
+
+    let visible = open_ternary_program(physical_t5)
+        .map_err(|error| format!("canonical physical T5 open failed: {error}"))?;
+    if visible_view != visible.as_bytes() {
+        return Err("triplet view does not byte-match the canonical T5 decoder output".into());
+    }
+    let reencoded_t5 = encode_binary_projection_ternary(&visible)
+        .map_err(|error| format!("canonical T5 re-encode failed: {error}"))?;
+    if reencoded_t5.as_slice() != physical_t5 {
+        return Err("physical T5 is not byte-canonical after decode/encode".into());
+    }
+
+    let source = std::str::from_utf8(lisp_source)
+        .map_err(|_| "triplet Lisp source is not UTF-8".to_string())?;
+    let source_parsed = parse_mixed_exact_domain(source)
+        .map_err(|error| format!("SENS source parse failed: {error}"))?;
+    let source_lowered = lower_program(&source_parsed);
+    let source_identity_wire = wire_encode_program(&source_lowered);
+
+    let binary_parsed = parse_canonical_binary(&visible)
+        .map_err(|error| format!("canonical exact-domain view parse failed: {error}"))?;
+    let binary_lowered = lower_program(&binary_parsed);
+    let binary_identity_wire = wire_encode_program(&binary_lowered);
+    if source_identity_wire != binary_identity_wire {
+        return Err("SENS source and physical-T5 view disagree after exact-domain lowering".into());
+    }
+
+    let program = lowered_program_to_exact_data(&binary_lowered)
+        .map_err(|error| format!("T5 program-data conversion failed closed: {error}"))?;
+    let physical_digest = sha256_hex(physical_t5);
+    compile_program_data(program, &physical_digest, sens_revision)
+}
+
 /// Compile one exact canonical syntax-wire stream through the executable SENS
 /// compiler. Ok((bytes, true)) means accepted; Ok((bytes, false)) means SENS
 /// emitted a canonical semantic-rejection artifact which must not execute.
@@ -103,30 +190,7 @@ fn compile_sw1_bytes(input: &[u8], sens_revision: &str) -> Result<(Vec<u8>, bool
     let program = lowered_program_to_exact_data(&expressions)
         .map_err(|error| format!("SW1 program-data conversion failed closed: {error}"))?;
     let wire_digest = sha256_hex(input);
-
-    // This is the language compiler entry point. Do not replace it with a Rust
-    // walk over expressions or per-node host identity->role lookups.
-    let artifact = compiler_program_artifact_from_sens(program, &wire_digest, sens_revision)
-        .map_err(|error| format!("SENS compiler invocation failed: {error}"))?;
-    let schema = artifact_schema(&artifact)?;
-    let accepted = schema == "compiler-compilation-artifact/1";
-    let canonical_bytes = compiler_evidence_canonical_bytes(&artifact)
-        .map_err(|error| format!("cannot encode SENS artifact as canonical evidence bytes: {error}"))?;
-
-    // Defend the producer boundary as well: the exact bytes we emit must decode
-    // and re-encode identically through the existing canonical evidence codec.
-    let decoded = compiler_evidence_from_canonical_bytes(&canonical_bytes)
-        .map_err(|error| format!("emitted artifact failed canonical evidence decode: {error}"))?;
-    let reencoded_artifact = compiler_evidence_canonical_bytes(&decoded)
-        .map_err(|error| format!("emitted artifact failed canonical evidence re-encode: {error}"))?;
-    if reencoded_artifact != canonical_bytes {
-        return Err("emitted compiler artifact is not byte-canonical".into());
-    }
-    if artifact_schema(&decoded)? != schema {
-        return Err("compiler artifact schema changed across canonical byte round-trip".into());
-    }
-
-    Ok((canonical_bytes, accepted))
+    compile_program_data(program, &wire_digest, sens_revision)
 }
 
 fn write_output(output: Option<&Path>, bytes: &[u8]) -> Result<(), String> {
@@ -157,6 +221,46 @@ fn write_output(output: Option<&Path>, bytes: &[u8]) -> Result<(), String> {
     }
 }
 
+fn read_triplet_member(path: &Path, role: &str) -> Result<Vec<u8>, String> {
+    let metadata = fs::symlink_metadata(path)
+        .map_err(|error| format!("cannot inspect {role} {}: {error}", path.display()))?;
+    if metadata.file_type().is_symlink() || !metadata.is_file() {
+        return Err(format!("{role} must be a regular non-symlink file: {}", path.display()));
+    }
+    if metadata.len() > MAX_INPUT_BYTES {
+        return Err(format!(
+            "{role} exceeds the {}-byte resource cap: {}",
+            MAX_INPUT_BYTES,
+            path.display()
+        ));
+    }
+    fs::read(path).map_err(|error| format!("cannot read {role} {}: {error}", path.display()))
+}
+
+/// Run the physical T5 route from an explicit .sens path, requiring same-stem
+/// .lisp and extensionless-view siblings. No format sniffing or fallback occurs.
+pub fn run_triplet(
+    repo_root: &str,
+    sens_path: &Path,
+    output: Option<&Path>,
+) -> Result<bool, String> {
+    if sens_path.extension().and_then(|extension| extension.to_str()) != Some("sens") {
+        return Err(format!("--triplet requires a physical .sens path: {}", sens_path.display()));
+    }
+    let lisp_path = sens_path.with_extension("lisp");
+    let view_path = sens_path.with_extension("");
+    let lisp = read_triplet_member(&lisp_path, "triplet Lisp source")?;
+    let physical = read_triplet_member(sens_path, "triplet physical T5")?;
+    let view = read_triplet_member(&view_path, "triplet visible view")?;
+    let revision = current_revision(repo_root)?;
+    let (artifact, accepted) = compile_t5_triplet_bytes(&lisp, &physical, &view, &revision)?;
+    write_output(output, &artifact)?;
+    if !accepted {
+        eprintln!("SENS compiler rejected the triplet program; canonical compiler-compilation-error/1 artifact emitted");
+    }
+    Ok(accepted)
+}
+
 pub fn run(repo_root: &str, options: RunOptions) -> Result<bool, String> {
     let metadata = fs::metadata(&options.input)
         .map_err(|error| format!("cannot stat SW1 input {}: {error}", options.input.display()))?;
@@ -185,8 +289,9 @@ pub fn run(repo_root: &str, options: RunOptions) -> Result<bool, String> {
 mod tests {
     use super::*;
     use sens::{
-        parse_mixed_exact_domain, lower_program, verify_compiler_program_artifact_from_sens,
-        CoreD8, Bit8, DomainIdentity, Expr, ExprKind, Span, CompilerLoweringRole,
+        encode_binary_projection_ternary, parse_mixed_exact_domain, lower_program,
+        verify_compiler_program_artifact_from_sens, CoreD8, Bit8, DomainIdentity, Expr,
+        ExprKind, Span, CompilerLoweringRole,
     };
     use std::rc::Rc;
 
@@ -267,6 +372,31 @@ mod tests {
         let artifact = compiler_evidence_from_canonical_bytes(&bytes)
             .expect("error artifact is canonical");
         assert_eq!(artifact_schema(&artifact).unwrap(), "compiler-compilation-error/1");
+    }
+
+    #[test]
+    fn canonical_t5_triplet_compiles_only_when_all_three_projections_match() {
+        let source = "(як-є ())\\n".as_bytes();
+        let view = b"10 001 00 000 01\\n";
+        let physical = encode_binary_projection_ternary(
+            std::str::from_utf8(view).expect("ASCII canonical view"),
+        ).expect("existing SENS T5 codec");
+
+        let revision = "0123456789abcdef0123456789abcdef01234567";
+        let (bytes, accepted) = compile_t5_triplet_bytes(
+            source, &physical, view, revision,
+        ).expect("three matching projections compile through SENS");
+        assert!(accepted);
+        let artifact = compiler_evidence_from_canonical_bytes(&bytes)
+            .expect("canonical compiler evidence");
+        assert_eq!(artifact_schema(&artifact).unwrap(), "compiler-compilation-artifact/1");
+
+        assert!(compile_t5_triplet_bytes(
+            source, &physical, b"10 100 00 000 01\\n", revision,
+        ).is_err(), "a mismatched extensionless view must block");
+        assert!(compile_t5_triplet_bytes(
+            b"(інакше ())\\n", &physical, view, revision,
+        ).is_err(), "a source that lowers to a different exact program must block");
     }
 
     #[test]
