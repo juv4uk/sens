@@ -42,6 +42,24 @@ fn journal_event_fields_are_retrieved_from_a_real_alist() {
 }
 
 #[test]
+fn root_proper_list_validation_is_exact_d1_and_rejects_dotted_tails() {
+    let mut session = session();
+    for (value, expected) in [
+        ("()", true),
+        ("(a b)", true),
+        ("(a . b)", false),
+        ("a", false),
+    ] {
+        let expr = format!("(внутрішній-правильний-список? (quote {value}))");
+        let actual = eval_program(&expr, &mut session)
+            .unwrap_or_else(|e| panic!("D1 proper list predicate {expr}: {e:?}"))
+            .value;
+        assert_eq!(actual.as_predicate_bit(), Some(expected),
+            "proper list checks must never consume host T/NIL or force empty tails");
+    }
+}
+
+#[test]
 fn root_commit_equality_is_structural_and_d1_only() {
     let mut session = session();
     for (a,b,expected) in [
