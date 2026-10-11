@@ -1,0 +1,8 @@
+repo	task	consumer	source_path	status	current_authority	next_required_gate	evidence
+juv4uk/sens	#5439	Rust codec	crates/sens/examples/two_codec_small_programs.rs	RESEARCH_GREEN_PRODUCTION_BLOCKED	T5 default, original F3 explicit research-only	Fix independent F3 Rust-Python parity and publish bounded decoder API	https://github.com/juv4uk/sens/actions/runs/38168516276
+juv4uk/sens	#5445	CLI reader	crates/sens-cli/src/bin/sens-trit.rs	NOT_MIGRATED	T5-only production open/eval	Explicit .senc/0xf3 route with strict negative parity, no default change	https://github.com/juv4uk/sens/issues/5445
+juv4uk/sens	#5446	Publisher and SENS triplet	scripts/prepare-two-codec-migration.py	STAGED_NOT_DEPLOYED	Existing .sens/.lisp/source triad unchanged	Retain immutable source SHA manifest and gate all producer/consumer routes	https://github.com/juv4uk/sens/actions/runs/38168516276
+juv4uk/cml	#696	Compiler and loader	TO_INVENTORY	BLOCKED_UPSTREAM_CODEC_API	NOT_AUDITED	Exact compile-encode-decode-execute parity on T5 and opt-in small F3	https://github.com/juv4uk/cml/issues/696
+juv4uk/wsm-graalvm	#302	JVM and GraalVM reader	TO_INVENTORY	BLOCKED_UPSTREAM_CODEC_API	NOT_AUDITED	Rust same-input typed-word parity, cold and warmed execution	https://github.com/juv4uk/wsm-graalvm/issues/302
+juv4uk/sens-futhark	#133	CUDA/Futhark substrate	TO_INVENTORY	BLOCKED_UPSTREAM_CODEC_API	NOT_AUDITED	Real GPU H2D-kernel-D2H parity and negative codec controls	https://github.com/juv4uk/sens-futhark/issues/133
+juv4uk/fpga-lisp	#86	FPGA substrate	TO_INVENTORY	BLOCKED_UPSTREAM_CODEC_API	NOT_AUDITED	RTL/FPGA actual streaming EOF/error and physical byte parity	https://github.com/juv4uk/fpga-lisp/issues/86
