@@ -24,7 +24,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          python3 scripts/audit_sid8_all_lisp_sources.py --report "$RUNNER_TEMP/sid8-all-lisp-census.json"
+          python3 scripts/audit_sid8_all_lisp_sources.py --strict-parser --report "$RUNNER_TEMP/sid8-all-lisp-census.json"
           python3 - "$RUNNER_TEMP/sid8-all-lisp-census.json" <<'PY'
           import json, sys
           x=json.load(open(sys.argv[1]))
