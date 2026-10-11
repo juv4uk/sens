@@ -48,7 +48,7 @@ jobs:
       - name: Regression test compiler migration fails closed on unratified symbol data
         run: >-
           python3 tests/test_migrate_t5_batch.py
-          RealBatchTest.test_compiler_ukrainian_define_heads_bind_global_calls_before_t5
+          RealBatchTest.test_compiler_migration_fails_closed_on_unratified_quoted_symbol_data
 
       - name: Migrate the compiler source with the canonical three-pass converter
         id: generate
