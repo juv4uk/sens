@@ -7,9 +7,9 @@
   "source_head_sha": "4bce46edc100b0a2d81e31b3cc1cd0ea5906b08c",
   "status": "HISTORICAL-RESEARCH-ONLY-NOT-RATIFIED-NOT_EXECUTABLE",
   "source_count": 7,
-  "archived_verified_count": 5,
-  "source_only_count": 2,
-  "summary": "П'ять первинних звітів і даних про масштабування двійкової ширини збережено з незмінними SHA; два вихідні програмні файли лише індексовані, не вважаються перенесеними.",
+  "archived_verified_count": 7,
+  "source_only_count": 0,
+  "summary": "Сім першоджерел PR #2005 збережено за оригінальними Git blob SHA, включно з двома програмними файлами як неактивні *.source.txt; це не діючий код.",
   "scope": "Cachegrind smoke widths 64,65,128,255,256,257,1024,4096; no production carrier decision or D1-D10 semantic admission.",
   "records": [
     {
@@ -29,16 +29,16 @@
     {
       "original_path": "benchmarks/unbounded-width/run.py",
       "source_blob_sha": "422e33e6b93d2b1c0c356f9cf6df372937f74d0e",
-      "archive_path": null,
-      "archive_blob_sha": null,
-      "status": "SOURCE_REFERENCED_NOT_COPIED"
+      "archive_path": "research/domain-archive/20261011/pr2005/benchmarks/unbounded-width/run.py.source.txt",
+      "archive_blob_sha": "422e33e6b93d2b1c0c356f9cf6df372937f74d0e",
+      "status": "BYTE_IDENTICAL_ARCHIVED"
     },
     {
       "original_path": "benchmarks/unbounded-width/width_scale.c",
       "source_blob_sha": "72d8593012a5d79c231d5b8f03db929d3e66e07f",
-      "archive_path": null,
-      "archive_blob_sha": null,
-      "status": "SOURCE_REFERENCED_NOT_COPIED"
+      "archive_path": "research/domain-archive/20261011/pr2005/benchmarks/unbounded-width/width_scale.c.source.txt",
+      "archive_blob_sha": "72d8593012a5d79c231d5b8f03db929d3e66e07f",
+      "status": "BYTE_IDENTICAL_ARCHIVED"
     },
     {
       "original_path": "docs/research/2000-unbounded-width-report.md",
@@ -66,11 +66,12 @@
     "Жодних змін у нормативних D1-D10 або фізичному кодеку",
     "Не вважати історичні тести поточним PASS",
     "Не активувати старі виконувані джерела",
-    "Два відсутні файли мають зберігати HOLD, а не false complete"
+    "Всі 7 файлів архівовані; неактивні *.source.txt не запускаються як production/CI"
   ],
   "coordination": [
     "#5549",
     "#5132",
     "#5041"
-  ]
+  ],
+  "archive_execution_policy": "All original historical programs are stored under *.source.txt in research/domain-archive; not imported, not executable in CI, not canonical runtime."
 }
