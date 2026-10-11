@@ -189,9 +189,8 @@
 
 (110
   ((11110111 pas-observed pas-expected)
-   (1)
    (001 (core4-predicate-answer-scale-ok)))
-  ((11110111 1 1) 1
+  ((010 (001 ()))
    (1110 (001 core4-predicate-answer-scale-mismatch)
          pas-expected
          pas-observed)))
