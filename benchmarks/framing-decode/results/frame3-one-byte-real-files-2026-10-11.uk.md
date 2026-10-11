@@ -49,9 +49,8 @@ production-файл `.sens` або доказ, що будь-який код м�
 ## Звичайні фізичні файли, а не повторювані W9
 
 [Парні результати — GitHub Actions](https://github.com/juv4uk/sens/actions/runs/38162725571).
-[Повний TSV пофайлово](https://github.com/juv4uk/sens/actions/runs/38162725571/artifacts/11711027228)
-містить також мікропрограмний експеримент; інший артефакт
-`frame3-real-file-*` доступний у тому самому Actions запуску.
+[Повний TSV пофайлово для справжніх файлів](https://github.com/juv4uk/sens/actions/runs/38162725571/artifacts/11710684313).
+[Окремий TSV і фізичні 1B файли мікропрограм](https://github.com/juv4uk/sens/actions/runs/38162725571/artifacts/11711027228).
 
 Програма `frame3_real_files_bench.rs` бере **всі Git-tracked
 `*.sens`**, без ручного вибору найкращих; кожен файл спершу
