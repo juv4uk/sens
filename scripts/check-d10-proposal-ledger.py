@@ -287,9 +287,12 @@ def main() -> int:
             print(f"D10-PROPOSAL-LEDGER: BLOCK {error}")
         return 1
     inventory_path = ROOT / "knowledge" / "d10-v1-semantic-inventory.json"
+    pointer_path = ROOT / "knowledge" / "d10-current-inventory.json"
     architecture_path = ROOT / "docs" / "architecture" / "ARCHIPELAGO-V1.uk.md"
     try:
         inventory = json.loads(inventory_path.read_text(encoding="utf-8"))
+        pointer = json.loads(pointer_path.read_text(encoding="utf-8"))
+        current_inventory = json.loads((ROOT / pointer["canonical_current"]["path"]).read_text(encoding="utf-8"))
         projection = architecture_path.read_text(encoding="utf-8")
     except (OSError, ValueError) as exc:
         print(f"D10-PROPOSAL-LEDGER: BLOCK cannot read D10 machine inventory/projection: {exc}")
@@ -310,7 +313,7 @@ def main() -> int:
         for error in trace_errors:
             print(f"D10-PROPOSAL-LEDGER: BLOCK {error}")
         return 1
-    projection_errors = inventory_projection_errors(inventory, projection)
+    projection_errors = inventory_projection_errors(current_inventory, projection)
     if projection_errors:
         for error in projection_errors:
             print(f"D10-PROPOSAL-LEDGER: BLOCK {error}")

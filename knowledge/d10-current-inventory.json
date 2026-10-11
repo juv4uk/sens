@@ -1,12 +1,12 @@
 {
   "schema": "d10-current-inventory-pointer/v1",
-  "status": "OWNER-DIRECTED-RESEARCH-SELECTION-719-UNRATIFIED",
+  "status": "OWNER-DIRECTED-RESEARCH-SELECTION-721-UNRATIFIED",
   "canonical_current": {
-    "path": "knowledge/d10-v6-semantic-inventory.json",
-    "git_blob": "db13680e3a8786faf5dec74c7f8792ace7c6fd5f",
-    "selected": 719,
+    "path": "knowledge/d10-v7-semantic-inventory.json",
+    "git_blob": "6a45275241717dafa6a6c9ccafae1e9ad819b306",
+    "selected": 721,
     "placed": 719,
-    "unplaced": 0,
+    "unplaced": 2,
     "ratified": 0
   },
   "historical_selection": {
@@ -20,10 +20,10 @@
     "role": "PINNED-GAUGE-ASSIGNMENT"
   },
   "policy": {
-    "description": "v6 preserves v1-v5 and adds four source-pinned historical CLOS research candidates.",
-    "selected_only": "719 selected research laws; 305 left; 0 ratified.",
-    "ratification": "No D10 meaning has been ratified, and D10 10-bit execution / physical T5 encoding is not authorized.",
-    "next_step": "Review CLOS candidate derivability and obtain independent semantic oracles before D10 ratification."
+    "description": "Canonical D10 v7 preserves v1-v6 archives and appends two unplaced historical Common Lisp stream laws; earlier CLOS research tranches remain unchanged.",
+    "selected_only": "721 selected research candidates; 719 placed, 2 unplaced pending semantic dedup/Core-vs-library review; 303 positions remain; 0 ratified.",
+    "ratification": "No D10 meaning has been ratified. D10 10-bit execution and physical T5 encoding are not authorized.",
+    "next_step": "Complete D1-D9 semantic derivability and Core-vs-library review; run donor fixtures and SENS conformance tests before ratification."
   },
   "branch_policy": "MAIN-ONLY; NO-NEW-BRANCHES",
   "historical_v2_coordinate_inventory": {
@@ -129,5 +129,58 @@
     "source_queue_git_blob": "131369263ac37c27798bb3c95521eb99e52b8f10",
     "owner_review": "CORE-VS-DERIVED-PENDING",
     "independent_oracle": "NOT-EXECUTED-FOR-SENS"
+  },
+  "historical_v6_research_inventory": {
+    "path": "knowledge/d10-v6-semantic-inventory.json",
+    "git_blob": "db13680e3a8786faf5dec74c7f8792ace7c6fd5f",
+    "selected": 719,
+    "placed": 719,
+    "unplaced": 0,
+    "ratified": 0,
+    "role": "FROZEN-PRE-V7-ARCHIVE"
+  },
+  "current_v7_historical_lisp_selection": {
+    "previous_inventory": "knowledge/d10-v6-semantic-inventory.json",
+    "previous_inventory_git_blob": "db13680e3a8786faf5dec74c7f8792ace7c6fd5f",
+    "selected_added": 2,
+    "source_pins": [
+      {
+        "path": "knowledge/d10-clhs-streams-census-20261009.json",
+        "git_blob": "4c39efaf558dd654272a690e6a01c0ae1c1b262f",
+        "names": [
+          "GET-OUTPUT-STREAM-STRING",
+          "MAKE-CONCATENATED-STREAM"
+        ]
+      },
+      {
+        "path": "knowledge/d10-historical-lisp-branch-evidence-intake-20261011.json",
+        "git_blob": "615307670709d8428d9b74daafe8fe24b36960ea",
+        "names": [
+          "GET-OUTPUT-STREAM-STRING",
+          "MAKE-CONCATENATED-STREAM"
+        ]
+      },
+      {
+        "path": "tests/oracles/d10-clhs-streams.sbcl",
+        "git_blob": "0d20f305b8fbf0b614b897f5f07bafbe3c895f84",
+        "names": [
+          "GET-OUTPUT-STREAM-STRING",
+          "MAKE-CONCATENATED-STREAM"
+        ]
+      }
+    ],
+    "manifest": {
+      "path": "knowledge/d10-historical-lisp-streams-selected-v7-20261011.json",
+      "git_blob": "3588f1dd80726ad169b05a674078b95f57307e82"
+    },
+    "owner_review": "PENDING",
+    "lower_domain_semantic_dedup": "PENDING",
+    "independent_oracle": "PINNED-DONOR-NOT-RUN-FOR-SENS",
+    "coordinate_delta": 0,
+    "ratified_added": 0,
+    "added_names": [
+      "GET-OUTPUT-STREAM-STRING",
+      "MAKE-CONCATENATED-STREAM"
+    ]
   }
 }

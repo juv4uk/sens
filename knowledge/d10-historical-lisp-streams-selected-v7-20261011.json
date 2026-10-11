@@ -1,0 +1,123 @@
+{
+  "schema": "sens-d10-historical-lisp-streams-selected/v1",
+  "date": "2026-10-11",
+  "status": "RESEARCH-SELECTED-UNRATIFIED",
+  "purpose": "Append two source-reviewed historical Common Lisp stream laws atop v6 while preserving all prior rows and CLOS research candidates.",
+  "baseline": {
+    "path": "knowledge/d10-v6-semantic-inventory.json",
+    "git_blob": "db13680e3a8786faf5dec74c7f8792ace7c6fd5f",
+    "selected": 719,
+    "placed": 719,
+    "unplaced": 0,
+    "remaining": 305,
+    "ratified": 0
+  },
+  "historical_universe": {
+    "path": "knowledge/d10-historical-lisp-all-source-consolidation-20261011.json",
+    "source_sets": 25,
+    "distinct_unselected_names": 352,
+    "entries_with_law_positive_witness_and_falsifier": 63
+  },
+  "candidate_intake": {
+    "path": "knowledge/d10-historical-lisp-branch-evidence-intake-20261011.json",
+    "git_blob": "615307670709d8428d9b74daafe8fe24b36960ea"
+  },
+  "primary_source": {
+    "path": "knowledge/d10-clhs-streams-census-20261009.json",
+    "git_blob": "4c39efaf558dd654272a690e6a01c0ae1c1b262f"
+  },
+  "donor_oracle": {
+    "path": "tests/oracles/d10-clhs-streams.sbcl",
+    "git_blob": "0d20f305b8fbf0b614b897f5f07bafbe3c895f84",
+    "kind": "external ANSI Common Lisp/SBCL",
+    "coverage": [
+      "MAKE-SYNONYM-STREAM",
+      "GET-OUTPUT-STREAM-STRING",
+      "MAKE-CONCATENATED-STREAM"
+    ],
+    "execution": "PINNED-BUT-NOT-RUN-IN-THIS-CHANGE; no SENS runtime parity claimed"
+  },
+  "rules": {
+    "old_branch_coordinates_reused": 0,
+    "coordinates_added": 0,
+    "ratified_added": 0,
+    "lower_domain_semantic_dedup": "PENDING",
+    "core_vs_library_adjudication": "PENDING"
+  },
+  "candidates": [
+    {
+      "semantic_name": "GET-OUTPUT-STREAM-STRING",
+      "stable_id": "d10.historical.clhs.get-output-stream-string.20261011",
+      "proposal_id": "D10P-700006",
+      "surface_uk": "витягнути-текст-буфера-потоку",
+      "surface_ukr": "отримати-й-очистити-буфер-потоку",
+      "relation_class": "DESTRUCTIVE-OUTPUT-STREAM-DRAIN",
+      "behavior": "Return the accumulated characters of an open string-output stream and clear the pending output buffer; a second call without writes returns the empty string and does not close the stream.",
+      "positive_witnesses": [
+        "Write \"ab\"; the first extraction returns \"ab\".",
+        "A second extraction without writes returns \"\"; after writing \"c\", the next extraction returns \"c\"."
+      ],
+      "falsifier": "Returning \"ab\" a second time without new writes, or closing the stream as a side effect, violates the drain law.",
+      "provenance": [
+        "knowledge/d10-clhs-streams-census-20261009.json",
+        "knowledge/d10-historical-lisp-branch-evidence-intake-20261011.json",
+        "tests/oracles/d10-clhs-streams.sbcl",
+        "https://www.cs.cmu.edu/Groups/AI/util/html/hyperspec/HyperSpec/Body/fun_get-outpu_tream-string.html"
+      ],
+      "source_path": "knowledge/d10-clhs-streams-census-20261009.json",
+      "source_git_blob": "4c39efaf558dd654272a690e6a01c0ae1c1b262f",
+      "primary_source": "https://www.cs.cmu.edu/Groups/AI/util/html/hyperspec/HyperSpec/Body/fun_get-outpu_tream-string.html",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED-RESEARCH-REPLAY",
+      "lower_domain_semantic_dedup": "PENDING",
+      "owner_core_vs_library_review": "PENDING",
+      "independent_oracle": "EXTERNAL-SBCL-DONOR-FILE-PINNED-NOT-EXECUTED-FOR-SENS",
+      "ratified_resident": false,
+      "physical_t5_authorized": false
+    },
+    {
+      "semantic_name": "MAKE-CONCATENATED-STREAM",
+      "stable_id": "d10.historical.clhs.make-concatenated-stream.20261011",
+      "proposal_id": "D10P-700007",
+      "surface_uk": "створити-потік-конкатенації",
+      "surface_ukr": "читати-вхідні-потоки-послідовно",
+      "relation_class": "ORDERED-COMPOSITE-INPUT-STREAM",
+      "behavior": "Create a composite input stream that reads each child stream to EOF in sequence, reveals terminal EOF only after every child is exhausted, and advances child cursors as characters are consumed.",
+      "positive_witnesses": [
+        "Concatenating input streams containing \"ab\" and \"cd\" yields successive characters a, b, c, d.",
+        "If the first child is empty and the second contains \"x\", the first read yields x rather than an intermediate EOF."
+      ],
+      "falsifier": "Skipping unread characters, interleaving children, or exposing EOF before advancing to the next child violates the ordered-concatenation law.",
+      "provenance": [
+        "knowledge/d10-clhs-streams-census-20261009.json",
+        "knowledge/d10-historical-lisp-branch-evidence-intake-20261011.json",
+        "tests/oracles/d10-clhs-streams.sbcl",
+        "https://www.cs.cmu.edu/Groups/AI/util/html/hyperspec/HyperSpec/Body/fun_make-conc_nated-stream.html"
+      ],
+      "source_path": "knowledge/d10-clhs-streams-census-20261009.json",
+      "source_git_blob": "4c39efaf558dd654272a690e6a01c0ae1c1b262f",
+      "primary_source": "https://www.cs.cmu.edu/Groups/AI/util/html/hyperspec/HyperSpec/Body/fun_make-conc_nated-stream.html",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED-RESEARCH-REPLAY",
+      "lower_domain_semantic_dedup": "PENDING",
+      "owner_core_vs_library_review": "PENDING",
+      "independent_oracle": "EXTERNAL-SBCL-DONOR-FILE-PINNED-NOT-EXECUTED-FOR-SENS",
+      "ratified_resident": false,
+      "physical_t5_authorized": false
+    }
+  ],
+  "resulting": {
+    "selected": 721,
+    "capacity": 1024,
+    "placed": 719,
+    "unplaced": 2,
+    "remaining": 303,
+    "ratified": 0,
+    "coordinate_delta": 0,
+    "ratified_delta": 0
+  },
+  "held_back": [
+    "MAKE-SYNONYM-STREAM: HOLD until dynamic-binding/control ownership at D2 is adjudicated",
+    "Other historical candidates remain in source/HOLD queues pending independent law and D1-D9 derivability review."
+  ]
+}

@@ -27,7 +27,7 @@ def source_queue(knowledge, selected, proposed):
     donor = defaultdict(list)
     ignored = {"d10-v1-semantic-inventory.json", "d10-v2-semantic-inventory.json",
                "d10-current-inventory.json", "d10-selected-coordinate-allocation-v1.json",
-               "d10-v3-semantic-inventory.json", "d10-v4-semantic-inventory.json", "d10-v5-semantic-inventory.json", "d10-v6-semantic-inventory.json", "d10-fill-v1-state.json",
+               "d10-v3-semantic-inventory.json", "d10-v4-semantic-inventory.json", "d10-v5-semantic-inventory.json", "d10-v6-semantic-inventory.json", "d10-v7-semantic-inventory.json", "d10-fill-v1-state.json",
                "d10-growth-baseline-v1.json", "d10-selection-transition-history.json",
                "d10-selector-seed.json"}
     for p in sorted(knowledge.glob("d10-*.json")):
@@ -57,7 +57,9 @@ def source_queue(knowledge, selected, proposed):
 def audit(root):
     k = root / "knowledge"
     data = (k / "d10-v1-semantic-inventory.json").read_bytes()
-    current_bytes = (k / "d10-v6-semantic-inventory.json").read_bytes()
+    ptr0 = json.loads((k / "d10-current-inventory.json").read_text(encoding="utf-8"))
+    current_path = ptr0["canonical_current"]["path"]
+    current_bytes = (k / current_path).read_bytes()
     inv = json.loads(current_bytes)
     hist = json.loads((k / "d10-selection-transition-history.json").read_text())
     with (k / "d10-proposal-ledger.tsv").open(newline="", encoding="utf-8") as f:
@@ -95,7 +97,8 @@ def audit(root):
         v3raw = (k/"d10-v3-semantic-inventory.json").read_bytes()
         v4raw = (k/"d10-v4-semantic-inventory.json").read_bytes()
         v5raw = (k/"d10-v5-semantic-inventory.json").read_bytes()
-        v2, v3, v4, v5 = json.loads(v2raw), json.loads(v3raw), json.loads(v4raw), json.loads(v5raw)
+        v6raw = (k/"d10-v6-semantic-inventory.json").read_bytes()
+        v2, v3, v4, v5, v6 = json.loads(v2raw), json.loads(v3raw), json.loads(v4raw), json.loads(v5raw), json.loads(v6raw)
         archive = ptr["current_archival_candidate_selection"]
         donor_raw = (root/archive["source_path"]).read_bytes()
         historical = json.loads(donor_raw)
@@ -129,16 +132,19 @@ def audit(root):
         sources_good = sources_good and len(all_review_names)==9
         legacy_ok = (
             ptr["canonical_current"]["git_blob"] == sha(current_bytes)
-            and ptr["canonical_current"]["path"] == "knowledge/d10-v6-semantic-inventory.json"
+            and ptr["canonical_current"]["path"] == current_path
+            and ptr["historical_v6_research_inventory"]["path"] == "knowledge/d10-v6-semantic-inventory.json"
+            and ptr["historical_v6_research_inventory"]["git_blob"]==sha(v6raw)
             and ptr["historical_v4_research_inventory"]["git_blob"]==sha(v4raw)
             and ptr["historical_v5_research_inventory"]["git_blob"]==sha(v5raw)
             and ptr["historical_v3_research_inventory"]["git_blob"]==sha(v3raw)
             and ptr["historical_v2_coordinate_inventory"]["git_blob"]==sha(v2raw)
             and ptr["historical_selection"]["git_blob"]==sha(data)
             and archive["source_git_blob"]==sha(donor_raw)
-            and len(v2["rows"])==675 and len(v3["rows"])==698 and len(v4["rows"])==707 and len(v5["rows"])==715
-            and rows[:715]==v5["rows"]
-            and rows[:707]==v4["rows"]
+            and len(v2["rows"])==675 and len(v3["rows"])==698 and len(v4["rows"])==707 and len(v5["rows"])==715 and len(v6["rows"])==719
+            and len(rows)==721 and rows[:719]==v6["rows"]
+            and v6["rows"][:715]==v5["rows"]
+            and v5["rows"][:707]==v4["rows"]
             and v4["rows"][:698]==v3["rows"]
             and v3["rows"][:675]==v2["rows"]
             and len(added)==23
@@ -179,7 +185,7 @@ def audit(root):
                     v5_source_names.add(name.upper())
         v5_good=v5_good and len(v5_source_names)==8
         if sources_good and legacy_ok and v5_good:
-            research_allocated=len(rows)-256
+            research_allocated=len(placed)-256
             source_review_exceptions=all_review_names | v5_source_names
         else:
             errors.append("CURRENT-D10-RESEARCH-REVIEW-SHA-OR-LAW-DRIFT")
@@ -194,7 +200,7 @@ def audit(root):
     placement_full = len(placed) == capacity
     return {"schema": "d10-completion-readiness/v1",
             "inventory_blob": sha(current_bytes), "historical_inventory_blob": sha(data),
-            "current_inventory_path": "knowledge/d10-v6-semantic-inventory.json", "capacity": capacity,
+            "current_inventory_path": current_path, "capacity": capacity,
             "selected": len(rows), "remaining": capacity-len(rows),
             "placed": len(placed), "unplaced": len(rows)-len(placed),
             "ratified": ratified, "inventory_full": inventory_full,
@@ -208,7 +214,7 @@ def audit(root):
             "ready_to_start_d11": inventory_full and placement_full and ratified == capacity and not errors,
             "source_queue": source_queue(k, set(names), proposed),
             "blocking_errors": errors,
-            "caution": "719 research-selected meanings with coordinates, 305 remain. Four historical CLOS entries selected for research review only; none ratified."}
+            "caution": "721 research-selected meanings; 719 are placed and 2 historical Common Lisp stream laws are unplaced pending semantic dedup and Core-vs-library review. 303 positions remain; none ratified."}
 
 def main():
     p = argparse.ArgumentParser(description=__doc__)

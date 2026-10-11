@@ -17,14 +17,14 @@ class Readiness(unittest.TestCase):
         self.assertEqual(1024, r["selected"]+r["remaining"])
         self.assertFalse(r["ready_to_start_d11"])
 
-    def test_current_v6_has_every_selected_coordinate(self):
+    def test_current_v7_preserves_v6_and_leaves_stream_laws_unplaced(self):
         report = gate.audit(ROOT)
-        self.assertEqual(719, report["selected"])
+        self.assertEqual(721, report["selected"])
         self.assertEqual(719, report["placed"])
-        self.assertEqual(0, report["unplaced"])
+        self.assertEqual(2, report["unplaced"])
         self.assertEqual(463, report["research_gauge_allocated"])
         self.assertTrue(report["current_map_is_canonical_research"])
-        self.assertEqual(305, report["remaining"])
+        self.assertEqual(303, report["remaining"])
         self.assertEqual(0, report["ratified"])
         self.assertFalse(report["blocking_errors"])
 
