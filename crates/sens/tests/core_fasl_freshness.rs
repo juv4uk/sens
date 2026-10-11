@@ -66,3 +66,27 @@ fn poslidovni_pryviazky_d6_vykonuiutsia_i_ne_prykhovuiut_nevidome_imia() {
         "невідомий символ повинен завершуватися помилкою, а не прихованим допуском"
     );
 }
+
+
+#[test]
+fn core4_length_terminates_on_exact_d4_null_not_on_nonempty_atom_negation() {
+    // #5408: Observe the Lisp-owned source law through the real Core4
+    // bootstrap. A prior NOT(ATOM(values)) guard returned zero for every
+    // nonempty proper list, breaking the seven-field SI constant witness.
+    let mut session = sens::Session::default();
+    sens::load_core_library(&mut session).expect("exact current Core4 must load");
+    for (source, expected) in [
+        ("(length (001 ()))", "0"),
+        ("(length (001 (7)))", "1"),
+        ("(length (001 (7 6 5 4 3 2 1)))", "7"),
+    ] {
+        let expressions = sens::parse(source).expect("admitted exact D3 QUOTE fixture");
+        let outcome = sens::eval_parsed_expressions(&expressions, &mut session)
+            .unwrap_or_else(|err| panic!("Lisp-owned length failed for {source}: {err}"));
+        assert_eq!(
+            outcome.value.to_string(),
+            expected,
+            "D4 NULL must distinguish empty from nonempty proper lists: {source}"
+        );
+    }
+}
