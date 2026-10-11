@@ -1,4 +1,5 @@
 """Lossless historical 1495-name D10 source-catalog merge regressions."""
+import csv
 import json
 import sys
 import tempfile
@@ -69,6 +70,16 @@ class CatalogRestoreTests(unittest.TestCase):
         self.assertIn("RESTORED_FROM_1495_NAME_FROZEN_INTAKE",
                       json.loads(result["beta"]["historical_status_claims"]))
         self.assertEqual("0", result["beta"]["ratified"])
+
+    def test_new_catalog_rfc_tsv_quoting_is_accepted(self):
+        with self.current.open("w", encoding="utf-8", newline="") as stream:
+            writer = csv.DictWriter(stream, fieldnames=merge.INDEX_FIELDS,
+                                    delimiter="\t", lineterminator="\n")
+            writer.writeheader()
+            writer.writerows(self.current_rows)
+        report = merge.merge_catalog(self.root, self.old, self.current, self.output)
+        self.assertEqual(4, report["full_union_names"])
+        self.assertEqual(2, report["restored_old_only_names"])
 
     def test_historical_blob_tampering_fails(self):
         self.old.write_text(self.old.read_text() + "\n")
