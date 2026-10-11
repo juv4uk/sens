@@ -78,6 +78,22 @@ fn likhtar_macro_expands_without_unadmitted_d6_let_dispatch() {
 }
 
 #[test]
+fn private_derived_length_counts_empty_and_nonempty_lists() {
+    let mut session = Session::default();
+    sens::eval_pinned_legacy_core_source("lib/core.lisp", SOURCE, &mut session)
+        .expect("typed core bootstrap");
+    for (form, expected) in [
+        ("(внутрішня-довжина (001 ()))", "0"),
+        ("(внутрішня-довжина (001 (a)))", "1"),
+        ("(внутрішня-довжина (001 (a b)))", "2"),
+    ] {
+        let outcome = eval_program(form, &mut session)
+            .unwrap_or_else(|e| panic!("derived LENGTH {form}: {e:?}"));
+        assert_eq!(outcome.value.to_string(), expected);
+    }
+}
+
+#[test]
 fn derived_map_preserves_macro_binding_parameter_and_value_lists() {
     let mut session = Session::default();
     sens::eval_pinned_legacy_core_source("lib/core.lisp", SOURCE, &mut session)
