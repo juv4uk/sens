@@ -17,6 +17,10 @@ use crate::{
     Bit1, Bit2, Bit3, Bit4, Bit5, Bit6, Bit7, Bit8, Bit9,
 };
 
+#[path = "frame3_v2.rs"]
+mod v2;
+pub use v2::{decode_v2, encode_v2, Frame3V2Decoder};
+
 const MAGIC: [u8; 3] = [b'S', b'3', 1];
 const RAW: u8 = 0;
 const REPEAT: u8 = 1;

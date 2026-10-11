@@ -11,12 +11,12 @@
 //! or a semantic validity oracle for executable D3 applications.
 
 use super::{
-    bits_to_bytes, bytes_to_words, get_varint, new_word, physical_crc32,
+    bits_to_bytes, bytes_to_words, get_varint, physical_crc32,
     put_varint, varint_len, Frame3Error, MAX_BLOCK_WORDS, MAX_FILE_BYTES,
     MAX_WORDS, RAW, REPEAT,
 };
 use crate::frame3_grammar::{
-    count_inner, decode_body_at_known_length, rank_binary_source_words,
+    count_inner, rank_binary_source_words,
     unrank_binary_source_words, GrammarRankError, MAX_INNER_BITS,
 };
 use crate::{parse_canonical_word_sequence, BinarySourceWord};
