@@ -54,7 +54,7 @@
     },
     {
       "origin_branch": "agent/chatgpt/4349-structural-effect",
-      "origin_commit": "a084021e31dd548fe6055d374fc468a",
+      "origin_commit": "a084021e31dd548fe6055d374bb94846345accae",
       "original_path": "lib/machine/effects/structural.lisp",
       "original_blob_sha": "88e8db2067c21b92aff09fa302e780295798819c",
       "archive_path": "research/domain-archive/20261011/alltime-branch-recovery/cohort-033-040/blobs/88e8db2067c21b92aff09fa302e780295798819c/lib__machine__effects__structural.lisp.source.txt",
