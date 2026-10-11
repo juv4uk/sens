@@ -101,25 +101,18 @@ fn equal_rendering_does_not_collapse_binary_and_legacy_number_carriers() {
     );
     assert_ne!(binary, legacy, "presentation equality must not erase carrier identity");
 
-    let distinct = eval_program("(equal? #b1001000 #d72)", &mut session)
-        .expect("EQUAL compares distinct carriers without coercion")
-        .value;
-    assert_eq!(
-        distinct,
-        Value::DomainIdentity(DomainIdentity::D1(PredicateBit::from_word(
-            Bit1::new(0).unwrap()
-        )))
-    );
-
-    let same = eval_program("(equal? #d72 #d72)", &mut session)
-        .expect("EQUAL accepts identical mechanical Number carriers")
-        .value;
-    assert_eq!(
-        same,
-        Value::DomainIdentity(DomainIdentity::D1(PredicateBit::from_word(
-            Bit1::new(1).unwrap()
-        )))
-    );
+    // Equality of runtime carriers is not a surface/callability grant.
+    // Existing Core does NOT admit the legacy EQUAL? dispatch code here.
+    assert_eq!(binary, binary.clone());
+    assert_eq!(legacy, legacy.clone());
+    for source in [
+        "(equal? #b1001000 #d72)",
+        "(equal? #d72 #d72)",
+    ] {
+        let err = eval_program(source, &mut session)
+            .expect_err("unadmitted EQUAL? callable must fail closed");
+        assert_eq!(err.kind, sens::ErrorKind::Type);
+    }
 }
 
 #[test]
