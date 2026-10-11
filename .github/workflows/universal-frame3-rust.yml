@@ -4,6 +4,8 @@ on:
     paths:
       - 'crates/sens/src/universal_frame3.rs'
       - 'crates/sens/src/frame3_v2.rs'
+      - 'crates/sens/examples/frame3_f3_bench.rs'
+      - 'crates/sens/examples/frame3_v3_bench.rs'
       - 'crates/sens/examples/frame3_v2_bench.rs'
       - 'crates/sens/examples/frame3_v2_paired_bench.rs'
       - 'crates/sens/src/lib.rs'
@@ -19,6 +21,8 @@ on:
     paths:
       - 'crates/sens/src/universal_frame3.rs'
       - 'crates/sens/src/frame3_v2.rs'
+      - 'crates/sens/examples/frame3_f3_bench.rs'
+      - 'crates/sens/examples/frame3_v3_bench.rs'
       - 'crates/sens/examples/frame3_v2_bench.rs'
       - 'crates/sens/examples/frame3_v2_paired_bench.rs'
       - 'crates/sens/src/lib.rs'
