@@ -36,7 +36,7 @@ class RealBatchTest(unittest.TestCase):
             *(["--write"] if write else []),
         ], text=True, capture_output=True)
 
-    def test_compiler_ukrainian_define_heads_bind_global_calls_before_t5(self):
+    def test_compiler_migration_fails_closed_on_unratified_quoted_symbol_data(self):
         source = REPO / "lib" / "compiler-nucleus.lisp"
         before = source.read_bytes()
         output = self.base / "compiler-nucleus-candidate"
@@ -45,20 +45,16 @@ class RealBatchTest(unittest.TestCase):
             sys.executable, str(REPO / "scripts" / "migrate-three-pass.py"),
             str(source), "--out", str(output), "--report", str(report_path),
         ], cwd=REPO, text=True, capture_output=True)
-        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        self.assertEqual(result.returncode, 2, result.stdout + result.stderr)
         report = json.loads(report_path.read_text(encoding="utf-8"))
         self.assertEqual(report["summary"]["files_seen"], 1)
-        self.assertEqual(report["summary"]["files_written"], 1)
-        self.assertEqual(report["summary"]["files_blocked"], 0)
-        passes = report["files"][0]["passes"]
-        self.assertGreater(passes["pass4-text7-global"], 0)
-        self.assertEqual(passes["passthrough-head"], 0)
-        physical = output / "compiler-nucleus.sens"
-        self.assertTrue(physical.is_file())
-        sys.path.insert(0, str(REPO / "scripts"))
-        from sens_t5_codec import decode_bytes, encode_words
-        words = decode_bytes(physical.read_bytes())
-        self.assertEqual(encode_words(words), physical.read_bytes())
+        self.assertEqual(report["summary"]["files_written"], 0)
+        self.assertEqual(report["summary"]["files_blocked"], 1)
+        self.assertIn(
+            "quoted symbol datum has no ratified D2/D7 binary representation",
+            report["files"][0]["reason"],
+        )
+        self.assertFalse((output / "compiler-nucleus.sens").exists())
         self.assertEqual(source.read_bytes(), before, "migration must keep canonical source byte-exact")
 
     def test_audited_d9_sid8_maps_to_exact_d9_without_reusing_legacy_bits(self):

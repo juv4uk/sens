@@ -45,7 +45,7 @@ jobs:
         with:
           python-version: "3.11"
 
-      - name: Regression test compiler source admits all scoped identifiers
+      - name: Regression test compiler migration fails closed on unratified symbol data
         run: >-
           python3 tests/test_migrate_t5_batch.py
           RealBatchTest.test_compiler_ukrainian_define_heads_bind_global_calls_before_t5

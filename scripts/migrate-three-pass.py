@@ -702,10 +702,14 @@ def encode_atom_data(node: Atom,text7,lexical_env=(),quoted=False):
     if t in D1_UK_SURFACES:
         return [D1_UK_SURFACES[t]]
     if quoted:
-        # Quoted Lisp symbols are data, so frame them as Text7 identifiers.
-        # This does not make a spelling callable: unresolved live heads still
-        # pass through to the exact-word gate and are rejected there.
-        return encode_text7_identifier(t,text7,node.tok)
+        # The current canonical D2/D7 contract does not ratify a reversible
+        # symbol-datum representation. A D2-framed Text7 identifier is NOT
+        # interchangeable with a quoted Value::Symbol: fail closed instead
+        # of guessing that ordinary symbol data is a binder/call-head frame.
+        raise MigrationError(
+            "quoted symbol datum has no ratified D2/D7 binary representation",
+            node.tok,
+        )
     return [t]
 
 
