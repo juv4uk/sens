@@ -54,9 +54,8 @@
 
 (110
   ((11110111 pab-observed pab-expected)
-   (1)
    (001 (core4-predicate-answer-boundary-ok)))
-  ((11110111 1 1) 1
+  ((010 (001 ()))
    (1110 (001 core4-predicate-answer-boundary-mismatch)
          pab-expected
          pab-observed)))
