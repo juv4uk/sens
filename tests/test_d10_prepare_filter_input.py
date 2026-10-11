@@ -61,10 +61,10 @@ class PrepareTests(unittest.TestCase):
 
     def test_batch_name_index_matches_legacy_locators(self):
         cases = (
-            (False, '{"semantic_name": "A"}\\n{"semantic_name": "B"}\\n'
-                    '{"semantic_name": "A"}\\n', ("A", "B", "MISSING")),
-            (True, "semantic_name\\tkind\\nA\\tone\\nB\\ttwo\\n"
-                   "BAD-LINE\\nA\\tthree\\n", ("A", "B", "BAD-LINE", "MISSING")),
+            (False, '{"semantic_name": "A"}\n{"semantic_name": "B"}\n'
+                    '{"semantic_name": "A"}\n', ("A", "B", "MISSING")),
+            (True, "semantic_name\tkind\nA\tone\nB\ttwo\n"
+                   "BAD-LINE\nA\tthree\n", ("A", "B", "BAD-LINE", "MISSING")),
         )
         for is_tsv, source, names in cases:
             with self.subTest(is_tsv=is_tsv):
@@ -72,8 +72,8 @@ class PrepareTests(unittest.TestCase):
                 for name in names:
                     self.assertEqual(adapter.find_name_line(source, name, is_tsv),
                                      indexed.get(name.casefold()))
-        many = ("semantic_name\\tvalue\\n" +
-                "".join(f"NAME-{n}\\t{n}\\n" for n in range(1000)))
+        many = ("semantic_name\tvalue\n" +
+                "".join(f"NAME-{n}\t{n}\n" for n in range(1000)))
         index = adapter.index_name_lines(many, True)
         self.assertEqual(len(index), 1000)
         self.assertEqual(index["name-999"], 1001)
