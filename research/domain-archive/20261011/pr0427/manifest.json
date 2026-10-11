@@ -1,0 +1,52 @@
+{
+  "schema": "sens-historical-branch-archive/v1",
+  "archived_at": "2026-10-11",
+  "source": {
+    "repo": "juv4uk/sens",
+    "pr": 427,
+    "title": "#383: classify knowledge artifacts by provenance and scope",
+    "branch": "feat/383-knowledge-authority-classification",
+    "head_sha": "96b7f6a0b963c65752bcff6654aa1bc847bfa8ba",
+    "base": "main",
+    "base_sha": "42e3945c5e8f27902ade6fedf52f54786c56f914",
+    "reason": "Old governance registry/checker in my-lisp-era paths. Current main authority map already states knowledge/ is not a separate semantic authority tier, but the proposed inventory/checker paths are not in current main and need a current-SENS design before CI activation."
+  },
+  "files": [
+    {
+      "original_path": ".github/workflows/ci.yml",
+      "archived_path": "research/domain-archive/20261011/pr0427/source/.github/workflows/ci.yml",
+      "git_blob_sha": "c1eb928fe3293f11500ec245b9e3792aa6ab5682",
+      "bytes": 16772
+    },
+    {
+      "original_path": "docs/semantic-authority-map.md",
+      "archived_path": "research/domain-archive/20261011/pr0427/source/docs/semantic-authority-map.md",
+      "git_blob_sha": "115ffac054c8f7e801f6d92b28b07e52ddc59b75",
+      "bytes": 8001
+    },
+    {
+      "original_path": "knowledge/knowledge-authority-inventory.lisp",
+      "archived_path": "research/domain-archive/20261011/pr0427/source/knowledge/knowledge-authority-inventory.lisp",
+      "git_blob_sha": "b3cf03e9def713f7a1341140ed48fa112cef0667",
+      "bytes": 6163
+    },
+    {
+      "original_path": "knowledge/repo-tooling-inventory.lisp",
+      "archived_path": "research/domain-archive/20261011/pr0427/source/knowledge/repo-tooling-inventory.lisp",
+      "git_blob_sha": "f5dc5486fc445f03634b96e40b59bf22614f0aa3",
+      "bytes": 12956
+    },
+    {
+      "original_path": "scripts/check-knowledge-authority.lisp",
+      "archived_path": "research/domain-archive/20261011/pr0427/source/scripts/check-knowledge-authority.lisp",
+      "git_blob_sha": "b71890932bb271f5a50556a396a4c90604e20341",
+      "bytes": 23569
+    }
+  ],
+  "disposition": "ARCHIVE-ONLY / OWNER-REVIEW-NEEDED / DO NOT MERGE STALE WORKFLOW OR CRATE PATHS",
+  "current_main_check": {
+    "inventory_present": false,
+    "checker_present": false,
+    "authority_map_has_knowledge_not_authority": true
+  }
+}
