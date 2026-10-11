@@ -1,18 +1,12 @@
 #!/usr/bin/env python3
-"""#2422 exact D6 closure map after owner ratification of the domain.
+"""Frozen PRE-OD006 sparse D6 selector-closure experiment (#2422).
 
-The D6 domain is ratified. Occupancy is not.
+This executable preserves the old 16-generated + 48-UNKNOWN research model.
+It is NOT current occupancy or coordinate authority after owner ratification
+#3393 / Contract 11.8. Current authority is knowledge/d6-ratified.json.
 
-This script classifies D6 conservatively:
-- selector-law closure is generated evidence inside the ratified domain;
-- every other coordinate remains UNKNOWN/free;
-- no non-selector resident is pre-placed by this map.
-
-Hardening:
-- cross-check generated coordinates against merged #2329;
-- replay #2345 selector certificates for every generated D6 row;
-- consume #2304/#2385 selector semantic-fact accounting without treating
-  UNKNOWN as zero.
+Only the historical frontier experiments may import this snapshot. The active
+current map lives in benchmarks/d6-closure-map/run.py.
 """
 
 from __future__ import annotations
@@ -28,8 +22,8 @@ from typing import Any
 
 WIDTH = 6
 ROOTS = {
-    "100": {"root_name": "CAR", "root_choice": 0, "selector_letter": "A"},
-    "011": {"root_name": "CDR", "root_choice": 1, "selector_letter": "D"},
+    "101": {"root_name": "CAR", "root_choice": 0, "selector_letter": "A"},
+    "110": {"root_name": "CDR", "root_choice": 1, "selector_letter": "D"},
 }
 LAW_BITS = {
     "0": {"law_id": "sel.law.extend-a", "display": "compose-first-projection", "letter": "A"},
@@ -42,11 +36,14 @@ LEDGER = REPO / "benchmarks/generator-economy/semantic-fact-ledger.json"
 
 
 def load_forecast_words() -> set[str]:
-    namespace = runpy.run_path(str(FORECAST))
-    selector_words = namespace["selector_words"]
-    words = set(selector_words(WIDTH))
+    """Return the pre-OD006 donor set only; never compare it to current #2329."""
+    words = {
+        root + "".join(suffix)
+        for root in ("101", "110")
+        for suffix in product("01", repeat=WIDTH - 3)
+    }
     if len(words) != 16:
-        raise AssertionError(f"#2329 forecast expected 16 D6 selectors, got {len(words)}")
+        raise AssertionError(f"historical PRE-OD006 selector set expected 16 words, got {len(words)}")
     return words
 
 
@@ -59,27 +56,6 @@ def load_selector_fact_interval() -> list[int]:
     if interval != [0, 5]:
         raise AssertionError(f"selector ledger interval drifted: {interval}")
     return interval
-
-
-def load_ratified_residents() -> dict[str, str]:
-    """Load the current owner-ratified D6 coordinate map, not the old OD-006 table."""
-    path = REPO / "knowledge" / "d6-ratified.json"
-    data = json.loads(path.read_text(encoding="utf-8"))
-    if data.get("schema") != "d6-ratified/v1":
-        raise AssertionError("current D6 authority schema mismatch")
-    if data.get("status") != "owner-ratified" or data.get("authority") != "#3393":
-        raise AssertionError("current D6 map is not the #3393 owner-ratified authority")
-    if data.get("width") != WIDTH or data.get("capacity") != 64:
-        raise AssertionError("current D6 map has the wrong exact domain")
-    if data.get("occupancy") != 64 or data.get("distinct_residents") != 64:
-        raise AssertionError("current D6 map must remain dense 64/64")
-    residents = data.get("residents")
-    expected = {format(n, "06b") for n in range(1 << WIDTH)}
-    if not isinstance(residents, dict) or set(residents) != expected:
-        raise AssertionError("current D6 resident coordinates must be exactly 000000..111111")
-    if len(set(residents.values())) != 64:
-        raise AssertionError("current D6 resident projections must be unique")
-    return {str(coordinate): str(name) for coordinate, name in residents.items()}
 
 
 def encode_certificate(root_choice: int, suffix: str) -> dict[str, Any]:
@@ -115,7 +91,7 @@ def decode_certificate(cert: dict[str, Any]) -> str:
         raise ValueError("certificate encoded depth mismatch")
     root_choice = (payload >> (depth + 3)) & 1
     path = payload & ((1 << depth) - 1 if depth else 0)
-    root = "100" if root_choice == 0 else "011"
+    root = "101" if root_choice == 0 else "110"
     suffix = format(path, f"0{depth}b") if depth else ""
     return root + suffix
 
@@ -159,8 +135,8 @@ def selector_rows() -> dict[str, dict[str, Any]]:
                 "certificate": cert,
                 "certificate_replay_ok": True,
                 "collision": False,
-                "core_closure": True,
-                "semantic_member_of_ratified_domain": True,
+                "core_closure": False,
+                "semantic_member_of_ratified_domain": False,
                 "manual_resident_required": False,
                 "placement_ref": "",
                 "research_overlay_refs": [],
@@ -173,40 +149,26 @@ def build_map() -> list[dict[str, Any]]:
     forecast_words = load_forecast_words()
     if set(generated) != forecast_words:
         raise AssertionError(
-            "Current D6 selector closure disagrees with #2329 forecast: "
+            "D6 closure disagrees with merged #2329 forecast: "
             f"local-only={sorted(set(generated)-forecast_words)} "
             f"forecast-only={sorted(forecast_words-set(generated))}"
         )
-
-    residents = load_ratified_residents()
-    for coordinate, row in generated.items():
-        if residents.get(coordinate) != row["display_name"]:
-            raise AssertionError(
-                f"selector proof disagrees with owner-ratified #3393 resident "
-                f"at {coordinate}: generated={row['display_name']!r}, "
-                f"ratified={residents.get(coordinate)!r}"
-            )
 
     rows: list[dict[str, Any]] = []
     for n in range(1 << WIDTH):
         coordinate = format(n, f"0{WIDTH}b")
         if coordinate in generated:
-            row = dict(generated[coordinate])
-            row["resident"] = residents[coordinate]
-            row["resident_authority"] = "#3393"
-            row["semantic_member_of_ratified_domain"] = True
+            row = generated[coordinate]
         else:
             row = {
                 "coordinate": coordinate,
                 "width": WIDTH,
                 "domain": "D6",
                 "domain_ratified": True,
-                "resident": residents[coordinate],
-                "resident_authority": "#3393",
-                "display_name": residents[coordinate],
+                "display_name": "",
                 "display_name_authority": False,
-                "semantic_family": "owner-ratified-other-resident",
-                "status": "owner-ratified-other-resident",
+                "semantic_family": "",
+                "status": "UNKNOWN/free",
                 "root_basis": "",
                 "root_name": "",
                 "law_path": [],
@@ -221,40 +183,32 @@ def build_map() -> list[dict[str, Any]]:
                 "certificate_replay_ok": False,
                 "collision": False,
                 "core_closure": False,
-                "semantic_member_of_ratified_domain": True,
+                "semantic_member_of_ratified_domain": False,
                 "manual_resident_required": False,
                 "placement_ref": "",
                 "research_overlay_refs": [],
             }
         rows.append(row)
 
-    if len(rows) != 64 or {r["coordinate"] for r in rows} != {
-        format(n, "06b") for n in range(64)
-    }:
-        raise AssertionError("current D6 map must cover each exact coordinate once")
-    if len({r["resident"] for r in rows}) != 64:
-        raise AssertionError("current D6 map must preserve 64 distinct residents")
+    if len(rows) != 64 or len({r["coordinate"] for r in rows}) != 64:
+        raise AssertionError("D6 map must contain every exact coordinate exactly once")
     if sum(r["status"] == "generated" for r in rows) != 16:
-        raise AssertionError("current selector-law closure must contain 16 coordinates")
-    if sum(r["status"] == "owner-ratified-other-resident" for r in rows) != 48:
-        raise AssertionError("the other 48 coordinates must remain owner-ratified residents")
-    if sum(r["status"] == "UNKNOWN/free" for r in rows) != 0:
-        raise AssertionError("current owner-ratified D6 has no UNKNOWN/free coordinates")
-    if not all(r["semantic_member_of_ratified_domain"] for r in rows):
-        raise AssertionError("all current D6 coordinates must be ratified members")
+        raise AssertionError("D6 selector closure must contain exactly 16 generated coordinates")
+    if sum(r["status"] == "UNKNOWN/free" for r in rows) != 48:
+        raise AssertionError("D6 must conservatively retain exactly 48 UNKNOWN/free coordinates")
     if any(r["collision"] for r in rows):
         raise AssertionError("D6 closure collision detected")
+    if sum(bool(r["semantic_member_of_ratified_domain"]) for r in rows) != 0:
+        raise AssertionError("pre-OD006 generated candidates must not claim current D6 membership")
     if any(r["manual_resident_required"] for r in rows):
-        raise AssertionError("current D6 map must not invent manual placements")
+        raise AssertionError("selector generation must not become manual occupancy")
     if any(r["placement_ref"] for r in rows):
-        raise AssertionError("current residency comes from #3393, not research placement refs")
+        raise AssertionError("non-selector capability must not be pre-placed by closure map")
     return rows
 
 
 def accounting(rows: list[dict[str, Any]]) -> dict[str, Any]:
     generated = sum(r["status"] == "generated" for r in rows)
-    other_residents = sum(r["status"] == "owner-ratified-other-resident" for r in rows)
-    unknown_free = sum(r["status"] == "UNKNOWN/free" for r in rows)
     depth = WIDTH - 3
     flat_each = WIDTH
     self_framed_each = 4 + depth
@@ -270,11 +224,8 @@ def accounting(rows: list[dict[str, Any]]) -> dict[str, Any]:
 
     return {
         "domain_ratified": True,
-        "current_residency_authority": "knowledge/d6-ratified.json (#3393)",
-        "current_resident_count": len(rows),
         "generated_coordinate_count": generated,
-        "other_owner_ratified_resident_count": other_residents,
-        "unknown_free_count": unknown_free,
+        "unknown_free_count": 64 - generated,
         "flat_exact_coordinate": totals(flat_each),
         "self_framed_selector_certificate": totals(self_framed_each),
         "outer_framed_certificate_payload": totals(outer_framed_each),
@@ -282,8 +233,8 @@ def accounting(rows: list[dict[str, Any]]) -> dict[str, Any]:
         "shared_basis_semantic_fact_interval": load_selector_fact_interval(),
         "new_d6_generated_rows_charged_as_independent_facts": 0,
         "semantic_accounting_note": (
-            "The 16 selectors are a derived subfamily within the already "
-            "owner-ratified 64/64 D6 map; this proof creates no new residents."
+            "D6 descendants are derived in the declared selector root+law model; "
+            "the shared basis itself remains independence-UNKNOWN within [0,5]."
         ),
         "no_scalar_winner": True,
     }
@@ -291,31 +242,26 @@ def accounting(rows: list[dict[str, Any]]) -> dict[str, Any]:
 
 def report(rows: list[dict[str, Any]], acct: dict[str, Any]) -> str:
     generated = [r for r in rows if r["status"] == "generated"]
-    other = [r for r in rows if r["status"] == "owner-ratified-other-resident"]
     unknown = [r for r in rows if r["status"] == "UNKNOWN/free"]
     lines = [
-        "# D6 selector closure against current owner-ratified map — #3393",
+        "# D6 closure map — #2422",
         "",
-        "Current authority: D6 is owner-ratified dense 64/64 under #3393 / Contract 11.8.",
-        "This report separates 16 selector-law-derived rows from the other 48 residents;",
-        "neither category changes the existing ratified coordinate map.",
+        "STATUS: historical PRE-OD006 sparse model only; current D6 occupancy is ratified 64/64 by #3393.",
         "",
         "| class | count |",
         "|---|---:|",
         f"| exact D6 coordinates | {len(rows)} |",
-        f"| selector-law generated (current resident) | {len(generated)} |",
-        f"| other owner-ratified residents | {len(other)} |",
-        f"| UNKNOWN/free coordinates | {len(unknown)} |",
+        f"| selector-law generated | {len(generated)} |",
+        f"| UNKNOWN/free | {len(unknown)} |",
         f"| collisions | {sum(bool(r['collision']) for r in rows)} |",
         f"| semantic members of ratified D6 | {sum(bool(r['semantic_member_of_ratified_domain']) for r in rows)} |",
         "",
         "Cross-checks:",
-        "- generated selector set equals the current #2329 D6 forecast (roots 011 and 100);",
-        "- generated names/coordinates match knowledge/d6-ratified.json under #3393;",
+        "- old roots 101/110 are replayed only as historical donor coordinates; not compared with current #2329;",
         "- every generated row replays through #2345 selector certificate encoding;",
-        "- the other 48 coordinates keep their existing #3393 residents; none are marked free.",
+        "- semantic selector composition (#2158) is separated from canonical bit realization (#2366).",
         "",
-        "Proof/storage accounting for the derived 16-selector subfamily:",
+        "Proof/storage accounting:",
         f"- flat exact identities: {acct['flat_exact_coordinate']['bits_total']} bits / "
         f"{acct['flat_exact_coordinate']['bytes_ceil_total']} bytes;",
         f"- self-framed certificates: {acct['self_framed_selector_certificate']['bits_total']} bits / "
@@ -324,14 +270,15 @@ def report(rows: list[dict[str, Any]], acct: dict[str, Any]) -> str:
         f"{acct['outer_framed_certificate_payload']['bytes_ceil_total']} bytes;",
         f"- shared selector semantic-fact basis interval: "
         f"{acct['shared_basis_semantic_fact_interval']} from #2304/#2385;",
-        "- generated D6 selector rows add zero independent per-coordinate facts.",
+        "- generated D6 rows add zero independent per-coordinate facts in that declared root+law model.",
         "",
         "NON-CONCLUSIONS:",
-        "- selector derivation does not create or move an owner-ratified resident;",
-        "- current D6 has no UNKNOWN/free coordinate under #3393;",
+        "- UNKNOWN/free is not residue and not an allocation invitation;",
         "- certificate storage is not semantic compression;",
         "- the [0,5] basis interval does not claim global selector minimality;",
-        "- ratified residency does not imply runtime callability.",
+        "- Core-Math hypotheses cannot change Core closure status;",
+        "- PRE-OD006 UNKNOWN/free labels are not current D6 vacancies or membership claims;",
+        "- binding-policy 0011xx remains overlay-only pending separate residency evidence.",
         "",
     ]
     return "\n".join(lines)
@@ -340,28 +287,30 @@ def report(rows: list[dict[str, Any]], acct: dict[str, Any]) -> str:
 def write_outputs(out: Path, rows: list[dict[str, Any]], acct: dict[str, Any]) -> None:
     out.mkdir(parents=True, exist_ok=True)
     payload = {
-        "schema": "d6-closure-map/v4",
-        "authority": "current-owner-ratified-d6-with-selector-closure",
+        "schema": "d6-closure-map/pre-od006-v1",
+        "authority": "historical-pre-OD006-snapshot-only",
         "domain": "D6",
         "domain_ratified": True,
-        "current_occupancy_authority": "knowledge/d6-ratified.json (#3393)",
+        "current_occupancy_authority": False,
+        "superseded_by": "#3393 / Contract 11.8",
         "width": WIDTH,
         "capacity": 1 << WIDTH,
         "provenance": {
-            "owner_domain_ratification": "#3393 / Contract 11.8",
-            "ratified_map": "knowledge/d6-ratified.json",
+            "core_authority": "#2410",
+            "owner_domain_ratification": "#2414/#2490",
             "ratified_selector_law": "#2158",
-            "current_forecast": "#2322/#2329",
+            "forecast": "historical donor roots 101/110; current #2329 intentionally not used",
             "generation_certificates": "#2323/#2345",
+            "anti_numerology": "#2366",
             "semantic_fact_ledger": "#2304/#2385",
-            "historical_sparse_frontier": "benchmarks/d6-unknown-frontier/pre-od006-closure.py (PRE-OD006 only)",
+            "closeout_parent": "#2414",
         },
-        "core_math_overlay_policy": "separate overlay only; never mutates Core residency",
+        "core_math_overlay_policy": "separate historical overlay only; never mutates current #3393 residency",
         "counts": {
-            "generated_selectors": 16,
-            "other_owner_ratified_residents": 48,
-            "unknown_free": 0,
-            "resident_count": 64,
+            "generated": 16,
+            "ratified-root": 0,
+            "ratified-residue": 0,
+            "UNKNOWN/free": 48,
             "collisions": 0,
         },
         "accounting": acct,
@@ -372,13 +321,13 @@ def write_outputs(out: Path, rows: list[dict[str, Any]], acct: dict[str, Any]) -
     )
 
     fields = [
-        "coordinate", "width", "domain", "domain_ratified", "resident", "resident_authority",
-        "display_name", "semantic_family", "status", "root_basis", "root_name", "law_path",
-        "canonical_coordinate_path_bits", "semantic_law", "semantic_law_authority",
-        "coordinate_realization", "coordinate_realization_authority", "certificate_ref",
+        "coordinate", "width", "domain", "domain_ratified", "display_name", "semantic_family", "status",
+        "root_basis", "root_name", "law_path", "canonical_coordinate_path_bits",
+        "semantic_law", "semantic_law_authority", "coordinate_realization",
+        "coordinate_realization_authority", "certificate_ref",
         "certificate_replay_ok", "collision", "core_closure",
-        "semantic_member_of_ratified_domain", "manual_resident_required", "placement_ref",
-        "research_overlay_refs",
+        "semantic_member_of_ratified_domain", "manual_resident_required",
+        "placement_ref", "research_overlay_refs",
     ]
     with (out / "d6-closure-map.tsv").open("w", newline="", encoding="utf-8") as fh:
         writer = csv.DictWriter(fh, fieldnames=fields, delimiter="\t", lineterminator="\n")
@@ -396,8 +345,6 @@ def write_outputs(out: Path, rows: list[dict[str, Any]], acct: dict[str, Any]) -
         json.dumps(acct, indent=2, sort_keys=True) + "\n", encoding="utf-8"
     )
     (out / "report.md").write_text(report(rows, acct), encoding="utf-8")
-
-
 
 
 def main() -> int:
