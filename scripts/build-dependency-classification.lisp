@@ -52,8 +52,8 @@
 ; ---------------------------------------------------------------------
 
 ; crates/my-lisp/src/eval/mod.rs evaluate_list's own match arms
-(00001001 core-special-forms
-  (00000001 (quote lambda def defmacro cond print princ write-to-string read
+(0011 core-special-forms
+  (001 (quote lambda def defmacro cond print princ write-to-string read
           eval string-append string<? read-all string? symbol->string
           string->symbol string-first string-rest sha256-hex json-parse)))
 
@@ -62,8 +62,8 @@
 ; timezone-detect intentionally do not appear here: they are defined by
 ; lib/time.lisp. The retained host-facing time operations expose observations
 ; only: mono-ns, unix-time-now, ntp-query-raw, timezone-declarations-raw.
-(00001001 core-builtins
-  (00000001 (* + - / < = > abs atom car cdr cons env eq f32 f32-buffer i32
+(0011 core-builtins
+  (001 (* + - / < = > abs atom car cdr cons env eq f32 f32-buffer i32
           i32-buffer make-vector max max-list min min-list mono-ns
           ntp-query-raw numeric-buffer-length numeric-buffer-map
           numeric-buffer-ref numeric-buffer-type numeric-buffer? string-slice
@@ -71,15 +71,15 @@
           vector-set!)))
 
 ; crates/my-lisp-host/src/lib.rs register_capability calls
-(00001001 host-capabilities
-  (00000001 (load process-run read-dir read-file read-file-bytes tcp-accept
+(0011 host-capabilities
+  (001 (load process-run read-dir read-file read-file-bytes tcp-accept
           tcp-close tcp-connect tcp-listen tcp-read tcp-write write-file
           write-file-bytes)))
 
 ; the string/reader-flavored subset of the two tables above, called out
 ; as its own bucket per the task description ("strings/reader")
-(00001001 strings-reader-subset
-  (00000001 (write-to-string read read-all string-append string<? string?
+(0011 strings-reader-subset
+  (001 (write-to-string read read-all string-append string<? string?
           symbol->string string->symbol string-first string-rest
           string-slice string-contains? string-empty? string-length
           string-prefix? digit->string number->string number->string-onto)))
@@ -88,39 +88,39 @@
 ; Generated tables: read the real library sources, don't hand-copy them
 ; ---------------------------------------------------------------------
 
-(00001001 top-level-def-names
-  (00001000 (forms)
-    (00000111
-      ((00000010 forms) () (00000001 ()))
-      ((00000010 forms) (1) (00000001 ()))
-      (t (10011101 ((form (00000101 forms))
-                (rest (top-level-def-names (00000110 forms))))
-           (00000111
-             ((00000010 form) () rest)
-             ((00000010 form) (1) rest)
-             ((00000011 (00000101 form) (00000001 def)) (00000100 (00000101 (00000110 form)) rest))
-             ((00000011 (00000101 form) (00000001 defmacro)) (00000100 (00000101 (00000110 form)) rest))
+(0011 top-level-def-names
+  (0010 (forms)
+    (110
+      ((010 forms) () (001 ()))
+      ((010 forms) (1) (001 ()))
+      (t (001001 ((form (100 forms))
+                (rest (top-level-def-names (011 forms))))
+           (110
+             ((010 form) () rest)
+             ((010 form) (1) rest)
+             ((101 (100 form) (001 def)) (111 (100 (011 form)) rest))
+             ((101 (100 form) (001 defmacro)) (111 (100 (011 form)) rest))
              (t rest)))))))
 
-(00001001 symbol-names-from-file
-  (00001000 (path)
-    (top-level-def-names (01001011 (10100110 path)))))
+(0011 symbol-names-from-file
+  (0010 (path)
+    (top-level-def-names (110101001 (110110111 path)))))
 
-(00001001 core-my-symbols
+(0011 core-my-symbols
   (symbol-names-from-file "lib/core.lisp"))
 
 ; every file under lib/ except core.lisp (and its .fasl cache), paired with
 ; the symbol names it defines -- an alist of (filename . (symbols...))
-(00001001 other-lib-tables
-  (00001000 ()
-    (10011101 ((entries (read-dir "lib"))
-           (relevant (00111000
-                       (00001000 (name)
-                         (10011010 (00111101 ".lisp" (01000001 name (00001101 (00111011 name) 3) (00111011 name)))
-                              (00100001 (00100010 name "core.lisp"))))
+(0011 other-lib-tables
+  (0010 ()
+    (001001 ((entries (read-dir "lib"))
+           (relevant (101001
+                       (0010 (name)
+                         (11110101 (110101010 ".lisp" (110100011 name (01011 (110100010 name) 3) (110100010 name)))
+                              (0100 (11110111 name "core.lisp"))))
                        entries)))
-      (00110111 (00001000 (name)
-             (00000100 name (symbol-names-from-file (00111010 "lib/" name))))
+      (101000 (0010 (name)
+             (111 name (symbol-names-from-file (110011110 "lib/" name))))
            relevant))))
 
 ; ---------------------------------------------------------------------
@@ -138,88 +138,88 @@
 ; needs to not crash while walking them, so every destructuring step
 ; below that assumes a minimum shape uses these instead of raw car/cdr,
 ; degrading a missing piece to () rather than erroring.
-(00001001 safe-car
-  (00001000 (lst) (00000111 ((00000010 lst) () (00000001 ()))
-                      ((00000010 lst) (1) (00000001 ())) (t (00000101 lst)))))
-(00001001 safe-cdr
-  (00001000 (lst) (00000111 ((00000010 lst) () (00000001 ()))
-                      ((00000010 lst) (1) (00000001 ())) (t (00000110 lst)))))
+(0011 safe-car
+  (0010 (lst) (110 ((010 lst) () (001 ()))
+                      ((010 lst) (1) (001 ())) (t (100 lst)))))
+(0011 safe-cdr
+  (0010 (lst) (110 ((010 lst) () (001 ()))
+                      ((010 lst) (1) (001 ())) (t (011 lst)))))
 
-(00001001 collect-symbols-leaf
-  (00001000 (form)
-    (00000111
-      ((00100011 form) (00100111 form))
-      ((00000010 form) () (00000001 ()))
-      ((00000010 form) (1) (00000001 ()))
-      (t (00101001 (collect-symbols-leaf (00000101 form)) (collect-symbols-leaf (00000110 form)))))))
+(0011 collect-symbols-leaf
+  (0010 (form)
+    (110
+      ((110101100 form) (1110 form))
+      ((010 form) () (001 ()))
+      ((010 form) (1) (001 ()))
+      (t (1111 (collect-symbols-leaf (100 form)) (collect-symbols-leaf (011 form)))))))
 
-(00001001 collect-heads-each
-  (00001000 (forms bound)
-    (00000111
-      ((00000010 forms) () (00000001 ()))
-      ((00000010 forms) (1) (00000001 ()))
-      (t (00101001 (collect-heads (00000101 forms) bound)
-                 (collect-heads-each (00000110 forms) bound))))))
+(0011 collect-heads-each
+  (0010 (forms bound)
+    (110
+      ((010 forms) () (001 ()))
+      ((010 forms) (1) (001 ()))
+      (t (1111 (collect-heads (100 forms) bound)
+                 (collect-heads-each (011 forms) bound))))))
 
-(00001001 collect-heads-cond-clauses
-  (00001000 (clauses bound)
-    (00000111
-      ((00000010 clauses) () (00000001 ()))
-      ((00000010 clauses) (1) (00000001 ()))
-      (t (10011101 ((clause (00000101 clauses))
+(0011 collect-heads-cond-clauses
+  (0010 (clauses bound)
+    (110
+      ((010 clauses) () (001 ()))
+      ((010 clauses) (1) (001 ()))
+      (t (001001 ((clause (100 clauses))
                 (test-form (safe-car clause))
                 (body-form (safe-car (safe-cdr clause)))
                 (test-deps (collect-heads test-form bound))
                 (body-deps (collect-heads body-form bound))
-                (rest-deps (collect-heads-cond-clauses (00000110 clauses) bound)))
-           (00101001 test-deps (00101001 body-deps rest-deps)))))))
+                (rest-deps (collect-heads-cond-clauses (011 clauses) bound)))
+           (1111 test-deps (1111 body-deps rest-deps)))))))
 
-(00001001 collect-heads-let*-seq
-  (00001000 (bindings body bound)
-    (00000111
-      ((00000010 bindings) () (collect-heads body bound))
-      ((00000010 bindings) (1) (collect-heads body bound))
-      (t (10011101 ((binding (00000101 bindings))
+(0011 collect-heads-let*-seq
+  (0010 (bindings body bound)
+    (110
+      ((010 bindings) () (collect-heads body bound))
+      ((010 bindings) (1) (collect-heads body bound))
+      (t (001001 ((binding (100 bindings))
                 (name (safe-car binding))
                 (value-form (safe-car (safe-cdr binding)))
                 (value-deps (collect-heads value-form bound))
-                (new-bound (00000100 name bound))
-                (rest-deps (collect-heads-let*-seq (00000110 bindings) body new-bound)))
-           (00101001 value-deps rest-deps))))))
+                (new-bound (111 name bound))
+                (rest-deps (collect-heads-let*-seq (011 bindings) body new-bound)))
+           (1111 value-deps rest-deps))))))
 
-(00001001 collect-heads
-  (00001000 (form bound)
-    (00000111
-      ((00000010 form) () (00000001 ()))
-      ((00000010 form) (1) (00000001 ()))
-      (t (10011100 ((head (00000101 form)))
-           (00000111
-             ((10011010 (00100011 head) (00000011 head (00000001 quote)))
-              (00000001 ()))
-             ((10011010 (00100011 head) (00000011 head (00000001 lambda)))
-              (10011101 ((params (safe-car (safe-cdr form)))
+(0011 collect-heads
+  (0010 (form bound)
+    (110
+      ((010 form) () (001 ()))
+      ((010 form) (1) (001 ()))
+      (t (001000 ((head (100 form)))
+           (110
+             ((11110101 (110101100 head) (101 head (001 quote)))
+              (001 ()))
+             ((11110101 (110101100 head) (101 head (001 lambda)))
+              (001001 ((params (safe-car (safe-cdr form)))
                      (body (safe-cdr (safe-cdr form)))
                      (param-names (collect-symbols-leaf params))
-                     (new-bound (00101001 param-names bound)))
-                (00000100 (00000001 %uses-lambda) (collect-heads-each body new-bound))))
-             ((10011010 (00100011 head) (00000011 head (00000001 let)))
-              (10011101 ((bindings (safe-car (safe-cdr form)))
+                     (new-bound (1111 param-names bound)))
+                (111 (001 %uses-lambda) (collect-heads-each body new-bound))))
+             ((11110101 (110101100 head) (101 head (001 let)))
+              (001001 ((bindings (safe-car (safe-cdr form)))
                      (body (safe-car (safe-cdr (safe-cdr form))))
-                     (names (00110111 (00001000 (b) (safe-car b)) bindings))
-                     (value-forms (00110111 (00001000 (b) (safe-car (safe-cdr b))) bindings))
+                     (names (101000 (0010 (b) (safe-car b)) bindings))
+                     (value-forms (101000 (0010 (b) (safe-car (safe-cdr b))) bindings))
                      (value-deps (collect-heads-each value-forms bound))
-                     (new-bound (00101001 names bound))
+                     (new-bound (1111 names bound))
                      (body-deps (collect-heads body new-bound)))
-                (00000100 (00000001 %uses-lambda)
-                      (00000100 (00000001 %uses-let-family) (00101001 value-deps body-deps)))))
-             ((10011010 (00100011 head) (00000011 head (00000001 let*)))
-              (10011101 ((bindings (safe-car (safe-cdr form)))
+                (111 (001 %uses-lambda)
+                      (111 (001 %uses-let-family) (1111 value-deps body-deps)))))
+             ((11110101 (110101100 head) (101 head (001 let*)))
+              (001001 ((bindings (safe-car (safe-cdr form)))
                      (body (safe-car (safe-cdr (safe-cdr form)))))
-                (00000100 (00000001 %uses-lambda)
-                      (00000100 (00000001 %uses-let-family)
+                (111 (001 %uses-lambda)
+                      (111 (001 %uses-let-family)
                             (collect-heads-let*-seq bindings body bound)))))
-             ((10011010 (00100011 head) (00000011 head (00000001 def)))
-              (10011101 ((name (safe-car (safe-cdr form)))
+             ((11110101 (110101100 head) (101 head (001 def)))
+              (001001 ((name (safe-car (safe-cdr form)))
                      (value-form (safe-car (safe-cdr (safe-cdr form))))
                      ; def's own name is visible inside its own value-expr:
                      ; the evaluator shares one lexical frame between a def
@@ -228,30 +228,30 @@
                      ; at call time even though f isn't bound yet when the
                      ; closure is created (crates/my-lisp/src/eval/special_forms/core.rs
                      ; evaluate_definition's own comment documents this).
-                     (new-bound (00000100 name bound)))
+                     (new-bound (111 name bound)))
                 (collect-heads value-form new-bound)))
-             ((10011010 (00100011 head) (00000011 head (00000001 defmacro)))
-              (10011101 ((params (safe-car (safe-cdr (safe-cdr form))))
+             ((11110101 (110101100 head) (101 head (001 defmacro)))
+              (001001 ((params (safe-car (safe-cdr (safe-cdr form))))
                      (body (safe-cdr (safe-cdr (safe-cdr form))))
                      (param-names (collect-symbols-leaf params))
-                     (new-bound (00101001 param-names bound)))
-                (00000100 (00000001 %uses-lambda) (collect-heads-each body new-bound))))
-             ((10011010 (00100011 head) (00000011 head (00000001 cond)))
-              (collect-heads-cond-clauses (00000110 form) bound))
+                     (new-bound (1111 param-names bound)))
+                (111 (001 %uses-lambda) (collect-heads-each body new-bound))))
+             ((11110101 (110101100 head) (101 head (001 cond)))
+              (collect-heads-cond-clauses (011 form) bound))
              (t
-              (10011101 ((head-dep (00000111
-                                  ((00100001 (00100011 head)) (00000001 ()))
-                                  ((00101100 head bound) (00000001 ()))
-                                  (t (00100111 head))))
-                     (head-recurse (00000111 ((00000010 head) () (00000001 ()))
-                                         ((00000010 head) (1) (00000001 ())) (t (collect-heads head bound))))
-                     (args-deps (collect-heads-each (00000110 form) bound)))
-                (00101001 head-dep (00101001 head-recurse args-deps))))))))))
+              (001001 ((head-dep (110
+                                  ((0100 (110101100 head)) (001 ()))
+                                  ((11101 head bound) (001 ()))
+                                  (t (1110 head))))
+                     (head-recurse (110 ((010 head) () (001 ()))
+                                         ((010 head) (1) (001 ())) (t (collect-heads head bound))))
+                     (args-deps (collect-heads-each (011 form) bound)))
+                (1111 head-dep (1111 head-recurse args-deps))))))))))
 
-(00001001 collect-deps-one
-  (00001000 (form bound)
-    (00000111
-      ((00100011 form) (00000111 ((00101100 form bound) (00000001 ())) (t (00100111 form))))
+(0011 collect-deps-one
+  (0010 (form bound)
+    (110
+      ((110101100 form) (110 ((11101 form bound) (001 ())) (t (1110 form))))
       (t (collect-heads form bound)))))
 
 ; a fixture's expr text can hold MORE than one top-level form (e.g.
@@ -260,66 +260,66 @@
 ; a top-level def/defmacro extends the bound-set for the forms that
 ; follow it in the SAME fixture, matching how they'd actually be
 ; evaluated in one shared environment.
-(00001001 collect-deps-top-seq
-  (00001000 (forms bound)
-    (00000111
-      ((00000010 forms) () (00000001 ()))
-      ((00000010 forms) (1) (00000001 ()))
-      (t (10011101 ((form (00000101 forms))
+(0011 collect-deps-top-seq
+  (0010 (forms bound)
+    (110
+      ((010 forms) () (001 ()))
+      ((010 forms) (1) (001 ()))
+      (t (001001 ((form (100 forms))
                 (deps (collect-deps-one form bound))
-                (new-bound (00000111
-                             ((00000010 form) () bound)
-                             ((00000010 form) (1) bound)
-                             ((10011010 (00100011 (00000101 form)) (00000011 (00000101 form) (00000001 def)))
-                              (00000100 (00000101 (00000110 form)) bound))
-                             ((10011010 (00100011 (00000101 form)) (00000011 (00000101 form) (00000001 defmacro)))
-                              (00000100 (00000101 (00000110 form)) bound))
+                (new-bound (110
+                             ((010 form) () bound)
+                             ((010 form) (1) bound)
+                             ((11110101 (110101100 (100 form)) (101 (100 form) (001 def)))
+                              (111 (100 (011 form)) bound))
+                             ((11110101 (110101100 (100 form)) (101 (100 form) (001 defmacro)))
+                              (111 (100 (011 form)) bound))
                              (t bound))))
-           (00101001 deps (collect-deps-top-seq (00000110 forms) new-bound)))))))
+           (1111 deps (collect-deps-top-seq (011 forms) new-bound)))))))
 
-(00001001 collect-deps-top
-  (00001000 (forms)
-    (collect-deps-top-seq forms (00000001 ()))))
+(0011 collect-deps-top
+  (0010 (forms)
+    (collect-deps-top-seq forms (001 ()))))
 
 ; ---------------------------------------------------------------------
 ; Classification of one fixture's collected raw head-symbol list against
 ; the known tables.
 ; ---------------------------------------------------------------------
 
-(00001001 is-marker?
-  (00001000 (s)
-    (10011011 (00000011 s (00000001 %uses-lambda)) (00000011 s (00000001 %uses-let-family)))))
+(0011 is-marker?
+  (0010 (s)
+    (11111100 (101 s (001 %uses-lambda)) (101 s (001 %uses-let-family)))))
 
-(00001001 unique-onto
-  (00001000 (items acc)
-    (00000111
-      ((00000010 items) () acc)
-      ((00000010 items) (1) acc)
-      ((00101100 (00000101 items) acc) (unique-onto (00000110 items) acc))
-      (t (unique-onto (00000110 items) (00000100 (00000101 items) acc))))))
+(0011 unique-onto
+  (0010 (items acc)
+    (110
+      ((010 items) () acc)
+      ((010 items) (1) acc)
+      ((11101 (100 items) acc) (unique-onto (011 items) acc))
+      (t (unique-onto (011 items) (111 (100 items) acc))))))
 
-(00001001 uniq (00001000 (items) (unique-onto items (00000001 ()))))
+(0011 uniq (0010 (items) (unique-onto items (001 ()))))
 
-(00001001 owning-library
-  (00001000 (sym tables)
-    (00000111
-      ((00000010 tables) () (00000001 ()))
-      ((00000010 tables) (1) (00000001 ()))
-      ((00101100 sym (00000110 (00000101 tables))) (00000101 (00000101 tables)))
-      (t (owning-library sym (00000110 tables))))))
+(0011 owning-library
+  (0010 (sym tables)
+    (110
+      ((010 tables) () (001 ()))
+      ((010 tables) (1) (001 ()))
+      ((11101 sym (011 (100 tables))) (100 (100 tables)))
+      (t (owning-library sym (011 tables))))))
 
 ; classify one real (non-marker) symbol; returns (bucket-tag . library-or-())
-(00001001 classify-symbol
-  (00001000 (sym other-tables)
-    (00000111
-      ((00101100 sym core-special-forms) (00000100 (00000001 core) (00000001 ())))
-      ((00101100 sym core-builtins) (00000100 (00000001 core) (00000001 ())))
-      ((00101100 sym host-capabilities) (00000100 (00000001 reasoning-world-or-host) sym))
-      ((00101100 sym core-my-symbols) (00000100 (00000001 macro-expanded-core) (00000001 ())))
-      (t (10011100 ((lib (owning-library sym other-tables)))
-           (00000111
-             ((00100010 lib (00000001 ())) (00000100 (00000001 unknown) (00000001 ())))
-             (t (00000100 (00000001 reasoning-world-or-host) lib))))))))
+(0011 classify-symbol
+  (0010 (sym other-tables)
+    (110
+      ((11101 sym core-special-forms) (111 (001 core) (001 ())))
+      ((11101 sym core-builtins) (111 (001 core) (001 ())))
+      ((11101 sym host-capabilities) (111 (001 reasoning-world-or-host) sym))
+      ((11101 sym core-my-symbols) (111 (001 macro-expanded-core) (001 ())))
+      (t (001000 ((lib (owning-library sym other-tables)))
+           (110
+             ((11110111 lib (001 ())) (111 (001 unknown) (001 ())))
+             (t (111 (001 reasoning-world-or-host) lib))))))))
 
 ; my-lisp has no try/catch: a fixture whose own point is that its source
 ; text exceeds the reader's decimal-literal exponent resource bound
@@ -337,97 +337,97 @@
 ; risk of hand-rolling number classification outside the real reader. If
 ; a future fixture adds a different oversized-exponent literal, this
 ; check needs re-verification against the live corpus, not silent trust.
-(00001001 known-unreadable-oversized-exponent?
-  (00001000 (expr-str)
-    (10011011 (00111110 "e100001" expr-str)
-        (00111110 "e-100001" expr-str))))
+(0011 known-unreadable-oversized-exponent?
+  (0010 (expr-str)
+    (11111100 (110101000 "e100001" expr-str)
+        (110101000 "e-100001" expr-str))))
 
-(00001001 classify-fixture
-  (00001000 (id expr-str axioms-list other-tables)
-    (00000111
+(0011 classify-fixture
+  (0010 (id expr-str axioms-list other-tables)
+    (110
       ((known-unreadable-oversized-exponent? expr-str)
-       (00100111 (00000001 dependency-classification)
-             (00000100 (00000001 id) id)
-             (00000100 (00000001 buckets) (00000001 (core)))
-             (00000100 (00000001 unknown-symbols) (00000001 ()))
-             (00000100 (00000001 world-host-libraries) (00000001 ()))
-             (00000100 (00000001 axiom-tagged-s1) (00101100 (00000001 S1) axioms-list))
-             (00000100 (00000001 note) "source text exceeds the reader's own decimal-literal exponent resource bound; not locally re-parsed, classified as core (the reader itself) by inspection")))
+       (1110 (001 dependency-classification)
+             (111 (001 id) id)
+             (111 (001 buckets) (001 (core)))
+             (111 (001 unknown-symbols) (001 ()))
+             (111 (001 world-host-libraries) (001 ()))
+             (111 (001 axiom-tagged-s1) (11101 (001 S1) axioms-list))
+             (111 (001 note) "source text exceeds the reader's own decimal-literal exponent resource bound; not locally re-parsed, classified as core (the reader itself) by inspection")))
       (t (classify-readable-fixture id expr-str axioms-list other-tables)))))
 
-(00001001 classify-readable-fixture
-  (00001000 (id expr-str axioms-list other-tables)
-    (10011101 ((parsed-forms (01001011 expr-str))
+(0011 classify-readable-fixture
+  (0010 (id expr-str axioms-list other-tables)
+    (001001 ((parsed-forms (110101001 expr-str))
            (raw (collect-deps-top parsed-forms))
-           (markers (00111000 is-marker? raw))
-           (real-syms (uniq (00111000 (00001000 (s) (00100001 (is-marker? s))) raw)))
-           (classified (00110111 (00001000 (s) (00000100 s (classify-symbol s other-tables))) real-syms))
-           (bucket-of (00001000 (tag) (00110111 (00001000 (c) (00000101 c)) (00111000 (00001000 (c) (00000011 (00000101 (00000110 c)) tag)) classified))))
-           (unknowns (bucket-of (00000001 unknown)))
-           (uses-core (10011011 (00101100 (00000001 core) (00110111 (00001000 (c) (00000101 (00000110 c))) classified))
-                          (00100001 (10110001 (00000010 real-syms)))))
-           (uses-macro-core (00101100 (00000001 macro-expanded-core) (00110111 (00001000 (c) (00000101 (00000110 c))) classified)))
-           (uses-world-host (00101100 (00000001 reasoning-world-or-host) (00110111 (00001000 (c) (00000101 (00000110 c))) classified)))
-           (uses-lambda (00101100 (00000001 %uses-lambda) markers))
-           (uses-let-family (00101100 (00000001 %uses-let-family) markers))
-           (uses-strings-reader (00111000 (00001000 (s) (00101100 s strings-reader-subset)) real-syms))
-           (world-host-libraries (uniq (00111000 (00001000 (x) (00100001 (00100010 x (00000001 ()))))
-                                                (00110111 (00001000 (c) (00000110 (00000110 c))) classified))))
-           (buckets (00111000 (00001000 (x) (00100001 (00100010 x (00000001 ()))))
-                      (00100111
-                        (00000111 (uses-core (00000001 core)) (t (00000001 ())))
-                        (00000111 ((10011011 uses-lambda uses-let-family) (00000001 closure-application)) (t (00000001 ())))
-                        (00000111 ((00101100 (00000001 S1) axioms-list) (00000001 exact-numbers)) (t (00000001 ())))
-                        (00000111 ((10110001 (00000010 uses-strings-reader)) (00000001 strings-reader)) (t (00000001 ())))
-                        (00000111 ((10011011 uses-macro-core uses-let-family) (00000001 macro-expanded-core)) (t (00000001 ())))
-                        (00000111 (uses-world-host (00000001 reasoning-world-or-host)) (t (00000001 ())))))))
-      (00100111 (00000001 dependency-classification)
-            (00000100 (00000001 id) id)
-            (00000100 (00000001 buckets) buckets)
-            (00000100 (00000001 unknown-symbols) unknowns)
-            (00000100 (00000001 world-host-libraries) world-host-libraries)
-            (00000100 (00000001 axiom-tagged-s1) (00101100 (00000001 S1) axioms-list))))))
+           (markers (101001 is-marker? raw))
+           (real-syms (uniq (101001 (0010 (s) (0100 (is-marker? s))) raw)))
+           (classified (101000 (0010 (s) (111 s (classify-symbol s other-tables))) real-syms))
+           (bucket-of (0010 (tag) (101000 (0010 (c) (100 c)) (101001 (0010 (c) (101 (100 (011 c)) tag)) classified))))
+           (unknowns (bucket-of (001 unknown)))
+           (uses-core (11111100 (11101 (001 core) (101000 (0010 (c) (100 (011 c))) classified))
+                          (0100 (110111011 (010 real-syms)))))
+           (uses-macro-core (11101 (001 macro-expanded-core) (101000 (0010 (c) (100 (011 c))) classified)))
+           (uses-world-host (11101 (001 reasoning-world-or-host) (101000 (0010 (c) (100 (011 c))) classified)))
+           (uses-lambda (11101 (001 %uses-lambda) markers))
+           (uses-let-family (11101 (001 %uses-let-family) markers))
+           (uses-strings-reader (101001 (0010 (s) (11101 s strings-reader-subset)) real-syms))
+           (world-host-libraries (uniq (101001 (0010 (x) (0100 (11110111 x (001 ()))))
+                                                (101000 (0010 (c) (011 (011 c))) classified))))
+           (buckets (101001 (0010 (x) (0100 (11110111 x (001 ()))))
+                      (1110
+                        (110 (uses-core (001 core)) (t (001 ())))
+                        (110 ((11111100 uses-lambda uses-let-family) (001 closure-application)) (t (001 ())))
+                        (110 ((11101 (001 S1) axioms-list) (001 exact-numbers)) (t (001 ())))
+                        (110 ((110111011 (010 uses-strings-reader)) (001 strings-reader)) (t (001 ())))
+                        (110 ((11111100 uses-macro-core uses-let-family) (001 macro-expanded-core)) (t (001 ())))
+                        (110 (uses-world-host (001 reasoning-world-or-host)) (t (001 ())))))))
+      (1110 (001 dependency-classification)
+            (111 (001 id) id)
+            (111 (001 buckets) buckets)
+            (111 (001 unknown-symbols) unknowns)
+            (111 (001 world-host-libraries) world-host-libraries)
+            (111 (001 axiom-tagged-s1) (11101 (001 S1) axioms-list))))))
 
 ; ---------------------------------------------------------------------
 ; Fixture pairing (same technique as scripts/oracle-batch.lisp)
 ; ---------------------------------------------------------------------
 
-(00001001 fixtures-only
-  (00001000 (entries)
-    (00000111
-      ((00000010 entries) () (00000001 ()))
-      ((00000010 entries) (1) (00000001 ()))
-      ((00000010 (00000101 entries)) () (fixtures-only (00000110 entries)))
-      ((00000010 (00000101 entries)) (1) (fixtures-only (00000110 entries)))
-      (t (00000111
-           ((00000011 (00000101 (00000101 entries)) (00000001 fixture))
-            (00000100 (00000101 entries) (fixtures-only (00000110 entries))))
-           (t (fixtures-only (00000110 entries))))))))
+(0011 fixtures-only
+  (0010 (entries)
+    (110
+      ((010 entries) () (001 ()))
+      ((010 entries) (1) (001 ()))
+      ((010 (100 entries)) () (fixtures-only (011 entries)))
+      ((010 (100 entries)) (1) (fixtures-only (011 entries)))
+      (t (110
+           ((101 (100 (100 entries)) (001 fixture))
+            (111 (100 entries) (fixtures-only (011 entries))))
+           (t (fixtures-only (011 entries))))))))
 
-(00001001 process-pair
-  (00001000 (inventory-remaining conformance-remaining other-tables)
-    (00000111
-      ((00000010 inventory-remaining) () (00000001 ()))
-      ((00000010 inventory-remaining) (1) (00000001 ()))
-      ((00000010 conformance-remaining) () (00000001 ()))
-      ((00000010 conformance-remaining) (1) (00000001 ()))
-      (t (10011101 ((invf (00000101 inventory-remaining))
-                (id (00000110 (00101101 (00000001 id) (00000110 invf))))
-                (conff (00000101 conformance-remaining))
-                (expr-str (00000110 (00101101 (00000001 expr) conff)))
-                (axioms-entry (00101101 (00000001 axioms) conff))
-                (axioms-list (00000111 ((00000010 axioms-entry) () (00000001 ()))
-                                   ((00000010 axioms-entry) (1) (00000001 ())) (t (00000110 axioms-entry))))
+(0011 process-pair
+  (0010 (inventory-remaining conformance-remaining other-tables)
+    (110
+      ((010 inventory-remaining) () (001 ()))
+      ((010 inventory-remaining) (1) (001 ()))
+      ((010 conformance-remaining) () (001 ()))
+      ((010 conformance-remaining) (1) (001 ()))
+      (t (001001 ((invf (100 inventory-remaining))
+                (id (011 (11100 (001 id) (011 invf))))
+                (conff (100 conformance-remaining))
+                (expr-str (011 (11100 (001 expr) conff)))
+                (axioms-entry (11100 (001 axioms) conff))
+                (axioms-list (110 ((010 axioms-entry) () (001 ()))
+                                   ((010 axioms-entry) (1) (001 ())) (t (011 axioms-entry))))
                 (record (classify-fixture id expr-str axioms-list other-tables))
-                (emitted (01001000 record)))
-           (process-pair (00000110 inventory-remaining) (00000110 conformance-remaining) other-tables))))))
+                (emitted (11011011 record)))
+           (process-pair (011 inventory-remaining) (011 conformance-remaining) other-tables))))))
 
-(01001000 (00000100 (00000001 about) "dependency-classification.lisp — WSM-CONSTITUTION-DEPENDENCY-CLASSIFICATION: every tests/fixtures/inventory.lisp fixture, classified by executable dependency (core / closure-application / exact-numbers / strings-reader / macro-expanded-core / reasoning-world-or-host), generated from the live source tables, not hand-copied."))
-(01001000 (00000100 (00000001 generated) "Run: my-lisp scripts/build-dependency-classification.lisp > tests/fixtures/dependency-classification.lisp"))
+(11011011 (111 (001 about) "dependency-classification.lisp — WSM-CONSTITUTION-DEPENDENCY-CLASSIFICATION: every tests/fixtures/inventory.lisp fixture, classified by executable dependency (core / closure-application / exact-numbers / strings-reader / macro-expanded-core / reasoning-world-or-host), generated from the live source tables, not hand-copied."))
+(11011011 (111 (001 generated) "Run: my-lisp scripts/build-dependency-classification.lisp > tests/fixtures/dependency-classification.lisp"))
 
 (process-pair
-  (fixtures-only (01001011 (10100110 "tests/fixtures/inventory.lisp")))
-  (01001011 (10100110 "tests/fixtures/conformance.lisp"))
+  (fixtures-only (110101001 (110110111 "tests/fixtures/inventory.lisp")))
+  (110101001 (110110111 "tests/fixtures/conformance.lisp"))
   (other-lib-tables))
 
-(00000001 ())
+(001 ())
