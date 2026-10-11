@@ -1,0 +1,11 @@
+# Exact compare pin main SHA: 41167ba7797a666b33c6e06a46a3de4a87ac8c79
+# GPU evidence v4/v5 are additional competing variants; preserve distinct heads but do not treat as independent confirmation.
+branch	source_sha	compare_status	ahead_by	behind_by	reported_file_entries	classification
+agent/3766-gpu-oracle-blocked-handoff-v4	7f0d0975b1a1698c3f461be60df9287a40680bbf	diverged	1	6657	1	OVERLAPPING_GPU_EVIDENCE_HISTORY
+agent/3766-gpu-oracle-blocked-handoff-v5	cb388a371242c2ebd0f55624b7816885838eebb8	diverged	1	6654	1	OVERLAPPING_GPU_EVIDENCE_HISTORY
+agent/3801-gpu-admission	95b086960d1f598c4b9416abfe5c6d7d84a2c4e7	behind	0	6546	0	ALREADY_IN_MAIN_ANCESTRY
+agent/3811-l1l5-law-data	746b6afb42b6d70ca5e33f307668e94d2cf2cfa2	behind	0	6638	0	ALREADY_IN_MAIN_ANCESTRY
+agent/3822-executable-fixed-point-report	c7ac71462579425888bf01e3abbb9e5afb16e409	behind	0	6365	0	ALREADY_IN_MAIN_ANCESTRY
+agent/3822-selfhost-lineage	a7b0773380f2487b940a40737a8cf07774b4bc4b	diverged	1	6563	2	HISTORY_ATTACHED_CONTENT_REVIEW_REQUIRED
+agent/3823-coverage-rebase	746ba642a21ae5702e7a32862e368bde6dce333b	behind	0	6592	0	ALREADY_IN_MAIN_ANCESTRY
+agent/3831-full-compiler-export	50a8741cfcc42f4eda25205aa1df457a061b177d	diverged	7	6583	3	HISTORY_ATTACHED_CONTENT_REVIEW_REQUIRED
