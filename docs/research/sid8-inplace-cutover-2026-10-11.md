@@ -2,6 +2,16 @@
 
 This is an execution and blocker ledger, not a claim that the repository is fully migrated.
 
+## 2026-10-12: five-file D4-only blocker-safe cohort
+
+- 38 historical D4 call heads rewritten in 5 existing Lisp sources: knowledge/guard-reference.lisp (25), knowledge/guard-fact-policy.lisp (6), scripts/enforce-function-table-mechanisms.lisp (2), scripts/enforce-island-math-evidence.lisp (2), scripts/semantic-authority-guard-enforce.lisp (3).
+- Only historical 00001001 => D4:0011 DEFINE and 00001000 => D4:0010 LAMBDA were rewritten, as executable S-expression call heads. All old three-field/host-truth 00000111 COND forms remain BLOCKED. This is not five complete executable migrations.
+- tests/test_sid8_d4_policy_cohort.py verifies current file contents are exactly the pinned original Git blobs with only these 38 D4 substitutions. The .github/workflows/sid8-source-bulk-census.yml workflow runs that proof against full Git history.
+- Partial D4 replacements removed old DEFINE era witnesses. To prevent falsely clearing legacy COND, scripts/migrate-sid8-source-batch.py now retains a fail-closed provenance pin for these five partially migrated files. tests/test_migrate_sid8_source_batch.py confirms historical D3 semantics still block them.
+- The corrected bulk census passed: https://github.com/juv4uk/sens/actions/runs/38181849738 . This is a source-only result, not Rust runtime parity or physical-file admission.
+- No new branches, physical .sens files, historical snapshot modifications, or conjectured D10 successors.
+
+
 ## 2026-10-12: expanded live-source census and D3 regression protection
 
 - Current read-only census: [GitHub Actions #38176044721](https://github.com/juv4uk/sens/actions/runs/38176044721), **196 scoped sources scanned, 0 additional automatically admissible files, 18 blocked files**. Other files are already migrated, nonprogram, or lack old-era evidence. The scanner's admitted count is not an all-repository certification metric.
