@@ -19,11 +19,12 @@ class Readiness(unittest.TestCase):
 
     def test_current_v2_has_every_selected_coordinate(self):
         report = gate.audit(ROOT)
-        self.assertEqual(675, report["selected"])
-        self.assertEqual(675, report["placed"])
+        self.assertEqual(698, report["selected"])
+        self.assertEqual(698, report["placed"])
         self.assertEqual(0, report["unplaced"])
-        self.assertEqual(419, report["research_gauge_allocated"])
+        self.assertEqual(442, report["research_gauge_allocated"])
         self.assertTrue(report["current_map_is_canonical_research"])
+        self.assertEqual(326, report["remaining"])
         self.assertEqual(0, report["ratified"])
         self.assertFalse(report["blocking_errors"])
 
