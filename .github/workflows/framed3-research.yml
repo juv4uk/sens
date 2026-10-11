@@ -3,10 +3,12 @@ on:
   push:
     paths:
       - 'research/framed3/**'
+      - 'crates/sens/tests/canonical_d2_rank_research.rs'
       - '.github/workflows/framed3-research.yml'
   pull_request:
     paths:
       - 'research/framed3/**'
+      - 'crates/sens/tests/canonical_d2_rank_research.rs'
       - '.github/workflows/framed3-research.yml'
   workflow_dispatch:
 permissions:
@@ -27,6 +29,8 @@ jobs:
         run: python3 -m unittest discover -s research/framed3 -p 'test_*.py' -v
       - name: Негативні свідки EOF без Python assert-оптимізації
         run: python3 -O -m unittest discover -s research/framed3 -p 'test_trailing_closers_research.py' -v
+      - name: Вичерпний точний D2 ранг (також під -O)
+        run: python3 -O -m unittest discover -s research/framed3 -p 'test_canonical_d2_rank_research.py' -v
 
   domain-ladder-rust:
     name: Ратифікований Rust D1–D9 reader проти відновлених закриттів
@@ -36,4 +40,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: dtolnay/rust-toolchain@stable
       - name: Точний семантичний оракул Rust D2; не міняти T5
-        run: cargo test --manifest-path crates/sens/Cargo.toml --test trailing_d2_closers_research -- --nocapture
+        run: |
+          set -euo pipefail
+          cargo test --manifest-path crates/sens/Cargo.toml --test trailing_d2_closers_research -- --nocapture
+          cargo test --manifest-path crates/sens/Cargo.toml --test canonical_d2_rank_research -- --nocapture
