@@ -39,5 +39,6 @@ def check():
  assert p["current_v5_candidate_selection"]["selected_added"]==8
  return {"selected":715,"added":8,"missing":309,"ratified":0}
 if __name__=="__main__":
+ if not __debug__:sys.exit("D10-V5 BLOCK optimized assertions")
  try: print("D10-V5 PASS",json.dumps(check(),sort_keys=True))
  except (AssertionError,KeyError,ValueError,StopIteration,OSError) as e:sys.exit("D10-V5 BLOCK "+str(e))
