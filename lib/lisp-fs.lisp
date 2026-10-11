@@ -137,7 +137,7 @@
        (1110 (001 accepted) (fs-package-field (001 value) package))))))
 (0011 fs-serialize-object
   (0010 (value)
-    (значення-у-текст (fs-object-package value))))
+    (11110100 (fs-object-package value))))
 
 (0011 fs-deserialize-object
   (0010 (text)
@@ -174,7 +174,7 @@
        (1110 (001 accepted) package)))))
 (0011 fs-serialize-root
   (0010 (fs)
-    (значення-у-текст (fs-root-package fs))))
+    (11110100 (fs-root-package fs))))
 
 (0011 fs-deserialize-root
   (0010 (text)
@@ -452,7 +452,7 @@
 
 (0011 fs-serialize-journal
   (0010 (journal)
-    (значення-у-текст journal)))
+    (11110100 journal)))
 
 (0011 fs-deserialize-journal
   (0010 (text)
