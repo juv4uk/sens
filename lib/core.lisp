@@ -179,8 +179,9 @@
 (00001001 length-onto
   (00001000 (values acc)
     (110
-      ((010 values) acc)
-      ((010 (001 ()))
+      ; D4 NULL is the exact empty-list predicate; ATOM is not a list terminator.
+      ((0101 values) acc)
+      ((010 ())
        (length-onto (011 values) (00001100 acc 1))))))
 
 
