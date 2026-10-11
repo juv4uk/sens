@@ -3,14 +3,14 @@
 ; Bootstrap-бібліотека my-lisp: похідна поведінка належить самій мові.
 ; my-lisp-Bootstrap-Bibliothek: Abgeleitetes Verhalten gehört in die Sprache selbst.
 
-(00001001 identity (00001000 (value) value))
+(0011 identity (0010 (value) value))
 
 ; Lisp-owned binary format descriptor for the canonical 8-bit bit syntax.
 ; The reader treats the following source forms as binary data until the next
 ; top-level source is read; decimal integers remain ordinary decimal values.
-(00001001 binary
-  (00001000 (width)
-    (00100111 (00000001 binary) width)))
+(0011 binary
+  (0010 (width)
+    (1110 (001 binary) width)))
 
 ; `list` used to be a Rust special form (`evaluate_list_func`) — moved here
 ; 2026-08-09 once variadic lambda parameters existed to express it: a bare
@@ -28,56 +28,56 @@
 ; кажуть має належати самій мові, щойно ядро вже може це виразити, не
 ; хосту. Лишено першим у файлі (не там, де випадково використовується),
 ; бо `let`/`let*` нижче будують свою розгортку через нього.
-(00001001 list (00001000 args args))
+(0011 list (0010 args args))
 
 ; and/or are Lisp-owned short-circuit macros. A tested operand must return
 ; an exact D1 PredicateBit; 0 is not () and neither result is host T/NIL.
 ; Each COND clause below has exactly two fields: (test expression). The last
 ; operand is still returned as a value without being reinterpreted as a test.
 (00001010 and rest
-  (00000111
-    ((00000010 rest) (00000010 ()))
-    ((00000010 (00000110 rest)) (00000101 rest))
-    ((00000010 ())
-     (00000100 (00000001 00000111)
-       (00000100
-         (00000100 (00000101 rest)
-           (00000100
-             (00000100 (00000001 and) (00000110 rest))
-             (00000001 ())))
-         (00000100
-           (00000100
-             (00000100 (00000001 00000010)
-               (00000100 (00000001 ()) (00000001 ())))
-             (00000100
-               (00000001 00000010)
-               (00000100
-                 (00000100 (00000001 00000100)
-                   (00000100 (00000001 ())
-                     (00000100 (00000001 ()) (00000001 ()))))
-                 (00000001 ())))
-           (00000001 ()))))))))
+  (110
+    ((010 rest) (010 ()))
+    ((010 (011 rest)) (100 rest))
+    ((010 ())
+     (111 (001 00000111)
+       (111
+         (111 (100 rest)
+           (111
+             (111 (001 and) (011 rest))
+             (001 ())))
+         (111
+           (111
+             (111 (001 00000010)
+               (111 (001 ()) (001 ())))
+             (111
+               (001 00000010)
+               (111
+                 (111 (001 00000100)
+                   (111 (001 ())
+                     (111 (001 ()) (001 ()))))
+                 (001 ())))
+           (001 ()))))))))
 
 (00001010 or rest
-  (00000111
-    ((00000010 rest) (00000010 (00000100 () ())))
-    ((00000010 (00000110 rest)) (00000101 rest))
-    ((00000010 ())
-     (00000100 (00000001 00000111)
-       (00000100
-         (00000100 (00000101 rest)
-           (00000100
-             (00000100 (00000001 00000010)
-               (00000100 (00000001 ()) (00000001 ())))
-             (00000001 ())))
-         (00000100
-           (00000100
-             (00000100 (00000001 00000010)
-               (00000100 (00000001 ()) (00000001 ())))
-             (00000100
-               (00000100 (00000001 or) (00000110 rest))
-               (00000001 ())))
-           (00000001 ())))))))
+  (110
+    ((010 rest) (010 (111 () ())))
+    ((010 (011 rest)) (100 rest))
+    ((010 ())
+     (111 (001 00000111)
+       (111
+         (111 (100 rest)
+           (111
+             (111 (001 00000010)
+               (111 (001 ()) (001 ())))
+             (001 ())))
+         (111
+           (111
+             (111 (001 00000010)
+               (111 (001 ()) (001 ())))
+             (111
+               (111 (001 or) (011 rest))
+               (001 ())))
+           (001 ())))))))
 
 ; gensym — my-lisp's defmacro is unhygienic by default (no automatic
 ; protection against accidental variable capture; verified live
@@ -90,25 +90,25 @@
 ; string->symbol assemble it into a real symbol. Requires an explicit
 ; prefix (no default-prefix convenience yet -- G5: earn that later if
 ; a real caller needs it, don't build it speculatively now).
-(00001001 gensym
-  (00001000 (prefix)
-    (01000011 (00111010 prefix (01001100 (01011010))))))
+(0011 gensym
+  (0010 (prefix)
+    (11101101 (110011110 prefix (11110100 (01011010))))))
 
-(00001001 pair
-  (00001000 (left right)
-    (00000100 left (00000100 right (00000001 ())))))
+(0011 pair
+  (0010 (left right)
+    (111 left (111 right (001 ())))))
 
-(00001001 second
-  (00001000 (values)
-    (00000101 (00000110 values))))
+(0011 second
+  (0010 (values)
+    (100 (011 values))))
 
-(00001001 third
-  (00001000 (values)
-    (00000101 (00000110 (00000110 values)))))
+(0011 third
+  (0010 (values)
+    (100 (011 (011 values)))))
 
-(00001001 fourth
-  (00001000 (values)
-    (00000101 (00000110 (00000110 (00000110 values))))))
+(0011 fourth
+  (0010 (values)
+    (100 (011 (011 (011 values))))))
 
 ; cadddr — the classical car/cdr-composition name for the exact same
 ; operation fourth already performs; kept as an alias (same closure
@@ -120,7 +120,7 @@
 ; не друге визначення), бо реальні виклики вже пишуть саме так
 ; (lib/reason.lisp мав власний локальний (def cadddr ...) до цього,
 ; посимвольно ідентичний тілу fourth).
-(00001001 cadddr fourth)
+(0011 cadddr fourth)
 
 ; fifth — same single-parameter primitive-chain pattern as second/third/
 ; fourth, one step deeper. Found duplicated in two places at once:
@@ -132,21 +132,21 @@
 ; у двох місцях: власний локальний (def fifth ...) у lib/narrate.lisp,
 ; посимвольно ідентичний, і node-right у lib/persistent-map.lisp — та
 ; сама операція, виписана вручну замість названа.
-(00001001 fifth
-  (00001000 (values)
-    (00000101 (00000110 (00000110 (00000110 (00000110 values)))))))
+(0011 fifth
+  (0010 (values)
+    (100 (011 (011 (011 (011 values)))))))
 
-(00001001 caar
-  (00001000 (values)
-    (00000101 (00000101 values))))
+(0011 caar
+  (0010 (values)
+    (100 (100 values))))
 
-(00001001 cadr
-  (00001000 (values)
-    (00000101 (00000110 values))))
+(0011 cadr
+  (0010 (values)
+    (100 (011 values))))
 
-(00001001 cddr
-  (00001000 (values)
-    (00000110 (00000110 values))))
+(0011 cddr
+  (0010 (values)
+    (011 (011 values))))
 
 ; length/map/filter build their result via a tail-recursive `-onto`
 ; accumulator, same shape as reverse/reverse-onto below, instead of consing
@@ -176,42 +176,42 @@
 ; umgekehrter Reihenfolge und rufen daher am Ende einmal `reverse` auf, um
 ; das rückgängig zu machen; length baut gar keine Liste, sondern gibt
 ; einfach seinen Akkumulator zurück.
-(00001001 length-onto
-  (00001000 (values acc)
-    (00000111
+(0011 length-onto
+  (0010 (values acc)
+    (110
       ; D4 NULL checks exactly the end of a proper list. NOT(ATOM) would
       ; terminate nonempty lists immediately and report every length as 0.
       ((0101 values) acc)
       ; Only a cons cell advances the accumulator. An improper nonempty
       ; tail is not silently counted as an empty list.
-      ((0100 (00000010 values))
-       (length-onto (00000110 values) (00001100 acc 1))))))
+      ((0100 (010 values))
+       (length-onto (011 values) (01010 acc 1))))))
 
 
-(00001001 length
-  (00001000 (values)
+(0011 length
+  (0010 (values)
     (length-onto values 0)))
 
 ; D5:10101 REVERSE-ONTO: canonical ratified surface owns the exact-domain
 ; binding. The historical English spelling below is compatibility-only.
 ; D1-controlled reverse: empty ends the fold; a pair advances it.
 ; Structural (0) and historical truth coercion are not valid D3 predicates.
-(00001001 зворот-до
-  (00001000 (values acc)
-    (00000111
+(0011 зворот-до
+  (0010 (values acc)
+    (110
       ((0101 values) acc)
       ((0100 (010 values))
        (зворот-до (011 values) (111 (100 values) acc))))))
 
 ; Internal derived closure for D6:000000 LENGTH when no admitted D6
 ; evaluator mechanism exists. This is a Lisp binding, not D6 dispatch.
-(00001001 внутрішня-довжина length)
+(0011 внутрішня-довжина length)
 
-(00001001 reverse-onto зворот-до)
+(0011 reverse-onto зворот-до)
 
-(00001001 reverse
-  (00001000 (values)
-    (зворот-до values (00000001 ()))))
+(0011 reverse
+  (0010 (values)
+    (зворот-до values (001 ()))))
 
 ; (reverse-onto (reverse left) right): reversing left first and then
 ; consing it back onto right, one element at a time, rebuilds
@@ -227,47 +227,47 @@
 ; korrekter Reihenfolge wieder auf — zwei endrekursive Durchläufe statt
 ; eines Nicht-Tail-Durchlaufs, ein kleiner Mehraufwand für ein
 ; Rust-Stack-sicheres append.
-(00001001 append
-  (00001000 (left right)
-    (зворот-до (00101010 left) right)))
+(0011 append
+  (0010 (left right)
+    (зворот-до (10100 left) right)))
 
 ; MAP is derived in Lisp: D4 NULL detects exactly the empty list,
 ; while D3 ATOM excludes improper non-pair tails. Both produce D1 control
 ; bits; structural (0) / equal? must never act as a COND predicate.
-(00001001 map-onto
-  (00001000 (f values acc)
-    (00000111
-      ((0101 values) (00101010 acc))
+(0011 map-onto
+  (0010 (f values acc)
+    (110
+      ((0101 values) (10100 acc))
       ((0100 (010 values))
        (map-onto f (011 values) (111 (f (100 values)) acc))))))
 
-(00001001 map
-  (00001000 (f values)
-    (map-onto f values (00000001 ()))))
+(0011 map
+  (0010 (f values)
+    (map-onto f values (001 ()))))
 
-(00001001 filter-onto
-  (00001000 (predicate values acc)
-    (00000111
-      ((0100 (00000010 values)) (00101010 acc))
-      ((00000010 values)  (00101010 acc))
-      ((00000010 values) 
-       (let ((decision (predicate (00000101 values))))
-         (00000111
+(0011 filter-onto
+  (0010 (predicate values acc)
+    (110
+      ((0100 (010 values)) (10100 acc))
+      ((010 values)  (10100 acc))
+      ((010 values) 
+       (let ((decision (predicate (100 values))))
+         (110
            (decision
-            (filter-onto predicate (00000110 values) (00000100 (00000101 values) acc)))
-           ((00000010 predicate)
-            (filter-onto predicate (00000110 values) acc))))))))
+            (filter-onto predicate (011 values) (111 (100 values) acc)))
+           ((010 predicate)
+            (filter-onto predicate (011 values) acc))))))))
 
-(00001001 filter
-  (00001000 (predicate values)
-    (filter-onto predicate values (00000001 ()))))
+(0011 filter
+  (0010 (predicate values)
+    (filter-onto predicate values (001 ()))))
 
-(00001001 reduce
-  (00001000 (f acc values)
-    (00000111
-      ((0100 (00000010 values)) acc)
-      ((00000010 values) 
-       (00111001 f (f acc (00000101 values)) (00000110 values))))))
+(0011 reduce
+  (0010 (f acc values)
+    (110
+      ((0100 (010 values)) acc)
+      ((010 values) 
+       (101110 f (f acc (100 values)) (011 values))))))
 
 ; `let` desugars to an immediately-invoked `lambda`: `(let ((x 1) (y 2)) body)`
 ; expands to `((lambda (x y) body) 1 2)` — the classic trick, same shape as
@@ -307,7 +307,7 @@
 ; admitted evaluator call mechanism. Until that mechanism is proved, the
 ; existing Lisp-owned map closure is the executable derivation for let.
 ; No invented D6 runtime dispatch or numeric/legacy fallback is introduced.
-(00001001 внутрішнє-відображення map)
+(0011 внутрішнє-відображення map)
 ; ЛІХТАР: a bounded macro bridge for legacy Lisp source modules.
 ; A ratified D6 LET identity without an admitted evaluator mechanism is NOT
 ; silently callable. This macro expands a surface call into a fresh lambda
@@ -315,12 +315,12 @@
 ; list and body are syntax, not values or fabricated D6 residents.
 ; (нехай-похідне ((x 7) (y 9)) (00100111 x y)) => (let ((x 7) (y 9)) ...).
 (00001010 нехай-похідне (bindings body)
-  (00000100 (00000001 let)
-    (00000100 bindings (00000100 body (00000001 ())))))
+  (111 (001 let)
+    (111 bindings (111 body (001 ())))))
 
 (00001010 let (bindings body)
-  (00000100 (00100111 (00000001 00001000) (внутрішнє-відображення (00001000 (binding) (00000101 binding)) bindings) body)
-        (внутрішнє-відображення (00001000 (binding) (00101111 binding)) bindings)))
+  (111 (1110 (001 00001000) (внутрішнє-відображення (0010 (binding) (100 binding)) bindings) body)
+        (внутрішнє-відображення (0010 (binding) (1001 binding)) bindings)))
 
 ; `let*` is `let` with sequential (not parallel) dependency: each binding's
 ; value expression can see every binding before it. Expands recursively —
@@ -357,63 +357,63 @@
 ; Core4 15-state scale (#1391): `(1)` — the same structure, `(0)` — different.
 ; Canonical three-part `cond` consumes the answer explicitly; a two-part
 ; clause selects only on a «yes» answer.
-(00001001 equal?
-  (00001000 (a b)
-    (00000111
-      ((0100 (00000010 a))
-       (00000111
-         ((0100 (00000010 b))
-          (00000001 (1)))
-         ((00000010 b) 
-          (00000001 (0)))
-         ((00000010 b) 
-          (00000001 (0)))))
-      ((00000010 a) 
-       (00000111
-         ((0100 (00000010 b))
-          (00000001 (0)))
-         ((00000010 b) 
-          (00000111
-            ((00000011 a b) 
-             (00000001 (1)))
-            ((00000011 a b) 
-             (00000001 (0)))))
-         ((00000010 b) 
-          (00000001 (0)))))
-      ((00000010 a) 
-       (00000111
-         ((0100 (00000010 b))
-          (00000001 (0)))
-         ((00000010 b) 
-          (00000001 (0)))
-         ((00000010 b) 
-          (00000111
-            ((00100010 (00000101 a) (00000101 b)) 
-             (00100010 (00000110 a) (00000110 b)))
-            ((0100 (00100010 (00000101 a) (00000101 b)))
-             (00000001 (0))))))))))
+(0011 equal?
+  (0010 (a b)
+    (110
+      ((0100 (010 a))
+       (110
+         ((0100 (010 b))
+          (001 (1)))
+         ((010 b) 
+          (001 (0)))
+         ((010 b) 
+          (001 (0)))))
+      ((010 a) 
+       (110
+         ((0100 (010 b))
+          (001 (0)))
+         ((010 b) 
+          (110
+            ((101 a b) 
+             (001 (1)))
+            ((101 a b) 
+             (001 (0)))))
+         ((010 b) 
+          (001 (0)))))
+      ((010 a) 
+       (110
+         ((0100 (010 b))
+          (001 (0)))
+         ((010 b) 
+          (001 (0)))
+         ((010 b) 
+          (110
+            ((11110111 (100 a) (100 b)) 
+             (11110111 (011 a) (011 b)))
+            ((0100 (11110111 (100 a) (100 b)))
+             (001 (0))))))))))
 
 ; Exact-Q uses 1 for YES and 0 for NO.  Structural and identity relations
 ; retain their own result domains, so predicate consumers normalize them here.
-(00001001 truthy?
-  (00001000 (value)
-    (00000111
+(0011 truthy?
+  (0010 (value)
+    (110
       
-      ((00000010 value) 
-       (00000111
-         ((00000011 value 0)  (00000001 ()))
-         ((0100 (00000011 value 0)) t)))
-      ((00000010 value) 
-       (00000111
-         ((00100010 value (00000001 (0)))  (00000001 ()))
-         ((00100010 value (00000001 (0)))  (00000001 ()))
-         ((00100010 value (00000001 (0)))  (00000001 ()))
-         ((00000010 ())  t))))))
+      ((010 value) 
+       (110
+         ((101 value 0)  (001 ()))
+         ((0100 (101 value 0)) t)))
+      ((010 value) 
+       (110
+         ((11110111 value (001 (0)))  (001 ()))
+         ((11110111 value (001 (0)))  (001 ()))
+         ((11110111 value (001 (0)))  (001 ()))
+         ((010 ())  t))))))
 
-(00001001 not?
-  (00001000 (value)
-    (00000111
-      ((truthy? value)  (00000001 ()))
+(0011 not?
+  (0010 (value)
+    (110
+      ((truthy? value)  (001 ()))
       ((0100 (truthy? value)) t))))
 
 
@@ -433,64 +433,64 @@
 ; спекулятивна прогалина. Узагальнений assoc тут також збігається з
 ; формою, яку lib/meta-eval.lisp's власний env-lookup уже вручну пише для
 ; свого специфічного випадку asoc-списку (symbol . value).
-(00001001 nth
-  (00001000 (i lst)
-    (00000111
-      ((00000011 i 0)  (00000101 lst))
-      ((00000011 i 0) 
-       (00101011 (00001101 i 1) (00000110 lst))))))
+(0011 nth
+  (0010 (i lst)
+    (110
+      ((101 i 0)  (100 lst))
+      ((101 i 0) 
+       (000100 (01011 i 1) (011 lst))))))
 
-(00001001 member?
-  (00001000 (item lst)
-    (00000111
+(0011 member?
+  (0010 (item lst)
+    (110
       
-      ((00000010 lst) 
-       (00000111
-         ((00100010 item (00000101 lst))  t)
-         ((0100 (00100010 item (00000101 lst)))
-          (00101100 item (00000110 lst))))))))
+      ((010 lst) 
+       (110
+         ((11110111 item (100 lst))  t)
+         ((0100 (11110111 item (100 lst)))
+          (11101 item (011 lst))))))))
 
-(00001001 assoc
-  (00001000 (key alist)
-    (00000111
+(0011 assoc
+  (0010 (key alist)
+    (110
       
-      ((00000010 alist) 
-       (00000111
-         ((00100010 key (00000101 (00000101 alist)))  (00000101 alist))
-         ((0100 (00100010 key (00000101 (00000101 alist))))
-          (00101101 key (00000110 alist))))))))
+      ((010 alist) 
+       (110
+         ((11110111 key (100 (100 alist)))  (100 alist))
+         ((0100 (11110111 key (100 (100 alist))))
+          (11100 key (011 alist))))))))
 
 
 ; D5:11110 PAIRLIS: Lisp-owned structural law. Canonical Ukrainian surface
 ; owns the exact-domain binding; English spelling is compatibility-only.
-(00001001 спарувати
-  (00001000 (keys values tail)
-    (00000111
-      ((0100 (00000010 keys)) tail)
-      ((00000010 keys) 
-       (00000100
-         (00000100 (00000101 keys) (00000101 values))
-         (спарувати (00000110 keys) (00000110 values) tail))))))
+(0011 спарувати
+  (0010 (keys values tail)
+    (110
+      ((0100 (010 keys)) tail)
+      ((010 keys) 
+       (111
+         (111 (100 keys) (100 values))
+         (спарувати (011 keys) (011 values) tail))))))
 
-(00001001 pairlis спарувати)
+(0011 pairlis спарувати)
 
 (00001010 let* (bindings body)
-  (00000111
-    ((00000010 bindings) body)
-    ((00000010 (00000001 ()))
+  (110
+    ((010 bindings) body)
+    ((010 (001 ()))
      ; Expand directly to ((lambda (name) (let* tail body)) value).
      ; This avoids the unadmitted D6:001000 LET execution path while
      ; retaining the language-owned sequential-binding law.
-     (00000100
-       (00000100 (00000001 00001000)
-         (00000100
-           (00000100 (00000101 (00000101 bindings)) (00000001 ()))
-           (00000100
-             (00000100 (00000001 let*)
-               (00000100 (00000110 bindings)
-                 (00000100 body (00000001 ()))))
-             (00000001 ()))))
-       (00000100 (00101111 (00000101 bindings)) (00000001 ()))))))
+     (111
+       (111 (001 00001000)
+         (111
+           (111 (100 (100 bindings)) (001 ()))
+           (111
+             (111 (001 let*)
+               (111 (011 bindings)
+                 (111 body (001 ()))))
+             (001 ()))))
+       (111 (1001 (100 bindings)) (001 ()))))))
 
 ; string-length/string-empty?/string-prefix?/string-contains? (PLAN.md
 ; item 14, item 20's G5 audit test applied live) — none of these need a
@@ -511,59 +511,59 @@
 ; лише по рядку, не по ланцюжку пар. string-append (справді невиразний
 ; так само — нічого тут не може побудувати новий об'єднаний рядок)
 ; лишається в Rust — див. власний коментар у special_forms.rs, чому.
-(00001001 string-membership-helper
-  (00001000 (value)
-    (00000111
-      ((0100 (00000010 value))
-       (00000001 (class-membership string nonmember)))
-      ((00000010 value) 
-       (00000111
-         ((00000011 (00111111 (01001100 value))
-              (00111111 (01001100 "")))
+(0011 string-membership-helper
+  (0010 (value)
+    (110
+      ((0100 (010 value))
+       (001 (class-membership string nonmember)))
+      ((010 value) 
+       (110
+         ((101 (110101011 (11110100 value))
+              (110101011 (11110100 "")))
           
-          (00000001 (class-membership string member)))
-         ((00000011 (00111111 (01001100 value))
-              (00111111 (01001100 "")))
+          (001 (class-membership string member)))
+         ((101 (110101011 (11110100 value))
+              (110101011 (11110100 "")))
           
-          (00000001 (class-membership string nonmember)))))
-      ((00000010 value) 
-       (00000001 (class-membership string nonmember))))))
+          (001 (class-membership string nonmember)))))
+      ((010 value) 
+       (001 (class-membership string nonmember))))))
 
-(00001001 string-order-helper
-  (00001000 (left right)
-    (00000111
-      ((00111100 left) 
-       (00000111
-         ((00111100 right) 
-          (00000001 (text-order same)))
-         ((0100 (00111100 right))
-          (00000001 (text-order before)))))
-      ((0100 (00111100 left))
-       (00000001 (text-order after)))
-      ((00000011 (00111111 left) (00111111 right))
+(0011 string-order-helper
+  (0010 (left right)
+    (110
+      ((110011100 left) 
+       (110
+         ((110011100 right) 
+          (001 (text-order same)))
+         ((0100 (110011100 right))
+          (001 (text-order before)))))
+      ((0100 (110011100 left))
+       (001 (text-order after)))
+      ((101 (110101011 left) (110101011 right))
        
-       (string-order-helper (01000000 left) (01000000 right)))
-      ((00011010 (01000101 (00111111 left))
-          (01000101 (00111111 right)))
+       (string-order-helper (110011101 left) (110011101 right)))
+      ((11010 (11100000 (110101011 left))
+          (11100000 (110101011 right)))
        
-       (00000001 (text-order before)))
-      ((0100 (00011010 (01000101 (00111111 left)) (01000101 (00111111 right))))
-       (00000001 (text-order after))))))
+       (001 (text-order before)))
+      ((0100 (11010 (11100000 (110101011 left)) (11100000 (110101011 right))))
+       (001 (text-order after))))))
 
-(00001001 nonempty-string-membership-helper
-  (00001000 (value)
-    (00000111
+(0011 nonempty-string-membership-helper
+  (0010 (value)
+    (110
       ((string-membership-helper value)
        
-       (00000111
-         ((0100 (00111100 value))
-          (00000001 (class-membership string nonempty-member)))
-         ((00111100 value)
+       (110
+         ((0100 (110011100 value))
+          (001 (class-membership string nonempty-member)))
+         ((110011100 value)
           
-          (00000001 (class-membership string member)))))
+          (001 (class-membership string member)))))
       ((string-membership-helper value)
        
-       (00000001 (class-membership string nonmember))))))
+       (001 (class-membership string nonmember))))))
 
 ; string<? — лексикографічний порядок за кодовими точками, як `<` для &str
 ; у Rust (UTF-8 зберігає порядок кодових точок). Переведено з Rust у мову
@@ -571,17 +571,17 @@
 ; (00111111), string-rest (01000000) і string->codepoint (01000101). Не-рядок
 ; дає природну помилку Type від string-first; неправильна кількість
 ; аргументів — Arity від прив'язки лямбди.
-(00001001 string<?
-  (00001000 (a b)
-    (00000111
+(0011 string<?
+  (0010 (a b)
+    (110
       ; Порожній бік: інший перевіряється як рядок (string-append дає Type).
-      ((00111100 b) 
-       (00101111 (00100111 (00111010 a "") (00000001 ()))))
-      ((00111100 a) 
-       (00101111 (00100111 (00111010 b "") t)))
-      ((00011010 (01000101 (00111111 a)) (01000101 (00111111 b)))  t)
-      ((00000011 (00111111 a) (00111111 b)) 
-       (00100101 (01000000 a) (01000000 b)))
+      ((110011100 b) 
+       (1001 (1110 (110011110 a "") (001 ()))))
+      ((110011100 a) 
+       (1001 (1110 (110011110 b "") t)))
+      ((11010 (11100000 (110101011 a)) (11100000 (110101011 b)))  t)
+      ((101 (110101011 a) (110101011 b)) 
+       (10110001 (110011101 a) (110011101 b)))
       )))
 
 
@@ -595,16 +595,16 @@
 ; відновленому з його канонічного тексту. `atom` не допускає пари до `eq`.
 ; `symbol?` wurde aus Rust verschoben: Unter Atomen ist nur ein Symbol mit dem
 ; aus seinem kanonischen Text rekonstruierten Symbol identisch; `atom` schützt `eq`.
-(00001001 symbol?
-  (00001000 (value)
-    (00000111
+(0011 symbol?
+  (0010 (value)
+    (110
       
-      ((00000010 value) 
-       (00000111
-         ((00000011 value (01000011 (01001100 value)))
-           (00000010 (00000001 ())))
+      ((010 value) 
+       (110
+         ((101 value (11101101 (11110100 value)))
+           (010 (001 ())))
          ))
-      ((00000010 value)  (00000001 ())))))
+      ((010 value)  (001 ())))))
 
 
 ; quotient/mod (G5 test: already expressible via existing means?) — yes.
@@ -661,12 +661,12 @@
 ; відняти, повторити) — стандартний трюк бінарного довгого ділення,
 ; глибина рекурсії O(log(a/b)) як у `largest-chunk`, так і в самому
 ; `quotient`, перевірено на 13-розрядному діленому без проблем.
-(00001001 largest-chunk
-  (00001000 (a b chunk mult)
-    (00000111
-      ((00011010 a (00001100 chunk chunk))  (00000100 chunk mult))
-      ((0100 (00011010 a (00001100 chunk chunk)))
-       (00011001 a b (00001100 chunk chunk) (00001100 mult mult))))))
+(0011 largest-chunk
+  (0010 (a b chunk mult)
+    (110
+      ((11010 a (01010 chunk chunk))  (111 chunk mult))
+      ((0100 (11010 a (01010 chunk chunk)))
+       (00011001 a b (01010 chunk chunk) (01010 mult mult))))))
 
 ; `b = 0` used to hang forever: `largest-chunk` starts doubling from
 ; `chunk = b`, and `0 + 0 = 0` never grows, so its "does chunk still
@@ -685,53 +685,53 @@
 ; нуль (`ErrorKind::InvalidForm`) — маршрутизація через нього тут
 ; перевикористовує цю реальну, вже перевірену помилку замість
 ; вигадування другої, іншої для того самого стану.
-(00001001 quotient
-  (00001000 (a b)
-    (00000111
-      ((00000011 b 0)  (00001111 a b))
-      ((00000011 b 0) 
-       (00000111
-         ((00011010 a b)  0)
-         ((0100 (00011010 a b))
+(0011 quotient
+  (0010 (a b)
+    (110
+      ((101 b 0)  (11110110 a b))
+      ((101 b 0) 
+       (110
+         ((11010 a b)  0)
+         ((0100 (11010 a b))
           (let ((chunk+mult (00011001 a b b 1)))
-            (00001100 (00000110 chunk+mult)
-               (00010100 (00001101 a (00000101 chunk+mult)) b)))))))))
+            (01010 (011 chunk+mult)
+               (10111 (01011 a (100 chunk+mult)) b)))))))))
 
-(00001001 mod
-  (00001000 (a b)
-    (00001101 a (00001110 b (00010100 a b)))))
+(0011 mod
+  (0010 (a b)
+    (01011 a (10110 b (10111 a b)))))
 
 ; `<=` and `>=` stay Lisp-derived, but #216 now requires the derived
 ; operators to preserve the same exact-Q answer algebra as `<`, `>` and `=`:
 ; exact YES -> 1/1, exact NO -> 0/1, and any inexact operand -> Canon 0 `()`.
 ; Canonical three-part `cond` distinguishes exact NO (0) from no-answer `()`
 ; without routing either through generic truthiness.
-(00001001 nondecreasing-from?
-  (00001000 (current remaining)
-    (00000111
-      ((0100 (00000010 remaining)) 1)
-      ((00011010 current (00000101 remaining)) 
-       (00011111 (00000101 remaining) (00000110 remaining)))
-      ((00011100 current (00000101 remaining)) 
-       (00011111 (00000101 remaining) (00000110 remaining)))
-      ((0100 (00011100 current (00000101 remaining))) 0))))
+(0011 nondecreasing-from?
+  (0010 (current remaining)
+    (110
+      ((0100 (010 remaining)) 1)
+      ((11010 current (100 remaining)) 
+       (00011111 (100 remaining) (011 remaining)))
+      ((11110111 current (100 remaining)) 
+       (00011111 (100 remaining) (011 remaining)))
+      ((0100 (11110111 current (100 remaining))) 0))))
 
-(00001001 nonincreasing-from?
-  (00001000 (current remaining)
-    (00000111
-      ((0100 (00000010 remaining)) 1)
-      ((00011011 current (00000101 remaining)) 
-       (00100000 (00000101 remaining) (00000110 remaining)))
-      ((00011100 current (00000101 remaining)) 
-       (00100000 (00000101 remaining) (00000110 remaining)))
-      ((0100 (00011100 current (00000101 remaining))) 0))))
+(0011 nonincreasing-from?
+  (0010 (current remaining)
+    (110
+      ((0100 (010 remaining)) 1)
+      ((11011 current (100 remaining)) 
+       (00100000 (100 remaining) (011 remaining)))
+      ((11110111 current (100 remaining)) 
+       (00100000 (100 remaining) (011 remaining)))
+      ((0100 (11110111 current (100 remaining))) 0))))
 
-(00001001 <=
-  (00001000 (first . remaining)
+(0011 <=
+  (0010 (first . remaining)
     (00011111 first remaining)))
 
-(00001001 >=
-  (00001000 (first . remaining)
+(0011 >=
+  (0010 (first . remaining)
     (00100000 first remaining)))
 
 ; number->string (G5 test: already expressible via existing means?) —
@@ -751,26 +751,26 @@
 ; quotient/mod, та сама -onto-форма акумулятора, що й length-onto/
 ; reverse-onto вище, тож не має власної стелі розрядності. Обсяг:
 ; лише невід'ємні цілі, як і самі quotient/mod.
-(00001001 digit->string
+(0011 digit->string
   ; Superseded by number->string's canonical delegation to write-to-string
   ; (FIX-NUMBER-TO-STRING-RATIONAL). Retained because racket/boot/core.lisp
   ; mirrors this file and fpga-lisp's assembler.lisp carries its own local
   ; variant — removal is a separate mirrored-surface decision, not a
   ; silent one.
-  (00001000 (d)
-    (00101011 d (00000001 ("0" "1" "2" "3" "4" "5" "6" "7" "8" "9")))))
+  (0010 (d)
+    (000100 d (001 ("0" "1" "2" "3" "4" "5" "6" "7" "8" "9")))))
 
-(00001001 number->string-onto
-  (00001000 (n acc)
-    (00000111
-      ((00000011 n 0)  acc)
-      ((00000011 n 0) 
+(0011 number->string-onto
+  (0010 (n acc)
+    (110
+      ((101 n 0)  acc)
+      ((101 n 0) 
        (number->string-onto
-         (00010100 n #d10)
-         (00111010 (01000111 (00010011 n #d10)) acc))))))
+         (10111 n #d10)
+         (110011110 (01000111 (00101100 n #d10)) acc))))))
 
-(00001001 number->string
-  (00001000 (n)
+(0011 number->string
+  (0010 (n)
     ; Canonical serialization for every number (FIX-NUMBER-TO-STRING-
     ; RATIONAL, docs/BUG-number-to-string-rational.md): integers render
     ; as themselves, non-integer rationals render REDUCED exactly —
@@ -780,7 +780,7 @@
     ; its misleading error surfaced as an apparent memory corruption.
     ; Delegation, not re-implementation: write-to-string is already the
     ; contract-tested renderer (G6 fixtures), so this cannot drift from it.
-    (01001100 n)))
+    (11110100 n)))
 
 ; -> / ->> (thread-first / thread-last macros) — express transformation pipelines
 ; without deep nesting (PLAN.md item / clean-code policy).
@@ -796,46 +796,46 @@
 ; -> / ->> (Threading-Makros) — drücken Transformations-Pipelines ohne tiefe
 ; Verschachtelung aus.
 (00001010 -> forms
-  (00000111
+  (110
     
-    ((00000010 forms) 
-     (00000111
-       ((0100 (00000010 (00000110 forms))) (00000101 forms))
-       ((00000010 (00000110 forms)) 
-        (10011101 ((x (00000101 forms))
-               (next (00000101 (00000110 forms)))
-               (rest (00000110 (00000110 forms)))
+    ((010 forms) 
+     (110
+       ((0100 (010 (011 forms))) (100 forms))
+       ((010 (011 forms)) 
+        (001001 ((x (100 forms))
+               (next (100 (011 forms)))
+               (rest (011 (011 forms)))
                (step
-                 (00000111
-                   ((0100 (00000010 next)) (00100111 next x))
-                   ((00000010 next)  (00100111 next x))
-                   ((00000010 next) 
-                    (00000100 (00000101 next) (00000100 x (00000110 next)))))))
-          (00000111
-            ((0100 (00000010 rest)) step)
-            ((00000010 rest) 
-             (00000100 (00000001 ->) (00000100 step rest))))))))))
+                 (110
+                   ((0100 (010 next)) (1110 next x))
+                   ((010 next)  (1110 next x))
+                   ((010 next) 
+                    (111 (100 next) (111 x (011 next)))))))
+          (110
+            ((0100 (010 rest)) step)
+            ((010 rest) 
+             (111 (001 ->) (111 step rest))))))))))
 
 (00001010 ->> forms
-  (00000111
+  (110
     
-    ((00000010 forms) 
-     (00000111
-       ((0100 (00000010 (00000110 forms))) (00000101 forms))
-       ((00000010 (00000110 forms)) 
-        (10011101 ((x (00000101 forms))
-               (next (00000101 (00000110 forms)))
-               (rest (00000110 (00000110 forms)))
+    ((010 forms) 
+     (110
+       ((0100 (010 (011 forms))) (100 forms))
+       ((010 (011 forms)) 
+        (001001 ((x (100 forms))
+               (next (100 (011 forms)))
+               (rest (011 (011 forms)))
                (step
-                 (00000111
-                   ((0100 (00000010 next)) (00100111 next x))
-                   ((00000010 next)  (00100111 next x))
-                   ((00000010 next) 
-                    (00101001 next (00100111 x))))))
-          (00000111
-            ((0100 (00000010 rest)) step)
-            ((00000010 rest) 
-             (00000100 (00000001 ->>) (00000100 step rest))))))))))
+                 (110
+                   ((0100 (010 next)) (1110 next x))
+                   ((010 next)  (1110 next x))
+                   ((010 next) 
+                    (1111 next (1110 x))))))
+          (110
+            ((0100 (010 rest)) step)
+            ((010 rest) 
+             (111 (001 ->>) (111 step rest))))))))))
 
 ;; ── Numeric library additions (M0, 2026-08-22) ─────────────────────
 ;; Додано для реальних задач (WSM-24 shape comparison): abs/min/max/
@@ -849,39 +849,39 @@
 ;;                      наближення, дробове — дробовий результат
 ;;                      (S1 inexact promotion). Відʼємний вхід → nil.
 
-(00001001 sqrt-iter
-  (00001000 (guess x n)
-    (00000111
-      ((00011100 n 0)  guess)
-      ((0100 (00011100 n 0))
-       (sqrt-iter (00001111 (00001100 guess (00001111 x guess)) 2) x (00001101 n 1))))))
+(0011 sqrt-iter
+  (0010 (guess x n)
+    (110
+      ((11110111 n 0)  guess)
+      ((0100 (11110111 n 0))
+       (sqrt-iter (11110110 (01010 guess (11110110 x guess)) 2) x (01011 n 1))))))
 
 ;; integer sqrt: Newton on quotients — provably terminating
-(00001001 isqrt
-  (00001000 (n)
-    (00000111
-      ((00011010 n 2)  n)
-      ((0100 (00011010 n 2))
-       (isqrt-step n (00010100 n 2))))))
+(0011 isqrt
+  (0010 (n)
+    (110
+      ((11010 n 2)  n)
+      ((0100 (11010 n 2))
+       (isqrt-step n (10111 n 2))))))
 
-(00001001 isqrt-step
-  (00001000 (n g)
-    (let ((next (00010100 (00001100 g (00010100 n g)) 2)))
-      (00000111
-        ((00011010 next g)  (isqrt-step n next))
-        ((0100 (00011010 next g)) g)))))
+(0011 isqrt-step
+  (0010 (n g)
+    (let ((next (10111 (01010 g (10111 n g)) 2)))
+      (110
+        ((11010 next g)  (isqrt-step n next))
+        ((0100 (11010 next g)) g)))))
 
-(00001001 sqrt
-  (00001000 (x)
-    (00000111
-      ((00011010 x 0)  (00000001 ()))
-      ((00011100 x 0)  0)
-      ((00011100 x (00010100 x 1)) 
-       (let ((r (00010110 x)))
-         (00000111
-           ((00011100 (00001110 r r) x)  r)
-           ((00000010 ())  (sqrt-iter (00001111 x 2) x 8)))))
-      ((00000010 ())  (sqrt-iter (00001111 x 2.0) x 5)))))
+(0011 sqrt
+  (0010 (x)
+    (110
+      ((11010 x 0)  (001 ()))
+      ((11110111 x 0)  0)
+      ((11110111 x (10111 x 1)) 
+       (let ((r (110111010 x)))
+         (110
+           ((11110111 (10110 r r) x)  r)
+           ((010 ())  (sqrt-iter (11110110 x 2) x 8)))))
+      ((010 ())  (sqrt-iter (11110110 x 2.0) x 5)))))
 
 ; abs/min/max/min-list/max-list — migrated from Rust builtins.rs to
 ; lib/core.lisp (owner directive 2026-09-11: "Lisp owns meaning, Rust owns
@@ -906,24 +906,24 @@
 ; volodiie lyshe nezvidnym mekhanizmom") — ni odyn iz piaty ne torkaietsia
 ; OS/host-mozhlyvosti, lyshe aryfmetychne porivniannia ta obkhid cons-spysku,
 ; vzhe vyrazhuvani samoiu movoiu.
-(00001001 abs
-  (00001000 (x)
-    (00000111
-      ((00011010 x 0)  (00001101 0 x))
-      ((0100 (00011010 x 0)) x))))
+(0011 abs
+  (0010 (x)
+    (110
+      ((11010 x 0)  (01011 0 x))
+      ((0100 (11010 x 0)) x))))
 
 ; Required first parameter (dotted lambda-list, same pattern as
 ; `<=`/`>=` above) keeps zero arguments an Arity error via the
 ; evaluator's own lambda-binding check -- matching the removed Rust
 ; builtin's explicit "min/max expects at least one argument" error --
 ; without this Lisp definition needing to raise a custom error itself.
-(00001001 min
-  (00001000 (first . rest)
-    (00010111 (00000100 first rest))))
+(0011 min
+  (0010 (first . rest)
+    (000010 (111 first rest))))
 
-(00001001 max
-  (00001000 (first . rest)
-    (00011000 (00000100 first rest))))
+(0011 max
+  (0010 (first . rest)
+    (000011 (111 first rest))))
 
 ; Two real bugs found live via oracle testing before this landed, not
 ; assumed from reading the removed Rust source:
@@ -937,33 +937,33 @@
 ;    the base-case branch. `items` itself is safe to test with `atom`
 ;    (it's always a list or (), never itself a bare number), but the
 ;    accumulator must use structural `equal?` against `(quote ())`.
-(00001001 min-list
-  (00001000 (items)
-    (00000111
+(0011 min-list
+  (0010 (items)
+    (110
       
-      ((00000010 items) 
-       (let ((rest-min (00010111 (00000110 items))))
-         (00000111
-           ((00100010 rest-min (00000001 ())) 
-            (00000101 items))
-           ((0100 (00100010 rest-min (00000001 ())))
-            (00000111
-              ((00011010 (00000101 items) rest-min)  (00000101 items))
-              ((0100 (00011010 (00000101 items) rest-min)) rest-min)))))))))
+      ((010 items) 
+       (let ((rest-min (000010 (011 items))))
+         (110
+           ((11110111 rest-min (001 ())) 
+            (100 items))
+           ((0100 (11110111 rest-min (001 ())))
+            (110
+              ((11010 (100 items) rest-min)  (100 items))
+              ((0100 (11010 (100 items) rest-min)) rest-min)))))))))
 
-(00001001 max-list
-  (00001000 (items)
-    (00000111
+(0011 max-list
+  (0010 (items)
+    (110
       
-      ((00000010 items) 
-       (let ((rest-max (00011000 (00000110 items))))
-         (00000111
-           ((00100010 rest-max (00000001 ())) 
-            (00000101 items))
-           ((0100 (00100010 rest-max (00000001 ())))
-            (00000111
-              ((00011011 (00000101 items) rest-max)  (00000101 items))
-              ((0100 (00011011 (00000101 items) rest-max)) rest-max)))))))))
+      ((010 items) 
+       (let ((rest-max (000011 (011 items))))
+         (110
+           ((11110111 rest-max (001 ())) 
+            (100 items))
+           ((0100 (11110111 rest-max (001 ())))
+            (110
+              ((11011 (100 items) rest-max)  (100 items))
+              ((0100 (11011 (100 items) rest-max)) rest-max)))))))))
 
 ; #469 — post-core stable peer materialization.
 ;
@@ -975,8 +975,8 @@
 ; Keep only unique stable spellings from lib/surface/semantic-registry.lisp.
 ; Candidate spellings are deliberately absent and therefore cannot become
 ; executable merely by appearing in documentation.
-(00001001 my-postcore-stable-peer-projection
-  (00000001 (
+(0011 my-postcore-stable-peer-projection
+  (001 (
     (1079 utc-now поточний-всч)
     (1080 utc-from-unix всч-із-юнікс)
     (1081 unix-time-observation->utc юнікс-спостереження-у-всч)
@@ -999,145 +999,145 @@
     (167 write-file записати-файл)
   )))
 
-(00001001 my-postcore-peer-group
-  (00001000 (semantic-id groups)
-    (00000111
+(0011 my-postcore-peer-group
+  (0010 (semantic-id groups)
+    (110
       
-      ((00000010 groups) 
-       (let ((group (00000101 groups)))
-         (00000111
-           ((00000011 semantic-id (00000101 group)) 
+      ((010 groups) 
+       (let ((group (100 groups)))
+         (110
+           ((101 semantic-id (100 group)) 
             group)
-           ((00000011 semantic-id (00000101 group)) 
-            (my-postcore-peer-group semantic-id (00000110 groups)))))))))
+           ((101 semantic-id (100 group)) 
+            (my-postcore-peer-group semantic-id (011 groups)))))))))
 
-(00001001 my-postcore-binding-status
-  (00001000 (surface bindings)
-    (00000111
-      ((0100 (00000010 bindings))
-       (00000001 absent))
-      ((00000010 bindings) 
-       (let ((binding (00000101 bindings)))
-         (00000111
-           ((00000011 (01000010 surface) (00000101 binding)) 
-            (00000001 present))
-           ((00000011 (01000010 surface) (00000101 binding)) 
-            (my-postcore-binding-status surface (00000110 bindings)))))))))
+(0011 my-postcore-binding-status
+  (0010 (surface bindings)
+    (110
+      ((0100 (010 bindings))
+       (001 absent))
+      ((010 bindings) 
+       (let ((binding (100 bindings)))
+         (110
+           ((101 (11101110 surface) (100 binding)) 
+            (001 present))
+           ((101 (11101110 surface) (100 binding)) 
+            (my-postcore-binding-status surface (011 bindings)))))))))
 
-(00001001 my-postcore-missing-peers
-  (00001000 (source peers bindings)
-    (00000111
+(0011 my-postcore-missing-peers
+  (0010 (source peers bindings)
+    (110
       
-      ((00000010 peers) 
-       (let ((peer (00000101 peers)))
-         (00000111
-           ((00000011 source peer) 
-            (my-postcore-missing-peers source (00000110 peers) bindings))
-           ((00000011 source peer) 
-            (00000111
-              ((00000011 (my-postcore-binding-status peer bindings) (00000001 present))
+      ((010 peers) 
+       (let ((peer (100 peers)))
+         (110
+           ((101 source peer) 
+            (my-postcore-missing-peers source (011 peers) bindings))
+           ((101 source peer) 
+            (110
+              ((101 (my-postcore-binding-status peer bindings) (001 present))
                
-               (my-postcore-missing-peers source (00000110 peers) bindings))
-              ((00000011 (my-postcore-binding-status peer bindings) (00000001 absent))
+               (my-postcore-missing-peers source (011 peers) bindings))
+              ((101 (my-postcore-binding-status peer bindings) (001 absent))
                
-               (00000100 peer
+               (111 peer
                      (my-postcore-missing-peers
                        source
-                       (00000110 peers)
+                       (011 peers)
                        bindings)))))))))))
 
 ; Build one expression whose nested DEFINE forms all execute in the caller's
 ; environment. This is why materialization is a macro rather than a function:
 ; an ordinary function would define peers only in its temporary child frame.
-(00001001 my-postcore-build-definitions
-  (00001000 (source peers)
-    (00000111
-      ((0100 (00000010 peers))
+(0011 my-postcore-build-definitions
+  (0010 (source peers)
+    (110
+      ((0100 (010 peers))
        source)
-      ((00000010 peers) 
-       (00100111 (00000001 define)
-             (00000101 peers)
-             (my-postcore-build-definitions source (00000110 peers)))))))
+      ((010 peers) 
+       (1110 (001 define)
+             (100 peers)
+             (my-postcore-build-definitions source (011 peers)))))))
 
 (00001010 my-postcore-materialize-stable-peers args
-  (10011101 ((semantic-id (00000101 args))
-         (source (00101111 args))
+  (001001 ((semantic-id (100 args))
+         (source (1001 args))
          (group
            (my-postcore-peer-group
              semantic-id
              my-postcore-stable-peer-projection)))
-    (00000111
-      ((0100 (00000010 group))
+    (110
+      ((0100 (010 group))
        source)
-      ((00000010 group) 
+      ((010 group) 
        (my-postcore-build-definitions
          source
-         (my-postcore-missing-peers source (00000110 group) (01001110)))))))
+         (my-postcore-missing-peers source (011 group) (11100111)))))))
 
 ; Ділення з остачою (Lisp 1.5 DIVIDE): повертає список (частка остача).
-(00001001 divmod
-  (00001000 (dividend divisor)
-    (00100111 (00010100 dividend divisor) (00010011 dividend divisor))))
+(0011 divmod
+  (0010 (dividend divisor)
+    (1110 (10111 dividend divisor) (00101100 dividend divisor))))
 
 ; McCarthy 1960, §3d: null, subst, sublis, maplist, apply — закон Core4, коди СЕНС.
-(00001001 null?
-  (00001000 (x)
-    (00000111
-      ((0100 (00000010 x)) t)
-      ((00000010 x)  (00000001 ()))
-      ((00000010 x)  (00000001 ())))))
+(0011 null?
+  (0010 (x)
+    (110
+      ((0100 (010 x)) t)
+      ((010 x)  (001 ()))
+      ((010 x)  (001 ())))))
 
-(00001001 subst
-  (00001000 (x y z)
-    (00000111
-      ((00000010 z) 
-       (00000100 (10101100 x y (00000101 z)) (10101100 x y (00000110 z))))
-      ((0100 (00000010 z))
-       (00000111
-         ((00000011 z y)  x)
-         ((0100 (00000011 z y)) z)))
-      ((00000010 z) 
-       (00000111
-         ((00000011 z y)  x)
-         ((0100 (00000011 z y)) z))))))
+(0011 subst
+  (0010 (x y z)
+    (110
+      ((010 z) 
+       (111 (11111 x y (100 z)) (11111 x y (011 z))))
+      ((0100 (010 z))
+       (110
+         ((101 z y)  x)
+         ((0100 (101 z y)) z)))
+      ((010 z) 
+       (110
+         ((101 z y)  x)
+         ((0100 (101 z y)) z))))))
 
-(00001001 sublis-pair
-  (00001000 (x z)
-    (00000111
-      ((0100 (00000010 x)) z)
-      ((00000010 x) 
-       (00000111
-         ((00000011 (00000101 (00000101 x)) z) 
-          (00000101 (00000110 (00000101 x))))
-         ((00000011 (00000101 (00000101 x)) z) 
-          (sublis-pair (00000110 x) z)))))))
+(0011 sublis-pair
+  (0010 (x z)
+    (110
+      ((0100 (010 x)) z)
+      ((010 x) 
+       (110
+         ((101 (100 (100 x)) z) 
+          (100 (011 (100 x))))
+         ((101 (100 (100 x)) z) 
+          (sublis-pair (011 x) z)))))))
 
-(00001001 sublis
-  (00001000 (x y)
-    (00000111
-      ((00000010 y) 
-       (00000100 (10101101 x (00000101 y)) (10101101 x (00000110 y))))
-      ((0100 (00000010 y)) (sublis-pair x y))
-      ((00000010 y)  (sublis-pair x y)))))
+(0011 sublis
+  (0010 (x y)
+    (110
+      ((010 y) 
+       (111 (001010 x (100 y)) (001010 x (011 y))))
+      ((0100 (010 y)) (sublis-pair x y))
+      ((010 y)  (sublis-pair x y)))))
 
-(00001001 maplist
-  (00001000 (x f)
-    (00000111
+(0011 maplist
+  (0010 (x f)
+    (110
       
-      ((00000010 x) 
-       (00000100 (f x) (10101110 (00000110 x) f))))))
+      ((010 x) 
+       (111 (f x) (000101 (011 x) f))))))
 
-(00001001 apply-quote-args
-  (00001000 (m)
-    (00000111
+(0011 apply-quote-args
+  (0010 (m)
+    (110
       
-      ((00000010 m) 
-       (00000100 (00000100 (00000001 00000001) (00000100 (00000101 m) (00000001 ())))
-                 (apply-quote-args (00000110 m)))))))
+      ((010 m) 
+       (111 (111 (001 00000001) (111 (100 m) (001 ())))
+                 (apply-quote-args (011 m)))))))
 
-(00001001 apply
-  (00001000 (f args)
-    (01001101 (00000100 f (apply-quote-args args)))))
+(0011 apply
+  (0010 (f args)
+    (0001 (111 f (apply-quote-args args)))))
 
 ; #1391: логіка відповідей Core4 — закон contracts/core4-predicate-answer-scale.lisp /3.
 ; Відповідь — список двійкових бітів: (1)…(1 1 1 1 1 1 1) «так»,
@@ -1146,85 +1146,85 @@
 ; Виконуваний свідок законів — experiments/core4-logic15-algebra.lisp.
 
 ; NOT: інвертувати кожен біт, ширина та сама; () лишається ().
-(00001001 answer-not
-  (00001000 (a)
-    (00000111
+(0011 answer-not
+  (0010 (a)
+    (110
       
-      ((00000010 a) 
-       (00000100
-         (00000111
-           ((00000011 (00000101 a) 0)  1)
-           ((0100 (00000011 (00000101 a) 0)) 0))
-         (10110001 (00000110 a)))))))
+      ((010 a) 
+       (111
+         (110
+           ((101 (100 a) 0)  1)
+           ((0100 (101 (100 a) 0)) 0))
+         (110111011 (011 a)))))))
 
 ; AND: мінімум на лінії. «Ні» перемагає; з двох «ні» — коротше (сильніше);
 ; з двох «так» — довше (слабше); () поглинає «так».
 ; Для двох відповідей одного напряму крок іде по обох списках разом.
-(00001001 answer-and
-  (00001000 (a b)
-    (00000111
-      ((0100 (00000010 a))
-       (00000111
+(0011 answer-and
+  (0010 (a b)
+    (110
+      ((0100 (010 a))
+       (110
          
-         ((00000010 b) 
-          (00000111
-            ((00000011 (00000101 b) 0)  b)
-            ((00000011 (00000101 b) 0)  (00000001 ()))))))
-      ((00000010 a) 
-       (00000111
-         ((0100 (00000010 b))
-          (00000111
-            ((00000011 (00000101 a) 0)  a)
-            ((00000011 (00000101 a) 0)  (00000001 ()))))
-         ((00000010 b) 
-          (00000111
-            ((00000011 (00000101 a) (00000101 b)) 
-             (00000111
-               ((00000011 (00000101 a) 0)  a)
-               ((0100 (00000011 (00000101 a) 0)) b)))
-            ((00000011 (00000101 a) (00000101 b)) 
-             (00000111
-               ((0100 (00000010 (00000110 a)))
-                (00000111
-                  ((00000011 (00000101 a) 0)  a)
-                  ((0100 (00000011 (00000101 a) 0)) b)))
-               ((0100 (00000010 (00000110 b)))
-                (00000111
-                  ((00000011 (00000101 b) 0)  b)
-                  ((0100 (00000011 (00000101 b) 0)) a)))
-               ((00000010 (00000110 b)) 
-                (00000100 (00000101 a)
-                          (10110010 (00000110 a) (00000110 b)))))))))))))
+         ((010 b) 
+          (110
+            ((101 (100 b) 0)  b)
+            ((101 (100 b) 0)  (001 ()))))))
+      ((010 a) 
+       (110
+         ((0100 (010 b))
+          (110
+            ((101 (100 a) 0)  a)
+            ((101 (100 a) 0)  (001 ()))))
+         ((010 b) 
+          (110
+            ((101 (100 a) (100 b)) 
+             (110
+               ((101 (100 a) 0)  a)
+               ((0100 (101 (100 a) 0)) b)))
+            ((101 (100 a) (100 b)) 
+             (110
+               ((0100 (010 (011 a)))
+                (110
+                  ((101 (100 a) 0)  a)
+                  ((0100 (101 (100 a) 0)) b)))
+               ((0100 (010 (011 b)))
+                (110
+                  ((101 (100 b) 0)  b)
+                  ((0100 (101 (100 b) 0)) a)))
+               ((010 (011 b)) 
+                (111 (100 a)
+                          (110110100 (011 a) (011 b)))))))))))))
 
 ; OR: максимум на лінії = NOT(AND(NOT a, NOT b)).
-(00001001 answer-or
-  (00001000 (a b)
-    (10110001 (10110010 (10110001 a) (10110001 b)))))
+(0011 answer-or
+  (0010 (a b)
+    (110111011 (110110100 (110111011 a) (110111011 b)))))
 
 ; Послаблення: дописати той самий біт; восьмий біт належить 256 функціям,
 ; тож із семи бітів шкала сходиться в ().
-(00001001 answer-weaken
-  (00001000 (a)
-    (00000111
+(0011 answer-weaken
+  (0010 (a)
+    (110
       
-      ((00000010 a) 
-       (00000111
-         ((00000011 (00101000 a) 7)  (00000001 ()))
-         ((00000011 (00101000 a) 7) 
-          (00000100 (00000101 a) a)))))))
+      ((010 a) 
+       (110
+         ((101 (000000 a) 7)  (001 ()))
+         ((101 (000000 a) 7) 
+          (111 (100 a) a)))))))
 
 ; atom? відповіддю шкали: атом (1), пара (0), () — невідомо, бо () стоїть
 ; вище розрізнення атом/пара.
-(00001001 answer-atom
-  (00001000 (x)
-    (00000111
-      ((00000010 x)  (00000001 (1)))
-      ((00000010 x)  (00000001 (0)))
+(0011 answer-atom
+  (0010 (x)
+    (110
+      ((010 x)  (001 (1)))
+      ((010 x)  (001 (0)))
       )))
 
 ; eq? відповіддю шкали: same (1), distinct (0). Область та сама, що в eq?: атоми.
-(00001001 answer-eq
-  (00001000 (a b)
-    (00000111
-      ((00000011 a b)  (00000001 (1)))
-      ((00000011 a b)  (00000001 (0))))))
+(0011 answer-eq
+  (0010 (a b)
+    (110
+      ((101 a b)  (001 (1)))
+      ((101 a b)  (001 (0))))))
