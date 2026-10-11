@@ -741,6 +741,7 @@ def encode(node,resolver,text7,quoted=False,lexical_env=()):
         words=[D2_OPEN]
         head_bits=None
         lambda_names=()
+        define_names=()
 
         for idx,item in enumerate(node.items):
             if idx:
@@ -792,8 +793,10 @@ def encode(node,resolver,text7,quoted=False,lexical_env=()):
                 )
                 continue
 
-            # D4 DEFINE: the binding target gets the same contextual Text7 frame
-            # used by global call heads. Shorthand signature remains data-shaped.
+            # D4 DEFINE: both a simple binding and a shorthand function
+            # signature carry contextual Text7 identifiers, never raw names.
+            # A shorthand (name arg ...) introduces the args into the body scope
+            # exactly as an immediately applied LAMBDA would.
             if not quoted and head_bits=="0011" and idx==1:
                 if isinstance(item,Atom):
                     words.extend(
@@ -801,10 +804,19 @@ def encode(node,resolver,text7,quoted=False,lexical_env=()):
                     )
                     continue
                 if isinstance(item,ListNode):
-                    words.extend(
-                        encode(item,resolver,text7,quoted=True,lexical_env=())
-                    )
+                    signature=lambda_parameter_names(item)
+                    if not signature:
+                        raise MigrationError("DEFINE shorthand requires a function name",item.tok)
+                    define_names=tuple(signature[1:])
+                    words.extend(encode_lambda_params(item,text7))
                     continue
+
+            if not quoted and head_bits=="0011" and idx>=2:
+                body_env=tuple(define_names)+tuple(lexical_env)
+                words.extend(
+                    encode(item,resolver,text7,quoted=False,lexical_env=body_env)
+                )
+                continue
 
             # COND clauses are structural containers, not call heads.
             if not quoted and head_bits=="110":
