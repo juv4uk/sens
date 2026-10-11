@@ -12847,21 +12847,33 @@
       "ratified": false,
       "physical_t5_authorized": false,
       "proof_readiness": {
-        "status": "INCOMPLETE-SOURCE-SEMANTICS",
-        "missing": [
-          "semantic-law",
-          "positive-witness",
-          "negative-falsifier"
-        ],
+        "status": "SOURCE-LAW-WITNESSES-PRESENT-UNVERIFIED",
+        "missing": [],
         "selection": false,
         "ratification": false,
-        "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+        "next_gate": "D1-D9-DEDUPE-CORE-VS-LIBRARY-AND-INDEPENDENT-ORACLE"
       },
       "source_candidate_gate": {
-        "status": "USER-INTEREST-NAME-ONLY-NO-SOURCE-OPERATION",
-        "source_kind": "owner-interest",
+        "status": "MATHEMATICAL-RESEARCH-LAW-WITH-INDEPENDENT-ORACLE",
+        "source_kind": "RECONCILED-HISTORICAL-BRANCH",
         "not_a_ratified_resident": true,
-        "reason": "A source occurrence or wish-list name is not an independent D10 law; candidate requires typed contract and distinct behavior."
+        "reason": "A source occurrence or wish-list name is not an independent D10 law; candidate requires typed contract and distinct behavior.",
+        "reviewed_from_donor_branch": true
+      },
+      "source_evidence": {
+        "status": "SOURCE-PINNED-INDEPENDENT-BOUNDED-DUAL-ORACLES-NOT-SENS-RUNTIME",
+        "source_branch": "research/d10-canonical-topological-order-20261011",
+        "source_path": "tools/research_d10_canonical_topological_order.py",
+        "source_git_blob": "ff52f0d26b198fdf2297be1f0b57ca7aaf524673",
+        "law": "For a finite directed graph with an explicit totally ordered finite vertex set, return the lexicographically smallest full topological permutation when the graph is acyclic, or CYCLIC if a directed cycle or self-loop exists. All edges u→v require pos(u)<pos(v); input vertex identities and edge validity are checked. This candidate specifies canonical lex-min order, not an implementation-dependent DFS order.",
+        "positive": "n=0, edges=[] -> []; n=4, edges=[] -> [0,1,2,3]; n=3, edges=[(0,2),(1,2)] -> [0,1,2]; n=3, edges=[(1,0)] -> [1,0,2].",
+        "negative": "n=3, edges=[(0,1),(1,2),(2,0)] -> CYCLIC, not a partial order; n=2, self-loop (1,1) -> CYCLIC; a duplicate edge or invalid/bool vertex id must be rejected. A valid but non-lex-min topological order is a counterexample.",
+        "source_oracle": "Kahn min-first vs lexicographically exhaustive permutations; in-session independent JS corroboration of 66,835 graphs (exhaustive n=0..4 plus 256 seeded graphs each n=5..7) on 2026-10-11; historical Python source replay NOT run this turn.",
+        "source_python_merged_to_main": true,
+        "core_vs_library": "PENDING-D1-D9-DERIVABILITY; LIKELY FINITE-GRAPH-LIBRARY-LAW",
+        "selected_neighbor": "CANONICAL-DIRECTED-CYCLE-WITNESS (different output, not an alias)",
+        "ratification": false,
+        "physical_t5_authorized": false
       }
     },
     {
@@ -23618,7 +23630,7 @@
         "rows": 9
       }
     ],
-    "total_passports": 122,
+    "total_passports": 123,
     "latest_sources": [
       {
         "path": "knowledge/d10-general-congruence-merge-hobbies-v1.json",
@@ -23666,7 +23678,7 @@
         "rows": 3
       }
     ],
-    "latest_source_pass": 3,
+    "latest_source_pass": 1,
     "source_verified_at": "b3cd6dbe9a8094e3794c1421e91f3d5b4c5247b6",
     "latest_model_review_specs": [
       "CALL-NEXT-METHOD",
@@ -23708,7 +23720,8 @@
       "pratyahara-members",
       "guna-of",
       "lemmatize-uk"
-    ]
+    ],
+    "latest_historical_branch_oracle": "research/d10-canonical-topological-order-20261011"
   },
   "evidence_gate": {
     "date": "2026-10-11",
@@ -23718,13 +23731,13 @@
     "formal_ratified": 0,
     "semantic_source_audit": {
       "total": 309,
-      "has_law": 230,
-      "has_positive": 215,
-      "has_negative": 215,
-      "law_and_witnesses": 212,
-      "missing_law": 79,
-      "missing_positive": 94,
-      "missing_negative": 94
+      "has_law": 231,
+      "has_positive": 216,
+      "has_negative": 216,
+      "law_and_witnesses": 213,
+      "missing_law": 78,
+      "missing_positive": 93,
+      "missing_negative": 93
     },
     "note": "Source-derived witnesses and selected-neighbor aliases are research-only; no D10 ratification or new independent Core function.",
     "uncorroborated_source_name_census": 96,
@@ -24132,6 +24145,14 @@
       "pratyahara-members",
       "PANINI-PHONEME-TRANSDUCE",
       "vrddhi-of"
-    ]
+    ],
+    "extra_merged_oracle": {
+      "branch": "research/d10-canonical-topological-order-20261011",
+      "source_git_blob": "ff52f0d26b198fdf2297be1f0b57ca7aaf524673",
+      "main_path": "tools/research_d10_canonical_topological_order.py",
+      "inspected_candidate": "topological-sort",
+      "cross_checked_graphs": 66835,
+      "local_SENS_execution": false
+    }
   }
 }
