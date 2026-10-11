@@ -207,6 +207,84 @@ mod tests {
     }
 
     #[test]
+    fn signed_rational_arithmetic_matches_independent_exact_i128_oracle() {
+        let gcd = |mut a: i128, mut b: i128| -> i128 {
+            while b != 0 { (a,b) = (b,a%b); }
+            a.abs()
+        };
+        let mut seed = 0x1234_5678_9abc_def1u64;
+        let mut next = || {
+            seed ^= seed << 13;
+            seed ^= seed >> 7;
+            seed ^= seed << 17;
+            seed
+        };
+        for _ in 0..4096 {
+            let a = (next() % 33) as i128;
+            let b = (next() % 32 + 1) as i128;
+            let c = (next() % 33) as i128;
+            let d0 = (next() % 32 + 1) as i128;
+            let left_negative = next() & 1 != 0;
+            let right_negative = next() & 1 != 0;
+            let left = canonical_parts(left_negative, &d(24,a as u64), &d(24,b as u64)).unwrap();
+            let right = canonical_parts(right_negative, &d(24,c as u64), &d(24,d0 as u64)).unwrap();
+            let x = if left_negative { -a } else { a };
+            let y = if right_negative { -c } else { c };
+            for op in ["+","-","*","/"] {
+                let pair = match op {
+                    "+" => (x*d0 + y*b, b*d0),
+                    "-" => (x*d0 - y*b, b*d0),
+                    "*" => (x*y, b*d0),
+                    "/" if y != 0 => (x*d0, b*y),
+                    "/" => { assert!(compute(op,&left,&right).is_none()); continue; }
+                    _ => unreachable!(),
+                };
+                let (mut n,mut den) = pair;
+                if den < 0 { n = -n; den = -den; }
+                let common = gcd(n.abs(),den);
+                let n = n/common;
+                let den = den/common;
+                let expected = if den == 1 { n.to_string() } else {
+                    format!("{n}/{den}")
+                };
+                let got = compute(op, &left, &right).unwrap();
+                assert_eq!(got.to_string(), expected, "input {x}/{b} {op} {y}/{d0}");
+                if let Value::NumericComposition(c) = &got {
+                    assert_eq!(c.domain_width(),24);
+                    let (negative,num,denominator) = c.as_parts();
+                    assert_eq!(negative,n<0);
+                    assert!(!num.is_zero());
+                    assert_eq!(num.numeric_domain_width(),Some(24));
+                    if let Some(denominator) = denominator {
+                        assert_eq!(denominator.numeric_domain_width(),Some(24));
+                        assert!(denominator.as_bits() != [0] && denominator.as_bits() != [1]);
+                    }
+                    assert!(got.to_canonical_wire_string().contains("WIRE-UNSUPPORTED"));
+                }
+            }
+            assert_eq!(compare("=", &left, &right), Some(x*d0 == y*b));
+            assert_eq!(compare("<", &left, &right), Some(x*d0 < y*b));
+        }
+    }
+
+    #[test]
+    fn composite_domain_is_not_inferred_and_overflow_retains_all_bits() {
+        let a = Value::BinaryNumber(d(24, (1<<24)-1));
+        let b = Value::BinaryNumber(d(24, 2));
+        let result = compute("*",&a,&b).unwrap();
+        let Value::BinaryNumber(ref bits) = result else { panic!("integer"); };
+        assert_eq!(bits.numeric_domain_width(),Some(48));
+        let neg = unary("-",&result).unwrap();
+        assert_eq!(neg.to_string(), format!("-{}", ((1u64<<24)-1)*2));
+        let Value::NumericComposition(ref composition) = neg else { panic!("negative"); };
+        assert_eq!(composition.domain_width(),48);
+        let other = Value::BinaryNumber(d(48,2));
+        assert!(compute("+",&Value::NumericComposition(composition.clone()),&other).is_some());
+        assert!(compute("+",&Value::NumericComposition(composition.clone()),&b).is_none());
+        assert!(compare("=",&Value::NumericComposition(composition.clone()),&b).is_none());
+    }
+
+    #[test]
     fn arithmetic_closes_over_negative_and_exact_rational_values() {
         let one = Value::BinaryNumber(d(24, 1));
         let two = Value::BinaryNumber(d(24, 2));
