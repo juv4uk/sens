@@ -47,6 +47,15 @@ jobs:
           PY
           bin=target/release/sens-trit
           canonical=tests/fixtures/migration-quote-cohort-main/quote-legacy.sens
+          cp "$canonical" "$RUNNER_TEMP/from-t5.sens"
+          "$bin" encode-f3 "$RUNNER_TEMP/from-t5.sens"
+          cmp "$RUNNER_TEMP/from-t5.senc" "$RUNNER_TEMP/small.senc"
+          # Refuse duplicate writes and never damage source.
+          if "$bin" encode-f3 "$RUNNER_TEMP/from-t5.sens" > /dev/null 2>&1; then
+            echo "encode-f3 overwrote existing output" >&2
+            exit 1
+          fi
+          cmp "$canonical" "$RUNNER_TEMP/from-t5.sens"
           "$bin" open-f3 "$RUNNER_TEMP/small.senc" | tee "$RUNNER_TEMP/f3-human.txt"
           printf '10 001 00 000 01\n' | cmp - "$RUNNER_TEMP/f3-human.txt"
           "$bin" decode-f3 "$RUNNER_TEMP/small.senc" > "$RUNNER_TEMP/f3-words.txt"
@@ -115,6 +124,7 @@ jobs:
           if "$bin" eval-f3 "$RUNNER_TEMP/truncated.senc" >/dev/null 2>&1; then exit 1; fi
           if "$bin" eval-f3 "$RUNNER_TEMP/empty-structure.senc" >/dev/null 2>&1; then exit 1; fi
           if "$bin" open-f3 "$RUNNER_TEMP/oversize.senc" >/dev/null 2>&1; then exit 1; fi
+          if "$bin" encode-f3 tests/fixtures/core1-domain-canary/second.sens >/dev/null 2>&1; then exit 1; fi
           echo TWO_CODEC_EXPLICIT_CLI_PASS
       - name: Preserve exact physical proof and program outputs
         if: always()
