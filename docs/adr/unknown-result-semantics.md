@@ -105,6 +105,10 @@ not the semantic authority. `narrate-outcome` keeps the outcome class visible
 so `unknown`, `partial`, `blocked`, `disputed`, and `invalid` cannot silently
 collapse back into one "cannot prove" phrase.
 
+A caller may still legitimately pass an explicitly established `(unknown subject)`
+value to the presenter. That presentation law is independent of the stricter rule
+about when a reasoner may create `unknown` in the first place.
+
 ## Executable evidence
 
 `crates/my-lisp/tests/result_status.rs` covers:
@@ -121,7 +125,20 @@ collapse back into one "cannot prove" phrase.
 
 `crates/my-lisp/tests/narrate_outcomes.rs` covers the presentation boundary for
 proved, unknown, disputed, partial, blocked, invalid, and malformed outcome
-shapes.
+shapes. Those paths are historical pre-rename test references; the current
+Lisp-owned semantic authority is:
+- `contracts/reasoning-honesty-contract.lisp`, which states
+  `no-proof-is-not-negation`, `no-evidence-is-not-unknown`, and
+  `missing-module-is-blocked`;
+- `tests/fixtures/reason-observe-honesty-v1.lisp`, which executes the
+  no-evidence case and requires Canon 0 `()`;
+- `lib/result-status.lisp`, which implements the same specialization boundary
+  for `reason-observe` and `reason-in-observe`.
+
+Rust tests may observe mechanism and integration, but the expected epistemic
+classification is Lisp-owned. Historical host-side tests that encode the older
+`neither -> unknown` rule are stale duplicates and should be retired only after
+any unique presentation law they carry is preserved in Lisp.
 
 ## Non-goals
 
