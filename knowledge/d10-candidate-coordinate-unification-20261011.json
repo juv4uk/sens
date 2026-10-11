@@ -3,7 +3,7 @@
   "date": "2026-10-11",
   "branch_policy": "DIRECT-TO-MAIN-NO-NEW-GIT-BRANCHES",
   "authority": "CANDIDATE-CENSUS-RESEARCH-ONLY; no ratification, T5 or executable opcode authority",
-  "interpretation": "Complete 1024-cell research name index, NOT a complete domain: 715 canonical research-selected, 249 provisional semantic-name candidates of mixed source law strength, 60 source-only name slots. No physical encoding or ratification granted.",
+  "interpretation": "Complete 1024-cell research name index but domain semantics incomplete: 715 canonical selected, 252 provisional-name research candidates, 57 source-only slots; no physical admission or ratification",
   "sources": [
     {
       "path": "knowledge/d10-v5-semantic-inventory.json",
@@ -126,24 +126,24 @@
     "canonical_selected": 715,
     "provisional_source": 96,
     "provisional_historical": 80,
-    "provisional_new_source": 73,
+    "provisional_new_source": 76,
     "lower_overlap_excluded": 97,
     "additional_source_names_unallocated": 273,
-    "unallocated": 60,
+    "unallocated": 57,
     "ratified": 0,
-    "candidate_names_with_10bit_research_coordinates": 964,
-    "accounted_names_including_lower_overlaps_and_unallocated_source_census": 1334,
+    "candidate_names_with_10bit_research_coordinates": 967,
+    "accounted_names_including_lower_overlaps_and_unallocated_source_census": 1337,
     "capacity": 1024,
     "selected_semantic_candidates": 715,
     "ratified_d10_residents": 0,
     "pending_evidence_for_formal_full_domain": 309,
     "verified_all_1024_assigned_to_semantics": false,
-    "provisional_followup_new_source": 66,
+    "provisional_followup_new_source": 69,
     "symbolic_ledger_candidate_names_preserved_without_core_admission": 176,
-    "source_name_census_assigned": 60,
+    "source_name_census_assigned": 57,
     "all_research_positions_named": 1024,
-    "source_name_index_only_not_semantic": 60,
-    "no_attested_semantic_candidate_positions": 60
+    "source_name_index_only_not_semantic": 57,
+    "no_attested_semantic_candidate_positions": 57
   },
   "policies": [
     "Preserve v5 and ratified D1-D9 byte-for-byte; this artifact does not mutate the normative tables.",
@@ -13362,45 +13362,99 @@
     },
     {
       "coordinate": "1111000100",
-      "status": "SOURCE-NAME-INDEXED-NOT-SEMANTIC-CANDIDATE",
-      "semantic_name": null,
-      "source_census_name": "OPEN",
-      "source_path": "knowledge/d10-clhs-streams-census-20261009.json",
-      "source_kind": "function",
-      "source_name_status": "HISTORICAL-STANDARD-NAME-CENSUS-OWNERSHIP-NOT-REVIEWED",
+      "status": "PROVISIONAL-HISTORICAL-LAW-REVIEW-HOLD-NOT-SELECTED",
+      "semantic_name": "MERGE-PATHNAMES",
+      "source_path": "knowledge/d10-clhs-pathnames-census-20261009.json",
       "selected": false,
       "ratified": false,
       "physical_t5_authorized": false,
       "d10_core_authority": false,
-      "source_index_authority": "NONCANONICAL-REFERENCE-ONLY"
+      "stable_id": "d10.source-research.merge-pathnames",
+      "source_git_blob": "f32d199c1325e7daebcd7598c5121b23312bfd57",
+      "source_original_status": "HOLD-BEHAVIORAL-REVIEW",
+      "law": "Fill unspecified name/type/host/device/version from explicit defaults; relative directory values concatenate with default directory, preserving component semantics.",
+      "positive_witness_spec": [
+        "Explicit (:absolute \"science\") base + (:relative \"trial\") filename gives directory (:absolute \"science\" \"trial\")",
+        "If pathname specifies name but not type, defaults supply type; existing path name takes precedence"
+      ],
+      "falsifier_spec": "Returning default name when input name supplied or dropping relative directory element.",
+      "source_document": "https://franz.com/support/documentation/10.1/ansicl/section/diction5.htm",
+      "source_scope": "Constructed component-value merge, no file access",
+      "owner_semantic_independence": "PENDING",
+      "owner_core_vs_library_review": "PENDING",
+      "independent_oracle": "NOT-EXECUTED-ON-SENS",
+      "d2_structural_control": "D2-ONLY",
+      "coordinate_basis": "NEXT-NONCANONICAL-SOURCE-HOLD-QUEUE; NOT CORE ADDRESS",
+      "previous_source_index": {
+        "coordinate": "1111000100",
+        "source_census_name": "OPEN",
+        "source_path": "knowledge/d10-clhs-streams-census-20261009.json",
+        "source_kind": "function"
+      }
     },
     {
       "coordinate": "1111000101",
-      "status": "SOURCE-NAME-INDEXED-NOT-SEMANTIC-CANDIDATE",
-      "semantic_name": null,
-      "source_census_name": "STREAM-EXTERNAL-FORMAT",
-      "source_path": "knowledge/d10-clhs-streams-census-20261009.json",
-      "source_kind": "function",
-      "source_name_status": "HISTORICAL-STANDARD-NAME-CENSUS-OWNERSHIP-NOT-REVIEWED",
+      "status": "PROVISIONAL-HISTORICAL-LAW-REVIEW-HOLD-NOT-SELECTED",
+      "semantic_name": "PATHNAME-MATCH-P",
+      "source_path": "knowledge/d10-clhs-pathnames-census-20261009.json",
       "selected": false,
       "ratified": false,
       "physical_t5_authorized": false,
       "d10_core_authority": false,
-      "source_index_authority": "NONCANONICAL-REFERENCE-ONLY"
+      "stable_id": "d10.source-research.pathname-match-p",
+      "source_git_blob": "f32d199c1325e7daebcd7598c5121b23312bfd57",
+      "source_original_status": "HOLD-IMPLEMENTATION-DEFINED",
+      "law": "Wildcard match is directional; a wildcard in the first pathname matches only a wildcard in the second; actual matching mechanics implementation-defined.",
+      "positive_witness_spec": [
+        "Nonwild name 'tone' matches :wild name in second argument",
+        "First argument wild :name does not match a concrete 'tone' in second argument"
+      ],
+      "falsifier_spec": "Treating pathname-match-p as symmetric or assuming cross-host wildcard syntax.",
+      "source_document": "https://franz.com/support/documentation/10.1/ansicl/section/diction5.htm",
+      "source_scope": "Two explicit constructed pathname objects only",
+      "owner_semantic_independence": "PENDING",
+      "owner_core_vs_library_review": "PENDING",
+      "independent_oracle": "NOT-EXECUTED-ON-SENS",
+      "d2_structural_control": "D2-ONLY",
+      "coordinate_basis": "NEXT-NONCANONICAL-SOURCE-HOLD-QUEUE; NOT CORE ADDRESS",
+      "previous_source_index": {
+        "coordinate": "1111000101",
+        "source_census_name": "STREAM-EXTERNAL-FORMAT",
+        "source_path": "knowledge/d10-clhs-streams-census-20261009.json",
+        "source_kind": "function"
+      }
     },
     {
       "coordinate": "1111000110",
-      "status": "SOURCE-NAME-INDEXED-NOT-SEMANTIC-CANDIDATE",
-      "semantic_name": null,
-      "source_census_name": "CLOSE",
-      "source_path": "knowledge/d10-clhs-streams-census-20261009.json",
-      "source_kind": "function",
-      "source_name_status": "HISTORICAL-STANDARD-NAME-CENSUS-OWNERSHIP-NOT-REVIEWED",
+      "status": "PROVISIONAL-HISTORICAL-LAW-REVIEW-HOLD-NOT-SELECTED",
+      "semantic_name": "ENOUGH-NAMESTRING",
+      "source_path": "knowledge/d10-clhs-pathnames-census-20261009.json",
       "selected": false,
       "ratified": false,
       "physical_t5_authorized": false,
       "d10_core_authority": false,
-      "source_index_authority": "NONCANONICAL-REFERENCE-ONLY"
+      "stable_id": "d10.source-research.enough-namestring",
+      "source_git_blob": "f32d199c1325e7daebcd7598c5121b23312bfd57",
+      "source_original_status": "HOLD-IMPLEMENTATION-DEFINED",
+      "law": "For any given pathname/defaults, merging enough-namestring representation with defaults must equal merging original pathname with defaults, modulo pathname equality.",
+      "positive_witness_spec": [
+        "Express output for same explicit pathname/default directory without requiring host spelling",
+        "Round-trip through parse-namestring + merge with defaults reconstructs same path"
+      ],
+      "falsifier_spec": "Hard-code Unix slash syntax as a universal semantic law.",
+      "source_document": "https://franz.com/support/documentation/10.1/ansicl/section/diction5.htm",
+      "source_scope": "Reconstruction equivalence relative to explicit default path, not any exact rendered string",
+      "owner_semantic_independence": "PENDING",
+      "owner_core_vs_library_review": "PENDING",
+      "independent_oracle": "NOT-EXECUTED-ON-SENS",
+      "d2_structural_control": "D2-ONLY",
+      "coordinate_basis": "NEXT-NONCANONICAL-SOURCE-HOLD-QUEUE; NOT CORE ADDRESS",
+      "previous_source_index": {
+        "coordinate": "1111000110",
+        "source_census_name": "CLOSE",
+        "source_path": "knowledge/d10-clhs-streams-census-20261009.json",
+        "source_kind": "function"
+      }
     },
     {
       "coordinate": "1111000111",
@@ -17832,5 +17886,25 @@
       "DEFINE-VALUES",
       "GUARD"
     ]
+  },
+  "recent_pathname_source_law_review": {
+    "status": "RESEARCH-HOLD-NOT-CANONICAL",
+    "source_path": "knowledge/d10-clhs-pathnames-census-20261009.json",
+    "source_git_blob": "f32d199c1325e7daebcd7598c5121b23312bfd57",
+    "added": [
+      {
+        "name": "MERGE-PATHNAMES",
+        "coordinate": "1111000100"
+      },
+      {
+        "name": "PATHNAME-MATCH-P",
+        "coordinate": "1111000101"
+      },
+      {
+        "name": "ENOUGH-NAMESTRING",
+        "coordinate": "1111000110"
+      }
+    ],
+    "caution": "Any implementation-dependent or derived pathname law remains a source-grounded question; no D10 resident, host I/O operation or codec permission"
   }
 }
