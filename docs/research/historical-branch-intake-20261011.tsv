@@ -905,7 +905,7 @@ feat/178-immediate-branch-atoms	UNTRIAGED	-	-	BRANCH-NAME-ONLY
 feat/196-cond-minimal-profile	UNTRIAGED	-	-	BRANCH-NAME-ONLY
 feat/196-cond-structural-composition	UNTRIAGED	-	-	BRANCH-NAME-ONLY
 feat/196-minimal-structural-profile	UNTRIAGED	-	-	BRANCH-NAME-ONLY
-feat/216-activate-exact-q-current	UNTRIAGED	-	-	BRANCH-NAME-ONLY
+feat/216-activate-exact-q-current	ALREADY-IN-MAIN-ARCHIVED	7dec82166faf8021c27f149dc075d55ffba70bb8	68732bd1f4b61a718b6b5bedf05b023ff87437ac	Four-file old exact-Q runtime diff preserved in research/domain-archive/20261011/pr0256; current #1826 contract / crates/sens test is authority; old crates/my-lisp arithmetic not merged. PR #256 closed archived.
 feat/216-exact-q-binary	UNTRIAGED	-	-	BRANCH-NAME-ONLY
 feat/216-exact-q-runtime-current	UNTRIAGED	-	-	BRANCH-NAME-ONLY
 feat/216-exact-q-runtime-v1	UNTRIAGED	-	-	BRANCH-NAME-ONLY
@@ -3883,7 +3883,7 @@ test/115-lisp-policy-red	UNTRIAGED	-	-	BRANCH-NAME-ONLY
 test/116-one-truth-three-paths-red	UNTRIAGED	-	-	BRANCH-NAME-ONLY
 test/150-machine-noninterference-current	UNTRIAGED	-	-	BRANCH-NAME-ONLY
 test/216-canonical-zero-one-source-spellings	UNTRIAGED	-	-	BRANCH-NAME-ONLY
-test/216-preservation-harvest	UNTRIAGED	-	-	BRANCH-NAME-ONLY
+test/216-preservation-harvest	ALREADY-IN-MAIN-NEWER	309813e3ead48b616dd41ba776deb2c68fbd38e6	e2db7251934d62ca00b8ee3f9e758776dcc69c68	Two valid exact-Q witnesses (= 3 3) and (< 1 2 3 4) replayed into current active fixture with PredicateBit schema via main commit 309813e3; old my-lisp observer/schema not merged. PR #258 closed integrated.
 test/218-knowledge-clause-kind	UNTRIAGED	-	-	BRANCH-NAME-ONLY
 test/219-missing-module-is-blocked	UNTRIAGED	-	-	BRANCH-NAME-ONLY
 test/219-no-evidence-is-not-unknown	UNTRIAGED	-	-	BRANCH-NAME-ONLY
