@@ -11659,21 +11659,30 @@
       "ratified": false,
       "physical_t5_authorized": false,
       "proof_readiness": {
-        "status": "INCOMPLETE-SOURCE-SEMANTICS",
-        "missing": [
-          "semantic-law",
-          "positive-witness",
-          "negative-falsifier"
-        ],
+        "status": "SOURCE-LAW-WITNESSES-PRESENT-UNVERIFIED",
+        "missing": [],
         "selection": false,
         "ratification": false,
-        "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+        "next_gate": "D1-D9-DEDUPE-CORE-VS-LIBRARY-AND-INDEPENDENT-ORACLE"
       },
       "source_candidate_gate": {
         "status": "USER-INTEREST-NAME-ONLY-NO-SOURCE-OPERATION",
         "source_kind": "owner-interest",
         "not_a_ratified_resident": true,
         "reason": "A source occurrence or wish-list name is not an independent D10 law; candidate requires typed contract and distinct behavior."
+      },
+      "source_evidence": {
+        "status": "PINNED-OWNER-MCTS-DONOR-WITNESSES-NOT-RATIFIED",
+        "source_git_blob": "f4038867dc1bf0c58cb86fbb54bb9d962681ae3d",
+        "source_path": "juv4uk/chess-lisp-zero:lib/puct/selection.lisp",
+        "law": "From an ordered finite child sequence, calculate PUCT score Q+c*P*sqrt(parent visits)/(1+child visits), where Q=0 for unvisited child else total value/visits. Choose the first strict maximum of scores, with source sentinel -999999; return () for empty child list.",
+        "positive": "Parent visits=4,c=1; A(visits=2,sum=1,prior=1/4) score=2/3; B(visits=0,sum=0,prior=3/4) score=3/2, so choose B. Equal scores above the sentinel keep the earlier child.",
+        "negative": "Choosing A over B violates scoring; switching source strict > to >= incorrectly changes tied order. The source's -999999 sentinel is not a guarantee for all possible negative scores.",
+        "existing_d10_semantic_name": null,
+        "existing_d10_coordinate": null,
+        "oracle": "Bounded arithmetic review, no SENS runtime executed",
+        "core_vs_library": "APPLICATION-LIBRARY-SEARCH-POLICY",
+        "ratification": false
       }
     },
     {
@@ -11703,21 +11712,30 @@
       "ratified": false,
       "physical_t5_authorized": false,
       "proof_readiness": {
-        "status": "INCOMPLETE-SOURCE-SEMANTICS",
-        "missing": [
-          "semantic-law",
-          "positive-witness",
-          "negative-falsifier"
-        ],
+        "status": "SOURCE-LAW-WITNESSES-PRESENT-UNVERIFIED",
+        "missing": [],
         "selection": false,
         "ratification": false,
-        "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+        "next_gate": "D1-D9-DEDUPE-CORE-VS-LIBRARY-AND-INDEPENDENT-ORACLE"
       },
       "source_candidate_gate": {
         "status": "USER-INTEREST-NAME-ONLY-NO-SOURCE-OPERATION",
         "source_kind": "owner-interest",
         "not_a_ratified_resident": true,
         "reason": "A source occurrence or wish-list name is not an independent D10 law; candidate requires typed contract and distinct behavior."
+      },
+      "source_evidence": {
+        "status": "PINNED-OWNER-MCTS-DONOR-WITNESSES-NOT-RATIFIED",
+        "source_git_blob": "4ca86d0c5a93e40ce1162aabd993e36a3f8598d8",
+        "source_path": "juv4uk/chess-lisp-zero:lib/puct/backup.lisp",
+        "law": "On a finite acyclic parent path from evaluated leaf to root, increment visits exactly once per node and add alternating-signed leaf value (-1)^k*v at ancestor distance k, stopping at root. This corresponds to already selected ALTERNATING-ZERO-SUM-BACKUP.",
+        "positive": "For a zeroed three-node leaf-to-root chain with v=1, all visits become 1 and sums [1,-1,1].",
+        "negative": "Using +1 for both child and parent or updating the root twice violates the source. Cyclic parent pointers are inadmissible.",
+        "existing_d10_semantic_name": "ALTERNATING-ZERO-SUM-BACKUP",
+        "existing_d10_coordinate": "1010110011",
+        "oracle": "Bounded arithmetic review, no SENS runtime executed",
+        "core_vs_library": "DUPLICATE-OF-SELECTED-D10-ROOT",
+        "ratification": false
       }
     },
     {
@@ -23630,7 +23648,7 @@
         "rows": 9
       }
     ],
-    "total_passports": 123,
+    "total_passports": 125,
     "latest_sources": [
       {
         "path": "knowledge/d10-general-congruence-merge-hobbies-v1.json",
@@ -23678,7 +23696,7 @@
         "rows": 3
       }
     ],
-    "latest_source_pass": 1,
+    "latest_source_pass": 2,
     "source_verified_at": "b3cd6dbe9a8094e3794c1421e91f3d5b4c5247b6",
     "latest_model_review_specs": [
       "CALL-NEXT-METHOD",
@@ -23721,7 +23739,11 @@
       "guna-of",
       "lemmatize-uk"
     ],
-    "latest_historical_branch_oracle": "research/d10-canonical-topological-order-20261011"
+    "latest_historical_branch_oracle": "research/d10-canonical-topological-order-20261011",
+    "latest_chess_puct_contracts": [
+      "mcts-select",
+      "mcts-backpropagate"
+    ]
   },
   "evidence_gate": {
     "date": "2026-10-11",
@@ -23731,13 +23753,13 @@
     "formal_ratified": 0,
     "semantic_source_audit": {
       "total": 309,
-      "has_law": 231,
-      "has_positive": 216,
-      "has_negative": 216,
-      "law_and_witnesses": 213,
-      "missing_law": 78,
-      "missing_positive": 93,
-      "missing_negative": 93
+      "has_law": 233,
+      "has_positive": 218,
+      "has_negative": 218,
+      "law_and_witnesses": 215,
+      "missing_law": 76,
+      "missing_positive": 91,
+      "missing_negative": 91
     },
     "note": "Source-derived witnesses and selected-neighbor aliases are research-only; no D10 ratification or new independent Core function.",
     "uncorroborated_source_name_census": 96,
