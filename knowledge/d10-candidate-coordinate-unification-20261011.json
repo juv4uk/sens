@@ -11266,7 +11266,20 @@
       "law": "When an accessor targets a slot absent from a standard-class object, dispatch to the operation-aware method with class, object, name and operation; on read, primary returned value is observed.",
       "selected": false,
       "ratified": false,
-      "physical_t5_authorized": false
+      "physical_t5_authorized": false,
+      "source_evidence": {
+        "status": "SOURCE-PINNED-LAW-AND-WITNESSES; NOT SELECTED",
+        "source_git_blob": "d8c6a2fdf60c11e23016be7aad5037bb5c26782d",
+        "law_source_key": "observable_law",
+        "positive_source_key": "positive_witness",
+        "negative_source_key": "falsifier",
+        "law": "When an accessor targets a slot absent from a standard-class object, dispatch to the operation-aware method with class, object, name and operation; on read, primary returned value is observed.",
+        "positive": "Custom SLOT-MISSING for SLOT-VALUE(C,z) returns sentinel, while existing-but-unbound a must follow SLOT-UNBOUND instead.",
+        "negative": "Do not conflate missing slot with unbound, and do not use hook return as result of SETF/MAKUNBOUND.",
+        "independent_semantic_review": "PENDING",
+        "core_vs_library": "PENDING",
+        "ratification": false
+      }
     },
     {
       "coordinate": "1101000101",
@@ -11278,7 +11291,20 @@
       "law": "On read of existing-but-unbound slot in a standard-class instance, dispatch to distinct hook; default signals UNBOUND-SLOT; primary handler value is used if provided.",
       "selected": false,
       "ratified": false,
-      "physical_t5_authorized": false
+      "physical_t5_authorized": false,
+      "source_evidence": {
+        "status": "SOURCE-PINNED-LAW-AND-WITNESSES; NOT SELECTED",
+        "source_git_blob": "d8c6a2fdf60c11e23016be7aad5037bb5c26782d",
+        "law_source_key": "observable_law",
+        "positive_source_key": "positive_witness",
+        "negative_source_key": "falsifier",
+        "law": "On read of existing-but-unbound slot in a standard-class instance, dispatch to distinct hook; default signals UNBOUND-SLOT; primary handler value is used if provided.",
+        "positive": "C has declared unbound a; SLOT-VALUE(C,a) follows SLOT-UNBOUND; SLOT-VALUE(C,z) follows SLOT-MISSING.",
+        "negative": "Never route a nonexisting slot to SLOT-UNBOUND; reading unbound cannot silently return NIL.",
+        "independent_semantic_review": "PENDING",
+        "core_vs_library": "PENDING",
+        "ratification": false
+      }
     },
     {
       "coordinate": "1101000110",
@@ -11290,7 +11316,20 @@
       "law": "Return the class name symbol if present; anonymous classes have NIL and name is not identical to class-object identity.",
       "selected": false,
       "ratified": false,
-      "physical_t5_authorized": false
+      "physical_t5_authorized": false,
+      "source_evidence": {
+        "status": "SOURCE-PINNED-LAW-AND-WITNESSES; NOT SELECTED",
+        "source_git_blob": "d8c6a2fdf60c11e23016be7aad5037bb5c26782d",
+        "law_source_key": "observable_law",
+        "positive_source_key": "positive_witness",
+        "negative_source_key": "falsifier",
+        "law": "Return the class name symbol if present; anonymous classes have NIL and name is not identical to class-object identity.",
+        "positive": "Named class C has CLASS-NAME(C)=name; anonymous class has no proper name.",
+        "negative": "Never synthesize a proper name for an anonymous class or conflate class name with class identity.",
+        "independent_semantic_review": "PENDING",
+        "core_vs_library": "PENDING",
+        "ratification": false
+      }
     },
     {
       "coordinate": "1101000111",
@@ -11302,7 +11341,20 @@
       "law": "Resolve a symbol to a class metaobject in the explicitly applicable environment; missing with errorp false returns NIL, with default true signals error.",
       "selected": false,
       "ratified": false,
-      "physical_t5_authorized": false
+      "physical_t5_authorized": false,
+      "source_evidence": {
+        "status": "SOURCE-PINNED-LAW-AND-WITNESSES; NOT SELECTED",
+        "source_git_blob": "d8c6a2fdf60c11e23016be7aad5037bb5c26782d",
+        "law_source_key": "observable_law",
+        "positive_source_key": "positive_witness",
+        "negative_source_key": "falsifier",
+        "law": "Resolve a symbol to a class metaobject in the explicitly applicable environment; missing with errorp false returns NIL, with default true signals error.",
+        "positive": "FIND-CLASS(Book,false,env) returns same class as CLASS-OF(book); missing(false)=NIL.",
+        "negative": "Different environment binding must not silently alias class with same printed name; errorp true cannot silently return NIL.",
+        "independent_semantic_review": "PENDING",
+        "core_vs_library": "PENDING",
+        "ratification": false
+      }
     },
     {
       "coordinate": "1101001000",
@@ -11362,7 +11414,20 @@
       "law": "Return exact predicate 1 only for NTP modes 4 and 5, otherwise 0.",
       "selected": false,
       "ratified": false,
-      "physical_t5_authorized": false
+      "physical_t5_authorized": false,
+      "source_evidence": {
+        "status": "SOURCE-PINNED-LAW-AND-WITNESSES; NOT SELECTED",
+        "source_git_blob": "cf28529677096a934aa0c31a4a3feefba6c51f12",
+        "law_source_key": "observable_law",
+        "positive_source_key": "witnesses",
+        "negative_source_key": "falsifier",
+        "law": "Return exact predicate 1 only for NTP modes 4 and 5, otherwise 0.",
+        "positive": "[{\"input\":{\"mode\":4},\"expect\":1},{\"input\":{\"mode\":5},\"expect\":1},{\"input\":{\"mode\":3},\"expect\":0},{\"input\":{\"mode\":6},\"expect\":0}]",
+        "negative": "Modes 4 and 5 pass; 3, 0, and 6 fail; Boolean 0 must not be evaluated as truthy Lisp.",
+        "independent_semantic_review": "PENDING",
+        "core_vs_library": "PENDING",
+        "ratification": false
+      }
     },
     {
       "coordinate": "1101001101",
@@ -11374,7 +11439,20 @@
       "law": "Return exact predicate 1 only for allowable NTP stratum range 1..15 inclusive, otherwise 0.",
       "selected": false,
       "ratified": false,
-      "physical_t5_authorized": false
+      "physical_t5_authorized": false,
+      "source_evidence": {
+        "status": "SOURCE-PINNED-LAW-AND-WITNESSES; NOT SELECTED",
+        "source_git_blob": "cf28529677096a934aa0c31a4a3feefba6c51f12",
+        "law_source_key": "observable_law",
+        "positive_source_key": "witnesses",
+        "negative_source_key": "falsifier",
+        "law": "Return exact predicate 1 only for allowable NTP stratum range 1..15 inclusive, otherwise 0.",
+        "positive": "[{\"input\":{\"stratum\":0},\"expect\":0},{\"input\":{\"stratum\":1},\"expect\":1},{\"input\":{\"stratum\":15},\"expect\":1},{\"input\":{\"stratum\":16},\"expect\":0}]",
+        "negative": "0 and 16 reject, 1 and 15 accept; exact 1/0 used under D2 control.",
+        "independent_semantic_review": "PENDING",
+        "core_vs_library": "PENDING",
+        "ratification": false
+      }
     },
     {
       "coordinate": "1101001110",
@@ -11386,7 +11464,20 @@
       "law": "If input tag is ntp-fields, project the fields into the NTP interpretation rule, else preserve the input observation unchanged.",
       "selected": false,
       "ratified": false,
-      "physical_t5_authorized": false
+      "physical_t5_authorized": false,
+      "source_evidence": {
+        "status": "SOURCE-PINNED-LAW-AND-WITNESSES; NOT SELECTED",
+        "source_git_blob": "cf28529677096a934aa0c31a4a3feefba6c51f12",
+        "law_source_key": "observable_law",
+        "positive_source_key": "witnesses",
+        "negative_source_key": "falsifier",
+        "law": "If input tag is ntp-fields, project the fields into the NTP interpretation rule, else preserve the input observation unchanged.",
+        "positive": "[{\"input\":{\"raw\":[\"rejected\",\"receive-failed\"]},\"expect\":[\"rejected\",\"receive-failed\"]},{\"input\":{\"raw\":[\"ntp-fields\",\"time.example\",4,1,2208988800,0]},\"expect\":[\"accepted\",\"time.example\",0,0]}]",
+        "negative": "Unexpected tag passes through unchanged; recognized tag takes the five relevant fields in original order.",
+        "independent_semantic_review": "PENDING",
+        "core_vs_library": "PENDING",
+        "ratification": false
+      }
     },
     {
       "coordinate": "1101001111",
@@ -11398,7 +11489,20 @@
       "law": "If raw input is tagged timezone-declarations, interpret two fields; otherwise construct rejected invalid-timezone-observation.",
       "selected": false,
       "ratified": false,
-      "physical_t5_authorized": false
+      "physical_t5_authorized": false,
+      "source_evidence": {
+        "status": "SOURCE-PINNED-LAW-AND-WITNESSES; NOT SELECTED",
+        "source_git_blob": "cf28529677096a934aa0c31a4a3feefba6c51f12",
+        "law_source_key": "observable_law",
+        "positive_source_key": "witnesses",
+        "negative_source_key": "falsifier",
+        "law": "If raw input is tagged timezone-declarations, interpret two fields; otherwise construct rejected invalid-timezone-observation.",
+        "positive": "[{\"input\":{\"raw\":[\"timezone-declarations\",\"Europe/Kyiv\",\"UTC\"]},\"expect\":[\"detected\",\"Europe/Kyiv\",\"TZ\"]},{\"input\":{\"raw\":[\"unexpected\",\"Europe/Kyiv\",\"UTC\"]},\"expect\":[\"rejected\",\"invalid-timezone-observation\"]}]",
+        "negative": "Wrong tag must reject; both absent declarations produce unknown; no host file reading.",
+        "independent_semantic_review": "PENDING",
+        "core_vs_library": "PENDING",
+        "ratification": false
+      }
     },
     {
       "coordinate": "1101010000",
@@ -11410,7 +11514,20 @@
       "law": "Attach an existing method object to a generic function, updating dispatch membership under agreement rules; assess whether action is derivable from already selected DEFMETHOD or a new effect law.",
       "selected": false,
       "ratified": false,
-      "physical_t5_authorized": false
+      "physical_t5_authorized": false,
+      "source_evidence": {
+        "status": "SOURCE-PINNED-LAW-AND-WITNESSES; NOT SELECTED",
+        "source_git_blob": "df8ed73011df39f9ec689046ce6936cc00892215",
+        "law_source_key": "observable_law",
+        "positive_source_key": "positive_witness",
+        "negative_source_key": "falsifier",
+        "law": "Attach an existing method object to a generic function, updating dispatch membership under agreement rules; assess whether action is derivable from already selected DEFMETHOD or a new effect law.",
+        "positive": "After adding a :before method its descriptor can be found; unaffected primary methods still exist.",
+        "negative": "Registering a method under a different generic function or duplicating agreeing signatures without replacement policy is invalid.",
+        "independent_semantic_review": "PENDING",
+        "core_vs_library": "PENDING",
+        "ratification": false
+      }
     },
     {
       "coordinate": "1101010001",
@@ -11422,7 +11539,20 @@
       "law": "Customization hook triggered during CHANGE-CLASS, receiving an ephemeral copy of the prior instance and the altered current instance; not a standalone call for user code.",
       "selected": false,
       "ratified": false,
-      "physical_t5_authorized": false
+      "physical_t5_authorized": false,
+      "source_evidence": {
+        "status": "SOURCE-PINNED-LAW-AND-WITNESSES; NOT SELECTED",
+        "source_git_blob": "df8ed73011df39f9ec689046ce6936cc00892215",
+        "law_source_key": "observable_law",
+        "positive_source_key": "positive_witness",
+        "negative_source_key": "falsifier",
+        "law": "Customization hook triggered during CHANGE-CLASS, receiving an ephemeral copy of the prior instance and the altered current instance; not a standalone call for user code.",
+        "positive": "Transition A->B invokes hook after preserving shared slots; hook can read old-only slot from ephemeral previous object.",
+        "negative": "Calling hook as an independent public operation, treating previous as persistent, or assuming its return value is a general semantic result is not allowed.",
+        "independent_semantic_review": "PENDING",
+        "core_vs_library": "PENDING",
+        "ratification": false
+      }
     },
     {
       "coordinate": "1101010010",
@@ -11434,7 +11564,20 @@
       "law": "Create a fresh instance of a class without standard MAKE-INSTANCE initialization; standard-class slots are initially unbound.",
       "selected": false,
       "ratified": false,
-      "physical_t5_authorized": false
+      "physical_t5_authorized": false,
+      "source_evidence": {
+        "status": "SOURCE-PINNED-LAW-AND-WITNESSES; NOT SELECTED",
+        "source_git_blob": "df8ed73011df39f9ec689046ce6936cc00892215",
+        "law_source_key": "observable_law",
+        "positive_source_key": "positive_witness",
+        "negative_source_key": "falsifier",
+        "law": "Create a fresh instance of a class without standard MAKE-INSTANCE initialization; standard-class slots are initially unbound.",
+        "positive": "Allocate then inspect slot-boundness: slots are unbound, whereas make-instance may apply initform/initargs.",
+        "negative": "Confusing allocated instance with fully initialized MAKE-INSTANCE result is a semantic failure.",
+        "independent_semantic_review": "PENDING",
+        "core_vs_library": "PENDING",
+        "ratification": false
+      }
     },
     {
       "coordinate": "1101010011",
@@ -11446,7 +11589,20 @@
       "law": "Resolve a symbolic record field label to a location in the current declared record layout; after layout redefinition the same field name resolves to the new offset.",
       "selected": false,
       "ratified": false,
-      "physical_t5_authorized": false
+      "physical_t5_authorized": false,
+      "source_evidence": {
+        "status": "SOURCE-PINNED-LAW-AND-WITNESSES; NOT SELECTED",
+        "source_git_blob": "df8ed73011df39f9ec689046ce6936cc00892215",
+        "law_source_key": "observable_law",
+        "positive_source_key": "positive_witness",
+        "negative_source_key": "falsifier",
+        "law": "Resolve a symbolic record field label to a location in the current declared record layout; after layout redefinition the same field name resolves to the new offset.",
+        "positive": "Fields of PERSON change from FIRSTNAME LASTNAME TITLE to FIRSTNAME INITIAL LASTNAME TITLE: TITLE changes from third to fourth field without modifying field-name references.",
+        "negative": "Keeping a stale fixed CADDR reference after schema redefinition violates source-level record meaning.",
+        "independent_semantic_review": "PENDING",
+        "core_vs_library": "PENDING",
+        "ratification": false
+      }
     },
     {
       "coordinate": "1101010100",
@@ -11458,7 +11614,20 @@
       "law": "A static program relation query over indexed sources (e.g., who calls a given function and uses a bound/free variable); treat as analysis tooling unless independent universal law is demonstrated.",
       "selected": false,
       "ratified": false,
-      "physical_t5_authorized": false
+      "physical_t5_authorized": false,
+      "source_evidence": {
+        "status": "SOURCE-PINNED-LAW-AND-WITNESSES; NOT SELECTED",
+        "source_git_blob": "df8ed73011df39f9ec689046ce6936cc00892215",
+        "law_source_key": "observable_law",
+        "positive_source_key": "positive_witness",
+        "negative_source_key": "falsifier",
+        "law": "A static program relation query over indexed sources (e.g., who calls a given function and uses a bound/free variable); treat as analysis tooling unless independent universal law is demonstrated.",
+        "positive": "Same source graph yields stable caller set regardless of traversal/reindexing; free-variable query distinguishes bound from free occurrences.",
+        "negative": "Text-only name occurrence or a tooling UI query with no binding analysis is not equivalent to a source semantic relation.",
+        "independent_semantic_review": "PENDING",
+        "core_vs_library": "PENDING",
+        "ratification": false
+      }
     },
     {
       "coordinate": "1101010101",
@@ -11470,7 +11639,20 @@
       "law": "Run before/after hooks whenever a captured continuation reenters/exits dynamic extent, not only at normal function call/return.",
       "selected": false,
       "ratified": false,
-      "physical_t5_authorized": false
+      "physical_t5_authorized": false,
+      "source_evidence": {
+        "status": "SOURCE-PINNED-LAW-AND-WITNESSES; NOT SELECTED",
+        "source_git_blob": "df8ed73011df39f9ec689046ce6936cc00892215",
+        "law_source_key": "observable_law",
+        "positive_source_key": "positive_witness",
+        "negative_source_key": "falsifier",
+        "law": "Run before/after hooks whenever a captured continuation reenters/exits dynamic extent, not only at normal function call/return.",
+        "positive": "Captured continuation reentered after nonlocal exit repeats before and then after; ordered event trace must match Scheme specification.",
+        "negative": "Running before/after only once despite continuation reentry violates the required trace.",
+        "independent_semantic_review": "PENDING",
+        "core_vs_library": "PENDING",
+        "ratification": false
+      }
     },
     {
       "coordinate": "1101010110",
@@ -11482,7 +11664,20 @@
       "law": null,
       "selected": false,
       "ratified": false,
-      "physical_t5_authorized": false
+      "physical_t5_authorized": false,
+      "source_evidence": {
+        "status": "SOURCE-PINNED-LAW-AND-WITNESSES; NOT SELECTED",
+        "source_git_blob": "99d3e1ba5f381df356fd0b335dfbf75c5027877d",
+        "law_source_key": "law",
+        "positive_source_key": "positive_witnesses",
+        "negative_source_key": "falsifiers",
+        "law": "Return a distinct hashtable carrying the same associations. If mutable-flag is absent or false, result is immutable; if true result is mutable. Subsequent association edits in mutable copy do not change original table.",
+        "positive": "[\"Copy of mutable {1↦one, 2↦two} with no second argument has both associations and hashtable-mutable? false; source stays mutable.\",\"Copy with explicit true has hashtable-mutable? true; set! copy[1]=changed leaves original[1]=one.\"]",
+        "negative": "[\"A default copy accepts mutation or is reported mutable.\",\"Mutating explicit-mutable copy changes an original association or losing mappings during copy.\"]",
+        "independent_semantic_review": "PENDING",
+        "core_vs_library": "PENDING",
+        "ratification": false
+      }
     },
     {
       "coordinate": "1101010111",
@@ -11494,7 +11689,20 @@
       "law": null,
       "selected": false,
       "ratified": false,
-      "physical_t5_authorized": false
+      "physical_t5_authorized": false,
+      "source_evidence": {
+        "status": "SOURCE-PINNED-LAW-AND-WITNESSES; NOT SELECTED",
+        "source_git_blob": "99d3e1ba5f381df356fd0b335dfbf75c5027877d",
+        "law_source_key": "law",
+        "positive_source_key": "positive_witnesses",
+        "negative_source_key": "falsifiers",
+        "law": "Return a boolean describing whether mutation of the hashtable is permitted; two tables with equal associations can differ in mutable state.",
+        "positive": "[\"Fresh make-eqv-hashtable is mutable.\",\"Immutable default copy and explicit mutable copy have equal initial mappings, but mutability predicates return false versus true.\"]",
+        "negative": "[\"Result is inferred exclusively from hashtable contents or size, so equal-association mutable/immutable instances are indistinguishable.\",\"A default immutable copy is reported mutable.\"]",
+        "independent_semantic_review": "PENDING",
+        "core_vs_library": "PENDING",
+        "ratification": false
+      }
     },
     {
       "coordinate": "1101011000",
@@ -11926,7 +12134,20 @@
       "coordinate_basis": "DETERMINISTIC-NEXT-FREE-NONCANONICAL-RESEARCH-RESERVATION",
       "selected": false,
       "ratified": false,
-      "physical_t5_authorized": false
+      "physical_t5_authorized": false,
+      "source_evidence": {
+        "status": "SOURCE-PINNED-LAW-AND-WITNESSES; NOT SELECTED",
+        "source_git_blob": "b93217e9b45c1339f09146a1daf4aa323e611ea9",
+        "law_source_key": "law",
+        "positive_source_key": "positivity",
+        "negative_source_key": "falsifiers",
+        "law": "Choose the closest rational p/q to x under denominator <= M, with exact absolute-rational error comparison. Tie: smallest denominator; if still tied, numerically smaller rational. Invalid M<1 rejects; input is exact rational, not an untyped ADC float.",
+        "positive": "[{\"x\":\"3/2\",\"M\":1,\"result\":\"1/1\",\"why\":\"equal-error integer tie: choose lower\"},{\"x\":\"355/113\",\"M\":1000,\"result\":\"355/113\",\"why\":\"identity under denominator bound\"},{\"x\":\"31415926535897932/10000000000000000\",\"M\":1000,\"result\":\"355/113\",\"why\":\"Pi decimal entered as exact rational, not an assumed transcendental exact Pi\"},{\"x\":\"-1/2\",\"M\":1,\"result\":\"-1/1\",\"why\":\"negative integer halfway tie\"},{\"x\":\"2/7\",\"M\":3,\"result\":\"1/3\",\"why\":\"bounded nontrivial closest\"}]",
+        "negative": "[\"Returning 3/2 when M=1 must fail, even though exact source denominator is 2.\",\"For x=1/2, M=1, returning 1 instead of 0 must fail (halfway integer tie).\",\"Using floating point to compare candidate errors may reverse sufficiently close rational order; only exact rational comparison is accepted.\",\"Returning a nonreduced or negative-denominator result violates the canonical output contract.\"]",
+        "independent_semantic_review": "PENDING",
+        "core_vs_library": "PENDING",
+        "ratification": false
+      }
     },
     {
       "coordinate": "1101111100",
@@ -11950,7 +12171,20 @@
       "coordinate_basis": "DETERMINISTIC-NEXT-FREE-NONCANONICAL-RESEARCH-RESERVATION",
       "selected": false,
       "ratified": false,
-      "physical_t5_authorized": false
+      "physical_t5_authorized": false,
+      "source_evidence": {
+        "status": "SOURCE-PINNED-LAW-AND-WITNESSES; NOT SELECTED",
+        "source_git_blob": "23a88762560ddfc82ebf434a65efe1e929173e76",
+        "law_source_key": "behavior",
+        "positive_source_key": "witnesses",
+        "negative_source_key": "falsifiers",
+        "law": "For a regular language L represented by a finite regex AST over alphabet {0,1} and a D1 input bit a, produce a regular expression denoting exactly D_a(L)={w in {0,1}* | a concatenated with w belongs to L}. Regex constructors: empty language ZERO, epsilon EPS, literal bit, union ALT, concatenation CAT, Kleene STAR. Syntactic AST equivalence not required: denoted languages must be identical. No implicit I/O, parsing control, actual SDR timing or regex-engine backtracking.",
+        "positive": "[{\"input\":\"D_0(CAT(0,1))\",\"expected_language\":\"{1}\",\"reason\":\"After reading first 0, only suffix 1 remains\"},{\"input\":\"D_1(CAT(0,1))\",\"expected_language\":\"empty\",\"reason\":\"No word beginning with 1 matched original 01\"},{\"input\":\"D_0(CAT(STAR(0),1))\",\"expected_language\":\"{0^n 1 | n>=0}\",\"reason\":\"Zero can be consumed by star\"},{\"input\":\"D_1(CAT(STAR(0),1))\",\"expected_language\":\"{epsilon}\",\"reason\":\"Nullable star allows bit 1 to belong to right factor\"},{\"input\":\"D_0(ALT(0,1))\",\"expected_language\":\"{epsilon}\",\"reason\":\"Union derivative keeps only branch matching 0\"},{\"input\":\"D_0(EPS)\",\"expected_language\":\"empty\",\"reason\":\"EPS has no nonempty strings\"}]",
+        "negative": "[\"Taking derivative of concatenation but omitting nullable(left) branch incorrectly rejects 1 in CAT(STAR(0),1).\",\"Using character matching instead of residual language discards all possible suffixes.\",\"Confusing AST tree identity with language equality rejects legitimate different derivative normal forms.\",\"Declaring empty-language AST nullable makes D_a(CAT(ZERO,X)) accept any word.\"]",
+        "independent_semantic_review": "PENDING",
+        "core_vs_library": "PENDING",
+        "ratification": false
+      }
     },
     {
       "coordinate": "1101111110",
@@ -11986,7 +12220,20 @@
       "coordinate_basis": "DETERMINISTIC-NEXT-FREE-NONCANONICAL-RESEARCH-RESERVATION",
       "selected": false,
       "ratified": false,
-      "physical_t5_authorized": false
+      "physical_t5_authorized": false,
+      "source_evidence": {
+        "status": "SOURCE-PINNED-LAW-AND-WITNESSES; NOT SELECTED",
+        "source_git_blob": "adf2be1236a6fd9418d29506a9ff00f539e4b812",
+        "law_source_key": "law",
+        "positive_source_key": "witnesses",
+        "negative_source_key": "falsifiers",
+        "law": "Найменше L від 0 до n, для якого існують коефіцієнти c[1..L]∈GF(2), що для кожного i=L..n−1 виконують s[i] = XOR_{j=1..L}(c[j] AND s[i−j]). Для порожнього слова L=0. Початкові біти до індексу L є довільним початковим станом, не штучними нулями. Усі послідовності точні, жодного шуму чи випадковості не виводимо.",
+        "positive": "[{\"word\":\"\",\"L\":0},{\"word\":\"000\",\"L\":0},{\"word\":\"1111\",\"L\":1},{\"word\":\"1000\",\"L\":1},{\"word\":\"001\",\"L\":3},{\"word\":\"010101\",\"L\":2},{\"word\":\"1101011110001\",\"L\":4}]",
+        "negative": "[\"001 -> L=2: попередні два біти нулі, неможливо одержати третій 1 з жодними GF(2) коефіцієнтами.\",\"1000 -> L=4: регістр довжини 1 з нульовим зворотним коефіцієнтом уже відтворює слово.\",\"Порожнє слово -> L=1: L=0 є мінімальним.\",\"Повторюваний період слова не дорівнює загальному лінійному GF(2)-рангу.\"]",
+        "independent_semantic_review": "PENDING",
+        "core_vs_library": "PENDING",
+        "ratification": false
+      }
     },
     {
       "coordinate": "1110000001",
@@ -12010,7 +12257,20 @@
       "coordinate_basis": "NEXT-FREE-NONCANONICAL-RESEARCH-NAME-RESERVATION",
       "selected": false,
       "ratified": false,
-      "physical_t5_authorized": false
+      "physical_t5_authorized": false,
+      "source_evidence": {
+        "status": "SOURCE-PINNED-LAW-AND-WITNESSES; NOT SELECTED",
+        "source_git_blob": "6337398217818c86ac27dc164ce8af4239704d95",
+        "law_source_key": "law",
+        "positive_source_key": "witnesses",
+        "negative_source_key": "falsifiers",
+        "law": "Given a partial deterministic finite map (state,input) -> (new-state,ordered-output-word), initial state and finite input word: consume left-to-right, concatenate output words, return final state and output; absent edge returns typed failure with input index; empty input preserves state and emits empty output.",
+        "positive": "[\"run(empty-input,S)=(S,())\",\"run(A,(1,))=(B,(x,y))\",\"run(A,X++Y) = run(run(A,X).state,Y), outputs concatenated\"]",
+        "negative": "[\"silent skip of missing edge\",\"reorder or loss of output symbols\",\"accept duplicate transition labels\"]",
+        "independent_semantic_review": "PENDING",
+        "core_vs_library": "PENDING",
+        "ratification": false
+      }
     },
     {
       "coordinate": "1110000011",
@@ -12022,7 +12282,20 @@
       "coordinate_basis": "NEXT-FREE-NONCANONICAL-RESEARCH-NAME-RESERVATION",
       "selected": false,
       "ratified": false,
-      "physical_t5_authorized": false
+      "physical_t5_authorized": false,
+      "source_evidence": {
+        "status": "SOURCE-PINNED-LAW-AND-WITNESSES; NOT SELECTED",
+        "source_git_blob": "6337398217818c86ac27dc164ce8af4239704d95",
+        "law_source_key": "law",
+        "positive_source_key": "witnesses",
+        "negative_source_key": "falsifiers",
+        "law": "Compose product-state machines: each T1 transition emits a word that T2 consumes sequentially, preserving order. If T2 lacks any transition, the composed input edge is undefined. Empty intermediate word leaves second state unchanged.",
+        "positive": "[\"composition output equals two-stage streaming cascade\",\"empty emitted word leaves second state\",\"ordered x,y emissions are both consumed\"]",
+        "negative": "[\"skip missing T2 edge\",\"reverse intermediate output\",\"change T2 state for empty output\"]",
+        "independent_semantic_review": "PENDING",
+        "core_vs_library": "PENDING",
+        "ratification": false
+      }
     },
     {
       "coordinate": "1110000100",
@@ -18458,6 +18731,49 @@
         "path": "knowledge/d10-hobbies-source-laws-v1.json",
         "git_blob": "fecd72417f556024fa20d5e6f1340960c5b82c7b",
         "rows": 9
+      }
+    ],
+    "total_passports": 36,
+    "latest_sources": [
+      {
+        "path": "knowledge/d10-clos-slot-state-historical-review-v1.json",
+        "git_blob": "d8c6a2fdf60c11e23016be7aad5037bb5c26782d",
+        "rows": 4
+      },
+      {
+        "path": "knowledge/d10-time-law-review-v2.json",
+        "git_blob": "cf28529677096a934aa0c31a4a3feefba6c51f12",
+        "rows": 4
+      },
+      {
+        "path": "knowledge/d10-historical-clos-interlisp-residual-review-v1.json",
+        "git_blob": "df8ed73011df39f9ec689046ce6936cc00892215",
+        "rows": 6
+      },
+      {
+        "path": "knowledge/d10-r6rs-copy-mutable-oracle-v1.json",
+        "git_blob": "99d3e1ba5f381df356fd0b335dfbf75c5027877d",
+        "rows": 2
+      },
+      {
+        "path": "knowledge/d10-cross-hobby-bounded-rational-v1.json",
+        "git_blob": "b93217e9b45c1339f09146a1daf4aa323e611ea9",
+        "rows": 1
+      },
+      {
+        "path": "knowledge/d10-brzozowski-1964-ai-donor-v1.json",
+        "git_blob": "23a88762560ddfc82ebf434a65efe1e929173e76",
+        "rows": 1
+      },
+      {
+        "path": "knowledge/d10-gf2-linear-complexity-research-20261009.json",
+        "git_blob": "adf2be1236a6fd9418d29506a9ff00f539e4b812",
+        "rows": 1
+      },
+      {
+        "path": "knowledge/d10-finite-transducer-cross-hobby-v1.json",
+        "git_blob": "6337398217818c86ac27dc164ce8af4239704d95",
+        "rows": 2
       }
     ]
   }
