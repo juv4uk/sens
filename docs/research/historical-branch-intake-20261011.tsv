@@ -2404,7 +2404,7 @@ main	UNTRIAGED	-	-	BRANCH-NAME-ONLY
 main-sync	UNTRIAGED	-	-	BRANCH-NAME-ONLY
 maintenance/2731-d5-baseline-metadata-refresh	UNTRIAGED	-	-	BRANCH-NAME-ONLY
 master	UNTRIAGED	-	-	BRANCH-NAME-ONLY
-merge/research-crosswidth-w6w8-current-main-20261009	UNTRIAGED	-	-	BRANCH-NAME-ONLY
+merge/research-crosswidth-w6w8-current-main-20261009	ALREADY-IN-MAIN-ANCESTOR	-	ae198253657a8569e63581a1dcc62537ad90d2ad	verified compare HEAD...main; source_ahead=0, no unique commits to merge
 migrate/atom-uk-t5-triplet-20261010	UNTRIAGED	-	-	BRANCH-NAME-ONLY
 migrate/block-binding-t5-20261008	UNTRIAGED	-	-	BRANCH-NAME-ONLY
 migrate/block-binding-t5-current-main-20261008	UNTRIAGED	-	-	BRANCH-NAME-ONLY
@@ -2662,8 +2662,8 @@ refactor/2947-domain-registry-on-3118	UNTRIAGED	-	-	BRANCH-NAME-ONLY
 refactor/2953-selector-source-on-3252	UNTRIAGED	-	-	BRANCH-NAME-ONLY
 refresh-readme-docs-d1-d8	UNTRIAGED	-	-	BRANCH-NAME-ONLY
 release/0.40.0-version-bump	UNTRIAGED	-	-	BRANCH-NAME-ONLY
-release/0.40.0-version-bump-fixed	UNTRIAGED	-	-	BRANCH-NAME-ONLY
-release/0.40.2	UNTRIAGED	-	-	BRANCH-NAME-ONLY
+release/0.40.0-version-bump-fixed	ALREADY-IN-MAIN-ANCESTOR	-	7eaea5a27f0476c4200319e05c0be8e4102f5fc7	verified compare HEAD...main; source_ahead=0, no unique commits to merge
+release/0.40.2	ALREADY-IN-MAIN-ANCESTOR	-	99706bfb6bb9d6a7788bcbf43cf367cef261338f	verified compare HEAD...main; source_ahead=0, no unique commits to merge
 release/0.41.0	UNTRIAGED	-	-	BRANCH-NAME-ONLY
 release/889-890-acceptance-completion	UNTRIAGED	-	-	BRANCH-NAME-ONLY
 release/889-890-contract-current-main	UNTRIAGED	-	-	BRANCH-NAME-ONLY
@@ -2671,13 +2671,13 @@ release/889-890-contract-current-main-v2	UNTRIAGED	-	-	BRANCH-NAME-ONLY
 release/891-892-acceptance-current-v2	UNTRIAGED	-	-	BRANCH-NAME-ONLY
 release/891-892-acceptance-current-v3	UNTRIAGED	-	-	BRANCH-NAME-ONLY
 release/891-892-transaction-probe-current-main	UNTRIAGED	-	-	BRANCH-NAME-ONLY
-release/975-preflight-gate	UNTRIAGED	-	-	BRANCH-NAME-ONLY
-release/4180-gpu-identity-only-current-main	UNTRIAGED	-	-	BRANCH-NAME-ONLY
+release/975-preflight-gate	ALREADY-IN-MAIN-ANCESTOR	-	47e2a9ba1af44d5c66a1e1c3a54df57e4c99281f	verified compare HEAD...main; source_ahead=0, no unique commits to merge
+release/4180-gpu-identity-only-current-main	ALREADY-IN-MAIN-ANCESTOR	-	98d4159aa4003c53e0ae7ecd5339eb7878b597d9	verified compare HEAD...main; source_ahead=0, no unique commits to merge
 release/4184-compiler-v1-keys-current	UNTRIAGED	-	-	BRANCH-NAME-ONLY
 release/4200-hosted-portable-gates	UNTRIAGED	-	-	BRANCH-NAME-ONLY
-release/4221-wix-current-main	UNTRIAGED	-	-	BRANCH-NAME-ONLY
+release/4221-wix-current-main	ALREADY-IN-MAIN-ANCESTOR	-	8120aea7e2e24f38c1991dc5e5b473ad63211282	verified compare HEAD...main; source_ahead=0, no unique commits to merge
 release/4225-compiler-nucleus-migrate	UNTRIAGED	-	-	BRANCH-NAME-ONLY
-release/4242-native-first-exact-sens	UNTRIAGED	-	-	BRANCH-NAME-ONLY
+release/4242-native-first-exact-sens	ALREADY-IN-MAIN-ANCESTOR	-	9d95f7dfaa069239fba4d80bc11fe22c937e858d	verified compare HEAD...main; source_ahead=0, no unique commits to merge
 release/4242-native-first-migrate	UNTRIAGED	-	-	BRANCH-NAME-ONLY
 repair/block-t5-rust-reader-20261008	UNTRIAGED	-	-	BRANCH-NAME-ONLY
 repair/uk-d10-yantra-provenance-20261010	UNTRIAGED	-	-	BRANCH-NAME-ONLY
@@ -3847,12 +3847,12 @@ surface/colon-to-divmod	UNTRIAGED	-	-	BRANCH-NAME-ONLY
 surface/d1-d4-uk-sa	UNTRIAGED	-	-	BRANCH-NAME-ONLY
 surface/d5-uk-sa	UNTRIAGED	-	-	BRANCH-NAME-ONLY
 surface/d5-uk-sa-contract11-4	UNTRIAGED	-	-	BRANCH-NAME-ONLY
-sync/4500-main-1008b	UNTRIAGED	-	-	BRANCH-NAME-ONLY
-sync/4500-main-1008c	UNTRIAGED	-	-	BRANCH-NAME-ONLY
-sync/4500-main-1008d	UNTRIAGED	-	-	BRANCH-NAME-ONLY
-sync/4500-main-1008e	UNTRIAGED	-	-	BRANCH-NAME-ONLY
-sync/4500-main-admission-1008g	UNTRIAGED	-	-	BRANCH-NAME-ONLY
-sync/4500-main-safe-batch-1008f	UNTRIAGED	-	-	BRANCH-NAME-ONLY
+sync/4500-main-1008b	ALREADY-IN-MAIN-ANCESTOR	-	e5607adc2cb70d6097696b8651f867ed3b19a8af	verified compare HEAD...main; source_ahead=0, no unique commits to merge
+sync/4500-main-1008c	ALREADY-IN-MAIN-ANCESTOR	-	c3e314f376fabe4fb934bcf387b52d0452dadebb	verified compare HEAD...main; source_ahead=0, no unique commits to merge
+sync/4500-main-1008d	ALREADY-IN-MAIN-ANCESTOR	-	fa340d7167b2ac7f34ae62acb77b340caa804bb7	verified compare HEAD...main; source_ahead=0, no unique commits to merge
+sync/4500-main-1008e	ALREADY-IN-MAIN-ANCESTOR	-	7e2061a73e97787adae2eae39498d7564f4da090	verified compare HEAD...main; source_ahead=0, no unique commits to merge
+sync/4500-main-admission-1008g	ALREADY-IN-MAIN-ANCESTOR	-	b4cc4410f725346d7de69f9d4acf2b5b2bc88788	verified compare HEAD...main; source_ahead=0, no unique commits to merge
+sync/4500-main-safe-batch-1008f	ALREADY-IN-MAIN-ANCESTOR	-	927fbf07efceca58ab0ced3e4da5728d92f2e3c3	verified compare HEAD...main; source_ahead=0, no unique commits to merge
 sync-mutation-bang-surfaces	UNTRIAGED	-	-	BRANCH-NAME-ONLY
 tantu-air-boundary-4173	UNTRIAGED	-	-	BRANCH-NAME-ONLY
 tasks/queryable-knowledge-3442	UNTRIAGED	-	-	BRANCH-NAME-ONLY
