@@ -136,6 +136,16 @@ class SensCodeMigrationTests(unittest.TestCase):
         with self.assertRaisesRegex(mod.BinaryMigrationError, "UNADMITTED_TEXT7_CONTEXT"):
             self.binary("(CONS a ())\n")
 
+    def test_quoted_symbol_blocker_reports_source_location(self):
+        # This is the exact unsupported source-value class reached in the
+        # assembled file-authority bundle, not an executable Text7 binder.
+        # Better diagnostics must NOT cause a fake physical .sens admission.
+        with self.assertRaisesRegex(
+            mod.BinaryMigrationError,
+            r"UNADMITTED_TEXT7_CONTEXT 'binary' at 2:3 \\(quoted-data\\)",
+        ):
+            self.binary("(QUOTE\n  binary)\n")
+
     def test_binary_source_uses_d2_structure_and_exact_function_words(self):
         converted, hits, shadowed = self.binary("(CONS (CAR ()) (CDR ()))\n")
         # Only D3 EMPTY is admitted as an operand here.
