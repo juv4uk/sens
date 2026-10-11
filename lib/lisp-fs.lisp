@@ -38,7 +38,7 @@
       (1110
         (1110
           (content-store-put (fs-objects fs) value)
-          (101101110 name address (fs-bindings fs))
+          (внутрішня-мапа-вставити name address (fs-bindings fs))
           (01010 1 (fs-revision fs)))
         address))))
 
@@ -46,7 +46,7 @@
 ; fs-read повертає (found value address) або (not-found name).
 (0011 fs-read
   (0010 (fs name)
-    (нехай-похідне ((binding (101100101 name (fs-bindings fs))))
+    (нехай-похідне ((binding (внутрішня-мапа-отримати name (fs-bindings fs))))
       (110
         ((0100 (010 binding)) (1110 (001 not-found) name))
         ((010 binding)  (1110 (001 not-found) name))
@@ -66,11 +66,11 @@
 
 (0011 fs-list
   (0010 (fs)
-    (101001100 (fs-bindings fs))))
+    (внутрішня-мапа-список (fs-bindings fs))))
 
 (0011 fs-contains?
   (0010 (fs name)
-    (110111011 (010 (101100101 name (fs-bindings fs))))))
+    (0100 (010 (внутрішня-мапа-отримати name (fs-bindings fs))))))
 
 ; Versioned data-only envelopes. They are ordinary alists and are never
 ; evaluated by the filesystem layer.
@@ -91,8 +91,8 @@
       (111 (001 format) (001 wsm-fs-root))
       (111 (001 version) *fs-format-version*)
       (111 (001 revision) (fs-revision fs))
-      (111 (001 bindings) (101001100 (fs-bindings fs)))
-      (111 (001 objects) (fs-object-addresses (101001100 (fs-objects fs)))))))
+      (111 (001 bindings) (внутрішня-мапа-список (fs-bindings fs)))
+      (111 (001 objects) (fs-object-addresses (внутрішня-мапа-список (fs-objects fs)))))))
 
 (0011 fs-object-addresses
   (0010 (entries)
@@ -236,7 +236,7 @@
       ((010 entries)  bindings)
       ((010 ()) (fs-bindings-from-list
            (011 entries)
-           (101101110 (100 (100 entries)) (011 (100 entries)) bindings))))))
+           (внутрішня-мапа-вставити (100 (100 entries)) (011 (100 entries)) bindings))))))
 
 ; F3 journal records are data-only append-only events.  Replay starts from
 ; fs-empty and returns either (accepted fs) or (rejected reason); unknown or
@@ -292,18 +292,18 @@
       ((101 (fs-package-field (001 op) event) (001 ()))
        (1110 (001 rejected) (001 missing-operation)))
       ((11110101 (101 (fs-package-field (001 op) event) (001 write))
-            (11111100 (0100 (110111011 (010 (11100 (001 name) event))))
-                (0100 (110111011 (010 (11100 (001 value) event))))))
+            (11111100 (0100 (0100 (010 (11100 (001 name) event))))
+                (0100 (0100 (010 (11100 (001 value) event))))))
        (1110 (001 rejected) (001 incomplete-write)))
       ((11110101 (101 (fs-package-field (001 op) event) (001 bind))
-            (11111100 (0100 (110111011 (010 (11100 (001 name) event))))
-                (0100 (110111011 (010 (11100 (001 address) event))))))
+            (11111100 (0100 (0100 (010 (11100 (001 name) event))))
+                (0100 (0100 (010 (11100 (001 address) event))))))
        (1110 (001 rejected) (001 incomplete-bind)))
       ((11110101 (101 (fs-package-field (001 op) event) (001 unbind))
-            (0100 (110111011 (010 (11100 (001 name) event)))))
+            (0100 (0100 (010 (11100 (001 name) event)))))
        (1110 (001 rejected) (001 incomplete-unbind)))
       ((11110101 (101 (fs-package-field (001 op) event) (001 root-commit))
-            (0100 (110111011 (010 (11100 (001 root) event)))))
+            (0100 (0100 (010 (11100 (001 root) event)))))
        (1110 (001 rejected) (001 incomplete-root-commit)))
       ((010 ()) (1110 (001 accepted) event)))))
 
@@ -318,13 +318,13 @@
         (fs-bindings-without
           (011 entries)
           name
-          (101101110 (100 (100 entries)) (011 (100 entries)) result))))))
+          (внутрішня-мапа-вставити (100 (100 entries)) (011 (100 entries)) result))))))
 
 (0011 fs-unbind
   (0010 (fs name)
     (1110
       (fs-objects fs)
-      (fs-bindings-without (101001100 (fs-bindings fs)) name map-empty)
+      (fs-bindings-without (внутрішня-мапа-список (fs-bindings fs)) name map-empty)
       (01010 1 (fs-revision fs)))))
 
 (0011 fs-journal-replay-event
@@ -350,7 +350,7 @@
                        (001 accepted)
                        (1110
                          (fs-objects fs)
-                         (101101110 (fs-package-field (001 name) event)
+                         (внутрішня-мапа-вставити (fs-package-field (001 name) event)
                                      address
                                      (fs-bindings fs))
                          (01010 1 (fs-revision fs))))))))
