@@ -13,6 +13,7 @@ mod bit9;
 mod binary_number;
 mod bits;
 mod canonical_reader;
+pub mod universal_frame3;
 mod program_data;
 mod compiler_role;
 mod compiler_bootstrap;

@@ -1,0 +1,14 @@
+{
+  "schema": "sens.domain-research-archive-extension/v1",
+  "date": "2026-10-11",
+  "source_pr": 3182,
+  "source_commit": "03aa306efff78c978fce49ce0fcfa670c857ccd8",
+  "source_blob_sha": "31c87f66cb5d8ecec23482057251f62df6d2d15f",
+  "archive_path": "research/domain-archive/20261011/pr3182/.github/workflows/cond-three-part-inventory.yml.source.txt",
+  "archive_blob_sha": "31c87f66cb5d8ecec23482057251f62df6d2d15f",
+  "supersedes_missing_ref": "research/domain-archive/20261011/supplement-migrator-remnants-20261011.json#not_archived/0",
+  "verified_original_sha": true,
+  "status": "ARCHIVAL_SOURCE_RESTORED_ONLY_NONEXECUTABLE",
+  "semantic_delta": 0,
+  "ratification_delta": 0
+}

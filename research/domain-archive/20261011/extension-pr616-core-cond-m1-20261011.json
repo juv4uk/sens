@@ -1,0 +1,43 @@
+{
+  "schema": "sens.domain-research-archive-extension/v1",
+  "date": "2026-10-11",
+  "kind": "ORIGINAL-GIT-BLOB-PROOF-ARCHIVE",
+  "status": "HISTORICAL-EVIDENCE-ONLY-NOT-EXECUTABLE-NOT-RATIFIED",
+  "summary": "Preserve the distinct non-merged PR #616 M1 canonical three-part COND core migration source and its original FASL without activating historical code.",
+  "source_pr": 616,
+  "source_pr_url": "https://github.com/juv4uk/sens/pull/616",
+  "source_commit": "75b19eb6e2cef3c55dea990ed1a6a49ffa60750a",
+  "source_base": "9ce5101853c0a9f43aacb32a98bb2bc9ab2eec3b",
+  "source_branch": "m1/upstream-canonical-cond-core-slice",
+  "current_main_at_archival": "41461531b3ad4f303ca4681cf59b664325e4c68a",
+  "source_claim": "M1 research migration of length-onto, reverse-onto, map-onto, reduce, nth/member?/assoc, LET*/threading, exact arithmetic and text predicates toward explicit result-domain COND; NOT a current semantic authority.",
+  "rules": [
+    "Original blobs are referenced unchanged; archive paths differ, blob content SHA does not.",
+    "Archive paths are inert evidence only and are not imported by build, runtime, code generation, or CI.",
+    "The historical binary FASL is retained as .binary, not as an active build input.",
+    "No D1-D9 law, D10 inventory/ledger/selection, current core source, runtime, or codec is modified."
+  ],
+  "entries": [
+    {
+      "original_path": "lib/core.lisp",
+      "original_git_blob_sha": "a5ec966e50e4f775dc32224f079d7be01517675b",
+      "archive_path": "research/domain-archive/20261011/pr0616/lib/core.lisp.source.txt",
+      "archive_git_blob_sha": "a5ec966e50e4f775dc32224f079d7be01517675b",
+      "active": false
+    },
+    {
+      "original_path": "lib/macro.lisp",
+      "original_git_blob_sha": "08d97ea0eb63dd44bacb5c508b07479526a055c0",
+      "archive_path": "research/domain-archive/20261011/pr0616/lib/macro.lisp.source.txt",
+      "archive_git_blob_sha": "08d97ea0eb63dd44bacb5c508b07479526a055c0",
+      "active": false
+    },
+    {
+      "original_path": "lib/core.lisp.fasl",
+      "original_git_blob_sha": "170c957c2cf3b6ad58a896873ae6252a636d2228",
+      "archive_path": "research/domain-archive/20261011/pr0616/lib/core.lisp.fasl.binary",
+      "archive_git_blob_sha": "170c957c2cf3b6ad58a896873ae6252a636d2228",
+      "active": false
+    }
+  ]
+}
