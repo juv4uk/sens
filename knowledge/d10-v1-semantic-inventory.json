@@ -8,10 +8,10 @@
   "capacity": 1024,
   "current_foundation": "#4008 / Contract 11.8 / D1-D9",
   "accounting": {
-    "selected_semantic_candidates": 653,
+    "selected_semantic_candidates": 654,
     "law_forced_coordinates": 256,
-    "unplaced_selected_candidates": 397,
-    "remaining_semantic_inventory": 371,
+    "unplaced_selected_candidates": 398,
+    "remaining_semantic_inventory": 370,
     "ratified_d10_residents": 0
   },
   "rules": [
@@ -14971,6 +14971,102 @@
         "https://www.mit.edu/~6.450/handouts/6.450book.pdf",
         "juv4uk/sens@81c805e22b1ed528869e49e7dc5e02a744ee8751:knowledge/d10-prefix-free-kraft-certificate-20261011.json:1"
       ]
+    },
+    {
+      "stable_id": "d10.math.finite-code-unique-decipherability.20261011",
+      "semantic_name": "FINITE-CODE-UNIQUE-DECIPHERABILITY",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "SARDINAS-PATTERSON-FINITE-BINARY-CODE-THEOREM",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "FINITE-STRING-UNIQUE-DECODABILITY",
+      "behavior": "For a finite ordered codebook of distinct nonempty symbol identities mapped to nonempty finite binary words, return YES exactly if no two different nonempty finite sequences of identities concatenate to the same binary string, otherwise NO; empty codebook YES, repeated codewords for different identities NO, malformed input rejected.",
+      "source_path": "knowledge/d10-unique-decipherability-selected-20261011.json",
+      "primary_url": "https://doi.org/10.1016/S0019-9958(67)80002-0",
+      "provenance": [
+        "#4013",
+        "#4463",
+        "#5041",
+        "knowledge/d10-unique-decipherability-selected-20261011.json",
+        "knowledge/d10-unique-decipherability-historical-20261009.json",
+        "https://doi.org/10.1016/S0019-9958(63)80011-X",
+        "https://doi.org/10.1016/S0019-9958(67)80002-0"
+      ],
+      "surface_uk": "однозначність-декодування?",
+      "surface_ukr": "код-однозначно-декодується?",
+      "positive_witnesses": [
+        {
+          "input": [],
+          "result": "YES"
+        },
+        {
+          "input": [
+            [
+              "a",
+              "0"
+            ],
+            [
+              "b",
+              "11"
+            ]
+          ],
+          "result": "YES"
+        },
+        {
+          "input": [
+            [
+              "a",
+              "0"
+            ],
+            [
+              "b",
+              "01"
+            ]
+          ],
+          "result": "YES, despite non-prefix-free"
+        },
+        {
+          "input": [
+            [
+              "a",
+              "0"
+            ],
+            [
+              "b",
+              "01"
+            ],
+            [
+              "c",
+              "10"
+            ]
+          ],
+          "result": "NO, [a,c] and [b,a] both encode 010"
+        },
+        {
+          "input": [
+            [
+              "a",
+              "0"
+            ],
+            [
+              "b",
+              "0"
+            ]
+          ],
+          "result": "NO, differing identity one-symbol collision"
+        }
+      ],
+      "falsifiers": [
+        "Treat every non-prefix-free code as non-unique",
+        "Accept a 010 collision between [a,c] and [b,a]",
+        "Treat duplicate codewords for distinct identities as uniquely decodable",
+        "Accept empty, nonbinary codewords or duplicate identities",
+        "Conclude unique decodability solely because brute-force search to a fixed bound found no collision"
+      ],
+      "dedup_check": "Exact D1–D9 behavioral name scan plus selected 653 D10: no same predicate. Distinct from PREFIX-FREE-KRAFT-CERTIFICATE on [0,01], which is non-prefix-free and uniquely decipherable. Core-vs-derived review still pending.",
+      "ownership_test": "Pure finite language-visible codebook property with exact terminating residual closure, independent from physical SENS, D2 parse, Rust transport, GPU, FPGA and ISA.",
+      "ratified_resident": false,
+      "physical_t5_authorized": false
     }
   ],
   "parent_domain": {
@@ -15017,6 +15113,7 @@
     "knowledge/d10-clock-radio-math-selection-20261009.json",
     "knowledge/d10-babbage-reiter-hobby-selected-20261009.json",
     "knowledge/d10-hysteretic-boolean-source-law-20261009.json",
-    "knowledge/d10-archive-admission-20261011.uk.md"
+    "knowledge/d10-archive-admission-20261011.uk.md",
+    "knowledge/d10-unique-decipherability-selected-20261011.json"
   ]
 }
