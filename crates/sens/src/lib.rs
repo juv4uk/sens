@@ -11,6 +11,7 @@
 mod bignum;
 mod bit9;
 mod binary_number;
+mod domain_numeric;
 mod bits;
 mod canonical_reader;
 pub mod universal_frame3;
@@ -153,6 +154,7 @@ mod text7_projection_generated;
 mod value;
 
 pub use binary_number::{BinaryNumber, BinaryNumberError};
+pub use domain_numeric::DomainNumericComposition;
 pub use bit9::Bit9;
 pub use bits::{Bit1, Bit2, Bit3, Bit4, Bit5, Bit6, Bit7, Bit8, Bits};
 pub use canonical_reader::{parse_canonical_binary, parse_canonical_packed_words, parse_canonical_word_sequence};
