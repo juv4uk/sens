@@ -8,10 +8,10 @@
   "capacity": 1024,
   "current_foundation": "#4008 / Contract 11.8 / D1-D9",
   "accounting": {
-    "selected_semantic_candidates": 658,
+    "selected_semantic_candidates": 661,
     "law_forced_coordinates": 256,
-    "unplaced_selected_candidates": 402,
-    "remaining_semantic_inventory": 366,
+    "unplaced_selected_candidates": 405,
+    "remaining_semantic_inventory": 363,
     "ratified_d10_residents": 0
   },
   "rules": [
@@ -15403,6 +15403,325 @@
       "behavioral_dedup": "Canonical minimal adjacent unwrapping with specified half-period tie polarity and accumulation, not residue-class, physical ground-truth motion or one-modulus bounded inverse image.",
       "owner_review": "CORE-VS-DERIVED-PENDING",
       "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.words.debruijn-binary-cycle.20261011",
+      "semantic_name": "DE-BRUIJN-BINARY-CYCLE?",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "SOURCE-PINNED-FORMAL-FINITE-COMBINATORICS-RESEARCH",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "CYCLIC-BINARY-EXHAUSTIVE-WINDOW-CERTIFICATE",
+      "behavior": "For n>=1, return D1 TRUE=1 iff length(word)=2^n AND the cyclic windows word[i],...,word[(i+n-1) mod 2^n] over all starts i∈[0,2^n) are pairwise distinct (equivalently cover all 2^n possible n-bit strings exactly once). Return D1 FALSE=0 for any well-typed word failing length or uniqueness. Invalid non-D1 data or n<=0 is a domain error, never a sneaky TRUE.",
+      "surface_uk": "повний-двійковий-цикл?",
+      "surface_ukr": "чи-усі-н-бітові-вікна-рівно-раз?",
+      "positive_witnesses": [
+        {
+          "word": "01",
+          "n": 1,
+          "value": 1,
+          "why": "both 1-bit patterns exactly once"
+        },
+        {
+          "word": "10",
+          "n": 1,
+          "value": 1,
+          "why": "cyclic rotation preserves coverage"
+        },
+        {
+          "word": "0011",
+          "n": 2,
+          "value": 1,
+          "why": "00, 01, 11, 10 each once"
+        },
+        {
+          "word": "00010111",
+          "n": 3,
+          "value": 1,
+          "why": "SageMath example order three"
+        },
+        {
+          "word": "00101110",
+          "n": 3,
+          "value": 1,
+          "why": "rotation of valid SageMath cycle"
+        },
+        {
+          "word": "00010110",
+          "n": 3,
+          "value": 0,
+          "why": "changed bit creates duplicate cyclic n-window"
+        },
+        {
+          "word": "00000000",
+          "n": 3,
+          "value": 0,
+          "why": "repeated zero windows"
+        },
+        {
+          "word": "000101110",
+          "n": 3,
+          "value": 0,
+          "why": "extra delimiter/bit changes required exact length"
+        },
+        {
+          "word": "",
+          "n": 1,
+          "value": 0,
+          "why": "empty word never has required length"
+        },
+        {
+          "word": "0101",
+          "n": 2,
+          "value": 0,
+          "why": "primitive 01 repetition does not cover all 2-bit patterns"
+        }
+      ],
+      "falsifiers": [
+        "Counting only linear substrings without wrap-around rejects valid 0011 at n=2",
+        "Accepting length 2^n with duplicate n-bit windows mistakes length for universal coverage",
+        "Treating a repeated primitive block as sufficient wrongly accepts 0101 at n=2",
+        "Treating word rotations as semantically different wrongly rejects 10001011 at n=3",
+        "Using an LFSR period alone without the all-zero state can miss one n-bit window"
+      ],
+      "provenance": [
+        "#4013",
+        "#4463",
+        "knowledge/d10-existing-combinatorial-laws-selected-20261011.json",
+        "knowledge/d10-debruijn-binary-cycle-research-v1.json",
+        "https://doc.sagemath.org/html/en/reference/combinat/sage/combinat/debruijn_sequence.html",
+        "scripts/check_d10_debruijn_binary_cycle.py",
+        "tests/test_d10_debruijn_binary_cycle.py"
+      ],
+      "historical_source_blob": "9c989ef46a7fc2798a21267a92a7d8690ecaad84",
+      "behavioral_dedup": "PRIMITIVE-BINARY-WORD-ROOT: predicate checks all cyclic n-bit windows, not primitive-root decomposition",
+      "owner_review": "CORE-VS-DERIVED-PENDING",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.words.binary-lyndon-factorization.20261011",
+      "semantic_name": "BINARY-LYNDON-FACTORIZATION",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "SOURCE-PINNED-FORMAL-FINITE-COMBINATORICS-RESEARCH",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "UNIQUE-ORDERED-LYNDON-FACTOR-DECOMPOSITION",
+      "behavior": "Return the unique finite factor list (l1,...,lk) such that concat(li)=w; all li are Lyndon (strictly lexicographically smaller than every proper nonempty suffix); and l1 >= l2 >= ... >= lk under explicit lexicographic 0<1. For empty source return []. No dependence on physical packing, phoneme ordering or hardware transport.",
+      "surface_uk": "розкласти-двійкове-слово",
+      "surface_ukr": "чин-розкладу-Ліндона",
+      "positive_witnesses": [
+        {
+          "input": "",
+          "factors": []
+        },
+        {
+          "input": "0",
+          "factors": [
+            "0"
+          ]
+        },
+        {
+          "input": "1111",
+          "factors": [
+            "1",
+            "1",
+            "1",
+            "1"
+          ]
+        },
+        {
+          "input": "01010",
+          "factors": [
+            "01",
+            "01",
+            "0"
+          ]
+        },
+        {
+          "input": "010010010001000",
+          "factors": [
+            "01",
+            "001",
+            "001",
+            "0001",
+            "0",
+            "0",
+            "0"
+          ]
+        },
+        {
+          "input": "001001",
+          "factors": [
+            "001",
+            "001"
+          ]
+        },
+        {
+          "input": "101",
+          "factors": [
+            "1",
+            "01"
+          ]
+        }
+      ],
+      "falsifiers": [
+        "Returning a shortest repeated primitive root (e.g. 01010 -> 01010) instead of the ordered factor list is wrong.",
+        "Allowing increasing factors l_i<l_(i+1) violates the theorem's canonical ordering.",
+        "Factoring by a hidden phoneme collation rather than explicit D1 order 0<1 changes identity.",
+        "Treating nonempty '00' as a Lyndon component is invalid: it equals a proper suffix only lexically larger, and is not primitive."
+      ],
+      "provenance": [
+        "#4013",
+        "#4463",
+        "knowledge/d10-existing-combinatorial-laws-selected-20261011.json",
+        "knowledge/d10-binary-lyndon-factorization-v1.json",
+        "https://doc.sagemath.org/html/en/reference/combinat/sage/combinat/words/finite_word.html",
+        "scripts/check_d10_binary_lyndon_factorization.py"
+      ],
+      "historical_source_blob": "7c7633e2e1041075bf589937e0b4f6ce72be0dcd",
+      "behavioral_dedup": "PRIMITIVE-BINARY-WORD-ROOT: returns unique nonincreasing full Lyndon factorization, not shortest repeated root",
+      "owner_review": "CORE-VS-DERIVED-PENDING",
+      "ratified_resident": false
+    },
+    {
+      "stable_id": "d10.math.stern-brocot-run-path.20261011",
+      "semantic_name": "STERN-BROCOT-RUN-PATH",
+      "status": "SELECTED-RESEARCH-CANDIDATE",
+      "source_class": "SOURCE-PINNED-FORMAL-FINITE-COMBINATORICS-RESEARCH",
+      "coordinate": null,
+      "coordinate_basis": "UNPLACED",
+      "relation_class": "EXACT-CANONICAL-STERN-BROCOT-BIT-RUNS",
+      "behavior": "Generate exact L/R path from root 1/1 by repeated numerator/denominator comparison and subtractive Euclid; compress maximal same-bit runs using quotient floor((a-1)/b) or floor((b-1)/a), preserving final equality stop without one extra step. Reject nonpositive and imprecise source inputs; reverse accepts ONLY alternating positive-length bit runs. Two-direction round trips are identity and representation is unique for every positive rational.",
+      "surface_uk": "шлдр",
+      "surface_ukr": "стиснений-шлях-дробу",
+      "positive_witnesses": [
+        {
+          "rational": "1/1",
+          "runs": [],
+          "note": "root needs zero directions"
+        },
+        {
+          "rational": "1/2",
+          "runs": [
+            [
+              0,
+              1
+            ]
+          ],
+          "note": "one left branch"
+        },
+        {
+          "rational": "2/1",
+          "runs": [
+            [
+              1,
+              1
+            ]
+          ],
+          "note": "one right branch"
+        },
+        {
+          "rational": "2/3",
+          "runs": [
+            [
+              0,
+              1
+            ],
+            [
+              1,
+              1
+            ]
+          ],
+          "note": "left then right"
+        },
+        {
+          "rational": "3/2",
+          "runs": [
+            [
+              1,
+              1
+            ],
+            [
+              0,
+              1
+            ]
+          ],
+          "note": "right then left"
+        },
+        {
+          "rational": "5/2",
+          "runs": [
+            [
+              1,
+              2
+            ],
+            [
+              0,
+              1
+            ]
+          ],
+          "note": "two rights one left"
+        },
+        {
+          "rational": "13/9",
+          "runs": [
+            [
+              1,
+              1
+            ],
+            [
+              0,
+              2
+            ],
+            [
+              1,
+              3
+            ]
+          ],
+          "note": "exact run compression from Euclid, final right run of 3"
+        },
+        {
+          "rational": "1/1000000001",
+          "runs": [
+            [
+              0,
+              1000000000
+            ]
+          ],
+          "note": "billion path steps represented by one positive run"
+        },
+        {
+          "rational": "1000000001/1",
+          "runs": [
+            [
+              1,
+              1000000000
+            ]
+          ],
+          "note": "unbounded integer width, no bit expansion"
+        }
+      ],
+      "falsifiers": [
+        "For 3/1, returning right-run count 3 rather than 2 introduces an extra branch past the exact rational.",
+        "For 1/1, returning any left or right step is not the root path.",
+        "For 5/2, reversing R² L into L R² reaches a different fraction.",
+        "Consecutive same-direction run records must reject rather than silently admit a noncanonical alternative code.",
+        "Zero/negative run counts, boolean bits, floats and nonpositive input rationals must reject.",
+        "A billion left steps must remain a run count, not allocate a billion-element bit sequence.",
+        "Turning the path into the nearest denominator-bounded fraction instead of exactly reversible p/q changes the mathematical meaning."
+      ],
+      "provenance": [
+        "#4013",
+        "#4463",
+        "knowledge/d10-existing-combinatorial-laws-selected-20261011.json",
+        "knowledge/d10-stern-brocot-run-path-20261009.json",
+        "https://devel.isa-afp.org/browser_info/current/AFP/Stern_Brocot/Stern_Brocot_Tree.html",
+        "scripts/check_d10_stern_brocot_runs.py"
+      ],
+      "historical_source_blob": "37cd7d1e77881d0818641d04c8d8b2ac4a605892",
+      "behavioral_dedup": "BOUNDED-RATIONAL-APPROX: lossless canonical positive fraction path rather than approximate bounded fraction",
+      "owner_review": "CORE-VS-DERIVED-PENDING",
+      "ratified_resident": false
     }
   ],
   "parent_domain": {
@@ -15452,6 +15771,7 @@
     "knowledge/d10-archive-admission-20261011.uk.md",
     "knowledge/d10-unique-decipherability-selected-20261011.json",
     "knowledge/d10-generalized-crt-selection-20261011.json",
-    "knowledge/d10-existing-math-signal-selected-20261011.json"
+    "knowledge/d10-existing-math-signal-selected-20261011.json",
+    "knowledge/d10-existing-combinatorial-laws-selected-20261011.json"
   ]
 }

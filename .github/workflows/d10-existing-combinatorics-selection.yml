@@ -1,0 +1,32 @@
+name: D10 archived combinatorial selection proof
+on:
+  pull_request:
+    paths:
+      - 'knowledge/d10-existing-combinatorial-laws-selected-20261011.json'
+      - 'knowledge/d10-v1-semantic-inventory.json'
+      - 'knowledge/d10-proposal-ledger.tsv'
+      - 'scripts/check_d10_existing_combinatorial_laws_selected.py'
+      - 'scripts/check_d10_binary_lyndon_factorization.py'
+      - 'scripts/check_d10_debruijn_binary_cycle.py'
+      - 'scripts/check_d10_stern_brocot_runs.py'
+      - '.github/workflows/d10-existing-combinatorics-selection.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  finite-combinatorial-proofs:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate three selected semantics and 8 falsifiers under -O
+        run: |
+          set -euo pipefail
+          python3 scripts/check_d10_existing_combinatorial_laws_selected.py --self-test
+          python3 -O scripts/check_d10_existing_combinatorial_laws_selected.py --self-test
+      - name: Preserve original frozen source-HOLD and verify independent oracles
+        run: |
+          set -euo pipefail
+          python3 scripts/check_d10_debruijn_binary_cycle.py --self-test
+          python3 tests/test_d10_debruijn_binary_cycle.py
+          python3 scripts/check_d10_binary_lyndon_factorization.py --self-test
+          python3 scripts/check_d10_stern_brocot_runs.py --self-test

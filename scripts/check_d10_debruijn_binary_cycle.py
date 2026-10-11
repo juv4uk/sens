@@ -52,7 +52,13 @@ def check(d, inventory, foundation):
     selected={x["semantic_name"].upper() for x in inventory["rows"]}
     lower={str(s).upper() for domain in foundation["domains"].values()
             for s in domain["residents"].values()}
-    assert c["semantic_name"] not in (selected | lower), "A real resident now exists: review before proceeding"
+    assert c["semantic_name"] not in lower
+    if c["semantic_name"] in selected:
+        from check_d10_existing_combinatorial_laws_selected import verify_promoted
+        matching = [r for r in inventory["rows"] if r["semantic_name"] == c["semantic_name"]]
+        assert len(matching) == 1
+        proof = verify_promoted(c["semantic_name"], matching[0])
+        assert proof["law"] == c["law"]
     assert PY_ORACLE.exists() and R6RS_ORACLE.exists()
     return {"research":1,"added":0,"main_selected":len(selected),"ratified":0}
 
