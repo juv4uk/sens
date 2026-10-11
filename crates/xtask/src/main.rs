@@ -36,6 +36,7 @@ fn main() -> ExitCode {
 fn run_compiler_compile(mut args: impl Iterator<Item = String>) -> ExitCode {
     let repo_root = locate_repo_root();
     let mut input: Option<std::path::PathBuf> = None;
+    let mut triplet: Option<std::path::PathBuf> = None;
     let mut output: Option<std::path::PathBuf> = None;
 
     while let Some(arg) = args.next() {
@@ -45,32 +46,55 @@ fn run_compiler_compile(mut args: impl Iterator<Item = String>) -> ExitCode {
                     eprintln!("--input requires a canonical SW1 input path");
                     return ExitCode::FAILURE;
                 };
-                input = Some(std::path::PathBuf::from(value));
+                if input.replace(std::path::PathBuf::from(value)).is_some() {
+                    eprintln!("--input may be specified only once");
+                    return ExitCode::FAILURE;
+                }
+            }
+            "--triplet" => {
+                let Some(value) = args.next() else {
+                    eprintln!("--triplet requires a physical .sens file path");
+                    return ExitCode::FAILURE;
+                };
+                if triplet.replace(std::path::PathBuf::from(value)).is_some() {
+                    eprintln!("--triplet may be specified only once");
+                    return ExitCode::FAILURE;
+                }
             }
             "--out" => {
                 let Some(value) = args.next() else {
                     eprintln!("--out requires an output evidence path");
                     return ExitCode::FAILURE;
                 };
-                output = Some(std::path::PathBuf::from(value));
+                if output.replace(std::path::PathBuf::from(value)).is_some() {
+                    eprintln!("--out may be specified only once");
+                    return ExitCode::FAILURE;
+                }
             }
             other => {
                 eprintln!("unknown compiler-compile option: {other}");
-                eprintln!("  available: --input <SW1-file>, --out <new-evidence-file>");
+                eprintln!("  available: (--input <SW1-file> | --triplet <name.sens>), --out <new-evidence-file>");
                 return ExitCode::FAILURE;
             }
         }
     }
 
-    let Some(input) = input else {
-        eprintln!("compiler-compile requires --input <canonical SW1 file>");
+    if input.is_some() == triplet.is_some() {
+        eprintln!("compiler-compile requires exactly one of --input <canonical SW1 file> or --triplet <name.sens>");
         return ExitCode::FAILURE;
+    }
+
+    let result = if let Some(sens_path) = triplet {
+        compiler_compile::run_triplet(&repo_root, &sens_path, output.as_deref())
+    } else {
+        let input = input.expect("exactly one input mode was checked");
+        compiler_compile::run(
+            &repo_root,
+            compiler_compile::RunOptions { input, output },
+        )
     };
 
-    match compiler_compile::run(
-        &repo_root,
-        compiler_compile::RunOptions { input, output },
-    ) {
+    match result {
         Ok(true) => ExitCode::SUCCESS,
         Ok(false) => ExitCode::FAILURE,
         Err(error) => {
@@ -121,7 +145,7 @@ fn run_compiler_export(mut args: impl Iterator<Item = String>) -> ExitCode {
 
 fn print_usage() {
     eprintln!(
-        "usage: cargo xtask <compiler-compile --input SW1 [--out EVIDENCE]|compiler-export [--artifact] [--fixture NAME]|external-oracle <export|render> [--fixture F-...]|import-xed-evidence [--check] [--vendor-root DIR] [--out FILE]|generate-encoder-coverage [--check] [--evidence FILE] [--out FILE]>"
+        "usage: cargo xtask <compiler-compile (--input SW1|--triplet FILE.sens) [--out EVIDENCE]|compiler-export [--artifact] [--fixture NAME]|external-oracle <export|render> [--fixture F-...]|import-xed-evidence [--check] [--vendor-root DIR] [--out FILE]|generate-encoder-coverage [--check] [--evidence FILE] [--out FILE]>"
     );
 }
 
