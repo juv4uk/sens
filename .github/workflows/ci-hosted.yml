@@ -40,14 +40,19 @@ jobs:
       - name: Verify migrated user demo sources run through canonical Core
         run: cargo test --locked -p sens --test exact_domain_migrated_demos
       - name: World D3 candidate differential against historical source
+        if: always()
         run: cargo test --locked -p sens --test reasoning_world_d3_migration
       - name: Forward and knowledge D3 candidates differential oracle
+        if: always()
         run: cargo test --locked -p sens --test reasoning_forward_knowledge_d3_migration
       - name: Legacy core D6 MAP reader execution
+        if: always()
         run: cargo test --locked -p sens --test legacy_core_d6_map_reader
       - name: World D3 complete CLI binary compilation
+        if: always()
         run: cargo check --locked -p sens-cli --bins
       - name: World D3 content-store integration
+        if: always()
         run: |
           cargo test --locked -p sens --test content_store
           cargo test --locked -p sens --test content_store_authority
