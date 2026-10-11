@@ -740,7 +740,6 @@ def binary_rewrite(
                 "data_slots": 0,
                 "parent_data_slot": parent_data_slot,
                 "parameter_owner": parameter_owner,
-                "parent": parent,
                 "resolved_head": None,
                 "bindings": set(),
             })
@@ -913,19 +912,6 @@ def binary_rewrite(
                     emit_text7_atom(token, role="binder")
                     parameter_owner["bindings"].add(token)
                 elif not quoted and is_bound(token):
-                    emit_text7_atom(token, role="reference")
-                elif (
-                    quoted and frame is not None
-                    and frame.get("resolved_head") == "QUOTE"
-                    and frame.get("parent") is not None
-                    and frame["parent"].get("resolved_head") == "SET"
-                    and frame["parent"]["items"] == 2
-                    and is_bound(token)
-                ):
-                    # In the exact first argument of SET, QUOTE(W7 binder)
-                    # is a contextual target, NOT globally quoted Text7
-                    # data or a new Symbol constructor. Runtime has a
-                    # matching D5 SET target law; all other quotes reject.
                     emit_text7_atom(token, role="reference")
                 else:
                     raise BinaryMigrationError(
