@@ -563,7 +563,7 @@
 ;; kein kryptographischer Digest; ein späteres SHA kann diesen Schlüssel kürzen.
 (0011 knowledge-content-address
   (0010 (knowledge)
-    (11110100 knowledge)))
+    (значення-у-текст knowledge)))
 
 (0011 world-address-content
   (0010 (world)
