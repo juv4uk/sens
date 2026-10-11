@@ -6,6 +6,7 @@ The older 1495-name index is SHA-pinned, not a second current authority.
 """
 from __future__ import annotations
 import argparse
+import csv
 import hashlib
 import json
 from pathlib import Path
@@ -23,21 +24,28 @@ ARRAY_FIELDS = (
 
 
 def literal_tsv(path):
-    lines = path.read_text(encoding="utf-8").splitlines()
-    if not lines or tuple(lines[0].split("\t")) != INDEX_FIELDS:
-        raise ValueError("INVALID_SOURCE_CATALOG_HEADER")
+    # Both the historical unquoted JSON-bearing tab index and the newer
+    # RFC4180-quoted TSV are accepted by csv.reader. Never split quoted
+    # fields manually; doubled JSON quotes are evidence, not delimiters.
     rows = {}
-    for number, line in enumerate(lines[1:], 2):
-        parts = line.split("\t")
-        if len(parts) != len(INDEX_FIELDS):
-            raise ValueError(f"INVALID_SOURCE_CATALOG_LINE:{number}")
-        record = dict(zip(INDEX_FIELDS, parts))
-        key = record["semantic_name"].strip().casefold()
-        if not key or key in rows:
-            raise ValueError(f"DUPLICATE_SOURCE_NAME:{number}:{key}")
-        if record["ratified"] != "0":
-            raise ValueError("UNEXPECTED_RATIFICATION")
-        rows[key] = record
+    with path.open(encoding="utf-8", newline="") as stream:
+        reader = csv.reader(stream, delimiter="\t", strict=True)
+        try:
+            if tuple(next(reader, ())) != INDEX_FIELDS:
+                raise ValueError("INVALID_SOURCE_CATALOG_HEADER")
+            for parts in reader:
+                number = reader.line_num
+                if len(parts) != len(INDEX_FIELDS):
+                    raise ValueError(f"INVALID_SOURCE_CATALOG_LINE:{number}")
+                record = dict(zip(INDEX_FIELDS, parts))
+                key = record["semantic_name"].strip().casefold()
+                if not key or key in rows:
+                    raise ValueError(f"DUPLICATE_SOURCE_NAME:{number}:{key}")
+                if record["ratified"] != "0":
+                    raise ValueError("UNEXPECTED_RATIFICATION")
+                rows[key] = record
+        except csv.Error as exc:
+            raise ValueError(f"INVALID_CATALOG_QUOTING:{reader.line_num}") from exc
     return rows
 
 
