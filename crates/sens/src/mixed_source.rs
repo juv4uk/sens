@@ -52,7 +52,7 @@ pub fn parse_mixed_exact_domain_reasoning_source(
     path: &str,
     source: &str,
 ) -> Result<Vec<Expr>, LanguageError> {
-    if !matches!(path, "lib/world.lisp" | "lib/forward.lisp" | "lib/knowledge.lisp" | "lib/unify.lisp" | "lib/reason.lisp" | "lib/persistent-map.lisp") {
+    if !matches!(path, "lib/world.lisp" | "lib/forward.lisp" | "lib/knowledge.lisp" | "lib/unify.lisp" | "lib/reason.lisp" | "lib/persistent-map.lisp" | "lib/content-store.lisp" | "lib/lisp-fs.lisp") {
         return Err(LanguageError::new(
             ErrorKind::Parse,
             "reasoning-source exact-domain reader requires a pinned source path",
@@ -528,7 +528,7 @@ mod tests {
     #[test]
     fn reasoning_source_is_path_bound_and_preserves_w8_macro_data() {
         let src = "(00001010 preserve (x) (110 ((010 x) (001 (101 x x)))))";
-        for path in ["lib/world.lisp", "lib/forward.lisp", "lib/knowledge.lisp", "lib/unify.lisp", "lib/reason.lisp", "lib/persistent-map.lisp"] {
+        for path in ["lib/world.lisp", "lib/forward.lisp", "lib/knowledge.lisp", "lib/unify.lisp", "lib/reason.lisp", "lib/persistent-map.lisp", "lib/content-store.lisp", "lib/lisp-fs.lisp"] {
             let tree = parse_mixed_exact_domain_reasoning_source(path, src)
                 .expect("one of three authorized reasoning source files");
             let ExprKind::List(parts) = &tree[0].kind else { panic!("macro"); };
