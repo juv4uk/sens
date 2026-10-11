@@ -179,8 +179,10 @@
 (00001001 length-onto
   (00001000 (values acc)
     (00000111
-      ((0100 (00000010 values)) acc)
-      ((00100010 (00000010 values) (00000001 (0)))
+      ; D1 ATOM chooses the empty proper-list tail; a pair must recurse.
+      ; Never run Core4 NOT or graded EQUAL as a COND predicate.
+      ((00000010 values) acc)
+      ((00000010 (00000001 ()))
        (length-onto (00000110 values) (00001100 acc 1))))))
 
 
@@ -447,22 +449,28 @@
 
 (00001001 pairlis спарувати)
 
+; Build LET*'s complete nested lambda tree during macro expansion. A macro
+; call left inside the returned body would be evaluated as ordinary data-call;
+; recurse here while the raw binding forms are still available.
+(00001001 core4-let*-expansion
+  (00001000 (bindings body)
+    (00000111
+      ((00000010 bindings) body)
+      ((00000010 (00000001 ()))
+       (111
+         (111
+           (001 0010)
+           (111
+             (111 (100 (100 bindings)) (001 ()))
+             (111
+               (core4-let*-expansion (011 bindings) body)
+               (001 ()))))
+         (111
+           (100 (011 (100 bindings)))
+           (001 ())))))))
+
 (00001010 let* (bindings body)
-  ; D3 ATOM повертає точний D1:1 для порожнього списку прив'язок.
-  ; Непорожні прив'язки переходять до рекурсивного LET через D1:1 за замовчуванням.
-  (00000111
-    ((00000010 bindings) body)
-    ((00000010 (00000001 ())) 
-     ; Build the recursive expansion from the primitive tree substrate only.
-     ; This keeps let* semantics in Lisp while allowing generic macro
-     ; frontends to execute the law without importing the higher-level list
-     ; helper as host/compiler semantic authority.
-     (00000100 (00000001 let)
-           (00000100 (00000100 (00000101 bindings) (00000001 ()))
-                 (00000100 (00000100 (00000001 let*)
-                             (00000100 (00000110 bindings)
-                                   (00000100 body (00000001 ()))))
-                       (00000001 ())))))))
+  (core4-let*-expansion bindings body))
 
 ; string-length/string-empty?/string-prefix?/string-contains? (PLAN.md
 ; item 14, item 20's G5 audit test applied live) — none of these need a
