@@ -268,6 +268,32 @@ mod tests {
     }
 
     #[test]
+    fn rational_high_bit_products_promote_components_from_d24_to_d48_without_loss() {
+        let n = (1u64 << 24) - 1;
+        let den = n - 1;
+        let ratio = canonical_parts(false, &d(24,n), &d(24,den)).unwrap();
+        assert_eq!(ratio.to_string(), format!("{n}/{den}"));
+        let squared = compute("*",&ratio,&ratio).unwrap();
+        let Value::NumericComposition(ref r) = squared else { panic!("exact RATIO") };
+        assert_eq!(r.domain_width(),48);
+        let (neg, numerator, denominator) = r.as_parts();
+        assert!(!neg);
+        let denominator = denominator.expect("reduced RATIO requires denominator");
+        assert_eq!(numerator.numeric_domain_width(),Some(48));
+        assert_eq!(denominator.numeric_domain_width(),Some(48));
+        assert_eq!(numerator.to_decimal_string(), (n*n).to_string());
+        assert_eq!(denominator.to_decimal_string(), (den*den).to_string());
+        assert_eq!(squared.to_string(), format!("{}/{}",n*n,den*den));
+        let negated = unary("-",&squared).unwrap();
+        assert_eq!(negated.to_string(),format!("-{}/{}",n*n,den*den));
+        assert_eq!(compute("+",&squared,&negated),Some(Value::BinaryNumber(
+            BinaryNumber::from_numeric_domain_bits(48,&vec![0;48]).unwrap()
+        )));
+        // The original operand still belongs to D24. No generic D24 <-> D48 bridge.
+        assert!(compute("+",&squared,&ratio).is_none());
+    }
+
+    #[test]
     fn composite_domain_is_not_inferred_and_overflow_retains_all_bits() {
         let a = Value::BinaryNumber(d(24, (1<<24)-1));
         let b = Value::BinaryNumber(d(24, 2));
