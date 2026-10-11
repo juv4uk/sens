@@ -1,0 +1,120 @@
+{
+  "schema": "d10-mop-database-v8-selection/v1",
+  "date": "2026-10-11",
+  "status": "RESEARCH-SELECTED-UNRATIFIED; NO-F2-F3-CLAIM",
+  "authority": "D10-RESEARCH-ONLY-NO-PHYSICAL-EXECUTION",
+  "source_database": {
+    "path": "knowledge/d10-candidate-database-v1.json",
+    "git_blob": "4abcd63ca23b4386bdc7e0bdcd1c4539e22fa94f",
+    "role": "PINNED-HISTORICAL-CATALOG"
+  },
+  "source_donor": {
+    "path": "knowledge/d10-mop-metaobject-reader-census-20261009.json",
+    "git_blob": "a830d9b2e29293ebc3f95ba2c905b420c1a03368"
+  },
+  "preceding_inventory": {
+    "path": "knowledge/d10-v7-semantic-inventory.json",
+    "git_blob": "6a45275241717dafa6a6c9ccafae1e9ad819b306",
+    "selected": 721,
+    "placed": 719,
+    "ratified": 0
+  },
+  "source_urls": [
+    "https://clos-mop.hexstreamsoft.com/generic-functions-and-methods/"
+  ],
+  "selected": [
+    {
+      "stable_id": "d10.research.mop.class-direct-slots.20261011",
+      "semantic_name": "CLASS-DIRECT-SLOTS",
+      "proposal_id": "D10P-700009",
+      "source_candidate_status": "pending-review",
+      "source_semantic_law": "Return only class-declared direct slot-definition metaobjects; exclude inherited slot definitions even though effective CLASS-SLOTS includes them.",
+      "positive_witnesses": [
+        "Parent P owns slot a; child C declares b: direct C slot names include b but exclude inherited a.",
+        "For parent P, its direct slot definitions include a; no-value class has empty direct slot set."
+      ],
+      "falsifier": "Returning effective inherited slot list as direct class slots.",
+      "source_needs_independent_oracle": false,
+      "coordinate": null,
+      "ratified": false,
+      "F1": "SOURCE-PINNED-PROVENANCE",
+      "F2": "HOLD_NOT_RUN",
+      "F3": "HOLD_DEDUP_UNPROVEN",
+      "F4": "NO_COORDINATE_PROPOSED",
+      "core_vs_derived_review": "PENDING"
+    },
+    {
+      "stable_id": "d10.research.mop.class-precedence-list.20261011",
+      "semantic_name": "CLASS-PRECEDENCE-LIST",
+      "proposal_id": "D10P-700010",
+      "source_candidate_status": "pending-review",
+      "source_semantic_law": "For finalized class C, return a linearized list of class metaobjects with C first, T last, each class/superclass exactly once, respecting source-superclass precedence.",
+      "positive_witnesses": [
+        "Single inheritance child C of P: C precedes P and T, no duplicates.",
+        "Distinct parent order influences the computed precedence under compatible local precedence rules."
+      ],
+      "falsifier": "Returning only direct superclasses, duplicated class objects or alphabetical/sorted order is not class precedence.",
+      "source_needs_independent_oracle": false,
+      "coordinate": null,
+      "ratified": false,
+      "F1": "SOURCE-PINNED-PROVENANCE",
+      "F2": "HOLD_NOT_RUN",
+      "F3": "HOLD_DEDUP_UNPROVEN",
+      "F4": "NO_COORDINATE_PROPOSED",
+      "core_vs_derived_review": "PENDING"
+    },
+    {
+      "stable_id": "d10.research.mop.generic-function-methods.20261011",
+      "semantic_name": "GENERIC-FUNCTION-METHODS",
+      "proposal_id": "D10P-700011",
+      "source_candidate_status": "pending-review",
+      "source_semantic_law": "Read the set of exact method metaobjects attached to a generic function; adding/removing a method changes membership without invoking any method body.",
+      "positive_witnesses": [
+        "Generic G with integer and string methods: introspection returns precisely both method metaobjects.",
+        "Remove integer method: introspection still returns string method, without deleting generic G."
+      ],
+      "falsifier": "Confuse applicable-method selection for current arguments with registered method-object membership.",
+      "source_needs_independent_oracle": false,
+      "coordinate": null,
+      "ratified": false,
+      "F1": "SOURCE-PINNED-PROVENANCE",
+      "F2": "HOLD_NOT_RUN",
+      "F3": "HOLD_DEDUP_UNPROVEN",
+      "F4": "NO_COORDINATE_PROPOSED",
+      "core_vs_derived_review": "PENDING"
+    },
+    {
+      "stable_id": "d10.research.mop.generic-function-argument-precedence-order.20261011",
+      "semantic_name": "GENERIC-FUNCTION-ARGUMENT-PRECEDENCE-ORDER",
+      "proposal_id": "D10P-700012",
+      "source_candidate_status": "pending-review",
+      "source_semantic_law": "Return the permutation of required generic-function parameter names specifying argument precedence for method specificity, not parameter types or method objects.",
+      "positive_witnesses": [
+        "Generic with two required parameters and an explicitly reversed precedence order returns the reversed symbol sequence.",
+        "Order contains each required parameter once and excludes optional/rest parameters."
+      ],
+      "falsifier": "Return default lambda-list textual order when a distinct explicit precedence order was specified.",
+      "source_needs_independent_oracle": true,
+      "coordinate": null,
+      "ratified": false,
+      "F1": "SOURCE-PINNED-PROVENANCE",
+      "F2": "HOLD_NOT_RUN",
+      "F3": "HOLD_DEDUP_UNPROVEN",
+      "F4": "NO_COORDINATE_PROPOSED",
+      "core_vs_derived_review": "PENDING"
+    }
+  ],
+  "deferred": [
+    {
+      "name": "MAKE-SYNONYM-STREAM",
+      "reason": "D2 dynamic-binding/control ownership unresolved; retain PENDING in frozen catalog"
+    }
+  ],
+  "resulting": {
+    "selected": 725,
+    "placed": 719,
+    "unplaced": 6,
+    "remaining": 299,
+    "ratified": 0
+  }
+}
