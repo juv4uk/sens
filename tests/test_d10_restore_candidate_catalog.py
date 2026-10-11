@@ -183,23 +183,32 @@ class CatalogRestoreTests(unittest.TestCase):
 
     def test_stale_ledger_pin_gains_byte_exact_archived_locator(self):
         repo_root = Path(__file__).resolve().parents[1]
+        names = (
+            "CLASS-DIRECT-SLOTS",
+            "CLASS-PRECEDENCE-LIST",
+            "GENERIC-FUNCTION-ARGUMENT-PRECEDENCE-ORDER",
+            "GENERIC-FUNCTION-METHODS",
+            "MAKE-SYNONYM-STREAM",
+        )
         old_ref = (
             "knowledge/d10-proposal-ledger.tsv@"
             + merge.HISTORICAL_LEDGER_BLOB + ":source-record"
-        )
-        refs = merge.restore_historical_ledger_snapshot_locator(
-            repo_root, "CLASS-DIRECT-SLOTS", [old_ref]
         )
         archive_ref = (
             merge.HISTORICAL_LEDGER_ARCHIVE + "@"
             + merge.HISTORICAL_LEDGER_BLOB + ":source-record"
         )
-        self.assertIn(old_ref, refs)  # retain exact historical provenance
-        self.assertIn(archive_ref, refs)
-        self.assertEqual(2, len(refs))
-        self.assertEqual(refs, merge.restore_historical_ledger_snapshot_locator(
-            repo_root, "CLASS-DIRECT-SLOTS", refs
-        ))  # repeated reconciliation is idempotent
+        for name in names:
+            with self.subTest(semantic_name=name):
+                refs = merge.restore_historical_ledger_snapshot_locator(
+                    repo_root, name, [old_ref]
+                )
+                self.assertIn(old_ref, refs)  # preserve the original claim
+                self.assertIn(archive_ref, refs)
+                self.assertEqual(2, len(refs))
+                self.assertEqual(refs, merge.restore_historical_ledger_snapshot_locator(
+                    repo_root, name, refs
+                ))  # repeated reconciliation is idempotent
 
     def test_historical_blob_tampering_fails(self):
         self.old.write_text(self.old.read_text() + "\n")
