@@ -105,7 +105,7 @@ def evaluate(row, root, inventory_sha, foundation_sha, occupied):
         return out
     # F1: pinned repository source, with a real line locator.
     source = row["donor_provenance"]
-    if not name or not ident or not row["semantic_law"] or not source:
+    if not name or not ident or not source:
         return verdict("rejected", "EXCLUDE_NO_PROVENANCE")
     pinned = read_donor_provenance(root, source)
     if pinned is None:
@@ -118,6 +118,10 @@ def evaluate(row, root, inventory_sha, foundation_sha, occupied):
             or git_blob(raw) != row["source_pin"]
             or last < first or last > len(raw.splitlines())):
         return verdict("escalated", "HOLD_UNVERIFIED_PIN")
+    # A verified donor without a recorded semantic law is incomplete research,
+    # not a source with no provenance. Never fabricate a law or accept the row.
+    if not row["semantic_law"].strip():
+        return verdict("rejected", "HOLD_NO_SEMANTIC_LAW")
     # F2: recorded command + digest-verified positive/negative oracle run receipt.
     if not row["witness_artifact"]:
         return verdict("rejected", "EXCLUDE_NO_WITNESS")
