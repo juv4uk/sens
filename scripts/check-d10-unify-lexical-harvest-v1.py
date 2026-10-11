@@ -64,8 +64,24 @@ def main():
     inv = read("knowledge/d10-v1-semantic-inventory.json")
     st = read("knowledge/d10-fill-v1-state.json")
     f = read("knowledge/d1-d9-foundation.json")
-    raw = {d["path"]: (ROOT / d["path"]).read_bytes() for d in h["donors"]}
-    print("D10-UNIFY-LEXICAL-EVIDENCE PASS", json.dumps(verify(h, inv, st, f, raw), sort_keys=True))
+    # Validate the exact historical donor bytes, not the mutable current lib/*.lisp.
+    # A live source drift must be visible in output, never silently recertified.
+    raw = {
+        d["path"]: (ROOT / "knowledge/d10-source-snapshots" / (d["source_sha"] + ".lisp")).read_bytes()
+        for d in h["donors"]
+    }
+    dispositions = []
+    for donor in h["donors"]:
+        historical = raw[donor["path"]]
+        historical_sha = hashlib.sha1(b"blob " + str(len(historical)).encode("ascii") + bytes([0]) + historical).hexdigest()
+        assert historical_sha == donor["source_sha"], (donor["path"], "corrupt immutable snapshot", historical_sha)
+        live = (ROOT / donor["path"]).read_bytes()
+        live_sha = hashlib.sha1(b"blob " + str(len(live)).encode("ascii") + bytes([0]) + live).hexdigest()
+        disposition = "HISTORICAL-BLOB-MATCH" if live_sha == donor["source_sha"] else "CURRENT-BLOB-DRIFT"
+        dispositions.append(f"{donor['path']}={disposition}")
+    result = verify(h, inv, st, f, raw)
+    print("D10-UNIFY-LEXICAL-EVIDENCE PASS", json.dumps(result, sort_keys=True),
+          "source_disposition=" + ",".join(dispositions))
 
 if __name__ == "__main__":
     main()
