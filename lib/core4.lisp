@@ -179,8 +179,12 @@
 (00001001 length-onto
   (00001000 (values acc)
     (00000111
-      ((0100 (00000010 values)) acc)
-      ((00100010 (00000010 values) (00000001 (0)))
+      ; D4 NULL checks exactly the end of a proper list. NOT(ATOM) would
+      ; terminate nonempty lists immediately and report every length as 0.
+      ((0101 values) acc)
+      ; Only a cons cell advances the accumulator. An improper nonempty
+      ; tail is not silently counted as an empty list.
+      ((0100 (00000010 values))
        (length-onto (00000110 values) (00001100 acc 1))))))
 
 
