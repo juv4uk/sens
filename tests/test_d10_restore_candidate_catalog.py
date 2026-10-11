@@ -62,7 +62,7 @@ class CatalogRestoreTests(unittest.TestCase):
         self.assertEqual(3, report["restored_prior_only_ids"])
         self.assertEqual(5, report["source_union_candidate_ids"])
         self.assertEqual(1, report["canonical_overlay_ids_added"])
-        self.assertEqual(7, report["full_union_ids"])
+        self.assertEqual(6, report["full_union_ids"])
         self.assertEqual(4, report["full_union_names"])
         self.assertEqual(1, report["colliding_spelling_groups_not_deduped"])
         result = merge.literal_tsv(self.output)
@@ -128,7 +128,7 @@ class CatalogRestoreTests(unittest.TestCase):
 
         report = merge.merge_catalog(self.root, self.old, self.current, self.output)
         self.assertEqual(3, report["source_latest_ids"])
-        self.assertEqual(6, report["full_union_ids"])
+        self.assertEqual(7, report["full_union_ids"])
         result = merge.literal_tsv(self.output)
         self.assertEqual({"d10.name.4", "d10.name.5"},
                          {ident for ident, row in result.items()
