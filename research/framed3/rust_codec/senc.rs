@@ -503,7 +503,7 @@ fn frame_transport(words: &[String]) -> Result<Vec<u8>, SencError> {
     Ok(trits)
 }
 
-fn frame_encode(words: &[String]) -> Result<Vec<u8>, SencError> {
+pub fn frame_encode(words: &[String]) -> Result<Vec<u8>, SencError> {
     let trits = frame_transport(words)?;
     let n = trits.len();
     for &(width, lo, hi) in frame_buckets() {

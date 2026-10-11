@@ -1,0 +1,13 @@
+# SHA	016c595cd3996f2b0f87c2bf2b1db41481c510bd
+# runner OS	Linux 6.18.33.2-microsoft-standard-WSL2 x86_64
+# rustc	rustc 1.99.0 (b940084d7 2026-09-28)
+# CPU	Intel(R) Core(TM) i5-6400 CPU @ 2.70GHz
+# scope	release; same process, same sample/corpus; 11 samples x 12 repetitions; ns/one call, p50/p95; T5/Frame3-v1/v2/v3/F3 are different physical formats; do not equate this with language execution; hosted CPUs vary
+case	words	t5_bytes	v1_bytes	v2_bytes	v3_bytes	f3_bytes	t5_encode_p50_ns	t5_encode_p95_ns	v1_encode_p50_ns	v1_encode_p95_ns	v2_encode_p50_ns	v2_encode_p95_ns	v3_encode_p50_ns	v3_encode_p95_ns	f3_encode_p50_ns	f3_encode_p95_ns	t5_decode_p50_ns	t5_decode_p95_ns	v1_decode_p50_ns	v1_decode_p95_ns	v2_decode_p50_ns	v2_decode_p95_ns	v3_decode_p50_ns	v3_decode_p95_ns	f3_decode_p50_ns	f3_decode_p95_ns
+empty-list	2	1	12	11	11	2	54	117	384	548	626	767	940	1112	2445	5273	133	188	728	869	1026	1128	1355	3220	9693	11425
+single-d3-quote	4	3	14	13	13	3	101	117	681	752	3189	4803	4192	4317	20562	22051	243	321	1269	1504	4905	6480	5924	6120	78255	84477
+nested-quote-data	8	5	17	15	15	5	141	329	1387	3064	18345	23086	22812	25162	46893	134387	415	572	2390	2977	22420	36847	26095	30734	172896	225306
+dotted-pair	5	3	14	12	12	3	101	117	752	3346	2680	2860	4349	5712	14873	17632	297	1144	1387	1786	4184	6151	5658	6065	57841	72996
+separator-exact	5	4	15	13	13	3	117	148	775	924	3761	3957	5328	6794	44291	49134	344	603	1418	1857	5752	9301	7397	8808	158006	245430
+mixed-width	8	6	17	16	16	6	164	188	1347	1465	7617	10461	11770	14889	59776	67189	454	760	2586	2954	13267	16331	15735	25609	220017	330268
+repeated-w9-80	82	161	21	21	21	NA
