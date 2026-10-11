@@ -9,8 +9,8 @@ add-complete-d7-domain-table	UNTRIAGED	-	-	BRANCH-NAME-ONLY
 add-d8-domain-table	UNTRIAGED	-	-	BRANCH-NAME-ONLY
 agent/binary-first-cli-20261009	UNTRIAGED	-	-	BRANCH-NAME-ONLY
 agent/canon-naming-1011	UNTRIAGED	-	-	BRANCH-NAME-ONLY
-agent/chatgpt/archive-generation-pareto-benchmarks-20261011	UNTRIAGED	-	-	BRANCH-NAME-ONLY
-agent/chatgpt/archive-original-bench-sources-20261011	UNTRIAGED	-	-	BRANCH-NAME-ONLY
+agent/chatgpt/archive-generation-pareto-benchmarks-20261011	ALREADY-IN-MAIN-ARCHIVED	-	b9f1915fe16a7006c7ea12044b29da736147d56c	6/6 source added files exact blob parity; research/domain-archive/20261011/extension-generation-pareto-20261011.json
+agent/chatgpt/archive-original-bench-sources-20261011	ALREADY-IN-MAIN-ARCHIVED	-	d3c9f4b0cd64e9a667a76c8e1b9d850a0b28db69	6/6 source paths exact blob parity including two newer manifests
 agent/chatgpt/core4-fasl-refresh-current-main-20261010	UNTRIAGED	-	-	BRANCH-NAME-ONLY
 agent/chatgpt/core4-fasl-refresh-current-main-r2-20261010	UNTRIAGED	-	-	BRANCH-NAME-ONLY
 agent/chatgpt/core4-fasl-refresh-main-20261010	UNTRIAGED	-	-	BRANCH-NAME-ONLY
@@ -467,8 +467,8 @@ bench/4217-core-eval-subsplit-20261007	UNTRIAGED	-	-	BRANCH-NAME-ONLY
 bench/4398-domain-altitude-economy	UNTRIAGED	-	-	BRANCH-NAME-ONLY
 bench/20261004-hotpath-refresh	UNTRIAGED	-	-	BRANCH-NAME-ONLY
 bench-controlled-variable-1843	UNTRIAGED	-	-	BRANCH-NAME-ONLY
-bench-controlled-variable-1846	UNTRIAGED	-	-	BRANCH-NAME-ONLY
-bench-lab-registry-4170	UNTRIAGED	-	-	BRANCH-NAME-ONLY
+bench-controlled-variable-1846	ALREADY-IN-MAIN-ANCESTOR	-	c63a7b701754e32ffe29190bcb897ef8a90811b1	compare source...main source_ahead=0
+bench-lab-registry-4170	ALREADY-IN-MAIN-ANCESTOR	-	6e54eee897ef28381eb77acd367ecd1fa20bb57c	compare source...main source_ahead=0
 bench-predicate1-1836	UNTRIAGED	-	-	BRANCH-NAME-ONLY
 benchmarks/full-sweep-codec-migration-20261010	UNTRIAGED	-	-	BRANCH-NAME-ONLY
 binary/control2-self-delimiting-framing	UNTRIAGED	-	-	BRANCH-NAME-ONLY
@@ -1140,7 +1140,7 @@ fix/admission-equal-to-d3-eq-20261010	UNTRIAGED	-	-	BRANCH-NAME-ONLY
 fix/admit-t5-d1-d9-authority-parity	UNTRIAGED	-	-	BRANCH-NAME-ONLY
 fix/agent-shards-reviewed-data-exclusion-20261008	UNTRIAGED	-	-	BRANCH-NAME-ONLY
 fix/archival-vs-executable-migration-gates-20261008	UNTRIAGED	-	-	BRANCH-NAME-ONLY
-fix/archive-cond-3182-replay-gpt6-20261011	UNTRIAGED	-	-	BRANCH-NAME-ONLY
+fix/archive-cond-3182-replay-gpt6-20261011	ALREADY-IN-MAIN-ARCHIVED	-	aa34d087aad7ef205dcafd39df7a504e58e951dc	one source added manifest exact blob parity; research/domain-archive/20261011/extension-cond-3182-completion-20261011.json
 fix/archive-only-candidate-gate-20261008	UNTRIAGED	-	-	BRANCH-NAME-ONLY
 fix/authority-convergence-2026-10-04	UNTRIAGED	-	-	BRANCH-NAME-ONLY
 fix/batch-w8-default-main-20261008	UNTRIAGED	-	-	BRANCH-NAME-ONLY
@@ -3140,13 +3140,13 @@ research/archive-d6-nonprefix-2546-20261011-gpt6	ALREADY-IN-MAIN-ARCHIVED	-	5e20
 research/archive-pr3182-cond-proof-20261011	ALREADY-IN-MAIN-ARCHIVED	-	6e0b3290ef0996fc3f23ebf96cca155fd9eeef54	research/domain-archive/20261011/supplement-migrator-remnants-20261011.json (2/2 exact blob)
 research/archive-readfile-profile-pr347-pr379-20261011-gpt6	ALREADY-IN-MAIN-ARCHIVED	-	a5b27ff042310fbd6c79ef143e7e75b85318690c	research/domain-archive/20261011/benchmark-readfile-profile-347-379-20261011.json (4/4 exact blob)
 research/archive-width-carrier-2005-20261011-gpt6	ALREADY-IN-MAIN-ARCHIVED-NEWER	-	8e34830ce4edb9cfd043f5184cb174d583f27b78	research/domain-archive/20261011/extension-width-carrier-2005-20261011.json (5/6 exact; latest manifest covers 7/7 archival files)
-research/axiom-corpus-3451	UNTRIAGED	-	-	BRANCH-NAME-ONLY
+research/axiom-corpus-3451	ALREADY-IN-MAIN-ANCESTOR	-	f9bac621de14e938124124c4b40db187453cb5a2	compare source...main source_ahead=0
 research/bench-paired-wall-replay-20261010	UNTRIAGED	-	-	BRANCH-NAME-ONLY
 research/bench-triad-replay-20261010	UNTRIAGED	-	-	BRANCH-NAME-ONLY
 research/benchmark-effect-ci-20261009	UNTRIAGED	-	-	BRANCH-NAME-ONLY
 research/byte-pack-t22-main-replay-20261010-r2	UNTRIAGED	-	-	BRANCH-NAME-ONLY
-research/consolidate-2761-2766	UNTRIAGED	-	-	BRANCH-NAME-ONLY
-research/consolidated-evidence-current-main	UNTRIAGED	-	-	BRANCH-NAME-ONLY
+research/consolidate-2761-2766	ALREADY-IN-MAIN-ANCESTOR	-	722bbb482ddb8bf00fa88f07e80926e27ddffaad	compare source...main source_ahead=0
+research/consolidated-evidence-current-main	ALREADY-IN-MAIN-ANCESTOR	-	1de43df47a6ace8405b18421c56c233db3f878b8	compare source...main source_ahead=0
 research/core4-answer-carrier-matrix-1257	UNTRIAGED	-	-	BRANCH-NAME-ONLY
 research/core4-boundary-projection-1256-rebased	UNTRIAGED	-	-	BRANCH-NAME-ONLY
 research/core4-boundary-projection-1256	UNTRIAGED	-	-	BRANCH-NAME-ONLY
