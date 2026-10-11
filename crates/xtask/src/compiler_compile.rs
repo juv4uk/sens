@@ -283,9 +283,10 @@ mod tests {
             concat!("define-", "form"),
             concat!("compiler_semantic_", "input_from_sens"),
         ];
+        for phrase in forbidden {
             assert!(
-                !source.contains(forbidden),
-                "host adapter contains a forbidden semantic shortcut: {forbidden}"
+                !source.contains(phrase),
+                "host adapter contains a forbidden semantic shortcut: {phrase}"
             );
         }
     }
