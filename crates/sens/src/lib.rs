@@ -15,6 +15,7 @@ mod bits;
 mod canonical_reader;
 pub mod universal_frame3;
 pub mod frame3_grammar;
+pub mod frame3_semantic;
 mod program_data;
 mod compiler_role;
 mod compiler_bootstrap;
