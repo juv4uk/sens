@@ -1,7 +1,7 @@
 {
   "schema": "d10-historical-lisp-branch-candidate-intake/v1",
   "date": "2026-10-11",
-  "policy": "MAIN-ONLY; NO-NEW-BRANCHES; RESEARCH-NOT-RATIFIED; no coordinates reserved and no physical encoder authority",
+  "policy": "MAIN-ONLY; NO-NEW-BRANCHES; RESEARCH-NOT-RATIFIED; no coordinates reserved and no physical encoder authority; exact lower-domain name exclusions enforced for this archival name queue",
   "baseline": {
     "canonical_path": "knowledge/d10-v5-semantic-inventory.json",
     "canonical_blob": "c8a23d0db0eebca0c8d780cc93bc1fda78425c44",
@@ -69,20 +69,190 @@
       "blob": "e861a8645e6ff3e124156c3badddca6aae45bdb0",
       "branch": "research/d10-lisp-machine-evaluator-harvest-20261009",
       "role": "HISTORICAL-DONOR-PROVENANCE"
+    },
+    {
+      "path": "knowledge/d10-historical-primary-manual-reconciliation-20261009.json",
+      "blob": "37e10ef9a953ea62beb5e4b46ef20f21cbfb3ee4",
+      "branch": "research/d10-historical-primary-manual-reconcile-20261009",
+      "role": "HISTORICAL-DONOR-PROVENANCE"
+    },
+    {
+      "path": "knowledge/d10-interlisp-psl-history-harvest-v1.json",
+      "blob": "c862fc5d5fe45a0a01eb0115ec9f8e9b2553817d",
+      "branch": "research/d10-psl-interlisp-historical-20261009",
+      "role": "HISTORICAL-DONOR-PROVENANCE"
+    },
+    {
+      "path": "knowledge/d10-r6rs-hashtable-hygiene-audit-v1.json",
+      "blob": "c6af11760a10a5944d9df286c52eb84e18bd3c96",
+      "branch": "research/d10-r6rs-hashtable-hygiene-audit-20261009",
+      "role": "HISTORICAL-DONOR-PROVENANCE"
+    },
+    {
+      "path": "knowledge/d10-clos-instance-lifecycle-residual-v1.json",
+      "blob": "3c6e85d94e78cdd5fe9b9b645095b48335f768e5",
+      "branch": "research/d10-historical-clos-instance-lifecycle-residual-20261009",
+      "role": "HISTORICAL-DONOR-PROVENANCE"
+    },
+    {
+      "path": "knowledge/d10-clos-slot-state-historical-review-v1.json",
+      "blob": "d8c6a2fdf60c11e23016be7aad5037bb5c26782d",
+      "branch": "research/d10-historical-clos-slot-state-20261009",
+      "role": "HISTORICAL-DONOR-PROVENANCE"
+    },
+    {
+      "path": "knowledge/d10-crossrepo-lisp-koans-v1.json",
+      "blob": "4a45760e93d4fb3f4d9e33914cf44f314d0a30b4",
+      "branch": "research/d10-crossrepo-lisp-koans-1",
+      "role": "HISTORICAL-DONOR-PROVENANCE"
+    },
+    {
+      "path": "knowledge/d10-crossrepo-mal-v1.json",
+      "blob": "f0a432a28de471efde8d59106670ef79f4c2082c",
+      "branch": "research/d10-crossrepo-mal-1",
+      "role": "HISTORICAL-DONOR-PROVENANCE"
+    },
+    {
+      "path": "knowledge/d10-crossrepo-golisp-pascal-v1.json",
+      "blob": "4914c152a03d78de926943f605992f88c2c0e0d6",
+      "branch": "research/d10-crossrepo-golisp-pascal-1",
+      "role": "HISTORICAL-DONOR-PROVENANCE"
+    },
+    {
+      "path": "knowledge/d10-historical-primary-admission-batch1-v1.json",
+      "blob": "bbe3df442d84dbed5258a1f64b67d769b0510554",
+      "branch": "research/d10-historical-admission-batch1-20261009",
+      "role": "HISTORICAL-DONOR-PROVENANCE"
+    },
+    {
+      "path": "knowledge/d10-historical-primary-admission-batch2-v1.json",
+      "blob": "4bf614924bf3ff6c3c909c947dfef9697e5b4653",
+      "branch": "research/d10-historical-selection-4-20261009",
+      "role": "HISTORICAL-DONOR-PROVENANCE"
     }
   ],
   "accounting": {
-    "distinct_unselected_historical_names": 242,
-    "with_semantic_law": 129,
-    "with_positive_witness": 21,
-    "with_falsifier": 21,
+    "distinct_unselected_historical_names": 322,
+    "with_semantic_law": 217,
+    "with_positive_witness": 68,
+    "with_falsifier": 68,
     "selected_added": 0,
     "coordinate_added": 0,
     "ratified_added": 0,
-    "archival_overlap_skipped": 90
+    "archival_overlap_skipped": 90,
+    "lower_domain_exact_name_excluded": 44
   },
   "audit_rule": "Names are not proof of independent semantic roots. Before promoting, compare behavior against ratified D1-D9 and selected D10, run positive/negative witnesses, resolve D2/control and derivability. Do not fill 1024 with empty or alias codes.",
   "candidates": [
+    {
+      "semantic_name": "ADJUST-ARRAY",
+      "evidence": [
+        {
+          "source_path": "knowledge/d10-historical-primary-manual-reconciliation-20261009.json",
+          "source_blob": "37e10ef9a953ea62beb5e4b46ef20f21cbfb3ee4",
+          "research_branch": "research/d10-historical-primary-manual-reconcile-20261009",
+          "record_group": "proposals",
+          "source_name": "ADJUST-ARRAY",
+          "source_status": "HOLD-OVERLAP-D10-REARRAY",
+          "observable_law": "change array dimensions, preserve bounded original entries as specified, optional adjustable identity and displacement/re-aliasing; do not infer universal in-place behavior",
+          "positive_witness": "adjust explicitly adjustable 2x3 array to 4x6; original known positions retain elements; new shape and distinct/improper alias cases checked",
+          "falsifier": "reshape always destroys old contents or always returns same object even when not adjustable",
+          "primary_source": "https://www.cs.cmu.edu/Groups/AI/util/html/hyperspec/HyperSpec/Body/fun_adjust-array.html",
+          "source_kind": null
+        }
+      ],
+      "evidence_score": 4,
+      "selection": "NOT-SELECTED",
+      "coordinate": null,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "required_review": "BEHAVIORAL-DEDUPE-AND-INDEPENDENT-ORACLE"
+    },
+    {
+      "semantic_name": "ARRAY-DISPLACEMENT",
+      "evidence": [
+        {
+          "source_path": "knowledge/d10-historical-primary-manual-reconciliation-20261009.json",
+          "source_blob": "37e10ef9a953ea62beb5e4b46ef20f21cbfb3ee4",
+          "research_branch": "research/d10-historical-primary-manual-reconcile-20261009",
+          "record_group": "proposals",
+          "source_name": "ARRAY-DISPLACEMENT",
+          "source_status": "D10-PROPOSAL-REVIEW",
+          "observable_law": "query displaced-to array and nonnegative offset as two values; a displaced view shares elements with the backing array",
+          "positive_witness": "make array A; make B displaced to A at offset 1; write B[0], require A[1] changed; query B -> (A,1)",
+          "falsifier": "B is instead an independent copy so mutation does not reach A; or returns an unrelated backing array",
+          "primary_source": "https://www.cs.cmu.edu/Groups/AI/html/hyperspec/HyperSpec/Body/fun_array-displacement.html",
+          "source_kind": null
+        },
+        {
+          "source_path": "knowledge/d10-historical-primary-admission-batch1-v1.json",
+          "source_blob": "bbe3df442d84dbed5258a1f64b67d769b0510554",
+          "research_branch": "research/d10-historical-admission-batch1-20261009",
+          "record_group": "rows",
+          "source_name": "ARRAY-DISPLACEMENT",
+          "source_status": "SELECTED-RESEARCH-CANDIDATE",
+          "observable_law": "Return exactly two values (direct backing-array, offset) for explicitly displaced array; for ordinary non-displaced array return (NIL,0), and view shares actual element storage.",
+          "positive_witness": "Displace B onto A at offset 1: ARRAY-DISPLACEMENT(B)=(A,1) | Write B[0]=7 then read A[1]=7",
+          "falsifier": "Copying rather than aliasing, or returning transitive root rather than immediate backing array, violates the law.",
+          "primary_source": "https://www.cs.cmu.edu/Groups/AI/html/hyperspec/HyperSpec/Body/fun_array-displacement.html",
+          "source_kind": null
+        }
+      ],
+      "evidence_score": 4,
+      "selection": "NOT-SELECTED",
+      "coordinate": null,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "required_review": "BEHAVIORAL-DEDUPE-AND-INDEPENDENT-ORACLE"
+    },
+    {
+      "semantic_name": "BACKQUANTIZE",
+      "evidence": [
+        {
+          "source_path": "knowledge/d10-historical-primary-manual-reconciliation-20261009.json",
+          "source_blob": "37e10ef9a953ea62beb5e4b46ef20f21cbfb3ee4",
+          "research_branch": "research/d10-historical-primary-manual-reconcile-20261009",
+          "record_group": "proposals",
+          "source_name": "BACKQUANTIZE",
+          "source_status": "HOLD-UNVERIFIED-SOURCE",
+          "observable_law": "claimed splicing macro behavior; not source-attested by this audit",
+          "positive_witness": "find exact historical original spelling, syntax and evaluation phase in a primary document",
+          "falsifier": "misread BACKQUOTE or UNQUOTE-SPLICING as independently named BACKQUANTIZE",
+          "primary_source": "https://github.com/juv4uk/sens/blob/main/knowledge/d9-overflow-review-v1.json",
+          "source_kind": null
+        }
+      ],
+      "evidence_score": 4,
+      "selection": "NOT-SELECTED",
+      "coordinate": null,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "required_review": "BEHAVIORAL-DEDUPE-AND-INDEPENDENT-ORACLE"
+    },
+    {
+      "semantic_name": "BOUND-IDENTIFIER=?",
+      "evidence": [
+        {
+          "source_path": "knowledge/d10-r6rs-hashtable-hygiene-audit-v1.json",
+          "source_blob": "c6af11760a10a5944d9df286c52eb84e18bd3c96",
+          "research_branch": "research/d10-r6rs-hashtable-hygiene-audit-20261009",
+          "record_group": "rows",
+          "source_name": "BOUND-IDENTIFIER=?",
+          "source_status": "HOLD-RESEARCH-NO-ADMISSION",
+          "observable_law": "рівність зв'язаних ідентифікаторів за іменем і контекстними мітками",
+          "positive_witness": "однаковий текст, але незалежно згенеровані мітки не дають bound-identifier=?",
+          "falsifier": "порівняння лише по рядку імені",
+          "primary_source": "https://r6rs.org/final/html/r6rs-lib/r6rs-lib-Z-H-13.html",
+          "source_kind": null
+        }
+      ],
+      "evidence_score": 4,
+      "selection": "NOT-SELECTED",
+      "coordinate": null,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "required_review": "BEHAVIORAL-DEDUPE-AND-INDEPENDENT-ORACLE"
+    },
     {
       "semantic_name": "BYTEVECTOR-COPY!",
       "evidence": [
@@ -180,6 +350,54 @@
       "required_review": "BEHAVIORAL-DEDUPE-AND-INDEPENDENT-ORACLE"
     },
     {
+      "semantic_name": "CLASS-NAME",
+      "evidence": [
+        {
+          "source_path": "knowledge/d10-clos-slot-state-historical-review-v1.json",
+          "source_blob": "d8c6a2fdf60c11e23016be7aad5037bb5c26782d",
+          "research_branch": "research/d10-historical-clos-slot-state-20261009",
+          "record_group": "rows",
+          "source_name": "CLASS-NAME",
+          "source_status": "HOLD-DERIVED-PROJECTION",
+          "observable_law": "Return the class name symbol if present; anonymous classes have NIL and name is not identical to class-object identity.",
+          "positive_witness": "Named class C has CLASS-NAME(C)=name; anonymous class has no proper name.",
+          "falsifier": "Never synthesize a proper name for an anonymous class or conflate class name with class identity.",
+          "primary_source": "https://franz.com/support/documentation/ansicl.94/dictentr/class-na.htm",
+          "source_kind": null
+        }
+      ],
+      "evidence_score": 4,
+      "selection": "NOT-SELECTED",
+      "coordinate": null,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "required_review": "BEHAVIORAL-DEDUPE-AND-INDEPENDENT-ORACLE"
+    },
+    {
+      "semantic_name": "CLASS-OF",
+      "evidence": [
+        {
+          "source_path": "knowledge/d10-clos-slot-state-historical-review-v1.json",
+          "source_blob": "d8c6a2fdf60c11e23016be7aad5037bb5c26782d",
+          "research_branch": "research/d10-historical-clos-slot-state-20261009",
+          "record_group": "rows",
+          "source_name": "CLASS-OF",
+          "source_status": "REVIEW-SEMANTIC-CANDIDATE",
+          "observable_law": "Return the exact class metaobject of which an object is a direct instance, not merely an approximate type specifier.",
+          "positive_witness": "After DEFCLASS Book and MAKE-INSTANCE, CLASS-OF(instance) is the Book class metaobject.",
+          "falsifier": "Returning only the symbol Book or any superclass rather than the direct class object violates the law.",
+          "primary_source": "https://www.lispworks.com/documentation/HyperSpec/Body/f_clas_1.htm",
+          "source_kind": null
+        }
+      ],
+      "evidence_score": 4,
+      "selection": "NOT-SELECTED",
+      "coordinate": null,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "required_review": "BEHAVIORAL-DEDUPE-AND-INDEPENDENT-ORACLE"
+    },
+    {
       "semantic_name": "CLASS-PRECEDENCE-LIST",
       "evidence": [
         {
@@ -194,6 +412,54 @@
           "falsifier": "Returning only direct superclasses, duplicated class objects or alphabetical/sorted order is not class precedence.",
           "primary_source": "https://clos-mop.hexstreamsoft.com/generic-functions-and-methods/",
           "source_kind": "generic-function-reader"
+        }
+      ],
+      "evidence_score": 4,
+      "selection": "NOT-SELECTED",
+      "coordinate": null,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "required_review": "BEHAVIORAL-DEDUPE-AND-INDEPENDENT-ORACLE"
+    },
+    {
+      "semantic_name": "COLLECTION",
+      "evidence": [
+        {
+          "source_path": "knowledge/d10-historical-primary-manual-reconciliation-20261009.json",
+          "source_blob": "37e10ef9a953ea62beb5e4b46ef20f21cbfb3ee4",
+          "research_branch": "research/d10-historical-primary-manual-reconcile-20261009",
+          "record_group": "proposals",
+          "source_name": "COLLECTION",
+          "source_status": "HOLD-UNVERIFIED-SOURCE",
+          "observable_law": "generic 'collect elements' lacks operation/ordering/multiplicity contract",
+          "positive_witness": "identify donor implementation/manual and provide order/duplicates/identity behavior before proposing",
+          "falsifier": "assert any traversal helper is a novel Core semantic primitive",
+          "primary_source": "https://github.com/juv4uk/sens/blob/main/knowledge/d9-overflow-review-v1.json",
+          "source_kind": null
+        }
+      ],
+      "evidence_score": 4,
+      "selection": "NOT-SELECTED",
+      "coordinate": null,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "required_review": "BEHAVIORAL-DEDUPE-AND-INDEPENDENT-ORACLE"
+    },
+    {
+      "semantic_name": "COUNT-LEADING-ZEROS",
+      "evidence": [
+        {
+          "source_path": "knowledge/d10-historical-primary-manual-reconciliation-20261009.json",
+          "source_blob": "37e10ef9a953ea62beb5e4b46ef20f21cbfb3ee4",
+          "research_branch": "research/d10-historical-primary-manual-reconcile-20261009",
+          "record_group": "proposals",
+          "source_name": "COUNT-LEADING-ZEROS",
+          "source_status": "HOLD-D8-DERIVABILITY",
+          "observable_law": "for a nonnegative fixed-width W-bit word x, CLZ(x) = W - integer-length(x), with CLZ(0)=W; must specify width W",
+          "positive_witness": "CLZ(0,W)=W; CLZ(1,W)=W-1; CLZ(highest_bit,W)=0",
+          "falsifier": "one unbounded integer without width is silently assumed to have a universal number of leading zeros",
+          "primary_source": "https://tumbleweed.nu/r/lm-3/uv/chinual.html",
+          "source_kind": null
         }
       ],
       "evidence_score": 4,
@@ -266,6 +532,211 @@
           "falsifier": "Реалізація нарощує лінійний стек/ланцюг відкладених примусових викликів або обчислює тіло завчасно.",
           "primary_source": "https://standards.scheme.org/r7rs-html5/index.html",
           "source_kind": "PRIMARY-STANDARD"
+        }
+      ],
+      "evidence_score": 4,
+      "selection": "NOT-SELECTED",
+      "coordinate": null,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "required_review": "BEHAVIORAL-DEDUPE-AND-INDEPENDENT-ORACLE"
+    },
+    {
+      "semantic_name": "DEPOSIT-FIELD",
+      "evidence": [
+        {
+          "source_path": "knowledge/d10-historical-primary-admission-batch2-v1.json",
+          "source_blob": "4bf614924bf3ff6c3c909c947dfef9697e5b4653",
+          "research_branch": "research/d10-historical-selection-4-20261009",
+          "record_group": "rows",
+          "source_name": "DEPOSIT-FIELD",
+          "source_status": "SELECT-D10-RESEARCH-CANDIDATE",
+          "observable_law": "Replace target bits [p,p+s) with the bits from the SAME POSITIONS of newbyte; outside bits stay from target. Unlike DPB, newbyte is position-aligned, not right-justified.",
+          "positive_witness": "[object Object] | [object Object] | [object Object]",
+          "falsifier": "newbyte=10,s=2,p=1,target=0 returns 4 (DPB's right-justified semantics) rather than 2.",
+          "primary_source": "https://www.cs.cmu.edu/Groups/AI/util/html/hyperspec/HyperSpec/Body/fun_deposit-field.html",
+          "source_kind": null
+        }
+      ],
+      "evidence_score": 4,
+      "selection": "NOT-SELECTED",
+      "coordinate": null,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "required_review": "BEHAVIORAL-DEDUPE-AND-INDEPENDENT-ORACLE"
+    },
+    {
+      "semantic_name": "DPB",
+      "evidence": [
+        {
+          "source_path": "knowledge/d10-historical-primary-manual-reconciliation-20261009.json",
+          "source_blob": "37e10ef9a953ea62beb5e4b46ef20f21cbfb3ee4",
+          "research_branch": "research/d10-historical-primary-manual-reconcile-20261009",
+          "record_group": "proposals",
+          "source_name": "DPB",
+          "source_status": "D10-PROPOSAL-REVIEW",
+          "observable_law": "deposit low bits of value in specified contiguous target integer bit-field, preserving all target bits outside that field",
+          "positive_witness": "for byte-field [position p,width w], show LDB(field, DPB(v,field,x)) equals low_w_bits(v), unchanged exterior bits of x",
+          "falsifier": "source bits overwrite upper/lower bits outside chosen field, or do not mask value to w bits",
+          "primary_source": "https://tumbleweed.nu/r/lm-3/uv/chinual.html",
+          "source_kind": null
+        },
+        {
+          "source_path": "knowledge/d10-historical-primary-admission-batch1-v1.json",
+          "source_blob": "bbe3df442d84dbed5258a1f64b67d769b0510554",
+          "research_branch": "research/d10-historical-admission-batch1-20261009",
+          "record_group": "rows",
+          "source_name": "DPB",
+          "source_status": "SELECTED-RESEARCH-CANDIDATE",
+          "observable_law": "Given integer newbyte and a bit-field (width,offset) and an integer target, replace only the specified target bits with the low width bits of newbyte; width zero preserves target.",
+          "positive_witness": "DPB(1,BYTE(1,10),0)=1024 | DPB(-2,BYTE(2,10),0)=2048",
+          "falsifier": "A zero-width byte always leaves the target unchanged; bit positions outside field may never change.",
+          "primary_source": "https://tumbleweed.nu/r/lm-3/uv/chinual.html",
+          "source_kind": null
+        }
+      ],
+      "evidence_score": 4,
+      "selection": "NOT-SELECTED",
+      "coordinate": null,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "required_review": "BEHAVIORAL-DEDUPE-AND-INDEPENDENT-ORACLE"
+    },
+    {
+      "semantic_name": "ENSURE-GENERIC-FUNCTION",
+      "evidence": [
+        {
+          "source_path": "knowledge/d10-clos-instance-lifecycle-residual-v1.json",
+          "source_blob": "3c6e85d94e78cdd5fe9b9b645095b48335f768e5",
+          "research_branch": "research/d10-historical-clos-instance-lifecycle-residual-20261009",
+          "record_group": "rows",
+          "source_name": "ENSURE-GENERIC-FUNCTION",
+          "source_status": "HOLD-DEFGENERIC-DERIVABILITY",
+          "observable_law": "Creates a new generic function for an unbound global function name or returns/modifies an existing generic descriptor; rejects ordinary-function/macro collision.",
+          "positive_witness": "Repeated ensure on an existing generic reuses its identity and leaves unrelated methods intact.",
+          "falsifier": "Fail if existing ordinary function is silently overwritten or unrelated methods vanish.",
+          "primary_source": "https://www.cs.cmu.edu/Groups/AI/html/hyperspec/HyperSpec/Body/sec_7-6-1.html",
+          "source_kind": "PRIMARY-CLHS-OR-HISTORICAL-CLTL2"
+        }
+      ],
+      "evidence_score": 4,
+      "selection": "NOT-SELECTED",
+      "coordinate": null,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "required_review": "BEHAVIORAL-DEDUPE-AND-INDEPENDENT-ORACLE"
+    },
+    {
+      "semantic_name": "EQUAL-HASH",
+      "evidence": [
+        {
+          "source_path": "knowledge/d10-r6rs-hashtable-hygiene-audit-v1.json",
+          "source_blob": "c6af11760a10a5944d9df286c52eb84e18bd3c96",
+          "research_branch": "research/d10-r6rs-hashtable-hygiene-audit-20261009",
+          "record_group": "rows",
+          "source_name": "EQUAL-HASH",
+          "source_status": "HOLD-RESEARCH-NO-ADMISSION",
+          "observable_law": "структурний хеш, сумісний з equal?, мусить завершуватися і для циклів",
+          "positive_witness": "два equal? циклічні об'єкти мають сумісний hash і обчислення завершується",
+          "falsifier": "нескінченна рекурсія для циклічної структури",
+          "primary_source": "https://r6rs.org/final/html/r6rs-lib/r6rs-lib-Z-H-14.html",
+          "source_kind": null
+        }
+      ],
+      "evidence_score": 4,
+      "selection": "NOT-SELECTED",
+      "coordinate": null,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "required_review": "BEHAVIORAL-DEDUPE-AND-INDEPENDENT-ORACLE"
+    },
+    {
+      "semantic_name": "FIND-CLASS",
+      "evidence": [
+        {
+          "source_path": "knowledge/d10-clos-slot-state-historical-review-v1.json",
+          "source_blob": "d8c6a2fdf60c11e23016be7aad5037bb5c26782d",
+          "research_branch": "research/d10-historical-clos-slot-state-20261009",
+          "record_group": "rows",
+          "source_name": "FIND-CLASS",
+          "source_status": "HOLD-D2-ENVIRONMENT",
+          "observable_law": "Resolve a symbol to a class metaobject in the explicitly applicable environment; missing with errorp false returns NIL, with default true signals error.",
+          "positive_witness": "FIND-CLASS(Book,false,env) returns same class as CLASS-OF(book); missing(false)=NIL.",
+          "falsifier": "Different environment binding must not silently alias class with same printed name; errorp true cannot silently return NIL.",
+          "primary_source": "https://franz.com/support/documentation/10.0/ansicl/dictentr/find-cla.htm",
+          "source_kind": null
+        }
+      ],
+      "evidence_score": 4,
+      "selection": "NOT-SELECTED",
+      "coordinate": null,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "required_review": "BEHAVIORAL-DEDUPE-AND-INDEPENDENT-ORACLE"
+    },
+    {
+      "semantic_name": "FREE-IDENTIFIER=?",
+      "evidence": [
+        {
+          "source_path": "knowledge/d10-r6rs-hashtable-hygiene-audit-v1.json",
+          "source_blob": "c6af11760a10a5944d9df286c52eb84e18bd3c96",
+          "research_branch": "research/d10-r6rs-hashtable-hygiene-audit-20261009",
+          "record_group": "rows",
+          "source_name": "FREE-IDENTIFIER=?",
+          "source_status": "HOLD-RESEARCH-NO-ADMISSION",
+          "observable_law": "рівність ідентифікаторів як лексичних посилань на ту саму прив'язку",
+          "positive_witness": "різні контекстні записи з тією самою лексичною прив'язкою еквівалентні",
+          "falsifier": "порівняння тільки поверхневого імені",
+          "primary_source": "https://r6rs.org/final/html/r6rs-lib/r6rs-lib-Z-H-13.html",
+          "source_kind": null
+        }
+      ],
+      "evidence_score": 4,
+      "selection": "NOT-SELECTED",
+      "coordinate": null,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "required_review": "BEHAVIORAL-DEDUPE-AND-INDEPENDENT-ORACLE"
+    },
+    {
+      "semantic_name": "FUNCTION-KEYWORDS",
+      "evidence": [
+        {
+          "source_path": "knowledge/d10-clos-instance-lifecycle-residual-v1.json",
+          "source_blob": "3c6e85d94e78cdd5fe9b9b645095b48335f768e5",
+          "research_branch": "research/d10-historical-clos-instance-lifecycle-residual-20261009",
+          "record_group": "rows",
+          "source_name": "FUNCTION-KEYWORDS",
+          "source_status": "REVIEW-METHOD-INTROSPECTION",
+          "observable_law": "Return an ordered set/list of explicit keyword parameters plus independent allow-other-keys bit for a method; omission is not equivalent to allow-all.",
+          "positive_witness": "Method (:key x &allow-other-keys) => keywords includes x, second answer YES; method without &allow-other-keys => NO.",
+          "falsifier": "Fail if absent keyword list implies allow-all or if keyword names are lost.",
+          "primary_source": "https://www.cs.cmu.edu/Groups/AI/html/cltl/clm/node311.html",
+          "source_kind": "PRIMARY-CLHS-OR-HISTORICAL-CLTL2"
+        }
+      ],
+      "evidence_score": 4,
+      "selection": "NOT-SELECTED",
+      "coordinate": null,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "required_review": "BEHAVIORAL-DEDUPE-AND-INDEPENDENT-ORACLE"
+    },
+    {
+      "semantic_name": "GENERATE-EXPANSION",
+      "evidence": [
+        {
+          "source_path": "knowledge/d10-historical-primary-manual-reconciliation-20261009.json",
+          "source_blob": "37e10ef9a953ea62beb5e4b46ef20f21cbfb3ee4",
+          "research_branch": "research/d10-historical-primary-manual-reconcile-20261009",
+          "record_group": "proposals",
+          "source_name": "GENERATE-EXPANSION",
+          "source_status": "HOLD-UNVERIFIED-SOURCE",
+          "observable_law": "claimed macro's own expansion function; lacks primary definition and stage-specific behavior",
+          "positive_witness": "locate authoritative manual page and distinguish from single-step expansion or macro-function lookup",
+          "falsifier": "mere alias of MACROEXPAND-1 given a new coordinate",
+          "primary_source": "https://github.com/juv4uk/sens/blob/main/knowledge/d9-overflow-review-v1.json",
+          "source_kind": null
         }
       ],
       "evidence_score": 4,
@@ -385,6 +856,259 @@
       "required_review": "BEHAVIORAL-DEDUPE-AND-INDEPENDENT-ORACLE"
     },
     {
+      "semantic_name": "HASHTABLE-COPY",
+      "evidence": [
+        {
+          "source_path": "knowledge/d10-r6rs-hashtable-hygiene-audit-v1.json",
+          "source_blob": "c6af11760a10a5944d9df286c52eb84e18bd3c96",
+          "research_branch": "research/d10-r6rs-hashtable-hygiene-audit-20261009",
+          "record_group": "rows",
+          "source_name": "HASHTABLE-COPY",
+          "source_status": "HOLD-RESEARCH-NO-ADMISSION",
+          "observable_law": "копія словника за замовчуванням незмінна, з mutable=true змінна",
+          "positive_witness": "копія зі старими асоціаціями не приймає set! без mutable",
+          "falsifier": "копія за замовчуванням залишається змінною",
+          "primary_source": "https://r6rs.org/final/html/r6rs-lib/r6rs-lib-Z-H-14.html",
+          "source_kind": null
+        }
+      ],
+      "evidence_score": 4,
+      "selection": "NOT-SELECTED",
+      "coordinate": null,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "required_review": "BEHAVIORAL-DEDUPE-AND-INDEPENDENT-ORACLE"
+    },
+    {
+      "semantic_name": "HASHTABLE-ENTRIES",
+      "evidence": [
+        {
+          "source_path": "knowledge/d10-r6rs-hashtable-hygiene-audit-v1.json",
+          "source_blob": "c6af11760a10a5944d9df286c52eb84e18bd3c96",
+          "research_branch": "research/d10-r6rs-hashtable-hygiene-audit-20261009",
+          "record_group": "rows",
+          "source_name": "HASHTABLE-ENTRIES",
+          "source_status": "HOLD-RESEARCH-NO-ADMISSION",
+          "observable_law": "повернути два вектори у двох значеннях зі збереженою відповідністю ключ→значення",
+          "positive_witness": "пари key[i] і value[i] відображають ті самі асоціації",
+          "falsifier": "вектори однакової довжини, але значення змішані між ключами",
+          "primary_source": "https://r6rs.org/final/html/r6rs-lib/r6rs-lib-Z-H-14.html",
+          "source_kind": null
+        },
+        {
+          "source_path": "knowledge/d10-historical-primary-admission-batch2-v1.json",
+          "source_blob": "4bf614924bf3ff6c3c909c947dfef9697e5b4653",
+          "research_branch": "research/d10-historical-selection-4-20261009",
+          "record_group": "rows",
+          "source_name": "HASHTABLE-ENTRIES",
+          "source_status": "SELECT-D10-RESEARCH-CANDIDATE",
+          "observable_law": "Return two values: vector of all keys and vector of their corresponding values aligned by index; ordering is unspecified but the correspondence is preserved.",
+          "positive_witness": "[object Object] | [object Object]",
+          "falsifier": "Keys and values independently shuffled so pair correspondence is lost, duplicate a key, or claim insertion order is guaranteed.",
+          "primary_source": "https://r6rs.org/final/html/r6rs-lib/r6rs-lib-Z-H-14.html",
+          "source_kind": null
+        }
+      ],
+      "evidence_score": 4,
+      "selection": "NOT-SELECTED",
+      "coordinate": null,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "required_review": "BEHAVIORAL-DEDUPE-AND-INDEPENDENT-ORACLE"
+    },
+    {
+      "semantic_name": "HASHTABLE-EQUIVALENCE-FUNCTION",
+      "evidence": [
+        {
+          "source_path": "knowledge/d10-r6rs-hashtable-hygiene-audit-v1.json",
+          "source_blob": "c6af11760a10a5944d9df286c52eb84e18bd3c96",
+          "research_branch": "research/d10-r6rs-hashtable-hygiene-audit-20261009",
+          "record_group": "rows",
+          "source_name": "HASHTABLE-EQUIVALENCE-FUNCTION",
+          "source_status": "HOLD-RESEARCH-NO-ADMISSION",
+          "observable_law": "повернути функцію еквівалентності, що визначає семантику ключів",
+          "positive_witness": "eq-словник повертає eq?",
+          "falsifier": "повернута функція порівняння має інше відношення",
+          "primary_source": "https://r6rs.org/final/html/r6rs-lib/r6rs-lib-Z-H-14.html",
+          "source_kind": null
+        }
+      ],
+      "evidence_score": 4,
+      "selection": "NOT-SELECTED",
+      "coordinate": null,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "required_review": "BEHAVIORAL-DEDUPE-AND-INDEPENDENT-ORACLE"
+    },
+    {
+      "semantic_name": "HASHTABLE-HASH-FUNCTION",
+      "evidence": [
+        {
+          "source_path": "knowledge/d10-r6rs-hashtable-hygiene-audit-v1.json",
+          "source_blob": "c6af11760a10a5944d9df286c52eb84e18bd3c96",
+          "research_branch": "research/d10-r6rs-hashtable-hygiene-audit-20261009",
+          "record_group": "rows",
+          "source_name": "HASHTABLE-HASH-FUNCTION",
+          "source_status": "HOLD-RESEARCH-NO-ADMISSION",
+          "observable_law": "повернути hash-процедуру словника, але #f для eq?/eqv? конструкторів",
+          "positive_witness": "eq-hashtable має результат #f",
+          "falsifier": "повернута довільна внутрішня функція для eq-hashtable",
+          "primary_source": "https://r6rs.org/final/html/r6rs-lib/r6rs-lib-Z-H-14.html",
+          "source_kind": null
+        }
+      ],
+      "evidence_score": 4,
+      "selection": "NOT-SELECTED",
+      "coordinate": null,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "required_review": "BEHAVIORAL-DEDUPE-AND-INDEPENDENT-ORACLE"
+    },
+    {
+      "semantic_name": "HASHTABLE-KEYS",
+      "evidence": [
+        {
+          "source_path": "knowledge/d10-r6rs-hashtable-hygiene-audit-v1.json",
+          "source_blob": "c6af11760a10a5944d9df286c52eb84e18bd3c96",
+          "research_branch": "research/d10-r6rs-hashtable-hygiene-audit-20261009",
+          "record_group": "rows",
+          "source_name": "HASHTABLE-KEYS",
+          "source_status": "HOLD-RESEARCH-NO-ADMISSION",
+          "observable_law": "повернути вектор усіх ключів, порядок стандартом не задано",
+          "positive_witness": "кількість і множина ключів збігаються зі словником",
+          "falsifier": "сортування нав'язується як обов'язкове спостереження",
+          "primary_source": "https://r6rs.org/final/html/r6rs-lib/r6rs-lib-Z-H-14.html",
+          "source_kind": null
+        }
+      ],
+      "evidence_score": 4,
+      "selection": "NOT-SELECTED",
+      "coordinate": null,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "required_review": "BEHAVIORAL-DEDUPE-AND-INDEPENDENT-ORACLE"
+    },
+    {
+      "semantic_name": "HASHTABLE-MUTABLE?",
+      "evidence": [
+        {
+          "source_path": "knowledge/d10-r6rs-hashtable-hygiene-audit-v1.json",
+          "source_blob": "c6af11760a10a5944d9df286c52eb84e18bd3c96",
+          "research_branch": "research/d10-r6rs-hashtable-hygiene-audit-20261009",
+          "record_group": "rows",
+          "source_name": "HASHTABLE-MUTABLE?",
+          "source_status": "HOLD-RESEARCH-NO-ADMISSION",
+          "observable_law": "перевірка змінності екземпляра словника",
+          "positive_witness": "за замовчуванням копія незмінна, оригінал змінний",
+          "falsifier": "копія default проголошена змінною",
+          "primary_source": "https://r6rs.org/final/html/r6rs-lib/r6rs-lib-Z-H-14.html",
+          "source_kind": null
+        }
+      ],
+      "evidence_score": 4,
+      "selection": "NOT-SELECTED",
+      "coordinate": null,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "required_review": "BEHAVIORAL-DEDUPE-AND-INDEPENDENT-ORACLE"
+    },
+    {
+      "semantic_name": "HASHTABLE-REF",
+      "evidence": [
+        {
+          "source_path": "knowledge/d10-r6rs-hashtable-hygiene-audit-v1.json",
+          "source_blob": "c6af11760a10a5944d9df286c52eb84e18bd3c96",
+          "research_branch": "research/d10-r6rs-hashtable-hygiene-audit-20261009",
+          "record_group": "rows",
+          "source_name": "HASHTABLE-REF",
+          "source_status": "HOLD-RESEARCH-NO-ADMISSION",
+          "observable_law": "пошук ключа з явним значенням за відсутності",
+          "positive_witness": "пошук відсутнього ключа повертає саме переданий default",
+          "falsifier": "втрата відмінності між відсутнім та значенням #f",
+          "primary_source": "https://r6rs.org/final/html/r6rs-lib/r6rs-lib-Z-H-14.html",
+          "source_kind": null
+        }
+      ],
+      "evidence_score": 4,
+      "selection": "NOT-SELECTED",
+      "coordinate": null,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "required_review": "BEHAVIORAL-DEDUPE-AND-INDEPENDENT-ORACLE"
+    },
+    {
+      "semantic_name": "HASHTABLE-UPDATE!",
+      "evidence": [
+        {
+          "source_path": "knowledge/d10-r6rs-hashtable-hygiene-audit-v1.json",
+          "source_blob": "c6af11760a10a5944d9df286c52eb84e18bd3c96",
+          "research_branch": "research/d10-r6rs-hashtable-hygiene-audit-20261009",
+          "record_group": "rows",
+          "source_name": "HASHTABLE-UPDATE!",
+          "source_status": "HOLD-RESEARCH-NO-ADMISSION",
+          "observable_law": "оновити асоціацію результатом однієї процедури від поточного значення або default",
+          "positive_witness": "відсутній ключ створює ключ з proc(default)",
+          "falsifier": "процедуру викликають на помилковому нульовому значенні",
+          "primary_source": "https://r6rs.org/final/html/r6rs-lib/r6rs-lib-Z-H-14.html",
+          "source_kind": null
+        }
+      ],
+      "evidence_score": 4,
+      "selection": "NOT-SELECTED",
+      "coordinate": null,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "required_review": "BEHAVIORAL-DEDUPE-AND-INDEPENDENT-ORACLE"
+    },
+    {
+      "semantic_name": "IDENTIFIER?",
+      "evidence": [
+        {
+          "source_path": "knowledge/d10-r6rs-hashtable-hygiene-audit-v1.json",
+          "source_blob": "c6af11760a10a5944d9df286c52eb84e18bd3c96",
+          "research_branch": "research/d10-r6rs-hashtable-hygiene-audit-20261009",
+          "record_group": "rows",
+          "source_name": "IDENTIFIER?",
+          "source_status": "HOLD-RESEARCH-NO-ADMISSION",
+          "observable_law": "предикат синтаксичного об'єкта, що представляє ідентифікатор, не просто символ",
+          "positive_witness": "звичайний datum символ не проходить перевірку identifier?",
+          "falsifier": "довільний символ вважається контекстним identifier",
+          "primary_source": "https://r6rs.org/final/html/r6rs-lib/r6rs-lib-Z-H-13.html",
+          "source_kind": null
+        }
+      ],
+      "evidence_score": 4,
+      "selection": "NOT-SELECTED",
+      "coordinate": null,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "required_review": "BEHAVIORAL-DEDUPE-AND-INDEPENDENT-ORACLE"
+    },
+    {
+      "semantic_name": "LOCF",
+      "evidence": [
+        {
+          "source_path": "knowledge/d10-historical-primary-manual-reconciliation-20261009.json",
+          "source_blob": "37e10ef9a953ea62beb5e4b46ef20f21cbfb3ee4",
+          "research_branch": "research/d10-historical-primary-manual-reconcile-20261009",
+          "record_group": "proposals",
+          "source_name": "LOCF",
+          "source_status": "HOLD-MECHANISM-VS-SEMANTICS",
+          "observable_law": "locate an existing generalized place as a first-class reference to that same cell (not allocate a detached new cell)",
+          "positive_witness": "obtain reference to array element, update through reference, observe same original element changes; require lifetime/alias safety model",
+          "falsifier": "reference points to a detached copy, or lets invalid pointer escape lifetime boundary",
+          "primary_source": "https://tumbleweed.nu/r/lm-3/uv/chinual.html",
+          "source_kind": null
+        }
+      ],
+      "evidence_score": 4,
+      "selection": "NOT-SELECTED",
+      "coordinate": null,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "required_review": "BEHAVIORAL-DEDUPE-AND-INDEPENDENT-ORACLE"
+    },
+    {
       "semantic_name": "MAKE-CONCATENATED-STREAM",
       "evidence": [
         {
@@ -412,6 +1136,102 @@
           "falsifier": "Skip unexhausted first stream, interleave streams, or expose EOF before advancing to next.",
           "primary_source": "https://www.cs.cmu.edu/Groups/AI/util/html/hyperspec/HyperSpec/Body/fun_make-conc_nated-stream.html",
           "source_kind": null
+        }
+      ],
+      "evidence_score": 4,
+      "selection": "NOT-SELECTED",
+      "coordinate": null,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "required_review": "BEHAVIORAL-DEDUPE-AND-INDEPENDENT-ORACLE"
+    },
+    {
+      "semantic_name": "MAKE-EQ-HASHTABLE",
+      "evidence": [
+        {
+          "source_path": "knowledge/d10-r6rs-hashtable-hygiene-audit-v1.json",
+          "source_blob": "c6af11760a10a5944d9df286c52eb84e18bd3c96",
+          "research_branch": "research/d10-r6rs-hashtable-hygiene-audit-20261009",
+          "record_group": "rows",
+          "source_name": "MAKE-EQ-HASHTABLE",
+          "source_status": "HOLD-RESEARCH-NO-ADMISSION",
+          "observable_law": "новий змінюваний словник з тотожністю ключів eq?",
+          "positive_witness": "два різні, але структурно рівні об'єкти не обов'язково один ключ",
+          "falsifier": "словник тихцем порівнює структурною рівністю",
+          "primary_source": "https://r6rs.org/final/html/r6rs-lib/r6rs-lib-Z-H-14.html",
+          "source_kind": null
+        }
+      ],
+      "evidence_score": 4,
+      "selection": "NOT-SELECTED",
+      "coordinate": null,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "required_review": "BEHAVIORAL-DEDUPE-AND-INDEPENDENT-ORACLE"
+    },
+    {
+      "semantic_name": "MAKE-EQV-HASHTABLE",
+      "evidence": [
+        {
+          "source_path": "knowledge/d10-r6rs-hashtable-hygiene-audit-v1.json",
+          "source_blob": "c6af11760a10a5944d9df286c52eb84e18bd3c96",
+          "research_branch": "research/d10-r6rs-hashtable-hygiene-audit-20261009",
+          "record_group": "rows",
+          "source_name": "MAKE-EQV-HASHTABLE",
+          "source_status": "HOLD-RESEARCH-NO-ADMISSION",
+          "observable_law": "новий змінюваний словник з порівнянням eqv?",
+          "positive_witness": "ключі з різною числовою репрезентацією перевіряти за eqv?",
+          "falsifier": "вибір порівняння ігнорується",
+          "primary_source": "https://r6rs.org/final/html/r6rs-lib/r6rs-lib-Z-H-14.html",
+          "source_kind": null
+        }
+      ],
+      "evidence_score": 4,
+      "selection": "NOT-SELECTED",
+      "coordinate": null,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "required_review": "BEHAVIORAL-DEDUPE-AND-INDEPENDENT-ORACLE"
+    },
+    {
+      "semantic_name": "MAKE-HASHTABLE",
+      "evidence": [
+        {
+          "source_path": "knowledge/d10-r6rs-hashtable-hygiene-audit-v1.json",
+          "source_blob": "c6af11760a10a5944d9df286c52eb84e18bd3c96",
+          "research_branch": "research/d10-r6rs-hashtable-hygiene-audit-20261009",
+          "record_group": "rows",
+          "source_name": "MAKE-HASHTABLE",
+          "source_status": "HOLD-RESEARCH-NO-ADMISSION",
+          "observable_law": "створення словника із заданими чистими hash/equiv процедурами та сумісним відношенням",
+          "positive_witness": "еквівалентні ключі мають збігатися за хешем; однаковий ключ замінює значення",
+          "falsifier": "несумісні hash/equiv мовчки гарантовано коректні",
+          "primary_source": "https://r6rs.org/final/html/r6rs-lib/r6rs-lib-Z-H-14.html",
+          "source_kind": null
+        }
+      ],
+      "evidence_score": 4,
+      "selection": "NOT-SELECTED",
+      "coordinate": null,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "required_review": "BEHAVIORAL-DEDUPE-AND-INDEPENDENT-ORACLE"
+    },
+    {
+      "semantic_name": "MAKE-INSTANCES-OBSOLETE",
+      "evidence": [
+        {
+          "source_path": "knowledge/d10-clos-instance-lifecycle-residual-v1.json",
+          "source_blob": "3c6e85d94e78cdd5fe9b9b645095b48335f768e5",
+          "research_branch": "research/d10-historical-clos-instance-lifecycle-residual-20261009",
+          "record_group": "rows",
+          "source_name": "MAKE-INSTANCES-OBSOLETE",
+          "source_status": "REVIEW-OBJECT-LIFECYCLE",
+          "observable_law": "Class C invalidation initiates update of extant C instances; on next admitted slot access instance layout is updated while declared existing-slot values are preserved.",
+          "positive_witness": "Redefine C with added z; old instance i still has former values and exposes new slot after lazy refresh.",
+          "falsifier": "Fail if refresh silently discards unchanged slot values or creates a fresh unrelated instance identity.",
+          "primary_source": "https://www.cs.cmu.edu/Groups/AI/util/html/hyperspec/HyperSpec/Body/stagenfun_mak_ces-obsolete.html",
+          "source_kind": "PRIMARY-CLHS-OR-HISTORICAL-CLTL2"
         }
       ],
       "evidence_score": 4,
@@ -483,6 +1303,174 @@
       "required_review": "BEHAVIORAL-DEDUPE-AND-INDEPENDENT-ORACLE"
     },
     {
+      "semantic_name": "MAKE-VARIABLE-TRANSFORMER",
+      "evidence": [
+        {
+          "source_path": "knowledge/d10-r6rs-hashtable-hygiene-audit-v1.json",
+          "source_blob": "c6af11760a10a5944d9df286c52eb84e18bd3c96",
+          "research_branch": "research/d10-r6rs-hashtable-hygiene-audit-20261009",
+          "record_group": "rows",
+          "source_name": "MAKE-VARIABLE-TRANSFORMER",
+          "source_status": "HOLD-RESEARCH-NO-ADMISSION",
+          "observable_law": "трансформер, що перехоплює також set! позицію ідентифікатора",
+          "positive_witness": "ліва частина set! переписується трансформером, а не відхиляється",
+          "falsifier": "звичайний transformer помилково отримує право переписати set!",
+          "primary_source": "https://r6rs.org/final/html/r6rs-lib/r6rs-lib-Z-H-13.html",
+          "source_kind": null
+        }
+      ],
+      "evidence_score": 4,
+      "selection": "NOT-SELECTED",
+      "coordinate": null,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "required_review": "BEHAVIORAL-DEDUPE-AND-INDEPENDENT-ORACLE"
+    },
+    {
+      "semantic_name": "MAKNUM",
+      "evidence": [
+        {
+          "source_path": "knowledge/d10-historical-primary-manual-reconciliation-20261009.json",
+          "source_blob": "37e10ef9a953ea62beb5e4b46ef20f21cbfb3ee4",
+          "research_branch": "research/d10-historical-primary-manual-reconcile-20261009",
+          "record_group": "proposals",
+          "source_name": "MAKNUM",
+          "source_status": "HOLD-SUBSTRATE-IDENTITY",
+          "observable_law": "map runtime object identity to positive integer, such that equal integer iff EQ identity; historically pointer or table-based, no portable persistent address guarantee",
+          "positive_witness": "two distinct EQ-nonidentical cons cells map to different live ids; identical object maps to same live id",
+          "falsifier": "structural equality alone forces same identity id; id asserted stable after serialization/restart",
+          "primary_source": "https://softwarepreservation.computerhistory.org/LISP/MIT/MACLISP_Reference_Manual-Dec_17_1975.pdf",
+          "source_kind": null
+        }
+      ],
+      "evidence_score": 4,
+      "selection": "NOT-SELECTED",
+      "coordinate": null,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "required_review": "BEHAVIORAL-DEDUPE-AND-INDEPENDENT-ORACLE"
+    },
+    {
+      "semantic_name": "METHOD-QUALIFIERS",
+      "evidence": [
+        {
+          "source_path": "knowledge/d10-clos-instance-lifecycle-residual-v1.json",
+          "source_blob": "3c6e85d94e78cdd5fe9b9b645095b48335f768e5",
+          "research_branch": "research/d10-historical-clos-instance-lifecycle-residual-20261009",
+          "record_group": "rows",
+          "source_name": "METHOD-QUALIFIERS",
+          "source_status": "HOLD-DERIVED-METADATA",
+          "observable_law": "Returns an ordered proper list of method qualifiers, separate from specializers and from runtime applicability.",
+          "positive_witness": "Method with (:before) returns (:before), primary method returns ().",
+          "falsifier": "Fail if returns method precedence position instead of stored qualifier list.",
+          "primary_source": "https://www.cs.cmu.edu/Groups/AI/util/html/hyperspec/HyperSpec/Body/stagenfun_met_d-qualifiers.html",
+          "source_kind": "PRIMARY-CLHS-OR-HISTORICAL-CLTL2"
+        }
+      ],
+      "evidence_score": 4,
+      "selection": "NOT-SELECTED",
+      "coordinate": null,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "required_review": "BEHAVIORAL-DEDUPE-AND-INDEPENDENT-ORACLE"
+    },
+    {
+      "semantic_name": "MULTIPLE-VALUE-PROG1",
+      "evidence": [
+        {
+          "source_path": "knowledge/d10-historical-primary-manual-reconciliation-20261009.json",
+          "source_blob": "37e10ef9a953ea62beb5e4b46ef20f21cbfb3ee4",
+          "research_branch": "research/d10-historical-primary-manual-reconcile-20261009",
+          "record_group": "proposals",
+          "source_name": "MULTIPLE-VALUE-PROG1",
+          "source_status": "HOLD-D2-CONTROL",
+          "observable_law": "preserve all first-form return values, execute later effects in sequence, and return exactly the preserved cardinality and values",
+          "positive_witness": "first expression yields (a,b); later expression changes state and yields c; overall result still (a,b) and effect occurred",
+          "falsifier": "only primary a retained or final c replaces first values",
+          "primary_source": "https://metaspec.dev/s_multiple-value-prog1.html",
+          "source_kind": null
+        }
+      ],
+      "evidence_score": 4,
+      "selection": "NOT-SELECTED",
+      "coordinate": null,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "required_review": "BEHAVIORAL-DEDUPE-AND-INDEPENDENT-ORACLE"
+    },
+    {
+      "semantic_name": "MUNKAM",
+      "evidence": [
+        {
+          "source_path": "knowledge/d10-historical-primary-manual-reconciliation-20261009.json",
+          "source_blob": "37e10ef9a953ea62beb5e4b46ef20f21cbfb3ee4",
+          "research_branch": "research/d10-historical-primary-manual-reconcile-20261009",
+          "record_group": "proposals",
+          "source_name": "MUNKAM",
+          "source_status": "HOLD-SUBSTRATE-IDENTITY",
+          "observable_law": "reverse a live object identity integer previously produced by MAKNUM; arbitrary/forged numbers are outside guaranteed contract",
+          "positive_witness": "for a live x, MUNKAM(MAKNUM(x)) is EQ to x",
+          "falsifier": "accept arbitrary forged handle as a valid object or claim stable cross-process object restoration",
+          "primary_source": "https://softwarepreservation.computerhistory.org/LISP/MIT/MACLISP_Reference_Manual-Dec_17_1975.pdf",
+          "source_kind": null
+        }
+      ],
+      "evidence_score": 4,
+      "selection": "NOT-SELECTED",
+      "coordinate": null,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "required_review": "BEHAVIORAL-DEDUPE-AND-INDEPENDENT-ORACLE"
+    },
+    {
+      "semantic_name": "NO-APPLICABLE-METHOD",
+      "evidence": [
+        {
+          "source_path": "knowledge/d10-clos-instance-lifecycle-residual-v1.json",
+          "source_blob": "3c6e85d94e78cdd5fe9b9b645095b48335f768e5",
+          "research_branch": "research/d10-historical-clos-instance-lifecycle-residual-20261009",
+          "record_group": "rows",
+          "source_name": "NO-APPLICABLE-METHOD",
+          "source_status": "HOLD-D2-ERROR-CONTROL",
+          "observable_law": "Invoked on generic call with zero applicable methods; default signals error, overriding method may return alternative result.",
+          "positive_witness": "Generic with zero applicable methods routes to this method with original arguments, before keyword-validity checking.",
+          "falsifier": "Fail if arbitrarily selects unrelated method or converts zero candidates to D1:NO without explicit result law.",
+          "primary_source": "https://www.cs.cmu.edu/Groups/AI/html/hyperspec/HyperSpec/Body/stagenfun_no-_cable-method.html",
+          "source_kind": "PRIMARY-CLHS-OR-HISTORICAL-CLTL2"
+        }
+      ],
+      "evidence_score": 4,
+      "selection": "NOT-SELECTED",
+      "coordinate": null,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "required_review": "BEHAVIORAL-DEDUPE-AND-INDEPENDENT-ORACLE"
+    },
+    {
+      "semantic_name": "NO-NEXT-METHOD",
+      "evidence": [
+        {
+          "source_path": "knowledge/d10-clos-instance-lifecycle-residual-v1.json",
+          "source_blob": "3c6e85d94e78cdd5fe9b9b645095b48335f768e5",
+          "research_branch": "research/d10-historical-clos-instance-lifecycle-residual-20261009",
+          "record_group": "rows",
+          "source_name": "NO-NEXT-METHOD",
+          "source_status": "HOLD-D2-ERROR-CONTROL",
+          "observable_law": "When CALL-NEXT-METHOD has no next method, no-next-method is invoked with generic, current method and args; default error.",
+          "positive_witness": "Last primary method invokes CALL-NEXT-METHOD; no-next-method receives the precise current method.",
+          "falsifier": "Fail if silently returns NIL or restarts from the first method.",
+          "primary_source": "https://www.cs.cmu.edu/Groups/AI/util/html/hyperspec/HyperSpec/Body/stagenfun_no-next-method.html",
+          "source_kind": "PRIMARY-CLHS-OR-HISTORICAL-CLTL2"
+        }
+      ],
+      "evidence_score": 4,
+      "selection": "NOT-SELECTED",
+      "coordinate": null,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "required_review": "BEHAVIORAL-DEDUPE-AND-INDEPENDENT-ORACLE"
+    },
+    {
       "semantic_name": "PROMISE?",
       "evidence": [
         {
@@ -521,6 +1509,246 @@
           "falsifier": "Після нормального повернення обробника операція безпідставно кидає вторинний виняток як для non-continuable raise.",
           "primary_source": "https://standards.scheme.org/r7rs-html5/index.html",
           "source_kind": "PRIMARY-STANDARD"
+        }
+      ],
+      "evidence_score": 4,
+      "selection": "NOT-SELECTED",
+      "coordinate": null,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "required_review": "BEHAVIORAL-DEDUPE-AND-INDEPENDENT-ORACLE"
+    },
+    {
+      "semantic_name": "REINITIALIZE-INSTANCE",
+      "evidence": [
+        {
+          "source_path": "knowledge/d10-clos-instance-lifecycle-residual-v1.json",
+          "source_blob": "3c6e85d94e78cdd5fe9b9b645095b48335f768e5",
+          "research_branch": "research/d10-historical-clos-instance-lifecycle-residual-20261009",
+          "record_group": "rows",
+          "source_name": "REINITIALIZE-INSTANCE",
+          "source_status": "HOLD-D9-STATE-DERIVABILITY",
+          "observable_law": "Changes existing instance slot values according to valid initargs without adding/removing slots and without re-running omitted initforms.",
+          "positive_witness": "Instance a=1,b=2 reinit a=3 => same instance with a=3,b=2.",
+          "falsifier": "Fail if b resets to initform or the instance layout changes.",
+          "primary_source": "https://www.cs.cmu.edu/Groups/AI/util/html/hyperspec/HyperSpec/Body/stagenfun_rei_ize-instance.html",
+          "source_kind": "PRIMARY-CLHS-OR-HISTORICAL-CLTL2"
+        }
+      ],
+      "evidence_score": 4,
+      "selection": "NOT-SELECTED",
+      "coordinate": null,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "required_review": "BEHAVIORAL-DEDUPE-AND-INDEPENDENT-ORACLE"
+    },
+    {
+      "semantic_name": "SLOT-BOUNDP",
+      "evidence": [
+        {
+          "source_path": "knowledge/d10-clos-slot-state-historical-review-v1.json",
+          "source_blob": "d8c6a2fdf60c11e23016be7aad5037bb5c26782d",
+          "research_branch": "research/d10-historical-clos-slot-state-20261009",
+          "record_group": "rows",
+          "source_name": "SLOT-BOUNDP",
+          "source_status": "REVIEW-SEMANTIC-CANDIDATE",
+          "observable_law": "Return D1 yes iff named existing slot has a bound value, including an explicit NIL value; unbound is distinct from nonexistence.",
+          "positive_witness": "Slot a declared without initform -> NO; assign a=NIL -> YES; slot still exists in both cases.",
+          "falsifier": "Must distinguish unbound slot from a bound NIL, and missing slot routes SLOT-MISSING rather than pretending false.",
+          "primary_source": "https://www.cs.cmu.edu/Groups/AI/util/html/hyperspec/HyperSpec/Body/fun_slot-boundp.html",
+          "source_kind": null
+        }
+      ],
+      "evidence_score": 4,
+      "selection": "NOT-SELECTED",
+      "coordinate": null,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "required_review": "BEHAVIORAL-DEDUPE-AND-INDEPENDENT-ORACLE"
+    },
+    {
+      "semantic_name": "SLOT-EXISTS-P",
+      "evidence": [
+        {
+          "source_path": "knowledge/d10-clos-slot-state-historical-review-v1.json",
+          "source_blob": "d8c6a2fdf60c11e23016be7aad5037bb5c26782d",
+          "research_branch": "research/d10-historical-clos-slot-state-20261009",
+          "record_group": "rows",
+          "source_name": "SLOT-EXISTS-P",
+          "source_status": "REVIEW-SEMANTIC-CANDIDATE",
+          "observable_law": "Return D1 yes iff object has a slot of this exact name, regardless of whether its value is unbound.",
+          "positive_witness": "Object C defines slot a without initform: exists(C,a)=YES, exists(C,z)=NO.",
+          "falsifier": "Defined-but-unbound a must NOT be treated as absent; stored NIL also counts as existing.",
+          "primary_source": "https://www.cs.cmu.edu/Groups/AI/util/html/hyperspec/HyperSpec/Body/fun_slot-exists-p.html",
+          "source_kind": null
+        }
+      ],
+      "evidence_score": 4,
+      "selection": "NOT-SELECTED",
+      "coordinate": null,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "required_review": "BEHAVIORAL-DEDUPE-AND-INDEPENDENT-ORACLE"
+    },
+    {
+      "semantic_name": "SLOT-MAKUNBOUND",
+      "evidence": [
+        {
+          "source_path": "knowledge/d10-clos-slot-state-historical-review-v1.json",
+          "source_blob": "d8c6a2fdf60c11e23016be7aad5037bb5c26782d",
+          "research_branch": "research/d10-historical-clos-slot-state-20261009",
+          "record_group": "rows",
+          "source_name": "SLOT-MAKUNBOUND",
+          "source_status": "REVIEW-SEMANTIC-CANDIDATE",
+          "observable_law": "Reset an existing instance slot to an unbound state without deleting the slot, changing class or clearing unrelated slots.",
+          "positive_witness": "C with a=3, b=4: SLOT-MAKUNBOUND(C,a) returns C; exists(a)=YES; boundp(a)=NO; value(b)=4.",
+          "falsifier": "Setting a=NIL is not unbinding; deleting the slot or mutating b is not equivalent.",
+          "primary_source": "https://www.cs.cmu.edu/Groups/AI/util/html/hyperspec/HyperSpec/Body/fun_slot-makunbound.html",
+          "source_kind": null
+        }
+      ],
+      "evidence_score": 4,
+      "selection": "NOT-SELECTED",
+      "coordinate": null,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "required_review": "BEHAVIORAL-DEDUPE-AND-INDEPENDENT-ORACLE"
+    },
+    {
+      "semantic_name": "SLOT-MISSING",
+      "evidence": [
+        {
+          "source_path": "knowledge/d10-clos-slot-state-historical-review-v1.json",
+          "source_blob": "d8c6a2fdf60c11e23016be7aad5037bb5c26782d",
+          "research_branch": "research/d10-historical-clos-slot-state-20261009",
+          "record_group": "rows",
+          "source_name": "SLOT-MISSING",
+          "source_status": "HOLD-D2-EFFECT-HOOK",
+          "observable_law": "When an accessor targets a slot absent from a standard-class object, dispatch to the operation-aware method with class, object, name and operation; on read, primary returned value is observed.",
+          "positive_witness": "Custom SLOT-MISSING for SLOT-VALUE(C,z) returns sentinel, while existing-but-unbound a must follow SLOT-UNBOUND instead.",
+          "falsifier": "Do not conflate missing slot with unbound, and do not use hook return as result of SETF/MAKUNBOUND.",
+          "primary_source": "https://www.cs.cmu.edu/Groups/AI/util/html/hyperspec/HyperSpec/Body/stagenfun_slot-missing.html",
+          "source_kind": null
+        }
+      ],
+      "evidence_score": 4,
+      "selection": "NOT-SELECTED",
+      "coordinate": null,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "required_review": "BEHAVIORAL-DEDUPE-AND-INDEPENDENT-ORACLE"
+    },
+    {
+      "semantic_name": "SLOT-UNBOUND",
+      "evidence": [
+        {
+          "source_path": "knowledge/d10-clos-slot-state-historical-review-v1.json",
+          "source_blob": "d8c6a2fdf60c11e23016be7aad5037bb5c26782d",
+          "research_branch": "research/d10-historical-clos-slot-state-20261009",
+          "record_group": "rows",
+          "source_name": "SLOT-UNBOUND",
+          "source_status": "HOLD-D2-EFFECT-HOOK",
+          "observable_law": "On read of existing-but-unbound slot in a standard-class instance, dispatch to distinct hook; default signals UNBOUND-SLOT; primary handler value is used if provided.",
+          "positive_witness": "C has declared unbound a; SLOT-VALUE(C,a) follows SLOT-UNBOUND; SLOT-VALUE(C,z) follows SLOT-MISSING.",
+          "falsifier": "Never route a nonexisting slot to SLOT-UNBOUND; reading unbound cannot silently return NIL.",
+          "primary_source": "https://www.cs.cmu.edu/Groups/AI/util/html/hyperspec/HyperSpec/Body/stagenfun_slot-unbound.html",
+          "source_kind": null
+        }
+      ],
+      "evidence_score": 4,
+      "selection": "NOT-SELECTED",
+      "coordinate": null,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "required_review": "BEHAVIORAL-DEDUPE-AND-INDEPENDENT-ORACLE"
+    },
+    {
+      "semantic_name": "STRING-CI-HASH",
+      "evidence": [
+        {
+          "source_path": "knowledge/d10-r6rs-hashtable-hygiene-audit-v1.json",
+          "source_blob": "c6af11760a10a5944d9df286c52eb84e18bd3c96",
+          "research_branch": "research/d10-r6rs-hashtable-hygiene-audit-20261009",
+          "record_group": "rows",
+          "source_name": "STRING-CI-HASH",
+          "source_status": "HOLD-RESEARCH-NO-ADMISSION",
+          "observable_law": "хеш рядка без врахування регістру, сумісний зі string-ci=?",
+          "positive_witness": "ключі, рівні за string-ci=?, мають рівні хеші",
+          "falsifier": "рядки, що відрізняються регістром, гарантовано мають різні хеші",
+          "primary_source": "https://r6rs.org/final/html/r6rs-lib/r6rs-lib-Z-H-14.html",
+          "source_kind": null
+        }
+      ],
+      "evidence_score": 4,
+      "selection": "NOT-SELECTED",
+      "coordinate": null,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "required_review": "BEHAVIORAL-DEDUPE-AND-INDEPENDENT-ORACLE"
+    },
+    {
+      "semantic_name": "TABLESPACE",
+      "evidence": [
+        {
+          "source_path": "knowledge/d10-historical-primary-manual-reconciliation-20261009.json",
+          "source_blob": "37e10ef9a953ea62beb5e4b46ef20f21cbfb3ee4",
+          "research_branch": "research/d10-historical-primary-manual-reconcile-20261009",
+          "record_group": "proposals",
+          "source_name": "TABLESPACE",
+          "source_status": "HOLD-UNVERIFIED-SOURCE",
+          "observable_law": "claimed allocated hash table capacity distinct from number of stored entries; standard/portable behavior unproven",
+          "positive_witness": "find primary definition differentiating capacity n from count k; require n>=k if applicable",
+          "falsifier": "merely relabel count as capacity or invent a new Core law without source",
+          "primary_source": "https://github.com/juv4uk/sens/blob/main/knowledge/d9-overflow-review-v1.json",
+          "source_kind": null
+        }
+      ],
+      "evidence_score": 4,
+      "selection": "NOT-SELECTED",
+      "coordinate": null,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "required_review": "BEHAVIORAL-DEDUPE-AND-INDEPENDENT-ORACLE"
+    },
+    {
+      "semantic_name": "THE",
+      "evidence": [
+        {
+          "source_path": "knowledge/d10-historical-primary-manual-reconciliation-20261009.json",
+          "source_blob": "37e10ef9a953ea62beb5e4b46ef20f21cbfb3ee4",
+          "research_branch": "research/d10-historical-primary-manual-reconcile-20261009",
+          "record_group": "proposals",
+          "source_name": "THE",
+          "source_status": "HOLD-D2-TYPE-CONTROL",
+          "observable_law": "declaration of expected type(s) of expression result(s), preserving exact return value cardinality; mismatched types have undefined consequences, NOT mandated runtime check",
+          "positive_witness": "correctly typed two-result expression returns the same two values with declaration in place",
+          "falsifier": "wrongly claim THE necessarily throws runtime type error for a violated declaration",
+          "primary_source": "https://www.cs.cmu.edu/Groups/AI/util/html/hyperspec/HyperSpec/Body/speope_the.html",
+          "source_kind": null
+        }
+      ],
+      "evidence_score": 4,
+      "selection": "NOT-SELECTED",
+      "coordinate": null,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "required_review": "BEHAVIORAL-DEDUPE-AND-INDEPENDENT-ORACLE"
+    },
+    {
+      "semantic_name": "UPDATE-INSTANCE-FOR-REDEFINED-CLASS",
+      "evidence": [
+        {
+          "source_path": "knowledge/d10-clos-instance-lifecycle-residual-v1.json",
+          "source_blob": "3c6e85d94e78cdd5fe9b9b645095b48335f768e5",
+          "research_branch": "research/d10-historical-clos-instance-lifecycle-residual-20261009",
+          "record_group": "rows",
+          "source_name": "UPDATE-INSTANCE-FOR-REDEFINED-CLASS",
+          "source_status": "HOLD-D2-STATE-CONTROL",
+          "observable_law": "Receives transformed instance, added/discarded slot names and pre-redefinition bound values for discarded slots; allows user-defined migration hooks.",
+          "positive_witness": "Old x,y slots discarded, new rho/theta added: hook can use old property-list x,y to fill new values.",
+          "falsifier": "Fail if discarded values are unavailable to hook or new initforms overwrite explicit migrated values.",
+          "primary_source": "https://www.cs.cmu.edu/Groups/AI/util/html/hyperspec/HyperSpec/Body/stagenfun_upd_efined-class.html",
+          "source_kind": "PRIMARY-CLHS-OR-HISTORICAL-CLTL2"
         }
       ],
       "evidence_score": 4,
@@ -703,30 +1931,6 @@
           "positive_witness": null,
           "falsifier": null,
           "primary_source": "character handling / LISP 1.5 Appendix F",
-          "source_kind": null
-        }
-      ],
-      "evidence_score": 2,
-      "selection": "NOT-SELECTED",
-      "coordinate": null,
-      "ratified": false,
-      "physical_t5_authorized": false,
-      "required_review": "PRIMARY-SOURCE-AND-SEMANTIC-LAW"
-    },
-    {
-      "semantic_name": "AND",
-      "evidence": [
-        {
-          "source_path": "knowledge/d10-historical-lisp15-reconciliation-20261009.json",
-          "source_blob": "da6f108e4f8553a150f0abed8f3758944193c49a",
-          "research_branch": "research/d10-lisp15-appendix-reconcile-20261009",
-          "record_group": "rows",
-          "source_name": "AND",
-          "source_status": "PARTIAL-OVERLAP-REVIEW-RESIDUAL-SEPARATELY",
-          "observable_law": "historical list/logical/numeric/control conveniences",
-          "positive_witness": null,
-          "falsifier": null,
-          "primary_source": "LISP I / LISP 1.5 manual lineage",
           "source_kind": null
         }
       ],
@@ -1050,30 +2254,6 @@
       "required_review": "PRIMARY-SOURCE-AND-SEMANTIC-LAW"
     },
     {
-      "semantic_name": "COMPILE",
-      "evidence": [
-        {
-          "source_path": "knowledge/d10-historical-lisp15-reconciliation-20261009.json",
-          "source_blob": "da6f108e4f8553a150f0abed8f3758944193c49a",
-          "research_branch": "research/d10-lisp15-appendix-reconcile-20261009",
-          "record_group": "rows",
-          "source_name": "COMPILE",
-          "source_status": "PARTIAL-OVERLAP-REVIEW-RESIDUAL-SEPARATELY",
-          "observable_law": "machine/system/compiler/storage control",
-          "positive_witness": null,
-          "falsifier": null,
-          "primary_source": "LISP 1.5 system/manual",
-          "source_kind": null
-        }
-      ],
-      "evidence_score": 2,
-      "selection": "NOT-SELECTED",
-      "coordinate": null,
-      "ratified": false,
-      "physical_t5_authorized": false,
-      "required_review": "PRIMARY-SOURCE-AND-SEMANTIC-LAW"
-    },
-    {
       "semantic_name": "CONC",
       "evidence": [
         {
@@ -1112,6 +2292,30 @@
           "falsifier": null,
           "primary_source": "LISP 1.5 manual",
           "source_kind": null
+        }
+      ],
+      "evidence_score": 2,
+      "selection": "NOT-SELECTED",
+      "coordinate": null,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "required_review": "PRIMARY-SOURCE-AND-SEMANTIC-LAW"
+    },
+    {
+      "semantic_name": "COPYD",
+      "evidence": [
+        {
+          "source_path": "knowledge/d10-interlisp-psl-history-harvest-v1.json",
+          "source_blob": "c862fc5d5fe45a0a01eb0115ec9f8e9b2553817d",
+          "research_branch": "research/d10-psl-interlisp-historical-20261009",
+          "record_group": "rows",
+          "source_name": "COPYD",
+          "source_status": "SELECT-D10-CANDIDATE",
+          "observable_law": "Copy the definition type and body from a defined function to another name; fail if missing",
+          "positive_witness": null,
+          "falsifier": null,
+          "primary_source": "https://manuals.plus/m/000ffa02fa9f17a7abece89bb6a08bd2e3330bef1b4947c7bfdb2bee1670c42b",
+          "source_kind": "HISTORICAL-REFERENCE-MANUAL"
         }
       ],
       "evidence_score": 2,
@@ -1338,78 +2542,6 @@
       "required_review": "PRIMARY-SOURCE-AND-SEMANTIC-LAW"
     },
     {
-      "semantic_name": "ENV-REFLECTION",
-      "evidence": [
-        {
-          "source_path": "knowledge/d10-historical-lisp15-reconciliation-20261009.json",
-          "source_blob": "da6f108e4f8553a150f0abed8f3758944193c49a",
-          "research_branch": "research/d10-lisp15-appendix-reconcile-20261009",
-          "record_group": "rows",
-          "source_name": "ENV-REFLECTION",
-          "source_status": "PARTIAL-OVERLAP-REVIEW-RESIDUAL-SEPARATELY",
-          "observable_law": "enumerate visible lexical bindings with shadow resolution",
-          "positive_witness": null,
-          "falsifier": null,
-          "primary_source": "current SENS capability; historical environment concept is older but reflection spelling is not backdated",
-          "source_kind": null
-        }
-      ],
-      "evidence_score": 2,
-      "selection": "NOT-SELECTED",
-      "coordinate": null,
-      "ratified": false,
-      "physical_t5_authorized": false,
-      "required_review": "PRIMARY-SOURCE-AND-SEMANTIC-LAW"
-    },
-    {
-      "semantic_name": "EQUAL",
-      "evidence": [
-        {
-          "source_path": "knowledge/d10-historical-lisp15-reconciliation-20261009.json",
-          "source_blob": "da6f108e4f8553a150f0abed8f3758944193c49a",
-          "research_branch": "research/d10-lisp15-appendix-reconcile-20261009",
-          "record_group": "rows",
-          "source_name": "EQUAL",
-          "source_status": "EXACT-NAME-OVERLAP-NO-NEW-ROW",
-          "observable_law": "recursive structural equality",
-          "positive_witness": null,
-          "falsifier": null,
-          "primary_source": "Memo 24 / LISP 1.5 lineage",
-          "source_kind": null
-        }
-      ],
-      "evidence_score": 2,
-      "selection": "NOT-SELECTED",
-      "coordinate": null,
-      "ratified": false,
-      "physical_t5_authorized": false,
-      "required_review": "PRIMARY-SOURCE-AND-SEMANTIC-LAW"
-    },
-    {
-      "semantic_name": "ERROR",
-      "evidence": [
-        {
-          "source_path": "knowledge/d10-historical-lisp15-reconciliation-20261009.json",
-          "source_blob": "da6f108e4f8553a150f0abed8f3758944193c49a",
-          "research_branch": "research/d10-lisp15-appendix-reconcile-20261009",
-          "record_group": "rows",
-          "source_name": "ERROR",
-          "source_status": "EXACT-NAME-OVERLAP-NO-NEW-ROW",
-          "observable_law": "intentional language failure with diagnostic/payload",
-          "positive_witness": null,
-          "falsifier": null,
-          "primary_source": "LISP 1.5 Programmer's Manual, 1961/1962 lineage",
-          "source_kind": null
-        }
-      ],
-      "evidence_score": 2,
-      "selection": "NOT-SELECTED",
-      "coordinate": null,
-      "ratified": false,
-      "physical_t5_authorized": false,
-      "required_review": "PRIMARY-SOURCE-AND-SEMANTIC-LAW"
-    },
-    {
       "semantic_name": "ERROR1",
       "evidence": [
         {
@@ -1423,30 +2555,6 @@
           "positive_witness": null,
           "falsifier": null,
           "primary_source": "LISP 1.5 Programmer's Manual Appendix F, 1962",
-          "source_kind": null
-        }
-      ],
-      "evidence_score": 2,
-      "selection": "NOT-SELECTED",
-      "coordinate": null,
-      "ratified": false,
-      "physical_t5_authorized": false,
-      "required_review": "PRIMARY-SOURCE-AND-SEMANTIC-LAW"
-    },
-    {
-      "semantic_name": "ERRORSET",
-      "evidence": [
-        {
-          "source_path": "knowledge/d10-historical-lisp15-reconciliation-20261009.json",
-          "source_blob": "da6f108e4f8553a150f0abed8f3758944193c49a",
-          "research_branch": "research/d10-lisp15-appendix-reconcile-20261009",
-          "record_group": "rows",
-          "source_name": "ERRORSET",
-          "source_status": "EXACT-NAME-OVERLAP-NO-NEW-ROW",
-          "observable_law": "convert evaluation failure into recoverable NIL while wrapping successful value in singleton list",
-          "positive_witness": null,
-          "falsifier": null,
-          "primary_source": "Memo 26 Errorset; LISP 1.5 Programmer's Manual §6.4",
           "source_kind": null
         }
       ],
@@ -1472,6 +2580,54 @@
           "falsifier": null,
           "primary_source": "LISP 1.5 system/manual",
           "source_kind": null
+        }
+      ],
+      "evidence_score": 2,
+      "selection": "NOT-SELECTED",
+      "coordinate": null,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "required_review": "PRIMARY-SOURCE-AND-SEMANTIC-LAW"
+    },
+    {
+      "semantic_name": "EXPRP",
+      "evidence": [
+        {
+          "source_path": "knowledge/d10-interlisp-psl-history-harvest-v1.json",
+          "source_blob": "c862fc5d5fe45a0a01eb0115ec9f8e9b2553817d",
+          "research_branch": "research/d10-psl-interlisp-historical-20261009",
+          "record_group": "rows",
+          "source_name": "EXPRP",
+          "source_status": "SELECT-D10-CANDIDATE",
+          "observable_law": "Test PSL expr-function kind of a code pointer, lambda or named expr function",
+          "positive_witness": null,
+          "falsifier": null,
+          "primary_source": "https://manuals.plus/m/000ffa02fa9f17a7abece89bb6a08bd2e3330bef1b4947c7bfdb2bee1670c42b",
+          "source_kind": "HISTORICAL-REFERENCE-MANUAL"
+        }
+      ],
+      "evidence_score": 2,
+      "selection": "NOT-SELECTED",
+      "coordinate": null,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "required_review": "PRIMARY-SOURCE-AND-SEMANTIC-LAW"
+    },
+    {
+      "semantic_name": "FEXPRP",
+      "evidence": [
+        {
+          "source_path": "knowledge/d10-interlisp-psl-history-harvest-v1.json",
+          "source_blob": "c862fc5d5fe45a0a01eb0115ec9f8e9b2553817d",
+          "research_branch": "research/d10-psl-interlisp-historical-20261009",
+          "record_group": "rows",
+          "source_name": "FEXPRP",
+          "source_status": "SELECT-D10-CANDIDATE",
+          "observable_law": "Test the defined fexpr kind, which receives unevaluated argument list",
+          "positive_witness": null,
+          "falsifier": null,
+          "primary_source": "https://manuals.plus/m/000ffa02fa9f17a7abece89bb6a08bd2e3330bef1b4947c7bfdb2bee1670c42b",
+          "source_kind": "HISTORICAL-REFERENCE-MANUAL"
         }
       ],
       "evidence_score": 2,
@@ -1567,20 +2723,44 @@
       "required_review": "PRIMARY-SOURCE-AND-SEMANTIC-LAW"
     },
     {
-      "semantic_name": "FSUBR",
+      "semantic_name": "FLUIDP",
       "evidence": [
         {
-          "source_path": "knowledge/d10-historical-lisp15-reconciliation-20261009.json",
-          "source_blob": "da6f108e4f8553a150f0abed8f3758944193c49a",
-          "research_branch": "research/d10-lisp15-appendix-reconcile-20261009",
+          "source_path": "knowledge/d10-interlisp-psl-history-harvest-v1.json",
+          "source_blob": "c862fc5d5fe45a0a01eb0115ec9f8e9b2553817d",
+          "research_branch": "research/d10-psl-interlisp-historical-20261009",
           "record_group": "rows",
-          "source_name": "FSUBR",
-          "source_status": "EXACT-NAME-OVERLAP-NO-NEW-ROW",
-          "observable_law": "compiled/subroutine implementation of special-call protocol",
+          "source_name": "FLUIDP",
+          "source_status": "SELECT-D10-CANDIDATE",
+          "observable_law": "Test explicit fluid declaration independently from ordinary variable boundness",
           "positive_witness": null,
           "falsifier": null,
-          "primary_source": "LISP 1.5",
-          "source_kind": null
+          "primary_source": "https://manuals.plus/m/000ffa02fa9f17a7abece89bb6a08bd2e3330bef1b4947c7bfdb2bee1670c42b",
+          "source_kind": "HISTORICAL-REFERENCE-MANUAL"
+        }
+      ],
+      "evidence_score": 2,
+      "selection": "NOT-SELECTED",
+      "coordinate": null,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "required_review": "PRIMARY-SOURCE-AND-SEMANTIC-LAW"
+    },
+    {
+      "semantic_name": "FUNBOUNDP",
+      "evidence": [
+        {
+          "source_path": "knowledge/d10-interlisp-psl-history-harvest-v1.json",
+          "source_blob": "c862fc5d5fe45a0a01eb0115ec9f8e9b2553817d",
+          "research_branch": "research/d10-psl-interlisp-historical-20261009",
+          "record_group": "rows",
+          "source_name": "FUNBOUNDP",
+          "source_status": "SELECT-D10-CANDIDATE",
+          "observable_law": "Test absence of a function definition, distinct from variable-value absence",
+          "positive_witness": null,
+          "falsifier": null,
+          "primary_source": "https://manuals.plus/m/000ffa02fa9f17a7abece89bb6a08bd2e3330bef1b4947c7bfdb2bee1670c42b",
+          "source_kind": "HISTORICAL-REFERENCE-MANUAL"
         }
       ],
       "evidence_score": 2,
@@ -1711,20 +2891,20 @@
       "required_review": "PRIMARY-SOURCE-AND-SEMANTIC-LAW"
     },
     {
-      "semantic_name": "GENSYM",
+      "semantic_name": "GETD",
       "evidence": [
         {
-          "source_path": "knowledge/d10-historical-lisp15-reconciliation-20261009.json",
-          "source_blob": "da6f108e4f8553a150f0abed8f3758944193c49a",
-          "research_branch": "research/d10-lisp15-appendix-reconcile-20261009",
+          "source_path": "knowledge/d10-interlisp-psl-history-harvest-v1.json",
+          "source_blob": "c862fc5d5fe45a0a01eb0115ec9f8e9b2553817d",
+          "research_branch": "research/d10-psl-interlisp-historical-20261009",
           "record_group": "rows",
-          "source_name": "GENSYM",
-          "source_status": "EXACT-NAME-OVERLAP-NO-NEW-ROW",
-          "observable_law": "fresh distinct symbol generation",
+          "source_name": "GETD",
+          "source_status": "SELECT-D10-CANDIDATE",
+          "observable_law": "Return the stored function type and definition body or absence when undefined",
           "positive_witness": null,
           "falsifier": null,
-          "primary_source": "LISP 1.5 manual 1962",
-          "source_kind": null
+          "primary_source": "https://manuals.plus/m/000ffa02fa9f17a7abece89bb6a08bd2e3330bef1b4947c7bfdb2bee1670c42b",
+          "source_kind": "HISTORICAL-REFERENCE-MANUAL"
         }
       ],
       "evidence_score": 2,
@@ -1735,20 +2915,44 @@
       "required_review": "PRIMARY-SOURCE-AND-SEMANTIC-LAW"
     },
     {
-      "semantic_name": "GET",
+      "semantic_name": "GLOBALP",
       "evidence": [
         {
-          "source_path": "knowledge/d10-historical-lisp15-reconciliation-20261009.json",
-          "source_blob": "da6f108e4f8553a150f0abed8f3758944193c49a",
-          "research_branch": "research/d10-lisp15-appendix-reconcile-20261009",
+          "source_path": "knowledge/d10-interlisp-psl-history-harvest-v1.json",
+          "source_blob": "c862fc5d5fe45a0a01eb0115ec9f8e9b2553817d",
+          "research_branch": "research/d10-psl-interlisp-historical-20261009",
           "record_group": "rows",
-          "source_name": "GET",
-          "source_status": "PARTIAL-OVERLAP-REVIEW-RESIDUAL-SEPARATELY",
-          "observable_law": "implicit mutable metadata attached to atomic symbols",
+          "source_name": "GLOBALP",
+          "source_status": "SELECT-D10-CANDIDATE",
+          "observable_law": "Test whether an identifier is globally declared or names a defined function in PSL",
           "positive_witness": null,
           "falsifier": null,
-          "primary_source": "LISP 1.5 manual 1962 property-list system",
-          "source_kind": null
+          "primary_source": "https://manuals.plus/m/000ffa02fa9f17a7abece89bb6a08bd2e3330bef1b4947c7bfdb2bee1670c42b",
+          "source_kind": "HISTORICAL-REFERENCE-MANUAL"
+        }
+      ],
+      "evidence_score": 2,
+      "selection": "NOT-SELECTED",
+      "coordinate": null,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "required_review": "PRIMARY-SOURCE-AND-SEMANTIC-LAW"
+    },
+    {
+      "semantic_name": "INTERLISP-HISTORY-REPLAY",
+      "evidence": [
+        {
+          "source_path": "knowledge/d10-interlisp-psl-history-harvest-v1.json",
+          "source_blob": "c862fc5d5fe45a0a01eb0115ec9f8e9b2553817d",
+          "research_branch": "research/d10-psl-interlisp-historical-20261009",
+          "record_group": "rows",
+          "source_name": "INTERLISP-HISTORY-REPLAY",
+          "source_status": "SELECT-D10-CANDIDATE",
+          "observable_law": "Replay an earlier recorded interactive operation with optional substitutions; label is a new semantic proposal, not a historically attested function spelling",
+          "positive_witness": null,
+          "falsifier": null,
+          "primary_source": "https://interlisp.org/history/timeline/",
+          "source_kind": "FIRSTHAND-HISTORICAL-RETROSPECTIVE"
         }
       ],
       "evidence_score": 2,
@@ -1807,30 +3011,6 @@
       "required_review": "PRIMARY-SOURCE-AND-SEMANTIC-LAW"
     },
     {
-      "semantic_name": "LENGTH",
-      "evidence": [
-        {
-          "source_path": "knowledge/d10-historical-lisp15-reconciliation-20261009.json",
-          "source_blob": "da6f108e4f8553a150f0abed8f3758944193c49a",
-          "research_branch": "research/d10-lisp15-appendix-reconcile-20261009",
-          "record_group": "rows",
-          "source_name": "LENGTH",
-          "source_status": "PARTIAL-OVERLAP-REVIEW-RESIDUAL-SEPARATELY",
-          "observable_law": "recursive algorithms over list/function basis",
-          "positive_witness": null,
-          "falsifier": null,
-          "primary_source": "LISP 1.5 manual",
-          "source_kind": null
-        }
-      ],
-      "evidence_score": 2,
-      "selection": "NOT-SELECTED",
-      "coordinate": null,
-      "ratified": false,
-      "physical_t5_authorized": false,
-      "required_review": "PRIMARY-SOURCE-AND-SEMANTIC-LAW"
-    },
-    {
       "semantic_name": "LOAD",
       "evidence": [
         {
@@ -1855,30 +3035,6 @@
       "required_review": "PRIMARY-SOURCE-AND-SEMANTIC-LAW"
     },
     {
-      "semantic_name": "LOGAND",
-      "evidence": [
-        {
-          "source_path": "knowledge/d10-historical-lisp15-reconciliation-20261009.json",
-          "source_blob": "da6f108e4f8553a150f0abed8f3758944193c49a",
-          "research_branch": "research/d10-lisp15-appendix-reconcile-20261009",
-          "record_group": "rows",
-          "source_name": "LOGAND",
-          "source_status": "PARTIAL-OVERLAP-REVIEW-RESIDUAL-SEPARATELY",
-          "observable_law": "fixed/floating and logical-word observations tied to machine carrier",
-          "positive_witness": null,
-          "falsifier": null,
-          "primary_source": "Memo 24, 1961; LISP 1.5 manual",
-          "source_kind": null
-        }
-      ],
-      "evidence_score": 2,
-      "selection": "NOT-SELECTED",
-      "coordinate": null,
-      "ratified": false,
-      "physical_t5_authorized": false,
-      "required_review": "PRIMARY-SOURCE-AND-SEMANTIC-LAW"
-    },
-    {
       "semantic_name": "LOGOR",
       "evidence": [
         {
@@ -1892,174 +3048,6 @@
           "positive_witness": null,
           "falsifier": null,
           "primary_source": "Memo 24, 1961; LISP 1.5 manual",
-          "source_kind": null
-        }
-      ],
-      "evidence_score": 2,
-      "selection": "NOT-SELECTED",
-      "coordinate": null,
-      "ratified": false,
-      "physical_t5_authorized": false,
-      "required_review": "PRIMARY-SOURCE-AND-SEMANTIC-LAW"
-    },
-    {
-      "semantic_name": "LOGXOR",
-      "evidence": [
-        {
-          "source_path": "knowledge/d10-historical-lisp15-reconciliation-20261009.json",
-          "source_blob": "da6f108e4f8553a150f0abed8f3758944193c49a",
-          "research_branch": "research/d10-lisp15-appendix-reconcile-20261009",
-          "record_group": "rows",
-          "source_name": "LOGXOR",
-          "source_status": "PARTIAL-OVERLAP-REVIEW-RESIDUAL-SEPARATELY",
-          "observable_law": "fixed/floating and logical-word observations tied to machine carrier",
-          "positive_witness": null,
-          "falsifier": null,
-          "primary_source": "Memo 24, 1961; LISP 1.5 manual",
-          "source_kind": null
-        }
-      ],
-      "evidence_score": 2,
-      "selection": "NOT-SELECTED",
-      "coordinate": null,
-      "ratified": false,
-      "physical_t5_authorized": false,
-      "required_review": "PRIMARY-SOURCE-AND-SEMANTIC-LAW"
-    },
-    {
-      "semantic_name": "MAKE-VECTOR",
-      "evidence": [
-        {
-          "source_path": "knowledge/d10-historical-lisp15-reconciliation-20261009.json",
-          "source_blob": "da6f108e4f8553a150f0abed8f3758944193c49a",
-          "research_branch": "research/d10-lisp15-appendix-reconcile-20261009",
-          "record_group": "rows",
-          "source_name": "MAKE-VECTOR",
-          "source_status": "EXACT-NAME-OVERLAP-NO-NEW-ROW",
-          "observable_law": "size constructor and extent observation",
-          "positive_witness": null,
-          "falsifier": null,
-          "primary_source": "current SENS vector API",
-          "source_kind": null
-        }
-      ],
-      "evidence_score": 2,
-      "selection": "NOT-SELECTED",
-      "coordinate": null,
-      "ratified": false,
-      "physical_t5_authorized": false,
-      "required_review": "PRIMARY-SOURCE-AND-SEMANTIC-LAW"
-    },
-    {
-      "semantic_name": "MAP",
-      "evidence": [
-        {
-          "source_path": "knowledge/d10-historical-lisp15-reconciliation-20261009.json",
-          "source_blob": "da6f108e4f8553a150f0abed8f3758944193c49a",
-          "research_branch": "research/d10-lisp15-appendix-reconcile-20261009",
-          "record_group": "rows",
-          "source_name": "MAP",
-          "source_status": "PARTIAL-OVERLAP-REVIEW-RESIDUAL-SEPARATELY",
-          "observable_law": "recursive algorithms over list/function basis",
-          "positive_witness": null,
-          "falsifier": null,
-          "primary_source": "LISP 1.5 manual",
-          "source_kind": null
-        }
-      ],
-      "evidence_score": 2,
-      "selection": "NOT-SELECTED",
-      "coordinate": null,
-      "ratified": false,
-      "physical_t5_authorized": false,
-      "required_review": "PRIMARY-SOURCE-AND-SEMANTIC-LAW"
-    },
-    {
-      "semantic_name": "MAPCON",
-      "evidence": [
-        {
-          "source_path": "knowledge/d10-historical-lisp15-reconciliation-20261009.json",
-          "source_blob": "da6f108e4f8553a150f0abed8f3758944193c49a",
-          "research_branch": "research/d10-lisp15-appendix-reconcile-20261009",
-          "record_group": "rows",
-          "source_name": "MAPCON",
-          "source_status": "PARTIAL-OVERLAP-REVIEW-RESIDUAL-SEPARATELY",
-          "observable_law": "destructive concatenation/deletion/mapping over mutable list structure",
-          "positive_witness": null,
-          "falsifier": null,
-          "primary_source": "LISP 1.5 Programmer's Manual, 1962, list-structure functions",
-          "source_kind": null
-        }
-      ],
-      "evidence_score": 2,
-      "selection": "NOT-SELECTED",
-      "coordinate": null,
-      "ratified": false,
-      "physical_t5_authorized": false,
-      "required_review": "PRIMARY-SOURCE-AND-SEMANTIC-LAW"
-    },
-    {
-      "semantic_name": "MAPLIST",
-      "evidence": [
-        {
-          "source_path": "knowledge/d10-historical-lisp15-reconciliation-20261009.json",
-          "source_blob": "da6f108e4f8553a150f0abed8f3758944193c49a",
-          "research_branch": "research/d10-lisp15-appendix-reconcile-20261009",
-          "record_group": "rows",
-          "source_name": "MAPLIST",
-          "source_status": "PARTIAL-OVERLAP-REVIEW-RESIDUAL-SEPARATELY",
-          "observable_law": "recursive algorithms over list/function basis",
-          "positive_witness": null,
-          "falsifier": null,
-          "primary_source": "LISP 1.5 manual",
-          "source_kind": null
-        }
-      ],
-      "evidence_score": 2,
-      "selection": "NOT-SELECTED",
-      "coordinate": null,
-      "ratified": false,
-      "physical_t5_authorized": false,
-      "required_review": "PRIMARY-SOURCE-AND-SEMANTIC-LAW"
-    },
-    {
-      "semantic_name": "MEMBER",
-      "evidence": [
-        {
-          "source_path": "knowledge/d10-historical-lisp15-reconciliation-20261009.json",
-          "source_blob": "da6f108e4f8553a150f0abed8f3758944193c49a",
-          "research_branch": "research/d10-lisp15-appendix-reconcile-20261009",
-          "record_group": "rows",
-          "source_name": "MEMBER",
-          "source_status": "PARTIAL-OVERLAP-REVIEW-RESIDUAL-SEPARATELY",
-          "observable_law": "recursive algorithms over list/function basis",
-          "positive_witness": null,
-          "falsifier": null,
-          "primary_source": "LISP 1.5 manual",
-          "source_kind": null
-        }
-      ],
-      "evidence_score": 2,
-      "selection": "NOT-SELECTED",
-      "coordinate": null,
-      "ratified": false,
-      "physical_t5_authorized": false,
-      "required_review": "PRIMARY-SOURCE-AND-SEMANTIC-LAW"
-    },
-    {
-      "semantic_name": "MINUSP",
-      "evidence": [
-        {
-          "source_path": "knowledge/d10-historical-lisp15-reconciliation-20261009.json",
-          "source_blob": "da6f108e4f8553a150f0abed8f3758944193c49a",
-          "research_branch": "research/d10-lisp15-appendix-reconcile-20261009",
-          "record_group": "rows",
-          "source_name": "MINUSP",
-          "source_status": "PARTIAL-OVERLAP-REVIEW-RESIDUAL-SEPARATELY",
-          "observable_law": "historical list/logical/numeric/control conveniences",
-          "positive_witness": null,
-          "falsifier": null,
-          "primary_source": "LISP I / LISP 1.5 manual lineage",
           "source_kind": null
         }
       ],
@@ -2109,6 +3097,30 @@
           "falsifier": null,
           "primary_source": "LISP 1.5 Programmer's Manual, 1962, list-structure functions",
           "source_kind": null
+        }
+      ],
+      "evidence_score": 2,
+      "selection": "NOT-SELECTED",
+      "coordinate": null,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "required_review": "PRIMARY-SOURCE-AND-SEMANTIC-LAW"
+    },
+    {
+      "semantic_name": "NEXPRP",
+      "evidence": [
+        {
+          "source_path": "knowledge/d10-interlisp-psl-history-harvest-v1.json",
+          "source_blob": "c862fc5d5fe45a0a01eb0115ec9f8e9b2553817d",
+          "research_branch": "research/d10-psl-interlisp-historical-20261009",
+          "record_group": "rows",
+          "source_name": "NEXPRP",
+          "source_status": "SELECT-D10-CANDIDATE",
+          "observable_law": "Test the defined nexpr kind, which receives evaluated arguments as one list",
+          "positive_witness": null,
+          "falsifier": null,
+          "primary_source": "https://manuals.plus/m/000ffa02fa9f17a7abece89bb6a08bd2e3330bef1b4947c7bfdb2bee1670c42b",
+          "source_kind": "HISTORICAL-REFERENCE-MANUAL"
         }
       ],
       "evidence_score": 2,
@@ -2191,30 +3203,6 @@
       "required_review": "PRIMARY-SOURCE-AND-SEMANTIC-LAW"
     },
     {
-      "semantic_name": "ONEP",
-      "evidence": [
-        {
-          "source_path": "knowledge/d10-historical-lisp15-reconciliation-20261009.json",
-          "source_blob": "da6f108e4f8553a150f0abed8f3758944193c49a",
-          "research_branch": "research/d10-lisp15-appendix-reconcile-20261009",
-          "record_group": "rows",
-          "source_name": "ONEP",
-          "source_status": "PARTIAL-OVERLAP-REVIEW-RESIDUAL-SEPARATELY",
-          "observable_law": "historical list/logical/numeric/control conveniences",
-          "positive_witness": null,
-          "falsifier": null,
-          "primary_source": "LISP I / LISP 1.5 manual lineage",
-          "source_kind": null
-        }
-      ],
-      "evidence_score": 2,
-      "selection": "NOT-SELECTED",
-      "coordinate": null,
-      "ratified": false,
-      "physical_t5_authorized": false,
-      "required_review": "PRIMARY-SOURCE-AND-SEMANTIC-LAW"
-    },
-    {
       "semantic_name": "OPCHAR",
       "evidence": [
         {
@@ -2263,30 +3251,6 @@
       "required_review": "PRIMARY-SOURCE-AND-SEMANTIC-LAW"
     },
     {
-      "semantic_name": "OR",
-      "evidence": [
-        {
-          "source_path": "knowledge/d10-historical-lisp15-reconciliation-20261009.json",
-          "source_blob": "da6f108e4f8553a150f0abed8f3758944193c49a",
-          "research_branch": "research/d10-lisp15-appendix-reconcile-20261009",
-          "record_group": "rows",
-          "source_name": "OR",
-          "source_status": "PARTIAL-OVERLAP-REVIEW-RESIDUAL-SEPARATELY",
-          "observable_law": "historical list/logical/numeric/control conveniences",
-          "positive_witness": null,
-          "falsifier": null,
-          "primary_source": "LISP I / LISP 1.5 manual lineage",
-          "source_kind": null
-        }
-      ],
-      "evidence_score": 2,
-      "selection": "NOT-SELECTED",
-      "coordinate": null,
-      "ratified": false,
-      "physical_t5_authorized": false,
-      "required_review": "PRIMARY-SOURCE-AND-SEMANTIC-LAW"
-    },
-    {
       "semantic_name": "PACK",
       "evidence": [
         {
@@ -2300,30 +3264,6 @@
           "positive_witness": null,
           "falsifier": null,
           "primary_source": "character handling / LISP 1.5 Appendix F",
-          "source_kind": null
-        }
-      ],
-      "evidence_score": 2,
-      "selection": "NOT-SELECTED",
-      "coordinate": null,
-      "ratified": false,
-      "physical_t5_authorized": false,
-      "required_review": "PRIMARY-SOURCE-AND-SEMANTIC-LAW"
-    },
-    {
-      "semantic_name": "PAIR",
-      "evidence": [
-        {
-          "source_path": "knowledge/d10-historical-lisp15-reconciliation-20261009.json",
-          "source_blob": "da6f108e4f8553a150f0abed8f3758944193c49a",
-          "research_branch": "research/d10-lisp15-appendix-reconcile-20261009",
-          "record_group": "rows",
-          "source_name": "PAIR",
-          "source_status": "PARTIAL-OVERLAP-REVIEW-RESIDUAL-SEPARATELY",
-          "observable_law": "historical list/logical/numeric/control conveniences",
-          "positive_witness": null,
-          "falsifier": null,
-          "primary_source": "LISP I / LISP 1.5 manual lineage",
           "source_kind": null
         }
       ],
@@ -2359,78 +3299,6 @@
       "required_review": "PRIMARY-SOURCE-AND-SEMANTIC-LAW"
     },
     {
-      "semantic_name": "PRIN1",
-      "evidence": [
-        {
-          "source_path": "knowledge/d10-historical-lisp15-reconciliation-20261009.json",
-          "source_blob": "da6f108e4f8553a150f0abed8f3758944193c49a",
-          "research_branch": "research/d10-lisp15-appendix-reconcile-20261009",
-          "record_group": "rows",
-          "source_name": "PRIN1",
-          "source_status": "PARTIAL-OVERLAP-REVIEW-RESIDUAL-SEPARATELY",
-          "observable_law": "console/card/punch/assembly I/O and transcript effects",
-          "positive_witness": null,
-          "falsifier": null,
-          "primary_source": "LISP 1.5 manual 1962",
-          "source_kind": null
-        }
-      ],
-      "evidence_score": 2,
-      "selection": "NOT-SELECTED",
-      "coordinate": null,
-      "ratified": false,
-      "physical_t5_authorized": false,
-      "required_review": "PRIMARY-SOURCE-AND-SEMANTIC-LAW"
-    },
-    {
-      "semantic_name": "PRINC",
-      "evidence": [
-        {
-          "source_path": "knowledge/d10-historical-lisp15-reconciliation-20261009.json",
-          "source_blob": "da6f108e4f8553a150f0abed8f3758944193c49a",
-          "research_branch": "research/d10-lisp15-appendix-reconcile-20261009",
-          "record_group": "rows",
-          "source_name": "PRINC",
-          "source_status": "PARTIAL-OVERLAP-REVIEW-RESIDUAL-SEPARATELY",
-          "observable_law": "console/card/punch/assembly I/O and transcript effects",
-          "positive_witness": null,
-          "falsifier": null,
-          "primary_source": "LISP 1.5 manual 1962",
-          "source_kind": null
-        }
-      ],
-      "evidence_score": 2,
-      "selection": "NOT-SELECTED",
-      "coordinate": null,
-      "ratified": false,
-      "physical_t5_authorized": false,
-      "required_review": "PRIMARY-SOURCE-AND-SEMANTIC-LAW"
-    },
-    {
-      "semantic_name": "PRINT",
-      "evidence": [
-        {
-          "source_path": "knowledge/d10-historical-lisp15-reconciliation-20261009.json",
-          "source_blob": "da6f108e4f8553a150f0abed8f3758944193c49a",
-          "research_branch": "research/d10-lisp15-appendix-reconcile-20261009",
-          "record_group": "rows",
-          "source_name": "PRINT",
-          "source_status": "PARTIAL-OVERLAP-REVIEW-RESIDUAL-SEPARATELY",
-          "observable_law": "console/card/punch/assembly I/O and transcript effects",
-          "positive_witness": null,
-          "falsifier": null,
-          "primary_source": "LISP 1.5 manual 1962",
-          "source_kind": null
-        }
-      ],
-      "evidence_score": 2,
-      "selection": "NOT-SELECTED",
-      "coordinate": null,
-      "ratified": false,
-      "physical_t5_authorized": false,
-      "required_review": "PRIMARY-SOURCE-AND-SEMANTIC-LAW"
-    },
-    {
       "semantic_name": "PRINTPROP",
       "evidence": [
         {
@@ -2444,30 +3312,6 @@
           "positive_witness": null,
           "falsifier": null,
           "primary_source": "LISP 1.5 manual 1962 property-list system",
-          "source_kind": null
-        }
-      ],
-      "evidence_score": 2,
-      "selection": "NOT-SELECTED",
-      "coordinate": null,
-      "ratified": false,
-      "physical_t5_authorized": false,
-      "required_review": "PRIMARY-SOURCE-AND-SEMANTIC-LAW"
-    },
-    {
-      "semantic_name": "PROG2",
-      "evidence": [
-        {
-          "source_path": "knowledge/d10-historical-lisp15-reconciliation-20261009.json",
-          "source_blob": "da6f108e4f8553a150f0abed8f3758944193c49a",
-          "research_branch": "research/d10-lisp15-appendix-reconcile-20261009",
-          "record_group": "rows",
-          "source_name": "PROG2",
-          "source_status": "PARTIAL-OVERLAP-REVIEW-RESIDUAL-SEPARATELY",
-          "observable_law": "historical list/logical/numeric/control conveniences",
-          "positive_witness": null,
-          "falsifier": null,
-          "primary_source": "LISP I / LISP 1.5 manual lineage",
           "source_kind": null
         }
       ],
@@ -2575,20 +3419,20 @@
       "required_review": "PRIMARY-SOURCE-AND-SEMANTIC-LAW"
     },
     {
-      "semantic_name": "READ",
+      "semantic_name": "PUTD",
       "evidence": [
         {
-          "source_path": "knowledge/d10-historical-lisp15-reconciliation-20261009.json",
-          "source_blob": "da6f108e4f8553a150f0abed8f3758944193c49a",
-          "research_branch": "research/d10-lisp15-appendix-reconcile-20261009",
+          "source_path": "knowledge/d10-interlisp-psl-history-harvest-v1.json",
+          "source_blob": "c862fc5d5fe45a0a01eb0115ec9f8e9b2553817d",
+          "research_branch": "research/d10-psl-interlisp-historical-20261009",
           "record_group": "rows",
-          "source_name": "READ",
-          "source_status": "EXACT-NAME-OVERLAP-NO-NEW-ROW",
-          "observable_law": "one-argument current SENS path parses one textual form to structural datum without evaluating it",
+          "source_name": "PUTD",
+          "source_status": "SELECT-D10-CANDIDATE",
+          "observable_law": "Install a typed function body under a named function identity, with language-level redefinition semantics",
           "positive_witness": null,
           "falsifier": null,
-          "primary_source": "early LISP read lineage; LISP 1.5 manual 1962",
-          "source_kind": null
+          "primary_source": "https://manuals.plus/m/000ffa02fa9f17a7abece89bb6a08bd2e3330bef1b4947c7bfdb2bee1670c42b",
+          "source_kind": "HISTORICAL-REFERENCE-MANUAL"
         }
       ],
       "evidence_score": 2,
@@ -2671,6 +3515,30 @@
       "required_review": "PRIMARY-SOURCE-AND-SEMANTIC-LAW"
     },
     {
+      "semantic_name": "REMD",
+      "evidence": [
+        {
+          "source_path": "knowledge/d10-interlisp-psl-history-harvest-v1.json",
+          "source_blob": "c862fc5d5fe45a0a01eb0115ec9f8e9b2553817d",
+          "research_branch": "research/d10-psl-interlisp-historical-20261009",
+          "record_group": "rows",
+          "source_name": "REMD",
+          "source_status": "SELECT-D10-CANDIDATE",
+          "observable_law": "Remove a named function definition and return its previous type-and-body pair or empty when absent",
+          "positive_witness": null,
+          "falsifier": null,
+          "primary_source": "https://manuals.plus/m/000ffa02fa9f17a7abece89bb6a08bd2e3330bef1b4947c7bfdb2bee1670c42b",
+          "source_kind": "HISTORICAL-REFERENCE-MANUAL"
+        }
+      ],
+      "evidence_score": 2,
+      "selection": "NOT-SELECTED",
+      "coordinate": null,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "required_review": "PRIMARY-SOURCE-AND-SEMANTIC-LAW"
+    },
+    {
       "semantic_name": "REMFLAG",
       "evidence": [
         {
@@ -2684,78 +3552,6 @@
           "positive_witness": null,
           "falsifier": null,
           "primary_source": "LISP 1.5 manual 1962 property-list system",
-          "source_kind": null
-        }
-      ],
-      "evidence_score": 2,
-      "selection": "NOT-SELECTED",
-      "coordinate": null,
-      "ratified": false,
-      "physical_t5_authorized": false,
-      "required_review": "PRIMARY-SOURCE-AND-SEMANTIC-LAW"
-    },
-    {
-      "semantic_name": "REVERSE",
-      "evidence": [
-        {
-          "source_path": "knowledge/d10-historical-lisp15-reconciliation-20261009.json",
-          "source_blob": "da6f108e4f8553a150f0abed8f3758944193c49a",
-          "research_branch": "research/d10-lisp15-appendix-reconcile-20261009",
-          "record_group": "rows",
-          "source_name": "REVERSE",
-          "source_status": "PARTIAL-OVERLAP-REVIEW-RESIDUAL-SEPARATELY",
-          "observable_law": "recursive algorithms over list/function basis",
-          "positive_witness": null,
-          "falsifier": null,
-          "primary_source": "LISP 1.5 manual",
-          "source_kind": null
-        }
-      ],
-      "evidence_score": 2,
-      "selection": "NOT-SELECTED",
-      "coordinate": null,
-      "ratified": false,
-      "physical_t5_authorized": false,
-      "required_review": "PRIMARY-SOURCE-AND-SEMANTIC-LAW"
-    },
-    {
-      "semantic_name": "RPLACA",
-      "evidence": [
-        {
-          "source_path": "knowledge/d10-historical-lisp15-reconciliation-20261009.json",
-          "source_blob": "da6f108e4f8553a150f0abed8f3758944193c49a",
-          "research_branch": "research/d10-lisp15-appendix-reconcile-20261009",
-          "record_group": "rows",
-          "source_name": "RPLACA",
-          "source_status": "EXACT-NAME-OVERLAP-NO-NEW-ROW",
-          "observable_law": "mutate CAR/CDR field of an existing pair; aliases observe mutation",
-          "positive_witness": null,
-          "falsifier": null,
-          "primary_source": "LISP 1.5 Programmer's Manual, 1962, §7.4",
-          "source_kind": null
-        }
-      ],
-      "evidence_score": 2,
-      "selection": "NOT-SELECTED",
-      "coordinate": null,
-      "ratified": false,
-      "physical_t5_authorized": false,
-      "required_review": "PRIMARY-SOURCE-AND-SEMANTIC-LAW"
-    },
-    {
-      "semantic_name": "RPLACD",
-      "evidence": [
-        {
-          "source_path": "knowledge/d10-historical-lisp15-reconciliation-20261009.json",
-          "source_blob": "da6f108e4f8553a150f0abed8f3758944193c49a",
-          "research_branch": "research/d10-lisp15-appendix-reconcile-20261009",
-          "record_group": "rows",
-          "source_name": "RPLACD",
-          "source_status": "EXACT-NAME-OVERLAP-NO-NEW-ROW",
-          "observable_law": "mutate CAR/CDR field of an existing pair; aliases observe mutation",
-          "positive_witness": null,
-          "falsifier": null,
-          "primary_source": "LISP 1.5 Programmer's Manual, 1962, §7.4",
           "source_kind": null
         }
       ],
@@ -2804,30 +3600,6 @@
           "positive_witness": null,
           "falsifier": null,
           "primary_source": "LISP 1.5 system/manual",
-          "source_kind": null
-        }
-      ],
-      "evidence_score": 2,
-      "selection": "NOT-SELECTED",
-      "coordinate": null,
-      "ratified": false,
-      "physical_t5_authorized": false,
-      "required_review": "PRIMARY-SOURCE-AND-SEMANTIC-LAW"
-    },
-    {
-      "semantic_name": "SPECIAL",
-      "evidence": [
-        {
-          "source_path": "knowledge/d10-historical-lisp15-reconciliation-20261009.json",
-          "source_blob": "da6f108e4f8553a150f0abed8f3758944193c49a",
-          "research_branch": "research/d10-lisp15-appendix-reconcile-20261009",
-          "record_group": "rows",
-          "source_name": "SPECIAL",
-          "source_status": "PARTIAL-OVERLAP-REVIEW-RESIDUAL-SEPARATELY",
-          "observable_law": "fixed SPECIAL cell used for dynamically visible free-variable communication; bind saves/restores prior value",
-          "positive_witness": null,
-          "falsifier": null,
-          "primary_source": "LISP 1.5 compiler/manual 1962",
           "source_kind": null
         }
       ],
@@ -2901,43 +3673,6 @@
           "falsifier": null,
           "primary_source": "LISP 1.5 system/manual",
           "source_kind": null
-        }
-      ],
-      "evidence_score": 2,
-      "selection": "NOT-SELECTED",
-      "coordinate": null,
-      "ratified": false,
-      "physical_t5_authorized": false,
-      "required_review": "PRIMARY-SOURCE-AND-SEMANTIC-LAW"
-    },
-    {
-      "semantic_name": "TERPRI",
-      "evidence": [
-        {
-          "source_path": "knowledge/d10-historical-lisp15-reconciliation-20261009.json",
-          "source_blob": "da6f108e4f8553a150f0abed8f3758944193c49a",
-          "research_branch": "research/d10-lisp15-appendix-reconcile-20261009",
-          "record_group": "rows",
-          "source_name": "TERPRI",
-          "source_status": "PARTIAL-OVERLAP-REVIEW-RESIDUAL-SEPARATELY",
-          "observable_law": "console/card/punch/assembly I/O and transcript effects",
-          "positive_witness": null,
-          "falsifier": null,
-          "primary_source": "LISP 1.5 manual 1962",
-          "source_kind": null
-        },
-        {
-          "source_path": "knowledge/d10-clhs-streams-census-20261009.json",
-          "source_blob": "4c39efaf558dd654272a690e6a01c0ae1c1b262f",
-          "research_branch": "research/d10-clhs-streams-census-20261009",
-          "record_group": "rows",
-          "source_name": "TERPRI",
-          "source_status": "HISTORICAL-REVIEW",
-          "observable_law": null,
-          "positive_witness": null,
-          "falsifier": null,
-          "primary_source": null,
-          "source_kind": "function"
         }
       ],
       "evidence_score": 2,
@@ -3068,6 +3803,54 @@
       "required_review": "PRIMARY-SOURCE-AND-SEMANTIC-LAW"
     },
     {
+      "semantic_name": "UNDO",
+      "evidence": [
+        {
+          "source_path": "knowledge/d10-interlisp-psl-history-harvest-v1.json",
+          "source_blob": "c862fc5d5fe45a0a01eb0115ec9f8e9b2553817d",
+          "research_branch": "research/d10-psl-interlisp-historical-20261009",
+          "record_group": "rows",
+          "source_name": "UNDO",
+          "source_status": "SELECT-D10-CANDIDATE",
+          "observable_law": "Undo a selected recorded interactive operation without forcibly undoing intervening history events",
+          "positive_witness": null,
+          "falsifier": null,
+          "primary_source": "https://interlisp.org/history/timeline/",
+          "source_kind": "FIRSTHAND-HISTORICAL-RETROSPECTIVE"
+        }
+      ],
+      "evidence_score": 2,
+      "selection": "NOT-SELECTED",
+      "coordinate": null,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "required_review": "PRIMARY-SOURCE-AND-SEMANTIC-LAW"
+    },
+    {
+      "semantic_name": "UNFLUID",
+      "evidence": [
+        {
+          "source_path": "knowledge/d10-interlisp-psl-history-harvest-v1.json",
+          "source_blob": "c862fc5d5fe45a0a01eb0115ec9f8e9b2553817d",
+          "research_branch": "research/d10-psl-interlisp-historical-20261009",
+          "record_group": "rows",
+          "source_name": "UNFLUID",
+          "source_status": "SELECT-D10-CANDIDATE",
+          "observable_law": "Remove FLUID declarations for listed identifiers while preserving other declarations",
+          "positive_witness": null,
+          "falsifier": null,
+          "primary_source": "https://manuals.plus/m/000ffa02fa9f17a7abece89bb6a08bd2e3330bef1b4947c7bfdb2bee1670c42b",
+          "source_kind": "HISTORICAL-REFERENCE-MANUAL"
+        }
+      ],
+      "evidence_score": 2,
+      "selection": "NOT-SELECTED",
+      "coordinate": null,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "required_review": "PRIMARY-SOURCE-AND-SEMANTIC-LAW"
+    },
+    {
       "semantic_name": "UNPACK",
       "evidence": [
         {
@@ -3164,23 +3947,23 @@
       "required_review": "PRIMARY-SOURCE-AND-SEMANTIC-LAW"
     },
     {
-      "semantic_name": "VECTOR",
+      "semantic_name": "BIT-VECTOR-P",
       "evidence": [
         {
-          "source_path": "knowledge/d10-historical-lisp15-reconciliation-20261009.json",
-          "source_blob": "da6f108e4f8553a150f0abed8f3758944193c49a",
-          "research_branch": "research/d10-lisp15-appendix-reconcile-20261009",
+          "source_path": "knowledge/d10-crossrepo-lisp-koans-v1.json",
+          "source_blob": "4a45760e93d4fb3f4d9e33914cf44f314d0a30b4",
+          "research_branch": "research/d10-crossrepo-lisp-koans-1",
           "record_group": "rows",
-          "source_name": "VECTOR",
-          "source_status": "PARTIAL-OVERLAP-REVIEW-RESIDUAL-SEPARATELY",
-          "observable_law": "construct finite indexed aggregate",
+          "source_name": "BIT-VECTOR-P",
+          "source_status": "SELECT-D10-CANDIDATE",
+          "observable_law": "test whether a value is a bit-vector",
           "positive_witness": null,
           "falsifier": null,
-          "primary_source": "LISP 1.5 ARRAY; current SENS VECTOR",
+          "primary_source": null,
           "source_kind": null
         }
       ],
-      "evidence_score": 2,
+      "evidence_score": 1,
       "selection": "NOT-SELECTED",
       "coordinate": null,
       "ratified": false,
@@ -3188,23 +3971,23 @@
       "required_review": "PRIMARY-SOURCE-AND-SEMANTIC-LAW"
     },
     {
-      "semantic_name": "VECTOR-LENGTH",
+      "semantic_name": "BLOCK",
       "evidence": [
         {
-          "source_path": "knowledge/d10-historical-lisp15-reconciliation-20261009.json",
-          "source_blob": "da6f108e4f8553a150f0abed8f3758944193c49a",
-          "research_branch": "research/d10-lisp15-appendix-reconcile-20261009",
+          "source_path": "knowledge/d10-crossrepo-lisp-koans-v1.json",
+          "source_blob": "4a45760e93d4fb3f4d9e33914cf44f314d0a30b4",
+          "research_branch": "research/d10-crossrepo-lisp-koans-1",
           "record_group": "rows",
-          "source_name": "VECTOR-LENGTH",
-          "source_status": "EXACT-NAME-OVERLAP-NO-NEW-ROW",
-          "observable_law": "size constructor and extent observation",
+          "source_name": "BLOCK",
+          "source_status": "SELECT-D10-CANDIDATE",
+          "observable_law": "establish a named lexical return target around a body",
           "positive_witness": null,
           "falsifier": null,
-          "primary_source": "current SENS vector API",
+          "primary_source": null,
           "source_kind": null
         }
       ],
-      "evidence_score": 2,
+      "evidence_score": 1,
       "selection": "NOT-SELECTED",
       "coordinate": null,
       "ratified": false,
@@ -3212,23 +3995,23 @@
       "required_review": "PRIMARY-SOURCE-AND-SEMANTIC-LAW"
     },
     {
-      "semantic_name": "VECTOR-REF",
+      "semantic_name": "CALL-WITH-VALUES",
       "evidence": [
         {
-          "source_path": "knowledge/d10-historical-lisp15-reconciliation-20261009.json",
-          "source_blob": "da6f108e4f8553a150f0abed8f3758944193c49a",
-          "research_branch": "research/d10-lisp15-appendix-reconcile-20261009",
+          "source_path": "knowledge/d10-crossrepo-golisp-pascal-v1.json",
+          "source_blob": "4914c152a03d78de926943f605992f88c2c0e0d6",
+          "research_branch": "research/d10-crossrepo-golisp-pascal-1",
           "record_group": "rows",
-          "source_name": "VECTOR-REF",
-          "source_status": "EXACT-NAME-OVERLAP-NO-NEW-ROW",
-          "observable_law": "observe cell by numeric index",
+          "source_name": "CALL-WITH-VALUES",
+          "source_status": "SELECT-D10-CANDIDATE",
+          "observable_law": "call a zero-argument producer and pass all values it returns as arguments to a consumer, treating a single ordinary result as one value",
           "positive_witness": null,
           "falsifier": null,
-          "primary_source": "historical ARRAY indexed access; current SENS surface",
+          "primary_source": null,
           "source_kind": null
         }
       ],
-      "evidence_score": 2,
+      "evidence_score": 1,
       "selection": "NOT-SELECTED",
       "coordinate": null,
       "ratified": false,
@@ -3236,23 +4019,23 @@
       "required_review": "PRIMARY-SOURCE-AND-SEMANTIC-LAW"
     },
     {
-      "semantic_name": "VECTOR-SET!",
+      "semantic_name": "CAPTURE-ENVIRONMENT",
       "evidence": [
         {
-          "source_path": "knowledge/d10-historical-lisp15-reconciliation-20261009.json",
-          "source_blob": "da6f108e4f8553a150f0abed8f3758944193c49a",
-          "research_branch": "research/d10-lisp15-appendix-reconcile-20261009",
+          "source_path": "knowledge/d10-crossrepo-golisp-pascal-v1.json",
+          "source_blob": "4914c152a03d78de926943f605992f88c2c0e0d6",
+          "research_branch": "research/d10-crossrepo-golisp-pascal-1",
           "record_group": "rows",
-          "source_name": "VECTOR-SET!",
-          "source_status": "EXACT-NAME-OVERLAP-NO-NEW-ROW",
-          "observable_law": "alias-visible in-place indexed update",
+          "source_name": "CAPTURE-ENVIRONMENT",
+          "source_status": "SELECT-D10-CANDIDATE",
+          "observable_law": "construct a new environment value whose parent is the supplied environment, preserving that binding context as an explicit language value",
           "positive_witness": null,
           "falsifier": null,
-          "primary_source": "historical mutable ARRAY; current SENS surface",
+          "primary_source": null,
           "source_kind": null
         }
       ],
-      "evidence_score": 2,
+      "evidence_score": 1,
       "selection": "NOT-SELECTED",
       "coordinate": null,
       "ratified": false,
@@ -3260,23 +4043,1439 @@
       "required_review": "PRIMARY-SOURCE-AND-SEMANTIC-LAW"
     },
     {
-      "semantic_name": "WRITE-TO-STRING",
+      "semantic_name": "CHANNEL-RECEIVE",
       "evidence": [
         {
-          "source_path": "knowledge/d10-historical-lisp15-reconciliation-20261009.json",
-          "source_blob": "da6f108e4f8553a150f0abed8f3758944193c49a",
-          "research_branch": "research/d10-lisp15-appendix-reconcile-20261009",
+          "source_path": "knowledge/d10-crossrepo-golisp-pascal-v1.json",
+          "source_blob": "4914c152a03d78de926943f605992f88c2c0e0d6",
+          "research_branch": "research/d10-crossrepo-golisp-pascal-1",
           "record_group": "rows",
-          "source_name": "WRITE-TO-STRING",
-          "source_status": "EXACT-NAME-OVERLAP-NO-NEW-ROW",
-          "observable_law": "canonical structural serialization to text",
+          "source_name": "CHANNEL-RECEIVE",
+          "source_status": "SELECT-D10-CANDIDATE",
+          "observable_law": "receive one language value from an abstract channel according to its synchronization law",
           "positive_witness": null,
           "falsifier": null,
-          "primary_source": "current SENS canonical serializer; historical print/read lineage",
+          "primary_source": null,
           "source_kind": null
         }
       ],
-      "evidence_score": 2,
+      "evidence_score": 1,
+      "selection": "NOT-SELECTED",
+      "coordinate": null,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "required_review": "PRIMARY-SOURCE-AND-SEMANTIC-LAW"
+    },
+    {
+      "semantic_name": "CHANNEL-SEND",
+      "evidence": [
+        {
+          "source_path": "knowledge/d10-crossrepo-golisp-pascal-v1.json",
+          "source_blob": "4914c152a03d78de926943f605992f88c2c0e0d6",
+          "research_branch": "research/d10-crossrepo-golisp-pascal-1",
+          "record_group": "rows",
+          "source_name": "CHANNEL-SEND",
+          "source_status": "SELECT-D10-CANDIDATE",
+          "observable_law": "send one language value through an abstract channel according to its synchronization law",
+          "positive_witness": null,
+          "falsifier": null,
+          "primary_source": null,
+          "source_kind": null
+        }
+      ],
+      "evidence_score": 1,
+      "selection": "NOT-SELECTED",
+      "coordinate": null,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "required_review": "PRIMARY-SOURCE-AND-SEMANTIC-LAW"
+    },
+    {
+      "semantic_name": "CHARACTERP",
+      "evidence": [
+        {
+          "source_path": "knowledge/d10-crossrepo-lisp-koans-v1.json",
+          "source_blob": "4a45760e93d4fb3f4d9e33914cf44f314d0a30b4",
+          "research_branch": "research/d10-crossrepo-lisp-koans-1",
+          "record_group": "rows",
+          "source_name": "CHARACTERP",
+          "source_status": "SELECT-D10-CANDIDATE",
+          "observable_law": "test whether a value is a character",
+          "positive_witness": null,
+          "falsifier": null,
+          "primary_source": null,
+          "source_kind": null
+        }
+      ],
+      "evidence_score": 1,
+      "selection": "NOT-SELECTED",
+      "coordinate": null,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "required_review": "PRIMARY-SOURCE-AND-SEMANTIC-LAW"
+    },
+    {
+      "semantic_name": "CHECK-TYPE",
+      "evidence": [
+        {
+          "source_path": "knowledge/d10-crossrepo-lisp-koans-v1.json",
+          "source_blob": "4a45760e93d4fb3f4d9e33914cf44f314d0a30b4",
+          "research_branch": "research/d10-crossrepo-lisp-koans-1",
+          "record_group": "rows",
+          "source_name": "CHECK-TYPE",
+          "source_status": "SELECT-D10-CANDIDATE",
+          "observable_law": "verify a value/place satisfies a type specifier and signal a typed error when it does not",
+          "positive_witness": null,
+          "falsifier": null,
+          "primary_source": null,
+          "source_kind": null
+        }
+      ],
+      "evidence_score": 1,
+      "selection": "NOT-SELECTED",
+      "coordinate": null,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "required_review": "PRIMARY-SOURCE-AND-SEMANTIC-LAW"
+    },
+    {
+      "semantic_name": "COERCE",
+      "evidence": [
+        {
+          "source_path": "knowledge/d10-crossrepo-lisp-koans-v1.json",
+          "source_blob": "4a45760e93d4fb3f4d9e33914cf44f314d0a30b4",
+          "research_branch": "research/d10-crossrepo-lisp-koans-1",
+          "record_group": "rows",
+          "source_name": "COERCE",
+          "source_status": "SELECT-D10-CANDIDATE",
+          "observable_law": "convert a value to a requested representable target type according to language coercion rules",
+          "positive_witness": null,
+          "falsifier": null,
+          "primary_source": null,
+          "source_kind": null
+        }
+      ],
+      "evidence_score": 1,
+      "selection": "NOT-SELECTED",
+      "coordinate": null,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "required_review": "PRIMARY-SOURCE-AND-SEMANTIC-LAW"
+    },
+    {
+      "semantic_name": "CONCATENATE",
+      "evidence": [
+        {
+          "source_path": "knowledge/d10-crossrepo-lisp-koans-v1.json",
+          "source_blob": "4a45760e93d4fb3f4d9e33914cf44f314d0a30b4",
+          "research_branch": "research/d10-crossrepo-lisp-koans-1",
+          "record_group": "rows",
+          "source_name": "CONCATENATE",
+          "source_status": "SELECT-D10-CANDIDATE",
+          "observable_law": "concatenate multiple sequences into a result sequence of an explicitly requested type",
+          "positive_witness": null,
+          "falsifier": null,
+          "primary_source": null,
+          "source_kind": null
+        }
+      ],
+      "evidence_score": 1,
+      "selection": "NOT-SELECTED",
+      "coordinate": null,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "required_review": "PRIMARY-SOURCE-AND-SEMANTIC-LAW"
+    },
+    {
+      "semantic_name": "DEFCLASS",
+      "evidence": [
+        {
+          "source_path": "knowledge/d10-crossrepo-lisp-koans-v1.json",
+          "source_blob": "4a45760e93d4fb3f4d9e33914cf44f314d0a30b4",
+          "research_branch": "research/d10-crossrepo-lisp-koans-1",
+          "record_group": "rows",
+          "source_name": "DEFCLASS",
+          "source_status": "SELECT-D10-CANDIDATE",
+          "observable_law": "define a named class with superclasses, slots and slot options",
+          "positive_witness": null,
+          "falsifier": null,
+          "primary_source": null,
+          "source_kind": null
+        }
+      ],
+      "evidence_score": 1,
+      "selection": "NOT-SELECTED",
+      "coordinate": null,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "required_review": "PRIMARY-SOURCE-AND-SEMANTIC-LAW"
+    },
+    {
+      "semantic_name": "DEFGENERIC",
+      "evidence": [
+        {
+          "source_path": "knowledge/d10-crossrepo-lisp-koans-v1.json",
+          "source_blob": "4a45760e93d4fb3f4d9e33914cf44f314d0a30b4",
+          "research_branch": "research/d10-crossrepo-lisp-koans-1",
+          "record_group": "rows",
+          "source_name": "DEFGENERIC",
+          "source_status": "SELECT-D10-CANDIDATE",
+          "observable_law": "define a named generic function and its dispatch interface",
+          "positive_witness": null,
+          "falsifier": null,
+          "primary_source": null,
+          "source_kind": null
+        }
+      ],
+      "evidence_score": 1,
+      "selection": "NOT-SELECTED",
+      "coordinate": null,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "required_review": "PRIMARY-SOURCE-AND-SEMANTIC-LAW"
+    },
+    {
+      "semantic_name": "DEFINE-CUSTOM-TYPE",
+      "evidence": [
+        {
+          "source_path": "knowledge/d10-crossrepo-golisp-pascal-v1.json",
+          "source_blob": "4914c152a03d78de926943f605992f88c2c0e0d6",
+          "research_branch": "research/d10-crossrepo-golisp-pascal-1",
+          "record_group": "rows",
+          "source_name": "DEFINE-CUSTOM-TYPE",
+          "source_status": "SELECT-D10-CANDIDATE",
+          "observable_law": "define a named custom wrapper protocol that exposes constructor, accessor and mutation operations for values of the new type",
+          "positive_witness": null,
+          "falsifier": null,
+          "primary_source": null,
+          "source_kind": null
+        }
+      ],
+      "evidence_score": 1,
+      "selection": "NOT-SELECTED",
+      "coordinate": null,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "required_review": "PRIMARY-SOURCE-AND-SEMANTIC-LAW"
+    },
+    {
+      "semantic_name": "DEFMETHOD",
+      "evidence": [
+        {
+          "source_path": "knowledge/d10-crossrepo-lisp-koans-v1.json",
+          "source_blob": "4a45760e93d4fb3f4d9e33914cf44f314d0a30b4",
+          "research_branch": "research/d10-crossrepo-lisp-koans-1",
+          "record_group": "rows",
+          "source_name": "DEFMETHOD",
+          "source_status": "SELECT-D10-CANDIDATE",
+          "observable_law": "define a specialized method attached to a generic function",
+          "positive_witness": null,
+          "falsifier": null,
+          "primary_source": null,
+          "source_kind": null
+        }
+      ],
+      "evidence_score": 1,
+      "selection": "NOT-SELECTED",
+      "coordinate": null,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "required_review": "PRIMARY-SOURCE-AND-SEMANTIC-LAW"
+    },
+    {
+      "semantic_name": "DEREF",
+      "evidence": [
+        {
+          "source_path": "knowledge/d10-crossrepo-mal-v1.json",
+          "source_blob": "f0a432a28de471efde8d59106670ef79f4c2082c",
+          "research_branch": "research/d10-crossrepo-mal-1",
+          "record_group": "rows",
+          "source_name": "DEREF",
+          "source_status": "SELECT-D10-CANDIDATE",
+          "observable_law": "read the current value stored in a mutable reference cell",
+          "positive_witness": null,
+          "falsifier": null,
+          "primary_source": null,
+          "source_kind": null
+        }
+      ],
+      "evidence_score": 1,
+      "selection": "NOT-SELECTED",
+      "coordinate": null,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "required_review": "PRIMARY-SOURCE-AND-SEMANTIC-LAW"
+    },
+    {
+      "semantic_name": "DESTRUCTURING-BIND",
+      "evidence": [
+        {
+          "source_path": "knowledge/d10-crossrepo-lisp-koans-v1.json",
+          "source_blob": "4a45760e93d4fb3f4d9e33914cf44f314d0a30b4",
+          "research_branch": "research/d10-crossrepo-lisp-koans-1",
+          "record_group": "rows",
+          "source_name": "DESTRUCTURING-BIND",
+          "source_status": "SELECT-D10-CANDIDATE",
+          "observable_law": "bind variables by destructuring a value according to a lambda-list shaped pattern",
+          "positive_witness": null,
+          "falsifier": null,
+          "primary_source": null,
+          "source_kind": null
+        }
+      ],
+      "evidence_score": 1,
+      "selection": "NOT-SELECTED",
+      "coordinate": null,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "required_review": "PRIMARY-SOURCE-AND-SEMANTIC-LAW"
+    },
+    {
+      "semantic_name": "EOF-OBJECT?",
+      "evidence": [
+        {
+          "source_path": "knowledge/d10-crossrepo-golisp-pascal-v1.json",
+          "source_blob": "4914c152a03d78de926943f605992f88c2c0e0d6",
+          "research_branch": "research/d10-crossrepo-golisp-pascal-1",
+          "record_group": "rows",
+          "source_name": "EOF-OBJECT?",
+          "source_status": "SELECT-D10-CANDIDATE",
+          "observable_law": "test whether a value is the distinguished end-of-input object",
+          "positive_witness": null,
+          "falsifier": null,
+          "primary_source": null,
+          "source_kind": null
+        }
+      ],
+      "evidence_score": 1,
+      "selection": "NOT-SELECTED",
+      "coordinate": null,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "required_review": "PRIMARY-SOURCE-AND-SEMANTIC-LAW"
+    },
+    {
+      "semantic_name": "FLUSH",
+      "evidence": [
+        {
+          "source_path": "knowledge/d10-crossrepo-golisp-pascal-v1.json",
+          "source_blob": "4914c152a03d78de926943f605992f88c2c0e0d6",
+          "research_branch": "research/d10-crossrepo-golisp-pascal-1",
+          "record_group": "rows",
+          "source_name": "FLUSH",
+          "source_status": "SELECT-D10-CANDIDATE",
+          "observable_law": "request that buffered output on an abstract output port become externally committed",
+          "positive_witness": null,
+          "falsifier": null,
+          "primary_source": null,
+          "source_kind": null
+        }
+      ],
+      "evidence_score": 1,
+      "selection": "NOT-SELECTED",
+      "coordinate": null,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "required_review": "PRIMARY-SOURCE-AND-SEMANTIC-LAW"
+    },
+    {
+      "semantic_name": "FORMAT",
+      "evidence": [
+        {
+          "source_path": "knowledge/d10-crossrepo-lisp-koans-v1.json",
+          "source_blob": "4a45760e93d4fb3f4d9e33914cf44f314d0a30b4",
+          "research_branch": "research/d10-crossrepo-lisp-koans-1",
+          "record_group": "rows",
+          "source_name": "FORMAT",
+          "source_status": "SELECT-D10-CANDIDATE",
+          "observable_law": "interpret a format-control language over arguments to produce text or directed output",
+          "positive_witness": null,
+          "falsifier": null,
+          "primary_source": null,
+          "source_kind": null
+        }
+      ],
+      "evidence_score": 1,
+      "selection": "NOT-SELECTED",
+      "coordinate": null,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "required_review": "PRIMARY-SOURCE-AND-SEMANTIC-LAW"
+    },
+    {
+      "semantic_name": "FUNCTIONP",
+      "evidence": [
+        {
+          "source_path": "knowledge/d10-crossrepo-mal-v1.json",
+          "source_blob": "f0a432a28de471efde8d59106670ef79f4c2082c",
+          "research_branch": "research/d10-crossrepo-mal-1",
+          "record_group": "rows",
+          "source_name": "FUNCTIONP",
+          "source_status": "SELECT-D10-CANDIDATE",
+          "observable_law": "test whether a value is an ordinary callable function and not a macro",
+          "positive_witness": null,
+          "falsifier": null,
+          "primary_source": null,
+          "source_kind": null
+        }
+      ],
+      "evidence_score": 1,
+      "selection": "NOT-SELECTED",
+      "coordinate": null,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "required_review": "PRIMARY-SOURCE-AND-SEMANTIC-LAW"
+    },
+    {
+      "semantic_name": "GETHASH",
+      "evidence": [
+        {
+          "source_path": "knowledge/d10-crossrepo-lisp-koans-v1.json",
+          "source_blob": "4a45760e93d4fb3f4d9e33914cf44f314d0a30b4",
+          "research_branch": "research/d10-crossrepo-lisp-koans-1",
+          "record_group": "rows",
+          "source_name": "GETHASH",
+          "source_status": "SELECT-D10-CANDIDATE",
+          "observable_law": "lookup a key and return both its associated value and an independent found/not-found result",
+          "positive_witness": null,
+          "falsifier": null,
+          "primary_source": null,
+          "source_kind": null
+        }
+      ],
+      "evidence_score": 1,
+      "selection": "NOT-SELECTED",
+      "coordinate": null,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "required_review": "PRIMARY-SOURCE-AND-SEMANTIC-LAW"
+    },
+    {
+      "semantic_name": "HASH-TABLE-COUNT",
+      "evidence": [
+        {
+          "source_path": "knowledge/d10-crossrepo-lisp-koans-v1.json",
+          "source_blob": "4a45760e93d4fb3f4d9e33914cf44f314d0a30b4",
+          "research_branch": "research/d10-crossrepo-lisp-koans-1",
+          "record_group": "rows",
+          "source_name": "HASH-TABLE-COUNT",
+          "source_status": "SELECT-D10-CANDIDATE",
+          "observable_law": "return the number of key/value entries currently stored in a hash table",
+          "positive_witness": null,
+          "falsifier": null,
+          "primary_source": null,
+          "source_kind": null
+        }
+      ],
+      "evidence_score": 1,
+      "selection": "NOT-SELECTED",
+      "coordinate": null,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "required_review": "PRIMARY-SOURCE-AND-SEMANTIC-LAW"
+    },
+    {
+      "semantic_name": "HASH-TABLE-P",
+      "evidence": [
+        {
+          "source_path": "knowledge/d10-crossrepo-lisp-koans-v1.json",
+          "source_blob": "4a45760e93d4fb3f4d9e33914cf44f314d0a30b4",
+          "research_branch": "research/d10-crossrepo-lisp-koans-1",
+          "record_group": "rows",
+          "source_name": "HASH-TABLE-P",
+          "source_status": "SELECT-D10-CANDIDATE",
+          "observable_law": "test whether a value is a hash-table object",
+          "positive_witness": null,
+          "falsifier": null,
+          "primary_source": null,
+          "source_kind": null
+        }
+      ],
+      "evidence_score": 1,
+      "selection": "NOT-SELECTED",
+      "coordinate": null,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "required_review": "PRIMARY-SOURCE-AND-SEMANTIC-LAW"
+    },
+    {
+      "semantic_name": "KEYWORD",
+      "evidence": [
+        {
+          "source_path": "knowledge/d10-crossrepo-mal-v1.json",
+          "source_blob": "f0a432a28de471efde8d59106670ef79f4c2082c",
+          "research_branch": "research/d10-crossrepo-mal-1",
+          "record_group": "rows",
+          "source_name": "KEYWORD",
+          "source_status": "SELECT-D10-CANDIDATE",
+          "observable_law": "idempotently construct or preserve a keyword value from a string/keyword input",
+          "positive_witness": null,
+          "falsifier": null,
+          "primary_source": null,
+          "source_kind": null
+        }
+      ],
+      "evidence_score": 1,
+      "selection": "NOT-SELECTED",
+      "coordinate": null,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "required_review": "PRIMARY-SOURCE-AND-SEMANTIC-LAW"
+    },
+    {
+      "semantic_name": "KEYWORDP",
+      "evidence": [
+        {
+          "source_path": "knowledge/d10-crossrepo-mal-v1.json",
+          "source_blob": "f0a432a28de471efde8d59106670ef79f4c2082c",
+          "research_branch": "research/d10-crossrepo-mal-1",
+          "record_group": "rows",
+          "source_name": "KEYWORDP",
+          "source_status": "SELECT-D10-CANDIDATE",
+          "observable_law": "test whether a value is a keyword",
+          "positive_witness": null,
+          "falsifier": null,
+          "primary_source": null,
+          "source_kind": null
+        }
+      ],
+      "evidence_score": 1,
+      "selection": "NOT-SELECTED",
+      "coordinate": null,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "required_review": "PRIMARY-SOURCE-AND-SEMANTIC-LAW"
+    },
+    {
+      "semantic_name": "LISTP",
+      "evidence": [
+        {
+          "source_path": "knowledge/d10-crossrepo-mal-v1.json",
+          "source_blob": "f0a432a28de471efde8d59106670ef79f4c2082c",
+          "research_branch": "research/d10-crossrepo-mal-1",
+          "record_group": "rows",
+          "source_name": "LISTP",
+          "source_status": "SELECT-D10-CANDIDATE",
+          "observable_law": "test whether a MAL value is list-shaped, including the empty list",
+          "positive_witness": null,
+          "falsifier": null,
+          "primary_source": null,
+          "source_kind": null
+        }
+      ],
+      "evidence_score": 1,
+      "selection": "NOT-SELECTED",
+      "coordinate": null,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "required_review": "PRIMARY-SOURCE-AND-SEMANTIC-LAW"
+    },
+    {
+      "semantic_name": "MACROP",
+      "evidence": [
+        {
+          "source_path": "knowledge/d10-crossrepo-mal-v1.json",
+          "source_blob": "f0a432a28de471efde8d59106670ef79f4c2082c",
+          "research_branch": "research/d10-crossrepo-mal-1",
+          "record_group": "rows",
+          "source_name": "MACROP",
+          "source_status": "SELECT-D10-CANDIDATE",
+          "observable_law": "test whether a callable value is marked as a macro",
+          "positive_witness": null,
+          "falsifier": null,
+          "primary_source": null,
+          "source_kind": null
+        }
+      ],
+      "evidence_score": 1,
+      "selection": "NOT-SELECTED",
+      "coordinate": null,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "required_review": "PRIMARY-SOURCE-AND-SEMANTIC-LAW"
+    },
+    {
+      "semantic_name": "MAKE-CHANNEL",
+      "evidence": [
+        {
+          "source_path": "knowledge/d10-crossrepo-golisp-pascal-v1.json",
+          "source_blob": "4914c152a03d78de926943f605992f88c2c0e0d6",
+          "research_branch": "research/d10-crossrepo-golisp-pascal-1",
+          "record_group": "rows",
+          "source_name": "MAKE-CHANNEL",
+          "source_status": "SELECT-D10-CANDIDATE",
+          "observable_law": "construct an abstract communication channel value",
+          "positive_witness": null,
+          "falsifier": null,
+          "primary_source": null,
+          "source_kind": null
+        }
+      ],
+      "evidence_score": 1,
+      "selection": "NOT-SELECTED",
+      "coordinate": null,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "required_review": "PRIMARY-SOURCE-AND-SEMANTIC-LAW"
+    },
+    {
+      "semantic_name": "MAKE-HASH-TABLE",
+      "evidence": [
+        {
+          "source_path": "knowledge/d10-crossrepo-lisp-koans-v1.json",
+          "source_blob": "4a45760e93d4fb3f4d9e33914cf44f314d0a30b4",
+          "research_branch": "research/d10-crossrepo-lisp-koans-1",
+          "record_group": "rows",
+          "source_name": "MAKE-HASH-TABLE",
+          "source_status": "SELECT-D10-CANDIDATE",
+          "observable_law": "construct a mutable key/value table with an explicit or default equality predicate",
+          "positive_witness": null,
+          "falsifier": null,
+          "primary_source": null,
+          "source_kind": null
+        }
+      ],
+      "evidence_score": 1,
+      "selection": "NOT-SELECTED",
+      "coordinate": null,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "required_review": "PRIMARY-SOURCE-AND-SEMANTIC-LAW"
+    },
+    {
+      "semantic_name": "MAKE-INSTANCE",
+      "evidence": [
+        {
+          "source_path": "knowledge/d10-crossrepo-lisp-koans-v1.json",
+          "source_blob": "4a45760e93d4fb3f4d9e33914cf44f314d0a30b4",
+          "research_branch": "research/d10-crossrepo-lisp-koans-1",
+          "record_group": "rows",
+          "source_name": "MAKE-INSTANCE",
+          "source_status": "SELECT-D10-CANDIDATE",
+          "observable_law": "construct an instance of a class using initialization arguments",
+          "positive_witness": null,
+          "falsifier": null,
+          "primary_source": null,
+          "source_kind": null
+        }
+      ],
+      "evidence_score": 1,
+      "selection": "NOT-SELECTED",
+      "coordinate": null,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "required_review": "PRIMARY-SOURCE-AND-SEMANTIC-LAW"
+    },
+    {
+      "semantic_name": "MAP-DISSOC",
+      "evidence": [
+        {
+          "source_path": "knowledge/d10-crossrepo-mal-v1.json",
+          "source_blob": "f0a432a28de471efde8d59106670ef79f4c2082c",
+          "research_branch": "research/d10-crossrepo-mal-1",
+          "record_group": "rows",
+          "source_name": "MAP-DISSOC",
+          "source_status": "SELECT-D10-CANDIDATE",
+          "observable_law": "return a map with one or more keys removed, preserving the input map value",
+          "positive_witness": null,
+          "falsifier": null,
+          "primary_source": null,
+          "source_kind": null
+        }
+      ],
+      "evidence_score": 1,
+      "selection": "NOT-SELECTED",
+      "coordinate": null,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "required_review": "PRIMARY-SOURCE-AND-SEMANTIC-LAW"
+    },
+    {
+      "semantic_name": "MAP-FROM-PAIRS",
+      "evidence": [
+        {
+          "source_path": "knowledge/d10-crossrepo-mal-v1.json",
+          "source_blob": "f0a432a28de471efde8d59106670ef79f4c2082c",
+          "research_branch": "research/d10-crossrepo-mal-1",
+          "record_group": "rows",
+          "source_name": "MAP-FROM-PAIRS",
+          "source_status": "SELECT-D10-CANDIDATE",
+          "observable_law": "construct a map from an even sequence of key/value arguments",
+          "positive_witness": null,
+          "falsifier": null,
+          "primary_source": null,
+          "source_kind": null
+        }
+      ],
+      "evidence_score": 1,
+      "selection": "NOT-SELECTED",
+      "coordinate": null,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "required_review": "PRIMARY-SOURCE-AND-SEMANTIC-LAW"
+    },
+    {
+      "semantic_name": "MAP-KEYS",
+      "evidence": [
+        {
+          "source_path": "knowledge/d10-crossrepo-mal-v1.json",
+          "source_blob": "f0a432a28de471efde8d59106670ef79f4c2082c",
+          "research_branch": "research/d10-crossrepo-mal-1",
+          "record_group": "rows",
+          "source_name": "MAP-KEYS",
+          "source_status": "SELECT-D10-CANDIDATE",
+          "observable_law": "return the keys of a map as a sequence",
+          "positive_witness": null,
+          "falsifier": null,
+          "primary_source": null,
+          "source_kind": null
+        }
+      ],
+      "evidence_score": 1,
+      "selection": "NOT-SELECTED",
+      "coordinate": null,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "required_review": "PRIMARY-SOURCE-AND-SEMANTIC-LAW"
+    },
+    {
+      "semantic_name": "MAP-VALUES",
+      "evidence": [
+        {
+          "source_path": "knowledge/d10-crossrepo-mal-v1.json",
+          "source_blob": "f0a432a28de471efde8d59106670ef79f4c2082c",
+          "research_branch": "research/d10-crossrepo-mal-1",
+          "record_group": "rows",
+          "source_name": "MAP-VALUES",
+          "source_status": "SELECT-D10-CANDIDATE",
+          "observable_law": "return the values of a map as a sequence",
+          "positive_witness": null,
+          "falsifier": null,
+          "primary_source": null,
+          "source_kind": null
+        }
+      ],
+      "evidence_score": 1,
+      "selection": "NOT-SELECTED",
+      "coordinate": null,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "required_review": "PRIMARY-SOURCE-AND-SEMANTIC-LAW"
+    },
+    {
+      "semantic_name": "MAPP",
+      "evidence": [
+        {
+          "source_path": "knowledge/d10-crossrepo-mal-v1.json",
+          "source_blob": "f0a432a28de471efde8d59106670ef79f4c2082c",
+          "research_branch": "research/d10-crossrepo-mal-1",
+          "record_group": "rows",
+          "source_name": "MAPP",
+          "source_status": "SELECT-D10-CANDIDATE",
+          "observable_law": "test whether a value is a map",
+          "positive_witness": null,
+          "falsifier": null,
+          "primary_source": null,
+          "source_kind": null
+        }
+      ],
+      "evidence_score": 1,
+      "selection": "NOT-SELECTED",
+      "coordinate": null,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "required_review": "PRIMARY-SOURCE-AND-SEMANTIC-LAW"
+    },
+    {
+      "semantic_name": "META",
+      "evidence": [
+        {
+          "source_path": "knowledge/d10-crossrepo-mal-v1.json",
+          "source_blob": "f0a432a28de471efde8d59106670ef79f4c2082c",
+          "research_branch": "research/d10-crossrepo-mal-1",
+          "record_group": "rows",
+          "source_name": "META",
+          "source_status": "SELECT-D10-CANDIDATE",
+          "observable_law": "retrieve metadata attached to a metadata-capable value, or empty/NIL when absent",
+          "positive_witness": null,
+          "falsifier": null,
+          "primary_source": null,
+          "source_kind": null
+        }
+      ],
+      "evidence_score": 1,
+      "selection": "NOT-SELECTED",
+      "coordinate": null,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "required_review": "PRIMARY-SOURCE-AND-SEMANTIC-LAW"
+    },
+    {
+      "semantic_name": "MODULO",
+      "evidence": [
+        {
+          "source_path": "knowledge/d10-crossrepo-golisp-pascal-v1.json",
+          "source_blob": "4914c152a03d78de926943f605992f88c2c0e0d6",
+          "research_branch": "research/d10-crossrepo-golisp-pascal-1",
+          "record_group": "rows",
+          "source_name": "MODULO",
+          "source_status": "SELECT-D10-CANDIDATE",
+          "observable_law": "return the modulus whose nonzero result has the divisor's sign, adjusting the raw remainder when operand signs differ",
+          "positive_witness": null,
+          "falsifier": null,
+          "primary_source": null,
+          "source_kind": null
+        }
+      ],
+      "evidence_score": 1,
+      "selection": "NOT-SELECTED",
+      "coordinate": null,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "required_review": "PRIMARY-SOURCE-AND-SEMANTIC-LAW"
+    },
+    {
+      "semantic_name": "MULTIPLE-VALUE-LIST",
+      "evidence": [
+        {
+          "source_path": "knowledge/d10-crossrepo-lisp-koans-v1.json",
+          "source_blob": "4a45760e93d4fb3f4d9e33914cf44f314d0a30b4",
+          "research_branch": "research/d10-crossrepo-lisp-koans-1",
+          "record_group": "rows",
+          "source_name": "MULTIPLE-VALUE-LIST",
+          "source_status": "SELECT-D10-CANDIDATE",
+          "observable_law": "evaluate a form and materialize all of its returned values as an ordinary list",
+          "positive_witness": null,
+          "falsifier": null,
+          "primary_source": null,
+          "source_kind": null
+        }
+      ],
+      "evidence_score": 1,
+      "selection": "NOT-SELECTED",
+      "coordinate": null,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "required_review": "PRIMARY-SOURCE-AND-SEMANTIC-LAW"
+    },
+    {
+      "semantic_name": "NULL-ENVIRONMENT",
+      "evidence": [
+        {
+          "source_path": "knowledge/d10-crossrepo-golisp-pascal-v1.json",
+          "source_blob": "4914c152a03d78de926943f605992f88c2c0e0d6",
+          "research_branch": "research/d10-crossrepo-golisp-pascal-1",
+          "record_group": "rows",
+          "source_name": "NULL-ENVIRONMENT",
+          "source_status": "SELECT-D10-CANDIDATE",
+          "observable_law": "construct an empty lexical environment value with no parent bindings",
+          "positive_witness": null,
+          "falsifier": null,
+          "primary_source": null,
+          "source_kind": null
+        }
+      ],
+      "evidence_score": 1,
+      "selection": "NOT-SELECTED",
+      "coordinate": null,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "required_review": "PRIMARY-SOURCE-AND-SEMANTIC-LAW"
+    },
+    {
+      "semantic_name": "READ-BYTE",
+      "evidence": [
+        {
+          "source_path": "knowledge/d10-crossrepo-golisp-pascal-v1.json",
+          "source_blob": "4914c152a03d78de926943f605992f88c2c0e0d6",
+          "research_branch": "research/d10-crossrepo-golisp-pascal-1",
+          "record_group": "rows",
+          "source_name": "READ-BYTE",
+          "source_status": "SELECT-D10-CANDIDATE",
+          "observable_law": "read one byte value from an abstract input port",
+          "positive_witness": null,
+          "falsifier": null,
+          "primary_source": null,
+          "source_kind": null
+        }
+      ],
+      "evidence_score": 1,
+      "selection": "NOT-SELECTED",
+      "coordinate": null,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "required_review": "PRIMARY-SOURCE-AND-SEMANTIC-LAW"
+    },
+    {
+      "semantic_name": "READ-CHAR",
+      "evidence": [
+        {
+          "source_path": "knowledge/d10-crossrepo-golisp-pascal-v1.json",
+          "source_blob": "4914c152a03d78de926943f605992f88c2c0e0d6",
+          "research_branch": "research/d10-crossrepo-golisp-pascal-1",
+          "record_group": "rows",
+          "source_name": "READ-CHAR",
+          "source_status": "SELECT-D10-CANDIDATE",
+          "observable_law": "read one character value from an abstract input port",
+          "positive_witness": null,
+          "falsifier": null,
+          "primary_source": null,
+          "source_kind": null
+        }
+      ],
+      "evidence_score": 1,
+      "selection": "NOT-SELECTED",
+      "coordinate": null,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "required_review": "PRIMARY-SOURCE-AND-SEMANTIC-LAW"
+    },
+    {
+      "semantic_name": "REF-CELL",
+      "evidence": [
+        {
+          "source_path": "knowledge/d10-crossrepo-mal-v1.json",
+          "source_blob": "f0a432a28de471efde8d59106670ef79f4c2082c",
+          "research_branch": "research/d10-crossrepo-mal-1",
+          "record_group": "rows",
+          "source_name": "REF-CELL",
+          "source_status": "SELECT-D10-CANDIDATE",
+          "observable_law": "construct a mutable reference cell containing a value",
+          "positive_witness": null,
+          "falsifier": null,
+          "primary_source": null,
+          "source_kind": null
+        }
+      ],
+      "evidence_score": 1,
+      "selection": "NOT-SELECTED",
+      "coordinate": null,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "required_review": "PRIMARY-SOURCE-AND-SEMANTIC-LAW"
+    },
+    {
+      "semantic_name": "REF-CELLP",
+      "evidence": [
+        {
+          "source_path": "knowledge/d10-crossrepo-mal-v1.json",
+          "source_blob": "f0a432a28de471efde8d59106670ef79f4c2082c",
+          "research_branch": "research/d10-crossrepo-mal-1",
+          "record_group": "rows",
+          "source_name": "REF-CELLP",
+          "source_status": "SELECT-D10-CANDIDATE",
+          "observable_law": "test whether a value is a mutable reference cell",
+          "positive_witness": null,
+          "falsifier": null,
+          "primary_source": null,
+          "source_kind": null
+        }
+      ],
+      "evidence_score": 1,
+      "selection": "NOT-SELECTED",
+      "coordinate": null,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "required_review": "PRIMARY-SOURCE-AND-SEMANTIC-LAW"
+    },
+    {
+      "semantic_name": "RESET-REF!",
+      "evidence": [
+        {
+          "source_path": "knowledge/d10-crossrepo-mal-v1.json",
+          "source_blob": "f0a432a28de471efde8d59106670ef79f4c2082c",
+          "research_branch": "research/d10-crossrepo-mal-1",
+          "record_group": "rows",
+          "source_name": "RESET-REF!",
+          "source_status": "SELECT-D10-CANDIDATE",
+          "observable_law": "replace the value stored in a mutable reference cell and return the new value",
+          "positive_witness": null,
+          "falsifier": null,
+          "primary_source": null,
+          "source_kind": null
+        }
+      ],
+      "evidence_score": 1,
+      "selection": "NOT-SELECTED",
+      "coordinate": null,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "required_review": "PRIMARY-SOURCE-AND-SEMANTIC-LAW"
+    },
+    {
+      "semantic_name": "RETURN-FROM",
+      "evidence": [
+        {
+          "source_path": "knowledge/d10-crossrepo-lisp-koans-v1.json",
+          "source_blob": "4a45760e93d4fb3f4d9e33914cf44f314d0a30b4",
+          "research_branch": "research/d10-crossrepo-lisp-koans-1",
+          "record_group": "rows",
+          "source_name": "RETURN-FROM",
+          "source_status": "SELECT-D10-CANDIDATE",
+          "observable_law": "transfer control to a lexically enclosing named block with an optional result value",
+          "positive_witness": null,
+          "falsifier": null,
+          "primary_source": null,
+          "source_kind": null
+        }
+      ],
+      "evidence_score": 1,
+      "selection": "NOT-SELECTED",
+      "coordinate": null,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "required_review": "PRIMARY-SOURCE-AND-SEMANTIC-LAW"
+    },
+    {
+      "semantic_name": "SEARCH",
+      "evidence": [
+        {
+          "source_path": "knowledge/d10-crossrepo-lisp-koans-v1.json",
+          "source_blob": "4a45760e93d4fb3f4d9e33914cf44f314d0a30b4",
+          "research_branch": "research/d10-crossrepo-lisp-koans-1",
+          "record_group": "rows",
+          "source_name": "SEARCH",
+          "source_status": "SELECT-D10-CANDIDATE",
+          "observable_law": "return the first index at which one sequence occurs as a subsequence of another or the no-match result",
+          "positive_witness": null,
+          "falsifier": null,
+          "primary_source": null,
+          "source_kind": null
+        }
+      ],
+      "evidence_score": 1,
+      "selection": "NOT-SELECTED",
+      "coordinate": null,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "required_review": "PRIMARY-SOURCE-AND-SEMANTIC-LAW"
+    },
+    {
+      "semantic_name": "SEQ-VIEW",
+      "evidence": [
+        {
+          "source_path": "knowledge/d10-crossrepo-mal-v1.json",
+          "source_blob": "f0a432a28de471efde8d59106670ef79f4c2082c",
+          "research_branch": "research/d10-crossrepo-mal-1",
+          "record_group": "rows",
+          "source_name": "SEQ-VIEW",
+          "source_status": "SELECT-D10-CANDIDATE",
+          "observable_law": "return a list view of a non-empty list/vector/string, or empty/NIL for an empty or unsupported value",
+          "positive_witness": null,
+          "falsifier": null,
+          "primary_source": null,
+          "source_kind": null
+        }
+      ],
+      "evidence_score": 1,
+      "selection": "NOT-SELECTED",
+      "coordinate": null,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "required_review": "PRIMARY-SOURCE-AND-SEMANTIC-LAW"
+    },
+    {
+      "semantic_name": "SEQUENCE-COUNT",
+      "evidence": [
+        {
+          "source_path": "knowledge/d10-crossrepo-mal-v1.json",
+          "source_blob": "f0a432a28de471efde8d59106670ef79f4c2082c",
+          "research_branch": "research/d10-crossrepo-mal-1",
+          "record_group": "rows",
+          "source_name": "SEQUENCE-COUNT",
+          "source_status": "SELECT-D10-CANDIDATE",
+          "observable_law": "return the number of elements in a sequence-like value",
+          "positive_witness": null,
+          "falsifier": null,
+          "primary_source": null,
+          "source_kind": null
+        }
+      ],
+      "evidence_score": 1,
+      "selection": "NOT-SELECTED",
+      "coordinate": null,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "required_review": "PRIMARY-SOURCE-AND-SEMANTIC-LAW"
+    },
+    {
+      "semantic_name": "SEQUENCE-EMPTY?",
+      "evidence": [
+        {
+          "source_path": "knowledge/d10-crossrepo-mal-v1.json",
+          "source_blob": "f0a432a28de471efde8d59106670ef79f4c2082c",
+          "research_branch": "research/d10-crossrepo-mal-1",
+          "record_group": "rows",
+          "source_name": "SEQUENCE-EMPTY?",
+          "source_status": "SELECT-D10-CANDIDATE",
+          "observable_law": "test whether a sequence-like value has zero elements",
+          "positive_witness": null,
+          "falsifier": null,
+          "primary_source": null,
+          "source_kind": null
+        }
+      ],
+      "evidence_score": 1,
+      "selection": "NOT-SELECTED",
+      "coordinate": null,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "required_review": "PRIMARY-SOURCE-AND-SEMANTIC-LAW"
+    },
+    {
+      "semantic_name": "SEQUENTIALP",
+      "evidence": [
+        {
+          "source_path": "knowledge/d10-crossrepo-mal-v1.json",
+          "source_blob": "f0a432a28de471efde8d59106670ef79f4c2082c",
+          "research_branch": "research/d10-crossrepo-mal-1",
+          "record_group": "rows",
+          "source_name": "SEQUENTIALP",
+          "source_status": "SELECT-D10-CANDIDATE",
+          "observable_law": "test whether a value belongs to the list/vector sequential family",
+          "positive_witness": null,
+          "falsifier": null,
+          "primary_source": null,
+          "source_kind": null
+        }
+      ],
+      "evidence_score": 1,
+      "selection": "NOT-SELECTED",
+      "coordinate": null,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "required_review": "PRIMARY-SOURCE-AND-SEMANTIC-LAW"
+    },
+    {
+      "semantic_name": "SLOT-VALUE",
+      "evidence": [
+        {
+          "source_path": "knowledge/d10-crossrepo-lisp-koans-v1.json",
+          "source_blob": "4a45760e93d4fb3f4d9e33914cf44f314d0a30b4",
+          "research_branch": "research/d10-crossrepo-lisp-koans-1",
+          "record_group": "rows",
+          "source_name": "SLOT-VALUE",
+          "source_status": "SELECT-D10-CANDIDATE",
+          "observable_law": "read or designate the value stored in a named slot of an object instance",
+          "positive_witness": null,
+          "falsifier": null,
+          "primary_source": null,
+          "source_kind": null
+        }
+      ],
+      "evidence_score": 1,
+      "selection": "NOT-SELECTED",
+      "coordinate": null,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "required_review": "PRIMARY-SOURCE-AND-SEMANTIC-LAW"
+    },
+    {
+      "semantic_name": "STRING-JOIN",
+      "evidence": [
+        {
+          "source_path": "knowledge/d10-crossrepo-golisp-pascal-v1.json",
+          "source_blob": "4914c152a03d78de926943f605992f88c2c0e0d6",
+          "research_branch": "research/d10-crossrepo-golisp-pascal-1",
+          "record_group": "rows",
+          "source_name": "STRING-JOIN",
+          "source_status": "SELECT-D10-CANDIDATE",
+          "observable_law": "join an ordered list of strings using a separator string",
+          "positive_witness": null,
+          "falsifier": null,
+          "primary_source": null,
+          "source_kind": null
+        }
+      ],
+      "evidence_score": 1,
+      "selection": "NOT-SELECTED",
+      "coordinate": null,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "required_review": "PRIMARY-SOURCE-AND-SEMANTIC-LAW"
+    },
+    {
+      "semantic_name": "STRING-SPLIT",
+      "evidence": [
+        {
+          "source_path": "knowledge/d10-crossrepo-golisp-pascal-v1.json",
+          "source_blob": "4914c152a03d78de926943f605992f88c2c0e0d6",
+          "research_branch": "research/d10-crossrepo-golisp-pascal-1",
+          "record_group": "rows",
+          "source_name": "STRING-SPLIT",
+          "source_status": "SELECT-D10-CANDIDATE",
+          "observable_law": "split a string by a separator string into an ordered list of substrings",
+          "positive_witness": null,
+          "falsifier": null,
+          "primary_source": null,
+          "source_kind": null
+        }
+      ],
+      "evidence_score": 1,
+      "selection": "NOT-SELECTED",
+      "coordinate": null,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "required_review": "PRIMARY-SOURCE-AND-SEMANTIC-LAW"
+    },
+    {
+      "semantic_name": "SUBTYPEP",
+      "evidence": [
+        {
+          "source_path": "knowledge/d10-crossrepo-lisp-koans-v1.json",
+          "source_blob": "4a45760e93d4fb3f4d9e33914cf44f314d0a30b4",
+          "research_branch": "research/d10-crossrepo-lisp-koans-1",
+          "record_group": "rows",
+          "source_name": "SUBTYPEP",
+          "source_status": "SELECT-D10-CANDIDATE",
+          "observable_law": "test the subset relation between two type specifiers",
+          "positive_witness": null,
+          "falsifier": null,
+          "primary_source": null,
+          "source_kind": null
+        }
+      ],
+      "evidence_score": 1,
+      "selection": "NOT-SELECTED",
+      "coordinate": null,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "required_review": "PRIMARY-SOURCE-AND-SEMANTIC-LAW"
+    },
+    {
+      "semantic_name": "SWAP-REF!",
+      "evidence": [
+        {
+          "source_path": "knowledge/d10-crossrepo-mal-v1.json",
+          "source_blob": "f0a432a28de471efde8d59106670ef79f4c2082c",
+          "research_branch": "research/d10-crossrepo-mal-1",
+          "record_group": "rows",
+          "source_name": "SWAP-REF!",
+          "source_status": "SELECT-D10-CANDIDATE",
+          "observable_law": "atomically-at-the-language-level replace a reference-cell value with the result of applying a function to its current value and extra arguments",
+          "positive_witness": null,
+          "falsifier": null,
+          "primary_source": null,
+          "source_kind": null
+        }
+      ],
+      "evidence_score": 1,
+      "selection": "NOT-SELECTED",
+      "coordinate": null,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "required_review": "PRIMARY-SOURCE-AND-SEMANTIC-LAW"
+    },
+    {
+      "semantic_name": "TYPE-OF",
+      "evidence": [
+        {
+          "source_path": "knowledge/d10-crossrepo-lisp-koans-v1.json",
+          "source_blob": "4a45760e93d4fb3f4d9e33914cf44f314d0a30b4",
+          "research_branch": "research/d10-crossrepo-lisp-koans-1",
+          "record_group": "rows",
+          "source_name": "TYPE-OF",
+          "source_status": "SELECT-D10-CANDIDATE",
+          "observable_law": "return a type specifier describing the dynamic type of a value",
+          "positive_witness": null,
+          "falsifier": null,
+          "primary_source": null,
+          "source_kind": null
+        }
+      ],
+      "evidence_score": 1,
+      "selection": "NOT-SELECTED",
+      "coordinate": null,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "required_review": "PRIMARY-SOURCE-AND-SEMANTIC-LAW"
+    },
+    {
+      "semantic_name": "TYPEP",
+      "evidence": [
+        {
+          "source_path": "knowledge/d10-crossrepo-lisp-koans-v1.json",
+          "source_blob": "4a45760e93d4fb3f4d9e33914cf44f314d0a30b4",
+          "research_branch": "research/d10-crossrepo-lisp-koans-1",
+          "record_group": "rows",
+          "source_name": "TYPEP",
+          "source_status": "SELECT-D10-CANDIDATE",
+          "observable_law": "test whether a value belongs to the set denoted by a general type specifier",
+          "positive_witness": null,
+          "falsifier": null,
+          "primary_source": null,
+          "source_kind": null
+        }
+      ],
+      "evidence_score": 1,
+      "selection": "NOT-SELECTED",
+      "coordinate": null,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "required_review": "PRIMARY-SOURCE-AND-SEMANTIC-LAW"
+    },
+    {
+      "semantic_name": "UNLESS",
+      "evidence": [
+        {
+          "source_path": "knowledge/d10-crossrepo-lisp-koans-v1.json",
+          "source_blob": "4a45760e93d4fb3f4d9e33914cf44f314d0a30b4",
+          "research_branch": "research/d10-crossrepo-lisp-koans-1",
+          "record_group": "rows",
+          "source_name": "UNLESS",
+          "source_status": "SELECT-D10-CANDIDATE",
+          "observable_law": "evaluate a body only when its predicate is false and otherwise produce the language false/empty result",
+          "positive_witness": null,
+          "falsifier": null,
+          "primary_source": null,
+          "source_kind": null
+        }
+      ],
+      "evidence_score": 1,
+      "selection": "NOT-SELECTED",
+      "coordinate": null,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "required_review": "PRIMARY-SOURCE-AND-SEMANTIC-LAW"
+    },
+    {
+      "semantic_name": "VECTOR-SLICE",
+      "evidence": [
+        {
+          "source_path": "knowledge/d10-crossrepo-golisp-pascal-v1.json",
+          "source_blob": "4914c152a03d78de926943f605992f88c2c0e0d6",
+          "research_branch": "research/d10-crossrepo-golisp-pascal-1",
+          "record_group": "rows",
+          "source_name": "VECTOR-SLICE",
+          "source_status": "SELECT-D10-CANDIDATE",
+          "observable_law": "return the half-open vector slice selected by lower and upper indices",
+          "positive_witness": null,
+          "falsifier": null,
+          "primary_source": null,
+          "source_kind": null
+        }
+      ],
+      "evidence_score": 1,
+      "selection": "NOT-SELECTED",
+      "coordinate": null,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "required_review": "PRIMARY-SOURCE-AND-SEMANTIC-LAW"
+    },
+    {
+      "semantic_name": "VECTORP",
+      "evidence": [
+        {
+          "source_path": "knowledge/d10-crossrepo-mal-v1.json",
+          "source_blob": "f0a432a28de471efde8d59106670ef79f4c2082c",
+          "research_branch": "research/d10-crossrepo-mal-1",
+          "record_group": "rows",
+          "source_name": "VECTORP",
+          "source_status": "SELECT-D10-CANDIDATE",
+          "observable_law": "test whether a value is a vector",
+          "positive_witness": null,
+          "falsifier": null,
+          "primary_source": null,
+          "source_kind": null
+        }
+      ],
+      "evidence_score": 1,
+      "selection": "NOT-SELECTED",
+      "coordinate": null,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "required_review": "PRIMARY-SOURCE-AND-SEMANTIC-LAW"
+    },
+    {
+      "semantic_name": "WHEN",
+      "evidence": [
+        {
+          "source_path": "knowledge/d10-crossrepo-lisp-koans-v1.json",
+          "source_blob": "4a45760e93d4fb3f4d9e33914cf44f314d0a30b4",
+          "research_branch": "research/d10-crossrepo-lisp-koans-1",
+          "record_group": "rows",
+          "source_name": "WHEN",
+          "source_status": "SELECT-D10-CANDIDATE",
+          "observable_law": "evaluate a body only when its predicate is true and otherwise produce the language false/empty result",
+          "positive_witness": null,
+          "falsifier": null,
+          "primary_source": null,
+          "source_kind": null
+        }
+      ],
+      "evidence_score": 1,
+      "selection": "NOT-SELECTED",
+      "coordinate": null,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "required_review": "PRIMARY-SOURCE-AND-SEMANTIC-LAW"
+    },
+    {
+      "semantic_name": "WITH-META",
+      "evidence": [
+        {
+          "source_path": "knowledge/d10-crossrepo-mal-v1.json",
+          "source_blob": "f0a432a28de471efde8d59106670ef79f4c2082c",
+          "research_branch": "research/d10-crossrepo-mal-1",
+          "record_group": "rows",
+          "source_name": "WITH-META",
+          "source_status": "SELECT-D10-CANDIDATE",
+          "observable_law": "return a value-equivalent copy carrying supplied metadata where the value kind supports metadata",
+          "positive_witness": null,
+          "falsifier": null,
+          "primary_source": null,
+          "source_kind": null
+        }
+      ],
+      "evidence_score": 1,
+      "selection": "NOT-SELECTED",
+      "coordinate": null,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "required_review": "PRIMARY-SOURCE-AND-SEMANTIC-LAW"
+    },
+    {
+      "semantic_name": "WRITE-BYTE",
+      "evidence": [
+        {
+          "source_path": "knowledge/d10-crossrepo-golisp-pascal-v1.json",
+          "source_blob": "4914c152a03d78de926943f605992f88c2c0e0d6",
+          "research_branch": "research/d10-crossrepo-golisp-pascal-1",
+          "record_group": "rows",
+          "source_name": "WRITE-BYTE",
+          "source_status": "SELECT-D10-CANDIDATE",
+          "observable_law": "write one byte value to an abstract output port",
+          "positive_witness": null,
+          "falsifier": null,
+          "primary_source": null,
+          "source_kind": null
+        }
+      ],
+      "evidence_score": 1,
+      "selection": "NOT-SELECTED",
+      "coordinate": null,
+      "ratified": false,
+      "physical_t5_authorized": false,
+      "required_review": "PRIMARY-SOURCE-AND-SEMANTIC-LAW"
+    },
+    {
+      "semantic_name": "WRITE-STRING",
+      "evidence": [
+        {
+          "source_path": "knowledge/d10-crossrepo-golisp-pascal-v1.json",
+          "source_blob": "4914c152a03d78de926943f605992f88c2c0e0d6",
+          "research_branch": "research/d10-crossrepo-golisp-pascal-1",
+          "record_group": "rows",
+          "source_name": "WRITE-STRING",
+          "source_status": "SELECT-D10-CANDIDATE",
+          "observable_law": "write a string value to an abstract output port",
+          "positive_witness": null,
+          "falsifier": null,
+          "primary_source": null,
+          "source_kind": null
+        }
+      ],
+      "evidence_score": 1,
       "selection": "NOT-SELECTED",
       "coordinate": null,
       "ratified": false,
@@ -3292,30 +5491,6 @@
           "research_branch": "research/d10-historical-maclisp-2",
           "record_group": "projections",
           "source_name": "ALPHALESSP",
-          "source_status": "CURRENT-PROJECTION",
-          "observable_law": null,
-          "positive_witness": null,
-          "falsifier": null,
-          "primary_source": null,
-          "source_kind": null
-        }
-      ],
-      "evidence_score": 0,
-      "selection": "NOT-SELECTED",
-      "coordinate": null,
-      "ratified": false,
-      "physical_t5_authorized": false,
-      "required_review": "PRIMARY-SOURCE-AND-SEMANTIC-LAW"
-    },
-    {
-      "semantic_name": "APPLY",
-      "evidence": [
-        {
-          "source_path": "knowledge/d10-crossrepo-early-lisp-v1.json",
-          "source_blob": "4523aad78809da4da9ce37408a676e352b1ec508",
-          "research_branch": "research/d10-crossrepo-early-lisp-1",
-          "record_group": "reviewed_nonselect",
-          "source_name": "APPLY",
           "source_status": "CURRENT-PROJECTION",
           "observable_law": null,
           "positive_witness": null,
@@ -3364,30 +5539,6 @@
           "research_branch": "research/d10-historical-maclisp-2",
           "record_group": "projections",
           "source_name": "ASCII",
-          "source_status": "CURRENT-PROJECTION",
-          "observable_law": null,
-          "positive_witness": null,
-          "falsifier": null,
-          "primary_source": null,
-          "source_kind": null
-        }
-      ],
-      "evidence_score": 0,
-      "selection": "NOT-SELECTED",
-      "coordinate": null,
-      "ratified": false,
-      "physical_t5_authorized": false,
-      "required_review": "PRIMARY-SOURCE-AND-SEMANTIC-LAW"
-    },
-    {
-      "semantic_name": "ASSOC",
-      "evidence": [
-        {
-          "source_path": "knowledge/d10-crossrepo-early-lisp-v1.json",
-          "source_blob": "4523aad78809da4da9ce37408a676e352b1ec508",
-          "research_branch": "research/d10-crossrepo-early-lisp-1",
-          "record_group": "reviewed_nonselect",
-          "source_name": "ASSOC",
           "source_status": "CURRENT-PROJECTION",
           "observable_law": null,
           "positive_witness": null,
@@ -3532,30 +5683,6 @@
           "research_branch": "research/d10-clhs-streams-census-20261009",
           "record_group": "rows",
           "source_name": "CLEAR-OUTPUT",
-          "source_status": "HISTORICAL-REVIEW",
-          "observable_law": null,
-          "positive_witness": null,
-          "falsifier": null,
-          "primary_source": null,
-          "source_kind": "function"
-        }
-      ],
-      "evidence_score": 0,
-      "selection": "NOT-SELECTED",
-      "coordinate": null,
-      "ratified": false,
-      "physical_t5_authorized": false,
-      "required_review": "PRIMARY-SOURCE-AND-SEMANTIC-LAW"
-    },
-    {
-      "semantic_name": "CLOSE",
-      "evidence": [
-        {
-          "source_path": "knowledge/d10-clhs-streams-census-20261009.json",
-          "source_blob": "4c39efaf558dd654272a690e6a01c0ae1c1b262f",
-          "research_branch": "research/d10-clhs-streams-census-20261009",
-          "record_group": "rows",
-          "source_name": "CLOSE",
           "source_status": "HISTORICAL-REVIEW",
           "observable_law": null,
           "positive_witness": null,
@@ -3850,30 +5977,6 @@
           "falsifier": null,
           "primary_source": null,
           "source_kind": "condition-type"
-        }
-      ],
-      "evidence_score": 0,
-      "selection": "NOT-SELECTED",
-      "coordinate": null,
-      "ratified": false,
-      "physical_t5_authorized": false,
-      "required_review": "PRIMARY-SOURCE-AND-SEMANTIC-LAW"
-    },
-    {
-      "semantic_name": "EVALQUOTE",
-      "evidence": [
-        {
-          "source_path": "knowledge/d10-crossrepo-early-lisp-v1.json",
-          "source_blob": "4523aad78809da4da9ce37408a676e352b1ec508",
-          "research_branch": "research/d10-crossrepo-early-lisp-1",
-          "record_group": "reviewed_nonselect",
-          "source_name": "EVALQUOTE",
-          "source_status": "CURRENT-PROJECTION",
-          "observable_law": null,
-          "positive_witness": null,
-          "falsifier": null,
-          "primary_source": null,
-          "source_kind": null
         }
       ],
       "evidence_score": 0,
@@ -4652,30 +6755,6 @@
       "required_review": "PRIMARY-SOURCE-AND-SEMANTIC-LAW"
     },
     {
-      "semantic_name": "MOD",
-      "evidence": [
-        {
-          "source_path": "knowledge/d10-crossrepo-early-lisp-v1.json",
-          "source_blob": "4523aad78809da4da9ce37408a676e352b1ec508",
-          "research_branch": "research/d10-crossrepo-early-lisp-1",
-          "record_group": "reviewed_nonselect",
-          "source_name": "MOD",
-          "source_status": "HOLD-SEMANTIC-REVIEW",
-          "observable_law": null,
-          "positive_witness": null,
-          "falsifier": null,
-          "primary_source": null,
-          "source_kind": null
-        }
-      ],
-      "evidence_score": 0,
-      "selection": "NOT-SELECTED",
-      "coordinate": null,
-      "ratified": false,
-      "physical_t5_authorized": false,
-      "required_review": "PRIMARY-SOURCE-AND-SEMANTIC-LAW"
-    },
-    {
       "semantic_name": "NAMESTRING",
       "evidence": [
         {
@@ -4685,30 +6764,6 @@
           "record_group": "roles",
           "source_name": "NAMESTRING",
           "source_status": "HOLD-IMPLEMENTATION-DEFINED",
-          "observable_law": null,
-          "positive_witness": null,
-          "falsifier": null,
-          "primary_source": null,
-          "source_kind": "function"
-        }
-      ],
-      "evidence_score": 0,
-      "selection": "NOT-SELECTED",
-      "coordinate": null,
-      "ratified": false,
-      "physical_t5_authorized": false,
-      "required_review": "PRIMARY-SOURCE-AND-SEMANTIC-LAW"
-    },
-    {
-      "semantic_name": "OPEN",
-      "evidence": [
-        {
-          "source_path": "knowledge/d10-clhs-streams-census-20261009.json",
-          "source_blob": "4c39efaf558dd654272a690e6a01c0ae1c1b262f",
-          "research_branch": "research/d10-clhs-streams-census-20261009",
-          "record_group": "rows",
-          "source_name": "OPEN",
-          "source_status": "HISTORICAL-REVIEW",
           "observable_law": null,
           "positive_witness": null,
           "falsifier": null,
@@ -4762,30 +6817,6 @@
           "falsifier": null,
           "primary_source": null,
           "source_kind": "function"
-        }
-      ],
-      "evidence_score": 0,
-      "selection": "NOT-SELECTED",
-      "coordinate": null,
-      "ratified": false,
-      "physical_t5_authorized": false,
-      "required_review": "PRIMARY-SOURCE-AND-SEMANTIC-LAW"
-    },
-    {
-      "semantic_name": "PAIRLIS",
-      "evidence": [
-        {
-          "source_path": "knowledge/d10-crossrepo-early-lisp-v1.json",
-          "source_blob": "4523aad78809da4da9ce37408a676e352b1ec508",
-          "research_branch": "research/d10-crossrepo-early-lisp-1",
-          "record_group": "reviewed_nonselect",
-          "source_name": "PAIRLIS",
-          "source_status": "CURRENT-PROJECTION",
-          "observable_law": null,
-          "positive_witness": null,
-          "falsifier": null,
-          "primary_source": null,
-          "source_kind": null
         }
       ],
       "evidence_score": 0,
@@ -5804,30 +7835,6 @@
       "required_review": "PRIMARY-SOURCE-AND-SEMANTIC-LAW"
     },
     {
-      "semantic_name": "WITH-OPEN-FILE",
-      "evidence": [
-        {
-          "source_path": "knowledge/d10-clhs-streams-census-20261009.json",
-          "source_blob": "4c39efaf558dd654272a690e6a01c0ae1c1b262f",
-          "research_branch": "research/d10-clhs-streams-census-20261009",
-          "record_group": "rows",
-          "source_name": "WITH-OPEN-FILE",
-          "source_status": "HISTORICAL-REVIEW",
-          "observable_law": null,
-          "positive_witness": null,
-          "falsifier": null,
-          "primary_source": null,
-          "source_kind": "macro"
-        }
-      ],
-      "evidence_score": 0,
-      "selection": "NOT-SELECTED",
-      "coordinate": null,
-      "ratified": false,
-      "physical_t5_authorized": false,
-      "required_review": "PRIMARY-SOURCE-AND-SEMANTIC-LAW"
-    },
-    {
       "semantic_name": "WITH-OPEN-STREAM",
       "evidence": [
         {
@@ -5995,5 +8002,10 @@
       "physical_t5_authorized": false,
       "required_review": "PRIMARY-SOURCE-AND-SEMANTIC-LAW"
     }
-  ]
+  ],
+  "lower_domain_pin": {
+    "path": "knowledge/d1-d9-foundation.json",
+    "git_blob": "09d1d71c39d1484dfd005a5068dbb18b76f0f0d4",
+    "policy": "NO-D10-CANDIDATE-FOR-EXACT-RATIFIED-LOWER-NAME-UNLESS-SEPARATE-BEHAVIORAL-PROOF"
+  }
 }
