@@ -70,6 +70,26 @@ class FilterTests(unittest.TestCase):
         self.row['source_pin'] = '1'*40
         self.assertEqual('HOLD_UNVERIFIED_PIN', self.result()['reason'])
 
+    def test_source_pinned_without_semantic_law_is_hold_not_no_provenance(self):
+        self.row['semantic_law'] = '   '
+        result = self.result()
+        self.assertEqual(('rejected', 'HOLD_NO_SEMANTIC_LAW'),
+                         (result['decision'], result['reason']))
+
+    def test_source_pin_mismatch_precedes_missing_semantic_law(self):
+        self.row['semantic_law'] = ''
+        self.row['source_pin'] = 'f' * 40
+        result = self.result()
+        self.assertEqual(('escalated', 'HOLD_UNVERIFIED_PIN'),
+                         (result['decision'], result['reason']))
+
+    def test_absent_source_is_still_no_provenance_even_without_law(self):
+        self.row['semantic_law'] = ''
+        self.row['donor_provenance'] = ''
+        result = self.result()
+        self.assertEqual(('rejected', 'EXCLUDE_NO_PROVENANCE'),
+                         (result['decision'], result['reason']))
+
     def test_witness_exists_but_not_run(self):
         self.row['witness_artifact'] = 'witness.json'
         self.assertEqual('HOLD_NOT_RUN', self.result()['reason'])
