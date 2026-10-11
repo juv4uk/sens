@@ -1,0 +1,32 @@
+{
+  "schema": "sens.git-branch-ancestry-run-summary/v1",
+  "date": "2026-10-11",
+  "repository": "juv4uk/sens",
+  "full_inventory_path": "research/branch-history/20261011/index.json",
+  "run_url": "https://github.com/juv4uk/sens/actions/runs/38104852799",
+  "run_id": 38104852799,
+  "job_log_id": 114368062040,
+  "run_exact_main_sha": "0480902353e20b7823f604c550f8ff8195afbc2a",
+  "observed_current_main_sha": "0d2cde420cd1fd75d6d69b69da88988133151ded",
+  "snapshot_branches": 4133,
+  "distinct_heads": 4034,
+  "counts": {
+    "IN_MAIN_ANCESTRY": 1256,
+    "NEEDS_CONTENT_REVIEW": 2877
+  },
+  "new_branch_names_seen": [],
+  "workflow_jobs": [
+    {
+      "name": "prohibit-new-branch-detection",
+      "conclusion": "success",
+      "status": "completed"
+    },
+    {
+      "name": "classify-legacy-branches",
+      "conclusion": "success",
+      "status": "completed"
+    }
+  ],
+  "interpretation": "At original run main SHA, 1256 heads are ancestors. 2877 heads differ in current tree from main. This is NOT proof 2877 contain unique admissible changes or that all historic deleted refs were enumerated. Historical branches are NOT all merged.",
+  "future_state": "Remaining 2877 require semantic dedup and direct-main or inert-archive replay. No new branches, no force merges. CI reports source verdicts; a platform ruleset is needed to restrict new branch creation; current rulesets=0 at last inspection."
+}
