@@ -74,6 +74,28 @@ fn content_store_membership_is_an_exact_d1_bit_not_structural_one() {
 }
 
 #[test]
+fn world_dedup_source_can_export_its_own_knowledge_envelope() {
+    let mut session = session();
+    let src = "(let ((source (world-tell (empty-world) (quote zoo) (quote ((has-fur cat)))))) (car (make-world-knowledge-package source (quote zoo))))";
+    assert_eq!(observe(&mut session, src), "(format . my-lisp-knowledge)");
+}
+
+#[test]
+fn world_dedup_can_import_its_exported_knowledge_package() {
+    let mut session = session();
+    let src = "(let ((source (world-tell (empty-world) (quote zoo) (quote ((has-fur cat)))))) (car (import-knowledge-package-world (empty-world) (make-world-knowledge-package source (quote zoo)))))";
+    assert_eq!(observe(&mut session, src), "accepted",
+        "an exported immutable world package must be reimportable");
+}
+
+#[test]
+fn world_dedup_two_equal_world_contents_share_one_key() {
+    let mut session = session();
+    let src = "(let ((source (world-tell (empty-world) (quote zoo) (quote ((has-fur cat)))))) (let ((copy (second (import-knowledge-package-world (empty-world) (make-world-knowledge-package source (quote zoo)))))) (content-store-size (content-store-put-world (content-store-put-world (empty-content-store) source) copy))))";
+    assert_eq!(observe(&mut session, src), "1");
+}
+
+#[test]
 fn object_package_fold_consumes_every_valid_package() {
     let mut session = session();
     let source = "(let ((decision (fs-build-object-store (list (fs-object-package (quote first)) (fs-object-package (quote second))) (empty-content-store)))) (list (car decision) (content-store-size (second decision))))";
