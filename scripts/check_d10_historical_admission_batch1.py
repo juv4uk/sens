@@ -93,9 +93,10 @@ def check(inv, batch, state, source, doc):
     n = len(live["rows"])
     unplaced = sum(r.get("coordinate") is None for r in live["rows"])
     assert n <= live["capacity"] == 1024
-    assert f"D10 selected              {n}/1024" in doc
-    assert f"unplaced                  {unplaced}" in doc
-    assert f"remaining                 {1024-n}" in doc
+    import re
+    assert re.search(r"(?m)^D10 selected[ \t]+" + str(n) + r"/1024[ \t]*$", doc)
+    assert re.search(r"(?m)^unplaced[ \t]+" + str(unplaced) + r"[ \t]*$", doc)
+    assert re.search(r"(?m)^remaining[ \t]+" + str(1024-n) + r"[ \t]*$", doc)
     return True
 
 def model_dpb(newbyte, width, offset, target):
