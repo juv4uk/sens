@@ -42,6 +42,31 @@ fn journal_event_fields_are_retrieved_from_a_real_alist() {
 }
 
 #[test]
+fn object_package_and_nonempty_map_addresses_are_structurally_consistent() {
+    let mut session = session();
+    assert_eq!(
+        observe(&mut session, "(car (fs-object-package-decision (fs-object-package (quote hello))))"),
+        "accepted",
+        "a canonical object envelope must be valid without foreign EQUAL semantics"
+    );
+    assert_eq!(
+        observe(&mut session, "(fs-object-addresses (внутрішня-мапа-список (внутрішня-мапа-вставити \"one\" (quote payload) map-empty)))"),
+        "(\"one\")",
+        "AVL dotted entries must project a proper key list"
+    );
+}
+
+#[test]
+fn empty_root_can_be_reconstructed_without_object_packages() {
+    let mut session = session();
+    assert_eq!(
+        observe(&mut session, "(car (fs-reconstruct-root (fs-root-package (fs-empty)) (quote ())))"),
+        "accepted",
+        "an empty root has no missing-address proof obligation"
+    );
+}
+
+#[test]
 fn referenced_address_checks_are_d1_and_fail_closed() {
     let mut session = session();
     for (source, expected) in [
