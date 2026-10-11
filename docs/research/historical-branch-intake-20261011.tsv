@@ -1487,7 +1487,7 @@ fix/sens-active-paths	UNTRIAGED	-	-	BRANCH-NAME-ONLY
 fix/sens-active-paths-current	UNTRIAGED	-	-	BRANCH-NAME-ONLY
 fix/sens-file-policy-single-owner-20261010	UNTRIAGED	-	-	BRANCH-NAME-ONLY
 fix/sens-performance-node24-37986748194	UNTRIAGED	-	-	BRANCH-NAME-ONLY
-fix/sens-priority-lowering-only	UNTRIAGED	-	-	BRANCH-NAME-ONLY
+fix/sens-priority-lowering-only	ALREADY-IN-MAIN-NEWER	f3a31a03fbdacb2077500d16412b73aa3ee57db0	8c60e92d7ab22d35e1beba804d62aac533874652	Current-main test file crates/sens/tests/sens_priority_over_names.rs exactly matches branch blob d01ee777205495e0987174c3b046e8faa4af3a1e, landed via direct main commit f3a31a03. PR #1949 is subsequently reported merged by GitHub; exact commit run/status API returned none, so no green claim.
 fix/sens-zero-physical-cond-oracle-20261010	UNTRIAGED	-	-	BRANCH-NAME-ONLY
 fix/sens-zero-postcore-cond-bootstrap-20261010	UNTRIAGED	-	-	BRANCH-NAME-ONLY
 fix/setq-location-identity-clippy	UNTRIAGED	-	-	BRANCH-NAME-ONLY
@@ -2972,7 +2972,7 @@ replay/1881-binary-default-current-main	UNTRIAGED	-	-	BRANCH-NAME-ONLY
 replay/1884-binary-file-default-current-main-2	UNTRIAGED	-	-	BRANCH-NAME-ONLY
 replay/1891-binary-xed-counts-current-main	UNTRIAGED	-	-	BRANCH-NAME-ONLY
 replay/1891-xed-binary-counts-current-main	UNTRIAGED	-	-	BRANCH-NAME-ONLY
-replay/1891-xed-binary-counts-current-main-3	UNTRIAGED	-	-	BRANCH-NAME-ONLY
+replay/1891-xed-binary-counts-current-main-3	ALREADY-IN-MAIN-NEWER	99a0f7130a40554a7e6d5be30f605fb13d1beb34	fd40580e958e189e281cd120c12e8c4e8d5ab280	Current xed_import.rs already emits form-count #b{:b}; three differing old generator/generated output blobs archived under research/domain-archive/20261011/pr1943, other three paths byte-identical to main. Older output counts/digests not re-applied; PR #1943 closed.
 replay/1895-probabilistic-label-current-main	UNTRIAGED	-	-	BRANCH-NAME-ONLY
 replay/1925-canonical-repl-on-1938	UNTRIAGED	-	-	BRANCH-NAME-ONLY
 replay/1926-xed-binary-counts-current-main-2	UNTRIAGED	-	-	BRANCH-NAME-ONLY
