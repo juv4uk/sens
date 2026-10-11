@@ -20,22 +20,22 @@
 
 (0011 content-store-put
   (0010 (store value)
-    (101101110 (knowledge-content-address value) value store)))
+    (внутрішня-мапа-вставити (knowledge-content-address value) value store)))
 
 (0011 content-store-get
   (0010 (store address)
-    (101100101 address store)))
+    (внутрішня-мапа-отримати address store)))
 
 (0011 content-store-contains?
   (0010 (store address)
-    (101100010 address store)))
+    (внутрішня-мапа-містить address store)))
 
 (0011 content-store-put-world
   (0010 (store world)
-    (101101110 (world-content-address world)
+    (внутрішня-мапа-вставити (world-content-address world)
                 (world-address-content world)
                 store)))
 
 (0011 content-store-size
   (0010 (store)
-    (000000 (101001100 store))))
+    (000000 (внутрішня-мапа-список store))))
