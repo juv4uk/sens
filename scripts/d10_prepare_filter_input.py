@@ -110,21 +110,24 @@ def prepare(root, index_path, output):
     rows = []
     names = set()
     ids = set()
+    name_collisions = 0
     verified_sources = 0
     for item in indexed:
         name = item["semantic_name"].strip()
         ident = item["candidate_id"].strip()
-        if not name or name.casefold() in names or not ident or ident in ids:
+        # A repeated *name* is NOT evidence of semantic equivalence. Historical
+        # candidate IDs are immutable source identities; only duplicate IDs
+        # may collapse, and that must fail closed rather than silently dedup.
+        if not name or not ident or ident in ids:
             raise ValueError("DUPLICATE_OR_EMPTY_SOURCE_IDENTITY")
         if item["ratified"] != "0":
             raise ValueError("UNEXPECTED_D10_RATIFIED_STATUS")
+        if name.casefold() in names:
+            name_collisions += 1
         names.add(name.casefold())
         ids.add(ident)
-        selected = canonical.get(name.casefold())
-        if selected and selected["stable_id"] != ident:
-            # A historical name may have entered the canonical D10 after the
-            # name-index snapshot. The present stable ID is authoritative.
-            ident = selected["stable_id"]
+        # Never rewrite a source candidate_id into a selected D10 stable_id
+        # based on identical human spelling. Both identities need evidence.
         laws = json_list(item["semantic_law_variants"])
         refs = json_list(item["source_records_sha_pinned"])
         source_ref = ""
@@ -154,8 +157,10 @@ def prepare(root, index_path, output):
     overlay_added = 0
     canonical_text = canonical_path.read_text()
     for name, selected in sorted(canonical.items()):
-        if name in names:
+        if selected["stable_id"] in ids:
             continue
+        # A historical namesake does not suppress the selected canonical
+        # stable_id. Add the canonical identity as a separate unverified row.
         name_spelling = selected["semantic_name"]
         line = find_name_line(canonical_text, name_spelling, False)
         row = {col: "" for col in COLUMNS}
@@ -176,6 +181,7 @@ def prepare(root, index_path, output):
     return {
         "index_rows": len(indexed), "canonical_selected": len(canonical),
         "new_selected_since_index": overlay_added, "filter_input_rows": len(rows),
+        "name_collisions_not_deduped": name_collisions,
         "source_file_pin_verified": verified_sources,
         "executed_witnesses_supplied": 0,
         "semantic_dedup_certificates_supplied": 0,
