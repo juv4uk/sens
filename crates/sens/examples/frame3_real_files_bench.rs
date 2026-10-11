@@ -10,22 +10,22 @@ use sens::{
 #[path = "../../../research/framed3/rust_codec/senc.rs"]
 mod senc;
 
-const SAMPLES: usize = 21;
+const SAMPLES: usize = 15;
+const INNER: usize = 16;
 
-fn median(samples: &mut [u128]) -> u128 {
-    samples.sort_unstable();
-    samples[samples.len() / 2]
-}
-fn time_ns(mut op: impl FnMut()) -> u128 {
-    // All timings are warm, after codec admission, one physical file per call.
-    op();
-    let mut samples = vec![0u128; SAMPLES];
-    for sample in &mut samples {
+/// Warm repeated batches reduce sub-microsecond timer quantization;
+/// p50/p95 are per-operation wall times on GitHub-hosted CPU.
+fn time_ns(mut op: impl FnMut()) -> (f64, f64) {
+    for _ in 0..INNER { op(); }
+    let mut samples = Vec::with_capacity(SAMPLES);
+    for _ in 0..SAMPLES {
         let start = Instant::now();
-        op();
-        *sample = start.elapsed().as_nanos();
+        for _ in 0..INNER { op(); }
+        let elapsed = start.elapsed().as_nanos();
+        samples.push(elapsed as f64 / INNER as f64);
     }
-    median(&mut samples)
+    samples.sort_by(f64::total_cmp);
+    (samples[SAMPLES / 2], samples[(SAMPLES * 95).div_ceil(100) - 1])
 }
 
 fn run() -> Result<(), Box<dyn std::error::Error>> {
@@ -44,9 +44,9 @@ fn run() -> Result<(), Box<dyn std::error::Error>> {
     }
     println!("# corpus=real git-tracked physical .sens, no synthetic repetition");
     println!("# F3=original research carrier with 1-byte profile label included");
-    println!("# timings=warm Rust encode/decode, {} samples p50 ns/op, unpaired order", SAMPLES);
+    println!("# timings=warm buffer-only Rust encode/decode, {SAMPLES} samples of {INNER} operations each; p50/p95 ns/op; per-file unpaired");
     println!("# this benchmark checks Rust D2 admission, NOT evaluation of arbitrary files");
-    println!("file\tstatus\tt5_bytes\tf3_total_bytes\tt5_encode_p50_ns\tf3_encode_p50_ns\tt5_decode_p50_ns\tf3_decode_p50_ns");
+    println!("file\tstatus\tt5_bytes\tf3_total_bytes\tt5_encode_p50_ns\tt5_encode_p95_ns\tf3_encode_p50_ns\tf3_encode_p95_ns\tt5_decode_p50_ns\tt5_decode_p95_ns\tf3_decode_p50_ns\tf3_decode_p95_ns");
     let mut scanned = 0usize;
     let mut admitted = 0usize;
     let mut f3_supported = 0usize;
@@ -56,7 +56,7 @@ fn run() -> Result<(), Box<dyn std::error::Error>> {
         scanned += 1;
         let raw = fs::read(Path::new(&path))?;
         let Ok(physical) = PhysicalT5Program::decode(&raw) else {
-            println!("{path}\tREJECTED_RUST_T5_READER\t{}\tNA\tNA\tNA\tNA\tNA",raw.len());
+            println!("{path}\tREJECTED_RUST_T5_READER\t{}\tNA\tNA\tNA\tNA\tNA\tNA\tNA\tNA\tNA\tNA",raw.len());
             continue;
         };
         let words = decode_ternary_words(&raw).map_err(|e| format!("T5 decode after admission: {e:?}"))?;
@@ -79,7 +79,7 @@ fn run() -> Result<(), Box<dyn std::error::Error>> {
             std::hint::black_box(decode_ternary_words(std::hint::black_box(&raw)).unwrap());
         });
         let Ok(body) = senc::frame_encode(&as_text) else {
-            println!("{path}\tF3_UNSUPPORTED\t{}\tNA\t{t5_en}\tNA\t{t5_de}\tNA",raw.len());
+            println!("{path}\tF3_UNSUPPORTED\t{}\tNA\t{:.2}\t{:.2}\tNA\tNA\t{:.2}\t{:.2}\tNA\tNA",raw.len(), t5_en.0, t5_en.1, t5_de.0, t5_de.1);
             continue;
         };
         let mut f3 = vec![senc::FRAME_LABEL];
@@ -87,7 +87,7 @@ fn run() -> Result<(), Box<dyn std::error::Error>> {
         match senc::decode_senc(&f3) {
             Ok(restored) if restored == as_text => {}
             Err(senc::SencError::NotCanonical) => {
-                println!("{path}\tF3_REJECTED_NONCANONICAL\t{}\tNA\t{t5_en}\tNA\t{t5_de}\tNA",raw.len());
+                println!("{path}\tF3_REJECTED_NONCANONICAL\t{}\tNA\t{:.2}\t{:.2}\tNA\tNA\t{:.2}\t{:.2}\tNA\tNA",raw.len(), t5_en.0, t5_en.1, t5_de.0, t5_de.1);
                 continue;
             }
             other => return Err(format!("F3 did not roundtrip exact source: {path}: {other:?}").into()),
@@ -104,7 +104,7 @@ fn run() -> Result<(), Box<dyn std::error::Error>> {
         let f3_de = time_ns(|| {
             std::hint::black_box(senc::decode_senc(std::hint::black_box(&f3)).unwrap());
         });
-        println!("{path}\tROUNDTRIP_OK\t{}\t{}\t{t5_en}\t{f3_en}\t{t5_de}\t{f3_de}",raw.len(),f3.len());
+        println!("{path}\tROUNDTRIP_OK\t{}\t{}\t{:.2}\t{:.2}\t{:.2}\t{:.2}\t{:.2}\t{:.2}\t{:.2}\t{:.2}",raw.len(), f3.len(), t5_en.0, t5_en.1, f3_en.0, f3_en.1, t5_de.0, t5_de.1, f3_de.0, f3_de.1);
     }
     eprintln!("REAL_FILE_BENCH: tracked={scanned}, Rust-T5-admitted={admitted}, F3-exact-roundtrip={f3_supported}, compared-only-on-F3-supported T5={t5_total}B F3={f3_total}B");
     if admitted == 0 {
