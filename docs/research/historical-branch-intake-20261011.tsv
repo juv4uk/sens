@@ -2334,7 +2334,7 @@ integration/d10-bit-hash-after-636-20261009	UNTRIAGED	-	-	BRANCH-NAME-ONLY
 integration/d10-bit-hash-on-630-20261009	UNTRIAGED	-	-	BRANCH-NAME-ONLY
 integration/d10-bit-hash-second-tranche-20261009	UNTRIAGED	-	-	BRANCH-NAME-ONLY
 integration/d10-clock-signal-ledger-20261009	UNTRIAGED	-	-	BRANCH-NAME-ONLY
-integration/d10-four-historical-roots-current-main-20261009	UNTRIAGED	-	-	BRANCH-NAME-ONLY
+integration/d10-four-historical-roots-current-main-20261009	PARTIALLY-ARCHIVED-TO-MAIN	99ce688126c5322470d4c634c3d21531e68a89e5	0986db8bbcfea918433062c8248547be74776af2	research/domain-archive/20261011/20261009-d10-four-historical-roots/provenance.json (5 missing historical source blobs copied; 14 diverged code paths require separate semantic review)
 integration/d10-gf2-minimal-recurrence-current-main-20261009	UNTRIAGED	-	-	BRANCH-NAME-ONLY
 integration/d10-gray-word-on-632-20261009	UNTRIAGED	-	-	BRANCH-NAME-ONLY
 integration/d10-hysteresis-634-to-635-20261009	UNTRIAGED	-	-	BRANCH-NAME-ONLY
