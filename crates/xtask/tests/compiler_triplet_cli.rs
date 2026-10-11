@@ -4,6 +4,7 @@ use std::process::{Command, Output};
 use std::time::{SystemTime, UNIX_EPOCH};
 
 const SOURCE_RELATIVE: &str = "examples/migrated/smoke-quote.lisp";
+const NESTED_SOURCE_RELATIVE: &str = "examples/migrated/smoke-nested.lisp";
 
 struct TempTree(PathBuf);
 
@@ -38,7 +39,7 @@ struct Triplet {
     view: PathBuf,
 }
 
-fn publish_triplet(tree: &TempTree) -> Triplet {
+fn publish_triplet(tree: &TempTree, source_relative: &str) -> Triplet {
     let repo_root = PathBuf::from(env!("CARGO_MANIFEST_DIR"))
         .join("../..")
         .canonicalize()
@@ -53,7 +54,7 @@ fn publish_triplet(tree: &TempTree) -> Triplet {
         .arg("--report")
         .arg(&report)
         .arg("--write")
-        .arg(SOURCE_RELATIVE)
+        .arg(source_relative)
         .output()
         .expect("canonical three-projection publisher should execute");
 
@@ -76,7 +77,7 @@ fn publish_triplet(tree: &TempTree) -> Triplet {
         "publisher status must preserve its explicit semantic-admission boundary"
     );
 
-    let lisp = mirror.join(SOURCE_RELATIVE);
+    let lisp = mirror.join(source_relative);
     let sens = lisp.with_extension("sens");
     let view = lisp.with_extension("");
     assert!(lisp.is_file(), "publisher must stage canonical .lisp");
@@ -101,7 +102,7 @@ fn compiler_triplet(sens: &Path, output: &Path) -> Output {
 #[test]
 fn real_three_projection_publisher_output_reaches_the_sens_compiler() {
     let tree = TempTree::new();
-    let triplet = publish_triplet(&tree);
+    let triplet = publish_triplet(&tree, SOURCE_RELATIVE);
     let artifact = tree.path().join("artifact.bin");
 
     let output = compiler_triplet(&triplet.sens, &artifact);
@@ -115,9 +116,27 @@ fn real_three_projection_publisher_output_reaches_the_sens_compiler() {
 }
 
 #[test]
+fn real_three_projection_nested_program_reaches_the_sens_compiler() {
+    let tree = TempTree::new();
+    let triplet = publish_triplet(&tree, NESTED_SOURCE_RELATIVE);
+    let artifact = tree.path().join("nested-artifact.bin");
+
+    let output = compiler_triplet(&triplet.sens, &artifact);
+    assert!(
+        output.status.success(),
+        "nested three-projection compiler run failed: {}",
+        String::from_utf8_lossy(&output.stderr)
+    );
+    assert!(
+        !fs::read(&artifact).expect("nested compiler artifact").is_empty(),
+        "nested source must produce a canonical compiler artifact"
+    );
+}
+
+#[test]
 fn mismatched_view_is_blocked_without_publishing_an_artifact() {
     let tree = TempTree::new();
-    let triplet = publish_triplet(&tree);
+    let triplet = publish_triplet(&tree, SOURCE_RELATIVE);
     fs::write(&triplet.view, b"10 100 00 000 01\n").expect("tamper extensionless view");
     let artifact = tree.path().join("must-not-exist.bin");
 
@@ -132,7 +151,7 @@ fn mismatched_view_is_blocked_without_publishing_an_artifact() {
 #[test]
 fn missing_final_lf_is_rejected_as_noncanonical_file_projection() {
     let tree = TempTree::new();
-    let triplet = publish_triplet(&tree);
+    let triplet = publish_triplet(&tree, SOURCE_RELATIVE);
     fs::write(&triplet.view, b"10 001 00 000 01").expect("remove canonical final LF");
     let artifact = tree.path().join("must-not-exist.bin");
 
@@ -147,7 +166,7 @@ fn missing_final_lf_is_rejected_as_noncanonical_file_projection() {
 #[test]
 fn source_and_machine_view_must_lower_to_the_same_exact_program() {
     let tree = TempTree::new();
-    let triplet = publish_triplet(&tree);
+    let triplet = publish_triplet(&tree, SOURCE_RELATIVE);
     fs::write(&triplet.lisp, b"(атом? ())\n").expect("tamper source projection");
     let artifact = tree.path().join("must-not-exist.bin");
 
@@ -162,7 +181,7 @@ fn source_and_machine_view_must_lower_to_the_same_exact_program() {
 #[test]
 fn sw1_and_triplet_modes_cannot_be_selected_together() {
     let tree = TempTree::new();
-    let triplet = publish_triplet(&tree);
+    let triplet = publish_triplet(&tree, SOURCE_RELATIVE);
     let sw1 = tree.path().join("input.sw1");
     fs::write(&sw1, b"not a SW1 stream").expect("write negative SW1 control");
     let artifact = tree.path().join("must-not-exist.bin");
@@ -189,7 +208,7 @@ fn sw1_and_triplet_modes_cannot_be_selected_together() {
 #[test]
 fn existing_artifact_is_never_overwritten() {
     let tree = TempTree::new();
-    let triplet = publish_triplet(&tree);
+    let triplet = publish_triplet(&tree, SOURCE_RELATIVE);
     let artifact = tree.path().join("immutable.bin");
     fs::write(&artifact, b"pre-existing evidence").expect("seed output file");
 
@@ -207,7 +226,7 @@ fn symlinked_physical_t5_is_rejected() {
     use std::os::unix::fs::symlink;
 
     let tree = TempTree::new();
-    let triplet = publish_triplet(&tree);
+    let triplet = publish_triplet(&tree, SOURCE_RELATIVE);
     let alias = tree.path().join("symlink-alias");
     let lisp = alias.with_extension("lisp");
     let sens = alias.with_extension("sens");
