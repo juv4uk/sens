@@ -23,6 +23,42 @@ pub enum SmallF3Error {
     NotSmallerThanT5,
 }
 
+
+/// Choose original F3 only for a canonical single-root tiny program if the
+/// complete physical carrier (including 0xf3) saves bytes. Other canonical
+/// T5 programs remain T5. This never mutates the input or falls back at decode.
+pub fn encode_explicit_small_f3(t5_input: &[u8]) -> Result<Option<Vec<u8>>, SmallF3Error> {
+    let parsed = PhysicalT5Program::decode(t5_input)
+        .map_err(|_| SmallF3Error::InvalidProgram)?;
+    if parsed.form_count() != 1 || t5_input.len() > MAX_TINY_T5_BYTES {
+        return Ok(None);
+    }
+    let typed = decode_ternary_words(t5_input)
+        .map_err(|_| SmallF3Error::InvalidProgram)?;
+    let current = encode_ternary_words(&typed)
+        .map_err(|_| SmallF3Error::InvalidProgram)?;
+    if current != t5_input {
+        return Err(SmallF3Error::InvalidProgram);
+    }
+    let exact = typed.iter().map(|w| {
+        format!("{:0width$b}", w.packed_bits(), width = w.width())
+    }).collect::<Vec<_>>();
+    let body = match original_f3::frame_encode(&exact) {
+        Ok(data) => data,
+        Err(_) => return Ok(None),
+    };
+    let mut small = vec![original_f3::FRAME_LABEL];
+    small.extend_from_slice(&body);
+    if small.len() >= t5_input.len() {
+        return Ok(None);
+    }
+    // Strict D3 code-admission, byte-exact canonical T5 word identity.
+    match decode_explicit_small_f3(&small) {
+        Ok(recovered) if recovered == t5_input => Ok(Some(small)),
+        _ => Ok(None), // optional compression may be unsupported, T5 stays valid
+    }
+}
+
 /// Decode explicitly provided .senc F3 bytes to the canonical physical T5
 /// representation for the existing parser/executor. Callers MUST require the
 /// .senc extension and an explicit F3 command, not byte autodetection.
@@ -74,6 +110,18 @@ mod tests {
             .unwrap().execute(&mut crate::Session::default()).unwrap();
         assert_eq!(a.value, b.value);
         assert_eq!(a.output, b.output);
+    }
+
+    #[test]
+    fn produce_tiny_f3_only_when_full_file_is_smaller() {
+        let t5 = [0x63, 0x89, 0x06, 0xa1];
+        assert_eq!(
+            encode_explicit_small_f3(&t5).unwrap(),
+            Some(vec![0xf3, 0x40, 0x60])
+        );
+        let t5_eq = crate::encode_binary_projection_ternary("10 010 0 01").unwrap();
+        assert!(encode_explicit_small_f3(&t5_eq).unwrap().is_none());
+        assert_eq!(decode_explicit_small_f3(&[0xf3, 0x40, 0x60]).unwrap(), t5);
     }
 
     #[test]
