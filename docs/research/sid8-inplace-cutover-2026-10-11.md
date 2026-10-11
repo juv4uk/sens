@@ -2,6 +2,16 @@
 
 This is an execution and blocker ledger, not a claim that the repository is fully migrated.
 
+## 2026-10-12: whole-corpus read-only triage and three D3-source repairs
+
+- Live GitHub Actions [#38183466413](https://github.com/juv4uk/sens/actions/runs/38183466413) **PASS**: **686 tracked .lisp files** were classified. **157 active candidates**, 168 contract/record-only, 173 preserved original archives, 154 preserved test/evidence witnesses and 34 unclassified paths. No source content, historical proof or binary format was changed by the census.
+- **805 eight-bit word-shaped list heads** remain visible in the inspected live/unclassified source scope; **124 separate eight-bit data atoms** were explicitly left alone. Among these are modern D8 residents, so word width alone is *not proof of old SID8*. **71 source-era-uncertain files** remain blocked from automatic rewrite; the only file with an explicit old DEFINE-era anchor was `lib/machine/block.lisp` (16 heads), which still requires its independent 9-case executable admission witness.
+- Independent D3 read-only findings: **887 COND_NOT_TWO_FIELDS**, **246 COND_HOST_TRUTH**, **9 LEGACY_W8_CALL** across live/unclassified source. **Zero unscannable** after moving the generated machine-iclass index, frozen Skylake SID8 provenance, mechanism records, and CML export records out of the executable rewrite queue. This avoids thousands of false positives and data loss.
+- Code: `scripts/audit_sid8_all_lisp_sources.py`, tests: `tests/test_audit_sid8_all_lisp_sources.py`, Actions: `.github/workflows/sid8-all-lisp-census.yml`. The artifact contains a complete per-file action/reason ledger.
+- **Three source-specific D3 fixes** (18 former three-part COND clauses) were committed to `scripts/check-core3-profile-contract.lisp` (14), `scripts/check-core4-predicate-answer-scale.lisp` (2), and `experiments/core4-predicate-answer-carrier-matrix.lisp` (2). Only demonstrated D1-bit conditions were simplified; the D1 true fallback is `(010 (001 ()))`. Pinned original-blob and negative controls in `tests/test_core3_profile_d3_source.py` **PASS** at [Actions #38183833706](https://github.com/juv4uk/sens/actions/runs/38183833706). These 18 repairs are **not** counted as new old-SID8-to-domain head substitutions, and static proof is not a runtime parity admission.
+- Fail-closed continuation: no blind conversion of multi-outcome historic COND, DEFMACRO package into one new resident, D6/D8 MAP without per-call arity proof, D10 observation without runtime admission, or W8 machine/surface records that are actually data.
+
+
 ## 2026-10-12: five-file D4-only blocker-safe cohort
 
 - 38 historical D4 call heads rewritten in 5 existing Lisp sources: knowledge/guard-reference.lisp (25), knowledge/guard-fact-policy.lisp (6), scripts/enforce-function-table-mechanisms.lisp (2), scripts/enforce-island-math-evidence.lisp (2), scripts/semantic-authority-guard-enforce.lisp (3).
