@@ -1,3 +1,28 @@
+<!-- OWNER-D24-EXACT-NUMERIC-FRAME-20261011:BEGIN -->
+## Core NEG/RATIO: двійкове обрамлення та упаковані байти вже перевірені
+
+Понад уже ратифікованим Core-законом виконання NEG/RATIO,
+існуючий `binary_framing.rs` має **адитивний** механічний
+EXT=11 для строго канонічної signed/rational композиції D24+.
+Формат зберігає точну ширину Dn, знак, повні слова чисельника
+та знаменника; decode відхиляє нульовий знаменник, `−0`,
+нескорочені дроби, unit-denominator RATIO, неправильну ширину
+і обрізані дані. `encode_numeric_value_frame`/
+`decode_numeric_value_frame` виконують Value round-trip,
+`encode_packed_numeric_value`/`decode_packed_numeric_value`
+користуються **наявним** `PackedBitstream` і перевіряють
+канонічний хвіст та точну довжину бітів. Старі фрейми без змін.
+Це фреймінг-метадані, **не новий SENS функціональний opcode**.
+
+Увага: `PackedBitstream` із D24 NEG/RATIO **НЕ означає**
+повний канонічний фізичний `.sens`/T5 program reader.
+Чинний T5 працює зі словами D1–D9; AST/FASL/source
+reification для цих композицій не додано. Не вставляти їх
+у T5 під невизначеними резидентами, не відключати oracle
+і не видавати поточний фрейм за повний `.sens` файл.
+Без нових гілок/ядер, всі докази через Hosted CI точного SHA.
+<!-- OWNER-D24-EXACT-NUMERIC-FRAME-20261011:END -->
+
 <!-- OWNER-D24-NEG-RATIO-EXEC-20261011:BEGIN -->
 ## Доведена Core-математика NEG/RATIO — без нових доменів
 
