@@ -1,0 +1,61 @@
+{
+  "schema": "d10-fill-v1-state/v1",
+  "status": "RESEARCH-UNRATIFIED",
+  "authority": "#4012",
+  "date": "2026-10-07",
+  "foundation": {
+    "current_contract": "11.8",
+    "current_authority": "#4008",
+    "current_domains": [
+      "D1",
+      "D2",
+      "D3",
+      "D4",
+      "D5",
+      "D6",
+      "D7",
+      "D8",
+      "D9"
+    ],
+    "parent_domain": "D9",
+    "d9_occupancy": 512,
+    "d9_ratified": true,
+    "d9_ratified_map": "knowledge/d9-ratified.json",
+    "research_domain": "D10"
+  },
+  "target": {
+    "domain": "D10",
+    "width": 10,
+    "capacity": 1024,
+    "dense_target": 1024,
+    "selected_semantic_candidates": 256,
+    "remaining_semantic_candidates": 768,
+    "law_forced_coordinates": 256,
+    "unplaced_selected_candidates": 0,
+    "ratified_residents": 0
+  },
+  "first_tranche": {
+    "kind": "PROVED-SELECTOR-GENERATOR",
+    "artifact": "knowledge/d10-selector-seed.json",
+    "parents": 128,
+    "children": 256,
+    "coordinate_rule": "D9 proved selector p -> D10 p0/p1",
+    "meaning_rule": "suffix 0 appends A/CAR; suffix 1 appends D/CDR"
+  },
+  "authority_boundary": {
+    "d9_coordinates": "NORMATIVE D9 parent identities under #4008",
+    "d9_to_d10_children": "NO AUTOMATIC SEMANTICS FROM WIDTH OR SUFFIX",
+    "d9_selector_law": "MAY CROSS because independently proved",
+    "legacy_sens8_sid8_function8": "NO D10 PLACEMENT AUTHORITY"
+  },
+  "construction_order": [
+    "preserve D9 positive/negative evidence and holdouts",
+    "generate law-forced candidates",
+    "build 1024 distinct semantic meanings",
+    "reject exact D1-D9 duplicates, pure aliases, mechanism-only rows and falsified rows",
+    "classify generator/algebra/duality/product/local families",
+    "fix theorem-forced geometry only",
+    "gauge-fix residual placement only after semantic inventory is complete",
+    "owner ratification last"
+  ]
+}

@@ -1,0 +1,400 @@
+{
+  "schema": "sens.domain-research-archive-extension/v1",
+  "date": "2026-10-11",
+  "kind": "ORIGINAL-GIT-BLOB-PROOF-ARCHIVE",
+  "status": "HISTORICAL-EVIDENCE-ONLY-NOT-EXECUTABLE-NOT-RATIFIED",
+  "summary": "14 historical domain-research PRs: D6, D7, D3–D8, D9 and early D10. Archived exact Git blobs; never replace authoritative registries or activate historical transport.",
+  "pull_requests": [
+    3315,
+    3514,
+    3371,
+    3189,
+    3117,
+    3131,
+    3133,
+    3136,
+    3997,
+    4002,
+    4014,
+    4764,
+    4798,
+    4841
+  ],
+  "record_count": 46,
+  "records": [
+    {
+      "pr": 3315,
+      "source_pr": "https://github.com/juv4uk/sens/pull/3315",
+      "original_path": "docs/research/d6-v2-cleanroom-shadow.md",
+      "archived_path": "research/domain-archive/20261011/pr3315/docs/research/d6-v2-cleanroom-shadow.md",
+      "exact_git_blob": "5fbf68a273f8ba4416ac5f39d0bdac6ceac72a65",
+      "source_change": "added"
+    },
+    {
+      "pr": 3315,
+      "source_pr": "https://github.com/juv4uk/sens/pull/3315",
+      "original_path": "docs/research/d6-v2-cleanroom-shadow.uk.md",
+      "archived_path": "research/domain-archive/20261011/pr3315/docs/research/d6-v2-cleanroom-shadow.uk.md",
+      "exact_git_blob": "4818c85625eb07f4e433379d9192ec801247ee7e",
+      "source_change": "added"
+    },
+    {
+      "pr": 3315,
+      "source_pr": "https://github.com/juv4uk/sens/pull/3315",
+      "original_path": "knowledge/d6-v2-cleanroom-shadow.json",
+      "archived_path": "research/domain-archive/20261011/pr3315/knowledge/d6-v2-cleanroom-shadow.json",
+      "exact_git_blob": "a0e9934c0660d9293ab0cddb33085b228f84b19b",
+      "source_change": "added"
+    },
+    {
+      "pr": 3315,
+      "source_pr": "https://github.com/juv4uk/sens/pull/3315",
+      "original_path": "scripts/check-d6-v2-cleanroom-shadow.py",
+      "archived_path": "research/domain-archive/20261011/pr3315/scripts/check-d6-v2-cleanroom-shadow.py.source.txt",
+      "exact_git_blob": "0f56fb968f0b4b66d72aa3224a10260c5fdeb6b8",
+      "source_change": "added"
+    },
+    {
+      "pr": 3514,
+      "source_pr": "https://github.com/juv4uk/sens/pull/3514",
+      "original_path": "knowledge/cross-width-law-atlas.json",
+      "archived_path": "research/domain-archive/20261011/pr3514/knowledge/cross-width-law-atlas.json",
+      "exact_git_blob": "3b2ef9feaed72208f905a4df1a2351f42bc978ec",
+      "source_change": "added"
+    },
+    {
+      "pr": 3514,
+      "source_pr": "https://github.com/juv4uk/sens/pull/3514",
+      "original_path": "scripts/check-cross-width-law-atlas.py",
+      "archived_path": "research/domain-archive/20261011/pr3514/scripts/check-cross-width-law-atlas.py.source.txt",
+      "exact_git_blob": "73929c6055732a136f6b293aa184525cb14df258",
+      "source_change": "added"
+    },
+    {
+      "pr": 3371,
+      "source_pr": "https://github.com/juv4uk/sens/pull/3371",
+      "original_path": "benchmarks/function-number-product-space/README.md",
+      "archived_path": "research/domain-archive/20261011/pr3371/benchmarks/function-number-product-space/README.md",
+      "exact_git_blob": "bee0370340387a4006dd4d0eb82803208e6c18ed",
+      "source_change": "added"
+    },
+    {
+      "pr": 3371,
+      "source_pr": "https://github.com/juv4uk/sens/pull/3371",
+      "original_path": "benchmarks/function-number-product-space/probe.py",
+      "archived_path": "research/domain-archive/20261011/pr3371/benchmarks/function-number-product-space/probe.py.source.txt",
+      "exact_git_blob": "b46c5f8efe51701dd0f1394191cce62f7454ffc1",
+      "source_change": "added"
+    },
+    {
+      "pr": 3371,
+      "source_pr": "https://github.com/juv4uk/sens/pull/3371",
+      "original_path": "benchmarks/function-number-product-space/selector_slab.py",
+      "archived_path": "research/domain-archive/20261011/pr3371/benchmarks/function-number-product-space/selector_slab.py.source.txt",
+      "exact_git_blob": "e646999ef19a095eb025331ba969f18963e81703",
+      "source_change": "added"
+    },
+    {
+      "pr": 3189,
+      "source_pr": "https://github.com/juv4uk/sens/pull/3189",
+      "original_path": "knowledge/d3-d8-stable-residents.json",
+      "archived_path": "research/domain-archive/20261011/pr3189/knowledge/d3-d8-stable-residents.json",
+      "exact_git_blob": "c3f7ec12484277d33c854b6ff8dfa1ddc9561926",
+      "source_change": "added"
+    },
+    {
+      "pr": 3189,
+      "source_pr": "https://github.com/juv4uk/sens/pull/3189",
+      "original_path": "knowledge/repo-tooling-inventory.lisp",
+      "archived_path": "research/domain-archive/20261011/pr3189/knowledge/repo-tooling-inventory.lisp.source.txt",
+      "exact_git_blob": "a812bdd5668935f18250b380628535acd0b2fca1",
+      "source_change": "modified"
+    },
+    {
+      "pr": 3189,
+      "source_pr": "https://github.com/juv4uk/sens/pull/3189",
+      "original_path": "scripts/check-3051-stable-resident-corpus.py",
+      "archived_path": "research/domain-archive/20261011/pr3189/scripts/check-3051-stable-resident-corpus.py.source.txt",
+      "exact_git_blob": "755c37203c0dd14cea26a2e774e0273f37655c70",
+      "source_change": "added"
+    },
+    {
+      "pr": 3117,
+      "source_pr": "https://github.com/juv4uk/sens/pull/3117",
+      "original_path": "benchmarks/d7-phonology-geometry/run.py",
+      "archived_path": "research/domain-archive/20261011/pr3117/benchmarks/d7-phonology-geometry/run.py.source.txt",
+      "exact_git_blob": "f165034d27a229b8e3167408896c45ac49526105",
+      "source_change": "added"
+    },
+    {
+      "pr": 3117,
+      "source_pr": "https://github.com/juv4uk/sens/pull/3117",
+      "original_path": "benchmarks/d7-vowel-geometry/run.py",
+      "archived_path": "research/domain-archive/20261011/pr3117/benchmarks/d7-vowel-geometry/run.py.source.txt",
+      "exact_git_blob": "a5829e7549f981dd6582aaea0f78806f240b5c04",
+      "source_change": "added"
+    },
+    {
+      "pr": 3131,
+      "source_pr": "https://github.com/juv4uk/sens/pull/3131",
+      "original_path": "benchmarks/d7-convention-residue/run.py",
+      "archived_path": "research/domain-archive/20261011/pr3131/benchmarks/d7-convention-residue/run.py.source.txt",
+      "exact_git_blob": "0d6167db43d6361d64bb2d5ee5c9fbbf248b76a3",
+      "source_change": "added"
+    },
+    {
+      "pr": 3133,
+      "source_pr": "https://github.com/juv4uk/sens/pull/3133",
+      "original_path": "benchmarks/d7-nonvarga-geometry/run.py",
+      "archived_path": "research/domain-archive/20261011/pr3133/benchmarks/d7-nonvarga-geometry/run.py.source.txt",
+      "exact_git_blob": "15cedfc4bc962638b62bcd0b8bd10b94c28c26d1",
+      "source_change": "added"
+    },
+    {
+      "pr": 3136,
+      "source_pr": "https://github.com/juv4uk/sens/pull/3136",
+      "original_path": "benchmarks/d7-vowel-geometry/run.py",
+      "archived_path": "research/domain-archive/20261011/pr3136/benchmarks/d7-vowel-geometry/run.py.source.txt",
+      "exact_git_blob": "a5829e7549f981dd6582aaea0f78806f240b5c04",
+      "source_change": "added"
+    },
+    {
+      "pr": 3997,
+      "source_pr": "https://github.com/juv4uk/sens/pull/3997",
+      "original_path": "docs/research/d9-final-semantic-fill-v1.uk.md",
+      "archived_path": "research/domain-archive/20261011/pr3997/docs/research/d9-final-semantic-fill-v1.uk.md",
+      "exact_git_blob": "29fb10b94860c1ae7ca99df55b3a677c0d7aeb3c",
+      "source_change": "added"
+    },
+    {
+      "pr": 3997,
+      "source_pr": "https://github.com/juv4uk/sens/pull/3997",
+      "original_path": "knowledge/d9-fill-v1-state.json",
+      "archived_path": "research/domain-archive/20261011/pr3997/knowledge/d9-fill-v1-state.json",
+      "exact_git_blob": "2afc9bfab85a5113243985f3b59fd5684505ac09",
+      "source_change": "modified"
+    },
+    {
+      "pr": 3997,
+      "source_pr": "https://github.com/juv4uk/sens/pull/3997",
+      "original_path": "knowledge/d9-final-semantic-fill-v1.json",
+      "archived_path": "research/domain-archive/20261011/pr3997/knowledge/d9-final-semantic-fill-v1.json",
+      "exact_git_blob": "b8e6c9da022780c9b205e5d8344889c9687871b4",
+      "source_change": "added"
+    },
+    {
+      "pr": 3997,
+      "source_pr": "https://github.com/juv4uk/sens/pull/3997",
+      "original_path": "knowledge/d9-v1-semantic-inventory.json",
+      "archived_path": "research/domain-archive/20261011/pr3997/knowledge/d9-v1-semantic-inventory.json",
+      "exact_git_blob": "c0b298b8701e74ac30a00ba8165072b19caade3e",
+      "source_change": "modified"
+    },
+    {
+      "pr": 3997,
+      "source_pr": "https://github.com/juv4uk/sens/pull/3997",
+      "original_path": "scripts/check-d9-final-semantic-fill-v1.py",
+      "archived_path": "research/domain-archive/20261011/pr3997/scripts/check-d9-final-semantic-fill-v1.py.source.txt",
+      "exact_git_blob": "fd0ef4bf2a09612a9bf251ace7f71171e8601815",
+      "source_change": "added"
+    },
+    {
+      "pr": 3997,
+      "source_pr": "https://github.com/juv4uk/sens/pull/3997",
+      "original_path": "scripts/check-d9-v1-semantic-inventory.py",
+      "archived_path": "research/domain-archive/20261011/pr3997/scripts/check-d9-v1-semantic-inventory.py.source.txt",
+      "exact_git_blob": "db7a674e5cc656f63834518f45b50df494550111",
+      "source_change": "modified"
+    },
+    {
+      "pr": 3997,
+      "source_pr": "https://github.com/juv4uk/sens/pull/3997",
+      "original_path": "scripts/check-d9-world-quantity-harvest-v1.py",
+      "archived_path": "research/domain-archive/20261011/pr3997/scripts/check-d9-world-quantity-harvest-v1.py.source.txt",
+      "exact_git_blob": "fea3c0d309b9eda916d81944ae94aee2ee1c16a9",
+      "source_change": "modified"
+    },
+    {
+      "pr": 4002,
+      "source_pr": "https://github.com/juv4uk/sens/pull/4002",
+      "original_path": "docs/research/d9-geometry-s2.uk.md",
+      "archived_path": "research/domain-archive/20261011/pr4002/docs/research/d9-geometry-s2.uk.md",
+      "exact_git_blob": "f4d0de687d7e1506422afcae33c9c00cb6e52d3e",
+      "source_change": "added"
+    },
+    {
+      "pr": 4002,
+      "source_pr": "https://github.com/juv4uk/sens/pull/4002",
+      "original_path": "knowledge/d9-v1-geometry-state.json",
+      "archived_path": "research/domain-archive/20261011/pr4002/knowledge/d9-v1-geometry-state.json",
+      "exact_git_blob": "87c44e695a199b47feba8971bd88f6ed8d5f6fd6",
+      "source_change": "added"
+    },
+    {
+      "pr": 4002,
+      "source_pr": "https://github.com/juv4uk/sens/pull/4002",
+      "original_path": "scripts/check-d9-geometry-s2.py",
+      "archived_path": "research/domain-archive/20261011/pr4002/scripts/check-d9-geometry-s2.py.source.txt",
+      "exact_git_blob": "7a48b4d6ee49644a6b4545dacfbb9bdfd53ad524",
+      "source_change": "added"
+    },
+    {
+      "pr": 4014,
+      "source_pr": "https://github.com/juv4uk/sens/pull/4014",
+      "original_path": "docs/research/d10-fill-v1.uk.md",
+      "archived_path": "research/domain-archive/20261011/pr4014/docs/research/d10-fill-v1.uk.md",
+      "exact_git_blob": "2c3c27812682ae83ec287b2ae58a9db8a61cb2c3",
+      "source_change": "added"
+    },
+    {
+      "pr": 4014,
+      "source_pr": "https://github.com/juv4uk/sens/pull/4014",
+      "original_path": "knowledge/d10-fill-v1-state.json",
+      "archived_path": "research/domain-archive/20261011/pr4014/knowledge/d10-fill-v1-state.json",
+      "exact_git_blob": "fe8519dc8e43fb57361ad1bc9922a52f3d98933b",
+      "source_change": "added"
+    },
+    {
+      "pr": 4014,
+      "source_pr": "https://github.com/juv4uk/sens/pull/4014",
+      "original_path": "knowledge/d10-selector-seed.json",
+      "archived_path": "research/domain-archive/20261011/pr4014/knowledge/d10-selector-seed.json",
+      "exact_git_blob": "ce1cfbaf2812010e1e4d0b5dfc9c36cbd9278a0c",
+      "source_change": "added"
+    },
+    {
+      "pr": 4014,
+      "source_pr": "https://github.com/juv4uk/sens/pull/4014",
+      "original_path": "knowledge/d10-v1-semantic-inventory.json",
+      "archived_path": "research/domain-archive/20261011/pr4014/knowledge/d10-v1-semantic-inventory.json",
+      "exact_git_blob": "ac6f5763ba2c81cba526582af01075a56d728207",
+      "source_change": "added"
+    },
+    {
+      "pr": 4014,
+      "source_pr": "https://github.com/juv4uk/sens/pull/4014",
+      "original_path": "scripts/check-d10-fill-v1-seed.py",
+      "archived_path": "research/domain-archive/20261011/pr4014/scripts/check-d10-fill-v1-seed.py.source.txt",
+      "exact_git_blob": "d90e781ba8d071f765750e374eb56c40fdf64d63",
+      "source_change": "added"
+    },
+    {
+      "pr": 4764,
+      "source_pr": "https://github.com/juv4uk/sens/pull/4764",
+      "original_path": "docs/research/d10-yantra-library-harvest-v1.uk.md",
+      "archived_path": "research/domain-archive/20261011/pr4764/docs/research/d10-yantra-library-harvest-v1.uk.md",
+      "exact_git_blob": "467866e4316573a5d1bf2cfea3dee2cb68bd4740",
+      "source_change": "added"
+    },
+    {
+      "pr": 4764,
+      "source_pr": "https://github.com/juv4uk/sens/pull/4764",
+      "original_path": "knowledge/d10-fill-v1-state.json",
+      "archived_path": "research/domain-archive/20261011/pr4764/knowledge/d10-fill-v1-state.json",
+      "exact_git_blob": "8fbc010ea75b5de2f3c0c1fd41d7da2c94d0a51d",
+      "source_change": "modified"
+    },
+    {
+      "pr": 4764,
+      "source_pr": "https://github.com/juv4uk/sens/pull/4764",
+      "original_path": "knowledge/d10-v1-semantic-inventory.json",
+      "archived_path": "research/domain-archive/20261011/pr4764/knowledge/d10-v1-semantic-inventory.json",
+      "exact_git_blob": "425ba5c02f76670bc5637110734ce7fc9c38a56d",
+      "source_change": "modified"
+    },
+    {
+      "pr": 4764,
+      "source_pr": "https://github.com/juv4uk/sens/pull/4764",
+      "original_path": "knowledge/d10-yantra-library-harvest-v1.json",
+      "archived_path": "research/domain-archive/20261011/pr4764/knowledge/d10-yantra-library-harvest-v1.json",
+      "exact_git_blob": "e5cdee4e912a2b6ed38df1ecea8ceb9fa73fbfb9",
+      "source_change": "added"
+    },
+    {
+      "pr": 4764,
+      "source_pr": "https://github.com/juv4uk/sens/pull/4764",
+      "original_path": "scripts/check-d10-crossrepo-panini-v1.py",
+      "archived_path": "research/domain-archive/20261011/pr4764/scripts/check-d10-crossrepo-panini-v1.py.source.txt",
+      "exact_git_blob": "936c25954681aa3714d1abd5440b9f405d084561",
+      "source_change": "modified"
+    },
+    {
+      "pr": 4764,
+      "source_pr": "https://github.com/juv4uk/sens/pull/4764",
+      "original_path": "scripts/check-d10-yantra-library-harvest-v1.py",
+      "archived_path": "research/domain-archive/20261011/pr4764/scripts/check-d10-yantra-library-harvest-v1.py.source.txt",
+      "exact_git_blob": "a5079050dfe1778c39b44a5e3b0e9e7e47f4ad21",
+      "source_change": "added"
+    },
+    {
+      "pr": 4798,
+      "source_pr": "https://github.com/juv4uk/sens/pull/4798",
+      "original_path": "docs/research/d10-selfhost-reason-harvest-v1.uk.md",
+      "archived_path": "research/domain-archive/20261011/pr4798/docs/research/d10-selfhost-reason-harvest-v1.uk.md",
+      "exact_git_blob": "5db6950b82c374913fbf1da18dfa05208c8c5818",
+      "source_change": "added"
+    },
+    {
+      "pr": 4798,
+      "source_pr": "https://github.com/juv4uk/sens/pull/4798",
+      "original_path": "knowledge/d10-fill-v1-state.json",
+      "archived_path": "research/domain-archive/20261011/pr4798/knowledge/d10-fill-v1-state.json",
+      "exact_git_blob": "36def56464de476aeeefac6f1d3e6af34a72c433",
+      "source_change": "modified"
+    },
+    {
+      "pr": 4798,
+      "source_pr": "https://github.com/juv4uk/sens/pull/4798",
+      "original_path": "knowledge/d10-selfhost-reason-harvest-v1.json",
+      "archived_path": "research/domain-archive/20261011/pr4798/knowledge/d10-selfhost-reason-harvest-v1.json",
+      "exact_git_blob": "1d6eb5aaefde15464dc7a5eb5093d706b6537b18",
+      "source_change": "added"
+    },
+    {
+      "pr": 4798,
+      "source_pr": "https://github.com/juv4uk/sens/pull/4798",
+      "original_path": "knowledge/d10-v1-semantic-inventory.json",
+      "archived_path": "research/domain-archive/20261011/pr4798/knowledge/d10-v1-semantic-inventory.json",
+      "exact_git_blob": "73dd518469f972c55411e004b70b054ba8b3ec86",
+      "source_change": "modified"
+    },
+    {
+      "pr": 4798,
+      "source_pr": "https://github.com/juv4uk/sens/pull/4798",
+      "original_path": "scripts/check-d10-selfhost-reason-harvest-v1.py",
+      "archived_path": "research/domain-archive/20261011/pr4798/scripts/check-d10-selfhost-reason-harvest-v1.py.source.txt",
+      "exact_git_blob": "312b86b998e45b106147d4fe61f0761dc25233c9",
+      "source_change": "added"
+    },
+    {
+      "pr": 4841,
+      "source_pr": "https://github.com/juv4uk/sens/pull/4841",
+      "original_path": "docs/research/d10-historical-primary-manual-reconciliation-20261009.uk.md",
+      "archived_path": "research/domain-archive/20261011/pr4841/docs/research/d10-historical-primary-manual-reconciliation-20261009.uk.md",
+      "exact_git_blob": "102d263e7a3841601304b75d2ad034fee0e82d4c",
+      "source_change": "added"
+    },
+    {
+      "pr": 4841,
+      "source_pr": "https://github.com/juv4uk/sens/pull/4841",
+      "original_path": "knowledge/d10-historical-primary-manual-reconciliation-20261009.json",
+      "archived_path": "research/domain-archive/20261011/pr4841/knowledge/d10-historical-primary-manual-reconciliation-20261009.json",
+      "exact_git_blob": "37e10ef9a953ea62beb5e4b46ef20f21cbfb3ee4",
+      "source_change": "added"
+    },
+    {
+      "pr": 4841,
+      "source_pr": "https://github.com/juv4uk/sens/pull/4841",
+      "original_path": "scripts/check_d10_historical_primary_reconcile.py",
+      "archived_path": "research/domain-archive/20261011/pr4841/scripts/check_d10_historical_primary_reconcile.py.source.txt",
+      "exact_git_blob": "148eacaf50020a425cf0a24523eb92855e6664dd",
+      "source_change": "added"
+    }
+  ],
+  "rules": [
+    "D1-D9 ratified authority remains unchanged",
+    "D10 selected and pending ledgers remain unchanged",
+    "No CI checks, validators, codec, production source files or ratification are changed",
+    "Archive-only source scripts are stored with .source.txt suffix, preserving bytes by exact Git blob SHA"
+  ]
+}
