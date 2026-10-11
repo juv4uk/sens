@@ -11035,21 +11035,29 @@
       "ratified": false,
       "physical_t5_authorized": false,
       "proof_readiness": {
-        "status": "INCOMPLETE-SOURCE-SEMANTICS",
-        "missing": [
-          "semantic-law",
-          "positive-witness",
-          "negative-falsifier"
-        ],
+        "status": "SOURCE-LAW-WITNESSES-PRESENT-UNVERIFIED",
+        "missing": [],
         "selection": false,
         "ratification": false,
-        "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+        "next_gate": "D1-D9-DEDUPE-CORE-VS-LIBRARY-AND-INDEPENDENT-ORACLE"
       },
       "source_candidate_gate": {
         "status": "USER-INTEREST-NAME-ONLY-NO-SOURCE-OPERATION",
         "source_kind": "owner-interest",
         "not_a_ratified_resident": true,
         "reason": "A source occurrence or wish-list name is not an independent D10 law; candidate requires typed contract and distinct behavior."
+      },
+      "source_evidence": {
+        "status": "SOURCE-PINNED-REVIEW-WITNESS-NOT-SELECTED",
+        "source_path": "juv4uk/chess-lisp-zero:lib/fen.lisp",
+        "source_git_blob": "96b2f1470cf8dc819ff6a0e815f5f4c833b453df",
+        "primary_reference": null,
+        "law": "Research adapter to pinned chess-position-from-fen: for a six-field valid FEN string, construct a 64-square board plus side-to-move, castling rights, en-passant target and half/full-move counters. The original donor returns a full position, NOT a board-only value.",
+        "positive": "For 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1', obtain white side, rights KQkq, no en-passant, halfmove=0, fullmove=1, and an initial piece arrangement (16 on each side).",
+        "negative": "A parser that reverses first rank, drops the white/black side field or discards halfmove/fullmove counters does not implement the donor's whole-position FEN law. No general invalid-FEN rejection is claimed.",
+        "core_vs_library": "APPLICATION-DERIVED-ALIAS-OF-CHESS-POSITION-FROM-FEN; BOARD-ONLY-NAME-UNDERREPRESESENTS-RESULT",
+        "witness_origin": "SOURCE-SPEC-RECONSTRUCTED-NO-SENS-RUNTIME",
+        "ratification": false
       }
     },
     {
@@ -11079,21 +11087,29 @@
       "ratified": false,
       "physical_t5_authorized": false,
       "proof_readiness": {
-        "status": "INCOMPLETE-SOURCE-SEMANTICS",
-        "missing": [
-          "semantic-law",
-          "positive-witness",
-          "negative-falsifier"
-        ],
+        "status": "SOURCE-LAW-WITNESSES-PRESENT-UNVERIFIED",
+        "missing": [],
         "selection": false,
         "ratification": false,
-        "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+        "next_gate": "D1-D9-DEDUPE-CORE-VS-LIBRARY-AND-INDEPENDENT-ORACLE"
       },
       "source_candidate_gate": {
         "status": "USER-INTEREST-NAME-ONLY-NO-SOURCE-OPERATION",
         "source_kind": "owner-interest",
         "not_a_ratified_resident": true,
         "reason": "A source occurrence or wish-list name is not an independent D10 law; candidate requires typed contract and distinct behavior."
+      },
+      "source_evidence": {
+        "status": "SOURCE-PINNED-REVIEW-WITNESS-NOT-SELECTED",
+        "source_path": "juv4uk/chess-lisp-zero:lib/fen.lisp",
+        "source_git_blob": "96b2f1470cf8dc819ff6a0e815f5f4c833b453df",
+        "primary_reference": null,
+        "law": "Research adapter to pinned chess-position-to-fen: for a complete chess position with 64-square board and side, castling, en-passant and clocks, serialize canonical six FEN fields; compress consecutive empty squares as digits and emit castling rights in KQkq order. A bare board alone is insufficient.",
+        "positive": "The initial chess position (start board, white side, KQkq rights, no ep, clocks 0 and 1) serializes to 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1'.",
+        "negative": "Output omitting side/clocks or printing castling rights in a noncanonical order contradicts the source; claiming serialization from a bare board without metadata invents input information.",
+        "core_vs_library": "APPLICATION-DERIVED-ALIAS-OF-CHESS-POSITION-TO-FEN; SOURCE-REQUIRES-FULL-POSITION",
+        "witness_origin": "SOURCE-SPEC-RECONSTRUCTED-NO-SENS-RUNTIME",
+        "ratification": false
       }
     },
     {
@@ -16992,13 +17008,23 @@
       "falsifiers": [],
       "independent_oracle": "NO-EVIDENCE-HELD",
       "proof_readiness": {
-        "status": "INCOMPLETE-SOURCE-SEMANTICS",
-        "missing": [
-          "semantic-law"
-        ],
+        "status": "SOURCE-LAW-WITNESSES-PRESENT-UNVERIFIED",
+        "missing": [],
         "selection": false,
         "ratification": false,
-        "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+        "next_gate": "D1-D9-DEDUPE-CORE-VS-LIBRARY-AND-INDEPENDENT-ORACLE"
+      },
+      "source_evidence": {
+        "status": "SOURCE-PINNED-REVIEW-WITNESS-NOT-SELECTED",
+        "source_path": "knowledge/d10-interdisciplinary-science-proposals-20261009.json",
+        "source_git_blob": "80bb9e97bfbfe8f3afe96f25bf07b5c8905233ed",
+        "primary_reference": "https://www.iers.org/iers/en/dataproducts/tools/webservices/webservice-time",
+        "law": "Review variant for validated UTC civil instants and supplied versioned IERS leap-second table: UTC-to-TAI attaches the applicable TAI−UTC offset and preserves explicit leap-second labels. It is not a single fixed-offset equation for all dates, and UT1 requires epoch-dependent DUT1 data. External table access is an island/data dependency, not D2 syntax.",
+        "positive": "With historical IERS offset 37s valid from 2017-01-01T00:00:00 UTC, that UTC instant maps to 2017-01-01T00:00:37 TAI. Pre-leap 2016-12-31T23:59:59 UTC uses 36s and maps to 2017-01-01T00:00:35 TAI.",
+        "negative": "Assuming 37s for 2016-12-31T23:59:59 UTC maps it to 00:00:36 TAI instead of 00:00:35; silently discarding 2016-12-31T23:59:60 UTC or conflating UT1−UTC with TAI−UTC violates time-scale semantics.",
+        "core_vs_library": "EXTERNAL-IERS-REFERENCE-TABLE-DEPENDENCY; NOT-SELF-CONTAINED-MATH-CORE",
+        "witness_origin": "SOURCE-SPEC-RECONSTRUCTED-NO-SENS-RUNTIME",
+        "ratification": false
       }
     },
     {
@@ -23392,7 +23418,7 @@
         "rows": 9
       }
     ],
-    "total_passports": 108,
+    "total_passports": 111,
     "latest_sources": [
       {
         "path": "knowledge/d10-general-congruence-merge-hobbies-v1.json",
@@ -23462,6 +23488,11 @@
       "CONTEXTUAL-TEXT-REWRITE",
       "AFFIX-RULE-WORDFORM-GENERATION",
       "LEAPFROG-STATE-UPDATE"
+    ],
+    "latest_chess_time_evidence": [
+      "board-from-fen",
+      "fen-from-board",
+      "TIME-SCALE-CONVERT"
     ]
   },
   "evidence_gate": {
@@ -23472,13 +23503,13 @@
     "formal_ratified": 0,
     "semantic_source_audit": {
       "total": 309,
-      "has_law": 216,
-      "has_positive": 202,
-      "has_negative": 202,
-      "law_and_witnesses": 198,
-      "missing_law": 93,
-      "missing_positive": 107,
-      "missing_negative": 107
+      "has_law": 219,
+      "has_positive": 204,
+      "has_negative": 204,
+      "law_and_witnesses": 201,
+      "missing_law": 90,
+      "missing_positive": 105,
+      "missing_negative": 105
     },
     "note": "All 28 SI names denote seven constants as data, not twenty-eight independent D10 residents; other source witness records are research-only.",
     "uncorroborated_source_name_census": 96,
