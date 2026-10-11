@@ -106,12 +106,17 @@
   (0010 (value)
     (0100 value)))
 
+; Structural alist lookup derived from D3 pair/atom/EQ and D4 NULL.
+; D5 ASSOC is not the authority for event-envelope field extraction.
+; Keys are atoms; the returned tail is the original value, not an evaluated
+; source form. Unknown and malformed keys have no invented value.
 (0011 fs-package-field
   (0010 (name package)
-    (нехай-похідне ((entry (11100 name package)))
-      (110
-        ((0101 entry) (001 ()))
-        ((010 ()) (011 entry))))))
+    (110
+      ((0101 package) (001 ()))
+      ((010 package) (001 ()))
+      ((101 name (100 (100 package))) (011 (100 package)))
+      ((010 ()) (fs-package-field name (011 package))))))
 (0011 fs-object-package-decision
   (0010 (package)
     (110
