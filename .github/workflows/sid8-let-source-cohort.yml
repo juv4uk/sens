@@ -1,4 +1,4 @@
-name: SID8 Lisp LET source cutover witness
+name: SID8 Lisp LET runtime admission blocker
 on:
   push:
     branches: [main]
@@ -15,7 +15,7 @@ on:
 permissions:
   contents: read
 jobs:
-  pinned-source-law:
+  fail-closed-identity-boundary:
     runs-on: ubuntu-latest
     timeout-minutes: 8
     steps:
@@ -25,5 +25,5 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.11"
-      - name: Prove 44 exact old LET binder replacements and D8 MOD exclusion
+      - name: Preserve 44 legacy LET sites until D6 is actually callable
         run: python3 -m unittest discover -s tests -p test_sid8_let_source_cohort.py -v
