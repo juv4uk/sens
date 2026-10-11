@@ -2,7 +2,7 @@
 
 Статус: **PASS для runner-component baseline; BLOCKED для повної метрики seed-input closure.** Два незалежні чисті прогони дали однаковий звіт. Пізніший аудит виявив, що runner під час виконання запускає `cargo run -p xtask -- compiler-export` у pinned SENS checkout; отже, вимір 34,580,696 Б — розмір компонента, а не повного набору байтів, без яких ланцюг не стартує. Повний seed-total не публікувати, доки closure не перелічено й не виміряно.
 
-Зовнішні crates для compile path `xtask → sens → serde` закріплено окремо в JSON census за версіями та `Cargo.lock` checksums: `serde 1.0.229`, `serde_core 1.0.229`, `serde_derive 1.0.229`, `proc-macro2 1.0.107`, `quote 1.0.47`, `syn 3.0.3`, `unicode-ident 1.0.24`. Їхні registry archive/cache bytes не входять у наведені 1,337,942 Б; availability і розмір зовнішнього кешу ще не виміряні. `cargo run -p xtask -- compiler-export` також виконує `git rev-parse HEAD`, тому `.git` metadata лишається явною залежністю до її вимірювання або вилучення з runtime chain.
+Зовнішні crates для compile path `xtask → sens → serde` закріплено окремо в JSON census за версіями та `Cargo.lock` checksums: `serde 1.0.229`, `serde_core 1.0.229`, `serde_derive 1.0.229`, `proc-macro2 1.0.107`, `quote 1.0.47`, `syn 3.0.3`, `unicode-ident 1.0.24`. Їхні registry archive/cache bytes не входять у наведені 1,432,402 Б; availability і розмір зовнішнього кешу ще не виміряні. `cargo run -p xtask -- compiler-export` також виконує `git rev-parse HEAD`, тому `.git` metadata лишається явною залежністю до її вимірювання або вилучення з runtime chain.
 
 ## Первинні докази
 
@@ -97,13 +97,13 @@ cargo run --manifest-path external/sens/Cargo.toml -p xtask -- compiler-export
 
 Отже, `seed-v0-c0-runner.bin` (34,580,696 Б у первинному прогоні) — виміряний ELF-компонент, але не єдиний runtime-вхід. Ланцюгу також потрібні pinned SENS checkout/ Cargo workspace inputs для побудови `xtask` і SENS runtime. Це не toolchain/linker/ОС: кодові файли й compiler nucleus не можна непомітно переносити в «external dependencies» і виключати з seed-total.
 
-Проміжний машинозчитуваний census: [`evidence/nano-sens-seed-v0-source-closure-census-2026-10-12.json`](../evidence/nano-sens-seed-v0-source-closure-census-2026-10-12.json). Поточний census після аудиту include-ів: **114 pinned paths / 1,397,243 Б** у перевіреному subset (70 production Rust sources, 20 Cargo package manifests, 24 root/authority/embedded inputs). Виправлено дві протилежні похибки попереднього census: вилучено 3,271-Б `bootstrap_measurement.rs`, який доступний лише під `#[cfg(test)]`, і додано 13 compile-time include-файлів з `lib.rs` та пов’язаних production-модулів (разом 254,906 Б; 13-й — `lib/core.lisp`, вбудований `gpu_oracle_conformance.rs`). Цей subset все ще не є повним closure чи seed-total; повна автоматична перевірка графа модулів та `.git`/Cargo inputs залишається відкритою.
+Проміжний машинозчитуваний census: [`SENS source closure`](../evidence/nano-sens-seed-v0-source-closure-census-2026-10-12.json). Окремо зафіксовано [CML runner input census](https://github.com/juv4uk/cml/blob/master/evidence/nano-sens-cml-runner-input-census-2026-10-12.json) для pinned CML `3320fe3b00a4a099ecb9ff06e22e0be2b1fee499): 62 default `cargo test --lib` module sources + 8 root/build/contract files = 70 paths / 1,320,729 Б. Це інший підрахунок, окремий від SENS subset; не складати ці числа в seed-total. Поточний census після аудиту include-ів: **117 pinned paths / 1,432,402 Б** у перевіреному SENS subset (70 production Rust sources, 20 Cargo package manifests, 27 root/authority/embedded and CML-consumed inputs). Виправлено дві протилежні похибки попереднього census: вилучено 3,271-Б `bootstrap_measurement.rs`, який доступний лише під `#[cfg(test)]`, і додано 13 compile-time include-файлів з `lib.rs` та пов’язаних production-модулів (разом 254,906 Б; 13-й — `lib/core.lisp`, вбудований `gpu_oracle_conformance.rs`). Цей subset все ще не є повним closure чи seed-total; повна автоматична перевірка графа модулів та `.git`/Cargo inputs залишається відкритою.
 
 Відомі точні pinned вузли ланцюга на SENS SHA `d0787a40fcea36501747732aa61b6de19fe29c70`:
 
 | Файл | Git blob SHA | Bytes |
 |---|---|---:|
-| `Cargo.toml` | `880cd66b98fd2fb9ea34fe428526f09a073fb8c3` | 1,399 |
+| `Cargo.toml` | `880cd66b98fd2fb9ea34fe428526f09a073fb8c3` | 1,492 |
 | `Cargo.lock` | `293e933d0fdb78954386243eae431c2826b62a79` | 20,813 |
 | `.cargo/config.toml` | `ae9cf46bf18b89c74c88462c29713601c7972f01` | 136 |
 | `crates/xtask/Cargo.toml` | `eed4c217f9d61b4db486b06df0fe80c163961a25` | 345 |
@@ -112,10 +112,10 @@ cargo run --manifest-path external/sens/Cargo.toml -p xtask -- compiler-export
 | `crates/sens/Cargo.toml` | `50b4c7a37ca3aa82993bea6b258b5de3b488820c` | 674 |
 | `crates/sens/src/lib.rs` | `386158468ec44c20433ddee8432c1c81f9907ef9` | 27,192 |
 | `crates/sens/src/compiler_language.rs` | `b15cee61eb8f0c40761a0d467c3818eeea89ca5f` | 59,607 |
-| `lib/compiler-nucleus.lisp` | `c81ff7341a3a18c7cb6ff8e77038318bb935b232` | pinned input; exact bytes to include in closure sum |
+| `lib/compiler-nucleus.lisp` | `c81ff7341a3a18c7cb6ff8e77038318bb935b232` | 24,506 |
 | `contracts/compiler-nucleus-identity-corpus-v1.tsv` | `c57b0df98f467ddcad067158dad1c97a349ad1bf` | 426 |
 
-Це **частковий список відомих вузлів**, не остаточний мінімальний closure: Cargo workspace resolution і всі компільовані модулі `crates/sens` / `crates/xtask`, усі `include_str!` файли та інші path inputs ще треба інвентаризувати й дедуплікувати. Тому `whole_chain_seed_closure_status = BLOCKED_UNENUMERATED`; одне число для повного seed наразі не публікується. Компонентний вимір зберігається як історично pinned baseline й не стирається.
+Це **перевірені subset-и, не остаточний мінімальний closure**. Уже записано 70 production Rust source files SENS/xtask, 20 workspace manifests, відомі compile-time include inputs і ще 70 CML source/metadata paths. Залишаються автоматичне вичерпне підтвердження `cfg`/module-графа обох репозиторіїв, усі активні Cargo build/test dependency sources (включно з `wsm-os-target` і registry cache), runtime file reads, generated outputs та точний облік `.git` metadata. Тому `whole_chain_seed_closure_status = BLOCKED_PARTIAL_LOWER_BOUND_NOT_COMPLETE_OR_MINIMIZED`; одне число для повного seed наразі не публікується. Компонентний вимір зберігається як історично pinned baseline й не стирається.
 
 ### K2 — перший кандидат після closure-аудиту
 
