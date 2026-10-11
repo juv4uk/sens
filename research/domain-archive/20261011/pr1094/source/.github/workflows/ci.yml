@@ -1,0 +1,390 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  pr-focused:
+    name: focused PR verification
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: clippy
+      - uses: Swatinem/rust-cache@v2
+        with:
+          shared-key: pr-focused
+
+      - name: Classify changed paths
+        id: changes
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          git diff --name-only "$BASE_SHA" "$HEAD_SHA" > /tmp/changed.txt
+          git diff --numstat "$BASE_SHA" "$HEAD_SHA" > /tmp/changed-numstat.txt
+          cat /tmp/changed.txt
+          surface=false; core=false; semantic=false; host=false; cli=false; xtask=false; meta=false; rust=false; workspace=false; workflow=false
+          while IFS= read -r path; do
+            case "$path" in Cargo.toml|Cargo.lock|.cargo/*) workspace=true ;; esac
+            case "$path" in .github/workflows/*) workflow=true ;; esac
+            case "$path" in *.rs|Cargo.toml|Cargo.lock|crates/*/Cargo.toml) rust=true ;; esac
+            case "$path" in lib/surface/*|lib/generated/meta-semantic-registry.lisp|docs/ukrainian-api.md|docs/generated/public-api-discovery.md|scripts/public_api_inventory.py|scripts/generate-meta-semantic-registry.lisp|scripts/generate-ukrainian-api.py|scripts/перевірити-український-профіль.lisp|machine-lowering-boundary.lisp|repo.lisp|crates/my-lisp/tests/macro_derivation.rs|crates/my-lisp/tests/ukrainian_api_docs.rs|crates/my-lisp/tests/uk_surface_equivalence.rs|crates/my-lisp/tests/public_api_inventory_contract.rs|crates/my-lisp/tests/machine_lowering_boundary.rs) surface=true ;; esac
+            case "$path" in crates/my-lisp/src/*|crates/my-lisp/tests/*|lib/*.lisp|lib/*/*.lisp) case "$path" in lib/surface/*|lib/generated/*) ;; *) core=true ;; esac ;; esac
+            case "$path" in crates/my-lisp/src/value.rs|crates/my-lisp/src/eval/*|crates/my-lisp/src/semantic_registry.rs|crates/my-lisp/src/semantic_registry_generated.rs|lib/evaluator-dispatch.lisp|scripts/generate-rust-evaluator-dispatch.lisp|scripts/generate-rust-semantic-registry.lisp|crates/my-lisp/tests/witness_authority.rs|crates/my-lisp/tests/structural_query_inventory.rs|lib/canon.lisp|lib/core.lisp|lib/meta-eval.lisp|lib/process.lisp|contracts/*.lisp|tests/fixtures/conformance.lisp|tests/fixtures/*-witness.lisp|my-lisp-constitution.lisp) semantic=true ;; esac
+            if bash scripts/is-current-semantic-fixture.sh "$path"; then semantic=true; fi
+            case "$path" in crates/my-lisp-host/src/*|crates/my-lisp-host/tests/*) host=true ;; esac
+            case "$path" in crates/my-lisp-cli/src/*|crates/my-lisp-cli/tests/*) cli=true ;; esac
+            case "$path" in crates/xtask/src/*|crates/xtask/tests/*) xtask=true ;; esac
+            case "$path" in lib/meta-eval.lisp|lib/reason.lisp|lib/forward.lisp|lib/knowledge.lisp|crates/my-lisp/tests/meta_eval_*|crates/my-lisp/tests/reason_*|crates/my-lisp/tests/reasoning_*) meta=true ;; esac
+          done < /tmp/changed.txt
+          { echo "surface=$surface"; echo "core=$core"; echo "semantic=$semantic"; echo "host=$host"; echo "cli=$cli"; echo "xtask=$xtask"; echo "meta=$meta"; echo "rust=$rust"; echo "workspace=$workspace"; echo "workflow=$workflow"; } | tee -a "$GITHUB_OUTPUT"
+
+      - name: Semantic fixture path classifier self-test
+        run: bash scripts/test-ci-semantic-path-classifier.sh
+
+      - name: Rust one-way valve self-test
+        shell: bash
+        run: bash scripts/test-rust-one-way-valve.sh
+
+      - name: Rust one-way subtraction valve
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        shell: bash
+        run: bash scripts/rust-one-way-valve.sh "$BASE_SHA" "$HEAD_SHA"
+
+      - name: Build swarm-node substrate crate
+        if: steps.changes.outputs.rust == 'true' || steps.changes.outputs.workflow == 'true'
+        run: cargo build -p swarm-node
+
+      - name: Debug post-core definition data shape for #771
+        shell: bash
+        run: |
+          set -euo pipefail
+          cargo test -p my-lisp --test postcore_build_definitions_debug -- --nocapture
+
+      - name: Lisp-owned semantic authority guard
+        shell: bash
+        run: |
+          set -euo pipefail
+          cargo run --release -p my-lisp-cli --bin gen-fasl -- lib/core.lisp lib/core.lisp.fasl
+          cargo build -p my-lisp-cli --bin my-lisp
+          : > tests/changed-host-tests.lisp
+          while IFS=$'\t' read -r additions deletions path; do
+            case "$path" in
+              crates/*/tests/*.rs)
+                if [[ "$additions" == "0" && "$deletions" != "0" ]]; then
+                  direction=deletion-only
+                else
+                  direction=modified
+                fi
+                printf '(change "%s" %s)\n' "$path" "$direction" >> tests/changed-host-tests.lisp
+                ;;
+            esac
+          done < /tmp/changed-numstat.txt
+          ./target/debug/my-lisp scripts/authority-guard.lisp > tests/authority-verdict.lisp
+          cat tests/authority-verdict.lisp
+          ./target/debug/my-lisp scripts/authority-guard-enforce.lisp
+
+      - name: Lisp-owned semantic authority leakage guard
+        shell: bash
+        run: |
+          set -euo pipefail
+          : > tests/semantic-authority-changes.lisp
+          while IFS= read -r path; do
+            case "$path" in
+              *.rs|*.c|*.cc|*.cpp|*.h|*.hpp|*.java|*.js|*.mjs|*.py|*.ps1)
+                ;;
+              *)
+                continue
+                ;;
+            esac
+            case "$path" in
+              tests/fixtures/semantic-authority-guard/*|crates/my-lisp/tests/semantic_authority_guard_1049.rs)
+                continue
+                ;;
+            esac
+            printf '(changed "%s")\n' "$path" >> tests/semantic-authority-changes.lisp
+          done < /tmp/changed.txt
+          ./target/debug/my-lisp scripts/semantic-authority-guard.lisp > tests/semantic-authority-verdict.lisp
+          cat tests/semantic-authority-verdict.lisp
+          ./target/debug/my-lisp scripts/semantic-authority-guard-enforce.lisp
+
+      - name: Upload regenerated core FASL for #771
+        uses: actions/upload-artifact@v4
+        with:
+          name: core-fasl-771
+          path: lib/core.lisp.fasl
+          if-no-files-found: error
+
+      - name: Export regenerated core FASL for #771
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -s lib/core.lisp.fasl
+          git diff --check
+        
+
+      - name: Lisp-owned repo tooling inventory
+        shell: bash
+        run: |
+          set -euo pipefail
+          ./target/debug/my-lisp scripts/check-repo-tooling-inventory.lisp
+
+      - name: Canon function-table mechanism provenance
+        shell: bash
+        run: |
+          set -euo pipefail
+          ./target/debug/my-lisp scripts/check-function-table-mechanisms.lisp > tests/function-table-mechanisms-verdict.lisp
+          cat tests/function-table-mechanisms-verdict.lisp
+          ./target/debug/my-lisp scripts/enforce-function-table-mechanisms.lisp
+
+      - name: Lisp-owned machine non-interference guard
+        shell: bash
+        run: |
+          set -euo pipefail
+          cargo build -p my-lisp-cli --bin my-lisp
+
+          # #150: the admitted authority graph is one-way.
+          ./target/debug/my-lisp scripts/machine-authority-guard.lisp
+
+          cp tests/machine-authority-edges.lisp /tmp/machine-authority-edges.lisp
+          cp tests/fixtures/machine-authority/reverse-edge.lisp tests/machine-authority-edges.lisp
+          if ./target/debug/my-lisp scripts/machine-authority-guard.lisp > /tmp/machine-reverse-edge.log 2>&1; then
+            echo "ERROR: #150 reverse machine->semantic authority edge was accepted"
+            exit 1
+          fi
+          grep -q 'machine-authority-boundary-violation' /tmp/machine-reverse-edge.log
+          cp /tmp/machine-authority-edges.lisp tests/machine-authority-edges.lisp
+
+          # #211: a native result may not become its own semantic authority
+          # or the only semantic answer key.
+          cp lib/machine/capability-provenance.lisp /tmp/machine-capability-provenance.lisp
+          cp tests/fixtures/machine-authority/hybrid-capability.lisp lib/machine/capability-provenance.lisp
+          if ./target/debug/my-lisp scripts/machine-authority-guard.lisp > /tmp/machine-hybrid.log 2>&1; then
+            echo "ERROR: #211 machine/native semantic answer key was accepted"
+            exit 1
+          fi
+          grep -q 'machine-semantic-hybrid-violation' /tmp/machine-hybrid.log
+          cp /tmp/machine-capability-provenance.lisp lib/machine/capability-provenance.lisp
+
+          # Same Lisp addition, two admitted register realizations.
+          representation_status="$(./target/debug/my-lisp tests/fixtures/machine-representation-independence-witness.lisp)"
+          if [[ "$representation_status" != "(machine-representation-independence-witness (status pass))" ]]; then
+            printf 'machine representation-independence witness failed: %s\n' "$representation_status" >&2
+            exit 1
+          fi
+
+          # Meaning must remain executable when the whole target-specific
+          # machine layer is physically absent from the checkout.
+          restore_machine_layer() {
+            if [[ -d /tmp/my-lisp-machine-211 ]]; then
+              mv /tmp/my-lisp-machine-211 lib/machine
+            fi
+          }
+          trap restore_machine_layer EXIT
+          rm -rf /tmp/my-lisp-machine-211
+          mv lib/machine /tmp/my-lisp-machine-211
+          replaceability_status="$(./target/debug/my-lisp tests/fixtures/machine-replaceability-witness.lisp)"
+          restore_machine_layer
+          trap - EXIT
+          if [[ "$replaceability_status" != "(machine-replaceability-witness (status pass))" ]]; then
+            printf 'machine replaceability witness failed: %s\n' "$replaceability_status" >&2
+            exit 1
+          fi
+
+      - name: Diff hygiene
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        run: git diff --check "$BASE_SHA" "$HEAD_SHA"
+
+      - name: Validate workflow YAML syntax
+        if: steps.changes.outputs.workflow == 'true'
+        run: ruby -e 'require "psych"; Dir[".github/workflows/*.yml"].sort.each { |f| Psych.parse_file(f); puts f }'
+
+      - name: Exercise future main fast critical gate
+        if: steps.changes.outputs.workflow == 'true'
+        run: |
+          ./target/debug/my-lisp scripts/generate-meta-semantic-registry.lisp --check
+          python3 scripts/public_api_inventory.py --check
+          bash scripts/test-current-semantic-slice.sh
+          cargo test -p my-lisp --test machine_lowering_boundary --test machine_admission_adversarial --test machine_type_discipline --test machine_noninterference_contract --test machine_atoms --test machine_minimal_profile --test uk_surface_equivalence --test public_api_inventory_contract
+          cargo test -p my-lisp-host --test native_lisp_bytes --test native_cond_profile
+          cargo test -p my-lisp-cli --test cli
+          cargo test -p xtask --test license_policy
+          cargo run -p xtask -- verify
+
+      - name: Exercise future main fast clippy
+        if: steps.changes.outputs.workflow == 'true'
+        run: cargo clippy -p my-lisp -p my-lisp-host -p my-lisp-cli -p xtask --all-targets -- -D warnings
+
+      - name: Workspace dependency-graph fallback
+        if: steps.changes.outputs.workspace == 'true'
+        run: |
+          cargo test --workspace
+          cargo build --workspace
+
+      - name: Check generated semantic registry
+        if: (steps.changes.outputs.surface == 'true' || steps.changes.outputs.semantic == 'true') && steps.changes.outputs.workspace != 'true'
+        run: |
+          ./target/debug/my-lisp scripts/generate-meta-semantic-registry.lisp --check
+          ./target/debug/my-lisp scripts/generate-rust-semantic-registry.lisp --check
+          ./target/debug/my-lisp scripts/generate-rust-evaluator-dispatch.lisp --check
+
+      - name: Check public API discovery projection
+        if: steps.changes.outputs.surface == 'true' && steps.changes.outputs.workspace != 'true'
+        run: python3 scripts/public_api_inventory.py --check
+
+      - name: Focused surface contracts
+        if: steps.changes.outputs.surface == 'true' && steps.changes.outputs.workspace != 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
+          tests=(macro_derivation ukrainian_api_docs uk_surface_equivalence public_api_inventory_contract machine_noninterference_contract)
+          if [[ -f crates/my-lisp/tests/machine_lowering_boundary.rs ]]; then tests+=(machine_lowering_boundary); fi
+          args=(); for test_name in "${tests[@]}"; do args+=(--test "$test_name"); done
+          cargo test -p my-lisp "${args[@]}"
+
+      - name: Current Lisp-owned semantic slice
+        if: steps.changes.outputs.semantic == 'true' && steps.changes.outputs.workspace != 'true'
+        run: bash scripts/test-current-semantic-slice.sh
+
+      - name: Core language package tests
+        if: steps.changes.outputs.core == 'true' && steps.changes.outputs.surface != 'true' && steps.changes.outputs.semantic != 'true' && steps.changes.outputs.workspace != 'true'
+        run: cargo test -p my-lisp
+
+      - name: Native host vertical witness
+        if: steps.changes.outputs.host == 'true' && steps.changes.outputs.workspace != 'true'
+        run: cargo test -p my-lisp-host --test native_lisp_bytes --test native_cond_profile
+
+      - name: CLI black-box tests
+        if: (steps.changes.outputs.cli == 'true' || steps.changes.outputs.surface == 'true') && steps.changes.outputs.workspace != 'true'
+        run: cargo test -p my-lisp-cli --test cli
+
+      - name: xtask policy tests
+        if: (steps.changes.outputs.xtask == 'true' || steps.changes.outputs.surface == 'true') && steps.changes.outputs.workspace != 'true'
+        run: |
+          cargo test -p xtask --test external_oracle_cli
+          cargo test -p xtask --test xed_import_cli
+          cargo test -p xtask --test encoder_coverage_cli
+          cargo test -p xtask --test license_policy
+          cargo run -p xtask -- verify
+          cargo run -p xtask -- import-xed-evidence --check
+          cargo run -p xtask -- generate-encoder-coverage --check
+
+      - name: Focused Advice Taker witness
+        if: steps.changes.outputs.meta == 'true' && steps.changes.outputs.workspace != 'true'
+        run: cargo test --profile ci-meta -p my-lisp --test meta_eval_advice_taker advice_taker_native_and_meta_preserve_expected_outcome_classes -- --ignored --nocapture
+
+      - name: Clippy changed Rust surfaces
+        if: steps.changes.outputs.rust == 'true' && steps.changes.outputs.workspace != 'true'
+        run: cargo clippy -p my-lisp -p my-lisp-host -p my-lisp-cli -p xtask --all-targets -- -D warnings
+
+  windows-native-exec-witness:
+    name: Windows native-exec ABI witness
+    runs-on: windows-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v5
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: clippy
+      - uses: Swatinem/rust-cache@v2
+        with:
+          shared-key: windows-native-exec-witness
+      - name: Windows guest-ABI witness (sysv64 vs win64)
+        run: cargo test -p my-lisp-host --test windows_native_exec_abi
+      - name: Native CPU vertical witnesses on Windows
+        run: cargo test -p my-lisp-host --test native_lisp_bytes --test native_cond_profile
+      - name: Clippy my-lisp-host on Windows
+        run: cargo clippy -p my-lisp-host --all-targets -- -D warnings
+
+  main-fast-critical:
+    name: main fast critical gate
+    if: github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v5
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+        with:
+          shared-key: main-fast-critical
+      - name: Generated authority projections
+        run: |
+          cargo build -p my-lisp-cli --bin my-lisp
+          ./target/debug/my-lisp scripts/generate-meta-semantic-registry.lisp --check
+          python3 scripts/public_api_inventory.py --check
+          cargo run -p xtask -- import-xed-evidence --check
+          cargo run -p xtask -- generate-encoder-coverage --check
+      - name: Machine non-interference guard
+        shell: bash
+        run: |
+          set -euo pipefail
+          cargo build -p my-lisp-cli --bin my-lisp
+          ./target/debug/my-lisp scripts/machine-authority-guard.lisp
+
+          representation_status="$(./target/debug/my-lisp tests/fixtures/machine-representation-independence-witness.lisp)"
+          if [[ "$representation_status" != "(machine-representation-independence-witness (status pass))" ]]; then
+            printf 'machine representation-independence witness failed: %s\n' "$representation_status" >&2
+            exit 1
+          fi
+
+          restore_machine_layer() {
+            if [[ -d /tmp/my-lisp-machine-211 ]]; then
+              mv /tmp/my-lisp-machine-211 lib/machine
+            fi
+          }
+          trap restore_machine_layer EXIT
+          rm -rf /tmp/my-lisp-machine-211
+          mv lib/machine /tmp/my-lisp-machine-211
+          replaceability_status="$(./target/debug/my-lisp tests/fixtures/machine-replaceability-witness.lisp)"
+          restore_machine_layer
+          trap - EXIT
+          if [[ "$replaceability_status" != "(machine-replaceability-witness (status pass))" ]]; then
+            printf 'machine replaceability witness failed: %s\n' "$replaceability_status" >&2
+            exit 1
+          fi
+      - name: Current Lisp-owned semantic witnesses
+        run: bash scripts/test-current-semantic-slice.sh
+      - name: Critical machine and surface witnesses
+        run: cargo test -p my-lisp --test machine_lowering_boundary --test machine_admission_adversarial --test machine_type_discipline --test machine_noninterference_contract --test machine_atoms --test machine_minimal_profile --test uk_surface_equivalence --test public_api_inventory_contract
+      - name: Native CPU vertical witnesses
+        run: cargo test -p my-lisp-host --test native_lisp_bytes --test native_cond_profile
+      - name: CLI smoke
+        run: cargo test -p my-lisp-cli --test cli
+      - name: Governance and policy checks
+        run: |
+          cargo test -p xtask --test license_policy
+          cargo run -p xtask -- verify
+
+  main-fast-clippy:
+    name: main fast clippy
+    if: github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v5
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: clippy
+      - uses: Swatinem/rust-cache@v2
+        with:
+          shared-key: main-fast-clippy
+      - run: cargo clippy -p my-lisp -p my-lisp-host -p my-lisp-cli -p xtask --all-targets -- -D warnings
