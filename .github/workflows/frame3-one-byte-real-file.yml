@@ -1,0 +1,73 @@
+name: Frame3 one-byte closed program and real file corpus
+on:
+  push:
+    paths:
+      - 'crates/sens/examples/frame3_one_byte_research.rs'
+      - 'crates/sens/examples/frame3_real_files_bench.rs'
+      - 'research/framed3/rust_codec/senc.rs'
+      - '.github/workflows/frame3-one-byte-real-file.yml'
+  pull_request:
+    paths:
+      - 'crates/sens/examples/frame3_one_byte_research.rs'
+      - 'crates/sens/examples/frame3_real_files_bench.rs'
+      - 'research/framed3/rust_codec/senc.rs'
+      - '.github/workflows/frame3-one-byte-real-file.yml'
+permissions:
+  contents: read
+jobs:
+  one-byte-program:
+    name: Real SENS evaluation of 1-byte closed programs
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Encode, decode, and execute with real Rust SENS oracle
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/frame3-one-byte"
+          {
+            echo "sha=$GITHUB_SHA"
+            echo "os=$(uname -srm)"
+            echo "rustc=$(rustc --version)"
+            cargo run --locked --release -p sens --example frame3_one_byte_research --quiet -- "$RUNNER_TEMP/frame3-one-byte"
+          } | tee "$RUNNER_TEMP/frame3-one-byte/program-results.tsv"
+          test "$(wc -c < "$RUNNER_TEMP/frame3-one-byte/car-cons-one-nil.f3m")" -eq 1
+          test "$(wc -c < "$RUNNER_TEMP/frame3-one-byte/atom-nil.f3m")" -eq 1
+          test "$(od -An -tx1 "$RUNNER_TEMP/frame3-one-byte/car-cons-one-nil.f3m" | tr -d ' \n')" = '45'
+          grep -q '^45' "$RUNNER_TEMP/frame3-one-byte/program-results.tsv"
+      - name: Preserve proof and actual one-byte physical files
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: frame3-one-byte-${{ github.sha }}
+          path: ${{ runner.temp }}/frame3-one-byte/
+          if-no-files-found: error
+          retention-days: 30
+  real-files:
+    name: Original F3 physical size and warm CPU on actual tracked files
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Verify real Rust T5 admission and original F3 full carrier
+        shell: bash
+        run: |
+          set -euo pipefail
+          {
+            echo "# sha=$GITHUB_SHA"
+            echo "# os=$(uname -srm)"
+            echo "# rustc=$(rustc --version)"
+            cargo run --locked --release -p sens --example frame3_real_files_bench --quiet
+          } | tee "$RUNNER_TEMP/frame3-real-file-results.tsv"
+          grep -q '^file' "$RUNNER_TEMP/frame3-real-file-results.tsv"
+      - name: Preserve complete file sizes and all admission verdicts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: frame3-real-file-${{ github.sha }}
+          path: ${{ runner.temp }}/frame3-real-file-results.tsv
+          if-no-files-found: warn
+          retention-days: 30
