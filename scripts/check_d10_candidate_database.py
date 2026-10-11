@@ -56,8 +56,20 @@ def verify(document: dict, root: Path = ROOT) -> dict:
         json.loads(raw[p]) for p in (expected_paths[0], expected_paths[1], expected_paths[2], expected_paths[5])
     ]
     pointer = json.loads((root / "knowledge/d10-current-inventory.json").read_text(encoding="utf-8"))
-    require(pointer["canonical_current"]["path"] == expected_paths[0], "current D10 pointer drift")
-    require(pointer["canonical_current"]["git_blob"] == pins[0]["git_blob"], "current D10 SHA drift")
+    # v1 is a frozen 721-selected catalog, not a mutable claim that no later
+    # research candidates can be admitted from it. Current D10 must retain its
+    # entire source inventory byte-exact as an append-only semantic prefix.
+    archive = pointer.get("historical_v7_research_inventory", {})
+    require(archive.get("path") == expected_paths[0]
+            and archive.get("git_blob") == pins[0]["git_blob"], "frozen v7 catalog pin drift")
+    live = pointer["canonical_current"]
+    live_path = (root / live["path"]).resolve()
+    require(live_path.is_relative_to(root.resolve()) and live_path.is_file(), "unsafe current inventory path")
+    live_bytes = live_path.read_bytes()
+    require(digest(live_bytes) == live["git_blob"], "current D10 SHA drift")
+    live_rows = json.loads(live_bytes)["rows"]
+    require(len(live_rows) >= len(current["rows"])
+            and live_rows[:len(current["rows"])] == current["rows"], "current D10 broke archived v7 prefix")
     selected = document["selected"]
     pending = document["pending"]
     excluded = document["lower_domain_name_overlaps"]
