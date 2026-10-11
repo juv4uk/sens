@@ -56,13 +56,22 @@ def find_name_line(text, name, is_tsv):
 
 def prepare(root, index_path, output):
     root = root.resolve()
+    # Historical unified index was written as literal tab-separated fields,
+    # NOT RFC4180 CSV quoting. JSON-encoded list fields contain unescaped
+    # double quotes, so csv.DictReader mis-parses some source rows.
+    indexed = []
     with index_path.open(encoding="utf-8", newline="") as stream:
-        reader = csv.DictReader(stream, delimiter="\t")
-        if tuple(reader.fieldnames or ()) != INDEX_FIELDS:
+        first_line = stream.readline()
+        if tuple(first_line.rstrip("\r\n").split("\t")) != INDEX_FIELDS:
             raise ValueError("INVALID_UNIFIED_INDEX_SCHEMA")
-        indexed = list(reader)
-    if any(None in item or any(x is None for x in item.values()) for item in indexed):
-        raise ValueError("MALFORMED_UNIFIED_INDEX")
+        for line_number, line in enumerate(stream, 2):
+            raw = line.rstrip("\r\n")
+            if not raw:
+                raise ValueError(f"EMPTY_INDEX_LINE:{line_number}")
+            values = raw.split("\t")
+            if len(values) != len(INDEX_FIELDS):
+                raise ValueError(f"MALFORMED_UNIFIED_INDEX:{line_number}:{len(values)}")
+            indexed.append(dict(zip(INDEX_FIELDS, values)))
 
     pointer = json.loads((root / "knowledge/d10-current-inventory.json").read_text())
     current = pointer["canonical_current"]
