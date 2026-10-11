@@ -47,11 +47,16 @@ def validate(document: str, inventory: dict, matrix: dict) -> dict:
     selected = counts["selected_semantic_candidates"]
     if inventory["status"] != "RESEARCH-UNRATIFIED-PARTIAL":
         raise ValueError("D10 inventory unexpectedly left research status")
+    coordinates = [r["coordinate"] for r in inventory["rows"] if r.get("coordinate") is not None]
     if (inventory["capacity"] != 1024 or inventory["width"] != 10
             or counts["ratified_d10_residents"] != 0
             or counts["remaining_semantic_inventory"] != 1024 - selected
-            or counts["unplaced_selected_candidates"]
-                != selected - counts["law_forced_coordinates"]
+            or counts["unplaced_selected_candidates"] != selected - len(coordinates)
+            or counts["placed_selected_candidates"] != len(coordinates)
+            or counts["law_forced_coordinates"] != 256
+            or len(set(coordinates)) != len(coordinates)
+            or any(not isinstance(c, str) or re.fullmatch(r"[01]{10}", c) is None for c in coordinates)
+            or any(row.get("ratified_resident") is not False for row in inventory["rows"])
             or len(inventory["rows"]) != selected):
         raise ValueError("machine D10 accounting is inconsistent")
     for name, key in COUNT_KEYS.items():
