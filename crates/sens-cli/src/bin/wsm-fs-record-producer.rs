@@ -26,7 +26,7 @@ fn main() {
         ("lib/content-store.lisp", include_str!("../../../../lib/content-store.lisp")),
         ("lib/lisp-fs.lisp", include_str!("../../../../lib/lisp-fs.lisp")),
     ] {
-        let result = if matches!(path, "lib/unify.lisp" | "lib/reason.lisp" | "lib/forward.lisp" | "lib/knowledge.lisp" | "lib/world.lisp" | "lib/persistent-map.lisp") {
+        let result = if matches!(path, "lib/unify.lisp" | "lib/reason.lisp" | "lib/forward.lisp" | "lib/knowledge.lisp" | "lib/world.lisp" | "lib/persistent-map.lisp" | "lib/content-store.lisp" | "lib/lisp-fs.lisp") {
             sens::eval_pinned_reasoning_source(path, source, &mut session)
         } else {
             eval_program(source, &mut session)
