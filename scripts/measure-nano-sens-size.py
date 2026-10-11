@@ -129,9 +129,24 @@ def make_report(args: argparse.Namespace) -> dict[str, Any]:
     seed = readable_file(args.seed, "seed")
     c1 = readable_file(args.c1_executable, "C1 executable")
     c2 = readable_file(args.c2_executable, "C2 executable") if args.c2_executable else None
+    static_c1_path_text = getattr(args, "c1_static_executable", None)
+    static_c1 = readable_file(static_c1_path_text, "static-linked C1 executable") if static_c1_path_text else None
+    static_output_path_text = getattr(args, "c1_static_output", None)
+    baseline_output_path_text = getattr(args, "baseline_c1_output", None)
+    static_output = readable_file(static_output_path_text, "static C1 output") if static_output_path_text else None
+    baseline_output = readable_file(baseline_output_path_text, "baseline C1 output") if baseline_output_path_text else None
+    require((static_c1 is None) == (static_output is None) == (baseline_output is None),
+            "K1 requires --c1-static-executable, --c1-static-output and --baseline-c1-output together")
     require(seed.resolve() != c1.resolve(), "seed and C1 paths must identify different artifacts")
     if c2 is not None:
         require(seed.resolve() != c2.resolve(), "seed and C2 paths must identify different artifacts")
+    if static_c1 is not None:
+        require(len({seed.resolve(), c1.resolve(), static_c1.resolve()}) == 3,
+                "seed, baseline C1 and static-linked C1 must be distinct files")
+        require(static_c1.resolve() != (c2.resolve() if c2 else Path("__no_c2__")),
+                "static-linked C1 and C2 must be distinct files")
+        require(sha256_file(static_output) == sha256_file(baseline_output),
+                "static-linked C1 output differs from baseline C1 output")
     lineage_path = readable_file(args.lineage_report, "lineage report")
     lineage = load_json(lineage_path, "lineage report")
 
@@ -260,6 +275,20 @@ def make_report(args: argparse.Namespace) -> dict[str, Any]:
             "Loadable-segment file bytes may differ from on-disk bytes; executable-section bytes are a section-header sum and are not interchangeable with loadable bytes.",
         ],
     }
+    if static_c1 is not None:
+        report["c1_static_link_strip_variant"] = {
+            "variant": "static-link+strip",
+            "file_name": static_c1.name,
+            "file_bytes": static_c1.stat().st_size,
+            "sha256": sha256_file(static_c1),
+            "size_breakdown": elf_size_breakdown(static_c1),
+            "output_sha256": sha256_file(static_output),
+            "baseline_output_sha256": sha256_file(baseline_output),
+            "observable_output_byte_identical_to_baseline": True,
+            "flags": ["-static", "-s", "-Wl,--build-id=none"],
+            "note": "A measured K1 experiment only; this variant does not replace or weaken the pinned dynamic C1/C2 lineage.",
+        }
+    return report
 
 
 def self_test() -> None:
@@ -268,11 +297,17 @@ def self_test() -> None:
         seed = root / "seed.bin"
         c1 = root / "c1.bin"
         c2 = root / "c2.bin"
+        static_c1 = root / "c1-static.bin"
+        baseline_output = root / "c1-output.bin"
+        static_output = root / "c1-static-output.bin"
         lineage_path = root / "lineage.json"
         seed.write_bytes(b"seed-123")
         c1_bytes = b"c1-executable-fixture"
         c1.write_bytes(c1_bytes)
         c2.write_bytes(c1_bytes)
+        static_c1.write_bytes(b"static-c1-executable-fixture")
+        baseline_output.write_bytes(b"canonical-output")
+        static_output.write_bytes(b"canonical-output")
         c1_sha = hashlib.sha256(c1_bytes).hexdigest()
         source_revision = "a" * 40
         report = {
@@ -302,6 +337,8 @@ def self_test() -> None:
         lineage_path.write_text(json.dumps(report), encoding="utf-8")
         args = argparse.Namespace(
             seed=str(seed), c1_executable=str(c1), c2_executable=str(c2), lineage_report=str(lineage_path),
+            c1_static_executable=str(static_c1), c1_static_output=str(static_output),
+            baseline_c1_output=str(baseline_output),
             source_revision=source_revision, seed_role="test fixture only",
             toolchain="self-test", target="test-target", abi_profile="test-abi",
             build_command="not a real build; fixture only",
@@ -312,6 +349,8 @@ def self_test() -> None:
         assert measured["c1_c2_lineage"]["byte_identical_executables"] is True
         assert measured["c1_c2_lineage"]["c2_executable_remeasured"] is True
         assert measured["c2_executable"]["file_bytes"] == len(c1_bytes)
+        assert measured["c1_static_link_strip_variant"]["file_bytes"] == len(b"static-c1-executable-fixture")
+        assert measured["c1_static_link_strip_variant"]["observable_output_byte_identical_to_baseline"] is True
 
         report["evidence"]["c1_executable_size"] = len(c1_bytes) + 1
         lineage_path.write_text(json.dumps(report), encoding="utf-8")
@@ -351,6 +390,9 @@ def main() -> int:
     parser.add_argument("--seed-role", help="explain exactly what the seed file contains")
     parser.add_argument("--c1-executable", help="C1 executable file from the same pinned lineage")
     parser.add_argument("--c2-executable", help="optional C2 executable to independently compare with C1")
+    parser.add_argument("--c1-static-executable", help="optional K1 static-linked + stripped C1 variant")
+    parser.add_argument("--c1-static-output", help="captured stdout bytes from the static-linked C1 variant")
+    parser.add_argument("--baseline-c1-output", help="captured stdout bytes from the unchanged baseline C1")
     parser.add_argument("--lineage-report", help="validated compiler-selfhost-lineage-report/1 JSON")
     parser.add_argument("--source-revision", help="40-character SENS source SHA pinned in the lineage")
     parser.add_argument("--toolchain", help="full toolchain description/version")
