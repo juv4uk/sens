@@ -90,3 +90,54 @@ jobs:
           python3 -m unittest discover -s research/framed3 -p 'test_semantic_redundancy_research.py' -v
           python3 -O -m unittest discover -s research/framed3 -p 'test_semantic_redundancy_research.py' -v
           python3 research/framed3/semantic_redundancy_research.py
+
+  frame3-all-bench:
+    name: Frame3 paired CPU and full-file bytes (T5, F3, S3v1-v3)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Verify Rust codec exact-word roundtrips before timing
+        shell: bash
+        run: |
+          set -euo pipefail
+          cargo test --locked -p sens --lib universal_frame3
+      - name: Measure identical typed programs and complete physical bytes
+        shell: bash
+        env:
+          FRAME3_BENCH_RAW: ${{ runner.temp }}/frame3-all/paired-raw.tsv
+        run: |
+          set -euo pipefail
+          out="$RUNNER_TEMP/frame3-all"
+          mkdir -p "$out"
+          export BENCH_OS="$(uname -srm)"
+          export BENCH_RUSTC="$(rustc --version)"
+          export BENCH_CPU="$(grep -m1 'model name' /proc/cpuinfo || true)"
+          {
+            echo "SHA=$GITHUB_SHA"
+            echo "RUN_ID=$GITHUB_RUN_ID"
+            echo "RUN_ATTEMPT=$GITHUB_RUN_ATTEMPT"
+            echo "OS=$BENCH_OS"
+            echo "RUSTC=$BENCH_RUSTC"
+            echo "CPU=$BENCH_CPU"
+            echo "scope=warm in-process codec encode/decode and full serialized bytes, not evaluation"
+          } | tee "$out/environment.txt"
+          cargo run --locked --release -p sens --example frame3_f3_bench --quiet | tee "$out/f3-vs-all.tsv"
+          cargo run --locked --release -p sens --example frame3_v3_bench --quiet | tee "$out/v3-vs-all.tsv"
+          cargo run --locked --release -p sens --example frame3_v2_paired_bench --quiet | tee "$out/v2-paired-summary.tsv"
+          test -s "$out/f3-vs-all.tsv"
+          test -s "$out/v3-vs-all.tsv"
+          test -s "$out/v2-paired-summary.tsv"
+          test -s "$out/paired-raw.tsv"
+          grep -q '^case' "$out/f3-vs-all.tsv"
+          grep -q '^case' "$out/v3-vs-all.tsv"
+          grep -q '^case' "$out/v2-paired-summary.tsv"
+      - name: Preserve measured data (or diagnose blocked run)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: frame3-all-bench-${{ github.sha }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/frame3-all/
+          if-no-files-found: warn
+          retention-days: 21
