@@ -23,11 +23,11 @@ def expected_cutover(source):
     assert source.count("((001 c3-no) c3-no") == 6
     assert source.count("((001 c3-fail) c3-fail") == 1
     assert len(re.findall(r"\)\s+\(1\)\s*\n", source)) == 6
-    return (source.replace("((010 selection) (0)",
-                           "((0100 (010 selection))")
-            .replace("((001 c3-no) c3-no", "((010 (001 ()))")
-            .replace("((001 c3-fail) c3-fail", "((010 (001 ()))")
-            .replace(") (1)\n", ")\n"))
+    rewritten = (source.replace("((010 selection) (0)",
+                                "((0100 (010 selection))")
+                 .replace("((001 c3-no) c3-no", "((010 (001 ()))")
+                 .replace("((001 c3-fail) c3-fail", "((010 (001 ()))"))
+    return re.sub(r"\)\s+\(1\)\s*\n", ")\n", rewritten)
 
 
 class Core3SourceCutover(unittest.TestCase):
