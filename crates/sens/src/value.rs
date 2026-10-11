@@ -874,7 +874,13 @@ fn render_canonical_wire(value: &Value) -> String {
             Rational::integer(*number as i64).to_binary_wire_token()
         }
         Value::Rational(number) => number.to_binary_wire_token(),
-        Value::BinaryNumber(number) => format!("#b{}", number.bits()),
+        Value::BinaryNumber(number) => match number.numeric_domain_width() {
+            // Explicitly non-reader token. This string API cannot return a
+            // typed error, so make the unsupported Dn transport unmistakable
+            // rather than silently losing the numeric domain with #b bits.
+            Some(width) => format!("#<D{width}-NUMERIC-WIRE-UNSUPPORTED>"),
+            None => format!("#b{}", number.bits()),
+        },
         Value::Pair(_, _) => render_pair_canonical_wire(value),
         Value::Vector(values) => {
             let items = values.borrow().iter().map(render_canonical_wire).collect::<Vec<_>>();
