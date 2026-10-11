@@ -147,6 +147,9 @@ pub(crate) mod fasl {
     const TAG_DOMAIN_IDENTITY: u8 = 11;
     // #3022: canonical variable-width natural Number, encoded as exact bits.
     const TAG_BINARY_NUMBER: u8 = 12;
+    // Explicit D24/D48/... numeric-domain identity, not merely normalized bits.
+    // Previously unknown additive tag: old v3 FASL readers reject it safely.
+    const TAG_NUMERIC_DOMAIN_NUMBER: u8 = 13;
 
     fn put_u32(out: &mut Vec<u8>, v: u32) {
         out.extend_from_slice(&v.to_le_bytes());
@@ -227,9 +230,18 @@ pub(crate) mod fasl {
                 rational.write_fasl(out);
             }
             ExprKind::BinaryNumber(number) => {
-                out.push(TAG_BINARY_NUMBER);
-                put_u32(out, number.width() as u32);
-                out.extend_from_slice(number.as_bits());
+                if let Some(domain_width) = number.numeric_domain_width() {
+                    // Domain tag and FULL n-bit payload, no literal/lossy
+                    // normalized-magnitude inference. Old FASL remains exact.
+                    out.push(TAG_NUMERIC_DOMAIN_NUMBER);
+                    put_u32(out, domain_width as u32);
+                    out.extend_from_slice(&number.exact_numeric_domain_bits()
+                        .expect("qualified Number owns exact Dn bits"));
+                } else {
+                    out.push(TAG_BINARY_NUMBER);
+                    put_u32(out, number.width() as u32);
+                    out.extend_from_slice(number.as_bits());
+                }
             }
             ExprKind::Sid(sid) => {
                 out.push(TAG_BINARY);
@@ -321,6 +333,15 @@ pub(crate) mod fasl {
                 let raw = bytes.get(*pos..pos.checked_add(count)?)?;
                 *pos += count;
                 ExprKind::BinaryNumber(BinaryNumber::from_canonical_bits(raw).ok()?)
+            }
+            TAG_NUMERIC_DOMAIN_NUMBER => {
+                let domain_width = get_u32(bytes, pos)? as usize;
+                if !BinaryNumber::is_numeric_domain_width(domain_width) {
+                    return None;
+                }
+                let raw = bytes.get(*pos..pos.checked_add(domain_width)?)?;
+                *pos += domain_width;
+                ExprKind::BinaryNumber(BinaryNumber::from_numeric_domain_bits(domain_width, raw)?)
             }
             TAG_BINARY => {
                 let value = *bytes.get(*pos)?;
@@ -454,6 +475,8 @@ pub(crate) mod wire {
     const TAG_LOCAL: u8 = 0x58;
     const TAG_DOMAIN_IDENTITY: u8 = 0x59;
     const TAG_BINARY_NUMBER: u8 = 0x5A;
+    // Domain-qualified natural number: distinct from historic normalized tag.
+    const TAG_NUMERIC_DOMAIN_NUMBER: u8 = 0x5B;
     /// Точні цілі поза цим діапазоном ідуть як f64, щоб не втратити точність.
     const EXACT_INTEGER_LIMIT: f64 = 9_007_199_254_740_992.0;
 
@@ -575,9 +598,16 @@ pub(crate) mod wire {
                 rational.write_fasl(out);
             }
             ExprKind::BinaryNumber(number) => {
-                out.push(TAG_BINARY_NUMBER);
-                put_varint(out, number.width() as u64);
-                out.extend_from_slice(number.as_bits());
+                if let Some(domain_width) = number.numeric_domain_width() {
+                    out.push(TAG_NUMERIC_DOMAIN_NUMBER);
+                    put_varint(out, domain_width as u64);
+                    out.extend_from_slice(&number.exact_numeric_domain_bits()
+                        .expect("qualified Number owns exact Dn bits"));
+                } else {
+                    out.push(TAG_BINARY_NUMBER);
+                    put_varint(out, number.width() as u64);
+                    out.extend_from_slice(number.as_bits());
+                }
             }
             ExprKind::Sid(sid) => {
                 out.push(TAG_BINARY);
@@ -755,6 +785,15 @@ pub(crate) mod wire {
                 let raw = bytes.get(*pos..pos.checked_add(count)?)?;
                 *pos += count;
                 ExprKind::BinaryNumber(BinaryNumber::from_canonical_bits(raw).ok()?)
+            }
+            TAG_NUMERIC_DOMAIN_NUMBER => {
+                let domain_width = usize::try_from(get_varint(bytes, pos)?).ok()?;
+                if !BinaryNumber::is_numeric_domain_width(domain_width) {
+                    return None;
+                }
+                let raw = bytes.get(*pos..pos.checked_add(domain_width)?)?;
+                *pos += domain_width;
+                ExprKind::BinaryNumber(BinaryNumber::from_numeric_domain_bits(domain_width, raw)?)
             }
             TAG_STRING => ExprKind::String(get_text(bytes, pos)?.into()),
             TAG_SYMBOL => ExprKind::Symbol(get_text(bytes, pos)?.into()),
