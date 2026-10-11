@@ -45,6 +45,22 @@ fn legacy_core_let_uses_lisp_owned_map_without_unadmitted_d6_dispatch() {
 }
 
 #[test]
+fn derived_map_preserves_macro_binding_parameter_and_value_lists() {
+    let mut session = Session::default();
+    sens::eval_pinned_legacy_core_source("lib/core.lisp", SOURCE, &mut session)
+        .expect("typed core bootstrap");
+    for (source, expected) in [
+        ("(внутрішнє-відображення (00001000 (binding) (00000101 binding)) (00000001 ((x 7))))", "(x)"),
+        ("(внутрішнє-відображення (00001000 (binding) (00101111 binding)) (00000001 ((x 7))))", "(7)"),
+        ("(map (00001000 (binding) (00000101 binding)) (00000001 ((x 7))))", "(x)"),
+    ] {
+        let output = eval_program(source, &mut session)
+            .unwrap_or_else(|e| panic!("derived MAP {source}: {e:?}")).value.to_string();
+        assert_eq!(output, expected, "derived MAP mismatch for {source}");
+    }
+}
+
+#[test]
 fn unadmitted_d6_map_does_not_silently_fall_back_to_historical_byte() {
     let mut session = Session::default();
     let parsed = parse_mixed_exact_domain_legacy_core_source("lib/core.lisp", SOURCE)
