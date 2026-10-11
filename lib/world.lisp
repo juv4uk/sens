@@ -126,8 +126,8 @@
       ((101 (knowledge-clause-valid? clause) (001 ()))
        (1110 (001 rejected) (1110 (001 reason) (001 invalid-clause)) (1110 (001 input) clause)))
       ((010 ())
-       (001000 ((opposite (opposite-knowledge-head (100 clause))))
-         (001000 ((proofs (110
+       (10011100 ((opposite (opposite-knowledge-head (100 clause))))
+         (10011100 ((proofs (110
                          ((world-module-known? world module-name)
                           (reason-in-world world module-name opposite))
                          )))
@@ -144,7 +144,7 @@
 
 (0011 advise-world
   (0010 (world module-name clause)
-    (001000 ((decision (advice-decision-in-world world module-name clause)))
+    (10011100 ((decision (advice-decision-in-world world module-name clause)))
       (110
         ((101 (100 decision) (001 accepted))
          (1110 decision (world-tell world module-name clause)))
@@ -169,11 +169,11 @@
       ((101 (knowledge-clauses-valid? clauses) (001 ()))
        (1110 (001 rejected) (1110 (001 reason) (001 invalid-clause)) (1110 (001 input) clauses)))
       ((010 ())
-       (001000 ((existing (110
+       (10011100 ((existing (110
                          ((world-module-known? world module-name)
                           (world-clauses world module-name))
                          )))
-         (001000 ((conflict (advice-batch-conflict
+         (10011100 ((conflict (advice-batch-conflict
                            clauses clauses (1111 clauses existing))))
            (110
              
@@ -259,7 +259,7 @@
 
 (0011 advise-all-world
   (0010 (world module-name clauses)
-    (001000 ((decision (advice-all-decision-in-world world module-name clauses)))
+    (10011100 ((decision (advice-all-decision-in-world world module-name clauses)))
       (110
         ((101 (100 decision) (001 accepted))
          (1110 decision (world-tell-all world module-name clauses)))
@@ -328,7 +328,7 @@
       ((world-module-missing? world module-name)
        (1110 (001 rejected) (1110 (001 reason) (001 Module-not-found)) (1110 (001 input) module-name)))
       ((world-module-known? world module-name)
-       (001000 ((clauses (world-clauses world module-name)))
+       (10011100 ((clauses (world-clauses world module-name)))
          (110
            
            ((010 clauses)  (1110 (001 rejected) (1110 (001 reason) (001 invalid-batch)) (1110 (001 input) clauses)))
@@ -447,7 +447,7 @@
       
       ((010 journal)  (001 World-not-ancestor))
       ((010 ())
-       (001000 ((rest (world-journal-prefix (011 journal) old-journal)))
+       (10011100 ((rest (world-journal-prefix (011 journal) old-journal)))
          (110
            ((world-not-ancestor? rest) rest)
            ((010 ()) (111 (100 journal) rest))))))))
@@ -466,11 +466,11 @@
       
       ((010 (world-parent to))  (001 World-not-ancestor))
       ((010 ())
-       (001000 ((earlier (world-diff from (world-parent to))))
+       (10011100 ((earlier (world-diff from (world-parent to))))
          (110
            ((world-not-ancestor? earlier) earlier)
            ((010 ())
-            (001000 ((transition
+            (10011100 ((transition
                     (world-journal-prefix
                       (world-journal to)
                       (world-journal (world-parent to)))))
@@ -514,9 +514,9 @@
 
 (0011 world-common-ancestor
   (0010 (left right)
-    (001000 ((left-depth (world-depth left))
+    (10011100 ((left-depth (world-depth left))
           (right-depth (world-depth right)))
-      (001000 ((target-depth (110
+      (10011100 ((target-depth (110
                             ((11010 left-depth right-depth)  left-depth)
                             ((010 ()) right-depth))))
         (world-common-ancestor-aligned
@@ -532,7 +532,7 @@
 
 (0011 world-branch-diff
   (0010 (left right)
-    (001000 ((base (world-common-ancestor left right)))
+    (10011100 ((base (world-common-ancestor left right)))
       (110
         ((world-no-common-ancestor? base) base)
         ((010 ())
