@@ -11,7 +11,8 @@ const D3: &str = include_str!("../../../lib/world.lisp");
 
 fn world_session(migrated: bool) -> Session {
     let mut s = Session::default();
-    eval_program(CORE, &mut s).expect("core bootstrap required for world library");
+    sens::eval_pinned_legacy_core_source("lib/core.lisp", CORE, &mut s)
+        .expect("source-pinned core required for world library");
     if migrated {
         let parsed = parse_mixed_exact_domain_reasoning_source("lib/world.lisp", D3)
             .expect("only explicitly pinned current-world projection may be typed");
