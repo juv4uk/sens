@@ -198,3 +198,41 @@ fn number_bits_do_not_collapse_equal_payload_core_domains() {
         "same payload bits in different domains need different canonical framing"
     );
 }
+
+
+#[test]
+fn natural_binary_subtraction_and_exact_division_execute_as_bits() {
+    let mut session = Session::default();
+    let subtract = eval_program("(- #b110 #b10)", &mut session)
+        .expect("natural difference").value;
+    assert_eq!(subtract, Value::BinaryNumber(BinaryNumber::parse("100").unwrap()));
+
+    let divide = eval_program("(/ #b110 #b10)", &mut session)
+        .expect("exact natural quotient").value;
+    assert_eq!(divide, Value::BinaryNumber(BinaryNumber::parse("11").unwrap()));
+
+    let unary_zero = eval_program("(- #b0)", &mut session)
+        .expect("negative zero is zero").value;
+    assert_eq!(unary_zero, Value::BinaryNumber(BinaryNumber::zero()));
+
+    let reciprocal_one = eval_program("(/ #b1)", &mut session)
+        .expect("reciprocal of one").value;
+    assert_eq!(reciprocal_one, Value::BinaryNumber(BinaryNumber::one()));
+}
+
+#[test]
+fn signed_rational_and_division_by_zero_remain_fail_closed() {
+    for source in ["(- #b10 #b11)", "(- #b10)", "(/ #b111 #b10)", "(/ #b10)"] {
+        let err = eval_program(source, &mut Session::default())
+            .expect_err("no unratified signed or rational encoding");
+        assert_eq!(err.kind, sens::ErrorKind::Type, "{source}");
+    }
+    for source in ["(/ #b1 #b0)", "(/ #b0)"] {
+        let err = eval_program(source, &mut Session::default())
+            .expect_err("cannot divide by zero");
+        assert_eq!(err.kind, sens::ErrorKind::DivisionByZero, "{source}");
+    }
+    let err = eval_program("(/ #b110 2)", &mut Session::default())
+        .expect_err("no implicit legacy number bridge");
+    assert_eq!(err.kind, sens::ErrorKind::Type);
+}

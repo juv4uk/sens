@@ -237,7 +237,7 @@ pub(super) fn arithmetic_on_values(
 ) -> Result<Value, LanguageError> {
     // #3022 canonical Number path. Once a BinaryNumber participates, every
     // operand must be a BinaryNumber; no implicit bridge to legacy f64/Q is
-    // permitted. The first ratified live slice is natural ADD/MUL only.
+    // permitted. Natural subtraction is partial until signed Number is ratified.
     if values.iter().any(|value| matches!(value, Value::BinaryNumber(_))) {
         let numbers = values
             .iter()
@@ -258,10 +258,32 @@ pub(super) fn arithmetic_on_values(
             "*" => numbers
                 .into_iter()
                 .fold(BinaryNumber::one(), |acc, value| acc.mul(value)),
+            "-" => {
+                let mut result = if numbers.len() == 1 {
+                    BinaryNumber::zero()
+                } else {
+                    (*numbers[0]).clone()
+                };
+                let subtractors = if numbers.len() == 1 {
+                    &numbers[..]
+                } else {
+                    &numbers[1..]
+                };
+                for &number in subtractors {
+                    result = result.checked_sub(number).ok_or_else(|| {
+                        LanguageError::new(
+                            ErrorKind::Type,
+                            "negative binary Number requires an unratified signed encoding",
+                            span,
+                        )
+                    })?;
+                }
+                result
+            }
             _ => {
                 return Err(LanguageError::new(
                     ErrorKind::Type,
-                    "signed/rational binary Number operation is not admitted in the natural-number slice",
+                    "binary Number operation is not admitted in the natural-number slice",
                     span,
                 ))
             }
@@ -387,6 +409,54 @@ pub(super) fn division_on_values(
             span,
         ));
     }
+    // Binary Number division is exact on naturals. Non-integral quotients
+    // cannot silently become a host Rational until a canonical binary
+    // rational layout is ratified (#3021).
+    if values.iter().any(|value| matches!(value, Value::BinaryNumber(_))) {
+        let numbers = values
+            .iter()
+            .map(|value| match value {
+                Value::BinaryNumber(number) => Ok(number),
+                _ => Err(LanguageError::new(
+                    ErrorKind::Type,
+                    "binary Number does not implicitly coerce legacy numeric values",
+                    span,
+                )),
+            })
+            .collect::<Result<Vec<&BinaryNumber>, _>>()?;
+
+        let mut result = if argument_count == 1 {
+            BinaryNumber::one()
+        } else {
+            (*numbers[0]).clone()
+        };
+        let divisors = if argument_count == 1 {
+            &numbers[..]
+        } else {
+            &numbers[1..]
+        };
+        for &divisor in divisors {
+            let (quotient, remainder) = result
+                .div_rem(divisor)
+                .ok_or_else(|| division_error(span))?;
+            if !remainder.is_zero() {
+                return Err(LanguageError::new(
+                    ErrorKind::Type,
+                    "fractional binary Number requires an unratified rational encoding",
+                    span,
+                ));
+            }
+            result = quotient;
+        }
+        if environment
+            .numeric_bit_limit()
+            .is_some_and(|limit| result.width() > limit)
+        {
+            return Err(arithmetic_overflow(span));
+        }
+        return Ok(Value::BinaryNumber(result));
+    }
+
     if argument_count == values.len() {
         if let Some(result) = small_rational_fast_path('/', values, environment, span) {
             return result;
