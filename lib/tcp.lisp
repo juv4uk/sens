@@ -10,42 +10,42 @@
 ; Preserve the historical public behavior explicitly in Lisp: listen on all
 ; IPv4 interfaces. Callers that need an explicit address can bypass that policy
 ; through tcp-listen-on without changing the host substrate.
-(00001001 tcp-listen-on
-  (00001000 (address port)
+(0011 tcp-listen-on
+  (0010 (address port)
     (tcp-listen-raw address port)))
 
-(00001001 tcp-listen
-  (00001000 (port)
+(0011 tcp-listen
+  (0010 (port)
     (tcp-listen-on "0.0.0.0" port)))
 
-(00001001 tcp-read-bytes->text
-  (00001000 (bytes)
-    (10011100 ((decoded (utf8-decode-string bytes)))
-      (00000111
-        ((00000011 (00000101 decoded) (00000001 decoded))
+(0011 tcp-read-bytes->text
+  (0010 (bytes)
+    (001000 ((decoded (utf8-decode-string bytes)))
+      (110
+        ((101 (100 decoded) (001 decoded))
          
-         (00101111 decoded))
-        ((0100 (00000011 (00000101 decoded) (00000001 decoded)))
+         (1001 decoded))
+        ((0100 (101 (100 decoded) (001 decoded)))
          decoded)))))
 
-(00001001 tcp-read
-  (00001000 (connection)
+(0011 tcp-read
+  (0010 (connection)
     (tcp-read-bytes->text (tcp-read-raw connection))))
 
-(00001001 tcp-write-text->bytes
-  (00001000 (text)
+(0011 tcp-write-text->bytes
+  (0010 (text)
     (utf8-encode-string text)))
 
 ; Return the original text after a successful raw write so the public result
 ; remains compatible with the historical tcp-write surface while encoding
 ; policy belongs to Lisp.
-(00001001 tcp-write-via-raw
-  (00001000 (connection text)
-    (10011100 ((written (tcp-write-raw connection (tcp-write-text->bytes text))))
+(0011 tcp-write-via-raw
+  (0010 (connection text)
+    (001000 ((written (tcp-write-raw connection (tcp-write-text->bytes text))))
       text)))
 
-(00001001 tcp-write
-  (00001000 (connection text)
+(0011 tcp-write
+  (0010 (connection text)
     (tcp-write-via-raw connection text)))
 
 

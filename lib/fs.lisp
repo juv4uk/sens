@@ -23,20 +23,20 @@
 ; Historical `read-file` returns the decoded text directly. Invalid UTF-8 is
 ; no longer a raw Rust IO error: it returns the same explicit rejection value
 ; `utf8-decode-string` already produces for process/TCP bytes.
-(00001001 read-file
-  (00001000 (path)
-    (10011100 ((decoded (read-file-utf8-raw path)))
-      (00000111
-        ((00000011 (00000101 decoded) (00000001 decoded))
-         (00101111 decoded))
-        ((00000010 (00000001 ()))
+(0011 read-file
+  (0010 (path)
+    (001000 ((decoded (read-file-utf8-raw path)))
+      (110
+        ((101 (100 decoded) (001 decoded))
+         (1001 decoded))
+        ((010 (001 ()))
          decoded)))))
 
 ; Historical `write-file` returns the text it was given after a successful
 ; write; encoding policy belongs to Lisp, the host only persists bytes.
-(00001001 write-file
-  (00001000 (path text)
-    (00101111 (00100111 (write-file-bytes path (utf8-encode-string text)) text))))
+(0011 write-file
+  (0010 (path text)
+    (1001 (1110 (write-file-bytes path (utf8-encode-string text)) text))))
  
 ; Stable surface peers are projected by load_fs_library after the public
 ; file closures exist. Avoid the retired per-file post-core materializer.

@@ -12,74 +12,74 @@
 ;   (disputed evidence)
 ;   (invalid reason payload)
 
-(00001001 make-proved
-  (00001000 (statement results)
-    (00100111 (00000001 proved) statement results)))
+(0011 make-proved
+  (0010 (statement results)
+    (1110 (001 proved) statement results)))
 
-(00001001 make-unknown
-  (00001000 (subject)
-    (00100111 (00000001 unknown) subject)))
+(0011 make-unknown
+  (0010 (subject)
+    (1110 (001 unknown) subject)))
 
-(00001001 make-partial
-  (00001000 (value bound)
-    (00100111 (00000001 partial) value bound)))
+(0011 make-partial
+  (0010 (value bound)
+    (1110 (001 partial) value bound)))
 
-(00001001 make-blocked
-  (00001000 (reason)
-    (00100111 (00000001 blocked) reason)))
+(0011 make-blocked
+  (0010 (reason)
+    (1110 (001 blocked) reason)))
 
-(00001001 make-disputed
-  (00001000 (evidence)
-    (00100111 (00000001 disputed) evidence)))
+(0011 make-disputed
+  (0010 (evidence)
+    (1110 (001 disputed) evidence)))
 
-(00001001 make-invalid
-  (00001000 (reason payload)
-    (00100111 (00000001 invalid) reason payload)))
+(0011 make-invalid
+  (0010 (reason payload)
+    (1110 (001 invalid) reason payload)))
 
-(00001001 result-tagged?
-  (00001000 (result)
-    (00000111
+(0011 result-tagged?
+  (0010 (result)
+    (110
       
-      ((00000010 result)  (00000001 ()))
-      ((00000011 (00000101 result) (00000001 proved)) t)
-      ((00000011 (00000101 result) (00000001 unknown)) t)
-      ((00000011 (00000101 result) (00000001 partial)) t)
-      ((00000011 (00000101 result) (00000001 blocked)) t)
-      ((00000011 (00000101 result) (00000001 disputed)) t)
-      ((00000011 (00000101 result) (00000001 invalid)) t)
+      ((010 result)  (001 ()))
+      ((101 (100 result) (001 proved)) t)
+      ((101 (100 result) (001 unknown)) t)
+      ((101 (100 result) (001 partial)) t)
+      ((101 (100 result) (001 blocked)) t)
+      ((101 (100 result) (001 disputed)) t)
+      ((101 (100 result) (001 invalid)) t)
       )))
 
-(00001001 result-status
-  (00001000 (result)
-    (00000111
-      ((result-tagged? result) (00000101 result))
+(0011 result-status
+  (0010 (result)
+    (110
+      ((result-tagged? result) (100 result))
       )))
 
-(00001001 result-payload
-  (00001000 (result)
-    (00000111
-      ((result-tagged? result) (00000110 result))
+(0011 result-payload
+  (0010 (result)
+    (110
+      ((result-tagged? result) (011 result))
       )))
 
 ; Proper-list validation follows the same atom-first shape as
 ; knowledge-proper-list?: `eq` is an atom operation, so a pair must never be
 ; passed to it merely to ask whether that pair is `()`.
-(00001001 result-proper-list?
-  (00001000 (value)
-    (00000111
+(0011 result-proper-list?
+  (0010 (value)
+    (110
       
-      ((00000010 value)  (00000111
-         ((00000011 value (00000001 ())) t)
+      ((010 value)  (110
+         ((101 value (001 ())) t)
          ))
-      ((00000010 ()) (result-proper-list? (00000110 value))))))
+      ((010 ()) (result-proper-list? (011 value))))))
 
 ; The reserved negation head: `not?` (predicate spelling since #1444) or the
 ; historical `not`.
-(00001001 result-not-head?
-  (00001000 (head)
-    (00000111
-      ((00000011 head (00000001 not?)) t)
-      ((00000011 head (00000001 not)) t)
+(0011 result-not-head?
+  (0010 (head)
+    (110
+      ((101 head (001 not?)) t)
+      ((101 head (001 not)) t)
       )))
 
 ; Minimal standalone goal validation for the observation adapter. Ordinary
@@ -87,34 +87,34 @@
 ; logical shape, `(not? goal)`, additionally requires exactly one recursively
 ; valid nested goal, so malformed `(not?)` / `(not? a b)` cannot be mislabeled as
 ; logical `unknown`.
-(00001001 result-goal?
-  (00001000 (goal)
-    (00000111
+(0011 result-goal?
+  (0010 (goal)
+    (110
       
-      ((00000010 goal)  (00000001 ()))
-      ((00100001 (result-proper-list? goal)) (00000001 ()))
-      ((00100001 (00100011 (00000101 goal))) (00000001 ()))
-      ((result-not-head? (00000101 goal))
-       (00000111
-         ((00011100 (00101000 goal) 2)  (result-goal? (00101111 goal)))
+      ((010 goal)  (001 ()))
+      ((0100 (result-proper-list? goal)) (001 ()))
+      ((0100 (110101100 (100 goal))) (001 ()))
+      ((result-not-head? (100 goal))
+       (110
+         ((11110111 (000000 goal) 2)  (result-goal? (1001 goal)))
          ))
-      ((00000010 ()) t))))
+      ((010 ()) t))))
 
 ; `(not? goal)` is the explicit logical opposite used by the knowledge layer.
 ; A well-shaped top-level negative query asks about its positive counterpart;
 ; every other goal gets wrapped in `not?`.
-(00001001 result-negated-goal?
-  (00001000 (goal)
-    (00000111
-      ((00100001 (result-goal? goal)) (00000001 ()))
-      ((result-not-head? (00000101 goal)) t)
+(0011 result-negated-goal?
+  (0010 (goal)
+    (110
+      ((0100 (result-goal? goal)) (001 ()))
+      ((result-not-head? (100 goal)) t)
       )))
 
-(00001001 result-opposite-goal
-  (00001000 (goal)
-    (00000111
-      ((result-negated-goal? goal) (00101111 goal))
-      ((00000010 ()) (00100111 (00000001 not?) goal)))))
+(0011 result-opposite-goal
+  (0010 (goal)
+    (110
+      ((result-negated-goal? goal) (1001 goal))
+      ((010 ()) (1110 (001 not?) goal)))))
 
 ; Observe one reasoning question without information collapse.
 ; - positive proof(s) => proved(goal, all-results)
@@ -129,38 +129,38 @@
 ; repeated-query callers may retain the prepared index themselves. There is no
 ; hidden cache or invalidation policy: a retained index continues to represent
 ; the exact rules captured when it was built.
-(00001001 reason-observe
-  (00001000 (goal rules-or-index)
-    (00000111
-      ((00100001 (result-goal? goal))
-       (make-invalid (00000001 invalid-goal) goal))
-      ((00000010 ())
-       (10011101 ((opposite (result-opposite-goal goal))
+(0011 reason-observe
+  (0010 (goal rules-or-index)
+    (110
+      ((0100 (result-goal? goal))
+       (make-invalid (001 invalid-goal) goal))
+      ((010 ())
+       (001001 ((opposite (result-opposite-goal goal))
               (index (reason-ensure-index rules-or-index))
               (positive-results
-                (10000000
+                (101011011
                   goal
                   (reason-index-candidates goal index)
-                  (00000001 ())
+                  (001 ())
                   index
                   0))
               (opposite-results
-                (10000000
+                (101011011
                   opposite
                   (reason-index-candidates opposite index)
-                  (00000001 ())
+                  (001 ())
                   index
                   0)))
-         (00000111
-           ((10011010 (10110001 (00000010 positive-results))
-                 (10110001 (00000010 opposite-results)))
+         (110
+           ((11110101 (110111011 (010 positive-results))
+                 (110111011 (010 opposite-results)))
             (make-disputed
-              (00100111
+              (1110
                 (make-proved goal positive-results)
                 (make-proved opposite opposite-results))))
-           ((10110001 (00000010 positive-results))
+           ((110111011 (010 positive-results))
             (make-proved goal positive-results))
-           ((10110001 (00000010 opposite-results))
+           ((110111011 (010 opposite-results))
             (make-proved opposite opposite-results))
            ))))))
 
@@ -169,15 +169,15 @@
 ; well-formed module name is absent after scanning the concrete append-only
 ; knowledge journal, that absence is already established: reasoning is blocked
 ; by a known missing precondition rather than epistemically `unknown`.
-(00001001 reason-in-observe
-  (00001000 (module-name goal)
-    (00000111
-      ((00100001 (00100011 module-name))
-       (make-invalid (00000001 invalid-module) module-name))
-      ((00100001 (result-goal? goal))
-       (make-invalid (00000001 invalid-goal) goal))
-      ((01111110 module-name)
-       (reason-observe goal (01111111 module-name)))
-      ((00000010 ())
+(0011 reason-in-observe
+  (0010 (module-name goal)
+    (110
+      ((0100 (110101100 module-name))
+       (make-invalid (001 invalid-module) module-name))
+      ((0100 (result-goal? goal))
+       (make-invalid (001 invalid-goal) goal))
+      ((101010010 module-name)
+       (reason-observe goal (110000011 module-name)))
+      ((010 ())
        (make-blocked
-         (00100111 (00000001 module-not-found) module-name))))))
+         (1110 (001 module-not-found) module-name))))))

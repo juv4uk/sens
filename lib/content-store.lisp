@@ -15,27 +15,27 @@
 ;; werden als `(world-history journal metadata)` ohne rekursive Elternkopien
 ;; gespeichert.
 
-(00001001 empty-content-store
-  (00001000 () map-empty))
+(0011 empty-content-store
+  (0010 () map-empty))
 
-(00001001 content-store-put
-  (00001000 (store value)
-    (01101110 (knowledge-content-address value) value store)))
+(0011 content-store-put
+  (0010 (store value)
+    (101101110 (knowledge-content-address value) value store)))
 
-(00001001 content-store-get
-  (00001000 (store address)
-    (01101101 address store)))
+(0011 content-store-get
+  (0010 (store address)
+    (101100101 address store)))
 
-(00001001 content-store-contains?
-  (00001000 (store address)
-    (01101111 address store)))
+(0011 content-store-contains?
+  (0010 (store address)
+    (101100010 address store)))
 
-(00001001 content-store-put-world
-  (00001000 (store world)
-    (01101110 (world-content-address world)
+(0011 content-store-put-world
+  (0010 (store world)
+    (101101110 (world-content-address world)
                 (world-address-content world)
                 store)))
 
-(00001001 content-store-size
-  (00001000 (store)
-    (00101000 (01110000 store))))
+(0011 content-store-size
+  (0010 (store)
+    (000000 (101001100 store))))
