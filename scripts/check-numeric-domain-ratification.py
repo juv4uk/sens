@@ -33,7 +33,7 @@ def validate(policy, ratification, lang):
                  "mixed-domain implicit coercion and general widening",
                  "overflow for other operations beyond same-domain natural ADD/MUL",
                  "binary opcode and production encoding for signed and rational compositions",
-                 "signed and rational arithmetic runtime admission and conformance"):
+                 "canonical physical NEG/RATIO composition reader and transport and source macro projection"):
         need(name in policy.get("not_yet_ratified", []), "deferred law: " + name)
     need("signedness" not in policy.get("not_yet_ratified", []), "NEG composition law must not be marked wholly deferred")
     extended = policy.get("extended_number_laws", {})
@@ -49,7 +49,7 @@ def validate(policy, ratification, lang):
     need("p=0 collapses" in extended.get("rational", ""), "zero numerator law")
     need(extended.get("binary_composition_opcode") == "deferred", "binary opcode still deferred")
     need(extended.get("wire_fasl_and_physical_encoding") == "deferred", "composite wire layout still deferred")
-    need(extended.get("callability_and_signed_rational_arithmetic") == "deferred", "signed/rational runtime still deferred")
+    need("Core-executable" in extended.get("callability_and_signed_rational_arithmetic", ""), "signed/rational Core runtime must execute")
     natural = policy.get("natural_arithmetic", {})
     need(natural.get("date") == "2026-10-11", "natural arithmetic source")
     need("same Dn" in natural.get("scope", ""), "same-domain operand scope")
@@ -58,7 +58,13 @@ def validate(policy, ratification, lang):
     need("a=b*q+r" in natural.get("div_rem", ""), "Euclidean division identity")
     need(natural.get("no_implicit_mixed_domain_coercion") is True, "mixed domain must fail closed")
     need(natural.get("no_rounding_or_wraparound") is True, "no rounding/wraparound")
-    need(natural.get("signed_and_rational_runtime") == "deferred", "signed/rational Value still deferred")
+    need("Core-executable" in natural.get("signed_and_rational_runtime", ""), "signed/rational Core Value must execute")
+    composite = policy.get("numeric_composition_runtime", {})
+    need("Core-executable" in composite.get("status", ""), "composite Core runtime status")
+    need(composite.get("physical_composite_codec") == "deferred", "physical composite codec remains deferred")
+    need(composite.get("unqualified_or_mixed_numeric_coercion") is False, "no numeric domain coercion")
+    need(composite.get("float_rounding") is False, "exact rational no floats")
+    need("smallest" in composite.get("domain_growth", ""), "explicit rational result width growth")
     for n in (24, 48, 96, 192, 384):
         biggest = (1 << n)-1
         full_product = biggest*biggest
@@ -92,6 +98,7 @@ def validate(policy, ratification, lang):
         "(addition-bridge-scope",
         "(same-domain-natural-multiplication", "(same-domain-natural-subtraction",
         "(same-domain-natural-division",
+        "(numeric-composition-runtime", "(composite-growth",
         "(base-natural-occupancy", "(signed-composition", "(rational-composition",
         "(composite-identity", "(canonicalization",
     ):
