@@ -1,0 +1,97 @@
+{
+  "schema": "sens.history.ratification-source-intake/v1",
+  "date": "2026-10-11",
+  "status": "SOURCE-PRESERVED-NOT-WHOLE-BRANCH-MERGED",
+  "purpose": "Restore independently SHA-verifiable original historical ratification sources into main without reverting the current ratified exact-width contracts, generated tables or executable guards.",
+  "branches": [
+    {
+      "branch": "ratify/d8-3960",
+      "head_sha": "8537e7ee4b81f060bf5f4bc146d9d471cc5453e3",
+      "source_ahead": 36,
+      "verdict": "CORE-D8-SOURCE-EXACT-IN-MAIN-DELTA-REVIEW",
+      "same_blob_paths": [
+        "contracts/d1-d8-foundation-ratification.lisp",
+        "contracts/d8-ratification.lisp",
+        "knowledge/d1-d8-foundation.json",
+        "knowledge/d8-ratified.json"
+      ],
+      "remaining_review": "Workflow/checker/other modified paths against current exact-domain main"
+    },
+    {
+      "branch": "ratify/d9-4008",
+      "head_sha": "fe26d97f0d9ca5b8ce3f53ba83bc00c74ed7ee18",
+      "source_ahead": 34,
+      "verdict": "CORE-D9-SOURCE-EXACT-IN-MAIN-DELTA-REVIEW",
+      "same_blob_paths": [
+        "contracts/d1-d9-foundation-ratification.lisp",
+        "contracts/d9-ratification.lisp",
+        "knowledge/d1-d9-foundation.json",
+        "knowledge/d9-ratified.json"
+      ],
+      "remaining_review": "Workflow/checker/other modified paths against current exact-domain main"
+    },
+    {
+      "branch": "ratify/3272-d4-full-16",
+      "head_sha": "33eeb001eafe769435726737e0c35a0300d20679",
+      "source_ahead": 1,
+      "verdict": "CORE-D4-CONTRACT-EXACT-IN-MAIN-DELTA-REVIEW",
+      "same_blob_paths": [
+        "contracts/d4-bootstrap-ratification.lisp"
+      ],
+      "remaining_review": "11 other changed branch paths"
+    },
+    {
+      "branch": "ratify/3305-d5-v2",
+      "head_sha": "4aab20959d35e2a69590086d02b58e566791b375",
+      "source_ahead": 5,
+      "verdict": "PARTIAL-ARCHIVED-TO-MAIN",
+      "archived_exact_blob": [
+        {
+          "source": "contracts/d5-ratification.lisp",
+          "archive": "research/domain-archive/20261011/ratifications/ratify-3305-d5-v2/contracts/d5-ratification.lisp.source.txt",
+          "blob_sha": "83c1d0430a5d13e5cc22661c4afc74c71c9e7747"
+        },
+        {
+          "source": "knowledge/d5-ratified.json",
+          "archive": "research/domain-archive/20261011/ratifications/ratify-3305-d5-v2/knowledge/d5-ratified.json.source.txt",
+          "blob_sha": "e1c6d26ed25d1448572e8a7538f6a3f7aa95b4a0"
+        }
+      ],
+      "remaining_review": "historical code and guard changes, never reset current D5 law"
+    },
+    {
+      "branch": "ratify/3331-d1-d5-foundation",
+      "head_sha": "02805099f5f6ceaeade514c3bd49e314c4eb0366",
+      "source_ahead": 14,
+      "verdict": "PARTIAL-ARCHIVED-TO-MAIN",
+      "archived_exact_blob": [
+        {
+          "source": "contracts/d1-d5-foundation-ratification.lisp",
+          "archive": "research/domain-archive/20261011/ratifications/ratify-3331-d1-d5-foundation/contracts/d1-d5-foundation-ratification.lisp.source.txt",
+          "blob_sha": "a70a74ed1fcd2819e88bdae9453205ee0df63c19"
+        },
+        {
+          "source": "knowledge/d1-d5-foundation.json",
+          "archive": "research/domain-archive/20261011/ratifications/ratify-3331-d1-d5-foundation/knowledge/d1-d5-foundation.json.source.txt",
+          "blob_sha": "c99ad7ff182682f9a5e0e3e1cc7cca7b4974f90b"
+        }
+      ],
+      "remaining_review": "historical code and guard changes"
+    },
+    {
+      "branch": "ratify/3202-bija3-a",
+      "head_sha": "876893f496b08fd732a9506dc96c963f9514b994",
+      "source_ahead": 4,
+      "verdict": "PARTIAL-ARCHIVED-TO-MAIN",
+      "archived_exact_blob": [
+        {
+          "source": "contracts/bija3-l1-l5-ratification.lisp",
+          "archive": "research/domain-archive/20261011/ratifications/ratify-3202-bija3-a/contracts/bija3-l1-l5-ratification.lisp.source.txt",
+          "blob_sha": "e14663e312d3908d3e5b03e3165ac7c29b686f0e"
+        }
+      ],
+      "remaining_review": "historical code and guard changes"
+    }
+  ],
+  "safety": "Not a merge of Git history; does not change canonical D1-D9/current contract. Source statuses are evidence-based and explicitly partial while divergent changes remain."
+}
