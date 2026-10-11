@@ -1,0 +1,63 @@
+{
+  "schema": "sens-historical-branch-archive/v1",
+  "archived_at": "2026-10-11",
+  "source": {
+    "repo": "juv4uk/sens",
+    "pr": 1943,
+    "title": "fix(numbers): land XED binary counts on current main",
+    "branch": "replay/1891-xed-binary-counts-current-main-3",
+    "head_sha": "fd40580e958e189e281cd120c12e8c4e8d5ab280",
+    "base": "main",
+    "base_sha": "42e3945c5e8f27902ade6fedf52f54786c56f914",
+    "reason": "Historical XED binary-count migration branch. Main already formats form-count through binary literals in the current xed_import.rs and generated data has newer counts/digests. Preserve the old differing outputs for provenance; never reapply them over current generated evidence."
+  },
+  "branch_files": [
+    {
+      "original_path": "crates/xtask/src/xed_import.rs",
+      "archive_path": "research/domain-archive/20261011/pr1943/source/crates/xtask/src/xed_import.rs.source.txt",
+      "original_git_blob_sha": "bc6d8e548bdfdd377ffbaa8b6644562ec11bf3cd",
+      "archive_encoding": "UTF-8 source snapshot",
+      "bytes": 19023,
+      "current_main_blob": "2d5eb020925f44599db8b3403deadac9c4d8752d",
+      "current_main_equals_branch": false
+    },
+    {
+      "original_path": "lib/machine/encoding/coverage.lisp",
+      "archive_path": "research/domain-archive/20261011/pr1943/source/lib/machine/encoding/coverage.lisp.source.txt",
+      "original_git_blob_sha": "b8987c0025bcb2b7990eec15b98ab42f62fdd405",
+      "archive_encoding": "UTF-8 source snapshot",
+      "bytes": 184489,
+      "current_main_blob": "943e53beceb7f5a0e6530625169ed6822eaa3015",
+      "current_main_equals_branch": false
+    },
+    {
+      "original_path": "lib/machine/xed/generated/machine-evidence.lisp",
+      "archive_path": "research/domain-archive/20261011/pr1943/source/lib/machine/xed/generated/machine-evidence.lisp.source.txt",
+      "original_git_blob_sha": "9656aa4d8bdc9ef0b75d2d9d7862906dbe2abff5",
+      "archive_encoding": "UTF-8 source snapshot",
+      "bytes": 300541,
+      "current_main_blob": "79cebe03d8219684eb7575d98ceef1e7c1471067",
+      "current_main_equals_branch": false
+    },
+    {
+      "original_path": "crates/xtask/src/encoder_coverage.rs",
+      "original_git_blob_sha": "86629f052f8c5237d1c9bcc3ffcd79b63fcc005b",
+      "current_main_equals_branch": true,
+      "status": "BYTE_IDENTICAL_TO_MAIN"
+    },
+    {
+      "original_path": "tests/data/numeral-active-lib-routes.json",
+      "original_git_blob_sha": "e09b563724cb1baeb8cef78eecee497df466fa43",
+      "current_main_equals_branch": true,
+      "status": "BYTE_IDENTICAL_TO_MAIN"
+    },
+    {
+      "original_path": "tests/data/numeric-source-inventory-baseline.json",
+      "original_git_blob_sha": "01a5edb666e3295c8c4f1e0973ba5397b7933133",
+      "current_main_equals_branch": true,
+      "status": "BYTE_IDENTICAL_TO_MAIN"
+    }
+  ],
+  "current_main_feature": "crates/xtask/src/xed_import.rs already emits (form-count #b{:b}) at its current lines 321 and 344; current machine-evidence top count is 1176 and coverage summary uses the newer current corpus.",
+  "disposition": "ALREADY-IN-MAIN-NEWER / stale generated outputs archived only"
+}
