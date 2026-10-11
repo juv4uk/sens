@@ -128,6 +128,13 @@ pub fn encode_binary_frame(frame: &BinaryFrame) -> Result<Vec<u8>, BinaryFrameEr
             }
         }
         BinaryFrame::BinaryNumber(number) => {
+            // The legacy BinaryNumber extension only stores normalized bits,
+            // not the newly-ratified D24/D48/... domain. Until a separate
+            // transport admission exists, do NOT serialize and silently
+            // re-read a Dn value as an unqualified Number.
+            if let Some(width) = number.numeric_domain_width() {
+                return Err(BinaryFrameError::UnsupportedDomainWidth { index: 0, width });
+            }
             out.extend_from_slice(&CONTROL_ESCAPE);
             out.extend_from_slice(&TYPE_EXTENSION);
             out.extend_from_slice(&EXT_BINARY_NUMBER);
@@ -775,4 +782,19 @@ mod tests {
             Err(BinaryFrameError::NonCanonicalNumber { .. })
         ));
     }
+    #[test]
+    fn d24_numeric_value_rejects_legacy_domain_erasing_frame_encoding() {
+        let qualified = BinaryNumber::from_numeric_domain_bits(24, &vec![1; 24])
+            .expect("direct admitted D24 word");
+        assert!(matches!(
+            encode_binary_frame(&BinaryFrame::BinaryNumber(qualified)),
+            Err(BinaryFrameError::UnsupportedDomainWidth { width: 24, .. })
+        ));
+        // The historic unqualified path remains round-trippable as before.
+        let unqualified = BinaryNumber::from_bits([1, 0, 1]).unwrap();
+        let frame = BinaryFrame::BinaryNumber(unqualified);
+        let wire = encode_binary_frame(&frame).unwrap();
+        assert_eq!(decode_binary_frame(&wire).unwrap().0, frame);
+    }
+
 }
