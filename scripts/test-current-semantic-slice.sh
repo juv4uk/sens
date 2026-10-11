@@ -70,6 +70,9 @@ probes = {
     "speed-record-valid": "(scientific-constant? si:defining-speed-of-light)",
     "speed-proper-list": "(science-proper-list? si:defining-speed-of-light)",
     "speed-length-seven": "(00011100 (00101000 si:defining-speed-of-light) 7)",
+    "speed-length-raw": "(00101000 si:defining-speed-of-light)",
+    "numeric-seven-equalp": "(00011100 7 7)",
+    "speed-length-eq": "(00000011 (00101000 si:defining-speed-of-light) 7)",
     "speed-schema": "(00000011 (00000101 si:defining-speed-of-light) *scientific-constant-schema*)",
     "speed-name-symbol": "(00100011 (scientific-constant-name si:defining-speed-of-light))",
     "speed-quantity-valid": "(quantity? (scientific-constant-quantity si:defining-speed-of-light))",
@@ -80,7 +83,7 @@ probes = {
 for name, expression in probes.items():
     (root / f"quantity-{name}.lisp").write_text(prefix + "\n" + expression + "\n", encoding="utf-8")
 PY
-    for stage in speed-record-valid speed-proper-list speed-length-seven speed-schema speed-name-symbol speed-quantity-valid speed-status-valid speed-kind-valid speed-source-valid; do
+    for stage in speed-record-valid speed-proper-list speed-length-seven speed-length-raw numeric-seven-equalp speed-length-eq speed-schema speed-name-symbol speed-quantity-valid speed-status-valid speed-kind-valid speed-source-valid; do
       probe="$quantity_diag_dir/quantity-$stage.lisp"
       if probe_out="$(cargo run --quiet -p sens-cli --bin sens -- "$probe" 2>&1)"; then
         printf 'QUANTITY-PROBE %s=%s\n' "$stage" "$probe_out" >&2
