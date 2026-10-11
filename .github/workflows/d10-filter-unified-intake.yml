@@ -91,10 +91,18 @@ jobs:
           stats = json.loads(filter_json.read_text().strip().splitlines()[-1])
           adapter = json.loads(adapter_json.read_text().strip().splitlines()[-1])
           reconciliation = json.loads(reconcile_json.read_text().strip().splitlines()[-1])
-          if reconciliation["full_union_names"] != adapter["index_rows"]:
-              raise SystemExit("D10 BLOCKED: restored source count differs from actual filter input")
+          if reconciliation["full_union_candidate_ids"] != adapter["index_rows"]:
+              raise SystemExit("D10 BLOCKED: restored candidate-ID count differs from actual filter input")
+          if (reconciliation["source_union_candidate_ids"] + reconciliation["canonical_overlay_ids_added"]
+                  != reconciliation["full_union_candidate_ids"]):
+              raise SystemExit("D10 BLOCKED: candidate-ID conservation failed during canonical overlay")
+          if (reconciliation["source_historical_ids"] + reconciliation["source_latest_ids"]
+                  - reconciliation["source_id_overlap"] != reconciliation["source_union_candidate_ids"]):
+              raise SystemExit("D10 BLOCKED: historical/current source-ID union arithmetic failed")
+          if reconciliation["source_historical_records"] != 1495:
+              raise SystemExit("D10 BLOCKED: frozen 1495-record historical source changed")
           if reconciliation["full_union_names"] < reconciliation["source_historical_names"]:
-              raise SystemExit("D10 BLOCKED: missing 1495-name historical entries")
+              raise SystemExit("D10 BLOCKED: missing historical semantic-name coverage")
           if stats != {key: len(rows) for key, rows in buckets.items()}:
               raise SystemExit("D10 BLOCKED: summary count drift")
           if buckets["accepted"]:
