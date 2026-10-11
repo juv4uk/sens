@@ -31,7 +31,7 @@ def validate(policy, ratification, lang):
                  "integer versus rational field layout",
                  "decimal literal lowering law",
                  "mixed-domain implicit coercion and general widening",
-                 "multiplication and other-operation overflow policy",
+                 "overflow for other operations beyond same-domain natural ADD/MUL",
                  "binary opcode and production encoding for signed and rational compositions",
                  "signed and rational arithmetic runtime admission and conformance"):
         need(name in policy.get("not_yet_ratified", []), "deferred law: " + name)
@@ -50,6 +50,23 @@ def validate(policy, ratification, lang):
     need(extended.get("binary_composition_opcode") == "deferred", "binary opcode still deferred")
     need(extended.get("wire_fasl_and_physical_encoding") == "deferred", "composite wire layout still deferred")
     need(extended.get("callability_and_signed_rational_arithmetic") == "deferred", "signed/rational runtime still deferred")
+    natural = policy.get("natural_arithmetic", {})
+    need(natural.get("date") == "2026-10-11", "natural arithmetic source")
+    need("same Dn" in natural.get("scope", ""), "same-domain operand scope")
+    need("D(2n)" in natural.get("mul", ""), "multiplication result domain")
+    need("if a>=b" in natural.get("sub", ""), "subtraction nonnegative guard")
+    need("a=b*q+r" in natural.get("div_rem", ""), "Euclidean division identity")
+    need(natural.get("no_implicit_mixed_domain_coercion") is True, "mixed domain must fail closed")
+    need(natural.get("no_rounding_or_wraparound") is True, "no rounding/wraparound")
+    need(natural.get("signed_and_rational_runtime") == "deferred", "signed/rational Value still deferred")
+    for n in (24, 48, 96, 192, 384):
+        biggest = (1 << n)-1
+        full_product = biggest*biggest
+        need(full_product.bit_length() == 2*n, "full-width multiplication lost bits")
+        need(full_product < 1<<(2*n), "D(2n) product capacity")
+        need(biggest-biggest == 0, "exact subtraction")
+        need(biggest == (biggest//3)*3 + (biggest%3), "Euclidean quotient remainder")
+
     addition = policy.get("addition_widening", {})
     need(addition.get("status") == "owner-ratified", "addition promotion status")
     need(addition.get("required_successor") == "D(2n)", "addition successor")
@@ -73,6 +90,8 @@ def validate(policy, ratification, lang):
         '(domain-rule . "D(24 * 2^n), n >= 0")',
         "(same-domain-natural-addition", "(add-carry-preservation",
         "(addition-bridge-scope",
+        "(same-domain-natural-multiplication", "(same-domain-natural-subtraction",
+        "(same-domain-natural-division",
         "(base-natural-occupancy", "(signed-composition", "(rational-composition",
         "(composite-identity", "(canonicalization",
     ):
@@ -80,6 +99,7 @@ def validate(policy, ratification, lang):
     for needle in (
         "(numeric-domains-peer-ratified",
         "(numeric-domain-natural-add-carry",
+        "(numeric-domain-natural-mul-sub-exact-div",
         "(numeric-domain-signed-reduced-ratio-composition",
         "D24, D48, D96, D192",
         "contracts/numeric-domains-ratification.lisp",
@@ -103,6 +123,9 @@ def selftest(policy, ratification, lang):
         ({"extended_number_laws": dict(policy["extended_number_laws"], denominator_zero_is_error=False)}, "denominator zero must fail"),
         ({"extended_number_laws": dict(policy["extended_number_laws"], rational="not reduced")}, "gcd canonical ratio law"),
         ({"extended_number_laws": dict(policy["extended_number_laws"], wire_fasl_and_physical_encoding="unconditionally executable")}, "composite wire layout still deferred"),
+        ({"natural_arithmetic": dict(policy["natural_arithmetic"], mul="truncate high bits")}, "multiplication result domain"),
+        ({"natural_arithmetic": dict(policy["natural_arithmetic"], no_rounding_or_wraparound=False)}, "no rounding/wraparound"),
+        ({"natural_arithmetic": dict(policy["natural_arithmetic"], signed_and_rational_runtime="complete")}, "signed/rational Value still deferred"),
     ]
     for change, why in edits:
         try:
@@ -133,7 +156,7 @@ def main():
     except (ValueError, KeyError, OSError) as exc:
         print(str(exc), file=sys.stderr)
         return 1
-    print("NUMERIC-DOMAIN-RATIFICATION: PASS D24+ full-natural atoms, NEG/RATIO composition laws and carry-safe ADD; signed/rational runtime deferred")
+    print("NUMERIC-DOMAIN-RATIFICATION: PASS D24+ natural ADD/MUL/SUB/exact DIV and NEG/RATIO composition laws; signed/rational runtime deferred")
     return 0
 
 if __name__ == "__main__":
