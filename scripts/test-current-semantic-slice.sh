@@ -53,6 +53,41 @@ quantity_witness="tests/fixtures/exact-quantity-arithmetic-witness.lisp"
 if quantity_status="$(cargo run --quiet -p sens-cli --bin sens -- "$quantity_witness" 2>&1)"; then
   if [[ "$quantity_status" != "(exact-quantity-arithmetic-witness (status pass))" ]]; then
     printf 'exact quantity Lisp witness returned a non-pass result: %s\n' "$quantity_status" >&2
+    # Diagnostic-only replay. Preserve the real failure and the Lisp-owned
+    # pass envelope; never alter or suppress the source witness.
+    quantity_diag_dir="${RUNNER_TEMP:-$(mktemp -d)}"
+    python3 - "$quantity_witness" "$quantity_diag_dir" <<'PY'
+from pathlib import Path
+import sys
+
+source = Path(sys.argv[1]).read_text(encoding="utf-8").rstrip()
+tail = "\n(exact-quantity-arithmetic-witness)"
+if not source.endswith(tail):
+    raise SystemExit("QUANTITY-DIAGNOSTIC-BLOCKED: fixture tail changed")
+prefix = source[:-len(tail)].rstrip()
+root = Path(sys.argv[2])
+probes = {
+    "speed-record-valid": "(scientific-constant? si:defining-speed-of-light)",
+    "speed-proper-list": "(science-proper-list? si:defining-speed-of-light)",
+    "speed-length-seven": "(00011100 (00101000 si:defining-speed-of-light) 7)",
+    "speed-schema": "(00000011 (00000101 si:defining-speed-of-light) *scientific-constant-schema*)",
+    "speed-name-symbol": "(00100011 (scientific-constant-name si:defining-speed-of-light))",
+    "speed-quantity-valid": "(quantity? (scientific-constant-quantity si:defining-speed-of-light))",
+    "speed-status-valid": "(scientific-constant-status-valid? (scientific-constant-status si:defining-speed-of-light))",
+    "speed-kind-valid": "(scientific-constant-kind-valid? (scientific-constant-kind si:defining-speed-of-light))",
+    "speed-source-valid": "(science-source? (scientific-constant-source si:defining-speed-of-light))",
+}
+for name, expression in probes.items():
+    (root / f"quantity-{name}.lisp").write_text(prefix + "\n" + expression + "\n", encoding="utf-8")
+PY
+    for stage in speed-record-valid speed-proper-list speed-length-seven speed-schema speed-name-symbol speed-quantity-valid speed-status-valid speed-kind-valid speed-source-valid; do
+      probe="$quantity_diag_dir/quantity-$stage.lisp"
+      if probe_out="$(cargo run --quiet -p sens-cli --bin sens -- "$probe" 2>&1)"; then
+        printf 'QUANTITY-PROBE %s=%s\n' "$stage" "$probe_out" >&2
+      else
+        printf 'QUANTITY-PROBE %s=ERROR %s\n' "$stage" "$probe_out" >&2
+      fi
+    done
     exit 1
   fi
 else
