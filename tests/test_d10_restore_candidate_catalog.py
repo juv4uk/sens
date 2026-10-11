@@ -111,31 +111,37 @@ class CatalogRestoreTests(unittest.TestCase):
         self.assertEqual(3, report["restored_old_only_names"])
 
     def test_duplicate_source_name_preserves_independent_candidate_ids(self):
-        duplicate = self.make("DELTA", "d10.name.4")
+        # Same spelling is not a semantic equivalence certificate. Retain both
+        # source claims under their distinct immutable IDs, never merge by name.
+        duplicate = self.make("DELTA", "d10.name.5")
         duplicate["semantic_law_variants"] = json.dumps(["independent law claim"])
         duplicate["donor_provenance_claims"] = json.dumps(["second donor source"])
         duplicate["source_records_sha_pinned"] = json.dumps(["second-source@" + "a" * 40])
         self.write(self.current, self.current_rows + [duplicate])
 
         report = merge.merge_catalog(self.root, self.old, self.current, self.output)
-        self.assertEqual(2, report["source_latest_names"])  # distinct names, not rows
+        self.assertEqual(3, report["source_latest_ids"])
+        self.assertEqual(6, report["full_union_ids"])
         result = merge.literal_tsv(self.output)
-        row = result["delta"]
-        self.assertEqual("2", row["source_record_count"])
-        self.assertEqual("0", row["ratified"])
-        self.assertEqual("NONE", row["canonical_coordinate"])
-        self.assertIn("independent law claim", json.loads(row["semantic_law_variants"]))
-        self.assertIn("second donor source", json.loads(row["donor_provenance_claims"]))
+        self.assertEqual({"d10.name.4", "d10.name.5"},
+                         {ident for ident, row in result.items()
+                          if row["semantic_name"] == "DELTA"})
+        original, extra = result["d10.name.4"], result["d10.name.5"]
+        self.assertEqual("1", original["source_record_count"])
+        self.assertEqual("1", extra["source_record_count"])
+        self.assertEqual("0", extra["ratified"])
+        self.assertEqual("NONE", extra["canonical_coordinate"])
+        self.assertIn("independent law claim", json.loads(extra["semantic_law_variants"]))
+        self.assertIn("second donor source", json.loads(extra["donor_provenance_claims"]))
         self.assertIn("second-source@" + "a" * 40,
-                      json.loads(row["source_records_sha_pinned"]))
-        tags = json.loads(row["historical_status_claims"])
-        self.assertIn("SOURCE_CANDIDATE_ID:d10.name.2", tags)
-        self.assertIn("SOURCE_CANDIDATE_ID:d10.name.4", tags)
+                      json.loads(extra["source_records_sha_pinned"]))
+        self.assertIn("HISTORIC_SOURCE_ID:d10.name.2",
+                      json.loads(result["d10.name.2"]["historical_status_claims"]))
 
     def test_repeated_name_with_same_candidate_id_still_fails(self):
         duplicate = dict(self.current_rows[1])
         self.write(self.current, self.current_rows + [duplicate])
-        with self.assertRaisesRegex(ValueError, "DUPLICATE_CANDIDATE_ID"):
+        with self.assertRaisesRegex(ValueError, "DUPLICATE_OR_EMPTY_SOURCE_IDENTITY"):
             merge.merge_catalog(self.root, self.old, self.current, self.output)
 
     def test_historical_blob_tampering_fails(self):
