@@ -14,6 +14,8 @@ import unittest
 ROOT = Path(__file__).resolve().parents[1]
 YANTRA = ROOT / "lib" / "yantra.lisp"
 LINTER = ROOT / "lib" / "linter.lisp"
+CORE = ROOT / "lib" / "core.lisp"
+KNOWLEDGE = ROOT / "lib" / "knowledge.lisp"
 
 class AuditedMapSourceCutover(unittest.TestCase):
     def test_authority_retains_distinct_d6_and_d8_map(self):
@@ -39,6 +41,23 @@ class AuditedMapSourceCutover(unittest.TestCase):
                 self.assertEqual(source.count(expr), 1)
         self.assertNotRegex(source, r"\(00110111(?=\s|\))")
         self.assertNotRegex(source, r"\(00001001(?=\s|\))")
+
+    def test_knowledge_clause_mapping_is_single_sequence(self):
+        source = KNOWLEDGE.read_text(encoding="utf-8")
+        expected = "(101000 (00001000 (clause) (00100111 (00000001 tell) module-name clause)) clauses)"
+        self.assertEqual(source.count(expected), 1)
+        self.assertNotRegex(source, r"\\(00110111(?=\\s|\\))")
+
+    def test_core_let_expansion_maps_are_single_sequence(self):
+        source = CORE.read_text(encoding="utf-8")
+        expected = (
+            "(101000 (00001000 (binding) (00000101 binding)) bindings)",
+            "(101000 (00001000 (binding) (00101111 binding)) bindings)",
+        )
+        for expr in expected:
+            with self.subTest(expr=expr):
+                self.assertEqual(source.count(expr), 1)
+        self.assertNotRegex(source, r"\\(00110111(?=\\s|\\))")
 
     def test_linter_eight_single_sequence_maps_keep_old_macro_datum(self):
         source = LINTER.read_text(encoding="utf-8")
