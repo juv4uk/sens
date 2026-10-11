@@ -33,7 +33,7 @@ fn main() {
         ("lib/content-store.lisp", include_str!("../../../../lib/content-store.lisp")),
         ("lib/lisp-fs.lisp", include_str!("../../../../lib/lisp-fs.lisp")),
     ] {
-        if matches!(path, "lib/forward.lisp" | "lib/knowledge.lisp" | "lib/world.lisp") {
+        if matches!(path, "lib/unify.lisp" | "lib/reason.lisp" | "lib/forward.lisp" | "lib/knowledge.lisp" | "lib/world.lisp") {
             sens::eval_pinned_reasoning_source(path, source, &mut session).unwrap();
         } else {
             eval_program(source, &mut session).unwrap();
