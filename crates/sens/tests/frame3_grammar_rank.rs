@@ -5,9 +5,10 @@ use std::collections::HashSet;
 
 use sens::frame3_grammar::{
     count_inner, decode_body_at_known_length, encode_body_at_known_length, rank_single_root,
-    unrank_single_root, ExactWord, GrammarRankError, MAX_INNER_BITS,
+    unrank_binary_source_words, unrank_single_root, rank_binary_source_words,
+    ExactWord, GrammarRankError, MAX_INNER_BITS,
 };
-use sens::parse_canonical_binary;
+use sens::{parse_binary_source_words, parse_canonical_binary};
 
 fn word(bits: &str) -> ExactWord {
     ExactWord::new(
@@ -155,4 +156,48 @@ fn fail_closed_on_unknown_lengths_ambiguous_roots_and_unused_codes() {
     assert_eq!(encode_body_at_known_length(&words("10 01")).unwrap(), (0, vec![]));
     assert_eq!(decode_body_at_known_length(0, &[]).unwrap(), words("10 01"));
     assert_eq!(decode_body_at_known_length(0, &[0]), Err(GrammarRankError::NonCanonical));
+}
+
+#[test]
+fn codec_typed_word_bridge_preserves_every_domain_and_d2_marker() {
+    for width in [1usize, 2, 3, 4, 5, 6, 7, 8, 9] {
+        for value in 0..(1usize << width) {
+            let source = format!("10 {value:0width$b} 01");
+            // W2 01 and 10 are NOT single-root list interiors; 11 is
+            // invalid before any list head. W2 00 is a valid separator.
+            let parsed = parse_canonical_binary(&source);
+            if !parsed.as_ref().is_ok_and(|ast| ast.len() == 1) {
+                continue;
+            }
+            let original = parse_binary_source_words(&source)
+                .unwrap()
+                .into_iter()
+                .map(|token| token.word)
+                .collect::<Vec<_>>();
+            let number = rank_binary_source_words(&original).unwrap();
+            let restored = unrank_binary_source_words(
+                number.inner_bits as usize,
+                number.ordinal,
+            )
+            .unwrap();
+            assert_eq!(restored, original, "{source}");
+        }
+    }
+    for source in [
+        "10 0 11 00 1 01",
+        "10 001 10 10 010 01 01 01",
+        "10 00 00 01",
+    ] {
+        let original = parse_binary_source_words(source)
+            .unwrap()
+            .into_iter()
+            .map(|token| token.word)
+            .collect::<Vec<_>>();
+        let ranked = rank_binary_source_words(&original).unwrap();
+        assert_eq!(
+            unrank_binary_source_words(ranked.inner_bits as usize, ranked.ordinal).unwrap(),
+            original,
+            "{source}"
+        );
+    }
 }
