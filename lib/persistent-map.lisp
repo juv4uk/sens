@@ -63,23 +63,21 @@
 (0011 node-left 00110001)
 (0011 node-right 00110010)
 
+; AVL height: only structural empty is the zero-height sentinel.
+; D4 NULL consumes () and returns exact D1; no unadmitted D8 EQUAL.
 (0011 height-of
   (0010 (n)
     (110
-      ((11110111 n (001 ())) 0)
-      ((11110111
-         (11110111 n (001 ()))
-         (11110111 (001 d1-no-left) (001 d1-no-right)))
-       (node-height n)))))
+      ((0101 n) 0)
+      ((010 ()) (node-height n)))))
 
+; Maximum of numeric heights; keep the D5 LESSP comparison and use exact
+; D1 YES as the unconditional fallback, not a fabricated EQUAL call.
 (0011 max2
   (0010 (a b)
     (110
       ((11010 a b) b)
-      ((11110111
-         (11010 a b)
-         (11110111 (001 d1-no-left) (001 d1-no-right)))
-       a))))
+      ((010 ()) a))))
 
 ; Rebuilds a node with a recomputed height from its (possibly new)
 ; children — every insert/rotation goes through this, never hand-tracks
