@@ -18,6 +18,7 @@ pub mod universal_frame3;
 pub mod frame3_domain;
 pub mod frame3_grammar;
 pub mod frame3_semantic;
+pub mod frame3_small;
 mod program_data;
 mod compiler_role;
 mod compiler_bootstrap;
