@@ -73,8 +73,6 @@ class BatchSourceTests(unittest.TestCase):
         paths = (
             "knowledge/guard-fact-policy.lisp",
             "knowledge/guard-reference.lisp",
-            "scripts/enforce-function-table-mechanisms.lisp",
-            "scripts/enforce-island-math-evidence.lisp",
             "scripts/semantic-authority-guard-enforce.lisp",
         )
         for path in paths:

@@ -30,8 +30,6 @@ HOLDS = {"lib/macro.lisp", "lib/machine/block.lisp"}
 PARTIAL_D4_WITH_LEGACY_D3 = {
     "knowledge/guard-reference.lisp",
     "knowledge/guard-fact-policy.lisp",
-    "scripts/enforce-function-table-mechanisms.lisp",
-    "scripts/enforce-island-math-evidence.lisp",
     "scripts/semantic-authority-guard-enforce.lisp",
 }
 

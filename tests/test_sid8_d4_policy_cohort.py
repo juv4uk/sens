@@ -15,8 +15,6 @@ ROOT = Path(__file__).resolve().parents[1]
 SOURCES = {
     "knowledge/guard-reference.lisp": ("f97371fd503075caec9344062847fb7c0e7642e7", 25),
     "knowledge/guard-fact-policy.lisp": ("d137f1b92a060980e0a2696300469ac0e9ec1b90", 6),
-    "scripts/enforce-function-table-mechanisms.lisp": ("472fdf97d50a4401302a42a2e56a095794f8c9f6", 2),
-    "scripts/enforce-island-math-evidence.lisp": ("eb9ae7d9c1b7a33f4c4cc429d0ee7d0bab701fe4", 2),
     "scripts/semantic-authority-guard-enforce.lisp": ("8e744541cb225f06f47a998204e7fc3d91f9082b", 3),
 }
 
@@ -26,7 +24,7 @@ D3_LEGACY_COND = re.compile(r"\(\s*00000111(?=[\s)])")
 
 class PolicyD4PartialCutover(unittest.TestCase):
     def test_all_five_originals_change_only_exact_d4_call_heads(self):
-        self.assertEqual(len(SOURCES), 5)
+        self.assertEqual(len(SOURCES), 3)
         total = 0
         for path, (blob, expected_count) in SOURCES.items():
             with self.subTest(path=path):
@@ -51,7 +49,7 @@ class PolicyD4PartialCutover(unittest.TestCase):
                 self.assertNotRegex(current, D4_HEAD)
                 self.assertRegex(current, D3_LEGACY_COND)
                 total += count
-        self.assertEqual(total, 38)
+        self.assertEqual(total, 34)
 
 
 if __name__ == "__main__":
