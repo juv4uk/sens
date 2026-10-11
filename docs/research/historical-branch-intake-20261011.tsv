@@ -1701,7 +1701,7 @@ fix/2274-x86-cond2	UNTRIAGED	-	-	BRANCH-NAME-ONLY
 fix/2278-core-quotient-cond2	UNTRIAGED	-	-	BRANCH-NAME-ONLY
 fix/2284-x86-admission-cond2	UNTRIAGED	-	-	BRANCH-NAME-ONLY
 fix/2292-semreg-api-cond2	UNTRIAGED	-	-	BRANCH-NAME-ONLY
-fix/2295-reduce-strict-d1-v2	UNTRIAGED	-	-	BRANCH-NAME-ONLY
+fix/2295-reduce-strict-d1-v2	ALREADY-IN-MAIN-ARCHIVED	56644f5975874b16249e0e5e188193e2ff0293fa	0c023acf29a92793e1ce067fc3c492401dbb47fa	Exact branch Core/Core4 source snapshots and FASL Base64 archived under research/domain-archive/20261011/pr2316. Critical reduce-state law remains unresolved; current-main replay and fresh FASL still required in existing #2295/#2298. PR #2316 closed as stale branch archive, not fixed.
 fix/2295-reduce-strict-d1	UNTRIAGED	-	-	BRANCH-NAME-ONLY
 fix/2298-core-length-cond2	UNTRIAGED	-	-	BRANCH-NAME-ONLY
 fix/2298-length-strict-d1	UNTRIAGED	-	-	BRANCH-NAME-ONLY
@@ -1730,7 +1730,7 @@ fix/2735-width-domain-current-main	UNTRIAGED	-	-	BRANCH-NAME-ONLY
 fix/2736-transformer-law-open	UNTRIAGED	-	-	BRANCH-NAME-ONLY
 fix/2743-transformer-needs-domain	UNTRIAGED	-	-	BRANCH-NAME-ONLY
 fix/2754-d5-od005-consumers	UNTRIAGED	-	-	BRANCH-NAME-ONLY
-fix/2754-d5-od005-consumers-replay	UNTRIAGED	-	-	BRANCH-NAME-ONLY
+fix/2754-d5-od005-consumers-replay	ALREADY-IN-MAIN-ARCHIVED	80eb7997c034ea4e8c2b4169da9653226f500496	74a6db12cd58147f6d7dbadfc3797dbca445b281	12-file D5 historical consumer migration diff archived under research/domain-archive/20261011/pr2774; current OD-005 D5 authority is 32/32, older closure/fill snapshots not replayed over current gates. PR #2774 closed archive-only.
 fix/2764-archive-pre-od006-consumers	UNTRIAGED	-	-	BRANCH-NAME-ONLY
 fix/2764-d6-owner-baseline	UNTRIAGED	-	-	BRANCH-NAME-ONLY
 fix/2804-runtime-peer-projection	UNTRIAGED	-	-	BRANCH-NAME-ONLY
@@ -2168,7 +2168,7 @@ impl/2055-selector-law-production	UNTRIAGED	-	-	BRANCH-NAME-ONLY
 impl/2763-d5-owner-baseline	UNTRIAGED	-	-	BRANCH-NAME-ONLY
 impl/2766-source-core-identity-admission	UNTRIAGED	-	-	BRANCH-NAME-ONLY
 impl/2782-2791-domain-ast	UNTRIAGED	-	-	BRANCH-NAME-ONLY
-impl/2782-d5-ast	UNTRIAGED	-	-	BRANCH-NAME-ONLY
+impl/2782-d5-ast	ALREADY-IN-MAIN-ARCHIVED	4154c547ce157b4ddc9854db6956e7aeb4a7bcbb	a5fee8f970de2eb2afcd36d40be209f458e8365e	Full explicit ExprKind::CoreD5 AST diff archived under research/domain-archive/20261011/pr2801; current main uses generic DomainIdentity/DomainCall and has typed CoreD5 carrier. PR #2801 closed superseded.
 impl/2783-d5-d6-carriers	UNTRIAGED	-	-	BRANCH-NAME-ONLY
 impl/2783-d5-d6-carriers-current	UNTRIAGED	-	-	BRANCH-NAME-ONLY
 impl/2791-core-d6-ast-carrier	UNTRIAGED	-	-	BRANCH-NAME-ONLY
@@ -2947,7 +2947,7 @@ replay/1490-sens-self-carry-current-main	UNTRIAGED	-	-	BRANCH-NAME-ONLY
 replay/1491-sid-bits-current-main	UNTRIAGED	-	-	BRANCH-NAME-ONLY
 replay/1493-macro-substrate-current-main	UNTRIAGED	-	-	BRANCH-NAME-ONLY
 replay/1658-core-decimal-radix-current	UNTRIAGED	-	-	BRANCH-NAME-ONLY
-replay/1713-predicatebit-20261001	UNTRIAGED	-	-	BRANCH-NAME-ONLY
+replay/1713-predicatebit-20261001	ALREADY-IN-MAIN-ARCHIVED	d5838418cde948f706acd83736c5439ffb3d28f3	8df1104819e39e7ab16222a5c36a7f356efcfdd1	Full 23-path PredicateBit/Core4 replay patch archived under research/domain-archive/20261011/pr2007; current main uses DomainIdentity::D1(PredicateBit) and newer Core/Core4 model. Two test families preserved but not active/green. PR #2007 closed archive-only.
 replay/1714-predicatebit-current-main	UNTRIAGED	-	-	BRANCH-NAME-ONLY
 replay/1725-core4-cond-on-1807	UNTRIAGED	-	-	BRANCH-NAME-ONLY
 replay/1748-structobs-current-main	UNTRIAGED	-	-	BRANCH-NAME-ONLY
@@ -2986,7 +2986,7 @@ replay/2212-m8-surface-clean-current	UNTRIAGED	-	-	BRANCH-NAME-ONLY
 replay/2367-one-core-current-main-v2	UNTRIAGED	-	-	BRANCH-NAME-ONLY
 replay/2369-rdrand-rdseed-current-20261007	UNTRIAGED	-	-	BRANCH-NAME-ONLY
 replay/2370-accounting-current-main-2	UNTRIAGED	-	-	BRANCH-NAME-ONLY
-replay/2370-generation-accounting-current-main	UNTRIAGED	-	-	BRANCH-NAME-ONLY
+replay/2370-generation-accounting-current-main	ALREADY-IN-MAIN-ARCHIVED	f8805f5898a6011d02dd46789195e97d0f989b42	17ddba20c91249ec3d56aa8c539159729ec37e49	Full workflow and 504-line generation-accounting benchmark patch archived under research/domain-archive/20261011/pr2412; numbers are historical accounting from old main 42e3945, not current performance. PR #2412 closed archive-only.
 replay/2376-mechanism-lab-one-core	UNTRIAGED	-	-	BRANCH-NAME-ONLY
 replay/2379-generation-accounting-current-main	UNTRIAGED	-	-	BRANCH-NAME-ONLY
 replay/2383-machine-law-census-current-20261007	UNTRIAGED	-	-	BRANCH-NAME-ONLY
