@@ -156,8 +156,12 @@ fn compile_t5_triplet_bytes(
 
     let program = lowered_program_to_exact_data(&binary_lowered)
         .map_err(|error| format!("T5 program-data conversion failed closed: {error}"))?;
-    let physical_digest = sha256_hex(physical_t5);
-    compile_program_data(program, &physical_digest, sens_revision)
+    // The artifact contract names this field program_wire_sha256. Derive it
+    // from the canonical SW1 encoding of the typed program; physical T5 bytes
+    // already passed their own byte-roundtrip gate above.
+    let canonical_program_wire = wire_encode_program(&binary_lowered);
+    let program_wire_digest = sha256_hex(&canonical_program_wire);
+    compile_program_data(program, &program_wire_digest, sens_revision)
 }
 
 /// Compile one exact canonical syntax-wire stream through the executable SENS
