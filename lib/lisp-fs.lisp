@@ -126,13 +126,13 @@
          (101 (fs-package-field (001 format) package) (001 wsm-fs-object)))
        (1110 (001 rejected) (001 invalid-format)))
       ((fs-d1-no?
-         (11110111 (fs-package-field (001 version) package) *fs-format-version*))
+         (fs-journal-version-current? (fs-package-field (001 version) package)))
        (1110 (001 rejected) (001 unsupported-version)))
       ((fs-d1-no?
-         (11110111 (fs-package-field (001 address) package)
+         (101 (fs-package-field (001 address) package)
                    (knowledge-content-address (fs-package-field (001 value) package))))
        (1110 (001 rejected) (001 address-mismatch)))
-      ((11110111 (fs-package-field (001 address) package)
+      ((101 (fs-package-field (001 address) package)
                  (knowledge-content-address (fs-package-field (001 value) package)))
        (1110 (001 accepted) (fs-package-field (001 value) package))))))
 (0011 fs-serialize-object
@@ -152,10 +152,10 @@
          (101 (fs-package-field (001 format) package) (001 wsm-fs-root)))
        (1110 (001 rejected) (001 invalid-format)))
       ((fs-d1-no?
-         (11110111 (fs-package-field (001 version) package) *fs-format-version*))
+         (fs-journal-version-current? (fs-package-field (001 version) package)))
        (1110 (001 rejected) (001 unsupported-version)))
       ((fs-d1-no?
-         (11110111 (fs-package-field (001 address) package)
+         (101 (fs-package-field (001 address) package)
                    (knowledge-content-address (fs-package-field (001 value) package))))
        (1110 (001 rejected) (001 address-mismatch)))
       ((fs-d1-no? (knowledge-proper-list? (fs-package-field (001 bindings) package)))
@@ -350,7 +350,7 @@
     (110
       
       ((010 entries)  result)
-      ((11110111 (100 (100 entries)) name)
+      ((101 (100 (100 entries)) name)
        (fs-bindings-without (011 entries) name result))
       ((010 ())
         (fs-bindings-without
