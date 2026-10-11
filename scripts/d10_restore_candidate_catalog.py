@@ -139,13 +139,20 @@ def merge_catalog(root, historical_path, current_path, output_path):
         raise ValueError("SYNTHETIC_CANDIDATE_ID_COLLISION")
     output_path.parent.mkdir(parents=True, exist_ok=True)
     with output_path.open("w", encoding="utf-8", newline="") as fh:
-        fh.write("\t".join(INDEX_FIELDS) + "\n")
+        # The exact historical blob contains literal, sometimes unbalanced
+        # quote characters in semantic names. Preserve those bytes as DATA,
+        # but emit a valid quoted TSV for the downstream strict csv.reader.
+        writer = csv.DictWriter(
+            fh, fieldnames=INDEX_FIELDS, delimiter="\t",
+            lineterminator="\n", extrasaction="raise",
+        )
+        writer.writeheader()
         for key in sorted(combined):
             rec = combined[key]
             values = [rec[c] for c in INDEX_FIELDS]
             if any("\t" in v or "\n" in v or "\r" in v for v in values):
                 raise ValueError("INVALID_LITERAL_TSV_FIELD:" + key)
-            fh.write("\t".join(values) + "\n")
+            writer.writerow(rec)
     return {
         "source_historical_names": len(historic),
         "source_latest_names": len(latest),
