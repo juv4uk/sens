@@ -1,0 +1,25 @@
+name: Заборона створення нових Git-гілок SENS — сигнал порушення
+
+on:
+  create:
+
+permissions:
+  contents: read
+
+jobs:
+  new-branch-is-forbidden:
+    if: ${{ github.event.ref_type == 'branch' && github.event.ref != 'main' }}
+    name: Нова гілка суперечить наказу власника
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Fail-closed фіксація порушення політики
+        env:
+          NEW_REF: ${{ github.event.ref }}
+          ACTOR: ${{ github.actor }}
+        run: |
+          echo "::error title=Нова Git-гілка заборонена::${NEW_REF} від ${ACTOR}; працювати тільки у main. Див. AGENTS.md та #5549."
+          exit 1
+
+# Ця подія сигналізує ПІСЛЯ створення ref. Справжню серверну заборону
+# забезпечує GitHub Ruleset: target ~ALL, Restrict creations, Active, no bypass.
+# Не видаляє автоматично ref, щоб не втратити неперенесені коміти.
