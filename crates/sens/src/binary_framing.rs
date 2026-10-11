@@ -265,6 +265,42 @@ pub fn decode_numeric_value_frame(bits: &[u8])
     Ok((value, consumed))
 }
 
+/// Dense physical-byte storage of the already-admitted framed Dn numeric
+/// value. Reuses the existing PackedBitstream MSB-first packer, without a
+/// new transport grammar, magic header, semantic opcode or .sens/T5 claim.
+/// The pair (bytes, exact meaningful bit length) is required to reconstruct
+/// the record; raw bytes alone must not guess a numeric domain/last bit.
+pub fn encode_packed_numeric_value(value: &Value)
+    -> Result<crate::PackedBitstream, BinaryFrameError>
+{
+    let bits = encode_numeric_value_frame(value)?;
+    let mut packer = crate::BitPacker::new();
+    for bit in bits {
+        let word = crate::Bit1::new(bit)
+            .ok_or(BinaryFrameError::InvalidNumber {index: 0})?;
+        packer.push(word);
+    }
+    Ok(packer.finish())
+}
+
+/// Recover from existing byte+meaningful-bit-length container, validate one
+/// complete canonical frame and refuse appended/trailing meaningful bits.
+pub fn decode_packed_numeric_value(packed: &crate::PackedBitstream)
+    -> Result<Value, BinaryFrameError>
+{
+    let bits = (0..packed.bit_len())
+        .map(|index| (packed.bytes()[index / 8] >> (7 - index % 8)) & 1)
+        .collect::<Vec<_>>();
+    let (value, consumed) = decode_numeric_value_frame(&bits)?;
+    if consumed != bits.len() {
+        return Err(BinaryFrameError::NonCanonicalNumber {index: consumed});
+    }
+    if encode_numeric_value_frame(&value)? != bits {
+        return Err(BinaryFrameError::NonCanonicalNumber {index: 0});
+    }
+    Ok(value)
+}
+
 pub fn encode_binary_program(frames: &[BinaryFrame]) -> Result<Vec<u8>, BinaryFrameError> {
     let mut out = Vec::new();
     let mut depth = 0usize;
