@@ -5,6 +5,7 @@
 //! xtask — machine-evidence generators only; repository policy checks
 //! (formerly `cargo xtask verify`) now live in `scripts/verify-repo.lisp`.
 
+pub mod compiler_compile;
 pub mod compiler_export;
 pub mod encoder_coverage;
 pub mod external_oracle;
@@ -16,6 +17,7 @@ fn main() -> ExitCode {
     let mut args = std::env::args().skip(1);
     match args.next().as_deref() {
         Some("compiler-export") => run_compiler_export(args),
+        Some("compiler-compile") => run_compiler_compile(args),
         Some("external-oracle") => run_external_oracle(args),
         Some("import-xed-evidence") => run_import_xed_evidence(args),
         Some("generate-encoder-coverage") => run_generate_encoder_coverage(args),
@@ -26,6 +28,53 @@ fn main() -> ExitCode {
         }
         None => {
             print_usage();
+            ExitCode::FAILURE
+        }
+    }
+}
+
+fn run_compiler_compile(mut args: impl Iterator<Item = String>) -> ExitCode {
+    let repo_root = locate_repo_root();
+    let mut input: Option<std::path::PathBuf> = None;
+    let mut output: Option<std::path::PathBuf> = None;
+
+    while let Some(arg) = args.next() {
+        match arg.as_str() {
+            "--input" => {
+                let Some(value) = args.next() else {
+                    eprintln!("--input requires a canonical SW1 input path");
+                    return ExitCode::FAILURE;
+                };
+                input = Some(std::path::PathBuf::from(value));
+            }
+            "--out" => {
+                let Some(value) = args.next() else {
+                    eprintln!("--out requires an output evidence path");
+                    return ExitCode::FAILURE;
+                };
+                output = Some(std::path::PathBuf::from(value));
+            }
+            other => {
+                eprintln!("unknown compiler-compile option: {other}");
+                eprintln!("  available: --input <SW1-file>, --out <new-evidence-file>");
+                return ExitCode::FAILURE;
+            }
+        }
+    }
+
+    let Some(input) = input else {
+        eprintln!("compiler-compile requires --input <canonical SW1 file>");
+        return ExitCode::FAILURE;
+    };
+
+    match compiler_compile::run(
+        &repo_root,
+        compiler_compile::RunOptions { input, output },
+    ) {
+        Ok(true) => ExitCode::SUCCESS,
+        Ok(false) => ExitCode::FAILURE,
+        Err(error) => {
+            eprintln!("SENS whole-program compile failed closed: {error}");
             ExitCode::FAILURE
         }
     }
@@ -72,7 +121,7 @@ fn run_compiler_export(mut args: impl Iterator<Item = String>) -> ExitCode {
 
 fn print_usage() {
     eprintln!(
-        "usage: cargo xtask <compiler-export [--artifact] [--fixture NAME]|external-oracle <export|render> [--fixture F-...]|import-xed-evidence [--check] [--vendor-root DIR] [--out FILE]|generate-encoder-coverage [--check] [--evidence FILE] [--out FILE]>"
+        "usage: cargo xtask <compiler-compile --input SW1 [--out EVIDENCE]|compiler-export [--artifact] [--fixture NAME]|external-oracle <export|render> [--fixture F-...]|import-xed-evidence [--check] [--vendor-root DIR] [--out FILE]|generate-encoder-coverage [--check] [--evidence FILE] [--out FILE]>"
     );
 }
 
