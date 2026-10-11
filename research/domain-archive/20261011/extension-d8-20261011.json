@@ -1,0 +1,142 @@
+{
+  "schema": "sens.domain-research-archive-extension/v1",
+  "date": "2026-10-11",
+  "basis_main": "457bb26caf58bada9a85d876b04d5dc28ee2ffe9",
+  "status": "RESEARCH-EVIDENCE-ONLY-NOT-RATIFIED",
+  "scope": "D8 historical research: three product witnesses, research ledger and minimal basis recovery",
+  "file_count": 18,
+  "source_pull_requests": [
+    3783,
+    3705,
+    3935
+  ],
+  "records": [
+    {
+      "pr": 3783,
+      "original_path": ".github/workflows/d8-neg-abs-recip.yml",
+      "source": "https://github.com/juv4uk/sens/pull/3783",
+      "archived_path": "research/domain-archive/20261011/pr3783/.github/workflows/d8-neg-abs-recip.yml.source.txt",
+      "exact_git_blob": "ad3c7816d1add7c46473fc6f73b63ce931e67e3e"
+    },
+    {
+      "pr": 3783,
+      "original_path": ".github/workflows/d8-nth-maplist-direction.yml",
+      "source": "https://github.com/juv4uk/sens/pull/3783",
+      "archived_path": "research/domain-archive/20261011/pr3783/.github/workflows/d8-nth-maplist-direction.yml.source.txt",
+      "exact_git_blob": "9b53bde04464024389dda6979d84c0b3897a3fae"
+    },
+    {
+      "pr": 3783,
+      "original_path": ".github/workflows/d8-rassoc-acons-orientation.yml",
+      "source": "https://github.com/juv4uk/sens/pull/3783",
+      "archived_path": "research/domain-archive/20261011/pr3783/.github/workflows/d8-rassoc-acons-orientation.yml.source.txt",
+      "exact_git_blob": "b19bb4136ff9659ebed962767a516df8f016e7e1"
+    },
+    {
+      "pr": 3783,
+      "original_path": "benchmarks/d8-neg-abs-recip/run.py",
+      "source": "https://github.com/juv4uk/sens/pull/3783",
+      "archived_path": "research/domain-archive/20261011/pr3783/benchmarks/d8-neg-abs-recip/run.py.source.txt",
+      "exact_git_blob": "9d4b45251a8956b6120fcb953ca4cb8be473b5b0"
+    },
+    {
+      "pr": 3783,
+      "original_path": "benchmarks/d8-nth-maplist-direction/run.py",
+      "source": "https://github.com/juv4uk/sens/pull/3783",
+      "archived_path": "research/domain-archive/20261011/pr3783/benchmarks/d8-nth-maplist-direction/run.py.source.txt",
+      "exact_git_blob": "cf3a4b393b53d8badefe9a0c90c76984a9ab63cc"
+    },
+    {
+      "pr": 3783,
+      "original_path": "benchmarks/d8-rassoc-acons-orientation/run.py",
+      "source": "https://github.com/juv4uk/sens/pull/3783",
+      "archived_path": "research/domain-archive/20261011/pr3783/benchmarks/d8-rassoc-acons-orientation/run.py.source.txt",
+      "exact_git_blob": "331a914f0dbca399c5a5cbc9f22d193756b4a23b"
+    },
+    {
+      "pr": 3783,
+      "original_path": "docs/research/3729-d8-neg-abs-recip.md",
+      "source": "https://github.com/juv4uk/sens/pull/3783",
+      "archived_path": "research/domain-archive/20261011/pr3783/docs/research/3729-d8-neg-abs-recip.md",
+      "exact_git_blob": "2f2e99945563b2ec8d1edf9171a3d5d3b57123ee"
+    },
+    {
+      "pr": 3783,
+      "original_path": "docs/research/3729-d8-neg-abs-recip.uk.md",
+      "source": "https://github.com/juv4uk/sens/pull/3783",
+      "archived_path": "research/domain-archive/20261011/pr3783/docs/research/3729-d8-neg-abs-recip.uk.md",
+      "exact_git_blob": "4674ca3653c57a272933998f53982a55f0197680"
+    },
+    {
+      "pr": 3783,
+      "original_path": "docs/research/3741-d8-rassoc-acons-orientation.md",
+      "source": "https://github.com/juv4uk/sens/pull/3783",
+      "archived_path": "research/domain-archive/20261011/pr3783/docs/research/3741-d8-rassoc-acons-orientation.md",
+      "exact_git_blob": "6fbd7d1ae954e7b945edcdd677e22bbf03a788c6"
+    },
+    {
+      "pr": 3783,
+      "original_path": "docs/research/3741-d8-rassoc-acons-orientation.uk.md",
+      "source": "https://github.com/juv4uk/sens/pull/3783",
+      "archived_path": "research/domain-archive/20261011/pr3783/docs/research/3741-d8-rassoc-acons-orientation.uk.md",
+      "exact_git_blob": "3cb622569fee819e82927c2d2b450e8d02c96a4d"
+    },
+    {
+      "pr": 3783,
+      "original_path": "docs/research/3744-d8-nth-maplist-direction.md",
+      "source": "https://github.com/juv4uk/sens/pull/3783",
+      "archived_path": "research/domain-archive/20261011/pr3783/docs/research/3744-d8-nth-maplist-direction.md",
+      "exact_git_blob": "27a0782b4c846a187ba8938cc21cde8001a4ccb4"
+    },
+    {
+      "pr": 3783,
+      "original_path": "docs/research/3744-d8-nth-maplist-direction.uk.md",
+      "source": "https://github.com/juv4uk/sens/pull/3783",
+      "archived_path": "research/domain-archive/20261011/pr3783/docs/research/3744-d8-nth-maplist-direction.uk.md",
+      "exact_git_blob": "82934d4e7091ed1174a9e0ade37c48de984bb1d1"
+    },
+    {
+      "pr": 3705,
+      "original_path": ".github/workflows/d8-research-ledger.yml",
+      "source": "https://github.com/juv4uk/sens/pull/3705",
+      "archived_path": "research/domain-archive/20261011/pr3705/.github/workflows/d8-research-ledger.yml.source.txt",
+      "exact_git_blob": "9d8687248e85b50453e2c482fb187cc48236bcf5"
+    },
+    {
+      "pr": 3705,
+      "original_path": "benchmarks/d8-research-ledger/run.py",
+      "source": "https://github.com/juv4uk/sens/pull/3705",
+      "archived_path": "research/domain-archive/20261011/pr3705/benchmarks/d8-research-ledger/run.py.source.txt",
+      "exact_git_blob": "7c460a5826a3b2b27a1a2fc50fb5c52f83cf4830"
+    },
+    {
+      "pr": 3705,
+      "original_path": "docs/research/3673-d8-research-ledger.md",
+      "source": "https://github.com/juv4uk/sens/pull/3705",
+      "archived_path": "research/domain-archive/20261011/pr3705/docs/research/3673-d8-research-ledger.md",
+      "exact_git_blob": "2f43fc7c37ef1e920b4f7faaa92ea6389c52ef95"
+    },
+    {
+      "pr": 3705,
+      "original_path": "docs/research/3673-d8-research-ledger.uk.md",
+      "source": "https://github.com/juv4uk/sens/pull/3705",
+      "archived_path": "research/domain-archive/20261011/pr3705/docs/research/3673-d8-research-ledger.uk.md",
+      "exact_git_blob": "8e78b92c5857727e1051e5822de1f77677053800"
+    },
+    {
+      "pr": 3935,
+      "original_path": "docs/research/d8-recovery-candidate-map.uk.md",
+      "source": "https://github.com/juv4uk/sens/pull/3935",
+      "archived_path": "research/domain-archive/20261011/pr3935/docs/research/d8-recovery-candidate-map.uk.md",
+      "exact_git_blob": "1b932dfaf81d5ae4f60a84e1c25a8e3d31ab1b18"
+    },
+    {
+      "pr": 3935,
+      "original_path": "knowledge/d8-recovery-candidate-map.json",
+      "source": "https://github.com/juv4uk/sens/pull/3935",
+      "archived_path": "research/domain-archive/20261011/pr3935/knowledge/d8-recovery-candidate-map.json",
+      "exact_git_blob": "dcff11002dc3f79d146378029e85beeb908b9681"
+    }
+  ],
+  "policy": "Exact unchanged Git blobs; Python/workflow originals stored as .source.txt, inactive. No semantic selection, coordinates, build, guard bypass or ratification."
+}
