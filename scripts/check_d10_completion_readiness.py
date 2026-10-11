@@ -25,7 +25,9 @@ def names_from_dossier(d):
 
 def source_queue(knowledge, selected, proposed):
     donor = defaultdict(list)
-    ignored = {"d10-v1-semantic-inventory.json", "d10-fill-v1-state.json",
+    ignored = {"d10-v1-semantic-inventory.json", "d10-v2-semantic-inventory.json",
+               "d10-current-inventory.json", "d10-selected-coordinate-allocation-v1.json",
+               "d10-fill-v1-state.json",
                "d10-growth-baseline-v1.json", "d10-selection-transition-history.json",
                "d10-selector-seed.json"}
     for p in sorted(knowledge.glob("d10-*.json")):
