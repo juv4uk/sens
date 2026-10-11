@@ -90,10 +90,11 @@ def verify(v9,v10,manifest,source,foundation):
 def check(root=ROOT,self_test=False):
     root=root.resolve()
     pointer=json.loads((root/"knowledge/d10-current-inventory.json").read_text())
-    cur=pointer["canonical_current"]
+    live=pointer["canonical_current"]
+    cur=pointer.get("historical_v10_research_inventory",live)
     prev=pointer["historical_v9_research_inventory"]
     index=pointer["current_v10_p0_text_witness_selection"]
-    fail(cur["path"]=="knowledge/d10-v10-semantic-inventory.json","live pointer")
+    fail(cur["path"]=="knowledge/d10-v10-semantic-inventory.json","frozen v10 pointer")
     fail(prev["path"]=="knowledge/d10-v9-semantic-inventory.json","frozen pointer")
     mp=index["manifest"]
     fail(mp["path"]==MANIFEST,"manifest path")
@@ -110,6 +111,8 @@ def check(root=ROOT,self_test=False):
     result=verify(v9,v10,m,source,foundation)
     fail((cur["selected"],cur["placed"],cur["unplaced"],cur["ratified"])==
          (799,719,80,0),"live pointer counts")
+    live_rows=json.loads(pinned(root,live["path"],live["git_blob"]))["rows"]
+    fail(len(live_rows)>=799 and live_rows[:799]==v10["rows"],"frozen v10 archive rewritten")
     if self_test:
         for field,bad in [("coordinate","0000000000"),("behavior","FAKE"),
                           ("ratified_resident",True)]:

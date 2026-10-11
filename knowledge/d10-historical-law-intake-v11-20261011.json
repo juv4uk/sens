@@ -1,0 +1,755 @@
+{
+  "schema": "d10-v11-historical-text-claim-intake/v1",
+  "date": "2026-10-11",
+  "authority": "OWNER-DIRECTED-RESEARCH-ONLY-NOT_CORE_OR_RATIFICATION",
+  "previous": {
+    "path": "knowledge/d10-v10-semantic-inventory.json",
+    "git_blob": "66b6789cbab5b70fea4e69b775f5cabc3a42a01f",
+    "selected": 799,
+    "placed": 719,
+    "unplaced": 80
+  },
+  "foundation": {
+    "path": "knowledge/d1-d9-foundation.json",
+    "git_blob": "09d1d71c39d1484dfd005a5068dbb18b76f0f0d4"
+  },
+  "source": {
+    "path": "knowledge/d10-source-snapshots/d10-v9-unified-catalog-1809.tsv",
+    "git_blob": "1660a19ff9482f932fb9a40fa78ad1fa50134c31",
+    "source_candidate_ids": 1809,
+    "source_occurrences_preserved": 7396
+  },
+  "counts": {
+    "prior_selected": 799,
+    "added_research_descriptions": 24,
+    "selected_after": 823,
+    "placed_after": 719,
+    "unplaced_after": 104,
+    "remaining": 201,
+    "ratified": 0,
+    "new_coordinates": 0,
+    "independent_F2_oracle_PASSES": 0,
+    "F3_semantic_proofs": 0
+  },
+  "policy": {
+    "name_screen": "Only absence of exact D1-D9+D10 spelling; not semantic independence",
+    "candidate_record": "one source-attested d10.name.* identity per label; all co-named pending IDs remain in archival catalog and linked here for behavioral comparison",
+    "selection": "preliminary research only; F2 and F3 remain HOLD",
+    "no_branch_creation": true,
+    "physical_sens_authorized": false,
+    "archives_unchanged": true
+  },
+  "candidates": [
+    {
+      "id": "d10.name.00265",
+      "name": "CALL-NEXT-METHOD",
+      "law": "Delegate to the next ordered method preserving or explicitly replacing arguments under established method-combination semantics",
+      "law_variants": [
+        "Delegate to the next ordered method preserving or explicitly replacing arguments under established method-combination semantics"
+      ],
+      "donor_claims": [
+        "1cbeac30ba5227a547ebf0f64de8ec4209260684",
+        "https://www.cs.cmu.edu/Groups/AI/util/html/hyperspec/HyperSpec/Body/sec_7-6-6-1-3.html",
+        "knowledge/d10-flavors-restarts-research-v1.json",
+        "knowledge/d10-flavors-restarts-research-v1.json@1cbeac30ba5227a547ebf0f64de8ec4209260684",
+        "knowledge/d10-historical-candidate-coordinate-queue-v1.json@131369263ac37c27798bb3c95521eb99e52b8f10"
+      ],
+      "positive_witness_claims": [],
+      "negative_witness_claims": [
+        "Invoking at end or outside dynamic method context must signal defined error, never fall back to guessed function identity"
+      ],
+      "source_records_sha_pinned": [
+        "knowledge/d10-historical-candidate-coordinate-queue-v1.json@131369263ac37c27798bb3c95521eb99e52b8f10:candidates[29]",
+        "knowledge/d10-historical-lisp-all-source-consolidation-20261011.json@962208ecad6b4b4d8845ea7dedaf88c34e93e702:candidates[44]",
+        "knowledge/d10-historical-lisp-main-consolidation-20261011.json@8c8253e5dd78cdec25de95009e9200ff08af4cc7:ledger_rows[29]"
+      ],
+      "co_named_pending_candidate_ids": [
+        "d10.pending.CALL-NEXT-METHOD"
+      ],
+      "F1": "ARCHIVAL-SOURCE-PINNED-NOT-INDEPENDENTLY_REPLAYED",
+      "F2": "HOLD_NOT_RUN",
+      "F3": "HOLD_DEDUP_UNPROVEN",
+      "F4": "NO_COORDINATE",
+      "ratified": false
+    },
+    {
+      "id": "d10.name.00525",
+      "name": "DEALLOCATE-WHOLE-RESOURCE",
+      "law": "Повернути всі ресурси в пул одразу; не означає free heap.",
+      "law_variants": [
+        "Повернути всі ресурси в пул одразу; не означає free heap."
+      ],
+      "donor_claims": [
+        "f5438abf3460fa7caac14a30edf511f907a5be44",
+        "https://tumbleweed.nu/r/lm-3/uv/chinual.html",
+        "juv4uk/sens@ffb1e8fefe3eaed1f77ddb890cd744f9ac328f2d:knowledge/d10-psl-interlisp-lispm-unmerged-residual-v1.json:598",
+        "knowledge/d10-historical-candidate-coordinate-queue-v1.json@131369263ac37c27798bb3c95521eb99e52b8f10",
+        "knowledge/d10-psl-interlisp-lispm-unmerged-residual-v1.json",
+        "knowledge/d10-psl-interlisp-lispm-unmerged-residual-v1.json@f5438abf3460fa7caac14a30edf511f907a5be44"
+      ],
+      "positive_witness_claims": [
+        "Завантажені ресурсні об'єкти стають повторно доступними після whole deallocate."
+      ],
+      "negative_witness_claims": [
+        "Трактувати операцію як фізичне знищення pooled objects."
+      ],
+      "source_records_sha_pinned": [
+        "knowledge/d10-historical-candidate-coordinate-queue-v1.json@131369263ac37c27798bb3c95521eb99e52b8f10:candidates[18]",
+        "knowledge/d10-historical-lisp-all-source-consolidation-20261011.json@962208ecad6b4b4d8845ea7dedaf88c34e93e702:candidates[76]",
+        "knowledge/d10-historical-lisp-main-consolidation-20261011.json@8c8253e5dd78cdec25de95009e9200ff08af4cc7:ledger_rows[18]",
+        "knowledge/d10-proposal-ledger.tsv@f10c545598b6aaf90f8f5caf8f49683448ff420f:line163",
+        "knowledge/d10-source-snapshots/d10-proposal-ledger-f10c545598b6a6af.tsv@f10c545598b6aaf90f8f5caf8f49683448ff420f:source-record"
+      ],
+      "co_named_pending_candidate_ids": [
+        "d10.pending.DEALLOCATE-WHOLE-RESOURCE"
+      ],
+      "F1": "ARCHIVAL-SOURCE-PINNED-NOT-INDEPENDENTLY_REPLAYED",
+      "F2": "HOLD_NOT_RUN",
+      "F3": "HOLD_DEDUP_UNPROVEN",
+      "F4": "NO_COORDINATE",
+      "ratified": false
+    },
+    {
+      "id": "d10.name.00533",
+      "name": "DEFINE-SYNTAX",
+      "law": "bind lexical syntax transformer and preserve macro identifier scopes; earlier lower-donor explicit projection is not an exact law witness",
+      "law_variants": [
+        "bind lexical syntax transformer and preserve macro identifier scopes; earlier lower-donor explicit projection is not an exact law witness"
+      ],
+      "donor_claims": [
+        "bff3156b89c6c0e6e69dd8d3a4e99c16c4c2e35b",
+        "knowledge/d10-crossrepo-early-lisp-v1.json@4523aad78809da4da9ce37408a676e352b1ec508",
+        "knowledge/d10-historical-coverage-gap-audit-v1.json",
+        "knowledge/d10-historical-coverage-gap-audit-v1.json@bff3156b89c6c0e6e69dd8d3a4e99c16c4c2e35b",
+        "knowledge/d10-historical-coverage-gap-audit-v1.json@bff3156b89c6c0e6e69dd8d3a4e99c16c4c2e35b:HIST-GAP-006"
+      ],
+      "positive_witness_claims": [
+        "[]"
+      ],
+      "negative_witness_claims": [],
+      "source_records_sha_pinned": [
+        "knowledge/d10-historical-lisp-all-source-consolidation-20261011.json@962208ecad6b4b4d8845ea7dedaf88c34e93e702:candidates[77]",
+        "knowledge/d10-historical-lisp-branch-candidate-intake-20261011.json@42362a46d7587e375ed19c156a0b67e40b86939a:candidates[130]",
+        "knowledge/d10-historical-lisp-branch-evidence-intake-20261011.json@615307670709d8429d8b74daafe8fe24b36960ea:new_candidates[133]",
+        "knowledge/d10-historical-lisp-main-consolidation-20261011.json@8c8253e5dd78cdec25de95009e9200ff08af4cc7:ledger_rows[84]"
+      ],
+      "co_named_pending_candidate_ids": [],
+      "F1": "ARCHIVAL-SOURCE-PINNED-NOT-INDEPENDENTLY_REPLAYED",
+      "F2": "HOLD_NOT_RUN",
+      "F3": "HOLD_DEDUP_UNPROVEN",
+      "F4": "NO_COORDINATE",
+      "ratified": false
+    },
+    {
+      "id": "d10.name.00593",
+      "name": "ENV",
+      "law": "enumerate visible lexical bindings with shadow resolution",
+      "law_variants": [
+        "enumerate visible lexical bindings with shadow resolution"
+      ],
+      "donor_claims": [
+        "knowledge/d10-historical-lisp15-reconciliation-20261009.json@da6f108e4f8553a150f0abed8f3758944193c49a"
+      ],
+      "positive_witness_claims": [],
+      "negative_witness_claims": [],
+      "source_records_sha_pinned": [
+        "knowledge/d10-historical-lisp-all-source-consolidation-20261011.json@962208ecad6b4b4d8845ea7dedaf88c34e93e702:candidates[95]",
+        "knowledge/d10-historical-lisp-branch-candidate-intake-20261011.json@42362a46d7587e375ed19c156a0b67e40b86939a:candidates[70]",
+        "knowledge/d10-historical-lisp-residual-intake-20261011.json@d48b4e960945af7aa9b5683b0e4a1d2e443c588d:candidates[25]"
+      ],
+      "co_named_pending_candidate_ids": [],
+      "F1": "ARCHIVAL-SOURCE-PINNED-NOT-INDEPENDENTLY_REPLAYED",
+      "F2": "HOLD_NOT_RUN",
+      "F3": "HOLD_DEDUP_UNPROVEN",
+      "F4": "NO_COORDINATE",
+      "ratified": false
+    },
+    {
+      "id": "d10.name.00625",
+      "name": "FAILED-SUBST?",
+      "law": "Recognize explicit unification failure only for the designated failure atom, not for a nonempty substitution alist",
+      "law_variants": [
+        "Recognize explicit unification failure only for the designated failure atom, not for a nonempty substitution alist"
+      ],
+      "donor_claims": [
+        "78eac7f7d0d05ec5734ccb61e73c1bed7ec707fa",
+        "knowledge/d10-historical-candidate-coordinate-queue-v1.json@131369263ac37c27798bb3c95521eb99e52b8f10",
+        "knowledge/d10-unify-lexical-harvest-v1.json"
+      ],
+      "positive_witness_claims": [],
+      "negative_witness_claims": [],
+      "source_records_sha_pinned": [
+        "knowledge/d10-historical-candidate-coordinate-queue-v1.json@131369263ac37c27798bb3c95521eb99e52b8f10:candidates[47]",
+        "knowledge/d10-historical-lisp-all-source-consolidation-20261011.json@962208ecad6b4b4d8845ea7dedaf88c34e93e702:candidates[107]",
+        "knowledge/d10-historical-lisp-main-consolidation-20261011.json@8c8253e5dd78cdec25de95009e9200ff08af4cc7:ledger_rows[47]"
+      ],
+      "co_named_pending_candidate_ids": [
+        "d10.pending.FAILED-SUBST%3F"
+      ],
+      "F1": "ARCHIVAL-SOURCE-PINNED-NOT-INDEPENDENTLY_REPLAYED",
+      "F2": "HOLD_NOT_RUN",
+      "F3": "HOLD_DEDUP_UNPROVEN",
+      "F4": "NO_COORDINATE",
+      "ratified": false
+    },
+    {
+      "id": "d10.name.00738",
+      "name": "GUARD",
+      "law": "Забезпечує condition matching і вихід до коду обробки, не вводячи ще один незалежний домен керування.",
+      "law_variants": [
+        "Забезпечує condition matching і вихід до коду обробки, не вводячи ще один незалежний домен керування."
+      ],
+      "donor_claims": [
+        "knowledge/d10-r7rs-primary-manual-slice-v1.json@891728c08c7df93e84c75b74585f9fc1a438a3c2",
+        "knowledge/d10-r7rs-primary-manual-slice-v1.json@891728c08c7df93e84c75b74585f9fc1a438a3c2:R7RS-HIST-011"
+      ],
+      "positive_witness_claims": [
+        "[\"Підходящий guard clause обробляє condition без втрати зв'язків/контексту.\"]",
+        "Підходящий guard clause обробляє condition без втрати зв'язків/контексту."
+      ],
+      "negative_witness_claims": [
+        "Гілка без збігу приховує первинну умову чи підміняє динамічний handler."
+      ],
+      "source_records_sha_pinned": [
+        "knowledge/d10-historical-lisp-branch-candidate-intake-20261011.json@42362a46d7587e375ed19c156a0b67e40b86939a:candidates[18]",
+        "knowledge/d10-historical-lisp-branch-evidence-intake-20261011.json@615307670709d8429d8b74daafe8fe24b36960ea:new_candidates[26]"
+      ],
+      "co_named_pending_candidate_ids": [],
+      "F1": "ARCHIVAL-SOURCE-PINNED-NOT-INDEPENDENTLY_REPLAYED",
+      "F2": "HOLD_NOT_RUN",
+      "F3": "HOLD_DEDUP_UNPROVEN",
+      "F4": "NO_COORDINATE",
+      "ratified": false
+    },
+    {
+      "id": "d10.name.00783",
+      "name": "INTERNET-TIME-RAW->OBSERVATION",
+      "law": "If input tag is ntp-fields, project the fields into the NTP interpretation rule, else preserve the input observation unchanged.",
+      "law_variants": [
+        "If input tag is ntp-fields, project the fields into the NTP interpretation rule, else preserve the input observation unchanged."
+      ],
+      "donor_claims": [
+        "cf28529677096a934aa0c31a4a3feefba6c51f12",
+        "knowledge/d10-historical-candidate-coordinate-queue-v1.json@131369263ac37c27798bb3c95521eb99e52b8f10",
+        "knowledge/d10-time-law-review-v2.json"
+      ],
+      "positive_witness_claims": [],
+      "negative_witness_claims": [
+        "Unexpected tag passes through unchanged; recognized tag takes the five relevant fields in original order."
+      ],
+      "source_records_sha_pinned": [
+        "knowledge/d10-historical-candidate-coordinate-queue-v1.json@131369263ac37c27798bb3c95521eb99e52b8f10:candidates[35]",
+        "knowledge/d10-historical-lisp-all-source-consolidation-20261011.json@962208ecad6b4b4d8845ea7dedaf88c34e93e702:candidates[141]",
+        "knowledge/d10-historical-lisp-main-consolidation-20261011.json@8c8253e5dd78cdec25de95009e9200ff08af4cc7:ledger_rows[35]"
+      ],
+      "co_named_pending_candidate_ids": [
+        "d10.pending.INTERNET-TIME-RAW-%3EOBSERVATION"
+      ],
+      "F1": "ARCHIVAL-SOURCE-PINNED-NOT-INDEPENDENTLY_REPLAYED",
+      "F2": "HOLD_NOT_RUN",
+      "F3": "HOLD_DEDUP_UNPROVEN",
+      "F4": "NO_COORDINATE",
+      "ratified": false
+    },
+    {
+      "id": "d10.name.00788",
+      "name": "INVOKE-RESTART",
+      "law": "Invoke a selected restart with exact supplied arguments, with scope and continuation preserved",
+      "law_variants": [
+        "Invoke a selected restart with exact supplied arguments, with scope and continuation preserved"
+      ],
+      "donor_claims": [
+        "1cbeac30ba5227a547ebf0f64de8ec4209260684",
+        "https://www.cs.cmu.edu/Groups/AI/html/hyperspec/HyperSpec/Body/mac_restart-case.html",
+        "knowledge/d10-flavors-restarts-research-v1.json",
+        "knowledge/d10-flavors-restarts-research-v1.json@1cbeac30ba5227a547ebf0f64de8ec4209260684",
+        "knowledge/d10-historical-candidate-coordinate-queue-v1.json@131369263ac37c27798bb3c95521eb99e52b8f10"
+      ],
+      "positive_witness_claims": [],
+      "negative_witness_claims": [
+        "Invoking stale/out-of-scope restart BLOCK; no default branch or OS capability is inferred"
+      ],
+      "source_records_sha_pinned": [
+        "knowledge/d10-historical-candidate-coordinate-queue-v1.json@131369263ac37c27798bb3c95521eb99e52b8f10:candidates[32]",
+        "knowledge/d10-historical-lisp-all-source-consolidation-20261011.json@962208ecad6b4b4d8845ea7dedaf88c34e93e702:candidates[144]",
+        "knowledge/d10-historical-lisp-main-consolidation-20261011.json@8c8253e5dd78cdec25de95009e9200ff08af4cc7:ledger_rows[32]"
+      ],
+      "co_named_pending_candidate_ids": [
+        "d10.pending.INVOKE-RESTART"
+      ],
+      "F1": "ARCHIVAL-SOURCE-PINNED-NOT-INDEPENDENTLY_REPLAYED",
+      "F2": "HOLD_NOT_RUN",
+      "F3": "HOLD_DEDUP_UNPROVEN",
+      "F4": "NO_COORDINATE",
+      "ratified": false
+    },
+    {
+      "id": "d10.name.00861",
+      "name": "LOCF",
+      "law": "locate an existing generalized place as a first-class reference to that same cell (not allocate a detached new cell)",
+      "law_variants": [
+        "locate an existing generalized place as a first-class reference to that same cell (not allocate a detached new cell)"
+      ],
+      "donor_claims": [
+        "knowledge/d10-historical-primary-manual-reconciliation-20261009.json@37e10ef9a953ea62beb5e4b46ef20f21cbfb3ee4"
+      ],
+      "positive_witness_claims": [
+        "obtain reference to array element, update through reference, observe same original element changes; require lifetime/alias safety model"
+      ],
+      "negative_witness_claims": [
+        "reference points to a detached copy, or lets invalid pointer escape lifetime boundary"
+      ],
+      "source_records_sha_pinned": [
+        "knowledge/d10-historical-lisp-all-source-consolidation-20261011.json@962208ecad6b4b4d8845ea7dedaf88c34e93e702:candidates[161]",
+        "knowledge/d10-historical-lisp-branch-candidate-intake-20261011.json@42362a46d7587e375ed19c156a0b67e40b86939a:candidates[25]",
+        "knowledge/d10-historical-lisp-residual-intake-20261011.json@d48b4e960945af7aa9b5683b0e4a1d2e443c588d:candidates[37]"
+      ],
+      "co_named_pending_candidate_ids": [],
+      "F1": "ARCHIVAL-SOURCE-PINNED-NOT-INDEPENDENTLY_REPLAYED",
+      "F2": "HOLD_NOT_RUN",
+      "F3": "HOLD_DEDUP_UNPROVEN",
+      "F4": "NO_COORDINATE",
+      "ratified": false
+    },
+    {
+      "id": "d10.name.00868",
+      "name": "LOOKUP-SUBST",
+      "law": "Return a bound logic variable value from a substitution alist keyed by possibly structured variable name, or the original variable if unbound",
+      "law_variants": [
+        "Return a bound logic variable value from a substitution alist keyed by possibly structured variable name, or the original variable if unbound"
+      ],
+      "donor_claims": [
+        "78eac7f7d0d05ec5734ccb61e73c1bed7ec707fa",
+        "knowledge/d10-historical-candidate-coordinate-queue-v1.json@131369263ac37c27798bb3c95521eb99e52b8f10",
+        "knowledge/d10-unify-lexical-harvest-v1.json"
+      ],
+      "positive_witness_claims": [],
+      "negative_witness_claims": [],
+      "source_records_sha_pinned": [
+        "knowledge/d10-historical-candidate-coordinate-queue-v1.json@131369263ac37c27798bb3c95521eb99e52b8f10:candidates[45]",
+        "knowledge/d10-historical-lisp-all-source-consolidation-20261011.json@962208ecad6b4b4d8845ea7dedaf88c34e93e702:candidates[166]",
+        "knowledge/d10-historical-lisp-main-consolidation-20261011.json@8c8253e5dd78cdec25de95009e9200ff08af4cc7:ledger_rows[45]"
+      ],
+      "co_named_pending_candidate_ids": [
+        "d10.pending.LOOKUP-SUBST"
+      ],
+      "F1": "ARCHIVAL-SOURCE-PINNED-NOT-INDEPENDENTLY_REPLAYED",
+      "F2": "HOLD_NOT_RUN",
+      "F3": "HOLD_DEDUP_UNPROVEN",
+      "F4": "NO_COORDINATE",
+      "ratified": false
+    },
+    {
+      "id": "d10.name.00891",
+      "name": "MAKE-PARAMETER",
+      "law": "first-class parameter object with optional conversion procedure; check behavior rather than name alone",
+      "law_variants": [
+        "first-class parameter object with optional conversion procedure; check behavior rather than name alone"
+      ],
+      "donor_claims": [
+        "bff3156b89c6c0e6e69dd8d3a4e99c16c4c2e35b",
+        "knowledge/d10-historical-coverage-gap-audit-v1.json",
+        "knowledge/d10-historical-coverage-gap-audit-v1.json@bff3156b89c6c0e6e69dd8d3a4e99c16c4c2e35b",
+        "knowledge/d10-historical-coverage-gap-audit-v1.json@bff3156b89c6c0e6e69dd8d3a4e99c16c4c2e35b:HIST-GAP-003"
+      ],
+      "positive_witness_claims": [
+        "[]"
+      ],
+      "negative_witness_claims": [],
+      "source_records_sha_pinned": [
+        "knowledge/d10-historical-lisp-all-source-consolidation-20261011.json@962208ecad6b4b4d8845ea7dedaf88c34e93e702:candidates[170]",
+        "knowledge/d10-historical-lisp-branch-evidence-intake-20261011.json@615307670709d8429d8b74daafe8fe24b36960ea:new_candidates[130]",
+        "knowledge/d10-historical-lisp-main-consolidation-20261011.json@8c8253e5dd78cdec25de95009e9200ff08af4cc7:ledger_rows[81]"
+      ],
+      "co_named_pending_candidate_ids": [],
+      "F1": "ARCHIVAL-SOURCE-PINNED-NOT-INDEPENDENTLY_REPLAYED",
+      "F2": "HOLD_NOT_RUN",
+      "F3": "HOLD_DEDUP_UNPROVEN",
+      "F4": "NO_COORDINATE",
+      "ratified": false
+    },
+    {
+      "id": "d10.name.00954",
+      "name": "MESSAGE-UNHANDLED",
+      "law": "Represent failure of explicit message dispatch when no applicable method is available, keeping object/message identity in data",
+      "law_variants": [
+        "Represent failure of explicit message dispatch when no applicable method is available, keeping object/message identity in data"
+      ],
+      "donor_claims": [
+        "1cbeac30ba5227a547ebf0f64de8ec4209260684",
+        "https://dspace.mit.edu/entities/publication/86c7fee8-196c-49e1-83a8-81f31c4295f0",
+        "knowledge/d10-flavors-restarts-research-v1.json",
+        "knowledge/d10-flavors-restarts-research-v1.json@1cbeac30ba5227a547ebf0f64de8ec4209260684",
+        "knowledge/d10-historical-candidate-coordinate-queue-v1.json@131369263ac37c27798bb3c95521eb99e52b8f10"
+      ],
+      "positive_witness_claims": [],
+      "negative_witness_claims": [
+        "A method-not-found case must not invent an execution result or silently select another method"
+      ],
+      "source_records_sha_pinned": [
+        "knowledge/d10-historical-candidate-coordinate-queue-v1.json@131369263ac37c27798bb3c95521eb99e52b8f10:candidates[30]",
+        "knowledge/d10-historical-lisp-all-source-consolidation-20261011.json@962208ecad6b4b4d8845ea7dedaf88c34e93e702:candidates[186]",
+        "knowledge/d10-historical-lisp-main-consolidation-20261011.json@8c8253e5dd78cdec25de95009e9200ff08af4cc7:ledger_rows[30]"
+      ],
+      "co_named_pending_candidate_ids": [
+        "d10.pending.MESSAGE-UNHANDLED"
+      ],
+      "F1": "ARCHIVAL-SOURCE-PINNED-NOT-INDEPENDENTLY_REPLAYED",
+      "F2": "HOLD_NOT_RUN",
+      "F3": "HOLD_DEDUP_UNPROVEN",
+      "F4": "NO_COORDINATE",
+      "ratified": false
+    },
+    {
+      "id": "d10.name.01049",
+      "name": "OBLIST",
+      "law": "find/create interned atom by print name; enumerate/remove global object-list membership",
+      "law_variants": [
+        "find/create interned atom by print name; enumerate/remove global object-list membership"
+      ],
+      "donor_claims": [
+        "knowledge/d10-historical-lisp15-reconciliation-20261009.json@da6f108e4f8553a150f0abed8f3758944193c49a"
+      ],
+      "positive_witness_claims": [],
+      "negative_witness_claims": [],
+      "source_records_sha_pinned": [
+        "knowledge/d10-historical-lisp-all-source-consolidation-20261011.json@962208ecad6b4b4d8845ea7dedaf88c34e93e702:candidates[204]",
+        "knowledge/d10-historical-lisp-branch-candidate-intake-20261011.json@42362a46d7587e375ed19c156a0b67e40b86939a:candidates[89]",
+        "knowledge/d10-historical-lisp-residual-intake-20261011.json@d48b4e960945af7aa9b5683b0e4a1d2e443c588d:candidates[47]"
+      ],
+      "co_named_pending_candidate_ids": [],
+      "F1": "ARCHIVAL-SOURCE-PINNED-NOT-INDEPENDENTLY_REPLAYED",
+      "F2": "HOLD_NOT_RUN",
+      "F3": "HOLD_DEDUP_UNPROVEN",
+      "F4": "NO_COORDINATE",
+      "ratified": false
+    },
+    {
+      "id": "d10.name.01069",
+      "name": "PARAMETERIZE",
+      "law": "dynamic parameter is restored on exit; compare existing D8 PROGV but do not assume semantic equivalence",
+      "law_variants": [
+        "dynamic parameter is restored on exit; compare existing D8 PROGV but do not assume semantic equivalence"
+      ],
+      "donor_claims": [
+        "bff3156b89c6c0e6e69dd8d3a4e99c16c4c2e35b",
+        "knowledge/d10-historical-coverage-gap-audit-v1.json",
+        "knowledge/d10-historical-coverage-gap-audit-v1.json@bff3156b89c6c0e6e69dd8d3a4e99c16c4c2e35b",
+        "knowledge/d10-historical-coverage-gap-audit-v1.json@bff3156b89c6c0e6e69dd8d3a4e99c16c4c2e35b:HIST-GAP-002"
+      ],
+      "positive_witness_claims": [
+        "[]"
+      ],
+      "negative_witness_claims": [],
+      "source_records_sha_pinned": [
+        "knowledge/d10-historical-lisp-all-source-consolidation-20261011.json@962208ecad6b4b4d8845ea7dedaf88c34e93e702:candidates[212]",
+        "knowledge/d10-historical-lisp-branch-evidence-intake-20261011.json@615307670709d8429d8b74daafe8fe24b36960ea:new_candidates[129]",
+        "knowledge/d10-historical-lisp-main-consolidation-20261011.json@8c8253e5dd78cdec25de95009e9200ff08af4cc7:ledger_rows[80]"
+      ],
+      "co_named_pending_candidate_ids": [],
+      "F1": "ARCHIVAL-SOURCE-PINNED-NOT-INDEPENDENTLY_REPLAYED",
+      "F2": "HOLD_NOT_RUN",
+      "F3": "HOLD_DEDUP_UNPROVEN",
+      "F4": "NO_COORDINATE",
+      "ratified": false
+    },
+    {
+      "id": "d10.name.01111",
+      "name": "PROMISE?",
+      "law": "Розпізнає обіцянку, але стандарт допускає реалізаційні варіації щодо спостережуваної відмінності обіцянки від значення.",
+      "law_variants": [
+        "Розпізнає обіцянку, але стандарт допускає реалізаційні варіації щодо спостережуваної відмінності обіцянки від значення."
+      ],
+      "donor_claims": [
+        "knowledge/d10-r7rs-primary-manual-slice-v1.json@891728c08c7df93e84c75b74585f9fc1a438a3c2",
+        "knowledge/d10-r7rs-primary-manual-slice-v1.json@891728c08c7df93e84c75b74585f9fc1a438a3c2:R7RS-HIST-003"
+      ],
+      "positive_witness_claims": [
+        "[\"Порівняти promise? на delay-value, forced promise і plain datum у конкретному стандартизованому профілі.\"]",
+        "Порівняти promise? на delay-value, forced promise і plain datum у конкретному стандартизованому профілі."
+      ],
+      "negative_witness_claims": [
+        "Вимагати безумовної об'єктної ідентичності promise/вмісту, яку стандарт допускає не розрізняти."
+      ],
+      "source_records_sha_pinned": [
+        "knowledge/d10-historical-lisp-branch-candidate-intake-20261011.json@42362a46d7587e375ed19c156a0b67e40b86939a:candidates[36]",
+        "knowledge/d10-historical-lisp-branch-evidence-intake-20261011.json@615307670709d8429d8b74daafe8fe24b36960ea:new_candidates[18]"
+      ],
+      "co_named_pending_candidate_ids": [],
+      "F1": "ARCHIVAL-SOURCE-PINNED-NOT-INDEPENDENTLY_REPLAYED",
+      "F2": "HOLD_NOT_RUN",
+      "F3": "HOLD_DEDUP_UNPROVEN",
+      "F4": "NO_COORDINATE",
+      "ratified": false
+    },
+    {
+      "id": "d10.name.01271",
+      "name": "SIGNAL-CONDITION",
+      "law": "Present a first-class condition value to an explicitly supplied lexical handler chain without turning it into host I/O",
+      "law_variants": [
+        "Present a first-class condition value to an explicitly supplied lexical handler chain without turning it into host I/O"
+      ],
+      "donor_claims": [
+        "1cbeac30ba5227a547ebf0f64de8ec4209260684",
+        "https://www.cs.cmu.edu/Groups/AI/html/hyperspec/HyperSpec/Body/mac_restart-case.html",
+        "knowledge/d10-flavors-restarts-research-v1.json",
+        "knowledge/d10-flavors-restarts-research-v1.json@1cbeac30ba5227a547ebf0f64de8ec4209260684",
+        "knowledge/d10-historical-candidate-coordinate-queue-v1.json@131369263ac37c27798bb3c95521eb99e52b8f10"
+      ],
+      "positive_witness_claims": [],
+      "negative_witness_claims": [
+        "Unmatched condition must remain available as typed failure with unmodified payload; no implicit host exception"
+      ],
+      "source_records_sha_pinned": [
+        "knowledge/d10-historical-candidate-coordinate-queue-v1.json@131369263ac37c27798bb3c95521eb99e52b8f10:candidates[31]",
+        "knowledge/d10-historical-lisp-all-source-consolidation-20261011.json@962208ecad6b4b4d8845ea7dedaf88c34e93e702:candidates[285]",
+        "knowledge/d10-historical-lisp-main-consolidation-20261011.json@8c8253e5dd78cdec25de95009e9200ff08af4cc7:ledger_rows[31]"
+      ],
+      "co_named_pending_candidate_ids": [
+        "d10.pending.SIGNAL-CONDITION"
+      ],
+      "F1": "ARCHIVAL-SOURCE-PINNED-NOT-INDEPENDENTLY_REPLAYED",
+      "F2": "HOLD_NOT_RUN",
+      "F3": "HOLD_DEDUP_UNPROVEN",
+      "F4": "NO_COORDINATE",
+      "ratified": false
+    },
+    {
+      "id": "d10.name.01330",
+      "name": "SYNTAX-CASE",
+      "law": "general-purpose hygienic syntax transformer; do not confuse with raw textual macro substitution",
+      "law_variants": [
+        "general-purpose hygienic syntax transformer; do not confuse with raw textual macro substitution"
+      ],
+      "donor_claims": [
+        "bff3156b89c6c0e6e69dd8d3a4e99c16c4c2e35b",
+        "knowledge/d10-historical-coverage-gap-audit-v1.json",
+        "knowledge/d10-historical-coverage-gap-audit-v1.json@bff3156b89c6c0e6e69dd8d3a4e99c16c4c2e35b",
+        "knowledge/d10-historical-coverage-gap-audit-v1.json@bff3156b89c6c0e6e69dd8d3a4e99c16c4c2e35b:HIST-GAP-005"
+      ],
+      "positive_witness_claims": [
+        "[]"
+      ],
+      "negative_witness_claims": [],
+      "source_records_sha_pinned": [
+        "knowledge/d10-historical-lisp-all-source-consolidation-20261011.json@962208ecad6b4b4d8845ea7dedaf88c34e93e702:candidates[305]",
+        "knowledge/d10-historical-lisp-branch-evidence-intake-20261011.json@615307670709d8429d8b74daafe8fe24b36960ea:new_candidates[132]",
+        "knowledge/d10-historical-lisp-main-consolidation-20261011.json@8c8253e5dd78cdec25de95009e9200ff08af4cc7:ledger_rows[83]"
+      ],
+      "co_named_pending_candidate_ids": [],
+      "F1": "ARCHIVAL-SOURCE-PINNED-NOT-INDEPENDENTLY_REPLAYED",
+      "F2": "HOLD_NOT_RUN",
+      "F3": "HOLD_DEDUP_UNPROVEN",
+      "F4": "NO_COORDINATE",
+      "ratified": false
+    },
+    {
+      "id": "d10.name.01331",
+      "name": "SYNTAX-RULES",
+      "law": "pattern-based hygienic rewrite must avoid variable capture and preserve lexical identity",
+      "law_variants": [
+        "pattern-based hygienic rewrite must avoid variable capture and preserve lexical identity"
+      ],
+      "donor_claims": [
+        "bff3156b89c6c0e6e69dd8d3a4e99c16c4c2e35b",
+        "knowledge/d10-historical-coverage-gap-audit-v1.json",
+        "knowledge/d10-historical-coverage-gap-audit-v1.json@bff3156b89c6c0e6e69dd8d3a4e99c16c4c2e35b",
+        "knowledge/d10-historical-coverage-gap-audit-v1.json@bff3156b89c6c0e6e69dd8d3a4e99c16c4c2e35b:HIST-GAP-004"
+      ],
+      "positive_witness_claims": [
+        "[]"
+      ],
+      "negative_witness_claims": [],
+      "source_records_sha_pinned": [
+        "knowledge/d10-historical-lisp-all-source-consolidation-20261011.json@962208ecad6b4b4d8845ea7dedaf88c34e93e702:candidates[306]",
+        "knowledge/d10-historical-lisp-branch-evidence-intake-20261011.json@615307670709d8429d8b74daafe8fe24b36960ea:new_candidates[131]",
+        "knowledge/d10-historical-lisp-main-consolidation-20261011.json@8c8253e5dd78cdec25de95009e9200ff08af4cc7:ledger_rows[82]"
+      ],
+      "co_named_pending_candidate_ids": [],
+      "F1": "ARCHIVAL-SOURCE-PINNED-NOT-INDEPENDENTLY_REPLAYED",
+      "F2": "HOLD_NOT_RUN",
+      "F3": "HOLD_DEDUP_UNPROVEN",
+      "F4": "NO_COORDINATE",
+      "ratified": false
+    },
+    {
+      "id": "d10.name.01344",
+      "name": "THREAD-CONJUNCTION",
+      "law": "Evaluate each conjunction condition through an injected goal strategy, branching across every successful intermediate state and collecting final states",
+      "law_variants": [
+        "Evaluate each conjunction condition through an injected goal strategy, branching across every successful intermediate state and collecting final states"
+      ],
+      "donor_claims": [
+        "78eac7f7d0d05ec5734ccb61e73c1bed7ec707fa",
+        "knowledge/d10-historical-candidate-coordinate-queue-v1.json@131369263ac37c27798bb3c95521eb99e52b8f10",
+        "knowledge/d10-unify-lexical-harvest-v1.json"
+      ],
+      "positive_witness_claims": [],
+      "negative_witness_claims": [],
+      "source_records_sha_pinned": [
+        "knowledge/d10-historical-candidate-coordinate-queue-v1.json@131369263ac37c27798bb3c95521eb99e52b8f10:candidates[50]",
+        "knowledge/d10-historical-lisp-all-source-consolidation-20261011.json@962208ecad6b4b4d8845ea7dedaf88c34e93e702:candidates[311]",
+        "knowledge/d10-historical-lisp-main-consolidation-20261011.json@8c8253e5dd78cdec25de95009e9200ff08af4cc7:ledger_rows[50]"
+      ],
+      "co_named_pending_candidate_ids": [
+        "d10.pending.THREAD-CONJUNCTION"
+      ],
+      "F1": "ARCHIVAL-SOURCE-PINNED-NOT-INDEPENDENTLY_REPLAYED",
+      "F2": "HOLD_NOT_RUN",
+      "F3": "HOLD_DEDUP_UNPROVEN",
+      "F4": "NO_COORDINATE",
+      "ratified": false
+    },
+    {
+      "id": "d10.name.01352",
+      "name": "TIMEZONE-RAW->OBSERVATION",
+      "law": "If raw input is tagged timezone-declarations, interpret two fields; otherwise construct rejected invalid-timezone-observation.",
+      "law_variants": [
+        "If raw input is tagged timezone-declarations, interpret two fields; otherwise construct rejected invalid-timezone-observation."
+      ],
+      "donor_claims": [
+        "cf28529677096a934aa0c31a4a3feefba6c51f12",
+        "knowledge/d10-historical-candidate-coordinate-queue-v1.json@131369263ac37c27798bb3c95521eb99e52b8f10",
+        "knowledge/d10-time-law-review-v2.json"
+      ],
+      "positive_witness_claims": [],
+      "negative_witness_claims": [
+        "Wrong tag must reject; both absent declarations produce unknown; no host file reading."
+      ],
+      "source_records_sha_pinned": [
+        "knowledge/d10-historical-candidate-coordinate-queue-v1.json@131369263ac37c27798bb3c95521eb99e52b8f10:candidates[36]",
+        "knowledge/d10-historical-lisp-all-source-consolidation-20261011.json@962208ecad6b4b4d8845ea7dedaf88c34e93e702:candidates[316]",
+        "knowledge/d10-historical-lisp-main-consolidation-20261011.json@8c8253e5dd78cdec25de95009e9200ff08af4cc7:ledger_rows[36]"
+      ],
+      "co_named_pending_candidate_ids": [
+        "d10.pending.TIMEZONE-RAW-%3EOBSERVATION"
+      ],
+      "F1": "ARCHIVAL-SOURCE-PINNED-NOT-INDEPENDENTLY_REPLAYED",
+      "F2": "HOLD_NOT_RUN",
+      "F3": "HOLD_DEDUP_UNPROVEN",
+      "F4": "NO_COORDINATE",
+      "ratified": false
+    },
+    {
+      "id": "d10.name.01402",
+      "name": "UNIFY-VAR",
+      "law": "Bind a logic variable to a term when identities differ and occurs-check permits it, otherwise preserve substitution or return failure",
+      "law_variants": [
+        "Bind a logic variable to a term when identities differ and occurs-check permits it, otherwise preserve substitution or return failure"
+      ],
+      "donor_claims": [
+        "78eac7f7d0d05ec5734ccb61e73c1bed7ec707fa",
+        "knowledge/d10-historical-candidate-coordinate-queue-v1.json@131369263ac37c27798bb3c95521eb99e52b8f10",
+        "knowledge/d10-unify-lexical-harvest-v1.json"
+      ],
+      "positive_witness_claims": [],
+      "negative_witness_claims": [],
+      "source_records_sha_pinned": [
+        "knowledge/d10-historical-candidate-coordinate-queue-v1.json@131369263ac37c27798bb3c95521eb99e52b8f10:candidates[49]",
+        "knowledge/d10-historical-lisp-all-source-consolidation-20261011.json@962208ecad6b4b4d8845ea7dedaf88c34e93e702:candidates[328]",
+        "knowledge/d10-historical-lisp-main-consolidation-20261011.json@8c8253e5dd78cdec25de95009e9200ff08af4cc7:ledger_rows[49]"
+      ],
+      "co_named_pending_candidate_ids": [
+        "d10.pending.UNIFY-VAR"
+      ],
+      "F1": "ARCHIVAL-SOURCE-PINNED-NOT-INDEPENDENTLY_REPLAYED",
+      "F2": "HOLD_NOT_RUN",
+      "F3": "HOLD_DEDUP_UNPROVEN",
+      "F4": "NO_COORDINATE",
+      "ratified": false
+    },
+    {
+      "id": "d10.name.01403",
+      "name": "UNIFY-WALKED",
+      "law": "Unify two dereferenced logic terms recursively, propagating substitutions or explicit failure across compound pairs",
+      "law_variants": [
+        "Unify two dereferenced logic terms recursively, propagating substitutions or explicit failure across compound pairs"
+      ],
+      "donor_claims": [
+        "78eac7f7d0d05ec5734ccb61e73c1bed7ec707fa",
+        "knowledge/d10-historical-candidate-coordinate-queue-v1.json@131369263ac37c27798bb3c95521eb99e52b8f10",
+        "knowledge/d10-unify-lexical-harvest-v1.json"
+      ],
+      "positive_witness_claims": [],
+      "negative_witness_claims": [],
+      "source_records_sha_pinned": [
+        "knowledge/d10-historical-candidate-coordinate-queue-v1.json@131369263ac37c27798bb3c95521eb99e52b8f10:candidates[48]",
+        "knowledge/d10-historical-lisp-all-source-consolidation-20261011.json@962208ecad6b4b4d8845ea7dedaf88c34e93e702:candidates[329]",
+        "knowledge/d10-historical-lisp-main-consolidation-20261011.json@8c8253e5dd78cdec25de95009e9200ff08af4cc7:ledger_rows[48]"
+      ],
+      "co_named_pending_candidate_ids": [
+        "d10.pending.UNIFY-WALKED"
+      ],
+      "F1": "ARCHIVAL-SOURCE-PINNED-NOT-INDEPENDENTLY_REPLAYED",
+      "F2": "HOLD_NOT_RUN",
+      "F3": "HOLD_DEDUP_UNPROVEN",
+      "F4": "NO_COORDINATE",
+      "ratified": false
+    },
+    {
+      "id": "d10.name.01426",
+      "name": "USING-RESOURCE",
+      "law": "Scoped resource lease, який використовує unwind-protect для повернення об'єкта навіть при throw.",
+      "law_variants": [
+        "Scoped resource lease, який використовує unwind-protect для повернення об'єкта навіть при throw."
+      ],
+      "donor_claims": [
+        "f5438abf3460fa7caac14a30edf511f907a5be44",
+        "https://tumbleweed.nu/r/lm-3/uv/chinual4th.html",
+        "juv4uk/sens@ffb1e8fefe3eaed1f77ddb890cd744f9ac328f2d:knowledge/d10-psl-interlisp-lispm-unmerged-residual-v1.json:516",
+        "knowledge/d10-historical-candidate-coordinate-queue-v1.json@131369263ac37c27798bb3c95521eb99e52b8f10",
+        "knowledge/d10-psl-interlisp-lispm-unmerged-residual-v1.json",
+        "knowledge/d10-psl-interlisp-lispm-unmerged-residual-v1.json@f5438abf3460fa7caac14a30edf511f907a5be44"
+      ],
+      "positive_witness_claims": [
+        "throw всередині body; resource lease повернений в pool."
+      ],
+      "negative_witness_claims": [
+        "Об'єкт назавжди залишається in-use після throw."
+      ],
+      "source_records_sha_pinned": [
+        "knowledge/d10-historical-candidate-coordinate-queue-v1.json@131369263ac37c27798bb3c95521eb99e52b8f10:candidates[15]",
+        "knowledge/d10-historical-lisp-all-source-consolidation-20261011.json@962208ecad6b4b4d8845ea7dedaf88c34e93e702:candidates[338]",
+        "knowledge/d10-historical-lisp-main-consolidation-20261011.json@8c8253e5dd78cdec25de95009e9200ff08af4cc7:ledger_rows[15]",
+        "knowledge/d10-proposal-ledger.tsv@f10c545598b6aaf90f8f5caf8f49683448ff420f:line160",
+        "knowledge/d10-source-snapshots/d10-proposal-ledger-f10c545598b6a6af.tsv@f10c545598b6aaf90f8f5caf8f49683448ff420f:source-record"
+      ],
+      "co_named_pending_candidate_ids": [
+        "d10.pending.USING-RESOURCE"
+      ],
+      "F1": "ARCHIVAL-SOURCE-PINNED-NOT-INDEPENDENTLY_REPLAYED",
+      "F2": "HOLD_NOT_RUN",
+      "F3": "HOLD_DEDUP_UNPROVEN",
+      "F4": "NO_COORDINATE",
+      "ratified": false
+    },
+    {
+      "id": "d10.name.01446",
+      "name": "WALK-RESOLVED",
+      "law": "Follow transitive bound-variable references until a nonvariable or an unbound variable is reached, preserving the original unbound variable",
+      "law_variants": [
+        "Follow transitive bound-variable references until a nonvariable or an unbound variable is reached, preserving the original unbound variable"
+      ],
+      "donor_claims": [
+        "78eac7f7d0d05ec5734ccb61e73c1bed7ec707fa",
+        "knowledge/d10-historical-candidate-coordinate-queue-v1.json@131369263ac37c27798bb3c95521eb99e52b8f10",
+        "knowledge/d10-unify-lexical-harvest-v1.json"
+      ],
+      "positive_witness_claims": [],
+      "negative_witness_claims": [],
+      "source_records_sha_pinned": [
+        "knowledge/d10-historical-candidate-coordinate-queue-v1.json@131369263ac37c27798bb3c95521eb99e52b8f10:candidates[46]",
+        "knowledge/d10-historical-lisp-all-source-consolidation-20261011.json@962208ecad6b4b4d8845ea7dedaf88c34e93e702:candidates[345]",
+        "knowledge/d10-historical-lisp-main-consolidation-20261011.json@8c8253e5dd78cdec25de95009e9200ff08af4cc7:ledger_rows[46]"
+      ],
+      "co_named_pending_candidate_ids": [
+        "d10.pending.WALK-RESOLVED"
+      ],
+      "F1": "ARCHIVAL-SOURCE-PINNED-NOT-INDEPENDENTLY_REPLAYED",
+      "F2": "HOLD_NOT_RUN",
+      "F3": "HOLD_DEDUP_UNPROVEN",
+      "F4": "NO_COORDINATE",
+      "ratified": false
+    }
+  ]
+}

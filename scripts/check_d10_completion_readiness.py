@@ -251,10 +251,17 @@ def audit(root):
             v10_manifest = json.loads(v10_manifest_raw)
             v10_source_pin = v10_manifest["candidate_index"]
             v10_source = (root / v10_source_pin["path"]).read_bytes()
-            v10_new = rows[len(v9["rows"]):]
+            v10_history = ptr.get("historical_v10_research_inventory", {})
+            v10_raw = (root / v10_history["path"]).read_bytes()
+            v10_archived = json.loads(v10_raw)
+            v10_new = v10_archived["rows"][len(v9["rows"]):]
             v10_proofs = v10_manifest["candidates"]
             v10_good = (
                 ptr.get("historical_v9_research_inventory", {}).get("git_blob") == sha(v9raw)
+                and v10_history.get("path") == "knowledge/d10-v10-semantic-inventory.json"
+                and v10_history.get("git_blob") == sha(v10_raw)
+                and len(v10_archived["rows"]) == 799
+                and preserves_archived_prefix(rows, v10_archived["rows"])
                 and v10_ref.get("previous_inventory") == "knowledge/d10-v9-semantic-inventory.json"
                 and v10_manifest_pin.get("git_blob") == sha(v10_manifest_raw)
                 and v10_source_pin["path"] == v10_ref["source_catalog"]["path"]
@@ -283,6 +290,44 @@ def audit(root):
                 )
             else:
                 errors.append("D10-V10-SOURCE-BATCH-SHA-OR-LAW-DRIFT")
+        # v11: distinct-name historical source laws, not F2/F3 certifications.
+        # All alternate same-name IDs remain in the immutable catalog.
+        if len(rows) > 799:
+            v11_ref = ptr.get("current_v11_historical_law_selection", {})
+            manifest_pin11 = v11_ref.get("manifest", {})
+            manifest_raw11 = (root / manifest_pin11["path"]).read_bytes()
+            manifest11 = json.loads(manifest_raw11)
+            catalog_pin11 = manifest11["source"]
+            catalog_raw11 = (root / catalog_pin11["path"]).read_bytes()
+            v11_suffix = rows[799:]
+            v11_good = (
+                v11_ref.get("previous_inventory") == "knowledge/d10-v10-semantic-inventory.json"
+                and manifest_pin11["git_blob"] == sha(manifest_raw11)
+                and catalog_pin11["path"] == v11_ref["source"]["path"]
+                and catalog_pin11["git_blob"] == v11_ref["source"]["git_blob"]
+                and sha(catalog_raw11) == catalog_pin11["git_blob"]
+                and len(v11_suffix) == len(manifest11["candidates"]) == 24
+                and all(
+                    r["stable_id"] == p["id"]
+                    and r["semantic_name"] == p["name"]
+                    and r["behavior"] == p["law"]
+                    and r["source_path"] == catalog_pin11["path"]
+                    and r["source_git_blob"] == catalog_pin11["git_blob"]
+                    and r["coordinate"] is None
+                    and r["ratified_resident"] is False
+                    and r["physical_t5_authorized"] is False
+                    and r["witness_independence"] == "PENDING"
+                    and p["F2"] == "HOLD_NOT_RUN"
+                    and p["F3"] == "HOLD_DEDUP_UNPROVEN"
+                    for r,p in zip(v11_suffix, manifest11["candidates"])
+                )
+            )
+            if v11_good:
+                source_review_exceptions.update(
+                    r["semantic_name"].upper() for r in v11_suffix
+                )
+            else:
+                errors.append("D10-V11-SOURCE-BATCH-SHA-OR-LAW-DRIFT")
         if sources_good and legacy_ok and v5_good:
             research_allocated=len(placed)-256
             source_review_exceptions |= all_review_names | v5_source_names
