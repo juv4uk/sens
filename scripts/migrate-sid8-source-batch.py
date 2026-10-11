@@ -171,6 +171,18 @@ def run(root, write=False, selected=None):
             report.append({"path": path, "status": "blocked", "reasons": ["symlink"]})
             continue
         original = file.read_text(encoding="utf-8")
+        # A modern D8 head or a record key is never proof of old SID8 source.
+        # Require an actual historical definition, otherwise fail closed.
+        if not re.search(r"\(\s*(?:00001001|00001011)(?=[\s)])", original):
+            report.append({"path": path, "status": "source-era-unproved",
+                           "potential_heads": 0,
+                           "reasons": ["no historical DEFINE/DEF call head"]})
+            continue
+        if "GENERATED" in original[:360] or "do not hand-edit" in original[:360]:
+            report.append({"path": path, "status": "source-era-unproved",
+                           "potential_heads": 0,
+                           "reasons": ["generated carrier needs generator migration"]})
+            continue
         updated, n, problems = rewrite(original, mapping, blocked)
         if n:
             try:
