@@ -57,6 +57,28 @@ fn object_package_and_nonempty_map_addresses_are_structurally_consistent() {
 }
 
 #[test]
+fn object_package_fold_consumes_every_valid_package() {
+    let mut session = session();
+    let source = "(let ((decision (fs-build-object-store (list (fs-object-package (quote first)) (fs-object-package (quote second))) (empty-content-store)))) (list (car decision) (content-store-size (second decision))))";
+    assert_eq!(observe(&mut session, source), "(accepted 2)",
+        "nonempty packages may not be accepted without insertion");
+}
+
+#[test]
+fn object_package_fold_rejects_invalid_second_package_without_partial_success() {
+    let mut session = session();
+    let source = "(fs-build-object-store (list (fs-object-package (quote first)) (list (cons (quote format) (quote wsm-fs-object)) (cons (quote version) (quote (0 1))) (cons (quote address) \"incorrect\") (cons (quote value) (quote second)))) (empty-content-store))";
+    assert_eq!(observe(&mut session, source), "(rejected address-mismatch)");
+}
+
+#[test]
+fn object_package_fold_rejects_an_improper_tail() {
+    let mut session = session();
+    let source = "(fs-build-object-store (cons (fs-object-package (quote first)) (quote broken-tail)) (empty-content-store))";
+    assert_eq!(observe(&mut session, source), "(rejected invalid-object-packages)");
+}
+
+#[test]
 fn referenced_root_can_project_its_real_object_and_binding_lists() {
     let mut session = session();
     let prefix = "(let* ((value (quote (hello world))) (written (fs-write (fs-empty) \"notes/today\" value)) (fs (car written)) (root (fs-root-package fs)))";
