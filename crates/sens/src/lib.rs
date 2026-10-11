@@ -166,7 +166,7 @@ pub fn domain_numeric_value(operator: &str, lhs: &Value, rhs: &Value) -> Option<
 pub use bit9::Bit9;
 pub use bits::{Bit1, Bit2, Bit3, Bit4, Bit5, Bit6, Bit7, Bit8, Bits};
 pub use canonical_reader::{parse_canonical_binary, parse_canonical_packed_words, parse_canonical_word_sequence};
-pub use mixed_source::{parse_mixed_exact_domain, parse_mixed_exact_domain_core_source, parse_mixed_exact_domain_machine_source};
+pub use mixed_source::{parse_mixed_exact_domain, parse_mixed_exact_domain_core_source, parse_mixed_exact_domain_machine_source, parse_mixed_exact_domain_time_source};
 pub use compiler_role::{compiler_execution_role, CompilerExecutionRole, CompilerLoweringRole};
 pub use compiler_bootstrap::{
     canonical_value_sha256_mechanism, compiler_evidence_canonical_bytes,
@@ -547,7 +547,10 @@ pub fn load_meta_evaluator_library(
 /// preserves the closed language core while giving embedders one canonical
 /// time-layer loader instead of ad-hoc `include_str!` calls.
 pub fn load_time_library(session: &mut Session) -> Result<EvalResult, LanguageError> {
-    let result = eval_program(TIME_LIBRARY_SOURCE, session)?;
+    // This owner-pinned loader admits current D3 heads inside W8 bootstrap
+    // wrappers; ordinary Lisp parse would see those short bits as numbers.
+    let expressions = parse_mixed_exact_domain_time_source("lib/time.lisp", TIME_LIBRARY_SOURCE)?;
+    let result = eval_parsed_expressions(&expressions, session)?;
     bind_missing_stable_surface_peers(&session.environment);
     Ok(result)
 }
