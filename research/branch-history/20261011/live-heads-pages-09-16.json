@@ -1,0 +1,3213 @@
+{
+  "schema": "sens.git-branch-heads-part/v1",
+  "repo": "juv4uk/sens",
+  "date": "2026-10-11",
+  "pages": [
+    9,
+    16
+  ],
+  "count": 800,
+  "scope": "live refs at fetch, not merged nor deleted refs",
+  "branches": [
+    {
+      "name": "feat/binary-authority-no-decimal-bootstrap",
+      "sha": "6e3cd0653b7f3df7f4e5058ad2c7ec76d5773f95"
+    },
+    {
+      "name": "feat/binary-authority-no-decimal-bootstrap-v2",
+      "sha": "4946412195cd4dbbdf2ac5d2685d1524e435b6f1"
+    },
+    {
+      "name": "feat/binary-authority-no-decimal-bootstrap-v3",
+      "sha": "7ae31cf92c03c9b2e412c100433c80555e9d3039"
+    },
+    {
+      "name": "feat/binary-authority-no-decimal-bootstrap-v4",
+      "sha": "ad532c2fe2bb7f89d40facaf26465742e379af3c"
+    },
+    {
+      "name": "feat/binary-math-216",
+      "sha": "65c7275583ffd1075d23b3ef35625c255e14d050"
+    },
+    {
+      "name": "feat/binary-only-d1-d7-executable-t5-e2e-20261009",
+      "sha": "d75da7af0fc4864ada6193d5daa7490385f660bb"
+    },
+    {
+      "name": "feat/canon-zero-215",
+      "sha": "2bf2664313323e98d6a5cc74641ba1ea76bda13a"
+    },
+    {
+      "name": "feat/clips-c-abi-witness",
+      "sha": "33228df543b817711cabc6438df45439c169b585"
+    },
+    {
+      "name": "feat/clips-native-c-scaffold-714",
+      "sha": "37ee386489ab1d85d392398c738132a59fd01c8a"
+    },
+    {
+      "name": "feat/clips-native-observation-714",
+      "sha": "1ca2f57aec904a2b2ab26b7acb546445fd92f6a3"
+    },
+    {
+      "name": "feat/clips-runtime-loader-714",
+      "sha": "0b0fecd7c6823919befbf529cc86b394ab91f82d"
+    },
+    {
+      "name": "feat/clips-working-memory-witness-714",
+      "sha": "d9eddfffde415e0712cda83f355b3e520c9fb71d"
+    },
+    {
+      "name": "feat/common-lisp-c-abi-witness",
+      "sha": "197015f01122b42b4c28fb2e3d292a20d93962cb"
+    },
+    {
+      "name": "feat/common-lisp-kernel-732",
+      "sha": "662a9a5123ca9e1751019cf3ea9eb7fa5e120085"
+    },
+    {
+      "name": "feat/control-logic-217",
+      "sha": "58dc89c6c7af22795b4a0dddbcd1c566ce468cf7"
+    },
+    {
+      "name": "feat/core1-in-sens",
+      "sha": "8ca85ba2da70408f184703772d019d28f356f46b"
+    },
+    {
+      "name": "feat/d3-role-aware-domain-bridge",
+      "sha": "19d2314dea3b4dbee638278f04abb46bb4cc8f2f"
+    },
+    {
+      "name": "feat/d5-historical-completion",
+      "sha": "fcb9a9b2abce8c5e40c7b006c0fb32d8b56919a5"
+    },
+    {
+      "name": "feat/d6-historical-completion",
+      "sha": "d47311a5ebd5891d3c1318e678a9a6e07cc29a91"
+    },
+    {
+      "name": "feat/d7-display-ratified-20261009",
+      "sha": "3387788e86ea95151be238d2ac1cba8cfa548269"
+    },
+    {
+      "name": "feat/d7-text7-shiva-w7-synthesis",
+      "sha": "365c4b24c292abafef721b3787dc9206e871c45d"
+    },
+    {
+      "name": "feat/d8-historical-full-occupancy",
+      "sha": "a21b15cab25d0a1af06984420c8865bb1a5e6f97"
+    },
+    {
+      "name": "feat/datalog-c-abi-main",
+      "sha": "3d5e3131799cf7aae8cd577f15079b30566f602b"
+    },
+    {
+      "name": "feat/datalog-c-abi-witness",
+      "sha": "b163deeb06a71a27a4ec489570bd6e8b2f051636"
+    },
+    {
+      "name": "feat/datalog-kernel-713",
+      "sha": "8fa4c4819a0275a3f2d9a617d9e2312c6edb4234"
+    },
+    {
+      "name": "feat/direct-t5-program-once-decoded-20261010",
+      "sha": "1469929e1b4293e459b0e999f152b61294419dad"
+    },
+    {
+      "name": "feat/domain-registry-authority",
+      "sha": "2074fc9f31780e8ad1ad8dcdc0917cb478661f6a"
+    },
+    {
+      "name": "feat/domainword-d4-d6-carrier",
+      "sha": "8fd74b3e788547c8056ecdb8384530947e6ad0ba"
+    },
+    {
+      "name": "feat/eco-canon-2-semantic-identity-red",
+      "sha": "aab53ec3d9881d633b7003ce1c1d56670641f6b2"
+    },
+    {
+      "name": "feat/embed-staticlib-311",
+      "sha": "94d006876ec2d448ab34cdc39e566e0bfce5d673"
+    },
+    {
+      "name": "feat/file-policy-sens-oracle-20261010",
+      "sha": "a96148e80894734f69d1e2b61ab70dc3eed710f5"
+    },
+    {
+      "name": "feat/four-kernel-c-abi-725",
+      "sha": "6005819e0c4c39bd2c88d1708d2b9d4137b957b6"
+    },
+    {
+      "name": "feat/full-uk-cyrillic-surface",
+      "sha": "74d113977ed9610492968238752b9143de23ead9"
+    },
+    {
+      "name": "feat/guard-reference-evidence-ranking",
+      "sha": "9c130c3d9ab47a2184aa8275b6b1b832572bd881"
+    },
+    {
+      "name": "feat/kernel-call-graph-728",
+      "sha": "8da3a60fed372a2737c3fb4b58e6b7f1b967ad66"
+    },
+    {
+      "name": "feat/kernel-host-abi-715",
+      "sha": "9b974eca87be9dd7fe5f6f1a8b318fc302b9925c"
+    },
+    {
+      "name": "feat/kernel-neutral-abi-contract",
+      "sha": "3912e570dac94a98e62547e7c53b244d0923cf6e"
+    },
+    {
+      "name": "feat/life-1-contract",
+      "sha": "89c62cabe2f1a606650eaa11cdf62899a4f3b478"
+    },
+    {
+      "name": "feat/lisp-assembler-atoms",
+      "sha": "2038d8d10975c97b5ec3221c3a0eaf9e733614c1"
+    },
+    {
+      "name": "feat/lisp-binary-format-8",
+      "sha": "a126f4dd0e12948cd7353add45791d59fbc76ca8"
+    },
+    {
+      "name": "feat/lisp-owned-semantic-registry",
+      "sha": "7287d5ec7505e9d580dd2d0329dd411a8fae0839"
+    },
+    {
+      "name": "feat/live-public-api-discovery",
+      "sha": "58dcd767150b7758190154c619265d8358806c62"
+    },
+    {
+      "name": "feat/machine-admission-1",
+      "sha": "3ec74465eaa30183a45cdb0e5a8a4c2f01247eaa"
+    },
+    {
+      "name": "feat/machine-admission-2-structured-lowering",
+      "sha": "2b4bc34edc34b87aafef5b660a52d8db7be65407"
+    },
+    {
+      "name": "feat/machine-to-sens",
+      "sha": "221a8743fc1596421ff37be396fc64841c0a561a"
+    },
+    {
+      "name": "feat/machine-type-discipline-1",
+      "sha": "1ead1b14511ac4e92f2c8135889b03c1282821ca"
+    },
+    {
+      "name": "feat/migrate-core-to-sens",
+      "sha": "8ee2554e49a149dc01e96dd1a6696beb9a69753f"
+    },
+    {
+      "name": "feat/migrate-reason-unify-to-sens",
+      "sha": "a259f5c84451c817a87c3f483e2b15b7dbf8b7b8"
+    },
+    {
+      "name": "feat/native-result-types-719",
+      "sha": "b057fe62d9c7ac026565f9b4464d9c0454b93e5f"
+    },
+    {
+      "name": "feat/physical-binary-final-20261009",
+      "sha": "20597707a409f5dd66c0e0260c8fe768290524eb"
+    },
+    {
+      "name": "feat/physical-binary-packedword-main-20261009",
+      "sha": "026369d2298ac918eecff07a6b12b84a5a434f7b"
+    },
+    {
+      "name": "feat/physical-d3-cond-t5-20261010",
+      "sha": "6f234afdcbec677c45401fece34410ff6ea0e127"
+    },
+    {
+      "name": "feat/physical-t5-direct-eval-20261009",
+      "sha": "86736589f370a5741c1c106485aeb81255eb1792"
+    },
+    {
+      "name": "feat/probabilistic-decision-1143-current",
+      "sha": "9facc840b70c670c7608ec0b3ccc1d4b62e0394e"
+    },
+    {
+      "name": "feat/probabilistic-decision-1143",
+      "sha": "8bd925544c825c1850f33ced4153c82fdc14ff12"
+    },
+    {
+      "name": "feat/prolog-c-abi-witness",
+      "sha": "49cff32fc7895dcd695d1172d0ff9e0c12ecec7f"
+    },
+    {
+      "name": "feat/prolog-kernel-712",
+      "sha": "3d6fe77278958aa66715cdf3ced3cf65d358fb80"
+    },
+    {
+      "name": "feat/radix-reader-projections-1635",
+      "sha": "ec8bb4c4e809fc377965133c36b33e08f6c38ab7"
+    },
+    {
+      "name": "feat/rational-fast-path",
+      "sha": "0c19a9ee5d1fb0d9494afabc3a509bbe51912025"
+    },
+    {
+      "name": "feat/runtime-semantic-ref",
+      "sha": "5999183f1acce3d322e616dd717f180d7a58c9cc"
+    },
+    {
+      "name": "feat/rust-primitives-by-sens-2",
+      "sha": "7e6b558c6014e5a8058ef552b39228aecb0e563b"
+    },
+    {
+      "name": "feat/semantic-registry-runtime-projection",
+      "sha": "311bfe07ae38c117622ce2ef6b511aace383e45a"
+    },
+    {
+      "name": "feat/semantic-registry-runtime-projection-v2",
+      "sha": "e3a082d5d4746aec87559a03d7ed245b36301c99"
+    },
+    {
+      "name": "feat/semantic-registry-runtime-projection-v3",
+      "sha": "3d94d84646054092ece57c912a42f7071aaae16c"
+    },
+    {
+      "name": "feat/sens-wire",
+      "sha": "8d62819eb1528c95e71795a6f069a92b52f30915"
+    },
+    {
+      "name": "feat/structure-core-230",
+      "sha": "bfed8ebc3b7fcd9e702afa34ea7a3816e08c163b"
+    },
+    {
+      "name": "feat/t5-explicit-pure-eval-cli-20261008",
+      "sha": "c839271661dc0465e6114039e77308f00db1f051"
+    },
+    {
+      "name": "feat/test-transition-231",
+      "sha": "b2481e0c303d5175be6c59069acc6b619e8dc4c8"
+    },
+    {
+      "name": "feat/u8-native-1",
+      "sha": "7ad37e42b3df1aae83cb96e1ddc27c3cda98ad46"
+    },
+    {
+      "name": "feat/uk-profile-161",
+      "sha": "a9353e5c7d07d7db798ee061b42defaeb07618ff"
+    },
+    {
+      "name": "feat/uk-surface-coherence-red",
+      "sha": "2f5b43935e7b62f366f081ac21667f223578c9e2"
+    },
+    {
+      "name": "feat/uk-t5-bounded-multiform-proof-20261009",
+      "sha": "0a6104f62eea5e5c98df48b6d83b6b37d3e105f8"
+    },
+    {
+      "name": "feat/ukr-surface-lisp-main",
+      "sha": "915d69a5cd18ec5bdeb27dc6355ccc025aa585a7"
+    },
+    {
+      "name": "feat/vertical-lisp-2-pair-layout-contract",
+      "sha": "3888883e9741580fd1d463b2a4e115c70f71afb1"
+    },
+    {
+      "name": "feat/vertical-lisp-pair-native",
+      "sha": "2f0de7882761d7f3d502de75ba929d2dc6a98afe"
+    },
+    {
+      "name": "feat/x86-64-alu-r64-imm32",
+      "sha": "2bc2d7b43b61dd99a852208fe263ca72094acb1f"
+    },
+    {
+      "name": "feat/x86-64-call-jmp-r64",
+      "sha": "afb6e50c0d5d855127bf8f86ba7bb43bd63ad699"
+    },
+    {
+      "name": "feat/x86-64-call-rel32",
+      "sha": "0d3ff43e26aaa09e806ab0e80aebb823e6d34367"
+    },
+    {
+      "name": "feat/x86-64-instruction-set-lisp-harvest",
+      "sha": "48506dc45897d144153614d29f2c6d96f3248d6f"
+    },
+    {
+      "name": "feat/x86-64-jcc-rel32",
+      "sha": "a6f003011a0ca14a12e4097c856074eb0033574c"
+    },
+    {
+      "name": "feat/x86-64-jmp-rel32",
+      "sha": "b0232d01c62819e799b4f2ae733d386a0f2908bc"
+    },
+    {
+      "name": "feat/x86-64-lea-r64-mem-disp8",
+      "sha": "3308f7d06748dc831ee28975763682a64fb63f27"
+    },
+    {
+      "name": "feat/x86-64-lea-rel32-lisp-harvest",
+      "sha": "1109f46c4c861c0e328444490643202313baf0d2"
+    },
+    {
+      "name": "feat/x86-64-mov-r64-r64",
+      "sha": "7793606b460463fb17ca684126112f3777a11ca0"
+    },
+    {
+      "name": "feat/x86-64-shift-r64-imm8",
+      "sha": "be9fd63eb56e32de125c5434b0c612600db2e65f"
+    },
+    {
+      "name": "feat/yantraos-bridge-1145",
+      "sha": "78f1c6957cc9d19a97e15871769a4f57a7752ff2"
+    },
+    {
+      "name": "feat/76-lisp-meta-semantic-registry",
+      "sha": "ed1ef28928df1db0cc83f17ae993527635b6256d"
+    },
+    {
+      "name": "feat/113-lisp-witness-runner",
+      "sha": "b51e0fb6d64a23985dc617ec4f1e6c499fca59f3"
+    },
+    {
+      "name": "feat/114-authority-inventory",
+      "sha": "969e46bc5ac14d7f38f60fb06dc14266d37a62c2"
+    },
+    {
+      "name": "feat/114-authority-inventory-main",
+      "sha": "f1383c942d284e0142cf34f339b2435de722d680"
+    },
+    {
+      "name": "feat/115-authority-guard",
+      "sha": "037a7a5ab55a4f4d1f837429452159ff31cdbc2d"
+    },
+    {
+      "name": "feat/115-authority-guard-main",
+      "sha": "14440e89e38568cd0143b7a8f947a1a31ec12c20"
+    },
+    {
+      "name": "feat/115-lisp-authority-policy",
+      "sha": "8da71dae09b8a83a9f1604818909b294ddf370a7"
+    },
+    {
+      "name": "feat/115-lisp-authority-policy-green",
+      "sha": "8da71dae09b8a83a9f1604818909b294ddf370a7"
+    },
+    {
+      "name": "feat/116-portable-witness-adapters",
+      "sha": "7f35d6a8d78d0ad6afe9385609998fab8039b02d"
+    },
+    {
+      "name": "feat/116-portable-witness-main",
+      "sha": "350145462449349cf3de826f8b9b1eeb36d62c41"
+    },
+    {
+      "name": "feat/150-machine-noninterference-green",
+      "sha": "cd123371c7a48dae6d845987c496d4d559bc74d2"
+    },
+    {
+      "name": "feat/177-machine-block-roundtrip",
+      "sha": "f3be82df2aa06898ce0242c159d605e53e743e1b"
+    },
+    {
+      "name": "feat/177-typed-operands",
+      "sha": "cbb04325a5ab8ed7ec675bfa809511190ea7a74c"
+    },
+    {
+      "name": "feat/177-typed-operands-mainline",
+      "sha": "e25838c7e9409798eb87f02775dee07422ff3334"
+    },
+    {
+      "name": "feat/178-current-gpr-atoms",
+      "sha": "ffbd13b7fc3cd4de4cf00bb5de30c23fda0e1f70"
+    },
+    {
+      "name": "feat/178-immediate-branch-atoms",
+      "sha": "25796d2a6e9e9a0d067f85093d1e868426a36081"
+    },
+    {
+      "name": "feat/196-cond-minimal-profile",
+      "sha": "4b2338f8e1ba0d23733fb3d790a59ccb80c7e71f"
+    },
+    {
+      "name": "feat/196-cond-structural-composition",
+      "sha": "d270448317bd58d37becb82abb4353b465d87cf9"
+    },
+    {
+      "name": "feat/196-minimal-structural-profile",
+      "sha": "b6f9b4a518fd925bcfa0ebf516026188dccf04ac"
+    },
+    {
+      "name": "feat/216-activate-exact-q-current",
+      "sha": "68732bd1f4b61a718b6b5bedf05b023ff87437ac"
+    },
+    {
+      "name": "feat/216-exact-q-binary",
+      "sha": "6896e38f24dca247da920336a453da5afe941a17"
+    },
+    {
+      "name": "feat/216-exact-q-runtime-current",
+      "sha": "d1c3666a40683153fcfaa1a3d100ad9081c51ec7"
+    },
+    {
+      "name": "feat/216-exact-q-runtime-v1",
+      "sha": "e9b22a89aa7a97d594292818f693c8e1e9463719"
+    },
+    {
+      "name": "feat/217-explicit-control-contract",
+      "sha": "2370a334aa14e3ac662f1c389dbe7644db201868"
+    },
+    {
+      "name": "feat/218-activate-structural-results",
+      "sha": "115978eb65e4883552a953d22fb5505dfab0feb8"
+    },
+    {
+      "name": "feat/218-equal-structural-relation",
+      "sha": "7ba7bdd9ddbc950dfc79a72cf8a7131b45bafb85"
+    },
+    {
+      "name": "feat/219-consume-unification-outcomes",
+      "sha": "4059ba689611961e09990dc56c7cccc7a7fbfd2b"
+    },
+    {
+      "name": "feat/219-consume-unification-outcomes-red",
+      "sha": "48be0b841d601f1d10a38691fdce246720a8bf7a"
+    },
+    {
+      "name": "feat/219-consume-unification-outcomes-work",
+      "sha": "48be0b841d601f1d10a38691fdce246720a8bf7a"
+    },
+    {
+      "name": "feat/225-math-result-taxonomy",
+      "sha": "acd0751d7d37b56596ed874dbca34b4ffc0f690f"
+    },
+    {
+      "name": "feat/229-canon-laws-v2",
+      "sha": "8ccf6f7f3c68e0db3146e937c938394cf959ab78"
+    },
+    {
+      "name": "feat/244-canon0-indeterminacy",
+      "sha": "a5e6f5e0d7c0fb9ac4b305aab816881c9e6d412e"
+    },
+    {
+      "name": "feat/300-rust-retirement-valve",
+      "sha": "19e697a94acc309830537353a900889b1851bb38"
+    },
+    {
+      "name": "feat/332-cli-bootstrap-perf",
+      "sha": "25f4d0788a90b77408465eff0f122f3f2529eec4"
+    },
+    {
+      "name": "feat/382-repo-tooling-inventory",
+      "sha": "b9e592b28c011e18f0ec1f9706a243e7e6fe0773"
+    },
+    {
+      "name": "feat/383-knowledge-authority-classification",
+      "sha": "96b7f6a0b963c65752bcff6654aa1bc847bfa8ba"
+    },
+    {
+      "name": "feat/487-derived-admission-coverage-input-20261007",
+      "sha": "c1dd3e3ee9c144e2e14ad85bf4ca9df04d9146c3"
+    },
+    {
+      "name": "feat/487-lisp-encoder-coverage-parity",
+      "sha": "fbef0ace3c3e052dc64faa084867bb7310829690"
+    },
+    {
+      "name": "feat/505-native-first-classifier",
+      "sha": "0e683c9cfe90abc2c1be70d8c6bef7f923d183f9"
+    },
+    {
+      "name": "feat/506-native-first-execution",
+      "sha": "9f970224c23fbb01ade90bbe37916a2321fb13c7"
+    },
+    {
+      "name": "feat/506-native-first-execution-bridge",
+      "sha": "1f02ff89c50d96d4b6e16a874cdfa83bd139f75c"
+    },
+    {
+      "name": "feat/507-compiled-encoder-bootstrap",
+      "sha": "89afa2abbcab95b5959488cecbed528d3ced7635"
+    },
+    {
+      "name": "feat/508-native-coverage-ledger",
+      "sha": "21d34e3f094136ac3626a1f6e530738414d991ff"
+    },
+    {
+      "name": "feat/604-lisp-coverage-authority-clean-20261007",
+      "sha": "65cb848b76b8c913ac310d237bde4f8aecbe2327"
+    },
+    {
+      "name": "feat/604-lisp-coverage-authority-cutover-20261007",
+      "sha": "747691e738416c53641f8c420afedd7c13672a63"
+    },
+    {
+      "name": "feat/718-clips-datalog-bridge",
+      "sha": "1981c7acf6fb9003dc66332a6755da4bfb716a3e"
+    },
+    {
+      "name": "feat/719-native-result-refs",
+      "sha": "b057fe62d9c7ac026565f9b4464d9c0454b93e5f"
+    },
+    {
+      "name": "feat/735-kernel-witness-map",
+      "sha": "65672f374df3bdb3584268e11f790d5ded9c7d79"
+    },
+    {
+      "name": "feat/735-sid-kernel-witness",
+      "sha": "543a75c3ddf5bd30e9b562d70c926cf69906c2b7"
+    },
+    {
+      "name": "feat/747-admit-island-invoke",
+      "sha": "f7e3b1eda912fbee110b4d6d1c24bb2a9fb7046f"
+    },
+    {
+      "name": "feat/749-island-compat-contract",
+      "sha": "f4f851b9e0dd4833ca23fc55235d5411783714a6"
+    },
+    {
+      "name": "feat/779-invoke-replay-main",
+      "sha": "f4e901ad6d178e1925974faa94c318888e1d5de7"
+    },
+    {
+      "name": "feat/785-life-1-current-main",
+      "sha": "f4edbef429cc3acbd029b806f79d31dc7bcae7b8"
+    },
+    {
+      "name": "feat/786-life-1-replay",
+      "sha": "96131e2fd33a7525fea986ed75983f5e2c328421"
+    },
+    {
+      "name": "feat/797-kernel-availability-current-main",
+      "sha": "19346ad032a74fa30a5ac2eda385536cd068dc4d"
+    },
+    {
+      "name": "feat/797-kernel-availability-observation",
+      "sha": "a09242aae754cd830565086bd8075c7fa19d70d6"
+    },
+    {
+      "name": "feat/799-explicit-kernel-lifecycle",
+      "sha": "51a85b152b054a4b6d1046078d289664fe43a6da"
+    },
+    {
+      "name": "feat/801-life-scheduler-current-main",
+      "sha": "90afe66498c3ad759499bdfcf249dc817f7780c2"
+    },
+    {
+      "name": "feat/801-life-scheduler-main2",
+      "sha": "b7cca3a874c19aabdfa2ff71eda29036c5bd9a27"
+    },
+    {
+      "name": "feat/801-life-scheduler-on-current-main",
+      "sha": "103c824e65188bf228fadbf117ee181a7b17c927"
+    },
+    {
+      "name": "feat/803-prolog-datalog-bridge-current-main",
+      "sha": "8bb7e3ff49b6e8c2f4a8465592386a225a254c2d"
+    },
+    {
+      "name": "feat/803-prolog-datalog-bridge-on-879",
+      "sha": "deea0849d16ffb6a95f98abb8280090f3436cfe5"
+    },
+    {
+      "name": "feat/805-native-ref-storage-failure",
+      "sha": "47899e9eb45d41df78db718f2e43f7036ce0b200"
+    },
+    {
+      "name": "feat/805-observation-provenance-current-main",
+      "sha": "f1d42e618830fa0cb2eab17346ec71f7d23e1587"
+    },
+    {
+      "name": "feat/805-observation-provenance-on-880",
+      "sha": "da447d459696c6eae038787af3c1a42eee63d99d"
+    },
+    {
+      "name": "feat/805-provenance-graph",
+      "sha": "4cb30fc89f7f07f2b87364edcb3f11d0247444b9"
+    },
+    {
+      "name": "feat/808-observation-capabilities",
+      "sha": "4c57036c2a0cd90d9f1b4ee68ebc2ad89438c9bf"
+    },
+    {
+      "name": "feat/809-life-substrate-parity-contract",
+      "sha": "8a0273f95508a18ac405b782fa7452a018b961fe"
+    },
+    {
+      "name": "feat/815-machine-capability-axis",
+      "sha": "725f4dd5fec8683f2c1ad1d2ddd1c8763c851119"
+    },
+    {
+      "name": "feat/826-invoke-replay-current-main",
+      "sha": "0279d42cceaba5fe963dc89dfc7a8a7a403ac393"
+    },
+    {
+      "name": "feat/832-life-1-on-839",
+      "sha": "bf8df393340ec3d4c24a9ef05870e08b2087efa7"
+    },
+    {
+      "name": "feat/834-mathematical-law-axis",
+      "sha": "2f34728b76c6666d1fcf1b1a546000b39ab169a0"
+    },
+    {
+      "name": "feat/834-semantic-coordinate-law-axis",
+      "sha": "480e70f9e4062e2bf0a958699febefb255ade117"
+    },
+    {
+      "name": "feat/839-invoke-current-main-v2",
+      "sha": "6e3befd092860c6c835fb6156d94c4f12b8590b5"
+    },
+    {
+      "name": "feat/840-life-1-on-849",
+      "sha": "fdbb8fadd4bd52e295f214e2fd7d7d2ace2ab0fa"
+    },
+    {
+      "name": "feat/845-semantic-coordinate-matrix",
+      "sha": "9e631ab0896f8ed8d31cc4490261565252f470ab"
+    },
+    {
+      "name": "feat/845-semantic-coordinate-matrix-ci",
+      "sha": "9e631ab0896f8ed8d31cc4490261565252f470ab"
+    },
+    {
+      "name": "feat/845-semantic-coordinate-matrix-current-main",
+      "sha": "ac89b3394f323c221049ff79020145927e86e1de"
+    },
+    {
+      "name": "feat/845-semantic-coordinate-matrix-current-main-v2",
+      "sha": "8b3f81c9a0ed0b4a4f5e0e851e395c731aa8e007"
+    },
+    {
+      "name": "feat/845-semantic-coordinate-matrix-current-main-v3",
+      "sha": "572a734f8a3188ee9c2cf04fa4b8c7da23b6ec18"
+    },
+    {
+      "name": "feat/845-semantic-coordinate-matrix-final",
+      "sha": "b20956b825bff63f674d044738474c3e1e3c0991"
+    },
+    {
+      "name": "feat/845-semantic-coordinate-matrix-final-ci",
+      "sha": "7676c80ba0476652cc4d404fc95afbead7c01d60"
+    },
+    {
+      "name": "feat/845-semantic-coordinate-matrix-main-2026-09-20",
+      "sha": "af294bc326f8382e2e28a46caddb7994b3e7c149"
+    },
+    {
+      "name": "feat/849-invoke-current-main-v3",
+      "sha": "353b49f13acfdbcfe7e92315bd4706fb475b8293"
+    },
+    {
+      "name": "feat/849-invoke-current-main-v4",
+      "sha": "fcce00371f2e6b8f74237b7909975761f9ca59eb"
+    },
+    {
+      "name": "feat/850-life-1-on-860",
+      "sha": "92fb8111df77ad43cad24878c1353eb085ffa945"
+    },
+    {
+      "name": "feat/851-island-release-installer",
+      "sha": "c554d6b3ca021f15c9bd6889fd4c717874f94ec4"
+    },
+    {
+      "name": "feat/889-890-current-main",
+      "sha": "f79efbee962c2fe0da7e471cfd1b43fc4f159c69"
+    },
+    {
+      "name": "feat/889-890-island-manifest-plan-contract",
+      "sha": "41aaaa736b7e237ae7eb671ec8fb75147ac90145"
+    },
+    {
+      "name": "feat/891-892-island-transaction-probe",
+      "sha": "56912b3cbef5431bf6c01ca1af25cd3eb2543f4d"
+    },
+    {
+      "name": "feat/899-life-trace-prolog-datalog",
+      "sha": "908d19d240e7b6e74306d0b70593402a693c2624"
+    },
+    {
+      "name": "feat/903-904-current-main",
+      "sha": "6bcd59589656a0d325008ad799ecd8b109325186"
+    },
+    {
+      "name": "feat/903-904-current-main-v2",
+      "sha": "29952dcf5d44f85e6006fdf58824ebd10a784a68"
+    },
+    {
+      "name": "feat/903-life-scheduler-vertical",
+      "sha": "4eeac7baff63aaaf6c7eb1fc5190bfde451331d9"
+    },
+    {
+      "name": "feat/903-life-scheduler-vertical-on-902",
+      "sha": "c828030e71860b02a89102b760bafdba775daacc"
+    },
+    {
+      "name": "feat/926-self-bootstrap-current",
+      "sha": "8eb35b7b38f5018cb508c40c76ba76b4063f169a"
+    },
+    {
+      "name": "feat/926-self-bootstrap-islands",
+      "sha": "b753b40520ec48c0f30f9572e68e082fe0769dbf"
+    },
+    {
+      "name": "feat/954-binary-numeric-on-1096",
+      "sha": "d65ab5a23f3d728d5186c2427ac2e03e0f88f815"
+    },
+    {
+      "name": "feat/954-u8-native-clean",
+      "sha": "0b55d045cdc003abd18f7675058d23665bc7df36"
+    },
+    {
+      "name": "feat/991-shared-math-lowering-contract",
+      "sha": "504ccd34f089bc5cdf53bf1340b51a8f66ce397a"
+    },
+    {
+      "name": "feat/996-binary-registry-handoff",
+      "sha": "75f109a35669e0b47d1b0768cb709113b0e52f6e"
+    },
+    {
+      "name": "feat/996-binary-sid-authority-handoff",
+      "sha": "40ceb37409b46654482e756a340ae79dd35ed19a"
+    },
+    {
+      "name": "feat/997-canon-dispatch-lisp",
+      "sha": "db586509eb55d8ab0176b5ef1a4c765bdfa5f194"
+    },
+    {
+      "name": "feat/997-lisp-owned-necessary-form-dispatch",
+      "sha": "38935d00bafbd2598b6d82398d6cb65f216c11d4"
+    },
+    {
+      "name": "feat/1006-raw-invoke-adapter",
+      "sha": "2744719284c1938efb94677fc12629baea97ebc7"
+    },
+    {
+      "name": "feat/1006-raw-island-sens",
+      "sha": "eb717d62d218790beeaba410587a0bc032e74ce9"
+    },
+    {
+      "name": "feat/1006-sens-mechanism-seam",
+      "sha": "7d13b1623ee2ed124c0a800fea2d8a907beb8ca4"
+    },
+    {
+      "name": "feat/1010-ukr-repl-surface",
+      "sha": "0b8b3bfd4c4896a542419c4cd772b54675c379ca"
+    },
+    {
+      "name": "feat/1022-uk-ukr-surface-cyrillic",
+      "sha": "4151c1cbf89df4fbc482a909d46054eb1ed0dfc1"
+    },
+    {
+      "name": "feat/1022-ukr-cyrillic-namespaces",
+      "sha": "8bf100a0cf2e52115065517766b711b03b337679"
+    },
+    {
+      "name": "feat/1030-nonscript-tooling-inventory",
+      "sha": "e9334e097cf312ca7b2edf1c13a521b7e7f958ff"
+    },
+    {
+      "name": "feat/1036-cml-bootstrap-envelope",
+      "sha": "c5bf3888bad91ac427f9d15e8e995766d563bd7e"
+    },
+    {
+      "name": "feat/1036-cml-bootstrap-frontend",
+      "sha": "efb11d09e2c2de3a4d9925b3f6e327f029f9743f"
+    },
+    {
+      "name": "feat/1096-bare-sid-literals",
+      "sha": "500f7fc995273ece42e970d14cadbf8d0695e971"
+    },
+    {
+      "name": "feat/1098-sid-binary-identity",
+      "sha": "e83c52041a0638d43aaae78907193b484c801338"
+    },
+    {
+      "name": "feat/1101-unify-sid-runtime-value",
+      "sha": "ff6736e7d1a655cff2178518b07eded064577a58"
+    },
+    {
+      "name": "feat/1104-error-vocab-drift",
+      "sha": "41b2dcbdc87780a6e4f19d6deef3b6be66efacb6"
+    },
+    {
+      "name": "feat/1106-cond-generator",
+      "sha": "95350c567433bf0b2c01ae6e93711de98f58b7fc"
+    },
+    {
+      "name": "feat/1108-cond-rust-semantic-registry-generator",
+      "sha": "a612c757e46b0b533c73608b32f911b228c4b6cf"
+    },
+    {
+      "name": "feat/1115-early-sid-lowering",
+      "sha": "71a49e6bcb3336632e799e6342f4b1d1c92530d9"
+    },
+    {
+      "name": "feat/1115-early-sid-lowering-v2",
+      "sha": "da7ce4d1c5b54d01e3b01d2312e790c7341f5042"
+    },
+    {
+      "name": "feat/1272-runtime-core-profile-signal",
+      "sha": "a9008b0334b5286bca78092b48a5fcb45286803b"
+    },
+    {
+      "name": "feat/1320-runtime-sid-one-way-cache",
+      "sha": "08fcfcf842bb735218db960e0d486aa1f8e12053"
+    },
+    {
+      "name": "feat/1359-cargo-rename-my-lisp-to-sens",
+      "sha": "6b71682adf2487db3573c87f1f636d463b87a8e7"
+    },
+    {
+      "name": "feat/1365-dual-sens-cli",
+      "sha": "233cd634a64dc2975ede61b22dc4d41961490cdc"
+    },
+    {
+      "name": "feat/1366-sens-extension",
+      "sha": "85b88a27bf2c56f8b15cba878b8f04320f7e17e9"
+    },
+    {
+      "name": "feat/1414-core3-selected-profile",
+      "sha": "a852bd4ee69a8ded89af8bcee5199e970a9d944c"
+    },
+    {
+      "name": "feat/1422-profile-mechanism-projection-on-1424",
+      "sha": "6f51fc28800b8be2f9724225667ae762a837748a"
+    },
+    {
+      "name": "feat/1443-mccarthy-functions",
+      "sha": "023c703929012ffc1821591114100e46bd244ed9"
+    },
+    {
+      "name": "feat/1663-shared-answer-domain",
+      "sha": "d6cb23599d719febe5942df66edf50f031716f76"
+    },
+    {
+      "name": "feat/1696-dot-is-punctuation",
+      "sha": "b09dfacbeef6cf97a922dd48e8a0c0be7ffac184"
+    },
+    {
+      "name": "feat/1697-local-slot-numeric",
+      "sha": "2f9b681b19ae177d07ad2e4e3d681e958af59771"
+    },
+    {
+      "name": "feat/1709-lisp-semantic-witnesses",
+      "sha": "71e56c40ce5b77688d5306c4a3608e75cef22c00"
+    },
+    {
+      "name": "feat/2164-bits1-8-carrier",
+      "sha": "4a2da9c4a170960a95f8f98a1529113106f06a19"
+    },
+    {
+      "name": "feat/2165-domain-word-newtypes",
+      "sha": "a592b61401a4e9394ff409175b20c4bbd5676291"
+    },
+    {
+      "name": "feat/2171-binary-source-tokenizer",
+      "sha": "613b4f283a23594d9f4726e1be80e271eb00798d"
+    },
+    {
+      "name": "feat/2171-binary-source-tokenizer-main",
+      "sha": "cc8a29eb51e84c1d9785177e0b597f6b9a4320a8"
+    },
+    {
+      "name": "feat/2183-source-domain123-bridge",
+      "sha": "c4e4d6f5905210a2f6e716e80d05293a068c7579"
+    },
+    {
+      "name": "feat/2188-sequential-bit-packer",
+      "sha": "5343ba1dbc2a804cbdc8605cb5ba8efbeefc24f8"
+    },
+    {
+      "name": "feat/2208-source-sequential-packing",
+      "sha": "90f8628fbdbd916ccd9c09c37332a53f70cbf131"
+    },
+    {
+      "name": "feat/2294-grammar-bound-codec",
+      "sha": "5bc7a392965ee14b270707a970a01b0bc3eb4328"
+    },
+    {
+      "name": "feat/2294-grammar-bound-codec-v2",
+      "sha": "d2b5e663bce1ec52c7c64489c87244afc826dfea"
+    },
+    {
+      "name": "feat/2294-grammar-bound-replay-main",
+      "sha": "e2965b5e3d73bcb7843c334b144dd488e1dd6c2a"
+    },
+    {
+      "name": "feat/2294-grammar-bound-unpack",
+      "sha": "20299de80b132d5b0b443e3ca2c538a689d487aa"
+    },
+    {
+      "name": "feat/2294-unpack-land",
+      "sha": "7a17ecffbcd546db42248cda7b019c145f9934e4"
+    },
+    {
+      "name": "feat/2294-unpack-replay-v3",
+      "sha": "805b777dc9a16d918d8fb05cc05aebb7b254024d"
+    },
+    {
+      "name": "feat/2415-d7-full-map",
+      "sha": "b184a2038aa98f734a57d1a24dd1d4e113aea0e1"
+    },
+    {
+      "name": "feat/2723-ratify-d6-001111",
+      "sha": "116c161344867bbc926a8518a9b065eec6649acb"
+    },
+    {
+      "name": "feat/2778-core-d5-word",
+      "sha": "023eb922ce24619a4917f79e3280382b201641f9"
+    },
+    {
+      "name": "feat/2778-core-d5-word-carrier",
+      "sha": "3b8b3f61fa92ca900187ce31a290a50d6730b8f3"
+    },
+    {
+      "name": "feat/2778-core-d5-word-current-main",
+      "sha": "51a3b52efadc9f7081888385712be2130f4b0d08"
+    },
+    {
+      "name": "feat/2782-core-d5-ast",
+      "sha": "968f1b4d68939f1491cb6884eebd4fc9d58cf1ad"
+    },
+    {
+      "name": "feat/2818-domain-source-d4-d6",
+      "sha": "8cac21a7d09ff7808a3c3e304ae8d7a498462a36"
+    },
+    {
+      "name": "feat/2821-callable-domain-id",
+      "sha": "56dc14385b04fc69ab39fa2ad304e76b296d16f6"
+    },
+    {
+      "name": "feat/2833-domain-binary-frame",
+      "sha": "e113bcd6b9dd5d844c2e2e7808b053ab649aec7c"
+    },
+    {
+      "name": "feat/2869-domain-presentation",
+      "sha": "ee61ad0bb1e194f93da9bf444bbef4e908640e3f"
+    },
+    {
+      "name": "feat/2952-d5-arithmetic-domain-native",
+      "sha": "20504f02fafdcfd75cbcffc2ee53dc01c8d71466"
+    },
+    {
+      "name": "feat/2958-coordinate-space-on-3252",
+      "sha": "92e6bc23aed6721600ca8843d1c2d147f4a8b64d"
+    },
+    {
+      "name": "feat/2958-domain-registry-gen",
+      "sha": "b6af676a8e735b9e72cce656690ee14d1d35407e"
+    },
+    {
+      "name": "feat/2974-d1-d8-domain-identity",
+      "sha": "bbbd7ae631233123ccf8728784846f76e502fda6"
+    },
+    {
+      "name": "feat/3072-domainidentity-predicate-bridge",
+      "sha": "67b4ec9db813871d9061d6d13f9e727aaa23e078"
+    },
+    {
+      "name": "feat/3135-machine-block-local-coordinate-proof-20261009",
+      "sha": "910c1e80684611fd2c2091053791eec8fd7b85ed"
+    },
+    {
+      "name": "feat/3141-bija3-a-uk-sa-current-main-r2",
+      "sha": "9a4b5d96b58226e65ea81bb7519cc555f685bbd1"
+    },
+    {
+      "name": "feat/3141-bija3-a-uk-sa-surfaces",
+      "sha": "97a69df6bdad9624454f237fc52f99b50d0c42cd"
+    },
+    {
+      "name": "feat/3141-current-d3-surfaces",
+      "sha": "2a571fa8f6457bbacf41282ebd187f6db0a6561a"
+    },
+    {
+      "name": "feat/3161-empty-witness-cond",
+      "sha": "65477f735577b6a22aefeb1b196874c2a6dfd3ac"
+    },
+    {
+      "name": "feat/3225-d4-list-append-executable-reference-20261009",
+      "sha": "93c8faf00002ec4300ccfe10409e44074e10c7d8"
+    },
+    {
+      "name": "feat/3354-d5-direct-runtime-current",
+      "sha": "f08c159c287ff9313cdaf1ca9773e0e38b763fbe"
+    },
+    {
+      "name": "feat/3364-contract-11-5-mixed-source",
+      "sha": "1ecb6d830e4522edd9463435d430c4f06a7698ea"
+    },
+    {
+      "name": "feat/3364-mixed-exact-source",
+      "sha": "cb17c3966df03cc6c6509278e840a98ebb316bab"
+    },
+    {
+      "name": "feat/3364-mixed-source-clean-r4",
+      "sha": "ea193b224b4309e7848f0623e072e1e684ef7068"
+    },
+    {
+      "name": "feat/3364-mixed-source-contract-11-5-direct-replay",
+      "sha": "7f4dc05f0d663f048708ecf8547c568c7cf03184"
+    },
+    {
+      "name": "feat/3364-mixed-source-contract-11-5-replay",
+      "sha": "b39fa6f3ab10b20ed62908f4e7d19a87c013d704"
+    },
+    {
+      "name": "feat/3364-mixed-source-current-main-r3",
+      "sha": "f68f871ba6d348afb7b3d27a190159d4a4aa5f80"
+    },
+    {
+      "name": "feat/3364-mixed-source-on-3498",
+      "sha": "4f375b914c50f5e1ad6988ce194491f5240cbb1d"
+    },
+    {
+      "name": "feat/3364-mixed-source-on-3530",
+      "sha": "07f0791d174cad9325ba7cdb3feaa16055102f6a"
+    },
+    {
+      "name": "feat/3364-mixed-source-on-3543-sol",
+      "sha": "08bea683418ead7c0ca621648b6edcefb67c4d44"
+    },
+    {
+      "name": "feat/3364-mixed-source-on-3543",
+      "sha": "4435952304014087529676e6e1982e35d1a467e8"
+    },
+    {
+      "name": "feat/3364-mixed-source-on-3587",
+      "sha": "9e45c9c3c3eae290643e6d5873323c3525717c09"
+    },
+    {
+      "name": "feat/3364-mixed-source-on-3623",
+      "sha": "66f8475fdb3a37bc6d53723873f42fb60f8985c7"
+    },
+    {
+      "name": "feat/3364-mixed-source-on-current-3587",
+      "sha": "d70b5f12b980a0db9bd861689b506de7e44a9a11"
+    },
+    {
+      "name": "feat/3364-mixed-source-on-current-callable",
+      "sha": "f7abce67c4925fe67dadc29da7d6b1d8ecbe0473"
+    },
+    {
+      "name": "feat/3554-mixed-source-after-callable",
+      "sha": "3a2b8b6f3a79e4e0cf1c0ab30049d202b60e8131"
+    },
+    {
+      "name": "feat/3561-bounded-d1-d3-on-3594",
+      "sha": "f807680cf56aca9bbeae84815ca397950542628a"
+    },
+    {
+      "name": "feat/3561-bounded-structural-corpus",
+      "sha": "df89b2fd8968737e9c2acfb406dc1581b9c6c6ce"
+    },
+    {
+      "name": "feat/3561-bounded-structural-corpus-r2",
+      "sha": "feab7ff5a6dbf17c09a58e3505c50142de8ef31d"
+    },
+    {
+      "name": "feat/3561-conformance-schema",
+      "sha": "5c88408728a6414f0ab7e9d7066b5fd79826661a"
+    },
+    {
+      "name": "feat/3561-conformance-schema-11-6",
+      "sha": "b9a0547506949e522990c919f5ccf91025b63d57"
+    },
+    {
+      "name": "feat/3561-first-oracle-cases",
+      "sha": "c47f68a6efbf4de74ad658ab7bd9167157a879cc"
+    },
+    {
+      "name": "feat/3561-first-oracle-cases-11-6",
+      "sha": "2c140ef2e5b0659e9e4363620bf7ccc673f38f82"
+    },
+    {
+      "name": "feat/3655-exact-domain-define",
+      "sha": "9770e5f34e5ec0a6f54e9ee4075e623983574632"
+    },
+    {
+      "name": "feat/3699-committed-bounded-artifact",
+      "sha": "0648bc6aad3693c7f7acba5067c72dff0d3b1cb9"
+    },
+    {
+      "name": "feat/3699-publish-bounded-d1-d3-artifact-20261005",
+      "sha": "be63419731ecd90259789f638b4f7828ebdcab12"
+    },
+    {
+      "name": "feat/3910-contextual-text7-current-main-20261009",
+      "sha": "5b3d8052d2d3d834679f9120f5e970f7d4669bbe"
+    },
+    {
+      "name": "feat/3910-contextual-text7-mainline-20261009",
+      "sha": "27a367c94cb766f4947a92813b1e92992b034aae"
+    },
+    {
+      "name": "feat/3910-text7-binder-framing-current-main",
+      "sha": "b0a045c6338a616f36fd33b0f811157cea89b8eb"
+    },
+    {
+      "name": "feat/4257-contract-binary-authority",
+      "sha": "32d89ca5c52090fc000aaae6ec9c8f61e269d6ad"
+    },
+    {
+      "name": "feat/4257-contract-binary-authority-current",
+      "sha": "8fc60c9e20b7725fccb4f0b84300f5feb3c055d8"
+    },
+    {
+      "name": "feat/4257-contract-binary-authority-current-r2",
+      "sha": "77599d45043faec93055f2bb62136064382fdd0e"
+    },
+    {
+      "name": "feat/4268-binary-language-pipeline",
+      "sha": "b5b1d62691113e70dde91b924f449703ff7e0258"
+    },
+    {
+      "name": "feat/4430-prove-d3-cons-d4-caar-uk-triplets-20261009",
+      "sha": "a8bc4f77cd53c767280561b3e5aa0248cf535fa7"
+    },
+    {
+      "name": "feat/4449-block-physical-proof-20261008",
+      "sha": "8c5e6eed746aeadbf20a325704be0bfef1fe11d9"
+    },
+    {
+      "name": "feat/4449-classify-domain-table-originals-20261008",
+      "sha": "ecf182279b354f013662cab175a3afdd89005c47"
+    },
+    {
+      "name": "feat/4449-era-triage-original-corpus-20261008",
+      "sha": "944a6e7e20bad8030a35a76a8afc872cc0481110"
+    },
+    {
+      "name": "feat/4449-explicit-core4-t5-eval-20261009",
+      "sha": "d6532c4049348fbfba68c9e10c710ae026e085d7"
+    },
+    {
+      "name": "feat/4449-verified-uk-t5-triplet-publisher-1009",
+      "sha": "79b8670487ab317018ce23660c103d558f79e263"
+    },
+    {
+      "name": "feat/4453-ukr-acceptance-physical-view-20261009",
+      "sha": "447422aac0eb3ffe2a90cfec74d7d576cd42f3cd"
+    },
+    {
+      "name": "feat/4453-ukr-acceptance-view-current-main-replay-20261009",
+      "sha": "fe0faae19d2fc34cb4698dabd385a2a47c2732c1"
+    },
+    {
+      "name": "feat/4501-exact-domain-migrator-current-main",
+      "sha": "28dabe5b82896fac6ab950a01b3a0be3b1b31975"
+    },
+    {
+      "name": "feat/4501-exact-domain-migrator-on-main",
+      "sha": "2a597af2515e628f205bdd65b3a1537ea621e8b8"
+    },
+    {
+      "name": "feat/4501-exact-domain-tool-f60e0de",
+      "sha": "61afa10820bbee1fb868e6b5c8e819026a261f31"
+    },
+    {
+      "name": "feat/4694-verified-t5-spaced-view-generator-20261009",
+      "sha": "a835cb56c3ef92c63978391229f0d2590ba039e6"
+    },
+    {
+      "name": "feat/5439-universal-frame3-rust-20261011",
+      "sha": "0310ca45d465e59f1eeae428c90dd3a6f81ac4ed"
+    },
+    {
+      "name": "feature/core1-domain-physical-canary-20261008",
+      "sha": "5ccbeabfb1703ce5259dcb8cf55569f9e574c6c1"
+    },
+    {
+      "name": "feature/d4-caar-uk-t5-triple-20261009",
+      "sha": "9cc014085fd0d6e286eb4594b7ae31d6228fadff"
+    },
+    {
+      "name": "feature/d7-owner-coordinate-carrier-20261009",
+      "sha": "07892561a98e4ee492f953aa9d27fea68fee828d"
+    },
+    {
+      "name": "feature/direct-packed-binary-reader-20261009",
+      "sha": "b99d8aec98b987fad335e30c1df491b18d8a83b4"
+    },
+    {
+      "name": "feature/direct-packed-binary-reader-rebased-20261009",
+      "sha": "a1787492b16716e87c62300fa748f3ead44e4653"
+    },
+    {
+      "name": "feature/exact-domain-foundation-main-1008",
+      "sha": "f8e819bb46bb208154302733423c82cf09679a45"
+    },
+    {
+      "name": "feature/exact-domain-migrator-main-1008",
+      "sha": "df81a6c2f08f6876d101286cc667b4df27e53770"
+    },
+    {
+      "name": "feature/failclosed-sens-inventory-4453",
+      "sha": "a7743b3b73ee4f59bfd3d905124363b07e926604"
+    },
+    {
+      "name": "feature/lisp-to-sens-t5-migration",
+      "sha": "78594f444552d2c0110f86507ad98352083ec6c7"
+    },
+    {
+      "name": "feature/migrate-entrypoint-spaced-view-20261009",
+      "sha": "5911ff716cb6b49b28515e4604f4fed6e68a681d"
+    },
+    {
+      "name": "feature/migrate-one-t5-runner-20261008",
+      "sha": "7b9b3a76ba415395f10ba97700afc28a8efdb567"
+    },
+    {
+      "name": "feature/numeral-radix-projections-1643",
+      "sha": "f339dd339260541ed6c743eff3e79d15481fce51"
+    },
+    {
+      "name": "feature/remove-binary-reader",
+      "sha": "102cb445763869376f18d71452737419903533bb"
+    },
+    {
+      "name": "feature/sens-t5-space-view",
+      "sha": "74fa98596ca84ee83d12c008c3f5b87499b28cd8"
+    },
+    {
+      "name": "feature/t5-human-air-stream-emulator",
+      "sha": "4cadac992f0cb77caae070bf5d94c677769022bb"
+    },
+    {
+      "name": "feature/t5-shard-authoritative-accounting-20261009",
+      "sha": "eaa95178f6ebfdb3b98dc0f4885b0fb56b75789b"
+    },
+    {
+      "name": "feature/t5-spaced-view-4694",
+      "sha": "62c859000f9b1f2f01a2cf88ca12146c678c450c"
+    },
+    {
+      "name": "feature/t5-triplet-crosscheck-4694",
+      "sha": "46122b6d5b972924b19252e5aea1f56ec04ab810"
+    },
+    {
+      "name": "feature/uk-callable-heads-exact-ast-20261009",
+      "sha": "75d3a1a14e3372887675d9fe1a2a79a51aa776b3"
+    },
+    {
+      "name": "feature/3766-gpu-oracle",
+      "sha": "bcca2a8937511e97443f64930a1dc4c76c731e58"
+    },
+    {
+      "name": "feature/4430-d4-caar-triple-on-current-d3-20261009",
+      "sha": "a3c9375764a7f85ae97b74743a92e3d10aa694b8"
+    },
+    {
+      "name": "feature/4449-comment-only-originals-audit-20261008",
+      "sha": "54b72b2e25082b2360e11569f4e166bb2e1f473c"
+    },
+    {
+      "name": "feature/4449-diff-original-migration-snapshots-20261008",
+      "sha": "9a861ff0b5dc0bcc8456c8c26ce1f4e4bdf0843e"
+    },
+    {
+      "name": "feature/4449-disjoint-agent-workshards-20261008",
+      "sha": "647f841d3487648cc5de623492085f0caef04af9"
+    },
+    {
+      "name": "feature/4449-first-blocker-cohorts-20261008",
+      "sha": "37eb46691c933d656928327cfd418bacee0e062c"
+    },
+    {
+      "name": "feature/4449-safe-batch-migrate-20261008",
+      "sha": "da8f3688c28ca2573c8dab0ee511187909fd4d11"
+    },
+    {
+      "name": "feature/4449-t5-migration-progress-ledger",
+      "sha": "c98af580d41885b4f87632f3416a67d4115fb254"
+    },
+    {
+      "name": "feature/4449-t5-proof-admission-20261008",
+      "sha": "7cd555bed03daacc83d2f530791ab6d4358ab2c1"
+    },
+    {
+      "name": "feature/4694-safe-binary-spaced-view-20261008",
+      "sha": "56361fa2e7ccc09f733fa6e7e85966f816555912"
+    },
+    {
+      "name": "feature/4694-verified-spaced-view-staging-20261009",
+      "sha": "71645319817460edda4cb10875dd8b8382914f68"
+    },
+    {
+      "name": "fill-d8-uk-san-all",
+      "sha": "056163d56fbf732ea59b8adb5ffe4ae8f0796e38"
+    },
+    {
+      "name": "finish/predicatebit-strict-current-main",
+      "sha": "0eae5a4208f109ffce7b8acd3f65e6c35ea4ab4e"
+    },
+    {
+      "name": "finish/953-binary-syntax-acceptance",
+      "sha": "2b4b8fc9e928b068b45f73769f3d7224919864ff"
+    },
+    {
+      "name": "fix/active-lib-iclass-catalogue-role-20261008",
+      "sha": "b4a4dfda8b80104653a7496749dc70b436703568"
+    },
+    {
+      "name": "fix/active-lib-role-aware-projection-gate-20261009",
+      "sha": "379b11405c14e29a9e4c056b6f9aed36c3f73bda"
+    },
+    {
+      "name": "fix/active-uk-compiler-ci-proof-20261009",
+      "sha": "74a7e712b83b5b8ced33ab59aca3a2e44d2f30d6"
+    },
+    {
+      "name": "fix/admission-balanced-cond-20261010",
+      "sha": "32dd14f1aea0c521443dc5e0f57a401f758b4304"
+    },
+    {
+      "name": "fix/admission-equal-to-d3-eq-20261010",
+      "sha": "c285a2003ba4ce4bbe15898ad9ab243b18802bd1"
+    },
+    {
+      "name": "fix/admit-t5-d1-d9-authority-parity",
+      "sha": "753b06844b80814f2e7e00239dc402a9b9737833"
+    },
+    {
+      "name": "fix/agent-shards-reviewed-data-exclusion-20261008",
+      "sha": "45e9372553661771ec7341120a8154e72caf6ec1"
+    },
+    {
+      "name": "fix/archival-vs-executable-migration-gates-20261008",
+      "sha": "4ccfcea9beab64fb59e659c933c377d7ac8c4846"
+    },
+    {
+      "name": "fix/archive-cond-3182-replay-gpt6-20261011",
+      "sha": "aa34d087aad7ef205dcafd39df7a504e58e951dc"
+    },
+    {
+      "name": "fix/archive-only-candidate-gate-20261008",
+      "sha": "524d7e192076572d4cb67601fb78eeac7f766c21"
+    },
+    {
+      "name": "fix/authority-convergence-2026-10-04",
+      "sha": "4e2b1f7bedd9a0abd816aae5aae6b1cbe9c38abf"
+    },
+    {
+      "name": "fix/batch-w8-default-main-20261008",
+      "sha": "39c1eca1d9020a8adfb11b27709353e8b2f225a3"
+    },
+    {
+      "name": "fix/bench-workloads",
+      "sha": "943276ca84f88d0b5698cdff77259ad3b6e10195"
+    },
+    {
+      "name": "fix/bilingual-docs-gate-20261009",
+      "sha": "76afba830b9bc7e8aa84344773959f66426d21e9"
+    },
+    {
+      "name": "fix/binary-bench-compiler-gates-20261009",
+      "sha": "62d2a58c5881a2fb4fac0f94dbbd6fb74effe8a7"
+    },
+    {
+      "name": "fix/binary-replace-stale-cond-20261010",
+      "sha": "0660c2d670ba78e0a2c74136f92741c3afa4dde3"
+    },
+    {
+      "name": "fix/build-remove-duplicate-d5-domain-tests-20261009",
+      "sha": "7a8879a2eb2fab69b94c6d78e9f146ea76414196"
+    },
+    {
+      "name": "fix/c1-historical-provenance-and-view-tests-20261009",
+      "sha": "8e6212224c393d3e47b0716d2e1b82dd5f75f747"
+    },
+    {
+      "name": "fix/c5-oracle-port-discovery",
+      "sha": "d5f0386debafc5c096bf1f4f4fe46b6f5aa964f4"
+    },
+    {
+      "name": "fix/canon-binder-domain-witness",
+      "sha": "4c47c974a69b503e1ad562837ae26398c840a35e"
+    },
+    {
+      "name": "fix/canon-builtin-semantic-identity",
+      "sha": "c2a7d57470ceae9dcd84d5f2bc65c0c7652ba934"
+    },
+    {
+      "name": "fix/canon-expected-envelope-20261009",
+      "sha": "aaac99dee5ec95b752b1a5d46175c558260475dd"
+    },
+    {
+      "name": "fix/canon-immutability-meta",
+      "sha": "86673d14a155e8f136d73c6069dafc99e396530b"
+    },
+    {
+      "name": "fix/canon-let-map-d1-no-20261009",
+      "sha": "fb2aa00aa5b515aac38092b12cadace980f2b406"
+    },
+    {
+      "name": "fix/canon-predicate-branch-d1-20261009",
+      "sha": "53bc80e85677a6eba9e786e7cd450ba6684c652b"
+    },
+    {
+      "name": "fix/canon-semantic-ref-slice",
+      "sha": "f76c739b3ad99e9032c20e01d957dfe9896894e5"
+    },
+    {
+      "name": "fix/canon-witness-exact-empty-fallback-20261009",
+      "sha": "ad5fcd6952f6b703059835d4b7df2e9fc831b268"
+    },
+    {
+      "name": "fix/capability-axis-exact-d1-fallbacks-20261010",
+      "sha": "5104e809e596b58665d17d029ed7eff34fa2a927"
+    },
+    {
+      "name": "fix/ci-binary-identity-guard-mainline",
+      "sha": "e8a67301cd6dba9513447d3207d641d8bdf03b1c"
+    },
+    {
+      "name": "fix/ci-binary-identity-guard-missing-files",
+      "sha": "e8a67301cd6dba9513447d3207d641d8bdf03b1c"
+    },
+    {
+      "name": "fix/ci-canon-exact-isolated-20261009",
+      "sha": "7f3c0137207ac7490c6cd3a02360bcb670acb58d"
+    },
+    {
+      "name": "fix/ci-canon-witness-cond-20261009",
+      "sha": "5b5ffabb6ec50b6542f23b11b097a85eb320581d"
+    },
+    {
+      "name": "fix/ci-core4-fasl-artifact-order-20261009",
+      "sha": "47d1480a75638c40f3d7689ca92313464a0a700c"
+    },
+    {
+      "name": "fix/ci-coverage-checked-div",
+      "sha": "62078bf5227bb02bbd7cd85d1fd9c6fd0f9c5e58"
+    },
+    {
+      "name": "fix/ci-silent-semantic-lookup-20261009",
+      "sha": "ce849fc22ed312bb3c95b1fcd10898a918d644e6"
+    },
+    {
+      "name": "fix/ci-text7-binding-key-import-20261009-gpt6",
+      "sha": "00da941ad0104336aa381233b8ff1adf922d9180"
+    },
+    {
+      "name": "fix/cli-stale-fasl-noise",
+      "sha": "55b52f16960edbdc97f72b86ae6051aae920bf82"
+    },
+    {
+      "name": "fix/clippy-emrg-wire-len-current-main-20261011",
+      "sha": "1064edaf16bfbeb4a336b76ddad9d56d3367b8fa"
+    },
+    {
+      "name": "fix/clippy-machine-exact-d5-unused-imports-20261011",
+      "sha": "459efc85d4e54ee298bef78e75c1054602159c76"
+    },
+    {
+      "name": "fix/clippy-semantic-authority-lifetime",
+      "sha": "62e98e0357a6ddc8fabcb45e915e8880d358572e"
+    },
+    {
+      "name": "fix/clippy-syntax-chunks-api",
+      "sha": "4e726527cfc756b8aa2d2112e85f71200a43acbd"
+    },
+    {
+      "name": "fix/clippy-trailing-d2-closers-repeat-n-20261011",
+      "sha": "3657a547f3f8a324cfbbd7634508ea872c0758b0"
+    },
+    {
+      "name": "fix/clips-64-ffi-signatures-714",
+      "sha": "d1f25c388f836309d82dc634b0f632a8ba4a6a0d"
+    },
+    {
+      "name": "fix/clips-642-dynamic-ffi-audit",
+      "sha": "d58ab7abcf638775a0c2d631069072dc0997517c"
+    },
+    {
+      "name": "fix/clips-642-ffi-return-codes",
+      "sha": "dda260373b467eb89a58df9a998ca5d4a164a255"
+    },
+    {
+      "name": "fix/clips-native-test-feature-gate",
+      "sha": "7ea3decb6da2a2d34164e8b6203fd8ff27715e5e"
+    },
+    {
+      "name": "fix/clips-native-test-feature-gate-replay",
+      "sha": "c797d0f0d026369916340d26ff72e1fc5cd82094"
+    },
+    {
+      "name": "fix/clock-literal-newline-blocker",
+      "sha": "2912dd2279584b1638ee35e7aecb4c3e59a1c587"
+    },
+    {
+      "name": "fix/code-slot-tail-call",
+      "sha": "6c478f2b083042cd6bc5e76db9387b2f81876ba4"
+    },
+    {
+      "name": "fix/compiler-nucleus-current-main-20261008",
+      "sha": "9fa38227118147906f1bacdd9b0e65a41778d279"
+    },
+    {
+      "name": "fix/compiler-uk-source-preserve-exact-ast-20261009",
+      "sha": "3b988da56010ca6e2e104cb2468ab3518ea04295"
+    },
+    {
+      "name": "fix/cond-modernize-safety-20261009",
+      "sha": "b020c449b4ee135cc65e3d361f2c470e2656a4b5"
+    },
+    {
+      "name": "fix/cond-strict-d1-x86-admission-20261010",
+      "sha": "40c663366b7833beeaf66539a5270d9c26311097"
+    },
+    {
+      "name": "fix/cond-two-part",
+      "sha": "0df38edad9d84bb2c0001a2c621f5198711af8f1"
+    },
+    {
+      "name": "fix/content-store-canonical-cond-results-20261009",
+      "sha": "ac6da556124470eedbbad4b7145e9b6250c802de"
+    },
+    {
+      "name": "fix/content-store-cond-clause-grouping-20261009",
+      "sha": "a7a4d3bc7fa70243ea24f3ce4dc361b27a2b418e"
+    },
+    {
+      "name": "fix/content-store-cond-grouping-after-io-20261009",
+      "sha": "9b16d65853ee45f02391b792e10ef095d248ff9a"
+    },
+    {
+      "name": "fix/content-store-exact-d1-no-carrier-20261009",
+      "sha": "a7b0b027c45bcf74c443182c726ec354a6bc9f19"
+    },
+    {
+      "name": "fix/content-store-exact-d1-witness-current-main-20261009",
+      "sha": "be28ca3384a52cfbc5298c741dc3ec0873651785"
+    },
+    {
+      "name": "fix/content-store-exact-d3-atom-boundary-current-main-20261009",
+      "sha": "b7179dcdb4ffa680673a298d66631004ead614c9"
+    },
+    {
+      "name": "fix/content-store-expected-d1-result-20261009",
+      "sha": "0f98fd7391ed31d404f9de252614f91c558e15da"
+    },
+    {
+      "name": "fix/content-store-two-part-d1-cond-current-main-20261009",
+      "sha": "d7cd3df79a16b5c0e5bd640a9dd8437e63dc92fe"
+    },
+    {
+      "name": "fix/content-store-witness-cond-sibling-clauses-20261009",
+      "sha": "ac8790a698913fdb88cab2359294d2eb3d4eeff3"
+    },
+    {
+      "name": "fix/contract-11-3-d3-empty-convergence",
+      "sha": "86605b2e755418018bae26f3c70f8ea7bddfa357"
+    },
+    {
+      "name": "fix/contract-11-7-xtask-expectation",
+      "sha": "1a46adeea3b160a8b4254b6696129f8f049daede"
+    },
+    {
+      "name": "fix/core1-sid8-self-load",
+      "sha": "5ea84bc50f0bb47786902ed2d9c0a287fbf0a316"
+    },
+    {
+      "name": "fix/core4-bootstrap-exact-d1-live-20261010",
+      "sha": "c7d5cb605978d587641354c2f62b2e08e6ae84c7"
+    },
+    {
+      "name": "fix/core4-current-let-binding-heads-20261010",
+      "sha": "a73e8f5d236f64f9f74cc81faf1b131b5ba58d4c"
+    },
+    {
+      "name": "fix/core4-defmacro-peer-bootstrap-20261010",
+      "sha": "b3b723f4ef3d9ab6630dc10c27558bf4dc07a5ff"
+    },
+    {
+      "name": "fix/core4-defmacro-peer-materialization-20261010",
+      "sha": "ef99c6d71361be53eb82e759be5ea627a7855f26"
+    },
+    {
+      "name": "fix/core4-exact-domain-fasl-mainline-20261010",
+      "sha": "358e0b3d4b1c548fdafa11cde2fca497895f7ef3"
+    },
+    {
+      "name": "fix/core4-exact-domain-fasl-reader-20261010",
+      "sha": "7253eb28e7b22c5d292fb5078601719d1aca4218"
+    },
+    {
+      "name": "fix/core4-fasl-current-head-20261009",
+      "sha": "e16ad3db4473f60d626b91f9b5f3990037aeaaf2"
+    },
+    {
+      "name": "fix/core4-fasl-current-main-20261009",
+      "sha": "295a339f77c070160a61dc272dee831869a8979c"
+    },
+    {
+      "name": "fix/core4-fasl-exact-main-20261010",
+      "sha": "a4dd9d276f2560c98cab057948bebc2705574153"
+    },
+    {
+      "name": "fix/core4-fasl-exact-word-ci-20261010",
+      "sha": "7a14b4ae9075715ef5886cce694dbc3d5c403afc"
+    },
+    {
+      "name": "fix/core4-fasl-github-hosted-20261009",
+      "sha": "1995cdd825ebc0d5f9a3ee326d8d8dc40c8d9f29"
+    },
+    {
+      "name": "fix/core4-fasl-refresh-20261009",
+      "sha": "2058fa8f20e394963e33fc4ee4470c0ebc65f585"
+    },
+    {
+      "name": "fix/core4-not-heads-current-main-20261010",
+      "sha": "9faf31623fc69ad4554ba582012ba1036168fc65"
+    },
+    {
+      "name": "fix/core4-peer-materialize-no-letstar-20261010",
+      "sha": "c3930fa06f30a28e36f851ebfc227e290344d4fb"
+    },
+    {
+      "name": "fix/core4-reader-strict-d1-x86-main-20261010-r2",
+      "sha": "eb6fb37a9bbe2498ed4bb183953c26c4fd4d3488"
+    },
+    {
+      "name": "fix/core4-reader-strict-d1-x86-main-20261010",
+      "sha": "c63a9d7fb8b2d7ce2eb19af82343fabd74d3c515"
+    },
+    {
+      "name": "fix/core4-reverse-onto-current-d3-20261010",
+      "sha": "8a4800731a8997c0a08987466da71c060361b761"
+    },
+    {
+      "name": "fix/core4-strict-cond-macro-20261010",
+      "sha": "361b9c1608457a562216aef228f072f23bf02a37"
+    },
+    {
+      "name": "fix/core4-time-d1-cond-current-20261009",
+      "sha": "35ec99c4056afa89bd3e06ec9dc4c7f879130000"
+    },
+    {
+      "name": "fix/core-artifact-json-feature",
+      "sha": "f5bc01433ea2f6820a8982360d4f277e788b099c"
+    },
+    {
+      "name": "fix/core-default-build-zero-deps-canon-20261009",
+      "sha": "1a43046d9e3852ee2be5e041aa11d531cac39cca"
+    },
+    {
+      "name": "fix/core-equal-atomic-structural-result",
+      "sha": "ec6ea9b6d3a23f9797e1fdc97ec906db94c85696"
+    },
+    {
+      "name": "fix/core-fasl-current-main",
+      "sha": "3b4573624de7807193479760f3fd019478063590"
+    },
+    {
+      "name": "fix/core-let-star-cond-118-20261010",
+      "sha": "4cf7f1f237c1155964e2edaa11b249343abdef6d"
+    },
+    {
+      "name": "fix/cross-language-bench-workflow",
+      "sha": "aeb5cbf75c267aa7450d3b60de6bfd81cce70699"
+    },
+    {
+      "name": "fix/current-defmacro-peer-materialization-20261010",
+      "sha": "bef09b2490f5abad67adaedf1b36b68324d2f5c0"
+    },
+    {
+      "name": "fix/current-doc-extension-guard-20261004",
+      "sha": "03220018497591630ced5acbdadc248fcb415708"
+    },
+    {
+      "name": "fix/current-main-build-and-generated-report-20261009",
+      "sha": "9e645f3a7b57d5cc9a1cc1980155092b7716129f"
+    },
+    {
+      "name": "fix/current-main-build-cond-ci-20261009",
+      "sha": "75d427a4ab62941095a218858c26552252c43bab"
+    },
+    {
+      "name": "fix/current-main-ci-baseline",
+      "sha": "bdb74edb594de910b64b781748668aa8a12e2fbc"
+    },
+    {
+      "name": "fix/current-main-cli-release-baseline",
+      "sha": "953f91db1e0371965b9a3cba8cf8e86a36642195"
+    },
+    {
+      "name": "fix/current-main-content-store-gates-20261009",
+      "sha": "8e7864ec0d155f4103efdd83c178ec69058d9092"
+    },
+    {
+      "name": "fix/current-main-core4-fasl-refresh-20261010-final",
+      "sha": "955db49152c75186b4d4ba03f7f0f982d3fc6e3a"
+    },
+    {
+      "name": "fix/current-main-core4-fasl-refresh-20261010-r2",
+      "sha": "488e4c4807ade894916b7ded2eb853d76e25267d"
+    },
+    {
+      "name": "fix/current-main-core4-fasl-refresh-20261010-r3",
+      "sha": "e3fd24372a63c7961d6c9cf2791de9f3091d372f"
+    },
+    {
+      "name": "fix/current-main-core4-fasl-refresh-20261010",
+      "sha": "dcbfeb82a83a34021e8680f78146ecf841ba0cd7"
+    },
+    {
+      "name": "fix/current-main-macro-registry-witness",
+      "sha": "6804dbc4a8d70ab858a003546bddca86d9f5d997"
+    },
+    {
+      "name": "fix/current-main-public-api-projection",
+      "sha": "db086a4e7e630ab3b885444d601958f69793210e"
+    },
+    {
+      "name": "fix/current-main-ratchet-recovery-20261005",
+      "sha": "ec7b15ec1e2026e363cbc873d3f967b46096aa01"
+    },
+    {
+      "name": "fix/current-main-single-artifact-authority",
+      "sha": "edbbcba58da05d351ac6d6ad48bcaee790e6e184"
+    },
+    {
+      "name": "fix/current-main-strict-clippy-ratchet-20261009",
+      "sha": "8f8426e8ccc0aa18e7ec99468e3aa8f99ee1cb7d"
+    },
+    {
+      "name": "fix/current-three-era-archive-scope-20261008",
+      "sha": "cb1c931cc814b0e6562231603f6cd16917f3c30c"
+    },
+    {
+      "name": "fix/d2-migrator-authority-current-main-1008",
+      "sha": "a205cf6833bbb9207714ebaf9afde864ffc892b6"
+    },
+    {
+      "name": "fix/d2-structural-delimiter-native-first-regression-20261010",
+      "sha": "1ad2c89c88117a59cc549c1299463cfc3fd8bd42"
+    },
+    {
+      "name": "fix/d3-empty-all-surfaces-20261009",
+      "sha": "38ca368b0983c0ae554f6d84cecc7c2136531ba7"
+    },
+    {
+      "name": "fix/d4-lisp-authority-current-main-20261009",
+      "sha": "3b0757f377d67525d053c7e05f73340ab9406f4b"
+    },
+    {
+      "name": "fix/d4-list-lisp-authority-20261009",
+      "sha": "0c4c314c6723f6673037dbd578b1c9b8a744a7df"
+    },
+    {
+      "name": "fix/d4-null-successor-20261008",
+      "sha": "82e979c339ca884dabb4ed6a5627a3c690afbbe3"
+    },
+    {
+      "name": "fix/d7-apostrophe-re-readable-surface",
+      "sha": "ac63abf6493143b400ca28499d5cb8a65eba560b"
+    },
+    {
+      "name": "fix/d7-contextual-carrier-gate-20261009",
+      "sha": "53244b6d97d69ad6b4d7d85c276262418826f175"
+    },
+    {
+      "name": "fix/d9-selector-seed-contract-118-guard-20261009",
+      "sha": "1391b1c05dbe4aea63e322252b8a1bbf16b78559"
+    },
+    {
+      "name": "fix/d10-allow-unknown-dedup-pending-20261009",
+      "sha": "15aafee1fe9fd7a6754cd8b3389d3271d51efec3"
+    },
+    {
+      "name": "fix/d10-clos-historical-transition-ci-20261009",
+      "sha": "0246478487ed6fcddafb10ae71116b58bff8960d"
+    },
+    {
+      "name": "fix/d10-clos-root-negative-tests-stable-id-20261009",
+      "sha": "74ec1ec1baadb258fcf30fb34a7fa9e9727c649d"
+    },
+    {
+      "name": "fix/d10-common-lisp-donor-oracle-evidence-class-20261009",
+      "sha": "4dad038161d40154bbbba1c8445a0a9f277c10ac"
+    },
+    {
+      "name": "fix/d10-current-single-stream-doc-20261009",
+      "sha": "43fc8230b2618aa3ea020d72bbd38e00b9c69ad9"
+    },
+    {
+      "name": "fix/d10-finite-bayes-snapshot-append-history-20261009",
+      "sha": "53838cb92b0cc3c8012925ea855b82e936dc581e"
+    },
+    {
+      "name": "fix/d10-gf2-selection-snapshot-append-history-20261009",
+      "sha": "d28fddc34e91cefd70bbe132e709c288e6e2d30f"
+    },
+    {
+      "name": "fix/d10-gray-historical-growth-guard-20261009",
+      "sha": "5894c3360ca80cded36013cd6b814743ad05b05a"
+    },
+    {
+      "name": "fix/d10-gray-historical-snapshot-append-chain-20261009",
+      "sha": "a008b8c2fcc9ce94271cb0102c0ee1a3aad01dd8"
+    },
+    {
+      "name": "fix/d10-gray-history-prefix-growth-20261009",
+      "sha": "3bc38485f8410e772db5519cce6fbacf0b8aae9a"
+    },
+    {
+      "name": "fix/d10-gray-ledger-append-id-20261009",
+      "sha": "c00aed06373a385d60e4e22e6ef98da5e9f79dee"
+    },
+    {
+      "name": "fix/d10-historical-donor-pins-20261011",
+      "sha": "8e9b474f0339357791f66f772cd2dc8e505f4605"
+    },
+    {
+      "name": "fix/d10-historical-gap-traced-promotion-20261009",
+      "sha": "c9d673ff748d1e7decc3fe0de991986a027e7998"
+    },
+    {
+      "name": "fix/d10-historical-gap-transition-20261009",
+      "sha": "dfa29e1aebb0aee28baf446ace1f86c5c54578aa"
+    },
+    {
+      "name": "fix/d10-historical-lisp15-snapshot-compat-20261009",
+      "sha": "d12465c3ef2325b3530dbd40ce50fc8b2afae54d"
+    },
+    {
+      "name": "fix/d10-historical-source-snapshots-20261011",
+      "sha": "0d77ee21ebf034b1f8a33af2a8f335578c6eb029"
+    },
+    {
+      "name": "fix/d10-historical-sources-sha-ledger-20261011",
+      "sha": "64883b5b4401448ab42c1364fd5c225c0d5e38ce"
+    },
+    {
+      "name": "fix/d10-ledger-selection-growth-gate-20261009",
+      "sha": "ddab4aebda5d809f5396fe5f3a6639ecfcc123ff"
+    },
+    {
+      "name": "fix/d10-ledger-selection-trace-gate",
+      "sha": "892a1535d26163668b5e23cad839d2e4c6354879"
+    },
+    {
+      "name": "fix/d10-library-selected-vs-source-symbols-20261009",
+      "sha": "526621329e044d638aa10c4b52c04ee6bb6e90e7"
+    },
+    {
+      "name": "fix/d10-lisp-machine-historical-source-snapshot-20261009",
+      "sha": "a1c7191a19bb86657624516679defe272ca27b1e"
+    },
+    {
+      "name": "fix/d10-maling-selection-snapshot-growth-20261009",
+      "sha": "658a06a76f0b1c5602cc8f6b47aacfa3a5d3db47"
+    },
+    {
+      "name": "fix/d10-pending-dedup-plus-forth-intake-20261009",
+      "sha": "8c32f75ca4d9e73d0b30423911ff286098220d44"
+    },
+    {
+      "name": "fix/d10-pending-intake-bayes-20261009",
+      "sha": "b295f86155dcd0de4240da3fe20763de1c6873b0"
+    },
+    {
+      "name": "fix/d10-pending-source-intake-after-4902-20261009",
+      "sha": "7cfda8f82b782176722439fa3d78ae9487dc13d4"
+    },
+    {
+      "name": "fix/d10-science-ledger-monotonic-20261009",
+      "sha": "d097524a7eb3329054d6266ca7746910df7b525b"
+    },
+    {
+      "name": "fix/d10-selection-ledger-gate-reconciled-20261009",
+      "sha": "658ee4c66d2883e90994391a11dd95195148a89b"
+    },
+    {
+      "name": "fix/d10-selection-ledger-gate-reconciled-v2-20261009",
+      "sha": "262efadc947a64f42371c702c1f4dfabd411e79a"
+    },
+    {
+      "name": "fix/d10-strips-checker-api-preserve-20261009",
+      "sha": "dafaf4aa60285ae9e7f256d7e7be95f8f92c6098"
+    },
+    {
+      "name": "fix/d10-symbolic-ai-pending-intake-635-20261009",
+      "sha": "bbf02639f1ed48dd57e12e061d0b4bdcb319422d"
+    },
+    {
+      "name": "fix/d10-tochna-pryviazka-kilkosti-20261010",
+      "sha": "7c790580049204bf850fe8d9deead5aebf3fb0b9"
+    },
+    {
+      "name": "fix/d10-yantra-dual-provenance-20261010",
+      "sha": "9ea16af5b375ee8a4205b0ed45cd85fdae3bc718"
+    },
+    {
+      "name": "fix/deletion-aware-semantic-authority-guard",
+      "sha": "7485946ce6d01da9cd5e8395b19ff110364113b2"
+    },
+    {
+      "name": "fix/domain-kind-callsite-20261009",
+      "sha": "57cf87d74a797c865b3a26af1f27916d9d875f19"
+    },
+    {
+      "name": "fix/domain-registry-eq-surface-tests",
+      "sha": "e39ca0c71fcc883e900959bd36315ce130f90e39"
+    },
+    {
+      "name": "fix/domain-surface-name-ratchet-2",
+      "sha": "dbbe3cd5523dcceee76362ef191d68ffa48a3d83"
+    },
+    {
+      "name": "fix/early-lisp-graph-archive-snapshot-growth-20261009",
+      "sha": "185730698e7d104b82d5ecfc044640365ddde6a7"
+    },
+    {
+      "name": "fix/eco-canon-2-unknown-semantic-ref",
+      "sha": "3da33b49b34ac6ca413ae4c50c7bfb3793b64bd3"
+    },
+    {
+      "name": "fix/embed-host-function-type-alias",
+      "sha": "f6da3731df812cfd252ab838505b6d6b3ba05b1d"
+    },
+    {
+      "name": "fix/encode-bin3-exact-d1-20261010",
+      "sha": "cf40562006c2222e195b845be6da8642326a896b"
+    },
+    {
+      "name": "fix/english-name-ratchet-mixed-source-tests-20261009",
+      "sha": "c65b33d2f0d641e683960e705bea21b33aedc311"
+    },
+    {
+      "name": "fix/english-predicate-dotted-data",
+      "sha": "075d4de526ba6614d6b409ef19b1026bacb316fb"
+    },
+    {
+      "name": "fix/english-predicates-question-mark",
+      "sha": "95fe57fd182ac1e49c73893c2783dc26d499cba7"
+    },
+    {
+      "name": "fix/english-ratchet-current-cli-and-research-evidence-20261011",
+      "sha": "8f3ac9774ee62559bbeeda586bda8087660b4ee2"
+    },
+    {
+      "name": "fix/evaluator-dispatch-generator-row-skip",
+      "sha": "a6a30c407afd81c8e87cb5f210637af3bf07d960"
+    },
+    {
+      "name": "fix/exact-binary-stale-ci-20261010",
+      "sha": "eae51198d26b70544a230f81bea3250ee39fd4f9"
+    },
+    {
+      "name": "fix/exact-domain-define-current-main-20261008",
+      "sha": "7f0937ca573e8fe1460c55c7712feeca12378146"
+    },
+    {
+      "name": "fix/exact-domain-program-packing",
+      "sha": "5c1fe99f047039ee5c27397adb68a9b16eb67ada"
+    },
+    {
+      "name": "fix/exact-predicate-empty-list-control-20261009",
+      "sha": "df23edb25ce13f7ad4221e185fe2ccc6cc2850b4"
+    },
+    {
+      "name": "fix/file-guard-policy-consolidation-20261010",
+      "sha": "3a55ec947a6de096551c56037b765c71b8cb5a21"
+    },
+    {
+      "name": "fix/file-guard-single-census-20261010",
+      "sha": "6c613dfcdad7ed98229e1f4f0015eda25c7f6b6a"
+    },
+    {
+      "name": "fix/full-run-reds",
+      "sha": "1c96004fa9fc17da94bf10ddf55aef587b287e8d"
+    },
+    {
+      "name": "fix/generated-public-api-discovery-current-20261010",
+      "sha": "a39446711fe9a2a60886e023cdea132b303cee8e"
+    },
+    {
+      "name": "fix/generated-public-api-discovery-main-20261010",
+      "sha": "4ec40cf07db7e5e882901640506f1c9f391c51c9"
+    },
+    {
+      "name": "fix/generated-public-api-report-after-655",
+      "sha": "097408405026fb0b1f0977dcc8479da68cd09b4b"
+    },
+    {
+      "name": "fix/github-hosted-runners-20261009",
+      "sha": "ed7557b31ac30b41f5c93cac8b0e73f6746f1ef6"
+    },
+    {
+      "name": "fix/gpu-oracle-current-v2",
+      "sha": "ae51c1a77aedf65a21a2b2201e1c7ae8e860ccdb"
+    },
+    {
+      "name": "fix/gpu-packet-test-imports",
+      "sha": "6e56f1b80fed712edd406acb5eb794aaa0d0950d"
+    },
+    {
+      "name": "fix/gpu-packet-test-imports-final",
+      "sha": "96f8bdb273ef88bb1936df8fe715da99b2ac7f9b"
+    },
+    {
+      "name": "fix/gpu-packet-test-imports-hosted",
+      "sha": "eca2a141c774ac848fd9ba9c5fbeb663d7196da8"
+    },
+    {
+      "name": "fix/gpu-packet-test-imports-v2",
+      "sha": "f3f0813cf94d55e1a6ff10f0c631ffadd87ceb16"
+    },
+    {
+      "name": "fix/guard-difference-param",
+      "sha": "f50fb2ff6ba8b6bbe5c6f0fc6d2c3a9854997de0"
+    },
+    {
+      "name": "fix/guard-lisp-operational-paths",
+      "sha": "f52afcda2d0d29d9392b4e93bcb90b0651437aa7"
+    },
+    {
+      "name": "fix/h-nil-11-8-scoped-contract-20261010",
+      "sha": "ef4e2d723408f16848828a736105f017d9d7f425"
+    },
+    {
+      "name": "fix/h-nil-contract11-domain-evidence-20261010",
+      "sha": "86635992c3bb8343f97e3b2c0d5eed25b6dd1d9c"
+    },
+    {
+      "name": "fix/h-nil-contract118-witness-20261010",
+      "sha": "d0d409ae0f3412a6048106c6d186eaf0a633079b"
+    },
+    {
+      "name": "fix/host-container-evidence",
+      "sha": "1fafa00dd60e65a20a2cca8e74c97127056c9992"
+    },
+    {
+      "name": "fix/host-load-uk-surface-current",
+      "sha": "1c54873c7e31b5b5227718d5d59551cab6a69bfb"
+    },
+    {
+      "name": "fix/hosted-ci-text7-import-gpt6-20261009",
+      "sha": "8652cd1d563bb78ebe5fe166f72e01c6528334fc"
+    },
+    {
+      "name": "fix/hosted-current-exact-domain-corpus-20261009",
+      "sha": "ba3d190843b9eda89f961911ebb82c18462e6b50"
+    },
+    {
+      "name": "fix/hosted-serde-outer-envelope-20261009",
+      "sha": "44508150386671fbdff6f06b2ac63c61166363aa"
+    },
+    {
+      "name": "fix/hosted-smoke-env-20261009",
+      "sha": "bd1378ca274d051d0e23f83fc3a5e2c09f7246a9"
+    },
+    {
+      "name": "fix/installer-cli-upgrade",
+      "sha": "7a6c90c8b28dec6da50504d3951e05321fb6580e"
+    },
+    {
+      "name": "fix/inventory-generator-immutable-binder",
+      "sha": "586bf4ebaae5af5c5038f08bab2a7f45b8054305"
+    },
+    {
+      "name": "fix/inventory-semantic-registry-generator",
+      "sha": "f35696ea4f49b0fa4de35edf28a551aa28c2f279"
+    },
+    {
+      "name": "fix/io-exact-d1-carrier-variant-20261009",
+      "sha": "69cc87cae999b6eaf491190596a308a324684a33"
+    },
+    {
+      "name": "fix/island-lowering-witness-q2-payload",
+      "sha": "5f781e47aeacdc893417d4efb45ff7494552b95f"
+    },
+    {
+      "name": "fix/island-witness-plus-exact",
+      "sha": "de0e9593c8ae9e66bcd6ce3ebecfe734cf910b78"
+    },
+    {
+      "name": "fix/kernel-host-files-on-main",
+      "sha": "83313999352c9c4674dd9568eaae582cd9e16e4e"
+    },
+    {
+      "name": "fix/knowledge-read-tcp-function8",
+      "sha": "7407895071bf41654e106e3b55c4c40a3721d3aa"
+    },
+    {
+      "name": "fix/language-core-canonical-extension-wording",
+      "sha": "0f057c604a124283ac8fdbc5f3cb18748eebcac3"
+    },
+    {
+      "name": "fix/language-core-doc-identity",
+      "sha": "b8655b85a4349e5ba5bd680a00e6794463d49048"
+    },
+    {
+      "name": "fix/language-core-reference-wording",
+      "sha": "9e74270a0172290c7f68e56dc7adcfe706ec42de"
+    },
+    {
+      "name": "fix/letstar-exact-d1-after-io-20261009",
+      "sha": "79a389629fb7e5c5e4c2f5d459982fad43cd0e57"
+    },
+    {
+      "name": "fix/life1-provenance-local-shadow",
+      "sha": "a34079d105d3d99939c664077fdf61d98915c6a0"
+    },
+    {
+      "name": "fix/life-scheduler-current-main-blocker",
+      "sha": "a17774da69f1fd563303af4f8c1864b575989464"
+    },
+    {
+      "name": "fix/lisp-fs-content-store-exact-d1-20261009",
+      "sha": "2dfe4a9d47860dacfeafa94a3e20e2dd651fb4b7"
+    },
+    {
+      "name": "fix/lisp-fs-exact-cond-current-20261009",
+      "sha": "30dd073e6a7669234a8fbccf9ba6da04e0940110"
+    },
+    {
+      "name": "fix/lisp-fs-explicit-d1-fallbacks-20261009",
+      "sha": "c0179a7c9ed90e9f8ee910e34bd0a50a677f9b95"
+    },
+    {
+      "name": "fix/lisp-fs-remove-legacy-false-atom-clauses-20261009",
+      "sha": "d7421537f01623b51e3bb7163d178d8de0f22d9a"
+    },
+    {
+      "name": "fix/local-runner-routing-20261005",
+      "sha": "beed5f629acbae727f8fe59c1a9a961d85a51753"
+    },
+    {
+      "name": "fix/lower-panic-macro",
+      "sha": "4cfc08b07af080ed75fdc4d801e28a8569f74029"
+    },
+    {
+      "name": "fix/lower-panic-macro-current",
+      "sha": "649a228e3d0ad59c6ae7c8dc8a40861240d5bee0"
+    },
+    {
+      "name": "fix/m0-adaptive-research-manifest-20261010",
+      "sha": "87bb5f40a9f1693743ef1d18673c22cc927616ab"
+    },
+    {
+      "name": "fix/m0-domain-archive-provenance-boundary-20261011",
+      "sha": "9b09d94bce8a4cd20aab49e6a282a37b86cb423d"
+    },
+    {
+      "name": "fix/m8-core1-resolver-pair-binder",
+      "sha": "97b54482af15f02d31693f60fd1616603694fd47"
+    },
+    {
+      "name": "fix/m8-forward-subst-binder",
+      "sha": "ff1c6b3bc42dd4d28a15b6381f08e5b4fa52aaf0"
+    },
+    {
+      "name": "fix/m8-island-provenance-binder",
+      "sha": "47b843504b64d912449bc36c991a5aea7ae58e21"
+    },
+    {
+      "name": "fix/m8-life-scheduler-second-binder",
+      "sha": "d9d84dd0b9180ee33602bdbb90348aa1bf3bb09e"
+    },
+    {
+      "name": "fix/m8-semantic-registry-binders",
+      "sha": "5cbb464ae3943f3cf7e8908e2443f3c8186cfd11"
+    },
+    {
+      "name": "fix/machine-admission-truncation-guard-20261010",
+      "sha": "ceab74f2cc7185b80fd677352361c186fd4fdabe"
+    },
+    {
+      "name": "fix/machine-admission-unclosed-cond-20261010",
+      "sha": "78da4355ebfdfd19ff7adfb45a824a0f6fdc2855"
+    },
+    {
+      "name": "fix/machine-effect-exact-d1-control-20261010",
+      "sha": "999db848ad395e763518e2846de331a03fa3c2e2"
+    },
+    {
+      "name": "fix/machine-source-exact-domain-reader-current-20261010",
+      "sha": "44ce40d1c5fed5e3fab90b75cb0babd8a69131a8"
+    },
+    {
+      "name": "fix/machine-source-reader-container-descent-20261010",
+      "sha": "21682e4b142b97774bb13c6a4e5bf46924883778"
+    },
+    {
+      "name": "fix/machine-source-reader-container-descent-fresh-20261010",
+      "sha": "7cc7eddad469ba05e6d1891eee3eafe87bfdbf60"
+    },
+    {
+      "name": "fix/macro-generated-canon-heads",
+      "sha": "3df18c71b9bfb8a85767e1c59cd685614ef24125"
+    },
+    {
+      "name": "fix/main-core4-fasl-refresh-20261010-r4",
+      "sha": "59cd93246b9d47691d2d48b44f2bb3780fe67759"
+    },
+    {
+      "name": "fix/main-fast-clippy-redundant-closure",
+      "sha": "c8ccabaee7a956d73ca82e64ee77291a4b4650d2"
+    },
+    {
+      "name": "fix/main-fast-critical-build",
+      "sha": "529bdd3d427696bdceb376fbdc2fd827014ea669"
+    },
+    {
+      "name": "fix/main-selector-surface-guard",
+      "sha": "3c6f48de419ee1758f90f404401dd83366ee2c74"
+    },
+    {
+      "name": "fix/mechanical-t5-and-bench-ci-20261009",
+      "sha": "0cfd74c1dda1d00c538c1da921a35c49676ff6c1"
+    },
+    {
+      "name": "fix/meta-cond-empty-clauses-failclosed-20261009",
+      "sha": "494a458f12d836493e6ac7b55305555f8e9713c1"
+    },
+    {
+      "name": "fix/meta-eval-verbatim-slice",
+      "sha": "b77540682cac5a183a1051f5f6acbb8c52e675bc"
+    },
+    {
+      "name": "fix/migrate-result-tagged-d1-cond-20261010",
+      "sha": "52342f1bf49be8e0fdcc5f19b9c8e4eb593e1c4c"
+    },
+    {
+      "name": "fix/migrate-sens-reader-contract-20261008",
+      "sha": "1380ec3b1dbbddfb80f8c8589f06631f3b6a8fc2"
+    },
+    {
+      "name": "fix/migrate-t5-batch-pass-count-20261009",
+      "sha": "a7962a5e67ade6acd968a47b7555e2671d4f3232"
+    },
+    {
+      "name": "fix/migration-5029-proven-heads-20261010",
+      "sha": "d0a74a873338459a4e7aae4dfce1c23faac5a5d1"
+    },
+    {
+      "name": "fix/migration-atom-cohort-spaced-view-20261010",
+      "sha": "206efaf1efa40d11037b9669f838b212efd1945c"
+    },
+    {
+      "name": "fix/migration-bindings-real-block-20261008",
+      "sha": "26bde5308c8b28935b3bd236c82271facba4c8aa"
+    },
+    {
+      "name": "fix/migration-bindings-real-block-main-20261008",
+      "sha": "5bebb8c0e2915c3b65ea9d83b71c5d5a38d71938"
+    },
+    {
+      "name": "fix/migration-eq-cohort-spaced-views-20261010",
+      "sha": "9acab601c8f098b9af0d394b59d3ffea42ebc3ab"
+    },
+    {
+      "name": "fix/migration-eq-cond-borrow-main-1008",
+      "sha": "9a524cf247a7a1607f0e16e252658481366ea471"
+    },
+    {
+      "name": "fix/migration-eq-cond-spaced-views-20261010",
+      "sha": "6691960f236d68fa2be0056e7218e5d5644f6c81"
+    },
+    {
+      "name": "fix/migration-guard-d1-two-part-cond-20261010",
+      "sha": "b8c41336b75da553de6df26ccd1c1031e3b51c76"
+    },
+    {
+      "name": "fix/migration-pair-cohort-spaced-views-20261010",
+      "sha": "b36ca4e2ed5ce4391f32c1b1deb194c2b8020cd4"
+    },
+    {
+      "name": "fix/migration-pair-main-test-20261009",
+      "sha": "07bb716ca74500370755a926ad3954f7a315c46f"
+    },
+    {
+      "name": "fix/migration-pair-value-borrow-current-main",
+      "sha": "1be4f177e609f1debef8fbacaadb127404d17600"
+    },
+    {
+      "name": "fix/migration-pair-views-20261010",
+      "sha": "95008d662915ab2c514ee1603ab0125f81ae6bcc"
+    },
+    {
+      "name": "fix/migration-quote-cohort-spaced-views-20261010",
+      "sha": "bc211694f79771b4de9b4d7c8964d1beabf95d52"
+    },
+    {
+      "name": "fix/migration-result-status-d1-shapes-20261010",
+      "sha": "5425ef799c7eab1815ba80c1685683ac661c8977"
+    },
+    {
+      "name": "fix/mixed-machine-source-reader-mainline-20261010",
+      "sha": "1b9ea10e00c3ece72a1da4d8733b60885c20742b"
+    },
+    {
+      "name": "fix/mixed-reader-native-machine-witnesses-20261010",
+      "sha": "ef4cc021da7b240a3a88ac00a0b6397ab2c9ccea"
+    },
+    {
+      "name": "fix/mixed-w8-opaque-binders-20261008",
+      "sha": "ca9fcbe50f10a6d488110dc522651cff98e8b8a7"
+    },
+    {
+      "name": "fix/native-20261010-exact-d1-admission",
+      "sha": "68047e7d199e81545354cb7ca31446824c09f075"
+    },
+    {
+      "name": "fix/native-domain-mechanics-not-program-parse-20261010",
+      "sha": "03763aa7249858c678d6390bdeda5aea84268609"
+    },
+    {
+      "name": "fix/native-exact-integer-no-legacy-let-20261010",
+      "sha": "ca1b243292192c30ef1ef60b20596ec5f394a991"
+    },
+    {
+      "name": "fix/native-integer-admission-no-let-fresh-20261010",
+      "sha": "df329498db15e9079612efccee0e97b50d08a5d6"
+    },
+    {
+      "name": "fix/native-ledger-expression-binder",
+      "sha": "17b16c1d813b61b93a8649ac31c40464fd0c6108"
+    },
+    {
+      "name": "fix/non-sens-evidence-classification",
+      "sha": "020b291bef8a9b87e26f0be6c781ade68aa3ba7c"
+    },
+    {
+      "name": "fix/numeric-buffer-peer-registry-only",
+      "sha": "543d43f8ddaba84046048895eec36134116867a4"
+    },
+    {
+      "name": "fix/one-file-runner-canonical-three-pass-20261008",
+      "sha": "15b2a1c5392360c101c81699910b9846e4dffb55"
+    },
+    {
+      "name": "fix/operands-d3-eq-20261010",
+      "sha": "fa7f9450be88f63399ac8975dc499d9ecc54d2e1"
+    },
+    {
+      "name": "fix/operands-d3-eq-tip-20261010",
+      "sha": "4993b4085f17a162365ba311d88d6540f4981b46"
+    },
+    {
+      "name": "fix/original-observable-parity-publisher-20261008",
+      "sha": "b09ec79dafddfd4b7bc980ef674dbc24c199ed47"
+    },
+    {
+      "name": "fix/p0-bootstrap-utf8-tooling-current",
+      "sha": "6b377ab320e1ade327289c5879c372a8810117e7"
+    },
+    {
+      "name": "fix/p0-process-peer-materialization-current-main",
+      "sha": "c57854f0c850db118ded6bb0b168e7d9ddee19a6"
+    },
+    {
+      "name": "fix/p0-repo-tooling-domain-aware-current-main",
+      "sha": "343afd2fcaacbad9f5a038e63780184fb5a3f856"
+    },
+    {
+      "name": "fix/p0-utf8-boundary-current-main",
+      "sha": "e8c24ff2fa44b5e16ced26b0762084a1f9deee55"
+    },
+    {
+      "name": "fix/packed-bits-rust199-clippy",
+      "sha": "17f02e9991a9ca93dfe814702d6f6c783deb8ec7"
+    },
+    {
+      "name": "fix/parity-probe-formats",
+      "sha": "4f0ce594476f3e602fa7cf11e49369c245dc0cfa"
+    },
+    {
+      "name": "fix/peer-surface-immutable-law",
+      "sha": "6968b1f6ee66e9238c7b3937c483116f2e651f38"
+    },
+    {
+      "name": "fix/persistent-map-height-of-dual-answer-modes-20261009",
+      "sha": "e44f9a353872dc2e5f09bcb2898eb2ad31505bfe"
+    },
+    {
+      "name": "fix/persistent-map-height-of-exact-d1-20261009",
+      "sha": "6da56027ae381c68b7a821c157cd035db2b5dcd7"
+    },
+    {
+      "name": "fix/persistent-map-height-of-exact-equality-20261009",
+      "sha": "39c13ffeb33cb746f4967a9457e6331d1d20da41"
+    },
+    {
+      "name": "fix/persistent-map-height-of-three-state-20261009",
+      "sha": "be9ccdabd0acad5c872c7731eb545c17a9a430ab"
+    },
+    {
+      "name": "fix/persistent-map-max2-exact-d1-20261009",
+      "sha": "95de0d81968408fb85fe307cf0fb9fd12624dd71"
+    },
+    {
+      "name": "fix/physical-d3-cond-reference-20261010-0044",
+      "sha": "1da8308217486c39e728cfc2911c7809dcfcaaf6"
+    },
+    {
+      "name": "fix/physical-d3-cond-source-20261010",
+      "sha": "9930d387f1d91fbc2b8ea97f9fe490bdc8a05429"
+    },
+    {
+      "name": "fix/physical-d3-cond-specimen-20261009",
+      "sha": "2db6cfb4edd97a8ffb76fb6a6a01473d1c0f3aab"
+    },
+    {
+      "name": "fix/physical-t5-bare-session-profile-isolation-20261011",
+      "sha": "4071ed4f9f11da94dd75172a8dfdf5917a4a805a"
+    },
+    {
+      "name": "fix/physical-t5-cli-direct-words-20261009",
+      "sha": "b6b31413ff7f1d883cc2f7829b3b39a61ce200c2"
+    },
+    {
+      "name": "fix/physical-t5-negative-smoke-20261009",
+      "sha": "4f85b91c19f044c1512b805f46ab7d2015f88a0b"
+    },
+    {
+      "name": "fix/physical-t5-profile-gate-20261011",
+      "sha": "b811d87e760e6d3b261164175b9ee9ab01b21c62"
+    },
+    {
+      "name": "fix/physical-t5-profile-gate-current-main-20261011",
+      "sha": "db9b61283e77cc4083c027d5696c8d7d4eae25ab"
+    },
+    {
+      "name": "fix/post-d4-boundary-clippy",
+      "sha": "b686ce63a1fbf5badad8115db6867ed39bc3f1f5"
+    },
+    {
+      "name": "fix/postcore-public-api-projection",
+      "sha": "7027d76be229cfd4623d6b41448c2d384781cb19"
+    },
+    {
+      "name": "fix/postcore-surface-coverage-internal",
+      "sha": "faf0145a3c7b5993fbf41db3cf1e5cebb69a48e5"
+    },
+    {
+      "name": "fix/postcore-time-cond-frontier-20261010-v2",
+      "sha": "fe713ad5518929959d88807987aec08ac9873ed3"
+    },
+    {
+      "name": "fix/presentation-bool-boundary",
+      "sha": "660c2dc732a06c699eae28db29c51abbe4281058"
+    },
+    {
+      "name": "fix/presentation-bool-boundary-current",
+      "sha": "d3eb19dcfd849e31f4080c40e70bc2c06ce8a131"
+    },
+    {
+      "name": "fix/presentation-bool-boundary-main",
+      "sha": "8343a6a75b88d851c349ed71467926758c72786e"
+    },
+    {
+      "name": "fix/presentation-builtin-fixture-lowering-only",
+      "sha": "0ce2140824ced7ed0270107322ad2502137a5703"
+    },
+    {
+      "name": "fix/presentation-builtin-witness-syntax-only-main",
+      "sha": "9522e22cce4b54b435d8fe43ef7d54dfbc21d9b1"
+    },
+    {
+      "name": "fix/presentation-sid-value-1944",
+      "sha": "17f3c75bb65c645b4634512f8bbe7404ffafc354"
+    },
+    {
+      "name": "fix/probabilistic-decision-unclosed-list",
+      "sha": "7177309bec4b2c318d723374def9116d6b9170da"
+    },
+    {
+      "name": "fix/probabilistic-map-car-value",
+      "sha": "8e4315cca7e72aab90bb5e2197c254160eefe8fd"
+    },
+    {
+      "name": "fix/program-bit-measure-yaml",
+      "sha": "2e1fbd3712f22966cdb7fd9e9ab30843c6e92b3d"
+    },
+    {
+      "name": "fix/public-api-discovery-current",
+      "sha": "6b281879d1cb18bd195e1be4fc6a6da7d0cd47ca"
+    },
+    {
+      "name": "fix/public-api-discovery-current-main",
+      "sha": "11989b276a6ac9b6ab0d15d44fd67029a06b1da1"
+    },
+    {
+      "name": "fix/public-api-discovery-current-main-v2",
+      "sha": "6028243050f89820665ffc5ad172f09b63e465f2"
+    },
+    {
+      "name": "fix/public-api-inventory-signatures",
+      "sha": "7a17e47b2b7ce832007db8adf7cfa0358a1e43ae"
+    },
+    {
+      "name": "fix/public-api-profile-exclusion-regex",
+      "sha": "ea68e64e1cacbc99288815f875a1548358c1c3f5"
+    },
+    {
+      "name": "fix/public-api-report",
+      "sha": "a3ed8b7d6967204ff41f19ab7ba1509591ac85b6"
+    },
+    {
+      "name": "fix/public-api-report-current-1247",
+      "sha": "cc4905fc85c4d64c463383e2a91afac456b76834"
+    },
+    {
+      "name": "fix/public-api-report-physical-core4-20261010",
+      "sha": "40ccc62287d218cfc3a0973e133614e72d3b709b"
+    },
+    {
+      "name": "fix/public-api-report-refresh-20261010",
+      "sha": "04b5c5066193c30ba9efac199ba17c4e1a74af79"
+    },
+    {
+      "name": "fix/quantity-d1-three-cell-guards-20261011-gpt6",
+      "sha": "3194d14c73d0da2e99197efbdf2220747faafae7"
+    },
+    {
+      "name": "fix/quantity-proper-list-atom-eq-1009",
+      "sha": "aaec332697c3df70c1415ccdc9989883ef1252f7"
+    },
+    {
+      "name": "fix/quarantine-legacy-quantity-gate-20261010",
+      "sha": "1ab11431852a2e77bc8713de576b59f9ca579b36"
+    },
+    {
+      "name": "fix/ratchet-inline-mixed-source-test-fixture-20261009",
+      "sha": "beac1ca0d0307ca87ca08cb2e8e8ff21ee7f17f1"
+    },
+    {
+      "name": "fix/ratchet-operational-doctrine-classifier",
+      "sha": "6d56fccc9b91b6b95a9c9ed07e22be8c54b6fadb"
+    },
+    {
+      "name": "fix/read-file-cond2-current-main",
+      "sha": "e69af2073bba7aa12b749302cf33988aaf768bf9"
+    },
+    {
+      "name": "fix/readiness-d1-d9-era-parity-20261008",
+      "sha": "b078176674379b20abb56eae8a09557d0100d6a1"
+    },
+    {
+      "name": "fix/reason-index-exact-d1-limit-20261009",
+      "sha": "95607bbff305c2619d105b6950ee83fef43a6fbc"
+    },
+    {
+      "name": "fix/reason-subst-binder-collision",
+      "sha": "83c17beb15465379d737b07b53919df07690b309"
+    },
+    {
+      "name": "fix/red-core4-eq-1258",
+      "sha": "6306f9159c80c589791c94041aacb4b545bcd633"
+    },
+    {
+      "name": "fix/red-inventories",
+      "sha": "b2e6cc6e21ed4fb18f35ed5816f431badce8a77a"
+    },
+    {
+      "name": "fix/red-lsp-guard",
+      "sha": "022b0fd7d927cccc8a1934112e9920fb130c9325"
+    },
+    {
+      "name": "fix/red-reason-logic",
+      "sha": "99d468fe855e79c0ffcc8e962d61621e6f4f6e52"
+    },
+    {
+      "name": "fix/red-tests-after-migration",
+      "sha": "a140986e9da2c8a016179a424fa194d57bd6a8f6"
+    },
+    {
+      "name": "fix/register-h-nil-research-tool",
+      "sha": "ae7b1619b649d72a55856425f0d36d2e086bf7bc"
+    },
+    {
+      "name": "fix/registry-driven-peer-identity-test",
+      "sha": "2a90fd76d3e6308b8ca65a7165ad64cf2f123655"
+    },
+    {
+      "name": "fix/release-4208-remove-dead-d6-helper",
+      "sha": "470578772996a1428cf40ba1ea3f3cd0bcf31bd9"
+    },
+    {
+      "name": "fix/release-4208-remove-dead-d6-helper-current-main",
+      "sha": "077f4b7c115300f25119b5f7b12e71565b88fe7d"
+    },
+    {
+      "name": "fix/release-4242-native-first-current-main",
+      "sha": "f98e0a41f697268c521d75dff0a19dc5fd68f102"
+    },
+    {
+      "name": "fix/release-baseline-897-islands-clippy",
+      "sha": "3262f64b962ac6526bedc38073dd8b834129ab32"
+    },
+    {
+      "name": "fix/release-clippy-4208",
+      "sha": "49c70f0574e18362aeff078babe063fdf4cdc078"
+    },
+    {
+      "name": "fix/release-english-name-ratchet-main",
+      "sha": "502bb69cf6b813a09713dc78be47ce1ff0654bf4"
+    },
+    {
+      "name": "fix/release-language-items-projection",
+      "sha": "b618560bfd9e63990d3921fafaf8fd9aa7134f2e"
+    },
+    {
+      "name": "fix/release-ratchet-compiler-d1-repairs",
+      "sha": "c36aa38911e0e0b45b2897f0a825431503bc21f2"
+    },
+    {
+      "name": "fix/release-ratchet-machine-schema-current-main",
+      "sha": "9eb0409273b824783fdec7fad9691c2db62a3a71"
+    },
+    {
+      "name": "fix/release-ratchet-sens-primary-current-main",
+      "sha": "9f1051bbc75191fd1019db4cfa268f91551947a6"
+    },
+    {
+      "name": "fix/release-ratchet-source-repairs",
+      "sha": "71a57cb3f5aaaeee6f39a93508f9ee07db5d5c9c"
+    },
+    {
+      "name": "fix/release-sens-wix-current-main",
+      "sha": "ae27f54e0caa0012a106466fd85e9b53f9c77f88"
+    },
+    {
+      "name": "fix/release-sens-wix-manifest",
+      "sha": "60db49e049fa953fb867d8b3172061b6cfcc238d"
+    },
+    {
+      "name": "fix/release-short-gate",
+      "sha": "27774fedd775d81f242e7b869988f999e53c369c"
+    },
+    {
+      "name": "fix/release-timezone-observer-newlines",
+      "sha": "db8ed28fcc16fadb45717fe5651fcb2a84d196db"
+    },
+    {
+      "name": "fix/remove-rust-owned-artifact-duplicates",
+      "sha": "9a9ddb4272eab81d8a54693e86420a73404f2469"
+    },
+    {
+      "name": "fix/repin-one-dynamic-tooling-addition-20261009",
+      "sha": "a4eb175dae367c43427ad6a0215adfa83f72c01d"
+    },
+    {
+      "name": "fix/replace-legacy-cond-with-physical-t5-20261010",
+      "sha": "d1f2d81a0fb09838a652391c25aefae17485eeb9"
+    },
+    {
+      "name": "fix/repo-tooling-domain-aware-post-842",
+      "sha": "917bb17e9298cd5287ccb982ccfe4470dede6d12"
+    },
+    {
+      "name": "fix/repo-tooling-inventory-current-scripts",
+      "sha": "f5f8a1329f8eb75641007aebb6d33e7477a36d55"
+    },
+    {
+      "name": "fix/repo-tooling-string-structural-equality",
+      "sha": "edb750f12cdefe2de8b34122edc6af97725de5c1"
+    },
+    {
+      "name": "fix/restore-human-rational-guard-1622",
+      "sha": "d8ff77b362e035bc307c32049027b83b12574384"
+    },
+    {
+      "name": "fix/retire-eq-cond-legacy-rust-oracles-20261009",
+      "sha": "17990d63ff916ee13c044987ce7f6de591d0cd26"
+    },
+    {
+      "name": "fix/retire-legacy-quantity-gate-use-physical-sens-20261010",
+      "sha": "b64bacb4865d8b6fc70e8b714b62f47bfa1aebae"
+    },
+    {
+      "name": "fix/review-nonprogram-d8-tooling-duplicate-20261009",
+      "sha": "df8cf43767d498019dc404089364c45d33ffcf8b"
+    },
+    {
+      "name": "fix/rivnopravnist-en-surface-source",
+      "sha": "86106783d46c0c2785f8f2e0f7a3d2d3df19dbc0"
+    },
+    {
+      "name": "fix/rust-semreg-empty-surface",
+      "sha": "736608a044cc58378e61d5fa59fd665c219209a7"
+    },
+    {
+      "name": "fix/s2-admission-cond-projection",
+      "sha": "532a3a7e463cdad2b751a219b90dbd859ecf8136"
+    },
+    {
+      "name": "fix/semantic-ownership-report-current",
+      "sha": "f5851850f632a738de02b9e145d3358bd793f1b1"
+    },
+    {
+      "name": "fix/semantic-slice",
+      "sha": "1d493fbde58facef57e8694cf581e664b1923e94"
+    },
+    {
+      "name": "fix/sens8-canonical-foundation-test",
+      "sha": "c4459cc69c6ac8be0ed08561c2a50aaa71df2afd"
+    },
+    {
+      "name": "fix/sens-active-paths",
+      "sha": "7cdcd7e86579b7055c2dd81ea2cc67316def2029"
+    },
+    {
+      "name": "fix/sens-active-paths-current",
+      "sha": "5f22e10bdd5de496545c01c0fc130c254a43be92"
+    },
+    {
+      "name": "fix/sens-file-policy-single-owner-20261010",
+      "sha": "fcacde73f2eadc986610dd71303deb6bcc66ed72"
+    },
+    {
+      "name": "fix/sens-performance-node24-37986748194",
+      "sha": "2ed0b1d3ed8d4de2c2f530e7b62ec9bc669858bc"
+    },
+    {
+      "name": "fix/sens-priority-lowering-only",
+      "sha": "8c60e92d7ab22d35e1beba804d62aac533874652"
+    },
+    {
+      "name": "fix/sens-zero-physical-cond-oracle-20261010",
+      "sha": "d071a3cd0a4eb529ff555e14b7ff3a6340447cad"
+    },
+    {
+      "name": "fix/sens-zero-postcore-cond-bootstrap-20261010",
+      "sha": "23c4d1479fc2784568c171be860af61de6d1b9f3"
+    },
+    {
+      "name": "fix/setq-location-identity-clippy",
+      "sha": "8044088004d7834ab9e52299265fb2fd33545a0d"
+    },
+    {
+      "name": "fix/silicon-census-read-canonical-index-20261009",
+      "sha": "b3fae12e45aaddb7bdd55a5b7ac95741a79362ae"
+    },
+    {
+      "name": "fix/single-sens-file-guard-20261010",
+      "sha": "b7b2de27b201868ad1890688b4dd94972512a235"
+    },
+    {
+      "name": "fix/sr2-materialize-missing-semantic-peers",
+      "sha": "514d8a9b7cda23d1e8ce8accd161be78577c377e"
+    },
+    {
+      "name": "fix/sr2-test-baseline-current-main",
+      "sha": "7d723a0fb47c04c473a865cc5cf589ec94f1d295"
+    },
+    {
+      "name": "fix/strict-cond-legacy-physical-rejection-20261010",
+      "sha": "5ca2b03babbfe55051793c213bd46b325a14db80"
+    },
+    {
+      "name": "fix/strict-d1-admission-fallbacks-current-20261010",
+      "sha": "8b354821a4d04c8586fa80e19a453c0f5f90953e"
+    },
+    {
+      "name": "fix/swarm-binary-priority-3529",
+      "sha": "ff7b52f5f225996f2a34082ed5dc399b0811bf2e"
+    },
+    {
+      "name": "fix/swarm-redelivery-race",
+      "sha": "6f3f3e74936b05b9e98e0abb56637aec478a0430"
+    },
+    {
+      "name": "fix/t5-current-typed-eval-route-20261010",
+      "sha": "22ecb0f7d979cef06101bfa3c70c7bcd34d2113e"
+    },
+    {
+      "name": "fix/t5-sens-mirror-transaction-20261008",
+      "sha": "6492ae9648aca3dcee71cbc2d57772a014f2eae9"
+    },
+    {
+      "name": "fix/t5-source-guard-combined-fasl-20261010",
+      "sha": "ed812c2c06f6c59a33b223eb8df8d90582960fef"
+    },
+    {
+      "name": "fix/test-migration-pair-value-borrow-20261008",
+      "sha": "0f79da2c6a0123eaae34214b40adc0dc32aaba1b"
+    },
+    {
+      "name": "fix/test-value-borrow-20261008",
+      "sha": "9cc9d46bf34c17aab4ecbd8ff51e3d0537a51bbc"
+    },
+    {
+      "name": "fix/test-value-borrow-current-20261008",
+      "sha": "63f0b3e79599b795c861f71b60180db88649f335"
+    },
+    {
+      "name": "fix/text7-binding-helper-import-20261009",
+      "sha": "8652cd1d563bb78ebe5fe166f72e01c6528334fc"
+    },
+    {
+      "name": "fix/three-pass-auto-default-20261008",
+      "sha": "ecfb13075f8b07b8dcbd7b88bfe19dfd64912f52"
+    },
+    {
+      "name": "fix/three-pass-auto-default-current-main-20261008",
+      "sha": "465fa44ead55efa0051c0e76fd6e26c528153882"
+    },
+    {
+      "name": "fix/three-pass-d8-current-main-replay-20261008",
+      "sha": "e35e4f864fb5f5dc2c44ce69af67d15106e1e625"
+    },
+    {
+      "name": "fix/three-pass-d8-era-single-file-20261008",
+      "sha": "da6f5a3363f9103b6365bf71a951cd7aa90e9e0e"
+    },
+    {
+      "name": "fix/time-civil-month-offset-20261010",
+      "sha": "7fc20c8eecb2c3214a020512370a794f23bb6afe"
+    },
+    {
+      "name": "fix/time-cond-11-8-atomic-20261010",
+      "sha": "eedd2546b28002a7c5b4308eeb718f295b3f9340"
+    },
+    {
+      "name": "fix/time-cond-contract-118-mainline-20261009",
+      "sha": "4614a2db8ef3bbafdc93d1f233a11841b26c3d70"
+    },
+    {
+      "name": "fix/time-cond-contract-118-mainline-v2-20261009",
+      "sha": "d13d81ae16db33b0774d77dcb112ae724cf21b3b"
+    },
+    {
+      "name": "fix/time-cond-current-main-20261010",
+      "sha": "d60a60300997c61ed090802a6ea17fb347dbe27f"
+    },
+    {
+      "name": "fix/time-twofield-cond-current-main-20261009",
+      "sha": "e727dd3b2251452cfd8e3b74b4186a48afb1dd36"
+    },
+    {
+      "name": "fix/time-twofield-cond-d10-ledger-20261009",
+      "sha": "090e14f9674ce77cc840115ef272323b3c091b50"
+    },
+    {
+      "name": "fix/time-twofield-cond-latest-main-20261009",
+      "sha": "0793327a16d7138cfa5b3b7f317a696c21a0e514"
+    },
+    {
+      "name": "fix/timezone-header-and-public-api-baseline",
+      "sha": "3e67489ff5d572133436f2412e7792cb770ef4c5"
+    },
+    {
+      "name": "fix/timezone-identity-relation-fallback",
+      "sha": "0f72979623016dd055298a7d9ba7788c3de46b25"
+    },
+    {
+      "name": "fix/translate-program-unicode-namespaces",
+      "sha": "beac4c499df3300c2eb9f10ab5f346728af9aa24"
+    },
+    {
+      "name": "fix/trilingual-drift-parser",
+      "sha": "306bfcd14efb1eb8057a2186e931fb25dd1c6615"
+    },
+    {
+      "name": "fix/trilingual-surface-regex",
+      "sha": "623754f7192bdc3ea1c49520b88bd435079eb97b"
+    },
+    {
+      "name": "fix/triple-projection-required-cohort-1009",
+      "sha": "b96be6ade9c286cdb784215d3c5bb7d57388b4c9"
+    },
+    {
+      "name": "fix/uk-audit-ft2",
+      "sha": "ab45292bf40ef56072371500a46af006fb52dbcc"
+    },
+    {
+      "name": "fix/uk-head-shadowing-20261009",
+      "sha": "f5679621fcf7f7d3c02b15092c460469c9927522"
+    },
+    {
+      "name": "fix/uk-sa-canonical-cond",
+      "sha": "5f3bbeeab7bdaab5592e355cd85103f67ea3c620"
+    },
+    {
+      "name": "fix/uk-sa-not-alias-peers",
+      "sha": "59d404940760d927fd9e89b42978446553621b54"
+    },
+    {
+      "name": "fix/ukr-acceptance-current-eq-result",
+      "sha": "eba39bc416c547e131d7ad4d8162f5cbc429489b"
+    },
+    {
+      "name": "fix/undefined-selfhost-cond-shape",
+      "sha": "1c052b75a63a640ded2283a9bc7a164c3eefb114"
+    },
+    {
+      "name": "fix/vendor-cc-generated-target-info",
+      "sha": "62a666286f4f41d9a56ab1fd6020426646397b93"
+    },
+    {
+      "name": "fix/verify-repo-env-check",
+      "sha": "6f95e62b52c2fde8ed7bc9444b2f84f7ed23dfdb"
+    },
+    {
+      "name": "fix/wire-local-slot-encoding",
+      "sha": "38a2e4f47d731f3480f45ea5cd951446e001884d"
+    },
+    {
+      "name": "fix/world-cond-expected-result-data-20261009",
+      "sha": "ebc2111761a137ba72c0e265e0554068e513283e"
+    },
+    {
+      "name": "fix/world-exact-predicate-cond-20261009",
+      "sha": "5d7f72e1421105cc4301ac822c41b6757a28ab4f"
+    },
+    {
+      "name": "fix/world-known-exact-cond-20261009",
+      "sha": "d1c17eab77de37036777b738aae34a4c97ef1b3c"
+    },
+    {
+      "name": "fix/world-retract-exact-cond-fallback-20261009",
+      "sha": "33a9236695d3b39027173acf280986d946beef72"
+    },
+    {
+      "name": "fix/xed-binary-counts",
+      "sha": "600cbdf30ccb0501b4406fd4186bc3361e7e233e"
+    },
+    {
+      "name": "fix/114-uk-audit-direct-peer-policy",
+      "sha": "bf28c8f969d60583f28072ce42b83cbe8641d6db"
+    },
+    {
+      "name": "fix/114-uk-audit-direct-peer-policy-main",
+      "sha": "d275e5e8e59c8a27650c8c13202c707fea0e5b70"
+    },
+    {
+      "name": "fix/115-authority-and-truthiness-current",
+      "sha": "a1f65c2bd219fe898bac0dfd42b3f706bc681c8e"
+    },
+    {
+      "name": "fix/115-deletion-only-authority",
+      "sha": "0f29261f15a1ffad80917f5d3cb6279071ee9a83"
+    },
+    {
+      "name": "fix/115-deletion-only-authority-current",
+      "sha": "e2ad03801145ac7bae62429f1a9a457d2ade3264"
+    },
+    {
+      "name": "fix/125-volnost-metadata",
+      "sha": "c41a1ecc14f3034e3577ee4bf3981d8feafa8f0d"
+    },
+    {
+      "name": "fix/149-fasl-hygiene",
+      "sha": "fb5f681db2d2ea55265f8be12dec38a2e1e3a466"
+    },
+    {
+      "name": "fix/149-repo-artifact-hygiene",
+      "sha": "8c0cc98d79c4b82e6e668b4b029e3fcde440c62c"
+    },
+    {
+      "name": "fix/149-rootbackup-dedup",
+      "sha": "e7bf019faf832f1779e7a30ca0ffee5ceefeaef7"
+    },
+    {
+      "name": "fix/149-rootbackup-dedup-clean",
+      "sha": "e7bf019faf832f1779e7a30ca0ffee5ceefeaef7"
+    },
+    {
+      "name": "fix/149-rootbackup-dedup-tmp",
+      "sha": "e7bf019faf832f1779e7a30ca0ffee5ceefeaef7"
+    },
+    {
+      "name": "fix/149-rootbackup-dedup-work",
+      "sha": "e7bf019faf832f1779e7a30ca0ffee5ceefeaef7"
+    },
+    {
+      "name": "fix/175-pinned-tzcnt-evidence-20261007",
+      "sha": "8a28a220c85433a4bc81198b576b125d25e70920"
+    },
+    {
+      "name": "fix/182-contract-sync-lisp-paths",
+      "sha": "6f770297597883c381eba88cbc9b1465e18bf6d3"
+    },
+    {
+      "name": "fix/220-decimal-comma-authority-current",
+      "sha": "a33fd8bbf0931a3e63506495ba35dc407293f628"
+    },
+    {
+      "name": "fix/220-migration-cond-d1-first",
+      "sha": "6f0863dbe16fbf816b0017463d4cadc6071257b4"
+    },
+    {
+      "name": "fix/220-scientific-constant-exactq-length",
+      "sha": "a0938ec044770204736f5eaa3cbfc1fd26589505"
+    },
+    {
+      "name": "fix/270-host-abi-callee-saved",
+      "sha": "5ba19c5315f091b888feab5432f2b8980bdab592"
+    },
+    {
+      "name": "fix/275-content-store-cond-current-main",
+      "sha": "be872a0ce3b98996191a6caf21dc3f6b87ae7e5c"
+    },
+    {
+      "name": "fix/275-content-store-witness-baseline",
+      "sha": "f0c0a80aefb79c09516e1561feb6da8db1d92292"
+    },
+    {
+      "name": "fix/287-epistemic-authority-current-main",
+      "sha": "884fcb5f746f508e1bc506c77fb243db8f943de9"
+    },
+    {
+      "name": "fix/319-rust-valve-merge-base",
+      "sha": "3081f65804ae8cb98836267b560a6cc6259163c2"
+    },
+    {
+      "name": "fix/343-meta-eval-evidence-map-current",
+      "sha": "a7544657957c1f0755c011f2cb09d5f4ee0e9512"
+    },
+    {
+      "name": "fix/352-time-explicit-fallback-query",
+      "sha": "70e222830cf4ac4d6a1d9be89427cba84fbd229a"
+    },
+    {
+      "name": "fix/376-semantic-fixture-path-gate",
+      "sha": "a74ca7f89a16747e9f9de9683fa7ce5c11ef98f1"
+    },
+    {
+      "name": "fix/382-current-main-tooling-inventory",
+      "sha": "41db4d7346b751f5b029bbb7d05c53911850b7d4"
+    },
+    {
+      "name": "fix/382-guard-navigation-current",
+      "sha": "7bc3869fe0879c1ce0c739e706e25fe8bbf9564f"
+    },
+    {
+      "name": "fix/382-repo-tooling-string-equality",
+      "sha": "a2b95093983914fe3fe00cfc3b0d7fd6256638a1"
+    },
+    {
+      "name": "fix/433-narrate-structural-tag-guard",
+      "sha": "4139224514836997cbd7f67b7a881c6e02bbc731"
+    },
+    {
+      "name": "fix/435-narrate-pair-tag",
+      "sha": "85021d004009d6c252ed97681015f8d3ba2db2cb"
+    },
+    {
+      "name": "fix/500-letstar-bootstrap-macro",
+      "sha": "2334a8e1135e8c454b12084003bfe283e4e02422"
+    },
+    {
+      "name": "fix/524-regenerate-core-fasl",
+      "sha": "a93a700655865a43c2a263bcfb214a6a628405be"
+    },
+    {
+      "name": "fix/525-andor-bootstrap",
+      "sha": "cd720d11b64fc6b26a239691b2fbd3a1105b296c"
+    },
+    {
+      "name": "fix/613-meta-eval-exact-q-cond",
+      "sha": "9d5c105ee3779e0b16f06f469b3a358312800af5"
+    },
+    {
+      "name": "fix/613-persistent-structures-explicit-q-cond",
+      "sha": "7e7cfc07f40f4ebd344a1f9255fffc52d716beef"
+    },
+    {
+      "name": "fix/613-time-explicit-q-cond",
+      "sha": "f8dffe7ce7896fbad7909fa3df0c915226e8543d"
+    },
+    {
+      "name": "fix/626-native-first-pair-head-totality",
+      "sha": "744edcd158cfffef323103689c419108b938fbc6"
+    },
+    {
+      "name": "fix/654-meta-eval-exact-q-current",
+      "sha": "2af4bc3aa7ad47a69252fa968a5aaafc53a34408"
+    },
+    {
+      "name": "fix/658-utf8-encode-string-onto-paren",
+      "sha": "e3cc3200d93e14ad744b6b4325994bc576eab933"
+    },
+    {
+      "name": "fix/746-no-rust-shadow-evaluator",
+      "sha": "e7da329feeeda2b97b2cd417fe970f0d1f476ddf"
+    },
+    {
+      "name": "fix/749-no-universal-island-result",
+      "sha": "4d09e771388dc73f77adb60073c56751e0d5720c"
+    },
+    {
+      "name": "fix/771-postcore-current-sid-replay",
+      "sha": "91a2528b3496f080555b1df1b4fe1c5c8f0da9f9"
+    },
+    {
+      "name": "fix/771-postcore-current-sid-replay-v2",
+      "sha": "5e93e580039b84732820db3ad55d4728074c247a"
+    },
+    {
+      "name": "fix/771-postcore-process-peer-current",
+      "sha": "4175478fd8a413b05f94d17dee5a51b97f7ef1bd"
+    },
+    {
+      "name": "fix/771-utf8-top-level-form",
+      "sha": "eca6cebe4bcc6a9bf68fac74708ddd946912e749"
+    },
+    {
+      "name": "fix/776-repo-tooling-cond",
+      "sha": "b6e86c56b03405b307a370b09d3baf161faa94a6"
+    },
+    {
+      "name": "fix/776-repo-tooling-cond-current",
+      "sha": "cd0131f4dd2455db8ec9d7930a2999daa6ed3a85"
+    },
+    {
+      "name": "fix/779-invoke-peer-materialization",
+      "sha": "0444e49326bb52765d7498fc9c31f2ef67b0b658"
+    },
+    {
+      "name": "fix/811-capability-honesty-current-main",
+      "sha": "52a27ca0b26dee0c2a6f1dd00027db19682c79de"
+    },
+    {
+      "name": "fix/845-explicit-absent-axis-current-main",
+      "sha": "b50dcbd7f23c66f597b6fcdbd98bc6a590e95a62"
+    },
+    {
+      "name": "fix/851-provision-embedded-datalog-current-main",
+      "sha": "a8d455877c8fb178088d760f4fb20e8bc2636c82"
+    },
+    {
+      "name": "fix/851-provision-embedded-datalog-through-installer",
+      "sha": "1a7ff1f9e4c42ec6f65e381ef3e8339be0fc45ae"
+    },
+    {
+      "name": "fix/853-sid-witness-honesty",
+      "sha": "aa97549415cd5c24e613b9440983a548c538f85a"
+    },
+    {
+      "name": "fix/884-coordinate-observer-baseline",
+      "sha": "7fa2e8b6e4a52cfb8664151a410da6ff925005ee"
+    },
+    {
+      "name": "fix/884-coordinate-observer-baseline-current-main",
+      "sha": "6cffe0ca4c8e29172add0ef82cb3e60b54b8942b"
+    },
+    {
+      "name": "fix/884-time-semanticref-baseline",
+      "sha": "6ba9e0ac9a1570a88830099383b8fa5c1b419b74"
+    },
+    {
+      "name": "fix/894-core-fasl-current-main",
+      "sha": "769a1f863e438e97e602361deac35e7b782b7866"
+    },
+    {
+      "name": "fix/894-core-fasl-parity",
+      "sha": "51afa4b026436b0238e0c0e2c9151db3de1bea60"
+    },
+    {
+      "name": "fix/903-scheduler-field-structural-match",
+      "sha": "681f7967922e037b2bd0db59a05385a87cdd4af0"
+    },
+    {
+      "name": "fix/908-semantic-coordinate-join-gate",
+      "sha": "ee3e6c730c2c473656f39433320e2b05c06cadfc"
+    },
+    {
+      "name": "fix/942-life-pending-dedup-edge",
+      "sha": "397ab8281a4fc8ba958818c2287dc0513c45b72c"
+    },
+    {
+      "name": "fix/964-remove-decimal-sid-shadows",
+      "sha": "adb47e81b810dfc14549216937516eaf80f9fbff"
+    }
+  ]
+}
