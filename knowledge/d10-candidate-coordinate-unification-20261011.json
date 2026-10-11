@@ -14279,15 +14279,24 @@
       "ratified": false,
       "physical_t5_authorized": false,
       "proof_readiness": {
-        "status": "INCOMPLETE-SOURCE-SEMANTICS",
-        "missing": [
-          "semantic-law",
-          "positive-witness",
-          "negative-falsifier"
-        ],
+        "status": "SOURCE-LAW-WITNESSES-PRESENT-UNVERIFIED",
+        "missing": [],
         "selection": false,
         "ratification": false,
-        "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+        "next_gate": "D1-D9-DEDUPE-CORE-VS-LIBRARY-AND-INDEPENDENT-ORACLE"
+      },
+      "source_evidence": {
+        "status": "SOURCE-WITNESS-RESEARCH-NOT-SELECTED",
+        "source_git_blob": "c19dce41525dc739620f34ecd380c3977e61e984",
+        "law_source_key": "law",
+        "positive_source_key": "positive_witnesses",
+        "negative_source_key": "negative_witnesses",
+        "law": "Normalize each r modulo m>0. For pairwise compatible constraints (ri-rj) mod gcd(mi,mj)=0, return unique least nonnegative representative x and period L=lcm(mi) such that x mod mi=ri mod mi for every original i; for empty input return x=0,L=1. On inconsistency return the lexicographically earliest original conflicting index pair (i,j) with gcd and nonzero difference mod gcd. Invalid modulus/type is a distinct input failure.",
+        "positive": "[{\"input\":[],\"expected\":{\"status\":\"SOLUTION\",\"residue\":0,\"modulus\":1}},{\"input\":[[2,6],[5,9]],\"expected\":{\"status\":\"SOLUTION\",\"residue\":14,\"modulus\":18}},{\"input\":[[2,3],[3,5],[2,7]],\"expected\":{\"status\":\"SOLUTION\",\"residue\":23,\"modulus\":105}},{\"input\":[[6,10],[0,4]],\"expected\":{\"status\":\"SOLUTION\",\"residue\":16,\"modulus\":20}},{\"input\":[[7,5],[2,5]],\"expected\":{\"status\":\"SOLUTION\",\"residue\":2,\"modulus\":5}}]",
+        "negative": "[{\"input\":[[2,3],[4,6]],\"conflict_indices\":[0,1]},{\"input\":[[2,6],[4,9]],\"conflict_indices\":[0,1]},{\"input\":[[0,4],[0,6],[1,2]],\"conflict_indices\":[0,2]}]",
+        "owner_review": "PENDING",
+        "independent_oracle": "PENDING",
+        "ratification": false
       }
     },
     {
@@ -14334,15 +14343,24 @@
       "ratified": false,
       "physical_t5_authorized": false,
       "proof_readiness": {
-        "status": "INCOMPLETE-SOURCE-SEMANTICS",
-        "missing": [
-          "semantic-law",
-          "positive-witness",
-          "negative-falsifier"
-        ],
+        "status": "SOURCE-LAW-WITNESSES-PRESENT-UNVERIFIED",
+        "missing": [],
         "selection": false,
         "ratification": false,
-        "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+        "next_gate": "D1-D9-DEDUPE-CORE-VS-LIBRARY-AND-INDEPENDENT-ORACLE"
+      },
+      "source_evidence": {
+        "status": "SOURCE-WITNESS-RESEARCH-NOT-SELECTED",
+        "source_git_blob": "87917f230c9d75624697b4db22368d89139d78bb",
+        "law_source_key": "behavior",
+        "positive_source_key": "positive_witnesses",
+        "negative_source_key": "falsifiers",
+        "law": "Given finite directed simple graph with explicit distinct totally ordered vertex identities, return NONE if acyclic. Otherwise return the lexicographically smallest cyclic-rotation-normalized vertex sequence representing any elementary directed cycle. An elementary cycle visits each vertex once; sequence omits repeated terminal start. Self-loop is a length-1 cycle. Directed reversal is never silently identified. Same vertex/edge sets must give exactly the same witness independent of insertion and traversal order; no mutation of input.",
+        "positive": "[{\"vertices\":[0,1,2],\"edges\":[[0,1],[1,0],[1,2],[2,1]],\"expected\":[0,1]},{\"vertices\":[0,1,2],\"edges\":[[1,1],[0,1],[1,0]],\"expected\":[0,1]},{\"vertices\":[0,1,2],\"edges\":[[2,0],[0,1],[1,2]],\"expected\":[0,1,2]},{\"vertices\":[0,1,2],\"edges\":[[0,1],[1,2]],\"expected\":null},{\"vertices\":[0,1],\"edges\":[[1,0],[0,1]],\"expected\":[0,1]}]",
+        "negative": "[\"Return SCC members without an explicit edge-connected simple cycle path; an SCC set is not a cycle proof.\",\"Treat reverse orientation as the same cycle when reverse directed edges do not exist.\",\"Choose first DFS-observed cycle instead of lexicographically least normalized witness.\",\"Drop a self-loop because cycle length less than two.\",\"Invent a vertex or accept an edge endpoint outside the explicit vertex set.\",\"Mutate adjacency or select a different witness when insertion order changes.\"]",
+        "owner_review": "PENDING",
+        "independent_oracle": "PENDING",
+        "ratification": false
       }
     },
     {
@@ -14357,15 +14375,24 @@
       "ratified": false,
       "physical_t5_authorized": false,
       "proof_readiness": {
-        "status": "INCOMPLETE-SOURCE-SEMANTICS",
-        "missing": [
-          "semantic-law",
-          "positive-witness",
-          "negative-falsifier"
-        ],
+        "status": "SOURCE-LAW-WITNESSES-PRESENT-UNVERIFIED",
+        "missing": [],
         "selection": false,
         "ratification": false,
-        "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+        "next_gate": "D1-D9-DEDUPE-CORE-VS-LIBRARY-AND-INDEPENDENT-ORACLE"
+      },
+      "source_evidence": {
+        "status": "SOURCE-WITNESS-RESEARCH-NOT-SELECTED",
+        "source_git_blob": "e071b864b22cb535af28d6fb81a3366883db6aed",
+        "law_source_key": "behavior",
+        "positive_source_key": "witness",
+        "negative_source_key": "falsifier",
+        "law": "preserve equal subtrees; recurse over equal constructor/arity; otherwise replace each ordered disagreement pair with a fresh variable, reusing variables for repeated equal disagreement pairs",
+        "positive": "p(a,a),p(b,b) -> p(V0,V0); left {V0:a}, right {V0:b}",
+        "negative": "p(V0,V1) for p(a,a) and p(b,b) is common generalization but NOT least; differing occurrences should share V0",
+        "owner_review": "PENDING",
+        "independent_oracle": "PENDING",
+        "ratification": false
       }
     },
     {
@@ -14412,15 +14439,24 @@
       "ratified": false,
       "physical_t5_authorized": false,
       "proof_readiness": {
-        "status": "INCOMPLETE-SOURCE-SEMANTICS",
-        "missing": [
-          "semantic-law",
-          "positive-witness",
-          "negative-falsifier"
-        ],
+        "status": "SOURCE-LAW-WITNESSES-PRESENT-UNVERIFIED",
+        "missing": [],
         "selection": false,
         "ratification": false,
-        "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+        "next_gate": "D1-D9-DEDUPE-CORE-VS-LIBRARY-AND-INDEPENDENT-ORACLE"
+      },
+      "source_evidence": {
+        "status": "SOURCE-WITNESS-RESEARCH-NOT-SELECTED",
+        "source_git_blob": "859eb63871c3a01289c69a4d89aebc64e7f2ada9",
+        "law_source_key": "law",
+        "positive_source_key": "positive_examples",
+        "negative_source_key": "falsifiers",
+        "law": "V={h in H | all h(x_i)==label_i}; S=minimal elements of V and G=maximal elements under inclusion of extension sets; each h in V lies between some s in S and g in G. Distinct result for contradictory source labels and empty representable hypothesis class.",
+        "positive": "[\"No observations: S={bottom}, G={all-wildcard}, V=whole H including bottom\",\"One positive example makes exact observation minimal S, all-wildcard maximal G\",\"Negative example excludes covering general hypotheses and may split G into incomparable members\",\"Repeated positive/negative label on same instance yields explicit CONTRADICTORY-OBSERVATIONS\"]",
+        "negative": "[\"If S,G reconstruct even one inconsistent hypothesis, boundary law fails\",\"If S,G omit any consistent hypothesis, completeness fails\",\"If ordering or duplicate examples change V, rule-learning semantics fails\",\"If negative-only training is treated as one false value instead of constraints, G antichain fails\",\"If unrepresentable XOR diagonal is assigned a hypothesis by guess, fail\",\"If D1 Boolean label is replaced by empty-list truthiness or inexact category, fail\"]",
+        "owner_review": "PENDING",
+        "independent_oracle": "PENDING",
+        "ratification": false
       }
     },
     {
@@ -14499,15 +14535,24 @@
       "ratified": false,
       "physical_t5_authorized": false,
       "proof_readiness": {
-        "status": "INCOMPLETE-SOURCE-SEMANTICS",
-        "missing": [
-          "semantic-law",
-          "positive-witness",
-          "negative-falsifier"
-        ],
+        "status": "SOURCE-LAW-WITNESSES-PRESENT-UNVERIFIED",
+        "missing": [],
         "selection": false,
         "ratification": false,
-        "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+        "next_gate": "D1-D9-DEDUPE-CORE-VS-LIBRARY-AND-INDEPENDENT-ORACLE"
+      },
+      "source_evidence": {
+        "status": "SOURCE-WITNESS-RESEARCH-NOT-SELECTED",
+        "source_git_blob": "eec53cf69ec9c9881354c7f423745cb121ef2344",
+        "law_source_key": "contract",
+        "positive_source_key": "witnesses",
+        "negative_source_key": "falsifiers",
+        "law": "YES iff a substitution σ defined ONLY for metavariables in P makes σ(P) structurally identical to S (including occurrence identity of variables already in S). Never bind or alter metavariables in S, and never modify P. Repeated metavariable occurrences in P demand equal S subtrees. On NO, no partial witness. If YES, return normalized witness as pure data, not a D2 binding.",
+        "positive": "[{\"p\":\"f(P0,P0)\",\"s\":\"f(a,a)\",\"out\":\"YES σ[P0]=a\",\"reason\":\"repeated pattern var must get same value\"},{\"p\":\"f(P0,P0)\",\"s\":\"f(a,b)\",\"out\":\"NO\",\"reason\":\"two different values for same pattern var\"},{\"p\":\"f(P0,P0)\",\"s\":\"f(S0,S0)\",\"out\":\"YES σ[P0]=S0\",\"reason\":\"target variable identity is preserved\"},{\"p\":\"f(P0,P0)\",\"s\":\"f(S0,b)\",\"out\":\"NO\",\"reason\":\"cannot bind target S0 to b\"},{\"p\":\"f(a,P0)\",\"s\":\"f(S0,b)\",\"out\":\"NO\",\"reason\":\"symmetric UNIFY may bind S0=a, but subsumption must not\"},{\"p\":\"f(P0,g(P0))\",\"s\":\"f(a,g(a))\",\"out\":\"YES σ[P0]=a\",\"reason\":\"cross-nested equality constraint\"},{\"p\":\"f(P0,g(P0))\",\"s\":\"f(a,g(b))\",\"out\":\"NO\",\"reason\":\"repeat mismatch\"},{\"p\":\"f(P0,P1)\",\"s\":\"f(S0,S0)\",\"out\":\"YES σ[P0]=S0,σ[P1]=S0\",\"reason\":\"different generic variables may map to same target variable\"},{\"p\":\"f(a)\",\"s\":\"f(a,b)\",\"out\":\"NO\",\"reason\":\"functor arity matters\"}]",
+        "negative": "[\"Returning YES for f(a,P0) on f(S0,b) by binding S0=a is ordinary UNIFY, not one-sided SUBSUMES.\",\"Returning YES for f(P0,P0) on f(a,b) violates variable identity.\",\"Returning YES for f(P0,P0) on f(S0,b) changes target variable S0 and is forbidden.\",\"Returning NO for f(P0,P1) on f(S0,S0) incorrectly imposes injectivity on substitution.\",\"Evaluating term constructors as host code or setting D2 source variables is forbidden.\",\"Treating f/1 and f/2 as the same symbol neglects arity.\"]",
+        "owner_review": "PENDING",
+        "independent_oracle": "PENDING",
+        "ratification": false
       }
     },
     {
@@ -14522,15 +14567,24 @@
       "ratified": false,
       "physical_t5_authorized": false,
       "proof_readiness": {
-        "status": "INCOMPLETE-SOURCE-SEMANTICS",
-        "missing": [
-          "semantic-law",
-          "positive-witness",
-          "negative-falsifier"
-        ],
+        "status": "SOURCE-LAW-WITNESSES-PRESENT-UNVERIFIED",
+        "missing": [],
         "selection": false,
         "ratification": false,
-        "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+        "next_gate": "D1-D9-DEDUPE-CORE-VS-LIBRARY-AND-INDEPENDENT-ORACLE"
+      },
+      "source_evidence": {
+        "status": "SOURCE-WITNESS-RESEARCH-NOT-SELECTED",
+        "source_git_blob": "37bfcf9bffaf9daf519a3c63dbce3bcbe6f422c6",
+        "law_source_key": "behavior",
+        "positive_source_key": "positive_witnesses",
+        "negative_source_key": "falsifiers",
+        "law": "For finite nonempty ordered point clouds A,B of exact rational vectors with the same fixed dimension d>=1, compute 1/2 * (sum_a min_b sum_k(a[k]-b[k])^2 / |A| + sum_b min_a sum_k(b[k]-a[k])^2 / |B|). Return exact rational score and 0-based first-minimum (input-order) indices in both directions. Duplicates count toward each directional mean; they are not deduplicated. Reject empty clouds, mixed dimensions, non-exact coordinates. This is squared-L2 Chamfer with symmetric averaging, not WSM-24's hypot-L2 contour score.",
+        "positive": "[{\"A\":[[0],[2]],\"B\":[[0]],\"score\":\"1\",\"A_to_B_indices\":[0,0],\"B_to_A_indices\":[0]},{\"A\":[[0]],\"B\":[[-1],[1]],\"score\":\"1\",\"A_to_B_indices\":[0],\"B_to_A_indices\":[0,0]},{\"A\":[[0],[0],[2]],\"B\":[[0]],\"score\":\"2/3\",\"A_to_B_indices\":[0,0,0],\"B_to_A_indices\":[0]},{\"A\":[[0,0],[1,0]],\"B\":[[0,0],[1,0]],\"score\":\"0\",\"A_to_B_indices\":[0,1],\"B_to_A_indices\":[0,1]}]",
+        "negative": "[\"Keeping only the A-to-B direction breaks symmetry for unequal cardinalities.\",\"Replacing squared Euclidean with Euclidean sqrt changes the result; WSM-24 code is a different donor variant.\",\"Reporting 1 for A=[0,0,2] and B=[0] rather than 2/3 reveals mistaken set deduplication.\",\"Picking the last equal-distance neighbor instead of the first breaks source-order stable witness.\",\"Calling this a metric is false: singleton A={0},B={1},C={2} yields d(A,C)=4>d(A,B)+d(B,C)=2, violating triangle inequality.\",\"Allowing empty point clouds, dimension mismatch or implicit float violates the exact source law.\",\"Unrelated physical camera/astronomy/FPGA data acquisition must not claim SENS semantic authority.\"]",
+        "owner_review": "PENDING",
+        "independent_oracle": "PENDING",
+        "ratification": false
       }
     },
     {
@@ -14545,15 +14599,24 @@
       "ratified": false,
       "physical_t5_authorized": false,
       "proof_readiness": {
-        "status": "INCOMPLETE-SOURCE-SEMANTICS",
-        "missing": [
-          "semantic-law",
-          "positive-witness",
-          "negative-falsifier"
-        ],
+        "status": "SOURCE-LAW-WITNESSES-PRESENT-UNVERIFIED",
+        "missing": [],
         "selection": false,
         "ratification": false,
-        "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+        "next_gate": "D1-D9-DEDUPE-CORE-VS-LIBRARY-AND-INDEPENDENT-ORACLE"
+      },
+      "source_evidence": {
+        "status": "SOURCE-WITNESS-RESEARCH-NOT-SELECTED",
+        "source_git_blob": "e9fe82c0f589ca0de39ede3b3543e002d8924e28",
+        "law_source_key": "behavior",
+        "positive_source_key": "positive_witnesses",
+        "negative_source_key": "falsifiers",
+        "law": "For x=0 return (m=0,e=0). Otherwise return the unique pair of exact values such that x=m*b^e, 1<=abs(m)<b, and m has the sign of x. Invalid radix b<2 or non-exact rational input is an ERROR, never approximate/coerce to float. Values are not rounded.",
+        "positive": "[{\"input\":\"x=3/4, b=2\",\"expected\":\"m=3/2, e=-1\"},{\"input\":\"x=-40/3, b=2\",\"expected\":\"m=-5/3, e=3\"},{\"input\":\"x=8, b=2\",\"expected\":\"m=1, e=3\"},{\"input\":\"x=1/1000, b=10\",\"expected\":\"m=1, e=-3\"},{\"input\":\"x=0, b=2\",\"expected\":\"m=0, e=0\"}]",
+        "negative": "[\"Returning a float for an exact 3/4 input loses exact type and violates preservation of exact rational identity.\",\"For x=8,b=2 returning (m=2,e=2) violates the strict upper bound |m|<2.\",\"For x=-40/3,b=2 returning positive mantissa violates signed reconstruction.\",\"For x=0 any nonzero exponent violates canonical uniqueness of the zero representation.\",\"Radix 1 and invalid inexact inputs must not silently loop or coerce.\"]",
+        "owner_review": "PENDING",
+        "independent_oracle": "PENDING",
+        "ratification": false
       }
     },
     {
@@ -14568,15 +14631,24 @@
       "ratified": false,
       "physical_t5_authorized": false,
       "proof_readiness": {
-        "status": "INCOMPLETE-SOURCE-SEMANTICS",
-        "missing": [
-          "semantic-law",
-          "positive-witness",
-          "negative-falsifier"
-        ],
+        "status": "SOURCE-LAW-WITNESSES-PRESENT-UNVERIFIED",
+        "missing": [],
         "selection": false,
         "ratification": false,
-        "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+        "next_gate": "D1-D9-DEDUPE-CORE-VS-LIBRARY-AND-INDEPENDENT-ORACLE"
+      },
+      "source_evidence": {
+        "status": "SOURCE-WITNESS-RESEARCH-NOT-SELECTED",
+        "source_git_blob": "ba024956e114eb7622dd5aa48b71d5910abdadf9",
+        "law_source_key": "semantic_law",
+        "positive_source_key": "positive_witnesses",
+        "negative_source_key": "falsifiers",
+        "law": "For an ambiguous finite codebook, produce two genuinely different source identity sequences yielding identical concatenated binary output. Deterministic source-order BFS returns first reached witness, without claiming globally shortest bits. For unique codebook give typed absence, not made-up ambiguity.",
+        "positive": "[\"[(a,0),(b,01),(c,10)] -> ([a,c],[b,a]), both 010 (order may reverse)\",\"[(a,00),(b,00)] -> ([a],[b]), both 00\"]",
+        "negative": "[\"returning only D1:NO without reconstructible differing sequences is not a witness\",\"returning the same source sequence twice is invalid\",\"claiming ambiguity on [(a,0),(b,01)] is incorrect\",\"unbounded guessed search depth is not a proof of uniqueness\"]",
+        "owner_review": "PENDING",
+        "independent_oracle": "PENDING",
+        "ratification": false
       }
     },
     {
@@ -14879,15 +14951,24 @@
       "ratified": false,
       "physical_t5_authorized": false,
       "proof_readiness": {
-        "status": "INCOMPLETE-SOURCE-SEMANTICS",
-        "missing": [
-          "semantic-law",
-          "positive-witness",
-          "negative-falsifier"
-        ],
+        "status": "SOURCE-LAW-WITNESSES-PRESENT-UNVERIFIED",
+        "missing": [],
         "selection": false,
         "ratification": false,
-        "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+        "next_gate": "D1-D9-DEDUPE-CORE-VS-LIBRARY-AND-INDEPENDENT-ORACLE"
+      },
+      "source_evidence": {
+        "status": "SOURCE-WITNESS-RESEARCH-NOT-SELECTED",
+        "source_git_blob": "c0e35c9a9d9a4438be2eb71dd407c8065d558a1b",
+        "law_source_key": "behavioral_law",
+        "positive_source_key": "positives",
+        "negative_source_key": "falsifier",
+        "law": "For a real triple (x,y,z), r=sqrt(x²+y²+z²). If r>0 return latitude=asin(z/r) deg, longitude=atan2(y,x) deg, radius=r. At the origin, signal absent direction; no invented angles. Pole azimuth and exact numeric tolerance require owner-defined convention before admission.",
+        "positive": "[{\"input\":[1,0,0],\"expected\":[0,0,1]},{\"input\":[0,1,0],\"expected\":[0,90,1]}]",
+        "negative": "{\"input\":[0,0,0],\"forbidden\":\"ordinary valid spherical angles at zero radius\"}",
+        "owner_review": "PENDING",
+        "independent_oracle": "PENDING",
+        "ratification": false
       }
     },
     {
@@ -14902,15 +14983,24 @@
       "ratified": false,
       "physical_t5_authorized": false,
       "proof_readiness": {
-        "status": "INCOMPLETE-SOURCE-SEMANTICS",
-        "missing": [
-          "semantic-law",
-          "positive-witness",
-          "negative-falsifier"
-        ],
+        "status": "SOURCE-LAW-WITNESSES-PRESENT-UNVERIFIED",
+        "missing": [],
         "selection": false,
         "ratification": false,
-        "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+        "next_gate": "D1-D9-DEDUPE-CORE-VS-LIBRARY-AND-INDEPENDENT-ORACLE"
+      },
+      "source_evidence": {
+        "status": "SOURCE-WITNESS-RESEARCH-NOT-SELECTED",
+        "source_git_blob": "c0e35c9a9d9a4438be2eb71dd407c8065d558a1b",
+        "law_source_key": "behavioral_law",
+        "positive_source_key": "positives",
+        "negative_source_key": "falsifier",
+        "law": "On a finite ordered vector s[0..N-1], sample rate Fs>0 and target frequency f, compute C=Σs[n]cos(2πfn/Fs), S=−Σs[n]sin(2πfn/Fs), return C²+S² (unnormalized single-frequency squared magnitude). No framing, modulation, codec, T5, GPU or hardware mechanics; numerical precision/error contract unproven.",
+        "positive": "[{\"input\":{\"samples\":[1,0,-1,0],\"sample_rate\":4,\"tone_frequency\":1},\"expected\":4},{\"input\":{\"samples\":[0,0,0,0],\"sample_rate\":4,\"tone_frequency\":1},\"expected\":0}]",
+        "negative": "{\"input\":{\"samples\":[2,0,-2,0],\"sample_rate\":4,\"tone_frequency\":1},\"expected\":16,\"forbidden\":8,\"law\":\"doubling amplitude multiplies energy by four\"}",
+        "owner_review": "PENDING",
+        "independent_oracle": "PENDING",
+        "ratification": false
       }
     },
     {
@@ -14925,15 +15015,24 @@
       "ratified": false,
       "physical_t5_authorized": false,
       "proof_readiness": {
-        "status": "INCOMPLETE-SOURCE-SEMANTICS",
-        "missing": [
-          "semantic-law",
-          "positive-witness",
-          "negative-falsifier"
-        ],
+        "status": "SOURCE-LAW-WITNESSES-PRESENT-UNVERIFIED",
+        "missing": [],
         "selection": false,
         "ratification": false,
-        "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+        "next_gate": "D1-D9-DEDUPE-CORE-VS-LIBRARY-AND-INDEPENDENT-ORACLE"
+      },
+      "source_evidence": {
+        "status": "SOURCE-WITNESS-RESEARCH-NOT-SELECTED",
+        "source_git_blob": "c0e35c9a9d9a4438be2eb71dd407c8065d558a1b",
+        "law_source_key": "behavioral_law",
+        "positive_source_key": "positives",
+        "negative_source_key": "falsifier",
+        "law": "Given valid Gregorian civil Y,M,D and UT hour in [0,24), use Gregorian calendar correction B=2−floor(Y'/100)+floor(floor(Y'/100)/4), Y'=Y−1/M'=M+12 when M<=2; JD=floor(365.25(Y'+4716))+floor(30.6001(M'+1))+D+B−1524.5+UT/24. No local timezone, leap-second, clock I/O or device time.",
+        "positive": "[{\"input\":[2000,1,1,12],\"expected\":2451545},{\"input\":[2000,1,1,0],\"expected\":2451544.5}]",
+        "negative": "{\"input\":[2000,1,1,0],\"forbidden\":2451545,\"reason\":\"Noon-vs-midnight half-day offset\"}",
+        "owner_review": "PENDING",
+        "independent_oracle": "PENDING",
+        "ratification": false
       }
     },
     {
@@ -21990,35 +22089,55 @@
         "rows": 9
       }
     ],
-    "total_passports": 78,
+    "total_passports": 89,
     "latest_sources": [
       {
-        "path": "knowledge/d10-psl-interlisp-lispm-unmerged-residual-v1.json",
-        "git_blob": "f5438abf3460fa7caac14a30edf511f907a5be44",
-        "rows": 19
-      },
-      {
-        "path": "knowledge/d10-unify-lexical-harvest-v1.json",
-        "git_blob": "78eac7f7d0d05ec5734ccb61e73c1bed7ec707fa",
-        "rows": 9
-      },
-      {
-        "path": "knowledge/d10-prolog-constraint-hobbies-research-v1.json",
-        "git_blob": "66ec74d6127f806372d51dd25c27898094124c36",
-        "rows": 3
-      },
-      {
-        "path": "knowledge/d10-babbage-reiter-hobby-selected-20261009.json",
-        "git_blob": "4cf8359f34924015f2efca3ddba2df567b5b43db",
+        "path": "knowledge/d10-general-congruence-merge-hobbies-v1.json",
+        "git_blob": "c19dce41525dc739620f34ecd380c3977e61e984",
         "rows": 1
       },
       {
-        "path": "knowledge/d10-historical-primary-manual-reconciliation-20261009.json",
-        "git_blob": "37e10ef9a953ea62beb5e4b46ef20f21cbfb3ee4",
-        "rows": 10
+        "path": "knowledge/d10-canonical-directed-cycle-witness-research-v1.json",
+        "git_blob": "87917f230c9d75624697b4db22368d89139d78bb",
+        "rows": 1
+      },
+      {
+        "path": "knowledge/d10-symbolic-ai-antiunification-research-v1.json",
+        "git_blob": "e071b864b22cb535af28d6fb81a3366883db6aed",
+        "rows": 1
+      },
+      {
+        "path": "knowledge/d10-mitchell-version-space-research-v1.json",
+        "git_blob": "859eb63871c3a01289c69a4d89aebc64e7f2ada9",
+        "rows": 1
+      },
+      {
+        "path": "knowledge/d10-symbolic-ai-one-sided-subsumption-v1.json",
+        "git_blob": "eec53cf69ec9c9881354c7f423745cb121ef2344",
+        "rows": 1
+      },
+      {
+        "path": "knowledge/d10-wsm24-exact-chamfer-hobbies-v1.json",
+        "git_blob": "37bfcf9bffaf9daf519a3c63dbce3bcbe6f422c6",
+        "rows": 1
+      },
+      {
+        "path": "knowledge/d10-exact-radix-normalization-v1.json",
+        "git_blob": "e9fe82c0f589ca0de39ede3b3543e002d8924e28",
+        "rows": 1
+      },
+      {
+        "path": "knowledge/d10-unique-decipherability-historical-20261009.json",
+        "git_blob": "ba024956e114eb7622dd5aa48b71d5910abdadf9",
+        "rows": 1
+      },
+      {
+        "path": "knowledge/d10-cross-hobby-law-intake-20261009.json",
+        "git_blob": "c0e35c9a9d9a4438be2eb71dd407c8065d558a1b",
+        "rows": 3
       }
     ],
-    "latest_source_pass": 42
+    "latest_source_pass": 11
   },
   "evidence_gate": {
     "date": "2026-10-11",
@@ -22028,14 +22147,14 @@
     "formal_ratified": 0,
     "semantic_source_audit": {
       "total": 309,
-      "law_and_witnesses": 168,
-      "has_law": 184,
-      "has_positive": 168,
-      "has_negative": 168,
-      "missing_law": 125,
-      "missing_positive": 141,
-      "missing_negative": 141
+      "has_law": 195,
+      "has_positive": 179,
+      "has_negative": 179,
+      "law_and_witnesses": 179,
+      "missing_law": 114,
+      "missing_positive": 130,
+      "missing_negative": 130
     },
-    "note": "Source witness presence is not proof of independent D10 residency or ratification."
+    "note": "Source witness presence does not imply verified primitive or ratified D10 resident."
   }
 }
