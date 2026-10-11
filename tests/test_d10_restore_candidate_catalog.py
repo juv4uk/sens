@@ -70,7 +70,7 @@ class CatalogRestoreTests(unittest.TestCase):
             '}\n'
         )
         self.assertEqual(4, merge.find_name_line(canonical, "ALPHA", True))
-        self.assertEqual(8, merge.find_name_line(canonical, "BETA", True))
+        self.assertEqual(9, merge.find_name_line(canonical, "BETA", True))
         self.assertIsNone(merge.find_name_line(canonical, "ALPH", True))
         self.assertEqual(4, merge.find_name_line(canonical, "alpha", False))
 
