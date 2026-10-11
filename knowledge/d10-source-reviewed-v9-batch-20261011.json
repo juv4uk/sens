@@ -1,0 +1,786 @@
+{
+  "schema": "d10-source-reviewed-batch-v9/v1",
+  "date": "2026-10-11",
+  "authority": "RESEARCH-PRELIMINARY-NO-CORE-OR-PHYSICAL-AUTHORITY",
+  "decision_rule": "Identical semantic law across source identities, SHA-pinned source F1 previously verified; excludes exact surface collisions with D1-D9/current D10 and rejects conflicting law texts. F2 executed witness and F3 behavioral distinctness NOT ESTABLISHED.",
+  "source_filter": {
+    "path": "knowledge/d10-filter/rejected.tsv",
+    "git_blob": "992fe91211b57965f3a650e3e84c7e366e1028ba",
+    "count": 1775,
+    "verified_provenance": true,
+    "source_decision": "EXCLUDE_NO_WITNESS"
+  },
+  "source_current": {
+    "path": "knowledge/d10-v8-semantic-inventory.json",
+    "git_blob": "f3d3aefd19e163a085ba6ce4f8e2ca2bef02028f",
+    "count": 725
+  },
+  "source_foundation": {
+    "path": "knowledge/d1-d9-foundation.json",
+    "git_blob": "09d1d71c39d1484dfd005a5068dbb18b76f0f0d4"
+  },
+  "counts": {
+    "selected_added": 34,
+    "prior_selected": 725,
+    "result_selected": 759,
+    "prior_placed": 719,
+    "result_placed": 719,
+    "prior_unplaced": 6,
+    "result_unplaced": 40,
+    "remaining": 265,
+    "ratified": 0
+  },
+  "candidates": [
+    {
+      "name": "BYTEVECTOR-COPY!",
+      "law": "Мутує цільовий байтовий вектор, копіюючи діапазон; якщо джерело і призначення перекриваються, результат як при тимчасовій копії.",
+      "sources": [
+        {
+          "candidate_id": "d10.name.00135",
+          "donor_provenance": "knowledge/d10-historical-lisp-branch-candidate-intake-20261011.json:202",
+          "source_pin": "42362a46d7587e375ed19c156a0b67e40b86939a",
+          "reason": "EXCLUDE_NO_WITNESS"
+        }
+      ],
+      "F1": "SOURCE_PINNED",
+      "F2": "HOLD_NOT_RUN",
+      "F3": "HOLD_DEDUP_UNPROVEN",
+      "F4": "NO_COORDINATE",
+      "ratified": false,
+      "selected_research_only": true
+    },
+    {
+      "name": "CANONICAL-UNICODE-NORMALIZE",
+      "law": "Map Unicode-equivalent representations to canonical NFC/NFD forms while preserving semantic equivalence for downstream transliteration.",
+      "sources": [
+        {
+          "candidate_id": "d10.name.00270",
+          "donor_provenance": "knowledge/d10-historical-candidate-coordinate-queue-v1.json:1114",
+          "source_pin": "131369263ac37c27798bb3c95521eb99e52b8f10",
+          "reason": "EXCLUDE_NO_WITNESS"
+        },
+        {
+          "candidate_id": "d10.pending.CANONICAL-UNICODE-NORMALIZE",
+          "donor_provenance": "knowledge/d10-historical-candidate-coordinate-queue-v1.json:1114",
+          "source_pin": "131369263ac37c27798bb3c95521eb99e52b8f10",
+          "reason": "EXCLUDE_NO_WITNESS"
+        }
+      ],
+      "F1": "SOURCE_PINNED",
+      "F2": "HOLD_NOT_RUN",
+      "F3": "HOLD_DEDUP_UNPROVEN",
+      "F4": "NO_COORDINATE",
+      "ratified": false,
+      "selected_research_only": true
+    },
+    {
+      "name": "CLEAR-RESOURCE",
+      "law": "Забути всі раніше відстежені об'єкти ресурсу, і при майбутній deallocation старого leased object видати error.",
+      "sources": [
+        {
+          "candidate_id": "d10.name.00434",
+          "donor_provenance": "knowledge/d10-historical-candidate-coordinate-queue-v1.json:377",
+          "source_pin": "131369263ac37c27798bb3c95521eb99e52b8f10",
+          "reason": "EXCLUDE_NO_WITNESS"
+        },
+        {
+          "candidate_id": "d10.pending.CLEAR-RESOURCE",
+          "donor_provenance": "knowledge/d10-historical-candidate-coordinate-queue-v1.json:377",
+          "source_pin": "131369263ac37c27798bb3c95521eb99e52b8f10",
+          "reason": "EXCLUDE_NO_WITNESS"
+        }
+      ],
+      "F1": "SOURCE_PINNED",
+      "F2": "HOLD_NOT_RUN",
+      "F3": "HOLD_DEDUP_UNPROVEN",
+      "F4": "NO_COORDINATE",
+      "ratified": false,
+      "selected_research_only": true
+    },
+    {
+      "name": "COUNT-LEADING-ZEROS",
+      "law": "for a nonnegative fixed-width W-bit word x, CLZ(x) = W - integer-length(x), with CLZ(0)=W; must specify width W",
+      "sources": [
+        {
+          "candidate_id": "d10.name.00513",
+          "donor_provenance": "knowledge/d10-historical-lisp-all-source-consolidation-20261011.json:1585",
+          "source_pin": "962208ecad6b4b4d8845ea7dedaf88c34e93e702",
+          "reason": "EXCLUDE_NO_WITNESS"
+        }
+      ],
+      "F1": "SOURCE_PINNED",
+      "F2": "HOLD_NOT_RUN",
+      "F3": "HOLD_DEDUP_UNPROVEN",
+      "F4": "NO_COORDINATE",
+      "ratified": false,
+      "selected_research_only": true
+    },
+    {
+      "name": "DEFINE-RECORD-TYPE",
+      "law": "Кожне визначення породжує новий тип навіть при однаковому імені/формі, разом із конструктором, предикатом, accessors і mutators.",
+      "sources": [
+        {
+          "candidate_id": "d10.name.00532",
+          "donor_provenance": "knowledge/d10-historical-lisp-branch-candidate-intake-20261011.json:370",
+          "source_pin": "42362a46d7587e375ed19c156a0b67e40b86939a",
+          "reason": "EXCLUDE_NO_WITNESS"
+        }
+      ],
+      "F1": "SOURCE_PINNED",
+      "F2": "HOLD_NOT_RUN",
+      "F3": "HOLD_DEDUP_UNPROVEN",
+      "F4": "NO_COORDINATE",
+      "ratified": false,
+      "selected_research_only": true
+    },
+    {
+      "name": "DELAYED-TERM-DISEQUALITY",
+      "law": "Monotonic disequality constraint on two terms: immediate success if terms cannot unify, failure if equal, otherwise residual delayed constraint preventing future bindings that make them identical. Distinct from immediate syntactic non-equality or D1 1-bit boolean comparison.",
+      "sources": [
+        {
+          "candidate_id": "d10.name.00543",
+          "donor_provenance": "knowledge/d10-historical-candidate-coordinate-queue-v1.json:1055",
+          "source_pin": "131369263ac37c27798bb3c95521eb99e52b8f10",
+          "reason": "EXCLUDE_NO_WITNESS"
+        },
+        {
+          "candidate_id": "d10.pending.DELAYED-TERM-DISEQUALITY",
+          "donor_provenance": "knowledge/d10-historical-candidate-coordinate-queue-v1.json:1055",
+          "source_pin": "131369263ac37c27798bb3c95521eb99e52b8f10",
+          "reason": "EXCLUDE_NO_WITNESS"
+        }
+      ],
+      "F1": "SOURCE_PINNED",
+      "F2": "HOLD_NOT_RUN",
+      "F3": "HOLD_DEDUP_UNPROVEN",
+      "F4": "NO_COORDINATE",
+      "ratified": false,
+      "selected_research_only": true
+    },
+    {
+      "name": "ENOUGH-NAMESTRING",
+      "law": "For any given pathname/defaults, merging enough-namestring representation with defaults must equal merging original pathname with defaults, modulo pathname equality.",
+      "sources": [
+        {
+          "candidate_id": "d10.name.00589",
+          "donor_provenance": "knowledge/d10-historical-lisp-branch-candidate-intake-20261011.json:1201",
+          "source_pin": "42362a46d7587e375ed19c156a0b67e40b86939a",
+          "reason": "EXCLUDE_NO_WITNESS"
+        }
+      ],
+      "F1": "SOURCE_PINNED",
+      "F2": "HOLD_NOT_RUN",
+      "F3": "HOLD_DEDUP_UNPROVEN",
+      "F4": "NO_COORDINATE",
+      "ratified": false,
+      "selected_research_only": true
+    },
+    {
+      "name": "HASHTABLE-UPDATE!",
+      "law": "оновити асоціацію результатом однієї процедури від поточного значення або default",
+      "sources": [
+        {
+          "candidate_id": "d10.name.00753",
+          "donor_provenance": "knowledge/d10-historical-lisp-all-source-consolidation-20261011.json:2931",
+          "source_pin": "962208ecad6b4b4d8845ea7dedaf88c34e93e702",
+          "reason": "EXCLUDE_NO_WITNESS"
+        }
+      ],
+      "F1": "SOURCE_PINNED",
+      "F2": "HOLD_NOT_RUN",
+      "F3": "HOLD_DEDUP_UNPROVEN",
+      "F4": "NO_COORDINATE",
+      "ratified": false,
+      "selected_research_only": true
+    },
+    {
+      "name": "MAKE-HASHTABLE",
+      "law": "створення словника із заданими чистими hash/equiv процедурами та сумісним відношенням",
+      "sources": [
+        {
+          "candidate_id": "d10.name.00884",
+          "donor_provenance": "knowledge/d10-historical-lisp-all-source-consolidation-20261011.json:3544",
+          "source_pin": "962208ecad6b4b4d8845ea7dedaf88c34e93e702",
+          "reason": "EXCLUDE_NO_WITNESS"
+        }
+      ],
+      "F1": "SOURCE_PINNED",
+      "F2": "HOLD_NOT_RUN",
+      "F3": "HOLD_DEDUP_UNPROVEN",
+      "F4": "NO_COORDINATE",
+      "ratified": false,
+      "selected_research_only": true
+    },
+    {
+      "name": "MAKE-PROMISE",
+      "law": "Перетворює вже обчислене значення на готову обіцянку; якщо аргумент уже promise, повертає його без створення іншого.",
+      "sources": [
+        {
+          "candidate_id": "d10.name.00893",
+          "donor_provenance": "knowledge/d10-historical-lisp-branch-candidate-intake-20261011.json:900",
+          "source_pin": "42362a46d7587e375ed19c156a0b67e40b86939a",
+          "reason": "EXCLUDE_NO_WITNESS"
+        }
+      ],
+      "F1": "SOURCE_PINNED",
+      "F2": "HOLD_NOT_RUN",
+      "F3": "HOLD_DEDUP_UNPROVEN",
+      "F4": "NO_COORDINATE",
+      "ratified": false,
+      "selected_research_only": true
+    },
+    {
+      "name": "MERGE-PATHNAMES",
+      "law": "Fill unspecified name/type/host/device/version from explicit defaults; relative directory values concatenate with default directory, preserving component semantics.",
+      "sources": [
+        {
+          "candidate_id": "d10.name.00952",
+          "donor_provenance": "knowledge/d10-historical-lisp-branch-candidate-intake-20261011.json:1238",
+          "source_pin": "42362a46d7587e375ed19c156a0b67e40b86939a",
+          "reason": "EXCLUDE_NO_WITNESS"
+        }
+      ],
+      "F1": "SOURCE_PINNED",
+      "F2": "HOLD_NOT_RUN",
+      "F3": "HOLD_DEDUP_UNPROVEN",
+      "F4": "NO_COORDINATE",
+      "ratified": false,
+      "selected_research_only": true
+    },
+    {
+      "name": "PATHNAME-MATCH-P",
+      "law": "Wildcard match is directional; a wildcard in the first pathname matches only a wildcard in the second; actual matching mechanics implementation-defined.",
+      "sources": [
+        {
+          "candidate_id": "d10.name.01077",
+          "donor_provenance": "knowledge/d10-historical-lisp-branch-candidate-intake-20261011.json:1275",
+          "source_pin": "42362a46d7587e375ed19c156a0b67e40b86939a",
+          "reason": "EXCLUDE_NO_WITNESS"
+        }
+      ],
+      "F1": "SOURCE_PINNED",
+      "F2": "HOLD_NOT_RUN",
+      "F3": "HOLD_DEDUP_UNPROVEN",
+      "F4": "NO_COORDINATE",
+      "ratified": false,
+      "selected_research_only": true
+    },
+    {
+      "name": "PROVENANCE-CHAIN",
+      "law": "Represent a claim/result together with the explicit assumption chain on which its validity depends, preserving provenance rather than treating the result as floating authority.",
+      "sources": [
+        {
+          "candidate_id": "d10.name.01115",
+          "donor_provenance": "knowledge/d10-historical-candidate-coordinate-queue-v1.json:1307",
+          "source_pin": "131369263ac37c27798bb3c95521eb99e52b8f10",
+          "reason": "EXCLUDE_NO_WITNESS"
+        },
+        {
+          "candidate_id": "d10.pending.PROVENANCE-CHAIN",
+          "donor_provenance": "knowledge/d10-historical-candidate-coordinate-queue-v1.json:1307",
+          "source_pin": "131369263ac37c27798bb3c95521eb99e52b8f10",
+          "reason": "EXCLUDE_NO_WITNESS"
+        }
+      ],
+      "F1": "SOURCE_PINNED",
+      "F2": "HOLD_NOT_RUN",
+      "F3": "HOLD_DEDUP_UNPROVEN",
+      "F4": "NO_COORDINATE",
+      "ratified": false,
+      "selected_research_only": true
+    },
+    {
+      "name": "RANKED-FULLTEXT-SEARCH",
+      "law": "Parse a structured text query, apply field/tag/date restrictions, compute text relevance, emit ordered results with snippets and pagination totals.",
+      "sources": [
+        {
+          "candidate_id": "d10.name.01135",
+          "donor_provenance": "knowledge/d10-historical-candidate-coordinate-queue-v1.json:1174",
+          "source_pin": "131369263ac37c27798bb3c95521eb99e52b8f10",
+          "reason": "EXCLUDE_NO_WITNESS"
+        },
+        {
+          "candidate_id": "d10.pending.RANKED-FULLTEXT-SEARCH",
+          "donor_provenance": "knowledge/d10-historical-candidate-coordinate-queue-v1.json:1174",
+          "source_pin": "131369263ac37c27798bb3c95521eb99e52b8f10",
+          "reason": "EXCLUDE_NO_WITNESS"
+        }
+      ],
+      "F1": "SOURCE_PINNED",
+      "F2": "HOLD_NOT_RUN",
+      "F3": "HOLD_DEDUP_UNPROVEN",
+      "F4": "NO_COORDINATE",
+      "ratified": false,
+      "selected_research_only": true
+    },
+    {
+      "name": "LONGEST-MATCH-TEXT-MAPPING",
+      "law": "At each input position choose the longest defined mapping key starting there, with token-kind context for marks/consonants.",
+      "sources": [
+        {
+          "candidate_id": "d10.name.00867",
+          "donor_provenance": "knowledge/d10-historical-candidate-coordinate-queue-v1.json:1134",
+          "source_pin": "131369263ac37c27798bb3c95521eb99e52b8f10",
+          "reason": "EXCLUDE_NO_WITNESS"
+        },
+        {
+          "candidate_id": "d10.pending.LONGEST-MATCH-TEXT-MAPPING",
+          "donor_provenance": "knowledge/d10-historical-candidate-coordinate-queue-v1.json:1134",
+          "source_pin": "131369263ac37c27798bb3c95521eb99e52b8f10",
+          "reason": "EXCLUDE_NO_WITNESS"
+        }
+      ],
+      "F1": "SOURCE_PINNED",
+      "F2": "HOLD_NOT_RUN",
+      "F3": "HOLD_DEDUP_UNPROVEN",
+      "F4": "NO_COORDINATE",
+      "ratified": false,
+      "selected_research_only": true
+    },
+    {
+      "name": "CONTEXTUAL-TEXT-REWRITE",
+      "law": "Apply a finite rewrite table where the result for a matched input depends on lexical context classes such as word-start and after-consonant, with deterministic longest-key matching and case projections.",
+      "sources": [
+        {
+          "candidate_id": "d10.name.00505",
+          "donor_provenance": "knowledge/d10-historical-candidate-coordinate-queue-v1.json:1094",
+          "source_pin": "131369263ac37c27798bb3c95521eb99e52b8f10",
+          "reason": "EXCLUDE_NO_WITNESS"
+        },
+        {
+          "candidate_id": "d10.pending.CONTEXTUAL-TEXT-REWRITE",
+          "donor_provenance": "knowledge/d10-historical-candidate-coordinate-queue-v1.json:1094",
+          "source_pin": "131369263ac37c27798bb3c95521eb99e52b8f10",
+          "reason": "EXCLUDE_NO_WITNESS"
+        }
+      ],
+      "F1": "SOURCE_PINNED",
+      "F2": "HOLD_NOT_RUN",
+      "F3": "HOLD_DEDUP_UNPROVEN",
+      "F4": "NO_COORDINATE",
+      "ratified": false,
+      "selected_research_only": true
+    },
+    {
+      "name": "AFFIX-RULE-WORDFORM-GENERATION",
+      "law": "Generate inflected word forms from lemma-class affix rules, including tag-bearing alternatives and alternation classes.",
+      "sources": [
+        {
+          "candidate_id": "d10.name.00063",
+          "donor_provenance": "knowledge/d10-historical-candidate-coordinate-queue-v1.json:1154",
+          "source_pin": "131369263ac37c27798bb3c95521eb99e52b8f10",
+          "reason": "EXCLUDE_NO_WITNESS"
+        },
+        {
+          "candidate_id": "d10.pending.AFFIX-RULE-WORDFORM-GENERATION",
+          "donor_provenance": "knowledge/d10-historical-candidate-coordinate-queue-v1.json:1154",
+          "source_pin": "131369263ac37c27798bb3c95521eb99e52b8f10",
+          "reason": "EXCLUDE_NO_WITNESS"
+        }
+      ],
+      "F1": "SOURCE_PINNED",
+      "F2": "HOLD_NOT_RUN",
+      "F3": "HOLD_DEDUP_UNPROVEN",
+      "F4": "NO_COORDINATE",
+      "ratified": false,
+      "selected_research_only": true
+    },
+    {
+      "name": "EPHEMERIS-TO-STATE-TRANSFORM",
+      "law": "Evaluate planetary ephemeris at a time coordinate and copy the resulting position/velocity into simulation state.",
+      "sources": [
+        {
+          "candidate_id": "d10.name.00598",
+          "donor_provenance": "knowledge/d10-historical-candidate-coordinate-queue-v1.json:1269",
+          "source_pin": "131369263ac37c27798bb3c95521eb99e52b8f10",
+          "reason": "EXCLUDE_NO_WITNESS"
+        },
+        {
+          "candidate_id": "d10.pending.EPHEMERIS-TO-STATE-TRANSFORM",
+          "donor_provenance": "knowledge/d10-historical-candidate-coordinate-queue-v1.json:1269",
+          "source_pin": "131369263ac37c27798bb3c95521eb99e52b8f10",
+          "reason": "EXCLUDE_NO_WITNESS"
+        }
+      ],
+      "F1": "SOURCE_PINNED",
+      "F2": "HOLD_NOT_RUN",
+      "F3": "HOLD_DEDUP_UNPROVEN",
+      "F4": "NO_COORDINATE",
+      "ratified": false,
+      "selected_research_only": true
+    },
+    {
+      "name": "LEAPFROG-STATE-UPDATE",
+      "law": "Advance position and mid-step velocity by a fixed timestep using acceleration, then atomically commit temporary state.",
+      "sources": [
+        {
+          "candidate_id": "d10.name.00845",
+          "donor_provenance": "knowledge/d10-historical-candidate-coordinate-queue-v1.json:1288",
+          "source_pin": "131369263ac37c27798bb3c95521eb99e52b8f10",
+          "reason": "EXCLUDE_NO_WITNESS"
+        },
+        {
+          "candidate_id": "d10.pending.LEAPFROG-STATE-UPDATE",
+          "donor_provenance": "knowledge/d10-historical-candidate-coordinate-queue-v1.json:1288",
+          "source_pin": "131369263ac37c27798bb3c95521eb99e52b8f10",
+          "reason": "EXCLUDE_NO_WITNESS"
+        }
+      ],
+      "F1": "SOURCE_PINNED",
+      "F2": "HOLD_NOT_RUN",
+      "F3": "HOLD_DEDUP_UNPROVEN",
+      "F4": "NO_COORDINATE",
+      "ratified": false,
+      "selected_research_only": true
+    },
+    {
+      "name": "UNIFY-WITH-OCCURS-CHECK",
+      "law": "For finite acyclic first-order terms, unify two terms while refusing any new binding V:=T when V occurs inside T; observable success/failure plus induced substitution. SWI special case with ALREADY cyclic inputs is non-portable and excluded.",
+      "sources": [
+        {
+          "candidate_id": "d10.name.01404",
+          "donor_provenance": "knowledge/d10-historical-candidate-coordinate-queue-v1.json:1035",
+          "source_pin": "131369263ac37c27798bb3c95521eb99e52b8f10",
+          "reason": "EXCLUDE_NO_WITNESS"
+        },
+        {
+          "candidate_id": "d10.pending.UNIFY-WITH-OCCURS-CHECK",
+          "donor_provenance": "knowledge/d10-historical-candidate-coordinate-queue-v1.json:1035",
+          "source_pin": "131369263ac37c27798bb3c95521eb99e52b8f10",
+          "reason": "EXCLUDE_NO_WITNESS"
+        }
+      ],
+      "F1": "SOURCE_PINNED",
+      "F2": "HOLD_NOT_RUN",
+      "F3": "HOLD_DEDUP_UNPROVEN",
+      "F4": "NO_COORDINATE",
+      "ratified": false,
+      "selected_research_only": true
+    },
+    {
+      "name": "ALLOCATE-RESOURCE",
+      "law": "Видати вільний сумісний об'єкт із пулу або створити новий; виділений не видається одночасно двом споживачам.",
+      "sources": [
+        {
+          "candidate_id": "d10.name.00070",
+          "donor_provenance": "knowledge/d10-historical-candidate-coordinate-queue-v1.json:326",
+          "source_pin": "131369263ac37c27798bb3c95521eb99e52b8f10",
+          "reason": "EXCLUDE_NO_WITNESS"
+        },
+        {
+          "candidate_id": "d10.pending.ALLOCATE-RESOURCE",
+          "donor_provenance": "knowledge/d10-historical-candidate-coordinate-queue-v1.json:326",
+          "source_pin": "131369263ac37c27798bb3c95521eb99e52b8f10",
+          "reason": "EXCLUDE_NO_WITNESS"
+        }
+      ],
+      "F1": "SOURCE_PINNED",
+      "F2": "HOLD_NOT_RUN",
+      "F3": "HOLD_DEDUP_UNPROVEN",
+      "F4": "NO_COORDINATE",
+      "ratified": false,
+      "selected_research_only": true
+    },
+    {
+      "name": "DEALLOCATE-RESOURCE",
+      "law": "Повернути виділений об'єкт пулу для можливого повторного використання, не доводячи негайного звільнення фізичної пам'яті.",
+      "sources": [
+        {
+          "candidate_id": "d10.name.00524",
+          "donor_provenance": "knowledge/d10-historical-candidate-coordinate-queue-v1.json:343",
+          "source_pin": "131369263ac37c27798bb3c95521eb99e52b8f10",
+          "reason": "EXCLUDE_NO_WITNESS"
+        },
+        {
+          "candidate_id": "d10.pending.DEALLOCATE-RESOURCE",
+          "donor_provenance": "knowledge/d10-historical-candidate-coordinate-queue-v1.json:343",
+          "source_pin": "131369263ac37c27798bb3c95521eb99e52b8f10",
+          "reason": "EXCLUDE_NO_WITNESS"
+        }
+      ],
+      "F1": "SOURCE_PINNED",
+      "F2": "HOLD_NOT_RUN",
+      "F3": "HOLD_DEDUP_UNPROVEN",
+      "F4": "NO_COORDINATE",
+      "ratified": false,
+      "selected_research_only": true
+    },
+    {
+      "name": "DEFRESOURCE",
+      "law": "Описати іменований пул із constructor, matcher, initializer та checker; semantics candidate is lease contract, not allocator address.",
+      "sources": [
+        {
+          "candidate_id": "d10.name.00540",
+          "donor_provenance": "knowledge/d10-historical-candidate-coordinate-queue-v1.json:309",
+          "source_pin": "131369263ac37c27798bb3c95521eb99e52b8f10",
+          "reason": "EXCLUDE_NO_WITNESS"
+        },
+        {
+          "candidate_id": "d10.pending.DEFRESOURCE",
+          "donor_provenance": "knowledge/d10-historical-candidate-coordinate-queue-v1.json:309",
+          "source_pin": "131369263ac37c27798bb3c95521eb99e52b8f10",
+          "reason": "EXCLUDE_NO_WITNESS"
+        }
+      ],
+      "F1": "SOURCE_PINNED",
+      "F2": "HOLD_NOT_RUN",
+      "F3": "HOLD_DEDUP_UNPROVEN",
+      "F4": "NO_COORDINATE",
+      "ratified": false,
+      "selected_research_only": true
+    },
+    {
+      "name": "METHOD-QUALIFIERS",
+      "law": "Returns an ordered proper list of method qualifiers, separate from specializers and from runtime applicability.",
+      "sources": [
+        {
+          "candidate_id": "d10.name.00956",
+          "donor_provenance": "knowledge/d10-historical-candidate-coordinate-queue-v1.json:445",
+          "source_pin": "131369263ac37c27798bb3c95521eb99e52b8f10",
+          "reason": "EXCLUDE_NO_WITNESS"
+        },
+        {
+          "candidate_id": "d10.pending.METHOD-QUALIFIERS",
+          "donor_provenance": "knowledge/d10-historical-candidate-coordinate-queue-v1.json:445",
+          "source_pin": "131369263ac37c27798bb3c95521eb99e52b8f10",
+          "reason": "EXCLUDE_NO_WITNESS"
+        }
+      ],
+      "F1": "SOURCE_PINNED",
+      "F2": "HOLD_NOT_RUN",
+      "F3": "HOLD_DEDUP_UNPROVEN",
+      "F4": "NO_COORDINATE",
+      "ratified": false,
+      "selected_research_only": true
+    },
+    {
+      "name": "INTERLISP-RECORD-FIELD-RESOLVE",
+      "law": "Resolve a symbolic record field label to a location in the current declared record layout; after layout redefinition the same field name resolves to the new offset.",
+      "sources": [
+        {
+          "candidate_id": "d10.name.00778",
+          "donor_provenance": "knowledge/d10-historical-candidate-coordinate-queue-v1.json:785",
+          "source_pin": "131369263ac37c27798bb3c95521eb99e52b8f10",
+          "reason": "EXCLUDE_NO_WITNESS"
+        },
+        {
+          "candidate_id": "d10.pending.INTERLISP-RECORD-FIELD-RESOLVE",
+          "donor_provenance": "knowledge/d10-historical-candidate-coordinate-queue-v1.json:785",
+          "source_pin": "131369263ac37c27798bb3c95521eb99e52b8f10",
+          "reason": "EXCLUDE_NO_WITNESS"
+        }
+      ],
+      "F1": "SOURCE_PINNED",
+      "F2": "HOLD_NOT_RUN",
+      "F3": "HOLD_DEDUP_UNPROVEN",
+      "F4": "NO_COORDINATE",
+      "ratified": false,
+      "selected_research_only": true
+    },
+    {
+      "name": "INTERNET-TIME-MODE-VALID?",
+      "law": "Return exact predicate 1 only for NTP modes 4 and 5, otherwise 0.",
+      "sources": [
+        {
+          "candidate_id": "d10.name.00781",
+          "donor_provenance": "knowledge/d10-historical-candidate-coordinate-queue-v1.json:666",
+          "source_pin": "131369263ac37c27798bb3c95521eb99e52b8f10",
+          "reason": "EXCLUDE_NO_WITNESS"
+        },
+        {
+          "candidate_id": "d10.pending.INTERNET-TIME-MODE-VALID%3F",
+          "donor_provenance": "knowledge/d10-historical-candidate-coordinate-queue-v1.json:666",
+          "source_pin": "131369263ac37c27798bb3c95521eb99e52b8f10",
+          "reason": "EXCLUDE_NO_WITNESS"
+        }
+      ],
+      "F1": "SOURCE_PINNED",
+      "F2": "HOLD_NOT_RUN",
+      "F3": "HOLD_DEDUP_UNPROVEN",
+      "F4": "NO_COORDINATE",
+      "ratified": false,
+      "selected_research_only": true
+    },
+    {
+      "name": "INTERNET-TIME-STRATUM-VALID?",
+      "law": "Return exact predicate 1 only for allowable NTP stratum range 1..15 inclusive, otherwise 0.",
+      "sources": [
+        {
+          "candidate_id": "d10.name.00784",
+          "donor_provenance": "knowledge/d10-historical-candidate-coordinate-queue-v1.json:683",
+          "source_pin": "131369263ac37c27798bb3c95521eb99e52b8f10",
+          "reason": "EXCLUDE_NO_WITNESS"
+        },
+        {
+          "candidate_id": "d10.pending.INTERNET-TIME-STRATUM-VALID%3F",
+          "donor_provenance": "knowledge/d10-historical-candidate-coordinate-queue-v1.json:683",
+          "source_pin": "131369263ac37c27798bb3c95521eb99e52b8f10",
+          "reason": "EXCLUDE_NO_WITNESS"
+        }
+      ],
+      "F1": "SOURCE_PINNED",
+      "F2": "HOLD_NOT_RUN",
+      "F3": "HOLD_DEDUP_UNPROVEN",
+      "F4": "NO_COORDINATE",
+      "ratified": false,
+      "selected_research_only": true
+    },
+    {
+      "name": "COPY-RESIDUAL-CONSTRAINTS",
+      "law": "Copy a term with fresh variables while extracting pending attribute constraints as explicit residual goals G. Replaying G restores the constraints onto the copy; copying alone DOES NOT implicitly preserve them for copy_term/3.",
+      "sources": [
+        {
+          "candidate_id": "d10.name.00507",
+          "donor_provenance": "knowledge/d10-historical-candidate-coordinate-queue-v1.json:1075",
+          "source_pin": "131369263ac37c27798bb3c95521eb99e52b8f10",
+          "reason": "EXCLUDE_NO_WITNESS"
+        },
+        {
+          "candidate_id": "d10.pending.COPY-RESIDUAL-CONSTRAINTS",
+          "donor_provenance": "knowledge/d10-historical-candidate-coordinate-queue-v1.json:1075",
+          "source_pin": "131369263ac37c27798bb3c95521eb99e52b8f10",
+          "reason": "EXCLUDE_NO_WITNESS"
+        }
+      ],
+      "F1": "SOURCE_PINNED",
+      "F2": "HOLD_NOT_RUN",
+      "F3": "HOLD_DEDUP_UNPROVEN",
+      "F4": "NO_COORDINATE",
+      "ratified": false,
+      "selected_research_only": true
+    },
+    {
+      "name": "CLASS-NAME",
+      "law": "Return the class name symbol if present; anonymous classes have NIL and name is not identical to class-object identity.",
+      "sources": [
+        {
+          "candidate_id": "d10.name.00424",
+          "donor_provenance": "knowledge/d10-historical-candidate-coordinate-queue-v1.json:564",
+          "source_pin": "131369263ac37c27798bb3c95521eb99e52b8f10",
+          "reason": "EXCLUDE_NO_WITNESS"
+        },
+        {
+          "candidate_id": "d10.pending.CLASS-NAME",
+          "donor_provenance": "knowledge/d10-historical-candidate-coordinate-queue-v1.json:564",
+          "source_pin": "131369263ac37c27798bb3c95521eb99e52b8f10",
+          "reason": "EXCLUDE_NO_WITNESS"
+        }
+      ],
+      "F1": "SOURCE_PINNED",
+      "F2": "HOLD_NOT_RUN",
+      "F3": "HOLD_DEDUP_UNPROVEN",
+      "F4": "NO_COORDINATE",
+      "ratified": false,
+      "selected_research_only": true
+    },
+    {
+      "name": "FUNCTION-BASIC-DEFINITION",
+      "law": "Отримати початкову функцію, навіть коли її обгорнуто; базова функція лишається відмінною від wrapper chain.",
+      "sources": [
+        {
+          "candidate_id": "d10.name.00704",
+          "donor_provenance": "knowledge/d10-historical-candidate-coordinate-queue-v1.json:173",
+          "source_pin": "131369263ac37c27798bb3c95521eb99e52b8f10",
+          "reason": "EXCLUDE_NO_WITNESS"
+        },
+        {
+          "candidate_id": "d10.pending.FUNCTION-BASIC-DEFINITION",
+          "donor_provenance": "knowledge/d10-historical-candidate-coordinate-queue-v1.json:173",
+          "source_pin": "131369263ac37c27798bb3c95521eb99e52b8f10",
+          "reason": "EXCLUDE_NO_WITNESS"
+        }
+      ],
+      "F1": "SOURCE_PINNED",
+      "F2": "HOLD_NOT_RUN",
+      "F3": "HOLD_DEDUP_UNPROVEN",
+      "F4": "NO_COORDINATE",
+      "ratified": false,
+      "selected_research_only": true
+    },
+    {
+      "name": "COLLECT-FREE-VARS-LET*",
+      "law": "Compute free identifiers of sequential let* bindings using each earlier binding only in later initializers and the body",
+      "sources": [
+        {
+          "candidate_id": "d10.name.00479",
+          "donor_provenance": "knowledge/d10-historical-candidate-coordinate-queue-v1.json:1001",
+          "source_pin": "131369263ac37c27798bb3c95521eb99e52b8f10",
+          "reason": "EXCLUDE_NO_WITNESS"
+        },
+        {
+          "candidate_id": "d10.pending.COLLECT-FREE-VARS-LET*",
+          "donor_provenance": "knowledge/d10-historical-candidate-coordinate-queue-v1.json:1001",
+          "source_pin": "131369263ac37c27798bb3c95521eb99e52b8f10",
+          "reason": "EXCLUDE_NO_WITNESS"
+        }
+      ],
+      "F1": "SOURCE_PINNED",
+      "F2": "HOLD_NOT_RUN",
+      "F3": "HOLD_DEDUP_UNPROVEN",
+      "F4": "NO_COORDINATE",
+      "ratified": false,
+      "selected_research_only": true
+    },
+    {
+      "name": "COLLECT-FREE-VARS-LETREC",
+      "law": "Compute free identifiers of mutually recursive letrec definitions with all names in scope for all initializers and body",
+      "sources": [
+        {
+          "candidate_id": "d10.name.00480",
+          "donor_provenance": "knowledge/d10-historical-candidate-coordinate-queue-v1.json:1018",
+          "source_pin": "131369263ac37c27798bb3c95521eb99e52b8f10",
+          "reason": "EXCLUDE_NO_WITNESS"
+        },
+        {
+          "candidate_id": "d10.pending.COLLECT-FREE-VARS-LETREC",
+          "donor_provenance": "knowledge/d10-historical-candidate-coordinate-queue-v1.json:1018",
+          "source_pin": "131369263ac37c27798bb3c95521eb99e52b8f10",
+          "reason": "EXCLUDE_NO_WITNESS"
+        }
+      ],
+      "F1": "SOURCE_PINNED",
+      "F2": "HOLD_NOT_RUN",
+      "F3": "HOLD_DEDUP_UNPROVEN",
+      "F4": "NO_COORDINATE",
+      "ratified": false,
+      "selected_research_only": true
+    },
+    {
+      "name": "MULTIPLE-VALUE-PROG1",
+      "law": "preserve all first-form return values, execute later effects in sequence, and return exactly the preserved cardinality and values",
+      "sources": [
+        {
+          "candidate_id": "d10.name.00977",
+          "donor_provenance": "knowledge/d10-historical-lisp-all-source-consolidation-20261011.json:3962",
+          "source_pin": "962208ecad6b4b4d8845ea7dedaf88c34e93e702",
+          "reason": "EXCLUDE_NO_WITNESS"
+        }
+      ],
+      "F1": "SOURCE_PINNED",
+      "F2": "HOLD_NOT_RUN",
+      "F3": "HOLD_DEDUP_UNPROVEN",
+      "F4": "NO_COORDINATE",
+      "ratified": false,
+      "selected_research_only": true
+    },
+    {
+      "name": "DELAY-FORCE",
+      "law": "Описує ліниве обчислення ланцюга promise через хвостовий FORCE без необмеженого накопичення відкладених примусових викликів.",
+      "sources": [
+        {
+          "candidate_id": "d10.name.00542",
+          "donor_provenance": "knowledge/d10-historical-lisp-branch-candidate-intake-20261011.json:418",
+          "source_pin": "42362a46d7587e375ed19c156a0b67e40b86939a",
+          "reason": "EXCLUDE_NO_WITNESS"
+        }
+      ],
+      "F1": "SOURCE_PINNED",
+      "F2": "HOLD_NOT_RUN",
+      "F3": "HOLD_DEDUP_UNPROVEN",
+      "F4": "NO_COORDINATE",
+      "ratified": false,
+      "selected_research_only": true
+    }
+  ],
+  "out_of_scope": "No witness fabrication, no new SENS codewords, no change to historical inventories or D1-D9 semantics"
+}
