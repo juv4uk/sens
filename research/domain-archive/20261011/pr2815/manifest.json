@@ -1,0 +1,45 @@
+{
+  "schema": "sens-historical-branch-archive/v1",
+  "archived_at": "2026-10-11",
+  "source": {
+    "repo": "juv4uk/sens",
+    "pr": 2815,
+    "title": "impl(2791): land CoreD6 AST identity on current main",
+    "branch": "impl/2791-d6-ast-current-main",
+    "head_sha": "04142e57c282fb8726b1fa732319f4c4173dd8b2",
+    "base": "main",
+    "base_sha": "42e3945c5e8f27902ade6fedf52f54786c56f914"
+  },
+  "files": [
+    {
+      "path": "crates/sens/src/bits.rs",
+      "patch_present": true,
+      "patch_chars": 330
+    },
+    {
+      "path": "crates/sens/src/domain_words.rs",
+      "patch_present": true,
+      "patch_chars": 316
+    },
+    {
+      "path": "crates/sens/src/syntax.rs",
+      "patch_present": true,
+      "patch_chars": 1580
+    },
+    {
+      "path": "knowledge/d6-runtime-admission-audit.json",
+      "patch_present": true,
+      "patch_chars": 36001
+    },
+    {
+      "path": "scripts/research-2766-d6-runtime-admission-audit.py",
+      "patch_present": true,
+      "patch_chars": 3137
+    }
+  ],
+  "current_main": {
+    "ast_representation": "CoreDomainIdentity / DomainIdentity generic form; no additional CoreD6 variant required",
+    "core_d6_carrier": "typed Bit6 carrier remains available"
+  },
+  "disposition": "ARCHIVE-ONLY / SUPERSEDED BY GENERIC DOMAIN AST"
+}
