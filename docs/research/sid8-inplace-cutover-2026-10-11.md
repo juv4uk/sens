@@ -119,6 +119,15 @@ baseline and must not be silently double-counted:
 - The new strict D3 scanner reports existing historical logic as blockers; do
   not weaken it to obtain a superficial green CI or claim old/new full parity.
 
+## Nine-file source and fixture cutover (2026-10-11 late)
+
+- **Nine original .lisp files, 333 audited historical executable call-head substitutions in-place on main.** This is a separate cohort beyond the earlier 86-file ledger, not a claim of repository-wide completion. No alternate extension, no branch, no alteration of archival evidence.
+- Five files in one Git tree transaction, [8c7221a](https://github.com/juv4uk/sens/commit/8c7221a483d97703ff72566f08c02e7dcf45202e): knowledge/guard-reference.lisp (272), knowledge/astronomy.lisp (1), knowledge/physics.lisp (1), knowledge/family.lisp (1), lib/machine/layout/pair-x86-64.lisp (5).
+- Four live executable fixtures in another Git tree transaction, [bca3d00](https://github.com/juv4uk/sens/commit/bca3d0074e42b247b2823617c9ae7e3cc05f9228): tests/fixtures/lisp-fs-conformance.lisp (10), tests/fixtures/rivnopravnist-uk.lisp (8), tests/fixtures/semantic-registry-self-hosted-witness.lisp (32), tests/fixtures/semantic-coordinate-matrix-845.lisp (3).
+- Independent source regression tests/test_sid8_knowledge_layout_source.py and dedicated workflow audit-domain-knowledge-layout.yml check all nine; focused [GitHub Actions run 38171461792 PASS](https://github.com/juv4uk/sens/actions/runs/38171461792).
+- Historic numeric value 00000001 in the semantic-registry identity table remains **data**, not a callable head; the regression test requires its preservation.
+- Existing broad Hosted CI D3 logic failures were reproduced on main before this cohort (run 38170921529). The focused tests are green, but independent all-program old/new runtime parity or a fully green Hosted CI is **not claimed**.
+
 ## Safety of completion claims
 
 - Syntax/Hosted CI green on intermediate migrated cohorts; T5 file-authority and migration readiness gates separately remain fail-closed on historical corpus.
