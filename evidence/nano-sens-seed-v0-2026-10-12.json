@@ -1,0 +1,84 @@
+{
+  "schema": "nano-sens-seed-v0-result/1",
+  "status": "PASS_MEASURED_BASELINE_NOT_MINIMUM",
+  "measurement": {
+    "schema": "nano-sens-size-report/1",
+    "report_sha256": "dd4473beb15d6bba6f8cabc12b4ae7885d388231b70750f4fdfc29bb0f18eca3",
+    "two_clean_runs": 2,
+    "report_byte_identical_across_runs": true,
+    "two_run_proof_schema": "nano-sens-two-clean-runs-proof/1",
+    "two_run_proof_sha256": "2e3110b5033ecd8927e35fe7540ee2e0b6cbff773c198d58a7bc30aa11aa615e",
+    "compiler_lineage_report_sha256": "1152eb6247561a595375600f02653503747b8b9542a8c6f9eaabb3316d3c939d"
+  },
+  "run": {
+    "repository": "juv4uk/cml",
+    "branch": "master",
+    "head_sha": "9b852bc70b3d529933b85dd592f301e0b1e9e37d",
+    "workflow_run_id": 38182268999,
+    "workflow_url": "https://github.com/juv4uk/cml/actions/runs/38182268999",
+    "state": "both independent matrix jobs and comparison job PASS",
+    "artifact_retention_days": 30,
+    "artifacts_expire_at_utc": "2026-11-10T22:55:24Z"
+  },
+  "source_pins": {
+    "sens_submodule_sha": "d0787a40fcea36501747732aa61b6de19fe29c70",
+    "compiler_nucleus_sha256": "34863f297e0f4f6f21c30dffc34a8bb85822015a89d13028c700b5a679f61b7e",
+    "language_contract_sha256": "177d532d24c1f0738a934152f65c7f01f90b5593c8dbfe519e31148c0aa80c40",
+    "structural_law_projection_sha256": "3ce5bb4e042bfec446199a9c77787d0a022109e9a6d6442a4f93b50f68e34e9a",
+    "measurement_tools_sens_commit": "ca9babfec9d20259a206153476d7717f91be3bb6"
+  },
+  "seed_v0": {
+    "role": "Operational CML Rust lib-test bootstrap runner that produces C1 and executes the C1/C2 lineage witness; includes host/bootstrap compiler logic. This is not a minimum-size claim or a SENS-native seed.",
+    "file_name": "seed-v0-c0-runner.bin",
+    "sha256": "d45e09837a10103879c3d405c54ddf53ee2b1376bce969ccd20316ece4065be4",
+    "on_disk_file_bytes": 34580696,
+    "loadable_segment_file_bytes": 6038608,
+    "executable_code_section_bytes": 4145007,
+    "format": "ELF",
+    "section_measurement": "GNU readelf -W -l/-S"
+  },
+  "c1_c2": {
+    "c1_executable_sha256": "27b8fbf096cddbb77be2b4bf57cc58bf8b4fac4accc42adbcfbc10d6cd95f375",
+    "c2_executable_sha256": "27b8fbf096cddbb77be2b4bf57cc58bf8b4fac4accc42adbcfbc10d6cd95f375",
+    "on_disk_file_bytes_each": 92248,
+    "loadable_segment_file_bytes_each": 85685,
+    "executable_code_section_bytes_each": 70655,
+    "c1_c2_source_sha256_each": "89199fe59621ce0434e70f2a161cdc3089ef8d588d6d8cc461a1e4f72372d225",
+    "compiler_artifact_output_sha256_each": "303d96cd1467fae319fb2dcf2c12e1a73c840bb0a0ecab67f3609ffde411d79a",
+    "equivalence": "byte-identical-artifact"
+  },
+  "external_dependencies_not_counted_in_seed_bytes": {
+    "rustc": "1.99.0 (b940084d7 2026-09-28)",
+    "cargo": "1.99.0 (5f94df478 2026-08-27)",
+    "gcc": "13.3.0",
+    "linker": "GNU ld (GNU Binutils for Ubuntu) 2.42",
+    "target": "x86_64-linux-gnu",
+    "shared_libraries": [
+      "libgcc_s.so.1",
+      "libc.so.6",
+      "/lib64/ld-linux-x86-64.so.2",
+      "linux-vdso.so.1"
+    ],
+    "os": "ubuntu-latest"
+  },
+  "still_not_measured": [
+    "shared-library/toolchain dependency bytes",
+    "minimum possible seed size",
+    "GAS/NASM golden-corpus parity"
+  ],
+  "campaign_gate": "The baseline metric gate is green. Do not combine optimization campaigns; measure each separately with full positive and negative corpus and two clean runs.",
+  "semantic_boundaries": {
+    "contract": "11.8",
+    "d10_dependency": false,
+    "d10_status": "research/unratified",
+    "current_main_d10_inventory_snapshot": {
+      "selected_research_candidates": 675,
+      "capacity": 1024,
+      "remaining": 349,
+      "ratified_residents": 0
+    },
+    "historical_lisp": "donor evidence, not automatic core semantics",
+    "mechanism_is_not_semantics": true,
+    "new_branches_or_domains_for_nano_sens": false
+  }
+}
