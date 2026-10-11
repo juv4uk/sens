@@ -1046,8 +1046,10 @@ def main():
     rewritten_files = 0
     blocked_files = 0
     total_hits = 0
+    # Validate every member of the batch before publishing any source.
+    pending_outputs: list[tuple[Path, bytes]] = []
 
-    for path in source_files(root, binary_master=bool(args.binary_mirror or args.sens_mirror)):
+    for path in sorted(source_files(root, binary_master=bool(args.binary_mirror or args.sens_mirror))):
         text = path.read_text(encoding="utf-8")
         rel = path.relative_to(root)
 
@@ -1062,7 +1064,7 @@ def main():
                     resolver,
                 )
                 if not converted.strip():
-                    status = "empty"
+                    raise BinaryMigrationError("EMPTY_BINARY_SOURCE: an empty source is not an admitted executable program")
                 else:
                     if args.sens_mirror:
                         target = args.sens_mirror / rel.with_suffix(".sens")
@@ -1070,22 +1072,7 @@ def main():
                         physical = encode_projection(converted)
                         if decode_bytes(physical) != source_words:
                             raise SensT5Error("physical T5 roundtrip changed exact typed words")
-                        target.parent.mkdir(parents=True, exist_ok=True)
-                        # Atomic no-overwrite: stage beside destination, link O_EXCL.
-                        staged_path = None
-                        try:
-                            with tempfile.NamedTemporaryFile(
-                                mode="wb", prefix=".sens-stage-", suffix=".tmp",
-                                dir=target.parent, delete=False,
-                            ) as staged:
-                                staged_path = Path(staged.name)
-                                staged.write(physical)
-                                staged.flush()
-                                os.fsync(staged.fileno())
-                            os.link(staged_path, target)
-                        finally:
-                            if staged_path is not None:
-                                staged_path.unlink(missing_ok=True)
+                        pending_outputs.append((target, physical))
                         status = "sens-written"
                         extra = {
                             "output": str(rel.with_suffix(".sens")),
@@ -1095,11 +1082,9 @@ def main():
                         }
                     else:
                         target = args.binary_mirror / rel
-                        target.parent.mkdir(parents=True, exist_ok=True)
-                        target.write_text(converted, encoding="ascii")
+                        pending_outputs.append((target, converted.encode("ascii")))
                         status = "binary-mirrored"
                         extra = {}
-                    rewritten_files += 1
                 total_hits += len(hits)
                 blocked = []
             except (BinaryMigrationError, SensT5Error, OSError) as error:
@@ -1139,6 +1124,47 @@ def main():
             **(extra if (args.binary_mirror or args.sens_mirror) and status == "sens-written" else {}),
         })
 
+    if args.binary_mirror or args.sens_mirror:
+        # Full-batch semantic admission is required, not "some files passed".
+        # A failing source must leave zero newly published outputs.
+        if not blocked_files and rows and len(pending_outputs) == len(rows):
+            created: list[Path] = []
+            try:
+                for target, payload in pending_outputs:
+                    target.parent.mkdir(parents=True, exist_ok=True)
+                    staged_path = None
+                    try:
+                        with tempfile.NamedTemporaryFile(
+                            mode="wb", prefix=".sens-stage-", suffix=".tmp",
+                            dir=target.parent, delete=False,
+                        ) as staged:
+                            staged_path = Path(staged.name)
+                            staged.write(payload)
+                            staged.flush()
+                            os.fsync(staged.fileno())
+                        os.link(staged_path, target)  # fail on existing target
+                        created.append(target)
+                    finally:
+                        if staged_path is not None:
+                            staged_path.unlink(missing_ok=True)
+                rewritten_files = len(created)
+            except OSError as error:
+                for target in reversed(created):
+                    target.unlink(missing_ok=True)
+                blocked_files += 1
+                rows[0]["blockers"].append({
+                    "reason": f"BATCH_PUBLICATION_BLOCKED: {error}"
+                })
+                rows[0]["status"] = "blocked"
+
+        if rewritten_files != len(rows):
+            rewritten_files = 0
+            for row in rows:
+                if row["status"] in ("sens-written", "binary-mirrored"):
+                    row["status"] = "not-written"
+                    for field in ("output", "physical_bytes", "physical_sha256", "typed_word_sha256"):
+                        row.pop(field, None)
+
     mode = (
         "apply" if args.apply
         else "mirror" if args.mirror
@@ -1175,7 +1201,7 @@ def main():
     print(json.dumps(report["summary"], ensure_ascii=False))
 
     if args.binary_mirror or args.sens_mirror:
-        return 0 if rewritten_files else 2
+        return 0 if (rows and blocked_files == 0 and rewritten_files == len(rows)) else 2
     return 2 if blocked_files else (1 if total_hits and not (args.apply or args.mirror) else 0)
 
 
