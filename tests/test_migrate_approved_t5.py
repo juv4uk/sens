@@ -17,6 +17,20 @@ EXPECTED_PHYSICAL = bytes.fromhex(
 )
 
 class ApprovedT5MigrationTests(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        # Publication requires the real Rust reader; do not let missing
+        # --reader turn negative tests into accidental successes.
+        build = subprocess.run(
+            ["cargo", "build", "--locked", "-p", "sens-cli", "--bin", "sens-trit"],
+            cwd=ROOT, capture_output=True, text=True, timeout=240,
+        )
+        if build.returncode != 0:
+            raise AssertionError(
+                "cannot build independent Rust D2 reader:\n"
+                + build.stdout + build.stderr
+            )
+
     def run_cli(self, manifest, out, report, dry_run=False):
         args = [
             sys.executable, str(SCRIPT), str(ROOT),
@@ -26,6 +40,9 @@ class ApprovedT5MigrationTests(unittest.TestCase):
         ]
         if dry_run:
             args.append("--dry-run")
+        else:
+            reader_name = "sens-trit.exe" if sys.platform == "win32" else "sens-trit"
+            args.extend(["--reader", str(ROOT / "target" / "debug" / reader_name)])
         return subprocess.run(args, cwd=ROOT, capture_output=True, text=True, timeout=60)
 
     def test_dry_run_is_manifest_only(self):
