@@ -41,12 +41,7 @@ def literal_tsv(path):
             parse_array(record[column])
         previous = rows.get(ident)
         if previous is not None:
-            # Exact retransmission of one source identity is idempotent. A
-            # reused ID with differing content is a real collision; equal names
-            # under different IDs are not.
-            if previous == record:
-                return
-            raise ValueError(f"DUPLICATE_CANDIDATE_ID_CONFLICT:{number}:{ident}")
+            raise ValueError(f"DUPLICATE_OR_EMPTY_SOURCE_IDENTITY:{number}:{ident}")
         rows[ident] = record
 
     if git_blob(path.read_bytes()) == HISTORICAL_BLOB:
@@ -112,6 +107,9 @@ def merge_catalog(root, historical_path, current_path, output_path):
 
     for ident in sorted(source_union_ids):
         a, b = historic.get(ident), latest.get(ident)
+        if (a is not None and b is not None and
+                a["semantic_name"].strip().casefold() != b["semantic_name"].strip().casefold()):
+            raise ValueError("HISTORICAL_ID_NAME_CONFLICT:" + ident)
         primary = dict(b or a)
         resident = selected.get(ident)
 
@@ -279,17 +277,30 @@ def merge_catalog(root, historical_path, current_path, output_path):
     return {
         "source_historical_records": len(historic),
         "source_latest_records": len(latest),
+        "source_historical_ids": len(source_historical_ids),
+        "source_latest_ids": len(source_latest_ids),
         "source_id_overlap": len(source_historical_ids & source_latest_ids),
         "restored_old_only_candidate_ids": len(source_historical_ids - source_latest_ids),
+        "restored_prior_only_ids": len(source_historical_ids - source_latest_ids),
         "new_candidate_ids_beyond_historical": len(source_latest_ids - source_historical_ids),
         "source_union_candidate_ids": len(source_union_ids),
         "canonical_overlay_ids_added": canonical_overlay_ids_added,
         "full_union_candidate_ids": len(combined),
+        "full_union_ids": len(combined),
         "source_historical_names": len(historic_names),
         "source_latest_names": len(latest_names),
         "restored_old_only_names": len(historic_names - latest_names),
         "new_names_beyond_historical": len(latest_names - historic_names),
         "full_union_names": len(union_names),
+        "colliding_spelling_groups_not_deduped": sum(
+            1 for _name, group in
+            __import__("itertools").groupby(
+                sorted((row["semantic_name"].strip().casefold(), ident)
+                       for ident, row in combined.items()),
+                key=lambda item: item[0]
+            )
+            if len({item[1] for item in group}) > 1
+        ),
         "current_canonical_selected": len(selected),
         "new_allocations": 0,
         "new_ratifications": 0,
