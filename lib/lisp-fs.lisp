@@ -430,14 +430,14 @@
 ; snapshot becomes visible only when the root-pointer stage completes.
 ; Модель межі commit F4. Objects і journal можна записати раніше, але
 ; snapshot стає видимим лише після завершення root-pointer.
+; Commit-stage membership returns exact D1, never host T or implicit NIL.
 (0011 fs-commit-stage?
   (0010 (stage)
     (110
-      ((101 stage (001 objects)) t)
-      ((101 stage (001 journal)) t)
-      ((101 stage (001 root-pointer)) t)
-      )))
-
+      ((101 stage (001 objects)) (0101 (001 ())))
+      ((101 stage (001 journal)) (0101 (001 ())))
+      ((101 stage (001 root-pointer)) (0101 (001 ())))
+      ((010 ()) (0101 (001 (0)))))))
 (0011 fs-recover-commit
   (0010 (old-fs new-fs completed-stage)
     (110
