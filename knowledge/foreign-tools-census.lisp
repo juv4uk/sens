@@ -1,7 +1,7 @@
 ; Політика foreign-інструментів: цей запис є SENS-даними, не доказом самохостингу.
 ; Детальні умови кожного дозволеного Python-інструмента записані пофайлово.
-(00001001 *foreign-tools-census*
-  (00000001
+(0011 *foreign-tools-census*
+  (001
     ((schema . foreign-tools-census/1)
      (status . staged-migration)
      (authority . "knowledge/file-authority-policy.lisp")
