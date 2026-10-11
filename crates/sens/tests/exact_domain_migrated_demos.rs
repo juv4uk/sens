@@ -5,6 +5,9 @@ fn migrated_user_demos_execute_with_current_domain_surfaces() {
     for (name, source) in [
         ("task-demo.lisp", include_str!("../../../task-demo.lisp")),
         ("demo-tasks.lisp", include_str!("../../../demo-tasks.lisp")),
+        ("tasks-summary.lisp", include_str!("../../../tasks-summary.lisp")),
+        ("tasks-summary2.lisp", include_str!("../../../tasks-summary2.lisp")),
+        ("task-stats.lisp", include_str!("../../../task-stats.lisp")),
     ] {
         let mut session = Session::default();
         load_core_library(&mut session).expect("Core bootstrap must be available");

@@ -16,8 +16,8 @@
 ; Compute remaining: 457 - 232
 ; Обчислити залишене: 457 - 232
 
-(10011100 ((total 457) (completed 232))
-  (00001101 total completed))
+(нехай ((total 457) (completed 232))
+  (відняти total completed))
 
 ; The my-lisp CLI prints the result of the last expression
 ; my-lisp CLI друкує результат останнього виразу

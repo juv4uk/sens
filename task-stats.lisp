@@ -22,9 +22,9 @@
 ; Compute statistics using let
 ; Використання let для обчислень
 
-(10011100 ((total 457)
+(нехай ((total 457)
       (completed 232)
-      (remaing (00001101 457 232)))  ; Note: typo 'remaing' intentional for demo
+      (remaing (відняти 457 232)))  ; Note: typo 'remaing' intentional for demo
   ; Output results
   ; Виведення результатів
   
