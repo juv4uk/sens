@@ -1,0 +1,11 @@
+# Exact compare pin main SHA: d9c0907f64019f6b48e2d380b1c6f7cef1a3ae42
+# Overlapping island-math, legacy invoke-repl/SID8, and mechanism-selector variants; histories attached without tree overlay.
+branch	source_sha	compare_status	ahead_by	behind_by	reported_file_entries	classification
+agent/992-island-math-execution-seed	6243585dd1abd465149b7bd50fe283f5cb545c48	diverged	6	8141	6	HISTORY_ATTACHED_CONTENT_REVIEW_REQUIRED
+agent/1004-function-table-projection-retire	17831eaeb462c62fe3525af8b19df51512cc7202	diverged	11	8136	9	HISTORY_ATTACHED_CONTENT_REVIEW_REQUIRED
+agent/1006-1047-integration-base	da96edccafdd67bb016606cb43a1b77c7775d95d	diverged	2	8121	2	HISTORY_ATTACHED_CONTENT_REVIEW_REQUIRED
+agent/1006-invoke-repl-replay	1c84d429de5a5b946428d06dae24dc19d44cc99b	diverged	15	8121	15	HISTORY_ATTACHED_CONTENT_REVIEW_REQUIRED
+agent/1006-invoke-repl-sid8-replay	582539aef8f505a968b7287f22acffe8bb163778	diverged	15	7926	15	HISTORY_ATTACHED_CONTENT_REVIEW_REQUIRED
+agent/1024-semreg-empty-surface	054b54cadadd22df5816d7e01dcc3a342dda836c	diverged	4	8139	1	HISTORY_ATTACHED_CONTENT_REVIEW_REQUIRED
+agent/1046-canon-function-table	7242a4420453bf0a5069c9d6aa4c53df888c1da9	behind	0	8121	0	ALREADY_IN_MAIN_ANCESTRY
+agent/1047-mechanism-selector	9abe6cdfe48dddd6433580a5e3066168991197d4	diverged	5	8121	3	HISTORY_ATTACHED_CONTENT_REVIEW_REQUIRED
