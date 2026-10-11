@@ -1,0 +1,75 @@
+{
+  "schema": "d10-change-class-selection-v1/v1",
+  "date": "2026-10-11",
+  "status": "SELECTED-RESEARCH-PENDING-OWNER-REVIEW",
+  "semantic_name": "CHANGE-CLASS",
+  "stable_id": "d10.historical.clos.change-class.c03",
+  "source_class": "HISTORICAL-CLOS-INSTANCE-REFORMATION",
+  "selection": {
+    "selected_prior": 647,
+    "selected_after": 648,
+    "delta_selected": 1,
+    "law_forced_coordinates": 256,
+    "unplaced_after": 392,
+    "remaining_after": 376,
+    "coordinate": null,
+    "ratified_added": 0,
+    "ratified_residents_after": 0,
+    "physical_t5_authorized": false
+  },
+  "provenance": {
+    "authority": [
+      "#4013",
+      "#4463",
+      "#4842"
+    ],
+    "dossier_path": "knowledge/d10-historical-clos-interlisp-residual-review-v1.json",
+    "dossier_blob_sha": "df8ed73011df39f9ec689046ce6936cc00892215",
+    "dossier_record": "CLOS-03",
+    "dossier_line": 69,
+    "dossier_git_commit": "c67db6cdd820dea8d3a110caed359507c0a2d7a4",
+    "primary_url": "https://www.cs.cmu.edu/Groups/AI/util/html/hyperspec/HyperSpec/Body/stagenfun_change-class.html",
+    "primary_section": "ANSI Common Lisp HyperSpec — CHANGE-CLASS"
+  },
+  "law": {
+    "arguments": "(existing instance, target class designator)",
+    "result": "the same instance after its class transition",
+    "observable_claim": "Reclassify an existing instance destructively while retaining EQ/object identity, preserving values of same-name common slots, and leaving previously unbound common slots unbound.",
+    "positive_witnesses": [
+      "Instance of A with common slot p=7 transitions to B; result is the identical object, CLASS-OF is B, p remains 7.",
+      "A common slot unbound before transition remains unbound after transition unless a separate initialization rule explicitly binds it."
+    ],
+    "falsifiers": [
+      "Return a fresh instance instead of retaining identity.",
+      "Lose the value of a same-name common slot.",
+      "Silently bind a common slot which was unbound before transition."
+    ],
+    "scope_boundary": "Lifecycle hooks such as UPDATE-INSTANCE-FOR-DIFFERENT-CLASS are not independent residents in this selection; D2 retains language-form/control authority."
+  },
+  "dedup": {
+    "lower_foundation_blob_sha": "09d1d71c39d1484dfd005a5068dbb18b76f0f0d4",
+    "prior_inventory_blob_sha": "7e13e929338baeef9b16c2139d24b78e23ea1e03",
+    "exact_d1_d9_name_collision": false,
+    "exact_prior_d10_name_collision": false,
+    "nearest_selected": [
+      "DEFCLASS",
+      "MAKE-INSTANCE",
+      "SLOT-VALUE",
+      "CLASS-OF is a separate pending proposal"
+    ],
+    "distinction": "A class-definition or construction operation does not reclassify an already existing instance while retaining its identity and common slot values."
+  },
+  "admission": {
+    "coordinate": null,
+    "coordinate_basis": "UNPLACED",
+    "ratified_resident": false,
+    "decision": "SELECT-D10-RESEARCH-CANDIDATE",
+    "owner_review": "PENDING",
+    "original_executable_sens_migrations_authorized": 0
+  },
+  "independent_oracle": {
+    "kind": "SBCL ANSI Common Lisp reference oracle",
+    "fixture": "tests/fixtures/d10-change-class-real-cl-oracle.lisp",
+    "not_a_sens_runtime_oracle": true
+  }
+}
