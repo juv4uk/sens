@@ -18,6 +18,7 @@ on:
       - "scripts/generate-domain-owner-registry.py"
       - "knowledge/d8-ratified.json"
       - "knowledge/d9-ratified.json"
+      - "knowledge/d10-ratified.json"
       - "crates/sens/src/text7.rs"
       - "crates/sens/src/text7_projection.rs"
       - "knowledge/d7-ratified.json"
@@ -71,7 +72,7 @@ jobs:
     steps:
       - uses: actions/checkout@v5
       - uses: dtolnay/rust-toolchain@stable
-      - name: Перевірити драбину D1–D10 та механічні цикли W7
+      - name: Перевірити точну ширину доменів і механічні цикли W7
         run: cargo test --locked -p sens --test domain_ladder --test d7_w7_pack --test d2_text7_frame_role_boundary --test text7_canonical_wire --test current_binary_preflight
       - name: Перевірити пряме читання упакованих байтів D2 без текстового джерела
         run: cargo test --locked -p sens --lib canonical_reader::tests::packed_
