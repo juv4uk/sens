@@ -104,10 +104,29 @@
   (0010 (world module-name)
     (010 (world-module-events world module-name))))
 
+; D5 REVERSE and D6 REDUCE are ratified names but cannot be presumed
+; callable; derive the chronological event fold from D3 list structure.
+(0011 внутрішній-зворот-подій
+  (0010 (events acc)
+    (110
+      ((0101 events) acc)
+      ((010 events) acc)
+      ((010 ()) (внутрішній-зворот-подій (011 events) (111 (100 events) acc))))))
+
+(0011 внутрішнє-згортання-подій
+  (0010 (events clauses)
+    (110
+      ((0101 events) clauses)
+      ((010 events) clauses)
+      ((010 ()) (внутрішнє-згортання-подій
+                  (011 events)
+                  (world-apply-event clauses (100 events)))))))
+
 (0011 world-clauses
   (0010 (world module-name)
-    (101110 world-apply-event (001 ())
-            (10100 (world-module-events world module-name)))))
+    (внутрішнє-згортання-подій
+      (внутрішній-зворот-подій (world-module-events world module-name) (001 ()))
+      (001 ()))))
 
 ;; Pure reasoning adapters: the answer depends only on the explicit world,
 ;; module, and goal. They deliberately do not inspect `*knowledge-journal*`.
