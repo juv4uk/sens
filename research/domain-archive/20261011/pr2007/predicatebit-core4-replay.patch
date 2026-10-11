@@ -1,0 +1,3231 @@
+# Historical source patch for SENS PR #2007
+# Original head: 8df1104819e39e7ab16222a5c36a7f356efcfdd1
+# PR branch: replay/1713-predicatebit-20261001
+# Base: main @ 42e3945c5e8f27902ade6fedf52f54786c56f914
+# Captured via GitHub PR patch API on 2026-10-11.
+# Review-only; do not apply wholesale over current main.
+
+===== FILE crates/sens/src/environment.rs =====
+@@ -66,17 +66,9 @@ pub enum CoreProfile {
+     Core4,
+ }
+ 
+-#[derive(Clone, Copy, Debug, Default, Eq, PartialEq)]
+-pub(crate) enum CondClauseMode {
+-    #[default]
+-    CurrentMigration,
+-    Core2LegacyTwoPart,
+-}
+-
+ #[derive(Debug, Default)]
+ struct Limits {
+     selected_core_profile: Option<CoreProfile>,
+-    cond_clause_mode: CondClauseMode,
+     cons_limit: Option<usize>,
+     cons_count: usize,
+     numeric_bit_limit: Option<usize>,
+@@ -216,14 +208,6 @@ impl Environment {
+         self.2.borrow_mut().selected_core_profile = Some(profile);
+     }
+ 
+-    pub(crate) fn set_cond_clause_mode(&self, mode: CondClauseMode) {
+-        self.2.borrow_mut().cond_clause_mode = mode;
+-    }
+-
+-    pub(crate) fn cond_clause_mode(&self) -> CondClauseMode {
+-        self.2.borrow().cond_clause_mode
+-    }
+-
+     /// Native root sessions are unrestricted (`None`). An embedding can set
+     /// an exact allowlist; an empty allowlist is an explicit deny-all policy.
+     pub fn is_process_allowed(&self, program: &str) -> bool {
+
+===== FILE crates/sens/src/eval/arithmetic.rs =====
+@@ -419,19 +419,18 @@ pub(super) fn comparison_on_values(
+         .iter()
+         .any(|value| matches!(value, Numeric::Inexact(_)))
+     {
+-        // #216 is deliberately narrower than generic numeric comparison:
+-        // this exact-Q layer has no absolute answer once any operand is
+-        // inexact, so Canon 0 is returned rather than manufacturing FALSE.
+-        return Ok(Value::Nil);
++        return Err(LanguageError::new(
++            ErrorKind::Type,
++            "comparison predicate requires exact numeric operands",
++            span,
++        ));
+     }
+ 
+     let holds = numerics
+         .windows(2)
+         .all(|pair| compare(operator, pair[0].to_exact(), pair[1].to_exact()));
+ 
+-    // #216 exact-rational decisions stay mathematical data: 1/1 for YES,
+-    // 0/1 for NO. `exact_value` writes those canonically as exact 1 and 0.
+-    Ok(exact_value(Rational::integer(if holds { 1 } else { 0 })))
++    Ok(Value::predicate_bit(holds))
+ }
+ 
+ #[cfg(test)]
+
+===== FILE crates/sens/src/eval/builtins.rs =====
+@@ -376,7 +376,7 @@ pub(super) fn prim_01001011(args: &[Value], env: &Environment, span: Span) -> Re
+ /// numeric-buffer?
+ pub(super) fn prim_00100110(args: &[Value], _env: &Environment, span: Span) -> Result<Value, crate::LanguageError> {
+         exact_args(crate::sens!(00100110), args, 1, span)?;
+-        Ok(if matches!(args[0], Value::NumericBuffer(_)) { Value::truth(true) } else { Value::Nil })
++        Ok(Value::predicate_bit(matches!(args[0], Value::NumericBuffer(_))))
+     }
+ 
+ /// numeric-buffer-type
+@@ -531,15 +531,15 @@ pub(super) fn prim_00111011(args: &[Value], _env: &Environment, span: Span) -> R
+ 
+ fn string_prefix_answer(prefix: &Value, text: &Value, span: Span) -> Result<Value, crate::LanguageError> {
+     match (prefix, text) {
+-        (Value::String(p), Value::String(t)) => Ok(Value::truth(t.starts_with(p.as_ref()))),
++        (Value::String(p), Value::String(t)) => Ok(Value::predicate_bit(t.starts_with(p.as_ref()))),
+         _ => {
+             // Той самий порядок кроків, що в мовній версії.
+             if is_empty_string(prefix) {
+-                return Ok(Value::truth(true));
++                return Ok(Value::predicate_bit(true));
+             }
+             string_empty_answer(prefix, span)?;
+             if is_empty_string(text) {
+-                return Ok(Value::Nil);
++                return Ok(Value::predicate_bit(false));
+             }
+             string_empty_answer(text, span)?;
+             string_first_or_error(prefix, span)?;
+@@ -560,15 +560,15 @@ pub(super) fn prim_00111110(args: &[Value], _env: &Environment, span: Span) -> R
+     exact_args(crate::sens!(00111110), args, 2, span)?;
+     match (&args[0], &args[1]) {
+         (Value::String(needle), Value::String(text)) => {
+-            Ok(Value::truth(text.contains(needle.as_ref())))
++            Ok(Value::predicate_bit(text.contains(needle.as_ref())))
+         }
+         (needle, text) => {
+             // Мовна версія: спершу string-prefix?, потім string-empty?, потім string-rest.
+-            if string_prefix_answer(needle, text, span)? == Value::truth(true) {
+-                return Ok(Value::truth(true));
++            if string_prefix_answer(needle, text, span)?.as_predicate_bit() == Some(true) {
++                return Ok(Value::predicate_bit(true));
+             }
+             if is_empty_string(text) {
+-                return Ok(Value::Nil);
++                return Ok(Value::predicate_bit(false));
+             }
+             string_empty_answer(text, span)?;
+             string_rest_or_error(text, span)?;
+
+===== FILE crates/sens/src/eval/closures.rs =====
+@@ -631,6 +631,13 @@ pub(super) fn value_to_expr(value: Value, span: Span) -> Result<Expr, LanguageEr
+     fn go_inner(value: &Value, span: Span, depth: u32) -> Result<Expr, LanguageError> {
+         let kind = match &value {
+         Value::Nil => ExprKind::List(Rc::new([])),
++        Value::PredicateBit(_) => {
++            return Err(LanguageError::new(
++                ErrorKind::InvalidForm,
++                "a contextual predicate bit has no source-code literal",
++                span,
++            ));
++        }
+         Value::Bool(true) => ExprKind::Symbol("t".into()),
+         Value::Bool(false) => ExprKind::List(Rc::new([])),
+         Value::Number(number, exactness) => ExprKind::Number(*number, *exactness),
+
+===== FILE crates/sens/src/eval/mod.rs =====
+@@ -356,8 +356,7 @@ mod single_pass_eval_tests {
+     fn binary_sids_keep_quote_and_cond_as_syntax() {
+         let source = r#"
+             (00000111
+-              ((00000010 (00000001 atom)) (1) (00000001 selected))
+-              (t t (00000001 missed)))
++              ((00000010 (00000001 atom)) (00000001 selected)))
+         "#;
+         let mut session = Session::default();
+         let result = eval_program(source, &mut session)
+@@ -372,7 +371,7 @@ mod single_pass_eval_tests {
+               (lambda (n)
+                 (cond
+                   ((eq? n 0) (quote done))
+-                  (t (count-down (- n 1))))))
++                  ((00000011 0 0) (count-down (- n 1))))))
+             (count-down 1000)
+         "#;
+         let mut session = Session::default();
+@@ -393,11 +392,12 @@ mod single_pass_eval_tests {
+     #[test]
+     fn macros_expand_and_evaluate_correctly() {
+         let source = r#"
+-            (defmacro unless (condition body)
++            (defmacro when-predicate (condition body)
+                 (cons (quote cond)
+-                    (cons (cons condition (cons (quote ()) (quote ())))
+-                    (cons (cons (quote t) (cons body (quote ()))) (quote ())))))
+-            (unless () (quote success))
++                    (cons
++                      (cons condition (cons body (quote ())))
++                      (quote ()))))
++            (when-predicate (eq? 0 0) (quote success))
+         "#;
+         let mut session = Session::default();
+         let result = eval_program(source, &mut session).expect("eval should succeed");
+@@ -427,15 +427,10 @@ mod single_pass_eval_tests {
+     fn ukrainian_canonical_surface_executes_the_core() {
+         let source = r#"
+             (за-умовою
+-              ((атом? (як-є кіт)) () (перше
++              ((атом? (як-є кіт)) (перше
+                  (сполучити
+                    (як-є груша)
+-                   (сполучити (як-є слива) ()))))
+-              ((атом? (як-є кіт)) (1) (перше
+-                 (сполучити
+-                   (як-є груша)
+-                   (сполучити (як-є слива) ()))))
+-              (t (як-є помилка)))
++                   (сполучити (як-є слива) ())))))
+         "#;
+         let mut session = Session::default();
+         let result = eval_program(source, &mut session)
+
+===== FILE crates/sens/src/eval/special_forms/core.rs =====
+@@ -4,65 +4,13 @@
+ 
+ use crate::eval::canon;
+ use crate::eval::{evaluate, evaluate_step, EvalStep};
+-use crate::environment::{CondClauseMode, CoreProfile};
+ use crate::{Environment, ErrorKind, Expr, ExprKind, LanguageError, Span, Value};
+ 
+ use std::rc::Rc;
+ 
+-/// Відповідь 15-станної шкали Core4 (#1391): список двійкових бітів.
+-/// `(1)` — «так» ступеня 1, `(0)` — «ні» ступеня 1, `()` — невідомо.
+-fn answer(bit: Option<u8>) -> Value {
+-    match bit {
+-        Some(bit) => Value::list([Value::Number(f64::from(bit), crate::Exactness::Exact)]),
+-        None => Value::Nil,
+-    }
+-}
+-
+-/// atom? відповіддю шкали (contracts/core4-predicate-answer-scale.lisp /3):
+-/// атом `(1)`, пара `(0)`. `()` стоїть вище розрізнення атом/пара, тож у Core4
+-/// (і Core3, що стоїть на ньому) відповідь `()`. Core1–2 мають лише ступінь 1,
+-/// тож там `()` — атом, як у Маккарті 1960: `(1)`.
+-pub(crate) fn atom_value(value: &Value, environment: &Environment) -> Value {
+-    match value {
+-        Value::Pair(_, _) => answer(Some(0)),
+-        Value::Nil => match environment.selected_core_profile() {
+-            Some(CoreProfile::Core1 | CoreProfile::Core2) => answer(Some(1)),
+-            _ => answer(None),
+-        },
+-        _ => answer(Some(1)),
+-    }
+-}
+-
+-/// Напрям відповіді шкали: `Some(true)` для 1^n, `Some(false)` для 0^n
+-/// (n = 1..7); `None`, якщо значення не є відповіддю зі стрілкою.
+-fn answer_direction(value: &Value) -> Option<bool> {
+-    let mut bits = Vec::new();
+-    let mut cursor = value;
+-    while let Value::Pair(head, tail) = cursor {
+-        match head.as_ref() {
+-            Value::Number(number, crate::Exactness::Exact) if *number == 0.0 || *number == 1.0 => {
+-                bits.push(*number == 1.0)
+-            }
+-            _ => return None,
+-        }
+-        cursor = tail.as_ref();
+-    }
+-    if !matches!(cursor, Value::Nil) || bits.is_empty() || bits.len() > 7 {
+-        return None;
+-    }
+-    let first = bits[0];
+-    bits.iter().all(|bit| *bit == first).then_some(first)
+-}
+-
+-/// Двочастинна клауза `cond` `(перевірка вираз)` за новою логікою (#1391):
+-/// клауза обирається лише відповіддю «так» (1^n). «Ні» (0^n) і невідомо `()`
+-/// її не обирають. Значення, що не є відповіддю шкали, лишаються за
+-/// історичною істинністю (лише () і false хибні).
+-fn migration_only_cond_truthy(value: &Value) -> bool {
+-    match answer_direction(value) {
+-        Some(direction) => direction,
+-        None => value.is_truthy(),
+-    }
++/// Exact one-bit SENS predicate answer.
++pub(crate) fn atom_value(value: &Value, _environment: &Environment) -> Value {
++    Value::predicate_bit(!matches!(value, Value::Pair(_, _)))
+ }
+ 
+ pub(crate) fn evaluate_definition(
+@@ -91,74 +39,39 @@ pub(crate) fn evaluate_definition(
+ pub(crate) fn evaluate_cond(
+     clauses: &[Expr],
+     environment: &Environment,
+-    span: Span,
++    _span: Span,
+ ) -> Result<EvalStep, LanguageError> {
+-    let mode = environment.cond_clause_mode();
+-    let mut migration_compatibility_seen = false;
+-
+     for clause in clauses {
+         let ExprKind::List(parts) = &clause.kind else {
+             return Err(LanguageError::new(
+                 ErrorKind::InvalidForm,
+-                "cond expects list clauses · cond ochikuie spysky-umovy · cond erwartet Listenklauseln",
++                "cond expects list clauses",
+                 clause.span,
+             ));
+         };
++        if parts.len() != 2 {
++            return Err(LanguageError::new(
++                ErrorKind::InvalidForm,
++                "cond expects exactly (test expression)",
++                clause.span,
++            ));
++        }
+ 
+-        match mode {
+-            CondClauseMode::Core2LegacyTwoPart => {
+-                if parts.len() != 2 {
+-                    return Err(LanguageError::new(
+-                        ErrorKind::InvalidForm,
+-                        "Core2 cond expects historical (test expression) clauses",
+-                        clause.span,
+-                    ));
+-                }
+-                let value = evaluate(&parts[0], environment)?;
+-                if migration_only_cond_truthy(&value) {
+-                    return evaluate_step(&parts[1], environment);
+-                }
++        let test = evaluate(&parts[0], environment)?;
++        match test.as_predicate_bit() {
++            Some(true) => return evaluate_step(&parts[1], environment),
++            Some(false) => {}
++            None => {
++                return Err(LanguageError::new(
++                    ErrorKind::Type,
++                    "cond test must return an exact one-bit predicate result",
++                    parts[0].span,
++                ))
+             }
+-            CondClauseMode::CurrentMigration => match parts.len() {
+-                // #217 canonical path: the clause explicitly names the domain
+-                // result that selects it. The expected form is data, not code.
+-                // No Value -> bool conversion occurs on this path.
+-                3 => {
+-                    let actual = evaluate(&parts[0], environment)?;
+-                    let expected = quoted(&parts[1])?;
+-                    if actual == expected {
+-                        return evaluate_step(&parts[2], environment);
+-                    }
+-                }
+-                // Migration-only compatibility path for callers not yet moved
+-                // to the canonical three-part form.
+-                2 => {
+-                    migration_compatibility_seen = true;
+-                    let value = evaluate(&parts[0], environment)?;
+-                    if migration_only_cond_truthy(&value) {
+-                        return evaluate_step(&parts[1], environment);
+-                    }
+-                }
+-                _ => {
+-                    return Err(LanguageError::new(
+-                        ErrorKind::InvalidForm,
+-                        "cond expects canonical (query expected-result expression) clauses or migration-only (test expression) clauses · cond ochikuie kanonichni (zapyt ochikuvanyi-rezultat vyraz) abo tymchasovi (perevirka vyraz) · cond erwartet kanonische (Abfrage erwartetes-Ergebnis Ausdruck)- oder voruebergehende (Test Ausdruck)-Klauseln",
+-                        clause.span,
+-                    ));
+-                }
+-            },
+         }
+     }
+ 
+-    if mode == CondClauseMode::Core2LegacyTwoPart || migration_compatibility_seen {
+-        return Ok(EvalStep::Value(Value::Nil));
+-    }
+-
+-    Err(LanguageError::new(
+-        ErrorKind::UnsatisfiedConditional,
+-        "канонічний cond: жоден query не збігся з expected-result · canonical cond: no query matched its expected result · kanonisches cond: keine Abfrage entsprach ihrem erwarteten Ergebnis",
+-        span,
+-    ))
++    Ok(EvalStep::Value(Value::Nil))
+ }
+ 
+ pub fn exact_arity(
+@@ -301,5 +214,5 @@ pub(crate) fn eq_values(left: Value, right: Value, span: Span) -> Result<Value,
+             span,
+         ));
+     }
+-    Ok(answer(Some(u8::from(left == right))))
++    Ok(Value::predicate_bit(left == right))
+ }
+
+===== FILE crates/sens/src/eval/special_forms/strings.rs =====
+@@ -127,7 +127,7 @@ pub(crate) fn string_predicate_values(
+     span: Span,
+ ) -> Result<Value, LanguageError> {
+     exact_value_arity("string?", arguments, 1, span)?;
+-    Ok(Value::truth(matches!(arguments[0], Value::String(_))))
++    Ok(Value::predicate_bit(matches!(arguments[0], Value::String(_))))
+ }
+ 
+ pub(crate) fn symbol_to_string_values(
+
+===== FILE crates/sens/src/lib.rs =====
+@@ -328,9 +328,6 @@ fn load_core_library_with_fasl(
+     core_fasl: &[u8],
+ ) -> Result<EvalResult, LanguageError> {
+     session.environment.select_core_profile(CoreProfile::Core4);
+-    session
+-        .environment
+-        .set_cond_clause_mode(environment::CondClauseMode::CurrentMigration);
+     load_macro_library(session)?;
+ 
+     let result = match fasl_decode_program(core_fasl) {
+@@ -366,9 +363,6 @@ pub fn core_library_fasl_is_current() -> bool {
+ /// remains stable across closures without exposing a shadowable Lisp binding.
+ pub fn load_core2_library(session: &mut Session) -> Result<EvalResult, LanguageError> {
+     session.environment.select_core_profile(CoreProfile::Core2);
+-    session
+-        .environment
+-        .set_cond_clause_mode(environment::CondClauseMode::Core2LegacyTwoPart);
+     let result = eval_program(CORE2_LIBRARY_SOURCE, session)?;
+     bind_missing_stable_surface_peers(&session.environment);
+     Ok(result)
+
+===== FILE crates/sens/src/presentation.rs =====
+@@ -74,6 +74,8 @@ fn render_uk(value: &Value) -> String {
+             format!("#f32({})", items.join(" "))
+         }
+         Value::Nil | Value::Bool(false) => "()".to_string(),
++        Value::PredicateBit(true) => "1".to_string(),
++        Value::PredicateBit(false) => "0".to_string(),
+         Value::Bool(true) => "істина".to_string(),
+         Value::Number(number, Exactness::Exact) => number.to_string(),
+         Value::Number(number, Exactness::Inexact) => uk_decimal(canonical_inexact(*number)),
+
+===== FILE crates/sens/src/value.rs =====
+@@ -498,6 +498,9 @@ impl std::fmt::Debug for Builtin {
+ #[derive(Clone, Debug)]
+ pub enum Value {
+     Nil,
++    /// Exact contextual SENS predicate result. This runtime carrier is
++    /// neither Number nor host Bool and has no source literal.
++    PredicateBit(bool),
+     Bool(bool),
+     Number(f64, Exactness),
+     Rational(Rational),
+@@ -562,6 +565,7 @@ impl PartialEq for Value {
+     fn eq(&self, other: &Self) -> bool {
+         match (self, other) {
+             (Value::Nil, Value::Nil) => true,
++            (Value::PredicateBit(left), Value::PredicateBit(right)) => left == right,
+             (Value::Bool(left), Value::Bool(right)) => left == right,
+             // Exactness is part of a number's identity (PLAN.md item 10, Path
+             // A): (eq 3 3.0) is () because these are different values in the
+@@ -686,6 +690,19 @@ impl Value {
+         !matches!(self, Value::Pair(_, _))
+     }
+ 
++    pub fn predicate_bit(holds: bool) -> Self {
++        Self::PredicateBit(holds)
++    }
++
++    pub fn as_predicate_bit(&self) -> Option<bool> {
++        match self {
++            Self::PredicateBit(bit) => Some(*bit),
++            _ => None,
++        }
++    }
++
++    /// Legacy host/boundary truthiness. Core predicate/control execution must
++    /// not call this; COND accepts PredicateBit only.
+     pub fn is_truthy(&self) -> bool {
+         !matches!(self, Value::Nil | Value::Bool(false))
+     }
+@@ -783,6 +800,8 @@ fn render(value: &Value, quote_strings: bool) -> String {
+             format!("#f32({})", items.join(" "))
+         }
+         Value::Nil => "()".to_string(),
++        Value::PredicateBit(true) => "1".to_string(),
++        Value::PredicateBit(false) => "0".to_string(),
+         Value::Bool(true) => "t".to_string(),
+         Value::Bool(false) => "()".to_string(),
+         Value::Number(number, Exactness::Exact) => number.to_string(),
+
+===== FILE crates/sens/tests/mccarthy_1960_functions.rs =====
+@@ -15,9 +15,9 @@ fn eval(source: &str) -> String {
+ 
+ #[test]
+ fn null_is_true_only_for_the_empty_list() {
+-    assert_eq!(eval("(null? (00000001 ()))"), "t");
+-    assert_eq!(eval("(null? (00000001 a))"), "()");
+-    assert_eq!(eval("(null? (00000001 (a)))"), "()");
++    assert_eq!(eval("(null? (00000001 ()))"), "1");
++    assert_eq!(eval("(null? (00000001 a))"), "0");
++    assert_eq!(eval("(null? (00000001 (a)))"), "0");
+ }
+ 
+ #[test]
+
+===== FILE crates/sens/tests/string_order_predicatebit.rs =====
+@@ -0,0 +1,28 @@
++use sens::{eval_program, load_core_library, ErrorKind, Session, Value};
++
++#[test]
++fn string_order_is_exact_predicatebit_after_strict_cond_migration() {
++    let mut session = Session::default();
++    load_core_library(&mut session).expect("strict Core4 must load");
++
++    for (source, expected) in [
++        ("(00100101 \"\" \"\")", false),
++        ("(00100101 \"\" \"a\")", true),
++        ("(00100101 \"a\" \"\")", false),
++        ("(00100101 \"a\" \"b\")", true),
++        ("(00100101 \"b\" \"a\")", false),
++        ("(00100101 \"aa\" \"ab\")", true),
++        ("(00100101 \"ab\" \"aa\")", false),
++        ("(00100101 \"a\" \"a\")", false),
++        ("(00100101 \"ю\" \"я\")", true),
++    ] {
++        let value = eval_program(source, &mut session)
++            .unwrap_or_else(|error| panic!("{source}: {error}"))
++            .value;
++        assert_eq!(value, Value::predicate_bit(expected), "{source}");
++    }
++
++    let error = eval_program("(00100101 #b1 \"a\")", &mut session)
++        .expect_err("string<? must fail closed on a non-string operand");
++    assert_eq!(error.kind, ErrorKind::Type);
++}
+
+===== FILE lib/bridge/prolog-to-datalog.lisp =====
+@@ -21,34 +21,42 @@
+ (00001001 prolog-values-to-datalog-facts
+   (00001000 (role values)
+     (00000111
+-      ((00000010 values) () (00000001 ()))
+-      ((00000010 values) (0)
+-       (00000100 (00100111 role (00000101 values))
+-             (prolog-values-to-datalog-facts role (00000110 values)))))))
++      ((00000010 values)
++       (00000001 ()))
++      ((00000010 (00000001 ()))
++       (00000100
++         (00100111 role (00000101 values))
++         (prolog-values-to-datalog-facts role (00000110 values)))))))
+ 
+ (00001001 prolog-substitutions-to-datalog-facts
+   (00001000 (observation)
+     (10011100 ((source-ref-row (00101101 (00000001 source-ref) (00000110 observation)))
+           (variable-row (00101101 (00000001 variable) (00000110 observation)))
+           (values-row (00101101 (00000001 values) (00000110 observation))))
+       (00000111
+-        ((00000010 source-ref-row) ()
+-         (00100111 (00000001 projection-failure) (00000001 missing-source-ref)))
+-        ((00000010 source-ref-row) (1)
+-         (00100111 (00000001 projection-failure) (00000001 malformed-source-ref)))
+-        ((00000010 source-ref-row) (0)
++        ((00000010 source-ref-row)
+          (00000111
+-           ((00000010 variable-row) ()
+-            (00100111 (00000001 projection-failure) (00000001 missing-variable-role)))
+-           ((00000010 variable-row) (1)
+-            (00100111 (00000001 projection-failure) (00000001 malformed-variable-role)))
+-           ((00000010 variable-row) (0)
++           ((00000011 source-ref-row (00000001 ()))
++            (00100111 (00000001 projection-failure) (00000001 missing-source-ref)))
++           ((00000010 (00000001 ()))
++            (00100111 (00000001 projection-failure) (00000001 malformed-source-ref)))))
++        ((00000010 (00000001 ()))
++         (00000111
++           ((00000010 variable-row)
++            (00000111
++              ((00000011 variable-row (00000001 ()))
++               (00100111 (00000001 projection-failure) (00000001 missing-variable-role)))
++              ((00000010 (00000001 ()))
++               (00100111 (00000001 projection-failure) (00000001 malformed-variable-role)))))
++           ((00000010 (00000001 ()))
+             (00000111
+-              ((00000010 values-row) ()
+-               (00100111 (00000001 projection-failure) (00000001 missing-values)))
+-              ((00000010 values-row) (1)
+-               (00100111 (00000001 projection-failure) (00000001 malformed-values)))
+-              ((00000010 values-row) (0)
++              ((00000010 values-row)
++               (00000111
++                 ((00000011 values-row (00000001 ()))
++                  (00100111 (00000001 projection-failure) (00000001 missing-values)))
++                 ((00000010 (00000001 ()))
++                  (00100111 (00000001 projection-failure) (00000001 malformed-values)))))
++              ((00000010 (00000001 ()))
+                (00100111
+                  (00000001 projection-result)
+                  (00100111 (00000001 projection)
+
+===== FILE lib/core.lisp =====
+@@ -30,53 +30,63 @@
+ ; бо `let`/`let*` нижче будують свою розгортку через нього.
+ (00001001 list (00001000 args args))
+ 
+-; and/or — раніше були відсутні і в цьому файлі, і як Rust-білтіни
+-; (перевірено: обидва grep дають нуль збігів), тож кожен, хто підключав
+-; my-lisp, мусив бутстрапити власні (знайдено живцем 2026-08-27 у
+-; chess-lisp-zero/lib/chess.lisp). Макроси, не функції — інакше "and"/"or"
+-; втратили б коротке замикання, обчислюючи всі аргументи наперед. Мусять
+-; бути variadic (rest-параметр як голий символ, як `list` вище), не
+-; фіксованої арності — саме так їх і використовує реальний код, що вже
+-; існує. Порожній `(and)` -> t, порожній `(or)` -> () — той самий вибір,
+-; що й у Common Lisp/Scheme, узгоджений з G8 (нейтральний елемент
+-; логічного "і"/"або"). Перевірено живцем: коротке замикання (другий
+-; аргумент дійсно не обчислюється), варіативність на 3+ аргументах,
+-; передача самого значення, не лише t/() (напр. (and t 42) -> 42).
++; and/or are predicate combinators on the shared one-bit foundation.
++; They keep lazy short-circuiting, but no longer preserve arbitrary Lisp
++; truthy values: every completed result is an exact PredicateBit.
++;
++; A constant predicate bit has no source literal, so macro expansions use
++; ATOM itself as the language-owned producer:
++;   (00000010 '())          => YES
++;   (00000010 '(00000000))  => NO
+ (00001010 and rest
+   (00000111
+-    ((00000010 rest) () t)
+-    ((00000010 rest) (1) t)
+-    ((00000010 (00000110 rest)) () (00000101 rest))
+-    ((00000010 (00000110 rest)) (1) (00000101 rest))
+-    (t
+-     ; Build the short-circuit cond AST from the primitive tree substrate.
+-     ; AND remains Lisp-owned; generic macro frontends need no private LIST
+-     ; semantic just to execute this law.
++    ((00000010 rest)
++     (00000001 (00000010 (00000001 ()))))
++    ((00000010 (00000110 rest))
++     (00000101 rest))
++    ((00000010 (00000001 ()))
++     ; Expand to:
++     ;   (COND (first (and ...))
++     ;         (YES   NO))
++     ; so the recursive tail is evaluated only after a YES first operand.
+      (00000100 (00000001 00000111)
+-           (00000100 (00000100 (00000101 rest)
+-                       (00000100 (00000100 (00000001 and) (00000110 rest))
+-                             (00000001 ())))
+-                 (00000100 (00000100 t
+-                             (00000100 (00000001 ())
+-                                   (00000001 ())))
+-                       (00000001 ())))))))
++       (00000100
++         (00000100 (00000101 rest)
++           (00000100
++             (00000100 (00000001 and) (00000110 rest))
++             (00000001 ())))
++         (00000100
++           (00000100
++             (00000001 (00000010 (00000001 ())))
++             (00000100
++               (00000001 (00000010 (00000001 (00000000))))
++               (00000001 ())))
++           (00000001 ())))))))
+ 
+ (00001010 or rest
+   (00000111
+-    ((00000010 rest) () (00000001 ()))
+-    ((00000010 rest) (1) (00000001 ()))
+-    ((00000010 (00000110 rest)) () (00000101 rest))
+-    ((00000010 (00000110 rest)) (1) (00000101 rest))
+-    (t
+-     ; Same primitive constructor discipline as AND above: preserve lazy
+-     ; short-circuit expansion without importing LIST into compiler authority.
++    ((00000010 rest)
++     (00000001 (00000010 (00000001 (00000000)))))
++    ((00000010 (00000110 rest))
++     (00000101 rest))
++    ((00000010 (00000001 ()))
++     ; Expand to:
++     ;   (COND (first YES)
++     ;         (YES   (or ...)))
++     ; and therefore never evaluate the recursive tail after a YES.
+      (00000100 (00000001 00000111)
+-           (00000100 (00000100 (00000101 rest)
+-                       (00000100 t (00000001 ())))
+-                 (00000100 (00000100 t
+-                             (00000100 (00000100 (00000001 or) (00000110 rest))
+-                                   (00000001 ())))
+-                       (00000001 ())))))))
++       (00000100
++         (00000100 (00000101 rest)
++           (00000100
++             (00000001 (00000010 (00000001 ())))
++             (00000001 ())))
++         (00000100
++           (00000100
++             (00000001 (00000010 (00000001 ())))
++             (00000100
++               (00000100 (00000001 or) (00000110 rest))
++               (00000001 ())))
++           (00000001 ())))))))
+ 
+ ; gensym — my-lisp's defmacro is unhygienic by default (no automatic
+ ; protection against accidental variable capture; verified live
+@@ -190,9 +200,16 @@
+ (00001001 reverse-onto
+   (00001000 (values acc)
+     (00000111
+-      ((00000010 values) () acc)
+-      ((00000010 values) (0)
+-       (reverse-onto (00000110 values) (00000100 (00000101 values) acc))))))
++      ((00000010 values)
++       (00000111
++         ((00000011 values (00000001 ()))
++          acc)
++         ((00000010 (00000001 ()))
++          (00000101 values))))
++      ((00000010 (00000001 ()))
++       (reverse-onto
++         (00000110 values)
++         (00000100 (00000101 values) acc))))))
+ 
+ (00001001 reverse
+   (00001000 (values)
+@@ -219,10 +236,17 @@
+ (00001001 map-onto
+   (00001000 (f values acc)
+     (00000111
+-      ((00000010 values) () (00101010 acc))
+-      ((00000010 values) (1) (00000001 ()))
+-      ((00000010 values) (0)
+-       (map-onto f (00000110 values) (00000100 (f (00000101 values)) acc))))))
++      ((00000010 values)
++       (00000111
++         ((00000011 values (00000001 ()))
++          (00101010 acc))
++         ((00000010 (00000001 ()))
++          (00000001 ()))))
++      ((00000010 (00000001 ()))
++       (map-onto
++         f
++         (00000110 values)
++         (00000100 (f (00000101 values)) acc))))))
+ 
+ (00001001 map
+   (00001000 (f values)
+@@ -231,14 +255,16 @@
+ (00001001 filter-onto
+   (00001000 (predicate values acc)
+     (00000111
+-      ((00000010 values) () (00101010 acc))
+-      ((00000010 values) (1) (00101010 acc))
+-      (t t
++      ((00000010 values)
++       (00101010 acc))
++      ((00000010 (00000001 ()))
+        (10011100 ((decision (predicate (00000101 values))))
+          (00000111
+-           ((truthy? decision) t
+-            (filter-onto predicate (00000110 values) (00000100 (00000101 values) acc)))
+-           ((truthy? decision) ()
++           (decision
++            (filter-onto predicate
++              (00000110 values)
++              (00000100 (00000101 values) acc)))
++           ((00000010 (00000001 ()))
+             (filter-onto predicate (00000110 values) acc))))))))
+ 
+ (00001001 filter
+@@ -318,71 +344,48 @@
+ ; Makro-Expansionsmechanismus, den `unless` und `let` bereits nutzen —
+ ; `let*`, das `let*` aufruft, ist gewöhnliche Rekursion, kein Sonderfall,
+ ; von dem der Evaluator wissen müsste.
+-; `eq` is deliberately atom-only per McCarthy's original primitive (see
+-; docs/language-core.md) — `(eq '(1 2) '(1 2))` errors rather than comparing
+-; structurally. `equal?` is the structural/deep-equality counterpart, built
+-; on top of `eq` and `atom` rather than replacing them. Its answer is the
+-; Core4 15-state scale (#1391): `(1)` — the same structure, `(0)` — different.
+-; Canonical three-part `cond` consumes the answer explicitly; a two-part
+-; clause selects only on a «yes» answer.
++; `eq` is deliberately atom-only per McCarthy's original primitive.
++; `equal?` is the structural/deep-equality predicate built on top of EQ,
++; ATOM, CAR and CDR. Contract 10 gives it the shared predicate result domain:
++; exact PredicateBit 1 for equal, 0 for different. No list-wrapped answer
++; scale and no three-part COND remain in this law.
+ (00001001 equal?
+   (00001000 (a b)
+     (00000111
+-      ((00000010 a) ()
+-       (00000111
+-         ((00000010 b) ()
+-          (00000001 (1)))
+-         ((00000010 b) (1)
+-          (00000001 (0)))
+-         ((00000010 b) (0)
+-          (00000001 (0)))))
+-      ((00000010 a) (1)
++      ; ATOM already returns exact PredicateBit. If both values are atoms,
++      ; EQ owns the identity decision directly.
++      ((00000010 a)
+        (00000111
+-         ((00000010 b) ()
+-          (00000001 (0)))
+-         ((00000010 b) (1)
+-          (00000111
+-            ((00000011 a b) (1)
+-             (00000001 (1)))
+-            ((00000011 a b) (0)
+-             (00000001 (0)))))
+-         ((00000010 b) (0)
+-          (00000001 (0)))))
+-      ((00000010 a) (0)
++         ((00000010 b)
++          (00000011 a b))
++         ; b is a pair: atom vs pair is structurally unequal.
++         ((00000010 (00000001 ()))
++          (00000010 (00000001 (00000000))))))
++      ; a is a pair. The explicit YES test below is a constant predicate
++      ; producer used only as the exhaustive second COND branch.
++      ((00000010 (00000001 ()))
+        (00000111
+-         ((00000010 b) ()
+-          (00000001 (0)))
+-         ((00000010 b) (1)
+-          (00000001 (0)))
+-         ((00000010 b) (0)
++         ((00000010 b)
++          (00000010 (00000001 (00000000))))
++         ((00000010 (00000001 ()))
+           (00000111
+-            ((00100010 (00000101 a) (00000101 b)) (1)
++            ; Deep equality short-circuits on the heads, then compares tails.
++            ((00100010 (00000101 a) (00000101 b))
+              (00100010 (00000110 a) (00000110 b)))
+-            ((00100010 (00000101 a) (00000101 b)) (0)
+-             (00000001 (0))))))))))
+-
+-; Exact-Q uses 1 for YES and 0 for NO.  Structural and identity relations
+-; retain their own result domains, so predicate consumers normalize them here.
+-(00001001 truthy?
+-  (00001000 (value)
+-    (00000111
+-      ((00000010 value) () (00000001 ()))
+-      ((00000010 value) (1)
+-       (00000111
+-         ((00000011 value 0) (1) (00000001 ()))
+-         ((00000011 value 0) (0) t)))
+-      ((00000010 value) (0)
+-       (00000111
+-         ((00100010 value (00000001 (0))) (1) (00000001 ()))
+-         ((00100010 value (00000001 (0))) (1) (00000001 ()))
+-         ((00100010 value (00000001 (0))) (1) (00000001 ()))
+-         (t t t))))))
++            ((00000010 (00000001 ()))
++             (00000010 (00000001 (00000000)))))))))))
+ 
++; NOT is a predicate combinator, not a generic truthiness converter.
++; Its input must already be an exact PredicateBit; strict COND rejects every
++; other domain. Constant YES/NO are produced by ATOM because PredicateBit has
++; no source literal.
+ (00001001 not?
+   (00001000 (value)
+     (00000111
+-      ((truthy? value) t (00000001 ()))
+-      ((truthy? value) () t))))
++      (value
++       (00000010 (00000001 (00000000))))
++      ((00000010 (00000001 ()))
++       (00000010 (00000001 ()))))))
+ 
+ 
+ ; nth/member?/assoc (G5 test: already expressible via existing means?)
+@@ -421,17 +424,28 @@
+ (00001001 assoc
+   (00001000 (key alist)
+     (00000111
+-      ((00000010 alist) () (00000001 ()))
+-      ((00000010 alist) (0)
++      ; ATOM is true for both structural () and malformed non-list atoms.
++      ; Distinguish the legitimate empty-alist base case with EQ; every other
++      ; atom deliberately reaches CAR and therefore fails Type instead of
++      ; being silently reclassified as an empty association list.
++      ((00000010 alist)
++       (00000111
++         ((00000011 alist (00000001 ()))
++          (00000001 ()))
++         ((00000010 (00000001 ()))
++          (00000101 alist))))
++      ; Pair case: deep key equality is itself an exact PredicateBit.
++      ((00000010 (00000001 ()))
+        (00000111
+-         ((00100010 key (00000101 (00000101 alist))) (1) (00000101 alist))
+-         ((00100010 key (00000101 (00000101 alist))) (0)
++         ((00100010 key (00000101 (00000101 alist)))
++          (00000101 alist))
++         ((00000010 (00000001 ()))
+           (00101101 key (00000110 alist))))))))
+ 
+ (00001010 let* (bindings body)
+   (00000111
+-    ((00000010 bindings) () body)
+-    ((00000010 bindings) (0)
++    ((00000010 bindings) body)
++    ((00000010 (00000001 ()))
+      ; Build the recursive expansion from the primitive tree substrate only.
+      ; This keeps let* semantics in Lisp while allowing generic macro
+      ; frontends to execute the law without importing the higher-level list
+@@ -483,24 +497,20 @@
+ (00001001 string-order-helper
+   (00001000 (left right)
+     (00000111
+-      ((00111100 left) (1)
++      ((00111100 left)
+        (00000111
+-         ((00111100 right) (1)
++         ((00111100 right)
+           (00000001 (text-order same)))
+-         ((00111100 right) (0)
++         ((00000010 (00000001 ()))
+           (00000001 (text-order before)))))
+-      ((00111100 left) (0)
++      ((00111100 right)
+        (00000001 (text-order after)))
+       ((00000011 (00111111 left) (00111111 right))
+-       (1)
+        (string-order-helper (01000000 left) (01000000 right)))
+       ((00011010 (01000101 (00111111 left))
+           (01000101 (00111111 right)))
+-       1
+        (00000001 (text-order before)))
+-      ((00011010 (01000101 (00111111 left))
+-          (01000101 (00111111 right)))
+-       0
++      ((00000010 (00000001 ()))
+        (00000001 (text-order after))))))
+ 
+ (00001001 nonempty-string-membership-helper
+@@ -527,16 +537,9 @@
+ ; аргументів — Arity від прив'язки лямбди.
+ (00001001 string<?
+   (00001000 (a b)
+-    (00000111
+-      ; Порожній бік: інший перевіряється як рядок (string-append дає Type).
+-      ((00111100 b) (1)
+-       (00101111 (00100111 (00111010 a "") (00000001 ()))))
+-      ((00111100 a) (1)
+-       (00101111 (00100111 (00111010 b "") t)))
+-      ((00011010 (01000101 (00111111 a)) (01000101 (00111111 b))) 1 t)
+-      ((00000011 (00111111 a) (00111111 b)) (1)
+-       (00100101 (01000000 a) (01000000 b)))
+-      (t t (00000001 ())))))
++    (00100010
++      (string-order-helper a b)
++      (00000001 (text-order before)))))
+ 
+ 
+ 
+@@ -956,61 +959,61 @@
+ (00001001 my-postcore-peer-group
+   (00001000 (semantic-id groups)
+     (00000111
+-      ((00000010 groups) ()
++      ((00000010 groups)
+        (00000001 ()))
+-      ((00000010 groups) (0)
++      ((00000010 (00000001 ()))
+        (10011100 ((group (00000101 groups)))
+          (00000111
+-           ((00000011 semantic-id (00000101 group)) (1)
++           ((00000011 semantic-id (00000101 group))
+             group)
+-           ((00000011 semantic-id (00000101 group)) (0)
++           ((00000010 (00000001 ()))
+             (my-postcore-peer-group semantic-id (00000110 groups)))))))))
+ 
+ (00001001 my-postcore-binding-status
+   (00001000 (surface bindings)
+     (00000111
+-      ((00000010 bindings) ()
++      ((00000010 bindings)
+        (00000001 absent))
+-      ((00000010 bindings) (0)
++      ((00000010 (00000001 ()))
+        (10011100 ((binding (00000101 bindings)))
+          (00000111
+-           ((00000011 (01000010 surface) (00000101 binding)) (1)
++           ((00000011 (01000010 surface) (00000101 binding))
+             (00000001 present))
+-           ((00000011 (01000010 surface) (00000101 binding)) (0)
++           ((00000010 (00000001 ()))
+             (my-postcore-binding-status surface (00000110 bindings)))))))))
+ 
+ (00001001 my-postcore-missing-peers
+   (00001000 (source peers bindings)
+     (00000111
+-      ((00000010 peers) ()
++      ((00000010 peers)
+        (00000001 ()))
+-      ((00000010 peers) (0)
++      ((00000010 (00000001 ()))
+        (10011100 ((peer (00000101 peers)))
+          (00000111
+-           ((00000011 source peer) (1)
++           ((00000011 source peer)
+             (my-postcore-missing-peers source (00000110 peers) bindings))
+-           ((00000011 source peer) (0)
++           ((00000010 (00000001 ()))
+             (00000111
+-              ((00000011 (my-postcore-binding-status peer bindings) (00000001 present))
+-               (1)
++              ((00000011
++                 (my-postcore-binding-status peer bindings)
++                 (00000001 present))
+                (my-postcore-missing-peers source (00000110 peers) bindings))
+-              ((00000011 (my-postcore-binding-status peer bindings) (00000001 absent))
+-               (1)
++              ((00000010 (00000001 ()))
+                (00000100 peer
+-                     (my-postcore-missing-peers
+-                       source
+-                       (00000110 peers)
+-                       bindings)))))))))))
++                 (my-postcore-missing-peers
++                   source
++                   (00000110 peers)
++                   bindings)))))))))))
+ 
+ ; Build one expression whose nested DEFINE forms all execute in the caller's
+ ; environment. This is why materialization is a macro rather than a function:
+ ; an ordinary function would define peers only in its temporary child frame.
+ (00001001 my-postcore-build-definitions
+   (00001000 (source peers)
+     (00000111
+-      ((00000010 peers) ()
++      ((00000010 peers)
+        source)
+-      ((00000010 peers) (0)
++      ((00000010 (00000001 ()))
+        (00100111 (00000001 define)
+              (00000101 peers)
+              (my-postcore-build-definitions source (00000110 peers)))))))
+@@ -1023,9 +1026,9 @@
+              semantic-id
+              my-postcore-stable-peer-projection)))
+     (00000111
+-      ((00000010 group) ()
++      ((00000010 group)
+        source)
+-      ((00000010 group) (0)
++      ((00000010 (00000001 ()))
+        (my-postcore-build-definitions
+          source
+          (my-postcore-missing-peers source (00000110 group) (01001110)))))))
+@@ -1039,148 +1042,55 @@
+ (00001001 null?
+   (00001000 (x)
+     (00000111
+-      ((00000010 x) () t)
+-      ((00000010 x) (0) (00000001 ()))
+-      ((00000010 x) (1) (00000001 ())))))
++      ((00000010 x)
++       (00000011 x (00000001 ())))
++      ((00000011 0 0)
++       (00000010 x)))))
+ 
+ (00001001 subst
+   (00001000 (x y z)
+     (00000111
+-      ((00000010 z) (0)
+-       (00000100 (10101100 x y (00000101 z)) (10101100 x y (00000110 z))))
+-      ((00000010 z) ()
++      ((00000010 z)
+        (00000111
+-         ((00000011 z y) (1) x)
+-         ((00000011 z y) (0) z)))
+-      ((00000010 z) (1)
+-       (00000111
+-         ((00000011 z y) (1) x)
+-         ((00000011 z y) (0) z))))))
++         ((00000011 z y) x)
++         ((00000011 0 0) z)))
++      ((00000011 0 0)
++       (00000100 (10101100 x y (00000101 z)) (10101100 x y (00000110 z)))))))
+ 
+ (00001001 sublis-pair
+   (00001000 (x z)
+     (00000111
+-      ((00000010 x) () z)
+-      ((00000010 x) (0)
++      ((00000010 x) z)
++      ((00000011 0 0)
+        (00000111
+-         ((00000011 (00000101 (00000101 x)) z) (1)
++         ((00000011 (00000101 (00000101 x)) z)
+           (00000101 (00000110 (00000101 x))))
+-         ((00000011 (00000101 (00000101 x)) z) (0)
++         ((00000011 0 0)
+           (sublis-pair (00000110 x) z)))))))
+ 
+ (00001001 sublis
+   (00001000 (x y)
+     (00000111
+-      ((00000010 y) (0)
+-       (00000100 (10101101 x (00000101 y)) (10101101 x (00000110 y))))
+-      ((00000010 y) () (sublis-pair x y))
+-      ((00000010 y) (1) (sublis-pair x y)))))
++      ((00000010 y)
++       (sublis-pair x y))
++      ((00000011 0 0)
++       (00000100 (10101101 x (00000101 y)) (10101101 x (00000110 y)))))))
+ 
+ (00001001 maplist
+   (00001000 (x f)
+     (00000111
+-      ((00000010 x) () (00000001 ()))
+-      ((00000010 x) (0)
++      ((00000010 x) (00000001 ()))
++      ((00000011 0 0)
+        (00000100 (f x) (10101110 (00000110 x) f))))))
+ 
+ (00001001 apply-quote-args
+   (00001000 (m)
+     (00000111
+-      ((00000010 m) () (00000001 ()))
+-      ((00000010 m) (0)
++      ((00000010 m) (00000001 ()))
++      ((00000011 0 0)
+        (00000100 (00000100 (00000001 00000001) (00000100 (00000101 m) (00000001 ())))
+                  (apply-quote-args (00000110 m)))))))
+ 
+ (00001001 apply
+   (00001000 (f args)
+     (01001101 (00000100 f (apply-quote-args args)))))
+-
+-; #1391: логіка відповідей Core4 — закон contracts/core4-predicate-answer-scale.lisp /3.
+-; Відповідь — список двійкових бітів: (1)…(1 1 1 1 1 1 1) «так»,
+-; (0)…(0 0 0 0 0 0 0) «ні», () «невідомо». Лінія істинності:
+-;   0 < 00 < … < 0000000 < () < 1111111 < … < 11 < 1
+-; Виконуваний свідок законів — experiments/core4-logic15-algebra.lisp.
+-
+-; NOT: інвертувати кожен біт, ширина та сама; () лишається ().
+-(00001001 answer-not
+-  (00001000 (a)
+-    (00000111
+-      ((00000010 a) () (00000001 ()))
+-      ((00000010 a) (0)
+-       (00000100
+-         (00000111
+-           ((00000011 (00000101 a) 0) (1) 1)
+-           ((00000011 (00000101 a) 0) (0) 0))
+-         (10110001 (00000110 a)))))))
+-
+-; AND: мінімум на лінії. «Ні» перемагає; з двох «ні» — коротше (сильніше);
+-; з двох «так» — довше (слабше); () поглинає «так».
+-; Для двох відповідей одного напряму крок іде по обох списках разом.
+-(00001001 answer-and
+-  (00001000 (a b)
+-    (00000111
+-      ((00000010 a) ()
+-       (00000111
+-         ((00000010 b) () (00000001 ()))
+-         ((00000010 b) (0)
+-          (00000111
+-            ((00000011 (00000101 b) 0) (1) b)
+-            ((00000011 (00000101 b) 0) (0) (00000001 ()))))))
+-      ((00000010 a) (0)
+-       (00000111
+-         ((00000010 b) ()
+-          (00000111
+-            ((00000011 (00000101 a) 0) (1) a)
+-            ((00000011 (00000101 a) 0) (0) (00000001 ()))))
+-         ((00000010 b) (0)
+-          (00000111
+-            ((00000011 (00000101 a) (00000101 b)) (0)
+-             (00000111
+-               ((00000011 (00000101 a) 0) (1) a)
+-               ((00000011 (00000101 a) 0) (0) b)))
+-            ((00000011 (00000101 a) (00000101 b)) (1)
+-             (00000111
+-               ((00000010 (00000110 a)) ()
+-                (00000111
+-                  ((00000011 (00000101 a) 0) (1) a)
+-                  ((00000011 (00000101 a) 0) (0) b)))
+-               ((00000010 (00000110 b)) ()
+-                (00000111
+-                  ((00000011 (00000101 b) 0) (1) b)
+-                  ((00000011 (00000101 b) 0) (0) a)))
+-               ((00000010 (00000110 b)) (0)
+-                (00000100 (00000101 a)
+-                          (10110010 (00000110 a) (00000110 b)))))))))))))
+-
+-; OR: максимум на лінії = NOT(AND(NOT a, NOT b)).
+-(00001001 answer-or
+-  (00001000 (a b)
+-    (10110001 (10110010 (10110001 a) (10110001 b)))))
+-
+-; Послаблення: дописати той самий біт; восьмий біт належить 256 функціям,
+-; тож із семи бітів шкала сходиться в ().
+-(00001001 answer-weaken
+-  (00001000 (a)
+-    (00000111
+-      ((00000010 a) () (00000001 ()))
+-      ((00000010 a) (0)
+-       (00000111
+-         ((00000011 (00101000 a) 7) (1) (00000001 ()))
+-         ((00000011 (00101000 a) 7) (0)
+-          (00000100 (00000101 a) a)))))))
+-
+-; atom? відповіддю шкали: атом (1), пара (0), () — невідомо, бо () стоїть
+-; вище розрізнення атом/пара.
+-(00001001 answer-atom
+-  (00001000 (x)
+-    (00000111
+-      ((00000010 x) (1) (00000001 (1)))
+-      ((00000010 x) (0) (00000001 (0)))
+-      ((00000010 x) () (00000001 ())))))
+-
+-; eq? відповіддю шкали: same (1), distinct (0). Область та сама, що в eq?: атоми.
+-(00001001 answer-eq
+-  (00001000 (a b)
+-    (00000111
+-      ((00000011 a b) (1) (00000001 (1)))
+-      ((00000011 a b) (0) (00000001 (0))))))
+
+===== FILE lib/core4.lisp =====
+@@ -30,53 +30,63 @@
+ ; бо `let`/`let*` нижче будують свою розгортку через нього.
+ (00001001 list (00001000 args args))
+ 
+-; and/or — раніше були відсутні і в цьому файлі, і як Rust-білтіни
+-; (перевірено: обидва grep дають нуль збігів), тож кожен, хто підключав
+-; my-lisp, мусив бутстрапити власні (знайдено живцем 2026-08-27 у
+-; chess-lisp-zero/lib/chess.lisp). Макроси, не функції — інакше "and"/"or"
+-; втратили б коротке замикання, обчислюючи всі аргументи наперед. Мусять
+-; бути variadic (rest-параметр як голий символ, як `list` вище), не
+-; фіксованої арності — саме так їх і використовує реальний код, що вже
+-; існує. Порожній `(and)` -> t, порожній `(or)` -> () — той самий вибір,
+-; що й у Common Lisp/Scheme, узгоджений з G8 (нейтральний елемент
+-; логічного "і"/"або"). Перевірено живцем: коротке замикання (другий
+-; аргумент дійсно не обчислюється), варіативність на 3+ аргументах,
+-; передача самого значення, не лише t/() (напр. (and t 42) -> 42).
++; and/or are predicate combinators on the shared one-bit foundation.
++; They keep lazy short-circuiting, but no longer preserve arbitrary Lisp
++; truthy values: every completed result is an exact PredicateBit.
++;
++; A constant predicate bit has no source literal, so macro expansions use
++; ATOM itself as the language-owned producer:
++;   (00000010 '())          => YES
++;   (00000010 '(00000000))  => NO
+ (00001010 and rest
+   (00000111
+-    ((00000010 rest) () t)
+-    ((00000010 rest) (1) t)
+-    ((00000010 (00000110 rest)) () (00000101 rest))
+-    ((00000010 (00000110 rest)) (1) (00000101 rest))
+-    (t
+-     ; Build the short-circuit cond AST from the primitive tree substrate.
+-     ; AND remains Lisp-owned; generic macro frontends need no private LIST
+-     ; semantic just to execute this law.
++    ((00000010 rest)
++     (00000001 (00000010 (00000001 ()))))
++    ((00000010 (00000110 rest))
++     (00000101 rest))
++    ((00000010 (00000001 ()))
++     ; Expand to:
++     ;   (COND (first (and ...))
++     ;         (YES   NO))
++     ; so the recursive tail is evaluated only after a YES first operand.
+      (00000100 (00000001 00000111)
+-           (00000100 (00000100 (00000101 rest)
+-                       (00000100 (00000100 (00000001 and) (00000110 rest))
+-                             (00000001 ())))
+-                 (00000100 (00000100 t
+-                             (00000100 (00000001 ())
+-                                   (00000001 ())))
+-                       (00000001 ())))))))
++       (00000100
++         (00000100 (00000101 rest)
++           (00000100
++             (00000100 (00000001 and) (00000110 rest))
++             (00000001 ())))
++         (00000100
++           (00000100
++             (00000001 (00000010 (00000001 ())))
++             (00000100
++               (00000001 (00000010 (00000001 (00000000))))
++               (00000001 ())))
++           (00000001 ())))))))
+ 
+ (00001010 or rest
+   (00000111
+-    ((00000010 rest) () (00000001 ()))
+-    ((00000010 rest) (1) (00000001 ()))
+-    ((00000010 (00000110 rest)) () (00000101 rest))
+-    ((00000010 (00000110 rest)) (1) (00000101 rest))
+-    (t
+-     ; Same primitive constructor discipline as AND above: preserve lazy
+-     ; short-circuit expansion without importing LIST into compiler authority.
++    ((00000010 rest)
++     (00000001 (00000010 (00000001 (00000000)))))
++    ((00000010 (00000110 rest))
++     (00000101 rest))
++    ((00000010 (00000001 ()))
++     ; Expand to:
++     ;   (COND (first YES)
++     ;         (YES   (or ...)))
++     ; and therefore never evaluate the recursive tail after a YES.
+      (00000100 (00000001 00000111)
+-           (00000100 (00000100 (00000101 rest)
+-                       (00000100 t (00000001 ())))
+-                 (00000100 (00000100 t
+-                             (00000100 (00000100 (00000001 or) (00000110 rest))
+-                                   (00000001 ())))
+-                       (00000001 ())))))))
++       (00000100
++         (00000100 (00000101 rest)
++           (00000100
++             (00000001 (00000010 (00000001 ())))
++             (00000001 ())))
++         (00000100
++           (00000100
++             (00000001 (00000010 (00000001 ())))
++             (00000100
++               (00000100 (00000001 or) (00000110 rest))
++               (00000001 ())))
++           (00000001 ())))))))
+ 
+ ; gensym — my-lisp's defmacro is unhygienic by default (no automatic
+ ; protection against accidental variable capture; verified live
+@@ -190,9 +200,16 @@
+ (00001001 reverse-onto
+   (00001000 (values acc)
+     (00000111
+-      ((00000010 values) () acc)
+-      ((00000010 values) (0)
+-       (reverse-onto (00000110 values) (00000100 (00000101 values) acc))))))
++      ((00000010 values)
++       (00000111
++         ((00000011 values (00000001 ()))
++          acc)
++         ((00000010 (00000001 ()))
++          (00000101 values))))
++      ((00000010 (00000001 ()))
++       (reverse-onto
++         (00000110 values)
++         (00000100 (00000101 values) acc))))))
+ 
+ (00001001 reverse
+   (00001000 (values)
+@@ -219,10 +236,17 @@
+ (00001001 map-onto
+   (00001000 (f values acc)
+     (00000111
+-      ((00000010 values) () (00101010 acc))
+-      ((00000010 values) (1) (00000001 ()))
+-      ((00000010 values) (0)
+-       (map-onto f (00000110 values) (00000100 (f (00000101 values)) acc))))))
++      ((00000010 values)
++       (00000111
++         ((00000011 values (00000001 ()))
++          (00101010 acc))
++         ((00000010 (00000001 ()))
++          (00000001 ()))))
++      ((00000010 (00000001 ()))
++       (map-onto
++         f
++         (00000110 values)
++         (00000100 (f (00000101 values)) acc))))))
+ 
+ (00001001 map
+   (00001000 (f values)
+@@ -231,14 +255,16 @@
+ (00001001 filter-onto
+   (00001000 (predicate values acc)
+     (00000111
+-      ((00000010 values) () (00101010 acc))
+-      ((00000010 values) (1) (00101010 acc))
+-      (t t
++      ((00000010 values)
++       (00101010 acc))
++      ((00000010 (00000001 ()))
+        (10011100 ((decision (predicate (00000101 values))))
+          (00000111
+-           ((truthy? decision) t
+-            (filter-onto predicate (00000110 values) (00000100 (00000101 values) acc)))
+-           ((truthy? decision) ()
++           (decision
++            (filter-onto predicate
++              (00000110 values)
++              (00000100 (00000101 values) acc)))
++           ((00000010 (00000001 ()))
+             (filter-onto predicate (00000110 values) acc))))))))
+ 
+ (00001001 filter
+@@ -318,71 +344,48 @@
+ ; Makro-Expansionsmechanismus, den `unless` und `let` bereits nutzen —
+ ; `let*`, das `let*` aufruft, ist gewöhnliche Rekursion, kein Sonderfall,
+ ; von dem der Evaluator wissen müsste.
+-; `eq` is deliberately atom-only per McCarthy's original primitive (see
+-; docs/language-core.md) — `(eq '(1 2) '(1 2))` errors rather than comparing
+-; structurally. `equal?` is the structural/deep-equality counterpart, built
+-; on top of `eq` and `atom` rather than replacing them. Its answer is the
+-; Core4 15-state scale (#1391): `(1)` — the same structure, `(0)` — different.
+-; Canonical three-part `cond` consumes the answer explicitly; a two-part
+-; clause selects only on a «yes» answer.
++; `eq` is deliberately atom-only per McCarthy's original primitive.
++; `equal?` is the structural/deep-equality predicate built on top of EQ,
++; ATOM, CAR and CDR. Contract 10 gives it the shared predicate result domain:
++; exact PredicateBit 1 for equal, 0 for different. No list-wrapped answer
++; scale and no three-part COND remain in this law.
+ (00001001 equal?
+   (00001000 (a b)
+     (00000111
+-      ((00000010 a) ()
+-       (00000111
+-         ((00000010 b) ()
+-          (00000001 (1)))
+-         ((00000010 b) (1)
+-          (00000001 (0)))
+-         ((00000010 b) (0)
+-          (00000001 (0)))))
+-      ((00000010 a) (1)
++      ; ATOM already returns exact PredicateBit. If both values are atoms,
++      ; EQ owns the identity decision directly.
++      ((00000010 a)
+        (00000111
+-         ((00000010 b) ()
+-          (00000001 (0)))
+-         ((00000010 b) (1)
+-          (00000111
+-            ((00000011 a b) (1)
+-             (00000001 (1)))
+-            ((00000011 a b) (0)
+-             (00000001 (0)))))
+-         ((00000010 b) (0)
+-          (00000001 (0)))))
+-      ((00000010 a) (0)
++         ((00000010 b)
++          (00000011 a b))
++         ; b is a pair: atom vs pair is structurally unequal.
++         ((00000010 (00000001 ()))
++          (00000010 (00000001 (00000000))))))
++      ; a is a pair. The explicit YES test below is a constant predicate
++      ; producer used only as the exhaustive second COND branch.
++      ((00000010 (00000001 ()))
+        (00000111
+-         ((00000010 b) ()
+-          (00000001 (0)))
+-         ((00000010 b) (1)
+-          (00000001 (0)))
+-         ((00000010 b) (0)
++         ((00000010 b)
++          (00000010 (00000001 (00000000))))
++         ((00000010 (00000001 ()))
+           (00000111
+-            ((00100010 (00000101 a) (00000101 b)) (1)
++            ; Deep equality short-circuits on the heads, then compares tails.
++            ((00100010 (00000101 a) (00000101 b))
+              (00100010 (00000110 a) (00000110 b)))
+-            ((00100010 (00000101 a) (00000101 b)) (0)
+-             (00000001 (0))))))))))
+-
+-; Exact-Q uses 1 for YES and 0 for NO.  Structural and identity relations
+-; retain their own result domains, so predicate consumers normalize them here.
+-(00001001 truthy?
+-  (00001000 (value)
+-    (00000111
+-      ((00000010 value) () (00000001 ()))
+-      ((00000010 value) (1)
+-       (00000111
+-         ((00000011 value 0) (1) (00000001 ()))
+-         ((00000011 value 0) (0) t)))
+-      ((00000010 value) (0)
+-       (00000111
+-         ((00100010 value (00000001 (0))) (1) (00000001 ()))
+-         ((00100010 value (00000001 (0))) (1) (00000001 ()))
+-         ((00100010 value (00000001 (0))) (1) (00000001 ()))
+-         (t t t))))))
++            ((00000010 (00000001 ()))
++             (00000010 (00000001 (00000000)))))))))))
+ 
++; NOT is a predicate combinator, not a generic truthiness converter.
++; Its input must already be an exact PredicateBit; strict COND rejects every
++; other domain. Constant YES/NO are produced by ATOM because PredicateBit has
++; no source literal.
+ (00001001 not?
+   (00001000 (value)
+     (00000111
+-      ((truthy? value) t (00000001 ()))
+-      ((truthy? value) () t))))
++      (value
++       (00000010 (00000001 (00000000))))
++      ((00000010 (00000001 ()))
++       (00000010 (00000001 ()))))))
+ 
+ 
+ ; nth/member?/assoc (G5 test: already expressible via existing means?)
+@@ -421,17 +424,28 @@
+ (00001001 assoc
+   (00001000 (key alist)
+     (00000111
+-      ((00000010 alist) () (00000001 ()))
+-      ((00000010 alist) (0)
++      ; ATOM is true for both structural () and malformed non-list atoms.
++      ; Distinguish the legitimate empty-alist base case with EQ; every other
++      ; atom deliberately reaches CAR and therefore fails Type instead of
++      ; being silently reclassified as an empty association list.
++      ((00000010 alist)
++       (00000111
++         ((00000011 alist (00000001 ()))
++          (00000001 ()))
++         ((00000010 (00000001 ()))
++          (00000101 alist))))
++      ; Pair case: deep key equality is itself an exact PredicateBit.
++      ((00000010 (00000001 ()))
+        (00000111
+-         ((00100010 key (00000101 (00000101 alist))) (1) (00000101 alist))
+-         ((00100010 key (00000101 (00000101 alist))) (0)
++         ((00100010 key (00000101 (00000101 alist)))
++          (00000101 alist))
++         ((00000010 (00000001 ()))
+           (00101101 key (00000110 alist))))))))
+ 
+ (00001010 let* (bindings body)
+   (00000111
+-    ((00000010 bindings) () body)
+-    ((00000010 bindings) (0)
++    ((00000010 bindings) body)
++    ((00000010 (00000001 ()))
+      ; Build the recursive expansion from the primitive tree substrate only.
+      ; This keeps let* semantics in Lisp while allowing generic macro
+      ; frontends to execute the law without importing the higher-level list
+@@ -483,24 +497,20 @@
+ (00001001 string-order-helper
+   (00001000 (left right)
+     (00000111
+-      ((00111100 left) (1)
++      ((00111100 left)
+        (00000111
+-         ((00111100 right) (1)
++         ((00111100 right)
+           (00000001 (text-order same)))
+-         ((00111100 right) (0)
++         ((00000010 (00000001 ()))
+           (00000001 (text-order before)))))
+-      ((00111100 left) (0)
++      ((00111100 right)
+        (00000001 (text-order after)))
+       ((00000011 (00111111 left) (00111111 right))
+-       (1)
+        (string-order-helper (01000000 left) (01000000 right)))
+       ((00011010 (01000101 (00111111 left))
+           (01000101 (00111111 right)))
+-       1
+        (00000001 (text-order before)))
+-      ((00011010 (01000101 (00111111 left))
+-          (01000101 (00111111 right)))
+-       0
++      ((00000010 (00000001 ()))
+        (00000001 (text-order after))))))
+ 
+ (00001001 nonempty-string-membership-helper
+@@ -527,16 +537,9 @@
+ ; аргументів — Arity від прив'язки лямбди.
+ (00001001 string<?
+   (00001000 (a b)
+-    (00000111
+-      ; Порожній бік: інший перевіряється як рядок (string-append дає Type).
+-      ((00111100 b) (1)
+-       (00101111 (00100111 (00111010 a "") (00000001 ()))))
+-      ((00111100 a) (1)
+-       (00101111 (00100111 (00111010 b "") t)))
+-      ((00011010 (01000101 (00111111 a)) (01000101 (00111111 b))) 1 t)
+-      ((00000011 (00111111 a) (00111111 b)) (1)
+-       (00100101 (01000000 a) (01000000 b)))
+-      (t t (00000001 ())))))
++    (00100010
++      (string-order-helper a b)
++      (00000001 (text-order before)))))
+ 
+ 
+ 
+@@ -956,61 +959,61 @@
+ (00001001 my-postcore-peer-group
+   (00001000 (semantic-id groups)
+     (00000111
+-      ((00000010 groups) ()
++      ((00000010 groups)
+        (00000001 ()))
+-      ((00000010 groups) (0)
++      ((00000010 (00000001 ()))
+        (10011100 ((group (00000101 groups)))
+          (00000111
+-           ((00000011 semantic-id (00000101 group)) (1)
++           ((00000011 semantic-id (00000101 group))
+             group)
+-           ((00000011 semantic-id (00000101 group)) (0)
++           ((00000010 (00000001 ()))
+             (my-postcore-peer-group semantic-id (00000110 groups)))))))))
+ 
+ (00001001 my-postcore-binding-status
+   (00001000 (surface bindings)
+     (00000111
+-      ((00000010 bindings) ()
++      ((00000010 bindings)
+        (00000001 absent))
+-      ((00000010 bindings) (0)
++      ((00000010 (00000001 ()))
+        (10011100 ((binding (00000101 bindings)))
+          (00000111
+-           ((00000011 (01000010 surface) (00000101 binding)) (1)
++           ((00000011 (01000010 surface) (00000101 binding))
+             (00000001 present))
+-           ((00000011 (01000010 surface) (00000101 binding)) (0)
++           ((00000010 (00000001 ()))
+             (my-postcore-binding-status surface (00000110 bindings)))))))))
+ 
+ (00001001 my-postcore-missing-peers
+   (00001000 (source peers bindings)
+     (00000111
+-      ((00000010 peers) ()
++      ((00000010 peers)
+        (00000001 ()))
+-      ((00000010 peers) (0)
++      ((00000010 (00000001 ()))
+        (10011100 ((peer (00000101 peers)))
+          (00000111
+-           ((00000011 source peer) (1)
++           ((00000011 source peer)
+             (my-postcore-missing-peers source (00000110 peers) bindings))
+-           ((00000011 source peer) (0)
++           ((00000010 (00000001 ()))
+             (00000111
+-              ((00000011 (my-postcore-binding-status peer bindings) (00000001 present))
+-               (1)
++              ((00000011
++                 (my-postcore-binding-status peer bindings)
++                 (00000001 present))
+                (my-postcore-missing-peers source (00000110 peers) bindings))
+-              ((00000011 (my-postcore-binding-status peer bindings) (00000001 absent))
+-               (1)
++              ((00000010 (00000001 ()))
+                (00000100 peer
+-                     (my-postcore-missing-peers
+-                       source
+-                       (00000110 peers)
+-                       bindings)))))))))))
++                 (my-postcore-missing-peers
++                   source
++                   (00000110 peers)
++                   bindings)))))))))))
+ 
+ ; Build one expression whose nested DEFINE forms all execute in the caller's
+ ; environment. This is why materialization is a macro rather than a function:
+ ; an ordinary function would define peers only in its temporary child frame.
+ (00001001 my-postcore-build-definitions
+   (00001000 (source peers)
+     (00000111
+-      ((00000010 peers) ()
++      ((00000010 peers)
+        source)
+-      ((00000010 peers) (0)
++      ((00000010 (00000001 ()))
+        (00100111 (00000001 define)
+              (00000101 peers)
+              (my-postcore-build-definitions source (00000110 peers)))))))
+@@ -1023,9 +1026,9 @@
+              semantic-id
+              my-postcore-stable-peer-projection)))
+     (00000111
+-      ((00000010 group) ()
++      ((00000010 group)
+        source)
+-      ((00000010 group) (0)
++      ((00000010 (00000001 ()))
+        (my-postcore-build-definitions
+          source
+          (my-postcore-missing-peers source (00000110 group) (01001110)))))))
+@@ -1039,148 +1042,55 @@
+ (00001001 null?
+   (00001000 (x)
+     (00000111
+-      ((00000010 x) () t)
+-      ((00000010 x) (0) (00000001 ()))
+-      ((00000010 x) (1) (00000001 ())))))
++      ((00000010 x)
++       (00000011 x (00000001 ())))
++      ((00000011 0 0)
++       (00000010 x)))))
+ 
+ (00001001 subst
+   (00001000 (x y z)
+     (00000111
+-      ((00000010 z) (0)
+-       (00000100 (10101100 x y (00000101 z)) (10101100 x y (00000110 z))))
+-      ((00000010 z) ()
++      ((00000010 z)
+        (00000111
+-         ((00000011 z y) (1) x)
+-         ((00000011 z y) (0) z)))
+-      ((00000010 z) (1)
+-       (00000111
+-         ((00000011 z y) (1) x)
+-         ((00000011 z y) (0) z))))))
++         ((00000011 z y) x)
++         ((00000011 0 0) z)))
++      ((00000011 0 0)
++       (00000100 (10101100 x y (00000101 z)) (10101100 x y (00000110 z)))))))
+ 
+ (00001001 sublis-pair
+   (00001000 (x z)
+     (00000111
+-      ((00000010 x) () z)
+-      ((00000010 x) (0)
++      ((00000010 x) z)
++      ((00000011 0 0)
+        (00000111
+-         ((00000011 (00000101 (00000101 x)) z) (1)
++         ((00000011 (00000101 (00000101 x)) z)
+           (00000101 (00000110 (00000101 x))))
+-         ((00000011 (00000101 (00000101 x)) z) (0)
++         ((00000011 0 0)
+           (sublis-pair (00000110 x) z)))))))
+ 
+ (00001001 sublis
+   (00001000 (x y)
+     (00000111
+-      ((00000010 y) (0)
+-       (00000100 (10101101 x (00000101 y)) (10101101 x (00000110 y))))
+-      ((00000010 y) () (sublis-pair x y))
+-      ((00000010 y) (1) (sublis-pair x y)))))
++      ((00000010 y)
++       (sublis-pair x y))
++      ((00000011 0 0)
++       (00000100 (10101101 x (00000101 y)) (10101101 x (00000110 y)))))))
+ 
+ (00001001 maplist
+   (00001000 (x f)
+     (00000111
+-      ((00000010 x) () (00000001 ()))
+-      ((00000010 x) (0)
++      ((00000010 x) (00000001 ()))
++      ((00000011 0 0)
+        (00000100 (f x) (10101110 (00000110 x) f))))))
+ 
+ (00001001 apply-quote-args
+   (00001000 (m)
+     (00000111
+-      ((00000010 m) () (00000001 ()))
+-      ((00000010 m) (0)
++      ((00000010 m) (00000001 ()))
++      ((00000011 0 0)
+        (00000100 (00000100 (00000001 00000001) (00000100 (00000101 m) (00000001 ())))
+                  (apply-quote-args (00000110 m)))))))
+ 
+ (00001001 apply
+   (00001000 (f args)
+     (01001101 (00000100 f (apply-quote-args args)))))
+-
+-; #1391: логіка відповідей Core4 — закон contracts/core4-predicate-answer-scale.lisp /3.
+-; Відповідь — список двійкових бітів: (1)…(1 1 1 1 1 1 1) «так»,
+-; (0)…(0 0 0 0 0 0 0) «ні», () «невідомо». Лінія істинності:
+-;   0 < 00 < … < 0000000 < () < 1111111 < … < 11 < 1
+-; Виконуваний свідок законів — experiments/core4-logic15-algebra.lisp.
+-
+-; NOT: інвертувати кожен біт, ширина та сама; () лишається ().
+-(00001001 answer-not
+-  (00001000 (a)
+-    (00000111
+-      ((00000010 a) () (00000001 ()))
+-      ((00000010 a) (0)
+-       (00000100
+-         (00000111
+-           ((00000011 (00000101 a) 0) (1) 1)
+-           ((00000011 (00000101 a) 0) (0) 0))
+-         (10110001 (00000110 a)))))))
+-
+-; AND: мінімум на лінії. «Ні» перемагає; з двох «ні» — коротше (сильніше);
+-; з двох «так» — довше (слабше); () поглинає «так».
+-; Для двох відповідей одного напряму крок іде по обох списках разом.
+-(00001001 answer-and
+-  (00001000 (a b)
+-    (00000111
+-      ((00000010 a) ()
+-       (00000111
+-         ((00000010 b) () (00000001 ()))
+-         ((00000010 b) (0)
+-          (00000111
+-            ((00000011 (00000101 b) 0) (1) b)
+-            ((00000011 (00000101 b) 0) (0) (00000001 ()))))))
+-      ((00000010 a) (0)
+-       (00000111
+-         ((00000010 b) ()
+-          (00000111
+-            ((00000011 (00000101 a) 0) (1) a)
+-            ((00000011 (00000101 a) 0) (0) (00000001 ()))))
+-         ((00000010 b) (0)
+-          (00000111
+-            ((00000011 (00000101 a) (00000101 b)) (0)
+-             (00000111
+-               ((00000011 (00000101 a) 0) (1) a)
+-               ((00000011 (00000101 a) 0) (0) b)))
+-            ((00000011 (00000101 a) (00000101 b)) (1)
+-             (00000111
+-               ((00000010 (00000110 a)) ()
+-                (00000111
+-                  ((00000011 (00000101 a) 0) (1) a)
+-                  ((00000011 (00000101 a) 0) (0) b)))
+-               ((00000010 (00000110 b)) ()
+-                (00000111
+-                  ((00000011 (00000101 b) 0) (1) b)
+-                  ((00000011 (00000101 b) 0) (0) a)))
+-               ((00000010 (00000110 b)) (0)
+-                (00000100 (00000101 a)
+-                          (10110010 (00000110 a) (00000110 b)))))))))))))
+-
+-; OR: максимум на лінії = NOT(AND(NOT a, NOT b)).
+-(00001001 answer-or
+-  (00001000 (a b)
+-    (10110001 (10110010 (10110001 a) (10110001 b)))))
+-
+-; Послаблення: дописати той самий біт; восьмий біт належить 256 функціям,
+-; тож із семи бітів шкала сходиться в ().
+-(00001001 answer-weaken
+-  (00001000 (a)
+-    (00000111
+-      ((00000010 a) () (00000001 ()))
+-      ((00000010 a) (0)
+-       (00000111
+-         ((00000011 (00101000 a) 7) (1) (00000001 ()))
+-         ((00000011 (00101000 a) 7) (0)
+-          (00000100 (00000101 a) a)))))))
+-
+-; atom? відповіддю шкали: атом (1), пара (0), () — невідомо, бо () стоїть
+-; вище розрізнення атом/пара.
+-(00001001 answer-atom
+-  (00001000 (x)
+-    (00000111
+-      ((00000010 x) (1) (00000001 (1)))
+-      ((00000010 x) (0) (00000001 (0)))
+-      ((00000010 x) () (00000001 ())))))
+-
+-; eq? відповіддю шкали: same (1), distinct (0). Область та сама, що в eq?: атоми.
+-(00001001 answer-eq
+-  (00001000 (a b)
+-    (00000111
+-      ((00000011 a b) (1) (00000001 (1)))
+-      ((00000011 a b) (0) (00000001 (0))))))
+
+===== FILE lib/life-1-scheduler.lisp =====
+@@ -21,31 +21,28 @@
+ (00001001 life-scheduler-field
+   (00001000 (entry field)
+     (00000111
+-      ((00000010 entry) () (00000001 ()))
+-      ((00000010 entry) (0)
++      ((00000010 entry)
++       (00000001 ()))
++      ((00000010 (00000001 ()))
+        (10011100 ((rows (00000110 entry)))
+          (00000111
+-           ((00000010 rows) () (00000001 ()))
+-           ((00000010 rows) (0)
++           ((00000010 rows)
++            (00000001 ()))
++           ((00000010 (00000001 ()))
+             (10011100 ((row (00000101 rows)))
+               (00000111
+-                ((00000010 row) ()
++                ((00000010 row)
+                  (life-scheduler-field
+                    (00000100 (00000101 entry) (00000110 rows))
+                    field))
+-                ((00000010 row) (1)
+-                 (life-scheduler-field
+-                   (00000100 (00000101 entry) (00000110 rows))
+-                   field))
+-                ((00000010 row) (0)
++                ((00000010 (00000001 ()))
+                  (00000111
+-                   ((00100010 field (00000101 row)) (1)
++                   ((00100010 field (00000101 row))
+                     (00000101 (00000110 row)))
+-                   ((00100010 field (00000101 row)) (0)
++                   ((00000010 (00000001 ()))
+                     (life-scheduler-field
+                       (00000100 (00000101 entry) (00000110 rows))
+                       field)))))))))))))
+-
+ (00001001 life-scheduler-invocation-key
+   (00001000 (invocation)
+     (00100111
+@@ -57,114 +54,108 @@
+ (00001001 life-scheduler-key-present?
+   (00001000 (key keys)
+     (00000111
+-      ((00000010 keys) () (00000001 absent))
+-      ((00000010 keys) (0)
++      ((00000010 keys)
++       (00000001 absent))
++      ((00000010 (00000001 ()))
+        (00000111
+-         ((00100010 key (00000101 keys)) (1) (00000001 present))
+-         ((00100010 key (00000101 keys)) (0)
++         ((00100010 key (00000101 keys))
++          (00000001 present))
++         ((00000010 (00000001 ()))
+           (life-scheduler-key-present? key (00000110 keys))))))))
+-
+ (00001001 life-scheduler-dedup-pending
+   (00001000 (pending seen-keys)
+     (00000111
+-      ((00000010 pending) () (00000001 ()))
+-      ((00000010 pending) (0)
++      ((00000010 pending)
++       (00000001 ()))
++      ((00000010 (00000001 ()))
+        (10011101 ((invocation (00000101 pending))
+               (key (life-scheduler-invocation-key invocation)))
+          (00000111
+            ((00000011 (life-scheduler-key-present? key seen-keys) (00000001 present))
+-            (1)
+             (life-scheduler-dedup-pending (00000110 pending) seen-keys))
+            ((00000011 (life-scheduler-key-present? key seen-keys) (00000001 absent))
+-            (1)
+             (00000100 invocation
+                   (life-scheduler-dedup-pending
+                     (00000110 pending)
+                     (00000100 key seen-keys))))))))))
+-
+ (00001001 life-scheduler-pending
+   (00001000 (pending)
+     (life-scheduler-dedup-pending pending (00000001 ()))))
+ 
+ (00001001 life-scheduler-projection-match?
+   (00001000 (expected projections)
+     (00000111
+-      ((00000010 projections) () (00000001 absent))
+-      ((00000010 projections) (0)
++      ((00000010 projections)
++       (00000001 absent))
++      ((00000010 (00000001 ()))
+        (10011100 ((projection (00000101 projections)))
+          (00000111
+            ((00100010 expected projection)
+-            (1)
+             (00000001 present))
+-           ((00100010 expected projection)
+-            (0)
++           ((00000010 (00000001 ()))
+             (life-scheduler-projection-match? expected (00000110 projections)))))))))
+-
+ (00001001 life-scheduler-projection-ready?
+   (00001000 (invocation projections)
+     (10011101 ((trigger (life-scheduler-field invocation (00000001 trigger)))
+            (provenance-ref-value (life-scheduler-field invocation (00000001 provenance-ref))))
+       (00000111
+-        ((00000010 trigger) ()
++        ((00000010 trigger)
+          (00000001 absent))
+-        ((00000010 trigger) (1)
+-         (00000001 absent))
+-        ((00000010 trigger) (0)
++        ((00000010 (00000001 ()))
+          (10011100 ((tail (00000110 trigger)))
+            (00000111
+-             ((00000010 tail) ()
+-              (00000001 absent))
+-             ((00000010 tail) (1)
++             ((00000010 tail)
+               (00000001 absent))
+-             ((00000010 tail) (0)
++             ((00000010 (00000001 ()))
+               (life-scheduler-projection-match?
+                 (00100111
+                   (00000001 projection-ready)
+                   (00000101 tail)
+                   provenance-ref-value)
+                 projections)))))))))
+-
+ (00001001 life-scheduler-select-ready
+   (00001000 (pending projections)
+     (00000111
+-      ((00000010 pending) ()
++      ((00000010 pending)
+        (00000001 (scheduler-selection none)))
+-      ((00000010 pending) (0)
++      ((00000010 (00000001 ()))
+        (10011100 ((invocation (00000101 pending)))
+          (00000111
+            ((00000011 (life-scheduler-projection-ready? invocation projections)
+                 (00000001 present))
+-            (1)
+             (00100111
+               (00000001 scheduler-selection)
+               (00000001 ready)
+               invocation
+               (00000110 pending)))
+            ((00000011 (life-scheduler-projection-ready? invocation projections)
+                 (00000001 absent))
+-            (1)
+             (life-scheduler-select-ready (00000110 pending) projections))))))))
+-
+ (00001001 life-scheduler-quiescence-state
+   (00001000 (projections lifecycle-state)
+     (00000111
+-      ((00000010 projections) ()
++      ((00000010 projections)
+        (00000111
+-         ((00000011 lifecycle-state (00000001 no-transition-required))
+-          (1)
+-          (00000001 (quiescence-state quiescent)))
+-         ((00000011 lifecycle-state (00000001 no-transition-required))
+-          (0)
++         ((00000011 projections (00000001 ()))
++          (00000111
++            ((00000011 lifecycle-state (00000001 no-transition-required))
++             (00000001 (quiescence-state quiescent)))
++            ((00000010 (00000001 ()))
++             (00000001 (quiescence-state active)))))
++         ((00000010 (00000001 ()))
+           (00000001 (quiescence-state active)))))
+-      ((00000010 projections) (0)
++      ((00000010 (00000001 ()))
+        (00000001 (quiescence-state active))))))
+-
+ (00001001 life-scheduler-quiescence
+   (00001000 (pending projections lifecycle-state)
+     (00000111
+-      ((00000010 pending) ()
+-       (life-scheduler-quiescence-state projections lifecycle-state))
+-      ((00000010 pending) (0)
++      ((00000010 pending)
++       (00000111
++         ((00000011 pending (00000001 ()))
++          (life-scheduler-quiescence-state projections lifecycle-state))
++         ((00000010 (00000001 ()))
++          (00000001 (quiescence-state active)))))
++      ((00000010 (00000001 ()))
+        (00000001 (quiescence-state active))))))
+ (00001001 life-scheduler-state
+   (00001000 (pending projections lifecycle-state)
+
+===== FILE lib/macro.lisp =====
+@@ -20,13 +20,10 @@
+         (00000001
+           ((00000111
+              ((00000010 args)
+-              ()
+               (make-macro))
+              ((00000010 (00000110 args))
+-              ()
+               (make-macro))
+-             (t
+-              t
++             ((00000010 (00000001 ()))
+               (00000100 (00000001 00001001)
+                 (00000100 (00000101 args)
+                   (00000100
+
+===== FILE scripts/build-constitution.lisp =====
+@@ -64,11 +64,11 @@
+ (00001001 print-fixtures
+   (00001000 (remaining)
+     (00000111
+-      ((00000010 remaining) () (00000001 ()))
+-      ((00000010 remaining) (1) (00000001 ()))
+-      (t ((00001000 ()
+-            (print-fixture (00000101 remaining))
+-            (print-fixtures (00000110 remaining))))))))
++      ((00000010 remaining) (00000001 ()))
++      ((00000010 (00000001 ()))
++       ((00001000 ()
++          (print-fixture (00000101 remaining))
++          (print-fixtures (00000110 remaining))))))))
+ 
+ (print-fixtures fixtures)
+ 
+
+===== FILE scripts/check-island-math-evidence.lisp =====
+@@ -18,18 +18,46 @@
+   (00001000 (sid)
+     (00000111
+       ((00100100 sid) sid)
+-      (t (01001100 sid)))))
++      ((00000010 (00000001 ()))
++       (01001100 sid)))))
++
++(00001001 empty-list?
++  (00001000 (values)
++    (00000111
++      ((00000010 values)
++       (00000011 values (00000001 ())))
++      ((00000010 (00000001 ()))
++       (00000010 (00000001 (00000000)))))))
++
++(00001001 four-item-row?
++  (00001000 (row)
++    (00000111
++      ((00000010 row)
++       (00000010 (00000001 (00000000))))
++      ((00000010 (00000110 row))
++       (00000010 (00000001 (00000000))))
++      ((00000010 (00000110 (00000110 row)))
++       (00000010 (00000001 (00000000))))
++      ((00000010 (00000110 (00000110 (00000110 row))))
++       (00000010 (00000001 (00000000))))
++      ((00000010
++         (00000110 (00000110 (00000110 (00000110 row)))))
++       (00000011
++         (00000110 (00000110 (00000110 (00000110 row))))
++         (00000001 ())))
++      ((00000010 (00000001 ()))
++       (00000010 (00000001 (00000000)))))))
++
+ 
+ (00001001 find-section
+   (00001000 (name sections)
+     (00000111
+-      ((00000010 sections) () (00000001 ()))
+-      ((00000010 sections) (0)
+-       (00000111
+-         ((00000011 (00000101 (00000101 sections)) name) (1)
+-          (00000101 sections))
+-         ((00000011 (00000101 (00000101 sections)) name) (0)
+-          (find-section name (00000110 sections))))))))
++      ((empty-list? sections)
++       (00000001 ()))
++      ((00000011 (00000101 (00000101 sections)) name)
++       (00000101 sections))
++      ((00000011 0 0)
++       (find-section name (00000110 sections))))))
+ 
+ (00001001 mechanism-rows
+   (00000110 (find-section (00000001 rows) mechanisms)))
+@@ -40,174 +68,224 @@
+ (00001001 registry-has-sid?
+   (00001000 (sid rows)
+     (00000111
+-      ((00000010 rows) () (00000001 no))
+-      ((00000010 rows) (0)
+-       (00000111
+-         ((00100010 sid (00000101 (00000101 rows))) (1) (00000001 yes))
+-         ((00100010 sid (00000101 (00000101 rows))) (0)
+-          (registry-has-sid? sid (00000110 rows))))))))
++      ((empty-list? rows)
++       (00000001 no))
++      ((00100010 sid (00000101 (00000101 rows)))
++       (00000001 yes))
++      ((00000011 0 0)
++       (registry-has-sid? sid (00000110 rows))))))
+ 
+ (00001001 mechanism-has-route?
+   (00001000 (sid executor rows)
+     (00000111
+-      ((00000010 rows) () (00000001 no))
+-      ((00000010 rows) (0)
+-       (10011100 ((row (00000101 rows)))
+-         (00000111
+-           ((00100010 (evidence-sid-bits sid) (evidence-sid-bits (00000101 row))) (1)
+-            (00000111
+-              ((00000011 executor (00101111 row)) (1) (00000001 yes))
+-              ((00000011 executor (00101111 row)) (0)
+-               (mechanism-has-route? sid executor (00000110 rows)))))
+-           ((00100010 (evidence-sid-bits sid) (evidence-sid-bits (00000101 row))) (0)
+-            (mechanism-has-route? sid executor (00000110 rows)))))))))
++      ((empty-list? rows)
++       (00000001 no))
++      ((00100010
++         (evidence-sid-bits sid)
++         (evidence-sid-bits (00000101 (00000101 rows))))
++       (00000111
++         ((00000011 executor (00101111 (00000101 rows)))
++          (00000001 yes))
++         ((00000011 0 0)
++          (mechanism-has-route? sid executor (00000110 rows)))))
++      ((00000011 0 0)
++       (mechanism-has-route? sid executor (00000110 rows))))))
+ 
+ (00001001 evidence-has-route?
+   (00001000 (sid executor rows)
+     (00000111
+-      ((00000010 rows) () (00000001 no))
+-      ((00000010 rows) (0)
+-       (10011100 ((row (00000101 rows)))
+-         (00000111
+-           ((00100010 sid (00000101 row)) (1)
+-            (00000111
+-              ((00000011 executor (00101111 row)) (1) (00000001 yes))
+-              ((00000011 executor (00101111 row)) (0)
+-               (evidence-has-route? sid executor (00000110 rows)))))
+-           ((00100010 sid (00000101 row)) (0)
+-            (evidence-has-route? sid executor (00000110 rows)))))))))
++      ((empty-list? rows)
++       (00000001 no))
++      ((00100010 sid (00000101 (00000101 rows)))
++       (00000111
++         ((00000011 executor (00101111 (00000101 rows)))
++          (00000001 yes))
++         ((00000011 0 0)
++          (evidence-has-route? sid executor (00000110 rows)))))
++      ((00000011 0 0)
++       (evidence-has-route? sid executor (00000110 rows))))))
+ 
+ (00001001 admitted-executor?
+   (00001000 (executor)
+     (00000111
+-      ((00000011 executor (00000001 common-lisp)) (1) (00000001 yes))
+-      ((00000011 executor (00000001 prolog)) (1) (00000001 yes))
+-      ((00000011 executor (00000001 clips)) (1) (00000001 yes))
+-      ((00000011 executor (00000001 datalog)) (1) (00000001 yes))
+-      (t (00000001 no)))))
++      ((00000011 executor (00000001 common-lisp)) (00000001 yes))
++      ((00000011 executor (00000001 prolog)) (00000001 yes))
++      ((00000011 executor (00000001 clips)) (00000001 yes))
++      ((00000011 executor (00000001 datalog)) (00000001 yes))
++      ((00000011 0 0) (00000001 no)))))
+ 
+ (00001001 admitted-status?
+   (00001000 (status)
+     (00000111
+-      ((00000011 status (00000001 execution-witness)) (1) (00000001 yes))
+-      (t (00000001 no)))))
++      ((00000011 status (00000001 execution-witness)) (00000001 yes))
++      ((00000011 0 0) (00000001 no)))))
+ 
+ (00001001 forbidden-semantic-symbol?
+   (00001000 (value)
+     (00000111
+-      ((00000010 value) () (00000001 no))
+-      ((00000010 value) (0) (00000001 no))
+-      ((00000010 value) (1)
+-       (00000111
+-         ((00000011 value (00000001 operation)) (1) (00000001 yes))
+-         ((00000011 value (00000001 meaning)) (1) (00000001 yes))
+-         ((00000011 value (00000001 law)) (1) (00000001 yes))
+-         ((00000011 value (00000001 domain)) (1) (00000001 yes))
+-         ((00000011 value (00000001 operand-domain)) (1) (00000001 yes))
+-         ((00000011 value (00000001 result-domain)) (1) (00000001 yes))
+-         (t (00000001 no)))))))
++      ((00000011 value (00000001 operation)) (00000001 yes))
++      ((00000011 value (00000001 meaning)) (00000001 yes))
++      ((00000011 value (00000001 law)) (00000001 yes))
++      ((00000011 value (00000001 domain)) (00000001 yes))
++      ((00000011 value (00000001 operand-domain)) (00000001 yes))
++      ((00000011 value (00000001 result-domain)) (00000001 yes))
++      ((00000011 0 0) (00000001 no)))))
+ 
+ (00001001 contains-forbidden-semantic-section?
+   (00001000 (sections)
+     (00000111
+-      ((00000010 sections) () (00000001 no))
+-      ((00000010 sections) (0)
+-       (10011100 ((section (00000101 sections)))
+-         (00000111
+-           ((00000010 section) (0)
+-            (00000111
+-              ((00000011 (forbidden-semantic-symbol? (00000101 section)) (00000001 yes))
+-               (1)
+-               (00000001 yes))
+-              (t (contains-forbidden-semantic-section? (00000110 sections)))))
+-           (t (contains-forbidden-semantic-section? (00000110 sections)))))))))
++      ((empty-list? sections)
++       (00000001 no))
++      ((00000011
++         (forbidden-semantic-symbol? (00000101 (00000101 sections)))
++         (00000001 yes))
++       (00000001 yes))
++      ((00000011 0 0)
++       (contains-forbidden-semantic-section? (00000110 sections))))))
+ 
+ (00001001 validate-rows
+   (00001000 (rows)
+     (00000111
+-      ((00000010 rows) ()
++      ((empty-list? rows)
+        (00000001 (island-math-evidence-ok)))
+-      ((00000010 rows) (0)
+-       (10011101 ((row (00000101 rows))
+-              (sid (00000101 row))
+-              (executor (00101111 row))
+-              (status (00110000 row))
+-              (provenance-ref (00110001 row)))
+-         (00000111
+-           ((00100010 (00101000 row) 4)
+-            (0)
+-            (00100111 (00000001 island-math-evidence-violation)
+-                  (00000001 invalid-evidence-row-shape) sid))
+-           ((00100100 provenance-ref)
+-            (0)
+-            (00100111 (00000001 island-math-evidence-violation)
+-                  (00000001 provenance-must-be-string) sid executor))
+-           ((00000011 (registry-has-sid? sid registry-rows) (00000001 no))
+-            (1)
+-            (00100111 (00000001 island-math-evidence-violation)
+-                  (00000001 sid-not-in-canon-function-table) sid))
+-           ((00000011 (admitted-executor? executor) (00000001 no))
+-            (1)
+-            (00100111 (00000001 island-math-evidence-violation)
+-                  (00000001 unsupported-executor) sid executor))
+-           ((00000011 (mechanism-has-route? sid executor mechanism-rows) (00000001 no))
+-            (1)
+-            (00100111 (00000001 island-math-evidence-violation)
+-                  (00000001 executor-route-not-admitted-by-canon-projection) sid executor))
+-           ((00000011 (admitted-status? status) (00000001 no))
+-            (1)
+-            (00100111 (00000001 island-math-evidence-violation)
+-                  (00000001 unsupported-status) sid status))
+-           ((00000011 (evidence-has-route? sid executor (00000110 rows)) (00000001 yes))
+-            (1)
+-            (00100111 (00000001 island-math-evidence-violation)
+-                  (00000001 duplicate-executor-evidence) sid executor))
+-           (t (validate-rows (00000110 rows)))))))))
++      ((four-item-row? (00000101 rows))
++       (00000111
++         ((00100100 (00110001 (00000101 rows)))
++          (00000111
++            ((00000011
++               (registry-has-sid?
++                 (00000101 (00000101 rows))
++                 registry-rows)
++               (00000001 yes))
++             (00000111
++               ((00000011
++                  (admitted-executor? (00101111 (00000101 rows)))
++                  (00000001 yes))
++                (00000111
++                  ((00000011
++                     (mechanism-has-route?
++                       (00000101 (00000101 rows))
++                       (00101111 (00000101 rows))
++                       mechanism-rows)
++                     (00000001 yes))
++                   (00000111
++                     ((00000011
++                        (admitted-status? (00110000 (00000101 rows)))
++                        (00000001 yes))
++                      (00000111
++                        ((00000011
++                           (evidence-has-route?
++                             (00000101 (00000101 rows))
++                             (00101111 (00000101 rows))
++                             (00000110 rows))
++                           (00000001 yes))
++                         (00100111
++                           (00000001 island-math-evidence-violation)
++                           (00000001 duplicate-executor-evidence)
++                           (00000101 (00000101 rows))
++                           (00101111 (00000101 rows))))
++                        ((00000011 0 0)
++                         (validate-rows (00000110 rows)))))
++                     ((00000011 0 0)
++                      (00100111
++                        (00000001 island-math-evidence-violation)
++                        (00000001 unsupported-status)
++                        (00000101 (00000101 rows))
++                        (00110000 (00000101 rows))))))
++                  ((00000011 0 0)
++                   (00100111
++                     (00000001 island-math-evidence-violation)
++                     (00000001 executor-route-not-admitted-by-canon-projection)
++                     (00000101 (00000101 rows))
++                     (00101111 (00000101 rows))))))
++               ((00000011 0 0)
++                (00100111
++                  (00000001 island-math-evidence-violation)
++                  (00000001 unsupported-executor)
++                  (00000101 (00000101 rows))
++                  (00101111 (00000101 rows))))))
++            ((00000011 0 0)
++             (00100111
++               (00000001 island-math-evidence-violation)
++               (00000001 sid-not-in-canon-function-table)
++               (00000101 (00000101 rows))))))
++         ((00000011 0 0)
++          (00100111
++            (00000001 island-math-evidence-violation)
++            (00000001 provenance-must-be-string)
++            (00000101 (00000101 rows))
++            (00101111 (00000101 rows))))))
++      ((00000011 0 0)
++       (00100111
++         (00000001 island-math-evidence-violation)
++         (00000001 invalid-evidence-row-shape)
++         (00000101 (00000101 rows)))))))
+ 
+ (00001001 same-sid?
+   (00001000 (sid rows)
+     (00000111
+-      ((00000010 rows) () (00000001 yes))
+-      ((00000010 rows) (0)
+-       (00000111
+-         ((00100010 sid (00000101 (00000101 rows))) (1)
+-          (same-sid? sid (00000110 rows)))
+-         ((00100010 sid (00000101 (00000101 rows))) (0)
+-          (00000001 no)))))))
++      ((empty-list? rows)
++       (00000001 yes))
++      ((00100010 sid (00000101 (00000101 rows)))
++       (same-sid? sid (00000110 rows)))
++      ((00000011 0 0)
++       (00000001 no)))))
+ 
+ (00001001 four-island-slice?
+   (00001000 (sid)
+     (00000111
+-      ((00000011 (evidence-has-route? sid (00000001 common-lisp) evidence-rows) (00000001 no))
+-       (1) (00000001 no))
+-      ((00000011 (evidence-has-route? sid (00000001 prolog) evidence-rows) (00000001 no))
+-       (1) (00000001 no))
+-      ((00000011 (evidence-has-route? sid (00000001 clips) evidence-rows) (00000001 no))
+-       (1) (00000001 no))
+-      ((00000011 (evidence-has-route? sid (00000001 datalog) evidence-rows) (00000001 no))
+-       (1) (00000001 no))
+-      (t (00000001 yes)))))
++      ((00000011
++         (evidence-has-route? sid (00000001 common-lisp) evidence-rows)
++         (00000001 no))
++       (00000001 no))
++      ((00000011
++         (evidence-has-route? sid (00000001 prolog) evidence-rows)
++         (00000001 no))
++       (00000001 no))
++      ((00000011
++         (evidence-has-route? sid (00000001 clips) evidence-rows)
++         (00000001 no))
++       (00000001 no))
++      ((00000011
++         (evidence-has-route? sid (00000001 datalog) evidence-rows)
++         (00000001 no))
++       (00000001 no))
++      ((00000011 0 0)
++       (00000001 yes)))))
+ 
+ (00001001 row-verdict (validate-rows evidence-rows))
+ 
+ (00001001 verdict
+   (00000111
+-    ((00000011 (contains-forbidden-semantic-section? evidence) (00000001 yes))
+-     (1)
+-     (00000001 (island-math-evidence-violation semantic-field-forbidden)))
+-    ((00000010 evidence-rows) ()
+-     (00000001 (island-math-evidence-violation empty-evidence)))
+-    ((00100010 row-verdict (00000001 (island-math-evidence-ok)))
+-     (1)
+-     (10011100 ((target-sid (00000101 (00000101 evidence-rows))))
+-       (00000111
+-         ((00000011 (same-sid? target-sid evidence-rows) (00000001 no))
+-          (1)
+-          (00000001 (island-math-evidence-violation first-slice-must-have-one-sid)))
+-         ((00000011 (four-island-slice? target-sid) (00000001 no))
+-          (1)
+-          (00000001 (island-math-evidence-violation missing-required-four-island-slice)))
+-         (t (00000001 (island-math-evidence-ok))))))
+-    (t row-verdict)))
++    ((00000011
++       (contains-forbidden-semantic-section? evidence)
++       (00000001 yes))
++     (00000001
++       (island-math-evidence-violation semantic-field-forbidden)))
++    ((empty-list? evidence-rows)
++     (00000001
++       (island-math-evidence-violation empty-evidence)))
++    ((00100010
++       row-verdict
++       (00000001 (island-math-evidence-ok)))
++     (00000111
++       ((00000011
++          (same-sid?
++            (00000101 (00000101 evidence-rows))
++            evidence-rows)
++          (00000001 no))
++        (00000001
++          (island-math-evidence-violation
++            first-slice-must-have-one-sid)))
++       ((00000011
++          (four-island-slice?
++            (00000101 (00000101 evidence-rows)))
++          (00000001 no))
++        (00000001
++          (island-math-evidence-violation
++            missing-required-four-island-slice)))
++       ((00000011 0 0)
++        (00000001 (island-math-evidence-ok)))))
++    ((00000011 0 0) row-verdict)))
+ 
+ (01001000 verdict)
+
+===== FILE scripts/check-repo-tooling-inventory.lisp =====
+@@ -18,110 +18,138 @@
+   (00001000 (kind detail)
+     (00100111 (00000001 repo-tooling-violation) kind detail)))
+ 
++; Local structural predicates preserve the retired three-state ATOM
++; classification without reintroducing generic truthiness.
++(00001001 repo-tooling-predicate-yes
++  (00001000 ()
++    (00000010 (00000001 ()))))
++
++(00001001 repo-tooling-predicate-no
++  (00001000 ()
++    (00000010 (00000001 (00000000)))))
++
++(00001001 repo-tooling-predicate-no?
++  (00001000 (value)
++    (00000011 value (repo-tooling-predicate-no))))
++
++(00001001 repo-tooling-empty-list?
++  (00001000 (value)
++    (00100010 value (00000001 ()))))
++
++(00001001 repo-tooling-nonempty-atom?
++  (00001000 (value)
++    (00000111
++      ((00000010 value)
++       (repo-tooling-predicate-no? (repo-tooling-empty-list? value)))
++      ((repo-tooling-predicate-yes)
++       (repo-tooling-predicate-no)))))
++
++(00001001 repo-tooling-pair?
++  (00001000 (value)
++    (00000111
++      ((00000010 value)
++       (repo-tooling-predicate-no))
++      ((repo-tooling-predicate-yes)
++       (repo-tooling-predicate-yes)))))
++
+ (00001001 repo-tooling-field-from
+   (00001000 (name fields)
+     (00000111
+-      ((00000010 fields) () (00000001 missing))
+-      ((00000010 fields) (1) (00000001 missing))
+-      ((00000010 fields) (0)
++      ((repo-tooling-empty-list? fields) (00000001 missing))
++      ((repo-tooling-nonempty-atom? fields) (00000001 missing))
++      ((repo-tooling-pair? fields)
+        (10011100 ((field (00000101 fields)))
+          (00000111
+-           ((00000010 field) ()
++           ((repo-tooling-empty-list? field)
+             (repo-tooling-field-from name (00000110 fields)))
+-           ((00000010 field) (1)
++           ((repo-tooling-nonempty-atom? field)
+             (repo-tooling-field-from name (00000110 fields)))
+-           ((00000010 field) (0)
++           ((repo-tooling-pair? field)
+             (00000111
+-              ((00000011 (00000101 field) name) (1) (00101111 field))
+-              ((00000011 (00000101 field) name) (0)
++              ((00000011 (00000101 field) name) (00101111 field))
++              ((repo-tooling-predicate-no? (00000011 (00000101 field) name))
+                (repo-tooling-field-from name (00000110 fields)))))))))))
+ 
+ (00001001 repo-tooling-field
+   (00001000 (name row)
+     (00000111
+-      ((00000010 row) () (00000001 missing))
+-      ((00000010 row) (1) (00000001 missing))
+-      ((00000010 row) (0)
++      ((repo-tooling-empty-list? row) (00000001 missing))
++      ((repo-tooling-nonempty-atom? row) (00000001 missing))
++      ((repo-tooling-pair? row)
+        (repo-tooling-field-from name (00000110 row))))))
+ 
+ (00001001 repo-tooling-verdict-ok-state
+   (00001000 (verdict)
+     (00000111
+       ((00100010 verdict (00100111 (00000001 repo-tooling-ok)))
+-       (1)
+        (00000001 yes))
+-      ((00100010 verdict (00100111 (00000001 repo-tooling-ok)))
+-       (0)
++      ((repo-tooling-predicate-no? (00100010 verdict (00100111 (00000001 repo-tooling-ok))))
+        (00000001 no)))))
+ 
+ (00001001 repo-tooling-field-presence
+   (00001000 (value)
+     (00000111
+-      ((00000010 value) () (00000001 present))
+-      ((00000010 value) (1)
++      ((repo-tooling-empty-list? value) (00000001 present))
++      ((repo-tooling-nonempty-atom? value)
+        (00000111
+-         ((00000011 value (00000001 missing)) (1) (00000001 missing))
+-         ((00000011 value (00000001 missing)) (0) (00000001 present))))
+-      ((00000010 value) (0) (00000001 present)))))
++         ((00000011 value (00000001 missing)) (00000001 missing))
++         ((repo-tooling-predicate-no? (00000011 value (00000001 missing))) (00000001 present))))
++      ((repo-tooling-pair? value) (00000001 present)))))
+ 
+ (00001001 repo-tooling-required-fields-verdict
+   (00001000 (required row)
+     (00000111
+-      ((00000010 required) () (00100111 (00000001 repo-tooling-ok)))
+-      ((00000010 required) (1)
++      ((repo-tooling-empty-list? required) (00100111 (00000001 repo-tooling-ok)))
++      ((repo-tooling-nonempty-atom? required)
+        (repo-tooling-violation (00000001 malformed-required-field-list) required))
+-      ((00000010 required) (0)
++      ((repo-tooling-pair? required)
+        (00000111
+          ((00000011 (repo-tooling-field-presence
+                 (repo-tooling-field (00000101 required) row))
+               (00000001 missing))
+-          (1)
+           (repo-tooling-violation (00000001 missing-field) (00000101 required)))
+-         ((00000011 (repo-tooling-field-presence
++         ((repo-tooling-predicate-no? (00000011 (repo-tooling-field-presence
+                 (repo-tooling-field (00000101 required) row))
+-              (00000001 missing))
+-          (0)
++              (00000001 missing)))
+           (repo-tooling-required-fields-verdict (00000110 required) row)))))))
+ 
+ (00001001 repo-tooling-row-required-verdict
+   (00001000 (row)
+     (00000111
+-      ((00000010 row) ()
++      ((repo-tooling-empty-list? row)
+        (repo-tooling-violation (00000001 malformed-row) row))
+-      ((00000010 row) (1)
++      ((repo-tooling-nonempty-atom? row)
+        (repo-tooling-violation (00000001 malformed-row) row))
+-      ((00000010 row) (0)
++      ((repo-tooling-pair? row)
+        (00000111
+-         ((00000011 (00000101 row) (00000001 tool)) (1)
++         ((00000011 (00000101 row) (00000001 tool))
+           (repo-tooling-required-fields-verdict repo-tooling-required-fields row))
+-         ((00000011 (00000101 row) (00000001 tool)) (0)
++         ((repo-tooling-predicate-no? (00000011 (00000101 row) (00000001 tool)))
+           (repo-tooling-violation (00000001 malformed-row-kind) (00000101 row))))))))
+ 
+ (00001001 repo-tooling-required-verdict
+   (00001000 (rows)
+     (00000111
+-      ((00000010 rows) () (00100111 (00000001 repo-tooling-ok)))
+-      ((00000010 rows) (1)
++      ((repo-tooling-empty-list? rows) (00100111 (00000001 repo-tooling-ok)))
++      ((repo-tooling-nonempty-atom? rows)
+        (repo-tooling-violation (00000001 malformed-inventory-list) rows))
+-      ((00000010 rows) (0)
++      ((repo-tooling-pair? rows)
+        (10011100 ((row-verdict (repo-tooling-row-required-verdict (00000101 rows))))
+          (00000111
+            ((00000011 (repo-tooling-verdict-ok-state row-verdict) (00000001 yes))
+-            (1)
+             (repo-tooling-required-verdict (00000110 rows)))
+            ((00000011 (repo-tooling-verdict-ok-state row-verdict) (00000001 no))
+-            (1)
+             row-verdict)))))))
+ 
+ (00001001 repo-tooling-symbol-admission
+   (00001000 (value admitted)
+     (00000111
+-      ((00000010 admitted) () (00000001 rejected))
+-      ((00000010 admitted) (1) (00000001 malformed-admitted-set))
+-      ((00000010 admitted) (0)
++      ((repo-tooling-empty-list? admitted) (00000001 rejected))
++      ((repo-tooling-nonempty-atom? admitted) (00000001 malformed-admitted-set))
++      ((repo-tooling-pair? admitted)
+        (00000111
+-         ((00000011 value (00000101 admitted)) (1) (00000001 admitted))
+-         ((00000011 value (00000101 admitted)) (0)
++         ((00000011 value (00000101 admitted)) (00000001 admitted))
++         ((repo-tooling-predicate-no? (00000011 value (00000101 admitted)))
+           (repo-tooling-symbol-admission value (00000110 admitted))))))))
+ 
+ (00001001 repo-tooling-row-enum-verdict
+@@ -131,235 +159,215 @@
+            (lifecycle (repo-tooling-field (00000001 lifecycle) row))
+            (kind-state (repo-tooling-symbol-admission kind repo-tooling-kinds)))
+       (00000111
+-        ((00000011 kind-state (00000001 admitted)) (1)
++        ((00000011 kind-state (00000001 admitted))
+          (10011100 ((language-state
+                  (repo-tooling-symbol-admission language repo-tooling-languages)))
+            (00000111
+-             ((00000011 language-state (00000001 admitted)) (1)
++             ((00000011 language-state (00000001 admitted))
+               (10011100 ((lifecycle-state
+                       (repo-tooling-symbol-admission lifecycle repo-tooling-lifecycles)))
+                 (00000111
+-                  ((00000011 lifecycle-state (00000001 admitted)) (1)
++                  ((00000011 lifecycle-state (00000001 admitted))
+                    (00100111 (00000001 repo-tooling-ok)))
+-                  ((00000011 lifecycle-state (00000001 rejected)) (1)
++                  ((00000011 lifecycle-state (00000001 rejected))
+                    (repo-tooling-violation (00000001 invalid-lifecycle) lifecycle))
+                   ((00000011 lifecycle-state (00000001 malformed-admitted-set))
+-                   (1)
+                    (repo-tooling-violation
+                      (00000001 malformed-lifecycle-vocabulary)
+                      lifecycle)))))
+-             ((00000011 language-state (00000001 rejected)) (1)
++             ((00000011 language-state (00000001 rejected))
+               (repo-tooling-violation (00000001 invalid-language) language))
+              ((00000011 language-state (00000001 malformed-admitted-set))
+-              (1)
+               (repo-tooling-violation
+                 (00000001 malformed-language-vocabulary)
+                 language)))))
+-        ((00000011 kind-state (00000001 rejected)) (1)
++        ((00000011 kind-state (00000001 rejected))
+          (repo-tooling-violation (00000001 invalid-kind) kind))
+-        ((00000011 kind-state (00000001 malformed-admitted-set)) (1)
++        ((00000011 kind-state (00000001 malformed-admitted-set))
+          (repo-tooling-violation (00000001 malformed-kind-vocabulary) kind))))))
+ 
+ (00001001 repo-tooling-enum-verdict
+   (00001000 (rows)
+     (00000111
+-      ((00000010 rows) () (00100111 (00000001 repo-tooling-ok)))
+-      ((00000010 rows) (1)
++      ((repo-tooling-empty-list? rows) (00100111 (00000001 repo-tooling-ok)))
++      ((repo-tooling-nonempty-atom? rows)
+        (repo-tooling-violation (00000001 malformed-inventory-list) rows))
+-      ((00000010 rows) (0)
++      ((repo-tooling-pair? rows)
+        (10011100 ((row-verdict (repo-tooling-row-enum-verdict (00000101 rows))))
+          (00000111
+            ((00000011 (repo-tooling-verdict-ok-state row-verdict) (00000001 yes))
+-            (1)
+             (repo-tooling-enum-verdict (00000110 rows)))
+            ((00000011 (repo-tooling-verdict-ok-state row-verdict) (00000001 no))
+-            (1)
+             row-verdict)))))))
+ 
+ (00001001 repo-tooling-python-migration-required-state
+   (00001000 (row)
+     (10011100 ((language (repo-tooling-field (00000001 language) row))
+           (lifecycle (repo-tooling-field (00000001 lifecycle) row)))
+       (00000111
+-        ((00000011 language (00000001 python)) (1)
++        ((00000011 language (00000001 python))
+          (00000111
+-           ((00000011 lifecycle (00000001 active)) (1) (00000001 required))
+-           ((00000011 lifecycle (00000001 active)) (0)
++           ((00000011 lifecycle (00000001 active)) (00000001 required))
++           ((repo-tooling-predicate-no? (00000011 lifecycle (00000001 active)))
+             (00000111
+               ((00000011 lifecycle (00000001 transitional))
+-               (1)
+                (00000001 required))
+-              ((00000011 lifecycle (00000001 transitional))
+-               (0)
++              ((repo-tooling-predicate-no? (00000011 lifecycle (00000001 transitional)))
+                (00000001 not-required))))))
+-        ((00000011 language (00000001 python)) (0)
++        ((repo-tooling-predicate-no? (00000011 language (00000001 python)))
+          (00000001 not-required))))))
+ 
+ (00001001 repo-tooling-migration-owner-state
+   (00001000 (owner)
+     (00000111
+-      ((00000010 owner) () (00000001 missing))
+-      ((00000010 owner) (1)
++      ((repo-tooling-empty-list? owner) (00000001 missing))
++      ((repo-tooling-nonempty-atom? owner)
+        (00000111
+-         ((00000011 owner (00000001 missing)) (1) (00000001 missing))
+-         ((00000011 owner (00000001 missing)) (0) (00000001 present))))
+-      ((00000010 owner) (0) (00000001 present)))))
++         ((00000011 owner (00000001 missing)) (00000001 missing))
++         ((repo-tooling-predicate-no? (00000011 owner (00000001 missing))) (00000001 present))))
++      ((repo-tooling-pair? owner) (00000001 present)))))
+ 
+ (00001001 repo-tooling-row-python-migration-verdict
+   (00001000 (row)
+     (10011100 ((required-state (repo-tooling-python-migration-required-state row)))
+       (00000111
+-        ((00000011 required-state (00000001 not-required)) (1)
++        ((00000011 required-state (00000001 not-required))
+          (00100111 (00000001 repo-tooling-ok)))
+-        ((00000011 required-state (00000001 required)) (1)
++        ((00000011 required-state (00000001 required))
+          (10011101 ((owner (repo-tooling-field (00000001 migration-issue) row))
+                 (owner-state (repo-tooling-migration-owner-state owner)))
+            (00000111
+-             ((00000011 owner-state (00000001 present)) (1)
++             ((00000011 owner-state (00000001 present))
+               (00100111 (00000001 repo-tooling-ok)))
+-             ((00000011 owner-state (00000001 missing)) (1)
++             ((00000011 owner-state (00000001 missing))
+               (repo-tooling-violation
+                 (00000001 python-migration-unowned)
+                 (repo-tooling-field (00000001 path) row))))))))))
+ 
+ (00001001 repo-tooling-python-migration-verdict
+   (00001000 (rows)
+     (00000111
+-      ((00000010 rows) () (00100111 (00000001 repo-tooling-ok)))
+-      ((00000010 rows) (1)
++      ((repo-tooling-empty-list? rows) (00100111 (00000001 repo-tooling-ok)))
++      ((repo-tooling-nonempty-atom? rows)
+        (repo-tooling-violation (00000001 malformed-inventory-list) rows))
+-      ((00000010 rows) (0)
++      ((repo-tooling-pair? rows)
+        (10011100 ((row-verdict (repo-tooling-row-python-migration-verdict (00000101 rows))))
+          (00000111
+            ((00000011 (repo-tooling-verdict-ok-state row-verdict) (00000001 yes))
+-            (1)
+             (repo-tooling-python-migration-verdict (00000110 rows)))
+            ((00000011 (repo-tooling-verdict-ok-state row-verdict) (00000001 no))
+-            (1)
+             row-verdict)))))))
+ 
+ (00001001 repo-tooling-find-row-by-path
+   (00001000 (path rows)
+     (00000111
+-      ((00000010 rows) () (00000001 ()))
+-      ((00000010 rows) (1) (00000001 ()))
+-      ((00000010 rows) (0)
++      ((repo-tooling-empty-list? rows) (00000001 ()))
++      ((repo-tooling-nonempty-atom? rows) (00000001 ()))
++      ((repo-tooling-pair? rows)
+        (10011100 ((row (00000101 rows)))
+          (00000111
+            ((00100010 path (repo-tooling-field (00000001 path) row))
+-            (1)
+             row)
+-           ((00100010 path (repo-tooling-field (00000001 path) row))
+-            (0)
++           ((repo-tooling-predicate-no? (00100010 path (repo-tooling-field (00000001 path) row)))
+             (repo-tooling-find-row-by-path path (00000110 rows)))))))))
+ 
+ (00001001 repo-tooling-duplicate-path-verdict
+   (00001000 (rows)
+     (00000111
+-      ((00000010 rows) () (00100111 (00000001 repo-tooling-ok)))
+-      ((00000010 rows) (1)
++      ((repo-tooling-empty-list? rows) (00100111 (00000001 repo-tooling-ok)))
++      ((repo-tooling-nonempty-atom? rows)
+        (repo-tooling-violation (00000001 malformed-inventory-list) rows))
+-      ((00000010 rows) (0)
++      ((repo-tooling-pair? rows)
+        (10011101 ((row (00000101 rows))
+               (path (repo-tooling-field (00000001 path) row))
+               (found (repo-tooling-find-row-by-path path (00000110 rows))))
+          (00000111
+-           ((00000010 found) ()
++           ((repo-tooling-empty-list? found)
+             (repo-tooling-duplicate-path-verdict (00000110 rows)))
+-           ((00000010 found) (1)
++           ((repo-tooling-nonempty-atom? found)
+             (repo-tooling-violation (00000001 malformed-row) path))
+-           ((00000010 found) (0)
++           ((repo-tooling-pair? found)
+             (repo-tooling-violation (00000001 duplicate-path) path))))))))
+ 
+ (00001001 repo-tooling-observed-path-state
+   (00001000 (path observed)
+     (00000111
+-      ((00000010 observed) () (00000001 absent))
+-      ((00000010 observed) (1) (00000001 malformed))
+-      ((00000010 observed) (0)
++      ((repo-tooling-empty-list? observed) (00000001 absent))
++      ((repo-tooling-nonempty-atom? observed) (00000001 malformed))
++      ((repo-tooling-pair? observed)
+        (10011100 ((observed-path (00111010 "scripts/" (00000101 observed))))
+          (00000111
+-           ((00100010 path observed-path) (1) (00000001 present))
+-           ((00100010 path observed-path) (0)
++           ((00100010 path observed-path) (00000001 present))
++           ((repo-tooling-predicate-no? (00100010 path observed-path))
+             (repo-tooling-observed-path-state path (00000110 observed)))))))))
+ 
+ (00001001 repo-tooling-stale-path-verdict
+   (00001000 (rows observed)
+     (00000111
+-      ((00000010 rows) () (00100111 (00000001 repo-tooling-ok)))
+-      ((00000010 rows) (1)
++      ((repo-tooling-empty-list? rows) (00100111 (00000001 repo-tooling-ok)))
++      ((repo-tooling-nonempty-atom? rows)
+        (repo-tooling-violation (00000001 malformed-inventory-list) rows))
+-      ((00000010 rows) (0)
++      ((repo-tooling-pair? rows)
+        (10011101 ((row (00000101 rows))
+               (path (repo-tooling-field (00000001 path) row))
+               (state (repo-tooling-observed-path-state path observed)))
+          (00000111
+-           ((00000011 state (00000001 present)) (1)
++           ((00000011 state (00000001 present))
+             (repo-tooling-stale-path-verdict (00000110 rows) observed))
+-           ((00000011 state (00000001 absent)) (1)
++           ((00000011 state (00000001 absent))
+             (repo-tooling-violation (00000001 stale-path) path))
+-           ((00000011 state (00000001 malformed)) (1)
++           ((00000011 state (00000001 malformed))
+             (repo-tooling-violation (00000001 malformed-observed-list) observed))))))))
+ 
+ (00001001 repo-tooling-observed-coverage-verdict
+   (00001000 (rows observed)
+     (00000111
+-      ((00000010 observed) () (00100111 (00000001 repo-tooling-ok)))
+-      ((00000010 observed) (1)
++      ((repo-tooling-empty-list? observed) (00100111 (00000001 repo-tooling-ok)))
++      ((repo-tooling-nonempty-atom? observed)
+        (repo-tooling-violation (00000001 malformed-observed-list) observed))
+-      ((00000010 observed) (0)
++      ((repo-tooling-pair? observed)
+        (10011101 ((name (00000101 observed))
+               (path (00111010 "scripts/" name))
+               (found (repo-tooling-find-row-by-path path rows)))
+          (00000111
+-           ((00000010 found) ()
++           ((repo-tooling-empty-list? found)
+             (repo-tooling-violation (00000001 unregistered-tool) path))
+-           ((00000010 found) (1)
++           ((repo-tooling-nonempty-atom? found)
+             (repo-tooling-violation (00000001 malformed-row) path))
+-           ((00000010 found) (0)
++           ((repo-tooling-pair? found)
+             (repo-tooling-observed-coverage-verdict rows (00000110 observed)))))))))
+ 
+ (00001001 repo-tooling-verdict-after-required
+   (00001000 (rows observed)
+     (10011100 ((enum-verdict (repo-tooling-enum-verdict rows)))
+       (00000111
+         ((00000011 (repo-tooling-verdict-ok-state enum-verdict) (00000001 yes))
+-         (1)
+          (10011100 ((migration-verdict (repo-tooling-python-migration-verdict rows)))
+            (00000111
+              ((00000011 (repo-tooling-verdict-ok-state migration-verdict) (00000001 yes))
+-              (1)
+               (10011100 ((duplicate-verdict (repo-tooling-duplicate-path-verdict rows)))
+                 (00000111
+                   ((00000011 (repo-tooling-verdict-ok-state duplicate-verdict) (00000001 yes))
+-                   (1)
+                    (10011100 ((stale-verdict (repo-tooling-stale-path-verdict rows observed)))
+                      (00000111
+                        ((00000011 (repo-tooling-verdict-ok-state stale-verdict) (00000001 yes))
+-                        (1)
+                         (repo-tooling-observed-coverage-verdict rows observed))
+                        ((00000011 (repo-tooling-verdict-ok-state stale-verdict) (00000001 no))
+-                        (1)
+                         stale-verdict))))
+                   ((00000011 (repo-tooling-verdict-ok-state duplicate-verdict) (00000001 no))
+-                   (1)
+                    duplicate-verdict))))
+              ((00000011 (repo-tooling-verdict-ok-state migration-verdict) (00000001 no))
+-              (1)
+               migration-verdict))))
+         ((00000011 (repo-tooling-verdict-ok-state enum-verdict) (00000001 no))
+-         (1)
+          enum-verdict)))))
+ 
+ (00001001 repo-tooling-verdict
+   (00001000 (rows observed)
+     (10011100 ((required-verdict (repo-tooling-required-verdict rows)))
+       (00000111
+         ((00000011 (repo-tooling-verdict-ok-state required-verdict) (00000001 yes))
+-         (1)
+          (repo-tooling-verdict-after-required rows observed))
+         ((00000011 (repo-tooling-verdict-ok-state required-verdict) (00000001 no))
+-         (1)
+          required-verdict)))))
+ 
+ ; ----- pure negative witnesses -----
+@@ -464,9 +472,9 @@
+ (00001001 repo-tooling-assert-verdict
+   (00001000 (actual expected)
+     (00000111
+-      ((00100010 actual expected) (1)
++      ((00100010 actual expected)
+        (00100111 (00000001 repo-tooling-selftest-ok)))
+-      ((00100010 actual expected) (0)
++      ((repo-tooling-predicate-no? (00100010 actual expected))
+        (10011100 ((shown
+                (01001000
+                  (00100111
+@@ -516,33 +524,33 @@
+ (00001001 repo-tooling-tool-rows
+   (00001000 (forms)
+     (00000111
+-      ((00000010 forms) () (00000001 ()))
+-      ((00000010 forms) (1) (00000001 ()))
+-      ((00000010 forms) (0)
++      ((repo-tooling-empty-list? forms) (00000001 ()))
++      ((repo-tooling-nonempty-atom? forms) (00000001 ()))
++      ((repo-tooling-pair? forms)
+        (10011100 ((form (00000101 forms)))
+          (00000111
+-           ((00000010 form) ()
++           ((repo-tooling-empty-list? form)
+             (repo-tooling-tool-rows (00000110 forms)))
+-           ((00000010 form) (1)
++           ((repo-tooling-nonempty-atom? form)
+             (repo-tooling-tool-rows (00000110 forms)))
+-           ((00000010 form) (0)
++           ((repo-tooling-pair? form)
+             (00000111
+-              ((00000011 (00000101 form) (00000001 tool)) (1)
++              ((00000011 (00000101 form) (00000001 tool))
+                (00000100 form (repo-tooling-tool-rows (00000110 forms))))
+-              ((00000011 (00000101 form) (00000001 tool)) (0)
++              ((repo-tooling-predicate-no? (00000011 (00000101 form) (00000001 tool)))
+                (repo-tooling-tool-rows (00000110 forms)))))))))))
+ 
+ (00001001 repo-tooling-observed-scripts
+   (00001000 (entries)
+     (00000111
+-      ((00000010 entries) () (00000001 ()))
+-      ((00000010 entries) (1) (00000001 ()))
+-      ((00000010 entries) (0)
++      ((repo-tooling-empty-list? entries) (00000001 ()))
++      ((repo-tooling-nonempty-atom? entries) (00000001 ()))
++      ((repo-tooling-pair? entries)
+        (10011100 ((name (00000101 entries)))
+          (00000111
+-           ((00100010 name "tests") (1)
++           ((00100010 name "tests")
+             (repo-tooling-observed-scripts (00000110 entries)))
+-           ((00100010 name "tests") (0)
++           ((repo-tooling-predicate-no? (00100010 name "tests"))
+             (00000100 name (repo-tooling-observed-scripts (00000110 entries))))))))))
+ 
+ (00001001 repo-tooling-live-forms
+
+===== FILE scripts/semantic-authority-guard-enforce.lisp =====
+@@ -5,16 +5,13 @@
+ 
+ (00001001 verdict-tag
+   (00000111
+-    ((00000010 verdict) (1) verdict)
+-    ((00000010 verdict) (0) (00000101 verdict))
+-    ((00000010 verdict) () (00000001 empty-verdict))))
++    ((00000010 verdict)
++     verdict)
++    ((00000010 (00000001 ()))
++     (00000101 verdict))))
+ 
+ (00000111
+   ((00000011 verdict-tag (00000001 semantic-authority-ok))
+-   (1)
+    (00000001 semantic-authority-ok))
+-  ((00000011 verdict-tag (00000001 semantic-authority-violation))
+-   (1)
+-   (00000101 ()))
+-  (t
++  ((00000010 (00000001 ()))
+    (00000101 ())))
+
+===== FILE scripts/semantic-authority-guard.lisp =====
+@@ -13,16 +13,12 @@
+ 
+ (00001001 exact-text?
+   (00001000 (left right)
+-    (00000111
+-      ((00100010 left right) (1) t)
+-      (t t ()))))
++    (00000011 left right)))
+ 
+-(00001001 contains-any?
+-  (00001000 (source needles)
+-    (00000111
+-      ((00000010 needles) () ())
+-      ((00111110 (00000101 needles) source) t)
+-      (t (contains-any? source (00000110 needles))))))
++; Exact PredicateBit YES without a source literal.
++(00001001 predicate-yes
++  (00001000 ()
++    (00000010 (00000001 ()))))
+ 
+ (00001001 language-authority-source?
+   (00001000 (path)
+@@ -31,65 +27,60 @@
+       (00111101 "contracts/" path)
+       (exact-text? path "language-contract.lisp")
+       (exact-text? path "my-lisp-constitution.lisp")
+-      ; Synthetic protected path used only by the guard self-test.
++      ; Synthetic protected paths used only by the guard self-test.
+       (exact-text? path "tests/semantic-authority-guard-probe.lisp")
+-      ; Підтримувані (не канонічні) розширення СЕНС теж захищені.
+       (exact-text? path "tests/semantic-authority-guard-probe.сенс"))))
+ 
+ (00001001 host-marker?
+   (00001000 (source)
+-    (contains-any?
+-      source
+-      (00000001
+-        (".rs"
+-         "crates/"
+-         "Rust"
+-         "rust::"
+-         "Value::"
+-         "ExprKind::"
+-         "CanonicalIdentity"
+-         "NecessaryFormIdentity")))))
++    (10011011
++      (00111110 ".rs" source)
++      (00111110 "crates/" source)
++      (00111110 "Rust" source)
++      (00111110 "rust::" source)
++      (00111110 "Value::" source)
++      (00111110 "ExprKind::" source)
++      (00111110 "CanonicalIdentity" source)
++      (00111110 "NecessaryFormIdentity" source))))
+ 
+ (00001001 semantic-authority-claim?
+   (00001000 (source)
+-    (contains-any?
+-      source
+-      (00000001
+-        ("semantic-authority-source"
+-         "authority-source"
+-         "source-of-truth"
+-         "semantic-source"
+-         "Authority:"
+-         "generated-from-host")))))
++    (10011011
++      (00111110 "semantic-authority-source" source)
++      (00111110 "authority-source" source)
++      (00111110 "source-of-truth" source)
++      (00111110 "semantic-source" source)
++      (00111110 "Authority:" source)
++      (00111110 "generated-from-host" source))))
+ 
+ (00001001 violation-class
+   (00001000 (path source)
+     (00000111
+       ; Host/runtime/compiler/backend files are intentionally unrestricted.
+-      ; They may have local meaning tables, enums, fallbacks, dispatch, etc.
+       ((00100001 (language-authority-source? path))
+        (00000001 allowed-local-implementation))
+-      ; A protected Lisp-owned source may mention Rust as evidence/history.
+-      ; It becomes a violation only when host implementation is explicitly
+-      ; claimed as a semantic authority/source of truth.
++      ; Protected Lisp source is a violation only when host implementation is
++      ; explicitly claimed as semantic authority/source of truth.
+       ((10011010
+          (host-marker? source)
+          (semantic-authority-claim? source))
+        (00000001 host-to-language-authority-leak))
+-      (t (00000001 allowed-language-source)))))
++      ((predicate-yes)
++       (00000001 allowed-language-source)))))
+ 
+ (00001001 scan
+   (00001000 (rows)
+     (00000111
+-      ((00000010 rows) () (00000001 (semantic-authority-ok)))
+-      (t
++      ((00000010 rows)
++       (00000001 (semantic-authority-ok)))
++      ((predicate-yes)
+        (10011101 ((row (00000101 rows))
+               (path (00101111 row)))
+          (00000111
+-           ; Crucial asymmetry: do not even inspect host implementation text.
++           ; Crucial asymmetry: do not inspect host implementation text.
+            ((00100001 (language-authority-source? path))
+             (scan (00000110 rows)))
+-           (t
++           ((predicate-yes)
+             (10011100 ((raw-source (10100110 path)))
+               (00000111
+                 ((00100001 (00100100 raw-source))
+@@ -98,7 +89,7 @@
+                    path
+                    (00000001 unreadable-language-authority-source)
+                    "protected Lisp language source must be readable text"))
+-                (t
++                ((predicate-yes)
+                  (10011100 ((class (violation-class path raw-source)))
+                    (00000111
+                      ((00000011 class (00000001 host-to-language-authority-leak))
+@@ -107,7 +98,7 @@
+                         path
+                         class
+                         "Lisp language authority must not derive semantic truth from host/Rust implementation artifacts"))
+-                     (t
++                     ((predicate-yes)
+                       (scan (00000110 rows)))))))))))))))
+ 
+ (01001000 (scan changed))
+
+===== FILE tests/fixtures/life-1-scheduler-witness.lisp =====
+@@ -58,14 +58,15 @@
+                     different-bridge-contract
+                     observation-42))))))
+       (00000111
+-        ((00000010 selection) ()
++        ((00000010 selection)
+          (00100111
+            (00000001 life-1-scheduler-witness)
+            (00100111 (00000001 status) (00000001 fail))
+            (00100111 (00000001 detail) (00000001 missing-selection))))
+-        ((00000010 selection) (0)
++        ((00000010 (00000001 ()))
+          (10011101 ((ready (00000101 (00000110 selection)))
+                 (remaining (00000101 (00000110 (00000110 (00000110 selection)))))
++                (ready-ok (00000011 ready (00000001 ready)))
+                 (dedup-ok (00100010 remaining (00100111 second-ref)))
+                 (quiescence-ok
+                   (00100010
+@@ -79,32 +80,41 @@
+                     (00100111 wrong-provenance wrong-bridge)
+                     (00000001 (absent absent)))))
+            (00000111
+-             ((00100010
+-                (00100111 ready dedup-ok quiescence-ok adversarial-ok)
+-                (00000001
+-                  (ready
+-                    (1)
+-                    (1)
+-                    (1))))
+-              (1)
+-              (00100111
+-                (00000001 life-1-scheduler-witness)
+-                (00100111 (00000001 status) (00000001 pass))
+-                (00100111 (00000001 detail)
+-                      (00000001 deduplicated-activation-and-quiescence))))
+-             ((00100010 (00100111 wrong-provenance wrong-bridge)
+-                      (00000001 (absent absent)))
+-              (1)
++             (adversarial-ok
++              (00000111
++                (ready-ok
++                 (00000111
++                   (dedup-ok
++                    (00000111
++                      (quiescence-ok
++                       (00100111
++                         (00000001 life-1-scheduler-witness)
++                         (00100111 (00000001 status) (00000001 pass))
++                         (00100111 (00000001 detail)
++                               (00000001 deduplicated-activation-and-quiescence))))
++                      ((00000010 (00000001 ()))
++                       (00100111
++                         (00000001 life-1-scheduler-witness)
++                         (00100111 (00000001 status) (00000001 fail))
++                         (00100111 (00000001 detail)
++                               (00000001 scheduler-invariant-mismatch))))))
++                   ((00000010 (00000001 ()))
++                    (00100111
++                      (00000001 life-1-scheduler-witness)
++                      (00100111 (00000001 status) (00000001 fail))
++                      (00100111 (00000001 detail)
++                            (00000001 scheduler-invariant-mismatch))))))
++                ((00000010 (00000001 ()))
++                 (00100111
++                   (00000001 life-1-scheduler-witness)
++                   (00100111 (00000001 status) (00000001 fail))
++                   (00100111 (00000001 detail)
++                         (00000001 scheduler-invariant-mismatch))))))
++             ((00000010 (00000001 ()))
+               (00100111
+                 (00000001 life-1-scheduler-witness)
+                 (00100111 (00000001 status) (00000001 fail))
+-                (00100111 (00000001 detail) (00000001 scheduler-invariant-mismatch))))
+-             ((00100010 (00100111 wrong-provenance wrong-bridge)
+-                      (00000001 (absent absent)))
+-              (0)
+-              (00100111
+-                (00000001 life-1-scheduler-witness)
+-                (00100111 (00000001 status) (00000001 fail))
+-                (00100111 (00000001 detail) (00000001 adversarial-readiness-mismatch)))))))))))
++                (00100111 (00000001 detail)
++                      (00000001 adversarial-readiness-mismatch)))))))))))
+ 
+ (life-1-scheduler-witness)
