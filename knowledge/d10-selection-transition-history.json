@@ -351,6 +351,37 @@
         "scripts/check-d10-proposal-ledger.py",
         "tests/test_d10_proposal_ledger_growth.py"
       ]
+    },
+    {
+      "id": "d10.archive.selected4.20261011",
+      "authority": "#4013 #4463",
+      "evidence": [
+        "knowledge/d10-exact-barycentric-interpolation-research-v1.json",
+        "knowledge/d10-finite-temporal-constraint-closure-v1.json",
+        "knowledge/d10-quine-prime-implicants-20261009.json",
+        "knowledge/d10-symbolic-ai-arc-support-20261009.json"
+      ],
+      "previous_inventory_blob_sha": "7e13e929338baeef9b16c2139d24b78e23ea1e03",
+      "resulting_inventory_blob_sha": "9e053a51b3b49741e3245ef02e3e366d16acb261",
+      "added_stable_ids": [
+        "d10.math.exact-barycentric-interpolate.20261011",
+        "d10.ai.finite-simple-temporal-closure.20261011",
+        "d10.logic.exact-boolean-prime-implicants.20261011",
+        "d10.ai.binary-constraint-support-projection.20261011"
+      ],
+      "appended_sources": [
+        "knowledge/d10-archive-admission-20261011.uk.md"
+      ],
+      "coordinates_added": 0,
+      "ratified_added": 0,
+      "delta_selected": 4,
+      "previous_selected": 647,
+      "resulting_selected": 651,
+      "decision": "selected research only; pending owner ratification",
+      "tests": [
+        "scripts/check_d10_selection_transition_history.py",
+        "scripts/check-d10-proposal-ledger.py"
+      ]
     }
   ]
 }
