@@ -230,19 +230,37 @@ fn write_output(output: Option<&Path>, bytes: &[u8]) -> Result<(), String> {
 }
 
 fn read_triplet_member(path: &Path, role: &str) -> Result<Vec<u8>, String> {
-    let metadata = fs::symlink_metadata(path)
-        .map_err(|error| format!("cannot inspect {role} {}: {error}", path.display()))?;
-    if metadata.file_type().is_symlink() || !metadata.is_file() {
-        return Err(format!("{role} must be a regular non-symlink file: {}", path.display()));
+    let absolute = if path.is_absolute() {
+        path.to_path_buf()
+    } else {
+        std::env::current_dir()
+            .map_err(|error| format!("cannot resolve current directory for {role}: {error}"))?
+            .join(path)
+    };
+    let mut cursor = PathBuf::new();
+    for component in absolute.components() {
+        cursor.push(component.as_os_str());
+        let metadata = fs::symlink_metadata(&cursor)
+            .map_err(|error| format!("cannot inspect {role} path component {}: {error}", cursor.display()))?;
+        if metadata.file_type().is_symlink() {
+            return Err(format!("{role} path contains a symlink: {}", cursor.display()));
+        }
+    }
+
+    let metadata = fs::symlink_metadata(&absolute)
+        .map_err(|error| format!("cannot inspect {role} {}: {error}", absolute.display()))?;
+    if !metadata.is_file() {
+        return Err(format!("{role} must be a regular file: {}", absolute.display()));
     }
     if metadata.len() > MAX_INPUT_BYTES {
         return Err(format!(
             "{role} exceeds the {}-byte resource cap: {}",
             MAX_INPUT_BYTES,
-            path.display()
+            absolute.display()
         ));
     }
-    fs::read(path).map_err(|error| format!("cannot read {role} {}: {error}", path.display()))
+    fs::read(&absolute)
+        .map_err(|error| format!("cannot read {role} {}: {error}", absolute.display()))
 }
 
 /// Run the physical T5 route from an explicit .sens path, requiring same-stem
