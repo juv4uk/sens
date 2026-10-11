@@ -1,0 +1,33 @@
+name: D10 formal Stern Brocot run path donor proof
+
+on:
+  pull_request:
+    paths:
+      - 'knowledge/d10-stern-brocot-run-path-20261009.json'
+      - 'scripts/check_d10_stern_brocot_runs.py'
+      - 'tests/oracles/d10_stern_brocot_runs_sbcl.lisp'
+      - 'knowledge/d10-proposal-ledger.tsv'
+      - 'docs/research/d10-stern-brocot-runs.uk.md'
+      - '.github/workflows/d10-stern-brocot-runs.yml'
+  push:
+    branches:
+      - research/d10-stern-brocot-runs-20261009
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  exact-rational-path-bijection:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check Python source syntax
+        run: python3 -m py_compile scripts/check_d10_stern_brocot_runs.py
+      - name: Formal Euclid subtractive vs quotient-batched model and falsifiers
+        run: python3 scripts/check_d10_stern_brocot_runs.py --self-test
+      - name: Install independent Lisp implementation
+        run: sudo apt-get install -y -qq sbcl
+      - name: Run actual SBCL formal Stern Brocot witness
+        run: sbcl --noinform --script tests/oracles/d10_stern_brocot_runs_sbcl.lisp
