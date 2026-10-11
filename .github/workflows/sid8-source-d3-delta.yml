@@ -1,0 +1,41 @@
+name: SID8 Lisp source D3 semantic delta
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "**/*.lisp"
+      - "scripts/check_sid8_source_delta_d3.py"
+      - "tests/test_sid8_source_delta_d3.py"
+      - ".github/workflows/sid8-source-d3-delta.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  reject-new-d3-violations:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Unit-test newly introduced D3 semantics checks
+        run: python3 -m unittest discover -s tests -p test_sid8_source_delta_d3.py -v
+      - name: Block accidental three-field COND, host truth or invalid ATOM/EQ arity
+        run: |
+          python3 scripts/check_sid8_source_delta_d3.py \
+            --base HEAD^ --head HEAD \
+            --report "$RUNNER_TEMP/sid8-d3-delta.json"
+      - name: Upload audit evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: sid8-source-d3-delta
+          if-no-files-found: ignore
+          retention-days: 7
+          path: ${{ runner.temp }}/sid8-d3-delta.json
