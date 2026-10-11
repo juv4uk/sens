@@ -1,0 +1,65 @@
+{
+  "schema": "sens-historical-branch-archive/v1",
+  "archived_at": "2026-10-11",
+  "source": {
+    "repo": "juv4uk/sens",
+    "pr": 650,
+    "title": "cleanup(#76): move surface coverage gate to my-lisp",
+    "branch": "replay/643-surface-coverage-current-main",
+    "head_sha": "bbd1cdcae0850a6ff7c3835bac6134177c2e8b0f",
+    "base": "main",
+    "base_sha": "42e3945c5e8f27902ade6fedf52f54786c56f914",
+    "reason": "Old my-lisp-era surface coverage replay; branch workflow/test paths reference crates/my-lisp and lib/core.my, while current main uses crates/sens and lib/core.lisp. Keep as evidence; do not replace current workflow or delete current Python checker without a current-SENS parity gate."
+  },
+  "files": [
+    {
+      "original_path": ".github/workflows/surface-drift-check.yml",
+      "archived_path": "research/domain-archive/20261011/pr0650/source/.github/workflows/surface-drift-check.yml",
+      "git_blob_sha": "fc3165b74474f8a52e407b8517a875532a93f60c",
+      "source_ref": "replay/643-surface-coverage-current-main",
+      "provenance": "branch-head",
+      "bytes": 2222
+    },
+    {
+      "original_path": "crates/my-lisp/tests/rivnopravnist_mov.rs",
+      "archived_path": "research/domain-archive/20261011/pr0650/source/crates/my-lisp/tests/rivnopravnist_mov.rs",
+      "git_blob_sha": "7d32bb418c322685e41d008c0f56b704a138fe89",
+      "source_ref": "replay/643-surface-coverage-current-main",
+      "provenance": "branch-head",
+      "bytes": 9057
+    },
+    {
+      "original_path": "docs/adr/ADR-008-NUMERIC-SURFACE-AUTHORITY.md",
+      "archived_path": "research/domain-archive/20261011/pr0650/source/docs/adr/ADR-008-NUMERIC-SURFACE-AUTHORITY.md",
+      "git_blob_sha": "b5b98b3dec854e1e89467eecfa9c0223c4cafa0a",
+      "source_ref": "replay/643-surface-coverage-current-main",
+      "provenance": "branch-head",
+      "bytes": 4800
+    },
+    {
+      "original_path": "knowledge/repo-tooling-inventory.lisp",
+      "archived_path": "research/domain-archive/20261011/pr0650/source/knowledge/repo-tooling-inventory.lisp",
+      "git_blob_sha": "e1f41cb208a4b9015515f5eed273f9e183832fba",
+      "source_ref": "replay/643-surface-coverage-current-main",
+      "provenance": "branch-head",
+      "bytes": 12665
+    },
+    {
+      "original_path": "scripts/check-surface-coverage.lisp",
+      "archived_path": "research/domain-archive/20261011/pr0650/source/scripts/check-surface-coverage.lisp",
+      "git_blob_sha": "1923015f9084e868a93ecf9beae469f74ea4c7c3",
+      "source_ref": "replay/643-surface-coverage-current-main",
+      "provenance": "branch-head",
+      "bytes": 13417
+    },
+    {
+      "original_path": "scripts/check_surface_coverage.py",
+      "archived_path": "research/domain-archive/20261011/pr0650/source/scripts/check_surface_coverage.py",
+      "git_blob_sha": "8948924c52e9d90f98012cfda1f6bd3e82eaecf1",
+      "source_ref": "42e3945c5e8f27902ade6fedf52f54786c56f914",
+      "provenance": "base-side-of-deletion",
+      "bytes": 4688
+    }
+  ],
+  "disposition": "ARCHIVE-ONLY / PORT REQUIRED FOR CURRENT SENS / OWNER DECISION REMAINS #76"
+}
