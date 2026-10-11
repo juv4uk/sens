@@ -24,9 +24,26 @@ ARRAY_FIELDS = (
 
 
 def literal_tsv(path):
-    # Both the historical unquoted JSON-bearing tab index and the newer
-    # RFC4180-quoted TSV are accepted by csv.reader. Never split quoted
-    # fields manually; doubled JSON quotes are evidence, not delimiters.
+    # The original frozen 1495-name blob used literal tabs but malformed
+    # RFC4180 quoting. Parse that ONE exact immutable blob as originally
+    # serialized; use strict csv.reader for every newer source.
+    if git_blob(path.read_bytes()) == HISTORICAL_BLOB:
+        rows = {}
+        lines = path.read_text(encoding="utf-8").splitlines()
+        if not lines or tuple(lines[0].split("\t")) != INDEX_FIELDS:
+            raise ValueError("INVALID_SOURCE_CATALOG_HEADER")
+        for number, line in enumerate(lines[1:], 2):
+            parts = line.split("\t")
+            if len(parts) != len(INDEX_FIELDS):
+                raise ValueError(f"INVALID_SOURCE_CATALOG_LINE:{number}")
+            record = dict(zip(INDEX_FIELDS, parts))
+            key = record["semantic_name"].strip().casefold()
+            if not key or key in rows:
+                raise ValueError(f"DUPLICATE_SOURCE_NAME:{number}:{key}")
+            if record["ratified"] != "0":
+                raise ValueError("UNEXPECTED_RATIFICATION")
+            rows[key] = record
+        return rows
     rows = {}
     with path.open(encoding="utf-8", newline="") as stream:
         reader = csv.reader(stream, delimiter="\t", strict=True)
