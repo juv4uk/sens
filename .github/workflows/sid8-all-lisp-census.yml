@@ -1,0 +1,41 @@
+name: SID8 all-Lisp read-only source census
+on:
+  push:
+    branches: [main]
+    paths:
+      - scripts/audit_sid8_all_lisp_sources.py
+      - tests/test_audit_sid8_all_lisp_sources.py
+      - .github/workflows/sid8-all-lisp-census.yml
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  census:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Test lexical disambiguation and archive protection
+        run: python3 -m unittest discover -s tests -p test_audit_sid8_all_lisp_sources.py -v
+      - name: Audit every tracked Lisp source, no modifications
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 scripts/audit_sid8_all_lisp_sources.py --report "$RUNNER_TEMP/sid8-all-lisp-census.json"
+          python3 - "$RUNNER_TEMP/sid8-all-lisp-census.json" <<'PY'
+          import json, sys
+          x=json.load(open(sys.argv[1]))
+          assert x["summary"]["tracked_lisp_files"] >= 600
+          assert x["policy"] == "READ_ONLY_NO_SENS_NO_NEW_BRANCH_NO_SEMANTIC_PARITY_CLAIM"
+          print("ALL-LISP-CENSUS", json.dumps(x["summary"], ensure_ascii=False))
+          PY
+      - name: Publish exact file-level evidence, including blockers
+        uses: actions/upload-artifact@v4
+        with:
+          name: sid8-all-lisp-readonly-census
+          retention-days: 7
+          if-no-files-found: error
+          path: ${{ runner.temp }}/sid8-all-lisp-census.json
