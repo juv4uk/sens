@@ -131,7 +131,8 @@ fn bench_speed() -> Result<(), Box<dyn std::error::Error>> {
     let visible = exact.join(" ");
     let tokens = parse_binary_source_words(&visible)?;
     let typed: Vec<_> = tokens.iter().map(|t| t.word).collect();
-    let full_t5 = encode_ternary_words(&typed)?;
+    let full_t5 = encode_ternary_words(&typed)
+        .map_err(|error| format!("T5 physical encode: {error:?}"))?;
     if full_t5.len() != 5 || exact.len() != 8 || encode(&exact)? != one_byte {
         return Err("wrong physical size or broken roundtrip".into());
     }
