@@ -57,6 +57,23 @@ fn object_package_and_nonempty_map_addresses_are_structurally_consistent() {
 }
 
 #[test]
+fn one_object_store_has_a_bounded_reconstruction_witness() {
+    let mut session = session();
+    assert_eq!(
+        observe(&mut session,
+            "(car (fs-build-object-store (list (fs-object-package (quote hello))) (empty-content-store)))"),
+        "accepted",
+        "one canonical object envelope should enter the immutable content store"
+    );
+    assert_eq!(
+        observe(&mut session,
+            "(car (fs-reconstruct-root (fs-root-package (fs-empty)) (list (fs-object-package (quote hello)))))"),
+        "accepted",
+        "an unreferenced but valid object must not corrupt an otherwise empty root"
+    );
+}
+
+#[test]
 fn empty_root_can_be_reconstructed_without_object_packages() {
     let mut session = session();
     assert_eq!(
