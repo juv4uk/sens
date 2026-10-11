@@ -12,7 +12,7 @@
 use std::{env, fs, fs::OpenOptions, io::Write, path::Path, process};
 
 const USAGE: &str =
-    "usage: sens-trit (encode path.lisp | open path.sens | view path.sens | decode path.sens | explain path.sens | eval path.sens | eval-core4 path.sens | verify path.lisp)\n       sens-trit path.sens  # open only; never execute implicitly";
+    "usage: sens-trit (encode path.lisp | open path.sens | view path.sens | decode path.sens | explain path.sens | eval path.sens | eval-core4 path.sens | verify path.lisp | open-f3 path.senc | decode-f3 path.senc | eval-f3 path.senc)\n       sens-trit path.sens  # open only; never execute implicitly";
 
 fn sibling_sens(path: &Path) -> Result<std::path::PathBuf, String> {
     if path.extension().and_then(|ext| ext.to_str()) != Some("lisp") {
@@ -26,6 +26,18 @@ fn read_sens(path: &Path) -> Result<Vec<u8>, String> {
         return Err("expected a physical .sens file".into());
     }
     fs::read(path).map_err(|e| format!("read .sens: {e}"))
+}
+
+
+fn read_explicit_f3(path: &Path) -> Result<Vec<u8>, String> {
+    if path.extension().and_then(|ext| ext.to_str()) != Some("senc") {
+        return Err("explicit F3 command requires a physical .senc file".into());
+    }
+    let framed = fs::read(path).map_err(|e| format!("read explicit F3 .senc: {e}"))?;
+    // The bounded F3 decoder restores physically canonical T5; all SENS
+    // parsing and execution stays in the same production D2/T5 pipeline.
+    sens::frame3_small::decode_explicit_small_f3(&framed)
+        .map_err(|e| format!("explicit small F3 rejected: {e:?}"))
 }
 
 fn verify_companion(source: &str, binary: &[u8]) -> Result<(), String> {
@@ -195,6 +207,30 @@ fn execute() -> Result<(), String> {
             println!("{}", result.value);
             Ok(())
         }
+        "open-f3" => {
+            let canonical_t5 = read_explicit_f3(path)?;
+            let human = sens::open_ternary_program(&canonical_t5)
+                .map_err(|e| format!("canonical reader after F3: {e:?}"))?;
+            println!("{human}");
+            Ok(())
+        }
+        "decode-f3" => {
+            let canonical_t5 = read_explicit_f3(path)?;
+            let words = sens::decode_ternary_program(&canonical_t5)
+                .map_err(|e| format!("canonical words after F3: {e:?}"))?;
+            print!("{}", sens::render_ternary_words_vertical(&words));
+            Ok(())
+        }
+        "eval-f3" => {
+            // Never execute on opening; explicit eval only, bare pure session.
+            let canonical_t5 = read_explicit_f3(path)?;
+            let result = eval_t5_bytes(&canonical_t5)?;
+            for output in result.output {
+                println!("{output}");
+            }
+            println!("{}", result.value);
+            Ok(())
+        }
         "verify" => {
             let sens_path = sibling_sens(path)?;
             let projection = fs::read_to_string(path).map_err(|e| format!("read .lisp: {e}"))?;
@@ -221,6 +257,20 @@ mod eval_tests {
         assert!(USAGE.contains("eval path.sens"));
         assert!(USAGE.contains("eval-core4 path.sens"));
         assert!(!USAGE.contains("eval-core path.sens"));
+    }
+
+    #[test]
+    fn original_tiny_f3_requires_explicit_route_and_preserves_quote_execution() {
+        let bytes = [0xf3, 0x40, 0x60];
+        let canonical = sens::frame3_small::decode_explicit_small_f3(&bytes).unwrap();
+        let t5 = include_bytes!("../../../../tests/fixtures/migration-quote-cohort-main/quote-legacy.sens");
+        assert_eq!(&canonical, t5);
+        let direct = eval_t5_bytes(t5).unwrap();
+        let framed = eval_t5_bytes(&canonical).unwrap();
+        assert_eq!(direct.value, framed.value);
+        assert_eq!(direct.output, framed.output);
+        assert!(sens::decode_ternary_program(&bytes).is_err());
+        assert!(USAGE.contains("eval-f3 path.senc"));
     }
 
     #[test]
