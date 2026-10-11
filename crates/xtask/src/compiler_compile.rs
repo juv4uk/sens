@@ -185,9 +185,8 @@ pub fn run(repo_root: &str, options: RunOptions) -> Result<bool, String> {
 mod tests {
     use super::*;
     use sens::{
-        parse_mixed_exact_domain, lower_program, wire_encode_program, compiler_evidence_from_canonical_bytes,
-        verify_compiler_program_artifact_from_sens, CoreD8, Bit8, DomainIdentity, Expr, ExprKind,
-        Span, CompilerLoweringRole,
+        parse_mixed_exact_domain, lower_program, verify_compiler_program_artifact_from_sens,
+        CoreD8, Bit8, DomainIdentity, Expr, ExprKind, Span, CompilerLoweringRole,
     };
     use std::rc::Rc;
 
@@ -273,15 +272,17 @@ mod tests {
     #[test]
     fn compiler_adapter_contains_no_parallel_role_or_coordinate_table() {
         let source = include_str!("compiler_compile.rs");
-        for forbidden in [
-            "match identity.width()",
-            "packed_bits()",
-            "selector-head",
-            "selector-tail",
-            "lambda-form",
-            "define-form",
-            "compiler_semantic_input_from_sens",
-        ] {
+        // Construct banned phrases from fragments so this negative guard does
+        // not fail merely because the test contains its own search strings.
+        let forbidden = [
+            concat!("match identity.", "width()"),
+            concat!("packed_", "bits()"),
+            concat!("selector-", "head"),
+            concat!("selector-", "tail"),
+            concat!("lambda-", "form"),
+            concat!("define-", "form"),
+            concat!("compiler_semantic_", "input_from_sens"),
+        ];
             assert!(
                 !source.contains(forbidden),
                 "host adapter contains a forbidden semantic shortcut: {forbidden}"
