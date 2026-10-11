@@ -1,11 +1,11 @@
 {
   "schema": "d10-current-inventory-pointer/v1",
-  "status": "OWNER-DIRECTED-RESEARCH-SELECTION-707-UNRATIFIED",
+  "status": "OWNER-DIRECTED-RESEARCH-SELECTION-715-UNRATIFIED",
   "canonical_current": {
-    "path": "knowledge/d10-v4-semantic-inventory.json",
-    "git_blob": "9c641ef17ecaa815e3a8aa2a1322a8697903e0af",
-    "selected": 707,
-    "placed": 707,
+    "path": "knowledge/d10-v5-semantic-inventory.json",
+    "git_blob": "c8a23d0db0eebca0c8d780cc93bc1fda78425c44",
+    "selected": 715,
+    "placed": 715,
     "unplaced": 0,
     "ratified": 0
   },
@@ -21,7 +21,7 @@
   },
   "policy": {
     "description": "Current v4 has 707 research-selected D10 meanings; latest nine selected by owner direction from existing source-grade observable-law reviews; historical v1,v2,v3 immutably pinned.",
-    "selected_only": "707 of 1024 research meanings selected with 10-bit coordinates; 317 positions remain unselected.",
+    "selected_only": "715 researched candidates allocated, 309 unselected, none ratified.",
     "ratification": "No D10 meaning has been ratified, and D10 10-bit execution / physical T5 encoding is not authorized.",
     "next_step": "Finish independent-source semantic Core/D2/library adjudication before ratification; continue evidence-based admission of missing 317."
   },
@@ -64,5 +64,47 @@
     ],
     "owner_review": "PENDING",
     "independent_oracle": "PENDING"
+  },
+  "historical_v4_research_inventory": {
+    "path": "knowledge/d10-v4-semantic-inventory.json",
+    "git_blob": "9c641ef17ecaa815e3a8aa2a1322a8697903e0af",
+    "selected": 707,
+    "placed": 707,
+    "unplaced": 0,
+    "ratified": 0
+  },
+  "current_v5_candidate_selection": {
+    "prior": "knowledge/d10-v4-semantic-inventory.json",
+    "selected_added": 8,
+    "source_pins": [
+      {
+        "path": "knowledge/d10-crossrepo-linguistic-v1.json",
+        "git_blob": "f72f9724acfa13f71bd52d5fdae19bddad860731",
+        "names": [
+          "TOKENIZE-SENTENCES",
+          "TOKENIZE-WORDS",
+          "LEMMATIZE-TEXT",
+          "INFLECT-WORD",
+          "MORPHO-SYNTACTIC-TAG"
+        ]
+      },
+      {
+        "path": "knowledge/d10-clos-slot-state-historical-review-v1.json",
+        "git_blob": "d8c6a2fdf60c11e23016be7aad5037bb5c26782d",
+        "names": [
+          "SLOT-EXISTS-P"
+        ]
+      },
+      {
+        "path": "knowledge/d10-clos-instance-lifecycle-residual-v1.json",
+        "git_blob": "3c6e85d94e78cdd5fe9b9b645095b48335f768e5",
+        "names": [
+          "MAKE-INSTANCES-OBSOLETE",
+          "FUNCTION-KEYWORDS"
+        ]
+      }
+    ],
+    "core_review": "PENDING",
+    "oracle_parity": "PENDING"
   }
 }
