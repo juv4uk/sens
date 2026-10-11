@@ -30,7 +30,7 @@ def need(condition, reason):
 
 
 def blob(data):
-    return hashlib.sha1(b"blob " + str(len(data)).encode() + b"\\0" + data).hexdigest()
+    return hashlib.sha1(b"blob " + str(len(data)).encode() + b"\0" + data).hexdigest()
 
 
 def read_pinned(relative, expected, root=ROOT):
@@ -127,7 +127,7 @@ def check(root=ROOT, self_test=False):
     need((canonical["selected"], canonical["placed"], canonical["unplaced"], canonical["ratified"])
          == (725, 719, 6, 0), "canonical pointer accounting")
     with (k / "d10-proposal-ledger.tsv").open(newline="", encoding="utf-8") as f:
-        ledger = list(csv.DictReader(f, delimiter="\\t"))
+        ledger = list(csv.DictReader(f, delimiter="\t"))
     result = verify_payload(ptr, v7, v8, manifest, catalog, donor, ledger)
     if self_test:
         for change in (
