@@ -62,12 +62,94 @@
       "/lib64/ld-linux-x86-64.so.2",
       "linux-vdso.so.1"
     ],
-    "os": "ubuntu-latest"
+    "os": "ubuntu-latest",
+    "git": {
+      "executable": "Git (invoked by xtask compiler-export and the CML pinned-authority test)",
+      "dependency_behavior": "SENS runtime and CML proof tests require checkout revision resolution via git rev-parse HEAD; the exact minimal object/ref subset has not been derived, so do not assume .git bytes are zero and do not count the full .git directory as a minimal seed.",
+      "measured_full_checkout_metadata_snapshot": {
+        "workflow_run": "https://github.com/juv4uk/cml/actions/runs/38185559594",
+        "note": "Regular-file lengths within each checkout's absolute git-dir; external checkout metadata measurement, not seed bytes and not a minimal Git closure.",
+        "run1": {
+          "cml": 33586639,
+          "sens_submodule": 30729145,
+          "wsm_witness": 1810846,
+          "total": 66126630
+        },
+        "run2": {
+          "cml": 33584388,
+          "sens_submodule": 30726886,
+          "wsm_witness": 1810848,
+          "total": 66122122
+        },
+        "run1_minus_run2": {
+          "cml": 2251,
+          "sens_submodule": 2259,
+          "wsm_witness": -2,
+          "total": 4508
+        },
+        "artifact_ids": [
+          11718759765,
+          11719377856
+        ],
+        "two_clean_run_proof_artifact_id": 11718994225
+      }
+    },
+    "vendored_crate_sources": {
+      "source": "Pinned SENS .cargo/config.toml replaces crates.io with `vendor/`",
+      "package_count": 7,
+      "file_count": 296,
+      "tracked_bytes": 4419723,
+      "packages": [
+        {
+          "name": "serde",
+          "version": "1.0.229",
+          "file_count": 34,
+          "tracked_bytes": 564707
+        },
+        {
+          "name": "serde_core",
+          "version": "1.0.229",
+          "file_count": 28,
+          "tracked_bytes": 395423
+        },
+        {
+          "name": "serde_derive",
+          "version": "1.0.229",
+          "file_count": 37,
+          "tracked_bytes": 337296
+        },
+        {
+          "name": "proc-macro2",
+          "version": "1.0.107",
+          "file_count": 33,
+          "tracked_bytes": 273263
+        },
+        {
+          "name": "quote",
+          "version": "1.0.47",
+          "file_count": 35,
+          "tracked_bytes": 140249
+        },
+        {
+          "name": "syn",
+          "version": "3.0.3",
+          "file_count": 105,
+          "tracked_bytes": 2369990
+        },
+        {
+          "name": "unicode-ident",
+          "version": "1.0.24",
+          "file_count": 24,
+          "tracked_bytes": 338795
+        }
+      ],
+      "detail": "Full per-file SHA-1 and byte inventory for all 296 tracked files is preserved in external_build_dependency_inventory.vendored_external_packages. These are third-party crates present under vendor/; they are explicitly external dependencies and excluded from the trusted SENS seed byte subtotal."
+    }
   },
   "still_not_measured": [
     "whole-chain seed-v0 input closure total and minimality",
-    "Cargo registry source/cache byte totals and availability policy (registry crates remain explicit external dependencies)",
-    "Git metadata inputs required by runtime git rev-parse HEAD",
+    "CML-only external dependency source closure for rebuilding the CML runner (including pinned wsm-os-target); it remains outside the trusted seed metric and is listed in the CML census",
+    "minimal Git object/ref metadata required for git rev-parse (full checkout .git snapshots are measured separately but are not minimal)",
     "shared-library/toolchain dependency bytes",
     "minimum possible seed size",
     "GAS/NASM golden-corpus parity"
@@ -165,12 +247,12 @@
       }
     ],
     "additional_closure_work_required": [
-      "finish the production module/cfg graph and automated include-edge scan for all compiled sources",
-      "inventory build scripts, proc-macro build-time inputs and environment-dependent compilation inputs",
-      "record the .git metadata required by xtask runtime git rev-parse HEAD or remove that call from the seed runtime by passing a pinned revision",
-      "record Cargo registry dependency availability and keep third-party sources on the separately declared external dependency ledger",
-      "verify runtime versus build-only inputs with a fresh controlled reproduction and derive the minimum operational closure",
-      "do not publish a whole-chain seed total until closure is complete and the dependency boundary is explicit"
+      "finish an automated cfg/module graph and transitive compile-time/runtime path-input audit across CML and SENS",
+      "validate the selected SENS xtask/sens Cargo dependency graph with a clean offline build against the vendored source override; active vendor packages are pinned and separately byte-accounted",
+      "derive the minimum Git ref/object metadata needed by the two git rev-parse call sites or remove those runtime calls while preserving revision proof",
+      "record CML-only wsm-os-target/registry build dependencies in the separate external ledger without folding their source bytes into trusted seed",
+      "verify runtime versus build-only inputs with a clean controlled reproduction and derive the minimum operational closure",
+      "do not publish a whole-chain seed total until the full required-input set is complete and its boundary/minimality is proved"
     ],
     "partial_census": {
       "file": "evidence/nano-sens-seed-v0-source-closure-census-2026-10-12.json",
@@ -204,6 +286,8 @@
     "Follow-up closure census records 102 pinned files (1,145,608 bytes) for a source/manifest lower-bound subset. This is not a seed total: include macro dependencies, full Cargo build/runtime closure, registry source packages and current Git metadata dependency are not yet minimized or fully classified.",
     "Census correction (2026-10-12): the prior 102-file/1,145,608-byte tally was not a reliable production-input subset because it included cfg(test)-only bootstrap_measurement.rs and omitted 12 lib.rs compile-time includes. The corrected verified subset contains 113 pinned paths/1,337,942 bytes. It remains incomplete and is not the seed total.",
     "Include-edge scan correction (2026-10-12): crates/sens/src/gpu_oracle_conformance.rs additionally includes lib/core.lisp (59,301 bytes). The corrected verified subset is now 114 pinned paths / 1,397,243 bytes; this remains a partial subset, not the whole seed-total.",
-    "Cross-repository closure update (2026-10-12): recorded the pinned CML K1 runner build/test source subset separately: 70 CML module/metadata files totaling 1,320,729 bytes. The SENS verified subset now includes three previously omitted SENS files consumed by the CML runner/build process, reaching 117 paths / 1,432,402 bytes. The two subtotals have distinct scopes and are not a full seed total."
+    "Cross-repository closure update (2026-10-12): recorded the pinned CML K1 runner build/test source subset separately: 70 CML module/metadata files totaling 1,320,729 bytes. The SENS verified subset now includes three previously omitted SENS files consumed by the CML runner/build process, reaching 117 paths / 1,432,402 bytes. The two subtotals have distinct scopes and are not a full seed total.",
+    "Vendor dependency correction (2026-10-12): pinned `.cargo/config.toml` replaces crates.io with the SENS `vendor/` directory. The selected xtask -> sens compile path uses seven vendored crates, 296 tracked files / 4,419,723 bytes. This third-party source bundle is explicitly external and excluded from the trusted-seed subtotal; exact file-level blob SHAs and sizes are in the closure census.",
+    "Git metadata measurement (2026-10-12): K1 follow-up CI run 38185559594 passed both independent runs and byte-identical report comparison. Summed `.git` regular-file bytes were 66,126,630 and 66,122,122 across the CML/SENS/WSM checkout snapshots; 4,508-byte difference means these are environment snapshots, not the minimized metadata seed. They remain separate external dependency evidence, not seed bytes."
   ]
 }
