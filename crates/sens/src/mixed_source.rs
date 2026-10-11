@@ -883,15 +883,17 @@ mod tests {
         ), "тільки типізований D4:1111 є власником APPEND");
 
         let mut session = crate::Session::default();
+        crate::load_core_library(&mut session)
+            .expect("explicit Core4 bootstrap binds Lisp-owned LIST/APPEND closures");
         let result = crate::eval::eval_parsed_expressions(&mixed, &mut session)
-            .expect("ратифікований APPEND має об'єднати правильні списки");
+            .expect("ратифікований Lisp-owned APPEND має об'єднати правильні списки");
         assert_eq!(result.value.to_string(), "(a b)");
 
         let invalid = parse_mixed_exact_domain("(1111 42)")
             .expect("структурно допустиме джерело");
         let error = crate::eval::eval_parsed_expressions(&invalid, &mut session)
             .expect_err("APPEND не приймає числовий аргумент як список");
-        assert!(error.message.contains("D4:1111 APPEND requires proper lists"));
+        assert_eq!(error.kind, crate::ErrorKind::Type);
     }
 
     #[test]
