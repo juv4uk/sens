@@ -60,6 +60,21 @@ fn internal_map_facade_is_not_d9_auto_dispatch() {
 }
 
 #[test]
+fn private_two_argument_string_order_preserves_distinct_avl_keys() {
+    let mut session = session();
+    let left_then_right = eval_program(
+        "(внутрішня-мапа-отримати \"b\" (внутрішня-мапа-вставити \"b\" 9 (внутрішня-мапа-вставити \"a\" 7 map-empty)))",
+        &mut session
+    ).expect("two string-key insertions must not call an unadmitted D8 byte head");
+    assert_eq!(left_then_right.value.to_string(), "(9)");
+    let reverse = eval_program(
+        "(внутрішня-мапа-отримати \"a\" (внутрішня-мапа-вставити \"a\" 7 (внутрішня-мапа-вставити \"b\" 9 map-empty)))",
+        &mut session
+    ).expect("comparison must be stable regardless of insertion order");
+    assert_eq!(reverse.value.to_string(), "(7)");
+}
+
+#[test]
 fn internal_map_facade_inserts_and_reads_one_element() {
     let mut session = session();
     let inserted = eval_program(
