@@ -1,0 +1,47 @@
+{
+  "schema": "sens-historical-branch-archive/v1",
+  "archived_at": "2026-10-11",
+  "source": {
+    "repo": "juv4uk/sens",
+    "pr": 1044,
+    "title": "feat(#718): fail-closed CLIPS↔Datalog mechanical projections under Lisp authority",
+    "branch": "feat/718-clips-datalog-bridge",
+    "head_sha": "1981c7acf6fb9003dc66332a6755da4bfb716a3e",
+    "base": "main",
+    "base_sha": "42e3945c5e8f27902ade6fedf52f54786c56f914",
+    "reason": "Bounded CLIPS↔Datalog projection proposal from old my-lisp era. Bridge source and Rust observer are absent in current main. Preserve exact mechanism/projection semantics as historical evidence; do not activate as current execution or claim semantic parity without current SENS and CLIPS/Datalog oracle tests."
+  },
+  "files": [
+    {
+      "original_path": "crates/my-lisp/tests/witness_authority.rs",
+      "archived_path": "research/domain-archive/20261011/pr1044/source/crates/my-lisp/tests/witness_authority.rs",
+      "git_blob_sha": "996ef8ced9a2feffeb39b2ae59b112725332b34a",
+      "bytes": 35807
+    },
+    {
+      "original_path": "lib/bridge/clips-to-datalog.lisp",
+      "archived_path": "research/domain-archive/20261011/pr1044/source/lib/bridge/clips-to-datalog.lisp",
+      "git_blob_sha": "76360d3fc13e1c4940b4576a095aef6cbef06bfc",
+      "bytes": 10519
+    },
+    {
+      "original_path": "tests/authority-inventory.lisp",
+      "archived_path": "research/domain-archive/20261011/pr1044/source/tests/authority-inventory.lisp",
+      "git_blob_sha": "c7c06820ce4f46a2c6ab4e7c9f62f169671948f9",
+      "bytes": 6007
+    },
+    {
+      "original_path": "tests/authority-inventory.tsv",
+      "archived_path": "research/domain-archive/20261011/pr1044/source/tests/authority-inventory.tsv",
+      "git_blob_sha": "13837c19ad8213727ffe2331816f4538299fc93b",
+      "bytes": 28721
+    },
+    {
+      "original_path": "tests/fixtures/clips-datalog-bridge-witness.lisp",
+      "archived_path": "research/domain-archive/20261011/pr1044/source/tests/fixtures/clips-datalog-bridge-witness.lisp",
+      "git_blob_sha": "333057013ac95dad8429ba6060bb99622f4b1a6a",
+      "bytes": 1459
+    }
+  ],
+  "disposition": "ARCHIVE-ONLY / current bridge design and cross-runtime oracle required"
+}
