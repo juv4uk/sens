@@ -42,3 +42,7 @@ python3 benchmarks/framing-decode/run.py --samples 3 --cpu 0
 
 Cachegrind execution cost is pairwise `full - prepare`, preserving raw sample
 values and wire-bit accounting separately.
+
+## Новий повний фізичний Frame3 v2 (11.10.2026)
+
+[SHA-пінований звіт T5/v1/v2: повні байти, Rust encode/decode p50/p95, негативні свідки](results/frame3-v2-2026-10-11.uk.md). Це opt-in S3/02, не новий `.sens` default; короткі файли T5 компактніші, повтори в Frame3 можуть бути компактнішими.

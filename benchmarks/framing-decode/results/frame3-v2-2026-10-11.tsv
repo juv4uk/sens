@@ -1,0 +1,16 @@
+# benchmark SHA: da63ff7860f0a3c34d08239366e2f42cb862d774
+# runner OS: Linux 6.17.0-1022-azure x86_64
+# rustc: rustc 1.99.0 (b940084d7 2026-09-28)
+# CPU: model name	: AMD EPYC 7763 64-Core Processor
+# SHA	da63ff7860f0a3c34d08239366e2f42cb862d774
+# scope	release; same process, same sample/corpus; 11 samples x 12 repetitions; ns/one call, p50/p95; T5/Frame3-v1/v2 are different physical formats; do not equate this with language execution; hosted CPUs vary
+case	words	t5_bytes	v1_bytes	v2_bytes	t5_encode_p50_ns	t5_encode_p95_ns	v1_encode_p50_ns	v1_encode_p95_ns	v2_encode_p50_ns	v2_encode_p95_ns	t5_decode_p50_ns	t5_decode_p95_ns	v1_decode_p50_ns	v1_decode_p95_ns	v2_decode_p50_ns	v2_decode_p95_ns
+empty-list	2	1	12	11	41	60	328	768	933	999	133	212	981	1636	1549	1670
+single-d3-quote	4	3	14	13	118	136	1068	1173	5263	7458	307	384	1071	1810	4125	6644
+nested-quote-data	8	5	17	15	105	113	1196	3902	15006	16757	285	349	2000	2312	18132	20261
+dotted-pair	5	3	14	12	141	156	636	1165	2171	3855	197	247	1131	1190	3332	3409
+separator-exact	5	4	15	13	162	180	690	1551	3202	3250	228	260	1219	1280	4935	5628
+multiple-roots	6	3	15	15	147	169	834	1388	2411	2729	208	236	1496	4301	3089	3369
+mixed-width	8	6	17	16	122	146	1147	1203	6322	8718	313	393	1957	1976	9361	10215
+top-level-atom	1	2	13	13	50	320	520	572	461	479	123	151	596	647	763	791
+repeated-w9-80	82	161	21	21	2339	2342	39956	41648	43181	44564	5525	6286	43446	46734	46323	46556
