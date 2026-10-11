@@ -80,7 +80,11 @@ fn build_surface_layer(base: &Environment, surface: WebSurface) -> Result<Enviro
             environment: layer.clone(),
         };
         for (name, source) in SURFACE_PREREQUISITES {
-            eval_program(source, &mut session)
+            (if name == "time.lisp" {
+                sens::load_time_library(&mut session)
+            } else {
+                eval_program(source, &mut session)
+            })
                 .map_err(|error| format!("failed to load {name}: {}", error.render(source)))?;
         }
         let (name, source) = match surface {
