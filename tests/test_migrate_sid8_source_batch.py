@@ -49,6 +49,22 @@ class BatchSourceTests(unittest.TestCase):
         findings = self.guard.scan_lisp(new, "lib/f.lisp")
         self.assertIn("COND_NOT_TWO_FIELDS", {f.rule for f in findings})
 
+    def test_generated_and_current_domain_data_are_never_mass_rewritten(self):
+        names = {
+            "lib/machine/encoding/admitted-iclass-index.lisp",
+            "lib/machine/cpu/intel-core-i5-6400-inventory.lisp",
+            "lib/machine/dispatch/native-first-execute.lisp",
+            "lib/island-math-evidence.lisp",
+            "knowledge/language-detection-probe.lisp",
+        }
+        census = MOD.run(ROOT, False, names)
+        self.assertEqual(census["summary"]["admitted_heads"], 0)
+        self.assertEqual(census["summary"]["admitted_files"], 0)
+        self.assertEqual(len(census["files"]), len(names))
+        for row in census["files"]:
+            with self.subTest(path=row["path"]):
+                self.assertEqual(row["status"], "source-era-unproved")
+
     def test_immutable_guard_reference_not_rewritten_until_cond_law(self):
         report = MOD.run(ROOT, False, {"knowledge/guard-reference.lisp"})
         self.assertEqual(report["summary"]["admitted_files"], 0)
