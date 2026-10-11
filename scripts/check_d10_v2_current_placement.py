@@ -27,7 +27,7 @@ def git_blob(data):
 def load(root=ROOT):
     meta = json.loads((root / POINTER).read_text(encoding="utf-8"))
     # Verify the preserved v2 archive even when the current research pointer is v3.
-    if meta.get("canonical_current", {}).get("path") in ("knowledge/d10-v3-semantic-inventory.json", "knowledge/d10-v4-semantic-inventory.json", "knowledge/d10-v5-semantic-inventory.json", "knowledge/d10-v6-semantic-inventory.json", "knowledge/d10-v7-semantic-inventory.json", "knowledge/d10-v8-semantic-inventory.json"):
+    if meta.get("canonical_current", {}).get("path") in ("knowledge/d10-v3-semantic-inventory.json", "knowledge/d10-v4-semantic-inventory.json", "knowledge/d10-v5-semantic-inventory.json", "knowledge/d10-v6-semantic-inventory.json", "knowledge/d10-v7-semantic-inventory.json", "knowledge/d10-v8-semantic-inventory.json", "knowledge/d10-v9-semantic-inventory.json"):
         meta["canonical_current"] = meta["historical_v2_coordinate_inventory"]
         meta["status"] = "OWNER-DIRECTED-PLACED-RESEARCH-UNRATIFIED"
     def take(key):
