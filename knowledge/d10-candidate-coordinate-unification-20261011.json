@@ -14845,14 +14845,23 @@
       "ratified": false,
       "physical_t5_authorized": false,
       "proof_readiness": {
-        "status": "INCOMPLETE-SOURCE-SEMANTICS",
-        "missing": [
-          "positive-witness",
-          "negative-falsifier"
-        ],
+        "status": "SOURCE-LAW-WITNESSES-PRESENT-UNVERIFIED",
+        "missing": [],
         "selection": false,
         "ratification": false,
-        "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+        "next_gate": "D1-D9-DEDUPE-CORE-VS-LIBRARY-AND-INDEPENDENT-ORACLE"
+      },
+      "source_evidence": {
+        "status": "SOURCE-BASED-LAW-WITNESSES-REVIEW-ONLY",
+        "source_path": "juv4uk/latynka:spec/translit.spec.js",
+        "source_git_blob": "cdb74fdf291d0d01e28d66d2de38742a326c8756",
+        "law": "A pinned user-repository transliteration table chooses word-start `start` versus internal `other` forms for the same source grapheme; multi-character rules match longest first; output also preserves unrecognized characters.",
+        "positive": "Pinned donor test: with rules ї:{start:'yi',other:'ji'}, к:'k', converting 'ї їк' => 'yi yik', and 'кї к\\'ї' => 'kji k\\'ji'.",
+        "negative": "Pinned contrast: converting inside-word 'кї' as 'kyi' would falsely use word-start rule; converting word-start 'ї' as 'ji' would falsely use the internal rule.",
+        "witness_origin": "SOURCE-TEST-EXAMPLE-NOT-SENS-ORACLE",
+        "core_vs_library": "LIBRARY-TEXT-TRANSFORMATION-COMPOSITE-D10-REVIEW",
+        "independent_oracle": "NOT-SENS-RUNTIME-VERIFIED",
+        "ratification": false
       }
     },
     {
@@ -14929,14 +14938,23 @@
       "ratified": false,
       "physical_t5_authorized": false,
       "proof_readiness": {
-        "status": "INCOMPLETE-SOURCE-SEMANTICS",
-        "missing": [
-          "positive-witness",
-          "negative-falsifier"
-        ],
+        "status": "SOURCE-LAW-WITNESSES-PRESENT-UNVERIFIED",
+        "missing": [],
         "selection": false,
         "ratification": false,
-        "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+        "next_gate": "D1-D9-DEDUPE-CORE-VS-LIBRARY-AND-INDEPENDENT-ORACLE"
+      },
+      "source_evidence": {
+        "status": "SOURCE-BASED-LAW-WITNESSES-REVIEW-ONLY",
+        "source_path": "juv4uk/dict_uk:data/affix/a.aff",
+        "source_git_blob": "e6b2fc9c718a4a7576e2bd93cafa3c05cbd91fdb",
+        "law": "For an explicitly selected lemma affix class and morphological feature tag, apply the matching source prefix/suffix replacement pattern(s) and return inflected form(s); output is conditioned on class and tags rather than a language-independent stemmer.",
+        "positive": "Pinned a.aff adjective rule [^жкчшщ]ій: suffix ій→я for feminine nominative: 'синій' -> 'синя'. This is a rule-level example, not an executed SENS morphology result.",
+        "negative": "For the same rule, emitting 'синійя' without deleting ій is a wrong affix replacement; emitting a masculine form as the specifically requested feminine nominative fails the tag filter.",
+        "witness_origin": "RULE-LEVEL-WITNESS-NOT-INDEPENDENT-MORPHOLOGY-ORACLE",
+        "core_vs_library": "SOURCE-MARKED-PROJECTION-OF-EXISTING-D10-INFLECT-WORD",
+        "independent_oracle": "NOT-SENS-RUNTIME-VERIFIED",
+        "ratification": false
       }
     },
     {
@@ -15083,14 +15101,23 @@
       "ratified": false,
       "physical_t5_authorized": false,
       "proof_readiness": {
-        "status": "INCOMPLETE-SOURCE-SEMANTICS",
-        "missing": [
-          "positive-witness",
-          "negative-falsifier"
-        ],
+        "status": "SOURCE-LAW-WITNESSES-PRESENT-UNVERIFIED",
+        "missing": [],
         "selection": false,
         "ratification": false,
-        "next_gate": "ATTACH-PRIMARY-SOURCE-WITH-WITNESSES"
+        "next_gate": "D1-D9-DEDUPE-CORE-VS-LIBRARY-AND-INDEPENDENT-ORACLE"
+      },
+      "source_evidence": {
+        "status": "SOURCE-BASED-LAW-WITNESSES-REVIEW-ONLY",
+        "source_path": "juv4uk/vsop2013:CelestialObjects.pas",
+        "source_git_blob": "811c574c7a3de7873951de8db7eebd8960b4e27a",
+        "law": "For active bodies with initialized state, stage next position x'=x+dt*v_mid, compute acceleration at staged x', then staged midpoint velocity v_mid'=v_mid+dt*a(x'), and commit all staged positions/velocities together. Donor also re-centers on Sun; don't claim this is canonical velocity or exact symplectic behavior for arbitrary forces.",
+        "positive": "Source-level invariant: for zero dt with defined initial state, the staged x' and v_mid' equal prior values before any Sun-frame translation; all bodies are staged before the final commit loop.",
+        "negative": "Updating one planet's live position before calculating another's staging changes source force evaluation order and violates the explicit temporary-state/atomic-commit contract; reporting tSpd as a physically synchronized whole-step velocity is contradicted by donor TOFIX.",
+        "witness_origin": "SOURCE-CONTRACT-REVIEW-NO-RUNTIME-ORACLE",
+        "core_vs_library": "HOST-STATE-SIMULATION-DERIVED-PROJECTION",
+        "independent_oracle": "NOT-SENS-RUNTIME-VERIFIED",
+        "ratification": false
       }
     },
     {
@@ -23365,7 +23392,7 @@
         "rows": 9
       }
     ],
-    "total_passports": 105,
+    "total_passports": 108,
     "latest_sources": [
       {
         "path": "knowledge/d10-general-congruence-merge-hobbies-v1.json",
@@ -23430,6 +23457,11 @@
       "FOURIER-TRANSFORM",
       "SATURATING-ADD",
       "OSCILLATOR-PHASE-STEP"
+    ],
+    "latest_crossrepo_review_witnesses": [
+      "CONTEXTUAL-TEXT-REWRITE",
+      "AFFIX-RULE-WORDFORM-GENERATION",
+      "LEAPFROG-STATE-UPDATE"
     ]
   },
   "evidence_gate": {
@@ -23441,12 +23473,12 @@
     "semantic_source_audit": {
       "total": 309,
       "has_law": 216,
-      "has_positive": 199,
-      "has_negative": 199,
-      "law_and_witnesses": 195,
+      "has_positive": 202,
+      "has_negative": 202,
+      "law_and_witnesses": 198,
       "missing_law": 93,
-      "missing_positive": 110,
-      "missing_negative": 110
+      "missing_positive": 107,
+      "missing_negative": 107
     },
     "note": "All 28 SI names denote seven constants as data, not twenty-eight independent D10 residents; other source witness records are research-only.",
     "uncorroborated_source_name_census": 96,
