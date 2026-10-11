@@ -26,6 +26,9 @@ def sha(raw):
 
 def load(root=ROOT):
     info=json.loads((root / POINTER).read_text(encoding="utf-8"))
+    if info.get("canonical_current", {}).get("path") == "knowledge/d10-v4-semantic-inventory.json":
+        info["canonical_current"] = info["historical_v3_research_inventory"]
+        info["status"] = "OWNER-DIRECTED-ARCHIVAL-RESEARCH-SELECTION-698-UNRATIFIED"
     current_ref=info["canonical_current"]
     old_ref=info["historical_v2_coordinate_inventory"]
     donor_ref=info["current_archival_candidate_selection"]
