@@ -412,6 +412,7 @@ fn require_exactly_one_d4_argument(
 fn invoke_compact_derived_d4(
     identity: CoreDomainIdentity,
     args: &[Value],
+    environment: &Environment,
     span: Span,
 ) -> Option<Result<Value, LanguageError>> {
     let CoreDomainIdentity::D4(word) = identity else {
@@ -435,12 +436,14 @@ fn invoke_compact_derived_d4(
             require_exactly_one_d4_argument(0b0101, args, span)?;
             Ok(Value::predicate_bit(matches!(args[0], Value::Nil)))
         })()),
-        // Ratified D4 LIST: collect evaluated values into a proper list.
-        0b1110 => Some(Ok(Value::list(args.iter().cloned()))),
+        // D4:1110 reference execution is present only in the explicit Core4 profile.
+        0b1110 if environment.selected_core_profile() == Some(crate::CoreProfile::Core4) => {
+            Some(Ok(Value::list(args.iter().cloned())))
+        },
         // Ratified D4 APPEND: combine only proper lists, left to right.
         // Never coerce a D1 predicate, Text7 datum, symbol, or dotted tail
         // into a proper-list carrier. Each pair is observed, not mutated.
-        0b1111 => {
+        0b1111 if environment.selected_core_profile() == Some(crate::CoreProfile::Core4) => {
             let mut items = Vec::new();
             for value in args {
                 let mut cursor = value;
@@ -477,7 +480,7 @@ pub(crate) fn invoke_domain_identity(
         return result;
     }
 
-    if let Some(result) = invoke_compact_derived_d4(identity, args, span) {
+    if let Some(result) = invoke_compact_derived_d4(identity, args, environment, span) {
         return result;
     }
 
@@ -694,6 +697,34 @@ mod exact_domain_primitive_tests {
         let arity = invoke_domain_identity(d4(0b0101), &[], &environment, span)
             .expect_err("NULL arity remains one");
         assert_eq!(arity.kind, ErrorKind::Arity);
+    }
+
+    #[test]
+    fn d4_compact_route_requires_explicit_profile() {
+        let bare = Environment::root();
+        let span = Span { start: 0, end: 0 };
+
+        for bits in [0b1110, 0b1111] {
+            let error = invoke_compact_derived_d4(d4(bits), &[Value::Nil], &bare, span)
+                .expect("the exact D4 coordinate is recognized")
+                .expect_err("bare root must not activate the Core4 route");
+            assert!(
+                error.message.contains("no admitted value-call mechanism"),
+                "expected a missing reference mechanism, got: {error}"
+            );
+        }
+
+        let core4 = Environment::root();
+        core4.select_core_profile(crate::CoreProfile::Core4);
+        let value = invoke_compact_derived_d4(d4(0b1110), &[], &core4, span)
+            .expect("explicit Core4 route is recognized")
+            .expect("explicit Core4 route executes");
+        assert!(matches!(value, Value::Nil));
+
+        let value = invoke_compact_derived_d4(d4(0b1111), &[Value::Nil], &core4, span)
+            .expect("explicit Core4 route is recognized")
+            .expect("explicit Core4 route executes");
+        assert!(matches!(value, Value::Nil));
     }
 
     #[test]
