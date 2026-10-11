@@ -123,7 +123,9 @@ def check(root=ROOT, self_test=False):
     manifest = read_pinned(selection["manifest"]["path"], selection["manifest"]["git_blob"], root)
     catalog = read_pinned(manifest["source_database"]["path"], manifest["source_database"]["git_blob"], root)
     donor = read_pinned(manifest["source_donor"]["path"], manifest["source_donor"]["git_blob"], root)
-    need(manifest["source_database"] == selection["source_database"], "database provenance pointer")
+    need(manifest["source_database"]["path"] == selection["source_database"]["path"]
+         and manifest["source_database"]["git_blob"] == selection["source_database"]["git_blob"],
+         "database provenance pointer")
     need((canonical["selected"], canonical["placed"], canonical["unplaced"], canonical["ratified"])
          == (725, 719, 6, 0), "canonical pointer accounting")
     with (k / "d10-proposal-ledger.tsv").open(newline="", encoding="utf-8") as f:
