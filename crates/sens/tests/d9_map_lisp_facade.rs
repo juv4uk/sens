@@ -18,7 +18,7 @@ fn source_cutover_blocks_old_d6_let_and_unadmitted_d9_map_heads() {
     for (path, source, expected_macro_count) in [
         ("lib/persistent-map.lisp", include_str!("../../../lib/persistent-map.lisp"), 2),
         ("lib/content-store.lisp", include_str!("../../../lib/content-store.lisp"), 0),
-        ("lib/lisp-fs.lisp", include_str!("../../../lib/lisp-fs.lisp"), 14),
+        ("lib/lisp-fs.lisp", include_str!("../../../lib/lisp-fs.lisp"), 13),
     ] {
         for head in [
             "001000",    // D6 LET: replaced with the Lisp-owned ЛІХТАР macro
@@ -56,6 +56,23 @@ fn internal_map_facade_is_not_d9_auto_dispatch() {
     assert!(
         error.message.contains("not callable"),
         "expected the named non-callable diagnostic: {error:?}"
+    );
+}
+
+#[test]
+fn historical_string_order_surface_has_explicit_result_shape() {
+    let mut session = session();
+    let forward = eval_program("(string<? \"a\" \"b\")", &mut session)
+        .expect("historical Lisp comparator should evaluate as a closure");
+    let backward = eval_program("(string<? \"b\" \"a\")", &mut session)
+        .expect("reverse lexical ordering should evaluate");
+    assert_eq!(
+        forward.value.to_string(), "t",
+        "the only positive legacy marker approved for an explicit D1 bridge"
+    );
+    assert_eq!(
+        backward.value.to_string(), "()",
+        "the only negative legacy marker approved for an explicit D1 bridge"
     );
 }
 
