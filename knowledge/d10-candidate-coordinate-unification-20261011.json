@@ -8026,7 +8026,21 @@
       "law_source": "knowledge/d10-unique-decipherability-selected-20261011.json",
       "selected": true,
       "ratified": false,
-      "physical_t5_authorized": false
+      "physical_t5_authorized": false,
+      "historical_branch_evidence": [
+        {
+          "branch": "research/d10-next-tranche-pending-20261011",
+          "research_path": "knowledge/d10-next-tranche-20261011.json",
+          "source_git_blob": "aec789468a7c18dbc1a1ea107c2c056f8f1976c1",
+          "source_stable_id": null,
+          "law": "Для скінченного впорядкованого набору різних ідентичностей із непорожніми двійковими кодовими словами визначити, чи будь-які дві різні непорожні послідовності ідентичностей можуть давати той самий конкатенований бітовий потік. Префіксність не є необхідною умовою; порожній кодбук має результат YES.",
+          "positive_witnesses": "[{\"input\":\"[(a,0),(b,11)]\",\"expected\":\"YES\"},{\"input\":\"[(a,0),(b,01)]\",\"expected\":\"YES although 0 is a prefix of 01\"},{\"input\":\"[(a,0),(b,01),(c,10)]\",\"expected\":\"NO: [a,c] and [b,a] both encode 010\"},{\"input\":\"empty codebook\",\"expected\":\"YES\"}]",
+          "negative_falsifiers": "[\"A prefix-free-only implementation incorrectly rejects [(a,0),(b,01)].\",\"A greedy decoder incorrectly accepts the ambiguous codebook producing 010.\",\"Duplicate encodings for different identities are accepted.\",\"Empty word, non-binary symbol or duplicate identity is silently accepted.\"]",
+          "evidence_scope": "ARCHIVED-RESEARCH-NOT-NATIVE-SENS-EXECUTION",
+          "owner_core_ratification": false,
+          "coordinate_basis": "EXACT-SEMANTIC-NAME-MATCH-SELECTED-CANONICAL"
+        }
+      ]
     },
     {
       "coordinate": "1010001110",
@@ -8050,7 +8064,21 @@
       "law_source": null,
       "selected": true,
       "ratified": false,
-      "physical_t5_authorized": false
+      "physical_t5_authorized": false,
+      "historical_branch_evidence": [
+        {
+          "branch": "research/d10-existing-math-signal-batch-20261011",
+          "research_path": "knowledge/d10-existing-math-signal-selected-20261011.json",
+          "source_git_blob": "81ab10c6cd9373744e938696eab8d411e0990794",
+          "source_stable_id": "d10.measure.hadamard-variance.20261011",
+          "law": "For N zero-dead-time uniformly sampled fractional-frequency observations y, positive integer m and N >= 3m, average each m-point contiguous block: a_i=(1/m)*sum(y[i:i+m]); compute the mean squared second difference of consecutive m-block averages divided by 6, over all i=0..N-3m. Return exact rational variance when inputs are exact rational. Reject invalid m or insufficient data.",
+          "positive_witnesses": "[{\"input\":[0,0,1],\"m\":1,\"expected\":\"1/6\",\"explanation\":\"single second-frequency-difference squared divided by 6\"},{\"input\":[0,0,0,1,0],\"m\":1,\"expected\":\"5/18\",\"explanation\":\"three overlapping triplets: squared differences 0,1,4\"},{\"input\":[0,0,1,1,0,0],\"m\":2,\"expected\":\"2/3\",\"explanation\":\"block means 0,1,0; m=2 reflects averaging time\"},{\"input\":[1,2,3,4,5,6],\"m\":1,\"expected\":\"0\",\"explanation\":\"linear frequency drift annihilated by second differences\"}]",
+          "negative_falsifiers": "[\"Use the Allan first-difference estimator instead of the Hadamard second-difference estimator: a linear frequency drift becomes nonzero, violating the contract.\",\"Normalize by 2 instead of 6, or silently use sample variance N-1; the 3-sample impulse must equal exactly 1/6.\",\"Allow m=0, negative/non-integer m, N<3*m or silently fill missing samples; valid samples must be uniformly timed with no dead-time.\",\"Conflate the HVAR finite nonoverlapping/overlapping convention or claim a different confidence estimator (modified or total Hadamard) is the same statistic.\"]",
+          "evidence_scope": "ARCHIVED-RESEARCH-NOT-NATIVE-SENS-EXECUTION",
+          "owner_core_ratification": false,
+          "coordinate_basis": "EXACT-SEMANTIC-NAME-MATCH-SELECTED-CANONICAL"
+        }
+      ]
     },
     {
       "coordinate": "1010010000",
@@ -8062,7 +8090,33 @@
       "law_source": null,
       "selected": true,
       "ratified": false,
-      "physical_t5_authorized": false
+      "physical_t5_authorized": false,
+      "historical_branch_evidence": [
+        {
+          "branch": "research/d10-next-tranche-pending-20261011",
+          "research_path": "knowledge/d10-next-tranche-20261011.json",
+          "source_git_blob": "aec789468a7c18dbc1a1ea107c2c056f8f1976c1",
+          "source_stable_id": null,
+          "law": "Для двох скінченних послідовностей над точним комутативним кільцем довжини n та m повернути коефіцієнти c[k]=Σᵢ a[i]·b[k−i], поза межами вхідних послідовностей вважати значення нулем. Якщо обидві послідовності непорожні, довжина результату n+m−1; якщо будь-яка порожня — результат порожній. Циклічне згортання не допускається.",
+          "positive_witnesses": "[{\"input\":\"[1,2,3] * [1,1]\",\"expected\":\"[1,3,5,3]\"},{\"input\":\"[0,1] * [1,-1]\",\"expected\":\"[0,1,-1]\"},{\"input\":\"[] * [1,2]\",\"expected\":\"[]\"}]",
+          "negative_falsifiers": "[\"Cyclic convolution wraps the final coefficient into the first position.\",\"Output length is not n+m-1 for two nonempty input sequences.\",\"Floating rounding is silently made part of the canonical exact law.\"]",
+          "evidence_scope": "ARCHIVED-RESEARCH-NOT-NATIVE-SENS-EXECUTION",
+          "owner_core_ratification": false,
+          "coordinate_basis": "EXACT-SEMANTIC-NAME-MATCH-SELECTED-CANONICAL"
+        },
+        {
+          "branch": "research/d10-existing-math-signal-batch-20261011",
+          "research_path": "knowledge/d10-existing-math-signal-selected-20261011.json",
+          "source_git_blob": "81ab10c6cd9373744e938696eab8d411e0990794",
+          "source_stable_id": "d10.math.finite-convolution.20261011",
+          "law": "For nonempty length n,m produce n+m-1 coefficients c[k]=Σ_i a[i]*b[k−i], treating out-of-bounds as zero; if either input empty the result is empty.",
+          "positive_witnesses": "[{\"in\":[[1,2,3],[1,1]],\"out\":[1,3,5,3]},{\"in\":[[0,1],[1,-1]],\"out\":[0,1,-1]},{\"in\":[[2],[-3]],\"out\":[-6]}]",
+          "negative_falsifiers": "[\"Cyclic convolution wraps the final coefficient into the first sample.\",\"Cross-correlation fails reversing kernel where required by convolution.\",\"Output shape differs from n+m-1 for nonempty inputs.\"]",
+          "evidence_scope": "ARCHIVED-RESEARCH-NOT-NATIVE-SENS-EXECUTION",
+          "owner_core_ratification": false,
+          "coordinate_basis": "EXACT-SEMANTIC-NAME-MATCH-SELECTED-CANONICAL"
+        }
+      ]
     },
     {
       "coordinate": "1010010001",
@@ -8074,7 +8128,33 @@
       "law_source": null,
       "selected": true,
       "ratified": false,
-      "physical_t5_authorized": false
+      "physical_t5_authorized": false,
+      "historical_branch_evidence": [
+        {
+          "branch": "research/d10-next-tranche-pending-20261011",
+          "research_path": "knowledge/d10-next-tranche-20261011.json",
+          "source_git_blob": "aec789468a7c18dbc1a1ea107c2c056f8f1976c1",
+          "source_stable_id": null,
+          "law": "Для скінченної послідовності точних раціональних фаз і додатного раціонального періоду залишити перше значення, далі для кожної сусідньої різниці вибрати конгруентну різницю мінімального абсолютного значення та накопичити її. За точного напівперіодного нічиєго випадку зберігати знак початкової різниці; порожній вхід повертає порожній результат. Це локальне правило найменшого стрибка, не твердження про фізичну траєкторію фази.",
+          "positive_witnesses": "[{\"input\":\"values=[0,1,2,-1,0], period=4\",\"expected\":\"[0,1,2,3,4]\"},{\"input\":\"values=[0,2,0], period=4\",\"expected\":\"[0,2,0]\"},{\"input\":\"empty sequence, period=4\",\"expected\":\"[]\"}]",
+          "negative_falsifiers": "[\"Reducing each phase independently modulo the period loses accumulated turns.\",\"An exact half-period tie is resolved nondeterministically.\",\"Physical phase continuity is claimed from the samples alone.\"]",
+          "evidence_scope": "ARCHIVED-RESEARCH-NOT-NATIVE-SENS-EXECUTION",
+          "owner_core_ratification": false,
+          "coordinate_basis": "EXACT-SEMANTIC-NAME-MATCH-SELECTED-CANONICAL"
+        },
+        {
+          "branch": "research/d10-existing-math-signal-batch-20261011",
+          "research_path": "knowledge/d10-existing-math-signal-selected-20261011.json",
+          "source_git_blob": "81ab10c6cd9373744e938696eab8d411e0990794",
+          "source_stable_id": "d10.signal.phase-unwrap.20261011",
+          "law": "q[0]=p[0]; for each next i choose Δ congruent to (p[i]-p[i-1]) modulo period minimizing |Δ|; for exact half-period ties preserve the sign of the original raw difference; q[i]=q[i-1]+Δ. Empty input yields empty. This is local minimal-jump phase reconstruction, not a proof of physical phase trajectory.",
+          "positive_witnesses": "[{\"in\":[[0,1,2,-1,0],4],\"out\":[0,1,2,3,4]},{\"in\":[[1,2,3,4,5,6,1,2],6],\"out\":[1,2,3,4,5,6,7,8]},{\"in\":[[0,180,-180],360],\"out\":[0,180,180]}]",
+          "negative_falsifiers": "[\"Replacing the entire sequence with input modulo period loses accumulated revolutions.\",\"For adjacent raw differences inside half period, altering values violates continuity law.\",\"Half-period ties picked without stated rule make result nondeterministic.\"]",
+          "evidence_scope": "ARCHIVED-RESEARCH-NOT-NATIVE-SENS-EXECUTION",
+          "owner_core_ratification": false,
+          "coordinate_basis": "EXACT-SEMANTIC-NAME-MATCH-SELECTED-CANONICAL"
+        }
+      ]
     },
     {
       "coordinate": "1010010010",
@@ -8086,7 +8166,21 @@
       "law_source": null,
       "selected": true,
       "ratified": false,
-      "physical_t5_authorized": false
+      "physical_t5_authorized": false,
+      "historical_branch_evidence": [
+        {
+          "branch": "research/d10-existing-combinatorics-batch-20261011",
+          "research_path": "knowledge/d10-existing-combinatorial-laws-selected-20261011.json",
+          "source_git_blob": "f2e710f6323327689f359d50e248e0d8d3e91a0a",
+          "source_stable_id": "d10.words.debruijn-binary-cycle.20261011",
+          "law": "For n>=1, return D1 TRUE=1 iff length(word)=2^n AND the cyclic windows word[i],...,word[(i+n-1) mod 2^n] over all starts i∈[0,2^n) are pairwise distinct (equivalently cover all 2^n possible n-bit strings exactly once). Return D1 FALSE=0 for any well-typed word failing length or uniqueness. Invalid non-D1 data or n<=0 is a domain error, never a sneaky TRUE.",
+          "positive_witnesses": "[{\"word\":\"01\",\"n\":1,\"value\":1,\"why\":\"both 1-bit patterns exactly once\"},{\"word\":\"10\",\"n\":1,\"value\":1,\"why\":\"cyclic rotation preserves coverage\"},{\"word\":\"0011\",\"n\":2,\"value\":1,\"why\":\"00, 01, 11, 10 each once\"},{\"word\":\"00010111\",\"n\":3,\"value\":1,\"why\":\"SageMath example order three\"},{\"word\":\"00101110\",\"n\":3,\"value\":1,\"why\":\"rotation of valid SageMath cycle\"},{\"word\":\"00010110\",\"n\":3,\"value\":0,\"why\":\"changed bit creates duplicate cyclic n-window\"},{\"word\":\"00000000\",\"n\":3,\"value\":0,\"why\":\"repeated zero windows\"},{\"word\":\"000101110\",\"n\":3,\"value\":0,\"why\":\"extra delimiter/bit changes required exact length\"},{\"word\":\"\",\"n\":1,\"value\":0,\"why\":\"empty word never has required length\"},{\"word\":\"0101\",\"n\":2,\"value\":0,\"why\":\"primitive 01 repetition does not cover all 2-bit patterns\"}]",
+          "negative_falsifiers": "[\"Counting only linear substrings without wrap-around rejects valid 0011 at n=2\",\"Accepting length 2^n with duplicate n-bit windows mistakes length for universal coverage\",\"Treating a repeated primitive block as sufficient wrongly accepts 0101 at n=2\",\"Treating word rotations as semantically different wrongly rejects 10001011 at n=3\",\"Using an LFSR period alone without the all-zero state can miss one n-bit window\"]",
+          "evidence_scope": "ARCHIVED-RESEARCH-NOT-NATIVE-SENS-EXECUTION",
+          "owner_core_ratification": false,
+          "coordinate_basis": "EXACT-SEMANTIC-NAME-MATCH-SELECTED-CANONICAL"
+        }
+      ]
     },
     {
       "coordinate": "1010010011",
@@ -8098,7 +8192,21 @@
       "law_source": null,
       "selected": true,
       "ratified": false,
-      "physical_t5_authorized": false
+      "physical_t5_authorized": false,
+      "historical_branch_evidence": [
+        {
+          "branch": "research/d10-existing-combinatorics-batch-20261011",
+          "research_path": "knowledge/d10-existing-combinatorial-laws-selected-20261011.json",
+          "source_git_blob": "f2e710f6323327689f359d50e248e0d8d3e91a0a",
+          "source_stable_id": "d10.words.binary-lyndon-factorization.20261011",
+          "law": "Return the unique finite factor list (l1,...,lk) such that concat(li)=w; all li are Lyndon (strictly lexicographically smaller than every proper nonempty suffix); and l1 >= l2 >= ... >= lk under explicit lexicographic 0<1. For empty source return []. No dependence on physical packing, phoneme ordering or hardware transport.",
+          "positive_witnesses": "[{\"input\":\"\",\"factors\":[]},{\"input\":\"0\",\"factors\":[\"0\"]},{\"input\":\"1111\",\"factors\":[\"1\",\"1\",\"1\",\"1\"]},{\"input\":\"01010\",\"factors\":[\"01\",\"01\",\"0\"]},{\"input\":\"010010010001000\",\"factors\":[\"01\",\"001\",\"001\",\"0001\",\"0\",\"0\",\"0\"]},{\"input\":\"001001\",\"factors\":[\"001\",\"001\"]},{\"input\":\"101\",\"factors\":[\"1\",\"01\"]}]",
+          "negative_falsifiers": "[\"Returning a shortest repeated primitive root (e.g. 01010 -> 01010) instead of the ordered factor list is wrong.\",\"Allowing increasing factors l_i<l_(i+1) violates the theorem's canonical ordering.\",\"Factoring by a hidden phoneme collation rather than explicit D1 order 0<1 changes identity.\",\"Treating nonempty '00' as a Lyndon component is invalid: it equals a proper suffix only lexically larger, and is not primitive.\"]",
+          "evidence_scope": "ARCHIVED-RESEARCH-NOT-NATIVE-SENS-EXECUTION",
+          "owner_core_ratification": false,
+          "coordinate_basis": "EXACT-SEMANTIC-NAME-MATCH-SELECTED-CANONICAL"
+        }
+      ]
     },
     {
       "coordinate": "1010010100",
@@ -8110,7 +8218,21 @@
       "law_source": null,
       "selected": true,
       "ratified": false,
-      "physical_t5_authorized": false
+      "physical_t5_authorized": false,
+      "historical_branch_evidence": [
+        {
+          "branch": "research/d10-existing-combinatorics-batch-20261011",
+          "research_path": "knowledge/d10-existing-combinatorial-laws-selected-20261011.json",
+          "source_git_blob": "f2e710f6323327689f359d50e248e0d8d3e91a0a",
+          "source_stable_id": "d10.math.stern-brocot-run-path.20261011",
+          "law": "Generate exact L/R path from root 1/1 by repeated numerator/denominator comparison and subtractive Euclid; compress maximal same-bit runs using quotient floor((a-1)/b) or floor((b-1)/a), preserving final equality stop without one extra step. Reject nonpositive and imprecise source inputs; reverse accepts ONLY alternating positive-length bit runs. Two-direction round trips are identity and representation is unique for every positive rational.",
+          "positive_witnesses": "[{\"rational\":\"1/1\",\"runs\":[],\"note\":\"root needs zero directions\"},{\"rational\":\"1/2\",\"runs\":[[0,1]],\"note\":\"one left branch\"},{\"rational\":\"2/1\",\"runs\":[[1,1]],\"note\":\"one right branch\"},{\"rational\":\"2/3\",\"runs\":[[0,1],[1,1]],\"note\":\"left then right\"},{\"rational\":\"3/2\",\"runs\":[[1,1],[0,1]],\"note\":\"right then left\"},{\"rational\":\"5/2\",\"runs\":[[1,2],[0,1]],\"note\":\"two rights one left\"},{\"rational\":\"13/9\",\"runs\":[[1,1],[0,2],[1,3]],\"note\":\"exact run compression from Euclid, final right run of 3\"},{\"rational\":\"1/1000000001\",\"runs\":[[0,1000000000]],\"note\":\"billion path steps represented by one positive run\"},{\"rational\":\"1000000001/1\",\"runs\":[[1,1000000000]],\"note\":\"unbounded integer width, no bit expansion\"}]",
+          "negative_falsifiers": "[\"For 3/1, returning right-run count 3 rather than 2 introduces an extra branch past the exact rational.\",\"For 1/1, returning any left or right step is not the root path.\",\"For 5/2, reversing R² L into L R² reaches a different fraction.\",\"Consecutive same-direction run records must reject rather than silently admit a noncanonical alternative code.\",\"Zero/negative run counts, boolean bits, floats and nonpositive input rationals must reject.\",\"A billion left steps must remain a run count, not allocate a billion-element bit sequence.\",\"Turning the path into the nearest denominator-bounded fraction instead of exactly reversible p/q changes the mathematical meaning.\"]",
+          "evidence_scope": "ARCHIVED-RESEARCH-NOT-NATIVE-SENS-EXECUTION",
+          "owner_core_ratification": false,
+          "coordinate_basis": "EXACT-SEMANTIC-NAME-MATCH-SELECTED-CANONICAL"
+        }
+      ]
     },
     {
       "coordinate": "1010010101",
@@ -8122,7 +8244,21 @@
       "law_source": null,
       "selected": true,
       "ratified": false,
-      "physical_t5_authorized": false
+      "physical_t5_authorized": false,
+      "historical_branch_evidence": [
+        {
+          "branch": "research/d10-alltime-archive-batch14-20261011",
+          "research_path": "knowledge/d10-alltime-existing-research-selected-batch14-20261011.json",
+          "source_git_blob": "7953a24a2bb487ec8785a140775b2a9c0fddbb8e",
+          "source_stable_id": "d10.archive.minimal-abductive-explanations.20261011",
+          "law": "For a finite ground propositional Horn theory T, designated abducibles A, observation g and finite integrity constraints IC, return the canonical antichain of inclusion-minimal Δ ⊆ A such that g belongs to the least fixed-point closure of T ∪ Δ and no integrity constraint is fully satisfied by that closure.",
+          "positive_witnesses": "wet_shoes follows from either rain or sprinkler, so the complete minimal explanation family is [[rain],[sprinkler]].",
+          "negative_falsifiers": "[\"Returning both rain and sprinkler as one required set is wrong when either alone proves wet_shoes.\",\"Returning a superset such as [rain,sprinkler] is wrong when a proper subset already explains the observation.\",\"Hypothesizing an atom outside the designated abducible set is forbidden.\",\"A forbidden conjunction reached through derived facts must reject that candidate even when the forbidden atom was not explicitly hypothesized.\",\"A mutually recursive Horn cycle without a seed must not prove itself.\",\"A successful empty explanation [[]] must remain distinct from no explanations [].\"]",
+          "evidence_scope": "ARCHIVED-RESEARCH-NOT-NATIVE-SENS-EXECUTION",
+          "owner_core_ratification": false,
+          "coordinate_basis": "EXACT-SEMANTIC-NAME-MATCH-SELECTED-CANONICAL"
+        }
+      ]
     },
     {
       "coordinate": "1010010110",
@@ -8134,7 +8270,21 @@
       "law_source": null,
       "selected": true,
       "ratified": false,
-      "physical_t5_authorized": false
+      "physical_t5_authorized": false,
+      "historical_branch_evidence": [
+        {
+          "branch": "research/d10-alltime-archive-batch14-20261011",
+          "research_path": "knowledge/d10-alltime-existing-research-selected-batch14-20261011.json",
+          "source_git_blob": "7953a24a2bb487ec8785a140775b2a9c0fddbb8e",
+          "source_stable_id": "d10.archive.correlated-affine-combination.20261011",
+          "law": "Combine affine forms coefficientwise by exact shared-noise identity; the exact same x minus x is zero, different noise IDs are not equated.",
+          "positive_witnesses": "[\"x=10+a => x-x = [0,0]\",\"x=10+a, y=10+b => x-y = [-2,2]\",\"(3+2a+b)-(2+2a-b)=1+2b\"]",
+          "negative_falsifiers": "[\"Standard intervals give [-2,2] for x-x: incorrect for repeated same observation\",\"Merging a and b due to equal magnitudes gives false cancellation\"]",
+          "evidence_scope": "ARCHIVED-RESEARCH-NOT-NATIVE-SENS-EXECUTION",
+          "owner_core_ratification": false,
+          "coordinate_basis": "EXACT-SEMANTIC-NAME-MATCH-SELECTED-CANONICAL"
+        }
+      ]
     },
     {
       "coordinate": "1010010111",
@@ -8146,7 +8296,21 @@
       "law_source": null,
       "selected": true,
       "ratified": false,
-      "physical_t5_authorized": false
+      "physical_t5_authorized": false,
+      "historical_branch_evidence": [
+        {
+          "branch": "research/d10-alltime-archive-batch14-20261011",
+          "research_path": "knowledge/d10-alltime-existing-research-selected-batch14-20261011.json",
+          "source_git_blob": "7953a24a2bb487ec8785a140775b2a9c0fddbb8e",
+          "source_stable_id": "d10.archive.sound-affine-product-enclosure.20261011",
+          "law": "Compute linearized product with exact coefficients x0*yi+y0*xi; residual is conservatively enclosed by an explicit fresh noise coefficient (Σ|xi|)(Σ|yi|). Does not assert probabilistic independence or optimal tightness.",
+          "positive_witnesses": "[\"(1+a)*(1-a): actual [0,1], safe [0,2]\",\"2*(3+4a)=6+8a with no fresh error\",\"a*a: actual [0,1], safe [-1,1]\"]",
+          "negative_falsifiers": "[\"Reused fresh ID collides with existing IDs and must BLOCK\",\"Any exact product outside claimed range refutes soundness\"]",
+          "evidence_scope": "ARCHIVED-RESEARCH-NOT-NATIVE-SENS-EXECUTION",
+          "owner_core_ratification": false,
+          "coordinate_basis": "EXACT-SEMANTIC-NAME-MATCH-SELECTED-CANONICAL"
+        }
+      ]
     },
     {
       "coordinate": "1010011000",
@@ -8158,7 +8322,33 @@
       "law_source": null,
       "selected": true,
       "ratified": false,
-      "physical_t5_authorized": false
+      "physical_t5_authorized": false,
+      "historical_branch_evidence": [
+        {
+          "branch": "research/d10-next-tranche-pending-20261011",
+          "research_path": "knowledge/d10-next-tranche-20261011.json",
+          "source_git_blob": "aec789468a7c18dbc1a1ea107c2c056f8f1976c1",
+          "source_stable_id": null,
+          "law": "Для двох непорожніх строгих інтервалів [start,end) із start<end повернути рівно одне з 13 відношень Аллена: BEFORE, MEETS, OVERLAPS, STARTS, DURING, FINISHES, EQUALS та їхні обернені відношення. MEETS означає спільну межу, а не позитивний часовий проміжок; перестановка аргументів повертає задане обернене відношення.",
+          "positive_witnesses": "[{\"input\":\"[0,1) and [2,3)\",\"expected\":\"BEFORE\"},{\"input\":\"[0,1) and [1,2)\",\"expected\":\"MEETS\"},{\"input\":\"[0,3) and [1,2)\",\"expected\":\"CONTAINS (inverse of DURING)\"},{\"input\":\"[0,2) and [0,2)\",\"expected\":\"EQUALS\"}]",
+          "negative_falsifiers": "[\"BEFORE is returned where the first endpoint equals the second interval's start (that case is MEETS).\",\"Two different base relations are returned for the same valid pair.\",\"Swapping the arguments does not return the specified inverse relation.\"]",
+          "evidence_scope": "ARCHIVED-RESEARCH-NOT-NATIVE-SENS-EXECUTION",
+          "owner_core_ratification": false,
+          "coordinate_basis": "EXACT-SEMANTIC-NAME-MATCH-SELECTED-CANONICAL"
+        },
+        {
+          "branch": "research/d10-alltime-archive-batch14-20261011",
+          "research_path": "knowledge/d10-alltime-existing-research-selected-batch14-20261011.json",
+          "source_git_blob": "7953a24a2bb487ec8785a140775b2a9c0fddbb8e",
+          "source_stable_id": "d10.archive.allen-interval-relation.20261011",
+          "law": "Exactly one of BEFORE, MEETS, OVERLAPS, STARTS, DURING, FINISHES, EQUALS and their six distinct converse relations for two nonempty intervals; MEETS differs from a positive temporal gap; swapping operands yields the specified inverse.",
+          "positive_witnesses": "[\"[0,1] BEFORE [2,3]\",\"[0,1] MEETS [1,2]\",\"[0,2] OVERLAPS [1,3]\",\"[0,3] CONTAINS [1,2]\",\"[0,2] EQUALS [0,2]\"]",
+          "negative_falsifiers": "[\"Coincident endpoints MEETS must never be BEFORE\",\"All 13 mutually exclusive relations appear on small exhaustive ordered endpoint samples\",\"Swapping intervals returns exact converse; EQUALS is self-converse\",\"Empty/reversed interval must raise an explicit invalid-input outcome, not a fabricated relation\"]",
+          "evidence_scope": "ARCHIVED-RESEARCH-NOT-NATIVE-SENS-EXECUTION",
+          "owner_core_ratification": false,
+          "coordinate_basis": "EXACT-SEMANTIC-NAME-MATCH-SELECTED-CANONICAL"
+        }
+      ]
     },
     {
       "coordinate": "1010011001",
@@ -8170,7 +8360,33 @@
       "law_source": null,
       "selected": true,
       "ratified": false,
-      "physical_t5_authorized": false
+      "physical_t5_authorized": false,
+      "historical_branch_evidence": [
+        {
+          "branch": "research/d10-next-tranche-pending-20261011",
+          "research_path": "knowledge/d10-next-tranche-20261011.json",
+          "source_git_blob": "aec789468a7c18dbc1a1ea107c2c056f8f1976c1",
+          "source_stable_id": null,
+          "law": "Для двох скінченних наборів support-environment і набору nogood утворити всі об'єднання по одному середовищу з кожного боку; відкинути об'єднання, що містять відомий nogood як підмножину; вилучити строгі надмножини інших результатів; повернути антинанцюг у порядку зростання кардинальності, потім лексикографічно. Порожнє середовище () відрізняється від відсутності альтернатив ().",
+          "positive_witnesses": "[{\"input\":\"left=[[],[a]], right=[[b]], nogood=[[a,b]]\",\"expected\":\"[[b]]\"},{\"input\":\"left=[[a],[b]], right=[[c]], nogood=[]\",\"expected\":\"[[a,c],[b,c]] in canonical order\"}]",
+          "negative_falsifiers": "[\"A candidate whose support contains an inconsistent nogood is retained.\",\"A strict superset of another consistent support is retained.\",\"Empty support environment is conflated with no alternatives.\"]",
+          "evidence_scope": "ARCHIVED-RESEARCH-NOT-NATIVE-SENS-EXECUTION",
+          "owner_core_ratification": false,
+          "coordinate_basis": "EXACT-SEMANTIC-NAME-MATCH-SELECTED-CANONICAL"
+        },
+        {
+          "branch": "research/d10-alltime-archive-batch14-20261011",
+          "research_path": "knowledge/d10-alltime-existing-research-selected-batch14-20261011.json",
+          "source_git_blob": "7953a24a2bb487ec8785a140775b2a9c0fddbb8e",
+          "source_stable_id": "d10.archive.atms-consistent-label-join.20261011",
+          "law": "Form all unions of one left support and one right support. Discard any union that contains a known inconsistent nogood as a subset. Remove strict supersets of surviving support environments. Return the antichain sorted first by support cardinality then lexicographically. Empty environment () denotes unconditional support and differs from no support alternatives ().",
+          "positive_witnesses": "[\"left {{0},{1}}, right {{2}}, nogoods {{0,2}} -> {{1,2}}\",\"left {{}}, right {{4}}, no nogood -> {{4}}\",\"left {{0},{0,1}}, right {{}}, no nogoods -> {{0}}\",\"empty nogood {} invalidates every candidate\"]",
+          "negative_falsifiers": "[\"No returned support can contain any nogood subset\",\"No two returned environments may be strict subsets of one another\",\"Order/duplicate of input supports may not change canonical result\",\"An empty family of alternatives is not the same as one empty support\",\"Inputs remain unchanged\"]",
+          "evidence_scope": "ARCHIVED-RESEARCH-NOT-NATIVE-SENS-EXECUTION",
+          "owner_core_ratification": false,
+          "coordinate_basis": "EXACT-SEMANTIC-NAME-MATCH-SELECTED-CANONICAL"
+        }
+      ]
     },
     {
       "coordinate": "1010011010",
@@ -8182,7 +8398,21 @@
       "law_source": null,
       "selected": true,
       "ratified": false,
-      "physical_t5_authorized": false
+      "physical_t5_authorized": false,
+      "historical_branch_evidence": [
+        {
+          "branch": "research/d10-alltime-archive-batch14-20261011",
+          "research_path": "knowledge/d10-alltime-existing-research-selected-batch14-20261011.json",
+          "source_git_blob": "7953a24a2bb487ec8785a140775b2a9c0fddbb8e",
+          "source_stable_id": "d10.archive.pinhole-image-project.20261011",
+          "law": "Return exact (u,v)=(fx*Xc/Zc+cx,fy*Yc/Zc+cy). Mathematically defined for negative Z too; a separate physical visibility predicate may require Z>0. Do not silently apply lens distortion or infer extrinsics.",
+          "positive_witnesses": "[{\"args\":[\"2\",\"3\",\"4\",\"10\",\"20\",\"3\",\"4\"],\"expected\":[\"8\",\"19\"]},{\"args\":[\"1\",\"-1\",\"2\",\"3\",\"5\",\"0\",\"0\"],\"expected\":[\"3/2\",\"-5/2\"]}]",
+          "negative_falsifiers": "[\"Zc=0 is an explicit invalid projection, not infinity, a float, or a dropped point.\",\"Scaling (Xc,Yc,Zc) by any nonzero rational must not change the pixel projection.\",\"Optical distortion/pose and sensor pitch cannot be introduced implicitly.\"]",
+          "evidence_scope": "ARCHIVED-RESEARCH-NOT-NATIVE-SENS-EXECUTION",
+          "owner_core_ratification": false,
+          "coordinate_basis": "EXACT-SEMANTIC-NAME-MATCH-SELECTED-CANONICAL"
+        }
+      ]
     },
     {
       "coordinate": "1010011011",
@@ -8194,7 +8424,21 @@
       "law_source": null,
       "selected": true,
       "ratified": false,
-      "physical_t5_authorized": false
+      "physical_t5_authorized": false,
+      "historical_branch_evidence": [
+        {
+          "branch": "research/d10-alltime-archive-batch14-20261011",
+          "research_path": "knowledge/d10-alltime-existing-research-selected-batch14-20261011.json",
+          "source_git_blob": "7953a24a2bb487ec8785a140775b2a9c0fddbb8e",
+          "source_stable_id": "d10.archive.pixel-to-camera-ray.20261011",
+          "law": "Return canonical unnormalized direction ((u-cx)/fx,(v-cy)/fy,1) in camera coordinates. This is a RAY, not a reconstructed 3D point/depth. For a distortion-free pinhole, projecting any nonzero exact multiple of the direction returns the original pixel.",
+          "positive_witnesses": "[{\"args\":[\"8\",\"19\",\"10\",\"20\",\"3\",\"4\"],\"expected\":[\"1/2\",\"3/4\",\"1\"]},{\"args\":[\"0\",\"0\",\"2\",\"3\",\"0\",\"0\"],\"expected\":[\"0\",\"0\",\"1\"]}]",
+          "negative_falsifiers": "[\"fx=0 or fy=0 must not be accepted.\",\"Recovered ray may not falsely claim unique object distance.\",\"Composing ray and projection must reproduce the input pixel exactly.\"]",
+          "evidence_scope": "ARCHIVED-RESEARCH-NOT-NATIVE-SENS-EXECUTION",
+          "owner_core_ratification": false,
+          "coordinate_basis": "EXACT-SEMANTIC-NAME-MATCH-SELECTED-CANONICAL"
+        }
+      ]
     },
     {
       "coordinate": "1010011100",
@@ -8206,7 +8450,21 @@
       "law_source": null,
       "selected": true,
       "ratified": false,
-      "physical_t5_authorized": false
+      "physical_t5_authorized": false,
+      "historical_branch_evidence": [
+        {
+          "branch": "research/d10-alltime-archive-batch14-20261011",
+          "research_path": "knowledge/d10-alltime-existing-research-selected-batch14-20261011.json",
+          "source_git_blob": "7953a24a2bb487ec8785a140775b2a9c0fddbb8e",
+          "source_stable_id": "d10.archive.finite-string-critical-pair-confluence.20261011",
+          "law": "Compute all same-source one-step peaks arising from overlapping (including nested) occurrences of any pair of left sides. Each critical pair is joinable iff its two descendants share at least one reachable normal form under the same rules. Because every rule strictly shortens finite words, termination is proved by exact length. Then all critical pairs joinable is equivalent to confluence of the entire finite string rewrite relation (critical pair criterion + Newman's lemma). Return CONFLUENT or a concrete NONCONFLUENT witness: source, two branches, and separately reachable normal-form sets with empty intersection. Wording does not imply that a nonconfluent ruleset lacks individual common normal forms for other starting words.",
+          "positive_witnesses": "[{\"rules\":[[\"00\",\"0\"]],\"verdict\":\"CONFLUENT\",\"reason\":\"00→0 is length-decreasing; overlapping runs of zeros converge\"},{\"rules\":[[\"01\",\"0\"],[\"10\",\"0\"]],\"verdict\":\"CONFLUENT\",\"reason\":\"critical peak 010 reduces to 00 by either branch\"},{\"rules\":[[\"01\",\"0\"],[\"10\",\"1\"]],\"verdict\":\"NONCONFLUENT\",\"reason\":\"010 can yield 00 or 01 and subsequently 0; direct normal-form witness may vary, compute oracle, don't assert exact branches blindly\"},{\"rules\":[[\"00\",\"0\"],[\"00\",\"1\"]],\"verdict\":\"NONCONFLUENT\",\"reason\":\"00 rewrites to both irreducible 0 and 1\"},{\"rules\":[],\"verdict\":\"CONFLUENT\",\"reason\":\"no redex, reflexive closure is confluent\"}]",
+          "negative_falsifiers": "[\"Never count disjoint non-overlapping redex occurrences as unjoinable critical conflicts; the two orders commute.\",\"Two peaks may differ immediately yet be joinable later; comparing only first descendants is unsound.\",\"Identical left sides with distinct right sides yield a critical peak; omitting containment or same-position overlaps misses a real conflict.\",\"Do not invoke termination/Newman's lemma for length-preserving, length-growing, cyclic or unrestricted higher-order rewrite systems.\",\"Do not return a nonconfluence witness without two reachable branches whose normal-form sets are disjoint.\"]",
+          "evidence_scope": "ARCHIVED-RESEARCH-NOT-NATIVE-SENS-EXECUTION",
+          "owner_core_ratification": false,
+          "coordinate_basis": "EXACT-SEMANTIC-NAME-MATCH-SELECTED-CANONICAL"
+        }
+      ]
     },
     {
       "coordinate": "1010011101",
@@ -8218,7 +8476,21 @@
       "law_source": null,
       "selected": true,
       "ratified": false,
-      "physical_t5_authorized": false
+      "physical_t5_authorized": false,
+      "historical_branch_evidence": [
+        {
+          "branch": "research/d10-alltime-archive-batch14-20261011",
+          "research_path": "knowledge/d10-alltime-existing-research-selected-batch14-20261011.json",
+          "source_git_blob": "7953a24a2bb487ec8785a140775b2a9c0fddbb8e",
+          "source_stable_id": "d10.archive.first-order-least-general-generalization.20261011",
+          "law": "For TWO finite ground, ordered, free first-order constructor terms (not D2 executable expressions), return their least general generalization modulo alpha-renaming and two substitutions which reconstruct each term EXACTLY. Identical atoms and equal-name/equal-arity constructors are retained. Every incompatible ordered pair of subterms becomes one fresh hole; equal ordered disagreement pairs reuse the SAME hole, even in disjoint branches. A different arity or constructor is a disagreement. Fresh holes are numbered by first depth-first left-to-right appearance. A non-ground input, binder, improper term or unbounded depth is BLOCKED. This operation is not unification and never claims a physical .sens semantics.",
+          "positive_witnesses": "[{\"left\":{\"f\":\"pair\",\"args\":[{\"a\":\"a\"},{\"a\":\"a\"}]},\"right\":{\"f\":\"pair\",\"args\":[{\"a\":\"b\"},{\"a\":\"b\"}]},\"expected_generalizer\":{\"f\":\"pair\",\"args\":[{\"hole\":\"V0\"},{\"hole\":\"V0\"}]},\"meaning\":\"Repeated ordered disagreement uses exactly one hole, not two independent variables\"},{\"left\":{\"f\":\"pair\",\"args\":[{\"a\":\"a\"},{\"a\":\"b\"}]},\"right\":{\"f\":\"pair\",\"args\":[{\"a\":\"b\"},{\"a\":\"a\"}]},\"expected_generalizer\":{\"f\":\"pair\",\"args\":[{\"hole\":\"V0\"},{\"hole\":\"V1\"}]},\"meaning\":\"Swapped difference pairs are not the same ordered pair\"},{\"left\":{\"f\":\"observation\",\"args\":[{\"a\":\"star\"},{\"f\":\"band\",\"args\":[{\"a\":\"radio\"}]}]},\"right\":{\"f\":\"observation\",\"args\":[{\"a\":\"star\"},{\"f\":\"band\",\"args\":[{\"a\":\"optical\"}]}]},\"expected_generalizer\":{\"f\":\"observation\",\"args\":[{\"a\":\"star\"},{\"f\":\"band\",\"args\":[{\"hole\":\"V0\"}]}]},\"meaning\":\"Astronomy schema retains shared star and band constructor\"}]",
+          "negative_falsifiers": "[\"A procedure that assigns two holes to identical ordered disagreement pairs is too general\",\"A procedure that shares a variable between (a,b) and (b,a) loses ordered relationships\",\"A procedure that discards shared constructors is not least-general\",\"A procedure that reconstructs only one source or drops the second substitution is insufficient\",\"A procedure that treats differing constructor arities as equal is unsound\",\"A procedure that interprets Lisp binders or Text7 frames as freely substitutable constructors violates the bounded contract\"]",
+          "evidence_scope": "ARCHIVED-RESEARCH-NOT-NATIVE-SENS-EXECUTION",
+          "owner_core_ratification": false,
+          "coordinate_basis": "EXACT-SEMANTIC-NAME-MATCH-SELECTED-CANONICAL"
+        }
+      ]
     },
     {
       "coordinate": "1010011110",
@@ -8230,7 +8502,21 @@
       "law_source": null,
       "selected": true,
       "ratified": false,
-      "physical_t5_authorized": false
+      "physical_t5_authorized": false,
+      "historical_branch_evidence": [
+        {
+          "branch": "research/d10-alltime-archive-batch14-20261011",
+          "research_path": "knowledge/d10-alltime-existing-research-selected-batch14-20261011.json",
+          "source_git_blob": "7953a24a2bb487ec8785a140775b2a9c0fddbb8e",
+          "source_stable_id": "d10.archive.exact-perceptron-mistake-step.20261011",
+          "law": "Given nonempty finite equal-length vectors of exact rationals weights w and nonzero feature x, label y in {-1,+1}, and strictly positive exact learning rate η, compute the exact margin m=y * sum_i(w_i*x_i). If m>0 return (w,corrected=NO), otherwise return (w+η*y*x,corrected=YES). A zero margin must trigger correction for either label. This is one pure mathematical update; no assumptions about convergence, SGD, hidden layers, approximate floats or physical sensor uncertainties.",
+          "positive_witnesses": "[{\"w\":[\"0\",\"0\"],\"x\":[\"2\",\"-1\"],\"y\":1,\"eta\":\"1\",\"result\":[\"2\",\"-1\"],\"corrected\":true},{\"w\":[\"2\",\"-1\"],\"x\":[\"2\",\"-1\"],\"y\":1,\"eta\":\"1\",\"result\":[\"2\",\"-1\"],\"corrected\":false},{\"w\":[\"2\",\"-1\"],\"x\":[\"1\",\"2\"],\"y\":-1,\"eta\":\"1\",\"result\":[\"1\",\"-3\"],\"corrected\":true},{\"w\":[\"1/2\",\"1/3\"],\"x\":[\"3/2\",\"-1/2\"],\"y\":-1,\"eta\":\"2/3\",\"result\":[\"-1/2\",\"2/3\"],\"corrected\":true}]",
+          "negative_falsifiers": "[\"A margin of exactly zero is incorrectly treated as strictly classified and does not update.\",\"A nonpositive learning rate, wrong vector shape, float, forbidden label or zero feature vector is accepted.\",\"The exact margin gain after a correction differs from eta * ||x||².\",\"The weight vector is changed when the signed margin was strictly positive.\",\"A claim that all non-linearly separable training samples converge violates the restricted Novikoff theorem.\"]",
+          "evidence_scope": "ARCHIVED-RESEARCH-NOT-NATIVE-SENS-EXECUTION",
+          "owner_core_ratification": false,
+          "coordinate_basis": "EXACT-SEMANTIC-NAME-MATCH-SELECTED-CANONICAL"
+        }
+      ]
     },
     {
       "coordinate": "1010011111",
@@ -8242,7 +8528,21 @@
       "law_source": null,
       "selected": true,
       "ratified": false,
-      "physical_t5_authorized": false
+      "physical_t5_authorized": false,
+      "historical_branch_evidence": [
+        {
+          "branch": "research/d10-alltime-archive-batch14-20261011",
+          "research_path": "knowledge/d10-alltime-existing-research-selected-batch14-20261011.json",
+          "source_git_blob": "7953a24a2bb487ec8785a140775b2a9c0fddbb8e",
+          "source_stable_id": "d10.archive.lower-mechanical-word.20261011",
+          "law": "For i=0..n−1 output D1 bit floor((i+1)*k/n + rho)-floor(i*k/n + rho). No floating-point approximation, no implicit hardware clock, and no two-valued T5 code.",
+          "positive_witnesses": "[{\"input\":{\"n\":8,\"k\":3,\"rho\":\"0\"},\"bits\":\"00100101\"},{\"input\":{\"n\":8,\"k\":3,\"rho\":\"1/2\"},\"bits\":\"01010010\"},{\"input\":{\"n\":8,\"k\":5,\"rho\":\"0\"},\"bits\":\"01011011\"},{\"input\":{\"n\":12,\"k\":4,\"rho\":\"0\"},\"bits\":\"001001001001\"},{\"input\":{\"n\":5,\"k\":2,\"rho\":\"1/3\"},\"bits\":\"01001\"},{\"input\":{\"n\":4,\"k\":4,\"rho\":\"0\"},\"bits\":\"1111\"},{\"input\":{\"n\":3,\"k\":0,\"rho\":\"0\"},\"bits\":\"000\"}]",
+          "negative_falsifiers": "[\"An 8-step, 3-event output with adjacent long clumps (e.g. 11100000) breaks balanced prefix behavior\",\"An off-by-one period that returns k−1 or k+1 events is incorrect\",\"A floating accumulator whose rounding changes the binary word at exact rational ties violates identity\",\"A rotation of a word may be a useful musical variant but does not in general satisfy the same rho=0 identity\"]",
+          "evidence_scope": "ARCHIVED-RESEARCH-NOT-NATIVE-SENS-EXECUTION",
+          "owner_core_ratification": false,
+          "coordinate_basis": "EXACT-SEMANTIC-NAME-MATCH-SELECTED-CANONICAL"
+        }
+      ]
     },
     {
       "coordinate": "1010100000",
@@ -8254,7 +8554,21 @@
       "law_source": null,
       "selected": true,
       "ratified": false,
-      "physical_t5_authorized": false
+      "physical_t5_authorized": false,
+      "historical_branch_evidence": [
+        {
+          "branch": "research/d10-alltime-archive-batch14-20261011",
+          "research_path": "knowledge/d10-alltime-existing-research-selected-batch14-20261011.json",
+          "source_git_blob": "7953a24a2bb487ec8785a140775b2a9c0fddbb8e",
+          "source_stable_id": "d10.archive.affine-quantity-transport.20261011",
+          "law": "Reject unless seven dimension exponents match exactly and source/target scale are >0. For POINT, coordinate source base = source_scale*x+source_origin, target result=(source_base-target_origin)/target_scale. For DELTA, source_base=source_scale*x, target result=source_base/target_scale; both origins ignored. Preserve kind, exact rational, and compositional inverse. Errors for invalid kind/dimensions/scale/float, not coercions.",
+          "positive_witnesses": "[{\"kind\":\"POINT\",\"input\":\"0 Celsius\",\"result\":\"27315/100 K\",\"explanation\":\"temperature origin offset is exact\"},{\"kind\":\"DELTA\",\"input\":\"5 Celsius-difference\",\"result\":\"5 K-difference\",\"explanation\":\"offset never applied\"},{\"kind\":\"POINT\",\"input\":\"32 Fahrenheit\",\"result\":\"27315/100 K\",\"explanation\":\"exact scale 5/9 and Fahrenheit origin 45967/180 K\"},{\"kind\":\"DELTA\",\"input\":\"9 Fahrenheit-difference\",\"result\":\"5 K-difference\",\"explanation\":\"5/9 times 9\"},{\"kind\":\"POINT\",\"input\":\"27315/100 Kelvin\",\"result\":\"0 Celsius\",\"explanation\":\"invertibility\"},{\"kind\":\"POINT\",\"input\":\"4 source calibrated volts, source origin -1/10 baseV, target origin 1/10 baseV\",\"result\":\"19/5 target volts\",\"explanation\":\"calibration offsets compose in exact rational arithmetic\"}]",
+          "negative_falsifiers": "[\"A 5 °C DELTA converted to 278.15 K confuses a difference with a point.\",\"A 0 °C POINT converted to 0 K loses the exact origin translation.\",\"Converting seconds to metres when seven base dimensions mismatch must reject.\",\"Applying an origin offset to a DELTA violates composition under instrument zero calibration.\",\"Treating floats as exact or allowing zero/negative scale silently invalidates the pure law.\",\"Converting a POINT roundtrip through arbitrary intermediate affine unit must be identity.\"]",
+          "evidence_scope": "ARCHIVED-RESEARCH-NOT-NATIVE-SENS-EXECUTION",
+          "owner_core_ratification": false,
+          "coordinate_basis": "EXACT-SEMANTIC-NAME-MATCH-SELECTED-CANONICAL"
+        }
+      ]
     },
     {
       "coordinate": "1010100001",
@@ -8266,7 +8580,21 @@
       "law_source": null,
       "selected": true,
       "ratified": false,
-      "physical_t5_authorized": false
+      "physical_t5_authorized": false,
+      "historical_branch_evidence": [
+        {
+          "branch": "research/d10-alltime-archive-batch14-20261011",
+          "research_path": "knowledge/d10-alltime-existing-research-selected-batch14-20261011.json",
+          "source_git_blob": "7953a24a2bb487ec8785a140775b2a9c0fddbb8e",
+          "source_stable_id": "d10.archive.ground-congruence-closure-partition.20261011",
+          "law": "Given finite acyclic ground term nodes with uninterpreted symbols, equations, and equality queries: return least equivalence relation containing the equations and closed under functions with equal symbols and pointwise equal arguments; booleans represent logical entailment, NOT proof of disequality.",
+          "positive_witnesses": "[{\"name\":\"same-symbol congruence and unlike-symbol negative\",\"input\":{\"nodes\":[{\"id\":\"a\",\"symbol\":\"A\",\"args\":[]},{\"id\":\"b\",\"symbol\":\"B\",\"args\":[]},{\"id\":\"fa\",\"symbol\":\"F\",\"args\":[\"a\"]},{\"id\":\"fb\",\"symbol\":\"F\",\"args\":[\"b\"]},{\"id\":\"ga\",\"symbol\":\"G\",\"args\":[\"a\"]}],\"equalities\":[[\"a\",\"b\"]],\"queries\":[[\"fa\",\"fb\"],[\"fa\",\"ga\"],[\"a\",\"b\"]]},\"output\":{\"classes\":[[\"a\",\"b\"],[\"fa\",\"fb\"],[\"ga\"]],\"entailed\":[true,false,true]}},{\"name\":\"absence of axioms\",\"input\":{\"nodes\":[{\"id\":\"a\",\"symbol\":\"A\",\"args\":[]},{\"id\":\"b\",\"symbol\":\"B\",\"args\":[]},{\"id\":\"fa\",\"symbol\":\"F\",\"args\":[\"a\"]},{\"id\":\"fb\",\"symbol\":\"F\",\"args\":[\"b\"]},{\"id\":\"ga\",\"symbol\":\"G\",\"args\":[\"a\"]}],\"equalities\":[],\"queries\":[[\"fa\",\"fb\"],[\"fa\",\"ga\"],[\"a\",\"b\"]]},\"output\":{\"classes\":[[\"a\"],[\"b\"],[\"fa\"],[\"fb\"],[\"ga\"]],\"entailed\":[false,false,false]}},{\"name\":\"direct unrelated function equation without equality of leaves\",\"input\":{\"nodes\":[{\"id\":\"a\",\"symbol\":\"A\",\"args\":[]},{\"id\":\"b\",\"symbol\":\"B\",\"args\":[]},{\"id\":\"fa\",\"symbol\":\"F\",\"args\":[\"a\"]},{\"id\":\"fb\",\"symbol\":\"F\",\"args\":[\"b\"]},{\"id\":\"ga\",\"symbol\":\"G\",\"args\":[\"a\"]}],\"equalities\":[[\"fa\",\"ga\"]],\"queries\":[[\"fa\",\"fb\"],[\"fa\",\"ga\"],[\"a\",\"b\"]]},\"output\":{\"classes\":[[\"a\"],[\"b\"],[\"fa\",\"ga\"],[\"fb\"]],\"entailed\":[false,true,false]}},{\"name\":\"transitive ground axioms\",\"input\":{\"nodes\":[{\"id\":\"a\",\"symbol\":\"A\",\"args\":[]},{\"id\":\"b\",\"symbol\":\"B\",\"args\":[]},{\"id\":\"c\",\"symbol\":\"C\",\"args\":[]},{\"id\":\"fa\",\"symbol\":\"F\",\"args\":[\"a\"]},{\"id\":\"fc\",\"symbol\":\"F\",\"args\":[\"c\"]}],\"equalities\":[[\"a\",\"b\"],[\"b\",\"c\"]],\"queries\":[[\"fa\",\"fc\"],[\"a\",\"c\"]]},\"output\":{\"classes\":[[\"a\",\"b\",\"c\"],[\"fa\",\"fc\"]],\"entailed\":[true,true]}},{\"name\":\"identical syntax with two DAG node IDs\",\"input\":{\"nodes\":[{\"id\":\"a\",\"symbol\":\"A\",\"args\":[]},{\"id\":\"fa1\",\"symbol\":\"F\",\"args\":[\"a\"]},{\"id\":\"fa2\",\"symbol\":\"F\",\"args\":[\"a\"]}],\"equalities\":[],\"queries\":[[\"fa1\",\"fa2\"]]},\"output\":{\"classes\":[[\"a\"],[\"fa1\",\"fa2\"]],\"entailed\":[true]}}]",
+          "negative_falsifiers": "[\"given a=b infer F(a)=F(b), not F(a)=G(b)\",\"same-symbol same-argument terms equal even when no equations\",\"no stated equations never entail equality of two distinct constants\",\"entailed=false is not explicit disequality\",\"unknown node, forward/cyclic reference, inconsistent function arity BLOCK\",\"no rewriting or symbolic variable substitution is smuggled into congruence\"]",
+          "evidence_scope": "ARCHIVED-RESEARCH-NOT-NATIVE-SENS-EXECUTION",
+          "owner_core_ratification": false,
+          "coordinate_basis": "EXACT-SEMANTIC-NAME-MATCH-SELECTED-CANONICAL"
+        }
+      ]
     },
     {
       "coordinate": "1010100010",
@@ -8278,7 +8606,21 @@
       "law_source": null,
       "selected": true,
       "ratified": false,
-      "physical_t5_authorized": false
+      "physical_t5_authorized": false,
+      "historical_branch_evidence": [
+        {
+          "branch": "research/d10-alltime-archive-batch14-20261011",
+          "research_path": "knowledge/d10-alltime-existing-research-selected-batch14-20261011.json",
+          "source_git_blob": "7953a24a2bb487ec8785a140775b2a9c0fddbb8e",
+          "source_stable_id": "d10.archive.cyclic-binary-word-canon.20261011",
+          "law": "For finite nonempty w of length N, define rotate(w,k)[i]=w[(i+k) mod N]. Choose c=min_lex {rotate(w,k) | 0<=k<N}. Return (c, min {k | rotate(w,k)=c}). No reversal, sorting, primitive-root contraction, incomplete-period padding, byte alignment, or physical carrier framing.",
+          "positive_witnesses": "[{\"word\":\"1100\",\"canonical\":\"0011\",\"least_left_shift\":2,\"why\":\"cross-boundary least rotation\"},{\"word\":\"1001\",\"canonical\":\"0011\",\"least_left_shift\":1,\"why\":\"same circle with different original phase\"},{\"word\":\"1010\",\"canonical\":\"0101\",\"least_left_shift\":1,\"why\":\"two identical least rotations, choose earlier k=1 rather than 3\"},{\"word\":\"010010\",\"canonical\":\"001001\",\"least_left_shift\":2,\"why\":\"repeated cyclic minimum at k=2 and k=5; stable source index 2\"},{\"word\":\"1111\",\"canonical\":\"1111\",\"least_left_shift\":0,\"why\":\"all rotations identical; earliest shift 0\"},{\"word\":\"01010\",\"canonical\":\"00101\",\"least_left_shift\":4,\"why\":\"aperiodic word with prefix period 2, root algorithm is inapplicable\"},{\"word\":\"0110\",\"canonical\":\"0011\",\"least_left_shift\":3,\"why\":\"left circular shift, not bit reversal\"},{\"word\":\"0\",\"canonical\":\"0\",\"least_left_shift\":0,\"why\":\"one-bit nonempty identity\"}]",
+          "negative_falsifiers": "[\"Returning 0101 shift 3 instead of shift 1 for 1010 violates smallest-offset witness.\",\"Returning 01 (shortest repeated root) instead of the full 4-bit 0101 for 1010 changes the semantic object length.\",\"Returning 01010 for 01010 because its prefix period appears to be 2 misses least full cyclic shift 00101.\",\"Returning reversed 0011 from 1100 without proving a circular shift (or any reverse operation) must reject.\",\"Returning empty word as a valid canonical cyclic phase erases the precondition N>0.\",\"Treating Python True as exact bit 1 silently conflates bool with bit identity in the typed oracle.\",\"Treating physical T5 padding/separators as elements of the cyclic mathematical word is a carrier/semantics violation.\"]",
+          "evidence_scope": "ARCHIVED-RESEARCH-NOT-NATIVE-SENS-EXECUTION",
+          "owner_core_ratification": false,
+          "coordinate_basis": "EXACT-SEMANTIC-NAME-MATCH-SELECTED-CANONICAL"
+        }
+      ]
     },
     {
       "coordinate": "1010100011",
@@ -8290,7 +8632,21 @@
       "law_source": "knowledge/d10-maling-symbolic-differentiation-1959-v1.json",
       "selected": true,
       "ratified": false,
-      "physical_t5_authorized": false
+      "physical_t5_authorized": false,
+      "historical_branch_evidence": [
+        {
+          "branch": "research/d10-canonical-ledger-evidence-batch23-20261011",
+          "research_path": "knowledge/d10-existing-ledger-semantic-tranche23-20261011.json",
+          "source_git_blob": "0dc1aa7240ffabfac6c84de45eed2014743a3fde",
+          "source_stable_id": "d10.archived-candidate.finite-symbolic-differentiation.20261011",
+          "law": "Для скінченного ациклічного AST Const(integer)|Var(name)|Add(expr,expr)|Mul(expr,expr) і заданої змінної повертає дерево формальної похідної за правилами константи, змінної, суми й добутку; вивід точний і навмисно не спрощується, вхід не мутується. Обмежений сучасний контракт, натхнений Maling MIT AI Memo 10 (1959), а не твердження про дослівну транскрипцію мемо; Core-vs-library мінімальність лишається на власниковому перегляді.",
+          "positive_witnesses": null,
+          "negative_falsifiers": null,
+          "evidence_scope": "ARCHIVED-RESEARCH-NOT-NATIVE-SENS-EXECUTION",
+          "owner_core_ratification": false,
+          "coordinate_basis": "EXACT-SEMANTIC-NAME-MATCH-SELECTED-CANONICAL"
+        }
+      ]
     },
     {
       "coordinate": "1010100100",
@@ -8302,7 +8658,21 @@
       "law_source": "knowledge/d10-mccarthy-finite-circumscription-20261009.json",
       "selected": true,
       "ratified": false,
-      "physical_t5_authorized": false
+      "physical_t5_authorized": false,
+      "historical_branch_evidence": [
+        {
+          "branch": "research/d10-canonical-ledger-evidence-batch23-20261011",
+          "research_path": "knowledge/d10-existing-ledger-semantic-tranche23-20261011.json",
+          "source_git_blob": "0dc1aa7240ffabfac6c84de45eed2014743a3fde",
+          "source_stable_id": "d10.archived-candidate.finite-predicate-circumscription.20261011",
+          "law": "Із скінченної множини моделей базової теорії залишає всі моделі без строго меншої множини заданих аномальних атомів за незмінного значення зафіксованих атомів; несумісність повертає окреме NO-MODELS.",
+          "positive_witnesses": null,
+          "negative_falsifiers": null,
+          "evidence_scope": "ARCHIVED-RESEARCH-NOT-NATIVE-SENS-EXECUTION",
+          "owner_core_ratification": false,
+          "coordinate_basis": "EXACT-SEMANTIC-NAME-MATCH-SELECTED-CANONICAL"
+        }
+      ]
     },
     {
       "coordinate": "1010100101",
@@ -8314,7 +8684,21 @@
       "law_source": "knowledge/d10-floyd-hoare-finite-inductiveness-20261009.json",
       "selected": true,
       "ratified": false,
-      "physical_t5_authorized": false
+      "physical_t5_authorized": false,
+      "historical_branch_evidence": [
+        {
+          "branch": "research/d10-canonical-ledger-evidence-batch23-20261011",
+          "research_path": "knowledge/d10-existing-ledger-semantic-tranche23-20261011.json",
+          "source_git_blob": "0dc1aa7240ffabfac6c84de45eed2014743a3fde",
+          "source_stable_id": "d10.archived-candidate.finite-inductive-safety-witness.20261011",
+          "law": "Для скінченного повного графа станів і кандидата-інваріанта повертає YES точно тоді коли всі початкові стани всередині інваріанта та кожний перехід зі стану інваріанта веде знов усередину; інакше найменший свідок початкового порушення чи втечі ребра.",
+          "positive_witnesses": null,
+          "negative_falsifiers": null,
+          "evidence_scope": "ARCHIVED-RESEARCH-NOT-NATIVE-SENS-EXECUTION",
+          "owner_core_ratification": false,
+          "coordinate_basis": "EXACT-SEMANTIC-NAME-MATCH-SELECTED-CANONICAL"
+        }
+      ]
     },
     {
       "coordinate": "1010100110",
@@ -8326,7 +8710,21 @@
       "law_source": "knowledge/d10-dung-grounded-argumentation-20261009.json",
       "selected": true,
       "ratified": false,
-      "physical_t5_authorized": false
+      "physical_t5_authorized": false,
+      "historical_branch_evidence": [
+        {
+          "branch": "research/d10-canonical-ledger-evidence-batch23-20261011",
+          "research_path": "knowledge/d10-existing-ledger-semantic-tranche23-20261011.json",
+          "source_git_blob": "0dc1aa7240ffabfac6c84de45eed2014743a3fde",
+          "source_stable_id": "d10.archived-candidate.grounded-argument-labeling.20261011",
+          "law": "Скінченний орієнтований граф нападів між унікальними аргументами переводить у три неперетинні списки даних IN, OUT, UNDEC за найменшою нерухомою точкою захисту Данга 1995; відсутність доведення не тотожна OUT, а взаємна атака без зовнішнього захисту залишає UNDEC; D1 предикати лишаються двійковими.",
+          "positive_witnesses": null,
+          "negative_falsifiers": null,
+          "evidence_scope": "ARCHIVED-RESEARCH-NOT-NATIVE-SENS-EXECUTION",
+          "owner_core_ratification": false,
+          "coordinate_basis": "EXACT-SEMANTIC-NAME-MATCH-SELECTED-CANONICAL"
+        }
+      ]
     },
     {
       "coordinate": "1010100111",
@@ -8338,7 +8736,21 @@
       "law_source": "knowledge/d10-reiter-minimal-diagnoses-20261009.json",
       "selected": true,
       "ratified": false,
-      "physical_t5_authorized": false
+      "physical_t5_authorized": false,
+      "historical_branch_evidence": [
+        {
+          "branch": "research/d10-canonical-ledger-evidence-batch23-20261011",
+          "research_path": "knowledge/d10-existing-ledger-semantic-tranche23-20261011.json",
+          "source_git_blob": "0dc1aa7240ffabfac6c84de45eed2014743a3fde",
+          "source_stable_id": "d10.archived-candidate.finite-minimal-diagnoses.20261011",
+          "law": "Із явної скінченної сім'ї наборів конфліктних припущень повертає ВСІ мінімальні за включенням набори компонентів, які перетинають кожен конфлікт; додає для кожного вилученого компонента перший приватний конфлікт як сертифікат мінімальності; порожня сім'я має один порожній діагноз, порожній конфлікт означає NO-DIAGNOSIS.",
+          "positive_witnesses": null,
+          "negative_falsifiers": null,
+          "evidence_scope": "ARCHIVED-RESEARCH-NOT-NATIVE-SENS-EXECUTION",
+          "owner_core_ratification": false,
+          "coordinate_basis": "EXACT-SEMANTIC-NAME-MATCH-SELECTED-CANONICAL"
+        }
+      ]
     },
     {
       "coordinate": "1010101000",
@@ -8350,7 +8762,33 @@
       "law_source": "knowledge/d10-adjust-array-rearray-differential-v1.json",
       "selected": true,
       "ratified": false,
-      "physical_t5_authorized": false
+      "physical_t5_authorized": false,
+      "historical_branch_evidence": [
+        {
+          "branch": "research/d10-next-tranche-pending-20261011",
+          "research_path": "knowledge/d10-next-tranche-20261011.json",
+          "source_git_blob": "aec789468a7c18dbc1a1ea107c2c056f8f1976c1",
+          "source_stable_id": null,
+          "law": "Змінити розміри або подання масиву за контрактом ADJUST-ARRAY: для змінного масиву повертається той самий об'єкт; якщо повернуто інший об'єкт, аргумент лишається незміненим. Окремо визначаються fill-pointer та спільне сховище displaced view; ланцюг A→B→C не можна сплющувати так, щоб A перестав посилатися на B.",
+          "positive_witnesses": "[{\"input\":\"adjust adjustable A to new dimensions\",\"expected\":\"result is EQ to A\"},{\"input\":\"adjust non-adjustable A and implementation returns a distinct result\",\"expected\":\"A remains unchanged\"},{\"input\":\"A is displaced to B; B is adjusted\",\"expected\":\"A remains displaced to B\"}]",
+          "negative_falsifiers": "[\"Implementation always allocates a new array for adjustable A.\",\"Adjusting a non-adjustable array mutates A even though a distinct result is returned.\",\"Displacement chain A→B→C is flattened so A no longer refers to B.\"]",
+          "evidence_scope": "ARCHIVED-RESEARCH-NOT-NATIVE-SENS-EXECUTION",
+          "owner_core_ratification": false,
+          "coordinate_basis": "EXACT-SEMANTIC-NAME-MATCH-SELECTED-CANONICAL"
+        },
+        {
+          "branch": "research/d10-canonical-ledger-evidence-batch23-20261011",
+          "research_path": "knowledge/d10-existing-ledger-semantic-tranche23-20261011.json",
+          "source_git_blob": "0dc1aa7240ffabfac6c84de45eed2014743a3fde",
+          "source_stable_id": "d10.archived-candidate.adjust-array.20261011",
+          "law": "Змінити розміри або подання масиву за контрактом ADJUST-ARRAY: для змінного масиву повертається той самий об'єкт; якщо повернуто інший об'єкт, аргумент лишається незміненим. Окремо визначаються fill-pointer та спільне сховище displaced view; ланцюг A→B→C не можна сплющувати так, щоб A перестав посилатися на B.",
+          "positive_witnesses": null,
+          "negative_falsifiers": null,
+          "evidence_scope": "ARCHIVED-RESEARCH-NOT-NATIVE-SENS-EXECUTION",
+          "owner_core_ratification": false,
+          "coordinate_basis": "EXACT-SEMANTIC-NAME-MATCH-SELECTED-CANONICAL"
+        }
+      ]
     },
     {
       "coordinate": "1010101001",
@@ -8362,7 +8800,33 @@
       "law_source": "knowledge/d10-psl-interlisp-lispm-unmerged-residual-v1.json",
       "selected": true,
       "ratified": false,
-      "physical_t5_authorized": false
+      "physical_t5_authorized": false,
+      "historical_branch_evidence": [
+        {
+          "branch": "research/d10-next-tranche-pending-20261011",
+          "research_path": "knowledge/d10-next-tranche-20261011.json",
+          "source_git_blob": "aec789468a7c18dbc1a1ea107c2c056f8f1976c1",
+          "source_stable_id": null,
+          "law": "Установити wrapper перед викликом функції, делегувати базовій функції й зберігати відмінність базової функції та ланцюга обгорток; вкладені обгортки мають зберігати визначений порядок виконання.",
+          "positive_witnesses": "[{\"input\":\"base f(x)=x+1; wrap f with w(x)=2*f(x)\",\"expected\":\"wrapped f(3)=8 while base f(3)=4\"},{\"input\":\"wrap a function with types A then B\",\"expected\":\"wrapper order and base function remain observable\"}]",
+          "negative_falsifiers": "[\"Installing a wrapper replaces and loses the base definition.\",\"Nested wrapper order is changed.\",\"A wrapper calls itself recursively in place of delegating to the prior function.\"]",
+          "evidence_scope": "ARCHIVED-RESEARCH-NOT-NATIVE-SENS-EXECUTION",
+          "owner_core_ratification": false,
+          "coordinate_basis": "EXACT-SEMANTIC-NAME-MATCH-SELECTED-CANONICAL"
+        },
+        {
+          "branch": "research/d10-canonical-ledger-evidence-batch23-20261011",
+          "research_path": "knowledge/d10-existing-ledger-semantic-tranche23-20261011.json",
+          "source_git_blob": "0dc1aa7240ffabfac6c84de45eed2014743a3fde",
+          "source_stable_id": "d10.archived-candidate.wrap.20261011",
+          "law": "Установити wrapper перед викликом функції, делегувати базовій функції й зберігати відмінність базової функції та ланцюга обгорток; вкладені обгортки мають зберігати визначений порядок виконання.",
+          "positive_witnesses": null,
+          "negative_falsifiers": null,
+          "evidence_scope": "ARCHIVED-RESEARCH-NOT-NATIVE-SENS-EXECUTION",
+          "owner_core_ratification": false,
+          "coordinate_basis": "EXACT-SEMANTIC-NAME-MATCH-SELECTED-CANONICAL"
+        }
+      ]
     },
     {
       "coordinate": "1010101010",
@@ -8374,7 +8838,33 @@
       "law_source": "knowledge/d10-psl-interlisp-lispm-unmerged-residual-v1.json",
       "selected": true,
       "ratified": false,
-      "physical_t5_authorized": false
+      "physical_t5_authorized": false,
+      "historical_branch_evidence": [
+        {
+          "branch": "research/d10-next-tranche-pending-20261011",
+          "research_path": "knowledge/d10-next-tranche-20261011.json",
+          "source_git_blob": "aec789468a7c18dbc1a1ea107c2c056f8f1976c1",
+          "source_stable_id": null,
+          "law": "Вилучити обгортки заданого типу, не знімаючи обгорток інших типів і не втрачаючи базову функцію; результат зберігає порядок решти wrapper chain.",
+          "positive_witnesses": "[{\"input\":\"base f; wrap type A then type B; remove type A\",\"expected\":\"type B remains and delegates to base f\"},{\"input\":\"remove a type not present\",\"expected\":\"unrelated wrappers and base f remain unchanged\"}]",
+          "negative_falsifiers": "[\"Removing type A removes all wrapper types.\",\"Removal loses or mutates the base function.\",\"Removal changes order among remaining wrappers.\"]",
+          "evidence_scope": "ARCHIVED-RESEARCH-NOT-NATIVE-SENS-EXECUTION",
+          "owner_core_ratification": false,
+          "coordinate_basis": "EXACT-SEMANTIC-NAME-MATCH-SELECTED-CANONICAL"
+        },
+        {
+          "branch": "research/d10-canonical-ledger-evidence-batch23-20261011",
+          "research_path": "knowledge/d10-existing-ledger-semantic-tranche23-20261011.json",
+          "source_git_blob": "0dc1aa7240ffabfac6c84de45eed2014743a3fde",
+          "source_stable_id": "d10.archived-candidate.remove-wrapper.20261011",
+          "law": "Вилучити обгортки заданого типу, не знімаючи обгорток інших типів і не втрачаючи базову функцію; результат зберігає порядок решти wrapper chain.",
+          "positive_witnesses": null,
+          "negative_falsifiers": null,
+          "evidence_scope": "ARCHIVED-RESEARCH-NOT-NATIVE-SENS-EXECUTION",
+          "owner_core_ratification": false,
+          "coordinate_basis": "EXACT-SEMANTIC-NAME-MATCH-SELECTED-CANONICAL"
+        }
+      ]
     },
     {
       "coordinate": "1010101011",
@@ -8386,7 +8876,21 @@
       "law_source": "research/d10/mealy_distinguishing_word.py",
       "selected": true,
       "ratified": false,
-      "physical_t5_authorized": false
+      "physical_t5_authorized": false,
+      "historical_branch_evidence": [
+        {
+          "branch": "research/d10-canonical-ledger-evidence-batch23-20261011",
+          "research_path": "knowledge/d10-existing-ledger-semantic-tranche23-20261011.json",
+          "source_git_blob": "0dc1aa7240ffabfac6c84de45eed2014743a3fde",
+          "source_stable_id": "d10.archived-candidate.finite-mealy-distinguishing-word.20261011",
+          "law": "Для двох повних детермінованих скінченних автоматів Мілі з однаковою впорядкованою абеткою повертає найкоротше лексикографічно перше слово розбіжності вихідних потоків або ознаку повної еквівалентності.",
+          "positive_witnesses": null,
+          "negative_falsifiers": null,
+          "evidence_scope": "ARCHIVED-RESEARCH-NOT-NATIVE-SENS-EXECUTION",
+          "owner_core_ratification": false,
+          "coordinate_basis": "EXACT-SEMANTIC-NAME-MATCH-SELECTED-CANONICAL"
+        }
+      ]
     },
     {
       "coordinate": "1010101100",
@@ -8398,7 +8902,21 @@
       "law_source": "knowledge/d10-class-of-proposal-v1.json",
       "selected": true,
       "ratified": false,
-      "physical_t5_authorized": false
+      "physical_t5_authorized": false,
+      "historical_branch_evidence": [
+        {
+          "branch": "research/d10-canonical-ledger-evidence-batch23-20261011",
+          "research_path": "knowledge/d10-existing-ledger-semantic-tranche23-20261011.json",
+          "source_git_blob": "0dc1aa7240ffabfac6c84de45eed2014743a3fde",
+          "source_stable_id": "d10.archived-candidate.class-of.20261011",
+          "law": "Return the direct class metaobject of an object; do not confuse the class object with a type specifier/name or the superclass.",
+          "positive_witnesses": null,
+          "negative_falsifiers": null,
+          "evidence_scope": "ARCHIVED-RESEARCH-NOT-NATIVE-SENS-EXECUTION",
+          "owner_core_ratification": false,
+          "coordinate_basis": "EXACT-SEMANTIC-NAME-MATCH-SELECTED-CANONICAL"
+        }
+      ]
     },
     {
       "coordinate": "1010101101",
@@ -8410,7 +8928,21 @@
       "law_source": "knowledge/d10-historical-clos-interlisp-residual-review-v1.json",
       "selected": true,
       "ratified": false,
-      "physical_t5_authorized": false
+      "physical_t5_authorized": false,
+      "historical_branch_evidence": [
+        {
+          "branch": "research/d10-canonical-ledger-evidence-batch23-20261011",
+          "research_path": "knowledge/d10-existing-ledger-semantic-tranche23-20261011.json",
+          "source_git_blob": "0dc1aa7240ffabfac6c84de45eed2014743a3fde",
+          "source_stable_id": "d10.archived-candidate.find-method.20261011",
+          "law": "Look up a method by its exact ordered qualifiers and specializers within one generic function; this is not runtime applicable-method selection.",
+          "positive_witnesses": null,
+          "negative_falsifiers": null,
+          "evidence_scope": "ARCHIVED-RESEARCH-NOT-NATIVE-SENS-EXECUTION",
+          "owner_core_ratification": false,
+          "coordinate_basis": "EXACT-SEMANTIC-NAME-MATCH-SELECTED-CANONICAL"
+        }
+      ]
     },
     {
       "coordinate": "1010101110",
@@ -8422,7 +8954,21 @@
       "law_source": "knowledge/d10-historical-clos-interlisp-residual-review-v1.json",
       "selected": true,
       "ratified": false,
-      "physical_t5_authorized": false
+      "physical_t5_authorized": false,
+      "historical_branch_evidence": [
+        {
+          "branch": "research/d10-canonical-ledger-evidence-batch23-20261011",
+          "research_path": "knowledge/d10-existing-ledger-semantic-tranche23-20261011.json",
+          "source_git_blob": "0dc1aa7240ffabfac6c84de45eed2014743a3fde",
+          "source_stable_id": "d10.archived-candidate.change-class.20261011",
+          "law": "Change an existing instance to another class in place while retaining its identity and common slot values, and leaving previously unbound common slots unbound.",
+          "positive_witnesses": null,
+          "negative_falsifiers": null,
+          "evidence_scope": "ARCHIVED-RESEARCH-NOT-NATIVE-SENS-EXECUTION",
+          "owner_core_ratification": false,
+          "coordinate_basis": "EXACT-SEMANTIC-NAME-MATCH-SELECTED-CANONICAL"
+        }
+      ]
     },
     {
       "coordinate": "1010101111",
@@ -8434,7 +8980,21 @@
       "law_source": "scripts/research_d10_finite_arc_consistency.py",
       "selected": true,
       "ratified": false,
-      "physical_t5_authorized": false
+      "physical_t5_authorized": false,
+      "historical_branch_evidence": [
+        {
+          "branch": "research/d10-canonical-ledger-evidence-batch23-20261011",
+          "research_path": "knowledge/d10-existing-ledger-semantic-tranche23-20261011.json",
+          "source_git_blob": "0dc1aa7240ffabfac6c84de45eed2014743a3fde",
+          "source_stable_id": "d10.archived-candidate.finite-binary-arc-consistency-fixpoint.20261011",
+          "law": "Given named finite domains and directed binary compatibility relations, iteratively eliminate unsupported source values to the greatest arc-consistent fixed point, independent of work-list order; return exact reduced domains and a separate EMPTY-DOMAIN-CONTRADICTION status when any domain is empty. Nonempty closure does not imply global satisfiability.",
+          "positive_witnesses": null,
+          "negative_falsifiers": null,
+          "evidence_scope": "ARCHIVED-RESEARCH-NOT-NATIVE-SENS-EXECUTION",
+          "owner_core_ratification": false,
+          "coordinate_basis": "EXACT-SEMANTIC-NAME-MATCH-SELECTED-CANONICAL"
+        }
+      ]
     },
     {
       "coordinate": "1010110000",
@@ -8446,7 +9006,21 @@
       "law_source": "knowledge/d10-dll1962-unit-closure-research-v1.json",
       "selected": true,
       "ratified": false,
-      "physical_t5_authorized": false
+      "physical_t5_authorized": false,
+      "historical_branch_evidence": [
+        {
+          "branch": "research/d10-canonical-ledger-evidence-batch23-20261011",
+          "research_path": "knowledge/d10-existing-ledger-semantic-tranche23-20261011.json",
+          "source_git_blob": "0dc1aa7240ffabfac6c84de45eed2014743a3fde",
+          "source_stable_id": "d10.archived-candidate.finite-cnf-unit-fixpoint.20261011",
+          "law": "Скінченна CNF: додає лише логічно вимушені одиничними клаузами літерали до нерухомої точки; повертає QUIESCENT або CONTRADICTION; QUIESCENT не означає SAT.",
+          "positive_witnesses": null,
+          "negative_falsifiers": null,
+          "evidence_scope": "ARCHIVED-RESEARCH-NOT-NATIVE-SENS-EXECUTION",
+          "owner_core_ratification": false,
+          "coordinate_basis": "EXACT-SEMANTIC-NAME-MATCH-SELECTED-CANONICAL"
+        }
+      ]
     },
     {
       "coordinate": "1010110001",
@@ -8458,7 +9032,21 @@
       "law_source": "knowledge/d10-finite-state-distinguishing-suffix-research-v1.json",
       "selected": true,
       "ratified": false,
-      "physical_t5_authorized": false
+      "physical_t5_authorized": false,
+      "historical_branch_evidence": [
+        {
+          "branch": "research/d10-canonical-ledger-evidence-batch23-20261011",
+          "research_path": "knowledge/d10-existing-ledger-semantic-tranche23-20261011.json",
+          "source_git_blob": "0dc1aa7240ffabfac6c84de45eed2014743a3fde",
+          "source_stable_id": "d10.archived-candidate.finite-state-shortest-distinguisher.20261011",
+          "law": "Shortest, then 0-first lexicographically least suffix distinguishing acceptance of p and q in a total deterministic D1-binary automaton; empty witness differs from no witness",
+          "positive_witnesses": null,
+          "negative_falsifiers": null,
+          "evidence_scope": "ARCHIVED-RESEARCH-NOT-NATIVE-SENS-EXECUTION",
+          "owner_core_ratification": false,
+          "coordinate_basis": "EXACT-SEMANTIC-NAME-MATCH-SELECTED-CANONICAL"
+        }
+      ]
     },
     {
       "coordinate": "1010110010",
@@ -8470,7 +9058,21 @@
       "law_source": "knowledge/d10-forth-circular-arc-v1.json",
       "selected": true,
       "ratified": false,
-      "physical_t5_authorized": false
+      "physical_t5_authorized": false,
+      "historical_branch_evidence": [
+        {
+          "branch": "research/d10-canonical-ledger-evidence-batch23-20261011",
+          "research_path": "knowledge/d10-existing-ledger-semantic-tranche23-20261011.json",
+          "source_git_blob": "0dc1aa7240ffabfac6c84de45eed2014743a3fde",
+          "source_stable_id": "d10.archived-candidate.circular-half-open-contains.20261011",
+          "law": "If start<end, return start<=test<end. If start>end, return test>=start OR test<end. If start==end, return NO, not whole ring. This is explicit-modulus, exact rational-free generalization of Forth WITHIN for canonical residues. It must not wrap invalid out-of-domain inputs silently.",
+          "positive_witnesses": null,
+          "negative_falsifiers": null,
+          "evidence_scope": "ARCHIVED-RESEARCH-NOT-NATIVE-SENS-EXECUTION",
+          "owner_core_ratification": false,
+          "coordinate_basis": "EXACT-SEMANTIC-NAME-MATCH-SELECTED-CANONICAL"
+        }
+      ]
     },
     {
       "coordinate": "1010110011",
@@ -8482,7 +9084,21 @@
       "law_source": "knowledge/d10-crossrepo-chess-law-proposals-20261009.json",
       "selected": true,
       "ratified": false,
-      "physical_t5_authorized": false
+      "physical_t5_authorized": false,
+      "historical_branch_evidence": [
+        {
+          "branch": "research/d10-canonical-ledger-evidence-batch23-20261011",
+          "research_path": "knowledge/d10-existing-ledger-semantic-tranche23-20261011.json",
+          "source_git_blob": "0dc1aa7240ffabfac6c84de45eed2014743a3fde",
+          "source_stable_id": "d10.archived-candidate.alternating-zero-sum-backup.20261011",
+          "law": "Given a finite chain from leaf to root, current per-node (visit_count,value_sum) and a leaf-side exact score v, visit_count increases exactly once at every chain node, value_sum at node depth k from leaf increases (-1)^k*v, and no off-path node changes. The sign changes because each node's score is from its own side-to-move perspective.",
+          "positive_witnesses": null,
+          "negative_falsifiers": null,
+          "evidence_scope": "ARCHIVED-RESEARCH-NOT-NATIVE-SENS-EXECUTION",
+          "owner_core_ratification": false,
+          "coordinate_basis": "EXACT-SEMANTIC-NAME-MATCH-SELECTED-CANONICAL"
+        }
+      ]
     },
     {
       "coordinate": "1010110100",
@@ -8494,7 +9110,21 @@
       "law_source": "knowledge/d10-crossrepo-chess-law-proposals-20261009.json",
       "selected": true,
       "ratified": false,
-      "physical_t5_authorized": false
+      "physical_t5_authorized": false,
+      "historical_branch_evidence": [
+        {
+          "branch": "research/d10-canonical-ledger-evidence-batch23-20261011",
+          "research_path": "knowledge/d10-existing-ledger-semantic-tranche23-20261011.json",
+          "source_git_blob": "0dc1aa7240ffabfac6c84de45eed2014743a3fde",
+          "source_stable_id": "d10.archived-candidate.chess-castling-rights-transition.20261011",
+          "law": "Given the exact subset of K,Q,k,q before a legal move: moving a white/black king erases both own rights; moving a rook from its home corner erases that right; capturing a rook on its home corner erases that captured side's right; all unrelated rights are preserved. Rights never reappear. This operation updates rights only; it does not itself establish legal move, king safety or FEN validity.",
+          "positive_witnesses": null,
+          "negative_falsifiers": null,
+          "evidence_scope": "ARCHIVED-RESEARCH-NOT-NATIVE-SENS-EXECUTION",
+          "owner_core_ratification": false,
+          "coordinate_basis": "EXACT-SEMANTIC-NAME-MATCH-SELECTED-CANONICAL"
+        }
+      ]
     },
     {
       "coordinate": "1010110101",
@@ -8506,7 +9136,21 @@
       "law_source": "knowledge/d10-linguistic-law-intake-20261009.json",
       "selected": true,
       "ratified": false,
-      "physical_t5_authorized": false
+      "physical_t5_authorized": false,
+      "historical_branch_evidence": [
+        {
+          "branch": "research/d10-canonical-ledger-evidence-batch23-20261011",
+          "research_path": "knowledge/d10-existing-ledger-semantic-tranche23-20261011.json",
+          "source_git_blob": "0dc1aa7240ffabfac6c84de45eed2014743a3fde",
+          "source_stable_id": "d10.archived-candidate.stress-syllable-transfer.20261011",
+          "law": "Transfer 1-based positions of U+0301 stress from source vowel nuclei to corresponding target vowel nuclei, recognizing upper/lower case equally; reject invalid or out-of-range marks and a pre-accented target. No rewriting of other characters.",
+          "positive_witnesses": null,
+          "negative_falsifiers": null,
+          "evidence_scope": "ARCHIVED-RESEARCH-NOT-NATIVE-SENS-EXECUTION",
+          "owner_core_ratification": false,
+          "coordinate_basis": "EXACT-SEMANTIC-NAME-MATCH-SELECTED-CANONICAL"
+        }
+      ]
     },
     {
       "coordinate": "1010110110",
@@ -8518,7 +9162,21 @@
       "law_source": "knowledge/d10-linguistic-law-intake-20261009.json",
       "selected": true,
       "ratified": false,
-      "physical_t5_authorized": false
+      "physical_t5_authorized": false,
+      "historical_branch_evidence": [
+        {
+          "branch": "research/d10-canonical-ledger-evidence-batch23-20261011",
+          "research_path": "knowledge/d10-existing-ledger-semantic-tranche23-20261011.json",
+          "source_git_blob": "0dc1aa7240ffabfac6c84de45eed2014743a3fde",
+          "source_stable_id": "d10.archived-candidate.contextual-longest-transliterate.20261011",
+          "law": "An explicit finite rule table selects word-start replacement before default; otherwise longest matching multigraph before shorter graph, then a specified after-consonant rule; preserve unmatched characters and apostrophe word continuity.",
+          "positive_witnesses": null,
+          "negative_falsifiers": null,
+          "evidence_scope": "ARCHIVED-RESEARCH-NOT-NATIVE-SENS-EXECUTION",
+          "owner_core_ratification": false,
+          "coordinate_basis": "EXACT-SEMANTIC-NAME-MATCH-SELECTED-CANONICAL"
+        }
+      ]
     },
     {
       "coordinate": "1010110111",
@@ -8530,7 +9188,21 @@
       "law_source": "knowledge/d10-music-enharmonic-primary-review-v1.json",
       "selected": true,
       "ratified": false,
-      "physical_t5_authorized": false
+      "physical_t5_authorized": false,
+      "historical_branch_evidence": [
+        {
+          "branch": "research/d10-canonical-ledger-evidence-batch23-20261011",
+          "research_path": "knowledge/d10-existing-ledger-semantic-tranche23-20261011.json",
+          "source_git_blob": "0dc1aa7240ffabfac6c84de45eed2014743a3fde",
+          "source_stable_id": "d10.archived-candidate.enharmonic-spelling-distinct.20261011",
+          "law": "Given two valid 12-TET MusicXML-like pitches (step, integer alter, octave), return 1 iff their exact sounding semitone index matches AND their notation triple differs; otherwise 0. An equal note written identically is not an enharmonic respelling.",
+          "positive_witnesses": null,
+          "negative_falsifiers": null,
+          "evidence_scope": "ARCHIVED-RESEARCH-NOT-NATIVE-SENS-EXECUTION",
+          "owner_core_ratification": false,
+          "coordinate_basis": "EXACT-SEMANTIC-NAME-MATCH-SELECTED-CANONICAL"
+        }
+      ]
     },
     {
       "coordinate": "1010111000",
@@ -8542,7 +9214,21 @@
       "law_source": "knowledge/d10-music-enharmonic-primary-review-v1.json",
       "selected": true,
       "ratified": false,
-      "physical_t5_authorized": false
+      "physical_t5_authorized": false,
+      "historical_branch_evidence": [
+        {
+          "branch": "research/d10-canonical-ledger-evidence-batch23-20261011",
+          "research_path": "knowledge/d10-existing-ledger-semantic-tranche23-20261011.json",
+          "source_git_blob": "0dc1aa7240ffabfac6c84de45eed2014743a3fde",
+          "source_stable_id": "d10.archived-candidate.notated-chromatic-interval.20261011",
+          "law": "Given two valid pitches, return ordered signed pair (target octave*7+step ordinal minus source octave*7+step ordinal, target exact 12-TET semitone number minus source semitone number); neither component may be silently discarded.",
+          "positive_witnesses": null,
+          "negative_falsifiers": null,
+          "evidence_scope": "ARCHIVED-RESEARCH-NOT-NATIVE-SENS-EXECUTION",
+          "owner_core_ratification": false,
+          "coordinate_basis": "EXACT-SEMANTIC-NAME-MATCH-SELECTED-CANONICAL"
+        }
+      ]
     },
     {
       "coordinate": "1010111001",
@@ -8554,7 +9240,21 @@
       "law_source": "knowledge/d10-interlisp-dwim-safe-suggestion-v1.json",
       "selected": true,
       "ratified": false,
-      "physical_t5_authorized": false
+      "physical_t5_authorized": false,
+      "historical_branch_evidence": [
+        {
+          "branch": "research/d10-canonical-ledger-evidence-batch23-20261011",
+          "research_path": "knowledge/d10-existing-ledger-semantic-tranche23-20261011.json",
+          "source_git_blob": "0dc1aa7240ffabfac6c84de45eed2014743a3fde",
+          "source_stable_id": "d10.archived-candidate.unique-surface-correction-suggestion.20261011",
+          "law": "Return the unique lowest-distance candidate within an explicit maximum adjacent-transposition edit bound. Exact binary identity is never guessed; equal-score distinct identities produce AMBIGUOUS; bit words or D2 syntax are blocked. Never rewrite or evaluate source.",
+          "positive_witnesses": null,
+          "negative_falsifiers": null,
+          "evidence_scope": "ARCHIVED-RESEARCH-NOT-NATIVE-SENS-EXECUTION",
+          "owner_core_ratification": false,
+          "coordinate_basis": "EXACT-SEMANTIC-NAME-MATCH-SELECTED-CANONICAL"
+        }
+      ]
     },
     {
       "coordinate": "1010111010",
@@ -24175,6 +24875,57 @@
       "inspected_candidate": "topological-sort",
       "cross_checked_graphs": 66835,
       "local_SENS_execution": false
-    }
+    },
+    "coordinate_placement_evidence": {
+      "status": "PER-SLOT-PINNED-RESEARCH-BATCH-WITNESSES-NO-NEW-OPCODES",
+      "batch_rows_checked": 51,
+      "unique_canonical_slots": 44,
+      "new_evidence_rows": 51,
+      "existing_evidence_rows": 0,
+      "source_rows_lacking_both_positive_negative_witnesses": 23,
+      "branches": [
+        {
+          "branch": "research/d10-next-tranche-pending-20261011",
+          "source_git_blob": "aec789468a7c18dbc1a1ea107c2c056f8f1976c1",
+          "source_records": 8,
+          "canonical_coordinates_matched": 8,
+          "new_evidence_rows": 8,
+          "already_present": 0
+        },
+        {
+          "branch": "research/d10-alltime-archive-batch14-20261011",
+          "source_git_blob": "7953a24a2bb487ec8785a140775b2a9c0fddbb8e",
+          "source_records": 14,
+          "canonical_coordinates_matched": 14,
+          "new_evidence_rows": 14,
+          "already_present": 0
+        },
+        {
+          "branch": "research/d10-existing-math-signal-batch-20261011",
+          "source_git_blob": "81ab10c6cd9373744e938696eab8d411e0990794",
+          "source_records": 3,
+          "canonical_coordinates_matched": 3,
+          "new_evidence_rows": 3,
+          "already_present": 0
+        },
+        {
+          "branch": "research/d10-existing-combinatorics-batch-20261011",
+          "source_git_blob": "f2e710f6323327689f359d50e248e0d8d3e91a0a",
+          "source_records": 3,
+          "canonical_coordinates_matched": 3,
+          "new_evidence_rows": 3,
+          "already_present": 0
+        },
+        {
+          "branch": "research/d10-canonical-ledger-evidence-batch23-20261011",
+          "source_git_blob": "0dc1aa7240ffabfac6c84de45eed2014743a3fde",
+          "source_records": 23,
+          "canonical_coordinates_matched": 23,
+          "new_evidence_rows": 23,
+          "already_present": 0
+        }
+      ]
+    },
+    "note": "Every matched archived selected semantic record has its original law attached to its exact current research coordinate; this does not change D10 canonical v5 or execute an oracle."
   }
 }
