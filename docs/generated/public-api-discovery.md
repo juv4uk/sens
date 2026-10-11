@@ -4,9 +4,9 @@
 > top-level визначення, але **не** оголошує їх публічним API.
 
 - проскановано бібліотечних файлів: 51
-- top-level функцій: 945
+- top-level функцій: 946
 - top-level макросів: 34
-- усього визначень: 979
+- усього визначень: 980
 - класифікація: `unreviewed`
 
 | джерело | вид | ім'я | класифікація |
@@ -658,6 +658,7 @@
 | `lib/quantity.lisp` | function | `*science-source-schema*` | unreviewed |
 | `lib/quantity.lisp` | function | `*scientific-constant-schema*` | unreviewed |
 | `lib/quantity.lisp` | function | `science-proper-list?` | unreviewed |
+| `lib/quantity.lisp` | function | `science-list-length-equals?` | unreviewed |
 | `lib/quantity.lisp` | function | `science-sixth` | unreviewed |
 | `lib/quantity.lisp` | function | `science-seventh` | unreviewed |
 | `lib/quantity.lisp` | function | `make-dimension` | unreviewed |
