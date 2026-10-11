@@ -111,13 +111,13 @@ def evaluate(row, root, inventory_sha, foundation_sha, occupied):
     if pinned is None:
         # Unsupported but identified historical sources must not disappear as "no provenance".
         if "@" in source or source.startswith(("https://", "http://")) or re.search(r":[1-9][0-9]*(?:-[1-9][0-9]*)?$", source):
-            return verdict("escalated", "HOLD_UNVERIFIED_PIN")
+            return verdict("rejected", "HOLD_UNVERIFIED_PIN")
         return verdict("rejected", "EXCLUDE_NO_PROVENANCE")
     raw, first, last = pinned
     if (not re.fullmatch(r"[0-9a-f]{40}", row["source_pin"])
             or git_blob(raw) != row["source_pin"]
             or last < first or last > len(raw.splitlines())):
-        return verdict("escalated", "HOLD_UNVERIFIED_PIN")
+        return verdict("rejected", "HOLD_UNVERIFIED_PIN")
     # A verified donor without a recorded semantic law is incomplete research,
     # not a source with no provenance. Never fabricate a law or accept the row.
     if not row["semantic_law"].strip():
