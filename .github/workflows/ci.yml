@@ -86,6 +86,10 @@ jobs:
         shell: bash
         run: bash scripts/rust-one-way-valve.sh "$BASE_SHA" "$HEAD_SHA"
 
+      - name: Build swarm-node substrate crate
+        if: steps.changes.outputs.rust == 'true' || steps.changes.outputs.workflow == 'true'
+        run: cargo build -p swarm-node
+
       - name: Exact-width paradigm one-way self-test
         shell: bash
         run: bash scripts/test-domain-paradigm-one-way-guard.sh
