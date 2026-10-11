@@ -19,7 +19,10 @@ fn world_session(migrated: bool) -> Session {
         eval_parsed_expressions(&parsed, &mut s)
             .expect("candidate world library should load with D3 identities");
     } else {
-        eval_program(OLD, &mut s).expect("historic world source must still load");
+        // The old W8 corpus contains exact-width selectors too; use the
+        // identical path-pinned reader for both old and migrated programs.
+        sens::eval_pinned_reasoning_source("lib/world.lisp", OLD, &mut s)
+            .expect("historic world source must load through the same typed reader");
     }
     s
 }
