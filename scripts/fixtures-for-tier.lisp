@@ -21,9 +21,8 @@
 
 (0011 target-tier
   (110
-    ((010 *argv*) () (missing-tier-argument))
-    ((010 *argv*) (1) (missing-tier-argument))
-    (t (11101010 (100 *argv*)))))
+    ((010 *argv*) (missing-tier-argument))
+    ((010 (001 ())) (11101010 (100 *argv*)))))
 
 ; `missing-tier-argument` is deliberately unbound — calling it is a real
 ; named ErrorKind::UnknownSymbol (S2), not an invented ad-hoc error
@@ -41,13 +40,12 @@
 (0011 print-matching
   (0010 (remaining)
     (110
-      ((010 remaining) () (001 ()))
-      ((010 remaining) (1) (001 ()))
-      (t ((0010 ()
+      ((010 remaining) (001 ()))
+      ((010 (001 ())) ((0010 ()
             (110
               ((101 (fixture-tier (100 remaining)) target-tier)
                (11011011 (100 remaining)))
-              (t (001 ())))
+              ((010 (001 ())) (001 ())))
             (print-matching (011 remaining))))))))
 
 (print-matching (110101001 (110110111 "tests/fixtures/conformance.lisp")))
