@@ -541,6 +541,33 @@ python3 scripts/migrate.py admit \
 Деталі маніфесту: [допуск міграції](docs/ADMIT-T5-MIGRATION.uk.md);
 [координація #4449](https://github.com/juv4uk/sens/issues/4449).
 
+### Компіляція з наявної трифайлової проєкції
+
+Для вже канонічного україномовного джерела обмеженої підтриманої підмножини
+три відповідники створює `scripts/publish_verified_uk_triplets.py`:
+джерело `.lisp`, фізичний T5 `.sens` і файл-view без розширення. Запис
+відбувається у зовнішнє дзеркало транзакційно. Цей генератор доводить
+узгодженість проєкцій та кодека, **але сам не надає semantic-oracle admission**.
+
+~~~bash
+python3 scripts/publish_verified_uk_triplets.py \
+  --mirror /tmp/sens-triplet-mirror \
+  --report /tmp/sens-triplet-report.json \
+  --write examples/migrated/smoke-quote.lisp
+
+cargo xtask compiler-compile \
+  --triplet /tmp/sens-triplet-mirror/examples/migrated/smoke-quote.sens \
+  --out /tmp/smoke-quote-compiler-artifact.bin
+~~~
+
+`compiler-compile --triplet` звіряє всі три проєкції після exact-domain
+lowering і викликає компіляторний корпус у `lib/compiler-nucleus.lisp`.
+`--input` лишається окремим входом для канонічних SW1-байтів; режими
+взаємовиключні, без format-sniffing чи fallback. Результат зараз —
+канонічний backend-neutral compiler artifact, **не native executable** і
+не доказ self-host fixed point C1→C2. Повний опис та acceptance gates:
+[історія Nano-SENS/compiler](docs/research/nano-sens-size-frontier-20261011.uk.md).
+
 ### Exact-width witness-и
 
 Корисні дослідницькі скрипти:
