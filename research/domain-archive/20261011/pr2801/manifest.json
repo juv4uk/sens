@@ -1,0 +1,43 @@
+{
+  "schema": "sens-historical-branch-archive/v1",
+  "archived_at": "2026-10-11",
+  "source": {
+    "repo": "juv4uk/sens",
+    "pr": 2801,
+    "title": "feat(2782): carry production CoreD5 in AST without reader admission",
+    "branch": "impl/2782-d5-ast",
+    "head_sha": "a5fee8f970de2eb2afcd36d40be209f458e8365e",
+    "base": "main",
+    "base_sha": "42e3945c5e8f27902ade6fedf52f54786c56f914",
+    "reason": "Old explicit ExprKind::CoreD5 AST tag proposal. Current main is a newer generic DomainIdentity/DomainCall model; a second explicit CoreD5 AST variant would duplicate the current representation."
+  },
+  "files": [
+    {
+      "path": "crates/sens/src/domain_words.rs",
+      "patch_present": true,
+      "patch_chars": 2293
+    },
+    {
+      "path": "crates/sens/src/lib.rs",
+      "patch_present": true,
+      "patch_chars": 434
+    },
+    {
+      "path": "crates/sens/src/syntax.rs",
+      "patch_present": true,
+      "patch_chars": 3151
+    },
+    {
+      "path": "crates/sens/tests/d5_ast_identity.rs",
+      "patch_present": true,
+      "patch_chars": 2180
+    }
+  ],
+  "current_main": {
+    "domain_words_blob": "759f7ba28acc1ba8c77a3bdc6b4aadfdb6eaacee",
+    "syntax_blob": "a631ee4f4e76aa4c5bbf37770c295252a8feea99",
+    "core_d5_type_present": true,
+    "domain_identity_mentions": 17
+  },
+  "disposition": "ALREADY-IN-MAIN-NEWER / archive legacy specific-AST alternative"
+}
