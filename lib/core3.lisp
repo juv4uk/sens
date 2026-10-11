@@ -11,24 +11,24 @@
 ;
 ; Core3 does not turn native kernel observations into global language truth.
 
-(00001011 core3-executors
-  (00000001 (common-lisp prolog clips datalog)))
+(0011 core3-executors
+  (001 (common-lisp prolog clips datalog)))
 
-(00001011 core3-route
-  (00001000 (sid executor)
+(0011 core3-route
+  (0010 (sid executor)
     (mechanism-select sid executor)))
 
-(00001011 core3-add-routes
-  (00001000 (sid)
-    (00100111
-      (core3-route sid (00000001 common-lisp))
-      (core3-route sid (00000001 prolog))
-      (core3-route sid (00000001 clips))
-      (core3-route sid (00000001 datalog)))))
+(0011 core3-add-routes
+  (0010 (sid)
+    (1110
+      (core3-route sid (001 common-lisp))
+      (core3-route sid (001 prolog))
+      (core3-route sid (001 clips))
+      (core3-route sid (001 datalog)))))
 
-(00001011 core3-profile-status
-  (00001000 ()
-    (00000001
+(0011 core3-profile-status
+  (0010 ()
+    (001
       (core3
         (contract 7 0)
         (role experimental-kernel-laboratory)
