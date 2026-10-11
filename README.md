@@ -322,6 +322,8 @@ semantic width  ≠  physical carrier width
 
 ---
 
+Історія назви: проєкт починався під робочою назвою `my-lisp`, поточне ім'я — SENS. Ратифікація D9: **owner-ratified #4008**. Чинні таблиці людських поверхонь: [D1](lib/domains/d1.lisp), [D8](lib/domains/d8.lisp), [D9](lib/domains/d9.lisp). Для D10 нормативні координати й декларації законів наведено в [канонічному інвентарі](knowledge/d10-v18-semantic-inventory.json), а статус рішення — в [акті власника](knowledge/d10-owner-whole-domain-ratification-20261012.json). Це не надає автоматичного допуску T5.
+
 ## D1–D10 та D24+
 
 SENS будує не одну плоску таблицю opcode, а **драбину доменів**.
