@@ -1,0 +1,173 @@
+#!/usr/bin/env python3
+"""Prepare the unified D10 candidate-name index for the fail-closed F1-F4 filter.
+
+A text witness claim is NEVER converted to an executed witness receipt.
+A name match is NEVER converted to a semantic dedup certificate.
+"""
+from __future__ import annotations
+import argparse
+import csv
+import functools
+import hashlib
+import json
+import re
+from pathlib import Path
+
+INDEX_FIELDS = (
+    "candidate_id", "semantic_name", "source_record_count", "current_d10_selected",
+    "canonical_coordinate", "provisional_coordinate_claims", "semantic_law_variants",
+    "donor_provenance_claims", "positive_witness_claims", "falsifier_claims",
+    "source_records_sha_pinned", "historical_status_claims", "semantic_dedup_state",
+    "witness_execution_state", "filter_state", "ratified",
+)
+from d10_mechanical_filter import COLUMNS, git_blob, safe_file
+
+SOURCE_REF = re.compile(r"^([^@]+)@([0-9a-f]{40}):(.+)$")
+SOURCE_NAME = re.compile(r'"(?:semantic_name|proposed_semantic_name|source_name)"\s*:\s*"([^"]+)"')
+
+
+def json_list(raw):
+    try:
+        values = json.loads(raw)
+    except (ValueError, TypeError) as exc:
+        raise ValueError("INVALID_INDEX_JSON_ARRAY") from exc
+    if not isinstance(values, list) or any(not isinstance(x, str) for x in values):
+        raise ValueError("INVALID_INDEX_JSON_ARRAY")
+    return values
+
+
+def find_name_line(text, name, is_tsv):
+    lines = text.splitlines()
+    if is_tsv and lines:
+        fields = lines[0].split("\t")
+        if "semantic_name" in fields:
+            k = fields.index("semantic_name")
+            for n, line in enumerate(lines[1:], 2):
+                cols = line.split("\t")
+                if len(cols) == len(fields) and cols[k].casefold() == name.casefold():
+                    return n
+    elif not is_tsv:
+        for n, line in enumerate(lines, 1):
+            if any(m.group(1).casefold() == name.casefold()
+                   for m in SOURCE_NAME.finditer(line)):
+                return n
+    return None
+
+
+def prepare(root, index_path, output):
+    root = root.resolve()
+    with index_path.open(encoding="utf-8", newline="") as stream:
+        reader = csv.DictReader(stream, delimiter="\t")
+        if tuple(reader.fieldnames or ()) != INDEX_FIELDS:
+            raise ValueError("INVALID_UNIFIED_INDEX_SCHEMA")
+        indexed = list(reader)
+    if any(None in item or any(x is None for x in item.values()) for item in indexed):
+        raise ValueError("MALFORMED_UNIFIED_INDEX")
+
+    pointer = json.loads((root / "knowledge/d10-current-inventory.json").read_text())
+    current = pointer["canonical_current"]
+    canonical_path = safe_file(root, current["path"])
+    if canonical_path is None or git_blob(canonical_path.read_bytes()) != current["git_blob"]:
+        raise ValueError("D10_CURRENT_POINTER_SHA_MISMATCH")
+    current_data = json.loads(canonical_path.read_text())
+    canonical = {item["semantic_name"].casefold(): item for item in current_data["rows"]}
+    if len(canonical) != len(current_data["rows"]) or len(canonical) != current["selected"]:
+        raise ValueError("D10_CURRENT_CANONICAL_COUNT_MISMATCH")
+
+    @functools.lru_cache(maxsize=128)
+    def pinned_text(path, expected):
+        source = safe_file(root, path)
+        if source is None:
+            return None
+        raw = source.read_bytes()
+        if git_blob(raw) != expected:
+            return None
+        return raw.decode("utf-8", errors="replace")
+
+    rows = []
+    names = set()
+    ids = set()
+    verified_sources = 0
+    for item in indexed:
+        name = item["semantic_name"].strip()
+        ident = item["candidate_id"].strip()
+        if not name or name.casefold() in names or not ident or ident in ids:
+            raise ValueError("DUPLICATE_OR_EMPTY_SOURCE_IDENTITY")
+        if item["ratified"] != "0":
+            raise ValueError("UNEXPECTED_D10_RATIFIED_STATUS")
+        names.add(name.casefold())
+        ids.add(ident)
+        selected = canonical.get(name.casefold())
+        if selected and selected["stable_id"] != ident:
+            raise ValueError("CANONICAL_ID_DRIFT:" + name)
+        laws = json_list(item["semantic_law_variants"])
+        refs = json_list(item["source_records_sha_pinned"])
+        source_ref = ""
+        pin = ""
+        for ref in refs:
+            match = SOURCE_REF.fullmatch(ref)
+            if match is None:
+                continue
+            path, expected, _ = match.groups()
+            text = pinned_text(path, expected)
+            if text is None:
+                continue
+            line = find_name_line(text, name, path.endswith(".tsv"))
+            if line is not None:
+                source_ref, pin = f"{path}:{line}", expected
+                break
+        if pin:
+            verified_sources += 1
+        row = {col: "" for col in COLUMNS}
+        row.update(candidate_id=ident, semantic_name=name,
+                   semantic_law=laws[0] if laws else "",
+                   donor_provenance=source_ref, source_pin=pin,
+                   ratification_state="UNRATIFIED")
+        # No guessed PASS, derived semantic distinction, or provisional code.
+        rows.append(row)
+
+    overlay_added = 0
+    canonical_text = canonical_path.read_text()
+    for name, selected in sorted(canonical.items()):
+        if name in names:
+            continue
+        name_spelling = selected["semantic_name"]
+        line = find_name_line(canonical_text, name_spelling, False)
+        row = {col: "" for col in COLUMNS}
+        row.update(candidate_id=selected["stable_id"], semantic_name=name_spelling,
+                   semantic_law=selected.get("behavior", selected.get("observable_law", "")),
+                   donor_provenance=(f"{current['path']}:{line}" if line else ""),
+                   source_pin=current["git_blob"], ratification_state="UNRATIFIED")
+        rows.append(row)
+        overlay_added += 1
+
+    if len(rows) != len(indexed) + overlay_added or len({r["candidate_id"] for r in rows}) != len(rows):
+        raise ValueError("LOST_OR_DUPLICATE_CANDIDATES")
+    output.parent.mkdir(parents=True, exist_ok=True)
+    with output.open("w", encoding="utf-8", newline="") as file:
+        writer = csv.DictWriter(file, fieldnames=COLUMNS, delimiter="\t", lineterminator="\n")
+        writer.writeheader()
+        writer.writerows(sorted(rows, key=lambda item: item["candidate_id"]))
+    return {
+        "index_rows": len(indexed), "canonical_selected": len(canonical),
+        "new_selected_since_index": overlay_added, "filter_input_rows": len(rows),
+        "source_file_pin_verified": verified_sources,
+        "executed_witnesses_supplied": 0,
+        "semantic_dedup_certificates_supplied": 0,
+    }
+
+
+def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--root", type=Path, default=Path(__file__).resolve().parents[1])
+    parser.add_argument("--input", type=Path)
+    parser.add_argument("--output", type=Path)
+    args = parser.parse_args()
+    root = args.root.resolve()
+    index = args.input or root / "knowledge/d10-filter/all-candidates.tsv"
+    output = args.output or root / "knowledge/d10-filter/filter-input.tsv"
+    print(json.dumps(prepare(root, index, output), sort_keys=True))
+
+
+if __name__ == "__main__":
+    main()
