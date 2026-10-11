@@ -83,6 +83,26 @@ jobs:
             echo '1052 regression: stable UK текст-у-символ must be a registry-driven peer, not an EN bridge' >&2
             exit 1
           fi
+          if grep -Fqx '(define кодова-точка-у-текст codepoint->string)' lib/surface/uk.lisp; then
+            echo '1053 regression: stable UK кодова-точка-у-текст must be a registry-driven peer, not an EN bridge' >&2
+            exit 1
+          fi
+          if grep -Fqx '(define текст-у-кодову-точку string->codepoint)' lib/surface/uk.lisp; then
+            echo '1054 regression: stable UK текст-у-кодову-точку must be a registry-driven peer, not an EN bridge' >&2
+            exit 1
+          fi
+          if grep -Fqx '(define число-у-текст number->string)' lib/surface/uk.lisp; then
+            echo '1055 regression: stable UK число-у-текст must be a registry-driven peer, not an EN bridge' >&2
+            exit 1
+          fi
+          if grep -Fqx '(define друкувати print)' lib/surface/uk.lisp; then
+            echo '1057 regression: stable UK друкувати must be a registry-driven peer, not an EN bridge' >&2
+            exit 1
+          fi
+          if grep -Fqx '(define значення-у-текст write-to-string)' lib/surface/uk.lisp; then
+            echo '1061 regression: stable UK значення-у-текст must be a registry-driven peer, not an EN bridge' >&2
+            exit 1
+          fi
 
   workspace-clippy:
     name: full workspace clippy
