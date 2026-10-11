@@ -1,0 +1,26 @@
+name: D10 lossless historical source occurrences
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'knowledge/d10-filter/all-candidates.tsv'
+      - 'knowledge/d10-filter/all-source-occurrences.tsv'
+      - 'knowledge/d10-filter/source-occurrence-manifest.json'
+      - 'scripts/d10_restore_source_occurrences.py'
+      - 'tests/test_d10_restore_source_occurrences.py'
+      - '.github/workflows/d10-source-occurrences.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  lossless-source-recovery:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Check all 7396 SHA-pinned occurrence rows
+        run: python3 scripts/d10_restore_source_occurrences.py
+      - name: Fail-closed source recovery regressions
+        run: python3 -m unittest discover -s tests -p 'test_d10_restore_source_occurrences.py' -v

@@ -1,0 +1,50 @@
+{
+  "schema": "d10-lossless-source-occurrence-manifest/v1",
+  "date": "2026-10-11",
+  "role": "ARCHIVAL_PROVENANCE_EXPANSION_NOT_CORE_SELECTION",
+  "input": {
+    "path": "knowledge/d10-filter/all-candidates.tsv",
+    "git_blob": "1660a19ff9482f932fb9a40fa78ad1fa50134c31"
+  },
+  "output": {
+    "path": "knowledge/d10-filter/all-source-occurrences.tsv",
+    "git_blob": "101a8e59146f95ec35ed60e2281da32476037984"
+  },
+  "counts": {
+    "candidate_identities": 1809,
+    "semantic_name_spellings": 1495,
+    "pinned_source_occurrences": 7396,
+    "distinct_reference_strings": 6949,
+    "distinct_source_paths": 18,
+    "source_path_blob_pairs": 19
+  },
+  "by_source_path": {
+    "knowledge/d10-alltime-existing-research-selected-batch14-20261011.json": 14,
+    "knowledge/d10-historical-candidate-coordinate-queue-v1.json": 156,
+    "knowledge/d10-historical-lisp-all-source-consolidation-20261011.json": 352,
+    "knowledge/d10-historical-lisp-branch-candidate-intake-20261011.json": 224,
+    "knowledge/d10-historical-lisp-branch-evidence-intake-20261011.json": 164,
+    "knowledge/d10-historical-lisp-main-consolidation-20261011.json": 92,
+    "knowledge/d10-historical-lisp-residual-intake-20261011.json": 80,
+    "knowledge/d10-library-source-symbols-v1.json": 102,
+    "knowledge/d10-next-tranche-20261011.json": 8,
+    "knowledge/d10-proposal-ledger-symbolic-v3.tsv": 278,
+    "knowledge/d10-proposal-ledger.tsv": 171,
+    "knowledge/d10-provisional-candidate-coordinate-queue-v1.json": 289,
+    "knowledge/d10-source-snapshots/d10-proposal-ledger-f10c545598b6a6af.tsv": 171,
+    "knowledge/d10-source-universe-891-20261011.json": 891,
+    "knowledge/d10-v6-semantic-inventory.json": 719,
+    "knowledge/d10-v7-semantic-inventory.json": 1442,
+    "knowledge/d10-v8-semantic-inventory.json": 725,
+    "knowledge/d10-v9-semantic-inventory.json": 1518
+  },
+  "claims": {
+    "historical_branch_coverage_complete": false,
+    "deduplicated_independent_laws": false,
+    "executed_oracles": false,
+    "semantic_distinctness_proven": false,
+    "d10_ratified_added": 0,
+    "d10_coordinates_added": 0
+  },
+  "note": "These are 7396 provenance-occurrence rows already contained in 1809 source-index identities. They include repeated historical inventory snapshots and are NOT 7396 unique D10 laws. No source Git branch census completeness is asserted; do not equate this snapshot to all-time unindexed history. Never remove a row simply because names or source file names coincide."
+}
