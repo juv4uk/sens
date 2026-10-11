@@ -3889,7 +3889,7 @@ test/219-missing-module-is-blocked	UNTRIAGED	-	-	BRANCH-NAME-ONLY
 test/219-no-evidence-is-not-unknown	UNTRIAGED	-	-	BRANCH-NAME-ONLY
 test/219-no-proof-is-not-negation	UNTRIAGED	-	-	BRANCH-NAME-ONLY
 test/219-search-scoped-unknown	UNTRIAGED	-	-	BRANCH-NAME-ONLY
-test/219-unification-outcomes	UNTRIAGED	-	-	BRANCH-NAME-ONLY
+test/219-unification-outcomes	ALREADY-IN-MAIN-NEWER	13343e3c89392d2330f6128dd2d9a1f9ecaf8956	f77ecc7fcd18d368593bb69753f1c8c4695f0b65	Contract and Lisp fixture byte-identical to current main; main's binary-authority unify-observe and crates/sens test supersede old crates/my-lisp ancestry. PR #248 closed after source readback.
 test/220-conformance-structural-authority	UNTRIAGED	-	-	BRANCH-NAME-ONLY
 test/220-decimal-comma-lisp-witness-current	UNTRIAGED	-	-	BRANCH-NAME-ONLY
 test/220-epistemic-authority-current	UNTRIAGED	-	-	BRANCH-NAME-ONLY
@@ -3898,7 +3898,7 @@ test/220-epistemic-cond-current-main	UNTRIAGED	-	-	BRANCH-NAME-ONLY
 test/220-epistemic-cond-current-main-r2	UNTRIAGED	-	-	BRANCH-NAME-ONLY
 test/220-epistemic-cond-no-generic-truthiness	UNTRIAGED	-	-	BRANCH-NAME-ONLY
 test/220-retire-vector-rust-semantic-duplicates	UNTRIAGED	-	-	BRANCH-NAME-ONLY
-test/250-capability-registry-honesty	UNTRIAGED	-	-	BRANCH-NAME-ONLY
+test/250-capability-registry-honesty	ALREADY-IN-MAIN-NEWER	13343e3c89392d2330f6128dd2d9a1f9ecaf8956	da8ba1d95f850698be244ea304e61be1c8ee3edc	Current crates/sens capability resolver distinguishes Present/Absent/Unreadable, maps unreadable to MechanismUnavailable, and has poisoned-RwLock unit witnesses; PR #252 closed as superseded.
 test/291-exact-quantity-roundtrip-authority	UNTRIAGED	-	-	BRANCH-NAME-ONLY
 test/291-lisp-only-exact-quantity-retirement-clean	UNTRIAGED	-	-	BRANCH-NAME-ONLY
 test/291-lisp-only-exact-quantity-retirement-current	UNTRIAGED	-	-	BRANCH-NAME-ONLY
