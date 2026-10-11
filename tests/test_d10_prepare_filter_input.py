@@ -110,7 +110,7 @@ class PrepareTests(unittest.TestCase):
         with self.input.open("w", newline="", encoding="utf-8") as stream:
             writer = csv.DictWriter(
                 stream, fieldnames=adapter.INDEX_FIELDS,
-                delimiter="\\t", lineterminator="\\n",
+                delimiter=chr(9), lineterminator=chr(10),
             )
             writer.writeheader()
             writer.writerow(self.row)
