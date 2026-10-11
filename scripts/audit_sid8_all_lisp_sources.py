@@ -45,6 +45,16 @@ def authority():
 
 
 def scope(path):
+    # Existing carrier/registry payloads are records, not executable W8 heads.
+    # Machine index rows are generated; CPU profiles are frozen provenance.
+    if path == "lib/machine/intel-core-i5-6400.lisp":
+        return "PRESERVE_HISTORICAL"
+    if path in {
+        "mylisp-cml-export.lisp",
+        "lib/function-table-mechanisms.lisp",
+        "lib/machine/encoding/admitted-iclass-index.lisp",
+    }:
+        return "CONTRACT_OR_DATA_REVIEW"
     if (path.startswith(("research/", "docs/archive/", "knowledge/archive/",
                          "knowledge/d10-source-snapshots/",
                          "benchmarks/sens-surface/results/"))):
