@@ -225,13 +225,15 @@
   (00001000 (left right)
     (зворот-до (00101010 left) right)))
 
+; MAP is derived in Lisp: D4 NULL detects exactly the empty list,
+; while D3 ATOM excludes improper non-pair tails. Both produce D1 control
+; bits; structural (0) / equal? must never act as a COND predicate.
 (00001001 map-onto
   (00001000 (f values acc)
     (00000111
-      ((0100 (00000010 values)) (00101010 acc))
-      ((00000010 values)  (00000001 ()))
-      ((00100010 (00000010 values) (00000001 (0)))
-       (map-onto f (00000110 values) (00000100 (f (00000101 values)) acc))))))
+      ((0101 values) (00101010 acc))
+      ((0100 (010 values))
+       (map-onto f (011 values) (111 (f (100 values)) acc))))))
 
 (00001001 map
   (00001000 (f values)
