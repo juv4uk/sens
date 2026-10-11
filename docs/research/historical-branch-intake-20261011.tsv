@@ -2554,14 +2554,14 @@ proof/4449-machine-block-historical-oracle-20261008	UNTRIAGED	-	-	BRANCH-NAME-ON
 proposal/d10-class-of-ledger-20261009	UNTRIAGED	-	-	BRANCH-NAME-ONLY
 racket/1794-predicate-bit	UNTRIAGED	-	-	BRANCH-NAME-ONLY
 ratchet/tasks-priority-numeric-source	UNTRIAGED	-	-	BRANCH-NAME-ONLY
-ratify/d8-3960	UNTRIAGED	-	-	BRANCH-NAME-ONLY
-ratify/d9-4008	UNTRIAGED	-	-	BRANCH-NAME-ONLY
+ratify/d8-3960	PARTIAL-EXACT-CORE-DELTA-REVIEW	-	8537e7ee4b81f060bf5f4bc146d9d471cc5453e3	4/4 canonical D8 contracts and ledger blobs exact; workflow/checker delta pending; research/domain-archive/20261011/ratifications/historical-branch-contract-provenance.json
+ratify/d9-4008	PARTIAL-EXACT-CORE-DELTA-REVIEW	-	fe26d97f0d9ca5b8ce3f53ba83bc00c74ed7ee18	4/4 canonical D9 contracts and ledger blobs exact; workflow/checker delta pending; research/domain-archive/20261011/ratifications/historical-branch-contract-provenance.json
 ratify/2723-d6-001111	UNTRIAGED	-	-	BRANCH-NAME-ONLY
 ratify/2747-od001-replay	UNTRIAGED	-	-	BRANCH-NAME-ONLY
-ratify/3202-bija3-a	UNTRIAGED	-	-	BRANCH-NAME-ONLY
-ratify/3272-d4-full-16	UNTRIAGED	-	-	BRANCH-NAME-ONLY
-ratify/3305-d5-v2	UNTRIAGED	-	-	BRANCH-NAME-ONLY
-ratify/3331-d1-d5-foundation	UNTRIAGED	-	-	BRANCH-NAME-ONLY
+ratify/3202-bija3-a	PARTIALLY-ARCHIVED-TO-MAIN	-	876893f496b08fd732a9506dc96c963f9514b994	1 historical Bija3 source blob copied exactly; source execution delta pending; research/domain-archive/20261011/ratifications/historical-branch-contract-provenance.json
+ratify/3272-d4-full-16	PARTIAL-EXACT-CORE-DELTA-REVIEW	-	33eeb001eafe769435726737e0c35a0300d20679	D4 bootstrap contract source Git blob exact; other changes pending; research/domain-archive/20261011/ratifications/historical-branch-contract-provenance.json
+ratify/3305-d5-v2	PARTIALLY-ARCHIVED-TO-MAIN	-	4aab20959d35e2a69590086d02b58e566791b375	2 historical D5 source blobs copied exactly; source execution delta pending; research/domain-archive/20261011/ratifications/historical-branch-contract-provenance.json
+ratify/3331-d1-d5-foundation	PARTIALLY-ARCHIVED-TO-MAIN	-	02805099f5f6ceaeade514c3bd49e314c4eb0366	2 historical foundation source blobs copied exactly; source execution delta pending; research/domain-archive/20261011/ratifications/historical-branch-contract-provenance.json
 rebase/243-on-canon0	UNTRIAGED	-	-	BRANCH-NAME-ONLY
 rebase/2183-source-domain123-after-2202	UNTRIAGED	-	-	BRANCH-NAME-ONLY
 rebase/2188-sequential-bit-packer	UNTRIAGED	-	-	BRANCH-NAME-ONLY
