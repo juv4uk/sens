@@ -106,7 +106,7 @@ class PrepareTests(unittest.TestCase):
         with self.input.open("w", newline="", encoding="utf-8") as stream:
             writer = csv.DictWriter(
                 stream, fieldnames=adapter.INDEX_FIELDS,
-                delimiter="\\t", lineterminator="\\n",
+                delimiter=chr(9), lineterminator=chr(10),
             )
             writer.writeheader()
             writer.writerow(self.row)
@@ -132,7 +132,7 @@ class PrepareTests(unittest.TestCase):
         # JSON array quotes must survive TSV decoding unchanged, and claims
         # never imply a successfully executed witness.
         self.row["semantic_law_variants"] = json.dumps(
-            ["first law with \\"quotes\\"", "independent second law"]
+            ['first law with "quotes"', "independent second law"]
         )
         with self.input.open("w", newline="", encoding="utf-8") as stream:
             writer = csv.DictWriter(
