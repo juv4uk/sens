@@ -4,7 +4,7 @@
 
 use sens::{
     eval_parsed_expressions, eval_parsed_expressions_incremental, eval_program,
-    load_macro_library, load_process_library, parse, Environment, Session, TIME_LIBRARY_SOURCE,
+    load_macro_library, load_process_library, parse, Environment, Session,
 };
 use std::io::{BufRead, BufReader, Write};
 use std::net::{Ipv4Addr, TcpListener};
