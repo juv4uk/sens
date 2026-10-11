@@ -8,6 +8,7 @@ on:
       - 'knowledge/d10-selected-coordinate-allocation-v1.json'
       - 'scripts/check_d10_v2_current_placement.py'
       - 'tests/test_d10_v2_current_placement.py'
+      - 'tests/test_d10_completion_readiness.py'
       - 'scripts/check_d10_completion_readiness.py'
       - '.github/workflows/d10-completion-readiness.yml'
   pull_request:
