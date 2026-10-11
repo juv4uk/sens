@@ -54,6 +54,9 @@ jobs:
       - name: D9 Lisp-derived AVL facade witnesses
         if: always()
         run: cargo test --locked -p sens --test d9_map_lisp_facade
+      - name: Filesystem macro and alist path-bound witnesses
+        if: always()
+        run: cargo test --locked -p sens --test fs_bridge_diagnostics
       - name: World D3 content-store integration
         if: always()
         run: |
