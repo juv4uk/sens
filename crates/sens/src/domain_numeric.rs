@@ -11,30 +11,21 @@ use std::cmp::Ordering;
 /// This guarantees unique sign and reduced rational shape *within* that
 /// numeric domain, without taking any of its 2^n natural payloads.
 #[derive(Clone, Debug, Eq, PartialEq)]
-pub enum DomainNumericComposition {
-    Negative(BinaryNumber),
-    Ratio {
-        negative: bool,
-        numerator: BinaryNumber,
-        denominator: BinaryNumber,
-    },
+pub struct DomainNumericComposition {
+    // Private: only canonical() may construct these. Public enum variants
+    // would allow callers to forge NEG(0), denominator=0 or unreduced RATIO.
+    negative: bool,
+    numerator: BinaryNumber,
+    denominator: Option<BinaryNumber>, // None precisely for negative integer
 }
 
 impl DomainNumericComposition {
     pub fn domain_width(&self) -> usize {
-        match self {
-            Self::Negative(m) => m.numeric_domain_width().expect("admitted domain"),
-            Self::Ratio { numerator, .. } => numerator.numeric_domain_width().expect("admitted domain"),
-        }
+        self.numerator.numeric_domain_width().expect("admitted domain")
     }
 
     pub fn as_parts(&self) -> (bool, &BinaryNumber, Option<&BinaryNumber>) {
-        match self {
-            Self::Negative(m) => (true, m, None),
-            Self::Ratio { negative, numerator, denominator } => {
-                (*negative, numerator, Some(denominator))
-            }
-        }
+        (self.negative, &self.numerator, self.denominator.as_ref())
     }
 }
 
@@ -49,10 +40,6 @@ fn own_word(n: BinaryNumber, width: usize) -> Option<BinaryNumber> {
     let mut bits = vec![0; width - n.width()];
     bits.extend_from_slice(n.as_bits());
     BinaryNumber::from_numeric_domain_bits(width, &bits)
-}
-
-fn unit(width: usize) -> Option<BinaryNumber> {
-    own_word(BinaryNumber::one(), width)
 }
 
 /// Mathematical canonicalization. Invariants:
@@ -86,12 +73,14 @@ fn canonical(
     if n.is_zero() { return Some(Value::BinaryNumber(n)); }
     if d.as_bits() == [1] {
         if negative {
-            return Some(Value::NumericComposition(DomainNumericComposition::Negative(n)));
+            return Some(Value::NumericComposition(DomainNumericComposition {
+                negative: true, numerator: n, denominator: None,
+            }));
         }
         return Some(Value::BinaryNumber(n));
     }
-    Some(Value::NumericComposition(DomainNumericComposition::Ratio {
-        negative, numerator: n, denominator: d,
+    Some(Value::NumericComposition(DomainNumericComposition {
+        negative, numerator: n, denominator: Some(d),
     }))
 }
 
@@ -103,12 +92,10 @@ fn ingredients(value: &Value) -> Option<(usize, bool, BinaryNumber, BinaryNumber
         }
         Value::NumericComposition(c) => {
             let width = c.domain_width();
-            match c {
-                DomainNumericComposition::Negative(n) =>
-                    Some((width, true, normalized(n), BinaryNumber::one())),
-                DomainNumericComposition::Ratio { negative, numerator, denominator } =>
-                    Some((width, *negative, normalized(numerator), normalized(denominator))),
-            }
+            Some((
+                width, c.negative, normalized(&c.numerator),
+                c.denominator.as_ref().map_or_else(BinaryNumber::one, normalized),
+            ))
         }
         _ => None,
     }
