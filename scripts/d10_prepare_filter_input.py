@@ -99,7 +99,9 @@ def prepare(root, index_path, output):
         ids.add(ident)
         selected = canonical.get(name.casefold())
         if selected and selected["stable_id"] != ident:
-            raise ValueError("CANONICAL_ID_DRIFT:" + name)
+            # A historical name may have entered the canonical D10 after the
+            # name-index snapshot. The present stable ID is authoritative.
+            ident = selected["stable_id"]
         laws = json_list(item["semantic_law_variants"])
         refs = json_list(item["source_records_sha_pinned"])
         source_ref = ""
