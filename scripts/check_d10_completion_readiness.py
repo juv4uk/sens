@@ -105,7 +105,10 @@ def audit(root):
         v5raw = (k/"d10-v5-semantic-inventory.json").read_bytes()
         v6raw = (k/"d10-v6-semantic-inventory.json").read_bytes()
         v7raw = (k/"d10-v7-semantic-inventory.json").read_bytes()
-        v2, v3, v4, v5, v6, v7 = json.loads(v2raw), json.loads(v3raw), json.loads(v4raw), json.loads(v5raw), json.loads(v6raw), json.loads(v7raw)
+        v8raw = (k/"d10-v8-semantic-inventory.json").read_bytes()
+        v9raw = (k/"d10-v9-semantic-inventory.json").read_bytes()
+        v2, v3, v4, v5, v6, v7, v8, v9 = (json.loads(raw) for raw in
+                               (v2raw, v3raw, v4raw, v5raw, v6raw, v7raw, v8raw, v9raw))
         archive = ptr["current_archival_candidate_selection"]
         donor_raw = (root/archive["source_path"]).read_bytes()
         historical = json.loads(donor_raw)
@@ -154,7 +157,9 @@ def audit(root):
             and sha(v7raw) == "6a45275241717dafa6a6c9ccafae1e9ad819b306"
             and len(v7["rows"]) == 721
             and preserves_archived_prefix(v7["rows"], v6["rows"])
-            and preserves_archived_prefix(rows, v7["rows"])
+            and preserves_archived_prefix(v8["rows"], v7["rows"])
+            and preserves_archived_prefix(v9["rows"], v8["rows"])
+            and preserves_archived_prefix(rows, v9["rows"])
             and v6["rows"][:715]==v5["rows"]
             and v5["rows"][:707]==v4["rows"]
             and v4["rows"][:698]==v3["rows"]
@@ -196,9 +201,48 @@ def audit(root):
                 else:
                     v5_source_names.add(name.upper())
         v5_good=v5_good and len(v5_source_names)==8
+        # Later research tranches may be selected without a proposal-ledger
+        # row only when their complete source-reviewed archival manifest is
+        # pinned and still matches the exact semantic inventory suffix.
+        v9_index = ptr["current_v9_source_reviewed_batch"]
+        manifest_pin = v9_index["manifest"]
+        manifest_raw = (root / manifest_pin["path"]).read_bytes()
+        manifest_v9 = json.loads(manifest_raw)
+        source_pin = manifest_v9["source_filter"]
+        snapshot_raw = (root / source_pin["path"]).read_bytes()
+        v9_appended = v9["rows"][725:]
+        mrecords = manifest_v9["candidates"]
+        v9_good = (
+            ptr["historical_v8_research_inventory"]["git_blob"] == sha(v8raw)
+            and ptr["historical_v8_research_inventory"]["path"] == "knowledge/d10-v8-semantic-inventory.json"
+            and v9_index["previous_blob"] == sha(v8raw)
+            and manifest_pin["git_blob"] == sha(manifest_raw)
+            and sha(snapshot_raw) == source_pin["git_blob"]
+            and len(v8["rows"]) == 725
+            and len(v9["rows"]) == 759
+            and len(v9_appended) == len(mrecords) == 34
+            and all(
+                r["semantic_name"] == m["name"]
+                and r["behavior"] == m["law"]
+                and r["source_path"] == source_pin["path"]
+                and r["source_git_blob"] == source_pin["git_blob"]
+                and r["coordinate"] is None
+                and r["ratified_resident"] is False
+                and r["physical_t5_authorized"] is False
+                and m["F2"] == "HOLD_NOT_RUN"
+                and m["F3"] == "HOLD_DEDUP_UNPROVEN"
+                for r,m in zip(v9_appended, mrecords)
+            )
+        )
+        if v9_good:
+            source_review_exceptions.update(
+                r["semantic_name"].upper() for r in v9_appended
+            )
+        else:
+            errors.append("D10-V9-SOURCE-BATCH-SHA-OR-LAW-DRIFT")
         if sources_good and legacy_ok and v5_good:
             research_allocated=len(placed)-256
-            source_review_exceptions=all_review_names | v5_source_names
+            source_review_exceptions |= all_review_names | v5_source_names
         else:
             errors.append("CURRENT-D10-RESEARCH-REVIEW-SHA-OR-LAW-DRIFT")
     except (OSError,ValueError,KeyError,TypeError):
