@@ -14,13 +14,13 @@
 
 (00001001 exact-quantity-arithmetic-rows
   (00001000 ()
-    ((функція (planck)
-  ((функція (cesium)
-    ((функція (energy)
-      ((функція (one-second)
-        ((функція (speed)
-          ((функція (distance)
-            ((функція (recovered)
+    ((00001000 (planck)
+  ((00001000 (cesium)
+    ((00001000 (energy)
+      ((00001000 (one-second)
+        ((00001000 (speed)
+          ((00001000 (distance)
+            ((00001000 (recovered)
               (00100111
                       (00100111
                         (00000001 planck-cesium-energy-shape)
