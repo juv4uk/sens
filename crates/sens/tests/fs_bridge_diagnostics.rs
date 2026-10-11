@@ -57,6 +57,23 @@ fn object_package_and_nonempty_map_addresses_are_structurally_consistent() {
 }
 
 #[test]
+fn content_store_membership_is_an_exact_d1_bit_not_structural_one() {
+    let mut session = session();
+    for (source, expected) in [
+        ("(content-store-contains? (content-store-put (empty-content-store) (quote star)) (knowledge-content-address (quote star)))", true),
+        ("(content-store-contains? (empty-content-store) (knowledge-content-address (quote star)))", false),
+        ("(fs-contains? (car (fs-write (fs-empty) \"x\" (quote star))) \"x\")", true),
+        ("(fs-contains? (fs-empty) \"x\")", false),
+    ] {
+        let output = eval_program(source, &mut session)
+            .unwrap_or_else(|e| panic!("store D1 witness {source}: {e:?}"))
+            .value;
+        assert_eq!(output.as_predicate_bit(), Some(expected),
+            "one-bit predicate must never be returned as structural (1)");
+    }
+}
+
+#[test]
 fn object_package_fold_consumes_every_valid_package() {
     let mut session = session();
     let source = "(let ((decision (fs-build-object-store (list (fs-object-package (quote first)) (fs-object-package (quote second))) (empty-content-store)))) (list (car decision) (content-store-size (second decision))))";
