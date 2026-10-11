@@ -178,10 +178,9 @@
 ; einfach seinen Akkumulator zurück.
 (00001001 length-onto
   (00001000 (values acc)
-    (00000111
-      ; D1 ATOM chooses the empty proper-list tail; a pair must recurse.
-      ; Never run Core4 NOT or graded EQUAL as a COND predicate.
-      ((00000010 values) acc)
+    (110
+      ; D4 NULL terminates only at the empty proper-list tail.
+      ((0101 values) acc)
       ((00000010 (00000001 ()))
        (length-onto (00000110 values) (00001100 acc 1))))))
 
