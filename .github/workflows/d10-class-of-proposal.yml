@@ -58,10 +58,12 @@ jobs:
           log="$RUNNER_TEMP/class-of-sbcl.log"
           sbcl --script tests/oracles/d10_clos_slot_states.lisp | tee "$log"
           grep -Eq '^SUMMARY[[:space:]]D10-CLOS-SLOT-ORACLE-V1[[:space:]]17$' "$log"
-      - name: Prove canonical D1-D9 and D10 inventories remain untouched
+      - name: Preserve D1-D9 and verify all D10 selection transitions
         if: github.event_name == 'pull_request'
         env:
           BASE_SHA: ${{ github.event.pull_request.base.sha }}
         run: |
           set -euo pipefail
-          git diff --exit-code "$BASE_SHA" -- knowledge/d1-d9-foundation.json knowledge/d10-v1-semantic-inventory.json
+          git diff --exit-code "$BASE_SHA" -- knowledge/d1-d9-foundation.json
+          python3 scripts/check_d10_selection_transition_history.py --self-test
+          python3 scripts/check-d10-proposal-ledger.py
