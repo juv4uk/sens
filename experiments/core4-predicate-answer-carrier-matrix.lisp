@@ -58,9 +58,8 @@
 
 (110
   ((11110111 cam-observed cam-expected)
-   (1)
    (001 (core4-answer-carrier-matrix-ok)))
-  ((11110111 1 1) 1
+  ((010 (001 ()))
    (1110 (001 core4-answer-carrier-matrix-mismatch)
          cam-expected
          cam-observed)))
