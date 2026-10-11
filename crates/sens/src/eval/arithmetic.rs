@@ -3,6 +3,7 @@
 //! Verarbeitung exakter/inexakter Zahlen für `+`, `-`, `*` und `/`.
 
 use crate::{BinaryNumber, Environment, ErrorKind, Exactness, LanguageError, Rational, Span, Value};
+use crate::domain_numeric;
 
 // `Rational` wraps a heap-allocated `BigRational` (arbitrary precision), so
 // it isn't `Copy` — neither is `Numeric` anymore. Both accessor methods
@@ -235,6 +236,33 @@ pub(super) fn arithmetic_on_values(
     environment: &Environment,
     span: Span,
 ) -> Result<Value, LanguageError> {
+    // Domain-qualified numeric atoms and lawful NEG/RATIO compositions are
+    // handled by ONE exact binary arithmetic engine. No implicit conversion
+    // from legacy Number/Rational, no new Dn domain, no host floating point.
+    if values.iter().any(domain_numeric::is_domain_value) {
+        let result = match values {
+            [single] if operator == "-" => domain_numeric::unary("-", single),
+            [left, right] => domain_numeric::compute(operator, left, right),
+            _ => None,
+        }.ok_or_else(|| LanguageError::new(
+            ErrorKind::Type,
+            "numeric Dn composition requires same-domain operands and a supported operation",
+            span,
+        ))?;
+        let bit_length = match &result {
+            Value::BinaryNumber(value) => value.width(),
+            Value::NumericComposition(value) => {
+                let (_, numerator, denominator) = value.as_parts();
+                numerator.width().max(denominator.map_or(0, BinaryNumber::width))
+            }
+            _ => return Err(LanguageError::new(ErrorKind::Type, "numeric composite invariant", span)),
+        };
+        if environment.numeric_bit_limit().is_some_and(|limit| bit_length > limit) {
+            return Err(arithmetic_overflow(span));
+        }
+        return Ok(result);
+    }
+
     // #3022 canonical Number path. Once a BinaryNumber participates, every
     // operand must be a BinaryNumber; no implicit bridge to legacy f64/Q is
     // permitted. Natural subtraction is partial until signed Number is ratified.
@@ -441,6 +469,37 @@ pub(super) fn division_on_values(
             span,
         ));
     }
+    // Reciprocal or exact rational division over admitted D24+ values.
+    if values.iter().any(domain_numeric::is_domain_value) {
+        let denominator_is_zero = match values {
+            [_] => matches!(&values[0], Value::BinaryNumber(n) if n.is_zero()),
+            [_, rhs] => matches!(rhs, Value::BinaryNumber(n) if n.is_zero()),
+            _ => false,
+        };
+        if denominator_is_zero { return Err(division_error(span)); }
+        let result = match values {
+            [single] => domain_numeric::unary("/", single),
+            [lhs, rhs] if argument_count == 2 => domain_numeric::compute("/", lhs, rhs),
+            _ => None,
+        }.ok_or_else(|| LanguageError::new(
+            ErrorKind::Type,
+            "Dn rational division requires exactly two same-domain inputs or unary reciprocal",
+            span,
+        ))?;
+        let bit_length = match &result {
+            Value::BinaryNumber(n) => n.width(),
+            Value::NumericComposition(n) => {
+                let (_, num, den) = n.as_parts();
+                num.width().max(den.map_or(0, BinaryNumber::width))
+            }
+            _ => return Err(LanguageError::new(ErrorKind::Type, "numeric composite invariant", span)),
+        };
+        if environment.numeric_bit_limit().is_some_and(|limit| bit_length > limit) {
+            return Err(arithmetic_overflow(span));
+        }
+        return Ok(result);
+    }
+
     // Binary Number division is exact on naturals. Non-integral quotients
     // cannot silently become a host Rational until a canonical binary
     // rational layout is ratified (#3021).
@@ -578,6 +637,15 @@ pub(super) fn comparison_on_values(
     values: &[Value],
     span: Span,
 ) -> Result<Value, LanguageError> {
+    if values.iter().any(domain_numeric::is_domain_value) {
+        let holds = match values {
+            [left, right] => domain_numeric::compare(operator, left, right),
+            _ => None,
+        }.ok_or_else(|| LanguageError::new(
+            ErrorKind::Type, "Dn comparison requires exactly two same-domain numeric values", span,
+        ))?;
+        return Ok(Value::predicate_bit(holds));
+    }
     // #3022 comparisons over canonical Number return the exact D1
     // PredicateBit domain, not legacy numeric 0/1 and not a host bool.
     if values.iter().any(|value| matches!(value, Value::BinaryNumber(_))) {
