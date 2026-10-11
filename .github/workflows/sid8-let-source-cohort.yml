@@ -1,0 +1,29 @@
+name: SID8 Lisp LET source cutover witness
+on:
+  push:
+    branches: [main]
+    paths:
+      - lib/forward.lisp
+      - lib/knowledge.lisp
+      - lib/core.lisp
+      - lib/core4.lisp
+      - lib/time.lisp
+      - knowledge/d1-d9-foundation.json
+      - tests/test_sid8_let_source_cohort.py
+      - .github/workflows/sid8-let-source-cohort.yml
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  pinned-source-law:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Prove 44 exact old LET binder replacements and D8 MOD exclusion
+        run: python3 -m unittest discover -s tests -p test_sid8_let_source_cohort.py -v
