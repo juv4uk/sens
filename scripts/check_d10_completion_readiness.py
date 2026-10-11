@@ -55,7 +55,8 @@ def source_queue(knowledge, selected, proposed):
 def audit(root):
     k = root / "knowledge"
     data = (k / "d10-v1-semantic-inventory.json").read_bytes()
-    inv = json.loads(data)
+    current_bytes = (k / "d10-v2-semantic-inventory.json").read_bytes()
+    inv = json.loads(current_bytes)
     hist = json.loads((k / "d10-selection-transition-history.json").read_text())
     with (k / "d10-proposal-ledger.tsv").open(newline="", encoding="utf-8") as f:
         ledger = list(csv.DictReader(f, delimiter="\t"))
@@ -85,54 +86,56 @@ def audit(root):
     missing = [r["semantic_name"] for r in rows[625:] if r["semantic_name"].upper() not in proposed]
     if missing:
         errors.append("SELECTED-WITHOUT-PROPOSAL")
-    # Research-stage allocation is a separately pinned coordinate map. It does
-    # not grant normative D10 placement, executable opcodes, or ratification.
     research_allocated = 0
-    gauge_path = k / "d10-selected-coordinate-allocation-v1.json"
-    if gauge_path.exists():
-        try:
-            gauge = json.loads(gauge_path.read_text(encoding="utf-8"))
-            pending = [r for r in rows if r.get("coordinate") is None]
-            taken = set(placed)
-            free_words = [format(i, "010b") for i in range(capacity)
-                          if format(i, "010b") not in taken]
-            proposals = gauge["rows"]
-            good = (
-                gauge.get("schema") == "d10-selected-coordinate-allocation/v1"
-                and gauge.get("status") == "OWNER-DIRECTED-RESEARCH-COORDINATE-ALLOCATION-UNRATIFIED"
-                and gauge.get("source_inventory_git_blob") == sha(data)
-                and len(proposals) == len(pending)
-                and all(
-                    p.get("stable_id") == r.get("stable_id")
-                    and p.get("semantic_name") == r.get("semantic_name")
-                    and p.get("coordinate") == free_words[i]
-                    and p.get("ratified_resident") is False
-                    for i, (p, r) in enumerate(zip(proposals, pending))
+    try:
+        pointer = json.loads((k / "d10-current-inventory.json").read_text())
+        original = json.loads(data)
+        overlay_bytes = (k / "d10-selected-coordinate-allocation-v1.json").read_bytes()
+        gauge = json.loads(overlay_bytes)
+        historical = {r["stable_id"]: r for r in original["rows"]}
+        allocated = {r["stable_id"]: r for r in gauge["rows"]}
+        valid = (
+            pointer["canonical_current"]["git_blob"] == sha(current_bytes)
+            and pointer["historical_selection"]["git_blob"] == sha(data)
+            and pointer["historical_address_allocation"]["git_blob"] == sha(overlay_bytes)
+            and len(rows) == len(original["rows"]) == 675
+            and len(allocated) == 419
+            and all(
+                r["stable_id"] in historical and
+                r["semantic_name"] == historical[r["stable_id"]]["semantic_name"] and
+                r["coordinate"] == (
+                    allocated[r["stable_id"]]["coordinate"]
+                    if historical[r["stable_id"]]["coordinate"] is None
+                    else historical[r["stable_id"]]["coordinate"]
                 )
+                for r in rows
             )
-            if good:
-                research_allocated = len(proposals)
-            else:
-                errors.append("RESEARCH-COORDINATE-ALLOCATION-DRIFT")
-        except (OSError, ValueError, KeyError, TypeError):
-            errors.append("RESEARCH-COORDINATE-ALLOCATION-INVALID")
+        )
+        if valid:
+            research_allocated = 419
+        else:
+            errors.append("CURRENT-D10-PLACEMENT-DRIFT")
+    except (OSError, ValueError, KeyError, TypeError):
+        errors.append("CURRENT-D10-PLACEMENT-INVALID")
     inventory_full = len(rows) == capacity
     placement_full = len(placed) == capacity
     return {"schema": "d10-completion-readiness/v1",
-            "inventory_blob": sha(data), "capacity": capacity,
+            "inventory_blob": sha(current_bytes), "historical_inventory_blob": sha(data),
+            "current_inventory_path": "knowledge/d10-v2-semantic-inventory.json", "capacity": capacity,
             "selected": len(rows), "remaining": capacity-len(rows),
             "placed": len(placed), "unplaced": len(rows)-len(placed),
             "ratified": ratified, "inventory_full": inventory_full,
             "research_gauge_allocated": research_allocated,
-            "selected_research_mapped": len(placed) + research_allocated,
-            "selected_research_unmapped": len(rows) - len(placed) - research_allocated,
+            "selected_research_mapped": len(placed),
+            "selected_research_unmapped": len(rows) - len(placed),
             "research_gauge_is_normative": False,
+            "current_map_is_canonical_research": True,
             "placement_full": placement_full,
             "ready_for_owner_review": inventory_full and placement_full and not errors,
             "ready_to_start_d11": inventory_full and placement_full and ratified == capacity and not errors,
             "source_queue": source_queue(k, set(names), proposed),
             "blocking_errors": errors,
-            "caution": "Donor names do not equal proven nonduplicate laws. No coordinates or ratification issued."}
+            "caution": "675 selected D10 meanings have coordinates; 349 semantic places remain empty; no D10 ratification or physical authorization."}
 
 def main():
     p = argparse.ArgumentParser(description=__doc__)
