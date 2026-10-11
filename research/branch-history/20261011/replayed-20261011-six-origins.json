@@ -1,0 +1,65 @@
+{
+  "schema": "sens.branch-history-source-replay-six/v1",
+  "date": "2026-10-11",
+  "run": "https://github.com/juv4uk/sens/actions/runs/38104852799",
+  "scope": "Additional distinct source files directly preserved on main from 6 currently unmergeable historic PRs. Archival evidence, not a whole-branch merge or active code admission.",
+  "branch_creation": 0,
+  "original_files_verified": 6,
+  "entries": [
+    {
+      "source_pr_url": "https://github.com/juv4uk/sens/pull/5214",
+      "source_head_sha": "822524bf20d0ab12830c554ed283554f23c008dc",
+      "original_path": "crates/sens/examples/t5_view_ab.rs",
+      "original_git_blob_sha": "26ee41c1a71530a269e3b8962e81873821bd8b5e",
+      "archived_path": "research/branch-history/20261011/source-pr5214/crates/sens/examples/t5_view_ab.rs.source.txt",
+      "status": "BYTE_EXACT_ARCHIVED_NONEXECUTABLE",
+      "branch_fully_consolidated": false
+    },
+    {
+      "source_pr_url": "https://github.com/juv4uk/sens/pull/5476",
+      "source_head_sha": "a7073f3105a3be281120821b6a73e46aa4fb92e8",
+      "original_path": "tests/test_migrate_approved_t5.py",
+      "original_git_blob_sha": "602310aa79759f04017c590f8fdd69243ba5a1a0",
+      "archived_path": "research/branch-history/20261011/source-pr5476/tests/test_migrate_approved_t5.py.source.txt",
+      "status": "BYTE_EXACT_ARCHIVED_NONEXECUTABLE",
+      "branch_fully_consolidated": false
+    },
+    {
+      "source_pr_url": "https://github.com/juv4uk/sens/pull/173",
+      "source_head_sha": "350145462449349cf3de826f8b9b1eeb36d62c41",
+      "original_path": "tests/fixtures/backend-adapters.lisp",
+      "original_git_blob_sha": "372d98c78181231abd9c504679217de454268e69",
+      "archived_path": "research/branch-history/20261011/source-pr0173/tests/fixtures/backend-adapters.lisp.source.txt",
+      "status": "BYTE_EXACT_ARCHIVED_NONEXECUTABLE",
+      "branch_fully_consolidated": false
+    },
+    {
+      "source_pr_url": "https://github.com/juv4uk/sens/pull/3745",
+      "source_head_sha": "f9a19ec81b70efb9512397a37eea41b30162eeaa",
+      "original_path": "benchmarks/sens-surface/gpu_numeric_buffer_map.py",
+      "original_git_blob_sha": "45b53dbfb0d25d35d54866be92ff474f9668b4ff",
+      "archived_path": "research/branch-history/20261011/source-pr3745/benchmarks/sens-surface/gpu_numeric_buffer_map.py.source.txt",
+      "status": "BYTE_EXACT_ARCHIVED_NONEXECUTABLE",
+      "branch_fully_consolidated": false
+    },
+    {
+      "source_pr_url": "https://github.com/juv4uk/sens/pull/2350",
+      "source_head_sha": "3d81fa1392b00678a7f46f02cb19246effd17f1a",
+      "original_path": "scripts/bench-2346-gf2-affine-certificate-economy.py",
+      "original_git_blob_sha": "6243167764df55dd5f3ae033bd3c086a47492107",
+      "archived_path": "research/branch-history/20261011/source-pr2350/scripts/bench-2346-gf2-affine-certificate-economy.py.source.txt",
+      "status": "BYTE_EXACT_ARCHIVED_NONEXECUTABLE",
+      "branch_fully_consolidated": false
+    },
+    {
+      "source_pr_url": "https://github.com/juv4uk/sens/pull/484",
+      "source_head_sha": "25796d2a6e9e9a0d067f85093d1e868426a36081",
+      "original_path": "tests/fixtures/machine-immediate-branch-atoms-witness.lisp",
+      "original_git_blob_sha": "efd39d085684f0737c48b5bbdbfaa1db494c81fe",
+      "archived_path": "research/branch-history/20261011/source-pr0484/tests/fixtures/machine-immediate-branch-atoms-witness.lisp.source.txt",
+      "status": "BYTE_EXACT_ARCHIVED_NONEXECUTABLE",
+      "branch_fully_consolidated": false
+    }
+  ],
+  "excluded": "Any workflow, executable library, benchmark runner or test suite in prior contract era remains inactive until independent current-main review and CI."
+}
