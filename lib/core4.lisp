@@ -478,21 +478,27 @@
 (00001001 pairlis спарувати)
 
 (00001010 let* (bindings body)
-  ; D3 ATOM повертає точний D1:1 для порожнього списку прив'язок.
-  ; Непорожні прив'язки переходять до рекурсивного LET через D1:1 за замовчуванням.
+  ; D3 ATOM returns exact D1:1 for the empty binding list.
+  ; For each non-empty binding, generate ((LAMBDA (name) (LET* rest body)) value)
+  ; directly in Lisp; do not invoke the legacy D4 LOOKUP-shaped "let" surface.
   (00000111
     ((00000010 bindings) body)
-    ((00000010 (00000001 ())) 
-     ; Build the recursive expansion from the primitive tree substrate only.
-     ; This keeps let* semantics in Lisp while allowing generic macro
-     ; frontends to execute the law without importing the higher-level list
-     ; helper as host/compiler semantic authority.
-     (00000100 (00000001 let)
-           (00000100 (00000100 (00000101 bindings) (00000001 ()))
-                 (00000100 (00000100 (00000001 let*)
-                             (00000100 (00000110 bindings)
-                                   (00000100 body (00000001 ()))))
-                       (00000001 ())))))))
+    ((00000010 (00000001 ()))
+     (111
+       (111
+         (001 0010)
+         (111
+           (111 (100 (100 bindings)) (001 ()))
+           (111
+             (111
+               (001 let*)
+               (111
+                 (011 bindings)
+                 (111 body (001 ()))))
+             (001 ()))))
+       (111
+         (100 (011 (100 bindings)))
+         (001 ()))))))
 
 ; string-length/string-empty?/string-prefix?/string-contains? (PLAN.md
 ; item 14, item 20's G5 audit test applied live) — none of these need a
