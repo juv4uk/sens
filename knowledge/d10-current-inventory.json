@@ -3,7 +3,7 @@
   "status": "OWNER-DIRECTED-RESEARCH-SELECTION-759-UNRATIFIED",
   "canonical_current": {
     "path": "knowledge/d10-v9-semantic-inventory.json",
-    "git_blob": "328d4babc0bef534eedaefe8b541373c326cf5da",
+    "git_blob": "b77c5b4aae35bcf377e8406f59328e6d82808a45",
     "selected": 759,
     "placed": 719,
     "unplaced": 40,
@@ -222,7 +222,7 @@
     "previous_blob": "f3d3aefd19e163a085ba6ce4f8e2ca2bef02028f",
     "manifest": {
       "path": "knowledge/d10-source-reviewed-v9-batch-20261011.json",
-      "git_blob": "33f19d92a348af02ae6f79572c35d65a56ed64f1"
+      "git_blob": "358ba3c67417bbabfdea4efada5f85f6055945fb"
     },
     "selected_added": 34,
     "unplaced_added": 34,
