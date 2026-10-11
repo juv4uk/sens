@@ -1,6 +1,6 @@
 {
   "schema": "nano-sens-seed-v0-result/1",
-  "status": "PASS_MEASURED_BASELINE_NOT_MINIMUM",
+  "status": "PASS_MEASURED_COMPONENT_BASELINE_SEED_CLOSURE_NOT_YET_MEASURED",
   "measurement": {
     "schema": "nano-sens-size-report/1",
     "report_sha256": "dd4473beb15d6bba6f8cabc12b4ae7885d388231b70750f4fdfc29bb0f18eca3",
@@ -28,14 +28,17 @@
     "measurement_tools_sens_commit": "ca9babfec9d20259a206153476d7717f91be3bb6"
   },
   "seed_v0": {
-    "role": "Operational CML Rust lib-test bootstrap runner that produces C1 and executes the C1/C2 lineage witness; includes host/bootstrap compiler logic. This is not a minimum-size claim or a SENS-native seed.",
+    "role": "Measured executable component only: CML Rust lib-test bootstrap runner. The runner dynamically invokes cargo run -p xtask -- compiler-export inside the pinned SENS checkout; therefore this executable's size alone is not the complete operational seed-input closure and must not be reported as total seed bytes.",
     "file_name": "seed-v0-c0-runner.bin",
     "sha256": "d45e09837a10103879c3d405c54ddf53ee2b1376bce969ccd20316ece4065be4",
     "on_disk_file_bytes": 34580696,
     "loadable_segment_file_bytes": 6038608,
     "executable_code_section_bytes": 4145007,
     "format": "ELF",
-    "section_measurement": "GNU readelf -W -l/-S"
+    "section_measurement": "GNU readelf -W -l/-S",
+    "component_class": "runner-executable-component",
+    "whole_chain_seed_closure_status": "BLOCKED_UNENUMERATED",
+    "whole_chain_seed_closure_total_bytes": null
   },
   "c1_c2": {
     "c1_executable_sha256": "27b8fbf096cddbb77be2b4bf57cc58bf8b4fac4accc42adbcfbc10d6cd95f375",
@@ -80,5 +83,94 @@
     "historical_lisp": "donor evidence, not automatic core semantics",
     "mechanism_is_not_semantics": true,
     "new_branches_or_domains_for_nano_sens": false
-  }
+  },
+  "required_runtime_input_chain": {
+    "status": "PARTIALLY_ENUMERATED_NOT_YET_A_COMPLETE_MINIMUM_FILE_SET",
+    "pinned_sens_source_commit": "d0787a40fcea36501747732aa61b6de19fe29c70",
+    "observed_runtime_call": "src/sens_c1_artifact.rs::pinned_compiler_export() -> cargo run --manifest-path external/sens/Cargo.toml -p xtask -- compiler-export",
+    "known_required_repo_inputs": [
+      {
+        "path": "Cargo.toml",
+        "git_blob_sha1": "880cd66b98fd2fb9ea34fe428526f09a073fb8c3",
+        "bytes": 1399,
+        "role": "Cargo workspace manifest"
+      },
+      {
+        "path": "Cargo.lock",
+        "git_blob_sha1": "293e933d0fdb78954386243eae431c2826b62a79",
+        "bytes": 20813,
+        "role": "pinned Rust crate dependency resolution"
+      },
+      {
+        "path": ".cargo/config.toml",
+        "git_blob_sha1": "ae9cf46bf18b89c74c88462c29713601c7972f01",
+        "bytes": 136,
+        "role": "Cargo build configuration"
+      },
+      {
+        "path": "crates/xtask/Cargo.toml",
+        "git_blob_sha1": "eed4c217f9d61b4db486b06df0fe80c163961a25",
+        "bytes": 345,
+        "role": "runtime exporter package manifest"
+      },
+      {
+        "path": "crates/xtask/src/main.rs",
+        "git_blob_sha1": "7b05ea47e12d35e702bd33b1969b1767ce0ddab8",
+        "bytes": 9133,
+        "role": "Rust xtask dispatcher"
+      },
+      {
+        "path": "crates/xtask/src/compiler_export.rs",
+        "git_blob_sha1": "8d8afb359f9f7adb35c4c76f662189226b5a332a",
+        "bytes": 10553,
+        "role": "Rust transport parser and request serializer; delegates role choice to SENS API"
+      },
+      {
+        "path": "crates/sens/Cargo.toml",
+        "git_blob_sha1": "50b4c7a37ca3aa82993bea6b258b5de3b488820c",
+        "bytes": 674,
+        "role": "SENS Rust runtime package manifest"
+      },
+      {
+        "path": "crates/sens/src/lib.rs",
+        "git_blob_sha1": "386158468ec44c20433ddee8432c1c81f9907ef9",
+        "bytes": 27192,
+        "role": "SENS API and runtime module graph"
+      },
+      {
+        "path": "crates/sens/src/compiler_language.rs",
+        "git_blob_sha1": "b15cee61eb8f0c40761a0d467c3818eeea89ca5f",
+        "bytes": 59607,
+        "role": "Rust adapter that executes the SENS-owned compiler-nucleus Lisp law"
+      },
+      {
+        "path": "lib/compiler-nucleus.lisp",
+        "git_blob_sha1": "c81ff7341a3a18c7cb6ff8e77038318bb935b232",
+        "bytes": null,
+        "role": "SENS-owned compiler law source, compiled into the SENS crate via include_str!"
+      },
+      {
+        "path": "contracts/compiler-nucleus-identity-corpus-v1.tsv",
+        "git_blob_sha1": "c57b0df98f467ddcad067158dad1c97a349ad1bf",
+        "bytes": 426,
+        "role": "compiler export identity corpus"
+      },
+      {
+        "path": "language-contract.lisp",
+        "sha256": "177d532d24c1f0738a934152f65c7f01f90b5593c8dbfe519e31148c0aa80c40",
+        "role": "authority content pinned by CML evidence"
+      }
+    ],
+    "additional_closure_work_required": [
+      "enumerate all Rust modules compiled into crates/sens and crates/xtask plus every include_str!/include_bytes! input",
+      "enumerate Cargo workspace member manifests consulted during package resolution",
+      "distinguish compiled-in source data from files read at runtime",
+      "measure each file's bytes and exact SHA on the pinned commit",
+      "separate Cargo/rustc/GCC/linker/OS/registry dependency packages into a non-counted external-dependency ledger",
+      "calculate one total only after proving the file closure is minimal and fail-closed"
+    ]
+  },
+  "notes": [
+    "Metric integrity correction (2026-10-12): the earlier 34,580,696-byte value remains a valid on-disk measurement of one ELF runner component. Code inspection shows this runner invokes cargo run -p xtask -- compiler-export at runtime, so the runner alone does not represent the complete seed input closure. The full-chain seed total is NOT MEASURED until every required non-toolchain input file is enumerated, pinned and counted."
+  ]
 }
