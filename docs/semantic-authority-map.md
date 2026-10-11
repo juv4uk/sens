@@ -35,7 +35,7 @@ exact binary number
 + admitted / proved law
 ```
 
-Current Core examples are exact-width D1 PredicateBit, D2 structure, D3 foundation, D4 bootstrap, owner-ratified D5/D6, D7 126/128 under #3572, D8 256/256 under #3960, and D9 512/512 under #4008. Equal packed numeric payloads in two domains do not imply equal semantic identity, and width alone does not grant occupancy or callability.
+Current Core domains include D1 PredicateBit, D2 structure, D3 foundation, D4 bootstrap, owner-ratified D5/D6, D7 126/128 under #3572, D8 256/256 under #3960, D9 512/512 under #4008, and peer numeric D24/D48/D96/D192/... ratified 2026-10-11. Equal packed numeric payloads in two domains do not imply equal semantic identity, and width alone does not grant occupancy or callability.
 
 Historical exact-eight-bit Sens8/Sid8/Function8 values remain bounded compatibility, transport, backend, and provenance projections while #2817 migrates runtime consumers. They are not the universal current ontology.
 
@@ -63,10 +63,12 @@ AOT/compiler та CPU/GPU/FPGA/GraalVM/Futhark й інші ядра** спожи
 **ті самі допущені закони SENS**. Ядро може бути ще не готовим до їх виконання;
 це `UNSUPPORTED/BLOCKED`, а не інша арифметика.
 
-- `Number` є одним окремим семантичним простором із власними ратифікованими
-  місткостями **24→48→96→192→…**, визначеними
-  `knowledge/number-width-ratified.json`. Це не D24/D48 функціональні домени
-  і не вибір GPU-регістра. `Text7`-цифри не можуть замінити `Number`.
+- **D24, D48, D96, D192, … є справжніми числовими доменами SENS,
+  рівноправними з D1–D9** за семантичним статусом. Їхня драбина:
+  `D(24·2^n)`, `n≥0`. Вони не просто фізичні `Number24`-місткості,
+  не псевдоніми функцій та не GPU-регістри. Акти:
+  `contracts/numeric-domains-ratification.lisp` і
+  `knowledge/number-width-ratified.json`. Цифри `Text7` не замінюють D24.
 - Арифметичний виклик має явний двійковий код операції та домен; обидва
   операнди й результат є точними двійковими об'єктами. Числове порівняння
   повертає окремий D1 `PredicateBit`, не числове 0/1.
@@ -88,6 +90,17 @@ CI на тому самому SHA. `UNKNOWN`, `UNSUPPORTED`, `BLOCKED` та `FAI
 не перетворюються на `PASS`. Відсутній механізм — відкрита робота цього
 ядра, **не** привід створювати нове математичне ядро чи гілку.
 
+## Ратифіковані числові домени D24/D48/D96/…
+
+Пряме рішення власника від 11.10.2026: **D24, D48, D96, D192, … — повноцінні
+домени SENS, рівноправні D1–D9**, а не просто ступені місткості
+бездоменного Number. Рівність статусу не означає рівність змісту.
+Цим рішенням **не** ратифіковано повне заповнення резидентами,
+кодування знака/дробів, неявні переходи між D24 і D48 або наявність
+готового виконавчого механізму. Доменні значення не потребують
+текстових літералів; саму належність до домену не можна
+вивести лише з довжини невизначеного бітового слова.
+
 ## Number-домени без обов'язкових літералів
 
 **Пріоритет Core, уточнений власником 11.10.2026:** для мови
@@ -96,16 +109,16 @@ CI на тому самому SHA. `UNKNOWN`, `UNSUPPORTED`, `BLOCKED` та `FAI
 Вихідний текстовий токен — лише факультативна проєкція читача.
 
 - Семантичний об'єкт = точні біти + **його домен** + допущений закон.
-  Арифметичні числа належать окремому простору `Number`, де
-  ратифіковані `Number24 → Number48 → Number96 → Number192 → …`.
-  Функціональні D1–D9, PredicateBit, D2 і Text7 залишаються іншими
-  просторами навіть для однакових бітових payload.
+  Числові об'єкти належать **D24 → D48 → D96 → D192 → …**,
+  які мають той самий онтологічний рівень, що й D1–D9, але
+  власні закони та ідентичності. D1 PredicateBit, D2 структура,
+  D7 Text7 і функціональні домени з ними не ототожнюються.
 - Не планувати нову роботу над синтаксисом числових літералів.
   Існуючі reader-нотації можуть залишатися для спадкової сумісності
   та введення/виведення, але **не визначають числової семантики**.
 - Стан виконання: `crates/sens/src/binary_number.rs` має натуральну
   точну бітову арифметику та перевірку деяких числових місткостей;
-  `Value::BinaryNumber` ще не включає явного Number-домену у власну
+  `Value::BinaryNumber` ще не включає явної приналежності до D24/D48/... у власну
   ідентичність. Його нормалізовані біти **не доводять** завершеності
   ратифікованого доменного представлення.
 - Схема знака, дробів, автоматичного розширення й десяткового
