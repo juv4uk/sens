@@ -2,14 +2,14 @@
 ; Bootstrap-бібліотека my-lisp: похідна поведінка належить самій мові.
 ; my-lisp-Bootstrap-Bibliothek: Abgeleitetes Verhalten gehört in die Sprache selbst.
 
-(00001001 identity (00001000 (value) value))
+(0011 identity (0010 (value) value))
 
 ; Lisp-owned binary format descriptor for the canonical 8-bit bit syntax.
 ; The reader treats the following source forms as binary data until the next
 ; top-level source is read; decimal integers remain ordinary decimal values.
-(00001001 binary
-  (00001000 (width)
-    (00100111 (00000001 binary) width)))
+(0011 binary
+  (0010 (width)
+    (1110 (001 binary) width)))
 
 ; `list` used to be a Rust special form (`evaluate_list_func`) — moved here
 ; 2026-08-09 once variadic lambda parameters existed to express it: a bare
@@ -27,29 +27,29 @@
 ; кажуть має належати самій мові, щойно ядро вже може це виразити, не
 ; хосту. Лишено першим у файлі (не там, де випадково використовується),
 ; бо `let`/`let*` нижче будують свою розгортку через нього.
-(00001001 list (00001000 args args))
+(0011 list (0010 args args))
 
-(00001001 not
-  (00001000 (value)
-    (00000111
-      (value (00000001 ()))
+(0011 not
+  (0010 (value)
+    (110
+      (value (001 ()))
       (t t))))
 
-(00001001 pair
-  (00001000 (left right)
-    (00000100 left (00000100 right (00000001 ())))))
+(0011 pair
+  (0010 (left right)
+    (111 left (111 right (001 ())))))
 
-(00001001 second
-  (00001000 (values)
-    (00000101 (00000110 values))))
+(0011 second
+  (0010 (values)
+    (100 (011 values))))
 
-(00001001 third
-  (00001000 (values)
-    (00000101 (00000110 (00000110 values)))))
+(0011 third
+  (0010 (values)
+    (100 (011 (011 values)))))
 
-(00001001 fourth
-  (00001000 (values)
-    (00000101 (00000110 (00000110 (00000110 values))))))
+(0011 fourth
+  (0010 (values)
+    (100 (011 (011 (011 values))))))
 
 ; cadddr — the classical car/cdr-composition name for the exact same
 ; operation fourth already performs; kept as an alias (same closure
@@ -61,7 +61,7 @@
 ; не друге визначення), бо реальні виклики вже пишуть саме так
 ; (lib/reason.my мав власний локальний (def cadddr ...) до цього,
 ; посимвольно ідентичний тілу fourth).
-(00001001 cadddr fourth)
+(0011 cadddr fourth)
 
 ; fifth — same single-parameter primitive-chain pattern as second/third/
 ; fourth, one step deeper. Found duplicated in two places at once:
@@ -73,21 +73,21 @@
 ; у двох місцях: власний локальний (def fifth ...) у lib/narrate.my,
 ; посимвольно ідентичний, і node-right у lib/persistent-map.my — та
 ; сама операція, виписана вручну замість названа.
-(00001001 fifth
-  (00001000 (values)
-    (00000101 (00000110 (00000110 (00000110 (00000110 values)))))))
+(0011 fifth
+  (0010 (values)
+    (100 (011 (011 (011 (011 values)))))))
 
-(00001001 caar
-  (00001000 (values)
-    (00000101 (00000101 values))))
+(0011 caar
+  (0010 (values)
+    (100 (100 values))))
 
-(00001001 cadr
-  (00001000 (values)
-    (00000101 (00000110 values))))
+(0011 cadr
+  (0010 (values)
+    (100 (011 values))))
 
-(00001001 cddr
-  (00001000 (values)
-    (00000110 (00000110 values))))
+(0011 cddr
+  (0010 (values)
+    (011 (011 values))))
 
 ; length/map/filter build their result via a tail-recursive `-onto`
 ; accumulator, same shape as reverse/reverse-onto below, instead of consing
@@ -117,25 +117,25 @@
 ; umgekehrter Reihenfolge und rufen daher am Ende einmal `reverse` auf, um
 ; das rückgängig zu machen; length baut gar keine Liste, sondern gibt
 ; einfach seinen Akkumulator zurück.
-(00001001 length-onto
-  (00001000 (values acc)
-    (00000111
-      ((00000010 values) acc)
-      (t (length-onto (00000110 values) (00001100 acc 1))))))
+(0011 length-onto
+  (0010 (values acc)
+    (110
+      ((010 values) acc)
+      (t (length-onto (011 values) (01010 acc 1))))))
 
-(00001001 length
-  (00001000 (values)
+(0011 length
+  (0010 (values)
     (length-onto values 0)))
 
-(00001001 reverse-onto
-  (00001000 (values acc)
-    (00000111
-      ((00000010 values) acc)
-      (t (reverse-onto (00000110 values) (00000100 (00000101 values) acc))))))
+(0011 reverse-onto
+  (0010 (values acc)
+    (110
+      ((010 values) acc)
+      (t (reverse-onto (011 values) (111 (100 values) acc))))))
 
-(00001001 reverse
-  (00001000 (values)
-    (reverse-onto values (00000001 ()))))
+(0011 reverse
+  (0010 (values)
+    (reverse-onto values (001 ()))))
 
 ; (reverse-onto (reverse left) right): reversing left first and then
 ; consing it back onto right, one element at a time, rebuilds
@@ -151,36 +151,36 @@
 ; korrekter Reihenfolge wieder auf — zwei endrekursive Durchläufe statt
 ; eines Nicht-Tail-Durchlaufs, ein kleiner Mehraufwand für ein
 ; Rust-Stack-sicheres append.
-(00001001 append
-  (00001000 (left right)
+(0011 append
+  (0010 (left right)
     (reverse-onto (reverse left) right)))
 
-(00001001 map-onto
-  (00001000 (f values acc)
-    (00000111
-      ((00000010 values) (reverse acc))
-      (t (map-onto f (00000110 values) (00000100 (f (00000101 values)) acc))))))
+(0011 map-onto
+  (0010 (f values acc)
+    (110
+      ((010 values) (reverse acc))
+      (t (map-onto f (011 values) (111 (f (100 values)) acc))))))
 
-(00001001 map
-  (00001000 (f values)
-    (map-onto f values (00000001 ()))))
+(0011 map
+  (0010 (f values)
+    (map-onto f values (001 ()))))
 
-(00001001 filter-onto
-  (00001000 (predicate values acc)
-    (00000111
-      ((00000010 values) (reverse acc))
-      ((predicate (00000101 values)) (filter-onto predicate (00000110 values) (00000100 (00000101 values) acc)))
-      (t (filter-onto predicate (00000110 values) acc)))))
+(0011 filter-onto
+  (0010 (predicate values acc)
+    (110
+      ((010 values) (reverse acc))
+      ((predicate (100 values)) (filter-onto predicate (011 values) (111 (100 values) acc)))
+      (t (filter-onto predicate (011 values) acc)))))
 
-(00001001 filter
-  (00001000 (predicate values)
-    (filter-onto predicate values (00000001 ()))))
+(0011 filter
+  (0010 (predicate values)
+    (filter-onto predicate values (001 ()))))
 
-(00001001 reduce
-  (00001000 (f acc values)
-    (00000111
-      ((00000010 values) acc)
-      (t (reduce f (f acc (00000101 values)) (00000110 values))))))
+(0011 reduce
+  (0010 (f acc values)
+    (110
+      ((010 values) acc)
+      (t (reduce f (f acc (100 values)) (011 values))))))
 
 ; `let` desugars to an immediately-invoked `lambda`: `(let ((x 1) (y 2)) body)`
 ; expands to `((lambda (x y) body) 1 2)` — the classic trick, same shape as
@@ -217,8 +217,8 @@
 ; könnte. Für eine Folge von Ausdrücken genauso einpacken, wie es der
 ; Rest dieses Codes bereits tut — `(let (...) ((lambda () ausdruck1 ausdruck2)))`.
 (00001010 let (bindings body)
-  (00000100 (list (00000001 lambda) (map (00001000 (binding) (00000101 binding)) bindings) body)
-        (map (00001000 (binding) (second binding)) bindings)))
+  (111 (list (001 lambda) (map (0010 (binding) (100 binding)) bindings) body)
+        (map (0010 (binding) (second binding)) bindings)))
 
 ; `let*` is `let` with sequential (not parallel) dependency: each binding's
 ; value expression can see every binding before it. Expands recursively —
@@ -277,14 +277,14 @@
 ; ein Nicht-Atom untergeschoben werden kann, wie es `var?` und `unify` in
 ; lib/unify.my anfangs passieren konnte (der dabei gefangene Bug steht im
 ; Header-Kommentar dieser Datei).
-(00001001 equal?
-  (00001000 (a b)
-    (00000111
-      ((00000010 a) (00000111 ((00000010 b) (00000011 a b)) (t (00000001 ()))))
-      ((00000010 b) (00000001 ()))
-      (t (00000111
-           ((equal? (00000101 a) (00000101 b)) (equal? (00000110 a) (00000110 b)))
-           (t (00000001 ())))))))
+(0011 equal?
+  (0010 (a b)
+    (110
+      ((010 a) (110 ((010 b) (101 a b)) (t (001 ()))))
+      ((010 b) (001 ()))
+      (t (110
+           ((equal? (100 a) (100 b)) (equal? (011 a) (011 b)))
+           (t (001 ())))))))
 
 ; nth/member?/assoc (G5 test: already expressible via existing means?)
 ; — yes, same recursive-list-walk shape as length/reverse above.
@@ -302,40 +302,40 @@
 ; спекулятивна прогалина. Узагальнений assoc тут також збігається з
 ; формою, яку lib/meta-eval.my's власний env-lookup уже вручну пише для
 ; свого специфічного випадку asoc-списку (symbol . value).
-(00001001 nth
-  (00001000 (i lst)
-    (00000111
-      ((00000011 i 0) (00000101 lst))
-      (t (nth (00001101 i 1) (00000110 lst))))))
+(0011 nth
+  (0010 (i lst)
+    (110
+      ((101 i 0) (100 lst))
+      (t (nth (01011 i 1) (011 lst))))))
 
-(00001001 member?
-  (00001000 (item lst)
-    (00000111
-      ((00000010 lst) (00000001 ()))
-      ((equal? item (00000101 lst)) t)
-      (t (member? item (00000110 lst))))))
+(0011 member?
+  (0010 (item lst)
+    (110
+      ((010 lst) (001 ()))
+      ((equal? item (100 lst)) t)
+      (t (member? item (011 lst))))))
 
-(00001001 assoc
-  (00001000 (key alist)
-    (00000111
-      ((00000010 alist) (00000001 ()))
-      ((equal? key (00000101 (00000101 alist))) (00000101 alist))
-      (t (assoc key (00000110 alist))))))
+(0011 assoc
+  (0010 (key alist)
+    (110
+      ((010 alist) (001 ()))
+      ((equal? key (100 (100 alist))) (100 alist))
+      (t (assoc key (011 alist))))))
 
 (00001010 let* (bindings body)
-  (00000111
-    ((00000010 bindings) body)
+  (110
+    ((010 bindings) body)
     (t
      ; Build the recursive expansion from the primitive tree substrate only.
      ; This keeps let* semantics in Lisp while allowing generic macro
      ; frontends to execute the law without importing the higher-level list
      ; helper as host/compiler semantic authority.
-     (00000100 (00000001 let)
-           (00000100 (00000100 (00000101 bindings) (00000001 ()))
-                 (00000100 (00000100 (00000001 let*)
-                             (00000100 (00000110 bindings)
-                                   (00000100 body (00000001 ()))))
-                       (00000001 ())))))))
+     (111 (001 let)
+           (111 (111 (100 bindings) (001 ()))
+                 (111 (111 (001 let*)
+                             (111 (011 bindings)
+                                   (111 body (001 ()))))
+                       (001 ())))))))
 
 ; string-length/string-empty?/string-prefix?/string-contains? (PLAN.md
 ; item 14, item 20's G5 audit test applied live) — none of these need a
@@ -356,30 +356,30 @@
 ; лише по рядку, не по ланцюжку пар. string-append (справді невиразний
 ; так само — нічого тут не може побудувати новий об'єднаний рядок)
 ; лишається в Rust — див. власний коментар у special_forms.rs, чому.
-(00001001 string-empty?
-  (00001000 (s) (00000011 s "")))
+(0011 string-empty?
+  (0010 (s) (101 s "")))
 
-(00001001 string-length
-  (00001000 (s)
-    (00000111
+(0011 string-length
+  (0010 (s)
+    (110
       ((string-empty? s) 0)
-      (t (00001100 1 (string-length (01000000 s)))))))
+      (t (01010 1 (string-length (110011101 s)))))))
 
-(00001001 string-prefix?
-  (00001000 (prefix s)
-    (00000111
+(0011 string-prefix?
+  (0010 (prefix s)
+    (110
       ((string-empty? prefix) t)
-      ((string-empty? s) (00000001 ()))
-      ((00000011 (00111111 prefix) (00111111 s))
-       (string-prefix? (01000000 prefix) (01000000 s)))
-      (t (00000001 ())))))
+      ((string-empty? s) (001 ()))
+      ((101 (110101011 prefix) (110101011 s))
+       (string-prefix? (110011101 prefix) (110011101 s)))
+      (t (001 ())))))
 
-(00001001 string-contains?
-  (00001000 (needle s)
-    (00000111
+(0011 string-contains?
+  (0010 (needle s)
+    (110
       ((string-prefix? needle s) t)
-      ((string-empty? s) (00000001 ()))
-      (t (string-contains? needle (01000000 s))))))
+      ((string-empty? s) (001 ()))
+      (t (string-contains? needle (110011101 s))))))
 
 ; `symbol?` moved out of Rust after `write-to-string` made the distinction
 ; expressible without exceptions: among atoms, exactly a Symbol is identical
@@ -390,14 +390,14 @@
 ; відновленому з його канонічного тексту. `atom` не допускає пари до `eq`.
 ; `symbol?` wurde aus Rust verschoben: Unter Atomen ist nur ein Symbol mit dem
 ; aus seinem kanonischen Text rekonstruierten Symbol identisch; `atom` schützt `eq`.
-(00001001 symbol?
-  (00001000 (value)
-    (00000111
-      ((00000010 value)
-       (00000111
-         ((00000011 value (01000011 (01001100 value))) t)
-         (t (00000001 ()))))
-      (t (00000001 ())))))
+(0011 symbol?
+  (0010 (value)
+    (110
+      ((010 value)
+       (110
+         ((101 value (11101101 (11110100 value))) t)
+         (t (001 ()))))
+      (t (001 ())))))
 
 ; quotient/mod (G5 test: already expressible via existing means?) — yes.
 ; Unlike bitwise operations (AND/OR/XOR/shift — no primitive exposes a
@@ -453,11 +453,11 @@
 ; відняти, повторити) — стандартний трюк бінарного довгого ділення,
 ; глибина рекурсії O(log(a/b)) як у `largest-chunk`, так і в самому
 ; `quotient`, перевірено на 13-розрядному діленому без проблем.
-(00001001 largest-chunk
-  (00001000 (a b chunk mult)
-    (00000111
-      ((00011010 a (00001100 chunk chunk)) (00000100 chunk mult))
-      (t (largest-chunk a b (00001100 chunk chunk) (00001100 mult mult))))))
+(0011 largest-chunk
+  (0010 (a b chunk mult)
+    (110
+      ((11010 a (01010 chunk chunk)) (111 chunk mult))
+      (t (largest-chunk a b (01010 chunk chunk) (01010 mult mult))))))
 
 ; `b = 0` used to hang forever: `largest-chunk` starts doubling from
 ; `chunk = b`, and `0 + 0 = 0` never grows, so its "does chunk still
@@ -476,17 +476,17 @@
 ; нуль (`ErrorKind::InvalidForm`) — маршрутизація через нього тут
 ; перевикористовує цю реальну, вже перевірену помилку замість
 ; вигадування другої, іншої для того самого стану.
-(00001001 quotient
-  (00001000 (a b)
-    (00000111
-      ((00000011 b 0) (00001111 a b))
-      ((00011010 a b) 0)
+(0011 quotient
+  (0010 (a b)
+    (110
+      ((101 b 0) (11110110 a b))
+      ((11010 a b) 0)
       (t (let ((chunk+mult (largest-chunk a b b 1)))
-           (00001100 (00000110 chunk+mult) (quotient (00001101 a (00000101 chunk+mult)) b)))))))
+           (01010 (011 chunk+mult) (quotient (01011 a (100 chunk+mult)) b)))))))
 
-(00001001 mod
-  (00001000 (a b)
-    (00001101 a (00001110 b (quotient a b)))))
+(0011 mod
+  (0010 (a b)
+    (01011 a (10110 b (quotient a b)))))
 
 ; `<=` and `>=` need no Rust dispatch: the strict comparisons plus equality
 ; already preserve exact/inexact numeric semantics, while ordinary recursion
@@ -498,32 +498,32 @@
 ; `<=` und `>=` brauchen keinen Rust-Dispatch: strikte Vergleiche und Gleichheit
 ; reichen, gewöhnliche Rekursion liefert die Verkettung. Der Pflichtparameter
 ; erhält den Arity-Fehler bei null Argumenten; ein Argument ist trivial geordnet.
-(00001001 nondecreasing-from?
-  (00001000 (current remaining)
-    (00000111
-      ((00000010 remaining) t)
-      ((00011010 current (00000101 remaining))
-       (nondecreasing-from? (00000101 remaining) (00000110 remaining)))
-      ((00011100 current (00000101 remaining))
-       (nondecreasing-from? (00000101 remaining) (00000110 remaining)))
-      (t (00000001 ())))))
+(0011 nondecreasing-from?
+  (0010 (current remaining)
+    (110
+      ((010 remaining) t)
+      ((11010 current (100 remaining))
+       (nondecreasing-from? (100 remaining) (011 remaining)))
+      ((11110111 current (100 remaining))
+       (nondecreasing-from? (100 remaining) (011 remaining)))
+      (t (001 ())))))
 
-(00001001 nonincreasing-from?
-  (00001000 (current remaining)
-    (00000111
-      ((00000010 remaining) t)
-      ((00011011 current (00000101 remaining))
-       (nonincreasing-from? (00000101 remaining) (00000110 remaining)))
-      ((00011100 current (00000101 remaining))
-       (nonincreasing-from? (00000101 remaining) (00000110 remaining)))
-      (t (00000001 ())))))
+(0011 nonincreasing-from?
+  (0010 (current remaining)
+    (110
+      ((010 remaining) t)
+      ((11011 current (100 remaining))
+       (nonincreasing-from? (100 remaining) (011 remaining)))
+      ((11110111 current (100 remaining))
+       (nonincreasing-from? (100 remaining) (011 remaining)))
+      (t (001 ())))))
 
-(00001001 <=
-  (00001000 (first . remaining)
+(0011 <=
+  (0010 (first . remaining)
     (nondecreasing-from? first remaining)))
 
-(00001001 >=
-  (00001000 (first . remaining)
+(0011 >=
+  (0010 (first . remaining)
     (nonincreasing-from? first remaining)))
 
 ; number->string (G5 test: already expressible via existing means?) —
@@ -543,20 +543,20 @@
 ; quotient/mod, та сама -onto-форма акумулятора, що й length-onto/
 ; reverse-onto вище, тож не має власної стелі розрядності. Обсяг:
 ; лише невід'ємні цілі, як і самі quotient/mod.
-(00001001 digit->string
-  (00001000 (d)
-    (nth d (00000001 ("0" "1" "2" "3" "4" "5" "6" "7" "8" "9")))))
+(0011 digit->string
+  (0010 (d)
+    (nth d (001 ("0" "1" "2" "3" "4" "5" "6" "7" "8" "9")))))
 
-(00001001 number->string-onto
-  (00001000 (n acc)
-    (00000111
-      ((00000011 n 0) acc)
-      (t (number->string-onto (quotient n 10) (00111010 (digit->string (mod n 10)) acc))))))
+(0011 number->string-onto
+  (0010 (n acc)
+    (110
+      ((101 n 0) acc)
+      (t (number->string-onto (quotient n 10) (110011110 (digit->string (mod n 10)) acc))))))
 
-(00001001 number->string
-  (00001000 (n)
-    (00000111
-      ((00000011 n 0) "0")
+(0011 number->string
+  (0010 (n)
+    (110
+      ((101 n 0) "0")
       (t (number->string-onto n "")))))
 
 ; -> / ->> (thread-first / thread-last macros) — express transformation pipelines
@@ -573,27 +573,27 @@
 ; -> / ->> (Threading-Makros) — drücken Transformations-Pipelines ohne tiefe
 ; Verschachtelung aus.
 (00001010 -> forms
-  (00000111
-    ((00000010 forms) (00000001 ()))
-    ((00000010 (00000110 forms)) (00000101 forms))
-    (t (let* ((x (00000101 forms))
-              (next (00000101 (00000110 forms)))
-              (rest (00000110 (00000110 forms)))
-              (step (00000111 ((00000010 next) (list next x))
-                          (t (00000100 (00000101 next) (00000100 x (00000110 next)))))))
-         (00000111
-           ((00000010 rest) step)
-           (t (00000100 (00000001 ->) (00000100 step rest))))))))
+  (110
+    ((010 forms) (001 ()))
+    ((010 (011 forms)) (100 forms))
+    (t (let* ((x (100 forms))
+              (next (100 (011 forms)))
+              (rest (011 (011 forms)))
+              (step (110 ((010 next) (list next x))
+                          (t (111 (100 next) (111 x (011 next)))))))
+         (110
+           ((010 rest) step)
+           (t (111 (001 ->) (111 step rest))))))))
 
 (00001010 ->> forms
-  (00000111
-    ((00000010 forms) (00000001 ()))
-    ((00000010 (00000110 forms)) (00000101 forms))
-    (t (let* ((x (00000101 forms))
-              (next (00000101 (00000110 forms)))
-              (rest (00000110 (00000110 forms)))
-              (step (00000111 ((00000010 next) (list next x))
+  (110
+    ((010 forms) (001 ()))
+    ((010 (011 forms)) (100 forms))
+    (t (let* ((x (100 forms))
+              (next (100 (011 forms)))
+              (rest (011 (011 forms)))
+              (step (110 ((010 next) (list next x))
                           (t (append next (list x))))))
-         (00000111
-           ((00000010 rest) step)
-           (t (00000100 (00000001 ->>) (00000100 step rest))))))))
+         (110
+           ((010 rest) step)
+           (t (111 (001 ->>) (111 step rest))))))))
