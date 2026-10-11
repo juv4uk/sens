@@ -345,7 +345,7 @@ def audit(root):
             v12_manifest = json.loads(v12_manifest_raw)
             v12_source_pin = v12_manifest["source"]
             v12_source_bytes = (root / v12_source_pin["path"]).read_bytes()
-            v12_suffix = rows[823:]
+            v12_suffix = rows[823:827]
             v12_claims = v12_manifest["candidates"]
             v12_good = (
                 v12_ref.get("previous_inventory") == "knowledge/d10-v11-semantic-inventory.json"
@@ -376,6 +376,52 @@ def audit(root):
                 )
             else:
                 errors.append("D10-V12-SOURCE-BATCH-SHA-OR-LAW-DRIFT")
+        # v13: verified archive of 70 standard-law DRAFTS; F2/F3 remain held.
+        if len(rows) > 827:
+            v13_hook = ptr.get("current_v13_standards_provisional_selection", {})
+            v13_pin = v13_hook.get("manifest", {})
+            v13_raw = (root / v13_pin["path"]).read_bytes()
+            v13_manifest = json.loads(v13_raw)
+            old_v12 = ptr.get("historical_v12_research_inventory", {})
+            v12_raw = (root / old_v12["path"]).read_bytes()
+            new_rows = rows[827:]
+            proofs = v13_manifest["candidates"]
+            author = v13_manifest["law_authors"]
+            author_raw = (root / author["path"]).read_bytes()
+            src = v13_manifest["catalog"]
+            src_raw = (root / src["path"]).read_bytes()
+            v13_good = (
+                v13_pin["git_blob"] == sha(v13_raw)
+                and old_v12["git_blob"] == sha(v12_raw)
+                and len(json.loads(v12_raw)["rows"]) == 827
+                and preserves_archived_prefix(rows, json.loads(v12_raw)["rows"])
+                and v13_manifest["previous"]["git_blob"] == sha(v12_raw)
+                and v13_hook["source"] == src
+                and v13_hook["authoring"] == author
+                and sha(src_raw) == src["git_blob"]
+                and sha(author_raw) == author["git_blob"]
+                and len(new_rows) == len(proofs) == 70
+                and all(
+                    x["stable_id"] == p["id"]
+                    and x["semantic_name"] == p["name"]
+                    and x["behavior"] == p["law"]
+                    and x["source_path"] == src["path"]
+                    and x["source_git_blob"] == src["git_blob"]
+                    and x["coordinate"] is None
+                    and x["ratified_resident"] is False
+                    and x["physical_t5_authorized"] is False
+                    and x["witness_independence"] == "PENDING"
+                    and p["F2"] == "HOLD_NOT_RUN"
+                    and p["F3"] == "HOLD_DEDUP_UNPROVEN"
+                    for x,p in zip(new_rows, proofs)
+                )
+            )
+            if v13_good:
+                source_review_exceptions.update(
+                    row["semantic_name"].upper() for row in new_rows
+                )
+            else:
+                errors.append("D10-V13-SOURCE-BATCH-SHA-OR-LAW-DRIFT")
         if sources_good and legacy_ok and v5_good:
             research_allocated=len(placed)-256
             source_review_exceptions |= all_review_names | v5_source_names
