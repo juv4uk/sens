@@ -5,6 +5,7 @@ on:
       - fix/5408-fasl-replay-20261011-gpt6
     paths:
       - .github/workflows/repair-5408-core4-fasl-replay.yml
+      - lib/core4.lisp
 permissions:
   contents: write
 jobs:
