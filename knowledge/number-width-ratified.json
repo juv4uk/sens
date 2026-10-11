@@ -114,5 +114,23 @@
     "float_rounding": false,
     "physical_composite_codec": "deferred",
     "external_substrates": "frozen"
+  },
+  "numeric_composition_transport": {
+    "status": "Core-only mechanical transport verified (not default .sens/T5 file authority)",
+    "date": "2026-10-11",
+    "core_frame": "additive previously-reserved TYPE_EXTENSION=11 / EXT=11 numeric composition subtype in existing binary_framing.rs; explicit gamma0(Dn width), shape bit, sign bit, exact n-bit magnitude, optional exact n-bit denominator; no new semantic function opcode",
+    "frame_adapters": "encode_numeric_value_frame + decode_numeric_value_frame; reject noncanonical zero, unreduced RATIO, unit denominator, missing payload or unknown Dn",
+    "physical_bytes": "encode_packed_numeric_value + decode_packed_numeric_value through existing PackedBitstream; exact meaningful bit length required and canonical zero slack",
+    "confirmed_domains": [
+      24,
+      48,
+      96,
+      192,
+      384
+    ],
+    "old_natural_frame_stable": true,
+    "legacy_unqualified_number_not_implicitly_admitted": true,
+    "physical_t5_program_numeric_composites": "deferred; current ternary transport and D2 physical reader remain D1-D9-only",
+    "ast_fasl_wire_expression_composites": "deferred; not a source-literal or new SENS callable"
   }
 }
