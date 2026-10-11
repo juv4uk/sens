@@ -409,7 +409,7 @@
         "scripts/check-d10-proposal-ledger.py --self-test",
         "scripts/check_d10_unique_bounded_modular_lift.py"
       ],
-      "source_provenance_note": "Actual historical canonical inventory.sources remained unchanged in 651→653; the law's file remains pinned under evidence[]. No source-tail event occurred."
+      "source_provenance_note": "The selected semantic law is evidenced in evidence[]; historical canonical inventory.sources was unchanged across this append. No source was appended to inventory.sources in this transition; preserve immutable resulting Git blob SHA."
     },
     {
       "id": "d10.math.prefix-free-kraft-certificate.current-main.20261011",
@@ -437,7 +437,7 @@
         "scripts/check_d10_selection_transition_history.py --self-test",
         "scripts/check-d10-proposal-ledger.py --self-test"
       ],
-      "source_provenance_note": "Actual historical canonical inventory.sources remained unchanged in 651→653; the law's file remains pinned under evidence[]. No source-tail event occurred."
+      "source_provenance_note": "The selected semantic law is evidenced in evidence[]; historical canonical inventory.sources was unchanged across this append. No source was appended to inventory.sources in this transition; preserve immutable resulting Git blob SHA."
     },
     {
       "id": "d10.math.finite-code-unique-decipherability.after-653.20261011",
