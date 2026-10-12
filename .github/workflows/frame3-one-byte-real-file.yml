@@ -35,7 +35,10 @@ jobs:
         run: |
           set -euo pipefail
           mkdir -p "$RUNNER_TEMP/frame3-proof"
-          cargo test --locked -p sens frame3_micro_enumerator::tests -- --nocapture             2>&1 | tee "$RUNNER_TEMP/frame3-proof/enumerator-tests.log"
+          {
+            cargo test --locked -p sens frame3_micro_v5::tests -- --nocapture
+            cargo test --locked -p sens frame3_micro_enumerator::tests -- --nocapture
+          } 2>&1 | tee "$RUNNER_TEMP/frame3-proof/enumerator-tests.log"
       - name: Encode, decode, and execute with real Rust SENS oracle
         shell: bash
         run: |
