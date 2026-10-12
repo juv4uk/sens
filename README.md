@@ -61,8 +61,10 @@ Frame3-Micro (F3M) мають відновити ті самі точні дом
 |---|---|---|
 | **T5** | `.sens` | загальний канонічний фізичний transport |
 | **Frame3 Carrier (F3C)** | `.senc` | явно вибраний компактний carrier для дуже малих програм; історичні CLI/докази ще використовують коротку назву `F3` |
-| **Frame3-Micro (F3M)** | `.f3m` | bounded micro-profile із зовнішньо відомим профілем; для доведеного класу справжня виконувана програма SENS може займати **рівно 1 байт** |
+| **Frame3-Micro (F3M)** | `.f3m` | bounded dense micro-rank: сімейство вибирається явно, а профіль визначає **довжина 1/2/3 байти**; без внутрішньої magic/version мітки |
 | **Envelope E1/E2/E3** | research carriers | самодостатні metadata-heavy оболонки, історично `S3/v1-v3`; це **не версії Frame3** |
+
+Повна нормативна матриця режимів: [**режими проєкту SENS**](docs/project-modes-2026-10-12.uk.md).
 
 Однобайтовий доказ не є моделлю іншої семантики: committed файл
 `research/framed3/fixtures/car-cons-one-nil.f3m` містить **один байт
@@ -77,9 +79,11 @@ Frame3-Micro (F3M) мають відновити ті самі точні дом
 відхиляються fail-closed. Вміст байтів не sniff-иться й не перемикає профіль,
 тому всі 8/16/24 біти лишаються програмному рангу. Чинний dense F3M-1
 використовує **всі 256/256 кодів** як унікальні замкнені виконувані програми;
-F3M-2/F3M-3 уже
-мають визначений length-route, але їх semantic rank/admission ще потребує
-окремого exhaustive proof. Деталі:
+F3M-2 займає наступні **65 536** global ranks і має exhaustive payload roundtrip;
+F3M-3 займає наступні **16 777 216** ranks, має real-evaluator witnesses,
+DP-доказ першого 6/6-capability коду `16 3C 63` та exhaustive-пошук останньої
+64K-сторінки з переможцем `FF FB 37`. Повний evaluator sweep усіх 16M F3M-3
+програм лишається окремим proof gate. Деталі:
 [профілі F3M за довжиною](docs/frame3-micro-length-profiles-2026-10-12.uk.md) ·
 [назви фізичних кодеків](docs/codec-naming-2026-10-12.uk.md).
 
