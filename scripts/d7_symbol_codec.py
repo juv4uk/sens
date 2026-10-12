@@ -21,25 +21,43 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 SOURCE = ROOT / "knowledge" / "d7-ratified.json"
-# Canonical D7 glyphs are Ukrainian-keyboard symbols only.
-# IAST is Sanskrit transliteration, NEVER English.
+# Ukrainian glyphs are keyboard characters; IAST is Sanskrit, NEVER English.
+# English is a candidate sound projection cross-checked against Shiva; no new D7 cells.
 LAYOUTS = {"ук": "uk", "укр": "uk", "sym": "uk",
            "san": "iast", "sa-iast": "iast", "sa-deva": "deva",
-           "sa-slp1": "slp1", "slp1": "slp1", "en": None}
+           "sa-slp1": "slp1", "slp1": "slp1", "en": "en", "en-ipa": "en-ipa"}
 # Microsoft Ukrainian (Enhanced) KBDUR1 layout; one physical symbol per key.
-# Structural space, parentheses and dot are owned by D2, not Text7/D7.
+# A glyph is text DATA inside a D7 text record; parser context owns D2.
+# Space and period have pre-existing OWNER-RATIFIED D7 text cells.
 UK_LETTERS = "абвгґдеєжзиіїйклмнопрстуфхцчшщьюя"
 UK_KEYBOARD = frozenset(
     UK_LETTERS + UK_LETTERS.upper() + "0123456789" +
-    "'!\"№;%:?*_-+=/\\,₴"
+    "'!\"№;%:?*_-+=/\\,₴ ."
 )
 D2_OWNED = frozenset({
-    "sign.space", "sign.newline", "sign.tab",
-    "sign.left-paren", "sign.right-paren", "sign.dot",
+    "sign.newline", "sign.tab",
+    "sign.left-paren", "sign.right-paren",
 })
 CAPITAL = "0100010"  # #3572: text modifier, not a visible glyph.
 BITS7 = re.compile(r"[01]{7}\Z")
 DEVA_DIGITS = "०१२३४५६७८९"
+
+# Donor juv4uk/shiva-sutras, prototype/upc7_layouts.py; English profile
+# supported by extensions/english-sarvam.yaml and
+# english-claude-sarvam.yaml. Keys are already ratified SENS D7 ROLES,
+# NEVER donor numeric cells. /b ɡ m ŋ/ cross-source exact; /k p/ differ
+# in phonemic aspiration; /j/ is system vs segment equivalent.
+# The English layouts are research views, NOT a new owner ratification.
+EN_RESEARCH = {
+    "varga.K.voiceless": ("k", "k", "candidate"),
+    "varga.K.voiced": ("g", "ɡ", "cross-source"),
+    "varga.K.nasal": (None, "ŋ", "cross-source"),
+    "varga.P.voiceless": ("p", "p", "candidate"),
+    "varga.P.voiced": ("b", "b", "cross-source"),
+    "varga.P.nasal": ("m", "m", "cross-source"),
+    "non-varga.C.primary-sonorant": ("y", "j", "candidate"),
+}
+EN_TEXT_SIGNS = frozenset({"sign.space", "sign.dot"})
 
 
 class D7CodecError(ValueError):
@@ -48,8 +66,17 @@ class D7CodecError(ValueError):
 
 def _surface_glyph(row: dict, layout: str) -> str | None:
     source = LAYOUTS[layout]
-    if row["report_name"] in D2_OWNED or source is None:
+    role = row["report_name"]
+    if role in D2_OWNED:
         return None
+    if layout in ("en", "en-ipa"):
+        if role in EN_RESEARCH:
+            roman, ipa, _status = EN_RESEARCH[role]
+            return roman if layout == "en" else ipa
+        if role not in EN_TEXT_SIGNS:
+            return None
+        # Reuse the owner's text-glyph mapping; no new identity or code.
+        source = "iast"
     value = row.get("projection", {}).get(source)
     if not value:
         kind = row["semantic_role"]
