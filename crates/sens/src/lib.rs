@@ -252,8 +252,8 @@ pub use ternary_transport::{
 };
 pub use source_packing::{
     append_binary_source_word, pack_binary_source_tokens, pack_binary_source_words,
-    packed_transport_accounting, semantic_source_bits, unpack_binary_source_words,
-    PackedTransportAccounting,
+    pack_domain_coordinates, packed_transport_accounting, semantic_source_bits,
+    unpack_binary_source_words, unpack_domain_coordinates, PackedTransportAccounting,
 };
 pub use text7::{Text7, Text7CellError, Text7W7Error, Text7WireError, Text7WordError};
 pub use text7_projection::{
