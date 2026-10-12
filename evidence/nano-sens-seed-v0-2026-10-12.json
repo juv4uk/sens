@@ -3,37 +3,79 @@
   "status": "PASS_MEASURED_COMPONENT_BASELINE_SEED_CLOSURE_NOT_YET_MEASURED",
   "measurement": {
     "schema": "nano-sens-size-report/1",
-    "report_sha256": "dd4473beb15d6bba6f8cabc12b4ae7885d388231b70750f4fdfc29bb0f18eca3",
+    "report_sha256": "dccd8748fcb47eb79ba10f22901534feeb30a7931f8310fedb95c0cf339f6aca",
     "two_clean_runs": 2,
     "report_byte_identical_across_runs": true,
     "two_run_proof_schema": "nano-sens-two-clean-runs-proof/1",
-    "two_run_proof_sha256": "2e3110b5033ecd8927e35fe7540ee2e0b6cbff773c198d58a7bc30aa11aa615e",
-    "compiler_lineage_report_sha256": "1152eb6247561a595375600f02653503747b8b9542a8c6f9eaabb3316d3c939d"
+    "two_run_proof_sha256": "ee35d998815ab467e10e8a1c6d2511ca723fa3ea095531919ae90ca4d6b05c78",
+    "two_run_proof_artifact_zip_sha256": "sha256:737aeffd1e0fa3d0f782c5d5379cc5ac01778c2eb8bf9891f25c695669acda7f",
+    "compiler_lineage_report_sha256": "5164895e343525c468a4b8e6eb0e4d21ab083ed2dacc6f39158f20aad8d2aa54",
+    "latest_runtime_open_path_census": {
+      "schema": "nano-sens-runtime-file-open-path-census/1",
+      "status": "OBSERVED_SUCCESSFUL_FILE_OPENS_NOT_A_MINIMUM_CLOSURE_PROOF",
+      "two_independent_runs_same_path_set": true,
+      "unique_successful_repo_path_files_each_run": 562,
+      "path_set_sha256_each_run": "53320597b6b55667498bbc8f7c2b0bee7a6ea05b723c9385e339f5cff8ec87ad",
+      "census_json_sha256_by_clean_run": {
+        "clean_run_1": "3bc95e8af2874ac0dceb8891bc45edab1c7df9d6e112bfc7fc359669f7bc52f7",
+        "clean_run_2": "48ca54b99470c3188548383851b5cd09327cb58643efd51213f54c25fa68364e"
+      },
+      "interpretation": "Same observed repository-path set across both clean runs; not a proof that unobserved files or external dependencies are unnecessary."
+    },
+    "latest_cargo_graphs": {
+      "byte_identical_across_runs": true,
+      "cml_tree_sha256": "fe4e29d9723e1c31a598d5905024670defad2a4ffce744cd099b84d95c285c29",
+      "sens_xtask_tree_sha256": "a11ec08911b104cfb31211d4f82459711d9b5ae8788f043bd8ce60baaff4736a",
+      "lockfiles_unchanged_under_locked_commands": true
+    }
   },
   "run": {
     "repository": "juv4uk/cml",
     "branch": "master",
-    "head_sha": "9b852bc70b3d529933b85dd592f301e0b1e9e37d",
-    "workflow_run_id": 38182268999,
-    "workflow_url": "https://github.com/juv4uk/cml/actions/runs/38182268999",
-    "state": "both independent matrix jobs and comparison job PASS",
+    "head_sha": "ec4ba010cebd9fdc37b39224142dcac3ee907cfe",
+    "workflow_run_id": 38187859376,
+    "workflow_url": "https://github.com/juv4uk/cml/actions/runs/38187859376",
+    "state": "PASS: both independent clean-run jobs and comparison job",
+    "clean_runs": 2,
+    "tests_per_run": {
+      "passed": 189,
+      "failed": 0
+    },
     "artifact_retention_days": 30,
-    "artifacts_expire_at_utc": "2026-11-10T22:55:24Z"
+    "artifacts_expire_at_utc": "2026-11-11T00:25:56Z",
+    "artifact_expiry_by_role": {
+      "clean_run_1_zip": {
+        "artifact_id": 11720512293,
+        "digest": "sha256:3e9ccf25e0c255a63bbe6cffc6d3187af753682a049deebda1dcd964f40ff452",
+        "expires_at_utc": "2026-11-11T00:25:56Z"
+      },
+      "clean_run_2_zip": {
+        "artifact_id": 11720585831,
+        "digest": "sha256:09ed42d2ff460e7c4e23ef75b02694b9dff6b22c279ad43a9bcdc20db598d05c",
+        "expires_at_utc": "2026-11-11T00:26:07Z"
+      },
+      "two_clean_run_proof": {
+        "artifact_id": 11719663973,
+        "digest": "sha256:737aeffd1e0fa3d0f782c5d5379cc5ac01778c2eb8bf9891f25c695669acda7f",
+        "expires_at_utc": "2026-11-11T00:26:20Z"
+      }
+    }
   },
   "source_pins": {
     "sens_submodule_sha": "d0787a40fcea36501747732aa61b6de19fe29c70",
     "compiler_nucleus_sha256": "34863f297e0f4f6f21c30dffc34a8bb85822015a89d13028c700b5a679f61b7e",
     "language_contract_sha256": "177d532d24c1f0738a934152f65c7f01f90b5593c8dbfe519e31148c0aa80c40",
     "structural_law_projection_sha256": "3ce5bb4e042bfec446199a9c77787d0a022109e9a6d6442a4f93b50f68e34e9a",
-    "measurement_tools_sens_commit": "ca9babfec9d20259a206153476d7717f91be3bb6"
+    "measurement_tools_sens_commit": "ca9babfec9d20259a206153476d7717f91be3bb6",
+    "latest_cml_source_sha": "ec4ba010cebd9fdc37b39224142dcac3ee907cfe"
   },
   "seed_v0": {
     "role": "Measured executable component only: CML Rust lib-test bootstrap runner. The runner dynamically invokes cargo run -p xtask -- compiler-export inside the pinned SENS checkout; therefore this executable's size alone is not the complete operational seed-input closure and must not be reported as total seed bytes.",
     "file_name": "seed-v0-c0-runner.bin",
-    "sha256": "d45e09837a10103879c3d405c54ddf53ee2b1376bce969ccd20316ece4065be4",
-    "on_disk_file_bytes": 34580696,
-    "loadable_segment_file_bytes": 6038608,
-    "executable_code_section_bytes": 4145007,
+    "sha256": "6fbbc819eac32253d9eadb5e1dc8e80295bdb0bde9a285076edd8d7fc9e40eb3",
+    "on_disk_file_bytes": 34623904,
+    "loadable_segment_file_bytes": 6042632,
+    "executable_code_section_bytes": 4147007,
     "format": "ELF",
     "section_measurement": "GNU readelf -W -l/-S",
     "component_class": "runner-executable-component",
@@ -99,13 +141,14 @@
       "status": "MEASURED_SUBSET_NOT_FULL_SEED_TOTAL",
       "cml_runner": {
         "repository": "juv4uk/cml",
-        "source_commit": "100f30174f728cf2564ceeb2348f58bd8ac7dd06",
-        "workflow_run": "https://github.com/juv4uk/cml/actions/runs/38186932277",
+        "source_commit": "ec4ba010cebd9fdc37b39224142dcac3ee907cfe",
+        "workflow_run": "https://github.com/juv4uk/cml/actions/runs/38187859376",
+        "workflow_run_id": 38187859376,
         "runner_sha256": "6fbbc819eac32253d9eadb5e1dc8e80295bdb0bde9a285076edd8d7fc9e40eb3",
         "on_disk_bytes": 34623904,
         "loadable_segment_file_bytes": 6042632,
         "executable_code_section_bytes": 4147007,
-        "role": "Latest independent locked two-clean-run checkpoint, CML source commit 100f30174f728cf2564ceeb2348f58bd8ac7dd06; runner hash/size unchanged vs immediately previous source checkpoint; do not infer optimization across source commits."
+        "role": "Freshly rebuilt CML lib-test bootstrap runner from the current measured checkpoint; component size only, not a minimum-seed claim."
       },
       "sens_runtime_build_inputs": {
         "repository": "juv4uk/sens",
@@ -116,7 +159,7 @@
       "cml_runtime_file_inputs": [
         {
           "repository": "juv4uk/cml",
-          "commit": "3320fe3b00a4a099ecb9ff06e22e0be2b1fee499",
+          "commit": "ec4ba010cebd9fdc37b39224142dcac3ee907cfe",
           "path": "contracts/machine-lowering-boundary.lisp",
           "git_blob_sha1": "e3e89721863142ff03689086c0985552eed5cb39",
           "on_disk_bytes": 1129
@@ -144,37 +187,46 @@
             "failed": 0
           }
         },
-        "identical_size_report_sha256": "5e42feee14a65d33e8e909dbb384276b5255591a7233bac09efbe37fc9635c72",
+        "identical_size_report_sha256": "dccd8748fcb47eb79ba10f22901534feeb30a7931f8310fedb95c0cf339f6aca",
+        "lineage_report_sha256": "5164895e343525c468a4b8e6eb0e4d21ab083ed2dacc6f39158f20aad8d2aa54",
         "active_cargo_graphs_byte_identical": true,
         "cml_graph_sha256": "fe4e29d9723e1c31a598d5905024670defad2a4ffce744cd099b84d95c285c29",
         "sens_xtask_graph_sha256": "a11ec08911b104cfb31211d4f82459711d9b5ae8788f043bd8ce60baaff4736a",
         "lockfiles_unchanged_under_locked_graph_commands": true,
-        "proof_artifact_id": 11719573111,
-        "proof_artifact_sha256": "sha256:b3c0eb3f5c8114331934b8070da126f9de49ec38eaf84d1aba34a9b91d203302",
-        "proof_expires_at": "2026-11-11T00:10:35Z",
+        "proof_artifact_id": 11719663973,
+        "proof_artifact_sha256": "sha256:737aeffd1e0fa3d0f782c5d5379cc5ac01778c2eb8bf9891f25c695669acda7f",
+        "proof_artifact_expires_at": "2026-11-11T00:26:20Z",
         "two_run_artifacts": [
           {
             "run": 1,
-            "id": 11719922452,
-            "sha256": "sha256:3e124c9832906c9474ab82a9237b9865c2a7e34f44bce1f38e6808158818db92",
-            "expires_at": "2026-11-11T00:10:17Z"
+            "id": 11720512293,
+            "sha256": "sha256:3e9ccf25e0c255a63bbe6cffc6d3187af753682a049deebda1dcd964f40ff452",
+            "expires_at": "2026-11-11T00:25:56Z"
           },
           {
             "run": 2,
-            "id": 11720415915,
-            "sha256": "sha256:109f1d0cfeafc9de7046a726eea1c7296fa2111f4ba64afe3a13d1a4e2ef788b",
-            "expires_at": "2026-11-11T00:10:20Z"
+            "id": 11720585831,
+            "sha256": "sha256:09ed42d2ff460e7c4e23ef75b02694b9dff6b22c279ad43a9bcdc20db598d05c",
+            "expires_at": "2026-11-11T00:26:07Z"
           }
-        ],
-        "lineage_report_sha256": "59ed91c8401d6f2e2a418e77dda40e6470ab03bff965bf417b3e1a3c6a6e1ec5"
+        ]
+      },
+      "runtime_open_path_census": {
+        "status": "OBSERVATION_ONLY_NOT_MINIMUM_CLOSURE_PROOF",
+        "unique_successful_repo_path_files_each_run": 562,
+        "path_set_sha256_each_run": "53320597b6b55667498bbc8f7c2b0bee7a6ea05b723c9385e339f5cff8ec87ad",
+        "all_vendor_paths_observed": 444,
+        "all_vendor_bytes_at_trace_end": 4940765,
+        "active_seven_dependency_package_files": 296,
+        "active_seven_dependency_package_bytes": 4419723,
+        "vendor_discovery_metadata_files": 148,
+        "vendor_discovery_metadata_bytes": 521042
       },
       "exclusions": [
         "not the whole-chain seed total and not a claim of minimality",
         "the 7 vendored third-party crates (296 files / 4,419,723 bytes) are external dependencies and separately inventoried",
-        "full Git metadata is measured separately; the minimal refs/objects needed by git rev-parse are not derived",
-        "CML outer registry/cache package source bytes are external and not measured",
-        "rustc/Cargo/GCC/assembler/linker/OS/shared libraries and other external dependencies remain separately classified",
-        "not-yet-enumerated or proven-minimal runtime/build paths may increase the required set"
+        "full Git metadata snapshots are measured separately; the minimum Git object/ref subset is not derived",
+        "toolchain, OS, shared libraries and remaining unenumerated runtime/build paths remain outside or unclosed"
       ]
     }
   },
@@ -408,20 +460,25 @@
       "observed_runtime_input_subset": {
         "schema": "nano-sens-vendor-runtime-observation/1",
         "status": "PASS_TWO_TRACE_RUNS; OBSERVED_SUBSET_NOT_MINIMUM_PRUNE_PROOF",
-        "cml_source_commit": "e6e0a601c4c2c8398e7ed8f6e460e594b3a02559",
+        "cml_source_commit": "ec4ba010cebd9fdc37b39224142dcac3ee907cfe",
         "sens_source_commit": "d0787a40fcea36501747732aa61b6de19fe29c70",
-        "workflow_run": "https://github.com/juv4uk/cml/actions/runs/38187252311",
+        "workflow_run": "https://github.com/juv4uk/cml/actions/runs/38187859376",
         "observed_vendor_file_paths": 444,
         "observed_vendor_bytes": 4940765,
         "seven_selected_package_files": 296,
         "seven_selected_package_bytes": 4419723,
         "other_74_vendor_roots_metadata_files": 148,
         "other_74_vendor_roots_metadata_bytes": 521042,
-        "note": "The two raw strace traces show successful read-capable opens of every file in the seven selected package roots and Cargo.toml + .cargo-checksum.json from the other 74 roots. Raw trace ZIPs retained 30 days. Full vendor/ tree is 141,366,139 bytes, not all read during this command; no subset is a trusted-seed byte count."
+        "note": "Latest two independent traces (CML run 38187859376) observed the same 562-file repository path set. The successful-open subset comprises 444 vendor paths / 4,940,765 bytes at trace end: seven selected packages (296 files / 4,419,723 tracked bytes) plus 148 manifest/checksum metadata files from 74 other vendor roots (521,042 bytes). This is runtime observation only, not a minimal seed byte count.",
+        "two_run_path_set_sha256": "53320597b6b55667498bbc8f7c2b0bee7a6ea05b723c9385e339f5cff8ec87ad",
+        "census_json_sha256_by_clean_run": {
+          "clean_run_1": "3bc95e8af2874ac0dceb8891bc45edab1c7df9d6e112bfc7fc359669f7bc52f7",
+          "clean_run_2": "48ca54b99470c3188548383851b5cd09327cb58643efd51213f54c25fa68364e"
+        }
       }
     },
     "cml_outer_cargo_graph": {
-      "status": "LOCKFILE_CORRECTED; LATEST --locked CLEAN-RUN VALIDATION IN PROGRESS",
+      "status": "LOCKFILE_CORRECTED; LATEST TWO-CLEAN-RUN AND FULL LIB-TEST VALIDATION PASS",
       "cml_pre_fix_commit": "dce7a75b61932e41846f36bf1dc5f2d97a8d11ee",
       "cml_pre_fix_lock_blob": "7882c2be6e83b26660a1e855d8ce97211620096e",
       "defect": "CML Cargo.lock's `sens 0.41.0` entry had no serde dependency edge. The first `cargo tree --locked` attempt failed with an explicit lockfile-update refusal.",
@@ -474,12 +531,12 @@
         "cml_graph_sha256": "fe4e29d9723e1c31a598d5905024670defad2a4ffce744cd099b84d95c285c29",
         "sens_xtask_graph_sha256": "a11ec08911b104cfb31211d4f82459711d9b5ae8788f043bd8ce60baaff4736a",
         "lock_diff_sha256": "4b975448e568f126da39479453fb3e00575303c369809824ca611a1c13cb3ef8",
-        "note": "Captured in a run whose Cargo graph step passed, but later lib test exposed a separate stale baseline assertion; do not cite that run as a green full-test gate."
+        "note": "Historical graph-only capture in a run that later failed a stale full-test assertion; superseded for the current full-test gate by locked_revalidation on 2026-10-12 (CML run 38187859376), which passed both 189-test runs and byte-identical active graphs."
       },
       "locked_revalidation": {
         "status": "PASS_TWO_CLEAN_RUNS",
-        "workflow_run": "https://github.com/juv4uk/cml/actions/runs/38186932277",
-        "source_commit": "100f30174f728cf2564ceeb2348f58bd8ac7dd06",
+        "workflow_run": "https://github.com/juv4uk/cml/actions/runs/38187859376",
+        "source_commit": "ec4ba010cebd9fdc37b39224142dcac3ee907cfe",
         "clean_runs": 2,
         "tests_per_run": {
           "passed": 189,
@@ -489,21 +546,24 @@
         "cml_tree_sha256": "fe4e29d9723e1c31a598d5905024670defad2a4ffce744cd099b84d95c285c29",
         "sens_xtask_tree_sha256": "a11ec08911b104cfb31211d4f82459711d9b5ae8788f043bd8ce60baaff4736a",
         "lockfiles_unchanged": true,
-        "two_run_proof_artifact_id": 11719214909,
-        "two_run_proof_artifact_sha256": "sha256:686108e9061d00d74fc0b49459c33f89f39f6bfec247b91e866200a5ffc5e4c0",
-        "report_sha256_both_runs": "5e42feee14a65d33e8e909dbb384276b5255591a7233bac09efbe37fc9635c72",
-        "proof_artifact_id": 11719573111,
-        "proof_artifact_sha256": "sha256:b3c0eb3f5c8114331934b8070da126f9de49ec38eaf84d1aba34a9b91d203302",
+        "report_sha256_both_runs": "dccd8748fcb47eb79ba10f22901534feeb30a7931f8310fedb95c0cf339f6aca",
+        "lineage_report_sha256_both_runs": "5164895e343525c468a4b8e6eb0e4d21ab083ed2dacc6f39158f20aad8d2aa54",
+        "two_run_proof_artifact_id": 11719663973,
+        "two_run_proof_artifact_sha256": "sha256:737aeffd1e0fa3d0f782c5d5379cc5ac01778c2eb8bf9891f25c695669acda7f",
+        "two_run_proof_json_sha256": "ee35d998815ab467e10e8a1c6d2511ca723fa3ea095531919ae90ca4d6b05c78",
+        "proof_expires_at": "2026-11-11T00:26:20Z",
         "run_artifacts": [
           {
             "run": 1,
-            "id": 11719822143,
-            "sha256": "sha256:d6daf3ffc94f90e3c573e7ee4ab062d9431ac819857ca0d27d49262781f7f278"
+            "id": 11720512293,
+            "sha256": "sha256:3e9ccf25e0c255a63bbe6cffc6d3187af753682a049deebda1dcd964f40ff452",
+            "expires_at": "2026-11-11T00:25:56Z"
           },
           {
             "run": 2,
-            "id": 11720500118,
-            "sha256": "sha256:488344b6f02252fcb5c0bb7770390ad190ce453ed0cdf2d908d31e12be5ccc5c"
+            "id": 11720585831,
+            "sha256": "sha256:09ed42d2ff460e7c4e23ef75b02694b9dff6b22c279ad43a9bcdc20db598d05c",
+            "expires_at": "2026-11-11T00:26:07Z"
           }
         ]
       },
@@ -517,9 +577,12 @@
     "shared-library/toolchain dependency bytes",
     "minimum possible seed size",
     "GAS/NASM golden-corpus parity",
-    "Outer CML Cargo registry/cache bytes for the corrected seven-package graph; package versions/checksums and active tree are pinned, but cache bytes are outside the trusted seed subtotal."
+    "Outer CML Cargo registry/cache bytes for the corrected seven-package graph; package versions/checksums and active tree are pinned, but cache bytes are outside the trusted seed subtotal.",
+    "complete Rust module/cfg and compile-time include closure across the current CML + pinned SENS source revisions",
+    "a controlled clean offline replay that proves the selected CML and nested SENS build inputs are sufficient without registry/cache residue",
+    "minimum Git refs/objects required for the current git rev-parse calls"
   ],
-  "campaign_gate": "BLOCKED for the whole-chain seed-v0 total. The 34,580,696-byte value is only one measured runner ELF component. K1 is a separate C1-local experiment and passed correctness witnesses but grew all size metrics; K2-K4 remain gated on a complete, pinned, reproducible operational input closure.",
+  "campaign_gate": "BLOCKED for whole-chain seed-v0 total and minimality. The latest measured runner component is 34,623,904 bytes (ELF file), with 6,042,632 PT_LOAD bytes and 4,147,007 executable-code-section bytes. Two clean C1/C2 runs pass and preserve artifacts for 30 days. The observed 562-file runtime path set is repeatable, but it does not prove the minimal source/build/runtime closure. K1 static-link+strip remains a measured no-size-win.",
   "semantic_boundaries": {
     "contract": "11.8",
     "d10_dependency": false,
@@ -647,6 +710,22 @@
         "file_count": 114,
         "on_disk_bytes": 1397243,
         "description": "SENS source+manifest/data subset used by nested cargo run; excludes the three extra SENS paths needed only to build the CML runner."
+      },
+      "runtime_open_path_observation": {
+        "schema": "nano-sens-runtime-file-open-path-census/1",
+        "status": "OBSERVED_SUCCESSFUL_FILE_OPENS_NOT_A_MINIMUM_CLOSURE_PROOF",
+        "cml_source_commit": "ec4ba010cebd9fdc37b39224142dcac3ee907cfe",
+        "sens_source_commit": "d0787a40fcea36501747732aa61b6de19fe29c70",
+        "workflow_run": "https://github.com/juv4uk/cml/actions/runs/38187859376",
+        "clean_runs": 2,
+        "successful_repo_path_files_each_run": 562,
+        "same_path_set": true,
+        "path_set_sha256": "53320597b6b55667498bbc8f7c2b0bee7a6ea05b723c9385e339f5cff8ec87ad",
+        "census_json_sha256": [
+          "3bc95e8af2874ac0dceb8891bc45edab1c7df9d6e112bfc7fc359669f7bc52f7",
+          "48ca54b99470c3188548383851b5cd09327cb58643efd51213f54c25fa68364e"
+        ],
+        "limitation": "Observation of successful read-capable file opens under checked-out repositories, not a proof of the complete or minimal closure."
       }
     },
     "external_dependency_ledger": "evidence/nano-sens-seed-v0-source-closure-census-2026-10-12.json :: external_build_dependency_inventory"
@@ -667,68 +746,91 @@
     "Latest measurement checkpoint update (2026-10-12): K1 run 38186651984 passed two clean runs and comparison for CML source commit f4f03066993e3fbeb824c9ae6879bc1a1059cbd6. The runner hash is now 6fbbc819... (34,623,904 B on disk; PT_LOAD 6,042,632 B; code section 4,147,007 B); the identical report SHA is 6b9b8202.... Both runs passed 189/189, and the locked dependency graphs were byte-identical. The known-input subtotal remains 36,033,737 B; it is not a whole seed-total or a minimality claim.",
     "Git metadata overlap correction (2026-10-12): previous snapshot totals added the full CML `.git` tree and the nested SENS submodule `.git` tree, counting SENS twice. Those aggregate totals are superseded. Historical non-overlapping totals have been recalculated, and CML workflow commit 100f3017... fixes the meter to exclude nested SENS from the CML subtotal. Fresh verification is queued in run 38186932277; Git metadata remains external and does not alter the measured operational subtotal or the blocked whole-seed status.",
     "Latest closure-ledger checkpoint (2026-10-12): K1 CI run 38186932277 passed two clean runs, 189/189 library tests per run, byte-identical reports, and identical --locked Cargo graphs. New disjoint Git metadata measurements are 35,515,603 B and 35,519,818 B across the three distinct gitdirs, excluding SENS duplication from CML .git. The runner ELF remains 34,623,904 B / SHA-256 6fbbc819... and the known operational subtotal remains 36,033,737 B; neither is a whole seed-total or minimum-size claim.",
-    "Runtime dependency tracing (2026-10-12): two successful strace runs of the frozen runner each passed 189/189 tests. The raw traces observed 444 distinct vendor file paths (4,940,765 bytes of tracked contents): all 296 files in seven selected crates plus 148 manifest/checksum metadata files from 74 other vendor roots. The full vendor checkout footprint is 3,963 files / 141,366,139 bytes and is external, not part of the trusted seed subtotal. A path-by-path census is being validated in the next run."
+    "Runtime dependency tracing (2026-10-12): two successful strace runs of the frozen runner each passed 189/189 tests. The raw traces observed 444 distinct vendor file paths (4,940,765 bytes of tracked contents): all 296 files in seven selected crates plus 148 manifest/checksum metadata files from 74 other vendor roots. The full vendor checkout footprint is 3,963 files / 141,366,139 bytes and is external, not part of the trusted seed subtotal. A path-by-path census is being validated in the next run.",
+    "Current Nano-SENS checkpoint (2026-10-12, CML run 38187859376): two independent clean runs and comparison PASS on CML commit ec4ba010cebd9fdc37b39224142dcac3ee907cfe; each run passed 189/189 library tests, used pinned SENS d0787a40fcea36501747732aa61b6de19fe29c70, and reported byte-identical 92,248-byte C1/C2 executables. The measured runner component is 34,623,904 B (PT_LOAD 6,042,632 B; executable code section 4,147,007 B).",
+    "Runtime census follow-through (2026-10-12): both raw run artifacts now include per-file successful-open census JSON. Both census files independently list the same 562 repository-path files with path-set SHA-256 53320597b6b55667498bbc8f7c2b0bee7a6ea05b723c9385e339f5cff8ec87ad. Vendor observations are 444 paths / 4,940,765 bytes (trace-time content sizes). These findings close the pending path-list observation task only; they do not prove minimality or whole-seed total."
   ],
   "runtime_file_process_trace": {
     "schema": "nano-sens-runtime-file-process-trace-pair/1",
-    "status": "PASS_TWO_INDEPENDENT_TRACED_RUNS; OBSERVATION_ONLY_NOT_MINIMUM_CLOSURE_PROOF",
-    "cml_source_commit": "e6e0a601c4c2c8398e7ed8f6e460e594b3a02559",
+    "status": "PASS_TWO_INDEPENDENT_TRACED_RUNS; SAME_562_PATH_SET; OBSERVATION_ONLY_NOT_MINIMUM_CLOSURE_PROOF",
+    "cml_source_commit": "ec4ba010cebd9fdc37b39224142dcac3ee907cfe",
     "sens_source_commit": "d0787a40fcea36501747732aa61b6de19fe29c70",
     "wsm_witness_commit": "a6bd9747196f2d676ab6883cbb4b84c7fcfc6947",
-    "workflow_run": "https://github.com/juv4uk/cml/actions/runs/38187252311",
+    "workflow_run": "https://github.com/juv4uk/cml/actions/runs/38187859376",
+    "workflow_run_id": 38187859376,
     "clean_runs": [
       {
         "run": 1,
-        "artifact_id": 11719862489,
-        "trace_sha256": "ba0da0393566a5bc5096985b3c1f5721a0003cc74c57e3db0f72233e8a8424f1",
-        "trace_bytes": 8914247,
-        "trace_line_count": 58029,
+        "artifact_id": 11720512293,
+        "artifact_digest": "sha256:3e9ccf25e0c255a63bbe6cffc6d3187af753682a049deebda1dcd964f40ff452",
+        "artifact_expires_at": "2026-11-11T00:25:56Z",
+        "trace_sha256": "963c3050f15238195b8a931ade9b6863576429bc497eaf0df52707b99c6e8795",
+        "trace_bytes": 8882502,
+        "trace_line_count": 57353,
         "execve_event_count": 1444,
         "file_event_count": 48447,
-        "repository_path_event_count": 12223,
-        "repository_path_events_sha256": "2f647d109c4f4dbad54db9dbc5fc083cb88503fb8eb405037811928596436d2f",
+        "repository_path_event_count": 12217,
+        "repository_path_events_sha256": "04308c48e811f8a9474981b2195e457ce357df149b9d9c42fde208c96857e136",
+        "census_json_sha256": "3bc95e8af2874ac0dceb8891bc45edab1c7df9d6e112bfc7fc359669f7bc52f7",
+        "successful_repo_path_files": 562,
+        "path_set_sha256": "53320597b6b55667498bbc8f7c2b0bee7a6ea05b723c9385e339f5cff8ec87ad",
         "tests": {
           "passed": 189,
           "failed": 0
-        },
-        "disjoint_git_metadata_bytes": {
-          "cml_excluding_sens_submodule": 2866613,
-          "sens": 30833944,
-          "wsm": 1810846,
-          "total": 35581403
         }
       },
       {
         "run": 2,
-        "artifact_id": 11719953009,
-        "trace_sha256": "a3066530ae2075751af6c1f20060101eeaa88e7b478a066d3f965c2b5403d93d",
-        "trace_bytes": 9014533,
-        "trace_line_count": 58113,
+        "artifact_id": 11720585831,
+        "artifact_digest": "sha256:09ed42d2ff460e7c4e23ef75b02694b9dff6b22c279ad43a9bcdc20db598d05c",
+        "artifact_expires_at": "2026-11-11T00:26:07Z",
+        "trace_sha256": "099756c3b47681c10d2e2c391ffe0fdbb309c77d2b86e3880f487471565e222a",
+        "trace_bytes": 8990662,
+        "trace_line_count": 57610,
         "execve_event_count": 1444,
         "file_event_count": 48915,
-        "repository_path_event_count": 12679,
-        "repository_path_events_sha256": "f7f26e3dbf57e04e6a0dec64b410bb9fbdfbf6fe689eae544447ebcaf7cd9386",
+        "repository_path_event_count": 12677,
+        "repository_path_events_sha256": "59717c6282c660444b1bedb8d952625f868e22bff3b4c219c81b6148a3fca013",
+        "census_json_sha256": "48ca54b99470c3188548383851b5cd09327cb58643efd51213f54c25fa68364e",
+        "successful_repo_path_files": 562,
+        "path_set_sha256": "53320597b6b55667498bbc8f7c2b0bee7a6ea05b723c9385e339f5cff8ec87ad",
         "tests": {
           "passed": 189,
           "failed": 0
-        },
-        "disjoint_git_metadata_bytes": {
-          "cml_excluding_sens_submodule": 2866621,
-          "sens": 30846510,
-          "wsm": 1810848,
-          "total": 35583979
         }
       }
     ],
     "common": {
       "runner_sha256": "6fbbc819eac32253d9eadb5e1dc8e80295bdb0bde9a285076edd8d7fc9e40eb3",
       "runner_bytes": 34623904,
-      "size_report_sha256": "965701a837f622b7484d20ce3303cda4da9d5b647e4ca3c38535dfe3800e2fe4",
-      "lineage_report_sha256": "708ea12e26c9caa2389049236223f96dc640d1b508c2c2096923619fc87d5843",
-      "active_cargo_graphs_byte_identical": true
+      "size_report_sha256": "dccd8748fcb47eb79ba10f22901534feeb30a7931f8310fedb95c0cf339f6aca",
+      "lineage_report_sha256": "5164895e343525c468a4b8e6eb0e4d21ab083ed2dacc6f39158f20aad8d2aa54",
+      "active_cargo_graphs_byte_identical": true,
+      "cml_active_cargo_tree_sha256": "fe4e29d9723e1c31a598d5905024670defad2a4ffce744cd099b84d95c285c29",
+      "sens_xtask_active_cargo_tree_sha256": "a11ec08911b104cfb31211d4f82459711d9b5ae8788f043bd8ce60baaff4736a",
+      "lockfiles_unchanged": true,
+      "unique_successful_repo_path_files_each_run": 562,
+      "same_path_set_sha256_each_run": "53320597b6b55667498bbc8f7c2b0bee7a6ea05b723c9385e339f5cff8ec87ad",
+      "tests_per_run": {
+        "passed": 189,
+        "failed": 0
+      },
+      "vendor_observation": {
+        "observed_paths": 444,
+        "observed_tracked_bytes": 4940765,
+        "seven_selected_dependency_packages": {
+          "files": 296,
+          "tracked_bytes": 4419723
+        },
+        "other_74_vendor_roots_metadata": {
+          "files": 148,
+          "tracked_bytes": 521042
+        }
+      }
     },
-    "trace_comparison": "Raw syscall traces are not expected to be byte-identical because event timing/temp files differ. Stable reports/graphs are the byte-identical reproducibility gates.",
-    "artifacts_expire_at": "2026-11-11T00:16Z",
-    "next_step": "A per-file successful open-path census generator has been added to the next K1 CI checkpoint (commit 1b740963fe1badc0d8e8ede99202f49617fc4edc). Its result is pending; do not cite the path-list census until that run finishes."
+    "trace_comparison": "Raw syscall traces differ in event counts/timing, but both runs report the same 562-file successful repository-path set and the same path-set SHA-256. Dynamic observation only; do not infer minimum closure from absent opens.",
+    "artifacts_expire_at": "2026-11-11T00:25:56Z",
+    "proof_artifact_expires_at": "2026-11-11T00:26:20Z",
+    "next_step": "Close the remaining exact runtime/build input set: module/cfg and compile-time include graph, process/toolchain/shared-library boundary, outer CML registry/cache bytes and clean offline replay, plus minimal required Git refs/objects. Do not turn the 562 observed paths or 36,033,737-byte subset into a whole-seed total."
   }
 }
