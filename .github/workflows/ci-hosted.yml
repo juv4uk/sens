@@ -87,3 +87,9 @@ jobs:
       - name: D3 stale core-logic audit (fail closed)
         if: always()
         run: python3 scripts/check_d3_legacy_logic.py --strict
+
+      # Exercise release packaging rejection gates on every main push, without
+      # requiring a release tag or touching GitHub Releases.
+      - name: Release asset verifier negative controls (no tag)
+        if: always()
+        run: python3 -m unittest discover -s tests -p 'test_verify_release_assets.py' -v
