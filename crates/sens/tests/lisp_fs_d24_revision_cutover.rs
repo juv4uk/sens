@@ -66,6 +66,28 @@ fn all_three_fs_increment_sites_have_exact_d6_heads() {
 }
 
 #[test]
+fn successor_opcode_is_six_bits_and_never_conflates_with_five_bit_plus() {
+    use sens::{parse_mixed_exact_domain, ExprKind};
+
+    for (source, width, bits) in [
+        ("(001110 revision)", 6usize, 0b001110u16),
+        ("(01010 value revision)", 5usize, 0b01010u16),
+    ] {
+        let expressions = parse_mixed_exact_domain(source)
+            .expect("the mixed migration reader must preserve source bit width");
+        assert_eq!(expressions.len(), 1);
+        let ExprKind::List(items) = &expressions[0].kind else {
+            panic!("an operator application must remain a list");
+        };
+        let ExprKind::DomainIdentity(identity) = &items[0].kind else {
+            panic!("an exact binary head may not become a legacy numeric ID");
+        };
+        assert_eq!(identity.width(), width, "{source}");
+        assert_eq!(identity.packed_bits(), bits, "{source}");
+    }
+}
+
+#[test]
 fn fs_unbind_preserves_qualified_d24_and_d48_revisions() {
     for width in [24usize, 48] {
         let mut session = load_filesystem();
