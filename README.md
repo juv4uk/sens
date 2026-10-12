@@ -61,7 +61,7 @@ Frame3-Micro (F3M) мають відновити ті самі точні дом
 |---|---|---|
 | **T5** | `.sens` | загальний канонічний фізичний transport |
 | **Frame3 Carrier (F3C)** | `.senc` | явно вибраний компактний carrier для дуже малих програм; історичні CLI/докази ще використовують коротку назву `F3` |
-| **Frame3-Micro (F3M)** | `.f3m` | bounded dense micro-rank: сімейство вибирається явно, а профіль визначає **довжина 1/2/3/4 байти**; без внутрішньої magic/version мітки |
+| **Frame3-Micro (F3M)** | `.f3m` | bounded dense micro-rank: сімейство вибирається явно, а профіль визначає **довжина 1/2/3/4/5 байтів**; без внутрішньої magic/version мітки |
 | **Envelope E1/E2/E3** | research carriers | самодостатні metadata-heavy оболонки, історично `S3/v1-v3`; це **не версії Frame3** |
 
 Повна нормативна матриця режимів: [**режими проєкту SENS**](docs/project-modes-2026-10-12.uk.md).
@@ -76,8 +76,8 @@ Frame3-Micro (F3M) мають відновити ті самі точні дом
 Межа доказу принципова: F3M не містить внутрішньої magic/version мітки.
 Сімейство вибирається зовнішнім маршрутом, а **профіль визначає тільки точна
 фізична довжина**: 1 байт = F3M-1, 2 = F3M-2, 3 = F3M-3,
-4 = F3M-4; 0 і 5+ зараз відхиляються fail-closed. Вміст байтів не
-sniff-иться й не перемикає профіль, тому всі 8/16/24/32 біти лишаються
+4 = F3M-4, 5 = F3M-5; 0 і 6+ зараз відхиляються fail-closed. Вміст байтів не
+sniff-иться й не перемикає профіль, тому всі 8/16/24/32/40 бітів лишаються
 програмному рангу. Чинний dense F3M-1
 використовує **всі 256/256 кодів** як унікальні замкнені виконувані програми;
 F3M-2 займає наступні **65 536** global ranks і має exhaustive payload roundtrip;
@@ -86,8 +86,12 @@ DP-доказ першого 6/6-capability коду `16 3C 63` та exhaustive-
 64K-сторінки з переможцем `FF FB 37`. F3M-4 займає наступні
 **4 294 967 296** ranks; для нього вже є algebraic capacity proof,
 65 536 stratified roundtrip samples і реальний executable witness
-`DE AD BE EF`. Повний evaluator sweep усіх 16M F3M-3 та 2^32 F3M-4
-програм лишається окремим proof gate. Деталі:
+`DE AD BE EF`. F3M-5 додає окремий prefix-stable extension-space на
+**2^40 = 1 099 511 627 776** payloads: старі F3M-1..4 ranks не зсуваються,
+а кожен F3M-5 вираз містить щонайменше новий `EQ` або `LAMBDA`.
+65 536 stratified roundtrip samples по 40-бітному простору та executable
+witness `03 B1 C7 07 93` із усіма D1–D3 capability-класами + LAMBDA
+проходять чинний proof gate. Повні evaluator sweeps 2^32/2^40 не заявляються. Деталі:
 [профілі F3M за довжиною](docs/frame3-micro-length-profiles-2026-10-12.uk.md) ·
 [назви фізичних кодеків](docs/codec-naming-2026-10-12.uk.md).
 
@@ -150,14 +154,19 @@ cargo run -q -p sens-cli --bin sens-trit -- eval tests/fixtures/migration-quote-
 значення байта не резервується під magic/version: профіль визначає сама
 фізична довжина файла.
 
-Канонічний порядок спільний для F3M-1/F3M-2/F3M-3/F3M-4: програми впорядковуються
+Канонічний legacy-порядок спільний для F3M-1/F3M-2/F3M-3/F3M-4: програми впорядковуються
 за розміром дерева, потім за конструктором, розбиттям піддерев і локальними
 рангами. Профілі беруть **неперетинні вікна** цього глобального порядку:
 
 - F3M-1: глобальні ранги `0..255` — **256 програм**;
 - F3M-2: наступні `65 536` рангів;
 - F3M-3: наступні `16 777 216` рангів;
-- F3M-4: наступні `4 294 967 296` рангів.
+- F3M-4: наступні `4 294 967 296` legacy-рангів;
+- F3M-5: **2^40** rank-ів окремого prefix-stable extension-space з D3 EQ і D4 LAMBDA.
+
+F3M-5 не вставляє нові конструктори всередину старого global order: це окремий
+ранкер лише для виразів, що містять EQ або LAMBDA, тому F3M-1..4 залишаються
+байт-в-байт незмінними.
 
 Через неперетинні вікна одна програма не має одночасно 1-, 2- і 3-байтового
 канонічного запису: `encode(decode(bytes)) == bytes` і encoder завжди
@@ -182,7 +191,7 @@ cargo run -q -p sens-cli --bin sens-trit -- eval tests/fixtures/migration-quote-
 artifact збережено **історично** для відтворюваності, але це вже не активна
 F3M-1 таблиця.
 
-### Круті програми, які реально поміщаються в 1–4 байти
+### Круті програми, які реально поміщаються в 1–5 байтів
 
 Це не намальовані opcode-приклади: байти нижче проходять чинний dense
 enumerator, canonical SENS parser і реальний evaluator.
@@ -206,6 +215,7 @@ enumerator, canonical SENS parser і реальний evaluator.
 | **F3M-4** | `0D E5 67 30` | `IF-ATOM(0,0,IF-ATOM(0,0,IF-ATOM(0,0,0)))` | **максимум 3×COND** для F3M-4; четвертий COND потребував би ≥13 nodes | `0` |
 | **F3M-4** | `BA BF 19 4E` | `ATOM(ATOM(ATOM(ATOM(ATOM(ATOM(ATOM(ATOM(ATOM(ATOM(ATOM(0)))))))))))` | абсолютна межа глибини: **12 рівнів / 12 nodes** | `1` |
 | **F3M-4** | `F5 A7 BC 39` | `ATOM(CAR(CONS(QUOTE(0),CDR(CONS(QUOTE(0),IF-ATOM(QUOTE(0),QUOTE(0),IF-ATOM(QUOTE(0),QUOTE(0),QUOTE(0))))))))` | metric-saturating witness: **6/6 класів, 2×COND, 16 encoded-операцій, depth 6, 12 nodes** | `1` |
+| **F3M-5** | `03 B1 C7 07 93` | `IF-ATOM(EQ(ATOM(LAMBDA((),QUOTE(0))),ATOM(QUOTE(1))),CAR(CONS(QUOTE(0),CDR(CONS(QUOTE(1),QUOTE(NIL))))),QUOTE(NIL))` | **усі D1–D3 capability-класи + LAMBDA** в одному 5-байтному executable witness | `0` |
 | **F3M-4** | `BA AD F0 0D` | `IF-ATOM(IF-ATOM(CDR(CONS(CAR(CONS(QUOTE(NIL),QUOTE(NIL))),NIL)),1,1),0,QUOTE(0))` | красивий hex-код випадково дав **6/6 класів + 2×COND** | `0` |
 | **F3M-4** | `FE ED FA CE` | `ATOM(CAR(CONS(IF-ATOM(1,0,QUOTE(NIL)),IF-ATOM(QUOTE(NIL),QUOTE(NIL),CAR(CONS(QUOTE(1),NIL))))))` | ще один mnemonic hex: **2×COND, 13 encoded-операцій** | `1` |
 | **F3M-4** | `FF FF 4F 4F` | `ATOM(CAR(CONS(CAR(CONS(0,ATOM(ATOM(QUOTE(NIL))))),IF-ATOM(ATOM(QUOTE(NIL)),QUOTE(NIL),QUOTE(NIL)))))` | переможець exhaustive-пошуку останньої **64K** сторінки F3M-4 | executes |
