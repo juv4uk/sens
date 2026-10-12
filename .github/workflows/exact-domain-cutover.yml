@@ -11,6 +11,12 @@ on:
       - "crates/sens/src/domain_ladder.rs"
       - "lib/domains/d3.lisp"
       - ".github/workflows/exact-domain-cutover.yml"
+  pull_request:
+    branches: [main]
+    paths:
+      - "scripts/migrate-exact-domain.py"
+      - "tests/test_migrate_exact_domain.py"
+      - ".github/workflows/exact-domain-cutover.yml"
   workflow_dispatch:
 
 jobs:
