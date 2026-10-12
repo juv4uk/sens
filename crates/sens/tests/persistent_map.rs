@@ -31,6 +31,15 @@ fn empty_map_has_nothing() {
 }
 
 #[test]
+fn avl_heights_are_structural_unary_values_not_numbers() {
+    assert_eq!(eval_map("(height-of map-empty)"), "()");
+    assert_eq!(
+        eval_map(r#"(node-height (map-insert "a" 1 map-empty))"#),
+        "(height)"
+    );
+}
+
+#[test]
 fn insert_then_get_finds_the_value() {
     assert_eq!(
         eval_map(r#"(map-get "a" (map-insert "a" 1 map-empty))"#),
@@ -110,7 +119,7 @@ fn sorted_insertion_order_stays_balanced_instead_of_degenerating_into_a_list() {
                             map-empty))
         (node-height m)
     "#;
-    assert_eq!(eval_map(source), "3");
+    assert_eq!(eval_map(source), "(height height height)");
 }
 
 #[test]
