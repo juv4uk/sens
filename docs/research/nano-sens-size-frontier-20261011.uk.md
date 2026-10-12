@@ -2,6 +2,21 @@
 Дата: 2026-10-11  
 Статус: **RESEARCH / NO NEW SEMANTICS / NOT A SIZE-MINIMUM CLAIM**
 
+## Оновлення 2026-10-12 — перше відтворюване число
+
+Live lineage flow пройшов у [CML run 38187859376](https://github.com/juv4uk/cml/actions/runs/38187859376), на CML commit `ec4ba010cebd9fdc37b39224142dcac3ee907cfe`, з pinned SENS source `d0787a40fcea36501747732aa61b6de19fe29c70`. Два незалежні clean-run jobs і job порівняння — **PASS**; кожен прогнав 189/189 тестів.
+
+Перше підтверджене число Nano-SENS — **34,623,904 байти** для явно визначеного компонента `seed-v0-c0-runner.bin` (CML Rust lib-test bootstrap runner). Для цього самого ELF виміряно 6,042,632 байти завантажуваних сегментів і 4,147,007 байтів виконуваних code sections. Це розмір runner-компонента, **не** повний розмір seed і не мінімальність.
+
+C1 і C2 кожен мають **92,248 байтів**, а їхні executable SHA-256 тотожні: `27b8fbf096cddbb77be2b4bf57cc58bf8b4fac4accc42adbcfbc10d6cd95f375`. Обидва покоління побудовані заново: C0 створив C1, C1 створив C2, без читання заздалегідь зібраних C1/C2. Два звіти розміру побайтно однакові: SHA-256 `dccd8748fcb47eb79ba10f22901534feeb30a7931f8310fedb95c0cf339f6aca`; чинний критерій лишається найсильнішим `byte-identical-artifact`.
+
+Raw артефакти збережені на 30 днів: [clean run 1](https://github.com/juv4uk/cml/actions/runs/38187859376/artifacts/11720512293), [clean run 2](https://github.com/juv4uk/cml/actions/runs/38187859376/artifacts/11720585831), [підсумковий доказ двох запусків](https://github.com/juv4uk/cml/actions/runs/38187859376/artifacts/11719663973). Їхній найраніший строк завершення — **2026-11-11 00:25:56 UTC**.
+
+Новий runtime census у кожному запуску знайшов 562 успішно відкриті repository-path файли; обидва набори збіглися за SHA `53320597b6b55667498bbc8f7c2b0bee7a6ea05b723c9385e339f5cff8ec87ad`. З-поміж спостережених шляхів 444 vendor-файли мали 4,940,765 байтів за виміром на кінець trace: сім вибраних пакетів — 296 файлів / 4,419,723 tracked bytes; ще 148 файлів manifest/checksum metadata з інших 74 vendor roots — 521,042 bytes. Це динамічне спостереження, а не доказ мінімальної замикальної множини.
+
+Відомий операційний підсумок нижньої межі — **36,033,737 байтів**: runner 34,623,904 + pinned SENS build-input subset 1,397,243 + CML runtime contract 1,129 + WSM nucleus source 11,461. Повний seed-total залишається **BLOCKED**: ще треба замкнути module/cfg та compile-time include граф, перевірити clean offline replay і зовнішній Cargo cache/toolchain/shared libraries, а також визначити мінімальні Git refs/objects. Поточний звіт і новий lineage JSON збережено в `main`: `evidence/nano-sens-seed-v0-2026-10-12.json` та `evidence/compiler-selfhost-lineage-2026-10-12-nano-sens.json`.
+
+
 ## Мета
 
 Вивести вже наявний compiler self-hosting доказ у напрямі Nano-SENS: виміряти найменший **довірений початковий seed**, потрібний для відтворюваного запуску SENS-компілятора, не плутаючи його з розміром згенерованого компілятора.
@@ -54,9 +69,9 @@
 
 Локально перевірено `python3 scripts/measure-nano-sens-size.py --self-test`: **PASS**, п’ять позитивних тверджень і три негативні контролі (неправильний розмір, читання попереднього C1, нерівні фізичні байти C1/C2). Опційний `--c2-executable` перевіряє фактичний файл C2, а не лише хеш у звіті. Також пройшов `python3 -m py_compile`. Це перевірки самого вимірювального інструмента, не новий запуск компілятора.
 
-Існуючий workflow `.github/workflows/compiler-selfhost-lineage-contract.yml` тепер має запускати цю перевірку для змін інструмента та контракту лінії доказів. Статус віддаленого Actions-run ще не підтверджений.
+Віддалений CML workflow для свіжого lineage тепер підтверджено: [run 38187859376](https://github.com/juv4uk/cml/actions/runs/38187859376) успішно зберіг бінарні артефакти, size report, lineage report і runtime census для двох чистих запусків. Додатково новий звіт `evidence/compiler-selfhost-lineage-2026-10-12-nano-sens.json` зафіксовано у `main`, а `.github/workflows/compiler-selfhost-lineage-contract.yml` розширено, щоб перевіряти його через SENS-side validator і повторно звіряти SHA pinned source. Остаточний результат саме цього validator workflow має бути зелений на останньому commit перед позначенням gate завершеним.
 
-Вимір seed поки **BLOCKED** на визначенні й отриманні точного файлу C0/seed і C1 executable відповідного pinned lineage. Старий звіт має C1 hash/розмір, але немає доступного workflow artifact у збережених артефактах зазначеного run; не підміняти бінарний файл даними з JSON і не називати виміряним seed рядок у source.
+Попереднє твердження, що вимірювання seed-компонента заблоковане відсутністю артефактів, **застаріло** й замінене свіжим виміром від 2026-10-12. Бінарний файл було справді отримано з workflow artifact, а не відновлено з JSON. Повна closure/minimality і далі **BLOCKED**: 34,623,904 байти — лише CML runner-компонент; 36,033,737 байтів — лише явно перелічений операційний підсумок нижньої межі.
 
 ## Виконуваний вхід до SENS-компілятора
 
@@ -119,13 +134,14 @@ CI тепер має end-to-end інтеграційні тести, які за
 
 ## Acceptance gates
 
-- [ ] З чистого checkout і без читання заздалегідь зібраного C1/C2 повторно запустити чинний self-host lineage flow.
-- [ ] До вимірювання визначити seed-артефакт і точну межу того, що рахується його фізичними байтами.
-- [ ] Два незалежні чисті запуски дають однакові pinned-входи та відтворювані виміри; рівність SHA вимагати для однакових детермінованих артефактів, а відмінності середовища записувати, не нормалізувати мовчки.
-- [ ] Перевірити lineage report наявним валідатором; не послаблювати критерій `byte-identical-artifact` після його успіху.
+- [x] З чистого checkout і без читання заздалегідь зібраного C1/C2 повторно запустити чинний self-host lineage flow: обидва clean-run jobs та comparison пройшли в [run 38187859376](https://github.com/juv4uk/cml/actions/runs/38187859376).
+- [x] Для виміряного компонента визначити точний seed-артефакт і межу фізичних байтів: `seed-v0-c0-runner.bin`, 34,623,904 байти. Це ще не повна closure.
+- [x] Два незалежні clean runs мають однакові pinned-входи, byte-identical size report і однаковий 562-файловий observed path set; traces збережено з retention 30 днів.
+- [ ] Дочекатися зеленого SENS-side validator workflow для свіжого збереженого lineage report і перевірки source digests; CML workflow вже зафіксував `byte-identical-artifact`, але це окремий gate.
+- [ ] Замкнути повний source/build/runtime closure, включно з module/cfg, compile-time includes, offline replay і мінімальним Git/toolchain dependency boundary.
 - [ ] Окремо звіряти спостережуваний результат і точні байти для тих випадків золотого GAS/NASM корпусу, де контракт вимагає byte identity.
 - [ ] Кожне зменшення seed проходить той самий функціональний корпус, негативні fail-closed випадки та lineage перевірки.
-- [ ] Публікувати мінімальний розмір тільки після вимірювання; не використовувати «десятки байтів» як незасвідчену ціль або заявлений результат.
+- [ ] Публікувати мінімальний розмір тільки після доведеної повноти closure і вимірювання; не використовувати «десятки байтів» як незасвідчену ціль або заявлений результат.
 
 ## Семантичні межі
 
