@@ -7,15 +7,15 @@
     "FALSIFIER"
   ],
   "question": "Can matched CPython, Lua 5.4, Racket CS, and SENS workload phases be compared without conflating startup, loading, setup, and execution?",
-  "claim": "Historical Function8/FASL SENS lane is provenance only. Current Contract 11.9 speed or parity claims remain blocked until canonical replay, exact SHA/environment capture, oracle correctness, and semantic parity pass. Never use historical ratios as current SENS-vs-Python evidence.",
+  "claim": "Historical Function8/FASL results remain provenance only. This stand deliberately stays BLOCKED until a current Contract 11.9 workload corpus, independent correctness oracle, exact source/environment capture, and semantic parity checks are implemented. Installing Guix or rerunning the historical harness is not sufficient to claim a current SENS-versus-Python comparison.",
   "witness": [
     "README.md",
     "run.py",
     "manifest.scm",
     "BINARY_TREES_PROVENANCE.md"
   ],
-  "status": "HISTORICAL-HARNESS; CURRENT-CANONICAL-REPLAY-BLOCKED",
-  "generation": "Historical Function8/FASL generation; current Contract 11.9 replay pending",
+  "status": "BLOCKED-CURRENT-CANONICAL-REPLAY-NOT-IMPLEMENTED",
+  "generation": "Historical Function8/FASL donor only; current Contract 11.9 canonical workload replay pending",
   "axis": "cross-language/matched-workload-phase-and-semantic-parity",
-  "reproduce": "if ! command -v guix >/dev/null 2>&1; then printf 'SENS_BENCHMARK_STATUS=BLOCKED\\nBLOCKED: cross-language historical replay requires the pinned Guix environment (channels.scm plus both Guix manifests).\\n'; exit 2; fi; cargo build --release -p sens --example ci_bench && guix time-machine -C channels.scm -- shell -m manifest.scm -m benchmarks/cross-language/manifest.scm -- python3 benchmarks/cross-language/run.py --sens-bench target/release/examples/ci_bench --historical-function8-fasl"
+  "reproduce": "printf 'SENS_BENCHMARK_STATUS=BLOCKED\\nBLOCKED: current Contract 11.9 canonical multi-language replay and independent oracle are not implemented; historical Function8/FASL output is provenance only.\\n'; exit 2"
 }

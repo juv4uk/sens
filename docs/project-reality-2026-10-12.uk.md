@@ -80,7 +80,7 @@ exhaustive bounded proof: файл `car-cons-one-nil.f3m` дорівнює од�
 - [Physical smoke run 38192284285](https://github.com/juv4uk/sens/actions/runs/38192284285): SUCCESS, 5/5 projection unit tests та 8/8 фізичних T5 fixtures.
 - У повному [run 38192284184](https://github.com/juv4uk/sens/actions/runs/38192284184) shard 6 дав PASS для `physical-binary-performance`: 8/8 source→T5 roundtrips побайтно тотожні й усі execution CLI paths мають parity. Це transport/CLI evidence, не AST compiler proof.
 
-Єдиний поточний blocker — `cross-language`: runner не має pinned Guix environment, тому він чесно видає `SENS_BENCHMARK_STATUS=BLOCKED`. Повторювати такий benchmark у стандартному runner без Guix не має сенсу; потрібне або закріплене середовище, або окреме рішення про формальне блокування/виведення historical lane з поточного gate. Довготривалий receipt містить усі sweep-и з точними SHA, counts і артефактами: [`evidence/benchmark-sweep-2026-10-12.json`](../evidence/benchmark-sweep-2026-10-12.json).
+Єдиний поточний blocker — `cross-language`: історичний Function8/FASL harness не є current Contract 11.9 SENS-versus-Python proof, а canonical workload corpus та незалежний oracle для поточної generation ще не реалізовані. Маніфест тепер fail-closed і друкує `SENS_BENCHMARK_STATUS=BLOCKED` незалежно від наявності Guix; відновити lane можна лише після реалізації current corpus/oracle/parity. Самої установки Guix недостатньо. Довготривалий receipt містить усі sweep-и з точними SHA, counts і артефактами: [`evidence/benchmark-sweep-2026-10-12.json`](../evidence/benchmark-sweep-2026-10-12.json).
 
 ## 4. Пріоритети — у порядку доказової цінності
 
