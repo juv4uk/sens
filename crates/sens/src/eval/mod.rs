@@ -105,7 +105,8 @@ pub fn eval_exact_domain_program(
     session: &mut Session,
 ) -> Result<EvalResult, LanguageError> {
     let expressions = crate::parser::parse_exact_domain_source(source)?;
-    eval_parsed_expressions(&expressions, session)
+    // Never pass a canonical Dn source through historical W8 head lowering.
+    eval_lowered_expressions(&lower::lower_exact_domain_program(&expressions), session)
 }
 
 pub(crate) enum EvalStep {

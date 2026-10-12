@@ -20,14 +20,34 @@ use crate::CoreDomainIdentity;
 use crate::Sens8;
 use std::rc::Rc;
 
-/// Звести всі виклики програми. Ідемпотентно: `Call` лишається `Call`.
-pub fn lower_program(expressions: &[Expr]) -> Vec<Expr> {
-    expressions.iter().map(|expression| lower(expression, 0)).collect()
+#[derive(Clone, Copy, Eq, PartialEq)]
+enum LowerMode {
+    Historical,
+    ExactDomain,
 }
 
-fn head_domain_identity(head: &Expr) -> Option<CoreDomainIdentity> {
+/// Legacy source only: W8 compatibility does not confer canonical D8 identity.
+pub fn lower_program(expressions: &[Expr]) -> Vec<Expr> {
+    expressions
+        .iter()
+        .map(|expression| lower(expression, 0, LowerMode::Historical))
+        .collect()
+}
+
+/// Exact D1–D9 source: no W8 fallback from bytes or historical surfaces.
+pub(crate) fn lower_exact_domain_program(expressions: &[Expr]) -> Vec<Expr> {
+    expressions
+        .iter()
+        .map(|expression| lower(expression, 0, LowerMode::ExactDomain))
+        .collect()
+}
+
+fn head_domain_identity(head: &Expr, mode: LowerMode) -> Option<CoreDomainIdentity> {
     match &head.kind {
         ExprKind::DomainIdentity(identity) => identity.core_operation(),
+        ExprKind::Symbol(name) if mode == LowerMode::ExactDomain => {
+            semantic_registry::domain_identity_for_surface(name)
+        }
         ExprKind::Symbol(name) => immutable_surface_domain_identity(name),
         _ => None,
     }
@@ -74,8 +94,11 @@ fn historical_head_has_d3_law(sid: Sens8, bits: u8) -> bool {
         .is_some_and(|identity| is_d3(identity, bits))
 }
 
-fn lower_all(items: &[Expr], depth: u32) -> Rc<[Expr]> {
-    items.iter().map(|item| lower(item, depth + 1)).collect()
+fn lower_all(items: &[Expr], depth: u32, mode: LowerMode) -> Rc<[Expr]> {
+    items
+        .iter()
+        .map(|item| lower(item, depth + 1, mode))
+        .collect()
 }
 
 /// Lower an already typed or newly discovered domain call in exactly the
@@ -84,6 +107,7 @@ fn lower_domain_arguments(
     identity: CoreDomainIdentity,
     arguments: &[Expr],
     depth: u32,
+    mode: LowerMode,
 ) -> Rc<[Expr]> {
     if is_d3(identity, 0b001) {
         return arguments.into();
@@ -93,7 +117,7 @@ fn lower_domain_arguments(
             .iter()
             .map(|clause| match &clause.kind {
                 ExprKind::List(parts) => Expr {
-                    kind: ExprKind::List(lower_all(parts, depth + 1)),
+                    kind: ExprKind::List(lower_all(parts, depth + 1, mode)),
                     span: clause.span,
                 },
                 _ => clause.clone(),
@@ -108,32 +132,40 @@ fn lower_domain_arguments(
                 if index == 0 {
                     argument.clone()
                 } else {
-                    lower(argument, depth + 1)
+                    lower(argument, depth + 1, mode)
                 }
             })
             .collect();
     }
-    lower_all(arguments, depth)
+    lower_all(arguments, depth, mode)
 }
 
-fn lower(expression: &Expr, depth: u32) -> Expr {
+fn lower(expression: &Expr, depth: u32, mode: LowerMode) -> Expr {
     if depth > MAX_STRUCTURE_DEPTH {
         return expression.clone();
     }
     let kind = match &expression.kind {
         ExprKind::Call(sid, arguments) => ExprKind::Call(*sid, arguments.clone()),
         ExprKind::DomainCall(identity, arguments) => {
-            ExprKind::DomainCall(*identity, lower_domain_arguments(*identity, arguments, depth))
+            ExprKind::DomainCall(*identity, lower_domain_arguments(*identity, arguments, depth, mode))
         }
         ExprKind::List(items) if !items.is_empty() => {
             let arguments = &items[1..];
 
-            if let Some(identity) = head_domain_identity(&items[0]) {
+            if let Some(identity) = head_domain_identity(&items[0], mode) {
                 return Expr {
                     kind: ExprKind::DomainCall(
                         identity,
-                        lower_domain_arguments(identity, arguments, depth),
+                        lower_domain_arguments(identity, arguments, depth, mode),
                     ),
+                    span: expression.span,
+                };
+            }
+
+            // Exact source must not consult a flat historical W8 registry.
+            if mode == LowerMode::ExactDomain {
+                return Expr {
+                    kind: ExprKind::List(lower_all(items, depth, mode)),
                     span: expression.span,
                 };
             }
@@ -146,7 +178,7 @@ fn lower(expression: &Expr, depth: u32) -> Expr {
                         .iter()
                         .map(|clause| match &clause.kind {
                             ExprKind::List(parts) => Expr {
-                                kind: ExprKind::List(lower_all(parts, depth + 1)),
+                                kind: ExprKind::List(lower_all(parts, depth + 1, mode)),
                                 span: clause.span,
                             },
                             _ => clause.clone(),
@@ -163,14 +195,14 @@ fn lower(expression: &Expr, depth: u32) -> Expr {
                                 if index == 0 {
                                     argument.clone()
                                 } else {
-                                    lower(argument, depth + 1)
+                                    lower(argument, depth + 1, mode)
                                 }
                             })
                             .collect(),
                     )
                 }
-                Some(sid) => ExprKind::Call(sid, lower_all(arguments, depth)),
-                None => ExprKind::List(lower_all(items, depth)),
+                Some(sid) => ExprKind::Call(sid, lower_all(arguments, depth, mode)),
+                None => ExprKind::List(lower_all(items, depth, mode)),
             }
         }
         _ => return expression.clone(),
@@ -261,5 +293,68 @@ mod domain_ladder_lowering_migration_tests {
             let lowered = lowered_one(source);
             assert!(matches!(lowered.kind, ExprKind::Call(_, _)));
         }
+    }
+}
+
+#[cfg(test)]
+mod exact_lowering_isolation_tests {
+    use super::*;
+
+    fn lower_current(source: &str) -> Expr {
+        let parsed = crate::parser::parse_exact_domain_source(source)
+            .expect("explicit exact-width source");
+        lower_exact_domain_program(&parsed)
+            .into_iter()
+            .next()
+            .expect("one expression")
+    }
+
+    #[test]
+    fn equal_eight_bit_payload_cannot_reopen_historical_dispatch() {
+        let current = lower_current("(00000001 (001 1))");
+        let ExprKind::List(items) = current.kind else {
+            panic!("unadmitted current D8 head cannot be a function");
+        };
+        assert!(matches!(&items[0].kind, ExprKind::DomainIdentity(identity)
+            if identity.width() == 8 && identity.packed_bits() == 0b00000001));
+        assert!(matches!(&items[1].kind, ExprKind::DomainCall(CoreDomainIdentity::D3(_), _)));
+
+        let historical = crate::parse("(00000001 (001 1))").unwrap();
+        assert!(matches!(lower_program(&historical)[0].kind, ExprKind::Call(_, _)));
+    }
+
+    #[test]
+    fn historical_def_surface_cannot_steal_exact_d4_binder() {
+        let current = lower_current("(def x (001 1))");
+        let ExprKind::List(items) = current.kind else {
+            panic!("legacy-only name has no implicit D4 law");
+        };
+        assert!(matches!(&items[0].kind, ExprKind::Symbol(name) if &**name == "def"));
+        assert!(matches!(&items[2].kind, ExprKind::DomainCall(CoreDomainIdentity::D3(_), _)));
+    }
+
+    #[test]
+    fn exact_d4_lambda_and_d3_quote_preserve_their_widths() {
+        let current = lower_current("(0010 (x) (001 (00000001 x)))");
+        let ExprKind::DomainCall(CoreDomainIdentity::D4(word), arguments) = current.kind else {
+            panic!("exact D4 lambda");
+        };
+        assert_eq!(word.word().packed_bits(), 0b0010);
+        let ExprKind::DomainCall(CoreDomainIdentity::D3(quote), quoted) = &arguments[1].kind else {
+            panic!("D3 quote");
+        };
+        assert_eq!(quote.word().packed_bits(), 0b001);
+        assert!(matches!(&quoted[0].kind, ExprKind::List(items)
+            if matches!(&items[0].kind, ExprKind::DomainIdentity(identity)
+                if identity.width() == 8 && identity.packed_bits() == 0b00000001)));
+    }
+
+    #[test]
+    fn exact_lowering_remains_idempotent_with_nested_calls() {
+        let parsed = crate::parser::parse_exact_domain_source(
+            "(111 (100 (001 000)) (011 (001 000)))"
+        ).unwrap();
+        let lowered = lower_exact_domain_program(&parsed);
+        assert_eq!(lower_exact_domain_program(&lowered), lowered);
     }
 }
