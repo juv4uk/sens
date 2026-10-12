@@ -1,20 +1,20 @@
 (0011 verdicts
   (01001011 (10100110 "tests/semantic-authority-verdict.lisp")))
 
-(0011 verdict (00000101 verdicts))
+(0011 verdict (100 verdicts))
 
 (0011 verdict-tag
-  (00000111
-    ((00000010 verdict) (1) verdict)
-    ((00000010 verdict) (0) (00000101 verdict))
-    ((00000010 verdict) () (00000001 empty-verdict))))
+  (110
+    ((010 verdict)
+     (110
+       ((101 verdict (001 ())) (001 empty-verdict))
+       ((010 (001 ())) verdict)))
+    ((010 (001 ())) (100 verdict))))
 
-(00000111
-  ((00000011 verdict-tag (00000001 semantic-authority-ok))
-   (1)
-   (00000001 semantic-authority-ok))
-  ((00000011 verdict-tag (00000001 semantic-authority-violation))
-   (1)
-   (00000101 ()))
-  (t
-   (00000101 ())))
+(110
+  ((101 verdict-tag (001 semantic-authority-ok))
+   (001 semantic-authority-ok))
+  ((101 verdict-tag (001 semantic-authority-violation))
+   (100 (001 ())))
+  ((010 (001 ()))
+   (100 (001 ()))))
