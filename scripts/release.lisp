@@ -1,4 +1,4 @@
-; Випуск підготовленого snapshot: sens scripts/release.lisp 0.41.0
+; Випуск підготовленого snapshot: sens scripts/release.lisp 0.42.0
 ; Версії семи Cargo.toml, Cargo.lock та packaging/install.sh оновлюються в PR.
 ; Скрипт перевіряє чистий checkout, відповідність origin/main, версії та
 ; зелений CI цього SHA. Не комітить файли й не пересуває наявні теги.
@@ -26,7 +26,7 @@
          (release-require program (100 result) 0)
          (1001 result))))))
 
-(release-require "Потрібна одна версія: 0.41.0" (0100 (110111011 (010 *argv*)))
+(release-require "Потрібна одна версія: 0.42.0" (0100 (110111011 (010 *argv*)))
                  (001 (0)))
 (release-require "Потрібен рівно один аргумент" (0100 (110111011 (010 (011 *argv*))))
                  (001 ()))
