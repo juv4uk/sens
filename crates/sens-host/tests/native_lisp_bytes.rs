@@ -141,6 +141,34 @@ fn bounded_x86_field_encoders_cover_every_admitted_tuple_without_math() {
 }
 
 #[test]
+fn disp8_admission_uses_the_finite_lisp_encoder_table_without_math() {
+    let _serial = test_lock();
+    let mut session = Session::default();
+    load_core_library(&mut session).expect("core must bootstrap before disp8 admission witness");
+    load_lisp_file("lib/machine/encoding/x86-64.lisp", &mut session);
+    load_lisp_file("lib/machine/admission/x86-64.lisp", &mut session);
+
+    for (source, accepted) in [
+        ("(x86-admission-disp8? -128)", true),
+        ("(x86-admission-disp8? -1)", true),
+        ("(x86-admission-disp8? 0)", true),
+        ("(x86-admission-disp8? 127)", true),
+        ("(x86-admission-disp8? -129)", false),
+        ("(x86-admission-disp8? 128)", false),
+        ("(x86-admission-disp8? #q2:1/2)", false),
+        ("(x86-admission-disp8? not-a-number)", false),
+    ] {
+        let result = eval_program(source, &mut session)
+            .unwrap_or_else(|error| panic!("{source} must return an admission predicate: {error}"));
+        assert_eq!(
+            result.value,
+            Value::predicate_bit(accepted),
+            "{source} must agree with the exhaustive signed-disp8 table"
+        );
+    }
+}
+
+#[test]
 fn unadmitted_ud2_form_is_rejected_before_host_executor() {
     let _serial = test_lock();
     let mut session = Session::default();
