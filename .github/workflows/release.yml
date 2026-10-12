@@ -26,16 +26,8 @@ jobs:
         env:
           RELEASE_TAG: ${{ github.ref_name }}
         run: |
-          python3 - <<'PY'
-          import os, pathlib, tomllib
-          package = tomllib.loads(pathlib.Path("crates/sens-cli/Cargo.toml").read_text())["package"]
-          expected = "l" + package["version"]
-          actual = os.environ["RELEASE_TAG"]
-          if actual != expected:
-              raise SystemExit(
-                  f"RELEASE_BLOCKED: tag/package version mismatch: {actual!r} != {expected!r}"
-              )
-          PY
+          set -euo pipefail
+          python3 scripts/verify_release_tag.py "$RELEASE_TAG"
           python3 -m unittest discover -s packaging/tests -v
       - name: Узгодженість версій усіх релізних crates
         run: cargo test --locked -p sens-lsp --test release_parity
