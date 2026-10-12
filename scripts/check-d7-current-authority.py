@@ -157,6 +157,21 @@ for bits,body in surface_rows:
     # table must preserve it verbatim. Empty authority fields are not guessed.
     evidence_row = authority_rows[bits]
     projection = evidence_row.get("projection", {})
+    if bits == "1100101":
+        # Existing D7 authority metadata says TAB for the resident named
+        # sign.double-quote. That is a projection inconsistency, not identity
+        # authority; keep the human surface readable and explicitly detect it
+        # until the metadata owner repairs its non-identity projection fields.
+        assert projection.get("slp1") == chr(9) and projection.get("iast") == chr(9), (
+            "D7:1100101 historical projection discrepancy changed; review the explicit exception"
+        )
+        assert projection.get("uk") is None and projection.get("deva") is None
+        assert row.surface_symbols["ук"] == '"'
+        assert row.surface_symbols["укр"] == '"'
+        assert row.surface_symbols["san"] is None
+        assert row.surface_symbols["en"] == '"'
+        assert row.surface_symbols["sym"] == '"'
+        continue
     for namespace, source_name in (("ук", "uk"), ("укр", "uk"), ("san", "deva"), ("en", "iast")):
         expected_symbol = projection.get(source_name)
         if expected_symbol:
