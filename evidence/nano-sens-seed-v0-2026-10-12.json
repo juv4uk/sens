@@ -66,14 +66,100 @@
         "on_disk_bytes": 11461,
         "role": "source file read by the CML lib-test witness"
       },
-      "sum_bytes": 35983896,
-      "formula": "34,575,192 + 1,397,243 + 11,461 = 35,983,896 bytes",
+      "sum_bytes": 35985025,
+      "formula": "34,575,192 + 1,397,243 + 11,461 + 1,129 = 35,985,025 bytes",
       "exclusions": [
         "not a whole-chain total and not a claim of minimality",
         "external vendored crate packages are separately listed and excluded: 7 packages / 296 files / 4,419,723 tracked bytes",
         "Git metadata is separately measured as full-checkout external metadata snapshots; minimal required refs/objects are not derived",
         "rustc, Cargo, GCC, assembler/linker, OS/shared libraries and other declared external dependencies are excluded",
-        "remaining unenumerated runtime/build paths may increase the total"
+        "remaining unenumerated runtime/build paths may increase the total",
+        "corrected scope: include the known CML runtime-read contract contracts/machine-lowering-boundary.lisp (1,129 bytes); this addition is a known input, not an optimization."
+      ],
+      "cml_runtime_file_inputs": [
+        {
+          "repository": "juv4uk/cml",
+          "commit": "3320fe3b00a4a099ecb9ff06e22e0be2b1fee499",
+          "path": "contracts/machine-lowering-boundary.lisp",
+          "git_blob_sha1": "e3e89721863142ff03689086c0985552eed5cb39",
+          "on_disk_bytes": 1129,
+          "role": "Read from the CML lib-test runner by the machine-lowering boundary contract test; not merely an include embedded in the executable."
+        }
+      ],
+      "file_count_components": {
+        "runner_elf": 1,
+        "sens_runtime_build_input_paths": 114,
+        "cml_runtime_file_inputs": 1,
+        "wsm_runtime_input_paths": 1,
+        "total_known_paths_in_partial_subtotal": 117
+      }
+    },
+    "latest_verified_operational_checkpoint": {
+      "schema": "nano-sens-known-operational-input-subtotal/1",
+      "status": "MEASURED_SUBSET_NOT_FULL_SEED_TOTAL",
+      "cml_runner": {
+        "repository": "juv4uk/cml",
+        "source_commit": "bdf0a0e75ef7ea6cb430c4286cb9352e7d422648",
+        "workflow_run": "https://github.com/juv4uk/cml/actions/runs/38186316487",
+        "runner_sha256": "9b5621ca25334916d044cdbe1c9809f6deb29bc39d62fa8aff1c5527d8b79fc3",
+        "on_disk_bytes": 34623904,
+        "loadable_segment_file_bytes": 6042632,
+        "executable_code_section_bytes": 4147007,
+        "role": "newer independently verified checkpoint; do not compare byte-size difference with earlier runner source checkpoints as an optimization result"
+      },
+      "sens_runtime_build_inputs": {
+        "repository": "juv4uk/sens",
+        "commit": "d0787a40fcea36501747732aa61b6de19fe29c70",
+        "file_count": 114,
+        "on_disk_bytes": 1397243
+      },
+      "cml_runtime_file_inputs": [
+        {
+          "repository": "juv4uk/cml",
+          "commit": "3320fe3b00a4a099ecb9ff06e22e0be2b1fee499",
+          "path": "contracts/machine-lowering-boundary.lisp",
+          "git_blob_sha1": "e3e89721863142ff03689086c0985552eed5cb39",
+          "on_disk_bytes": 1129
+        }
+      ],
+      "wsm_nucleus": {
+        "repository": "juv4uk/wsm-my-lisp",
+        "commit": "a6bd9747196f2d676ab6883cbb4b84c7fcfc6947",
+        "path": "asm/nucleus.s",
+        "git_blob_sha1": "0fd0787bff2f64f0f9432f4395e9acb177544973",
+        "on_disk_bytes": 11461
+      },
+      "sum_bytes": 36033737,
+      "formula": "34,623,904 + 1,397,243 + 1,129 + 11,461 = 36,033,737 bytes",
+      "proof": {
+        "status": "PASS",
+        "clean_runs": 2,
+        "test_corpus": {
+          "run1": {
+            "passed": 189,
+            "failed": 0
+          },
+          "run2": {
+            "passed": 189,
+            "failed": 0
+          }
+        },
+        "identical_size_report_sha256": "8b2ec82d1fa57e0811a7c754e05f9fac9966b6caac8708045e1eea85d9b8ed90",
+        "active_cargo_graphs_byte_identical": true,
+        "cml_graph_sha256": "fe4e29d9723e1c31a598d5905024670defad2a4ffce744cd099b84d95c285c29",
+        "sens_xtask_graph_sha256": "a11ec08911b104cfb31211d4f82459711d9b5ae8788f043bd8ce60baaff4736a",
+        "lockfiles_unchanged_under_locked_graph_commands": true,
+        "proof_artifact_id": 11719214909,
+        "proof_artifact_sha256": "sha256:686108e9061d00d74fc0b49459c33f89f39f6bfec247b91e866200a5ffc5e4c0",
+        "proof_expires_at": "2026-11-11T00:00:42Z"
+      },
+      "exclusions": [
+        "not the whole-chain seed total and not a claim of minimality",
+        "the 7 vendored third-party crates (296 files / 4,419,723 bytes) are external dependencies and separately inventoried",
+        "full Git metadata is measured separately; the minimal refs/objects needed by git rev-parse are not derived",
+        "CML outer registry/cache package source bytes are external and not measured",
+        "rustc/Cargo/GCC/assembler/linker/OS/shared libraries and other external dependencies remain separately classified",
+        "not-yet-enumerated or proven-minimal runtime/build paths may increase the required set"
       ]
     }
   },
@@ -129,6 +215,31 @@
           11719377856
         ],
         "two_clean_run_proof_artifact_id": 11718994225
+      },
+      "latest_verified_snapshot": {
+        "workflow_run": "https://github.com/juv4uk/cml/actions/runs/38186316487",
+        "source_commit": "bdf0a0e75ef7ea6cb430c4286cb9352e7d422648",
+        "full_checkout_regular_file_bytes": {
+          "run1": {
+            "cml": 33664781,
+            "sens_submodule": 30802943,
+            "wsm_witness": 1810846,
+            "total": 66278570
+          },
+          "run2": {
+            "cml": 33664797,
+            "sens_submodule": 30802951,
+            "wsm_witness": 1810848,
+            "total": 66278596
+          }
+        },
+        "delta_run1_minus_run2": {
+          "cml": -16,
+          "sens_submodule": -8,
+          "wsm_witness": -2,
+          "total": -26
+        },
+        "classification": "Measured full-checkout metadata snapshots only; excluded from seed subtotal and not a minimal Git object/ref closure."
       }
     },
     "vendored_crate_sources": {
@@ -239,17 +350,27 @@
         "note": "Captured in a run whose Cargo graph step passed, but later lib test exposed a separate stale baseline assertion; do not cite that run as a green full-test gate."
       },
       "locked_revalidation": {
+        "status": "PASS_TWO_CLEAN_RUNS",
         "workflow_run": "https://github.com/juv4uk/cml/actions/runs/38186316487",
         "source_commit": "bdf0a0e75ef7ea6cb430c4286cb9352e7d422648",
-        "status_at_recording": "run1 success; run2 in progress; graph step passed in both up to C1 test step",
-        "note": "The workflow now requires `cargo tree --locked` for the outer CML and nested SENS graphs and asserts their lockfile blob hashes do not change. Await terminal run status before treating the full K1+graph proof as green."
+        "clean_runs": 2,
+        "tests_per_run": {
+          "passed": 189,
+          "failed": 0
+        },
+        "active_graphs_byte_identical": true,
+        "cml_tree_sha256": "fe4e29d9723e1c31a598d5905024670defad2a4ffce744cd099b84d95c285c29",
+        "sens_xtask_tree_sha256": "a11ec08911b104cfb31211d4f82459711d9b5ae8788f043bd8ce60baaff4736a",
+        "lockfiles_unchanged": true,
+        "two_run_proof_artifact_id": 11719214909,
+        "two_run_proof_artifact_sha256": "sha256:686108e9061d00d74fc0b49459c33f89f39f6bfec247b91e866200a5ffc5e4c0"
       },
       "dependency_bytes": "Outer CML Cargo registry/cache source bytes remain external and unmeasured."
     }
   },
   "still_not_measured": [
     "whole-chain seed-v0 input closure total and minimality",
-    "CML outer Cargo registry/cache byte size and a clean offline dependency-graph proof; the pinned wsm-os-target tree and its selected compile-source subset are now measured separately in the CML census.",
+    "CML outer Cargo registry/cache source bytes and a controlled offline replay; the active default-feature graph is now pinned and passes `--locked` in two clean runs, but registry/cache bytes and offline availability are not measured.",
     "minimal Git object/ref metadata required for git rev-parse (full checkout .git snapshots are measured separately but are not minimal)",
     "shared-library/toolchain dependency bytes",
     "minimum possible seed size",
@@ -352,7 +473,7 @@
       "finish an automated cfg/module graph and transitive compile-time/runtime path-input audit across CML and SENS",
       "validate the selected SENS xtask/sens Cargo dependency graph with a clean offline build against the vendored source override; active vendor packages are pinned and separately byte-accounted",
       "derive the minimum Git ref/object metadata needed by the two git rev-parse call sites or remove those runtime calls while preserving revision proof",
-      "Validate the selected default-feature CML dependency graph under a controlled clean build; wsm-os-target has a separate pinned tree/source ledger, while registry/cache bytes remain external and are not part of the seed subtotal.",
+      "Measure CML outer registry/cache package source bytes and perform a controlled offline replay; the active graph has passed `--locked` twice without lockfile changes, but external source/cache bytes remain unmeasured.",
       "verify runtime versus build-only inputs with a clean controlled reproduction and derive the minimum operational closure",
       "do not publish a whole-chain seed total until the full required-input set is complete and its boundary/minimality is proved"
     ],
@@ -398,6 +519,8 @@
     "Git metadata measurement (2026-10-12): K1 follow-up CI run 38185559594 passed both independent runs and byte-identical report comparison. Summed `.git` regular-file bytes were 66,126,630 and 66,122,122 across the CML/SENS/WSM checkout snapshots; 4,508-byte difference means these are environment snapshots, not the minimized metadata seed. They remain separate external dependency evidence, not seed bytes.",
     "Measured operational subset (2026-10-12): the pinned K1 runner checkpoint (34,575,192 B), 114 known SENS runtime-build input paths (1,397,243 B), and the pinned WSM nucleus source (11,461 B) sum to 35,983,896 B. This is a measured subtotal only, not the complete seed total or a minimality claim; external dependencies and unclosed runtime paths remain separate.",
     "CML external dependency update (2026-10-12): the pinned `wsm-os-target` Git repository is 22 tracked files / 48,742 bytes; the selected compile-source subset (workspace Cargo.toml, LICENSE, crate Cargo.toml, lib.rs) is 4 files / 24,935 bytes. These are external dependency bytes and excluded from trusted-seed subtotal. The CML census also lists the seven default-feature crates.io package versions/checksums separately.",
-    "Lockfile integrity correction (2026-10-12): resolved CML's stale root Cargo.lock mismatch for its pinned SENS 0.41.0 path dependency by adding exact serde-family lock entries. Outer CML uses syn 3.0.4 while nested SENS uses syn 3.0.3; keep those separate. Locked revalidation is in progress and is not marked PASS yet."
+    "Lockfile integrity correction (2026-10-12): resolved CML's stale root Cargo.lock mismatch for its pinned SENS 0.41.0 path dependency by adding exact serde-family lock entries. Outer CML uses syn 3.0.4 while nested SENS uses syn 3.0.3; keep those separate. Locked revalidation is in progress and is not marked PASS yet.",
+    "Locked dependency graph validation (2026-10-12): CML workflow run 38186316487 completed all steps successfully; two clean runs each passed 189/189 CML lib tests, both active Cargo graph captures ran with `--locked`, lock files remained unchanged, the graphs and size reports matched byte-for-byte. This closes the lockfile-drift/graph-repro gate, not the full seed input-closure gate.",
+    "Operational subtotal boundary correction (2026-10-12): the CML lib-test runner dynamically reads `contracts/machine-lowering-boundary.lisp` (1,129 B). Added it as a separate known runtime input. The earlier K1 partial subtotal is corrected to 35,985,025 B; the newer, distinct CML checkpoint has a verified known-input subtotal of 36,033,737 B. Both remain partial subtotals, not a whole seed-total."
   ]
 }
