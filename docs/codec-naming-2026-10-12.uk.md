@@ -51,18 +51,22 @@ SENS-програму одним байтом у доведеному bounded pr
 - 2 байти → **F3M-2**;
 - 3 байти → **F3M-3**;
 - 4 байти → **F3M-4**;
-- 0 або 5+ байти → fail-closed до окремого рішення.
+- 5 байтів → **F3M-5**;
+- 0 або 6+ байтів → fail-closed до окремого рішення.
 
 Вміст байтів не sniff-иться і не може перемкнути профіль; fallback у T5/F3C
-заборонений. Через це всі 8/16/24 біти доступні програмному рангу, а не
+заборонений. Через це всі 8/16/24/32/40 бітів доступні програмному рангу, а не
 службовому selector. Dense F3M-1 має 256/256 unique mappings; F3M-2/F3M-3 використовують
 наступні неперетинні global-rank windows на 65 536 і 16 777 216 програм.
 F3M-2 має exhaustive 65 536/65 536 roundtrip; для F3M-3 вже є real-evaluator
 witnesses, DP-доказ першого 6/6-capability рангу `16 3C 63` та exhaustive
 final-64K winner `FF FB 37`. F3M-4 додає наступні **4 294 967 296** rank-ів;
 для нього є algebraic capacity proof, 65 536 stratified roundtrip samples і
-real-evaluator witness `DE AD BE EF`. Повні evaluator sweeps F3M-3/F3M-4
-лишаються окремими proof gates. Детально:
+real-evaluator witness `DE AD BE EF`. F3M-5 має окремий prefix-stable
+**2^40** extension-space, не рухає старі ranks і додає D3 EQ + closed D4
+LAMBDA; dedicated proof **38234038310 — SUCCESS**, all-basis witness
+`03 B1 C7 07 93`. Повні evaluator sweeps F3M-3/F3M-4/F3M-5 лишаються
+окремими proof gates. Детально:
 [профілі F3M за довжиною](frame3-micro-length-profiles-2026-10-12.uk.md).
 [Нормативні режими проєкту](project-modes-2026-10-12.uk.md).
 
