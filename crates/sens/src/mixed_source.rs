@@ -1482,4 +1482,12 @@ mod tests {
         );
     }
 
+    #[test]
+    fn process_tcp_language_loaders_use_path_bound_reader() {
+        let mut session = crate::Session::default();
+        crate::load_core_library(&mut session).expect("current Core bootstrap");
+        crate::load_process_library(&mut session)
+            .expect("process/TCP Lisp libraries must load via the path-bound exact-domain reader");
+    }
+
 }
