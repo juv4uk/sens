@@ -202,6 +202,31 @@ class LegacyD3GuardTests(unittest.TestCase):
             f.rule for f in MODULE.scan_lisp(bad, path)
         ])
 
+    def test_evaluator_dispatch_generator_uses_exact_d3_cond(self):
+        path = "scripts/generate-rust-evaluator-dispatch.lisp"
+        source = (ROOT / path).read_text(encoding="utf-8")
+        self.assertEqual(MODULE.scan_lisp(source, path), [])
+
+        # Representative mutations restore old result-matching triplets;
+        # every one must be rejected by the same scanner used in Hosted CI.
+        mutations = (
+            ("((010 remaining)\\n       (001 ()))",
+             "((010 remaining)\\n       ()\\n       (001 ()))"),
+            ("((11110111 name (001 lambda))\\n       \\\"NecessaryFormMechanism::Lambda\\\")",
+             "((11110111 name (001 lambda)) (1)\\n       \\\"NecessaryFormMechanism::Lambda\\\")"),
+            ("((010 (001 ())) (100 (001 ())))",
+             "((001 no-known-mechanism) no-known-mechanism (100 (001 ())))"),
+            ("((010 remaining) \\\"\\\")",
+             "((010 remaining) () \\\"\\\")"),
+        )
+        for good, legacy in mutations:
+            with self.subTest(legacy=legacy):
+                self.assertIn(good, source)
+                mutated = source.replace(good, legacy, 1)
+                self.assertIn("COND_NOT_TWO_FIELDS", [
+                    finding.rule for finding in MODULE.scan_lisp(mutated, path)
+                ])
+
     def test_invalid_lisp_is_incomplete_not_green(self):
         for source in ("(110 (1 1)", "(110 (1 1)))", '"unclosed'):
             with self.subTest(source=source), self.assertRaises(MODULE.Unscannable):
