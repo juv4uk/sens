@@ -3,7 +3,7 @@
 
 use sens::{
     decode_binary_program, encode_binary_program, BinaryFrame, BinaryFrameError,
-    BinaryNumber, BinarySourceWord, Bit3, Bit8, Bit9, Rational, Sens8, Text7,
+    BinaryNumber, BinarySourceWord, Bit3, Bit8, Bit9, Rational, Text7,
 };
 
 fn числове_слово(width: usize) -> BinaryFrame {
@@ -44,7 +44,7 @@ fn точні_d3_d8_d9_та_d24_d48_не_змішуються_з_історич�
     assert_eq!(decode_binary_program(&encoded).unwrap(), frames);
 
     // Однаковий восьмибітний payload не є дозволом змінити історичну роль.
-    let old = BinaryFrame::Function(Sens8::from_packed_byte(0b10101000));
+    let old = BinaryFrame::Function(sens::sens!(10101000));
     assert_ne!(encode_binary_program(&[old]).unwrap(),
                encode_binary_program(&[d8]).unwrap());
     assert_ne!(encode_binary_program(&[d3]).unwrap(),
@@ -55,7 +55,7 @@ fn точні_d3_d8_d9_та_d24_d48_не_змішуються_з_історич�
 #[test]
 fn старі_виклики_літерали_та_некваліфіковані_числа_блокуються() {
     let old = [
-        BinaryFrame::Function(Sens8::from_packed_byte(0b10101000)),
+        BinaryFrame::Function(sens::sens!(10101000)),
         BinaryFrame::Number(Rational::from_literal("1", "2").unwrap()),
         BinaryFrame::BinaryNumber(BinaryNumber::parse("1").unwrap()),
     ];
