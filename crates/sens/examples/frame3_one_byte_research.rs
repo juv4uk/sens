@@ -1,10 +1,11 @@
 //! One physical byte, one genuinely evaluated *closed* SENS program.
 //!
-//! This is a bounded RESEARCH enumerative profile (".f3m"), NOT the universal
-//! Frame-3, NOT a replacement of physical ".sens" T5, and NOT a claim that
-//! arbitrary programs fit in one byte. The profile is selected externally by
-//! the caller/file type, so that selector's cost is excluded from the byte.
-//! A reserved byte or wrong-sized file is rejected; no implicit T5 fallback.
+//! This is the bounded F3M-1 RESEARCH enumerative profile (".f3m"), NOT a
+//! replacement of physical ".sens" T5, and NOT a claim that arbitrary programs
+//! fit in one byte. The Frame3-Micro family selects profile by exact physical
+//! payload length: 1 byte = F3M-1, 2 = F3M-2, 3 = F3M-3. This witness proves
+//! only F3M-1; F3M-2/F3M-3 need their own rank/admission proofs.
+//! No content sniffing, magic-byte selector, or implicit T5 fallback.
 //! Values are verified by the actual SENS evaluator and independent T5 path.
 use std::path::Path;
 use sens::{
@@ -193,7 +194,8 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         let source = decode(&[code])?.join(" ");
         println!("{code:02x}\t1\t{t5_len}\t{source}\t{result}");
     }
-    // Malformed/aliased inputs must remain rejected. No multi-byte extension.
+    // This witness is F3M-1 only. Multi-byte inputs belong to separately
+    // selected F3M-2/F3M-3 profiles and must not be decoded by this table.
     for bad in [vec![], vec![0xff], vec![0x40, 0], vec![0xf3]] {
         if decode(&bad).is_ok() { return Err(format!("accepted invalid carrier {bad:?}").into()); }
     }
