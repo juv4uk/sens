@@ -1,0 +1,26 @@
+name: Міграція ядра — числові дані компілятора лише D24+
+
+on:
+  pull_request:
+    paths:
+      - "crates/sens/src/program_data.rs"
+      - ".github/workflows/program-data-d24-cutover.yml"
+  push:
+    branches: [main]
+    paths:
+      - "crates/sens/src/program_data.rs"
+      - ".github/workflows/program-data-d24-cutover.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  domain-number-conversion:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Перевірити позитивні та негативні свідки D24+ у компіляторі
+        run: cargo test --locked -p sens --lib тести_міграції_чисел_d24
+      - name: Перевірити фізичний T5 після суворої межі числових доменів
+        run: cargo test --locked -p sens --test physical_t5_execution
