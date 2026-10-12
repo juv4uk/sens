@@ -105,7 +105,7 @@
                       (reason-index-add-reversed
                         predicate (100 remaining) buckets)
                       (01010 predicate-count 1)))
-                   ((11110111
+                   ((unify-equal?
                       (11010 predicate-count *reason-index-max-predicates*)
                       (010 (001 (x))))
                     (reason-index-linear original))))
@@ -345,7 +345,7 @@
     (110
       
       ((010 alist)  (1110 entry))
-      ((11110111 (100 (100 alist)) (100 entry))
+      ((unify-equal? (100 (100 alist)) (100 entry))
        (111
          (111
            (100 entry)

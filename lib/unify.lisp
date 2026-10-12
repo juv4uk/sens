@@ -58,6 +58,21 @@
 ; unendlicher Strukturen und erhält die Stabilität der Engine bei komplexer
 ; logischer Inferenz.
 
+; Reasoning-local structural equality with exact D1 result.
+; It deliberately avoids the legacy Core equal? result carrier while the
+; separate Core PredicateBit cutover remains evidence-gated.
+(0011 unify-equal?
+  (0010 (a b)
+    (110
+      ((010 a)
+       (110
+         ((010 b) (101 a b))
+         ((010 ()) (010 (001 (0))))))
+      ((010 b) (010 (001 (0))))
+      ((unify-equal? (100 a) (100 b))
+       (unify-equal? (011 a) (011 b)))
+      ((010 ()) (010 (001 (0)))))))
+
 (0011 logic-var
   (0010 (name)
     (1110 (001 var) name)))
@@ -90,7 +105,7 @@
     (110
       
       ((010 bindings)  variable)
-      ((11110111 (100 (100 bindings)) (1001 variable)) (011 (100 bindings)))
+      ((unify-equal? (100 (100 bindings)) (1001 variable)) (011 (100 bindings)))
       ((010 ()) (lookup-subst variable (011 bindings))))))
 
 (0011 extend-subst
@@ -112,7 +127,7 @@
     (110
       ((101100100 resolved)
        (110
-         ((11110111 (1001 resolved) (1001 term)) term)
+         ((unify-equal? (1001 resolved) (1001 term)) term)
          ((010 ()) (101110100 resolved bindings))))
       ((010 ()) resolved))))
 
@@ -155,7 +170,7 @@
     (001000 ((resolved (101110100 term bindings)))
       (110
         ((101100100 resolved)
-         (11110111 (1001 variable) (1001 resolved)))
+         (unify-equal? (1001 variable) (1001 resolved)))
         ((010 resolved) (010 (001 (0))))
         ((101110101 variable (100 resolved) bindings) (010 ()))
         ((010 ()) (101110101 variable (011 resolved) bindings))))))
@@ -167,7 +182,7 @@
     (110
       ((101100100 term)
        (110
-         ((11110111 (1001 variable) (1001 term)) bindings)
+         ((unify-equal? (1001 variable) (1001 term)) bindings)
          ((010 ()) (extend-subst variable term bindings))))
       ((101110101 variable term bindings) (001 fail))
       ((010 ()) (extend-subst variable term bindings)))))

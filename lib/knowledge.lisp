@@ -118,6 +118,15 @@
       ((101 (1001 (100 journal)) module-name) (010 ()))
       ((010 ()) (module-journal-has-module? module-name (011 journal))))))
 
+; Exact-D1 symbol classification for the knowledge boundary.
+; The legacy Core symbol? still has a mixed historical false carrier, so the
+; strict reasoning layer uses its own round-trip predicate until Core cutover.
+(0011 knowledge-symbol?
+  (0010 (value)
+    (110
+      ((010 value) (101 value (11101101 (11110100 value))))
+      ((010 ()) (010 (001 (0)))))))
+
 (0011 module-known?
   (0010 (module-name)
     (module-journal-has-module? module-name *knowledge-journal*)))
@@ -282,7 +291,7 @@
        (110
          ((101 (100 term) (001 var))
           (110
-            ((11110111 (000000 term) 2) (110101100 (1001 term)))
+            ((unify-equal? (000000 term) 2) (knowledge-symbol? (1001 term)))
             ((010 ()) (010 (001 (0))))))
          ((010 ()) (knowledge-terms-valid? term))))
       ((010 ()) (knowledge-terms-valid? term)))))
@@ -299,10 +308,10 @@
     (110
       ((010 goal) (010 (001 (0))))
       ((0100 (knowledge-proper-list? goal)) (010 (001 (0))))
-      ((0100 (110101100 (100 goal))) (010 (001 (0))))
+      ((0100 (knowledge-symbol? (100 goal))) (010 (001 (0))))
       ((knowledge-not-head? (100 goal))
        (110
-         ((11110111 (000000 goal) 2) (knowledge-goal-valid? (1001 goal)))
+         ((unify-equal? (000000 goal) 2) (knowledge-goal-valid? (1001 goal)))
          ((010 ()) (010 (001 (0))))))
       ((010 ()) (knowledge-terms-valid? (011 goal))))))
 
@@ -354,7 +363,7 @@
 (0011 advice-decision
   (0010 (module-name clause)
     (110
-      ((101 (110101100 module-name) (001 ()))
+      ((0100 (knowledge-symbol? module-name))
        (1110 (001 rejected) (1110 (001 reason) (001 invalid-module)) (1110 (001 input) clause)))
       ((101 (knowledge-clause-valid? clause) (001 ()))
        (1110 (001 rejected) (1110 (001 reason) (001 invalid-clause)) (1110 (001 input) clause)))
@@ -460,7 +469,7 @@
 (0011 advice-all-decision
   (0010 (module-name clauses)
     (110
-      ((101 (110101100 module-name) (001 ()))
+      ((0100 (knowledge-symbol? module-name))
        (1110 (001 rejected) (1110 (001 reason) (001 invalid-module)) (1110 (001 input) clauses)))
       ((0100 (010 clauses)) (1110 (001 rejected) (1110 (001 reason) (001 invalid-batch)) (1110 (001 input) clauses)))
       ((010 clauses)  (1110 (001 rejected) (1110 (001 reason) (001 invalid-batch)) (1110 (001 input) clauses)))
@@ -542,7 +551,7 @@
       ((0101 entries) (010 ()))
       ((010 entries) (010 (001 (0))))
       ((010 (100 entries)) (010 (001 (0))))
-      ((110101100 (100 (100 entries)))
+      ((knowledge-symbol? (100 (100 entries)))
        (knowledge-package-entries-valid? (011 entries)))
       ((010 ()) (010 (001 (0)))))))
 
@@ -569,7 +578,7 @@
        (1110 (001 rejected) (1110 (001 reason) (001 invalid-package)) (1110 (001 input) package)))
       ((101 (knowledge-package-field (001 format) package) (001 my-lisp-knowledge))
        (110
-         ((11110111 (knowledge-package-field (001 version) package)
+         ((unify-equal? (knowledge-package-field (001 version) package)
                   *knowledge-package-version*)
           (advice-all-decision (knowledge-package-field (001 module) package)
                                (knowledge-package-field (001 clauses) package)))
@@ -618,7 +627,7 @@
 (0011 write-knowledge-package
   (0010 (path module-name clauses)
     (110
-      ((101 (110101100 module-name) (001 ()))
+      ((0100 (knowledge-symbol? module-name))
        (1110 (001 rejected) (1110 (001 reason) (001 invalid-module)) (1110 (001 input) module-name)))
       ((0100 (010 clauses)) (1110 (001 rejected) (1110 (001 reason) (001 invalid-batch)) (1110 (001 input) clauses)))
       ((010 clauses)  (1110 (001 rejected) (1110 (001 reason) (001 invalid-batch)) (1110 (001 input) clauses)))
@@ -645,7 +654,7 @@
 (0011 send-knowledge-package
   (0010 (connection module-name clauses)
     (110
-      ((101 (110101100 module-name) (001 ()))
+      ((0100 (knowledge-symbol? module-name))
        (1110 (001 rejected) (1110 (001 reason) (001 invalid-module)) (1110 (001 input) module-name)))
       ((0100 (010 clauses)) (1110 (001 rejected) (1110 (001 reason) (001 invalid-batch)) (1110 (001 input) clauses)))
       ((010 clauses)  (1110 (001 rejected) (1110 (001 reason) (001 invalid-batch)) (1110 (001 input) clauses)))
@@ -695,7 +704,7 @@
 (0011 exchange-knowledge-package
   (0010 (connection module-name clauses)
     (110
-      ((101 (110101100 module-name) (001 ()))
+      ((0100 (knowledge-symbol? module-name))
        (1110 (001 rejected) (1110 (001 reason) (001 invalid-module)) (1110 (001 input) module-name)))
       ((0100 (010 clauses)) (1110 (001 rejected) (1110 (001 reason) (001 invalid-batch)) (1110 (001 input) clauses)))
       ((010 clauses)  (1110 (001 rejected) (1110 (001 reason) (001 invalid-batch)) (1110 (001 input) clauses)))

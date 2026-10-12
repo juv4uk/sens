@@ -464,7 +464,7 @@
 (0011 world-at-depth-from
   (0010 (world current-depth target-depth)
     (110
-      ((11110111 current-depth target-depth)  world)
+      ((101 current-depth target-depth)  world)
       ((010 ()) (001 World-not-found))
       
       ((010 (world-parent world))  (001 World-not-found))
@@ -481,7 +481,7 @@
 (0011 world-journal-prefix
   (0010 (journal old-journal)
     (110
-      ((11110111 journal old-journal) (001 ()))
+      ((внутрішня-рівність-версій journal old-journal) (001 ()))
       
       ((010 journal)  (001 World-not-ancestor))
       ((010 ())
@@ -500,7 +500,7 @@
 (0011 world-diff
   (0010 (from to)
     (110
-      ((11110111 from to) (001 ()))
+      ((внутрішня-рівність-версій from to) (001 ()))
       
       ((010 (world-parent to))  (001 World-not-ancestor))
       ((010 ())
@@ -534,7 +534,7 @@
 (0011 world-climb-to-depth
   (0010 (world current-depth target-depth)
     (110
-      ((11110111 current-depth target-depth)  world)
+      ((101 current-depth target-depth)  world)
       ((010 ()) (world-climb-to-depth (world-parent world)
                                (01011 current-depth 1)
                                target-depth)))))
@@ -542,7 +542,7 @@
 (0011 world-common-ancestor-aligned
   (0010 (left right)
     (110
-      ((11110111 left right) left)
+      ((внутрішня-рівність-версій left right) left)
       
       ((010 ()) (001 World-no-common-ancestor))
       

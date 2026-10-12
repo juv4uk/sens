@@ -350,34 +350,72 @@
 ; Makro-Expansionsmechanismus, den `unless` und `let` bereits nutzen —
 ; `let*`, das `let*` aufruft, ist gewöhnliche Rekursion, kein Sonderfall,
 ; von dem der Evaluator wissen müsste.
-; `eq` is deliberately atom-only per McCarthy's original primitive.
-; `equal?` is the structural/deep-equality predicate built on D3 EQ/ATOM/CAR/CDR.
-; The result is exact D1: 1 for equal, 0 for different. This restores the
-; already-researched PredicateBit law from the historical Contract-10 replay;
-; list-wrapped (1)/(0) is not a predicate domain.
+; `eq` is deliberately atom-only per McCarthy's original primitive (see
+; docs/language-core.md) — `(eq '(1 2) '(1 2))` errors rather than comparing
+; structurally. `equal?` is the structural/deep-equality counterpart, built
+; on top of `eq` and `atom` rather than replacing them. Its answer is the
+; Core4 15-state scale (#1391): `(1)` — the same structure, `(0)` — different.
+; Canonical three-part `cond` consumes the answer explicitly; a two-part
+; clause selects only on a «yes» answer.
 (0011 equal?
   (0010 (a b)
     (110
-      ((010 a)
+      ((0100 (010 a))
        (110
-         ((010 b) (101 a b))
-         ((010 ()) (010 (001 (0))))))
-      ((010 ())
+         ((0100 (010 b))
+          (001 (1)))
+         ((010 b) 
+          (001 (0)))
+         ((010 b) 
+          (001 (0)))))
+      ((010 a) 
        (110
-         ((010 b) (010 (001 (0))))
-         ((010 ())
+         ((0100 (010 b))
+          (001 (0)))
+         ((010 b) 
           (110
-            ((equal? (100 a) (100 b))
-             (equal? (011 a) (011 b)))
-            ((010 ()) (010 (001 (0)))))))))))
+            ((101 a b) 
+             (001 (1)))
+            ((101 a b) 
+             (001 (0)))))
+         ((010 b) 
+          (001 (0)))))
+      ((010 a) 
+       (110
+         ((0100 (010 b))
+          (001 (0)))
+         ((010 b) 
+          (001 (0)))
+         ((010 b) 
+          (110
+            ((11110111 (100 a) (100 b)) 
+             (11110111 (011 a) (011 b)))
+            ((0100 (11110111 (100 a) (100 b)))
+             (001 (0))))))))))
 
-; NOT is a predicate combinator, not a generic truthiness converter. Its input
-; must already be exact D1; strict COND rejects every other result domain.
+; Exact-Q uses 1 for YES and 0 for NO.  Structural and identity relations
+; retain their own result domains, so predicate consumers normalize them here.
+(0011 truthy?
+  (0010 (value)
+    (110
+      
+      ((010 value) 
+       (110
+         ((101 value 0)  (001 ()))
+         ((0100 (101 value 0)) t)))
+      ((010 value) 
+       (110
+         ((11110111 value (001 (0)))  (001 ()))
+         ((11110111 value (001 (0)))  (001 ()))
+         ((11110111 value (001 (0)))  (001 ()))
+         ((010 ())  t))))))
+
 (0011 not?
   (0010 (value)
     (110
-      (value (010 (001 (0))))
-      ((010 ()) (010 ())))))
+      ((truthy? value)  (001 ()))
+      ((0100 (truthy? value)) t))))
+
 
 ; nth/member?/assoc (G5 test: already expressible via existing means?)
 ; — yes, same recursive-list-walk shape as length/reverse above.
@@ -560,9 +598,14 @@
 (0011 symbol?
   (0010 (value)
     (110
-      ((010 value)
-       (101 value (11101101 (11110100 value))))
-      ((010 ()) (010 (001 (0)))))))
+      
+      ((010 value) 
+       (110
+         ((101 value (11101101 (11110100 value)))
+           (010 (001 ())))
+         ))
+      ((010 value)  (001 ())))))
+
 
 ; quotient/mod (G5 test: already expressible via existing means?) — yes.
 ; Unlike bitwise operations (AND/OR/XOR/shift — no primitive exposes a

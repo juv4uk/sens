@@ -202,7 +202,7 @@
 (0011 run
   (0010 (rules facts)
     ((0010 (merged) (110
-        ((11110111 (000000 merged) (000000 facts))  facts)
+        ((unify-equal? (000000 merged) (000000 facts))  facts)
         ((010 ()) (run rules merged)))) (append-new (fire-rules-on-facts rules facts) facts))))
 
 (00001010 assert-facts! (facts)
@@ -243,7 +243,7 @@
     (110
       
       ((010 facts)  (001 ()))
-      ((11110111 fact (100 facts)) (011 facts))
+      ((unify-equal? fact (100 facts)) (011 facts))
       ((010 ()) (111 (100 facts) (retract-fact fact (011 facts)))))))
 
 (00001010 retract-fact! (fact)
@@ -359,7 +359,7 @@
     (110
       
       ((010 entries)  (001 ()))
-      ((11110111 fact (fact-of (100 entries))) (010 ()))
+      ((unify-equal? fact (fact-of (100 entries))) (010 ()))
       ((010 ()) (justified-member? fact (011 entries))))))
 
 (0011 add-new-justified
@@ -375,7 +375,7 @@
 (0011 run-tms
   (0010 (rules entries)
     ((0010 (new-entries) ((0010 (merged) (110
-          ((11110111 (000000 merged) (000000 entries))  entries)
+          ((unify-equal? (000000 merged) (000000 entries))  entries)
           ((010 ()) (run-tms rules merged)))) (add-new-justified new-entries entries))) (fire-rules-on-facts-tms rules (map-fact-of entries)))))
 
 (0011 *justified-memory* (001 ()))
@@ -391,7 +391,7 @@
     (110
       
       ((010 entries)  (001 ()))
-      ((11110111 fact (fact-of (100 entries))) (remove-justified fact (011 entries)))
+      ((unify-equal? fact (fact-of (100 entries))) (remove-justified fact (011 entries)))
       ((010 ()) (111 (100 entries) (remove-justified fact (011 entries)))))))
 
 (0011 dependents-of
@@ -503,7 +503,7 @@
     (110
       
       ((010 entries)  (001 ()))
-      ((11110111 fact (fact-of (100 entries))) (100 entries))
+      ((unify-equal? fact (fact-of (100 entries))) (100 entries))
       ((010 ()) (find-entry fact (011 entries))))))
 
 (0011 remove-entry-jtms
@@ -511,7 +511,7 @@
     (110
       
       ((010 entries)  (001 ()))
-      ((11110111 fact (fact-of (100 entries))) (remove-entry-jtms fact (011 entries)))
+      ((unify-equal? fact (fact-of (100 entries))) (remove-entry-jtms fact (011 entries)))
       ((010 ()) (111 (100 entries) (remove-entry-jtms fact (011 entries)))))))
 
 ; Folds one new `(fact justification)` pair into `entries`: a brand-new
@@ -544,7 +544,7 @@
 (0011 run-jtms
   (0010 (rules entries)
     ((0010 (merged) (110
-        ((11110111 merged entries) entries)
+        ((unify-equal? merged entries) entries)
         ((010 ()) (run-jtms rules merged)))) (add-new-entries-jtms (fire-rules-on-facts-jtms rules (map-fact-of entries)) entries))))
 
 (0011 *jtms-memory* (001 ()))
@@ -696,7 +696,7 @@
 (0011 run-jtms-multi
   (0010 (rules entries)
     ((0010 (merged) (110
-        ((11110111 merged entries) entries)
+        ((unify-equal? merged entries) entries)
         ((010 ()) (run-jtms-multi rules merged)))) (add-new-entries-jtms (fire-rules-jtms-multi rules (map-fact-of entries)) entries))))
 
 (00001010 run-jtms-multi! (rules)
@@ -1057,13 +1057,13 @@
       ; relation same/distinct)) without feeding comparison results to cond
       ; as numeric clauses.
       (110
-        ((11110111 result (001 ())) 
+        ((unify-equal? result (001 ())) 
          (001 ()))
-        ((0100 (11110111 result (001 ())))
+        ((0100 (unify-equal? result (001 ())))
          (110
-           ((11110111 result 0) 
+           ((unify-equal? result 0) 
             (001 ()))
-           ((0100 (11110111 result 0))
+           ((0100 (unify-equal? result 0))
             (1110 bindings))))))))
 
 ; Step 15: `(exists <CE>+)`/`(forall <first-CE> <CE>+)` — the same class of
@@ -1254,6 +1254,6 @@
 (0011 run-multi
   (0010 (rules facts)
     ((0010 (merged) (110
-        ((11110111 (000000 merged) (000000 facts))  facts)
+        ((unify-equal? (000000 merged) (000000 facts))  facts)
         ((010 ()) (run-multi rules merged)))) (append-new (fire-rules-multi rules facts) facts))))
 
