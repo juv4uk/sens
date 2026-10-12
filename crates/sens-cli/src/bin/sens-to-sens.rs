@@ -135,7 +135,12 @@ fn ratified_english_identity(name: &str) -> Option<CoreDomainIdentity> {
                 if parsed.len() != 1 {
                     return None;
                 }
-                let identity = CoreDomainIdentity::from_source_word(parsed[0].word)?;
+                // Таблиця містить і ратифіковані, але ще невиконувані
+                // клітинки D6. Вони не повинні обнулити весь індекс;
+                // просто не допускаємо їх як викличні голови.
+                let Some(identity) = CoreDomainIdentity::from_source_word(parsed[0].word) else {
+                    continue;
+                };
                 for column in columns.iter().skip(1) {
                     let ExprKind::List(parts) = &column.kind else { continue };
                     if parts.len() != 2 {
@@ -750,6 +755,8 @@ mod tests {
             );
         }
         assert!(ratified_english_identity("defmacro").is_none());
+        assert!(ratified_english_identity("length").is_none(),
+            "сам факт D6 residency не засвідчує callable механізм");
     }
 
     #[test]
