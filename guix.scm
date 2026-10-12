@@ -20,7 +20,7 @@
 
 (package
   (name "sens")
-  (version "0.41.0")
+  (version "0.42.0")
   (source (local-file "." "sens-source" #:recursive? #t #:select? source-filter))
   (build-system gnu-build-system)
   (arguments
