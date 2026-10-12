@@ -5,9 +5,8 @@
 //! `lib/surface/function-signatures.lisp`.
 //! This module only projects the selected operation class onto Rust evaluator mechanisms.
 
-use crate::semantic_registry;
+use crate::semantic_registry::{self, LegacyRegistrySlot};
 use crate::{Bit4, CoreD4, CoreDomainIdentity};
-use crate::Sens8;
 
 mod generated {
     include!("necessary_forms_generated.rs");
@@ -67,7 +66,7 @@ pub(crate) fn domain_identity_for_symbol(name: &str) -> Option<CoreDomainIdentit
 /// a necessary-form mechanism only by projecting it to its ratified D4 word.
 /// The historical byte itself never becomes a current domain identity.
 fn domain_identity_for_legacy_semantic_id(
-    legacy: Sens8,
+    legacy: LegacyRegistrySlot,
 ) -> Option<CoreDomainIdentity> {
     let mechanism = generated::NECESSARY_FORM_DISPATCH
         .iter()
@@ -80,7 +79,7 @@ fn domain_identity_for_legacy_semantic_id(
     identity_for_domain_identity(identity).map(|_| identity)
 }
 
-pub(crate) fn identity_for_semantic_id(semantic_id: Sens8) -> Option<NecessaryFormIdentity> {
+pub(crate) fn identity_for_semantic_id(semantic_id: LegacyRegistrySlot) -> Option<NecessaryFormIdentity> {
     domain_identity_for_legacy_semantic_id(semantic_id)
         .and_then(identity_for_domain_identity)
 }
@@ -129,7 +128,7 @@ mod exact_d4_necessary_form_migration_tests {
             (0b00001001, 0b0011, NecessaryFormIdentity::Define),
             (0b00001011, 0b0011, NecessaryFormIdentity::Define),
         ] {
-            let legacy = Sens8::from_packed_byte(slot);
+            let legacy = LegacyRegistrySlot::from_packed_byte(slot);
             let identity = domain_identity_for_legacy_semantic_id(legacy)
                 .expect("the three admitted compatibility rows have an explicit D4 bridge");
             assert_eq!(identity.width(), 4);
@@ -167,7 +166,7 @@ mod exact_d4_necessary_form_migration_tests {
                 _ => None,
             };
             assert_eq!(
-                identity_for_semantic_id(Sens8::from_packed_byte(slot)),
+                identity_for_semantic_id(LegacyRegistrySlot::from_packed_byte(slot)),
                 expected,
                 "unexpected necessary-form route for historical W8 {slot:08b}",
             );
