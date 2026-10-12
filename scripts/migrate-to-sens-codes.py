@@ -893,11 +893,19 @@ def binary_rewrite(
                 # Canonical source spelling for the exact D1 PredicateBit.
                 # Do not treat these as Number-domain values.
                 out.append(token)
-            elif re.fullmatch(
+            elif (re.fullmatch(
                 r"[+-]?(?:[0-9]+(?:[.,][0-9]*)?|[.,][0-9]+)"
                 r"(?:[eE][+-]?[0-9]+)?(?:/[0-9]+)?",
                 token,
-            ):
+            ) or re.fullmatch(
+                r"(?i)#(?:d[+-]?[0-9]+(?:/[0-9]+)?|b[01]+|q2:[+-]?[01]+/[01]+)",
+                token,
+            ) or (len(token) >= 24 and len(token) % 24 == 0
+                  and set(token) <= {"0", "1"}
+                  and (len(token) // 24 & (len(token) // 24 - 1)) == 0)):
+                # Domain D24+ requires an explicit admitted domain-bearing
+                # physical envelope. The full-width bits alone never authorize
+                # silent Number inference or replacement with D7 text glyphs.
                 raise BinaryMigrationError(
                     f"numeric literal {token!r} belongs to Number, not Text7; "
                     "ratified Number widths are 24 -> 48 -> 96 -> ...; "
