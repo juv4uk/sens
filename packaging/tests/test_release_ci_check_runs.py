@@ -73,5 +73,46 @@ class ReleaseCIChecks(unittest.TestCase):
             verify_check_runs({"check_runs": self.runs}, SHA)
 
 
+def verify_publish_wiring(workflow):
+    """Keep exact-SHA CI admission on both sides of draft creation."""
+    if "\n  release-publish:\n" not in workflow:
+        raise ValueError("RELEASE_BLOCKED: no final publication job")
+    job = workflow.split("\n  release-publish:\n", 1)[1]
+    required = "python3 scripts/verify_release_ci.py"
+    if job.count(required) != 2:
+        raise ValueError("RELEASE_BLOCKED: two live CI rechecks required")
+    first = job.index(required)
+    draft = job.index('gh release create "$GITHUB_REF_NAME"')
+    replay = job.index("scripts/verify_release_assets.py replay")
+    final = job.rindex(required)
+    publish = job.index('gh release edit "$GITHUB_REF_NAME" --draft=false')
+    if not (first < draft < replay < final < publish):
+        raise ValueError("RELEASE_BLOCKED: CI guards must straddle draft verification")
+    if "checks: read" not in job:
+        raise ValueError("RELEASE_BLOCKED: live check-read token permission missing")
+
+
+class ReleaseCIWorkflowWiring(unittest.TestCase):
+    def setUp(self):
+        self.workflow = (
+            Path(__file__).resolve().parents[2] / ".github" / "workflows" / "release.yml"
+        ).read_text(encoding="utf-8")
+
+    def test_live_ci_gate_before_draft_and_after_replay(self):
+        verify_publish_wiring(self.workflow)
+
+    def test_bypassing_either_ci_gate_is_rejected(self):
+        pattern = "python3 scripts/verify_release_ci.py"
+        for first in (True, False):
+            with self.subTest(remove_first=first):
+                if first:
+                    broken = self.workflow.replace(pattern, "true # bypass", 1)
+                else:
+                    prefix, suffix = self.workflow.rsplit(pattern, 1)
+                    broken = prefix + "true # bypass" + suffix
+                with self.assertRaisesRegex(ValueError, "RELEASE_BLOCKED"):
+                    verify_publish_wiring(broken)
+
+
 if __name__ == "__main__":
     unittest.main()
