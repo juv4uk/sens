@@ -17,10 +17,22 @@
     "carrier": "F3M-5 lambda ranking is a carrier experiment and does not itself allocate a canonical SENS domain identity"
   },
   "canonical_witnesses": {
-    "I": {"nameless": "lambda(bound(0))", "payload_hex": "0000000000"},
-    "K": {"nameless": "lambda(lambda(bound(1)))", "payload_hex": "0000000010"},
-    "KI": {"nameless": "lambda(lambda(bound(0)))", "payload_hex": "000000000F"},
-    "all_d1_d3_lambda": {"payload_hex": "056169CB4A", "micro_nodes": 11}
+    "I": {
+      "nameless": "lambda(bound(0))",
+      "payload_hex": "0000000000"
+    },
+    "K": {
+      "nameless": "lambda(lambda(bound(1)))",
+      "payload_hex": "0000000010"
+    },
+    "KI": {
+      "nameless": "lambda(lambda(bound(0)))",
+      "payload_hex": "000000000F"
+    },
+    "all_d1_d3_lambda": {
+      "payload_hex": "056169CB4A",
+      "micro_nodes": 11
+    }
   },
   "capacity": {
     "physical_bits": 40,
@@ -35,6 +47,14 @@
     "independent_checker": "scripts/check_f3m5_lambda_lexical_reference.py",
     "stratified_roundtrips": 65536,
     "exhaustive_2_pow_40_sweep": false,
-    "production_admission": false
+    "production_admission": false,
+    "physical_fixture_bytes": 5,
+    "physical_fixture_count": 4
+  },
+  "physical_fixtures": {
+    "I": "research/framed3/fixtures/f3m5-lambda-i.f3m",
+    "K": "research/framed3/fixtures/f3m5-lambda-k.f3m",
+    "KI": "research/framed3/fixtures/f3m5-lambda-ki.f3m",
+    "all_d1_d3_lambda": "research/framed3/fixtures/f3m5-all-d1-d3-lambda.f3m"
   }
 }

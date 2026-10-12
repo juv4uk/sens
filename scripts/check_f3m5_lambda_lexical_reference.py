@@ -130,6 +130,16 @@ def main() -> int:
     assert witnesses["KI"]["payload_hex"] == "000000000F"
     assert witnesses["all_d1_d3_lambda"]["payload_hex"] == "056169CB4A"
 
+    fixtures = spec["physical_fixtures"]
+    for name, path in fixtures.items():
+        payload = (ROOT / path).read_bytes()
+        assert len(payload) == 5, (name, len(payload))
+        assert payload.hex().upper() == witnesses[name]["payload_hex"], (
+            name,
+            payload.hex().upper(),
+            witnesses[name]["payload_hex"],
+        )
+
     print("F3M5-LAMBDA-LEXICAL-REFERENCE: PASS")
     print("alpha=canonical debruijn=nearest-zero free=reject beta=I,K,KI capture=pass")
     print("status=research-candidate production-admission=no domain-coordinate=no")

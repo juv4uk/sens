@@ -815,6 +815,39 @@ mod tests {
     }
 
     #[test]
+    fn tracked_five_byte_lambda_trophies_are_exact_physical_payloads() {
+        const I: &[u8; 5] = include_bytes!("../../../research/framed3/fixtures/f3m5-lambda-i.f3m");
+        const K: &[u8; 5] = include_bytes!("../../../research/framed3/fixtures/f3m5-lambda-k.f3m");
+        const KI: &[u8; 5] = include_bytes!("../../../research/framed3/fixtures/f3m5-lambda-ki.f3m");
+        const ALL: &[u8; 5] = include_bytes!("../../../research/framed3/fixtures/f3m5-all-d1-d3-lambda.f3m");
+
+        assert_eq!(*I, [0x00, 0x00, 0x00, 0x00, 0x00]);
+        assert_eq!(*K, [0x00, 0x00, 0x00, 0x00, 0x10]);
+        assert_eq!(*KI, [0x00, 0x00, 0x00, 0x00, 0x0f]);
+        assert_eq!(*ALL, [0x05, 0x61, 0x69, 0xcb, 0x4a]);
+
+        let i = decode_candidate(*I).expect("tracked I");
+        let k = decode_candidate(*K).expect("tracked K");
+        let ki = decode_candidate(*KI).expect("tracked KI");
+        let all = decode_candidate(*ALL).expect("tracked all-capability witness");
+
+        assert_eq!(i, F3m5LambdaExpr::Lambda(Box::new(F3m5LambdaExpr::Bound(0))));
+        assert_eq!(encode_candidate(&i).unwrap(), *I);
+        assert_eq!(encode_candidate(&k).unwrap(), *K);
+        assert_eq!(encode_candidate(&ki).unwrap(), *KI);
+        assert_eq!(encode_candidate(&all).unwrap(), *ALL);
+        assert_eq!(all.capability_mask(), CAP_ALL_F3M5);
+
+        let one = F3m5LambdaValue::Bit(true);
+        let zero = F3m5LambdaValue::Bit(false);
+        assert_eq!(apply_candidate(eval_candidate(&i).unwrap(), one.clone()).unwrap(), one);
+        let k1 = apply_candidate(eval_candidate(&k).unwrap(), one.clone()).unwrap();
+        assert_eq!(apply_candidate(k1, zero.clone()).unwrap(), one);
+        let ki1 = apply_candidate(eval_candidate(&ki).unwrap(), one).unwrap();
+        assert_eq!(apply_candidate(ki1, zero.clone()).unwrap(), zero);
+    }
+
+    #[test]
     fn alpha_equivalent_surface_names_collapse_to_one_nameless_identity() {
         // The candidate has no symbol/name constructor for binders at all:
         // λx.x, λy.y and λfoo.foo all lower to this single closed term.
