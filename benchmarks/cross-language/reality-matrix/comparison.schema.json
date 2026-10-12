@@ -26,11 +26,17 @@
           "type": "string"
         },
         "contract": {
-          "type": "string"
+          "type": "string",
+          "const": "11.9"
         },
         "ratified_domains": {
           "type": "string",
-          "description": "Domains ratified and in scope for this exact benchmark row; residency does not imply runtime execution authority."
+          "enum": [
+            "D1-D7",
+            "D1-D10",
+            "D24+"
+          ],
+          "description": "Exact ratified domain family in scope for this row; semantic residency does not imply execution authority."
         }
       },
       "additionalProperties": true
