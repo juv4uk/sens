@@ -22,7 +22,7 @@
     (110
       ((010 VALUE) NIL)
       ((101 (100 VALUE) (001 C1-ERROR)) T)
-      (T NIL))))
+      ((010 (001 ())) NIL))))
 
 (0011 C1-MAKE-FOUND
   (0010 (VALUE)
@@ -34,7 +34,7 @@
     (110
       ((010 VALUE) NIL)
       ((101 (100 VALUE) (001 C1-FOUND)) T)
-      (T NIL))))
+      ((010 (001 ())) NIL))))
 
 (0011 C1-FOUND-VALUE
   (0010 (VALUE)
@@ -47,7 +47,7 @@
         ((101 ENV NIL) (001 C1-MISSING))
         ((101 (100 (100 ENV)) NAME)
          (C1-MAKE-FOUND (011 (100 ENV))))
-        (T
+        ((010 (001 ()))
          (C1-LOOKUP-IN NAME (011 ENV)))))))
 
 (0011 C1-ADMITTED-SID-VALUEP
@@ -67,7 +67,7 @@
       ((101 VALUE 01011) T)
       ((101 VALUE 0100) T)
       ((101 VALUE 1110) T)
-      (T NIL))))
+      ((010 (001 ())) NIL))))
 
 (0011 C1-PRIMITIVE-IDENTITY
   (0010 (NAME)
@@ -93,7 +93,7 @@
       ((101 NAME (001 list)) 1110)
       ((101 NAME (001 NOT))  0100)
       ((101 NAME (001 not))  0100)
-      (T NIL))))
+      ((010 (001 ())) NIL))))
 
 (0011 C1-DEFAULT
   (0010 (NAME)
@@ -101,7 +101,7 @@
        (110
          ((101 IDENTITY NIL)
           (C1-MAKE-ERROR (001 UNBOUND) NAME))
-         (T IDENTITY)))
+         ((010 (001 ())) IDENTITY)))
      (C1-PRIMITIVE-IDENTITY NAME))))
 
 (0011 C1-LOOKUP
@@ -109,11 +109,11 @@
     ((0010 (LOCAL)
        (110
          ((C1-FOUNDP LOCAL) (C1-FOUND-VALUE LOCAL))
-         (T
+         ((010 (001 ()))
           ((0010 (TOP)
              (110
                ((C1-FOUNDP TOP) (C1-FOUND-VALUE TOP))
-               (T (C1-DEFAULT NAME))))
+               ((010 (001 ())) (C1-DEFAULT NAME))))
            (C1-LOOKUP-IN NAME GLOBAL)))))
      (C1-LOOKUP-IN NAME ENV))))
 
@@ -122,14 +122,14 @@
     (110
       ((010 VALUE) NIL)
       ((101 (100 VALUE) (001 FUNARG)) T)
-      (T NIL))))
+      ((010 (001 ())) NIL))))
 
 (0011 C1-ONE-ARGP
   (0010 (ARGS)
     (110
       ((010 ARGS) NIL)
       ((101 (011 ARGS) NIL) T)
-      (T NIL))))
+      ((010 (001 ())) NIL))))
 
 (0011 C1-TWO-ARGP
   (0010 (ARGS)
@@ -137,7 +137,7 @@
       ((010 ARGS) NIL)
       ((010 (011 ARGS)) NIL)
       ((101 (011 (011 ARGS)) NIL) T)
-      (T NIL))))
+      ((010 (001 ())) NIL))))
 
 (0011 C1-BIND
   (00100 C1-BIND
@@ -146,10 +146,10 @@
         ((101 PARAMS NIL)
          (110
            ((101 ARGS NIL) ENV)
-           (T (C1-MAKE-ERROR (001 ARITY) (001 TOO-MANY-ARGUMENTS)))))
+           ((010 (001 ())) (C1-MAKE-ERROR (001 ARITY) (001 TOO-MANY-ARGUMENTS)))))
         ((101 ARGS NIL)
          (C1-MAKE-ERROR (001 ARITY) (001 TOO-FEW-ARGUMENTS)))
-        (T
+        ((010 (001 ()))
          (C1-BIND
            (011 PARAMS)
            (011 ARGS)
@@ -164,37 +164,37 @@
          ((C1-ONE-ARGP ARGS)
           (110
             ((101 (100 ARGS) NIL) T)
-            (T NIL)))
-         (T (C1-MAKE-ERROR (001 ARITY) SID))))
+            ((010 (001 ())) NIL)))
+         ((010 (001 ())) (C1-MAKE-ERROR (001 ARITY) SID))))
       ((101 SID 010)
        (110
          ((C1-ONE-ARGP ARGS) (010 (100 ARGS)))
-         (T (C1-MAKE-ERROR (001 ARITY) SID))))
+         ((010 (001 ())) (C1-MAKE-ERROR (001 ARITY) SID))))
       ((101 SID 101)
        (110
          ((C1-TWO-ARGP ARGS) (101 (100 ARGS) (100 (011 ARGS))))
-         (T (C1-MAKE-ERROR (001 ARITY) SID))))
+         ((010 (001 ())) (C1-MAKE-ERROR (001 ARITY) SID))))
       ((101 SID 111)
        (110
          ((C1-TWO-ARGP ARGS) (111 (100 ARGS) (100 (011 ARGS))))
-         (T (C1-MAKE-ERROR (001 ARITY) SID))))
+         ((010 (001 ())) (C1-MAKE-ERROR (001 ARITY) SID))))
       ((101 SID 100)
        (110
          ((C1-ONE-ARGP ARGS)
           (110
             ((010 (100 ARGS))
              (C1-MAKE-ERROR (001 TYPE) (001 CAR-REQUIRES-PAIR)))
-            (T (100 (100 ARGS)))))
-         (T (C1-MAKE-ERROR (001 ARITY) SID))))
+            ((010 (001 ())) (100 (100 ARGS)))))
+         ((010 (001 ())) (C1-MAKE-ERROR (001 ARITY) SID))))
       ((101 SID 011)
        (110
          ((C1-ONE-ARGP ARGS)
           (110
             ((010 (100 ARGS))
              (C1-MAKE-ERROR (001 TYPE) (001 CDR-REQUIRES-PAIR)))
-            (T (011 (100 ARGS)))))
-         (T (C1-MAKE-ERROR (001 ARITY) SID))))
-      (T
+            ((010 (001 ())) (011 (100 ARGS)))))
+         ((010 (001 ())) (C1-MAKE-ERROR (001 ARITY) SID))))
+      ((010 (001 ()))
        (C1-MAKE-ERROR (001 UNSUPPORTED-PRIMITIVE) SID)))))
 
 (0011 C1-EVLIS
@@ -202,15 +202,15 @@
     (0010 (FORMS ENV GLOBAL)
       (110
         ((101 FORMS NIL) NIL)
-        (T
+        ((010 (001 ()))
          ((0010 (FIRST)
             (110
               ((C1-ERRORP FIRST) FIRST)
-              (T
+              ((010 (001 ()))
                ((0010 (REST)
                   (110
                     ((C1-ERRORP REST) REST)
-                    (T (111 FIRST REST))))
+                    ((010 (001 ())) (111 FIRST REST))))
                 (C1-EVLIS (011 FORMS) ENV GLOBAL)))))
           (C1-EVAL (100 FORMS) ENV GLOBAL)))))))
 
@@ -220,13 +220,13 @@
       (110
         ((101 CLAUSES NIL)
          (C1-MAKE-ERROR (001 UNSATISFIED-CONDITIONAL) NIL))
-        (T
+        ((010 (001 ()))
          ((0010 (TEST-VALUE)
             (110
               ((C1-ERRORP TEST-VALUE) TEST-VALUE)
               ((101 TEST-VALUE NIL)
                (C1-EVCON (011 CLAUSES) ENV GLOBAL))
-              (T
+              ((010 (001 ()))
                (C1-EVAL
                  (C1-SECOND (100 CLAUSES))
                  ENV
@@ -244,7 +244,7 @@
        (C1-APPLY-PRIMITIVE (C1-PRIMITIVE-IDENTITY FN) ARGS))
       ((C1-FUNARGP FN)
        (FN ARGS GLOBAL))
-      (T
+      ((010 (001 ()))
        (C1-MAKE-ERROR (001 NOT-CALLABLE) FN)))))
 
 (0011 C1-QUOTE-NAMEP
@@ -253,7 +253,7 @@
       ((101 NAME 001) T)
       ((101 NAME (001 QUOTE)) T)
       ((101 NAME (001 quote)) T)
-      (T NIL))))
+      ((010 (001 ())) NIL))))
 
 (0011 C1-COND-NAMEP
   (0010 (NAME)
@@ -261,7 +261,7 @@
       ((101 NAME 110) T)
       ((101 NAME (001 COND)) T)
       ((101 NAME (001 cond)) T)
-      (T NIL))))
+      ((010 (001 ())) NIL))))
 
 (0011 C1-LAMBDA-NAMEP
   (0010 (NAME)
@@ -269,7 +269,7 @@
       ((101 NAME 0010) T)
       ((101 NAME (001 LAMBDA)) T)
       ((101 NAME (001 lambda)) T)
-      (T NIL))))
+      ((010 (001 ())) NIL))))
 
 (0011 C1-DEFINE-NAMEP
   (0010 (NAME)
@@ -278,7 +278,7 @@
       ((101 NAME (001 DEFINE)) T)
       ((101 NAME (001 define)) T)
       ((101 NAME (001 def)) T)
-      (T NIL))))
+      ((010 (001 ())) NIL))))
 
 (0011 C1-LABEL-NAMEP
   (0010 (NAME)
@@ -286,7 +286,7 @@
       ((101 NAME 00100) T)
       ((101 NAME (001 LABEL)) T)
       ((101 NAME (001 label)) T)
-      (T NIL))))
+      ((010 (001 ())) NIL))))
 
 (0011 C1-EVAL
   (00100 C1-EVAL
@@ -299,7 +299,7 @@
            ((101 EXPR T) T)
            ((101 EXPR (001 t)) T)
            ((C1-ADMITTED-SID-VALUEP EXPR) EXPR)
-           (T (C1-LOOKUP EXPR ENV GLOBAL))))
+           ((010 (001 ())) (C1-LOOKUP EXPR ENV GLOBAL))))
         ((C1-QUOTE-NAMEP (100 EXPR))
          (C1-SECOND EXPR))
         ((C1-COND-NAMEP (100 EXPR))
@@ -312,7 +312,7 @@
              ((0010 (BOUND)
                 (110
                   ((C1-ERRORP BOUND) BOUND)
-                  (T
+                  ((010 (001 ()))
                    (C1-EVAL
                      (C1-THIRD EXPR)
                      BOUND
@@ -325,15 +325,15 @@
          (C1-MAKE-ERROR
            (001 INVALID-FORM)
            (001 DEFINE-IS-TOP-LEVEL-ONLY)))
-        (T
+        ((010 (001 ()))
          ((0010 (FN)
             (110
               ((C1-ERRORP FN) FN)
-              (T
+              ((010 (001 ()))
                ((0010 (ARGS)
                   (110
                     ((C1-ERRORP ARGS) ARGS)
-                    (T (C1-APPLY FN ARGS GLOBAL))))
+                    ((010 (001 ())) (C1-APPLY FN ARGS GLOBAL))))
                 (C1-EVLIS (011 EXPR) ENV GLOBAL)))))
           (C1-EVAL (100 EXPR) ENV GLOBAL)))))))
 
@@ -356,7 +356,7 @@
     (110
       ((010 FORM) NIL)
       ((C1-DEFINE-NAMEP (100 FORM)) T)
-      (T NIL))))
+      ((010 (001 ())) NIL))))
 
 (0011 C1-EVAL-PROGRAM
   (00100 C1-EVAL-PROGRAM
@@ -370,7 +370,7 @@
                (110
                  ((C1-ERRORP VALUE)
                   (C1-MAKE-WORLD VALUE GLOBAL))
-                 (T
+                 ((010 (001 ()))
                   (C1-EVAL-PROGRAM
                     (011 FORMS)
                     (111
@@ -382,12 +382,12 @@
          (C1-MAKE-WORLD
            (C1-EVAL (100 FORMS) NIL GLOBAL)
            GLOBAL))
-        (T
+        ((010 (001 ()))
          ((0010 (VALUE)
             (110
               ((C1-ERRORP VALUE)
                (C1-MAKE-WORLD VALUE GLOBAL))
-              (T
+              ((010 (001 ()))
                (C1-EVAL-PROGRAM
                  (011 FORMS)
                  GLOBAL))))
