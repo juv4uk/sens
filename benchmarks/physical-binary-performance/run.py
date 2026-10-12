@@ -140,17 +140,26 @@ def main() -> None:
     compile_raw_rows: list[dict] = []
     compile_warmup, compile_reps = 1, 5
 
+    source_projections: dict[str, bytes] = {}
     for fixture_index, fixture in enumerate(FIXTURES):
         committed_physical = ROOT / fixture
-        source = committed_physical.with_suffix(".lisp")
         if not committed_physical.is_file():
             raise RuntimeError(f"fixture missing: {fixture}")
-        if not source.is_file():
-            raise RuntimeError(f"canonical source companion missing: {source.relative_to(ROOT)}")
-        source_bytes = source.read_bytes()
         committed_bytes = committed_physical.read_bytes()
-        if not source_bytes or not committed_bytes:
-            raise RuntimeError(f"empty source or physical fixture: {fixture}")
+        if not committed_bytes:
+            raise RuntimeError(f"empty physical fixture: {fixture}")
+
+        # The committed T5 file is the physical authority for this transport
+        # measurement. Its exact-width word projection is decoded independently
+        # and then re-encoded by the Rust CLI. Historical sibling .lisp files
+        # are intentionally not used as T5 sources: some contain pre-cutover
+        # AST syntax (for example (00000001 ()), not canonical 0/1 word streams.
+        words = decode_bytes(committed_bytes)
+        source_bytes = (" ".join(words) + "\\n").encode("ascii")
+        if encode_words(words) != committed_bytes:
+            raise RuntimeError(f"{fixture}: independent Python T5 roundtrip failed")
+        source_projections[fixture] = source_bytes
+        source_label = f"{fixture}#canonical-word-projection"
 
         encode_samples: list[float] = []
         result_path: Path | None = None
@@ -158,7 +167,7 @@ def main() -> None:
         for iteration in range(compile_warmup + compile_reps):
             invocation_dir = compile_root / f"{fixture_index:02d}-encode-{iteration:02d}"
             invocation_dir.mkdir(parents=True)
-            staged_source = invocation_dir / source.name
+            staged_source = invocation_dir / f"{Path(fixture).stem}.lisp"
             staged_source.write_bytes(source_bytes)
             elapsed, encoder_stdout = invoke([trit, "encode", str(staged_source)])
             generated = staged_source.with_suffix(".sens")
@@ -167,7 +176,7 @@ def main() -> None:
             generated_bytes = generated.read_bytes()
             if generated_bytes != committed_bytes:
                 raise RuntimeError(
-                    f"{fixture}: fresh encode differs byte-for-byte from committed .sens"
+                    f"{fixture}: canonical word projection re-encoded to different T5 bytes"
                 )
             if b"VERIFIED " not in encoder_stdout:
                 raise RuntimeError(f"{fixture}: encode did not emit its verification witness")
@@ -176,7 +185,7 @@ def main() -> None:
                 encode_samples.append(elapsed)
                 compile_raw_rows.append({
                     "sha": commit,
-                    "source": str(source.relative_to(ROOT)),
+                    "source": source_label,
                     "rep": iteration - compile_warmup + 1,
                     "wall_ms": f"{elapsed:.6f}",
                     "source_sha256": sha256(source_bytes),
@@ -188,13 +197,14 @@ def main() -> None:
         assert result_path is not None
         compiled_files[fixture] = result_path
         compile_summary = {
-            "source": str(source.relative_to(ROOT)),
+            "source": source_label,
             "committed_fixture": fixture,
             "source_bytes": len(source_bytes),
             "physical_t5_bytes": len(committed_bytes),
             "source_sha256": sha256(source_bytes),
             "artifact_sha256": artifact_digest,
             "bytewise_matches_committed": True,
+            "source_kind": "canonical word projection decoded from committed physical artifact",
             "warmup_processes": compile_warmup,
             "measured_processes": len(encode_samples),
             "encode_median_wall_ms": round(statistics.median(encode_samples), 6),
@@ -203,18 +213,18 @@ def main() -> None:
         }
         compile_summaries.append(compile_summary)
         print(
-            f"encode {source.relative_to(ROOT)} -> {len(committed_bytes)}B T5, "
+            f"encode {source_label} -> {len(committed_bytes)}B T5, "
             f"median={compile_summary['encode_median_wall_ms']:.3f}ms, bytewise=PASS",
             flush=True,
         )
 
     for fixture in FIXTURES:
         physical = ROOT / fixture
-        source = physical.with_suffix(".lisp")
         if not physical.is_file():
             raise RuntimeError(f"fixture missing: {fixture}")
-        # Runtime lanes execute the newly encoded temporary artifact, not the
-        # checked-in .sens file. The latter is only the bytewise reference.
+        source_bytes = source_projections[fixture]
+        # Runtime lanes execute the newly encoded temporary artifact, and its
+        # bytes must remain exactly the committed physical fixture.
         payload = compiled_files[fixture].read_bytes()
         if payload != physical.read_bytes():
             raise RuntimeError(f"{fixture}: compiled artifact changed after encode admission")
@@ -242,8 +252,8 @@ def main() -> None:
         visible_bytes = len(visible)
         dimensions = {
             "fixture": fixture,
-            "source_bytes": source.stat().st_size,
-            "source_sha256": sha256(source.read_bytes()),
+            "source_bytes": len(source_bytes),
+            "source_sha256": sha256(source_bytes),
             "encode_median_wall_ms": next(
                 item["encode_median_wall_ms"] for item in compile_summaries
                 if item["committed_fixture"] == fixture
