@@ -117,6 +117,31 @@ class LegacyD3GuardTests(unittest.TestCase):
             f.rule for f in MODULE.scan_lisp(changed, "scripts/build-inventory.lisp")
         ])
 
+    def test_dependency_classifier_exact_d1_cond_and_negative_guards(self):
+        source = (ROOT / "scripts" / "build-dependency-classification.lisp").read_text(
+            encoding="utf-8"
+        )
+        self.assertEqual(
+            MODULE.scan_lisp(source, "scripts/build-dependency-classification.lisp"), []
+        )
+
+        # A host fallback and a historical ATOM/result-matching clause are
+        # independently invalid even when the rest of the generator is current.
+        fallback = "((010 (001 ())) rest)"
+        self.assertIn(fallback, source)
+        bad_truth = source.replace(fallback, "(t rest)", 1)
+        self.assertIn(
+            "COND_HOST_TRUTH",
+            [f.rule for f in MODULE.scan_lisp(bad_truth, "scripts/build-dependency-classification.lisp")],
+        )
+        clause = "((010 form) rest)"
+        self.assertIn(clause, source)
+        bad_arity = source.replace(clause, "((010 form) (1) rest)", 1)
+        self.assertIn(
+            "COND_NOT_TWO_FIELDS",
+            [f.rule for f in MODULE.scan_lisp(bad_arity, "scripts/build-dependency-classification.lisp")],
+        )
+
     def test_historical_paths_and_metadata_excluded(self):
         for path in ("docs/research/old.lisp", "research/domain-archive/a.lisp",
                      "tests/fixtures/old.lisp", "lib/domains/d3.lisp",
