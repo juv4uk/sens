@@ -668,7 +668,7 @@
     (110
       ((11010 a (01010 chunk chunk))  (111 chunk mult))
       ((0100 (11010 a (01010 chunk chunk)))
-       (00011001 a b (01010 chunk chunk) (01010 mult mult))))))
+       (largest-chunk a b (01010 chunk chunk) (01010 mult mult))))))
 
 ; `b = 0` used to hang forever: `largest-chunk` starts doubling from
 ; `chunk = b`, and `0 + 0 = 0` never grows, so its "does chunk still
@@ -687,21 +687,23 @@
 ; нуль (`ErrorKind::InvalidForm`) — маршрутизація через нього тут
 ; перевикористовує цю реальну, вже перевірену помилку замість
 ; вигадування другої, іншої для того самого стану.
+; Integer quotient recurses in Lisp; D5 QUOTIENT is exact rational division.
 (0011 quotient
   (0010 (a b)
     (110
       ((101 b 0)  (11110110 a b))
-      ((101 b 0) 
+      ((0100 (101 b 0))
        (110
          ((11010 a b)  0)
          ((0100 (11010 a b))
-          (let ((chunk+mult (00011001 a b b 1)))
+          (let ((chunk+mult (largest-chunk a b b 1)))
             (01010 (011 chunk+mult)
-               (10111 (01011 a (100 chunk+mult)) b)))))))))
+               (quotient (01011 a (100 chunk+mult)) b)))))))))
 
+; Integer remainder uses the Lisp-owned floor quotient: a - b * floor(a / b).
 (0011 mod
   (0010 (a b)
-    (01011 a (10110 b (10111 a b)))))
+    (01011 a (10110 b (quotient a b)))))
 
 ; `<=` and `>=` stay Lisp-derived, but #216 now requires the derived
 ; operators to preserve the same exact-Q answer algebra as `<`, `>` and `=`:
