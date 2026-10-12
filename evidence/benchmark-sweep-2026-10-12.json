@@ -346,8 +346,8 @@
   ],
   "pending_current_head_validation": {
     "recorded_base_head": "e1884ad07fae9e3fb30d439318dcb3d1fa3d9828",
-    "status": "COMPLETE_FOR_BENCHMARK_CODE; MAIN_HAS_DOCS_AND_EVIDENCE_DESCENDANTS",
-    "latest_main_at_receipt": "e1884ad07fae9e3fb30d439318dcb3d1fa3d9828",
+    "status": "COMPLETE_FOR_BENCHMARK_CODE; LATER_MAIN_COMMITS_ARE_DOCS_AND_EVIDENCE_ONLY",
+    "latest_main_at_receipt": "4edf4680987ab7c90d382ed036d35f947fa88450",
     "validated_benchmark_code_sha": "10a3594427f1568122d32c733b7fc965714b372d",
     "latest_sweep": {
       "id": 38193453177,
@@ -361,9 +361,10 @@
       }
     },
     "notes": [
-      "The cross-language fail-closed regression gate passed 3/3 tests on the validated benchmark code SHA.",
-      "Main descendants after the validated benchmark SHA contain only receipt/documentation updates and do not change benchmark implementation or manifests.",
-      "The single BLOCKED is intentional and transparent; all 54 stands were classified with complete coverage."
+      "The exact benchmark-code SHA 10a3594427f1568122d32c733b7fc965714b372d passed run 38193453177: 54/54 coverage, 53 PASS, 0 FAIL, 1 intentional BLOCKED, 0 TIMEOUT.",
+      "The current cross-language fail-closed regression suite passed 3/3 checks in the same run.",
+      "Main advanced to the recorded SHA after that sweep only through documentation/evidence updates; no benchmark runner, fixture, manifest, or workflow changes were made after the validated code SHA.",
+      "The remaining BLOCKED requires a real current Contract 11.9 multi-language corpus, independent correctness oracle, exact provenance, and parity-before-timing. Installing Guix alone is not sufficient."
     ]
   },
   "latest_stand_level_results": {
