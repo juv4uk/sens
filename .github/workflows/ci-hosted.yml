@@ -104,6 +104,12 @@ jobs:
           python3 -m unittest discover -s tests -p 'test_verify_release_assets.py' -v
           python3 -m unittest discover -s packaging/tests -p 'test_release_preflight_scope.py' -v
 
+      # Validate release proof ingestion independently of release tags.
+      # A forged .sens reference or symlink must never become admissible.
+      - name: Physical T5 admission-ledger positive and negative witnesses (no tag)
+        if: always()
+        run: python3 -m unittest discover -s tests -p 'test_check_release_admission_ledger.py' -v
+
       # A local workflow YAML and trigger-scope test do not prove GitHub has
       # registered the independent workflow. Check the real Actions API on
       # main pushes (fork PR tokens cannot be trusted for repository-level API).
