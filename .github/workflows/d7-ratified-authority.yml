@@ -39,6 +39,7 @@ jobs:
         run: |
           python3 scripts/d7_source_projection.py --check
           python3 -m unittest discover -s tests -p 'test_d7_source_projection.py' -v
+          python3 -m unittest discover -s tests -p 'test_d7_symbol_codec.py' -v
       - uses: dtolnay/rust-toolchain@stable
       - name: Prove mechanical dense W7 and contextual D2/Text7 identities
         run: cargo test --locked -p sens --test d7_w7_pack --test text7_contextual_binding
