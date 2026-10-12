@@ -82,6 +82,45 @@ class ExactDomainMigrationTests(unittest.TestCase):
                 with self.assertRaisesRegex(ValueError, "SHADOWED_SURFACE_BLOCK"):
                     self.rewrite(source)
 
+    def test_let_binding_shadows_domain_surface_without_rewriting(self):
+        for source in (
+            "(let ((car f)) (car x))",
+            "(let* ((eq? f)) (eq? x y))",
+            "(001000 ((перше f)) (перше x))",
+            "(001001 ((тотожне? f)) (тотожне? x y))",
+        ):
+            with self.subTest(source=source):
+                with self.assertRaisesRegex(ValueError, "SHADOWED_SURFACE_BLOCK"):
+                    self.rewrite(source)
+
+    def test_local_function_binders_cannot_be_misread_as_builtins(self):
+        for source in (
+            "(flet ((car (x) x)) (car x))",
+            "(labels ((car (x) x)) (car x))",
+            "(macrolet ((car (x) x)) (car x))",
+            "(defun car (x) x) (car x)",
+            "(defmacro car (x) x) (car x)",
+        ):
+            with self.subTest(source=source):
+                with self.assertRaisesRegex(ValueError, "SHADOWED_SURFACE_BLOCK"):
+                    self.rewrite(source)
+
+    def test_unproved_binding_syntax_fails_closed(self):
+        for source in ("(let bad (car x))", "(flet (bad) (car x))"):
+            with self.subTest(source=source):
+                with self.assertRaisesRegex(ValueError, "BINDING_FORM_BLOCK"):
+                    self.rewrite(source)
+
+    def test_unshadowed_let_and_quoted_let_remain_safe(self):
+        self.assertEqual(
+            self.rewrite("(let ((x f)) (car x))"),
+            "(let ((x f)) (100 x))",
+        )
+        self.assertEqual(
+            self.rewrite("'(let ((car f)) (car x)) (car y)"),
+            "'(let ((car f)) (car x)) (100 y)",
+        )
+
     def test_quoted_definitions_are_data_not_shadowing(self):
         for source in (
             "'(define car (lambda (x) x)) (car x)",
