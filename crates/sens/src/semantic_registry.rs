@@ -41,7 +41,10 @@ use domain_surface_generated::DOMAIN_SURFACE_ROWS;
 use d7_display_generated::D7_DISPLAY_ROWS;
 use generated::{SemanticRow, SEMANTIC_ROWS};
 
-pub(crate) type SemanticId = Sens8;
+/// Only the historical W8 surface-table slot. This alias is deliberately NOT
+/// called a semantic ID: D3/D4/D5/D6/D8 identities are domain-qualified,
+/// and no W8 payload can be implicitly promoted to a current D8 resident.
+pub(crate) type LegacyRegistrySlot = Sens8;
 
 fn exact_domain_identity_from_projection(width: u8, bits: u8) -> Option<CoreDomainIdentity> {
     // Канонічний маршрут: точне слово драбини → домен → допущений механізм.
@@ -91,7 +94,7 @@ fn direct_domain_identity_for_surface(name: &str) -> Option<CoreDomainIdentity> 
 /// встановлює виключно ратифікована доменна таблиця. Немає збігу або
 /// кілька різних координат — fail-closed, жодної таблиці SID→роль у Rust.
 pub(crate) fn compatibility_d3_route_from_ratified_domains(
-    semantic_id: SemanticId,
+    semantic_id: LegacyRegistrySlot,
 ) -> Option<CoreDomainIdentity> {
     let packed = semantic_id.packed_byte();
     let row = SEMANTIC_ROWS.get(usize::from(packed))?;
@@ -195,7 +198,7 @@ pub(crate) fn surface_for_domain_identity(
         .iter()
         .find_map(|surface| (surface.namespace == namespace).then_some(surface.name))
 }
-pub(crate) fn semantic_id_bits(semantic_id: SemanticId) -> String {
+pub(crate) fn semantic_id_bits(semantic_id: LegacyRegistrySlot) -> String {
     semantic_id.to_string()
 }
 
@@ -205,7 +208,7 @@ fn live_rows() -> &'static [SemanticRow] {
 
 
 
-pub(crate) fn admitted_semantic_ids() -> Vec<SemanticId> {
+pub(crate) fn admitted_semantic_ids() -> Vec<LegacyRegistrySlot> {
     live_rows()
         .iter()
         .map(|row| Sens8::from_packed_byte(row.semantic_id))
@@ -213,9 +216,9 @@ pub(crate) fn admitted_semantic_ids() -> Vec<SemanticId> {
 }
 
 fn insert_surface_mapping(
-    index: &mut HashMap<&'static str, SemanticId>,
+    index: &mut HashMap<&'static str, LegacyRegistrySlot>,
     surface: &'static str,
-    semantic_id: SemanticId,
+    semantic_id: LegacyRegistrySlot,
 ) {
     if let Some(previous) = index.insert(surface, semantic_id) {
         if previous != semantic_id {
@@ -228,8 +231,8 @@ fn insert_surface_mapping(
     }
 }
 
-fn surface_index() -> &'static HashMap<&'static str, SemanticId> {
-    static INDEX: OnceLock<HashMap<&'static str, SemanticId>> = OnceLock::new();
+fn surface_index() -> &'static HashMap<&'static str, LegacyRegistrySlot> {
+    static INDEX: OnceLock<HashMap<&'static str, LegacyRegistrySlot>> = OnceLock::new();
     INDEX.get_or_init(|| {
         let mut index = HashMap::new();
         for row in live_rows() {
@@ -241,13 +244,13 @@ fn surface_index() -> &'static HashMap<&'static str, SemanticId> {
     })
 }
 
-pub(crate) fn admitted_semantic_id_for_surface(name: &str) -> Option<SemanticId> {
+pub(crate) fn admitted_semantic_id_for_surface(name: &str) -> Option<LegacyRegistrySlot> {
     surface_index().get(name).copied()
 }
 
 fn stable_surfaces_from_index(
-    index: &HashMap<&'static str, SemanticId>,
-    semantic_id: SemanticId,
+    index: &HashMap<&'static str, LegacyRegistrySlot>,
+    semantic_id: LegacyRegistrySlot,
 ) -> Vec<&'static str> {
     let mut surfaces = index
         .iter()
@@ -259,7 +262,7 @@ fn stable_surfaces_from_index(
 
 fn admitted_surfaces_from_rows(
     rows: &[SemanticRow],
-    semantic_id: SemanticId,
+    semantic_id: LegacyRegistrySlot,
 ) -> Vec<&'static str> {
     let mut surfaces = rows
         .iter()
@@ -271,24 +274,24 @@ fn admitted_surfaces_from_rows(
     surfaces
 }
 
-pub(crate) fn semantic_id_for_surface(name: &str) -> Option<SemanticId> {
+pub(crate) fn semantic_id_for_surface(name: &str) -> Option<LegacyRegistrySlot> {
     admitted_semantic_id_for_surface(name)
 }
 
 pub(crate) fn stable_surfaces_for_semantic_id(
-    semantic_id: SemanticId,
+    semantic_id: LegacyRegistrySlot,
 ) -> Vec<&'static str> {
     stable_surfaces_from_index(surface_index(), semantic_id)
 }
 
 pub(crate) fn admitted_surfaces_for_semantic_id(
-    semantic_id: SemanticId,
+    semantic_id: LegacyRegistrySlot,
 ) -> Vec<&'static str> {
     admitted_surfaces_from_rows(live_rows(), semantic_id)
 }
 
 pub(crate) fn admitted_surfaces_with_namespace_for_semantic_id(
-    semantic_id: SemanticId,
+    semantic_id: LegacyRegistrySlot,
 ) -> Vec<(&'static str, &'static str)> {
     let mut surfaces = live_rows()
         .iter()
@@ -298,6 +301,41 @@ pub(crate) fn admitted_surfaces_with_namespace_for_semantic_id(
         .collect::<Vec<_>>();
     surfaces.sort_unstable();
     surfaces
+}
+
+#[cfg(test)]
+mod exact_registry_vs_historical_slot_tests {
+    use super::*;
+    use crate::{Bit8, CoreD8};
+
+    #[test]
+    fn historical_w8_slot_cannot_become_current_d8_round() {
+        let historical: LegacyRegistrySlot = crate::sens!(10101000);
+        let current = DomainIdentity::D8(
+            CoreD8::from_word(Bit8::new(0b10101000).unwrap()),
+        );
+        // Bit-for-bit equality of the mechanical payload is insufficient.
+        assert_eq!(historical.packed_byte() as u16, current.packed_bits());
+        assert_eq!(current.width(), 8);
+        assert_eq!(current.to_string(), "10101000");
+        // Only the ratified D8 table owns the modern projection.
+        assert_eq!(surface_for_domain_identity(current, "en"), Some("round"));
+    }
+
+    #[test]
+    fn surface_domain_projection_never_requires_the_legacy_byte_slot() {
+        for (surface, width, bits) in [
+            ("атом?", 3usize, 0b010u16),
+            ("quote", 3usize, 0b001u16),
+        ] {
+            // Compatibility spelling is not itself evidence of callability.
+            // Only a successful ratified domain lookup can establish identity.
+            if let Some(identity) = domain_identity_for_surface(surface) {
+                assert_eq!(identity.width(), width);
+                assert_eq!(identity.packed_bits(), bits);
+            }
+        }
+    }
 }
 
 #[cfg(test)]
