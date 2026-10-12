@@ -271,7 +271,7 @@ pub use eval::{
 };
 pub use eval::{
     eval_lowered_expressions, eval_parsed_expressions, eval_parsed_expressions_incremental,
-    eval_program, evaluate as eval_expr, EvalResult,
+    eval_exact_domain_program, eval_program, evaluate as eval_expr, EvalResult,
 };
 pub use eval::lower::lower_program;
 pub use parser::parse;
