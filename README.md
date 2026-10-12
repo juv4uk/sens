@@ -216,6 +216,8 @@ enumerator, canonical SENS parser і реальний evaluator.
 | **F3M-4** | `BA BF 19 4E` | `ATOM(ATOM(ATOM(ATOM(ATOM(ATOM(ATOM(ATOM(ATOM(ATOM(ATOM(0)))))))))))` | абсолютна межа глибини: **12 рівнів / 12 nodes** | `1` |
 | **F3M-4** | `F5 A7 BC 39` | `ATOM(CAR(CONS(QUOTE(0),CDR(CONS(QUOTE(0),IF-ATOM(QUOTE(0),QUOTE(0),IF-ATOM(QUOTE(0),QUOTE(0),QUOTE(0))))))))` | metric-saturating witness: **6/6 класів, 2×COND, 16 encoded-операцій, depth 6, 12 nodes** | `1` |
 | **F3M-5** | `03 B1 C7 07 93` | `IF-ATOM(EQ(ATOM(LAMBDA((),QUOTE(0))),ATOM(QUOTE(1))),CAR(CONS(QUOTE(0),CDR(CONS(QUOTE(1),QUOTE(NIL))))),QUOTE(NIL))` | **усі D1–D3 capability-класи + LAMBDA** в одному 5-байтному executable witness | `0` |
+| **F3M-5λ (research)** | `00 00 00 00 00` | `λ.BOUND(0)` | **справжня nameless identity-функція**: `BOUND(0) → Local{depth:0,index:0}`, D4 LAMBDA; `λx.x = λy.y = λfoo.foo` | повертає аргумент |
+| **F3M-5λ (research)** | `05 61 69 CB 4A` | nameless 11-node witness | **QUOTE+ATOM+CONS+CAR+CDR+EQ+COND+LAMBDA**, виконано canonical SENS evaluator-ом | exact D1 `0` |
 | **F3M-4** | `BA AD F0 0D` | `IF-ATOM(IF-ATOM(CDR(CONS(CAR(CONS(QUOTE(NIL),QUOTE(NIL))),NIL)),1,1),0,QUOTE(0))` | красивий hex-код випадково дав **6/6 класів + 2×COND** | `0` |
 | **F3M-4** | `FE ED FA CE` | `ATOM(CAR(CONS(IF-ATOM(1,0,QUOTE(NIL)),IF-ATOM(QUOTE(NIL),QUOTE(NIL),CAR(CONS(QUOTE(1),NIL))))))` | ще один mnemonic hex: **2×COND, 13 encoded-операцій** | `1` |
 | **F3M-4** | `FF FF 4F 4F` | `ATOM(CAR(CONS(CAR(CONS(0,ATOM(ATOM(QUOTE(NIL))))),IF-ATOM(ATOM(QUOTE(NIL)),QUOTE(NIL),QUOTE(NIL)))))` | переможець exhaustive-пошуку останньої **64K** сторінки F3M-4 | executes |
@@ -257,6 +259,7 @@ Evidence: [F3M-1 exhaustive census run 38196658709](https://github.com/juv4uk/se
 [F3M-3 final-page proof run 38195272188](https://github.com/juv4uk/sens/actions/runs/38195272188) ·
 [F3M-4 dense 32-bit proof run 38197907496](https://github.com/juv4uk/sens/actions/runs/38197907496).
 [F3M-4 extremes + final-64K search run 38198382120](https://github.com/juv4uk/sens/actions/runs/38198382120).
+[F3M-5λ nameless/de-Bruijn + real SENS runtime proof run 38260383334](https://github.com/juv4uk/sens/actions/runs/38260383334) — SUCCESS. Цей proof **не змінює** чинний F3M-5 mapping: F3M-5λ поки окремий research candidate, без production routing і без заяви exhaustive 2^40 sweep.
 
 ### Відтворення
 
