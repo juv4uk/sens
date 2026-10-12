@@ -1,4 +1,4 @@
-name: SID8 two original Lisp witness cutovers
+name: SID8 witness cutover and pinned S0 hold
 
 on:
   push:
@@ -27,5 +27,5 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.11"
-      - name: Original Git blob to exact in-place Lisp rewrite witness
+      - name: Prove 16 current heads and preserve historical S0 test input
         run: python3 -m unittest discover -s tests -p test_sid8_two_witness_source_cutover.py -v
