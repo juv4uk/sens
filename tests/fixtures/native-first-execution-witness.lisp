@@ -11,24 +11,24 @@
 (load "lib/machine/dispatch/native-first.lisp")
 (load "lib/machine/dispatch/native-first-execute.lisp")
 
-(00001001 native-first-execution-witness-check
-  (00001000 (actual expected)
-    (00000111
-      ((00100010 actual expected)
+(0011 native-first-execution-witness-check
+  (0010 (actual expected)
+    (110
+      ((11110111 actual expected)
        (1)
-       (00000001 pass))
-      ((00100010 actual expected)
+       (001 pass))
+      ((11110111 actual expected)
        (0)
-       (00100111 (00000001 fail) actual expected)))))
+       (1110 (001 fail) actual expected)))))
 
-(00001001 native-first-execution-witness
-  (00001000 ()
-    (00100111
+(0011 native-first-execution-witness
+  (0010 ()
+    (1110
       ; Supported bounded structural slice really reaches the CPU.
       (native-first-execution-witness-check
         (native-first-execute-expression
-          (00000001 (car (cons 2 3))))
-        (00000001
+          (001 (car (cons 2 3))))
+        (001
           (execution-route native
             (status completed)
             (value 2))))
@@ -36,8 +36,8 @@
       ; Unsupported ordinary Lisp is not an error: it stays evaluator-owned.
       (native-first-execution-witness-check
         (native-first-execute-expression
-          (00000001 (+ 2 3)))
-        (00000001
+          (001 (+ 2 3)))
+        (001
           (execution-route evaluator
             (status completed)
             (value 5))))
@@ -47,7 +47,7 @@
         (native-first-execute-source
           "(+ 1 2)
 (car (cons 7 9))")
-        (00000001
+        (001
           (source-execution
             ((execution-route evaluator
                (status completed)
@@ -60,11 +60,11 @@
       ; The bridge must NOT hide this bug by evaluating (+ 40 2) instead.
       (native-first-execution-witness-check
         (native-first-execute-plan
-          (00000001
+          (001
             (native-plan
               ((definitely-not-an-admitted-machine-form))
               0)))
-        (00000001
+        (001
           (execution-route native
             (status rejected)
             (detail
@@ -75,8 +75,8 @@
       ; Malformed native plans also fail closed on the native route.
       (native-first-execution-witness-check
         (native-first-execute-plan
-          (00000001 (native-plan ((ret)))))
-        (00000001
+          (001 (native-plan ((ret)))))
+        (001
           (execution-route native
             (status rejected)
             (detail
