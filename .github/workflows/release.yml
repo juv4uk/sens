@@ -156,12 +156,16 @@ jobs:
           print(destination.read_text(encoding="utf-8"))
 
       - name: Stage manifest and installer (not a public release)
+        shell: bash
+        run: cp packaging/install.sh install.sh
+
+      - name: Upload staged manifest and installer
         uses: actions/upload-artifact@v4
         with:
           name: release-manifest
           path: |
             islands-manifest-v1.json
-            packaging/install.sh
+            install.sh
           if-no-files-found: error
           retention-days: 7
 
