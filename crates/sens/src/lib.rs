@@ -358,7 +358,15 @@ pub const FS_LIBRARY_SOURCE: &str = include_str!("../../../lib/fs.lisp");
 /// surface. `Environment::root()` therefore remains the minimal kernel.
 pub fn load_macro_library(session: &mut Session) -> Result<EvalResult, LanguageError> {
     eval::install_macro_substrate(&session.environment);
-    let result = eval_program(MACRO_LIBRARY_SOURCE, session)?;
+    // Цей embedded bootstrap уже використовує точні D3/D4 голови.
+    // Звичайний Lisp-reader помилково трактує 0001 як число;
+    // тільки наявний mixed source bridge піднімає executable heads,
+    // зберігаючи історичні слова всередині QUOTE як дані.
+    let expressions = mixed_source::parse_mixed_exact_domain_macro_source(
+        "lib/macro.lisp",
+        MACRO_LIBRARY_SOURCE,
+    )?;
+    let result = eval_parsed_expressions(&expressions, session)?;
 
     if !matches!(&result.value, Value::Macro(_)) {
         return Err(LanguageError::new(

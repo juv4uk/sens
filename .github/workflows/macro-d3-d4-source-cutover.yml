@@ -1,0 +1,28 @@
+name: Міграція макро-bootstrap D3 D4
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - "lib/macro.lisp"
+      - "crates/sens/src/lib.rs"
+      - "crates/sens/src/mixed_source.rs"
+      - "tests/test_domain_lisp_corpus_macro_source.py"
+      - ".github/workflows/macro-d3-d4-source-cutover.yml"
+  workflow_dispatch:
+
+jobs:
+  exact-macro-source:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Перевірити ратифіковані координати і незалежний source-delta/AST proof
+        run: python3 -m unittest discover -s tests -p 'test_domain_lisp_corpus_macro_source.py' -v
+      - name: Завантажити D3/D4 макро-bootstrap в реальну Session
+        run: |
+          cargo test --locked -p sens --lib mixed_source::tests::macro_source_mixed_reader_is_path_pinned_and_descends_legacy_eval
+          cargo test --locked -p sens --lib environment::tests::bare_session_keeps_lisp_macro_bootstrap_explicit
+          cargo test --locked -p sens --lib environment::tests::bare_session_evaluates_the_same_exact_d1_and_d3_results
