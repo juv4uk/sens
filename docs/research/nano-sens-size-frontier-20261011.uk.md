@@ -153,3 +153,21 @@ CI тепер має end-to-end інтеграційні тести, які за
 ## Власник наступної дії
 
 Продовжити в межах наявних #3835 / #3822 / #3760: спершу зробити seed-метрику відтворюваною, потім оптимізувати фізичний результат, зберігаючи чинний доказ C1/C2. Нову гілку й окремий домен для Nano-SENS не створювати.
+
+## 2026-10-12 — статичний аудит module/cfg/include для Nano-SENS
+
+Коміт аудиту в `main`: [629bd287](https://github.com/juv4uk/sens/commit/629bd287b7e3fbc26f9de7abf9d7494a961faed3). Скрипт: [`scripts/audit-nano-sens-source-closure.py`](https://github.com/juv4uk/sens/blob/main/scripts/audit-nano-sens-source-closure.py). Workflow: [Nano-SENS source closure edge audit](https://github.com/juv4uk/sens/actions/runs/38188859555) — **PASS**.
+
+Аудит тепер запускається двічі: на актуальному `main` та на точному pinned SENS commit `d0787a40fcea36501747732aa61b6de19fe29c70`, записаному в наявному census. Це важливо: поточний main сам по собі не є свідченням про історичне source tree, використане для вимірювання.
+
+| Зріз | Зафіксований SHA | Rust-файли, досяжні з обраних коренів | Статичні ребра | Нерозв’язані краї цього сканера |
+|---|---|---:|---:|---:|
+| Поточний main | `629bd287b7e3fbc26f9de7abf9d7494a961faed3` | 77 | 111 | 0 |
+| Pinned Nano-SENS SENS source | `d0787a40fcea36501747732aa61b6de19fe29c70` | 71 | 90 | 0 |
+
+Машинозчитуваний артефакт обох звітів: [artifact 11720244692](https://github.com/juv4uk/sens/actions/runs/38188859555/artifacts/11720244692), SHA-256 ZIP `51c4f95f319d764f1278d261d419951f79875e071962d8eba0e2da1bb00a579d`, строк зберігання до **2026-11-11 00:39:53 UTC**. Self-test аудитора пройшов 6 позитивних/негативних перевірок, включно з відновленням дочірніх модулів для явного `#[path]`.
+
+**Інтерпретація:** у двох знятих SENS source trees статичні `mod`, літеральні `include!`, `include_str!` і `include_bytes!` ребра, досяжні з `crates/sens/src/lib.rs` та `crates/xtask/src/main.rs`, розв’язалися. Обидва JSON навмисно мають статус `STATIC_EDGE_AUDIT_ONLY_CLOSURE_NOT_PROVEN`; `minimum_seed_proven=false` і `whole_chain_closure_proven=false`.
+
+Це **не** доводить повне оточення або мінімальний seed. Сканер ще не замінює Rust/Cargo resolver: `cfg` інвентаризується, а не виконується як набір конфігурацій rustc; build scripts, proc macros та їхні файлові/environment-залежності потребують окремого трасування. Не закриті також CML-side module/build inputs, вибрані vendor crates і CML-only Git dependency, необхідні Git refs/objects для runtime `git rev-parse HEAD`, offline Cargo cache та Rust/GCC/linker/OS/shared libraries. Ці категорії залишаються окремими блокерами; їх не можна додавати до 36,033,737 Б як нібито вже виміряні й замкнені складові.
+
