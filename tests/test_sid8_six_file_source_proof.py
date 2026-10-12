@@ -155,9 +155,9 @@ class InPlaceSID8Proof(unittest.TestCase):
         for path, expected_count in expected.items():
             with self.subTest(path=path):
                 src = (ROOT / path).read_text(encoding="utf-8")
-                self.assertEqual(len(re.findall(r"\\(10011100(?=\\s+\\(\\s*\\()", src)), expected_count)
+                self.assertEqual(len(re.findall(r"\(10011100(?=\s+\(\s*\()", src)), expected_count)
 
-    def test_ratified_mapping_and_474_original_call_heads(self):
+    def test_ratified_mapping_and_421_safe_original_call_heads(self):
         mapping = correspondence()
         self.assertEqual(mapping["10011100"], "001000")
         counts = []
