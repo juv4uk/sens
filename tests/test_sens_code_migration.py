@@ -221,6 +221,20 @@ class SensCodeMigrationTests(unittest.TestCase):
         ):
             self.binary("(LIST 25)\n")
 
+    def test_legacy_prefixed_and_untyped_d24_number_tokens_block_physical_t5(self):
+        # Exactly the same prohibition applies in BOTH physical SENS
+        # converters. No guessed Number domain from bare width/magnitude.
+        for literal in (
+            "#d25", "#b101", "#q2:1/10",
+            "0" * 24, "1" * 48, "0" * 96,
+        ):
+            with self.subTest(literal=literal[:20]):
+                with self.assertRaisesRegex(
+                    mod.BinaryMigrationError,
+                    "ratified Number widths are 24 -> 48 -> 96",
+                ):
+                    self.binary(f"(LIST {literal})\n")
+
     def test_comments_are_absent_and_do_not_change_binary_output(self):
         commented = """; outside
 (CAR ; inline
