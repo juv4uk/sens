@@ -288,6 +288,71 @@ pub fn parse_binary_source_words(source: &str) -> Result<Vec<BinarySourceToken>,
     Ok(tokens)
 }
 
+/// Один бінарний source-токен ратифікованої драбини D1–D10.
+///
+/// Тут є лише координата (ширина, біти), а не допуск до виконання.
+/// Зокрема, D8:10101000 ніколи не отримує значення історичного W8.
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub struct DomainLadderSourceToken {
+    pub coordinate: crate::domain_ladder::DomainCoordinate,
+    pub span: Span,
+}
+
+/// Читає D1–D10 без обмеження старою 8-бітною таблицею.
+///
+/// Історичний parse_binary_source_words лишається незмінним для своїх
+/// споживачів D1–D9. Новий механічний шлях зберігає точну ширину й
+/// ведучі нулі, але сам собою не дає D10 callable-закону або D24+ числа.
+pub fn parse_domain_ladder_source_words(
+    source: &str,
+) -> Result<Vec<DomainLadderSourceToken>, LanguageError> {
+    let bytes = source.as_bytes();
+    let mut cursor = 0usize;
+    let mut result = Vec::new();
+    while cursor < bytes.len() {
+        match bytes[cursor] {
+            byte if byte.is_ascii_whitespace() => cursor += 1,
+            b';' => {
+                while cursor < bytes.len() && bytes[cursor] != b'\n' {
+                    cursor += 1;
+                }
+            }
+            _ => {
+                let start = cursor;
+                while cursor < bytes.len()
+                    && !bytes[cursor].is_ascii_whitespace()
+                    && bytes[cursor] != b';'
+                {
+                    cursor += 1;
+                }
+                let token = &bytes[start..cursor];
+                if !(1..=10).contains(&token.len())
+                    || !token.iter().all(|byte| matches!(byte, b'0' | b'1'))
+                {
+                    return Err(LanguageError::new(
+                        ErrorKind::Parse,
+                        "драбина D1–D10 приймає лише точні бінарні слова шириною 1–10",
+                        Span { start, end: cursor },
+                    ));
+                }
+                let mut bits = 0u16;
+                for &bit in token {
+                    bits = (bits << 1) | u16::from(bit - b'0');
+                }
+                let coordinate = crate::domain_ladder::DomainCoordinate::new(
+                    token.len() as u8, bits,
+                )
+                .expect("перевірені 1–10 бітів утворюють механічну координату");
+                result.push(DomainLadderSourceToken {
+                    coordinate,
+                    span: Span { start, end: cursor },
+                });
+            }
+        }
+    }
+    Ok(result)
+}
+
 fn parse_word(token: &str) -> Option<BinarySourceWord> {
     if token.is_empty() || token.len() > 9 {
         return None;
