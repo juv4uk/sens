@@ -171,3 +171,22 @@ CI тепер має end-to-end інтеграційні тести, які за
 
 Це **не** доводить повне оточення або мінімальний seed. Сканер ще не замінює Rust/Cargo resolver: `cfg` інвентаризується, а не виконується як набір конфігурацій rustc; build scripts, proc macros та їхні файлові/environment-залежності потребують окремого трасування. Не закриті також CML-side module/build inputs, вибрані vendor crates і CML-only Git dependency, необхідні Git refs/objects для runtime `git rev-parse HEAD`, offline Cargo cache та Rust/GCC/linker/OS/shared libraries. Ці категорії залишаються окремими блокерами; їх не можна додавати до 36,033,737 Б як нібито вже виміряні й замкнені складові.
 
+### 2026-10-12 — включено pinned CML і SENS submodule
+
+Останній успішний тристоронній аудит: [workflow run 38189048135](https://github.com/juv4uk/sens/actions/runs/38189048135), main commit `cf49ea638edbdc4b0bd76228ffa913013bb62baa`. Workflow отримує SHA безпосередньо з Nano-SENS evidence, checkout-ить точний CML commit з рекурсивними submodules та сканує:
+- поточний SENS `main`;
+- pinned SENS source `d0787a40fcea36501747732aa61b6de19fe29c70`;
+- pinned CML source `ec4ba010cebd9fdc37b39224142dcac3ee907cfe`.
+
+| Зріз | Rust-файли | Статичні ребра | Нерозв’язані ребра в межах аудиту | Додаткові класи |
+|---|---:|---:|---:|---|
+| SENS main | 77 | 111 | 0 | 5 хешованих manifest/input-файлів |
+| Pinned SENS | 71 | 90 | 0 | 5 хешованих manifest/input-файлів |
+| Pinned CML | 66 | 83 | 0 | 3 хешовані manifest/input-файли; 1 `OUT_DIR` generated-source edge |
+
+Для pinned CML submodule `external/sens` тепер ініціалізується рекурсивно, отже його потрібні compile-time include paths реально присутні під час сканування. `include!(concat!(env!("OUT_DIR"), ...))` класифікується як згенерований build output, а не як відсутній tracked source. Це не знімає окремого зобов’язання простежити, які саме файли й змінні оточення генерують цей output.
+
+Свіжий машинозчитуваний тристоронній артефакт: [artifact 11720384501](https://github.com/juv4uk/sens/actions/runs/38189048135/artifacts/11720384501), SHA-256 ZIP `471ea589a4827b9369ceaf463879f1689bd79e03eb71160a2a6062b2f7c4b8d6`, строк зберігання до **2026-11-11 00:43:01 UTC**. Усі три звіти й далі навмисно позначені `STATIC_EDGE_AUDIT_ONLY_CLOSURE_NOT_PROVEN`.
+
+**Наступні фактичні незамкнені межі:** перевірити build-time файлові читання й генерований `OUT_DIR` output; закрити повний Cargo resolver/build graph та vendored metadata; окремо заміряти pinned `wsm-os-target` Git dependency і мінімальні Git refs/objects; виконати чистий offline replay з тими самими locks/source pins і збереженням runner, C1/C2 та trace-артефактів. Не підсумовувати ці категорії як уже доведені байти і не називати статичний audit мінімальним seed.
+
