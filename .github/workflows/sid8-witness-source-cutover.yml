@@ -5,7 +5,7 @@ on:
     branches: [main]
     paths:
       - "tests/fixtures/*-witness.lisp"
-      - "tests/test_sid8_witness_source_cutover.py"
+      - "tests/test_sid8_witness_*.py"
       - "scripts/audit_lisp_migration_edits.py"
       - ".github/workflows/sid8-witness-source-cutover.yml"
   workflow_dispatch:
@@ -24,5 +24,5 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.11"
-      - name: Audit 23 executable witness sources and 1858 SID8 head-only replacements
+      - name: Audit 29 executable witness sources and 2806 SID8 head-only replacements
         run: python3 -m unittest discover -s tests -p 'test_sid8_witness_*.py' -v
