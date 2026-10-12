@@ -1,0 +1,21 @@
+{
+  "schema": "sens-benchmark-manifest/v1",
+  "stand": "cross-language",
+  "wing": "Cross-language performance; historical/donor studies",
+  "roles": [
+    "RESEARCH",
+    "FALSIFIER"
+  ],
+  "question": "Can matched CPython, Lua 5.4, Racket CS, and SENS workload phases be compared without conflating startup, loading, setup, and execution?",
+  "claim": "Historical Function8/FASL SENS lane is provenance only. Current Contract 11.9 speed or parity claims remain blocked until canonical replay, exact SHA/environment capture, oracle correctness, and semantic parity pass. Never use historical ratios as current SENS-vs-Python evidence.",
+  "witness": [
+    "README.md",
+    "run.py",
+    "manifest.scm",
+    "BINARY_TREES_PROVENANCE.md"
+  ],
+  "status": "HISTORICAL-HARNESS; CURRENT-CANONICAL-REPLAY-BLOCKED",
+  "generation": "Historical Function8/FASL generation; current Contract 11.9 replay pending",
+  "axis": "cross-language/matched-workload-phase-and-semantic-parity",
+  "reproduce": "cargo build --release -p sens --example ci_bench && guix time-machine -C channels.scm -- shell -m manifest.scm -m benchmarks/cross-language/manifest.scm -- python3 benchmarks/cross-language/run.py --sens-bench target/release/examples/ci_bench --historical-function8-fasl"
+}
