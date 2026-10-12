@@ -30,3 +30,18 @@ cat /tmp/native-baseline/report.md
 ```
 
 Це не універсальний рейтинг мов. Це контрольне порівняння конкретних toolchain-ів на одному host і одному workload. Воно також не є SENS runtime evidence: SENS повинен мати окремий current-authority lane з власною семантичною parity-перевіркою.
+
+## Recursive-tree + delivery cost
+
+Друга вісь використовує recursive checksum tree з однаковою глибиною та seed
+для всіх чотирьох реалізацій. Окрім cold-process median/p95, вона записує
+`source bytes`, `gzip source bytes`, `compiled artifact bytes` і compile time.
+
+```bash
+python3 benchmarks/cross-language/native-baseline/tree_run.py \
+  --depth 18 --reps 7 --warmups 2 --out /tmp/native-tree
+cat /tmp/native-tree/report.md
+```
+
+Це дає окремі осі для питання "швидше виконати" та питання "дешевше
+передати"; їх не можна зводити в один магічний score.

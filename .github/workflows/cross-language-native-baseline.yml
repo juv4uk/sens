@@ -29,12 +29,18 @@ jobs:
           python3 benchmarks/cross-language/native-baseline/run.py \
             --n 200000 --reps 9 --warmups 2 \
             --out "$RUNNER_TEMP/native-baseline"
+          python3 benchmarks/cross-language/native-baseline/tree_run.py \
+            --depth 18 --reps 7 --warmups 2 \
+            --out "$RUNNER_TEMP/native-tree"
           cat "$RUNNER_TEMP/native-baseline/report.md" >> "$GITHUB_STEP_SUMMARY"
+          cat "$RUNNER_TEMP/native-tree/report.md" >> "$GITHUB_STEP_SUMMARY"
       - name: Preserve raw evidence
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: cross-language-native-baseline-${{ github.sha }}
-          path: ${{ runner.temp }}/native-baseline/
+          path: |
+            ${{ runner.temp }}/native-baseline/
+            ${{ runner.temp }}/native-tree/
           if-no-files-found: warn
           retention-days: 14

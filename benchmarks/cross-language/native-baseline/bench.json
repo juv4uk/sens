@@ -5,9 +5,9 @@
   "roles": ["RESEARCH", "PERFORMANCE", "FALSIFIER"],
   "question": "How do concrete C, Rust, CPython and Node.js implementations compare on one exact-integer workload when correctness, compile and cold-process costs are separated?",
   "claim": "Reports per-toolchain measurements on one host; does not rank languages universally and does not measure SENS.",
-  "witness": ["run.py", "README.md", "programs/workload.c", "programs/workload.rs", "programs/workload.py", "programs/workload.js"],
+  "witness": ["run.py", "tree_run.py", "README.md", "programs/workload.c", "programs/workload.rs", "programs/workload.py", "programs/workload.js", "programs/tree.c", "programs/tree.rs", "programs/tree.py", "programs/tree.js"],
   "status": "HOST-BASELINE / RESEARCH",
   "generation": "2026-10-12",
-  "axis": "cross-language/exact-integer/compile-vs-cold-process",
+  "axis": "cross-language/exact-integer+recursive-tree/compile-vs-cold-process-vs-delivery",
   "reproduce": "python3 benchmarks/cross-language/native-baseline/run.py --out /tmp/native-baseline"
 }
