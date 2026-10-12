@@ -139,18 +139,24 @@ assert coordinates==sorted(set(coordinates)), "D7 surface coordinates must be un
 assert set(coordinates)==set(d["residents"]), "D7 surface/resident map drift"
 assert set(coordinates).isdisjoint(d["reserved_coordinates"]), "reserved D7 coordinates were allocated"
 expected_columns=("ук","укр","san","en","LISP","sym")
+rows_by_bits = {row.bits: row for row in table_rows}
 for bits,body in surface_rows:
-    for name in expected_columns:
-        assert body.count(f"({name} ")==1, f"D7:{bits} missing or duplicated {name}"
-    labels=re.findall(r"\((ук|укр|san|en|LISP|sym) ",body)
-    assert tuple(labels)==expected_columns, f"D7:{bits} surface column order changed"
-    en=re.search(r"\(en ([^()]*)\)",body)
+    # Only inspect the top-level human labels before the nested per-surface sym map.
+    top_level = body.split("(sym (", 1)[0]
+    labels=re.findall(r"\\((ук|укр|san|en|LISP) ",top_level)
+    assert tuple(labels)==expected_columns[:-1], f"D7:{bits} top-level surface column order changed"
+    assert body.count("(sym (")==1, f"D7:{bits} needs exactly one per-surface glyph map"
+    en=re.search(r"\\(en ([^()]*)\\)",top_level)
     assert en is not None and en.group(1)==d["residents"][bits], f"D7:{bits} role projection drift"
-    assert "(LISP ())" in body, f"D7:{bits} invented Lisp callable name"
+    assert "(LISP ())" in top_level, f"D7:{bits} invented Lisp callable name"
+    row=rows_by_bits[bits]
+    assert row.surface_symbols is not None, f"D7:{bits} lacks the surface symbol map"
+    assert tuple(row.surface_symbols)==expected_columns, f"D7:{bits} symbol map order changed"
+    assert row.surface_symbols["LISP"] is None, f"D7:{bits} invented a Lisp glyph"
     if en.group(1).startswith("text.digit."):
-        glyph=re.search(r"\(sym ([0-9])\)$",body)
-        assert glyph is not None and glyph.group(1)==en.group(1).rsplit(".",1)[1], (
-            f"D7:{bits} text digit glyph drifted from ratified digit identity"
+        expected_digit=en.group(1).rsplit(".",1)[1]
+        assert row.surface_symbols["sym"]==expected_digit, (
+            f"D7:{bits} preferred digit glyph drifted from ratified digit identity"
         )
 
 print("D7-SURFACE-ROWS: PASS residents=126 reserved=2 no-Rust-law")
