@@ -16,54 +16,54 @@
 (load "lib/result-status.lisp")
 (load "lib/narrate.lisp")
 
-(00001001 narrate-outcome-authority-rows
-  (00001000 ()
-    (00100111
-      (00100111
-        (00000001 explicit-unknown-presentation)
+(0011 narrate-outcome-authority-rows
+  (0010 ()
+    (1110
+      (1110
+        (001 explicit-unknown-presentation)
         (narrate-outcome
-          (make-unknown (00000001 (parent bob alice))))
-        (00000001
+          (make-unknown (001 (parent bob alice))))
+        (001
           (unknown because no-proof-found-for (parent bob alice))))
-      (00100111
-        (00000001 non-symbol-tag-is-invalid)
-        (narrate-outcome (00000001 (42 payload)))
-        (00000001 (invalid outcome-tag 42)))
-      (00100111
-        (00000001 pair-tag-is-invalid)
-        (narrate-outcome (00000001 ((bad-tag) payload)))
-        (00000001 (invalid outcome-tag (bad-tag))))
-      (00100111
-        (00000001 empty-list-tag-is-invalid)
-        (narrate-outcome (00000001 (() payload)))
-        (00000001 (invalid outcome-tag ()))))))
+      (1110
+        (001 non-symbol-tag-is-invalid)
+        (narrate-outcome (001 (42 payload)))
+        (001 (invalid outcome-tag 42)))
+      (1110
+        (001 pair-tag-is-invalid)
+        (narrate-outcome (001 ((bad-tag) payload)))
+        (001 (invalid outcome-tag (bad-tag))))
+      (1110
+        (001 empty-list-tag-is-invalid)
+        (narrate-outcome (001 (() payload)))
+        (001 (invalid outcome-tag ()))))))
 
-(00001001 narrate-outcome-authority-check-rows
-  (00001000 (rows)
-    (00000111
-      ((00000010 rows) ()
-       (00000001 (narrate-outcome-authority-witness (status pass))))
-      ((00000010 rows) (1)
-       (00100111
-         (00000001 narrate-outcome-authority-witness)
-         (00000001 (status fail))
-         (00000001 (law malformed-row-tail))
-         (00100111 (00000001 actual) rows)))
-      ((00000010 rows) (0)
-       (10011100 ((row (00000101 rows)))
-         (00000111
-           ((00100010 (00101111 row) (00110000 row)) (1)
-            (narrate-outcome-authority-check-rows (00000110 rows)))
-           ((00100010 (00101111 row) (00110000 row)) (0)
-            (00100111
-              (00000001 narrate-outcome-authority-witness)
-              (00000001 (status fail))
-              (00100111 (00000001 law) (00000101 row))
-              (00100111 (00000001 expected) (00110000 row))
-              (00100111 (00000001 actual) (00101111 row))))))))))
+(0011 narrate-outcome-authority-check-rows
+  (0010 (rows)
+    (110
+      ((010 rows) ()
+       (001 (narrate-outcome-authority-witness (status pass))))
+      ((010 rows) (1)
+       (1110
+         (001 narrate-outcome-authority-witness)
+         (001 (status fail))
+         (001 (law malformed-row-tail))
+         (1110 (001 actual) rows)))
+      ((010 rows) (0)
+       (001000 ((row (100 rows)))
+         (110
+           ((11110111 (1001 row) (10011 row)) (1)
+            (narrate-outcome-authority-check-rows (011 rows)))
+           ((11110111 (1001 row) (10011 row)) (0)
+            (1110
+              (001 narrate-outcome-authority-witness)
+              (001 (status fail))
+              (1110 (001 law) (100 row))
+              (1110 (001 expected) (10011 row))
+              (1110 (001 actual) (1001 row))))))))))
 
-(00001001 narrate-outcome-authority-check
-  (00001000 ()
+(0011 narrate-outcome-authority-check
+  (0010 ()
     (narrate-outcome-authority-check-rows
       (narrate-outcome-authority-rows))))
 
