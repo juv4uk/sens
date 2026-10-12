@@ -245,7 +245,7 @@ def self_test() -> None:
         entry["classification"] = classification
         entry["current_target"] = target
     synthetic = {"status": "AUDIT-COMPLETE", "rows": entries}
-    d8_sample = "\\n".join(
+    d8_sample = "\n".join(
         f"({bits} (en {label}) (sym ()))"
         for bits, (_, _, _, label) in W8_COLLISION.items()
     )
