@@ -99,13 +99,13 @@
       "status": "MEASURED_SUBSET_NOT_FULL_SEED_TOTAL",
       "cml_runner": {
         "repository": "juv4uk/cml",
-        "source_commit": "bdf0a0e75ef7ea6cb430c4286cb9352e7d422648",
-        "workflow_run": "https://github.com/juv4uk/cml/actions/runs/38186316487",
-        "runner_sha256": "9b5621ca25334916d044cdbe1c9809f6deb29bc39d62fa8aff1c5527d8b79fc3",
+        "source_commit": "f4f03066993e3fbeb824c9ae6879bc1a1059cbd6",
+        "workflow_run": "https://github.com/juv4uk/cml/actions/runs/38186651984",
+        "runner_sha256": "6fbbc819eac32253d9eadb5e1dc8e80295bdb0bde9a285076edd8d7fc9e40eb3",
         "on_disk_bytes": 34623904,
         "loadable_segment_file_bytes": 6042632,
         "executable_code_section_bytes": 4147007,
-        "role": "newer independently verified checkpoint; do not compare byte-size difference with earlier runner source checkpoints as an optimization result"
+        "role": "Latest independently verified checkpoint at CML source commit f4f03066993e3fbeb824c9ae6879bc1a1059cbd6; do not compare runner sizes across commits as an optimization result."
       },
       "sens_runtime_build_inputs": {
         "repository": "juv4uk/sens",
@@ -144,14 +144,28 @@
             "failed": 0
           }
         },
-        "identical_size_report_sha256": "8b2ec82d1fa57e0811a7c754e05f9fac9966b6caac8708045e1eea85d9b8ed90",
+        "identical_size_report_sha256": "6b9b820232c6da5d832588bfbfcb71529aff13864b75c1e0449b97d32317795c",
         "active_cargo_graphs_byte_identical": true,
         "cml_graph_sha256": "fe4e29d9723e1c31a598d5905024670defad2a4ffce744cd099b84d95c285c29",
         "sens_xtask_graph_sha256": "a11ec08911b104cfb31211d4f82459711d9b5ae8788f043bd8ce60baaff4736a",
         "lockfiles_unchanged_under_locked_graph_commands": true,
-        "proof_artifact_id": 11719214909,
-        "proof_artifact_sha256": "sha256:686108e9061d00d74fc0b49459c33f89f39f6bfec247b91e866200a5ffc5e4c0",
-        "proof_expires_at": "2026-11-11T00:00:42Z"
+        "proof_artifact_id": 11719792149,
+        "proof_artifact_sha256": "sha256:9a72f4dd3e279291bc6100585bcfb62fff962d86f864315e888aeafb67523e7f",
+        "proof_expires_at": "2026-11-11T00:06:22Z",
+        "two_run_artifacts": [
+          {
+            "run": 1,
+            "id": 11719822143,
+            "sha256": "sha256:d6daf3ffc94f90e3c573e7ee4ab062d9431ac819857ca0d27d49262781f7f278",
+            "expires_at": "2026-11-11T00:05:47Z"
+          },
+          {
+            "run": 2,
+            "id": 11720500118,
+            "sha256": "sha256:488344b6f02252fcb5c0bb7770390ad190ce453ed0cdf2d908d31e12be5ccc5c",
+            "expires_at": "2026-11-11T00:06:11Z"
+          }
+        ]
       },
       "exclusions": [
         "not the whole-chain seed total and not a claim of minimality",
@@ -217,27 +231,27 @@
         "two_clean_run_proof_artifact_id": 11718994225
       },
       "latest_verified_snapshot": {
-        "workflow_run": "https://github.com/juv4uk/cml/actions/runs/38186316487",
-        "source_commit": "bdf0a0e75ef7ea6cb430c4286cb9352e7d422648",
+        "workflow_run": "https://github.com/juv4uk/cml/actions/runs/38186651984",
+        "source_commit": "f4f03066993e3fbeb824c9ae6879bc1a1059cbd6",
         "full_checkout_regular_file_bytes": {
           "run1": {
-            "cml": 33664781,
-            "sens_submodule": 30802943,
-            "wsm_witness": 1810846,
-            "total": 66278570
+            "cml": 33673307,
+            "sens_submodule": 30809435,
+            "wsm_witness": 1810848,
+            "total": 66293590
           },
           "run2": {
-            "cml": 33664797,
-            "sens_submodule": 30802951,
-            "wsm_witness": 1810848,
-            "total": 66278596
+            "cml": 33675259,
+            "sens_submodule": 30811395,
+            "wsm_witness": 1810846,
+            "total": 66297500
           }
         },
         "delta_run1_minus_run2": {
-          "cml": -16,
-          "sens_submodule": -8,
-          "wsm_witness": -2,
-          "total": -26
+          "cml": -1952,
+          "sens_submodule": -1960,
+          "wsm_witness": 2,
+          "total": -3910
         },
         "classification": "Measured full-checkout metadata snapshots only; excluded from seed subtotal and not a minimal Git object/ref closure."
       }
@@ -351,8 +365,8 @@
       },
       "locked_revalidation": {
         "status": "PASS_TWO_CLEAN_RUNS",
-        "workflow_run": "https://github.com/juv4uk/cml/actions/runs/38186316487",
-        "source_commit": "bdf0a0e75ef7ea6cb430c4286cb9352e7d422648",
+        "workflow_run": "https://github.com/juv4uk/cml/actions/runs/38186651984",
+        "source_commit": "f4f03066993e3fbeb824c9ae6879bc1a1059cbd6",
         "clean_runs": 2,
         "tests_per_run": {
           "passed": 189,
@@ -363,7 +377,22 @@
         "sens_xtask_tree_sha256": "a11ec08911b104cfb31211d4f82459711d9b5ae8788f043bd8ce60baaff4736a",
         "lockfiles_unchanged": true,
         "two_run_proof_artifact_id": 11719214909,
-        "two_run_proof_artifact_sha256": "sha256:686108e9061d00d74fc0b49459c33f89f39f6bfec247b91e866200a5ffc5e4c0"
+        "two_run_proof_artifact_sha256": "sha256:686108e9061d00d74fc0b49459c33f89f39f6bfec247b91e866200a5ffc5e4c0",
+        "report_sha256_both_runs": "6b9b820232c6da5d832588bfbfcb71529aff13864b75c1e0449b97d32317795c",
+        "proof_artifact_id": 11719792149,
+        "proof_artifact_sha256": "sha256:9a72f4dd3e279291bc6100585bcfb62fff962d86f864315e888aeafb67523e7f",
+        "run_artifacts": [
+          {
+            "run": 1,
+            "id": 11719822143,
+            "sha256": "sha256:d6daf3ffc94f90e3c573e7ee4ab062d9431ac819857ca0d27d49262781f7f278"
+          },
+          {
+            "run": 2,
+            "id": 11720500118,
+            "sha256": "sha256:488344b6f02252fcb5c0bb7770390ad190ce453ed0cdf2d908d31e12be5ccc5c"
+          }
+        ]
       },
       "dependency_bytes": "Outer CML Cargo registry/cache source bytes remain external and unmeasured."
     }
@@ -521,6 +550,7 @@
     "CML external dependency update (2026-10-12): the pinned `wsm-os-target` Git repository is 22 tracked files / 48,742 bytes; the selected compile-source subset (workspace Cargo.toml, LICENSE, crate Cargo.toml, lib.rs) is 4 files / 24,935 bytes. These are external dependency bytes and excluded from trusted-seed subtotal. The CML census also lists the seven default-feature crates.io package versions/checksums separately.",
     "Lockfile integrity correction (2026-10-12): resolved CML's stale root Cargo.lock mismatch for its pinned SENS 0.41.0 path dependency by adding exact serde-family lock entries. Outer CML uses syn 3.0.4 while nested SENS uses syn 3.0.3; keep those separate. Locked revalidation is in progress and is not marked PASS yet.",
     "Locked dependency graph validation (2026-10-12): CML workflow run 38186316487 completed all steps successfully; two clean runs each passed 189/189 CML lib tests, both active Cargo graph captures ran with `--locked`, lock files remained unchanged, the graphs and size reports matched byte-for-byte. This closes the lockfile-drift/graph-repro gate, not the full seed input-closure gate.",
-    "Operational subtotal boundary correction (2026-10-12): the CML lib-test runner dynamically reads `contracts/machine-lowering-boundary.lisp` (1,129 B). Added it as a separate known runtime input. The earlier K1 partial subtotal is corrected to 35,985,025 B; the newer, distinct CML checkpoint has a verified known-input subtotal of 36,033,737 B. Both remain partial subtotals, not a whole seed-total."
+    "Operational subtotal boundary correction (2026-10-12): the CML lib-test runner dynamically reads `contracts/machine-lowering-boundary.lisp` (1,129 B). Added it as a separate known runtime input. The earlier K1 partial subtotal is corrected to 35,985,025 B; the newer, distinct CML checkpoint has a verified known-input subtotal of 36,033,737 B. Both remain partial subtotals, not a whole seed-total.",
+    "Latest measurement checkpoint update (2026-10-12): K1 run 38186651984 passed two clean runs and comparison for CML source commit f4f03066993e3fbeb824c9ae6879bc1a1059cbd6. The runner hash is now 6fbbc819... (34,623,904 B on disk; PT_LOAD 6,042,632 B; code section 4,147,007 B); the identical report SHA is 6b9b8202.... Both runs passed 189/189, and the locked dependency graphs were byte-identical. The known-input subtotal remains 36,033,737 B; it is not a whole seed-total or a minimality claim."
   ]
 }
