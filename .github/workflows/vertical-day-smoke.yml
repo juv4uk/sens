@@ -61,6 +61,16 @@ jobs:
             -- --exact --nocapture \
             2>&1 | tee "$RUNNER_TEMP/vertical-day/physical-cpu.log"
 
+      - name: Check bounded disp8 admission by exhaustive encoder table
+        if: ${{ !cancelled() }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          cargo test -p sens-host --test native_lisp_bytes \
+            disp8_admission_uses_the_finite_lisp_encoder_table_without_math \
+            -- --exact --nocapture \
+            2>&1 | tee "$RUNNER_TEMP/vertical-day/disp8-admission.log"
+
       - name: Invalid machine form never reaches host
         if: ${{ !cancelled() }}
         shell: bash
@@ -78,7 +88,7 @@ jobs:
           root="$RUNNER_TEMP/vertical-day"
           test "$(cat "$root/commit.sha")" = "$GITHUB_SHA"
           sha256sum --check "$root/inputs.sha256"
-          sha256sum "$root/domain.log" "$root/physical-cpu.log" "$root/rejection.log" \
+          sha256sum "$root/domain.log" "$root/physical-cpu.log" "$root/disp8-admission.log" "$root/rejection.log" \
             > "$root/logs.sha256"
           sha256sum --check "$root/logs.sha256"
           find target/debug/deps -maxdepth 1 -type f -executable \
