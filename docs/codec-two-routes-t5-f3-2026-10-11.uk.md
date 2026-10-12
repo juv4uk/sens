@@ -118,11 +118,15 @@ selector/version/checksum. Сімейство відоме з явного `.f3m
 **профіль визначає довжина payload**, не sniffing вмісту. Чинний F3M-1
 використовує всі **256/256** байтових кодів; F3M-2 — наступні **65 536**,
 F3M-3 — наступні **16 777 216** global ranks, F3M-4 — наступні
-**4 294 967 296**. Для F3M-3 вже доведено реальні COND-виконання,
+**4 294 967 296** legacy ranks. F3M-5 має окремий prefix-stable
+**2^40 = 1 099 511 627 776** extension rank-space, тому старі F3M-1..4
+payloads не змінюються. Для F3M-3 вже доведено реальні COND-виконання,
 найраніший 6/6-capability witness `16 3C 63` і exhaustive final-64K winner
 `FF FB 37`. Для F3M-4 є algebraic capacity proof, 65 536 stratified
-roundtrip samples і executable `DE AD BE EF`. Повні evaluator sweeps 16M/2^32
-лишаються окремими proof gates. Sparse 45/256 mapping — лише історичний доказ.
+roundtrip samples і executable `DE AD BE EF`. F3M-5 додає total D3 EQ та
+closed D4 LAMBDA; **65 536** stratified 40-bit roundtrips і all-basis
+witness `03 B1 C7 07 93` пройшли dedicated run **38234038310**. Повні
+evaluator sweeps 16M/2^32/2^40 лишаються окремими proof gates. Sparse 45/256 mapping — лише історичний доказ.
 
 
 ## Перша реальна перевірка (успішний GitHub Actions)
