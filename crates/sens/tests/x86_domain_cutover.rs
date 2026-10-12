@@ -65,3 +65,35 @@ fn machine_rejection_returns_exact_d1_yes_or_no_instead_of_legacy_nil() {
         );
     }
 }
+
+
+#[test]
+fn xmm_sentinel_shortens_quoted_data_without_collapsing_d3_and_d8() {
+    // Функція x86-xmm-name? не викликає D8:00000000 CODE-CHAR:
+    // її три цитовані singleton-списки потрібні лише як D3 ATOM = D1:NO.
+    let marker_old = "(010 (001 (00000000)))";
+    let marker_d3 = "(010 (001 (000)))";
+    assert_eq!(OPERANDS.matches(marker_old).count(), 0);
+    assert_eq!(OPERANDS.matches(marker_d3).count(), 3);
+    assert_eq!(marker_old.len() - marker_d3.len(), 5);
+
+    // Старий та новий цитовані payload різні: переносити CODE-CHAR у D3
+    // за однакового числового значення заборонено. Доведено лише одну
+    // спостережну властивість: непорожній список не є атомом.
+    for (source, expected) in [
+        (marker_old, false),
+        (marker_d3, false),
+        ("(010 (001 ()))", true),
+    ] {
+        let forms = parse_mixed_exact_domain_machine_source(OPERANDS_PATH, source)
+            .unwrap_or_else(|error| panic!("точна граматика {source}: {error}"));
+        let mut session = Session::default();
+        let answer = eval_parsed_expressions(&forms, &mut session)
+            .unwrap_or_else(|error| panic!("D3 ATOM {source}: {error}"));
+        assert_eq!(
+            answer.value.as_predicate_bit(),
+            Some(expected),
+            "D1 результат ATOM для цитованої структури: {source}"
+        );
+    }
+}
