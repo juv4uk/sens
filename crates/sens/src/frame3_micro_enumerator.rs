@@ -1617,7 +1617,7 @@ mod tests {
         assert_eq!(conditional_count(&expr), 2);
         assert_eq!(encoded_operation_count(&expr), 16);
         assert_eq!(expression_depth(&expr), 6);
-        assert_eq!(expr.exact_words().len(), 63);
+        assert_eq!(expr.exact_words().len(), 65);
         assert_eq!(expr.node_count(), 12);
         assert_eq!(
             expr.human_projection(),
