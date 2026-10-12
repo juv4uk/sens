@@ -1,0 +1,28 @@
+name: SID8 witness Lisp source cutover
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "tests/fixtures/*-witness.lisp"
+      - "tests/test_sid8_witness_source_cutover.py"
+      - "scripts/audit_lisp_migration_edits.py"
+      - ".github/workflows/sid8-witness-source-cutover.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  immutable-blob-vs-domain-source:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Audit 11 executable witness sources and 557 SID8 head-only replacements
+        run: python3 -m unittest discover -s tests -p test_sid8_witness_source_cutover.py -v
