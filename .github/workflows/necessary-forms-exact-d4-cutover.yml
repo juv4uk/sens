@@ -1,0 +1,28 @@
+name: "Точний D4 для необхідних форм"
+
+on:
+  pull_request:
+    paths:
+      - "crates/sens/src/eval/necessary_forms.rs"
+      - ".github/workflows/necessary-forms-exact-d4-cutover.yml"
+  push:
+    branches: [main]
+    paths:
+      - "crates/sens/src/eval/necessary_forms.rs"
+      - ".github/workflows/necessary-forms-exact-d4-cutover.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  exact-d4-necessary-forms:
+    name: "Перевірити точнодоменний dispatch D4"
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v5
+      - uses: dtolnay/rust-toolchain@stable
+      - name: "Зібрати бібліотеку"
+        run: cargo check --locked -p sens --lib
+      - name: "Позитивні й негативні свідки necessary forms"
+        run: cargo test --locked -p sens --lib eval::necessary_forms::exact_d4_necessary_form_migration_tests -- --nocapture
