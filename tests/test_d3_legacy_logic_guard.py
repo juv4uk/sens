@@ -224,10 +224,9 @@ class LegacyD3GuardTests(unittest.TestCase):
         findings = MODULE.scan_lisp(source, path)
         kinds = [finding.rule for finding in findings]
 
-        # The four surviving historical equality/result matches remain honest
-        # strict-audit debt; new source must never grow additional triples or
-        # return to host-T condition heads.
-        self.assertLessEqual(kinds.count("COND_NOT_TWO_FIELDS"), 4)
+        # Four obsolete result-match forms were replaced by exact D1
+        # two-field D3 clauses. Any reintroduction is a CI regression.
+        self.assertEqual(kinds.count("COND_NOT_TWO_FIELDS"), 0)
         self.assertNotIn("COND_HOST_TRUTH", kinds)
 
         exact = "((010 surface) ())"
@@ -247,6 +246,19 @@ class LegacyD3GuardTests(unittest.TestCase):
             "COND_HOST_TRUTH",
             [f.rule for f in MODULE.scan_lisp(reverted, path)],
         )
+
+        # Inject historical 3-field result matching in each of the two
+        # newly migrated equality sites; strict audit must reject both.
+        for predicate in (
+            '((101 current generated)',
+            '((101 (100 *argv*) "--check")',
+        ):
+            with self.subTest(predicate=predicate):
+                self.assertIn(predicate, source)
+                drift = source.replace(predicate, predicate + ' (1)', 1)
+                self.assertIn("COND_NOT_TWO_FIELDS", [
+                    f.rule for f in MODULE.scan_lisp(drift, path)
+                ])
 
     def test_uk_surface_audit_generator_exact_atom_pairs_with_bounded_debt(self):
         path = "scripts/generate-uk-surface-audit.lisp"

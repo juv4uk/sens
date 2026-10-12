@@ -123,21 +123,17 @@
        (110111100 output-path generated)
        (11011011 "meta semantic registry projection written"))))
   
-  ((11110111 (100 *argv*) "--check")
-   (1)
+  ((101 (100 *argv*) "--check")
    (001000 ((current (110110111 output-path)))
      (110
-       ((11110111 current generated)
-        (1)
+       ((101 current generated)
         (11011011 "meta semantic registry projection is current"))
-       ((11110111 current generated)
-        (0)
+       ((010 (001 ()))
         (1001
           (1110
             (11011011 "meta semantic registry projection is stale")
             (100 (001 ()))))))))
-  ((11110111 (100 *argv*) "--check")
-   (0)
+  ((010 (001 ()))
    (1001
      (1110
        (110111100 output-path generated)
