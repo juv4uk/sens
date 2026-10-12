@@ -69,18 +69,18 @@ exhaustive bounded proof: файл `car-cons-one-nil.f3m` дорівнює од�
 
 [Перший sweep, run 38190345552](https://github.com/juv4uk/sens/actions/runs/38190345552) на SHA `d57d55f7f50f157d672bb283d31f9a427690596f` дав **54/54 coverage, 50 PASS / 4 FAIL**. Після виправлення D6 reproduction [run 38190822493](https://github.com/juv4uk/sens/actions/runs/38190822493) дав **51 PASS / 3 FAIL**. Обидва історичні результати збережені окремо.
 
-Найновіший завершений sweep [run 38192536311](https://github.com/juv4uk/sens/actions/runs/38192536311), exact SHA `bbfd6d4aa873e904bf8497bf7dfb611d60557470`, дав **54/54 coverage, 52 PASS / 0 FAIL / 2 BLOCKED / 0 TIMEOUT**. Це перший sweep без жодного FAIL, але ще не global green: `all_benchmarks_pass=false` через два чесно позначені блокери.
+Найновіший завершений sweep [run 38192977589](https://github.com/juv4uk/sens/actions/runs/38192977589), exact SHA `ea156c1d0fe386fe7422e4a345a6431a536e0c80`, дав **54/54 coverage, 53 PASS / 0 FAIL / 1 BLOCKED / 0 TIMEOUT**. Це найкращий завершений стан лабораторії на сьогодні, але ще не global green: `all_benchmarks_pass=false` через один чесно позначений blocker.
 
 - `cross-language` — явний `SENS_BENCHMARK_STATUS=BLOCKED`: середовище не має pinned Guix; це не вимір продуктивності чи паритету мов.
-- `store-air-load` у цьому історичному прогоні був BLOCKED, бо fixtures викликали англійські `quote`/`car` як source-head. Чинний source reader правильно не виводить callable identity з цих alias-ів.
+- `store-air-load` був BLOCKED на SHA `bbfd6d4`, бо fixtures викликали англійські `quote`/`car` як source-head. Після заміни на ratified Ukrainian source heads та `parse_mixed_exact_domain` він став PASS у наступному exact-SHA sweep.
 
-Останній блок уже виправлено в commit `ea156c1d0fe386fe7422e4a345a6431a536e0c80`: paired fixtures тепер використовують чинні українські голови `як-є` та `перше`, а helper додає окремий `ukrainian-surface` шлях через `parse_mixed_exact_domain`. Англійський compatibility lane в інших дослідженнях лишається незмінним. **Це ще не PASS** — новий exact-head sweep має підтвердити збіг lowered trace, value та output з canonical-binary парою.
+Останній блок виправлено в commit `ea156c1d0fe386fe7422e4a345a6431a536e0c80`: paired fixtures використовують чинні українські голови `як-є` та `перше`, а helper додає окремий `ukrainian-surface` шлях через `parse_mixed_exact_domain`. Англійський compatibility lane в інших дослідженнях лишився незмінним. [Registry run 38192977589](https://github.com/juv4uk/sens/actions/runs/38192977589) підтвердив **PASS** для STORE/AIR: обидві paired-програми мають однакові lowered trace, value та output із canonical-binary варіантом. Це базовий STORE/AIR replay, не повний LOAD профіль — LOAD I-ref поля лишилися null.
 
 Фізичний T5 стенд уже має окремо підтверджені результати:
 - [Physical smoke run 38192284285](https://github.com/juv4uk/sens/actions/runs/38192284285): SUCCESS, 5/5 projection unit tests та 8/8 фізичних T5 fixtures.
 - У повному [run 38192284184](https://github.com/juv4uk/sens/actions/runs/38192284184) shard 6 дав PASS для `physical-binary-performance`: 8/8 source→T5 roundtrips побайтно тотожні й усі execution CLI paths мають parity. Це transport/CLI evidence, не AST compiler proof.
 
-Поточне exact-head підтвердження для української source-пари: [registry run 38192977589](https://github.com/juv4uk/sens/actions/runs/38192977589); на момент запису він ще виконується. Довготривалий receipt містить кожний sweep з його точним SHA та артефактами: [`evidence/benchmark-sweep-2026-10-12.json`](../evidence/benchmark-sweep-2026-10-12.json).
+Єдиний поточний blocker — `cross-language`: runner не має pinned Guix environment, тому він чесно видає `SENS_BENCHMARK_STATUS=BLOCKED`. Повторювати такий benchmark у стандартному runner без Guix не має сенсу; потрібне або закріплене середовище, або окреме рішення про формальне блокування/виведення historical lane з поточного gate. Довготривалий receipt містить усі sweep-и з точними SHA, counts і артефактами: [`evidence/benchmark-sweep-2026-10-12.json`](../evidence/benchmark-sweep-2026-10-12.json).
 
 ## 4. Пріоритети — у порядку доказової цінності
 
