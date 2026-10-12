@@ -225,13 +225,24 @@ class PolicyD4PartialCutover(unittest.TestCase):
                     expected, lowered = _lower_parallel_let(expected)
                     self.assertEqual(lowered, 6)
                     self.assertNotIn("(10011100 ", expected)
+                    # Each helper contained two ATOM branches returning the
+                    # SAME quoted empty value; exact D1 ATOM merges them.
+                    old_cond = re.compile(
+                        r"\\(110\\s+\\(\\(010 pair\\) \\(\\) \\(001 \\(\\)\\)\\)"
+                        r"\\s+\\(\\(010 pair\\) \\(1\\) \\(001 \\(\\)\\)\\)"
+                        r"\\s+\\(t \\(1001 pair\\)\\)\\)"
+                    )
+                    self.assertEqual(len(old_cond.findall(expected)), 2)
+                    expected = old_cond.sub(
+                        "(110 ((010 pair) (001 ()))\\n"
+                        "       ((010 (001 ())) (1001 pair)))", expected
+                    )
                     self.assertEqual(current.count(fallback), 0)
                     self.assertEqual(current.count("((010 (001 ())) (guard-unknown"), 4)
                     self.assertEqual(current, expected,
-                                     "зміна поза 110 головами, 4 D1:YES та 6 parallel LET")
-                    reasons = {x.rule for x in self.d3.scan_lisp(current, path)}
-                    self.assertIn("COND_NOT_TWO_FIELDS", reasons)
-                    self.assertIn("COND_HOST_TRUTH", reasons)
+                                     "зміна поза 110 heads, 4 YES, 6 LET та 2 ATOM cases")
+                    self.assertEqual(self.d3.scan_lisp(current, path), [],
+                                     "exact two-field D3 source must stay free of legacy clauses")
                     self.assertNotRegex(current, D3_LEGACY_COND)
 
                 self.assertNotRegex(current, D4_HEAD)
