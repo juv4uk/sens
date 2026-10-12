@@ -11,25 +11,25 @@
 ; witness's two-part gate: (< n 0) answers exact-Q 0 for n >= 0, and 0 is
 ; truthy -- so range-list returned the empty accumulator immediately.
 ; E1 (#216): explicit expected-result domains under the current 1/0 answers.
-(00001001 range-list
-  (00001000 (n acc)
-    (00000111
-      ((00011010 n 0) acc)
-      ((00011100 0 0) (range-list (00001101 n 1) (00000100 n acc))))))
+(0011 range-list
+  (0010 (n acc)
+    (110
+      ((11010 n 0) acc)
+      ((11110111 0 0) (range-list (01011 n 1) (111 n acc))))))
 
-(00001001 persistent-vector-balance-check
-  (00001000 ()
-    (10011101 ((v (01110110 (range-list 499 (00000001 ()))))
+(0011 persistent-vector-balance-check
+  (0010 ()
+    (001001 ((v (101111011 (range-list 499 (001 ()))))
            (h (vnode-height (vec-tree v)))
-           (balanced? (00011010 h 15)))
-      (00000111
-        ((00000011 balanced? 1) (1)
-         (00000001 (persistent-vector-balance-witness (status pass))))
+           (balanced? (11010 h 15)))
+      (110
+        ((101 balanced? 1) (1)
+         (001 (persistent-vector-balance-witness (status pass))))
         (t
-         (00100111
-           (00000001 persistent-vector-balance-witness)
-           (00000001 (status fail))
-           (00100111 (00000001 height) h)
-           (00100111 (00000001 balanced) balanced?)))))))
+         (1110
+           (001 persistent-vector-balance-witness)
+           (001 (status fail))
+           (1110 (001 height) h)
+           (1110 (001 balanced) balanced?)))))))
 
 (persistent-vector-balance-check)
