@@ -1,0 +1,24 @@
+name: Verify 362 fused UTF-8 benchmark
+
+on:
+  pull_request:
+    paths:
+      - 'scripts/profile-fused-utf8-candidate.lisp'
+      - '.github/workflows/verify-362-fused-benchmark.yml'
+
+jobs:
+  benchmark:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v5
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+        with:
+          shared-key: verify-362-fused-utf8
+      - name: Build my-lisp CLI
+        run: cargo build -p my-lisp-cli --bin my-lisp
+      - name: Measure fused UTF-8 candidate
+        run: |
+          /usr/bin/time -f 'fused_profile_wall_seconds=%e' \
+            ./target/debug/my-lisp scripts/profile-fused-utf8-candidate.lisp
