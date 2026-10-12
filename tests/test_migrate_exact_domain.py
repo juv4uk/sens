@@ -54,16 +54,16 @@ class ExactDomainMigrationTests(unittest.TestCase):
         self.assertEqual(mod.plan(source, self.surfaces, self.legacy), [])
 
     def test_quoted_head_is_data_and_cannot_be_rewritten(self):
-        source = "('car x)\\n'(00100111 x)\\n(quote (00100111 x))\\n"
+        source = "('car x)\n'(00100111 x)\n(quote (00100111 x))\n"
         self.assertEqual(
             self.rewrite(source),
-            "('car x)\\n'(00100111 x)\\n(001 (00100111 x))\\n",
+            "('car x)\n'(00100111 x)\n(001 (00100111 x))\n",
         )
         # Цитована W8-голова не є виконуваною навіть у режимі запису.
         mod.plan(source, self.surfaces, self.legacy, reject_unmapped_w8=True)
 
     def test_unknown_eight_bit_executable_head_blocks_write(self):
-        source = "(00100111 evaluator-fallback expression)\\n"
+        source = "(00100111 evaluator-fallback expression)\n"
         self.assertEqual(mod.plan(source, self.surfaces, self.legacy), [])
         with self.assertRaisesRegex(ValueError, "неоднозначна виконувана W8/D8"):
             mod.plan(source, self.surfaces, self.legacy, reject_unmapped_w8=True)
@@ -72,17 +72,17 @@ class ExactDomainMigrationTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as temporary:
             first = Path(temporary) / "first.lisp"
             second = Path(temporary) / "second.lisp"
-            first.write_text("(car x)\\n", encoding="utf-8")
-            second.write_text("(00100111 x)\\n", encoding="utf-8")
+            first.write_text("(car x)\n", encoding="utf-8")
+            second.write_text("(00100111 x)\n", encoding="utf-8")
             with self.assertRaisesRegex(ValueError, "неоднозначна виконувана W8/D8"):
                 mod.prepare_batch([first, second], self.surfaces, self.legacy, for_write=True)
-            self.assertEqual(first.read_text(encoding="utf-8"), "(car x)\\n")
-            self.assertEqual(second.read_text(encoding="utf-8"), "(00100111 x)\\n")
+            self.assertEqual(first.read_text(encoding="utf-8"), "(car x)\n")
+            self.assertEqual(second.read_text(encoding="utf-8"), "(00100111 x)\n")
 
     def test_old_byte_requires_source_era_certificate(self):
         with tempfile.TemporaryDirectory() as temporary:
             path = Path(temporary) / "before.lisp"
-            path.write_text("(00000101 x)\\n", encoding="utf-8")
+            path.write_text("(00000101 x)\n", encoding="utf-8")
             with self.assertRaisesRegex(ValueError, "епоху джерела"):
                 mod.prepare_batch([path], self.surfaces, self.legacy, for_write=True)
             staged = mod.prepare_batch(
@@ -90,20 +90,20 @@ class ExactDomainMigrationTests(unittest.TestCase):
                 for_write=True, legacy_source_era_proved=True,
             )
             mod.write_batch(staged)
-            self.assertEqual(path.read_text(encoding="utf-8"), "(100 x)\\n")
+            self.assertEqual(path.read_text(encoding="utf-8"), "(100 x)\n")
 
     def test_stale_source_blocks_whole_batch_before_any_write(self):
         with tempfile.TemporaryDirectory() as temporary:
             first = Path(temporary) / "first.lisp"
             second = Path(temporary) / "second.lisp"
-            first.write_text("(car x)\\n", encoding="utf-8")
-            second.write_text("(quote x)\\n", encoding="utf-8")
+            first.write_text("(car x)\n", encoding="utf-8")
+            second.write_text("(quote x)\n", encoding="utf-8")
             staged = mod.prepare_batch([first, second], self.surfaces, self.legacy, for_write=True)
-            second.write_text("(quote y)\\n", encoding="utf-8")
+            second.write_text("(quote y)\n", encoding="utf-8")
             with self.assertRaisesRegex(ValueError, "змінилося після планування"):
                 mod.write_batch(staged)
-            self.assertEqual(first.read_text(encoding="utf-8"), "(car x)\\n")
-            self.assertEqual(second.read_text(encoding="utf-8"), "(quote y)\\n")
+            self.assertEqual(first.read_text(encoding="utf-8"), "(car x)\n")
+            self.assertEqual(second.read_text(encoding="utf-8"), "(quote y)\n")
 
     def test_unbalanced_source_fails_closed(self):
         with self.assertRaisesRegex(ValueError, "unterminated list"):
