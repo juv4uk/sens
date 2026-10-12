@@ -93,7 +93,11 @@ assert not (set(projected_bits) & set(d["reserved_coordinates"]))
 assert len({row.bits for row in table_rows}) == len(table_rows)
 for row in table_rows:
     assert row.width == 7 and len(row.bits) == 7
+    assert row.en == d["residents"][row.bits], f"D7:{row.bits} owner map mismatch"
     assert row.lisp is None, f"D7:{row.bits} must not mint a Lisp callable"
+    assert all(getattr(row, key) for key in ("uk", "ukr", "san")), (
+        f"D7:{row.bits} missing human projection"
+    )
 
 # The row-wise evidence must stay a one-to-one projection of the ratified
 # coordinates, not an alternative Rust/reader-generated semantic registry.
@@ -102,6 +106,7 @@ assert len(authority_rows) == len(d["rows"]) == 128
 for row in table_rows:
     owner = authority_rows[row.bits]
     assert owner["status"] == "OWNER-RATIFIED"
+    assert owner["report_name"] == row.en
 for reserved in d["reserved_coordinates"]:
     assert authority_rows[reserved]["status"] != "OWNER-RATIFIED"
 
@@ -134,18 +139,53 @@ assert coordinates==sorted(set(coordinates)), "D7 surface coordinates must be un
 assert set(coordinates)==set(d["residents"]), "D7 surface/resident map drift"
 assert set(coordinates).isdisjoint(d["reserved_coordinates"]), "reserved D7 coordinates were allocated"
 expected_columns=("ук","укр","san","en","LISP","sym")
+rows_by_bits = {row.bits: row for row in table_rows}
 for bits,body in surface_rows:
-    for name in expected_columns:
-        assert body.count(f"({name} ")==1, f"D7:{bits} missing or duplicated {name}"
-    labels=re.findall(r"\((ук|укр|san|en|LISP|sym) ",body)
-    assert tuple(labels)==expected_columns, f"D7:{bits} surface column order changed"
-    assert "(LISP ())" in body, f"D7:{bits} invented Lisp callable name"
-    semantic_role = d["residents"][bits]
-    if semantic_role.startswith("text.digit."):
-        glyph = re.search(r"\(sym ([0-9])\)$", body)
-        assert glyph is not None and glyph.group(1) == semantic_role.rsplit(".", 1)[1], (
-            f"D7:{bits} text digit glyph drifted from ratified digit identity"
+    # Only inspect the top-level human labels before the nested per-surface sym map.
+    top_level = body.split("(sym (", 1)[0]
+    labels=re.findall(r"\((ук|укр|san|en|LISP) ",top_level)
+    assert tuple(labels)==expected_columns[:-1], f"D7:{bits} top-level surface column order changed"
+    assert "(sym ((" in body, f"D7:{bits} needs a nested per-surface glyph map"
+    en=re.search(r"\(en ([^()]*)\)",top_level)
+    assert en is not None and en.group(1)==d["residents"][bits], f"D7:{bits} role projection drift"
+    assert "(LISP ())" in top_level, f"D7:{bits} invented Lisp callable name"
+    row=rows_by_bits[bits]
+    assert row.surface_symbols is not None, f"D7:{bits} lacks the surface symbol map"
+    assert tuple(row.surface_symbols)==expected_columns, f"D7:{bits} symbol map order changed"
+    assert row.surface_symbols["LISP"] is None, f"D7:{bits} invented a Lisp glyph"
+    # Where #3572 already records a concrete surface projection, the human
+    # table must preserve it verbatim. Empty authority fields are not guessed.
+    evidence_row = authority_rows[bits]
+    projection = evidence_row.get("projection", {})
+    if bits == "1100101":
+        # Existing D7 authority metadata says TAB for the resident named
+        # sign.double-quote. That is a projection inconsistency, not identity
+        # authority; keep the human surface readable and explicitly detect it
+        # until the metadata owner repairs its non-identity projection fields.
+        assert projection.get("slp1") == chr(9) and projection.get("iast") == chr(9), (
+            "D7:1100101 historical projection discrepancy changed; review the explicit exception"
         )
+        assert projection.get("uk") is None and projection.get("deva") is None
+        assert row.surface_symbols["ук"] == '"'
+        assert row.surface_symbols["укр"] == '"'
+        assert row.surface_symbols["san"] is None
+        assert row.surface_symbols["en"] == '"'
+        assert row.surface_symbols["sym"] == '"'
+        continue
+    for namespace, source_name in (("ук", "uk"), ("укр", "uk"), ("san", "deva"), ("en", "iast")):
+        expected_symbol = projection.get(source_name)
+        if expected_symbol:
+            assert row.surface_symbols[namespace] == expected_symbol, (
+                f"D7:{bits} {namespace} glyph disagrees with ratified {source_name} projection"
+            )
+    if en.group(1).startswith("text.digit."):
+        expected_digit=en.group(1).rsplit(".",1)[1]
+        assert row.surface_symbols["sym"]==expected_digit, (
+            f"D7:{bits} preferred digit glyph drifted from ratified digit identity"
+        )
+        assert row.surface_symbols["ук"] == expected_digit
+        assert row.surface_symbols["укр"] == expected_digit
+        assert row.surface_symbols["san"] == "०१२३४५६७८९"[int(expected_digit)]
 
 print("D7-SURFACE-ROWS: PASS residents=126 reserved=2 no-Rust-law")
 
