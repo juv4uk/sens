@@ -8,7 +8,7 @@
     "tree_sha": "d0787a40fcea36501747732aa61b6de19fe29c70",
     "tree_entry_count": 8038
   },
-  "reason_for_census": "The measured CML runner invokes `cargo run --manifest-path external/sens/Cargo.toml -p xtask -- compiler-export` at runtime. Cargo compiles `xtask` and the SENS library from the pinned checkout. This census includes 70 production Rust source files (excluding cfg(test)-only Rust source), workspace manifests, authority/compiler inputs, direct compile-time library includes, and SENS files consumed by the pinned CML build/test runner. It remains a verified subset, not the complete runtime closure or minimum seed total.",
+  "reason_for_census": "The measured CML runner invokes `cargo run --manifest-path external/sens/Cargo.toml -p xtask -- compiler-export` at runtime. Cargo compiles `xtask` and the SENS library from the pinned checkout. This census includes 70 production Rust source files (excluding cfg(test)-only Rust source), workspace manifests, authority/compiler inputs, direct compile-time library includes, and SENS files consumed by the pinned CML build/test runner. It remains a verified subset, not the complete runtime closure or minimum seed total. A two-run strace audit of the selected CML runner also observed Cargo opening 444 vendor files totaling 4,940,765 tracked bytes: every file in the seven selected dependency package roots plus Cargo.toml/.cargo-checksum.json for the other 74 package roots.",
   "known_input_subset": {
     "file_count": 117,
     "total_on_disk_source_bytes": 1432402,
@@ -2368,7 +2368,50 @@
             }
           ]
         }
-      ]
+      ],
+      "full_vendor_directory_snapshot": {
+        "source_repository": "juv4uk/sens",
+        "source_commit": "d0787a40fcea36501747732aa61b6de19fe29c70",
+        "vendor_root_count": 81,
+        "tracked_file_count": 3963,
+        "tracked_bytes": 141366139,
+        "classification": "Complete tracked vendor/ checkout footprint at the pinned SENS tree; external dependency bundle, excluded from trusted SENS seed subtotal. Not all bytes are opened by the selected xtask command."
+      },
+      "observed_runtime_input_subset": {
+        "schema": "nano-sens-vendor-runtime-observation/1",
+        "status": "OBSERVED_IN_TWO_SUCCESSFUL_TRACES_NOT_A_MINIMUM_PRUNING_PROOF",
+        "cml_repository": "juv4uk/cml",
+        "cml_commit": "e6e0a601c4c2c8398e7ed8f6e460e594b3a02559",
+        "sens_commit": "d0787a40fcea36501747732aa61b6de19fe29c70",
+        "workflow_run": "https://github.com/juv4uk/cml/actions/runs/38187252311",
+        "trace_artifacts": [
+          {
+            "run": 1,
+            "id": 11719862489,
+            "trace_sha256": "ba0da0393566a5bc5096985b3c1f5721a0003cc74c57e3db0f72233e8a8424f1",
+            "trace_bytes": 8914247,
+            "tests_passed": 189
+          },
+          {
+            "run": 2,
+            "id": 11719953009,
+            "trace_sha256": "a3066530ae2075751af6c1f20060101eeaa88e7b478a066d3f965c2b5403d93d",
+            "trace_bytes": 9014533,
+            "tests_passed": 189
+          }
+        ],
+        "observed_vendor_paths": {
+          "unique_file_paths": 444,
+          "bytes_from_pinned_tree": 4940765,
+          "selected_seven_package_files": 296,
+          "selected_seven_package_bytes": 4419723,
+          "metadata_files_from_other_74_vendor_roots": 148,
+          "metadata_bytes_from_other_74_vendor_roots": 521042,
+          "roots_seen": 81,
+          "note": "Trace parser pairs unfinished/resumed openat calls and counts successful read-capable file opens. Every file in each of the seven active package roots was observed, along with Cargo.toml and .cargo-checksum.json from the other 74 roots. Raw full traces remain in the 30-day GitHub artifacts; path-by-path census generation is now added to the follow-up workflow."
+        },
+        "not a minimum claim": "Cargo's observed source discovery touches metadata for all 81 vendor roots in this checkout. A controlled pruned-vendor experiment would be needed before claiming the non-active 74 packages can be removed safely. All vendor bytes remain external dependencies and are not part of the trusted-seed subtotal."
+      }
     }
   },
   "optional_runtime_references_not_exercised_by_compiler_export": [
