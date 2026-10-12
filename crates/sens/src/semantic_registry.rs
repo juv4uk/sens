@@ -210,6 +210,24 @@ pub(crate) fn d7_uk_keyboard_glyph(cell: u8) -> Option<&'static str> {
         .and_then(|row| row.uk)
 }
 
+/// Sanskrit IAST is a Sanskrit projection, never an English surface.
+pub(crate) fn d7_sa_iast_glyph(cell: u8) -> Option<&'static str> {
+    D7_DISPLAY_ROWS.iter().find(|row| row.bits == cell).and_then(|row| row.sa)
+}
+
+pub(crate) fn d7_sa_iast_longest_prefix(rest: &str) -> Option<(usize, u8)> {
+    D7_DISPLAY_ROWS
+        .iter()
+        .filter_map(|row| row.sa.and_then(|glyph| {
+            rest.starts_with(glyph).then_some((glyph.len(), row.bits))
+        }))
+        .max_by_key(|(length, _)| *length)
+}
+
+pub(crate) fn d7_is_owner_resident(cell: u8) -> bool {
+    D7_DISPLAY_ROWS.iter().any(|row| row.bits == cell)
+}
+
 pub(crate) fn d7_uk_keyboard_cell(glyph: &str) -> Option<u8> {
     D7_DISPLAY_ROWS
         .iter()
