@@ -835,6 +835,133 @@ mod tests {
     }
 
     #[test]
+    fn census_one_byte_cool_programs() {
+        let mut best_overall: Option<
+            ((u32, usize, usize, usize, usize, usize, u32), Frame3MicroExpr),
+        > = None;
+        let mut deepest: Option<
+            ((usize, usize, u32, usize, usize, u32), Frame3MicroExpr),
+        > = None;
+        let mut best_car: Option<
+            ((u32, usize, usize, usize, usize, usize, u32), Frame3MicroExpr),
+        > = None;
+        let mut best_cdr: Option<
+            ((u32, usize, usize, usize, usize, usize, u32), Frame3MicroExpr),
+        > = None;
+        let mut best_cons: Option<
+            ((u32, usize, usize, usize, usize, usize, u32), Frame3MicroExpr),
+        > = None;
+        let mut conditional_count_total = 0usize;
+
+        for local in 0u32..=u8::MAX as u32 {
+            let payload = [local as u8];
+            let expr = decode_payload(&payload).unwrap();
+
+            let cap = expr.capability_mask().count_ones();
+            let cond = conditional_count(&expr);
+            let ops = encoded_operation_count(&expr);
+            let depth = expression_depth(&expr);
+            let words = expr.exact_words().len();
+            let nodes = expr.node_count();
+            let expressive = (cap, cond, ops, depth, words, nodes, local);
+
+            if best_overall
+                .as_ref()
+                .is_none_or(|(current, _)| expressive > *current)
+            {
+                best_overall = Some((expressive, expr.clone()));
+            }
+            if cond > 0 {
+                conditional_count_total += 1;
+            }
+            if expr.capability_mask() & CAP_CAR != 0
+                && best_car
+                    .as_ref()
+                    .is_none_or(|(current, _)| expressive > *current)
+            {
+                best_car = Some((expressive, expr.clone()));
+            }
+            if expr.capability_mask() & CAP_CDR != 0
+                && best_cdr
+                    .as_ref()
+                    .is_none_or(|(current, _)| expressive > *current)
+            {
+                best_cdr = Some((expressive, expr.clone()));
+            }
+            if expr.capability_mask() & CAP_CONS != 0
+                && best_cons
+                    .as_ref()
+                    .is_none_or(|(current, _)| expressive > *current)
+            {
+                best_cons = Some((expressive, expr.clone()));
+            }
+
+            let depth_score = (depth, ops, cap, words, nodes, local);
+            if deepest
+                .as_ref()
+                .is_none_or(|(current, _)| depth_score > *current)
+            {
+                deepest = Some((depth_score, expr));
+            }
+        }
+
+        let (best_score, best_expr) = best_overall.unwrap();
+        eprintln!(
+            "F3M1_BEST_OVERALL={:02X}\tcap={}\tcond={}\tops={}\tdepth={}\twords={}\tnodes={}\t{}",
+            best_score.6,
+            best_score.0,
+            best_score.1,
+            best_score.2,
+            best_score.3,
+            best_score.4,
+            best_score.5,
+            best_expr.human_projection()
+        );
+
+        let (depth_score, depth_expr) = deepest.unwrap();
+        eprintln!(
+            "F3M1_DEEPEST={:02X}\tdepth={}\tops={}\tcap={}\twords={}\tnodes={}\t{}",
+            depth_score.5,
+            depth_score.0,
+            depth_score.1,
+            depth_score.2,
+            depth_score.3,
+            depth_score.4,
+            depth_expr.human_projection()
+        );
+
+        for (label, candidate) in [
+            ("F3M1_BEST_CAR", best_car.unwrap()),
+            ("F3M1_BEST_CDR", best_cdr.unwrap()),
+            ("F3M1_BEST_CONS", best_cons.unwrap()),
+        ] {
+            let (score, expr) = candidate;
+            eprintln!(
+                "{label}={:02X}\tcap={}\tcond={}\tops={}\tdepth={}\twords={}\tnodes={}\t{}",
+                score.6,
+                score.0,
+                score.1,
+                score.2,
+                score.3,
+                score.4,
+                score.5,
+                expr.human_projection()
+            );
+        }
+
+        eprintln!("F3M1_COND_CODES={conditional_count_total}");
+
+        assert_eq!(conditional_count_total, 0);
+        for local in 0u32..=u8::MAX as u32 {
+            let expr = decode_payload(&[local as u8]).unwrap();
+            let source = expr.exact_words().join(" ");
+            let parsed = parse_canonical_binary(&source).expect("F3M-1 census source");
+            eval_parsed_expressions(&parsed, &mut Session::default())
+                .expect("every F3M-1 census candidate must execute");
+        }
+    }
+
+    #[test]
     fn two_byte_space_roundtrips_exhaustively() {
         for value in 0u32..=u16::MAX as u32 {
             let payload = (value as u16).to_be_bytes();
