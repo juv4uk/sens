@@ -5,7 +5,7 @@
 //! - exact 3/4/5/6-bit heads become DomainIdentity;
 //! - exact 7-bit heads fail closed because current D7 is Sound/Text/local-ordinal, not callable;
 //! - exact 8-bit heads remain the ordinary parser's compatibility path except for pinned machine D8 I/O;
-//! - four D9 string heads are lifted only in lib/machine/admission/x86-64.lisp;
+//! - four D9 string heads are lifted only in the two source-pinned machine wire paths: admission and encoding;
 //! - non-head and quoted data keep the ordinary parser's interpretation.
 //!
 //! This gives active Core migration a mixed symbol + exact-domain path without
@@ -51,12 +51,12 @@ pub fn parse_mixed_exact_domain_machine_source(
         .map(|expr| lift_pinned_d8_io(source, expr, 0))
         .collect::<Result<Vec<_>, _>>()?;
 
-    // The admission wire parser uses exactly four ratified D9 string
-    // operations. Pin their callability to this one source file rather than
-    // enabling general D9 call-head inference in machine code.
-    if path == "lib/machine/admission/x86-64.lisp" {
+    // Only the admission/encoding wire paths need these four ratified D9
+    // string operations. Pin callability to those exact source files; this is
+    // not general D9 call-head inference for machine code.
+    if matches!(path, "lib/machine/admission/x86-64.lisp" | "lib/machine/encoding/x86-64.lisp") {
         parsed.into_iter()
-            .map(|expr| lift_pinned_machine_admission_d9_strings(source, expr, 0))
+            .map(|expr| lift_pinned_machine_wire_d9_strings(source, expr, 0))
             .collect()
     } else {
         Ok(parsed)
@@ -127,7 +127,7 @@ fn lift_pinned_d8_io(
 /// recognizer in lib/machine/admission/x86-64.lisp. This narrow exception is
 /// source-path pinned; it does not make arbitrary D9 identities callable in
 /// other machine files. Quote payloads and binding slots remain opaque.
-fn lift_pinned_machine_admission_d9_strings(
+fn lift_pinned_machine_wire_d9_strings(
     source: &str,
     expression: Expr,
     depth: u32,
@@ -141,7 +141,7 @@ fn lift_pinned_machine_admission_d9_strings(
     if depth > MAX_STRUCTURE_DEPTH {
         return Err(LanguageError::new(
             ErrorKind::Parse,
-            "pinned D9 machine-admission source exceeds structure depth",
+            "pinned D9 machine-wire source exceeds structure depth",
             expression.span,
         ));
     }
@@ -1618,9 +1618,19 @@ mod tests {
         }
 
         let source = "(0011 probe (0010 (text) (110101010 \"#q2:\" text)))";
-        let other_machine_path = only(parse_mixed_exact_domain_machine_source(
+        let encoding_path = only(parse_mixed_exact_domain_machine_source(
             "lib/machine/encoding/x86-64.lisp", source,
-        ).expect("other trusted machine source remains D9-closed"));
+        ).expect("encoding's exact wire reader admits the same bounded D9 string heads"));
+        let ExprKind::List(definition) = &encoding_path.kind else { panic!("DEFINE"); };
+        let ExprKind::List(lambda) = &definition[2].kind else { panic!("LAMBDA"); };
+        let ExprKind::List(call) = &lambda[2].kind else { panic!("call"); };
+        assert!(matches!(&call[0].kind, ExprKind::DomainIdentity(id)
+            if id.width() == 9 && id.packed_bits() == 0b110101010),
+            "encoding can call only the exact D9 prefix mechanism for canonical wire validation");
+
+        let other_machine_path = only(parse_mixed_exact_domain_machine_source(
+            "lib/machine/lowering/semantic-x86-64.lisp", source,
+        ).expect("unrelated trusted machine source remains D9-closed"));
         let ExprKind::List(definition) = &other_machine_path.kind else { panic!("DEFINE"); };
         let ExprKind::List(lambda) = &definition[2].kind else { panic!("LAMBDA"); };
         let ExprKind::List(call) = &lambda[2].kind else { panic!("call"); };
