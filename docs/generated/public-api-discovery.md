@@ -4,9 +4,9 @@
 > top-level визначення, але **не** оголошує їх публічним API.
 
 - проскановано бібліотечних файлів: 51
-- top-level функцій: 946
+- top-level функцій: 948
 - top-level макросів: 34
-- усього визначень: 980
+- усього визначень: 982
 - класифікація: `unreviewed`
 
 | джерело | вид | ім'я | класифікація |
@@ -612,9 +612,11 @@
 | `lib/persistent-map.lisp` | function | `node-left` | unreviewed |
 | `lib/persistent-map.lisp` | function | `node-right` | unreviewed |
 | `lib/persistent-map.lisp` | function | `height-of` | unreviewed |
+| `lib/persistent-map.lisp` | function | `map-height-successor` | unreviewed |
+| `lib/persistent-map.lisp` | function | `map-height-greater?` | unreviewed |
 | `lib/persistent-map.lisp` | function | `max2` | unreviewed |
 | `lib/persistent-map.lisp` | function | `make-balanced-node` | unreviewed |
-| `lib/persistent-map.lisp` | function | `balance-factor` | unreviewed |
+| `lib/persistent-map.lisp` | function | `balance-state` | unreviewed |
 | `lib/persistent-map.lisp` | function | `rotate-left` | unreviewed |
 | `lib/persistent-map.lisp` | function | `rotate-right` | unreviewed |
 | `lib/persistent-map.lisp` | function | `balance` | unreviewed |

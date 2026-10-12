@@ -63,34 +63,57 @@
 (0011 node-left 00110001)
 (0011 node-right 00110010)
 
-; AVL height: only structural empty is the zero-height sentinel.
-; D4 NULL consumes () and returns exact D1; no unadmitted D8 EQUAL.
+; AVL height is structural data, not an unqualified arithmetic number.
+; Empty height is (), and each successor is one quoted marker consed onto it.
+; Висоти порівнюються структурною рекурсією: D24+ arithmetic тут не потрібна.
 (0011 height-of
   (0010 (n)
     (110
-      ((0101 n) 0)
+      ((0101 n) (001 ()))
       ((010 ()) (node-height n)))))
 
-; Maximum of numeric heights; keep the D5 LESSP comparison and use exact
-; D1 YES as the unconditional fallback, not a fabricated EQUAL call.
+(0011 map-height-successor
+  (0010 (height)
+    (111 (001 height) height)))
+
+; Strict ordering over unary height lists. D3 EQ only creates the canonical
+; D1 predicate bit; no mathematical operator receives a structural height.
+(0011 map-height-greater?
+  (0010 (a b)
+    (110
+      ((0101 a) (101 1 0))
+      ((0101 b) (101 1 1))
+      ((010 ()) (map-height-greater? (011 a) (011 b))))))
+
 (0011 max2
   (0010 (a b)
     (110
-      ((11010 a b) b)
-      ((010 ()) a))))
+      ((map-height-greater? a b) a)
+      ((010 ()) b))))
 
-; Rebuilds a node with a recomputed height from its (possibly new)
-; children — every insert/rotation goes through this, never hand-tracks
-; a height number itself.
-; Перебудовує вузол із перерахованою висотою з його (можливо нових)
-; дітей — кожна вставка/ротація йде через це, ніколи не рахує висоту
-; вручну.
+; Height is successor(max(left,right)), encoded as a structural unary list.
 (0011 make-balanced-node
   (0010 (key value left right)
-    (1110 key value (01010 1 (max2 (height-of left) (height-of right))) left right)))
+    (1110 key value
+          (map-height-successor
+            (max2 (height-of left) (height-of right)))
+          left right)))
 
-(0011 balance-factor
-  (0010 (n) (01011 (height-of (node-left n)) (height-of (node-right n)))))
+; A signed numeric balance factor is unnecessary: classify the shape instead.
+; balance-state returns one of left-heavy, right-heavy, balanced as Lisp data.
+(0011 balance-state
+  (0010 (n)
+    (110
+      ((0101 n) (001 balanced))
+      ((map-height-greater?
+         (height-of (node-left n))
+         (map-height-successor (height-of (node-right n))))
+       (001 left-heavy))
+      ((map-height-greater?
+         (height-of (node-right n))
+         (map-height-successor (height-of (node-left n))))
+       (001 right-heavy))
+      ((010 ()) (001 balanced)))))
 
 (0011 rotate-left
   (0010 (n)
@@ -106,28 +129,32 @@
         (node-left l)
         (make-balanced-node (node-key n) (node-value n) (node-right l) (node-right n))))))
 
-; Standard AVL rebalance: at most one single or double rotation restores
-; |balance factor| <= 1 after a single insert, checked on the way back up
-; the recursive call stack in map-insert below.
-; Стандартна AVL-ребалансировка: щонайбільше одна проста чи подвійна
-; ротація відновлює |balance-factor| <= 1 після однієї вставки,
-; перевіряється на зворотному шляху рекурсії в map-insert нижче.
+; Standard AVL rebalance uses only structural height comparisons and D1 bits.
 (0011 balance
   (0010 (n)
     (110
-      
-      ((010 n)  n)
-      ((11011 (balance-factor n) 1) 
+      ((010 n) n)
+      ((101 (balance-state n) (001 left-heavy))
        (110
-         ((11010 (balance-factor (node-left n)) 0) 
-          (rotate-right (make-balanced-node (node-key n) (node-value n)
-                          (rotate-left (node-left n)) (node-right n))))
+         ((map-height-greater?
+            (height-of (node-right (node-left n)))
+            (height-of (node-left (node-left n))))
+          (rotate-right
+            (make-balanced-node
+              (node-key n) (node-value n)
+              (rotate-left (node-left n))
+              (node-right n))))
          ((010 ()) (rotate-right n))))
-      ((11010 (balance-factor n) -1) 
+      ((101 (balance-state n) (001 right-heavy))
        (110
-         ((11011 (balance-factor (node-right n)) 0) 
-          (rotate-left (make-balanced-node (node-key n) (node-value n)
-                         (node-left n) (rotate-right (node-right n)))))
+         ((map-height-greater?
+            (height-of (node-left (node-right n)))
+            (height-of (node-right (node-right n))))
+          (rotate-left
+            (make-balanced-node
+              (node-key n) (node-value n)
+              (node-left n)
+              (rotate-right (node-right n)))))
          ((010 ()) (rotate-left n))))
       ((010 ()) n))))
 
@@ -202,11 +229,11 @@
 (0011 внутрішній-текст-передує?
   (0010 (a b)
     (110
-      ((00111100 a) (0100 (00111100 b)))
-      ((00111100 b) (0101 (001 (0))))
-      ((11010 (01000101 (00111111 a)) (01000101 (00111111 b)))
+      ((110011100 a) (0100 (110011100 b)))
+      ((110011100 b) (0101 (001 (0))))
+      ((11010 (01000101 (110101011 a)) (01000101 (110101011 b)))
        (0101 (001 ())))
-      ((11010 (01000101 (00111111 b)) (01000101 (00111111 a)))
+      ((11010 (01000101 (110101011 b)) (01000101 (110101011 a)))
        (0101 (001 (0))))
-      ((010 ()) (внутрішній-текст-передує? (01000000 a) (01000000 b))))))
+      ((010 ()) (внутрішній-текст-передує? (110011101 a) (110011101 b))))))
 (0011 внутрішня-мапа-список map->list)

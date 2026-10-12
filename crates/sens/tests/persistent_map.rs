@@ -31,6 +31,28 @@ fn empty_map_has_nothing() {
 }
 
 #[test]
+fn avl_heights_are_structural_unary_values_not_numbers() {
+    assert_eq!(eval_map("(height-of map-empty)"), "()");
+    assert_eq!(
+        eval_map(r#"(node-height (map-insert "a" 1 map-empty))"#),
+        "(height)"
+    );
+}
+
+#[test]
+fn avl_heights_and_balance_state_are_structural_not_numeric() {
+    assert_eq!(eval_map("(height-of map-empty)"), "()");
+    assert_eq!(
+        eval_map(r#"(node-height (map-insert "a" 1 map-empty))"#),
+        "(height)"
+    );
+    assert_eq!(
+        eval_map(r#"(balance-state (map-insert "a" 1 map-empty))"#),
+        "balanced"
+    );
+}
+
+#[test]
 fn insert_then_get_finds_the_value() {
     assert_eq!(
         eval_map(r#"(map-get "a" (map-insert "a" 1 map-empty))"#),
@@ -87,15 +109,14 @@ fn map_to_list_returns_keys_in_sorted_order() {
 /// keys inserted in already-sorted order is the textbook worst case for
 /// an unbalanced tree (degenerates into a linked list, height 7). AVL
 /// rotations keep it at the theoretical minimum for 7 nodes, height 3
-/// (`ceil(log2(8))`) — verified live before this test was written, not
-/// assumed from the rotation code looking plausible.
+/// (`ceil(log2(8))`). `node-height` encodes that as three structural
+/// `height` markers, not as a naked numeric scalar under the D24+ law.
 /// Sama sut vyboru zbalansovanoho dereva zamist zvychainoho BST: sim
 /// kliuchiv, vstavlenykh uzhe u vidsortovanomu poriadku — pidruchnykovyi
 /// naihirshyi vypadok dlia nezbalansovanoho dereva (vyrodzhuietsia v
 /// zviazanyi spysok, vysota 7). AVL-rotatsii trymaiut teoretychnyi minimum
-/// dlia 7 vuzliv, vysotu 3 (`ceil(log2(8))`) — perevireno zhyvo pered
-/// napysanniam tsoho testu, ne prypushcheno z toho, shcho kod rotatsii vyhliadaie
-/// pravdopodibno.
+/// dlia 7 vuzliv, vysotu 3 (`ceil(log2(8))`), zakodovanu tryma
+/// strukturalnymy markeramy `height`, ne holym chyslom.
 #[test]
 fn sorted_insertion_order_stays_balanced_instead_of_degenerating_into_a_list() {
     let source = r#"
@@ -110,7 +131,7 @@ fn sorted_insertion_order_stays_balanced_instead_of_degenerating_into_a_list() {
                             map-empty))
         (node-height m)
     "#;
-    assert_eq!(eval_map(source), "3");
+    assert_eq!(eval_map(source), "(height height height)");
 }
 
 #[test]

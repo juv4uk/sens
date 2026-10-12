@@ -57,7 +57,10 @@ assert actual_sources==expected_sources
 # in the claimed Lisp file.
 for source_file,count in expected_sources.items():
     text=(root/source_file).read_text(encoding="utf-8")
-    defs={m.group(1) for m in re.finditer(r'^\([01]{8}\s+([^\s()]+)\s+', text, re.MULTILINE)}
+# Source DEFINE heads retain their exact ratified D1-D10 width. They are not
+# all W8: fixed-eight matching would silently reject migrated D3/D4/D9
+# definitions even though this check is only validating source-name presence.
+    defs={m.group(1) for m in re.finditer(r'^\([01]{1,10}\s+([^\s()]+)\s+', text, re.MULTILINE)}
     claimed={row["source_name"] for row in rows if row["source_file"]==source_file}
     assert len(claimed)==count
     assert claimed <= defs
