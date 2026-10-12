@@ -21,8 +21,23 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 SOURCE = ROOT / "knowledge" / "d7-ratified.json"
-LAYOUTS = {"ук": "uk", "укр": "uk", "san": "deva", "en": "iast",
-           "sym": "iast", "slp1": "slp1"}
+# Canonical D7 glyphs are Ukrainian-keyboard symbols only.
+# IAST is Sanskrit transliteration, NEVER English.
+LAYOUTS = {"ук": "uk", "укр": "uk", "sym": "uk",
+           "san": "iast", "sa-iast": "iast", "sa-deva": "deva",
+           "sa-slp1": "slp1", "slp1": "slp1", "en": None}
+# Microsoft Ukrainian (Enhanced) KBDUR1 layout; one physical symbol per key.
+# Structural space, parentheses and dot are owned by D2, not Text7/D7.
+UK_LETTERS = "абвгґдеєжзиіїйклмнопрстуфхцчшщьюя"
+UK_KEYBOARD = frozenset(
+    UK_LETTERS + UK_LETTERS.upper() + "0123456789" +
+    "'!\"№;%:?*_-+=/\\,₴"
+)
+D2_OWNED = frozenset({
+    "sign.space", "sign.newline", "sign.tab",
+    "sign.left-paren", "sign.right-paren", "sign.dot",
+})
+CAPITAL = "0100010"  # #3572: text modifier, not a visible glyph.
 BITS7 = re.compile(r"[01]{7}\Z")
 DEVA_DIGITS = "०१२३४५६७८९"
 
@@ -33,16 +48,14 @@ class D7CodecError(ValueError):
 
 def _surface_glyph(row: dict, layout: str) -> str | None:
     source = LAYOUTS[layout]
-    # Owner ledger contains a historical TAB projection at the *quote* cell.
-    # Do not reinterpret TAB as a double quote or silently rewrite authority.
-    if row["coordinate"] == "1100101":
+    if row["report_name"] in D2_OWNED or source is None:
         return None
     value = row.get("projection", {}).get(source)
     if not value:
         kind = row["semantic_role"]
         label = row.get("surface_label")
         if kind == "text-digit" and label in "0123456789":
-            value = DEVA_DIGITS[int(label)] if layout == "san" else label
+            value = DEVA_DIGITS[int(label)] if layout == "sa-deva" else label
         elif kind == "text-punctuation" and label:
             value = label
     if not value:
@@ -52,9 +65,13 @@ def _surface_glyph(row: dict, layout: str) -> str | None:
     if re.fullmatch(r"\\x[0-9a-fA-F]{2}", value):
         return chr(int(value[2:], 16))
     if value == "\\\\":
-        return "\\"
+        value = "\\"
     if any(ch in value for ch in ("\x00",)):
         raise D7CodecError("NUL is not an admitted text glyph")
+    # Ukrainian D7 is a keyboard-CHARACTER mapping, not a phonetic digraph
+    # or a Unicode superset. Ukrainian 'дз' and 'дж' are two keys.
+    if source == "uk" and (len(value) != 1 or value not in UK_KEYBOARD):
+        return None
     return value
 
 
