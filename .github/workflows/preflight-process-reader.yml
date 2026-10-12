@@ -1,0 +1,29 @@
+name: Тест preflight — exact-domain process reader
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - "crates/sens/tests/current_binary_preflight.rs"
+      - "crates/sens/src/mixed_source.rs"
+      - ".github/workflows/preflight-process-reader.yml"
+  push:
+    branches: [main]
+    paths:
+      - "crates/sens/tests/current_binary_preflight.rs"
+      - "crates/sens/src/mixed_source.rs"
+      - ".github/workflows/preflight-process-reader.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  process-reader-preflight:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v5
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Позитивний і негативний exact-domain process reader preflight
+        run: cargo test --locked -p sens --test current_binary_preflight -- --nocapture
