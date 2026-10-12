@@ -267,7 +267,7 @@
     (110
       ((0100 (010 values)) acc)
       ((010 values) 
-       (101110 f (f acc (100 values)) (011 values))))))
+       (reduce f (f acc (100 values)) (011 values))))))
 
 ; `let` desugars to an immediately-invoked `lambda`: `(let ((x 1) (y 2)) body)`
 ; expands to `((lambda (x y) body) 1 2)` — the classic trick, same shape as
