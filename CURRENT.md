@@ -28,7 +28,7 @@ The language is **sens / СЕНС**.
 ```text
 semantic object
 =
-exact binary number
+exact binary word (0/1 digits)
 + exact domain
 + admitted / proved law
 ```
@@ -48,6 +48,10 @@ D9  full compact 512/512 — owner-ratified #4008; canonical map in knowledge/d9
 D10  whole-domain owner-ratified 1024/1024 (2026-10-12), per-row F1/F2/F3 and T5 execution pending
 D24+  owner-ratified numeric domain ladder D24/D48/D96/D192/..., separate from function domains
 ```
+
+**Mathematical operand boundary (owner clarification 2026-10-12):** D1–D10 are domain-qualified binary words, not arithmetic operands. Only explicitly qualified D24/D48/D96/... values and lawful numeric compositions admit `+ - * /` and numeric `< > =`. An operator may have a D5/D6 function identity without making that function identity a number. D3 EQ and D1 predicates are separate non-mathematical laws; old unqualified Number/Rational/BinaryNumber no longer grants arithmetic admission.
+
+**Migration evidence, not a green release claim:** Core checks now include `crates/sens/tests/math_domain_exclusivity.rs` and static admission checks in `scripts/check-numeric-domain-ratification.py`. Local Cargo execution has not yet been verified for these changes because the linked desktop runner is offline. Frozen Core4 still contains old numeric literals and arithmetic, e.g. `lib/core4.lisp:188,193` computes LENGTH by adding `1` to `acc` initialized as `0`; this is incompatible with D24+-only operands until an explicitly admitted domain-preserving migration is available. Do not silently re-enable legacy-number arithmetic to make the test green, and do not claim release pass before exact-SHA CI and Core4 evidence.
 
 Owner foundation ratification #4008 extends the current chain through D9: D1 #1699, D2 #1702, D3 #3202, D4 #3272, D5 #3305/#3330, D6 #3393, D7 #3572, D8 #3960, D9 #4008. #3960 remains the historical D1–D8 foundation cut; D9 is owner-ratified 512/512 under #4008. Intermediate clean-room maps remain research provenance only. Any current implementation or fixture that still uses the superseded ordering `011=COND, 100=CONS, 101=CAR, 110=CDR, 111=EQ` is migration debt tracked by #3203/#2055/#3205/#3206, not an alternate language law.
 
