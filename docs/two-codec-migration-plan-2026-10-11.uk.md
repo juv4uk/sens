@@ -6,6 +6,8 @@
 Історичні CLI-команди лишають назву `f3`, тому **encode-f3/open-f3/decode-f3/eval-f3 означають F3C**, а не Envelope E1/E2/E3.
 Чинні .sens не переписувати і не перейменовувати; звичайні команди залишилися на T5.
 
+Нормативна матриця режимів: [режими проєкту](project-modes-2026-10-12.uk.md).
+
 **Frame3-Micro (F3M, .f3m)** — не третій production-кодек, але це справжнє
 фізичне кодування SENS для dense bounded profile: один committed байт
 `0x3E` відновлює `CAR(CONS(1,NIL))` і проходить той самий SENS evaluator з
