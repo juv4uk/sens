@@ -165,6 +165,27 @@ def rewrite(src, mapping, blocked):
             output = output[:start] + word + output[stop:]
     return output, len(edits), sorted(set(problems))
 
+def executable_call_heads(source, guard):
+    """Only executed list heads; ignore comments, strings, and quoted datum.
+
+    The existing canonical D3 Lisp parser is used for attribution. An
+    unparseable candidate must block, never silently become current source.
+    """
+    result = set()
+    nodes = list(guard.parse(source))
+    while nodes:
+        node = nodes.pop()
+        if node.opaque or not node.children:
+            continue
+        head = node.children[0].atom
+        if head in guard.QUOTE:
+            continue
+        if head is not None:
+            result.add(head)
+        nodes.extend(node.children)
+    return result
+
+
 def guard_module(root):
     name = "sid8_bulk_guard"
     spec = importlib.util.spec_from_file_location(name, root / "scripts/check_d3_legacy_logic.py")
@@ -206,16 +227,28 @@ def run(root, write=False, selected=None):
             })
             continue
         original = file.read_text(encoding="utf-8")
-        # A modern D8 head or a record key is never proof of old SID8 source.
-        # Require an actual historical definition, otherwise fail closed.
-        has_legacy_definition = bool(re.search(
+        # Raw regexes incorrectly attribute generated strings to historical
+        # executable W8: e.g. a quoted "(00001001 ...)" source template.
+        # Only actual unquoted list heads may establish source-era provenance.
+        possible_legacy = bool(re.search(
             r"\(\s*(?:00001001|00001011)(?=[\s)])", original))
-        # A D4-only cutover can already have the *new* D3:110 head while
-        # its clauses still follow the obsolete three-field/host-truth law.
-        # A missing historical W8 head does not prove a safe D3 cutover.
-        has_pinned_legacy_d3 = (
+        possible_pinned_d3 = (
             path in PARTIAL_D4_WITH_LEGACY_D3
             and bool(re.search(r"\(\s*(?:00000111|110)(?=[\s)])", original))
+        )
+        active_heads = set()
+        if possible_legacy or possible_pinned_d3:
+            try:
+                active_heads = executable_call_heads(original, guard)
+            except (guard.Unscannable, RecursionError) as err:
+                report.append({"path": path, "status": "blocked",
+                               "potential_heads": 0,
+                               "reasons": ["source-era parser incomplete: " + str(err)]})
+                continue
+        has_legacy_definition = bool(active_heads & {"00001001", "00001011"})
+        has_pinned_legacy_d3 = (
+            path in PARTIAL_D4_WITH_LEGACY_D3
+            and bool(active_heads & {"00000111", "110"})
         )
         if not (has_legacy_definition or has_pinned_legacy_d3):
             report.append({"path": path, "status": "source-era-unproved",

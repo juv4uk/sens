@@ -77,6 +77,33 @@ class BatchSourceTests(unittest.TestCase):
             "e749d5696205efb335447859388630c493cf8df2",
         )
 
+    def test_template_strings_are_not_old_executable_define_heads(self):
+        source = """; (00001011 ignored)\n(0011 code (0010 () "(00001001 inside-string)"))\n(001 quoted (00001001 ignored))\n'(00001001 ignored)\n#| (00001001 blocked-comment) |#\n"""
+        heads = MOD.executable_call_heads(source, self.guard)
+        self.assertNotIn("00001001", heads)
+        self.assertNotIn("00001011", heads)
+        self.assertIn("0011", heads)
+        self.assertIn("0010", heads)
+        self.assertEqual(
+            MOD.executable_call_heads("(00001001 real (00001000 (x) x))", self.guard)
+            & {"00001001", "00001000"},
+            {"00001001", "00001000"},
+        )
+
+    def test_current_d8_in_templates_is_not_misclassified_as_legacy(self):
+        paths = {
+            "scripts/generate-meta-semantic-registry.lisp",
+            "scripts/verify-repo.lisp",
+        }
+        report = MOD.run(ROOT, False, paths)
+        self.assertEqual(report["summary"]["admitted_files"], 0)
+        self.assertEqual(report["summary"]["blocked_files"], 0)
+        self.assertEqual(report["summary"]["scanned"], 2)
+        self.assertEqual(
+            {row["status"] for row in report["files"]},
+            {"source-era-unproved"},
+        )
+
     def test_historical_cond_guard_rejects_other_active_policy_sources(self):
         # Executable historical COND clauses may carry a third explicit
         # expected-result field or a host T fallback. Replacing just the
