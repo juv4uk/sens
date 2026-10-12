@@ -1,5 +1,5 @@
 (0011 verdicts
-  (01001011 (10100110 "tests/semantic-authority-verdict.lisp")))
+  (110101001 (110110111 "tests/semantic-authority-verdict.lisp")))
 
 (0011 verdict (100 verdicts))
 

@@ -104,24 +104,25 @@ class BatchSourceTests(unittest.TestCase):
             {"source-era-unproved"},
         )
 
-    def test_historical_W8_heads_cannot_be_mistaken_for_modern_D8_calls(self):
-        sources = {
-            "scripts/semantic-authority-guard-enforce.lisp": (
-                "01001011", "D9:110101001", "ABS∘RECIP"
-            ),
-        }
-        for path, (old, successor, modern_d8_name) in sources.items():
-            with self.subTest(path=path):
-                src = (ROOT / path).read_text(encoding="utf-8")
-                heads = MOD.executable_call_heads(src, self.guard)
-                problems = MOD.pinned_cross_domain_blockers(ROOT, path, heads, self.mapping)
-                self.assertTrue(any(old in p and successor in p and modern_d8_name in p
-                                    for p in problems), problems)
-                report = MOD.run(ROOT, False, {path})
-                self.assertEqual(report["summary"]["admitted_files"], 0)
-                self.assertEqual(report["summary"]["blocked_files"], 1)
-                self.assertTrue(any("W8_CROSS_DOMAIN_EXECUTION_BLOCK" in p
-                                    for p in report["files"][0]["reasons"]))
+    def test_historical_W8_read_successors_use_distinct_ratified_D9_codes(self):
+        path = "scripts/semantic-authority-guard-enforce.lisp"
+        src = (ROOT / path).read_text(encoding="utf-8")
+        heads = MOD.executable_call_heads(src, self.guard)
+        for old, new in (("01001011", "110101001"),
+                         ("10100110", "110110111")):
+            self.assertNotIn(old, heads)
+            self.assertIn(new, heads)
+            self.assertEqual(self.mapping[old], new)
+        self.assertIn("(110101001 (110110111 ", src)
+        self.assertEqual(
+            MOD.pinned_cross_domain_blockers(ROOT, path, heads, self.mapping),
+            [], "No retired D8/W8 head may be reused as current D8"
+        )
+        report = MOD.run(ROOT, False, {path})
+        self.assertEqual(report["summary"]["admitted_files"], 0)
+        self.assertEqual(report["summary"]["blocked_files"], 0)
+        self.assertEqual(report["files"][0]["status"], "unchanged")
+
         facts = "knowledge/guard-fact-policy.lisp"
         current_heads = MOD.executable_call_heads(
             (ROOT / facts).read_text(encoding="utf-8"), self.guard
@@ -182,22 +183,18 @@ class BatchSourceTests(unittest.TestCase):
         self.assertEqual(report["files"][0]["status"], "unchanged",
                          "Source census does not grant T5/runtime admission")
 
-    def test_semantic_guard_d3_is_migrated_but_d9_reader_still_blocks(self):
+    def test_semantic_guard_d3_and_d9_reader_are_both_exact_source(self):
         path = "scripts/semantic-authority-guard-enforce.lisp"
         text = (ROOT / path).read_text(encoding="utf-8")
         self.assertEqual(self.guard.scan_lisp(text, path), [],
                          "no three-field/host-truth D3 may remain")
+        self.assertIn("(110101001 (110110111 ", text)
         report = MOD.run(ROOT, False, {path})
         self.assertEqual(report["summary"]["admitted_files"], 0)
-        self.assertEqual(report["summary"]["blocked_files"], 1)
+        self.assertEqual(report["summary"]["blocked_files"], 0)
         row = report["files"][0]
-        self.assertEqual(row["status"], "blocked")
-        self.assertTrue(any("W8_CROSS_DOMAIN_EXECUTION_BLOCK" in reason
-                            for reason in row["reasons"]), row["reasons"])
-        self.assertTrue(any("READ-ALL" in reason and "D9:" in reason
-                            for reason in row["reasons"]), row["reasons"])
-        self.assertTrue(any("READ-FILE" in reason and "D9:" in reason
-                            for reason in row["reasons"]), row["reasons"])
+        self.assertEqual(row["status"], "unchanged")
+        self.assertEqual(row["reasons"], [])
 
     def test_immutable_guard_reference_not_rewritten_until_cond_law(self):
         report = MOD.run(ROOT, False, {"knowledge/guard-reference.lisp"})

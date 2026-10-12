@@ -173,12 +173,15 @@ class PolicyD4PartialCutover(unittest.TestCase):
 
                 if path == GUARD_ENFORCE:
                     expected = _migrate_semantic_authority_guard(d4_only)
+                    expected = expected.replace(
+                        "(01001011 (10100110 ", "(110101001 (110110111 ", 1
+                    )
                     self.assertEqual(current, expected,
                                      "semantic guard has unproved source changes")
                     self.assertEqual(self.d3.scan_lisp(current, path), [],
                                      "D3 must be exactly two-field with D1 controls")
-                    self.assertIn("(01001011 (10100110", current,
-                                  "D9 file reader remains unadmitted; don't fake an oracle")
+                    self.assertIn("(110101001 (110110111", current,
+                                  "Ratified D9 reader must stay exact-width")
                     self.assertNotRegex(current, D3_LEGACY_COND)
                 elif path != GUARD_FACT:
                     self.assertEqual(current, d4_only,
