@@ -29,9 +29,9 @@ fn exact_d7_is_human_presentable_without_gaining_callability() {
         if sa != exact {
             displayed += 1;
             assert!(!uk.is_empty(), "D7 human display cannot be empty");
-            assert_ne!(uk, format!("#<домен {exact}>"), "D7 display must have matching UK/SA entries");
+            assert_ne!(uk, format!("#<домен D7:{exact}>"), "D7 display must have matching UK/SA entries");
         } else {
-            assert_eq!(uk, format!("#<домен {exact}>"), "unadmitted W7 must render as exact identity");
+            assert_eq!(uk, format!("#<домен D7:{exact}>"), "unadmitted W7 must render as exact identity");
         }
     }
     assert!(displayed > 0, "ratified D7 must be reflected in human presentation");
