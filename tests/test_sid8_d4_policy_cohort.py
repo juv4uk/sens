@@ -23,6 +23,7 @@ D4_HEAD = re.compile(r"\((\s*)(00001001|00001000)(?=[\s)])")
 D3_LEGACY_COND = re.compile(r"\(\s*00000111(?=[\s)])")
 CALL_HEAD = re.compile(r"\((\s*)([01]{8})(?=[\s)])")
 GUARD_FACT = "knowledge/guard-fact-policy.lisp"
+GUARD_ENFORCE = "scripts/semantic-authority-guard-enforce.lisp"
 
 # Точно перевірена повна зміна поточного guard-fact-policy:
 # 110 тільки як заміна коду, а НЕ свідчення двопольового COND.
@@ -99,6 +100,44 @@ def _lower_parallel_let(source):
     return output, count
 
 
+def _migrate_semantic_authority_guard(original):
+    """Pinned-only D3 source law; never touches D9 reader or authorizes runtime."""
+    old_car = "(00000101 verdicts)"
+    old_tag = """(0011 verdict-tag
+  (00000111
+    ((00000010 verdict) (1) verdict)
+    ((00000010 verdict) (0) (00000101 verdict))
+    ((00000010 verdict) () (00000001 empty-verdict))))"""
+    new_tag = """(0011 verdict-tag
+  (110
+    ((010 verdict)
+     (110
+       ((101 verdict (001 ())) (001 empty-verdict))
+       ((010 (001 ())) verdict)))
+    ((010 (001 ())) (100 verdict))))"""
+    old_final = """(00000111
+  ((00000011 verdict-tag (00000001 semantic-authority-ok))
+   (1)
+   (00000001 semantic-authority-ok))
+  ((00000011 verdict-tag (00000001 semantic-authority-violation))
+   (1)
+   (00000101 ()))
+  (t
+   (00000101 ())))"""
+    new_final = """(110
+  ((101 verdict-tag (001 semantic-authority-ok))
+   (001 semantic-authority-ok))
+  ((101 verdict-tag (001 semantic-authority-violation))
+   (100 (001 ())))
+  ((010 (001 ()))
+   (100 (001 ()))))"""
+    for needle in (old_car, old_tag, old_final):
+        if original.count(needle) != 1:
+            raise AssertionError("unproved historical authority-guard delta " + repr(needle))
+    return (original.replace(old_car, "(100 verdicts)")
+            .replace(old_tag, new_tag).replace(old_final, new_final))
+
+
 class PolicyD4PartialCutover(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
@@ -132,7 +171,16 @@ class PolicyD4PartialCutover(unittest.TestCase):
                 self.assertEqual(count_d4, expected_d4)
                 total_d4 += count_d4
 
-                if path != GUARD_FACT:
+                if path == GUARD_ENFORCE:
+                    expected = _migrate_semantic_authority_guard(d4_only)
+                    self.assertEqual(current, expected,
+                                     "semantic guard has unproved source changes")
+                    self.assertEqual(self.d3.scan_lisp(current, path), [],
+                                     "D3 must be exactly two-field with D1 controls")
+                    self.assertIn("(01001011 (10100110", current,
+                                  "D9 file reader remains unadmitted; don't fake an oracle")
+                    self.assertNotRegex(current, D3_LEGACY_COND)
+                elif path != GUARD_FACT:
                     self.assertEqual(current, d4_only,
                                      "додаткові заміни поза доказом D4-only")
                     self.assertRegex(current, D3_LEGACY_COND)
@@ -204,6 +252,53 @@ class PolicyD4PartialCutover(unittest.TestCase):
             text,
             "((0010 (x y) (111 x y)) (100 source) (011 source))",
         )
+
+
+    def test_semantic_authority_guard_negative_d3_controls(self):
+        path = GUARD_ENFORCE
+        current = (ROOT / path).read_text(encoding="utf-8")
+        self.assertEqual(self.d3.scan_lisp(current, path), [])
+        # Wrong domain must never be treated as a host-Lisp truth value.
+        host_true = current.replace(
+            "((010 (001 ()))\n   (100 (001 ())))",
+            "(t\n   (100 (001 ())))", 1)
+        self.assertNotEqual(host_true, current)
+        self.assertIn("COND_HOST_TRUTH",
+                      {f.rule for f in self.d3.scan_lisp(host_true, path)})
+        # The former three-field expected-result selector is forbidden.
+        three_fields = current.replace(
+            "((101 verdict-tag (001 semantic-authority-ok))\n   (001 semantic-authority-ok))",
+            "((101 verdict-tag (001 semantic-authority-ok))\n   (1)\n   (001 semantic-authority-ok))", 1)
+        self.assertNotEqual(three_fields, current)
+        self.assertIn("COND_NOT_TWO_FIELDS",
+                      {f.rule for f in self.d3.scan_lisp(three_fields, path)})
+        # Reject changes that would turn a guard failure into a successful NIL.
+        self.assertEqual(current.count("(100 (001 ()))"), 2)
+
+    def test_semantic_authority_guard_bounded_verdict_shape_cases(self):
+        # Independent *shape-only* witness, not D9 reader/runtime parity.
+        # The valid inputs are Nil, a symbol, or a proper list; all others
+        # remain unadmitted until an executable oracle covers them.
+        cases = [
+            (None, "empty-verdict", "error"),
+            ("semantic-authority-ok", "semantic-authority-ok", "ok"),
+            ("semantic-authority-violation", "semantic-authority-violation", "error"),
+            ("other", "other", "error"),
+            (("semantic-authority-ok",), "semantic-authority-ok", "ok"),
+            (("semantic-authority-violation", "explanation"),
+             "semantic-authority-violation", "error"),
+            (("other",), "other", "error"),
+        ]
+        def tag(value):
+            if value is None:
+                return "empty-verdict"
+            return value[0] if isinstance(value, tuple) else value
+        for value, expected_tag, expected_outcome in cases:
+            with self.subTest(value=value):
+                observed_tag = tag(value)
+                self.assertEqual(observed_tag, expected_tag)
+                self.assertEqual("ok" if observed_tag == "semantic-authority-ok"
+                                 else "error", expected_outcome)
 
 
 if __name__ == "__main__":
