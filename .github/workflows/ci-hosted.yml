@@ -48,6 +48,10 @@ jobs:
         run: |
           python3 scripts/check-core4-d24-migration.py --self-test
           python3 scripts/check-core4-d24-migration.py --check
+      - name: Canonical domain ladder — Rust Python C Lisp negative controls
+        run: |
+          python3 scripts/check-domain-ladder-identity.py --self-test
+          python3 scripts/check-domain-ladder-identity.py --check
       - name: Verify Core domain and ownership boundaries
         run: |
           python3 scripts/check-domain-surfaces-d1-d4.py
