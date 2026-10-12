@@ -1,4 +1,4 @@
-use crate::{CoreDomainIdentity, DomainIdentity, Value};
+use crate::{DomainIdentity, Value};
 use std::{cell::RefCell, collections::HashMap, path::PathBuf, rc::Rc};
 
 /// Dropping a deeply nested `Environment` chain (thousands of `let`/currying
@@ -507,7 +507,7 @@ impl Default for Session {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::Exactness;
+    use crate::{CoreDomainIdentity, Exactness};
 
     #[test]
     fn bare_session_keeps_lisp_macro_bootstrap_explicit() {
