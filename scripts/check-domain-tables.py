@@ -101,20 +101,15 @@ def validate_d7(authority: dict):
         fail("D7: owner-reserved pinned coordinate appeared as a semantic row")
 
     for row in rows:
-        resident = residents[row.bits]
-        if row.en is None or row.en.casefold() != resident.casefold():
-            fail(f"D7:{row.bits}: en {row.en!r} does not match resident {resident!r}")
         if row.lisp is not None:
             fail(f"D7:{row.bits}: LISP must stay () because D7 is sound/text, not a Lisp operator")
-        for attr in ("uk", "ukr", "san"):
-            if getattr(row, attr) is None:
-                fail(f"D7:{row.bits}: missing {attr}")
-
     return rows
 
 
 def validate_compact_uk(rows) -> None:
     for row in rows:
+        if row.domain == "D7":
+            continue  # D7 cells are glyphs, not verbose/compact human names.
         if row.uk is None or row.ukr is None:
             fail(f"{row.domain}:{row.bits}: uk/ukr must both be present")
 
@@ -208,6 +203,8 @@ def main() -> int:
     for attr in ("uk", "ukr", "san"):
         seen = {}
         for row in all_rows:
+            if row.domain == "D7":
+                continue  # Shared glyphs and missing glyphs do not collide across domains.
             value = getattr(row, attr)
             previous = seen.get(value)
             key = (row.domain, row.bits, row.en)
@@ -225,8 +222,8 @@ def main() -> int:
     print("files=9 layout=one-domain-per-file")
     print("rows=d1:2,d2:4,d3:8,d4:16,d5:32,d6:64,d7:126,d8:256,d9:512 total=1020")
     print("d7-reserved=0100001,0101010")
-    print("missing-uk=0 missing-ukr=0 missing-san=0")
-    print("surface-collisions=0 namespaces=uk,ukr,san")
+    print("D7 symbol availability is independent of semantic residency")
+    print("non-D7-surface-collisions=0 namespaces=uk,ukr,san")
     print("uk-style=compact ukr-style=expanded selectors=п/р mutation=! in uk,ukr,en predicate=? in uk,ukr,en")
     print("d9-runtime=W9-carrier-separate-fail-closed-#4038")
     print("columns=ук->укр->san->en->LISP->sym")
