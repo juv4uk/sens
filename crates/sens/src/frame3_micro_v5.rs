@@ -112,17 +112,6 @@ fn count_table() -> Result<Counts, Frame3MicroEnumerateError> {
     Ok(counts)
 }
 
-pub(crate) fn extension_exact_capacity(
-    nodes: usize,
-) -> Result<u128, Frame3MicroEnumerateError> {
-    let counts = count_table()?;
-    counts
-        .get(nodes)
-        .map(|entry| entry[1])
-        .filter(|value| *value != 0)
-        .ok_or(Frame3MicroEnumerateError::RankOutOfRange)
-}
-
 pub(crate) fn contains_extension(expr: &Frame3MicroExpr) -> bool {
     match expr {
         Frame3MicroExpr::Lambda0(_) | Frame3MicroExpr::EqAtom(_, _) => true,
