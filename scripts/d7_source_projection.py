@@ -14,10 +14,11 @@ import re
 from pathlib import Path
 
 from domain_tables import D7_TABLE, read_domain_table
+from d7_symbol_codec import D7CodecError, current_codec
 
 ROOT = Path(__file__).resolve().parents[1]
 AUTHORITY = ROOT / "knowledge/d7-ratified.json"
-NAMESPACES = ("ук", "укр", "san", "en", "sym")
+NAMESPACES = ("ук", "укр", "san", "en", "sym", "slp1")
 EXACT_W7 = re.compile(r"[01]{7}\Z")
 
 
@@ -83,17 +84,18 @@ def project(bits: str, *, role: str, namespace: str = "ук") -> dict:
     if row is None:
         raise D7ProjectionError(f"D7:{bits} is reserved; owner admission required")
     owner = evidence[bits]
-    # Lisp columns use ук/укр; the structural table reader exposes uk/ukr.
-    # Namespaces are presentation only, never the coordinate authority.
-    field = {"ук": "uk", "укр": "ukr"}.get(namespace, namespace)
-    surface = getattr(row, field)
-    if surface is None:
-        raise D7ProjectionError(f"D7:{bits} has no {namespace} projection")
+    # Surface MUST be a real symbol chosen by surface (not a phonetic
+    # description, not a translated report name). Missing symbol stays None.
+    try:
+        glyph = current_codec().glyph(bits, namespace)
+    except D7CodecError as exc:
+        raise D7ProjectionError(str(exc)) from exc
     return {
         "domain": "D7", "coordinate": bits, "width": 7,
         "role": "sound-text", "semantic_role": owner["semantic_role"],
         "status": "OWNER-RATIFIED", "namespace": namespace,
-        "surface": surface, "callable": False, "arithmetic_number": False,
+        "surface": glyph, "symbol": glyph, "report_name": owner["report_name"],
+        "callable": False, "arithmetic_number": False,
     }
 
 
