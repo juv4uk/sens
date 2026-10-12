@@ -2,10 +2,12 @@ name: Драбина доменів — власна бітність D1–D10
 
 on:
   pull_request:
+    types: [opened, synchronize, reopened]
     branches: [main]
     paths:
       - "crates/sens/src/domain_ladder.rs"
       - ".github/workflows/domain-ladder-stream-cutover.yml"
+  workflow_dispatch:
   push:
     branches: [main]
     paths:

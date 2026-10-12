@@ -225,6 +225,12 @@ mod tests {
         assert_eq!(packed.byte_len(), 4);
         assert_eq!(DomainCoordinate::unpack_sequence(&packed, &widths), Some(words.to_vec()));
         assert!(DomainCoordinate::unpack_sequence(&packed, &[3, 4, 9, 9]).is_none());
+        // A different schedule with the same total length can parse as
+        // different valid words: only trusted source grammar owns boundaries.
+        assert_ne!(
+            DomainCoordinate::unpack_sequence(&packed, &[4, 3, 9, 10]),
+            Some(words.to_vec())
+        );
     }
 
     #[test]
