@@ -150,7 +150,6 @@ class BatchSourceTests(unittest.TestCase):
         # eight-bit head with D3:110 would change semantics at runtime.
         # Fail closed until a source-specific two-branch D1/D3 oracle exists.
         paths = (
-            "knowledge/guard-fact-policy.lisp",
             "knowledge/guard-reference.lisp",
         )
         for path in paths:
@@ -170,6 +169,18 @@ class BatchSourceTests(unittest.TestCase):
                         for reason in row["reasons"]),
                     f"{path}: missing D3 semantic blocker {row['reasons']}",
                 )
+
+    def test_fact_policy_has_exact_D1_D3_but_no_unsupported_source_admission(self):
+        path = "knowledge/guard-fact-policy.lisp"
+        text = (ROOT / path).read_text(encoding="utf-8")
+        self.assertEqual(self.guard.scan_lisp(text, path), [])
+        self.assertNotIn("(10011100 ", text,
+                         "W8 LET must remain lower-domain lambda applications")
+        report = MOD.run(ROOT, False, {path})
+        self.assertEqual(report["summary"]["admitted_files"], 0)
+        self.assertEqual(report["summary"]["blocked_files"], 0)
+        self.assertEqual(report["files"][0]["status"], "unchanged",
+                         "Source census does not grant T5/runtime admission")
 
     def test_semantic_guard_d3_is_migrated_but_d9_reader_still_blocks(self):
         path = "scripts/semantic-authority-guard-enforce.lisp"
