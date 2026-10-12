@@ -142,16 +142,16 @@ K2 candidate — перенести формування запитів/обхі
 
 ## Статичний Rust source-edge audit — 12.10.2026
 
-[CI run 38190369519](https://github.com/juv4uk/sens/actions/runs/38190369519) завершився **SUCCESS**. Окремий self-test аналізатора пройшов **7/7** позитивних і негативних перевірок. Аудит зафіксував три точні snapshots:
+[CI run 38190527591](https://github.com/juv4uk/sens/actions/runs/38190527591) на snapshot `a825e5d3d0afe615869117e0e2d22b926493a862` завершився **SUCCESS**. Окремий self-test аналізатора пройшов **7/7** позитивних і негативних перевірок. Аудит зафіксував три точні snapshots:
 
 | Snapshot | Rust-файли | Статичні source edges | Невирішені observations у межах аналізатора |
 |---|---:|---:|---:|
-| SENS main snapshot `96ee15564d7a707d31664dca6e55b331d76ea6de` | 77 | 111 | 0 |
+| SENS main snapshot `a825e5d3d0afe615869117e0e2d22b926493a862` | 77 | 111 | 0 |
 | Pinned SENS `d0787a40fcea36501747732aa61b6de19fe29c70` | 71 | 90 | 0 |
 | Pinned CML `ec4ba010cebd9fdc37b39224142dcac3ee907cfe` | 66 | 83 | 0 |
 
 **Трактування:** нуль unresolved observations означає, що аналізатор не залишив невирішених ребер у своїй підтриманій статичній моделі для цих snapshots. Це **не** означає, що seed мінімальний або весь ланцюг замкнений: аналізатор сам називає відкритими active `cfg`-resolution (це не результат `rustc` для кожної конфігурації), dynamic include paths, build-script/proc-macro та environment inputs, Cargo/workspace dependency closure, vendor/registry/cache, Git refs/objects, toolchain/OS/shared libraries і контрольований clean offline replay.
 
-Довготривалий receipt з точними SHA, лічильниками та межами тверджень: [`evidence/nano-sens-static-source-edges-2026-10-12.json`](../evidence/nano-sens-static-source-edges-2026-10-12.json). Три raw machine-readable reports збережені в [CI artifact 11721286686](https://github.com/juv4uk/sens/actions/runs/38190369519/artifacts/11721286686), ZIP SHA-256 `fd6ad9a74c1c0469203da8ef4019dc3ffa938b7aef9f0e58eadd49c0e490b969`; raw artifact доступний до **11.11.2026 01:03:32 UTC**.
+Попередній успішний snapshot `96ee15564d7a707d31664dca6e55b331d76ea6de` у [run 38190369519](https://github.com/juv4uk/sens/actions/runs/38190369519) дав ті самі три набори лічильників. Довготривалий receipt з точними SHA, лічильниками та межами тверджень: [`evidence/nano-sens-static-source-edges-2026-10-12.json`](../evidence/nano-sens-static-source-edges-2026-10-12.json). Три raw machine-readable reports збережені в [найновішому CI artifact 11721233152](https://github.com/juv4uk/sens/actions/runs/38190527591/artifacts/11721233152), ZIP SHA-256 `52a95e38a40ee603350bc255440c0b1f9c6144de613ff43c2478ba1a9a8f8e6e`; raw artifact доступний до **11.11.2026 01:05:52 UTC**.
 
 Це новий доказовий шар — **статична інвентаризація джерел**, а не новий запуск компілятора, не перерахунок seed bytes і не дозвіл оголосити повний seed total.
