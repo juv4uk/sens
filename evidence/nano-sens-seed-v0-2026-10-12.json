@@ -228,6 +228,22 @@
         "full Git metadata snapshots are measured separately; the minimum Git object/ref subset is not derived",
         "toolchain, OS, shared libraries and remaining unenumerated runtime/build paths remain outside or unclosed"
       ]
+    },
+    "compile_input_census_instrumentation": {
+      "schema": "nano-sens-rustc-dep-info-input-census-instrumentation/1",
+      "status": "IMPLEMENTED_IN_CML; CLEAN-RUN VALIDATION QUEUED; NO MEASURED DEP-INFO TOTAL PUBLISHED",
+      "purpose": "Replace guessed module-only counts with an observed source input ledger from compiler-generated dep-info files across the actual CML lib-test runner build and the nested pinned SENS xtask build.",
+      "script": "https://github.com/juv4uk/cml/blob/f01ff979b5626379c99a4cd5c5e890ca962b8a28/scripts/nano-sens-rustc-dep-info-census.py",
+      "workflow": "https://github.com/juv4uk/cml/blob/f01ff979b5626379c99a4cd5c5e890ca962b8a28/.github/workflows/issue-655-c2-executable.yml",
+      "validation_run": "https://github.com/juv4uk/cml/actions/runs/38191754506",
+      "cml_checkpoint": "f01ff979b5626379c99a4cd5c5e890ca962b8a28",
+      "status_at_update": "QUEUED",
+      "gate": "two clean runs must each emit rustc-dep-info-input-census.json; parser errors must be zero; every discovered tracked source must match its pinned Git blob; normalized census JSON must be byte-identical across the two runs.",
+      "boundaries": [
+        "Output separates CML/SENS/WSM tracked files, generated compile inputs, Cargo-home package source inputs, host/toolchain source paths and unresolved dep-info tokens.",
+        "Output is observational compilation evidence, not a minimum seed closure proof and not part of nano-sens-size-report/1 seed bytes.",
+        "Do not advance latest_verified_operational_checkpoint or replace the 36,033,737-byte known operational subtotal until this CI run reaches PASS and the measured input categories are reviewed."
+      ]
     }
   },
   "c1_c2": {
@@ -748,7 +764,8 @@
     "Latest closure-ledger checkpoint (2026-10-12): K1 CI run 38186932277 passed two clean runs, 189/189 library tests per run, byte-identical reports, and identical --locked Cargo graphs. New disjoint Git metadata measurements are 35,515,603 B and 35,519,818 B across the three distinct gitdirs, excluding SENS duplication from CML .git. The runner ELF remains 34,623,904 B / SHA-256 6fbbc819... and the known operational subtotal remains 36,033,737 B; neither is a whole seed-total or minimum-size claim.",
     "Runtime dependency tracing (2026-10-12): two successful strace runs of the frozen runner each passed 189/189 tests. The raw traces observed 444 distinct vendor file paths (4,940,765 bytes of tracked contents): all 296 files in seven selected crates plus 148 manifest/checksum metadata files from 74 other vendor roots. The full vendor checkout footprint is 3,963 files / 141,366,139 bytes and is external, not part of the trusted seed subtotal. A path-by-path census is being validated in the next run.",
     "Current Nano-SENS checkpoint (2026-10-12, CML run 38187859376): two independent clean runs and comparison PASS on CML commit ec4ba010cebd9fdc37b39224142dcac3ee907cfe; each run passed 189/189 library tests, used pinned SENS d0787a40fcea36501747732aa61b6de19fe29c70, and reported byte-identical 92,248-byte C1/C2 executables. The measured runner component is 34,623,904 B (PT_LOAD 6,042,632 B; executable code section 4,147,007 B).",
-    "Runtime census follow-through (2026-10-12): both raw run artifacts now include per-file successful-open census JSON. Both census files independently list the same 562 repository-path files with path-set SHA-256 53320597b6b55667498bbc8f7c2b0bee7a6ea05b723c9385e339f5cff8ec87ad. Vendor observations are 444 paths / 4,940,765 bytes (trace-time content sizes). These findings close the pending path-list observation task only; they do not prove minimality or whole-seed total."
+    "Runtime census follow-through (2026-10-12): both raw run artifacts now include per-file successful-open census JSON. Both census files independently list the same 562 repository-path files with path-set SHA-256 53320597b6b55667498bbc8f7c2b0bee7a6ea05b723c9385e339f5cff8ec87ad. Vendor observations are 444 paths / 4,940,765 bytes (trace-time content sizes). These findings close the pending path-list observation task only; they do not prove minimality or whole-seed total.",
+    "Compile input-census instrumentation (2026-10-12): added `scripts/nano-sens-rustc-dep-info-census.py` in CML and wired it into both clean runs plus byte-identical proof comparison. Run 38191754506 was queued at ledger update; there are intentionally no dep-info counts or totals asserted until the artifacts validate."
   ],
   "runtime_file_process_trace": {
     "schema": "nano-sens-runtime-file-process-trace-pair/1",
