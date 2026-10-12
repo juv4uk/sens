@@ -713,9 +713,9 @@
     (110
       ((0100 (010 remaining)) 1)
       ((11010 current (100 remaining)) 
-       (00011111 (100 remaining) (011 remaining)))
+       (nondecreasing-from? (100 remaining) (011 remaining)))
       ((11110111 current (100 remaining)) 
-       (00011111 (100 remaining) (011 remaining)))
+       (nondecreasing-from? (100 remaining) (011 remaining)))
       ((0100 (11110111 current (100 remaining))) 0))))
 
 (0011 nonincreasing-from?
@@ -723,18 +723,18 @@
     (110
       ((0100 (010 remaining)) 1)
       ((11011 current (100 remaining)) 
-       (00100000 (100 remaining) (011 remaining)))
+       (nonincreasing-from? (100 remaining) (011 remaining)))
       ((11110111 current (100 remaining)) 
-       (00100000 (100 remaining) (011 remaining)))
+       (nonincreasing-from? (100 remaining) (011 remaining)))
       ((0100 (11110111 current (100 remaining))) 0))))
 
 (0011 <=
   (0010 (first . remaining)
-    (00011111 first remaining)))
+    (nondecreasing-from? first remaining)))
 
 (0011 >=
   (0010 (first . remaining)
-    (00100000 first remaining)))
+    (nonincreasing-from? first remaining)))
 
 ; number->string (G5 test: already expressible via existing means?) —
 ; yes, now that quotient/mod exist. Surfaced from the fpga-lisp
