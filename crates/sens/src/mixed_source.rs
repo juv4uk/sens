@@ -1484,6 +1484,16 @@ mod tests {
 
     #[test]
     fn process_tcp_language_loaders_use_path_bound_reader() {
+        let process_ast = parse_mixed_exact_domain_process_tcp_source(
+            "lib/process.lisp",
+            crate::PROCESS_LIBRARY_SOURCE,
+        ).expect("actual process.lisp parses through its path-bound reader");
+        let tcp_ast = parse_mixed_exact_domain_process_tcp_source(
+            "lib/tcp.lisp",
+            crate::TCP_LIBRARY_SOURCE,
+        ).expect("actual tcp.lisp parses through its path-bound reader");
+        assert!(!process_ast.is_empty() && !tcp_ast.is_empty());
+
         let mut session = crate::Session::default();
         crate::load_core_library(&mut session).expect("current Core bootstrap");
         crate::load_process_library(&mut session)
