@@ -103,9 +103,15 @@ impl DomainIdentity {
             {
                 Some(CoreDomainIdentity::D6(value))
             }
-            Self::D8(value) if matches!(value.word().packed_bits(), 0b11101010 | 0b11101101 | 0b11110100) => {
-                // Only D8 READ, STRING-TO-SYMBOL and WRITE-TO-STRING have mechanisms.
-                // No other ratified D8 coordinate is made callable here.
+            Self::D8(value)
+                if matches!(
+                    value.word().packed_bits(),
+                    0b11101010 | 0b11101101 | 0b11110100 | 0b11110111
+                ) =>
+            {
+                // D8 READ, STRING-TO-SYMBOL, WRITE-TO-STRING and EQUAL have
+                // explicit direct mechanisms in eval::canon. A resident alone
+                // cannot enter this callable projection.
                 Some(CoreDomainIdentity::D8(value))
             }
             Self::D9(_) => None,
@@ -328,6 +334,36 @@ mod tests {
         );
         assert_eq!(high.packed_bits(), 0x101);
         assert_ne!(high, d9);
+    }
+
+    #[test]
+    fn d8_equal_uses_admitted_exact_domain_not_historical_byte() {
+        // D8:11110111 EQUAL is ratified and has an independent D1-valued
+        // mechanism in eval::canon; adjacent D8 residents must not inherit it.
+        let equal = DomainIdentity::from_source_word(
+            BinarySourceWord::W8(Bit8::new(0b11110111).unwrap()),
+        );
+        let unrelated = DomainIdentity::from_source_word(
+            BinarySourceWord::W8(Bit8::new(0b11110110).unwrap()),
+        );
+        let wider_same_payload = DomainIdentity::from_source_word(
+            BinarySourceWord::W9(Bit9::new(0b011110111).unwrap()),
+        );
+        let predicate = DomainIdentity::from_source_word(
+            BinarySourceWord::W1(Bit1::new(1).unwrap()),
+        );
+
+        assert_eq!(equal.width(), 8);
+        assert_eq!(equal.packed_bits(), 0b11110111);
+        assert!(matches!(equal.core_operation(), Some(CoreDomainIdentity::D8(_))));
+        assert_eq!(
+            CoreDomainIdentity::from_source_word(equal.source_word()),
+            equal.core_operation(),
+        );
+        assert!(unrelated.core_operation().is_none());
+        assert!(wider_same_payload.core_operation().is_none());
+        assert!(predicate.core_operation().is_none());
+        assert_ne!(equal, wider_same_payload);
     }
 
     #[test]
