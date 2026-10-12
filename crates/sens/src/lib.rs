@@ -241,7 +241,8 @@ pub use error::{Classification, ErrorKind, LanguageError};
 pub use language_items::{language_items, Arity, LanguageItem, LanguageItemKind};
 pub use sens::{Sens, Sens8};
 pub use source_words::{
-    parse_binary_source_words, BinarySourceToken, BinarySourceWord, CANONICAL_SOURCE_EXTENSION,
+    parse_binary_source_words, parse_domain_ladder_source_words, BinarySourceToken,
+    BinarySourceWord, DomainLadderSourceToken, CANONICAL_SOURCE_EXTENSION,
 };
 pub use ternary_transport::{
     decode_ternary_program, decode_ternary_words, encode_binary_projection_ternary,

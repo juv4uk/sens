@@ -1,0 +1,37 @@
+name: "Драбина D1–D10: механічний носій джерельних слів"
+
+on:
+  pull_request:
+    paths:
+      - "crates/sens/src/source_words.rs"
+      - "crates/sens/src/lib.rs"
+      - "crates/sens/tests/domain_ladder_source_words.rs"
+      - ".github/workflows/domain-ladder-source-words.yml"
+  push:
+    branches: [main]
+    paths:
+      - "crates/sens/src/source_words.rs"
+      - "crates/sens/src/lib.rs"
+      - "crates/sens/tests/domain_ladder_source_words.rs"
+      - ".github/workflows/domain-ladder-source-words.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  domain-ladder-source-words:
+    name: "D1–D10: 1024/1024 координати, жодного W8→D8"
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v5
+      - uses: dtolnay/rust-toolchain@stable
+      - name: "Зовнішній Rust-тест на незмінній канонічній бібліотеці"
+        run: cargo test --locked -p sens --test domain_ladder_source_words -- --nocapture
+      - name: "Відсутність мутацій джерел"
+        shell: bash
+        run: |
+          test -z "$(git status --porcelain --untracked-files=all)" || {
+            git status --short
+            exit 1
+          }
