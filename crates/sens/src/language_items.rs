@@ -10,7 +10,7 @@
 //! which that value was found, so adding a peer name does not invent another
 //! operation signature.
 
-use crate::{semantic_registry, CoreDomainIdentity, Sens8};
+use crate::{semantic_registry::{self, LegacyRegistrySlot}, CoreDomainIdentity};
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum LanguageItemKind {
@@ -63,12 +63,15 @@ mod generated {
 /// згенерованої проєкції lib/surface/function-signatures.lisp. Назви дає
 /// таблиця функцій; Rust не тримає власної копії назв чи описів.
 fn semantic_language_items_with(
-    stable_surfaces: impl Fn(Sens8) -> Vec<&'static str>,
-    admitted_surfaces: impl Fn(Sens8) -> Vec<&'static str>,
+    stable_surfaces: impl Fn(LegacyRegistrySlot) -> Vec<&'static str>,
+    admitted_surfaces: impl Fn(LegacyRegistrySlot) -> Vec<&'static str>,
 ) -> Vec<LanguageItem> {
     let mut items = Vec::new();
     for row in generated::FUNCTION_SIGNATURES {
-        let semantic_id = Sens8::from_packed_byte(row.semantic_id);
+        // The generated signature table is a HISTORICAL W8 ledger, not a
+        // source of current D8 or any other domain identity. It may supply
+        // documentation, never the authority for a current operation.
+        let semantic_id = LegacyRegistrySlot::from_packed_byte(row.semantic_id);
         let surfaces = if row.admitted_surfaces {
             admitted_surfaces(semantic_id)
         } else {
@@ -87,7 +90,9 @@ fn semantic_language_items_with(
 }
 
 /// Вид функції таблиці за кодом (з lib/surface/function-signatures.lisp).
-pub(crate) fn signature_kind(semantic_id: Sens8) -> Option<LanguageItemKind> {
+/// Історичний запит: тільки для старих W8-споживачів у проєкції.
+/// Поточна доменна тотожність надходить виключно з таблиці поверхонь.
+pub(crate) fn signature_kind(semantic_id: LegacyRegistrySlot) -> Option<LanguageItemKind> {
     generated::FUNCTION_SIGNATURES
         .iter()
         .find(|row| row.semantic_id == semantic_id.packed_byte())
@@ -99,6 +104,20 @@ pub fn language_items() -> Vec<LanguageItem> {
         semantic_registry::stable_surfaces_for_semantic_id,
         semantic_registry::admitted_surfaces_for_semantic_id,
     )
+}
+
+
+/// Інструментальна проєкція лише ратифікованих точних тотожностей.
+///
+/// Наявність рядка в старому восьмибітному реєстрі не є дозволом до
+/// виконання або автоматичною тотожністю D8: навіть коли біти однакові.
+/// Історичні метадані залишаються доступні через `language_items`.
+#[allow(dead_code)]
+pub(crate) fn current_domain_language_items() -> Vec<LanguageItem> {
+    language_items()
+        .into_iter()
+        .filter(|item| item.domain_identity.is_some())
+        .collect()
 }
 
 #[cfg(test)]
