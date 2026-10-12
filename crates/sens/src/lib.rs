@@ -19,6 +19,7 @@ pub mod frame3_domain;
 pub mod frame3_grammar;
 pub mod frame3_semantic;
 pub mod frame3_small;
+pub mod frame3_micro;
 
 
 /// Public names for the self-contained, metadata-heavy transport experiments.
