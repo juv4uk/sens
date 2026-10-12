@@ -12,6 +12,8 @@ on:
       - ".github/workflows/release.yml"
       - ".github/workflows/release-preflight.yml"
       - "scripts/verify_release_assets.py"
+      - "scripts/verify_release_tag.py"
+      - "packaging/tests/test_release_tag_guard.py"
       - "tests/test_verify_release_assets.py"
       - "packaging/**"
       - "scripts/verify_uk_t5_triplet.py"
@@ -32,6 +34,8 @@ on:
       - ".github/workflows/release.yml"
       - ".github/workflows/release-preflight.yml"
       - "scripts/verify_release_assets.py"
+      - "scripts/verify_release_tag.py"
+      - "packaging/tests/test_release_tag_guard.py"
       - "tests/test_verify_release_assets.py"
       - "scripts/verify_uk_t5_triplet.py"
       - "scripts/report_t5_triplet_inventory.py"
@@ -66,6 +70,9 @@ jobs:
       - uses: Swatinem/rust-cache@v2
         with:
           shared-key: release-preflight
+
+      - name: Release tag safety under optimized Python
+        run: python3 -m unittest discover -s packaging/tests -p test_release_tag_guard.py -v
 
       - name: Release artifact integrity negative controls
         run: python3 -m unittest discover -s tests -p test_verify_release_assets.py -v
