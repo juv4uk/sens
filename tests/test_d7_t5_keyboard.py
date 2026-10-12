@@ -1,4 +1,4 @@
-"""D7 Ukrainian physical T5 integration: no D2 symbols or false latin text."""
+"""D7 Ukrainian physical T5: text signs have W7 identity, D2 grammar stays W2."""
 from __future__ import annotations
 
 import sys
@@ -33,17 +33,27 @@ class UkrainianD7T5Tests(unittest.TestCase):
             with self.subTest(structural=structural):
                 with self.assertRaisesRegex(SensT5Error, "D7_T5_WIDTH"):
                     decode_d7_t5(encode_words([structural]))
-        for uk in (" ", "\t", "\n", "(", ")", "."):
+        for uk in ("\t", "\n", "(", ")"):
             with self.subTest(key=repr(uk)):
                 with self.assertRaisesRegex(SensT5Error, "D7_UK_INPUT"):
                     encode_d7_uk_t5(uk)
 
     def test_owner_reserved_and_obsolete_d7_structural_signs_rejected(self) -> None:
-        for word in ("0100001", "0101010", "1100000", "1100001",
-                     "1100010", "1100011", "1100100", "1111010"):
+        for word in ("0100001", "0101010", "1100001",
+                     "1100010", "1100011", "1100100"):
             with self.subTest(word=word):
                 with self.assertRaisesRegex(SensT5Error, "D7_T5_PROJECTION"):
                     decode_d7_t5(encode_words([word]))
+
+    def test_text_period_and_space_are_d7_words_not_d2_control(self) -> None:
+        physical = encode_d7_uk_t5("б. м")
+        self.assertEqual(decode_bytes(physical),
+                         ["0010110", "1111010", "1100000", "0011000"])
+        self.assertEqual(decode_d7_t5(physical), "б. м")
+        self.assertEqual(decode_d7_t5(physical, surface="en"), "b. m")
+        self.assertEqual(decode_d7_t5(physical, surface="en-ipa"), "b. m")
+        for bits, symbol in (("1100000", " "), ("1111010", ".")):
+            self.assertEqual(decode_d7_t5(encode_words([bits])), symbol)
 
     def test_other_alphabet_does_not_become_ukrainian_keyboard(self) -> None:
         for invalid in ("@", "&", "#", "<", ">", "k", "kh", "я", "щ", "№"):
