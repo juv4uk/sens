@@ -55,10 +55,10 @@
 (0011 render-kind
   (0010 (kind)
     (110
-      ((11110111 kind (001 builtin)) (1) "LanguageItemKind::Builtin")
-      ((11110111 kind (001 syntax)) (1) "LanguageItemKind::SyntaxForm")
-      ((11110111 kind (001 macro)) (1) "LanguageItemKind::Macro")
-      ((001 unknown-kind) unknown-kind (100 (001 ()))))))
+      ((101 kind (001 builtin)) "LanguageItemKind::Builtin")
+      ((101 kind (001 syntax)) "LanguageItemKind::SyntaxForm")
+      ((101 kind (001 macro)) "LanguageItemKind::Macro")
+      ((010 (001 ())) (100 (001 ()))))))
 
 (0011 render-arity
   (0010 (arity)
@@ -77,8 +77,8 @@
 (0011 render-admitted
   (0010 (row)
     (110
-      ((11110111 (field (001 surfaces) row) (001 admitted)) (1) "true")
-      ((11110111 (field (001 surfaces) row) (001 admitted)) (0) "false"))))
+      ((101 (field (001 surfaces) row) (001 admitted)) "true")
+      ((010 (001 ())) "false"))))
 
 (0011 render-row
   (0010 (row)
