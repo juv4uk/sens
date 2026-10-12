@@ -81,6 +81,36 @@ fn raw_timezone_declarations_are_interpreted_by_lisp() {
         "(unknown host-declaration-unavailable)"
     );
 
+    // Empty strings are absent declarations too; timezone precedence must
+    // remain language-owned and D3:110 must stay exactly two-clause.
+    for (source, expected) in [
+        (
+            "(timezone-raw->observation (quote (timezone-declarations \"\" \"Etc/UTC\")))",
+            "(detected \"Etc/UTC\" etc-timezone)",
+        ),
+        (
+            "(timezone-raw->observation (quote (timezone-declarations \"\" \"\")))",
+            "(unknown host-declaration-unavailable)",
+        ),
+        (
+            "(timezone-raw->observation (quote (timezone-declarations \"Europe/Kyiv\" \"\")))",
+            "(detected \"Europe/Kyiv\" TZ)",
+        ),
+        (
+            "(timezone-raw->observation (quote (timezone-declarations () \"\")))",
+            "(unknown host-declaration-unavailable)",
+        ),
+    ] {
+        assert_eq!(
+            eval_program(source, &mut session)
+                .unwrap_or_else(|error| panic!("{source}: {error}"))
+                .value
+                .to_string(),
+            expected,
+            "{source}"
+        );
+    }
+
     assert_eq!(
         eval_program(
             "(timezone-raw->observation (quote (not-timezone-declarations () ())))",
