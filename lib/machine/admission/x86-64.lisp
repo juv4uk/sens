@@ -245,12 +245,13 @@
       (11110100 value))))
 (0011 x86-admission-within-inclusive-integer-range?
   (0010 (value lower upper)
-    ; Contract 11.8: current D6 >=/<= producers answer exact D1 control.
-    ; Never compare PredicateBit with a Number or route via host truthiness.
+    ; Contract 11.8: compose admitted D5 strict comparisons with exact D4 NOT.
+    ; GEQ/LEQ are D6 residents without generic callability; do not invoke them.
+    ; Both guards consume/return exact D1 PredicateBit, never Number 1 or host truth.
     (110
-      ((тотожне? (не-менше? value lower) 1)
+      ((0100 (11010 value lower))
        (110
-         ((тотожне? (не-більше? value upper) 1)
+         ((0100 (11011 value upper))
           (010 (001 ())))
          ((010 (001 ()))
           (010 (001 (00000000))))))
