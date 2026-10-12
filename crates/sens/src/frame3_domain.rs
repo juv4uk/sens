@@ -574,7 +574,7 @@ mod tests {
             assert_eq!(packed.len(), 4);
             assert_eq!(packed[3] & 0x7f, 0, "лише кінцевий padding дозволено");
             // Незалежний текстовий оракул, а не повторення реалізації write_packed.
-            let expected = format!("10".to_owned() + "001" + &format!("{payload:010b}") + "10101000" + "01");
+            let expected = format!("10001{payload:010b}1010100001");
             assert_eq!(expected.len(), 25);
             for (offset, expected_bit) in expected.bytes().enumerate() {
                 assert_eq!((packed[offset / 8] >> (7 - offset % 8)) & 1, expected_bit - b'0',
