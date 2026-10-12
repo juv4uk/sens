@@ -114,9 +114,9 @@ pub(crate) fn invoke_value(
             if let Some(core_identity) = identity.core_operation() {
                 return canon::invoke_domain_identity(core_identity, arguments, environment, span);
             }
-            match environment.domain_code_slot(*identity) {
+            match environment.domain_code_slot(*identity).as_ref() {
                 Some(Value::Builtin(builtin)) => (builtin.func)(arguments, environment, span),
-                Some(Value::Closure(closure)) => closures::apply_values(closure, arguments, span),
+                Some(Value::Closure(closure)) => closures::apply_values(closure.clone(), arguments, span),
                 _ => Err(LanguageError::new(
                     ErrorKind::Type,
                     format!(
@@ -524,9 +524,9 @@ fn dispatch_call(
                     span,
                 ));
             };
-            match bound {
-                Value::Macro(closure) => closures::apply_macro(closure, arguments, environment, span),
-                closure @ Value::Closure(_) => closures::apply(closure, arguments, environment, span),
+            match &bound {
+                Value::Macro(closure) => closures::apply_macro(closure.clone(), arguments, environment, span),
+                Value::Closure(_) => closures::apply(bound.clone(), arguments, environment, span),
                 Value::Builtin(builtin) => {
                     let mut values = Vec::with_capacity(arguments.len());
                     for argument in arguments {
