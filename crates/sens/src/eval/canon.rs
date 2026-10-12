@@ -878,28 +878,16 @@ mod exact_domain_primitive_tests {
     }
 
     #[test]
-    fn historical_canon_value_bytes_have_no_separate_primitive_bodies() {
+    fn d3_uses_one_domain_mechanism_without_duplicate_byte_primitives() {
+        // The historical Canon byte slots have no independent primitive
+        // implementation; all current D3 operations use domain laws.
+        assert!(PRIMITIVE_TABLE[2..7].iter().all(Option::is_none));
         let environment = Environment::root();
         let span = Span { start: 0, end: 0 };
-        for (sid, current_bits) in [
-            (crate::sens!(00000010), 0b010),
-            (crate::sens!(00000011), 0b101),
-            (crate::sens!(00000100), 0b111),
-            (crate::sens!(00000101), 0b100),
-            (crate::sens!(00000110), 0b011),
-        ] {
-            assert!(PRIMITIVE_TABLE[sid.packed_byte() as usize].is_none());
-            assert!(has_primitive(sid));
-            assert_eq!(
-                semantic_registry::compatibility_d3_route_from_ratified_domains(sid),
-                Some(d3(current_bits)),
-            );
-        }
-        let arity = invoke_semantic_ref(crate::sens!(00000010), &[], &environment, span)
-            .expect_err("historical input must use current D3 arity law");
+        let arity = invoke_domain_identity(d3(0b010), &[], &environment, span)
+            .expect_err("D3 ATOM must enforce current exact arity");
         assert_eq!(arity.kind, ErrorKind::Arity);
         assert!(arity.message.contains("010: expected 1 arguments; received 0"));
-        assert!(!arity.message.contains("00000010"));
     }
 
     #[test]
