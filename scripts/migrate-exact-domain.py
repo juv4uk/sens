@@ -199,7 +199,9 @@ def reject_ambiguous_local_bindings(source: str, surfaces):
                 if not binding.children or binding.children[0].atom is None:
                     raise ValueError("непідтверджений binder у LET")
                 forbid_name(binding.children[0].atom, operator)
-        for child in parts[1:]:
+        # Голова також може бути вкладеною λ-формою: ((λ (car) ...) arg).
+        # Її лексичні binder-и не можна обійти, переглядаючи лише аргументи.
+        for child in parts:
             walk(child)
 
     for root in roots:

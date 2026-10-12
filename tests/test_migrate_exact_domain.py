@@ -62,6 +62,7 @@ class ExactDomainMigrationTests(unittest.TestCase):
             "(001000 ((перше value)) (перше x))",
             "(define car (lambda (x) x))",
             "(0011 (CAR x) (CAR x))",
+            "((lambda (car) (car x)) y)",
             "(defmacro rewrite (car) (car x))",
         ):
             with self.subTest(source=source):
