@@ -98,6 +98,9 @@ jobs:
           print("RELEASE_TRIPLE_FULL_CORPUS_PASS")
           PY
 
+      - name: Release asset integrity negative controls
+        run: python3 -m unittest discover -s tests -p test_verify_release_assets.py -v
+
       - name: Required full workspace test (same tagged SHA)
         run: cargo test --locked --workspace
 
@@ -340,55 +343,14 @@ jobs:
           merge-multiple: true
           path: dist
 
-      - name: Reject missing, extra or empty assets; produce exact SHA-256 manifest
+      - name: Exercise release integrity negative controls
+        run: python3 -m unittest discover -s tests -p test_verify_release_assets.py -v
+
+      - name: Verify staged assets and write SHA-256 manifest
         shell: bash
         run: |
           set -euo pipefail
-          python3 - <<'PY'
-          import hashlib
-          import json
-          import os
-          from pathlib import Path
-
-          root = Path("dist")
-          tag = os.environ["GITHUB_REF_NAME"]
-          sha = os.environ["GITHUB_SHA"]
-          if not tag.startswith("l") or len(sha) != 40:
-              raise SystemExit("RELEASE_BLOCKED: invalid tag or SHA")
-          version = tag[1:]
-          expected = {
-              f"sens-cli_{version}_linux_amd64",
-              f"sens-cli_{version}_windows_x64.exe",
-              f"sens-cli_{version}_windows_x64.msi",
-              f"sens-cli_{version}_macos_x64",
-              f"sens-cli_{version}_macos_arm64",
-              "sens-cli-web.html",
-              "islands-manifest-v1.json",
-              "install.sh",
-          }
-          if not root.is_dir():
-              raise SystemExit("RELEASE_BLOCKED: dist directory missing")
-          seen = {p.name for p in root.iterdir()}
-          if seen != expected:
-              raise SystemExit(f"RELEASE_BLOCKED: asset set mismatch missing={sorted(expected-seen)} extra={sorted(seen-expected)}")
-          rows = []
-          provenance = {"schema": "sens-release-assets/v1", "tag": tag, "commit": sha, "contract": "11.9", "assets": []}
-          for name in sorted(expected):
-              p = root / name
-              if not p.is_file() or p.is_symlink() or p.stat().st_size == 0:
-                  raise SystemExit(f"RELEASE_BLOCKED: missing, symlink or empty asset: {name}")
-              digest = hashlib.sha256(p.read_bytes()).hexdigest()
-              rows.append(f"{digest}  {name}\n")
-              provenance["assets"].append({"name": name, "sha256": digest, "bytes": p.stat().st_size})
-          (root / "SHA256SUMS").write_text("".join(rows), encoding="ascii")
-          (root / "release-provenance.json").write_text(
-              json.dumps(provenance, indent=2, sort_keys=True) + "\n", encoding="utf-8"
-          )
-          p = root / "release-provenance.json"
-          rows.append(f"{hashlib.sha256(p.read_bytes()).hexdigest()}  {p.name}\n")
-          (root / "SHA256SUMS").write_text("".join(rows), encoding="ascii")
-          print(f"RELEASE_STAGED {len(expected)} artifacts, commit={sha}, with provenance and SHA256SUMS")
-          PY
+          python3 scripts/verify_release_assets.py prepare dist "$GITHUB_REF_NAME" "$GITHUB_SHA"
           (cd dist && sha256sum --check SHA256SUMS)
 
       - name: Create DRAFT, verify downloaded bytes, then publish
@@ -407,17 +369,7 @@ jobs:
             --notes "SENS Contract 11.9 release on exact commit $GITHUB_SHA. Source of truth: RELEASE.md and RELEASE-EVIDENCE.md at this commit."
           mkdir -p "$RUNNER_TEMP/release-replay"
           gh release download "$GITHUB_REF_NAME" --dir "$RUNNER_TEMP/release-replay"
-          python3 - <<'PY'
-          from pathlib import Path
-          import os
-          source = Path("dist")
-          remote = Path(os.environ["RUNNER_TEMP"]) / "release-replay"
-          if {p.name for p in source.iterdir()} != {p.name for p in remote.iterdir()}:
-              raise SystemExit("RELEASE_BLOCKED: downloaded asset set differs from staged bytes")
-          for p in source.iterdir():
-              if p.read_bytes() != (remote / p.name).read_bytes():
-                  raise SystemExit(f"RELEASE_BLOCKED: published draft asset bytes mismatch: {p.name}")
-          print("RELEASE_DRAFT_REPLAY_PASS")
-          PY
+          python3 scripts/verify_release_assets.py replay \
+            dist "$RUNNER_TEMP/release-replay" "$GITHUB_REF_NAME" "$GITHUB_SHA"
           (cd "$RUNNER_TEMP/release-replay" && sha256sum --check SHA256SUMS)
           gh release edit "$GITHUB_REF_NAME" --draft=false
