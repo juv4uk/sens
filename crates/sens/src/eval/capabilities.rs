@@ -386,7 +386,7 @@ mod honesty_tests {
         let d8 = DomainIdentity::D8(CoreD8::from_word(Bit8::new(0b10101000).unwrap()));
         let old = crate::sens!(10101000);
         assert_eq!(d3.packed_bits(), d4.packed_bits());
-        assert_eq!(d8.packed_bits(), old.packed_byte() as u64);
+        assert_eq!(d8.packed_bits(), old.packed_byte() as u16);
 
         let routes = RwLock::new(HashMap::from([
             (d3, d3_nil as DomainHostFn),
