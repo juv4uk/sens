@@ -4,6 +4,7 @@
 
 use super::{canon, capabilities, evaluate, necessary_forms, special_forms::quoted, EvalStep};
 use crate::canonical_reader::text7_binding_key;
+use crate::semantic_registry;
 use crate::{Closure, Environment, ErrorKind, Expr, ExprKind, LanguageError, Sens8, Span, Value};
 use crate::CoreDomainIdentity;
 use std::{
@@ -263,8 +264,6 @@ enum Head {
     Call,
 }
 
-const EVAL: Sens8 = crate::sens!(01001101);
-
 fn domain_head(identity: CoreDomainIdentity, environment: &Environment) -> Head {
     if let Some(necessary) = necessary_forms::identity_for_domain_identity(identity) {
         return match necessary {
@@ -279,6 +278,9 @@ fn domain_head(identity: CoreDomainIdentity, environment: &Environment) -> Head 
             0b110 => Head::Cond,
             _ => Head::Call,
         },
+        // D4:0001 is the ratified EVAL word. It can execute code and must
+        // never be misclassified as an ordinary pure value-call.
+        CoreDomainIdentity::D4(word) if word.word().packed_bits() == 0b0001 => Head::Opaque,
         CoreDomainIdentity::D5(word) if word.word().packed_bits() == 0b00100 => Head::Opaque,
         _ => Head::Call,
     };
@@ -292,7 +294,9 @@ fn domain_head(identity: CoreDomainIdentity, environment: &Environment) -> Head 
 }
 
 fn sid_head(sid: Sens8, environment: &Environment) -> Head {
-    if sid == EVAL {
+    // Historical W8 EVAL remains a compatibility mechanism only. Obtain
+    // its slot from the Lisp-owned generated registry, not a Rust byte law.
+    if semantic_registry::admitted_semantic_id_for_surface("eval") == Some(sid) {
         return Head::Opaque;
     }
     match necessary_forms::identity_for_semantic_id(sid) {
@@ -851,6 +855,39 @@ pub(super) fn value_to_expr(value: Value, span: Span) -> Result<Expr, LanguageEr
     }
 
     go(&value, span, 0)
+}
+
+#[cfg(test)]
+mod exact_d4_eval_head_migration_tests {
+    use super::*;
+
+    fn d4(bits: u8) -> CoreDomainIdentity {
+        CoreDomainIdentity::D4(crate::CoreD4::from_word(
+            crate::Bit4::new(bits).expect("точна ширина D4"),
+        ))
+    }
+
+    #[test]
+    fn exact_d4_eval_is_opaque_and_not_a_plain_pure_call() {
+        let env = Environment::root();
+        assert!(matches!(domain_head(d4(0b0001), &env), Head::Opaque));
+        // Equal numeric payload in a different domain never becomes D4 EVAL.
+        let d3 = CoreDomainIdentity::D3(crate::Bija3::from_word(
+            crate::Bit3::new(0b001).unwrap(),
+        ));
+        assert!(matches!(domain_head(d3, &env), Head::Quote));
+        assert!(matches!(domain_head(d4(0b0010), &env), Head::Call));
+    }
+
+    #[test]
+    fn historical_eval_uses_registry_slot_but_other_w8_is_not_eval() {
+        let env = Environment::root();
+        let historical = semantic_registry::admitted_semantic_id_for_surface("eval")
+            .expect("історична таблиця має окремий сумісний слот EVAL");
+        assert_eq!(historical.packed_byte(), 0b01001101);
+        assert!(matches!(sid_head(historical, &env), Head::Opaque));
+        assert!(!matches!(sid_head(crate::sens!(10101000), &env), Head::Opaque));
+    }
 }
 
 #[cfg(test)]
