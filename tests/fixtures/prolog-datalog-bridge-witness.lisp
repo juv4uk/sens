@@ -3,17 +3,17 @@
 (load "lib/core.lisp")
 (load "lib/bridge/prolog-to-datalog.lisp")
 
-(00001001 prolog-datalog-bridge-witness
-  (00001000 ()
-    (00000111
-      ((00100010
+(0011 prolog-datalog-bridge-witness
+  (0010 ()
+    (110
+      ((11110111
          (prolog-substitutions-to-datalog-facts
-           (00000001
+           (001
              (prolog-substitution-observation
                (source-ref observation-42)
                (variable ancestor)
                (values bob dave carol))))
-         (00000001
+         (001
            (projection-result
              (projection prolog-substitutions-to-datalog-facts)
              (source-ref observation-42)
@@ -22,15 +22,15 @@
                 (ancestor dave)
                 (ancestor carol))))))
        (1)
-       (00000001 (prolog-datalog-bridge-witness (status pass))))
-      ((00100010
+       (001 (prolog-datalog-bridge-witness (status pass))))
+      ((11110111
          (prolog-substitutions-to-datalog-facts
-           (00000001
+           (001
              (prolog-substitution-observation
                (variable ancestor)
                (values bob))))
-         (00000001 (projection-failure missing-source-ref)))
+         (001 (projection-failure missing-source-ref)))
        (1)
-       (00000001 (prolog-datalog-bridge-witness (status pass)))))))
+       (001 (prolog-datalog-bridge-witness (status pass)))))))
 
 (prolog-datalog-bridge-witness)
