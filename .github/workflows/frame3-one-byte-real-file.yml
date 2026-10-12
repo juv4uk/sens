@@ -22,12 +22,17 @@ permissions:
   contents: read
 jobs:
   one-byte-program:
-    name: Dense F3M-1: all 256 byte codes are real SENS programs
+    name: 'Dense F3M-1: all 256 byte codes are real SENS programs'
     runs-on: ubuntu-24.04
     timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
       - uses: dtolnay/rust-toolchain@stable
+      - name: Prove dense F3M rank windows and executable 3-byte witness
+        shell: bash
+        run: |
+          set -euo pipefail
+          cargo test --locked -p sens frame3_micro_enumerator::tests -- --nocapture
       - name: Encode, decode, and execute with real Rust SENS oracle
         shell: bash
         run: |
