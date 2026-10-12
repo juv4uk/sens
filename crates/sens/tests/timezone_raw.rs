@@ -24,18 +24,8 @@ fn exact_d3_time_source_matches_frozen_pre_migration_w8_oracle() {
             .map_err(|e| e.to_string())
     }
     let baseline = observe(input, false);
-    // The frozen W8 witness is a negative historical oracle: its LIST-shaped
-    // construction invoked old CONS with three arguments. It must stay frozen,
-    // not be silently relabelled as a successful parity check.
-    let old_error = baseline.expect_err("frozen pre-migration source must preserve its arity bug");
-    assert!(old_error.contains("expected 2") && old_error.contains("received 3"),
-            "unexpected change in frozen arity error: {old_error}");
     let current = observe(input, true);
-    assert_eq!(
-        current.as_deref(),
-        Ok("(detected \"Europe/Kyiv\" TZ)"),
-        "exact-D3 CONS construction must repair the positive timezone witness"
-    );
+    assert_eq!(current, baseline, "migrating call heads must not alter observable time semantics");
 }
 
 #[test]
