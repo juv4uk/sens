@@ -110,3 +110,23 @@ Current `main` has moved beyond this diagnostic SHA; the current ref observed du
 - `scripts/release.lisp`, `guix.scm`, and active `packaging/install.sh` asset/version references now target `0.42.0` / `l0.42.0`.
 - Rust compiler/toolchain is pinned to `1.99.0` in `rust-toolchain.toml` and explicit release/CI workflow configuration. The hosted runner confirmed `rustc 1.99.0 (b940084d7 2026-09-28)` in the diagnostic batch.
 - Exact Rust distribution / runner-image digests and the final candidate's successful `release_parity`, installer tests, full workspace tests/Clippy, independent T5-oracle admission and platform asset replay remain **UNKNOWN**, not PASS.
+
+## Newest completed GitHub Actions snapshot — 2026-10-12
+
+The newest complete diagnostic batch currently observed for main is SHA `b1a43d41402794f511426bd3f4e733b158f53866`. This is a **diagnostic snapshot only**, not a release-candidate freeze; any later commit invalidates its verdict for release use.
+
+| Gate on this exact SHA | Result | Evidence |
+|---|---|---|
+| Hosted runner routing policy | **PASS** | [run 38235487536](https://github.com/juv4uk/sens/actions/runs/38235487536) |
+| Triple projection gate | **PASS** | [run 38235487342](https://github.com/juv4uk/sens/actions/runs/38235487342) |
+| D10 finite transducer witness | **PASS** | [run 38235487529](https://github.com/juv4uk/sens/actions/runs/38235487529) |
+| Binary executable T5 end-to-end | **PASS** | [run 38235487442](https://github.com/juv4uk/sens/actions/runs/38235487442) |
+| Physical binary SENS CLI smoke | **PASS** | [run 38235487498](https://github.com/juv4uk/sens/actions/runs/38235487498) |
+| T5 migration inventory (M0) | **PASS** | [run 38235487504](https://github.com/juv4uk/sens/actions/runs/38235487504) |
+| T5 program syntax audit | **PASS** | [run 38235487485](https://github.com/juv4uk/sens/actions/runs/38235487485) |
+| Hosted CI | **FAIL** | [run 38235487411](https://github.com/juv4uk/sens/actions/runs/38235487411): obsolete COND/ATOM/EQ scanner regression, migrated time-source witnesses and stale Core-logic audit failed. **The new release publication/pre-tag structural regression and release asset verifier controls passed inside this overall red job.** |
+| Vertical Day non-cancelling native smoke | **FAIL** | [run 38235487508](https://github.com/juv4uk/sens/actions/runs/38235487508): `native_pair_car_cdr_match_the_interpreter_reference_witness` still reports a non-callable numeric carrier `#q2:110100100000000001000010010/1` at span `8830..8853`. The explicit unadmitted-UD2 rejection test passes; this does not establish positive native parity. |
+| Vertical Day immutable L0/native smoke | **FAIL** | [run 38235487599](https://github.com/juv4uk/sens/actions/runs/38235487599): `bounded_eq_cond_native_execution_follows_generated_cmp_jnz_branches` fails at the same non-callable carrier/span. |
+| Physical T5 file-authority oracle | **BLOCKED** | [run 38235487525](https://github.com/juv4uk/sens/actions/runs/38235487525): migration reports `UNADMITTED_TEXT7_CONTEXT 'binary'` in quoted data; no T5 oracle verdict. |
+
+**Decision from this snapshot: NO-GO.** These green rows establish only the named narrow properties. The native positive witnesses, source/runtime admission, and whole-corpus independent T5 oracle still block release. The mandatory full Release Preflight workflow also has **no observed run/result** in this audit; do not replace that absence with the green rows above. Re-run every mandatory gate on a newly frozen single SHA, then write that new candidate SHA only after owner review.
