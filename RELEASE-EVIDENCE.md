@@ -37,6 +37,14 @@ Authority: [CURRENT.md](CURRENT.md), [language-contract.lisp](language-contract.
 - **Пінований exact-multiset:** `tests/data/core4-d24-direct-operand-baseline.json`, ключ = клас / доменний код голови / номер аргументу / числовий source token. Перевірка `scripts/check-core4-d24-migration.py --self-test` та `--check` у двох основних Core CI; зміна source + леджер має бути синхронною після незалежних свідків.
 - **Жодного вигаданого дозволу:** цей облік не конвертує `0`, `1`, `#d10` чи `2` в D24, не змінює reader, FASL, фізичний T5 чи ратифіковані закони. Виконувана міграція лишається **BLOCKED**, доки існує підтверджений безлітеральний механізм явного D24 object construction та проходять runtime parity tests.
 - **Стан виконання:** структурний облік незалежно перераховано за актуальним файлом: 14/14 ключів збігаються; `cargo test` і Python `--self-test` на GitHub runner ще **UNVERIFIED**. Не підміняти читання джерела пройденими тестами.
+### Безлітеральні виконувані кандидати для Lisp-owned Core4
+
+У `crates/sens/tests/math_domain_exclusivity.rs` додані **не запущені на підтвердженому CI SHA** Lisp-owned позитивні/негативні тести майбутньої міграції без нової арифметичної граматики:
+
+- `lisp_owned_d24_length_fold_uses_ratified_d6_add1_without_number_literals` — D3/D4 рекурсія, `001110` D6 ADD1 замість `(01010 acc 1)`, seed як точно кваліфікований D24 Value; перевіряє 0–9 елементів, D24→D48 carry та відмову для legacy Rational(0).
+- `lisp_owned_d24_nth_uses_d3_identity_and_d6_sub1_without_number_literals` — D3 `101` EQ з явно кваліфікованим нулем і D6 `001111` SUB1 замість `(01011 i 1)`; індекси 0–2 та відмова для бездоменного індексу.
+
+**Умовне приймання, не автоматична міграція:** тести передають D24(0)/D24(1) через explicit `Environment::define` у proof session. Вони **не** дають нового SENS source-literal/T5/FASL формату й **не** міняють `lib/core4.lisp`/збережений `.fasl`. Core4 `length` досі викликає `length-onto` із бездоменним `0`; для зміни canonical source потрібні легітимний D24 seed mechanism, регенерація FASL, чинний exact-SHA Core CI та негативні свідки. Реліз **NO-GO**.
 ## D10: наявні докази — чесний розподіл по рівнях
 
 Поелементний аудит [усіх 1024 D10 записів](docs/research/D10-PROOF-COVERAGE-AUDIT-20261012.uk.md) (pinned Git blob `7e6acb2531308ae5f63600d4e0042111cc3ec59c`) підтверджує:
