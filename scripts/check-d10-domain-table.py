@@ -18,6 +18,7 @@ from domain_tables import CURRENT_HUMAN_TABLES, D10_TABLE, read_domain_table
 ROOT = Path(__file__).resolve().parents[1]
 POINTER = ROOT / "knowledge/d10-current-inventory.json"
 OWNER = ROOT / "knowledge/d10-owner-whole-domain-ratification-20261012.json"
+EDITORIAL_ANCHORS = ROOT / "knowledge/d10-uk-editorial-anchors-20261012.json"
 CODE = re.compile(r"[01]{10}\Z")
 
 PREDICATES_WITH_DONOR_PLAIN_NAMES = frozenset({
@@ -96,9 +97,30 @@ def check(d10, inventory, lower):
                  row.domain + ":" + row.bits)
             distinct[column][value] = row.domain + ":" + row.bits
 
+    editorial = json.loads(EDITORIAL_ANCHORS.read_text(encoding="utf-8"))
+    need(editorial["schema"] == "d10-uk-editorial-anchor-review/v1" and
+         editorial["status"] ==
+         "ASSISTANT_EDITORIAL_REVIEW_NOT_OWNER_RATIFICATION_OR_SAN_GRAMMAR_ATTESTATION",
+         "editorial anchor scope or schema")
+    need(editorial["codebook"]["git_blob"] ==
+         json.loads(OWNER.read_text(encoding="utf-8"))["inventory"]["git_blob"],
+         "editorial anchor source pin")
+    anchor_list = editorial["anchors"]
+    need(len(anchor_list) == 32 and
+         len({a["semantic_name"] for a in anchor_list}) == 32,
+         "editorial anchor coverage/duplicate")
+    anchor_by_code = {a["coordinate"]: a for a in anchor_list}
+    need(len(anchor_by_code) == 32, "duplicate editorial coordinates")
+
     for row in d10:
         original = expected[row.bits]
         name = original["semantic_name"]
+        anchor = anchor_by_code.get(row.bits)
+        if anchor is not None:
+            need(anchor["stable_id"] == original["stable_id"] and
+                 anchor["semantic_name"] == name and
+                 anchor["uk"] == row.uk and anchor["ukr"] == row.ukr,
+                 "editorially verified Ukrainian semantic anchor drift " + row.bits)
         need(row.domain == "D10" and row.width == 10, "D10 width")
         need(row.lisp == name and row.en == name.lower() +
              ("?" if row.uk.endswith("?") and not name.endswith("?") else ""),
@@ -151,6 +173,10 @@ def main():
 
     if args.self_test:
         mutants = [
+            ("wrong editorial meaning", lambda xs: xs.__setitem__(
+                next(i for i, row in enumerate(xs) if row.lisp == "SLOT-VALUE"),
+                replace(next(row for row in xs if row.lisp == "SLOT-VALUE"),
+                        uk="переклад-зіпсовано"))),
             ("wrong code", lambda xs: xs.__setitem__(
                 1, replace(xs[1], bits=xs[0].bits))),
             ("wrong resident", lambda xs: xs.__setitem__(
