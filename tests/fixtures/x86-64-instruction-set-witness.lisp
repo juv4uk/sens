@@ -7,8 +7,8 @@
 (load "lib/machine/encoding/x86-64.lisp")
 (load "lib/machine/admission/x86-64.lisp")
 
-(00001001 x86-instruction-witness-tests
-  (00000001
+(0011 x86-instruction-witness-tests
+  (001
     (((encode lea-basic)
       (x86-encode-lea-r64-mem-disp8 (quote rax) (quote rbx) 10)
       (72 141 67 10))
@@ -808,34 +808,34 @@
         0)
       1))))
 
-(00001001 x86-instruction-eval-row
-  (00001000 (row)
-    (10011100 ((name (00000101 row))
-          (expr (00101111 row))
-          (expected (00110000 row)))
-      (10011100 ((actual (01001101 expr)))
-        (00000111
-          ((00100010 actual expected) (1)
-           (00000001 pass))
+(0011 x86-instruction-eval-row
+  (0010 (row)
+    (001000 ((name (100 row))
+          (expr (1001 row))
+          (expected (10011 row)))
+      (001000 ((actual (0001 expr)))
+        (110
+          ((11110111 actual expected) (1)
+           (001 pass))
           (t
-           (00100111 (00000001 fail) name expected actual)))))))
+           (1110 (001 fail) name expected actual)))))))
 
-(00001001 x86-instruction-run-all
-  (00001000 (rows)
-    (00000111
-      ((00000010 rows) () (00000001 (x86-64-instruction-set-witness (status pass))))
-      ((00000010 rows) (1) (00000001 (x86-64-instruction-set-witness (status pass))))
+(0011 x86-instruction-run-all
+  (0010 (rows)
+    (110
+      ((010 rows) () (001 (x86-64-instruction-set-witness (status pass))))
+      ((010 rows) (1) (001 (x86-64-instruction-set-witness (status pass))))
       (t
-       (10011100 ((result (x86-instruction-eval-row (00000101 rows))))
-         (00000111
-           ((00100010 result (00000001 pass))
-            (x86-instruction-run-all (00000110 rows)))
+       (001000 ((result (x86-instruction-eval-row (100 rows))))
+         (110
+           ((11110111 result (001 pass))
+            (x86-instruction-run-all (011 rows)))
            (t
-            (00100111
-              (00000001 x86-64-instruction-set-witness)
-              (00000001 (status fail))
-              (00100111 (00000001 check) (00101111 result))
-              (00100111 (00000001 expected) (00110000 result))
-              (00100111 (00000001 actual) (00110001 result))))))))))
+            (1110
+              (001 x86-64-instruction-set-witness)
+              (001 (status fail))
+              (1110 (001 check) (1001 result))
+              (1110 (001 expected) (10011 result))
+              (1110 (001 actual) (100111 result))))))))))
 
 (x86-instruction-run-all x86-instruction-witness-tests)
