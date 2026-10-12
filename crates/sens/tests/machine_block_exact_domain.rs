@@ -69,6 +69,42 @@ fn exact_machine_block_preserves_nine_historical_observations() {
 }
 
 #[test]
+fn x86_atom_let_cutover_uses_exact_d4_lambda_applications() {
+    let source = include_str!("../../../lib/machine/atoms/x86-64.lisp");
+    assert!(!source.contains("(001000 "), "виконувана D6 LET більше не потрібна");
+    let expressions = parse_mixed_exact_domain_machine_source(
+        "lib/machine/atoms/x86-64.lisp",
+        source,
+    ).expect("основний x86 Lisp-файл має читатися за точною доменною шириною");
+
+    fn check(expression: &Expr, lambda_applications: &mut usize) {
+        let ExprKind::List(items) = &expression.kind else { return };
+        if let Some(Expr { kind: ExprKind::List(operator), .. }) = items.first() {
+            if matches!(
+                operator.first().map(|e| &e.kind),
+                Some(ExprKind::DomainIdentity(identity))
+                    if identity.width() == 4 && identity.packed_bits() == 0b0010
+            ) {
+                assert_eq!(items.len(), 2, "LET мав лише одне ініціалізоване зв'язування");
+                assert_eq!(operator.len(), 3, "кожна LAMBDA має одне тіло");
+                let ExprKind::List(parameters) = &operator[1].kind else {
+                    panic!("параметр LAMBDA має бути структурним списком")
+                };
+                assert_eq!(parameters.len(), 1, "кожний локальний binder є одномісним");
+                assert!(matches!(&parameters[0].kind, ExprKind::Symbol(_)));
+                *lambda_applications += 1;
+            }
+        }
+        for item in items { check(item, lambda_applications); }
+    }
+
+    let mut converted = 0;
+    for expression in &expressions { check(expression, &mut converted); }
+    assert_eq!(converted, 28, "усі 28 доведених LET перетворено без випадкових пропусків");
+}
+
+
+#[test]
 fn machine_block_reader_is_path_bound_and_quote_data_stays_opaque() {
     assert!(parse_mixed_exact_domain_machine_source(
         "lib/machine/other/block-exact.lisp", SOURCE
