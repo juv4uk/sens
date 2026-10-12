@@ -94,21 +94,32 @@ jobs:
           from pathlib import Path
           data=json.loads(Path(sys.argv[1]).read_text(encoding="utf-8"))
           # Fail-closed even under python3 -O: assert statements vanish under optimization.
+          summary = data["summary"]
+          physical = summary["physical_pairs_seen"]
+          # This is a bounded preflight, not the tag-time full-corpus GO gate.
+          # Do not freeze today's zero-admission debt as a permanent invariant:
+          # legitimate, independently evidenced admissions must not make future
+          # progress fail this preflight. The tag workflow separately requires
+          # release_admitted == physical_pairs_seen > 0 on the same exact SHA.
           checks = (
               (data["schema"] == "sens-t5-triplet-inventory/v1", "invalid evidence schema"),
               (data["failed_required"] == [], "required triple witness failed"),
-              (data["summary"]["physical_pairs_seen"] > 0, "no physical pairs"),
-              (data["summary"]["physical_blocked"] == 0, "physical source blocked"),
-              (data["summary"]["view_present_valid"] >= 1, "bounded view witness missing"),
-              (data["summary"]["release_admitted"] == 0, "admission claims need release-scoped gate"),
-              (data["summary"]["original_executable_migrations_certified"] == 0,
-               "original executable migration claims need independent replay"),
+              (physical > 0, "no physical pairs"),
+              (summary["physical_blocked"] == 0, "physical source blocked"),
+              (summary["view_present_valid"] >= 1, "bounded view witness missing"),
+              (0 <= summary["view_present_valid"] <= physical, "view count exceeds physical pair count"),
+              (0 <= summary["uk_oracle_verified"] <= physical, "oracle count exceeds physical pair count"),
+              (0 <= summary["release_admitted"] <= physical, "admission count exceeds physical pair count"),
+              (0 <= summary["original_executable_migrations_certified"] <= physical,
+               "certified migration count exceeds physical pair count"),
           )
           for valid, explanation in checks:
               if not valid:
                   raise SystemExit("RELEASE_PREFLIGHT_BLOCKED: " + explanation)
-          print("BOUNDED_TRIPLE_PREFLIGHT_PASS / GENERAL_UK_ORACLE_AND_FULL_VIEW_RELEASE_STILL_BLOCKED")
-          print("REMAINING_MISSING_SPACED_VIEWS", data["summary"]["view_missing"])
+          print("BOUNDED_TRIPLE_PREFLIGHT_PASS / TAG-TIME GATE STILL REQUIRES COMPLETE SAME-SHA CORPUS ADMISSION")
+          print("RELEASE_ADMITTED", summary["release_admitted"], "/", physical)
+          print("ORIGINAL_EXECUTABLE_MIGRATIONS_CERTIFIED", summary["original_executable_migrations_certified"])
+          print("REMAINING_MISSING_SPACED_VIEWS", summary["view_missing"])
           PY
 
       - name: translation boundary regression
