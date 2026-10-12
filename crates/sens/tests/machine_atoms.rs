@@ -1,4 +1,7 @@
-use sens::{eval_program, load_core_library, Session};
+use sens::{
+    eval_parsed_expressions, eval_program, load_core_library,
+    parse_mixed_exact_domain_machine_source, Session,
+};
 
 #[path = "support/machine_block_exact.rs"]
 mod machine_block_exact;
@@ -10,11 +13,16 @@ fn repo_root() -> PathBuf {
 }
 
 fn load_lisp_file(path: &str, session: &mut Session) {
-    let path = repo_root().join(path);
-    let source = fs::read_to_string(&path)
-        .unwrap_or_else(|error| panic!("{} must exist: {error}", path.display()));
-    eval_program(&source, session)
-        .unwrap_or_else(|error| panic!("{} must load as ordinary sens: {error}", path.display()));
+    let file = repo_root().join(path);
+    let source = fs::read_to_string(&file)
+        .unwrap_or_else(|error| panic!("{} must exist: {error}", file.display()));
+    // Двійкові D3/D4-голови в машинних бібліотеках є виконуваним кодом,
+    // але звичайний Lisp reader бачить у них некваліфіковані числа.
+    // Лише path-bound reader може зберегти їхню ратифіковану ширину.
+    let forms = parse_mixed_exact_domain_machine_source(path, &source)
+        .unwrap_or_else(|error| panic!("{} requires exact-domain machine reader: {error}", file.display()));
+    eval_parsed_expressions(&forms, session)
+        .unwrap_or_else(|error| panic!("{} must evaluate with exact domains: {error}", file.display()));
 }
 
 fn machine_session() -> Session {
