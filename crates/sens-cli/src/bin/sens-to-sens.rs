@@ -18,6 +18,7 @@ struct Analysis {
     /// `--language`: this file defines the language's own table functions.
     language: bool,
     exact_domain: bool,
+    source: String,
     edits: Vec<Edit>,
     named_calls: usize,
     blocked_host_capabilities: usize,
@@ -118,7 +119,13 @@ fn resolve_head<'a>(
         }
         ExprKind::Sid(sens) => Some((None, HeadRoute::Legacy(*sens))),
         ExprKind::DomainIdentity(identity) if analysis.exact_domain => {
-            identity.core_operation().map(|id| (None, HeadRoute::Exact(id)))
+            // Змішаний читач зберігає оригінальні span; уже двійкову
+            // голову не переписуємо, а українське ім'я можна проектувати.
+            let original = analysis.source.get(head.span.start..head.span.end);
+            let human_surface = original.filter(|spelling| {
+                !spelling.is_empty() && !spelling.bytes().all(|b| b == b'0' || b == b'1')
+            });
+            identity.core_operation().map(|id| (human_surface, HeadRoute::Exact(id)))
         }
         ExprKind::Symbol(name) if !bound.contains(name.as_ref()) => {
             let current = semantic_registry_export::admitted_core_domain_for_surface(name);
@@ -450,8 +457,20 @@ fn analyze_with_mode(
     language: bool,
     exact_domain: bool,
 ) -> Result<Analysis, String> {
-    let expressions = parse(source).map_err(|error| error.render(source))?;
-    let mut analysis = Analysis { language, exact_domain, ..Analysis::default() };
+    // Повторний прохід уже переписаного джерела повинен розпізнати
+    // 001/110 як точні D3 QUOTE/COND, а не як числа. Інакше в наступному
+    // проході зміняться цитовані дані.
+    let expressions = if exact_domain {
+        sens::parse_mixed_exact_domain(source)
+    } else {
+        parse(source)
+    }.map_err(|error| error.render(source))?;
+    let mut analysis = Analysis {
+        language,
+        exact_domain,
+        source: source.to_owned(),
+        ..Analysis::default()
+    };
     let mut bound = HashSet::new();
     walk_sequence(
         &expressions,
@@ -526,6 +545,9 @@ fn main() {
     let host_capabilities = host_capability_names();
     let mut failed = false;
     let mut changes_available = false;
+    // Точнодоменний пакет спочатку перевіряємо цілком: пізніший BLOCK
+    // не може залишити раніші файли вже переписаними.
+    let mut staged_exact_writes = Vec::<(String, String)>::new();
 
     for filename in files {
         let source = match fs::read_to_string(&filename) {
@@ -585,7 +607,9 @@ fn main() {
         }
 
         if output != source {
-            if let Err(error) = fs::write(&filename, &output) {
+            if exact_domain {
+                staged_exact_writes.push((filename.clone(), output.clone()));
+            } else if let Err(error) = fs::write(&filename, &output) {
                 eprintln!("sens-to-sens: {filename}: {error}");
                 failed = true;
                 continue;
@@ -604,6 +628,16 @@ fn main() {
 
     if failed {
         process::exit(2);
+    }
+    // Не обіцяємо транзакційність файлової системи; це суворий
+    // семантичний preflight без жодного запису при BLOCK у пакеті.
+    if exact_domain && !check {
+        for (filename, output) in staged_exact_writes {
+            if let Err(error) = fs::write(&filename, &output) {
+                eprintln!("sens-to-sens: {filename}: помилка запису: {error}");
+                process::exit(2);
+            }
+        }
     }
     if check && changes_available {
         process::exit(1);
@@ -631,6 +665,16 @@ mod tests {
         let source = "(quote (car x)) (atom? x) (car (cdr x)) (lambda (car) (car x)) (define car (lambda (x) x)) (car x)";
         let expected = "(001 (car x)) (010 x) (100 (011 x)) (0010 (car) (car x)) (0011 car (0010 (x) x)) (car x)";
         assert_eq!(rewrite_exact(source).expect("доведені D3/D4"), expected);
+    }
+
+    #[test]
+    fn exact_domain_mode_is_idempotent_even_with_quoted_binary_heads() {
+        let original = "(quote (car x)) (atom? x) (lambda (x) (quote (cdr x)))";
+        let once = rewrite_exact(original).expect("перший прохід");
+        let twice = rewrite_exact(&once).expect("другий прохід");
+        assert_eq!(once, twice, "повторний прохід не переписує цитовані дані");
+        assert!(once.contains("(001 (car x))"), "цитований CAR лишається даними");
+        assert!(once.contains("(001 (cdr x))"), "цитований CDR лишається даними");
     }
 
     #[test]
