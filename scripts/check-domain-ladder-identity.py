@@ -9,6 +9,7 @@ Domain *capacity* never proves a resident callable. D24+ is arithmetic only.
 from __future__ import annotations
 
 import argparse
+import json
 from pathlib import Path
 import re
 import sys
@@ -88,6 +89,70 @@ def inspect_domains(table_texts: dict[int, str]) -> dict[int, int]:
     return counts
 
 
+
+# Негативні, а не правотворчі докази: однаковий W8 не стає D8.
+# Запис = old label, classification, незалежний target, поточний D8 label.
+W8_COLLISION = {
+    "10101000": ("invoke", "MECHANISM-HOLD", None, "round"),
+    "01001011": ("read-all", "DIRECT-CURRENT-IDENTITY", "D9:110101001", "abs∘recip"),
+    "10100110": ("read-file", "DIRECT-CURRENT-IDENTITY", "D9:110110111", "1/"),
+}
+ACTIVE_GATES = (
+    "scripts/test-binary-language-pipeline.sh",
+    ".github/workflows/ci.yml",
+    ".github/workflows/ci-hosted.yml",
+)
+
+
+def inspect_w8_d8_collision(coverage: dict, d8_source: str) -> None:
+    rows = coverage.get("rows")
+    if coverage.get("status") != "AUDIT-COMPLETE" or not isinstance(rows, list):
+        raise ValueError("W8 provenance lacks verified historical inventory")
+    legacy = {}
+    for row in rows:
+        bits = row.get("legacy_code")
+        if bits in legacy:
+            raise ValueError(f"historical W8 duplicate: {bits}")
+        legacy[bits] = row
+    if len(legacy) != 256:
+        raise ValueError("historical W8 inventory incomplete")
+    for bits, (name, classification, target, current_name) in W8_COLLISION.items():
+        row = legacy.get(bits)
+        if row is None or row.get("legacy_name") != name:
+            raise ValueError(f"historical W8 collision missing: {bits}")
+        if row.get("classification") != classification:
+            raise ValueError(f"historical W8 classification changed: {bits}")
+        actual_target = row.get("current_target")
+        if target is None:
+            if actual_target is not None:
+                raise ValueError(f"W8 mechanism HOLD improperly admitted: {bits}")
+        elif not isinstance(actual_target, str) or target not in actual_target:
+            raise ValueError(f"W8 cross-domain successor lost: {bits}")
+        row_lines = [
+            line for line in d8_source.splitlines()
+            if line.lstrip().startswith("(" + bits + " ")
+        ]
+        if len(row_lines) != 1 or f"(en {current_name})" not in row_lines[0]:
+            raise ValueError(f"D8 ratified resident drift: {bits}")
+        if actual_target is not None and actual_target.startswith("D8:"):
+            raise ValueError(f"historical W8 reclassified by same D8 bits: {bits}")
+
+
+def inspect_active_gates(root: Path) -> None:
+    for rel in ACTIVE_GATES:
+        path = root / rel
+        if not path.is_file() or path.is_symlink():
+            raise ValueError(f"active migration gate missing: {rel}")
+        data = path.read_text(encoding="utf-8")
+        if "scripts/sid-binary-identity-guard.sh" in data:
+            raise ValueError(f"retired flat-eight guard reintroduced: {rel}")
+        for mode in ("--check", "--self-test"):
+            if "scripts/check-domain-ladder-identity.py " + mode not in data:
+                raise ValueError(f"domain-ladder {mode} gate missing: {rel}")
+    if (root / "scripts/sid-binary-identity-guard.sh").exists():
+        raise ValueError("retired eight-bit guard reintroduced in active tree")
+
+
 def inspect_files(root: Path) -> dict[int, int]:
     for rel in CANONICAL:
         path = root / rel
@@ -104,7 +169,15 @@ def inspect_files(root: Path) -> dict[int, int]:
         if not path.is_file() or path.is_symlink():
             raise ValueError(f"missing domain table: {rel}")
         domain_texts[domain] = path.read_text(encoding="utf-8")
-    return inspect_domains(domain_texts)
+    counts = inspect_domains(domain_texts)
+    provenance = root / "knowledge/sens8-current-coverage-v1.json"
+    if not provenance.is_file() or provenance.is_symlink():
+        raise ValueError("historical collision evidence missing")
+    inspect_w8_d8_collision(
+        json.loads(provenance.read_text(encoding="utf-8")), domain_texts[8]
+    )
+    inspect_active_gates(root)
+    return counts
 
 
 def self_test() -> None:
