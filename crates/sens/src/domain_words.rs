@@ -169,7 +169,7 @@ impl SoundD7 {
 
 /// Exact eight-bit logical carrier for the ratified D8 domain.
 ///
-/// This carrier remains distinct from historical flat Sens8/Sid8 bytes. It
+/// This carrier remains distinct from historical unqualified eight-bit bytes. It
 /// proves exact width/domain typing; physical program bytes are produced only
 /// by the program-level packing layer.
 #[repr(transparent)]
@@ -191,7 +191,7 @@ impl CoreD8 {
 /// Exact nine-bit carrier for owner-ratified D9 semantic identity (#4008).
 ///
 /// This proves only exact D9 membership. It deliberately grants no callable
-/// mechanism and never routes through SID8/Function8.
+/// mechanism and never routes through an unqualified eight-bit function table.
 #[repr(transparent)]
 #[derive(Clone, Copy, Eq, Hash, PartialEq)]
 pub struct CoreD9(Bit9);
