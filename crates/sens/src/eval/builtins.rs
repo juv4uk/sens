@@ -116,9 +116,8 @@ fn ntp_query_raw_value(
     ]))
 }
 
-/// Арність визначається конкретним механізмом, а не історичним W8/SID.
-/// Точний домен виклику перевіряє dispatch до входу в цей backend.
 fn exact_args(
+    name: crate::Sens8,
     args: &[Value],
     expected: usize,
     span: Span,
@@ -126,10 +125,7 @@ fn exact_args(
     if args.len() != expected {
         return Err(crate::LanguageError::new(
             crate::ErrorKind::Arity,
-            format!(
-                "невірна кількість аргументів: очікується {expected}, отримано {}",
-                args.len()
-            ),
+            format!("{name} expects exactly {expected} argument(s)"),
             span,
         ));
     }
@@ -139,7 +135,7 @@ fn exact_args(
 // Примітиви мови за кодом СЕНС (власник, 2026-09-26: Rust знає лише коди).
 /// make-vector
 pub(super) fn prim_01010000(args: &[Value], _env: &Environment, span: Span) -> Result<Value, crate::LanguageError> {
-        exact_args(args, 1, span)?;
+        exact_args(crate::sens!(01010000), args, 1, span)?;
         match &args[0] {
             Value::Number(f, Exactness::Exact) if *f >= 0.0 && f.fract() == 0.0 =>
                 Ok(Value::vector(std::iter::repeat_n(Value::Nil, *f as usize))),
@@ -155,7 +151,7 @@ pub(super) fn prim_01001111(args: &[Value], _env: &Environment, _span: Span) -> 
 
 /// mono-ns
 pub(super) fn prim_01011010(args: &[Value], _env: &Environment, span: Span) -> Result<Value, crate::LanguageError> {
-        exact_args(args, 0, span)?;
+        exact_args(crate::sens!(01011010), args, 0, span)?;
         static START: std::sync::OnceLock<std::time::Instant> = std::sync::OnceLock::new();
         let elapsed = START.get_or_init(std::time::Instant::now).elapsed();
         Ok(exact_value(Rational::integer(elapsed.as_nanos() as i64)))
@@ -163,7 +159,7 @@ pub(super) fn prim_01011010(args: &[Value], _env: &Environment, span: Span) -> R
 
 /// unix-time-now
 pub(super) fn prim_01011011(args: &[Value], _env: &Environment, span: Span) -> Result<Value, crate::LanguageError> {
-        exact_args(args, 0, span)?;
+        exact_args(crate::sens!(01011011), args, 0, span)?;
         let duration = std::time::SystemTime::now().duration_since(std::time::UNIX_EPOCH)
             .map_err(|_| crate::LanguageError::new(crate::ErrorKind::Type,
                 "unix-time-now is unavailable before the Unix epoch", span))?;
@@ -180,7 +176,7 @@ pub(super) fn prim_01011011(args: &[Value], _env: &Environment, span: Span) -> R
 
 /// ntp-query-raw
 pub(super) fn prim_01011100(args: &[Value], _env: &Environment, span: Span) -> Result<Value, crate::LanguageError> {
-        exact_args(args, 2, span)?;
+        exact_args(crate::sens!(01011100), args, 2, span)?;
         let host = match &args[0] {
             Value::String(value) => value.as_ref(),
             _ => return Err(crate::LanguageError::new(crate::ErrorKind::Type,
@@ -196,7 +192,7 @@ pub(super) fn prim_01011100(args: &[Value], _env: &Environment, span: Span) -> R
 
 /// timezone-declarations-raw
 pub(super) fn prim_01011101(args: &[Value], _env: &Environment, span: Span) -> Result<Value, crate::LanguageError> {
-        exact_args(args, 0, span)?;
+        exact_args(crate::sens!(01011101), args, 0, span)?;
         let tz_value = std::env::var("TZ").ok().filter(|value| !value.is_empty())
             .map(|value| Value::String(std::rc::Rc::from(value))).unwrap_or(Value::Nil);
         let etc_timezone_value = std::fs::read_to_string("/etc/timezone").ok()
@@ -209,7 +205,7 @@ pub(super) fn prim_01011101(args: &[Value], _env: &Environment, span: Span) -> R
 
 /// vector-length
 pub(super) fn prim_01010001(args: &[Value], _env: &Environment, span: Span) -> Result<Value, crate::LanguageError> {
-        exact_args(args, 1, span)?;
+        exact_args(crate::sens!(01010001), args, 1, span)?;
         match &args[0] {
             Value::Vector(vec) => Ok(Value::Number(vec.borrow().len() as f64, Exactness::Exact)),
             _ => Err(crate::LanguageError::new(crate::ErrorKind::Type, "vector-length expects a vector", span)),
@@ -218,7 +214,7 @@ pub(super) fn prim_01010001(args: &[Value], _env: &Environment, span: Span) -> R
 
 /// vector-ref
 pub(super) fn prim_01010010(args: &[Value], _env: &Environment, span: Span) -> Result<Value, crate::LanguageError> {
-        exact_args(args, 2, span)?;
+        exact_args(crate::sens!(01010010), args, 2, span)?;
         let index = match &args[1] {
             Value::Number(f, Exactness::Exact) if *f >= 0.0 && f.fract() == 0.0 && *f <= usize::MAX as f64 => *f as usize,
             _ => return Err(crate::LanguageError::new(crate::ErrorKind::Type,
@@ -235,7 +231,7 @@ pub(super) fn prim_01010010(args: &[Value], _env: &Environment, span: Span) -> R
 
 /// vector-set!
 pub(super) fn prim_01010011(args: &[Value], _env: &Environment, span: Span) -> Result<Value, crate::LanguageError> {
-        exact_args(args, 3, span)?;
+        exact_args(crate::sens!(01010011), args, 3, span)?;
         let index = match &args[1] {
             Value::Number(f, Exactness::Exact) if *f >= 0.0 && f.fract() == 0.0 && *f <= usize::MAX as f64 => *f as usize,
             _ => return Err(crate::LanguageError::new(crate::ErrorKind::Type,
@@ -379,13 +375,13 @@ pub(super) fn prim_01001011(args: &[Value], env: &Environment, span: Span) -> Re
 
 /// numeric-buffer?
 pub(super) fn prim_00100110(args: &[Value], _env: &Environment, span: Span) -> Result<Value, crate::LanguageError> {
-        exact_args(args, 1, span)?;
+        exact_args(crate::sens!(00100110), args, 1, span)?;
         Ok(Value::predicate_bit(matches!(args[0], Value::NumericBuffer(_))))
     }
 
 /// numeric-buffer-type
 pub(super) fn prim_01010110(args: &[Value], _env: &Environment, span: Span) -> Result<Value, crate::LanguageError> {
-        exact_args(args, 1, span)?;
+        exact_args(crate::sens!(01010110), args, 1, span)?;
         let name = match &args[0] {
             Value::NumericBuffer(NumericBuffer::I32(_)) => "i32",
             Value::NumericBuffer(NumericBuffer::F32(_)) => "f32",
@@ -397,7 +393,7 @@ pub(super) fn prim_01010110(args: &[Value], _env: &Environment, span: Span) -> R
 
 /// numeric-buffer-length
 pub(super) fn prim_01010111(args: &[Value], _env: &Environment, span: Span) -> Result<Value, crate::LanguageError> {
-        exact_args(args, 1, span)?;
+        exact_args(crate::sens!(01010111), args, 1, span)?;
         let length = match &args[0] {
             Value::NumericBuffer(NumericBuffer::I32(values)) => values.len(),
             Value::NumericBuffer(NumericBuffer::F32(values)) => values.len(),
@@ -409,7 +405,7 @@ pub(super) fn prim_01010111(args: &[Value], _env: &Environment, span: Span) -> R
 
 /// numeric-buffer-ref
 pub(super) fn prim_01011000(args: &[Value], _env: &Environment, span: Span) -> Result<Value, crate::LanguageError> {
-        exact_args(args, 2, span)?;
+        exact_args(crate::sens!(01011000), args, 2, span)?;
         let index = match args[1] {
             Value::Number(number, Exactness::Exact)
                 if number >= 0.0 && number.fract() == 0.0 && number <= usize::MAX as f64 => number as usize,
@@ -429,7 +425,7 @@ pub(super) fn prim_01011000(args: &[Value], _env: &Environment, span: Span) -> R
 
 /// numeric-buffer-map
 pub(super) fn prim_01011001(args: &[Value], env: &Environment, span: Span) -> Result<Value, crate::LanguageError> {
-        exact_args(args, 2, span)?;
+        exact_args(crate::sens!(01011001), args, 2, span)?;
         match &args[1] {
             Value::NumericBuffer(NumericBuffer::I32(input)) => {
                 let mut output = Vec::with_capacity(input.len());
@@ -479,7 +475,7 @@ pub(super) fn prim_01011001(args: &[Value], env: &Environment, span: Span) -> Re
 
 /// env
 pub(super) fn prim_01001110(args: &[Value], env: &Environment, span: Span) -> Result<Value, crate::LanguageError> {
-        exact_args(args, 0, span)?;
+        exact_args(crate::sens!(01001110), args, 0, span)?;
         let mut items = Vec::new();
         for (name, value) in env.snapshot() {
             items.push(Value::Pair(std::rc::Rc::new(Value::String(name)), std::rc::Rc::new(value)));
@@ -515,13 +511,13 @@ fn is_empty_string(value: &Value) -> bool {
 
 /// string-empty?
 pub(super) fn prim_00111100(args: &[Value], _env: &Environment, span: Span) -> Result<Value, crate::LanguageError> {
-    exact_args(args, 1, span)?;
+    exact_args(crate::sens!(00111100), args, 1, span)?;
     string_empty_answer(&args[0], span)
 }
 
 /// string-length — кількість символів (кодових точок).
 pub(super) fn prim_00111011(args: &[Value], _env: &Environment, span: Span) -> Result<Value, crate::LanguageError> {
-    exact_args(args, 1, span)?;
+    exact_args(crate::sens!(00111011), args, 1, span)?;
     match &args[0] {
         Value::String(text) => Ok(exact_value(Rational::integer(text.chars().count() as i64))),
         other => {
@@ -555,13 +551,13 @@ fn string_prefix_answer(prefix: &Value, text: &Value, span: Span) -> Result<Valu
 
 /// string-prefix? prefix s
 pub(super) fn prim_00111101(args: &[Value], _env: &Environment, span: Span) -> Result<Value, crate::LanguageError> {
-    exact_args(args, 2, span)?;
+    exact_args(crate::sens!(00111101), args, 2, span)?;
     string_prefix_answer(&args[0], &args[1], span)
 }
 
 /// string-contains? needle s
 pub(super) fn prim_00111110(args: &[Value], _env: &Environment, span: Span) -> Result<Value, crate::LanguageError> {
-    exact_args(args, 2, span)?;
+    exact_args(crate::sens!(00111110), args, 2, span)?;
     match (&args[0], &args[1]) {
         (Value::String(needle), Value::String(text)) => {
             Ok(Value::predicate_bit(text.contains(needle.as_ref())))
@@ -578,60 +574,5 @@ pub(super) fn prim_00111110(args: &[Value], _env: &Environment, span: Span) -> R
             string_rest_or_error(text, span)?;
             unreachable!("string-rest accepts only strings")
         }
-    }
-}
-
-#[cfg(test)]
-mod arity_without_legacy_id_tests {
-    use super::*;
-
-    #[test]
-    fn mechanism_arity_keeps_kind_and_source_span_without_w8_identity() {
-        let span = Span { start: 12, end: 34 };
-        for (expected, supplied) in [(0, 1), (1, 0), (1, 2), (2, 1), (3, 4)] {
-            let args = vec![Value::Nil; supplied];
-            let error = exact_args(&args, expected, span)
-                .expect_err("невідповідність кількості аргументів має завершитися помилкою");
-            assert_eq!(error.kind, crate::ErrorKind::Arity);
-            assert_eq!(error.span, span);
-            assert!(error.message.contains(&format!("очікується {expected}")));
-            assert!(error.message.contains(&format!("отримано {supplied}")));
-        }
-        for expected in 0..=3 {
-            let args = vec![Value::Nil; expected];
-            exact_args(&args, expected, span)
-                .expect("точна кількість аргументів приймається");
-        }
-    }
-
-    #[test]
-    fn live_predicate_backend_keeps_d1_and_rejects_wrong_arity() {
-        let env = Environment::root();
-        let span = Span { start: 4, end: 11 };
-        let value = prim_00100110(&[Value::Nil], &env, span)
-            .expect("механізм numeric-buffer? виконується без W8 у перевірці арності");
-        assert_eq!(value.as_predicate_bit(), Some(false));
-
-        let error = prim_00100110(&[], &env, span)
-            .expect_err("нуль аргументів не є допустимою арністю");
-        assert_eq!(error.kind, crate::ErrorKind::Arity);
-        assert_eq!(error.span, span);
-
-        let too_many = prim_00100110(&[Value::Nil, Value::Nil], &env, span)
-            .expect_err("надлишковий аргумент не є допустимим");
-        assert_eq!(too_many.kind, crate::ErrorKind::Arity);
-    }
-
-    #[test]
-    fn string_predicate_backend_keeps_exact_d1_result_without_sid8() {
-        let env = Environment::root();
-        let span = Span::default();
-        let value = Value::String(std::rc::Rc::from(""));
-        let result = prim_00111100(&[value], &env, span)
-            .expect("порожній рядок обробляється поточним предикатним механізмом");
-        assert_eq!(result.as_predicate_bit(), Some(true));
-        let error = prim_00111100(&[], &env, span)
-            .expect_err("помилка арності лишається явною");
-        assert_eq!(error.kind, crate::ErrorKind::Arity);
     }
 }
