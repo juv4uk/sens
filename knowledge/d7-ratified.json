@@ -1518,10 +1518,10 @@
       "report_name": "sign.double-quote",
       "baseline_class": "sign/operator",
       "projection": {
-        "slp1": "\t",
-        "iast": "\t",
-        "deva": null,
-        "uk": null
+        "slp1": "\"",
+        "iast": "\"",
+        "deva": "\"",
+        "uk": "\""
       },
       "provenance": "baseline-recovered / D7-v2"
     },
