@@ -121,6 +121,18 @@ pub fn is_domain_value(v: &Value) -> bool {
 /// Exactly two operands in the SAME Dn; arithmetic creates no unqualified
 /// identity. The specific result-domain growth is explicit and validated.
 pub fn compute(operator: &str, lhs: &Value, rhs: &Value) -> Option<Value> {
+    // Натуральні слова D24+ уже мають доведені власні бітові механізми.
+    // Не проводимо їх через зайві NEG/RATIO gcd та повторне означення Dn.
+    // Допуск SAME-Dn і перенесення Dn -> D(2n) перевіряє BinaryNumber.
+    // Некваліфіковані й змішані Dn мають відхилятися тут, без fallback.
+    if let (Value::BinaryNumber(left), Value::BinaryNumber(right)) = (lhs, rhs) {
+        match operator {
+            "+" => return left.add_admitted_numeric(right).map(Value::BinaryNumber),
+            "*" => return left.mul_admitted_numeric(right).map(Value::BinaryNumber),
+            _ => {}
+        }
+    }
+
     let (width, x_neg, x_num, x_den) = ingredients(lhs)?;
     let (other_width, y_neg, y_num, y_den) = ingredients(rhs)?;
     if width != other_width { return None; }
@@ -308,6 +320,77 @@ mod tests {
         assert!(compute("+",&Value::NumericComposition(composition.clone()),&other).is_some());
         assert!(compute("+",&Value::NumericComposition(composition.clone()),&b).is_none());
         assert!(compare("=",&Value::NumericComposition(composition.clone()),&b).is_none());
+    }
+
+    #[test]
+    fn one_bit_boundary_diagnostic_preserves_every_domain_bit() {
+        // Незалежний оракул: (2^n - 2) + 1 вміщується в Dn;
+        // (2^n - 1) + 1 = 2^n мусить бути точним D(2n).
+        // Зміна ОДНОГО біта на вході змінює обраний домен результату.
+        for width in [24usize, 48, 96, 192] {
+            let mut nearly_full = vec![1u8; width];
+            nearly_full[width - 1] = 0;
+            let full = vec![1u8; width];
+            let mut one = vec![0u8; width];
+            one[width - 1] = 1;
+            let admitted = |word: &[u8]| {
+                Value::BinaryNumber(
+                    BinaryNumber::from_numeric_domain_bits(width, word)
+                        .expect("точна бітність D24+"),
+                )
+            };
+            let almost = admitted(&nearly_full);
+            let maximum = admitted(&full);
+            let unit = admitted(&one);
+
+            let fitting = compute("+", &almost, &unit).expect("вміщується в Dn");
+            let Value::BinaryNumber(fitted) = &fitting else {
+                panic!("ціле натуральне має залишитися доменним числом")
+            };
+            assert_eq!(fitted.numeric_domain_width(), Some(width), "D{width}: fit");
+            assert_eq!(fitted.exact_numeric_domain_bits(), Some(full.clone()),
+                "D{width}: усі n бітів суми повинні зберегтися");
+
+            let crossing = compute("+", &maximum, &unit).expect("точне перенесення");
+            let Value::BinaryNumber(carried) = &crossing else {
+                panic!("carry мусить залишитися натуральним числом")
+            };
+            let mut expected = vec![0u8; 2 * width];
+            expected[width - 1] = 1;
+            assert_eq!(carried.numeric_domain_width(), Some(2 * width),
+                "D{width}: не можна обрізати старший біт");
+            assert_eq!(carried.exact_numeric_domain_bits(), Some(expected),
+                "D{width}: єдиний біт перенесення на точній D(2n) позиції");
+
+            let unchanged = compute("*", &maximum, &unit)
+                .expect("множення на одиницю того самого домену");
+            assert_eq!(unchanged, maximum, "D{width}: natural MUL path");
+            let mut two = vec![0u8; width];
+            two[width - 2] = 1;
+            let doubled = compute("*", &maximum, &admitted(&two))
+                .expect("точне множення з перенесенням");
+            let Value::BinaryNumber(product) = doubled else {
+                panic!("добуток має залишитися точним натуральним словом")
+            };
+            let mut product_bits = vec![0u8; 2 * width];
+            product_bits[(width - 1)..(2 * width - 1)].fill(1);
+            assert_eq!(product.numeric_domain_width(), Some(2 * width));
+            assert_eq!(product.exact_numeric_domain_bits(), Some(product_bits));
+
+            let legacy_one = Value::BinaryNumber(BinaryNumber::one());
+            for op in ["+", "*"] {
+                assert!(compute(op, &maximum, &legacy_one).is_none(),
+                    "D{width}: {op} must reject unqualified one");
+                assert!(compute(op, &legacy_one, &maximum).is_none(),
+                    "D{width}: {op} must reject unqualified first operand");
+                let other_domain = Value::BinaryNumber(
+                    BinaryNumber::from_numeric_domain_bits(2 * width, &vec![0; 2 * width])
+                        .unwrap(),
+                );
+                assert!(compute(op, &maximum, &other_domain).is_none(),
+                    "D{width}: {op} must reject mixed Dn/D(2n)");
+            }
+        }
     }
 
     #[test]
