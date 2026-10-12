@@ -204,7 +204,7 @@ CAR+CDR і максимальної глибини, бо «крутість» н
 Повний evaluator sweep усіх 16 777 216 F3M-3 програм лишається окремим
 proof gate.
 
-Evidence: [F3M-2 exhaustive census run 38196443593](https://github.com/juv4uk/sens/actions/runs/38196443593) ·
+Evidence: [F3M-2 exhaustive census + pinned regression run 38196520171](https://github.com/juv4uk/sens/actions/runs/38196520171) ·
 [F3M-3 final-page proof run 38195272188](https://github.com/juv4uk/sens/actions/runs/38195272188).
 
 ### Відтворення
