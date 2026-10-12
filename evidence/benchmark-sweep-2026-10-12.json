@@ -118,5 +118,55 @@
       "sha256": "d0f7f9978da2981aac0ffac0c23601e1f02c63688b65c56907ae62daf6e02d8d",
       "expires_utc": "2026-11-02T01:04:55Z"
     }
+  ],
+  "follow_up_sweeps": [
+    {
+      "workflow_run_id": 38190822493,
+      "workflow_url": "https://github.com/juv4uk/sens/actions/runs/38190822493",
+      "commit": "411312eab71a7c31cd9d71e52ebd34c031881c58",
+      "result": "COMPLETE_WITH_BENCHMARK_FAILURES",
+      "coverage": {
+        "expected_stands": 54,
+        "observed_stands": 54,
+        "duplicates": false,
+        "missing": [],
+        "extra": [],
+        "coverage_complete": true
+      },
+      "outcome_counts": {
+        "pass": 51,
+        "fail": 3,
+        "blocked": 0,
+        "timeout": 0,
+        "all_benchmarks_pass": false
+      },
+      "changes_vs_initial_sweep": "d6-parity-duality passed after correcting its reproduction command; outcomes changed from 50/4 to 51/3.",
+      "remaining_failures": [
+        {
+          "stand": "store-air-load",
+          "category": "STALE_SEMANTIC_GENERATION",
+          "historical_contract": "11.8",
+          "current_contract": "11.9",
+          "latest_action": "Classified current run as explicitly BLOCKED until Contract 11.9 replay; code/manifests updated in commits 8450034 and 4a61e89."
+        },
+        {
+          "stand": "cross-language",
+          "category": "MISSING_PINNED_GUIX_ENVIRONMENT",
+          "latest_action": "Added an explicit SENS_BENCHMARK_STATUS=BLOCKED marker if Guix is absent, instead of treating unavailable infrastructure as a benchmark FAIL; commit b099580."
+        },
+        {
+          "stand": "physical-binary-performance",
+          "category": "LEGACY_SOURCE_FIXTURE_INCOMPATIBLE_WITH_CURRENT_EXACT_WIDTH_READER",
+          "latest_action": "Still unresolved; do not weaken the reader or claim physical performance until source fixtures and physical artifacts are reconciled."
+        }
+      ],
+      "summary_artifact": {
+        "id": 11721029580,
+        "url": "https://github.com/juv4uk/sens/actions/runs/38190822493/artifacts/11721029580",
+        "sha256": "114fcf5ae61aff3fef8659a22ef70507bd442090e27a968e57512e00998b9616",
+        "expires_at_utc": "2026-11-02T01:15:51Z"
+      },
+      "interpretation": "This is a follow-up run for its exact SHA only. Two subsequent classification-only changes have been committed and await a fresh registry run; neither is presented as a passing benchmark."
+    }
   ]
 }
