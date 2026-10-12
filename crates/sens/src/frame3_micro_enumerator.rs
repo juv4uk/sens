@@ -856,7 +856,7 @@ mod tests {
         }
     }
 
-    fn runtime_operation_count(expr: &Frame3MicroExpr) -> usize {
+    fn encoded_operation_count(expr: &Frame3MicroExpr) -> usize {
         let own = match expr {
             Frame3MicroExpr::Zero | Frame3MicroExpr::One | Frame3MicroExpr::Nil => 0,
             Frame3MicroExpr::QuoteZero
@@ -868,16 +868,16 @@ mod tests {
             | Frame3MicroExpr::IfAtom(_, _, _) => 2,
         };
         own + match expr {
-            Frame3MicroExpr::Atom(value) => runtime_operation_count(value),
+            Frame3MicroExpr::Atom(value) => encoded_operation_count(value),
             Frame3MicroExpr::Cons(left, right)
             | Frame3MicroExpr::CarCons(left, right)
             | Frame3MicroExpr::CdrCons(left, right) => {
-                runtime_operation_count(left) + runtime_operation_count(right)
+                encoded_operation_count(left) + encoded_operation_count(right)
             }
             Frame3MicroExpr::IfAtom(test, then_value, else_value) => {
-                runtime_operation_count(test)
-                    + runtime_operation_count(then_value)
-                    + runtime_operation_count(else_value)
+                encoded_operation_count(test)
+                    + encoded_operation_count(then_value)
+                    + encoded_operation_count(else_value)
             }
             _ => 0,
         }
@@ -919,7 +919,7 @@ mod tests {
     #[test]
     fn strongest_last_64k_f3m3_rank_is_full_basis_and_executes() {
         // Transparent lexicographic search score:
-        // capability diversity, COND count, runtime operation count, depth,
+        // capability diversity, COND count, encoded operation count, depth,
         // exact-word count, node count, then the later physical rank.
         let mut best: Option<((u32, usize, usize, usize, usize, usize, u32), Frame3MicroExpr)> =
             None;
@@ -933,7 +933,7 @@ mod tests {
             let score = (
                 expr.capability_mask().count_ones(),
                 conditional_count(&expr),
-                runtime_operation_count(&expr),
+                encoded_operation_count(&expr),
                 expression_depth(&expr),
                 expr.exact_words().len(),
                 expr.node_count(),
