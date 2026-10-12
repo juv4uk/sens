@@ -183,6 +183,26 @@ class PolicyD4PartialCutover(unittest.TestCase):
                     self.assertIn("(110101001 (110110111", current,
                                   "Ratified D9 reader must stay exact-width")
                     self.assertNotRegex(current, D3_LEGACY_COND)
+                elif path == "knowledge/guard-reference.lisp":
+                    # A separate, immutable-original witness now owns six D3
+                    # conversions after this earlier D4-only staging phase.
+                    # Both exact states remain checked, not just the latest.
+                    pinned_d4 = subprocess.run(
+                        ["git", "cat-file", "blob",
+                         "ca32234690b8d5062a81fc90c8eb11333c8901a8"],
+                        cwd=ROOT, capture_output=True, check=True,
+                    ).stdout.decode("utf-8")
+                    pinned_d3 = subprocess.run(
+                        ["git", "cat-file", "blob",
+                         "a5485f83a242343508fc8bed11c77befc49d2d96"],
+                        cwd=ROOT, capture_output=True, check=True,
+                    ).stdout.decode("utf-8")
+                    self.assertEqual(d4_only, pinned_d4,
+                                     "historical D4-only stage drifted")
+                    self.assertEqual(current, pinned_d3,
+                                     "six Guard D3 definitions diverged from exact proof")
+                    self.assertRegex(current, D3_LEGACY_COND,
+                                     "remaining legacy Guard forms must stay visible")
                 elif path != GUARD_FACT:
                     self.assertEqual(current, d4_only,
                                      "додаткові заміни поза доказом D4-only")
