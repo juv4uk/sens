@@ -93,6 +93,9 @@ fn bare_numbers_and_numeric_spelling_cannot_bypass_d24_admission() {
         "(+ 100 100)",
         "(+ 0000000001 0000000001)",
         "(* 24 48)",
+        // A 24/48-bit-looking source spelling is not a D24/D48
+        // qualified value. Width alone has no numeric-domain authority.
+        "(01010 000000000000000000000001 000000000000000000000001)",
     ] {
         let error = eval_program(source, &mut session).unwrap_err();
         assert_eq!(error.kind, ErrorKind::Type, "{source}");
@@ -101,9 +104,9 @@ fn bare_numbers_and_numeric_spelling_cannot_bypass_d24_admission() {
 }
 
 #[test]
-fn d5_d6_operator_codes_compute_on_explicit_d24_d48_d96_values() {
+fn d5_d6_operator_codes_compute_without_literals_across_d24_d384() {
     let mut session = Session::default();
-    for width in [24usize, 48, 96] {
+    for width in [24usize, 48, 96, 192, 384] {
         session.environment.define("left", numeric(width, 7));
         session.environment.define("right", numeric(width, 2));
         for (source, expected) in [
