@@ -152,7 +152,7 @@ class ThreePassClassifierTests(unittest.TestCase):
         )
         historical, current, dynamic, empty = self.classify(source)
         self.assertEqual([hit.token for hit in historical],
-                         ["quote", "00000001", "car"])
+                         ["quote", "QUOTE", "00000001", "car"])
         self.assertEqual([hit.token for hit in current], ["001"])
         self.assertFalse(dynamic)
         self.assertFalse(empty)
