@@ -830,7 +830,7 @@ mod tests {
             vec![0b1010_1100, 0b0111_0001],
             16,
         ).unwrap();
-        let partial = PackedBitstream::from_parts(vec![0b1010_1100], 5).unwrap();
+        let partial = PackedBitstream::from_parts(vec![0b1010_1000], 5).unwrap();
 
         let mut packer = BitPacker::new();
         assert_eq!(packer.push_stream(&empty), Some(0));
