@@ -98,12 +98,45 @@ assert "fifth" in selector_research and "CADDDDR" in selector_research
 # Every selected source binding must exist in the claimed language-owned file.
 selected=[row for row in rows if row["selected_d9_candidate"]]
 assert len(selected)==22
+# Визначення живих бібліотек вже використовують D4:0011 DEFINE.
+# Історичні макроси -> / ->> у lib/core.lisp залишаються тільки
+# джерельними прив'язками, не семантичними D8/Function8 викликами.
+SOURCE_DEFINE = re.compile(
+    r'^[ \t]*\((?:0011|00001001)\s+([^\s()]+)\s+', re.MULTILINE
+)
+SOURCE_MACRO = re.compile(
+    r'^[ \t]*\(00001010\s+([^\s()]+)\s+', re.MULTILINE
+)
+PINNED_OLD_CORE_MACROS = frozenset(("->", "->>"))
+
+
+def top_level_source_bindings(path: str, source: str) -> set[str]:
+    names = {match.group(1) for match in SOURCE_DEFINE.finditer(source)}
+    if path == "lib/core.lisp":
+        names.update(
+            match.group(1) for match in SOURCE_MACRO.finditer(source)
+            if match.group(1) in PINNED_OLD_CORE_MACROS
+        )
+    return names
+
+
+# Позитивні / негативні свідки відділяють історичний binder
+# від довільного W8 або сучасного D8 оператора.
+assert top_level_source_bindings("lib/core.lisp", "(0011 isqrt\n (0010 (x) x))\n") == {"isqrt"}
+assert top_level_source_bindings("lib/core.lisp", "(00001001 legacy (00001000 (x) x))\n") == {"legacy"}
+assert top_level_source_bindings("lib/core.lisp", "(00001010 -> forms\n (001 forms))\n") == {"->"}
+assert top_level_source_bindings("lib/core.lisp", "(00001010 ->> forms\n (001 forms))\n") == {"->>"}
+assert top_level_source_bindings("lib/other.lisp", "(00001010 -> forms ())\n") == set()
+assert top_level_source_bindings("lib/core.lisp", "(00001010 other forms ())\n") == set()
+assert top_level_source_bindings("lib/core.lisp", "(00000001 quoted ())\n") == set()
+assert top_level_source_bindings("lib/core.lisp", "(110011100 not-define ())\n") == set()
+
 source_cache={}
 for row in selected:
     path=row["source_file"]
     if path not in source_cache:
         source_cache[path]=(root/path).read_text(encoding="utf-8")
-    defs={m.group(1) for m in re.finditer(r'^\([01]{8}\s+([^\s()]+)\s+', source_cache[path], re.MULTILINE)}
+    defs=top_level_source_bindings(path, source_cache[path])
     assert row["source_binding"] in defs, (row["semantic_name"],row["source_binding"],path)
 
 inventory_by_id={row["stable_id"]:row for row in inventory["rows"]}
