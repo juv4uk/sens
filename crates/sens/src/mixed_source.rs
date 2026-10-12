@@ -121,22 +121,54 @@ fn parse_mixed_pinned_d8_io(source: &str) -> Result<Vec<Expr>, LanguageError> {
 /// Migrate only the three pinned reasoning modules. W8 syntax containers
 /// remain compatible while their executable D3 call heads retain exact width.
 /// This is NOT a general license to reinterpret W8 data or older Lisp files.
-pub fn parse_mixed_exact_domain_reasoning_source(
-    path: &str,
-    source: &str,
-) -> Result<Vec<Expr>, LanguageError> {
+fn lift_pinned_d9_language_calls(source: &str, expression: Expr, depth: u32) -> Result<Expr, LanguageError> {
+    if depth > MAX_STRUCTURE_DEPTH {
+        return Err(LanguageError::new(ErrorKind::Parse, "pinned D9 reasoning source exceeds structure depth", expression.span));
+    }
+    let Expr { kind, span } = expression;
+    let ExprKind::List(items) = kind else { return Ok(Expr { kind, span }); };
+    if items.is_empty() { return Ok(Expr { kind: ExprKind::List(items), span }); }
+
+    let mut lifted = items.to_vec();
+    let spelling = source_spelling(source, &lifted[0]);
+    if is_legacy_w8_quote_head(source, &lifted[0]) || is_exact_quote(&lifted[0]) || spelling == Some("'") {
+        return Ok(Expr { kind: ExprKind::List(items), span });
+    }
+    if spelling.is_some_and(|s| s.len() == 9 && s.bytes().all(|b| matches!(b, b'0' | b'1'))) {
+        let word = parse_binary_source_words(spelling.expect("D9 spelling"))?[0].word;
+        let identity = DomainIdentity::from_source_word(word);
+        if identity.width() != 9 {
+            return Err(LanguageError::new(ErrorKind::Parse, "nine-bit reasoning head must be D9", lifted[0].span));
+        }
+        lifted[0] = Expr { kind: ExprKind::DomainIdentity(identity), span: lifted[0].span };
+    } else if matches!(&lifted[0].kind, ExprKind::List(_)) {
+        lifted[0] = lift_pinned_d9_language_calls(source, lifted[0].clone(), depth + 1)?;
+    }
+
+    let skip_binding = is_legacy_w8_define_head(source, &items[0])
+        || is_legacy_w8_lambda_head(source, &items[0])
+        || is_legacy_w8_macro_head(source, &items[0])
+        || is_exact_d4_binding_head(&items[0]);
+    for index in 1..lifted.len() {
+        if skip_binding && index == 1 { continue; }
+        lifted[index] = lift_pinned_d9_language_calls(source, lifted[index].clone(), depth + 1)?;
+    }
+    Ok(Expr { kind: ExprKind::List(Rc::from(lifted.into_boxed_slice())), span })
+}
+
+/// Path-pinned reasoning reader. Materializing a D9 identity here does not make
+/// it callable: dispatch still requires a concrete mechanism slot installed by
+/// its evaluated Lisp definition.
+pub fn parse_mixed_exact_domain_reasoning_source(path: &str, source: &str) -> Result<Vec<Expr>, LanguageError> {
     if !matches!(path, "lib/world.lisp" | "lib/forward.lisp" | "lib/knowledge.lisp" | "lib/unify.lisp" | "lib/reason.lisp" | "lib/persistent-map.lisp" | "lib/content-store.lisp" | "lib/lisp-fs.lisp") {
-        return Err(LanguageError::new(
-            ErrorKind::Parse,
-            "reasoning-source exact-domain reader requires a pinned source path",
-            Span::default(),
-        ));
+        return Err(LanguageError::new(ErrorKind::Parse, "reasoning-source exact-domain reader requires a pinned source path", Span::default()));
     }
-    if matches!(path, "lib/world.lisp" | "lib/knowledge.lisp" | "lib/lisp-fs.lisp") {
-        parse_mixed_pinned_d8_io(source)
+    let base = if matches!(path, "lib/world.lisp" | "lib/knowledge.lisp" | "lib/lisp-fs.lisp") {
+        parse_mixed_pinned_d8_io(source)?
     } else {
-        parse_mixed_source(source, true)
-    }
+        parse_mixed_source(source, true)?
+    };
+    base.into_iter().map(|expr| lift_pinned_d9_language_calls(source, expr, 0)).collect()
 }
 
 /// Exact D3/D4 call heads are intentionally present in this single
@@ -670,6 +702,30 @@ mod tests {
         for path in ["lib/core4.lisp", "lib/other.lisp", "../world.lisp"] {
             assert!(parse_mixed_exact_domain_reasoning_source(path, src).is_err());
         }
+    }
+
+    #[test]
+    fn reasoning_reader_lifts_d9_heads_only_on_pinned_paths() {
+        let src = "(0011 probe (0010 (a b s) (101010000 a b s)))";
+        let parsed = parse_mixed_exact_domain_reasoning_source("lib/unify.lisp", src).unwrap();
+        let ExprKind::List(defn) = &parsed[0].kind else { panic!("def"); };
+        let ExprKind::List(lambda) = &defn[2].kind else { panic!("lambda"); };
+        let ExprKind::List(call) = &lambda[2].kind else { panic!("call"); };
+        assert!(matches!(&call[0].kind, ExprKind::DomainIdentity(id)
+            if id.width() == 9 && id.packed_bits() == 0b101010000));
+
+        let ordinary = only(parse_mixed_exact_domain("(101010000 a b s)").unwrap());
+        let ExprKind::List(call) = &ordinary.kind else { panic!("call"); };
+        assert!(!matches!(&call[0].kind, ExprKind::DomainIdentity(_)));
+
+        let quoted = parse_mixed_exact_domain_reasoning_source(
+            "lib/unify.lisp", "(0011 datum (0010 () (001 (101010000 a b s))))"
+        ).unwrap();
+        let ExprKind::List(defn) = &quoted[0].kind else { panic!("def"); };
+        let ExprKind::List(lambda) = &defn[2].kind else { panic!("lambda"); };
+        let ExprKind::List(quote) = &lambda[2].kind else { panic!("quote"); };
+        let ExprKind::List(data) = &quote[1].kind else { panic!("data"); };
+        assert!(!matches!(&data[0].kind, ExprKind::DomainIdentity(_)));
     }
 
     #[test]

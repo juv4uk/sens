@@ -110,19 +110,23 @@ pub(crate) fn invoke_value(
     span: Span,
 ) -> Result<Value, LanguageError> {
     match function {
-        Value::DomainIdentity(identity) => match identity.core_operation() {
-            Some(core_identity) => {
-                canon::invoke_domain_identity(core_identity, arguments, environment, span)
+        Value::DomainIdentity(identity) => {
+            if let Some(core_identity) = identity.core_operation() {
+                return canon::invoke_domain_identity(core_identity, arguments, environment, span);
             }
-            None => Err(LanguageError::new(
-                ErrorKind::Type,
-                format!(
-                    "domain identity is not callable under its ratified law: D{} {}",
-                    identity.width(),
-                    identity
-                ),
-                span,
-            )),
+            match environment.domain_code_slot(*identity) {
+                Some(Value::Builtin(builtin)) => (builtin.func)(arguments, environment, span),
+                Some(Value::Closure(closure)) => closures::apply_values(closure, arguments, span),
+                _ => Err(LanguageError::new(
+                    ErrorKind::Type,
+                    format!(
+                        "domain identity is not callable under its ratified law: D{} {}",
+                        identity.width(),
+                        identity
+                    ),
+                    span,
+                )),
+            }
         }
         Value::Sid(sid) => canon::invoke_semantic_ref(*sid, arguments, environment, span),
         Value::Builtin(builtin) => (builtin.func)(arguments, environment, span),
@@ -501,7 +505,15 @@ fn dispatch_call(
     };
     match &function {
         Value::DomainIdentity(identity) => {
-            let Some(core_identity) = identity.core_operation() else {
+            if let Some(core_identity) = identity.core_operation() {
+                let mut values = Vec::with_capacity(arguments.len());
+                for argument in arguments {
+                    values.push(evaluate(argument, environment)?);
+                }
+                return canon::invoke_domain_identity(core_identity, &values, environment, span)
+                    .map(EvalStep::Value);
+            }
+            let Some(bound) = environment.domain_code_slot(*identity) else {
                 return Err(LanguageError::new(
                     ErrorKind::Type,
                     format!(
@@ -512,12 +524,22 @@ fn dispatch_call(
                     span,
                 ));
             };
-            let mut values = Vec::with_capacity(arguments.len());
-            for argument in arguments {
-                values.push(evaluate(argument, environment)?);
+            match bound {
+                Value::Macro(closure) => closures::apply_macro(closure, arguments, environment, span),
+                closure @ Value::Closure(_) => closures::apply(closure, arguments, environment, span),
+                Value::Builtin(builtin) => {
+                    let mut values = Vec::with_capacity(arguments.len());
+                    for argument in arguments {
+                        values.push(evaluate(argument, environment)?);
+                    }
+                    (builtin.func)(&values, environment, span).map(EvalStep::Value)
+                }
+                _ => Err(LanguageError::new(
+                    ErrorKind::Type,
+                    format!("exact domain mechanism slot is not callable: D{} {}", identity.width(), identity),
+                    span,
+                )),
             }
-            canon::invoke_domain_identity(core_identity, &values, environment, span)
-                .map(EvalStep::Value)
         }
         Value::Sid(sid) => {
             // #1455: макрос, прив'язаний до коду, розгортається до обчислення аргументів.

@@ -1,4 +1,4 @@
-use crate::{CoreDomainIdentity, Value};
+use crate::{CoreDomainIdentity, DomainIdentity, Value};
 use std::{cell::RefCell, collections::HashMap, path::PathBuf, rc::Rc};
 
 /// Dropping a deeply nested `Environment` chain (thousands of `let`/currying
@@ -82,8 +82,9 @@ struct Limits {
     tcp_connect_allowlist: Option<Vec<(String, u16, u16)>>,
     tcp_listen_allowlist: Option<Vec<(String, u16, u16)>>,
     /// Canonical language-owned bindings keyed by exact semantic domain.
-    /// Equal payloads in D3/D4/D5/D6 remain distinct HashMap keys.
-    domain_code_slots: HashMap<CoreDomainIdentity, Value>,
+    /// Equal payloads in different D1-D9 domains remain distinct HashMap keys.
+    /// Residency alone never inserts a mechanism slot.
+    domain_code_slots: HashMap<DomainIdentity, Value>,
     /// Historical exact-eight compatibility slots. These are intentionally
     /// separate storage so a legacy byte can never collide with a canonical
     /// domain identity merely from its packed payload.
@@ -220,16 +221,22 @@ impl Environment {
     }
 
     /// Canonical exact-domain language slot.
-    pub(crate) fn domain_code_slot(&self, identity: CoreDomainIdentity) -> Option<Value> {
+    pub(crate) fn domain_code_slot(
+        &self,
+        identity: impl Into<DomainIdentity>,
+    ) -> Option<Value> {
+        let identity = identity.into();
         self.2.borrow().domain_code_slots.get(&identity).cloned()
     }
 
-    /// Binds a canonical exact-domain identity once.
+    /// Binds one concrete mechanism to one already-known exact-domain identity.
+    /// Width/residency alone never grants callability.
     pub(crate) fn bind_domain_code_slot_once(
         &self,
-        identity: CoreDomainIdentity,
+        identity: impl Into<DomainIdentity>,
         value: Value,
     ) -> bool {
+        let identity = identity.into();
         let mut limits = self.2.borrow_mut();
         if limits.domain_code_slots.contains_key(&identity) {
             return false;

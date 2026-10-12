@@ -600,6 +600,11 @@ pub(crate) fn bind_language_definition(name: &str, value: &Value, environment: &
         return;
     }
 
+    if let Some(identity) = semantic_registry::d9_binding_identity_for_definition(name) {
+        // Concrete Lisp implementation only; D9 itself remains non-Core.
+        environment.bind_domain_code_slot_once(identity, value.clone());
+    }
+
     let direct_d5_binding = semantic_registry::d5_binding_identity_for_definition(name);
     if let Some(identity) = direct_d5_binding {
         if super::necessary_forms::identity_for_domain_identity(identity).is_none()

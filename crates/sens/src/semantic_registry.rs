@@ -12,7 +12,7 @@
 
 use std::{collections::HashMap, sync::OnceLock};
 
-use crate::{Bit3, Bit4, Bit5, CoreD5, CoreDomainIdentity, DomainIdentity};
+use crate::{Bit3, Bit4, Bit5, Bit9, CoreD5, CoreD9, CoreDomainIdentity, DomainIdentity};
 use crate::Sens8;
 
 mod generated {
@@ -31,7 +31,12 @@ mod d5_definition_bindings_generated {
     include!("d5_definition_bindings_generated.rs");
 }
 
+mod d9_definition_bindings_generated {
+    include!("d9_definition_bindings_generated.rs");
+}
+
 use d5_definition_bindings_generated::D5_DEFINITION_BINDINGS;
+use d9_definition_bindings_generated::D9_DEFINITION_BINDINGS;
 use domain_surface_generated::DOMAIN_SURFACE_ROWS;
 use d7_display_generated::D7_DISPLAY_ROWS;
 use generated::{SemanticRow, SEMANTIC_ROWS};
@@ -132,6 +137,18 @@ pub(crate) fn d5_binding_identity_for_definition(name: &str) -> Option<CoreDomai
         .iter()
         .find(|row| row.name == name)
         .map(|row| CoreDomainIdentity::D5(CoreD5::from_word(Bit5::new(row.bits).unwrap())))
+}
+
+/// Binding-only D9 lookup for language-owned Lisp definitions.
+/// D9 residency remains separate from callability: only a concrete evaluated
+/// definition can populate the exact mechanism slot.
+pub(crate) fn d9_binding_identity_for_definition(name: &str) -> Option<DomainIdentity> {
+    D9_DEFINITION_BINDINGS
+        .iter()
+        .find(|row| row.names.iter().any(|candidate| *candidate == name))
+        .map(|row| DomainIdentity::D9(CoreD9::from_word(
+            Bit9::new(row.bits).expect("generated D9 binding is exactly nine bits"),
+        )))
 }
 
 /// Канонічний surface → domain маршрут читає тільки ратифіковану
@@ -270,6 +287,25 @@ pub(crate) fn admitted_surfaces_with_namespace_for_semantic_id(
         .collect::<Vec<_>>();
     surfaces.sort_unstable();
     surfaces
+}
+
+#[cfg(test)]
+mod exact_d9_binding_projection_tests {
+    use super::*;
+
+    #[test]
+    fn reasoning_definitions_have_exact_d9_binding_identity_only() {
+        for (name, bits) in [
+            ("unify", 0b101010000u16),
+            ("apply-subst", 0b101101001u16),
+            ("var?", 0b101100100u16),
+            ("walk", 0b101110100u16),
+        ] {
+            let identity = d9_binding_identity_for_definition(name).expect("ratified D9 binding");
+            assert_eq!(identity.packed_bits(), bits);
+            assert!(identity.core_operation().is_none());
+        }
+    }
 }
 
 #[cfg(test)]
