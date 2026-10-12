@@ -171,7 +171,7 @@ fn lift_pinned_machine_wire_d9_strings(
             span: lifted[0].span,
         };
     } else if matches!(&lifted[0].kind, ExprKind::List(_)) {
-        lifted[0] = lift_pinned_machine_admission_d9_strings(
+        lifted[0] = lift_pinned_machine_wire_d9_strings(
             source, lifted[0].clone(), depth + 1,
         )?;
     }
@@ -185,7 +185,7 @@ fn lift_pinned_machine_wire_d9_strings(
         if skip_binding_slot && index == 1 {
             continue;
         }
-        lifted[index] = lift_pinned_machine_admission_d9_strings(
+        lifted[index] = lift_pinned_machine_wire_d9_strings(
             source, lifted[index].clone(), depth + 1,
         )?;
     }
