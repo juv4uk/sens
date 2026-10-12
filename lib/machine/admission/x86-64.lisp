@@ -258,11 +258,16 @@
       ((010 (001 ()))
        (010 (001 (00000000)))))))
 
+; disp8 is a finite x86 machine field, so admission reuses the
+; Lisp-owned exhaustive encoder table instead of treating this bound check
+; as numeric magnitude arithmetic. Exact-integer admission remains separate:
+; NUMBER->STRING supplies canonical #q2 wire and denominator must be 1.
+; EQ distinguishes the table's fail-closed NIL sentinel from the valid byte 0.
 (0011 x86-admission-disp8?
   (0010 (value)
     (110
       ((x86-admission-exact-integer? value)
-       (x86-admission-within-inclusive-integer-range? value -128 127))
+       (0100 (101 (x86-disp8-byte value) (001 ()))))
       ((010 ()) (010 (001 (00000000)))))))
 
 (0011 x86-admission-imm32?
