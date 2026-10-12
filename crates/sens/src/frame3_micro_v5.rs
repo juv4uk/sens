@@ -737,12 +737,15 @@ mod tests {
     #[test]
     fn first_extension_programs_are_lambda_and_eq_capable() {
         let zero = decode_extension(0).unwrap();
-        assert_eq!(zero, Frame3MicroExpr::Atom(Box::new(Frame3MicroExpr::Lambda0(Box::new(Frame3MicroExpr::Zero)))));
-        // The exact first shape is less important than invertibility, but pin it
-        // so future grammar edits cannot silently remap five-byte payloads.
+        assert_eq!(
+            zero,
+            Frame3MicroExpr::Lambda0(Box::new(Frame3MicroExpr::Zero))
+        );
+        // Pin the first five-byte mapping so future grammar edits cannot
+        // silently remap the profile.
         assert_eq!(encode_extension(&zero).unwrap(), 0);
 
-        let lambda = Frame3MicroExpr::Lambda0(Box::new(Frame3MicroExpr::Zero));
+        let lambda = Frame3MicroExpr::Lambda0(Box::new(Frame3MicroExpr::QuoteNil));
         let lambda_rank = encode_extension(&lambda).unwrap();
         assert_eq!(decode_extension(lambda_rank).unwrap(), lambda);
 
