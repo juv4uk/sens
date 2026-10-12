@@ -103,7 +103,110 @@ def load_authority(root: Path = ROOT):
     return surfaces, legacy
 
 
+
+def reject_ambiguous_local_bindings(source: str, surfaces):
+    """Не переписувати глобальний surface, якщо він став локальним ім'ям.
+
+    Повторно використовуємо чинний AST reader із cond-modernize.py:
+    коментарі, лапки та цитовані datum не стають виконуваними зв'язуваннями.
+    Недоведені складені форми fail-closed, без спроб підміни семантики.
+    """
+    import importlib.util
+    import sys
+
+    module_name = "_sens_exact_domain_scope_reader"
+    parser = sys.modules.get(module_name)
+    if parser is None:
+        spec = importlib.util.spec_from_file_location(
+            module_name, ROOT / "scripts/cond-modernize.py"
+        )
+        if spec is None or spec.loader is None:
+            raise ValueError("current Lisp AST reader is unavailable")
+        parser = importlib.util.module_from_spec(spec)
+        sys.modules[module_name] = parser
+        spec.loader.exec_module(parser)
+
+    try:
+        roots = parser.parse(source)
+    except parser.Blocked as error:
+        raise ValueError("cannot establish local binding scopes: " + str(error)) from error
+
+    quote_heads = {"001", "00000001", "quote", "QUOTE", "як-є"}
+    lambda_heads = {"0010", "00001000", "lambda", "LAMBDA"}
+    define_heads = {"0011", "00001001", "00001011", "define", "DEFINE", "def", "DEF"}
+    let_heads = {
+        "001000", "001001", "10011100", "10011101",
+        "let", "LET", "let*", "LET*", "letrec", "LETREC",
+        "10110011",
+    }
+    compound_bindings = {"defmacro", "DEFMACRO", "00001010",
+                         "macrolet", "MACROLET", "flet", "FLET",
+                         "labels", "LABELS"}
+
+    def forbid_name(name, operator):
+        if name is not None and name.casefold() in surfaces:
+            raise ValueError(
+                f"локальне/визначене ім'я {name!r} перетинається з "
+                f"доменним surface ({operator}); потрібен доказ scope"
+            )
+
+    def parameter_names(node, operator):
+        if node.atom is not None:
+            if node.atom != ".":
+                forbid_name(node.atom, operator)
+        else:
+            for child in node.children:
+                parameter_names(child, operator)
+
+    def walk(node):
+        if node.opaque or not node.children:
+            return
+        parts = node.children
+        operator = parts[0].atom
+        if operator in quote_heads:
+            return
+        if operator in compound_bindings:
+            raise ValueError(
+                f"складене лексичне зв'язування {operator!r} "
+                "потребує окремого AST-доказу"
+            )
+        if operator in lambda_heads:
+            if len(parts) < 3:
+                raise ValueError("неповна lambda: неможливо довести scope")
+            parameter_names(parts[1], operator)
+        elif operator in define_heads:
+            if len(parts) < 3:
+                raise ValueError("неповний define: неможливо довести scope")
+            name_form = parts[1]
+            name = (name_form.atom if name_form.atom is not None else
+                    name_form.children[0].atom if name_form.children else None)
+            if name is None:
+                raise ValueError("непідтверджений binder у DEFINE")
+            forbid_name(name, operator)
+        elif operator in let_heads:
+            if len(parts) < 3:
+                raise ValueError("неповний LET: неможливо довести scope")
+            bindings = parts[1]
+            if bindings.atom is not None:
+                # Named LET uses its own function name before the binding list.
+                forbid_name(bindings.atom, operator)
+                if len(parts) < 4:
+                    raise ValueError("неповний named LET")
+                bindings = parts[2]
+            if bindings.atom is not None:
+                raise ValueError("LET bindings не є списком")
+            for binding in bindings.children:
+                if not binding.children or binding.children[0].atom is None:
+                    raise ValueError("непідтверджений binder у LET")
+                forbid_name(binding.children[0].atom, operator)
+        for child in parts[1:]:
+            walk(child)
+
+    for root in roots:
+        walk(root)
+
 def plan(source: str, surfaces, legacy):
+    reject_ambiguous_local_bindings(source, surfaces)
     frames, edits = [], []
     pending_quote = False
     i = 0

@@ -52,6 +52,36 @@ class ExactDomainMigrationTests(unittest.TestCase):
         self.assertEqual(self.rewrite(source), source)
         self.assertEqual(mod.plan(source, self.surfaces, self.legacy), [])
 
+    def test_local_shadowing_does_not_silently_become_domain_call(self):
+        for source in (
+            "(lambda (car) (car x))",
+            "(0010 (CAR) (CAR x))",
+            "(let ((car value)) (car x))",
+            "(let* ((quote value)) (quote x))",
+            "(letrec ((car (lambda (x) x))) (car x))",
+            "(001000 ((перше value)) (перше x))",
+            "(define car (lambda (x) x))",
+            "(0011 (CAR x) (CAR x))",
+            "(defmacro rewrite (car) (car x))",
+        ):
+            with self.subTest(source=source):
+                with self.assertRaisesRegex(ValueError, "scope|binder|зв'язування|перетинається"):
+                    self.rewrite(source)
+
+    def test_unrelated_binders_and_quoted_shadow_names_are_safe(self):
+        self.assertEqual(
+            self.rewrite("(lambda (value) (car value))"),
+            "(0010 (value) (100 value))",
+        )
+        self.assertEqual(
+            self.rewrite("'(lambda (car) (car x))\n(car x)"),
+            "'(lambda (car) (car x))\n(100 x)",
+        )
+        self.assertEqual(
+            self.rewrite("(quote (let ((car x)) (car x)))\n(car x)"),
+            "(001 (let ((car x)) (car x)))\n(100 x)",
+        )
+
     def test_unbalanced_source_fails_closed(self):
         with self.assertRaisesRegex(ValueError, "unterminated list"):
             mod.plan("(car x", self.surfaces, self.legacy)
