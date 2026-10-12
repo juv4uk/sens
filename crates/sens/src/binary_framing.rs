@@ -40,6 +40,8 @@ pub enum BinaryFrameError {
     UnsupportedDomainWidth { index: usize, width: usize },
     NonCanonicalNumber { index: usize },
     InvalidNumber { index: usize },
+    /// Індекс кадру, який не має права потрапляти до точнодоменної програми.
+    LegacyFrameForbidden { index: usize },
     UnexpectedClose { index: usize },
     UnclosedStructure { index: usize, depth: usize },
 }
@@ -299,6 +301,37 @@ pub fn decode_packed_numeric_value(packed: &crate::PackedBitstream)
         return Err(BinaryFrameError::NonCanonicalNumber {index: 0});
     }
     Ok(value)
+}
+
+impl BinaryFrame {
+    fn check_exact_program(frames: &[Self]) -> Result<(), BinaryFrameError> {
+        for (index, frame) in frames.iter().enumerate() {
+            match frame {
+                Self::Function(_) | Self::Number(_) => {
+                    return Err(BinaryFrameError::LegacyFrameForbidden { index });
+                }
+                Self::BinaryNumber(number) if number.numeric_domain_width().is_none() => {
+                    return Err(BinaryFrameError::LegacyFrameForbidden { index });
+                }
+                _ => {}
+            }
+        }
+        Ok(())
+    }
+
+    /// Записати точнодоменну програму, не змінюючи існуючого бітового формату.
+    pub fn encode_exact_domain_program(frames: &[Self]) -> Result<Vec<u8>, BinaryFrameError> {
+        Self::check_exact_program(frames)?;
+        encode_binary_program(frames)
+    }
+
+    /// Прочитати точнодоменну програму без підвищення історичного W8 до D8.
+    /// Помилка містить індекс кадру, а не позицію біта.
+    pub fn decode_exact_domain_program(bits: &[u8]) -> Result<Vec<Self>, BinaryFrameError> {
+        let frames = decode_binary_program(bits)?;
+        Self::check_exact_program(&frames)?;
+        Ok(frames)
+    }
 }
 
 pub fn encode_binary_program(frames: &[BinaryFrame]) -> Result<Vec<u8>, BinaryFrameError> {
@@ -717,6 +750,9 @@ impl fmt::Display for BinaryFrameError {
             Self::InvalidNumber { index } => {
                 write!(f, "invalid exact Number frame begins at bit {index}")
             }
+            Self::LegacyFrameForbidden { index } => {
+                write!(f, "точнодоменна програма не допускає історичний кадр номер {index}")
+            }
             Self::UnexpectedClose { index } => {
                 write!(f, "canonical Control2 program closes unopened structure at bit {index}")
             }
@@ -1021,6 +1057,134 @@ mod tests {
         let unqualified = BinaryFrame::BinaryNumber(BinaryNumber::from_bits([1,0,1]).unwrap());
         let encoded = encode_binary_frame(&unqualified).unwrap();
         assert_eq!(decode_binary_frame(&encoded).unwrap().0, unqualified);
+    }
+
+
+    fn domain_frame(width: usize, bits: u16) -> BinaryFrame {
+        let source = match width {
+            1 => crate::BinarySourceWord::W1(crate::Bit1::new(bits as u8).unwrap()),
+            2 => crate::BinarySourceWord::W2(crate::Bit2::new(bits as u8).unwrap()),
+            3 => crate::BinarySourceWord::W3(crate::Bit3::new(bits as u8).unwrap()),
+            4 => crate::BinarySourceWord::W4(crate::Bit4::new(bits as u8).unwrap()),
+            5 => crate::BinarySourceWord::W5(crate::Bit5::new(bits as u8).unwrap()),
+            6 => crate::BinarySourceWord::W6(crate::Bit6::new(bits as u8).unwrap()),
+            7 => crate::BinarySourceWord::W7(crate::Bit7::new(bits as u8).unwrap()),
+            8 => crate::BinarySourceWord::W8(crate::Bit8::new(bits as u8).unwrap()),
+            9 => crate::BinarySourceWord::W9(crate::Bit9::new(bits).unwrap()),
+            _ => panic!("BinaryFrame::Domain currently admits D1-D9 only"),
+        };
+        BinaryFrame::Domain(source.domain_identity())
+    }
+
+    fn qualified_numeric_word(width: usize) -> BinaryFrame {
+        let mut bits = vec![0u8; width];
+        *bits.last_mut().expect("D24+ numeric word has a payload") = 1;
+        BinaryFrame::BinaryNumber(
+            BinaryNumber::from_numeric_domain_bits(width, &bits)
+                .expect("numeric domain is explicit and admitted at D24+"),
+        )
+    }
+
+    #[test]
+    fn every_d1_through_d9_payload_round_trips_without_width_collapse() {
+        // Exhaust every payload, not just a representative from each width.
+        // Current DomainIdentity has D1-D9; D10 is not silently squeezed here.
+        for width in 1usize..=9 {
+            for bits in 0u16..(1u16 << width) {
+                let frame = domain_frame(width, bits);
+                let encoded = encode_binary_frame(&frame).expect("exact domain frame");
+                let (decoded, consumed) =
+                    decode_binary_frame(&encoded).expect("exact domain decode");
+                assert_eq!(decoded, frame, "D{width}:{bits:0width$b}");
+                assert_eq!(consumed, encoded.len());
+            }
+        }
+
+        let d3 = domain_frame(3, 0b010);
+        let d4 = domain_frame(4, 0b0010);
+        let d8 = domain_frame(8, 0b1010_1000);
+        let d9 = domain_frame(9, 0b0_1010_1000);
+        assert_ne!(d3, d4, "D3:010 and D4:0010 remain different identities");
+        assert_ne!(d8, d9, "D8:10101000 and D9:010101000 remain distinct");
+        assert_ne!(
+            encode_binary_frame(&d8).unwrap(),
+            encode_binary_frame(&BinaryFrame::Function(crate::sens!(10101000))).unwrap(),
+            "typed D8 cannot alias the historical W8 Function frame",
+        );
+    }
+
+    #[test]
+    fn exact_program_admits_domains_and_d24_plus_with_width_preserved() {
+        let frames = vec![
+            BinaryFrame::Open,
+            domain_frame(3, 0b001),
+            BinaryFrame::Space,
+            domain_frame(4, 0b0010),
+            BinaryFrame::Space,
+            domain_frame(8, 0b1010_1000),
+            BinaryFrame::Space,
+            domain_frame(9, 0b0_0000_0001),
+            BinaryFrame::Space,
+            qualified_numeric_word(24),
+            BinaryFrame::Space,
+            qualified_numeric_word(48),
+            BinaryFrame::Close,
+        ];
+        let encoded = BinaryFrame::encode_exact_domain_program(&frames).unwrap();
+        assert_eq!(BinaryFrame::decode_exact_domain_program(&encoded).unwrap(), frames);
+        assert_eq!(decode_binary_program(&encoded).unwrap(), frames);
+        assert_ne!(
+            encode_binary_program(&[BinaryFrame::Function(crate::sens!(10101000))]).unwrap(),
+            encode_binary_program(&[domain_frame(8, 0b1010_1000)]).unwrap(),
+            "identical eight payload bits do not transfer historical Function semantics to D8",
+        );
+        assert_ne!(qualified_numeric_word(24), qualified_numeric_word(48));
+    }
+
+    #[test]
+    fn exact_program_rejects_legacy_frames_but_archive_api_stays_compatible() {
+        let historical_frames = [
+            BinaryFrame::Function(crate::sens!(10101000)),
+            BinaryFrame::Number(number("1", "10")),
+            BinaryFrame::BinaryNumber(BinaryNumber::parse("1").unwrap()),
+        ];
+
+        for historical in historical_frames {
+            let sequence = [
+                BinaryFrame::Open,
+                historical.clone(),
+                BinaryFrame::Close,
+            ];
+            assert!(matches!(
+                BinaryFrame::encode_exact_domain_program(&sequence),
+                Err(BinaryFrameError::LegacyFrameForbidden { index: 1 })
+            ));
+
+            let archive = encode_binary_program(&sequence)
+                .expect("compatibility writer must preserve archived frames");
+            assert_eq!(decode_binary_program(&archive).unwrap(), sequence);
+            assert!(matches!(
+                BinaryFrame::decode_exact_domain_program(&archive),
+                Err(BinaryFrameError::LegacyFrameForbidden { index: 1 })
+            ));
+        }
+    }
+
+    #[test]
+    fn exact_program_preserves_text7_and_structure_and_rejects_bad_structure() {
+        let frames = vec![
+            BinaryFrame::Open,
+            BinaryFrame::Text(Text7::from_cells(vec![0, 127]).unwrap()),
+            BinaryFrame::Space,
+            domain_frame(2, 0b11),
+            BinaryFrame::Close,
+        ];
+        let encoded = BinaryFrame::encode_exact_domain_program(&frames).unwrap();
+        assert_eq!(BinaryFrame::decode_exact_domain_program(&encoded).unwrap(), frames);
+        assert!(matches!(
+            BinaryFrame::encode_exact_domain_program(&[BinaryFrame::Close]),
+            Err(BinaryFrameError::UnexpectedClose { index: 0 })
+        ));
     }
 
 }
