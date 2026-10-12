@@ -153,11 +153,24 @@ for bits,body in surface_rows:
     assert row.surface_symbols is not None, f"D7:{bits} lacks the surface symbol map"
     assert tuple(row.surface_symbols)==expected_columns, f"D7:{bits} symbol map order changed"
     assert row.surface_symbols["LISP"] is None, f"D7:{bits} invented a Lisp glyph"
+    # Where #3572 already records a concrete surface projection, the human
+    # table must preserve it verbatim. Empty authority fields are not guessed.
+    evidence_row = authority_rows[bits]
+    projection = evidence_row.get("projection", {})
+    for namespace, source_name in (("ук", "uk"), ("укр", "uk"), ("san", "deva"), ("en", "iast")):
+        expected_symbol = projection.get(source_name)
+        if expected_symbol:
+            assert row.surface_symbols[namespace] == expected_symbol, (
+                f"D7:{bits} {namespace} glyph disagrees with ratified {source_name} projection"
+            )
     if en.group(1).startswith("text.digit."):
         expected_digit=en.group(1).rsplit(".",1)[1]
         assert row.surface_symbols["sym"]==expected_digit, (
             f"D7:{bits} preferred digit glyph drifted from ratified digit identity"
         )
+        assert row.surface_symbols["ук"] == expected_digit
+        assert row.surface_symbols["укр"] == expected_digit
+        assert row.surface_symbols["san"] == "०१२३४५६७८९"[int(expected_digit)]
 
 print("D7-SURFACE-ROWS: PASS residents=126 reserved=2 no-Rust-law")
 
