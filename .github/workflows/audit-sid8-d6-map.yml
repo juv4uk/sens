@@ -28,8 +28,7 @@ permissions:
   contents: read
 
 jobs:
-  exact-domain-map-witness:
-    name: Перевірити розрізнення D6/D8 MAP
+  source-law-witness:
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
