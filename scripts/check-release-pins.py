@@ -5,7 +5,9 @@ Locks the RELEASE.md gate #3 invariant. It asserts, for the release-path
 workflows only:
 
 * the pinned Rust channel in ``rust-toolchain.toml`` equals the
-  ``dtolnay/rust-toolchain`` ref used by every release-path workflow;
+  ``dtolnay/rust-toolchain`` ref used by every release-path workflow, **and**
+  equals any ``with: toolchain:`` value on that step (so a step cannot pin the
+  ref and request a different toolchain);
 * every other ``uses:`` action in those workflows is pinned to an immutable
   40-hex commit SHA (an optional ``# tag`` comment is allowed), so a floating
   major tag can never silently change what builds a published artifact.
@@ -30,8 +32,9 @@ RELEASE_WORKFLOWS = (
     ".github/workflows/publish-binary-master.yml",
 )
 
-# A `uses:` step line, optionally a list item, optionally annotated `# tag`.
-USES = re.compile(r"^\s*-?\s*uses:\s*(\S+)(?:\s+#\s*\S+)?\s*$")
+STEP = re.compile(r"^\s*-\s")
+USES_LINE = re.compile(r"^\s*-?\s*uses:\s*(\S+)\s*$")
+TOOLCHAIN_LINE = re.compile(r"^\s*toolchain:\s*[\"']?([^\"'\s]+)[\"']?\s*$")
 SHA = re.compile(r"[0-9a-f]{40}\Z")
 LOCAL = re.compile(r"\./\S+\Z")
 TOOLCHAIN_ACTION = "dtolnay/rust-toolchain"
@@ -48,6 +51,24 @@ def pinned_channel(root: Path = ROOT) -> str:
     return channel.strip()
 
 
+def _steps(text: str) -> list[tuple[int, list[str]]]:
+    """Split a workflow into step blocks by ``- `` list items, with line numbers."""
+    blocks: list[tuple[int, list[str]]] = []
+    current: list[str] | None = None
+    start = 0
+    for lineno, line in enumerate(text.splitlines(), 1):
+        if STEP.match(line):
+            if current is not None:
+                blocks.append((start, current))
+            current = [line]
+            start = lineno
+        elif current is not None:
+            current.append(line)
+    if current is not None:
+        blocks.append((start, current))
+    return blocks
+
+
 def check(root: Path = ROOT) -> tuple[str, list[str]]:
     channel = pinned_channel(root)
     errors: list[str] = []
@@ -56,26 +77,32 @@ def check(root: Path = ROOT) -> tuple[str, list[str]]:
         if not path.is_file():
             errors.append(f"{rel}: release-path workflow is missing")
             continue
-        for lineno, line in enumerate(path.read_text(encoding="utf-8").splitlines(), 1):
-            match = USES.match(line)
-            if match is None:
+        for start, block in _steps(path.read_text(encoding="utf-8")):
+            uses = None
+            toolchains: list[str] = []
+            for line in block:
+                match = USES_LINE.match(line)
+                if match:
+                    uses = match.group(1)
+                tool = TOOLCHAIN_LINE.match(line)
+                if tool:
+                    toolchains.append(tool.group(1))
+            if uses is None or LOCAL.fullmatch(uses):
                 continue
-            ref = match.group(1)
-            if LOCAL.fullmatch(ref):
+            if "@" not in uses:
+                errors.append(f"{rel}:{start}: uses without a ref: {uses}")
                 continue
-            if "@" not in ref:
-                errors.append(f"{rel}:{lineno}: uses without a ref: {ref}")
-                continue
-            action, _, pin = ref.rpartition("@")
+            action, _, pin = uses.rpartition("@")
             if action == TOOLCHAIN_ACTION:
                 if pin != channel:
-                    errors.append(
-                        f"{rel}:{lineno}: toolchain {pin} != pinned channel {channel}"
-                    )
+                    errors.append(f"{rel}:{start}: toolchain ref {pin} != pinned channel {channel}")
+                for requested in toolchains:
+                    if requested != channel:
+                        errors.append(
+                            f"{rel}:{start}: with: toolchain {requested} != pinned channel {channel}"
+                        )
             elif not SHA.fullmatch(pin):
-                errors.append(
-                    f"{rel}:{lineno}: {action} not pinned to a 40-hex SHA (got {pin!r})"
-                )
+                errors.append(f"{rel}:{start}: {action} not pinned to a 40-hex SHA (got {pin!r})")
     return channel, errors
 
 

@@ -24,6 +24,8 @@ CHECKOUT_SHA = "fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09"
 GOOD_STEP = (
     f"      - uses: actions/checkout@{CHECKOUT_SHA} # v5\n"
     "      - uses: dtolnay/rust-toolchain@1.99.0\n"
+    "        with:\n"
+    '          toolchain: "1.99.0"\n'
 )
 
 
@@ -54,6 +56,19 @@ class ReleasePinsTests(unittest.TestCase):
             )
             _, errors = MODULE.check(root)
             self.assertTrue(any("!= pinned channel" in e for e in errors), errors)
+
+    def test_with_toolchain_mismatch_blocks(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            step = (
+                "      - uses: dtolnay/rust-toolchain@1.99.0\n"
+                "        with:\n"
+                '          toolchain: "1.98.0"\n'
+            )
+            root = materialize(
+                Path(tmp), CHANNEL, {w: step for w in MODULE.RELEASE_WORKFLOWS}
+            )
+            _, errors = MODULE.check(root)
+            self.assertTrue(any("with: toolchain" in e for e in errors), errors)
 
     def test_floating_action_tag_blocks(self):
         with tempfile.TemporaryDirectory() as tmp:
