@@ -29,7 +29,12 @@ jobs:
           python3 - <<'PY'
           import os, pathlib, tomllib
           package = tomllib.loads(pathlib.Path("crates/sens-cli/Cargo.toml").read_text())["package"]
-          assert os.environ["RELEASE_TAG"] == "l" + package["version"], "tag/package version mismatch"
+          expected = "l" + package["version"]
+          actual = os.environ["RELEASE_TAG"]
+          if actual != expected:
+              raise SystemExit(
+                  f"RELEASE_BLOCKED: tag/package version mismatch: {actual!r} != {expected!r}"
+              )
           PY
           python3 -m unittest discover -s packaging/tests -v
       - name: Узгодженість версій усіх релізних crates
