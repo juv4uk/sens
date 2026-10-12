@@ -49,15 +49,15 @@
 (0011 release-fasl-diff-status
   (100 (110101111 "git" (001 ("diff" "--quiet" "--" "lib/core4.lisp.fasl")))))
 (110
-  ((101 release-fasl-diff-status 0) (1) (001 ()))
-  ((101 release-fasl-diff-status 1) (1)
+  ((101 release-fasl-diff-status 0) (001 ()))
+  ((101 release-fasl-diff-status 1)
    ((0010 ()
       ; Never create an implicit commit while preparing an exact-SHA release.
       ; The snapshot must be reviewed and committed by the single main writer
       ; in a separate change, then all exact-SHA gates must be replayed.
       (11011011 "RELEASE_BLOCKED: Core4 FASL differs from pinned main; no automatic commit/push")
       (release-preflight-failed)))
-  (t
+  ((010 (001 ()))
    ((0010 ()
       (11011011 "Не вдалося визначити стан regenerated FASL")
       (11011011 release-fasl-diff-status)
@@ -70,8 +70,8 @@
 (0011 release-check-manifests
   (0010 (paths)
     (110
-      ((010 paths) () (001 ()))
-      ((010 paths) (0)
+      ((010 paths) (001 ()))
+      ((010 (001 ()))
        ((0010 ()
           (release-require (100 paths)
             (110101000

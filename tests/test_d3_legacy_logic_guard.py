@@ -508,6 +508,28 @@ class LegacyD3GuardTests(unittest.TestCase):
         self.assertNotEqual(guard, without_error)
         self.assertNotIn("(release-preflight-failed)", without_error)
 
+    def test_release_fasl_and_manifest_guards_preserve_exact_d1_fail_closed(self):
+        path = "scripts/release.lisp"
+        source = (ROOT / path).read_text(encoding="utf-8")
+        self.assertIn("((101 release-fasl-diff-status 0) (001 ()))", source)
+        self.assertIn("((101 release-fasl-diff-status 1)", source)
+        self.assertIn("((010 paths) (001 ()))", source)
+        self.assertNotIn("((010 paths) () (001 ()))", source)
+        fs = source.index("(0011 release-fasl-diff-status" + chr(10))
+        fe = source.index('(release-run "timeout" (001 ("60" "git" "fetch" "origin" "main")))', fs)
+        ms = source.index("(0011 release-check-manifests" + chr(10))
+        me = source.index("(release-check-manifests" + chr(10), ms + 1)
+        for label, block in (("fasl", source[fs:fe]),
+                             ("manifests", source[ms:me])):
+            with self.subTest(label=label):
+                self.assertEqual(MODULE.scan_lisp(block, path), [])
+                fallback = "((010 (001 ()))"
+                self.assertIn(fallback, block)
+                bad = block.replace(fallback, "(t", 1)
+                self.assertIn("COND_HOST_TRUTH", [
+                    x.rule for x in MODULE.scan_lisp(bad, path)
+                ])
+
     def test_historical_paths_and_metadata_excluded(self):
         for path in ("docs/research/old.lisp", "research/domain-archive/a.lisp",
                      "tests/fixtures/old.lisp", "lib/domains/d3.lisp",
