@@ -19,6 +19,8 @@ jobs:
     steps:
       - uses: actions/checkout@v5
       - uses: dtolnay/rust-toolchain@stable
+        with:
+          toolchain: "1.99.0"
       - name: Compile canonical SENS Core
         run: cargo check --locked -p sens --lib
       - name: Carry-safe D24/D48 numeric and Value evaluator (Core-only Rust)
