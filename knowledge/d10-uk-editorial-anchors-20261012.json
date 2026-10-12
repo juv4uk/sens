@@ -8,7 +8,7 @@
     "rows": 1024
   },
   "human_table": "lib/domains/d10.lisp",
-  "authority_boundary": "41 selected Ukrainian coding/expanded aliases guard selected source semantics, not exhaustive 1024-entry or Sanskrit morphology ratification.",
+  "authority_boundary": "44 selected Ukrainian aliases pinned to exact semantic inventory; editorial proof only, not runtime admission or Sanskrit grammar proof.",
   "anchors": [
     {
       "semantic_name": "IF",
@@ -337,6 +337,30 @@
       "uk": "передискретизувати-дробово",
       "ukr": "змінити-частоту-відліків-за-відношенням-цілих-коефіцієнтів",
       "scope_note": "For input signal x sampled at fs, positive integer interpolation L and decimation M, and explicit FIR taps h, zero-insert by L, convolve causally with h, then retain indices divisible by M: output rate fs*L/M. The explicit finite-output con"
+    },
+    {
+      "semantic_name": "LISTEN",
+      "coordinate": "1101000001",
+      "stable_id": "d10.name.00855",
+      "uk": "символ-доступний?",
+      "ukr": "символ-доступний-негайно-без-споживання?",
+      "scope_note": "Observe whether a character is immediately available from a character input stream without consuming it; EOF can return false."
+    },
+    {
+      "semantic_name": "FIND-IF-ANYWHERE",
+      "coordinate": "0011010011",
+      "stable_id": "d10.paip.cf9aa3e6cc56fe82",
+      "uk": "дерево-має-збіг?",
+      "ukr": "є-листок-дерева-що-задовольняє-предикат?",
+      "scope_note": "test whether a predicate succeeds on any atomic leaf of a tree"
+    },
+    {
+      "semantic_name": "MY-COMPARE-CHAIN",
+      "coordinate": "0101011111",
+      "stable_id": "d10.selfhost.85b6437380ff9636",
+      "uk": "ланцюг-узгоджений?",
+      "ukr": "усі-сусідні-значення-задовольняють-порівняння?",
+      "scope_note": "Test an ordered series of evaluated values pairwise under one comparison identity, stopping at first false pair"
     }
   ]
 }
