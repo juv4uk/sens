@@ -1,0 +1,95 @@
+{
+  "schema": "nano-sens-k2-stripped-runner-candidate/1",
+  "measured_at": "2026-10-12",
+  "status": "NORMALIZED_HASH_MATCH_LOCALLY; FULL_STRIPPED_EXECUTION_AND_TWO_RUN_CI_COMPARISON_PENDING",
+  "hypothesis": "The previous two-clean-run report mismatch is caused by nondeterministic GNU build-id and non-loadable debug/symbol payload in the CML Rust lib-test runner. Strip those sections and remove the build-id, then require the candidate to pass the full corpus and report comparison.",
+  "failed_baseline": {
+    "repository": "juv4uk/cml",
+    "branch": "master",
+    "source_commit": "5edc767d83808bb6a6ec6ca53c6b9488f8c801e2",
+    "workflow_run_id": 38190670627,
+    "workflow_url": "https://github.com/juv4uk/cml/actions/runs/38190670627",
+    "matrix_jobs": {
+      "clean_run_1": "success: full 189-test corpus, isolated Cargo home, offline Cargo replay, lineage, and runtime trace",
+      "clean_run_2": "success: full 189-test corpus, isolated Cargo home, offline Cargo replay, lineage, and runtime trace",
+      "comparison": "failure: nano-sens-size-report.json differed only at seed_artifact.sha256"
+    },
+    "raw_runner": {
+      "clean_run_1": {
+        "artifact_id": 11721412987,
+        "artifact_sha256": "d3bebc513eaa789d518a3597f6b743c7776bffcef1068debf2807e4851b66da8",
+        "runner_sha256": "c3ea6b661486439fa4b004ddaf5765c01706d9eb4ea4ec8e81710214acf80f31",
+        "gnu_build_id": "22c56f60d21b81ee15c0cfadd3d19a8afdb401af",
+        "on_disk_bytes": 34624064,
+        "expires_at_utc": "2026-11-11T01:08:55Z"
+      },
+      "clean_run_2": {
+        "artifact_id": 11721766929,
+        "artifact_sha256": "b4ce7e3a94ccf00434ca6f63fb5ca4c41841240b596e448536564572c03c5a25",
+        "runner_sha256": "c1133f9a1631dde0c6a67512f52e23ad328aff9be1c06d3bc7eecee69651521f",
+        "gnu_build_id": "ccefc39b1b299f28691d61a20aa15db8b8e67501",
+        "on_disk_bytes": 34624064,
+        "expires_at_utc": "2026-11-11T01:08:59Z"
+      }
+    },
+    "preserved_c1_c2_invariants": {
+      "c1_executable_sha256": "27b8fbf096cddbb77be2b4bf57cc58bf8b4fac4accc42adbcfbc10d6cd95f375",
+      "c2_executable_sha256": "27b8fbf096cddbb77be2b4bf57cc58bf8b4fac4accc42adbcfbc10d6cd95f375",
+      "c1_c2_on_disk_bytes_each": 92248,
+      "c1_c2_source_and_output_byte_identical": true
+    }
+  },
+  "normalization_experiment": {
+    "executed_locally_on_both_downloaded_raw_runner_artifacts": true,
+    "command": "objcopy --strip-all --remove-section=.note.gnu.build-id input.bin output-stripped.bin",
+    "stripped_candidate": {
+      "clean_run_1_sha256": "adedd8717daf64977b01c20050efa305af6f04525fdb13fe068d07d8f16db919",
+      "clean_run_2_sha256": "adedd8717daf64977b01c20050efa305af6f04525fdb13fe068d07d8f16db919",
+      "on_disk_bytes_each": 6045248,
+      "byte_identical": true
+    },
+    "size_delta_for_this_exact_artifact_pair": {
+      "raw_bytes_each": 34624064,
+      "stripped_bytes_each": 6045248,
+      "bytes_removed": 28578816,
+      "percent_removed": 82.54032802157482,
+      "scope_warning": "This is one ELF runner component only; it is not the full trusted seed closure and does not establish minimum seed size."
+    },
+    "limitation": "This local step proves the transform makes the two downloaded binary files byte-identical. It does not prove the transformed runner remains executable; the workflow must run all 189 tests on each stripped candidate before promotion."
+  },
+  "candidate_workflow": {
+    "repository": "juv4uk/cml",
+    "branch": "master",
+    "source_commit": "1eb3f461dd18046adf841c13d094892ce3b0612a",
+    "workflow_path": ".github/workflows/issue-655-c2-executable.yml",
+    "workflow_blob_sha": "a368f22ccfb2843893a0f8e841e1ae5f7f5e8f30",
+    "workflow_run_id": 38191565378,
+    "workflow_url": "https://github.com/juv4uk/cml/actions/runs/38191565378",
+    "state_at_recording": "queued",
+    "changes": [
+      "Preserve the unstripped runner as a separate artifact.",
+      "Create seed-v0-c0-runner.bin by stripping symbols/debug sections and removing GNU build-id.",
+      "Fail if a GNU build-id remains.",
+      "Run the entire 189-test corpus from the stripped candidate before runtime tracing.",
+      "Measure the stripped candidate and keep the raw ELF available for audit.",
+      "Retain matrix and two-run comparison artifacts for 30 days."
+    ]
+  },
+  "acceptance": {
+    "required": [
+      "Both clean-run jobs complete successfully.",
+      "Each stripped candidate passes exactly 189 tests with zero failures.",
+      "No GNU build-id remains in either candidate.",
+      "Both nano-sens-size-report/1 JSON files are byte-identical.",
+      "C1/C2 executable and output hashes remain byte-identical.",
+      "Offline Cargo replay and dependency graph/lockfile checks remain green.",
+      "Artifacts for raw and stripped runners, reports, manifests, and traces are preserved."
+    ],
+    "no_claims_yet": [
+      "The stripped candidate is not yet CI-accepted.",
+      "The 6,045,248-byte candidate is not the whole seed total.",
+      "The result is not a minimum-size proof.",
+      "This is not a claim of reducing SENS language semantics or C1/C2 executable size."
+    ]
+  }
+}
