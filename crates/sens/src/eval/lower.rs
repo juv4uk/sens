@@ -195,7 +195,7 @@ mod domain_ladder_lowering_migration_tests {
         let ExprKind::List(items) = &args[0].kind else {
             panic!("дані після QUOTE не виконуються");
         };
-        assert!(matches!(items[0].kind, ExprKind::Sid(_)));
+        assert!(matches!(&items[0].kind, ExprKind::Sid(_)));
     }
 
     #[test]
@@ -207,11 +207,11 @@ mod domain_ladder_lowering_migration_tests {
         let ExprKind::List(parts) = &clauses[0].kind else {
             panic!("клаузи COND є структурними");
         };
-        assert!(matches!(parts[0].kind, ExprKind::Call(_, _)));
+        assert!(matches!(&parts[0].kind, ExprKind::Call(_, _)));
         let ExprKind::Call(_, quoted) = &parts[1].kind else {
             panic!("QUOTE усередині клаузи зберігається");
         };
-        assert!(matches!(quoted[0].kind, ExprKind::List(_)));
+        assert!(matches!(&quoted[0].kind, ExprKind::List(_)));
     }
 
     #[test]
