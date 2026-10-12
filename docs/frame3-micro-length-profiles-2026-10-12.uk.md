@@ -66,6 +66,37 @@ payloads пройшли exhaustive encode/decode roundtrip, F3M-3 boundary/sampl
 roundtrip PASS, трьохбайтовий COND witness PASS, F3M-1 256/256 evaluator/T5
 proof PASS.
 
+
+### Пошук максимально виразного коду біля верхньої межі F3M-3
+
+Для поточної microgrammar визначено 6 capability-класів: **QUOTE, ATOM,
+CONS, CAR, CDR, COND**. DP по всіх 64 capability-mask'ах довів, що
+найраніший глобальний ранг, який уже містить усі шість класів, дорівнює
+`1 523 043`, тобто локальний F3M-3 payload **`16 3C 63`**.
+
+Окремий exhaustive-пошук перевіряє **всі останні 65 536** трьохбайтових
+payloads, від `FF 00 00` до `FF FF FF`. Прозорий lexicographic score:
+кількість capability-класів → кількість COND → кількість runtime-операцій →
+глибина → exact-word count → node count → пізніший rank.
+
+Переможець цієї останньої 64K-сторінки — **`FF FB 37`**, лише на
+**1 224 ранги** раніше за фізичну межу `FF FF FF`:
+
+`CAR(CONS(CDR(CONS(1,QUOTE(1))),ATOM(IF-ATOM(QUOTE(NIL),QUOTE(NIL),QUOTE(NIL)))))`
+
+Властивості witness: **6/6 capability-класів, 1 COND, 11 runtime-операцій,
+глибина 4, 43 exact words, 9 micro-nodes**. Канонічний reader приймає
+відновлені слова, реальний evaluator виконує програму і повертає exact
+**D1:1**; encode/decode повертає ті самі три байти `FF FB 37`.
+
+Сам крайній `FF FF FF` не є «найпотужнішим»: у ньому лише 4/6
+capability-класів і немає COND. Тобто порядок rank є канонічним порядком
+enumerator'а, а не шкалою обчислювальної сили.
+
+[GitHub Actions run 38195272188](https://github.com/juv4uk/sens/actions/runs/38195272188)
+— **SUCCESS**: DP-minimum, exhaustive final-64K search, реальне виконання,
+F3M-1 256/256 regression і original-F3 corpus усі PASS.
+
 Старі дослідження canonical capacity можуть бути донорами для побудови
 F3M-2/F3M-3, але їхні числа не стають автоматично чинною ємністю нового
 профілю без нового exhaustive witness.
