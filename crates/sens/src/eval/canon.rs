@@ -45,8 +45,7 @@ pub(crate) fn routed_sid_for_surface(surface: &str) -> Option<Sens8> {
 /// D5 definitions without admitted mechanisms remain bindable by the language;
 /// mere residency is never sufficient to freeze a binding or grant callability.
 fn immutable_exact_surface_identity(surface: &str) -> Option<CoreDomainIdentity> {
-    let identity = necessary_forms::domain_identity_for_symbol(surface)
-        .or_else(|| semantic_registry::domain_identity_for_surface(surface))?;
+    let identity = super::lower::immutable_surface_domain_identity(surface)?;
     (matches!(identity, CoreDomainIdentity::D3(_))
         || domain_primitive_kind(identity).is_some()
         || necessary_forms::identity_for_domain_identity(identity).is_some())
@@ -54,8 +53,10 @@ fn immutable_exact_surface_identity(surface: &str) -> Option<CoreDomainIdentity>
 }
 
 pub(crate) fn is_reserved_surface(surface: &str) -> bool {
-    immutable_exact_surface_identity(surface).is_some()
-        || routed_sid_for_surface(surface).is_some()
+    if immutable_exact_surface_identity(surface).is_some() {
+        return true;
+    }
+    routed_sid_for_surface(surface).is_some()
 }
 
 /// Surface, яку не можна перевизначити: Canon, necessary form, або примітив.
