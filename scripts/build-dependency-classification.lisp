@@ -93,11 +93,11 @@
     (110 ((010 forms) (001 ())) ((010 (001 ())) (001001 ((form (100 forms))
                 (rest (top-level-def-names (011 forms))))
            (110
-             ((010 form) () rest)
-             ((010 form) (1) rest)
+             ((010 form) rest)
+             
              ((101 (100 form) (001 def)) (111 (100 (011 form)) rest))
              ((101 (100 form) (001 defmacro)) (111 (100 (011 form)) rest))
-             (t rest)))))))
+             ((010 (001 ())) rest)))))))
 
 (0011 symbol-names-from-file
   (0010 (path)
@@ -144,9 +144,9 @@
   (0010 (form)
     (110
       ((110101100 form) (1110 form))
-      ((010 form) () (001 ()))
-      ((010 form) (1) (001 ()))
-      (t (1111 (collect-symbols-leaf (100 form)) (collect-symbols-leaf (011 form)))))))
+      ((010 form) (001 ()))
+      
+      ((010 (001 ())) (1111 (collect-symbols-leaf (100 form)) (collect-symbols-leaf (011 form)))))))
 
 (0011 collect-heads-each
   (0010 (forms bound)
@@ -176,9 +176,9 @@
 (0011 collect-heads
   (0010 (form bound)
     (110
-      ((010 form) () (001 ()))
-      ((010 form) (1) (001 ()))
-      (t (001000 ((head (100 form)))
+      ((010 form) (001 ()))
+      
+      ((010 (001 ())) (001000 ((head (100 form)))
            (110
              ((11110101 (110101100 head) (101 head (001 quote)))
               (001 ()))
@@ -224,11 +224,11 @@
                 (111 (001 %uses-lambda) (collect-heads-each body new-bound))))
              ((11110101 (110101100 head) (101 head (001 cond)))
               (collect-heads-cond-clauses (011 form) bound))
-             (t
+             ((010 (001 ()))
               (001001 ((head-dep (110
                                   ((0100 (110101100 head)) (001 ()))
                                   ((11101 head bound) (001 ()))
-                                  (t (1110 head))))
+                                  ((010 (001 ())) (1110 head))))
                      (head-recurse (110 ((010 head) (001 ())) ((010 (001 ())) (collect-heads head bound))))
                      (args-deps (collect-heads-each (011 form) bound)))
                 (1111 head-dep (1111 head-recurse args-deps))))))))))
@@ -236,8 +236,8 @@
 (0011 collect-deps-one
   (0010 (form bound)
     (110
-      ((110101100 form) (110 ((11101 form bound) (001 ())) (t (1110 form))))
-      (t (collect-heads form bound)))))
+      ((110101100 form) (110 ((11101 form bound) (001 ())) ((010 (001 ())) (1110 form))))
+      ((010 (001 ())) (collect-heads form bound)))))
 
 ; a fixture's expr text can hold MORE than one top-level form (e.g.
 ; "(def count-down (lambda ...)) (count-down 100000)" -- a def followed
@@ -250,13 +250,13 @@
     (110 ((010 forms) (001 ())) ((010 (001 ())) (001001 ((form (100 forms))
                 (deps (collect-deps-one form bound))
                 (new-bound (110
-                             ((010 form) () bound)
-                             ((010 form) (1) bound)
+                             ((010 form) bound)
+                             
                              ((11110101 (110101100 (100 form)) (101 (100 form) (001 def)))
                               (111 (100 (011 form)) bound))
                              ((11110101 (110101100 (100 form)) (101 (100 form) (001 defmacro)))
                               (111 (100 (011 form)) bound))
-                             (t bound))))
+                             ((010 (001 ())) bound))))
            (1111 deps (collect-deps-top-seq (011 forms) new-bound)))))))
 
 (0011 collect-deps-top
@@ -275,20 +275,20 @@
 (0011 unique-onto
   (0010 (items acc)
     (110
-      ((010 items) () acc)
-      ((010 items) (1) acc)
+      ((010 items) acc)
+      
       ((11101 (100 items) acc) (unique-onto (011 items) acc))
-      (t (unique-onto (011 items) (111 (100 items) acc))))))
+      ((010 (001 ())) (unique-onto (011 items) (111 (100 items) acc))))))
 
 (0011 uniq (0010 (items) (unique-onto items (001 ()))))
 
 (0011 owning-library
   (0010 (sym tables)
     (110
-      ((010 tables) () (001 ()))
-      ((010 tables) (1) (001 ()))
+      ((010 tables) (001 ()))
+      
       ((11101 sym (011 (100 tables))) (100 (100 tables)))
-      (t (owning-library sym (011 tables))))))
+      ((010 (001 ())) (owning-library sym (011 tables))))))
 
 ; classify one real (non-marker) symbol; returns (bucket-tag . library-or-())
 (0011 classify-symbol
@@ -298,10 +298,10 @@
       ((11101 sym core-builtins) (111 (001 core) (001 ())))
       ((11101 sym host-capabilities) (111 (001 reasoning-world-or-host) sym))
       ((11101 sym core-my-symbols) (111 (001 macro-expanded-core) (001 ())))
-      (t (001000 ((lib (owning-library sym other-tables)))
+      ((010 (001 ())) (001000 ((lib (owning-library sym other-tables)))
            (110
              ((11110111 lib (001 ())) (111 (001 unknown) (001 ())))
-             (t (111 (001 reasoning-world-or-host) lib))))))))
+             ((010 (001 ())) (111 (001 reasoning-world-or-host) lib))))))))
 
 ; my-lisp has no try/catch: a fixture whose own point is that its source
 ; text exceeds the reader's decimal-literal exponent resource bound
@@ -335,7 +335,7 @@
              (111 (001 world-host-libraries) (001 ()))
              (111 (001 axiom-tagged-s1) (11101 (001 S1) axioms-list))
              (111 (001 note) "source text exceeds the reader's own decimal-literal exponent resource bound; not locally re-parsed, classified as core (the reader itself) by inspection")))
-      (t (classify-readable-fixture id expr-str axioms-list other-tables)))))
+      ((010 (001 ())) (classify-readable-fixture id expr-str axioms-list other-tables)))))
 
 (0011 classify-readable-fixture
   (0010 (id expr-str axioms-list other-tables)
@@ -357,12 +357,12 @@
                                                 (101000 (0010 (c) (011 (011 c))) classified))))
            (buckets (101001 (0010 (x) (0100 (11110111 x (001 ()))))
                       (1110
-                        (110 (uses-core (001 core)) (t (001 ())))
-                        (110 ((11111100 uses-lambda uses-let-family) (001 closure-application)) (t (001 ())))
-                        (110 ((11101 (001 S1) axioms-list) (001 exact-numbers)) (t (001 ())))
-                        (110 ((110111011 (010 uses-strings-reader)) (001 strings-reader)) (t (001 ())))
-                        (110 ((11111100 uses-macro-core uses-let-family) (001 macro-expanded-core)) (t (001 ())))
-                        (110 (uses-world-host (001 reasoning-world-or-host)) (t (001 ())))))))
+                        (110 (uses-core (001 core)) ((010 (001 ())) (001 ())))
+                        (110 ((11111100 uses-lambda uses-let-family) (001 closure-application)) ((010 (001 ())) (001 ())))
+                        (110 ((11101 (001 S1) axioms-list) (001 exact-numbers)) ((010 (001 ())) (001 ())))
+                        (110 ((110111011 (010 uses-strings-reader)) (001 strings-reader)) ((010 (001 ())) (001 ())))
+                        (110 ((11111100 uses-macro-core uses-let-family) (001 macro-expanded-core)) ((010 (001 ())) (001 ())))
+                        (110 (uses-world-host (001 reasoning-world-or-host)) ((010 (001 ())) (001 ())))))))
       (1110 (001 dependency-classification)
             (111 (001 id) id)
             (111 (001 buckets) buckets)
@@ -377,23 +377,23 @@
 (0011 fixtures-only
   (0010 (entries)
     (110
-      ((010 entries) () (001 ()))
-      ((010 entries) (1) (001 ()))
-      ((010 (100 entries)) () (fixtures-only (011 entries)))
-      ((010 (100 entries)) (1) (fixtures-only (011 entries)))
-      (t (110
+      ((010 entries) (001 ()))
+      
+      ((010 (100 entries)) (fixtures-only (011 entries)))
+      
+      ((010 (001 ())) (110
            ((101 (100 (100 entries)) (001 fixture))
             (111 (100 entries) (fixtures-only (011 entries))))
-           (t (fixtures-only (011 entries))))))))
+           ((010 (001 ())) (fixtures-only (011 entries))))))))
 
 (0011 process-pair
   (0010 (inventory-remaining conformance-remaining other-tables)
     (110
-      ((010 inventory-remaining) () (001 ()))
-      ((010 inventory-remaining) (1) (001 ()))
-      ((010 conformance-remaining) () (001 ()))
-      ((010 conformance-remaining) (1) (001 ()))
-      (t (001001 ((invf (100 inventory-remaining))
+      ((010 inventory-remaining) (001 ()))
+      
+      ((010 conformance-remaining) (001 ()))
+      
+      ((010 (001 ())) (001001 ((invf (100 inventory-remaining))
                 (id (011 (11100 (001 id) (011 invf))))
                 (conff (100 conformance-remaining))
                 (expr-str (011 (11100 (001 expr) conff)))
