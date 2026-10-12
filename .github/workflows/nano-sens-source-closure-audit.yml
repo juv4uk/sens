@@ -37,6 +37,7 @@ on:
       - "contracts/**"
       - "knowledge/**"
       - "evidence/nano-sens-seed-v0-source-closure-census-2026-10-12.json"
+      - "evidence/nano-sens-seed-v0-2026-10-12.json"
       - ".github/workflows/nano-sens-source-closure-audit.yml"
 
 permissions:
@@ -89,6 +90,7 @@ jobs:
           ref: ${{ steps.pins.outputs.cml_sha }}
           path: cml-pinned
           fetch-depth: 0
+          submodules: recursive
           persist-credentials: false
 
       - name: Перевірити сам аудит на позитивних і негативних прикладах
@@ -140,4 +142,4 @@ jobs:
 
       - name: Зафіксувати межі доказу в анотації CI
         run: |
-          echo "::notice title=Nano-SENS::Побудовано граф актуального main, pinned SENS і pinned CML. Це статичний edge audit, не доказ повного входового оточення або мінімального seed; Cargo/vendor/Git/toolchain межі лишаються відкритими."
+          echo "::notice title=Nano-SENS::Побудовано граф актуального main, pinned SENS і pinned CML із рекурсивними submodules. OUT_DIR класифіковано як згенерований output; build-script inputs, Cargo/vendor/Git/toolchain межі лишаються відкритими."
