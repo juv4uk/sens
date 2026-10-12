@@ -60,6 +60,16 @@ def need(condition: bool, reason: str):
         raise ValueError("D10_HUMAN_TABLE_BLOCK:" + reason)
 
 
+def orthographic_alias_key(surface: str) -> str:
+    """Conservative visual-key audit; never changes the stored source spelling."""
+    result = unicodedata.normalize("NFC", surface)
+    for variant in ("’", "ʼ", "`", "´"):
+        result = result.replace(variant, "'")
+    for variant in ("‐", "‑", "–", "−"):
+        result = result.replace(variant, "-")
+    return result
+
+
 def git_blob(raw: bytes) -> str:
     return hashlib.sha1(b"blob " + str(len(raw)).encode() + b"\0" + raw).hexdigest()
 
@@ -93,6 +103,7 @@ def check(d10, inventory, lower):
     need(len(lower) == 1020, "D1–D9 lower-domain residents changed")
 
     distinct = {"uk": {}, "ukr": {}, "san": {}}
+    visually_distinct = {"uk": {}, "ukr": {}, "san": {}}
     for row in lower + d10:
         for column in distinct:
             value = getattr(row, column)
@@ -109,6 +120,12 @@ def check(d10, inventory, lower):
                  column + " " + value + ": " + str(before) + " and " +
                  row.domain + ":" + row.bits)
             distinct[column][value] = row.domain + ":" + row.bits
+            visual_key = orthographic_alias_key(value)
+            same_visual = visually_distinct[column].get(visual_key)
+            need(same_visual is None,
+                 "visually confusable surface " + column + " " + value +
+                 " against " + str(same_visual))
+            visually_distinct[column][visual_key] = row.domain + ":" + row.bits
 
     editorial = json.loads(EDITORIAL_ANCHORS.read_text(encoding="utf-8"))
     need(editorial["schema"] == "d10-uk-editorial-anchor-review/v1" and
@@ -211,6 +228,14 @@ def main():
                 next(i for i, row in enumerate(xs) if row.lisp == "CHARACTERP"),
                 replace(next(row for row in xs if row.lisp == "CHARACTERP"),
                         en="characterp"))),
+            ("orthographically colliding apostrophe", lambda xs: xs.__setitem__(
+                next(i for i, row in enumerate(xs)
+                     if row.lisp == "MY-UNRESOLVED-NAME?"),
+                replace(next(row for row in xs
+                             if row.lisp == "MY-UNRESOLVED-NAME?"),
+                        uk=next(row for row in xs
+                                if row.lisp == "MY-FORM-REFERENCES-NAME?").uk
+                        .replace("'", "’")))),
             ("non-NFC Sanskrit alias", lambda xs: xs.__setitem__(
                 next(i for i, row in enumerate(xs) if row.lisp == "COERCE"),
                 replace(next(row for row in xs if row.lisp == "COERCE"),
