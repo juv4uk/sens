@@ -289,12 +289,12 @@ def render(manifests: list[dict[str, Any]], exemptions: list[dict[str, Any]] | N
         ]
     )
     for entry in exemptions:
-        witness = "<br>".join(f"\`{_cell(item)}\`" for item in entry["witness"])
+        witness = "<br>".join(f"`{_cell(item)}`" for item in entry["witness"])
         lines.append(
             "| "
             + " | ".join(
                 [
-                    f"\`{_cell(entry['path'])}\`",
+                    f"`{_cell(entry['path'])}`",
                     _cell(entry["reason"]),
                     witness,
                     _cell(entry["owner_or_issue"]),
