@@ -95,7 +95,7 @@ fn x86_atom_let_cutover_uses_exact_d4_lambda_applications() {
                 *lambda_applications += 1;
             }
         }
-        for item in items { check(item, lambda_applications); }
+        for item in items.iter() { check(item, lambda_applications); }
     }
 
     let mut converted = 0;
