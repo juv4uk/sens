@@ -1,0 +1,19 @@
+{
+  "schema": "sens-benchmark-manifest/v1",
+  "stand": "residue-domain-law",
+  "wing": "Domain-law and semantic research",
+  "roles": [
+    "RESEARCH",
+    "FALSIFIER"
+  ],
+  "question": "What bounded observation does the existing benchmarks/residue-domain-law/run.py witness provide for Residue Domain Law, and what counterexample limits the conclusion?",
+  "claim": "Metadata-only backfill. Adding this record does not replay the runner, create a benchmark result, raise evidence strength, ratify a semantic identity, or grant production authority. Interpret any prior result only with its own exact SHA, raw witness and declared limits.",
+  "witness": [
+    "benchmarks/residue-domain-law/README.md",
+    "benchmarks/residue-domain-law/run.py"
+  ],
+  "status": "METADATA-BACKFILL; NOT REPLAYED BY THIS CHANGE",
+  "generation": "unknown",
+  "axis": "research/backfill/residue-domain-law",
+  "reproduce": "python3 benchmarks/residue-domain-law/run.py"
+}

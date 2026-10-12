@@ -1,0 +1,19 @@
+{
+  "schema": "sens-benchmark-manifest/v1",
+  "stand": "d5-structural-discovery",
+  "wing": "Domain-law and semantic research",
+  "roles": [
+    "RESEARCH",
+    "FALSIFIER"
+  ],
+  "question": "What bounded observation does the existing benchmarks/d5-structural-discovery/factor_graph.py witness provide for D5 Structural Discovery, and what counterexample limits the conclusion?",
+  "claim": "Metadata-only backfill. Adding this record does not replay the runner, create a benchmark result, raise evidence strength, ratify a semantic identity, or grant production authority. Interpret any prior result only with its own exact SHA, raw witness and declared limits.",
+  "witness": [
+    "benchmarks/d5-structural-discovery/README.md",
+    "benchmarks/d5-structural-discovery/factor_graph.py"
+  ],
+  "status": "METADATA-BACKFILL; NOT REPLAYED BY THIS CHANGE",
+  "generation": "unknown",
+  "axis": "research/backfill/d5-structural-discovery",
+  "reproduce": "python3 benchmarks/d5-structural-discovery/factor_graph.py"
+}

@@ -1,0 +1,19 @@
+{
+  "schema": "sens-benchmark-manifest/v1",
+  "stand": "l1-l5-d4-falsifier",
+  "wing": "Domain-law and semantic research",
+  "roles": [
+    "RESEARCH",
+    "FALSIFIER"
+  ],
+  "question": "What bounded observation does the existing benchmarks/l1-l5-d4-falsifier/run.py witness provide for L1 L5 D4 Falsifier, and what counterexample limits the conclusion?",
+  "claim": "Metadata-only backfill. Adding this record does not replay the runner, create a benchmark result, raise evidence strength, ratify a semantic identity, or grant production authority. Interpret any prior result only with its own exact SHA, raw witness and declared limits.",
+  "witness": [
+    "benchmarks/l1-l5-d4-falsifier/README.md",
+    "benchmarks/l1-l5-d4-falsifier/run.py"
+  ],
+  "status": "METADATA-BACKFILL; NOT REPLAYED BY THIS CHANGE",
+  "generation": "unknown",
+  "axis": "research/backfill/l1-l5-d4-falsifier",
+  "reproduce": "python3 benchmarks/l1-l5-d4-falsifier/run.py"
+}

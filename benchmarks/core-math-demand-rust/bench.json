@@ -1,0 +1,18 @@
+{
+  "schema": "sens-benchmark-manifest/v1",
+  "stand": "core-math-demand-rust",
+  "wing": "Core and proof-oriented research",
+  "roles": [
+    "RESEARCH",
+    "FALSIFIER"
+  ],
+  "question": "What bounded observation does the existing benchmarks/core-math-demand-rust/Cargo.toml witness provide for Core Math Demand Rust, and what counterexample limits the conclusion?",
+  "claim": "Metadata-only backfill. Adding this record does not replay the runner, create a benchmark result, raise evidence strength, ratify a semantic identity, or grant production authority. Interpret any prior result only with its own exact SHA, raw witness and declared limits.",
+  "witness": [
+    "benchmarks/core-math-demand-rust/Cargo.toml"
+  ],
+  "status": "METADATA-BACKFILL; NOT REPLAYED BY THIS CHANGE",
+  "generation": "unknown",
+  "axis": "research/backfill/core-math-demand-rust",
+  "reproduce": "cargo test --manifest-path benchmarks/core-math-demand-rust/Cargo.toml"
+}

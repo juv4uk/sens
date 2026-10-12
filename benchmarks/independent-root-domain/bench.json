@@ -1,0 +1,19 @@
+{
+  "schema": "sens-benchmark-manifest/v1",
+  "stand": "independent-root-domain",
+  "wing": "Core and proof-oriented research",
+  "roles": [
+    "RESEARCH",
+    "FALSIFIER"
+  ],
+  "question": "What bounded observation does the existing benchmarks/independent-root-domain/run.py witness provide for Independent Root Domain, and what counterexample limits the conclusion?",
+  "claim": "Metadata-only backfill. Adding this record does not replay the runner, create a benchmark result, raise evidence strength, ratify a semantic identity, or grant production authority. Interpret any prior result only with its own exact SHA, raw witness and declared limits.",
+  "witness": [
+    "benchmarks/independent-root-domain/README.md",
+    "benchmarks/independent-root-domain/run.py"
+  ],
+  "status": "METADATA-BACKFILL; NOT REPLAYED BY THIS CHANGE",
+  "generation": "unknown",
+  "axis": "research/backfill/independent-root-domain",
+  "reproduce": "python3 benchmarks/independent-root-domain/run.py"
+}

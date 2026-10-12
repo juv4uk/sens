@@ -1,0 +1,18 @@
+{
+  "schema": "sens-benchmark-manifest/v1",
+  "stand": "post-d4-root-min-r3",
+  "wing": "Domain-law and semantic research",
+  "roles": [
+    "RESEARCH",
+    "FALSIFIER"
+  ],
+  "question": "What bounded observation does the existing benchmarks/post-d4-root-min-r3/run.py witness provide for Post D4 Root Min R3, and what counterexample limits the conclusion?",
+  "claim": "Metadata-only backfill. Adding this record does not replay the runner, create a benchmark result, raise evidence strength, ratify a semantic identity, or grant production authority. Interpret any prior result only with its own exact SHA, raw witness and declared limits.",
+  "witness": [
+    "benchmarks/post-d4-root-min-r3/run.py"
+  ],
+  "status": "METADATA-BACKFILL; NOT REPLAYED BY THIS CHANGE",
+  "generation": "unknown",
+  "axis": "research/backfill/post-d4-root-min-r3",
+  "reproduce": "python3 benchmarks/post-d4-root-min-r3/run.py"
+}

@@ -1,0 +1,18 @@
+{
+  "schema": "sens-benchmark-manifest/v1",
+  "stand": "core-math-equivalence-law",
+  "wing": "Core and proof-oriented research",
+  "roles": [
+    "RESEARCH",
+    "FALSIFIER"
+  ],
+  "question": "What bounded observation does the existing benchmarks/core-math-equivalence-law/run.py witness provide for Core Math Equivalence Law, and what counterexample limits the conclusion?",
+  "claim": "Metadata-only backfill. Adding this record does not replay the runner, create a benchmark result, raise evidence strength, ratify a semantic identity, or grant production authority. Interpret any prior result only with its own exact SHA, raw witness and declared limits.",
+  "witness": [
+    "benchmarks/core-math-equivalence-law/run.py"
+  ],
+  "status": "METADATA-BACKFILL; NOT REPLAYED BY THIS CHANGE",
+  "generation": "unknown",
+  "axis": "research/backfill/core-math-equivalence-law",
+  "reproduce": "python3 benchmarks/core-math-equivalence-law/run.py"
+}

@@ -1,0 +1,20 @@
+{
+  "schema": "sens-benchmark-manifest/v1",
+  "stand": "current-en-vs-d1d8",
+  "wing": "Implementation and physical-cost research",
+  "roles": [
+    "RESEARCH",
+    "FALSIFIER"
+  ],
+  "question": "What bounded observation does the existing benchmarks/current-en-vs-d1d8/validate.py witness provide for Current En Vs D1d8, and what counterexample limits the conclusion?",
+  "claim": "Metadata-only backfill. Adding this record does not replay the runner, create a benchmark result, raise evidence strength, ratify a semantic identity, or grant production authority. Interpret any prior result only with its own exact SHA, raw witness and declared limits.",
+  "witness": [
+    "benchmarks/current-en-vs-d1d8/README.md",
+    "benchmarks/current-en-vs-d1d8/validate.py",
+    "benchmarks/current-en-vs-d1d8/schema.json"
+  ],
+  "status": "METADATA-BACKFILL; NOT REPLAYED BY THIS CHANGE",
+  "generation": "unknown",
+  "axis": "research/backfill/current-en-vs-d1d8",
+  "reproduce": "python3 benchmarks/current-en-vs-d1d8/validate.py"
+}

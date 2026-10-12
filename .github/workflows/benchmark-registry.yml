@@ -42,7 +42,7 @@ jobs:
           set -euo pipefail
           python3 -m unittest discover -s scripts -p 'test_benchmark_registry.py' -v
           python3 -m unittest discover -s benchmarks/cross-language -p 'test_*.py' -v
-          python3 scripts/benchmark_registry.py --check --coverage
+          python3 scripts/benchmark_registry.py --strict --check --coverage
 
       - name: Verify historical paired effect methodology (synthetic falsifiers only)
         shell: bash

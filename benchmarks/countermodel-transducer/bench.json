@@ -1,0 +1,18 @@
+{
+  "schema": "sens-benchmark-manifest/v1",
+  "stand": "countermodel-transducer",
+  "wing": "Core and proof-oriented research",
+  "roles": [
+    "RESEARCH",
+    "FALSIFIER"
+  ],
+  "question": "What bounded observation does the existing benchmarks/countermodel-transducer/run.py witness provide for Countermodel Transducer, and what counterexample limits the conclusion?",
+  "claim": "Metadata-only backfill. Adding this record does not replay the runner, create a benchmark result, raise evidence strength, ratify a semantic identity, or grant production authority. Interpret any prior result only with its own exact SHA, raw witness and declared limits.",
+  "witness": [
+    "benchmarks/countermodel-transducer/run.py"
+  ],
+  "status": "METADATA-BACKFILL; NOT REPLAYED BY THIS CHANGE",
+  "generation": "unknown",
+  "axis": "research/backfill/countermodel-transducer",
+  "reproduce": "python3 benchmarks/countermodel-transducer/run.py"
+}
