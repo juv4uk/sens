@@ -56,12 +56,12 @@
       ; The snapshot must be reviewed and committed by the single main writer
       ; in a separate change, then all exact-SHA gates must be replayed.
       (11011011 "RELEASE_BLOCKED: Core4 FASL differs from pinned main; no automatic commit/push")
-      (release-preflight-failed)))
+      (release-preflight-failed))))
   ((010 (001 ()))
    ((0010 ()
       (11011011 "Не вдалося визначити стан regenerated FASL")
       (11011011 release-fasl-diff-status)
-      (release-preflight-failed))))))
+      (release-preflight-failed)))))
 (release-run "timeout" (001 ("60" "git" "fetch" "origin" "main")))
 (0011 release-head (release-run "git" (001 ("log" "-1" "--pretty=format:%H" "HEAD"))))
 (release-require "HEAD має дорівнювати свіжому origin/main"
