@@ -11,7 +11,7 @@ from pathlib import Path
 
 
 def _expected(tag):
-    if re.fullmatch(r"l\d+\.\d+\.\d+", tag) is None:
+    if re.fullmatch(r"l(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)", tag) is None:
         raise ValueError("RELEASE_BLOCKED: malformed release tag")
     version = tag[1:]
     return {
