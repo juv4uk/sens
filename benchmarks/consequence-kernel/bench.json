@@ -1,0 +1,19 @@
+{
+  "schema": "sens-benchmark-manifest/v1",
+  "stand": "consequence-kernel",
+  "wing": "Core-Math / bounded proof machinery",
+  "roles": [
+    "RESEARCH",
+    "FALSIFIER"
+  ],
+  "question": "Do bounded Horn-style proof-maintenance candidates preserve explicit support/refutation semantics while exposing prepare, query, and invalidation costs?",
+  "claim": "Bounded research benchmark only; it does not change the SENS proof system or production semantics, and does not establish a universal runtime or size claim.",
+  "witness": [
+    "README.md",
+    "run.py"
+  ],
+  "status": "RESEARCH-ONLY; BOUNDED WITNESS; METADATA BACKFILL",
+  "generation": "unknown",
+  "axis": "prepare/query/invalidation rule checks / derived facts / support sets / semantic parity",
+  "reproduce": "python3 benchmarks/consequence-kernel/run.py --out-dir /tmp/sens-consequence-kernel"
+}
