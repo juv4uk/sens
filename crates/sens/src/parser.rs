@@ -13,12 +13,34 @@ fn dotted_list(items: Vec<Expr>, tail: Expr, start: usize, end: usize) -> Expr {
     })
 }
 
+/// Звичайний читач для історичних споживачів восьмибітного носія.
+/// Він НЕ є авторитетом точних доменів.
 pub fn parse(source: &str) -> Result<Vec<Expr>, LanguageError> {
+    parse_with_mode(source, ReaderMode::LegacyCompatibility)
+}
+
+/// Перший незалежний читач точних слів D1–D9 для поетапного переходу
+/// виконавців. D10 і числова D24+ граматика потребують окремого носія;
+/// жодне невідоме слово не перетворюється на Number або історичний Sens8.
+///
+/// Нові споживачі підключаються до цього API тільки після окремого HANDOFF
+/// із READER/AST: історичний parse() навмисно не змінює свою семантику.
+pub fn parse_exact_domain_source(source: &str) -> Result<Vec<Expr>, LanguageError> {
+    parse_with_mode(source, ReaderMode::ExactDomain)
+}
+
+#[derive(Clone, Copy, Eq, PartialEq)]
+enum ReaderMode {
+    LegacyCompatibility,
+    ExactDomain,
+}
+
+fn parse_with_mode(source: &str, mode: ReaderMode) -> Result<Vec<Expr>, LanguageError> {
     let mut parser = Parser {
         source,
         cursor: 0,
         depth: 0,
-        exact_domain: false,
+        mode,
     };
     let mut expressions = Vec::new();
     parser.skip_ignored();
@@ -27,48 +49,28 @@ pub fn parse(source: &str) -> Result<Vec<Expr>, LanguageError> {
         expressions.push(expression);
         parser.skip_ignored();
     }
-    Ok(expressions)
-}
-
-/// Строго доменний читач для джерел із доведеним exact-origin.
-///
-/// Це навмисно окремий режим від історичного parse(): невідомі старі
-/// восьмибітні токени не можна автоматично оголосити чинними D8.
-pub fn parse_exact_domain_source(source: &str) -> Result<Vec<Expr>, LanguageError> {
-    let mut parser = Parser {
-        source,
-        cursor: 0,
-        depth: 0,
-        exact_domain: true,
-    };
-    let mut expressions = Vec::new();
-    parser.skip_ignored();
-    while parser.cursor < source.len() {
-        expressions.push(parser.expression()?);
-        parser.skip_ignored();
-    }
-    // Немає implicit Number у SENS: тільки D24+ числові механізми.
-    // Звичайний parse() лишає старі форми для сумісних споживачів.
-    let mut pending: Vec<&Expr> = expressions.iter().collect();
-    while let Some(expr) = pending.pop() {
-        match &expr.kind {
-            ExprKind::Number(_, _) | ExprKind::Rational(_) |
-            ExprKind::BinaryNumber(_) | ExprKind::NumericBuffer(_) |
-            ExprKind::Sid(_) | ExprKind::Call(_, _) => {
-                return Err(LanguageError::new(
-                    ErrorKind::Parse,
-                    "точнодоменне джерело не допускає старих чисел, буферів чи SID8",
-                    expr.span,
-                ));
+    if mode == ReaderMode::ExactDomain {
+        let mut pending: Vec<&Expr> = expressions.iter().collect();
+        while let Some(expr) = pending.pop() {
+            match &expr.kind {
+                ExprKind::Sid(_) | ExprKind::Call(_, _)
+                | ExprKind::Number(_, _) | ExprKind::Rational(_)
+                | ExprKind::BinaryNumber(_) | ExprKind::NumericBuffer(_) => {
+                    return Err(LanguageError::new(
+                        ErrorKind::Parse,
+                        "точнодоменне джерело не допускає SID8 чи старих чисел без D24+",
+                        expr.span,
+                    ));
+                }
+                ExprKind::List(items) => pending.extend(items.iter()),
+                ExprKind::Pair(head, tail) => {
+                    pending.push(head);
+                    pending.push(tail);
+                }
+                ExprKind::DomainCall(_, items) => pending.extend(items.iter()),
+                ExprKind::DomainIdentity(_) | ExprKind::String(_)
+                | ExprKind::Symbol(_) | ExprKind::Local { .. } => {}
             }
-            ExprKind::List(items) => pending.extend(items.iter()),
-            ExprKind::Pair(head, tail) => {
-                pending.push(head);
-                pending.push(tail);
-            }
-            ExprKind::DomainCall(_, items) => pending.extend(items.iter()),
-            ExprKind::DomainIdentity(_) | ExprKind::String(_) |
-            ExprKind::Symbol(_) | ExprKind::Local { .. } => {}
         }
     }
     Ok(expressions)
@@ -78,19 +80,19 @@ struct Parser<'a> {
     source: &'a str,
     cursor: usize,
     depth: u32,
-    exact_domain: bool,
+    mode: ReaderMode,
 }
 
 impl Parser<'_> {
     fn expression(&mut self) -> Result<Expr, LanguageError> {
         self.skip_ignored();
         let start = self.cursor;
-        if self.exact_domain &&
-            (self.source[self.cursor..].starts_with("#i32(")
+        if self.mode == ReaderMode::ExactDomain
+            && (self.source[self.cursor..].starts_with("#i32(")
                 || self.source[self.cursor..].starts_with("#f32("))
         {
             return Err(self.error(
-                "числові буфери сумісного парсера не є числами D24+",
+                "історичні числові буфери не є числами D24+",
                 start,
                 (start + 5).min(self.source.len()),
             ));
@@ -424,29 +426,65 @@ impl Parser<'_> {
             ));
         }
 
-        if self.exact_domain && !token.is_empty()
-            && token.bytes().all(|byte| matches!(byte, b'0' | b'1'))
-        {
-            if token.len() == 8 {
+        // В окремому exact-режимі біти означають виключно
+        // ширино-залежну DomainIdentity. Історичний 8-бітний payload
+        // тут не дає права на виклик; це вирішує окремий domain law.
+        if self.mode == ReaderMode::ExactDomain {
+            if !token.is_empty()
+                && token.bytes().all(|byte| matches!(byte, b'0' | b'1'))
+            {
+                // Без сертифіката походження восьмибітний W8 не є D8.
+                // Навіть у цитатах байтовий payload не стає новою identity.
+                if token.len() == 8 {
+                    return Err(self.error(
+                        "неоднозначність W8/D8: потрібне підтвердження походження",
+                        start,
+                        self.cursor,
+                    ));
+                }
+                let words = crate::parse_binary_source_words(token).map_err(|_| {
+                    self.error(
+                        "непідтримана точна ширина; потрібен окремий D10/D24+ носій",
+                        start,
+                        self.cursor,
+                    )
+                })?;
+                let word = words
+                    .first()
+                    .expect("непорожнє точне бінарне слово містить одну тотожність")
+                    .word;
+                return Ok(Expr {
+                    kind: ExprKind::DomainIdentity(
+                        crate::DomainIdentity::from_source_word(word),
+                    ),
+                    span: Span {
+                        start,
+                        end: self.cursor,
+                    },
+                });
+            }
+
+            // Історичні десяткові, раціональні й #b/#d/#q2 проєкції
+            // не мають права стати числами у поточній D1–D9 граматиці.
+            // Числовий D24+ носій повинен бути кваліфікованим явно.
+            let first = token.as_bytes().first().copied();
+            let numeric_prefix = first.is_some_and(|b| b.is_ascii_digit())
+                || matches!(first, Some(b'+' | b'-'))
+                    && token
+                        .as_bytes()
+                        .get(1)
+                        .is_some_and(|b| b.is_ascii_digit());
+            if numeric_prefix
+                || token.starts_with("#b")
+                || token.starts_with("#d")
+                || token.starts_with("#q2:")
+            {
                 return Err(self.error(
-                    "неоднозначна восьмибітна голова: W8 не доводить D8 без походження",
+                    "арифметичні літерали поза явно кваліфікованим D24+ заборонені",
                     start,
                     self.cursor,
                 ));
             }
-            if token.len() > 9 {
-                return Err(self.error(
-                    "D10 або ширше слово ще не має допущеного носія в цьому читачі",
-                    start,
-                    self.cursor,
-                ));
-            }
-            let words = crate::parse_binary_source_words(token)?;
-            let word = words.first().expect("перевірене бінарне слово").word;
-            return Ok(Expr {
-                kind: ExprKind::DomainIdentity(crate::DomainIdentity::from_source_word(word)),
-                span: Span { start, end: self.cursor },
-            });
         }
 
         if let Some(payload) = explicit_radix_payload(token, "#d") {
@@ -626,6 +664,68 @@ mod tests {
         let expressions = parse(source).expect("parsing should succeed");
         assert_eq!(expressions.len(), 1, "expected exactly one top-level form");
         expressions.into_iter().next().unwrap()
+    }
+
+    #[test]
+    fn exact_domain_reader_preserves_all_supported_word_widths() {
+        for source in [
+            "0", "1", "10", "001", "0010", "10101", "101000",
+            "1010101", "11110111", "110011100",
+        ] {
+            let forms = parse_exact_domain_source(source)
+                .expect("точне бінарне слово має власну доменну тотожність");
+            assert_eq!(forms.len(), 1);
+            let ExprKind::DomainIdentity(identity) = forms[0].kind else {
+                panic!("очікується DomainIdentity, а не байтовий SID: {source}");
+            };
+            assert_eq!(identity.width(), source.len(), "{source}");
+            assert_eq!(identity.to_string(), source, "{source}");
+        }
+    }
+
+    #[test]
+    fn exact_reader_does_not_lift_legacy_w8_by_implicit_inference() {
+        let old = parse("11110111").expect("історичний читач лишається окремим");
+        assert!(matches!(&old[0].kind, ExprKind::Sid(_)));
+
+        let current = parse_exact_domain_source("11110111")
+            .expect("поточна D8 тотожність в явному режимі");
+        assert!(matches!(&current[0].kind, ExprKind::DomainIdentity(identity)
+            if identity.width() == 8 && identity.packed_bits() == 0b11110111));
+
+        let not_callable = parse_exact_domain_source("11110110")
+            .expect("D8 резидентність не тотожна виклику");
+        assert!(matches!(&not_callable[0].kind, ExprKind::DomainIdentity(identity)
+            if identity.core_operation().is_none()));
+    }
+
+    #[test]
+    fn exact_reader_preserves_quote_data_and_symbolic_binders() {
+        let tree = parse_exact_domain_source("(0010 (x) (001 (11110111 x)))")
+            .expect("точні D4/D3 форми й символ-параметр");
+        let ExprKind::List(root) = &tree[0].kind else { panic!("форма"); };
+        assert!(matches!(&root[0].kind, ExprKind::DomainIdentity(id)
+            if id.width() == 4 && id.packed_bits() == 0b0010));
+        let ExprKind::List(parameters) = &root[1].kind else { panic!("параметри"); };
+        assert!(matches!(&parameters[0].kind, ExprKind::Symbol(symbol) if &**symbol == "x"));
+        let ExprKind::List(quote) = &root[2].kind else { panic!("цитата"); };
+        assert!(matches!(&quote[0].kind, ExprKind::DomainIdentity(id)
+            if id.width() == 3 && id.packed_bits() == 0b001));
+        let ExprKind::List(data) = &quote[1].kind else { panic!("цитовані дані"); };
+        assert!(matches!(&data[0].kind, ExprKind::DomainIdentity(id)
+            if id.width() == 8 && id.packed_bits() == 0b11110111));
+    }
+
+    #[test]
+    fn exact_reader_rejects_unknown_width_and_unqualified_arithmetic() {
+        for source in ["1111111111", "42", "-1", "1/2", "#d10", "#b1010",
+                       "#q2:101/1", "010120"] {
+            let error = parse_exact_domain_source(source)
+                .expect_err("непідтверджене слово чи число не допускається");
+            assert_eq!(error.kind, ErrorKind::Parse, "{source}");
+        }
+        // Старі споживачі зберігають чинний compatibility-контракт.
+        assert!(matches!(parse_one("42").kind, ExprKind::Number(_, _)));
     }
 
     #[test]
