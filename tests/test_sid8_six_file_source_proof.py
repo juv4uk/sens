@@ -1,4 +1,4 @@
-"""Pinned source-byte witness for six SID8 -> exact-domain Lisp cutovers.
+"""Pinned source-byte witness for six reviewed Lisp sources: four safe cutovers.
 
 Compares original and resulting Git *blobs*, not mutable future source text:
 future agents may keep working without invalidating this historical proof.
@@ -12,21 +12,17 @@ import unittest
 
 ROOT = Path(__file__).resolve().parents[1]
 CASES = [
-    ("lib/forward.lisp", "f94d602b9b40668ec1f17e3b51956eaf72af74d2", "partial", 19),
-    ("lib/knowledge.lisp", "4f314e54da95ef9af8f51cc6b87b8d665cc65a8a", "partial", 25),
     ("lib/surface/uk.lisp", "66acf2ed0723a2f7850d858b7e7c97f923f42f49", "full", 141),
     ("lib/surface/sa.lisp", "ccf74daab65bf842112f57da784582c0243b83e3", "full", 83),
-    ("lib/surface/semantic-registry-api.lisp", "45f4828ea79ca00607a9368320d80c9f46b9656a", "full", 96),
-    ("knowledge/guard-fact-policy.lisp", "f5f538e9072d03f7e045ebd9b2e8001cc80a140e", "full", 110),
+    ("lib/surface/semantic-registry-api.lisp", "45f4828ea79ca00607a9368320d80c9f46b9656a", "full", 93),
+    ("knowledge/guard-fact-policy.lisp", "f5f538e9072d03f7e045ebd9b2e8001cc80a140e", "full", 104),
 ]
 # Exact result blobs from the two direct file commits and the one atomic tree.
 RESULT = {
-    "lib/forward.lisp": "b1000907227b3011bf5b1b0c265620109e780b2d",
-    "lib/knowledge.lisp": "fd2c4c569f913f9564fb24b77923b42356b6491c",
     "lib/surface/uk.lisp": "7b9ae8d3f81544f6cd9d262ebde235f294d198c2",
     "lib/surface/sa.lisp": "9b70d9b25df3cc2906f70ae4d71c7572218e117a",
-    "lib/surface/semantic-registry-api.lisp": "76b83864a0c8a1508a7e68939cbf1463ceef8dee",
-    "knowledge/guard-fact-policy.lisp": "a50f032b3b3b5f98bc2f51411a37c38917188d99",
+    "lib/surface/semantic-registry-api.lisp": "76476394f8f22dd03b20300c8405769f4ff79f03",
+    "knowledge/guard-fact-policy.lisp": "296c3333d690ea6593fb47a3f1b99b8aa89bc7fb",
 }
 # For the two independently committed files, RESULT stores the *commit*
 # identifiers, so their actual resulting file blob is resolved via commit:path.
@@ -132,7 +128,7 @@ def rewrite(source, mapping, mode):
         if frame and frame["first"]:
             frame["first"] = False
             if not frame["quoted"] and re.fullmatch(r"[01]{8}", token):
-                if mode == "partial" and token != "10011100":
+                if token == "10011100":
                     pass
                 else:
                     if token not in mapping:
@@ -152,6 +148,15 @@ def rewrite(source, mapping, mode):
 
 
 class InPlaceSID8Proof(unittest.TestCase):
+    def test_uncallable_d6_let_is_preserved_until_runtime_witness(self):
+        expected = {"lib/forward.lisp": 19, "lib/knowledge.lisp": 25,
+                    "lib/surface/semantic-registry-api.lisp": 3,
+                    "knowledge/guard-fact-policy.lisp": 6}
+        for path, expected_count in expected.items():
+            with self.subTest(path=path):
+                src = (ROOT / path).read_text(encoding="utf-8")
+                self.assertEqual(len(re.findall(r"\\(10011100(?=\\s+\\(\\s*\\()", src)), expected_count)
+
     def test_ratified_mapping_and_474_original_call_heads(self):
         mapping = correspondence()
         self.assertEqual(mapping["10011100"], "001000")
@@ -168,7 +173,7 @@ class InPlaceSID8Proof(unittest.TestCase):
                 self.assertEqual(amount, expected_count)
                 self.assertEqual(rendered.encode("utf-8"), new.encode("utf-8"))
                 counts.append(amount)
-        self.assertEqual(sum(counts), 474)
+        self.assertEqual(sum(counts), 421)
 
 if __name__ == "__main__":
     unittest.main()
