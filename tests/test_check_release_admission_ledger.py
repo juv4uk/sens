@@ -56,10 +56,13 @@ class FormatTests(unittest.TestCase):
     def test_pending_entry_not_admitted(self):
         self.assertEqual(self.check([entry(ratified=0)])["release_admitted"], 0)
 
-    def test_ratified_full_entry_admitted(self):
+    def test_ratified_full_entry_is_not_admitted_without_content(self):
         receipt = self.check([entry(ratified=1)])
-        self.assertEqual(receipt["release_admitted"], 1)
-        self.assertEqual(receipt["uk_oracle_verified"], 1)
+        self.assertEqual(receipt["validation_mode"], "form_only")
+        self.assertEqual(receipt["form_candidates"], 1)
+        self.assertEqual(receipt["release_admitted"], 0)
+        self.assertEqual(receipt["uk_oracle_verified"], 0)
+        self.assertEqual(receipt["admitted_sens"], [])
 
     def test_unknown_schema_blocks(self):
         with self.assertRaises(MODULE.LedgerBlocked):
@@ -163,10 +166,19 @@ class CliTests(unittest.TestCase):
             self.assertEqual(MODULE.main(["--ledger", str(Path(tmp) / "nope.json")]), 2)
 
     def test_format_only_roundtrip(self):
+        import io
+        from contextlib import redirect_stdout
+
         with tempfile.TemporaryDirectory() as tmp:
             path = Path(tmp) / "ledger.json"
             path.write_text(json.dumps(ledger([entry(ratified=1)])), encoding="utf-8")
-            self.assertEqual(MODULE.main(["--ledger", str(path), "--no-verify-content"]), 0)
+            output = io.StringIO()
+            with redirect_stdout(output):
+                self.assertEqual(MODULE.main(["--ledger", str(path), "--no-verify-content"]), 0)
+            self.assertIn("RELEASE_ADMISSION_FORM_ONLY", output.getvalue())
+            self.assertNotIn("RELEASE_ADMISSION_PASS", output.getvalue())
+            self.assertIn('"release_admitted": 0', output.getvalue())
+            self.assertIn('"form_candidates": 1', output.getvalue())
 
 
 class HostedCiAdmissionWiringTests(unittest.TestCase):

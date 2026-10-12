@@ -91,7 +91,7 @@ def validate_ledger(document: object, *, root: Path = ROOT, verify_content: bool
         raise LedgerBlocked("entries має бути списком")
 
     seen: set[str] = set()
-    admitted: list[str] = []
+    form_candidates: list[str] = []
     for index, entry in enumerate(entries, start=1):
         if not isinstance(entry, dict) or set(entry) != set(FIELDS):
             raise LedgerBlocked(f"запис {index}: набір полів не збігається з канонічним")
@@ -116,14 +116,20 @@ def validate_ledger(document: object, *, root: Path = ROOT, verify_content: bool
         if ratified not in (0, 1) or isinstance(ratified, bool):
             raise LedgerBlocked(f"запис {index}: ratified має бути 0 або 1")
         if ratified == 1:
-            admitted.append(sens)
+            form_candidates.append(sens)
 
+    # A shape-only/draft check never authorizes physical release admission.
+    # Keep the form candidate count separately for review, but emit no
+    # executable proof or admitted_sens until content verification is enabled.
+    verified = sorted(form_candidates) if verify_content else []
     return {
         "schema": SCHEMA,
+        "validation_mode": "content_verified" if verify_content else "form_only",
         "entries": len(entries),
-        "uk_oracle_verified": len(admitted),
-        "release_admitted": len(admitted),
-        "admitted_sens": sorted(admitted),
+        "form_candidates": len(form_candidates),
+        "uk_oracle_verified": len(verified),
+        "release_admitted": len(verified),
+        "admitted_sens": verified,
     }
 
 
@@ -144,7 +150,10 @@ def main(argv: list[str] | None = None) -> int:
         print(f"RELEASE_ADMISSION_BLOCKED: {exc}", file=sys.stderr)
         return 1
     print(json.dumps(receipt, ensure_ascii=False, sort_keys=True))
-    print(f"RELEASE_ADMISSION_PASS entries={receipt['entries']} admitted={receipt['release_admitted']}")
+    if args.no_verify_content:
+        print(f"RELEASE_ADMISSION_FORM_ONLY entries={receipt['entries']} candidates={receipt['form_candidates']} admitted=0")
+    else:
+        print(f"RELEASE_ADMISSION_PASS entries={receipt['entries']} admitted={receipt['release_admitted']}")
     return 0
 
 
