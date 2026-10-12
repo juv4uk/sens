@@ -38,6 +38,34 @@ impl DomainCoordinate {
         self.bits
     }
 
+    /// Pack a D1–D10 sequence as one dense payload, without byte padding
+    /// between adjacent domain words. Width comes from each coordinate;
+    /// this operation assigns no executable meaning and is not a new codec.
+    pub fn pack_sequence(words: &[Self]) -> crate::PackedBitstream {
+        let mut packer = crate::BitPacker::new();
+        for &word in words {
+            packer.push_coordinate(word);
+        }
+        packer.finish()
+    }
+
+    /// Recover words using an external, source-owned width schedule.
+    /// Reject invalid widths, truncation and extra meaningful bits.
+    /// An unframed byte payload can never determine word boundaries itself.
+    pub fn unpack_sequence(
+        payload: &crate::PackedBitstream,
+        widths: &[u8],
+    ) -> Option<Vec<Self>> {
+        let mut words = Vec::with_capacity(widths.len());
+        let mut offset = 0usize;
+        for &width in widths {
+            let word = payload.read_coordinate(offset, width)?;
+            offset = offset.checked_add(usize::from(width))?;
+            words.push(word);
+        }
+        (offset == payload.bit_len()).then_some(words)
+    }
+
     /// Pure occupancy projection from owner-ratified domain sources.
     ///
     /// D3–D7 are a generated coordinate subset. D8/D9 have independent
@@ -161,6 +189,95 @@ mod tests {
             assert_eq!(coordinate, DomainCoordinate::new(7, u16::from(bits)).unwrap());
             assert_ne!(coordinate, DomainCoordinate::new(8, u16::from(bits)).unwrap());
         }
+    }
+
+
+    #[test]
+    fn exact_sequence_all_d1_through_d10_words_has_no_internal_padding() {
+        let words = (1u8..=10)
+            .map(|width| DomainCoordinate::new(width, (1u16 << width) - 1).unwrap())
+            .collect::<Vec<_>>();
+        let payload = DomainCoordinate::pack_sequence(&words);
+        assert_eq!(payload.bit_len(), 55);
+        assert_eq!(payload.byte_len(), 7);
+        assert_eq!(payload.valid_bits_in_last_byte(), 7);
+        assert_eq!(
+            DomainCoordinate::unpack_sequence(&payload, &(1u8..=10).collect::<Vec<_>>()),
+            Some(words)
+        );
+        // Independently rounding every word to a byte would cost 12 bytes.
+        assert!(payload.byte_len() < 12);
+    }
+
+    #[test]
+    fn equal_payload_d3_d4_d9_d10_keeps_each_original_width() {
+        let widths = [3u8, 4, 9, 10];
+        let words = widths.map(|width| DomainCoordinate::new(width, 1).unwrap());
+        for word in words {
+            assert_eq!(word.bits(), 1);
+        }
+        for left in 0..words.len() {
+            for right in left + 1..words.len() {
+                assert_ne!(words[left], words[right]);
+            }
+        }
+        let packed = DomainCoordinate::pack_sequence(&words);
+        assert_eq!(packed.bit_len(), 26);
+        assert_eq!(packed.byte_len(), 4);
+        assert_eq!(DomainCoordinate::unpack_sequence(&packed, &widths), Some(words.to_vec()));
+        assert!(DomainCoordinate::unpack_sequence(&packed, &[3, 4, 9, 9]).is_none());
+        // A different schedule with the same total length can parse as
+        // different valid words: only trusted source grammar owns boundaries.
+        assert_ne!(
+            DomainCoordinate::unpack_sequence(&packed, &[4, 3, 9, 10]),
+            Some(words.to_vec())
+        );
+    }
+
+    #[test]
+    fn all_1024_d10_words_round_trip_after_seven_unaligned_prefix_bits() {
+        let prefix = [
+            DomainCoordinate::new(3, 0b101).unwrap(),
+            DomainCoordinate::new(4, 0b0010).unwrap(),
+        ];
+        for bits in 0u16..1024 {
+            let words = [prefix[0], prefix[1], DomainCoordinate::new(10, bits).unwrap()];
+            let packed = DomainCoordinate::pack_sequence(&words);
+            assert_eq!(packed.bit_len(), 17);
+            assert_eq!(packed.byte_len(), 3);
+            assert_eq!(packed.valid_bits_in_last_byte(), 1);
+            assert_eq!(packed.read_coordinate(7, 10), Some(words[2]));
+            assert_eq!(DomainCoordinate::unpack_sequence(&packed, &[3, 4, 10]), Some(words.to_vec()));
+            assert_ne!(words[2], DomainCoordinate::new(9, bits % 512).unwrap());
+        }
+    }
+
+    #[test]
+    fn invalid_width_truncation_extra_tail_and_noncanonical_padding_are_rejected() {
+        let words = [
+            DomainCoordinate::new(3, 0b101).unwrap(),
+            DomainCoordinate::new(10, 0b1111000011).unwrap(),
+        ];
+        let packed = DomainCoordinate::pack_sequence(&words);
+        assert_eq!(packed.bit_len(), 13);
+        assert_eq!(DomainCoordinate::unpack_sequence(&packed, &[3, 10]), Some(words.to_vec()));
+        let invalid_schedules: &[&[u8]] = &[
+            &[], &[3], &[3, 9], &[3, 11], &[0, 3, 10], &[3, 10, 1],
+        ];
+        for &widths in invalid_schedules {
+            assert!(DomainCoordinate::unpack_sequence(&packed, widths).is_none());
+        }
+        let mut bad_tail = packed.bytes().to_vec();
+        *bad_tail.last_mut().unwrap() |= 1;
+        assert!(crate::PackedBitstream::from_parts(bad_tail, 13).is_none());
+        let mut extra_byte = packed.bytes().to_vec();
+        extra_byte.push(0);
+        assert!(crate::PackedBitstream::from_parts(extra_byte, 13).is_none());
+        let empty = DomainCoordinate::pack_sequence(&[]);
+        assert_eq!(empty.bit_len(), 0);
+        assert_eq!(empty.byte_len(), 0);
+        assert_eq!(DomainCoordinate::unpack_sequence(&empty, &[]), Some(vec![]));
+        assert!(DomainCoordinate::unpack_sequence(&empty, &[1]).is_none());
     }
 
 }
