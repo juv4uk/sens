@@ -1,0 +1,39 @@
+name: Issue 74 real read-file benchmark
+
+on:
+  pull_request:
+    paths:
+      - lib/utf8.lisp
+      - scripts/benchmark-semantic-registry-read.lisp
+      - .github/workflows/issue-74-real-readfile-benchmark.yml
+
+jobs:
+  benchmark:
+    runs-on: ubuntu-24.04
+    env:
+      BASE_SHA: ${{ github.event.pull_request.base.sha }}
+      HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+        with:
+          shared-key: issue-74-real-readfile
+      - name: Preserve benchmark harness
+        run: cp scripts/benchmark-semantic-registry-read.lisp /tmp/benchmark-semantic-registry-read.lisp
+      - name: Measure base on this runner
+        run: |
+          git checkout --detach "$BASE_SHA"
+          cargo build -p my-lisp-cli --bin my-lisp
+          echo '--- BASE ---'
+          /usr/bin/time -f 'base_wall_seconds=%e' \
+            ./target/debug/my-lisp /tmp/benchmark-semantic-registry-read.lisp
+      - name: Measure candidate on this runner
+        run: |
+          git checkout --detach "$HEAD_SHA"
+          cargo build -p my-lisp-cli --bin my-lisp
+          echo '--- CANDIDATE ---'
+          /usr/bin/time -f 'candidate_wall_seconds=%e' \
+            ./target/debug/my-lisp /tmp/benchmark-semantic-registry-read.lisp
