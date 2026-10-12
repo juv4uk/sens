@@ -147,10 +147,16 @@ def resolve_module(
     return (base / f"{name}.rs").resolve()
 
 
-def scan(root: Path) -> dict[str, Any]:
+def scan(
+    root: Path,
+    root_files: tuple[str, ...] | list[str] | None = None,
+    manifest_paths: tuple[str, ...] | list[str] | None = None,
+) -> dict[str, Any]:
     root = root.resolve()
+    selected_roots = tuple(root_files or ROOTS)
+    selected_manifests = tuple(manifest_paths or MANIFESTS)
     queue: list[tuple[Path, Path | None]] = []
-    for item in ROOTS:
+    for item in selected_roots:
         path = root / item
         if path.is_file():
             queue.append((path.resolve(), None))
@@ -271,7 +277,7 @@ def scan(root: Path) -> dict[str, Any]:
                 })
 
     manifest_files: dict[str, dict[str, Any]] = {}
-    for item in MANIFESTS:
+    for item in selected_manifests:
         path = root / item
         if path.is_file():
             raw = path.read_bytes()
@@ -302,7 +308,7 @@ def scan(root: Path) -> dict[str, Any]:
         "status": "STATIC_EDGE_AUDIT_ONLY_CLOSURE_NOT_PROVEN",
         "source_revision": head,
         "scope": {
-            "roots": list(ROOTS),
+            "roots": list(selected_roots),
             "source_file_count": len(source_files),
             "static_edge_count": len(edges),
             "manifest_file_count": len(manifest_files),
@@ -365,7 +371,15 @@ def self_test() -> None:
 
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--repo-root", default=".", help="SENS repository checkout")
+    parser.add_argument("--repo-root", default=".", help="repository checkout")
+    parser.add_argument(
+        "--root-file", action="append", dest="root_files",
+        help="Rust file to scan from; may be repeated. Defaults to the Nano-SENS SENS roots.",
+    )
+    parser.add_argument(
+        "--manifest-file", action="append", dest="manifest_files",
+        help="scope manifest/input metadata file to hash; may be repeated. Defaults to the Nano-SENS SENS manifests.",
+    )
     parser.add_argument("--out", help="write JSON report to this path; otherwise print to stdout")
     parser.add_argument("--self-test", action="store_true", help="run parser/resolution falsifiers")
     parser.add_argument(
@@ -379,7 +393,7 @@ def main(argv: list[str] | None = None) -> int:
         if args.out is None:
             return 0
 
-    report = scan(Path(args.repo_root))
+    report = scan(Path(args.repo_root), args.root_files, args.manifest_files)
     rendered = json.dumps(report, ensure_ascii=False, indent=2) + "\n"
     if args.out:
         output = Path(args.out)
