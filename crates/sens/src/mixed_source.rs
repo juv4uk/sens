@@ -207,6 +207,45 @@ pub fn parse_mixed_exact_domain_legacy_core_source(
     parse_mixed_pinned_d8_io(source)
 }
 
+/// Parse only the language-owned UTF-8 module through the exact-domain reader.
+/// D9 heads are materialized only on this pinned path; execution still requires
+/// a concrete callable mechanism previously attached to that exact identity.
+pub fn parse_mixed_exact_domain_utf8_source(
+    path: &str,
+    source: &str,
+) -> Result<Vec<Expr>, LanguageError> {
+    if path != "lib/utf8.lisp" {
+        return Err(LanguageError::new(
+            ErrorKind::Parse,
+            "UTF-8 exact-domain reader is restricted to lib/utf8.lisp",
+            Span::default(),
+        ));
+    }
+    parse_mixed_source(source, true)?
+        .into_iter()
+        .map(|expr| lift_pinned_d9_language_calls(source, expr, 0))
+        .collect()
+}
+
+/// Parse only the language-owned filesystem text adapter. Like process/TCP,
+/// this is a path-bound migration bridge, not general numeric-width inference.
+pub fn parse_mixed_exact_domain_fs_source(
+    path: &str,
+    source: &str,
+) -> Result<Vec<Expr>, LanguageError> {
+    if path != "lib/fs.lisp" {
+        return Err(LanguageError::new(
+            ErrorKind::Parse,
+            "filesystem exact-domain reader is restricted to lib/fs.lisp",
+            Span::default(),
+        ));
+    }
+    parse_mixed_source(source, true)?
+        .into_iter()
+        .map(|expr| lift_pinned_d9_language_calls(source, expr, 0))
+        .collect()
+}
+
 /// Parse the process/TCP Lisp-owned adapters with exact current-domain call heads.
 /// This exception is path-bound to these two source files; ordinary source must
 /// never infer semantic width from short numeric-looking literals. QUOTE keeps
@@ -1536,6 +1575,24 @@ mod tests {
             parse_mixed_exact_domain_process_tcp_source("lib/time.lisp", source).is_err(),
             "the process/TCP exception must not authorize a third source path"
         );
+    }
+
+    #[test]
+    fn utf8_reader_materializes_current_short_and_d9_heads_without_touching_quotes() {
+        let source = "(0011 probe (0010 (x) (110 ((010 x) (110011100 \"\")) ((010 ()) (110011101 x)))))";
+        let parsed = parse_mixed_exact_domain_utf8_source("lib/utf8.lisp", source)
+            .expect("pinned UTF8 source");
+        let ExprKind::List(defn) = &parsed[0].kind else { panic!("DEFINE"); };
+        let ExprKind::List(lambda) = &defn[2].kind else { panic!("LAMBDA"); };
+        let ExprKind::List(cond) = &lambda[2].kind else { panic!("COND"); };
+        assert!(matches!(&cond[0].kind, ExprKind::DomainIdentity(id)
+            if id.width() == 3 && id.packed_bits() == 0b110));
+        let ExprKind::List(first_clause) = &cond[1].kind else { panic!("clause"); };
+        let ExprKind::List(d9_call) = &first_clause[1].kind else { panic!("D9 call"); };
+        assert!(matches!(&d9_call[0].kind, ExprKind::DomainIdentity(id)
+            if id.width() == 9 && id.packed_bits() == 0b110011100));
+
+        assert!(parse_mixed_exact_domain_utf8_source("lib/not-utf8.lisp", source).is_err());
     }
 
     #[test]

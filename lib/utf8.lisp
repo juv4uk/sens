@@ -20,8 +20,8 @@
       ((11010 value low)  0)
       ((0100 (11010 value low))
        (110
-         ((110100 value high)  1)
-         ((0100 (110100 value high)) 0))))))
+         ((0100 (11010 high value))  1)
+         ((0100 (0100 (11010 high value))) 0))))))
 
 (0011 utf8-continuation-byte?
   (0010 (b)
@@ -94,9 +94,9 @@
               (r1 (011 bytes)))
          (110
            ; ASCII
-           ((110100 b1 127) 
+           ((0100 (11010 127 b1)) 
             (utf8-decode-onto r1 (111 b1 out)))
-           ((0100 (110100 b1 127))
+           ((0100 (0100 (11010 127 b1)))
             (110
               ; 2-byte sequence: C2..DF 80..BF
               ((utf8-in-range? b1 194 223) 
@@ -239,25 +239,25 @@
               (rest (110011101 text))
               (scalar (11100000 character)))
          (110
-           ((110100 scalar 127) 
+           ((0100 (11010 127 scalar)) 
             (utf8-encode-string-onto rest (111 scalar out)))
-           ((0100 (110100 scalar 127))
+           ((0100 (0100 (11010 127 scalar)))
             (110
-              ((110100 scalar 2047) 
+              ((0100 (11010 2047 scalar)) 
                (utf8-encode-string-onto
                  rest
                  (111 (01010 128 (00101100 scalar 64))
                        (111 (01010 192 (10111 scalar 64)) out))))
-              ((0100 (110100 scalar 2047))
+              ((0100 (0100 (11010 2047 scalar)))
                (110
-                 ((110100 scalar 65535) 
+                 ((0100 (11010 65535 scalar)) 
                   (utf8-encode-string-onto
                     rest
                     (111 (01010 128 (00101100 scalar 64))
                           (111 (01010 128 (00101100 (10111 scalar 64) 64))
                                 (111 (01010 224 (10111 scalar 4096))
                                       out)))))
-                 ((0100 (110100 scalar 65535))
+                 ((0100 (0100 (11010 65535 scalar)))
                   (utf8-encode-string-onto
                     rest
                     (111 (01010 128 (00101100 scalar 64))

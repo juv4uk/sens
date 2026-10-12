@@ -195,7 +195,7 @@ pub fn domain_numeric_value(operator: &str, lhs: &Value, rhs: &Value) -> Option<
 pub use bit9::Bit9;
 pub use bits::{Bit1, Bit2, Bit3, Bit4, Bit5, Bit6, Bit7, Bit8, Bits};
 pub use canonical_reader::{parse_canonical_binary, parse_canonical_packed_words, parse_canonical_word_sequence};
-pub use mixed_source::{parse_mixed_exact_domain, parse_mixed_exact_domain_core_source, parse_mixed_exact_domain_machine_source, parse_mixed_exact_domain_time_source, parse_mixed_exact_domain_reasoning_source, parse_mixed_exact_domain_legacy_core_source, parse_mixed_exact_domain_fs_fixture_source, parse_mixed_exact_domain_process_tcp_source};
+pub use mixed_source::{parse_mixed_exact_domain, parse_mixed_exact_domain_core_source, parse_mixed_exact_domain_machine_source, parse_mixed_exact_domain_time_source, parse_mixed_exact_domain_reasoning_source, parse_mixed_exact_domain_legacy_core_source, parse_mixed_exact_domain_fs_fixture_source, parse_mixed_exact_domain_process_tcp_source, parse_mixed_exact_domain_utf8_source, parse_mixed_exact_domain_fs_source};
 pub use compiler_role::{compiler_execution_role, CompilerExecutionRole, CompilerLoweringRole};
 pub use compiler_bootstrap::{
     canonical_value_sha256_mechanism, compiler_evidence_canonical_bytes,
@@ -504,7 +504,24 @@ fn load_core_library_with_fasl_mode(
     };
 
     bind_missing_stable_surface_peers(&session.environment);
+    bind_existing_d9_language_mechanisms(&session.environment);
     Ok(result)
+}
+
+/// Attach only already-existing callable values to their ratified D9 identities.
+/// This is a mechanism migration bridge, never a width-based callability grant.
+fn bind_existing_d9_language_mechanisms(environment: &Environment) {
+    for (name, value) in environment.snapshot() {
+        if !matches!(value, Value::Builtin(_) | Value::Closure(_) | Value::Macro(_)) {
+            continue;
+        }
+        let Some(identity) = semantic_registry::d9_binding_identity_for_definition(name.as_ref()) else {
+            continue;
+        };
+        if environment.domain_code_slot(identity).is_none() {
+            let _ = environment.bind_domain_code_slot_once(identity, value);
+        }
+    }
 }
 
 /// Production always uses the owner-verified binary decode/lowering cache.
@@ -625,46 +642,53 @@ pub fn eval_pinned_legacy_core_source(
 /// binding-list arguments are evaluated. No D6 law or Rust implementation is
 /// added here, and an existing non-macro slot is a hard error.
 fn bind_process_tcp_lisp_owned_macros(session: &mut Session) -> Result<(), LanguageError> {
-    let identity = semantic_registry::exact_uk_callable_for_source_head("нехай*")
-        .and_then(|surface| surface.core_operation())
-        .filter(|identity| {
-            matches!(identity, CoreDomainIdentity::D6(word) if word.word().packed_bits() == 0b001001)
-        })
-        .ok_or_else(|| {
-            LanguageError::new(
-                ErrorKind::InvalidForm,
-                "D6 LET* source identity is not admitted by the current exact domain registry",
-                Span::default(),
-            )
-        })?;
+    for (uk_surface, compatibility_surface, expected_bits) in [
+        ("нехай", "let", 0b001000u8),
+        ("нехай*", "let*", 0b001001u8),
+    ] {
+        let identity = semantic_registry::exact_uk_callable_for_source_head(uk_surface)
+            .filter(|identity| identity.width() == 6 && identity.packed_bits() == expected_bits)
+            .ok_or_else(|| {
+                LanguageError::new(
+                    ErrorKind::InvalidForm,
+                    format!("D6 {uk_surface} source identity is not admitted by the exact domain registry"),
+                    Span::default(),
+                )
+            })?;
 
-    let implementation = session
-        .environment
-        .get("let*")
-        .or_else(|| session.environment.get("нехай*"))
-        .filter(|value| matches!(value, Value::Macro(_)))
-        .ok_or_else(|| {
-            LanguageError::new(
-                ErrorKind::InvalidForm,
-                "Core4 Lisp-owned LET* macro is not installed; refusing to evaluate D6 LET* as an ordinary call",
-                Span::default(),
-            )
-        })?;
+        let implementation = session
+            .environment
+            .get(compatibility_surface)
+            .or_else(|| session.environment.get(uk_surface))
+            .filter(|value| matches!(value, Value::Macro(_)))
+            .ok_or_else(|| {
+                LanguageError::new(
+                    ErrorKind::InvalidForm,
+                    format!("Lisp-owned {compatibility_surface} macro is not installed"),
+                    Span::default(),
+                )
+            })?;
 
-    match session.environment.domain_code_slot(identity) {
-        Some(Value::Macro(_)) => Ok(()),
-        Some(_) => Err(LanguageError::new(
-            ErrorKind::InvalidForm,
-            "D6 LET* code-slot is already occupied by a non-macro value",
-            Span::default(),
-        )),
-        None if session.environment.bind_domain_code_slot_once(identity, implementation) => Ok(()),
-        None => Err(LanguageError::new(
-            ErrorKind::InvalidForm,
-            "could not bind the Lisp-owned implementation to the admitted D6 LET* identity",
-            Span::default(),
-        )),
+        match session.environment.domain_code_slot(identity) {
+            Some(Value::Macro(_)) => {}
+            Some(_) => {
+                return Err(LanguageError::new(
+                    ErrorKind::InvalidForm,
+                    format!("D6 {uk_surface} mechanism slot is occupied by a non-macro"),
+                    Span::default(),
+                ));
+            }
+            None if session.environment.bind_domain_code_slot_once(identity, implementation) => {}
+            None => {
+                return Err(LanguageError::new(
+                    ErrorKind::InvalidForm,
+                    format!("could not bind Lisp-owned {compatibility_surface} to exact D6"),
+                    Span::default(),
+                ));
+            }
+        }
     }
+    Ok(())
 }
 
 /// Load the shared byte/text adapters used by process and TCP boundaries.
@@ -673,8 +697,10 @@ fn bind_process_tcp_lisp_owned_macros(session: &mut Session) -> Result<(), Langu
 /// public `process-run` over `process-run-raw`, and public `tcp-read` over
 /// `tcp-read-raw`. Neither raw capability is required merely to define them.
 pub fn load_process_library(session: &mut Session) -> Result<EvalResult, LanguageError> {
-    eval_program(UTF8_LIBRARY_SOURCE, session)?;
+    bind_existing_d9_language_mechanisms(&session.environment);
     bind_process_tcp_lisp_owned_macros(session)?;
+    let utf8 = parse_mixed_exact_domain_utf8_source("lib/utf8.lisp", UTF8_LIBRARY_SOURCE)?;
+    eval_parsed_expressions(&utf8, session)?;
     let process = parse_mixed_exact_domain_process_tcp_source(
         "lib/process.lisp",
         PROCESS_LIBRARY_SOURCE,
@@ -689,8 +715,10 @@ pub fn load_process_library(session: &mut Session) -> Result<EvalResult, Languag
 /// Load language-owned TCP text semantics explicitly when an embedder does
 /// not otherwise need the process adapter.
 pub fn load_tcp_library(session: &mut Session) -> Result<EvalResult, LanguageError> {
-    eval_program(UTF8_LIBRARY_SOURCE, session)?;
+    bind_existing_d9_language_mechanisms(&session.environment);
     bind_process_tcp_lisp_owned_macros(session)?;
+    let utf8 = parse_mixed_exact_domain_utf8_source("lib/utf8.lisp", UTF8_LIBRARY_SOURCE)?;
+    eval_parsed_expressions(&utf8, session)?;
     let tcp = parse_mixed_exact_domain_process_tcp_source("lib/tcp.lisp", TCP_LIBRARY_SOURCE)?;
     let result = eval_parsed_expressions(&tcp, session)?;
     bind_missing_stable_surface_peers(&session.environment);
@@ -702,8 +730,12 @@ pub fn load_tcp_library(session: &mut Session) -> Result<EvalResult, LanguageErr
 /// host capabilities plus the shared UTF-8 layer. No new host capability is
 /// introduced for this migration.
 pub fn load_fs_library(session: &mut Session) -> Result<EvalResult, LanguageError> {
-    eval_program(UTF8_LIBRARY_SOURCE, session)?;
-    let result = eval_program(FS_LIBRARY_SOURCE, session)?;
+    bind_existing_d9_language_mechanisms(&session.environment);
+    bind_process_tcp_lisp_owned_macros(session)?;
+    let utf8 = parse_mixed_exact_domain_utf8_source("lib/utf8.lisp", UTF8_LIBRARY_SOURCE)?;
+    eval_parsed_expressions(&utf8, session)?;
+    let fs = parse_mixed_exact_domain_fs_source("lib/fs.lisp", FS_LIBRARY_SOURCE)?;
+    let result = eval_parsed_expressions(&fs, session)?;
     bind_missing_stable_surface_peers(&session.environment);
     Ok(result)
 }
