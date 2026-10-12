@@ -992,20 +992,54 @@ mod tests {
             word_expr.human_projection()
         );
 
-        for (score, expr) in [
-            (best_score.6, best_expr),
-            (cond_score.6, cond_expr),
-            (first_cond_code, first_cond_expr),
-            (selector_score.6, selector_expr),
-            (depth_score.5, depth_expr),
-            (word_score.5, word_expr),
+        assert_eq!(best_score.6, 0xfc25);
+        assert_eq!(best_score.0, 5);
+        assert_eq!(best_score.1, 1);
+        assert_eq!(
+            best_expr.human_projection(),
+            "ATOM(CAR(CONS(QUOTE(NIL),IF-ATOM(QUOTE(NIL),QUOTE(NIL),QUOTE(NIL)))))"
+        );
+
+        assert_eq!(first_cond_code, 0x00c8);
+        assert_eq!(
+            first_cond_expr.human_projection(),
+            "IF-ATOM(0,0,0)"
+        );
+
+        assert_eq!(selector_score.6, 0xfb4d);
+        assert_eq!(
+            selector_expr.human_projection(),
+            "ATOM(CAR(CONS(QUOTE(NIL),CDR(CONS(ATOM(QUOTE(NIL)),QUOTE(NIL))))))"
+        );
+
+        assert_eq!(depth_score.5, 0xbb51);
+        assert_eq!(depth_score.0, 7);
+        assert_eq!(
+            depth_expr.human_projection(),
+            "ATOM(ATOM(ATOM(ATOM(ATOM(ATOM(QUOTE(NIL)))))))"
+        );
+
+        for (score, expr, expected_source) in [
+            (best_score.6, best_expr, "1"),
+            (cond_score.6, cond_expr, "1"),
+            (first_cond_code, first_cond_expr, "0"),
+            (selector_score.6, selector_expr, "1"),
+            (depth_score.5, depth_expr, "1"),
+            (word_score.5, word_expr, "1"),
         ] {
             let payload = (score as u16).to_be_bytes();
             assert_eq!(encode_expr(&expr).unwrap(), payload);
             let source = expr.exact_words().join(" ");
             let parsed = parse_canonical_binary(&source).expect("F3M-2 candidate source");
-            eval_parsed_expressions(&parsed, &mut Session::default())
+            let actual = eval_parsed_expressions(&parsed, &mut Session::default())
                 .expect("F3M-2 candidate must execute");
+            let expected = eval_parsed_expressions(
+                &parse_canonical_binary(expected_source).unwrap(),
+                &mut Session::default(),
+            )
+            .unwrap();
+            assert_eq!(actual.value, expected.value);
+            assert_eq!(actual.output, expected.output);
         }
     }
 
