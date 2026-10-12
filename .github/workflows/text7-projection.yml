@@ -1,60 +1,53 @@
-name: Text7 UPC-7 projection
+name: D7 Text7 owner projection and T5
 
 on:
   pull_request:
     paths:
-      - contracts/text7-upc7.lock
+      - knowledge/d7-ratified.json
+      - lib/domains/d7.lisp
+      - scripts/d7_symbol_codec.py
+      - scripts/sens_t5_codec.py
       - scripts/generate-text7-projection.py
-      - crates/sens/src/text7.rs
+      - scripts/check-d7-runtime-projection.py
       - crates/sens/src/text7_projection.rs
       - crates/sens/src/text7_projection_generated.rs
+      - crates/sens/src/d7_display_registry_generated.rs
+      - crates/sens/src/ternary_transport.rs
+      - crates/sens/tests/d7_keyboard_t5.rs
       - .github/workflows/text7-projection.yml
   push:
     branches: [main]
     paths:
-      - contracts/text7-upc7.lock
+      - knowledge/d7-ratified.json
+      - lib/domains/d7.lisp
+      - scripts/d7_symbol_codec.py
+      - scripts/sens_t5_codec.py
       - scripts/generate-text7-projection.py
-      - crates/sens/src/text7.rs
+      - scripts/check-d7-runtime-projection.py
       - crates/sens/src/text7_projection.rs
       - crates/sens/src/text7_projection_generated.rs
+      - crates/sens/src/d7_display_registry_generated.rs
+      - crates/sens/src/ternary_transport.rs
+      - crates/sens/tests/d7_keyboard_t5.rs
       - .github/workflows/text7-projection.yml
+
+permissions:
+  contents: read
 
 jobs:
   projection:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
     steps:
       - uses: actions/checkout@v5
-
-      - name: Read pinned upstream
-        id: pin
-        shell: bash
+      - name: Reject old 107-cell donor as active D7 runtime table
+        run: python3 scripts/generate-text7-projection.py --check
+      - name: Check all D7 Rust surfaces against the 126/128 owner map
+        run: python3 scripts/check-d7-runtime-projection.py
+      - name: Ukrainian keyboard and canonical T5 roundtrip
         run: |
-          python3 - <<'PY' >> "$GITHUB_OUTPUT"
-          import re
-          from pathlib import Path
-
-          text = Path("contracts/text7-upc7.lock").read_text(encoding="utf-8")
-          for name in ("repository", "revision"):
-              match = re.search(r"\(" + name + r'\s+"([^"]+)"\)', text)
-              if not match:
-                  raise SystemExit(f"missing {name} in Text7 lock")
-              print(f"{name}={match.group(1)}")
-          PY
-
-      - name: Checkout pinned UPC-7 authority
-        uses: actions/checkout@v5
-        with:
-          repository: ${{ steps.pin.outputs.repository }}
-          ref: ${{ steps.pin.outputs.revision }}
-          path: .upstream/shiva-sutras
-
-      - name: Check generated Text7 projection
-        run: >-
-          python3 scripts/generate-text7-projection.py
-          --upstream-root .upstream/shiva-sutras
-          --check
-
+          python3 -m unittest discover -s tests -p 'test_d7_symbol_codec.py' -v
+          python3 -m unittest discover -s tests -p 'test_d7_t5_keyboard.py' -v
       - uses: dtolnay/rust-toolchain@stable
-
-      - name: Check Text7 projection tests
-        run: cargo test -p sens text7 -- --nocapture
+      - name: Rust Text7 owner source and D2/T5 boundaries
+        run: cargo test --locked -p sens --test d7_keyboard_t5 --test text7_canonical_wire --test text7_shiva_w7_synthesis
