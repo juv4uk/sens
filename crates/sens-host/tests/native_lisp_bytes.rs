@@ -192,9 +192,9 @@ fn x86_pair_layout_is_one_lisp_owned_machine_readable_authority() {
 
     sens::parse(&source).expect("x86 pair layout authority must be valid sens");
     for required in [
-        "(00001001 x86-pair-cell-bytes 16)",
-        "(00001001 x86-pair-car-offset 0)",
-        "(00001001 x86-pair-cdr-offset 8)",
+        "(0011 x86-pair-cell-bytes 16)",
+        "(0011 x86-pair-car-offset 0)",
+        "(0011 x86-pair-cdr-offset 8)",
         "(target x86-64)",
         "(arena-argument-register rdi)",
         "(lifetime native-call)",
