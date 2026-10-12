@@ -93,7 +93,7 @@
     (110
       ((0100 (010 journal)) (10100 acc))
       ((010 journal)  (10100 acc))
-      ((11110111 (1001 (100 journal)) module-name)
+      ((101 (1001 (100 journal)) module-name)
        (module-journal-events-onto
          module-name
          (011 journal)
@@ -114,18 +114,10 @@
 (0011 module-journal-has-module?
   (0010 (module-name journal)
     (110
-      
-      ((010 journal)  (001 ()))
-      ((11110111 (1001 (100 journal)) module-name) t)
+      ((010 journal) (010 (001 (0))))
+      ((101 (1001 (100 journal)) module-name) (010 ()))
       ((010 ()) (module-journal-has-module? module-name (011 journal))))))
 
-;; module-known? distinguishes "no module by this name was ever told
-;; anything" from "the module exists but every clause it was ever told has
-;; since been retracted" — the second case must still project to an empty
-;; clause list, not `Module-not-found`. Kept as its own check (not folded
-;; into `module-clauses-now`) precisely so callers can tell those two
-;; apart, the same distinction `reason-in`/`forward-in`/`describe` already
-;; promised before the journal existed.
 (0011 module-known?
   (0010 (module-name)
     (module-journal-has-module? module-name *knowledge-journal*)))
@@ -214,11 +206,14 @@
   (0010 (module-name rules)
     (110
       ((101010010 module-name)
-       ((0010 (head) ((0010 (proofs) (110
-             
-             ((010 proofs)  (001 ()))
-             ((010 ()) t))) (101111010 module-name (opposite-knowledge-head head)))) (100 (100 rules))))
-      )))
+       ((0010 (head)
+          ((0010 (proofs)
+             (110
+               ((010 proofs) (010 (001 (0))))
+               ((010 ()) (010 ()))))
+           (101111010 module-name (opposite-knowledge-head head))))
+        (100 (100 rules))))
+      ((010 ()) (010 (001 (0)))))))
 
 (0011 check-conflict check-conflict?)
 
@@ -266,82 +261,66 @@
 (0011 knowledge-proper-list?
   (0010 (value)
     (110
-      ((0100 (010 value)) (110 ((101 value (001 ())) t) ))
-      ((010 value)  (110 ((101 value (001 ())) t) ))
+      ((0101 value) (010 ()))
+      ((010 value) (010 (001 (0))))
       ((010 ()) (knowledge-proper-list? (011 value))))))
 
 (0011 knowledge-terms-valid?
   (0010 (terms)
     (110
-      ((0100 (010 terms)) (110 ((101 terms (001 ())) t) ))
-      ((010 terms)  (110 ((101 terms (001 ())) t) ))
+      ((0101 terms) (010 ()))
+      ((010 terms) (010 (001 (0))))
       ((knowledge-term-valid? (100 terms))
        (knowledge-terms-valid? (011 terms)))
-      )))
+      ((010 ()) (010 (001 (0)))))))
 
 (0011 knowledge-term-valid?
   (0010 (term)
     (110
-      
-      ((010 term)  t)
-      ((0100 (010 (100 term))) (110
+      ((010 term) (010 ()))
+      ((010 (100 term))
+       (110
          ((101 (100 term) (001 var))
           (110
-            ((11110111 (000000 term) 2)  (110101100 (1001 term)))
-            ))
-         ((knowledge-proper-list? term) (knowledge-terms-valid? term))
-         ))
-      ((010 (100 term))  (110
-         ((101 (100 term) (001 var))
-          (110
-            ((11110111 (000000 term) 2)  (110101100 (1001 term)))
-            ))
-         ((knowledge-proper-list? term) (knowledge-terms-valid? term))
-         ))
-      )))
+            ((11110111 (000000 term) 2) (110101100 (1001 term)))
+            ((010 ()) (010 (001 (0))))))
+         ((010 ()) (knowledge-terms-valid? term))))
+      ((010 ()) (knowledge-terms-valid? term)))))
 
-; Зарезервована голова заперечення: `not?` (присудок з `?`, #1444) або
-; історичне `not`.
 (0011 knowledge-not-head?
   (0010 (head)
     (110
-      ((101 head (001 not?)) t)
-      ((101 head (001 not)) t)
-      )))
+      ((101 head (001 not?)) (010 ()))
+      ((101 head (001 not)) (010 ()))
+      ((010 ()) (010 (001 (0)))))))
 
 (0011 knowledge-goal-valid?
   (0010 (goal)
     (110
-      
-      ((010 goal)  (001 ()))
-      ((101 (knowledge-proper-list? goal) (001 ())) (001 ()))
-      ((101 (110101100 (100 goal)) (001 ())) (001 ()))
-      ((101 (100 goal) (001 not))
+      ((010 goal) (010 (001 (0))))
+      ((0100 (knowledge-proper-list? goal)) (010 (001 (0))))
+      ((0100 (110101100 (100 goal))) (010 (001 (0))))
+      ((knowledge-not-head? (100 goal))
        (110
-         ((11110111 (000000 goal) 2)  (knowledge-goal-valid? (1001 goal)))
-         ))
-      ((101 (100 goal) (001 not?))
-       (110
-         ((11110111 (000000 goal) 2)  (knowledge-goal-valid? (1001 goal)))
-         ))
+         ((11110111 (000000 goal) 2) (knowledge-goal-valid? (1001 goal)))
+         ((010 ()) (010 (001 (0))))))
       ((010 ()) (knowledge-terms-valid? (011 goal))))))
 
 (0011 knowledge-goals-valid?
   (0010 (goals)
     (110
-      ((0100 (010 goals)) (110 ((101 goals (001 ())) t) ))
-      ((010 goals)  (110 ((101 goals (001 ())) t) ))
+      ((0101 goals) (010 ()))
+      ((010 goals) (010 (001 (0))))
       ((knowledge-goal-valid? (100 goals))
        (knowledge-goals-valid? (011 goals)))
-      )))
+      ((010 ()) (010 (001 (0)))))))
 
 (0011 knowledge-clause-valid?
   (0010 (clause)
     (110
-      
-      ((010 clause)  (001 ()))
-      ((101 (knowledge-proper-list? clause) (001 ())) (001 ()))
-      ((101 (knowledge-goal-valid? (100 clause)) (001 ())) (001 ()))
+      ((010 clause) (010 (001 (0))))
+      ((0100 (knowledge-proper-list? clause)) (010 (001 (0))))
+      ((0100 (knowledge-goal-valid? (100 clause))) (010 (001 (0))))
       ((010 ()) (knowledge-goals-valid? (011 clause))))))
 
 ;; Explicit opposites operate on heads, not whole clauses: a rule and a fact
@@ -441,13 +420,11 @@
 (0011 knowledge-clauses-valid?
   (0010 (clauses)
     (110
-      ((0100 (010 clauses)) t)
-      ((010 clauses)  (001 ()))
-      ((010 clauses) 
-       (110
-         ((knowledge-clause-valid? (100 clauses))
-          (knowledge-clauses-valid? (011 clauses)))
-         )))))
+      ((0101 clauses) (010 ()))
+      ((010 clauses) (010 (001 (0))))
+      ((knowledge-clause-valid? (100 clauses))
+       (knowledge-clauses-valid? (011 clauses)))
+      ((010 ()) (010 (001 (0)))))))
 
 (0011 advice-negative-head-conflict
   (0010 (rules all-rules)
@@ -562,15 +539,12 @@
 (0011 knowledge-package-entries-valid?
   (0010 (entries)
     (110
-      ((0100 (010 entries)) t)
-      ((010 entries)  (001 ()))
-      ((010 entries) 
-       (110
-         
-         ((010 (100 entries))  (001 ()))
-         ((110101100 (100 (100 entries)))
-          (knowledge-package-entries-valid? (011 entries)))
-         )))))
+      ((0101 entries) (010 ()))
+      ((010 entries) (010 (001 (0))))
+      ((010 (100 entries)) (010 (001 (0))))
+      ((110101100 (100 (100 entries)))
+       (knowledge-package-entries-valid? (011 entries)))
+      ((010 ()) (010 (001 (0)))))))
 
 (0011 knowledge-package-field
   (0010 (name package)
@@ -773,20 +747,14 @@
 (0011 contains-atom?
   (0010 (item lst)
     (110
-      
-      ((010 lst)  (001 ()))
-      ((0100 (010 (100 lst))) (110
-         ((101 (100 lst) item) t)
-         ((010 ()) (101110011 item (011 lst)))))
-      ((010 (100 lst))  (110
-         ((101 (100 lst) item) t)
-         ((010 ()) (101110011 item (011 lst)))))
-      ((010 ()) (101110011 item (011 lst))))))
+      ((0101 lst) (010 (001 (0))))
+      ((010 lst) (010 (001 (0))))
+      ((010 (100 lst))
+       (110
+         ((101 (100 lst) item) (010 ()))
+         ((010 ()) (contains-atom? item (011 lst)))))
+      ((010 ()) (contains-atom? item (011 lst))))))
 
-;; is-fact? answers the knowledge-domain question explicitly. The structural
-;; shape of the clause body is mechanism: an empty body means a fact, while a
-;; non-empty proper body means a rule. Do not leak atom's structural record as
-;; the public answer and do not collapse the distinction into historical t/().
 (0011 is-fact?
   (0010 (clause)
     (110

@@ -21,13 +21,9 @@
 (0011 reason-index?
   (0010 (value)
     (110
-      
-      ((010 value)  (001 ()))
-      
-      ((010 (100 value))  (110
-         ((101 (100 value) *reason-index-schema*) t)
-         ))
-      )))
+      ((010 value) (010 (001 (0))))
+      ((101 (100 value) *reason-index-schema*) (010 ()))
+      ((010 ()) (010 (001 (0)))))))
 
 (0011 reason-index-linear
   (0010 (rules)

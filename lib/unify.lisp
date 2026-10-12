@@ -81,15 +81,10 @@
 (0011 var?
   (0010 (term)
     (110
-      
-      ((010 term)  (001 ()))
-      
-      ((010 (100 term))  (101 (100 term) (001 var)))
-      )))
+      ((010 term) (010 (001 (0))))
+      ((010 (100 term)) (101 (100 term) (001 var)))
+      ((010 ()) (010 (001 (0)))))))
 
-; subst is an alist of (name . term) pairs, keyed by the variable's
-; name — never by the `(var name)` pair itself. We use `equal?` instead
-; of `eq` because names can be structures like `(x . 3)` from renaming.
 (0011 lookup-subst
   (0010 (variable bindings)
     (110
@@ -140,9 +135,8 @@
 (0011 failed-subst?
   (0010 (bindings)
     (110
-      
-      ((010 bindings)  (101 bindings (001 fail)))
-      )))
+      ((010 bindings) (101 bindings (001 fail)))
+      ((010 ()) (010 (001 (0)))))))
 
 (0011 unify-walked
   (0010 (a b bindings)
@@ -160,12 +154,11 @@
   (0010 (variable term bindings)
     (001000 ((resolved (101110100 term bindings)))
       (110
-        ((101100100 resolved) (11110111 (1001 variable) (1001 resolved)))
-        
-        ((010 resolved)  (001 ()))
-        ((010 ()) (110
-             ((101110101 variable (100 resolved) bindings) t)
-             ((010 ()) (101110101 variable (011 resolved) bindings))))))))
+        ((101100100 resolved)
+         (11110111 (1001 variable) (1001 resolved)))
+        ((010 resolved) (010 (001 (0))))
+        ((101110101 variable (100 resolved) bindings) (010 ()))
+        ((010 ()) (101110101 variable (011 resolved) bindings))))))
 
 (0011 occurs-check occurs-check?)
 

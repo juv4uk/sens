@@ -27,10 +27,9 @@
 (0011 world?
   (0010 (value)
     (110
-      
-      ((010 value)  (001 ()))
-      ((101 (100 value) (001 world)) t)
-      )))
+      ((010 value) (010 (001 (0))))
+      ((101 (100 value) (001 world)) (010 ()))
+      ((010 ()) (010 (001 (0)))))))
 
 (0011 world-parent (0010 (world) (1001 world)))
 (0011 world-journal (0010 (world) (10011 world)))

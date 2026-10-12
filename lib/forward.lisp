@@ -359,7 +359,7 @@
     (110
       
       ((010 entries)  (001 ()))
-      ((11110111 fact (fact-of (100 entries))) t)
+      ((11110111 fact (fact-of (100 entries))) (010 ()))
       ((010 ()) (justified-member? fact (011 entries))))))
 
 (0011 add-new-justified
@@ -1187,7 +1187,7 @@
   (0010 (candidates rest-conditions facts)
     (110
       
-      ((010 candidates)  t)
+      ((010 candidates)  (010 ()))
       
       ((010 (match-conditions rest-conditions facts (100 candidates)))  (001 ()))
       ((010 ()) (forall-every-candidate-satisfies? (011 candidates) rest-conditions facts)))))
