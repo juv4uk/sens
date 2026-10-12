@@ -3,14 +3,21 @@
 Цей каталог реалізує спільний machine-readable evidence-контракт для #3580 / #3595.
 
 Поточний replay generation:
-- `contract_version=11.8`;
-- `semantic_generation=contract-11-8-exact-d1-d9`;
-- current foundation = D1–D9;
+- `contract_version=11.9`;
+- `semantic_generation=contract-11-9-exact-d1-d9`;
+- scope цього стенда = D1–D9 fixtures; D10 не виконується цим benchmark;
 - measured exact-width carriers = W1–W8;
 - D9 = `BLOCKED-CARRIER` до реалізації W9 (#4038 / PR #4044).
 
-Runner відмовляється мовчки перелабелювати ці рядки під іншу версію Contract:
-після зміни Contract потрібен новий generation replay.
+Раніше зібрані рядки Contract 11.8 залишаються історичним результатом і не
+перемарковуються. Runner створює нові рядки із точним поточним SHA та generation
+11.9. Якщо checkout має іншу версію Contract, runner повертає явний
+`SENS_BENCHMARK_STATUS=BLOCKED`.
+
+Базовий replay вимірює STORE/AIR та семантичний паритет English/canonical пар.
+LOAD I-ref поля навмисно лишаються base-null, доки окремо не запущено
+`load.py` з потрібними Cachegrind/helpers; без цього enrichment benchmark
+не заявляє повного LOAD-профілю.
 
 ## Головна межа
 

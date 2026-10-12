@@ -8,7 +8,7 @@
     "FALSIFIER"
   ],
   "question": "Can canonical exact-width payload identity be preserved while storage, transport, and load costs are measured as separate physical axes?",
-  "claim": "Measures STORE/AIR/LOAD accounting for its pinned Contract 11.8 D1-D9 generation. It must not be treated as current Contract 11.9 evidence until the corpus is replayed and validated under that generation.",
+  "claim": "Measures STORE/AIR accounting and semantic-parity checks for the D1-D9 fixture subset under Contract 11.9. D10 behavior is outside this lane; LOAD I-ref fields remain explicitly base-null unless separately enriched with load.py and its pinned helpers.",
   "witness": [
     "README.md",
     "run.py",
@@ -16,8 +16,8 @@
     "fixtures.json",
     "schema.json"
   ],
-  "status": "HISTORICAL-GENERATION; CURRENT-REPLAY-BLOCKED",
-  "generation": "Contract 11.8 D1-D9 baseline; Contract 11.9 replay pending",
+  "status": "ACTIVE-CURRENT-GENERATION; CONTRACT-11.9; LOAD-BASE-NULL",
+  "generation": "Contract 11.9 D1-D9 fixture subset; D10 not exercised; LOAD enrichment separate",
   "axis": "store-air-load/physical-separation",
   "reproduce": "python3 benchmarks/store-air-load/run.py --out /tmp/store-air-load.jsonl --bitrate-bps 2 && python3 benchmarks/store-air-load/validate.py /tmp/store-air-load.jsonl"
 }

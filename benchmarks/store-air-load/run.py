@@ -27,8 +27,8 @@ from pathlib import Path
 SCHEMA = "sens-store-air-load/v1"
 FIXTURE_SCHEMA = "sens-store-air-load-fixtures/v1"
 REPO = "juv4uk/sens"
-CURRENT_CONTRACT = "11.8"
-SEMANTIC_GENERATION = "contract-11-8-exact-d1-d9"
+CURRENT_CONTRACT = "11.9"
+SEMANTIC_GENERATION = "contract-11-9-exact-d1-d9"
 CURRENT_FOUNDATION = "D1-D9"
 MEASURED_CARRIERS = "W1-W8"
 D9_STATUS = "BLOCKED-CARRIER"
@@ -335,6 +335,16 @@ def make_row(
     }
 
 
+def require_current_contract(current_contract: str) -> None:
+    """Reject stale benchmark generations with an explicit machine-readable BLOCKED marker."""
+    if current_contract != CURRENT_CONTRACT:
+        print("SENS_BENCHMARK_STATUS=BLOCKED")
+        raise SystemExit(
+            f"STORE-AIR-LOAD: BLOCKED; this generation expects Contract {CURRENT_CONTRACT}; "
+            f"found {current_contract}. Replay as a new generation instead of relabeling historical rows."
+        )
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
@@ -355,16 +365,7 @@ def main() -> int:
     fixtures = load_fixtures(args.fixtures.resolve())
     current_git_sha = git_sha(repo)
     current_contract = contract_version(repo)
-    if current_contract != CURRENT_CONTRACT:
-        # This is a generation boundary, not a semantic assertion failure.
-        # Keep old Contract 11.8 measurements historical until a distinct
-        # Contract 11.9 replay has been run and validated.
-        print("SENS_BENCHMARK_STATUS=BLOCKED")
-        raise SystemExit(
-            f"STORE-AIR-LOAD: BLOCKED; this evidence generation is pinned to "
-            f"Contract {CURRENT_CONTRACT}; found {current_contract}. "
-            "Start a new generation replay instead of relabeling rows."
-        )
+    require_current_contract(current_contract)
 
     if args.packing_helper and args.semantic_helper:
         packing_helper = args.packing_helper.resolve()

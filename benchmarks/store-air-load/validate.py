@@ -12,8 +12,8 @@ from collections import defaultdict
 from pathlib import Path
 
 SCHEMA = "sens-store-air-load/v1"
-CURRENT_CONTRACT = "11.8"
-SEMANTIC_GENERATION = "contract-11-8-exact-d1-d9"
+CURRENT_CONTRACT = "11.9"
+SEMANTIC_GENERATION = "contract-11-9-exact-d1-d9"
 CURRENT_FOUNDATION = "D1-D9"
 MEASURED_CARRIERS = "W1-W8"
 D9_STATUS = "BLOCKED-CARRIER"
