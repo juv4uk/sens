@@ -101,5 +101,54 @@ class ReleaseWorkflowOrderingTest(unittest.TestCase):
         self.assertIn("RELEASE_BLOCKED", final_guard)
 
 
+
+
+class TaggedReleaseVersionGuardTests(unittest.TestCase):
+    """Exercise the real release.yml tag/version gate, including Python -O."""
+
+    def test_tag_guard_has_positive_and_negative_optimized_receipts(self):
+        import os
+        import re
+        import subprocess
+        import textwrap
+        import tomllib
+
+        root = Path(__file__).resolve().parents[1]
+        workflow = (root / ".github" / "workflows" / "release.yml").read_text(
+            encoding="utf-8"
+        )
+        # Test the same inline Python snippet executed by the tagged workflow;
+        # a stale test-specific rewrite must not mask a weakened production gate.
+        match = re.search(
+            r"^          python3 - <<'PY'\n(.*?)^          PY$",
+            workflow,
+            flags=re.MULTILINE | re.DOTALL,
+        )
+        self.assertIsNotNone(match, "RELEASE_BLOCKED: tag preflight missing")
+        code = textwrap.dedent(match.group(1))
+        version = tomllib.loads(
+            (root / "crates/sens-cli/Cargo.toml").read_text(encoding="utf-8")
+        )["package"]["version"]
+        cases = (
+            ("l" + version, True),
+            ("v" + version, False),
+            ("l0.0.0", False),
+        )
+        for tag, should_pass in cases:
+            with self.subTest(tag=tag):
+                result = subprocess.run(
+                    [sys.executable, "-O", "-c", code],
+                    cwd=root,
+                    env={**os.environ, "RELEASE_TAG": tag},
+                    text=True,
+                    capture_output=True,
+                    timeout=10,
+                )
+                if should_pass:
+                    self.assertEqual(result.returncode, 0, result.stderr)
+                else:
+                    self.assertNotEqual(result.returncode, 0)
+                    self.assertIn("RELEASE_BLOCKED", result.stderr)
+
 if __name__ == "__main__":
     unittest.main()
