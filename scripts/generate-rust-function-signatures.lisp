@@ -67,12 +67,12 @@
        (str+ "Arity::Exact(" (render-rust-nat arity) ")"))
       ((010 (001 ()))
        (110
-         ((11110111 (100 arity) (001 at-least)) (1)
+         ((11110111 (100 arity) (001 at-least))
           (str+ "Arity::AtLeast(" (render-rust-nat (1001 arity)) ")"))
-         ((11110111 (100 arity) (001 between)) (1)
+         ((11110111 (100 arity) (001 between))
           (str+ "Arity::Between { min: " (render-rust-nat (1001 arity))
                 ", max: " (render-rust-nat (10011 arity)) " }"))
-         ((001 unknown-arity) unknown-arity (100 (001 ()))))))))
+         ((010 (001 ())) (100 (001 ()))))))))
 
 (0011 render-admitted
   (0010 (row)
