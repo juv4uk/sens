@@ -172,3 +172,26 @@ The live `lib/time.lisp` calendar transform and machine encoding/lowering still 
 The release-preflight workflow is present in source but its GitHub Actions registration check reports `disabled_manually`; no successful run of the mandatory Release Preflight is present in this audit. Re-enabling the workflow requires repository Actions administration/API write access not available in this integration path. Treat this as an external GO blocker, not as permission to remove the check.
 
 **Decision remains NO-GO.** Successful T5 codec/projection/D10 tests are limited proofs and do not override red Hosted CI, native runtime, inventory, or physical-oracle evidence. This SHA is a diagnostic ancestor, not a frozen candidate; all mandatory gates must rerun and be green on one exact candidate SHA after these blockers are resolved.
+
+## Current post-reconciliation release snapshot — `f110f9fa3364ca3444579edc5d77186d5f8ae627`
+
+This is the latest fully observed release-related batch on 2026-10-12. It is a **diagnostic integration SHA**, not a frozen release candidate.
+
+| Exact-SHA gate | Result | Evidence / interpretation |
+|---|---|---|
+| Hosted runner routing | **PASS** | [run 38255095223](https://github.com/juv4uk/sens/actions/runs/38255095223) |
+| T5 migration inventory M0 | **PASS** | [run 38255095019](https://github.com/juv4uk/sens/actions/runs/38255095019); 451 sorted rows and live-registry match at this SHA. |
+| Binary executable T5 | **PASS** | [run 38255094961](https://github.com/juv4uk/sens/actions/runs/38255094961) |
+| Physical binary CLI smoke | **PASS** | [run 38255095004](https://github.com/juv4uk/sens/actions/runs/38255095004) |
+| D10 finite-transducer witness | **PASS** | [run 38255095093](https://github.com/juv4uk/sens/actions/runs/38255095093); this is a bounded witness, not universal executable coverage. |
+| Triple projection | **PASS** | [run 38255095074](https://github.com/juv4uk/sens/actions/runs/38255095074) |
+| T5 program syntax audit | **PASS** | [run 38255095208](https://github.com/juv4uk/sens/actions/runs/38255095208) |
+| Hosted CI | **FAIL** | [run 38255095083](https://github.com/juv4uk/sens/actions/runs/38255095083): migrated user demos, legacy D6 MAP, D9 AVL, filesystem/alist, content-store, time-source, and stale Core audit have red steps; release asset/negative controls and publication structure tests are green inside the same overall red job. GitHub API registration check says Release Preflight is `disabled_manually`. |
+| Vertical Day native parity | **FAIL** | [non-cancelling run 38255094957](https://github.com/juv4uk/sens/actions/runs/38255094957) fails `native_pair_car_cdr_match_the_interpreter_reference_witness`; [immutable run 38255094842](https://github.com/juv4uk/sens/actions/runs/38255094842) fails the native CPU step. The current numeric law correctly requires explicit D24+ operands; existing machine encoding/lowering still passes unqualified numbers or D1–D10 words into arithmetic. Invalid machine-form rejection passes independently. |
+| Physical SENS file-authority oracle | **BLOCKED** | [run 38255095027](https://github.com/juv4uk/sens/actions/runs/38255095027): assembled Lisp oracle migration fails before complete T5 encode/execute/attestation; no whole-corpus oracle verdict. |
+
+### Exact decision and next dependencies
+
+**NO-GO remains in force.** M0 inventory drift has been repaired and passes on this SHA; this closes the inventory defect only. The semantic/source gap remains: `lib/time.lisp` and machine lowering need a ratified way to obtain explicit D24+ values (including literal/constant and raw clock-observation handling). Do not invent implicit promotions or relax negative witnesses. Separately, repository administration must re-enable the manually disabled Release Preflight workflow so the mandatory full workspace test + Clippy gate can run; repo content edits alone did not change that GitHub Actions setting.
+
+The `l0.42.0` ref and GitHub Release were both absent at last check. This assistant did not set owner GO variables, create a tag, or publish assets. Freeze a future candidate only after the source-law and runtime/oracle blockers are resolved, Release Preflight is enabled, and all required gates are green for one exact SHA.
