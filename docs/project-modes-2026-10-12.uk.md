@@ -128,6 +128,37 @@ Proof run **38242173136 — SUCCESS**:
 зчитується з source, не входить у rank/payload і не використовується
 `BOUND`-посиланнями; семантика залежить тільки від `Local(depth,index)`.
 
+
+### F3M-5λA: application уже всередині п'яти байтів
+
+Окремий research-модуль `frame3_micro_v5_lambda_app.rs` не змінює ні
+production F3M-5, ні заморожений F3M-5λ v1. Він додає один структурний
+constructor:
+
+- `APPLY(function, argument)` — це **D2 call framing**, не новий domain resident;
+- `LAMBDA` лишається D4:0010;
+- `BOUND(n)` лишається nameless lexical reference;
+- D1/D3 операції лишаються тими самими exact-domain механізмами.
+
+Через це β-редукція тепер може бути частиною самого 40-бітного payload, без
+зовнішнього підкладання аргументу:
+
+- `00 00 00 02 4B` → `APPLY(λ.BOUND(0),1)` → exact **D1:1**;
+- `00 00 0D 06 4F` → `APPLY(APPLY(λ.λ.BOUND(1),1),0)` → exact **D1:1**.
+
+Обидва witnesses виконані **реальним SENS evaluator**, не лише research
+evaluator. `0000000000` і далі означає `λ.BOUND(0)`, тому найкоротша
+nameless identity не зрушилась.
+
+Новий combinatorial space має **683 904 239 271** extension-термів через
+12 micro-nodes і **9 019 588 596 096** через 13, тому повністю покриває
+всі `2^40` payloads усередині 13-node шару. 65 536 deterministic stratified
+roundtrips по 40-бітному простору пройшли. Це не exhaustive `2^40`
+semantic sweep і не production admission.
+
+Proof run **38263454497 — SUCCESS**.
+
+
 Межа: de-Bruijn `BOUND(n)` поки research-semantic constructor і ще не має
 окремо ратифікованої exact SENS-domain identity. Тому кандидат не може
 підмінити production F3M-5, доки не буде прийнято закон lexical reference.
