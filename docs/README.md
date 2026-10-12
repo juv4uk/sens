@@ -45,6 +45,7 @@ D7 має 126 semantic rows; `0100001` і `0101010` owner-reserved. D8 owner-rat
 
 - [`project-reality-2026-10-12.uk.md`](project-reality-2026-10-12.uk.md) — робоча картина і правила інтерпретації результатів.
 - [`../benchmarks/README.md`](../benchmarks/README.md) — **згенерований** індекс зареєстрованих стендів та окрема таблиця support-exemptions; не редагувати вручну.
+- [`../evidence/benchmark-sweep-2026-10-12.json`](../evidence/benchmark-sweep-2026-10-12.json) — повний sweep 54/54 зі збереженими чотирма FAIL, без оголошення глобального green.
 - [`../benchmarks/support-exemptions.json`](../benchmarks/support-exemptions.json) + [`../benchmarks/support-exemptions.schema.json`](../benchmarks/support-exemptions.schema.json) — явно перевірені support-каталоги, які не є benchmark stands; `scripts/benchmark_registry.py --coverage` показує решту backfill debt #4172, а `--strict` лишається фінальним воротом.
 - [`research/nano-sens-seed-v0-20261012.uk.md`](research/nano-sens-seed-v0-20261012.uk.md) — виміряний Nano-SENS baseline з відкритим seed closure.
 - [`../evidence/nano-sens-static-source-edges-2026-10-12.json`](../evidence/nano-sens-static-source-edges-2026-10-12.json) — receipt успішного статичного source-edge аудиту (окремо від повного seed-closure gate).
