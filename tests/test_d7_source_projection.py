@@ -60,6 +60,24 @@ class D7ProjectionTests(unittest.TestCase):
         self.assertFalse(one["arithmetic_number"])
         self.assertFalse(one["callable"])
 
+    def test_english_ipa_surface_keeps_owner_w7_roles_and_text_space(self) -> None:
+        cases = (
+            ("0000000", "en", "k"),
+            ("0000010", "en-ipa", "ɡ"),
+            ("0000100", "en-ipa", "ŋ"),
+            ("0100110", "en-ipa", "j"),
+            ("1100000", "en", " "),
+            ("1111010", "en-ipa", "."),
+        )
+        for bits, namespace, expected in cases:
+            with self.subTest(bits=bits, namespace=namespace):
+                result = project(bits, role="sound-text", namespace=namespace)
+                self.assertEqual(result["coordinate"], bits)
+                self.assertEqual(result["width"], 7)
+                self.assertEqual(result["surface"], expected)
+                self.assertFalse(result["callable"])
+                self.assertFalse(result["arithmetic_number"])
+
     def test_bare_or_malformed_width_does_not_gain_a_role(self) -> None:
         for bits in ("1", "00000000", "000000x", " 0000000", "0000000 "):
             with self.subTest(bits=bits):
