@@ -1368,6 +1368,47 @@ mod tests {
     }
 
     #[test]
+    fn five_byte_single_program_carries_all_d1_d3_capabilities_plus_lambda() {
+        let expr = Frame3MicroExpr::IfAtom(
+            Box::new(Frame3MicroExpr::EqAtom(
+                Box::new(Frame3MicroExpr::Lambda0(Box::new(
+                    Frame3MicroExpr::QuoteZero,
+                ))),
+                Box::new(Frame3MicroExpr::QuoteOne),
+            )),
+            Box::new(Frame3MicroExpr::CarCons(
+                Box::new(Frame3MicroExpr::QuoteZero),
+                Box::new(Frame3MicroExpr::CdrCons(
+                    Box::new(Frame3MicroExpr::QuoteOne),
+                    Box::new(Frame3MicroExpr::QuoteNil),
+                )),
+            )),
+            Box::new(Frame3MicroExpr::QuoteNil),
+        );
+
+        assert_eq!(expr.capability_mask(), CAP_ALL_F3M5);
+        let payload = encode_expr(&expr).expect("all-basis F3M5 program must fit five bytes");
+        assert_eq!(payload.len(), 5);
+        assert_eq!(decode_payload(&payload).unwrap(), expr);
+
+        let source = expr.exact_words().join(" ");
+        let actual = eval_parsed_expressions(
+            &parse_canonical_binary(&source).expect("all-basis F3M5 source"),
+            &mut Session::default(),
+        )
+        .expect("all-basis F3M5 program must execute");
+        assert_eq!(actual.value.as_predicate_bit(), Some(false));
+
+        eprintln!(
+            "F3M5_ALL_D1_D3_LAMBDA={}\tnodes={}\twords={}\t{}",
+            payload.iter().map(|byte| format!("{byte:02X}")).collect::<String>(),
+            expr.node_count(),
+            expr.exact_words().len(),
+            expr.human_projection()
+        );
+    }
+
+    #[test]
     fn five_byte_eq_program_executes_and_lambda_decodes_to_a_real_closure() {
         let eq = Frame3MicroExpr::EqAtom(
             Box::new(Frame3MicroExpr::Zero),
