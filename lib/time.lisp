@@ -180,12 +180,14 @@
 (0011 timezone-declarations->observation
   (0010 (tz-value etc-timezone-value)
     (110
-      ((and (110100110 tz-value) (11011 (110100010 tz-value) 0))
-       (111 (001 detected) (111 tz-value (111 (001 TZ) (001 ())))))
-      ((and (110100110 etc-timezone-value) (11011 (110100010 etc-timezone-value) 0))
-       (111 (001 detected) (111 etc-timezone-value (111 (001 etc-timezone) (001 ())))))
+      ((101 tz-value (001 ()))
+       (110
+         ((101 etc-timezone-value (001 ()))
+          (111 (001 unknown) (111 (001 host-declaration-unavailable) (001 ()))))
+         ((010 (001 ()))
+          (111 (001 detected) (111 etc-timezone-value (111 (001 etc-timezone) (001 ())))))))
       ((010 (001 ()))
-       (111 (001 unknown) (111 (001 host-declaration-unavailable) (001 ()))))))
+       (111 (001 detected) (111 tz-value (111 (001 TZ) (001 ())))))))
 )
 
 ; Adapt the mechanism-only host observation to public timezone meaning.
