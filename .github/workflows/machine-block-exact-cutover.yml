@@ -4,6 +4,7 @@ on:
   pull_request:
     paths:
       - "lib/machine/block-exact.lisp"
+      - "lib/machine/atoms/x86-64.lisp"
       - "crates/sens/tests/machine_block_exact_domain.rs"
       - "crates/sens/tests/support/machine_block_exact.rs"
       - "crates/sens/tests/machine_atoms.rs"
