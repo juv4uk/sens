@@ -649,6 +649,9 @@ mod tests {
             assert_eq!(unqualified.add_in_numeric_domain(&unqualified, width), None);
             assert_eq!(unqualified.add_in_numeric_domain(&qualified, width), None);
             assert_eq!(qualified.add_in_numeric_domain(&unqualified, width), None);
+            let unqualified_zero = BinaryNumber::zero();
+            assert_eq!(unqualified_zero.add_in_numeric_domain(&qualified, width), None);
+            assert_eq!(qualified.add_in_numeric_domain(&unqualified_zero, width), None);
             let (result_width, result_bits) =
                 qualified.add_in_numeric_domain(&qualified, width).unwrap();
             assert_eq!(result_width, width);
