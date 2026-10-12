@@ -23,6 +23,7 @@ class D7ProjectionTests(unittest.TestCase):
                 self.assertEqual(result["width"], 7)
                 self.assertEqual(result["domain"], "D7")
                 self.assertEqual(result["surface"], row.en)
+                self.assertEqual(result["symbol"], row.surface_symbols["en"])
                 self.assertEqual(result["semantic_role"], evidence[bits]["semantic_role"])
                 self.assertEqual(result["status"], "OWNER-RATIFIED")
                 self.assertFalse(result["callable"])
@@ -62,6 +63,7 @@ class D7ProjectionTests(unittest.TestCase):
     def test_text_digit_has_no_arithmetic_number_or_function_admission(self) -> None:
         one = project("0011111", role="sound-text", namespace="sym")
         self.assertEqual(one["surface"], "1")
+        self.assertEqual(one["symbol"], "1")
         self.assertEqual(one["semantic_role"], "text-digit")
         self.assertFalse(one["arithmetic_number"])
         self.assertFalse(one["callable"])
@@ -74,6 +76,42 @@ class D7ProjectionTests(unittest.TestCase):
         self.assertEqual(english["surface"], "varga.K.voiceless")
         self.assertEqual(ukrainian["surface"], "велярний-глухий")
         self.assertEqual(sanskrit["surface"], "ka-varga-aghoṣa")
+        self.assertEqual(ukrainian["symbol"], "к")
+        self.assertEqual(sanskrit["symbol"], "क")
+        self.assertEqual(english["symbol"], "k")
+        self.assertEqual(project("0000000", role="sound-text", namespace="укр")["symbol"], "к")
+
+    def test_surface_specific_symbols_do_not_change_width_or_aliases(self) -> None:
+        # The same exact coordinate has a different glyph by surface, not by identity.
+        self.assertEqual(project("0000000", role="sound-text", namespace="ук")["coordinate"], "0000000")
+        self.assertEqual(project("0000000", role="sound-text", namespace="san")["symbol"], "क")
+        self.assertEqual(project("0000000", role="sound-text", namespace="en")["symbol"], "k")
+
+        # Sanskrit has an admitted glyph for aspirated K; Ukrainian has no
+        # admitted 1:1 symbol, so we do not fabricate one from the Latin form.
+        aspirated_uk = project("0000001", role="sound-text", namespace="ук")
+        self.assertIsNone(aspirated_uk["symbol"])
+        self.assertEqual(project("0000001", role="sound-text", namespace="san")["symbol"], "ख")
+        self.assertEqual(project("0000001", role="sound-text", namespace="en")["symbol"], "kh")
+
+        # Text digit remains a D7 text glyph, not a Number, with script-specific numeral.
+        self.assertEqual(project("0011111", role="sound-text", namespace="ук")["symbol"], "1")
+        self.assertEqual(project("0011111", role="sound-text", namespace="en")["symbol"], "1")
+        self.assertEqual(project("0011111", role="sound-text", namespace="san")["symbol"], "१")
+
+    def test_nasal_vowels_use_surface_specific_nasalization_not_empty_universal_sym(self) -> None:
+        nasal_a = "1000010"
+        self.assertEqual(project(nasal_a, role="sound-text", namespace="san")["symbol"], "अँ")
+        self.assertEqual(project(nasal_a, role="sound-text", namespace="en")["symbol"], "ã")
+        self.assertEqual(project(nasal_a, role="sound-text", namespace="sym")["symbol"], "ã")
+        self.assertIsNone(project(nasal_a, role="sound-text", namespace="ук")["symbol"])
+
+    def test_non_glyph_and_control_symbols_are_explicit(self) -> None:
+        self.assertEqual(project("1100001", role="sound-text", namespace="ук")["symbol"], "␊")
+        self.assertEqual(project("1100010", role="sound-text", namespace="en")["symbol"], "␉")
+        self.assertEqual(project("1100101", role="sound-text", namespace="sym")["symbol"], '"')
+        # Capitalize-next-letter has no stable standalone glyph; absence is explicit.
+        self.assertIsNone(project("0100010", role="sound-text", namespace="sym")["symbol"])
 
     def test_bare_or_malformed_width_does_not_gain_a_role(self) -> None:
         for bits in ("1", "00000000", "000000x", " 0000000", "0000000 "):

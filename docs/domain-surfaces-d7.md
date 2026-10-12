@@ -14,12 +14,13 @@ D7 has 126 semantic residents of 128 possible coordinates. Owner-reserved `01000
 
 Columns: `ук → укр → san → en → LISP → sym`.
 
-All 126 residents have Ukrainian, expanded-Ukrainian, and Sanskrit explanatory surfaces. `sym` carries a concrete glyph or sound projection where one exists. D7 is a sound/text domain, so no Lisp operator names are invented: `LISP` stays `()`.
+All 126 residents have Ukrainian, expanded-Ukrainian, and Sanskrit explanatory surfaces. `sym` is a surface-indexed symbol map, not one universal glyph. For example, D7:0000000 projects as Ukrainian `к`, Devanagari `क`, and Latin `k`; D7:0011111 projects as `1` on Ukrainian/Latin surfaces and `१` in Devanagari. `LISP` stays `()` for every row because D7 is sound/text, not a Lisp callable domain. A surface with no defensible glyph stores `()` rather than borrowing another surface's symbol.
 
 ## Механічне введення D7 в Rust
 
-Джерело розміщення: `knowledge/d7-ratified.json` (#3572); людиночитна таблиця
-`lib/domains/d7.lisp` не змінюється. Команда
+Джерело розміщення й резидентів: `knowledge/d7-ratified.json` (#3572);
+`lib/domains/d7.lisp` є проєкцією для читання й гліфів, не джерелом нових
+координат. Команда
 `python3 scripts/generate-domain-owner-registry.py` матеріалізує тільки
 координати з нормативного джерела, без назв, фонемних законів, старих SID8 чи
 виконуваних примітивів. `--check` відхиляє будь-яке розходження генератора
@@ -63,3 +64,15 @@ Sound/Text. LocalOrdinal — окрема роль: джерело
 `tests/test_d7_source_projection.py`, `scripts/check-d7-current-authority.py`,
 `crates/sens/tests/d7_w7_pack.rs`. Обов'язкова перевірка D7 включена
 у `.github/workflows/triple-projection-gate.yml` для кожного push у main.
+
+
+## Символи, залежні від поверхні
+
+У таблиці `(sym ((ук …) (укр …) (san …) (en …) (LISP ()) (sym …)))` зберігає окремі гліфи:
+- `ук` і `укр` — українська графема, лише коли така проєкція визначена;
+- `san` — знак Devanagari там, де він є;
+- `en` — латинська/IAST-проєкція;
+- `sym` — збережена узагальнена проєкція для сумісності;
+- `LISP` — завжди `()`.
+
+Для звичайного велярного глухого `D7:0000000` це `к` / `क` / `k`. Для текстової цифри один `D7:0011111` це `1` / `१` / `1`. Носовість у санскритській поверхні передається candrabindu (наприклад `अँ`); латинська проєкція використовує комбінувальну тилду (наприклад `ã`). Це гліфові проєкції, а не нові резиденти або зміна семи бітів. Unicode визначає candrabindu як anunāsika і має окремі Devanagari digits; див. [таблицю Unicode Devanagari](https://unicode.org/Public/18.0.0/charts/nameslist/0900/) та [Unicode Core Spec про bindu](https://www.unicode.org/versions/Unicode17.0.0/core-spec/chapter-12/).
