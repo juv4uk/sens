@@ -1,0 +1,75 @@
+{
+  "schema": "nano-sens-static-source-edges-audit-summary/1",
+  "measured_at": "2026-10-12",
+  "status": "STATIC_SOURCE_INVENTORY_PASS_FULL_SEED_CLOSURE_BLOCKED",
+  "source_pins": {
+    "repository": "juv4uk/sens",
+    "audit_head_sha": "96ee15564d7a707d31664dca6e55b331d76ea6de",
+    "audit_tool_path": "scripts/audit-nano-sens-source-closure.py",
+    "audit_tool_blob_sha": "e6c2649de9533f7b9f0f0bb476fe50f9cb311dd2",
+    "workflow_path": ".github/workflows/nano-sens-source-closure-audit.yml",
+    "workflow_blob_sha": "1b4881c403cf89a943a59105130bf5a32a7156d9",
+    "pinned_sens_sha": "d0787a40fcea36501747732aa61b6de19fe29c70",
+    "pinned_cml_sha": "ec4ba010cebd9fdc37b39224142dcac3ee907cfe"
+  },
+  "workflow": {
+    "name": "Nano-SENS source closure edge audit",
+    "run_id": 38190369519,
+    "url": "https://github.com/juv4uk/sens/actions/runs/38190369519",
+    "conclusion": "success",
+    "self_test": {
+      "checks": 7,
+      "result": "PASS"
+    }
+  },
+  "inventories": {
+    "main_snapshot": {
+      "commit": "96ee15564d7a707d31664dca6e55b331d76ea6de",
+      "rust_files": 77,
+      "static_edges": 111,
+      "unresolved_static_observations": 0
+    },
+    "pinned_sens": {
+      "commit": "d0787a40fcea36501747732aa61b6de19fe29c70",
+      "rust_files": 71,
+      "static_edges": 90,
+      "unresolved_static_observations": 0
+    },
+    "pinned_cml": {
+      "commit": "ec4ba010cebd9fdc37b39224142dcac3ee907cfe",
+      "roots": [
+        "src/lib.rs",
+        "build.rs"
+      ],
+      "manifests": [
+        "Cargo.toml",
+        "Cargo.lock",
+        ".gitmodules"
+      ],
+      "rust_files": 66,
+      "static_edges": 83,
+      "unresolved_static_observations": 0
+    }
+  },
+  "raw_artifact": {
+    "artifact_id": 11721286686,
+    "name": "nano-sens-static-source-edges-96ee15564d7a707d31664dca6e55b331d76ea6de",
+    "url": "https://github.com/juv4uk/sens/actions/runs/38190369519/artifacts/11721286686",
+    "zip_sha256": "fd6ad9a74c1c0469203da8ef4019dc3ffa938b7aef9f0e58eadd49c0e490b969",
+    "expires_at_utc": "2026-11-11T01:03:32Z"
+  },
+  "interpretation": {
+    "positive_result": "The conservative static source-edge inventory completed and reported no unresolved observations within the analyzer's supported static edge patterns for these three pinned snapshots.",
+    "not_proven": [
+      "minimum seed bytes or whole-chain seed closure",
+      "active rustc cfg resolution for all build configurations",
+      "build-script and proc-macro execution inputs",
+      "complete Cargo/workspace dependency closure",
+      "minimum vendored crate subset or registry/cache needs",
+      "minimum Git refs/objects",
+      "toolchain, OS and shared-library byte inclusion",
+      "controlled clean offline replay"
+    ],
+    "policy": "Keep the measured runner/component baseline and partial operational-input subtotal labeled separately from any full seed total."
+  }
+}
