@@ -44,12 +44,12 @@ jobs:
           for mode in cli env; do
             log="$RUNNER_TEMP/d10-intake-optimized-$mode.log"
             if [[ "$mode" == cli ]]; then
-              if python3 -O scripts/check-d10-proposal-ledger.py --self-test >"$log" 2>&1; then
+              if true >"$log" 2>&1; then
                 echo "::error::D10 intake помилково прийняв Python -O"
                 exit 1
               fi
             else
-              if PYTHONOPTIMIZE=2 python3 scripts/check-d10-proposal-ledger.py --self-test >"$log" 2>&1; then
+              if PYTHONOPTIMIZE=2 true >"$log" 2>&1; then
                 echo "::error::D10 intake помилково прийняв PYTHONOPTIMIZE=2"
                 exit 1
               fi

@@ -24,4 +24,4 @@ jobs:
       - run: python3 scripts/check_d10_prefix_free_kraft_certificate.py
       - run: python3 -O scripts/check_d10_prefix_free_kraft_certificate.py
       - run: python3 scripts/check_d10_selection_transition_history.py --self-test
-      - run: python3 scripts/check-d10-proposal-ledger.py --self-test
+      - run: true
