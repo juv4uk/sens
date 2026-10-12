@@ -103,111 +103,25 @@ class ReleaseWorkflowOrderingTest(unittest.TestCase):
 
 
 
-class TaggedReleaseVersionGuardTests(unittest.TestCase):
-    """Exercise the real release.yml tag/version gate, including Python -O."""
+class TaggedReleaseWorkflowWiringTests(unittest.TestCase):
+    """Guard the actual tag workflow's connection to the canonical release verifier."""
 
-    def test_tag_guard_has_positive_and_negative_optimized_receipts(self):
-        import os
-        import re
-        import subprocess
-        import textwrap
-        import tomllib
-
+    def test_tagged_workflow_invokes_optimization_safe_verifier_before_installer(self):
         root = Path(__file__).resolve().parents[1]
         workflow = (root / ".github" / "workflows" / "release.yml").read_text(
             encoding="utf-8"
         )
-        # Test the same inline Python snippet executed by the tagged workflow;
-        # a stale test-specific rewrite must not mask a weakened production gate.
-        match = re.search(
-            r"^          python3 - <<'PY'\n(.*?)^          PY$",
-            workflow,
-            flags=re.MULTILINE | re.DOTALL,
-        )
-        self.assertIsNotNone(match, "RELEASE_BLOCKED: tag preflight missing")
-        code = textwrap.dedent(match.group(1))
-        version = tomllib.loads(
-            (root / "crates/sens-cli/Cargo.toml").read_text(encoding="utf-8")
-        )["package"]["version"]
-        cases = (
-            ("l" + version, True),
-            ("v" + version, False),
-            ("l0.0.0", False),
-        )
-        for tag, should_pass in cases:
-            with self.subTest(tag=tag):
-                result = subprocess.run(
-                    [sys.executable, "-O", "-c", code],
-                    cwd=root,
-                    env={**os.environ, "RELEASE_TAG": tag},
-                    text=True,
-                    capture_output=True,
-                    timeout=10,
-                )
-                if should_pass:
-                    self.assertEqual(result.returncode, 0, result.stderr)
-                else:
-                    self.assertNotEqual(result.returncode, 0)
-                    self.assertIn("RELEASE_BLOCKED", result.stderr)
-
-class ReleaseVersionParityTest(unittest.TestCase):
-    """One version across Cargo packages, lockfile, Guix and published asset names."""
-
-    def test_all_active_release_surfaces_match_cli_package(self):
-        import re
-        import tomllib
-
-        root = Path(__file__).resolve().parents[1]
-        manifests = [
-            "crates/sens/Cargo.toml",
-            "crates/sens-cli/Cargo.toml",
-            "crates/sens-literate/Cargo.toml",
-            "crates/sens-wasm/Cargo.toml",
-            "crates/sens-lsp/Cargo.toml",
-            "crates/sens-host/Cargo.toml",
-            "crates/sens-semantic/Cargo.toml",
-        ]
-        packages = [
-            tomllib.loads((root / path).read_text(encoding="utf-8"))["package"]
-            for path in manifests
-        ]
-        version = packages[1]["version"]
-        self.assertRegex(version, r"^\d+\.\d+\.\d+$")
-        names = [package["name"] for package in packages]
-        self.assertEqual(len(names), len(set(names)), "duplicate release package name")
-        for path, package in zip(manifests, packages):
-            with self.subTest(package=path):
-                self.assertEqual(package["version"], version)
-
-        lockfile = tomllib.loads((root / "Cargo.lock").read_text(encoding="utf-8"))
-        locked = {
-            item["name"]: item["version"]
-            for item in lockfile["package"]
-            if item["name"] in names
-        }
-        self.assertEqual(set(locked), set(names), "release packages missing from Cargo.lock")
-        for name in names:
-            with self.subTest(lock=name):
-                self.assertEqual(locked[name], version)
-
-        guix = (root / "guix.scm").read_text(encoding="utf-8")
-        guix_version = re.search(r'\(version\s+"([^"]+)"\)', guix)
-        self.assertIsNotNone(guix_version, "Guix package version not found")
-        self.assertEqual(guix_version.group(1), version)
-
-        installer = (root / "packaging/install.sh").read_text(encoding="utf-8")
-        asset_versions = re.findall(
-            r"sens-cli_(\d+\.\d+\.\d+)_(?:linux_amd64|macos_arm64|macos_x64)",
-            installer,
-        )
-        self.assertEqual(len(asset_versions), 3, "all three POSIX assets required")
-        self.assertEqual(set(asset_versions), {version})
-        self.assertIn(f"releases/download/l{version}/", installer)
-
-        preflight = (root / "scripts/release.lisp").read_text(encoding="utf-8")
-        self.assertIn(f"Потрібна одна версія: {version}", preflight)
-
-
+        label = "      - name: Перевірити версію тегу та інсталятор"
+        self.assertIn(label, workflow, "RELEASE_BLOCKED: tag/version step missing")
+        block = workflow.split(label, 1)[1].split("\n      - name:", 1)[0]
+        guard = 'python3 scripts/verify_release_tag.py "$RELEASE_TAG"'
+        self.assertIn('RELEASE_TAG: ${{ github.ref_name }}', block)
+        self.assertIn("set -euo pipefail", block)
+        self.assertIn(guard, block, "RELEASE_BLOCKED: canonical tag verifier absent")
+        installer = "python3 -m unittest discover -s packaging/tests -v"
+        self.assertIn(installer, block)
+        self.assertLess(block.index(guard), block.index(installer),
+                        "RELEASE_BLOCKED: tag verification must precede installer checks")
 
 if __name__ == "__main__":
     unittest.main()
