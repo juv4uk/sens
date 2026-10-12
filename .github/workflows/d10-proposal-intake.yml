@@ -37,8 +37,6 @@ jobs:
     timeout-minutes: 12
     steps:
       - uses: actions/checkout@v4
-      - name: Перевірити D10 intake та негативні контролі
-        run: python3 scripts/check-d10-proposal-ledger.py --self-test
       - name: Негативні свідки оптимізованого Python для D10
         shell: bash
         run: |

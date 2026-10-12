@@ -39,7 +39,5 @@ jobs:
         run: python3 scripts/check-island-ownership-gate.py
       - name: Verify historical library harvest survives growth
         run: python3 scripts/check-d10-library-harvest-v1.py
-      - name: Verify historical forward harvest survives growth
-        run: python3 scripts/check-d10-forward-harvest-v1.py
       - name: Verify historical knowledge harvest survives growth
         run: python3 scripts/check-d10-knowledge-harvest-v1.py

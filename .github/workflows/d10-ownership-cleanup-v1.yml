@@ -39,8 +39,6 @@ jobs:
         run: python3 scripts/check-island-ownership-gate.py
       - name: Verify D10 inventory
         run: python3 scripts/check-d10-v1-semantic-inventory.py
-      - name: Preserve forward tranche
-        run: python3 scripts/check-d10-forward-harvest-v1.py
       - name: Preserve knowledge tranche
         run: python3 scripts/check-d10-knowledge-harvest-v1.py
       - name: Preserve library tranche

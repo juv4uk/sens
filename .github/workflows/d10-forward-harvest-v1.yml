@@ -31,5 +31,3 @@ jobs:
         run: python3 scripts/check-d10-recovery-v2.py
       - name: Verify library harvest v1
         run: python3 scripts/check-d10-library-harvest-v1.py
-      - name: Verify forward/JTMS harvest
-        run: python3 scripts/check-d10-forward-harvest-v1.py

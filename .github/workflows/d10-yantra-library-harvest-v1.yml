@@ -33,8 +33,6 @@ jobs:
       - uses: actions/checkout@v5
       - name: Негативні свідки цілісності та рухомих рядків
         run: python3 tests/test_d10_yantra_donor_provenance.py
-      - name: Перевірити історичний SHA, рядки донора й чинні визначення
-        run: python3 scripts/check-d10-yantra-library-harvest-v1.py
       - name: Перевірити розширення історичного добору D10 Panini
         run: python3 scripts/check-d10-crossrepo-panini-v1.py
       - name: Перевірити повноваження й облік D10

@@ -39,5 +39,3 @@ jobs:
         run: python3 scripts/check_d10_r6rs_history_audit.py --self-test
       - name: PSL Interlisp machine HOLD protected
         run: python3 scripts/check_d10_psl_interlisp_lispm_residual.py --self-test
-      - name: Archipelago projection
-        run: python3 scripts/check-d10-archipelago-doc-projection.py

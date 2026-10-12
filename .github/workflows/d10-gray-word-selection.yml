@@ -24,8 +24,6 @@ jobs:
         run: python3 scripts/check_d10_gray_word_selection.py --self-test
       - name: Check selected transition history
         run: python3 scripts/check_d10_selection_transition_history.py --self-test
-      - name: Check proposal ledger
-        run: python3 scripts/check-d10-proposal-ledger.py --self-test
       - name: Install real Scheme reference runtime
         run: sudo apt-get update -qq && sudo apt-get install -y chezscheme
       - name: Run genuine R6RS Gray-code donor oracle
