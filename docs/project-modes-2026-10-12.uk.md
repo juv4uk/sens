@@ -80,6 +80,7 @@ Encoder повертає найкоротший допустимий профі�
 Green evidence:
 - dense base proof: GitHub Actions run **38194615315**;
 - final-page/full-capability search: GitHub Actions run **38195272188**.
+- F3M-4 32-bit dense proof: GitHub Actions run **38197907496** — SUCCESS.
 
 **Межа доказу:** ще не заявляється exhaustive evaluator sweep усіх
 16 777 216 F3M-3 чи 4 294 967 296 F3M-4 програм. Для F3M-4 доведено
