@@ -685,6 +685,7 @@
 ; нуль (`ErrorKind::InvalidForm`) — маршрутизація через нього тут
 ; перевикористовує цю реальну, вже перевірену помилку замість
 ; вигадування другої, іншої для того самого стану.
+; Recurse through this Lisp-owned integer quotient; D5:10111 is exact division, not floor division.
 (0011 quotient
   (0010 (a b)
     (110
@@ -695,11 +696,12 @@
          ((0100 (11010 a b))
           (let ((chunk+mult (largest-chunk a b b 1)))
             (01010 (011 chunk+mult)
-               (10111 (01011 a (100 chunk+mult)) b)))))))))
+               (quotient (01011 a (100 chunk+mult)) b)))))))))
 
+; The remainder uses the same Lisp-owned integer quotient: a - b * floor(a / b).
 (0011 mod
   (0010 (a b)
-    (01011 a (10110 b (10111 a b)))))
+    (01011 a (10110 b (quotient a b)))))
 
 ; `<=` and `>=` stay Lisp-derived, but #216 now requires the derived
 ; operators to preserve the same exact-Q answer algebra as `<`, `>` and `=`:

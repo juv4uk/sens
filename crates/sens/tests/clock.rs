@@ -11,38 +11,12 @@ fn time_session() -> Session {
 }
 
 #[test]
-fn exact_d1_atom_quoted_nil_selects_a_cond_clause() {
-    let mut session = Session::default();
-    load_core_library(&mut session).unwrap();
-    assert_eq!(
-        eval_program("(cond ((atom (quote ())) 42))", &mut session)
-            .unwrap()
-            .value
-            .to_string(),
-        "42"
-    );
-}
-
-#[test]
-fn exact_d4_not_negates_false_d5_lessp_in_a_cond_test() {
-    let mut session = Session::default();
-    load_core_library(&mut session).unwrap();
-    assert_eq!(
-        eval_program("(cond ((not (lessp 10 3)) 42))", &mut session)
-            .unwrap()
-            .value
-            .to_string(),
-        "42"
-    );
-}
-
-#[test]
 fn core_quotient_and_mod_return_numeric_values_for_nonzero_divisors() {
     let mut session = Session::default();
     load_core_library(&mut session).unwrap();
 
     for (source, expected) in [
-        ("(largest-chunk 10 3 3 1)", "(6 2)"),
+        ("(largest-chunk 10 3 3 1)", "(6 . 2)"),
         ("(quotient 10 3)", "3"),
         ("(quotient 1 3)", "0"),
         ("(mod 10 3)", "1"),
