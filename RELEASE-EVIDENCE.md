@@ -143,3 +143,32 @@ The newest complete diagnostic batch currently observed for main is SHA `b1a43d4
 - `packaging/tests/test_release_ci_check_runs.py`: 13 локальних тестів (із них 11 сценаріїв позитивних/негативних check-run даних) і окрема перевірка порядку workflow; синтетичні fixtures **не** заміняють реальний Hosted/Native proof.
 - `focused release preflight` має бути виконаний на candidate SHA (за потреби через існуючий `workflow_dispatch`, якщо `paths` не запустили workflow автоматично). Обов'язковий full-workspace тест/Clippy на тому самому SHA і незалежні мовні докази залишаються окремими воротами.
 - Інтеграційні коміти: [`8aabc6df`](https://github.com/juv4uk/sens/commit/8aabc6df6e12b1f1003aaa266865ea0dac79f958), [`a864dce5`](https://github.com/juv4uk/sens/commit/a864dce59105e4c597773c9851fb09bc8cd73c38), [`5a78cd68`](https://github.com/juv4uk/sens/commit/5a78cd68cabfb769e0556845cd4c3ddb4c5e5825). Реальний `GO` ще не отримано; `l0.42.0` не теговано.
+
+## Exact-head Contract 11.9 / D24+ impact — 2026-10-12
+
+The completed diagnostic batch for `main@9612f4d0f27d479b5779e47f90be896285466b57` records a deeper integration blocker: the current Core math law now requires explicit D24+ qualified numeric values and rejects unqualified Numbers and D1–D10 binary words as arithmetic operands. The new negative witness `crates/sens/tests/math_domain_exclusivity.rs` is an active discovered inventory row. This is a contract boundary; do not “fix” it by implicit promotion or by weakening the negative controls.
+
+| Required gate | Result on `9612f4d0f27d479b5779e47f90be896285466b57` | Evidence |
+|---|---|---|
+| Hosted runner routing | **PASS** | [run 38253883643](https://github.com/juv4uk/sens/actions/runs/38253883643) |
+| Triple projection | **PASS** | [run 38253883126](https://github.com/juv4uk/sens/actions/runs/38253883126) |
+| Binary executable T5 | **PASS** | [run 38253883558](https://github.com/juv4uk/sens/actions/runs/38253883558) |
+| Binary-only SENS execution | **PASS** | [run 38253883385](https://github.com/juv4uk/sens/actions/runs/38253883385) |
+| Physical binary CLI smoke | **PASS** | [run 38253883100](https://github.com/juv4uk/sens/actions/runs/38253883100) |
+| T5 program syntax audit | **PASS** | [run 38253883105](https://github.com/juv4uk/sens/actions/runs/38253883105) |
+| D10 finite-transducer witness | **PASS** | [run 38253883131](https://github.com/juv4uk/sens/actions/runs/38253883131) |
+| Nano-SENS source-closure audit | **PASS** | [run 38253883581](https://github.com/juv4uk/sens/actions/runs/38253883581) |
+| EQ/COND Rust oracle migration | **PASS** | [run 38253883751](https://github.com/juv4uk/sens/actions/runs/38253883751) |
+| Performance scoreboard | **PASS** | [run 38253882963](https://github.com/juv4uk/sens/actions/runs/38253882963); this is not release correctness evidence |
+| Hosted CI | **FAIL** | [run 38253883681](https://github.com/juv4uk/sens/actions/runs/38253883681): clock/time witnesses fail under the explicit D24+ operand law; the strict legacy D3 scanner still reports many live-source findings (799 in this scan), and `test_island_math_evidence_guard_uses_only_d1_cond_tests` finds 60 legacy three-field COND clauses in `scripts/check-island-math-evidence.lisp`. The independent release-preflight registration check reports workflow state `disabled_manually`. |
+| Native Vertical Day | **FAIL** | [run 38253883107](https://github.com/juv4uk/sens/actions/runs/38253883107) and [run 38253883687](https://github.com/juv4uk/sens/actions/runs/38253883687): the positive native CONS/CAR and EQ/COND witnesses fail because machine lowering/encoding still performs math with unqualified numbers or D1–D10 bit words, rejected with `math requires explicit D24+ operands`. The unadmitted-UD2 negative witness is separate and passing; it does not establish positive execution parity. |
+| Independent physical SENS authority oracle | **BLOCKED** | [run 38253883767](https://github.com/juv4uk/sens/actions/runs/38253883767): quoted `binary` is unadmitted Text7 context; no migration verdict, no whole-corpus T5 oracle PASS. |
+| T5 inventory M0 | **FAIL on that SHA; follow-up repair in progress** | [run 38253883782](https://github.com/juv4uk/sens/actions/runs/38253883782) found two live paths missing from the manifest. The inventory was updated, and a subsequent main-head run then surfaced another add/remove pair as source files changed. Current manifest correction on `main@0b33dd6c1cb74dd85c0ba7c4963a3101bac01c5f` removes the no-longer-discovered `.github/workflows/ci-hosted.yml` row and adds `crates/sens/tests/math_domain_exclusivity.rs`; its validation is queued as [run 38254647511](https://github.com/juv4uk/sens/actions/runs/38254647511), **not yet PASS**. |
+
+### Unresolved source-law dependency
+
+The live `lib/time.lisp` calendar transform and machine encoding/lowering still rely on decimal/unqualified numbers. Current numeric policy says decimal-literal lowering is not ratified and forbids implicit D1–D10/unqualified-number arithmetic. The necessary design choice is therefore **not** a Rust cast: an owner-ratified source/reader mechanism must create domain-qualified D24+ constants and typed raw clock observations, or those functions remain blocked. Until that mechanism exists and independent behavior parity passes, the old clock result cannot be certified under Contract 11.9.
+
+The release-preflight workflow is present in source but its GitHub Actions registration check reports `disabled_manually`; no successful run of the mandatory Release Preflight is present in this audit. Re-enabling the workflow requires repository Actions administration/API write access not available in this integration path. Treat this as an external GO blocker, not as permission to remove the check.
+
+**Decision remains NO-GO.** Successful T5 codec/projection/D10 tests are limited proofs and do not override red Hosted CI, native runtime, inventory, or physical-oracle evidence. This SHA is a diagnostic ancestor, not a frozen candidate; all mandatory gates must rerun and be green on one exact candidate SHA after these blockers are resolved.
