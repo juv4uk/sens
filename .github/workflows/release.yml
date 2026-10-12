@@ -5,7 +5,12 @@ on:
     tags: ['l*']
 
 permissions:
-  contents: write
+  contents: read
+
+# Never publish a partial release or let concurrent tagged runs race.
+concurrency:
+  group: sens-release-${{ github.ref }}
+  cancel-in-progress: false
 
 jobs:
   test:
@@ -93,51 +98,19 @@ jobs:
           print("RELEASE_TRIPLE_FULL_CORPUS_PASS")
           PY
 
+      - name: Required full workspace test (same tagged SHA)
+        run: cargo test --locked --workspace
+
+      - name: Required full workspace Clippy (same tagged SHA)
+        run: cargo clippy --locked --workspace --all-targets -- -D warnings
+
       - name: focused release clippy
-        run: cargo clippy -p sens -p sens-cli --all-targets -- -D warnings
+        run: cargo clippy --locked -p sens -p sens-cli --all-targets -- -D warnings
 
-
-  create-release:
-    name: Create the GitHub release
-    needs: test
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v5
-      # Creates the release once, before any asset-uploading job runs. Without
-      # this, build-cli's 4 matrix jobs and build-web all raced to create the
-      # same tag_name concurrently — softprops/action-gh-release only upserts
-      # cleanly against a release that already exists; several simultaneous
-      # "does it exist yet" checks can all say no and all try to create it,
-      # and only the first one to land succeeds (l0.11.0's build-cli and
-      # build-web jobs all failed with "already_exists" this way).
-      # Створює реліз один раз, до того, як запуститься будь-яка джоба
-      # заливання asset'ів. Без цього 4 матричні джоби build-cli і build-web
-      # усі одночасно змагались створити той самий tag_name —
-      # softprops/action-gh-release чисто апсертить лише в реліз, що вже
-      # існує; кілька одночасних перевірок "чи він уже є" можуть усі
-      # відповісти "ні" й усі спробувати створити, і успішною буде лише
-      # перша, що доїде (саме так усі джоби build-cli й build-web для
-      # l0.11.0 впали з "already_exists").
-      # Erstellt das Release einmal, bevor irgendein Asset-Upload-Job läuft.
-      # Ohne dies liefen sich die 4 Matrix-Jobs von build-cli und build-web
-      # gegenseitig ins Rennen, um denselben tag_name zu erstellen —
-      # softprops/action-gh-release upsertet nur sauber gegen ein bereits
-      # existierendes Release; mehrere gleichzeitige "existiert es schon"
-      # Prüfungen können alle Nein sagen und alle versuchen zu erstellen,
-      # und nur die erste, die ankommt, gewinnt (genau so scheiterten
-      # l0.11.0s build-cli- und build-web-Jobs mit "already_exists").
-      - name: Create release
-        uses: softprops/action-gh-release@v1
-        with:
-          name: Release ${{ github.ref_name }}
-          tag_name: ${{ github.ref_name }}
-          draft: true
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   publish-island-manifest:
     name: Publish generated self-bootstrap island manifest
-    needs: create-release
+    needs: test
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
@@ -182,21 +155,19 @@ jobs:
           )
           print(destination.read_text(encoding="utf-8"))
 
-      - name: Upload generated manifest and installer script
-        uses: softprops/action-gh-release@v1
+      - name: Stage manifest and installer (not a public release)
+        uses: actions/upload-artifact@v4
         with:
-          files: |
+          name: release-manifest
+          path: |
             islands-manifest-v1.json
             packaging/install.sh
-          name: Release ${{ github.ref_name }}
-          tag_name: ${{ github.ref_name }}
-          draft: true
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          if-no-files-found: error
+          retention-days: 7
 
   build-cli:
     name: sens-cli · ${{ matrix.os }}
-    needs: create-release
+    needs: test
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
@@ -245,19 +216,17 @@ jobs:
           mv "$SRC" "$DST"
           echo "ASSET_PATH=$DST" >> "$GITHUB_ENV"
 
-      - name: Upload
-        uses: softprops/action-gh-release@v1
+      - name: Stage CLI asset (one unique artifact per matrix leg)
+        uses: actions/upload-artifact@v4
         with:
-          files: ${{ env.ASSET_PATH }}
-          name: Release ${{ github.ref_name }}
-          tag_name: ${{ github.ref_name }}
-          draft: true
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          name: release-cli-${{ matrix.asset_suffix }}
+          path: ${{ env.ASSET_PATH }}
+          if-no-files-found: error
+          retention-days: 7
 
   build-msi:
     name: sens-cli · Windows MSI installer
-    needs: create-release
+    needs: test
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v5
@@ -292,19 +261,17 @@ jobs:
             packaging/windows/sens.wxs
           if (-not (Test-Path "sens-cli_${VERSION}_windows_x64.msi")) { throw 'MSI was not produced.' }
 
-      - name: Upload
-        uses: softprops/action-gh-release@v1
+      - name: Stage MSI (not a public release)
+        uses: actions/upload-artifact@v4
         with:
-          files: sens-cli_*_windows_x64.msi
-          name: Release ${{ github.ref_name }}
-          tag_name: ${{ github.ref_name }}
-          draft: true
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          name: release-msi
+          path: sens-cli_*_windows_x64.msi
+          if-no-files-found: error
+          retention-days: 7
 
   build-web:
     name: Portable web REPL · single HTML
-    needs: create-release
+    needs: test
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
@@ -327,152 +294,126 @@ jobs:
           node scripts/make-portable-web.mjs public/sens-cli-web.html sens-cli-web.html
           test -s sens-cli-web.html
 
-      - name: Upload
-        uses: softprops/action-gh-release@v1
+      - name: Stage portable HTML (not a public release)
+        uses: actions/upload-artifact@v4
         with:
-          files: sens-cli-web.html
-          name: Release ${{ github.ref_name }}
-          tag_name: ${{ github.ref_name }}
-          draft: true
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          name: release-web
+          path: sens-cli-web.html
+          if-no-files-found: error
+          retention-days: 7
 
-
-  publish-release:
-    name: Verify complete draft and publish atomically
-    needs: [test, create-release, publish-island-manifest, build-cli, build-msi, build-web]
+  release-publish:
+    name: Final SHA-pinned publish only after ALL jobs are green
+    needs: [test, publish-island-manifest, build-cli, build-msi, build-web]
     runs-on: ubuntu-latest
-    env:
-      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      RELEASE_TAG: ${{ github.ref_name }}
+    permissions:
+      contents: write
     steps:
-      - name: Verify the release is still a draft on the exact current main SHA
+      - uses: actions/checkout@v5
+      - name: Verify exact main SHA, version and explicit owner GO
         shell: bash
+        env:
+          RELEASE_GO_SHA: ${{ vars.SENS_RELEASE_GO_SHA }}
+          RELEASE_GO_TAG: ${{ vars.SENS_RELEASE_GO_TAG }}
         run: |
           set -euo pipefail
-          main_sha="$(gh api "repos/${GITHUB_REPOSITORY}/git/ref/heads/main" --jq '.object.sha')"
-          if [[ "$main_sha" != "$GITHUB_SHA" ]]; then
-            echo "RELEASE_BLOCKED: tag SHA $GITHUB_SHA is not current main SHA $main_sha" >&2
-            exit 1
-          fi
-          draft="$(gh api "repos/${GITHUB_REPOSITORY}/releases/tags/${RELEASE_TAG}" --jq '.draft')"
-          if [[ "$draft" != "true" ]]; then
-            echo "RELEASE_BLOCKED: release was not kept as a draft through asset staging" >&2
-            exit 1
-          fi
-
-      - name: Remove stale SHA256SUMS from a previous failed attempt
-        shell: bash
-        run: |
-          set -euo pipefail
-          release_id="$(gh api "repos/${GITHUB_REPOSITORY}/releases/tags/${RELEASE_TAG}" --jq '.id')"
-          stale_id="$(gh api --paginate "repos/${GITHUB_REPOSITORY}/releases/${release_id}/assets" --jq '.[] | select(.name == "SHA256SUMS") | .id' | head -n 1 || true)"
-          if [[ -n "$stale_id" ]]; then
-            gh api --method DELETE "repos/${GITHUB_REPOSITORY}/releases/assets/${stale_id}"
-          fi
-
-      - name: Download, require the complete platform set, and calculate SHA-256
-        shell: bash
-        run: |
-          set -euo pipefail
-          assets_dir="$RUNNER_TEMP/sens-release-assets"
-          mkdir -p "$assets_dir"
-          gh release download "$RELEASE_TAG" --repo "$GITHUB_REPOSITORY" --dir "$assets_dir" \
-            --pattern "sens-cli_*" \
-            --pattern "islands-manifest-v1.json" \
-            --pattern "install.sh"
-          python3 - "$assets_dir" "$RELEASE_TAG" <<'PY'
-          import hashlib
-          import sys
-          from pathlib import Path
-
-          root = Path(sys.argv[1])
-          version = sys.argv[2].removeprefix("l")
-          required = {
-              f"sens-cli_{version}_linux_amd64",
-              f"sens-cli_{version}_windows_x64.exe",
-              f"sens-cli_{version}_macos_x64",
-              f"sens-cli_{version}_macos_arm64",
-              f"sens-cli_{version}_windows_x64.msi",
-              "sens-cli-web.html",
-              "islands-manifest-v1.json",
-              "install.sh",
+          test "$GITHUB_REF_TYPE" = "tag"
+          test "$GITHUB_REF_NAME" = "l$(python3 -c 'import pathlib,tomllib; print(tomllib.loads(pathlib.Path("crates/sens-cli/Cargo.toml").read_text())["package"]["version"])')"
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          git fetch --no-tags --depth=1 origin main
+          test "$(git rev-parse FETCH_HEAD)" = "$GITHUB_SHA" || {
+            echo "RELEASE_BLOCKED: candidate tag is not current main"; exit 1;
           }
-          assets = sorted((p for p in root.iterdir() if p.is_file()), key=lambda p: p.name)
-          present = {p.name for p in assets}
-          missing = sorted(required - present)
-          unexpected = sorted(present - required)
-          if missing:
-              raise SystemExit("RELEASE_BLOCKED: missing required release assets: " + ", ".join(missing))
-          if unexpected:
-              raise SystemExit("RELEASE_BLOCKED: unexpected release assets: " + ", ".join(unexpected))
-          unexpected = sorted(present - required)
-          if unexpected:
-              raise SystemExit("RELEASE_BLOCKED: unexpected assets in staged set: " + ", ".join(unexpected))
-          lines = []
-          for path in assets:
-              digest = hashlib.sha256(path.read_bytes()).hexdigest()
-              lines.append(f"{digest}  {path.name}")
-          (root / "SHA256SUMS").write_text("\n".join(lines) + "\n", encoding="ascii")
-          print("\n".join(lines))
-          PY
-          echo "ASSETS_DIR=$assets_dir" >> "$GITHUB_ENV"
+          if [[ -z "$RELEASE_GO_SHA" || -z "$RELEASE_GO_TAG" || "$RELEASE_GO_SHA" != "$GITHUB_SHA" || "$RELEASE_GO_TAG" != "$GITHUB_REF_NAME" ]]; then
+            echo "RELEASE_BLOCKED: exact-SHA owner GO variables are missing or mismatched"
+            exit 1
+          fi
 
-      - name: Upload SHA-256 manifest to the draft
+      - name: Download all independently built artifacts
+        uses: actions/download-artifact@v4
+        with:
+          pattern: release-*
+          merge-multiple: true
+          path: dist
+
+      - name: Reject missing, extra or empty assets; produce exact SHA-256 manifest
         shell: bash
         run: |
           set -euo pipefail
-          gh release upload "$RELEASE_TAG" "$ASSETS_DIR/SHA256SUMS" --repo "$GITHUB_REPOSITORY" --clobber
-
-      - name: Re-download the staged assets and verify their uploaded bytes
-        shell: bash
-        run: |
-          set -euo pipefail
-          verify_dir="$RUNNER_TEMP/sens-release-verify"
-          mkdir -p "$verify_dir"
-          gh release download "$RELEASE_TAG" --repo "$GITHUB_REPOSITORY" --dir "$verify_dir"
-          python3 - "$verify_dir" "$RELEASE_TAG" <<'PY'
-          import sys
+          python3 - <<'PY'
+          import hashlib
+          import json
+          import os
           from pathlib import Path
 
-          root = Path(sys.argv[1])
-          version = sys.argv[2].removeprefix("l")
+          root = Path("dist")
+          tag = os.environ["GITHUB_REF_NAME"]
+          sha = os.environ["GITHUB_SHA"]
+          if not tag.startswith("l") or len(sha) != 40:
+              raise SystemExit("RELEASE_BLOCKED: invalid tag or SHA")
+          version = tag[1:]
           expected = {
               f"sens-cli_{version}_linux_amd64",
               f"sens-cli_{version}_windows_x64.exe",
+              f"sens-cli_{version}_windows_x64.msi",
               f"sens-cli_{version}_macos_x64",
               f"sens-cli_{version}_macos_arm64",
-              f"sens-cli_{version}_windows_x64.msi",
               "sens-cli-web.html",
               "islands-manifest-v1.json",
               "install.sh",
-              "SHA256SUMS",
           }
-          actual = {p.name for p in root.iterdir() if p.is_file()}
-          if actual != expected:
-              raise SystemExit(
-                  "RELEASE_BLOCKED: uploaded asset inventory mismatch; "
-                  f"missing={sorted(expected - actual)}, extra={sorted(actual - expected)}"
-              )
-          PY
-          (
-            cd "$verify_dir"
-            sha256sum --check SHA256SUMS
+          if not root.is_dir():
+              raise SystemExit("RELEASE_BLOCKED: dist directory missing")
+          seen = {p.name for p in root.iterdir()}
+          if seen != expected:
+              raise SystemExit(f"RELEASE_BLOCKED: asset set mismatch missing={sorted(expected-seen)} extra={sorted(seen-expected)}")
+          rows = []
+          provenance = {"schema": "sens-release-assets/v1", "tag": tag, "commit": sha, "contract": "11.9", "assets": []}
+          for name in sorted(expected):
+              p = root / name
+              if not p.is_file() or p.is_symlink() or p.stat().st_size == 0:
+                  raise SystemExit(f"RELEASE_BLOCKED: missing, symlink or empty asset: {name}")
+              digest = hashlib.sha256(p.read_bytes()).hexdigest()
+              rows.append(f"{digest}  {name}\n")
+              provenance["assets"].append({"name": name, "sha256": digest, "bytes": p.stat().st_size})
+          (root / "SHA256SUMS").write_text("".join(rows), encoding="ascii")
+          (root / "release-provenance.json").write_text(
+              json.dumps(provenance, indent=2, sort_keys=True) + "\n", encoding="utf-8"
           )
-          echo "UPLOADED_ASSET_BYTES_SHA256=PASS"
+          p = root / "release-provenance.json"
+          rows.append(f"{hashlib.sha256(p.read_bytes()).hexdigest()}  {p.name}\n")
+          (root / "SHA256SUMS").write_text("".join(rows), encoding="ascii")
+          print(f"RELEASE_STAGED {len(expected)} artifacts, commit={sha}, with provenance and SHA256SUMS")
+          PY
+          (cd dist && sha256sum --check SHA256SUMS)
 
-      - name: Publish only after every required job and asset verification succeeded
+      - name: Create DRAFT, verify downloaded bytes, then publish
         shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail
-          main_sha="$(gh api "repos/${GITHUB_REPOSITORY}/git/ref/heads/main" --jq '.object.sha')"
-          if [[ "$main_sha" != "$GITHUB_SHA" ]]; then
-            echo "RELEASE_BLOCKED: main advanced after verification; tag SHA $GITHUB_SHA is no longer main SHA $main_sha" >&2
+          if gh release view "$GITHUB_REF_NAME" --json isDraft >/dev/null 2>&1; then
+            echo "RELEASE_BLOCKED: release record already exists; refuse overwrite"
             exit 1
           fi
-          draft="$(gh api "repos/${GITHUB_REPOSITORY}/releases/tags/${RELEASE_TAG}" --jq '.draft')"
-          if [[ "$draft" != "true" ]]; then
-            echo "RELEASE_BLOCKED: refusing to publish a release that is already public or is not a draft" >&2
-            exit 1
-          fi
-          gh release edit "$RELEASE_TAG" --repo "$GITHUB_REPOSITORY" --draft=false
+          gh release create "$GITHUB_REF_NAME" dist/* \
+            --draft --verify-tag \
+            --title "SENS $GITHUB_REF_NAME · Contract 11.9" \
+            --notes "SENS Contract 11.9 release on exact commit $GITHUB_SHA. Source of truth: RELEASE.md and RELEASE-EVIDENCE.md at this commit."
+          mkdir -p "$RUNNER_TEMP/release-replay"
+          gh release download "$GITHUB_REF_NAME" --dir "$RUNNER_TEMP/release-replay"
+          python3 - <<'PY'
+          from pathlib import Path
+          import os
+          source = Path("dist")
+          remote = Path(os.environ["RUNNER_TEMP"]) / "release-replay"
+          if {p.name for p in source.iterdir()} != {p.name for p in remote.iterdir()}:
+              raise SystemExit("RELEASE_BLOCKED: downloaded asset set differs from staged bytes")
+          for p in source.iterdir():
+              if p.read_bytes() != (remote / p.name).read_bytes():
+                  raise SystemExit(f"RELEASE_BLOCKED: published draft asset bytes mismatch: {p.name}")
+          print("RELEASE_DRAFT_REPLAY_PASS")
+          PY
+          (cd "$RUNNER_TEMP/release-replay" && sha256sum --check SHA256SUMS)
+          gh release edit "$GITHUB_REF_NAME" --draft=false
