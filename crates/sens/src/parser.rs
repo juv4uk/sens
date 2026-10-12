@@ -23,10 +23,11 @@ pub fn parse(source: &str) -> Result<Vec<Expr>, LanguageError> {
 /// виконавців. D10 і числова D24+ граматика потребують окремого носія;
 /// жодне невідоме слово не перетворюється на Number або історичний Sens8.
 ///
-/// Нові споживачі підключаються до цього API тільки після окремого HANDOFF
-/// із READER/AST: історичний parse() навмисно не змінює свою семантику.
+/// Явний публічний вхід для міграції активних споживачів.
+/// Історичний parse() поки відокремлений: дані W8 не стають D8 через
+/// неявне вгадування вихідної епохи.
 #[allow(dead_code)]
-pub(crate) fn parse_exact_domain_source(source: &str) -> Result<Vec<Expr>, LanguageError> {
+pub fn parse_exact_domain_source(source: &str) -> Result<Vec<Expr>, LanguageError> {
     parse_with_mode(source, ReaderMode::ExactDomain)
 }
 
