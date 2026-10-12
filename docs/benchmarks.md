@@ -1,6 +1,10 @@
-# my-lisp benchmarks · Benchmarks my-lisp · my-lisp-Benchmarks
+# my-lisp benchmarks — історичний зріз (серпень–вересень 2026)
 
-**Status:** CURRENT · regenerated 2026-08-24 · base `1566fcf`+ · Vyasa
+> **HISTORICAL / NOT CURRENT SENS RELEASE EVIDENCE.** Цей файл містить старі виміри попередньої реалізації `my-lisp`, збережені для provenance. Позначки «current» / «NEW» нижче відносяться **лише до дат первинних експериментів**; вони не стверджують поточний стан SENS Contract 11.9 або кандидатного релізу `l0.42.0`. Не використовувати наведені співвідношення як виміряне прискорення сучасного SENS без нового exact-SHA replay.
+>
+> Актуальна операційна картина, точні SHA й обмеження: [SENS project reality (2026-10-12)](project-reality-2026-10-12.uk.md), [release scope / NO-GO](../RELEASE.md), [release readiness runbook](release-readiness-contract-11-9-2026-10-12.uk.md). Для конкретних поточних performance probes — [T5 streaming baseline](../benchmarks/physical-sens-runtime/streaming-t5-baseline-2026-10-09.md) та [domain occupancy](benchmarks/2026-10-09-domain-occupancy-bitmask.uk.md); ці два стенди теж **не** є заміною повного cross-language/conformance звіту.
+
+**Original snapshot:** `my-lisp`, regenerated 2026-08-24 · base `1566fcf`+ · Vyasa
 **Runner:** `cargo run --release -p my-lisp --example benchmark`
 (env var `MY_LISP_BENCH_ITERATIONS`, default 1000; `MY_LISP_RAT_N` for the rational chain depth)
 
