@@ -327,7 +327,7 @@ pub fn parse_domain_ladder_source_words(
                 }
                 let token = &bytes[start..cursor];
                 if !(1..=10).contains(&token.len())
-                    || !token.iter().all(|byte| matches!(byte, b'0' | b'1'))
+                    || !token.iter().all(|&byte| matches!(byte, b'0' | b'1'))
                 {
                     return Err(LanguageError::new(
                         ErrorKind::Parse,
