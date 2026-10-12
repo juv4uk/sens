@@ -307,16 +307,52 @@
         }
       },
       "interpretation": "Coverage is complete; 53 stands pass and the sole current cross-language lane remains intentionally blocked. This is not an all-benchmarks-pass result."
+    },
+    {
+      "workflow_run_id": 38193453177,
+      "workflow_url": "https://github.com/juv4uk/sens/actions/runs/38193453177",
+      "commit": "10a3594427f1568122d32c733b7fc965714b372d",
+      "result": "COMPLETE_WITH_ONE_INTENTIONAL_BLOCKED_STAND",
+      "coverage": {
+        "expected_stands": 54,
+        "observed_stands": 54,
+        "duplicates": false,
+        "missing": [],
+        "extra": [],
+        "coverage_complete": true
+      },
+      "outcome_counts": {
+        "pass": 53,
+        "fail": 0,
+        "blocked": 1,
+        "timeout": 0,
+        "all_benchmarks_pass": false
+      },
+      "regression_gate": {
+        "path": "benchmarks/cross-language/test_current_gate.py",
+        "tests": 3,
+        "result": "PASS",
+        "workflow_run_url": "https://github.com/juv4uk/sens/actions/runs/38193453177",
+        "summary": "A historical Function8/FASL reproduction cannot be promoted to a current Contract 11.9 benchmark merely because Guix is available."
+      },
+      "summary_artifact": {
+        "id": 11722377810,
+        "url": "https://github.com/juv4uk/sens/actions/runs/38193453177/artifacts/11722377810",
+        "sha256": "a0092396c5ef9c10c895c268935ffc8666ac3c2f4f2e574fbc669202f8f63a57",
+        "expires_at_utc": "2026-11-02T01:52:39Z"
+      },
+      "interpretation": "All 54 stand results were observed with no duplicates, missing or extra rows. The only BLOCKED is the intentionally fail-closed cross-language current replay; it is not an all-benchmarks-pass result."
     }
   ],
   "pending_current_head_validation": {
-    "recorded_base_head": "10a3594427f1568122d32c733b7fc965714b372d",
-    "status": "PENDING_FAIL_CLOSED_REGRESSION_TEST_AND_CURRENT_SWEEP",
-    "latest_main_at_receipt": "10a3594427f1568122d32c733b7fc965714b372d",
-    "last_completed_sweep": {
-      "id": 38193326356,
-      "sha": "69752ac30f40d1d196a34f5831032b3a6cb9c19d",
-      "url": "https://github.com/juv4uk/sens/actions/runs/38193326356",
+    "recorded_base_head": "e1884ad07fae9e3fb30d439318dcb3d1fa3d9828",
+    "status": "COMPLETE_FOR_BENCHMARK_CODE; MAIN_HAS_DOCS_AND_EVIDENCE_DESCENDANTS",
+    "latest_main_at_receipt": "e1884ad07fae9e3fb30d439318dcb3d1fa3d9828",
+    "validated_benchmark_code_sha": "10a3594427f1568122d32c733b7fc965714b372d",
+    "latest_sweep": {
+      "id": 38193453177,
+      "url": "https://github.com/juv4uk/sens/actions/runs/38193453177",
+      "conclusion": "success",
       "outcomes": {
         "pass": 53,
         "fail": 0,
@@ -324,16 +360,10 @@
         "timeout": 0
       }
     },
-    "current_sweep": {
-      "id": 38193453177,
-      "sha": "10a3594427f1568122d32c733b7fc965714b372d",
-      "url": "https://github.com/juv4uk/sens/actions/runs/38193453177",
-      "status": "queued"
-    },
     "notes": [
-      "The current commit adds test_current_gate.py and runs it in the benchmark-registry validation job.",
-      "The latest completed sweep has 53 PASS / 0 FAIL / 1 BLOCKED, full 54/54 coverage.",
-      "The single BLOCKED is intentional: current cross-language semantics are not implemented. Regression test prevents a historical Function8/FASL harness from being counted as current just because Guix exists."
+      "The cross-language fail-closed regression gate passed 3/3 tests on the validated benchmark code SHA.",
+      "Main descendants after the validated benchmark SHA contain only receipt/documentation updates and do not change benchmark implementation or manifests.",
+      "The single BLOCKED is intentional and transparent; all 54 stands were classified with complete coverage."
     ]
   },
   "latest_stand_level_results": {
@@ -464,6 +494,48 @@
         "sha256": "9fd7bc50691785663957bb04b1cdfbd428cb6e80478997e87091ded60a381e28"
       },
       "reason": "Pinned Guix environment absent; status marker is explicit; no language performance conclusion is available."
+    }
+  },
+  "current_code_validation": {
+    "validated_benchmark_sha": "10a3594427f1568122d32c733b7fc965714b372d",
+    "current_main_observed_before_receipt_update": "e1884ad07fae9e3fb30d439318dcb3d1fa3d9828",
+    "registry_run": {
+      "id": 38193453177,
+      "url": "https://github.com/juv4uk/sens/actions/runs/38193453177",
+      "conclusion": "success",
+      "outcomes": {
+        "pass": 53,
+        "fail": 0,
+        "blocked": 1,
+        "timeout": 0
+      }
+    },
+    "cross_language_gate_tests": {
+      "path": "benchmarks/cross-language/test_current_gate.py",
+      "result": "PASS",
+      "tests": 3
+    },
+    "store_air_load": {
+      "result": "PASS",
+      "commit": "ea156c1d0fe386fe7422e4a345a6431a536e0c80",
+      "paired_fixtures": 2,
+      "semantic_checks": "lowered trace/value/output match canonical binary"
+    },
+    "physical_binary_performance": {
+      "result": "PASS",
+      "source_to_t5_bytewise": "8/8",
+      "execution_cli_parity": "8/8",
+      "projection_tests": 5
+    },
+    "remaining_blocker": {
+      "stand": "cross-language",
+      "status": "BLOCKED-CURRENT-CANONICAL-REPLAY-NOT-IMPLEMENTED",
+      "required_work": [
+        "current Contract 11.9 workload corpus",
+        "independent correctness oracle",
+        "exact source/environment provenance",
+        "semantic parity before performance measurements"
+      ]
     }
   }
 }
