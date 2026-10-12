@@ -1111,9 +1111,9 @@ mod tests {
         let d3 = domain_frame(3, 0b010);
         let d4 = domain_frame(4, 0b0010);
         let d8 = domain_frame(8, 0b1010_1000);
-        let d9 = domain_frame(9, 0b1_0101_0000);
+        let d9 = domain_frame(9, 0b0_1010_1000);
         assert_ne!(d3, d4, "D3:010 and D4:0010 remain different identities");
-        assert_ne!(d8, d9, "D8 and D9 never collapse by payload suffix");
+        assert_ne!(d8, d9, "D8:10101000 and D9:010101000 are different identities despite equal payload");
         assert_ne!(
             encode_binary_frame(&d8).unwrap(),
             encode_binary_frame(&BinaryFrame::Function(crate::sens!(10101000))).unwrap(),
@@ -1131,7 +1131,7 @@ mod tests {
             BinaryFrame::Space,
             domain_frame(8, 0b1010_1000),
             BinaryFrame::Space,
-            domain_frame(9, 0b1_0000_0001),
+            domain_frame(9, 0b0_0000_0001),
             BinaryFrame::Space,
             qualified_numeric_word(24),
             BinaryFrame::Space,
