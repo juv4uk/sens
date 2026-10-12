@@ -53,11 +53,33 @@ for row in rows:
     actual_sources[row["source_file"]]=actual_sources.get(row["source_file"],0)+1
 assert actual_sources==expected_sources
 
-# Every selected source name must be an actual top-level semantic definition
-# in the claimed Lisp file.
+# Дозволені лише дві доведені форми верхньорівневого визначення:
+# чинна D4:0011 DEFINE та історичний W8:00001001 DEFINE.
+# Довжина 8 сама по собі НЕ дозволяє вважати будь-який старий виклик
+# визначенням, і не прирівнює D8 до історичного Function8.
+TOP_LEVEL_DEFINE = re.compile(
+    r'^[ \t]*\((?:0011|00001001)[ \t]+([^\s()]+)[ \t]+', re.MULTILINE
+)
+
+
+def top_level_definitions(text: str) -> set[str]:
+    return {match.group(1) for match in TOP_LEVEL_DEFINE.finditer(text)}
+
+
+# Позитивні та негативні самосвідки входять у той самий CI-гейт.
+assert top_level_definitions("(0011 точне (0010 (x) x))\n") == {"точне"}
+assert top_level_definitions("(00001001 старе (00001000 (x) x))\n") == {"старе"}
+assert top_level_definitions("(0010 не-визначення ())\n") == set()
+assert top_level_definitions("(00001010 макрос (x) x)\n") == set()
+assert top_level_definitions("(00000001 цитата ())\n") == set()
+assert top_level_definitions("(110011100 рядок ())\n") == set()
+assert top_level_definitions("; (0011 коментар ())\n") == set()
+
+# Історичні source_name повинні бути живими визначеннями, навіть після
+# точнодоменного cutover вихідного .lisp.
 for source_file,count in expected_sources.items():
     text=(root/source_file).read_text(encoding="utf-8")
-    defs={m.group(1) for m in re.finditer(r'^\([01]{8}\s+([^\s()]+)\s+', text, re.MULTILINE)}
+    defs=top_level_definitions(text)
     claimed={row["source_name"] for row in rows if row["source_file"]==source_file}
     assert len(claimed)==count
     assert claimed <= defs
