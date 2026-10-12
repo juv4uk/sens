@@ -216,8 +216,8 @@ class LegacyD3GuardTests(unittest.TestCase):
              "((11110111 name (001 lambda)) (1)\n       \"NecessaryFormMechanism::Lambda\")"),
             ("((010 (001 ())) (100 (001 ())))",
              "((001 no-known-mechanism) no-known-mechanism (100 (001 ())))"),
-            ("((010 remaining) \"\")",
-             "((010 remaining) () \"\")"),
+            ("((010 remaining)\n       \"\")",
+             "((010 remaining) ()\n       \"\")"),
         )
         for good, legacy in mutations:
             with self.subTest(legacy=legacy):
