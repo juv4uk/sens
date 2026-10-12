@@ -64,7 +64,7 @@ class ReleasePublicationGateTest(unittest.TestCase):
 
     def test_local_tag_driver_requires_every_exact_sha_workflow_and_owner_go(self):
         driver = (ROOT / "scripts" / "release.lisp").read_text(encoding="utf-8")
-        for workflow in ('"ci.yml"', '"ci-hosted.yml"', '"release-preflight.yml"'):
+        for workflow in ('"ci-hosted.yml"', '"release-preflight.yml"'):
             with self.subTest(workflow=workflow):
                 self.assertIn(workflow, driver)
                 self.assertIn('"--limit" "1"', driver)
@@ -75,6 +75,7 @@ class ReleasePublicationGateTest(unittest.TestCase):
     def test_local_tag_driver_is_not_satisfied_by_any_old_green_run(self):
         driver = (ROOT / "scripts" / "release.lisp").read_text(encoding="utf-8")
         self.assertNotIn('"--workflow" "CI"', driver)
+        self.assertNotIn('"--workflow" "ci.yml"', driver)
         self.assertNotIn('"--limit" "20"', driver)
 
 
