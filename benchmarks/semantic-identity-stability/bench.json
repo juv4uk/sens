@@ -1,0 +1,13 @@
+{
+  "schema": "sens-benchmark-manifest/v1",
+  "stand": "semantic-identity-stability",
+  "wing": "Semantic sovereignty / representation independence",
+  "roles": ["RESEARCH", "CONFORMANCE", "FALSIFIER"],
+  "question": "Does canonical identity remain unchanged when only surface spellings are renamed?",
+  "claim": "Source-level identity mapping is invariant under deterministic surface renaming; this does not prove runtime loader or evaluator acceptance.",
+  "witness": ["run.py", "README.md", "bench.json"],
+  "status": "RESEARCH + SOURCE-CONFORMANCE",
+  "generation": "Canonical semantic registry; 2026-10-12",
+  "axis": "identity-stability/surface-rename/representation-cost",
+  "reproduce": "python3 benchmarks/semantic-identity-stability/run.py --out /tmp/semantic-identity-stability"
+}

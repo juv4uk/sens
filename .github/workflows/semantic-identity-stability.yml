@@ -1,0 +1,40 @@
+name: Semantic identity stability benchmark
+
+on:
+  pull_request:
+    paths:
+      - 'lib/surface/semantic-registry.lisp'
+      - 'benchmarks/semantic-identity-stability/**'
+      - '.github/workflows/semantic-identity-stability.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'lib/surface/semantic-registry.lisp'
+      - 'benchmarks/semantic-identity-stability/**'
+      - '.github/workflows/semantic-identity-stability.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  identity-stability:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v5
+      - name: Run canonical registry identity benchmark
+        run: |
+          set -euo pipefail
+          rm -rf "$RUNNER_TEMP/semantic-identity-stability"
+          python3 benchmarks/semantic-identity-stability/run.py \
+            --out "$RUNNER_TEMP/semantic-identity-stability"
+          cat "$RUNNER_TEMP/semantic-identity-stability/report.md" >> "$GITHUB_STEP_SUMMARY"
+      - name: Preserve raw evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: semantic-identity-stability-${{ github.sha }}
+          path: ${{ runner.temp }}/semantic-identity-stability/
+          if-no-files-found: warn
+          retention-days: 14
