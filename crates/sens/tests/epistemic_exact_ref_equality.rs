@@ -1,7 +1,7 @@
 //! Точковий доказ: епістемічні посилання порівнюються лише D3/D1,
  //! а історичний W8 не може підмінити чинну D8-тотожність.
 use sens::{
-    eval_parsed_expressions, eval_program, parse_domain_ladder_source_words,
+    eval_parsed_expressions, parse_domain_ladder_source_words,
     parse_mixed_exact_domain, Expr, ExprKind, Session,
 };
 
@@ -97,7 +97,11 @@ fn nested_reference_equality_returns_only_exact_d1() {
     ];
     for (left, right, expected) in cases {
         let query = format!("({NAME} {left} {right})");
-        let result = eval_program(&query, &mut session)
+        // Той самий exact-reader, що й у визначенні функції: 001 це D3 QUOTE,
+        // а не некваліфіковане число у звичайному Lisp-reader.
+        let call = parse_mixed_exact_domain(&query)
+            .unwrap_or_else(|error| panic!("{query}: {error}"));
+        let result = eval_parsed_expressions(&call, &mut session)
             .unwrap_or_else(|error| panic!("{query}: {error}"));
         assert_eq!(
             result.value.as_predicate_bit(), Some(expected),
