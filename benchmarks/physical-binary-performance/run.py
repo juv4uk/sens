@@ -155,7 +155,7 @@ def main() -> None:
         # are intentionally not used as T5 sources: some contain pre-cutover
         # AST syntax (for example (00000001 ()), not canonical 0/1 word streams.
         words = decode_bytes(committed_bytes)
-        source_bytes = (" ".join(words) + "\\n").encode("ascii")
+        source_bytes = (" ".join(words) + chr(10)).encode("ascii")
         if encode_words(words) != committed_bytes:
             raise RuntimeError(f"{fixture}: independent Python T5 roundtrip failed")
         source_projections[fixture] = source_bytes
