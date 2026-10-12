@@ -426,7 +426,23 @@ def main() -> int:
     parser.add_argument("--only", default=",".join(CASES))
     parser.add_argument("--check-only", action="store_true")
     parser.add_argument("--out")
+    parser.add_argument(
+        "--historical-function8-fasl",
+        action="store_true",
+        help=(
+            "explicitly run the legacy Function8/FASL lane for provenance only; "
+            "this is not current Contract 11.9 evidence"
+        ),
+    )
     args = parser.parse_args()
+
+    if not args.historical_function8_fasl:
+        parser.error(
+            "this harness still uses historical Function8/FASL for SENS and "
+            "cannot produce current Contract 11.9 evidence; use "
+            "--historical-function8-fasl only for provenance, or wait for the "
+            "canonical-domain replay tracked by #1546/#1668"
+        )
 
     selected = tuple(name for name in args.only.split(",") if name)
     unknown = sorted(set(selected) - set(CASES))
@@ -612,6 +628,8 @@ def main() -> int:
     version_proc = run_checked([args.python, "--version"])
     python_version = (version_proc.stdout or version_proc.stderr).strip()
     environment = {
+        "evidence_class": "historical-function8-fasl-provenance-only",
+        "current_contract_evidence": False,
         "date_utc": dt.datetime.now(dt.timezone.utc).isoformat(timespec="seconds"),
         "git_sha": git_fact("rev-parse", "HEAD"),
         "python": python_version,
@@ -671,6 +689,9 @@ def main() -> int:
 
     lines = [
         "# SENS ↔ CPython ↔ Lua 5.4 ↔ Racket CS: benchmark реалізацій",
+        "",
+        "**HISTORICAL PROVENANCE ONLY:** SENS uses Function8/FASL; "
+        "not current Contract 11.9 evidence.",
         "",
         "Мірило: Valgrind Cachegrind I refs, медіана повторів. "
         "Це не рейтинг абстрактних мов.",
