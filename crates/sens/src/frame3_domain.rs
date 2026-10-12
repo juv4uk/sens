@@ -1,4 +1,7 @@
-//! S3/v3 opt-in physical carrier for exact Core D1-D9 and *explicit* D24+ domains.
+//! Envelope E3: domain-aware self-contained carrier for Core D1-D9 and explicit D24+.
+//!
+//! Historical wire/research name: S3/v3.  This is an Envelope, not Frame3/F3;
+//! the old filename/API is retained only for compatibility with evidence/tests.
 //!
 //! This is not the canonical .sens format, not a semantic oracle, and does not
 //! authorize any arithmetic/coercion. Numeric identity is (ladder index, full

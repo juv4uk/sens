@@ -19,6 +19,33 @@ pub mod frame3_domain;
 pub mod frame3_grammar;
 pub mod frame3_semantic;
 pub mod frame3_small;
+
+
+/// Public names for the self-contained, metadata-heavy transport experiments.
+///
+/// These are deliberately called Envelope E1/E2/E3 so they cannot be confused
+/// with compact Frame3/F3.  The historical module paths remain available for
+/// source compatibility, but new code and documentation should use these names.
+pub mod envelope_e1 {
+    pub use crate::universal_frame3::{
+        decode, encode, Frame3Decoder as Decoder, Frame3Error as Error,
+    };
+}
+
+/// Envelope E2: E1 plus the bounded grammar-rank block mode.
+/// Historical wire/research name: S3/v2.
+pub mod envelope_e2 {
+    pub use crate::universal_frame3::{
+        decode_v2 as decode, encode_v2 as encode, Frame3Error as Error,
+        Frame3V2Decoder as Decoder,
+    };
+}
+
+/// Envelope E3: domain-aware self-contained carrier, including explicit D24+.
+/// Historical wire/research name: S3/v3.
+pub mod envelope_e3 {
+    pub use crate::frame3_domain::{decode, encode, Error, Word};
+}
 mod program_data;
 mod compiler_role;
 mod compiler_bootstrap;

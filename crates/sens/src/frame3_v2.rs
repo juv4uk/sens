@@ -1,4 +1,7 @@
-//! Explicit opt-in S3/v2 candidate: physical byte-DP over RAW/REPEAT/GRAMMAR.
+//! Envelope E2: self-contained byte-DP over RAW/REPEAT/GRAMMAR.
+//!
+//! Historical wire/research name: S3/v2.  It is an Envelope, not Frame3/F3;
+//! the old filename/API is retained only for compatibility with evidence/tests.
 //!
 //! S3 02 | minimal ULEB total-word-count |
 //! [tag | minimal ULEB block-word-count | block data]* | CRC32.

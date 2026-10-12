@@ -1,5 +1,6 @@
 //! Two *explicit* research physical codecs: canonical T5 for ordinary programs,
-//! original F3/Frame-3 for very small programs. NOT S3/v1-v3 or .f3m.
+//! Frame3 Carrier (F3C, historical `.senc`) for very small programs.
+//! NOT Envelope E1/E2/E3 and NOT the one-byte Frame3-Micro (F3M, `.f3m`).
 //!
 //! Does not modify the production .sens loader, the D1-D9 domains, or the
 //! existing SENS execution path. Convert only already-admitted physical T5.
