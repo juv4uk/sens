@@ -5,9 +5,8 @@
 //! `lib/surface/function-signatures.lisp`.
 //! This module only projects the selected operation class onto Rust evaluator mechanisms.
 
-use crate::semantic_registry;
+use crate::semantic_registry::{self, LegacyRegistrySlot};
 use crate::{Bit4, CoreD4, CoreDomainIdentity};
-use crate::Sens8;
 
 mod generated {
     include!("necessary_forms_generated.rs");
@@ -60,21 +59,30 @@ pub(crate) fn domain_identity_for_symbol(name: &str) -> Option<CoreDomainIdentit
     }
 
     let legacy = semantic_registry::admitted_semantic_id_for_surface(name)?;
+    domain_identity_for_legacy_semantic_id(legacy)
+}
+
+/// Explicit compatibility seam: an admitted historical W8 row may identify
+/// a necessary-form mechanism only by projecting it to its ratified D4 word.
+/// The historical byte itself never becomes a current domain identity.
+fn domain_identity_for_legacy_semantic_id(
+    legacy: LegacyRegistrySlot,
+) -> Option<CoreDomainIdentity> {
     let mechanism = generated::NECESSARY_FORM_DISPATCH
         .iter()
         .find(|row| row.semantic_id == legacy.packed_byte())
         .map(|row| row.mechanism)?;
-    Some(canonical_domain_identity(mechanism))
+    let identity = canonical_domain_identity(mechanism);
+
+    // Select the evaluator mechanism only after exact D4 qualification.
+    identity_for_domain_identity(identity).map(|_| identity)
 }
 
-pub(crate) fn identity_for_semantic_id(semantic_id: Sens8) -> Option<NecessaryFormIdentity> {
-    generated::NECESSARY_FORM_DISPATCH
-        .iter()
-        .find(|row| row.semantic_id == semantic_id.packed_byte())
-        .map(|row| match row.mechanism {
-            generated::NecessaryFormMechanism::Define => NecessaryFormIdentity::Define,
-            generated::NecessaryFormMechanism::Lambda => NecessaryFormIdentity::Lambda,
-        })
+pub(crate) fn identity_for_semantic_id(
+    semantic_id: LegacyRegistrySlot,
+) -> Option<NecessaryFormIdentity> {
+    domain_identity_for_legacy_semantic_id(semantic_id)
+        .and_then(identity_for_domain_identity)
 }
 
 /// Resolve an executable list-head symbol through the shared authority
@@ -87,4 +95,82 @@ pub(crate) fn identity_for_semantic_id(semantic_id: Sens8) -> Option<NecessaryFo
 /// this reason -- both removed once this function could see it).
 pub(crate) fn identity_for_symbol(name: &str) -> Option<NecessaryFormIdentity> {
     domain_identity_for_symbol(name).and_then(identity_for_domain_identity)
+}
+
+
+#[cfg(test)]
+mod exact_d4_necessary_form_migration_tests {
+    use super::*;
+
+    fn d4(bits: u8) -> CoreDomainIdentity {
+        CoreDomainIdentity::D4(
+            CoreD4::from_word(Bit4::new(bits).expect("test D4 coordinate must fit")),
+        )
+    }
+
+    #[test]
+    fn canonical_lambda_and_define_route_only_through_exact_d4() {
+        assert_eq!(
+            identity_for_domain_identity(d4(0b0010)),
+            Some(NecessaryFormIdentity::Lambda),
+        );
+        assert_eq!(
+            identity_for_domain_identity(d4(0b0011)),
+            Some(NecessaryFormIdentity::Define),
+        );
+        assert_eq!(identity_for_domain_identity(d4(0b0001)), None);
+        assert_eq!(identity_for_domain_identity(d4(0b1111)), None);
+    }
+
+    #[test]
+    fn compatibility_w8_rows_are_explicitly_projected_to_d4() {
+        for (slot, bits, expected) in [
+            (0b00001000, 0b0010, NecessaryFormIdentity::Lambda),
+            (0b00001001, 0b0011, NecessaryFormIdentity::Define),
+            (0b00001011, 0b0011, NecessaryFormIdentity::Define),
+        ] {
+            let legacy = LegacyRegistrySlot::from_packed_byte(slot);
+            let identity = domain_identity_for_legacy_semantic_id(legacy)
+                .expect("the three admitted compatibility rows have an explicit D4 bridge");
+            assert_eq!(identity.width(), 4);
+            assert_eq!(identity.packed_bits(), bits);
+            assert_eq!(identity_for_semantic_id(legacy), Some(expected));
+        }
+    }
+
+    #[test]
+    fn equal_payload_in_d3_does_not_inherit_d4_lambda() {
+        let d3_atom = semantic_registry::domain_identity_for_surface("атом?")
+            .expect("the canonical D3 atom surface is admitted");
+        let d4_lambda = d4(0b0010);
+
+        assert_eq!(d3_atom.width(), 3);
+        assert_eq!(d4_lambda.width(), 4);
+        assert_eq!(
+            u16::from(d3_atom.packed_bits()),
+            u16::from(d4_lambda.packed_bits()),
+            "D3:010 and D4:0010 share a numeric payload only",
+        );
+        assert_eq!(identity_for_domain_identity(d3_atom), None);
+        assert_eq!(
+            identity_for_domain_identity(d4_lambda),
+            Some(NecessaryFormIdentity::Lambda),
+        );
+    }
+
+    #[test]
+    fn every_other_historical_w8_slot_fails_closed() {
+        for slot in 0u8..=u8::MAX {
+            let expected = match slot {
+                0b00001000 => Some(NecessaryFormIdentity::Lambda),
+                0b00001001 | 0b00001011 => Some(NecessaryFormIdentity::Define),
+                _ => None,
+            };
+            assert_eq!(
+                identity_for_semantic_id(LegacyRegistrySlot::from_packed_byte(slot)),
+                expected,
+                "unexpected necessary-form route for historical W8 {slot:08b}",
+            );
+        }
+    }
 }
