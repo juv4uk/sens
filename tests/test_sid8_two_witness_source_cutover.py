@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Exact proof of two historical SID8 call-head source changes, never .sens."""
+"""Prove one in-place Lisp cutover; preserve independent pinned SID8 S0 oracle."""
 import importlib.util
 from pathlib import Path
 import subprocess
@@ -14,44 +14,43 @@ module = importlib.util.module_from_spec(spec)
 sys.modules[spec.name] = module
 spec.loader.exec_module(module)
 
-SOURCES = (
-    ("tests/fixtures/machine-replaceability-witness.lisp",
-     "90d9066779db127e3b34eb285fc138da5a87e4a7", 16),
-    ("tests/fixtures/post-d4-evalquote-witness.lisp",
-     "ed0a87df18e1f5bde0997b642f406113c16bb6d0", 14),
-)
+MIGRATED = ("tests/fixtures/machine-replaceability-witness.lisp",
+            "90d9066779db127e3b34eb285fc138da5a87e4a7", 16)
+PINNED_S0 = ("tests/fixtures/post-d4-evalquote-witness.lisp",
+             "ed0a87df18e1f5bde0997b642f406113c16bb6d0")
 
-class SID8TwoWitnessSourceCutover(unittest.TestCase):
-    def test_original_sources_rewrite_only_executable_call_heads(self):
+def git_blob(sha):
+    return subprocess.run(["git", "cat-file", "blob", sha], cwd=ROOT,
+                          capture_output=True, check=True).stdout.decode("utf-8")
+
+class SID8WitnessSourceCutover(unittest.TestCase):
+    def test_machine_rewrite_exact_old_to_ratified_heads(self):
         mapping, blocked = module.authority(ROOT)
-        for path, old_sha, expected in SOURCES:
-            with self.subTest(path=path):
-                before = subprocess.run(
-                    ["git", "cat-file", "blob", old_sha],
-                    cwd=ROOT, capture_output=True, check=True
-                ).stdout.decode("utf-8")
-                after = (ROOT / path).read_text(encoding="utf-8")
-                rewritten, count, issues = module.rewrite(before, mapping, blocked)
-                self.assertEqual(issues, [])
-                self.assertEqual(count, expected)
-                self.assertEqual(rewritten, after,
-                                 "only admitted Lisp heads may change")
+        path, original_sha, expected = MIGRATED
+        historic = git_blob(original_sha)
+        updated = (ROOT / path).read_text(encoding="utf-8")
+        rewritten, count, issues = module.rewrite(historic, mapping, blocked)
+        self.assertEqual(issues, [])
+        self.assertEqual(count, expected)
+        self.assertEqual(rewritten, updated)
 
-    def test_quoted_lambda_and_bare_identity_are_preserved(self):
-        text = (ROOT / SOURCES[1][0]).read_text(encoding="utf-8")
-        self.assertIn("(001 (00001000 (X Y) (00000100 X Y)))", text)
-        self.assertIn("(001 00000100)", text)
-        self.assertIn("(001 00000101)", text)
+    def test_pinned_s0_witness_is_untouched_historical_code(self):
+        path, original_sha = PINNED_S0
+        historic = git_blob(original_sha)
+        actual = (ROOT / path).read_text(encoding="utf-8")
+        self.assertEqual(actual, historic,
+                         "S0 oracle is pinned to SID8; domain rewrite requires new oracle")
+        self.assertIn("(00000001 (00001000 (X Y) (00000100 X Y)))", actual)
+        self.assertIn("(00000001 00000100)", actual)
+        self.assertIn("(00000001 00000101)", actual)
 
-    def test_both_fixtures_have_no_retired_exec_heads(self):
-        for path, _, _ in SOURCES:
-            with self.subTest(path=path):
-                s = (ROOT / path).read_text(encoding="utf-8")
-                # Never mistake old data beneath QUOTE for executable heads.
-                active = module.executable_call_heads(s, module.guard_module(ROOT))
-                for old in ("00001001", "00001000", "00000100",
-                            "00000101", "00000111", "00000011"):
-                    self.assertNotIn(old, active)
+    def test_machine_executable_heads_are_current(self):
+        path = MIGRATED[0]
+        source = (ROOT / path).read_text(encoding="utf-8")
+        heads = module.executable_call_heads(source, module.guard_module(ROOT))
+        for old in ("00001001", "00001000", "00000100", "00000101",
+                    "00000111", "00000011"):
+            self.assertNotIn(old, heads)
 
 if __name__ == "__main__":
     unittest.main()
