@@ -12,57 +12,57 @@
 (load "lib/mechanism-selector.lisp")
 (load "lib/island-lowering.lisp")
 
-(00001001 island-lowering-1048-witness
-  (00001000 ()
-    (10011101 ((plus-sid 00001100)
-           (cl (island-lower-binary plus-sid (00000001 common-lisp) 2 3))
-           (pl (island-lower-binary plus-sid (00000001 prolog) 2 3))
-           (clips-result (island-lower-binary plus-sid (00000001 clips) 2 3))
-           (dl (island-lower-binary plus-sid (00000001 datalog) 2 3)))
-      (00000111
-        ((00100010
+(0011 island-lowering-1048-witness
+  (0010 ()
+    (001001 ((plus-sid 00001100)
+           (cl (island-lower-binary plus-sid (001 common-lisp) 2 3))
+           (pl (island-lower-binary plus-sid (001 prolog) 2 3))
+           (clips-result (island-lower-binary plus-sid (001 clips) 2 3))
+           (dl (island-lower-binary plus-sid (001 datalog) 2 3)))
+      (110
+        ((11110111
            cl
-           (00100111 (00000001 island-lowering-result)
+           (1110 (001 island-lowering-result)
                  plus-sid
-                 (00000001 common-lisp)
-                 (00000001 bounded-exact-add)
+                 (001 common-lisp)
+                 (001 bounded-exact-add)
                  "#q2:10/1 #q2:11/1"))
          (1)
-         (00000111
-           ((00100010
+         (110
+           ((11110111
               pl
-              (00100111 (00000001 island-lowering-result)
+              (1110 (001 island-lowering-result)
                     plus-sid
-                    (00000001 prolog)
-                    (00000001 bounded-exact-add)
+                    (001 prolog)
+                    (001 bounded-exact-add)
                     "#q2:10/1 #q2:11/1"))
             (1)
-            (00000111
-              ((00100010
+            (110
+              ((11110111
                  dl
-                 (00100111 (00000001 island-lowering-result)
+                 (1110 (001 island-lowering-result)
                        plus-sid
-                       (00000001 datalog)
-                       (00000001 bounded-exact-add)
+                       (001 datalog)
+                       (001 bounded-exact-add)
                        "#q2:10/1 #q2:11/1"))
                (1)
-               (00000111
-                 ((00100010
+               (110
+                 ((11110111
                     clips-result
-                    (00100111 (00000001 island-lowering-result)
+                    (1110 (001 island-lowering-result)
                           plus-sid
-                          (00000001 clips)
-                          (00000001 bounded-exact-add)
+                          (001 clips)
+                          (001 bounded-exact-add)
                           "#q2:10/1 #q2:11/1"))
                   (1)
-                  (00000001 (island-lowering-1048 (status pass) (executable-payloads 4) (clips admitted-direct-sid8))))
-                 ((00000001 witness-clips-fail) witness-clips-fail
-                  (00000101 (00000001 ())))))
-              ((00000001 witness-datalog-fail) witness-datalog-fail
-               (00000101 (00000001 ())))))
-           ((00000001 witness-prolog-fail) witness-prolog-fail
-            (00000101 (00000001 ())))))
-        ((00000001 witness-cl-fail) witness-cl-fail
-         (00000101 (00000001 ())))))))
+                  (001 (island-lowering-1048 (status pass) (executable-payloads 4) (clips admitted-direct-sid8))))
+                 ((001 witness-clips-fail) witness-clips-fail
+                  (100 (001 ())))))
+              ((001 witness-datalog-fail) witness-datalog-fail
+               (100 (001 ())))))
+           ((001 witness-prolog-fail) witness-prolog-fail
+            (100 (001 ())))))
+        ((001 witness-cl-fail) witness-cl-fail
+         (100 (001 ())))))))
 
 (island-lowering-1048-witness)
