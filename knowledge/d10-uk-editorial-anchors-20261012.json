@@ -8,7 +8,7 @@
     "rows": 1024
   },
   "human_table": "lib/domains/d10.lisp",
-  "authority_boundary": "44 selected Ukrainian aliases pinned to exact semantic inventory; editorial proof only, not runtime admission or Sanskrit grammar proof.",
+  "authority_boundary": "51 curated Ukrainian names anchored to source semantic inventory; not a machine-executable extension or Sanskrit morphology attestation.",
   "anchors": [
     {
       "semantic_name": "IF",
@@ -361,6 +361,62 @@
       "uk": "ланцюг-узгоджений?",
       "ukr": "усі-сусідні-значення-задовольняють-порівняння?",
       "scope_note": "Test an ordered series of evaluated values pairwise under one comparison identity, stopping at first false pair"
+    },
+    {
+      "semantic_name": "GRAY-ENCODE-WORD",
+      "coordinate": "0101111000",
+      "stable_id": "d10.fpga.gray.encode-word.20261009",
+      "uk": "закодувати-греєм",
+      "ukr": "перетворити-двійкове-слово-на-відбитий-код-грея",
+      "scope_note": "For unsigned w-bit binary rank n (0<=n<2^w), return w-bit binary-reflected Gray codeword n XOR (n shifted right once); preserve declared width including leading zeroes."
+    },
+    {
+      "semantic_name": "GRAY-DECODE-WORD",
+      "coordinate": "0101111001",
+      "stable_id": "d10.fpga.gray.decode-word.20261009",
+      "uk": "декодувати-код-грея",
+      "ukr": "відновити-двійковий-ранг-із-відбитого-коду-грея",
+      "scope_note": "For a width w reflected Gray codeword g, recover unsigned rank n by XOR prefix from most significant Gray bit to least, preserving width."
+    },
+    {
+      "semantic_name": "BINARY-LFSR-MINIMAL-RECURRENCE",
+      "coordinate": "0101111011",
+      "stable_id": "d10.fpga.gf2.minimum-recurrence.20261009",
+      "uk": "найкоротша-лінійна-рекуренція",
+      "ukr": "знайти-мінімальний-порядок-та-коефіцієнти-рекуренції-над-gf2",
+      "scope_note": "Among all binary homogeneous GF(2) linear recurrences matching every observed position t>=L in the finite input, return the least possible order L and lexicographically least (a1..aL) taps for s[t] = XOR_j(a_j AND s[t-j]); all-zero or empty words return (0,()). No unseen-future prediction guarantee."
+    },
+    {
+      "semantic_name": "DEPOSIT-FIELD",
+      "coordinate": "0101111100",
+      "stable_id": "d10.hist.primary.20261009.deposit-field",
+      "uk": "вписати-вирівняне-бітове-поле",
+      "ukr": "замінити-бітове-поле-бітами-тих-самих-позицій-джерела",
+      "scope_note": "Replace target bits [p,p+s) with the bits from the SAME POSITIONS of newbyte; outside bits stay from target. Unlike DPB, newbyte is position-aligned, not right-justified."
+    },
+    {
+      "semantic_name": "HASHTABLE-ENTRIES",
+      "coordinate": "0101111101",
+      "stable_id": "d10.hist.primary.20261009.hashtable-entries",
+      "uk": "вміст-хештаблиці",
+      "ukr": "повернути-узгоджені-вектори-ключів-та-значень-хештаблиці",
+      "scope_note": "Return two values: vector of all keys and vector of their corresponding values aligned by index; ordering is unspecified but the correspondence is preserved."
+    },
+    {
+      "semantic_name": "BINARY-LYNDON-FACTORIZATION",
+      "coordinate": "1010010011",
+      "stable_id": "d10.words.binary-lyndon-factorization.20261011",
+      "uk": "розкласти-на-слова-ліндона",
+      "ukr": "розкласти-двійкове-слово-на-лексикографічно-невисхідні-слова-ліндона",
+      "scope_note": "Return the unique finite factor list (l1,...,lk) such that concat(li)=w; all li are Lyndon (strictly lexicographically smaller than every proper nonempty suffix); and l1 >= l2 >= ... >= lk under explicit lexicographic 0<1. For empty source return []. No dependence on physical packing, phoneme ordering or hardware transport."
+    },
+    {
+      "semantic_name": "BRIDGE",
+      "coordinate": "0000000101",
+      "stable_id": "d10.bridge.c66ef27c9d2bfe4c",
+      "uk": "перетворити-між-поданнями",
+      "ukr": "частково-перетворити-результат-між-рідними-поданнями-зі-збереженням-спостереження",
+      "scope_note": "perform an explicit partial conversion from a source native result representation toward a target representation while preserving source observation and making no semantic-equivalence assumption"
     }
   ]
 }
