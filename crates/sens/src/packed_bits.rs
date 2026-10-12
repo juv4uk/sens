@@ -24,6 +24,7 @@
 //! ```
 
 use crate::bits::Bits;
+use crate::domain_ladder::DomainCoordinate;
 use crate::Bit9;
 
 /// Canonical dense payload bytes plus the exact count of meaningful bits.
@@ -150,6 +151,28 @@ impl PackedBitstream {
         Bit9::new(value)
     }
 
+    /// Read any exact D1–D10 coordinate at a caller-supplied bit offset.
+    ///
+    /// Its width comes from the source/grammar, never from the payload bits.
+    /// This extends the existing W1–W9 fast paths without rounding a D10
+    /// word down to W8/W9 or granting runtime callability by width.
+    pub fn read_coordinate(&self, bit_offset: usize, width: u8) -> Option<DomainCoordinate> {
+        if !(1..=10).contains(&width) {
+            return None;
+        }
+        let end = bit_offset.checked_add(usize::from(width))?;
+        if end > self.bit_len {
+            return None;
+        }
+
+        let mut value = 0u16;
+        for position in bit_offset..end {
+            let byte = *self.bytes.get(position / 8)?;
+            value = (value << 1) | u16::from((byte >> (7 - position % 8)) & 1);
+        }
+        DomainCoordinate::new(width, value)
+    }
+
     /// Split the mechanical container into its physical payload and exact bit
     /// count. The returned byte vector alone is not a complete identity.
     pub fn into_parts(self) -> (Vec<u8>, usize) {
@@ -233,6 +256,30 @@ impl BitPacker {
                 self.bytes[byte_index] |= 1 << (7 - bit_in_byte);
             }
 
+            self.bit_len += 1;
+        }
+
+        start
+    }
+
+    /// Append an already validated D1–D10 coordinate, bit for bit.
+    ///
+    /// No byte is allocated per domain word: only the final packed payload
+    /// can contain unused low tail bits. The caller retains the width schedule
+    /// as source/grammar information; this does not invent a wire envelope.
+    pub fn push_coordinate(&mut self, coordinate: DomainCoordinate) -> usize {
+        let start = self.bit_len;
+        let width = usize::from(coordinate.width());
+        let bits = coordinate.bits();
+
+        for index in (0..width).rev() {
+            let bit_in_byte = self.bit_len % 8;
+            if bit_in_byte == 0 {
+                self.bytes.push(0);
+            }
+            if (bits >> index) & 1 != 0 {
+                self.bytes[self.bit_len / 8] |= 1 << (7 - bit_in_byte);
+            }
             self.bit_len += 1;
         }
 
@@ -579,5 +626,82 @@ mod tests {
         assert_eq!(packed.read::<6>(offsets[5]).unwrap().packed_bits(), 0b101010);
         assert_eq!(packed.read::<7>(offsets[6]).unwrap().packed_bits(), 0b1010101);
         assert_eq!(packed.read::<8>(offsets[7]).unwrap().packed_bits(), 0b10101010);
+    }
+ 
+    #[test]
+    fn exact_d1_through_d10_are_dense_with_only_one_final_tail() {
+        let coordinates: Vec<_> = [
+            (1u8, 1u16), (2, 2), (3, 5), (4, 10), (5, 21),
+            (6, 42), (7, 85), (8, 170), (9, 257), (10, 1023),
+        ]
+        .into_iter()
+        .map(|(width, bits)| DomainCoordinate::new(width, bits).unwrap())
+        .collect();
+        let mut packer = BitPacker::new();
+        let mut offsets = Vec::new();
+        for coordinate in &coordinates {
+            offsets.push(packer.push_coordinate(*coordinate));
+        }
+        let packed = packer.finish();
+        assert_eq!(packed.bit_len(), 55, "1+2+...+10 must be 55 semantic bits");
+        assert_eq!(packed.byte_len(), 7, "only seven physical bytes, not ten words");
+        assert_eq!(packed.valid_bits_in_last_byte(), 7);
+        assert_eq!(packed.bytes()[6] & 1, 0, "only final container slack may be zeroed");
+        for (coordinate, offset) in coordinates.iter().zip(offsets) {
+            assert_eq!(
+                packed.read_coordinate(offset, coordinate.width()),
+                Some(*coordinate),
+                "word width and bits survive crossing physical byte boundaries"
+            );
+        }
+        assert_ne!(
+            DomainCoordinate::new(9, 257),
+            DomainCoordinate::new(10, 257),
+            "equal numeric payloads never establish equal domain identity"
+        );
+    }
+
+    #[test]
+    fn all_d1_d10_payloads_round_trip_at_every_byte_alignment() {
+        for width in 1u8..=10 {
+            for bits in 0u16..(1u16 << width) {
+                let coordinate = DomainCoordinate::new(width, bits).unwrap();
+                for prefix in 0..8usize {
+                    let mut packer = BitPacker::new();
+                    for _ in 0..prefix {
+                        packer.push(crate::Bit1::new(1).unwrap());
+                    }
+                    let offset = packer.push_coordinate(coordinate);
+                    assert_eq!(offset, prefix);
+                    let packed = packer.finish();
+                    assert_eq!(packed.bit_len(), prefix + usize::from(width));
+                    assert_eq!(packed.byte_len(), (packed.bit_len() + 7) / 8);
+                    assert_eq!(packed.read_coordinate(offset, width), Some(coordinate));
+                    assert_eq!(packed.read_coordinate(offset + 1, width), None);
+                }
+            }
+        }
+    }
+
+    #[test]
+    fn domain_coordinate_reader_fails_closed_on_bad_width_and_noncanonical_padding() {
+        let mut packer = BitPacker::new();
+        let start = packer.push_coordinate(DomainCoordinate::new(10, 0b10_1010_0101).unwrap());
+        let packed = packer.finish();
+        assert_eq!(start, 0);
+        assert_eq!(packed.bit_len(), 10);
+        assert_eq!(packed.bytes(), &[0b1010_1001, 0b0100_0000]);
+        assert!(packed.read_coordinate(0, 0).is_none());
+        assert!(packed.read_coordinate(0, 11).is_none());
+        assert!(packed.read_coordinate(1, 10).is_none());
+        assert_eq!(
+            packed.read_coordinate(0, 10).unwrap().bits(),
+            0b10_1010_0101
+        );
+        let (bytes, bit_len) = packed.into_parts();
+        assert!(PackedBitstream::from_parts(bytes.clone(), bit_len).is_some());
+        let mut corrupted = bytes;
+        *corrupted.last_mut().unwrap() |= 1;
+        assert!(PackedBitstream::from_parts(corrupted, bit_len).is_none());
     }
 }
