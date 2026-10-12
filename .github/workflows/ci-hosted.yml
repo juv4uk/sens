@@ -92,6 +92,8 @@ jobs:
 
       # Exercise release packaging rejection gates on every main push, without
       # requiring a release tag or touching GitHub Releases.
-      - name: Release asset verifier negative controls (no tag)
+      - name: Release asset verifier and preflight path negative controls (no tag)
         if: always()
-        run: python3 -m unittest discover -s tests -p 'test_verify_release_assets.py' -v
+        run: |
+          python3 -m unittest discover -s tests -p 'test_verify_release_assets.py' -v
+          python3 -m unittest discover -s packaging/tests -p 'test_release_preflight_scope.py' -v
