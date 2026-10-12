@@ -196,6 +196,17 @@ pub(crate) fn evaluate_step(
         ExprKind::NumericBuffer(buffer) => Ok(EvalStep::Value(Value::NumericBuffer(buffer.clone()))),
         ExprKind::String(value) => Ok(EvalStep::Value(Value::String(value.clone()))),
         ExprKind::Symbol(symbol) => {
+            // A ratified D3 surface is syntax-only here. Diagnose its exact
+            // domain identity, not the historical SID8 compatibility byte.
+            if let Some(identity @ CoreDomainIdentity::D3(_)) =
+                crate::semantic_registry::domain_identity_for_surface(symbol)
+            {
+                return Err(LanguageError::new(
+                    ErrorKind::InvalidForm,
+                    format!("exact domain surface is syntax-only in this position: D3 {identity}"),
+                    expression.span,
+                ));
+            }
             if let Some(sid) = canon::routed_sid_for_surface(symbol) {
                 return Err(LanguageError::new(
                     ErrorKind::InvalidForm,
@@ -647,5 +658,21 @@ mod top_level_error_span_tests {
         };
         let already_located = LanguageError::new(ErrorKind::Type, "точний діапазон", precise);
         assert_eq!(top_level_error_span(already_located, form).span, precise);
+    }
+}
+
+#[cfg(test)]
+mod exact_domain_surface_value_position_tests {
+    use super::*;
+
+    #[test]
+    fn bare_ukrainian_d3_surface_is_diagnosed_without_sid8() {
+        let mut session = Session::default();
+        let error = eval_program("атом?", &mut session)
+            .expect_err("bare D3 function surface is not a value call");
+        assert_eq!(error.kind, ErrorKind::InvalidForm);
+        assert!(error.message.contains("D3 010"), "{}", error.message);
+        assert!(!error.message.contains("SID"), "{}", error.message);
+        assert!(!error.message.contains("00000010"), "{}", error.message);
     }
 }
