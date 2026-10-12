@@ -24,6 +24,23 @@ from typing import Iterable
 
 
 @dataclass(frozen=True, order=True)
+class DomainCoordinate:
+    """Exact-width mechanical location in ratified D1–D10 capacity.
+
+    It is NOT an executable resident, an arithmetic Number or a proof of a
+    function law. This explicit pair never aliases a different domain.
+    """
+    width: int
+    payload: int
+
+    def __post_init__(self) -> None:
+        if not (1 <= self.width <= 10):
+            raise ValueError("D1-D10 coordinate requires explicit width 1..10")
+        if not (0 <= self.payload < (1 << self.width)):
+            raise ValueError("payload exceeds the declared exact domain")
+
+
+@dataclass(frozen=True, order=True)
 class BinaryWord:
     bits: str
 
@@ -38,16 +55,15 @@ class BinaryWord:
     def is_prefix_of(self, other: "BinaryWord") -> bool:
         return other.bits.startswith(self.bits)
 
-    def to_sens8(self) -> int:
-        if self.width != 8:
-            raise ValueError("Sens8 projection requires exact width 8")
-        return int(self.bits, 2)
+    def to_domain_coordinate(self, declared_width: int) -> DomainCoordinate:
+        """Explicit, width-preserving projection; never infer a resident."""
+        if self.width != declared_width:
+            raise ValueError("binary word and declared domain have different widths")
+        return DomainCoordinate(declared_width, int(self.bits, 2))
 
     @staticmethod
-    def from_sens8(value: int) -> "BinaryWord":
-        if not (0 <= value <= 0xFF):
-            raise ValueError("Sens8 value out of range")
-        return BinaryWord(f"{value:08b}")
+    def from_domain_coordinate(coordinate: DomainCoordinate) -> "BinaryWord":
+        return BinaryWord(f"{coordinate.payload:0{coordinate.width}b}")
 
     def packed_payload(self) -> bytes:
         byte_len = (self.width + 7) // 8
@@ -168,13 +184,20 @@ def main() -> None:
     assert long_word.width == 4096
     assert decode_stream(encode_stream([long_word])) == [long_word]
 
-    # Sens8 is a checked reversible projection, not the identity universe.
-    eight = BinaryWord("00000101")
-    packed = eight.to_sens8()
-    assert packed == 5
-    assert BinaryWord.from_sens8(packed) == eight
-    for invalid in (BinaryWord("101"), BinaryWord("000000101"), BinaryWord("1" * 65)):
-        expect_raises(invalid.to_sens8, f"width={invalid.width}")
+    # Explicit mechanical coordinates cover the D1-D10 ladder. Neither
+    # capacity nor width grants a resident callable status or numeric rights.
+    for width in range(1, 11):
+        word = BinaryWord("0" * (width - 1) + "1")
+        coordinate = word.to_domain_coordinate(width)
+        assert coordinate == DomainCoordinate(width, 1)
+        assert BinaryWord.from_domain_coordinate(coordinate) == word
+        if width < 10:
+            assert coordinate != DomainCoordinate(width + 1, 1)
+        expect_raises(lambda: word.to_domain_coordinate(width + 1), "width mismatch")
+    for width in (0, 11, 24):
+        expect_raises(lambda width=width: DomainCoordinate(width, 0), "unadmitted coordinate width")
+    expect_raises(lambda: DomainCoordinate(3, 8), "overflow at D3")
+    assert DomainCoordinate(8, 1) != DomainCoordinate(9, 1)
 
     # Canonical framing rejects hidden information in padding.
     expect_raises(
@@ -203,7 +226,7 @@ def main() -> None:
     print("internal-00-is-data: PASS")
     print("7/8/9 and 64/65 widths: PASS")
     print("4096-bit round-trip: PASS")
-    print("Sens8 checked projection: PASS")
+    print("D1-D10 explicit-width coordinate projection: PASS")
     print("numeric-collapse-detected: PASS")
     print("semantic-admission-independent-of-width: PASS")
     print("NON-CONCLUSION: epsilon semantic admission is unresolved")
