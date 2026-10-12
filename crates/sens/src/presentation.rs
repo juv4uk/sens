@@ -151,6 +151,46 @@ fn unchanged_non_domain_presentation(value: &Value) -> String {
     value.to_string()
 }
 
+fn render_en(value: &Value) -> String {
+    match value {
+        Value::DomainIdentity(identity) => semantic_registry::surface_for_domain_identity(*identity, "en")
+            .map(str::to_string)
+            .unwrap_or_else(|| value.to_string()),
+        Value::Pair(_, _) => {
+            let mut output = String::from("(");
+            let mut current = value;
+            let mut first = true;
+            loop {
+                match current {
+                    Value::Pair(head, tail) => {
+                        if !first {
+                            output.push(' ');
+                        }
+                        output.push_str(&render_en(head));
+                        current = tail;
+                        first = false;
+                    }
+                    Value::Nil => {
+                        output.push(')');
+                        return output;
+                    }
+                    tail => {
+                        output.push_str(" . ");
+                        output.push_str(&render_en(tail));
+                        output.push(')');
+                        return output;
+                    }
+                }
+            }
+        }
+        Value::Vector(vector) => {
+            let items = vector.borrow().iter().map(render_en).collect::<Vec<_>>();
+            format!("#({})", items.join(" "))
+        }
+        _ => unchanged_non_domain_presentation(value),
+    }
+}
+
 fn render_sa(value: &Value) -> String {
     match value {
         Value::DomainIdentity(identity) => semantic_registry::surface_for_domain_identity(*identity, "sa")
@@ -193,9 +233,10 @@ fn render_sa(value: &Value) -> String {
 
 pub fn render_value_for_presentation(value: &Value, language: PresentationLanguage) -> String {
     match language {
+        PresentationLanguage::English => render_en(value),
         PresentationLanguage::Ukrainian => render_uk(value),
         PresentationLanguage::Sanskrit => render_sa(value),
-        PresentationLanguage::Canonical | PresentationLanguage::English => value.to_string(),
+        PresentationLanguage::Canonical => value.to_string(),
     }
 }
 
@@ -390,6 +431,25 @@ mod tests {
 
         assert_eq!(render_value_for_presentation(&lambda, PresentationLanguage::Canonical), "0010");
         assert_eq!(lambda.to_string(), "0010");
+    }
+
+    #[test]
+    fn d1_human_projection_keeps_machine_bits_separate_from_words() {
+        let no = Value::DomainIdentity(crate::DomainIdentity::D1(
+            crate::PredicateBit::from_word(crate::Bit1::new(0).unwrap()),
+        ));
+        let yes = Value::DomainIdentity(crate::DomainIdentity::D1(
+            crate::PredicateBit::from_word(crate::Bit1::new(1).unwrap()),
+        ));
+
+        assert_eq!(render_value_for_presentation(&no, PresentationLanguage::Canonical), "0");
+        assert_eq!(render_value_for_presentation(&yes, PresentationLanguage::Canonical), "1");
+        assert_eq!(render_value_for_presentation(&no, PresentationLanguage::English), "no");
+        assert_eq!(render_value_for_presentation(&yes, PresentationLanguage::English), "yes");
+        assert_eq!(render_value_for_presentation(&no, PresentationLanguage::Ukrainian), "ні");
+        assert_eq!(render_value_for_presentation(&yes, PresentationLanguage::Ukrainian), "так");
+        assert_eq!(render_value_for_presentation(&no, PresentationLanguage::Sanskrit), "na");
+        assert_eq!(render_value_for_presentation(&yes, PresentationLanguage::Sanskrit), "ām");
     }
 
     #[test]
