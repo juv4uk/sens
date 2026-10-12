@@ -1,0 +1,30 @@
+name: Точнодоменна міграція машинного блока
+
+on:
+  pull_request:
+    paths:
+      - "lib/machine/block-exact.lisp"
+      - "lib/machine/atoms/x86-64.lisp"
+      - "lib/machine/operands/x86-64.lisp"
+      - "crates/sens/tests/machine_block_exact_domain.rs"
+      - ".github/workflows/machine-block-exact-cutover.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  machine-block-exact:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      CARGO_BUILD_JOBS: "1"
+      RUST_TEST_THREADS: "1"
+      RUST_MIN_STACK: "33554432"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Вісімбітний історичний блок лишається незмінним свідком
+        run: python3 -m unittest discover -s tests -p test_machine_block_historical_oracle.py -v
+      - name: Точні D3/D4 і дев'ять історичних спостережень
+        run: cargo test --locked -p sens --test machine_block_exact_domain -- --nocapture
