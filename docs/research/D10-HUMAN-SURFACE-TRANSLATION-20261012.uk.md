@@ -139,3 +139,23 @@ GitHub Actions.
 поверхні та 257 однакових. Усі семантичні коди й LISP-ідентичності
 залишено без змін.
 
+## Наступний веб-аудит: поведінка предикатів і математичні скорочення
+
+**Першоджерела:**
+
+- [Common Lisp HyperSpec: DEPOSIT-FIELD](https://www.cs.cmu.edu/Groups/AI/util/html/hyperspec/HyperSpec/Body/fun_deposit-field.html) та [DPB](https://www.cs.cmu.edu/Groups/AI/util/html/hyperspec/HyperSpec/Body/fun_dpb.html): `deposit-field` бере біти **з тих самих позицій** числа-джерела, `dpb` — молодші біти джерела, зсунуті у поле. Для D10 назва `вписати-вирівняне-бітове-поле` прямо попереджає про суттєву відмінність.
+- [LispWorks: stream-listen](https://www.lispworks.com/documentation/lw71/LW/html/lw-1292.htm): `listen` перевіряє готовність символу **без блокування та споживання**. Тому у людських полях `символ-доступний?` та `listen?`; історична назва `LISP LISTEN` лишається.
+- [J. Berlekamp–Massey, University of Groningen](https://research.rug.nl/en/publications/on-constructing-a-shortest-linear-recurrence-relation/) і [Chinese University of Hong Kong, алгоритм](https://mypage.cuhk.edu.cn/academics/wkshum/sage/Berlekamp_Massey.html): `BINARY-LFSR-MINIMAL-RECURRENCE` зберігає мінімальний порядок рекуренції й коефіцієнти над GF(2), а не довільне «мін-лін-рекур».
+- [Lecture: Lyndon words, University of Paris-Est Marne-la-Vallée](https://www-igm.univ-mlv.fr/~perrin/Enseignement/Master2016-17/Cours5/lecture5.pdf): кожне слово має єдину факторизацію у **лексикографічно невисхідні слова Ліндона**.
+- [Binary-reflected Gray code](https://algorithms.alexli.ca/gray-code/): пряме перетворення (g=n\oplus(n\mathbin{\mathrm{>>}}1)), обернене — префіксне XOR; саме ці дві операції тепер мають явні українські назви.
+
+**Внесені зміни:**
+
+- Три логічні операції, які в канонічному законі повертають результат перевірки, отримали `?`: `LISTEN`, `FIND-IF-ANYWHERE`, `MY-COMPARE-CHAIN`. Донорські `LISP` не перейменовано, `en` отримало тільки людський знак питання.
+- Сім раніше невдалих українських назв перевірено за смислом: `GRAY-ENCODE-WORD`, `GRAY-DECODE-WORD`, `BINARY-LFSR-MINIMAL-RECURRENCE`, `DEPOSIT-FIELD`, `HASHTABLE-ENTRIES`, `BINARY-LYNDON-FACTORIZATION`, `BRIDGE`.
+- У контрольні смислові орієнтири додано 10 пар — **51**, а не 41. Валідатор тепер відхиляє також регресію до `впис-вир-пл` і втрату `?` у семантичного предиката.
+- При зміні псевдонімів **не** додано жодної нової функції, коду чи ратифікації.
+
+**Підрахунок від вихідного D10 blob `8532e568b1ba902ffd899626c909e1f2ba5ef1d0`: 534 змінених із 1024 записів**, 507 оновлених `ук`, 392 `укр`, 20 `san`, 43 `en`. **774** різні пари `ук/укр`, **250** однакових. Усього **135 предикатів** із `?`, 13 перетворень зі стрілкою, 256 незмінних складених селекторів. `LISP`-ідентичності й 10-бітні коди залишено точно за ратифікованим інвентарем.
+
+Це доказ перевірки смислової відповідності вибраних назв, **не** свідоцтво зеленого CI та **не** філологічна атестація всієї санскритської поверхні.
