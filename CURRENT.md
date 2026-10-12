@@ -19,6 +19,7 @@ This file exists per [`DOC-AUTHORITY-ARCHIVE`](https://github.com/juv4uk/ecosyst
    - Independent substrates such as C, WASM, FPGA, GraalVM, Common Lisp, Prolog, Datalog, and CLIPS may execute or observe admitted behavior without becoming semantic authority.
 4. **Active plans and standing doctrine** — [`AGENTS.md`](AGENTS.md), [`docs/agent-doctrine.md`](docs/agent-doctrine.md), [`PLAN.md`](PLAN.md), [`STATUS.md`](STATUS.md), [`ecosystem-status.md`](ecosystem-status.md), and the currently active scoped plans they reference.
 5. **Tests and evidence** — `cargo test --workspace`, `--oracle-check`, focused witnesses, and CI prove what the implementation currently satisfies. A claim without executable or source evidence is a hypothesis, not a fact.
+6. **Operational snapshot (2026-10-12)** — [`docs/project-reality-2026-10-12.uk.md`](docs/project-reality-2026-10-12.uk.md) tracks the benchmark-lab registry gap, measured Nano-SENS baseline and its open seed-closure gate, plus D10 runtime-admission boundaries. The pinned Nano-SENS Contract 11.8 run is not evidence of D10 execution under current Contract 11.9.
 
 ## Current identity rule
 
