@@ -140,7 +140,7 @@ def check(d10, inventory, lower):
          "editorial anchor source pin")
     anchor_list = editorial["anchors"]
     need(len(anchor_list) == 51 and
-         len({a["semantic_name"] for a in anchor_list}) == 41,
+         len({a["semantic_name"] for a in anchor_list}) == 51,
          "editorial anchor coverage/duplicate")
     anchor_by_code = {a["coordinate"]: a for a in anchor_list}
     need(len(anchor_by_code) == 51, "duplicate editorial coordinates")
