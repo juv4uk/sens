@@ -117,10 +117,12 @@ f3 40 60. Для інших програм очікуваний хеш треб�
 selector/version/checksum. Сімейство відоме з явного `.f3m` маршруту, а
 **профіль визначає довжина payload**, не sniffing вмісту. Чинний F3M-1
 використовує всі **256/256** байтових кодів; F3M-2 — наступні **65 536**,
-F3M-3 — наступні **16 777 216** global ranks. Для F3M-3 вже доведено
-реальні COND-виконання, найраніший 6/6-capability witness `16 3C 63` і
-exhaustive final-64K winner `FF FB 37`; повний evaluator sweep 16M лишається
-окремим proof gate. Sparse 45/256 mapping — лише історичний доказ.
+F3M-3 — наступні **16 777 216** global ranks, F3M-4 — наступні
+**4 294 967 296**. Для F3M-3 вже доведено реальні COND-виконання,
+найраніший 6/6-capability witness `16 3C 63` і exhaustive final-64K winner
+`FF FB 37`. Для F3M-4 є algebraic capacity proof, 65 536 stratified
+roundtrip samples і executable `DE AD BE EF`. Повні evaluator sweeps 16M/2^32
+лишаються окремими proof gates. Sparse 45/256 mapping — лише історичний доказ.
 
 
 ## Перша реальна перевірка (успішний GitHub Actions)
