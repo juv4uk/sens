@@ -15,7 +15,7 @@ fn exact_d1_atom_quoted_nil_selects_a_cond_clause() {
     let mut session = Session::default();
     load_core_library(&mut session).unwrap();
     assert_eq!(
-        eval_program("(110 ((010 (001 ())) 42))", &mut session)
+        eval_program("(cond ((atom (quote ())) 42))", &mut session)
             .unwrap()
             .value
             .to_string(),
@@ -28,7 +28,7 @@ fn exact_d4_not_negates_false_d5_lessp_in_a_cond_test() {
     let mut session = Session::default();
     load_core_library(&mut session).unwrap();
     assert_eq!(
-        eval_program("(110 ((0100 (11010 10 3)) 42))", &mut session)
+        eval_program("(cond ((not (lessp 10 3)) 42))", &mut session)
             .unwrap()
             .value
             .to_string(),
