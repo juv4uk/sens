@@ -23,6 +23,25 @@ use std::process::Command;
 
 const MAX_INPUT_BYTES: u64 = 64 * 1024 * 1024;
 
+// The recursive compiler is written and executed in SENS. Give its host
+// entrypoints a bounded dedicated stack without copying the SW1/T5 input.
+// Only the canonical artifact bytes and acceptance bit cross the thread
+// boundary; SENS Value (Rc-backed) never becomes Send or an authority table.
+const SENS_COMPILER_STACK_BYTES: usize = 64 * 1024 * 1024;
+
+fn on_compiler_stack<T: Send>(
+    operation: impl FnOnce() -> T + Send,
+) -> Result<T, String> {
+    std::thread::scope(|scope| {
+        let worker = std::thread::Builder::new()
+            .name("sens-compiler-transport".to_owned())
+            .stack_size(SENS_COMPILER_STACK_BYTES)
+            .spawn_scoped(scope, operation)
+            .map_err(|error| format!("cannot start SENS compiler worker: {error}"))?;
+        worker.join().map_err(|_| "SENS compiler worker panicked".to_owned())
+    })
+}
+
 #[derive(Debug, Clone)]
 pub struct RunOptions {
     pub input: PathBuf,
@@ -126,6 +145,17 @@ fn compile_t5_triplet_bytes(
     visible_view: &[u8],
     sens_revision: &str,
 ) -> Result<(Vec<u8>, bool), String> {
+    on_compiler_stack(|| compile_t5_triplet_on_worker(
+        lisp_source, physical_t5, visible_view, sens_revision,
+    ))?
+}
+
+fn compile_t5_triplet_on_worker(
+    lisp_source: &[u8],
+    physical_t5: &[u8],
+    visible_view: &[u8],
+    sens_revision: &str,
+) -> Result<(Vec<u8>, bool), String> {
     for (name, bytes) in [
         ("Lisp source", lisp_source),
         ("physical T5", physical_t5),
@@ -208,6 +238,10 @@ fn compile_t5_triplet_bytes(
 /// compiler. Ok((bytes, true)) means accepted; Ok((bytes, false)) means SENS
 /// emitted a canonical semantic-rejection artifact which must not execute.
 fn compile_sw1_bytes(input: &[u8], sens_revision: &str) -> Result<(Vec<u8>, bool), String> {
+    on_compiler_stack(|| compile_sw1_on_worker(input, sens_revision))?
+}
+
+fn compile_sw1_on_worker(input: &[u8], sens_revision: &str) -> Result<(Vec<u8>, bool), String> {
     if input.is_empty() {
         return Err("SW1 compiler input is empty".into());
     }
@@ -357,6 +391,46 @@ mod tests {
     use std::rc::Rc;
 
     const NUCLEUS: &str = include_str!("../../../lib/compiler-nucleus.lisp");
+
+    #[test]
+    fn compiler_worker_preserves_borrowed_inputs_and_fails_closed_on_panic() {
+        let bytes = b"no extra copy of caller SW1/T5 input";
+        let observed = on_compiler_stack(|| bytes.as_ptr() as usize).unwrap();
+        assert_eq!(observed, bytes.as_ptr() as usize);
+        let err = on_compiler_stack(|| -> () {
+            panic!("deliberate worker panic must become an error")
+        })
+        .expect_err("panicking compiler worker cannot report an artifact");
+        assert!(err.contains("panicked"), "{err}");
+    }
+
+    #[test]
+    fn canonical_wire_retains_domain_width_when_payload_values_are_equal() {
+        // One shared payload demonstrates that the encoded DOMAIN WIDTH,
+        // rather than the integer value alone, defines the identity.
+        let payload = 0b0010;
+        let d3 = sens::BinarySourceWord::W3(sens::Bit3::new(payload).unwrap()).domain_identity();
+        let d4 = sens::BinarySourceWord::W4(sens::Bit4::new(payload).unwrap()).domain_identity();
+        assert_eq!(d3.width(), 3);
+        assert_eq!(d4.width(), 4);
+        assert_ne!(d3, d4);
+
+        let make_node = |identity| Expr {
+            kind: ExprKind::DomainIdentity(identity),
+            span: Span::default(),
+        };
+        let w3 = wire_encode_program(&[make_node(d3)]);
+        let w4 = wire_encode_program(&[make_node(d4)]);
+        assert_ne!(w3, w4, "width is part of the canonical identity");
+        for (wire, original) in [(w3, d3), (w4, d4)] {
+            let decoded = wire_decode_program(&wire).expect("canonical SW1 wire parses");
+            let [Expr { kind: ExprKind::DomainIdentity(actual), .. }] = decoded.as_slice() else {
+                panic!("exact domain identity must not become a legacy SID")
+            };
+            assert_eq!(*actual, original);
+            assert_eq!(wire_encode_program(&decoded), wire);
+        }
+    }
 
     #[test]
     fn canonical_sw1_runs_through_sens_compiler_and_emits_repeatable_artifact_bytes() {
