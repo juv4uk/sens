@@ -9,16 +9,16 @@
 (0011 civil-from-days
   (0010 (days)
     (let* ((z (01010 days 719468))
-           (era (10111 z 146097))
+           (era (quotient z 146097))
            (doe (01011 z (10110 era 146097)))
-           (yoe (10111 (01011 (01010 doe (10111 doe 36524))
-                              (01010 (10111 doe 1460) (10111 doe 146096)))
+           (yoe (quotient (01011 (01010 doe (quotient doe 36524))
+                              (01010 (quotient doe 1460) (quotient doe 146096)))
                            365))
            (y (01010 yoe (10110 era 400)))
            (doy (01011 doe (01010 (10110 365 yoe)
-                           (01011 (10111 yoe 4) (10111 yoe #d100)))))
-           (mp (10111 (01010 (10110 5 doy) 2) 153))
-           (day (01010 (01011 doy (10111 (01010 (10110 153 mp) 2) 5)) 1))
+                           (01011 (quotient yoe 4) (quotient yoe #d100)))))
+           (mp (quotient (01010 (10110 5 doy) 2) 153))
+           (day (01010 (01011 doy (quotient (01010 (10110 153 mp) 2) 5)) 1))
            (month (01010 mp
                     (110
                       ((11010 mp #d10) 3)
@@ -34,11 +34,11 @@
 ; calendar semantics.
 (0011 utc-from-unix
   (0010 (seconds nanosecond)
-    (let* ((days (10111 seconds 86400))
+    (let* ((days (quotient seconds 86400))
            (day-seconds (00101100 seconds 86400))
            (civil (civil-from-days days))
-           (hour (10111 day-seconds 3600))
-           (minute (10111 (00101100 day-seconds 3600) 60))
+           (hour (quotient day-seconds 3600))
+           (minute (quotient (00101100 day-seconds 3600) 60))
            (second-of-minute (00101100 day-seconds 60)))
       (111 (001 utc) (111 (100 civil) (111 (1001 civil) (111 (10011 civil) (111 hour (111 minute (111 second-of-minute (111 nanosecond (001 ()))))))))))))
 
@@ -101,7 +101,7 @@
             ((11010 ntp-seconds 2208988800)
              (111 (001 rejected) (111 (001 invalid-epoch) (001 ()))))
             ((010 (001 ()))
-             (111 (001 accepted) (111 host (111 (01011 ntp-seconds 2208988800) (111 (10111 (10110 fraction #d1000000000) 4294967296) (001 ()))))))))
+             (111 (001 accepted) (111 host (111 (01011 ntp-seconds 2208988800) (111 (quotient (10110 fraction #d1000000000) 4294967296) (001 ()))))))))
          ((010 (001 ()))
           (111 (001 rejected) (111 (001 invalid-response) (001 ()))))))
       ((010 (001 ()))
@@ -147,7 +147,7 @@
 ; whole elapsed milliseconds (floor toward zero == floor here).
 (0011 milliseconds-from-nanoseconds
   (0010 (nanoseconds)
-    (10111 nanoseconds #d1000000)))
+    (quotient nanoseconds #d1000000)))
 
 (0011 mono-ms
   (0010 ()
