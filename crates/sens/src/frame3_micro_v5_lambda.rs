@@ -10,7 +10,7 @@
 //! this 40-bit research space.
 
 use crate::frame3_micro_enumerator::{
-    Frame3MicroEnumerateError, CAP_ALL_F3M5, CAP_ATOM, CAP_CAR, CAP_CDR, CAP_COND, CAP_CONS,
+    Frame3MicroEnumerateError, CAP_ATOM, CAP_CAR, CAP_CDR, CAP_COND, CAP_CONS,
     CAP_EQ, CAP_LAMBDA, CAP_QUOTE,
 };
 use crate::{
@@ -833,6 +833,7 @@ pub fn decode_and_eval_with_sens_runtime(
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::frame3_micro_enumerator::CAP_ALL_F3M5;
 
     #[test]
     fn closed_space_fills_all_40_bits_by_node_13() {
@@ -1131,7 +1132,7 @@ mod tests {
             (runtime_d3(0b111, vec![runtime_d1(true), runtime_list(vec![])]), "(1)"),
         ] {
             let call = runtime_list(vec![lowered.clone(), argument]);
-            let mut session = Session::bare();
+            let session = Session::bare();
             let actual = crate::eval_expr(&call, &session.environment)
                 .expect("real SENS evaluator must execute nameless identity");
             assert_eq!(actual.to_string(), expected);
