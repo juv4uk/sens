@@ -13,7 +13,11 @@ use crate::frame3_micro_enumerator::{
     Frame3MicroEnumerateError, CAP_ALL_F3M5, CAP_ATOM, CAP_CAR, CAP_CDR, CAP_COND, CAP_CONS,
     CAP_EQ, CAP_LAMBDA, CAP_QUOTE,
 };
-use std::sync::OnceLock;
+use crate::{
+    Bija3, Bit1, Bit3, Bit4, CoreD4, CoreDomainIdentity, DomainIdentity, ErrorKind, Expr,
+    ExprKind, LanguageError, PredicateBit, Session, Span, Value,
+};
+use std::{rc::Rc, sync::OnceLock};
 
 pub const F3M5_LAMBDA_CAPACITY: u128 = 1u128 << 40;
 const MAX_NODES: usize = 13;
@@ -677,6 +681,155 @@ pub fn apply_candidate(
     eval_env(&body, &bound)
 }
 
+
+/// Internal evaluator-only binder token used solely to allocate one call-frame
+/// slot for a nameless lambda.  F3M-5λ semantic identity never contains this
+/// string: every bound occurrence is already an ExprKind::Local coordinate.
+///
+/// A NUL prefix keeps this token outside ordinary parsed source spellings.  If
+/// this debug/arity token changes, the physical five-byte mapping and lowered
+/// Local coordinates remain identical.
+const RUNTIME_BINDER_SENTINEL: &str = "\0f3m-debruijn-slot";
+
+fn runtime_expr(kind: ExprKind) -> Expr {
+    Expr {
+        kind,
+        span: Span::default(),
+    }
+}
+
+fn runtime_list(items: Vec<Expr>) -> Expr {
+    runtime_expr(ExprKind::List(Rc::from(items.into_boxed_slice())))
+}
+
+fn runtime_d1(bit: bool) -> Expr {
+    runtime_expr(ExprKind::DomainIdentity(DomainIdentity::D1(
+        PredicateBit::from_word(Bit1::new(u8::from(bit)).expect("D1 bit")),
+    )))
+}
+
+fn runtime_d3(bits: u8, arguments: Vec<Expr>) -> Expr {
+    runtime_expr(ExprKind::DomainCall(
+        CoreDomainIdentity::D3(Bija3::from_word(Bit3::new(bits).expect("D3 word"))),
+        Rc::from(arguments.into_boxed_slice()),
+    ))
+}
+
+fn runtime_lambda(body: Expr) -> Expr {
+    let parameter = runtime_expr(ExprKind::Symbol(Rc::from(RUNTIME_BINDER_SENTINEL)));
+    let parameters = runtime_list(vec![parameter]);
+    runtime_expr(ExprKind::DomainCall(
+        CoreDomainIdentity::D4(CoreD4::from_word(Bit4::new(0b0010).expect("D4 LAMBDA"))),
+        Rc::from(vec![parameters, body].into_boxed_slice()),
+    ))
+}
+
+fn lower_runtime(
+    expression: &F3m5LambdaExpr,
+    lexical_depth: usize,
+) -> Result<Expr, LanguageError> {
+    Ok(match expression {
+        F3m5LambdaExpr::Zero => runtime_d1(false),
+        F3m5LambdaExpr::One => runtime_d1(true),
+        F3m5LambdaExpr::Nil => runtime_list(vec![]),
+        F3m5LambdaExpr::QuoteZero => runtime_d3(0b001, vec![runtime_d1(false)]),
+        F3m5LambdaExpr::QuoteOne => runtime_d3(0b001, vec![runtime_d1(true)]),
+        F3m5LambdaExpr::QuoteNil => runtime_d3(0b001, vec![runtime_list(vec![])]),
+        F3m5LambdaExpr::Bound(index) => {
+            if usize::from(*index) >= lexical_depth {
+                return Err(LanguageError::new(
+                    ErrorKind::InvalidForm,
+                    format!(
+                        "F3M-5λ BOUND({index}) is free at lexical depth {lexical_depth}"
+                    ),
+                    Span::default(),
+                ));
+            }
+            runtime_expr(ExprKind::Local {
+                depth: u32::from(*index),
+                index: 0,
+            })
+        }
+        F3m5LambdaExpr::Atom(value) => {
+            runtime_d3(0b010, vec![lower_runtime(value, lexical_depth)?])
+        }
+        F3m5LambdaExpr::Cons(left, right) => runtime_d3(
+            0b111,
+            vec![
+                lower_runtime(left, lexical_depth)?,
+                lower_runtime(right, lexical_depth)?,
+            ],
+        ),
+        F3m5LambdaExpr::CarCons(left, right) => {
+            let cons = runtime_d3(
+                0b111,
+                vec![
+                    lower_runtime(left, lexical_depth)?,
+                    lower_runtime(right, lexical_depth)?,
+                ],
+            );
+            runtime_d3(0b100, vec![cons])
+        }
+        F3m5LambdaExpr::CdrCons(left, right) => {
+            let cons = runtime_d3(
+                0b111,
+                vec![
+                    lower_runtime(left, lexical_depth)?,
+                    lower_runtime(right, lexical_depth)?,
+                ],
+            );
+            runtime_d3(0b011, vec![cons])
+        }
+        F3m5LambdaExpr::EqAtom(left, right) => {
+            let left = runtime_d3(0b010, vec![lower_runtime(left, lexical_depth)?]);
+            let right = runtime_d3(0b010, vec![lower_runtime(right, lexical_depth)?]);
+            runtime_d3(0b101, vec![left, right])
+        }
+        F3m5LambdaExpr::Lambda(body) => {
+            runtime_lambda(lower_runtime(body, lexical_depth + 1)?)
+        }
+        F3m5LambdaExpr::IfAtom(test, yes, no) => {
+            let predicate = runtime_d3(0b010, vec![lower_runtime(test, lexical_depth)?]);
+            let yes_clause = runtime_list(vec![predicate, lower_runtime(yes, lexical_depth)?]);
+            let no_clause = runtime_list(vec![runtime_d1(true), lower_runtime(no, lexical_depth)?]);
+            runtime_d3(0b110, vec![yes_clause, no_clause])
+        }
+    })
+}
+
+/// Lower the nameless five-byte candidate directly into SENS's existing
+/// numeric lexical-slot AST.  Bound-variable names never enter the result:
+/// BOUND(n) becomes Local { depth: n, index: 0 }.
+///
+/// The only temporary string is the evaluator-private lambda-list sentinel
+/// required by the current Closure arity/frame allocator.  It is never
+/// referenced by the body and therefore cannot affect semantic identity.
+pub fn lower_candidate_to_sens_expr(
+    expression: &F3m5LambdaExpr,
+) -> Result<Expr, LanguageError> {
+    lower_runtime(expression, 0)
+}
+
+/// Evaluate a decoded F3M-5λ term with the real SENS evaluator, not the small
+/// research evaluator above.
+pub fn eval_candidate_with_sens_runtime(
+    expression: &F3m5LambdaExpr,
+    session: &mut Session,
+) -> Result<Value, LanguageError> {
+    let lowered = lower_candidate_to_sens_expr(expression)?;
+    crate::eval_expr(&lowered, &session.environment)
+}
+
+/// Decode an exact five-byte F3M-5λ payload and run it through the real SENS
+/// evaluator.  Decode errors remain distinct from language-evaluation errors.
+pub fn decode_and_eval_with_sens_runtime(
+    payload: [u8; 5],
+    session: &mut Session,
+) -> Result<Value, String> {
+    let expression = decode_candidate(payload).map_err(|error| format!("{error}"))?;
+    eval_candidate_with_sens_runtime(&expression, session).map_err(|error| error.to_string())
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -951,6 +1104,74 @@ mod tests {
             apply_candidate(eval_candidate(&atom_to_bit).unwrap(), pair_value).unwrap(),
             F3m5LambdaValue::Bit(false)
         );
+    }
+
+    #[test]
+    fn zero_payload_runs_as_real_sens_lambda_identity_without_a_source_name() {
+        let candidate = decode_candidate([0; 5]).expect("five-byte identity");
+        let lowered = lower_candidate_to_sens_expr(&candidate).expect("closed nameless lambda");
+
+        let ExprKind::DomainCall(lambda, arguments) = &lowered.kind else {
+            panic!("F3M-5λ identity must lower to real D4 LAMBDA");
+        };
+        assert_eq!((lambda.width(), lambda.packed_bits()), (4, 0b0010));
+        let ExprKind::List(parameters) = &arguments[0].kind else {
+            panic!("runtime lambda-list");
+        };
+        assert_eq!(parameters.len(), 1);
+        let ExprKind::Local { depth, index } = arguments[1].kind else {
+            panic!("λ.BOUND(0) body must already be a numeric Local");
+        };
+        assert_eq!((depth, index), (0, 0));
+
+        for (argument, expected) in [
+            (runtime_d1(false), "0"),
+            (runtime_d1(true), "1"),
+            (runtime_list(vec![]), "()"),
+            (runtime_d3(0b111, vec![runtime_d1(true), runtime_list(vec![])]), "(1)"),
+        ] {
+            let call = runtime_list(vec![lowered.clone(), argument]);
+            let mut session = Session::bare();
+            let actual = crate::eval_expr(&call, &session.environment)
+                .expect("real SENS evaluator must execute nameless identity");
+            assert_eq!(actual.to_string(), expected);
+        }
+    }
+
+    #[test]
+    fn k_and_ki_beta_reduce_through_real_sens_nested_closures() {
+        let k = decode_candidate([0x00, 0x00, 0x00, 0x00, 0x10]).expect("K");
+        let ki = decode_candidate([0x00, 0x00, 0x00, 0x00, 0x0f]).expect("KI");
+
+        for (term, expected) in [(k, "1"), (ki, "0")] {
+            let lowered = lower_candidate_to_sens_expr(&term).expect("closed K-family term");
+            let first = runtime_list(vec![lowered, runtime_d1(true)]);
+            let second = runtime_list(vec![first, runtime_d1(false)]);
+            let mut session = Session::bare();
+            let actual = crate::eval_expr(&second, &session.environment)
+                .expect("real SENS nested closure execution");
+            assert_eq!(actual.to_string(), expected);
+        }
+    }
+
+    #[test]
+    fn tracked_all_basis_payload_executes_on_real_sens_evaluator() {
+        const ALL: &[u8; 5] =
+            include_bytes!("../../../research/framed3/fixtures/f3m5-all-d1-d3-lambda.f3m");
+        let candidate = decode_candidate(*ALL).expect("all-basis five-byte witness");
+        assert_eq!(candidate.capability_mask(), CAP_ALL_F3M5);
+
+        let mut session = Session::bare();
+        let actual = eval_candidate_with_sens_runtime(&candidate, &mut session)
+            .expect("all D1-D3 capabilities plus real lambda run in canonical evaluator");
+        assert_eq!(actual.as_predicate_bit(), Some(false));
+    }
+
+    #[test]
+    fn free_debruijn_reference_fails_before_real_sens_evaluation() {
+        let error = lower_candidate_to_sens_expr(&F3m5LambdaExpr::Bound(0))
+            .expect_err("root BOUND(0) is not closed");
+        assert_eq!(error.kind, ErrorKind::InvalidForm);
     }
 
     #[test]
