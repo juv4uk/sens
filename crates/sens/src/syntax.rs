@@ -127,6 +127,12 @@ fn is_exact_domain_program(expressions: &[Expr]) -> bool {
         }
         match &expr.kind {
             ExprKind::Sid(_) | ExprKind::Call(_, _) => return false,
+            // Лише D24+ володіє числовою семантикою. Старі f64,
+            // дроби та нормалізовані біти без Dn — тільки сумісність.
+            ExprKind::Number(_, _) | ExprKind::Rational(_) => return false,
+            ExprKind::BinaryNumber(number) if number.numeric_domain_width().is_none() => {
+                return false;
+            }
             ExprKind::DomainCall(identity, args) => {
                 if crate::DomainIdentity::from(*identity).core_operation() != Some(*identity) {
                     return false;
@@ -955,6 +961,28 @@ mod wire_tests {
         let old_fasl = fasl::encode_program(&[outer], &[0; 32]);
         assert!(fasl::decode_program(&old_fasl).is_some());
         assert!(fasl::decode_exact_program(&old_fasl).is_none());
+    }
+
+    #[test]
+    fn exact_domain_requires_d24_or_larger_for_numbers() {
+        let expr = |kind| Expr { kind, span: crate::Span::default() };
+        let old_float = expr(ExprKind::Number(7.0, super::Exactness::Exact));
+        assert!(super::wire::encode_exact_program(&[old_float.clone()]).is_none());
+        assert!(fasl::encode_exact_program(&[old_float], &[0; 32]).is_none());
+        let old_binary = expr(ExprKind::BinaryNumber(
+            crate::BinaryNumber::from_bits([1, 0, 1]).unwrap(),
+        ));
+        assert!(super::wire::encode_exact_program(&[old_binary]).is_none());
+        let mut exact_word = vec![0u8; 24];
+        exact_word[23] = 1;
+        let qualified = expr(ExprKind::BinaryNumber(
+            crate::BinaryNumber::from_numeric_domain_bits(24, &exact_word).unwrap(),
+        ));
+        let w = super::wire::encode_exact_program(&[qualified.clone()]).unwrap();
+        let decoded = super::wire::decode_exact_program(&w).unwrap();
+        assert_eq!(decoded[0].kind, qualified.kind);
+        let f = fasl::encode_exact_program(&[qualified.clone()], &[0; 32]).unwrap();
+        assert_eq!(fasl::decode_exact_program(&f).unwrap().0[0].kind, qualified.kind);
     }
 
     #[test]
