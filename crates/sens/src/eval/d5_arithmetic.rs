@@ -1,6 +1,6 @@
 //! Direct execution for the ratified Core.D5 arithmetic roles.
 //!
-//! Domain identity selects the mechanism. Historical Function8/Sens8 slots
+//! Domain identity selects the mechanism. Historical flat eight-bit slots
 //! do not participate in this path.
 
 use super::arithmetic;
