@@ -161,6 +161,27 @@ fn d1_predicates_and_d3_eq_remain_non_arithmetic_laws() {
 }
 
 #[test]
+fn ten_bit_domain_ratification_does_not_invent_d10_callability_or_arithmetic() {
+    let mut session = Session::default();
+    session.environment.define("number", numeric(24, 9));
+
+    // D10 has a whole-domain owner ratification, but no generic W10
+    // runtime callable lift, per-resident proof or physical T5 admission.
+    // An ordinary ten-digit head must NOT be reinterpreted as a D10
+    // callable merely because its binary spelling fits ten bits.
+    for expression in ["(0000000001 number)", "(1111111111 number)"] {
+        let result = exact_call(expression, &mut session);
+        assert!(result.is_err(), "{expression} must fail closed before D10 admission");
+    }
+
+    // Nor can a ten-digit spelling be a substitute for a qualified
+    // D24+ number. The value's own domain is never inferred from digits.
+    let error = exact_call("(01010 number 0000000001)", &mut session).unwrap_err();
+    assert_eq!(error.kind, ErrorKind::Type);
+    assert!(error.message.contains("D24+"), "{error}");
+}
+
+#[test]
 fn different_numeric_domains_do_not_implicitly_coerce() {
     let mut session = Session::default();
     session.environment.define("left", numeric(24, 7));
