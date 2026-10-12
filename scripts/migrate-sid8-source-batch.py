@@ -11,12 +11,16 @@ import importlib.util
 import json
 from pathlib import Path
 
-from report_original_migration_candidates import load_nonprogram_classification
 import re
 import subprocess
 import sys
 
 ROOT = Path(__file__).resolve().parents[1]
+# Тестовий importlib.spec_from_file_location не додає scripts/ в sys.path.
+SCRIPT_DIR = ROOT / "scripts"
+if str(SCRIPT_DIR) not in sys.path:
+    sys.path.insert(0, str(SCRIPT_DIR))
+from report_original_migration_candidates import load_nonprogram_classification
 BITS = re.compile(r"[01]{8}\Z")
 TARGET = re.compile(r"D([1-9]):([01]{1,9})")
 ALLOW = {"DIRECT-CURRENT-IDENTITY", "CURRENT-PROJECTION-DERIVED"}
