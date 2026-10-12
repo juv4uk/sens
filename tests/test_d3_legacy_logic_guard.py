@@ -243,6 +243,34 @@ class LegacyD3GuardTests(unittest.TestCase):
             [f.rule for f in MODULE.scan_lisp(bad, path)],
         )
 
+    def test_function_table_generator_safe_d3_migration_is_monotonic(self):
+        path = "scripts/generate-function-table.lisp"
+        source = (ROOT / path).read_text(encoding="utf-8")
+        rules = [f.rule for f in MODULE.scan_lisp(source, path)]
+
+        # Six non-trivial historical match branches still need independent
+        # semantic proof; do not suppress them in the strict project audit.
+        self.assertEqual(rules.count("COND_NOT_TWO_FIELDS"), 6)
+        self.assertNotIn("COND_HOST_TRUTH", rules)
+        self.assertNotIn("LEGACY_W8_CALL", rules)
+
+        pair = "((010 sections) (001 ()))"
+        self.assertIn(pair, source)
+        regression = source.replace(pair, "((010 sections) (1) (001 ()))", 1)
+        new_rules = [f.rule for f in MODULE.scan_lisp(regression, path)]
+        self.assertGreater(
+            new_rules.count("COND_NOT_TWO_FIELDS"),
+            rules.count("COND_NOT_TWO_FIELDS"),
+        )
+
+        predicate = "((010 (001 ())) (find-section name (011 sections)))"
+        self.assertIn(predicate, source)
+        regression = source.replace(predicate, "(t (find-section name (011 sections)))", 1)
+        self.assertIn(
+            "COND_HOST_TRUTH",
+            [f.rule for f in MODULE.scan_lisp(regression, path)],
+        )
+
     def test_historical_paths_and_metadata_excluded(self):
         for path in ("docs/research/old.lisp", "research/domain-archive/a.lisp",
                      "tests/fixtures/old.lisp", "lib/domains/d3.lisp",
