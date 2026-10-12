@@ -235,6 +235,53 @@ fn lisp_owned_d24_length_fold_uses_ratified_d6_add1_without_number_literals() {
     assert!(err.message.contains("D24+"), "{err}");
 }
 
+/// A second Core4 migration slice: nth's old numeric (01011 i 1)
+/// can become the already-admitted D6 SUB1. Equality with zero is D3 EQ
+/// over *explicitly* qualified values, not mathematical comparison of
+/// a legacy scalar literal. This is a candidate law witness, not a
+/// modification of pinned Core4 or a newly admitted D24 source literal.
+#[test]
+fn lisp_owned_d24_nth_uses_d3_identity_and_d6_sub1_without_number_literals() {
+    const SOURCE: &str = r#"
+        (0011 елемент-д24
+          (0010 (i xs zero)
+            (110
+              ((101 i zero) (100 xs))
+              ((0100 (101 i zero))
+                (елемент-д24 (001111 i) (011 xs) zero)))))
+    "#;
+    let mut session = Session::bare();
+    let definitions = parse_mixed_exact_domain(SOURCE)
+        .expect("D3 equality and D6 SUB1 remain distinct identities");
+    eval_parsed_expressions(&definitions, &mut session)
+        .expect("Lisp-owned D24 nth recursive definition");
+
+    let mut list = Value::Nil;
+    for symbol in ["третій", "другий", "перший"] {
+        list = Value::Pair(
+            std::rc::Rc::new(Value::Symbol(std::rc::Rc::from(symbol))),
+            std::rc::Rc::new(list),
+        );
+    }
+    session.environment.define("xs", list);
+    session.environment.define("zero", numeric(24, 0));
+
+    for (index, answer) in ["перший", "другий", "третій"].iter().enumerate() {
+        session.environment.define("i", numeric(24, index as u32));
+        let actual = eval_program("(елемент-д24 i xs zero)", &mut session)
+            .expect("D24 index accepted through D3 EQ / D6 SUB1").value;
+        assert_eq!(actual, Value::Symbol(std::rc::Rc::from(*answer)));
+    }
+
+    // A same-looking unqualified zero is NOT D24(0); it must never act
+    // as an index in the arithmetic decrement branch.
+    session.environment.define("i", Value::Rational(Rational::integer(1)));
+    let error = eval_program("(елемент-д24 i xs zero)", &mut session)
+        .expect_err("unqualified index refused by exact D6 SUB1");
+    assert_eq!(error.kind, ErrorKind::Type);
+    assert!(error.message.contains("D24+"), "{error}");
+}
+
 #[test]
 fn different_numeric_domains_do_not_implicitly_coerce() {
     let mut session = Session::default();
