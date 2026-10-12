@@ -277,6 +277,19 @@ mod tests {
             assert_eq!(packer.push_coordinate(d8), 13);
             assert_eq!(packer.push_coordinate(d4), 21);
             let packed = packer.finish();
+            // Independent MSB-first physical golden vectors (not a
+            // packer→reader roundtrip, which could hide a shared bit-order bug).
+            // All four coordinates concatenate without word-local padding.
+            let golden: Option<[u8; 4]> = match bits {
+                0 => Some([0x20, 0x05, 0x41, 0x00]),
+                1 => Some([0x20, 0x0d, 0x41, 0x00]),
+                1023 => Some([0x3f, 0xfd, 0x41, 0x00]),
+                _ => None,
+            };
+            if let Some(golden) = golden {
+                assert_eq!(packed.bytes(), golden.as_slice(),
+                    "bit order or cross-word boundary changed at D10={bits}");
+            }
             assert_eq!(packed.bit_len(), 25);
             assert_eq!(packed.byte_len(), 4);
             assert_eq!(packed.valid_bits_in_last_byte(), 1);
