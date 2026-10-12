@@ -147,12 +147,12 @@ fn core4_local_binding_heads_are_current_and_postcore_libraries_load() {
         ("time", include_str!("../../../lib/time.lisp")),
         ("process", include_str!("../../../lib/process.lisp")),
     ] {
-        // Runtime's lib/time.lisp has an owner-pinned exact-domain reader.
-        // The ordinary parser would turn its short binary heads into Number.
+        // Both source libraries have owner-pinned exact-domain readers.
+        // Their ordinary parser would turn short binary heads into Number.
         let forms = if library == "time" {
             sens::parse_mixed_exact_domain_time_source("lib/time.lisp", source)
         } else {
-            parse(source)
+            sens::parse_mixed_exact_domain_process_tcp_source("lib/process.lisp", source)
         }
         .unwrap_or_else(|error| panic!("{library} parse: {error}"));
         for (index, form) in forms.iter().enumerate() {
