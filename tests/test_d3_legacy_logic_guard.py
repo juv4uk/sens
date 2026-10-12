@@ -136,13 +136,9 @@ class LegacyD3GuardTests(unittest.TestCase):
                 self.assertEqual(MODULE.scan_lisp(fragment, path), [])
 
         arity = segment("render-arity", "render-admitted")
-        # Nested at-least/between and unknown-arity result-match clauses
-        # remain three separate historical migration debts, not an admitted D3 form.
-        rules = [f.rule for f in MODULE.scan_lisp(arity, path)]
-        self.assertEqual(rules.count("COND_NOT_TWO_FIELDS"), 3)
-        self.assertNotIn("COND_HOST_TRUTH", rules)
+        self.assertEqual(MODULE.scan_lisp(arity, path), [])
 
-        # Each reverted 3-field condition MUST fail independently.
+        # Restoring an expected-result field recreates the obsolete triplet.
         substitutions = (
             (nonlegacy[0], "((010 (11100 key (011 row))) (001 ()))",
              "((010 (11100 key (011 row))) (1) (001 ()))"),
@@ -150,6 +146,10 @@ class LegacyD3GuardTests(unittest.TestCase):
              '((010 remaining) (1) "")'),
             (arity, '((010 arity)\n       (str+',
              '((010 arity) (1)\n       (str+'),
+            (arity, '((11110111 (100 arity) (001 at-least))\n          (str+',
+             '((11110111 (100 arity) (001 at-least)) (1)\n          (str+'),
+            (arity, '((11110111 (100 arity) (001 between))\n          (str+',
+             '((11110111 (100 arity) (001 between)) (1)\n          (str+'),
         )
         for fragment, original, invalid in substitutions:
             with self.subTest(original=original):
@@ -158,6 +158,16 @@ class LegacyD3GuardTests(unittest.TestCase):
                 self.assertIn("COND_NOT_TWO_FIELDS", [
                     f.rule for f in MODULE.scan_lisp(changed, path)
                 ])
+
+        # The unknown-arity default is an unconditional exact-D1 fallback,
+        # not a quoted symbol compared against itself in a historical triplet.
+        exact_fallback = "((010 (001 ())) (100 (001 ())))"
+        legacy_fallback = "((001 unknown-arity) unknown-arity (100 (001 ())))"
+        self.assertIn(exact_fallback, arity)
+        reverted = arity.replace(exact_fallback, legacy_fallback, 1)
+        self.assertIn("COND_NOT_TWO_FIELDS", [
+            f.rule for f in MODULE.scan_lisp(reverted, path)
+        ])
 
         fallback = "((010 (001 ())) t)"
         self.assertIn(fallback, nonlegacy[0])
