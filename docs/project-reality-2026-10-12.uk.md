@@ -17,32 +17,46 @@
 
 Десяткові значення, host integer, byte, Rust type, backend opcode або назва поверхні — похідні подання, не джерело семантичної влади.
 
-## 1A. Фізичні кодеки: одна семантика SENS
+## 1A. Режими проєкту: одна семантика SENS
 
-Чинна номенклатура відокремлює компактне сімейство **Frame3** від
-самодостатніх metadata-heavy контейнерів: **Frame3 Carrier (F3C)** — явний
-`.senc` маршрут для дуже малих програм; **Frame3-Micro (F3M)** — bounded
-`.f3m` micro-profile; **Envelope E1/E2/E3** — історичні S3/v1-v3 і більше
-не називаються «Frame3 v1/v2/v3». T5 лишається загальним канонічним
-`.sens` transport. Повна таблиця — [codec naming](codec-naming-2026-10-12.uk.md).
+Чинна матриця фізичних режимів має **два production routes, один bounded
+micro-rank route і research envelopes**:
 
-F3C/F3M **не мають окремої семантики**: вони відновлюють точні доменні
-слова SENS і передають їх тому самому reader/evaluator. Для F3M вже є
-dense bounded proof: файл `car-cons-one-nil.f3m` дорівнює одному
-байту `0x3E`, відновлює `10 100 10 111 1 000 01 01` і виконується як
-`CAR(CONS(1,NIL))` з паритетом до T5. Це доводить можливість
-**1-байтової виконуваної SENS-програми в конкретному профілі**, але не
-можливість стискати довільну SENS-програму до одного байта.
+| Режим | Носій | Статус | Роль |
+|---|---|---|---|
+| **T5 / General** | `.sens` | production/default | загальний канонічний transport |
+| **F3C / Tiny Portable** | `.senc` | production explicit | компактний самодостатній carrier для дуже малих програм |
+| **F3M / Micro Rank** | `.f3m` | bounded proven/research | щільний enumerative rank без внутрішньої magic/version мітки |
+| **Envelope E1/E2/E3** | research carriers | research/history | self-contained metadata/integrity envelopes |
 
-Рішення власника 12.10.2026: **F3M-профіль визначає фізична довжина, а не
-внутрішня мітка**. Після зовнішнього вибору сімейства `.f3m`:
-1 байт = F3M-1, 2 = F3M-2, 3 = F3M-3; 0 і 4+ зараз fail-closed. Байтовий
-вміст не sniff-иться й не може перемкнути профіль, тож 8/16/24 біти
-залишаються payload/rank. F3M-1 має dense 256/256 mapping і exhaustive
-однобайтовий evaluator/T5 proof. F3M-2 займає наступні 65 536 global ranks
-і має exhaustive payload roundtrip; F3M-3 займає наступні 16 777 216 ranks
-і має boundary/sample roundtrip плюс реальний COND witness. Повний evaluator
-sweep усіх 16 777 216 F3M-3 рангів ще не оголошено завершеним. [Формальне правило](frame3-micro-length-profiles-2026-10-12.uk.md).
+Нормативний опис: [режими проєкту](project-modes-2026-10-12.uk.md) ·
+[codec naming](codec-naming-2026-10-12.uk.md).
+
+T5, F3C і F3M **не мають окремої семантики**: вони повинні відновити ті самі
+точні доменні слова SENS і передати їх тому самому reader/evaluator.
+Маршрути fail-closed: `.sens` → T5, `.senc` → F3C, `.f3m` → F3M;
+content sniffing та decoder fallback заборонені.
+
+Для F3M сімейство вибирається зовнішнім маршрутом, але конкретний профіль
+визначає **тільки фізична довжина**: 1 байт = F3M-1, 2 = F3M-2,
+3 = F3M-3; 0 і 4+ зараз fail-closed. F3M-1/F3M-2/F3M-3 займають
+неперетинні послідовні вікна одного canonical enumerator:
+
+- F3M-1: **256/256** unique; exhaustive evaluator + physical-T5 parity;
+- F3M-2: наступні **65 536/65 536** ranks; exhaustive encode/decode roundtrip;
+- F3M-3: наступні **16 777 216** ranks; real evaluator witnesses,
+  DP/full-capability proof та exhaustive search останньої 64K-сторінки.
+
+Поточні трофеї: `3E` → `CAR(CONS(1,NIL))`; `16 3C 63` — найраніший
+F3M-3 witness із усіма 6 capability-класами
+`QUOTE+ATOM+CONS+CAR+CDR+COND`; `FF FB 37` — переможець exhaustive
+пошуку `FF 00 00..FF FF FF` за зафіксованою метрикою виразності.
+Сам `FF FF FF` має лише 4/6 capability-класів і без COND.
+
+Evidence: [run 38194615315](https://github.com/juv4uk/sens/actions/runs/38194615315)
+і [run 38195272188](https://github.com/juv4uk/sens/actions/runs/38195272188)
+— SUCCESS. Повний evaluator sweep **усіх 16 777 216** F3M-3 програм ще не
+оголошується завершеним; це окремий proof gate.
 
 ## 2. Nano-SENS: що виміряно і що ще заблоковано
 
