@@ -17,7 +17,7 @@
 use crate::frame3_micro_enumerator::{Frame3MicroEnumerateError, Frame3MicroExpr};
 
 pub const F3M5_CAPACITY: u128 = 1u128 << 40;
-const COUNT_LIMIT: usize = 16;
+const COUNT_LIMIT: usize = 13;
 
 type Counts = [[u128; 2]; COUNT_LIMIT + 1];
 
