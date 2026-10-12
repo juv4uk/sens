@@ -6,6 +6,7 @@ on:
       - 'crates/sens/src/frame3_micro.rs'
       - 'crates/sens/src/frame3_micro_enumerator.rs'
       - 'crates/sens/src/frame3_micro_v5.rs'
+      - 'crates/sens/src/frame3_micro_v5_lambda.rs'
       - 'research/framed3/fixtures/*.f3m'
       - 'crates/sens/examples/frame3_real_files_bench.rs'
       - 'research/framed3/rust_codec/senc.rs'
@@ -16,6 +17,7 @@ on:
       - 'crates/sens/src/frame3_micro.rs'
       - 'crates/sens/src/frame3_micro_enumerator.rs'
       - 'crates/sens/src/frame3_micro_v5.rs'
+      - 'crates/sens/src/frame3_micro_v5_lambda.rs'
       - 'research/framed3/fixtures/*.f3m'
       - 'crates/sens/examples/frame3_real_files_bench.rs'
       - 'research/framed3/rust_codec/senc.rs'
@@ -37,6 +39,7 @@ jobs:
           mkdir -p "$RUNNER_TEMP/frame3-proof"
           {
             cargo test --locked -p sens frame3_micro_v5::tests -- --nocapture
+            cargo test --locked -p sens frame3_micro_v5_lambda::tests -- --nocapture
             cargo test --locked -p sens frame3_micro_enumerator::tests -- --nocapture
           } 2>&1 | tee "$RUNNER_TEMP/frame3-proof/enumerator-tests.log"
       - name: Encode, decode, and execute with real Rust SENS oracle
