@@ -186,6 +186,10 @@ class ThreePassClassifierTests(unittest.TestCase):
              "define", "atom?", "визначити", "cdr"],
         )
 
+    def test_variadic_lambda_binder_atom_does_not_hide_body(self):
+        heads = mod.scan_heads("sample.lisp", "(lambda args (car args))")
+        self.assertEqual([head.token for head in heads], ["lambda", "car"])
+
     def test_nested_quoted_and_structural_empty_lists_remain_data(self):
         source = """(quote (()))
 '(car ())

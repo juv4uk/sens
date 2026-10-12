@@ -201,20 +201,21 @@ def scan_heads(path: str, text: str) -> list[Head]:
             i += 1
             continue
 
-        if frames and frames[-1]["need_head"]:
+        if frames:
             frame = frames[-1]
-            if not frame["quoted"] and not pending_quote:
-                line, col = line_col(text, start)
-                heads.append(Head(path, line, col, start, i, token, False))
-                normalized = token.casefold()
-                if normalized in quote_heads:
-                    frame["quote_children"] = True
-                if normalized in binder_heads:
-                    frame["binding_next"] = True
+            if frame["need_head"]:
+                if not frame["quoted"] and not pending_quote:
+                    line, col = line_col(text, start)
+                    heads.append(Head(path, line, col, start, i, token, False))
+                    normalized = token.casefold()
+                    if normalized in quote_heads:
+                        frame["quote_children"] = True
+                    if normalized in binder_heads:
+                        frame["binding_next"] = True
+                frame["need_head"] = False
             elif frame["binding_next"]:
                 # A variadic binder atom consumes the declaration position.
                 frame["binding_next"] = False
-            frame["need_head"] = False
 
         pending_quote = False
 
