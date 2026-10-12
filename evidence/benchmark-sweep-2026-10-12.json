@@ -170,17 +170,116 @@
     }
   ],
   "pending_current_head_validation": {
-    "observed_head": "c9c3214b5bfed156e8302561215a961d9e972b4e",
-    "status": "PENDING_EXACT_HEAD_CI",
-    "physical_smoke": {
-      "id": 38192217893,
-      "url": "https://github.com/juv4uk/sens/actions/runs/38192217893",
-      "status": "queued"
-    },
+    "recorded_base_head": "3f89d4f32ad463b375d90d3f69285c5163cfb601",
+    "status": "PENDING_CURRENT_GENERATION_SWEEP",
+    "latest_main_at_receipt": "57b12f9a02e8b97d5d593924beeb27a4c1708fff",
+    "runs": [
+      {
+        "id": 38192536311,
+        "name": "Benchmark registry",
+        "commit": "bbfd6d4aa873e904bf8497bf7dfb611d60557470",
+        "url": "https://github.com/juv4uk/sens/actions/runs/38192536311",
+        "status": "queued"
+      },
+      {
+        "id": 38192538259,
+        "name": "Physical binary SENS CLI smoke",
+        "commit": "57b12f9a02e8b97d5d593924beeb27a4c1708fff",
+        "url": "https://github.com/juv4uk/sens/actions/runs/38192538259",
+        "status": "queued"
+      }
+    ],
     "notes": [
-      "Physical source projection is a byte-preserving view of committed T5 words, not a reconstruction of legacy Lisp AST.",
-      "The five projection boundary unit tests are invoked by .github/workflows/physical-binary-sens-cli.yml.",
-      "Historical sweep outcomes remain immutable; only a future exact-head sweep can change the current benchmark verdict."
+      "The physical stand PASS above is an exact stand-level result from SHA c10d2387, not the full sweep conclusion.",
+      "The subsequent STORE/AIR commit creates a fresh Contract 11.9 generation; its PASS/FAIL/BLOCKED outcome is pending the next sweep.",
+      "Historical full-sweep counts remain pinned to their exact commits and are not overwritten."
     ]
+  },
+  "latest_stand_level_results": {
+    "physical_binary_performance": {
+      "status": "PASS",
+      "commit": "c10d23871edc0113eab8d26f4a77ea6c16349d36",
+      "workflow_run": {
+        "id": 38192284184,
+        "url": "https://github.com/juv4uk/sens/actions/runs/38192284184",
+        "status": "in_progress",
+        "note": "Full sweep aggregator was still running when this individual shard PASS was recorded."
+      },
+      "shard": 6,
+      "artifact": {
+        "id": 11722305482,
+        "name": "benchmark-sweep-38192284184-6",
+        "url": "https://github.com/juv4uk/sens/actions/runs/38192284184/artifacts/11722305482",
+        "sha256": "883e73b3aaa71703a5c9a022b6e14e04834d2964d7ae89c707f2471899677b68",
+        "expires_at_utc": "2026-11-02T01:36:56Z"
+      },
+      "checks": {
+        "projection_unit_tests": 5,
+        "source_to_t5_pairs": 8,
+        "bytewise_encode_parity": "8/8 PASS",
+        "two_execution_cli_paths": "8/8 parity PASS",
+        "independent_python_t5_roundtrip": "PASS",
+        "sens_trit_open_projection": "8/8 PASS"
+      },
+      "encode_median_ms": [
+        {
+          "fixture": "quote-legacy.sens",
+          "bytes": 4,
+          "source_projection_bytes": 17,
+          "median": 0.863,
+          "p95": 0.89
+        },
+        {
+          "fixture": "two-forms.sens",
+          "bytes": 14,
+          "source_projection_bytes": 70,
+          "median": 0.834,
+          "p95": 0.845
+        },
+        {
+          "fixture": "branch.sens",
+          "bytes": 12,
+          "source_projection_bytes": 57,
+          "median": 0.866,
+          "p95": 0.93
+        },
+        {
+          "fixture": "pair-cons.sens",
+          "bytes": 10,
+          "source_projection_bytes": 50,
+          "median": 0.855,
+          "p95": 0.871
+        },
+        {
+          "fixture": "pair-car-cdr.sens",
+          "bytes": 11,
+          "source_projection_bytes": 56,
+          "median": 0.854,
+          "p95": 0.882
+        },
+        {
+          "fixture": "caar.sens",
+          "bytes": 20,
+          "source_projection_bytes": 97,
+          "median": 0.861,
+          "p95": 0.951
+        },
+        {
+          "fixture": "eq-cond-select.sens",
+          "bytes": 33,
+          "source_projection_bytes": 166,
+          "median": 0.879,
+          "p95": 0.964
+        },
+        {
+          "fixture": "eq-cond-skip.sens",
+          "bytes": 33,
+          "source_projection_bytes": 166,
+          "median": 0.875,
+          "p95": 0.963
+        }
+      ],
+      "interpretation": "This is a physical T5 word-stream roundtrip and CLI-mechanism measurement, not Lisp AST compilation or an independent semantic-law proof. Cachegrind instruction references were not enabled in this run."
+    }
   }
 }
