@@ -149,7 +149,7 @@ for bits,body in surface_rows:
     assert "(LISP ())" in body, f"D7:{bits} invented Lisp callable name"
     semantic_role = d["residents"][bits]
     if semantic_role.startswith("text.digit."):
-        glyph = re.search(r"\(sym ([0-9])\)$", body)
+        glyph = re.search(r'\(sym "?([0-9])"?\)$', body)
         assert glyph is not None and glyph.group(1) == semantic_role.rsplit(".", 1)[1], (
             f"D7:{bits} text digit glyph drifted from ratified digit identity"
         )
