@@ -131,6 +131,7 @@ jobs:
         with:
           name: Release ${{ github.ref_name }}
           tag_name: ${{ github.ref_name }}
+          draft: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
@@ -189,6 +190,7 @@ jobs:
             packaging/install.sh
           name: Release ${{ github.ref_name }}
           tag_name: ${{ github.ref_name }}
+          draft: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
@@ -249,6 +251,7 @@ jobs:
           files: ${{ env.ASSET_PATH }}
           name: Release ${{ github.ref_name }}
           tag_name: ${{ github.ref_name }}
+          draft: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
@@ -295,6 +298,7 @@ jobs:
           files: sens-cli_*_windows_x64.msi
           name: Release ${{ github.ref_name }}
           tag_name: ${{ github.ref_name }}
+          draft: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
@@ -329,5 +333,87 @@ jobs:
           files: sens-cli-web.html
           name: Release ${{ github.ref_name }}
           tag_name: ${{ github.ref_name }}
+          draft: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+
+  publish-release:
+    name: Verify complete draft and publish atomically
+    needs: [test, create-release, publish-island-manifest, build-cli, build-msi, build-web]
+    runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      RELEASE_TAG: ${{ github.ref_name }}
+    steps:
+      - name: Verify the release is still a draft on the exact current main SHA
+        shell: bash
+        run: |
+          set -euo pipefail
+          main_sha="$(gh api "repos/${GITHUB_REPOSITORY}/git/ref/heads/main" --jq '.object.sha')"
+          if [[ "$main_sha" != "$GITHUB_SHA" ]]; then
+            echo "RELEASE_BLOCKED: tag SHA $GITHUB_SHA is not current main SHA $main_sha" >&2
+            exit 1
+          fi
+          draft="$(gh api "repos/${GITHUB_REPOSITORY}/releases/tags/${RELEASE_TAG}" --jq '.draft')"
+          if [[ "$draft" != "true" ]]; then
+            echo "RELEASE_BLOCKED: release was not kept as a draft through asset staging" >&2
+            exit 1
+          fi
+
+      - name: Download, require the complete platform set, and calculate SHA-256
+        shell: bash
+        run: |
+          set -euo pipefail
+          assets_dir="$RUNNER_TEMP/sens-release-assets"
+          mkdir -p "$assets_dir"
+          gh release download "$RELEASE_TAG" --repo "$GITHUB_REPOSITORY" --dir "$assets_dir"
+          python3 - "$assets_dir" "$RELEASE_TAG" <<'PY'
+          import hashlib
+          import sys
+          from pathlib import Path
+
+          root = Path(sys.argv[1])
+          version = sys.argv[2].removeprefix("l")
+          required = {
+              f"sens-cli_{version}_linux_amd64",
+              f"sens-cli_{version}_windows_x64.exe",
+              f"sens-cli_{version}_macos_x64",
+              f"sens-cli_{version}_macos_arm64",
+              f"sens-cli_{version}_windows_x64.msi",
+              "sens-cli-web.html",
+              "islands-manifest-v1.json",
+              "install.sh",
+          }
+          assets = sorted((p for p in root.iterdir() if p.is_file()), key=lambda p: p.name)
+          present = {p.name for p in assets}
+          missing = sorted(required - present)
+          if missing:
+              raise SystemExit("RELEASE_BLOCKED: missing required release assets: " + ", ".join(missing))
+          if len(present) != len(assets):
+              raise SystemExit("RELEASE_BLOCKED: duplicate asset filenames in downloaded release")
+          lines = []
+          for path in assets:
+              digest = hashlib.sha256(path.read_bytes()).hexdigest()
+              lines.append(f"{digest}  {path.name}")
+          (root / "SHA256SUMS").write_text("\n".join(lines) + "\n", encoding="ascii")
+          print("\n".join(lines))
+          PY
+          echo "ASSETS_DIR=$assets_dir" >> "$GITHUB_ENV"
+
+      - name: Upload SHA-256 manifest to the draft
+        shell: bash
+        run: |
+          set -euo pipefail
+          gh release upload "$RELEASE_TAG" "$ASSETS_DIR/SHA256SUMS" --repo "$GITHUB_REPOSITORY"
+
+      - name: Publish only after every required job and asset verification succeeded
+        shell: bash
+        run: |
+          set -euo pipefail
+          draft="$(gh api "repos/${GITHUB_REPOSITORY}/releases/tags/${RELEASE_TAG}" --jq '.draft')"
+          if [[ "$draft" != "true" ]]; then
+            echo "RELEASE_BLOCKED: refusing to publish a release that is already public or is not a draft" >&2
+            exit 1
+          fi
+          gh release edit "$RELEASE_TAG" --repo "$GITHUB_REPOSITORY" --draft=false
