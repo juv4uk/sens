@@ -40,6 +40,15 @@ on:
       - "tests/test_report_t5_triplet_inventory.py"
       - "lib/domains/d1.lisp"
       - "lib/domains/d3.lisp"
+      - "packaging/tests/**"
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/release.yml"
+      - ".github/workflows/release-preflight.yml"
+      - "packaging/tests/**"
+      - "packaging/install.sh"
+      - "crates/sens-cli/Cargo.toml"
   workflow_dispatch:
 
 concurrency:
@@ -69,6 +78,9 @@ jobs:
 
       - name: Версійна паритетність релізних crates
         run: cargo test --locked -p sens-lsp --test release_parity
+
+      - name: Релізний draft та checksum guard: позитивні й негативні свідки
+        run: python3 -m unittest discover -s packaging/tests -p test_release_publication_gate.py -v
 
       - name: Ізольовані перевірки інсталятора
         run: python3 -m unittest discover -s packaging/tests -p test_install.py -v
