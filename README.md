@@ -75,9 +75,10 @@ Frame3-Micro (F3M) мають відновити ті самі точні дом
 
 Межа доказу принципова: F3M не містить внутрішньої magic/version мітки.
 Сімейство вибирається зовнішнім маршрутом, а **профіль визначає тільки точна
-фізична довжина**: 1 байт = F3M-1, 2 = F3M-2, 3 = F3M-3; 0 і 4+ зараз
-відхиляються fail-closed. Вміст байтів не sniff-иться й не перемикає профіль,
-тому всі 8/16/24 біти лишаються програмному рангу. Чинний dense F3M-1
+фізична довжина**: 1 байт = F3M-1, 2 = F3M-2, 3 = F3M-3,
+4 = F3M-4; 0 і 5+ зараз відхиляються fail-closed. Вміст байтів не
+sniff-иться й не перемикає профіль, тому всі 8/16/24/32 біти лишаються
+програмному рангу. Чинний dense F3M-1
 використовує **всі 256/256 кодів** як унікальні замкнені виконувані програми;
 F3M-2 займає наступні **65 536** global ranks і має exhaustive payload roundtrip;
 F3M-3 займає наступні **16 777 216** ranks, має real-evaluator witnesses,
@@ -228,7 +229,8 @@ boundary cases, **65 536 stratified roundtrip samples** по всьому 32-б�
 
 Evidence: [F3M-1 exhaustive census run 38196658709](https://github.com/juv4uk/sens/actions/runs/38196658709) ·
 [F3M-2 exhaustive census + pinned regression run 38196520171](https://github.com/juv4uk/sens/actions/runs/38196520171) ·
-[F3M-3 final-page proof run 38195272188](https://github.com/juv4uk/sens/actions/runs/38195272188).
+[F3M-3 final-page proof run 38195272188](https://github.com/juv4uk/sens/actions/runs/38195272188) ·
+[F3M-4 dense 32-bit proof run 38197907496](https://github.com/juv4uk/sens/actions/runs/38197907496).
 
 ### Відтворення
 
