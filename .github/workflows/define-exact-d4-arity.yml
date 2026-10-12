@@ -1,0 +1,19 @@
+name: Арність визначення D4 без SID8
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - "crates/sens/src/eval/special_forms/core.rs"
+      - ".github/workflows/define-exact-d4-arity.yml"
+  workflow_dispatch:
+
+jobs:
+  визначення-d4:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Перевірити позитивні й негативні арності та доменні ширини
+        run: cargo test --locked -p sens --lib exact_d4_define_arity_tests -- --nocapture
