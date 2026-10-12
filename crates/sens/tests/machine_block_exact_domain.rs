@@ -1,0 +1,93 @@
+use sens::{
+    eval_parsed_expressions, eval_program, load_core_library,
+    parse_mixed_exact_domain_machine_source, Expr, ExprKind, Session,
+};
+
+const SOURCE: &str = include_str!("../../../lib/machine/block-exact.lisp");
+const PATH: &str = "lib/machine/block-exact.lisp";
+
+fn parsed_source() -> Vec<Expr> {
+    parse_mixed_exact_domain_machine_source(PATH, SOURCE)
+        .expect("точнодоменний файл машинних блоків має читатися лише власним шляхом")
+}
+
+#[test]
+fn six_machine_block_definitions_have_exact_d4_and_no_legacy_w8_heads() {
+    let definitions = parsed_source();
+    assert_eq!(definitions.len(), 6);
+    assert!(!SOURCE.contains("(00001001 "));
+    assert!(!SOURCE.contains("(00001000 "));
+    assert!(!SOURCE.contains("(00000001 "));
+    assert!(!SOURCE.contains("(00100111 "));
+    assert!(!SOURCE.contains("(00101001 "));
+
+    for definition in &definitions {
+        let ExprKind::List(items) = &definition.kind else {
+            panic!("машинне визначення має бути структурним списком")
+        };
+        assert_eq!(items.len(), 3);
+        assert!(matches!(
+            &items[0].kind,
+            ExprKind::DomainIdentity(identity)
+                if identity.width() == 4 && identity.packed_bits() == 0b0011
+        ), "DEFINE має мати точну D4-координату");
+        let ExprKind::List(lambda) = &items[2].kind else {
+            panic!("значення має бути безпосередньою LAMBDA")
+        };
+        assert!(matches!(
+            &lambda[0].kind,
+            ExprKind::DomainIdentity(identity)
+                if identity.width() == 4 && identity.packed_bits() == 0b0010
+        ), "LAMBDA має мати точну D4-координату");
+    }
+}
+
+#[test]
+fn exact_machine_block_preserves_nine_historical_observations() {
+    let mut session = Session::default();
+    load_core_library(&mut session).expect("потрібна Lisp-owned реалізація LIST/APPEND");
+    eval_parsed_expressions(&parsed_source(), &mut session)
+        .expect("визначення мають виконуватися з точними доменами");
+
+    let cases = [
+        ("(machine-block-empty)", "()"),
+        ("(machine-block-one (quote (mov r1 r2)))", "((mov r1 r2))"),
+        ("(machine-block-append (quote ((mov r1 r2) (branch L1))) (quote ret))", "((mov r1 r2) (branch L1) ret)"),
+        ("(machine-block-concat (quote ((mov r1 r2) (branch L1))) (quote ((label L2))))", "((mov r1 r2) (branch L1) (label L2))"),
+        ("(machine-block-forms (quote ((mov r1 r2) (branch L1))))", "((mov r1 r2) (branch L1))"),
+        ("(machine-block (quote ((mov r1 r2) (branch L1))))", "((mov r1 r2) (branch L1))"),
+        ("(machine-block-append (quote ()) (quote nop))", "(nop)"),
+        ("(machine-block-concat (quote ()) (quote ((mov r1 r2))))", "((mov r1 r2))"),
+        ("(machine-block-concat (quote ((mov r1 r2))) (quote ()))", "((mov r1 r2))"),
+    ];
+    for (program, expected) in cases {
+        let actual = eval_program(program, &mut session)
+            .unwrap_or_else(|error| panic!("{program}: {error}"))
+            .value.to_string();
+        assert_eq!(actual, expected, "{program}");
+    }
+}
+
+#[test]
+fn machine_block_reader_is_path_bound_and_quote_data_stays_opaque() {
+    assert!(parse_mixed_exact_domain_machine_source(
+        "lib/other/block-exact.lisp", SOURCE
+    ).is_ok(), "сам машинний reader не здогадується про семантику шляху");
+    assert!(parse_mixed_exact_domain_machine_source(
+        "lib/not-machine/block-exact.lisp", SOURCE
+    ).is_err());
+    let quoted = parse_mixed_exact_domain_machine_source(
+        PATH,
+        "(001 (00001001 старе (00001000 (x) x)))",
+    ).expect("цитовані дані не можна перетворювати на виклики");
+    let ExprKind::List(items) = &quoted[0].kind else {
+        panic!("QUOTE має лишатися списком")
+    };
+    assert!(matches!(&items[0].kind, ExprKind::DomainIdentity(id)
+        if id.width() == 3 && id.packed_bits() == 0b001));
+    let ExprKind::List(payload) = &items[1].kind else {
+        panic!("цитований payload має лишатися списком")
+    };
+    assert!(!matches!(&payload[0].kind, ExprKind::DomainIdentity(_)),
+        "історична голова в цитаті не стає D8");
+}
