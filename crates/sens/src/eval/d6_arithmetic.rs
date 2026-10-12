@@ -90,6 +90,42 @@ mod tests {
     }
 
     #[test]
+    fn add1_carries_d24_into_d48_and_sub1_uses_ratified_neg_composition() {
+        let env = Environment::root();
+        let add1 = CoreDomainIdentity::D6(crate::CoreD6::from_word(
+            crate::Bit6::new(0b001110).unwrap(),
+        ));
+        let sub1 = CoreDomainIdentity::D6(crate::CoreD6::from_word(
+            crate::Bit6::new(0b001111).unwrap(),
+        ));
+
+        // A full D24 natural + 1 cannot wrap or invent an unqualified result.
+        let carried = invoke(add1, &[d24((1 << 24) - 1)], &env, Span::default())
+            .unwrap().unwrap();
+        let Value::BinaryNumber(ref number) = carried else {
+            panic!("D24 carry must stay an exact numeric domain word");
+        };
+        assert_eq!(number.numeric_domain_width(), Some(48));
+        let mut next_bits = vec![0; 48];
+        next_bits[23] = 1; // full-width D48 encoding of 2^24
+        assert_eq!(number.exact_numeric_domain_bits().unwrap(), next_bits);
+
+        // 0 - 1 is canonical NEG(D24(1)), not a wrapped 24-bit word
+        // and not a host Rational with unqualified identity.
+        let negative = invoke(sub1, &[d24(0)], &env, Span::default())
+            .unwrap().unwrap();
+        let Value::NumericComposition(ref composition) = negative else {
+            panic!("D24 SUB1 below zero must return canonical NEG");
+        };
+        assert_eq!(composition.domain_width(), 24);
+        assert_eq!(negative.to_string(), "-1");
+        assert_eq!(
+            invoke(add1, &[negative], &env, Span::default()).unwrap().unwrap(),
+            d24(0),
+        );
+    }
+
+    #[test]
     fn add1_sub1_use_same_d24_numeric_domain_not_legacy_one() {
         let env = Environment::root();
         for (bits, expected) in [(0b001110, d24(8)), (0b001111, d24(6))] {
