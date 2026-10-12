@@ -1,10 +1,11 @@
-name: Frame3-Micro dense 1-4 byte proof and real file corpus
+name: Frame3-Micro dense 1-5 byte proof and real file corpus
 on:
   push:
     paths:
       - 'crates/sens/examples/frame3_one_byte_research.rs'
       - 'crates/sens/src/frame3_micro.rs'
       - 'crates/sens/src/frame3_micro_enumerator.rs'
+      - 'crates/sens/src/frame3_micro_v5.rs'
       - 'research/framed3/fixtures/*.f3m'
       - 'crates/sens/examples/frame3_real_files_bench.rs'
       - 'research/framed3/rust_codec/senc.rs'
@@ -14,6 +15,7 @@ on:
       - 'crates/sens/examples/frame3_one_byte_research.rs'
       - 'crates/sens/src/frame3_micro.rs'
       - 'crates/sens/src/frame3_micro_enumerator.rs'
+      - 'crates/sens/src/frame3_micro_v5.rs'
       - 'research/framed3/fixtures/*.f3m'
       - 'crates/sens/examples/frame3_real_files_bench.rs'
       - 'research/framed3/rust_codec/senc.rs'
@@ -22,13 +24,13 @@ permissions:
   contents: read
 jobs:
   dense-f3m-programs:
-    name: 'Dense F3M-1/2/3/4 rank and evaluator proofs'
+    name: 'Dense F3M-1/2/3/4/5 rank and evaluator proofs'
     runs-on: ubuntu-24.04
     timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
       - uses: dtolnay/rust-toolchain@stable
-      - name: Prove dense F3M 1-4 byte rank windows and executable witnesses
+      - name: Prove dense F3M 1-5 byte rank windows and executable witnesses
         shell: bash
         run: |
           set -euo pipefail
