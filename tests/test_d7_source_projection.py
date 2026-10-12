@@ -107,9 +107,20 @@ class D7ProjectionTests(unittest.TestCase):
         self.assertIsNone(project(nasal_a, role="sound-text", namespace="ук")["symbol"])
 
     def test_non_glyph_and_control_symbols_are_explicit(self) -> None:
-        self.assertEqual(project("1100001", role="sound-text", namespace="ук")["symbol"], "␊")
-        self.assertEqual(project("1100010", role="sound-text", namespace="en")["symbol"], "␉")
+        # Control chars are represented by the normative escaped spellings on
+        # script-specific surfaces; sym offers a print-safe control picture.
+        self.assertEqual(project("1100001", role="sound-text", namespace="ук")["symbol"], chr(92) + "x0a")
+        self.assertEqual(project("1100001", role="sound-text", namespace="sym")["symbol"], "␊")
+        self.assertEqual(project("1100010", role="sound-text", namespace="en")["symbol"], chr(92) + "x09")
+        self.assertEqual(project("1100010", role="sound-text", namespace="sym")["symbol"], "␉")
+
+        # The existing ratified resident label is double-quote even though the
+        # JSON projection metadata currently contains TAB for SLP1/IAST.
+        self.assertEqual(project("1100101", role="sound-text", namespace="ук")["symbol"], '"')
+        self.assertEqual(project("1100101", role="sound-text", namespace="en")["symbol"], '"')
+        self.assertIsNone(project("1100101", role="sound-text", namespace="san")["symbol"])
         self.assertEqual(project("1100101", role="sound-text", namespace="sym")["symbol"], '"')
+
         # Capitalize-next-letter has no stable standalone glyph; absence is explicit.
         self.assertIsNone(project("0100010", role="sound-text", namespace="sym")["symbol"])
 
