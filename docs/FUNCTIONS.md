@@ -54,9 +54,11 @@
 
 `narrate-fact`, `provenance-goal`, `provenance-source`, `provenance-rule`, `provenance-derived-from`, `narrate-derivation`, `narrate-provenance`, `narrate-answer`, `narrate-proved-outcome`, `narrate-invalid-outcome-shape`, `narrate-outcome-arity?`, `narrate-outcome`
 
-### persistent-map.lisp (17)
+### persistent-map.lisp (19)
 
-`balance`, `balance-factor`, `height-of`, `make-balanced-node`, `map->list`, `map-contains?`, `map-empty`, `map-get`, `map-insert`, `max2`, `node-height`, `node-key`, `node-left`, `node-right`, `node-value`, `rotate-left`, `rotate-right`
+`balance`, `balance-state`, `height-of`, `make-balanced-node`, `map->list`, `map-contains?`, `map-empty`, `map-get`, `map-height-greater?`, `map-height-successor`, `map-insert`, `max2`, `node-height`, `node-key`, `node-left`, `node-right`, `node-value`, `rotate-left`, `rotate-right`
+
+Висота AVL-мапи — структурний унарний список: `()`, `(height)`, `(height height)` тощо. `balance-state` повертає `left-heavy`, `right-heavy` або `balanced`; числова арифметика не використовується для внутрішнього AVL-балансу.
 
 ### persistent-vector.lisp (23)
 
