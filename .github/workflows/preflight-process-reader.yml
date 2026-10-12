@@ -1,0 +1,31 @@
+name: Тест preflight — exact-domain process reader
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - "crates/sens/tests/current_binary_preflight.rs"
+      - "crates/sens/src/mixed_source.rs"
+      - ".github/workflows/preflight-process-reader.yml"
+  push:
+    branches: [main]
+    paths:
+      - "crates/sens/tests/current_binary_preflight.rs"
+      - "crates/sens/src/mixed_source.rs"
+      - ".github/workflows/preflight-process-reader.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  process-reader-preflight:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v5
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Перевірити чинну шляхову заборону читача process/TCP
+        run: cargo test --locked -p sens --lib process_tcp_reader_is_path_bound_and_preserves_quoted_data -- --nocapture
+      - name: Виконати весь current_binary_preflight після Core4
+        run: cargo test --locked -p sens --test current_binary_preflight -- --nocapture
