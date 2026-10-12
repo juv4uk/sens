@@ -17,6 +17,12 @@ const D2_CLOSE: u8 = 0b01;
 const D2_OPEN: u8 = 0b10;
 const D2_DOT: u8 = 0b11;
 
+/// Bound the RECURSIVE physical reader independently from the larger AST
+/// traversal allowance. The latter (768 nodes deep) is not a safe Rust
+/// call-stack budget: each D2 frame currently uses several parser frames.
+/// Until D2 parsing is converted to an explicit heap stack, cap it here.
+const MAX_D2_RECURSIVE_DEPTH: u32 = 128;
+
 /// Parse canonical visible-binary SENS source directly into AST.
 ///
 /// Human punctuation/names are not accepted by the underlying source-word
@@ -151,7 +157,7 @@ impl<'a> CanonicalReader<'a> {
         // The exact-domain reader has the same finite recursion contract as
         // the source AST parser. Unbounded D2 OPEN words must fail closed
         // instead of exhausting the evaluator's stack.
-        if depth > crate::syntax::MAX_STRUCTURE_DEPTH {
+        if depth > MAX_D2_RECURSIVE_DEPTH {
             return Err(self.error("canonical D2 nesting exceeds AST depth limit", token.span));
         }
 
@@ -421,10 +427,16 @@ mod tests {
 
     #[test]
     fn надмірна_вкладеність_d2_повертає_помилку_замість_переповнення_стека() {
-        let depth = crate::syntax::MAX_STRUCTURE_DEPTH as usize + 2;
+        let depth = MAX_D2_RECURSIVE_DEPTH as usize + 2;
         let mut source = "10 ".repeat(depth);
         source.push_str("001");
         source.push_str(&" 01".repeat(depth));
+
+        let moderate = 16usize;
+        let mut valid = "10 ".repeat(moderate);
+        valid.push_str("001");
+        valid.push_str(&" 01".repeat(moderate));
+        assert!(parse_canonical_binary(&valid).is_ok(), "звичайна вкладеність працює");
 
         let err = parse_canonical_binary(&source).expect_err("надмірна глибина D2");
         assert_eq!(err.kind, ErrorKind::Parse);
