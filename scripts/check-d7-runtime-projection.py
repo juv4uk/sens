@@ -70,14 +70,19 @@ def generated_source(rows) -> str:
         "    pub(super) bits: u8,",
         "    pub(super) uk: Option<&'static str>,",
         "    pub(super) sa: Option<&'static str>,",
+        "    pub(super) deva: Option<&'static str>,",
+        "    pub(super) slp1: Option<&'static str>,",
         "}",
         "",
         "pub(super) const D7_DISPLAY_ROWS: &[D7DisplayRow] = &[",
     ]
+    codec = current_codec()
     for row in rows:
         lines.append(
             f"    D7DisplayRow {{ bits: 0b{row.bits}, "
-            f"uk: {rust_string(row.uk)}, sa: {rust_string(row.san)} }},"
+            f"uk: {rust_string(row.uk)}, sa: {rust_string(row.san)}, "
+            f"deva: {rust_string(codec.glyph(row.bits, 'sa-deva'))}, "
+            f"slp1: {rust_string(codec.glyph(row.bits, 'sa-slp1'))} }},"
         )
     lines.append("];")
     return "\n".join(lines) + "\n"
