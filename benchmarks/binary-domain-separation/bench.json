@@ -1,0 +1,18 @@
+{
+  "schema": "sens-benchmark-manifest/v1",
+  "stand": "binary-domain-separation",
+  "wing": "Domain-qualified identity / mechanism reuse",
+  "roles": [
+    "RESEARCH",
+    "FALSIFIER"
+  ],
+  "question": "Can two distinct law domains share a low-level append-bit mechanism while rejecting cross-domain application?",
+  "claim": "Research-only source witness; synthetic same-bits controls do not grant selector-root residency, law convergence, or current-runtime callability.",
+  "witness": [
+    "run.py"
+  ],
+  "status": "RESEARCH-ONLY; METADATA BACKFILL; NOT REPLAYED BY REGISTRY CHANGE",
+  "generation": "unknown",
+  "axis": "domain identity / shared mechanism / negative cross-domain controls",
+  "reproduce": "python3 benchmarks/binary-domain-separation/run.py --out /tmp/sens-binary-domain-separation"
+}
