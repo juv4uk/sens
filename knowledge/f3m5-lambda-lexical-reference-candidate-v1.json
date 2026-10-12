@@ -49,7 +49,18 @@
     "exhaustive_2_pow_40_sweep": false,
     "production_admission": false,
     "physical_fixture_bytes": 5,
-    "physical_fixture_count": 4
+    "physical_fixture_count": 4,
+    "real_sens_evaluator_bridge": true,
+    "real_sens_lowering": "BOUND(n)->ExprKind::Local{depth:n,index:0}; LAMBDA->D4:0010; evaluator-private binder token is nonsemantic frame-allocation metadata only",
+    "real_sens_witnesses": [
+      "I",
+      "K",
+      "KI",
+      "all_d1_d3_lambda"
+    ],
+    "proof_run": 38260383334,
+    "proof_run_conclusion": "SUCCESS",
+    "production_mapping_unchanged": true
   },
   "physical_fixtures": {
     "I": "research/framed3/fixtures/f3m5-lambda-i.f3m",
