@@ -1,0 +1,66 @@
+name: Domain-ladder source-only bulk census
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'lib/**/*.lisp'
+      - scripts/migrate-domain-ladder-source-batch.py
+      - tests/test_domain_ladder_source_batch.py
+      - tests/test_domain_ladder_d3_enforcement.py
+      - scripts/enforce-function-table-mechanisms.lisp
+      - scripts/enforce-island-math-evidence.lisp
+      - tests/test_domain_ladder_d4_policy_cohort.py
+      - scripts/enforce-function-table-mechanisms.lisp
+      - scripts/enforce-island-math-evidence.lisp
+      - scripts/semantic-authority-guard-enforce.lisp
+      - knowledge/guard-fact-policy.lisp
+      - knowledge/guard-reference.lisp
+      - .github/workflows/domain-ladder-source-census.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  audit-existing-lisp:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Inventory active Lisp sources for exact-domain conversion; never write in CI
+        run: |
+          python3 scripts/migrate-domain-ladder-source-batch.py --report "$RUNNER_TEMP/domain-ladder-source-batch-report.json"
+          python3 - "$RUNNER_TEMP/domain-ladder-source-batch-report.json" <<'PY'
+          import json
+          import sys
+          x = json.load(open(sys.argv[1]))
+          print(json.dumps(x["summary"], ensure_ascii=False))
+          for row in x["files"]:
+              if row["status"] == "admitted":
+                  print("ADMITTED-SOURCE", row["path"], row["potential_heads"])
+              elif row["status"] == "blocked":
+                  print("BLOCKED-SOURCE", row["path"], row["reasons"][:3])
+          assert x["summary"]["scanned"] >= 20
+          assert x["summary"]["write"] is False
+          PY
+      - name: Upload source-only ready/blocker inventory
+        uses: actions/upload-artifact@v4
+        with:
+          name: domain-ladder-source-bulk-census
+          retention-days: 7
+          if-no-files-found: error
+          path: ${{ runner.temp }}/domain-ladder-source-batch-report.json
+      - name: Regression tests for historical crosswalk to exact-domain words and D3 blockers
+        run: python3 -m unittest discover -s tests -p test_domain_ladder_source_batch.py -v
+      - name: Verify D3 two-field PredicateBit enforcement with negative controls
+        run: python3 -m unittest discover -s tests -p test_domain_ladder_d3_enforcement.py -v
+      - name: Validate five exact-domain source replacements against immutable Git blobs
+        run: python3 -m unittest discover -s tests -p test_domain_ladder_d4_policy_cohort.py -v
+      - name: Verify exact-domain service source deltas against pinned original blobs
+        run: python3 -m unittest discover -s tests -p test_domain_ladder_two_script_source_delta.py -v
