@@ -122,9 +122,13 @@ def detect_runtime_shape() -> dict[str, Any]:
         and "pub type Sens = Sens8" in sens
         and "exactly eight" in sens.lower()
     )
+    # This is still a flat historical compatibility lookup even after the
+    # misleading SemanticId alias was renamed LegacyRegistrySlot. A cosmetic
+    # Rust rename cannot count as executable D5 admission.
     registry_sens8 = (
-        "type SemanticId = Sens8" in registry
-        and "SEMANTIC_ROWS.len(), 256" in registry
+        ("type LegacyRegistrySlot = Sens8" in registry
+         or "type SemanticId = Sens8" in registry)
+        and "Sens8::from_packed_byte(row.semantic_id)" in registry
     )
     lower_sens8 = (
         "use crate::Sens8;" in lower
