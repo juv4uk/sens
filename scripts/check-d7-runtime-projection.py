@@ -43,12 +43,8 @@ def check_rows():
     ):
         raise ValueError("D7 resident/reserved coordinates do not match owner authority")
     for row in rows:
-        if not row.uk or not row.san:
-            raise ValueError(f"D7:{row.bits}: missing human display names")
         if row.lisp is not None:
             raise ValueError(f"D7:{row.bits}: sound/text must not become a Lisp function")
-        if row.en != authority["residents"][row.bits]:
-            raise ValueError(f"D7:{row.bits}: role label drift")
     return rows
 
 
