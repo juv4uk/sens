@@ -1,0 +1,19 @@
+name: Доказ 1022 точних слів у пакувальнику
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - "crates/sens/src/source_packing.rs"
+      - ".github/workflows/source-packing-width-1022.yml"
+  workflow_dispatch:
+
+jobs:
+  d1-d9-packer:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Усі 1022 координати, offsets, roundtrip і захист D9 від обрізання
+        run: cargo test --locked -p sens --lib source_packing::tests:: -- --nocapture
