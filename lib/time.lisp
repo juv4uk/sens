@@ -27,7 +27,7 @@
                    (110
                      ((110100 month 2) 1)
                      ((010 (001 ())) 0)))))
-      (1110 year month day))))
+      (111 year (111 month (111 day (001 ())))))))
 
 ; Pure language-level conversion from an exact Unix timestamp into UTC calendar
 ; data. The host owns clock observation; this function owns deterministic
@@ -40,11 +40,7 @@
            (hour (10111 day-seconds 3600))
            (minute (10111 (00101100 day-seconds 3600) 60))
            (second-of-minute (00101100 day-seconds 60)))
-      (1110 (001 utc)
-            (100 civil)
-            (1001 civil)
-            (10011 civil)
-            hour minute second-of-minute nanosecond))))
+      (111 (001 utc) (111 (100 civil) (111 (1001 civil) (111 (10011 civil) (111 hour (111 minute (111 second-of-minute (111 nanosecond (001 ()))))))))))))
 
 ; Minimal wall-clock host capability contract:
 ;   (unix-time-now) -> (unix-time seconds nanosecond)
@@ -53,13 +49,9 @@
   (0010 (observation)
     (110
       ((101 (100 observation) (001 unix-time))
-       (1110
-         (001 utc)
-         (100 observation)
-         (1001 observation)
-         (10011 observation)))
+       (utc-from-unix (1001 observation) (10011 observation)))
       ((010 (001 ()))
-       (1110 (001 rejected) (001 invalid-unix-time-observation)))))
+       (111 (001 rejected) (111 (001 invalid-unix-time-observation) (001 ()))))))
 )
 
 ; Public UTC clock meaning is language-owned. The only host fact needed here is
@@ -103,17 +95,13 @@
          ((internet-time-stratum-valid? stratum)
           (110
             ((11010 ntp-seconds 2208988800)
-             (1110 (001 rejected) (001 invalid-epoch)))
+             (111 (001 rejected) (111 (001 invalid-epoch) (001 ()))))
             ((010 (001 ()))
-             (1110
-               (001 accepted)
-               host
-               (01011 ntp-seconds 2208988800)
-               (10111 (10110 fraction #d1000000000) 4294967296)))))
+             (111 (001 accepted) (111 host (111 (01011 ntp-seconds 2208988800) (111 (10111 (10110 fraction #d1000000000) 4294967296) (001 ()))))))))
          ((010 (001 ()))
-          (1110 (001 rejected) (001 invalid-response)))))
+          (111 (001 rejected) (111 (001 invalid-response) (001 ()))))))
       ((010 (001 ()))
-       (1110 (001 rejected) (001 invalid-response))))))
+       (111 (001 rejected) (111 (001 invalid-response) (001 ())))))))
 
 
 ; Adapter for the raw host boundary. The host returns either:
@@ -145,12 +133,7 @@
   (0010 (observation)
     (110
       ((101 (100 observation) (001 accepted))
-       (1110
-         (001 accepted)
-         (1001 observation)
-         (101110110
-           (10011 observation)
-           (100 (011 (011 (011 observation)))))))
+       (111 (001 accepted) (111 (1001 observation) (111 (101110110 (10011 observation) (100 (011 (011 (011 observation))))) (001 ())))))
       ((010 (001 ())) observation))))
 
 
@@ -228,15 +211,13 @@
       ((110100110 name)
        (110
          ((11010 offset-seconds -86400)
-          (1110 (001 rejected) (001 invalid-offset)))
+          (111 (001 rejected) (111 (001 invalid-offset) (001 ()))))
          ((11011 offset-seconds 86400)
-          (1110 (001 rejected) (001 invalid-offset)))
+          (111 (001 rejected) (111 (001 invalid-offset) (001 ()))))
          ((010 (001 ()))
-          (1110
-            (001 accepted)
-            (1110 (001 timezone) name offset-seconds)))))
+          (111 (001 accepted) (111 (111 (001 timezone) (111 name (111 offset-seconds (001 ())))) (001 ()))))))
       ((010 (001 ()))
-       (1110 (001 rejected) (001 invalid-name))))))
+       (111 (001 rejected) (111 (001 invalid-name) (001 ())))))))
 
 
 (0011 timezone-name
