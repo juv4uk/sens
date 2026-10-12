@@ -147,7 +147,14 @@ fn core4_local_binding_heads_are_current_and_postcore_libraries_load() {
         ("time", include_str!("../../../lib/time.lisp")),
         ("process", include_str!("../../../lib/process.lisp")),
     ] {
-        let forms = parse(source).unwrap_or_else(|error| panic!("{library} parse: {error}"));
+        // Runtime's lib/time.lisp has an owner-pinned exact-domain reader.
+        // The ordinary parser would turn its short binary heads into Number.
+        let forms = if library == "time" {
+            sens::parse_mixed_exact_domain_time_source("lib/time.lisp", source)
+        } else {
+            parse(source)
+        }
+        .unwrap_or_else(|error| panic!("{library} parse: {error}"));
         for (index, form) in forms.iter().enumerate() {
             eval_parsed_expressions(std::slice::from_ref(form), &mut session)
                 .unwrap_or_else(|error| panic!(
@@ -158,6 +165,13 @@ fn core4_local_binding_heads_are_current_and_postcore_libraries_load() {
     }
 }
 
+#[test]
+fn time_library_reader_rejects_foreign_path_instead_of_inferring_domain_from_bits() {
+    let source = include_str!("../../../lib/time.lisp");
+    assert!(sens::parse_mixed_exact_domain_time_source("lib/process.lisp", source).is_err());
+    assert!(sens::parse_mixed_exact_domain_time_source("lib/not-time.lisp", source).is_err());
+}
+
 /// Diagnose the first non-callable top-level time form after Core4 bootstrap.
 /// This test intentionally preserves strict runtime behavior: it reports the
 /// exact top-level index and source bytes instead of replacing the failed form.
@@ -166,7 +180,8 @@ fn time_library_top_level_replay_reports_first_noncallable_form() {
     let mut session = Session::default();
     sens::load_core_library(&mut session).expect("Core4 bootstrap");
     let source = include_str!("../../../lib/time.lisp");
-    let parsed = sens::parse(source).expect("time library syntax");
+    let parsed = sens::parse_mixed_exact_domain_time_source("lib/time.lisp", source)
+        .expect("time library through its admitted exact-domain reader");
 
     for (index, expression) in parsed.iter().enumerate() {
         if let Err(error) =
@@ -196,7 +211,8 @@ fn time_library_top_level_replay_reports_first_noncallable_form() {
 #[test]
 fn time_library_loader_reports_first_failing_form() {
     let source = include_str!("../../../lib/time.lisp");
-    let parsed = sens::parse(source).expect("time library syntax");
+    let parsed = sens::parse_mixed_exact_domain_time_source("lib/time.lisp", source)
+        .expect("time library through its admitted exact-domain reader");
     let mut session = Session::default();
     sens::load_core_library(&mut session).expect("Core4 bootstrap");
 

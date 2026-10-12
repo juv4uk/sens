@@ -637,20 +637,12 @@ impl Value {
         }
     }
 
-    /// Returns the exact eight-bit function sense (СЕНС) if this value is one.
-    pub fn as_sens8(&self) -> Option<crate::Sens8> {
-        match self {
-            Self::Sid(s) => Some(*s),
-            _ => None,
-        }
-    }
-
-    /// Legacy alias for [`Self::as_sens8`].
-    pub fn as_sid8(&self) -> Option<crate::Sens8> {
-        self.as_sens8()
-    }
-
-    /// Returns the exact D1→D8 domain identity if this value carries one.
+    /// Returns the explicit exact-width domain identity carried by this value.
+    ///
+    /// A historical W8/Sens8 carrier is not a D8 value and MUST NOT be
+    /// converted to one by matching its packed byte. Only the ratified
+    /// DomainIdentity variant can pass this boundary.
+    /// Вісім бітів без домену не дають виконуваної тотожності D8.
     pub fn as_domain_identity(&self) -> Option<DomainIdentity> {
         match self {
             Self::DomainIdentity(identity) => Some(*identity),
@@ -974,6 +966,44 @@ impl Drop for Value {
                 }
             }
         }
+    }
+}
+
+#[cfg(test)]
+mod exact_domain_value_tests {
+    use super::Value;
+    use crate::{Bit3, Bit4, Bit8, Bija3, CoreD4, CoreD8, DomainIdentity};
+
+    #[test]
+    fn one_payload_never_collapses_d3_d4_and_d8_values() {
+        let values = [
+            DomainIdentity::D3(Bija3::from_word(Bit3::new(1).unwrap())),
+            DomainIdentity::D4(CoreD4::from_word(Bit4::new(1).unwrap())),
+            DomainIdentity::D8(CoreD8::from_word(Bit8::new(1).unwrap())),
+        ];
+        for (index, identity) in values.iter().enumerate() {
+            let value = Value::DomainIdentity(*identity);
+            assert_eq!(value.as_domain_identity(), Some(*identity));
+            assert_eq!(value.as_domain_identity().unwrap().width(), [3, 4, 8][index]);
+            assert_eq!(value.as_domain_identity().unwrap().packed_bits(), 1);
+        }
+        assert_ne!(values[0], values[1]);
+        assert_ne!(values[0], values[2]);
+        assert_ne!(values[1], values[2]);
+    }
+
+    #[test]
+    fn old_eight_bit_carrier_cannot_masquerade_as_d8_domain_value() {
+        // Historical W8:10101000 INVOKE is NOT current D8:10101000 ROUND.
+        let old = Value::Sid(crate::sens!(10101000));
+        let current = Value::DomainIdentity(DomainIdentity::D8(
+            CoreD8::from_word(Bit8::new(0b10101000).unwrap()),
+        ));
+        assert_eq!(old.as_domain_identity(), None);
+        assert_eq!(current.as_domain_identity(), Some(DomainIdentity::D8(
+            CoreD8::from_word(Bit8::new(0b10101000).unwrap()),
+        )));
+        assert_ne!(old, current);
     }
 }
 

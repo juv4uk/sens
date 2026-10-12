@@ -1,4 +1,4 @@
-name: Заборона створення нових Git-гілок SENS — сигнал порушення
+name: Політика нових Git-гілок SENS — короткоживучі дозволені
 
 on:
   create:
@@ -7,19 +7,20 @@ permissions:
   contents: read
 
 jobs:
-  new-branch-is-forbidden:
+  new-branch-policy:
     if: ${{ github.event.ref_type == 'branch' && github.event.ref != 'main' }}
-    name: Нова гілка суперечить наказу власника
+    name: Політика нової Git-гілки SENS
     runs-on: ubuntu-24.04
     steps:
-      - name: Fail-closed фіксація порушення політики
+      - name: Зафіксувати короткоживучу гілку як дозволену
         env:
           NEW_REF: ${{ github.event.ref }}
           ACTOR: ${{ github.actor }}
         run: |
-          echo "::error title=Нова Git-гілка заборонена::${NEW_REF} від ${ACTOR}; працювати тільки у main. Див. AGENTS.md та #5549."
-          exit 1
+          set -euo pipefail
+          echo "::notice title=Короткоживучі гілки дозволені::${NEW_REF} від ${ACTOR}; дотримуйтесь AGENTS.md: атомарна зміна, PR та оперативне злиття в main через #5041."
 
-# Ця подія сигналізує ПІСЛЯ створення ref. Справжню серверну заборону
-# забезпечує GitHub Ruleset: target ~ALL, Restrict creations, Active, no bypass.
-# Не видаляє автоматично ref, щоб не втратити неперенесені коміти.
+# Ця подія сигналізує ПІСЛЯ створення ref. Вона більше не відхиляє створення
+# гілки: наказ власника 2026-10-12 дозволяє короткоживучі робочі гілки.
+# Цей job не видаляє ref і не замінює required CI чи branch protection.
+# Ref не видаляється автоматично, щоб не втратити коміти.
