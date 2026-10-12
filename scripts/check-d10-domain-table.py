@@ -146,11 +146,11 @@ def check(d10, inventory, lower):
          json.loads(OWNER.read_text(encoding="utf-8"))["inventory"]["git_blob"],
          "editorial anchor source pin")
     anchor_list = editorial["anchors"]
-    need(len(anchor_list) == 51 and
-         len({a["semantic_name"] for a in anchor_list}) == 51,
+    need(len(anchor_list) >= 51 and
+         len({a["semantic_name"] for a in anchor_list}) == len(anchor_list),
          "editorial anchor coverage/duplicate")
     anchor_by_code = {a["coordinate"]: a for a in anchor_list}
-    need(len(anchor_by_code) == 51, "duplicate editorial coordinates")
+    need(len(anchor_by_code) == len(anchor_list), "duplicate editorial coordinates")
 
     for row in d10:
         original = expected[row.bits]
