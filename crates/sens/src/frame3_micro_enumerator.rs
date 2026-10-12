@@ -790,6 +790,7 @@ pub const fn profile_program_capacity(profile: Frame3MicroProfile) -> u128 {
         Frame3MicroProfile::F3M1 => F3M1_CAPACITY,
         Frame3MicroProfile::F3M2 => F3M2_CAPACITY,
         Frame3MicroProfile::F3M3 => F3M3_CAPACITY,
+        Frame3MicroProfile::F3M4 => F3M4_CAPACITY,
     }
 }
 
@@ -798,6 +799,7 @@ pub const fn profile_global_offset(profile: Frame3MicroProfile) -> u128 {
         Frame3MicroProfile::F3M1 => 0,
         Frame3MicroProfile::F3M2 => F3M2_OFFSET,
         Frame3MicroProfile::F3M3 => F3M3_OFFSET,
+        Frame3MicroProfile::F3M4 => F3M4_OFFSET,
     }
 }
 
