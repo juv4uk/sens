@@ -106,8 +106,18 @@ class PolicyD4PartialCutover(unittest.TestCase):
                         if m.group(2) in GUARD_FACT_HEADS else m.group(0),
                         original,
                     )
+                    # Four independent two-field COND fallbacks replace host
+                    # T with the exact D1:YES witness ATOM(QUOTE EMPTY).
+                    # This is not authority to rewrite obsolete 3-field COND.
+                    fallback = "(t (guard-unknown"
+                    self.assertEqual(expected.count(fallback), 4)
+                    expected = expected.replace(
+                        fallback, "((010 (001 ())) (guard-unknown"
+                    )
+                    self.assertEqual(current.count(fallback), 0)
+                    self.assertEqual(current.count("((010 (001 ())) (guard-unknown"), 4)
                     self.assertEqual(current, expected,
-                                     "зміна поза 110 зафіксованими головами викликів")
+                                     "зміна поза 110 головами та 4 D1:YES fallback")
                     report = self.audit.audit_edit(original, current)
                     self.assertEqual(report["status"], "LEXICAL_CONTEXT_ONLY")
                     self.assertEqual(report["semantic_parity"], "NOT_CHECKED")
