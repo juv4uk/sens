@@ -250,7 +250,7 @@ mod tests {
             DomainCoordinate::from_domain_identity(token.word.domain_identity())
         }).collect();
         let packed = pack_domain_coordinates(&coordinates);
-        assert_eq!(packed, pack_binary_source_tokens(&tokens));
+        assert!(packed == pack_binary_source_tokens(&tokens), "source and domain packers must emit identical physical bits");
         assert_eq!(packed.bit_len(), 45);
         assert_eq!(packed.byte_len(), 6);
         let widths: Vec<_> = coordinates.iter().map(|coordinate| coordinate.width()).collect();
@@ -300,7 +300,7 @@ mod tests {
         let a = [DomainCoordinate::new(1, 0).unwrap(), DomainCoordinate::new(2, 0).unwrap()];
         let b = [DomainCoordinate::new(3, 0).unwrap()];
         let packed = pack_domain_coordinates(&a);
-        assert_eq!(packed, pack_domain_coordinates(&b));
+        assert!(packed == pack_domain_coordinates(&b), "equal bits with distinct schedules share payload, not identity");
         assert_eq!(unpack_domain_coordinates(&packed, &[1, 2]), Some(a.to_vec()));
         assert_eq!(unpack_domain_coordinates(&packed, &[3]), Some(b.to_vec()));
         assert_ne!(a[0], b[0]);
