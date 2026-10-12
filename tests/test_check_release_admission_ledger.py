@@ -21,7 +21,10 @@ MODULE = importlib.util.module_from_spec(SPEC)
 sys.modules[SPEC.name] = MODULE
 SPEC.loader.exec_module(MODULE)
 
-REF = "juv4uk/sens@f63b46c4eab71c6fd6f3ceea45589b4ef92d2718:tests/evidence.lisp:1"
+REF = "juv4uk/sens@f63b46c4eab71c6fd6f3ceea45589b4ef92d2718:tests/donor-evidence.lisp:1"
+POSITIVE_REF = "juv4uk/sens@f63b46c4eab71c6fd6f3ceea45589b4ef92d2718:tests/positive-evidence.lisp:2"
+NEGATIVE_REF = "juv4uk/sens@f63b46c4eab71c6fd6f3ceea45589b4ef92d2718:tests/negative-evidence.lisp:3"
+F4_REF = "juv4uk/sens@f63b46c4eab71c6fd6f3ceea45589b4ef92d2718:tests/physical-t5-evidence.lisp:4"
 DEDUP = "D1-D9@f63b46c4eab71c6fd6f3ceea45589b4ef92d2718=NO-MATCH;D10@f63b46c4eab71c6fd6f3ceea45589b4ef92d2718=NO-MATCH"
 REAL_SENS = "tests/fixtures/migration-d1-cond-cohort/branch.sens"
 
@@ -31,10 +34,10 @@ def entry(**over):
         "sens": "tests/fixtures/x.sens",
         "typed_word_sha256": "a" * 64,
         "f1_donor_provenance": REF,
-        "f2_positive_witness": REF,
-        "f2_negative_witness": REF,
+        "f2_positive_witness": POSITIVE_REF,
+        "f2_negative_witness": NEGATIVE_REF,
         "f3_dedup": DEDUP,
-        "f4_t5_execution": REF,
+        "f4_t5_execution": F4_REF,
         "ratified": 0,
     }
     base.update(over)
@@ -83,6 +86,9 @@ class FormatTests(unittest.TestCase):
     def test_duplicate_sens_blocks(self):
         with self.assertRaises(MODULE.LedgerBlocked):
             self.check([entry(), entry()])
+    def test_same_f2_positive_and_negative_reference_blocks(self):
+        with self.assertRaises(MODULE.LedgerBlocked):
+            self.check([entry(f2_negative_witness=POSITIVE_REF, ratified=1)])
 
     def test_extra_or_missing_field_blocks(self):
         with self.assertRaises(MODULE.LedgerBlocked):
@@ -108,6 +114,16 @@ class ContentTests(unittest.TestCase):
     def test_wrong_content_hash_blocks(self):
         with self.assertRaises(MODULE.LedgerBlocked):
             MODULE.validate_ledger(ledger([entry(sens=REAL_SENS, typed_word_sha256="b" * 64)]))
+    def test_same_f2_reference_blocks_even_with_matching_t5_hash_and_ratification(self):
+        good = MODULE.content_sha256(ROOT, REAL_SENS)
+        candidate = entry(
+            sens=REAL_SENS,
+            typed_word_sha256=good,
+            f2_negative_witness=POSITIVE_REF,
+            ratified=1,
+        )
+        with self.assertRaises(MODULE.LedgerBlocked):
+            MODULE.validate_ledger(ledger([candidate]))
 
     def test_root_regular_file_is_accepted_but_symlink_evidence_is_rejected(self):
         data = (ROOT / REAL_SENS).read_bytes()
