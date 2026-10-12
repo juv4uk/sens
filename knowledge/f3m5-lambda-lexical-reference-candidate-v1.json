@@ -1,0 +1,40 @@
+{
+  "schema": "sens-f3m5-lambda-lexical-reference-candidate/v1",
+  "date": "2026-10-12",
+  "status": "RESEARCH-CANDIDATE-NOT-RATIFIED",
+  "production_mapping_changed": false,
+  "domain_coordinate_allocated": false,
+  "text7_or_d7_required": false,
+  "law": {
+    "binder": "LAMBDA introduces exactly one nearest lexical binder for its body",
+    "reference": "BOUND(n) denotes the n-th enclosing binder outward, with BOUND(0) the nearest binder",
+    "admission": "BOUND(n) is valid iff 0 <= n < lexical_depth",
+    "root": "a closed candidate is checked at lexical_depth=0",
+    "alpha_equivalence": "bound-variable names are not semantic data; alpha-renaming cannot change the nameless term",
+    "capture": "a closure captures the lexical environment present when LAMBDA is evaluated",
+    "application": "applying a one-argument closure pushes the argument at lexical index 0 and shifts captured outer bindings outward",
+    "failure": "a free or out-of-depth BOUND(n) fails closed",
+    "carrier": "F3M-5 lambda ranking is a carrier experiment and does not itself allocate a canonical SENS domain identity"
+  },
+  "canonical_witnesses": {
+    "I": {"nameless": "lambda(bound(0))", "payload_hex": "0000000000"},
+    "K": {"nameless": "lambda(lambda(bound(1)))", "payload_hex": "0000000010"},
+    "KI": {"nameless": "lambda(lambda(bound(0)))", "payload_hex": "000000000F"},
+    "all_d1_d3_lambda": {"payload_hex": "056169CB4A", "micro_nodes": 11}
+  },
+  "capacity": {
+    "physical_bits": 40,
+    "physical_bytes": 5,
+    "payloads": 1099511627776,
+    "through_12_nodes": 298460447325,
+    "through_13_nodes": 3706360960907,
+    "full_window_filled_by_node_layer": 13
+  },
+  "proof_scope": {
+    "rust_module": "crates/sens/src/frame3_micro_v5_lambda.rs",
+    "independent_checker": "scripts/check_f3m5_lambda_lexical_reference.py",
+    "stratified_roundtrips": 65536,
+    "exhaustive_2_pow_40_sweep": false,
+    "production_admission": false
+  }
+}
