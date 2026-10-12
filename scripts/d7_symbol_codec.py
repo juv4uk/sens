@@ -164,6 +164,14 @@ class D7SymbolCodec:
         result: list[str] = []
         offset = 0
         while offset < len(text):
+            # Uppercase is a genuine keyboard key, represented by the already
+            # ratified D7 modifier + one lowercase cell (no invented resident).
+            if layout in ("ук", "укр", "sym"):
+                letter = text[offset]
+                if letter in UK_LETTERS.upper() and letter.lower() in inverse:
+                    result.extend((CAPITAL, inverse[letter.lower()]))
+                    offset += 1
+                    continue
             for glyph in choices:
                 if text.startswith(glyph, offset):
                     result.append(inverse[glyph])
@@ -176,7 +184,24 @@ class D7SymbolCodec:
     def render_text(self, codes: tuple[str, ...] | list[str], layout: str) -> str:
         """Reject any concatenation which would lose exact cell boundaries."""
         words = tuple(codes)
-        displayed = "".join(self.render_tokens(words, layout))
+        if layout in ("ук", "укр", "sym"):
+            parts: list[str] = []
+            index = 0
+            while index < len(words):
+                if words[index] == CAPITAL:
+                    if index + 1 == len(words):
+                        raise D7CodecError("dangling D7 uppercase modifier")
+                    low = self._required_glyph(words[index + 1], layout)
+                    if len(low) != 1 or low not in UK_LETTERS:
+                        raise D7CodecError("D7 uppercase modifier must precede a Ukrainian letter")
+                    parts.append(low.upper())
+                    index += 2
+                else:
+                    parts.append(self._required_glyph(words[index], layout))
+                    index += 1
+            displayed = "".join(parts)
+        else:
+            displayed = "".join(self.render_tokens(words, layout))
         if self.encode_text(displayed, layout) != words:
             raise D7CodecError(f"{layout}: ambiguous concatenation; use render_tokens")
         return displayed
