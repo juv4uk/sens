@@ -1,6 +1,6 @@
 name: "Зшивання канонічних бітопотоків"
 
-on:
+"on":
   pull_request:
     paths:
       - "crates/sens/src/packed_bits.rs"
