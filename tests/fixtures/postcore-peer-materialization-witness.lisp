@@ -19,484 +19,484 @@
 ; promotion fail closed without giving Rust or a second hand-written table any
 ; authority.
 
-(00001001 postcore-authority-form
-  (00000101 (01001011 (10100110 "lib/surface/semantic-registry.lisp"))))
+(0011 postcore-authority-form
+  (100 (110101001 (110110111 "lib/surface/semantic-registry.lisp"))))
 
-(00001001 postcore-authority-rows postcore-authority-form)
+(0011 postcore-authority-rows postcore-authority-form)
 
-(00001001 postcore-member-status
-  (00001000 (needle items)
-    (00000111
-      ((00000010 items) ()
-       (00000001 absent))
-      ((00000010 items) (0)
-       (00000111
-         ((00000011 needle (00000101 items)) (1)
-          (00000001 present))
-         ((00000011 needle (00000101 items)) (0)
-          (postcore-member-status needle (00000110 items))))))))
+(0011 postcore-member-status
+  (0010 (needle items)
+    (110
+      ((010 items) ()
+       (001 absent))
+      ((010 items) (0)
+       (110
+         ((101 needle (100 items)) (1)
+          (001 present))
+         ((101 needle (100 items)) (0)
+          (postcore-member-status needle (011 items))))))))
 
-(00001001 postcore-find-authority-row
-  (00001000 (semantic-id rows)
-    (00000111
-      ((00000010 rows) ()
-       (00000001 ()))
-      ((00000010 rows) (0)
-       (10011100 ((row (00000101 rows)))
-         (00000111
-           ((00011100 semantic-id (00000101 row)) 1
+(0011 postcore-find-authority-row
+  (0010 (semantic-id rows)
+    (110
+      ((010 rows) ()
+       (001 ()))
+      ((010 rows) (0)
+       (001000 ((row (100 rows)))
+         (110
+           ((11110111 semantic-id (100 row)) 1
             row)
-           ((00011100 semantic-id (00000101 row)) 0
-            (postcore-find-authority-row semantic-id (00000110 rows)))))))))
+           ((11110111 semantic-id (100 row)) 0
+            (postcore-find-authority-row semantic-id (011 rows)))))))))
 
-(00001001 postcore-surfaces-with-status-onto
-  (00001000 (status surfaces acc)
-    (00000111
-      ((00000010 surfaces) ()
-       (00101010 acc))
-      ((00000010 surfaces) (0)
-       (10011101 ((surface (00000101 surfaces))
-              (word (00101111 surface))
-              (surface-status (00110000 surface)))
-         (00000111
-           ((00000011 surface-status status) (1)
-            (00000111
-              ((00000011 word (00000001 —)) (1)
+(0011 postcore-surfaces-with-status-onto
+  (0010 (status surfaces acc)
+    (110
+      ((010 surfaces) ()
+       (10100 acc))
+      ((010 surfaces) (0)
+       (001001 ((surface (100 surfaces))
+              (word (1001 surface))
+              (surface-status (10011 surface)))
+         (110
+           ((101 surface-status status) (1)
+            (110
+              ((101 word (001 —)) (1)
                (postcore-surfaces-with-status-onto
                  status
-                 (00000110 surfaces)
+                 (011 surfaces)
                  acc))
-              ((00000011 word (00000001 —)) (0)
-               (00000111
-                 ((00000011 (postcore-member-status word acc) (00000001 present))
+              ((101 word (001 —)) (0)
+               (110
+                 ((101 (postcore-member-status word acc) (001 present))
                   (1)
                   (postcore-surfaces-with-status-onto
                     status
-                    (00000110 surfaces)
+                    (011 surfaces)
                     acc))
-                 ((00000011 (postcore-member-status word acc) (00000001 absent))
+                 ((101 (postcore-member-status word acc) (001 absent))
                   (1)
                   (postcore-surfaces-with-status-onto
                     status
-                    (00000110 surfaces)
-                    (00000100 word acc)))))))
-           ((00000011 surface-status status) (0)
-            (postcore-surfaces-with-status-onto status (00000110 surfaces) acc))))))))
+                    (011 surfaces)
+                    (111 word acc)))))))
+           ((101 surface-status status) (0)
+            (postcore-surfaces-with-status-onto status (011 surfaces) acc))))))))
 
-(00001001 postcore-surfaces-with-status
-  (00001000 (status registry-row)
-    (00000111
-      ((00000010 registry-row) ()
-       (00000001 ()))
-      ((00000010 registry-row) (0)
-       (postcore-surfaces-with-status-onto status (00000110 registry-row) (00000001 ()))))))
+(0011 postcore-surfaces-with-status
+  (0010 (status registry-row)
+    (110
+      ((010 registry-row) ()
+       (001 ()))
+      ((010 registry-row) (0)
+       (postcore-surfaces-with-status-onto status (011 registry-row) (001 ()))))))
 
-(00001001 postcore-materialization-declarations-onto
-  (00001000 (forms acc)
-    (00000111
-      ((00000010 forms) ()
-       (00101010 acc))
-      ((00000010 forms) (0)
-       (10011100 ((form (00000101 forms)))
-         (00000111
-           ((00000010 form) (0)
-            (00000111
-              ((00000011 (00000101 form) (00000001 my-postcore-materialize-stable-peers))
+(0011 postcore-materialization-declarations-onto
+  (0010 (forms acc)
+    (110
+      ((010 forms) ()
+       (10100 acc))
+      ((010 forms) (0)
+       (001000 ((form (100 forms)))
+         (110
+           ((010 form) (0)
+            (110
+              ((101 (100 form) (001 my-postcore-materialize-stable-peers))
                (1)
                (postcore-materialization-declarations-onto
-                 (00000110 forms)
-                 (00000100 (00100111 (00101111 form) (00110000 form)) acc)))
-              ((00000011 (00000101 form) (00000001 my-postcore-materialize-stable-peers))
+                 (011 forms)
+                 (111 (1110 (1001 form) (10011 form)) acc)))
+              ((101 (100 form) (001 my-postcore-materialize-stable-peers))
                (0)
                (postcore-materialization-declarations-onto
-                 (00000110 forms)
+                 (011 forms)
                  acc))))
-           ((00000010 form) (1)
-            (postcore-materialization-declarations-onto (00000110 forms) acc))
-           ((00000010 form) ()
-            (postcore-materialization-declarations-onto (00000110 forms) acc))))))))
+           ((010 form) (1)
+            (postcore-materialization-declarations-onto (011 forms) acc))
+           ((010 form) ()
+            (postcore-materialization-declarations-onto (011 forms) acc))))))))
 
-(00001001 postcore-materialization-declarations
-  (00001000 (path)
+(0011 postcore-materialization-declarations
+  (0010 (path)
     (postcore-materialization-declarations-onto
-      (01001011 (10100110 path))
-      (00000001 ()))))
+      (110101001 (110110111 path))
+      (001 ()))))
 
-(00001001 postcore-declarations
-  (00101001
+(0011 postcore-declarations
+  (1111
     (postcore-materialization-declarations "lib/time.lisp")
-    (00101001
+    (1111
       (postcore-materialization-declarations "lib/process.lisp")
-      (00101001
+      (1111
         (postcore-materialization-declarations "lib/tcp.lisp")
         (postcore-materialization-declarations "lib/fs.lisp")))))
 
-(00001001 postcore-declarations-match-authority
-  (00001000 (declarations)
-    (00000111
-      ((00000010 declarations) ()
-       (00000001 registry-consistent))
-      ((00000010 declarations) (0)
-       (10011101 ((declaration (00000101 declarations))
-              (semantic-id (00000101 declaration))
-              (source (00101111 declaration))
+(0011 postcore-declarations-match-authority
+  (0010 (declarations)
+    (110
+      ((010 declarations) ()
+       (001 registry-consistent))
+      ((010 declarations) (0)
+       (001001 ((declaration (100 declarations))
+              (semantic-id (100 declaration))
+              (source (1001 declaration))
               (row
                 (postcore-find-authority-row
                   semantic-id
                   postcore-authority-rows))
               (stable-peers
-                (postcore-surfaces-with-status (00000001 stable) row)))
-         (00000111
-           ((00000010 row) ()
-            (00000001 registry-drift))
-           ((00000010 row) (0)
-            (00000111
-              ((00000011 (postcore-member-status source stable-peers) (00000001 present))
+                (postcore-surfaces-with-status (001 stable) row)))
+         (110
+           ((010 row) ()
+            (001 registry-drift))
+           ((010 row) (0)
+            (110
+              ((101 (postcore-member-status source stable-peers) (001 present))
                (1)
-               (postcore-declarations-match-authority (00000110 declarations)))
-              ((00000011 (postcore-member-status source stable-peers) (00000001 absent))
+               (postcore-declarations-match-authority (011 declarations)))
+              ((101 (postcore-member-status source stable-peers) (001 absent))
                (1)
-               (00000001 registry-drift))))))))))
+               (001 registry-drift))))))))))
 
-(00001001 postcore-expected-peer-groups-onto
-  (00001000 (declarations acc)
-    (00000111
-      ((00000010 declarations) ()
-       (00101010 acc))
-      ((00000010 declarations) (0)
-       (10011101 ((declaration (00000101 declarations))
-              (semantic-id (00000101 declaration))
+(0011 postcore-expected-peer-groups-onto
+  (0010 (declarations acc)
+    (110
+      ((010 declarations) ()
+       (10100 acc))
+      ((010 declarations) (0)
+       (001001 ((declaration (100 declarations))
+              (semantic-id (100 declaration))
               (row
                 (postcore-find-authority-row
                   semantic-id
                   postcore-authority-rows))
               (stable-peers
-                (postcore-surfaces-with-status (00000001 stable) row)))
-         (00000111
-           ((00011011 (00101000 stable-peers) 1) 1
+                (postcore-surfaces-with-status (001 stable) row)))
+         (110
+           ((11011 (000000 stable-peers) 1) 1
             (postcore-expected-peer-groups-onto
-              (00000110 declarations)
-              (00000100 (00000100 semantic-id stable-peers) acc)))
-           ((00011011 (00101000 stable-peers) 1) 0
+              (011 declarations)
+              (111 (111 semantic-id stable-peers) acc)))
+           ((11011 (000000 stable-peers) 1) 0
             (postcore-expected-peer-groups-onto
-              (00000110 declarations)
+              (011 declarations)
               acc))))))))
 
-(00001001 postcore-expected-peer-groups
-  (postcore-expected-peer-groups-onto postcore-declarations (00000001 ())))
+(0011 postcore-expected-peer-groups
+  (postcore-expected-peer-groups-onto postcore-declarations (001 ())))
 
-(00001001 postcore-find-group
-  (00001000 (semantic-id groups)
-    (00000111
-      ((00000010 groups) ()
-       (00000001 ()))
-      ((00000010 groups) (0)
-       (10011100 ((group (00000101 groups)))
-         (00000111
-           ((00011100 semantic-id (00000101 group)) 1
+(0011 postcore-find-group
+  (0010 (semantic-id groups)
+    (110
+      ((010 groups) ()
+       (001 ()))
+      ((010 groups) (0)
+       (001000 ((group (100 groups)))
+         (110
+           ((11110111 semantic-id (100 group)) 1
             group)
-           ((00011100 semantic-id (00000101 group)) 0
-            (postcore-find-group semantic-id (00000110 groups)))))))))
+           ((11110111 semantic-id (100 group)) 0
+            (postcore-find-group semantic-id (011 groups)))))))))
 
-(00001001 postcore-peer-members-match
-  (00001000 (expected actual)
-    (00000111
-      ((00000010 expected) ()
-       (00000001 registry-consistent))
-      ((00000010 expected) (0)
-       (00000111
-         ((00000011 (postcore-member-status (00000101 expected) actual) (00000001 present))
+(0011 postcore-peer-members-match
+  (0010 (expected actual)
+    (110
+      ((010 expected) ()
+       (001 registry-consistent))
+      ((010 expected) (0)
+       (110
+         ((101 (postcore-member-status (100 expected) actual) (001 present))
           (1)
-          (postcore-peer-members-match (00000110 expected) actual))
-         ((00000011 (postcore-member-status (00000101 expected) actual) (00000001 absent))
+          (postcore-peer-members-match (011 expected) actual))
+         ((101 (postcore-member-status (100 expected) actual) (001 absent))
           (1)
-          (00000001 registry-drift)))))))
+          (001 registry-drift)))))))
 
-(00001001 postcore-peer-sets-match
-  (00001000 (expected actual)
-    (00000111
-      ((00011100 (00101000 expected) (00101000 actual)) 0
-       (00000001 registry-drift))
-      ((00011100 (00101000 expected) (00101000 actual)) 1
+(0011 postcore-peer-sets-match
+  (0010 (expected actual)
+    (110
+      ((11110111 (000000 expected) (000000 actual)) 0
+       (001 registry-drift))
+      ((11110111 (000000 expected) (000000 actual)) 1
        (postcore-peer-members-match expected actual)))))
 
-(00001001 postcore-projection-groups-match
-  (00001000 (expected actual)
-    (00000111
-      ((00000010 expected) ()
-       (00000001 registry-consistent))
-      ((00000010 expected) (0)
-       (10011101 ((expected-group (00000101 expected))
-              (semantic-id (00000101 expected-group))
+(0011 postcore-projection-groups-match
+  (0010 (expected actual)
+    (110
+      ((010 expected) ()
+       (001 registry-consistent))
+      ((010 expected) (0)
+       (001001 ((expected-group (100 expected))
+              (semantic-id (100 expected-group))
               (actual-group (postcore-find-group semantic-id actual)))
-         (00000111
-           ((00000010 actual-group) ()
-            (00000001 registry-drift))
-           ((00000010 actual-group) (0)
-            (00000111
-              ((00000011
+         (110
+           ((010 actual-group) ()
+            (001 registry-drift))
+           ((010 actual-group) (0)
+            (110
+              ((101
                  (postcore-peer-sets-match
-                   (00000110 expected-group)
-                   (00000110 actual-group))
-                 (00000001 registry-consistent))
+                   (011 expected-group)
+                   (011 actual-group))
+                 (001 registry-consistent))
                (1)
-               (postcore-projection-groups-match (00000110 expected) actual))
-              ((00000011
+               (postcore-projection-groups-match (011 expected) actual))
+              ((101
                  (postcore-peer-sets-match
-                   (00000110 expected-group)
-                   (00000110 actual-group))
-                 (00000001 registry-drift))
+                   (011 expected-group)
+                   (011 actual-group))
+                 (001 registry-drift))
                (1)
-               (00000001 registry-drift))))))))))
+               (001 registry-drift))))))))))
 
-(00001001 postcore-projection-matches-authority
-  (00001000 (expected actual)
-    (00000111
-      ((00011100 (00101000 expected) (00101000 actual)) 0
-       (00000001 registry-drift))
-      ((00011100 (00101000 expected) (00101000 actual)) 1
+(0011 postcore-projection-matches-authority
+  (0010 (expected actual)
+    (110
+      ((11110111 (000000 expected) (000000 actual)) 0
+       (001 registry-drift))
+      ((11110111 (000000 expected) (000000 actual)) 1
        (postcore-projection-groups-match expected actual)))))
 
-(00001001 postcore-surfaces-unbound
-  (00001000 (surfaces)
-    (00000111
-      ((00000010 surfaces) ()
-       (00000001 surfaces-unbound))
-      ((00000010 surfaces) (0)
-       (00000111
-         ((00000011
-            (my-postcore-binding-status (00000101 surfaces) (01001110))
-            (00000001 absent))
+(0011 postcore-surfaces-unbound
+  (0010 (surfaces)
+    (110
+      ((010 surfaces) ()
+       (001 surfaces-unbound))
+      ((010 surfaces) (0)
+       (110
+         ((101
+            (my-postcore-binding-status (100 surfaces) (11100111))
+            (001 absent))
           (1)
-          (postcore-surfaces-unbound (00000110 surfaces)))
-         ((00000011
-            (my-postcore-binding-status (00000101 surfaces) (01001110))
-            (00000001 present))
+          (postcore-surfaces-unbound (011 surfaces)))
+         ((101
+            (my-postcore-binding-status (100 surfaces) (11100111))
+            (001 present))
           (1)
-          (00000001 surfaces-bound)))))))
+          (001 surfaces-bound)))))))
 
-(00001001 postcore-candidate-surfaces-unbound
-  (00001000 (declarations)
-    (00000111
-      ((00000010 declarations) ()
-       (00000001 candidates-unbound))
-      ((00000010 declarations) (0)
-       (10011101 ((semantic-id (00000101 (00000101 declarations)))
+(0011 postcore-candidate-surfaces-unbound
+  (0010 (declarations)
+    (110
+      ((010 declarations) ()
+       (001 candidates-unbound))
+      ((010 declarations) (0)
+       (001001 ((semantic-id (100 (100 declarations)))
               (row
                 (postcore-find-authority-row
                   semantic-id
                   postcore-authority-rows))
               (candidates
-                (postcore-surfaces-with-status (00000001 candidate) row)))
-         (00000111
-           ((00000011
+                (postcore-surfaces-with-status (001 candidate) row)))
+         (110
+           ((101
               (postcore-surfaces-unbound candidates)
-              (00000001 surfaces-unbound))
+              (001 surfaces-unbound))
             (1)
-            (postcore-candidate-surfaces-unbound (00000110 declarations)))
-           ((00000011
+            (postcore-candidate-surfaces-unbound (011 declarations)))
+           ((101
               (postcore-surfaces-unbound candidates)
-              (00000001 surfaces-bound))
+              (001 surfaces-bound))
             (1)
-            (00000001 candidates-bound))))))))
+            (001 candidates-bound))))))))
 
-(00001001 postcore-registry-surface-count
-  (00001000 (semantic-id-text entries)
-    (00000111
-      ((00000010 entries) ()
+(0011 postcore-registry-surface-count
+  (0010 (semantic-id-text entries)
+    (110
+      ((010 entries) ()
        0)
-      ((00000010 entries) (0)
-       (10011100 ((entry (00000101 entries)))
-         (00000111
-           ((00000011 (00101111 entry) semantic-id-text) (1)
-            (00001100 1
+      ((010 entries) (0)
+       (001000 ((entry (100 entries)))
+         (110
+           ((101 (1001 entry) semantic-id-text) (1)
+            (01010 1
                (postcore-registry-surface-count
                  semantic-id-text
-                 (00000110 entries))))
-           ((00000011 (00101111 entry) semantic-id-text) (0)
+                 (011 entries))))
+           ((101 (1001 entry) semantic-id-text) (0)
             (postcore-registry-surface-count
               semantic-id-text
-              (00000110 entries)))))))))
+              (011 entries)))))))))
 
-(00001001 postcore-peers-match-id
-  (00001000 (peers semantic-id-text)
-    (00000111
-      ((00000010 peers) ()
-       (00000001 registry-consistent))
-      ((00000010 peers) (0)
-       (00000111
-         ((00000011 (my-semantic-id-for-surface (00000101 peers)) semantic-id-text)
+(0011 postcore-peers-match-id
+  (0010 (peers semantic-id-text)
+    (110
+      ((010 peers) ()
+       (001 registry-consistent))
+      ((010 peers) (0)
+       (110
+         ((101 (my-semantic-id-for-surface (100 peers)) semantic-id-text)
           (1)
-          (postcore-peers-match-id (00000110 peers) semantic-id-text))
-         ((00000011 (my-semantic-id-for-surface (00000101 peers)) semantic-id-text)
+          (postcore-peers-match-id (011 peers) semantic-id-text))
+         ((101 (my-semantic-id-for-surface (100 peers)) semantic-id-text)
           (0)
-          (00000001 registry-drift)))))))
+          (001 registry-drift)))))))
 
-(00001001 postcore-groups-match-generated-registry
-  (00001000 (groups)
-    (00000111
-      ((00000010 groups) ()
-       (00000001 registry-consistent))
-      ((00000010 groups) (0)
-       (10011101 ((group (00000101 groups))
-              (semantic-id (00000101 group))
-              (peers (00000110 group))
-              (semantic-id-text (01000110 semantic-id))
+(0011 postcore-groups-match-generated-registry
+  (0010 (groups)
+    (110
+      ((010 groups) ()
+       (001 registry-consistent))
+      ((010 groups) (0)
+       (001001 ((group (100 groups))
+              (semantic-id (100 group))
+              (peers (011 group))
+              (semantic-id-text (110111001 semantic-id))
               (projected-count
                 (postcore-registry-surface-count
                   semantic-id-text
                   my-semantic-surface-registry)))
-         (00000111
-           ((00011100 projected-count (00101000 peers)) 1
-            (00000111
-              ((00000011 (postcore-peers-match-id peers semantic-id-text)
-                   (00000001 registry-consistent))
+         (110
+           ((11110111 projected-count (000000 peers)) 1
+            (110
+              ((101 (postcore-peers-match-id peers semantic-id-text)
+                   (001 registry-consistent))
                (1)
-               (postcore-groups-match-generated-registry (00000110 groups)))
-              ((00000011 (postcore-peers-match-id peers semantic-id-text)
-                   (00000001 registry-drift))
+               (postcore-groups-match-generated-registry (011 groups)))
+              ((101 (postcore-peers-match-id peers semantic-id-text)
+                   (001 registry-drift))
                (1)
-               (00000001 registry-drift))))
-           ((00011100 projected-count (00101000 peers)) 0
-            (00000001 registry-drift))))))))
+               (001 registry-drift))))
+           ((11110111 projected-count (000000 peers)) 0
+            (001 registry-drift))))))))
 
-(00001001 postcore-witness-failure
-  (00001000 (case actual expected)
-    (00100111
-      (00000001 postcore-peer-materialization-witness)
-      (00000001 (status fail))
-      (00100111 (00000001 case) case)
-      (00100111 (00000001 actual) actual)
-      (00100111 (00000001 expected) expected))))
+(0011 postcore-witness-failure
+  (0010 (case actual expected)
+    (1110
+      (001 postcore-peer-materialization-witness)
+      (001 (status fail))
+      (1110 (001 case) case)
+      (1110 (001 actual) actual)
+      (1110 (001 expected) expected))))
 
-(00001001 postcore-check-rows
-  (00001000 (rows)
-    (00000111
-      ((00000010 rows) ()
-       (00000001 (postcore-peer-materialization-witness (status pass))))
-      ((00000010 rows) (1)
+(0011 postcore-check-rows
+  (0010 (rows)
+    (110
+      ((010 rows) ()
+       (001 (postcore-peer-materialization-witness (status pass))))
+      ((010 rows) (1)
        (postcore-witness-failure
-         (00000001 malformed-row-tail)
+         (001 malformed-row-tail)
          rows
-         (00000001 ())))
-      ((00000010 rows) (0)
-       (10011100 ((row (00000101 rows)))
-         (00000111
-           ((00100010 (00101111 row) (00110000 row)) (1)
-            (postcore-check-rows (00000110 rows)))
-           ((00100010 (00101111 row) (00110000 row)) (0)
+         (001 ())))
+      ((010 rows) (0)
+       (001000 ((row (100 rows)))
+         (110
+           ((11110111 (1001 row) (10011 row)) (1)
+            (postcore-check-rows (011 rows)))
+           ((11110111 (1001 row) (10011 row)) (0)
             (postcore-witness-failure
-              (00000101 row)
-              (00101111 row)
-              (00110000 row)))))))))
+              (100 row)
+              (1001 row)
+              (10011 row)))))))))
 
-(00001001 postcore-phase-one
+(0011 postcore-phase-one
   (postcore-check-rows
-    (00100111
+    (1110
       ; Every numeric materialization declaration in the post-core libraries
       ; must name a stable source binding from the single semantic authority.
-      (00100111
-        (00000001 declaration-source-authority)
+      (1110
+        (001 declaration-source-authority)
         (postcore-declarations-match-authority postcore-declarations)
-        (00000001 registry-consistent))
+        (001 registry-consistent))
 
       ; The bootstrap cache must be exactly the set of declared post-core IDs
       ; that currently have more than one unique stable spelling. IDs with only
       ; their source spelling need no cache row yet; promoting a candidate to
       ; stable therefore makes this witness RED until the cache is refreshed.
-      (00100111
-        (00000001 authority-derived-complete-projection)
+      (1110
+        (001 authority-derived-complete-projection)
         (postcore-projection-matches-authority
           postcore-expected-peer-groups
           my-postcore-stable-peer-projection)
-        (00000001 registry-consistent))
+        (001 registry-consistent))
 
       ; Declaring a post-core identity must never admit candidate spellings.
-      (00100111
-        (00000001 candidates-remain-unbound)
+      (1110
+        (001 candidates-remain-unbound)
         (postcore-candidate-surfaces-unbound postcore-declarations)
-        (00000001 candidates-unbound))
+        (001 candidates-unbound))
 
       ; The hand-executed runtime projection must exactly match the generated
       ; admitted registry projection for every currently exercised time ID.
-      (00100111
-        (00000001 generated-registry-parity)
+      (1110
+        (001 generated-registry-parity)
         (postcore-groups-match-generated-registry
           my-postcore-stable-peer-projection)
-        (00000001 registry-consistent))
+        (001 registry-consistent))
 
       ; Both stable spellings route to the same opaque numeric identity.
-      (00100111
-        (00000001 semantic-id-en)
-        (my-semantic-id-for-surface (00000001 utc-from-unix))
+      (1110
+        (001 semantic-id-en)
+        (my-semantic-id-for-surface (001 utc-from-unix))
         "1080")
-      (00100111
-        (00000001 semantic-id-uk)
-        (my-semantic-id-for-surface (00000001 всч-із-юнікс))
+      (1110
+        (001 semantic-id-uk)
+        (my-semantic-id-for-surface (001 всч-із-юнікс))
         "1080")
 
       ; The full UKR spelling is still candidate. It must be absent from both
       ; the admitted registry projection and the live environment.
-      (00100111
-        (00000001 candidate-not-admitted)
-        (00000010
+      (1110
+        (001 candidate-not-admitted)
+        (010
           (my-semantic-id-for-surface
-            (00000001 всесвітній-координований-час-із-часу-юнікс)))
-        (00000001 ()))
-      (00100111
-        (00000001 candidate-not-bound)
+            (001 всесвітній-координований-час-із-часу-юнікс)))
+        (001 ()))
+      (1110
+        (001 candidate-not-bound)
         (my-postcore-binding-status
-          (00000001 всесвітній-координований-час-із-часу-юнікс)
-          (01001110))
-        (00000001 absent))
+          (001 всесвітній-координований-час-із-часу-юнікс)
+          (11100111))
+        (001 absent))
 
       ; Stable EN/UK peers begin as exactly the same closure and execute with
       ; the same deterministic result.
-      (00100111
-        (00000001 initial-peer-identity)
-        (00000011 utc-from-unix всч-із-юнікс)
-        (00000001 (1)))
-      (00100111
-        (00000001 invocation-parity)
-        (00100010 (01011111 0 0) (01011111 0 0))
-        (00000001 (1)))
+      (1110
+        (001 initial-peer-identity)
+        (101 utc-from-unix всч-із-юнікс)
+        (001 (1)))
+      (1110
+        (001 invocation-parity)
+        (11110111 (101110110 0 0) (101110110 0 0))
+        (001 (1)))
 
       ; Ordinary lexical shadowing is independent: rebinding one spelling does
       ; not mutate or retarget the other spelling.
-      (00100111
-        (00000001 lexical-shadowing-independent)
-        (10011100 ((всч-із-юнікс
-                (00001000 (seconds nanosecond) (00000001 shadowed))))
-          (00000011 utc-from-unix всч-із-юнікс))
-        (00000001 (0))))))
+      (1110
+        (001 lexical-shadowing-independent)
+        (001000 ((всч-із-юнікс
+                (0010 (seconds nanosecond) (001 shadowed))))
+          (101 utc-from-unix всч-із-юнікс))
+        (001 (0))))))
 
 ; Stronger idempotence law: install an explicit existing peer binding, invoke
 ; materialization again at top level, and prove the macro does NOT overwrite it.
 ; This mutation is local to this one-shot witness process.
-(00001001 postcore-existing-peer
-  (00001000 (seconds nanosecond) (00000001 preserved-peer)))
+(0011 postcore-existing-peer
+  (0010 (seconds nanosecond) (001 preserved-peer)))
 
-(00001001 всч-із-юнікс postcore-existing-peer)
+(0011 всч-із-юнікс postcore-existing-peer)
 (my-postcore-materialize-stable-peers 1080 utc-from-unix)
 
-(00001001 postcore-phase-two
+(0011 postcore-phase-two
   (postcore-check-rows
-    (00100111
-      (00100111
-        (00000001 phase-one)
+    (1110
+      (1110
+        (001 phase-one)
         postcore-phase-one
-        (00000001 (postcore-peer-materialization-witness (status pass))))
-      (00100111
-        (00000001 rematerialization-preserves-existing-binding)
-        (00000011 всч-із-юнікс postcore-existing-peer)
-        (00000001 (1)))
-      (00100111
-        (00000001 rematerialization-does-not-retarget-source)
-        (00000011 всч-із-юнікс utc-from-unix)
-        (00000001 (0)))
-      (00100111
-        (00000001 preserved-binding-invocation)
+        (001 (postcore-peer-materialization-witness (status pass))))
+      (1110
+        (001 rematerialization-preserves-existing-binding)
+        (101 всч-із-юнікс postcore-existing-peer)
+        (001 (1)))
+      (1110
+        (001 rematerialization-does-not-retarget-source)
+        (101 всч-із-юнікс utc-from-unix)
+        (001 (0)))
+      (1110
+        (001 preserved-binding-invocation)
         (всч-із-юнікс 0 0)
-        (00000001 preserved-peer)))))
+        (001 preserved-peer)))))
 
 postcore-phase-two
