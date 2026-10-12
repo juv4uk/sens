@@ -253,7 +253,7 @@ mod tests {
         let source_packed = packer.finish();
         let domain_packed = pack_domain_coordinates(&coordinates);
         assert_eq!(source_packed.bit_len(), expected_bits);
-        assert_eq!(source_packed, domain_packed);
+        assert!(source_packed == domain_packed, "all exact-width bits and total length must match");
         assert_eq!(source_packed.byte_len(), expected_bits.div_ceil(8));
 
         let widths: Vec<_> = tokens.iter().map(|token| token.word.width()).collect();
