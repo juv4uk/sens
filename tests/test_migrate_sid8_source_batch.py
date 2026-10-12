@@ -152,7 +152,6 @@ class BatchSourceTests(unittest.TestCase):
         paths = (
             "knowledge/guard-fact-policy.lisp",
             "knowledge/guard-reference.lisp",
-            "scripts/semantic-authority-guard-enforce.lisp",
         )
         for path in paths:
             with self.subTest(path=path):
@@ -171,6 +170,23 @@ class BatchSourceTests(unittest.TestCase):
                         for reason in row["reasons"]),
                     f"{path}: missing D3 semantic blocker {row['reasons']}",
                 )
+
+    def test_semantic_guard_d3_is_migrated_but_d9_reader_still_blocks(self):
+        path = "scripts/semantic-authority-guard-enforce.lisp"
+        text = (ROOT / path).read_text(encoding="utf-8")
+        self.assertEqual(self.guard.scan_lisp(text, path), [],
+                         "no three-field/host-truth D3 may remain")
+        report = MOD.run(ROOT, False, {path})
+        self.assertEqual(report["summary"]["admitted_files"], 0)
+        self.assertEqual(report["summary"]["blocked_files"], 1)
+        row = report["files"][0]
+        self.assertEqual(row["status"], "blocked")
+        self.assertTrue(any("W8_CROSS_DOMAIN_EXECUTION_BLOCK" in reason
+                            for reason in row["reasons"]), row["reasons"])
+        self.assertTrue(any("READ-ALL" in reason and "D9:" in reason
+                            for reason in row["reasons"]), row["reasons"])
+        self.assertTrue(any("READ-FILE" in reason and "D9:" in reason
+                            for reason in row["reasons"]), row["reasons"])
 
     def test_immutable_guard_reference_not_rewritten_until_cond_law(self):
         report = MOD.run(ROOT, False, {"knowledge/guard-reference.lisp"})
