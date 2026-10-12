@@ -9,6 +9,7 @@
 3. [`domain-paradigm.uk.md`](domain-paradigm.uk.md) — домени, закони й генеративний ріст.
 4. [`language-core.md`](language-core.md) — технічна exact-domain модель.
 5. [`semantic-authority-map.md`](semantic-authority-map.md) — що має семантичну владу.
+6. [`project-reality-2026-10-12.uk.md`](project-reality-2026-10-12.uk.md) — актуальний зведений стан D10, Nano-SENS, бенчмарк-лабораторії та фізичних кодеків.
 
 ## Канонічні human tables
 
@@ -23,6 +24,9 @@
 - `../lib/domains/d7.lisp`
 - `../lib/domains/d8.lisp`
 - `../lib/domains/d9.lisp`
+- `../knowledge/d10-v18-semantic-inventory.json` — повний 1024/1024 каталог D10; окремий акт цілісної ратифікації: `../knowledge/d10-owner-whole-domain-ratification-20261012.json`.
+
+D10 ratification — нормативне рішення над повним каталогом, але не свідчення, що кожний закон independently verified або що D10 допущений до T5/physical runtime.
 
 Колонки: `ук → укр → san → en → LISP → sym`.
 
@@ -36,6 +40,13 @@ D7 має 126 semantic rows; `0100001` і `0101010` owner-reserved. D8 owner-rat
 - [`domain-surfaces-d7.md`](domain-surfaces-d7.md) — специфіка D7 sound/text surfaces.
 - [`domain-surfaces-d8.md`](domain-surfaces-d8.md) — специфіка D8 human surfaces.
 - [`domain-surfaces-d9.md`](domain-surfaces-d9.md) — D9 512/512 human projection і межа W9 runtime.
+
+## Бенчмарк-лабораторія та поточні докази
+
+- [`project-reality-2026-10-12.uk.md`](project-reality-2026-10-12.uk.md) — робоча картина і правила інтерпретації результатів.
+- [`../benchmarks/README.md`](../benchmarks/README.md) — **згенерований** індекс зареєстрованих стендів; не редагувати вручну. Незареєстровані стенди — backfill debt #4172, вимога `bench.json` для нових стендів — #4171.
+- [`research/nano-sens-seed-v0-20261012.uk.md`](research/nano-sens-seed-v0-20261012.uk.md) — виміряний Nano-SENS baseline з відкритим seed closure.
+- [`benchmarks/2026-10-09-domain-occupancy-bitmask.uk.md`](benchmarks/2026-10-09-domain-occupancy-bitmask.uk.md) — історичний occupancy-механізм; його старі виміри не переіменовуються в D10 runtime-admission доказ.
 
 ## Реалізація та conformance
 
