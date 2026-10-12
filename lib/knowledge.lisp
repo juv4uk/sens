@@ -57,7 +57,12 @@
 ;; grow `*knowledge-journal*`) do.
 (0011 clauses->tell-events
   (0010 (module-name clauses)
-    (101000 (0010 (clause) (1110 (001 tell) module-name clause)) clauses)))
+    (110
+      ((010 clauses) (001 ()))
+      ((010 (001 ()))
+       (111
+         (1110 (001 tell) module-name (100 clauses))
+         (clauses->tell-events module-name (011 clauses)))))))
 
 ;; defmodule registers a list of clauses under a specific module name —
 ;; same public shape as before, but now expands to pushing one `tell`
