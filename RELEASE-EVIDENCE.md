@@ -201,3 +201,25 @@ This is the latest fully observed release-related batch on 2026-10-12. It is a *
 **NO-GO remains in force.** M0 inventory drift has been repaired and passes on this SHA; this closes the inventory defect only. The semantic/source gap remains: `lib/time.lisp` and machine lowering need a ratified way to obtain explicit D24+ values (including literal/constant and raw clock-observation handling). Do not invent implicit promotions or relax negative witnesses. Separately, repository administration must re-enable the manually disabled Release Preflight workflow so the mandatory full workspace test + Clippy gate can run; repo content edits alone did not change that GitHub Actions setting.
 
 The `l0.42.0` ref and GitHub Release were both absent at last check. This assistant did not set owner GO variables, create a tag, or publish assets. Freeze a future candidate only after the source-law and runtime/oracle blockers are resolved, Release Preflight is enabled, and all required gates are green for one exact SHA.
+
+
+## Latest exact-head diagnostic — 2026-10-12
+
+This is an immutable **diagnostic snapshot**, not a release candidate. The checks below were run against exact `main@2d642bf43bd88d7502d175b23d1b866e7dbbc775`; any later commit invalidates it as a candidate. `Candidate SHA` remains **UNSET** and verdict remains **NO-GO**.
+
+| Gate on exact SHA | Result | Evidence / boundary |
+|---|---|---|
+| Physical binary SENS CLI smoke | **PASS** | [run 38262026489](https://github.com/juv4uk/sens/actions/runs/38262026489) — narrow CLI path only |
+| Physical T5 to D2/D3/D4/D7 runtime | **PASS** | [run 38262026420](https://github.com/juv4uk/sens/actions/runs/38262026420) — bounded witness, not whole-corpus admission |
+| Triple projection gate | **PASS** | [run 38262026521](https://github.com/juv4uk/sens/actions/runs/38262026521) |
+| New D3 regression guard | **PASS** | [run 38262026522](https://github.com/juv4uk/sens/actions/runs/38262026522); no new violations in its bounded scope |
+| D3 generator regressions | **PASS** | [Hosted CI run 38262026511](https://github.com/juv4uk/sens/actions/runs/38262026511), including exact two-field signature/evaluator generator tests and negative mutations |
+| Live-source D3 strict audit | **FAIL** | Same [Hosted CI run 38262026511](https://github.com/juv4uk/sens/actions/runs/38262026511): 144 live Lisp files, 498 findings, **0 scan errors**. This follows the targeted generator repair; it does not certify full D3 migration. |
+| Portable critical/runtime gates | **FAIL** | [run 38262026511](https://github.com/juv4uk/sens/actions/runs/38262026511): migrated demos, D6 MAP length, D9 map facade, filesystem/content-store, and time-source witnesses fail with `math requires explicit D24+ operands; D1-D10 bit words and unqualified numbers are not arithmetic values`. Do not add implicit promotions or weaken fail-closed controls. |
+| Native CPU positive witness | **FAIL** | [run 38262026526](https://github.com/juv4uk/sens/actions/runs/38262026526): native CPU mechanism witness fails; negative invalid-machine rejection is separate evidence and does not establish positive parity. |
+| Physical T5 whole-file authority oracle | **FAIL / NO VERDICT** | [run 38262026507](https://github.com/juv4uk/sens/actions/runs/38262026507): whole assembled oracle migration does not complete; no whole-corpus physical T5 parity claim. |
+| Release Preflight workflow registration | **BLOCKED** | The registration guard is fail-closed; workflow is still `disabled_manually`. Requires repository owner/admin to re-enable in GitHub Actions, then run it on a frozen exact SHA. |
+
+A targeted D3 defect found in this batch—an extra closing parenthesis in `scripts/generate-rust-function-signatures.lisp`—was removed in [commit 2d642bf](https://github.com/juv4uk/sens/commit/2d642bf43bd88d7502d175b23d1b866e7dbbc775). Its scanner regression test and new-regression gate are green on that SHA. The strict audit still has 498 findings, so no claim of full migration is made.
+
+**Decision: NO-GO.** Do not create `l0.42.0`, set owner GO variables, or publish assets. The owner/admin action needed to re-enable Release Preflight is an external repository setting; no bypass was used.
