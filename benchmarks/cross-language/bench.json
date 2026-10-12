@@ -17,5 +17,5 @@
   "status": "HISTORICAL-HARNESS; CURRENT-CANONICAL-REPLAY-BLOCKED",
   "generation": "Historical Function8/FASL generation; current Contract 11.9 replay pending",
   "axis": "cross-language/matched-workload-phase-and-semantic-parity",
-  "reproduce": "cargo build --release -p sens --example ci_bench && guix time-machine -C channels.scm -- shell -m manifest.scm -m benchmarks/cross-language/manifest.scm -- python3 benchmarks/cross-language/run.py --sens-bench target/release/examples/ci_bench --historical-function8-fasl"
+  "reproduce": "if ! command -v guix >/dev/null 2>&1; then printf 'SENS_BENCHMARK_STATUS=BLOCKED\\nBLOCKED: cross-language historical replay requires the pinned Guix environment (channels.scm plus both Guix manifests).\\n'; exit 2; fi; cargo build --release -p sens --example ci_bench && guix time-machine -C channels.scm -- shell -m manifest.scm -m benchmarks/cross-language/manifest.scm -- python3 benchmarks/cross-language/run.py --sens-bench target/release/examples/ci_bench --historical-function8-fasl"
 }
