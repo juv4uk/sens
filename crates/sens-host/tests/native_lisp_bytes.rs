@@ -202,6 +202,10 @@ fn x86_pair_layout_is_one_lisp_owned_machine_readable_authority() {
     ] {
         assert!(source.contains(required), "pair layout authority missing {required}");
     }
+    assert!(
+        !source.contains("(00001001"),
+        "pair layout must not reintroduce historical W8 DEFINE identity"
+    );
 
     assert!(
         !source.contains("semantic-id"),
