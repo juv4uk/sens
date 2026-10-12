@@ -89,14 +89,40 @@
         "verify/362-readfile-current-main-benchmark",
         "verify/596-readfile-benchmark"
       ]
+    },
+    {
+      "origin_ref": "perf/74-readfile-benchmark-harness-replay",
+      "same_blob_refs": [
+        "perf/74-real-readfile-benchmark-harness",
+        "perf/74-real-readfile-benchmark-harness-current"
+      ],
+      "original_path": ".github/workflows/issue-74-real-readfile-benchmark.yml",
+      "original_blob_sha": "bf642a5830c427118206661e0a17521cd13bb922",
+      "archive_path": "research/branch-history/20261012/benchmark-unique-source-recovery/readfile-legacy/.github/workflows/issue-74-real-readfile-benchmark.yml.source.txt",
+      "archived_blob_sha": "bf642a5830c427118206661e0a17521cd13bb922",
+      "status": "BYTE_IDENTICAL_ARCHIVED"
+    },
+    {
+      "origin_ref": "perf/74-readfile-benchmark-harness-replay",
+      "same_blob_refs": [
+        "perf/74-real-readfile-benchmark-harness",
+        "perf/74-real-readfile-benchmark-harness-current"
+      ],
+      "original_path": "scripts/benchmark-semantic-registry-read.lisp",
+      "original_blob_sha": "9e1606b65d795e4f095a31518e29b696615809e4",
+      "archive_path": "research/branch-history/20261012/benchmark-unique-source-recovery/readfile-legacy/scripts/benchmark-semantic-registry-read.lisp.source.txt",
+      "archived_blob_sha": "9e1606b65d795e4f095a31518e29b696615809e4",
+      "status": "BYTE_IDENTICAL_ARCHIVED"
     }
   ],
   "checks": {
     "source_blob_sha_compared_to_archived_blob_sha": "PASS for all 9 unique source blobs",
-    "unique_source_blob_count": 9,
+    "unique_source_blob_count": 11,
     "readfile_alias_refs_with_matching_blobs": [
       "verify/362-readfile-current-main-benchmark",
-      "verify/596-readfile-benchmark"
+      "verify/596-readfile-benchmark",
+      "perf/74-real-readfile-benchmark-harness",
+      "perf/74-real-readfile-benchmark-harness-current"
     ],
     "canonical_runtime_modified": false,
     "active_workflow_created": false,
@@ -106,6 +132,7 @@
     "Archiving source is not merging original Git commit ancestry.",
     "These historical workflows name my-lisp/my-lisp-cli and were deliberately stored with .source.txt suffix.",
     "Archived sources do not establish current correctness, runnability, performance, or semantic ratification.",
-    "Do not copy older lib/utf8.lisp or lib/fs.lisp over current main."
+    "Do not copy older lib/utf8.lisp or lib/fs.lisp over current main.",
+    "The legacy #74 branch used the pre-canonical Lisp human surface; current main has a rewritten canonical-binary script, so the source is archived only and must not replace it."
   ]
 }
