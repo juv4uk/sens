@@ -33,6 +33,7 @@
 - `perf/packed-vs-visible-hosted-bench-20261009`, `perf/packed-vs-visible-hosted-bench-rebased-20261009`
 - `perf/74-readfile-benchmark-harness-replay`, `perf/74-real-readfile-benchmark-harness`, `perf/74-real-readfile-benchmark-harness-current`
 - `research/archive-bench-1995-20261011-gpt6`, `research/bench-paired-wall-replay-20261010`, `research/bench-triad-replay-20261010`, `research/benchmark-effect-ci-20261009`, `research/encoder-same-input-bench-20261010`, `research/t22-benchmark-main-replay-20261011`
+- `fix/5520-measurement-triad-repro-20261010` (відрізняється лише застарілим generated index; manifest вимірювального triad збігається з main).
 - `staging/benchmark-paired-effect-ci-after-l0-20261009`
 - `verify/362-fused-utf8-benchmark`, `verify/362-production-readfile-benchmark`, `verify/362-readfile-current-main-benchmark`, `verify/596-readfile-benchmark`
 
