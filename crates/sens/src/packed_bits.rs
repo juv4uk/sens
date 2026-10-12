@@ -356,7 +356,9 @@ impl BitPacker {
         let mut source_offset = whole_bytes * 8;
         while source_offset < source.bit_len {
             let width = (source.bit_len - source_offset).min(8);
-            let chunk = source.read_chunk(source_offset, width)?;
+            let chunk = source
+                .read_chunk(source_offset, width)
+                .expect("a validated stream contains every bounded chunk in its exact bit length");
             self.push_chunk(chunk, width);
             source_offset += width;
         }
