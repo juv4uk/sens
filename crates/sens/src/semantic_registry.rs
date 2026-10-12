@@ -224,6 +224,32 @@ pub(crate) fn d7_sa_iast_longest_prefix(rest: &str) -> Option<(usize, u8)> {
         .max_by_key(|(length, _)| *length)
 }
 
+/// Script-specific Sanskrit projections of the SAME ratified D7 bits.
+pub(crate) fn d7_sanskrit_glyph(cell: u8, layout: &str) -> Option<&'static str> {
+    let row = D7_DISPLAY_ROWS.iter().find(|row| row.bits == cell)?;
+    match layout {
+        "iast" => row.sa,
+        "deva" => row.deva,
+        "slp1" => row.slp1,
+        _ => None,
+    }
+}
+
+pub(crate) fn d7_sanskrit_longest_prefix(rest: &str, layout: &str) -> Option<(usize, u8)> {
+    D7_DISPLAY_ROWS
+        .iter()
+        .filter_map(|row| {
+            let spelling = match layout {
+                "iast" => row.sa,
+                "deva" => row.deva,
+                "slp1" => row.slp1,
+                _ => None,
+            }?;
+            rest.starts_with(spelling).then_some((spelling.len(), row.bits))
+        })
+        .max_by_key(|(length, _)| *length)
+}
+
 pub(crate) fn d7_is_owner_resident(cell: u8) -> bool {
     D7_DISPLAY_ROWS.iter().any(|row| row.bits == cell)
 }
