@@ -228,13 +228,13 @@ class PolicyD4PartialCutover(unittest.TestCase):
                     # Each helper contained two ATOM branches returning the
                     # SAME quoted empty value; exact D1 ATOM merges them.
                     old_cond = re.compile(
-                        r"\\(110\\s+\\(\\(010 pair\\) \\(\\) \\(001 \\(\\)\\)\\)"
-                        r"\\s+\\(\\(010 pair\\) \\(1\\) \\(001 \\(\\)\\)\\)"
-                        r"\\s+\\(t \\(1001 pair\\)\\)\\)"
+                        r"\(110\s+\(\(010 pair\) \(\) \(001 \(\)\)\)"
+                        r"\s+\(\(010 pair\) \(1\) \(001 \(\)\)\)"
+                        r"\s+\(t \(1001 pair\)\)\)"
                     )
                     self.assertEqual(len(old_cond.findall(expected)), 2)
                     expected = old_cond.sub(
-                        "(110 ((010 pair) (001 ()))\\n"
+                        "(110 ((010 pair) (001 ()))\n"
                         "       ((010 (001 ())) (1001 pair)))", expected
                     )
                     self.assertEqual(current.count(fallback), 0)
