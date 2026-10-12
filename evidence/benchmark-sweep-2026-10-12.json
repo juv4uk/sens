@@ -217,33 +217,77 @@
         }
       ],
       "interpretation": "This exact-SHA sweep has complete registry coverage with zero FAIL and two honest BLOCKED stands. It is not a global-green result. The store-air-load blocked cause was then addressed at source/fixture level by commit ea156c1d0fe386fe7422e4a345a6431a536e0c80; that new pair has its own current-head sweep pending."
+    },
+    {
+      "workflow_run_id": 38192977589,
+      "workflow_url": "https://github.com/juv4uk/sens/actions/runs/38192977589",
+      "commit": "ea156c1d0fe386fe7422e4a345a6431a536e0c80",
+      "result": "COMPLETE_WITH_ONE_BLOCKED_STAND",
+      "coverage": {
+        "expected_stands": 54,
+        "observed_stands": 54,
+        "duplicates": false,
+        "missing": [],
+        "extra": [],
+        "coverage_complete": true
+      },
+      "outcome_counts": {
+        "pass": 53,
+        "fail": 0,
+        "blocked": 1,
+        "timeout": 0,
+        "all_benchmarks_pass": false
+      },
+      "summary_artifact": {
+        "id": 11722316226,
+        "url": "https://github.com/juv4uk/sens/actions/runs/38192977589/artifacts/11722316226",
+        "sha256": "72de1c9f0bba44e07f7da9e4048d10469a0bb3e6ff9fe6b46d5384e13a5629ea",
+        "expires_at_utc": "2026-11-02T01:45:33Z"
+      },
+      "stand_results": {
+        "store_air_load": {
+          "status": "PASS",
+          "shard": 4,
+          "artifact": {
+            "id": 11721987570,
+            "name": "benchmark-sweep-38192977589-4",
+            "sha256": "46c05ebbf44e845ac0a762affe3dd8adcd810501e6670edc93756f97d40766fa",
+            "expires_at_utc": "2026-11-02T01:44:06Z"
+          },
+          "claim_boundary": "Contract 11.9 D1-D9 subset; Ukrainian current-source heads як-є/перше parsed via parse_mixed_exact_domain; exact traces/value/output matched canonical-binary companions. D10 not exercised, LOAD I-ref stays base-null unless separately enriched."
+        },
+        "physical_binary_performance": {
+          "status": "PASS",
+          "note": "Historical physical PASS remains independently confirmed for SHA c10d238 and bbfd6d4; the current run also includes the physical stand and did not introduce a new reported failure."
+        },
+        "cross_language": {
+          "status": "BLOCKED",
+          "reason": "Pinned Guix environment missing on hosted runner; explicit SENS_BENCHMARK_STATUS=BLOCKED."
+        }
+      },
+      "interpretation": "This is the first full sweep with no FAILs: 53 PASS and one honest BLOCKED. Coverage is complete, but all_benchmarks_pass remains false until the Guix environment is provided or this lane is formally retired/re-scoped."
     }
   ],
   "pending_current_head_validation": {
-    "recorded_base_head": "ea156c1d0fe386fe7422e4a345a6431a536e0c80",
-    "status": "PENDING_EXACT_HEAD_REGISTRY_SWEEP",
-    "latest_main_at_receipt": "ea156c1d0fe386fe7422e4a345a6431a536e0c80",
-    "runs": [
-      {
-        "id": 38192977589,
-        "name": "Benchmark registry",
-        "commit": "ea156c1d0fe386fe7422e4a345a6431a536e0c80",
-        "url": "https://github.com/juv4uk/sens/actions/runs/38192977589",
-        "status": "in_progress"
-      },
-      {
-        "id": 38192977616,
-        "name": "Physical binary SENS CLI smoke",
-        "commit": "ea156c1d0fe386fe7422e4a345a6431a536e0c80",
-        "url": "https://github.com/juv4uk/sens/actions/runs/38192977616",
-        "status": "in_progress"
+    "recorded_base_head": "677b1a1b630d0c0b80959fbca350806e5f83f4b9",
+    "status": "COMPLETE_FOR_BENCHMARK_CODE; MAIN_ADVANCED_WITH_DOCS_ONLY_COMMITS",
+    "latest_main_at_receipt": "677b1a1b630d0c0b80959fbca350806e5f83f4b9",
+    "validated_benchmark_code_sha": "ea156c1d0fe386fe7422e4a345a6431a536e0c80",
+    "latest_sweep": {
+      "id": 38192977589,
+      "url": "https://github.com/juv4uk/sens/actions/runs/38192977589",
+      "conclusion": "success",
+      "outcomes": {
+        "pass": 53,
+        "fail": 0,
+        "blocked": 1,
+        "timeout": 0
       }
-    ],
+    },
     "notes": [
-      "The latest completed full sweep is 52 PASS / 0 FAIL / 2 BLOCKED on bbfd6d4.",
-      "Store/AIR BLOCKED in that sweep used non-routable English aliases; commit ea156c1 switches to ratified Ukrainian source heads and parse_mixed_exact_domain, preserving the exact canonical-binary comparison.",
-      "The next exact-head sweep must decide whether the Ukrainian/canonical paired traces, values, and output actually match.",
-      "Historical run outcomes stay pinned to their exact SHAs and are not rewritten."
+      "The only commits after ea156c1 at receipt time update README/project status text and do not change benchmark code or manifests.",
+      "Coverage is 54/54, with 53 PASS and one explicit BLOCKED for missing Guix; this is not an all-benchmarks-pass result.",
+      "Historical runs remain pinned to their exact SHAs and outcomes."
     ]
   },
   "latest_stand_level_results": {
@@ -331,6 +375,49 @@
         }
       ],
       "interpretation": "This is a physical T5 word-stream roundtrip and CLI-mechanism measurement, not Lisp AST compilation or an independent semantic-law proof. Cachegrind instruction references were not enabled in this run."
+    },
+    "store_air_load": {
+      "status": "PASS",
+      "commit": "ea156c1d0fe386fe7422e4a345a6431a536e0c80",
+      "workflow_run": {
+        "id": 38192977589,
+        "url": "https://github.com/juv4uk/sens/actions/runs/38192977589"
+      },
+      "shard": 4,
+      "artifact": {
+        "id": 11721987570,
+        "url": "https://github.com/juv4uk/sens/actions/runs/38192977589/artifacts/11721987570",
+        "sha256": "46c05ebbf44e845ac0a762affe3dd8adcd810501e6670edc93756f97d40766fa"
+      },
+      "paired_programs": [
+        {
+          "id": "d3-quote-empty",
+          "current_source": "(як-є ())",
+          "canonical_source": "10 001 00 10 01 01"
+        },
+        {
+          "id": "d3-car-empty",
+          "current_source": "(перше (як-є (())))",
+          "canonical_source": "10 100 00 10 001 00 10 10 01 01 01 01"
+        }
+      ],
+      "checks": "The current Ukrainian source and canonical binary preflight have matching lowered trace, value, and output for both paired-program fixtures. English aliases stay non-authoritative and are not made callable by this benchmark.",
+      "claim_boundary": "Contract 11.9 D1-D9 subset; D10 not exercised; STORE/AIR only in base replay; LOAD I-ref fields remain null unless load.py is run separately."
+    },
+    "cross_language": {
+      "status": "BLOCKED",
+      "commit": "ea156c1d0fe386fe7422e4a345a6431a536e0c80",
+      "workflow_run": {
+        "id": 38192977589,
+        "url": "https://github.com/juv4uk/sens/actions/runs/38192977589"
+      },
+      "shard": 5,
+      "artifact": {
+        "id": 11722876074,
+        "url": "https://github.com/juv4uk/sens/actions/runs/38192977589/artifacts/11722876074",
+        "sha256": "9fd7bc50691785663957bb04b1cdfbd428cb6e80478997e87091ded60a381e28"
+      },
+      "reason": "Pinned Guix environment absent; status marker is explicit; no language performance conclusion is available."
     }
   }
 }
