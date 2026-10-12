@@ -952,6 +952,36 @@ mod tests {
         eprintln!("F3M1_COND_CODES={conditional_count_total}");
 
         assert_eq!(conditional_count_total, 0);
+
+        for (code, projection) in [
+            (0x1a, "CONS(1,NIL)"),
+            (0x3e, "CAR(CONS(1,NIL))"),
+            (0x67, "CDR(CONS(NIL,1))"),
+            (0x83, "ATOM(ATOM(ATOM(QUOTE(NIL))))"),
+            (0xcb, "ATOM(CAR(CONS(QUOTE(NIL),QUOTE(NIL))))"),
+            (0xef, "ATOM(CDR(CONS(QUOTE(NIL),QUOTE(NIL))))"),
+        ] {
+            let expr = decode_payload(&[code]).unwrap();
+            assert_eq!(expr.human_projection(), projection);
+            assert_eq!(encode_expr(&expr).unwrap(), vec![code]);
+        }
+
+        for code in [0x3e, 0x67, 0x83, 0xcb, 0xef] {
+            let expr = decode_payload(&[code]).unwrap();
+            let source = expr.exact_words().join(" ");
+            let actual = eval_parsed_expressions(
+                &parse_canonical_binary(&source).unwrap(),
+                &mut Session::default(),
+            )
+            .unwrap();
+            let expected = eval_parsed_expressions(
+                &parse_canonical_binary("1").unwrap(),
+                &mut Session::default(),
+            )
+            .unwrap();
+            assert_eq!(actual.value, expected.value);
+            assert_eq!(actual.output, expected.output);
+        }
         for local in 0u32..=u8::MAX as u32 {
             let expr = decode_payload(&[local as u8]).unwrap();
             let source = expr.exact_words().join(" ");
