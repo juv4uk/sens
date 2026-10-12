@@ -10,6 +10,8 @@ pub enum Text7Layout {
     SaSlp1,
     SaIast,
     SaDeva,
+    En,
+    EnIpa,
 }
 
 /// Fail-closed boundary error. No failed human spelling becomes Text7 identity.
@@ -40,26 +42,28 @@ pub const TEXT7_LAYOUT_SHA256: &str = generated::UPC7_LAYOUT_SHA256;
 /// Text7 projections below use the ratified #3572 D7 coordinates.
 #[inline]
 fn d2_owned_glyph(glyph: char) -> bool {
-    glyph.is_whitespace() || matches!(glyph, '(' | ')' | '.')
+    (glyph.is_whitespace() && glyph != ' ') || matches!(glyph, '(' | ')')
 }
 
 #[inline]
 fn d2_shadow_cell(cell: u8) -> bool {
-    matches!(cell, 0b1100000 | 0b1100001 | 0b1100010 |
-                   0b1100011 | 0b1100100 | 0b1111010)
+    matches!(cell, 0b1100001 | 0b1100010 | 0b1100011 | 0b1100100)
 }
 
-fn sanskrit_layout(layout: Text7Layout) -> Option<&'static str> {
+fn text_layout_name(layout: Text7Layout) -> Option<&'static str> {
     match layout {
         Text7Layout::SaSlp1 => Some("slp1"),
         Text7Layout::SaIast => Some("iast"),
         Text7Layout::SaDeva => Some("deva"),
+        Text7Layout::En => Some("en"),
+        Text7Layout::EnIpa => Some("en-ipa"),
         Text7Layout::Uk => None,
     }
 }
 
-/// Encode Ukrainian keyboard symbols or an explicitly selected Sanskrit
-/// projection into exactly seven-bit D7 cells. No D2 punctuation in D7.
+/// Encode Unicode text data as existing exact W7 D7 cells.
+ /// Space and period are TEXT when inside a Text7 record; external D2
+ /// grammatical tokens keep their OWN 2-bit parsing context.
 pub fn encode_text7(text: &str, layout: Text7Layout) -> Result<Text7, Text7ProjectionError> {
     let mut cells: Vec<u8> = Vec::new();
     let mut at = 0usize;
@@ -91,9 +95,9 @@ pub fn encode_text7(text: &str, layout: Text7Layout) -> Result<Text7, Text7Proje
                 at += current.len_utf8();
             }
             _ => {
-                let spelling = sanskrit_layout(layout).expect("Sanskrit branch");
+                let spelling = text_layout_name(layout).expect("non-Ukrainian text surface");
                 let (length, cell) =
-                    crate::semantic_registry::d7_sanskrit_longest_prefix(rest, spelling)
+                    crate::semantic_registry::d7_text_surface_longest_prefix(rest, spelling)
                     .ok_or(Text7ProjectionError::UnknownSpelling {
                         layout, byte_offset: at,
                     })?;
@@ -136,8 +140,8 @@ pub fn render_text7(text: &Text7, layout: Text7Layout) -> Result<String, Text7Pr
         }
         let glyph = match layout {
             Text7Layout::Uk => crate::semantic_registry::d7_uk_keyboard_glyph(cell),
-            _ => crate::semantic_registry::d7_sanskrit_glyph(
-                cell, sanskrit_layout(layout).expect("Sanskrit branch")
+            _ => crate::semantic_registry::d7_text_surface_glyph(
+                cell, text_layout_name(layout).expect("non-Ukrainian text surface")
             ),
         }.ok_or(Text7ProjectionError::UnrenderableCell {
             layout, index, cell,
@@ -233,15 +237,42 @@ mod tests {
     }
 
     #[test]
-    fn d2_punctuation_is_never_a_d7_text7_symbol() {
-        for punctuation in [" ", "\t", "\n", "(", ")", "."] {
+    fn context_keeps_space_period_as_text_not_d2_syntax() {
+        for punctuation in ["\t", "\n", "(", ")"] {
             assert!(matches!(encode_text7(punctuation, Text7Layout::Uk),
                 Err(Text7ProjectionError::UnknownSpelling { .. })));
         }
-        for cell in [0x60, 0x61, 0x62, 0x63, 0x64, 0x7a] {
+        for cell in [0x61, 0x62, 0x63, 0x64] {
             let text = Text7::from_cells(vec![cell]).unwrap();
             assert!(render_text7(&text, Text7Layout::Uk).is_err());
         }
+        for layout in [Text7Layout::Uk, Text7Layout::SaIast,
+                       Text7Layout::SaDeva, Text7Layout::En, Text7Layout::EnIpa] {
+            let words = encode_text7(" .", layout).unwrap();
+            assert_eq!(words.cells(), &[0x60, 0x7a]);
+            assert_eq!(render_text7(&words, layout).unwrap(), " .");
+        }
+        let slp1 = encode_text7(".", Text7Layout::SaSlp1).unwrap();
+        assert_eq!(slp1.cells(), &[0x6b]); // danda, not ASCII period
+        assert_ne!(slp1.cells(), &[0x7a]);
+    }
+
+    #[test]
+    fn english_and_ipa_are_explicit_sound_projections_not_english_orthography() {
+        for (roman, ipa, cell) in [("b", "b", 0x16), ("g", "ɡ", 0x02),
+                                   ("m", "m", 0x18), ("y", "j", 0x26),
+                                   ("k", "k", 0x00), ("p", "p", 0x14)] {
+            assert_eq!(encode_text7(roman, Text7Layout::En).unwrap().cells(), &[cell]);
+            assert_eq!(encode_text7(ipa, Text7Layout::EnIpa).unwrap().cells(), &[cell]);
+        }
+        assert_eq!(encode_text7("ŋ", Text7Layout::EnIpa).unwrap().cells(), &[0x04]);
+        for false_friend in ["th", "θ", "ð", "ə"] {
+            assert!(encode_text7(false_friend, Text7Layout::En).is_err());
+            assert!(encode_text7(false_friend, Text7Layout::EnIpa).is_err());
+        }
+        let english = encode_text7("b. m", Text7Layout::En).unwrap();
+        assert_eq!(english.cells(), &[0x16, 0x7a, 0x60, 0x18]);
+        assert_eq!(render_text7(&english, Text7Layout::En).unwrap(), "b. m");
     }
 
     #[test]
