@@ -64,6 +64,80 @@ fn spy_executor(
 }
 
 #[test]
+fn bounded_x86_field_encoders_cover_every_admitted_tuple_without_math() {
+    let _serial = test_lock();
+    let mut session = Session::default();
+    load_core_library(&mut session).expect("core must bootstrap before finite x86 transducer checks");
+    load_lisp_file("lib/machine/encoding/x86-64.lisp", &mut session);
+
+    // Every REX tuple (W,R,X,B) maps to the architectural four-bit field.
+    for w in 0i32..=1 {
+        for r in 0i32..=1 {
+            for x in 0i32..=1 {
+                for b in 0i32..=1 {
+                    let source = format!("(x86-encode-rex {w} {r} {x} {b})");
+                    let result = eval_program(&source, &mut session)
+                        .unwrap_or_else(|error| panic!("{source} must evaluate: {error}"));
+                    assert_eq!(result.value.to_string(), (64 + 8*w + 4*r + 2*x + b).to_string(), "{source}");
+                }
+            }
+        }
+    }
+
+    // All 4 × 8 × 8 ModR/M tuples are explicitly present in the source transducer.
+    for mode in 0i32..=3 {
+        for reg in 0i32..=7 {
+            for rm in 0i32..=7 {
+                let source = format!("(x86-encode-modrm {mode} {reg} {rm})");
+                let result = eval_program(&source, &mut session)
+                    .unwrap_or_else(|error| panic!("{source} must evaluate: {error}"));
+                assert_eq!(result.value.to_string(), (64*mode + 8*reg + rm).to_string(), "{source}");
+            }
+        }
+    }
+
+    // All 4 × 8 × 8 SIB tuples are explicit; this is encoding, not arithmetic authority.
+    for scale in 0i32..=3 {
+        for index in 0i32..=7 {
+            for base in 0i32..=7 {
+                let source = format!("(x86-encode-sib {scale} {index} {base})");
+                let result = eval_program(&source, &mut session)
+                    .unwrap_or_else(|error| panic!("{source} must evaluate: {error}"));
+                assert_eq!(result.value.to_string(), (64*scale + 8*index + base).to_string(), "{source}");
+            }
+        }
+    }
+
+    // Signed disp8 spans exactly [-128,127]; negative values are mapped to their
+    // two's-complement byte by the finite table, without invoking Core math.
+    for displacement in -128i32..=127 {
+        let source = format!("(x86-disp8-byte {displacement})");
+        let result = eval_program(&source, &mut session)
+            .unwrap_or_else(|error| panic!("{source} must evaluate: {error}"));
+        let expected = if displacement < 0 { displacement + 256 } else { displacement };
+        assert_eq!(result.value.to_string(), expected.to_string(), "{source}");
+    }
+
+    // Out-of-domain tuples are not normalized, truncated, or auto-promoted.
+    for source in [
+        "(x86-encode-rex 2 0 0 0)",
+        "(x86-encode-rex 0 0 0 -1)",
+        "(x86-encode-modrm 4 0 0)",
+        "(x86-encode-modrm 0 8 0)",
+        "(x86-encode-modrm 0 0 8)",
+        "(x86-encode-sib 4 0 0)",
+        "(x86-encode-sib 0 8 0)",
+        "(x86-encode-sib 0 0 8)",
+        "(x86-disp8-byte -129)",
+        "(x86-disp8-byte 128)",
+    ] {
+        let result = eval_program(source, &mut session)
+            .unwrap_or_else(|error| panic!("{source} should return a fail-closed value: {error}"));
+        assert_eq!(result.value.to_string(), "()", "{source} must fail closed without coercion");
+    }
+}
+
+#[test]
 fn unadmitted_ud2_form_is_rejected_before_host_executor() {
     let _serial = test_lock();
     let mut session = Session::default();
