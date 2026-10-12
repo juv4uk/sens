@@ -99,7 +99,7 @@ class CanonicalOneFileMigration(unittest.TestCase):
         self.assertEqual(report["status"], "blocked")
         self.assertEqual(report["source_era"], "auto")
         self.assertEqual(report["output"], "lib/surface/peer-identity-acceptance.sens")
-        self.assertIn("requires exact D1..D9 0/1 word", report["reason"])
+        self.assertIn("quoted symbol datum has no ratified D2/D7 binary representation", report["reason"])
         self.assertIn("модуль", report["reason"])
         self.assertFalse(target.exists(), "blocked staging must not emit physical SENS")
         self.assertEqual(source.read_bytes(), original_source)
