@@ -7,6 +7,7 @@ mod surface_catalog;
 use sens::{
     eval_parsed_expressions_incremental, eval_program, parse, render_error_for_presentation,
     render_value_for_presentation, Environment, ErrorKind, ExprKind, PresentationLanguage, Session,
+    Value,
 };
 use rustyline::error::ReadlineError;
 use rustyline::DefaultEditor;
@@ -162,6 +163,55 @@ impl ReplState {
     }
 }
 
+/// Classic Lisp REPL printer policy: user-entered symbols may be lowercase,
+/// while replies print symbol data in uppercase. This is presentation only:
+/// runtime values, semantic identities, strings, numbers and machine protocols
+/// are unchanged.
+fn render_repl_reply(value: &Value, language: PresentationLanguage) -> String {
+    match value {
+        Value::Symbol(_) => render_value_for_presentation(value, language).to_uppercase(),
+        Value::Pair(_, _) => render_repl_pair(value, language),
+        Value::Vector(vector) => {
+            let items = vector
+                .borrow()
+                .iter()
+                .map(|item| render_repl_reply(item, language))
+                .collect::<Vec<_>>();
+            format!("#({})", items.join(" "))
+        }
+        _ => render_value_for_presentation(value, language),
+    }
+}
+
+fn render_repl_pair(value: &Value, language: PresentationLanguage) -> String {
+    let mut output = String::from("(");
+    let mut current = value;
+    let mut first = true;
+
+    loop {
+        match current {
+            Value::Pair(head, tail) => {
+                if !first {
+                    output.push(' ');
+                }
+                output.push_str(&render_repl_reply(head, language));
+                current = tail;
+                first = false;
+            }
+            Value::Nil => {
+                output.push(')');
+                return output;
+            }
+            tail => {
+                output.push_str(" . ");
+                output.push_str(&render_repl_reply(tail, language));
+                output.push(')');
+                return output;
+            }
+        }
+    }
+}
+
 /// `~/.sens-history`, якщо home directory доступний.
 pub(crate) fn history_path() -> Option<PathBuf> {
     let home = env::var_os("HOME").or_else(|| env::var_os("USERPROFILE"))?;
@@ -272,6 +322,7 @@ pub(crate) fn run_repl(session: Session, initial_surface: ReplSurface) {
         state.surface.title(),
         state.surface.code()
     );
+    println!("Символи можна вводити малими літерами; REPL друкує їх ВЕЛИКИМИ.");
     println!("Ctrl-C або Ctrl-D — вихід.");
 
     let mut rl = match DefaultEditor::new() {
@@ -315,7 +366,7 @@ pub(crate) fn run_repl(session: Session, initial_surface: ReplSurface) {
                                 }
                                 println!(
                                     "{}",
-                                    render_value_for_presentation(
+                                    render_repl_reply(
                                         &result.value,
                                         state.surface.presentation(),
                                     )
@@ -373,6 +424,49 @@ mod tests {
             .unwrap_or_else(|error| panic!("{source}: {}", error.render(source)))
             .value
             .to_string()
+    }
+
+    #[test]
+    fn classic_repl_reply_uppercases_symbols_but_preserves_strings_and_numbers() {
+        let value = Value::list([
+            Value::Symbol("car".into()),
+            Value::list([
+                Value::Symbol("cons".into()),
+                Value::String("Keep Mixed Case".into()),
+                Value::Number(42.0, sens::Exactness::Exact),
+            ]),
+        ]);
+
+        assert_eq!(
+            render_repl_reply(&value, PresentationLanguage::Canonical),
+            "(CAR (CONS \"Keep Mixed Case\" 42))"
+        );
+        // Presentation is one-way only: the runtime symbol identity is untouched.
+        let Value::Pair(head, _) = &value else {
+            panic!("list");
+        };
+        assert_eq!(head.as_ref(), &Value::Symbol("car".into()));
+    }
+
+    #[test]
+    fn classic_repl_reply_uppercases_dotted_and_vector_symbol_data() {
+        let dotted = Value::Pair(
+            std::rc::Rc::new(Value::Symbol("left".into())),
+            std::rc::Rc::new(Value::Symbol("right".into())),
+        );
+        assert_eq!(
+            render_repl_reply(&dotted, PresentationLanguage::Canonical),
+            "(LEFT . RIGHT)"
+        );
+
+        let vector = Value::Vector(std::rc::Rc::new(std::cell::RefCell::new(vec![
+            Value::Symbol("alpha".into()),
+            Value::String("beta".into()),
+        ])));
+        assert_eq!(
+            render_repl_reply(&vector, PresentationLanguage::Canonical),
+            "#(ALPHA \"beta\")"
+        );
     }
 
     #[test]
