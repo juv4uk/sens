@@ -99,13 +99,13 @@
       "status": "MEASURED_SUBSET_NOT_FULL_SEED_TOTAL",
       "cml_runner": {
         "repository": "juv4uk/cml",
-        "source_commit": "f4f03066993e3fbeb824c9ae6879bc1a1059cbd6",
-        "workflow_run": "https://github.com/juv4uk/cml/actions/runs/38186651984",
+        "source_commit": "100f30174f728cf2564ceeb2348f58bd8ac7dd06",
+        "workflow_run": "https://github.com/juv4uk/cml/actions/runs/38186932277",
         "runner_sha256": "6fbbc819eac32253d9eadb5e1dc8e80295bdb0bde9a285076edd8d7fc9e40eb3",
         "on_disk_bytes": 34623904,
         "loadable_segment_file_bytes": 6042632,
         "executable_code_section_bytes": 4147007,
-        "role": "Latest independently verified checkpoint at CML source commit f4f03066993e3fbeb824c9ae6879bc1a1059cbd6; do not compare runner sizes across commits as an optimization result."
+        "role": "Latest independent locked two-clean-run checkpoint, CML source commit 100f30174f728cf2564ceeb2348f58bd8ac7dd06; runner hash/size unchanged vs immediately previous source checkpoint; do not infer optimization across source commits."
       },
       "sens_runtime_build_inputs": {
         "repository": "juv4uk/sens",
@@ -144,28 +144,29 @@
             "failed": 0
           }
         },
-        "identical_size_report_sha256": "6b9b820232c6da5d832588bfbfcb71529aff13864b75c1e0449b97d32317795c",
+        "identical_size_report_sha256": "5e42feee14a65d33e8e909dbb384276b5255591a7233bac09efbe37fc9635c72",
         "active_cargo_graphs_byte_identical": true,
         "cml_graph_sha256": "fe4e29d9723e1c31a598d5905024670defad2a4ffce744cd099b84d95c285c29",
         "sens_xtask_graph_sha256": "a11ec08911b104cfb31211d4f82459711d9b5ae8788f043bd8ce60baaff4736a",
         "lockfiles_unchanged_under_locked_graph_commands": true,
-        "proof_artifact_id": 11719792149,
-        "proof_artifact_sha256": "sha256:9a72f4dd3e279291bc6100585bcfb62fff962d86f864315e888aeafb67523e7f",
-        "proof_expires_at": "2026-11-11T00:06:22Z",
+        "proof_artifact_id": 11719573111,
+        "proof_artifact_sha256": "sha256:b3c0eb3f5c8114331934b8070da126f9de49ec38eaf84d1aba34a9b91d203302",
+        "proof_expires_at": "2026-11-11T00:10:35Z",
         "two_run_artifacts": [
           {
             "run": 1,
-            "id": 11719822143,
-            "sha256": "sha256:d6daf3ffc94f90e3c573e7ee4ab062d9431ac819857ca0d27d49262781f7f278",
-            "expires_at": "2026-11-11T00:05:47Z"
+            "id": 11719922452,
+            "sha256": "sha256:3e124c9832906c9474ab82a9237b9865c2a7e34f44bce1f38e6808158818db92",
+            "expires_at": "2026-11-11T00:10:17Z"
           },
           {
             "run": 2,
-            "id": 11720500118,
-            "sha256": "sha256:488344b6f02252fcb5c0bb7770390ad190ce453ed0cdf2d908d31e12be5ccc5c",
-            "expires_at": "2026-11-11T00:06:11Z"
+            "id": 11720415915,
+            "sha256": "sha256:109f1d0cfeafc9de7046a726eea1c7296fa2111f4ba64afe3a13d1a4e2ef788b",
+            "expires_at": "2026-11-11T00:10:20Z"
           }
-        ]
+        ],
+        "lineage_report_sha256": "59ed91c8401d6f2e2a418e77dda40e6470ab03bff965bf417b3e1a3c6a6e1ec5"
       },
       "exclusions": [
         "not the whole-chain seed total and not a claim of minimality",
@@ -210,7 +211,8 @@
           "cause": "The CML root gitdir contains `.git/modules/external/sens`, so adding CML root .git bytes and the SENS submodule gitdir bytes double-counts SENS metadata.",
           "old_totals_invalid_for_addition": true,
           "workflow_fix_commit": "100f30174f728cf2564ceeb2348f58bd8ac7dd06",
-          "method": "Measure CML gitdir with the nested SENS submodule path excluded, then measure SENS gitdir and WSM gitdir separately. The new workflow run is the definitive fresh check."
+          "method": "Measure CML gitdir with the nested SENS submodule path excluded, then measure SENS gitdir and WSM gitdir separately. The new workflow run is the definitive fresh check.",
+          "status": "PASS: latest K1 run 38186932277 measured disjoint CML/SENS/WSM gitdirs in both clean runs; older overlapping aggregate totals remain historical and superseded."
         },
         "historical_run_38185559594": {
           "workflow_run": "https://github.com/juv4uk/cml/actions/runs/38185559594",
@@ -290,8 +292,33 @@
         "next_corrected_meter_run": {
           "workflow_run": "https://github.com/juv4uk/cml/actions/runs/38186932277",
           "source_commit": "100f30174f728cf2564ceeb2348f58bd8ac7dd06",
-          "status": "QUEUED",
-          "note": "Do not mark the new disjoint Git metadata meter green until both clean runs and comparison complete."
+          "status": "PASS_TWO_CLEAN_RUNS_AND_COMPARE",
+          "method": "CML .git counted excluding nested .git/modules/external/sens; SENS submodule and WSM gitdirs counted separately; three disjoint directories",
+          "clean_runs": [
+            {
+              "run": 1,
+              "cml_gitdir_excluding_sens_submodule": 2864603,
+              "sens_submodule": 30840152,
+              "wsm_witness": 1810848,
+              "disjoint_total": 35515603
+            },
+            {
+              "run": 2,
+              "cml_gitdir_excluding_sens_submodule": 2864595,
+              "sens_submodule": 30844377,
+              "wsm_witness": 1810846,
+              "disjoint_total": 35519818
+            }
+          ],
+          "run1_minus_run2": {
+            "cml_gitdir_excluding_sens_submodule": 8,
+            "sens_submodule": -4225,
+            "wsm_witness": 2,
+            "disjoint_total": -4215
+          },
+          "proof_artifact_id": 11719573111,
+          "proof_artifact_sha256": "sha256:b3c0eb3f5c8114331934b8070da126f9de49ec38eaf84d1aba34a9b91d203302",
+          "classification": "External full-checkout metadata snapshot, no overlap, not a minimal Git object/ref closure and excluded from trusted seed subtotal."
         }
       },
       "latest_verified_snapshot": {
@@ -429,8 +456,8 @@
       },
       "locked_revalidation": {
         "status": "PASS_TWO_CLEAN_RUNS",
-        "workflow_run": "https://github.com/juv4uk/cml/actions/runs/38186651984",
-        "source_commit": "f4f03066993e3fbeb824c9ae6879bc1a1059cbd6",
+        "workflow_run": "https://github.com/juv4uk/cml/actions/runs/38186932277",
+        "source_commit": "100f30174f728cf2564ceeb2348f58bd8ac7dd06",
         "clean_runs": 2,
         "tests_per_run": {
           "passed": 189,
@@ -442,9 +469,9 @@
         "lockfiles_unchanged": true,
         "two_run_proof_artifact_id": 11719214909,
         "two_run_proof_artifact_sha256": "sha256:686108e9061d00d74fc0b49459c33f89f39f6bfec247b91e866200a5ffc5e4c0",
-        "report_sha256_both_runs": "6b9b820232c6da5d832588bfbfcb71529aff13864b75c1e0449b97d32317795c",
-        "proof_artifact_id": 11719792149,
-        "proof_artifact_sha256": "sha256:9a72f4dd3e279291bc6100585bcfb62fff962d86f864315e888aeafb67523e7f",
+        "report_sha256_both_runs": "5e42feee14a65d33e8e909dbb384276b5255591a7233bac09efbe37fc9635c72",
+        "proof_artifact_id": 11719573111,
+        "proof_artifact_sha256": "sha256:b3c0eb3f5c8114331934b8070da126f9de49ec38eaf84d1aba34a9b91d203302",
         "run_artifacts": [
           {
             "run": 1,
@@ -616,6 +643,7 @@
     "Locked dependency graph validation (2026-10-12): CML workflow run 38186316487 completed all steps successfully; two clean runs each passed 189/189 CML lib tests, both active Cargo graph captures ran with `--locked`, lock files remained unchanged, the graphs and size reports matched byte-for-byte. This closes the lockfile-drift/graph-repro gate, not the full seed input-closure gate.",
     "Operational subtotal boundary correction (2026-10-12): the CML lib-test runner dynamically reads `contracts/machine-lowering-boundary.lisp` (1,129 B). Added it as a separate known runtime input. The earlier K1 partial subtotal is corrected to 35,985,025 B; the newer, distinct CML checkpoint has a verified known-input subtotal of 36,033,737 B. Both remain partial subtotals, not a whole seed-total.",
     "Latest measurement checkpoint update (2026-10-12): K1 run 38186651984 passed two clean runs and comparison for CML source commit f4f03066993e3fbeb824c9ae6879bc1a1059cbd6. The runner hash is now 6fbbc819... (34,623,904 B on disk; PT_LOAD 6,042,632 B; code section 4,147,007 B); the identical report SHA is 6b9b8202.... Both runs passed 189/189, and the locked dependency graphs were byte-identical. The known-input subtotal remains 36,033,737 B; it is not a whole seed-total or a minimality claim.",
-    "Git metadata overlap correction (2026-10-12): previous snapshot totals added the full CML `.git` tree and the nested SENS submodule `.git` tree, counting SENS twice. Those aggregate totals are superseded. Historical non-overlapping totals have been recalculated, and CML workflow commit 100f3017... fixes the meter to exclude nested SENS from the CML subtotal. Fresh verification is queued in run 38186932277; Git metadata remains external and does not alter the measured operational subtotal or the blocked whole-seed status."
+    "Git metadata overlap correction (2026-10-12): previous snapshot totals added the full CML `.git` tree and the nested SENS submodule `.git` tree, counting SENS twice. Those aggregate totals are superseded. Historical non-overlapping totals have been recalculated, and CML workflow commit 100f3017... fixes the meter to exclude nested SENS from the CML subtotal. Fresh verification is queued in run 38186932277; Git metadata remains external and does not alter the measured operational subtotal or the blocked whole-seed status.",
+    "Latest closure-ledger checkpoint (2026-10-12): K1 CI run 38186932277 passed two clean runs, 189/189 library tests per run, byte-identical reports, and identical --locked Cargo graphs. New disjoint Git metadata measurements are 35,515,603 B and 35,519,818 B across the three distinct gitdirs, excluding SENS duplication from CML .git. The runner ELF remains 34,623,904 B / SHA-256 6fbbc819... and the known operational subtotal remains 36,033,737 B; neither is a whole seed-total or minimum-size claim."
   ]
 }
