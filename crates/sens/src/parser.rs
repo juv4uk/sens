@@ -63,8 +63,8 @@ impl Parser<'_> {
         }
     }
 
-    /// Reader sugar: `'form` produces a list headed directly by SID 00000001.
-    /// No named function identity is introduced by the reader.
+    /// Reader sugar: `'form` produces the ratified exact D3:001 QUOTE head.
+    /// No historical SID8 or human-name identity is introduced by the reader.
     fn quote_sugar(&mut self, start: usize) -> Result<Expr, LanguageError> {
         self.bump();
         self.skip_ignored();
@@ -80,7 +80,11 @@ impl Parser<'_> {
             kind: ExprKind::List(
                 vec![
                     Expr {
-                        kind: ExprKind::Sid(crate::sens!(00000001)),
+                        kind: ExprKind::DomainIdentity(crate::DomainIdentity::D3(
+                            crate::Bija3::from_word(
+                                crate::Bit3::new(0b001).expect("ratified D3 QUOTE word"),
+                            ),
+                        )),
                         span: Span {
                             start,
                             end: start + 1,
@@ -909,6 +913,21 @@ mod tests {
     fn unexpected_closing_paren_is_a_parse_error() {
         let error = parse(")").unwrap_err();
         assert_eq!(error.kind, ErrorKind::Parse);
+    }
+
+    #[test]
+    fn apostrophe_reader_sugar_uses_ratified_d3_quote_without_sid8() {
+        let expression = parse_one("'мама");
+        let ExprKind::List(items) = expression.kind else {
+            panic!("apostrophe must expand into a D2 list");
+        };
+        assert_eq!(items.len(), 2);
+        assert!(matches!(
+            items[0].kind,
+            ExprKind::DomainIdentity(crate::DomainIdentity::D3(word))
+                if word.word().packed_bits() == 0b001
+        ));
+        assert!(matches!(&items[1].kind, ExprKind::Symbol(name) if name.as_ref() == "мама"));
     }
 
     #[test]
