@@ -145,7 +145,7 @@ def main() -> int:
         f"D9 status: {D9_STATUS} — {D9_REASON}.",
         f"D9 mechanism owner: {D9_MECHANISM_OWNER}.",
         "It contains no benchmark-local residency table, surface-name lookup, or legacy "
-        "Sens8/Function8 identity.",
+        "unqualified flat eight-bit identity.",
         "",
         "| case | raw I refs / iter | extra I refs / iter vs paired empty | spread |",
         "|---|---:|---:|---:|",
