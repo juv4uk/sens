@@ -32,44 +32,41 @@ fn explicit_binary_source_is_canonical_binary_number_not_rational() {
     );
 }
 
+fn d24(value: u32) -> Value {
+    let mut bits = vec![0u8; 24];
+    for i in 0..24 {
+        bits[23 - i] = ((value >> i) & 1) as u8;
+    }
+    Value::BinaryNumber(
+        BinaryNumber::from_numeric_domain_bits(24, &bits).expect("explicit D24 test value"),
+    )
+}
+
 #[test]
-fn d5_add_mul_and_order_use_binary_number_path() {
+fn d5_add_mul_and_order_use_explicit_d24_values_not_literals() {
     let mut session = Session::default();
+    session.environment.define("left", d24(2));
+    session.environment.define("right", d24(3));
 
-    let sum = eval_program("(+ #b10 #b11)", &mut session)
-        .expect("D5 PLUS accepts canonical binary Number")
-        .value;
     assert_eq!(
-        sum,
-        Value::BinaryNumber(BinaryNumber::parse("101").unwrap())
+        eval_program("(+ left right)", &mut session)
+            .expect("D5 PLUS accepts explicitly qualified D24").value,
+        d24(5),
     );
-
-    let product = eval_program("(* #b11 #b10)", &mut session)
-        .expect("D5 TIMES accepts canonical binary Number")
-        .value;
     assert_eq!(
-        product,
-        Value::BinaryNumber(BinaryNumber::parse("110").unwrap())
+        eval_program("(* left right)", &mut session)
+            .expect("D5 TIMES accepts explicitly qualified D24").value,
+        d24(6),
     );
-
-    let less = eval_program("(< #b10 #b11)", &mut session)
-        .expect("D5 LESSP returns D1")
-        .value;
     assert_eq!(
-        less,
-        Value::DomainIdentity(DomainIdentity::D1(PredicateBit::from_word(
-            Bit1::new(1).unwrap()
-        )))
+        eval_program("(< left right)", &mut session)
+            .expect("D5 LESSP returns exact D1").value,
+        Value::predicate_bit(true),
     );
-
-    let greater = eval_program("(> #b10 #b11)", &mut session)
-        .expect("D5 GREATERP returns D1")
-        .value;
     assert_eq!(
-        greater,
-        Value::DomainIdentity(DomainIdentity::D1(PredicateBit::from_word(
-            Bit1::new(0).unwrap()
-        )))
+        eval_program("(> left right)", &mut session)
+            .expect("D5 GREATERP returns exact D1").value,
+        Value::predicate_bit(false),
     );
 }
 
@@ -194,40 +191,65 @@ fn number_bits_do_not_collapse_equal_payload_core_domains() {
 
 
 #[test]
-fn natural_binary_subtraction_and_exact_division_execute_as_bits() {
+fn natural_binary_subtraction_and_exact_division_execute_as_d24_values() {
     let mut session = Session::default();
-    let subtract = eval_program("(- #b110 #b10)", &mut session)
-        .expect("natural difference").value;
-    assert_eq!(subtract, Value::BinaryNumber(BinaryNumber::parse("100").unwrap()));
+    session.environment.define("six", d24(6));
+    session.environment.define("two", d24(2));
+    session.environment.define("zero", d24(0));
+    session.environment.define("one", d24(1));
 
-    let divide = eval_program("(/ #b110 #b10)", &mut session)
-        .expect("exact natural quotient").value;
-    assert_eq!(divide, Value::BinaryNumber(BinaryNumber::parse("11").unwrap()));
-
-    let unary_zero = eval_program("(- #b0)", &mut session)
-        .expect("negative zero is zero").value;
-    assert_eq!(unary_zero, Value::BinaryNumber(BinaryNumber::zero()));
-
-    let reciprocal_one = eval_program("(/ #b1)", &mut session)
-        .expect("reciprocal of one").value;
-    assert_eq!(reciprocal_one, Value::BinaryNumber(BinaryNumber::one()));
+    assert_eq!(
+        eval_program("(- six two)", &mut session)
+            .expect("exact D24 natural subtraction").value,
+        d24(4),
+    );
+    assert_eq!(
+        eval_program("(/ six two)", &mut session)
+            .expect("exact D24 natural quotient").value,
+        d24(3),
+    );
+    assert_eq!(
+        eval_program("(- zero)", &mut session)
+            .expect("negative D24 zero normalizes to D24 zero").value,
+        d24(0),
+    );
+    assert_eq!(
+        eval_program("(/ one)", &mut session)
+            .expect("reciprocal of D24 one").value,
+        d24(1),
+    );
 }
 
 #[test]
-fn signed_rational_and_division_by_zero_remain_fail_closed() {
-    for source in ["(- #b10 #b11)", "(- #b10)", "(/ #b111 #b10)", "(/ #b10)"] {
+fn unqualified_numeric_literals_fail_closed_d24_negative_and_ratio_execute() {
+    // Old #b spelling is still readable as DATA but does not admit Core math.
+    for source in [
+        "(- #b10 #b11)", "(- #b10)", "(/ #b111 #b10)",
+        "(/ #b10)", "(/ #b1 #b0)", "(/ #b0)", "(/ #b110 2)",
+    ] {
         let err = eval_program(source, &mut Session::default())
-            .expect_err("no unratified signed or rational encoding");
+            .expect_err("unqualified numeric source is not D24 arithmetic");
         assert_eq!(err.kind, sens::ErrorKind::Type, "{source}");
     }
-    for source in ["(/ #b1 #b0)", "(/ #b0)"] {
-        let err = eval_program(source, &mut Session::default())
-            .expect_err("cannot divide by zero");
-        assert_eq!(err.kind, sens::ErrorKind::DivisionByZero, "{source}");
+
+    let mut session = Session::default();
+    session.environment.define("one", d24(1));
+    session.environment.define("two", d24(2));
+    session.environment.define("three", d24(3));
+    session.environment.define("zero", d24(0));
+    assert_eq!(
+        eval_program("(- one two)", &mut session).unwrap().value.to_string(),
+        "-1",
+    );
+    assert_eq!(
+        eval_program("(/ one three)", &mut session).unwrap().value.to_string(),
+        "1/3",
+    );
+    for expression in ["(/ one zero)", "(/ zero)"] {
+        let err = eval_program(expression, &mut session)
+            .expect_err("admitted D24 denominator zero must reject");
+        assert_eq!(err.kind, sens::ErrorKind::DivisionByZero, "{expression}");
     }
-    let err = eval_program("(/ #b110 2)", &mut Session::default())
-        .expect_err("no implicit legacy number bridge");
-    assert_eq!(err.kind, sens::ErrorKind::Type);
 }
 
 #[test]
