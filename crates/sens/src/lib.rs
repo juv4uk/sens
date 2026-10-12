@@ -274,7 +274,7 @@ pub use eval::{
     eval_exact_domain_program, eval_program, evaluate as eval_expr, EvalResult,
 };
 pub use eval::lower::lower_program;
-pub use parser::parse;
+pub use parser::{parse, parse_exact_domain_source};
 pub use program_data::{expr_to_exact_program_data, lowered_program_to_exact_data};
 pub use presentation::{
     present_system_message, render_error_for_presentation, render_value_for_presentation,
