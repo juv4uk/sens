@@ -1,89 +1,80 @@
-# D7 human surfaces
+# D7 — українська клавіатура, точні 7 бітів і T5
 
-Канонічна таблиця людських поверхонь D7 живе у `lib/domains/d7.lisp`.
-D7 має 126 семантичних резидентів зі 128 координат; `0100001` і `0101010`
-зарезервовані. **Кожна поверхня містить символ саме її писемності**, а не
-фонетичний опис. Якщо символ не засвідчено, поле має `()` (відсутня лише
-проєкція, а не семибітний резидент). `LISP` завжди `()`.
+**Чинний принцип:** семантична ідентичність D7 — точна ратифікована координата
+`[01]{7}` та її роль за [#3572](https://github.com/juv4uk/sens/issues/3572).
+Символ не визначає координату; це лише проєкція вибраної поверхні.
+**D2** одноосібно визначає структуру: `00` роздільник, `10` відкриття,
+`01` закриття, `11` крапка. **Ніякої дубльованої структури в D7.**
 
-Canonical D7 human table: `lib/domains/d7.lisp`.
+## Канонічні символи D7
 
-Authority: `knowledge/d7-ratified.json` (#3572), Contract 11.8.
+- `ук`, `укр`, `sym`: **лише одиночні клавіатурні символи Ukrainian (Enhanced)**
+  (`KBDUR1`, Windows), відомі ратифікованій проєкції. Це **не** список
+  всіх можливих Unicode-символів і **не** фонетичні описи.
+- `san`: **IAST санскриту**. Ніколи не використовувати цей запис як `en`.
+- `en`: `()`, оскільки англійські написи не ратифіковані як D7-проєкція.
+- `LISP`: `()` — D7 sound/text не створює викличних функцій.
+- Інші санскритські написання `sa-deva`, `sa-slp1` доступні через кодек
+  як **окремі проєкції тих самих координат**, не як нові домени чи ASCII-гліфи
+  української клавіатури.
 
-D7 has 126 semantic residents of 128 possible coordinates. Owner-reserved `0100001` and `0101010` are intentionally absent from the table.
+Клавіатурна межа взята з [Windows Ukrainian (Enhanced)](https://www.kbdlayout.info/KBDUR1)
+і є явним перевірним набором у `scripts/d7_symbol_codec.py`.
+Клавішні `пробіл`, `(`, `)`, `.` не проходять через D7: це D2.
+Так само `\t` і `\n` не стають D7-словами; їхній структурний
+ефект має пройти окремим механізмом D2.
 
-Columns: `ук → укр → san → en → LISP → sym`.
+Власник ратифікував **126/128** семибітних резидентів; зарезервовані
+`0100001`, `0101010`. Відсутній гліф не вилучає резидента. П'ять клавіш
+`я`, `ю`, `є`, `ї`, `щ` не мають незалежних допущених
+клавіатурних координат у поточному #3572: кодек їх відхиляє; він **не**
+підміняє їх фонетичними комбінаціями (`йа`, `шч` тощо).
+Цифри D7 — **символи тексту, не арифметичні Number**.
+Великі українські літери, для яких є мала D7-літера, представляються
+ратифікованим модифікатором `0100010` + точне W7 слово малої літери.
+`дз` і `дж` з української клавіатури — по **дві літери**, а не одна клавіша.
 
-The 126 ratified codes are independent of their script-specific glyphs.
-`ук/укр` contain Ukrainian graphemes, `san` Devanagari, `en` IAST,
-and `sym` the IAST symbol view. Missing spellings are represented by `()`.
-Explanatory phonetic names remain only in the owner evidence JSON. `LISP`
-never grants execution.
+## Один T5, без нового формату
 
-## Механічне введення D7 в Rust
+Використовуються ті самі 5 тритів у фізичному байті. Трит `2` лише розділяє
+**точні двійкові слова**, не є D2-структурою, пробілом D7 чи закодованим
+символом. Додаткового `D7` заголовка, восьмого біта або прихованого
+кодового простору немає.
 
-Джерело розміщення: `knowledge/d7-ratified.json` (#3572); людиночитна таблиця
-`lib/domains/d7.lisp` тепер має справжні гліфи, а не описи. Команда
-`python3 scripts/generate-domain-owner-registry.py` матеріалізує тільки
-координати з нормативного джерела, без назв, фонемних законів, старих SID8 чи
-виконуваних примітивів. `--check` відхиляє будь-яке розходження генератора
-і Rust-проєкції.
+Виконувані модулі:
 
-`DomainCoordinate::new(7, bits)` відповідає лише за форму слова.
-`DomainCoordinate::owner_residency()` для D3–D7 повертає
-`Some(true)` для admitted, `Some(false)` для не зайнятих координат
-та `None` за межами охоплення проєкції. У D7 маємо рівно 126 admitted
-і лише дві зарезервовані координати `0100001` та `0101010`.
+- `scripts/d7_symbol_codec.py` — проєкції Sound7 і оборотний кодек;
+- `scripts/sens_t5_codec.py`: `encode_d7_uk_t5` / `decode_d7_t5`;
+- `crates/sens/src/ternary_transport.rs`: `encode_d7_uk_t5` /
+  `decode_d7_uk_t5` — той самий Rust T5 transport;
+- `crates/sens/src/text7_projection.rs` — правильні українські
+  клавіатурні графеми й санскритські проєкції з ратифікованої таблиці;
+- `lib/domains/d7.lisp` — символьна проєкція, а не список описів;
+- `scripts/check-d7-runtime-projection.py` — генератор Rust-проєкції.
 
-D7 identity залишається `DomainIdentity::D7(SoundD7)`, а
-`core_operation()` для нього повертає `None`. Отже, навіть admitted
-Sound7/Text7/LocalOrdinal **не стає** Lisp-функцією за фактом ширини
-або місця у таблиці. Гліфи, українські та санскритські написання — тільки
-проєкції. Аріфметичні Number-значення, Text7 та локальний порядковий
-індекс не ототожнюються автоматично.
+Приклад `кіт`: три W7 слова `0000000 1000100 0001111`, фізичний T5
+`00 15 09 a3 7d` (5 байтів). Безпомилкове декодування повертає `кіт`.
+Будь-яке слово ширини D2 у D7-текстовому T5 записі — **помилка**, не
+підставляння пробілу чи дужки.
 
-## D7 у чинному виконанні
+Тести: `tests/test_d7_symbol_codec.py`, `tests/test_d7_t5_keyboard.py`,
+`crates/sens/tests/d7_keyboard_t5.rs`, `crates/sens/tests/d7_runtime_presentation.rs`.
+Сертифікат точних ширин: `knowledge/domain-width-authority.generated.json`.
 
-Вхід — **точні сім бітів та явно названа роль**, а не вільний символ чи
-число. Авторитет резидентів: `knowledge/d7-ratified.json` (рішення #3572);
-`lib/domains/d7.lisp` — лише читабельна проєкція.
+## Звідки взято дослідження — без створення архівних копій
 
-```sh
-python3 scripts/d7_source_projection.py --check
-python3 scripts/d7_source_projection.py --coordinate 0000000 --role sound-text --namespace ук
-python3 scripts/d7_source_projection.py --coordinate 0000001 --role local-ordinal
-python3 scripts/d7_source_projection.py --coordinate 0011111 --role sound-text --namespace sym
-```
+Донор інженерної реалізації —
+[`shiva-sutras/prototype/upc7_layouts.py`](https://github.com/juv4uk/shiva-sutras/blob/master/prototype/upc7_layouts.py):
+розділення координати і мовної проєкції, строгий encode/render,
+невідповідні символи не домислюються. Ранні 107-клітинкові таблиці,
+експериментальні перестановки h/r/l і фонетичні аліаси **не стають**
+актуальними координатами SENS.
 
-Два зарезервовані `0100001` та `0101010` ніколи не допускаються як
-Sound/Text. LocalOrdinal — окрема роль: джерело
-`contracts/d7-local-ordinal.lock` і 14 підтверджених порядкових номерів
-Śiva-sūtras; довільна W7-координата не набуває цього статусу автоматично.
-Зокрема гліф `1` у D7 — текст, **не** арифметичне число й **не** функція.
+Чотири дослідження геометрії вже були інтегровані у живі
+`benchmarks/d7-v2/varga.py`, `vowel.py`, `nonvarga.py`, `residue.py`.
+Семантичне джерело — `knowledge/d7-ratified.json` і доказові реєстри
+`knowledge/d7-v2-*.json`, а не старі гілки.
 
-`scripts/d7_source_projection.py` нічого не ратифікує; повертає
-`surface` = символ обраної писемності, `report_name` = службова
-фонетична мітка. `scripts/d7_symbol_codec.py` — реальний двосторонній
-кодек, порт механізму `juv4uk/shiva-sutras/prototype/upc7_layouts.py`,
-який читає **тільки** координати чинного #3572. Rust зберігає механічну
-координату W7 без мовної семантичної таблиці. Тестові докази:
-`tests/test_d7_source_projection.py`, `scripts/check-d7-current-authority.py`,
-`crates/sens/tests/d7_w7_pack.rs`. Обов'язкова перевірка D7 включена
-у `.github/workflows/triple-projection-gate.yml` для кожного push у main.
-
-## Фактичний кодек / тест
-
-```sh
-python3 scripts/d7_symbol_codec.py --surface ук --text 'кіт' --target en
-python3 scripts/d7_symbol_codec.py --surface san --code 0000000
-python3 scripts/d7_symbol_codec.py --surface ук --code 0000001
-python3 -m unittest discover -s tests -p 'test_d7_symbol_codec.py' -v
-python3 scripts/check-d7-runtime-projection.py
-```
-
-Багатосимвольні відповідники (напр. `kh`) потребують збереження границь
-кодів: `encode_tokens/render_tokens` працюють із точними семибітними словами;
-`render_text` відхиляє неоднозначне склеювання. У D7:1100101 старий
-ратифікований запис помилково містить TAB замість glyph подвійних лапок;
-до виправлення джерела проєкцію не вигадано. Немає зміни законів чи зайвих
-бітів у виконуваній мові.
+Під час виправлення виявлено старий TAB у `1100101 sign.double-quote`.
+Виправлено саме проєкцію лапки `"`, без зміни бітів, ролі чи зайнятості.
+Не плутати виправлення символу із повторною ратифікацією звукових законів.
