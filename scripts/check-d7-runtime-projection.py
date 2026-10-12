@@ -12,6 +12,7 @@ import json
 from pathlib import Path
 
 from domain_tables import D7_TABLE, read_domain_table
+from d7_symbol_codec import current_codec
 
 ROOT = Path(__file__).resolve().parents[1]
 AUTHORITY = ROOT / "knowledge/d7-ratified.json"
@@ -42,14 +43,19 @@ def check_rows():
         and {row.bits for row in rows} == residents
     ):
         raise ValueError("D7 resident/reserved coordinates do not match owner authority")
+    codec = current_codec()
     for row in rows:
         if row.lisp is not None:
             raise ValueError(f"D7:{row.bits}: sound/text must not become a Lisp function")
+        for name, field in (("ук", "uk"), ("укр", "ukr"),
+                            ("san", "san"), ("en", "en"), ("sym", "sym")):
+            if getattr(row, field) != codec.glyph(row.bits, name):
+                raise ValueError(f"D7:{row.bits}: {name} glyph differs from owner codec")
     return rows
 
 
-def rust_string(text: str) -> str:
-    return '"' + text.replace("\\", "\\\\").replace('"', '\\"') + '"'
+def rust_string(text: str | None) -> str:
+    return "None" if text is None else f"Some({json.dumps(text, ensure_ascii=False)})"
 
 
 def generated_source(rows) -> str:
@@ -62,8 +68,8 @@ def generated_source(rows) -> str:
         "#[derive(Clone, Copy)]",
         "pub(super) struct D7DisplayRow {",
         "    pub(super) bits: u8,",
-        "    pub(super) uk: &'static str,",
-        "    pub(super) sa: &'static str,",
+        "    pub(super) uk: Option<&'static str>,",
+        "    pub(super) sa: Option<&'static str>,",
         "}",
         "",
         "pub(super) const D7_DISPLAY_ROWS: &[D7DisplayRow] = &[",
