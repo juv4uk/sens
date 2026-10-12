@@ -1,0 +1,38 @@
+# Окремий точковий доказ: D10 — рівно десять корисних бітів.
+# Не ратифікує нових функцій і не обходить загальні required checks.
+name: D10 — фізична точність десяти бітів
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "crates/sens/src/domain_words.rs"
+      - "crates/sens/src/domain_ladder.rs"
+      - "crates/sens/src/packed_bits.rs"
+      - ".github/workflows/d10-exact-bitness-carrier.yml"
+  pull_request:
+    branches: [main]
+    paths:
+      - "crates/sens/src/domain_words.rs"
+      - "crates/sens/src/domain_ladder.rs"
+      - "crates/sens/src/packed_bits.rs"
+      - ".github/workflows/d10-exact-bitness-carrier.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  ten-bit-packing:
+    name: D10 1024/1024 · 3+10+8+4=25 біт
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v5
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          toolchain: "1.99.0"
+      - name: Повний перебір D10, хибний D9 та заборонені хвостові біти
+        run: cargo test --locked -p sens --lib domain_words::tests::d10_all_1024_coordinates_pack_in_ten_bits_without_byte_alignment -- --exact
+      - name: Перевірка існуючих типізованих доменів та розміру носіїв
+        run: cargo test --locked -p sens --lib domain_words::tests
