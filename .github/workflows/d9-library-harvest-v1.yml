@@ -8,6 +8,7 @@ on:
       - "lib/reason.lisp"
       - "lib/unify.lisp"
       - "lib/epistemic.lisp"
+      - "crates/sens/tests/epistemic_exact_ref_equality.rs"
       - "lib/knowledge.lisp"
       - "lib/time.lisp"
       - "knowledge/d9-library-harvest-v1.json"
@@ -22,6 +23,8 @@ on:
   push:
     branches: [main]
     paths:
+      - "lib/epistemic.lisp"
+      - "crates/sens/tests/epistemic_exact_ref_equality.rs"
       - "knowledge/d9-library-harvest-v1.json"
       - "knowledge/d9-v1-semantic-inventory.json"
       - "knowledge/d9-fill-v1-state.json"
@@ -47,3 +50,17 @@ jobs:
         run: python3 scripts/check-d9-overflow-review-v1.py
       - name: Preserve D9 local-law tranche
         run: python3 scripts/check-d9-laws-1.py
+
+  epistemic-exact-d1:
+    name: "Епістеміка: 12 структурних D1 та точна D3/D8 ширина"
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    env:
+      CARGO_BUILD_JOBS: "1"
+      RUST_TEST_THREADS: "1"
+      RUST_MIN_STACK: "33554432"
+    steps:
+      - uses: actions/checkout@v5
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Епістемічна структура та жодного неявного W8→D8
+        run: cargo test --locked -p sens --test epistemic_exact_ref_equality -- --nocapture
