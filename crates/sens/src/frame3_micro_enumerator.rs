@@ -1520,6 +1520,17 @@ mod tests {
         }
 
         let (score, expr) = best.unwrap();
+        assert_eq!(score.6, 0xffff_4f4f);
+        assert_eq!(score.0, 5);
+        assert_eq!(score.1, 1);
+        assert_eq!(score.2, 14);
+        assert_eq!(score.3, 6);
+        assert_eq!(score.4, 52);
+        assert_eq!(score.5, 12);
+        assert_eq!(
+            expr.human_projection(),
+            "ATOM(CAR(CONS(CAR(CONS(0,ATOM(ATOM(QUOTE(NIL))))),IF-ATOM(ATOM(QUOTE(NIL)),QUOTE(NIL),QUOTE(NIL)))))"
+        );
         eprintln!(
             "F3M4_FINAL64K_BEST={:08X}\tcap={}\tcond={}\tops={}\tdepth={}\twords={}\tnodes={}\t{}",
             score.6,
@@ -1573,6 +1584,60 @@ mod tests {
             );
             assert_eq!(encode_expr(&expr).unwrap(), payload);
         }
+    }
+
+    #[test]
+    fn four_byte_metric_saturating_full_basis_witness_executes() {
+        // With CAP_ALL, CAR and CDR require two binary micro-nodes.
+        // Three COND nodes plus those selectors need at least
+        // 1 + 3*3 + 2*2 = 14 nodes, but F3M-4 ends inside node 12.
+        // Therefore CAP_ALL can carry at most two CONDs in F3M-4.
+        //
+        // For two CONDs + CAR + CDR the minimum tree is 11 nodes:
+        // 2 ternary + 2 binary internal nodes and 7 leaves. At 12 nodes
+        // there is room for exactly one unary ATOM. Making all seven leaves
+        // QUOTE forms yields the maximum encoded-operation count:
+        // 2*2 (COND) + 2*2 (CAR/CDR+CONS) + 1 (ATOM) + 7 (QUOTE) = 16.
+        let q = Frame3MicroExpr::QuoteZero;
+        let inner_if = Frame3MicroExpr::IfAtom(
+            Box::new(q.clone()),
+            Box::new(q.clone()),
+            Box::new(q.clone()),
+        );
+        let outer_if = Frame3MicroExpr::IfAtom(
+            Box::new(q.clone()),
+            Box::new(q.clone()),
+            Box::new(inner_if),
+        );
+        let cdr = Frame3MicroExpr::CdrCons(Box::new(q.clone()), Box::new(outer_if));
+        let car = Frame3MicroExpr::CarCons(Box::new(q), Box::new(cdr));
+        let expr = Frame3MicroExpr::Atom(Box::new(car));
+
+        assert_eq!(expr.capability_mask(), CAP_ALL);
+        assert_eq!(conditional_count(&expr), 2);
+        assert_eq!(encoded_operation_count(&expr), 16);
+        assert_eq!(expression_depth(&expr), 6);
+        assert_eq!(expr.exact_words().len(), 63);
+        assert_eq!(expr.node_count(), 12);
+        assert_eq!(
+            expr.human_projection(),
+            "ATOM(CAR(CONS(QUOTE(0),CDR(CONS(QUOTE(0),IF-ATOM(QUOTE(0),QUOTE(0),IF-ATOM(QUOTE(0),QUOTE(0),QUOTE(0))))))))"
+        );
+        assert_eq!(encode_expr(&expr).unwrap(), [0xf5, 0xa7, 0xbc, 0x39]);
+
+        let source = expr.exact_words().join(" ");
+        let actual = eval_parsed_expressions(
+            &parse_canonical_binary(&source).unwrap(),
+            &mut Session::default(),
+        )
+        .unwrap();
+        let expected = eval_parsed_expressions(
+            &parse_canonical_binary("1").unwrap(),
+            &mut Session::default(),
+        )
+        .unwrap();
+        assert_eq!(actual.value, expected.value);
+        assert_eq!(actual.output, expected.output);
     }
 
     #[test]
