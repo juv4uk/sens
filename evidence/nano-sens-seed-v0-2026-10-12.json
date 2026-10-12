@@ -396,7 +396,29 @@
           "tracked_bytes": 338795
         }
       ],
-      "detail": "Full per-file SHA-1 and byte inventory for all 296 tracked files is preserved in external_build_dependency_inventory.vendored_external_packages. These are third-party crates present under vendor/; they are explicitly external dependencies and excluded from the trusted SENS seed byte subtotal."
+      "detail": "Full per-file SHA-1 and byte inventory for all 296 tracked files is preserved in external_build_dependency_inventory.vendored_external_packages. These are third-party crates present under vendor/; they are explicitly external dependencies and excluded from the trusted SENS seed byte subtotal.",
+      "full_vendor_directory_snapshot": {
+        "source_repository": "juv4uk/sens",
+        "source_commit": "d0787a40fcea36501747732aa61b6de19fe29c70",
+        "package_roots": 81,
+        "tracked_file_count": 3963,
+        "tracked_bytes": 141366139,
+        "policy": "Full checked-out vendor/ footprint is an external dependency bundle and excluded from trusted-seed subtotal. It is not equivalent to bytes read by the active command."
+      },
+      "observed_runtime_input_subset": {
+        "schema": "nano-sens-vendor-runtime-observation/1",
+        "status": "PASS_TWO_TRACE_RUNS; OBSERVED_SUBSET_NOT_MINIMUM_PRUNE_PROOF",
+        "cml_source_commit": "e6e0a601c4c2c8398e7ed8f6e460e594b3a02559",
+        "sens_source_commit": "d0787a40fcea36501747732aa61b6de19fe29c70",
+        "workflow_run": "https://github.com/juv4uk/cml/actions/runs/38187252311",
+        "observed_vendor_file_paths": 444,
+        "observed_vendor_bytes": 4940765,
+        "seven_selected_package_files": 296,
+        "seven_selected_package_bytes": 4419723,
+        "other_74_vendor_roots_metadata_files": 148,
+        "other_74_vendor_roots_metadata_bytes": 521042,
+        "note": "The two raw strace traces show successful read-capable opens of every file in the seven selected package roots and Cargo.toml + .cargo-checksum.json from the other 74 roots. Raw trace ZIPs retained 30 days. Full vendor/ tree is 141,366,139 bytes, not all read during this command; no subset is a trusted-seed byte count."
+      }
     },
     "cml_outer_cargo_graph": {
       "status": "LOCKFILE_CORRECTED; LATEST --locked CLEAN-RUN VALIDATION IN PROGRESS",
@@ -644,6 +666,69 @@
     "Operational subtotal boundary correction (2026-10-12): the CML lib-test runner dynamically reads `contracts/machine-lowering-boundary.lisp` (1,129 B). Added it as a separate known runtime input. The earlier K1 partial subtotal is corrected to 35,985,025 B; the newer, distinct CML checkpoint has a verified known-input subtotal of 36,033,737 B. Both remain partial subtotals, not a whole seed-total.",
     "Latest measurement checkpoint update (2026-10-12): K1 run 38186651984 passed two clean runs and comparison for CML source commit f4f03066993e3fbeb824c9ae6879bc1a1059cbd6. The runner hash is now 6fbbc819... (34,623,904 B on disk; PT_LOAD 6,042,632 B; code section 4,147,007 B); the identical report SHA is 6b9b8202.... Both runs passed 189/189, and the locked dependency graphs were byte-identical. The known-input subtotal remains 36,033,737 B; it is not a whole seed-total or a minimality claim.",
     "Git metadata overlap correction (2026-10-12): previous snapshot totals added the full CML `.git` tree and the nested SENS submodule `.git` tree, counting SENS twice. Those aggregate totals are superseded. Historical non-overlapping totals have been recalculated, and CML workflow commit 100f3017... fixes the meter to exclude nested SENS from the CML subtotal. Fresh verification is queued in run 38186932277; Git metadata remains external and does not alter the measured operational subtotal or the blocked whole-seed status.",
-    "Latest closure-ledger checkpoint (2026-10-12): K1 CI run 38186932277 passed two clean runs, 189/189 library tests per run, byte-identical reports, and identical --locked Cargo graphs. New disjoint Git metadata measurements are 35,515,603 B and 35,519,818 B across the three distinct gitdirs, excluding SENS duplication from CML .git. The runner ELF remains 34,623,904 B / SHA-256 6fbbc819... and the known operational subtotal remains 36,033,737 B; neither is a whole seed-total or minimum-size claim."
-  ]
+    "Latest closure-ledger checkpoint (2026-10-12): K1 CI run 38186932277 passed two clean runs, 189/189 library tests per run, byte-identical reports, and identical --locked Cargo graphs. New disjoint Git metadata measurements are 35,515,603 B and 35,519,818 B across the three distinct gitdirs, excluding SENS duplication from CML .git. The runner ELF remains 34,623,904 B / SHA-256 6fbbc819... and the known operational subtotal remains 36,033,737 B; neither is a whole seed-total or minimum-size claim.",
+    "Runtime dependency tracing (2026-10-12): two successful strace runs of the frozen runner each passed 189/189 tests. The raw traces observed 444 distinct vendor file paths (4,940,765 bytes of tracked contents): all 296 files in seven selected crates plus 148 manifest/checksum metadata files from 74 other vendor roots. The full vendor checkout footprint is 3,963 files / 141,366,139 bytes and is external, not part of the trusted seed subtotal. A path-by-path census is being validated in the next run."
+  ],
+  "runtime_file_process_trace": {
+    "schema": "nano-sens-runtime-file-process-trace-pair/1",
+    "status": "PASS_TWO_INDEPENDENT_TRACED_RUNS; OBSERVATION_ONLY_NOT_MINIMUM_CLOSURE_PROOF",
+    "cml_source_commit": "e6e0a601c4c2c8398e7ed8f6e460e594b3a02559",
+    "sens_source_commit": "d0787a40fcea36501747732aa61b6de19fe29c70",
+    "wsm_witness_commit": "a6bd9747196f2d676ab6883cbb4b84c7fcfc6947",
+    "workflow_run": "https://github.com/juv4uk/cml/actions/runs/38187252311",
+    "clean_runs": [
+      {
+        "run": 1,
+        "artifact_id": 11719862489,
+        "trace_sha256": "ba0da0393566a5bc5096985b3c1f5721a0003cc74c57e3db0f72233e8a8424f1",
+        "trace_bytes": 8914247,
+        "trace_line_count": 58029,
+        "execve_event_count": 1444,
+        "file_event_count": 48447,
+        "repository_path_event_count": 12223,
+        "repository_path_events_sha256": "2f647d109c4f4dbad54db9dbc5fc083cb88503fb8eb405037811928596436d2f",
+        "tests": {
+          "passed": 189,
+          "failed": 0
+        },
+        "disjoint_git_metadata_bytes": {
+          "cml_excluding_sens_submodule": 2866613,
+          "sens": 30833944,
+          "wsm": 1810846,
+          "total": 35581403
+        }
+      },
+      {
+        "run": 2,
+        "artifact_id": 11719953009,
+        "trace_sha256": "a3066530ae2075751af6c1f20060101eeaa88e7b478a066d3f965c2b5403d93d",
+        "trace_bytes": 9014533,
+        "trace_line_count": 58113,
+        "execve_event_count": 1444,
+        "file_event_count": 48915,
+        "repository_path_event_count": 12679,
+        "repository_path_events_sha256": "f7f26e3dbf57e04e6a0dec64b410bb9fbdfbf6fe689eae544447ebcaf7cd9386",
+        "tests": {
+          "passed": 189,
+          "failed": 0
+        },
+        "disjoint_git_metadata_bytes": {
+          "cml_excluding_sens_submodule": 2866621,
+          "sens": 30846510,
+          "wsm": 1810848,
+          "total": 35583979
+        }
+      }
+    ],
+    "common": {
+      "runner_sha256": "6fbbc819eac32253d9eadb5e1dc8e80295bdb0bde9a285076edd8d7fc9e40eb3",
+      "runner_bytes": 34623904,
+      "size_report_sha256": "965701a837f622b7484d20ce3303cda4da9d5b647e4ca3c38535dfe3800e2fe4",
+      "lineage_report_sha256": "708ea12e26c9caa2389049236223f96dc640d1b508c2c2096923619fc87d5843",
+      "active_cargo_graphs_byte_identical": true
+    },
+    "trace_comparison": "Raw syscall traces are not expected to be byte-identical because event timing/temp files differ. Stable reports/graphs are the byte-identical reproducibility gates.",
+    "artifacts_expire_at": "2026-11-11T00:16Z",
+    "next_step": "A per-file successful open-path census generator has been added to the next K1 CI checkpoint (commit 1b740963fe1badc0d8e8ede99202f49617fc4edc). Its result is pending; do not cite the path-list census until that run finishes."
+  }
 }
