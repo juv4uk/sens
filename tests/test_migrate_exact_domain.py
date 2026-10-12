@@ -61,6 +61,41 @@ class ExactDomainMigrationTests(unittest.TestCase):
 """
         self.assertEqual(mod.plan(source, self.surfaces, self.legacy), [])
 
+    def test_shadowed_lambda_parameter_blocks_domain_head_rewrite(self):
+        for source in (
+            "(lambda (car) (car x))",
+            "(0010 (перше) (перше x))",
+            "(lambda (eq?) (eq? x y))",
+        ):
+            with self.subTest(source=source):
+                with self.assertRaisesRegex(ValueError, "SHADOWED_SURFACE_BLOCK"):
+                    self.rewrite(source)
+
+    def test_shadowed_global_definition_blocks_domain_head_rewrite(self):
+        for source in (
+            "(define car (lambda (x) x)) (car y)",
+            "(0011 перше (0010 (x) x)) (перше y)",
+            "(def car (lambda (x) x)) (car y)",
+            "(define (car x) x) (car y)",
+        ):
+            with self.subTest(source=source):
+                with self.assertRaisesRegex(ValueError, "SHADOWED_SURFACE_BLOCK"):
+                    self.rewrite(source)
+
+    def test_quoted_definitions_are_data_not_shadowing(self):
+        for source in (
+            "'(define car (lambda (x) x)) (car x)",
+            "(quote (define car (lambda (x) x))) (car x)",
+        ):
+            with self.subTest(source=source):
+                self.assertTrue(self.rewrite(source).endswith("(100 x)"))
+
+    def test_unshadowed_lambda_still_migrates_exactly(self):
+        self.assertEqual(
+            self.rewrite("(lambda (x) (car x))"),
+            "(0010 (x) (100 x))",
+        )
+
     def test_legacy_list_successor_is_not_narrowed_into_nonadmitted_d4(self):
         source = "(00100111 evaluator-fallback expression)\n"
         self.assertEqual(mod.plan(source, self.surfaces, self.legacy), [])
