@@ -97,6 +97,26 @@ class LegacyD3GuardTests(unittest.TestCase):
         source = (ROOT / "scripts" / "check-island-math-evidence.lisp").read_text(encoding="utf-8")
         self.assertEqual(MODULE.scan_lisp(source, "scripts/check-island-math-evidence.lisp"), [])
 
+    def test_build_inventory_uses_only_exact_d1_two_field_cond(self):
+        source = (ROOT / "scripts" / "build-inventory.lisp").read_text(encoding="utf-8")
+        self.assertEqual(MODULE.scan_lisp(source, "scripts/build-inventory.lisp"), [])
+
+        # Host truth is never a PredicateBit; restoration must fail.
+        fallback = "((010 (001 ())) (assoc key (011 alist)))"
+        self.assertIn(fallback, source)
+        changed = source.replace(fallback, "(t (assoc key (011 alist)))", 1)
+        self.assertIn("COND_HOST_TRUTH", [
+            f.rule for f in MODULE.scan_lisp(changed, "scripts/build-inventory.lisp")
+        ])
+
+        # Historical three-field ATOM-result matching is also forbidden.
+        clause = "((010 (0111 v)) ())"
+        self.assertIn(clause, source)
+        changed = source.replace(clause, "((010 (0111 v)) (1) ())", 1)
+        self.assertIn("COND_NOT_TWO_FIELDS", [
+            f.rule for f in MODULE.scan_lisp(changed, "scripts/build-inventory.lisp")
+        ])
+
     def test_historical_paths_and_metadata_excluded(self):
         for path in ("docs/research/old.lisp", "research/domain-archive/a.lisp",
                      "tests/fixtures/old.lisp", "lib/domains/d3.lisp",
