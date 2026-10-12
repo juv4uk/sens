@@ -857,6 +857,10 @@ mod tests {
         let mut most_words: Option<
             ((usize, usize, u32, usize, usize, u32), Frame3MicroExpr),
         > = None;
+        let mut first_conditional: Option<(u32, Frame3MicroExpr)> = None;
+        let mut best_selector_pair: Option<
+            ((u32, usize, usize, usize, usize, usize, u32), Frame3MicroExpr),
+        > = None;
 
         for local in 0u32..=u16::MAX as u32 {
             let payload = (local as u16).to_be_bytes();
@@ -882,6 +886,18 @@ mod tests {
                     .is_none_or(|(current, _)| expressive > *current)
             {
                 best_conditional = Some((expressive, expr.clone()));
+            }
+            if cond > 0 && first_conditional.is_none() {
+                first_conditional = Some((local, expr.clone()));
+            }
+
+            let selector_mask = CAP_CAR | CAP_CDR | CAP_CONS;
+            if expr.capability_mask() & selector_mask == selector_mask
+                && best_selector_pair
+                    .as_ref()
+                    .is_none_or(|(current, _)| expressive > *current)
+            {
+                best_selector_pair = Some((expressive, expr.clone()));
             }
 
             let depth_score = (depth, ops, cap, words, nodes, local);
@@ -927,6 +943,31 @@ mod tests {
             cond_expr.human_projection()
         );
 
+        let (first_cond_code, first_cond_expr) = first_conditional.unwrap();
+        eprintln!(
+            "F3M2_FIRST_COND={:04X}\tcap={}\tops={}\tdepth={}\twords={}\tnodes={}\t{}",
+            first_cond_code,
+            first_cond_expr.capability_mask().count_ones(),
+            encoded_operation_count(&first_cond_expr),
+            expression_depth(&first_cond_expr),
+            first_cond_expr.exact_words().len(),
+            first_cond_expr.node_count(),
+            first_cond_expr.human_projection()
+        );
+
+        let (selector_score, selector_expr) = best_selector_pair.unwrap();
+        eprintln!(
+            "F3M2_BEST_CAR_CDR={:04X}\tcap={}\tcond={}\tops={}\tdepth={}\twords={}\tnodes={}\t{}",
+            selector_score.6,
+            selector_score.0,
+            selector_score.1,
+            selector_score.2,
+            selector_score.3,
+            selector_score.4,
+            selector_score.5,
+            selector_expr.human_projection()
+        );
+
         let (depth_score, depth_expr) = deepest.unwrap();
         eprintln!(
             "F3M2_DEEPEST={:04X}\tdepth={}\tops={}\tcap={}\twords={}\tnodes={}\t{}",
@@ -954,6 +995,8 @@ mod tests {
         for (score, expr) in [
             (best_score.6, best_expr),
             (cond_score.6, cond_expr),
+            (first_cond_code, first_cond_expr),
+            (selector_score.6, selector_expr),
             (depth_score.5, depth_expr),
             (word_score.5, word_expr),
         ] {
