@@ -88,8 +88,10 @@ def typed_sha256(words: list[str]) -> str:
 def encode_d7_uk_t5(text: str) -> bytes:
     """Ukrainian keyboard glyphs -> owner D7:W7 -> existing physical T5.
 
-    Structural whitespace, parentheses and dot are D2, therefore rejected
-    as D7 text. This is a D7 text *record*, not executable Lisp admission.
+    D7:W7 space and period are text data inside this explicit record.
+    D2:W2 structural separator/dot never become text or Lisp execution.
+    Parentheses, tabs and newlines remain unsupported as text projections
+    pending a separate context decision.
     """
     from d7_symbol_codec import D7CodecError, current_codec
 
