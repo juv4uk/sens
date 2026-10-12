@@ -1,6 +1,25 @@
 name: Release Preflight
 
 on:
+  # Main-only integration: verify release tooling changes before any tag exists.
+  push:
+    branches: [main]
+    paths:
+      - "Cargo.lock"
+      - "Cargo.toml"
+      - "crates/**/Cargo.toml"
+      - ".github/workflows/release.yml"
+      - ".github/workflows/release-preflight.yml"
+      - "packaging/**"
+      - "scripts/verify_uk_t5_triplet.py"
+      - "scripts/report_t5_triplet_inventory.py"
+      - "scripts/audit_t5_file_pairs.py"
+      - "scripts/sens_t5_codec.py"
+      - "tests/fixtures/migration-d1-cond-cohort/**"
+      - "tests/test_verify_uk_t5_triplet.py"
+      - "tests/test_report_t5_triplet_inventory.py"
+      - "lib/domains/d1.lisp"
+      - "lib/domains/d3.lisp"
   pull_request:
     paths:
       - "Cargo.lock"
@@ -27,9 +46,8 @@ jobs:
   release-preflight:
     # Той самий focused набір, що тег-гейт `test` у `release.yml`: тег-час
     # гарантує ці чеки серверно, тут вони ловлять проблему ще в PR. Повний
-    # `cargo test --workspace` + `clippy --workspace` належить `full-nightly`,
-    # не PR-гейту випуску: релізний скрипт тепер вимагає саме зелений CI на
-    # злитому SHA, а не локальний повний прогон.
+    # Це focused preflight для main і PR; фінальний tag release.yml окремо
+    # вимагає cargo test/clippy --locked --workspace та обов'язкові T5-докази.
     name: focused release preflight
     runs-on: ubuntu-latest
     timeout-minutes: 20
@@ -89,4 +107,4 @@ jobs:
         run: cargo test --locked -p sens-cli --test islands_release_asset
 
       - name: focused release clippy
-        run: cargo clippy -p sens -p sens-cli --all-targets -- -D warnings
+        run: cargo clippy --locked -p sens -p sens-cli --all-targets -- -D warnings
