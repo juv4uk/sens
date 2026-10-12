@@ -84,6 +84,39 @@ class LegacyD3GuardTests(unittest.TestCase):
             [f.rule for f in MODULE.scan_lisp(corrupted, "lib/core1.lisp")],
         )
 
+    def test_signature_generator_kind_and_admission_are_exact_d1(self):
+        path = "scripts/generate-rust-function-signatures.lisp"
+        source = (ROOT / path).read_text(encoding="utf-8")
+
+        def definition(name: str, next_name: str) -> str:
+            start = source.index(f"(0011 {name}\\n")
+            end = source.index(f"\\n(0011 {next_name}\\n", start)
+            return source[start:end]
+
+        kind = definition("render-kind", "render-arity")
+        admitted = definition("render-admitted", "render-row")
+        for label, fragment in (("kind", kind), ("admitted", admitted)):
+            with self.subTest(label=label):
+                self.assertEqual(MODULE.scan_lisp(fragment, path), [])
+
+        # Reinstate an obsolete three-field result-match branch: fail closed.
+        good = '((101 kind (001 builtin)) "LanguageItemKind::Builtin")'
+        self.assertIn(good, kind)
+        old = kind.replace(
+            good, '((101 kind (001 builtin)) (1) "LanguageItemKind::Builtin")', 1
+        )
+        self.assertIn("COND_NOT_TWO_FIELDS", [
+            item.rule for item in MODULE.scan_lisp(old, path)
+        ])
+
+        # A literal host T cannot stand in for an exact D1 predicate.
+        fallback = '((010 (001 ())) "false")'
+        self.assertIn(fallback, admitted)
+        drift = admitted.replace(fallback, '(t "false")', 1)
+        self.assertIn("COND_HOST_TRUTH", [
+            item.rule for item in MODULE.scan_lisp(drift, path)
+        ])
+
     def test_invalid_lisp_is_incomplete_not_green(self):
         for source in ("(110 (1 1)", "(110 (1 1)))", '"unclosed'):
             with self.subTest(source=source), self.assertRaises(MODULE.Unscannable):
