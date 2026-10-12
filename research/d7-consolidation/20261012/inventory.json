@@ -1,0 +1,136 @@
+{
+  "schema": "sens/d7-integration-inventory/1",
+  "date": "2026-10-12",
+  "repo": "juv4uk/sens",
+  "review_boundary": "This is a provenance inventory and an archive of exact branch files. It does not assert that every historical branch was merged into production or that any failing CI was waived.",
+  "domain": {
+    "id": "D7",
+    "bit_width": 7,
+    "capacity": 128,
+    "ratified_residents": 126,
+    "reserved_coordinates": [
+      "0100001",
+      "0101010"
+    ],
+    "authority": "knowledge/d7-ratified.json; issue #3572"
+  },
+  "branch_discovery": {
+    "d7_named": 35,
+    "text7_named": 28,
+    "unique_refs": 60,
+    "refs": [
+      "add-complete-d7-domain-table",
+      "ci/d7-gate-in-domain-tables-20261009",
+      "codex/d7-admission-gate-20261009",
+      "codex/three-pass-no-d7",
+      "feat/binary-only-d1-d7-executable-t5-e2e-20261009",
+      "feat/d7-display-ratified-20261009",
+      "feat/d7-text7-shiva-w7-synthesis",
+      "feat/2415-d7-full-map",
+      "feature/d7-owner-coordinate-carrier-20261009",
+      "fix/d7-apostrophe-re-readable-surface",
+      "fix/d7-contextual-carrier-gate-20261009",
+      "fix/domeny-d7-d9-vyklyky-20261012",
+      "fix/3572-d7-contract-numeric-ratchet",
+      "impl/2793-d7-text7-main",
+      "impl/2974-d7-d8-carriers",
+      "impl/2974-d7-d8-cutover-replay",
+      "impl/2974-d7-d8-domain-carriers",
+      "impl/2974-d7-d8-runtime-cutover",
+      "land/2517-d7-conformance-current",
+      "migration/d7-surface-specific-glyphs-20261012",
+      "migration/5141-three-pass-d7-d9-20261012",
+      "projection/current-d1-d7-corpus",
+      "replay/1187-core3-evidence-d724cb43",
+      "replay/2802-d7-text7-current-main",
+      "replay/4168-on-d7-fix",
+      "research/d7-v2-consolidate-3419",
+      "research/2443-d7-number-map",
+      "research/2517-d7-ratification-conformance",
+      "research/2739-d7-local-ordinal-corpus",
+      "research/3101-d7-varga-product-s1",
+      "research/3121-d7-vowel-geometry",
+      "research/3122-d7-nonvarga-factors",
+      "research/3123-d7-convention-residue",
+      "review/2739-d7-ordinal-reorder-sensitivity",
+      "verify/287-full-package-d735",
+      "text7/carrier-current",
+      "text7/reader-literal-boundary",
+      "text7/string-consumer-inventory",
+      "text7/upc7-first-provenance-pin",
+      "text7/upc7-first-provenance-pin-current",
+      "text7/upc7-projection-current",
+      "text7/1877-canonical-wire-law",
+      "draft/3910-text7-binder-candidate",
+      "feat/3910-contextual-text7-current-main-20261009",
+      "feat/3910-contextual-text7-mainline-20261009",
+      "feat/3910-text7-binder-framing-current-main",
+      "fix/ci-text7-binding-key-import-20261009-gpt6",
+      "fix/hosted-ci-text7-import-gpt6-20261009",
+      "fix/text7-binding-helper-import-20261009",
+      "fix/3910-test-only-legacy-fixture-and-scoped-text7-20261009",
+      "fix/3910-unframed-text7-all-atoms-20261009",
+      "fix/4449-reject-unframed-text7-atoms-20261009",
+      "fix/4777-text7-binding-key-import",
+      "perf/text7-bulk-pack-7",
+      "replay/3910-text7-current-main-1009-r2",
+      "replay/3910-text7-current-main-1009",
+      "replay/3910-text7-framing-current-main-20261009",
+      "replay/3910-text7-role-current-main",
+      "simplify/delete-text7-parser-shim",
+      "test/3910-d2-text7-no-global-retag-20261009"
+    ]
+  },
+  "in_main_artifact_bundles": [
+    {
+      "path": "research/d7-consolidation/20261012/pr5669-594bd4f-bundle.json",
+      "files": 9,
+      "source": "PR #5669 @ 594bd4f276f0a75fcd0dfc85710a7fa43192eeca"
+    },
+    {
+      "path": "research/d7-consolidation/20261012/geometry-research-four-families.json",
+      "files": 8,
+      "source": "D7 varga/vowel/nonvarga/convention geometry"
+    },
+    {
+      "path": "research/d7-consolidation/20261012/superseded-conformance-ordinal-upc7-variants.json",
+      "files": 3,
+      "source": "historical conformance/local ordinal/UPC7 revisions"
+    },
+    {
+      "path": "research/d7-consolidation/20261012/text7-carrier-bench-and-context-prototypes.json",
+      "files": 6,
+      "source": "Text7 reader/packing/context experiment"
+    }
+  ],
+  "other_material_already_in_main": [
+    "knowledge/d7-ratified.json",
+    "knowledge/d7-full-map.json",
+    "knowledge/d7-v2-evidence-ledger.json",
+    "knowledge/d7-v2-geometry-ledger.json",
+    "benchmarks/d7-ratification-conformance/validate.py",
+    "benchmarks/d7-local-ordinal-corpus/generate.py",
+    "benchmarks/d7-v2/varga.py",
+    "benchmarks/d7-v2/vowel.py",
+    "benchmarks/d7-v2/nonvarga.py",
+    "benchmarks/d7-v2/residue.py",
+    "research/domain-archive/20261011/pr3117/benchmarks/d7-phonology-geometry/run.py.source.txt",
+    "research/domain-archive/20261011/pr3133/benchmarks/d7-nonvarga-geometry/run.py.source.txt",
+    "research/domain-archive/20261011/pr3136/benchmarks/d7-vowel-geometry/run.py.source.txt"
+  ],
+  "verified_byte_identical_in_main": [
+    "text7/upc7-projection-current:.github/workflows/text7-projection.yml",
+    "text7/upc7-projection-current:contracts/text7-upc7.lock",
+    "text7/upc7-projection-current:crates/sens/src/text7_projection.rs",
+    "text7/upc7-projection-current:crates/sens/src/text7_projection_generated.rs",
+    "text7/upc7-projection-current:scripts/generate-text7-projection.py",
+    "impl/2793-d7-text7-main:docs/research/2756-d7-text7-shiva-w7-synthesis.uk.md",
+    "replay/2802-d7-text7-current-main:knowledge/d7-sound-text7-w7-map.json"
+  ],
+  "production_blocker": {
+    "pr": 5669,
+    "status": "OPEN; HOLD; requested research files archived in main but not active",
+    "observed_ci": "domain-tables failed due to stale width certificate; exact-width-ladder failed in Rust compiler_language stack overflow; PR body reports other required failures",
+    "owner_pin": "D7:1100101 ratified source projected TAB but current glyph research expects double quote; do not silently mutate owner map"
+  }
+}
