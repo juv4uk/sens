@@ -11,7 +11,7 @@
 | Date/time UTC | **UNSET** |
 | Contract source SHA-256 | **UNSET** |
 | Contract generation | **11.9** (перевірити з pinned tree) |
-| Rust version / rustup toolchain digest | **UNSET** |
+| Rust version / rustup toolchain digest | Rust `1.99.0` pinned in `rust-toolchain.toml` and release/CI workflows; rustup distribution digest and runner-image digests **UNSET** |
 | Cargo.lock SHA-256 | **UNSET** |
 | CI run ID and immutable logs | **UNSET** |
 | OS, CPU arch, container/runner image identifiers | **UNSET** |
@@ -48,7 +48,7 @@ Authority: [CURRENT.md](CURRENT.md), [language-contract.lisp](language-contract.
 |---|---|---|
 | `cargo test --locked --workspace` | URL, runner, SHA, raw log | UNKNOWN |
 | `cargo clippy --locked --workspace --all-targets -- -D warnings` | URL, runner, SHA | UNKNOWN |
-| Release package/tag version alignment | `crates/sens-cli/Cargo.toml` is `0.41.0`; proposed tag `l0.42.0` requires `0.42.0` | BLOCKED |
+| Release package/tag version alignment | Seven canonical Cargo manifests, their seven `Cargo.lock` entries, `scripts/release.lisp`, `guix.scm`, and `packaging/install.sh` now target `0.42.0` / `l0.42.0` | UNKNOWN until `release_parity` + installer tests pass on candidate SHA |
 | D1–D9 exact-width / COND/ATOM/EQ negative controls | Source+binary/oracle parity & run URL | UNKNOWN |
 | D10 owner-ratification metadata and proof limits | Pinned manifest digest; negative callable tests | UNKNOWN |
 | T5 and F3C roundtrip + corrupted input refusal | Physical byte golden fixtures | UNKNOWN |
