@@ -778,7 +778,7 @@ mod exact_domain_program_tests {
         let mut session = Session::bare();
         let result = eval_exact_domain_program("(001 (def x 11110111))", &mut session)
             .expect("D3 quoted syntax must not be mistaken for a call");
-        assert!(matches!(result.value, Value::Cons(_)));
+        assert!(matches!(result.value, Value::Pair(_, _)));
     }
 
     #[test]
