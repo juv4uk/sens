@@ -106,7 +106,6 @@ class BatchSourceTests(unittest.TestCase):
 
     def test_historical_W8_heads_cannot_be_mistaken_for_modern_D8_calls(self):
         sources = {
-            "knowledge/guard-fact-policy.lisp": ("10011100", "D6:001000", "CADDDAAR"),
             "scripts/semantic-authority-guard-enforce.lisp": (
                 "01001011", "D9:110101001", "ABS∘RECIP"
             ),
@@ -123,9 +122,19 @@ class BatchSourceTests(unittest.TestCase):
                 self.assertEqual(report["summary"]["blocked_files"], 1)
                 self.assertTrue(any("W8_CROSS_DOMAIN_EXECUTION_BLOCK" in p
                                     for p in report["files"][0]["reasons"]))
+        facts = "knowledge/guard-fact-policy.lisp"
+        current_heads = MOD.executable_call_heads(
+            (ROOT / facts).read_text(encoding="utf-8"), self.guard
+        )
+        self.assertNotIn("10011100", current_heads,
+                         "six historical LETs must be lowered to D4 LAMBDA")
         self.assertEqual(
-            MOD.pinned_cross_domain_blockers(
-                ROOT, "knowledge/guard-fact-policy.lisp", set(), self.mapping),
+            MOD.pinned_cross_domain_blockers(ROOT, facts, current_heads, self.mapping),
+            [],
+            "No historical W8 LET must remain as executable code",
+        )
+        self.assertEqual(
+            MOD.pinned_cross_domain_blockers(ROOT, facts, set(), self.mapping),
             [],
             "A historical-looking token only in quote/string is not executable",
         )
