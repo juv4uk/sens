@@ -17,7 +17,7 @@ permissions:
 jobs:
   pinned-source-and-independent-peer:
     runs-on: ubuntu-latest
-    timeout-minutes: 12
+    timeout-minutes: 25
     steps:
       - uses: actions/checkout@v4
         with:
@@ -31,3 +31,11 @@ jobs:
         run: python3 -m unittest discover -s tests -p test_migrate_sid8_source_batch.py -v
       - name: Verify D3 source law and guard-side exact D9 source
         run: python3 -m unittest discover -s tests -p test_sid8_d4_policy_cohort.py -v
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+        with:
+          shared-key: sid8-d9-guard-reader
+      - name: Compile canonical SENS executable
+        run: cargo build -p sens-cli --bin sens
+      - name: Execute eight real Guard cases through admitted D9 reader
+        run: bash scripts/test-semantic-authority-guard.sh ./target/debug/sens
