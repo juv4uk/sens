@@ -372,6 +372,97 @@ pub fn ternary_transport_accounting(
     })
 }
 
+/// Ukrainian keyboard D7 record on the *existing* canonical T5 physical wire.
+/// No additional tag, no semantic remapping, and never a D2 structural token.
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub enum D7T5Error {
+    Transport(TernaryTransportError),
+    EmptyText,
+    UnassignedKeyboardGlyph { byte_offset: usize },
+    NonD7Word,
+    UnrenderableD7Cell,
+    InvalidCapitalModifier,
+    AmbiguousText,
+}
+
+impl From<TernaryTransportError> for D7T5Error {
+    fn from(source: TernaryTransportError) -> Self {
+        Self::Transport(source)
+    }
+}
+
+fn keyboard_d7_words(source: &str) -> Result<Vec<BinarySourceWord>, D7T5Error> {
+    if source.is_empty() {
+        return Err(D7T5Error::EmptyText);
+    }
+    let mut out = Vec::new();
+    for (offset, character) in source.char_indices() {
+        let lower: String = character.to_lowercase().collect();
+        let glyph = if character.is_uppercase() {
+            lower.as_str()
+        } else {
+            &source[offset..offset + character.len_utf8()]
+        };
+        let cell = crate::semantic_registry::d7_uk_keyboard_cell(glyph)
+            .ok_or(D7T5Error::UnassignedKeyboardGlyph { byte_offset: offset })?;
+        if character.is_uppercase() {
+            // #3572: D7:0100010 (uppercase-next), not an extra glyph
+            // or a host-created resident.
+            out.push(BinarySourceWord::W7(Bit7::new(0b0100010).unwrap()));
+        }
+        out.push(BinarySourceWord::W7(Bit7::new(cell).unwrap()));
+    }
+    Ok(out)
+}
+
+/// Encode strictly admitted Ukrainian keyboard characters as D7 W7 words
+/// through the already existing five-trits-per-byte T5 codec.
+pub fn encode_d7_uk_t5(source: &str) -> Result<Vec<u8>, D7T5Error> {
+    let words = keyboard_d7_words(source)?;
+    let packed = encode_ternary_words(&words)?;
+    if decode_d7_uk_t5(&packed)? != source {
+        return Err(D7T5Error::AmbiguousText);
+    }
+    Ok(packed)
+}
+
+/// Strictly decode *only* W7 words with admitted Ukrainian keyboard glyphs.
+/// D2 words (00/01/10/11) are never turned into D7 text or punctuation.
+pub fn decode_d7_uk_t5(packed: &[u8]) -> Result<String, D7T5Error> {
+    let words = decode_ternary_words(packed)?;
+    let mut text = String::new();
+    let mut index = 0usize;
+    while index < words.len() {
+        let BinarySourceWord::W7(mut word) = words[index] else {
+            return Err(D7T5Error::NonD7Word);
+        };
+        let capital = word.packed_bits() == 0b0100010;
+        if capital {
+            index += 1;
+            let Some(BinarySourceWord::W7(next)) = words.get(index).copied() else {
+                return Err(D7T5Error::InvalidCapitalModifier);
+            };
+            word = next;
+        }
+        let glyph = crate::semantic_registry::d7_uk_keyboard_glyph(word.packed_bits())
+            .ok_or(D7T5Error::UnrenderableD7Cell)?;
+        if capital {
+            // A modifier applies only to a lowercase Ukrainian letter.
+            if glyph.chars().count() != 1 || !glyph.chars().all(char::is_lowercase) {
+                return Err(D7T5Error::InvalidCapitalModifier);
+            }
+            text.extend(glyph.chars().flat_map(char::to_uppercase));
+        } else {
+            text.push_str(glyph);
+        }
+        index += 1;
+    }
+    if keyboard_d7_words(&text)? != words {
+        return Err(D7T5Error::AmbiguousText);
+    }
+    Ok(text)
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
