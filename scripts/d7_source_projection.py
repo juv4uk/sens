@@ -18,7 +18,7 @@ from d7_symbol_codec import D7CodecError, current_codec
 
 ROOT = Path(__file__).resolve().parents[1]
 AUTHORITY = ROOT / "knowledge/d7-ratified.json"
-NAMESPACES = ("ук", "укр", "san", "en", "sym", "slp1")
+NAMESPACES = ("ук", "укр", "san", "en", "en-ipa", "sym", "slp1")
 EXACT_W7 = re.compile(r"[01]{7}\Z")
 
 
