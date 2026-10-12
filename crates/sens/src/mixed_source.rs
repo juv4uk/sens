@@ -158,58 +158,6 @@ pub fn parse_mixed_exact_domain_fs_fixture_source(
     parse_mixed_source(source, true)
 }
 
-/// D6 LET* is a ratified identity whose implementation is the existing
-/// Lisp-owned Core4 macro, not a Rust callable primitive. Only in these two
-/// approved adapters, route an executable D6:001001 head to the already-bound
-/// `let*` macro so its Lisp definition performs expansion. This never applies
-/// to ordinary source or quoted data.
-fn bridge_process_tcp_macro_calls(
-    source: &str,
-    expression: Expr,
-    depth: u32,
-) -> Result<Expr, LanguageError> {
-    if depth > MAX_STRUCTURE_DEPTH {
-        return Err(LanguageError::new(
-            ErrorKind::Parse,
-            "process/TCP macro bridge exceeds structure depth",
-            expression.span,
-        ));
-    }
-
-    let Expr { kind, span } = expression;
-    let ExprKind::List(items) = kind else {
-        return Ok(Expr { kind, span });
-    };
-    if items.is_empty()
-        || is_exact_quote(&items[0])
-        || is_legacy_w8_quote_head(source, &items[0])
-    {
-        return Ok(Expr {
-            kind: ExprKind::List(items),
-            span,
-        });
-    }
-
-    let mut items = items.to_vec();
-    if matches!(
-        &items[0].kind,
-        ExprKind::DomainIdentity(identity)
-            if identity.width() == 6 && identity.packed_bits() == 0b001001
-    ) {
-        items[0] = Expr {
-            kind: ExprKind::Symbol(Rc::<str>::from("let*")),
-            span: items[0].span,
-        };
-    }
-    for item in &mut items {
-        *item = bridge_process_tcp_macro_calls(source, item.clone(), depth + 1)?;
-    }
-    Ok(Expr {
-        kind: ExprKind::List(Rc::from(items.into_boxed_slice())),
-        span,
-    })
-}
-
 /// Read only the frozen legacy library core with exact D3-D6 callable heads.
 /// This library (lib/core.lisp) is distinct from the canonical Core4/FASL
 /// bootstrap. W8 macro/define syntax and quoted templates remain data.
@@ -242,10 +190,7 @@ pub fn parse_mixed_exact_domain_process_tcp_source(
             Span::default(),
         ));
     }
-    parse_mixed_source(source, true)?
-        .into_iter()
-        .map(|expression| bridge_process_tcp_macro_calls(source, expression, 0))
-        .collect()
+    parse_mixed_source(source, true)
 }
 
 /// Parse only the language-owned time module with exact-width D3 call heads.
@@ -1548,8 +1493,9 @@ mod tests {
         let ExprKind::List(lambda) = &definition[2].kind else { panic!("LAMBDA"); };
         let ExprKind::List(let_star) = &lambda[2].kind else { panic!("LET* body"); };
         assert!(
-            matches!(&let_star[0].kind, ExprKind::Symbol(name) if name.as_ref() == "let*"),
-            "D6 LET* must route through the existing Lisp-owned macro binding"
+            matches!(&let_star[0].kind, ExprKind::DomainIdentity(identity)
+                if identity.width() == 6 && identity.packed_bits() == 0b001001),
+            "D6 LET* must remain its exact canonical identity until the loader binds its Lisp-owned macro code-slot"
         );
 
         let quoted_source = "(0011 probe (0010 (x) (001 (001001 ((y 1)) y))))";
@@ -1562,9 +1508,8 @@ mod tests {
         let ExprKind::List(quote_form) = &quoted_lambda[2].kind else { panic!("QUOTE"); };
         let ExprKind::List(payload) = &quote_form[1].kind else { panic!("quoted payload"); };
         assert!(
-            matches!(&payload[0].kind, ExprKind::DomainIdentity(identity)
-                if identity.width() == 6 && identity.packed_bits() == 0b001001),
-            "quoted D6 LET* remains exact domain data"
+            !matches!(&payload[0].kind, ExprKind::DomainIdentity(_)),
+            "quoted D6-shaped spelling remains opaque data; no call-head projection runs beneath QUOTE"
         );
     }
 
