@@ -28,8 +28,8 @@
 
 F3C/F3M **не мають окремої семантики**: вони відновлюють точні доменні
 слова SENS і передають їх тому самому reader/evaluator. Для F3M вже є
-exhaustive bounded proof: файл `car-cons-one-nil.f3m` дорівнює одному
-байту `0x45`, відновлює `10 100 10 111 1 000 01 01` і виконується як
+dense bounded proof: файл `car-cons-one-nil.f3m` дорівнює одному
+байту `0x3E`, відновлює `10 100 10 111 1 000 01 01` і виконується як
 `CAR(CONS(1,NIL))` з паритетом до T5. Це доводить можливість
 **1-байтової виконуваної SENS-програми в конкретному профілі**, але не
 можливість стискати довільну SENS-програму до одного байта.
@@ -38,9 +38,11 @@ exhaustive bounded proof: файл `car-cons-one-nil.f3m` дорівнює од�
 внутрішня мітка**. Після зовнішнього вибору сімейства `.f3m`:
 1 байт = F3M-1, 2 = F3M-2, 3 = F3M-3; 0 і 4+ зараз fail-closed. Байтовий
 вміст не sniff-иться й не може перемкнути профіль, тож 8/16/24 біти
-залишаються payload/rank. F3M-1 має exhaustive proof; F3M-2/F3M-3 наразі
-мають лише визначену маршрутизацію — їхні semantic rank/admission tables
-ще не оголошені доведеними. [Формальне правило](frame3-micro-length-profiles-2026-10-12.uk.md).
+залишаються payload/rank. F3M-1 має dense 256/256 mapping і exhaustive
+однобайтовий evaluator/T5 proof. F3M-2 займає наступні 65 536 global ranks
+і має exhaustive payload roundtrip; F3M-3 займає наступні 16 777 216 ranks
+і має boundary/sample roundtrip плюс реальний COND witness. Повний evaluator
+sweep усіх 16 777 216 F3M-3 рангів ще не оголошено завершеним. [Формальне правило](frame3-micro-length-profiles-2026-10-12.uk.md).
 
 ## 2. Nano-SENS: що виміряно і що ще заблоковано
 
