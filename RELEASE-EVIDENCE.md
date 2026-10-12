@@ -89,3 +89,24 @@ Authority: [CURRENT.md](CURRENT.md), [language-contract.lisp](language-contract.
 | Інші обов'язкові CI | Latest checked `Hosted CI`, native vertical smoke, T5 file-authority на сусідніх HEAD ще мають FAIL | Не переносити чужий/старий verdict на майбутній release candidate; **NO-GO** |
 
 Усі наступні докази замінюють лише відповідні UNKNOWN/FAIL після перевірки **одного** `main@<40-hex SHA>`. Release-публікація лишається з незалежним явним owner-GO та strict triplet admission.
+
+## Latest exact-head action sample — 2026-10-12, not a release certificate
+
+The last inspected full workflow batch is tied to `main@`[`e2d6f798215434f5127bab43e6c8cb40de90d643`](https://github.com/juv4uk/sens/commit/e2d6f798215434f5127bab43e6c8cb40de90d643). It is a diagnostic snapshot only; subsequent `main` commits invalidate its SHA as a release candidate.
+
+| Workflow | Result on that SHA | Observed failure / boundary |
+|---|---|---|
+| [README current SENS owner and triplet contract](https://github.com/juv4uk/sens/actions/runs/38234492757) | **FAIL** | Six README contract unittests passed, then invoking `sens scripts/verify-repo.lisp` failed at line 8 because the `str+` form was reported as not callable (`#q2:1011/1`). This is an executable language/runtime failure, not a reason to bypass the guard. |
+| [Vertical Day immutable L0 and native smoke](https://github.com/juv4uk/sens/actions/runs/38234492564) | **FAIL** | `bounded_eq_cond_native_execution_follows_generated_cmp_jnz_branches` fails with a non-callable numeric-carrier expression at span `8830..8853`. |
+| [Vertical Day non-cancelling smoke](https://github.com/juv4uk/sens/actions/runs/38234492701) | **FAIL** | `native_pair_car_cdr_match_the_interpreter_reference_witness` fails during Lisp-owned CONS+CAR admission at span `8830..8853`; the explicit unadmitted-UD2 rejection test passes. |
+| [Hosted CI](https://github.com/juv4uk/sens/actions/runs/38234492771) and [physical T5 file-authority oracle](https://github.com/juv4uk/sens/actions/runs/38234492469) | **IN PROGRESS at last observation** | No final result on this SHA was recorded in this audit. |
+| [Binary executable T5 end-to-end](https://github.com/juv4uk/sens/actions/runs/38234492752) and [Hosted runner routing policy](https://github.com/juv4uk/sens/actions/runs/38234492474) | **PASS** | Narrow successes only; they do not override red native/runtime gates. |
+
+Current `main` has moved beyond this diagnostic SHA; the current ref observed during this update is `c55e2c17cd2681702ec69659b2fa4406bbec3a99`. No set of mandatory CI proofs has yet been attached to that newer exact SHA in this audit. Consequently, do not transfer a green or red verdict from `e2d6f79` to the current head. Keep candidate SHA unset, do not create `l0.42.0`, and rerun all mandatory workflows on one frozen current SHA before any GO review.
+
+## Version and compiler preparation update
+
+- All seven canonical Cargo crate versions and their `Cargo.lock` records are now `0.42.0`.
+- `scripts/release.lisp`, `guix.scm`, and active `packaging/install.sh` asset/version references now target `0.42.0` / `l0.42.0`.
+- Rust compiler/toolchain is pinned to `1.99.0` in `rust-toolchain.toml` and explicit release/CI workflow configuration. The hosted runner confirmed `rustc 1.99.0 (b940084d7 2026-09-28)` in the diagnostic batch.
+- Exact Rust distribution / runner-image digests and the final candidate's successful `release_parity`, installer tests, full workspace tests/Clippy, independent T5-oracle admission and platform asset replay remain **UNKNOWN**, not PASS.
