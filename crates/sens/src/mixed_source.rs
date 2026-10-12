@@ -155,10 +155,7 @@ pub fn parse_mixed_exact_domain_fs_fixture_source(
             Span::default(),
         ));
     }
-    parse_mixed_source(source, true)?
-        .into_iter()
-        .map(|expression| bridge_process_tcp_macro_calls(source, expression, 0))
-        .collect()
+    parse_mixed_source(source, true)
 }
 
 /// D6 LET* is a ratified identity whose implementation is the existing
@@ -245,7 +242,10 @@ pub fn parse_mixed_exact_domain_process_tcp_source(
             Span::default(),
         ));
     }
-    parse_mixed_source(source, true)
+    parse_mixed_source(source, true)?
+        .into_iter()
+        .map(|expression| bridge_process_tcp_macro_calls(source, expression, 0))
+        .collect()
 }
 
 /// Parse only the language-owned time module with exact-width D3 call heads.
