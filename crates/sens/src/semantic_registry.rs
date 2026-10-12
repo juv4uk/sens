@@ -57,6 +57,18 @@ fn exact_domain_identity_from_projection(width: u8, bits: u8) -> Option<CoreDoma
     CoreDomainIdentity::from_source_word(source)
 }
 
+fn exact_domain_resident_from_projection(width: u8, bits: u8) -> Option<DomainIdentity> {
+    use crate::BinarySourceWord;
+    let source = match width {
+        3 => BinarySourceWord::W3(Bit3::new(bits)?),
+        4 => BinarySourceWord::W4(Bit4::new(bits)?),
+        5 => BinarySourceWord::W5(Bit5::new(bits)?),
+        6 => BinarySourceWord::W6(crate::Bit6::new(bits)?),
+        _ => return None,
+    };
+    Some(DomainIdentity::from_source_word(source))
+}
+
 /// Direct D3/D4/D5 human-surface projection.
 ///
 /// This path consumes the exact-domain projection generated from
@@ -116,8 +128,7 @@ pub(crate) fn exact_uk_callable_for_source_head(name: &str) -> Option<crate::Dom
         {
             return None;
         }
-        exact_domain_identity_from_projection(row.width, row.bits)
-            .map(crate::DomainIdentity::from)
+        exact_domain_resident_from_projection(row.width, row.bits)
     })
 }
 
