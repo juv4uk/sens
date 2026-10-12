@@ -769,6 +769,62 @@ mod tests {
     }
 
     #[test]
+    fn canonical_i_k_ki_have_unique_five_byte_payloads_and_beta_behavior() {
+        let i = F3m5LambdaExpr::Lambda(Box::new(F3m5LambdaExpr::Bound(0)));
+        let k = F3m5LambdaExpr::Lambda(Box::new(F3m5LambdaExpr::Lambda(Box::new(
+            F3m5LambdaExpr::Bound(1),
+        ))));
+        let ki = F3m5LambdaExpr::Lambda(Box::new(F3m5LambdaExpr::Lambda(Box::new(
+            F3m5LambdaExpr::Bound(0),
+        ))));
+
+        let pi = encode_candidate(&i).expect("I must fit F3M-5λ");
+        let pk = encode_candidate(&k).expect("K must fit F3M-5λ");
+        let pki = encode_candidate(&ki).expect("KI must fit F3M-5λ");
+        assert_ne!(pi, pk);
+        assert_ne!(pi, pki);
+        assert_ne!(pk, pki);
+        assert_eq!(decode_candidate(pi).unwrap(), i);
+        assert_eq!(decode_candidate(pk).unwrap(), k);
+        assert_eq!(decode_candidate(pki).unwrap(), ki);
+
+        let one = F3m5LambdaValue::Bit(true);
+        let zero = F3m5LambdaValue::Bit(false);
+
+        let i_value = apply_candidate(eval_candidate(&i).unwrap(), one.clone()).unwrap();
+        assert_eq!(i_value, one);
+
+        let k1 = apply_candidate(eval_candidate(&k).unwrap(), one.clone()).unwrap();
+        assert_eq!(apply_candidate(k1, zero.clone()).unwrap(), one);
+
+        let ki1 = apply_candidate(eval_candidate(&ki).unwrap(), one).unwrap();
+        assert_eq!(apply_candidate(ki1, zero.clone()).unwrap(), zero);
+
+        let hex = |payload: [u8; 5]| {
+            payload
+                .iter()
+                .map(|byte| format!("{byte:02X}"))
+                .collect::<String>()
+        };
+        eprintln!(
+            "F3M5L_I={}\tK={}\tKI={}",
+            hex(pi),
+            hex(pk),
+            hex(pki)
+        );
+    }
+
+    #[test]
+    fn alpha_equivalent_surface_names_collapse_to_one_nameless_identity() {
+        // The candidate has no symbol/name constructor for binders at all:
+        // λx.x, λy.y and λfoo.foo all lower to this single closed term.
+        let canonical_identity =
+            F3m5LambdaExpr::Lambda(Box::new(F3m5LambdaExpr::Bound(0)));
+        assert_eq!(canonical_identity.human_projection(), "λ.BOUND(0)");
+        assert_eq!(encode_candidate(&canonical_identity).unwrap(), [0; 5]);
+    }
+
+    #[test]
     fn one_program_carries_all_d1_d3_capabilities_plus_real_lambda() {
         let e = F3m5LambdaExpr::IfAtom(
             Box::new(F3m5LambdaExpr::EqAtom(
