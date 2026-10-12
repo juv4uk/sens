@@ -117,6 +117,36 @@ const _: () = assert!(std::mem::size_of::<Sens8>() == 1);
 // error when an additive Expr variant changed compiler frame layout.
 pub(crate) const MAX_STRUCTURE_DEPTH: u32 = 768;
 
+/// Точнодоменна AST не дозволяє давньому байту W8 видати себе за
+/// D8. Перевірка ітеративна й бачить історичні вузли навіть у цитатах.
+fn is_exact_domain_program(expressions: &[Expr]) -> bool {
+    let mut pending: Vec<(&Expr, u32)> = expressions.iter().map(|expr| (expr, 0)).collect();
+    while let Some((expr, depth)) = pending.pop() {
+        if depth > MAX_STRUCTURE_DEPTH {
+            return false;
+        }
+        match &expr.kind {
+            ExprKind::Sid(_) | ExprKind::Call(_, _) => return false,
+            ExprKind::DomainCall(identity, args) => {
+                if crate::DomainIdentity::from(*identity).core_operation() != Some(*identity) {
+                    return false;
+                }
+                pending.extend(args.iter().map(|arg| (arg, depth + 1)));
+            }
+            ExprKind::List(items) => {
+                pending.extend(items.iter().map(|item| (item, depth + 1)));
+            }
+            ExprKind::Pair(head, tail) => {
+                pending.push((head, depth + 1));
+                pending.push((tail, depth + 1));
+            }
+            _ => {}
+        }
+    }
+    true
+}
+
+
 /// FASL snapshot encoding — parse-output cache (OPT-CORE-MY-AST-SNAPSHOT).
 /// Deterministic, versioned; decode returns None on ANY inconsistency so
 /// callers fall back to text parsing (never a wrong program).
@@ -419,6 +449,16 @@ pub(crate) mod fasl {
         put_u32(&mut out, payload.len() as u32);
         out.extend_from_slice(&payload);
         out
+    }
+
+    /// Новий FASL: сувора доменна AST, без історичних W8 вузлів.
+    pub fn encode_exact_program(expressions: &[Expr], hash: &[u8; 32]) -> Option<Vec<u8>> {
+        super::is_exact_domain_program(expressions).then(|| encode_program(expressions, hash))
+    }
+
+    pub fn decode_exact_program(bytes: &[u8]) -> Option<(Vec<Expr>, [u8; 32])> {
+        let (expressions, hash) = decode_program(bytes)?;
+        super::is_exact_domain_program(&expressions).then_some((expressions, hash))
     }
 
     pub fn decode_program(bytes: &[u8]) -> Option<(Vec<Expr>, [u8; 32])> {
@@ -816,6 +856,16 @@ pub(crate) mod wire {
             encode_expr(expr, &mut out);
         }
         out
+    }
+
+    /// Новий wire: W8 transport не перетворюється на D8 за збігом біта.
+    pub fn encode_exact_program(expressions: &[Expr]) -> Option<Vec<u8>> {
+        super::is_exact_domain_program(expressions).then(|| encode_program(expressions))
+    }
+
+    pub fn decode_exact_program(bytes: &[u8]) -> Option<Vec<Expr>> {
+        let expressions = decode_program(bytes)?;
+        super::is_exact_domain_program(&expressions).then_some(expressions)
     }
 
     pub fn decode_program(bytes: &[u8]) -> Option<Vec<Expr>> {
