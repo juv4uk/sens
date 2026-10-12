@@ -54,6 +54,14 @@ pub enum Frame3MicroEnumerateError {
     InternalCountOverflow,
 }
 
+impl std::fmt::Display for Frame3MicroEnumerateError {
+    fn fmt(&self, formatter: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(formatter, "{self:?}")
+    }
+}
+
+impl std::error::Error for Frame3MicroEnumerateError {}
+
 impl Frame3MicroExpr {
     pub fn node_count(&self) -> usize {
         match self {
