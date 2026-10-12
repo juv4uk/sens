@@ -4,6 +4,7 @@ on:
   push:
     branches: [main]
     paths:
+      - 'lib/**/*.lisp'
       - scripts/migrate-sid8-source-batch.py
       - tests/test_migrate_sid8_source_batch.py
       - tests/test_sid8_d3_enforcement_cutover.py
