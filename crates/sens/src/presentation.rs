@@ -258,6 +258,26 @@ fn ukrainian_message(message: &str) -> String {
         return format!("Невідомий символ: {symbol}");
     }
 
+    // Exact-domain arity diagnostics are produced by the canonical domain
+    // mechanism and contain the exact-width binary operator, not a legacy SID8.
+    // Keep the width visible: 010 and 00000010 are different identities.
+    if let Some((operator, rest)) = message.split_once(": expected ") {
+        if (3..=9).contains(&operator.len())
+            && operator.bytes().all(|bit| bit == b'0' || bit == b'1')
+        {
+            if let Some((expected, received)) = rest.split_once("; received ") {
+                if let Some(expected) = expected.strip_suffix(" arguments") {
+                    if expected.parse::<usize>().is_ok() && received.parse::<usize>().is_ok() {
+                        return format!(
+                            "D{}:{operator}: очікувалося {expected}; отримано {received}",
+                            operator.len()
+                        );
+                    }
+                }
+            }
+        }
+    }
+
     if let Some((operator, rest)) = message.split_once(": expected / ochikuvalosia / erwartet ") {
         if let Some((expected, received)) = rest.split_once("; received / otrymano / erhalten ") {
             return format!(
@@ -568,16 +588,23 @@ mod tests {
     }
 
     #[test]
-    fn ukrainian_exact_arity_preserves_function_sid_diagnostic() {
-        let source = "(атом?)";
-        let mut session = Session::default();
-        let error = eval_program(source, &mut session).expect_err("arity");
-        let rendered =
-            render_error_for_presentation(&error, source, PresentationLanguage::Ukrainian);
-        assert!(
-            rendered.contains("00000010: очікувалося 1; отримано 0"),
-            "{rendered}"
-        );
+    fn ukrainian_exact_arity_preserves_d3_atom_coordinate() {
+        for source in ["(атом?)", "(010)"] {
+            let mut session = Session::default();
+            let error = eval_program(source, &mut session).expect_err("arity");
+            assert_eq!(error.kind, ErrorKind::Arity, "{source}: {}", error.message);
+            assert!(
+                error.message.starts_with("010: expected 1 arguments; received 0"),
+                "{source}: {}", error.message
+            );
+            let rendered =
+                render_error_for_presentation(&error, source, PresentationLanguage::Ukrainian);
+            assert!(
+                rendered.contains("D3:010: очікувалося 1; отримано 0"),
+                "{source}: {rendered}"
+            );
+            assert!(!rendered.contains("00000010"), "{source}: {rendered}");
+        }
     }
 
     #[test]
