@@ -39,6 +39,10 @@ RELEASE_GATING_WORKFLOWS = (
     ".github/workflows/important-file-guard.yml",
     ".github/workflows/binary-program-e2e.yml",
     ".github/workflows/vertical-day-smoke.yml",
+    ".github/workflows/vertical-day-immutable-smoke.yml",
+    ".github/workflows/triple-projection-gate.yml",
+    ".github/workflows/physical-binary-sens-cli.yml",
+    ".github/workflows/audit-t5-program-syntax.yml",
 )
 
 STEP = re.compile(r"^\s*-\s")
