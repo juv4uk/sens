@@ -1357,6 +1357,224 @@ mod tests {
         }
     }
 
+    fn earliest_expr_with_conditionals(
+        max_nodes: usize,
+        target_conditionals: usize,
+    ) -> Option<(usize, Frame3MicroExpr)> {
+        let counts = count_table().unwrap();
+        let mut best = vec![vec![None::<Frame3MicroExpr>; target_conditionals + 1]; max_nodes + 1];
+        best[1][0] = Some(Frame3MicroExpr::Zero);
+
+        let consider = |slot: &mut Option<Frame3MicroExpr>, candidate: Frame3MicroExpr| {
+            let candidate_rank = rank_exact(&candidate, &counts).unwrap();
+            if slot
+                .as_ref()
+                .is_none_or(|current| candidate_rank < rank_exact(current, &counts).unwrap())
+            {
+                *slot = Some(candidate);
+            }
+        };
+
+        for nodes in 2..=max_nodes {
+            for conds in 0..=target_conditionals {
+                if let Some(child) = best[nodes - 1][conds].clone() {
+                    consider(
+                        &mut best[nodes][conds],
+                        Frame3MicroExpr::Atom(Box::new(child)),
+                    );
+                }
+
+                for left_nodes in 1..nodes - 1 {
+                    let right_nodes = nodes - 1 - left_nodes;
+                    for left_conds in 0..=conds {
+                        let right_conds = conds - left_conds;
+                        let (Some(left), Some(right)) = (
+                            best[left_nodes][left_conds].clone(),
+                            best[right_nodes][right_conds].clone(),
+                        ) else {
+                            continue;
+                        };
+                        for family in 0..3 {
+                            let candidate = match family {
+                                0 => Frame3MicroExpr::Cons(
+                                    Box::new(left.clone()),
+                                    Box::new(right.clone()),
+                                ),
+                                1 => Frame3MicroExpr::CarCons(
+                                    Box::new(left.clone()),
+                                    Box::new(right.clone()),
+                                ),
+                                _ => Frame3MicroExpr::CdrCons(
+                                    Box::new(left.clone()),
+                                    Box::new(right.clone()),
+                                ),
+                            };
+                            consider(&mut best[nodes][conds], candidate);
+                        }
+                    }
+                }
+
+                if conds > 0 {
+                    for test_nodes in 1..nodes.saturating_sub(2) {
+                        for then_nodes in 1..nodes - 1 - test_nodes {
+                            let else_nodes = nodes - 1 - test_nodes - then_nodes;
+                            if else_nodes == 0 {
+                                continue;
+                            }
+                            for test_conds in 0..conds {
+                                for then_conds in 0..conds - test_conds {
+                                    let used = 1 + test_conds + then_conds;
+                                    if used > conds {
+                                        continue;
+                                    }
+                                    let else_conds = conds - used;
+                                    let (Some(test), Some(then_value), Some(else_value)) = (
+                                        best[test_nodes][test_conds].clone(),
+                                        best[then_nodes][then_conds].clone(),
+                                        best[else_nodes][else_conds].clone(),
+                                    ) else {
+                                        continue;
+                                    };
+                                    consider(
+                                        &mut best[nodes][conds],
+                                        Frame3MicroExpr::IfAtom(
+                                            Box::new(test),
+                                            Box::new(then_value),
+                                            Box::new(else_value),
+                                        ),
+                                    );
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        (1..=max_nodes)
+            .find_map(|nodes| best[nodes][target_conditionals].clone().map(|expr| (nodes, expr)))
+    }
+
+    #[test]
+    fn four_byte_conditional_and_depth_extremes() {
+        let (nodes, triple_cond) = earliest_expr_with_conditionals(12, 3).unwrap();
+        assert_eq!(nodes, 10);
+        assert_eq!(conditional_count(&triple_cond), 3);
+        assert_eq!(
+            triple_cond.human_projection(),
+            "IF-ATOM(0,0,IF-ATOM(0,0,IF-ATOM(0,0,0)))"
+        );
+        assert_eq!(rank_global(&triple_cond).unwrap(), 249_980_976);
+        assert_eq!(encode_expr(&triple_cond).unwrap(), [0x0d, 0xe5, 0x67, 0x30]);
+        assert!(earliest_expr_with_conditionals(12, 4).is_none());
+
+        let mut deepest = Frame3MicroExpr::Zero;
+        for _ in 0..11 {
+            deepest = Frame3MicroExpr::Atom(Box::new(deepest));
+        }
+        assert_eq!(deepest.node_count(), 12);
+        assert_eq!(expression_depth(&deepest), 12);
+        assert_eq!(rank_global(&deepest).unwrap(), 3_149_929_038);
+        assert_eq!(encode_expr(&deepest).unwrap(), [0xba, 0xbf, 0x19, 0x4e]);
+
+        for (payload, expr, expected_source) in [
+            ([0x0d, 0xe5, 0x67, 0x30], triple_cond, "0"),
+            ([0xba, 0xbf, 0x19, 0x4e], deepest, "1"),
+        ] {
+            let source = expr.exact_words().join(" ");
+            let actual = eval_parsed_expressions(
+                &parse_canonical_binary(&source).unwrap(),
+                &mut Session::default(),
+            )
+            .unwrap();
+            let expected = eval_parsed_expressions(
+                &parse_canonical_binary(expected_source).unwrap(),
+                &mut Session::default(),
+            )
+            .unwrap();
+            assert_eq!(actual.value, expected.value);
+            assert_eq!(actual.output, expected.output);
+            assert_eq!(decode_payload(&payload).unwrap(), expr);
+        }
+    }
+
+    #[test]
+    fn strongest_last_64k_f3m4_rank_is_executable() {
+        let mut best: Option<((u32, usize, usize, usize, usize, usize, u32), Frame3MicroExpr)> =
+            None;
+        for local in 0xffff_0000u32..=0xffff_ffff {
+            let payload = local.to_be_bytes();
+            let expr = decode_payload(&payload).unwrap();
+            let score = (
+                expr.capability_mask().count_ones(),
+                conditional_count(&expr),
+                encoded_operation_count(&expr),
+                expression_depth(&expr),
+                expr.exact_words().len(),
+                expr.node_count(),
+                local,
+            );
+            if best.as_ref().is_none_or(|(current, _)| score > *current) {
+                best = Some((score, expr));
+            }
+        }
+
+        let (score, expr) = best.unwrap();
+        eprintln!(
+            "F3M4_FINAL64K_BEST={:08X}\tcap={}\tcond={}\tops={}\tdepth={}\twords={}\tnodes={}\t{}",
+            score.6,
+            score.0,
+            score.1,
+            score.2,
+            score.3,
+            score.4,
+            score.5,
+            expr.human_projection()
+        );
+        let payload = score.6.to_be_bytes();
+        assert_eq!(encode_expr(&expr).unwrap(), payload);
+        let source = expr.exact_words().join(" ");
+        eval_parsed_expressions(
+            &parse_canonical_binary(&source).unwrap(),
+            &mut Session::default(),
+        )
+        .expect("F3M-4 final-page winner executes");
+    }
+
+    #[test]
+    fn memorable_four_byte_payloads_are_real_programs() {
+        for value in [
+            0xcafe_babeu32,
+            0xdead_beef,
+            0xfeed_face,
+            0xbaad_f00d,
+            0xc0de_c0de,
+            0x1234_5678,
+            0xffff_ffff,
+        ] {
+            let payload = value.to_be_bytes();
+            let expr = decode_payload(&payload).unwrap();
+            let source = expr.exact_words().join(" ");
+            let result = eval_parsed_expressions(
+                &parse_canonical_binary(&source).unwrap(),
+                &mut Session::default(),
+            )
+            .expect("memorable F3M-4 payload executes");
+            eprintln!(
+                "F3M4_MEM={value:08X}\tcap={}\tcond={}\tops={}\tdepth={}\twords={}\tnodes={}\tresult={:?}\t{}",
+                expr.capability_mask().count_ones(),
+                conditional_count(&expr),
+                encoded_operation_count(&expr),
+                expression_depth(&expr),
+                expr.exact_words().len(),
+                expr.node_count(),
+                result.value,
+                expr.human_projection()
+            );
+            assert_eq!(encode_expr(&expr).unwrap(), payload);
+        }
+    }
+
     #[test]
     fn strongest_last_64k_f3m3_rank_is_full_basis_and_executes() {
         // Transparent lexicographic search score:
