@@ -30,6 +30,17 @@ on:
       - "tests/test_report_t5_triplet_inventory.py"
       - "lib/domains/d1.lisp"
       - "lib/domains/d3.lisp"
+      - "tests/test_d3_legacy_logic_guard.py"
+      - "scripts/check_d3_legacy_logic.py"
+      - "crates/sens-host/tests/native_lisp_bytes.rs"
+      - "crates/sens-host/tests/native_cond_profile.rs"
+      - "crates/sens/tests/timezone_raw.rs"
+      - "crates/sens/src/frame3_micro*.rs"
+      - "crates/sens/src/eval/**"
+      - "crates/sens/src/mixed_source.rs"
+      - "lib/machine/**"
+      - "lib/time.lisp"
+      - "lib/core4.lisp"
   pull_request:
     paths:
       - "rust-toolchain.toml"
@@ -57,6 +68,17 @@ on:
       - "tests/test_report_t5_triplet_inventory.py"
       - "lib/domains/d1.lisp"
       - "lib/domains/d3.lisp"
+      - "tests/test_d3_legacy_logic_guard.py"
+      - "scripts/check_d3_legacy_logic.py"
+      - "crates/sens-host/tests/native_lisp_bytes.rs"
+      - "crates/sens-host/tests/native_cond_profile.rs"
+      - "crates/sens/tests/timezone_raw.rs"
+      - "crates/sens/src/frame3_micro*.rs"
+      - "crates/sens/src/eval/**"
+      - "crates/sens/src/mixed_source.rs"
+      - "lib/machine/**"
+      - "lib/time.lisp"
+      - "lib/core4.lisp"
   workflow_dispatch:
 
 concurrency:
