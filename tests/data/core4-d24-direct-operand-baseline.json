@@ -3,9 +3,9 @@
   "source": "lib/core4.lisp",
   "contract": "11.9",
   "status": "known-source-debt-NOT-admitted-arithmetic",
-  "scope": "direct scalar numeric spellings in D5/D6 mathematical call arguments; length-onto initial seed; comments and strings excluded",
+  "scope": "Direct scalar numeric spellings in executable D5/D6 mathematical call arguments plus length-onto seed; comments, strings, and explicit QUOTE data excluded",
   "key_format": "class|exact-head|one-based-argument-index|source-token",
-  "note": "The baseline is an exact inventory, not a permission or execution proof. On any migration update, revise this record in the same atomic change. Do not infer a D24 domain from a token.",
+  "note": "Exact-source inventory, not admission or execution proof. A source migration must change this baseline with independent runtime evidence. Source-token spelling cannot infer a D24 domain. Apostrophe shorthand and indirect numeric calls are outside this narrow audit.",
   "counts": {
     "math|01010|2|1": 1,
     "math|01011|1|0": 1,
