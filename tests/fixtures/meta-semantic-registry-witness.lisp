@@ -17,136 +17,136 @@
 (load "lib/generated/meta-semantic-registry.lisp")
 (load "lib/meta-eval.lisp")
 
-(00001001 registry-native-value
-  (00001000 (source)
-    (01001101 (01001010 source))))
+(0011 registry-native-value
+  (0010 (source)
+    (0001 (11101010 source))))
 
-(00001001 registry-meta-value
-  (00001000 (source)
-    (my-eval (01001010 source) (00000001 ()))))
+(0011 registry-meta-value
+  (0010 (source)
+    (my-eval (11101010 source) (001 ()))))
 
-(00001001 registry-meta-program-result
-  (00001000 (source)
-    (00000110 (my-eval-program (01001011 source) (00000001 ())))))
+(0011 registry-meta-program-result
+  (0010 (source)
+    (011 (my-eval-program (110101001 source) (001 ())))))
 
-(00001001 registry-witness-failure
-  (00001000 (case actual expected)
-    (00100111
-      (00000001 meta-semantic-registry-witness)
-      (00000001 (status fail))
-      (00100111 (00000001 case) case)
-      (00100111 (00000001 actual) actual)
-      (00100111 (00000001 expected) expected))))
+(0011 registry-witness-failure
+  (0010 (case actual expected)
+    (1110
+      (001 meta-semantic-registry-witness)
+      (001 (status fail))
+      (1110 (001 case) case)
+      (1110 (001 actual) actual)
+      (1110 (001 expected) expected))))
 
-(00001001 registry-check-rows
-  (00001000 (rows)
-    (00000111
-      ((00000010 rows) ()
-       (00000001 (meta-semantic-registry-witness (status pass))))
-      ((00000010 rows) (1)
+(0011 registry-check-rows
+  (0010 (rows)
+    (110
+      ((010 rows) ()
+       (001 (meta-semantic-registry-witness (status pass))))
+      ((010 rows) (1)
        (registry-witness-failure
-         (00000001 malformed-row-tail)
+         (001 malformed-row-tail)
          rows
-         (00000001 ())))
-      ((00000010 rows) (0)
-       (10011100 ((row (00000101 rows)))
-         (00000111
-           ((00100010 (00101111 row) (00110000 row)) (1)
-            (registry-check-rows (00000110 rows)))
-           ((00100010 (00101111 row) (00110000 row)) (0)
+         (001 ())))
+      ((010 rows) (0)
+       (001000 ((row (100 rows)))
+         (110
+           ((11110111 (1001 row) (10011 row)) (1)
+            (registry-check-rows (011 rows)))
+           ((11110111 (1001 row) (10011 row)) (0)
             (registry-witness-failure
-              (00000101 row)
-              (00101111 row)
-              (00110000 row)))))))))
+              (100 row)
+              (1001 row)
+              (10011 row)))))))))
 
-(00001001 registry-witness-rows
-  (00001000 ()
-    (00100111
+(0011 registry-witness-rows
+  (0010 ()
+    (1110
       ; Generated projection/admission law.
-      (00100111 (00000001 quote-id-en)
-            (my-semantic-id-for-surface (00000001 quote))
+      (1110 (001 quote-id-en)
+            (my-semantic-id-for-surface (001 quote))
             00000001)
-      (00100111 (00000001 quote-id-uk)
-            (my-semantic-id-for-surface (00000001 як-є))
+      (1110 (001 quote-id-uk)
+            (my-semantic-id-for-surface (001 як-є))
             00000001)
-      (00100111 (00000001 lambda-id-en)
-            (my-semantic-id-for-surface (00000001 lambda))
+      (1110 (001 lambda-id-en)
+            (my-semantic-id-for-surface (001 lambda))
             00001000)
-      (00100111 (00000001 lambda-id-uk)
-            (my-semantic-id-for-surface (00000001 функція))
+      (1110 (001 lambda-id-uk)
+            (my-semantic-id-for-surface (001 функція))
             00001000)
-      (00100111 (00000001 define-id-en)
-            (my-semantic-id-for-surface (00000001 define))
+      (1110 (001 define-id-en)
+            (my-semantic-id-for-surface (001 define))
             00001001)
-      (00100111 (00000001 define-id-uk)
-            (my-semantic-id-for-surface (00000001 визначити))
+      (1110 (001 define-id-uk)
+            (my-semantic-id-for-surface (001 визначити))
             00001001)
-      (00100111 (00000001 def-compat-id)
-            (my-semantic-id-for-surface (00000001 def))
+      (1110 (001 def-compat-id)
+            (my-semantic-id-for-surface (001 def))
             00001011)
-      (00100111 (00000001 rupa-id-sa)
-            (my-semantic-id-for-surface (00000001 rūpa))
+      (1110 (001 rupa-id-sa)
+            (my-semantic-id-for-surface (001 rūpa))
             00010000)
-      (00100111 (00000001 unmapped-surface-fails-closed)
-            (00000010 (my-semantic-id-for-surface (00000001 unmapped-surface)))
-            (00000001 ()))
+      (1110 (001 unmapped-surface-fails-closed)
+            (010 (my-semantic-id-for-surface (001 unmapped-surface)))
+            (001 ()))
 
       ; Historical explicit-byte ATOM remains a compatibility witness.
       ; Current exact-D3 predicate surfaces are verified by the typed,
       ; Lisp-data-owned boundary corpus in witness_authority.rs; this older
       ; meta-registry witness cannot manufacture free-standing D1 literals.
-      (00100111 (00000001 atom-native-legacy-byte)
+      (1110 (001 atom-native-legacy-byte)
             (registry-native-value "(00000010 (quote x))")
-            (00000001 (1)))
+            (001 (1)))
 
       ; The metacircular evaluator still exercises the compatibility
       ; mechanism in my-apply-primitive. Its D1 cutover remains #2184 follow-up,
       ; so these rows deliberately retain the historical carrier until that
       ; evaluator can consume exact D1 false without generic truth coercion.
-      (00100111 (00000001 atom-meta-en)
+      (1110 (001 atom-meta-en)
             (registry-meta-value "(00000010 (quote x))")
-            (00000001 (1)))
-      (00100111 (00000001 atom-meta-uk)
+            (001 (1)))
+      (1110 (001 atom-meta-uk)
             (registry-meta-value "(атом? (як-є x))")
-            (00000001 (1)))
-      (00100111 (00000001 atom-meta-sa)
+            (001 (1)))
+      (1110 (001 atom-meta-sa)
             (registry-meta-value "(aṇu (svarūpa x))")
-            (00000001 (1)))
-      (00100111 (00000001 atom-meta-symbolic)
+            (001 (1)))
+      (1110 (001 atom-meta-symbolic)
             (registry-meta-value "(.? (quote x))")
-            (00000001 (1)))
+            (001 (1)))
 
       ; Necessary-form routing: native evaluator.
-      (00100111 (00000001 lambda-native-en)
+      (1110 (001 lambda-native-en)
             (registry-native-value "((lambda (x) x) 42)")
             42)
-      (00100111 (00000001 lambda-native-uk)
+      (1110 (001 lambda-native-uk)
             (registry-native-value "((функція (x) x) 42)")
             42)
-      (00100111 (00000001 define-native-en)
+      (1110 (001 define-native-en)
             (registry-native-value "(define registry-native-en-answer 42)")
             42)
-      (00100111 (00000001 define-native-uk)
+      (1110 (001 define-native-uk)
             (registry-native-value "(визначити registry-native-uk-answer 42)")
             42)
-      (00100111 (00000001 def-native-compat)
+      (1110 (001 def-native-compat)
             (registry-native-value "(def registry-native-def-answer 42)")
             42)
 
       ; The same necessary forms through the metacircular evaluator.
-      (00100111 (00000001 lambda-meta-en)
+      (1110 (001 lambda-meta-en)
             (registry-meta-value "((lambda (x) x) 42)")
             42)
-      (00100111 (00000001 lambda-meta-uk)
+      (1110 (001 lambda-meta-uk)
             (registry-meta-value "((функція (x) x) 42)")
             42)
-      (00100111 (00000001 define-meta-en)
+      (1110 (001 define-meta-en)
             (registry-meta-program-result "(define registry-meta-en-answer 42)")
             42)
-      (00100111 (00000001 define-meta-uk)
+      (1110 (001 define-meta-uk)
             (registry-meta-program-result "(визначити registry-meta-uk-answer 42)")
             42)
-      (00100111 (00000001 def-meta-compat)
+      (1110 (001 def-meta-compat)
             (registry-meta-program-result "(def registry-meta-def-answer 42)")
             42))))
 
