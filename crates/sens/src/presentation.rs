@@ -594,7 +594,15 @@ mod tests {
     fn ukrainian_exact_arity_preserves_d3_atom_coordinate() {
         for source in ["(атом?)", "(010)"] {
             let mut session = Session::default();
-            let error = eval_program(source, &mut session).expect_err("arity");
+            // Human Lisp and exact-domain binary source have distinct readers.
+            // The ordinary Lisp reader must not reinterpret 010 as a D3 word.
+            let error = if source == "(010)" {
+                let exact = crate::parse_mixed_exact_domain(source)
+                    .expect("exact D3 call head");
+                crate::eval_parsed_expressions(&exact, &mut session).expect_err("arity")
+            } else {
+                eval_program(source, &mut session).expect_err("arity")
+            };
             assert_eq!(error.kind, ErrorKind::Arity, "{source}: {}", error.message);
             assert!(
                 error.message.starts_with("010: expected 1 arguments; received 0"),
