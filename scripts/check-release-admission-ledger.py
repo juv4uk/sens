@@ -1,20 +1,24 @@
 #!/usr/bin/env python3
-"""Fail-closed формальна перевірка релізного admission-ledger (F1–F4).
+"""Fail-closed перевірка релізного admission-ledger (F1–F4) + звірка з репо.
 
-Це МЕХАНІЗМ, не ратифікація. Він не доводить семантику й не вигадує допуск:
-перевіряє лише ФОРМУ записів і рахує admitted строго за наявністю всіх чотирьох
-рівнів доказу, названих Contract 11.9, ПЛЮС явного `ratified=1` власника.
+Це МЕХАНІЗМ, не ратифікація. Він не доводить семантику й не вигадує допуск.
 
-Рівні (language-contract.lisp): F1 donor provenance, F2 independent positive and
-negative witnesses, F3 behavioural dedup against D1-D9/D10, F4 physical T5
-execution — кожен окремо gated.
+Дві незалежні перевірки:
+1. ФОРМА запису: усі чотири рівні, названі Contract 11.9, плюс явний `ratified=1`.
+   F1 donor provenance, F2 independent positive and negative witnesses,
+   F3 behavioural dedup against D1-D9/D10, F4 physical T5 execution.
+2. КОНТЕНТ: заявлений `typed_word_sha256` мусить збігатися з реальними байтами
+   `.sens` (decode через sens_t5_codec → typed_sha256). Ledger, що посилається на
+   неіснуючий файл, неканонічні байти чи чужий хеш, fail-closed.
 
-Fail-closed: відсутній ledger, невідома схема, зіпсований запис, дубль `sens`
-або відсутнє будь-яке з F1–F4 → запис НЕ admitted. Порожній ledger → 0/0.
+Fail-closed: відсутній ledger, невідома схема, зіпсований запис, дубль `sens`,
+відсутнє будь-яке з F1–F4, або розбіжність typed_word_sha256 → НЕ admitted.
+Порожній ledger → 0/0.
 """
 from __future__ import annotations
 
 import argparse
+import importlib.util
 import json
 import re
 import sys
@@ -24,7 +28,6 @@ ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_LEDGER = ROOT / "knowledge" / "release-admission-ledger.json"
 SCHEMA = "sens-release-admission-ledger/v1"
 
-# owner/repo@COMMIT:path:line[-line]
 REF = re.compile(r"[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+@[0-9a-f]{7,40}:[^:\t\n]+:[1-9][0-9]*(?:-[1-9][0-9]*)?\Z")
 SHA256 = re.compile(r"[0-9a-f]{64}\Z")
 DEDUP = re.compile(r"D1-D9@[0-9a-f]{7,40}=NO-MATCH;D10@[0-9a-f]{7,40}=NO-MATCH\Z")
@@ -36,10 +39,34 @@ FIELDS = (
 
 
 class LedgerBlocked(ValueError):
-    """Ledger не допущено: форма/прованація не витримують fail-closed."""
+    """Ledger не допущено: форма/прованація/контент не витримують fail-closed."""
 
 
-def validate_ledger(document: object) -> dict:
+def _load_codec():
+    spec = importlib.util.spec_from_file_location("sens_t5_codec_for_ledger", ROOT / "scripts" / "sens_t5_codec.py")
+    if spec is None or spec.loader is None:
+        raise LedgerBlocked("не вдалося завантажити sens_t5_codec")
+    module = importlib.util.module_from_spec(spec)
+    sys.modules[spec.name] = module
+    spec.loader.exec_module(module)
+    return module
+
+
+CODEC = _load_codec()
+
+
+def content_sha256(root: Path, sens: str) -> str:
+    path = root / sens
+    if not path.is_file():
+        raise LedgerBlocked(f"немає файла .sens: {sens}")
+    try:
+        words = CODEC.decode_bytes(path.read_bytes())
+    except CODEC.SensT5Error as exc:
+        raise LedgerBlocked(f"{sens}: неканонічні T5-байти ({exc})") from exc
+    return CODEC.typed_sha256(words)
+
+
+def validate_ledger(document: object, *, root: Path = ROOT, verify_content: bool = True) -> dict:
     if not isinstance(document, dict):
         raise LedgerBlocked("ledger не є JSON-об'єктом")
     if document.get("schema") != SCHEMA:
@@ -49,7 +76,7 @@ def validate_ledger(document: object) -> dict:
         raise LedgerBlocked("entries має бути списком")
 
     seen: set[str] = set()
-    admitted: list[dict] = []
+    admitted: list[str] = []
     for index, entry in enumerate(entries, start=1):
         if not isinstance(entry, dict) or set(entry) != set(FIELDS):
             raise LedgerBlocked(f"запис {index}: набір полів не збігається з канонічним")
@@ -59,8 +86,11 @@ def validate_ledger(document: object) -> dict:
         if sens in seen:
             raise LedgerBlocked(f"запис {index}: дубль sens {sens}")
         seen.add(sens)
-        if not SHA256.fullmatch(str(entry["typed_word_sha256"])):
+        claimed = str(entry["typed_word_sha256"])
+        if not SHA256.fullmatch(claimed):
             raise LedgerBlocked(f"запис {index}: typed_word_sha256 не 64-hex")
+        if verify_content and content_sha256(root, sens) != claimed:
+            raise LedgerBlocked(f"запис {index}: typed_word_sha256 не збігається з .sens {sens}")
         for field in ("f1_donor_provenance", "f2_positive_witness",
                       "f2_negative_witness", "f4_t5_execution"):
             if not REF.fullmatch(str(entry[field])):
@@ -71,27 +101,30 @@ def validate_ledger(document: object) -> dict:
         if ratified not in (0, 1) or isinstance(ratified, bool):
             raise LedgerBlocked(f"запис {index}: ratified має бути 0 або 1")
         if ratified == 1:
-            admitted.append(entry)
+            admitted.append(sens)
 
     return {
         "schema": SCHEMA,
         "entries": len(entries),
         "uk_oracle_verified": len(admitted),
         "release_admitted": len(admitted),
-        "admitted_sens": sorted(e["sens"] for e in admitted),
+        "admitted_sens": sorted(admitted),
     }
 
 
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description="fail-closed release admission-ledger check")
     parser.add_argument("--ledger", type=Path, default=DEFAULT_LEDGER)
+    parser.add_argument("--root", type=Path, default=ROOT)
+    parser.add_argument("--no-verify-content", action="store_true",
+                        help="перевіряти лише форму (для тестів/чернеток)")
     args = parser.parse_args(argv)
     if not args.ledger.is_file():
         print(f"RELEASE_ADMISSION_BLOCKED: ledger відсутній: {args.ledger}", file=sys.stderr)
         return 2
     try:
         document = json.loads(args.ledger.read_text(encoding="utf-8"))
-        receipt = validate_ledger(document)
+        receipt = validate_ledger(document, root=args.root, verify_content=not args.no_verify_content)
     except (LedgerBlocked, json.JSONDecodeError, OSError) as exc:
         print(f"RELEASE_ADMISSION_BLOCKED: {exc}", file=sys.stderr)
         return 1
