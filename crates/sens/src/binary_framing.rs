@@ -763,6 +763,12 @@ impl fmt::Display for BinaryFrameError {
                     "canonical Control2 program ends at bit {index} with {depth} unclosed structure(s)"
                 )
             }
+            Self::LegacyFrameForbidden { index } => {
+                write!(
+                    f,
+                    "точнодоменна програма не допускає історичний кадр номер {index}"
+                )
+            }
         }
     }
 }
