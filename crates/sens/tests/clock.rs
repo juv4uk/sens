@@ -421,4 +421,12 @@ fn timezone_detection_is_explicit_and_ntp_requires_host_string() {
             .to_string(),
         "(accepted (timezone \"Europe/Kyiv\" 7200))"
     );
+
+    assert_eq!(
+        eval_program("(timezone-config 123 7200)", &mut session)
+            .unwrap()
+            .value
+            .to_string(),
+        "(rejected invalid-name)"
+    );
 }

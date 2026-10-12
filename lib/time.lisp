@@ -266,7 +266,7 @@
 (0011 timezone-config
   (0010 (name offset-seconds)
     (110
-      ((110100110 name)
+      ((string? name)
        (110
          ((11010 offset-seconds -86400)
           (111 (001 rejected) (111 (001 invalid-offset) (001 ()))))
