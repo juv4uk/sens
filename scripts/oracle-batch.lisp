@@ -49,31 +49,27 @@
 (0011 fixtures-only
   (0010 (entries)
     (110
-      ((010 entries) () (001 ()))
-      ((010 entries) (1) (001 ()))
+      ((010 entries) (001 ()))
       ; inventory.lisp's own last top-level form is a bare () -- the CLI's
       ; auto-printed final script return value, captured by the shell
       ; redirect that originally generated the file, not a real record.
       ; (car (car entries)) on that entry would car an atom and error, so
       ; skip any non-Pair top-level form defensively instead of assuming
       ; every entry is shaped like a tagged record.
-      ((010 (100 entries)) () (fixtures-only (011 entries)))
-      ((010 (100 entries)) (1) (fixtures-only (011 entries)))
-      (t (110
+      ((010 (100 entries)) (fixtures-only (011 entries)))
+      ((010 (001 ())) (110
            ((101 (100 (100 entries)) (001 fixture))
             (111 (100 entries) (fixtures-only (011 entries))))
-           (t (fixtures-only (011 entries))))))))
+           ((010 (001 ())) (fixtures-only (011 entries))))))))
 
 ; Walk inventory.lisp's (fixture ...) records and conformance.lisp's raw
 ; ((expr . ...) ...) records in lockstep -- same position, same fixture.
 (0011 process-pair
   (0010 (inventory-remaining conformance-remaining)
     (110
-      ((010 inventory-remaining) () (001 ()))
-      ((010 inventory-remaining) (1) (001 ()))
-      ((010 conformance-remaining) () (001 ()))
-      ((010 conformance-remaining) (1) (001 ()))
-      (t
+      ((010 inventory-remaining) (001 ()))
+      ((010 conformance-remaining) (001 ()))
+      ((010 (001 ()))
        (001001 ((inventory-fixture (100 inventory-remaining))
               (id (011 (11100 (001 id) (011 inventory-fixture))))
               (conformance-fixture (100 conformance-remaining))
