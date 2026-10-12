@@ -235,8 +235,14 @@ mod tests {
             let three = d(width, 3);
             let zero = d(width, 0);
 
-            let bit_distance: usize = one.as_bits().iter()
-                .zip(three.as_bits())
+            // as_bits() returns a normalized magnitude. The *domain word*
+            // must be compared at its authoritative full Dn width.
+            let one_bits = one.exact_numeric_domain_bits().expect("exact Dn(1)");
+            let three_bits = three.exact_numeric_domain_bits().expect("exact Dn(3)");
+            assert_eq!(one_bits.len(), width);
+            assert_eq!(three_bits.len(), width);
+            let bit_distance: usize = one_bits.iter()
+                .zip(three_bits.iter())
                 .map(|(a, b)| usize::from(a != b))
                 .sum();
             assert_eq!(bit_distance, 1, "D{width}: single-bit mutation");
