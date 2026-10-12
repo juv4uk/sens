@@ -6,6 +6,12 @@ on:
       - "lib/machine/admission/x86-64.lisp"
       - "crates/sens/tests/machine_admission_false_width.rs"
       - ".github/workflows/machine-admission-false-width.yml"
+  push:
+    branches: [main]
+    paths:
+      - "lib/machine/admission/x86-64.lisp"
+      - "crates/sens/tests/machine_admission_false_width.rs"
+      - ".github/workflows/machine-admission-false-width.yml"
   workflow_dispatch:
 
 permissions:
