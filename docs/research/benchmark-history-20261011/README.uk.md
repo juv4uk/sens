@@ -1,6 +1,6 @@
 # Історичні бенчмарки SENS: перша партія (11.10.2026)
 
-> **Актуальний аудит злиття гілок (12.10.2026):** [результати порівняння benchmark- і docs-refs із main](../../../../research/branch-history/20261012/benchmark-branch-audit-20261012.uk.md). Унікальні старі джерела, яких не було в активних шляхах, збережені неактивно в [source recovery archive](../../../../research/branch-history/20261012/benchmark-unique-source-recovery/README.uk.md); це не означає, що старі workflow можна запускати.
+> **Актуальний аудит злиття гілок (12.10.2026):** [результати порівняння benchmark- і docs-refs із main](../../../research/branch-history/20261012/benchmark-branch-audit-20261012.uk.md). Унікальні старі джерела, яких не було в активних шляхах, збережені неактивно в [source recovery archive](../../../research/branch-history/20261012/benchmark-unique-source-recovery/README.uk.md); це не означає, що старі workflow можна запускати.
 
 Першоджерела з PR #5517, #5514, #5508, #5500, #3185, #3128, #5214, #5192 інтегровано до main в **невиконуваний доказовий архів**. Файли мають оригінальний Git blob SHA: жодної зміни сирцевих байтів. Повторні SHA між PR навмисні й свідчать про спільний донорський код.
 
