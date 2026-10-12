@@ -207,7 +207,7 @@
        xmm-register register disp8 uimm8))))
 
 ; A disp8 slot only admits an exact integer in [-128,127].
-; Number identity is recognized using admitted 8-bit SID 01001100 WRITE-TO-STRING
+; Number identity uses the exact D8 word 11110100 WRITE-TO-STRING (not an SID alias)
 ; producing canonical #q2:<num>/<den> wire; D9 NUMBER->STRING callability
 ; is not inferred from its ratified nine-bit coordinate.
 ; never from human decimal presentation.  A reduced exact number is an
@@ -242,7 +242,7 @@
         ((110101010 "#q2:" wire)
          (x86-admission-wire-denominator-one? wire))
         ((101 0 0) (010 (001 (00000000))))))
-      (01001100 value))))
+      (11110100 value))))
 (0011 x86-admission-within-inclusive-integer-range?
   (0010 (value lower upper)
     ; Contract 11.8: current D6 >=/<= producers answer exact D1 control.
