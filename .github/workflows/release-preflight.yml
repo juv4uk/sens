@@ -90,13 +90,20 @@ jobs:
           import json, sys
           from pathlib import Path
           data=json.loads(Path(sys.argv[1]).read_text(encoding="utf-8"))
-          assert data["schema"] == "sens-t5-triplet-inventory/v1"
-          assert data["failed_required"] == []
-          assert data["summary"]["physical_pairs_seen"] > 0
-          assert data["summary"]["physical_blocked"] == 0
-          assert data["summary"]["view_present_valid"] >= 1
-          assert data["summary"]["release_admitted"] == 0
-          assert data["summary"]["original_executable_migrations_certified"] == 0
+          # Fail-closed even under python3 -O: assert statements vanish under optimization.
+          checks = (
+              (data["schema"] == "sens-t5-triplet-inventory/v1", "invalid evidence schema"),
+              (data["failed_required"] == [], "required triple witness failed"),
+              (data["summary"]["physical_pairs_seen"] > 0, "no physical pairs"),
+              (data["summary"]["physical_blocked"] == 0, "physical source blocked"),
+              (data["summary"]["view_present_valid"] >= 1, "bounded view witness missing"),
+              (data["summary"]["release_admitted"] == 0, "admission claims need release-scoped gate"),
+              (data["summary"]["original_executable_migrations_certified"] == 0,
+               "original executable migration claims need independent replay"),
+          )
+          for valid, explanation in checks:
+              if not valid:
+                  raise SystemExit("RELEASE_PREFLIGHT_BLOCKED: " + explanation)
           print("BOUNDED_TRIPLE_PREFLIGHT_PASS / GENERAL_UK_ORACLE_AND_FULL_VIEW_RELEASE_STILL_BLOCKED")
           print("REMAINING_MISSING_SPACED_VIEWS", data["summary"]["view_missing"])
           PY
