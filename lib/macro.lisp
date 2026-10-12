@@ -1,23 +1,18 @@
-; lib/macro.lisp — bootstrap derivation on exact 8-bit function identities.
+; lib/macro.lisp — часткова міграція bootstrap на точну драбину D3/D4.
 ;
-; #1325: the language has one function-identity space: 00000000..11111111.
-; Human words are not function identities.
+; Зовнішні виконувані голови EVAL, CONS і QUOTE використовують ратифіковані
+; D4:0001, D3:111, D3:001 відповідно. Історичні 8-бітні слова всередині
+; (001 <шаблон>) є ЦИТОВАНИМИ ДАНИМИ, а не дозволом виконувати старий SID8.
+; Їхню заміну разом зі старою COND треба довести окремим runtime-оракулом.
 ;
-; SID 00001010 is derived here from mechanisms already selected by:
-;   00001001 + 00001000 + 00000100 + the narrow host Closure->Macro mechanism.
-;
-; `make-macro` below is NOT a my-lisp function identity. It is an explicit
-; temporary host substrate with no SID and is tracked by #1330/#1328 until that
-; boundary is removed or represented without creating a second function ontology.
-;
-; Every actual my-lisp function used below is invoked only by its eight bits.
-; No SID is wrapped in a string, symbol, quote-label, or named identity.
+; make-macro — тимчасовий host-механізм без власної доменної тотожності
+; (#1330/#1328); не створювати прихованої семантики макровизначення.
 
 (make-macro
-  (01001101
-    (00000100 (00000001 00001000)
-      (00000100 (00000001 args)
-        (00000001
+  (0001
+    (111 (001 00001000)
+      (111 (001 args)
+        (001
           ((00000111
              ((00000010 args)
               (make-macro))
