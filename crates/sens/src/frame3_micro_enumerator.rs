@@ -1,4 +1,4 @@
-//! Dense Frame3-Micro enumerator for 1/2/3-byte payloads.
+//! Dense Frame3-Micro enumerator for 1/2/3/4-byte payloads.
 //!
 //! Canonical order is over a deliberately total, closed D3 microgrammar:
 //! literals 0/1/NIL, QUOTE of those literals, ATOM, CONS,
@@ -11,6 +11,7 @@
 //!   F3M-1 = global ranks [0, 256)
 //!   F3M-2 = next 65_536 ranks
 //!   F3M-3 = next 16_777_216 ranks
+//!   F3M-4 = next 4_294_967_296 ranks
 //! Thus every payload value in each admitted width names exactly one program,
 //! with no reserved/magic code points and no aliases across widths.
 
@@ -20,9 +21,11 @@ const LEAF_COUNT: u128 = 6;
 const F3M1_CAPACITY: u128 = 1u128 << 8;
 const F3M2_CAPACITY: u128 = 1u128 << 16;
 const F3M3_CAPACITY: u128 = 1u128 << 24;
+const F3M4_CAPACITY: u128 = 1u128 << 32;
 const F3M2_OFFSET: u128 = F3M1_CAPACITY;
 const F3M3_OFFSET: u128 = F3M1_CAPACITY + F3M2_CAPACITY;
-const F3M_END: u128 = F3M3_OFFSET + F3M3_CAPACITY;
+const F3M4_OFFSET: u128 = F3M3_OFFSET + F3M3_CAPACITY;
+const F3M_END: u128 = F3M4_OFFSET + F3M4_CAPACITY;
 const COUNT_LIMIT: usize = 16;
 
 #[derive(Clone, Debug, Eq, Hash, PartialEq)]
@@ -58,7 +61,7 @@ pub const CAP_ALL: u8 = CAP_QUOTE | CAP_ATOM | CAP_CONS | CAP_CAR | CAP_CDR | CA
 pub enum Frame3MicroEnumerateError {
     UnsupportedLength(usize),
     RankOutOfRange,
-    ProgramOutsideF3M3,
+    ProgramOutsideF3M4,
     InternalCountOverflow,
 }
 
@@ -379,7 +382,7 @@ fn rank_exact(
         return leaf_rank(expr).ok_or(Frame3MicroEnumerateError::RankOutOfRange);
     }
     if nodes > COUNT_LIMIT {
-        return Err(Frame3MicroEnumerateError::ProgramOutsideF3M3);
+        return Err(Frame3MicroEnumerateError::ProgramOutsideF3M4);
     }
 
     let atom_block = counts[nodes - 1];
@@ -683,7 +686,7 @@ pub fn first_global_rank_with_capabilities(
             if global < F3M_END {
                 return Ok(global);
             }
-            return Err(Frame3MicroEnumerateError::ProgramOutsideF3M3);
+            return Err(Frame3MicroEnumerateError::ProgramOutsideF3M4);
         }
 
         cumulative = cumulative
@@ -696,7 +699,7 @@ pub fn first_global_rank_with_capabilities(
 
 pub fn unrank_global(global_rank: u128) -> Result<Frame3MicroExpr, Frame3MicroEnumerateError> {
     if global_rank >= F3M_END {
-        return Err(Frame3MicroEnumerateError::ProgramOutsideF3M3);
+        return Err(Frame3MicroEnumerateError::ProgramOutsideF3M4);
     }
     let counts = count_table()?;
     let mut remaining = global_rank;
@@ -713,13 +716,13 @@ pub fn rank_global(expr: &Frame3MicroExpr) -> Result<u128, Frame3MicroEnumerateE
     let counts = count_table()?;
     let nodes = expr.node_count();
     if nodes > COUNT_LIMIT {
-        return Err(Frame3MicroEnumerateError::ProgramOutsideF3M3);
+        return Err(Frame3MicroEnumerateError::ProgramOutsideF3M4);
     }
     let rank = cumulative_before(nodes, &counts)?
         .checked_add(rank_exact(expr, &counts)?)
         .ok_or(Frame3MicroEnumerateError::InternalCountOverflow)?;
     if rank >= F3M_END {
-        return Err(Frame3MicroEnumerateError::ProgramOutsideF3M3);
+        return Err(Frame3MicroEnumerateError::ProgramOutsideF3M4);
     }
     Ok(rank)
 }
@@ -729,6 +732,7 @@ fn profile_offset(profile: Frame3MicroProfile) -> u128 {
         Frame3MicroProfile::F3M1 => 0,
         Frame3MicroProfile::F3M2 => F3M2_OFFSET,
         Frame3MicroProfile::F3M3 => F3M3_OFFSET,
+        Frame3MicroProfile::F3M4 => F3M4_OFFSET,
     }
 }
 
@@ -737,6 +741,7 @@ fn profile_capacity(profile: Frame3MicroProfile) -> u128 {
         Frame3MicroProfile::F3M1 => F3M1_CAPACITY,
         Frame3MicroProfile::F3M2 => F3M2_CAPACITY,
         Frame3MicroProfile::F3M3 => F3M3_CAPACITY,
+        Frame3MicroProfile::F3M4 => F3M4_CAPACITY,
     }
 }
 
@@ -759,10 +764,12 @@ pub fn encode_expr(expr: &Frame3MicroExpr) -> Result<Vec<u8>, Frame3MicroEnumera
         (Frame3MicroProfile::F3M1, global)
     } else if global < F3M3_OFFSET {
         (Frame3MicroProfile::F3M2, global - F3M2_OFFSET)
-    } else if global < F3M_END {
+    } else if global < F3M4_OFFSET {
         (Frame3MicroProfile::F3M3, global - F3M3_OFFSET)
+    } else if global < F3M_END {
+        (Frame3MicroProfile::F3M4, global - F3M4_OFFSET)
     } else {
-        return Err(Frame3MicroEnumerateError::ProgramOutsideF3M3);
+        return Err(Frame3MicroEnumerateError::ProgramOutsideF3M4);
     };
 
     let width = profile.physical_bytes();
@@ -808,18 +815,32 @@ mod tests {
             profile_program_capacity(Frame3MicroProfile::F3M3),
             16_777_216
         );
+        assert_eq!(
+            profile_program_capacity(Frame3MicroProfile::F3M4),
+            4_294_967_296
+        );
         assert_eq!(profile_global_offset(Frame3MicroProfile::F3M2), 256);
         assert_eq!(profile_global_offset(Frame3MicroProfile::F3M3), 65_792);
+        assert_eq!(
+            profile_global_offset(Frame3MicroProfile::F3M4),
+            16_843_008
+        );
     }
 
     #[test]
-    fn grammar_has_enough_distinct_programs_for_all_three_profiles() {
+    fn grammar_has_enough_distinct_programs_for_all_four_profiles() {
         let counts = count_table().unwrap();
         let through_eight = (1..=8).map(|nodes| counts[nodes]).sum::<u128>();
         let through_nine = through_eight + counts[9];
+        let through_eleven = (1..=11).map(|nodes| counts[nodes]).sum::<u128>();
+        let through_twelve = through_eleven + counts[12];
         assert_eq!(through_eight, 3_839_232);
         assert_eq!(counts[9], 31_422_390);
-        assert!(through_nine >= F3M_END);
+        assert_eq!(through_eleven, 3_149_929_038);
+        assert_eq!(counts[12], 27_233_592_018);
+        assert!(through_nine < F3M4_OFFSET);
+        assert!(through_eleven < F3M_END);
+        assert!(through_twelve >= F3M_END);
     }
 
     #[test]
@@ -1211,6 +1232,64 @@ mod tests {
             let expr = decode_payload(&payload).unwrap();
             assert_eq!(encode_expr(&expr).unwrap(), payload);
         }
+    }
+
+    #[test]
+    fn four_byte_boundaries_and_stratified_samples_roundtrip() {
+        for value in [
+            0u32,
+            1,
+            0x12_34_56_78,
+            0x80_00_00_00,
+            0xde_ad_be_ef,
+            0xff_ff_ff_ff,
+        ] {
+            let payload = value.to_be_bytes();
+            let expr = decode_payload(&payload).unwrap();
+            assert_eq!(encode_expr(&expr).unwrap(), payload);
+        }
+
+        // Deterministic coverage across the full 32-bit local-rank interval:
+        // one point from every high-16 bucket, without claiming exhaustive 2^32.
+        for high in 0u32..=u16::MAX as u32 {
+            let low = (high ^ 0xa5a5) & 0xffff;
+            let value = (high << 16) | low;
+            let payload = value.to_be_bytes();
+            let expr = decode_payload(&payload).unwrap();
+            assert_eq!(encode_expr(&expr).unwrap(), payload);
+        }
+    }
+
+    #[test]
+    fn four_byte_deadbeef_is_a_real_executable_program() {
+        let payload = [0xde, 0xad, 0xbe, 0xef];
+        let expr = decode_payload(&payload).unwrap();
+        assert_eq!(
+            expr.human_projection(),
+            "ATOM(CONS(ATOM(CDR(CONS(QUOTE(0),CAR(CONS(NIL,QUOTE(0)))))),ATOM(ATOM(ATOM(QUOTE(NIL))))))"
+        );
+        assert_eq!(expr.node_count(), 12);
+        assert_eq!(encode_expr(&expr).unwrap(), payload);
+
+        let source = expr.exact_words().join(" ");
+        let parsed = parse_canonical_binary(&source).expect("F3M-4 DEADBEEF source");
+        let actual = eval_parsed_expressions(&parsed, &mut Session::default())
+            .expect("F3M-4 DEADBEEF witness executes");
+        let expected = eval_parsed_expressions(
+            &parse_canonical_binary("0").unwrap(),
+            &mut Session::default(),
+        )
+        .unwrap();
+        assert_eq!(actual.value, expected.value);
+        assert_eq!(actual.output, expected.output);
+
+        eprintln!(
+            "F3M4_DEADBEEF={}\tnodes={}\twords={}\t{}",
+            payload.iter().map(|byte| format!("{byte:02x}")).collect::<String>(),
+            expr.node_count(),
+            expr.exact_words().len(),
+            expr.human_projection()
+        );
     }
 
     fn encoded_operation_count(expr: &Frame3MicroExpr) -> usize {
