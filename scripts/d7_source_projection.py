@@ -38,8 +38,12 @@ def load_current_d7() -> tuple[dict, dict[str, object]]:
         or pins.intersection(by_coordinate)):
         raise D7ProjectionError("D7 Lisp table and owner-ratified residency diverged")
     for bits, row in by_coordinate.items():
-        if row.lisp is not None:
-            raise D7ProjectionError(f"D7:{bits} minted a Lisp callable")
+        if row.en != owner["residents"][bits] or row.lisp is not None:
+            raise D7ProjectionError(f"D7:{bits} changed or minted a Lisp callable")
+        if row.surface_symbols is None or tuple(row.surface_symbols) != ("ук", "укр", "san", "en", "LISP", "sym"):
+            raise D7ProjectionError(f"D7:{bits} is missing the surface-indexed symbol map")
+        if row.surface_symbols["LISP"] is not None:
+            raise D7ProjectionError(f"D7:{bits} must not invent a Lisp symbol/callable")
     evidence = {item["coordinate"]: item for item in owner["rows"]}
     if len(evidence) != 128:
         raise D7ProjectionError("D7 owner evidence must cover all 128 coordinates")
@@ -87,13 +91,22 @@ def project(bits: str, *, role: str, namespace: str = "ук") -> dict:
     # Namespaces are presentation only, never the coordinate authority.
     field = {"ук": "uk", "укр": "ukr"}.get(namespace, namespace)
     surface = getattr(row, field)
-    if surface is None:
+    # A missing symbol is a valid explicit empty projection; descriptive
+    # namespaces still fail closed if their human label itself is absent.
+    if surface is None and namespace != "sym":
         raise D7ProjectionError(f"D7:{bits} has no {namespace} projection")
+    symbols = row.surface_symbols
+    if symbols is None:
+        raise D7ProjectionError(f"D7:{bits} lacks a surface-indexed symbol map")
+    symbol = symbols.get(namespace)
     return {
         "domain": "D7", "coordinate": bits, "width": 7,
         "role": "sound-text", "semantic_role": owner["semantic_role"],
         "status": "OWNER-RATIFIED", "namespace": namespace,
-        "surface": surface, "callable": False, "arithmetic_number": False,
+        # Keep the explanatory label for compatibility and expose the selected
+        # surface's actual glyph separately; these are projections, not identity.
+        "surface": surface, "symbol": symbol,
+        "callable": False, "arithmetic_number": False,
     }
 
 
