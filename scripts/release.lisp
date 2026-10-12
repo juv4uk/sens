@@ -12,8 +12,8 @@
 (0011 release-require
   (0010 (label actual expected)
     (110
-      ((11110111 actual expected) (1) actual)
-      ((11110111 actual expected) (0)
+      ((101 actual expected) actual)
+      ((010 (001 ()))
        ((0010 ()
           (11011011 label)
           (11011011 actual)

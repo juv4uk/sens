@@ -474,6 +474,40 @@ class LegacyD3GuardTests(unittest.TestCase):
             [f.rule for f in MODULE.scan_lisp(reverted, path)],
         )
 
+    def test_release_require_exact_d3_fail_closed(self):
+        """The tag/CI/owner preconditions retain an actual failure path."""
+        path = "scripts/release.lisp"
+        source = (ROOT / path).read_text(encoding="utf-8")
+        start = source.index("(0011 release-require" + chr(10))
+        end = source.index("(0011 release-run" + chr(10), start)
+        guard = source[start:end]
+
+        self.assertEqual(MODULE.scan_lisp(guard, path), [])
+        self.assertIn("((101 actual expected) actual)", guard)
+        self.assertIn("((010 (001 ()))", guard)
+        self.assertIn("(release-preflight-failed)", guard)
+
+        # A former three-field, result-matching branch must fail the
+        # live exact-D3 scanner, never become an accepted release bypass.
+        degraded = guard.replace(
+            "((101 actual expected) actual)",
+            "((101 actual expected) (1) actual)", 1
+        )
+        self.assertIn("COND_NOT_TWO_FIELDS", [
+            f.rule for f in MODULE.scan_lisp(degraded, path)
+        ])
+
+        # Host truth T is not a canonical D1 predicate in tag checks.
+        degraded = guard.replace("((010 (001 ()))", "(t", 1)
+        self.assertIn("COND_HOST_TRUTH", [
+            f.rule for f in MODULE.scan_lisp(degraded, path)
+        ])
+
+        # The error route cannot be silently detached from preflight.
+        without_error = guard.replace("(release-preflight-failed)", "(001 ())", 1)
+        self.assertNotEqual(guard, without_error)
+        self.assertNotIn("(release-preflight-failed)", without_error)
+
     def test_historical_paths_and_metadata_excluded(self):
         for path in ("docs/research/old.lisp", "research/domain-archive/a.lisp",
                      "tests/fixtures/old.lisp", "lib/domains/d3.lisp",
