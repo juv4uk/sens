@@ -48,6 +48,7 @@ CANONICAL = (
     "crates/sens/src/domain_surface_registry_generated.rs",
     "crates/sens/src/error.rs",
     "crates/sens/src/eval/arithmetic.rs",
+    "crates/sens/src/eval/builtins.rs",
     "crates/sens/src/eval/macro_substrate.rs",
     "crates/sens/src/eval/necessary_forms_generated.rs",
     "crates/sens/src/eval/selector_law.rs",
@@ -85,7 +86,6 @@ CANONICAL = (
 LEGACY_DEBT_MAX = {
     "crates/sens/src/binary_framing.rs": 5,
     "crates/sens/src/environment.rs": 2,
-    "crates/sens/src/eval/builtins.rs": 19,
     "crates/sens/src/eval/canon.rs": 54,
     "crates/sens/src/eval/capabilities.rs": 9,
     "crates/sens/src/eval/closures.rs": 16,
@@ -323,6 +323,15 @@ def self_test() -> None:
             raise
     else:
         raise ValueError("missing sources were admitted")
+    # Механізми backend, що вже не відновлюють історичну identity,
+    # більше не можуть повернути Sens8 навіть один раз: CANONICAL fail-closed.
+    if "crates/sens/src/eval/builtins.rs" not in CANONICAL:
+        raise ValueError("migrated backend lost canonical-identity guard")
+    if "crates/sens/src/eval/builtins.rs" in LEGACY_DEBT_MAX:
+        raise ValueError("migrated backend still carries a legacy-debt allowance")
+    for forbidden in ("use crate::Sens8;", "exact_args(crate::sens!(01010000), args, 1, span)?;"):
+        if not inspect_code("crates/sens/src/eval/builtins.rs", forbidden):
+            raise ValueError("canonical backend guard missed a legacy identity reintroduction")
     # Debt ratchet: any core file that GROWS old identity must fail.
     with tempfile.TemporaryDirectory() as tmp:
         probe = Path(tmp)
