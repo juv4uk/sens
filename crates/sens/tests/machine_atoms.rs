@@ -1,4 +1,7 @@
 use sens::{eval_program, load_core_library, Session};
+
+#[path = "support/machine_block_exact.rs"]
+mod machine_block_exact;
 use std::fs;
 use std::path::PathBuf;
 
@@ -17,7 +20,7 @@ fn load_lisp_file(path: &str, session: &mut Session) {
 fn machine_session() -> Session {
     let mut session = Session::default();
     load_core_library(&mut session).expect("core must bootstrap before machine atoms");
-    load_lisp_file("lib/machine/block.lisp", &mut session);
+    machine_block_exact::load(&mut session);
     load_lisp_file("lib/machine/encoding/x86-64.lisp", &mut session);
     load_lisp_file("lib/machine/operands/x86-64.lisp", &mut session);
     load_lisp_file("lib/machine/admission/x86-64.lisp", &mut session);
