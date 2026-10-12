@@ -1,0 +1,40 @@
+name: Cross-language native baseline
+
+on:
+  pull_request:
+    paths:
+      - 'benchmarks/cross-language/native-baseline/**'
+      - '.github/workflows/cross-language-native-baseline.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'benchmarks/cross-language/native-baseline/**'
+      - '.github/workflows/cross-language-native-baseline.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  native-baseline:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v5
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Run parity-first native baseline
+        run: |
+          set -euo pipefail
+          rm -rf "$RUNNER_TEMP/native-baseline"
+          python3 benchmarks/cross-language/native-baseline/run.py \
+            --n 200000 --reps 9 --warmups 2 \
+            --out "$RUNNER_TEMP/native-baseline"
+          cat "$RUNNER_TEMP/native-baseline/report.md" >> "$GITHUB_STEP_SUMMARY"
+      - name: Preserve raw evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: cross-language-native-baseline-${{ github.sha }}
+          path: ${{ runner.temp }}/native-baseline/
+          if-no-files-found: warn
+          retention-days: 14
