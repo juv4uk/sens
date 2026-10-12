@@ -196,11 +196,21 @@
 ; precedence and the public detected/unknown result shape.
 (0011 timezone-declarations->observation
   (0010 (tz-value etc-timezone-value)
+    ; Avoid old AND macro: its historical expansion has an unadmitted CONS
+    ; arity. Two D3 COND levels preserve exact D1 checks and short-circuit.
     (110
-      ((and (110100110 tz-value) (11011 (110100010 tz-value) 0))
-       (111 (001 detected) (111 tz-value (111 (001 TZ) (001 ())))))
-      ((and (110100110 etc-timezone-value) (11011 (110100010 etc-timezone-value) 0))
-       (111 (001 detected) (111 etc-timezone-value (111 (001 etc-timezone) (001 ())))))
+      ((110100110 tz-value)
+       (110
+         ((11011 (110100010 tz-value) 0)
+          (111 (001 detected) (111 tz-value (111 (001 TZ) (001 ())))))
+         ((010 (001 ()))
+          (timezone-declarations->observation (001 ()) etc-timezone-value))))
+      ((110100110 etc-timezone-value)
+       (110
+         ((11011 (110100010 etc-timezone-value) 0)
+          (111 (001 detected) (111 etc-timezone-value (111 (001 etc-timezone) (001 ())))))
+         ((010 (001 ()))
+          (111 (001 unknown) (111 (001 host-declaration-unavailable) (001 ()))))))
       ((010 (001 ()))
        (111 (001 unknown) (111 (001 host-declaration-unavailable) (001 ()))))))
 )
