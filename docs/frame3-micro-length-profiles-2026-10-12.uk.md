@@ -76,7 +76,7 @@ CONS, CAR, CDR, COND**. DP по всіх 64 capability-mask'ах довів, щ�
 
 Окремий exhaustive-пошук перевіряє **всі останні 65 536** трьохбайтових
 payloads, від `FF 00 00` до `FF FF FF`. Прозорий lexicographic score:
-кількість capability-класів → кількість COND → кількість runtime-операцій →
+кількість capability-класів → кількість COND → кількість encoded-операцій →
 глибина → exact-word count → node count → пізніший rank.
 
 Переможець цієї останньої 64K-сторінки — **`FF FB 37`**, лише на
@@ -84,7 +84,7 @@ payloads, від `FF 00 00` до `FF FF FF`. Прозорий lexicographic scor
 
 `CAR(CONS(CDR(CONS(1,QUOTE(1))),ATOM(IF-ATOM(QUOTE(NIL),QUOTE(NIL),QUOTE(NIL)))))`
 
-Властивості witness: **6/6 capability-класів, 1 COND, 11 runtime-операцій,
+Властивості witness: **6/6 capability-класів, 1 COND, 11 encoded-операцій,
 глибина 4, 43 exact words, 9 micro-nodes**. Канонічний reader приймає
 відновлені слова, реальний evaluator виконує програму і повертає exact
 **D1:1**; encode/decode повертає ті самі три байти `FF FB 37`.
