@@ -8,7 +8,7 @@
     "FALSIFIER"
   ],
   "question": "Can canonical exact-width payload identity be preserved while storage, transport, and load costs are measured as separate physical axes?",
-  "claim": "Measures STORE/AIR/LOAD accounting and validates exact-width recovery for declared fixtures; transport overhead does not become language semantics.",
+  "claim": "Measures STORE/AIR/LOAD accounting for its pinned Contract 11.8 D1-D9 generation. It must not be treated as current Contract 11.9 evidence until the corpus is replayed and validated under that generation.",
   "witness": [
     "README.md",
     "run.py",
@@ -16,8 +16,8 @@
     "fixtures.json",
     "schema.json"
   ],
-  "status": "ACTIVE",
-  "generation": "unknown",
+  "status": "HISTORICAL-GENERATION; CURRENT-REPLAY-BLOCKED",
+  "generation": "Contract 11.8 D1-D9 baseline; Contract 11.9 replay pending",
   "axis": "store-air-load/physical-separation",
   "reproduce": "python3 benchmarks/store-air-load/run.py --out /tmp/store-air-load.jsonl --bitrate-bps 2 && python3 benchmarks/store-air-load/validate.py /tmp/store-air-load.jsonl"
 }
