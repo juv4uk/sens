@@ -68,8 +68,10 @@ class ReleaseAssetsTest(unittest.TestCase):
             verify_replay(self.dist, self.replay(), TAG, "b" * 40)
 
     def test_wrong_tag_rejected(self):
-        with self.assertRaisesRegex(ValueError, "malformed release tag"):
-            prepare(self.dist, "main", SHA)
+        # Asset staging must use the same canonical tag grammar as tag admission.
+        for tag in ("main", "l00.42.0", "l0.042.0", "l0.42.00", "l0.42", "l0.42.0-rc1"):
+            with self.subTest(tag=tag), self.assertRaisesRegex(ValueError, "malformed release tag"):
+                prepare(self.dist, tag, SHA)
 
     def test_symlink_rejected(self):
         target = self.dist / "sens-cli-web.html"
