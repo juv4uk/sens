@@ -9,7 +9,8 @@ on:
   workflow_dispatch:
 
 jobs:
-  визначення-d4:
+  define-d4:
+    name: Перевірка DEFINE за точною D4
     runs-on: ubuntu-latest
     timeout-minutes: 12
     steps:
