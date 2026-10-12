@@ -433,6 +433,11 @@ fn binding_form(source: &str, head: &Expr) -> Option<u16> {
 }
 
 fn is_source_quote(source: &str, head: &Expr) -> bool {
+    // Apostrophe is lowered to exact D3:001 by the ordinary parser. Treat
+    // quoted bindings as data while collecting names, not as live DEFINEs.
+    if is_exact_quote(head) || source_spelling(source, head) == Some("'") {
+        return true;
+    }
     if source_spelling(source, head) == Some("001") {
         return true;
     }
@@ -809,6 +814,25 @@ mod tests {
     fn only(mut expressions: Vec<Expr>) -> Expr {
         assert_eq!(expressions.len(), 1);
         expressions.remove(0)
+    }
+
+    #[test]
+    fn apostrophe_d3_quote_does_not_introduce_executable_binders() {
+        let forms = parse_mixed_exact_domain("'(визначити атом? ()) (атом? ())")
+            .expect("apostrophe quoted data and D3 surface head");
+        assert_eq!(forms.len(), 2);
+        let ExprKind::List(items) = &forms[1].kind else {
+            panic!("second form must remain an executable list");
+        };
+        assert!(matches!(
+            &items[0].kind,
+            ExprKind::DomainIdentity(identity)
+                if identity.width() == 3 && identity.packed_bits() == 0b010
+        ));
+        let ExprKind::List(quoted) = &forms[0].kind else {
+            panic!("apostrophe expands to D2 list");
+        };
+        assert!(is_exact_quote(&quoted[0]));
     }
 
     #[test]
