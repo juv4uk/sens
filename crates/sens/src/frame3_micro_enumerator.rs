@@ -803,28 +803,24 @@ pub fn decode_payload(payload: &[u8]) -> Result<Frame3MicroExpr, Frame3MicroEnum
 }
 
 pub fn encode_expr(expr: &Frame3MicroExpr) -> Result<Vec<u8>, Frame3MicroEnumerateError> {
-    let (profile, local) = match rank_global(expr) {
-        Ok(global) if global < F3M1_CAPACITY => (Frame3MicroProfile::F3M1, global),
-        Ok(global) if global < F3M3_OFFSET => {
+    let (profile, local) = if crate::frame3_micro_v5::contains_extension(expr) {
+        (
+            Frame3MicroProfile::F3M5,
+            crate::frame3_micro_v5::encode_extension(expr)?,
+        )
+    } else {
+        let global = rank_global(expr)?;
+        if global < F3M1_CAPACITY {
+            (Frame3MicroProfile::F3M1, global)
+        } else if global < F3M3_OFFSET {
             (Frame3MicroProfile::F3M2, global - F3M2_OFFSET)
-        }
-        Ok(global) if global < F3M4_OFFSET => {
+        } else if global < F3M4_OFFSET {
             (Frame3MicroProfile::F3M3, global - F3M3_OFFSET)
-        }
-        Ok(global) if global < F3M_END => {
+        } else if global < F3M_END {
             (Frame3MicroProfile::F3M4, global - F3M4_OFFSET)
+        } else {
+            return Err(Frame3MicroEnumerateError::ProgramOutsideF3M4);
         }
-        Ok(_) => return Err(Frame3MicroEnumerateError::ProgramOutsideF3M4),
-        Err(Frame3MicroEnumerateError::RankOutOfRange)
-        | Err(Frame3MicroEnumerateError::ProgramOutsideF3M4)
-            if crate::frame3_micro_v5::contains_extension(expr) =>
-        {
-            (
-                Frame3MicroProfile::F3M5,
-                crate::frame3_micro_v5::encode_extension(expr)?,
-            )
-        }
-        Err(error) => return Err(error),
     };
 
     let width = profile.physical_bytes();
