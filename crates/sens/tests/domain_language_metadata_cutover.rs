@@ -36,10 +36,16 @@ fn ukrainian_d4_lambda_and_define_keep_distinct_four_bit_identities() {
 #[test]
 fn historical_defmacro_does_not_inherit_d5_macro_identity() {
     let all = language_items();
-    let macro_record = unique(&all, "визначити-макрос");
-    assert_eq!(macro_record.kind, LanguageItemKind::Macro);
-    assert!(macro_record.domain_identity.is_none(),
-        "історичний DEFMACRO ≠ ратифікований D5 MACRO");
+    // W8 compatibility metadata can repeat the same spelling in ук/укр,
+    // but it cannot acquire a canonical D5 identity in either projection.
+    let records = all.iter().filter(|row| row.name == "визначити-макрос")
+        .collect::<Vec<_>>();
+    assert!(!records.is_empty(), "історичний макрос присутній в інвентарі");
+    for record in records {
+        assert_eq!(record.kind, LanguageItemKind::Macro);
+        assert!(record.domain_identity.is_none(),
+            "історичний DEFMACRO ≠ ратифікований D5 MACRO");
+    }
 }
 
 #[test]
