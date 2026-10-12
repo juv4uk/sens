@@ -26,16 +26,12 @@
   (0010 (remaining)
     (110
       ((010 remaining)
-       ()
        (001 ()))
-      ((010 remaining)
-       (0)
+      ((010 (001 ()))
        (110
          ((010 (11100 (001 form) (011 (100 remaining))))
-          ()
           (form-rows (011 remaining)))
-         ((010 (11100 (001 form) (011 (100 remaining))))
-          (0)
+         ((010 (001 ()))
           (111 (100 remaining) (form-rows (011 remaining)))))))))
 
 (0011 rows (form-rows all-rows))
@@ -44,24 +40,18 @@
   (0010 (name)
     (110
       ((11110111 name (001 lambda))
-       (1)
        "NecessaryFormMechanism::Lambda")
       ((11110111 name (001 define))
-       (1)
        "NecessaryFormMechanism::Define")
-      ((001 no-known-mechanism)
-       no-known-mechanism
-       (100 (001 ()))))))
+      ((010 (001 ())) (100 (001 ()))))))
 
 (0011 render-row
   (0010 (row)
     (001000 ((mechanism (rust-mechanism (row-form row))))
       (110
         ((010 mechanism)
-         ()
          (100 (001 ())))
-        ((010 mechanism)
-         (1)
+        ((010 (001 ()))
          (str+
            "    NecessaryFormDispatchRow { semantic_id: 0b"
            (11110100 (100 row))
@@ -73,10 +63,8 @@
   (0010 (remaining)
     (110
       ((010 remaining)
-       ()
        "")
-      ((010 remaining)
-       (0)
+      ((010 (001 ()))
        (str+ (render-row (100 remaining))
              (render-rows (011 remaining)))))))
 
@@ -102,27 +90,22 @@
 
 (110
   ((010 *argv*)
-   ()
-   (1001
-     (1110
-       (110111100 output-path generated)
-       (11011011 "Rust evaluator dispatch projection written"))))
-  ((11110111 (100 *argv*) "--check")
-   (1)
-   (001000 ((current (110110111 output-path)))
-     (110
-       ((11110111 current generated)
-        (1)
-        (11011011 "Rust evaluator dispatch projection is current"))
-       ((11110111 current generated)
-        (0)
-        (1001
-          (1110
-            (11011011 "Rust evaluator dispatch projection is stale")
-            (100 (001 ()))))))))
-  ((001 write-projection)
-   write-projection
    (1001
      (1110
        (110111100 output-path generated)
        (11011011 "Rust evaluator dispatch projection written")))))
+  ((11110111 (100 *argv*) "--check")
+   (001000 ((current (110110111 output-path)))
+     (110
+       ((11110111 current generated)
+        (11011011 "Rust evaluator dispatch projection is current"))
+       ((010 (001 ()))
+        (1001
+          (1110
+            (11011011 "Rust evaluator dispatch projection is stale")
+            (100 (001 ()))))))))
+  ((010 (001 ()))
+   (1001
+     (1110
+       (110111100 output-path generated)
+       (11011011 "Rust evaluator dispatch projection written"))))
