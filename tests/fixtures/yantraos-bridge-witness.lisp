@@ -5,179 +5,179 @@
 ; the execution owner, and the returned execution observation remains data.
 ; No raw shell command is admitted to the envelope.
 
-(00001001 yo-proper-list?
-  (00001000 (value)
-    (00000111
-      ((00000010 value)
+(0011 yo-proper-list?
+  (0010 (value)
+    (110
+      ((010 value)
        (1)
-       (00000111
-         ((00100010 value (00000001 ()))
+       (110
+         ((11110111 value (001 ()))
           (1)
-          (00000001 yes))
-         ((00000001 always)
-          (00000001 always)
-          (00000001 invalid))))
-      ((00000001 always)
-       (00000001 always)
-       (yo-proper-list? (00000110 value))))))
+          (001 yes))
+         ((001 always)
+          (001 always)
+          (001 invalid))))
+      ((001 always)
+       (001 always)
+       (yo-proper-list? (011 value))))))
 
-(00001001 yo-field
-  (00001000 (name record)
-    (10011100 ((found (00101101 name record)))
-      (00000111
-        ((00100010 found (00000001 ()))
+(0011 yo-field
+  (0010 (name record)
+    (001000 ((found (11100 name record)))
+      (110
+        ((11110111 found (001 ()))
          (1)
-         (00000001 ()))
-        ((00000001 always)
-         (00000001 always)
-         (00000110 found))))))
+         (001 ()))
+        ((001 always)
+         (001 always)
+         (011 found))))))
 
-(00001001 yo-has-field?
-  (00001000 (name record)
-    (10011100 ((found (00101101 name record)))
-      (00000111
-        ((00100010 found (00000001 ()))
+(0011 yo-has-field?
+  (0010 (name record)
+    (001000 ((found (11100 name record)))
+      (110
+        ((11110111 found (001 ()))
          (1)
-         (00000001 no))
-        ((00000001 always)
-         (00000001 always)
-         (00000001 yes))))))
+         (001 no))
+        ((001 always)
+         (001 always)
+         (001 yes))))))
 
-(00001001 yo-no-raw-shell?
-  (00001000 (envelope)
-    (10011100 ((action (yo-field (00000001 action) envelope))
-          (parameters (yo-field (00000001 parameters) envelope)))
-      (00000111
-        ((00100010
-           (yo-field (00000001 capability) action)
-           (00000001 shell))
+(0011 yo-no-raw-shell?
+  (0010 (envelope)
+    (001000 ((action (yo-field (001 action) envelope))
+          (parameters (yo-field (001 parameters) envelope)))
+      (110
+        ((11110111
+           (yo-field (001 capability) action)
+           (001 shell))
          (1)
-         (00000001 no))
-        ((yo-has-field? (00000001 command) parameters)
-         (00000001 yes)
-         (00000001 no))
-        ((00000001 always)
-         (00000001 always)
-         (00000001 yes))))))
+         (001 no))
+        ((yo-has-field? (001 command) parameters)
+         (001 yes)
+         (001 no))
+        ((001 always)
+         (001 always)
+         (001 yes))))))
 
-(00001001 yo-action-envelope
-  (00001000 (goal capability operation target parameters verification provenance approval)
-    (00100111
-      (00000100 (00000001 protocol) (00000001 (yantraos-bridge 1)))
-      (00000100 (00000001 intent)
-            (00100111
-              (00000100 (00000001 goal) goal)
-              (00000100 (00000001 requires) (00000001 ()))
-              (00000100 (00000001 stop-on) (00000001 (verified)))
-              (00000100 (00000001 produces) (00000001 (execution-observation)))))
-      (00000100 (00000001 action)
-            (00100111
-              (00000100 (00000001 capability) capability)
-              (00000100 (00000001 operation) operation)
-              (00000100 (00000001 target) target)))
-      (00000100 (00000001 parameters) parameters)
-      (00000100 (00000001 verification) verification)
-      (00000100 (00000001 provenance) provenance)
-      (00000100 (00000001 approval) approval))))
+(0011 yo-action-envelope
+  (0010 (goal capability operation target parameters verification provenance approval)
+    (1110
+      (111 (001 protocol) (001 (yantraos-bridge 1)))
+      (111 (001 intent)
+            (1110
+              (111 (001 goal) goal)
+              (111 (001 requires) (001 ()))
+              (111 (001 stop-on) (001 (verified)))
+              (111 (001 produces) (001 (execution-observation)))))
+      (111 (001 action)
+            (1110
+              (111 (001 capability) capability)
+              (111 (001 operation) operation)
+              (111 (001 target) target)))
+      (111 (001 parameters) parameters)
+      (111 (001 verification) verification)
+      (111 (001 provenance) provenance)
+      (111 (001 approval) approval))))
 
-(00001001 yo-action-envelope?
-  (00001000 (value)
-    (00000111
+(0011 yo-action-envelope?
+  (0010 (value)
+    (110
       ((yo-proper-list? value)
-       (00000001 yes)
-       (00000111
-         ((yo-has-field? (00000001 protocol) value)
-          (00000001 yes)
-          (00000111
-            ((yo-has-field? (00000001 intent) value)
-             (00000001 yes)
-             (00000111
-               ((yo-has-field? (00000001 action) value)
-                (00000001 yes)
-                (00000111
-                  ((yo-has-field? (00000001 parameters) value)
-                   (00000001 yes)
-                   (00000111
-                     ((yo-has-field? (00000001 verification) value)
-                      (00000001 yes)
-                      (00000111
-                        ((yo-has-field? (00000001 provenance) value)
-                         (00000001 yes)
-                         (00000111
-                           ((yo-has-field? (00000001 approval) value)
-                            (00000001 yes)
+       (001 yes)
+       (110
+         ((yo-has-field? (001 protocol) value)
+          (001 yes)
+          (110
+            ((yo-has-field? (001 intent) value)
+             (001 yes)
+             (110
+               ((yo-has-field? (001 action) value)
+                (001 yes)
+                (110
+                  ((yo-has-field? (001 parameters) value)
+                   (001 yes)
+                   (110
+                     ((yo-has-field? (001 verification) value)
+                      (001 yes)
+                      (110
+                        ((yo-has-field? (001 provenance) value)
+                         (001 yes)
+                         (110
+                           ((yo-has-field? (001 approval) value)
+                            (001 yes)
                             (yo-no-raw-shell? value))
-                           ((00000001 always)
-                            (00000001 always)
-                            (00000001 no))))
-                        ((00000001 always)
-                         (00000001 always)
-                         (00000001 no))))
-                     ((00000001 always)
-                      (00000001 always)
-                      (00000001 no))))
-                  ((00000001 always)
-                   (00000001 always)
-                   (00000001 no))))
-               ((00000001 always)
-                (00000001 always)
-                (00000001 no))))
-            ((00000001 always)
-             (00000001 always)
-             (00000001 no))))
-         ((00000001 always)
-          (00000001 always)
-          (00000001 no))))
-      ((00000001 always)
-       (00000001 always)
-       (00000001 no)))))
+                           ((001 always)
+                            (001 always)
+                            (001 no))))
+                        ((001 always)
+                         (001 always)
+                         (001 no))))
+                     ((001 always)
+                      (001 always)
+                      (001 no))))
+                  ((001 always)
+                   (001 always)
+                   (001 no))))
+               ((001 always)
+                (001 always)
+                (001 no))))
+            ((001 always)
+             (001 always)
+             (001 no))))
+         ((001 always)
+          (001 always)
+          (001 no))))
+      ((001 always)
+       (001 always)
+       (001 no)))))
 
-(00001001 yo-execution-observation
-  (00001000 (result route evidence audit-ref provenance)
-    (00100111
-      (00000100 (00000001 protocol) (00000001 (yantraos-bridge 1)))
-      (00000100 (00000001 result) result)
-      (00000100 (00000001 route) route)
-      (00000100 (00000001 evidence) evidence)
-      (00000100 (00000001 audit-ref) audit-ref)
-      (00000100 (00000001 provenance) provenance))))
+(0011 yo-execution-observation
+  (0010 (result route evidence audit-ref provenance)
+    (1110
+      (111 (001 protocol) (001 (yantraos-bridge 1)))
+      (111 (001 result) result)
+      (111 (001 route) route)
+      (111 (001 evidence) evidence)
+      (111 (001 audit-ref) audit-ref)
+      (111 (001 provenance) provenance))))
 
-(00001001 yo-execution-observation?
-  (00001000 (value)
-    (00000111
+(0011 yo-execution-observation?
+  (0010 (value)
+    (110
       ((yo-proper-list? value)
-       (00000001 yes)
-       (00000111
-         ((yo-has-field? (00000001 protocol) value)
-          (00000001 yes)
-          (00000111
-            ((yo-has-field? (00000001 result) value)
-             (00000001 yes)
-             (00000111
-               ((yo-has-field? (00000001 route) value)
-                (00000001 yes)
-                (00000111
-                  ((yo-has-field? (00000001 evidence) value)
-                   (00000001 yes)
-                   (00000111
-                     ((yo-has-field? (00000001 audit-ref) value)
-                      (00000001 yes)
-                      (yo-has-field? (00000001 provenance) value))
-                     ((00000001 always)
-                      (00000001 always)
-                      (00000001 no))))
-                  ((00000001 always)
-                   (00000001 always)
-                   (00000001 no))))
-               ((00000001 always)
-                (00000001 always)
-                (00000001 no))))
-            ((00000001 always)
-             (00000001 always)
-             (00000001 no))))
-         ((00000001 always)
-          (00000001 always)
-          (00000001 no))))
-      ((00000001 always)
-       (00000001 always)
-       (00000001 no)))))
+       (001 yes)
+       (110
+         ((yo-has-field? (001 protocol) value)
+          (001 yes)
+          (110
+            ((yo-has-field? (001 result) value)
+             (001 yes)
+             (110
+               ((yo-has-field? (001 route) value)
+                (001 yes)
+                (110
+                  ((yo-has-field? (001 evidence) value)
+                   (001 yes)
+                   (110
+                     ((yo-has-field? (001 audit-ref) value)
+                      (001 yes)
+                      (yo-has-field? (001 provenance) value))
+                     ((001 always)
+                      (001 always)
+                      (001 no))))
+                  ((001 always)
+                   (001 always)
+                   (001 no))))
+               ((001 always)
+                (001 always)
+                (001 no))))
+            ((001 always)
+             (001 always)
+             (001 no))))
+         ((001 always)
+          (001 always)
+          (001 no))))
+      ((001 always)
+       (001 always)
+       (001 no)))))
