@@ -1029,6 +1029,20 @@ pub fn compiler_execution_role_from_sens(
 mod tests {
     use super::*;
 
+    // The compiler nucleus self-traverses an entire canonical source corpus.
+    // Keep all proof assertions and run this intentionally deep witness on
+    // a named test thread with a sufficient explicit stack. This does NOT
+    // change the interpreter or grant unbounded recursion in production.
+    fn run_full_program_witness(test: impl FnOnce() + Send + 'static) {
+        std::thread::Builder::new()
+            .name("сенс-компілятор-доказ".to_string())
+            .stack_size(64 * 1024 * 1024)
+            .spawn(test)
+            .expect("cannot create compiler proof thread")
+            .join()
+            .expect("compiler proof failed or panicked");
+    }
+
     fn d3(raw: u8) -> CoreDomainIdentity {
         CoreDomainIdentity::D3(
             crate::Bija3::from_word(crate::Bit3::new(raw).expect("D3 test word")),
@@ -1257,6 +1271,7 @@ mod tests {
 
     #[test]
     fn whole_program_artifact_verifier_binds_requests_to_current_sens_authority() {
+        run_full_program_witness(|| {
         let parsed = parse_mixed_exact_domain(COMPILER_NUCLEUS_SOURCE).expect("compiler nucleus parses");
         let lowered = crate::lower_program(&parsed);
         let wire = crate::wire_encode_program(&lowered);
@@ -1305,10 +1320,12 @@ mod tests {
                 proof_ref_for_lowering_role(request.lowering_role)
             );
         }
+        });
     }
 
     #[test]
     fn whole_program_artifact_verifier_rejects_tampering_and_target_smuggling() {
+        run_full_program_witness(|| {
         // The compiler source is D3/D4: the historical generic parser may
         // reintroduce legacy W8 nodes before the artifact gets verified.
         let parsed = parse_mixed_exact_domain(COMPILER_NUCLEUS_SOURCE)
@@ -1352,10 +1369,12 @@ mod tests {
             verify_compiler_program_artifact_from_sens(&smuggled, &digest, revision)
                 .is_err()
         );
+        });
     }
 
     #[test]
     fn whole_program_artifact_wraps_real_wire_traversal_inside_sens() {
+        run_full_program_witness(|| {
         let parsed = parse_mixed_exact_domain(COMPILER_NUCLEUS_SOURCE)
             .expect("compiler nucleus parses through exact-domain seam");
         let lowered = crate::lower_program(&parsed);
@@ -1466,6 +1485,7 @@ mod tests {
                 "whole artifact leaked backend policy: {forbidden}"
             );
         }
+        });
     }
 
     #[test]
