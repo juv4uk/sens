@@ -12,7 +12,8 @@
     "README.md",
     "run.py",
     "manifest.scm",
-    "BINARY_TREES_PROVENANCE.md"
+    "BINARY_TREES_PROVENANCE.md",
+    "test_current_gate.py"
   ],
   "status": "BLOCKED-CURRENT-CANONICAL-REPLAY-NOT-IMPLEMENTED",
   "generation": "Historical Function8/FASL donor only; current Contract 11.9 canonical workload replay pending",
