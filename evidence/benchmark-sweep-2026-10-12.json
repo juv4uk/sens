@@ -269,14 +269,13 @@
     }
   ],
   "pending_current_head_validation": {
-    "recorded_base_head": "677b1a1b630d0c0b80959fbca350806e5f83f4b9",
-    "status": "COMPLETE_FOR_BENCHMARK_CODE; MAIN_ADVANCED_WITH_DOCS_ONLY_COMMITS",
-    "latest_main_at_receipt": "677b1a1b630d0c0b80959fbca350806e5f83f4b9",
-    "validated_benchmark_code_sha": "ea156c1d0fe386fe7422e4a345a6431a536e0c80",
-    "latest_sweep": {
+    "recorded_base_head": "69752ac30f40d1d196a34f5831032b3a6cb9c19d",
+    "status": "PENDING_FAIL_CLOSED_CROSS_LANGUAGE_REGISTRY_SWEEP",
+    "latest_main_at_receipt": "69752ac30f40d1d196a34f5831032b3a6cb9c19d",
+    "last_completed_sweep": {
       "id": 38192977589,
+      "sha": "ea156c1d0fe386fe7422e4a345a6431a536e0c80",
       "url": "https://github.com/juv4uk/sens/actions/runs/38192977589",
-      "conclusion": "success",
       "outcomes": {
         "pass": 53,
         "fail": 0,
@@ -284,10 +283,17 @@
         "timeout": 0
       }
     },
+    "current_sweep": {
+      "id": 38193326356,
+      "sha": "69752ac30f40d1d196a34f5831032b3a6cb9c19d",
+      "url": "https://github.com/juv4uk/sens/actions/runs/38193326356",
+      "status": "queued"
+    },
     "notes": [
-      "The only commits after ea156c1 at receipt time update README/project status text and do not change benchmark code or manifests.",
-      "Coverage is 54/54, with 53 PASS and one explicit BLOCKED for missing Guix; this is not an all-benchmarks-pass result.",
-      "Historical runs remain pinned to their exact SHAs and outcomes."
+      "The most recent completed full sweep is 53 PASS / 0 FAIL / 1 BLOCKED at ea156c1.",
+      "STORE/AIR is PASS under Contract 11.9 with current Ukrainian source heads paired against canonical binary.",
+      "Cross-language manifest now fails closed independent of Guix presence while its current Contract 11.9 canonical corpus/oracle remains unimplemented; running a historical Function8/FASL donor cannot become current evidence merely because Guix is installed.",
+      "The latest commit changes the cross-language manifest, generated index and descriptive docs. The new exact-SHA registry sweep is queued; do not publish its result until aggregation completes."
     ]
   },
   "latest_stand_level_results": {
