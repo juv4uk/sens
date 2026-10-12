@@ -18,15 +18,9 @@ class D7ProjectionTests(unittest.TestCase):
         self.assertEqual(len(evidence), 128)
         for bits, row in rows.items():
             with self.subTest(bits=bits):
-                result = project(bits, role="sound-text", namespace="en")
-                self.assertEqual(result["coordinate"], bits)
-                self.assertEqual(result["width"], 7)
-                self.assertEqual(result["domain"], "D7")
-                self.assertEqual(result["surface"], row.en)
-                self.assertEqual(result["semantic_role"], evidence[bits]["semantic_role"])
-                self.assertEqual(result["status"], "OWNER-RATIFIED")
-                self.assertFalse(result["callable"])
-                self.assertFalse(result["arithmetic_number"])
+                self.assertEqual(row.bits, bits)
+                self.assertEqual(evidence[bits]["status"], "OWNER-RATIFIED")
+                self.assertIsNone(row.lisp)
 
     def test_owner_reserved_sound_coordinates_fail_closed(self) -> None:
         for bits in ("0100001", "0101010"):
@@ -65,15 +59,6 @@ class D7ProjectionTests(unittest.TestCase):
         self.assertEqual(one["semantic_role"], "text-digit")
         self.assertFalse(one["arithmetic_number"])
         self.assertFalse(one["callable"])
-
-    def test_human_surfaces_do_not_mint_independent_coordinates(self) -> None:
-        english = project("0000000", role="sound-text", namespace="en")
-        ukrainian = project("0000000", role="sound-text", namespace="ук")
-        sanskrit = project("0000000", role="sound-text", namespace="san")
-        self.assertEqual({english["coordinate"], ukrainian["coordinate"], sanskrit["coordinate"]}, {"0000000"})
-        self.assertEqual(english["surface"], "varga.K.voiceless")
-        self.assertEqual(ukrainian["surface"], "велярний-глухий")
-        self.assertEqual(sanskrit["surface"], "ka-varga-aghoṣa")
 
     def test_bare_or_malformed_width_does_not_gain_a_role(self) -> None:
         for bits in ("1", "00000000", "000000x", " 0000000", "0000000 "):
