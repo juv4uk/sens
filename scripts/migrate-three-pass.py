@@ -714,7 +714,7 @@ def encode_atom_data(node: Atom,text7,lexical_env=(),quoted=False):
     domain_width = (numeric_width >= 24 and numeric_width % 24 == 0
                     and (numeric_width // 24 & (numeric_width // 24 - 1)) == 0)
     if ((NUMERIC_RE.fullmatch(t) and not binary_word)
-            or re.fullmatch(r"(?i)#(?:d[+-]?\\d+(?:/\\d+)?|b[01]+|q2:[+-]?[01]+/[01]+)", t)
+            or re.fullmatch(r"(?i)#(?:d[+-]?\d+(?:/\d+)?|b[01]+|q2:[+-]?[01]+/[01]+)", t)
             or (binary_word and domain_width)):
         raise MigrationError(
             "unqualified numeric literal blocked: requires explicit D24+ "
