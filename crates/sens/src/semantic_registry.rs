@@ -212,8 +212,8 @@ pub(crate) fn surface_for_domain_identity(
             u16::from(row.bits) == identity.packed_bits()
         )?;
         return match namespace {
-            "uk" => Some(row.uk),
-            "sa" => Some(row.sa),
+            "uk" => row.uk,
+            "sa" => row.sa,
             _ => None,
         };
     }
