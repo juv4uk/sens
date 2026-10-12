@@ -131,8 +131,6 @@ fn assert_bounded_x86_field_encoders_cover_every_admitted_tuple(session: &mut Se
     }
 }
 
-}
- 
 #[test]
 fn bounded_x86_field_encoders_cover_every_admitted_tuple_without_math() {
     let _serial = test_lock();
