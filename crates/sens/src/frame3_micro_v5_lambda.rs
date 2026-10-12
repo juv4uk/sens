@@ -815,6 +815,145 @@ mod tests {
     }
 
     #[test]
+    fn five_byte_lambda_behavioral_trophy_catalog() {
+        fn hex(payload: [u8; 5]) -> String {
+            payload.iter().map(|b| format!("{b:02X}")).collect::<String>()
+        }
+        fn trophy(name: &str, expr: F3m5LambdaExpr) -> [u8; 5] {
+            let payload = encode_candidate(&expr).expect("trophy must fit F3M-5λ");
+            assert_eq!(decode_candidate(payload).unwrap(), expr);
+            eprintln!(
+                "F3M5L_TROPHY\t{name}\t{}\tnodes={}\tcap={:02X}\t{}",
+                hex(payload),
+                expr.node_count(),
+                expr.capability_mask(),
+                expr.human_projection()
+            );
+            payload
+        }
+
+        let i = F3m5LambdaExpr::Lambda(Box::new(F3m5LambdaExpr::Bound(0)));
+        let k = F3m5LambdaExpr::Lambda(Box::new(F3m5LambdaExpr::Lambda(Box::new(
+            F3m5LambdaExpr::Bound(1),
+        ))));
+        let ki = F3m5LambdaExpr::Lambda(Box::new(F3m5LambdaExpr::Lambda(Box::new(
+            F3m5LambdaExpr::Bound(0),
+        ))));
+        let pair = F3m5LambdaExpr::Lambda(Box::new(F3m5LambdaExpr::Lambda(Box::new(
+            F3m5LambdaExpr::Cons(
+                Box::new(F3m5LambdaExpr::Bound(1)),
+                Box::new(F3m5LambdaExpr::Bound(0)),
+            ),
+        ))));
+        let swap_pair = F3m5LambdaExpr::Lambda(Box::new(F3m5LambdaExpr::Lambda(Box::new(
+            F3m5LambdaExpr::Cons(
+                Box::new(F3m5LambdaExpr::Bound(0)),
+                Box::new(F3m5LambdaExpr::Bound(1)),
+            ),
+        ))));
+        let atom_pred = F3m5LambdaExpr::Lambda(Box::new(F3m5LambdaExpr::Atom(Box::new(
+            F3m5LambdaExpr::Bound(0),
+        ))));
+        let first = F3m5LambdaExpr::Lambda(Box::new(F3m5LambdaExpr::Lambda(Box::new(
+            F3m5LambdaExpr::CarCons(
+                Box::new(F3m5LambdaExpr::Bound(1)),
+                Box::new(F3m5LambdaExpr::Bound(0)),
+            ),
+        ))));
+        let second = F3m5LambdaExpr::Lambda(Box::new(F3m5LambdaExpr::Lambda(Box::new(
+            F3m5LambdaExpr::CdrCons(
+                Box::new(F3m5LambdaExpr::Bound(1)),
+                Box::new(F3m5LambdaExpr::Bound(0)),
+            ),
+        ))));
+        let same_atom_kind = F3m5LambdaExpr::Lambda(Box::new(F3m5LambdaExpr::Lambda(Box::new(
+            F3m5LambdaExpr::EqAtom(
+                Box::new(F3m5LambdaExpr::Bound(1)),
+                Box::new(F3m5LambdaExpr::Bound(0)),
+            ),
+        ))));
+        let atom_to_bit = F3m5LambdaExpr::Lambda(Box::new(F3m5LambdaExpr::IfAtom(
+            Box::new(F3m5LambdaExpr::Bound(0)),
+            Box::new(F3m5LambdaExpr::QuoteOne),
+            Box::new(F3m5LambdaExpr::QuoteZero),
+        )));
+
+        let _ = trophy("I", i.clone());
+        let _ = trophy("K", k.clone());
+        let _ = trophy("KI", ki.clone());
+        let _ = trophy("PAIR", pair.clone());
+        let _ = trophy("SWAP_PAIR", swap_pair.clone());
+        let _ = trophy("ATOM_PRED", atom_pred.clone());
+        let _ = trophy("FIRST_VIA_CAR_CONS", first.clone());
+        let _ = trophy("SECOND_VIA_CDR_CONS", second.clone());
+        let _ = trophy("SAME_ATOM_KIND", same_atom_kind.clone());
+        let _ = trophy("ATOM_TO_BIT_COND", atom_to_bit.clone());
+
+        let one = F3m5LambdaValue::Bit(true);
+        let zero = F3m5LambdaValue::Bit(false);
+        let nil = F3m5LambdaValue::Nil;
+        let pair_value = F3m5LambdaValue::Pair(Box::new(one.clone()), Box::new(nil.clone()));
+
+        assert_eq!(
+            apply_candidate(eval_candidate(&i).unwrap(), pair_value.clone()).unwrap(),
+            pair_value
+        );
+
+        let k1 = apply_candidate(eval_candidate(&k).unwrap(), one.clone()).unwrap();
+        assert_eq!(apply_candidate(k1, zero.clone()).unwrap(), one);
+
+        let ki1 = apply_candidate(eval_candidate(&ki).unwrap(), one.clone()).unwrap();
+        assert_eq!(apply_candidate(ki1, zero.clone()).unwrap(), zero);
+
+        let pair1 = apply_candidate(eval_candidate(&pair).unwrap(), one.clone()).unwrap();
+        assert_eq!(
+            apply_candidate(pair1, zero.clone()).unwrap(),
+            F3m5LambdaValue::Pair(Box::new(one.clone()), Box::new(zero.clone()))
+        );
+
+        let swap1 = apply_candidate(eval_candidate(&swap_pair).unwrap(), one.clone()).unwrap();
+        assert_eq!(
+            apply_candidate(swap1, zero.clone()).unwrap(),
+            F3m5LambdaValue::Pair(Box::new(zero.clone()), Box::new(one.clone()))
+        );
+
+        assert_eq!(
+            apply_candidate(eval_candidate(&atom_pred).unwrap(), pair_value.clone()).unwrap(),
+            F3m5LambdaValue::Bit(false)
+        );
+        assert_eq!(
+            apply_candidate(eval_candidate(&atom_pred).unwrap(), one.clone()).unwrap(),
+            F3m5LambdaValue::Bit(true)
+        );
+
+        let first1 = apply_candidate(eval_candidate(&first).unwrap(), one.clone()).unwrap();
+        assert_eq!(apply_candidate(first1, zero.clone()).unwrap(), one);
+
+        let second1 = apply_candidate(eval_candidate(&second).unwrap(), one.clone()).unwrap();
+        assert_eq!(apply_candidate(second1, zero.clone()).unwrap(), zero);
+
+        let eq1 = apply_candidate(eval_candidate(&same_atom_kind).unwrap(), one.clone()).unwrap();
+        assert_eq!(
+            apply_candidate(eq1, zero.clone()).unwrap(),
+            F3m5LambdaValue::Bit(true)
+        );
+        let eq2 = apply_candidate(eval_candidate(&same_atom_kind).unwrap(), pair_value.clone()).unwrap();
+        assert_eq!(
+            apply_candidate(eq2, one.clone()).unwrap(),
+            F3m5LambdaValue::Bit(false)
+        );
+
+        assert_eq!(
+            apply_candidate(eval_candidate(&atom_to_bit).unwrap(), one).unwrap(),
+            F3m5LambdaValue::Bit(true)
+        );
+        assert_eq!(
+            apply_candidate(eval_candidate(&atom_to_bit).unwrap(), pair_value).unwrap(),
+            F3m5LambdaValue::Bit(false)
+        );
+    }
+
+    #[test]
     fn tracked_five_byte_lambda_trophies_are_exact_physical_payloads() {
         const I: &[u8; 5] = include_bytes!("../../../research/framed3/fixtures/f3m5-lambda-i.f3m");
         const K: &[u8; 5] = include_bytes!("../../../research/framed3/fixtures/f3m5-lambda-k.f3m");
