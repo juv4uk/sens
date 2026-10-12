@@ -325,9 +325,7 @@ fn classify_head(head: &Expr, own: &[Rc<str>], environment: &Environment) -> Hea
             // Ratified exact-domain surfaces must reach the same head policy as
             // DomainCall. In particular, Ukrainian D3 QUOTE/COND are not
             // reclassified through their historical SID8 compatibility bytes.
-            if let Some(identity) = necessary_forms::domain_identity_for_symbol(name)
-                .or_else(|| crate::semantic_registry::domain_identity_for_surface(name))
-            {
+            if let Some(identity) = super::lower::immutable_surface_domain_identity(name) {
                 return domain_head(identity, environment);
             }
             if let Some(sid) = canon::routed_sid_for_surface(name) {
