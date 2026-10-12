@@ -18,6 +18,7 @@ on:
       - "contracts/**"
       - "knowledge/**"
       - "evidence/nano-sens-seed-v0-source-closure-census-2026-10-12.json"
+      - "evidence/nano-sens-seed-v0-2026-10-12.json"
       - ".github/workflows/nano-sens-source-closure-audit.yml"
   push:
     branches: [main]
@@ -56,6 +57,40 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Витягнути pinned CML і SENS SHA з машинозчитуваних доказів
+        id: pins
+        shell: bash
+        run: |
+          set -euo pipefail
+          CML_SHA="$(python3 - <<'PY'
+          import json
+          from pathlib import Path
+          r = json.loads(Path("evidence/nano-sens-seed-v0-2026-10-12.json").read_text())
+          print(r["run"]["head_sha"])
+          PY
+          )"
+          SENS_SHA="$(python3 - <<'PY'
+          import json
+          from pathlib import Path
+          r = json.loads(Path("evidence/nano-sens-seed-v0-source-closure-census-2026-10-12.json").read_text())
+          print(r["pinned_source"]["commit"])
+          PY
+          )"
+          [[ "$CML_SHA" =~ ^[0-9a-f]{40}$ ]]
+          [[ "$SENS_SHA" =~ ^[0-9a-f]{40}$ ]]
+          echo "cml_sha=$CML_SHA" >> "$GITHUB_OUTPUT"
+          echo "sens_sha=$SENS_SHA" >> "$GITHUB_OUTPUT"
+          echo "Nano-SENS pins: CML=$CML_SHA SENS=$SENS_SHA"
+
+      - name: Отримати точний pinned CML source tree
+        uses: actions/checkout@v5
+        with:
+          repository: juv4uk/cml
+          ref: ${{ steps.pins.outputs.cml_sha }}
+          path: cml-pinned
+          fetch-depth: 0
+          persist-credentials: false
+
       - name: Перевірити сам аудит на позитивних і негативних прикладах
         run: python3 scripts/audit-nano-sens-source-closure.py --self-test
 
@@ -70,17 +105,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          PINNED_SHA="$(python3 - <<'PY'
-          import json
-          from pathlib import Path
-          report = json.loads(Path("evidence/nano-sens-seed-v0-source-closure-census-2026-10-12.json").read_text())
-          print(report["pinned_source"]["commit"])
-          PY
-          )"
-          if [[ ! "$PINNED_SHA" =~ ^[0-9a-f]{40}$ ]]; then
-            echo "::error::Invalid pinned SENS commit in source-closure census"
-            exit 1
-          fi
+          PINNED_SHA="${{ steps.pins.outputs.sens_sha }}"
           git cat-file -e "${PINNED_SHA}^{commit}"
           PINNED_ROOT="$RUNNER_TEMP/sens-pinned-source"
           git worktree add --detach "$PINNED_ROOT" "$PINNED_SHA"
@@ -89,16 +114,30 @@ jobs:
             --repo-root "$PINNED_ROOT" \
             --out "$RUNNER_TEMP/nano-sens-source-edges-pinned.json"
 
-      - name: Опублікувати обидва машинозчитувані аудити на 30 днів
+      - name: Побудувати граф CML src/lib.rs та build.rs для pinned CML
+        run: |
+          set -euo pipefail
+          test "$(git -C cml-pinned rev-parse HEAD)" = "${{ steps.pins.outputs.cml_sha }}"
+          python3 scripts/audit-nano-sens-source-closure.py \
+            --repo-root cml-pinned \
+            --root-file src/lib.rs \
+            --root-file build.rs \
+            --manifest-file Cargo.toml \
+            --manifest-file Cargo.lock \
+            --manifest-file .gitmodules \
+            --out "$RUNNER_TEMP/nano-sens-source-edges-cml-pinned.json"
+
+      - name: Опублікувати всі три машинозчитувані аудити на 30 днів
         uses: actions/upload-artifact@v4
         with:
           name: nano-sens-static-source-edges-${{ github.sha }}
           path: |
             ${{ runner.temp }}/nano-sens-source-edges-main.json
             ${{ runner.temp }}/nano-sens-source-edges-pinned.json
+            ${{ runner.temp }}/nano-sens-source-edges-cml-pinned.json
           if-no-files-found: error
           retention-days: 30
 
       - name: Зафіксувати межі доказу в анотації CI
         run: |
-          echo "::notice title=Nano-SENS::Побудовано граф актуального main і граф pinned SENS revision. Це не доказ повного входового оточення або мінімального seed; невирішені краї лишаються відкритими."
+          echo "::notice title=Nano-SENS::Побудовано граф актуального main, pinned SENS і pinned CML. Це статичний edge audit, не доказ повного входового оточення або мінімального seed; Cargo/vendor/Git/toolchain межі лишаються відкритими."
