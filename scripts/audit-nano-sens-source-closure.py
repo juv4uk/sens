@@ -236,6 +236,21 @@ def scan(
             line = text.count("\n", 0, match.start()) + 1
             literal = STRING_RE.fullmatch(arg or "")
             if literal is None:
+                # Cargo's OUT_DIR is a generated-output location, not a tracked
+                # source path. Classify it separately, without claiming that its
+                # generating build script/input graph has been closed.
+                if macro == "include" and arg and 'env!("OUT_DIR")' in arg:
+                    generated = re.search(r'["\']([^"\']+\.rs)["\']', arg)
+                    edges.append({
+                        "kind": macro,
+                        "source": source_rel,
+                        "line": line,
+                        "target": "$OUT_DIR/" + (generated.group(1).lstrip("/") if generated else "<dynamic-rust-source>"),
+                        "target_exists": None,
+                        "resolution": "generated-by-build-script",
+                        "argument_prefix": arg[:120],
+                    })
+                    continue
                 edges.append({
                     "kind": macro,
                     "source": source_rel,
@@ -313,6 +328,7 @@ def scan(
             "static_edge_count": len(edges),
             "manifest_file_count": len(manifest_files),
             "unresolved_dynamic_include_count": unresolved,
+            "generated_output_include_count": sum(1 for edge in edges if edge.get("resolution") == "generated-by-build-script"),
             "gap_count": len(unique_gaps),
             "minimum_seed_proven": False,
             "whole_chain_closure_proven": False,
@@ -348,7 +364,8 @@ def self_test() -> None:
             'mod child;\n#[cfg(test)]\nmod tests;\n'
             '#[path = "../../../research/rust_codec/senc.rs"]\nmod imported;\n'
             'const TEXT: &str = include_str!("data.txt");\n'
-            'const DYNAMIC: &str = include_str!(concat!(env!("ROOT"), "/dyn.txt"));\n',
+            'const DYNAMIC: &str = include_str!(concat!(env!("ROOT"), "/dyn.txt"));\n'
+            'include!(concat!(env!("OUT_DIR"), "/generated.rs"));\n',
             encoding="utf-8",
         )
         (root / "crates/sens/src/child.rs").write_text("pub fn child() {}\n", encoding="utf-8")
@@ -361,12 +378,13 @@ def self_test() -> None:
             any(e["kind"] == "rust-mod" and e["name"] == "tests" and "test" in " ".join(e["cfg"]) and e["target_exists"] for e in report["edges"]),
             any(e["kind"] == "include_str" and e.get("target") == "crates/sens/src/data.txt" and e["target_exists"] for e in report["edges"]),
             any(g["kind"] == "unresolved_compile_time_include" for g in report["gaps"]),
+            any(e["kind"] == "include" and e.get("resolution") == "generated-by-build-script" and e.get("target") == "$OUT_DIR/generated.rs" for e in report["edges"]),
             any(e["kind"] == "rust-mod" and e["source"] == "research/rust_codec/senc.rs" and e["target"] == "research/rust_codec/canonical_form_capacity.rs" and e["target_exists"] for e in report["edges"]),
             report["scope"]["minimum_seed_proven"] is False,
         ]
         if not all(checks):
             raise RuntimeError(f"self-test failed: {checks}; report={json.dumps(report, ensure_ascii=False)[:4000]}")
-    print("NANO-SENS STATIC SOURCE EDGE AUDIT SELF-TEST: PASS (6 checks)")
+    print("NANO-SENS STATIC SOURCE EDGE AUDIT SELF-TEST: PASS (7 checks)")
 
 
 def main(argv: list[str] | None = None) -> int:
