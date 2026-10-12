@@ -28,6 +28,7 @@ PREDICATES_WITH_DONOR_PLAIN_NAMES = frozenset({
     "KEYWORDP", "FUNCTIONP", "LISTP", "VECTORP", "FLUIDP", "GLOBALP",
     "EXPRP", "FEXPRP", "NEXPRP", "FUNBOUNDP", "SLOT-BOUNDP",
     "FINITE-CODE-UNIQUE-DECIPHERABILITY", "CIRCULAR-HALF-OPEN-CONTAINS",
+    "LISTEN", "FIND-IF-ANYWHERE", "MY-COMPARE-CHAIN",
     "SLOT-EXISTS-P", "PATHNAME-MATCH-P", "INPUT-STREAM-P",
     "OUTPUT-STREAM-P", "INTERACTIVE-STREAM-P", "OPEN-STREAM-P",
     "STREAMP", "PATHNAMEP", "CLASS-FINALIZED-P", "FLOATP", "FIXP",
@@ -136,11 +137,11 @@ def check(d10, inventory, lower):
          json.loads(OWNER.read_text(encoding="utf-8"))["inventory"]["git_blob"],
          "editorial anchor source pin")
     anchor_list = editorial["anchors"]
-    need(len(anchor_list) == 41 and
+    need(len(anchor_list) == 44 and
          len({a["semantic_name"] for a in anchor_list}) == 41,
          "editorial anchor coverage/duplicate")
     anchor_by_code = {a["coordinate"]: a for a in anchor_list}
-    need(len(anchor_by_code) == 41, "duplicate editorial coordinates")
+    need(len(anchor_by_code) == 44, "duplicate editorial coordinates")
 
     for row in d10:
         original = expected[row.bits]
@@ -224,6 +225,11 @@ def main():
                 next(i for i, row in enumerate(xs) if row.lisp == "ALLAN-VARIANCE"),
                 replace(next(row for row in xs if row.lisp == "ALLAN-VARIANCE"),
                         uk="дсп-алн"))),
+            ("undetected semantic predicate", lambda xs: xs.__setitem__(
+                next(i for i, row in enumerate(xs) if row.lisp == "LISTEN"),
+                replace(next(row for row in xs if row.lisp == "LISTEN"),
+                        uk="символ-доступний", ukr="символ-доступний-негайно",
+                        en="listen"))),
             ("English question marker", lambda xs: xs.__setitem__(
                 next(i for i, row in enumerate(xs) if row.lisp == "CHARACTERP"),
                 replace(next(row for row in xs if row.lisp == "CHARACTERP"),
