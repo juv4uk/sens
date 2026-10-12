@@ -158,6 +158,25 @@ def reject_shadowed_surfaces(source: str, surfaces) -> None:
         if item.domain == "D4" and item.label.upper() == "DEFINE"
     }
 
+    # D6 LET/LET* — семантична зайнятість, а не дозвіл виконання.
+    # Читаємо координати з ратифікованої основи, не виводимо з SID8.
+    foundation = json.loads(
+        (ROOT / "knowledge/d1-d9-foundation.json").read_text(encoding="utf-8")
+    )
+    if foundation.get("status") != "owner-ratified":
+        raise ValueError("BINDING_FORM_BLOCK: основа доменів не ратифікована")
+    let_heads = {
+        bits for bits, label in foundation["domains"]["D6"]["residents"].items()
+        if label in {"LET", "LET*"}
+    }
+    if len(let_heads) != 2:
+        raise ValueError("BINDING_FORM_BLOCK: координати D6 LET змінилися")
+
+    def binding_list(node, context):
+        if not isinstance(node, reader.ListNode) or node.tail is not None:
+            raise ValueError(f"BINDING_FORM_BLOCK: {context}: непідтверджена форма зв'язувань")
+        return node.items
+
     def visit(node):
         if isinstance(node, reader.Quote):
             return
@@ -185,6 +204,35 @@ def reject_shadowed_surfaces(source: str, surfaces) -> None:
                     elif (isinstance(target, reader.ListNode)
                           and target.items):
                         guard_name(target.items[0], "голова DEFINE")
+
+            # Історичні форми зв'язування не створюють нової callable
+            # семантики. Забороняємо переписувати їхні затінені імена,
+            # зокрема якщо голова вже подана точним кодом D6.
+            if spelling in let_heads | {"let", "let*"}:
+                if len(node.items) < 2:
+                    raise ValueError("BINDING_FORM_BLOCK: LET без списку зв'язувань")
+                for item in binding_list(node.items[1], "LET"):
+                    if isinstance(item, reader.Atom):
+                        guard_name(item, "змінна LET")
+                    else:
+                        pair = binding_list(item, "пара LET")
+                        if not pair or not isinstance(pair[0], reader.Atom):
+                            raise ValueError("BINDING_FORM_BLOCK: некоректна пара LET")
+                        guard_name(pair[0], "змінна LET")
+
+            if spelling in {"flet", "labels", "macrolet"}:
+                if len(node.items) < 2:
+                    raise ValueError("BINDING_FORM_BLOCK: локальні функції без декларацій")
+                for item in binding_list(node.items[1], spelling):
+                    signature = binding_list(item, "локальна функція")
+                    if not signature or not isinstance(signature[0], reader.Atom):
+                        raise ValueError("BINDING_FORM_BLOCK: некоректна локальна функція")
+                    guard_name(signature[0], "ім'я локальної функції")
+
+            if spelling in {"defun", "defmacro"}:
+                if len(node.items) < 2 or not isinstance(node.items[1], reader.Atom):
+                    raise ValueError("BINDING_FORM_BLOCK: некоректне оголошення функції")
+                guard_name(node.items[1], "ім'я оголошеної функції")
         for child in node.items:
             visit(child)
         if node.tail is not None:
