@@ -76,3 +76,16 @@ Authority: [CURRENT.md](CURRENT.md), [language-contract.lisp](language-contract.
 - Після кожної зміни релізних байтів: попередній verdict кандидата недійсний; новий SHA → повний повтор перевірок.
 
 Документи: [release scope](RELEASE.md), [операційний runbook](docs/release-readiness-contract-11-9-2026-10-12.uk.md), [#4198 exact-SHA cut](https://github.com/juv4uk/sens/issues/4198).
+
+## Операційний журнал підготовки — 2026-10-12 (M0 / Cargo release)
+
+Це **доказ вузьких виконаних задач**, не сертифікат `l0.42.0`; `candidate SHA = UNSET`, випуск залишається **NO-GO**.
+
+| Робота | Факт | Межа доказу |
+|---|---|---|
+| M0 physical-T5 producer/consumer manifest | Закрито drift `benchmarks/physical-binary-performance/test_word_projection.py`; [атомарний коміт 4b9adf8](https://github.com/juv4uk/sens/commit/4b9adf824ccfa71868820eee224745232f279e03), наступні синхронізації agentів; [зелений CI 38232293478](https://github.com/juv4uk/sens/actions/runs/38232293478) на `ef96318e78e4dd67a0af140ac5918eceaf43421e` | Успішний **M0 inventory**, не semantic/oracle admission і не випуск на цьому SHA |
+| `release.yml` Cargo dependency resolution | Сім додаткових `cargo test/build` команд отримали `--locked`; [коміт 7c0dffb](https://github.com/juv4uk/sens/commit/7c0dffbb7653ce759441c416923527d447dfa199) | Синтаксичний аудит у `main` підтверджує `--locked` для команд Cargo; **реальний tagged asset build ще не проводився** |
+| `release-preflight.yml` | Додано `push`-тригер для релізних змін `main`, focused `clippy --locked`; [коміт 80b6f6d](https://github.com/juv4uk/sens/commit/80b6f6d8c5d9fe8d6832e7ca91bf7425d515e12e) | Конфігурація збережена; **успішного workflow run не зафіксовано** під час цього аудиту, тому gate залишається UNKNOWN |
+| Інші обов'язкові CI | Latest checked `Hosted CI`, native vertical smoke, T5 file-authority на сусідніх HEAD ще мають FAIL | Не переносити чужий/старий verdict на майбутній release candidate; **NO-GO** |
+
+Усі наступні докази замінюють лише відповідні UNKNOWN/FAIL після перевірки **одного** `main@<40-hex SHA>`. Release-публікація лишається з незалежним явним owner-GO та strict triplet admission.
