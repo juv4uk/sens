@@ -1,0 +1,37 @@
+name: "Міграція ядра — точний D3 без жорсткого SID8"
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "crates/sens/src/semantic_registry.rs"
+      - "crates/sens/src/eval/lower.rs"
+      - ".github/workflows/core-d3-lowering-cutover.yml"
+  pull_request:
+    paths:
+      - "crates/sens/src/semantic_registry.rs"
+      - "crates/sens/src/eval/lower.rs"
+      - ".github/workflows/core-d3-lowering-cutover.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  exact-d3-legacy-bridge:
+    name: "D3: ратифіковані QUOTE/COND замість плоского W8"
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v5
+      - uses: dtolnay/rust-toolchain@stable
+      - name: "Дозволяти тільки доведені D3 проєкції"
+        run: cargo test --locked -p sens --lib exact_d3_compatibility_migration_tests -- --nocapture
+      - name: "Точний D3 у компіляторному знижувачі"
+        run: cargo test --locked -p sens --lib domain_ladder_lowering_migration_tests -- --nocapture
+      - name: "Перевірити відсутність змін джерел після тестів"
+        shell: bash
+        run: |
+          test -z "$(git status --porcelain --untracked-files=all)" || {
+            git status --short
+            exit 1
+          }
