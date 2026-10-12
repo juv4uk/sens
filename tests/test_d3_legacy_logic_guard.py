@@ -409,6 +409,44 @@ class LegacyD3GuardTests(unittest.TestCase):
         self.assertNotIn("COND_HOST_TRUTH", rules)
         self.assertNotIn("LEGACY_W8_CALL", rules)
 
+        # Preserve the already-established adversarial witnesses elsewhere in
+        # this generator: reverting any exact two-field predicate clause must
+        # immediately reintroduce scanner debt.
+        for klass, value in (("member", "word"), ("nonmember", "(11110100 word)")):
+            with self.subTest(klass=klass):
+                exact = (
+                    f"((101 (string-membership-helper word) "
+                    f"(class-membership string {klass}))\\n       {value})"
+                ).replace("\\n", "\n")
+                legacy = (
+                    f"((string-membership-helper word)\\n"
+                    f"       (class-membership string {klass})\\n"
+                    f"       {value})"
+                ).replace("\\n", "\n")
+                self.assertIn(exact, source)
+                drift = MODULE.scan_lisp(source.replace(exact, legacy, 1), path)
+                self.assertGreater(
+                    [f.rule for f in drift].count("COND_NOT_TWO_FIELDS"), 0
+                )
+
+        pair = "((010 sections) (001 ()))"
+        self.assertIn(pair, source)
+        regression = source.replace(pair, "((010 sections) (1) (001 ()))", 1)
+        self.assertGreater(
+            [f.rule for f in MODULE.scan_lisp(regression, path)].count(
+                "COND_NOT_TWO_FIELDS"
+            ),
+            0,
+        )
+
+        predicate = "((010 (001 ())) (find-section name (011 sections)))"
+        self.assertIn(predicate, source)
+        regression = source.replace(predicate, "(t (find-section name (011 sections)))", 1)
+        self.assertIn(
+            "COND_HOST_TRUTH",
+            [f.rule for f in MODULE.scan_lisp(regression, path)],
+        )
+
         # String comparisons are atomic: D3:101 EQ is sufficient and remains
         # distinct from the wider D8:11110111 structural EQUAL identity.
         d3 = (ROOT / "lib/domains/d3.lisp").read_text(encoding="utf-8")
@@ -432,8 +470,8 @@ class LegacyD3GuardTests(unittest.TestCase):
             with self.subTest(exact=exact):
                 self.assertIn(exact, source)
 
-        # One deliberately reverted expected-result field must be diagnosed
-        # as exactly one old three-field COND clause.
+        # Point diagnostic: restoring one expected-result field produces
+        # exactly one old three-field COND finding, not a vague global failure.
         exact = "((101 current-wsm wsm-output)\n         (110"
         reverted = source.replace(
             exact,
