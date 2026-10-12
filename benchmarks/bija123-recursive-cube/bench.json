@@ -1,0 +1,19 @@
+{
+  "schema": "sens-benchmark-manifest/v1",
+  "stand": "bija123-recursive-cube",
+  "wing": "D1–D3 recursive-domain geometry",
+  "roles": [
+    "RESEARCH",
+    "FALSIFIER"
+  ],
+  "question": "Does a bounded exhaustive search support the proposed recursive D2-prefix fibres and XOR-111 D3 duality across all placements?",
+  "claim": "Bounded exhaustive search over 5040 D3 placements for the stated D2-prefix and duality hypotheses only; the optional suffix-zero spine remains a hypothesis and no production mapping changes.",
+  "witness": [
+    "README.md",
+    "run.py"
+  ],
+  "status": "RESEARCH-ONLY; METADATA BACKFILL; NOT REPLAYED BY REGISTRY CHANGE",
+  "generation": "unknown",
+  "axis": "D1-D2-D3 prefix fibres / XOR duality / bounded placement count",
+  "reproduce": "python3 benchmarks/bija123-recursive-cube/run.py --json-out /tmp/sens-bija123-recursive-cube.json"
+}
