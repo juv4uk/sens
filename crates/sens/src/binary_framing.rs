@@ -42,6 +42,8 @@ pub enum BinaryFrameError {
     InvalidNumber { index: usize },
     UnexpectedClose { index: usize },
     UnclosedStructure { index: usize, depth: usize },
+    /// Індекс кадру, який не має права потрапляти до точнодоменної програми.
+    LegacyFrameForbidden { index: usize },
 }
 
 const CONTROL_SPACE: [u8; 2] = [0, 0];
@@ -299,6 +301,41 @@ pub fn decode_packed_numeric_value(packed: &crate::PackedBitstream)
         return Err(BinaryFrameError::NonCanonicalNumber {index: 0});
     }
     Ok(value)
+}
+
+/// Суворий транспортний маршрут для нових програм: ніякої прихованої
+/// восьмибітної функції, раціонального літерала чи числа без D24+.
+/// Це лише перевірка КАДРІВ; `Domain(D8)` означає дані з точною шириною,
+/// а не автоматичний допуск відповідного механізму до виконання.
+impl BinaryFrame {
+    fn check_exact_program(frames: &[Self]) -> Result<(), BinaryFrameError> {
+        for (index, frame) in frames.iter().enumerate() {
+            match frame {
+                Self::Function(_) | Self::Number(_) => {
+                    return Err(BinaryFrameError::LegacyFrameForbidden { index });
+                }
+                Self::BinaryNumber(number) if number.numeric_domain_width().is_none() => {
+                    return Err(BinaryFrameError::LegacyFrameForbidden { index });
+                }
+                _ => {}
+            }
+        }
+        Ok(())
+    }
+
+    /// Записати точнодоменну програму, не змінюючи існуючого бітового формату.
+    pub fn encode_exact_domain_program(frames: &[Self]) -> Result<Vec<u8>, BinaryFrameError> {
+        Self::check_exact_program(frames)?;
+        encode_binary_program(frames)
+    }
+
+    /// Прочитати точнодоменну програму без підвищення історичного W8 до D8.
+    /// Помилка містить індекс кадру, а не позицію біта.
+    pub fn decode_exact_domain_program(bits: &[u8]) -> Result<Vec<Self>, BinaryFrameError> {
+        let frames = decode_binary_program(bits)?;
+        Self::check_exact_program(&frames)?;
+        Ok(frames)
+    }
 }
 
 pub fn encode_binary_program(frames: &[BinaryFrame]) -> Result<Vec<u8>, BinaryFrameError> {
