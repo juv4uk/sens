@@ -1,4 +1,4 @@
-//! Dense Frame3-Micro enumerator for 1/2/3/4-byte payloads.
+//! Dense Frame3-Micro enumerator for 1/2/3/4-byte payloads plus prefix-stable F3M-5.
 //!
 //! Canonical order is over a deliberately total, closed D3 microgrammar:
 //! literals 0/1/NIL, QUOTE of those literals, ATOM, CONS,
@@ -11,7 +11,8 @@
 //!   F3M-1 = global ranks [0, 256)
 //!   F3M-2 = next 65_536 ranks
 //!   F3M-3 = next 16_777_216 ranks
-//!   F3M-4 = next 4_294_967_296 ranks
+//!   F3M-4 = next 4_294_967_296 legacy ranks
+//!   F3M-5 = independent 2^40 extension ranks containing EQ and/or LAMBDA
 //! Thus every payload value in each admitted width names exactly one program,
 //! with no reserved/magic code points and no aliases across widths.
 
@@ -22,6 +23,7 @@ const F3M1_CAPACITY: u128 = 1u128 << 8;
 const F3M2_CAPACITY: u128 = 1u128 << 16;
 const F3M3_CAPACITY: u128 = 1u128 << 24;
 const F3M4_CAPACITY: u128 = 1u128 << 32;
+const F3M5_CAPACITY: u128 = crate::frame3_micro_v5::F3M5_CAPACITY;
 const F3M2_OFFSET: u128 = F3M1_CAPACITY;
 const F3M3_OFFSET: u128 = F3M1_CAPACITY + F3M2_CAPACITY;
 const F3M4_OFFSET: u128 = F3M3_OFFSET + F3M3_CAPACITY;
@@ -40,6 +42,10 @@ pub enum Frame3MicroExpr {
     Cons(Box<Frame3MicroExpr>, Box<Frame3MicroExpr>),
     CarCons(Box<Frame3MicroExpr>, Box<Frame3MicroExpr>),
     CdrCons(Box<Frame3MicroExpr>, Box<Frame3MicroExpr>),
+    /// Total D3 EQ witness: EQ is applied only to exact-D1 ATOM results.
+    EqAtom(Box<Frame3MicroExpr>, Box<Frame3MicroExpr>),
+    /// D4 LAMBDA with an empty parameter list and a closed body.
+    Lambda0(Box<Frame3MicroExpr>),
     /// Total conditional:
     /// (COND ((ATOM test) then) (1 else))
     IfAtom(
@@ -55,7 +61,12 @@ pub const CAP_CONS: u8 = 1 << 2;
 pub const CAP_CAR: u8 = 1 << 3;
 pub const CAP_CDR: u8 = 1 << 4;
 pub const CAP_COND: u8 = 1 << 5;
+pub const CAP_EQ: u8 = 1 << 6;
+pub const CAP_LAMBDA: u8 = 1 << 7;
+/// Frozen six-capability mask used by F3M-1..4 proofs.
 pub const CAP_ALL: u8 = CAP_QUOTE | CAP_ATOM | CAP_CONS | CAP_CAR | CAP_CDR | CAP_COND;
+/// F3M-5 adds the missing D3 EQ capability plus D4 LAMBDA.
+pub const CAP_ALL_F3M5: u8 = CAP_ALL | CAP_EQ | CAP_LAMBDA;
 
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub enum Frame3MicroEnumerateError {
@@ -82,10 +93,11 @@ impl Frame3MicroExpr {
             | Self::QuoteZero
             | Self::QuoteOne
             | Self::QuoteNil => 1,
-            Self::Atom(value) => 1 + value.node_count(),
+            Self::Atom(value) | Self::Lambda0(value) => 1 + value.node_count(),
             Self::Cons(left, right)
             | Self::CarCons(left, right)
-            | Self::CdrCons(left, right) => 1 + left.node_count() + right.node_count(),
+            | Self::CdrCons(left, right)
+            | Self::EqAtom(left, right) => 1 + left.node_count() + right.node_count(),
             Self::IfAtom(test, then_value, else_value) => {
                 1 + test.node_count() + then_value.node_count() + else_value.node_count()
             }
@@ -108,6 +120,12 @@ impl Frame3MicroExpr {
             Self::CdrCons(left, right) => {
                 unary_call("011", binary_call("111", left.exact_words(), right.exact_words()))
             }
+            Self::EqAtom(left, right) => binary_call(
+                "101",
+                unary_call("010", left.exact_words()),
+                unary_call("010", right.exact_words()),
+            ),
+            Self::Lambda0(body) => lambda0_call(body.exact_words()),
             Self::IfAtom(test, then_value, else_value) => {
                 let predicate = unary_call("010", test.exact_words());
                 let first_clause = list2(predicate, then_value.exact_words());
@@ -143,6 +161,12 @@ impl Frame3MicroExpr {
                 left.human_projection(),
                 right.human_projection()
             ),
+            Self::EqAtom(left, right) => format!(
+                "EQ(ATOM({}),ATOM({}))",
+                left.human_projection(),
+                right.human_projection()
+            ),
+            Self::Lambda0(body) => format!("LAMBDA((),{})", body.human_projection()),
             Self::IfAtom(test, then_value, else_value) => format!(
                 "IF-ATOM({},{},{})",
                 test.human_projection(),
@@ -171,6 +195,10 @@ impl Frame3MicroExpr {
             Self::CdrCons(left, right) => {
                 CAP_CDR | CAP_CONS | left.capability_mask() | right.capability_mask()
             }
+            Self::EqAtom(left, right) => {
+                CAP_EQ | CAP_ATOM | left.capability_mask() | right.capability_mask()
+            }
+            Self::Lambda0(body) => CAP_LAMBDA | body.capability_mask(),
             Self::IfAtom(test, then_value, else_value) => {
                 CAP_COND
                     | CAP_ATOM
@@ -205,6 +233,15 @@ fn list2(left: Vec<&'static str>, right: Vec<&'static str>) -> Vec<&'static str>
     let mut out = vec!["10"];
     out.extend(left);
     out.extend(right);
+    out.push("01");
+    out
+}
+
+fn lambda0_call(body: Vec<&'static str>) -> Vec<&'static str> {
+    // (LAMBDA () body) where the empty parameter list is structural D2 framing,
+    // not the D3 NIL resident used as a value expression.
+    let mut out = vec!["10", "0010", "10", "01"];
+    out.extend(body);
     out.push("01");
     out
 }
