@@ -318,23 +318,23 @@ mod exact_registry_vs_historical_slot_tests {
         assert_eq!(historical.packed_byte() as u16, current.packed_bits());
         assert_eq!(current.width(), 8);
         assert_eq!(current.to_string(), "10101000");
-        // Only the ratified D8 table owns the modern projection.
-        assert_eq!(surface_for_domain_identity(current, "en"), Some("round"));
+        // D8 is ratified in the Lisp table but has NO callable source
+        // route in this generated runtime surface projection.
+        assert_eq!(surface_for_domain_identity(current, "en"), None);
     }
 
     #[test]
     fn surface_domain_projection_never_requires_the_legacy_byte_slot() {
         for (surface, width, bits) in [
             ("атом?", 3usize, 0b010u16),
-            ("quote", 3usize, 0b001u16),
+            ("як-є", 3usize, 0b001u16),
         ] {
-            // Compatibility spelling is not itself evidence of callability.
-            // Only a successful ratified domain lookup can establish identity.
-            if let Some(identity) = domain_identity_for_surface(surface) {
-                assert_eq!(identity.width(), width);
-                assert_eq!(identity.packed_bits(), bits);
-            }
+            let identity = domain_identity_for_surface(surface)
+                .expect("generated ratified D3 surface must have an exact domain");
+            assert_eq!(identity.width(), width);
+            assert_eq!(identity.packed_bits(), bits);
         }
+        assert_eq!(domain_identity_for_surface("__unknown_domain_name__"), None);
     }
 }
 
