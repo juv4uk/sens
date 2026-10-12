@@ -5,127 +5,127 @@
 ; This witness uses Canon 6 explicit-result COND clauses. Canon 0 is data and
 ; list termination; it is never consumed as generic FALSE.
 
-(00001001 life-1-schema
-  (00001000 () (00000101 life-1-document)))
+(0011 life-1-schema
+  (0010 () (100 life-1-document)))
 
-(00001001 life-1-entries
-  (00001000 () (00000110 life-1-document)))
+(0011 life-1-entries
+  (0010 () (011 life-1-document)))
 
-(00001001 life-1-field
-  (00001000 (entry field)
-    (10011100 ((found (00101101 field entry)))
-      (00000111
-        ((00000010 found) () (00000001 ()))
-        ((00000010 found) (0) (00000110 found))))))
+(0011 life-1-field
+  (0010 (entry field)
+    (001000 ((found (11100 field entry)))
+      (110
+        ((010 found) () (001 ()))
+        ((010 found) (0) (011 found))))))
 
-(00001001 life-1-find
-  (00001000 (identity entries)
-    (00000111
-      ((00000010 entries) () (00000001 ()))
-      ((00000010 entries) (0)
-       (00000111
-         ((00000011 (life-1-field (00000101 entries) (00000001 identity)) identity)
+(0011 life-1-find
+  (0010 (identity entries)
+    (110
+      ((010 entries) () (001 ()))
+      ((010 entries) (0)
+       (110
+         ((101 (life-1-field (100 entries) (001 identity)) identity)
           (1)
-          (00000101 entries))
-         ((00000011 (life-1-field (00000101 entries) (00000001 identity)) identity)
+          (100 entries))
+         ((101 (life-1-field (100 entries) (001 identity)) identity)
           (0)
-          (life-1-find identity (00000110 entries))))))))
+          (life-1-find identity (011 entries))))))))
 
-(00001001 life-1-entry
-  (00001000 (identity)
+(0011 life-1-entry
+  (0010 (identity)
     (life-1-find identity (life-1-entries))))
 
-(00001001 life-1-check
-  (00001000 (identity field expected)
-    (10011100 ((entry (life-1-entry identity)))
-      (00000111
-        ((00000010 entry) ()
-         (00100111 (00000001 missing-entry) identity))
-        ((00000010 entry) (0)
-         (00000111
-           ((00000011 (life-1-field entry field) expected)
+(0011 life-1-check
+  (0010 (identity field expected)
+    (001000 ((entry (life-1-entry identity)))
+      (110
+        ((010 entry) ()
+         (1110 (001 missing-entry) identity))
+        ((010 entry) (0)
+         (110
+           ((101 (life-1-field entry field) expected)
             (1)
-            (00000001 ()))
-           ((00000011 (life-1-field entry field) expected)
+            (001 ()))
+           ((101 (life-1-field entry field) expected)
             (0)
-            (00100111 (00000001 mismatch)
+            (1110 (001 mismatch)
                   identity
                   field
                   expected
                   (life-1-field entry field)))))))))
 
-(00001001 life-1-first-failure
-  (00001000 (checks)
-    (00000111
-      ((00000010 checks) () (00000001 ()))
-      ((00000010 checks) (0)
-       (00000111
-         ((00000010 (00000101 checks)) ()
-          (life-1-first-failure (00000110 checks)))
-         ((00000010 (00000101 checks)) (0)
-          (00000101 checks)))))))
+(0011 life-1-first-failure
+  (0010 (checks)
+    (110
+      ((010 checks) () (001 ()))
+      ((010 checks) (0)
+       (110
+         ((010 (100 checks)) ()
+          (life-1-first-failure (011 checks)))
+         ((010 (100 checks)) (0)
+          (100 checks)))))))
 
-(00001001 life-1-contract-witness
-  (00001000 ()
-    (10011100 ((failure
+(0011 life-1-contract-witness
+  (0010 ()
+    (001000 ((failure
             (life-1-first-failure
-              (00100111
-                (life-1-check (00000001 life-trace)
-                              (00000001 owner)
-                              (00000001 sens))
-                (life-1-check (00000001 life-trace)
-                              (00000001 truth-value)
-                              (00000001 forbidden))
-                (life-1-check (00000001 source-observation)
-                              (00000001 native-domain-preserved)
-                              (00000001 yes))
-                (life-1-check (00000001 source-observation)
-                              (00000001 universal-result-normalization)
-                              (00000001 forbidden))
-                (life-1-check (00000001 projection)
-                              (00000001 explicit)
-                              (00000001 yes))
-                (life-1-check (00000001 projection)
-                              (00000001 partial)
-                              (00000001 yes))
-                (life-1-check (00000001 projection)
-                              (00000001 semantic-equivalence-assumed)
-                              (00000001 no))
-                (life-1-check (00000001 target-invocation)
-                              (00000001 kernel-reinterpretation)
-                              (00000001 forbidden))
-                (life-1-check (00000001 missing-source-kernel)
-                              (00000001 changes-semantic-id-meaning)
-                              (00000001 no))
-                (life-1-check (00000001 first-vertical-slice)
-                              (00000001 source)
-                              (00000001 prolog))
-                (life-1-check (00000001 first-vertical-slice)
-                              (00000001 target)
-                              (00000001 datalog))
-                (life-1-check (00000001 first-vertical-slice)
-                              (00000001 shared-result-type)
-                              (00000001 forbidden))
-                (life-1-check (00000001 liveness)
-                              (00000001 fresh-checkout)
-                              (00000001 required))))))
-      (00000111
-        ((00000011 (life-1-schema) (00000001 life-1-contract/1))
+              (1110
+                (life-1-check (001 life-trace)
+                              (001 owner)
+                              (001 sens))
+                (life-1-check (001 life-trace)
+                              (001 truth-value)
+                              (001 forbidden))
+                (life-1-check (001 source-observation)
+                              (001 native-domain-preserved)
+                              (001 yes))
+                (life-1-check (001 source-observation)
+                              (001 universal-result-normalization)
+                              (001 forbidden))
+                (life-1-check (001 projection)
+                              (001 explicit)
+                              (001 yes))
+                (life-1-check (001 projection)
+                              (001 partial)
+                              (001 yes))
+                (life-1-check (001 projection)
+                              (001 semantic-equivalence-assumed)
+                              (001 no))
+                (life-1-check (001 target-invocation)
+                              (001 kernel-reinterpretation)
+                              (001 forbidden))
+                (life-1-check (001 missing-source-kernel)
+                              (001 changes-semantic-id-meaning)
+                              (001 no))
+                (life-1-check (001 first-vertical-slice)
+                              (001 source)
+                              (001 prolog))
+                (life-1-check (001 first-vertical-slice)
+                              (001 target)
+                              (001 datalog))
+                (life-1-check (001 first-vertical-slice)
+                              (001 shared-result-type)
+                              (001 forbidden))
+                (life-1-check (001 liveness)
+                              (001 fresh-checkout)
+                              (001 required))))))
+      (110
+        ((101 (life-1-schema) (001 life-1-contract/1))
          (1)
-         (00000111
-           ((00000010 failure) ()
-            (00100111 (00000001 life-1-contract-witness)
-                  (00100111 (00000001 status) (00000001 pass))
-                  (00100111 (00000001 detail)
-                        (00000001 provenance-not-truth))))
-           ((00000010 failure) (0)
-            (00100111 (00000001 life-1-contract-witness)
-                  (00100111 (00000001 status) (00000001 fail))
-                  (00100111 (00000001 detail) failure)))))
-        ((00000011 (life-1-schema) (00000001 life-1-contract/1))
+         (110
+           ((010 failure) ()
+            (1110 (001 life-1-contract-witness)
+                  (1110 (001 status) (001 pass))
+                  (1110 (001 detail)
+                        (001 provenance-not-truth))))
+           ((010 failure) (0)
+            (1110 (001 life-1-contract-witness)
+                  (1110 (001 status) (001 fail))
+                  (1110 (001 detail) failure)))))
+        ((101 (life-1-schema) (001 life-1-contract/1))
          (0)
-         (00100111 (00000001 life-1-contract-witness)
-               (00100111 (00000001 status) (00000001 fail))
-               (00100111 (00000001 detail)
-                     (00100111 (00000001 schema)
+         (1110 (001 life-1-contract-witness)
+               (1110 (001 status) (001 fail))
+               (1110 (001 detail)
+                     (1110 (001 schema)
                            (life-1-schema)))))))))
