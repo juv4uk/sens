@@ -144,7 +144,7 @@ class ReleaseVersionParityTest(unittest.TestCase):
             (root / "crates/sens-cli/Cargo.toml").read_text(encoding="utf-8")
         )["package"]
         version = cli_package["version"]
-        self.assertRegex(version, r"^\\d+\\.\\d+\\.\\d+$")
+        self.assertRegex(version, r"^\d+\.\d+\.\d+$")
 
         for relative in manifest_paths:
             with self.subTest(manifest=relative):
@@ -171,7 +171,7 @@ class ReleaseVersionParityTest(unittest.TestCase):
         )
 
         guix = (root / "guix.scm").read_text(encoding="utf-8")
-        guix_version = re.search(r'\\(version\\s+"([^"]+)"\\)', guix)
+        guix_version = re.search(r'\(version\s+"([^"]+)"\)', guix)
         self.assertIsNotNone(guix_version, "Guix package version is missing")
         self.assertEqual(guix_version.group(1), version)
 
