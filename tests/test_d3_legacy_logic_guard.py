@@ -140,7 +140,7 @@ class LegacyD3GuardTests(unittest.TestCase):
 
         helpers = (
             segment("wire-integer-bits-onto", "render-rust-nat"),
-            segment("render-rust-nat", "rows"),
+            segment("render-rust-nat", "field"),
         )
         for fragment in helpers:
             with self.subTest(helper=fragment[:40]):
