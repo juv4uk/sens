@@ -47,16 +47,18 @@ F3M не платить внутрішній байт за magic/version. Сім
 | 1 байт | **F3M-1** | 256 | dense **256/256** unique; exhaustive evaluator + T5 parity |
 | 2 байти | **F3M-2** | 65 536 | dense **65 536/65 536** exhaustive encode/decode roundtrip |
 | 3 байти | **F3M-3** | 16 777 216 | dense rank window; boundary/sample roundtrip, real evaluator witnesses, exhaustive final-64K search |
-| 0 або 4+ | — | — | fail-closed до окремого рішення |
+| 4 байти | **F3M-4** | 4 294 967 296 | dense rank window; algebraic capacity proof, 65 536 stratified roundtrip samples, real evaluator witness `DE AD BE EF` |
+| 0 або 5+ | — | — | fail-closed до окремого рішення |
 
 ### Єдиний canonical order
 
-F3M-1, F3M-2 і F3M-3 не мають окремих таблиць із дублями. Вони займають
+F3M-1, F3M-2, F3M-3 і F3M-4 не мають окремих таблиць із дублями. Вони займають
 **неперетинні послідовні вікна одного глобального enumerator**:
 
 - F3M-1: global ranks `0..255`;
 - F3M-2: наступні `65 536`;
-- F3M-3: наступні `16 777 216`.
+- F3M-3: наступні `16 777 216`;
+- F3M-4: наступні `4 294 967 296`.
 
 Encoder повертає найкоротший допустимий профіль. Для canonical mapping
 виконується `encode(decode(payload)) == payload`.
@@ -73,14 +75,17 @@ Encoder повертає найкоротший допустимий профі�
   capability diversity → COND count → encoded-operation count → depth →
   exact-word count → node count → later rank.
   Він має 6/6 capability-класів; сам `FF FF FF` має лише 4/6 і без COND.
+- **F3M-4 `DE AD BE EF`** → 12-вузлова виконувана програма `ATOM(CONS(ATOM(CDR(CONS(QUOTE(0),CAR(CONS(NIL,QUOTE(0)))))),ATOM(ATOM(ATOM(QUOTE(NIL))))))`; evaluator повертає `0`.
 
 Green evidence:
 - dense base proof: GitHub Actions run **38194615315**;
 - final-page/full-capability search: GitHub Actions run **38195272188**.
 
 **Межа доказу:** ще не заявляється exhaustive evaluator sweep усіх
-16 777 216 F3M-3 програм. Ємність rank-space та bijective decode/encode
-визначені enumerator-ом; повний 16M semantic sweep є окремим proof gate.
+16 777 216 F3M-3 чи 4 294 967 296 F3M-4 програм. Для F3M-4 доведено
+алгебраїчну достатність каталогу, boundary cases, 65 536 stratified
+roundtrip samples і реальний evaluator witness. Повний 32-бітний semantic
+sweep є окремим proof gate.
 
 ## Envelope E1/E2/E3
 
@@ -97,7 +102,7 @@ default project-mode selection.
 
 1. `.sens` → T5.
 2. `.senc` → F3C.
-3. `.f3m` → F3M family, а **payload length 1/2/3** → F3M-1/2/3.
+3. `.f3m` → F3M family, а **payload length 1/2/3/4** → F3M-1/2/3/4.
 4. Content sniffing не дозволений.
 5. Decode failure не дозволяє спробувати інший codec.
 6. Один фізичний файл не трактується одночасно в кількох режимах.
