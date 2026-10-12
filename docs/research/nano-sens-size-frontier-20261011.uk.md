@@ -2,6 +2,28 @@
 Дата: 2026-10-11  
 Статус: **RESEARCH / NO NEW SEMANTICS / NOT A SIZE-MINIMUM CLAIM**
 
+## K2-кандидат — відтворюваний stripped runner (2026-10-12; CI-перевірка триває)
+
+У [CML run 38190670627](https://github.com/juv4uk/cml/actions/runs/38190670627) обидва ізольовані Cargo clean-run jobs успішно пройшли offline replay, lineage, runtime trace та 189/189 тестів. Порівняння звітів упало лише на `seed_artifact.sha256`: два сирі test-runner ELF мали різні GNU build-id і non-loadable DWARF/debug/symbol bytes. Це була невідтворюваність фізичного runner-артефакту, а не різниця C1/C2: самі C1/C2 executable, C source та compiler output збіглися.
+
+Я отримав обидва сирі runner-артефакти з цього CI run і локально застосував до кожного:
+
+```sh
+objcopy --strip-all --remove-section=.note.gnu.build-id input.bin output-stripped.bin
+```
+
+Результат саме цієї пари артефактів:
+
+| Метрика | Сирий runner | Stripped-кандидат |
+|---|---:|---:|
+| Розмір файла | 34,624,064 B | 6,045,248 B |
+| SHA-256 clean run 1 | різний build-id | `adedd8717daf64977b01c20050efa305af6f04525fdb13fe068d07d8f16db919` |
+| SHA-256 clean run 2 | різний build-id | `adedd8717daf64977b01c20050efa305af6f04525fdb13fe068d07d8f16db919` |
+
+Це зменшення **28,578,816 байтів (82.54%)** у виміряному ELF-компоненті тієї самої пари збірок. Не переносити це відсоткове число на повний seed: порівняння охоплює лише runner, а не зовнішні Cargo/Git/toolchain/shared-library залежності. Локальне байтове порівняння — попередній доказ відтворюваності нормалізації, **не** доказ виконуваності stripped-файла.
+
+У CML `master` закомічено [`1eb3f46`](https://github.com/juv4uk/cml/commit/1eb3f461dd18046adf841c13d094892ce3b0612a): workflow зберігає сирий ELF для аудиту, вимірює stripped-кандидат, відхиляє наявний GNU build-id і повторно запускає повний 189-тестовий корпус саме зі stripped-файла. [CI run 38191565378](https://github.com/juv4uk/cml/actions/runs/38191565378) має підтвердити два незалежні запуски та побайтно однаковий size report. До завершення цих gates K2 лишається **кандидатом**, а не прийнятою оптимізацією.
+
 ## Оновлення 2026-10-12 — перше відтворюване число
 
 Live lineage flow пройшов у [CML run 38187859376](https://github.com/juv4uk/cml/actions/runs/38187859376), на CML commit `ec4ba010cebd9fdc37b39224142dcac3ee907cfe`, з pinned SENS source `d0787a40fcea36501747732aa61b6de19fe29c70`. Два незалежні clean-run jobs і job порівняння — **PASS**; кожен прогнав 189/189 тестів.
