@@ -24,8 +24,8 @@
   ((identity . shared-foundation)
    (predicate-result . exact-one-bit)
    (atom-object . (Core.D3 "010"))
-   (eq-object . (Core.D3 "111"))
-   (cond-object . (Core.D3 "011"))
+   (eq-object . (Core.D3 "101"))
+   (cond-object . (Core.D3 "110"))
    (cond-clause . (test expression))
    (cond-select . exact-one)
    (cond-skip . exact-zero)
@@ -70,7 +70,6 @@
    (public-api-excluded-source . "lib/core.lisp")
    (public-api-excluded-source . "lib/core1.lisp")
    (public-api-excluded-source . "lib/core1-compiler-sid-resolver.lisp")
-   (public-api-excluded-source . "lib/core1-sid8-bootstrap-overlay.lisp")
    (public-api-excluded-source . "lib/core2.lisp")
    (public-api-excluded-source . "lib/core3.lisp"))
 
