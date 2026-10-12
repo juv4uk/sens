@@ -33,8 +33,10 @@ OLD_HEADER = """; lib/macro.lisp — bootstrap derivation on exact 8-bit functio
 """
 NEW_HEADER = """; lib/macro.lisp — часткова міграція bootstrap на точну драбину D3/D4.
 ;
-; Зовнішні виконувані голови EVAL, CONS і QUOTE використовують ратифіковані
-; D4:0001, D3:111, D3:001 відповідно. Історичні 8-бітні слова всередині
+; Зовнішні виконувані голови CONS і QUOTE використовують ратифіковані
+; D3:111 та D3:001. Історичний EVAL 01001101 лишається лише суміснісним
+; викликом: D4:0001 ратифіковано, але value-call mechanism ще не допущений.
+; Історичні 8-бітні слова всередині
 ; (001 <шаблон>) є ЦИТОВАНИМИ ДАНИМИ, а не дозволом виконувати старий SID8.
 ; Їхню заміну разом зі старою COND треба довести окремим runtime-оракулом.
 ;
@@ -48,7 +50,7 @@ OLD_CALLS = """(make-macro
         (00000001
 """
 NEW_CALLS = """(make-macro
-  (0001
+  (01001101
     (111 (001 00001000)
       (111 (001 args)
         (001
@@ -96,8 +98,8 @@ class MacroDomainCutoverTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "SOURCE_DELTA_BLOCK"):
             check_exact_source(mutant)
 
-    def test_witness_rejects_reintroduced_flat_evaluator_head(self):
-        mutant = self.current.replace("(0001\n", "(01001101\n", 1)
+    def test_witness_rejects_reintroduced_flat_cons_head(self):
+        mutant = self.current.replace("(111 (001 00001000)", "(00000100 (001 00001000)", 1)
         self.assertNotEqual(mutant, self.current)
         with self.assertRaisesRegex(ValueError, "SOURCE_DELTA_BLOCK"):
             check_exact_source(mutant)
@@ -147,7 +149,7 @@ class MacroDomainCutoverTests(unittest.TestCase):
         for node in nodes:
             walk(node)
         self.assertEqual(
-            heads, ["make-macro", "0001", "111", "001", "111", "001", "001"]
+            heads, ["make-macro", "01001101", "111", "001", "111", "001", "001"]
         )
 
 
