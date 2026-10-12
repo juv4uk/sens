@@ -155,7 +155,7 @@ fn disp8_admission_uses_the_finite_lisp_encoder_table_without_math() {
         ("(x86-admission-disp8? 127)", true),
         ("(x86-admission-disp8? -129)", false),
         ("(x86-admission-disp8? 128)", false),
-        ("(x86-admission-disp8? #q2:1/2)", false),
+        ("(x86-admission-disp8? #q2:1/10)", false),
         ("(x86-admission-disp8? not-a-number)", false),
     ] {
         let result = eval_program(source, &mut session)
