@@ -32,6 +32,20 @@ on:
       - "crates/sens/tests/d7_w7_pack.rs"
       - "crates/sens/tests/d2_text7_frame_role_boundary.rs"
       - "crates/sens/tests/text7_canonical_wire.rs"
+      # Domain-ladder retirement touches the runtime parser, evaluator,
+      # source owners, executable Lisp, and migration tooling—not just bit carriers.
+      - "crates/sens/src/sens.rs"
+      - "crates/sens/src/syntax.rs"
+      - "crates/sens/src/parser.rs"
+      - "crates/sens/src/value.rs"
+      - "crates/sens/src/semantic_registry.rs"
+      - "crates/sens/src/language_items.rs"
+      - "crates/sens/src/eval/**"
+      - "crates/sens-cli/**"
+      - "crates/sens-host/tests/**"
+      - "lib/**/*.lisp"
+      - "scripts/**"
+      - "tests/**"
       - ".github/workflows/domain-ladder.yml"
   push:
     branches: [main]
@@ -64,6 +78,20 @@ on:
       - "crates/sens/tests/d7_w7_pack.rs"
       - "crates/sens/tests/d2_text7_frame_role_boundary.rs"
       - "crates/sens/tests/text7_canonical_wire.rs"
+      # Domain-ladder retirement touches the runtime parser, evaluator,
+      # source owners, executable Lisp, and migration tooling—not just bit carriers.
+      - "crates/sens/src/sens.rs"
+      - "crates/sens/src/syntax.rs"
+      - "crates/sens/src/parser.rs"
+      - "crates/sens/src/value.rs"
+      - "crates/sens/src/semantic_registry.rs"
+      - "crates/sens/src/language_items.rs"
+      - "crates/sens/src/eval/**"
+      - "crates/sens-cli/**"
+      - "crates/sens-host/tests/**"
+      - "lib/**/*.lisp"
+      - "scripts/**"
+      - "tests/**"
       - ".github/workflows/domain-ladder.yml"
 
 jobs:
@@ -87,5 +115,9 @@ jobs:
         run: python3 scripts/check-d7-current-authority.py
       - name: Перевірити відповідність таблиць D7 ратифікованим координатам
         run: python3 scripts/check-domain-tables.py
+      - name: Перевірити весь Rust runtime після змін драбини доменів
+        run: cargo test --locked -p sens --lib
+      - name: Перевірити фізичний native pair execution і fail-closed barrier
+        run: cargo test --locked -p sens-host --test native_lisp_bytes
       - name: Перевірити, що ролі SoundCell і LocalOrdinal у D7 не перетворюються на Number
         run: python3 benchmarks/d7-ratification-conformance/validate.py
