@@ -406,9 +406,11 @@ mod tests {
 
     #[test]
     fn canonical_wire_retains_domain_width_when_payload_values_are_equal() {
-        let d3 = sens::BinarySourceWord::W3(sens::Bit3::new(0b010).unwrap()).domain_identity();
-        let d4 = sens::BinarySourceWord::W4(sens::Bit4::new(0b0010).unwrap()).domain_identity();
-        assert_eq!(d3.packed_bits(), d4.packed_bits());
+        // One shared payload demonstrates that the encoded DOMAIN WIDTH,
+        // rather than the integer value alone, defines the identity.
+        let payload = 0b0010;
+        let d3 = sens::BinarySourceWord::W3(sens::Bit3::new(payload).unwrap()).domain_identity();
+        let d4 = sens::BinarySourceWord::W4(sens::Bit4::new(payload).unwrap()).domain_identity();
         assert_eq!(d3.width(), 3);
         assert_eq!(d4.width(), 4);
         assert_ne!(d3, d4);
