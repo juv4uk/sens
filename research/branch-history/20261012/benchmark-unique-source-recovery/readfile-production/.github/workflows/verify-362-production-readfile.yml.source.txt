@@ -1,0 +1,27 @@
+name: Verify 362 production read-file
+
+on:
+  pull_request:
+    paths:
+      - 'lib/fs.lisp'
+      - 'scripts/profile-production-readfile.lisp'
+      - '.github/workflows/verify-362-production-readfile.yml'
+
+jobs:
+  benchmark:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v5
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+        with:
+          shared-key: verify-362-production-readfile
+      - name: Verify existing filesystem text semantics
+        run: cargo test -p my-lisp-host --test fs_text
+      - name: Build my-lisp CLI
+        run: cargo build -p my-lisp-cli --bin my-lisp
+      - name: Measure actual public read-file candidate
+        run: |
+          /usr/bin/time -f 'production_readfile_wall_seconds=%e' \
+            ./target/debug/my-lisp scripts/profile-production-readfile.lisp
