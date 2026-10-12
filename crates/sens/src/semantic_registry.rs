@@ -201,6 +201,22 @@ pub(crate) fn domain_identity_for_surface(name: &str) -> Option<CoreDomainIdenti
     direct_domain_identity_for_surface(name)
 }
 
+/// D7 Ukrainian keyboard projection for the physical T5 text boundary.
+/// No semantic role is inferred from equal bits in D2/another width.
+pub(crate) fn d7_uk_keyboard_glyph(cell: u8) -> Option<&'static str> {
+    D7_DISPLAY_ROWS
+        .iter()
+        .find(|row| row.bits == cell)
+        .and_then(|row| row.uk)
+}
+
+pub(crate) fn d7_uk_keyboard_cell(glyph: &str) -> Option<u8> {
+    D7_DISPLAY_ROWS
+        .iter()
+        .find(|row| row.uk == Some(glyph))
+        .map(|row| row.bits)
+}
+
 pub(crate) fn surface_for_domain_identity(
     identity: DomainIdentity,
     namespace: &str,
