@@ -203,25 +203,45 @@ mod tests {
     use super::*;
 
     #[test]
-    fn ukrainian_sequence_and_case_projection_preserve_identity() {
-        let ya = encode_text7("я", Text7Layout::Uk).unwrap();
-        assert_eq!(ya, encode_text7("йа", Text7Layout::Uk).unwrap());
-        assert_eq!(ya, encode_text7("Я", Text7Layout::Uk).unwrap());
+    fn ukrainian_keyboard_and_uppercase_are_exact_d7_words() {
+        let lower = encode_text7("кіт", Text7Layout::Uk).unwrap();
+        assert_eq!(lower.cells(), &[0x00, 0x44, 0x0f]);
+        assert_eq!(render_text7(&lower, Text7Layout::Uk).unwrap(), "кіт");
 
-        let shcha = encode_text7("щ", Text7Layout::Uk).unwrap();
-        assert_eq!(shcha, encode_text7("шч", Text7Layout::Uk).unwrap());
-        assert_eq!(shcha, encode_text7("Щ", Text7Layout::Uk).unwrap());
+        let title = encode_text7("Кіт", Text7Layout::Uk).unwrap();
+        assert_eq!(title.cells(), &[0x22, 0x00, 0x44, 0x0f]);
+        assert_eq!(render_text7(&title, Text7Layout::Uk).unwrap(), "Кіт");
+
+        // These Ukrainian keys have no distinct ratified D7 resident yet.
+        // Never silently collapse them into another sequence of sound cells.
+        for missing in ["я", "щ", "є", "ї", "ю"] {
+            assert!(matches!(encode_text7(missing, Text7Layout::Uk),
+                Err(Text7ProjectionError::UnknownSpelling { .. })));
+        }
     }
 
     #[test]
-    fn ukrainian_affricate_longest_match_stays_one_cell() {
+    fn ukrainian_digraph_uses_two_keyboard_symbols_not_old_sound_alias() {
         let lower = encode_text7("дж", Text7Layout::Uk).unwrap();
+        assert_eq!(lower.cells(), &[0x11, 0x25]);
+        assert_eq!(render_text7(&lower, Text7Layout::Uk).unwrap(), "дж");
         let title = encode_text7("Дж", Text7Layout::Uk).unwrap();
+        assert_eq!(title.cells(), &[0x22, 0x11, 0x25]);
+        assert_ne!(lower, title);
         let upper = encode_text7("ДЖ", Text7Layout::Uk).unwrap();
+        assert_eq!(upper.cells(), &[0x22, 0x11, 0x22, 0x25]);
+    }
 
-        assert_eq!(lower.cells(), &[0x3f]);
-        assert_eq!(lower, title);
-        assert_eq!(lower, upper);
+    #[test]
+    fn d2_punctuation_is_never_a_d7_text7_symbol() {
+        for punctuation in [" ", "\t", "\n", "(", ")", "."] {
+            assert!(matches!(encode_text7(punctuation, Text7Layout::Uk),
+                Err(Text7ProjectionError::UnknownSpelling { .. })));
+        }
+        for cell in [0x60, 0x61, 0x62, 0x63, 0x64, 0x7a] {
+            let text = Text7::from_cells(vec![cell]).unwrap();
+            assert!(render_text7(&text, Text7Layout::Uk).is_err());
+        }
     }
 
     #[test]
