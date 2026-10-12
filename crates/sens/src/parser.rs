@@ -18,6 +18,7 @@ pub fn parse(source: &str) -> Result<Vec<Expr>, LanguageError> {
         source,
         cursor: 0,
         depth: 0,
+        exact_domain: false,
     };
     let mut expressions = Vec::new();
     parser.skip_ignored();
@@ -29,16 +30,71 @@ pub fn parse(source: &str) -> Result<Vec<Expr>, LanguageError> {
     Ok(expressions)
 }
 
+/// Строго доменний читач для джерел із доведеним exact-origin.
+///
+/// Це навмисно окремий режим від історичного parse(): невідомі старі
+/// восьмибітні токени не можна автоматично оголосити чинними D8.
+pub fn parse_exact_domain_source(source: &str) -> Result<Vec<Expr>, LanguageError> {
+    let mut parser = Parser {
+        source,
+        cursor: 0,
+        depth: 0,
+        exact_domain: true,
+    };
+    let mut expressions = Vec::new();
+    parser.skip_ignored();
+    while parser.cursor < source.len() {
+        expressions.push(parser.expression()?);
+        parser.skip_ignored();
+    }
+    // Немає implicit Number у SENS: тільки D24+ числові механізми.
+    // Звичайний parse() лишає старі форми для сумісних споживачів.
+    let mut pending: Vec<&Expr> = expressions.iter().collect();
+    while let Some(expr) = pending.pop() {
+        match &expr.kind {
+            ExprKind::Number(_, _) | ExprKind::Rational(_) |
+            ExprKind::BinaryNumber(_) | ExprKind::NumericBuffer(_) |
+            ExprKind::Sid(_) | ExprKind::Call(_, _) => {
+                return Err(LanguageError::new(
+                    ErrorKind::Parse,
+                    "точнодоменне джерело не допускає старих чисел, буферів чи SID8",
+                    expr.span,
+                ));
+            }
+            ExprKind::List(items) => pending.extend(items.iter()),
+            ExprKind::Pair(head, tail) => {
+                pending.push(head);
+                pending.push(tail);
+            }
+            ExprKind::DomainCall(_, items) => pending.extend(items.iter()),
+            ExprKind::DomainIdentity(_) | ExprKind::String(_) |
+            ExprKind::Symbol(_) | ExprKind::Local { .. } => {}
+        }
+    }
+    Ok(expressions)
+}
+
 struct Parser<'a> {
     source: &'a str,
     cursor: usize,
     depth: u32,
+    exact_domain: bool,
 }
 
 impl Parser<'_> {
     fn expression(&mut self) -> Result<Expr, LanguageError> {
         self.skip_ignored();
         let start = self.cursor;
+        if self.exact_domain &&
+            (self.source[self.cursor..].starts_with("#i32(")
+                || self.source[self.cursor..].starts_with("#f32("))
+        {
+            return Err(self.error(
+                "числові буфери сумісного парсера не є числами D24+",
+                start,
+                (start + 5).min(self.source.len()),
+            ));
+        }
         if self.source[self.cursor..].starts_with("#i32(") {
             return self.numeric_buffer(start, false);
         }
@@ -366,6 +422,31 @@ impl Parser<'_> {
                 start,
                 self.cursor,
             ));
+        }
+
+        if self.exact_domain && !token.is_empty()
+            && token.bytes().all(|byte| matches!(byte, b'0' | b'1'))
+        {
+            if token.len() == 8 {
+                return Err(self.error(
+                    "неоднозначна восьмибітна голова: W8 не доводить D8 без походження",
+                    start,
+                    self.cursor,
+                ));
+            }
+            if token.len() > 9 {
+                return Err(self.error(
+                    "D10 або ширше слово ще не має допущеного носія в цьому читачі",
+                    start,
+                    self.cursor,
+                ));
+            }
+            let words = crate::parse_binary_source_words(token)?;
+            let word = words.first().expect("перевірене бінарне слово").word;
+            return Ok(Expr {
+                kind: ExprKind::DomainIdentity(crate::DomainIdentity::from_source_word(word)),
+                span: Span { start, end: self.cursor },
+            });
         }
 
         if let Some(payload) = explicit_radix_payload(token, "#d") {
