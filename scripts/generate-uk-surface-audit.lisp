@@ -30,10 +30,10 @@
 (0011 join-newline-onto
   (0010 (strings acc)
     (110
-      ((010 strings) () acc)
-      ((010 strings) (1) acc)
+      ((010 strings) acc)
+      
       ((101 acc "") (join-newline-onto (011 strings) (100 strings)))
-      (t (join-newline-onto (011 strings) (str+ acc "\n" (100 strings)))))))
+      ((010 (001 ())) (join-newline-onto (011 strings) (str+ acc "\n" (100 strings)))))))
 (0011 join-newline (0010 (strings) (join-newline-onto strings "")))
 
 ; Function-table rows have the generated schema ft/2:
@@ -48,7 +48,7 @@
   (0010 (surface)
     (110
       ((101 (1001 surface) (001 ())) t)
-      (t (001 ())))))
+      ((010 (001 ())) (001 ())))))
 
 (0011 named-row?
   (0010 (row)
@@ -60,17 +60,17 @@
             ((surface-empty? (110110101 row))
              (110
                ((surface-empty? (sixth row)) (0100 (surface-empty? (seventh row))))
-               (t t)))
-            (t t)))
-         (t t)))
-      (t t))))
+               ((010 (001 ())) t)))
+            ((010 (001 ())) t)))
+         ((010 (001 ())) t)))
+      ((010 (001 ())) t))))
 
 (0011 named-rows
   (0010 (rows)
     (110
       ((010 rows) () (001 ()))
       ((named-row? (100 rows)) (111 (100 rows) (named-rows (011 rows))))
-      (t (named-rows (011 rows))))))
+      ((010 (001 ())) (named-rows (011 rows))))))
 
 (0011 ft-rows (named-rows (011 ft-form)))
 
@@ -80,11 +80,11 @@
 (0011 find-section
   (0010 (name sections)
     (110
-      ((010 sections) () (001 ()))
-      ((010 sections) (1) (001 ()))
+      ((010 sections) (001 ()))
+      
       ((11110101 (110111011 (010 (100 sections))) (101 (100 (100 sections)) name))
        (100 sections))
-      (t (find-section name (011 sections))))))
+      ((010 (001 ())) (find-section name (011 sections))))))
 
 (0011 candidate-section (find-section (001 назви) (011 profile-form)))
 (0011 candidate-rows
@@ -93,21 +93,21 @@
 (0011 find-candidate-row
   (0010 (sid rows)
     (110
-      ((010 rows) () (001 ()))
-      ((010 rows) (1) (001 ()))
+      ((010 rows) (001 ()))
+      
       ((11110111 (100 (100 rows)) sid) (100 rows))
-      (t (find-candidate-row sid (011 rows))))))
+      ((010 (001 ())) (find-candidate-row sid (011 rows))))))
 
 (0011 surface-word
   (0010 (surface)
     (110
       ((101 (1001 surface) (001 ())) (001 —))
-      (t (1001 surface)))))
+      ((010 (001 ())) (1001 surface)))))
 (0011 surface-status
   (0010 (surface)
     (110
       ((101 (1001 surface) (001 ())) (001 missing))
-      (t (001 stable)))))
+      ((010 (001 ())) (001 stable)))))
 
 (0011 missing-surface?
   (0010 (surface)
@@ -123,10 +123,10 @@
       ((101 (candidate-evidence-status candidate) (001 кандидат-сумісності))
        (001 compatibility-only))
       ((missing-surface? uk) (001 needs-research))
-      ((010 candidate) () (001 needs-research))
-      ((010 candidate) (1) (001 needs-research))
+      ((010 candidate) (001 needs-research))
+      
       ((101 (1001 candidate) (10011 candidate)) (001 full))
-      (t (001 needs-research)))))
+      ((010 (001 ())) (001 needs-research)))))
 
 (0011 candidate-full-word
   (0010 (candidate)
@@ -152,7 +152,7 @@
       ((010 candidate) () (001 missing))
       ((101 (100111 candidate) (001 чинна)) (001 stable))
       ((101 (100111 candidate) (001 кандидат-сумісності)) (001 compatibility-only))
-      (t (001 candidate)))))
+      ((010 (001 ())) (001 candidate)))))
 
 (0011 render-row
   (0010 (row)
@@ -196,7 +196,7 @@
               (class (audit-class uk candidate)))
          (count-class wanted (011 rows)
            (110 ((101 class wanted) (01010 acc 1))
-                 (t acc))))))))
+                 ((010 (001 ())) acc))))))))
 
 (0011 count-candidates
   (0010 (rows acc)
