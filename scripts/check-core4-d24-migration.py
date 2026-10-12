@@ -29,7 +29,7 @@ MATH_HEADS = frozenset({
 # which is not itself syntactically a mathematical primitive call.
 SEED_HEADS = frozenset({"length-onto"})
 NUMERIC_TOKEN = re.compile(
-    r"(?:[+-]?[0-9]+(?:/[+-]?[0-9]+)?(?:\\.[0-9]+)?|#[bBoOdDxX][0-9a-fA-F]+)\\Z"
+    r"(?:[+-]?[0-9]+(?:/[+-]?[0-9]+)?(?:\.[0-9]+)?|#[bBoOdDxX][0-9a-fA-F]+)\Z"
 )
 
 
@@ -39,7 +39,7 @@ def tokens(source: str):
     index = 0
     while index < len(source):
         ch = source[index]
-        if ch == "\\n":
+        if ch == "\n":
             line += 1
             index += 1
             continue
@@ -47,7 +47,7 @@ def tokens(source: str):
             index += 1
             continue
         if ch == ";":
-            while index < len(source) and source[index] != "\\n":
+            while index < len(source) and source[index] != "\n":
                 index += 1
             continue
         if ch in "()":
@@ -60,8 +60,8 @@ def tokens(source: str):
             closed = False
             while index < len(source):
                 ch = source[index]
-                if ch == "\\\\":
-                    if index + 1 < len(source) and source[index + 1] == "\\n":
+                if ch == "\\":
+                    if index + 1 < len(source) and source[index + 1] == "\n":
                         line += 1
                     index += 2
                 elif ch == '"':
@@ -69,7 +69,7 @@ def tokens(source: str):
                     closed = True
                     break
                 else:
-                    if ch == "\\n":
+                    if ch == "\n":
                         line += 1
                     index += 1
             if not closed:
@@ -135,11 +135,11 @@ def check(current, expected):
 
 def self_test():
     sample = (
-        '; (01010 ignored 1)\\n'
-        '(0011 f (0010 (a) (01010 a 1)))\\n'
-        '(01011 (10110 a b) #d10)\\n'
-        '(length-onto xs 0)\\n'
-        '(01010 "<string with 2 and (01011 a 8)>" a)\\n'
+        '; (01010 ignored 1)\n'
+        '(0011 f (0010 (a) (01010 a 1)))\n'
+        '(01011 (10110 a b) #d10)\n'
+        '(length-onto xs 0)\n'
+        '(01010 "<string with 2 and (01011 a 8)>" a)\n'
     )
     actual = audit(sample)
     expected = Counter({
@@ -149,9 +149,9 @@ def self_test():
     })
     check(actual, expected)
     for damaged in (
-        sample + "(01010 a 1)\\n",  # same key, increased count
-        sample + "(01010 a 2)\\n",  # novel numeric spelling
-        sample + "(length-onto xs 0)\\n",  # helper seed reintroduced
+        sample + "(01010 a 1)\n",  # same key, increased count
+        sample + "(01010 a 2)\n",  # novel numeric spelling
+        sample + "(length-onto xs 0)\n",  # helper seed reintroduced
     ):
         try:
             check(audit(damaged), expected)
