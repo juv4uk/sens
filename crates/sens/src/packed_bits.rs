@@ -816,9 +816,8 @@ mod tests {
             ).is_some(), "joined tail must be canonical");
 
             for index in 0..source.bit_len() {
-                assert_eq!(
-                    joined.read::<1>(start + index),
-                    source.read::<1>(index),
+                assert!(
+                    joined.read::<1>(start + index) == source.read::<1>(index),
                     "bit {index} changed when concatenated after prefix length {prefix}",
                 );
             }
@@ -844,7 +843,7 @@ mod tests {
         assert_eq!(joined.read::<8>(0).unwrap().packed_bits(), 0b1010_1100);
         assert_eq!(joined.read::<8>(8).unwrap().packed_bits(), 0b0111_0001);
         assert_eq!(joined.read::<5>(16).unwrap().packed_bits(), 0b10101);
-        assert_eq!(joined.read::<1>(21), None);
+        assert!(joined.read::<1>(21).is_none());
         assert!(PackedBitstream::from_parts(joined.bytes().to_vec(), joined.bit_len()).is_some());
     }
 
