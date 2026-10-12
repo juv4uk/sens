@@ -169,20 +169,20 @@ class ThreePassMigrationTests(unittest.TestCase):
                 with self.assertRaisesRegex(
                     mod.MigrationError, "фонемна/текстова ідентичність"
                 ):
-                    self.migrate(f"({word} x)\\n")
+                    self.migrate(f"({word} x)\n")
         for word in ("000000000", "111111111"):
             with self.subTest(domain="D9", word=word):
                 with self.assertRaisesRegex(
                     mod.MigrationError, "відсутній доказ допущеного механізму"
                 ):
-                    self.migrate(f"({word} x)\\n")
+                    self.migrate(f"({word} x)\n")
 
     def test_d7_d9_data_words_remain_distinct_from_executable_heads(self):
         # Зміна стосується лише позиції виклику, не даних.
         for word in ("0000000", "000000000"):
             with self.subTest(word=word):
-                out, _ = self.migrate(f"(100 {word})\\n")
-                self.assertEqual(out, f"10 100 00 {word} 01\\n")
+                out, _ = self.migrate(f"(100 {word})\n")
+                self.assertEqual(out, f"10 100 00 {word} 01\n")
 
     def test_d2_words_cannot_survive_as_ordinary_data(self):
         for word in ("00","01","10","11"):
