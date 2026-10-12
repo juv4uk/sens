@@ -36,7 +36,9 @@ fn head_domain_identity(head: &Expr) -> Option<CoreDomainIdentity> {
     }
 }
 
-fn immutable_surface_domain_identity(name: &str) -> Option<CoreDomainIdentity> {
+/// The source-surface → exact-domain projection boundary, shared by lowering
+/// and immutable-binding checks. Never reconstruct an historical eight-bit ID.
+pub(crate) fn immutable_surface_domain_identity(name: &str) -> Option<CoreDomainIdentity> {
     necessary_forms::domain_identity_for_symbol(name)
         .or_else(|| semantic_registry::domain_identity_for_surface(name))
 }
