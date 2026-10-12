@@ -103,7 +103,8 @@ jobs:
       - uses: actions/checkout@v5
       - uses: dtolnay/rust-toolchain@stable
       - name: Перевірити побітове пакування D1–D10 без вирівнювання
-        run: cargo test --locked -p sens --lib packed_bits::tests:: -- --nocapture
+        run: >-
+          cargo test --locked -p sens --lib packed_bits::tests:: -- --nocapture
       - name: Перевірити точну ширину доменів і механічні цикли W7
         run: cargo test --locked -p sens --test domain_ladder --test d7_w7_pack --test d2_text7_frame_role_boundary --test text7_canonical_wire --test current_binary_preflight
       - name: Перевірити пряме читання упакованих байтів D2 без текстового джерела
