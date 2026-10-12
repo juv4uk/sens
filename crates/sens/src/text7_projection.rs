@@ -29,80 +29,139 @@ pub enum Text7ProjectionError {
         index: usize,
         cell: u8,
     },
+    AmbiguousGlyphSequence { layout: Text7Layout },
 }
 
 pub const TEXT7_UPSTREAM_REVISION: &str = generated::UPC7_SOURCE_REVISION;
 pub const TEXT7_TABLE_SHA256: &str = generated::UPC7_TABLE_SHA256;
 pub const TEXT7_LAYOUT_SHA256: &str = generated::UPC7_LAYOUT_SHA256;
 
-type Candidate = (&'static str, Option<&'static [u8]>);
+/// Old donor pins are retained as *historical evidence only*. Active
+/// Text7 projections below use the ratified #3572 D7 coordinates.
+#[inline]
+fn d2_owned_glyph(glyph: char) -> bool {
+    glyph.is_whitespace() || matches!(glyph, '(' | ')' | '.')
+}
 
-fn projection(layout: Text7Layout) -> (&'static [Candidate], &'static [Option<&'static str>; 128]) {
+#[inline]
+fn d2_shadow_cell(cell: u8) -> bool {
+    matches!(cell, 0b1100000 | 0b1100001 | 0b1100010 |
+                   0b1100011 | 0b1100100 | 0b1111010)
+}
+
+fn sanskrit_layout(layout: Text7Layout) -> Option<&'static str> {
     match layout {
-        Text7Layout::Uk => (generated::UK_ENCODE, generated::UK_RENDER),
-        Text7Layout::SaSlp1 => (generated::SA_SLP1_ENCODE, generated::SA_SLP1_RENDER),
-        Text7Layout::SaIast => (generated::SA_IAST_ENCODE, generated::SA_IAST_RENDER),
-        Text7Layout::SaDeva => (generated::SA_DEVA_ENCODE, generated::SA_DEVA_RENDER),
+        Text7Layout::SaSlp1 => Some("slp1"),
+        Text7Layout::SaIast => Some("iast"),
+        Text7Layout::SaDeva => Some("deva"),
+        Text7Layout::Uk => None,
     }
 }
 
-/// Lower one human spelling through a selected pinned UPC-7 layout.
-///
-/// Candidate order is generated longest-first from upstream. A source alias
-/// may therefore expand to several cells, while canonical Text identity is
-/// only the resulting cell stream.
+/// Encode Ukrainian keyboard symbols or an explicitly selected Sanskrit
+/// projection into exactly seven-bit D7 cells. No D2 punctuation in D7.
 pub fn encode_text7(text: &str, layout: Text7Layout) -> Result<Text7, Text7ProjectionError> {
-    let (candidates, _) = projection(layout);
-    let mut cells = Vec::new();
-    let mut byte_offset = 0usize;
-
-    while byte_offset < text.len() {
-        let rest = &text[byte_offset..];
-        let Some((spelling, projected)) = candidates
-            .iter()
-            .find(|(spelling, _)| rest.starts_with(*spelling))
-        else {
+    let mut cells: Vec<u8> = Vec::new();
+    let mut at = 0usize;
+    while at < text.len() {
+        let rest = &text[at..];
+        let current = rest.chars().next().expect("nonempty rest");
+        if d2_owned_glyph(current) {
             return Err(Text7ProjectionError::UnknownSpelling {
-                layout,
-                byte_offset,
+                layout, byte_offset: at,
             });
-        };
+        }
 
-        let Some(projected) = projected else {
-            return Err(Text7ProjectionError::UnassignedSpelling {
-                layout,
-                byte_offset,
-                spelling,
-            });
-        };
-
-        cells.extend_from_slice(projected);
-        byte_offset += spelling.len();
+        match layout {
+            Text7Layout::Uk => {
+                let lower: String = current.to_lowercase().collect();
+                let glyph = if current.is_uppercase() {
+                    lower.as_str()
+                } else {
+                    &rest[..current.len_utf8()]
+                };
+                let cell = crate::semantic_registry::d7_uk_keyboard_cell(glyph)
+                    .ok_or(Text7ProjectionError::UnknownSpelling {
+                        layout, byte_offset: at,
+                    })?;
+                if current.is_uppercase() {
+                    cells.push(0b0100010); // owner-ratified D7 uppercase-next
+                }
+                cells.push(cell);
+                at += current.len_utf8();
+            }
+            _ => {
+                let spelling = sanskrit_layout(layout).expect("Sanskrit branch");
+                let (length, cell) =
+                    crate::semantic_registry::d7_sanskrit_longest_prefix(rest, spelling)
+                    .ok_or(Text7ProjectionError::UnknownSpelling {
+                        layout, byte_offset: at,
+                    })?;
+                if d2_shadow_cell(cell) {
+                    return Err(Text7ProjectionError::UnknownSpelling {
+                        layout, byte_offset: at,
+                    });
+                }
+                cells.push(cell);
+                at += length;
+            }
+        }
     }
 
-    Ok(Text7::from_cells(cells)
-        .expect("generated UPC-7 projection must contain only seven-bit cells"))
+    Ok(Text7::from_cells(cells).expect("ratified D7 cells fit seven bits"))
 }
 
-/// Render canonical Text7 through one human layout.
-///
-/// A layout is allowed to be partial. Missing renderings fail instead of
-/// inventing a near-equivalent spelling.
+/// Render Unicode presentation of exact Sound/Text cells, NOT a D2 program.
+/// Any absent glyph or ambiguous cell boundary is an error.
 pub fn render_text7(text: &Text7, layout: Text7Layout) -> Result<String, Text7ProjectionError> {
-    let (_, render) = projection(layout);
     let mut out = String::new();
-
-    for (index, &cell) in text.cells().iter().enumerate() {
-        let Some(spelling) = render[cell as usize] else {
+    let cells = text.cells();
+    let mut index = 0usize;
+    while index < cells.len() {
+        let mut cell = cells[index];
+        let uppercase = layout == Text7Layout::Uk && cell == 0b0100010;
+        if uppercase {
+            index += 1;
+            let Some(&next) = cells.get(index) else {
+                return Err(Text7ProjectionError::UnrenderableCell {
+                    layout, index: index - 1, cell,
+                });
+            };
+            cell = next;
+        }
+        if d2_shadow_cell(cell) {
             return Err(Text7ProjectionError::UnrenderableCell {
-                layout,
-                index,
-                cell,
+                layout, index, cell,
             });
-        };
-        out.push_str(spelling);
+        }
+        let glyph = match layout {
+            Text7Layout::Uk => crate::semantic_registry::d7_uk_keyboard_glyph(cell),
+            _ => crate::semantic_registry::d7_sanskrit_glyph(
+                cell, sanskrit_layout(layout).expect("Sanskrit branch")
+            ),
+        }.ok_or(Text7ProjectionError::UnrenderableCell {
+            layout, index, cell,
+        })?;
+        if glyph.chars().any(d2_owned_glyph) {
+            return Err(Text7ProjectionError::UnrenderableCell {
+                layout, index, cell,
+            });
+        }
+        if uppercase {
+            if glyph.chars().count() != 1 || !glyph.chars().all(char::is_lowercase) {
+                return Err(Text7ProjectionError::UnrenderableCell {
+                    layout, index, cell,
+                });
+            }
+            out.extend(glyph.chars().flat_map(char::to_uppercase));
+        } else {
+            out.push_str(glyph);
+        }
+        index += 1;
     }
-
+    if encode_text7(&out, layout)?.cells() != cells {
+        return Err(Text7ProjectionError::AmbiguousGlyphSequence { layout });
+    }
     Ok(out)
 }
 
@@ -132,6 +191,7 @@ impl fmt::Display for Text7ProjectionError {
                 f,
                 "{layout:?} cannot render Text7 cell {cell:07b} at index {index}"
             ),
+            Self::AmbiguousGlyphSequence { layout } => write!(f, "{layout:?} glyph concatenation loses D7 word boundaries"),
         }
     }
 }
