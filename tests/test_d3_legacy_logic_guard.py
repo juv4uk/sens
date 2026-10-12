@@ -76,9 +76,9 @@ class LegacyD3GuardTests(unittest.TestCase):
         source = (ROOT / "lib" / "core1.lisp").read_text(encoding="utf-8")
         self.assertEqual(MODULE.scan_lisp(source, "lib/core1.lisp"), [])
         # Replacing even one exact-D1 fallback with host T must be rejected.
-        good = "(110 ((010 VALUE) NIL) ((010 (001 ())) VALUE))"
+        good = "((010 (001 ())) NIL))))"
         self.assertIn(good, source)
-        corrupted = source.replace(good, "(110 ((010 VALUE) NIL) (T VALUE))", 1)
+        corrupted = source.replace(good, "(T NIL))))", 1)
         self.assertIn(
             "COND_HOST_TRUTH",
             [f.rule for f in MODULE.scan_lisp(corrupted, "lib/core1.lisp")],
