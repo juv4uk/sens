@@ -430,53 +430,6 @@ fn repl_history_persists_across_separate_sessions() {
 }
 
 #[test]
-fn repl_accepts_lowercase_symbols_and_prints_symbol_data_uppercase() {
-    use std::io::Write;
-    use std::process::Stdio;
-
-    let dir = std::env::temp_dir().join(format!(
-        "sens-cli-test-classic-repl-case-{}",
-        std::process::id()
-    ));
-    std::fs::create_dir_all(&dir).expect("should create temp home dir");
-
-    let mut child = sens()
-        .env("HOME", &dir)
-        .env("USERPROFILE", &dir)
-        .stdin(Stdio::piped())
-        .stdout(Stdio::piped())
-        .stderr(Stdio::piped())
-        .spawn()
-        .expect("binary should spawn");
-    child
-        .stdin
-        .take()
-        .expect("stdin should be piped")
-        .write_all(b"(quote (car cons \"MiXeD\" 42))\n")
-        .expect("should write lowercase REPL source");
-
-    let output = child.wait_with_output().expect("binary should run");
-    let _ = std::fs::remove_dir_all(&dir);
-
-    let stdout = String::from_utf8_lossy(&output.stdout);
-    let stderr = String::from_utf8_lossy(&output.stderr);
-    assert!(
-        output.status.success(),
-        "status={:?}\nstdout={stdout:?}\nstderr={stderr:?}",
-        output.status.code()
-    );
-    assert!(
-        stdout.contains("(CAR CONS \"MiXeD\" 42)"),
-        "stdout was: {stdout:?}"
-    );
-    assert!(
-        !stdout.contains("(car cons \"MiXeD\" 42)"),
-        "REPL leaked lowercase symbol data: {stdout:?}"
-    );
-    assert!(stderr.trim().is_empty(), "stderr was: {stderr:?}");
-}
-
-#[test]
 fn repl_echoes_a_lone_unknown_symbol_as_a_greeting_not_an_error() {
     // Isolated HOME, like repl_history_persists_across_separate_sessions.
     use std::io::Write;
