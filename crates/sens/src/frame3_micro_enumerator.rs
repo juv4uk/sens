@@ -859,11 +859,11 @@ mod tests {
     #[test]
     fn first_full_capability_basis_fits_in_three_bytes_and_executes() {
         let first = first_global_rank_with_capabilities(CAP_ALL).unwrap();
-        assert_eq!(first, 4_934_877);
+        assert_eq!(first, 1_523_043);
 
         let local = first - F3M3_OFFSET;
-        assert_eq!(local, 0x4a_4b_dd);
-        let payload = [0x4a, 0x4b, 0xdd];
+        assert_eq!(local, 0x16_3c_63);
+        let payload = [0x16, 0x3c, 0x63];
 
         let expr = decode_payload(&payload).unwrap();
         assert_eq!(expr.capability_mask(), CAP_ALL);
@@ -874,8 +874,12 @@ mod tests {
         let parsed = parse_canonical_binary(&source).expect("full-basis F3M-3 source");
         let actual = eval_parsed_expressions(&parsed, &mut Session::default())
             .expect("full-basis F3M-3 program executes");
+        assert_eq!(
+            expr.human_projection(),
+            "CAR(CONS(0,CDR(CONS(0,IF-ATOM(0,0,QUOTE(0))))))"
+        );
         let expected = eval_parsed_expressions(
-            &parse_canonical_binary("1").unwrap(),
+            &parse_canonical_binary("0").unwrap(),
             &mut Session::default(),
         )
         .unwrap();
