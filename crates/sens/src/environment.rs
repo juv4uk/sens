@@ -88,7 +88,7 @@ struct Limits {
     /// Historical exact-eight compatibility slots. These are intentionally
     /// separate storage so a legacy byte can never collide with a canonical
     /// domain identity merely from its packed payload.
-    legacy_code_slots: HashMap<u8, Value>,
+    legacy_code_slots: HashMap<crate::Sens8, Value>,
 }
 
 impl Environment {
@@ -253,7 +253,7 @@ impl Environment {
         self.2
             .borrow()
             .legacy_code_slots
-            .get(&sid.packed_byte())
+            .get(&sid)
             .cloned()
     }
 
@@ -262,10 +262,10 @@ impl Environment {
     /// New canonical code uses bind_domain_code_slot_once.
     pub(crate) fn bind_code_slot_once(&self, sid: crate::Sens8, value: Value) -> bool {
         let mut limits = self.2.borrow_mut();
-        if limits.legacy_code_slots.contains_key(&sid.packed_byte()) {
+        if limits.legacy_code_slots.contains_key(&sid) {
             return false;
         }
-        limits.legacy_code_slots.insert(sid.packed_byte(), value);
+        limits.legacy_code_slots.insert(sid, value);
         true
     }
 
@@ -566,6 +566,28 @@ mod tests {
             env.domain_code_slot(d4),
             Some(Value::Symbol(Rc::from("d4-one")))
         );
+    }
+
+    #[test]
+    fn historical_w8_slots_never_alias_ratified_d8_even_with_equal_bits() {
+        use crate::{Bit8, CoreD8, Sens8};
+
+        let environment = Environment::root();
+        let legacy = Sens8::from_packed_byte(0b1010_1000);
+        let current = DomainIdentity::D8(CoreD8::from_word(
+            Bit8::new(0b1010_1000).expect("точно вісім біт"),
+        ));
+        let old_value = Value::Symbol(Rc::from("історичне"));
+        let new_value = Value::Symbol(Rc::from("доменне"));
+
+        assert!(environment.bind_code_slot_once(legacy, old_value.clone()));
+        assert_eq!(environment.code_slot(legacy), Some(old_value.clone()));
+        assert_eq!(environment.domain_code_slot(current), None);
+        assert!(environment.bind_domain_code_slot_once(current, new_value.clone()));
+        assert_eq!(environment.domain_code_slot(current), Some(new_value));
+        assert_eq!(environment.code_slot(legacy), Some(old_value));
+        assert!(!environment.bind_code_slot_once(legacy, Value::Nil));
+        assert!(!environment.bind_domain_code_slot_once(current, Value::Nil));
     }
 
     #[test]

@@ -30,7 +30,7 @@ fn uk_semantic_name(semantic_id: Sens8) -> String {
     semantic_registry::admitted_surfaces_with_namespace_for_semantic_id(semantic_id)
         .into_iter()
         .find_map(|(namespace, name)| (namespace == "ук").then_some(name.to_string()))
-        .unwrap_or_else(|| format!("SID {}", semantic_registry::semantic_id_bits(semantic_id)))
+        .unwrap_or_else(|| format!("W8:{}", semantic_registry::semantic_id_bits(semantic_id)))
 }
 
 fn canonical_inexact(number: f64) -> String {
@@ -88,11 +88,22 @@ fn render_uk(value: &Value) -> String {
             }
         },
         Value::Sid(sid) => {
-            format!("#<вбудована {}>", uk_semantic_name(*sid))
+            // Історичний W8 має окремий простір від D8. Лише доведена
+            // семантична відповідність D3 дозволяє показати його чинну
+            // ратифіковану проєкцію. Інші W8 — лише сумісність.
+            if let Some(domain) =
+                semantic_registry::compatibility_d3_route_from_ratified_domains(*sid)
+            {
+                semantic_registry::surface_for_domain_identity(domain.into(), "uk")
+                    .map(str::to_string)
+                    .unwrap_or_else(|| format!("#<домен D{}:{domain}>", domain.width()))
+            } else {
+                format!("#<сумісний W8:{} {}>", sid, uk_semantic_name(*sid))
+            }
         }
         Value::DomainIdentity(identity) => semantic_registry::surface_for_domain_identity(*identity, "uk")
             .map(str::to_string)
-            .unwrap_or_else(|| format!("#<домен {identity}>")),
+            .unwrap_or_else(|| format!("#<домен D{}:{identity}>", identity.width())),
         Value::String(text) => {
             let mut escaped = String::with_capacity(text.len() + 2);
             escaped.push('"');
@@ -449,7 +460,7 @@ mod tests {
         // identity, while Sanskrit falls back to the exact canonical bits.
         assert_eq!(
             render_value_for_presentation(&d9, PresentationLanguage::Ukrainian),
-            "#<домен 100000001>"
+            "#<домен D9:100000001>"
         );
         assert_eq!(
             render_value_for_presentation(&d9, PresentationLanguage::Sanskrit),
@@ -470,6 +481,36 @@ mod tests {
             render_value_for_presentation(&value, PresentationLanguage::Sanskrit),
             "(phalana ām)"
         );
+    }
+
+    #[test]
+    fn історичний_w8_не_маскується_під_чинний_d8() {
+        let old = Value::Sid(crate::sens!(10101000));
+        let exact = Value::DomainIdentity(crate::DomainIdentity::D8(
+            crate::CoreD8::from_word(crate::Bit8::new(0b10101000).unwrap()),
+        ));
+        let old_uk = render_value_for_presentation(&old, PresentationLanguage::Ukrainian);
+        let current_uk = render_value_for_presentation(&exact, PresentationLanguage::Ukrainian);
+        assert!(old_uk.starts_with("#<сумісний W8:10101000 "), "{old_uk}");
+        assert_eq!(current_uk, "#<домен D8:10101000>");
+        assert_ne!(old_uk, current_uk);
+        // Формати механічної передачі не змінюються в UI міграції.
+        assert_eq!(old.to_string(), exact.to_string());
+        assert_eq!(old.to_string(), "10101000");
+    }
+
+    #[test]
+    fn ратифікований_d3_міст_не_дає_w8_довільної_семантики() {
+        let historical_quote = Value::Sid(crate::sens!(00000001));
+        let current_quote = Value::DomainIdentity(crate::DomainIdentity::D3(
+            crate::Bija3::from_word(crate::Bit3::new(0b001).unwrap()),
+        ));
+        assert_eq!(
+            render_value_for_presentation(&historical_quote, PresentationLanguage::Ukrainian),
+            render_value_for_presentation(&current_quote, PresentationLanguage::Ukrainian)
+        );
+        assert_eq!(current_quote.to_string(), "001");
+        assert_eq!(historical_quote.to_string(), "00000001");
     }
 
     #[test]

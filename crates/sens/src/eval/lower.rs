@@ -20,9 +20,6 @@ use crate::CoreDomainIdentity;
 use crate::Sens8;
 use std::rc::Rc;
 
-const QUOTE: Sens8 = crate::sens!(00000001);
-const COND: Sens8 = crate::sens!(00000111);
-
 /// Звести всі виклики програми. Ідемпотентно: `Call` лишається `Call`.
 pub fn lower_program(expressions: &[Expr]) -> Vec<Expr> {
     expressions.iter().map(|expression| lower(expression, 0)).collect()
@@ -71,8 +68,52 @@ fn is_d3(identity: CoreDomainIdentity, bits: u8) -> bool {
     )
 }
 
+/// Сумісна голова W8 одержує закон лише через доказову D3-проєкцію.
+fn historical_head_has_d3_law(sid: Sens8, bits: u8) -> bool {
+    semantic_registry::compatibility_d3_route_from_ratified_domains(sid)
+        .is_some_and(|identity| is_d3(identity, bits))
+}
+
 fn lower_all(items: &[Expr], depth: u32) -> Rc<[Expr]> {
     items.iter().map(|item| lower(item, depth + 1)).collect()
+}
+
+/// Lower an already typed or newly discovered domain call in exactly the
+/// same way. A quoted datum and a D4 binder are not executable call heads.
+fn lower_domain_arguments(
+    identity: CoreDomainIdentity,
+    arguments: &[Expr],
+    depth: u32,
+) -> Rc<[Expr]> {
+    if is_d3(identity, 0b001) {
+        return arguments.into();
+    }
+    if is_d3(identity, 0b110) {
+        return arguments
+            .iter()
+            .map(|clause| match &clause.kind {
+                ExprKind::List(parts) => Expr {
+                    kind: ExprKind::List(lower_all(parts, depth + 1)),
+                    span: clause.span,
+                },
+                _ => clause.clone(),
+            })
+            .collect();
+    }
+    if necessary_forms::identity_for_domain_identity(identity).is_some() {
+        return arguments
+            .iter()
+            .enumerate()
+            .map(|(index, argument)| {
+                if index == 0 {
+                    argument.clone()
+                } else {
+                    lower(argument, depth + 1)
+                }
+            })
+            .collect();
+    }
+    lower_all(arguments, depth)
 }
 
 fn lower(expression: &Expr, depth: u32) -> Expr {
@@ -82,54 +123,24 @@ fn lower(expression: &Expr, depth: u32) -> Expr {
     let kind = match &expression.kind {
         ExprKind::Call(sid, arguments) => ExprKind::Call(*sid, arguments.clone()),
         ExprKind::DomainCall(identity, arguments) => {
-            ExprKind::DomainCall(*identity, arguments.clone())
+            ExprKind::DomainCall(*identity, lower_domain_arguments(*identity, arguments, depth))
         }
         ExprKind::List(items) if !items.is_empty() => {
             let arguments = &items[1..];
 
             if let Some(identity) = head_domain_identity(&items[0]) {
                 return Expr {
-                    kind: if is_d3(identity, 0b001) {
-                        ExprKind::DomainCall(identity, arguments.into())
-                    } else if is_d3(identity, 0b110) {
-                        ExprKind::DomainCall(
-                            identity,
-                            arguments
-                                .iter()
-                                .map(|clause| match &clause.kind {
-                                    ExprKind::List(parts) => Expr {
-                                        kind: ExprKind::List(lower_all(parts, depth + 1)),
-                                        span: clause.span,
-                                    },
-                                    _ => clause.clone(),
-                                })
-                                .collect(),
-                        )
-                    } else if necessary_forms::identity_for_domain_identity(identity).is_some() {
-                        ExprKind::DomainCall(
-                            identity,
-                            arguments
-                                .iter()
-                                .enumerate()
-                                .map(|(index, argument)| {
-                                    if index == 0 {
-                                        argument.clone()
-                                    } else {
-                                        lower(argument, depth + 1)
-                                    }
-                                })
-                                .collect(),
-                        )
-                    } else {
-                        ExprKind::DomainCall(identity, lower_all(arguments, depth))
-                    },
+                    kind: ExprKind::DomainCall(
+                        identity,
+                        lower_domain_arguments(identity, arguments, depth),
+                    ),
                     span: expression.span,
                 };
             }
 
             match head_sid(&items[0]) {
-                Some(sid) if sid == QUOTE => ExprKind::Call(sid, arguments.into()),
-                Some(sid) if sid == COND => ExprKind::Call(
+                Some(sid) if historical_head_has_d3_law(sid, 0b001) => ExprKind::Call(sid, arguments.into()),
+                Some(sid) if historical_head_has_d3_law(sid, 0b110) => ExprKind::Call(
                     sid,
                     arguments
                         .iter()
@@ -167,5 +178,88 @@ fn lower(expression: &Expr, depth: u32) -> Expr {
     Expr {
         kind,
         span: expression.span,
+    }
+}
+
+#[cfg(test)]
+mod exact_domain_lowering_tests {
+    use super::*;
+
+    /// A partially lowered AST is a valid compiler input. Typed call heads
+    /// must not shield their nested domain calls from lowering.
+    fn compare_partial_and_source(source: &str) {
+        let parsed = crate::parser::parse_exact_domain_source(source)
+            .expect("valid current exact-domain source");
+        let ExprKind::List(items) = &parsed[0].kind else {
+            panic!("top-level call required");
+        };
+        let ExprKind::DomainIdentity(domain) = items[0].kind else {
+            panic!("current domain head required");
+        };
+        let identity = domain.core_operation().expect("admitted callable domain");
+        let partial = Expr {
+            kind: ExprKind::DomainCall(identity, items[1..].into()),
+            span: parsed[0].span,
+        };
+        let canonical = lower_program(&parsed);
+        let lowered = lower_program(&[partial]);
+        assert_eq!(lowered, canonical, "typed and source heads must lower alike");
+        assert_eq!(lower_program(&lowered), lowered, "lowering must be idempotent");
+    }
+
+    #[test]
+    fn nested_d3_calls_are_lowered_under_an_already_typed_head() {
+        compare_partial_and_source("(111 (100 (001 000)) (011 (001 000)))");
+    }
+
+    #[test]
+    fn quote_data_is_not_rewritten_as_executable_domain_calls() {
+        compare_partial_and_source("(001 (010 (001 11110111)))");
+    }
+
+    #[test]
+    fn lambda_binder_stays_data_while_its_body_is_lowered() {
+        compare_partial_and_source("(0010 (x) (010 (001 x)))");
+    }
+
+    #[test]
+    fn cond_clause_structure_and_nested_calls_survive_lowering() {
+        compare_partial_and_source("(110 ((001 1) (010 (001 000))))");
+    }
+}
+
+
+#[cfg(test)]
+mod domain_ladder_lowering_migration_tests {
+    use super::*;
+
+    fn lowered_one(source: &str) -> Expr {
+        let parsed = crate::parse(source).expect("сумісний читач");
+        lower_program(&parsed).into_iter().next().expect("одна форма")
+    }
+
+    #[test]
+    fn historical_quote_does_not_evaluate_quoted_data() {
+        let lowered = lowered_one("(00000001 (00000101 x))");
+        let ExprKind::Call(_, args) = lowered.kind else { panic!("QUOTE має лишатися W8 для сумісного читача"); };
+        assert_eq!(args.len(), 1);
+        assert!(matches!(&args[0].kind, ExprKind::List(items) if matches!(&items[0].kind, ExprKind::Sid(_))));
+    }
+
+    #[test]
+    fn historical_cond_lowers_only_clause_expressions() {
+        let lowered = lowered_one("(00000111 ((00000101 x) (00000001 (00000101 y))))");
+        let ExprKind::Call(_, clauses) = lowered.kind else { panic!("COND має залишатися W8 для сумісності"); };
+        let ExprKind::List(parts) = &clauses[0].kind else { panic!("структурна клауза"); };
+        assert!(matches!(&parts[0].kind, ExprKind::Call(_, _)));
+        assert!(matches!(&parts[1].kind, ExprKind::Call(_, _)));
+    }
+
+    #[test]
+    fn unrelated_w8_cannot_infer_d3_law() {
+        for source in ["(00001000 x)", "(10101000 x)"] {
+            let lowered = lowered_one(source);
+            assert!(matches!(lowered.kind, ExprKind::Call(_, _)));
+        }
     }
 }

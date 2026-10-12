@@ -103,6 +103,11 @@ pub(crate) fn compatibility_d3_route_from_ratified_domains(
     }
     let mut admitted = None;
     for surface in row.surfaces {
+        // Лише іменні історичні проєкції підтверджують чинний D3-закон.
+        // Байт W8 та символічна мітка не мають права призначати D8/D3.
+        if !matches!(surface.namespace, "ук" | "укр" | "sa") {
+            continue;
+        }
         let Some(identity) = direct_domain_identity_for_surface(surface.name) else {
             continue;
         };
@@ -332,7 +337,7 @@ mod exact_registry_vs_historical_slot_tests {
             let identity = domain_identity_for_surface(surface)
                 .expect("generated ratified D3 surface must have an exact domain");
             assert_eq!(identity.width(), width);
-            assert_eq!(identity.packed_bits(), bits);
+            assert_eq!(u16::from(identity.packed_bits()), bits);
         }
         assert_eq!(domain_identity_for_surface("__unknown_domain_name__"), None);
     }
@@ -379,5 +384,35 @@ mod exact_d5_binding_projection_tests {
     #[test]
     fn unknown_definition_does_not_gain_a_d5_coordinate() {
         assert_eq!(d5_binding_identity_for_definition("__unknown_d5_binding__"), None);
+    }
+}
+
+
+#[cfg(test)]
+mod exact_d3_compatibility_migration_tests {
+    use super::*;
+
+    #[test]
+    fn only_ratified_surfaces_project_historical_quote_cond_car() {
+        for (legacy_byte, bits) in [
+            (0b00000001, 0b001u8),
+            (0b00000111, 0b110u8),
+            (0b00000101, 0b100u8),
+        ] {
+            let identity = compatibility_d3_route_from_ratified_domains(
+                Sens8::from_packed_byte(legacy_byte)
+            ).expect("іменна історична проєкція на ратифікований D3");
+            assert_eq!(identity.width(), 3);
+            assert_eq!(identity.packed_bits(), bits);
+        }
+    }
+
+    #[test]
+    fn unrelated_w8_never_becomes_d3() {
+        for byte in [0b00000000, 0b00001000, 0b00001001, 0b10101000] {
+            assert!(compatibility_d3_route_from_ratified_domains(
+                Sens8::from_packed_byte(byte)
+            ).is_none());
+        }
     }
 }

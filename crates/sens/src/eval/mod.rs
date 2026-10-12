@@ -95,6 +95,19 @@ pub fn eval_program(source: &str, session: &mut Session) -> Result<EvalResult, L
     eval_parsed_expressions(&expressions, session)
 }
 
+/// Виконати точне джерело D1–D9 без історичного восьмибітного читача.
+///
+/// Ширина слова зберігається у DomainIdentity. Резидентність не надає права
+/// виклику; перевірка механізму відбувається в доменному evaluator-і.
+/// Літерали чисел D24+ не допускаються цим читачем до окремого HANDOFF.
+pub fn eval_exact_domain_program(
+    source: &str,
+    session: &mut Session,
+) -> Result<EvalResult, LanguageError> {
+    let expressions = crate::parser::parse_exact_domain_source(source)?;
+    eval_parsed_expressions(&expressions, session)
+}
+
 pub(crate) enum EvalStep {
     Value(Value),
     TailCall {
@@ -674,5 +687,30 @@ mod exact_domain_surface_value_position_tests {
         assert!(error.message.contains("D3 010"), "{}", error.message);
         assert!(!error.message.contains("SID"), "{}", error.message);
         assert!(!error.message.contains("00000010"), "{}", error.message);
+    }
+}
+
+#[cfg(test)]
+mod exact_domain_program_tests {
+    use super::*;
+
+    #[test]
+    fn exact_d3_quote_keeps_the_current_d8_data_identity() {
+        let mut session = Session::bare();
+        let result = eval_exact_domain_program("(001 11110111)", &mut session)
+            .expect("ратифікована D3 цитата виконується без історичного SID");
+        assert!(matches!(
+            result.value,
+            Value::DomainIdentity(identity)
+                if identity.width() == 8 && identity.packed_bits() == 0b11110111
+        ));
+    }
+
+    #[test]
+    fn exact_source_rejects_implicit_decimal_literals() {
+        let mut session = Session::bare();
+        let error = eval_exact_domain_program("(001 42)", &mut session)
+            .expect_err("числа потребують окремого допуску D24+");
+        assert_eq!(error.kind, ErrorKind::Parse);
     }
 }
