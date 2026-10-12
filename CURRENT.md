@@ -61,6 +61,8 @@ Equal packed bits in two domains do not imply equal identity. In particular owne
 
 Owner direction (2026-10-12): remove active Sens8/SID8/Function8 runtime semantics across Rust, Lisp, scripts, tests, CLI and workflows; replace each call/data position with a width-qualified domain identity and explicit admitted mechanism. No new consumer may be added to the legacy carrier. Historical manifests and archived experiments remain provenance-only and must never be loaded as executable input.
 
+**Виконаний полімовний зріз і залишкові блокери:** [`docs/migration/domain-ladder-cutover-2026-10-12.uk.md`](docs/migration/domain-ladder-cutover-2026-10-12.uk.md) фіксує видалений старий guard, новий Rust/Python/C/Lisp CI, явні D1–D10 координати в Python і ще не перенесені AST/evaluator/capability та Lisp-шляхи. На одному candidate SHA повний green ще **не доведений**; автоматично ототожнювати історичний W8:10101000 INVOKE із чинним D8:10101000 ROUND заборонено.
+
 Structural `()` is the admitted Core.D3 `000` object. It is not historical exact-eight-bit `00000000`, PredicateBit `0`, or Number zero; those equal-looking numeric payloads remain distinct across domains.
 
 Historical McCarthy names remain useful when discussing the 1960 evaluator, Core1, migration evidence, or provenance. They do not create a second current identity ontology.
