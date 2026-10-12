@@ -770,6 +770,9 @@ fn profile_offset(profile: Frame3MicroProfile) -> u128 {
         Frame3MicroProfile::F3M2 => F3M2_OFFSET,
         Frame3MicroProfile::F3M3 => F3M3_OFFSET,
         Frame3MicroProfile::F3M4 => F3M4_OFFSET,
+        // Logical profile ordering only. F3M-5 uses its own prefix-stable
+        // extension ranker rather than extending the legacy grammar order.
+        Frame3MicroProfile::F3M5 => F3M_END,
     }
 }
 
@@ -779,6 +782,7 @@ fn profile_capacity(profile: Frame3MicroProfile) -> u128 {
         Frame3MicroProfile::F3M2 => F3M2_CAPACITY,
         Frame3MicroProfile::F3M3 => F3M3_CAPACITY,
         Frame3MicroProfile::F3M4 => F3M4_CAPACITY,
+        Frame3MicroProfile::F3M5 => F3M5_CAPACITY,
     }
 }
 
@@ -792,21 +796,35 @@ pub fn decode_payload(payload: &[u8]) -> Result<Frame3MicroExpr, Frame3MicroEnum
     if local >= profile_capacity(profile) {
         return Err(Frame3MicroEnumerateError::RankOutOfRange);
     }
+    if profile == Frame3MicroProfile::F3M5 {
+        return crate::frame3_micro_v5::decode_extension(local);
+    }
     unrank_global(profile_offset(profile) + local)
 }
 
 pub fn encode_expr(expr: &Frame3MicroExpr) -> Result<Vec<u8>, Frame3MicroEnumerateError> {
-    let global = rank_global(expr)?;
-    let (profile, local) = if global < F3M1_CAPACITY {
-        (Frame3MicroProfile::F3M1, global)
-    } else if global < F3M3_OFFSET {
-        (Frame3MicroProfile::F3M2, global - F3M2_OFFSET)
-    } else if global < F3M4_OFFSET {
-        (Frame3MicroProfile::F3M3, global - F3M3_OFFSET)
-    } else if global < F3M_END {
-        (Frame3MicroProfile::F3M4, global - F3M4_OFFSET)
-    } else {
-        return Err(Frame3MicroEnumerateError::ProgramOutsideF3M4);
+    let (profile, local) = match rank_global(expr) {
+        Ok(global) if global < F3M1_CAPACITY => (Frame3MicroProfile::F3M1, global),
+        Ok(global) if global < F3M3_OFFSET => {
+            (Frame3MicroProfile::F3M2, global - F3M2_OFFSET)
+        }
+        Ok(global) if global < F3M4_OFFSET => {
+            (Frame3MicroProfile::F3M3, global - F3M3_OFFSET)
+        }
+        Ok(global) if global < F3M_END => {
+            (Frame3MicroProfile::F3M4, global - F3M4_OFFSET)
+        }
+        Ok(_) => return Err(Frame3MicroEnumerateError::ProgramOutsideF3M4),
+        Err(Frame3MicroEnumerateError::RankOutOfRange)
+        | Err(Frame3MicroEnumerateError::ProgramOutsideF3M4)
+            if crate::frame3_micro_v5::contains_extension(expr) =>
+        {
+            (
+                Frame3MicroProfile::F3M5,
+                crate::frame3_micro_v5::encode_extension(expr)?,
+            )
+        }
+        Err(error) => return Err(error),
     };
 
     let width = profile.physical_bytes();
@@ -828,6 +846,7 @@ pub const fn profile_program_capacity(profile: Frame3MicroProfile) -> u128 {
         Frame3MicroProfile::F3M2 => F3M2_CAPACITY,
         Frame3MicroProfile::F3M3 => F3M3_CAPACITY,
         Frame3MicroProfile::F3M4 => F3M4_CAPACITY,
+        Frame3MicroProfile::F3M5 => F3M5_CAPACITY,
     }
 }
 
@@ -837,6 +856,7 @@ pub const fn profile_global_offset(profile: Frame3MicroProfile) -> u128 {
         Frame3MicroProfile::F3M2 => F3M2_OFFSET,
         Frame3MicroProfile::F3M3 => F3M3_OFFSET,
         Frame3MicroProfile::F3M4 => F3M4_OFFSET,
+        Frame3MicroProfile::F3M5 => F3M_END,
     }
 }
 
