@@ -167,32 +167,83 @@
         "expires_at_utc": "2026-11-02T01:15:51Z"
       },
       "interpretation": "This is a follow-up run for its exact SHA only. Two subsequent classification-only changes have been committed and await a fresh registry run; neither is presented as a passing benchmark."
+    },
+    {
+      "workflow_run_id": 38192536311,
+      "workflow_url": "https://github.com/juv4uk/sens/actions/runs/38192536311",
+      "commit": "bbfd6d4aa873e904bf8497bf7dfb611d60557470",
+      "result": "COMPLETE_WITH_BLOCKED_STANDS",
+      "coverage": {
+        "expected_stands": 54,
+        "observed_stands": 54,
+        "duplicates": false,
+        "missing": [],
+        "extra": [],
+        "coverage_complete": true
+      },
+      "outcome_counts": {
+        "pass": 52,
+        "fail": 0,
+        "blocked": 2,
+        "timeout": 0,
+        "all_benchmarks_pass": false
+      },
+      "summary_artifact": {
+        "id": 11721294476,
+        "url": "https://github.com/juv4uk/sens/actions/runs/38192536311/artifacts/11721294476",
+        "sha256": "ce5c7742f7977fa688e4fba4a643b1f6022c80318940fcf9e48e80fc3475369e",
+        "expires_at_utc": "2026-11-02T01:39:05Z"
+      },
+      "blocked_stands": [
+        {
+          "stand": "cross-language",
+          "category": "MISSING_PINNED_GUIX_ENVIRONMENT",
+          "reason": "Explicit SENS_BENCHMARK_STATUS=BLOCKED marker when Guix is absent; no language performance or parity claim is made.",
+          "shard": 5,
+          "artifact": {
+            "id": 11722191497,
+            "sha256": "69d5c2bab40e6dc01f30e7fd55f51296d736396be45b63bc030e86dfc093fa5e"
+          }
+        },
+        {
+          "stand": "store-air-load",
+          "category": "UNROUTABLE_ENGLISH_ALIAS_IN_CURRENT_SOURCE_PREFLIGHT",
+          "reason": "The stale English source heads quote/car are not current source-routable semantic identities; preflight correctly rejects the legacy call node. A subsequent commit changes the fixture to ratified Ukrainian heads and uses parse_mixed_exact_domain; this older BLOCKED result is preserved.",
+          "shard": 4,
+          "artifact": {
+            "id": 11721219455,
+            "sha256": "d64c253cb810c77b1bad60c80d6526f5b248c8a3727e4f0eef476829e4643985"
+          }
+        }
+      ],
+      "interpretation": "This exact-SHA sweep has complete registry coverage with zero FAIL and two honest BLOCKED stands. It is not a global-green result. The store-air-load blocked cause was then addressed at source/fixture level by commit ea156c1d0fe386fe7422e4a345a6431a536e0c80; that new pair has its own current-head sweep pending."
     }
   ],
   "pending_current_head_validation": {
-    "recorded_base_head": "3f89d4f32ad463b375d90d3f69285c5163cfb601",
-    "status": "PENDING_CURRENT_GENERATION_SWEEP",
-    "latest_main_at_receipt": "57b12f9a02e8b97d5d593924beeb27a4c1708fff",
+    "recorded_base_head": "ea156c1d0fe386fe7422e4a345a6431a536e0c80",
+    "status": "PENDING_EXACT_HEAD_REGISTRY_SWEEP",
+    "latest_main_at_receipt": "ea156c1d0fe386fe7422e4a345a6431a536e0c80",
     "runs": [
       {
-        "id": 38192536311,
+        "id": 38192977589,
         "name": "Benchmark registry",
-        "commit": "bbfd6d4aa873e904bf8497bf7dfb611d60557470",
-        "url": "https://github.com/juv4uk/sens/actions/runs/38192536311",
-        "status": "queued"
+        "commit": "ea156c1d0fe386fe7422e4a345a6431a536e0c80",
+        "url": "https://github.com/juv4uk/sens/actions/runs/38192977589",
+        "status": "in_progress"
       },
       {
-        "id": 38192538259,
+        "id": 38192977616,
         "name": "Physical binary SENS CLI smoke",
-        "commit": "57b12f9a02e8b97d5d593924beeb27a4c1708fff",
-        "url": "https://github.com/juv4uk/sens/actions/runs/38192538259",
-        "status": "queued"
+        "commit": "ea156c1d0fe386fe7422e4a345a6431a536e0c80",
+        "url": "https://github.com/juv4uk/sens/actions/runs/38192977616",
+        "status": "in_progress"
       }
     ],
     "notes": [
-      "The physical stand PASS above is an exact stand-level result from SHA c10d2387, not the full sweep conclusion.",
-      "The subsequent STORE/AIR commit creates a fresh Contract 11.9 generation; its PASS/FAIL/BLOCKED outcome is pending the next sweep.",
-      "Historical full-sweep counts remain pinned to their exact commits and are not overwritten."
+      "The latest completed full sweep is 52 PASS / 0 FAIL / 2 BLOCKED on bbfd6d4.",
+      "Store/AIR BLOCKED in that sweep used non-routable English aliases; commit ea156c1 switches to ratified Ukrainian source heads and parse_mixed_exact_domain, preserving the exact canonical-binary comparison.",
+      "The next exact-head sweep must decide whether the Ukrainian/canonical paired traces, values, and output actually match.",
+      "Historical run outcomes stay pinned to their exact SHAs and are not rewritten."
     ]
   },
   "latest_stand_level_results": {
