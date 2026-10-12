@@ -117,6 +117,42 @@ const _: () = assert!(std::mem::size_of::<Sens8>() == 1);
 // error when an additive Expr variant changed compiler frame layout.
 pub(crate) const MAX_STRUCTURE_DEPTH: u32 = 768;
 
+/// Точнодоменна AST не дозволяє давньому байту W8 видати себе за
+/// D8. Перевірка ітеративна й бачить історичні вузли навіть у цитатах.
+fn is_exact_domain_program(expressions: &[Expr]) -> bool {
+    let mut pending: Vec<(&Expr, u32)> = expressions.iter().map(|expr| (expr, 0)).collect();
+    while let Some((expr, depth)) = pending.pop() {
+        if depth > MAX_STRUCTURE_DEPTH {
+            return false;
+        }
+        match &expr.kind {
+            ExprKind::Sid(_) | ExprKind::Call(_, _) => return false,
+            // Лише D24+ володіє числовою семантикою. Старі f64,
+            // дроби та нормалізовані біти без Dn — тільки сумісність.
+            ExprKind::Number(_, _) | ExprKind::Rational(_) => return false,
+            ExprKind::BinaryNumber(number) if number.numeric_domain_width().is_none() => {
+                return false;
+            }
+            ExprKind::DomainCall(identity, args) => {
+                if crate::DomainIdentity::from(*identity).core_operation() != Some(*identity) {
+                    return false;
+                }
+                pending.extend(args.iter().map(|arg| (arg, depth + 1)));
+            }
+            ExprKind::List(items) => {
+                pending.extend(items.iter().map(|item| (item, depth + 1)));
+            }
+            ExprKind::Pair(head, tail) => {
+                pending.push((head, depth + 1));
+                pending.push((tail, depth + 1));
+            }
+            _ => {}
+        }
+    }
+    true
+}
+
+
 /// FASL snapshot encoding — parse-output cache (OPT-CORE-MY-AST-SNAPSHOT).
 /// Deterministic, versioned; decode returns None on ANY inconsistency so
 /// callers fall back to text parsing (never a wrong program).
@@ -419,6 +455,16 @@ pub(crate) mod fasl {
         put_u32(&mut out, payload.len() as u32);
         out.extend_from_slice(&payload);
         out
+    }
+
+    /// Новий FASL: сувора доменна AST, без історичних W8 вузлів.
+    pub fn encode_exact_program(expressions: &[Expr], hash: &[u8; 32]) -> Option<Vec<u8>> {
+        super::is_exact_domain_program(expressions).then(|| encode_program(expressions, hash))
+    }
+
+    pub fn decode_exact_program(bytes: &[u8]) -> Option<(Vec<Expr>, [u8; 32])> {
+        let (expressions, hash) = decode_program(bytes)?;
+        super::is_exact_domain_program(&expressions).then_some((expressions, hash))
     }
 
     pub fn decode_program(bytes: &[u8]) -> Option<(Vec<Expr>, [u8; 32])> {
@@ -818,6 +864,16 @@ pub(crate) mod wire {
         out
     }
 
+    /// Новий wire: W8 transport не перетворюється на D8 за збігом біта.
+    pub fn encode_exact_program(expressions: &[Expr]) -> Option<Vec<u8>> {
+        super::is_exact_domain_program(expressions).then(|| encode_program(expressions))
+    }
+
+    pub fn decode_exact_program(bytes: &[u8]) -> Option<Vec<Expr>> {
+        let expressions = decode_program(bytes)?;
+        super::is_exact_domain_program(&expressions).then_some(expressions)
+    }
+
     pub fn decode_program(bytes: &[u8]) -> Option<Vec<Expr>> {
         if bytes.get(0..3)? != MAGIC {
             return None;
@@ -835,6 +891,17 @@ pub(crate) mod wire {
     }
 }
 
+// Нові доменні API можна викликати зовні без розкриття
+// історичних внутрішніх форматів як canonical authority.
+pub use fasl::{
+    decode_exact_program as decode_exact_fasl_program,
+    encode_exact_program as encode_exact_fasl_program,
+};
+pub use wire::{
+    decode_exact_program as decode_exact_wire_program,
+    encode_exact_program as encode_exact_wire_program,
+};
+
 #[cfg(test)]
 mod wire_tests {
     use super::wire::{decode_program, encode_program};
@@ -850,6 +917,95 @@ mod wire_tests {
 (00000001 (a b . c))
 (00000001 (1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17))
 "#;
+
+    #[test]
+    fn exact_domain_wire_and_fasl_preserve_width_without_old_byte_alias() {
+        let expr = |kind| Expr { kind, span: crate::Span::default() };
+        let d3 = crate::DomainIdentity::D3(
+            crate::Bija3::from_word(crate::Bit3::new(0b001).unwrap()));
+        let d4 = crate::DomainIdentity::D4(
+            crate::CoreD4::from_word(crate::Bit4::new(0b0001).unwrap()));
+        let d8 = crate::DomainIdentity::D8(
+            crate::CoreD8::from_word(crate::Bit8::new(0b10101000).unwrap()));
+        let d9 = crate::DomainIdentity::D9(
+            crate::CoreD9::from_word(crate::Bit9::new(0b1_00000001).unwrap()));
+        let program = [
+            expr(ExprKind::DomainIdentity(d3)),
+            expr(ExprKind::DomainIdentity(d4)),
+            expr(ExprKind::DomainIdentity(d8)),
+            expr(ExprKind::DomainIdentity(d9)),
+        ];
+        let w = super::wire::encode_exact_program(&program).expect("точний wire");
+        let w2 = super::wire::decode_exact_program(&w).expect("точний wire decode");
+        for (actual, expected) in w2.iter().zip(program.iter()) {
+            assert_eq!(actual.kind, expected.kind);
+        }
+        assert_ne!(w2[0].kind, w2[1].kind, "D3:001 та D4:0001 різні");
+        assert_eq!(super::wire::encode_exact_program(&w2).unwrap(), w);
+        let hash = [0b101u8; 32];
+        let f = fasl::encode_exact_program(&program, &hash).expect("точний FASL");
+        let (f2, digest) = fasl::decode_exact_program(&f).expect("точний FASL decode");
+        assert_eq!(digest, hash);
+        for (actual, expected) in f2.iter().zip(program.iter()) {
+            assert_eq!(actual.kind, expected.kind);
+        }
+        assert_eq!(fasl::encode_exact_program(&f2, &hash).unwrap(), f);
+    }
+
+    #[test]
+    fn exact_domain_rejects_nested_legacy_byte_but_keeps_historical_decoder() {
+        let expr = |kind| Expr { kind, span: crate::Span::default() };
+        let legacy = expr(ExprKind::Sid(crate::Sens8::from_packed_byte(0b10101000)));
+        let outer = expr(ExprKind::List(vec![
+            expr(ExprKind::DomainIdentity(crate::DomainIdentity::D3(
+                crate::Bija3::from_word(crate::Bit3::new(0b001).unwrap())))),
+            expr(ExprKind::Pair(
+                std::rc::Rc::new(expr(ExprKind::String("дані".into()))),
+                std::rc::Rc::new(legacy),
+            )),
+        ].into()));
+        assert!(super::wire::encode_exact_program(std::slice::from_ref(&outer)).is_none());
+        assert!(fasl::encode_exact_program(std::slice::from_ref(&outer), &[0; 32]).is_none());
+        let old_wire = encode_program(std::slice::from_ref(&outer));
+        assert!(decode_program(&old_wire).is_some());
+        assert!(super::wire::decode_exact_program(&old_wire).is_none());
+        let old_fasl = fasl::encode_program(&[outer], &[0; 32]);
+        assert!(fasl::decode_program(&old_fasl).is_some());
+        assert!(fasl::decode_exact_program(&old_fasl).is_none());
+    }
+
+    #[test]
+    fn exact_domain_requires_d24_or_larger_for_numbers() {
+        let expr = |kind| Expr { kind, span: crate::Span::default() };
+        let old_float = expr(ExprKind::Number(7.0, super::Exactness::Exact));
+        assert!(super::wire::encode_exact_program(&[old_float.clone()]).is_none());
+        assert!(fasl::encode_exact_program(&[old_float], &[0; 32]).is_none());
+        let old_binary = expr(ExprKind::BinaryNumber(
+            crate::BinaryNumber::from_bits([1, 0, 1]).unwrap(),
+        ));
+        assert!(super::wire::encode_exact_program(&[old_binary]).is_none());
+        let mut exact_word = vec![0u8; 24];
+        exact_word[23] = 1;
+        let qualified = expr(ExprKind::BinaryNumber(
+            crate::BinaryNumber::from_numeric_domain_bits(24, &exact_word).unwrap(),
+        ));
+        let w = super::wire::encode_exact_program(&[qualified.clone()]).unwrap();
+        let decoded = super::wire::decode_exact_program(&w).unwrap();
+        assert_eq!(decoded[0].kind, qualified.kind);
+        let f = fasl::encode_exact_program(&[qualified.clone()], &[0; 32]).unwrap();
+        assert_eq!(fasl::decode_exact_program(&f).unwrap().0[0].kind, qualified.kind);
+    }
+
+    #[test]
+    fn exact_domain_data_d8_does_not_admit_unproved_d8_call() {
+        let d8 = crate::CoreDomainIdentity::D8(crate::CoreD8::from_word(
+            crate::Bit8::new(0b10101000).unwrap()));
+        let data = Expr { kind: ExprKind::DomainIdentity(d8.into()), span: crate::Span::default() };
+        assert!(super::wire::encode_exact_program(&[data]).is_some());
+        let call = Expr { kind: ExprKind::DomainCall(d8, [].into()), span: crate::Span::default() };
+        assert!(super::wire::encode_exact_program(&[call.clone()]).is_none());
+        assert!(fasl::encode_exact_program(&[call], &[0; 32]).is_none());
+    }
 
     #[test]
     fn wire_local_carries_numeric_coordinates_and_no_name() {

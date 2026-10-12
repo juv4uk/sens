@@ -1,0 +1,51 @@
+name: "AST: точнодоменні wire та FASL"
+
+on:
+  pull_request:
+    paths:
+      - "crates/sens/src/syntax.rs"
+      - "crates/sens/tests/ast_exact_domain_transport.rs"
+      - ".github/workflows/ast-exact-domain-transport.yml"
+  push:
+    branches: [main]
+    paths:
+      - "crates/sens/src/syntax.rs"
+      - ".github/workflows/ast-exact-domain-transport.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  exact-ast:
+    name: "Точний AST: D3-D9, W8-блокування, FASL/wire"
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v5
+      - uses: dtolnay/rust-toolchain@stable
+      - name: "Збереження доменної ширини та суворі негативні перевірки"
+        run: cargo test --locked -p sens --lib syntax::wire_tests -- --nocapture
+      - name: "Тести не змінюють робочі файли"
+        shell: bash
+        run: |
+          test -z "$(git status --porcelain --untracked-files=all)" || {
+            git status --short
+            exit 1
+          }
+
+  exact-ast-integration:
+    name: "Інтеграція AST без сторонніх unit-тестів"
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v5
+      - uses: dtolnay/rust-toolchain@stable
+      - name: "Незалежний тест нового точнодоменного API"
+        run: cargo test --locked -p sens --test ast_exact_domain_transport -- --nocapture
+      - name: "Відсутні робочі зміни від тестів"
+        shell: bash
+        run: |
+          test -z "$(git status --porcelain --untracked-files=all)" || {
+            git status --short
+            exit 1
+          }
