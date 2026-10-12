@@ -123,5 +123,67 @@ class TaggedReleaseWorkflowWiringTests(unittest.TestCase):
         self.assertLess(block.index(guard), block.index(installer),
                         "RELEASE_BLOCKED: tag verification must precede installer checks")
 
+class ReleaseVersionParityTest(unittest.TestCase):
+    """One exact release version across crates, Cargo.lock, Guix and installer tooling."""
+
+    def test_all_active_release_surfaces_match_cli_package(self):
+        import re
+        import tomllib
+
+        root = Path(__file__).resolve().parents[1]
+        manifest_paths = [
+            "crates/sens/Cargo.toml",
+            "crates/sens-cli/Cargo.toml",
+            "crates/sens-host/Cargo.toml",
+            "crates/sens-lsp/Cargo.toml",
+            "crates/sens-wasm/Cargo.toml",
+            "crates/sens-literate/Cargo.toml",
+            "crates/sens-semantic/Cargo.toml",
+        ]
+        cli_package = tomllib.loads(
+            (root / "crates/sens-cli/Cargo.toml").read_text(encoding="utf-8")
+        )["package"]
+        version = cli_package["version"]
+        self.assertRegex(version, r"^\\d+\\.\\d+\\.\\d+$")
+
+        for relative in manifest_paths:
+            with self.subTest(manifest=relative):
+                package = tomllib.loads(
+                    (root / relative).read_text(encoding="utf-8")
+                )["package"]
+                self.assertEqual(package["version"], version, relative)
+
+        locked = tomllib.loads((root / "Cargo.lock").read_text(encoding="utf-8"))
+        canonical_names = {
+            "sens", "sens-cli", "sens-host", "sens-lsp",
+            "sens-wasm", "sens-literate", "sens-semantic",
+        }
+        locked_versions = {
+            package["name"]: package["version"]
+            for package in locked["package"]
+            if package["name"] in canonical_names
+        }
+        self.assertEqual(set(locked_versions), canonical_names)
+        self.assertEqual(
+            locked_versions,
+            {name: version for name in canonical_names},
+            "root Cargo.lock canonical release package versions differ",
+        )
+
+        guix = (root / "guix.scm").read_text(encoding="utf-8")
+        guix_version = re.search(r'\\(version\\s+"([^"]+)"\\)', guix)
+        self.assertIsNotNone(guix_version, "Guix package version is missing")
+        self.assertEqual(guix_version.group(1), version)
+
+        installer = (root / "packaging" / "install.sh").read_text(encoding="utf-8")
+        for suffix in ("linux_amd64", "macos_arm64", "macos_x64"):
+            with self.subTest(asset=suffix):
+                self.assertIn(f"sens-cli_{version}_{suffix}", installer)
+        self.assertIn(f"releases/download/l{version}/", installer)
+
+        release_script = (root / "scripts" / "release.lisp").read_text(encoding="utf-8")
+        self.assertIn(f"scripts/release.lisp {version}", release_script)
+        self.assertIn(f"Потрібна одна версія: {version}", release_script)
+
 if __name__ == "__main__":
     unittest.main()
