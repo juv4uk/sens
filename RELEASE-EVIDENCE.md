@@ -48,15 +48,17 @@ Authority: [CURRENT.md](CURRENT.md), [language-contract.lisp](language-contract.
 |---|---|---|
 | `cargo test --locked --workspace` | URL, runner, SHA, raw log | UNKNOWN |
 | `cargo clippy --locked --workspace --all-targets -- -D warnings` | URL, runner, SHA | UNKNOWN |
+| Release package/tag version alignment | `crates/sens-cli/Cargo.toml` is `0.41.0`; proposed tag `l0.42.0` requires `0.42.0` | BLOCKED |
 | D1–D9 exact-width / COND/ATOM/EQ negative controls | Source+binary/oracle parity & run URL | UNKNOWN |
 | D10 owner-ratification metadata and proof limits | Pinned manifest digest; negative callable tests | UNKNOWN |
 | T5 and F3C roundtrip + corrupted input refusal | Physical byte golden fixtures | UNKNOWN |
 | All release-scope `.lisp` ↔ `.sens` ↔ extensionless triples | Full corpus inventory + independent Ukrainian oracle ledger | UNKNOWN |
 | T5 authority, quantity witness, exact-width blockers | [#5406](https://github.com/juv4uk/sens/issues/5406), [#5408](https://github.com/juv4uk/sens/issues/5408), [#2170](https://github.com/juv4uk/sens/issues/2170) | OPEN |
+| Filesystem runtime and exact-domain admission | [#5603](https://github.com/juv4uk/sens/issues/5603); Hosted run [38176345658](https://github.com/juv4uk/sens/actions/runs/38176345658) | BLOCKED: `content_store` 22/24 tests failed |
 | `release-preflight.yml` + mandatory hosted/native jobs | Exact SHA, all required checks | UNKNOWN |
 | Linux/Windows/macOS CLI + MSI + portable Web | Platform-specific install/smoke results | UNKNOWN |
 | SHA-256 of every release asset and independent clean replay | Published digest manifest, verified bytes, environment | UNKNOWN |
-| Clean release publication (no incomplete visible release) | Atomic publication workflow proof | UNKNOWN |
+| Clean release publication (no incomplete visible release) | Draft-first workflow, full asset set, SHA256SUMS, exact-main-SHA check; commit [6b980ca](https://github.com/juv4uk/sens/commit/6b980ca78ba3893fc16c6b3b8c91565567173a8) | IMPLEMENTED ON MAIN; CI / failure-injection verification UNKNOWN (still blocks GO) |
 
 **GO iff** всі потрібні gates на **одному** Git SHA позитивні, усі обіцяні платформи й файли перевірені, без жодного невирішеного `UNKNOWN/BLOCKED/FAIL`. Не підміняти невиконані platform gates успішними локальними тестами.
 
