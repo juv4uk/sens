@@ -60,21 +60,25 @@ pub(crate) fn domain_identity_for_symbol(name: &str) -> Option<CoreDomainIdentit
     }
 
     let legacy = semantic_registry::admitted_semantic_id_for_surface(name)?;
-    let mechanism = generated::NECESSARY_FORM_DISPATCH
+    domain_identity_for_legacy_semantic_id(legacy)
+}
+
+/// Compatibility boundary: the historical W8 slot is evidence only.
+/// Translate an explicitly admitted legacy form to its ratified D4 word
+/// before selecting any current evaluator mechanism. Packed bytes cannot
+/// acquire D4 meaning merely by sharing their low bits.
+fn domain_identity_for_legacy_semantic_id(
+    legacy: Sens8,
+) -> Option<CoreDomainIdentity> {
+    generated::NECESSARY_FORM_DISPATCH
         .iter()
         .find(|row| row.semantic_id == legacy.packed_byte())
-        .map(|row| row.mechanism)?;
-    Some(canonical_domain_identity(mechanism))
+        .map(|row| canonical_domain_identity(row.mechanism))
 }
 
 pub(crate) fn identity_for_semantic_id(semantic_id: Sens8) -> Option<NecessaryFormIdentity> {
-    generated::NECESSARY_FORM_DISPATCH
-        .iter()
-        .find(|row| row.semantic_id == semantic_id.packed_byte())
-        .map(|row| match row.mechanism {
-            generated::NecessaryFormMechanism::Define => NecessaryFormIdentity::Define,
-            generated::NecessaryFormMechanism::Lambda => NecessaryFormIdentity::Lambda,
-        })
+    domain_identity_for_legacy_semantic_id(semantic_id)
+        .and_then(identity_for_domain_identity)
 }
 
 /// Resolve an executable list-head symbol through the shared authority
@@ -87,4 +91,57 @@ pub(crate) fn identity_for_semantic_id(semantic_id: Sens8) -> Option<NecessaryFo
 /// this reason -- both removed once this function could see it).
 pub(crate) fn identity_for_symbol(name: &str) -> Option<NecessaryFormIdentity> {
     domain_identity_for_symbol(name).and_then(identity_for_domain_identity)
+}
+
+#[cfg(test)]
+mod exact_d4_necessary_form_migration_tests {
+    use super::*;
+    use crate::{Bit3, Bit8, Bija3, CoreD8};
+
+    #[test]
+    fn only_current_d4_lambda_and_define_select_necessary_forms() {
+        for (bits, expected) in [
+            (0b0010, NecessaryFormIdentity::Lambda),
+            (0b0011, NecessaryFormIdentity::Define),
+        ] {
+            let identity = CoreDomainIdentity::D4(
+                CoreD4::from_word(Bit4::new(bits).unwrap()),
+            );
+            assert_eq!(identity_for_domain_identity(identity), Some(expected));
+        }
+        let d3 = CoreDomainIdentity::D3(
+            Bija3::from_word(Bit3::new(0b010).unwrap()),
+        );
+        let d8 = CoreDomainIdentity::D8(
+            CoreD8::from_word(Bit8::new(0b00000010).unwrap()),
+        );
+        assert_eq!(identity_for_domain_identity(d3), None);
+        assert_eq!(identity_for_domain_identity(d8), None);
+    }
+
+    #[test]
+    fn admitted_historical_slots_must_pass_through_exact_d4() {
+        for code in u8::MIN..=u8::MAX {
+            let legacy = Sens8::from_packed_byte(code);
+            let expected = match code {
+                0b00001000 => Some(NecessaryFormIdentity::Lambda),
+                0b00001001 | 0b00001011 => Some(NecessaryFormIdentity::Define),
+                _ => None,
+            };
+            assert_eq!(
+                identity_for_semantic_id(legacy),
+                expected,
+                "unapproved historical W8 slot {code:08b} must not become D4",
+            );
+            assert_eq!(
+                domain_identity_for_legacy_semantic_id(legacy)
+                    .and_then(identity_for_domain_identity),
+                expected,
+            );
+        }
+        let define = CoreDomainIdentity::D4(
+            CoreD4::from_word(Bit4::new(0b0011).unwrap()),
+        );
+        assert_eq!(domain_identity_for_symbol("def"), Some(define));
+    }
 }
