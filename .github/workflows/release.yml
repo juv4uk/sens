@@ -317,6 +317,7 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: write
+      checks: read
     steps:
       - uses: actions/checkout@v5
       - name: Verify exact main SHA, version and explicit owner GO
@@ -337,6 +338,16 @@ jobs:
             echo "RELEASE_BLOCKED: exact-SHA owner GO variables are missing or mismatched"
             exit 1
           fi
+
+      # No public release may be created while any independent mandatory
+      # Hosted/Native/T5/preflight gate is red, stale, missing, or still running.
+      - name: Verify independent exact-SHA mandatory CI before draft
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 scripts/verify_release_ci.py "$GITHUB_SHA" "$GITHUB_REPOSITORY"
 
       - name: Download all independently built artifacts
         uses: actions/download-artifact@v4
@@ -388,4 +399,7 @@ jobs:
             echo "RELEASE_BLOCKED: final exact-SHA owner GO check failed" >&2
             exit 1
           fi
+          # Recheck independently of cached earlier status: CI may be
+          # rerun or invalidated while multi-platform artifacts are staged.
+          python3 scripts/verify_release_ci.py "$GITHUB_SHA" "$GITHUB_REPOSITORY"
           gh release edit "$GITHUB_REF_NAME" --draft=false
