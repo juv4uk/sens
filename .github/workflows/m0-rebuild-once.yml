@@ -1,24 +1,23 @@
 name: M0 — одноразове відновлення інвентарю за живими джерелами
 
 on:
-  pull_request:
-    branches: [main]
+  push:
+    branches: ["міграція/реєстр-т5-домени-20261012"]
     paths:
       - ".github/workflows/m0-rebuild-once.yml"
-      - "data/t5-migration-inventory.jsonl"
 
 permissions:
   contents: write
 
 jobs:
   regenerate:
-    if: github.event.pull_request.number == 5619 && github.event.pull_request.head.repo.full_name == github.repository
+    if: github.ref == 'refs/heads/міграція/реєстр-т5-домени-20261012'
     runs-on: ubuntu-latest
     timeout-minutes: 12
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: ${{ github.head_ref }}
+          ref: міграція/реєстр-т5-домени-20261012
           fetch-depth: 0
           persist-credentials: true
       - name: Оновити PR-гілку з main без переписування історії
@@ -38,7 +37,7 @@ jobs:
       - name: Атомарно записати лише перевірений manifest у PR
         shell: bash
         env:
-          PR_BRANCH: ${{ github.head_ref }}
+          PR_BRANCH: міграція/реєстр-т5-домени-20261012
         run: |
           set -euo pipefail
           git add -- data/t5-migration-inventory.jsonl
