@@ -1,0 +1,77 @@
+{
+  "c0": {
+    "abi_profile": "SW1+compiler-evidence-canonical/1",
+    "backend": "CML Rust bootstrap + GCC C execution",
+    "cml_sha": "ec4ba010cebd9fdc37b39224142dcac3ee907cfe",
+    "implementation_sha": "ec4ba010cebd9fdc37b39224142dcac3ee907cfe",
+    "target": "x86_64-linux-gnu"
+  },
+  "d8_admitted": false,
+  "equivalence": {
+    "attempts": [
+      {
+        "method": "byte-identical-artifact",
+        "reason": null,
+        "status": "pass"
+      },
+      {
+        "method": "normalized-ir-or-artifact-identical",
+        "reason": "The stronger byte-identical criterion passed.",
+        "status": "unavailable"
+      },
+      {
+        "method": "canonical-lowering-and-executable-corpus-identical",
+        "reason": "A complete GAS/NASM golden corpus was not run by this witness.",
+        "status": "unavailable"
+      }
+    ],
+    "selected_method": "byte-identical-artifact"
+  },
+  "evidence": {
+    "c0_expected_artifact_sha256": "303d96cd1467fae319fb2dcf2c12e1a73c840bb0a0ecab67f3609ffde411d79a",
+    "c1_c_source_sha256": "89199fe59621ce0434e70f2a161cdc3089ef8d588d6d8cc461a1e4f72372d225",
+    "c1_executable_sha256": "27b8fbf096cddbb77be2b4bf57cc58bf8b4fac4accc42adbcfbc10d6cd95f375",
+    "c1_executable_size": 92248,
+    "c1_output_sha256": "303d96cd1467fae319fb2dcf2c12e1a73c840bb0a0ecab67f3609ffde411d79a",
+    "c2_c_source_sha256": "89199fe59621ce0434e70f2a161cdc3089ef8d588d6d8cc461a1e4f72372d225",
+    "c2_executable_sha256": "27b8fbf096cddbb77be2b4bf57cc58bf8b4fac4accc42adbcfbc10d6cd95f375",
+    "c2_output_sha256": "303d96cd1467fae319fb2dcf2c12e1a73c840bb0a0ecab67f3609ffde411d79a",
+    "c2_repeat_executable_sha256": "27b8fbf096cddbb77be2b4bf57cc58bf8b4fac4accc42adbcfbc10d6cd95f375",
+    "cml_source_revision": "ec4ba010cebd9fdc37b39224142dcac3ee907cfe",
+    "executable_equivalence": "byte-identical",
+    "gcc_target": "x86_64-linux-gnu",
+    "gcc_version": "13.3.0",
+    "output_equivalence": "byte-identical",
+    "source_equivalence": "byte-identical"
+  },
+  "failure_category": null,
+  "fresh_bootstrap": {
+    "c0_produced_c1": true,
+    "c1_produced_c2": true,
+    "preexisting_c1_read": false,
+    "preexisting_c2_read": false
+  },
+  "generations": {
+    "c1": {
+      "artifact_sha256": "27b8fbf096cddbb77be2b4bf57cc58bf8b4fac4accc42adbcfbc10d6cd95f375",
+      "executable": true,
+      "normalized_sha256": "89199fe59621ce0434e70f2a161cdc3089ef8d588d6d8cc461a1e4f72372d225",
+      "produced": true
+    },
+    "c2": {
+      "artifact_sha256": "27b8fbf096cddbb77be2b4bf57cc58bf8b4fac4accc42adbcfbc10d6cd95f375",
+      "executable": true,
+      "normalized_sha256": "89199fe59621ce0434e70f2a161cdc3089ef8d588d6d8cc461a1e4f72372d225",
+      "produced": true
+    }
+  },
+  "legacy_core1_sid8_substitution": false,
+  "schema": "compiler-selfhost-lineage-report/1",
+  "source": {
+    "compiler_nucleus_sha256": "34863f297e0f4f6f21c30dffc34a8bb85822015a89d13028c700b5a679f61b7e",
+    "language_contract_sha256": "177d532d24c1f0738a934152f65c7f01f90b5593c8dbfe519e31148c0aa80c40",
+    "sens_source_sha": "d0787a40fcea36501747732aa61b6de19fe29c70",
+    "structural_law_projection_sha256": "3ce5bb4e042bfec446199a9c77787d0a022109e9a6d6442a4f93b50f68e34e9a"
+  },
+  "status": "pass"
+}
