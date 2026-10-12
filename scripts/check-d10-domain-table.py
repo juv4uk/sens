@@ -201,6 +201,12 @@ def check(d10, inventory, lower):
                  row.san == "-".join("ādi" if x == "A" else "śeṣa" for x in path),
                  "selector path translation changed " + row.bits)
     return {"D10": 1024, "D1_D9": 1020, "all_domains": 2044,
+            "short_uk_distinct": sum(row.uk != row.ukr for row in d10),
+            "short_uk_codepoints": sum(len(row.uk) for row in d10),
+            "expanded_ukr_codepoints": sum(len(row.ukr) for row in d10),
+            "editorial_anchor_count": len(anchor_list),
+            "predicate_question_aliases": sum(row.uk.endswith("?") for row in d10),
+            "conversion_arrow_aliases": sum("->" in row.uk for row in d10),
             "missing_uk": 0, "missing_ukr": 0, "missing_san": 0,
             "cross_domain_surface_collisions": 0, "word_width": 10,
             "owner_ratified_domain": True, "runtime_admitted_by_check": False}
