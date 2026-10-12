@@ -46,6 +46,14 @@ pub enum Frame3MicroExpr {
     ),
 }
 
+pub const CAP_QUOTE: u8 = 1 << 0;
+pub const CAP_ATOM: u8 = 1 << 1;
+pub const CAP_CONS: u8 = 1 << 2;
+pub const CAP_CAR: u8 = 1 << 3;
+pub const CAP_CDR: u8 = 1 << 4;
+pub const CAP_COND: u8 = 1 << 5;
+pub const CAP_ALL: u8 = CAP_QUOTE | CAP_ATOM | CAP_CONS | CAP_CAR | CAP_CDR | CAP_COND;
+
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub enum Frame3MicroEnumerateError {
     UnsupportedLength(usize),
@@ -138,6 +146,35 @@ impl Frame3MicroExpr {
                 then_value.human_projection(),
                 else_value.human_projection()
             ),
+        }
+    }
+
+
+    /// Semantic constructor classes exercised by this closed micro-program.
+    ///
+    /// CAR(CONS(...)) and CDR(CONS(...)) count both the selector and CONS,
+    /// while IF-ATOM counts COND; its exact expansion also contains ATOM.
+    pub fn capability_mask(&self) -> u8 {
+        match self {
+            Self::Zero | Self::One | Self::Nil => 0,
+            Self::QuoteZero | Self::QuoteOne | Self::QuoteNil => CAP_QUOTE,
+            Self::Atom(value) => CAP_ATOM | value.capability_mask(),
+            Self::Cons(left, right) => {
+                CAP_CONS | left.capability_mask() | right.capability_mask()
+            }
+            Self::CarCons(left, right) => {
+                CAP_CAR | CAP_CONS | left.capability_mask() | right.capability_mask()
+            }
+            Self::CdrCons(left, right) => {
+                CAP_CDR | CAP_CONS | left.capability_mask() | right.capability_mask()
+            }
+            Self::IfAtom(test, then_value, else_value) => {
+                CAP_COND
+                    | CAP_ATOM
+                    | test.capability_mask()
+                    | then_value.capability_mask()
+                    | else_value.capability_mask()
+            }
         }
     }
 }
@@ -473,6 +510,190 @@ fn rank_exact(
     Err(Frame3MicroEnumerateError::RankOutOfRange)
 }
 
+fn update_minimum(slot: &mut Option<u128>, candidate: u128) {
+    match slot {
+        Some(current) if *current <= candidate => {}
+        _ => *slot = Some(candidate),
+    }
+}
+
+/// Small dynamic-programming proof over the 64 possible capability masks.
+///
+/// Returns the earliest global rank whose decoded program contains every bit
+/// requested by `required`. This searches the grammar algebraically rather
+/// than enumerating millions of physical payloads.
+pub fn first_global_rank_with_capabilities(
+    required: u8,
+) -> Result<u128, Frame3MicroEnumerateError> {
+    if required & !CAP_ALL != 0 {
+        return Err(Frame3MicroEnumerateError::RankOutOfRange);
+    }
+
+    let counts = count_table()?;
+    let mut minima = vec![[None::<u128>; 64]; COUNT_LIMIT + 1];
+    // Node-one order: 0, 1, NIL, QUOTE(0), QUOTE(1), QUOTE(NIL).
+    minima[1][0] = Some(0);
+    minima[1][usize::from(CAP_QUOTE)] = Some(3);
+
+    let mut cumulative = 0u128;
+    for nodes in 1..=COUNT_LIMIT {
+        if nodes > 1 {
+            // ATOM is the first constructor block for an exact node count.
+            for child_mask in 0..64 {
+                if let Some(child_rank) = minima[nodes - 1][child_mask] {
+                    let mask = child_mask | usize::from(CAP_ATOM);
+                    update_minimum(&mut minima[nodes][mask], child_rank);
+                }
+            }
+
+            let mut binary_pairs = 0u128;
+            for left_nodes in 1..nodes - 1 {
+                let right_nodes = nodes - 1 - left_nodes;
+                binary_pairs = binary_pairs
+                    .checked_add(
+                        counts[left_nodes]
+                            .checked_mul(counts[right_nodes])
+                            .ok_or(Frame3MicroEnumerateError::InternalCountOverflow)?,
+                    )
+                    .ok_or(Frame3MicroEnumerateError::InternalCountOverflow)?;
+            }
+
+            let families = [
+                CAP_CONS,
+                CAP_CONS | CAP_CAR,
+                CAP_CONS | CAP_CDR,
+            ];
+            for (family_index, family_mask) in families.into_iter().enumerate() {
+                let mut split_offset = 0u128;
+                for left_nodes in 1..nodes - 1 {
+                    let right_nodes = nodes - 1 - left_nodes;
+                    for left_mask in 0..64 {
+                        let Some(left_rank) = minima[left_nodes][left_mask] else {
+                            continue;
+                        };
+                        for right_mask in 0..64 {
+                            let Some(right_rank) = minima[right_nodes][right_mask] else {
+                                continue;
+                            };
+                            let rank = counts[nodes - 1]
+                                .checked_add(
+                                    (family_index as u128)
+                                        .checked_mul(binary_pairs)
+                                        .ok_or(
+                                            Frame3MicroEnumerateError::InternalCountOverflow,
+                                        )?,
+                                )
+                                .and_then(|value| value.checked_add(split_offset))
+                                .and_then(|value| {
+                                    value.checked_add(
+                                        left_rank.checked_mul(counts[right_nodes])?,
+                                    )
+                                })
+                                .and_then(|value| value.checked_add(right_rank))
+                                .ok_or(Frame3MicroEnumerateError::InternalCountOverflow)?;
+                            let mask = usize::from(family_mask) | left_mask | right_mask;
+                            update_minimum(&mut minima[nodes][mask], rank);
+                        }
+                    }
+                    split_offset = split_offset
+                        .checked_add(
+                            counts[left_nodes]
+                                .checked_mul(counts[right_nodes])
+                                .ok_or(Frame3MicroEnumerateError::InternalCountOverflow)?,
+                        )
+                        .ok_or(Frame3MicroEnumerateError::InternalCountOverflow)?;
+                }
+            }
+
+            let if_base = counts[nodes - 1]
+                .checked_add(
+                    binary_pairs
+                        .checked_mul(3)
+                        .ok_or(Frame3MicroEnumerateError::InternalCountOverflow)?,
+                )
+                .ok_or(Frame3MicroEnumerateError::InternalCountOverflow)?;
+            let mut split_offset = 0u128;
+            for test_nodes in 1..nodes.saturating_sub(2) {
+                for then_nodes in 1..nodes - 1 - test_nodes {
+                    let else_nodes = nodes - 1 - test_nodes - then_nodes;
+                    if else_nodes == 0 {
+                        continue;
+                    }
+                    let then_else = counts[then_nodes]
+                        .checked_mul(counts[else_nodes])
+                        .ok_or(Frame3MicroEnumerateError::InternalCountOverflow)?;
+                    for test_mask in 0..64 {
+                        let Some(test_rank) = minima[test_nodes][test_mask] else {
+                            continue;
+                        };
+                        for then_mask in 0..64 {
+                            let Some(then_rank) = minima[then_nodes][then_mask] else {
+                                continue;
+                            };
+                            for else_mask in 0..64 {
+                                let Some(else_rank) = minima[else_nodes][else_mask] else {
+                                    continue;
+                                };
+                                let rank = if_base
+                                    .checked_add(split_offset)
+                                    .and_then(|value| {
+                                        value.checked_add(test_rank.checked_mul(then_else)?)
+                                    })
+                                    .and_then(|value| {
+                                        value.checked_add(
+                                            then_rank.checked_mul(counts[else_nodes])?,
+                                        )
+                                    })
+                                    .and_then(|value| value.checked_add(else_rank))
+                                    .ok_or(
+                                        Frame3MicroEnumerateError::InternalCountOverflow,
+                                    )?;
+                                let mask = usize::from(CAP_COND | CAP_ATOM)
+                                    | test_mask
+                                    | then_mask
+                                    | else_mask;
+                                update_minimum(&mut minima[nodes][mask], rank);
+                            }
+                        }
+                    }
+                    split_offset = split_offset
+                        .checked_add(
+                            counts[test_nodes]
+                                .checked_mul(counts[then_nodes])
+                                .and_then(|value| value.checked_mul(counts[else_nodes]))
+                                .ok_or(Frame3MicroEnumerateError::InternalCountOverflow)?,
+                        )
+                        .ok_or(Frame3MicroEnumerateError::InternalCountOverflow)?;
+                }
+            }
+        }
+
+        let mut earliest = None;
+        for mask in 0..64 {
+            if (mask as u8) & required == required {
+                if let Some(rank) = minima[nodes][mask] {
+                    update_minimum(&mut earliest, rank);
+                }
+            }
+        }
+        if let Some(exact_rank) = earliest {
+            let global = cumulative
+                .checked_add(exact_rank)
+                .ok_or(Frame3MicroEnumerateError::InternalCountOverflow)?;
+            if global < F3M_END {
+                return Ok(global);
+            }
+            return Err(Frame3MicroEnumerateError::ProgramOutsideF3M3);
+        }
+
+        cumulative = cumulative
+            .checked_add(counts[nodes])
+            .ok_or(Frame3MicroEnumerateError::InternalCountOverflow)?;
+    }
+
+    Err(Frame3MicroEnumerateError::RankOutOfRange)
+}
+
 pub fn unrank_global(global_rank: u128) -> Result<Frame3MicroExpr, Frame3MicroEnumerateError> {
     if global_rank >= F3M_END {
         return Err(Frame3MicroEnumerateError::ProgramOutsideF3M3);
@@ -633,6 +854,33 @@ mod tests {
             let expr = decode_payload(&payload).unwrap();
             assert_eq!(encode_expr(&expr).unwrap(), payload);
         }
+    }
+
+    #[test]
+    fn first_full_capability_basis_fits_in_three_bytes_and_executes() {
+        let first = first_global_rank_with_capabilities(CAP_ALL).unwrap();
+        assert_eq!(first, 4_934_877);
+
+        let local = first - F3M3_OFFSET;
+        assert_eq!(local, 0x4a_4b_dd);
+        let payload = [0x4a, 0x4b, 0xdd];
+
+        let expr = decode_payload(&payload).unwrap();
+        assert_eq!(expr.capability_mask(), CAP_ALL);
+        assert_eq!(rank_global(&expr).unwrap(), first);
+        assert_eq!(encode_expr(&expr).unwrap(), payload);
+
+        let source = expr.exact_words().join(" ");
+        let parsed = parse_canonical_binary(&source).expect("full-basis F3M-3 source");
+        let actual = eval_parsed_expressions(&parsed, &mut Session::default())
+            .expect("full-basis F3M-3 program executes");
+        let expected = eval_parsed_expressions(
+            &parse_canonical_binary("1").unwrap(),
+            &mut Session::default(),
+        )
+        .unwrap();
+        assert_eq!(actual.value, expected.value);
+        assert_eq!(actual.output, expected.output);
     }
 
     #[test]
