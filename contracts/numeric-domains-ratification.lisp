@@ -18,6 +18,7 @@
     . ((identity . "exact binary bits + explicit numeric domain + domain law")
        (equal-rank . "D24/D48/... are semantic domains with equal ontology rank to D1-D9")
        (role-distinction . "numeric domain laws do not collapse into D1 predicates, D2 structure, D7 text or function domains")
+       (arithmetic-exclusivity . "Only explicitly domain-qualified D24/D48/D96/... atoms and their canonical same-domain NEG/RATIO compositions may participate in mathematical + - * / or numeric < > =. D1-D10 are exact binary-digit semantic words, never arithmetic operands or inferred numbers. Legacy Number/Rational and unqualified BinaryNumber cannot bypass this rule. D5/D6 function-code identities selecting arithmetic operators are not themselves mathematical values; D3 EQ and D1 predicate logic are separate non-arithmetic laws.")
        (no-inference . "bits, width alone, human literals, and host storage cannot confer numeric-domain membership")
        (non-collapse . "D24 and D48 remain distinct domain identities even if payload magnitude coincides")
        (no-literals-required . "numeric source tokens are optional projection, not semantic identity")
