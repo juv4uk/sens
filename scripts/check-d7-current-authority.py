@@ -7,6 +7,7 @@ if not __debug__:
     raise SystemExit("D7-CURRENT-AUTHORITY: BLOCKED — Python -O вимикає перевірки")
 
 from domain_tables import D7_TABLE, read_domain_table
+from d7_symbol_codec import current_codec
 
 root=Path(__file__).resolve().parents[1]
 d=json.loads((root/"knowledge/d7-ratified.json").read_text(encoding="utf-8"))
@@ -91,9 +92,15 @@ assert len(table_rows) == d["occupancy"] == 126
 assert projected_bits == sorted(ratified_bits), "D7 surface coordinate drift"
 assert not (set(projected_bits) & set(d["reserved_coordinates"]))
 assert len({row.bits for row in table_rows}) == len(table_rows)
+codec = current_codec()
 for row in table_rows:
     assert row.width == 7 and len(row.bits) == 7
     assert row.lisp is None, f"D7:{row.bits} must not mint a Lisp callable"
+    for name, field in (("ук", "uk"), ("укр", "ukr"), ("san", "san"),
+                        ("en", "en"), ("sym", "sym")):
+        assert getattr(row, field) == codec.glyph(row.bits, name), (
+            f"D7:{row.bits}: {name} is not its surface-specific glyph"
+        )
 
 # The row-wise evidence must stay a one-to-one projection of the ratified
 # coordinates, not an alternative Rust/reader-generated semantic registry.
