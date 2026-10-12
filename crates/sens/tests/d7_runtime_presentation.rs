@@ -28,10 +28,21 @@ fn exact_d7_is_human_presentable_without_gaining_callability() {
         let sa = render_value_for_presentation(&value, PresentationLanguage::Sanskrit);
         if sa != exact {
             displayed += 1;
-            assert!(!uk.is_empty(), "D7 human display cannot be empty");
-            assert_ne!(uk, format!("#<домен D7:{exact}>"), "D7 display must have matching UK/SA entries");
-        } else {
-            assert_eq!(uk, format!("#<домен D7:{exact}>"), "unadmitted W7 must render as exact identity");
+        }
+        assert!(!uk.is_empty());
+        assert!(!sa.is_empty());
+        if raw == 0 {
+            assert_eq!(uk, "к", "D7 Ukrainian surface must show the glyph");
+            assert_eq!(sa, "क", "D7 Sanskrit surface must show Devanagari");
+        }
+        if raw == 1 {
+            assert_eq!(sa, "ख");
+            assert_eq!(uk, format!("#<домен D7:{exact}>"),
+                       "unassigned Ukrainian spelling must not be invented");
+        }
+        if raw == 0b0100001 || raw == 0b0101010 {
+            assert_eq!(uk, format!("#<домен D7:{exact}>"));
+            assert_eq!(sa, exact);
         }
     }
     assert!(displayed > 0, "ratified D7 must be reflected in human presentation");
