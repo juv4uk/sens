@@ -181,6 +181,70 @@
         }
       ],
       "detail": "Full per-file SHA-1 and byte inventory for all 296 tracked files is preserved in external_build_dependency_inventory.vendored_external_packages. These are third-party crates present under vendor/; they are explicitly external dependencies and excluded from the trusted SENS seed byte subtotal."
+    },
+    "cml_outer_cargo_graph": {
+      "status": "LOCKFILE_CORRECTED; LATEST --locked CLEAN-RUN VALIDATION IN PROGRESS",
+      "cml_pre_fix_commit": "dce7a75b61932e41846f36bf1dc5f2d97a8d11ee",
+      "cml_pre_fix_lock_blob": "7882c2be6e83b26660a1e855d8ce97211620096e",
+      "defect": "CML Cargo.lock's `sens 0.41.0` entry had no serde dependency edge. The first `cargo tree --locked` attempt failed with an explicit lockfile-update refusal.",
+      "corrected_commit": "c41704cbbd9e6f0b6c4c12597ab5e50da6ac66a3",
+      "corrected_lock_blob": "b9bd778db07efa1a1883665939707612063e2e2c",
+      "corrected_lock_sha256": "95dfac9d0b3db0ce6b1f1ae04be4863c6281fcbc9dca60d53a096c0623908b92",
+      "corrected_lock_bytes": 29360,
+      "correction": "Pinned serde 1.0.229, serde_core 1.0.229 and serde_derive 1.0.229 entries with exact checksums, added `sens -> serde` and pinned serde_derive to syn 3.0.4 in the outer CML lock.",
+      "outer_registry_packages": [
+        {
+          "name": "serde",
+          "version": "1.0.229",
+          "checksum": "4148590afebada386688f18773da617792bf2ef03ffc1e4cbd2b1d45b023e0ba"
+        },
+        {
+          "name": "serde_core",
+          "version": "1.0.229",
+          "checksum": "67dca2c9c51e58a4791a4b1ed58308b39c64224d349a935ab5039aa360942a48"
+        },
+        {
+          "name": "serde_derive",
+          "version": "1.0.229",
+          "checksum": "e7a5d71263a5a7d47b41f6b3f06ba276f10cc18b0931f1799f710578e2309348"
+        },
+        {
+          "name": "proc-macro2",
+          "version": "1.0.107",
+          "checksum": "985e7ec9bb745e6ce6535b544d84d6cd6f7ad8bd711c398938ae983b91a766d9"
+        },
+        {
+          "name": "quote",
+          "version": "1.0.47",
+          "checksum": "1fbf4db142a473a8d80c26bbf18454ed458bf8d26c8219c331daecfdbd079001"
+        },
+        {
+          "name": "syn",
+          "version": "3.0.4",
+          "checksum": "e6275cddf4610d1775e6d1fe9469b2e77d0f39fd98fb7450901b821e0c53649f"
+        },
+        {
+          "name": "unicode-ident",
+          "version": "1.0.24",
+          "checksum": "e6e4313cd5fcd3dad5cafa179702e2b244f760991f45397d14d4ebf38247da75"
+        }
+      ],
+      "nested_sens_distinction": "Nested `cargo run -p xtask` uses SENS-local Cargo.lock and vendor override, including syn 3.0.3 (different from outer CML's syn 3.0.4). Do not merge the two dependency graphs or assume both read the same crate source cache.",
+      "active_graph_artifact": {
+        "workflow_run": "https://github.com/juv4uk/cml/actions/runs/38186153760",
+        "artifact_id": 11719851914,
+        "cml_graph_sha256": "fe4e29d9723e1c31a598d5905024670defad2a4ffce744cd099b84d95c285c29",
+        "sens_xtask_graph_sha256": "a11ec08911b104cfb31211d4f82459711d9b5ae8788f043bd8ce60baaff4736a",
+        "lock_diff_sha256": "4b975448e568f126da39479453fb3e00575303c369809824ca611a1c13cb3ef8",
+        "note": "Captured in a run whose Cargo graph step passed, but later lib test exposed a separate stale baseline assertion; do not cite that run as a green full-test gate."
+      },
+      "locked_revalidation": {
+        "workflow_run": "https://github.com/juv4uk/cml/actions/runs/38186316487",
+        "source_commit": "bdf0a0e75ef7ea6cb430c4286cb9352e7d422648",
+        "status_at_recording": "run1 success; run2 in progress; graph step passed in both up to C1 test step",
+        "note": "The workflow now requires `cargo tree --locked` for the outer CML and nested SENS graphs and asserts their lockfile blob hashes do not change. Await terminal run status before treating the full K1+graph proof as green."
+      },
+      "dependency_bytes": "Outer CML Cargo registry/cache source bytes remain external and unmeasured."
     }
   },
   "still_not_measured": [
@@ -189,7 +253,8 @@
     "minimal Git object/ref metadata required for git rev-parse (full checkout .git snapshots are measured separately but are not minimal)",
     "shared-library/toolchain dependency bytes",
     "minimum possible seed size",
-    "GAS/NASM golden-corpus parity"
+    "GAS/NASM golden-corpus parity",
+    "Outer CML Cargo registry/cache bytes for the corrected seven-package graph; package versions/checksums and active tree are pinned, but cache bytes are outside the trusted seed subtotal."
   ],
   "campaign_gate": "BLOCKED for the whole-chain seed-v0 total. The 34,580,696-byte value is only one measured runner ELF component. K1 is a separate C1-local experiment and passed correctness witnesses but grew all size metrics; K2-K4 remain gated on a complete, pinned, reproducible operational input closure.",
   "semantic_boundaries": {
@@ -332,6 +397,7 @@
     "Vendor dependency correction (2026-10-12): pinned `.cargo/config.toml` replaces crates.io with the SENS `vendor/` directory. The selected xtask -> sens compile path uses seven vendored crates, 296 tracked files / 4,419,723 bytes. This third-party source bundle is explicitly external and excluded from the trusted-seed subtotal; exact file-level blob SHAs and sizes are in the closure census.",
     "Git metadata measurement (2026-10-12): K1 follow-up CI run 38185559594 passed both independent runs and byte-identical report comparison. Summed `.git` regular-file bytes were 66,126,630 and 66,122,122 across the CML/SENS/WSM checkout snapshots; 4,508-byte difference means these are environment snapshots, not the minimized metadata seed. They remain separate external dependency evidence, not seed bytes.",
     "Measured operational subset (2026-10-12): the pinned K1 runner checkpoint (34,575,192 B), 114 known SENS runtime-build input paths (1,397,243 B), and the pinned WSM nucleus source (11,461 B) sum to 35,983,896 B. This is a measured subtotal only, not the complete seed total or a minimality claim; external dependencies and unclosed runtime paths remain separate.",
-    "CML external dependency update (2026-10-12): the pinned `wsm-os-target` Git repository is 22 tracked files / 48,742 bytes; the selected compile-source subset (workspace Cargo.toml, LICENSE, crate Cargo.toml, lib.rs) is 4 files / 24,935 bytes. These are external dependency bytes and excluded from trusted-seed subtotal. The CML census also lists the seven default-feature crates.io package versions/checksums separately."
+    "CML external dependency update (2026-10-12): the pinned `wsm-os-target` Git repository is 22 tracked files / 48,742 bytes; the selected compile-source subset (workspace Cargo.toml, LICENSE, crate Cargo.toml, lib.rs) is 4 files / 24,935 bytes. These are external dependency bytes and excluded from trusted-seed subtotal. The CML census also lists the seven default-feature crates.io package versions/checksums separately.",
+    "Lockfile integrity correction (2026-10-12): resolved CML's stale root Cargo.lock mismatch for its pinned SENS 0.41.0 path dependency by adding exact serde-family lock entries. Outer CML uses syn 3.0.4 while nested SENS uses syn 3.0.3; keep those separate. Locked revalidation is in progress and is not marked PASS yet."
   ]
 }
