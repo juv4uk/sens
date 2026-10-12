@@ -230,12 +230,28 @@ fn small_rational_fast_path(
 // builtin closures in eval/builtins.rs call these directly with
 // pre-evaluated values. Single compute path, two front doors.
 
+/// Domain words are exact binary digit strings, not automatically numbers.
+/// Only explicitly qualified D24+ values admit arithmetic and numeric ordering.
+/// Legacy unqualified Number/Rational/BinaryNumber remains representable for
+/// transport/migration, never a source of mathematical operand authority.
+fn require_math_domain(values: &[Value], span: Span) -> Result<(), LanguageError> {
+    if values.is_empty() || values.iter().any(|v| !domain_numeric::is_domain_value(v)) {
+        return Err(LanguageError::new(
+            ErrorKind::Type,
+            "math requires explicit D24+ operands; D1-D10 bit words and unqualified numbers are not arithmetic values",
+            span,
+        ));
+    }
+    Ok(())
+}
+
 pub(super) fn arithmetic_on_values(
     operator: &str,
     values: &[Value],
     environment: &Environment,
     span: Span,
 ) -> Result<Value, LanguageError> {
+    require_math_domain(values, span)?;
     // Domain-qualified numeric atoms and lawful NEG/RATIO compositions are
     // handled by ONE exact binary arithmetic engine. No implicit conversion
     // from legacy Number/Rational, no new Dn domain, no host floating point.
@@ -469,6 +485,7 @@ pub(super) fn division_on_values(
             span,
         ));
     }
+    require_math_domain(values, span)?;
     // Reciprocal or exact rational division over admitted D24+ values.
     if values.iter().any(domain_numeric::is_domain_value) {
         // Validate domain admission BEFORE divisor error classification:
@@ -651,6 +668,9 @@ pub(super) fn comparison_on_values(
     values: &[Value],
     span: Span,
 ) -> Result<Value, LanguageError> {
+    // Numeric order/equality is mathematical. D3 EQ is a distinct identity
+    // law, and does not pass through this arithmetic admission gate.
+    require_math_domain(values, span)?;
     if values.iter().any(domain_numeric::is_domain_value) {
         let holds = match values {
             [left, right] => domain_numeric::compare(operator, left, right),
@@ -734,6 +754,56 @@ pub(super) fn comparison_on_values(
 #[cfg(test)]
 mod qualified_numeric_domain_value_tests {
     use super::*;
+
+    #[test]
+    fn binary_code_domains_and_unqualified_numbers_are_never_math_operands() {
+        let env = Environment::root();
+        let words = [
+            crate::BinarySourceWord::W1(crate::Bit1::new(1).unwrap()),
+            crate::BinarySourceWord::W2(crate::Bit2::new(1).unwrap()),
+            crate::BinarySourceWord::W3(crate::Bit3::new(1).unwrap()),
+            crate::BinarySourceWord::W4(crate::Bit4::new(1).unwrap()),
+            crate::BinarySourceWord::W5(crate::Bit5::new(1).unwrap()),
+            crate::BinarySourceWord::W6(crate::Bit6::new(1).unwrap()),
+            crate::BinarySourceWord::W7(crate::Bit7::new(1).unwrap()),
+            crate::BinarySourceWord::W8(crate::Bit8::new(1).unwrap()),
+            crate::BinarySourceWord::W9(crate::Bit9::new(1).unwrap()),
+        ];
+        for word in words {
+            let identity = crate::DomainIdentity::from_source_word(word);
+            let value = Value::DomainIdentity(identity);
+            for op in ["+", "-", "*"] {
+                assert_eq!(
+                    arithmetic_on_values(op, &[value.clone(), value.clone()], &env, Span::default())
+                        .unwrap_err().kind,
+                    ErrorKind::Type,
+                    "D{} is not an arithmetic operand", identity.width()
+                );
+            }
+            assert_eq!(division_on_values(&[value.clone(), value.clone()], 2, &env, Span::default())
+                .unwrap_err().kind, ErrorKind::Type);
+            for op in ["=", "<", ">"] {
+                assert_eq!(comparison_on_values(op, &[value.clone(), value.clone()], Span::default())
+                    .unwrap_err().kind, ErrorKind::Type);
+            }
+        }
+        for value in [
+            Value::Number(1.0, Exactness::Exact),
+            Value::Rational(Rational::integer(1)),
+            Value::BinaryNumber(BinaryNumber::one()),
+        ] {
+            assert_eq!(arithmetic_on_values("+", &[value.clone(), value.clone()], &env, Span::default())
+                .unwrap_err().kind, ErrorKind::Type);
+            assert_eq!(division_on_values(&[value.clone(), value.clone()], 2, &env, Span::default())
+                .unwrap_err().kind, ErrorKind::Type);
+            assert_eq!(comparison_on_values("=", &[value.clone(), value], Span::default())
+                .unwrap_err().kind, ErrorKind::Type);
+        }
+        assert_eq!(
+            arithmetic_on_values("+", &[], &env, Span::default()).unwrap_err().kind,
+            ErrorKind::Type
+        );
+    }
 
     fn in_domain(width: usize, bits: Vec<u8>) -> Value {
         Value::BinaryNumber(
