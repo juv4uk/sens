@@ -38,6 +38,34 @@ impl DomainCoordinate {
         self.bits
     }
 
+    /// Pack a D1–D10 sequence as one dense payload, without byte padding
+    /// between adjacent domain words. Width comes from each coordinate;
+    /// this operation assigns no executable meaning and is not a new codec.
+    pub fn pack_sequence(words: &[Self]) -> crate::PackedBitstream {
+        let mut packer = crate::BitPacker::new();
+        for &word in words {
+            packer.push_coordinate(word);
+        }
+        packer.finish()
+    }
+
+    /// Recover words using an external, source-owned width schedule.
+    /// Reject invalid widths, truncation and extra meaningful bits.
+    /// An unframed byte payload can never determine word boundaries itself.
+    pub fn unpack_sequence(
+        payload: &crate::PackedBitstream,
+        widths: &[u8],
+    ) -> Option<Vec<Self>> {
+        let mut words = Vec::with_capacity(widths.len());
+        let mut offset = 0usize;
+        for &width in widths {
+            let word = payload.read_coordinate(offset, width)?;
+            offset = offset.checked_add(usize::from(width))?;
+            words.push(word);
+        }
+        (offset == payload.bit_len()).then_some(words)
+    }
+
     /// Pure occupancy projection from owner-ratified domain sources.
     ///
     /// D3–D7 are a generated coordinate subset. D8/D9 have independent
