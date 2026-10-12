@@ -198,16 +198,24 @@ class ThreePassMigrationTests(unittest.TestCase):
         out,_=self.migrate("'()\n")
         self.assertEqual(out,"10 001 00 000 01\n")
 
-    def test_dotted_pair_uses_d2_dot_and_preserves_unknown_data(self):
-        out,_=self.migrate("'(a . b)\n")
-        self.assertEqual(out,"10 001 00 10 a 11 b 01 01\n")
+    def test_dotted_pair_uses_d2_dot_without_unadmitted_quote_symbols(self):
+        # D2 DOT is structural; quoted free symbols still have no ratified
+        # reversible D7 datum transport. Use admitted D3 EMPTY instead.
+        out,_=self.migrate("'(() . ())\n")
+        self.assertEqual(out,"10 001 00 10 000 11 000 01 01\n")
+
+    def test_quoted_symbol_datum_remains_blocked_independently_of_numerics(self):
+        with self.assertRaisesRegex(
+            mod.MigrationError, "quoted symbol datum has no ratified"
+        ):
+            self.migrate("'(a . b)\n")
 
     def test_known_structure_and_function_convert_while_unknown_data_stays_visible(self):
         out,_=self.migrate("(CONS x y)\n")
         self.assertEqual(out,"10 111 00 x 00 y 01\n")
 
     def test_all_emitted_structural_control_is_d2_and_empty_is_d3_value(self):
-        out,_=self.migrate("(CONS () (a . b))\n")
+        out,_=self.migrate("(CONS () 1)\n")
         words=out.split()
         controls=[word for word in words if len(word)==2]
         self.assertTrue(controls)
