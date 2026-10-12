@@ -62,8 +62,8 @@ fn text_layout_name(layout: Text7Layout) -> Option<&'static str> {
 }
 
 /// Encode Unicode text data as existing exact W7 D7 cells.
- /// Space and period are TEXT when inside a Text7 record; external D2
- /// grammatical tokens keep their OWN 2-bit parsing context.
+/// Space and period are TEXT when inside a Text7 record; external D2
+/// grammatical tokens keep their OWN 2-bit parsing context.
 pub fn encode_text7(text: &str, layout: Text7Layout) -> Result<Text7, Text7ProjectionError> {
     let mut cells: Vec<u8> = Vec::new();
     let mut at = 0usize;
