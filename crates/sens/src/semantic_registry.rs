@@ -210,19 +210,21 @@ pub(crate) fn d7_uk_keyboard_glyph(cell: u8) -> Option<&'static str> {
         .and_then(|row| row.uk)
 }
 
-/// Sanskrit IAST is a Sanskrit projection, never an English surface.
-/// Script-specific Sanskrit projections of the SAME ratified D7 bits.
-pub(crate) fn d7_sanskrit_glyph(cell: u8, layout: &str) -> Option<&'static str> {
+/// Text-only sound/symbol display; never a callable source-name lookup.
+/// Sanskrit IAST and English IPA are separate views of SAME ratified D7 bits.
+pub(crate) fn d7_text_surface_glyph(cell: u8, layout: &str) -> Option<&'static str> {
     let row = D7_DISPLAY_ROWS.iter().find(|row| row.bits == cell)?;
     match layout {
         "iast" => row.sa,
         "deva" => row.deva,
         "slp1" => row.slp1,
+        "en" => row.en,
+        "en-ipa" => row.en_ipa,
         _ => None,
     }
 }
 
-pub(crate) fn d7_sanskrit_longest_prefix(rest: &str, layout: &str) -> Option<(usize, u8)> {
+pub(crate) fn d7_text_surface_longest_prefix(rest: &str, layout: &str) -> Option<(usize, u8)> {
     D7_DISPLAY_ROWS
         .iter()
         .filter_map(|row| {
@@ -230,6 +232,8 @@ pub(crate) fn d7_sanskrit_longest_prefix(rest: &str, layout: &str) -> Option<(us
                 "iast" => row.sa,
                 "deva" => row.deva,
                 "slp1" => row.slp1,
+                "en" => row.en,
+                "en-ipa" => row.en_ipa,
                 _ => None,
             }?;
             rest.starts_with(spelling).then_some((spelling.len(), row.bits))
@@ -257,6 +261,8 @@ pub(crate) fn surface_for_domain_identity(
         return match namespace {
             "uk" => row.uk,
             "sa" => row.sa,
+            "en" => row.en,
+            "en-ipa" => row.en_ipa,
             _ => None,
         };
     }
