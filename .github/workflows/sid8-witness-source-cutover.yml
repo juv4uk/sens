@@ -24,5 +24,5 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.11"
-      - name: Audit 29 executable witness sources and 2806 SID8 head-only replacements
+      - name: Audit 28 executable witness sources and 2741 SID8 head-only replacements
         run: python3 -m unittest discover -s tests -p 'test_sid8_witness_*.py' -v
