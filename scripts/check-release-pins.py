@@ -32,6 +32,15 @@ RELEASE_WORKFLOWS = (
     ".github/workflows/publish-binary-master.yml",
 )
 
+# Workflows whose checks are the release gate's REQUIRED_CHECKS
+# (scripts/verify_release_ci.py): an unpinned check weakens the release proof.
+RELEASE_GATING_WORKFLOWS = (
+    ".github/workflows/ci-hosted.yml",
+    ".github/workflows/important-file-guard.yml",
+    ".github/workflows/binary-program-e2e.yml",
+    ".github/workflows/vertical-day-smoke.yml",
+)
+
 STEP = re.compile(r"^\s*-\s")
 USES_LINE = re.compile(r"^\s*-?\s*uses:\s*(\S+)(?:\s+#.*)?\s*$")
 TOOLCHAIN_LINE = re.compile(r"^\s*toolchain:\s*[\"']?([^\"'\s]+)[\"']?\s*$")
@@ -72,7 +81,7 @@ def _steps(text: str) -> list[tuple[int, list[str]]]:
 def check(root: Path = ROOT) -> tuple[str, list[str]]:
     channel = pinned_channel(root)
     errors: list[str] = []
-    for rel in RELEASE_WORKFLOWS:
+    for rel in RELEASE_WORKFLOWS + RELEASE_GATING_WORKFLOWS:
         path = root / rel
         if not path.is_file():
             errors.append(f"{rel}: release-path workflow is missing")
@@ -116,7 +125,8 @@ def main(argv: list[str]) -> int:
         for error in errors:
             print(f"RELEASE_PINS_BLOCKED: {error}", file=sys.stderr)
         return 1
-    print(f"RELEASE_PINS_PASS channel={channel} workflows={len(RELEASE_WORKFLOWS)}")
+    total = len(RELEASE_WORKFLOWS) + len(RELEASE_GATING_WORKFLOWS)
+    print(f"RELEASE_PINS_PASS channel={channel} workflows={total}")
     return 0
 
 

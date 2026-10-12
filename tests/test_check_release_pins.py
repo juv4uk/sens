@@ -19,6 +19,8 @@ MODULE = importlib.util.module_from_spec(SPEC)
 sys.modules[SPEC.name] = MODULE
 SPEC.loader.exec_module(MODULE)
 
+ALL_WORKFLOWS = MODULE.RELEASE_WORKFLOWS + MODULE.RELEASE_GATING_WORKFLOWS
+
 CHANNEL = '[toolchain]\nchannel = "1.99.0"\nprofile = "minimal"\n'
 CHECKOUT_SHA = "fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09"
 GOOD_STEP = (
@@ -42,7 +44,7 @@ class ReleasePinsTests(unittest.TestCase):
     def test_pinned_release_path_passes(self):
         with tempfile.TemporaryDirectory() as tmp:
             root = materialize(
-                Path(tmp), CHANNEL, {w: GOOD_STEP for w in MODULE.RELEASE_WORKFLOWS}
+                Path(tmp), CHANNEL, {w: GOOD_STEP for w in ALL_WORKFLOWS}
             )
             channel, errors = MODULE.check(root)
             self.assertEqual(channel, "1.99.0")
@@ -52,7 +54,7 @@ class ReleasePinsTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             step = "      - uses: dtolnay/rust-toolchain@1.98.0\n"
             root = materialize(
-                Path(tmp), CHANNEL, {w: step for w in MODULE.RELEASE_WORKFLOWS}
+                Path(tmp), CHANNEL, {w: step for w in ALL_WORKFLOWS}
             )
             _, errors = MODULE.check(root)
             self.assertTrue(any("!= pinned channel" in e for e in errors), errors)
@@ -65,7 +67,7 @@ class ReleasePinsTests(unittest.TestCase):
                 '          toolchain: "1.98.0"\n'
             )
             root = materialize(
-                Path(tmp), CHANNEL, {w: step for w in MODULE.RELEASE_WORKFLOWS}
+                Path(tmp), CHANNEL, {w: step for w in ALL_WORKFLOWS}
             )
             _, errors = MODULE.check(root)
             self.assertTrue(any("with: toolchain" in e for e in errors), errors)
@@ -74,7 +76,7 @@ class ReleasePinsTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             step = "      - uses: actions/checkout@v5\n"
             root = materialize(
-                Path(tmp), CHANNEL, {w: step for w in MODULE.RELEASE_WORKFLOWS}
+                Path(tmp), CHANNEL, {w: step for w in ALL_WORKFLOWS}
             )
             _, errors = MODULE.check(root)
             self.assertTrue(any("not pinned to a 40-hex SHA" in e for e in errors), errors)
@@ -84,7 +86,7 @@ class ReleasePinsTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             step = "      - uses: actions/checkout@v5 # v5\n"
             root = materialize(
-                Path(tmp), CHANNEL, {w: step for w in MODULE.RELEASE_WORKFLOWS}
+                Path(tmp), CHANNEL, {w: step for w in ALL_WORKFLOWS}
             )
             _, errors = MODULE.check(root)
             self.assertTrue(any("not pinned to a 40-hex SHA" in e for e in errors), errors)
@@ -102,7 +104,7 @@ class ReleasePinsTests(unittest.TestCase):
             root = materialize(
                 Path(tmp),
                 '[toolchain]\nprofile = "minimal"\n',
-                {w: GOOD_STEP for w in MODULE.RELEASE_WORKFLOWS},
+                {w: GOOD_STEP for w in ALL_WORKFLOWS},
             )
             with self.assertRaises(ValueError):
                 MODULE.check(root)
@@ -111,7 +113,7 @@ class ReleasePinsTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             step = "      - uses: actions/checkout\n"
             root = materialize(
-                Path(tmp), CHANNEL, {w: step for w in MODULE.RELEASE_WORKFLOWS}
+                Path(tmp), CHANNEL, {w: step for w in ALL_WORKFLOWS}
             )
             _, errors = MODULE.check(root)
             self.assertTrue(any("uses without a ref" in e for e in errors), errors)
