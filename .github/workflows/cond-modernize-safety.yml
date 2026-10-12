@@ -36,6 +36,10 @@ jobs:
           d=json.load(open(sys.argv[1], encoding="utf-8"))
           print("Inventory findings:", len(d["findings"]))
           print("Parse failures:", len(d["errors"]))
+          from collections import Counter
+          print("Migration categories:", dict(Counter(x["status"] for x in d["findings"])))
+          for item in d["findings"][:40]:
+              print("COND-MIGRATION", item["path"], "line", item["line"], item["status"], item["reason"])
           for error in d["errors"][:40]:
               print("BLOCKED:", error)
           PY
