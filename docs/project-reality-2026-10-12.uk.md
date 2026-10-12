@@ -47,35 +47,17 @@
 - Реєстр винятків [`../benchmarks/support-exemptions.json`](../benchmarks/support-exemptions.json) валідовується скриптом і має JSON Schema; свідок кожного винятку має існувати. Новий standalone-стенд вимагає `bench.json` за guard #4171, а support-каталог може бути винятком лише з явним поясненням і свідком.
 - `benchmarks/README.md` генерується `scripts/benchmark_registry.py`: **не редагувати вручну**. Виправляти manifests і генератор, потім запускати перевірку/генерацію.
 
-### Найсвіжіший повний sweep зареєстрованих стендів
+### Повний sweep зареєстрованих стендів і follow-up
 
-[Benchmark Registry run 38190345552](https://github.com/juv4uk/sens/actions/runs/38190345552) на точному SHA `d57d55f7f50f157d672bb283d31f9a427690596f` завершив реєстровий sweep із **54/54 стендів**, без дублікатів, пропусків чи зайвих результатів. Підсумок: **50 PASS / 4 FAIL / 0 BLOCKED / 0 TIMEOUT**. `coverage_complete=true`, але `all_benchmarks_pass=false`: зелений workflow означає, що аудит коректно завершив збір, а не що всі стенди пройшли.
+[Перший повний sweep, run 38190345552](https://github.com/juv4uk/sens/actions/runs/38190345552) на SHA `d57d55f7f50f157d672bb283d31f9a427690596f` охопив **54/54** стенди без дублікатів, пропусків чи зайвих результатів: **50 PASS / 4 FAIL / 0 BLOCKED / 0 TIMEOUT**. Його чотири первинні відмови розібрано в історичній частині receipt.
 
-Довготривалий зведений receipt: [`../evidence/benchmark-sweep-2026-10-12.json`](../evidence/benchmark-sweep-2026-10-12.json). Чотири збережені відмови мають різні причини:
+Після виправлення CLI-контракту `d6-parity-duality` [follow-up run 38190822493](https://github.com/juv4uk/sens/actions/runs/38190822493) на SHA `411312eab71a7c31cd9d71e52ebd34c031881c58` знову охопив **54/54**, цього разу **51 PASS / 3 FAIL / 0 BLOCKED / 0 TIMEOUT**. Це реальний приріст на один PASS, не просто зміна опису. Довготривалий receipt з історією обох прогонів: [`evidence/benchmark-sweep-2026-10-12.json`](../evidence/benchmark-sweep-2026-10-12.json).
 
-- `d6-parity-duality` — manifest передавав `--corpus`, якого runner не підтримує; команда в manifest уже виправлена на його справжній `--out` інтерфейс, але новий sweep після виправлення ще потрібен.
-- `cross-language` — `guix` відсутній на звичайному GitHub-hosted runner; це не результат порівняння швидкості SENS і Python. Потрібен запуск у зафіксованому Guix-середовищі або явне BLOCKED.
-- `store-air-load` — старий harness відмовився змішувати Contract 11.8 з поточним Contract 11.9; не можна просто перемаркувати історичні рядки, потрібен current-generation replay.
-- `physical-binary-performance` — тест підхопив legacy W8 projection `(00000001 ())`, яку поточний reader правильно відхиляє як неканонічний exact-width source. Потрібні сучасні canonical fixtures; parser не послаблювати.
+Після другого sweep виправлено класифікацію двох відомих generation/environment blockers:
+- `cross-language` тепер друкує явний `SENS_BENCHMARK_STATUS=BLOCKED`, коли немає pinned Guix environment; без Guix це не результат порівняння мов.
+- `store-air-load` тепер класифікує Contract 11.8 проти поточного 11.9 як `BLOCKED` для current replay, а маніфест прямо зветься історичним до окремого replay.
 
-Цей sweep зафіксований як історичний результат конкретного SHA й не доводить глобально зелений CI. Після виправлення D6 reproduction треба повторити перевірку реального runner; інші три мають власні ворота.
-- Не заводити паралельний benchmark framework лише для того, щоб описати існуючий результат. Звести наявні виміри до одного індексу, не викидаючи raw results і історичний provenance.
-- Для історичних гілок: не називати їх код «інтегрованим», доки свідок/тест і корисна реалізація не присутні в `main`. Існуючі дослідження переносити та перевіряти у `main`; не створювати нові гілки для чергової паралельної копії.
-
-### Мінімальна картка для кожного стенда
-
-Кожен `bench.json` повинен давати змогу відповісти: яке питання перевіряємо; яку семантичну генерацію/Contract вимірюємо; які саме encode/decode/compile/setup/execute шари включено; який oracle й corpus; як відтворити прогін; де raw JSON/TSV/stdout; які `git_sha`, `corpus_sha`, artifact SHA та toolchain/host provenance; що саме результат **не** доводить.
-
-Мітки на кшталт `CURRENT`, `RESEARCH-ONLY`, `HISTORICAL`, `BLOCKED` та `COMPLEMENTARY-BOUNDED` мають зберігатися. Наявність у каталозі не надає семантичної влади; зелений benchmark не підміняє oracle parity.
-
-### Вже опубліковані виміри й межі
-
-- **T5 streaming, 09.10:** 1 D3 QUOTE — 109 → 70 нс/виклик; 1024 форми — 48 896 → 47 852 нс/виклик у парному same-run контролі, з перевіркою побайтової тотожності.
-- **D3/D7 occupancy bitmask:** наведені виграші порівнюють різні hosted прогони. Це історичні механічні заміри lookup, не контрольований A/B на тому самому фізичному runner і не швидкість усієї мови.
-- **Frame-3:** на обмеженому корпусі з 5000 валідних D2-програм отримано 37 837 Б проти 46 327 Б T5 (−18.3%). Це окремий явний кодек F3 (`.senc`), не заміна канонічного T5 `.sens`, і не дає права на автоматичний format-sniffing/fallback.
-- **Однобайтовий `.f3m`:** незалежний вичерпний свідок приймає 45 програм із 256 кодів у вузькому мікропрофілі. Це не означає, що довільна SENS-програма або універсальний `.senc` вміщується в один байт.
-
-Принцип: **encode/correctness перед timing; raw evidence перед висновком; порівнювати лише тотожний workload/semantic generation з належною provenance.** Один benchmark, один host або один шар не визначає переможця для всієї мови.
+Обидві зміни й нові рядки generated index потрапили в останні коміти, але exact-head sweep для них іще не завершився. Третя проблема — `physical-binary-performance` — лишається справжнім fixture-блокером: старий `(00000001 ())` projection не приймається canonical exact-width reader. Parser не послаблюємо; потрібне узгодження канонічного джерела з committed physical artifact. До нового успішного sweep не оголошувати фізичні виміри або всю лабораторію зеленими.
 
 ## 4. Пріоритети — у порядку доказової цінності
 
