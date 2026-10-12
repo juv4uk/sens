@@ -15,7 +15,9 @@ Hard rules:
 - D2 words are reserved exclusively for structural control and never pass as data/call heads.
 - Unknown D1 words may pass through unchanged as predicate/data evidence, but are never reclassified as D2.
 - Comments disappear before migration.
-- Unrecognized data/numbers/strings PASS THROUGH unchanged instead of being forced into Text7.
+- Unqualified numeric literals fail closed: numbers require an explicit D24+ domain.
+- Domain-identity words (D1/D3-D9) are NEVER inferred to be numeric by spelling.
+- Unrecognized nonnumeric data/strings stay unresolved, not forced into Text7.
 - Output is a PHYSICAL T5 binary file with the same stem and extension .sens.\n- Unknown/unmapped words FAIL CLOSED: never ship text remnants as .sens.\n- Source .lisp is retained; migration never overwrites an existing .sens.
 """
 from __future__ import annotations
@@ -701,6 +703,24 @@ def encode_atom_data(node: Atom,text7,lexical_env=(),quoted=False):
         )
     if t in D1_UK_SURFACES:
         return [D1_UK_SURFACES[t]]
+    # D24/D48/... are qualified numeric domains. A historical decimal, sign,
+    # ratio, #d or #b source token is NOT a raw D1-D9 identity and has no
+    # admitted literal->Dn physical-source lowering. Never transcode a number
+    # into a function address or Text7 glyphs by matching its spelling.
+    # Bare bit words outside 0/1 remain domain addresses, *not* numerals;
+    # exact D24+ payload words also require an explicit domain-bearing envelope.
+    binary_word = bool(re.fullmatch(r"[01]+", t))
+    numeric_width = len(t)
+    domain_width = (numeric_width >= 24 and numeric_width % 24 == 0
+                    and (numeric_width // 24 & (numeric_width // 24 - 1)) == 0)
+    if ((NUMERIC_RE.fullmatch(t) and not binary_word)
+            or re.fullmatch(r"(?i)#(?:d[+-]?\\d+(?:/\\d+)?|b[01]+|q2:[+-]?[01]+/[01]+)", t)
+            or (binary_word and domain_width)):
+        raise MigrationError(
+            "unqualified numeric literal blocked: requires explicit D24+ "
+            "numeric-domain identity and admitted physical encoding",
+            node.tok,
+        )
     if quoted:
         # The current canonical D2/D7 contract does not ratify a reversible
         # symbol-datum representation. A D2-framed Text7 identifier is NOT
