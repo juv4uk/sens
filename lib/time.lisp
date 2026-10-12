@@ -226,25 +226,54 @@
 ; precedence and the public detected/unknown result shape.
 (0011 timezone-declarations->observation
   (0010 (tz-value etc-timezone-value)
+    ; D3 COND is exactly two clauses. First distinguish absent TZ; for a
+    ; present TZ, distinguish empty from non-empty in a nested two-clause COND.
     (110
-      ((101 tz-value "")
-       (110
-         ((101 etc-timezone-value "")
-          (111 (001 unknown) (111 (001 host-declaration-unavailable) (001 ()))))
-         ((101 etc-timezone-value (001 ()))
-          (111 (001 unknown) (111 (001 host-declaration-unavailable) (001 ()))))
-         ((010 (001 ()))
-          (111 (001 detected) (111 etc-timezone-value (111 (001 etc-timezone) (001 ())))))))
       ((101 tz-value (001 ()))
+       ; TZ is absent: ETC is the only fallback source.
        (110
-         ((101 etc-timezone-value "")
-          (111 (001 unknown) (111 (001 host-declaration-unavailable) (001 ()))))
          ((101 etc-timezone-value (001 ()))
-          (111 (001 unknown) (111 (001 host-declaration-unavailable) (001 ()))))
-         ((010 (001 ()))
-          (111 (001 detected) (111 etc-timezone-value (111 (001 etc-timezone) (001 ())))))))
-      ((010 (001 ()))
-       (111 (001 detected) (111 tz-value (111 (001 TZ) (001 ())))))))
+          (111 (001 unknown) (111 (001 host-declaration-unavailable) (001 ())))
+         )
+         ((0100 (101 etc-timezone-value (001 ())))
+          (110
+            ((101 etc-timezone-value "")
+             (111 (001 unknown) (111 (001 host-declaration-unavailable) (001 ())))
+            )
+            ((0100 (101 etc-timezone-value ""))
+             (111 (001 detected) (111 etc-timezone-value (111 (001 etc-timezone) (001 ()))))
+            )
+          )
+         )
+       )
+      )
+      ((0100 (101 tz-value (001 ())))
+       ; TZ is present: empty string still permits the ETC fallback.
+       (110
+         ((101 tz-value "")
+          (110
+            ((101 etc-timezone-value (001 ()))
+             (111 (001 unknown) (111 (001 host-declaration-unavailable) (001 ())))
+            )
+            ((0100 (101 etc-timezone-value (001 ())))
+             (110
+               ((101 etc-timezone-value "")
+                (111 (001 unknown) (111 (001 host-declaration-unavailable) (001 ())))
+               )
+               ((0100 (101 etc-timezone-value ""))
+                (111 (001 detected) (111 etc-timezone-value (111 (001 etc-timezone) (001 ()))))
+               )
+             )
+            )
+          )
+         )
+         ((0100 (101 tz-value ""))
+          (111 (001 detected) (111 tz-value (111 (001 TZ) (001 ()))))
+         )
+       )
+      )
+    )
+  )
 )
 (0011 timezone-raw->observation
   (0010 (raw)
