@@ -1,0 +1,270 @@
+{
+  "schema": "d10-uk-editorial-anchor-review/v1",
+  "date": "2026-10-12",
+  "status": "ASSISTANT_EDITORIAL_REVIEW_NOT_OWNER_RATIFICATION_OR_SAN_GRAMMAR_ATTESTATION",
+  "codebook": {
+    "path": "knowledge/d10-v18-semantic-inventory.json",
+    "git_blob": "7e6acb2531308ae5f63600d4e0042111cc3ec59c",
+    "rows": 1024
+  },
+  "human_table": "lib/domains/d10.lisp",
+  "authority_boundary": "These 32 reviewed Ukrainian wording anchors protect meaning from accidental regressions, but neither Sanskrit morphology nor all 1024 entries are independently linguistically attested.",
+  "anchors": [
+    {
+      "semantic_name": "IF",
+      "coordinate": "0000000110",
+      "stable_id": "d10.crossrepo.early.7e7576e6a5af03b7",
+      "uk": "якщо",
+      "ukr": "якщо",
+      "scope_note": "evaluate one predicate and select exactly one of two branch forms, preserving short-circuit branch semantics"
+    },
+    {
+      "semantic_name": "NUMERIC-NOT-EQUAL",
+      "coordinate": "0000000111",
+      "stable_id": "d10.crossrepo.early.c54e7e4316a0f576",
+      "uk": "числа-нерівні?",
+      "ukr": "числа-нерівні?",
+      "scope_note": "compare two numeric values and return the predicate result that they are unequal by numeric value rather than atom identity"
+    },
+    {
+      "semantic_name": "MISSING-CAPABILITY",
+      "coordinate": "0000000000",
+      "stable_id": "d10.bridge.16592788ef60fafb",
+      "uk": "немає-можливості",
+      "ukr": "відсутня-можливість-виконання",
+      "scope_note": "represent typed absence of an execution capability such as kernel or bridge without changing semantic identity or registry numbering"
+    },
+    {
+      "semantic_name": "RESULT-COUNT",
+      "coordinate": "0000000001",
+      "stable_id": "d10.bridge.6898d14e7d0fafc5",
+      "uk": "кількість-результатів",
+      "ukr": "кількість-результатів-спостереження",
+      "scope_note": "observe the result cardinality of one completed native observation without coercing the native results"
+    },
+    {
+      "semantic_name": "ISLAND-CALL",
+      "coordinate": "0000000010",
+      "stable_id": "d10.bridge.9348ac86d4d019d4",
+      "uk": "виклик-острова",
+      "ukr": "виклик-виконання-на-автономному-острові",
+      "scope_note": "invoke one semantic identity on an autonomous execution island using opaque native payload while preserving producer-native observation and provenance"
+    },
+    {
+      "semantic_name": "SLOT-VALUE",
+      "coordinate": "0000001111",
+      "stable_id": "d10.crossrepo.koans.0f1de1be19160f5a",
+      "uk": "значення-поля",
+      "ukr": "значення-іменованого-поля-об'єкта",
+      "scope_note": "read or designate the value stored in a named slot of an object instance"
+    },
+    {
+      "semantic_name": "SEARCH",
+      "coordinate": "0000010001",
+      "stable_id": "d10.crossrepo.koans.192017552cbfb355",
+      "uk": "знайти-підпослідовність",
+      "ukr": "знайти-початковий-індекс-підпослідовності",
+      "scope_note": "return the first index at which one sequence occurs as a subsequence of another or the no-match result"
+    },
+    {
+      "semantic_name": "RETURN-FROM",
+      "coordinate": "0000010010",
+      "stable_id": "d10.crossrepo.koans.21c5d59e5d2abd0e",
+      "uk": "повернутися-з-блоку",
+      "ukr": "повернути-значення-з-іменованого-блоку",
+      "scope_note": "transfer control to a lexically enclosing named block with an optional result value"
+    },
+    {
+      "semantic_name": "CALL/CC",
+      "coordinate": "0000001011",
+      "stable_id": "d10.crossrepo.early.fbbdb9f97d617f40",
+      "uk": "виклик-із-продовженням",
+      "ukr": "виклик-із-продовженням",
+      "scope_note": "capture the current continuation as a first-class callable value and invoke the supplied function with that continuation"
+    },
+    {
+      "semantic_name": "BIT-VECTOR-P",
+      "coordinate": "0000001101",
+      "stable_id": "d10.crossrepo.koans.09ef6cea8657b6ce",
+      "uk": "бітовий-вектор?",
+      "ukr": "бітовий-вектор?",
+      "scope_note": "test whether a value is a bit-vector"
+    },
+    {
+      "semantic_name": "HASH-TABLE-P",
+      "coordinate": "0000010101",
+      "stable_id": "d10.crossrepo.koans.38e9791ae8a745fe",
+      "uk": "об'єкт-хеш-таблиці?",
+      "ukr": "об'єкт-хеш-таблиці?",
+      "scope_note": "test whether a value is a hash-table object"
+    },
+    {
+      "semantic_name": "MULTIPLE-VALUE-LIST",
+      "coordinate": "0000011000",
+      "stable_id": "d10.crossrepo.koans.46801b92169fff06",
+      "uk": "список-усіх-значень",
+      "ukr": "зібрати-всі-повернені-значення-у-список",
+      "scope_note": "evaluate a form and materialize all of its returned values as an ordinary list"
+    },
+    {
+      "semantic_name": "CHARACTERP",
+      "coordinate": "0000010011",
+      "stable_id": "d10.crossrepo.koans.2ebc9090d1217cbf",
+      "uk": "знак?",
+      "ukr": "знак?",
+      "scope_note": "test whether a value is a character"
+    },
+    {
+      "semantic_name": "REMPROP",
+      "coordinate": "0001010101",
+      "stable_id": "d10.hist.maclisp.102c3ce43e683d0c",
+      "uk": "вилучити-властивість!",
+      "ukr": "вилучити-властивість-на-місці!",
+      "scope_note": "remove a named property from a symbol or property-list object and expose whether it existed"
+    },
+    {
+      "semantic_name": "FIRE-RULE-MULTI",
+      "coordinate": "0001010000",
+      "stable_id": "d10.forward.d4f31203838f06cd",
+      "uk": "застосувати-правило-до-всіх",
+      "ukr": "застосувати-одне-правило-до-всіх-збігів",
+      "scope_note": "fire one rule over all matching substitutions instead of only one match"
+    },
+    {
+      "semantic_name": "VECTOR->LIST",
+      "coordinate": "0000101100",
+      "stable_id": "d10.crossrepo.portable.66ee8572b7f5ca2b",
+      "uk": "вектор-у-список",
+      "ukr": "перетворити-вектор-на-список",
+      "scope_note": "convert a vector to a proper list preserving element order"
+    },
+    {
+      "semantic_name": "READ-CHAR-NO-HANG",
+      "coordinate": "1101000101",
+      "stable_id": "d10.name.01141",
+      "uk": "читати-без-очікування",
+      "ukr": "читати-символ-без-очікування",
+      "scope_note": "Attempt a character read only if immediately available; distinguish no available input from EOF, with optional EOF policy."
+    },
+    {
+      "semantic_name": "PATHNAME-MATCH-P",
+      "coordinate": "1011011100",
+      "stable_id": "d10.research.v9.012.pathname-match-p",
+      "uk": "шлях-відповідає-шаблону?",
+      "ukr": "шлях-файлу-відповідає-шаблону?",
+      "scope_note": "Wildcard match is directional; a wildcard in the first pathname matches only a wildcard in the second; actual matching mechanics implementation-defined."
+    },
+    {
+      "semantic_name": "STREAM-EXTERNAL-FORMAT",
+      "coordinate": "1101010100",
+      "stable_id": "d10.name.01303",
+      "uk": "зовнішній-формат-потоку",
+      "ukr": "визначити-зовнішній-формат-потоку",
+      "scope_note": "For a file stream report the implementation's external format designator, whose representation may be implementation-specific."
+    },
+    {
+      "semantic_name": "FUNCTION-BASIC-DEFINITION",
+      "coordinate": "1011101110",
+      "stable_id": "d10.research.v9.030.function-basic-definition",
+      "uk": "основне-визначення-функції",
+      "ukr": "отримати-базове-визначення-функції",
+      "scope_note": "Отримати початкову функцію, навіть коли її обгорнуто; базова функція лишається відмінною від wrapper chain."
+    },
+    {
+      "semantic_name": "FINITE-TERM-SUBSUMES",
+      "coordinate": "1110001010",
+      "stable_id": "d10.research.source.v14.finite-term-subsumes",
+      "uk": "терм-покриває-інший?",
+      "ukr": "перевірити-чи-терм-є-узагальненням-іншого?",
+      "scope_note": "YES iff a substitution σ defined ONLY for metavariables in P makes σ(P) structurally identical to S (including occurrence identity of variables already in S). Never bind or alter metavariables in S, a"
+    },
+    {
+      "semantic_name": "ALPHA-EQUIVALENCE-DEBRUIJN",
+      "coordinate": "1111111000",
+      "stable_id": "d10.research.v17.047.alpha-equivalence-debruijn",
+      "uk": "альфа-рівність-де-брейна?",
+      "ukr": "перевірити-альфа-еквівалентність-у-поданні-де-брейна?",
+      "scope_note": "Parse two first-order lambda terms with explicit lexical scope into canonical De Bruijn forms; return YES iff forms are structurally equal, ignoring bound-variable names but not free-variable names."
+    },
+    {
+      "semantic_name": "RATIONAL-PHASE-MOD-ONE",
+      "coordinate": "1111110010",
+      "stable_id": "d10.research.v17.041.rational-phase-mod-one",
+      "uk": "дробова-фаза",
+      "ukr": "нормалізувати-раціональну-фазу-за-модулем-одиниці",
+      "scope_note": "For any exact rational cycles q, return unique exact phase q-floor(q) in [0,1); preserve correct behavior for negative q."
+    },
+    {
+      "semantic_name": "BINARY-CANONICAL-PACK-MSB",
+      "coordinate": "1111111110",
+      "stable_id": "d10.research.v17.053.binary-canonical-pack-msb",
+      "uk": "пакувати-біти-старшим-першим",
+      "ukr": "канонічно-пакувати-двійкові-дані-зі-старшим-бітом-першим",
+      "scope_note": "Given exactly n bits in {0,1}, serialize groups of up to 8 in MSB-first order padding only the final partial byte with zeros, and return original bit length n as metadata."
+    },
+    {
+      "semantic_name": "BINARY-CANONICAL-UNPACK-MSB",
+      "coordinate": "1111111111",
+      "stable_id": "d10.research.v17.054.binary-canonical-unpack-msb",
+      "uk": "розпакувати-біти-старшим-першим",
+      "ukr": "канонічно-розпакувати-двійкові-дані-зі-старшим-бітом-першим",
+      "scope_note": "Given a byte vector plus original bit length n within 0..8*bytes and zero-valued padding bits, reconstruct the first n bits MSB-first; reject nonzero padding."
+    },
+    {
+      "semantic_name": "MAKE-CONCATENATED-STREAM",
+      "coordinate": "1011001100",
+      "stable_id": "d10.historical.clhs.make-concatenated-stream.20261011",
+      "uk": "створити-складений-потік",
+      "ukr": "створити-потік-із-послідовності-вхідних-потоків",
+      "scope_note": "Create a composite input stream that reads each child stream to EOF in sequence, reveals terminal EOF only after every child is exhausted, and advances child cursors as characters are consumed."
+    },
+    {
+      "semantic_name": "DYNAMIC-WIND",
+      "coordinate": "1011111001",
+      "stable_id": "d10.name.00573",
+      "uk": "динамічне-оточення",
+      "ukr": "виконати-дії-до-й-після-динамічної-ділянки",
+      "scope_note": "Run before/after hooks whenever a captured continuation reenters/exits dynamic extent, not only at normal function call/return."
+    },
+    {
+      "semantic_name": "TRIT-FIXED-WIDTH-UNRANK",
+      "coordinate": "1111001011",
+      "stable_id": "d10.research.v17.002.trit-fixed-width-unrank",
+      "uk": "тріт-із-рангу",
+      "ukr": "відновити-трітове-слово-зі-сталої-ширини-та-рангу",
+      "scope_note": "For n>=0 and 0<=r<3^n, output the unique n-trit most-significant-first base-3 representation of r, zero padded on the left."
+    },
+    {
+      "semantic_name": "SLOT-EXISTS-P",
+      "coordinate": "1011001000",
+      "stable_id": "d10.reviewed-candidate.20261011.slot-exists-p",
+      "uk": "поле-існує?",
+      "ukr": "іменоване-поле-об'єкта-існує?",
+      "scope_note": "Return D1 yes iff object has a slot of this exact name, regardless of whether its value is unbound."
+    },
+    {
+      "semantic_name": "SEQUENTIALP",
+      "coordinate": "0100000001",
+      "stable_id": "d10.xrepo.mal.57b39afa4ec59d9a",
+      "uk": "послідовна-структура?",
+      "ukr": "значення-є-послідовною-структурою?",
+      "scope_note": "test whether a value belongs to the list/vector sequential family"
+    },
+    {
+      "semantic_name": "PHASE-UNWRAP",
+      "coordinate": "1010010001",
+      "stable_id": "d10.signal.phase-unwrap.20261011",
+      "uk": "розгорнути-фазу",
+      "ukr": "усунути-стрибки-фази-на-межі-періоду",
+      "scope_note": "q[0]=p[0]; for each next i choose Δ congruent to (p[i]-p[i-1]) modulo period minimizing |Δ|; for exact half-period ties preserve the sign of the original raw difference; q[i]=q[i-1]+Δ. Empty input yie"
+    },
+    {
+      "semantic_name": "MEMOIZE",
+      "coordinate": "0011010110",
+      "stable_id": "d10.paip.e7380398ec6d7198",
+      "uk": "мемоізувати",
+      "ukr": "запам'ятовувати-результати-викликів",
+      "scope_note": "replace a named global function definition with a memoizing wrapper"
+    }
+  ]
+}
