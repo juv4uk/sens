@@ -149,10 +149,10 @@ class LegacyD3GuardTests(unittest.TestCase):
         helper_substitutions = (
             (helpers[0], '((11110111 (110101011 remaining) "/") acc)',
              '((11110111 (110101011 remaining) "/") (1) acc)'),
-            (helpers[0], '((010 (001 ()))\\n       (wire-integer-bits-onto',
-             '((11110111 (110101011 remaining) "/") (0)\\n       (wire-integer-bits-onto'),
-            (helpers[1], '((110101010 "#q2:" wire)\\n         (str+',
-             '((110101010 "#q2:" wire) t\\n         (str+'),
+            (helpers[0], '((010 (001 ()))\n       (wire-integer-bits-onto',
+             '((11110111 (110101011 remaining) "/") (0)\n       (wire-integer-bits-onto'),
+            (helpers[1], '((110101010 "#q2:" wire)\n         (str+',
+             '((110101010 "#q2:" wire) t\n         (str+'),
             (helpers[1], '((010 (001 ())) (100 (001 ())))',
              '((110101010 "#q2:" wire) () (100 (001 ())))'),
         )
