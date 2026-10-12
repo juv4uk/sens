@@ -138,6 +138,32 @@ class LegacyD3GuardTests(unittest.TestCase):
         arity = segment("render-arity", "render-admitted")
         self.assertEqual(MODULE.scan_lisp(arity, path), [])
 
+        helpers = (
+            segment("wire-integer-bits-onto", "render-rust-nat"),
+            segment("render-rust-nat", "rows"),
+        )
+        for fragment in helpers:
+            with self.subTest(helper=fragment[:40]):
+                self.assertEqual(MODULE.scan_lisp(fragment, path), [])
+
+        helper_substitutions = (
+            (helpers[0], '((11110111 (110101011 remaining) "/") acc)',
+             '((11110111 (110101011 remaining) "/") (1) acc)'),
+            (helpers[0], '((010 (001 ()))\\n       (wire-integer-bits-onto',
+             '((11110111 (110101011 remaining) "/") (0)\\n       (wire-integer-bits-onto'),
+            (helpers[1], '((110101010 "#q2:" wire)\\n         (str+',
+             '((110101010 "#q2:" wire) t\\n         (str+'),
+            (helpers[1], '((010 (001 ())) (100 (001 ())))',
+             '((110101010 "#q2:" wire) () (100 (001 ())))'),
+        )
+        for fragment, original, invalid in helper_substitutions:
+            with self.subTest(helper_triplet=original):
+                self.assertIn(original, fragment)
+                changed = fragment.replace(original, invalid, 1)
+                self.assertIn("COND_NOT_TWO_FIELDS", [
+                    f.rule for f in MODULE.scan_lisp(changed, path)
+                ])
+
         # Restoring an expected-result field recreates the obsolete triplet.
         substitutions = (
             (nonlegacy[0], "((010 (11100 key (011 row))) (001 ()))",
