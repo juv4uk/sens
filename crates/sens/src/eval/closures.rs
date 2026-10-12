@@ -402,7 +402,9 @@ fn resolve_body(
 }
 
 fn local_for(name: &Rc<str>, scopes: &[Rc<[Rc<str>]>]) -> Option<ExprKind> {
-    if canon::routed_sid_for_surface(name).is_some()
+    // Exact-domain immutable heads are never captured as lambda locals.
+    // Keep the historical byte route only as a fallback for unmigrated heads.
+    if canon::is_reserved_surface(name)
         || necessary_forms::identity_for_symbol(name).is_some()
     {
         return None;
