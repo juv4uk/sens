@@ -114,6 +114,11 @@ pub(crate) fn invoke_value(
             if let Some(core_identity) = identity.core_operation() {
                 return canon::invoke_domain_identity(core_identity, arguments, environment, span);
             }
+            // A bounded D9 mechanism cut remains outside CoreDomainIdentity.
+            if canon::has_d9_string_mechanism(*identity) {
+                return canon::invoke_d9_string_mechanism(*identity, arguments, environment, span)
+                    .expect("exact D9 string-mechanism route was checked above");
+            }
             match environment.domain_code_slot(*identity).as_ref() {
                 Some(Value::Builtin(builtin)) => (builtin.func)(arguments, environment, span),
                 Some(Value::Closure(closure)) => closures::apply_values(closure.clone(), arguments, span),
@@ -511,6 +516,17 @@ fn dispatch_call(
                     values.push(evaluate(argument, environment)?);
                 }
                 return canon::invoke_domain_identity(core_identity, &values, environment, span)
+                    .map(EvalStep::Value);
+            }
+            // Only four exact D9 string residents have this direct value-call
+            // mechanism. Leave all other D9 values on the ordinary fail-closed slot path.
+            if canon::has_d9_string_mechanism(*identity) {
+                let mut values = Vec::with_capacity(arguments.len());
+                for argument in arguments {
+                    values.push(evaluate(argument, environment)?);
+                }
+                return canon::invoke_d9_string_mechanism(*identity, &values, environment, span)
+                    .expect("exact D9 string-mechanism route was checked above")
                     .map(EvalStep::Value);
             }
             let Some(bound) = environment.domain_code_slot(*identity) else {
