@@ -63,6 +63,10 @@ fn canonical(
     if !nr.is_zero() || !dr.is_zero() {
         return None;
     }
+    // Test the reduced unit *before* left-padding it into an explicit Dn.
+    // D24(1) is 000...001, not the normalized single-bit [1]; checking
+    // after own_word() incorrectly preserves RATIO(2,1) and NEG(2,1).
+    let denominator_is_one = d.as_bits() == [1];
 
     let mut width = minimum_width;
     while n.width().max(d.width()) > width {
@@ -71,7 +75,7 @@ fn canonical(
     let n = own_word(n, width)?;
     let d = own_word(d, width)?;
     if n.is_zero() { return Some(Value::BinaryNumber(n)); }
-    if d.as_bits() == [1] {
+    if denominator_is_one {
         if negative {
             return Some(Value::NumericComposition(DomainNumericComposition {
                 negative: true, numerator: n, denominator: None,
@@ -216,6 +220,69 @@ mod tests {
             unary("-", &Value::BinaryNumber(d(24, 5))));
         assert!(canonical_parts(false, &d(24, 1), &d(24, 0)).is_none());
         assert!(canonical_parts(false, &d(24, 1), &d(48, 2)).is_none());
+    }
+
+    #[test]
+    fn one_bit_denominator_mutation_keeps_d24_plus_integers_canonical() {
+        // Targeted witness: the one-bit change 000...001 -> 000...011
+        // is exactly what separates an integer from a rational.
+        // Every intermediate constituent still belongs to the same Dn.
+        for width in [24usize, 48, 96, 192] {
+            let one = d(width, 1);
+            let two = d(width, 2);
+            let three = d(width, 3);
+            let zero = d(width, 0);
+
+            let bit_distance: usize = one.as_bits().iter()
+                .zip(three.as_bits())
+                .map(|(a, b)| usize::from(a != b))
+                .sum();
+            assert_eq!(bit_distance, 1, "D{width}: single-bit mutation");
+
+            let integer = canonical_parts(false, &two, &one)
+                .expect("unit denominator reduces to admitted natural Dn");
+            assert_eq!(integer, Value::BinaryNumber(two.clone()),
+                "D{width}: RATIO(2,1) must not survive as an extra tag");
+
+            let negative = canonical_parts(true, &two, &one)
+                .expect("negative integer still uses exact Dn");
+            let Value::NumericComposition(ref neg) = negative else {
+                panic!("D{width}: a negative integer has its own composition")
+            };
+            let (is_negative, numerator, denominator) = neg.as_parts();
+            assert!(is_negative);
+            assert_eq!(neg.domain_width(), width);
+            assert_eq!(numerator.numeric_domain_width(), Some(width));
+            assert!(denominator.is_none(),
+                "D{width}: no unneeded Dn denominator for integer -2");
+            assert_eq!(negative.to_string(), "-2");
+
+            let ratio = canonical_parts(false, &two, &three)
+                .expect("one-bit-mutated denominator is a valid fraction");
+            let Value::NumericComposition(ref fraction) = ratio else {
+                panic!("D{width}: the mutated denominator is not unity")
+            };
+            assert_eq!(ratio.to_string(), "2/3");
+            assert_eq!(fraction.domain_width(), width);
+            let (_, numerator, denominator) = fraction.as_parts();
+            assert_eq!(numerator.numeric_domain_width(), Some(width));
+            assert_eq!(denominator.expect("actual fraction").numeric_domain_width(), Some(width));
+
+            let divided = compute(
+                "/", &Value::BinaryNumber(d(width, 6)),
+                &Value::BinaryNumber(d(width, 3)),
+            ).expect("same domain 6/3");
+            assert_eq!(divided, Value::BinaryNumber(two),
+                "D{width}: reduced division becomes exactly Dn(2)");
+            assert_eq!(
+                canonical_parts(true, &zero, &one),
+                Some(Value::BinaryNumber(zero)),
+                "D{width}: negative zero must not allocate a sign or denominator"
+            );
+            assert!(canonical_parts(
+                false, &d(width, 2), &d(width * 2, 1)
+            ).is_none(), "D{width}: mixed Dn values are forbidden");
+        }
     }
 
     #[test]
