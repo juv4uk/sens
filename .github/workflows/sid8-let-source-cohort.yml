@@ -1,4 +1,4 @@
-name: SID8 Lisp LET runtime admission blocker
+name: SID8 parallel LET to D4 LAMBDA source proof
 on:
   push:
     branches: [main]
@@ -25,5 +25,5 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.11"
-      - name: Preserve 44 legacy LET sites until D6 is actually callable
+      - name: Verify 43 Lisp-owned LAMBDA lowerings and one held LET with exact Git blob replay
         run: python3 -m unittest discover -s tests -p test_sid8_let_source_cohort.py -v

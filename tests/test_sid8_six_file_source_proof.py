@@ -149,9 +149,9 @@ def rewrite(source, mapping, mode):
 
 class InPlaceSID8Proof(unittest.TestCase):
     def test_uncallable_d6_let_is_preserved_until_runtime_witness(self):
-        expected = {"lib/forward.lisp": 19, "lib/knowledge.lisp": 25,
+        expected = {"lib/forward.lisp": 1, "lib/knowledge.lisp": 0,
                     "lib/surface/semantic-registry-api.lisp": 3,
-                    "knowledge/guard-fact-policy.lisp": 6}
+                    "knowledge/guard-fact-policy.lisp": 0}
         for path, expected_count in expected.items():
             with self.subTest(path=path):
                 src = (ROOT / path).read_text(encoding="utf-8")
