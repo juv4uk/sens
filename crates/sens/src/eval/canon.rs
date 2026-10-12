@@ -133,55 +133,63 @@ fn exact_args(
 
 type PrimitiveFn = fn(&[Value], &Environment, Span) -> Result<Value, LanguageError>;
 
-const PRIMITIVE_TABLE: [Option<PrimitiveFn>; 256] = {
-    let mut table: [Option<PrimitiveFn>; 256] = [None; 256];
-    table[crate::sens!(00001100).packed_byte() as usize] = Some(prim_00001100);
-    table[crate::sens!(00001101).packed_byte() as usize] = Some(prim_00001101);
-    table[crate::sens!(00001110).packed_byte() as usize] = Some(prim_00001110);
-    table[crate::sens!(00001111).packed_byte() as usize] = Some(prim_00001111);
-    table[crate::sens!(00011010).packed_byte() as usize] = Some(prim_00011010);
-    table[crate::sens!(00011011).packed_byte() as usize] = Some(prim_00011011);
-    table[crate::sens!(00011100).packed_byte() as usize] = Some(prim_00011100);
-    table[crate::sens!(01001101).packed_byte() as usize] = Some(prim_01001101);
-    table[crate::sens!(00111011).packed_byte() as usize] = Some(builtins::prim_00111011); // string-length
-    table[crate::sens!(00111100).packed_byte() as usize] = Some(builtins::prim_00111100); // string-empty?
-    table[crate::sens!(00111101).packed_byte() as usize] = Some(builtins::prim_00111101); // string-prefix?
-    table[crate::sens!(00111110).packed_byte() as usize] = Some(builtins::prim_00111110); // string-contains?
-    table[crate::sens!(01010000).packed_byte() as usize] = Some(builtins::prim_01010000); // make-vector
-    table[crate::sens!(01001111).packed_byte() as usize] = Some(builtins::prim_01001111); // vector
-    table[crate::sens!(01011010).packed_byte() as usize] = Some(builtins::prim_01011010); // mono-ns
-    table[crate::sens!(01011011).packed_byte() as usize] = Some(builtins::prim_01011011); // unix-time-now
-    table[crate::sens!(01011100).packed_byte() as usize] = Some(builtins::prim_01011100); // ntp-query-raw
-    table[crate::sens!(01011101).packed_byte() as usize] = Some(builtins::prim_01011101); // timezone-declarations-raw
-    table[crate::sens!(01010001).packed_byte() as usize] = Some(builtins::prim_01010001); // vector-length
-    table[crate::sens!(01010010).packed_byte() as usize] = Some(builtins::prim_01010010); // vector-ref
-    table[crate::sens!(01010011).packed_byte() as usize] = Some(builtins::prim_01010011); // vector-set!
-    table[crate::sens!(01010100).packed_byte() as usize] = Some(builtins::prim_01010100); // i32-buffer
-    table[crate::sens!(01010101).packed_byte() as usize] = Some(builtins::prim_01010101); // f32-buffer
-    table[crate::sens!(01000001).packed_byte() as usize] = Some(builtins::prim_01000001); // string-slice
-    table[crate::sens!(00111010).packed_byte() as usize] = Some(builtins::prim_00111010); // string-append
-    table[crate::sens!(00100100).packed_byte() as usize] = Some(builtins::prim_00100100); // string?
-    table[crate::sens!(01000010).packed_byte() as usize] = Some(builtins::prim_01000010); // symbol->string
-    table[crate::sens!(01000011).packed_byte() as usize] = Some(builtins::prim_01000011); // string->symbol
-    table[crate::sens!(00111111).packed_byte() as usize] = Some(builtins::prim_00111111); // string-first
-    table[crate::sens!(01000000).packed_byte() as usize] = Some(builtins::prim_01000000); // string-rest
-    table[crate::sens!(01000100).packed_byte() as usize] = Some(builtins::prim_01000100); // codepoint->string
-    table[crate::sens!(01000101).packed_byte() as usize] = Some(builtins::prim_01000101); // string->codepoint
-    table[crate::sens!(10100001).packed_byte() as usize] = Some(builtins::prim_10100001); // sha256-hex
-    table[crate::sens!(10100000).packed_byte() as usize] = Some(builtins::prim_10100000); // json-parse
-    table[crate::sens!(01001000).packed_byte() as usize] = Some(builtins::prim_01001000); // print
-    table[crate::sens!(01001001).packed_byte() as usize] = Some(builtins::prim_01001001); // princ
-    table[crate::sens!(01001100).packed_byte() as usize] = Some(builtins::prim_01001100); // write-to-string
-    table[crate::sens!(01001010).packed_byte() as usize] = Some(builtins::prim_01001010); // read
-    table[crate::sens!(01001011).packed_byte() as usize] = Some(builtins::prim_01001011); // read-all
-    table[crate::sens!(00100110).packed_byte() as usize] = Some(builtins::prim_00100110); // numeric-buffer?
-    table[crate::sens!(01010110).packed_byte() as usize] = Some(builtins::prim_01010110); // numeric-buffer-type
-    table[crate::sens!(01010111).packed_byte() as usize] = Some(builtins::prim_01010111); // numeric-buffer-length
-    table[crate::sens!(01011000).packed_byte() as usize] = Some(builtins::prim_01011000); // numeric-buffer-ref
-    table[crate::sens!(01011001).packed_byte() as usize] = Some(builtins::prim_01011001); // numeric-buffer-map
-    table[crate::sens!(01001110).packed_byte() as usize] = Some(builtins::prim_01001110); // env
-    table
-};
+/// Вузька таблиця тільки історичних backend-механізмів.
+///
+/// Цей сумісний транспорт ніколи не визначає координату, роль чи закон
+/// поточних D1–D10. Виклики через CoreDomainIdentity мають власні
+/// допущені механізми і перевіряються ПЕРЕД цим маршрутом.
+/// Замість плоского масиву 256 слотів дозволяємо лише явні старі
+/// механізми, які ще мають підтверджених споживачів.
+fn legacy_backend_primitive(sid: Sens8) -> Option<PrimitiveFn> {
+    match sid.packed_byte() {
+        0b00001100 => Some(prim_00001100),
+        0b00001101 => Some(prim_00001101),
+        0b00001110 => Some(prim_00001110),
+        0b00001111 => Some(prim_00001111),
+        0b00011010 => Some(prim_00011010),
+        0b00011011 => Some(prim_00011011),
+        0b00011100 => Some(prim_00011100),
+        0b01001101 => Some(prim_01001101),
+        0b00111011 => Some(builtins::prim_00111011),
+        0b00111100 => Some(builtins::prim_00111100),
+        0b00111101 => Some(builtins::prim_00111101),
+        0b00111110 => Some(builtins::prim_00111110),
+        0b01010000 => Some(builtins::prim_01010000),
+        0b01001111 => Some(builtins::prim_01001111),
+        0b01011010 => Some(builtins::prim_01011010),
+        0b01011011 => Some(builtins::prim_01011011),
+        0b01011100 => Some(builtins::prim_01011100),
+        0b01011101 => Some(builtins::prim_01011101),
+        0b01010001 => Some(builtins::prim_01010001),
+        0b01010010 => Some(builtins::prim_01010010),
+        0b01010011 => Some(builtins::prim_01010011),
+        0b01010100 => Some(builtins::prim_01010100),
+        0b01010101 => Some(builtins::prim_01010101),
+        0b01000001 => Some(builtins::prim_01000001),
+        0b00111010 => Some(builtins::prim_00111010),
+        0b00100100 => Some(builtins::prim_00100100),
+        0b01000010 => Some(builtins::prim_01000010),
+        0b01000011 => Some(builtins::prim_01000011),
+        0b00111111 => Some(builtins::prim_00111111),
+        0b01000000 => Some(builtins::prim_01000000),
+        0b01000100 => Some(builtins::prim_01000100),
+        0b01000101 => Some(builtins::prim_01000101),
+        0b10100001 => Some(builtins::prim_10100001),
+        0b10100000 => Some(builtins::prim_10100000),
+        0b01001000 => Some(builtins::prim_01001000),
+        0b01001001 => Some(builtins::prim_01001001),
+        0b01001100 => Some(builtins::prim_01001100),
+        0b01001010 => Some(builtins::prim_01001010),
+        0b01001011 => Some(builtins::prim_01001011),
+        0b00100110 => Some(builtins::prim_00100110),
+        0b01010110 => Some(builtins::prim_01010110),
+        0b01010111 => Some(builtins::prim_01010111),
+        0b01011000 => Some(builtins::prim_01011000),
+        0b01011001 => Some(builtins::prim_01011001),
+        0b01001110 => Some(builtins::prim_01001110),
+        _ => None,
+    }
+}
 
 fn prim_00001100(
     args: &[Value],
@@ -599,10 +607,7 @@ pub(crate) fn invoke_semantic_ref(
         }
     }
     // Unmigrated non-D3 host capabilities remain on the temporary backend lane.
-    if let Some(primitive) = PRIMITIVE_TABLE
-        .get(sid.packed_byte() as usize)
-        .and_then(|function| *function)
-    {
+    if let Some(primitive) = legacy_backend_primitive(sid) {
         return primitive(args, environment, span);
     }
     match &environment.code_slot(sid) {
@@ -643,9 +648,8 @@ pub(crate) fn invoke_semantic_ref(
 pub(crate) fn has_primitive(sid: Sens8) -> bool {
     // D3 is protected by the current exact-domain mechanism even when the
     // caller still arrives through a historical, read-only compatibility SID.
-    matches!(route_kind_for_sid(sid), Some(SidRouteKind::ValueCall)) || PRIMITIVE_TABLE
-        .get(sid.packed_byte() as usize)
-        .is_some_and(|function| function.is_some())
+    matches!(route_kind_for_sid(sid), Some(SidRouteKind::ValueCall))
+        || legacy_backend_primitive(sid).is_some()
 }
 
 /// #1455: визначення (функція або макрос) верхнього рівня з назвою з таблиці функцій, чий код не
@@ -878,10 +882,82 @@ mod exact_domain_primitive_tests {
     }
 
     #[test]
+    fn legacy_backend_is_sparse_and_never_autocreates_current_domain_calls() {
+        let expected = [
+            0b00001100,
+            0b00001101,
+            0b00001110,
+            0b00001111,
+            0b00011010,
+            0b00011011,
+            0b00011100,
+            0b01001101,
+            0b00111011,
+            0b00111100,
+            0b00111101,
+            0b00111110,
+            0b01010000,
+            0b01001111,
+            0b01011010,
+            0b01011011,
+            0b01011100,
+            0b01011101,
+            0b01010001,
+            0b01010010,
+            0b01010011,
+            0b01010100,
+            0b01010101,
+            0b01000001,
+            0b00111010,
+            0b00100100,
+            0b01000010,
+            0b01000011,
+            0b00111111,
+            0b01000000,
+            0b01000100,
+            0b01000101,
+            0b10100001,
+            0b10100000,
+            0b01001000,
+            0b01001001,
+            0b01001100,
+            0b01001010,
+            0b01001011,
+            0b00100110,
+            0b01010110,
+            0b01010111,
+            0b01011000,
+            0b01011001,
+            0b01001110,
+        ];
+        assert_eq!(expected.len(), 45);
+        for candidate in 0..=u8::MAX {
+            let routed = legacy_backend_primitive(Sens8::from_packed_byte(candidate)).is_some();
+            assert_eq!(
+                routed,
+                expected.contains(&candidate),
+                "сумісний backend допускає лише явно збережені історичні механізми"
+            );
+        }
+        // Та сама числова величина у іншій доменній ширині — інша
+        // ідентичність; D3 механізмів у старому backend не існує.
+        for bits in 0..=7 {
+            let exact = d3(bits);
+            assert_eq!(exact.width(), 3);
+            assert!(legacy_backend_primitive(Sens8::from_packed_byte(bits)).is_none());
+        }
+    }
+
+    #[test]
     fn d3_uses_one_domain_mechanism_without_duplicate_byte_primitives() {
         // The historical Canon byte slots have no independent primitive
         // implementation; all current D3 operations use domain laws.
-        assert!(PRIMITIVE_TABLE[2..7].iter().all(Option::is_none));
+        for old_byte in 2..7 {
+            assert!(
+                legacy_backend_primitive(Sens8::from_packed_byte(old_byte)).is_none(),
+                "історичний байт D3 не отримує дубльований примітив"
+            );
+        }
         let environment = Environment::root();
         let span = Span { start: 0, end: 0 };
         let arity = invoke_domain_identity(d3(0b010), &[], &environment, span)
