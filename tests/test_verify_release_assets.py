@@ -150,5 +150,64 @@ class TaggedReleaseVersionGuardTests(unittest.TestCase):
                     self.assertNotEqual(result.returncode, 0)
                     self.assertIn("RELEASE_BLOCKED", result.stderr)
 
+class ReleaseVersionParityTest(unittest.TestCase):
+    """One version across Cargo packages, lockfile, Guix and published asset names."""
+
+    def test_all_active_release_surfaces_match_cli_package(self):
+        import re
+        import tomllib
+
+        root = Path(__file__).resolve().parents[1]
+        manifests = [
+            "crates/sens/Cargo.toml",
+            "crates/sens-cli/Cargo.toml",
+            "crates/sens-literate/Cargo.toml",
+            "crates/sens-wasm/Cargo.toml",
+            "crates/sens-lsp/Cargo.toml",
+            "crates/sens-host/Cargo.toml",
+            "crates/sens-semantic/Cargo.toml",
+        ]
+        packages = [
+            tomllib.loads((root / path).read_text(encoding="utf-8"))["package"]
+            for path in manifests
+        ]
+        version = packages[1]["version"]
+        self.assertRegex(version, r"^\d+\.\d+\.\d+$")
+        names = [package["name"] for package in packages]
+        self.assertEqual(len(names), len(set(names)), "duplicate release package name")
+        for path, package in zip(manifests, packages):
+            with self.subTest(package=path):
+                self.assertEqual(package["version"], version)
+
+        lockfile = tomllib.loads((root / "Cargo.lock").read_text(encoding="utf-8"))
+        locked = {
+            item["name"]: item["version"]
+            for item in lockfile["package"]
+            if item["name"] in names
+        }
+        self.assertEqual(set(locked), set(names), "release packages missing from Cargo.lock")
+        for name in names:
+            with self.subTest(lock=name):
+                self.assertEqual(locked[name], version)
+
+        guix = (root / "guix.scm").read_text(encoding="utf-8")
+        guix_version = re.search(r'\(version\s+"([^"]+)"\)', guix)
+        self.assertIsNotNone(guix_version, "Guix package version not found")
+        self.assertEqual(guix_version.group(1), version)
+
+        installer = (root / "packaging/install.sh").read_text(encoding="utf-8")
+        asset_versions = re.findall(
+            r"sens-cli_(\d+\.\d+\.\d+)_(?:linux_amd64|macos_arm64|macos_x64)",
+            installer,
+        )
+        self.assertEqual(len(asset_versions), 3, "all three POSIX assets required")
+        self.assertEqual(set(asset_versions), {version})
+        self.assertIn(f"releases/download/l{version}/", installer)
+
+        preflight = (root / "scripts/release.lisp").read_text(encoding="utf-8")
+        self.assertIn(f"Потрібна одна версія: {version}", preflight)
+
+
+
 if __name__ == "__main__":
     unittest.main()
