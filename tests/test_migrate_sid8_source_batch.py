@@ -104,6 +104,37 @@ class BatchSourceTests(unittest.TestCase):
             {"source-era-unproved"},
         )
 
+    def test_historical_W8_heads_cannot_be_mistaken_for_modern_D8_calls(self):
+        sources = {
+            "knowledge/guard-fact-policy.lisp": ("10011100", "D6:001000", "CADDDAAR"),
+            "scripts/semantic-authority-guard-enforce.lisp": (
+                "01001011", "D9:110101001", "ABS∘RECIP"
+            ),
+        }
+        for path, (old, successor, modern_d8_name) in sources.items():
+            with self.subTest(path=path):
+                src = (ROOT / path).read_text(encoding="utf-8")
+                heads = MOD.executable_call_heads(src, self.guard)
+                problems = MOD.pinned_cross_domain_blockers(ROOT, path, heads, self.mapping)
+                self.assertTrue(any(old in p and successor in p and modern_d8_name in p
+                                    for p in problems), problems)
+                report = MOD.run(ROOT, False, {path})
+                self.assertEqual(report["summary"]["admitted_files"], 0)
+                self.assertEqual(report["summary"]["blocked_files"], 1)
+                self.assertTrue(any("W8_CROSS_DOMAIN_EXECUTION_BLOCK" in p
+                                    for p in report["files"][0]["reasons"]))
+        self.assertEqual(
+            MOD.pinned_cross_domain_blockers(
+                ROOT, "knowledge/guard-fact-policy.lisp", set(), self.mapping),
+            [],
+            "A historical-looking token only in quote/string is not executable",
+        )
+        self.assertEqual(
+            MOD.pinned_cross_domain_blockers(ROOT, "lib/modern-d8.lisp", {"10011100"}, self.mapping),
+            [],
+            "No global W8 interpretation for legitimate D8 source",
+        )
+
     def test_historical_cond_guard_rejects_other_active_policy_sources(self):
         # Executable historical COND clauses may carry a third explicit
         # expected-result field or a host T fallback. Replacing just the
