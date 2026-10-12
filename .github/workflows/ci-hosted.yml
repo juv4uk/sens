@@ -33,7 +33,12 @@ jobs:
           cargo test --locked -p sens --test binary_number_live
           cargo test --locked -p sens --test numeric_domain_math_stress
           cargo test --locked -p sens --test numeric_composition_frames
+          cargo test --locked -p sens --test math_domain_exclusivity
           cargo test --locked -p sens --test physical_d2_d7_binding
+      - name: Core4 FASL typed identity regressions
+        run: |
+          RUST_MIN_STACK=33554432 cargo test --locked -p sens --lib core4_bootstrap_cache_tests::valid_fasl_path_selects_core4_and_evaluates_current_core
+          RUST_MIN_STACK=33554432 cargo test --locked -p sens --lib core4_bootstrap_cache_tests::same_hash_ordinary_reader_fasl_cannot_reinterpret_d3_heads_as_numbers
       - name: Ratified numeric D24/D48/... peer domains (Core-only)
         run: |
           python3 scripts/check-numeric-domain-ratification.py --self-test
