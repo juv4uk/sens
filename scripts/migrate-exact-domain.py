@@ -131,6 +131,10 @@ def plan(source: str, surfaces, legacy):
             i = len(source) if end < 0 else end
             continue
         if c == '"':
+            # A string in first position consumes the list head; the next
+            # atom is an argument, never another executable call head.
+            if frames and frames[-1]["first"]:
+                frames[-1]["first"] = False
             i += 1
             while i < len(source):
                 if source[i] == "\\":
