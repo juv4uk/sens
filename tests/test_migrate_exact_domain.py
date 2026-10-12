@@ -105,6 +105,30 @@ class ExactDomainMigrationTests(unittest.TestCase):
                 with self.assertRaisesRegex(ValueError, "SHADOWED_SURFACE_BLOCK"):
                     self.rewrite(source)
 
+    def test_callable_parameters_in_all_binder_forms_are_shadowed(self):
+        for source in (
+            "(define (f car) (car x))",
+            "(0011 (f перше) (перше x))",
+            "(defun f (car) (car x))",
+            "(defmacro f (car) (car x))",
+            "(flet ((f (car) (car x))) (f z))",
+            "(labels ((f (car) (car x))) (f z))",
+            "(macrolet ((f (car) (car x))) (f z))",
+        ):
+            with self.subTest(source=source):
+                with self.assertRaisesRegex(ValueError, "SHADOWED_SURFACE_BLOCK"):
+                    self.rewrite(source)
+
+    def test_unproved_parameter_destructuring_stays_blocked(self):
+        for source in (
+            "(lambda x (car x))",
+            "(defun f ((car x)) (car x))",
+            "(flet ((f ((car x)) (car x))) (f z))",
+        ):
+            with self.subTest(source=source):
+                with self.assertRaisesRegex(ValueError, "BINDING_FORM_BLOCK"):
+                    self.rewrite(source)
+
     def test_unproved_binding_syntax_fails_closed(self):
         for source in ("(let bad (car x))", "(flet (bad) (car x))"):
             with self.subTest(source=source):
