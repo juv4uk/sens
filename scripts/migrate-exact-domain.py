@@ -103,7 +103,89 @@ def load_authority(root: Path = ROOT):
     return surfaces, legacy
 
 
+def reject_shadowed_surfaces(source: str, surfaces) -> None:
+    """Заборонити підміну локальної назви глобальним кодом домену.
+
+    Використовуємо наявний AST-reader трипрохідного мігратора; другий
+    синтаксичний парсер не створюємо. Без scope-aware lowering такі випадки
+    НЕ можуть бути безпечно переписані механічно.
+    """
+    import importlib.util
+    import sys
+
+    key = "_sens_three_pass_source_reader_for_shadow_guard"
+    reader = sys.modules.get(key)
+    if reader is None:
+        script = ROOT / "scripts/migrate-three-pass.py"
+        spec = importlib.util.spec_from_file_location(key, script)
+        if spec is None or spec.loader is None:
+            raise ValueError("SHADOWED_SURFACE_BLOCK: немає AST-reader")
+        reader = importlib.util.module_from_spec(spec)
+        sys.modules[key] = reader
+        try:
+            spec.loader.exec_module(reader)
+        except BaseException:
+            sys.modules.pop(key, None)
+            raise
+
+    try:
+        forms = reader.Parser(
+            reader.tokenize(reader.strip_comments(source))
+        ).parse_program()
+    except reader.MigrationError as error:
+        raise ValueError(f"AST_PARSE_BLOCK: {error}") from error
+
+    def collides(node):
+        return (
+            isinstance(node, reader.Atom)
+            and node.tok.text.casefold() in surfaces
+        )
+
+    def guard_name(node, context):
+        if collides(node):
+            raise ValueError(
+                "SHADOWED_SURFACE_BLOCK: "
+                f"{context}: {node.tok.text!r} — необхідне scope-aware lowering"
+            )
+
+    def visit(node):
+        if isinstance(node, reader.Quote):
+            return
+        if not isinstance(node, reader.ListNode):
+            return
+        if not node.items:
+            return
+        head = node.items[0]
+        if isinstance(head, reader.Atom):
+            spelling = head.tok.text.casefold()
+            # Дані в явному QUOTE не містять активних binding declarations.
+            if spelling in {"quote", "як-є", "001", "00000001"}:
+                return
+            surface = surfaces.get(spelling)
+            role = (surface.label if surface is not None else "").upper()
+            if role == "LAMBDA" or spelling in {"00001000"}:
+                if len(node.items) >= 2 and isinstance(node.items[1], reader.ListNode):
+                    for parameter in node.items[1].items:
+                        guard_name(parameter, "параметр LAMBDA")
+            if role == "DEFINE" or spelling in {"00001001", "def"}:
+                if len(node.items) >= 2:
+                    target = node.items[1]
+                    if isinstance(target, reader.Atom):
+                        guard_name(target, "ім'я DEFINE")
+                    elif (isinstance(target, reader.ListNode)
+                          and target.items):
+                        guard_name(target.items[0], "голова DEFINE")
+        for child in node.items:
+            visit(child)
+        if node.tail is not None:
+            visit(node.tail)
+
+    for form in forms:
+        visit(form)
+
+
 def plan(source: str, surfaces, legacy):
+    reject_shadowed_surfaces(source, surfaces)
     frames, edits = [], []
     pending_quote = False
     i = 0
