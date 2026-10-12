@@ -1,0 +1,26 @@
+name: Точність бітів — координати D1–D10
+
+on:
+  pull_request:
+    paths:
+      - "crates/sens/src/packed_bits.rs"
+      - ".github/workflows/точне-вікно-доменів.yml"
+  push:
+    branches: [main]
+    paths:
+      - "crates/sens/src/packed_bits.rs"
+      - ".github/workflows/точне-вікно-доменів.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  точно-доменні-біти:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Діагностика трьох байтів, D10 та чотирьох невикористаних бітів
+        run: cargo test --locked -p sens --lib three_byte_window_preserves_d10_and_reports_every_bit_of_cost -- --nocapture
+      - name: Усі D1–D10, усі значення та усі 8 позицій у байті
+        run: cargo test --locked -p sens --lib all_d1_d10_payloads_round_trip_at_every_byte_alignment -- --nocapture
