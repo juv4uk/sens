@@ -25,8 +25,7 @@ pub fn parse(source: &str) -> Result<Vec<Expr>, LanguageError> {
 ///
 /// Нові споживачі підключаються до цього API тільки після окремого HANDOFF
 /// із READER/AST: історичний parse() навмисно не змінює свою семантику.
-#[allow(dead_code)]
-pub(crate) fn parse_exact_domain_source(source: &str) -> Result<Vec<Expr>, LanguageError> {
+pub fn parse_exact_domain_source(source: &str) -> Result<Vec<Expr>, LanguageError> {
     parse_with_mode(source, ReaderMode::ExactDomain)
 }
 
@@ -50,6 +49,30 @@ fn parse_with_mode(source: &str, mode: ReaderMode) -> Result<Vec<Expr>, Language
         expressions.push(expression);
         parser.skip_ignored();
     }
+    if mode == ReaderMode::ExactDomain {
+        let mut pending: Vec<&Expr> = expressions.iter().collect();
+        while let Some(expr) = pending.pop() {
+            match &expr.kind {
+                ExprKind::Sid(_) | ExprKind::Call(_, _)
+                | ExprKind::Number(_, _) | ExprKind::Rational(_)
+                | ExprKind::BinaryNumber(_) | ExprKind::NumericBuffer(_) => {
+                    return Err(LanguageError::new(
+                        ErrorKind::Parse,
+                        "точнодоменне джерело не допускає SID8 чи старих чисел без D24+",
+                        expr.span,
+                    ));
+                }
+                ExprKind::List(items) => pending.extend(items.iter()),
+                ExprKind::Pair(head, tail) => {
+                    pending.push(head);
+                    pending.push(tail);
+                }
+                ExprKind::DomainCall(_, items) => pending.extend(items.iter()),
+                ExprKind::DomainIdentity(_) | ExprKind::String(_)
+                | ExprKind::Symbol(_) | ExprKind::Local { .. } => {}
+            }
+        }
+    }
     Ok(expressions)
 }
 
@@ -64,6 +87,16 @@ impl Parser<'_> {
     fn expression(&mut self) -> Result<Expr, LanguageError> {
         self.skip_ignored();
         let start = self.cursor;
+        if self.mode == ReaderMode::ExactDomain
+            && (self.source[self.cursor..].starts_with("#i32(")
+                || self.source[self.cursor..].starts_with("#f32("))
+        {
+            return Err(self.error(
+                "історичні числові буфери не є числами D24+",
+                start,
+                (start + 5).min(self.source.len()),
+            ));
+        }
         if self.source[self.cursor..].starts_with("#i32(") {
             return self.numeric_buffer(start, false);
         }
@@ -400,6 +433,15 @@ impl Parser<'_> {
             if !token.is_empty()
                 && token.bytes().all(|byte| matches!(byte, b'0' | b'1'))
             {
+                // Без сертифіката походження восьмибітний W8 не є D8.
+                // Навіть у цитатах байтовий payload не стає новою identity.
+                if token.len() == 8 {
+                    return Err(self.error(
+                        "неоднозначність W8/D8: потрібне підтвердження походження",
+                        start,
+                        self.cursor,
+                    ));
+                }
                 let words = crate::parse_binary_source_words(token).map_err(|_| {
                     self.error(
                         "непідтримана точна ширина; потрібен окремий D10/D24+ носій",

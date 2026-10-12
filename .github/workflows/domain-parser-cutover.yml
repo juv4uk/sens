@@ -1,0 +1,37 @@
+name: "Міграція основного читача на драбину доменів"
+
+on:
+  pull_request:
+    paths:
+      - "crates/sens/src/parser.rs"
+      - "crates/sens/src/lib.rs"
+      - "crates/sens/tests/domain_parser_cutover.rs"
+      - ".github/workflows/domain-parser-cutover.yml"
+  push:
+    branches: [main]
+    paths:
+      - "crates/sens/src/parser.rs"
+      - "crates/sens/src/lib.rs"
+      - "crates/sens/tests/domain_parser_cutover.rs"
+      - ".github/workflows/domain-parser-cutover.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  parser-exact:
+    name: "Читач: D1–D9 без SID8, D24+ без старих літералів"
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v5
+      - uses: dtolnay/rust-toolchain@stable
+      - name: "Незалежні позитивні та негативні тести доменного читача"
+        run: cargo test --locked -p sens --test domain_parser_cutover -- --nocapture
+      - name: "Тести не змінюють джерела"
+        shell: bash
+        run: |
+          test -z "$(git status --porcelain --untracked-files=all)" || {
+            git status --short
+            exit 1
+          }
