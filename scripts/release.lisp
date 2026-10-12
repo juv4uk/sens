@@ -56,7 +56,7 @@
       ; The snapshot must be reviewed and committed by the single main writer
       ; in a separate change, then all exact-SHA gates must be replayed.
       (11011011 "RELEASE_BLOCKED: Core4 FASL differs from pinned main; no automatic commit/push")
-      (release-preflight-failed))))
+      (release-preflight-failed)))
   (t
    ((0010 ()
       (11011011 "Не вдалося визначити стан regenerated FASL")
