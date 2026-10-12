@@ -965,13 +965,13 @@
         (verify (exit-0-clean no-forbidden-teleology no-paraphrase-drift))))))
 
 
-(00001011 guard-script-find
+(0011 guard-script-find
   (0010 (name tools)
-    (00000111
-      ((00000010 tools) () (00000001 ()))
-      ((00000010 tools) (1) (00000001 ()))
-      ((00000011 (guard-reference-field (00000001 name) (00000101 tools)) name) (00000101 tools))
-      (t (guard-script-find name (00000110 tools))))))
+    (110
+      ((010 tools) (001 ()))
+      
+      ((101 (guard-reference-field (001 name) (100 tools)) name) (100 tools))
+      ((010 (001 ())) (guard-script-find name (011 tools))))))
 
 (00001011 guard-script
   (0010 (name)
@@ -989,13 +989,13 @@
            (00100111 (00000001 unknown-routes) (guard-unknown-routes))))
         (t tool)))))
 
-(00001011 guard-scripts
+(0011 guard-scripts
   (0010 (tools)
-    (00000111
-      ((00000010 tools) () (00000001 ()))
-      ((00000010 tools) (1) (00000001 ()))
-      (t (00000100 (guard-reference-field (00000001 name) (00000101 tools))
-               (guard-scripts (00000110 tools)))))))
+    (110
+      ((010 tools) (001 ()))
+      
+      ((010 (001 ())) (111 (guard-reference-field (001 name) (100 tools))
+               (guard-scripts (011 tools)))))))
 
 ; A topic may have more than one (reference ...) entry. Adding a stronger
 ; answer never deletes or rejects the older one -- it stays in the
@@ -1019,14 +1019,14 @@
         ((00000010 status) (1) status)
         ((00000010 status) (0) status)))))
 
-(00001011 guard-evidence-status-strength
+(0011 guard-evidence-status-strength
   (0010 (status)
-    (00000111
-      ((00000011 status (00000001 confirmed)) 4)
-      ((00000011 status (00000001 partial)) 3)
-      ((00000011 status (00000001 unresolved)) 2)
-      ((00000011 status (00000001 broken)) 1)
-      (t 0))))
+    (110
+      ((101 status (001 confirmed)) 4)
+      ((101 status (001 partial)) 3)
+      ((101 status (001 unresolved)) 2)
+      ((101 status (001 broken)) 1)
+      ((010 (001 ())) 0))))
 
 (00001011 guard-reference-stronger
   (0010 (best candidate)
@@ -1040,29 +1040,29 @@
            ((00011011 candidate-strength best-strength) 1 candidate)
            ((00011011 candidate-strength best-strength) 0 best)))))))
 
-(00001011 guard-reference-all
+(0011 guard-reference-all
   (0010 (topic references)
-    (00000111
-      ((00000010 references) () (00000001 ()))
-      ((00000010 references) (1) (00000001 ()))
-      ((00000011 (guard-reference-field (00000001 topic) (00000101 references)) topic)
-       (00000100 (00000101 references) (guard-reference-all topic (00000110 references))))
-      (t (guard-reference-all topic (00000110 references))))))
+    (110
+      ((010 references) (001 ()))
+      
+      ((101 (guard-reference-field (001 topic) (100 references)) topic)
+       (111 (100 references) (guard-reference-all topic (011 references))))
+      ((010 (001 ())) (guard-reference-all topic (011 references))))))
 
-(00001011 guard-reference-find-strongest
+(0011 guard-reference-find-strongest
   (0010 (topic references best)
-    (00000111
-      ((00000010 references) () best)
-      ((00000010 references) (1) best)
-      ((00000011 (guard-reference-field (00000001 topic) (00000101 references)) topic)
+    (110
+      ((010 references) best)
+      
+      ((101 (guard-reference-field (001 topic) (100 references)) topic)
        (guard-reference-find-strongest
-         topic (00000110 references)
-         (guard-reference-stronger best (00000101 references))))
-      (t (guard-reference-find-strongest topic (00000110 references) best)))))
+         topic (011 references)
+         (guard-reference-stronger best (100 references))))
+      ((010 (001 ())) (guard-reference-find-strongest topic (011 references) best)))))
 
-(00001011 guard-reference-find
+(0011 guard-reference-find
   (0010 (topic references)
-    (guard-reference-find-strongest topic references (00000001 ()))))
+    (guard-reference-find-strongest topic references (001 ()))))
 
 (0011 guard-reference
   (0010 (topic)
