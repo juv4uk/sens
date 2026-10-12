@@ -190,7 +190,11 @@ fn x86_pair_layout_is_one_lisp_owned_machine_readable_authority() {
     let source = fs::read_to_string(&path)
         .unwrap_or_else(|error| panic!("{} must exist: {error}", path.display()));
 
-    sens::parse(&source).expect("x86 pair layout authority must be valid sens");
+    let expressions = parse_mixed_exact_domain_machine_source(
+        "lib/machine/layout/pair-x86-64.lisp",
+        &source,
+    )
+    .expect("x86 pair layout must parse through the exact-domain machine-source reader");
     for required in [
         "(0011 x86-pair-cell-bytes 16)",
         "(0011 x86-pair-car-offset 0)",
@@ -214,7 +218,8 @@ fn x86_pair_layout_is_one_lisp_owned_machine_readable_authority() {
 
     let mut session = Session::default();
     load_core_library(&mut session).expect("core must bootstrap before layout authority");
-    eval_program(&source, &mut session).expect("pair layout authority must evaluate as ordinary sens");
+    eval_parsed_expressions(&expressions, &mut session)
+        .expect("pair layout authority must evaluate through the exact-domain machine-source reader");
 
     for (name, expected) in [
         ("x86-pair-cell-bytes", "16"),
