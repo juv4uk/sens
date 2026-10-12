@@ -8,7 +8,7 @@
     "rows": 1024
   },
   "human_table": "lib/domains/d10.lisp",
-  "authority_boundary": "These 32 reviewed Ukrainian wording anchors protect meaning from accidental regressions, but neither Sanskrit morphology nor all 1024 entries are independently linguistically attested.",
+  "authority_boundary": "41 selected Ukrainian coding/expanded aliases guard selected source semantics, not exhaustive 1024-entry or Sanskrit morphology ratification.",
   "anchors": [
     {
       "semantic_name": "IF",
@@ -265,6 +265,78 @@
       "uk": "мемоізувати",
       "ukr": "запам'ятовувати-результати-викликів",
       "scope_note": "replace a named global function definition with a memoizing wrapper"
+    },
+    {
+      "semantic_name": "FIXNUM->FLONUM",
+      "coordinate": "0000100110",
+      "stable_id": "d10.crossrepo.portable.0a9e280f95dd5d31",
+      "uk": "фікснум->флонум",
+      "ukr": "перетворити-машинне-ціле-на-найближчий-флонум",
+      "scope_note": "convert an exact fixnum to a floating numeric value while leaving an already floating value unchanged"
+    },
+    {
+      "semantic_name": "FLOATP",
+      "coordinate": "1101111101",
+      "stable_id": "d10.name.00680",
+      "uk": "рухома-кома?",
+      "ukr": "значення-є-числом-із-рухомою-комою?",
+      "scope_note": "Historical floating-point type predicate tests representation category (float), not integrality of mathematical value."
+    },
+    {
+      "semantic_name": "FIXP",
+      "coordinate": "1101111110",
+      "stable_id": "d10.name.00675",
+      "uk": "машинне-ціле?",
+      "ukr": "значення-є-машинним-цілим-числом?",
+      "scope_note": "Historical FIXP tests whether object is implemented as machine fixed integer under donor implementation, not any arbitrary-precision integer."
+    },
+    {
+      "semantic_name": "SUBTYPEP",
+      "coordinate": "0000011110",
+      "stable_id": "d10.crossrepo.koans.7cb614c79c6b9e69",
+      "uk": "підтип?",
+      "ukr": "перший-тип-є-підтипом-другого?",
+      "scope_note": "test the subset relation between two type specifiers"
+    },
+    {
+      "semantic_name": "SLOT-BOUNDP",
+      "coordinate": "0101110011",
+      "stable_id": "d10.clos.slot-boundp.v1",
+      "uk": "поле-зв'язане?",
+      "ukr": "поле-об'єкта-зв'язане-навіть-із-порожнім-значенням?",
+      "scope_note": "Return D1 YES iff an existing named instance slot is bound, including when its stored value is EMPTY/NIL; a declared-but-unbound slot is NO. A nonexistent slot is a distinct SLOT-MISSING case, not an ordinary NO."
+    },
+    {
+      "semantic_name": "COERCE",
+      "coordinate": "0000001100",
+      "stable_id": "d10.crossrepo.koans.06aa667b66eda1fc",
+      "uk": "привести-до-типу",
+      "ukr": "перетворити-значення-до-заданого-типу",
+      "scope_note": "convert a value to a requested representable target type according to language coercion rules"
+    },
+    {
+      "semantic_name": "CLASS-OF",
+      "coordinate": "1010101100",
+      "stable_id": "d10.archived-candidate.class-of.20261011",
+      "uk": "клас-об'єкта",
+      "ukr": "отримати-безпосередній-клас-об'єкта",
+      "scope_note": "Return the direct class metaobject of an object; do not confuse the class object with a type specifier/name or the superclass."
+    },
+    {
+      "semantic_name": "RANDOM",
+      "coordinate": "1101111100",
+      "stable_id": "d10.name.01134",
+      "uk": "випадкове-значення",
+      "ukr": "псевдовипадкове-значення-менше-заданої-межі",
+      "scope_note": "Generate pseudo-random value below positive bound n from random-state: for positive integer n result is integer in [0,n); for positive float bound result is nonnegative float below bound."
+    },
+    {
+      "semantic_name": "RATIONAL-RESAMPLE",
+      "coordinate": "1010000000",
+      "stable_id": "d10.science.rational-resample.20261009",
+      "uk": "передискретизувати-дробово",
+      "ukr": "змінити-частоту-відліків-за-відношенням-цілих-коефіцієнтів",
+      "scope_note": "For input signal x sampled at fs, positive integer interpolation L and decimation M, and explicit FIR taps h, zero-insert by L, convolve causally with h, then retain indices divisible by M: output rate fs*L/M. The explicit finite-output con"
     }
   ]
 }
