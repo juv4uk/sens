@@ -181,6 +181,60 @@ fn ten_bit_domain_ratification_does_not_invent_d10_callability_or_arithmetic() {
     assert!(error.message.contains("D24+"), "{error}");
 }
 
+/// Prove the admissible replacement for Core4 length-onto's old
+/// (01010 acc 1), without changing pinned Core4 source or its FASL before a
+/// verified source+binary rebuild. Only the caller supplies an exact D24 seed.
+/// The recursive implementation is SENS-owned D3/D4/D6 source.
+#[test]
+fn lisp_owned_d24_length_fold_uses_ratified_d6_add1_without_number_literals() {
+    const SOURCE: &str = r#"
+        (0011 довжина-д24-до
+          (0010 (values acc)
+            (110
+              ((0101 values) acc)
+              ((0100 (010 values))
+                (довжина-д24-до (011 values) (001110 acc))))))
+    "#;
+
+    let mut session = Session::bare();
+    let definitions = parse_mixed_exact_domain(SOURCE)
+        .expect("typed D3/D4/D6 call heads in Lisp-owned numeric fold");
+    eval_parsed_expressions(&definitions, &mut session)
+        .expect("admitted Lisp-owned recursive fold definition");
+
+    for count in 0u32..=9 {
+        let mut list = Value::Nil;
+        for _ in 0..count {
+            list = Value::Pair(
+                std::rc::Rc::new(Value::Symbol(std::rc::Rc::from("елемент"))),
+                std::rc::Rc::new(list),
+            );
+        }
+        session.environment.define("items", list);
+        session.environment.define("seed", numeric(24, 0));
+
+        // The length is computed by domain-owned ADD1, not by a numeric
+        // source literal or implicit D1/D3/D5 -> D24 coercion.
+        let result = eval_program("(довжина-д24-до items seed)", &mut session)
+            .expect("exact D24 Lisp-owned fold");
+        assert_eq!(result.value, numeric(24, count), "length={count}");
+    }
+
+    // An unqualified seed never becomes D24 just because it is called 0.
+    session.environment.define(
+        "items",
+        Value::Pair(
+            std::rc::Rc::new(Value::Symbol(std::rc::Rc::from("елемент"))),
+            std::rc::Rc::new(Value::Nil),
+        ),
+    );
+    session.environment.define("seed", Value::Rational(Rational::integer(0)));
+    let err = eval_program("(довжина-д24-до items seed)", &mut session)
+        .expect_err("unqualified zero must not enter D6 ADD1");
+    assert_eq!(err.kind, ErrorKind::Type);
+    assert!(err.message.contains("D24+"), "{err}");
+}
+
 #[test]
 fn different_numeric_domains_do_not_implicitly_coerce() {
     let mut session = Session::default();
