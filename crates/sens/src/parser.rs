@@ -923,7 +923,7 @@ mod tests {
         };
         assert_eq!(items.len(), 2);
         assert!(matches!(
-            items[0].kind,
+            &items[0].kind,
             ExprKind::DomainIdentity(crate::DomainIdentity::D3(word))
                 if word.word().packed_bits() == 0b001
         ));
