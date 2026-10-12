@@ -12,8 +12,8 @@
 (load "lib/quantity.lisp")
 (load "lib/si.lisp")
 
-(00001001 exact-quantity-arithmetic-rows
-  (00001000 ()
+(0011 exact-quantity-arithmetic-rows
+  (0010 ()
     ((функція (planck)
   ((функція (cesium)
     ((функція (energy)
@@ -21,65 +21,65 @@
         ((функція (speed)
           ((функція (distance)
             ((функція (recovered)
-              (00100111
-                      (00100111
-                        (00000001 planck-cesium-energy-shape)
-                        (00100010
+              (1110
+                      (1110
+                        (001 planck-cesium-energy-shape)
+                        (11110111
                           energy
-                          (00000001
+                          (001
                             (quantity/1
                               121822045942277331/20000000000000000000000000000000000000000
                               (unit/1
                                 (dimension/1 kilogram 1)
                                 (dimension/1 metre 2)
                                 (dimension/1 second -2)))))
-                        (00000001 (1)))
-                      (00100111
-                        (00000001 speed-times-second-distance-shape)
-                        (00100010
+                        (001 (1)))
+                      (1110
+                        (001 speed-times-second-distance-shape)
+                        (11110111
                           distance
-                          (00000001
+                          (001
                             (quantity/1
                               299792458
                               (unit/1 (dimension/1 metre 1)))))
-                        (00000001 (1)))
-                      (00100111
-                        (00000001 recovered-speed-shape)
-                        (00100010
+                        (001 (1)))
+                      (1110
+                        (001 recovered-speed-shape)
+                        (11110111
                           recovered
-                          (00000001
+                          (001
                             (quantity/1
                               299792458
                               (unit/1
                                 (dimension/1 metre 1)
                                 (dimension/1 second -1)))))
-                        (00000001 (1)))
-                      (00100111
-                        (00000001 quotient-inverse)
-                        (00100010 recovered speed)
-                        (00000001 (1)))
-                      (00100111
-                        (00000001 si-numeric-views-match-authoritative-records)
-                        (00100111
-                          (00011100 si:cesium-frequency
+                        (001 (1)))
+                      (1110
+                        (001 quotient-inverse)
+                        (11110111 recovered speed)
+                        (001 (1)))
+                      (1110
+                        (001 si-numeric-views-match-authoritative-records)
+                        (1110
+                          (11110111 si:cesium-frequency
                              (scientific-constant-value si:defining-cesium-frequency))
-                          (00011100 si:speed-of-light
+                          (11110111 si:speed-of-light
                              (scientific-constant-value si:defining-speed-of-light))
-                          (00011100 si:planck-constant
+                          (11110111 si:planck-constant
                              (scientific-constant-value si:defining-planck-constant))
-                          (00011100 si:elementary-charge
+                          (11110111 si:elementary-charge
                              (scientific-constant-value si:defining-elementary-charge))
-                          (00011100 si:boltzmann-constant
+                          (11110111 si:boltzmann-constant
                              (scientific-constant-value si:defining-boltzmann-constant))
-                          (00011100 si:avogadro-constant
+                          (11110111 si:avogadro-constant
                              (scientific-constant-value si:defining-avogadro-constant))
-                          (00011100 si:luminous-efficacy
+                          (11110111 si:luminous-efficacy
                              (scientific-constant-value si:defining-luminous-efficacy)))
-                        (00100111 (тотожне? 1 1) (тотожне? 1 1) (тотожне? 1 1) (тотожне? 1 1) (тотожне? 1 1) (тотожне? 1 1) (тотожне? 1 1)))
-                      (00100111
-                        (00000001 speed-constant-knowledge-projection)
+                        (1110 (тотожне? 1 1) (тотожне? 1 1) (тотожне? 1 1) (тотожне? 1 1) (тотожне? 1 1) (тотожне? 1 1) (тотожне? 1 1)))
+                      (1110
+                        (001 speed-constant-knowledge-projection)
                         (scientific-constant->clauses si:defining-speed-of-light)
-                        (00000001
+                        (001
                           (((scientific-constant si:speed-of-light))
                            ((constant-value si:speed-of-light 299792458))
                            ((constant-unit
@@ -93,15 +93,15 @@
                            ((constant-source
                               si:speed-of-light
                               (science-source/1 bipm-si-brochure-9 2019))))))
-                      (00100111
-                        (00000001 malformed-short-constant-does-not-project)
+                      (1110
+                        (001 malformed-short-constant-does-not-project)
                         (scientific-constant->clauses
-                          (00000001 (scientific-constant/1 broken)))
-                        (00000001 ()))
-                      (00100111
-                        (00000001 invalid-string-name-does-not-project)
+                          (001 (scientific-constant/1 broken)))
+                        (001 ()))
+                      (1110
+                        (001 invalid-string-name-does-not-project)
                         (scientific-constant->clauses
-                          (00000001
+                          (001
                             (scientific-constant/1 "not-a-symbol"
                               (quantity/1 299792458
                                 (unit/1
@@ -109,23 +109,23 @@
                                   (dimension/1 second -1)))
                               exact-by-definition physical-defining si
                               (science-source/1 bipm-si-brochure-9 2019))))
-                        (00000001 ()))))
+                        (001 ()))))
               (quantity-quotient distance one-second)))
             (quantity-product speed one-second)))
           (scientific-constant-quantity si:defining-speed-of-light)))
         (make-quantity
                        1
                        (make-unit
-                         (00100111 (make-dimension (00000001 second) 1))))))
+                         (1110 (make-dimension (001 second) 1))))))
       (quantity-product planck cesium)))
     (scientific-constant-quantity si:defining-cesium-frequency)))
   (scientific-constant-quantity si:defining-planck-constant))))
 
-(00001001 exact-quantity-structural-equal?
-  (00001000 (left right)
-    (00000111
+(0011 exact-quantity-structural-equal?
+  (0010 (left right)
+    (110
       ((атом? left)
-       (00000111
+       (110
          ((атом? right) (тотожне? left right))
          ((атом? ()) (тотожне? 1 0))))
       ((атом? right) (тотожне? 1 0))
@@ -133,35 +133,35 @@
        (exact-quantity-structural-equal? (решта left) (решта right)))
       ((атом? ()) (тотожне? 1 0)))))
 
-(00001001 exact-quantity-arithmetic-check
-  (00001000 (rows)
+(0011 exact-quantity-arithmetic-check
+  (0010 (rows)
     ; D3 COND має рівно двопольові гілки; D1 1/0 — не третє поле.
-    (00000111
-      ((00000010 rows)
-       (00000111
-         ((00000011 rows (00000001 ()))
-          (00000001 (exact-quantity-arithmetic-witness (status pass))))
+    (110
+      ((010 rows)
+       (110
+         ((101 rows (001 ()))
+          (001 (exact-quantity-arithmetic-witness (status pass))))
          ((атом? ())
-          (00100111
-            (00000001 exact-quantity-arithmetic-witness)
-            (00100111 (00000001 status) (00000001 fail))
-            (00100111 (00000001 case) (00000001 malformed-row-tail))
-            (00100111 (00000001 actual) rows)))))
+          (1110
+            (001 exact-quantity-arithmetic-witness)
+            (1110 (001 status) (001 fail))
+            (1110 (001 case) (001 malformed-row-tail))
+            (1110 (001 actual) rows)))))
       ((атом? ())
-       (нехай ((row (00000101 rows)))
-         (00000111
-           ((exact-quantity-structural-equal? (00101111 row) (00110000 row))
-            (exact-quantity-arithmetic-check (00000110 rows)))
+       (нехай ((row (100 rows)))
+         (110
+           ((exact-quantity-structural-equal? (1001 row) (10011 row))
+            (exact-quantity-arithmetic-check (011 rows)))
            ((атом? ())
-            (00100111
-              (00000001 exact-quantity-arithmetic-witness)
-              (00100111 (00000001 status) (00000001 fail))
-              (00100111 (00000001 case) (00000101 row))
-              (00100111 (00000001 actual) (00101111 row))
-              (00100111 (00000001 expected) (00110000 row))))))))))
+            (1110
+              (001 exact-quantity-arithmetic-witness)
+              (1110 (001 status) (001 fail))
+              (1110 (001 case) (100 row))
+              (1110 (001 actual) (1001 row))
+              (1110 (001 expected) (10011 row))))))))))
 
-(00001001 exact-quantity-arithmetic-witness
-  (00001000 ()
+(0011 exact-quantity-arithmetic-witness
+  (0010 ()
     (exact-quantity-arithmetic-check (exact-quantity-arithmetic-rows))))
 
 (exact-quantity-arithmetic-witness)
