@@ -2,7 +2,8 @@
 ; Ратифіковано прямою настановою власника 2026-09-07.
 ;
 ; Цей контракт стосується людської комунікації в репозиторії: документації,
-; інструкцій агентам, пояснень і коментарів у коді. Він НЕ скасовує окремі
+; інструкцій агентам, пояснень, коментарів у коді, Git-задач, PR і комітів.
+; Він НЕ скасовує окремі
 ; програмні surface мови (зокрема Sanskrit surface), канонічні ідентичності,
 ; зовнішні API, точні назви символів, протоколів, файлів чи upstream-термінів.
 
@@ -33,7 +34,12 @@
         (latynka-only-for-explicit-non-unicode-boundary . t)
         (mass-comment-rewrite-without-task . ())
         (exact-upstream-spelling-preserved . t)
-        (identifiers-and-protocol-literals-preserved . t)))
+        (identifiers-and-protocol-literals-preserved . t)
+        (git-tasks-and-issues-ukrainian-first . t)
+        (git-pull-requests-and-reviews-ukrainian-first . t)
+        (git-commit-subject-and-body-ukrainian-first . t)
+        (git-ci-bot-human-text-ukrainian-first . t)
+        (existing-git-history-no-language-only-rewrite . t)))
      (repository-boundary .
        ((include . owner-authored-repositories)
         (include-authored-repository-with-third-party-notices . shiva-sutras)
@@ -44,7 +50,13 @@
         human-facing-documentation
         code-comments
         explanatory-prose
-        guard-summaries))
+        guard-summaries
+        git-issue-titles-bodies-and-comments
+        git-pull-request-titles-bodies-and-reviews
+        git-commit-subject-and-body
+        git-project-tasks-and-agent-statuses
+        git-ci-bot-human-messages
+        release-titles-and-notes))
      (outside-scope .
        (canonical-programming-identities
         programming-language-surfaces
@@ -56,7 +68,9 @@
      (migration .
        ((existing-english-or-german-prose . migrate-when-touched)
         (existing-non-ukrainian-code-comments . migrate-when-touched)
-        (bulk-rewrite . separate-reviewed-task)))
+        (bulk-rewrite . separate-reviewed-task)
+        (existing-git-issues-and-prs . migrate-when-touched)
+        (existing-git-commit-history . preserve-without-rewrite)))
      (evidence .
        ((guard-topic . language-policy)
         (guard-scope-topic . owner-authored-repository-scope)
