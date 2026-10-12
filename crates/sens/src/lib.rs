@@ -643,8 +643,8 @@ pub fn eval_pinned_legacy_core_source(
 /// added here, and an existing non-macro slot is a hard error.
 fn bind_process_tcp_lisp_owned_macros(session: &mut Session) -> Result<(), LanguageError> {
     for (uk_surface, compatibility_surface, expected_bits) in [
-        ("нехай", "let", 0b001000u8),
-        ("нехай*", "let*", 0b001001u8),
+        ("нехай", "let", 0b001000u16),
+        ("нехай*", "let*", 0b001001u16),
     ] {
         let identity = semantic_registry::exact_uk_callable_for_source_head(uk_surface)
             .filter(|identity| identity.width() == 6 && identity.packed_bits() == expected_bits)
