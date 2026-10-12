@@ -42,6 +42,7 @@ KNOWN_OPEN_BOUNDARIES = [
     "Dynamic include!/include_str!/include_bytes! paths are reported as unresolved.",
     "cfg-dependent paths are inventoried conservatively; this is not rustc's active configuration result.",
     "The pinned CML runner, WSM nucleus, required Git refs/objects, vendored crate closure, toolchain, OS and shared libraries are outside this SENS-local source graph.",
+    "The inventory includes cfg-gated sources (including cfg(test)) and is not a production-only byte subtotal.",
     "An observed static source graph is not a minimum-seed or whole-chain closure proof.",
 ]
 
@@ -124,10 +125,18 @@ def call_argument(text: str, open_paren: int) -> str | None:
     return None
 
 
-def resolve_module(source: Path, name: str, path_attr: str | None) -> Path:
+def resolve_module(
+    source: Path, name: str, path_attr: str | None, module_base_override: Path | None
+) -> Path:
     if path_attr is not None:
         return (source.parent / unescape_rust_path(path_attr)).resolve()
-    if source.name in {"lib.rs", "main.rs", "mod.rs"}:
+    # A source file loaded through #[path = "..."] resolves its direct child
+    # modules from the explicit file's directory. Carry that context for this
+    # level only; a normally resolved child starts its own conventional module
+    # directory (e.g. child.rs -> child/).
+    if module_base_override is not None:
+        base = module_base_override
+    elif source.name in {"lib.rs", "main.rs", "mod.rs"}:
         base = source.parent
     else:
         base = source.parent / source.stem
@@ -140,29 +149,32 @@ def resolve_module(source: Path, name: str, path_attr: str | None) -> Path:
 
 def scan(root: Path) -> dict[str, Any]:
     root = root.resolve()
-    queue: list[Path] = []
+    queue: list[tuple[Path, Path | None]] = []
     for item in ROOTS:
         path = root / item
         if path.is_file():
-            queue.append(path.resolve())
+            queue.append((path.resolve(), None))
     # Build scripts are possible selected-package inputs even if no mod edge
     # reaches them; record and scan them when present.
     for item in ("crates/sens/build.rs", "crates/xtask/build.rs"):
         path = root / item
         if path.is_file():
-            queue.append(path.resolve())
+            queue.append((path.resolve(), None))
 
-    visited: set[Path] = set()
+    visited: set[tuple[Path, Path | None]] = set()
     edges: list[dict[str, Any]] = []
     gaps: list[dict[str, Any]] = []
     environment: set[tuple[str, str]] = set()
     source_files: dict[str, dict[str, Any]] = {}
 
     while queue:
-        source = queue.pop(0).resolve()
-        if source in visited or not source.is_file():
+        source, module_base_override = queue.pop(0)
+        source = source.resolve()
+        module_base_override = module_base_override.resolve() if module_base_override is not None else None
+        visit_key = (source, module_base_override)
+        if visit_key in visited or not source.is_file():
             continue
-        visited.add(source)
+        visited.add(visit_key)
         try:
             text = read_text(source)
         except (OSError, UnicodeError) as error:
@@ -187,7 +199,7 @@ def scan(root: Path) -> dict[str, Any]:
             path_matches = [PATH_RE.search(attr) for attr in attrs]
             path_match = next((m for m in reversed(path_matches) if m), None)
             path_attr = path_match.group(1) if path_match else None
-            target = resolve_module(source, name, path_attr)
+            target = resolve_module(source, name, path_attr, module_base_override)
             exists = target.is_file()
             edge = {
                 "kind": "rust-mod",
@@ -201,7 +213,8 @@ def scan(root: Path) -> dict[str, Any]:
             }
             edges.append(edge)
             if exists and target.suffix == ".rs":
-                queue.append(target)
+                child_base_override = target.parent.resolve() if path_attr is not None else None
+                queue.append((target.resolve(), child_base_override))
             elif not exists:
                 gaps.append({
                     "kind": "missing_module_target",
@@ -247,7 +260,8 @@ def scan(root: Path) -> dict[str, Any]:
             edges.append(edge)
             if exists:
                 if macro == "include" and target.suffix == ".rs":
-                    queue.append(target)
+                    # include! expands in its caller's module context.
+                    queue.append((target.resolve(), module_base_override))
             else:
                 gaps.append({
                     "kind": "missing_compile_time_include_target",
@@ -321,8 +335,12 @@ def self_test() -> None:
             target = root / item
             target.parent.mkdir(parents=True, exist_ok=True)
             target.write_text("# fixture\n", encoding="utf-8")
+        (root / "research/rust_codec").mkdir(parents=True)
+        (root / "research/rust_codec/senc.rs").write_text("mod canonical_form_capacity;\n", encoding="utf-8")
+        (root / "research/rust_codec/canonical_form_capacity.rs").write_text("pub struct FormProfile;\n", encoding="utf-8")
         (root / "crates/sens/src/lib.rs").write_text(
             'mod child;\n#[cfg(test)]\nmod tests;\n'
+            '#[path = "../../../research/rust_codec/senc.rs"]\nmod imported;\n'
             'const TEXT: &str = include_str!("data.txt");\n'
             'const DYNAMIC: &str = include_str!(concat!(env!("ROOT"), "/dyn.txt"));\n',
             encoding="utf-8",
@@ -337,11 +355,12 @@ def self_test() -> None:
             any(e["kind"] == "rust-mod" and e["name"] == "tests" and "test" in " ".join(e["cfg"]) and e["target_exists"] for e in report["edges"]),
             any(e["kind"] == "include_str" and e.get("target") == "crates/sens/src/data.txt" and e["target_exists"] for e in report["edges"]),
             any(g["kind"] == "unresolved_compile_time_include" for g in report["gaps"]),
+            any(e["kind"] == "rust-mod" and e["source"] == "research/rust_codec/senc.rs" and e["target"] == "research/rust_codec/canonical_form_capacity.rs" and e["target_exists"] for e in report["edges"]),
             report["scope"]["minimum_seed_proven"] is False,
         ]
         if not all(checks):
             raise RuntimeError(f"self-test failed: {checks}; report={json.dumps(report, ensure_ascii=False)[:4000]}")
-    print("NANO-SENS STATIC SOURCE EDGE AUDIT SELF-TEST: PASS (5 checks)")
+    print("NANO-SENS STATIC SOURCE EDGE AUDIT SELF-TEST: PASS (6 checks)")
 
 
 def main(argv: list[str] | None = None) -> int:
