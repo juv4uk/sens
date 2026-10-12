@@ -41,13 +41,30 @@ pub(crate) fn routed_sid_for_surface(surface: &str) -> Option<Sens8> {
     Some(sid)
 }
 
+/// Admit immutable source surfaces from the ratified exact-domain route first.
+/// D5 definitions without admitted mechanisms remain bindable by the language;
+/// mere residency is never sufficient to freeze a binding or grant callability.
+fn immutable_exact_surface_identity(surface: &str) -> Option<CoreDomainIdentity> {
+    let identity = necessary_forms::domain_identity_for_symbol(surface)
+        .or_else(|| semantic_registry::domain_identity_for_surface(surface))?;
+    (matches!(identity, CoreDomainIdentity::D3(_))
+        || domain_primitive_kind(identity).is_some()
+        || necessary_forms::identity_for_domain_identity(identity).is_some())
+    .then_some(identity)
+}
+
 pub(crate) fn is_reserved_surface(surface: &str) -> bool {
-    routed_sid_for_surface(surface).is_some()
+    immutable_exact_surface_identity(surface).is_some()
+        || routed_sid_for_surface(surface).is_some()
 }
 
 /// Surface, яку не можна перевизначити: Canon, necessary form, або примітив.
-/// M8 (#1590): після lower admitted surface → SENS, біндинг `+` не змінює Call.
+/// Exact domain + exact bits own the canonical diagnostic. The old eight-bit
+/// compatibility route is only consulted for unmigrated source surfaces.
 pub(crate) fn ensure_bindable(surface: &str, span: Span) -> Result<(), LanguageError> {
+    if let Some(identity) = immutable_exact_surface_identity(surface) {
+        return Err(immutable_domain_binding_error(identity.into(), span));
+    }
     if let Some(sid) = routed_sid_for_surface(surface) {
         return Err(immutable_surface_error(surface, sid, span));
     }
@@ -736,6 +753,18 @@ pub(crate) fn bind_language_definition(name: &str, value: &Value, environment: &
 #[cfg(test)]
 mod exact_domain_primitive_tests {
     use super::*;
+
+    #[test]
+    fn current_d3_atom_surface_is_reserved_without_legacy_sid8_routing() {
+        let identity = immutable_exact_surface_identity("атом?")
+            .expect("D3 atom must have a ratified exact-domain surface");
+        assert!(matches!(identity, CoreDomainIdentity::D3(_)));
+        assert!(is_reserved_surface("атом?"));
+        assert!(
+            ensure_bindable("атом?", Span { start: 0, end: 0 }).is_err(),
+            "ratified D3 surface must never be rebound through an old byte alias"
+        );
+    }
 
     fn d3(bits: u8) -> CoreDomainIdentity {
         CoreDomainIdentity::D3(crate::Bija3::from_word(
