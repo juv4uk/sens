@@ -11,7 +11,7 @@
 | Назва | Скорочення | Роль |
 |---|---|---|
 | **Frame3** | **F3** | компактне сімейство Рамки3 |
-| **Frame3-Micro** | **F3M** | explicit `.f3m` family; профіль задає точна довжина 1/2/3/4 байти; dense bounded micro-rank |
+| **Frame3-Micro** | **F3M** | explicit `.f3m` family; профіль задає точна довжина 1/2/3/4/5 байтів; dense bounded micro-rank |
 | **Frame3 Carrier** | **F3C** | явно маркований компактний carrier `.senc`; повний файл не зобов'язаний бути 1 байтом |
 | **Envelope E1** | **E1** | self-contained RAW/REPEAT + counts + CRC32; історично S3/v1 |
 | **Envelope E2** | **E2** | E1 + bounded grammar-rank; історично S3/v2 |
