@@ -78,6 +78,44 @@ class ReleasePublicationGateTest(unittest.TestCase):
         self.assertNotIn('"--workflow" "ci.yml"', driver)
         self.assertNotIn('"--limit" "20"', driver)
 
+    def test_publisher_waits_for_all_assets_and_replays_exact_bytes(self):
+        workflow = WORKFLOW.read_text(encoding="utf-8")
+        publish_at = workflow.index("  release-publish:")
+        job = workflow[publish_at:]
+        self.assertIn(
+            "needs: [test, publish-island-manifest, build-cli, build-msi, build-web]",
+            job,
+        )
+        self.assertIn("actions/download-artifact@v4", job)
+        self.assertIn("python3 scripts/verify_release_assets.py replay", job)
+        self.assertIn("sha256sum --check SHA256SUMS", job)
+        self.assertIn("RELEASE_GO_SHA: ${{ vars.SENS_RELEASE_GO_SHA }}", job)
+        self.assertIn("RELEASE_GO_TAG: ${{ vars.SENS_RELEASE_GO_TAG }}", job)
+        self.assertIn('gh release edit "$GITHUB_REF_NAME" --draft=false', job)
+        self.assertIn("--draft --verify-tag", job)
+
+    def test_preflight_runs_workspace_test_clippy_and_triggers_on_release_docs(self):
+        preflight = (ROOT / ".github" / "workflows" / "release-preflight.yml").read_text(
+            encoding="utf-8"
+        )
+        self.assertIn("cargo test --locked --workspace", preflight)
+        self.assertIn(
+            "cargo clippy --locked --workspace --all-targets -- -D warnings",
+            preflight,
+        )
+        push = preflight.split("  push:", 1)[1].split("  pull_request:", 1)[0]
+        pull_request = preflight.split("  pull_request:", 1)[1].split("  workflow_dispatch:", 1)[0]
+        for path in (
+            "RELEASE.md",
+            "RELEASE-EVIDENCE.md",
+            "docs/release-readiness-contract-11-9-2026-10-12.uk.md",
+            "scripts/release.lisp",
+            "rust-toolchain.toml",
+        ):
+            with self.subTest(path=path):
+                self.assertIn(f'- "{path}"', push)
+                self.assertIn(f'- "{path}"', pull_request)
+
 
 if __name__ == "__main__":
     unittest.main()
