@@ -4,6 +4,7 @@ The guard must execute after the draft has been downloaded and replay-verified,
 because main can advance while platform artifacts are being built or uploaded.
 """
 
+import re
 import unittest
 from pathlib import Path
 
@@ -46,6 +47,18 @@ def require_final_publication_guard(source: str) -> None:
         raise AssertionError("both initial and final main-SHA checks are required")
 
 
+def require_pinned_artifact_download(job: str) -> None:
+    """Reject floating action tags and truncated hashes before publication."""
+    pinned = re.search(
+        r"(?m)^\s+uses:\s+actions/download-artifact@[0-9a-f]{40}\s+# v4\s*$",
+        job,
+    )
+    if pinned is None:
+        raise AssertionError(
+            "release-publish must use full immutable SHA for actions/download-artifact v4"
+        )
+
+
 class ReleasePublicationGateTest(unittest.TestCase):
     def setUp(self):
         self.source = WORKFLOW.read_text(encoding="utf-8")
@@ -86,13 +99,32 @@ class ReleasePublicationGateTest(unittest.TestCase):
             "needs: [test, publish-island-manifest, build-cli, build-msi, build-web]",
             job,
         )
-        self.assertIn("actions/download-artifact@v4", job)
+        require_pinned_artifact_download(job)
         self.assertIn("python3 scripts/verify_release_assets.py replay", job)
         self.assertIn("sha256sum --check SHA256SUMS", job)
         self.assertIn("RELEASE_GO_SHA: ${{ vars.SENS_RELEASE_GO_SHA }}", job)
         self.assertIn("RELEASE_GO_TAG: ${{ vars.SENS_RELEASE_GO_TAG }}", job)
         self.assertIn('gh release edit "$GITHUB_REF_NAME" --draft=false', job)
         self.assertIn("--draft --verify-tag", job)
+
+    def test_download_artifact_pin_is_not_satisfied_by_floating_tag_or_short_hash(self):
+        job = self.source[self.source.index(PUBLISH_JOB):]
+        require_pinned_artifact_download(job)
+        pin = re.search(
+            r"actions/download-artifact@[0-9a-f]{40} # v4",
+            job,
+        )
+        self.assertIsNotNone(pin)
+        for broken in (
+            "actions/download-artifact@v4",
+            "actions/download-artifact@1234567 # v4",
+            "actions/download-artifact@1234567890123456789012345678901234567890 # v3",
+            "actions/upload-artifact@1234567890123456789012345678901234567890 # v4",
+        ):
+            with self.subTest(broken=broken), self.assertRaisesRegex(
+                AssertionError, "full immutable SHA"
+            ):
+                require_pinned_artifact_download(job.replace(pin.group(), broken))
 
     def test_preflight_runs_workspace_test_clippy_and_triggers_on_release_docs(self):
         preflight = (ROOT / ".github" / "workflows" / "release-preflight.yml").read_text(
