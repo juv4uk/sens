@@ -1,0 +1,74 @@
+name: Nano-SENS source closure edge audit
+# Static inventory only: this workflow must not imply a minimum-seed or full-closure result.
+
+on:
+  pull_request:
+    paths:
+      - "scripts/audit-nano-sens-source-closure.py"
+      - "crates/sens/src/**"
+      - "crates/xtask/src/**"
+      - "crates/sens/build.rs"
+      - "crates/xtask/build.rs"
+      - "Cargo.toml"
+      - "Cargo.lock"
+      - ".cargo/config.toml"
+      - "crates/sens/Cargo.toml"
+      - "crates/xtask/Cargo.toml"
+      - "lib/**"
+      - "contracts/**"
+      - "knowledge/**"
+      - ".github/workflows/nano-sens-source-closure-audit.yml"
+  push:
+    branches: [main]
+    paths:
+      - "scripts/audit-nano-sens-source-closure.py"
+      - "crates/sens/src/**"
+      - "crates/xtask/src/**"
+      - "crates/sens/build.rs"
+      - "crates/xtask/build.rs"
+      - "Cargo.toml"
+      - "Cargo.lock"
+      - ".cargo/config.toml"
+      - "crates/sens/Cargo.toml"
+      - "crates/xtask/Cargo.toml"
+      - "lib/**"
+      - "contracts/**"
+      - "knowledge/**"
+      - ".github/workflows/nano-sens-source-closure-audit.yml"
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  source-edges:
+    name: Static Rust module and include edge inventory
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Вилучити точний стан репозиторію
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      - name: Перевірити сам аудит на позитивних і негативних прикладах
+        run: python3 scripts/audit-nano-sens-source-closure.py --self-test
+
+      - name: Зібрати статичний граф входів для поточного checkout
+        run: |
+          set -euo pipefail
+          python3 scripts/audit-nano-sens-source-closure.py \
+            --repo-root . \
+            --out "$RUNNER_TEMP/nano-sens-source-edges.json"
+
+      - name: Опублікувати машинозчитуваний аудит на 30 днів
+        uses: actions/upload-artifact@v4
+        with:
+          name: nano-sens-static-source-edges-${{ github.sha }}
+          path: ${{ runner.temp }}/nano-sens-source-edges.json
+          if-no-files-found: error
+          retention-days: 30
+
+      - name: Зафіксувати межі доказу в анотації CI
+        run: |
+          echo "::notice title=Nano-SENS::Статичний граф сформовано. Це не доказ повного входового оточення або мінімального seed; невирішені краї лишаються відкритими."
