@@ -4,6 +4,7 @@ on:
   pull_request:
     paths:
       - "crates/sens/src/program_data.rs"
+      - "crates/sens/tests/program_data_d24.rs"
       - ".github/workflows/program-data-d24-cutover.yml"
   push:
     branches: [main]
@@ -21,6 +22,6 @@ jobs:
       - uses: actions/checkout@v5
       - uses: dtolnay/rust-toolchain@stable
       - name: Перевірити позитивні та негативні свідки D24+ у компіляторі
-        run: cargo test --locked -p sens --lib тести_міграції_чисел_d24
+        run: cargo test --locked -p sens --test program_data_d24
       - name: Перевірити фізичний T5 після суворої межі числових доменів
         run: cargo test --locked -p sens --test physical_t5_execution
