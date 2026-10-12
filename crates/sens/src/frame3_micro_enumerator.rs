@@ -844,6 +844,129 @@ mod tests {
     }
 
     #[test]
+    fn census_two_byte_cool_programs() {
+        let mut best_overall: Option<
+            ((u32, usize, usize, usize, usize, usize, u32), Frame3MicroExpr),
+        > = None;
+        let mut best_conditional: Option<
+            ((u32, usize, usize, usize, usize, usize, u32), Frame3MicroExpr),
+        > = None;
+        let mut deepest: Option<
+            ((usize, usize, u32, usize, usize, u32), Frame3MicroExpr),
+        > = None;
+        let mut most_words: Option<
+            ((usize, usize, u32, usize, usize, u32), Frame3MicroExpr),
+        > = None;
+
+        for local in 0u32..=u16::MAX as u32 {
+            let payload = (local as u16).to_be_bytes();
+            let expr = decode_payload(&payload).unwrap();
+
+            let cap = expr.capability_mask().count_ones();
+            let cond = conditional_count(&expr);
+            let ops = encoded_operation_count(&expr);
+            let depth = expression_depth(&expr);
+            let words = expr.exact_words().len();
+            let nodes = expr.node_count();
+
+            let expressive = (cap, cond, ops, depth, words, nodes, local);
+            if best_overall
+                .as_ref()
+                .is_none_or(|(current, _)| expressive > *current)
+            {
+                best_overall = Some((expressive, expr.clone()));
+            }
+            if cond > 0
+                && best_conditional
+                    .as_ref()
+                    .is_none_or(|(current, _)| expressive > *current)
+            {
+                best_conditional = Some((expressive, expr.clone()));
+            }
+
+            let depth_score = (depth, ops, cap, words, nodes, local);
+            if deepest
+                .as_ref()
+                .is_none_or(|(current, _)| depth_score > *current)
+            {
+                deepest = Some((depth_score, expr.clone()));
+            }
+
+            let word_score = (words, ops, cap, depth, nodes, local);
+            if most_words
+                .as_ref()
+                .is_none_or(|(current, _)| word_score > *current)
+            {
+                most_words = Some((word_score, expr));
+            }
+        }
+
+        let (best_score, best_expr) = best_overall.unwrap();
+        eprintln!(
+            "F3M2_BEST_OVERALL={:04X}\tcap={}\tcond={}\tops={}\tdepth={}\twords={}\tnodes={}\t{}",
+            best_score.6,
+            best_score.0,
+            best_score.1,
+            best_score.2,
+            best_score.3,
+            best_score.4,
+            best_score.5,
+            best_expr.human_projection()
+        );
+
+        let (cond_score, cond_expr) = best_conditional.unwrap();
+        eprintln!(
+            "F3M2_BEST_COND={:04X}\tcap={}\tcond={}\tops={}\tdepth={}\twords={}\tnodes={}\t{}",
+            cond_score.6,
+            cond_score.0,
+            cond_score.1,
+            cond_score.2,
+            cond_score.3,
+            cond_score.4,
+            cond_score.5,
+            cond_expr.human_projection()
+        );
+
+        let (depth_score, depth_expr) = deepest.unwrap();
+        eprintln!(
+            "F3M2_DEEPEST={:04X}\tdepth={}\tops={}\tcap={}\twords={}\tnodes={}\t{}",
+            depth_score.5,
+            depth_score.0,
+            depth_score.1,
+            depth_score.2,
+            depth_score.3,
+            depth_score.4,
+            depth_expr.human_projection()
+        );
+
+        let (word_score, word_expr) = most_words.unwrap();
+        eprintln!(
+            "F3M2_MOST_WORDS={:04X}\twords={}\tops={}\tcap={}\tdepth={}\tnodes={}\t{}",
+            word_score.5,
+            word_score.0,
+            word_score.1,
+            word_score.2,
+            word_score.3,
+            word_score.4,
+            word_expr.human_projection()
+        );
+
+        for (score, expr) in [
+            (best_score.6, best_expr),
+            (cond_score.6, cond_expr),
+            (depth_score.5, depth_expr),
+            (word_score.5, word_expr),
+        ] {
+            let payload = (score as u16).to_be_bytes();
+            assert_eq!(encode_expr(&expr).unwrap(), payload);
+            let source = expr.exact_words().join(" ");
+            let parsed = parse_canonical_binary(&source).expect("F3M-2 candidate source");
+            eval_parsed_expressions(&parsed, &mut Session::default())
+                .expect("F3M-2 candidate must execute");
+        }
+    }
+
+    #[test]
     fn three_byte_boundaries_and_samples_roundtrip() {
         for value in [0u32, 1, 0x12_34_56, 0x2f_18_59, 0x80_00_00, 0xff_ff_ff] {
             let payload = [
