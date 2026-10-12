@@ -92,6 +92,30 @@ Encoder повертає найкоротший допустимий профі�
 повний 40-bit local rank-space, але **не** заявляє exhaustive 2^40 evaluator
 sweep і лишається explicit bounded F3M route, а не новим default-кодеком.
 
+### F3M-5λ research candidate: справжня nameless LAMBDA
+
+Окремий модуль `frame3_micro_v5_lambda.rs` **не змінює чинний F3M-5 mapping**.
+Він досліджує наступний канонічний 40-бітний простір, де параметри LAMBDA
+представлені de-Bruijn references, а не текстовими символами:
+
+- `BOUND(0)` — найближчий binder;
+- `BOUND(1)` — binder на один рівень вище;
+- вільний `BOUND(n)` за межами lexical depth відхиляється fail-closed;
+- `λx.x`, `λy.y`, `λfoo.foo` мають одну nameless форму `λ.BOUND(0)`.
+
+Proof run **38242173136 — SUCCESS**:
+- усі boundary + 65 536 stratified 40-bit roundtrips PASS;
+- `0000000000` → `λ.BOUND(0)` (I);
+- `0000000010` → K = `λ.λ.BOUND(1)`;
+- `000000000F` → KI = `λ.λ.BOUND(0)`;
+- beta-witnesses I/K/KI PASS;
+- all-basis witness `056169CB4A` має 11 micro-nodes і несе
+  QUOTE+ATOM+CONS+CAR+CDR+EQ+COND+LAMBDA.
+
+Межа: de-Bruijn `BOUND(n)` поки research-semantic constructor і ще не має
+окремо ратифікованої exact SENS-domain identity. Тому кандидат не може
+підмінити production F3M-5, доки не буде прийнято закон lexical reference.
+
 Green evidence:
 - dense base proof: GitHub Actions run **38194615315**;
 - final-page/full-capability search: GitHub Actions run **38195272188**.
