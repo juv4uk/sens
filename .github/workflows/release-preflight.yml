@@ -5,6 +5,7 @@ on:
   push:
     branches: [main]
     paths:
+      - "rust-toolchain.toml"
       - "Cargo.lock"
       - "Cargo.toml"
       - "crates/**/Cargo.toml"
@@ -24,6 +25,7 @@ on:
       - "lib/domains/d3.lisp"
   pull_request:
     paths:
+      - "rust-toolchain.toml"
       - "Cargo.lock"
       - "Cargo.toml"
       - "crates/**/Cargo.toml"
