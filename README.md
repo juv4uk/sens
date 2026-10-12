@@ -21,6 +21,8 @@
 
 Current authority: Contract 11.9 · D1–D10 owner-ratified (D10 whole-domain) · D24+ numeric owner-ratified · D10 F1/F2/F3/T5 pending
 
+> **Операційний стан на 12.10.2026:** каталог D10 ратифіковано цілісно (1024/1024), але це не відкриває автоматично фізичне виконання. Nano-SENS має відтворювані два чисті прогони для конкретного compiler-artifact baseline, однак повний мінімальний seed ще не виміряно. Бенчмарк-лабораторія перевищила масштаб одного README: generated index зараз містить 46 зареєстрованих стендів, а незареєстровані залишаються окремим боргом. [Повний статус, межі доказів і план лабораторії](docs/project-reality-2026-10-12.uk.md).
+
 ## SENS у двох словах
 
 SENS — це не «звичайна мова з бітовими opcode».
@@ -575,6 +577,8 @@ lowering і викликає компіляторний корпус у `lib/com
 канонічний backend-neutral compiler artifact, **не native executable** і
 не доказ self-host fixed point C1→C2. Повний опис та acceptance gates:
 [історія Nano-SENS/compiler](docs/research/nano-sens-size-frontier-20261011.uk.md).
+
+**Виміряний стан Nano-SENS (12.10.2026):** два clean runs на pinned checkpoint пройшли по **189/189 тестів**, а C1/C2 executable і compiler-artifact output побайтно збіглися. Динамічний C1/C2: **92 248 Б на диску**, **85 685 Б PT_LOAD**, **70 655 Б executable sections**. Відомий partial operational-input subtotal останнього checkpoint — **36 033 737 Б**, але це **не** повний seed-total і не доказ мінімальності: source closure, Git metadata, toolchain/OS/shared libraries та межа vendor pruning ще не замкнені. Окремий K1 static-link/strip експеримент збільшив C1 до **792 544 Б**; його не прийнято як оптимізацію розміру. Див. [повний журнал seed-v0](docs/research/nano-sens-seed-v0-20261012.uk.md) та [машинні докази](evidence/nano-sens-seed-v0-2026-10-12.json).
 
 ### Exact-width witness-и
 
