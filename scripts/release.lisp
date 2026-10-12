@@ -85,12 +85,32 @@
           "crates/sens-lsp/Cargo.toml" "crates/sens-host/Cargo.toml"
           "crates/sens-semantic/Cargo.toml")))
 ; pretty=format дає SHA без кінцевого newline.
-(release-require "Потрібен успішний CI для точного HEAD на main"
+; Each mandatory workflow's latest run on this exact SHA must be green.
+(release-require "Основний CI не зелений на точному SHA"
   (release-run "timeout"
     (1110 "60" "gh" "run" "list" "--branch" "main" "--commit" release-head
-          "--workflow" "CI" "--limit" "20" "--json" "conclusion,status"
-          "--jq" "any(.[]; .status == \"completed\" and .conclusion == \"success\")"))
+          "--workflow" "ci.yml" "--limit" "1" "--json" "conclusion,status"
+          "--jq" "length == 1 and .[0].status == \"completed\" and .[0].conclusion == \"success\""))
   "true\n")
+(release-require "Hosted CI не зелений на точному SHA"
+  (release-run "timeout"
+    (1110 "60" "gh" "run" "list" "--branch" "main" "--commit" release-head
+          "--workflow" "ci-hosted.yml" "--limit" "1" "--json" "conclusion,status"
+          "--jq" "length == 1 and .[0].status == \"completed\" and .[0].conclusion == \"success\""))
+  "true\n")
+(release-require "Release Preflight не зелений на точному SHA"
+  (release-run "timeout"
+    (1110 "60" "gh" "run" "list" "--branch" "main" "--commit" release-head
+          "--workflow" "release-preflight.yml" "--limit" "1" "--json" "conclusion,status"
+          "--jq" "length == 1 and .[0].status == \"completed\" and .[0].conclusion == \"success\""))
+  "true\n")
+; The owner must authorize the exact SHA and tag before this script creates a tag.
+(release-require "Немає явного дозволу власника для поточного SHA"
+  (release-run "gh" (001 ("variable" "get" "SENS_RELEASE_GO_SHA" "--repo" "juv4uk/sens")))
+  (110011110 release-head "\n"))
+(release-require "Немає явного дозволу власника для поточного тегу"
+  (release-run "gh" (001 ("variable" "get" "SENS_RELEASE_GO_TAG" "--repo" "juv4uk/sens")))
+  (110011110 release-tag "\n"))
 ; main міг змінитися під час попередніх перевірок.
 (release-run "timeout" (001 ("60" "git" "fetch" "origin" "main")))
 (release-require "origin/main змінився; підготуй новий snapshot"
