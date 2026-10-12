@@ -97,3 +97,7 @@ jobs:
         run: |
           python3 -m unittest discover -s tests -p 'test_verify_release_assets.py' -v
           python3 -m unittest discover -s packaging/tests -p 'test_release_preflight_scope.py' -v
+
+      - name: Release publication and pre-tag gate structural regressions
+        if: always()
+        run: python3 -m unittest discover -s packaging/tests -p 'test_release_publication_gate.py' -v
