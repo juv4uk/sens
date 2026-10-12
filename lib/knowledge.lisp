@@ -91,7 +91,7 @@
 (0011 module-journal-events-onto
   (0010 (module-name journal acc)
     (110
-      ((0100 (010 journal)) (10100 acc))
+      ((0101 journal) (10100 acc))
       ((010 journal)  (10100 acc))
       ((101 (1001 (100 journal)) module-name)
        (module-journal-events-onto
@@ -473,9 +473,9 @@
        (1110 (001 rejected) (1110 (001 reason) (001 invalid-module)) (1110 (001 input) clauses)))
       ((0100 (010 clauses)) (1110 (001 rejected) (1110 (001 reason) (001 invalid-batch)) (1110 (001 input) clauses)))
       ((010 clauses)  (1110 (001 rejected) (1110 (001 reason) (001 invalid-batch)) (1110 (001 input) clauses)))
-      ((101 (knowledge-proper-list? clauses) (001 ()))
+      ((0100 (knowledge-proper-list? clauses))
        (1110 (001 rejected) (1110 (001 reason) (001 invalid-batch)) (1110 (001 input) clauses)))
-      ((101 (knowledge-clauses-valid? clauses) (001 ()))
+      ((0100 (knowledge-clauses-valid? clauses))
        (1110 (001 rejected) (1110 (001 reason) (001 invalid-clause)) (1110 (001 input) clauses)))
       ((010 ())
        ((0010 (existing) ((0010 (conflict) (110
@@ -557,8 +557,10 @@
 
 (0011 knowledge-package-field
   (0010 (name package)
-    ((0010 (entry) (110 
-            ((010 entry)  (001 ())) ((010 ()) (011 entry)))) (11100 name package))))
+    (110
+      ((010 package) (001 ()))
+      ((101 name (100 (100 package))) (011 (100 package)))
+      ((010 ()) (knowledge-package-field name (011 package))))))
 
 (0011 make-knowledge-package
   (0010 (module-name clauses)
@@ -570,11 +572,10 @@
 (0011 knowledge-package-decision
   (0010 (package)
     (110
-      ((0100 (010 package)) (1110 (001 rejected) (1110 (001 reason) (001 invalid-package)) (1110 (001 input) package)))
       ((010 package)  (1110 (001 rejected) (1110 (001 reason) (001 invalid-package)) (1110 (001 input) package)))
-      ((101 (knowledge-proper-list? package) (001 ()))
+      ((0100 (knowledge-proper-list? package))
        (1110 (001 rejected) (1110 (001 reason) (001 invalid-package)) (1110 (001 input) package)))
-      ((101 (knowledge-package-entries-valid? package) (001 ()))
+      ((0100 (knowledge-package-entries-valid? package))
        (1110 (001 rejected) (1110 (001 reason) (001 invalid-package)) (1110 (001 input) package)))
       ((101 (knowledge-package-field (001 format) package) (001 my-lisp-knowledge))
        (110
@@ -631,9 +632,9 @@
        (1110 (001 rejected) (1110 (001 reason) (001 invalid-module)) (1110 (001 input) module-name)))
       ((0100 (010 clauses)) (1110 (001 rejected) (1110 (001 reason) (001 invalid-batch)) (1110 (001 input) clauses)))
       ((010 clauses)  (1110 (001 rejected) (1110 (001 reason) (001 invalid-batch)) (1110 (001 input) clauses)))
-      ((101 (knowledge-proper-list? clauses) (001 ()))
+      ((0100 (knowledge-proper-list? clauses))
        (1110 (001 rejected) (1110 (001 reason) (001 invalid-batch)) (1110 (001 input) clauses)))
-      ((101 (knowledge-clauses-valid? clauses) (001 ()))
+      ((0100 (knowledge-clauses-valid? clauses))
        (1110 (001 rejected) (1110 (001 reason) (001 invalid-clause)) (1110 (001 input) clauses)))
       ((010 ())
        ((0010 (package) (1001 (1110 (110111100 path (11110100 package)) package))) (make-knowledge-package module-name clauses))))))
@@ -658,9 +659,9 @@
        (1110 (001 rejected) (1110 (001 reason) (001 invalid-module)) (1110 (001 input) module-name)))
       ((0100 (010 clauses)) (1110 (001 rejected) (1110 (001 reason) (001 invalid-batch)) (1110 (001 input) clauses)))
       ((010 clauses)  (1110 (001 rejected) (1110 (001 reason) (001 invalid-batch)) (1110 (001 input) clauses)))
-      ((101 (knowledge-proper-list? clauses) (001 ()))
+      ((0100 (knowledge-proper-list? clauses))
        (1110 (001 rejected) (1110 (001 reason) (001 invalid-batch)) (1110 (001 input) clauses)))
-      ((101 (knowledge-clauses-valid? clauses) (001 ()))
+      ((0100 (knowledge-clauses-valid? clauses))
        (1110 (001 rejected) (1110 (001 reason) (001 invalid-clause)) (1110 (001 input) clauses)))
       ((010 ())
        ((0010 (package) (10011 (1110 (110110011 connection (11110100 package))
@@ -708,9 +709,9 @@
        (1110 (001 rejected) (1110 (001 reason) (001 invalid-module)) (1110 (001 input) module-name)))
       ((0100 (010 clauses)) (1110 (001 rejected) (1110 (001 reason) (001 invalid-batch)) (1110 (001 input) clauses)))
       ((010 clauses)  (1110 (001 rejected) (1110 (001 reason) (001 invalid-batch)) (1110 (001 input) clauses)))
-      ((101 (knowledge-proper-list? clauses) (001 ()))
+      ((0100 (knowledge-proper-list? clauses))
        (1110 (001 rejected) (1110 (001 reason) (001 invalid-batch)) (1110 (001 input) clauses)))
-      ((101 (knowledge-clauses-valid? clauses) (001 ()))
+      ((0100 (knowledge-clauses-valid? clauses))
        (1110 (001 rejected) (1110 (001 reason) (001 invalid-clause)) (1110 (001 input) clauses)))
       ((010 ())
        ((0010 (package) (10011
