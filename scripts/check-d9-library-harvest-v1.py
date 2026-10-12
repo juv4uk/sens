@@ -58,7 +58,7 @@ assert actual_sources==expected_sources
 # Довжина 8 сама по собі НЕ дозволяє вважати будь-який старий виклик
 # визначенням, і не прирівнює D8 до історичного Function8.
 TOP_LEVEL_DEFINE = re.compile(
-    r'^[ \t]*\((?:0011|00001001)[ \t]+([^\s()]+)[ \t]+', re.MULTILINE
+    r'^[ \t]*\((?:0011|00001001)\s+([^\s()]+)\s+', re.MULTILINE
 )
 
 
@@ -68,6 +68,7 @@ def top_level_definitions(text: str) -> set[str]:
 
 # Позитивні та негативні самосвідки входять у той самий CI-гейт.
 assert top_level_definitions("(0011 точне (0010 (x) x))\n") == {"точне"}
+assert top_level_definitions("(0011 багаторядкове\n  (0010 (x) x))\n") == {"багаторядкове"}
 assert top_level_definitions("(00001001 старе (00001000 (x) x))\n") == {"старе"}
 assert top_level_definitions("(0010 не-визначення ())\n") == set()
 assert top_level_definitions("(00001010 макрос (x) x)\n") == set()
