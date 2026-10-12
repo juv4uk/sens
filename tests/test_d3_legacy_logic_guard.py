@@ -89,8 +89,9 @@ class LegacyD3GuardTests(unittest.TestCase):
         source = (ROOT / path).read_text(encoding="utf-8")
 
         def definition(name: str, next_name: str) -> str:
-            start = source.index(f"(0011 {name}\\n")
-            end = source.index(f"\\n(0011 {next_name}\\n", start)
+            newline = chr(10)
+            start = source.index(f"(0011 {name}" + newline)
+            end = source.index(newline + f"(0011 {next_name}" + newline, start)
             return source[start:end]
 
         kind = definition("render-kind", "render-arity")
