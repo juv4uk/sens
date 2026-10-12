@@ -145,6 +145,17 @@ pub mod semantic_registry_export {
     }
 
 
+    /// Current domain-ladder lookup for admitted callable surfaces.
+    ///
+    /// Unlike historical Sens8, this returns the exact D3/D4/D5/D6/D8
+    /// identity; an equal packed payload from another domain cannot alias it.
+    /// Unadmitted or ambiguous surfaces fail closed.
+    pub fn admitted_core_domain_for_surface(
+        name: &str,
+    ) -> Option<super::CoreDomainIdentity> {
+        super::semantic_registry::domain_identity_for_surface(name)
+    }
+
     /// Legacy packed-byte export for external projection consumers.
     ///
     /// Runtime/source semantics use opaque `Sens8`; this function deliberately
