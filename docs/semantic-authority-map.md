@@ -32,7 +32,7 @@ Canonical semantic identity is domain-qualified:
 ```text
 semantic object
 =
-exact binary number
+exact binary word (digits 0/1)
 + exact domain
 + admitted / proved law
 ```
