@@ -1,0 +1,32 @@
+name: Audited SID8 in-place Lisp source replacements
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - lib/forward.lisp
+      - lib/knowledge.lisp
+      - lib/surface/uk.lisp
+      - lib/surface/sa.lisp
+      - lib/surface/semantic-registry-api.lisp
+      - knowledge/guard-fact-policy.lisp
+      - tests/test_sid8_six_file_source_proof.py
+      - .github/workflows/audit-sid8-six-lisp-source.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  exact-source-delta:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Verify all 474 changes against six original Git blobs
+        run: python3 -m unittest discover -s tests -p 'test_sid8_six_file_source_proof.py' -v
