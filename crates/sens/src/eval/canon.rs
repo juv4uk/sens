@@ -134,11 +134,6 @@ type PrimitiveFn = fn(&[Value], &Environment, Span) -> Result<Value, LanguageErr
 
 const PRIMITIVE_TABLE: [Option<PrimitiveFn>; 256] = {
     let mut table: [Option<PrimitiveFn>; 256] = [None; 256];
-    table[crate::sens!(00000010).packed_byte() as usize] = Some(prim_00000010);
-    table[crate::sens!(00000011).packed_byte() as usize] = Some(prim_00000011);
-    table[crate::sens!(00000100).packed_byte() as usize] = Some(prim_00000100);
-    table[crate::sens!(00000101).packed_byte() as usize] = Some(prim_00000101);
-    table[crate::sens!(00000110).packed_byte() as usize] = Some(prim_00000110);
     table[crate::sens!(00001100).packed_byte() as usize] = Some(prim_00001100);
     table[crate::sens!(00001101).packed_byte() as usize] = Some(prim_00001101);
     table[crate::sens!(00001110).packed_byte() as usize] = Some(prim_00001110);
@@ -186,51 +181,6 @@ const PRIMITIVE_TABLE: [Option<PrimitiveFn>; 256] = {
     table[crate::sens!(01001110).packed_byte() as usize] = Some(builtins::prim_01001110); // env
     table
 };
-
-fn prim_00000010(
-    args: &[Value],
-    env: &Environment,
-    span: Span,
-) -> Result<Value, LanguageError> {
-    exact_args(crate::sens!(00000010), args, 1, span)?;
-    Ok(special_forms::atom_value(&args[0], env))
-}
-
-fn prim_00000011(
-    args: &[Value],
-    _env: &Environment,
-    span: Span,
-) -> Result<Value, LanguageError> {
-    exact_args(crate::sens!(00000011), args, 2, span)?;
-    special_forms::eq_values(args[0].clone(), args[1].clone(), span)
-}
-
-fn prim_00000100(
-    args: &[Value],
-    env: &Environment,
-    span: Span,
-) -> Result<Value, LanguageError> {
-    exact_args(crate::sens!(00000100), args, 2, span)?;
-    special_forms::cons_values(args[0].clone(), args[1].clone(), env, span)
-}
-
-fn prim_00000101(
-    args: &[Value],
-    _env: &Environment,
-    span: Span,
-) -> Result<Value, LanguageError> {
-    exact_args(crate::sens!(00000101), args, 1, span)?;
-    special_forms::car_value(&args[0], span)
-}
-
-fn prim_00000110(
-    args: &[Value],
-    _env: &Environment,
-    span: Span,
-) -> Result<Value, LanguageError> {
-    exact_args(crate::sens!(00000110), args, 1, span)?;
-    special_forms::cdr_value(&args[0], span)
-}
 
 fn prim_00001100(
     args: &[Value],
@@ -639,7 +589,15 @@ pub(crate) fn invoke_semantic_ref(
     environment: &Environment,
     span: Span,
 ) -> Result<Value, LanguageError> {
-    // #1455: примітив Rust → визначення мовою, прив'язане до коду → помилка.
+    // Transitional input adapter only: the five historical Canon value calls
+    // now execute the ratified D3 mechanism, never duplicate Rust SID8 bodies.
+    // No historical byte gains placement authority; an unmapped SID fails closed.
+    if let Some(identity) = semantic_registry::compatibility_d3_route_from_ratified_domains(sid) {
+        if matches!(route_kind_for_sid(sid), Some(SidRouteKind::ValueCall)) {
+            return invoke_domain_identity(identity, args, environment, span);
+        }
+    }
+    // Unmigrated non-D3 host capabilities remain on the temporary backend lane.
     if let Some(primitive) = PRIMITIVE_TABLE
         .get(sid.packed_byte() as usize)
         .and_then(|function| *function)
@@ -682,7 +640,9 @@ pub(crate) fn invoke_semantic_ref(
 
 /// #1455: чи має код примітив Rust.
 pub(crate) fn has_primitive(sid: Sens8) -> bool {
-    PRIMITIVE_TABLE
+    // D3 is protected by the current exact-domain mechanism even when the
+    // caller still arrives through a historical, read-only compatibility SID.
+    matches!(route_kind_for_sid(sid), Some(SidRouteKind::ValueCall)) || PRIMITIVE_TABLE
         .get(sid.packed_byte() as usize)
         .is_some_and(|function| function.is_some())
 }
@@ -914,6 +874,31 @@ mod exact_domain_primitive_tests {
         assert_eq!(arity_error.kind, ErrorKind::Arity);
         assert!(arity_error.message.contains(&d9(0b110101010).to_string()));
         assert!(!arity_error.message.contains("00111101"));
+    }
+
+    #[test]
+    fn historical_canon_value_bytes_have_no_separate_primitive_bodies() {
+        let environment = Environment::root();
+        let span = Span { start: 0, end: 0 };
+        for (sid, current_bits) in [
+            (crate::sens!(00000010), 0b010),
+            (crate::sens!(00000011), 0b101),
+            (crate::sens!(00000100), 0b111),
+            (crate::sens!(00000101), 0b100),
+            (crate::sens!(00000110), 0b011),
+        ] {
+            assert!(PRIMITIVE_TABLE[sid.packed_byte() as usize].is_none());
+            assert!(has_primitive(sid));
+            assert_eq!(
+                semantic_registry::compatibility_d3_route_from_ratified_domains(sid),
+                Some(d3(current_bits)),
+            );
+        }
+        let arity = invoke_semantic_ref(crate::sens!(00000010), &[], &environment, span)
+            .expect_err("historical input must use current D3 arity law");
+        assert_eq!(arity.kind, ErrorKind::Arity);
+        assert!(arity.message.contains("010: expected 1 arguments; received 0"));
+        assert!(!arity.message.contains("00000010"));
     }
 
     #[test]
