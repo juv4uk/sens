@@ -199,7 +199,7 @@ pub(crate) fn evaluate_step(
             // A ratified D3 surface is syntax-only here. Diagnose its exact
             // domain identity, not the historical SID8 compatibility byte.
             if let Some(identity @ CoreDomainIdentity::D3(_)) =
-                crate::semantic_registry::domain_identity_for_surface(symbol)
+                lower::immutable_surface_domain_identity(symbol)
             {
                 return Err(LanguageError::new(
                     ErrorKind::InvalidForm,
