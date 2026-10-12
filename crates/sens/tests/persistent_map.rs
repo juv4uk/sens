@@ -40,6 +40,19 @@ fn avl_heights_are_structural_unary_values_not_numbers() {
 }
 
 #[test]
+fn avl_heights_and_balance_state_are_structural_not_numeric() {
+    assert_eq!(eval_map("(height-of map-empty)"), "()");
+    assert_eq!(
+        eval_map(r#"(node-height (map-insert "a" 1 map-empty))"#),
+        "(height)"
+    );
+    assert_eq!(
+        eval_map(r#"(balance-state (map-insert "a" 1 map-empty))"#),
+        "balanced"
+    );
+}
+
+#[test]
 fn insert_then_get_finds_the_value() {
     assert_eq!(
         eval_map(r#"(map-get "a" (map-insert "a" 1 map-empty))"#),
