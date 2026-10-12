@@ -25,7 +25,5 @@ jobs:
     steps:
       - uses: actions/checkout@v5
       - uses: dtolnay/rust-toolchain@stable
-      - name: Перевірити чинну шляхову заборону читача process/TCP
-        run: cargo test --locked -p sens --lib process_tcp_reader_is_path_bound_and_preserves_quoted_data -- --nocapture
-      - name: Виконати весь current_binary_preflight після Core4
+      - name: Позитивний і негативний exact-domain process reader preflight
         run: cargo test --locked -p sens --test current_binary_preflight -- --nocapture

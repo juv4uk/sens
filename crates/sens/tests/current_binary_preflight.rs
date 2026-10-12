@@ -172,6 +172,28 @@ fn time_library_reader_rejects_foreign_path_instead_of_inferring_domain_from_bit
     assert!(sens::parse_mixed_exact_domain_time_source("lib/not-time.lisp", source).is_err());
 }
 
+#[test]
+fn process_library_reader_is_path_bound_and_preserves_quoted_data() {
+    let source = "(0011 probe (0010 (x) (001 (101 x))))";
+    assert!(sens::parse_mixed_exact_domain_process_tcp_source("lib/time.lisp", source).is_err());
+    assert!(sens::parse_mixed_exact_domain_process_tcp_source("lib/not-process.lisp", source).is_err());
+
+    let parsed = sens::parse_mixed_exact_domain_process_tcp_source("lib/process.lisp", source)
+        .expect("owner-bound process source");
+    assert_eq!(parsed.len(), 1);
+    let ExprKind::List(definition) = &parsed[0].kind else { panic!("definition"); };
+    let ExprKind::List(lambda) = &definition[2].kind else { panic!("lambda"); };
+    let ExprKind::List(quote_form) = &lambda[2].kind else { panic!("quoted body"); };
+    assert!(matches!(&quote_form[0].kind, ExprKind::DomainIdentity(id)
+        if id.width() == 3 && id.packed_bits() == 0b001),
+        "D3 QUOTE remains an exact identity");
+    let ExprKind::List(payload) = &quote_form[1].kind else { panic!("quoted payload"); };
+    assert!(
+        !matches!(&payload[0].kind, ExprKind::DomainIdentity(_)),
+        "numeric-looking payload under QUOTE must not become an executable identity"
+    );
+}
+
 /// Diagnose the first non-callable top-level time form after Core4 bootstrap.
 /// This test intentionally preserves strict runtime behavior: it reports the
 /// exact top-level index and source bytes instead of replacing the failed form.
