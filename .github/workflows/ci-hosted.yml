@@ -53,7 +53,9 @@ jobs:
         run: cargo check --locked -p sens-cli --bins
       - name: Classic Lisp REPL case presentation
         if: always()
-        run: cargo test --locked -p sens-cli classic_repl_reply_ -- --nocapture
+        run: |
+          cargo test --locked -p sens --lib d1_human_projection_keeps_machine_bits_separate_from_words -- --nocapture
+          cargo test --locked -p sens-cli classic_repl_reply_ -- --nocapture
       - name: D8 exact writer admission witnesses
         if: always()
         run: cargo test --locked -p sens --test d8_writer_admission
