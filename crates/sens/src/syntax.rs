@@ -891,6 +891,17 @@ pub(crate) mod wire {
     }
 }
 
+// Нові доменні API можна викликати зовні без розкриття
+// історичних внутрішніх форматів як canonical authority.
+pub use fasl::{
+    decode_exact_program as decode_exact_fasl_program,
+    encode_exact_program as encode_exact_fasl_program,
+};
+pub use wire::{
+    decode_exact_program as decode_exact_wire_program,
+    encode_exact_program as encode_exact_wire_program,
+};
+
 #[cfg(test)]
 mod wire_tests {
     use super::wire::{decode_program, encode_program};
