@@ -136,9 +136,10 @@ class LegacyD3GuardTests(unittest.TestCase):
                 self.assertEqual(MODULE.scan_lisp(fragment, path), [])
 
         arity = segment("render-arity", "render-admitted")
-        # Nested at-least/between historical result matches are separate debt.
+        # Nested at-least/between and unknown-arity result-match clauses
+        # remain three separate historical migration debts, not an admitted D3 form.
         rules = [f.rule for f in MODULE.scan_lisp(arity, path)]
-        self.assertEqual(rules.count("COND_NOT_TWO_FIELDS"), 2)
+        self.assertEqual(rules.count("COND_NOT_TWO_FIELDS"), 3)
         self.assertNotIn("COND_HOST_TRUTH", rules)
 
         # Each reverted 3-field condition MUST fail independently.
