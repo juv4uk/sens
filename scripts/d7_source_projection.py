@@ -38,9 +38,14 @@ def load_current_d7() -> tuple[dict, dict[str, object]]:
         or pins != {"0100001", "0101010"}
         or pins.intersection(by_coordinate)):
         raise D7ProjectionError("D7 Lisp table and owner-ratified residency diverged")
+    codec = current_codec()
     for bits, row in by_coordinate.items():
         if row.lisp is not None:
             raise D7ProjectionError(f"D7:{bits} minted a Lisp callable")
+        for name, field in (("ук", "uk"), ("укр", "ukr"), ("san", "san"),
+                            ("en", "en"), ("sym", "sym")):
+            if getattr(row, field) != codec.glyph(bits, name):
+                raise D7ProjectionError(f"D7:{bits} {name} glyph differs from ratified projection")
     evidence = {item["coordinate"]: item for item in owner["rows"]}
     if len(evidence) != 128:
         raise D7ProjectionError("D7 owner evidence must cover all 128 coordinates")
