@@ -230,7 +230,49 @@ def self_test() -> None:
             raise
     else:
         raise ValueError("missing sources were admitted")
-    print("DOMAIN-LADDER-IDENTITY: self-test PASS (Rust/Python/C/Lisp + negative controls)")
+    # Контроль колізій: числовий payload 1 НЕ визначає домен.
+    same_payload = {(3, "001"), (4, "0001"), (5, "00001")}
+    if len(same_payload) != 3 or {int(bits, 2) for _, bits in same_payload} != {1}:
+        raise ValueError("D3/D4/D5 must never collapse by packed numeric payload")
+    entries = [
+        {"legacy_code": f"{i:08b}", "legacy_name": None,
+         "classification": "UNNAMED-LEGACY-IDENTITY", "current_target": None}
+        for i in range(256)
+    ]
+    for bits, (name, classification, target, _) in W8_COLLISION.items():
+        entry = entries[int(bits, 2)]
+        entry["legacy_name"] = name
+        entry["classification"] = classification
+        entry["current_target"] = target
+    synthetic = {"status": "AUDIT-COMPLETE", "rows": entries}
+    d8_sample = "\\n".join(
+        f"({bits} (en {label}) (sym ()))"
+        for bits, (_, _, _, label) in W8_COLLISION.items()
+    )
+    inspect_w8_d8_collision(synthetic, d8_sample)
+    # Кожен мутаційний негатив повинен впасти, а не «мігрувати» функцію.
+    mutation_cases = [
+        ({"status": "AUDIT-COMPLETE", "rows": entries[:-1]}, d8_sample),
+        ({"status": "UNVERIFIED", "rows": entries}, d8_sample),
+        (synthetic, d8_sample.replace("(en round)", "(en invoke)")),
+        (synthetic, d8_sample.replace("(en 1/)", "(en read-file)")),
+    ]
+    for corrupted, table in mutation_cases:
+        try:
+            inspect_w8_d8_collision(corrupted, table)
+        except ValueError:
+            pass
+        else:
+            raise ValueError("W8/D8 collision mutation was incorrectly admitted")
+    held = {"status": "AUDIT-COMPLETE", "rows": [dict(row) for row in entries]}
+    held["rows"][int("10101000", 2)]["current_target"] = "D8:10101000"
+    try:
+        inspect_w8_d8_collision(held, d8_sample)
+    except ValueError:
+        pass
+    else:
+        raise ValueError("legacy INVOKE incorrectly admitted as D8 ROUND")
+    print("DOMAIN-LADDER-IDENTITY: self-test PASS (Rust/Python/C/Lisp, D3/D4/D5, W8/D8 negative controls)")
 
 
 def main() -> int:
