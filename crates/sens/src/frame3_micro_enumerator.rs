@@ -838,9 +838,12 @@ mod tests {
         let through_twelve = through_eleven + counts[12];
         assert_eq!(through_eight, 3_839_232);
         assert_eq!(counts[9], 31_422_390);
+        assert_eq!(through_nine, 35_261_622);
         assert_eq!(through_eleven, 3_149_929_038);
         assert_eq!(counts[12], 27_233_592_018);
-        assert!(through_nine < F3M4_OFFSET);
+        // F3M-4 begins inside the 9-node layer and extends into 12-node forms.
+        assert!(through_eight < F3M4_OFFSET);
+        assert!(through_nine > F3M4_OFFSET);
         assert!(through_eleven < F3M_END);
         assert!(through_twelve >= F3M_END);
     }
