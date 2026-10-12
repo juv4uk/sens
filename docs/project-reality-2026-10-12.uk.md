@@ -8,7 +8,7 @@
 - D1–D9 залишаються попереднім exact-domain фундаментом.
 - **D10 ратифіковано як один цілісний каталог 1024/1024**: [каталог](../knowledge/d10-v18-semantic-inventory.json), [акт ратифікації](../knowledge/d10-owner-whole-domain-ratification-20261012.json).
 - D24/D48/D96/… — окрема owner-ratified числова драбина.
-- Цілісна ратифікація каталогу **не означає**, що індивідуальні F1/F2/F3/F4 докази, незалежні позитивні/негативні witness-и, behavioral independence або physical T5 admission завершені. У самому акті ці межі зафіксовано явно.
+- Цілісна ратифікація каталогу **не означає**, що індивідуальні F1/F2/F3 докази, незалежні позитивні/негативні witness-и, behavioral independence або physical T5 admission завершені. У самому акті ці межі зафіксовано явно.
 - Перехід `language-contract.lisp` на повністю canonical visible-binary source ще триває (#4248). Документація не має називати цей cutover завершеним до landed evidence.
 
 Канонічна identity лишається:
