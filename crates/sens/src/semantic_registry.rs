@@ -100,6 +100,13 @@ pub(crate) fn compatibility_d3_route_from_ratified_domains(
     }
     let mut admitted = None;
     for surface in row.surfaces {
+        // Лише історичні людські проєкції можуть свідчити про точну D3
+        // координату. Символічні мітки або збіг байта не є authority.
+        // Історичні "ук"/"укр" проєктуються на чинне "uk" за назвою,
+        // а механізм/виконуваність визначає вже ратифікована таблиця.
+        if !matches!(surface.namespace, "ук" | "укр" | "sa") {
+            continue;
+        }
         let Some(identity) = direct_domain_identity_for_surface(surface.name) else {
             continue;
         };
@@ -341,5 +348,38 @@ mod exact_d5_binding_projection_tests {
     #[test]
     fn unknown_definition_does_not_gain_a_d5_coordinate() {
         assert_eq!(d5_binding_identity_for_definition("__unknown_d5_binding__"), None);
+    }
+}
+
+#[cfg(test)]
+mod exact_d3_compatibility_migration_tests {
+    use super::*;
+
+    #[test]
+    fn historical_quote_and_cond_project_only_through_ratified_d3_surfaces() {
+        // Лише семантично доведений міст із W8 до D3; ніякого обрізання
+        // або припущення, що восьмибітний байт сам є доменною тотожністю.
+        for (historical_byte, d3_bits) in [
+            (0b00000001, 0b001), // історичне QUOTE → ратифіковане D3 QUOTE
+            (0b00000111, 0b110), // історичне COND → ратифіковане D3 COND
+            (0b00000101, 0b100), // історичне CAR → ратифіковане D3 CAR
+        ] {
+            let historical = Sens8::from_packed_byte(historical_byte);
+            let identity = compatibility_d3_route_from_ratified_domains(historical)
+                .expect("ратіфікована українська поверхня має доводити D3-координату");
+            assert_eq!(identity.width(), 3);
+            assert_eq!(identity.packed_bits(), d3_bits);
+        }
+    }
+
+    #[test]
+    fn unknown_or_other_domain_historical_slots_never_infer_a_d3_route() {
+        for byte in [0b00000000, 0b00001000, 0b00001001, 0b10101000] {
+            assert!(
+                compatibility_d3_route_from_ratified_domains(Sens8::from_packed_byte(byte))
+                    .is_none(),
+                "історичний W8-байт {byte:08b} не дає права виклику D3"
+            );
+        }
     }
 }
