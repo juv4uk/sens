@@ -220,6 +220,30 @@ fn lisp_owned_d24_length_fold_uses_ratified_d6_add1_without_number_literals() {
         assert_eq!(result.value, numeric(24, count), "length={count}");
     }
 
+    // Crossing the D24 boundary in a real Lisp-owned recursive call must
+    // carry the exact result into D48, without truncating to 24 bits.
+    let unit = Value::Symbol(std::rc::Rc::from("елемент"));
+    session.environment.define(
+        "items",
+        Value::Pair(
+            std::rc::Rc::new(unit.clone()),
+            std::rc::Rc::new(Value::Pair(
+                std::rc::Rc::new(unit),
+                std::rc::Rc::new(Value::Nil),
+            )),
+        ),
+    );
+    session.environment.define(
+        "seed",
+        Value::BinaryNumber(
+            BinaryNumber::from_numeric_domain_bits(24, &vec![1; 24])
+                .expect("exact maximum D24 word"),
+        ),
+    );
+    let carried = eval_program("(довжина-д24-до items seed)", &mut session)
+        .expect("Lisp-owned fold must retain carry into D48").value;
+    assert_eq!(carried, numeric(48, (1 << 24) + 2));
+    
     // An unqualified seed never becomes D24 just because it is called 0.
     session.environment.define(
         "items",
