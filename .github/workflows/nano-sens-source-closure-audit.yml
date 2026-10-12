@@ -17,6 +17,7 @@ on:
       - "lib/**"
       - "contracts/**"
       - "knowledge/**"
+      - "evidence/nano-sens-seed-v0-source-closure-census-2026-10-12.json"
       - ".github/workflows/nano-sens-source-closure-audit.yml"
   push:
     branches: [main]
@@ -34,7 +35,11 @@ on:
       - "lib/**"
       - "contracts/**"
       - "knowledge/**"
+      - "evidence/nano-sens-seed-v0-source-closure-census-2026-10-12.json"
       - ".github/workflows/nano-sens-source-closure-audit.yml"
+
+permissions:
+  contents: read
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -54,21 +59,46 @@ jobs:
       - name: Перевірити сам аудит на позитивних і негативних прикладах
         run: python3 scripts/audit-nano-sens-source-closure.py --self-test
 
-      - name: Зібрати статичний граф входів для поточного checkout
+      - name: Побудувати граф входів актуального main
         run: |
           set -euo pipefail
           python3 scripts/audit-nano-sens-source-closure.py \
             --repo-root . \
-            --out "$RUNNER_TEMP/nano-sens-source-edges.json"
+            --out "$RUNNER_TEMP/nano-sens-source-edges-main.json"
 
-      - name: Опублікувати машинозчитуваний аудит на 30 днів
+      - name: Побудувати граф точної SENS-версії, закріпленої в Nano-SENS census
+        shell: bash
+        run: |
+          set -euo pipefail
+          PINNED_SHA="$(python3 - <<'PY'
+          import json
+          from pathlib import Path
+          report = json.loads(Path("evidence/nano-sens-seed-v0-source-closure-census-2026-10-12.json").read_text())
+          print(report["pinned_source"]["commit"])
+          PY
+          )"
+          if [[ ! "$PINNED_SHA" =~ ^[0-9a-f]{40}$ ]]; then
+            echo "::error::Invalid pinned SENS commit in source-closure census"
+            exit 1
+          fi
+          git cat-file -e "${PINNED_SHA}^{commit}"
+          PINNED_ROOT="$RUNNER_TEMP/sens-pinned-source"
+          git worktree add --detach "$PINNED_ROOT" "$PINNED_SHA"
+          trap 'git worktree remove --force "$PINNED_ROOT" >/dev/null 2>&1 || true' EXIT
+          python3 scripts/audit-nano-sens-source-closure.py \
+            --repo-root "$PINNED_ROOT" \
+            --out "$RUNNER_TEMP/nano-sens-source-edges-pinned.json"
+
+      - name: Опублікувати обидва машинозчитувані аудити на 30 днів
         uses: actions/upload-artifact@v4
         with:
           name: nano-sens-static-source-edges-${{ github.sha }}
-          path: ${{ runner.temp }}/nano-sens-source-edges.json
+          path: |
+            ${{ runner.temp }}/nano-sens-source-edges-main.json
+            ${{ runner.temp }}/nano-sens-source-edges-pinned.json
           if-no-files-found: error
           retention-days: 30
 
       - name: Зафіксувати межі доказу в анотації CI
         run: |
-          echo "::notice title=Nano-SENS::Статичний граф сформовано. Це не доказ повного входового оточення або мінімального seed; невирішені краї лишаються відкритими."
+          echo "::notice title=Nano-SENS::Побудовано граф актуального main і граф pinned SENS revision. Це не доказ повного входового оточення або мінімального seed; невирішені краї лишаються відкритими."
