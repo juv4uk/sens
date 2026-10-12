@@ -167,9 +167,32 @@ class ThreePassMigrationTests(unittest.TestCase):
             with self.assertRaisesRegex(mod.MigrationError,"structural control only"):
                 self.migrate(f"(CONS {word} x)\n")
 
-    def test_numeric_literal_passes_through_verbatim(self):
-        out,_=self.migrate("(CAR 25)\n")
-        self.assertEqual(out,"10 100 00 25 01\n")
+    def test_numeric_literals_are_blocked_until_explicit_d24_admission(self):
+        # Historic human spellings are not D1-D9 function/domain addresses.
+        # An incomplete source cannot silently become physical executable T5.
+        for literal in ("25", "#d25", "#b101", "#q2:1/10", "-3",
+                        "1/2", "1.5", "2e3"):
+            with self.subTest(literal=literal):
+                with self.assertRaisesRegex(
+                    mod.MigrationError, "requires explicit D24\\+ numeric-domain"
+                ):
+                    self.migrate(f"(CAR {literal})\n")
+
+    def test_bare_d24_full_width_is_not_guessed_from_bits(self):
+        for width in (24, 48, 96):
+            with self.subTest(width=width):
+                with self.assertRaisesRegex(
+                    mod.MigrationError, "requires explicit D24\\+ numeric-domain"
+                ):
+                    self.migrate(f"(CAR {'0' * width})\n")
+
+    def test_d1_predicates_and_binary_domain_codes_are_not_numeric_literals(self):
+        for bit in ("0", "1"):
+            projection, _=self.migrate(f"(CAR {bit})\n")
+            self.assertEqual(projection, f"10 100 00 {bit} 01\n")
+        # A binary D3 identity in a data slot does not infer a numeric 5.
+        projection, _=self.migrate("(CAR 101)\n")
+        self.assertEqual(projection, "10 100 00 101 01\n")
 
     def test_quote_of_empty_is_quote_plus_000(self):
         out,_=self.migrate("'()\n")
