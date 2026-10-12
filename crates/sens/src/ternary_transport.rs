@@ -409,6 +409,62 @@ mod tests {
     }
 
     #[test]
+    fn точковий_т5_кожен_біт_впливає_лише_на_свій_домен() {
+        use crate::domain_ladder::DomainCoordinate;
+
+        let d3 = DomainCoordinate::new(3, 0b101).unwrap();
+        let d4 = DomainCoordinate::new(4, 0b0010).unwrap();
+        let mut flips = 0usize;
+        for payload in 0u16..1024 {
+            let original = [
+                d3,
+                d4,
+                DomainCoordinate::new(10, payload).unwrap(),
+            ];
+            let canonical = encode_ternary_coordinates(&original).unwrap();
+            // Трит 2 стоїть тільки на позиціях 3, 8 і 19 (padding).
+            for position in 0..19 {
+                if position == 3 || position == 8 {
+                    continue;
+                }
+                let byte_index = position / TRITS_PER_BYTE;
+                let significance = 3u8.pow((TRITS_PER_BYTE - 1 - position % TRITS_PER_BYTE) as u32);
+                let digit = (canonical[byte_index] / significance) % 3;
+                assert!(digit <= 1, "semantic trit became separator");
+                let mut altered = canonical.clone();
+                if digit == 0 {
+                    altered[byte_index] += significance;
+                } else {
+                    altered[byte_index] -= significance;
+                }
+                let decoded = decode_ternary_coordinates(&altered)
+                    .expect("переворот значущого трита не є пошкодженням кадру");
+                let (domain, local_bit) = match position {
+                    0..=2 => (0, position),
+                    4..=7 => (1, position - 4),
+                    9..=18 => (2, position - 9),
+                    _ => unreachable!(),
+                };
+                for (index, observed) in decoded.iter().enumerate() {
+                    let expected_bits = if index == domain {
+                        original[index].bits() ^ (1u16 << (usize::from(original[index].width()) - 1 - local_bit))
+                    } else {
+                        original[index].bits()
+                    };
+                    assert_eq!(observed.width(), original[index].width(),
+                        "D10={payload} physical_trit={position}");
+                    assert_eq!(observed.bits(), expected_bits,
+                        "D10={payload} physical_trit={position} domain={index}");
+                }
+                assert_eq!(encode_ternary_coordinates(&decoded).unwrap(), altered);
+                flips += 1;
+            }
+        }
+        // (3 + 4 + 10) * 1024: жоден біт не перевіряється лише опосередковано.
+        assert_eq!(flips, 17 * 1024);
+    }
+
+    #[test]
     fn точковий_т5_девять_старих_доменів_байт_у_байт_сумісні() {
         use crate::domain_ladder::DomainCoordinate;
         for width in 1usize..=9 {
