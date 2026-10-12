@@ -1,0 +1,69 @@
+{
+  "schema": "sens-benchmark-support-exemptions/1",
+  "exemptions": [
+    {
+      "path": "axiom-corpus-function-description",
+      "reason": "Name-erased D5 distinguishing corpus documentation only; it has no independent runner and is consumed as supporting corpus/specification.",
+      "witness": [
+        "benchmarks/axiom-corpus-function-description/README.md"
+      ],
+      "owner_or_issue": "#4172; #3451/#3454",
+      "reviewed_at": "2026-10-12"
+    },
+    {
+      "path": "d5-eligibility",
+      "reason": "Machine-readable D5 derivation eligibility ledger, explicitly research-only/no-placement; not an executable benchmark stand.",
+      "witness": [
+        "benchmarks/d5-eligibility/eligibility.json"
+      ],
+      "owner_or_issue": "#4172; #2616",
+      "reviewed_at": "2026-10-12"
+    },
+    {
+      "path": "d5-sens-derivation-closeout",
+      "reason": "Source-backed factor eligibility/derivation closeout ledger; evidence data without an independent runner.",
+      "witness": [
+        "benchmarks/d5-sens-derivation-closeout/factor-eligibility.json"
+      ],
+      "owner_or_issue": "#4172; #2616",
+      "reviewed_at": "2026-10-12"
+    },
+    {
+      "path": "d7-number-map",
+      "reason": "README and TSV record a negative domain-width finding; no runner, and the directory is a research artifact rather than a measurement stand.",
+      "witness": [
+        "benchmarks/d7-number-map/README.md",
+        "benchmarks/d7-number-map/number-map.tsv"
+      ],
+      "owner_or_issue": "#4172; #2443",
+      "reviewed_at": "2026-10-12"
+    },
+    {
+      "path": "gpu-oracle-current",
+      "reason": "Blocked GPU-admission evidence ledger with no positive oracle rows; this records a blocker and must not appear as a completed benchmark result.",
+      "witness": [
+        "benchmarks/gpu-oracle-current/blocked-gpu-admission.json"
+      ],
+      "owner_or_issue": "#4172; #3766/#3801",
+      "reviewed_at": "2026-10-12"
+    },
+    {
+      "path": "standard",
+      "reason": "Parent fixture/provenance directory for binary-trees only; the README explicitly says the execution adapter is deferred, so this is not yet a runnable stand.",
+      "witness": [
+        "benchmarks/standard/binary-trees/README.md"
+      ],
+      "owner_or_issue": "#4172; #1546/#1550",
+      "reviewed_at": "2026-10-12"
+    },
+    {
+      "path": "whole-model-pareto",
+      "reason": "Consumer/projection documentation that joins published evidence from other stands and does not implement an independent harness.",
+      "witness": [
+        "benchmarks/whole-model-pareto/README.md"
+      ],
+      "owner_or_issue": "#4172; #1973/#1987",
+      "reviewed_at": "2026-10-12"
+    }
+  ]
+}

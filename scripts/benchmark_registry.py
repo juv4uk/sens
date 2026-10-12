@@ -11,6 +11,7 @@ import argparse
 import json
 import subprocess
 import sys
+from datetime import date
 from pathlib import Path
 from typing import Any
 
@@ -19,6 +20,8 @@ BENCHMARKS = ROOT / "benchmarks"
 OUTPUT = BENCHMARKS / "README.md"
 MANIFEST_NAME = "bench.json"
 SCHEMA_ID = "sens-benchmark-manifest/v1"
+EXEMPTION_FILE = BENCHMARKS / "support-exemptions.json"
+EXEMPTION_SCHEMA_ID = "sens-benchmark-support-exemptions/1"
 ROLES = {"MEASUREMENT", "CONFORMANCE", "FALSIFIER", "RESEARCH"}
 REQUIRED = {
     "schema",
@@ -105,6 +108,118 @@ def validate_manifest(path: Path) -> dict[str, Any]:
     return data
 
 
+
+
+EXEMPTION_FIELDS = {"path", "reason", "witness", "owner_or_issue", "reviewed_at"}
+
+
+def validate_support_exemptions(
+    path: Path | None = None,
+    benchmarks_root: Path | None = None,
+    repository_root: Path | None = None,
+) -> list[dict[str, Any]]:
+    """Load explicit non-stand directory exemptions; never infer exemptions."""
+    registry_path = path if path is not None else EXEMPTION_FILE
+    benches = benchmarks_root if benchmarks_root is not None else BENCHMARKS
+    root = repository_root if repository_root is not None else ROOT
+    try:
+        data = json.loads(registry_path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError) as error:
+        raise RegistryError(f"{registry_path}: cannot read support-exemption registry: {error}") from error
+
+    if not isinstance(data, dict) or set(data) != {"schema", "exemptions"}:
+        raise RegistryError(f"{registry_path}: expected exactly schema and exemptions")
+    if data.get("schema") != EXEMPTION_SCHEMA_ID:
+        raise RegistryError(
+            f"{registry_path}: schema must be {EXEMPTION_SCHEMA_ID!r}, got {data.get('schema')!r}"
+        )
+    entries = data.get("exemptions")
+    if not isinstance(entries, list):
+        raise RegistryError(f"{registry_path}: exemptions must be a list")
+
+    seen: set[str] = set()
+    validated: list[dict[str, Any]] = []
+    for index, entry in enumerate(entries):
+        label = f"{registry_path}: exemptions[{index}]"
+        if not isinstance(entry, dict) or set(entry) != EXEMPTION_FIELDS:
+            raise RegistryError(
+                f"{label}: expected fields {', '.join(sorted(EXEMPTION_FIELDS))}"
+            )
+
+        directory = _nonempty_string(entry["path"], "path", registry_path)
+        if directory in {".", ".."} or "/" in directory or "\\" in directory:
+            raise RegistryError(f"{label}: path must be one top-level directory name")
+        if directory in seen:
+            raise RegistryError(f"{registry_path}: duplicate support exemption path {directory!r}")
+        seen.add(directory)
+
+        reason = _nonempty_string(entry["reason"], "reason", registry_path)
+        owner_or_issue = _nonempty_string(entry["owner_or_issue"], "owner_or_issue", registry_path)
+        reviewed_at = _nonempty_string(entry["reviewed_at"], "reviewed_at", registry_path)
+        try:
+            date.fromisoformat(reviewed_at)
+        except ValueError as error:
+            raise RegistryError(f"{label}: reviewed_at must be an ISO date YYYY-MM-DD") from error
+
+        directory_path = benches / directory
+        if not directory_path.is_dir() or directory_path.resolve().parent != benches.resolve():
+            raise RegistryError(f"{label}: exempted directory does not exist at top level: {directory}")
+        if (directory_path / MANIFEST_NAME).is_file():
+            raise RegistryError(f"{label}: {directory} has {MANIFEST_NAME}; it cannot also be exempted")
+
+        witnesses = entry["witness"]
+        if (
+            not isinstance(witnesses, list)
+            or not witnesses
+            or any(not isinstance(item, str) or not item.strip() for item in witnesses)
+            or len(set(witnesses)) != len(witnesses)
+        ):
+            raise RegistryError(f"{label}: witness must be a non-empty list of unique repository paths")
+        for witness in witnesses:
+            witness_path = Path(witness)
+            prefix = Path("benchmarks") / directory
+            if witness_path.is_absolute() or ".." in witness_path.parts or witness_path.parts[:2] != prefix.parts:
+                raise RegistryError(f"{label}: witness must stay inside benchmarks/{directory}/: {witness}")
+            if not (root / witness_path).is_file():
+                raise RegistryError(f"{label}: witness file does not exist: {witness}")
+
+        validated.append(
+            {
+                "path": directory,
+                "reason": reason,
+                "witness": witnesses,
+                "owner_or_issue": owner_or_issue,
+                "reviewed_at": reviewed_at,
+            }
+        )
+
+    return sorted(validated, key=lambda item: item["path"])
+
+
+def load_support_exemptions() -> list[dict[str, Any]]:
+    return validate_support_exemptions()
+
+
+def report_coverage(manifests: list[dict[str, Any]], exemptions: list[dict[str, Any]]) -> None:
+    registered = {item["stand"] for item in manifests}
+    exempted = {item["path"] for item in exemptions}
+    directories = {
+        path.name
+        for path in BENCHMARKS.iterdir()
+        if path.is_dir() and not path.name.startswith(".")
+    }
+    unclassified = sorted(directories - registered - exempted)
+    print(
+        "benchmark directory coverage: "
+        f"{len(registered)} registered stands; "
+        f"{len(exempted)} explicit support exemptions; "
+        f"{len(unclassified)} unclassified directories; "
+        f"{len(directories)} top-level directories total"
+    )
+    if unclassified:
+        print("unclassified directories: " + ", ".join(unclassified))
+
+
 def load_manifests() -> list[dict[str, Any]]:
     manifests = [
         validate_manifest(path)
@@ -123,18 +238,20 @@ def _cell(value: str) -> str:
     return value.replace("|", "\\|").replace("\n", "<br>")
 
 
-def render(manifests: list[dict[str, Any]]) -> str:
+def render(manifests: list[dict[str, Any]], exemptions: list[dict[str, Any]] | None = None) -> str:
+    exemptions = exemptions or []
     lines = [
         "# Benchmark laboratory index",
         "",
         "> **GENERATED FILE — DO NOT EDIT BY HAND.**",
-        "> Sources: `benchmarks/*/bench.json`.",
+        "> Sources: `benchmarks/*/bench.json` and `benchmarks/support-exemptions.json`.",
         "> Generator: `scripts/benchmark_registry.py`.",
         "> This is discovery metadata only: presence in this table does not grant semantic authority or increase evidence strength.",
         "",
         "Bootstrap rule: existing unregistered stands remain explicit backfill debt tracked by #4172. Any newly created benchmark stand must carry `bench.json`; #4171 guards that ratchet.",
         "",
         f"**Registered stands:** {len(manifests)}",
+        f"**Explicit support-directory exemptions:** {len(exemptions)} (not benchmark stands)",
         "",
         "| Stand | Wing | Role | Question | Claim boundary | Witness | Status | Generation | Axis | Reproduce |",
         "|---|---|---|---|---|---|---|---|---|---|",
@@ -163,6 +280,33 @@ def render(manifests: list[dict[str, Any]]) -> str:
     lines.extend(
         [
             "",
+            "## Explicit support-directory exemptions (not benchmark stands)",
+            "",
+            "These directories support corpora, evidence ledgers, blocked-admission records, or consumer documentation. They are not counted as benchmark stands and must not imply a measurement or conformance result.",
+            "",
+            "| Directory | Reason | Witness | Owner / issue | Reviewed |",
+            "|---|---|---|---|---|",
+        ]
+    )
+    for entry in exemptions:
+        witness = "<br>".join(f"\`{_cell(item)}\`" for item in entry["witness"])
+        lines.append(
+            "| "
+            + " | ".join(
+                [
+                    f"\`{_cell(entry['path'])}\`",
+                    _cell(entry["reason"]),
+                    witness,
+                    _cell(entry["owner_or_issue"]),
+                    _cell(entry["reviewed_at"]),
+                ]
+            )
+            + " |"
+        )
+
+    lines.extend(
+        [
+            "",
             "## Rules",
             "",
             "The registry answers *where to look* and *what strength a stand may claim*. Semantic authority remains where the language contract says it lives. A benchmark result is evidence, not a ratification mechanism.",
@@ -174,7 +318,7 @@ def render(manifests: list[dict[str, Any]]) -> str:
             "python3 scripts/benchmark_registry.py --check",
             "```",
             "",
-            "After #4172 backfills the historical laboratory, CI can switch to `--strict`, which rejects every top-level benchmark directory without a manifest rather than only rejecting newly introduced ones.",
+            "The `--strict` gate rejects every top-level benchmark directory lacking either a valid bench.json manifest or an explicit, source-backed support exemption. The remaining unclassified directories are reported by `--coverage` and stay tracked as backfill debt under #4172.",
             "",
         ]
     )
@@ -192,7 +336,8 @@ def _base_has_stand(base: str, stand: str) -> bool:
     return result.returncode == 0
 
 
-def check_new_stands(base: str, head: str) -> None:
+def check_new_stands(base: str, head: str, exempted_paths: set[str] | None = None) -> None:
+    exempted_paths = exempted_paths or set()
     result = subprocess.run(
         [
             "git",
@@ -233,7 +378,7 @@ def check_new_stands(base: str, head: str) -> None:
     missing = [
         stand
         for stand in sorted(new_stands)
-        if not (BENCHMARKS / stand / MANIFEST_NAME).is_file()
+        if not (BENCHMARKS / stand / MANIFEST_NAME).is_file() and stand not in exempted_paths
     ]
     if missing:
         raise RegistryError(
@@ -241,15 +386,19 @@ def check_new_stands(base: str, head: str) -> None:
         )
 
 
-def check_strict() -> None:
+def check_strict(exempted_paths: set[str] | None = None) -> None:
+    exempted_paths = exempted_paths or set()
     missing = [
         path.name
         for path in sorted(BENCHMARKS.iterdir())
-        if path.is_dir() and not path.name.startswith(".") and not (path / MANIFEST_NAME).is_file()
+        if path.is_dir()
+        and not path.name.startswith(".")
+        and not (path / MANIFEST_NAME).is_file()
+        and path.name not in exempted_paths
     ]
     if missing:
         raise RegistryError(
-            "unclassified benchmark stand(s): " + ", ".join(missing)
+            "unclassified benchmark directory(ies): " + ", ".join(missing)
         )
 
 
@@ -269,7 +418,12 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--strict",
         action="store_true",
-        help="fail if any top-level benchmark directory lacks bench.json",
+        help="fail if any top-level benchmark directory lacks bench.json or explicit support exemption",
+    )
+    parser.add_argument(
+        "--coverage",
+        action="store_true",
+        help="report registered, exempted, and still-unclassified top-level directories without changing files",
     )
     return parser.parse_args()
 
@@ -278,12 +432,16 @@ def main() -> int:
     args = parse_args()
     try:
         manifests = load_manifests()
+        exemptions = load_support_exemptions()
+        exempted_paths = {item["path"] for item in exemptions}
         if args.check_new:
-            check_new_stands(*args.check_new)
+            check_new_stands(*args.check_new, exempted_paths=exempted_paths)
         if args.strict:
-            check_strict()
+            check_strict(exempted_paths=exempted_paths)
+        if args.coverage:
+            report_coverage(manifests, exemptions)
 
-        generated = render(manifests)
+        generated = render(manifests, exemptions)
         if args.check:
             try:
                 current = OUTPUT.read_text(encoding="utf-8")
@@ -296,6 +454,9 @@ def main() -> int:
                 )
                 return 1
             print(f"benchmark registry projection is current: {OUTPUT}")
+            return 0
+
+        if args.coverage:
             return 0
 
         OUTPUT.write_text(generated, encoding="utf-8")

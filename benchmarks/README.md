@@ -1,13 +1,14 @@
 # Benchmark laboratory index
 
 > **GENERATED FILE — DO NOT EDIT BY HAND.**
-> Sources: `benchmarks/*/bench.json`.
+> Sources: `benchmarks/*/bench.json` and `benchmarks/support-exemptions.json`.
 > Generator: `scripts/benchmark_registry.py`.
 > This is discovery metadata only: presence in this table does not grant semantic authority or increase evidence strength.
 
 Bootstrap rule: existing unregistered stands remain explicit backfill debt tracked by #4172. Any newly created benchmark stand must carry `bench.json`; #4171 guards that ratchet.
 
 **Registered stands:** 47
+**Explicit support-directory exemptions:** 7 (not benchmark stands)
 
 | Stand | Wing | Role | Question | Claim boundary | Witness | Status | Generation | Axis | Reproduce |
 |---|---|---|---|---|---|---|---|---|---|
@@ -59,6 +60,21 @@ Bootstrap rule: existing unregistered stands remain explicit backfill debt track
 | `store-air-load` | STORE → AIR → LOAD | `MEASUREMENT`<br>`CONFORMANCE`<br>`FALSIFIER` | Can canonical exact-width payload identity be preserved while storage, transport, and load costs are measured as separate physical axes? | Measures STORE/AIR/LOAD accounting and validates exact-width recovery for declared fixtures; transport overhead does not become language semantics. | `README.md`<br>`run.py`<br>`validate.py`<br>`fixtures.json`<br>`schema.json` | ACTIVE | unknown | `store-air-load/physical-separation` | `python3 benchmarks/store-air-load/run.py --out /tmp/store-air-load.jsonl --bitrate-bps 2 && python3 benchmarks/store-air-load/validate.py /tmp/store-air-load.jsonl` |
 | `unbounded-width` | Exact-width carrier mechanisms | `MEASUREMENT`<br>`CONFORMANCE`<br>`FALSIFIER` | Do dynamic exact-width carriers preserve bit identity and avoid a semantic width ceiling through the measured 4096-bit sample? | Bounded Cachegrind and exact-width identity evidence only; no production carrier selection, universal performance law, or D1-D10 ratification. | `README.md`<br>`run.py`<br>`width_scale.c` | HISTORICAL-RESEARCH-ONLY | historical source PR #2005 replayed 2026-10-09 | `carrier/dynamic-unbounded-width` | `python3 benchmarks/unbounded-width/run.py --smoke` |
 
+
+## Explicit support-directory exemptions (not benchmark stands)
+
+These directories support corpora, evidence ledgers, blocked-admission records, or consumer documentation. They are not counted as benchmark stands and must not imply a measurement or conformance result.
+
+| Directory | Reason | Witness | Owner / issue | Reviewed |
+|---|---|---|---|---|
+| `axiom-corpus-function-description` | Name-erased D5 distinguishing corpus documentation only; it has no independent runner and is consumed as supporting corpus/specification. | `benchmarks/axiom-corpus-function-description/README.md` | #4172; #3451/#3454 | 2026-10-12 |
+| `d5-eligibility` | Machine-readable D5 derivation eligibility ledger, explicitly research-only/no-placement; not an executable benchmark stand. | `benchmarks/d5-eligibility/eligibility.json` | #4172; #2616 | 2026-10-12 |
+| `d5-sens-derivation-closeout` | Source-backed factor eligibility/derivation closeout ledger; evidence data without an independent runner. | `benchmarks/d5-sens-derivation-closeout/factor-eligibility.json` | #4172; #2616 | 2026-10-12 |
+| `d7-number-map` | README and TSV record a negative domain-width finding; no runner, and the directory is a research artifact rather than a measurement stand. | `benchmarks/d7-number-map/README.md`<br>`benchmarks/d7-number-map/number-map.tsv` | #4172; #2443 | 2026-10-12 |
+| `gpu-oracle-current` | Blocked GPU-admission evidence ledger with no positive oracle rows; this records a blocker and must not appear as a completed benchmark result. | `benchmarks/gpu-oracle-current/blocked-gpu-admission.json` | #4172; #3766/#3801 | 2026-10-12 |
+| `standard` | Parent fixture/provenance directory for binary-trees only; the README explicitly says the execution adapter is deferred, so this is not yet a runnable stand. | `benchmarks/standard/binary-trees/README.md` | #4172; #1546/#1550 | 2026-10-12 |
+| `whole-model-pareto` | Consumer/projection documentation that joins published evidence from other stands and does not implement an independent harness. | `benchmarks/whole-model-pareto/README.md` | #4172; #1973/#1987 | 2026-10-12 |
+
 ## Rules
 
 The registry answers *where to look* and *what strength a stand may claim*. Semantic authority remains where the language contract says it lives. A benchmark result is evidence, not a ratification mechanism.
@@ -70,4 +86,4 @@ python3 scripts/benchmark_registry.py
 python3 scripts/benchmark_registry.py --check
 ```
 
-After #4172 backfills the historical laboratory, CI can switch to `--strict`, which rejects every top-level benchmark directory without a manifest rather than only rejecting newly introduced ones.
+The `--strict` gate rejects every top-level benchmark directory lacking either a valid bench.json manifest or an explicit, source-backed support exemption. The remaining unclassified directories are reported by `--coverage` and stay tracked as backfill debt under #4172.

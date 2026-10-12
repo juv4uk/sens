@@ -6,6 +6,12 @@ on:
     paths:
       - "benchmarks/**"
       - "scripts/benchmark_registry.py"
+      - "scripts/test_benchmark_registry.py"
+      - "benchmarks/support-exemptions.json"
+      - "benchmarks/support-exemptions.schema.json"
+      - "scripts/test_benchmark_registry.py"
+      - "benchmarks/support-exemptions.json"
+      - "benchmarks/support-exemptions.schema.json"
       - "scripts/benchmark_sweep.py"
       - "scripts/test_benchmark_sweep.py"
       - ".github/workflows/benchmark-registry.yml"
@@ -31,8 +37,11 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Validate manifests and generated index
-        run: python3 scripts/benchmark_registry.py --check
+      - name: Validate registry, explicit exemptions, and remaining coverage debt
+        run: |
+          set -euo pipefail
+          python3 -m unittest discover -s scripts -p 'test_benchmark_registry.py' -v
+          python3 scripts/benchmark_registry.py --check --coverage
 
       - name: Verify historical paired effect methodology (synthetic falsifiers only)
         shell: bash

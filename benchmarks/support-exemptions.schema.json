@@ -1,0 +1,58 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "sens-benchmark-support-exemptions/1",
+  "title": "SENS benchmark support-directory exemption registry",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema",
+    "exemptions"
+  ],
+  "properties": {
+    "schema": {
+      "const": "sens-benchmark-support-exemptions/1"
+    },
+    "exemptions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "path",
+          "reason",
+          "witness",
+          "owner_or_issue",
+          "reviewed_at"
+        ],
+        "properties": {
+          "path": {
+            "type": "string",
+            "minLength": 1,
+            "pattern": "^[^./\\\\\\\\]+$"
+          },
+          "reason": {
+            "type": "string",
+            "minLength": 1
+          },
+          "witness": {
+            "type": "array",
+            "minItems": 1,
+            "uniqueItems": true,
+            "items": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          "owner_or_issue": {
+            "type": "string",
+            "minLength": 1
+          },
+          "reviewed_at": {
+            "type": "string",
+            "format": "date"
+          }
+        }
+      }
+    }
+  }
+}
