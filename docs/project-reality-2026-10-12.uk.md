@@ -29,6 +29,8 @@
 - Відомий partial operational-input subtotal найсвіжішого checkpoint: **36 033 737 Б** (runner + pinned SENS build-input subset + CML runtime-read contract + WSM nucleus source).
 - Вимірювач має позитивні й негативні self-tests; це перевіряє інструмент, не створює нового compiler run.
 
+**Версія семантичного джерела:** pinned Nano checkpoint використовує SENS source SHA `d0787a40fcea36501747732aa61b6de19fe29c70` і Contract 11.8 (`d10_dependency=false` у машинному звіті). Отже ці прогони не є виконанням D10 під поточним Contract 11.9; цей статус окремий від актуальної ратифікації D10 у `main`.
+
 ### Не доведено
 
 **Повний seed-total, його мінімальність і самодостатність offline replay лишаються BLOCKED.** У підсумок не закрито весь граф `mod`/`cfg`/`include`, залежності toolchain/OS/shared libraries, Git refs/objects та повний мінімізований набір зовнішніх vendor inputs. Спостережені vendor-файли — subset runtime traces, не доказ мінімального набору.
