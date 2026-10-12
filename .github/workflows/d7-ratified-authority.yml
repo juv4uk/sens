@@ -40,8 +40,10 @@ jobs:
           python3 scripts/d7_source_projection.py --check
           python3 -m unittest discover -s tests -p 'test_d7_source_projection.py' -v
           python3 -m unittest discover -s tests -p 'test_d7_symbol_codec.py' -v
+          python3 -m unittest discover -s tests -p 'test_d7_t5_keyboard.py' -v
+          python3 scripts/check-d7-runtime-projection.py
       - uses: dtolnay/rust-toolchain@stable
       - name: Prove mechanical dense W7 and contextual D2/Text7 identities
-        run: cargo test --locked -p sens --test d7_w7_pack --test text7_contextual_binding
+        run: cargo test --locked -p sens --test d7_w7_pack --test d7_keyboard_t5 --test d7_runtime_presentation --test text7_canonical_wire --test text7_shiva_w7_synthesis --test text7_contextual_binding
       - name: Confirm D7 coordinates remain only width-qualified Rust carriers
         run: cargo test --locked -p sens --lib domain_ladder::tests::every_d7_source_word_has_a_width_preserving_coordinate -- --exact
