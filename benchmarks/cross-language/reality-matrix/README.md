@@ -5,12 +5,32 @@ Owner issue: #3680
 This directory extends the existing `benchmarks/cross-language/run.py` discipline to
 SENS vs WebAssembly, CakeML, Lean, Clash, Nock, Unison and Rust.
 
+## Current authority — Contract 11.9 (2026-10-12)
+
+Canonical semantic identity is exact bits + exact domain + admitted/proved law.
+D1–D10 are owner-ratified as semantic residents; this does **not** mean every
+resident has an executable runtime mechanism. In particular, D10 F1/F2/F3
+evidence and physical T5 execution remain pending and must fail closed.
+D24+ numeric domains are separately owner-ratified. Historical Sens8/Sid8/Function8
+lanes are provenance only, never a fallback or current semantic authority.
+
+Historical benchmark rows remain valid only for the exact generation, commit,
+runtime and workload that produced them. Do not relabel them as current Contract
+11.9 evidence. Any fresh row must record the exact SENS SHA, Contract 11.9,
+competitor version, environment, workload parameters and parity result.
+
+**Execution boundary:** the repository's current directive freezes independent/
+external execution kernels and keeps active work on the canonical SENS Core.
+This matrix documents existing evidence and defines fair comparison gates; it
+does not authorize restarting frozen backends or creating new branches.
+
 ## Non-negotiable rules
 
 1. **Current SENS only.** Canonical semantic identity is exact bits + exact domain +
    admitted/proved law. Historical Sens8/Sid8/Function8 lanes are provenance only.
-2. **D1–D7 are the ratified Core foundation. D8 is research.** D8 data may be reported
-   only in a clearly separated research row.
+2. **D1–D10 residency is ratified; runtime authority is separate.** D10 data may be
+   reported as resident inventory, but execution claims require their own F1/F2/F3/T5
+   evidence. Do not imply that whole-domain ratification proves executable behavior.
 3. **Parity before timing.** Every measured workload MUST have a golden output or a
    stronger equivalence witness checked before timing.
 4. **Same machine, same load context.** Timing/RSS ratios are valid only within one
