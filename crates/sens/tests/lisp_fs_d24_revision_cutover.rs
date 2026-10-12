@@ -45,7 +45,7 @@ fn list(items: Vec<Value>) -> Value {
 }
 
 fn revision_of(snapshot: Value) -> Value {
-    let Value::Pair(_, rest) = snapshot else {
+    let Value::Pair(_, rest) = &snapshot else {
         panic!("snapshot: missing objects");
     };
     let Value::Pair(_, rest) = rest.as_ref() else {
