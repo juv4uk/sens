@@ -5,6 +5,9 @@ on:
     paths:
       - "lib/machine/block-exact.lisp"
       - "crates/sens/tests/machine_block_exact_domain.rs"
+      - "crates/sens/tests/support/machine_block_exact.rs"
+      - "crates/sens/tests/machine_atoms.rs"
+      - "crates/sens/tests/machine_block_roundtrip.rs"
       - ".github/workflows/machine-block-exact-cutover.yml"
   workflow_dispatch:
 
@@ -26,3 +29,7 @@ jobs:
         run: python3 -m unittest discover -s tests -p test_machine_block_historical_oracle.py -v
       - name: Точні D3/D4 і дев'ять історичних спостережень
         run: cargo test --locked -p sens --test machine_block_exact_domain -- --nocapture
+      - name: Машинні атоми з актуальним D3/D4 блоком
+        run: cargo test --locked -p sens --test machine_atoms -- --nocapture
+      - name: Незалежний декодер перевіряє точнодоменні блоки
+        run: cargo test --locked -p sens --test machine_block_roundtrip -- --nocapture
