@@ -271,6 +271,34 @@ class LegacyD3GuardTests(unittest.TestCase):
             [f.rule for f in MODULE.scan_lisp(regression, path)],
         )
 
+    def test_fpga_program_symbol_table_exact_d1_migration(self):
+        path = "scripts/program-symbol-table.lisp"
+        source = (ROOT / path).read_text(encoding="utf-8")
+        rules = [f.rule for f in MODULE.scan_lisp(source, path)]
+
+        # A historical three-field printing clause remains real debt.
+        # This negative test must not erase or allow it to silently grow.
+        self.assertEqual(rules.count("COND_NOT_TWO_FIELDS"), 1)
+        self.assertNotIn("COND_HOST_TRUTH", rules)
+
+        exact = "((010 lst) acc)"
+        self.assertIn(exact, source)
+        reverted = source.replace(exact, "((010 lst) (1) acc)", 1)
+        self.assertGreater(
+            [f.rule for f in MODULE.scan_lisp(reverted, path)].count(
+                "COND_NOT_TWO_FIELDS"
+            ),
+            rules.count("COND_NOT_TWO_FIELDS"),
+        )
+
+        fallback = "((010 (001 ())) (reverse-acc"
+        self.assertIn(fallback, source)
+        reverted = source.replace(fallback, "(t (reverse-acc", 1)
+        self.assertIn(
+            "COND_HOST_TRUTH",
+            [f.rule for f in MODULE.scan_lisp(reverted, path)],
+        )
+
     def test_historical_paths_and_metadata_excluded(self):
         for path in ("docs/research/old.lisp", "research/domain-archive/a.lisp",
                      "tests/fixtures/old.lisp", "lib/domains/d3.lisp",
