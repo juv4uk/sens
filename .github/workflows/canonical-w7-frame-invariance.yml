@@ -28,6 +28,8 @@ jobs:
       - uses: dtolnay/rust-toolchain@stable
       - name: Preserve D2 LIST / DOT and exact noncallable W7 in all source contexts
         run: cargo test -p sens --locked --test canonical_w7_frame_invariance -- --nocapture
+      - name: Вичерпний аудит 8186 бітів, 20-бітний еталон і межа D2
+        run: cargo test --locked -p sens --lib canonical_reader::tests:: -- --nocapture
       - name: Explain what the guard proves
         run: |
           echo "D2 list and dotted-pair semantics unchanged; no unratified Text7 binder/source frame admitted."
