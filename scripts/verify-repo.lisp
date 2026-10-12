@@ -7,7 +7,7 @@
 
 (0011 str+
   (0010 args
-    (101110 (0010 (acc s) (110011110 acc s)) "" args)))
+    (reduce (0010 (acc s) (string-append acc s)) "" args)))
 
 (0011 fail
   (0010 (message)
