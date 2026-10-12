@@ -1,0 +1,57 @@
+name: Release pins guard
+
+# Enforces the RELEASE.md gate #3 reproducibility invariant on the release path:
+# the pinned Rust channel and SHA-pinned actions may not silently drift. This is
+# additive to release.yml / release-preflight.yml and runs the guard against the
+# real checkout (the guard's own unit tests only cover synthetic fixtures).
+
+on:
+  pull_request:
+    paths:
+      - "rust-toolchain.toml"
+      - ".github/workflows/release.yml"
+      - ".github/workflows/release-preflight.yml"
+      - ".github/workflows/release-smoke-short.yml"
+      - ".github/workflows/current-binary-preflight.yml"
+      - ".github/workflows/publish-binary-master.yml"
+      - ".github/workflows/release-pins-guard.yml"
+      - "scripts/check-release-pins.py"
+      - "scripts/check-release-admission-ledger.py"
+      - "tests/test_check_release_pins.py"
+      - "tests/test_check_release_admission_ledger.py"
+  push:
+    branches: [main]
+    paths:
+      - "rust-toolchain.toml"
+      - ".github/workflows/release.yml"
+      - ".github/workflows/release-preflight.yml"
+      - ".github/workflows/release-smoke-short.yml"
+      - ".github/workflows/current-binary-preflight.yml"
+      - ".github/workflows/publish-binary-master.yml"
+      - ".github/workflows/release-pins-guard.yml"
+      - "scripts/check-release-pins.py"
+      - "scripts/check-release-admission-ledger.py"
+      - "tests/test_check_release_pins.py"
+      - "tests/test_check_release_admission_ledger.py"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: release-pins-guard-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  guard:
+    name: release pins guard
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
+
+      - name: Release-path toolchain and action pins are locked
+        run: python3 scripts/check-release-pins.py
+
+      - name: Negative witnesses for the release guards
+        run: python3 -m unittest discover -s tests -p 'test_check_release_*.py' -v
