@@ -40,11 +40,16 @@ impl DomainCoordinate {
 
     /// Pure occupancy projection from owner-ratified domain sources.
     ///
-    /// D3–D7 are a generated coordinate subset. D8/D9 have independent,
-    /// exhaustively-validated full-width owner ratification certificates.
-    /// D1/D2 structural/predicate roles and D10 research stay unprojected.
+    /// D3–D7 are a generated coordinate subset. D8/D9 have independent
+    /// full-width owner certificates; Contract 11.9 separately ratifies
+    /// D10 as one complete 1024/1024 domain, without runtime admission.
+    /// D1/D2 structural/predicate roles stay unprojected.
     /// Some(true) proves occupancy, never a callable mechanism or human name.
     pub fn owner_residency(self) -> Option<bool> {
+        if self.width == 10 {
+            // Whole-domain ratification; NOT physical T5 or callability.
+            return Some(true);
+        }
         if crate::domain_owner_generated::DOMAIN_OWNER_FULL_WIDTHS.contains(&self.width) {
             return Some(true);
         }
@@ -110,7 +115,7 @@ mod tests {
         );
         assert_eq!(
             DomainCoordinate::new(10, 0b0100001).unwrap().owner_residency(),
-            None
+            Some(true)
         );
     }
 
@@ -126,8 +131,8 @@ mod tests {
         for bits in [0, 1, 255, 511, 1023] {
             assert_eq!(
                 DomainCoordinate::new(10, bits).unwrap().owner_residency(),
-                None,
-                "D10 research coordinates are not ratified residents"
+                Some(true),
+                "whole D10 owner ratification is not an execution admission"
             );
         }
     }
@@ -137,6 +142,9 @@ mod tests {
         assert_eq!(DomainCoordinate::new(10, 1023).unwrap().bits(), 1023);
         assert_eq!(DomainCoordinate::new(10, 1024), None);
         assert_ne!(DomainCoordinate::new(9, 511), DomainCoordinate::new(10, 511));
+        for bits in 0..1024 {
+            assert_eq!(DomainCoordinate::new(10, bits).unwrap().owner_residency(), Some(true));
+        }
         assert_eq!(DomainCoordinate::new(0, 0), None);
         assert_eq!(DomainCoordinate::new(11, 0), None);
     }
