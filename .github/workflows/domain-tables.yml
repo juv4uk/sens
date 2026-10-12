@@ -35,6 +35,8 @@ on:
       - "crates/sens/src/semantic_registry.rs"
       - "crates/sens/src/presentation.rs"
       - "crates/sens/src/eval/lower.rs"
+      - "lib/linter.lisp"
+      - "tests/test_linter_domain_head_cutover.py"
       - ".github/workflows/domain-tables.yml"
   push:
     branches: [main]
@@ -71,6 +73,8 @@ on:
       - "crates/sens/src/semantic_registry.rs"
       - "crates/sens/src/presentation.rs"
       - "crates/sens/src/eval/lower.rs"
+      - "lib/linter.lisp"
+      - "tests/test_linter_domain_head_cutover.py"
       - ".github/workflows/domain-tables.yml"
 
 jobs:
@@ -80,6 +84,8 @@ jobs:
       - uses: actions/checkout@v5
       - name: Validate canonical domain tables
         run: python3 scripts/check-domain-tables.py
+      - name: Guard linter against old flat 8-bit head aliases
+        run: python3 -m unittest discover -s tests -p test_linter_domain_head_cutover.py -v
       - name: Check generated SENS domain-width certificate
         run: python3 scripts/generate-domain-width-certificate.py --check
       - name: Prove Rust exact-width carriers match SENS certificate
