@@ -24,8 +24,8 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 15
     steps:
-      - uses: actions/checkout@v5
-      - uses: dtolnay/rust-toolchain@stable
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
+      - uses: dtolnay/rust-toolchain@1.99.0
       - name: Check D7 ratified source coordinates
         run: python3 scripts/check-d7-current-authority.py
       - name: Execute physical-binary-only program and fail-closed negatives
