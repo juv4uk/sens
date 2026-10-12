@@ -448,6 +448,38 @@ fn bind_missing_stable_surface_peers(environment: &Environment) {
 /// Per-thread cache of the *mechanical* Core4 binary decode and lowering.
 /// This is not a shared Environment, evaluated Value, macro, or Lisp semantic
 /// snapshot. Every caller still performs the full language-owned bootstrap.
+/// Canonical Core4 FASL is determined by the path-bound exact-domain reader,
+/// never by a source hash alone. Cache only this mechanical reference encoding
+/// per thread, independently of the decoded/lowered bootstrap cache.
+fn canonical_core4_fasl_bytes() -> Option<std::rc::Rc<[u8]>> {
+    thread_local! {
+        static EXPECTED: std::cell::OnceCell<Option<std::rc::Rc<[u8]>>> =
+            const { std::cell::OnceCell::new() };
+    }
+    EXPECTED.with(|slot| {
+        slot.get_or_init(|| {
+            let expressions = parse_mixed_exact_domain_core_source(
+                "lib/core4.lisp",
+                CORE_LIBRARY_SOURCE,
+            ).ok()?;
+            let hash = sha256_source(CORE_LIBRARY_SOURCE.as_bytes());
+            Some(std::rc::Rc::<[u8]>::from(fasl_encode(&expressions, &hash)))
+        })
+        .clone()
+    })
+}
+
+/// A forged or incorrectly parsed FASL may carry the correct source hash but
+/// represent short D3/D4 callable heads as Numbers. Admit only the exact
+/// canonical path-bound Core4 encoding; otherwise fall back to source.
+fn decode_verified_core4_fasl(fasl: &[u8]) -> Option<Vec<Expr>> {
+    let expected = canonical_core4_fasl_bytes()?;
+    if fasl != expected.as_ref() {
+        return None;
+    }
+    fasl_decode_program(fasl).map(|(expressions, _)| expressions)
+}
+
 fn current_core_verified_lowered() -> Option<std::rc::Rc<[Expr]>> {
     thread_local! {
         static LOWERED: std::cell::OnceCell<Option<std::rc::Rc<[Expr]>>> =
@@ -455,10 +487,7 @@ fn current_core_verified_lowered() -> Option<std::rc::Rc<[Expr]>> {
     }
     LOWERED.with(|slot| {
         slot.get_or_init(|| {
-            let (expressions, source_hash) = fasl_decode_program(CORE_LIBRARY_FASL)?;
-            if source_hash != sha256_source(CORE_LIBRARY_SOURCE.as_bytes()) {
-                return None;
-            }
+            let expressions = decode_verified_core4_fasl(CORE_LIBRARY_FASL)?;
             let lowered = eval::lower::lower_program(&expressions);
             Some(std::rc::Rc::<[Expr]>::from(lowered))
         })
@@ -495,13 +524,9 @@ fn load_core_library_with_fasl_mode(
             None => eval_core4_source_fallback(session)?,
         }
     } else {
-        match fasl_decode_program(core_fasl) {
-            Some((expressions, source_hash))
-                if source_hash == sha256_source(CORE_LIBRARY_SOURCE.as_bytes()) =>
-            {
-                eval_parsed_expressions(&expressions, session)?
-            }
-            _ => eval_core4_source_fallback(session)?,
+        match decode_verified_core4_fasl(core_fasl) {
+            Some(expressions) => eval_parsed_expressions(&expressions, session)?,
+            None => eval_core4_source_fallback(session)?,
         }
     };
 
@@ -543,9 +568,7 @@ pub fn load_core_library(session: &mut Session) -> Result<EvalResult, LanguageEr
 /// Read-only діагностика для embedder-а: чи відповідає Core4 FASL точному
 /// вбудованому source. Не вибирає profile і не змінює bootstrap.
 pub fn core_library_fasl_is_current() -> bool {
-    fasl_decode_program(CORE_LIBRARY_FASL)
-        .map(|(_, source_hash)| source_hash == sha256_source(CORE_LIBRARY_SOURCE.as_bytes()))
-        .unwrap_or(false)
+    decode_verified_core4_fasl(CORE_LIBRARY_FASL).is_some()
 }
 
 /// Activate the frozen Core2/Contract-6 compatibility profile.
@@ -918,7 +941,8 @@ mod core4_bootstrap_cache_tests {
 
     #[test]
     fn valid_fasl_path_selects_core4_and_evaluates_current_core() {
-        let expressions = parse(CORE_LIBRARY_SOURCE).expect("current Core4 parses");
+        let expressions = parse_mixed_exact_domain_core_source("lib/core4.lisp", CORE_LIBRARY_SOURCE)
+            .expect("current Core4 parses with exact-domain call heads");
         let hash = sha256_source(CORE_LIBRARY_SOURCE.as_bytes());
         let fasl = fasl_encode(&expressions, &hash);
         let mut session = Session::default();
@@ -929,6 +953,30 @@ mod core4_bootstrap_cache_tests {
             session.environment.selected_core_profile(),
             Some(CoreProfile::Core4)
         );
+    }
+
+    #[test]
+    fn same_hash_ordinary_reader_fasl_cannot_reinterpret_d3_heads_as_numbers() {
+        // A matching source hash does NOT prove that callable D3-D6 heads
+        // survived reading; the generic parser reads bare 100 as a Number.
+        let expressions = parse(CORE_LIBRARY_SOURCE).expect("ordinary reader can parse Core4");
+        let hash = sha256_source(CORE_LIBRARY_SOURCE.as_bytes());
+        let wrong_fasl = fasl_encode(&expressions, &hash);
+        assert!(
+            decode_verified_core4_fasl(&wrong_fasl).is_none(),
+            "source hash must not authorize FASL built by the wrong reader"
+        );
+
+        let mut session = Session::default();
+        load_core_library_with_fasl(&mut session, &wrong_fasl)
+            .expect("incorrect-reader FASL must fall back to exact-domain Core4 source");
+        assert_eq!(
+            session.environment.selected_core_profile(),
+            Some(CoreProfile::Core4)
+        );
+        let result = eval_program("(let* ((x 7) (y x)) y)", &mut session)
+            .expect("D6 let* remains callable after rejected FASL");
+        assert_eq!(result.value.to_string(), "7");
     }
 
     #[test]
