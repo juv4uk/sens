@@ -24,7 +24,7 @@
 | T5 file authority | Повне перенесення assembled original Lisp oracle заблоковане семантичним допуском; verdict T5 oracle не отримано | [run 38228581765](https://github.com/juv4uk/sens/actions/runs/38228581765) |
 | Native vertical smoke | `sens-host --test native_cond_profile` має реальне FAILED на EQ/COND branches | [run 38228581849](https://github.com/juv4uk/sens/actions/runs/38228581849) |
 | LET source replay | Pinned очікування розійшлося з поточними `lib/forward.lisp`, `lib/knowledge.lisp` (перевірити семантичний delta до оновлення witness) | [run 38228581890](https://github.com/juv4uk/sens/actions/runs/38228581890) |
-| Релізна упаковка | `sens-cli` зараз має version `0.41.0`, а задуманий реліз — `l0.42.0`; перевірити всі crate/Guix/install/asset surfaces механічно | [crates/sens-cli/Cargo.toml](../crates/sens-cli/Cargo.toml), [#4197](https://github.com/juv4uk/sens/issues/4197) |
+| Релізна упаковка | Усі сім канонічних crates, Cargo.lock, `scripts/release.lisp`, Guix і installer оновлено до `0.42.0`; parity/installer CI та перевірка всього candidate SHA ще обов’язкові | [crates/sens-cli/Cargo.toml](../crates/sens-cli/Cargo.toml), [#4197](https://github.com/juv4uk/sens/issues/4197) |
 
 Зовнішні залежності **не припускати готовими**: перевірити фактичний стан CML, GraalVM, Futhark/CUDA, FPGA та їхні exact-SHA CI. На час аудиту GitHub повідомляв default branch `master` для `juv4uk/cml`, а `juv4uk/wsm-mu-lisp` за цією адресою не відкривався. `juv4uk/sens` і `juv4uk/sens-futhark` повернули `public`: перед релізом перевірити потрібну власнику політику видимості (не змінювати автоматично).
 
