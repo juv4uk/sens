@@ -12,6 +12,12 @@ on:
       - "crates/**/Cargo.toml"
       - ".github/workflows/release.yml"
       - ".github/workflows/release-preflight.yml"
+      - "RELEASE.md"
+      - "RELEASE-EVIDENCE.md"
+      - "docs/release-readiness-contract-11-9-2026-10-12.uk.md"
+      - "RELEASE.md"
+      - "RELEASE-EVIDENCE.md"
+      - "docs/release-readiness-contract-11-9-2026-10-12.uk.md"
       - "scripts/release.lisp"
       - "scripts/verify_release_assets.py"
       - "scripts/verify_release_tag.py"
@@ -59,13 +65,11 @@ concurrency:
 
 jobs:
   release-preflight:
-    # Той самий focused набір, що тег-гейт `test` у `release.yml`: тег-час
-    # гарантує ці чеки серверно, тут вони ловлять проблему ще в PR. Повний
-    # Це focused preflight для main і PR; фінальний tag release.yml окремо
-    # вимагає cargo test/clippy --locked --workspace та обов'язкові T5-докази.
+    # Full pre-tag release gate. Run workspace tests and Clippy before the
+    # explicit owner GO/tag step; release.yml repeats them on the tagged SHA.
     name: focused release preflight
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 45
     steps:
       - uses: actions/checkout@v5
       - uses: dtolnay/rust-toolchain@stable
@@ -149,5 +153,8 @@ jobs:
       - name: release asset contract
         run: cargo test --locked -p sens-cli --test islands_release_asset
 
-      - name: focused release clippy
-        run: cargo clippy --locked -p sens -p sens-cli --all-targets -- -D warnings
+      - name: Full workspace tests (pre-tag, exact SHA)
+        run: cargo test --locked --workspace
+
+      - name: Full workspace Clippy (pre-tag, exact SHA)
+        run: cargo clippy --locked --workspace --all-targets -- -D warnings
