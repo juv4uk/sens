@@ -144,9 +144,11 @@ fn resolve_head<'a>(
                         return Some((Some(name.as_ref()), HeadRoute::Exact(identity)));
                     }
                 }
-                if legacy.is_some() || current.is_some() {
-                    analysis.blocked_unmapped_surfaces.push(name.to_string());
-                }
+                // У режимі повної двійкової міграції невідоме
+                // виконуване ім'я також є блокером, а не успіхом.
+                // Локально зв'язані функції і окремі host-capabilities
+                // відфільтровано вище.
+                analysis.blocked_unmapped_surfaces.push(name.to_string());
                 None
             } else {
                 legacy.map(|sens| (Some(name.as_ref()), HeadRoute::Legacy(sens)))
@@ -684,6 +686,10 @@ mod tests {
             "цитовані біти не можуть створювати виконувані W8-голови");
         assert!(rewrite_exact("(defmacro m (x) x)").is_err(),
             "DEFMACRO не має доведеного однослівного наступника");
+        assert!(rewrite_exact("(unmapped-operation x)").is_err(),
+            "невідома глобальна голова не може мовчки лишитися в exact-only результаті");
+        assert!(rewrite_exact("(lambda (local) (local x))").is_ok(),
+            "локально зв'язану функцію не можна помилково визнати глобальним викликом");
     }
 
     fn no_host() -> HashSet<String> {
