@@ -214,6 +214,35 @@ class LegacyD3GuardTests(unittest.TestCase):
             [f.rule for f in MODULE.scan_lisp(reverted, path)],
         )
 
+    def test_uk_surface_audit_generator_exact_atom_pairs_with_bounded_debt(self):
+        path = "scripts/generate-uk-surface-audit.lisp"
+        source = (ROOT / path).read_text(encoding="utf-8")
+        findings = MODULE.scan_lisp(source, path)
+        rules = [f.rule for f in findings]
+
+        # Two non-identical old clauses require separate semantic proof.
+        # Never convert them by guesswork or hide them in strict audit.
+        self.assertLessEqual(rules.count("COND_NOT_TWO_FIELDS"), 2)
+        self.assertNotIn("COND_HOST_TRUTH", rules)
+
+        exact = "((010 strings) acc)"
+        self.assertIn(exact, source)
+        bad = source.replace(exact, "((010 strings) (1) acc)", 1)
+        self.assertGreater(
+            [f.rule for f in MODULE.scan_lisp(bad, path)].count(
+                "COND_NOT_TWO_FIELDS"
+            ),
+            rules.count("COND_NOT_TWO_FIELDS"),
+        )
+
+        fallback = "((010 (001 ())) (join-newline-onto"
+        self.assertIn(fallback, source)
+        bad = source.replace(fallback, "(t (join-newline-onto", 1)
+        self.assertIn(
+            "COND_HOST_TRUTH",
+            [f.rule for f in MODULE.scan_lisp(bad, path)],
+        )
+
     def test_historical_paths_and_metadata_excluded(self):
         for path in ("docs/research/old.lisp", "research/domain-archive/a.lisp",
                      "tests/fixtures/old.lisp", "lib/domains/d3.lisp",
