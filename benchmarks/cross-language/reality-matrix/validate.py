@@ -31,10 +31,19 @@ def main() -> int:
             fail(f"missing top-level key {key!r}")
 
     sens = data["sens"]
-    if sens.get("ratified_domains") != "D1-D7":
-        fail("current headline SENS must declare ratified_domains=D1-D7")
     if not sens.get("commit") or not sens.get("contract"):
         fail("SENS commit and Contract version are required")
+    if sens.get("contract") != "11.9":
+        fail(
+            "Reality Matrix current rows require Contract 11.9; "
+            "historical contract rows must remain historical provenance"
+        )
+    ratified_domains = sens.get("ratified_domains")
+    if ratified_domains not in {"D1-D7", "D1-D10", "D24+"}:
+        fail(
+            "ratified_domains must declare the exact in-scope ratified family "
+            "(D1-D7, D1-D10, or D24+); do not label research domains ratified"
+        )
 
     competitor = data["competitor"]
     if not competitor.get("name") or not competitor.get("version"):
@@ -45,6 +54,14 @@ def main() -> int:
         if not env.get(key):
             fail(f"environment.{key} is required")
     evidence_mode = env.get("evidence_mode")
+    if evidence_mode == "performance":
+        if env.get("load_context") not in {"idle", "high"}:
+            fail("performance evidence requires explicit load_context=idle|high")
+        for workload in data["workloads"]:
+            if workload.get("parity") == "pass":
+                params = workload.get("params", {})
+                if "outer_reps" in params and params["outer_reps"] < 10:
+                    fail(f"{workload.get('id')}: performance evidence requires >=10 outer_reps")
 
     workload_ids: set[str] = set()
     for workload in data["workloads"]:
@@ -54,7 +71,8 @@ def main() -> int:
         if wid in workload_ids:
             fail(f"duplicate workload id {wid!r}")
         workload_ids.add(wid)
-        if workload.get("parity") not in PARITY:
+        parity = workload.get("parity")
+        if parity not in PARITY:
             fail(f"{wid}: invalid parity status")
 
         for measurement in workload.get("measurements", []):
@@ -64,8 +82,14 @@ def main() -> int:
             if measurement.get("status") not in STATUSES:
                 fail(f"{wid}/{axis}: invalid measurement status")
             if measurement.get("status") == "measured":
-                if not measurement.get("sens_samples") or not measurement.get("competitor_samples"):
+                if parity != "pass":
+                    fail(f"{wid}/{axis}: measured rows require parity=pass")
+                left = measurement.get("sens_samples")
+                right = measurement.get("competitor_samples")
+                if not isinstance(left, list) or not left or not isinstance(right, list) or not right:
                     fail(f"{wid}/{axis}: measured rows require raw samples")
+                if any(not isinstance(value, (int, float)) or value != value for value in left + right):
+                    fail(f"{wid}/{axis}: raw samples must be finite numbers")
 
             # #3698 owns RSS. Only its validated fresh-process GNU-time primitive is admissible.
             if axis == "process_maxrss_kb" and measurement.get("status") == "measured":
