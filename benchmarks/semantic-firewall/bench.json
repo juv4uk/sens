@@ -1,0 +1,13 @@
+{
+  "schema": "sens-benchmark-manifest/v1",
+  "stand": "semantic-firewall",
+  "wing": "Semantic sovereignty / negative controls",
+  "roles": ["CONFORMANCE", "FALSIFIER", "RESEARCH"],
+  "question": "Does the canonical registry reject named authority mutations before they can masquerade as valid semantics?",
+  "claim": "Eight deterministic source mutations are rejected by the canonical registry checker; this is not a general runtime security proof.",
+  "witness": ["run.py", "README.md", "bench.json"],
+  "status": "SOURCE-CONFORMANCE",
+  "generation": "Canonical semantic registry; 2026-10-12",
+  "axis": "negative-controls/authority-integrity/fail-closed",
+  "reproduce": "python3 benchmarks/semantic-firewall/run.py --out /tmp/semantic-firewall"
+}
