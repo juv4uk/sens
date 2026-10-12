@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+import json
 from pathlib import Path
 import re
 
@@ -15,7 +16,7 @@ D9_TABLE = ROOT / "lib" / "domains" / "d9.lisp"
 D10_TABLE = ROOT / "lib" / "domains" / "d10.lisp"
 CURRENT_HUMAN_TABLES = DOMAIN_TABLES + (D7_TABLE, D8_TABLE, D9_TABLE, D10_TABLE,)
 
-TOKEN = r'(\(\)|"[^"]*"|[^()\s]+)'
+TOKEN = r'(\(\)|"(?:\\.|[^"\\])*"|[^()\s]+)'
 ROW = re.compile(
     r'^\s*\(([01]{1,10})\s+'
     + r'\(ук\s+' + TOKEN + r'\)\s+'
@@ -52,7 +53,9 @@ def decode(token: str, *, literal_empty: bool = False) -> str | None:
     if token == "()":
         return "()" if literal_empty else None
     if token.startswith('"') and token.endswith('"'):
-        return token[1:-1]
+        # Escaped punctuation, whitespace and quotes belong to the glyph,
+        # not to D7 binary identity.
+        return json.loads(token)
     return token
 
 
