@@ -106,6 +106,52 @@ class ContentTests(unittest.TestCase):
         with self.assertRaises(MODULE.LedgerBlocked):
             MODULE.validate_ledger(ledger([entry(sens=REAL_SENS, typed_word_sha256="b" * 64)]))
 
+    def test_root_regular_file_is_accepted_but_symlink_evidence_is_rejected(self):
+        data = (ROOT / REAL_SENS).read_bytes()
+        with tempfile.TemporaryDirectory() as tmp:
+            base = Path(tmp)
+            repo = base / "repo"
+            repo.mkdir()
+            regular = repo / "valid.sens"
+            regular.write_bytes(data)
+            outside = base / "external.sens"
+            outside.write_bytes(data)
+            digest = MODULE.content_sha256(repo, "valid.sens")
+            admitted = MODULE.validate_ledger(
+                ledger([entry(sens="valid.sens", typed_word_sha256=digest, ratified=1)]),
+                root=repo,
+            )
+            self.assertEqual(admitted["release_admitted"], 1)
+            for target in (regular, outside):
+                link = repo / "linked.sens"
+                link.symlink_to(target)
+                try:
+                    with self.subTest(target=target), self.assertRaises(MODULE.LedgerBlocked):
+                        MODULE.validate_ledger(
+                            ledger([entry(sens="linked.sens", typed_word_sha256=digest,
+                                          ratified=1)]), root=repo,
+                        )
+                finally:
+                    link.unlink()
+
+            external_dir = base / "linked-directory"
+            external_dir.mkdir()
+            (external_dir / "nested.sens").write_bytes(data)
+            (repo / "linkdir").symlink_to(external_dir, target_is_directory=True)
+            with self.assertRaises(MODULE.LedgerBlocked):
+                MODULE.validate_ledger(
+                    ledger([entry(sens="linkdir/nested.sens",
+                                  typed_word_sha256=digest, ratified=1)]), root=repo,
+                )
+
+    def test_noncanonical_alias_paths_cannot_duplicate_admission(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            (root / "one.sens").write_bytes((ROOT / REAL_SENS).read_bytes())
+            for alias in ("./one.sens", "a/../one.sens", "a//one.sens"):
+                with self.subTest(alias=alias), self.assertRaises(MODULE.LedgerBlocked):
+                    MODULE.content_sha256(root, alias)
+
     def test_missing_sens_file_blocks(self):
         with self.assertRaises(MODULE.LedgerBlocked):
             MODULE.validate_ledger(ledger([entry(sens="tests/fixtures/does-not-exist.sens")]))

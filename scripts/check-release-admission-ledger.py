@@ -56,11 +56,26 @@ CODEC = _load_codec()
 
 
 def content_sha256(root: Path, sens: str) -> str:
-    path = root / sens
-    if not path.is_file():
-        raise LedgerBlocked(f"немає файла .sens: {sens}")
+    # An admission witness must be a canonical regular file within the selected
+    # checkout, never a symlink into an untracked or external directory.
+    # Path.resolve() alone follows symlinks, so reject every linked component.
+    relative = Path(sens)
+    if (relative.is_absolute() or relative.as_posix() != sens
+            or relative.suffix != ".sens" or ".." in relative.parts):
+        raise LedgerBlocked(f"{sens}: неканонічний шлях .sens")
     try:
+        repo_root = root.resolve(strict=True)
+        path = repo_root
+        for part in relative.parts:
+            path = path / part
+            if path.is_symlink():
+                raise LedgerBlocked(f"{sens}: symlink не може бути доказовим .sens")
+        resolved = path.resolve(strict=True)
+        if not resolved.is_relative_to(repo_root) or not resolved.is_file():
+            raise LedgerBlocked(f"{sens}: файл .sens поза дозволеним деревом")
         words = CODEC.decode_bytes(path.read_bytes())
+    except (OSError, RuntimeError) as exc:
+        raise LedgerBlocked(f"{sens}: немає доступного канонічного файла .sens ({exc})") from exc
     except CODEC.SensT5Error as exc:
         raise LedgerBlocked(f"{sens}: неканонічні T5-байти ({exc})") from exc
     return CODEC.typed_sha256(words)
