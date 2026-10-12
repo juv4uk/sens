@@ -67,15 +67,20 @@ exhaustive bounded proof: файл `car-cons-one-nil.f3m` дорівнює од�
 
 ### Повний sweep зареєстрованих стендів і follow-up
 
-[Перший повний sweep, run 38190345552](https://github.com/juv4uk/sens/actions/runs/38190345552) на SHA `d57d55f7f50f157d672bb283d31f9a427690596f` охопив **54/54** стенди без дублікатів, пропусків чи зайвих результатів: **50 PASS / 4 FAIL / 0 BLOCKED / 0 TIMEOUT**. Його чотири первинні відмови розібрано в історичній частині receipt.
+[Перший sweep, run 38190345552](https://github.com/juv4uk/sens/actions/runs/38190345552) на SHA `d57d55f7f50f157d672bb283d31f9a427690596f` дав **54/54 coverage, 50 PASS / 4 FAIL**. Після виправлення D6 reproduction [run 38190822493](https://github.com/juv4uk/sens/actions/runs/38190822493) дав **51 PASS / 3 FAIL**. Обидва історичні результати збережені окремо.
 
-Після виправлення CLI-контракту `d6-parity-duality` [follow-up run 38190822493](https://github.com/juv4uk/sens/actions/runs/38190822493) на SHA `411312eab71a7c31cd9d71e52ebd34c031881c58` знову охопив **54/54**, цього разу **51 PASS / 3 FAIL / 0 BLOCKED / 0 TIMEOUT**. Це реальний приріст на один PASS, не просто зміна опису. Довготривалий receipt з історією обох прогонів: [`evidence/benchmark-sweep-2026-10-12.json`](../evidence/benchmark-sweep-2026-10-12.json).
+Найновіший завершений sweep [run 38192536311](https://github.com/juv4uk/sens/actions/runs/38192536311), exact SHA `bbfd6d4aa873e904bf8497bf7dfb611d60557470`, дав **54/54 coverage, 52 PASS / 0 FAIL / 2 BLOCKED / 0 TIMEOUT**. Це перший sweep без жодного FAIL, але ще не global green: `all_benchmarks_pass=false` через два чесно позначені блокери.
 
-Після другого sweep виправлено класифікацію двох відомих generation/environment blockers:
-- `cross-language` тепер друкує явний `SENS_BENCHMARK_STATUS=BLOCKED`, коли немає pinned Guix environment; без Guix це не результат порівняння мов.
-- `store-air-load` тепер класифікує Contract 11.8 проти поточного 11.9 як `BLOCKED` для current replay, а маніфест прямо зветься історичним до окремого replay.
+- `cross-language` — явний `SENS_BENCHMARK_STATUS=BLOCKED`: середовище не має pinned Guix; це не вимір продуктивності чи паритету мов.
+- `store-air-load` у цьому історичному прогоні був BLOCKED, бо fixtures викликали англійські `quote`/`car` як source-head. Чинний source reader правильно не виводить callable identity з цих alias-ів.
 
-Обидві зміни й нові рядки generated index потрапили в останні коміти, але exact-head sweep для них іще не завершився. Третя проблема — `physical-binary-performance` — виникла тому, що runner намагався передати старий Lisp AST `(00000001 ())` до canonical exact-width reader. Parser не послаблюємо. Runner тепер формує тимчасову ASCII word-projection безпосередньо з committed `.sens` через незалежний Python T5-декодер, а потім вимагає від Rust `sens-trit encode` побайтної тотожності. Додано окрему функцію проєкції, п'ять unit-тестів і перевірку всіх восьми фізичних файлів у smoke workflow. Це доводить транспортний round-trip, не компіляцію історичного AST і не семантичну ратифікацію. **Окремий physical smoke пройшов SUCCESS**: [run 38192284285](https://github.com/juv4uk/sens/actions/runs/38192284285), 5/5 projection tests і всі 8 physical fixtures. У повному registry run [38192284184](https://github.com/juv4uk/sens/actions/runs/38192284184) сам `physical-binary-performance` теж має `PASS` у shard 6 на exact SHA `c10d23871edc0113eab8d26f4a77ea6c16349d36`: 8/8 source projections побайтно збіглися з committed T5; усі три CLI-доріжки дали parity. Загальний summary ще агрегується; після переходу STORE/AIR на 11.9 запущено наступний sweep [38192536311](https://github.com/juv4uk/sens/actions/runs/38192536311), який має підтвердити current-generation lane.
+Останній блок уже виправлено в commit `ea156c1d0fe386fe7422e4a345a6431a536e0c80`: paired fixtures тепер використовують чинні українські голови `як-є` та `перше`, а helper додає окремий `ukrainian-surface` шлях через `parse_mixed_exact_domain`. Англійський compatibility lane в інших дослідженнях лишається незмінним. **Це ще не PASS** — новий exact-head sweep має підтвердити збіг lowered trace, value та output з canonical-binary парою.
+
+Фізичний T5 стенд уже має окремо підтверджені результати:
+- [Physical smoke run 38192284285](https://github.com/juv4uk/sens/actions/runs/38192284285): SUCCESS, 5/5 projection unit tests та 8/8 фізичних T5 fixtures.
+- У повному [run 38192284184](https://github.com/juv4uk/sens/actions/runs/38192284184) shard 6 дав PASS для `physical-binary-performance`: 8/8 source→T5 roundtrips побайтно тотожні й усі execution CLI paths мають parity. Це transport/CLI evidence, не AST compiler proof.
+
+Поточне exact-head підтвердження для української source-пари: [registry run 38192977589](https://github.com/juv4uk/sens/actions/runs/38192977589); на момент запису він ще виконується. Довготривалий receipt містить кожний sweep з його точним SHA та артефактами: [`evidence/benchmark-sweep-2026-10-12.json`](../evidence/benchmark-sweep-2026-10-12.json).
 
 ## 4. Пріоритети — у порядку доказової цінності
 
