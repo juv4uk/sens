@@ -49,6 +49,8 @@ NON_PREDICATE_ACTIONS = frozenset({
 FORBIDDEN_CLIPPED_CODE_ALIASES = frozenset({
     "дсп-алн", "диф-код", "диф-дек", "диф-фаз",
     "св-різн", "замчас",
+    "кд-грей", "дк-грей", "мін-лін-рекур",
+    "впис-вир-пл", "пар-хеш", "чин-розкладу-Ліндона",
 })
 
 FORBIDDEN_UNTRANSLATED_SAN_SUFFIX = re.compile(
@@ -137,11 +139,11 @@ def check(d10, inventory, lower):
          json.loads(OWNER.read_text(encoding="utf-8"))["inventory"]["git_blob"],
          "editorial anchor source pin")
     anchor_list = editorial["anchors"]
-    need(len(anchor_list) == 44 and
+    need(len(anchor_list) == 51 and
          len({a["semantic_name"] for a in anchor_list}) == 41,
          "editorial anchor coverage/duplicate")
     anchor_by_code = {a["coordinate"]: a for a in anchor_list}
-    need(len(anchor_by_code) == 44, "duplicate editorial coordinates")
+    need(len(anchor_by_code) == 51, "duplicate editorial coordinates")
 
     for row in d10:
         original = expected[row.bits]
@@ -221,6 +223,10 @@ def main():
                 next(i for i, row in enumerate(xs) if row.lisp == "LIST->VECTOR"),
                 replace(next(row for row in xs if row.lisp == "LIST->VECTOR"),
                         uk="список-у-вектор"))),
+            ("historical bit-field abbreviation", lambda xs: xs.__setitem__(
+                next(i for i, row in enumerate(xs) if row.lisp == "DEPOSIT-FIELD"),
+                replace(next(row for row in xs if row.lisp == "DEPOSIT-FIELD"),
+                        uk="впис-вир-пл"))),
             ("fabricated clipped stem", lambda xs: xs.__setitem__(
                 next(i for i, row in enumerate(xs) if row.lisp == "ALLAN-VARIANCE"),
                 replace(next(row for row in xs if row.lisp == "ALLAN-VARIANCE"),
