@@ -20,9 +20,6 @@ use crate::CoreDomainIdentity;
 use crate::Sens8;
 use std::rc::Rc;
 
-const QUOTE: Sens8 = crate::sens!(00000001);
-const COND: Sens8 = crate::sens!(00000111);
-
 /// Звести всі виклики програми. Ідемпотентно: `Call` лишається `Call`.
 pub fn lower_program(expressions: &[Expr]) -> Vec<Expr> {
     expressions.iter().map(|expression| lower(expression, 0)).collect()
@@ -69,6 +66,13 @@ fn is_d3(identity: CoreDomainIdentity, bits: u8) -> bool {
         identity,
         CoreDomainIdentity::D3(word) if word.word().packed_bits() == bits
     )
+}
+
+/// Історичний W8 не є D8. Лише явно доведена в реєстрі відповідність
+/// людської поверхні до ратифікованої D3 дозволяє сумісну спеціальну форму.
+fn historical_head_has_d3_law(sid: Sens8, bits: u8) -> bool {
+    semantic_registry::compatibility_d3_route_from_ratified_domains(sid)
+        .is_some_and(|identity| is_d3(identity, bits))
 }
 
 fn lower_all(items: &[Expr], depth: u32) -> Rc<[Expr]> {
@@ -128,8 +132,8 @@ fn lower(expression: &Expr, depth: u32) -> Expr {
             }
 
             match head_sid(&items[0]) {
-                Some(sid) if sid == QUOTE => ExprKind::Call(sid, arguments.into()),
-                Some(sid) if sid == COND => ExprKind::Call(
+                Some(sid) if historical_head_has_d3_law(sid, 0b001) => ExprKind::Call(sid, arguments.into()),
+                Some(sid) if historical_head_has_d3_law(sid, 0b110) => ExprKind::Call(
                     sid,
                     arguments
                         .iter()
@@ -167,5 +171,56 @@ fn lower(expression: &Expr, depth: u32) -> Expr {
     Expr {
         kind,
         span: expression.span,
+    }
+}
+
+#[cfg(test)]
+mod domain_ladder_lowering_migration_tests {
+    use super::*;
+
+    fn lowered_one(source: &str) -> Expr {
+        let parsed = crate::parse(source).expect("чинний читач");
+        let lowered = lower_program(&parsed);
+        assert_eq!(lowered.len(), 1);
+        lowered.into_iter().next().expect("одна форма")
+    }
+
+    #[test]
+    fn historical_quote_uses_ratified_d3_law_and_preserves_quoted_data() {
+        let lowered = lowered_one("(00000001 (00000101 x))");
+        let ExprKind::Call(_, args) = lowered.kind else {
+            panic!("історична сумісна форма QUOTE має залишатися явно W8");
+        };
+        assert_eq!(args.len(), 1);
+        let ExprKind::List(items) = &args[0].kind else {
+            panic!("дані після QUOTE не виконуються");
+        };
+        assert!(matches!(items[0].kind, ExprKind::Sid(_)));
+    }
+
+    #[test]
+    fn historical_cond_uses_ratified_d3_law_only_for_clause_expressions() {
+        let lowered = lowered_one("(00000111 ((00000101 x) (00000001 (00000101 y))))");
+        let ExprKind::Call(_, clauses) = lowered.kind else {
+            panic!("історична сумісна форма COND залишається явно W8");
+        };
+        let ExprKind::List(parts) = &clauses[0].kind else {
+            panic!("клаузи COND є структурними");
+        };
+        assert!(matches!(parts[0].kind, ExprKind::Call(_, _)));
+        let ExprKind::Call(_, quoted) = &parts[1].kind else {
+            panic!("QUOTE усередині клаузи зберігається");
+        };
+        assert!(matches!(quoted[0].kind, ExprKind::List(_)));
+    }
+
+    #[test]
+    fn unrelated_legacy_head_never_becomes_a_d3_quote_or_cond() {
+        for source in ["(00001000 x)", "(10101000 x)"] {
+            let lowered = lowered_one(source);
+            let ExprKind::Call(_, _) = lowered.kind else {
+                panic!("старий байт не отримує новий домен за збігом значення");
+            };
+        }
     }
 }
