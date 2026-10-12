@@ -24,7 +24,7 @@ OLD_HEADER = """; lib/macro.lisp — bootstrap derivation on exact 8-bit functio
 ; SID 00001010 is derived here from mechanisms already selected by:
 ;   00001001 + 00001000 + 00000100 + the narrow host Closure->Macro mechanism.
 ;
-; \`make-macro\` below is NOT a my-lisp function identity. It is an explicit
+; `make-macro` below is NOT a my-lisp function identity. It is an explicit
 ; temporary host substrate with no SID and is tracked by #1330/#1328 until that
 ; boundary is removed or represented without creating a second function ontology.
 ;
