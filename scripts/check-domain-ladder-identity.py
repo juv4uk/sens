@@ -13,6 +13,7 @@ import json
 from pathlib import Path
 import re
 import sys
+import tempfile
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -29,7 +30,81 @@ CANONICAL = (
     "scripts/check-core4-d24-migration.py",
     "benchmarks/domain12345678/run.py",
     "benchmarks/domain1234-dispatch/d34_dispatch.c",
+    "crates/sens/src/bignum.rs",
+    "crates/sens/src/binary_execution.rs",
+    "crates/sens/src/binary_number.rs",
+    "crates/sens/src/bit9.rs",
+    "crates/sens/src/bits.rs",
+    "crates/sens/src/bootstrap_measurement.rs",
+    "crates/sens/src/compiler_bootstrap.rs",
+    "crates/sens/src/compiler_language.rs",
+    "crates/sens/src/compiler_role.rs",
+    "crates/sens/src/d5_definition_bindings_generated.rs",
+    "crates/sens/src/d7_display_registry_generated.rs",
+    "crates/sens/src/d9_definition_bindings_generated.rs",
+    "crates/sens/src/domain_ladder.rs",
+    "crates/sens/src/domain_numeric.rs",
+    "crates/sens/src/domain_owner_generated.rs",
+    "crates/sens/src/domain_surface_registry_generated.rs",
+    "crates/sens/src/error.rs",
+    "crates/sens/src/eval/arithmetic.rs",
+    "crates/sens/src/eval/builtins.rs",
+    "crates/sens/src/eval/macro_substrate.rs",
+    "crates/sens/src/eval/necessary_forms_generated.rs",
+    "crates/sens/src/eval/selector_law.rs",
+    "crates/sens/src/eval/special_forms/codepoint.rs",
+    "crates/sens/src/eval/special_forms/digest.rs",
+    "crates/sens/src/eval/special_forms/io.rs",
+    "crates/sens/src/eval/special_forms/json.rs",
+    "crates/sens/src/eval/special_forms/strings.rs",
+    "crates/sens/src/eval/special_forms.rs",
+    "crates/sens/src/frame3_domain.rs",
+    "crates/sens/src/frame3_grammar.rs",
+    "crates/sens/src/frame3_micro.rs",
+    "crates/sens/src/frame3_micro_enumerator.rs",
+    "crates/sens/src/frame3_micro_v5.rs",
+    "crates/sens/src/frame3_micro_v5_lambda.rs",
+    "crates/sens/src/frame3_micro_v5_lambda_app.rs",
+    "crates/sens/src/frame3_semantic.rs",
+    "crates/sens/src/frame3_small.rs",
+    "crates/sens/src/frame3_v2.rs",
+    "crates/sens/src/function_signatures_generated.rs",
+    "crates/sens/src/gpu_execution_packet.rs",
+    "crates/sens/src/outer_envelope.rs",
+    "crates/sens/src/packed_bits.rs",
+    "crates/sens/src/semantic_registry_generated.rs",
+    "crates/sens/src/source_packing.rs",
+    "crates/sens/src/ternary_transport.rs",
+    "crates/sens/src/text7.rs",
+    "crates/sens/src/text7_projection.rs",
+    "crates/sens/src/text7_projection_generated.rs",
+    "crates/sens/src/universal_frame3.rs",
 )
+# Files that still carry old identity and that the migration may only SHRINK.
+# This freezes the current count so no NEW Sens8/Sid8 semantic call path can be
+# added (acceptance of #5608); a decrease is progress and is always allowed.
+LEGACY_DEBT_MAX = {
+    "crates/sens/src/binary_framing.rs": 5,
+    "crates/sens/src/environment.rs": 2,
+    "crates/sens/src/eval/canon.rs": 54,
+    "crates/sens/src/eval/capabilities.rs": 9,
+    "crates/sens/src/eval/closures.rs": 16,
+    "crates/sens/src/eval/lower.rs": 8,
+    "crates/sens/src/eval/mod.rs": 12,
+    "crates/sens/src/eval/necessary_forms.rs": 2,
+    "crates/sens/src/eval/profile_mechanisms_generated.rs": 4,
+    "crates/sens/src/eval/special_forms/core.rs": 5,
+    "crates/sens/src/language_items.rs": 5,
+    "crates/sens/src/lib.rs": 8,
+    "crates/sens/src/mixed_source.rs": 6,
+    "crates/sens/src/parser.rs": 4,
+    "crates/sens/src/presentation.rs": 3,
+    "crates/sens/src/program_data.rs": 1,
+    "crates/sens/src/semantic_registry.rs": 4,
+    "crates/sens/src/sens.rs": 8,
+    "crates/sens/src/syntax.rs": 12,
+    "crates/sens/src/value.rs": 7,
+}
 EXPECTED = {1: 2, 2: 4, 3: 8, 4: 16, 5: 32, 6: 64,
             7: 126, 8: 256, 9: 512, 10: 1024}
 D7_RESERVED = {"0100001", "0101010"}
@@ -153,6 +228,23 @@ def inspect_active_gates(root: Path) -> None:
         raise ValueError("retired eight-bit guard reintroduced in active tree")
 
 
+def inspect_legacy_debt(root: Path) -> None:
+    """Fail if any core file grows its old-identity count (migration is monotone).
+
+    A missing/symlinked core file also fails closed; only a decrease is accepted.
+    """
+    for rel, ceiling in LEGACY_DEBT_MAX.items():
+        path = root / rel
+        if not path.is_file() or path.is_symlink():
+            raise ValueError(f"missing core file under debt ratchet: {rel}")
+        found = len(inspect_code(rel, path.read_text(encoding="utf-8")))
+        if found > ceiling:
+            raise ValueError(
+                f"new legacy identity in {rel}: {found} > frozen {ceiling} "
+                f"(migration may only shrink)"
+            )
+
+
 def inspect_files(root: Path) -> dict[int, int]:
     for rel in CANONICAL:
         path = root / rel
@@ -177,6 +269,7 @@ def inspect_files(root: Path) -> dict[int, int]:
         json.loads(provenance.read_text(encoding="utf-8")), domain_texts[8]
     )
     inspect_active_gates(root)
+    inspect_legacy_debt(root)
     return counts
 
 
@@ -230,6 +323,33 @@ def self_test() -> None:
             raise
     else:
         raise ValueError("missing sources were admitted")
+    # Механізми backend, що вже не відновлюють історичну identity,
+    # більше не можуть повернути Sens8 навіть один раз: CANONICAL fail-closed.
+    if "crates/sens/src/eval/builtins.rs" not in CANONICAL:
+        raise ValueError("migrated backend lost canonical-identity guard")
+    if "crates/sens/src/eval/builtins.rs" in LEGACY_DEBT_MAX:
+        raise ValueError("migrated backend still carries a legacy-debt allowance")
+    for forbidden in ("use crate::Sens8;", "exact_args(crate::sens!(01010000), args, 1, span)?;"):
+        if not inspect_code("crates/sens/src/eval/builtins.rs", forbidden):
+            raise ValueError("canonical backend guard missed a legacy identity reintroduction")
+    # Debt ratchet: any core file that GROWS old identity must fail.
+    with tempfile.TemporaryDirectory() as tmp:
+        probe = Path(tmp)
+        for rel in LEGACY_DEBT_MAX:
+            target = probe / rel
+            target.parent.mkdir(parents=True, exist_ok=True)
+            target.write_text("// clean\n", encoding="utf-8")
+        inspect_legacy_debt(probe)
+        ceiling = LEGACY_DEBT_MAX["crates/sens/src/sens.rs"]
+        (probe / "crates/sens/src/sens.rs").write_text(
+            "use crate::Sens8;\n" * (ceiling + 1), encoding="utf-8"
+        )
+        try:
+            inspect_legacy_debt(probe)
+        except ValueError:
+            pass
+        else:
+            raise ValueError("debt ratchet admitted new legacy identity")
     # Контроль колізій: числовий payload 1 НЕ визначає домен.
     same_payload = {(3, "001"), (4, "0001"), (5, "00001")}
     if len(same_payload) != 3 or {int(bits, 2) for _, bits in same_payload} != {1}:

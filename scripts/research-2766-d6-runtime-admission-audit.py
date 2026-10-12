@@ -48,7 +48,10 @@ def mechanism_facts() -> dict:
 
     facts = {
         "bit6_source_variant": "W6(Bit6)" in source,
-        "bit6_source_parse": "6 => BinarySourceWord::W6(Bit6::new(packed)?)" in source,
+        "bit6_source_parse": (
+            "6 => BinarySourceWord::W6(Bit6::new(packed)?)" in source
+            or "6 => BinarySourceWord::W6(Bit6::new(small()?)?)" in source
+        ),
         "bit6_source_display": 'width = self.width()' in source and '"{:0width$b}"' in source,
         "bit6_packing": "BinarySourceWord::W6(word) => packer.push(word)" in packing,
         "bit6_unpacking": "6 => BinarySourceWord::W6(packed.read::<6>(bit_offset)?)" in packing,
@@ -62,10 +65,12 @@ def mechanism_facts() -> dict:
             or "D6(" in value
             or "Bit6" in value
         ),
+        # Presence of Bit6 projection DOES NOT abolish the flat W8 registry
+        # or establish executable per-resident D6 mechanism admission.
         "registry_d6_identity": (
             "type SemanticId = Sens8" not in registry
-            or "Bit6" in registry
-            or "Domain6" in registry
+            and "type LegacyRegistrySlot = Sens8" not in registry
+            and "CoreDomainIdentity" in registry
         ),
         "lowering_d6_identity": (
             "Bit6" in lower

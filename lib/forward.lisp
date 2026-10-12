@@ -1048,7 +1048,7 @@
 
 (0011 match-test-condition
   (0010 (expression bindings)
-    (10011100 ((result (0001 (101101001 expression bindings))))
+    (нехай-похідне ((result (0001 (101101001 expression bindings))))
       ; E1 (#216): under exact-Q a false comparison answers 0, and 0 is
       ; truthy -- the pre-exact-Q two-part `(cond (result (list subst)) (t ()))`
       ; treated a falsy test as a success. A test condition is falsy when its
