@@ -249,6 +249,7 @@ pub use ternary_transport::{
     encode_ternary_words, open_ternary_program, render_ternary_words_spaced,
     render_ternary_words_vertical, ternary_transport_accounting,
     TernaryTransportAccounting, TernaryTransportError,
+    encode_d7_uk_t5, decode_d7_uk_t5, D7T5Error,
 };
 pub use source_packing::{
     append_binary_source_word, pack_binary_source_tokens, pack_binary_source_words,
