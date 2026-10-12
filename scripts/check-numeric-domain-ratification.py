@@ -145,6 +145,17 @@ def validate_runtime_boundary(arithmetic, d6):
         body = tail.split(end, 1)[0]
         need(body.count("require_math_domain(values, span)?;") == 1, name + " must enforce D24+ admission")
     need("!domain_numeric::is_domain_value(v)" in arithmetic, "unqualified/functional values must be refused")
+    # Historical Number/Rational/floating point branches were removed from the
+    # mathematical evaluator. Reader and JSON presentation may still retain
+    # legacy data, but the Core arithmetic source may not gain a second path.
+    for legacy in (
+        "small_rational_fast_path",
+        "numeric_value(",
+        "enum Numeric",
+        "if values.iter().any(domain_numeric::is_domain_value)",
+        "if values.iter().any(|value| matches!(value, Value::BinaryNumber(_)))",
+    ):
+        need(legacy not in arithmetic, "legacy literal math path returned: " + legacy)
     need("values.is_empty()" in arithmetic, "no zero-arity generic Number operations")
     need("Value::NumericComposition(composition) => Some(composition.domain_width())" in d6,
          "D6 must accept canonical D24+ composite width")
@@ -162,6 +173,7 @@ def selftest_runtime(arithmetic, d6):
     for damaged in (
         arithmetic.replace("require_math_domain(values, span)?;", "", 1),
         arithmetic.replace("!domain_numeric::is_domain_value(v)", "false", 1),
+        arithmetic + "\nfn small_rational_fast_path() {}\n",
     ):
         try:
             validate_runtime_boundary(damaged, d6)
