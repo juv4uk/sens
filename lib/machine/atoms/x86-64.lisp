@@ -12,45 +12,39 @@
 
 (0011 x86-mov-r64-imm64
   (0010 (register immediate)
-    (001000 ((typed-register (x86-as-gpr64 register)))
-      (110
+    ((0010 (typed-register) (110
         ((x86-machine-rejected? typed-register) typed-register)
         ((010 ())
-         (001000 ((typed-immediate (x86-as-u64-imm immediate)))
-           (110
+         ((0010 (typed-immediate) (110
              ((x86-machine-rejected? typed-immediate) typed-immediate)
              ((010 ())
               (1110 (001 mov-r64-imm64)
                     (x86-gpr64-value typed-register)
-                    (x86-u64-imm-value typed-immediate))))))))))
+                    (x86-u64-imm-value typed-immediate))))) (x86-as-u64-imm immediate))))) (x86-as-gpr64 register))))
 
 (0011 x86-add-r64-r64
   (0010 (destination source)
-    (001000 ((typed-destination (x86-as-gpr64 destination)))
-      (110
+    ((0010 (typed-destination) (110
         ((x86-machine-rejected? typed-destination) typed-destination)
         ((010 ())
-         (001000 ((typed-source (x86-as-gpr64 source)))
-           (110
+         ((0010 (typed-source) (110
              ((x86-machine-rejected? typed-source) typed-source)
              ((010 ())
               (1110 (001 add-r64-r64)
                     (x86-gpr64-value typed-destination)
-                    (x86-gpr64-value typed-source))))))))))
+                    (x86-gpr64-value typed-source))))) (x86-as-gpr64 source))))) (x86-as-gpr64 destination))))
 
 (0011 x86-binary-gpr64-form
   (0010 (mnemonic destination source)
-    (001000 ((typed-destination (x86-as-gpr64 destination)))
-      (110
+    ((0010 (typed-destination) (110
         ((x86-machine-rejected? typed-destination) typed-destination)
         ((010 ())
-         (001000 ((typed-source (x86-as-gpr64 source)))
-           (110
+         ((0010 (typed-source) (110
              ((x86-machine-rejected? typed-source) typed-source)
              ((010 ())
               (1110 mnemonic
                     (x86-gpr64-value typed-destination)
-                    (x86-gpr64-value typed-source))))))))))
+                    (x86-gpr64-value typed-source))))) (x86-as-gpr64 source))))) (x86-as-gpr64 destination))))
 
 (0011 x86-or-r64-r64
   (0010 (destination source)
@@ -77,21 +71,19 @@
 ; conditional-transfer family demanded by the bounded EQ+COND witness.
 (0011 x86-jnz-rel8
   (0010 (displacement)
-    (001000 ((typed-displacement (x86-as-disp8 displacement)))
-      (110
+    ((0010 (typed-displacement) (110
         ((x86-machine-rejected? typed-displacement) typed-displacement)
         ((010 ())
          (1110
            (001 jnz-rel8)
-           (x86-disp8-value typed-displacement)))))))
+           (x86-disp8-value typed-displacement))))) (x86-as-disp8 displacement))))
 
 (0011 x86-unary-gpr64-form
   (0010 (mnemonic register)
-    (001000 ((typed-register (x86-as-gpr64 register)))
-      (110
+    ((0010 (typed-register) (110
         ((x86-machine-rejected? typed-register) typed-register)
         ((010 ())
-         (1110 mnemonic (x86-gpr64-value typed-register)))))))
+         (1110 mnemonic (x86-gpr64-value typed-register))))) (x86-as-gpr64 register))))
 
 (0011 x86-push-r64
   (0010 (register)
@@ -111,50 +103,44 @@
 
 (0011 x86-mov-mem64-r64
   (0010 (memory source)
-    (001000 ((typed-memory (x86-as-mem64-disp8 memory)))
-      (110
+    ((0010 (typed-memory) (110
         ((x86-machine-rejected? typed-memory) typed-memory)
         ((010 ())
-         (001000 ((typed-source (x86-as-gpr64 source)))
-           (110
+         ((0010 (typed-source) (110
              ((x86-machine-rejected? typed-source) typed-source)
              ((010 ())
               (1110 (001 mov-mem-disp8-r64)
                     (x86-mem64-disp8-base typed-memory)
                     (x86-mem64-disp8-displacement typed-memory)
-                    (x86-gpr64-value typed-source))))))))))
+                    (x86-gpr64-value typed-source))))) (x86-as-gpr64 source))))) (x86-as-mem64-disp8 memory))))
 
 (0011 x86-mov-r64-mem64
   (0010 (destination memory)
-    (001000 ((typed-destination (x86-as-gpr64 destination)))
-      (110
+    ((0010 (typed-destination) (110
         ((x86-machine-rejected? typed-destination) typed-destination)
         ((010 ())
-         (001000 ((typed-memory (x86-as-mem64-disp8 memory)))
-           (110
+         ((0010 (typed-memory) (110
              ((x86-machine-rejected? typed-memory) typed-memory)
              ((010 ())
               (1110 (001 mov-r64-mem-disp8)
                     (x86-gpr64-value typed-destination)
                     (x86-mem64-disp8-base typed-memory)
-                    (x86-mem64-disp8-displacement typed-memory))))))))))
+                    (x86-mem64-disp8-displacement typed-memory))))) (x86-as-mem64-disp8 memory))))) (x86-as-gpr64 destination))))
 
 ; Compatibility constructors for the first #177 foundation. They now pass
 ; through typed memory/register validation and project back to the canonical
 ; #176-native forms.
 (0011 x86-mov-mem-disp8-r64
   (0010 (base displacement source)
-    (001000 ((memory (x86-mem64-disp8 base displacement)))
-      (110
+    ((0010 (memory) (110
         ((x86-machine-rejected? memory) memory)
-        ((010 ()) (x86-mov-mem64-r64 memory source))))))
+        ((010 ()) (x86-mov-mem64-r64 memory source)))) (x86-mem64-disp8 base displacement))))
 
 (0011 x86-mov-r64-mem-disp8
   (0010 (destination base displacement)
-    (001000 ((memory (x86-mem64-disp8 base displacement)))
-      (110
+    ((0010 (memory) (110
         ((x86-machine-rejected? memory) memory)
-        ((010 ()) (x86-mov-r64-mem64 destination memory))))))
+        ((010 ()) (x86-mov-r64-mem64 destination memory)))) (x86-mem64-disp8 base displacement))))
 
 ; #178 — composable atoms for register/implicit forms that #176 already
 ; admits and encodes. These constructors reuse typed GPR/memory operands and
@@ -199,39 +185,34 @@
 
 (0011 x86-unary-gpr8-form
   (0010 (mnemonic register)
-    (001000 ((typed-register (x86-as-gpr8 register)))
-      (110
+    ((0010 (typed-register) (110
         ((x86-machine-rejected? typed-register) typed-register)
         ((010 ())
-         (1110 mnemonic (x86-gpr8-value typed-register)))))))
+         (1110 mnemonic (x86-gpr8-value typed-register))))) (x86-as-gpr8 register))))
 
 (0011 x86-gpr64-gpr8-form
   (0010 (mnemonic destination source)
-    (001000 ((typed-destination (x86-as-gpr64 destination)))
-      (110
+    ((0010 (typed-destination) (110
         ((x86-machine-rejected? typed-destination) typed-destination)
         ((010 ())
-         (001000 ((typed-source (x86-as-gpr8 source)))
-           (110
+         ((0010 (typed-source) (110
              ((x86-machine-rejected? typed-source) typed-source)
              ((010 ())
               (1110 mnemonic
                     (x86-gpr64-value typed-destination)
-                    (x86-gpr8-value typed-source))))))))))
+                    (x86-gpr8-value typed-source))))) (x86-as-gpr8 source))))) (x86-as-gpr64 destination))))
 
 (0011 x86-gpr64-gpr32-form
   (0010 (mnemonic destination source)
-    (001000 ((typed-destination (x86-as-gpr64 destination)))
-      (110
+    ((0010 (typed-destination) (110
         ((x86-machine-rejected? typed-destination) typed-destination)
         ((010 ())
-         (001000 ((typed-source (x86-as-gpr32 source)))
-           (110
+         ((0010 (typed-source) (110
              ((x86-machine-rejected? typed-source) typed-source)
              ((010 ())
               (1110 mnemonic
                     (x86-gpr64-value typed-destination)
-                    (x86-gpr32-value typed-source))))))))))
+                    (x86-gpr32-value typed-source))))) (x86-as-gpr32 source))))) (x86-as-gpr64 destination))))
 
 (0011 x86-seto-r8
   (0010 (register)
@@ -522,70 +503,61 @@
 
 (0011 x86-lea-r64-mem64
   (0010 (destination memory)
-    (001000 ((typed-destination (x86-as-gpr64 destination)))
-      (110
+    ((0010 (typed-destination) (110
         ((x86-machine-rejected? typed-destination) typed-destination)
         ((010 ())
-         (001000 ((typed-memory (x86-as-mem64-disp8 memory)))
-           (110
+         ((0010 (typed-memory) (110
              ((x86-machine-rejected? typed-memory) typed-memory)
              ((010 ())
               (1110 (001 lea-r64-mem-disp8)
                     (x86-gpr64-value typed-destination)
                     (x86-mem64-disp8-base typed-memory)
-                    (x86-mem64-disp8-displacement typed-memory))))))))))
+                    (x86-mem64-disp8-displacement typed-memory))))) (x86-as-mem64-disp8 memory))))) (x86-as-gpr64 destination))))
 
 (0011 x86-lea-r64-mem-disp8
   (0010 (destination base displacement)
-    (001000 ((memory (x86-mem64-disp8 base displacement)))
-      (110
+    ((0010 (memory) (110
         ((x86-machine-rejected? memory) memory)
-        ((010 ()) (x86-lea-r64-mem64 destination memory))))))
+        ((010 ()) (x86-lea-r64-mem64 destination memory)))) (x86-mem64-disp8 base displacement))))
 
 ; Current admitted XMM and late #176 forms. These atoms own only typed
 ; composition; prefix/opcode/ModR/M facts remain in encoding/x86-64.lisp.
 
 (0011 x86-binary-xmm-form
   (0010 (mnemonic destination source)
-    (001000 ((typed-destination (x86-as-xmm destination)))
-      (110
+    ((0010 (typed-destination) (110
         ((x86-machine-rejected? typed-destination) typed-destination)
         ((010 ())
-         (001000 ((typed-source (x86-as-xmm source)))
-           (110
+         ((0010 (typed-source) (110
              ((x86-machine-rejected? typed-source) typed-source)
              ((010 ())
               (1110 mnemonic
                     (x86-xmm-value typed-destination)
-                    (x86-xmm-value typed-source))))))))))
+                    (x86-xmm-value typed-source))))) (x86-as-xmm source))))) (x86-as-xmm destination))))
 
 (0011 x86-xmm-gpr64-form
   (0010 (mnemonic destination source)
-    (001000 ((typed-destination (x86-as-xmm destination)))
-      (110
+    ((0010 (typed-destination) (110
         ((x86-machine-rejected? typed-destination) typed-destination)
         ((010 ())
-         (001000 ((typed-source (x86-as-gpr64 source)))
-           (110
+         ((0010 (typed-source) (110
              ((x86-machine-rejected? typed-source) typed-source)
              ((010 ())
               (1110 mnemonic
                     (x86-xmm-value typed-destination)
-                    (x86-gpr64-value typed-source))))))))))
+                    (x86-gpr64-value typed-source))))) (x86-as-gpr64 source))))) (x86-as-xmm destination))))
 
 (0011 x86-gpr64-xmm-form
   (0010 (mnemonic destination source)
-    (001000 ((typed-destination (x86-as-gpr64 destination)))
-      (110
+    ((0010 (typed-destination) (110
         ((x86-machine-rejected? typed-destination) typed-destination)
         ((010 ())
-         (001000 ((typed-source (x86-as-xmm source)))
-           (110
+         ((0010 (typed-source) (110
              ((x86-machine-rejected? typed-source) typed-source)
              ((010 ())
               (1110 mnemonic
                     (x86-gpr64-value typed-destination)
-                    (x86-xmm-value typed-source))))))))))
+                    (x86-xmm-value typed-source))))) (x86-as-xmm source))))) (x86-as-gpr64 destination))))
 
 (0011 x86-rdtsc (0010 () (001 (rdtsc))))
 
