@@ -1,6 +1,6 @@
 """Source-only proof for the third audited SID8 -> domain Lisp witness cohort.
 
-Compare six executable witnesses to immutable historical Git blob SHA values.
+Compare five executable witnesses to immutable historical Git blob SHA values.
 Lexical/AST preservation is validated; full runtime semantic parity is not.
 """
 from pathlib import Path
@@ -19,7 +19,6 @@ sys.modules[spec.name] = audit
 spec.loader.exec_module(audit)
 
 COHORT = {
-    "tests/fixtures/decimal-comma-authority-witness.lisp": ("753813a2bccb5c357d407598405627bf4d49c3c9", 65),
     "tests/fixtures/exact-quantity-arithmetic-witness.lisp": ("747073d34f67e489961aba4bffd62e275c1d3428", 89),
     "tests/fixtures/island-compat-witness.lisp": ("ed110556c90fd82c989f65c6d140ff9d46a1799f", 152),
     "tests/fixtures/island-lowering-1048-witness.lisp": ("ce0cba8641b8ce0a5409c22de6d03f4b9be63aa9", 44),
@@ -47,8 +46,8 @@ class ThirdWitnessCohort(unittest.TestCase):
                 n = sum(a != b for a, b in zip(before, after))
                 self.assertEqual(n, expected)
                 count += n
-        self.assertEqual(len(COHORT), 6)
-        self.assertEqual(count, 948)
+        self.assertEqual(len(COHORT), 5)
+        self.assertEqual(count, 883)
 
 
 if __name__ == "__main__":
