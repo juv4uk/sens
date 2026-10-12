@@ -1,15 +1,20 @@
 use sens::{
-    eval_lowered_expressions, load_core_library, lower_program, parse, parse_canonical_binary,
+    eval_lowered_expressions, load_core_library, lower_program, parse, parse_canonical_binary, parse_mixed_exact_domain,
     Expr, ExprKind, Session, Value,
 };
 use std::{env, fs, process, time::Instant};
 
 const ENGLISH: &str = "english-surface";
+const UKRAINIAN: &str = "ukrainian-surface";
 const BINARY: &str = "canonical-d1d8";
 
 fn parse_source(candidate: &str, source: &str) -> Result<Vec<Expr>, String> {
     match candidate {
         ENGLISH => parse(source).map_err(|e| format!("{e:?}")),
+        // Current source authority is the ratified Ukrainian surface. English
+        // names remain display/compatibility projections and do not create
+        // callable identity in this lane.
+        UKRAINIAN => parse_mixed_exact_domain(source).map_err(|e| format!("{e:?}")),
         BINARY => parse_canonical_binary(source).map_err(|e| format!("{e:?}")),
         other => Err(format!("unknown candidate: {other}")),
     }
@@ -101,9 +106,9 @@ fn preflight(candidate: &str, source: &str) -> Result<(), String> {
     let parsed = parse_source(candidate, source)?;
     let lowered = lower_program(&parsed);
     let semantic_trace = trace_program(&lowered)?;
-    // This preflight is the bounded D3 domain-ladder smoke (QUOTE/CAR only).
-    // Keep it independent of the full Lisp application library: those language
-    // laws are owned and tested by Lisp witnesses, not by Rust bootstrap here.
+    // This preflight pairs ratified Ukrainian D3 source heads with canonical
+    // exact-width binary source (QUOTE/CAR only). It deliberately does not
+    // grant callable meaning to English aliases or use a legacy SID table.
     let mut session = Session::default();
     let result = eval_lowered_expressions(&lowered, &mut session).map_err(|e| format!("{e:?}"))?;
     emit(

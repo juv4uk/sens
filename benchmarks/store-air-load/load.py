@@ -28,11 +28,11 @@ REPEAT_LADDER = (1, 10, 100)
 CORE_MODES = ("session", "bytes", "decode", "parse", "macro", "core")
 CANDIDATES = {
     "canonical-packed": "canonical-d1d8",
-    "text-surface": "english-surface",
+    "text-surface": "ukrainian-surface",
 }
 SOURCE_KEYS = {
     "canonical-packed": "canonical_source",
-    "text-surface": "english_source",
+    "text-surface": "ukrainian_source",
 }
 IREF_RE = re.compile(r"I\s+refs:\s*([\d,]+)")
 

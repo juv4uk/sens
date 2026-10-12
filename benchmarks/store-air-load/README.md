@@ -14,7 +14,7 @@
 11.9. Якщо checkout має іншу версію Contract, runner повертає явний
 `SENS_BENCHMARK_STATUS=BLOCKED`.
 
-Базовий replay вимірює STORE/AIR та семантичний паритет English/canonical пар.
+Базовий replay вимірює STORE/AIR та семантичний паритет Ukrainian/canonical пар.
 LOAD I-ref поля навмисно лишаються base-null, доки окремо не запущено
 `load.py` з потрібними Cachegrind/helpers; без цього enrichment benchmark
 не заявляє повного LOAD-профілю.
@@ -217,8 +217,8 @@ Ratchet покриває всі критичні довжини:
 - `eight-bit-mechanical` — рівно 8 біт;
 - `twelve-bit-mechanical` — 9..15-бітний клас;
 - `mixed-28-bit-mechanical` — довга mixed-width послідовність D1..D7;
-- `d3-quote-empty` — English/canonical paired semantic witness;
-- `d3-car-empty` — другий English/canonical paired witness.
+- `d3-quote-empty` — Ukrainian/canonical paired semantic witness;
+- `d3-car-empty` — другий Ukrainian/canonical paired witness.
 
 Для кожної canonical fixture runner незалежно рахує
 `expected_semantic_bits = sum(word_widths)`, звіряє його з production helper,

@@ -7,17 +7,18 @@
     "CONFORMANCE",
     "FALSIFIER"
   ],
-  "question": "Can canonical exact-width payload identity be preserved while storage, transport, and load costs are measured as separate physical axes?",
-  "claim": "Measures STORE/AIR accounting and semantic-parity checks for the D1-D9 fixture subset under Contract 11.9. D10 behavior is outside this lane; LOAD I-ref fields remain explicitly base-null unless separately enriched with load.py and its pinned helpers.",
+  "question": "Can exact-width payload identity and STORE/AIR costs be measured while a ratified Ukrainian source-head path is checked against canonical binary D1-D9 fixtures?",
+  "claim": "Measures STORE/AIR accounting for Contract 11.9 D1-D9 fixtures. Paired-program controls compare the current Ukrainian source heads (parsed through the mixed exact-domain reader) against canonical binary input; English aliases are not treated as semantic authority. D10 is outside this lane, and LOAD I-ref fields remain base-null unless separately enriched with load.py and its pinned helpers.",
   "witness": [
     "README.md",
     "run.py",
     "validate.py",
     "fixtures.json",
-    "schema.json"
+    "schema.json",
+    "../crates/sens/examples/current_en_vs_d1d8_cpu.rs"
   ],
-  "status": "ACTIVE-CURRENT-GENERATION; CONTRACT-11.9; LOAD-BASE-NULL",
-  "generation": "Contract 11.9 D1-D9 fixture subset; D10 not exercised; LOAD enrichment separate",
+  "status": "ACTIVE-CURRENT-GENERATION; UKRAINIAN-CANONICAL-PAIR; LOAD-BASE-NULL",
+  "generation": "Contract 11.9 D1-D9 subset; Ukrainian current-source vs canonical-binary pairs; D10 not exercised; LOAD enrichment separate",
   "axis": "store-air-load/physical-separation",
   "reproduce": "python3 benchmarks/store-air-load/run.py --out /tmp/store-air-load.jsonl --bitrate-bps 2 && python3 benchmarks/store-air-load/validate.py /tmp/store-air-load.jsonl"
 }
