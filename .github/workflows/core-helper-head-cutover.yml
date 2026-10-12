@@ -1,0 +1,21 @@
+name: Міграція внутрішніх Core-викликів
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - "lib/core.lisp"
+      - "tests/test_core_lisp_helper_head_cutover.py"
+      - ".github/workflows/core-helper-head-cutover.yml"
+  workflow_dispatch:
+
+jobs:
+  core-helper-source:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Перевірити точно шість замін та відсутність доменних вигадок
+        run: python3 -m unittest discover -s tests -p 'test_core_lisp_helper_head_cutover.py' -v
