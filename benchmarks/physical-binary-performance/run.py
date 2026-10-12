@@ -49,6 +49,19 @@ def sha256(data: bytes) -> str:
     return hashlib.sha256(data).hexdigest()
 
 
+def canonical_word_projection(payload: bytes) -> bytes:
+    """Return the canonical ASCII D1-D9 word stream represented by a T5 file.
+
+    This is a physical transport projection, not an AST/source reconstruction.
+    Keep exact word boundaries and one terminal LF explicit so the Rust
+    encoder can be compared against the committed physical bytes.
+    """
+    words = decode_bytes(payload)
+    if encode_words(words) != payload:
+        raise ValueError("noncanonical T5 payload in canonical word projection")
+    return (" ".join(words) + chr(10)).encode("ascii")
+
+
 def invoke(argv: list[str], *, timeout: int = 30) -> tuple[float, bytes]:
     start = time.perf_counter_ns()
     proc = subprocess.run(
@@ -154,10 +167,10 @@ def main() -> None:
         # and then re-encoded by the Rust CLI. Historical sibling .lisp files
         # are intentionally not used as T5 sources: some contain pre-cutover
         # AST syntax (for example (00000001 ()), not canonical 0/1 word streams.
-        words = decode_bytes(committed_bytes)
-        source_bytes = (" ".join(words) + chr(10)).encode("ascii")
-        if encode_words(words) != committed_bytes:
-            raise RuntimeError(f"{fixture}: independent Python T5 roundtrip failed")
+        try:
+            source_bytes = canonical_word_projection(committed_bytes)
+        except ValueError as error:
+            raise RuntimeError(f"{fixture}: independent Python T5 projection failed: {error}") from error
         source_projections[fixture] = source_bytes
         source_label = f"{fixture}#canonical-word-projection"
 
