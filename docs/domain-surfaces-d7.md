@@ -18,8 +18,9 @@ All 126 residents have Ukrainian, expanded-Ukrainian, and Sanskrit explanatory s
 
 ## Механічне введення D7 в Rust
 
-Джерело розміщення: `knowledge/d7-ratified.json` (#3572); людиночитна таблиця
-`lib/domains/d7.lisp` не змінюється. Команда
+Джерело розміщення й резидентів: `knowledge/d7-ratified.json` (#3572);
+`lib/domains/d7.lisp` є проєкцією для читання й гліфів, не джерелом нових
+координат. Команда
 `python3 scripts/generate-domain-owner-registry.py` матеріалізує тільки
 координати з нормативного джерела, без назв, фонемних законів, старих SID8 чи
 виконуваних примітивів. `--check` відхиляє будь-яке розходження генератора
