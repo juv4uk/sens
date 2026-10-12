@@ -369,7 +369,7 @@ mod tests {
             two[width - 2] = 1;
             let doubled = compute("*", &maximum, &admitted(&two))
                 .expect("точне множення з перенесенням");
-            let Value::BinaryNumber(product) = doubled else {
+            let Value::BinaryNumber(product) = &doubled else {
                 panic!("добуток має залишитися точним натуральним словом")
             };
             let mut product_bits = vec![0u8; 2 * width];
