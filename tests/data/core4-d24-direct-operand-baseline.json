@@ -1,0 +1,22 @@
+{
+  "schema": 1,
+  "source": "lib/core4.lisp",
+  "contract": "11.9",
+  "status": "known-source-debt-NOT-admitted-arithmetic",
+  "scope": "direct scalar numeric spellings in D5/D6 mathematical call arguments; length-onto initial seed; comments and strings excluded",
+  "key_format": "class|exact-head|one-based-argument-index|source-token",
+  "note": "The baseline is an exact inventory, not a permission or execution proof. On any migration update, revise this record in the same atomic change. Do not infer a D24 domain from a token.",
+  "counts": {
+    "math|01010|2|1": 1,
+    "math|01011|1|0": 1,
+    "math|01011|2|1": 2,
+    "math|10111|2|#d10": 1,
+    "math|10111|2|1": 1,
+    "math|10111|2|2": 2,
+    "math|11010|2|0": 3,
+    "math|11010|2|2": 2,
+    "seed|length-onto|2|0": 1
+  },
+  "blocking_migration": "length-onto's initial zero plus D5 PLUS accumulator increment need explicit D24+ values, never auto-literal promotion",
+  "beyond_scope": "Other indirect numeric calls, source quotations, runtime binding proofs and physical T5 source admission require separate evidence."
+}
