@@ -10,7 +10,8 @@
   "claim": "Measures canonical word-projection-to-T5 re-encoding, physical file size, and per-process wall startup+execution, p95 and optional Cachegrind I refs across eight existing physical T5 fixtures. The reference Python decoder creates a temporary exact-width word projection from each committed .sens file; the Rust encoder must reproduce the committed bytes, and two CLI execution paths must emit identical output. This does not measure Lisp AST lowering or establish an independent semantic oracle, in-process warm throughput, or cross-machine superiority.",
   "witness": [
     "README.md",
-    "run.py"
+    "run.py",
+    "test_word_projection.py"
   ],
   "status": "ACTIVE-PHYSICAL-T5-ROUNDTRIP-MEASUREMENT",
   "generation": "2026-10-12 canonical word projection from committed T5 artifacts",

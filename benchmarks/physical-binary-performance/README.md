@@ -56,6 +56,11 @@
 
 ## Відтворення
 
+Перед замірами перевірте проєкцію й негативні межі:
+
+`python3 -m unittest discover -s benchmarks/physical-binary-performance -p 'test_*.py' -v`.
+
+
 ```sh
 cargo build --locked --release -p sens-cli --bin sens --bin sens-trit
 python3 benchmarks/physical-binary-performance/run.py \

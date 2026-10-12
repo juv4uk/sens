@@ -157,7 +157,7 @@
         {
           "stand": "physical-binary-performance",
           "category": "LEGACY_SOURCE_FIXTURE_INCOMPATIBLE_WITH_CURRENT_EXACT_WIDTH_READER",
-          "latest_action": "Still unresolved; do not weaken the reader or claim physical performance until source fixtures and physical artifacts are reconciled."
+          "latest_action": "Historical FAIL remains valid for SHA 411312. Current runner now constructs a canonical exact-width word projection from the committed T5 bytes via the independent Python decoder, re-encodes it using Rust sens-trit, and requires byte-for-byte identity. Five projection regression tests and an eight-file physical smoke check have been added; the exact-head CI is pending, so current PASS is not yet claimed."
         }
       ],
       "summary_artifact": {
@@ -168,5 +168,19 @@
       },
       "interpretation": "This is a follow-up run for its exact SHA only. Two subsequent classification-only changes have been committed and await a fresh registry run; neither is presented as a passing benchmark."
     }
-  ]
+  ],
+  "pending_current_head_validation": {
+    "observed_head": "c9c3214b5bfed156e8302561215a961d9e972b4e",
+    "status": "PENDING_EXACT_HEAD_CI",
+    "physical_smoke": {
+      "id": 38192217893,
+      "url": "https://github.com/juv4uk/sens/actions/runs/38192217893",
+      "status": "queued"
+    },
+    "notes": [
+      "Physical source projection is a byte-preserving view of committed T5 words, not a reconstruction of legacy Lisp AST.",
+      "The five projection boundary unit tests are invoked by .github/workflows/physical-binary-sens-cli.yml.",
+      "Historical sweep outcomes remain immutable; only a future exact-head sweep can change the current benchmark verdict."
+    ]
+  }
 }
