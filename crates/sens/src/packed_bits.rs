@@ -31,7 +31,7 @@ use crate::Bit9;
 ///
 /// Unused low bits in the final byte, when any, are always zero and are not
 /// part of the payload. No padding exists between words.
-#[derive(Clone, Eq, PartialEq)]
+#[derive(Clone, Debug, Eq, PartialEq)]
 pub struct PackedBitstream {
     bytes: Vec<u8>,
     bit_len: usize,
