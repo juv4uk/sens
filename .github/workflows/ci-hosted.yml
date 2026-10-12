@@ -10,6 +10,7 @@ on:
 
 permissions:
   contents: read
+  actions: read
 
 jobs:
   critical:
@@ -97,6 +98,19 @@ jobs:
         run: |
           python3 -m unittest discover -s tests -p 'test_verify_release_assets.py' -v
           python3 -m unittest discover -s packaging/tests -p 'test_release_preflight_scope.py' -v
+
+      # A local workflow YAML and trigger-scope test do not prove GitHub has
+      # registered the independent workflow. Check the real Actions API on
+      # main pushes (fork PR tokens cannot be trusted for repository-level API).
+      - name: Independent release preflight registration negative controls
+        if: always()
+        run: python3 -m unittest discover -s tests -p test_verify_release_workflow_registration.py -v
+
+      - name: GitHub API independent Release Preflight registration (fail closed)
+        if: always() && github.event_name != 'pull_request'
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: python3 scripts/verify_release_workflow_registration.py "$GITHUB_REPOSITORY"
 
       - name: Release publication and pre-tag gate structural regressions
         if: always()
