@@ -2,7 +2,7 @@
 
 use sens::{
     Bija3, Bit3, Bit4, Bit8, Bit9, BinaryNumber, CoreD4, CoreD8, CoreD9,
-    DomainIdentity, Expr, ExprKind, Exactness, Sens8, Span,
+    DomainIdentity, Expr, ExprKind, Exactness, Span,
 };
 use sens::syntax::{
     decode_exact_fasl_program, decode_exact_wire_program,
@@ -55,7 +55,7 @@ fn історичний_w8_під_цитатою_не_стає_d8() {
         expression(ExprKind::Pair(
             std::rc::Rc::new(expression(ExprKind::String("дані".into()))),
             std::rc::Rc::new(expression(ExprKind::Sid(
-                Sens8::from_packed_byte(0b10101000),
+                sens::sens!(10101000),
             ))),
         )),
     ].into()));
