@@ -93,13 +93,14 @@ Raw repetitions and binary/runtime provenance are emitted next to the summary.
       -m manifest.scm \
       -m benchmarks/cross-language/manifest.scm -- \
       python3 benchmarks/cross-language/run.py \
-        --sens-bench target/release/examples/ci_bench
+        --sens-bench target/release/examples/ci_bench \
+        --historical-function8-fasl  # provenance only; not current Contract 11.9
 
 Для швидкої перевірки лише відповідей:
 
     python3 benchmarks/cross-language/run.py \
       --sens-bench target/release/examples/ci_bench \
-      --check-only
+      --check-only --historical-function8-fasl
 
 Результат містить instructions.tsv, runtime.tsv, environment.json і report.md.
 
