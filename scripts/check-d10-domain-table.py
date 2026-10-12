@@ -35,6 +35,13 @@ PREDICATES_WITH_DONOR_PLAIN_NAMES = frozenset({
     "FINITE-TERM-SUBSUMES", "WILD-PATHNAME-P", "PACKAGEP", "READTABLEP",
     "FINITE-TILE-DISJOINT-CHECK", "ALPHA-EQUIVALENCE-DEBRUIJN",
 })
+# Intentional SENS donor-name divergence: CLHS FBOUNDP tests presence;
+# the owner-pinned D10 inventory tests ABSENCE. Never invert by name alone.
+CONTRACT_POLARITY_PINS = {
+    "FUNBOUNDP": ("функція-не-визначена?",
+                  "функціональне-визначення-відсутнє?"),
+}
+
 NON_PREDICATE_ACTIONS = frozenset({
     "REMPROP", "MY-FRAME-LOOKUP", "ENV-LOOKUP",
     "HYSTERETIC-BOOLEAN-STEP", "PHASE-UNWRAP",
@@ -172,6 +179,9 @@ def check(d10, inventory, lower):
              "destructive marker drift between ук/укр " + row.bits)
         need(not FORBIDDEN_UNTRANSLATED_SAN_SUFFIX.search(row.san),
              "English suffix leaking into Sanskrit " + row.bits)
+        if name in CONTRACT_POLARITY_PINS:
+            need((row.uk, row.ukr) == CONTRACT_POLARITY_PINS[name],
+                 "historical donor-name polarity inversion " + row.bits)
         if name in PREDICATES_WITH_DONOR_PLAIN_NAMES:
             need(row.uk.endswith("?"), "missing semantic predicate marker " + row.bits)
         if name in NON_PREDICATE_ACTIONS:
@@ -231,6 +241,11 @@ def main():
                 next(i for i, row in enumerate(xs) if row.lisp == "ALLAN-VARIANCE"),
                 replace(next(row for row in xs if row.lisp == "ALLAN-VARIANCE"),
                         uk="дсп-алн"))),
+            ("inverted historical function-binding predicate", lambda xs: xs.__setitem__(
+                next(i for i, row in enumerate(xs) if row.lisp == "FUNBOUNDP"),
+                replace(next(row for row in xs if row.lisp == "FUNBOUNDP"),
+                        uk="функція-визначена?",
+                        ukr="функціональне-визначення-присутнє?"))),
             ("undetected semantic predicate", lambda xs: xs.__setitem__(
                 next(i for i, row in enumerate(xs) if row.lisp == "LISTEN"),
                 replace(next(row for row in xs if row.lisp == "LISTEN"),
