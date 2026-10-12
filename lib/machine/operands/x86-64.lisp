@@ -13,10 +13,8 @@
 (0011 x86-machine-rejected?
   (0010 (value)
     (110
-      
-      ((010 value)  (001 ()))
-      ((101 (100 value) (001 rejected)) t)
-      )))
+      ((010 value) (101 (001 ()) (001 rejected)))
+      ((010 ()) (101 (100 value) (001 rejected))))))
 
 (0011 x86-gpr8-name?
   (0010 (name)
