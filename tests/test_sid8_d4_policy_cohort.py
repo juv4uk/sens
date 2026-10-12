@@ -50,6 +50,55 @@ def _load(name, path):
     return module
 
 
+def _lower_parallel_let(source):
+    """Six source-pinned W8 LET forms -> D4 LAMBDA applications.
+
+    The existing S-expression parser provides exact source spans. Parallel
+    arguments evaluate in the caller's lexical environment, as in LET;
+    no D6:001000 execution claim is made. Never rewrite quoted data.
+    """
+    parser = _load("guard_fact_parallel_let_parser", "scripts/cond-modernize.py")
+    roots = parser.parse(source)
+    count = 0
+
+    def emit(node):
+        nonlocal count
+        original = source[node.start:node.end]
+        if node.opaque or not node.children:
+            return original
+        parts = node.children
+        if parts[0].atom in ("001", "00000001", "QUOTE", "quote"):
+            return original
+        if parts[0].atom == "10011100":
+            if len(parts) != 3 or not parts[1].children:
+                raise AssertionError("unproved parallel LET structure")
+            names, values = [], []
+            for binding in parts[1].children:
+                if len(binding.children) != 2 or binding.children[0].atom is None:
+                    raise AssertionError("unproved parallel LET binding")
+                names.append(binding.children[0].atom)
+                values.append(emit(binding.children[1]))
+            if len(set(names)) != len(names):
+                raise AssertionError("duplicate LET variables")
+            count += 1
+            return (f"((0010 ({' '.join(names)}) {emit(parts[2])}) "
+                    f"{' '.join(values)})")
+        rendered = original
+        for child in reversed(parts):
+            converted = emit(child)
+            if converted != source[child.start:child.end]:
+                rendered = (rendered[:child.start - node.start]
+                            + converted + rendered[child.end - node.start:])
+        return rendered
+
+    output = source
+    for root in reversed(roots):
+        converted = emit(root)
+        if converted != source[root.start:root.end]:
+            output = (output[:root.start] + converted + output[root.end:])
+    return output, count
+
+
 class PolicyD4PartialCutover(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
@@ -120,10 +169,18 @@ class PolicyD4PartialCutover(unittest.TestCase):
                     expected = expected.replace(
                         fallback, "((010 (001 ())) (guard-unknown"
                     )
+                    # Historical W8:10011100 LET overlaps current D8 CADDDAAR.
+                    # D6 LET has no admitted runtime route, so express exactly
+                    # the six pinned *parallel* bindings with D4 LAMBDA.
+                    original_let_heads = expected.count("(10011100 ")
+                    self.assertEqual(original_let_heads, 6)
+                    expected, lowered = _lower_parallel_let(expected)
+                    self.assertEqual(lowered, 6)
+                    self.assertNotIn("(10011100 ", expected)
                     self.assertEqual(current.count(fallback), 0)
                     self.assertEqual(current.count("((010 (001 ())) (guard-unknown"), 4)
                     self.assertEqual(current, expected,
-                                     "зміна поза 110 головами та 4 D1:YES fallback")
+                                     "зміна поза 110 головами, 4 D1:YES та 6 parallel LET")
                     reasons = {x.rule for x in self.d3.scan_lisp(current, path)}
                     self.assertIn("COND_NOT_TWO_FIELDS", reasons)
                     self.assertIn("COND_HOST_TRUTH", reasons)
@@ -131,6 +188,22 @@ class PolicyD4PartialCutover(unittest.TestCase):
 
                 self.assertNotRegex(current, D4_HEAD)
         self.assertEqual(total_d4, 34)
+
+
+    def test_parallel_let_lowering_keeps_quotes_and_refuses_duplicate_bindings(self):
+        quoted = "(001 (10011100 ((a 1)) (100 a)))"
+        text, count = _lower_parallel_let(quoted)
+        self.assertEqual((text, count), (quoted, 0))
+        bad = "(10011100 ((x 1) (x 2)) (111 x x))"
+        with self.assertRaisesRegex(AssertionError, "duplicate LET variables"):
+            _lower_parallel_let(bad)
+        safe = "(10011100 ((x (100 source)) (y (011 source))) (111 x y))"
+        text, count = _lower_parallel_let(safe)
+        self.assertEqual(count, 1)
+        self.assertEqual(
+            text,
+            "((0010 (x y) (111 x y)) (100 source) (011 source))",
+        )
 
 
 if __name__ == "__main__":
