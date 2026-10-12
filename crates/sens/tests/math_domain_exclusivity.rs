@@ -245,7 +245,9 @@ fn lisp_owned_d24_length_fold_uses_ratified_d6_add1_without_number_literals() {
     );
     let carried = eval_program("(довжина-д24-до items seed)", &mut session)
         .expect("Lisp-owned fold must retain carry into D48").value;
-    assert_eq!(carried, numeric(48, (1 << 24) + 2));
+    // D24(max) is 2^24 - 1. Two Lisp-owned ADD1 steps yield 2^24 + 1,
+    // represented losslessly in D48; expecting 2^24 + 2 would be off by one.
+    assert_eq!(carried, numeric(48, (1 << 24) + 1));
     
     // An unqualified seed never becomes D24 just because it is called 0.
     session.environment.define(
