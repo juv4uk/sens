@@ -47,6 +47,10 @@ jobs:
         run: |
           python3 scripts/check-core4-d24-migration.py --self-test
           python3 scripts/check-core4-d24-migration.py --check
+      - name: Драбина D1–D10 у Rust Python C Lisp без старої восьмибітної identity
+        run: |
+          python3 scripts/check-domain-ladder-identity.py --self-test
+          python3 scripts/check-domain-ladder-identity.py --check
       - name: Семантична ідентичність ядра з точною шириною
         run: cargo test --locked -p sens --test domain_ladder --test domain_ast_value_identity --test domain_width_authority_test
       - name: Регресійні тести старої логіки COND/ATOM/EQ у D3
