@@ -203,6 +203,12 @@ enumerator, canonical SENS parser і реальний evaluator.
 | **F3M-3** | `2F 18 59` | `IF-ATOM(QUOTE(0),CAR(CONS(QUOTE(1),1)),CDR(CONS(QUOTE(NIL),QUOTE(0))))` | компактне реальне умовне обчислення з двома різними гілками | `1` |
 | **F3M-3** | `FF FB 37` | `CAR(CONS(CDR(CONS(1,QUOTE(1))),ATOM(IF-ATOM(QUOTE(NIL),QUOTE(NIL),QUOTE(NIL)))))` | переможець exhaustive-пошуку останньої 64K-сторінки; 6/6 класів, 1 COND, 11 encoded-операцій | `1` |
 | **F3M-4** | `DE AD BE EF` | `ATOM(CONS(ATOM(CDR(CONS(QUOTE(0),CAR(CONS(NIL,QUOTE(0)))))),ATOM(ATOM(ATOM(QUOTE(NIL))))))` | **12 micro-nodes у 4 байтах**; canonical parse + real evaluator + exact roundtrip | `0` |
+| **F3M-4** | `0D E5 67 30` | `IF-ATOM(0,0,IF-ATOM(0,0,IF-ATOM(0,0,0)))` | **максимум 3×COND** для F3M-4; четвертий COND потребував би ≥13 nodes | `0` |
+| **F3M-4** | `BA BF 19 4E` | `ATOM(ATOM(ATOM(ATOM(ATOM(ATOM(ATOM(ATOM(ATOM(ATOM(ATOM(0)))))))))))` | абсолютна межа глибини: **12 рівнів / 12 nodes** | `1` |
+| **F3M-4** | `F5 A7 BC 39` | `ATOM(CAR(CONS(QUOTE(0),CDR(CONS(QUOTE(0),IF-ATOM(QUOTE(0),QUOTE(0),IF-ATOM(QUOTE(0),QUOTE(0),QUOTE(0))))))))` | metric-saturating witness: **6/6 класів, 2×COND, 16 encoded-операцій, depth 6, 12 nodes** | `1` |
+| **F3M-4** | `BA AD F0 0D` | `IF-ATOM(IF-ATOM(CDR(CONS(CAR(CONS(QUOTE(NIL),QUOTE(NIL))),NIL)),1,1),0,QUOTE(0))` | красивий hex-код випадково дав **6/6 класів + 2×COND** | `0` |
+| **F3M-4** | `FE ED FA CE` | `ATOM(CAR(CONS(IF-ATOM(1,0,QUOTE(NIL)),IF-ATOM(QUOTE(NIL),QUOTE(NIL),CAR(CONS(QUOTE(1),NIL))))))` | ще один mnemonic hex: **2×COND, 13 encoded-операцій** | `1` |
+| **F3M-4** | `FF FF 4F 4F` | `ATOM(CAR(CONS(CAR(CONS(0,ATOM(ATOM(QUOTE(NIL))))),IF-ATOM(ATOM(QUOTE(NIL)),QUOTE(NIL),QUOTE(NIL)))))` | переможець exhaustive-пошуку останньої **64K** сторінки F3M-4 | executes |
 
 Для F3M-1 перебрано **всі 256/256 payloads**. Усі вони унікальні,
 канонічно roundtrip-яться й проходять реальний evaluator. Найвиразніший
@@ -227,10 +233,20 @@ proof gate.
 boundary cases, **65 536 stratified roundtrip samples** по всьому 32-бітному
 простору і реальний 12-вузловий `DE AD BE EF` witness.
 
+Додатковий структурний пошук довів межі самої microgrammar в цьому вікні:
+F3M-4 доходить лише до 12 nodes, тому **3 COND — абсолютний максимум**.
+Якщо одночасно вимагати всі 6 capability-класів
+`QUOTE+ATOM+CONS+CAR+CDR+COND`, то максимум — **2 COND**: третій разом із
+CAR і CDR потребував би щонайменше 14 nodes. `F5 A7 BC 39` насичує цю
+межу й одночасно досягає 16 encoded-операцій, depth 6 і 12 nodes.
+Окремо exhaustive перевірено всю останню сторінку
+`FF FF 00 00..FF FF FF FF`; її переможець — `FF FF 4F 4F`.
+
 Evidence: [F3M-1 exhaustive census run 38196658709](https://github.com/juv4uk/sens/actions/runs/38196658709) ·
 [F3M-2 exhaustive census + pinned regression run 38196520171](https://github.com/juv4uk/sens/actions/runs/38196520171) ·
 [F3M-3 final-page proof run 38195272188](https://github.com/juv4uk/sens/actions/runs/38195272188) ·
 [F3M-4 dense 32-bit proof run 38197907496](https://github.com/juv4uk/sens/actions/runs/38197907496).
+[F3M-4 extremes + final-64K search run 38198382120](https://github.com/juv4uk/sens/actions/runs/38198382120).
 
 ### Відтворення
 
