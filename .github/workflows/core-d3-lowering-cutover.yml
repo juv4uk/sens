@@ -28,6 +28,8 @@ jobs:
       - uses: dtolnay/rust-toolchain@stable
       - name: "Дозволяти тільки доведені D3 проєкції"
         run: cargo test --locked -p sens --lib exact_d3_compatibility_migration_tests -- --nocapture
+      - name: "Точковий тест: D3/D4 колізія назв і збереження всіх 238 проєкцій"
+        run: cargo test --locked -p sens --lib domain_source_projection_anti_collision_tests -- --nocapture
       - name: "Точний D3 у компіляторному знижувачі"
         run: cargo test --locked -p sens --lib domain_ladder_lowering_migration_tests -- --nocapture
       - name: "Точні D1–D9 AST без повернення до історичного W8"
