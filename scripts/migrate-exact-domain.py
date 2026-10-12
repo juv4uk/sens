@@ -148,6 +148,16 @@ def reject_shadowed_surfaces(source: str, surfaces) -> None:
                 f"{context}: {node.tok.text!r} — необхідне scope-aware lowering"
             )
 
+    # Координати беруться зі схвалених D4-таблиць, а не зі старого SID8.
+    lambda_heads = {
+        item.bits for item in surfaces.values()
+        if item.domain == "D4" and item.label.upper() == "LAMBDA"
+    }
+    define_heads = {
+        item.bits for item in surfaces.values()
+        if item.domain == "D4" and item.label.upper() == "DEFINE"
+    }
+
     def visit(node):
         if isinstance(node, reader.Quote):
             return
@@ -163,11 +173,11 @@ def reject_shadowed_surfaces(source: str, surfaces) -> None:
                 return
             surface = surfaces.get(spelling)
             role = (surface.label if surface is not None else "").upper()
-            if role == "LAMBDA" or spelling in {"00001000"}:
+            if role == "LAMBDA" or spelling in lambda_heads | {"00001000"}:
                 if len(node.items) >= 2 and isinstance(node.items[1], reader.ListNode):
                     for parameter in node.items[1].items:
                         guard_name(parameter, "параметр LAMBDA")
-            if role == "DEFINE" or spelling in {"00001001", "def"}:
+            if role == "DEFINE" or spelling in define_heads | {"00001001", "def"}:
                 if len(node.items) >= 2:
                     target = node.items[1]
                     if isinstance(target, reader.Atom):
