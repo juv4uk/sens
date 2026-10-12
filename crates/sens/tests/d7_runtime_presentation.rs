@@ -33,10 +33,10 @@ fn exact_d7_is_human_presentable_without_gaining_callability() {
         assert!(!sa.is_empty());
         if raw == 0 {
             assert_eq!(uk, "к", "D7 Ukrainian surface must show the glyph");
-            assert_eq!(sa, "क", "D7 Sanskrit surface must show Devanagari");
+            assert_eq!(sa, "k", "D7 Sanskrit surface is IAST, not English");
         }
         if raw == 1 {
-            assert_eq!(sa, "ख");
+            assert_eq!(sa, "kh");
             assert_eq!(uk, format!("#<домен D7:{exact}>"),
                        "unassigned Ukrainian spelling must not be invented");
         }
