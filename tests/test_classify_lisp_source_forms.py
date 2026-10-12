@@ -138,6 +138,53 @@ class ThreePassClassifierTests(unittest.TestCase):
         self.assertFalse(dynamic)
         self.assertFalse(empty)
 
+    def test_explicit_quote_data_is_not_counted_as_executable_calls(self):
+        source = """(quote (car x))
+(001 (00000101 x))
+(QUOTE ((PLUS a b) (CAR c)))
+(00000001 (00110111 f xs))
+(car x)
+"""
+        heads = mod.scan_heads("sample.lisp", source)
+        self.assertEqual(
+            [head.token for head in heads if not head.empty_list],
+            ["quote", "001", "QUOTE", "00000001", "car"],
+        )
+        historical, current, dynamic, empty = self.classify(source)
+        self.assertEqual([hit.token for hit in historical],
+                         ["quote", "00000001", "car"])
+        self.assertEqual([hit.token for hit in current], ["001"])
+        self.assertFalse(dynamic)
+        self.assertFalse(empty)
+
+    def test_nested_executable_operator_does_not_create_second_head(self):
+        source = """((car f) car)
+((0010 (x) (car x)) value)
+('car x)
+("car" car)
+(car x)
+"""
+        heads = mod.scan_heads("sample.lisp", source)
+        self.assertEqual(
+            [head.token for head in heads if not head.empty_list],
+            ["car", "0010", "car", "car"],
+        )
+        # The atom following the nested operator, or a quoted operator atom,
+        # is never a new executable head.
+        self.assertFalse(any(head.token == "value" for head in heads))
+
+    def test_nested_quoted_and_structural_empty_lists_remain_data(self):
+        source = """(quote (()))
+'(car ())
+(())
+(car ())
+"""
+        heads = mod.scan_heads("sample.lisp", source)
+        self.assertEqual([head.token for head in heads if not head.empty_list],
+                         ["quote", "car"])
+        self.assertEqual([head.token for head in heads if head.empty_list],
+                         ["()", "()"])
+
     def test_uppercase_define_collapses_two_legacy_candidates_to_one_current_identity(self):
         historical, _, dynamic, _ = self.classify("(DEFINE foo x)\n")
         self.assertFalse(dynamic)

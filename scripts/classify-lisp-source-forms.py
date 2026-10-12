@@ -85,6 +85,10 @@ def scan_heads(path: str, text: str) -> list[Head]:
     def current_quoted() -> bool:
         return bool(frames and frames[-1]["quoted"])
 
+    # A quoted *form* is data, even when it syntactically contains lists.
+    # Only explicit QUOTE is recognized here. It grants no W8 -> D8 meaning.
+    quote_heads = {"quote", "як-є", "001", "00000001"}
+
     while i < len(text):
         ch = text[i]
 
@@ -138,9 +142,19 @@ def scan_heads(path: str, text: str) -> list[Head]:
             continue
 
         if ch == "(":
-            quoted = current_quoted() or pending_quote
+            parent = frames[-1] if frames else None
+            quoted = (
+                current_quoted()
+                or pending_quote
+                or bool(parent and parent["quote_children"])
+            )
+            # A nested list can itself be the operator. The following atom
+            # then belongs to its arguments, not a second executable head.
+            if parent and parent["need_head"]:
+                parent["need_head"] = False
             frames.append({
                 "quoted": quoted,
+                "quote_children": False,
                 "need_head": True,
                 "open_offset": i,
             })
@@ -177,9 +191,11 @@ def scan_heads(path: str, text: str) -> list[Head]:
 
         if frames and frames[-1]["need_head"]:
             frame = frames[-1]
-            if not frame["quoted"]:
+            if not frame["quoted"] and not pending_quote:
                 line, col = line_col(text, start)
                 heads.append(Head(path, line, col, start, i, token, False))
+                if token.casefold() in quote_heads:
+                    frame["quote_children"] = True
             frame["need_head"] = False
 
         pending_quote = False
