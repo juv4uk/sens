@@ -1,0 +1,26 @@
+name: Точковий свідок T5 — кожен біт D10
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - "crates/sens/src/ternary_transport.rs"
+      - ".github/workflows/t5-exact-width-d10-probe.yml"
+  push:
+    branches: [main]
+    paths:
+      - "crates/sens/src/ternary_transport.rs"
+      - ".github/workflows/t5-exact-width-d10-probe.yml"
+
+jobs:
+  transport-d10-exhaustive:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Перевірити компіляцію механічного T5-носія
+        run: cargo check --locked -p sens --lib
+      - name: Два вичерпні тести D10 та спадкової D1–D9 сумісності
+        run: cargo test --locked -p sens --lib ternary_transport::tests::точковий_ -- --nocapture
+      - name: Усі попередні T5 тести, нічого не вимкнено
+        run: cargo test --locked -p sens --lib ternary_transport::tests:: -- --nocapture
