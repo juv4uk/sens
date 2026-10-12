@@ -822,6 +822,9 @@ pub fn verify_compiler_program_artifact_from_sens(
         "required-capabilities",
         "artifact-status",
     ];
+    // Validate unique field names, preventing first-wins/last-wins
+    // ambiguity across the signed compiler authority boundary.
+    let mut seen_fields = std::collections::HashSet::new();
     for row in &rows[1..] {
         let parts = compiler_artifact_list(row, "compiler artifact field")?;
         if parts.len() != 2 {
@@ -837,6 +840,11 @@ pub fn verify_compiler_program_artifact_from_sens(
         if !ALLOWED_FIELDS.contains(&name.as_ref()) {
             return Err(invalid_projection(format!(
                 "compiler artifact contains unsupported field {name}"
+            )));
+        }
+        if !seen_fields.insert(name.as_ref()) {
+            return Err(invalid_projection(format!(
+                "duplicate compiler artifact field {name}"
             )));
         }
     }
@@ -1144,6 +1152,12 @@ mod tests {
             .expect("D4 semantic input")
             .expect("LAMBDA is in compiler closure");
         assert_eq!(d4_input.lowering_role, CompilerLoweringRole::LambdaForm);
+        // Same numeric payload is not the same operation: D3:010 != D4:0010.
+        assert_eq!(d3_input.identity.packed_bits(), d4_input.identity.packed_bits());
+        assert_eq!(d3_input.identity.width(), 3);
+        assert_eq!(d4_input.identity.width(), 4);
+        assert_ne!(d3_input.identity, d4_input.identity);
+        assert_ne!(d3_input.proof_ref, d4_input.proof_ref);
         assert_eq!(d4_input.authority_ref, COMPILER_ROLE_LAW_REF);
         assert_eq!(d4_input.proof_ref, COMPILER_D4_PROOF_REF);
         assert_eq!(d4_input.authority_sha256, d3_input.authority_sha256);
@@ -1200,6 +1214,24 @@ mod tests {
     }
 
     #[test]
+    fn whole_program_artifact_verifier_rejects_duplicate_fields_before_execution() {
+        let repeated = Value::Symbol(Rc::from("artifact-kind"));
+        let artifact = Value::list([
+            Value::Symbol(Rc::from("compiler-compilation-artifact/1")),
+            Value::list([repeated.clone(), Value::Symbol(Rc::from("whole-program"))]),
+            Value::list([repeated, Value::Symbol(Rc::from("whole-program"))]),
+        ]);
+        let error = verify_compiler_program_artifact_from_sens(
+            &artifact,
+            &"00".repeat(32),
+            "0123456789abcdef0123456789abcdef01234567",
+        )
+        .expect_err("duplicate authority field must be rejected");
+        assert_eq!(error.kind, ErrorKind::InvalidForm);
+        assert!(error.to_string().contains("duplicate compiler artifact field"));
+    }
+
+    #[test]
     fn whole_program_artifact_verifier_binds_requests_to_current_sens_authority() {
         let parsed = parse_mixed_exact_domain(COMPILER_NUCLEUS_SOURCE).expect("compiler nucleus parses");
         let lowered = crate::lower_program(&parsed);
@@ -1253,7 +1285,10 @@ mod tests {
 
     #[test]
     fn whole_program_artifact_verifier_rejects_tampering_and_target_smuggling() {
-        let parsed = crate::parse(COMPILER_NUCLEUS_SOURCE).expect("compiler nucleus parses");
+        // The compiler source is D3/D4: the historical generic parser may
+        // reintroduce legacy W8 nodes before the artifact gets verified.
+        let parsed = parse_mixed_exact_domain(COMPILER_NUCLEUS_SOURCE)
+            .expect("compiler nucleus parses with exact domain widths");
         let lowered = crate::lower_program(&parsed);
         let wire = crate::wire_encode_program(&lowered);
         let decoded = crate::wire_decode_program(&wire).expect("canonical SW\\x01 program wire");
