@@ -724,6 +724,81 @@ mod tests {
     }
 
     #[test]
+    fn de_bruijn_lambda1_probe_fits_a_full_five_byte_window_by_node_13() {
+        // Research-only capacity probe for a *real* one-argument lambda.
+        // A bound variable is represented canonically by its de Bruijn index,
+        // so alpha-renaming cannot create duplicate programs. This does NOT
+        // alter the admitted F3M-5 mapping or SENS LAMBDA semantics.
+        const NODES: usize = 13;
+        const DEPTHS: usize = 15;
+        let mut closed = [[0u128; DEPTHS]; NODES + 1];
+
+        // Six frozen F3M leaves plus one canonical bound-variable leaf for
+        // every in-scope de Bruijn index 0..depth-1.
+        for depth in 0..DEPTHS {
+            closed[1][depth] = 6 + depth as u128;
+        }
+
+        for nodes in 2..=NODES {
+            for depth in (0..DEPTHS - 1).rev() {
+                // ATOM(body) + LAMBDA1(body-at-depth+1).
+                let mut total = closed[nodes - 1][depth]
+                    .checked_add(closed[nodes - 1][depth + 1])
+                    .expect("probe count");
+
+                // CONS, CAR(CONS), CDR(CONS), EQ(ATOM,ATOM).
+                let mut binary_pairs = 0u128;
+                for left_nodes in 1..nodes - 1 {
+                    let right_nodes = nodes - 1 - left_nodes;
+                    binary_pairs = binary_pairs
+                        .checked_add(
+                            closed[left_nodes][depth]
+                                .checked_mul(closed[right_nodes][depth])
+                                .expect("probe pair count"),
+                        )
+                        .expect("probe pair sum");
+                }
+                total = total
+                    .checked_add(binary_pairs.checked_mul(4).expect("four binary families"))
+                    .expect("probe binary sum");
+
+                // Total IF-ATOM, same ternary split law as current F3M.
+                for test_nodes in 1..nodes.saturating_sub(2) {
+                    for then_nodes in 1..nodes - 1 - test_nodes {
+                        let else_nodes = nodes - 1 - test_nodes - then_nodes;
+                        if else_nodes == 0 {
+                            continue;
+                        }
+                        total = total
+                            .checked_add(
+                                closed[test_nodes][depth]
+                                    .checked_mul(closed[then_nodes][depth])
+                                    .and_then(|v| v.checked_mul(closed[else_nodes][depth]))
+                                    .expect("probe conditional count"),
+                            )
+                            .expect("probe conditional sum");
+                    }
+                }
+                closed[nodes][depth] = total;
+            }
+        }
+
+        let legacy = count_table().expect("current F3M counts");
+        let through_12_total = (1..=12).map(|n| closed[n][0]).sum::<u128>();
+        let through_13_total = through_12_total + closed[13][0];
+        let through_12_legacy = (1..=12).map(|n| legacy[n][0]).sum::<u128>();
+        let through_13_legacy = through_12_legacy + legacy[13][0];
+
+        let through_12_extension = through_12_total - through_12_legacy;
+        let through_13_extension = through_13_total - through_13_legacy;
+
+        assert_eq!(through_12_extension, 298_460_447_325);
+        assert_eq!(through_13_extension, 3_706_360_960_907);
+        assert!(through_12_extension < F3M5_CAPACITY);
+        assert!(through_13_extension >= F3M5_CAPACITY);
+    }
+
+    #[test]
     fn first_extension_programs_are_lambda_and_eq_capable() {
         let zero = decode_extension(0).unwrap();
         assert_eq!(
