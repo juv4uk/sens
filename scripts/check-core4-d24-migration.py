@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Observe unqualified source operands in pinned Core4, without admitting them.
+"""Observe unqualified executable direct operands in Core4, without admission.
 
 Contract 11.9: D1-D10 are binary domain words; only explicit D24+ numerical
 objects may enter math. This structural audit is an exact *debt inventory*,
@@ -28,6 +28,9 @@ MATH_HEADS = frozenset({
 # Capture precisely the Lisp-owned LENGTH accumulator's source-level seed,
 # which is not itself syntactically a mathematical primitive call.
 SEED_HEADS = frozenset({"length-onto"})
+# Only explicit Lisp/D3 quote forms are proven inert at this reader stage.
+# The abbreviated apostrophe reader surface is outside this narrow audit.
+QUOTE_HEADS = frozenset({"001", "quote", "00000001"})
 NUMERIC_TOKEN = re.compile(
     r"(?:[+-]?[0-9]+(?:/[+-]?[0-9]+)?(?:\.[0-9]+)?|#[bBoOdDxX][0-9a-fA-F]+)\Z"
 )
@@ -88,18 +91,27 @@ def tokens(source: str):
 
 
 def audit(source: str):
-    """Identify only *direct* scalar arguments; nested calls stay distinct."""
+    """Identify direct scalar operands outside explicit quoted source data."""
     stack = []
     found = []
     for token, line in tokens(source):
         if token == "(":
-            stack.append([])
+            in_quote = False
+            if stack:
+                parent = stack[-1]
+                items = parent["items"]
+                parent_head = items[0][0] if items and items[0] else None
+                in_quote = parent["quoted"] or parent_head in QUOTE_HEADS
+            stack.append({"items": [], "quoted": in_quote})
         elif token == ")":
             if not stack:
                 raise ValueError(f"unexpected closing parenthesis on line {line}")
-            children = stack.pop()
+            node = stack.pop()
+            children = node["items"]
             head = children[0][0] if children and children[0] else None
-            if head in MATH_HEADS or head in SEED_HEADS:
+            # Quoted SENS data may contain apparent operator-shaped forms,
+            # but no mathematical call happens under this lexical boundary.
+            if not node["quoted"] and (head in MATH_HEADS or head in SEED_HEADS):
                 kind = "math" if head in MATH_HEADS else "seed"
                 for argument_number, child in enumerate(children[1:], start=1):
                     if child is None:
@@ -109,9 +121,9 @@ def audit(source: str):
                         key = f"{kind}|{head}|{argument_number}|{value}"
                         found.append({"key": key, "line": value_line})
             if stack:
-                stack[-1].append(None)  # nested expression, not a scalar token
+                stack[-1]["items"].append(None)  # nested form, not a scalar
         elif stack:
-            stack[-1].append((token, line))
+            stack[-1]["items"].append((token, line))
     if stack:
         raise ValueError(f"unclosed source list (depth={len(stack)})")
     return found
@@ -140,6 +152,9 @@ def self_test():
         '(01011 (10110 a b) #d10)\n'
         '(length-onto xs 0)\n'
         '(01010 "<string with 2 and (01011 a 8)>" a)\n'
+        '(001 (01010 quoted-code 42))\n'
+        '(quote (01011 quoted-code 44))\n'
+        '(00000001 (11010 quoted-code 46))\n'
     )
     actual = audit(sample)
     expected = Counter({
