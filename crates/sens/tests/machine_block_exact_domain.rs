@@ -71,8 +71,8 @@ fn exact_machine_block_preserves_nine_historical_observations() {
 #[test]
 fn machine_block_reader_is_path_bound_and_quote_data_stays_opaque() {
     assert!(parse_mixed_exact_domain_machine_source(
-        "lib/other/block-exact.lisp", SOURCE
-    ).is_ok(), "сам машинний reader не здогадується про семантику шляху");
+        "lib/machine/other/block-exact.lisp", SOURCE
+    ).is_ok(), "машинний reader не наділяє семантикою сам basename");
     assert!(parse_mixed_exact_domain_machine_source(
         "lib/not-machine/block-exact.lisp", SOURCE
     ).is_err());
