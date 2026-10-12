@@ -653,7 +653,7 @@ mod tests {
                 qualified.add_in_numeric_domain(&qualified, width).unwrap();
             assert_eq!(result_width, width);
             assert_eq!(result_bits.len(), width);
-            assert_eq!(&result_bits[..width - 2], vec![0; width - 2]);
+            assert!(result_bits[..width - 2].iter().all(|&bit| bit == 0));
             assert_eq!(&result_bits[width - 2..], &[1, 0]);
         }
         let d24 = BinaryNumber::from_numeric_domain_bits(24, &[0; 24]).unwrap();
