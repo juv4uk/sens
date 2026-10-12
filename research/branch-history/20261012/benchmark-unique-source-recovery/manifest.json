@@ -116,7 +116,7 @@
     }
   ],
   "checks": {
-    "source_blob_sha_compared_to_archived_blob_sha": "PASS for all 9 unique source blobs",
+    "source_blob_sha_compared_to_archived_blob_sha": "PASS for all 11 unique source blobs; re-fetched from main and verified against origin SHA.",
     "unique_source_blob_count": 11,
     "readfile_alias_refs_with_matching_blobs": [
       "verify/362-readfile-current-main-benchmark",
