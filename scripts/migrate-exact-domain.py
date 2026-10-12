@@ -177,6 +177,14 @@ def reject_shadowed_surfaces(source: str, surfaces) -> None:
             raise ValueError(f"BINDING_FORM_BLOCK: {context}: непідтверджена форма зв'язувань")
         return node.items
 
+    def guard_parameters(node, context):
+        for parameter in binding_list(node, context):
+            if not isinstance(parameter, reader.Atom):
+                raise ValueError(
+                    f"BINDING_FORM_BLOCK: {context}: вкладений параметр без доведеного закону"
+                )
+            guard_name(parameter, context)
+
     def visit(node):
         if isinstance(node, reader.Quote):
             return
@@ -193,9 +201,9 @@ def reject_shadowed_surfaces(source: str, surfaces) -> None:
             surface = surfaces.get(spelling)
             role = (surface.label if surface is not None else "").upper()
             if role == "LAMBDA" or spelling in lambda_heads | {"00001000"}:
-                if len(node.items) >= 2 and isinstance(node.items[1], reader.ListNode):
-                    for parameter in node.items[1].items:
-                        guard_name(parameter, "параметр LAMBDA")
+                if len(node.items) < 2:
+                    raise ValueError("BINDING_FORM_BLOCK: LAMBDA без параметрів")
+                guard_parameters(node.items[1], "параметр LAMBDA")
             if role == "DEFINE" or spelling in define_heads | {"00001001", "def"}:
                 if len(node.items) >= 2:
                     target = node.items[1]
@@ -204,6 +212,14 @@ def reject_shadowed_surfaces(source: str, surfaces) -> None:
                     elif (isinstance(target, reader.ListNode)
                           and target.items):
                         guard_name(target.items[0], "голова DEFINE")
+                        for parameter in target.items[1:]:
+                            if not isinstance(parameter, reader.Atom):
+                                raise ValueError(
+                                    "BINDING_FORM_BLOCK: вкладений параметр DEFINE"
+                                )
+                            guard_name(parameter, "параметр DEFINE")
+                    else:
+                        raise ValueError("BINDING_FORM_BLOCK: некоректний DEFINE")
 
             # Історичні форми зв'язування не створюють нової callable
             # семантики. Забороняємо переписувати їхні затінені імена,
@@ -228,11 +244,15 @@ def reject_shadowed_surfaces(source: str, surfaces) -> None:
                     if not signature or not isinstance(signature[0], reader.Atom):
                         raise ValueError("BINDING_FORM_BLOCK: некоректна локальна функція")
                     guard_name(signature[0], "ім'я локальної функції")
+                    if len(signature) < 2:
+                        raise ValueError("BINDING_FORM_BLOCK: немає списку параметрів")
+                    guard_parameters(signature[1], "параметр локальної функції")
 
             if spelling in {"defun", "defmacro"}:
-                if len(node.items) < 2 or not isinstance(node.items[1], reader.Atom):
+                if len(node.items) < 3 or not isinstance(node.items[1], reader.Atom):
                     raise ValueError("BINDING_FORM_BLOCK: некоректне оголошення функції")
                 guard_name(node.items[1], "ім'я оголошеної функції")
+                guard_parameters(node.items[2], "параметр оголошеної функції")
         for child in node.items:
             visit(child)
         if node.tail is not None:
