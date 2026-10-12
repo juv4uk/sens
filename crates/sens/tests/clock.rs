@@ -42,6 +42,7 @@ fn core_quotient_and_mod_return_numeric_values_for_nonzero_divisors() {
     load_core_library(&mut session).unwrap();
 
     for (source, expected) in [
+        ("(largest-chunk 10 3 3 1)", "(6 2)"),
         ("(quotient 10 3)", "3"),
         ("(quotient 1 3)", "0"),
         ("(mod 10 3)", "1"),

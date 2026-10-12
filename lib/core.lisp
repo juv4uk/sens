@@ -666,7 +666,7 @@
     (110
       ((11010 a (01010 chunk chunk))  (111 chunk mult))
       ((0100 (11010 a (01010 chunk chunk)))
-       (00011001 a b (01010 chunk chunk) (01010 mult mult))))))
+       (largest-chunk a b (01010 chunk chunk) (01010 mult mult))))))
 
 ; `b = 0` used to hang forever: `largest-chunk` starts doubling from
 ; `chunk = b`, and `0 + 0 = 0` never grows, so its "does chunk still
@@ -693,7 +693,7 @@
        (110
          ((11010 a b)  0)
          ((0100 (11010 a b))
-          (let ((chunk+mult (00011001 a b b 1)))
+          (let ((chunk+mult (largest-chunk a b b 1)))
             (01010 (011 chunk+mult)
                (10111 (01011 a (100 chunk+mult)) b)))))))))
 
