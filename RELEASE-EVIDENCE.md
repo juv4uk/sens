@@ -47,6 +47,13 @@ Authority: [CURRENT.md](CURRENT.md), [language-contract.lisp](language-contract.
 **Захист точності аудиту:** `scripts/check-core4-d24-migration.py` тепер пропускає вкладені дані в явних `D3 QUOTE`/`quote`/історичній W8 QUOTE, щоб не рахувати інертний код виконуваною арифметикою. Самотести мають негативні приклади всіх трьох форм. Незалежний структурний підрахунок на актуальному `lib/core4.lisp` лишається **14/14**, без drift; обидва вбудовані Lisp SOURCE-фрагменти нових Rust-свідків мають збалансовані дужки. Це **не** Rust/Python CI PASS; скорочена апострофна quote-поверхня й непрямі числові виклики не входять у вузьку область аудиту.
 
 **Умовне приймання, не автоматична міграція:** тести передають D24(0)/D24(1) через explicit `Environment::define` у proof session. Вони **не** дають нового SENS source-literal/T5/FASL формату й **не** міняють `lib/core4.lisp`/збережений `.fasl`. Core4 `length` досі викликає `length-onto` із бездоменним `0`; для зміни canonical source потрібні легітимний D24 seed mechanism, регенерація FASL, чинний exact-SHA Core CI та негативні свідки. Реліз **NO-GO**.
+### Полімовний демонтаж старого восьмибітного runtime identity — поточний зріз
+
+- ВИДАЛЕНО з активного дерева `scripts/sid-binary-identity-guard.sh` (`e397a5b`); у головному pipeline його замінено на `scripts/check-domain-ladder-identity.py`, також додано до Core/Hosted CI.
+- Python `research-2077-binary-word-law.py` використовує явний `DomainCoordinate(width,payload)` замість восьмибітних `to_sens8/from_sens8`. Канонічні Rust/Python/C джерела й таблиці Lisp D1–D10 контролюються новою охороною. Незалежне читання з GitHub показало рівно **2/4/8/16/32/64/126/256/512/1024** рядків без дубльованих координат; це тільки статична перевірка, не виконання CI.
+- **КРИТИЧНА КОЛІЗІЯ:** старий `10101000` у CLI/host означав INVOKE, але сучасний D8:`10101000` означає ROUND. Historical source row має `MECHANISM-HOLD` і `current_target=null`; механічно переприсвоювати D8 за тим самим byte заборонено.
+- Інші чинні AST/evaluator/codec/CLI та Lisp/міграційні шляхи ще містять стару compatibility-реалізацію. Точний статус і конкретні файли — `docs/migration/domain-ladder-cutover-2026-10-12.uk.md`. **Повне видалення ще НЕ завершене**, а `cargo test`, незалежні source→T5 свідки та full release CI на одному SHA лишаються **UNVERIFIED**; реліз **NO-GO**.
+
 ## D10: наявні докази — чесний розподіл по рівнях
 
 Поелементний аудит [усіх 1024 D10 записів](docs/research/D10-PROOF-COVERAGE-AUDIT-20261012.uk.md) (pinned Git blob `7e6acb2531308ae5f63600d4e0042111cc3ec59c`) підтверджує:
