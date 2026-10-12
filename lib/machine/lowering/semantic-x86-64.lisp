@@ -334,10 +334,10 @@
              (110
                ((x86-admission-within-inclusive-integer-range?
                   right 0 18446744073709551615)
-                ; Exact-Q >= returns D1 1/0. Compare explicitly because 0 is
-                ; itself a value and must never become generic truthiness.
+                ; Inclusive order is derived from admitted D5 LESSP + D4 NOT.
+                ; Exact D1 controls stay distinct from numeric 0/1 and host truth.
                 (110
-                  ((110110 left right)  (010 (001 ())))
+                  ((0100 (11010 left right)) (010 (001 ())))
                   ((010 ()) (001 ()))))
                ((010 ()) (001 ()))))
             ((010 ()) (001 ()))))
