@@ -17,7 +17,7 @@ class AtomT5Cohort(unittest.TestCase):
         payload = PHYSICAL.read_bytes()
         self.assertEqual(payload, EXPECTED_BYTES)
         self.assertNotEqual(payload, EXPECTED.encode("ascii"))
-        self.assertFalse((FIXTURE / "atom-empty").exists())
+        self.assertEqual((FIXTURE / "atom-empty").read_text(encoding="ascii"), EXPECTED)
 
     def test_t5_bytes_are_canonical_and_typed_shape_is_preserved(self):
         trits = []
