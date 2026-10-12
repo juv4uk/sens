@@ -9,7 +9,6 @@ Domain *capacity* never proves a resident callable. D24+ is arithmetic only.
 from __future__ import annotations
 
 import argparse
-from collections import Counter
 from pathlib import Path
 import re
 import sys
@@ -141,9 +140,9 @@ def self_test() -> None:
     if counts != EXPECTED:
         raise ValueError("ratified domain ladder counts failed")
     for invalid in (
-        dict(toy, **{1: toy[1].replace("(0 ", "(00 ")}),
-        dict(toy, **{3: toy[3] + "(001 (ук дубль))\n"}),
-        dict(toy, **{7: toy[7].replace("(0000000 ", "(0100001 ")}),
+        {**toy, 1: toy[1].replace("(0 ", "(00 ")},
+        {**toy, 3: toy[3] + "(001 (ук дубль))\n"},
+        {**toy, 7: toy[7].replace("(0000000 ", "(0100001 ")},
         {n: value for n, value in toy.items() if n != 10},
     ):
         try:
