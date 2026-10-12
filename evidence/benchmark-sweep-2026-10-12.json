@@ -266,16 +266,57 @@
         }
       },
       "interpretation": "This is the first full sweep with no FAILs: 53 PASS and one honest BLOCKED. Coverage is complete, but all_benchmarks_pass remains false until the Guix environment is provided or this lane is formally retired/re-scoped."
+    },
+    {
+      "workflow_run_id": 38193326356,
+      "workflow_url": "https://github.com/juv4uk/sens/actions/runs/38193326356",
+      "commit": "69752ac30f40d1d196a34f5831032b3a6cb9c19d",
+      "result": "COMPLETE_WITH_ONE_INTENTIONAL_BLOCKED_STAND",
+      "coverage": {
+        "expected_stands": 54,
+        "observed_stands": 54,
+        "duplicates": false,
+        "missing": [],
+        "extra": [],
+        "coverage_complete": true
+      },
+      "outcome_counts": {
+        "pass": 53,
+        "fail": 0,
+        "blocked": 1,
+        "timeout": 0,
+        "all_benchmarks_pass": false
+      },
+      "summary_artifact": {
+        "id": 11722008256,
+        "url": "https://github.com/juv4uk/sens/actions/runs/38193326356/artifacts/11722008256",
+        "sha256": "c764a47f01eabbe6b38cf60dc5788bed262062521802cec5165228096d542b7a",
+        "expires_at_utc": "2026-11-02T01:50:40Z"
+      },
+      "stand_results": {
+        "cross_language": {
+          "status": "BLOCKED",
+          "shard": 5,
+          "artifact": {
+            "id": 11722562154,
+            "name": "benchmark-sweep-38193326356-5",
+            "sha256": "7bb5d2a4474876fecc6da17ac19b518c3f33ad04403fb718935014ad91605b0e",
+            "expires_at_utc": "2026-11-02T01:50:28Z"
+          },
+          "reason": "Current Contract 11.9 canonical multi-language corpus and independent oracle are not implemented; the manifest emits an explicit BLOCKED marker independent of Guix presence. Historical Function8/FASL output is provenance only."
+        }
+      },
+      "interpretation": "Coverage is complete; 53 stands pass and the sole current cross-language lane remains intentionally blocked. This is not an all-benchmarks-pass result."
     }
   ],
   "pending_current_head_validation": {
-    "recorded_base_head": "69752ac30f40d1d196a34f5831032b3a6cb9c19d",
-    "status": "PENDING_FAIL_CLOSED_CROSS_LANGUAGE_REGISTRY_SWEEP",
-    "latest_main_at_receipt": "69752ac30f40d1d196a34f5831032b3a6cb9c19d",
+    "recorded_base_head": "10a3594427f1568122d32c733b7fc965714b372d",
+    "status": "PENDING_FAIL_CLOSED_REGRESSION_TEST_AND_CURRENT_SWEEP",
+    "latest_main_at_receipt": "10a3594427f1568122d32c733b7fc965714b372d",
     "last_completed_sweep": {
-      "id": 38192977589,
-      "sha": "ea156c1d0fe386fe7422e4a345a6431a536e0c80",
-      "url": "https://github.com/juv4uk/sens/actions/runs/38192977589",
+      "id": 38193326356,
+      "sha": "69752ac30f40d1d196a34f5831032b3a6cb9c19d",
+      "url": "https://github.com/juv4uk/sens/actions/runs/38193326356",
       "outcomes": {
         "pass": 53,
         "fail": 0,
@@ -284,16 +325,15 @@
       }
     },
     "current_sweep": {
-      "id": 38193326356,
-      "sha": "69752ac30f40d1d196a34f5831032b3a6cb9c19d",
-      "url": "https://github.com/juv4uk/sens/actions/runs/38193326356",
+      "id": 38193453177,
+      "sha": "10a3594427f1568122d32c733b7fc965714b372d",
+      "url": "https://github.com/juv4uk/sens/actions/runs/38193453177",
       "status": "queued"
     },
     "notes": [
-      "The most recent completed full sweep is 53 PASS / 0 FAIL / 1 BLOCKED at ea156c1.",
-      "STORE/AIR is PASS under Contract 11.9 with current Ukrainian source heads paired against canonical binary.",
-      "Cross-language manifest now fails closed independent of Guix presence while its current Contract 11.9 canonical corpus/oracle remains unimplemented; running a historical Function8/FASL donor cannot become current evidence merely because Guix is installed.",
-      "The latest commit changes the cross-language manifest, generated index and descriptive docs. The new exact-SHA registry sweep is queued; do not publish its result until aggregation completes."
+      "The current commit adds test_current_gate.py and runs it in the benchmark-registry validation job.",
+      "The latest completed sweep has 53 PASS / 0 FAIL / 1 BLOCKED, full 54/54 coverage.",
+      "The single BLOCKED is intentional: current cross-language semantics are not implemented. Regression test prevents a historical Function8/FASL harness from being counted as current just because Guix exists."
     ]
   },
   "latest_stand_level_results": {
