@@ -58,11 +58,6 @@ def main() -> int:
     if evidence_mode == "performance":
         if env.get("load_context") not in {"idle", "high"}:
             fail("performance evidence requires explicit load_context=idle|high")
-        for workload in data["workloads"]:
-            if workload.get("parity") == "pass":
-                params = workload.get("params", {})
-                if "outer_reps" in params and params["outer_reps"] < 10:
-                    fail(f"{workload.get('id')}: performance evidence requires >=10 outer_reps")
 
     workload_ids: set[str] = set()
     for workload in data["workloads"]:
@@ -91,6 +86,22 @@ def main() -> int:
                     fail(f"{wid}/{axis}: measured rows require raw samples")
                 if any(not isinstance(value, (int, float)) or not math.isfinite(value) for value in left + right):
                     fail(f"{wid}/{axis}: raw samples must be finite numbers")
+
+                # Performance verdicts require repeated process-level observations for
+                # timing and RSS. Artifact-size axes are deliberately exempt.
+                if evidence_mode == "performance" and axis in {
+                    "warm_ready_execution_ns_per_op",
+                    "process_maxrss_kb",
+                }:
+                    params = workload.get("params", {})
+                    reps = params.get("outer_reps")
+                    if not isinstance(reps, int) or isinstance(reps, bool) or reps < 10:
+                        fail(f"{wid}/{axis}: performance evidence requires integer outer_reps >= 10")
+                    if len(left) != reps or len(right) != reps:
+                        fail(
+                            f"{wid}/{axis}: raw sample counts must equal outer_reps "
+                            f"({reps}); got SENS={len(left)}, competitor={len(right)}"
+                        )
 
             # #3698 owns RSS. Only its validated fresh-process GNU-time primitive is admissible.
             if axis == "process_maxrss_kb" and measurement.get("status") == "measured":
