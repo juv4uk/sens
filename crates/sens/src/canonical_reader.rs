@@ -3,7 +3,7 @@
 //! This path is intentionally separate from the human/compatibility parser.
 //! It consumes already-bounded binary source words, applies the ratified D2
 //! structural law, and lifts W1 plus W3-W9 payloads directly into DomainIdentity.
-//! D8/D9 stay domain-qualified; no legacy Sens8/Function8 identity is constructed.
+//! D8/D9 stay domain-qualified; no unqualified flat-byte function identity is constructed.
 
 use crate::{
     parse_binary_source_words, BinarySourceToken, BinarySourceWord, ErrorKind, Expr, LanguageError,
