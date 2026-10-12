@@ -23,6 +23,7 @@ pub mod frame3_micro;
 pub mod frame3_micro_enumerator;
 pub mod frame3_micro_v5;
 pub mod frame3_micro_v5_lambda;
+pub mod frame3_micro_v5_lambda_app;
 
 
 /// Public names for the self-contained, metadata-heavy transport experiments.
