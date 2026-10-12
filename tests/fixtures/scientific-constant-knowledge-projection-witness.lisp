@@ -18,39 +18,39 @@
 (load "lib/quantity.lisp")
 (load "lib/si.lisp")
 
-(00001001 scientific-constant-knowledge-projection-observation
-  (00001000 ()
-    (10011101 ((before *knowledge-journal*)
+(0011 scientific-constant-knowledge-projection-observation
+  (0010 ()
+    (001001 ((before *knowledge-journal*)
            (clauses
              (scientific-constant->clauses
                si:defining-speed-of-light))
-           (count (00101000 clauses))
+           (count (000000 clauses))
            (admitted (knowledge-clauses-valid? clauses))
            (journal-relation
-             (00100010 before *knowledge-journal*)))
-      (00100111 count admitted journal-relation))))
+             (11110111 before *knowledge-journal*)))
+      (1110 count admitted journal-relation))))
 
-(00001001 scientific-constant-knowledge-projection-witness
-  (00001000 ()
-    (10011100 ((observation
+(0011 scientific-constant-knowledge-projection-witness
+  (0010 ()
+    (001000 ((observation
             (scientific-constant-knowledge-projection-observation)))
-      (00000111
-        ((00100010
+      (110
+        ((11110111
            observation
-           (00000001 (7 t (1))))
+           (001 (7 t (1))))
          (1)
-         (00000001
+         (001
            (scientific-constant-knowledge-projection-witness
              (status pass))))
-        ((00100010
+        ((11110111
            observation
-           (00000001 (7 t (1))))
+           (001 (7 t (1))))
          (0)
-         (00100111
-           (00000001 scientific-constant-knowledge-projection-witness)
-           (00000001 (status fail))
-           (00100111 (00000001 actual) observation)
-           (00000001
+         (1110
+           (001 scientific-constant-knowledge-projection-witness)
+           (001 (status fail))
+           (1110 (001 actual) observation)
+           (001
              (expected
                (7 t (1))))))))))
 
