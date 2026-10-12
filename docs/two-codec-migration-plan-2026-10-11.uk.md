@@ -11,7 +11,7 @@
 **Frame3-Micro (F3M, .f3m)** — не третій default production-кодек, але це
 справжнє фізичне кодування SENS для dense bounded rank-space. Сімейство
 вибирається явно як F3M, а конкретний профіль визначає **точна довжина**:
-1 байт = F3M-1, 2 = F3M-2, 3 = F3M-3. Один committed байт `0x3E`
+1 байт = F3M-1, 2 = F3M-2, 3 = F3M-3, 4 = F3M-4. Один committed байт `0x3E`
 відновлює `CAR(CONS(1,NIL))` і проходить той самий SENS evaluator з
 паритетом до T5. Внутрішнього selector/version/integrity metadata немає.
 Назви E1/E2/E3 зарезервовано за колишніми S3/v1-v3 Envelope.
@@ -50,7 +50,9 @@
 explicit bounded proof/research route: F3M-1 має 256/256 unique ranks,
 F3M-2 — 65 536/65 536 exhaustive roundtrip, F3M-3 — 16 777 216 rank slots,
 real-evaluator witnesses, DP-minimum `16 3C 63` для першого 6/6-capability
-коду та exhaustive final-64K winner `FF FB 37`. Воно не змінює default:
+коду та exhaustive final-64K winner `FF FB 37`; F3M-4 — наступні
+4 294 967 296 rank slots з algebraic capacity proof, 65 536 stratified
+roundtrip samples і executable `DE AD BE EF`. Воно не змінює default:
 `.sens` → T5, `.senc` → F3C, `.f3m` → F3M family + length profile.
 
 - T5 завжди припустимий для поточної канонічної фізичної програми.
