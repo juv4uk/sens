@@ -412,7 +412,7 @@ fn bind_missing_stable_surface_peers(environment: &Environment) {
     let mut values_by_semantic_id = std::collections::HashMap::new();
 
     for (name, value) in snapshot {
-        if eval::canon::routed_sid_for_surface(&name).is_some() {
+        if eval::canon::is_reserved_surface(&name) {
             continue;
         }
         if let Some(semantic_id) = semantic_registry::semantic_id_for_surface(&name) {
@@ -430,7 +430,7 @@ fn bind_missing_stable_surface_peers(environment: &Environment) {
         // Special/necessary forms мають власний routing і тут не стають
         // першокласними lexical values.
         if peers.iter().any(|peer| {
-            eval::canon::routed_sid_for_surface(peer).is_some()
+            eval::canon::is_reserved_surface(peer)
                 || eval::necessary_forms::identity_for_symbol(peer).is_some()
         }) {
             continue;
