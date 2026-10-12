@@ -6,11 +6,13 @@ on:
     paths:
       - "crates/sens/src/semantic_registry.rs"
       - "crates/sens/src/eval/lower.rs"
+      - "crates/sens/src/eval/mod.rs"
       - ".github/workflows/core-d3-lowering-cutover.yml"
   pull_request:
     paths:
       - "crates/sens/src/semantic_registry.rs"
       - "crates/sens/src/eval/lower.rs"
+      - "crates/sens/src/eval/mod.rs"
       - ".github/workflows/core-d3-lowering-cutover.yml"
 
 permissions:
@@ -28,6 +30,10 @@ jobs:
         run: cargo test --locked -p sens --lib exact_d3_compatibility_migration_tests -- --nocapture
       - name: "Точний D3 у компіляторному знижувачі"
         run: cargo test --locked -p sens --lib domain_ladder_lowering_migration_tests -- --nocapture
+      - name: "Точні D1–D9 AST без повернення до історичного W8"
+        run: cargo test --locked -p sens --lib exact_lowering_isolation_tests -- --nocapture
+      - name: "Збереження D3 QUOTE у поточному evaluator"
+        run: cargo test --locked -p sens --lib exact_domain_program_tests -- --nocapture
       - name: "Перевірити відсутність змін джерел після тестів"
         shell: bash
         run: |
