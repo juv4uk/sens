@@ -118,6 +118,53 @@ class LegacyD3GuardTests(unittest.TestCase):
             item.rule for item in MODULE.scan_lisp(drift, path)
         ])
 
+    def test_signature_generator_atom_case_branches_exact_d1(self):
+        path = "scripts/generate-rust-function-signatures.lisp"
+        source = (ROOT / path).read_text(encoding="utf-8")
+
+        def segment(name, following):
+            start = source.index("(0011 " + name + "\n")
+            end = source.index("\n(0011 " + following + "\n", start)
+            return source[start:end]
+
+        nonlegacy = (
+            segment("has-field?", "render-kind"),
+            segment("render-rows", "header"),
+        )
+        for fragment in nonlegacy:
+            with self.subTest(prefix=fragment[:30]):
+                self.assertEqual(MODULE.scan_lisp(fragment, path), [])
+
+        arity = segment("render-arity", "render-admitted")
+        # Nested at-least/between historical result matches are separate debt.
+        rules = [f.rule for f in MODULE.scan_lisp(arity, path)]
+        self.assertEqual(rules.count("COND_NOT_TWO_FIELDS"), 2)
+        self.assertNotIn("COND_HOST_TRUTH", rules)
+
+        # Each reverted 3-field condition MUST fail independently.
+        substitutions = (
+            (nonlegacy[0], "((010 (11100 key (011 row))) (001 ()))",
+             "((010 (11100 key (011 row))) (1) (001 ()))"),
+            (nonlegacy[1], '((010 remaining) "")',
+             '((010 remaining) (1) "")'),
+            (arity, '((010 arity)\n       (str+',
+             '((010 arity) (1)\n       (str+'),
+        )
+        for fragment, original, invalid in substitutions:
+            with self.subTest(original=original):
+                self.assertIn(original, fragment)
+                changed = fragment.replace(original, invalid, 1)
+                self.assertIn("COND_NOT_TWO_FIELDS", [
+                    f.rule for f in MODULE.scan_lisp(changed, path)
+                ])
+
+        fallback = "((010 (001 ())) t)"
+        self.assertIn(fallback, nonlegacy[0])
+        bad = nonlegacy[0].replace(fallback, "(t t)", 1)
+        self.assertIn("COND_HOST_TRUTH", [
+            f.rule for f in MODULE.scan_lisp(bad, path)
+        ])
+
     def test_invalid_lisp_is_incomplete_not_green(self):
         for source in ("(110 (1 1)", "(110 (1 1)))", '"unclosed'):
             with self.subTest(source=source), self.assertRaises(MODULE.Unscannable):

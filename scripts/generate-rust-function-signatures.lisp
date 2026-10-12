@@ -49,8 +49,8 @@
 (0011 has-field?
   (0010 (key row)
     (110
-      ((010 (11100 key (011 row))) () (001 ()))
-      ((010 (11100 key (011 row))) (0) t))))
+      ((010 (11100 key (011 row))) (001 ()))
+      ((010 (001 ())) t))))
 
 (0011 render-kind
   (0010 (kind)
@@ -63,9 +63,9 @@
 (0011 render-arity
   (0010 (arity)
     (110
-      ((010 arity) (1)
+      ((010 arity)
        (str+ "Arity::Exact(" (render-rust-nat arity) ")"))
-      ((010 arity) (0)
+      ((010 (001 ()))
        (110
          ((11110111 (100 arity) (001 at-least)) (1)
           (str+ "Arity::AtLeast(" (render-rust-nat (1001 arity)) ")"))
@@ -95,8 +95,8 @@
 (0011 render-rows
   (0010 (remaining)
     (110
-      ((010 remaining) () "")
-      ((010 remaining) (0)
+      ((010 remaining) "")
+      ((010 (001 ()))
        (str+ (render-row (100 remaining)) (render-rows (011 remaining)))))))
 
 (0011 header
