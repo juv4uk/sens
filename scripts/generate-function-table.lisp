@@ -48,10 +48,10 @@
 (0011 find-section
   (0010 (name sections)
     (110
-      ((010 sections) () (001 ()))
-      ((010 sections) (1) (001 ()))
+      ((010 sections) (001 ()))
+      
       ((101 (100 (100 sections)) name) (100 sections))
-      (t (find-section name (011 sections))))))
+      ((010 (001 ())) (find-section name (011 sections))))))
 
 (0011 machine-rows
   (011 (find-section (001 rows) (011 machine-profile-form))))
@@ -59,10 +59,10 @@
 (0011 find-machine-row
   (0010 (sid rows)
     (110
-      ((010 rows) () (001 ()))
-      ((010 rows) (1) (001 ()))
+      ((010 rows) (001 ()))
+      
       ((11110111 (100 (100 rows)) sid) (100 rows))
-      (t (find-machine-row sid (011 rows))))))
+      ((010 (001 ())) (find-machine-row sid (011 rows))))))
 
 (0011 machine-path
   (0010 (sid)
@@ -82,10 +82,10 @@
 (0011 find-historical-row
   (0010 (sid rows)
     (110
-      ((010 rows) () (001 ()))
-      ((010 rows) (1) (001 ()))
+      ((010 rows) (001 ()))
+      
       ((11110111 (1001 (100 rows)) sid) (100 rows))
-      (t (find-historical-row sid (011 rows))))))
+      ((010 (001 ())) (find-historical-row sid (011 rows))))))
 
 (0011 mccarthy-label
   (0010 (sid)
@@ -128,10 +128,10 @@
 (0011 find-surface
   (0010 (lang surfaces)
     (110
-      ((010 surfaces) () (001 ()))
-      ((010 surfaces) (1) (001 ()))
+      ((010 surfaces) (001 ()))
+      
       ((101 (100 (100 surfaces)) lang) (100 surfaces))
-      (t (find-surface lang (011 surfaces))))))
+      ((010 (001 ())) (find-surface lang (011 surfaces))))))
 
 (0011 surface-word
   (0010 (surface-entry)
@@ -165,7 +165,7 @@
          (str+ "identity:" (sid-bits sid) "/surface:" (surface-word-text ук)))
         ((surface-usable? sa)
          (str+ "identity:" (sid-bits sid) "/surface:" (surface-word-text sa)))
-        (t (110011110 "identity:" (sid-bits sid)))))))
+        ((010 (001 ())) (110011110 "identity:" (sid-bits sid)))))))
 
 ; Historical projection intentionally has no 256-row completeness law.
 ; Exact domains grow under their own widths, occupancy maps, and admitted laws.
@@ -179,10 +179,10 @@
 (0011 join-newline-onto
   (0010 (strings acc)
     (110
-      ((010 strings) () acc)
-      ((010 strings) (1) acc)
+      ((010 strings) acc)
+      
       ((101 acc "") (join-newline-onto (011 strings) (100 strings)))
-      (t (join-newline-onto (011 strings) (str+ acc "
+      ((010 (001 ())) (join-newline-onto (011 strings) (str+ acc "
 " (100 strings)))))))
 
 (0011 join-newline (0010 (strings) (join-newline-onto strings "")))
@@ -291,12 +291,12 @@
                 "function-table: "
                 (110111001 (000000 entries))
                 " historical projection rows current")))
-           (t
+           ((010 (001 ()))
             (1001
               (1110
                 (11011011 "function-table markdown projection is stale")
                 (100 (001 ())))))))
-        (t
+        ((010 (001 ()))
          (1001
            (1110
              (11011011 "function-table Lisp projection is stale")
@@ -309,5 +309,5 @@
   ((11110111 (100 *argv*) "--check")
    (1)
    (check-projections))
-  (t
+  ((010 (001 ()))
    (write-projections)))
