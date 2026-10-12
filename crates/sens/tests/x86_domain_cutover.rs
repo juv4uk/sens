@@ -1,0 +1,67 @@
+use sens::{
+    eval_parsed_expressions, eval_program, load_core_library,
+    parse_mixed_exact_domain_machine_source, Expr, ExprKind, Session,
+};
+
+const ATOMS_PATH: &str = "lib/machine/atoms/x86-64.lisp";
+const ATOMS: &str = include_str!("../../../lib/machine/atoms/x86-64.lisp");
+const OPERANDS_PATH: &str = "lib/machine/operands/x86-64.lisp";
+const OPERANDS: &str = include_str!("../../../lib/machine/operands/x86-64.lisp");
+
+#[test]
+fn all_28_x86_let_bindings_are_exact_one_argument_d4_lambda_calls() {
+    assert!(!ATOMS.contains("(001000 "), "D6 LET must not reappear as an executable head");
+    let expressions = parse_mixed_exact_domain_machine_source(ATOMS_PATH, ATOMS)
+        .expect("точні D3/D4 координати в основному x86-файлі");
+    assert_eq!(expressions.len(), 132, "набір верхніх форм x86 не можна скорочувати");
+
+    fn inspect(node: &Expr, converted: &mut usize) {
+        let ExprKind::List(items) = &node.kind else { return };
+        if let Some(Expr { kind: ExprKind::List(head), .. }) = items.first() {
+            if matches!(
+                head.first().map(|v| &v.kind),
+                Some(ExprKind::DomainIdentity(identity))
+                    if identity.width() == 4 && identity.packed_bits() == 0b0010
+            ) {
+                assert_eq!(items.len(), 2, "одне ініціалізоване зв'язування, як у старому LET");
+                assert_eq!(head.len(), 3, "одна LAMBDA із єдиним тілом");
+                let ExprKind::List(parameters) = &head[1].kind else {
+                    panic!("параметри мають бути списком")
+                };
+                assert_eq!(parameters.len(), 1);
+                assert!(matches!(&parameters[0].kind, ExprKind::Symbol(_)));
+                *converted += 1;
+            }
+        }
+        for child in items.iter() { inspect(child, converted); }
+    }
+
+    let mut migrated = 0;
+    for expression in &expressions { inspect(expression, &mut migrated); }
+    assert_eq!(migrated, 28, "кожне старе LET має мати рівно одну нову D4-форму");
+}
+
+#[test]
+fn machine_rejection_returns_exact_d1_yes_or_no_instead_of_legacy_nil() {
+    let forms = parse_mixed_exact_domain_machine_source(OPERANDS_PATH, OPERANDS)
+        .expect("точні координати в бібліотеці операндів");
+    let mut session = Session::default();
+    load_core_library(&mut session).expect("міграційний базовий Lisp");
+    eval_parsed_expressions(&forms, &mut session)
+        .expect("визначення Lisp-owned операндів");
+
+    for (argument, expected) in [
+        ("(quote ())", false),
+        ("(quote (gpr64 rax))", false),
+        ("(quote (rejected machine-operand gpr64 invalid))", true),
+    ] {
+        let query = format!("(x86-machine-rejected? {argument})");
+        let answer = eval_program(&query, &mut session)
+            .unwrap_or_else(|error| panic!("{query}: {error}"));
+        assert_eq!(
+            answer.value.as_predicate_bit(),
+            Some(expected),
+            "предикат відхилення має давати точний D1: {query}"
+        );
+    }
+}
