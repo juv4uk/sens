@@ -28,5 +28,7 @@ jobs:
       - uses: dtolnay/rust-toolchain@1.99.0
       - name: Check D7 ratified source coordinates
         run: python3 scripts/check-d7-current-authority.py
+      - name: Точкова вичерпна перевірка бітності T5 D1–D10
+        run: cargo test --locked -p sens --lib ternary_transport::tests:: -- --nocapture
       - name: Execute physical-binary-only program and fail-closed negatives
         run: cargo test --locked -p sens --test binary_program_e2e --test text7_contextual_binding -- --nocapture
