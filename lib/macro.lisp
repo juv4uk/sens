@@ -1,23 +1,24 @@
-; lib/macro.lisp — bootstrap derivation on exact 8-bit function identities.
+; lib/macro.lisp — bootstrap macro: exact-domain outer forms, historical quoted template.
 ;
-; #1325: the language has one function-identity space: 00000000..11111111.
-; Human words are not function identities.
+; Migration boundary:
+;   executable outer heads use ratified D3/D4 coordinates;
+;   the nested macro template beginning with D3 COND remains unchanged quoted
+;   historical data until independent macro-expansion parity is established.
 ;
-; SID 00001010 is derived here from mechanisms already selected by:
-;   00001001 + 00001000 + 00000100 + the narrow host Closure->Macro mechanism.
+; Historical record, not current semantic authority:
+;   old SID 00001010 was explained through the former mechanism set
+;   00001001 + 00001000 + 00000100 and the host Closure->Macro substrate.
 ;
-; `make-macro` below is NOT a my-lisp function identity. It is an explicit
-; temporary host substrate with no SID and is tracked by #1330/#1328 until that
-; boundary is removed or represented without creating a second function ontology.
+; `make-macro` is a host substrate, not a ratified SENS function identity.
+; This source makes no claim that its macro-expansion law has been admitted.
 ;
-; Every actual my-lisp function used below is invoked only by its eight bits.
-; No SID is wrapped in a string, symbol, quote-label, or named identity.
+; The exact-domain outer-head migration never rewrites quoted template bytes.
 
 (make-macro
-  (01001101
-    (00000100 (00000001 00001000)
-      (00000100 (00000001 args)
-        (00000001
+  (0001
+    (111 (001 00001000)
+      (111 (001 args)
+        (001
           ((00000111
              ((00000010 args)
               (make-macro))
