@@ -416,11 +416,11 @@
       ((x86-admission-pattern-match? (001 (neg-r64 register)) form)
        (x86-encode-neg-r64 (1001 form)))
       ((x86-admission-pattern-match? (001 (mov-mem-disp8-r64 register disp8 register)) form)
-       (x86-encode-mov-mem-disp8-r64 (1001 form) (10011 form) (100111 form)))
+       (x86-encode-mov-mem-disp8-r64 (1001 form) (10011 form) (100 (011 (011 (011 form))))))
       ((x86-admission-pattern-match? (001 (mov-r64-mem-disp8 register register disp8)) form)
-       (x86-encode-mov-r64-mem-disp8 (1001 form) (10011 form) (100111 form)))
+       (x86-encode-mov-r64-mem-disp8 (1001 form) (10011 form) (100 (011 (011 (011 form))))))
       ((x86-admission-pattern-match? (001 (lea-r64-mem-disp8 register register disp8)) form)
-       (x86-encode-lea-r64-mem-disp8 (1001 form) (10011 form) (100111 form)))
+       (x86-encode-lea-r64-mem-disp8 (1001 form) (10011 form) (100 (011 (011 (011 form))))))
       ((x86-admission-pattern-match? (001 (jo-rel8 disp8)) form)
        (x86-encode-jo-rel8 (1001 form)))
       ((x86-admission-pattern-match? (001 (jno-rel8 disp8)) form)
@@ -741,76 +741,76 @@
          (001 (aeskeygenassist-xmm-xmm-imm8 xmm-register xmm-register uimm8))
          form)
        (x86-encode-aeskeygenassist-xmm-xmm-imm8
-         (1001 form) (10011 form) (100111 form)))
+         (1001 form) (10011 form) (100 (011 (011 (011 form))))))
       ((x86-admission-pattern-match?
          (001 (aesenc-xmm-mem-disp8 xmm-register register disp8))
          form)
        (x86-encode-aesenc-xmm-mem-disp8
-         (1001 form) (10011 form) (100111 form)))
+         (1001 form) (10011 form) (100 (011 (011 (011 form))))))
       ((x86-admission-pattern-match?
          (001 (aesenclast-xmm-mem-disp8 xmm-register register disp8))
          form)
        (x86-encode-aesenclast-xmm-mem-disp8
-         (1001 form) (10011 form) (100111 form)))
+         (1001 form) (10011 form) (100 (011 (011 (011 form))))))
       ((x86-admission-pattern-match?
          (001 (aesdec-xmm-mem-disp8 xmm-register register disp8))
          form)
        (x86-encode-aesdec-xmm-mem-disp8
-         (1001 form) (10011 form) (100111 form)))
+         (1001 form) (10011 form) (100 (011 (011 (011 form))))))
       ((x86-admission-pattern-match?
          (001 (aesdeclast-xmm-mem-disp8 xmm-register register disp8))
          form)
        (x86-encode-aesdeclast-xmm-mem-disp8
-         (1001 form) (10011 form) (100111 form)))
+         (1001 form) (10011 form) (100 (011 (011 (011 form))))))
       ((x86-admission-pattern-match?
          (001 (aesimc-xmm-mem-disp8 xmm-register register disp8))
          form)
        (x86-encode-aesimc-xmm-mem-disp8
-         (1001 form) (10011 form) (100111 form)))
+         (1001 form) (10011 form) (100 (011 (011 (011 form))))))
       ((x86-admission-pattern-match?
          (001
            (aeskeygenassist-xmm-mem-disp8-imm8
              xmm-register register disp8 uimm8))
          form)
        (x86-encode-aeskeygenassist-xmm-mem-disp8-imm8
-         (1001 form) (10011 form) (100111 form) (110110101 form)))
+         (1001 form) (10011 form) (100 (011 (011 (011 form)))) (110110101 form)))
       ((x86-admission-pattern-match?
          (001
            (pclmulqdq-xmm-xmm-imm8 xmm-register xmm-register uimm8))
          form)
        (x86-encode-pclmulqdq-xmm-xmm-imm8
-         (1001 form) (10011 form) (100111 form)))
+         (1001 form) (10011 form) (100 (011 (011 (011 form))))))
       ((x86-admission-pattern-match?
          (001
            (vandnps-xmm-xmm-xmm xmm-register xmm-register xmm-register))
          form)
        (x86-encode-vandnps-xmm-xmm-xmm
-         (1001 form) (10011 form) (100111 form)))
+         (1001 form) (10011 form) (100 (011 (011 (011 form))))))
       ((x86-admission-pattern-match?
          (001
            (vandnpd-xmm-xmm-xmm xmm-register xmm-register xmm-register))
          form)
        (x86-encode-vandnpd-xmm-xmm-xmm
-         (1001 form) (10011 form) (100111 form)))
+         (1001 form) (10011 form) (100 (011 (011 (011 form))))))
       ((x86-admission-pattern-match?
          (001
            (vaddps-xmm-xmm-xmm xmm-register xmm-register xmm-register))
          form)
        (x86-encode-vaddps-xmm-xmm-xmm
-         (1001 form) (10011 form) (100111 form)))
+         (1001 form) (10011 form) (100 (011 (011 (011 form))))))
       ((x86-admission-pattern-match?
          (001
            (vaddpd-xmm-xmm-xmm xmm-register xmm-register xmm-register))
          form)
        (x86-encode-vaddpd-xmm-xmm-xmm
-         (1001 form) (10011 form) (100111 form)))
+         (1001 form) (10011 form) (100 (011 (011 (011 form))))))
       ((x86-admission-pattern-match?
          (001
            (pclmulqdq-xmm-mem-disp8-imm8
              xmm-register register disp8 uimm8))
          form)
        (x86-encode-pclmulqdq-xmm-mem-disp8-imm8
-         (1001 form) (10011 form) (100111 form) (110110101 form)))
+         (1001 form) (10011 form) (100 (011 (011 (011 form)))) (110110101 form)))
       ; Unreachable after admission. Keep fail-closed data instead of inventing
       ; a fallback encoder.
       ((010 ()) (001 ())))))
