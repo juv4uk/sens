@@ -286,30 +286,97 @@ class PolicyD4PartialCutover(unittest.TestCase):
         # Reject changes that would turn a guard failure into a successful NIL.
         self.assertEqual(current.count("(100 (001 ()))"), 2)
 
-    def test_semantic_authority_guard_bounded_verdict_shape_cases(self):
-        # Independent *shape-only* witness, not D9 reader/runtime parity.
-        # The valid inputs are Nil, a symbol, or a proper list; all others
-        # remain unadmitted until an executable oracle covers them.
+    def test_semantic_authority_guard_bounded_exact_d3_oracle(self):
+        """Execute real migrated D3 AST on a separate strict bounded oracle.
+
+        Verdict reader stays outside this test: READ-ALL/READ-FILE D9
+        mechanisms must be proved separately before full admission.
+        """
+        path = GUARD_ENFORCE
+        program = self.d3.parse((ROOT / path).read_text(encoding="utf-8"))
+        self.assertEqual(len(program), 4)
+        helper = program[2]
+        self.assertEqual([x.atom for x in helper.children[:2]],
+                         ["0011", "verdict-tag"])
+        root = program[3]
+
+        def quote(node):
+            if node.atom is not None:
+                return node.atom
+            return tuple(quote(child) for child in node.children)
+
+        def atom(value):
+            # Structural () is an atom; nonempty pairs are not.
+            return not (isinstance(value, tuple) and len(value) > 0)
+
+        def evaluate(node, env):
+            if node.atom is not None:
+                if node.atom not in env:
+                    raise ValueError("unbound source atom " + node.atom)
+                return env[node.atom]
+            if not node.children:
+                return ()
+            head, *args = node.children
+            operator = head.atom
+            if operator == "001":
+                if len(args) != 1:
+                    raise ValueError("bad quote arity")
+                return quote(args[0])
+            if operator == "010":
+                if len(args) != 1:
+                    raise ValueError("bad atom arity")
+                return atom(evaluate(args[0], env))
+            if operator == "101":
+                if len(args) != 2:
+                    raise ValueError("bad eq arity")
+                lhs, rhs = (evaluate(arg, env) for arg in args)
+                if not atom(lhs) or not atom(rhs):
+                    raise ValueError("EQ requires two atoms")
+                return lhs == rhs
+            if operator == "100":
+                if len(args) != 1:
+                    raise ValueError("bad car arity")
+                value = evaluate(args[0], env)
+                if not isinstance(value, tuple) or not value:
+                    raise ValueError("CAR of empty/non-pair: intentional rejection")
+                return value[0]
+            if operator == "110":
+                for clause in args:
+                    if clause.atom is not None or len(clause.children) != 2:
+                        raise ValueError("old three-field COND")
+                    predicate = evaluate(clause.children[0], env)
+                    if type(predicate) is not bool:
+                        raise TypeError("COND requires exact D1 PredicateBit")
+                    if predicate:
+                        return evaluate(clause.children[1], env)
+                return ()
+            raise ValueError("unadmitted operator: " + repr(operator))
+
         cases = [
-            (None, "empty-verdict", "error"),
-            ("semantic-authority-ok", "semantic-authority-ok", "ok"),
-            ("semantic-authority-violation", "semantic-authority-violation", "error"),
-            ("other", "other", "error"),
-            (("semantic-authority-ok",), "semantic-authority-ok", "ok"),
-            (("semantic-authority-violation", "explanation"),
-             "semantic-authority-violation", "error"),
-            (("other",), "other", "error"),
+            ((), "reject"),
+            ("semantic-authority-ok", "semantic-authority-ok"),
+            ("semantic-authority-violation", "reject"),
+            ("other", "reject"),
+            (("semantic-authority-ok",), "semantic-authority-ok"),
+            (("semantic-authority-violation", "reason"), "reject"),
+            (("other",), "reject"),
+            ((("nested-tag",),), "reject"),
         ]
-        def tag(value):
-            if value is None:
-                return "empty-verdict"
-            return value[0] if isinstance(value, tuple) else value
-        for value, expected_tag, expected_outcome in cases:
+        for value, expected in cases:
             with self.subTest(value=value):
-                observed_tag = tag(value)
-                self.assertEqual(observed_tag, expected_tag)
-                self.assertEqual("ok" if observed_tag == "semantic-authority-ok"
-                                 else "error", expected_outcome)
+                env = {"verdict": value}
+                tag = evaluate(helper.children[2], env)
+                env["verdict-tag"] = tag
+                if expected == "reject":
+                    with self.assertRaises(ValueError):
+                        evaluate(root, env)
+                else:
+                    self.assertEqual(evaluate(root, env), expected)
+        # The oracle must independently reject host truth and 3-field COND.
+        with self.assertRaises(TypeError):
+            evaluate(self.d3.parse("(110 (t (001 yes)))")[0], {"t": 1})
+        with self.assertRaises(ValueError):
+            evaluate(self.d3.parse("(110 ((010 (001 ())) (1) (001 yes)))")[0], {})
 
 
 if __name__ == "__main__":
