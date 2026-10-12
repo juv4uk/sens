@@ -54,11 +54,11 @@ Authority: [CURRENT.md](CURRENT.md), [language-contract.lisp](language-contract.
 | T5 and F3C roundtrip + corrupted input refusal | Physical byte golden fixtures | UNKNOWN |
 | All release-scope `.lisp` ↔ `.sens` ↔ extensionless triples | Full corpus inventory + independent Ukrainian oracle ledger | UNKNOWN |
 | T5 authority, quantity witness, exact-width blockers | [#5406](https://github.com/juv4uk/sens/issues/5406), [#5408](https://github.com/juv4uk/sens/issues/5408), [#2170](https://github.com/juv4uk/sens/issues/2170) | OPEN |
-| Filesystem runtime and exact-domain admission | [#5603](https://github.com/juv4uk/sens/issues/5603); Hosted run [38176345658](https://github.com/juv4uk/sens/actions/runs/38176345658) | BLOCKED: `content_store` 22/24 tests failed |
+| Filesystem runtime and exact-domain admission | Earlier [#5603](https://github.com/juv4uk/sens/issues/5603) / [run 38176345658](https://github.com/juv4uk/sens/actions/runs/38176345658): `content_store` 22/24 tests failed. Newer visible [run 38228581929](https://github.com/juv4uk/sens/actions/runs/38228581929) still fails overall: filesystem macro/alist path-bound witnesses, obsolete COND/ATOM/EQ scanner regressions, time-source witnesses and stale core-logic audit are red; its `content-store integration` step is green. | BLOCKED; rerun after fixes |
 | `release-preflight.yml` + mandatory hosted/native jobs | Exact SHA, all required checks | UNKNOWN |
 | Linux/Windows/macOS CLI + MSI + portable Web | Platform-specific install/smoke results | UNKNOWN |
-| SHA-256 of every release asset and independent clean replay | Published digest manifest, verified bytes, environment | UNKNOWN |
-| Clean release publication (no incomplete visible release) | Draft-first workflow, full asset set, SHA256SUMS, exact-main-SHA check; commit [6b980ca](https://github.com/juv4uk/sens/commit/6b980ca78ba3893fc16c6b3b8c91565567173a8) | IMPLEMENTED ON MAIN; CI / failure-injection verification UNKNOWN (still blocks GO) |
+| SHA-256 of every release asset and independent clean replay | Workflow computes `SHA256SUMS` and re-downloads / byte-compares draft assets; no candidate tag or release artifacts exist yet | IMPLEMENTED, NOT RUN / UNKNOWN |
+| Clean release publication (no incomplete visible release) | Single `release-publish` job; staged artifacts; exact-main-SHA + explicit owner GO; complete asset set, provenance, SHA256SUMS and byte-exact draft replay; commit [50048ecc](https://github.com/juv4uk/sens/commit/50048ecc3edd782e2a4ab5f9ed42aeb86f4b0280) | IMPLEMENTED ON MAIN; CI / failure-injection verification UNKNOWN (still blocks GO) |
 
 **GO iff** всі потрібні gates на **одному** Git SHA позитивні, усі обіцяні платформи й файли перевірені, без жодного невирішеного `UNKNOWN/BLOCKED/FAIL`. Не підміняти невиконані platform gates успішними локальними тестами.
 
