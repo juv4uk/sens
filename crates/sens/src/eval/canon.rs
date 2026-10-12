@@ -278,10 +278,6 @@ pub(crate) enum DomainPrimitiveKind {
     Read,
     WriteToString,
     Equal,
-    StringEmpty,
-    StringRest,
-    StringPrefix,
-    StringFirst,
     AtomPredicate,
     AtomEquality,
     PairConstruct,
@@ -311,13 +307,6 @@ pub(crate) fn domain_primitive_kind(
             0b11110111 => Some(DomainPrimitiveKind::Equal),
             _ => None,
         },
-        CoreDomainIdentity::D9(word) => match word.word().packed_bits() {
-            0b110011100 => Some(DomainPrimitiveKind::StringEmpty),
-            0b110011101 => Some(DomainPrimitiveKind::StringRest),
-            0b110101010 => Some(DomainPrimitiveKind::StringPrefix),
-            0b110101011 => Some(DomainPrimitiveKind::StringFirst),
-            _ => None,
-        },
         _ => None,
     }
 }
@@ -337,10 +326,6 @@ fn invoke_domain_primitive(
             DomainPrimitiveKind::StringToSymbol => 1,
             DomainPrimitiveKind::Read => args.len(),
             DomainPrimitiveKind::WriteToString => 1,
-            DomainPrimitiveKind::StringEmpty => 1,
-            DomainPrimitiveKind::StringRest => 1,
-            DomainPrimitiveKind::StringPrefix => 2,
-            DomainPrimitiveKind::StringFirst => 1,
             DomainPrimitiveKind::AtomPredicate => 1,
             DomainPrimitiveKind::AtomEquality => 2,
             DomainPrimitiveKind::PairConstruct => 2,
@@ -387,19 +372,84 @@ fn invoke_domain_primitive(
                 // serializer directly, never reconstitute a historical byte.
                 special_forms::write_to_string_values(args, environment, span)
             }
-            // D9 exact identities select these four existing value mechanisms.
-            // The 8-bit names below identify reusable implementation functions
-            // only; they do NOT route the call through Sens8 or authorize any
-            // other D9 resident.
-            DomainPrimitiveKind::StringEmpty =>
-                super::builtins::prim_00111100(args, environment, span),
-            DomainPrimitiveKind::StringRest =>
-                super::builtins::prim_01000000(args, environment, span),
-            DomainPrimitiveKind::StringPrefix =>
-                super::builtins::prim_00111101(args, environment, span),
-            DomainPrimitiveKind::StringFirst =>
-                super::builtins::prim_00111111(args, environment, span),
         }
+    })())
+}
+
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+enum D9StringPrimitiveKind {
+    Empty,
+    Rest,
+    Prefix,
+    First,
+}
+
+fn d9_string_primitive_kind(identity: crate::DomainIdentity) -> Option<D9StringPrimitiveKind> {
+    let crate::DomainIdentity::D9(word) = identity else {
+        return None;
+    };
+    match word.word().packed_bits() {
+        0b110011100 => Some(D9StringPrimitiveKind::Empty),
+        0b110011101 => Some(D9StringPrimitiveKind::Rest),
+        0b110101010 => Some(D9StringPrimitiveKind::Prefix),
+        0b110101011 => Some(D9StringPrimitiveKind::First),
+        _ => None,
+    }
+}
+
+/// True only for the four explicit D9 value mechanisms required by the
+/// machine-admission wire checker. This is deliberately outside
+/// CoreDomainIdentity: D9 identity remains universal-domain identity, not Core.
+pub(crate) fn has_d9_string_mechanism(identity: crate::DomainIdentity) -> bool {
+    d9_string_primitive_kind(identity).is_some()
+}
+
+/// Execute the bounded D9 string mechanism cut. Routing is selected from the
+/// full nine-bit D9 identity; the called functions are reused implementation
+/// bodies only, never looked up or invoked through a historical SID8.
+pub(crate) fn invoke_d9_string_mechanism(
+    identity: crate::DomainIdentity,
+    args: &[Value],
+    environment: &Environment,
+    span: Span,
+) -> Option<Result<Value, LanguageError>> {
+    let kind = d9_string_primitive_kind(identity)?;
+    Some((|| {
+        let expected = match kind {
+            D9StringPrimitiveKind::Empty | D9StringPrimitiveKind::Rest | D9StringPrimitiveKind::First => 1,
+            D9StringPrimitiveKind::Prefix => 2,
+        };
+        if args.len() != expected {
+            return Err(LanguageError::new(
+                ErrorKind::Arity,
+                format!("D9 {identity}: expected {expected} arguments; received {}", args.len()),
+                span,
+            ));
+        }
+        let value = match kind {
+            D9StringPrimitiveKind::Empty => {
+                super::builtins::prim_00111100(args, environment, span)?
+            }
+            D9StringPrimitiveKind::Rest => {
+                super::builtins::prim_01000000(args, environment, span)?
+            }
+            D9StringPrimitiveKind::Prefix => {
+                super::builtins::prim_00111101(args, environment, span)?
+            }
+            D9StringPrimitiveKind::First => {
+                super::builtins::prim_00111111(args, environment, span)?
+            }
+        };
+        if matches!(kind, D9StringPrimitiveKind::Empty | D9StringPrimitiveKind::Prefix)
+            && value.as_predicate_bit().is_none()
+        {
+            return Err(LanguageError::new(
+                ErrorKind::Type,
+                format!("D9 {identity} must return an exact D1 PredicateBit; got {value}"),
+                span,
+            ));
+        }
+        Ok(value)
     })())
 }
 
@@ -415,9 +465,6 @@ pub(crate) fn has_language_result_boundary(identity: CoreDomainIdentity) -> bool
             0b01000 | 0b01001 | 0b11010 | 0b11011 | 0b11101
         ),
         CoreDomainIdentity::D8(word) => matches!(word.word().packed_bits(), 0b11110111),
-        CoreDomainIdentity::D9(word) => {
-            matches!(word.word().packed_bits(), 0b110011100 | 0b110101010)
-        }
         _ => false,
     }
 }
@@ -757,8 +804,8 @@ mod exact_domain_primitive_tests {
         assert_eq!(arity.kind, ErrorKind::Arity);
     }
 
-    fn d9(bits: u16) -> CoreDomainIdentity {
-        CoreDomainIdentity::D9(crate::CoreD9::from_word(
+    fn d9(bits: u16) -> crate::DomainIdentity {
+        crate::DomainIdentity::D9(crate::CoreD9::from_word(
             crate::Bit9::new(bits).expect("D9 word"),
         ))
     }
@@ -768,23 +815,23 @@ mod exact_domain_primitive_tests {
         let environment = Environment::root();
         let span = Span { start: 0, end: 0 };
 
-        let empty = invoke_domain_identity(
+        let empty = invoke_d9_string_mechanism(
             d9(0b110011100),
             &[Value::String(std::rc::Rc::from(""))],
             &environment,
             span,
-        ).expect("D9 STRING-EMPTY? has the narrow admitted value mechanism");
+        ).expect("D9 STRING-EMPTY? route").expect("D9 STRING-EMPTY? value");
         assert_eq!(empty.as_predicate_bit(), Some(true));
 
-        let nonempty = invoke_domain_identity(
+        let nonempty = invoke_d9_string_mechanism(
             d9(0b110011100),
             &[Value::String(std::rc::Rc::from("q2:7/1"))],
             &environment,
             span,
-        ).expect("D9 STRING-EMPTY? has the narrow admitted value mechanism");
+        ).expect("D9 STRING-EMPTY? route").expect("D9 STRING-EMPTY? value");
         assert_eq!(nonempty.as_predicate_bit(), Some(false));
 
-        let starts = invoke_domain_identity(
+        let starts = invoke_d9_string_mechanism(
             d9(0b110101010),
             &[
                 Value::String(std::rc::Rc::from("#q2:")),
@@ -792,10 +839,10 @@ mod exact_domain_primitive_tests {
             ],
             &environment,
             span,
-        ).expect("D9 STRING-PREFIX? has the narrow admitted value mechanism");
+        ).expect("D9 STRING-PREFIX? route").expect("D9 STRING-PREFIX? value");
         assert_eq!(starts.as_predicate_bit(), Some(true));
 
-        let does_not_start = invoke_domain_identity(
+        let does_not_start = invoke_d9_string_mechanism(
             d9(0b110101010),
             &[
                 Value::String(std::rc::Rc::from("q2:")),
@@ -803,41 +850,38 @@ mod exact_domain_primitive_tests {
             ],
             &environment,
             span,
-        ).expect("D9 STRING-PREFIX? has the narrow admitted value mechanism");
+        ).expect("D9 STRING-PREFIX? route").expect("D9 STRING-PREFIX? value");
         assert_eq!(does_not_start.as_predicate_bit(), Some(false));
 
-        let first = invoke_domain_identity(
+        let first = invoke_d9_string_mechanism(
             d9(0b110101011),
             &[Value::String(std::rc::Rc::from("#q2:7/1"))],
             &environment,
             span,
-        ).expect("D9 STRING-FIRST has the narrow admitted value mechanism");
+        ).expect("D9 STRING-FIRST route").expect("D9 STRING-FIRST value");
         assert!(matches!(first, Value::String(ref value) if value.as_ref() == "#"));
 
-        let rest = invoke_domain_identity(
+        let rest = invoke_d9_string_mechanism(
             d9(0b110011101),
             &[Value::String(std::rc::Rc::from("#q2:7/1"))],
             &environment,
             span,
-        ).expect("D9 STRING-REST has the narrow admitted value mechanism");
+        ).expect("D9 STRING-REST route").expect("D9 STRING-REST value");
         assert!(matches!(rest, Value::String(ref value) if value.as_ref() == "q2:7/1"));
 
-        // A D9 resident is not callable merely because a different domain
-        // contains a historically related byte; all other D9 residents stay blocked.
-        assert_eq!(
-            domain_primitive_kind(CoreDomainIdentity::D8(crate::CoreD8::from_word(
-                crate::Bit8::new(0b00111100).expect("D8 word"),
-            ))),
-            None,
-        );
-        assert_eq!(domain_primitive_kind(d9(0b110111111)), None);
+        assert!(!has_d9_string_mechanism(d9(0b110111111)),
+            "other D9 residents stay fail-closed");
+        assert!(!has_d9_string_mechanism(crate::DomainIdentity::D8(
+            crate::CoreD8::from_word(crate::Bit8::new(0b00111100).expect("D8 word"))
+        )), "D8 coordinates never alias D9 mechanisms");
 
-        let arity_error = invoke_domain_identity(
+        let arity_error = invoke_d9_string_mechanism(
             d9(0b110101010),
             &[Value::String(std::rc::Rc::from("#q2:"))],
             &environment,
             span,
-        ).expect_err("D9 STRING-PREFIX? retains exact two-argument arity");
+        ).expect("D9 STRING-PREFIX? route")
+         .expect_err("exact two-argument arity");
         assert_eq!(arity_error.kind, ErrorKind::Arity);
         assert!(arity_error.message.contains(&d9(0b110101010).to_string()));
         assert!(!arity_error.message.contains("00111101"));
