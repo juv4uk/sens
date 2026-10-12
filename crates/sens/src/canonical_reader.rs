@@ -408,8 +408,15 @@ mod tests {
         }
         assert!(crate::PackedBitstream::from_parts(vec![0x88, 0xC0, 0x51], 20).is_none(),
             "nonzero trailing padding may not spell the same 20 bits");
-        assert!(parse_canonical_packed_words(&packed, &[2, 3, 5, 8, 2]).is_err(),
-            "wrong widths with the same total bits must not silently reassign domains");
+        // A dense payload has no self-describing word boundaries.
+        // Both schedules total 20 bits and are structurally valid, but
+        // different exact widths select different domain identities.
+        let alternate = parse_canonical_packed_words(&packed, &[2, 3, 5, 8, 2])
+            .expect("the second complete width schedule is mechanically valid");
+        let ExprKind::List(other) = &alternate[0].kind else { panic!("same D2 frame"); };
+        assert_eq!((domain(&other[1]).width(), domain(&other[2]).width()), (5, 8));
+        assert_ne!(domain(&items[1]), domain(&other[1]));
+        assert_ne!(domain(&items[2]), domain(&other[2]));
     }
 
     #[test]
