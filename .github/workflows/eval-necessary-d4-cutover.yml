@@ -5,6 +5,7 @@ on:
     branches: [main]
     paths:
       - "crates/sens/src/eval/mod.rs"
+      - "crates/sens/tests/domain_eval_cutover_necessary_d4.rs"
       - ".github/workflows/eval-necessary-d4-cutover.yml"
   push:
     branches: [main]
@@ -20,5 +21,7 @@ jobs:
       - uses: dtolnay/rust-toolchain@stable
       - name: Перевірити компіляцію чинного обчислювача
         run: cargo check --locked -p sens --lib
+      - name: Зовнішні інтеграційні докази raw D4 без збірки чужих unit-тестів
+        run: cargo test --locked -p sens --test domain_eval_cutover_necessary_d4
       - name: Позитивні і негативні докази exact D4
         run: cargo test --locked -p sens --lib eval::domain_eval_cutover_necessary_forms
