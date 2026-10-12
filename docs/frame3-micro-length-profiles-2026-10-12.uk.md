@@ -121,6 +121,11 @@ F3M-1 256/256 regression і original-F3 corpus усі PASS. F3M-4 окремо �
 algebraic capacity proof, 65 536 stratified roundtrip samples і executable
 `DE AD BE EF` witness.
 
+[F3M-4 run 38197907496](https://github.com/juv4uk/sens/actions/runs/38197907496)
+— **SUCCESS** на оновленому dense 1–4 byte gate: 32-bit window, node-layer
+capacity proof, 65 536 stratified roundtrip samples і `DE AD BE EF`
+real-evaluator witness пройшли разом із regressions F3M-1/2/3.
+
 Старі дослідження canonical capacity можуть бути донорами для побудови
 F3M-2/F3M-3, але їхні числа не стають автоматично чинною ємністю нового
 профілю без нового exhaustive witness.
