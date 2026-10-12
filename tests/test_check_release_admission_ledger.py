@@ -169,5 +169,20 @@ class CliTests(unittest.TestCase):
             self.assertEqual(MODULE.main(["--ledger", str(path), "--no-verify-content"]), 0)
 
 
+class HostedCiAdmissionWiringTests(unittest.TestCase):
+    def test_actual_hosted_ci_replays_ledger_negative_controls(self):
+        workflow = (ROOT / ".github" / "workflows" / "ci-hosted.yml").read_text(
+            encoding="utf-8"
+        )
+        label = "      - name: Physical T5 admission-ledger positive and negative witnesses (no tag)"
+        self.assertEqual(workflow.count(label), 1)
+        block = workflow.split(label, 1)[1].split("\n      - name:", 1)[0]
+        self.assertIn("if: always()", block)
+        self.assertIn(
+            "python3 -m unittest discover -s tests -p 'test_check_release_admission_ledger.py' -v",
+            block,
+        )
+
+
 if __name__ == "__main__":
     unittest.main()
