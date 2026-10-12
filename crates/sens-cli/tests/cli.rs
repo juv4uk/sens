@@ -458,9 +458,13 @@ fn repl_accepts_lowercase_symbols_and_prints_symbol_data_uppercase() {
     let output = child.wait_with_output().expect("binary should run");
     let _ = std::fs::remove_dir_all(&dir);
 
-    assert!(output.status.success());
     let stdout = String::from_utf8_lossy(&output.stdout);
     let stderr = String::from_utf8_lossy(&output.stderr);
+    assert!(
+        output.status.success(),
+        "status={:?}\nstdout={stdout:?}\nstderr={stderr:?}",
+        output.status.code()
+    );
     assert!(
         stdout.contains("(CAR CONS \"MiXeD\" 42)"),
         "stdout was: {stdout:?}"
