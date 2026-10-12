@@ -61,7 +61,7 @@ Frame3-Micro (F3M) мають відновити ті самі точні дом
 |---|---|---|
 | **T5** | `.sens` | загальний канонічний фізичний transport |
 | **Frame3 Carrier (F3C)** | `.senc` | явно вибраний компактний carrier для дуже малих програм; історичні CLI/докази ще використовують коротку назву `F3` |
-| **Frame3-Micro (F3M)** | `.f3m` | bounded dense micro-rank: сімейство вибирається явно, а профіль визначає **довжина 1/2/3 байти**; без внутрішньої magic/version мітки |
+| **Frame3-Micro (F3M)** | `.f3m` | bounded dense micro-rank: сімейство вибирається явно, а профіль визначає **довжина 1/2/3/4 байти**; без внутрішньої magic/version мітки |
 | **Envelope E1/E2/E3** | research carriers | самодостатні metadata-heavy оболонки, історично `S3/v1-v3`; це **не версії Frame3** |
 
 Повна нормативна матриця режимів: [**режими проєкту SENS**](docs/project-modes-2026-10-12.uk.md).
@@ -82,7 +82,10 @@ Frame3-Micro (F3M) мають відновити ті самі точні дом
 F3M-2 займає наступні **65 536** global ranks і має exhaustive payload roundtrip;
 F3M-3 займає наступні **16 777 216** ranks, має real-evaluator witnesses,
 DP-доказ першого 6/6-capability коду `16 3C 63` та exhaustive-пошук останньої
-64K-сторінки з переможцем `FF FB 37`. Повний evaluator sweep усіх 16M F3M-3
+64K-сторінки з переможцем `FF FB 37`. F3M-4 займає наступні
+**4 294 967 296** ranks; для нього вже є algebraic capacity proof,
+65 536 stratified roundtrip samples і реальний executable witness
+`DE AD BE EF`. Повний evaluator sweep усіх 16M F3M-3 та 2^32 F3M-4
 програм лишається окремим proof gate. Деталі:
 [профілі F3M за довжиною](docs/frame3-micro-length-profiles-2026-10-12.uk.md) ·
 [назви фізичних кодеків](docs/codec-naming-2026-10-12.uk.md).
@@ -146,13 +149,14 @@ cargo run -q -p sens-cli --bin sens-trit -- eval tests/fixtures/migration-quote-
 значення байта не резервується під magic/version: профіль визначає сама
 фізична довжина файла.
 
-Канонічний порядок спільний для F3M-1/F3M-2/F3M-3: програми впорядковуються
+Канонічний порядок спільний для F3M-1/F3M-2/F3M-3/F3M-4: програми впорядковуються
 за розміром дерева, потім за конструктором, розбиттям піддерев і локальними
 рангами. Профілі беруть **неперетинні вікна** цього глобального порядку:
 
 - F3M-1: глобальні ранги `0..255` — **256 програм**;
 - F3M-2: наступні `65 536` рангів;
-- F3M-3: наступні `16 777 216` рангів.
+- F3M-3: наступні `16 777 216` рангів;
+- F3M-4: наступні `4 294 967 296` рангів.
 
 Через неперетинні вікна одна програма не має одночасно 1-, 2- і 3-байтового
 канонічного запису: `encode(decode(bytes)) == bytes` і encoder завжди
@@ -177,7 +181,7 @@ cargo run -q -p sens-cli --bin sens-trit -- eval tests/fixtures/migration-quote-
 artifact збережено **історично** для відтворюваності, але це вже не активна
 F3M-1 таблиця.
 
-### Круті програми, які реально поміщаються в 1–3 байти
+### Круті програми, які реально поміщаються в 1–4 байти
 
 Це не намальовані opcode-приклади: байти нижче проходять чинний dense
 enumerator, canonical SENS parser і реальний evaluator.
@@ -197,6 +201,7 @@ enumerator, canonical SENS parser і реальний evaluator.
 | **F3M-3** | `16 3C 63` | `CAR(CONS(0,CDR(CONS(0,IF-ATOM(0,0,QUOTE(0))))))` | **найраніший** rank, де вже є всі 6/6 класів: QUOTE+ATOM+CONS+CAR+CDR+COND | `0` |
 | **F3M-3** | `2F 18 59` | `IF-ATOM(QUOTE(0),CAR(CONS(QUOTE(1),1)),CDR(CONS(QUOTE(NIL),QUOTE(0))))` | компактне реальне умовне обчислення з двома різними гілками | `1` |
 | **F3M-3** | `FF FB 37` | `CAR(CONS(CDR(CONS(1,QUOTE(1))),ATOM(IF-ATOM(QUOTE(NIL),QUOTE(NIL),QUOTE(NIL)))))` | переможець exhaustive-пошуку останньої 64K-сторінки; 6/6 класів, 1 COND, 11 encoded-операцій | `1` |
+| **F3M-4** | `DE AD BE EF` | `ATOM(CONS(ATOM(CDR(CONS(QUOTE(0),CAR(CONS(NIL,QUOTE(0)))))),ATOM(ATOM(ATOM(QUOTE(NIL))))))` | **12 micro-nodes у 4 байтах**; canonical parse + real evaluator + exact roundtrip | `0` |
 
 Для F3M-1 перебрано **всі 256/256 payloads**. Усі вони унікальні,
 канонічно roundtrip-яться й проходять реальний evaluator. Найвиразніший
@@ -216,6 +221,11 @@ CAR+CDR і максимальної глибини, бо «крутість» н
 Повний evaluator sweep усіх 16 777 216 F3M-3 програм лишається окремим
 proof gate.
 
+Для F3M-4 фізичний простір має **4 294 967 296** локальних rank-ів. Повний
+перебір 2^32 тут не видається за виконаний: натомість є algebraic count proof,
+boundary cases, **65 536 stratified roundtrip samples** по всьому 32-бітному
+простору і реальний 12-вузловий `DE AD BE EF` witness.
+
 Evidence: [F3M-1 exhaustive census run 38196658709](https://github.com/juv4uk/sens/actions/runs/38196658709) ·
 [F3M-2 exhaustive census + pinned regression run 38196520171](https://github.com/juv4uk/sens/actions/runs/38196520171) ·
 [F3M-3 final-page proof run 38195272188](https://github.com/juv4uk/sens/actions/runs/38195272188).
@@ -228,7 +238,7 @@ cargo run -p sens --example frame3_one_byte_research
 ~~~
 
 Перший тест перевіряє dense rank/unrank, включно з exhaustive roundtrip усіх
-65 536 F3M-2 payloads і вибірковими межами F3M-3. Другий перебирає всі
+65 536 F3M-2 payloads, вибірковими межами F3M-3 та 65 536 stratified F3M-4 samples. Другий перебирає всі
 256 F3M-1 байтів і для кожного вимагає unique roundtrip, canonical SENS parse,
 реальне виконання та parity з фізичним T5.
 
