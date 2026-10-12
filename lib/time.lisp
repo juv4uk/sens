@@ -8,39 +8,66 @@
 ; before the Unix epoch.
 (0011 civil-from-days
   (0010 (days)
-    (let* ((z (01010 days 719468))
-           (era (quotient z 146097))
-           (doe (01011 z (10110 era 146097)))
-           (yoe (quotient (01011 (01010 doe (quotient doe 36524))
-                              (01010 (quotient doe 1460) (quotient doe 146096)))
-                           365))
-           (y (01010 yoe (10110 era 400)))
-           (doy (01011 doe (01010 (10110 365 yoe)
-                           (01011 (quotient yoe 4) (quotient yoe #d100)))))
-           (mp (quotient (01010 (10110 5 doy) 2) 153))
-           (day (01010 (01011 doy (quotient (01010 (10110 153 mp) 2) 5)) 1))
-           (month (01010 mp
-                    (110
-                      ((11010 mp #d10) 3)
-                      ((010 (001 ())) -9))))
-           (year (01010 y
-                   (110
-                     ((11010 month 3) 1)
-                     ((010 (001 ())) 0)))))
-      (111 year (111 month (111 day (001 ())))))))
+    ((0010 (z)
+      ((0010 (era)
+        ((0010 (doe)
+          ((0010 (yoe)
+            ((0010 (y)
+              ((0010 (doy)
+                ((0010 (mp)
+                  ((0010 (day)
+                    ((0010 (month)
+                      ((0010 (year)
+                        (111 year (111 month (111 day (001 ()))))
+                      )
+                        (01010 y (110 ((11010 month 3) 1) ((010 (001 ())) 0)))
+                    )
+                      (01010 mp (110 ((11010 mp #d10) 3) ((010 (001 ())) -9))))
+                  )
+                    (01010 (01011 doy (quotient (01010 (10110 153 mp) 2) 5)) 1))
+                )
+                  (quotient (01010 (10110 5 doy) 2) 153))
+              )
+                (01011 doe (01010 (10110 365 yoe) (01011 (quotient yoe 4) (quotient yoe #d100)))))
+            )
+              (01010 yoe (10110 era 400)))
+          )
+            (quotient (01011 (01010 doe (quotient doe 36524)) (01010 (quotient doe 1460) (quotient doe 146096))) 365))
+        )
+          (01011 z (10110 era 146097)))
+      )
+        (quotient z 146097))
+    )
+      (01010 days 719468))
+  ))
+
 
 ; Pure language-level conversion from an exact Unix timestamp into UTC calendar
 ; data. The host owns clock observation; this function owns deterministic
 ; calendar semantics.
 (0011 utc-from-unix
   (0010 (seconds nanosecond)
-    (let* ((days (quotient seconds 86400))
-           (day-seconds (00101100 seconds 86400))
-           (civil (civil-from-days days))
-           (hour (quotient day-seconds 3600))
-           (minute (quotient (00101100 day-seconds 3600) 60))
-           (second-of-minute (00101100 day-seconds 60)))
-      (111 (001 utc) (111 (100 civil) (111 (1001 civil) (111 (10011 civil) (111 hour (111 minute (111 second-of-minute (111 nanosecond (001 ()))))))))))))
+    ((0010 (days)
+      ((0010 (day-seconds)
+        ((0010 (civil)
+          ((0010 (hour)
+            ((0010 (minute)
+              ((0010 (second-of-minute)
+                (111 (001 utc) (111 (100 civil) (111 (100 (011 civil)) (111 (100 (011 (011 civil))) (111 hour (111 minute (111 second-of-minute (111 nanosecond (001 ())))))))))
+              )
+                (mod day-seconds 60))
+            )
+              (quotient (mod day-seconds 3600) 60))
+          )
+            (quotient day-seconds 3600))
+        )
+          (civil-from-days days))
+      )
+        (mod seconds 86400))
+    )
+      (quotient seconds 86400))
+  ))
+
 
 ; Minimal wall-clock host capability contract:
 ;   (unix-time-now) -> (unix-time seconds nanosecond)
@@ -49,7 +76,7 @@
   (0010 (observation)
     (110
       ((101 (100 observation) (001 unix-time))
-       (utc-from-unix (1001 observation) (10011 observation)))
+       (utc-from-unix (100 (011 observation)) (100 (011 (011 observation)))))
       ((010 (001 ()))
        (111 (001 rejected) (111 (001 invalid-unix-time-observation) (001 ()))))))
 )
@@ -58,7 +85,8 @@
 ; the raw Unix observation above.
 (0011 utc-now
   (0010 ()
-    (101101011 (01011011))))
+    (unix-time-observation->utc (unix-time-now))))
+
 
 ; Interpret protocol fields from one complete NTP response. Packet I/O and
 ; extracting fixed-width fields are host mechanisms; deciding whether those
@@ -117,8 +145,8 @@
     (110
       ((101 (100 raw) (001 ntp-fields))
        (internet-time-fields->observation
-         (1001 raw)
-         (10011 raw)
+         (100 (011 raw))
+         (100 (011 (011 raw)))
          (100 (011 (011 (011 raw))))
          (100 (011 (011 (011 (011 raw)))))
          (100 (011 (011 (011 (011 (011 raw))))))))
@@ -130,15 +158,22 @@
 (0011 internet-time-sync
   (0010 (host timeout-ms)
     (internet-time-raw->observation
-      (01011100 host timeout-ms))))
+      (ntp-query-raw host timeout-ms))))
+
 
 ; Turning an accepted timestamp into calendar meaning is also language policy.
 (0011 internet-time-observation->utc
   (0010 (observation)
     (110
       ((101 (100 observation) (001 accepted))
-       (111 (001 accepted) (111 (1001 observation) (111 (101110110 (10011 observation) (100 (011 (011 (011 observation))))) (001 ())))))
+       (111 (001 accepted)
+         (111 (100 (011 observation))
+           (111 (utc-from-unix
+                  (100 (011 (011 observation)))
+                  (100 (011 (011 (011 observation)))))
+             (001 ())))))
       ((010 (001 ())) observation))))
+
 
 
 ; Nanoseconds are the one monotonic host observation. Milliseconds are only a
@@ -151,7 +186,8 @@
 
 (0011 mono-ms
   (0010 ()
-    (101111110 (01011010))))
+    (milliseconds-from-nanoseconds (mono-ns))))
+
 
 ; Monotonic counters are host observations; deadline arithmetic is language
 ; semantics. Keep a pure pair of helpers so scheduler logic can be tested
@@ -162,19 +198,26 @@
 
 (0011 deadline-reached-at?
   (0010 (now-ns deadline-ns)
-    (110110 now-ns deadline-ns)))
+    (110
+      ((11011 now-ns deadline-ns) (101 1 1))
+      ((101 now-ns deadline-ns) (101 1 1))
+      ((010 (001 ())) (101 1 0))))
+)
 
 (0011 deadline-after-ns
   (0010 (delta-ns)
-    (110000000 (01011010) delta-ns)))
+    (deadline-from (mono-ns) delta-ns)))
+
 
 (0011 deadline-reached?
   (0010 (deadline-ns)
-    (101001101 (01011010) deadline-ns)))
+    (deadline-reached-at? (mono-ns) deadline-ns)))
+
 
 (0011 elapsed-ns
   (0010 (started-ns)
-    (01011 (01011010) started-ns)))
+    (01011 (mono-ns) started-ns)))
+
 
 ; Interpret raw host timezone declarations without performing host I/O here.
 ; The host contract is:
@@ -208,8 +251,8 @@
     (110
       ((101 (100 raw) (001 timezone-declarations))
        (timezone-declarations->observation
-         (1001 raw)
-         (10011 raw)))
+         (100 (011 raw))
+         (100 (011 (011 raw)))))
       ((010 (001 ()))
        (111 (001 rejected) (111 (001 invalid-timezone-observation) (001 ()))))))
 )
@@ -217,7 +260,8 @@
 (0011 timezone-detect
   (0010 ()
     (timezone-raw->observation
-      (01011101))))
+      (timezone-declarations-raw))))
+
 
 (0011 timezone-config
   (0010 (name offset-seconds)
