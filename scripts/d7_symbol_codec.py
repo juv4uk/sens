@@ -2,7 +2,9 @@
 """D7 Sound/Text: exact 7-bit code <-> glyph of an explicitly selected surface.
 
 Engineering algorithm adapted from juv4uk/shiva-sutras:
-prototype/upc7_layouts.py (UPC7Text.encode/render/switch_layout, master).
+prototype/upc7_layouts.py (UPC7Text.encode/render/switch_layout).
+Donor master commit: 2968dcb10334a86614d4f8076597a7b1aaf574c9;
+donor blob: 64b5df14a0a9fe993397106b7155983c4aeefe16.
 The SENS owner-ratified knowledge/d7-ratified.json (#3572) is the ONLY source
 of admitted coordinates and existing glyph assignments. The donor's old 107-cell
 map or later candidate remappings MUST NEVER be imported as D7 identities.
