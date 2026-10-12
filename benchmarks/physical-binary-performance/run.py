@@ -22,6 +22,7 @@ import statistics
 import subprocess
 import sys
 import time
+import tempfile
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -128,18 +129,102 @@ def main() -> None:
     raw_rows: list[dict] = []
     summaries: list[dict] = []
 
+    # Encode each source in an isolated directory before timing execution.
+    # sens-trit encode produces the physical packed T5 artifact; it is not a
+    # native machine-code compiler. Every generated artifact must equal the
+    # committed .sens bytes, otherwise no runtime measurements are admitted.
+    compile_tmp = tempfile.TemporaryDirectory(prefix="sens-physical-t5-encode-")
+    compile_root = Path(compile_tmp.name)
+    compiled_files: dict[str, Path] = {}
+    compile_summaries: list[dict] = []
+    compile_raw_rows: list[dict] = []
+    compile_warmup, compile_reps = 1, 5
+
+    for fixture_index, fixture in enumerate(FIXTURES):
+        committed_physical = ROOT / fixture
+        source = committed_physical.with_suffix(".lisp")
+        if not committed_physical.is_file():
+            raise RuntimeError(f"fixture missing: {fixture}")
+        if not source.is_file():
+            raise RuntimeError(f"canonical source companion missing: {source.relative_to(ROOT)}")
+        source_bytes = source.read_bytes()
+        committed_bytes = committed_physical.read_bytes()
+        if not source_bytes or not committed_bytes:
+            raise RuntimeError(f"empty source or physical fixture: {fixture}")
+
+        encode_samples: list[float] = []
+        result_path: Path | None = None
+        artifact_digest = ""
+        for iteration in range(compile_warmup + compile_reps):
+            invocation_dir = compile_root / f"{fixture_index:02d}-encode-{iteration:02d}"
+            invocation_dir.mkdir(parents=True)
+            staged_source = invocation_dir / source.name
+            staged_source.write_bytes(source_bytes)
+            elapsed, encoder_stdout = invoke([trit, "encode", str(staged_source)])
+            generated = staged_source.with_suffix(".sens")
+            if not generated.is_file():
+                raise RuntimeError(f"{fixture}: encoder returned success without a .sens artifact")
+            generated_bytes = generated.read_bytes()
+            if generated_bytes != committed_bytes:
+                raise RuntimeError(
+                    f"{fixture}: fresh encode differs byte-for-byte from committed .sens"
+                )
+            if b"VERIFIED " not in encoder_stdout:
+                raise RuntimeError(f"{fixture}: encode did not emit its verification witness")
+            artifact_digest = sha256(generated_bytes)
+            if iteration >= compile_warmup:
+                encode_samples.append(elapsed)
+                compile_raw_rows.append({
+                    "sha": commit,
+                    "source": str(source.relative_to(ROOT)),
+                    "rep": iteration - compile_warmup + 1,
+                    "wall_ms": f"{elapsed:.6f}",
+                    "source_sha256": sha256(source_bytes),
+                    "artifact_sha256": artifact_digest,
+                    "bytewise_matches_committed": "true",
+                })
+            result_path = generated
+
+        assert result_path is not None
+        compiled_files[fixture] = result_path
+        compile_summary = {
+            "source": str(source.relative_to(ROOT)),
+            "committed_fixture": fixture,
+            "source_bytes": len(source_bytes),
+            "physical_t5_bytes": len(committed_bytes),
+            "source_sha256": sha256(source_bytes),
+            "artifact_sha256": artifact_digest,
+            "bytewise_matches_committed": True,
+            "warmup_processes": compile_warmup,
+            "measured_processes": len(encode_samples),
+            "encode_median_wall_ms": round(statistics.median(encode_samples), 6),
+            "encode_p95_wall_ms": round(percentile_nearest_rank(encode_samples, 0.95), 6),
+            "encode_samples_wall_ms": [round(value, 6) for value in encode_samples],
+        }
+        compile_summaries.append(compile_summary)
+        print(
+            f"encode {source.relative_to(ROOT)} -> {len(committed_bytes)}B T5, "
+            f"median={compile_summary['encode_median_wall_ms']:.3f}ms, bytewise=PASS",
+            flush=True,
+        )
+
     for fixture in FIXTURES:
         physical = ROOT / fixture
+        source = physical.with_suffix(".lisp")
         if not physical.is_file():
             raise RuntimeError(f"fixture missing: {fixture}")
-        payload = physical.read_bytes()
+        # Runtime lanes execute the newly encoded temporary artifact, not the
+        # checked-in .sens file. The latter is only the bytewise reference.
+        payload = compiled_files[fixture].read_bytes()
+        if payload != physical.read_bytes():
+            raise RuntimeError(f"{fixture}: compiled artifact changed after encode admission")
         if not payload:
             raise RuntimeError(f"fixture empty: {fixture}")
 
         commands = {
-            "sens-exec": [sens, str(physical)],
-            "sens-trit-eval": [trit, "eval", str(physical)],
-            "sens-trit-open": [trit, "open", str(physical)],
+            "sens-exec": [sens, str(compiled_files[fixture])],
+            "sens-trit-eval": [trit, "eval", str(compiled_files[fixture])],
+            "sens-trit-open": [trit, "open", str(compiled_files[fixture])],
         }
         # Перед замірами: дві виконавчі доріжки повинні збігатися.
         # Окремий Python T5-декодер доводить точну транспортну проєкцію,
@@ -157,6 +242,12 @@ def main() -> None:
         visible_bytes = len(visible)
         dimensions = {
             "fixture": fixture,
+            "source_bytes": source.stat().st_size,
+            "source_sha256": sha256(source.read_bytes()),
+            "encode_median_wall_ms": next(
+                item["encode_median_wall_ms"] for item in compile_summaries
+                if item["committed_fixture"] == fixture
+            ),
             "physical_bytes": len(payload),
             "visible_binary_bytes": visible_bytes,
             "visible_to_physical_ratio": round(visible_bytes / len(payload), 5),
@@ -232,6 +323,16 @@ def main() -> None:
         )
         writer.writeheader()
         writer.writerows(raw_rows)
+    with (args.out / "compile-raw.tsv").open("w", newline="", encoding="utf-8") as handle:
+        fieldnames = [
+            "sha", "source", "rep", "wall_ms", "source_sha256",
+            "artifact_sha256", "bytewise_matches_committed",
+        ]
+        writer = csv.DictWriter(
+            handle, fieldnames=fieldnames, delimiter="\t", lineterminator="\n"
+        )
+        writer.writeheader()
+        writer.writerows(compile_raw_rows)
     report = {
         "schema": "sens-physical-binary-performance/v1",
         "commit_sha": commit,
@@ -257,6 +358,15 @@ def main() -> None:
         "reps": args.reps,
         "warmup": args.warmup,
         "cachegrind_enabled": args.cachegrind,
+        "source_to_t5_encoding": {
+            "method": "sens-trit encode on canonical paired .lisp source",
+            "claim_boundary": "physical packed T5 encoding; not native machine-code compilation",
+            "warmup_processes_per_source": compile_warmup,
+            "measured_processes_per_source": compile_reps,
+            "bytewise_match_required": True,
+            "results": compile_summaries,
+            "raw_samples_file": "compile-raw.tsv",
+        },
         "results": summaries,
     }
     (args.out / "results.json").write_text(
@@ -269,6 +379,15 @@ def main() -> None:
         "",
         f"CLI SHA256: sens=`{binary_sha256['sens']}`; sens-trit=`{binary_sha256['sens-trit']}`.",
         f"Codec SHA256: `{codec_sha256}`; benchmark SHA256: `{benchmark_sha256}`.",
+        "",
+        "## Source → фізичне T5 кодування",
+        "",
+        "| Джерело | Source bytes | T5 bytes | encode median, ms | encode p95, ms | Байтова тотожність |",
+        "|---|---:|---:|---:|---:|---|",
+        *[f"| {Path(row['source']).name} | {row['source_bytes']} | {row['physical_t5_bytes']} | {row['encode_median_wall_ms']:.3f} | {row['encode_p95_wall_ms']:.3f} | PASS |" for row in compile_summaries],
+        "",
+        "Це процесне source→packed-T5 кодування, а не генерація нативного машинного коду.",
+        "До runtime вимірів допускається лише артефакт, байти якого точно збігаються з канонічним `.sens`.",
         "",
         "| Програма | Шлях | Медіана, мс | p95, мс | Перший preflight, мс | I refs |",
         "|---|---|---:|---:|---:|---:|",
@@ -310,6 +429,7 @@ def main() -> None:
     )
     (args.out / "report.md").write_text("\n".join(lines), encoding="utf-8")
     print("\n".join(lines))
+    compile_tmp.cleanup()
 
 
 if __name__ == "__main__":
