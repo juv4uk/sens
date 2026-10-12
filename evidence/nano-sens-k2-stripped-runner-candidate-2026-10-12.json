@@ -60,19 +60,37 @@
   "candidate_workflow": {
     "repository": "juv4uk/cml",
     "branch": "master",
-    "source_commit": "1eb3f461dd18046adf841c13d094892ce3b0612a",
+    "source_commit": "33a0361b07700e254aff55eb03defd40c99f05eb",
     "workflow_path": ".github/workflows/issue-655-c2-executable.yml",
-    "workflow_blob_sha": "a368f22ccfb2843893a0f8e841e1ae5f7f5e8f30",
-    "workflow_run_id": 38191565378,
-    "workflow_url": "https://github.com/juv4uk/cml/actions/runs/38191565378",
-    "state_at_recording": "queued",
+    "workflow_blob_sha": "2a81d2651c2d1405c2cb3f2dd7f8b49442f59a3a",
+    "workflow_run_id": 38191665717,
+    "workflow_url": "https://github.com/juv4uk/cml/actions/runs/38191665717",
+    "state_at_recording": "pending",
     "changes": [
       "Preserve the unstripped runner as a separate artifact.",
       "Create seed-v0-c0-runner.bin by stripping symbols/debug sections and removing GNU build-id.",
       "Fail if a GNU build-id remains.",
       "Run the entire 189-test corpus from the stripped candidate before runtime tracing.",
+      "Generate a Rust dep-info input census in each isolated measurement run.",
       "Measure the stripped candidate and keep the raw ELF available for audit.",
+      "Disable cancel-in-progress for this workflow so later master commits do not cancel active two-clean-run evidence runs.",
       "Retain matrix and two-run comparison artifacts for 30 days."
+    ],
+    "superseded_attempts": [
+      {
+        "workflow_run_id": 38191565378,
+        "workflow_url": "https://github.com/juv4uk/cml/actions/runs/38191565378",
+        "source_commit": "1eb3f461dd18046adf841c13d094892ce3b0612a",
+        "conclusion": "cancelled",
+        "reason": "A subsequent commit to master superseded this run while concurrency used cancel-in-progress=true."
+      },
+      {
+        "workflow_run_id": 38191641452,
+        "workflow_url": "https://github.com/juv4uk/cml/actions/runs/38191641452",
+        "source_commit": "dafda318bbd21c20bbd8ca7a5aba418fba21538d",
+        "state_at_recording": "queued",
+        "note": "Intermediate dep-info census checkpoint; newest candidate workflow run is 38191665717."
+      }
     ]
   },
   "acceptance": {
