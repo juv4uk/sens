@@ -88,7 +88,7 @@ fn runtime_peer_slice_matches_numeric_registry_rows() {
 }
 
 #[test]
-fn ukrainian_builtin_presentation_uses_numeric_authority_not_legacy_audit() {
+fn українське_подання_розрізняє_історичний_w8_і_домени() {
     assert!(!PRESENTATION.contains("uk-sa-coverage.lisp"));
     for case in CASES {
         let sid = sens::semantic_registry_export::semantic_id_for_admitted_surface(case.sym)
@@ -96,7 +96,7 @@ fn ukrainian_builtin_presentation_uses_numeric_authority_not_legacy_audit() {
         let exact = Value::Sid(sid);
         assert_eq!(
             render_value_for_presentation(&exact, PresentationLanguage::Ukrainian),
-            format!("#<вбудована {}>", case.uk),
+            format!("#<сумісний W8:{} {}>", sid, case.uk),
             "{} presentation",
             case.uk
         );
