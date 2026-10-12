@@ -96,7 +96,10 @@ fn world_dedup_source_can_export_its_own_knowledge_envelope() {
 #[test]
 fn world_dedup_can_import_its_exported_knowledge_package() {
     let mut session = session();
-    let src = "(let ((source (world-tell (empty-world) (quote zoo) (quote ((has-fur cat)))))) (car (import-knowledge-package-world (empty-world) (make-world-knowledge-package source (quote zoo)))))";
+    // The import returns (receipt world); the receipt is itself a tagged
+    // record (accepted (module ...) (knowledge ...)), not a bare symbol.
+    // Probe only its D3 CAR tag, retaining the richer language-owned receipt.
+    let src = "(let ((source (world-tell (empty-world) (quote zoo) (quote ((has-fur cat)))))) (car (car (import-knowledge-package-world (empty-world) (make-world-knowledge-package source (quote zoo))))))";
     assert_eq!(observe(&mut session, src), "accepted",
         "an exported immutable world package must be reimportable");
 }
