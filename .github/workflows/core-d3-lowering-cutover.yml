@@ -1,0 +1,28 @@
+name: Міграція ядра — точний D3 замість старих SID8-констант
+
+on:
+  pull_request:
+    paths:
+      - "crates/sens/src/semantic_registry.rs"
+      - "crates/sens/src/eval/lower.rs"
+      - ".github/workflows/core-d3-lowering-cutover.yml"
+  push:
+    branches: [main]
+    paths:
+      - "crates/sens/src/semantic_registry.rs"
+      - "crates/sens/src/eval/lower.rs"
+      - ".github/workflows/core-d3-lowering-cutover.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  d3-domain-lowering:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Перевірити семантичне перенесення історичних W8-голів через D3
+        run: cargo test --locked -p sens --lib exact_d3_compatibility_migration_tests
+      - name: Перевірити зниження QUOTE і COND без старих SID8-констант
+        run: cargo test --locked -p sens --lib domain_ladder_lowering_migration_tests
