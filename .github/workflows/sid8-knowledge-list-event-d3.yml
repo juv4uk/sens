@@ -1,0 +1,24 @@
+name: Knowledge Lisp D3 list-event lowering witness
+on:
+  push:
+    branches: [main]
+    paths:
+      - lib/knowledge.lisp
+      - tests/test_sid8_knowledge_list_event_d3.py
+      - .github/workflows/sid8-knowledge-list-event-d3.yml
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  immutable-original-delta:
+    runs-on: ubuntu-latest
+    timeout-minutes: 6
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Verify exact Lisp-only source rewrite and negative D3 witnesses
+        run: python3 -m unittest discover -s tests -p 'test_sid8_knowledge_list_event_d3.py' -v
