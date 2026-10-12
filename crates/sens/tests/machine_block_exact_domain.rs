@@ -105,6 +105,35 @@ fn x86_atom_let_cutover_uses_exact_d4_lambda_applications() {
 
 
 #[test]
+fn x86_operand_rejection_predicate_returns_exact_d1_for_all_shapes() {
+    let source = include_str!("../../../lib/machine/operands/x86-64.lisp");
+    let parsed = parse_mixed_exact_domain_machine_source(
+        "lib/machine/operands/x86-64.lisp",
+        source,
+    ).expect("лише машинний читач має обробляти цей Lisp-код");
+    let mut session = Session::default();
+    load_core_library(&mut session).expect("канонічна базова бібліотека");
+    eval_parsed_expressions(&parsed, &mut session)
+        .expect("визначення машинних операндів належать Lisp");
+
+    for (argument, expected) in [
+        ("(quote ())", false),
+        ("(quote (gpr64 rax))", false),
+        ("(quote (rejected machine-operand gpr64 invalid))", true),
+    ] {
+        let program = format!("(x86-machine-rejected? {argument})");
+        let result = eval_program(&program, &mut session)
+            .unwrap_or_else(|error| panic!("{program}: {error}"));
+        assert_eq!(
+            result.value.as_predicate_bit(),
+            Some(expected),
+            "тестовий предикат має повертати лише D1 так/ні: {program}"
+        );
+    }
+}
+
+
+#[test]
 fn machine_block_reader_is_path_bound_and_quote_data_stays_opaque() {
     assert!(parse_mixed_exact_domain_machine_source(
         "lib/machine/other/block-exact.lisp", SOURCE
