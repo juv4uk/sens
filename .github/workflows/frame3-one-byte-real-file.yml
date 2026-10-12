@@ -7,6 +7,8 @@ on:
       - 'crates/sens/src/frame3_micro_enumerator.rs'
       - 'crates/sens/src/frame3_micro_v5.rs'
       - 'crates/sens/src/frame3_micro_v5_lambda.rs'
+      - 'knowledge/f3m5-lambda-lexical-reference-candidate-v1.json'
+      - 'scripts/check_f3m5_lambda_lexical_reference.py'
       - 'research/framed3/fixtures/*.f3m'
       - 'crates/sens/examples/frame3_real_files_bench.rs'
       - 'research/framed3/rust_codec/senc.rs'
@@ -32,6 +34,9 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: dtolnay/rust-toolchain@stable
+      - name: Prove nameless lexical-reference law independently
+        shell: bash
+        run: python3 scripts/check_f3m5_lambda_lexical_reference.py
       - name: Prove dense F3M 1-5 byte rank windows and executable witnesses
         shell: bash
         run: |
