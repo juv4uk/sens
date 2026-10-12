@@ -184,6 +184,36 @@ class LegacyD3GuardTests(unittest.TestCase):
             f.rule for f in MODULE.scan_lisp(regression, path)
         ])
 
+    def test_meta_semantic_generator_redundant_atom_paths_retired(self):
+        path = "scripts/generate-meta-semantic-registry.lisp"
+        source = (ROOT / path).read_text(encoding="utf-8")
+        findings = MODULE.scan_lisp(source, path)
+        kinds = [finding.rule for finding in findings]
+
+        # The four surviving historical equality/result matches remain honest
+        # strict-audit debt; new source must never grow additional triples or
+        # return to host-T condition heads.
+        self.assertLessEqual(kinds.count("COND_NOT_TWO_FIELDS"), 4)
+        self.assertNotIn("COND_HOST_TRUTH", kinds)
+
+        exact = "((010 surface) ())"
+        self.assertIn(exact, source)
+        reverted = source.replace(exact, "((010 surface) (1) ())", 1)
+        self.assertGreater(
+            [f.rule for f in MODULE.scan_lisp(reverted, path)].count(
+                "COND_NOT_TWO_FIELDS"
+            ),
+            kinds.count("COND_NOT_TWO_FIELDS"),
+        )
+
+        fallback = "((010 (001 ())) t)"
+        self.assertIn(fallback, source)
+        reverted = source.replace(fallback, "(t t)", 1)
+        self.assertIn(
+            "COND_HOST_TRUTH",
+            [f.rule for f in MODULE.scan_lisp(reverted, path)],
+        )
+
     def test_historical_paths_and_metadata_excluded(self):
         for path in ("docs/research/old.lisp", "research/domain-archive/a.lisp",
                      "tests/fixtures/old.lisp", "lib/domains/d3.lisp",
