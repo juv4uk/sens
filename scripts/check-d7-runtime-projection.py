@@ -2,7 +2,7 @@
 """Generate and verify D7 display-only projection from ratified SENS tables.
 
 No D7 function names or executable dispatch are generated: these are
-human-readable UK/Sanskrit renderings for already-width-qualified D7 values.
+human-readable Ukrainian/Sanskrit/English views for already-width-qualified D7 values.
 """
 
 from __future__ import annotations
@@ -72,6 +72,8 @@ def generated_source(rows) -> str:
         "    pub(super) sa: Option<&'static str>,",
         "    pub(super) deva: Option<&'static str>,",
         "    pub(super) slp1: Option<&'static str>,",
+        "    pub(super) en: Option<&'static str>,",
+        "    pub(super) en_ipa: Option<&'static str>,",
         "}",
         "",
         "pub(super) const D7_DISPLAY_ROWS: &[D7DisplayRow] = &[",
@@ -82,7 +84,9 @@ def generated_source(rows) -> str:
             f"    D7DisplayRow {{ bits: 0b{row.bits}, "
             f"uk: {rust_string(row.uk)}, sa: {rust_string(row.san)}, "
             f"deva: {rust_string(codec.glyph(row.bits, 'sa-deva'))}, "
-            f"slp1: {rust_string(codec.glyph(row.bits, 'sa-slp1'))} }},"
+            f"slp1: {rust_string(codec.glyph(row.bits, 'sa-slp1'))}, "
+            f"en: {rust_string(row.en)}, "
+            f"en_ipa: {rust_string(codec.glyph(row.bits, 'en-ipa'))} }},"
         )
     lines.append("];")
     return "\n".join(lines) + "\n"
