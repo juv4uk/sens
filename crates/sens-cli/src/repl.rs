@@ -449,6 +449,21 @@ mod tests {
     }
 
     #[test]
+    fn classic_repl_reply_accepts_lowercase_source_and_prints_uppercase_symbols() {
+        let mut state = core_state();
+        let result = eval_program(
+            "(quote (car cons \"MiXeD\" 42))",
+            &mut state.session,
+        )
+        .expect("lowercase REPL source should evaluate");
+
+        assert_eq!(
+            render_repl_reply(&result.value, PresentationLanguage::Canonical),
+            "(CAR CONS \"MiXeD\" 42)"
+        );
+    }
+
+    #[test]
     fn classic_repl_reply_uppercases_dotted_and_vector_symbol_data() {
         let dotted = Value::Pair(
             std::rc::Rc::new(Value::Symbol("left".into())),
