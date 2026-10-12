@@ -65,6 +65,18 @@ class BatchSourceTests(unittest.TestCase):
             with self.subTest(path=row["path"]):
                 self.assertEqual(row["status"], "source-era-unproved")
 
+    def test_exact_sha_pinned_schema_metadata_is_not_executable_source(self):
+        path = "lib/function-table-mechanisms.lisp"
+        report = MOD.run(ROOT, False, {path})
+        self.assertEqual(report["summary"]["admitted_files"], 0)
+        self.assertEqual(report["summary"]["blocked_files"], 0)
+        self.assertEqual(report["files"][0]["status"], "nonprogram-data-reviewed")
+        self.assertEqual(report["files"][0]["potential_heads"], 0)
+        self.assertEqual(
+            report["files"][0]["source_git_blob_sha"],
+            "e749d5696205efb335447859388630c493cf8df2",
+        )
+
     def test_historical_cond_guard_rejects_other_active_policy_sources(self):
         # Executable historical COND clauses may carry a third explicit
         # expected-result field or a host T fallback. Replacing just the

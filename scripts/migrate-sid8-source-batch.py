@@ -10,6 +10,8 @@ import hashlib
 import importlib.util
 import json
 from pathlib import Path
+
+from report_original_migration_candidates import load_nonprogram_classification
 import re
 import subprocess
 import sys
@@ -22,6 +24,10 @@ SCOPES = ("lib/", "knowledge/", "scripts/", "experiments/", "racket/boot/")
 SKIP = ("lib/domains/", "lib/generated/", "lib/surface/", "knowledge/archive/",
         "knowledge/d10-source-snapshots/", "research/", "docs/", "tests/")
 HOLDS = {"lib/macro.lisp", "lib/machine/block.lisp"}
+
+# Ця декларативна схема вже включена до незалежного SHA-прикріпленого
+# non-program manifest; ніколи не видавати її записи за виклики функцій.
+PINNED_SCHEMA_METADATA = "lib/function-table-mechanisms.lisp"
 
 # The five pinned service/policy sources were migrated only at D4 DEFINE/LAMBDA
 # heads. Their surviving 8-bit D3 COND forms remain HISTORICAL, not current D8.
@@ -166,6 +172,12 @@ def guard_module(root):
 def run(root, write=False, selected=None):
     mapping, blocked = authority(root)
     guard = guard_module(root)
+    # Повторно використовуємо канонічні Git-blob pins із #4460.
+    # Будь-яка зміна навіть одного байта в джерелі залишається BLOCK, а не skip.
+    reviewed = load_nonprogram_classification(root)
+    pinned = reviewed.get(PINNED_SCHEMA_METADATA)
+    if pinned is None or pinned["cohort"] != "schema":
+        raise ValueError("missing independently reviewed schema metadata authority")
     proc = subprocess.run(["git", "ls-files", "-z", "--", "*.lisp"],
                           cwd=root, check=True, capture_output=True)
     paths = sorted(p.decode() for p in proc.stdout.split(b"\0") if p)
@@ -180,6 +192,14 @@ def run(root, write=False, selected=None):
         file = root / path
         if file.is_symlink():
             report.append({"path": path, "status": "blocked", "reasons": ["symlink"]})
+            continue
+        if path == PINNED_SCHEMA_METADATA:
+            report.append({
+                "path": path, "status": "nonprogram-data-reviewed",
+                "source_git_blob_sha": pinned["source_git_blob_sha"],
+                "potential_heads": 0,
+                "reasons": ["SHA-pinned schema metadata; never executable migration credit"],
+            })
             continue
         original = file.read_text(encoding="utf-8")
         # A modern D8 head or a record key is never proof of old SID8 source.
