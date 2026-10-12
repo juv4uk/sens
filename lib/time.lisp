@@ -8,7 +8,7 @@
 ; before the Unix epoch.
 (0011 civil-from-days
   (0010 (days)
-    (001001 ((z (01010 days 719468))
+    (let* ((z (01010 days 719468))
            (era (10111 z 146097))
            (doe (01011 z (10110 era 146097)))
            (yoe (10111 (01011 (01010 doe (10111 doe 36524))
@@ -25,7 +25,7 @@
                       ((010 (001 ())) -9))))
            (year (01010 y
                    (110
-                     ((110100 month 2) 1)
+                     ((11010 month 3) 1)
                      ((010 (001 ())) 0)))))
       (111 year (111 month (111 day (001 ())))))))
 
@@ -34,7 +34,7 @@
 ; calendar semantics.
 (0011 utc-from-unix
   (0010 (seconds nanosecond)
-    (001001 ((days (10111 seconds 86400))
+    (let* ((days (10111 seconds 86400))
            (day-seconds (00101100 seconds 86400))
            (civil (civil-from-days days))
            (hour (10111 day-seconds 3600))
@@ -75,16 +75,20 @@
 ; neither Number 1/0, T/NIL, structural () nor rich classifiers act as tests.
 (0011 internet-time-mode-valid?
   (0010 (mode)
-    (or
-      (11110111 mode 4)
-      (11110111 mode 5)))
+    (110
+      ((101 mode 4) (101 1 1))
+      ((101 mode 5) (101 1 1))
+      ((010 (001 ())) (101 1 0))))
 )
 
 (0011 internet-time-stratum-valid?
   (0010 (stratum)
-    (and
-      (11011 stratum 0)
-      (11010 stratum 16)))
+    (110
+      ((11011 stratum 0)
+       (110
+         ((11010 stratum 16) (101 1 1))
+         ((010 (001 ())) (101 1 0))))
+      ((010 (001 ())) (101 1 0))))
 )
 
 (0011 internet-time-fields->observation
