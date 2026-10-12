@@ -1,6 +1,6 @@
 """Fail-closed regression guards for SENS's one-shot release publication.
 
-Replays the actual asset verifier embedded in .github/workflows/release.yml
+Replays the actual scripts/verify_release_assets.py invoked by release.yml
 on synthetic files. No tags or releases are created. It does not replace
 exact-SHA hosted release evidence.
 """
@@ -14,7 +14,6 @@ import re
 import subprocess
 import sys
 import tempfile
-import textwrap
 import unittest
 
 WORKFLOW = Path(__file__).resolve().parents[2] / ".github/workflows/release.yml"
@@ -55,7 +54,7 @@ def check_release_workflow(workflow: str) -> None:
         "merge-multiple: true",
         'gh release create "$GITHUB_REF_NAME" dist/*',
         "--draft --verify-tag",
-        "RELEASE_DRAFT_REPLAY_PASS",
+        "scripts/verify_release_assets.py replay",
         "sha256sum --check SHA256SUMS",
         'gh release edit "$GITHUB_REF_NAME" --draft=false',
     )
@@ -63,31 +62,16 @@ def check_release_workflow(workflow: str) -> None:
         if marker not in job:
             raise ValueError("RELEASE_BLOCKED: missing release safety requirement: " + marker)
     if not (job.index('gh release create "$GITHUB_REF_NAME" dist/*')
-            < job.index("RELEASE_DRAFT_REPLAY_PASS")
+            < job.index("scripts/verify_release_assets.py replay")
             < job.index('gh release edit "$GITHUB_REF_NAME" --draft=false')):
         raise ValueError("RELEASE_BLOCKED: release publication order changed")
-
-
-def embedded_asset_verifier(workflow: str) -> str:
-    job = release_job(workflow)
-    step = "      - name: Reject missing, extra or empty assets; produce exact SHA-256 manifest"
-    if step not in job:
-        raise ValueError("RELEASE_BLOCKED: asset preflight step missing")
-    after = job.split(step, 1)[1]
-    start = "          python3 - <<'PY'\n"
-    if start not in after:
-        raise ValueError("RELEASE_BLOCKED: missing executable asset verifier")
-    code = after.split(start, 1)[1].split("\n          PY", 1)
-    if len(code) != 2:
-        raise ValueError("RELEASE_BLOCKED: unterminated asset verifier")
-    return textwrap.dedent(code[0])
 
 
 class PublicationGateTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls) -> None:
         cls.workflow = WORKFLOW.read_text(encoding="utf-8")
-        cls.verifier = embedded_asset_verifier(cls.workflow)
+        cls.verifier = Path(__file__).resolve().parents[2] / "scripts/verify_release_assets.py"
 
     def test_release_flow_is_draft_first_and_exact_sha(self):
         check_release_workflow(self.workflow)
@@ -113,8 +97,8 @@ class PublicationGateTests(unittest.TestCase):
 
     def invoke(self, root: Path, *, tag: str = TAG, sha: str = SHA):
         return subprocess.run(
-            [sys.executable, "-c", self.verifier], cwd=root,
-            env={**os.environ, "GITHUB_REF_NAME": tag, "GITHUB_SHA": sha},
+            [sys.executable, str(self.verifier), "prepare", str(root / "dist"), tag, sha],
+            cwd=root,
             capture_output=True, text=True, timeout=15,
         )
 
@@ -124,7 +108,7 @@ class PublicationGateTests(unittest.TestCase):
             dist = self.stage(root)
             result = self.invoke(root)
             self.assertEqual(result.returncode, 0, result.stderr)
-            self.assertIn("RELEASE_STAGED", result.stdout)
+            self.assertIn("RELEASE_STAGE_PASS", result.stdout)
             manifest = json.loads((dist / "release-provenance.json").read_text())
             self.assertEqual(manifest["commit"], SHA)
             self.assertEqual(manifest["tag"], TAG)
