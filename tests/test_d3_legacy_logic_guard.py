@@ -142,6 +142,28 @@ class LegacyD3GuardTests(unittest.TestCase):
             [f.rule for f in MODULE.scan_lisp(bad_arity, "scripts/build-dependency-classification.lisp")],
         )
 
+    def test_symbol_table_exact_d1_cond_and_negative_mutations(self):
+        path = "scripts/symbol-table.lisp"
+        source = (ROOT / path).read_text(encoding="utf-8")
+        self.assertEqual(MODULE.scan_lisp(source, path), [])
+
+        # Both historical ATOM result matches had the SAME branch body. Restoring
+        # the obsolete three-field shape must never silently pass.
+        exact = "((010 expr) acc)"
+        self.assertIn(exact, source)
+        old = source.replace(exact, "((010 expr) (1) acc)", 1)
+        self.assertIn("COND_NOT_TWO_FIELDS", [
+            finding.rule for finding in MODULE.scan_lisp(old, path)
+        ])
+
+        # This is exact D1:1, not Lisp host T or numeric one.
+        fallback = "((010 (001 ())) (111 expr acc))"
+        self.assertIn(fallback, source)
+        host = source.replace(fallback, "(t (111 expr acc))", 1)
+        self.assertIn("COND_HOST_TRUTH", [
+            finding.rule for finding in MODULE.scan_lisp(host, path)
+        ])
+
     def test_historical_paths_and_metadata_excluded(self):
         for path in ("docs/research/old.lisp", "research/domain-archive/a.lisp",
                      "tests/fixtures/old.lisp", "lib/domains/d3.lisp",
