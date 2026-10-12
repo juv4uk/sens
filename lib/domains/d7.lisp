@@ -1,17 +1,17 @@
-; D7: exact 7-bit identities, УКРАЇНСЬКІ клавіатурні символи, Sanskrit IAST projection.
+; D7: exact owner-ratified 7-bit identities, human text/sound projections.
 ; Authority: knowledge/d7-ratified.json (#3572). Glyphs are not resident identity.
-; D2 alone owns structural separator/open/close/dot; no D7 duplicate glyph.
-; 'ук'/'укр'/'sym': only Ukrainian (Enhanced) keyboard single symbols.
-; 'san': Sanskrit IAST (NOT English); sa-deva/sa-slp1 are codec views.
-; 'en': () because IAST is not English; 'LISP': () (no call admission).
+; Text D7 space/dot are DATA; D2 separator/dot are parser STRUCTURE by context.
+; 'ук'/'укр'/'sym': Ukrainian keyboard glyphs, no English letters.
+; 'san': Sanskrit IAST. 'en': English pilot romanized phonemes; NOT Sanskrit.
+; 'en-ipa': codec-only (no extra Lisp column or new resident); 'LISP': no call admission.
 ; Missing projection () does not delete a D7 resident.
 ; 126/128 ratified, owner-reserved 0100001,0101010.
 ; D7 uppercase input may use the ratified text modifier 0100010.
 
 (domain-table/1
-  (0000000 (ук "к") (укр "к") (san "k") (en ()) (LISP ()) (sym "к"))
+  (0000000 (ук "к") (укр "к") (san "k") (en "k") (LISP ()) (sym "к"))
   (0000001 (ук ()) (укр ()) (san "kh") (en ()) (LISP ()) (sym ()))
-  (0000010 (ук "ґ") (укр "ґ") (san "g") (en ()) (LISP ()) (sym "ґ"))
+  (0000010 (ук "ґ") (укр "ґ") (san "g") (en "g") (LISP ()) (sym "ґ"))
   (0000011 (ук ()) (укр ()) (san "gh") (en ()) (LISP ()) (sym ()))
   (0000100 (ук ()) (укр ()) (san "ṅ") (en ()) (LISP ()) (sym ()))
   (0000101 (ук ()) (укр ()) (san "c") (en ()) (LISP ()) (sym ()))
@@ -29,11 +29,11 @@
   (0010001 (ук "д") (укр "д") (san "d") (en ()) (LISP ()) (sym "д"))
   (0010010 (ук ()) (укр ()) (san "dh") (en ()) (LISP ()) (sym ()))
   (0010011 (ук "н") (укр "н") (san "n") (en ()) (LISP ()) (sym "н"))
-  (0010100 (ук "п") (укр "п") (san "p") (en ()) (LISP ()) (sym "п"))
+  (0010100 (ук "п") (укр "п") (san "p") (en "p") (LISP ()) (sym "п"))
   (0010101 (ук ()) (укр ()) (san "ph") (en ()) (LISP ()) (sym ()))
-  (0010110 (ук "б") (укр "б") (san "b") (en ()) (LISP ()) (sym "б"))
+  (0010110 (ук "б") (укр "б") (san "b") (en "b") (LISP ()) (sym "б"))
   (0010111 (ук ()) (укр ()) (san "bh") (en ()) (LISP ()) (sym ()))
-  (0011000 (ук "м") (укр "м") (san "m") (en ()) (LISP ()) (sym "м"))
+  (0011000 (ук "м") (укр "м") (san "m") (en "m") (LISP ()) (sym "м"))
   (0011001 (ук "8") (укр "8") (san "8") (en ()) (LISP ()) (sym "8"))
   (0011010 (ук "9") (укр "9") (san "9") (en ()) (LISP ()) (sym "9"))
   (0011011 (ук ()) (укр ()) (san "…") (en ()) (LISP ()) (sym ()))
@@ -46,7 +46,7 @@
   (0100011 (ук ()) (укр ()) (san ()) (en ()) (LISP ()) (sym ()))
   (0100100 (ук "ш") (укр "ш") (san "ś") (en ()) (LISP ()) (sym "ш"))
   (0100101 (ук "ж") (укр "ж") (san ()) (en ()) (LISP ()) (sym "ж"))
-  (0100110 (ук "й") (укр "й") (san "y") (en ()) (LISP ()) (sym "й"))
+  (0100110 (ук "й") (укр "й") (san "y") (en "y") (LISP ()) (sym "й"))
   (0100111 (ук "ь") (укр "ь") (san ()) (en ()) (LISP ()) (sym "ь"))
   (0101000 (ук ()) (укр ()) (san "ṣ") (en ()) (LISP ()) (sym ()))
   (0101001 (ук ()) (укр ()) (san "«") (en ()) (LISP ()) (sym ()))
@@ -103,7 +103,7 @@
   (1011101 (ук "е") (укр "е") (san ()) (en ()) (LISP ()) (sym "е"))
   (1011110 (ук "о") (укр "о") (san ()) (en ()) (LISP ()) (sym "о"))
   (1011111 (ук "и") (укр "и") (san ()) (en ()) (LISP ()) (sym "и"))
-  (1100000 (ук ()) (укр ()) (san ()) (en ()) (LISP ()) (sym ()))
+  (1100000 (ук " ") (укр " ") (san " ") (en " ") (LISP ()) (sym " "))
   (1100001 (ук ()) (укр ()) (san ()) (en ()) (LISP ()) (sym ()))
   (1100010 (ук ()) (укр ()) (san ()) (en ()) (LISP ()) (sym ()))
   (1100011 (ук ()) (укр ()) (san ()) (en ()) (LISP ()) (sym ()))
@@ -129,7 +129,7 @@
   (1110111 (ук "?") (укр "?") (san "?") (en ()) (LISP ()) (sym "?"))
   (1111000 (ук "!") (укр "!") (san "!") (en ()) (LISP ()) (sym "!"))
   (1111001 (ук "'") (укр "'") (san "'") (en ()) (LISP ()) (sym "'"))
-  (1111010 (ук ()) (укр ()) (san ()) (en ()) (LISP ()) (sym ()))
+  (1111010 (ук ".") (укр ".") (san ".") (en ".") (LISP ()) (sym "."))
   (1111011 (ук ",") (укр ",") (san ",") (en ()) (LISP ()) (sym ","))
   (1111100 (ук ":") (укр ":") (san ":") (en ()) (LISP ()) (sym ":"))
   (1111101 (ук ";") (укр ";") (san ";") (en ()) (LISP ()) (sym ";"))
