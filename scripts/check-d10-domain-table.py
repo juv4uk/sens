@@ -41,6 +41,14 @@ NON_PREDICATE_ACTIONS = frozenset({
     "OSCILLATOR-PHASE-STEP", "TRIT-PREFIX-REJECT-STRIP",
     "TRIT-SUFFIX-REJECT-STRIP", "IEEE-FINITE-NEXTUP",
 })
+
+# The R7RS type-conversion arrow belongs only to the human surface; it does
+# not revise the authoritative binary codeword or historical LISP spelling.
+FORBIDDEN_CLIPPED_CODE_ALIASES = frozenset({
+    "дсп-алн", "диф-код", "диф-дек", "диф-фаз",
+    "св-різн", "замчас",
+})
+
 FORBIDDEN_UNTRANSLATED_SAN_SUFFIX = re.compile(
     r"-(?:my-result-fail|ref-cell|pathnamep|readtablep|memoize|keyword)(?:-|$)"
 )
@@ -130,6 +138,11 @@ def check(d10, inventory, lower):
         need(len(row.uk) <= len(row.ukr), "compact Ukrainian longer than expanded")
         need(row.uk.endswith("?") == row.ukr.endswith("?") == row.en.endswith("?"),
              "predicate markers disagree across ук/укр/en " + row.bits)
+        if "->" in name:
+            need("->" in row.uk, "R7RS conversion arrow missing " + row.bits)
+        need(row.uk not in FORBIDDEN_CLIPPED_CODE_ALIASES and
+             row.ukr not in FORBIDDEN_CLIPPED_CODE_ALIASES,
+             "unsupported clipped Ukrainian alias " + row.bits)
         need(row.uk.endswith("!") == row.ukr.endswith("!"),
              "destructive marker drift between ук/укр " + row.bits)
         need(not FORBIDDEN_UNTRANSLATED_SAN_SUFFIX.search(row.san),
@@ -181,6 +194,14 @@ def main():
                 1, replace(xs[1], bits=xs[0].bits))),
             ("wrong resident", lambda xs: xs.__setitem__(
                 0, replace(xs[0], lisp="FORGED"))),
+            ("lost type conversion arrow", lambda xs: xs.__setitem__(
+                next(i for i, row in enumerate(xs) if row.lisp == "LIST->VECTOR"),
+                replace(next(row for row in xs if row.lisp == "LIST->VECTOR"),
+                        uk="список-у-вектор"))),
+            ("fabricated clipped stem", lambda xs: xs.__setitem__(
+                next(i for i, row in enumerate(xs) if row.lisp == "ALLAN-VARIANCE"),
+                replace(next(row for row in xs if row.lisp == "ALLAN-VARIANCE"),
+                        uk="дсп-алн"))),
             ("English question marker", lambda xs: xs.__setitem__(
                 next(i for i, row in enumerate(xs) if row.lisp == "CHARACTERP"),
                 replace(next(row for row in xs if row.lisp == "CHARACTERP"),
