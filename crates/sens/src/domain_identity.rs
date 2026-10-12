@@ -367,6 +367,44 @@ mod tests {
     }
 
     #[test]
+    fn ratified_d8_equal_executes_directly_and_returns_only_d1() {
+        let identity = DomainIdentity::from_source_word(
+            BinarySourceWord::W8(Bit8::new(0b11110111).unwrap()),
+        )
+        .core_operation()
+        .expect("D8 EQUAL has a directly admitted mechanism");
+        let environment = crate::Environment::root();
+        let span = crate::Span::default();
+
+        let same = crate::eval::canon::invoke_domain_identity(
+            identity,
+            &[crate::Value::Nil, crate::Value::Nil],
+            &environment,
+            span,
+        )
+        .expect("D8 EQUAL must execute without converting through a legacy byte");
+        assert_eq!(same.as_predicate_bit(), Some(true));
+
+        let different = crate::eval::canon::invoke_domain_identity(
+            identity,
+            &[crate::Value::Nil, crate::Value::predicate_bit(false)],
+            &environment,
+            span,
+        )
+        .expect("D8 EQUAL must compare distinct domain values");
+        assert_eq!(different.as_predicate_bit(), Some(false));
+
+        let error = crate::eval::canon::invoke_domain_identity(
+            identity,
+            &[],
+            &environment,
+            span,
+        )
+        .expect_err("D8 EQUAL must reject incorrect arity");
+        assert_eq!(error.kind, crate::ErrorKind::Arity);
+    }
+
+    #[test]
     fn equal_payloads_do_not_collapse_across_d1_d9() {
         let ids = [
             DomainIdentity::from_source_word(BinarySourceWord::W1(Bit1::new(1).unwrap())),
