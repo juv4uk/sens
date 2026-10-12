@@ -24,6 +24,25 @@ pub fn parse_mixed_exact_domain(source: &str) -> Result<Vec<Expr>, LanguageError
     parse_mixed_source(source, false)
 }
 
+/// Єдиний допущений перехідний bootstrap для `lib/macro.lisp`.
+///
+/// Його зовнішній історичний W8 EVAL залишається opaque compatibility-call,
+/// але поточні D3-голови всередині аргументів необхідно підняти до домену.
+/// Жодна 8-бітна голова не переосмислюється як D8, а QUOTE лишається даними.
+pub(crate) fn parse_mixed_exact_domain_macro_source(
+    path: &str,
+    source: &str,
+) -> Result<Vec<Expr>, LanguageError> {
+    if path != "lib/macro.lisp" {
+        return Err(LanguageError::new(
+            ErrorKind::Parse,
+            "macro-source exact-domain reader is restricted to lib/macro.lisp",
+            Span::default(),
+        ));
+    }
+    parse_mixed_source(source, true)
+}
+
 /// Parse a trusted `lib/machine/**` Lisp source file whose outer definition
 /// and lambda wrappers still use historical 8-bit syntax, but whose executable
 /// bodies contain current exact-width D3-D6 call heads.
@@ -814,6 +833,29 @@ mod tests {
     fn only(mut expressions: Vec<Expr>) -> Expr {
         assert_eq!(expressions.len(), 1);
         expressions.remove(0)
+    }
+
+    #[test]
+    fn macro_source_mixed_reader_is_path_pinned_and_descends_legacy_eval() {
+        let source = "(01001101 (111 (001 00001000) (111 (001 x) (001 (00000111)))))";
+        assert!(parse_mixed_exact_domain_macro_source("lib/core.lisp", source).is_err());
+        let forms = parse_mixed_exact_domain_macro_source("lib/macro.lisp", source)
+            .expect("тільки довірений макро-bootstrap");
+        let ExprKind::List(outer) = &forms[0].kind else {
+            panic!("очікується старий зовнішній EVAL");
+        };
+        let ExprKind::List(cons) = &outer[1].kind else {
+            panic!("очікується вкладений CONS");
+        };
+        assert!(matches!(&cons[0].kind, ExprKind::DomainIdentity(identity)
+            if identity.width() == 3 && identity.packed_bits() == 0b111));
+        let ExprKind::List(quoted) = &cons[1].kind else {
+            panic!("очікується QUOTE");
+        };
+        assert!(matches!(&quoted[0].kind, ExprKind::DomainIdentity(identity)
+            if identity.width() == 3 && identity.packed_bits() == 0b001));
+        assert!(matches!(&quoted[1].kind, ExprKind::Sid(_)),
+            "цитоване W8 значення не може тихцем перетворитись на D8");
     }
 
     #[test]
