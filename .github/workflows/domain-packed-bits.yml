@@ -5,11 +5,13 @@ on:
     branches: [main]
     paths:
       - "crates/sens/src/packed_bits.rs"
+      - "crates/sens/src/source_packing.rs"
       - "crates/sens/src/domain_ladder.rs"
       - ".github/workflows/domain-packed-bits.yml"
   pull_request:
     paths:
       - "crates/sens/src/packed_bits.rs"
+      - "crates/sens/src/source_packing.rs"
       - "crates/sens/src/domain_ladder.rs"
       - ".github/workflows/domain-packed-bits.yml"
   workflow_dispatch:
@@ -23,3 +25,6 @@ jobs:
       - name: Перевірити точні біти D1–D10 без прихованого вирівнювання
         run: >-
           cargo test --locked -p sens --lib packed_bits::tests:: -- --nocapture
+      - name: Перевірити точнодоменне джерельне пакування та декодування
+        run: >-
+          cargo test --locked -p sens --lib source_packing::tests:: -- --nocapture
