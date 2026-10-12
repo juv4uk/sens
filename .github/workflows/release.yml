@@ -361,6 +361,16 @@ jobs:
             exit 1
           fi
 
+      - name: Remove stale SHA256SUMS from a previous failed attempt
+        shell: bash
+        run: |
+          set -euo pipefail
+          release_id="$(gh api "repos/${GITHUB_REPOSITORY}/releases/tags/${RELEASE_TAG}" --jq '.id')"
+          stale_id="$(gh api --paginate "repos/${GITHUB_REPOSITORY}/releases/${release_id}/assets" --jq '.[] | select(.name == "SHA256SUMS") | .id' | head -n 1 || true)"
+          if [[ -n "$stale_id" ]]; then
+            gh api --method DELETE "repos/${GITHUB_REPOSITORY}/releases/assets/${stale_id}"
+          fi
+
       - name: Download, require the complete platform set, and calculate SHA-256
         shell: bash
         run: |
@@ -388,8 +398,11 @@ jobs:
           assets = sorted((p for p in root.iterdir() if p.is_file()), key=lambda p: p.name)
           present = {p.name for p in assets}
           missing = sorted(required - present)
+          unexpected = sorted(present - required)
           if missing:
               raise SystemExit("RELEASE_BLOCKED: missing required release assets: " + ", ".join(missing))
+          if unexpected:
+              raise SystemExit("RELEASE_BLOCKED: unexpected release assets: " + ", ".join(unexpected))
           if len(present) != len(assets):
               raise SystemExit("RELEASE_BLOCKED: duplicate asset filenames in downloaded release")
           lines = []
@@ -407,10 +420,52 @@ jobs:
           set -euo pipefail
           gh release upload "$RELEASE_TAG" "$ASSETS_DIR/SHA256SUMS" --repo "$GITHUB_REPOSITORY"
 
+      - name: Re-download the staged assets and verify their uploaded bytes
+        shell: bash
+        run: |
+          set -euo pipefail
+          verify_dir="$RUNNER_TEMP/sens-release-verify"
+          mkdir -p "$verify_dir"
+          gh release download "$RELEASE_TAG" --repo "$GITHUB_REPOSITORY" --dir "$verify_dir"
+          python3 - "$verify_dir" "$RELEASE_TAG" <<'PY'
+          import sys
+          from pathlib import Path
+
+          root = Path(sys.argv[1])
+          version = sys.argv[2].removeprefix("l")
+          expected = {
+              f"sens-cli_{version}_linux_amd64",
+              f"sens-cli_{version}_windows_x64.exe",
+              f"sens-cli_{version}_macos_x64",
+              f"sens-cli_{version}_macos_arm64",
+              f"sens-cli_{version}_windows_x64.msi",
+              "sens-cli-web.html",
+              "islands-manifest-v1.json",
+              "install.sh",
+              "SHA256SUMS",
+          }
+          actual = {p.name for p in root.iterdir() if p.is_file()}
+          if actual != expected:
+              raise SystemExit(
+                  "RELEASE_BLOCKED: uploaded asset inventory mismatch; "
+                  f"missing={sorted(expected - actual)}, extra={sorted(actual - expected)}"
+              )
+          PY
+          (
+            cd "$verify_dir"
+            sha256sum --check SHA256SUMS
+          )
+          echo "UPLOADED_ASSET_BYTES_SHA256=PASS"
+
       - name: Publish only after every required job and asset verification succeeded
         shell: bash
         run: |
           set -euo pipefail
+          main_sha="$(gh api "repos/${GITHUB_REPOSITORY}/git/ref/heads/main" --jq '.object.sha')"
+          if [[ "$main_sha" != "$GITHUB_SHA" ]]; then
+            echo "RELEASE_BLOCKED: main advanced after verification; tag SHA $GITHUB_SHA is no longer main SHA $main_sha" >&2
+            exit 1
+          fi
           draft="$(gh api "repos/${GITHUB_REPOSITORY}/releases/tags/${RELEASE_TAG}" --jq '.draft')"
           if [[ "$draft" != "true" ]]; then
             echo "RELEASE_BLOCKED: refusing to publish a release that is already public or is not a draft" >&2
