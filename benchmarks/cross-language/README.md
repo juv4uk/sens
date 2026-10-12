@@ -23,11 +23,31 @@ marked otherwise.
 (#1548) використовують той самий корпус та machine-readable формат.
 Standard binary-trees (#1549) лишається окремим workload slice.
 
+## Current Python-comparison status — Contract 11.9
+
+The existing `run.py` is a **historical harness**, not a current SENS benchmark:
+its SENS lane encodes and decodes the old Function8 FASL artifact. Do not use
+its output as current Contract 11.9 evidence or as a current Python-vs-SENS
+ratio. #1546 tracks the Python replay; #1668 owns the correctness gate.
+
+Current semantic authority is D1–D10 residency, with execution authority
+proved separately per mechanism. D10 F1/F2/F3 evidence and physical T5 execution
+remain pending. A workload may be timed only after oracle correctness and exact
+canonical-domain parity pass; otherwise report `BLOCKED-MECHANISM` (or the
+specific parity blocker). No Sens8/Sid8/Function8 fallback is permitted.
+
+The Python comparison must preserve the five workloads
+`fib, loop, ackermann, closures, evenodd` and split phases into process startup,
+CPython `.py` read+compile, reproducibly generated `.pyc` load, canonical SENS
+decode, setup/ready, repeated execution and one-shot. Pin exact SENS main SHA,
+CPython version, environment and raw samples before publishing results.
+
 ## Historical D1-D4 boundary
 
 The historical shared harness still uses the old Function8 FASL SENS lane.
 It is preserved for provenance but must not be relabeled as current D1-D4
-whole-program evidence. #1668 owns the replay onto ratified exact-width D1-D4.
+whole-program evidence. #1668 owns the replay onto the currently ratified
+canonical exact-width domains.
 
 For load-format evidence, `load_formats.py` adds a fairer CPython cached lane:
 
@@ -110,13 +130,16 @@ Steady execution навмисно не рахується як `full - load`: н
 ## Перший steady-state witness
 
 Run 36318596454 (head 320886c5, self-hosted wsm-i5-6400) уперше дав GREEN
-matched measurement. На п'яти workload геометричне CPython/SENS за
-Cachegrind I refs = 0.021, тобто поточний SENS evaluator виконує приблизно
-47.6× більше інструкцій у steady execution. Водночас SENS startup був
-приблизно 34.5× дешевшим.
+matched measurement **для тодішнього історичного SENS evaluator**. На п'яти
+workload геометричне CPython/SENS за Cachegrind I refs = 0.021: тодішній SENS
+evaluator використовував приблизно 47.6× більше інструкцій у steady execution.
+Водночас SENS startup був приблизно 34.5× дешевшим.
 
-Цей witness збережений як історична точка до environment optimization #1558.
-Він не повинен підміняти повторний вимір після злиття #1558.
+Це лише історичний результат старого Function8/FASL покоління. Він не є
+показником Contract 11.9, не є wall-clock ratio і не повинен підміняти свіжий
+canonical replay після #1668. Поточний run.py усе ще використовує FASL, тож
+до міграції та GREEN parity жоден новий результат цього harness не можна
+публікувати як актуальне порівняння SENS із Python.
 
 
 
