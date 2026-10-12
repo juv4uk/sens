@@ -1,5 +1,16 @@
 # SID8 → D1–D9: in-place Lisp source migration (2026-10-11)
 
+## source-lane-2026-10-12-four-safe-files: 421 original Lisp call-head replacements
+
+- Four live sources were transformed **in place**, using the owner-audited historical-to-domain mapping and preserving source bytes outside admitted executable list heads. No new `.sens`, files renamed, or Git branches.
+- `lib/surface/uk.lisp`: **141** historical heads (140 DEFINE, 1 QUOTE), `lib/surface/sa.lisp`: **83** historical DEFINE heads.
+- `lib/surface/semantic-registry-api.lisp`: **93** admitted historical heads; `knowledge/guard-fact-policy.lisp`: **104** admitted historical heads.
+- Original four-source bulk commit [`3fa69f3`](https://github.com/juv4uk/sens/commit/3fa69f3fa00330fc9bf41404803b869a56db72a4) originally included **430** substitutions. Its **nine** D6:001000 LET rewrites were immediately identified as invalid against previously demonstrated runtime law; those 9 source heads were restored in [`5e9e617`](https://github.com/juv4uk/sens/commit/5e9e6175b2e9e32c9e85fcb536567b49d9184f35).
+- The same rollback restored **44** additional unsupported D6 LET call heads in `lib/forward.lisp` (19) and `lib/knowledge.lisp` (25). Thus **53 attempted LET changes are excluded** from the migration tally. Those two original files were left unchanged overall by this source lane.
+- Source-only evidence: `tests/test_sid8_six_file_source_proof.py` verifies exact old-blob → current resulting-blob replay for the **421 safe replacements**, and guards all **53** retained historical LET binders; `.github/workflows/audit-sid8-six-lisp-source.yml` executes the witness. This is a **syntactic source-delta proof**, not independent runtime parity.
+- The original whole-project Hosted CI was already red at seven D3/world/forward-knowledge/filesystem/time gates before this cohort. Do not call overall CI green merely because the source witness passes. Continue current exact-D6 LET runtime/callability work via #3394 before any retry.
+- This cohort adds **421 admitted source-head substitutions across four new files** to the previously recorded original-source migration accounting. Do not count the 53 reverted heads, historical snapshots, or independent workers' separate AST-CONDITION repairs as extra opcode replacements.
+
 ## source-lane-2026-10-12-bulk-44: дванадцять наявних .lisp, без створення .sens
 
 - **Точна заміна двох історичних імен функціональних форм** у цитованому AST-еталоні `scripts/check-core1-compiler-sid-resolver.lisp`: `00001001 DEFINE → D4:0011`, `00001000 LAMBDA → D4:0010`. Оригінальний `lib/core1-compiler-sid-resolver.lisp` вже мав нові біти; історичні SID8-значення `(ATOM 00000010)`, `(EQ 00000011)`, `(NOT 00100001)` залишені як **дані**, без перекодування.
