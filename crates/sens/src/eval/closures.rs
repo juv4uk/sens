@@ -304,12 +304,15 @@ fn sid_head(sid: Sens8, environment: &Environment) -> Head {
         Some(necessary_forms::NecessaryFormIdentity::Define) => return Head::Define,
         _ => {}
     }
-    if canon::route_kind_for_sid(sid).is_some() {
-        if sid == crate::sens!(00000001) {
-            return Head::Quote;
-        }
-        if sid == crate::sens!(00000111) {
-            return Head::Cond;
+    // Compatibility source heads inherit only their ratified D3 law.
+    // No old eight-bit payload is itself a QUOTE/COND semantic authority.
+    if let Some(CoreDomainIdentity::D3(word)) =
+        semantic_registry::compatibility_d3_route_from_ratified_domains(sid)
+    {
+        match word.word().packed_bits() {
+            0b001 => return Head::Quote,
+            0b110 => return Head::Cond,
+            _ => {}
         }
     }
     if !canon::has_primitive(sid) && matches!(environment.code_slot(sid), Some(Value::Macro(_))) {
@@ -887,6 +890,20 @@ mod exact_d4_eval_head_migration_tests {
         assert_eq!(historical.packed_byte(), 0b01001101);
         assert!(matches!(sid_head(historical, &env), Head::Opaque));
         assert!(!matches!(sid_head(crate::sens!(10101000), &env), Head::Opaque));
+    }
+
+    #[test]
+    fn historical_quote_and_cond_require_admitted_d3_laws() {
+        let env = Environment::root();
+        let historical_quote = semantic_registry::admitted_semantic_id_for_surface("quote")
+            .expect("історична QUOTE мітка");
+        let historical_cond = semantic_registry::admitted_semantic_id_for_surface("cond")
+            .expect("історична COND мітка");
+        assert!(matches!(sid_head(historical_quote, &env), Head::Quote));
+        assert!(matches!(sid_head(historical_cond, &env), Head::Cond));
+        // W8:10101000 was INVOKE, current D8:10101000 is ROUND.
+        // Neither spelling is automatically an admitted D3 special form.
+        assert!(matches!(sid_head(crate::sens!(10101000), &env), Head::Call));
     }
 }
 
