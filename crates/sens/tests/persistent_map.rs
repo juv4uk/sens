@@ -109,15 +109,14 @@ fn map_to_list_returns_keys_in_sorted_order() {
 /// keys inserted in already-sorted order is the textbook worst case for
 /// an unbalanced tree (degenerates into a linked list, height 7). AVL
 /// rotations keep it at the theoretical minimum for 7 nodes, height 3
-/// (`ceil(log2(8))`) — verified live before this test was written, not
-/// assumed from the rotation code looking plausible.
+/// (`ceil(log2(8))`). `node-height` encodes that as three structural
+/// `height` markers, not as a naked numeric scalar under the D24+ law.
 /// Sama sut vyboru zbalansovanoho dereva zamist zvychainoho BST: sim
 /// kliuchiv, vstavlenykh uzhe u vidsortovanomu poriadku — pidruchnykovyi
 /// naihirshyi vypadok dlia nezbalansovanoho dereva (vyrodzhuietsia v
 /// zviazanyi spysok, vysota 7). AVL-rotatsii trymaiut teoretychnyi minimum
-/// dlia 7 vuzliv, vysotu 3 (`ceil(log2(8))`) — perevireno zhyvo pered
-/// napysanniam tsoho testu, ne prypushcheno z toho, shcho kod rotatsii vyhliadaie
-/// pravdopodibno.
+/// dlia 7 vuzliv, vysotu 3 (`ceil(log2(8))`), zakodovanu tryma
+/// strukturalnymy markeramy `height`, ne holym chyslom.
 #[test]
 fn sorted_insertion_order_stays_balanced_instead_of_degenerating_into_a_list() {
     let source = r#"
