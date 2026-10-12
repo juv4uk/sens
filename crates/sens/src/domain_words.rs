@@ -206,9 +206,103 @@ impl CoreD9 {
     }
 }
 
+/// Exact ten-bit D10 coordinate carrier, without executable admission.
+///
+/// The full D10 table is owner-ratified (1024/1024), but none of that
+/// establishes a runtime call mechanism. The two host bytes occupied by u16
+/// are NOT the wire size: BitPacker writes exactly ten consecutive bits.
+#[repr(transparent)]
+#[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
+pub struct DomainD10(u16);
+
+impl DomainD10 {
+    /// Accept only the 1024 ten-bit payloads. Reject narrowing/truncation.
+    pub const fn new(bits: u16) -> Option<Self> {
+        if bits >= (1u16 << 10) {
+            None
+        } else {
+            Some(Self(bits))
+        }
+    }
+
+    /// A D9 or D8 coordinate cannot become D10 by matching its payload.
+    pub const fn from_coordinate(coordinate: crate::domain_ladder::DomainCoordinate) -> Option<Self> {
+        if coordinate.width() == 10 {
+            Self::new(coordinate.bits())
+        } else {
+            None
+        }
+    }
+
+    pub const fn packed_bits(self) -> u16 {
+        self.0
+    }
+
+    /// Construct an exact-width, meaning-free coordinate for dense transport.
+    pub const fn coordinate(self) -> crate::domain_ladder::DomainCoordinate {
+        match crate::domain_ladder::DomainCoordinate::new(10, self.0) {
+            Some(coordinate) => coordinate,
+            None => panic!("validated D10 carrier invariant"),
+        }
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn d10_all_1024_coordinates_pack_in_ten_bits_without_byte_alignment() {
+        use crate::{BitPacker, PackedBitstream};
+        use crate::domain_ladder::DomainCoordinate;
+
+        // 3 + 10 + 8 + 4 = 25 meaningful bits, not four padded cells.
+        let d3 = DomainCoordinate::new(3, 0b001).unwrap();
+        let d8 = DomainCoordinate::new(8, 0b10101000).unwrap();
+        let d4 = DomainCoordinate::new(4, 0b0010).unwrap();
+
+        for bits in 0u16..1024 {
+            let d10 = DomainD10::new(bits).expect("all ten-bit payloads");
+            let exact = d10.coordinate();
+            assert_eq!(exact.width(), 10);
+            assert_eq!(exact.bits(), bits);
+            assert_eq!(DomainD10::from_coordinate(exact), Some(d10));
+            assert_eq!(DomainD10::from_coordinate(
+                DomainCoordinate::new(9, bits & 0b1_1111_1111).unwrap()
+            ), None, "same numeric bits in D9 must not become D10");
+
+            let mut packer = BitPacker::new();
+            assert_eq!(packer.push_coordinate(d3), 0);
+            assert_eq!(packer.push_coordinate(exact), 3);
+            assert_eq!(packer.push_coordinate(d8), 13);
+            assert_eq!(packer.push_coordinate(d4), 21);
+            let packed = packer.finish();
+            assert_eq!(packed.bit_len(), 25);
+            assert_eq!(packed.byte_len(), 4);
+            assert_eq!(packed.valid_bits_in_last_byte(), 1);
+
+            for (offset, word) in [(0, d3), (3, exact), (13, d8), (21, d4)] {
+                assert_eq!(packed.read_coordinate(offset, word.width()), Some(word));
+            }
+            assert_eq!(DomainD10::from_coordinate(
+                packed.read_coordinate(3, 10).unwrap()
+            ), Some(d10));
+            assert_eq!(packed.bytes()[3] & 0b0111_1111, 0,
+                "seven non-payload bits at end must be zero");
+
+            // A nonzero physical padding bit is not an alternate valid word.
+            let mut corrupted = packed.bytes().to_vec();
+            corrupted[3] |= 0b0000_0001;
+            assert!(PackedBitstream::from_parts(corrupted, 25).is_none());
+            assert!(packed.read_coordinate(16, 10).is_none());
+            assert!(packed.read_coordinate(3, 11).is_none());
+        }
+
+        assert_eq!(DomainD10::new(1024), None);
+        assert_eq!(DomainD10::new(u16::MAX), None);
+        assert_eq!(std::mem::size_of::<DomainD10>(), 2,
+            "two host bytes do not imply 16 meaningful wire bits");
+    }
 
     #[test]
     fn domain_carriers_round_trip_all_logical_words() {
@@ -271,6 +365,7 @@ mod tests {
         assert_eq!(size_of::<SoundD7>(), 1);
         assert_eq!(size_of::<CoreD8>(), 1);
         assert_eq!(size_of::<CoreD9>(), 2);
+        assert_eq!(size_of::<DomainD10>(), 2);
     }
 
     
