@@ -106,17 +106,11 @@ pub fn unpack_domain_coordinates(
 ///
 /// Returns the starting bit offset of the word in the packed payload.
 pub fn append_binary_source_word(packer: &mut BitPacker, word: BinarySourceWord) -> usize {
-    match word {
-        BinarySourceWord::W1(word) => packer.push(word),
-        BinarySourceWord::W2(word) => packer.push(word),
-        BinarySourceWord::W3(word) => packer.push(word),
-        BinarySourceWord::W4(word) => packer.push(word),
-        BinarySourceWord::W5(word) => packer.push(word),
-        BinarySourceWord::W6(word) => packer.push(word),
-        BinarySourceWord::W7(word) => packer.push(word),
-        BinarySourceWord::W8(word) => packer.push(word),
-        BinarySourceWord::W9(word) => packer.push_w9(word),
-    }
+    // Width belongs to the already-validated source word, not the host u16.
+    // Use the same bit-exact packer as D1–D10 without assigning any callability.
+    let coordinate = DomainCoordinate::new(word.width() as u8, word.packed_bits())
+        .expect("a typed W1–W9 source word must fit its exact width");
+    packer.push_coordinate(coordinate)
 }
 
 /// Count the exact semantic payload bits carried by canonical source tokens.
@@ -226,6 +220,75 @@ pub fn unpack_binary_source_words(
 mod tests {
     use super::*;
     use crate::parse_binary_source_words;
+
+    /// Вичерпний бітовий свідок: 2+4+8+...+512 = 1022 слова.
+    ///
+    /// Порівнює мігрований W1–W9 source шлях із єдиним D1–D10 packer,
+    /// перевіряючи також нульові старші біти, offsets і фізичний roundtrip.
+    #[test]
+    fn all_1022_exact_d1_to_d9_words_use_one_lossless_dense_packer() {
+        let mut source = String::new();
+        let mut coordinates = Vec::new();
+        let mut expected_bits = 0usize;
+        for width in 1u8..=9 {
+            for bits in 0..(1u16 << width) {
+                source.push_str(&format!("{bits:0width$b} ", width = usize::from(width)));
+                coordinates.push(DomainCoordinate::new(width, bits).unwrap());
+                expected_bits += usize::from(width);
+            }
+        }
+        assert_eq!(coordinates.len(), 1022);
+
+        let tokens = parse_binary_source_words(&source).unwrap();
+        assert_eq!(tokens.len(), coordinates.len());
+        let mut packer = BitPacker::with_capacity_bits(expected_bits);
+        let mut bit_offset = 0usize;
+        for (token, &coordinate) in tokens.iter().zip(&coordinates) {
+            assert_eq!(token.word.width(), usize::from(coordinate.width()));
+            assert_eq!(token.word.packed_bits(), coordinate.bits());
+            assert_eq!(append_binary_source_word(&mut packer, token.word), bit_offset);
+            bit_offset += usize::from(coordinate.width());
+        }
+
+        let source_packed = packer.finish();
+        let domain_packed = pack_domain_coordinates(&coordinates);
+        assert_eq!(source_packed.bit_len(), expected_bits);
+        assert_eq!(source_packed, domain_packed);
+        assert_eq!(source_packed.byte_len(), expected_bits.div_ceil(8));
+
+        let widths: Vec<_> = tokens.iter().map(|token| token.word.width()).collect();
+        let domain_widths: Vec<_> = coordinates.iter().map(|coordinate| coordinate.width()).collect();
+        assert_eq!(
+            unpack_binary_source_words(&source_packed, &widths),
+            Some(tokens.iter().map(|token| token.word).collect()),
+        );
+        assert_eq!(
+            unpack_domain_coordinates(&source_packed, &domain_widths),
+            Some(coordinates),
+        );
+    }
+
+    #[test]
+    fn d9_high_bit_and_leading_zeros_never_alias_eight_bit_source() {
+        let words = parse_binary_source_words(
+            "000000001 100000001 111111111 00000001",
+        ).unwrap();
+        let packed = pack_binary_source_tokens(&words);
+        assert_eq!(packed.bit_len(), 35);
+        assert_eq!(
+            unpack_binary_source_words(&packed, &[9, 9, 9, 8]),
+            Some(words.iter().map(|token| token.word).collect()),
+        );
+        // D9 high bit is an identity bit, not disposable physical padding.
+        assert_ne!(
+            DomainCoordinate::new(9, 0b100000001),
+            DomainCoordinate::new(8, 0b00000001),
+        );
+        assert_eq!(DomainCoordinate::new(9, 1).unwrap().width(), 9);
+        assert_eq!(DomainCoordinate::new(9, 0b1_0000_0000).unwrap().bits(), 256);
+        assert!(DomainCoordinate::new(9, 0b10_0000_0000).is_none());
+        assert!(unpack_domain_coordinates(&packed, &[9, 9, 8, 8]).is_none());
+    }
 
     #[test]
     fn domain_ladder_is_packed_at_exact_width_not_host_register_width() {
