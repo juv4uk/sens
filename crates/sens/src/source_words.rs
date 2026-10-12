@@ -83,7 +83,7 @@ impl BinarySourceWord {
 
     /// Lift an exact three-bit source word into the typed D3 carrier.
     ///
-    /// Primitive roles remain language-owned; no legacy Function8 mapping is
+    /// Primitive roles remain language-owned; no historical flat-byte mapping is
     /// performed at this boundary.
     pub const fn d3(self) -> Option<crate::Bija3> {
         match self {
@@ -130,7 +130,7 @@ impl BinarySourceWord {
     }
 
     /// Lift an exact eight-bit source word into the owner-ratified D8 carrier (#3960).
-    /// This never converts through historical Sens8 compatibility identity;
+    /// This never converts through historical flat-byte compatibility identity;
     /// runtime callability remains a separate mechanism decision.
     pub const fn d8(self) -> Option<crate::CoreD8> {
         match self {
