@@ -5,6 +5,7 @@ on:
     branches: [main]
     paths:
       - "crates/sens/src/eval/special_forms/core.rs"
+      - "tests/test_d4_define_source_cutover.py"
       - ".github/workflows/define-exact-d4-arity.yml"
   workflow_dispatch:
 
@@ -15,6 +16,10 @@ jobs:
     timeout-minutes: 12
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - uses: dtolnay/rust-toolchain@stable
+      - name: Довести точний source-diff без побічних змін
+        run: python3 -m unittest discover -s tests -p 'test_d4_define_source_cutover.py' -v
       - name: Перевірити позитивні й негативні арності та доменні ширини
         run: cargo test --locked -p sens --lib exact_d4_define_arity_tests -- --nocapture
