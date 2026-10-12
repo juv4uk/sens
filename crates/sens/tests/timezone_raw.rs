@@ -48,22 +48,6 @@ fn exact_d3_time_source_repairs_preexisting_w8_cons_arity_error() {
 fn raw_timezone_declarations_are_interpreted_by_lisp() {
     let mut session = time_session();
 
-    // Keep this stage inventory while the pre-existing W8 arity defect is
-    // isolated. Each probe is diagnostic only; none converts failure to PASS.
-    for (name, source) in [
-        ("string-empty-predicate", "(110100110 \"Europe/Kyiv\")"),
-        ("string-length", "(110100010 \"Europe/Kyiv\")"),
-        ("numeric-greater-zero", "(11011 (110100010 \"Europe/Kyiv\") 0)"),
-        ("short-circuit-and", "(and (110100110 \"Europe/Kyiv\") (11011 (110100010 \"Europe/Kyiv\") 0))"),
-        ("exact-cons-result", "(111 (001 detected) (111 \"Europe/Kyiv\" (111 (001 TZ) (001 ()))))"),
-        ("declaration-function", "(timezone-declarations->observation \"Europe/Kyiv\" \"Etc/UTC\")"),
-    ] {
-        let observed = eval_program(source, &mut session)
-            .map(|value| value.value.to_string())
-            .unwrap_or_else(|error| format!("ERROR: {error}"));
-        eprintln!("TIMEZONE-STAGE {name}: {observed}");
-    }
-
     assert_eq!(
         eval_program(
             "(timezone-raw->observation (quote (timezone-declarations \"Europe/Kyiv\" \"Etc/UTC\")))",
