@@ -91,7 +91,9 @@ def project(bits: str, *, role: str, namespace: str = "ук") -> dict:
     # Namespaces are presentation only, never the coordinate authority.
     field = {"ук": "uk", "укр": "ukr"}.get(namespace, namespace)
     surface = getattr(row, field)
-    if surface is None:
+    # A missing symbol is a valid explicit empty projection; descriptive
+    # namespaces still fail closed if their human label itself is absent.
+    if surface is None and namespace != "sym":
         raise D7ProjectionError(f"D7:{bits} has no {namespace} projection")
     symbols = row.surface_symbols
     if symbols is None:
