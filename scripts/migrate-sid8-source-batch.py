@@ -186,6 +186,50 @@ def executable_call_heads(source, guard):
     return result
 
 
+# Existing historically pinned active programs contain W8 call heads whose
+# bits are ALSO modern D8 residents with different meanings. A ratified
+# successor is not an executable mechanism. Never reinterpret these as D8.
+PINNED_W8_COLLISIONS = {
+    "knowledge/guard-fact-policy.lisp": {
+        "10011100": ("LET", "D6", "001000", "CADDDAAR"),
+    },
+    "scripts/semantic-authority-guard-enforce.lisp": {
+        "01001011": ("READ-ALL", "D9", "110101001", "ABS∘RECIP"),
+        "10100110": ("READ-FILE", "D9", "110110111", "1/"),
+    },
+}
+
+
+def pinned_cross_domain_blockers(root, path, active_heads, mapping):
+    """Fail closed on independently identified historical call-head collisions.
+
+    Ratified identity alone never proves a D6/D9 executable route. This
+    check is source-specific; unknown eras are NEVER globally treated as W8.
+    """
+    expected = PINNED_W8_COLLISIONS.get(path)
+    if not expected:
+        return []
+    data = json.loads((root / "knowledge/d1-d9-foundation.json").read_text(encoding="utf-8"))
+    d8 = data["domains"]["D8"]["residents"]
+    d6 = json.loads((root / "knowledge/d6-mechanism-ledger.json").read_text(encoding="utf-8"))
+    d6_status = {row["coordinate"]: row["mechanism_status"] for row in d6["rows"]}
+    reasons = []
+    for old, (name, domain, bits, current_d8) in expected.items():
+        if old not in active_heads:
+            continue
+        if (mapping.get(old) != bits
+                or data["domains"][domain]["residents"].get(bits) != name
+                or d8.get(old) != current_d8):
+            raise ValueError(f"pinned W8 source successor drift: {path}: {old}")
+        mechanism = (d6_status.get(bits, "UNVERIFIED") if domain == "D6"
+                     else "NOT_ATTESTED_BY_THIS_SOURCE_CENSUS")
+        reasons.append(
+            f"W8_CROSS_DOMAIN_EXECUTION_BLOCK: {old} historical {name} -> "
+            f"{domain}:{bits} ({mechanism}); current D8:{old} is {current_d8}"
+        )
+    return reasons
+
+
 def guard_module(root):
     name = "sid8_bulk_guard"
     spec = importlib.util.spec_from_file_location(name, root / "scripts/check_d3_legacy_logic.py")
@@ -261,6 +305,7 @@ def run(root, write=False, selected=None):
                            "reasons": ["generated carrier needs generator migration"]})
             continue
         updated, n, problems = rewrite(original, mapping, blocked)
+        problems.extend(pinned_cross_domain_blockers(root, path, active_heads, mapping))
         if n or has_pinned_legacy_d3:
             try:
                 problems.extend(x.rule + " at line " + str(x.line)
