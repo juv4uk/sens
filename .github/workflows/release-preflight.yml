@@ -80,6 +80,9 @@ jobs:
         with:
           shared-key: release-preflight
 
+      - name: Release preflight trigger scope negative controls
+        run: python3 -m unittest discover -s packaging/tests -p test_release_preflight_scope.py -v
+
       - name: Release tag safety under optimized Python
         run: python3 -m unittest discover -s packaging/tests -p test_release_tag_guard.py -v
 
