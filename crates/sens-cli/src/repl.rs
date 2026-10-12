@@ -170,6 +170,9 @@ impl ReplState {
 fn render_repl_reply(value: &Value, language: PresentationLanguage) -> String {
     match value {
         Value::Symbol(_) => render_value_for_presentation(value, language).to_uppercase(),
+        Value::DomainIdentity(sens::DomainIdentity::D1(_)) => {
+            render_value_for_presentation(value, language).to_uppercase()
+        }
         Value::Pair(_, _) => render_repl_pair(value, language),
         Value::Vector(vector) => {
             let items = vector
@@ -323,6 +326,7 @@ pub(crate) fn run_repl(session: Session, initial_surface: ReplSurface) {
         state.surface.code()
     );
     println!("Символи можна вводити малими літерами; REPL друкує їх ВЕЛИКИМИ.");
+    println!("D1 лишається 1/0 у Canon; людські проекції друкуються ВЕЛИКИМИ.");
     println!("Ctrl-C або Ctrl-D — вихід.");
 
     let mut rl = match DefaultEditor::new() {
@@ -446,6 +450,25 @@ mod tests {
             panic!("list");
         };
         assert_eq!(head.as_ref(), &Value::Symbol("car".into()));
+    }
+
+    #[test]
+    fn classic_repl_reply_uppercases_d1_human_projection_but_not_machine_bits() {
+        let no = Value::DomainIdentity(sens::DomainIdentity::D1(
+            sens::PredicateBit::from_word(sens::Bit1::new(0).unwrap()),
+        ));
+        let yes = Value::DomainIdentity(sens::DomainIdentity::D1(
+            sens::PredicateBit::from_word(sens::Bit1::new(1).unwrap()),
+        ));
+
+        assert_eq!(render_repl_reply(&no, PresentationLanguage::Canonical), "0");
+        assert_eq!(render_repl_reply(&yes, PresentationLanguage::Canonical), "1");
+        assert_eq!(render_repl_reply(&no, PresentationLanguage::English), "NO");
+        assert_eq!(render_repl_reply(&yes, PresentationLanguage::English), "YES");
+        assert_eq!(render_repl_reply(&no, PresentationLanguage::Ukrainian), "НІ");
+        assert_eq!(render_repl_reply(&yes, PresentationLanguage::Ukrainian), "ТАК");
+        assert_eq!(render_repl_reply(&no, PresentationLanguage::Sanskrit), "NA");
+        assert_eq!(render_repl_reply(&yes, PresentationLanguage::Sanskrit), "ĀM");
     }
 
     #[test]
