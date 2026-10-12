@@ -106,12 +106,12 @@ fn host_capability_names() -> HashSet<String> {
 
 /// У точнодоменному режимі старий восьмибітний реєстр не надає семантики.
 /// Колізія старого W8 та чинного D8 завжди блокує неявне перетворення.
-fn resolve_head<'a>(
-    head: &'a Expr,
+fn resolve_head(
+    head: &Expr,
     bound: &HashSet<String>,
     host_capabilities: &HashSet<String>,
     analysis: &mut Analysis,
-) -> Option<(Option<&'a str>, HeadRoute)> {
+) -> Option<(Option<String>, HeadRoute)> {
     match &head.kind {
         ExprKind::Sid(_) if analysis.exact_domain => {
             analysis.blocked_legacy_heads += 1;
@@ -125,7 +125,7 @@ fn resolve_head<'a>(
             let human_surface = original.filter(|spelling| {
                 !spelling.is_empty() && !spelling.bytes().all(|b| b == b'0' || b == b'1')
             });
-            identity.core_operation().map(|id| (human_surface, HeadRoute::Exact(id)))
+            identity.core_operation().map(|id| (human_surface.map(str::to_owned), HeadRoute::Exact(id)))
         }
         ExprKind::Symbol(name) if !bound.contains(name.as_ref()) => {
             let current = semantic_registry_export::admitted_core_domain_for_surface(name);
@@ -141,7 +141,7 @@ fn resolve_head<'a>(
                     // Без доведеного source-era W8 неможливо відрізнити
                     // вихідний D8 від однойменної історичної восьмибітної голови.
                     if identity.width() < 8 {
-                        return Some((Some(name.as_ref()), HeadRoute::Exact(identity)));
+                        return Some((Some(name.to_string()), HeadRoute::Exact(identity)));
                     }
                 }
                 // У режимі повної двійкової міграції невідоме
@@ -151,7 +151,7 @@ fn resolve_head<'a>(
                 analysis.blocked_unmapped_surfaces.push(name.to_string());
                 None
             } else {
-                legacy.map(|sens| (Some(name.as_ref()), HeadRoute::Legacy(sens)))
+                legacy.map(|sens| (Some(name.to_string()), HeadRoute::Legacy(sens)))
             }
         }
         _ => None,
@@ -307,7 +307,7 @@ fn walk_expr(
             // Точний домен береться лише з ратифікованої проєкції. Сумісний
             // режим не повинен зворотно псувати вже доменні українські голови.
             if analysis.exact_domain
-                || semantic_registry_export::exact_uk_callable_for_source_head(spelling).is_none()
+                || semantic_registry_export::exact_uk_callable_for_source_head(&spelling).is_none()
             {
                 push_head_edit(head, route, analysis);
             }
