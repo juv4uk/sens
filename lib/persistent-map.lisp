@@ -65,8 +65,7 @@
 
 ; AVL height is structural data, not an unqualified arithmetic number.
 ; Empty height is (), and each successor is one quoted marker consed onto it.
-; Це прибирає приховану математичну залежність: висоти порівнюються
-; рекурсією над D2-структурою, а не через голі 0/1/-1 чи D24+ coercion.
+; Висоти порівнюються структурною рекурсією: D24+ arithmetic тут не потрібна.
 (0011 height-of
   (0010 (n)
     (110
@@ -77,8 +76,8 @@
   (0010 (height)
     (111 (001 height) height)))
 
-; Strict structural ordering for unary heights. Return the canonical D1
-; predicate bit through D3 EQ; no arithmetic operator sees these values.
+; Strict ordering over unary height lists. D3 EQ only creates the canonical
+; D1 predicate bit; no mathematical operator receives a structural height.
 (0011 map-height-greater?
   (0010 (a b)
     (110
@@ -86,48 +85,35 @@
       ((0101 b) (101 1 1))
       ((010 ()) (map-height-greater? (011 a) (011 b))))))
 
-(0011 map-height-max
+(0011 max2
   (0010 (a b)
     (110
       ((map-height-greater? a b) a)
       ((010 ()) b))))
 
-; A node stores successor(max(left-height, right-height)) as a structural
-; unary list, preserving AVL height while keeping math outside the tree.
+; Height is successor(max(left,right)), encoded as a structural unary list.
 (0011 make-balanced-node
   (0010 (key value left right)
     (1110 key value
           (map-height-successor
-            (map-height-max (height-of left) (height-of right)))
+            (max2 (height-of left) (height-of right)))
           left right)))
 
-(0011 map-left-heavy?
+; A signed numeric balance factor is unnecessary: classify the shape instead.
+; balance-state returns one of left-heavy, right-heavy, balanced as Lisp data.
+(0011 balance-state
   (0010 (n)
-    (map-height-greater?
-      (height-of (node-left n))
-      (map-height-successor (height-of (node-right n))))))
-
-(0011 map-right-heavy?
-  (0010 (n)
-    (map-height-greater?
-      (height-of (node-right n))
-      (map-height-successor (height-of (node-left n))))))
-
-; For a left-heavy node, rotate twice only when the left child's right
-; subtree is taller than its left subtree.
-(0011 map-left-child-right-heavy?
-  (0010 (n)
-    (map-height-greater?
-      (height-of (node-right (node-left n)))
-      (height-of (node-left (node-left n))))))
-
-; Mirror case: for a right-heavy node, rotate twice only when the right
-; child's left subtree is taller than its right subtree.
-(0011 map-right-child-left-heavy?
-  (0010 (n)
-    (map-height-greater?
-      (height-of (node-left (node-right n)))
-      (height-of (node-right (node-right n))))))
+    (110
+      ((0101 n) (001 balanced))
+      ((map-height-greater?
+         (height-of (node-left n))
+         (map-height-successor (height-of (node-right n))))
+       (001 left-heavy))
+      ((map-height-greater?
+         (height-of (node-right n))
+         (map-height-successor (height-of (node-left n))))
+       (001 right-heavy))
+      ((010 ()) (001 balanced)))))
 
 (0011 rotate-left
   (0010 (n)
@@ -143,24 +129,27 @@
         (node-left l)
         (make-balanced-node (node-key n) (node-value n) (node-right l) (node-right n))))))
 
-; Standard AVL rebalance using only exact D1 predicates and structural
-; heights. The threshold is successor(other-height), never signed math.
+; Standard AVL rebalance uses only structural height comparisons and D1 bits.
 (0011 balance
   (0010 (n)
     (110
       ((010 n) n)
-      ((map-left-heavy? n)
+      ((101 (balance-state n) (001 left-heavy))
        (110
-         ((map-left-child-right-heavy? n)
+         ((map-height-greater?
+            (height-of (node-right (node-left n)))
+            (height-of (node-left (node-left n))))
           (rotate-right
             (make-balanced-node
               (node-key n) (node-value n)
               (rotate-left (node-left n))
               (node-right n))))
          ((010 ()) (rotate-right n))))
-      ((map-right-heavy? n)
+      ((101 (balance-state n) (001 right-heavy))
        (110
-         ((map-right-child-left-heavy? n)
+         ((map-height-greater?
+            (height-of (node-left (node-right n)))
+            (height-of (node-right (node-right n))))
           (rotate-left
             (make-balanced-node
               (node-key n) (node-value n)
