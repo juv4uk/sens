@@ -21,18 +21,18 @@
 (0011 surface-included?
   (0010 (surface)
     (110
-      ((010 surface) () ())
-      ((010 surface) (1) ())
+      ((010 surface) ())
+      
       ((11110111 (surface-word surface) (001 ())) ())
       ((11110111 (surface-word surface) "'") ())
-      (t t))))
+      ((010 (001 ())) t))))
 
 (0011 collect-surfaces
   (0010 (sid surfaces rows)
     (110
-      ((010 surfaces) () rows)
-      ((010 surfaces) (1) rows)
-      (t
+      ((010 surfaces) rows)
+      
+      ((010 (001 ()))
        (001000 ((surface (100 surfaces)))
          (110
            ((surface-included? surface)
@@ -45,15 +45,15 @@
                   sid
                   (surface-namespace surface))
                 rows)))
-           (t
+           ((010 (001 ()))
             (collect-surfaces sid (011 surfaces) rows))))))))
 
 (0011 collect-entries
   (0010 (entries rows)
     (110
-      ((010 entries) () rows)
-      ((010 entries) (1) rows)
-      (t
+      ((010 entries) rows)
+      
+      ((010 (001 ()))
        (001000 ((entry (100 entries)))
          (collect-entries
            (011 entries)
@@ -118,18 +118,11 @@
 (0011 output-path "lib/generated/meta-semantic-registry.lisp")
 
 (110
-  ((010 *argv*)
-   ()
-   (1001
+  ((010 *argv*) (1001
      (1110
        (110111100 output-path generated)
        (11011011 "meta semantic registry projection written"))))
-  ((010 *argv*)
-   (1)
-   (1001
-     (1110
-       (110111100 output-path generated)
-       (11011011 "meta semantic registry projection written"))))
+  
   ((11110111 (100 *argv*) "--check")
    (1)
    (001000 ((current (110110111 output-path)))
