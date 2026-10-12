@@ -32,10 +32,10 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
         with:
           fetch-depth: 0
-      - uses: dtolnay/rust-toolchain@stable
+      - uses: dtolnay/rust-toolchain@1.99.0
       - name: Build the ACTUAL SENS binary reader
         run: cargo build -q -p sens-cli --bin sens-trit
       - name: Show canonical D2 word-coordinate failures without executing SENS
@@ -182,7 +182,7 @@ jobs:
           PY
       - name: Upload provenance + D2 grammar report
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: t5-d2-syntax-audit
           if-no-files-found: warn
