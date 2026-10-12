@@ -418,15 +418,16 @@ impl BinaryNumber {
     /// zero-filled to the selected domain's FULL width (not normalized).
     /// The (width, bits) pair is a mechanism boundary, not itself a SENS
     /// language value; generic mixed-domain coercion remains unratified.
+    /// Both arguments MUST already carry the same explicit Dn identity.
+    /// Passing a width alone must not promote an unqualified historical Number.
     pub fn add_in_numeric_domain(
         &self,
         other: &Self,
         input_domain_width: usize,
     ) -> Option<(usize, Vec<u8>)> {
-        if !self.fits_ratified_width(input_domain_width)
-            || !other.fits_ratified_width(input_domain_width)
-            || self.numeric_domain_width.is_some_and(|d| d != input_domain_width)
-            || other.numeric_domain_width.is_some_and(|d| d != input_domain_width)
+        if !Self::is_numeric_domain_width(input_domain_width)
+            || self.numeric_domain_width != Some(input_domain_width)
+            || other.numeric_domain_width != Some(input_domain_width)
         {
             return None;
         }
@@ -590,8 +591,9 @@ mod tests {
 
     #[test]
     fn numeric_domain_addition_carries_d24_into_d48_without_truncation() {
-        // Inputs are direct bits with explicit domain width, not literals.
-        let max = BinaryNumber::from_bits(vec![1; 24]).unwrap();
+        // The number must already carry D24 identity; a width parameter
+        // must never admit an old unqualified number after the fact.
+        let max = BinaryNumber::from_numeric_domain_bits(24, &vec![1; 24]).unwrap();
         let (width, exact_bits) = max.add_in_numeric_domain(&max, 24).unwrap();
         assert_eq!(width, 48);
         assert_eq!(exact_bits.len(), 48);
@@ -604,7 +606,9 @@ mod tests {
         assert_eq!(magnitude.to_decimal_string(), (2u64 * ((1u64 << 24) - 1)).to_string());
 
         // Carry must not trigger promotion when a same-domain sum still fits.
-        let one = BinaryNumber::one();
+        let mut one_word = vec![0; 24];
+        one_word[23] = 1;
+        let one = BinaryNumber::from_numeric_domain_bits(24, &one_word).unwrap();
         let (small_width, small_bits) = one.add_in_numeric_domain(&one, 24).unwrap();
         assert_eq!(small_width, 24);
         assert_eq!(small_bits.len(), 24);
@@ -615,7 +619,7 @@ mod tests {
     #[test]
     fn numeric_domain_addition_widens_unbounded_rungs_and_rejects_bad_domains() {
         for width in [24, 48, 96, 192, 384, 768] {
-            let max = BinaryNumber::from_bits(vec![1; width]).unwrap();
+            let max = BinaryNumber::from_numeric_domain_bits(width, &vec![1; width]).unwrap();
             let (target_width, result) = max.add_in_numeric_domain(&max, width).unwrap();
             assert_eq!(target_width, width * 2);
             assert_eq!(result.len(), target_width);
@@ -624,12 +628,41 @@ mod tests {
             assert_eq!(result[2 * width - 1], 0);
             assert!(max.fits_ratified_width(width));
         }
-        let one = BinaryNumber::one();
+        let mut one_word = vec![0; 24];
+        one_word[23] = 1;
+        let one = BinaryNumber::from_numeric_domain_bits(24, &one_word).unwrap();
         for invalid_width in [0, 1, 23, 25, 47, 72, 192 + 1] {
             assert_eq!(one.add_in_numeric_domain(&one, invalid_width), None);
         }
         let wide = BinaryNumber::from_bits(vec![1; 25]).unwrap();
         assert_eq!(wide.add_in_numeric_domain(&one, 24), None);
+    }
+
+    #[test]
+    fn width_argument_never_admits_historical_unqualified_numbers() {
+        for width in [24usize, 48, 96, 192] {
+            let unqualified = BinaryNumber::one();
+            let mut exact_one = vec![0; width];
+            exact_one[width - 1] = 1;
+            let qualified = BinaryNumber::from_numeric_domain_bits(width, &exact_one).unwrap();
+
+            assert_eq!(unqualified.add_in_numeric_domain(&unqualified, width), None);
+            assert_eq!(unqualified.add_in_numeric_domain(&qualified, width), None);
+            assert_eq!(qualified.add_in_numeric_domain(&unqualified, width), None);
+            let (result_width, result_bits) =
+                qualified.add_in_numeric_domain(&qualified, width).unwrap();
+            assert_eq!(result_width, width);
+            assert_eq!(result_bits.len(), width);
+            assert_eq!(&result_bits[..width - 2], vec![0; width - 2]);
+            assert_eq!(&result_bits[width - 2..], &[1, 0]);
+        }
+        let d24 = BinaryNumber::from_numeric_domain_bits(24, &[0; 24]).unwrap();
+        let d48 = BinaryNumber::from_numeric_domain_bits(48, &[0; 48]).unwrap();
+        assert_eq!(d24.add_in_numeric_domain(&d48, 24), None);
+        assert_eq!(d24.add_in_numeric_domain(&d48, 48), None);
+        assert_eq!(d48.add_in_numeric_domain(&d24, 24), None);
+        assert_eq!(d48.add_in_numeric_domain(&d24, 48), None);
+        assert_eq!(d24.add_in_numeric_domain(&d24, 48), None);
     }
 
     #[test]
