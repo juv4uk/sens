@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import math
 from pathlib import Path
 
 VERDICTS = {"sens", "competitor", "pareto", "tie", "inconclusive", "unsupported"}
@@ -88,7 +89,7 @@ def main() -> int:
                 right = measurement.get("competitor_samples")
                 if not isinstance(left, list) or not left or not isinstance(right, list) or not right:
                     fail(f"{wid}/{axis}: measured rows require raw samples")
-                if any(not isinstance(value, (int, float)) or value != value for value in left + right):
+                if any(not isinstance(value, (int, float)) or not math.isfinite(value) for value in left + right):
                     fail(f"{wid}/{axis}: raw samples must be finite numbers")
 
             # #3698 owns RSS. Only its validated fresh-process GNU-time primitive is admissible.
