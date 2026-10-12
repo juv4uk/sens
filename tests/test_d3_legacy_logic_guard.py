@@ -157,14 +157,14 @@ class LegacyD3GuardTests(unittest.TestCase):
              '((110101010 "#q2:" wire) () (100 (001 ())))'),
         )
         for fragment, original, invalid in helper_substitutions:
-            with self.subTest(helper_triplet=original):
+            with self.subTest(helper_clause=original):
                 self.assertIn(original, fragment)
                 changed = fragment.replace(original, invalid, 1)
                 self.assertIn("COND_NOT_TWO_FIELDS", [
                     f.rule for f in MODULE.scan_lisp(changed, path)
                 ])
 
-        # Restoring an expected-result field recreates the obsolete triplet.
+        # Restoring an expected-result field recreates the obsolete three-field clause.
         substitutions = (
             (nonlegacy[0], "((010 (11100 key (011 row))) (001 ()))",
              "((010 (11100 key (011 row))) (1) (001 ()))"),
