@@ -1,26 +1,14 @@
-# Випуск підготовленого snapshot
+# Випуск підготовленого snapshot SENS
 
-1. В окремому PR оновити версії семи канонічних crates, їхні записи в
-   `Cargo.lock` та всі артефакти/URL у `packaging/install.sh`.
-2. Після merge дочекатися успішного workflow `CI` для точного SHA на `main`.
-3. У чистому checkout цього SHA запустити
-   `my-lisp scripts/release.lisp 0.41.0` (для наступного випуску — його версію).
-4. Дочекатися успіху workflow `Release` і перевірити набір опублікованих assets.
+Цей документ описує **умови** випуску, а не підтверджує GO для кандидата. Поточний задум — `l0.42.0` / Cargo `0.42.0` / Contract 11.9; див. кореневі [RELEASE.md](../../RELEASE.md) та [RELEASE-EVIDENCE.md](../../RELEASE-EVIDENCE.md).
 
-Скрипт **не піднімає версії і не комітить**. Він звіряє Cargo.toml з аргументом,
-запускає installer-тести, перевіряє remote main і результат CI, створює лише
-новий тег на перевіреному SHA та пушить його. Кожна помилка process-run
-зупиняє виконання. Старий локальний повний `cargo test --workspace` більше
-не запускається цим скриптом: preflight тепер вимагає успішний GitHub CI для
-точного SHA, а workflow Release зберігає свої focused test/clippy gates.
-Це не твердження, що full workspace suite пройшов.
+1. Переконатися, що сім канонічних crates, їхні записи в `Cargo.lock`, `scripts/release.lisp`, `guix.scm` та активні asset URL в `packaging/install.sh` узгоджені на `0.42.0`. Не редагувати історичні snapshots/архіви для косметичного усунення старих номерів.
+2. Зафіксувати повний SHA поточного `main`; Rust toolchain задається `rust-toolchain.toml` (`1.99.0`). Перевірити provenance і всі зміни на цьому SHA.
+3. На **цьому самому SHA** вимагати завершені успішні Hosted CI та Release Preflight. Release Preflight повинен пройти `cargo test --locked --workspace`, `cargo clippy --locked --workspace --all-targets -- -D warnings`, version/installer guards, asset integrity, публікаційний guard і bounded T5/triple witnesses. Якщо для SHA немає прогона, запустити **Actions → Release Preflight → Run workflow** для `main`; відсутність прогона або успіх сусіднього SHA — не PASS.
+4. Лише після перегляду доказів власник має явно встановити repository variables `SENS_RELEASE_GO_SHA=<точний 40-hex SHA>` та `SENS_RELEASE_GO_TAG=l0.42.0`. Ці змінні — явне підтвердження рішення власника; автоматично їх не створювати й не підставляти.
+5. У чистому checkout саме цього SHA, з авторизованими `git` і `gh`, запустити `my-lisp scripts/release.lisp 0.42.0`. Скрипт перевіряє чистоту checkout, `origin/main`, узгодження версій, останні успішні прогони Hosted CI та Release Preflight на точному SHA, явний owner GO і відсутність однойменного віддаленого тегу. Він не змінює файли, не створює гілок і не видаляє/пересуває наявний тег.
+6. Після тегування Release workflow збирає платформні артефакти як CI artifacts. Єдина фінальна job вимагає повний набір CLI (Linux/Windows/macOS x64/arm64), Windows MSI, portable Web REPL і installer/manifest; генерує SHA-256 та provenance; створює чернетку, завантажує її назад для перевірки побайтової тотожності й digest і публікує тільки після повторної перевірки exact-main SHA та owner GO.
 
-Новий workflow запускається лише тегом, тому push гілки `l*` більше не
-пересуває тег. Якщо push нового тегу не вдався, локальний тег залишається для
-діагностики; скрипт не видаляє і не force-push його. Перед ручним повтором
-звірити локальний/віддалений SHA. Опублікований тег незмінний.
+**На будь-який FAIL/UNKNOWN або невідповідність SHA — NO-GO.** Не послаблювати guards і не публікувати частковий комплект. Якщо тег уже створений, але релізний workflow не завершився, не пересувати й не force-push існуючий тег; залишити невдалу чернетку як діагностичний слід, виправити `main`, узгодити наступний дозволений кандидат/версію та повторити всі ворота з нового SHA. Публічний release ніколи не є доказом, що артефакти пройшли перевірку постфактум.
 
-Потрібні `git`, авторизований `gh`, GNU `timeout` і робочий `my-lisp`.
-`release.lisp` є єдиним release preflight: він перевіряє чистоту checkout,
-відповідність `origin/main`, версії manifests, точний зелений CI та відсутність
-наявного тега перед його публікацією.
+Потрібні `git`, авторизований GitHub CLI `gh`, GNU `timeout`, Rust toolchain із `rust-toolchain.toml` та робочий `my-lisp`. Відтворюваність байт-у-байт не обіцяється без pinned runner-image і зовнішніх tool/distribution digests; ці відсутні докази мають залишатися видимими в `RELEASE-EVIDENCE.md`.
