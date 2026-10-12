@@ -110,6 +110,10 @@ def validate_ledger(document: object, *, root: Path = ROOT, verify_content: bool
                       "f2_negative_witness", "f4_t5_execution"):
             if not REF.fullmatch(str(entry[field])):
                 raise LedgerBlocked(f"запис {index}: {field} не owner/repo@COMMIT:path:line")
+        if str(entry["f2_positive_witness"]) == str(entry["f2_negative_witness"]):
+            raise LedgerBlocked(
+                f"запис {index}: F2 positive and negative witnesses must reference distinct evidence"
+            )
         if not DEDUP.fullmatch(str(entry["f3_dedup"])):
             raise LedgerBlocked(f"запис {index}: f3_dedup потребує окремих D1-D9 та D10 SHA з NO-MATCH")
         ratified = entry["ratified"]
