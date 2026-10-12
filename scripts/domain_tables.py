@@ -25,7 +25,7 @@ ROW = re.compile(
     + r'\(san\s+' + TOKEN + r'\)\s+'
     + r'\(en\s+' + TOKEN + r'\)\s+'
     + r'\(LISP\s+' + TOKEN + r'\)\s+'
-    + r'\(sym\s+' + TOKEN + r'\)\s*$'
+    + r'\(sym\s+' + TOKEN + r'\)\)\s*$'
 )
 
 # D7 stores symbols by presentation surface inside the sym field. Other domain
