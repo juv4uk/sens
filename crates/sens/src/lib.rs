@@ -590,6 +590,54 @@ pub fn eval_pinned_legacy_core_source(
     eval_parsed_expressions(&expressions, session)
 }
 
+/// Bind the already-evaluated Lisp-owned LET* macro to the exact D6 identity
+/// from the ratified Ukrainian source registry. The parser preserves the D6
+/// head; dispatch then finds this code-slot and expands the macro before its
+/// binding-list arguments are evaluated. No D6 law or Rust implementation is
+/// added here, and an existing non-macro slot is a hard error.
+fn bind_process_tcp_lisp_owned_macros(session: &mut Session) -> Result<(), LanguageError> {
+    let identity = semantic_registry::exact_uk_callable_for_source_head("нехай*")
+        .and_then(|surface| surface.core_operation())
+        .filter(|identity| {
+            matches!(identity, CoreDomainIdentity::D6(word) if word.word().packed_bits() == 0b001001)
+        })
+        .ok_or_else(|| {
+            LanguageError::new(
+                ErrorKind::InvalidForm,
+                "D6 LET* source identity is not admitted by the current exact domain registry",
+                Span::default(),
+            )
+        })?;
+
+    let implementation = session
+        .environment
+        .get("let*")
+        .or_else(|| session.environment.get("нехай*"))
+        .filter(|value| matches!(value, Value::Macro(_)))
+        .ok_or_else(|| {
+            LanguageError::new(
+                ErrorKind::InvalidForm,
+                "Core4 Lisp-owned LET* macro is not installed; refusing to evaluate D6 LET* as an ordinary call",
+                Span::default(),
+            )
+        })?;
+
+    match session.environment.domain_code_slot(identity) {
+        Some(Value::Macro(_)) => Ok(()),
+        Some(_) => Err(LanguageError::new(
+            ErrorKind::InvalidForm,
+            "D6 LET* code-slot is already occupied by a non-macro value",
+            Span::default(),
+        )),
+        None if session.environment.bind_domain_code_slot_once(identity, implementation) => Ok(()),
+        None => Err(LanguageError::new(
+            ErrorKind::InvalidForm,
+            "could not bind the Lisp-owned implementation to the admitted D6 LET* identity",
+            Span::default(),
+        )),
+    }
+}
+
 /// Load the shared byte/text adapters used by process and TCP boundaries.
 /// `load_process_library` remains the compatibility entry point already used
 /// by native embedders, so it now installs both language-owned text adapters:
@@ -597,6 +645,7 @@ pub fn eval_pinned_legacy_core_source(
 /// `tcp-read-raw`. Neither raw capability is required merely to define them.
 pub fn load_process_library(session: &mut Session) -> Result<EvalResult, LanguageError> {
     eval_program(UTF8_LIBRARY_SOURCE, session)?;
+    bind_process_tcp_lisp_owned_macros(session)?;
     let process = parse_mixed_exact_domain_process_tcp_source(
         "lib/process.lisp",
         PROCESS_LIBRARY_SOURCE,
@@ -612,6 +661,7 @@ pub fn load_process_library(session: &mut Session) -> Result<EvalResult, Languag
 /// not otherwise need the process adapter.
 pub fn load_tcp_library(session: &mut Session) -> Result<EvalResult, LanguageError> {
     eval_program(UTF8_LIBRARY_SOURCE, session)?;
+    bind_process_tcp_lisp_owned_macros(session)?;
     let tcp = parse_mixed_exact_domain_process_tcp_source("lib/tcp.lisp", TCP_LIBRARY_SOURCE)?;
     let result = eval_parsed_expressions(&tcp, session)?;
     bind_missing_stable_surface_peers(&session.environment);
