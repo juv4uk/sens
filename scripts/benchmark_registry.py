@@ -248,7 +248,7 @@ def render(manifests: list[dict[str, Any]], exemptions: list[dict[str, Any]] | N
         "> Generator: `scripts/benchmark_registry.py`.",
         "> This is discovery metadata only: presence in this table does not grant semantic authority or increase evidence strength.",
         "",
-        "Bootstrap rule: existing unregistered stands remain explicit backfill debt tracked by #4172. Any newly created benchmark stand must carry `bench.json`; #4171 guards that ratchet.",
+        "Registry invariant: every top-level `benchmarks/` directory must have a valid `bench.json` or a source-backed entry in `support-exemptions.json`. #4171 guards index freshness and new stands; #4172 tracks metadata backfill quality. Manifest presence alone never upgrades evidence strength.",
         "",
         f"**Registered stands:** {len(manifests)}",
         f"**Explicit support-directory exemptions:** {len(exemptions)} (not benchmark stands)",

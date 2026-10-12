@@ -5,7 +5,7 @@
 > Generator: `scripts/benchmark_registry.py`.
 > This is discovery metadata only: presence in this table does not grant semantic authority or increase evidence strength.
 
-Bootstrap rule: existing unregistered stands remain explicit backfill debt tracked by #4172. Any newly created benchmark stand must carry `bench.json`; #4171 guards that ratchet.
+Registry invariant: every top-level `benchmarks/` directory must have a valid `bench.json` or a source-backed entry in `support-exemptions.json`. #4171 guards index freshness and new stands; #4172 tracks metadata backfill quality. Manifest presence alone never upgrades evidence strength.
 
 **Registered stands:** 163
 **Explicit support-directory exemptions:** 7 (not benchmark stands)
