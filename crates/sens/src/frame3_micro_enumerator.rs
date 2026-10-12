@@ -878,6 +878,10 @@ mod tests {
             profile_program_capacity(Frame3MicroProfile::F3M4),
             4_294_967_296
         );
+        assert_eq!(
+            profile_program_capacity(Frame3MicroProfile::F3M5),
+            1_099_511_627_776
+        );
         assert_eq!(profile_global_offset(Frame3MicroProfile::F3M2), 256);
         assert_eq!(profile_global_offset(Frame3MicroProfile::F3M3), 65_792);
         assert_eq!(
@@ -1297,6 +1301,101 @@ mod tests {
     }
 
     #[test]
+    fn five_byte_boundaries_and_stratified_samples_roundtrip() {
+        for value in [
+            0u64,
+            1,
+            0x00_12_34_56_78,
+            0x80_00_00_00_00,
+            0xde_ad_be_ef_01,
+            0xff_ff_ff_ff_ff,
+        ] {
+            let payload = [
+                ((value >> 32) & 0xff) as u8,
+                ((value >> 24) & 0xff) as u8,
+                ((value >> 16) & 0xff) as u8,
+                ((value >> 8) & 0xff) as u8,
+                (value & 0xff) as u8,
+            ];
+            let expr = decode_payload(&payload).unwrap();
+            assert!(crate::frame3_micro_v5::contains_extension(&expr));
+            assert_eq!(encode_expr(&expr).unwrap(), payload);
+        }
+
+        // One deterministic point from every high-16 bucket. This spans the
+        // full 40-bit interval without pretending to exhaust 2^40 payloads.
+        for high in 0u64..=u16::MAX as u64 {
+            let low24 = ((high * 0x9e37) ^ 0x5a_a5_3c) & 0xff_ff_ff;
+            let value = (high << 24) | low24;
+            let payload = [
+                ((value >> 32) & 0xff) as u8,
+                ((value >> 24) & 0xff) as u8,
+                ((value >> 16) & 0xff) as u8,
+                ((value >> 8) & 0xff) as u8,
+                (value & 0xff) as u8,
+            ];
+            let expr = decode_payload(&payload).unwrap();
+            assert_eq!(encode_expr(&expr).unwrap(), payload);
+        }
+    }
+
+    #[test]
+    fn five_byte_profile_adds_missing_d3_eq_and_d4_lambda_without_remapping_old_bytes() {
+        let lambda_payload = [0u8; 5];
+        let lambda = decode_payload(&lambda_payload).unwrap();
+        assert_eq!(
+            lambda,
+            Frame3MicroExpr::Lambda0(Box::new(Frame3MicroExpr::Zero))
+        );
+        assert_eq!(encode_expr(&lambda).unwrap(), lambda_payload);
+        assert_eq!(lambda.capability_mask() & CAP_LAMBDA, CAP_LAMBDA);
+
+        let eq = Frame3MicroExpr::EqAtom(
+            Box::new(Frame3MicroExpr::Zero),
+            Box::new(Frame3MicroExpr::One),
+        );
+        let eq_payload = encode_expr(&eq).unwrap();
+        assert_eq!(eq_payload.len(), 5);
+        assert_eq!(decode_payload(&eq_payload).unwrap(), eq);
+        assert_eq!(eq.capability_mask() & CAP_EQ, CAP_EQ);
+
+        // Frozen trophies from old profiles remain byte-identical.
+        for payload in [
+            vec![0x3e],
+            vec![0xfc, 0x25],
+            vec![0x2f, 0x18, 0x59],
+            vec![0xde, 0xad, 0xbe, 0xef],
+        ] {
+            let expr = decode_payload(&payload).unwrap();
+            assert_eq!(encode_expr(&expr).unwrap(), payload);
+        }
+    }
+
+    #[test]
+    fn five_byte_eq_program_executes_and_lambda_decodes_to_a_real_closure() {
+        let eq = Frame3MicroExpr::EqAtom(
+            Box::new(Frame3MicroExpr::Zero),
+            Box::new(Frame3MicroExpr::One),
+        );
+        let eq_source = eq.exact_words().join(" ");
+        let eq_result = eval_parsed_expressions(
+            &parse_canonical_binary(&eq_source).expect("F3M5 EQ source"),
+            &mut Session::default(),
+        )
+        .expect("F3M5 EQ must execute");
+        assert_eq!(eq_result.value.as_predicate_bit(), Some(true));
+
+        let lambda = Frame3MicroExpr::Lambda0(Box::new(Frame3MicroExpr::QuoteOne));
+        let lambda_source = lambda.exact_words().join(" ");
+        let lambda_result = eval_parsed_expressions(
+            &parse_canonical_binary(&lambda_source).expect("F3M5 LAMBDA source"),
+            &mut Session::default(),
+        )
+        .expect("F3M5 LAMBDA must evaluate");
+        assert!(matches!(lambda_result.value, crate::Value::Closure(_)));
+    }
+
+    #[test]
     fn four_byte_boundaries_and_stratified_samples_roundtrip() {
         for value in [
             0u32,
@@ -1360,16 +1459,22 @@ mod tests {
             Frame3MicroExpr::QuoteZero
             | Frame3MicroExpr::QuoteOne
             | Frame3MicroExpr::QuoteNil => 1,
-            Frame3MicroExpr::Atom(_) | Frame3MicroExpr::Cons(_, _) => 1,
+            Frame3MicroExpr::Atom(_)
+            | Frame3MicroExpr::Cons(_, _)
+            | Frame3MicroExpr::Lambda0(_) => 1,
             Frame3MicroExpr::CarCons(_, _)
             | Frame3MicroExpr::CdrCons(_, _)
-            | Frame3MicroExpr::IfAtom(_, _, _) => 2,
+            | Frame3MicroExpr::IfAtom(_, _, _)
+            | Frame3MicroExpr::EqAtom(_, _) => 2,
         };
         own + match expr {
-            Frame3MicroExpr::Atom(value) => encoded_operation_count(value),
+            Frame3MicroExpr::Atom(value) | Frame3MicroExpr::Lambda0(value) => {
+                encoded_operation_count(value)
+            }
             Frame3MicroExpr::Cons(left, right)
             | Frame3MicroExpr::CarCons(left, right)
-            | Frame3MicroExpr::CdrCons(left, right) => {
+            | Frame3MicroExpr::CdrCons(left, right)
+            | Frame3MicroExpr::EqAtom(left, right) => {
                 encoded_operation_count(left) + encoded_operation_count(right)
             }
             Frame3MicroExpr::IfAtom(test, then_value, else_value) => {
@@ -1384,10 +1489,13 @@ mod tests {
     fn conditional_count(expr: &Frame3MicroExpr) -> usize {
         let own = usize::from(matches!(expr, Frame3MicroExpr::IfAtom(_, _, _)));
         own + match expr {
-            Frame3MicroExpr::Atom(value) => conditional_count(value),
+            Frame3MicroExpr::Atom(value) | Frame3MicroExpr::Lambda0(value) => {
+                conditional_count(value)
+            }
             Frame3MicroExpr::Cons(left, right)
             | Frame3MicroExpr::CarCons(left, right)
-            | Frame3MicroExpr::CdrCons(left, right) => {
+            | Frame3MicroExpr::CdrCons(left, right)
+            | Frame3MicroExpr::EqAtom(left, right) => {
                 conditional_count(left) + conditional_count(right)
             }
             Frame3MicroExpr::IfAtom(test, then_value, else_value) => {
@@ -1401,10 +1509,13 @@ mod tests {
 
     fn expression_depth(expr: &Frame3MicroExpr) -> usize {
         1 + match expr {
-            Frame3MicroExpr::Atom(value) => expression_depth(value),
+            Frame3MicroExpr::Atom(value) | Frame3MicroExpr::Lambda0(value) => {
+                expression_depth(value)
+            }
             Frame3MicroExpr::Cons(left, right)
             | Frame3MicroExpr::CarCons(left, right)
-            | Frame3MicroExpr::CdrCons(left, right) => {
+            | Frame3MicroExpr::CdrCons(left, right)
+            | Frame3MicroExpr::EqAtom(left, right) => {
                 expression_depth(left).max(expression_depth(right))
             }
             Frame3MicroExpr::IfAtom(test, then_value, else_value) => expression_depth(test)
