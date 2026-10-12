@@ -177,6 +177,36 @@ cargo run -q -p sens-cli --bin sens-trit -- eval tests/fixtures/migration-quote-
 artifact збережено **історично** для відтворюваності, але це вже не активна
 F3M-1 таблиця.
 
+### Круті програми, які реально поміщаються в 1–3 байти
+
+Це не намальовані opcode-приклади: байти нижче проходять чинний dense
+enumerator, canonical SENS parser і реальний evaluator.
+
+| F3M | Байти | Програма | Що в ній крутого | Результат |
+|---|---|---|---|---|
+| **F3M-1** | `3E` | `CAR(CONS(1,NIL))` | справжня побудова пари + вибір першого елемента в **1 байті** | `1` |
+| **F3M-2** | `00 C8` | `IF-ATOM(0,0,0)` | **найперший двобайтовий COND** у canonical rank order | `0` |
+| **F3M-2** | `FC 25` | `ATOM(CAR(CONS(QUOTE(NIL),IF-ATOM(QUOTE(NIL),QUOTE(NIL),QUOTE(NIL)))))` | переможець exhaustive census усіх **65 536** двобайтових програм: 5/6 capability-класів, 1 COND, 9 encoded-операцій | `1` |
+| **F3M-2** | `FB 4D` | `ATOM(CAR(CONS(QUOTE(NIL),CDR(CONS(ATOM(QUOTE(NIL)),QUOTE(NIL))))))` | одночасно **CAR + CDR + CONS + QUOTE + ATOM** у 2 байтах | `1` |
+| **F3M-2** | `BB 51` | `ATOM(ATOM(ATOM(ATOM(ATOM(ATOM(QUOTE(NIL)))))))` | рекорд глибини двобайтового census: **7 рівнів** | `1` |
+| **F3M-3** | `16 3C 63` | `CAR(CONS(0,CDR(CONS(0,IF-ATOM(0,0,QUOTE(0))))))` | **найраніший** rank, де вже є всі 6/6 класів: QUOTE+ATOM+CONS+CAR+CDR+COND | `0` |
+| **F3M-3** | `2F 18 59` | `IF-ATOM(QUOTE(0),CAR(CONS(QUOTE(1),1)),CDR(CONS(QUOTE(NIL),QUOTE(0))))` | компактне реальне умовне обчислення з двома різними гілками | `1` |
+| **F3M-3** | `FF FB 37` | `CAR(CONS(CDR(CONS(1,QUOTE(1))),ATOM(IF-ATOM(QUOTE(NIL),QUOTE(NIL),QUOTE(NIL)))))` | переможець exhaustive-пошуку останньої 64K-сторінки; 6/6 класів, 1 COND, 11 encoded-операцій | `1` |
+
+Для F3M-2 перебрано **всі 65 536/65 536 payloads**. Метрика «найвиразнішого»
+фіксована й прозора: capability diversity → COND count → encoded-operation
+count → depth → exact-word count → node count → later rank. За нею `FC 25`
+перемагає весь двобайтовий простір. Окремо збережено категорії першого COND,
+CAR+CDR і максимальної глибини, бо «крутість» не зводиться до одного числа.
+
+Для F3M-3 `FF FB 37` — не глобальний максимум по всіх 16M кодах, а
+переможець **exhaustive останньої сторінки `FF 00 00..FF FF FF`**.
+Повний evaluator sweep усіх 16 777 216 F3M-3 програм лишається окремим
+proof gate.
+
+Evidence: [F3M-2 exhaustive census run 38196443593](https://github.com/juv4uk/sens/actions/runs/38196443593) ·
+[F3M-3 final-page proof run 38195272188](https://github.com/juv4uk/sens/actions/runs/38195272188).
+
 ### Відтворення
 
 ~~~sh
