@@ -33,10 +33,9 @@
 (0011 collect-symbols-onto
   (0010 (expr acc)
     (110
-      ((110101100 expr) (110 ((11101 expr acc) acc) (t (111 expr acc))))
-      ((010 expr) () acc)
-      ((010 expr) (1) acc)
-      (t (collect-symbols-onto (011 expr) (collect-symbols-onto (100 expr) acc))))))
+      ((110101100 expr) (110 ((11101 expr acc) acc) ((010 (001 ())) (111 expr acc))))
+      ((010 expr) acc)
+      ((010 (001 ())) (collect-symbols-onto (011 expr) (collect-symbols-onto (100 expr) acc))))))
 
 (0011 collect-all-symbols
   (0010 (forms acc)
@@ -58,11 +57,10 @@
 (0011 insert-sorted-onto
   (0010 (sym before after)
     (110
-      ((010 after) () (reverse-onto before (1110 sym)))
-      ((010 after) (1) (reverse-onto before (1110 sym)))
+      ((010 after) (reverse-onto before (1110 sym)))
       ((10110001 (11101110 sym) (11101110 (100 after)))
        (reverse-onto before (111 sym after)))
-      (t (insert-sorted-onto sym (111 (100 after) before) (011 after))))))
+      ((010 (001 ())) (insert-sorted-onto sym (111 (100 after) before) (011 after))))))
 
 (0011 insert-sorted
   (0010 (sym sorted)
