@@ -356,9 +356,14 @@ def main() -> int:
     current_git_sha = git_sha(repo)
     current_contract = contract_version(repo)
     if current_contract != CURRENT_CONTRACT:
-        raise ValueError(
-            f"this evidence generation is pinned to Contract {CURRENT_CONTRACT}; "
-            f"found {current_contract}. Start a new generation replay instead of relabeling rows."
+        # This is a generation boundary, not a semantic assertion failure.
+        # Keep old Contract 11.8 measurements historical until a distinct
+        # Contract 11.9 replay has been run and validated.
+        print("SENS_BENCHMARK_STATUS=BLOCKED")
+        raise SystemExit(
+            f"STORE-AIR-LOAD: BLOCKED; this evidence generation is pinned to "
+            f"Contract {CURRENT_CONTRACT}; found {current_contract}. "
+            "Start a new generation replay instead of relabeling rows."
         )
 
     if args.packing_helper and args.semantic_helper:
