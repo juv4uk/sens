@@ -2,10 +2,11 @@
 //!
 //! The ordinary Lisp parser remains unchanged. This bridge is intentionally
 //! bounded to executable list heads:
-//! - exact 3/4/5/6-bit binary heads become DomainIdentity;
+//! - exact 3/4/5/6-bit heads become DomainIdentity;
 //! - exact 7-bit heads fail closed because current D7 is Sound/Text/local-ordinal, not callable;
-//! - exact 8-bit heads remain the ordinary parser's compatibility path; this bridge does not infer current D8;
-//! - non-head data keeps the ordinary parser's interpretation.
+//! - exact 8-bit heads remain the ordinary parser's compatibility path except for pinned machine D8 I/O;
+//! - four D9 string heads are lifted only in lib/machine/admission/x86-64.lisp;
+//! - non-head and quoted data keep the ordinary parser's interpretation.
 //!
 //! This gives active Core migration a mixed symbol + exact-domain path without
 //! teaching the compatibility parser to infer domains from historical bytes.
@@ -43,12 +44,23 @@ pub fn parse_mixed_exact_domain_machine_source(
         ));
     }
     // Only the already-admitted D8 I/O identities are projected here, after
-    // the exact D3-D6 machine-source pass.  This does not license arbitrary D8
+    // the exact D3-D6 machine-source pass. This does not license arbitrary D8
     // or D9 call heads; quoting and binder data remain opaque.
-    parse_mixed_source(source, true)?
+    let parsed = parse_mixed_source(source, true)?
         .into_iter()
         .map(|expr| lift_pinned_d8_io(source, expr, 0))
-        .collect()
+        .collect::<Result<Vec<_>, _>>()?;
+
+    // The admission wire parser uses exactly four ratified D9 string
+    // operations. Pin their callability to this one source file rather than
+    // enabling general D9 call-head inference in machine code.
+    if path == "lib/machine/admission/x86-64.lisp" {
+        parsed.into_iter()
+            .map(|expr| lift_pinned_machine_admission_d9_strings(source, expr, 0))
+            .collect()
+    } else {
+        Ok(parsed)
+    }
 }
 
 /// The only approved D8 READ/WRITE head at this migration boundary is the
@@ -104,6 +116,78 @@ fn lift_pinned_d8_io(
             continue;
         }
         lifted[index] = lift_pinned_d8_io(source, lifted[index].clone(), depth + 1)?;
+    }
+    Ok(Expr {
+        kind: ExprKind::List(Rc::from(lifted.into_boxed_slice())),
+        span,
+    })
+}
+
+/// Lift only the D9 string operations used by the exact-integer wire
+/// recognizer in lib/machine/admission/x86-64.lisp. This narrow exception is
+/// source-path pinned; it does not make arbitrary D9 identities callable in
+/// other machine files. Quote payloads and binding slots remain opaque.
+fn lift_pinned_machine_admission_d9_strings(
+    source: &str,
+    expression: Expr,
+    depth: u32,
+) -> Result<Expr, LanguageError> {
+    const ADMITTED: [&str; 4] = [
+        "110011100", // string-empty?
+        "110011101", // string-rest
+        "110101010", // string-prefix?
+        "110101011", // string-first
+    ];
+    if depth > MAX_STRUCTURE_DEPTH {
+        return Err(LanguageError::new(
+            ErrorKind::Parse,
+            "pinned D9 machine-admission source exceeds structure depth",
+            expression.span,
+        ));
+    }
+    let Expr { kind, span } = expression;
+    let ExprKind::List(items) = kind else {
+        return Ok(Expr { kind, span });
+    };
+    if items.is_empty() {
+        return Ok(Expr { kind: ExprKind::List(items), span });
+    }
+
+    let mut lifted = items.to_vec();
+    let spelling = source_spelling(source, &lifted[0]);
+    if is_legacy_w8_quote_head(source, &lifted[0])
+        || is_exact_quote(&lifted[0])
+        || spelling == Some("'")
+    {
+        return Ok(Expr { kind: ExprKind::List(items), span });
+    }
+
+    if spelling.is_some_and(|head| ADMITTED.contains(&head)) {
+        let source_word = spelling.expect("matched exact D9 string head");
+        let words = parse_binary_source_words(source_word)?;
+        let word = words.first().expect("one static D9 source word").word;
+        lifted[0] = Expr {
+            kind: ExprKind::DomainIdentity(DomainIdentity::from_source_word(word)),
+            span: lifted[0].span,
+        };
+    } else if matches!(&lifted[0].kind, ExprKind::List(_)) {
+        lifted[0] = lift_pinned_machine_admission_d9_strings(
+            source, lifted[0].clone(), depth + 1,
+        )?;
+    }
+
+    let skip_binding_slot = is_legacy_w8_define_head(source, &items[0])
+        || is_legacy_w8_lambda_head(source, &items[0])
+        || is_legacy_w8_macro_head(source, &items[0])
+        || is_exact_d4_binding_head(&items[0]);
+
+    for index in 1..lifted.len() {
+        if skip_binding_slot && index == 1 {
+            continue;
+        }
+        lifted[index] = lift_pinned_machine_admission_d9_strings(
+            source, lifted[index].clone(), depth + 1,
+        )?;
     }
     Ok(Expr {
         kind: ExprKind::List(Rc::from(lifted.into_boxed_slice())),
@@ -1509,6 +1593,48 @@ mod tests {
         let ExprKind::List(other_call) = &other.kind else { panic!("other call"); };
         assert!(!matches!(&other_call[0].kind, ExprKind::DomainIdentity(_)),
             "no general D8 callability expansion");
+    }
+
+    #[test]
+    fn machine_admission_lifts_only_four_pinned_d9_string_heads() {
+        let cases = [
+            ("110011100", "(110011100 text)"), // string-empty?
+            ("110011101", "(110011101 text)"), // string-rest
+            ("110101010", "(110101010 \"#q2:\" text)"), // string-prefix?
+            ("110101011", "(110101011 text)"), // string-first
+        ];
+        for (word, call_source) in cases {
+            let source = format!("(0011 probe (0010 (text) {call_source}))");
+            let parsed = only(parse_mixed_exact_domain_machine_source(
+                "lib/machine/admission/x86-64.lisp", &source,
+            ).expect("pinned machine-admission D9 string head"));
+            let ExprKind::List(definition) = &parsed.kind else { panic!("DEFINE"); };
+            let ExprKind::List(lambda) = &definition[2].kind else { panic!("LAMBDA"); };
+            let ExprKind::List(call) = &lambda[2].kind else { panic!("call"); };
+            assert!(matches!(
+                &call[0].kind, ExprKind::DomainIdentity(id)
+                    if id.width() == 9 && id.packed_bits() == u16::from_str_radix(word, 2).unwrap()
+            ), "ratified D9 head {word} must retain its exact width");
+        }
+
+        let source = "(0011 probe (0010 (text) (110101010 \"#q2:\" text)))";
+        let other_machine_path = only(parse_mixed_exact_domain_machine_source(
+            "lib/machine/encoding/x86-64.lisp", source,
+        ).expect("other trusted machine source remains D9-closed"));
+        let ExprKind::List(definition) = &other_machine_path.kind else { panic!("DEFINE"); };
+        let ExprKind::List(lambda) = &definition[2].kind else { panic!("LAMBDA"); };
+        let ExprKind::List(call) = &lambda[2].kind else { panic!("call"); };
+        assert!(!matches!(&call[0].kind, ExprKind::DomainIdentity(id) if id.width() == 9),
+            "D9 callability must not leak to other machine files");
+
+        let quoted_source = "(001 (110101010 \"#q2:\" text))";
+        let quoted = only(parse_mixed_exact_domain_machine_source(
+            "lib/machine/admission/x86-64.lisp", quoted_source,
+        ).expect("quoted D9-looking datum remains opaque"));
+        let ExprKind::List(quote) = &quoted.kind else { panic!("QUOTE"); };
+        let ExprKind::List(payload) = &quote[1].kind else { panic!("quoted payload"); };
+        assert!(!matches!(&payload[0].kind, ExprKind::DomainIdentity(id) if id.width() == 9),
+            "quoted data must never gain D9 callability");
     }
 
     #[test]
