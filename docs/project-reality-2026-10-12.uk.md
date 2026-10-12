@@ -17,6 +17,24 @@
 
 Десяткові значення, host integer, byte, Rust type, backend opcode або назва поверхні — похідні подання, не джерело семантичної влади.
 
+## 1A. Фізичні кодеки: одна семантика SENS
+
+Чинна номенклатура відокремлює компактне сімейство **Frame3** від
+самодостатніх metadata-heavy контейнерів: **Frame3 Carrier (F3C)** — явний
+`.senc` маршрут для дуже малих програм; **Frame3-Micro (F3M)** — bounded
+`.f3m` micro-profile; **Envelope E1/E2/E3** — історичні S3/v1-v3 і більше
+не називаються «Frame3 v1/v2/v3». T5 лишається загальним канонічним
+`.sens` transport. Повна таблиця — [codec naming](codec-naming-2026-10-12.uk.md).
+
+F3C/F3M **не мають окремої семантики**: вони відновлюють точні доменні
+слова SENS і передають їх тому самому reader/evaluator. Для F3M вже є
+exhaustive bounded proof: файл `car-cons-one-nil.f3m` дорівнює одному
+байту `0x45`, відновлює `10 100 10 111 1 000 01 01` і виконується як
+`CAR(CONS(1,NIL))` з паритетом до T5. Це доводить можливість
+**1-байтової виконуваної SENS-програми в конкретному профілі**, але не
+можливість стискати довільну SENS-програму до одного байта. F3M-профіль
+вибирається зовні та не містить у цьому байті version/integrity metadata.
+
 ## 2. Nano-SENS: що виміряно і що ще заблоковано
 
 Первинні джерела: [звіт seed-v0](research/nano-sens-seed-v0-20261012.uk.md), [звіт про frontier/варіанти розміру](research/nano-sens-size-frontier-20261011.uk.md), [канонічний evidence JSON](../evidence/nano-sens-seed-v0-2026-10-12.json), [K1 static-link evidence](../evidence/nano-sens-k1-static-link-2026-10-12.json).
