@@ -135,6 +135,32 @@ fn d5_d6_operator_codes_compute_on_explicit_d24_d48_d96_values() {
 }
 
 #[test]
+fn d1_predicates_and_d3_eq_remain_non_arithmetic_laws() {
+    let mut session = Session::default();
+    session.environment.define("left", Value::predicate_bit(true));
+    session.environment.define("right", Value::predicate_bit(false));
+
+    // D3 EQ tests exact atom identity; it is not numeric '='.
+    assert_eq!(
+        exact_call("(101 left left)", &mut session).unwrap(),
+        Value::predicate_bit(true),
+    );
+    assert_eq!(
+        exact_call("(101 left right)", &mut session).unwrap(),
+        Value::predicate_bit(false),
+    );
+    assert_eq!(
+        exact_call("(010 left)", &mut session).unwrap(),
+        Value::predicate_bit(true),
+    );
+
+    // The same D1 operands MUST be rejected by mathematical ordering.
+    let error = exact_call("(11010 left right)", &mut session).unwrap_err();
+    assert_eq!(error.kind, ErrorKind::Type);
+    assert!(error.message.contains("D24+"), "{error}");
+}
+
+#[test]
 fn different_numeric_domains_do_not_implicitly_coerce() {
     let mut session = Session::default();
     session.environment.define("left", numeric(24, 7));
