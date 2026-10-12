@@ -4,7 +4,7 @@
   "status": "STATIC_SOURCE_INVENTORY_PASS_FULL_SEED_CLOSURE_BLOCKED",
   "source_pins": {
     "repository": "juv4uk/sens",
-    "audit_head_sha": "96ee15564d7a707d31664dca6e55b331d76ea6de",
+    "audit_head_sha": "a825e5d3d0afe615869117e0e2d22b926493a862",
     "audit_tool_path": "scripts/audit-nano-sens-source-closure.py",
     "audit_tool_blob_sha": "e6c2649de9533f7b9f0f0bb476fe50f9cb311dd2",
     "workflow_path": ".github/workflows/nano-sens-source-closure-audit.yml",
@@ -14,8 +14,8 @@
   },
   "workflow": {
     "name": "Nano-SENS source closure edge audit",
-    "run_id": 38190369519,
-    "url": "https://github.com/juv4uk/sens/actions/runs/38190369519",
+    "run_id": 38190527591,
+    "url": "https://github.com/juv4uk/sens/actions/runs/38190527591",
     "conclusion": "success",
     "self_test": {
       "checks": 7,
@@ -24,7 +24,7 @@
   },
   "inventories": {
     "main_snapshot": {
-      "commit": "96ee15564d7a707d31664dca6e55b331d76ea6de",
+      "commit": "a825e5d3d0afe615869117e0e2d22b926493a862",
       "rust_files": 77,
       "static_edges": 111,
       "unresolved_static_observations": 0
@@ -52,11 +52,11 @@
     }
   },
   "raw_artifact": {
-    "artifact_id": 11721286686,
-    "name": "nano-sens-static-source-edges-96ee15564d7a707d31664dca6e55b331d76ea6de",
-    "url": "https://github.com/juv4uk/sens/actions/runs/38190369519/artifacts/11721286686",
-    "zip_sha256": "fd6ad9a74c1c0469203da8ef4019dc3ffa938b7aef9f0e58eadd49c0e490b969",
-    "expires_at_utc": "2026-11-11T01:03:32Z"
+    "artifact_id": 11721233152,
+    "name": "nano-sens-static-source-edges-a825e5d3d0afe615869117e0e2d22b926493a862",
+    "url": "https://github.com/juv4uk/sens/actions/runs/38190527591/artifacts/11721233152",
+    "zip_sha256": "52a95e38a40ee603350bc255440c0b1f9c6144de613ff43c2478ba1a9a8f8e6e",
+    "expires_at_utc": "2026-11-11T01:05:52Z"
   },
   "interpretation": {
     "positive_result": "The conservative static source-edge inventory completed and reported no unresolved observations within the analyzer's supported static edge patterns for these three pinned snapshots.",
@@ -71,5 +71,13 @@
       "controlled clean offline replay"
     ],
     "policy": "Keep the measured runner/component baseline and partial operational-input subtotal labeled separately from any full seed total."
+  },
+  "previous_successful_audit": {
+    "audit_head_sha": "96ee15564d7a707d31664dca6e55b331d76ea6de",
+    "run_id": 38190369519,
+    "url": "https://github.com/juv4uk/sens/actions/runs/38190369519",
+    "artifact_id": 11721286686,
+    "artifact_zip_sha256": "fd6ad9a74c1c0469203da8ef4019dc3ffa938b7aef9f0e58eadd49c0e490b969",
+    "result": "SUCCESS; same three inventory counts; raw artifact expires 2026-11-11T01:03:32Z"
   }
 }
