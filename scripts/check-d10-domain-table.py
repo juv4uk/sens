@@ -11,6 +11,7 @@ from dataclasses import replace
 import hashlib
 import json
 import re
+import unicodedata
 from pathlib import Path
 
 from domain_tables import CURRENT_HUMAN_TABLES, D10_TABLE, read_domain_table
@@ -99,6 +100,10 @@ def check(d10, inventory, lower):
                 if row.domain == "D10":
                     need(False, "D10 missing " + column + " " + row.bits)
                 continue
+            need(unicodedata.normalize("NFC", value) == value,
+                 "non-NFC human surface " + column + " " + row.domain + ":" + row.bits)
+            need(not any(unicodedata.category(c) == "Cf" for c in value),
+                 "invisible format char " + column + " " + row.domain + ":" + row.bits)
             before = distinct[column].get(value)
             need(before is None, "human surface collision " +
                  column + " " + value + ": " + str(before) + " and " +
@@ -114,11 +119,11 @@ def check(d10, inventory, lower):
          json.loads(OWNER.read_text(encoding="utf-8"))["inventory"]["git_blob"],
          "editorial anchor source pin")
     anchor_list = editorial["anchors"]
-    need(len(anchor_list) == 32 and
-         len({a["semantic_name"] for a in anchor_list}) == 32,
+    need(len(anchor_list) == 41 and
+         len({a["semantic_name"] for a in anchor_list}) == 41,
          "editorial anchor coverage/duplicate")
     anchor_by_code = {a["coordinate"]: a for a in anchor_list}
-    need(len(anchor_by_code) == 32, "duplicate editorial coordinates")
+    need(len(anchor_by_code) == 41, "duplicate editorial coordinates")
 
     for row in d10:
         original = expected[row.bits]
@@ -206,6 +211,15 @@ def main():
                 next(i for i, row in enumerate(xs) if row.lisp == "CHARACTERP"),
                 replace(next(row for row in xs if row.lisp == "CHARACTERP"),
                         en="characterp"))),
+            ("non-NFC Sanskrit alias", lambda xs: xs.__setitem__(
+                next(i for i, row in enumerate(xs) if row.lisp == "COERCE"),
+                replace(next(row for row in xs if row.lisp == "COERCE"),
+                        san=unicodedata.normalize("NFD", next(
+                            row.san for row in xs if row.lisp == "COERCE"))))),
+            ("invisible format control", lambda xs: xs.__setitem__(
+                next(i for i, row in enumerate(xs) if row.lisp == "COERCE"),
+                replace(next(row for row in xs if row.lisp == "COERCE"),
+                        san="rūpāntaraṇa\u200b"))),
             ("wrong action marker", lambda xs: xs.__setitem__(
                 next(i for i, row in enumerate(xs) if row.lisp == "REMPROP"),
                 replace(next(row for row in xs if row.lisp == "REMPROP"),
