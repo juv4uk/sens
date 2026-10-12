@@ -5,16 +5,18 @@
 //!   1 byte -> F3M-1
 //!   2 bytes -> F3M-2
 //!   3 bytes -> F3M-3
+//!   4 bytes -> F3M-4
 //! Any other length is rejected fail-closed until separately admitted.
 //!
-//! This module selects the physical profile only.  It does not claim that
-//! F3M-2/F3M-3 semantic rank tables are already proved or production-ready.
+//! This module selects the physical profile only. Semantic proof status is
+//! tracked separately; adding a physical width never implies production admission.
 
 #[derive(Debug, Clone, Copy, Eq, PartialEq)]
 pub enum Frame3MicroProfile {
     F3M1,
     F3M2,
     F3M3,
+    F3M4,
 }
 
 impl Frame3MicroProfile {
@@ -23,6 +25,7 @@ impl Frame3MicroProfile {
             Self::F3M1 => 1,
             Self::F3M2 => 2,
             Self::F3M3 => 3,
+            Self::F3M4 => 4,
         }
     }
 
@@ -43,6 +46,7 @@ pub const fn frame3_micro_profile_from_len(
         1 => Ok(Frame3MicroProfile::F3M1),
         2 => Ok(Frame3MicroProfile::F3M2),
         3 => Ok(Frame3MicroProfile::F3M3),
+        4 => Ok(Frame3MicroProfile::F3M4),
         other => Err(UnsupportedFrame3MicroLength {
             physical_bytes: other,
         }),
@@ -74,6 +78,10 @@ mod tests {
             frame3_micro_profile(&[0x00, 0x00, 0x00]),
             Ok(Frame3MicroProfile::F3M3)
         );
+        assert_eq!(
+            frame3_micro_profile(&[0x00, 0x00, 0x00, 0x00]),
+            Ok(Frame3MicroProfile::F3M4)
+        );
     }
 
     #[test]
@@ -92,11 +100,15 @@ mod tests {
             frame3_micro_profile(&[0x00, 0xF3, 0xFF]),
             Ok(Frame3MicroProfile::F3M3)
         );
+        assert_eq!(
+            frame3_micro_profile(&[0xF3, 0xF4, 0x00, 0xFF]),
+            Ok(Frame3MicroProfile::F3M4)
+        );
     }
 
     #[test]
     fn unsupported_lengths_fail_closed() {
-        for len in [0usize, 4, 5, 8, 255] {
+        for len in [0usize, 5, 8, 255] {
             assert_eq!(
                 frame3_micro_profile_from_len(len),
                 Err(UnsupportedFrame3MicroLength {
@@ -111,5 +123,6 @@ mod tests {
         assert_eq!(Frame3MicroProfile::F3M1.payload_bits(), 8);
         assert_eq!(Frame3MicroProfile::F3M2.payload_bits(), 16);
         assert_eq!(Frame3MicroProfile::F3M3.payload_bits(), 24);
+        assert_eq!(Frame3MicroProfile::F3M4.payload_bits(), 32);
     }
 }
