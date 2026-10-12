@@ -69,7 +69,13 @@ jobs:
           mkdir -p "$RUNNER_TEMP/sens-binary"
           for file in \
             tests/fixtures/migration-quote-cohort-main/quote-legacy.sens \
-            tests/fixtures/migration-multiform-cohort-main/two-forms.sens; do
+            tests/fixtures/migration-multiform-cohort-main/two-forms.sens \
+            tests/fixtures/migration-d1-cond-cohort/branch.sens \
+            tests/fixtures/migration-pair-cohort-main/pair-cons.sens \
+            tests/fixtures/migration-pair-cohort-main/pair-car-cdr.sens \
+            tests/fixtures/migration-d4-selector-cohort/caar.sens \
+            tests/fixtures/migration-eq-cond-cohort-main/eq-cond-select.sens \
+            tests/fixtures/migration-eq-cond-cohort-main/eq-cond-skip.sens; do
             stem="${file##*/}"
             target/debug/sens "$file" > "$RUNNER_TEMP/sens-binary/${stem}.sens-exec"
             target/debug/sens-trit eval "$file" > "$RUNNER_TEMP/sens-binary/${stem}.trit-exec"
