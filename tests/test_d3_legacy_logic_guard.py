@@ -403,11 +403,31 @@ class LegacyD3GuardTests(unittest.TestCase):
         source = (ROOT / path).read_text(encoding="utf-8")
         rules = [f.rule for f in MODULE.scan_lisp(source, path)]
 
-        # Six non-trivial historical match branches still need independent
-        # semantic proof; do not suppress them in the strict project audit.
-        self.assertEqual(rules.count("COND_NOT_TWO_FIELDS"), 6)
+        # Only four non-trivial historical result-matches remain.
+        # Both surface word/class cases now use exact D3 EQ (D1 result).
+        self.assertEqual(rules.count("COND_NOT_TWO_FIELDS"), 4)
         self.assertNotIn("COND_HOST_TRUTH", rules)
         self.assertNotIn("LEGACY_W8_CALL", rules)
+
+        # Replacing either two-field D3 EQ clause with its old three-field
+        # result-matching COND must fail the strict scanner.
+        for klass, value in (("member", "word"), ("nonmember", "(11110100 word)")):
+            with self.subTest(klass=klass):
+                exact = (
+                    f"((101 (string-membership-helper word) "
+                    f"(class-membership string {klass}))\\n       {value})"
+                )
+                # Decode one escaped newline for the contiguous Lisp source form.
+                exact = exact.replace("\\n", "\n")
+                legacy = (
+                    f"((string-membership-helper word)\\n"
+                    f"       (class-membership string {klass})\\n"
+                    f"       {value})"
+                ).replace("\\n", "\n")
+                self.assertIn(exact, source)
+                drift = source.replace(exact, legacy, 1)
+                findings = [f.rule for f in MODULE.scan_lisp(drift, path)]
+                self.assertGreater(findings.count("COND_NOT_TWO_FIELDS"), 4)
 
         pair = "((010 sections) (001 ()))"
         self.assertIn(pair, source)

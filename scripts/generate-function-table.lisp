@@ -100,11 +100,9 @@
   (0010 (word)
     (110
       ((11110111 word (001 ())) "()")
-      ((string-membership-helper word)
-       (class-membership string member)
+      ((101 (string-membership-helper word) (class-membership string member))
        word)
-      ((string-membership-helper word)
-       (class-membership string nonmember)
+      ((101 (string-membership-helper word) (class-membership string nonmember))
        (11110100 word)))))
 
 ; For the machine-readable .lisp output specifically, a bare apostrophe
