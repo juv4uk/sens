@@ -10,6 +10,28 @@ fn time_session() -> Session {
     session
 }
 
+#[test]
+fn core_quotient_and_mod_return_numeric_values_for_nonzero_divisors() {
+    let mut session = Session::default();
+    load_core_library(&mut session).unwrap();
+
+    for (source, expected) in [
+        ("(quotient 10 3)", "3"),
+        ("(quotient 1 3)", "0"),
+        ("(mod 10 3)", "1"),
+        ("(mod 0 7)", "0"),
+    ] {
+        assert_eq!(
+            eval_program(source, &mut session)
+                .unwrap_or_else(|error| panic!("{source}: {error}"))
+                .value
+                .to_string(),
+            expected,
+            "{source}"
+        );
+    }
+}
+
 /// A raw host observation is a Rust primitive on its SENS code (#1477), not a
 /// name bound in the environment.
 fn assert_raw_host_primitive(surface: &str) {
