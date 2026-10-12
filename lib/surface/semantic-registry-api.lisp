@@ -67,7 +67,7 @@
 
 (0011 semantic-registry-surface-name
   (0010 (namespace row)
-    (001000 ((entry
+    (10011100 ((entry
             (semantic-registry-find-surface
               namespace
               (semantic-registry-row-surfaces row))))
@@ -93,7 +93,7 @@
     (110
       
       ((0100 (010 namespaces))
-       (001000 ((candidate
+       (10011100 ((candidate
                (semantic-registry-surface-name
                  (100 namespaces)
                  row)))
@@ -111,7 +111,7 @@
     (110
       
       ((0100 (010 rows))
-       (001000 ((sens-ref
+       (10011100 ((sens-ref
                (semantic-registry-find-id-in-namespaces
                  name
                  (100 rows)

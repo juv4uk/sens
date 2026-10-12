@@ -69,9 +69,9 @@
 ; template that legitimately evaluates to `()`.
 (0011 fire-rule
   (0010 (rule fact)
-    (001000 ((pattern (100 rule))
+    (10011100 ((pattern (100 rule))
           (template (1001 rule)))
-      (001000 ((bindings (101010000 pattern fact (001 ()))))
+      (10011100 ((bindings (101010000 pattern fact (001 ()))))
         (110
           ((failed-subst? bindings) (001 no-match))
           ((010 ()) (101101001 template bindings)))))))
@@ -109,7 +109,7 @@
     (110
       
       ((010 facts)  (001 ()))
-      ((010 ()) (001000 ((result (fire-rule rule (100 facts))))
+      ((010 ()) (10011100 ((result (fire-rule rule (100 facts))))
            (110
              ((0100 (010 result)) (110
                 ((101 result (001 no-match)) (fire-rule-on-facts rule (011 facts)))
@@ -205,7 +205,7 @@
 
 (0011 run
   (0010 (rules facts)
-    (001000 ((merged (append-new (fire-rules-on-facts rules facts) facts)))
+    (10011100 ((merged (append-new (fire-rules-on-facts rules facts) facts)))
       (110
         ((11110111 (000000 merged) (000000 facts))  facts)
         ((010 ()) (run rules merged))))))
@@ -332,7 +332,7 @@
 ; single supporting fact that produced it.
 (0011 fire-rule-tms
   (0010 (rule fact)
-    (001000 ((result (fire-rule rule fact)))
+    (10011100 ((result (fire-rule rule fact)))
       (110
         ((0100 (010 result)) (110
            ((101 result (001 no-match)) (001 no-match))
@@ -347,7 +347,7 @@
     (110
       
       ((010 facts)  (001 ()))
-      ((010 ()) (001000 ((result (fire-rule-tms rule (100 facts))))
+      ((010 ()) (10011100 ((result (fire-rule-tms rule (100 facts))))
            (110
              ((0100 (010 result)) (fire-rule-on-facts-tms rule (011 facts)))
              ((010 result)  (fire-rule-on-facts-tms rule (011 facts)))
@@ -381,8 +381,8 @@
 ; The fixpoint loop over justified facts, mirroring `run` from Step 4.
 (0011 run-tms
   (0010 (rules entries)
-    (001000 ((new-entries (fire-rules-on-facts-tms rules (map-fact-of entries))))
-      (001000 ((merged (add-new-justified new-entries entries)))
+    (10011100 ((new-entries (fire-rules-on-facts-tms rules (map-fact-of entries))))
+      (10011100 ((merged (add-new-justified new-entries entries)))
         (110
           ((11110111 (000000 merged) (000000 entries))  entries)
           ((010 ()) (run-tms rules merged)))))))
@@ -480,7 +480,7 @@
 
 (0011 fire-rule-jtms
   (0010 (rule fact)
-    (001000 ((result (fire-rule rule fact)))
+    (10011100 ((result (fire-rule rule fact)))
       (110
         ((0100 (010 result)) (110
            ((101 result (001 no-match)) (001 no-match))
@@ -495,7 +495,7 @@
     (110
       
       ((010 facts)  (001 ()))
-      ((010 ()) (001000 ((result (fire-rule-jtms rule (100 facts))))
+      ((010 ()) (10011100 ((result (fire-rule-jtms rule (100 facts))))
            (110
              ((0100 (010 result)) (fire-rule-on-facts-jtms rule (011 facts)))
              ((010 result)  (fire-rule-on-facts-jtms rule (011 facts)))
@@ -531,7 +531,7 @@
 ; twice is a no-op, needed for `run-jtms`'s fixpoint check to terminate).
 (0011 add-justification
   (0010 (fact justification entries)
-    (001000 ((existing (find-entry fact entries)))
+    (10011100 ((existing (find-entry fact entries)))
       (110
         ((0100 (010 existing)) (111 (1110 fact justification) entries))
         ((010 existing)  (111 (1110 fact justification) entries))
@@ -555,7 +555,7 @@
 ; real progress and stop too early.
 (0011 run-jtms
   (0010 (rules entries)
-    (001000 ((merged (add-new-entries-jtms (fire-rules-on-facts-jtms rules (map-fact-of entries)) entries)))
+    (10011100 ((merged (add-new-entries-jtms (fire-rules-on-facts-jtms rules (map-fact-of entries)) entries)))
       (110
         ((11110111 merged entries) entries)
         ((010 ()) (run-jtms rules merged))))))
@@ -652,7 +652,7 @@
     (110
       
       ((010 facts)  (001 ()))
-      ((010 ()) (001000 ((s (101010000 condition (100 facts) (jtms-state-subst state))))
+      ((010 ()) (10011100 ((s (101010000 condition (100 facts) (jtms-state-subst state))))
            (110
              ((failed-subst? s) (match-plain-condition-jtms condition (011 facts) state))
              ((010 ()) (111 (jtms-make-state s (111 (100 facts) (jtms-state-used state)))
@@ -709,7 +709,7 @@
 
 (0011 run-jtms-multi
   (0010 (rules entries)
-    (001000 ((merged (add-new-entries-jtms (fire-rules-jtms-multi rules (map-fact-of entries)) entries)))
+    (10011100 ((merged (add-new-entries-jtms (fire-rules-jtms-multi rules (map-fact-of entries)) entries)))
       (110
         ((11110111 merged entries) entries)
         ((010 ()) (run-jtms-multi rules merged))))))
@@ -761,8 +761,8 @@
 ; justification left" instead of "any support left".
 (0011 retract-fact-jtms
   (0010 (fact entries)
-    (001000 ((pruned (prune-all-entries fact (remove-entry-jtms fact entries))))
-      (001000 ((newly-unsupported (unsupported-facts pruned))
+    (10011100 ((pruned (prune-all-entries fact (remove-entry-jtms fact entries))))
+      (10011100 ((newly-unsupported (unsupported-facts pruned))
             (remaining (drop-unsupported pruned)))
         (110
           
@@ -860,7 +860,7 @@
     (110
       
       ((010 facts)  (001 ()))
-      ((010 ()) (001000 ((s (101010000 condition (100 facts) bindings)))
+      ((010 ()) (10011100 ((s (101010000 condition (100 facts) bindings)))
            (110
              ((failed-subst? s) (match-condition-against-facts condition (011 facts) bindings))
              ((010 ()) (111 s (match-condition-against-facts condition (011 facts) bindings)))))))))
@@ -1067,7 +1067,7 @@
 
 (0011 match-test-condition
   (0010 (expression bindings)
-    (001000 ((result (0001 (101101001 expression bindings))))
+    (10011100 ((result (0001 (101101001 expression bindings))))
       ; E1 (#216): under exact-Q a false comparison answers 0, and 0 is
       ; truthy -- the pre-exact-Q two-part `(cond (result (list subst)) (t ()))`
       ; treated a falsy test as a success. A test condition is falsy when its
@@ -1272,7 +1272,7 @@
 
 (0011 run-multi
   (0010 (rules facts)
-    (001000 ((merged (append-new (fire-rules-multi rules facts) facts)))
+    (10011100 ((merged (append-new (fire-rules-multi rules facts) facts)))
       (110
         ((11110111 (000000 merged) (000000 facts))  facts)
         ((010 ()) (run-multi rules merged))))))
