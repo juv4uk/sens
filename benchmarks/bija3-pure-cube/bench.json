@@ -1,0 +1,19 @@
+{
+  "schema": "sens-benchmark-manifest/v1",
+  "stand": "bija3-pure-cube",
+  "wing": "D3 / bīja3 law-first mapping research",
+  "roles": [
+    "RESEARCH",
+    "FALSIFIER"
+  ],
+  "question": "Among all 5,040 D3 placements with EMPTY fixed at 000, which satisfy the shared XOR-sibling and family-edge objective using only the eight D3 residents?",
+  "claim": "Exhaustively evaluates the closed eight-resident D3 cube without D4–D8, historical/current code tables, placement reward, or migration cost. Research witness only; it does not change the production D3 map or ratify a candidate.",
+  "witness": [
+    "run.py",
+    "README.md"
+  ],
+  "status": "RESEARCH-ONLY; NO PRODUCTION D3 MAP CHANGE",
+  "generation": "unknown",
+  "axis": "D3/bija3-pure-cube-law-first",
+  "reproduce": "python3 benchmarks/bija3-pure-cube/run.py --json-out /tmp/bija3-pure-cube.json"
+}
