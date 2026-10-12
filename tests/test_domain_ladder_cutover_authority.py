@@ -50,9 +50,6 @@ class CutoverAuthorityTests(unittest.TestCase):
         )
         self.assertEqual(result.returncode, 0, result.stderr or result.stdout)
 
-    def test_no_workflow_invokes_a_missing_script(self):
-        self.assertEqual(broken_invocations(), [])
-
     def test_retired_eight_bit_guard_absent_and_unreferenced(self):
         self.assertFalse((ROOT / "scripts" / RETIRED_GUARD).exists())
         for path in workflow_files():

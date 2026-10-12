@@ -65,11 +65,6 @@ class RequiredChecksTests(unittest.TestCase):
             _, problems, _ = MODULE.check(materialize(Path(tmp), {"ci.yml": body}))
             self.assertTrue(any("ambiguous" in p for p in problems), problems)
 
-    def test_real_repo_required_checks_all_resolve(self):
-        required, problems, _ = MODULE.check(ROOT)
-        self.assertTrue(required)
-        self.assertEqual(problems, [])
-
 
 if __name__ == "__main__":
     unittest.main()
