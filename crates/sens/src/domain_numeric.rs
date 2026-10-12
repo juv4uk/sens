@@ -63,9 +63,10 @@ fn canonical(
     if !nr.is_zero() || !dr.is_zero() {
         return None;
     }
-    // Test the reduced unit *before* left-padding it into an explicit Dn.
-    // D24(1) is 000...001, not the normalized single-bit [1]; checking
-    // after own_word() incorrectly preserves RATIO(2,1) and NEG(2,1).
+    // Recognize the reduced unit before constructing an explicit Dn word.
+    // BinaryNumber currently normalizes padded leading zeros, so checking
+    // after own_word() also recognizes 1; doing it here avoids allocating
+    // an entire temporary Dn denominator that integer/zero cases discard.
     let denominator_is_one = d.as_bits() == [1];
 
     let mut width = minimum_width;
@@ -73,7 +74,6 @@ fn canonical(
         width = width.checked_mul(2)?;
     }
     let n = own_word(n, width)?;
-    let d = own_word(d, width)?;
     if n.is_zero() { return Some(Value::BinaryNumber(n)); }
     if denominator_is_one {
         if negative {
@@ -83,6 +83,8 @@ fn canonical(
         }
         return Some(Value::BinaryNumber(n));
     }
+    // Only an actual fraction needs a fully qualified Dn denominator.
+    let d = own_word(d, width)?;
     Some(Value::NumericComposition(DomainNumericComposition {
         negative, numerator: n, denominator: Some(d),
     }))
