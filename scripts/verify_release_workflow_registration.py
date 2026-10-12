@@ -17,7 +17,7 @@ from urllib.request import Request, urlopen
 
 WORKFLOW_PATH = ".github/workflows/release-preflight.yml"
 WORKFLOW_NAME = "Release Preflight"
-REPOSITORY = re.compile(r"[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+\\Z")
+REPOSITORY = re.compile(r"[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+\Z")
 
 
 class RegistrationBlocked(ValueError):
