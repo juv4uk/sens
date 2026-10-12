@@ -48,6 +48,24 @@ boundary/sample roundtrip і реальний трьохбайтовий COND wi
 exhaustive evaluator sweep усіх 16 777 216 F3M-3 програм ще не заявляється
 завершеним.
 
+### Трьохбайтовий виконуваний свідок
+
+Фізичний payload **`2F 18 59`** (рівно 3 байти, без мітки) у чинному
+dense F3M-3 декодується в:
+
+`IF-ATOM(QUOTE(0), CAR(CONS(QUOTE(1),1)), CDR(CONS(QUOTE(NIL),QUOTE(0))))`
+
+Він відновлює точні SENS-слова, проходить canonical parser і реальний
+evaluator та дає результат **`1`**. Це не вручну призначений opcode:
+`2F 18 59` є локальним 24-бітовим рангом усередині неперетинного
+F3M-3 global-rank window.
+
+[GitHub Actions run 38194615315](https://github.com/juv4uk/sens/actions/runs/38194615315)
+— **SUCCESS**: dense rank-window tests PASS, усі **65 536/65 536** F3M-2
+payloads пройшли exhaustive encode/decode roundtrip, F3M-3 boundary/sample
+roundtrip PASS, трьохбайтовий COND witness PASS, F3M-1 256/256 evaluator/T5
+proof PASS.
+
 Старі дослідження canonical capacity можуть бути донорами для побудови
 F3M-2/F3M-3, але їхні числа не стають автоматично чинною ємністю нового
 профілю без нового exhaustive witness.
