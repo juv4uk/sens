@@ -1,0 +1,122 @@
+{
+  "schema": "sens-benchmark-sweep-evidence/1",
+  "measured_at": "2026-10-12",
+  "repository": "juv4uk/sens",
+  "ref": "main",
+  "commit": "d57d55f7f50f157d672bb283d31f9a427690596f",
+  "workflow": {
+    "name": "Benchmark registry",
+    "run_id": 38190345552,
+    "url": "https://github.com/juv4uk/sens/actions/runs/38190345552",
+    "conclusion": "success",
+    "summary_artifact_id": 11721512391,
+    "summary_artifact_url": "https://github.com/juv4uk/sens/actions/runs/38190345552/artifacts/11721512391",
+    "summary_artifact_sha256": "e1beca72a4d47c7f70e9366cf51d92a735c1f5067f59377638a9ed37975448c5",
+    "summary_artifact_expires_utc": "2026-11-02T01:06:04Z"
+  },
+  "coverage": {
+    "expected_stands": 54,
+    "observed_stands": 54,
+    "duplicates": false,
+    "missing": [],
+    "extra": [],
+    "exact_git_sha_observed": true,
+    "coverage_complete": true
+  },
+  "outcome_counts": {
+    "pass": 50,
+    "fail": 4,
+    "blocked": 0,
+    "timeout": 0,
+    "all_benchmarks_pass": false
+  },
+  "failures": [
+    {
+      "stand": "store-air-load",
+      "status": "FAIL",
+      "exit_code": 2,
+      "category": "STALE_SEMANTIC_GENERATION",
+      "evidence": "The harness is deliberately pinned to Contract 11.8 and detects Contract 11.9 in the current checkout.",
+      "log_artifact": "benchmark-sweep-38190345552-4/store-air-load.log",
+      "decision": "Do not relabel old rows as current. Either replay the STORE/AIR/LOAD corpus under Contract 11.9 with parity evidence, or keep the current replay explicitly blocked/historical."
+    },
+    {
+      "stand": "cross-language",
+      "status": "FAIL",
+      "exit_code": 127,
+      "category": "MISSING_ENVIRONMENT_PREREQUISITE",
+      "evidence": "The command attempts guix time-machine, but guix is not installed on the standard GitHub-hosted Ubuntu runner.",
+      "log_artifact": "benchmark-sweep-38190345552-5/cross-language.log",
+      "decision": "Treat this as a runner/environment prerequisite failure, not as a measured SENS-vs-Python performance result. Run in the pinned Guix environment or classify the lane blocked."
+    },
+    {
+      "stand": "d6-parity-duality",
+      "status": "FAIL",
+      "exit_code": 2,
+      "category": "BROKEN_REPRODUCTION_COMMAND",
+      "evidence": "The manifest passed --corpus to benchmarks/d6-parity-duality/run.py although the runner CLI accepts only --out.",
+      "log_artifact": "benchmark-sweep-38190345552-2/d6-parity-duality.log",
+      "decision": "The manifest command has since been corrected to invoke the actual runner interface; this is not yet a new passing sweep."
+    },
+    {
+      "stand": "physical-binary-performance",
+      "status": "FAIL",
+      "exit_code": 1,
+      "category": "LEGACY_FIXTURE_INCOMPATIBLE_WITH_CURRENT_SOURCE_READER",
+      "evidence": "The benchmark attempted to encode the legacy projection `(00000001 ())`, and current sens-trit correctly rejected it as not a canonical exact-width binary source word.",
+      "log_artifact": "benchmark-sweep-38190345552-6/physical-binary-performance.log",
+      "decision": "Use current canonical source fixtures or a source-to-physical-byte proof fixture; do not weaken the parser or count the failed sample as performance data."
+    }
+  ],
+  "interpretation": "This sweep proves full registered-stand coverage for its pinned commit, not global repository health. 50 stands passed; four failed for separately identified causes. Other CI/runtime/source-authority gates remain independent.",
+  "shard_artifacts": [
+    {
+      "id": 11721820728,
+      "name": "benchmark-sweep-38190345552-4",
+      "sha256": "ddd2026f33ab3e6b92016c69a630ada1067c46418024054aba5140d6a906c75c",
+      "expires_utc": "2026-11-02T01:04:25Z"
+    },
+    {
+      "id": 11721532208,
+      "name": "benchmark-sweep-38190345552-3",
+      "sha256": "0cf7c456d397aff544d75359bab06666631e80352c8c294e1d41f7070bae2405",
+      "expires_utc": "2026-11-02T01:04:24Z"
+    },
+    {
+      "id": 11721452540,
+      "name": "benchmark-sweep-38190345552-0",
+      "sha256": "ab713f849d69eb136f7fcc559d5ad6b966471b8edab9151da8fda977538806c7",
+      "expires_utc": "2026-11-02T01:04:54Z"
+    },
+    {
+      "id": 11721337677,
+      "name": "benchmark-sweep-38190345552-7",
+      "sha256": "1ab4189fc53f84266cdb130672a67d2de832138dd6bf4dd2f0988aa6baad0821",
+      "expires_utc": "2026-11-02T01:04:45Z"
+    },
+    {
+      "id": 11721187979,
+      "name": "benchmark-sweep-38190345552-1",
+      "sha256": "174b67b0a5e199a90a04777248aeab7e16398c3cdb762da814b60b67b0fb407b",
+      "expires_utc": "2026-11-02T01:04:51Z"
+    },
+    {
+      "id": 11721127047,
+      "name": "benchmark-sweep-38190345552-6",
+      "sha256": "aa4aa1c6e35703f2086ce02360691f2d9f3b9edf567db87c6efb8725ea68f851",
+      "expires_utc": "2026-11-02T01:04:47Z"
+    },
+    {
+      "id": 11720952239,
+      "name": "benchmark-sweep-38190345552-5",
+      "sha256": "136be883a3055304f21b2179ba70cca677c33f8ff3b5c33b4d4c62a0d73b05a2",
+      "expires_utc": "2026-11-02T01:05:46Z"
+    },
+    {
+      "id": 11720693029,
+      "name": "benchmark-sweep-38190345552-2",
+      "sha256": "d0f7f9978da2981aac0ffac0c23601e1f02c63688b65c56907ae62daf6e02d8d",
+      "expires_utc": "2026-11-02T01:04:55Z"
+    }
+  ]
+}
