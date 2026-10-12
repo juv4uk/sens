@@ -18,13 +18,13 @@
   (0010 (key alist)
     (110 ((010 alist) ()) ((010 (001 ())) (110
            ((101 (1000 alist) key) (100 alist))
-           (t (assoc key (011 alist))))))))
+           ((010 (001 ())) (assoc key (011 alist))))))))
 
 (0011 assoc-str
   (0010 (key alist)
     (110 ((010 alist) ()) ((010 (001 ())) (110
            ((101 (1000 alist) key) (011 (100 alist)))
-           (t (assoc-str key (011 alist))))))))
+           ((010 (001 ())) (assoc-str key (011 alist))))))))
 
 (0011 alist-keys
   (0010 (alist)
@@ -35,7 +35,7 @@
   (0010 (lst)
     (110 ((010 lst) ()) ((010 (001 ())) (110
            ((11101 (100 lst) (011 lst)) (uniq (011 lst)))
-           (t (111 (100 lst) (uniq (011 lst)))))))))
+           ((010 (001 ())) (111 (100 lst) (uniq (011 lst)))))))))
 
 ;; Structural walk to collect observed-forms
 ;; Rules:
@@ -61,14 +61,12 @@
                      (110 ((010 (0111 v)) ()) ((010 (001 ())) (walk-observed (100 (0111 v)))))))
               ((101 head (001 defmacro))
                (111 (001 defmacro)
-                     (110 ((010 (0111 v)) () ())
-                           ((010 (0111 v)) (1) ())
-                           ((010 (011 (0111 v))) () ())
-                           ((010 (011 (0111 v))) (1) ())
-                           (t (walk-observed (100 (011 (0111 v))))))))
+                     (110 ((010 (0111 v)) ())
+                           ((010 (011 (0111 v))) ())
+                           ((010 (001 ())) (walk-observed (100 (011 (0111 v))))))))
               ((101 head (001 cond))
                (111 (001 cond) (walk-cond-clauses (011 v))))
-              (t
+              ((010 (001 ()))
                (111 (001 application) (walk-list v))))) ((010 (001 ())) (111 (001 application) (walk-list v)))))))))
 
 (0011 walk-cond-clauses
@@ -90,7 +88,7 @@
     (110
       ((101 error-kind "NumericOverflow")
        ())
-      (t
+      ((010 (001 ()))
        (001000 ((forms (110101001 expr-str)))
          (110 ((010 forms) ()) ((010 (001 ())) (uniq (walk-observed (100 forms))))))))))
 
@@ -121,20 +119,20 @@
           (requires (assoc-str (001 requires) fixture))
           (role (assoc-str (001 role) fixture))
           (note (assoc-str (001 note) fixture))
-          (outcome-kind (110 (expected (001 expected)) (t (001 error))))
-          (outcome-value (110 (expected expected) (t error-kind)))
+          (outcome-kind (110 (expected (001 expected)) ((010 (001 ())) (001 error))))
+          (outcome-value (110 (expected expected) ((010 (001 ())) error-kind)))
           (id (compute-id expr axioms outcome-kind outcome-value))
           (observed-forms (get-observed-forms expr error-kind)))
       (11011011 (1110 (001 fixture)
                    (111 (001 id) id)
                    (111 (001 tier) tier)
                    (111 (001 axioms) axioms)
-                   (111 (001 declared-requires) (110 (requires requires) (t ())))
+                   (111 (001 declared-requires) (110 (requires requires) ((010 (001 ())) ())))
                    (111 (001 observed-forms) observed-forms)
                    (111 (001 outcome-kind) outcome-kind)
                    (111 (001 outcome-value) outcome-value)
-                   (111 (001 role) (110 (role role) (t ())))
-                   (111 (001 note) (110 (note note) (t ()))))))))
+                   (111 (001 role) (110 (role role) ((010 (001 ())) ())))
+                   (111 (001 note) (110 (note note) ((010 (001 ())) ()))))))))
 
 ;; Emit all fixtures
 (0011 emit-all
