@@ -95,7 +95,7 @@ fn bare_numbers_and_numeric_spelling_cannot_bypass_d24_admission() {
         "(* 24 48)",
         // A 24/48-bit-looking source spelling is not a D24/D48
         // qualified value. Width alone has no numeric-domain authority.
-        "(01010 000000000000000000000001 000000000000000000000001)",
+        "(+ 000000000000000000000001 000000000000000000000001)",
     ] {
         let error = eval_program(source, &mut session).unwrap_err();
         assert_eq!(error.kind, ErrorKind::Type, "{source}");
