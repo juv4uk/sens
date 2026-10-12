@@ -79,6 +79,16 @@ class ReleasePinsTests(unittest.TestCase):
             _, errors = MODULE.check(root)
             self.assertTrue(any("not pinned to a 40-hex SHA" in e for e in errors), errors)
 
+    def test_floating_action_tag_with_comment_blocks(self):
+        # A trailing `# tag` comment must not let a floating ref slip through.
+        with tempfile.TemporaryDirectory() as tmp:
+            step = "      - uses: actions/checkout@v5 # v5\n"
+            root = materialize(
+                Path(tmp), CHANNEL, {w: step for w in MODULE.RELEASE_WORKFLOWS}
+            )
+            _, errors = MODULE.check(root)
+            self.assertTrue(any("not pinned to a 40-hex SHA" in e for e in errors), errors)
+
     def test_missing_release_workflow_blocks(self):
         with tempfile.TemporaryDirectory() as tmp:
             root = materialize(

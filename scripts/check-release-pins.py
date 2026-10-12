@@ -33,7 +33,7 @@ RELEASE_WORKFLOWS = (
 )
 
 STEP = re.compile(r"^\s*-\s")
-USES_LINE = re.compile(r"^\s*-?\s*uses:\s*(\S+)\s*$")
+USES_LINE = re.compile(r"^\s*-?\s*uses:\s*(\S+)(?:\s+#.*)?\s*$")
 TOOLCHAIN_LINE = re.compile(r"^\s*toolchain:\s*[\"']?([^\"'\s]+)[\"']?\s*$")
 SHA = re.compile(r"[0-9a-f]{40}\Z")
 LOCAL = re.compile(r"\./\S+\Z")
