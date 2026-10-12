@@ -1,8 +1,9 @@
 ; Мовна політика екосистеми my-lisp.
 ; Ратифіковано прямою настановою власника 2026-09-07.
 ;
-; Цей контракт стосується людської комунікації в репозиторії: документації,
-; інструкцій агентам, пояснень, коментарів у коді, Git-задач, PR і комітів.
+; Цей контракт стосується ВСЬОГО людського тексту у власних репозиторіях,
+; Git, GitHub, CI, релізах, задачах, комітах, повідомленнях агентів та діалозі.
+; Для нових людських назв Git-гілок: українська, якщо підтримує інтерфейс.
 ; Він НЕ скасовує окремі
 ; програмні surface мови (зокрема Sanskrit surface), канонічні ідентичності,
 ; зовнішні API, точні назви символів, протоколів, файлів чи upstream-термінів.
@@ -38,7 +39,13 @@
         (git-tasks-and-issues-ukrainian-first . t)
         (git-pull-requests-and-reviews-ukrainian-first . t)
         (git-commit-subject-and-body-ukrainian-first . t)
+        (git-branch-human-names-ukrainian-first . t)
+        (all-agent-and-owner-messages-ukrainian-first . t)
+        (workflow-job-and-ci-human-labels-ukrainian-first . t)
+        (release-and-project-human-names-ukrainian-first . t)
         (git-ci-bot-human-text-ukrainian-first . t)
+        (human-text-any-channel-ukrainian-first . t)
+        (machine-token-exceptions-are-not-prose-exceptions . t)
         (existing-git-history-no-language-only-rewrite . t)))
      (repository-boundary .
        ((include . owner-authored-repositories)
@@ -54,6 +61,10 @@
         git-issue-titles-bodies-and-comments
         git-pull-request-titles-bodies-and-reviews
         git-commit-subject-and-body
+        git-branch-human-names
+        git-workflow-and-job-human-labels
+        human-agent-messages-and-bus
+        all-owner-facing-and-agent-facing-channels
         git-project-tasks-and-agent-statuses
         git-ci-bot-human-messages
         release-titles-and-notes))
