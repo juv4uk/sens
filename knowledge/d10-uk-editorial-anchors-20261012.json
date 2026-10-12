@@ -134,7 +134,7 @@
       "semantic_name": "VECTOR->LIST",
       "coordinate": "0000101100",
       "stable_id": "d10.crossrepo.portable.66ee8572b7f5ca2b",
-      "uk": "вектор-у-список",
+      "uk": "вектор->список",
       "ukr": "перетворити-вектор-на-список",
       "scope_note": "convert a vector to a proper list preserving element order"
     },
