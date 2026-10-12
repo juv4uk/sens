@@ -1,0 +1,36 @@
+# Точковий свідок числової доменної ширини та канонічного знаменника.
+# Не допускає старі бездоменні літерали і не змінює фізичний кодек.
+name: D24+ — один біт знаменника
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "crates/sens/src/domain_numeric.rs"
+      - "crates/sens/src/binary_number.rs"
+      - ".github/workflows/d24-unit-denominator-canonical.yml"
+  pull_request:
+    paths:
+      - "crates/sens/src/domain_numeric.rs"
+      - "crates/sens/src/binary_number.rs"
+      - ".github/workflows/d24-unit-denominator-canonical.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  exact-unit-denominator:
+    name: Відрізнити Dn(2) від Dn(2/3) без втрати біта
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v5
+      - name: Встановити закріплений Rust
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          toolchain: "1.99.0"
+      - name: Один змінений біт D24 D48 D96 D192
+        run: cargo test --locked -p sens --lib domain_numeric::tests::one_bit_denominator_mutation_keeps_d24_plus_integers_canonical -- --exact
+      - name: Незалежні канонічні операції того самого математичного домену
+        run: cargo test --locked -p sens --lib domain_numeric::tests
