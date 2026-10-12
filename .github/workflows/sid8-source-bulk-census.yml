@@ -33,12 +33,6 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.11"
-      - name: Regression tests for old-to-domain words and D3 semantic blockers
-        run: python3 -m unittest discover -s tests -p test_migrate_sid8_source_batch.py -v
-      - name: Verify two D3 two-field enforcement cutovers with negative controls
-        run: python3 -m unittest discover -s tests -p test_sid8_d3_enforcement_cutover.py -v
-      - name: Validate five D4-only source replacements against immutable Git blobs
-        run: python3 -m unittest discover -s tests -p test_sid8_d4_policy_cohort.py -v
       - name: Inspect all live original Lisp files without changing any file
         run: |
           python3 scripts/migrate-sid8-source-batch.py --report "$RUNNER_TEMP/sid8-source-batch-report.json"
@@ -62,3 +56,9 @@ jobs:
           retention-days: 7
           if-no-files-found: error
           path: ${{ runner.temp }}/sid8-source-batch-report.json
+      - name: Regression tests for old-to-domain words and D3 semantic blockers
+        run: python3 -m unittest discover -s tests -p test_migrate_sid8_source_batch.py -v
+      - name: Verify two D3 two-field enforcement cutovers with negative controls
+        run: python3 -m unittest discover -s tests -p test_sid8_d3_enforcement_cutover.py -v
+      - name: Validate five D4-only source replacements against immutable Git blobs
+        run: python3 -m unittest discover -s tests -p test_sid8_d4_policy_cohort.py -v
