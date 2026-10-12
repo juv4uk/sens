@@ -16,6 +16,17 @@ REQUIRED = (
     "Cargo.lock",
     "Cargo.toml",
     "crates/**/Cargo.toml",
+    "lib/core4.lisp",
+    "lib/time.lisp",
+    "lib/machine/**",
+    "crates/sens/src/mixed_source.rs",
+    "crates/sens/src/eval/**",
+    "crates/sens/src/frame3_micro*.rs",
+    "crates/sens/tests/timezone_raw.rs",
+    "crates/sens-host/tests/native_cond_profile.rs",
+    "crates/sens-host/tests/native_lisp_bytes.rs",
+    "scripts/check_d3_legacy_logic.py",
+    "tests/test_d3_legacy_logic_guard.py",
     "guix.scm",
     "scripts/release.lisp",
     "scripts/verify_release_tag.py",
@@ -60,6 +71,14 @@ class ReleasePreflightScopeTest(unittest.TestCase):
         corrupted = self.workflow.replace('      - "guix.scm"\n', "", 1)
         with self.assertRaisesRegex(AssertionError, "excludes guix.scm"):
             require_trigger_coverage(corrupted)
+
+    def test_negative_guard_rejects_missing_time_and_native_semantic_paths(self):
+        for path in ("lib/time.lisp", "crates/sens/src/mixed_source.rs",
+                     "crates/sens-host/tests/native_lisp_bytes.rs"):
+            with self.subTest(path=path):
+                corrupted = self.workflow.replace(f'      - "{path}"\n', "", 1)
+                with self.assertRaisesRegex(AssertionError, "excludes "):
+                    require_trigger_coverage(corrupted)
 
     def test_negative_guard_rejects_missing_installer_scope(self):
         prefix, suffix = self.workflow.split("  pull_request:\n", 1)
