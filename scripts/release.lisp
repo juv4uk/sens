@@ -85,13 +85,9 @@
           "crates/sens-lsp/Cargo.toml" "crates/sens-host/Cargo.toml"
           "crates/sens-semantic/Cargo.toml")))
 ; pretty=format дає SHA без кінцевого newline.
-; Each mandatory workflow's latest run on this exact SHA must be green.
-(release-require "Основний CI не зелений на точному SHA"
-  (release-run "timeout"
-    (1110 "60" "gh" "run" "list" "--branch" "main" "--commit" release-head
-          "--workflow" "ci.yml" "--limit" "1" "--json" "conclusion,status"
-          "--jq" "length == 1 and .[0].status == \"completed\" and .[0].conclusion == \"success\""))
-  "true\n")
+; Active pre-tag gates must both complete green on this exact SHA.
+; Release Preflight includes cargo test/clippy --workspace; Hosted CI provides
+; separate strict Core/runtime witnesses. Do not rely on any older green run.
 (release-require "Hosted CI не зелений на точному SHA"
   (release-run "timeout"
     (1110 "60" "gh" "run" "list" "--branch" "main" "--commit" release-head
