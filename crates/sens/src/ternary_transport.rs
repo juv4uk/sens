@@ -62,27 +62,27 @@ fn append_t5_digit(
     }
 }
 
-/// Потокове фізичне пакування точних доменних слів.
-///
-/// Тут немає таблиці функцій чи семантики D1–D9: трит `2` лише розділяє
-/// слова; невикористаний фізичний хвіст заповнюється щонайбільше чотирма `2`.
-/// Пам'ять пропорційна тільки вихідним байтам T5, не проміжним тритам.
-pub fn encode_ternary_words(
-    words: &[BinarySourceWord],
+/// Один T5-алгоритм для вже валідованих доменних координат.
+/// Значення читається з u16 без обрізання старшого біта D9/D10.
+/// Трити 2 лише розділяють слова й заповнюють останню фізичну п'ятірку.
+fn encode_ternary_fields(
+    words: impl Iterator<Item = (usize, u16)> + ExactSizeIterator + Clone,
+    max_width: usize,
 ) -> Result<Vec<u8>, TernaryTransportError> {
-    if words.is_empty() {
+    let word_count = words.len();
+    if word_count == 0 {
         return Err(TernaryTransportError::EmptyProgram);
     }
+
     let mut semantic_trits = 0usize;
-    for word in words {
-        let width = word.width();
-        if !(1..=9).contains(&width) {
+    for (width, payload) in words.clone() {
+        if width == 0 || width > max_width || width > 10 || payload >= (1u16 << width) {
             return Err(TernaryTransportError::UnsupportedDomainWidth);
         }
         semantic_trits = semantic_trits.checked_add(width)
             .ok_or(TernaryTransportError::TransportTooLarge)?;
     }
-    let trit_count = semantic_trits.checked_add(words.len() - 1)
+    let trit_count = semantic_trits.checked_add(word_count - 1)
         .ok_or(TernaryTransportError::TransportTooLarge)?;
     let byte_len = trit_count.checked_add(TRITS_PER_BYTE - 1)
         .ok_or(TernaryTransportError::TransportTooLarge)? / TRITS_PER_BYTE;
@@ -93,18 +93,13 @@ pub fn encode_ternary_words(
     let mut out = Vec::with_capacity(byte_len);
     let mut current = 0u8;
     let mut used = 0usize;
-    for (position, word) in words.iter().copied().enumerate() {
+    for (position, (width, payload)) in words.enumerate() {
         if position != 0 {
             append_t5_digit(&mut out, &mut current, &mut used, 2);
         }
-        let value = word.packed_bits();
-        for shift in (0..word.width()).rev() {
-            append_t5_digit(
-                &mut out,
-                &mut current,
-                &mut used,
-                ((value >> shift) & 1) as u8,
-            );
+        for shift in (0..width).rev() {
+            append_t5_digit(&mut out, &mut current, &mut used,
+                ((payload >> shift) & 1) as u8);
         }
     }
     while used != 0 {
@@ -112,6 +107,26 @@ pub fn encode_ternary_words(
     }
     debug_assert_eq!(out.len(), byte_len);
     Ok(out)
+}
+
+/// Історичний D1–D9 інтерфейс: бітність кожного слова лишається незмінною.
+pub fn encode_ternary_words(
+    words: &[BinarySourceWord],
+) -> Result<Vec<u8>, TernaryTransportError> {
+    encode_ternary_fields(words.iter().map(|w| (w.width(), w.packed_bits())), 9)
+}
+
+/// Механічний T5-перенос D1–D10; координата сама по собі НЕ callable.
+///
+/// Не створює нового формату, не додає D10 до історичного Lisp-парсера
+/// та не припускає рівності W8 і сучасної доменної тотожності D8.
+pub fn encode_ternary_coordinates(
+    coordinates: &[crate::domain_ladder::DomainCoordinate],
+) -> Result<Vec<u8>, TernaryTransportError> {
+    encode_ternary_fields(
+        coordinates.iter().map(|c| (usize::from(c.width()), c.bits())),
+        10,
+    )
 }
 
 /// Lift a bit payload into the exact-width word carrier.
@@ -152,26 +167,24 @@ fn typed_binary_word(
     })
 }
 
-/// Читає ФІЗИЧНІ байти, відновлює трити, розбиває на слова
-/// лише за цифрою 2, а потім отримує точні типи D1..D9.
-/// Доказом безпомилковості носія є канонічний повторний encode.
-pub fn decode_ternary_words(
+/// Єдиний канонічний T5-декодер, параметризований межею допустимої
+/// фізичної ширини та відповідним механічним носієм. Не допускає
+/// довільного semantic routing чи підміни W8 і D8.
+fn decode_ternary_fields<T>(
     data: &[u8],
-) -> Result<Vec<BinarySourceWord>, TernaryTransportError> {
+    max_width: usize,
+    from: fn(usize, u16) -> Result<T, TernaryTransportError>,
+    project: fn(&T) -> (usize, u16),
+) -> Result<Vec<T>, TernaryTransportError> {
     if data.is_empty() {
         return Err(TernaryTransportError::EmptyProgram);
     }
     if data.len() > MAX_FILE_BYTES {
         return Err(TernaryTransportError::TransportTooLarge);
     }
-    // Check every physical byte before parsing. This preserves InvalidPhysicalByte
-    // precedence even when an earlier digit sequence has malformed grammar.
     if data.iter().any(|byte| *byte >= 243) {
         return Err(TernaryTransportError::InvalidPhysicalByte);
     }
-
-    // Count terminal padding directly from base-3 byte digits, backwards.
-    // No proportional intermediate allocation of 5 * data.len() trits.
     let mut tail = 0usize;
     'padding: for mut byte in data.iter().rev().copied() {
         for _ in 0..TRITS_PER_BYTE {
@@ -190,7 +203,7 @@ pub fn decode_ternary_words(
         return Err(TernaryTransportError::EmptyDomainWord);
     }
 
-    let mut words = Vec::<BinarySourceWord>::new();
+    let mut words = Vec::<T>::new();
     let mut current_value = 0u16;
     let mut current_width = 0usize;
     let mut consumed = 0usize;
@@ -210,17 +223,18 @@ pub fn decode_ternary_words(
             consumed += 1;
             match digit {
                 0 | 1 => {
-                    current_value = (current_value << 1) | u16::from(digit);
                     current_width += 1;
-                    if current_width > 9 {
+                    // Перевірити ширину ДО зсуву, щоб не втратити старші біти.
+                    if current_width > max_width || current_width > 10 {
                         return Err(TernaryTransportError::UnsupportedDomainWidth);
                     }
+                    current_value = (current_value << 1) | u16::from(digit);
                 }
                 2 => {
                     if current_width == 0 {
                         return Err(TernaryTransportError::EmptyDomainWord);
                     }
-                    words.push(typed_binary_word(current_width, current_value)?);
+                    words.push(from(current_width, current_value)?);
                     current_value = 0;
                     current_width = 0;
                 }
@@ -231,12 +245,37 @@ pub fn decode_ternary_words(
     if current_width == 0 {
         return Err(TernaryTransportError::EmptyDomainWord);
     }
-    words.push(typed_binary_word(current_width, current_value)?);
-    // Зайвий байт, неоднозначний або неканонічний хвіст — відмова.
-    if encode_ternary_words(&words)? != data {
+    words.push(from(current_width, current_value)?);
+    // Канонічність також перевіряє рівно 0–4 заключних трита 2.
+    if encode_ternary_fields(words.iter().map(project), max_width)? != data {
         return Err(TernaryTransportError::NoncanonicalEncoding);
     }
     Ok(words)
+}
+
+/// Зберегти чинний вузький D1–D9 API без зміни жодного wire-byte.
+pub fn decode_ternary_words(
+    data: &[u8],
+) -> Result<Vec<BinarySourceWord>, TernaryTransportError> {
+    decode_ternary_fields(data, 9, typed_binary_word,
+        |w| (w.width(), w.packed_bits()))
+}
+
+/// Прочитати D1–D10 фізичні слова як механічні координати.
+///
+/// D10 тут не є автоматично дозволеним викликом функції.
+pub fn decode_ternary_coordinates(
+    data: &[u8],
+) -> Result<Vec<crate::domain_ladder::DomainCoordinate>, TernaryTransportError> {
+    decode_ternary_fields(data, 10,
+        |width, payload| {
+            let width = u8::try_from(width)
+                .map_err(|_| TernaryTransportError::UnsupportedDomainWidth)?;
+            crate::domain_ladder::DomainCoordinate::new(width, payload)
+                .ok_or(TernaryTransportError::UnsupportedDomainWidth)
+        },
+        |c| (usize::from(c.width()), c.bits()),
+    )
 }
 
 /// Вертикальний вигляд — тільки для людини, newline не є
@@ -340,6 +379,54 @@ mod tests {
     fn words(source: &str) -> Vec<BinarySourceWord> {
         parse_binary_source_words(source).unwrap()
             .into_iter().map(|token| token.word).collect()
+    }
+
+    #[test]
+    fn точковий_т5_кожний_біт_d10_за_d3_d4_без_обрізання() {
+        use crate::domain_ladder::DomainCoordinate;
+        let d3 = DomainCoordinate::new(3, 0b101).unwrap();
+        let d4 = DomainCoordinate::new(4, 0b0010).unwrap();
+        // 3 + 4 + 10 = 17 семантичних бітів; два транспортні
+        // роздільники = 19 тритів, рівно чотири фізичні байти.
+        // Залишок: один заключний трит 2. Жодного округлення між словами.
+        for payload in 0u16..1024 {
+            let d10 = DomainCoordinate::new(10, payload).unwrap();
+            let source = [d3, d4, d10];
+            let physical = encode_ternary_coordinates(&source).unwrap();
+            assert_eq!(physical.len(), 4, "D10={payload}");
+            assert_eq!(decode_ternary_coordinates(&physical).unwrap(), source, "D10={payload}");
+            assert_eq!(decode_ternary_words(&physical),
+                Err(TernaryTransportError::UnsupportedDomainWidth),
+                "старий D1–D9 читач має fail-closed при D10={payload}");
+            // Підміна єдиного транспортного padding-трита значущим бітом
+            // не може непомітно змінити десятирозрядне слово.
+            let mut altered = physical;
+            *altered.last_mut().unwrap() -= 1;
+            assert!(decode_ternary_coordinates(&altered).is_err(), "tail D10={payload}");
+        }
+        assert!(DomainCoordinate::new(10, 1024).is_none());
+        assert!(DomainCoordinate::new(11, 0).is_none());
+    }
+
+    #[test]
+    fn точковий_т5_девять_старих_доменів_байт_у_байт_сумісні() {
+        use crate::domain_ladder::DomainCoordinate;
+        for width in 1usize..=9 {
+            for payload in 0u16..(1u16 << width) {
+                let legacy = typed_binary_word(width, payload).unwrap();
+                let current = DomainCoordinate::new(width as u8, payload).unwrap();
+                let old_wire = encode_ternary_words(&[legacy]).unwrap();
+                let new_wire = encode_ternary_coordinates(&[current]).unwrap();
+                assert_eq!(old_wire, new_wire, "D{width} payload={payload}");
+                assert_eq!(decode_ternary_words(&old_wire).unwrap(), vec![legacy]);
+                assert_eq!(decode_ternary_coordinates(&new_wire).unwrap(), vec![current]);
+            }
+        }
+        let nine = DomainCoordinate::new(9, 1).unwrap();
+        let ten = DomainCoordinate::new(10, 1).unwrap();
+        assert_ne!(nine, ten);
+        assert_ne!(encode_ternary_coordinates(&[nine]).unwrap(),
+                   encode_ternary_coordinates(&[ten]).unwrap());
     }
 
     #[test]
