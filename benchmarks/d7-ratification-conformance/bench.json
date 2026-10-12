@@ -1,0 +1,19 @@
+{
+  "schema": "sens-benchmark-manifest/v1",
+  "stand": "d7-ratification-conformance",
+  "wing": "D7 semantic-role and width conformance",
+  "roles": [
+    "CONFORMANCE",
+    "FALSIFIER"
+  ],
+  "question": "Does the historical D7 witness keep SoundCell, LocalOrdinal, and arithmetic Number distinct, reject role erasure without guessing, and separate width validity from resident admission?",
+  "claim": "Historical #2517 role-boundary witness replayed against Contract 11.6 / #3572 source assertions. It claims no new Contract 11.9 ratification, no new D7 occupancy, and no inference that every width-valid coordinate is callable.",
+  "witness": [
+    "README.md",
+    "validate.py"
+  ],
+  "status": "HISTORICAL-CONTRACT-11.6; ROLE-BOUNDARY-WITNESS; NO-NEW-RATIFICATION",
+  "generation": "Historical D7 role-boundary evidence; validator checks current Text7 source and wire tests",
+  "axis": "D7/role-separation-width-and-occupancy-firewall",
+  "reproduce": "python3 benchmarks/d7-ratification-conformance/validate.py"
+}

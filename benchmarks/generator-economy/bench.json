@@ -1,0 +1,21 @@
+{
+  "schema": "sens-benchmark-manifest/v1",
+  "stand": "generator-economy",
+  "wing": "Generator accounting and family closure economics",
+  "roles": [
+    "RESEARCH",
+    "FALSIFIER"
+  ],
+  "question": "Under an explicit deterministic logical-step model, when does a local generator law justify its one-time description cost over materialized residue rows, and which counterexamples reject the law?",
+  "claim": "Research-only utilisation-threshold model; equal per-call costs cancel N. Reports logical steps and raw rows, not CPU instruction counts, wall time, or a general runtime speedup. A pinned Cachegrind witness is still required for physical-performance claims.",
+  "witness": [
+    "README.md",
+    "generator_economy.py",
+    "run.py",
+    "semantic-fact-ledger.json"
+  ],
+  "status": "RESEARCH-ONLY; LOGICAL-COST-MODEL; PHYSICAL-PERFORMANCE-UNVERIFIED",
+  "generation": "Historical #1968/#1972/#1987 generator-economy work; bounded Python model",
+  "axis": "generator-economy/one-time-cost-vs-workload-utilisation",
+  "reproduce": "python3 benchmarks/generator-economy/generator_economy.py --tsv /tmp/sens-generator-economy.tsv"
+}

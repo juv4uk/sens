@@ -1,0 +1,21 @@
+{
+  "schema": "sens-benchmark-manifest/v1",
+  "stand": "human-wire-arq",
+  "wing": "Human-keyed transport framing and recovery",
+  "roles": [
+    "RESEARCH",
+    "FALSIFIER"
+  ],
+  "question": "How do whole-message framing, block framing, synchronization, CRC16, optional Hamming(7,4), and selective retries trade wire overhead and recovery across bounded block sizes and injected faults?",
+  "claim": "Mechanism-only transport experiment over a deterministic pseudo-payload. It does not establish SENS semantic authority, an admitted radio implementation, a measured RF/SNR curve, or a canonical production wire format.",
+  "witness": [
+    "README.md",
+    "Cargo.toml",
+    "src/lib.rs",
+    "src/main.rs"
+  ],
+  "status": "MECHANISM-ONLY; TRANSPORT-RESEARCH; NO-SEMANTIC-AUTHORITY",
+  "generation": "Historical #2646 zero-dependency Rust harness; bounded 272-bit pseudo-payload is not a frozen law",
+  "axis": "human-wire-arq/physical-overhead-and-fault-recovery",
+  "reproduce": "cargo test --manifest-path benchmarks/human-wire-arq/Cargo.toml && cargo run --release --manifest-path benchmarks/human-wire-arq/Cargo.toml"
+}
