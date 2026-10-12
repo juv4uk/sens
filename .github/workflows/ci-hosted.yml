@@ -51,6 +51,11 @@ jobs:
       - name: World D3 complete CLI binary compilation
         if: always()
         run: cargo check --locked -p sens-cli --bins
+      - name: Classic Lisp REPL case presentation
+        if: always()
+        run: |
+          cargo test --locked -p sens-cli classic_repl_reply_ -- --nocapture
+          cargo test --locked -p sens-cli repl_accepts_lowercase_symbols_and_prints_symbol_data_uppercase -- --nocapture
       - name: D8 exact writer admission witnesses
         if: always()
         run: cargo test --locked -p sens --test d8_writer_admission
