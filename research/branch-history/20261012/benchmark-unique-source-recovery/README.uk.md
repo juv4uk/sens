@@ -10,5 +10,6 @@
 - `encoder-same-input`: парне дослідження фізичних T5/F3/F4 носіїв.
 - `utf8-fused`: історична спроба fused UTF-8 decoder і її profiler/witness.
 - `readfile-production`: історична композиція Lisp `read-file` та окремий profiler.
+- `readfile-legacy`: попередня версія #74 read-file harness до переходу на canonical binary source; три refs мають однакові вихідні blob SHA й архівуються один раз.
 
 Не переносити старі файли поверх актуальних `lib/utf8.lisp`, `lib/fs.lisp`, benchmark registry або workflow. Для активного повернення потрібні окрема адаптація на main, exact byte/parity checks, незалежний correctness oracle, raw samples і green CI.
