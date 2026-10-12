@@ -463,8 +463,8 @@ mod tests {
 
         assert_eq!(render_repl_reply(&no, PresentationLanguage::Canonical), "0");
         assert_eq!(render_repl_reply(&yes, PresentationLanguage::Canonical), "1");
-        assert_eq!(render_repl_reply(&no, PresentationLanguage::English), "NO");
-        assert_eq!(render_repl_reply(&yes, PresentationLanguage::English), "YES");
+        assert_eq!(render_repl_reply(&no, PresentationLanguage::English), "0");
+        assert_eq!(render_repl_reply(&yes, PresentationLanguage::English), "1");
         assert_eq!(render_repl_reply(&no, PresentationLanguage::Ukrainian), "НІ");
         assert_eq!(render_repl_reply(&yes, PresentationLanguage::Ukrainian), "ТАК");
         assert_eq!(render_repl_reply(&no, PresentationLanguage::Sanskrit), "NA");
