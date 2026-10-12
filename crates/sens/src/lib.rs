@@ -166,7 +166,7 @@ pub fn domain_numeric_value(operator: &str, lhs: &Value, rhs: &Value) -> Option<
 pub use bit9::Bit9;
 pub use bits::{Bit1, Bit2, Bit3, Bit4, Bit5, Bit6, Bit7, Bit8, Bits};
 pub use canonical_reader::{parse_canonical_binary, parse_canonical_packed_words, parse_canonical_word_sequence};
-pub use mixed_source::{parse_mixed_exact_domain, parse_mixed_exact_domain_core_source, parse_mixed_exact_domain_machine_source, parse_mixed_exact_domain_time_source, parse_mixed_exact_domain_reasoning_source, parse_mixed_exact_domain_legacy_core_source, parse_mixed_exact_domain_fs_fixture_source};
+pub use mixed_source::{parse_mixed_exact_domain, parse_mixed_exact_domain_core_source, parse_mixed_exact_domain_machine_source, parse_mixed_exact_domain_time_source, parse_mixed_exact_domain_reasoning_source, parse_mixed_exact_domain_legacy_core_source, parse_mixed_exact_domain_fs_fixture_source, parse_mixed_exact_domain_process_tcp_source};
 pub use compiler_role::{compiler_execution_role, CompilerExecutionRole, CompilerLoweringRole};
 pub use compiler_bootstrap::{
     canonical_value_sha256_mechanism, compiler_evidence_canonical_bytes,
@@ -597,8 +597,13 @@ pub fn eval_pinned_legacy_core_source(
 /// `tcp-read-raw`. Neither raw capability is required merely to define them.
 pub fn load_process_library(session: &mut Session) -> Result<EvalResult, LanguageError> {
     eval_program(UTF8_LIBRARY_SOURCE, session)?;
-    eval_program(PROCESS_LIBRARY_SOURCE, session)?;
-    let result = eval_program(TCP_LIBRARY_SOURCE, session)?;
+    let process = parse_mixed_exact_domain_process_tcp_source(
+        "lib/process.lisp",
+        PROCESS_LIBRARY_SOURCE,
+    )?;
+    eval_parsed_expressions(&process, session)?;
+    let tcp = parse_mixed_exact_domain_process_tcp_source("lib/tcp.lisp", TCP_LIBRARY_SOURCE)?;
+    let result = eval_parsed_expressions(&tcp, session)?;
     bind_missing_stable_surface_peers(&session.environment);
     Ok(result)
 }
@@ -607,7 +612,8 @@ pub fn load_process_library(session: &mut Session) -> Result<EvalResult, Languag
 /// not otherwise need the process adapter.
 pub fn load_tcp_library(session: &mut Session) -> Result<EvalResult, LanguageError> {
     eval_program(UTF8_LIBRARY_SOURCE, session)?;
-    let result = eval_program(TCP_LIBRARY_SOURCE, session)?;
+    let tcp = parse_mixed_exact_domain_process_tcp_source("lib/tcp.lisp", TCP_LIBRARY_SOURCE)?;
+    let result = eval_parsed_expressions(&tcp, session)?;
     bind_missing_stable_surface_peers(&session.environment);
     Ok(result)
 }

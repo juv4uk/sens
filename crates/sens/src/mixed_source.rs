@@ -175,6 +175,24 @@ pub fn parse_mixed_exact_domain_legacy_core_source(
     parse_mixed_pinned_d8_io(source)
 }
 
+/// Parse the process/TCP Lisp-owned adapters with exact current-domain call heads.
+/// This exception is path-bound to these two source files; ordinary source must
+/// never infer semantic width from short numeric-looking literals. QUOTE keeps
+/// its payload opaque, and the approved paths do not alter language authority.
+pub fn parse_mixed_exact_domain_process_tcp_source(
+    path: &str,
+    source: &str,
+) -> Result<Vec<Expr>, LanguageError> {
+    if !matches!(path, "lib/process.lisp" | "lib/tcp.lisp") {
+        return Err(LanguageError::new(
+            ErrorKind::Parse,
+            "process/TCP exact-domain reader is restricted to lib/process.lisp or lib/tcp.lisp",
+            Span::default(),
+        ));
+    }
+    parse_mixed_source(source, true)
+}
+
 /// Parse only the language-owned time module with exact-width D3 call heads.
 /// Its W8 DEFINE/LAMBDA wrappers remain bootstrap syntax; no general source
 /// inference or W8-to-D8 promotion is authorized.
@@ -1422,6 +1440,46 @@ mod tests {
             "nested executable CAR must be an exact D3 identity");
         assert!(matches!(&call[1].kind, ExprKind::Number(value, _) if *value == 7.0),
             "numeric call arguments remain data");
+    }
+
+    #[test]
+    fn process_tcp_reader_is_path_bound_and_preserves_quoted_data() {
+        let source = "(0011 probe (0010 (x) (101 (100 x) (001 x))))";
+        for path in ["lib/process.lisp", "lib/tcp.lisp"] {
+            let parsed = only(
+                parse_mixed_exact_domain_process_tcp_source(path, source)
+                    .expect("approved process/TCP reader"),
+            );
+            let ExprKind::List(definition) = &parsed.kind else { panic!("definition"); };
+            let ExprKind::List(lambda) = &definition[2].kind else { panic!("lambda"); };
+            let ExprKind::List(call) = &lambda[2].kind else { panic!("body call"); };
+            assert!(matches!(
+                &call[0].kind,
+                ExprKind::DomainIdentity(identity)
+                    if identity.width() == 3 && identity.packed_bits() == 0b101
+            ), "exact D3 EQ call head in approved process/TCP source must be typed");
+        }
+
+        let quoted_source = "(0011 probe (0010 (x) (001 (101 x))))";
+        let quoted = only(
+            parse_mixed_exact_domain_process_tcp_source("lib/process.lisp", quoted_source)
+                .expect("approved source with quote"),
+        );
+        let ExprKind::List(definition) = &quoted.kind else { panic!("definition"); };
+        let ExprKind::List(lambda) = &definition[2].kind else { panic!("lambda"); };
+        let ExprKind::List(quote_form) = &lambda[2].kind else { panic!("quoted body"); };
+        assert!(matches!(&quote_form[0].kind, ExprKind::DomainIdentity(id)
+            if id.width() == 3 && id.packed_bits() == 0b001), "D3 QUOTE remains an identity");
+        let ExprKind::List(payload) = &quote_form[1].kind else { panic!("quoted payload"); };
+        assert!(
+            !matches!(&payload[0].kind, ExprKind::DomainIdentity(_)),
+            "quoted numeric-looking payload must not become executable domain identity"
+        );
+
+        assert!(
+            parse_mixed_exact_domain_process_tcp_source("lib/time.lisp", source).is_err(),
+            "the process/TCP exception must not authorize a third source path"
+        );
     }
 
 }
