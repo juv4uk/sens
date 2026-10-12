@@ -1,4 +1,4 @@
-name: Frame3-Micro dense one-byte proof and real file corpus
+name: Frame3-Micro dense 1-4 byte proof and real file corpus
 on:
   push:
     paths:
@@ -21,18 +21,19 @@ on:
 permissions:
   contents: read
 jobs:
-  one-byte-program:
-    name: 'Dense F3M-1: all 256 byte codes are real SENS programs'
+  dense-f3m-programs:
+    name: 'Dense F3M-1/2/3/4 rank and evaluator proofs'
     runs-on: ubuntu-24.04
     timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
       - uses: dtolnay/rust-toolchain@stable
-      - name: Prove dense F3M rank windows and executable 3-byte witness
+      - name: Prove dense F3M 1-4 byte rank windows and executable witnesses
         shell: bash
         run: |
           set -euo pipefail
-          cargo test --locked -p sens frame3_micro_enumerator::tests -- --nocapture
+          mkdir -p "$RUNNER_TEMP/frame3-proof"
+          cargo test --locked -p sens frame3_micro_enumerator::tests -- --nocapture             2>&1 | tee "$RUNNER_TEMP/frame3-proof/enumerator-tests.log"
       - name: Encode, decode, and execute with real Rust SENS oracle
         shell: bash
         run: |
@@ -61,12 +62,14 @@ jobs:
             cargo run --locked --release -p sens --example frame3_one_byte_research --quiet -- --speed
           } | tee "$RUNNER_TEMP/frame3-one-byte/speed.tsv"
           awk -F '\t' '$1 == "f3m_dense_encode_exact_program" && $2 > 0 { en=1 } $1 == "t5_decode_5b_to_typed_words" && $2 > 0 { de=1 } $1 == "f3m_dense_decode_1b_to_program" && $2 > 0 { dec=1 } END { exit !(en && de && dec) }' "$RUNNER_TEMP/frame3-one-byte/speed.tsv"
-      - name: Preserve proof and actual one-byte physical files
+      - name: Preserve dense proof and actual one-byte physical files
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: frame3-one-byte-${{ github.sha }}
-          path: ${{ runner.temp }}/frame3-one-byte/
+          name: frame3-dense-proof-${{ github.sha }}
+          path: |
+            ${{ runner.temp }}/frame3-proof/
+            ${{ runner.temp }}/frame3-one-byte/
           if-no-files-found: error
           retention-days: 30
   real-files:
