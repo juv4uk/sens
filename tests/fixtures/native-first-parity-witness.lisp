@@ -12,7 +12,7 @@
 (load "lib/machine/dispatch/native-first-execute.lisp")
 (load "lib/machine/dispatch/native-first-parity.lisp")
 
-(00001001 native-first-parity-corpus
+(0011 native-first-parity-corpus
   '
     ((car-cons-u64-zero
        (перше (сполучити 0 1))
@@ -35,23 +35,23 @@
        pure
        not-applicable)))
 
-(00001001 native-first-parity-verdicts
+(0011 native-first-parity-verdicts
   (native-first-parity-run native-first-parity-corpus))
 
-(00001001 native-first-parity-witness
-  (00001000 ()
-    (00000111
-      ((00100010 (native-first-parity-all-pass? native-first-parity-verdicts) t)
+(0011 native-first-parity-witness
+  (0010 ()
+    (110
+      ((11110111 (native-first-parity-all-pass? native-first-parity-verdicts) t)
        (1)
-       (00100111
-         (00000001 native-first-parity-witness)
-         (00000001 (status pass))
-         (00100111 (00000001 cases) (00101000 native-first-parity-corpus))))
-      ((00100010 (native-first-parity-all-pass? native-first-parity-verdicts) t)
+       (1110
+         (001 native-first-parity-witness)
+         (001 (status pass))
+         (1110 (001 cases) (000000 native-first-parity-corpus))))
+      ((11110111 (native-first-parity-all-pass? native-first-parity-verdicts) t)
        (0)
-       (00100111
-         (00000001 native-first-parity-witness)
-         (00000001 (status fail))
-         (00100111 (00000001 verdicts) native-first-parity-verdicts))))))
+       (1110
+         (001 native-first-parity-witness)
+         (001 (status fail))
+         (1110 (001 verdicts) native-first-parity-verdicts))))))
 
 (native-first-parity-witness)
