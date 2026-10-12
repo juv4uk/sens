@@ -8,7 +8,7 @@ fn time_session() -> Session {
 }
 
 #[test]
-fn exact_d3_time_source_matches_frozen_pre_migration_w8_oracle() {
+fn exact_d3_time_source_repairs_preexisting_w8_cons_arity_error() {
     let input = "(timezone-raw->observation (quote (timezone-declarations \"Europe/Kyiv\" \"Etc/UTC\")))";
     fn observe(input: &str, migrated: bool) -> Result<String, String> {
         let mut session = Session::default();
@@ -23,9 +23,25 @@ fn exact_d3_time_source_matches_frozen_pre_migration_w8_oracle() {
             .map(|x| x.value.to_string())
             .map_err(|e| e.to_string())
     }
+
+    // Preserve the frozen pre-migration W8 error as evidence; never rewrite the fixture
+    // to pretend this pre-existing arity defect was absent.
     let baseline = observe(input, false);
-    let current = observe(input, true);
-    assert_eq!(current, baseline, "migrating call heads must not alter observable time semantics");
+    match baseline {
+        Err(error) => assert!(
+            error.contains("expected 2 arguments; received 3"),
+            "frozen W8 witness changed for an unexpected reason: {error}"
+        ),
+        Ok(value) => panic!("frozen W8 source unexpectedly changed behavior: {value}"),
+    }
+
+    // The current Lisp-owned implementation must repair the arity defect and retain
+    // the public observation shape without a host-side fallback.
+    assert_eq!(
+        observe(input, true),
+        Ok("(detected \"Europe/Kyiv\" TZ)".to_string()),
+        "current exact-D3 time source must construct the observation via binary D3 CONS"
+    );
 }
 
 #[test]
