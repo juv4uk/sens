@@ -19,6 +19,9 @@ class D7ProjectionTests(unittest.TestCase):
         for bits, row in rows.items():
             with self.subTest(bits=bits):
                 result = project(bits, role="sound-text", namespace="en")
+                self.assertEqual(row.bits, bits)
+                self.assertEqual(evidence[bits]["status"], "OWNER-RATIFIED")
+                self.assertIsNone(row.lisp)
                 self.assertEqual(result["coordinate"], bits)
                 self.assertEqual(result["width"], 7)
                 self.assertEqual(result["domain"], "D7")
