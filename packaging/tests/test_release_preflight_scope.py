@@ -33,6 +33,7 @@ REQUIRED = (
     "scripts/verify_release_assets.py",
     "packaging/**",
     "tests/test_verify_release_assets.py",
+    "tests/test_verify_release_ci.py",
     ".github/workflows/release-preflight.yml",
     ".github/workflows/release.yml",
 )
