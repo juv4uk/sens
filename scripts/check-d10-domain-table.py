@@ -20,6 +20,30 @@ POINTER = ROOT / "knowledge/d10-current-inventory.json"
 OWNER = ROOT / "knowledge/d10-owner-whole-domain-ratification-20261012.json"
 CODE = re.compile(r"[01]{10}\Z")
 
+PREDICATES_WITH_DONOR_PLAIN_NAMES = frozenset({
+    "NUMERIC-NOT-EQUAL", "BIT-VECTOR-P", "CHARACTERP", "HASH-TABLE-P",
+    "TYPEP", "SUBTYPEP", "MACROP", "REF-CELLP", "MAPP", "SEQUENTIALP",
+    "KEYWORDP", "FUNCTIONP", "LISTP", "VECTORP", "FLUIDP", "GLOBALP",
+    "EXPRP", "FEXPRP", "NEXPRP", "FUNBOUNDP", "SLOT-BOUNDP",
+    "FINITE-CODE-UNIQUE-DECIPHERABILITY", "CIRCULAR-HALF-OPEN-CONTAINS",
+    "SLOT-EXISTS-P", "PATHNAME-MATCH-P", "INPUT-STREAM-P",
+    "OUTPUT-STREAM-P", "INTERACTIVE-STREAM-P", "OPEN-STREAM-P",
+    "STREAMP", "PATHNAMEP", "CLASS-FINALIZED-P", "FLOATP", "FIXP",
+    "FINITE-TERM-SUBSUMES", "WILD-PATHNAME-P", "PACKAGEP", "READTABLEP",
+    "FINITE-TILE-DISJOINT-CHECK", "ALPHA-EQUIVALENCE-DEBRUIJN",
+})
+NON_PREDICATE_ACTIONS = frozenset({
+    "REMPROP", "MY-FRAME-LOOKUP", "ENV-LOOKUP",
+    "HYSTERETIC-BOOLEAN-STEP", "PHASE-UNWRAP",
+    "EXACT-PERCEPTRON-MISTAKE-STEP", "WRAP",
+    "ALTERNATING-ZERO-SUM-BACKUP", "LEAPFROG-SNAPSHOT-STEP",
+    "OSCILLATOR-PHASE-STEP", "TRIT-PREFIX-REJECT-STRIP",
+    "TRIT-SUFFIX-REJECT-STRIP", "IEEE-FINITE-NEXTUP",
+})
+FORBIDDEN_UNTRANSLATED_SAN_SUFFIX = re.compile(
+    r"-(?:my-result-fail|ref-cell|pathnamep|readtablep|memoize|keyword)(?:-|$)"
+)
+
 
 def need(condition: bool, reason: str):
     if not condition:
@@ -76,11 +100,22 @@ def check(d10, inventory, lower):
         original = expected[row.bits]
         name = original["semantic_name"]
         need(row.domain == "D10" and row.width == 10, "D10 width")
-        need(row.lisp == name and row.en == name.lower(),
+        need(row.lisp == name and row.en == name.lower() +
+             ("?" if row.uk.endswith("?") and not name.endswith("?") else ""),
              "donor/English projection drift " + row.bits)
         need(bool(row.uk) and bool(row.ukr) and bool(row.san),
              "incomplete surface " + row.bits)
         need(len(row.uk) <= len(row.ukr), "compact Ukrainian longer than expanded")
+        need(row.uk.endswith("?") == row.ukr.endswith("?") == row.en.endswith("?"),
+             "predicate markers disagree across ук/укр/en " + row.bits)
+        need(row.uk.endswith("!") == row.ukr.endswith("!"),
+             "destructive marker drift between ук/укр " + row.bits)
+        need(not FORBIDDEN_UNTRANSLATED_SAN_SUFFIX.search(row.san),
+             "English suffix leaking into Sanskrit " + row.bits)
+        if name in PREDICATES_WITH_DONOR_PLAIN_NAMES:
+            need(row.uk.endswith("?"), "missing semantic predicate marker " + row.bits)
+        if name in NON_PREDICATE_ACTIONS:
+            need(not row.uk.endswith("?"), "action mislabeled as predicate " + row.bits)
         need(row.sym is None, "symbolic coordinate borrowed without authority")
         if name.endswith("?"):
             need(row.uk.endswith("?") and row.ukr.endswith("?") and
@@ -120,6 +155,14 @@ def main():
                 1, replace(xs[1], bits=xs[0].bits))),
             ("wrong resident", lambda xs: xs.__setitem__(
                 0, replace(xs[0], lisp="FORGED"))),
+            ("English question marker", lambda xs: xs.__setitem__(
+                next(i for i, row in enumerate(xs) if row.lisp == "CHARACTERP"),
+                replace(next(row for row in xs if row.lisp == "CHARACTERP"),
+                        en="characterp"))),
+            ("wrong action marker", lambda xs: xs.__setitem__(
+                next(i for i, row in enumerate(xs) if row.lisp == "REMPROP"),
+                replace(next(row for row in xs if row.lisp == "REMPROP"),
+                        uk="remprop?"))),
             ("missing Ukrainian", lambda xs: xs.__setitem__(
                 0, replace(xs[0], uk=None))),
             ("colliding Sanskrit", lambda xs: xs.__setitem__(
