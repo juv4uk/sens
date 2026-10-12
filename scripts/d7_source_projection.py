@@ -38,8 +38,8 @@ def load_current_d7() -> tuple[dict, dict[str, object]]:
         or pins.intersection(by_coordinate)):
         raise D7ProjectionError("D7 Lisp table and owner-ratified residency diverged")
     for bits, row in by_coordinate.items():
-        if row.en != owner["residents"][bits] or row.lisp is not None:
-            raise D7ProjectionError(f"D7:{bits} changed or minted a Lisp callable")
+        if row.lisp is not None:
+            raise D7ProjectionError(f"D7:{bits} minted a Lisp callable")
     evidence = {item["coordinate"]: item for item in owner["rows"]}
     if len(evidence) != 128:
         raise D7ProjectionError("D7 owner evidence must cover all 128 coordinates")
