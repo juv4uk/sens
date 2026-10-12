@@ -67,6 +67,9 @@ jobs:
       - name: Release artifact integrity negative controls
         run: python3 -m unittest discover -s tests -p test_verify_release_assets.py -v
 
+      - name: Release publication workflow structure regression
+        run: python3 -m unittest discover -s packaging/tests -p 'test_release_publication_gate.py' -v
+
       - name: Версійна паритетність релізних crates
         run: cargo test --locked -p sens-lsp --test release_parity
 
