@@ -57,3 +57,24 @@
 3. Історичний код зберігати як source-only із точним SHA та origin ref, якщо він не проходить чинну перевірку.
 4. Щоб відновити archived benchmark як активний, потрібні адаптація до чинного контракту, перевірка byte/parity, незалежний oracle, відтворювані raw samples і успішний актуальний CI.
 5. **Архів не робить коміти гілки ancestor main.** Отже, чесний статус зараз: значний benchmark-вміст консолідовано на main, унікальні історичні джерела збережені; твердження «всі гілки всього репозиторію злиті» не підтверджене.
+
+
+## Додаткова контрольна перевірка реєстру — 12.10.2026
+
+Після первинного аудиту повторно перевірено суміжні refs для README, measurement, performance та codec-документації:
+
+- `docs/bench-t5-d2-evidence-20261010`, `docs/stability-window-benchmark-recap-20261009`, `docs/verified-benchmark-summary-main-20261011`, `bench/measurement-triad-5227`, `bench/physical-t5-performance-20261009`, `docs/roiy-enkoder-routing-2026-10-10` та `docs/universal-codec-swarm-doctrine-20261011`: у перевірці проти поточного `main` — **0 комітів попереду**; вміст цих refs не є підставою для merge поверх main.
+
+- `fix/5520-measurement-triad-repro-20261010`: ref має 2 коміти поза ancestry поточного main, але його `benchmarks/measurement-triad/bench.json` побайтно збігається з main (Git blob SHA `0ad5cedfe7d2d9451b5e628a178e711968712664`). Його `benchmarks/README.md` — застарілий згенерований знімок: 42 стенди без окремої таблиці support-exemptions проти поточного індексу main із 54 стендами та 7 явними винятками. Не переносити цей README; manifest уже конвергований.
+
+### Залишковий борг benchmark registry
+
+Поточний `benchmarks/README.md` рахує **54 зареєстровані стенди + 7 явних support-directory exemptions**. Це не дорівнює доказу, що кожна top-level директорія вже класифікована: #4172 усе ще веде backfill debt.
+
+Workflow `.github/workflows/benchmark-registry.yml` виконує `benchmark_registry.py --check --coverage` та pull-request перевірку `--check-new BASE HEAD`. `--coverage` звітує про unclassified directories, але сам по собі не робить їх помилкою; суворий `--strict` режим існує в скрипті, проте не ввімкнений у workflow. Тому стан варто формулювати так:
+
+- **перевірка свіжості індексу й захист нових стендів — реалізовані**;
+- **повна класифікація історичного дерева — не підтверджена, #4172 лишається відкритою**;
+- **не закривати #4171/#4172 і не стверджувати «усі стенди класифіковані» без нульового coverage debt та hosted CI на точному SHA**.
+
+Це уточнення не змінює runtime, manifests або індекс і не надає жодних нових benchmark-висновків.
