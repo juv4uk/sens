@@ -879,7 +879,10 @@ mod exact_d4_eval_head_migration_tests {
             crate::Bit3::new(0b001).unwrap(),
         ));
         assert!(matches!(domain_head(d3, &env), Head::Quote));
-        assert!(matches!(domain_head(d4(0b0010), &env), Head::Call));
+        // D4:0010 and D4:0011 are ratified syntax mechanisms, not
+        // ordinary calls. The historical assertion expected the opposite.
+        assert!(matches!(domain_head(d4(0b0010), &env), Head::Lambda));
+        assert!(matches!(domain_head(d4(0b0011), &env), Head::Define));
     }
 
     #[test]
