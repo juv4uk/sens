@@ -186,9 +186,12 @@ def run(root, write=False, selected=None):
         # Require an actual historical definition, otherwise fail closed.
         has_legacy_definition = bool(re.search(
             r"\(\s*(?:00001001|00001011)(?=[\s)])", original))
+        # A D4-only cutover can already have the *new* D3:110 head while
+        # its clauses still follow the obsolete three-field/host-truth law.
+        # A missing historical W8 head does not prove a safe D3 cutover.
         has_pinned_legacy_d3 = (
             path in PARTIAL_D4_WITH_LEGACY_D3
-            and bool(re.search(r"\(\s*00000111(?=[\s)])", original))
+            and bool(re.search(r"\(\s*(?:00000111|110)(?=[\s)])", original))
         )
         if not (has_legacy_definition or has_pinned_legacy_d3):
             report.append({"path": path, "status": "source-era-unproved",
@@ -201,7 +204,7 @@ def run(root, write=False, selected=None):
                            "reasons": ["generated carrier needs generator migration"]})
             continue
         updated, n, problems = rewrite(original, mapping, blocked)
-        if n:
+        if n or has_pinned_legacy_d3:
             try:
                 problems.extend(x.rule + " at line " + str(x.line)
                                 for x in guard.scan_lisp(updated, path))
