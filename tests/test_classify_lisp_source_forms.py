@@ -173,6 +173,19 @@ class ThreePassClassifierTests(unittest.TestCase):
         # is never a new executable head.
         self.assertFalse(any(head.token == "value" for head in heads))
 
+    def test_lambda_and_definition_binders_are_not_function_heads(self):
+        source = """(0010 (CAR CDR) (car CAR))
+(функція (перше) (car перше))
+(define (car x) (atom? x))
+(визначити (CAR x) (cdr x))
+"""
+        heads = mod.scan_heads("sample.lisp", source)
+        self.assertEqual(
+            [head.token for head in heads if not head.empty_list],
+            ["0010", "car", "функція", "car",
+             "define", "atom?", "визначити", "cdr"],
+        )
+
     def test_nested_quoted_and_structural_empty_lists_remain_data(self):
         source = """(quote (()))
 '(car ())
