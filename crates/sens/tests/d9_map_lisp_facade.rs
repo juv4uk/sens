@@ -42,6 +42,69 @@ fn source_cutover_blocks_old_d6_let_and_unadmitted_d9_map_heads() {
 }
 
 #[test]
+fn persistent_map_string_comparator_has_exact_d9_heads_and_no_w8_string_route() {
+    use sens::{Expr, ExprKind};
+    let source = include_str!("../../../lib/persistent-map.lisp");
+    let original = [
+        ("00111100", "110011100", 3_usize),
+        ("00111111", "110101011", 4_usize),
+        ("01000000", "110011101", 2_usize),
+    ];
+    let start = source.find("(0011 внутрішній-текст-передує?")
+        .expect("затверджена Lisp-функція порівняння");
+    let end = source[start..].find("(0011 внутрішня-мапа-список")
+        .expect("наступне визначення")
+        + start;
+    let definition_source = &source[start..end];
+
+    for (old, exact, expected) in original {
+        assert_eq!(
+            definition_source.matches(&format!("({old} ")).count(), 0,
+            "історична W8-голова {old} не повинна бути викликом"
+        );
+        assert_eq!(
+            definition_source.matches(&format!("({exact} ")).count(), expected,
+            "лише перевірений D9-наступник {exact}"
+        );
+    }
+    // W8 CHAR-CODE не змішуємо з поточним D8 без доказу викликаності.
+    assert_eq!(definition_source.matches("(01000101 ").count(), 4);
+
+    let expressions = sens::parse_mixed_exact_domain_reasoning_source(
+        "lib/persistent-map.lisp", source,
+    ).expect("шляховий читач зберігає exact D9");
+    let definition = expressions.iter().find(|expression| {
+        let ExprKind::List(items) = &expression.kind else { return false };
+        matches!(items.get(1).map(|item| &item.kind),
+            Some(ExprKind::Symbol(name)) if name.as_ref() == "внутрішній-текст-передує?")
+    }).expect("Lisp-замикання існує в AST");
+
+    fn scan(expression: &Expr, counts: &mut [usize; 3]) {
+        let ExprKind::List(parts) = &expression.kind else { return };
+        if let Some(Expr { kind: ExprKind::DomainIdentity(identity), .. }) = parts.first() {
+            if identity.width() == 9 {
+                match identity.packed_bits() {
+                    0b110011100 => counts[0] += 1,
+                    0b110101011 => counts[1] += 1,
+                    0b110011101 => counts[2] += 1,
+                    _ => {}
+                }
+            }
+        }
+        for part in parts.iter() { scan(part, counts); }
+    }
+    let mut counts = [0_usize; 3];
+    scan(definition, &mut counts);
+    assert_eq!(counts, [3, 4, 2], "D9-виклики мають точну ширину в AST");
+
+    // Звичайний читач не має права вгадувати дев'ятибітний механізм.
+    let ordinary = sens::parse_mixed_exact_domain("(110011100 \"\")")
+        .expect("неприкріплений вихідний код синтаксично коректний");
+    let ExprKind::List(parts) = &ordinary[0].kind else { panic!("форма-виклик") };
+    assert!(!matches!(&parts[0].kind, ExprKind::DomainIdentity(_)));
+}
+
+#[test]
 fn internal_map_facade_is_not_d9_auto_dispatch() {
     let mut session = session();
     let empty = eval_program("(внутрішня-мапа-список map-empty)", &mut session)
