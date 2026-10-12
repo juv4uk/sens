@@ -1,5 +1,8 @@
-//! Non-destructive D3 migration rehearsal for the Lisp-owned forward and
-//! knowledge engines. Live files stay W8 until candidate/runtime parity holds.
+//! D3/D9 migration witness for the Lisp-owned forward and knowledge engines.
+//!
+//! Frozen W8 files remain provenance only. They used the old NIL-as-false
+//! conditional convention, so executing them with the ratified exact-D1 COND
+//! would test a retired law rather than current behavior.
 use sens::{eval_parsed_expressions, eval_program, parse_mixed_exact_domain_reasoning_source, Session};
 
 const CORE: &str = include_str!("../../../lib/core.lisp");
@@ -10,38 +13,29 @@ const FORWARD_D3: &str = include_str!("../../../lib/forward.lisp");
 const KNOWLEDGE_OLD: &str = include_str!("../../../tests/fixtures/knowledge-d3-before.lisp");
 const KNOWLEDGE_D3: &str = include_str!("../../../lib/knowledge.lisp");
 
-fn session(migrated: bool) -> Session {
+fn session() -> Session {
     let mut session = Session::default();
     sens::eval_pinned_legacy_core_source("lib/core.lisp", CORE, &mut session)
         .expect("source-pinned exact-width legacy core bootstrap");
-    for (path, source) in [("lib/unify.lisp", UNIFY), ("lib/reason.lisp", REASON)] {
-        sens::eval_pinned_reasoning_source(path, source, &mut session)
-            .expect("exact-domain reasoning prerequisite bootstrap");
-    }
-    for (name, old, candidate) in [
-        ("lib/forward.lisp", FORWARD_OLD, FORWARD_D3),
-        ("lib/knowledge.lisp", KNOWLEDGE_OLD, KNOWLEDGE_D3),
+    for (path, source) in [
+        ("lib/unify.lisp", UNIFY),
+        ("lib/reason.lisp", REASON),
+        ("lib/forward.lisp", FORWARD_D3),
+        ("lib/knowledge.lisp", KNOWLEDGE_D3),
     ] {
-        if migrated {
-            let parsed = parse_mixed_exact_domain_reasoning_source(name, candidate)
-                .expect("authorized reasoning source must parse");
-            eval_parsed_expressions(&parsed, &mut session)
-                .expect("candidate reasoning source must load");
-        } else {
-            // The frozen W8 corpus already contains short D3-D6 selectors.
-            // The ordinary numeric reader cannot execute it faithfully.
-            // Compare *both* variants under the same pinned typed reader.
-            sens::eval_pinned_reasoning_source(name, old, &mut session)
-                .expect("pre-migration W8 source must load through the same typed reader");
-        }
+        let parsed = parse_mixed_exact_domain_reasoning_source(path, source)
+            .expect("authorized reasoning source must parse");
+        eval_parsed_expressions(&parsed, &mut session)
+            .unwrap_or_else(|error| panic!("current reasoning source {path} must load: {error:?}"));
     }
     session
 }
 
-fn observed(program: &str, migrated: bool) -> Result<String, String> {
-    eval_program(program, &mut session(migrated))
-        .map(|x| x.value.to_string())
-        .map_err(|error| format!("{:?}: {}", error.kind, error.message))
+fn observed(program: &str) -> String {
+    eval_program(program, &mut session())
+        .unwrap_or_else(|error| panic!("reasoning witness {program} failed: {error:?}"))
+        .value
+        .to_string()
 }
 
 #[test]
@@ -59,18 +53,14 @@ fn candidate_forward_and_knowledge_have_only_exact_d3_executable_heads() {
 }
 
 #[test]
-fn reasoning_d3_projections_are_behaviorally_equal_on_bounded_oracle_cases() {
-    for program in [
-        "(module-journal-events (quote example) (quote ()))",
-        "(module-journal-events (quote example) (quote ((tell example (fact a)))))",
-        "(fire-rule (quote ((fact a) (derived a))) (quote (fact a)))",
-        "(fire-rule (quote ((fact a) (derived a))) (quote (fact b)))",
-        "(fire-rule-on-facts (quote ((fact a) (derived a))) (quote ()))",
+fn reasoning_d3_d9_projections_replay_frozen_bounded_behavior() {
+    for (program, expected) in [
+        ("(module-journal-events (quote example) (quote ()))", "()"),
+        ("(module-journal-events (quote example) (quote ((tell example (fact a)))))", "((tell example (fact a)))"),
+        ("(fire-rule (quote ((fact a) (derived a))) (quote (fact a)))", "(derived a)"),
+        ("(fire-rule (quote ((fact a) (derived a))) (quote (fact b)))", "no-match"),
+        ("(fire-rule-on-facts (quote ((fact a) (derived a))) (quote ()))", "()"),
     ] {
-        assert_eq!(
-            observed(program, true),
-            observed(program, false),
-            "forward/knowledge D3 candidate changed behavior for {program}"
-        );
+        assert_eq!(observed(program), expected, "current reasoning behavior changed: {program}");
     }
 }

@@ -1,37 +1,31 @@
-//! Candidate-only differential witness. Does not replace the live world library
-//! until the current D3 reader and the evaluator independently agree with the
-//! ordinary pre-migration source. Keep old compatibility calls active meanwhile.
-use sens::{
-    eval_parsed_expressions, eval_program, parse_mixed_exact_domain_reasoning_source, Session,
-};
+//! D3 migration witness for the Lisp-owned immutable world layer.
+//!
+//! The frozen W8 source is retained as provenance, but it cannot be executed
+//! as a semantic oracle after COND was ratified to accept exact D1 only:
+//! historical NIL-as-false is intentionally no longer a current language law.
+use sens::{eval_parsed_expressions, eval_program, parse_mixed_exact_domain_reasoning_source, Session};
 
 const CORE: &str = include_str!("../../../lib/core.lisp");
 const OLD: &str = include_str!("../../../tests/fixtures/world-d3-before.lisp");
 const D3: &str = include_str!("../../../lib/world.lisp");
 
-fn world_session(migrated: bool) -> Session {
-    let mut s = Session::default();
-    sens::eval_pinned_legacy_core_source("lib/core.lisp", CORE, &mut s)
+fn world_session() -> Session {
+    let mut session = Session::default();
+    sens::eval_pinned_legacy_core_source("lib/core.lisp", CORE, &mut session)
         .expect("source-pinned core required for world library");
-    if migrated {
-        let parsed = parse_mixed_exact_domain_reasoning_source("lib/world.lisp", D3)
-            .expect("only explicitly pinned current-world projection may be typed");
-        eval_parsed_expressions(&parsed, &mut s)
-            .expect("candidate world library should load with D3 identities");
-    } else {
-        // The old W8 corpus contains exact-width selectors too; use the
-        // identical path-pinned reader for both old and migrated programs.
-        sens::eval_pinned_reasoning_source("lib/world.lisp", OLD, &mut s)
-            .expect("historic world source must load through the same typed reader");
-    }
-    s
+    let parsed = parse_mixed_exact_domain_reasoning_source("lib/world.lisp", D3)
+        .expect("only explicitly pinned current-world projection may be typed");
+    eval_parsed_expressions(&parsed, &mut session)
+        .expect("current world library should load with exact domain identities");
+    session
 }
 
-fn observe(program: &str, migrated: bool) -> Result<String, String> {
-    let mut session = world_session(migrated);
+fn observe(program: &str) -> String {
+    let mut session = world_session();
     eval_program(program, &mut session)
-        .map(|x| x.value.to_string())
-        .map_err(|e| format!("{:?}: {}", e.kind, e.message))
+        .unwrap_or_else(|error| panic!("current D3 world failed for {program}: {error:?}"))
+        .value
+        .to_string()
 }
 
 #[test]
@@ -49,20 +43,16 @@ fn world_d3_candidate_does_not_rewrite_w8_quote_data() {
 }
 
 #[test]
-fn world_d3_candidate_replays_existing_world_operations() {
-    for program in [
-        "(empty-world)",
-        "(world? (empty-world))",
-        "(world-parent (empty-world))",
-        "(world-journal (empty-world))",
-        "(world-metadata (empty-world))",
-        "(world-module-missing? (empty-world) (quote unknown))",
-        "(world-remove-first (quote x) (quote (a x b)))",
+fn world_d3_current_semantics_replay_the_frozen_behavioral_witnesses() {
+    for (program, expected) in [
+        ("(empty-world)", "(world () () ())"),
+        ("(world? (empty-world))", "1"),
+        ("(world-parent (empty-world))", "()"),
+        ("(world-journal (empty-world))", "()"),
+        ("(world-metadata (empty-world))", "()"),
+        ("(world-module-missing? (empty-world) (quote unknown))", "1"),
+        ("(world-remove-first (quote x) (quote (a x b)))", "(a b)"),
     ] {
-        assert_eq!(
-            observe(program, true),
-            observe(program, false),
-            "D3 candidate and historic W8 world disagree: {program}"
-        );
+        assert_eq!(observe(program), expected, "current D3 world changed: {program}");
     }
 }

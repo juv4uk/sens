@@ -36,13 +36,16 @@ jobs:
           python3 scripts/check-numeric-domain-ratification.py --self-test
           python3 scripts/check-numeric-domain-ratification.py
       - name: Verify Core domain and ownership boundaries
-        run: cargo test --locked -p sens --test domain_ladder --test domain_ladder_only_kernel --test domain_ast_value_identity
+        run: |
+          python3 scripts/check-domain-surfaces-d1-d4.py
+          python3 scripts/check-d9-definition-bindings.py
+          cargo test --locked -p sens --test domain_ladder --test domain_ladder_only_kernel --test domain_ast_value_identity
       - name: Verify migrated user demo sources run through canonical Core
         run: cargo test --locked -p sens --test exact_domain_migrated_demos
-      - name: World D3 candidate differential against historical source
+      - name: World D3 exact-D1 migration witnesses
         if: always()
         run: cargo test --locked -p sens --test reasoning_world_d3_migration
-      - name: Forward and knowledge D3 candidates differential oracle
+      - name: Forward/knowledge D3+D9 migration witnesses
         if: always()
         run: cargo test --locked -p sens --test reasoning_forward_knowledge_d3_migration
       - name: Legacy core D6 MAP reader execution
