@@ -39,9 +39,10 @@ content sniffing та decoder fallback заборонені.
 
 Для F3M сімейство вибирається зовнішнім маршрутом, але конкретний профіль
 визначає **тільки фізична довжина**: 1 байт = F3M-1, 2 = F3M-2,
-3 = F3M-3, 4 = F3M-4; 0 і 5+ зараз fail-closed.
-F3M-1/F3M-2/F3M-3/F3M-4 займають
-неперетинні послідовні вікна одного canonical enumerator:
+3 = F3M-3, 4 = F3M-4, 5 = F3M-5; 0 і 6+ fail-closed.
+F3M-1/F3M-2/F3M-3/F3M-4 займають неперетинні послідовні вікна legacy
+canonical enumerator; F3M-5 має окремий prefix-stable extension ranker, тому
+не перенумеровує старі payloads:
 
 - F3M-1: **256/256** unique; exhaustive evaluator + physical-T5 parity;
 - F3M-2: наступні **65 536/65 536** ranks; exhaustive encode/decode roundtrip;
@@ -49,20 +50,26 @@ F3M-1/F3M-2/F3M-3/F3M-4 займають
   DP/full-capability proof та exhaustive search останньої 64K-сторінки.
 - F3M-4: наступні **4 294 967 296** ranks; algebraic capacity proof,
   boundary cases, 65 536 stratified roundtrip samples і executable `DE AD BE EF` witness.
+- F3M-5: **1 099 511 627 776** local extension ranks; D3 EQ + closed D4
+  LAMBDA, 65 536 stratified 40-bit roundtrips, frozen F3M1–4 regression і
+  executable all-basis witness `03 B1 C7 07 93` → exact D1:0.
 
 Поточні трофеї: `3E` → `CAR(CONS(1,NIL))`; `16 3C 63` — найраніший
 F3M-3 witness із усіма 6 capability-класами
 `QUOTE+ATOM+CONS+CAR+CDR+COND`; `FF FB 37` — переможець exhaustive
 пошуку `FF 00 00..FF FF FF` за зафіксованою метрикою виразності.
 Сам `FF FF FF` має лише 4/6 capability-класів і без COND.
+F3M-5 witness `03 B1 C7 07 93` має всі **8/8** рахованих класів
+`QUOTE+ATOM+CONS+CAR+CDR+COND+EQ+LAMBDA`; D2 лишається structural framing.
 
 Evidence: [run 38194615315](https://github.com/juv4uk/sens/actions/runs/38194615315)
 і [run 38195272188](https://github.com/juv4uk/sens/actions/runs/38195272188)
 — SUCCESS. F3M-4 proof [run 38197700174](https://github.com/juv4uk/sens/actions/runs/38197700174)
 також SUCCESS: 4-byte selector, 32-bit rank window, node-layer capacity,
-65 536 stratified samples і real evaluator witness пройшли. Повний evaluator
-sweep **усіх 16 777 216** F3M-3 або **4 294 967 296** F3M-4 програм ще не
-оголошується завершеним; це окремі proof gates.
+65 536 stratified samples і real evaluator witness пройшли. F3M-5 dedicated
+proof **38234038310 — SUCCESS**. Повний evaluator sweep **16 777 216**
+F3M-3, **2^32** F3M-4 або **2^40** F3M-5 програм не оголошується
+завершеним; це окремі proof gates.
 
 ## 2. Nano-SENS: що виміряно і що ще заблоковано
 
