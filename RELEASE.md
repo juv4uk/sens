@@ -28,9 +28,9 @@ SENS — експериментальна двійкова мова з *точн
 
 ## Релізні ворота: NO-GO до доказу на одному SHA
 
-1. Вирівняти номер CLI/crates/інсталятора/asset-ів: поточний `sens-cli` має `0.41.0`; кандидат `l0.42.0` потребує `0.42.0`.
+1. Повторно підтвердити версійну паритетність: усі сім канонічних Cargo crates, `Cargo.lock`, `scripts/release.lisp`, Guix та installer уже переведені на `0.42.0`; це має пройти `release_parity` й installer tests на одному candidate SHA.
 2. Закрити фактичні P0, включно з [#5406](https://github.com/juv4uk/sens/issues/5406) (T5 authority), [#5408](https://github.com/juv4uk/sens/issues/5408) (quantity witness), [#2170](https://github.com/juv4uk/sens/issues/2170) (exact-width), та всі обов'язкові release blockers із [#4196](https://github.com/juv4uk/sens/issues/4196). Не заміняти незалежного свідка host-перевіркою, не робити BLOCK «зеленим».
-3. Закріпити інструментарій (у тому числі **конкретну** версію Rust, `Cargo.lock`, Actions) і задокументувати середовище. Чинний `.github/workflows/release.yml` використовує `dtolnay/rust-toolchain@stable`; цього недостатньо для обіцянки ідентичної відтворюваності.
+3. Rust compiler тепер закріплено як `1.99.0` у `rust-toolchain.toml` та як явний `toolchain` у release, release-preflight і основних CI workflows. До обіцянки ідентичного бінарного відтворення все ще потрібні точні runner-image та зовнішні tool/distribution digests і їхній запис у доказах.
 4. Для **одного повного SHA** зафіксувати `cargo test --locked --workspace`, `cargo clippy --locked --workspace --all-targets -- -D warnings`, conformance D1–D9, D10 ratification metadata, T5/F3C roundtrip, суворий corpus-wide Ukrainian/T5/view gate, release preflight та всі потрібні Hosted/Native CI. Позначати недоступні substrates **UNVERIFIED**, не PASS.
 5. Зібрати та перевірити платформи, які реально обіцяно в релізі; згенерувати manifest, SHA-256 кожного файла та доказ походження. Чистий clone/replay має перевіряти опубліковані байти і дайджести; незалежні платформи повинні мати власні докази.
 6. **Тільки після GO:** записати `main@<full SHA>`, погодити scope і видимість репозиторію, підпис власника, створити незмінний тег на цьому SHA, перевірити workflow тега та **лише потім** опублікувати повний перевірений release. Якщо workflow упав — **NO PUBLISH**, виправлення в `main`, новий candidate SHA і повний повтор перевірок.
