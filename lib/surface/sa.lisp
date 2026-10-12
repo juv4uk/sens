@@ -32,19 +32,19 @@
 ; are ratified stable peers installed directly by the runtime together with
 ; Ukrainian and symbolic spellings. None is defined through another surface.
 ; rūpa = absolute value (candidate — polysemous)
-(00001001 rūpa abs)
+(0011 rūpa abs)
 ; alpatara = least (alpa + -tara comparative)
-(00001001 alpatara min)
+(0011 alpatara min)
 ; brhattara = greatest (bṛhat + -tara comparative)
-(00001001 brhattara max)
+(0011 brhattara max)
 ; avasiṣṭa = remainder (ava-śiṣ; ≠ śeṣa CDR)
-(00001001 avasiṣṭa mod)
+(0011 avasiṣṭa mod)
 ; bhāga = quotient (result of division)
-(00001001 bhāga quotient)
+(0011 bhāga quotient)
 ; mūla = square root
-(00001001 mūla sqrt)
+(0011 mūla sqrt)
 ; sakalamūla = integer square root
-(00001001 sakalamūla isqrt)
+(0011 sakalamūla isqrt)
 
 ;; ═══════════════════════════════════════════════════════════════
 ;; Batch 1 — Comparisons (status: candidate)
@@ -53,9 +53,9 @@
 ; ADR-007/008 / 1014–1016: hīna?, adhika? and sama? are ratified
 ; stable peers installed directly by the runtime with UK and symbolic names.
 ; na-adhika = not-greater (compound)
-(00001001 na-adhika? <=)
+(0011 na-adhika? <=)
 ; na-hīna = not-lesser (compound)
-(00001001 na-hīna? >=)
+(0011 na-hīna? >=)
 
 ;; ═══════════════════════════════════════════════════════════════
 ;; Batch 1 — Predicates (status: candidate)
@@ -63,48 +63,48 @@
 
 ; na = not (universal negation)
 ; tulya = structurally equal (≠ abheda eq, sama =)
-(00001001 tulya? equal?)
+(0011 tulya? equal?)
 ; nāman = symbol/name (Pāṇini 1.1.62)
-(00001001 nāman? symbol?)
+(0011 nāman? symbol?)
 ; śabda = string/text
-(00001001 śabda-hīna? string<?)
+(0011 śabda-hīna? string<?)
 
 ;; ═══════════════════════════════════════════════════════════════
 ;; Batch 1 — Lists (status: candidate)
 ;; ═══════════════════════════════════════════════════════════════
 
 ; śreṇī = ordered sequence
-(00001001 śreṇī list)
+(0011 śreṇī list)
 ; pramāṇa = measure/quantity
-(00001001 pramāṇa length)
+(0011 pramāṇa length)
 ; saṅkalana = collection (≠ saṃyuj CONS)
-(00001001 saṅkalana append)
+(0011 saṅkalana append)
 ; viloma = reverse order
-(00001001 viloma reverse)
+(0011 viloma reverse)
 ; kramāṅka = ordinal number (candidate)
-(00001001 kramāṅka nth)
+(0011 kramāṅka nth)
 ; sambaddha = included/bound (candidate)
-(00001001 sambaddha? member?)
+(0011 sambaddha? member?)
 ; saṃbandha = relation/connection
-(00001001 saṃbandha assoc)
+(0011 saṃbandha assoc)
 ; dvandva = pair (Pāṇini 2.2.29-34)
-(00001001 dvandva pair)
+(0011 dvandva pair)
 ; ordinals — safe: return element, not sublist
-(00001001 dvitīya second)
-(00001001 tṛtīya third)
-(00001001 caturtha fourth)
-(00001001 pañcama fifth)
+(0011 dvitīya second)
+(0011 tṛtīya third)
+(0011 caturtha fourth)
+(0011 pañcama fifth)
 
 ;; ═══════════════════════════════════════════════════════════════
 ;; Batch 1 — Higher-order (status: candidate)
 ;; ═══════════════════════════════════════════════════════════════
 
 ; āvartana = repeated application (candidate — no direct traditional source)
-(00001001 āvartana map)
+(0011 āvartana map)
 ; kalpana = selection/postulation (Mīmāṃsā)
-(00001001 kalpana filter)
+(0011 kalpana filter)
 ; saṅgraha = comprehension/collection
-(00001001 saṅgraha reduce)
+(0011 saṅgraha reduce)
 
 ;; ═══════════════════════════════════════════════════════════════
 ;; Batch 1 — Strings (status: candidate)
@@ -122,7 +122,7 @@
 ;; ═══════════════════════════════════════════════════════════════
 
 ; svabhāva = own nature/identity (≠ svarūpa QUOTE)
-(00001001 svabhāva identity)
+(0011 svabhāva identity)
 
 ;; ═══════════════════════════════════════════════════════════════
 ;; Batch 2 — I/O (status: candidate)
@@ -146,103 +146,103 @@
 ;; ═══════════════════════════════════════════════════════════════
 
 ; saṅkhyā-śabda = number-to-word
-(00001001 saṅkhyā-śabda number->string)
+(0011 saṅkhyā-śabda number->string)
 
 ;; ═══════════════════════════════════════════════════════════════
 ;; Batch 2 — Time (status: candidate)
 ;; ═══════════════════════════════════════════════════════════════
 
 ; kāla = time
-(00001001 kāla-adya utc-now)
-(00001001 kāla-mono-ms mono-ms)
-(00001001 kāla-millisecondāni milliseconds-from-nanoseconds)
+(0011 kāla-adya utc-now)
+(0011 kāla-mono-ms mono-ms)
+(0011 kāla-millisecondāni milliseconds-from-nanoseconds)
 ; deśa-kāla = timezone
-(00001001 deśa-kāla-nāma timezone-name)
-(00001001 deśa-kāla-jñāna timezone-detect)
-(00001001 deśa-kāla-śeṣa timezone-offset-seconds)
+(0011 deśa-kāla-nāma timezone-name)
+(0011 deśa-kāla-jñāna timezone-detect)
+(0011 deśa-kāla-śeṣa timezone-offset-seconds)
 ;avadhi = deadline
-(00001001 avadhi-gatā? deadline-reached?)
-(00001001 avadhi-gatā-kadā? deadline-reached-at?)
-(00001001 avadhi-nirmāṇa deadline-from)
-(00001001 avadhi-anantara-ns deadline-after-ns)
-(00001001 atīta-ns elapsed-ns)
+(0011 avadhi-gatā? deadline-reached?)
+(0011 avadhi-gatā-kadā? deadline-reached-at?)
+(0011 avadhi-nirmāṇa deadline-from)
+(0011 avadhi-anantara-ns deadline-after-ns)
+(0011 atīta-ns elapsed-ns)
 
 ;; ═══════════════════════════════════════════════════════════════
 ;; Batch 2 — Persistent map (status: candidate)
 ;; ═══════════════════════════════════════════════════════════════
 
 ; kośa = repository/map
-(00001001 kośa-śūnya map-empty)
-(00001001 kośa-grahaṇa map-get)
-(00001001 kośa-niveśana map-insert)
-(00001001 kośa-sambaddha? map-contains?)
-(00001001 kośa-śreṇī map->list)
+(0011 kośa-śūnya map-empty)
+(0011 kośa-grahaṇa map-get)
+(0011 kośa-niveśana map-insert)
+(0011 kośa-sambaddha? map-contains?)
+(0011 kośa-śreṇī map->list)
 
 ;; ═══════════════════════════════════════════════════════════════
 ;; Batch 2 — Persistent vector (status: candidate)
 ;; ═══════════════════════════════════════════════════════════════
 
-(00001001 samūha-śūnya vec-empty)
-(00001001 samūha-yukti vec-conj)
-(00001001 samūha-gaṇana vec-count)
-(00001001 samūha-kramāṅka vec-nth)
-(00001001 samūha-śreṇī vec->list)
-(00001001 śreṇī-samūha vec-from-list)
+(0011 samūha-śūnya vec-empty)
+(0011 samūha-yukti vec-conj)
+(0011 samūha-gaṇana vec-count)
+(0011 samūha-kramāṅka vec-nth)
+(0011 samūha-śreṇī vec->list)
+(0011 śreṇī-samūha vec-from-list)
 
 ;; ═══════════════════════════════════════════════════════════════
 ;; Batch 2 — Knowledge/Reasoning (status: candidate)
 ;; ═══════════════════════════════════════════════════════════════
 
 ; jñāna = knowledge
-(00001001 jñāna-satya? is-fact?)
-(00001001 varṇana describe)
-(00001001 jñāna-saṅgraha collect-facts-about)
-(00001001 aṇu-sambaddha? contains-atom?)
+(0011 jñāna-satya? is-fact?)
+(0011 varṇana describe)
+(0011 jñāna-saṅgraha collect-facts-about)
+(0011 aṇu-sambaddha? contains-atom?)
 ; abhimukha = forward
-(00001001 abhimukha-anumāna forward-in)
+(0011 abhimukha-anumāna forward-in)
 ; anumāna = inference
-(00001001 anumāna reason-in)
-(00001001 virodha-parīkṣā check-conflict)
+(0011 anumāna reason-in)
+(0011 virodha-parīkṣā check-conflict)
 ; pramāṇa-siddhi = proof
-(00001001 siddhi-sādhana prove-goal)
-(00001001 siddhi-sādhana-sarva prove-goals)
-(00001001 siddhi-vyākhyā explain-proof)
-(00001001 siddhi-mūla source-of)
-(00001001 utpatti provenance)
-(00001001 tarka reason)
-(00001001 tarka-vyākhyā reason-explain)
+(0011 siddhi-sādhana prove-goal)
+(0011 siddhi-sādhana-sarva prove-goals)
+(0011 siddhi-vyākhyā explain-proof)
+(0011 siddhi-mūla source-of)
+(0011 utpatti provenance)
+(0011 tarka reason)
+(0011 tarka-vyākhyā reason-explain)
 
 ; Unification
-(00001001 ekīkaraṇa unify)
-(00001001 tarka-cihna logic-var)
-(00001001 cihna? var?)
-(00001001 pratyāroha apply-subst)
-(00001001 vicāraṇa-gamana walk)
-(00001001 parivṛtti-parīkṣā occurs-check)
+(0011 ekīkaraṇa unify)
+(0011 tarka-cihna logic-var)
+(0011 cihna? var?)
+(0011 pratyāroha apply-subst)
+(0011 vicāraṇa-gamana walk)
+(0011 parivṛtti-parīkṣā occurs-check)
 
 ;; ═══════════════════════════════════════════════════════════════
 ;; Batch 2 — Epistemic (status: candidate)
 ;; ═══════════════════════════════════════════════════════════════
 
 ; pratyaya = claim/conviction
-(00001001 pratyaya? claim?)
-(00001001 pratyaya-vākya claim-statement)
-(00001001 pratyaya-parīkṣā claim-review)
+(0011 pratyaya? claim?)
+(0011 pratyaya-vākya claim-statement)
+(0011 pratyaya-parīkṣā claim-review)
 ; pramāṇa = evidence
-(00001001 pramāṇa? evidence?)
-(00001001 pramāṇa-vidhi evidence-method)
-(00001001 pramāṇa-phala evidence-outcome)
+(0011 pramāṇa? evidence?)
+(0011 pramāṇa-vidhi evidence-method)
+(0011 pramāṇa-phala evidence-outcome)
 ; pratyakṣa = observation
-(00001001 pratyakṣa? observation?)
-(00001001 pratyakṣa-vākya observation-statement)
+(0011 pratyakṣa? observation?)
+(0011 pratyakṣa-vākya observation-statement)
 ; saṅkalpa = intent
-(00001001 saṅkalpa? intent?)
-(00001001 saṅkalpa-lakṣya intent-goal)
-(00001001 sahāya-pramāṇa supporting-evidence)
+(0011 saṅkalpa? intent?)
+(0011 saṅkalpa-lakṣya intent-goal)
+(0011 sahāya-pramāṇa supporting-evidence)
 
 ;; ═══════════════════════════════════════════════════════════════
 ;; Batch 2 — Missing SA fill (status: candidate)
 ;; ═══════════════════════════════════════════════════════════════
 
 ; nāman-nirmāṇa = name generation
-(00001001 nāman-nirmāṇa gensym)
+(0011 nāman-nirmāṇa gensym)
