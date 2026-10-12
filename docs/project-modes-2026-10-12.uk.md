@@ -48,7 +48,8 @@ F3M не платить внутрішній байт за magic/version. Сім
 | 2 байти | **F3M-2** | 65 536 | dense **65 536/65 536** exhaustive encode/decode roundtrip |
 | 3 байти | **F3M-3** | 16 777 216 | dense rank window; boundary/sample roundtrip, real evaluator witnesses, exhaustive final-64K search |
 | 4 байти | **F3M-4** | 4 294 967 296 | dense rank window; algebraic capacity proof, 65 536 stratified roundtrip samples, real evaluator witness `DE AD BE EF` |
-| 0 або 5+ | — | — | fail-closed до окремого рішення |
+| 5 байтів | **F3M-5** | 1 099 511 627 776 | **дослідний** окремий prefix-stable простір з EQ(ATOM,ATOM) і LAMBDA0; повний релізний доказ відсутній |
+| 0 або 6+ | — | — | fail-closed до окремого рішення |
 
 ### Єдиний canonical order
 
@@ -59,6 +60,8 @@ F3M-1, F3M-2, F3M-3 і F3M-4 не мають окремих таблиць із 
 - F3M-2: наступні `65 536`;
 - F3M-3: наступні `16 777 216`;
 - F3M-4: наступні `4 294 967 296`.
+
+**F3M-5 не перенумеровує жодне з цих чотирьох вікон.** У поточному Rust-коді його 40-бітовий локальний rank-space задає окремий розширювальний enumerator `frame3_micro_v5.rs`; `EQ(ATOM,ATOM)` і замкнений `LAMBDA0` — нові конструктори. Механічна реалізація не є доказом повного evaluator sweep або production admission; до перевірки на одному SHA статус **RESEARCH / NO-GO**.
 
 Encoder повертає найкоротший допустимий профіль. Для canonical mapping
 виконується `encode(decode(payload)) == payload`.
@@ -76,6 +79,8 @@ Encoder повертає найкоротший допустимий профі�
   exact-word count → node count → later rank.
   Він має 6/6 capability-класів; сам `FF FF FF` має лише 4/6 і без COND.
 - **F3M-4 `DE AD BE EF`** → 12-вузлова виконувана програма `ATOM(CONS(ATOM(CDR(CONS(QUOTE(0),CAR(CONS(NIL,QUOTE(0)))))),ATOM(ATOM(ATOM(QUOTE(NIL))))))`; evaluator повертає `0`.
+
+**F3M-5:** у `main` з'явились фізичний selector, окремий enumerator і цільові тести; до завершеного Hosted CI точного SHA це **кандидати доказу**, а не готовий п'ятибайтовий production-кодек.
 
 Green evidence:
 - dense base proof: GitHub Actions run **38194615315**;
@@ -103,7 +108,7 @@ default project-mode selection.
 
 1. `.sens` → T5.
 2. `.senc` → F3C.
-3. `.f3m` → F3M family, а **payload length 1/2/3/4** → F3M-1/2/3/4.
+3. `.f3m` → F3M family, а **payload length 1/2/3/4/5** → F3M-1/2/3/4/5 відповідно; профіль 5 поки дослідний, його виконання не можна автоматично вважати production-admitted.
 4. Content sniffing не дозволений.
 5. Decode failure не дозволяє спробувати інший codec.
 6. Один фізичний файл не трактується одночасно в кількох режимах.
