@@ -856,6 +856,128 @@ mod tests {
         }
     }
 
+    fn runtime_operation_count(expr: &Frame3MicroExpr) -> usize {
+        let own = match expr {
+            Frame3MicroExpr::Zero | Frame3MicroExpr::One | Frame3MicroExpr::Nil => 0,
+            Frame3MicroExpr::QuoteZero
+            | Frame3MicroExpr::QuoteOne
+            | Frame3MicroExpr::QuoteNil => 1,
+            Frame3MicroExpr::Atom(_) | Frame3MicroExpr::Cons(_, _) => 1,
+            Frame3MicroExpr::CarCons(_, _)
+            | Frame3MicroExpr::CdrCons(_, _)
+            | Frame3MicroExpr::IfAtom(_, _, _) => 2,
+        };
+        own + match expr {
+            Frame3MicroExpr::Atom(value) => runtime_operation_count(value),
+            Frame3MicroExpr::Cons(left, right)
+            | Frame3MicroExpr::CarCons(left, right)
+            | Frame3MicroExpr::CdrCons(left, right) => {
+                runtime_operation_count(left) + runtime_operation_count(right)
+            }
+            Frame3MicroExpr::IfAtom(test, then_value, else_value) => {
+                runtime_operation_count(test)
+                    + runtime_operation_count(then_value)
+                    + runtime_operation_count(else_value)
+            }
+            _ => 0,
+        }
+    }
+
+    fn conditional_count(expr: &Frame3MicroExpr) -> usize {
+        let own = usize::from(matches!(expr, Frame3MicroExpr::IfAtom(_, _, _)));
+        own + match expr {
+            Frame3MicroExpr::Atom(value) => conditional_count(value),
+            Frame3MicroExpr::Cons(left, right)
+            | Frame3MicroExpr::CarCons(left, right)
+            | Frame3MicroExpr::CdrCons(left, right) => {
+                conditional_count(left) + conditional_count(right)
+            }
+            Frame3MicroExpr::IfAtom(test, then_value, else_value) => {
+                conditional_count(test)
+                    + conditional_count(then_value)
+                    + conditional_count(else_value)
+            }
+            _ => 0,
+        }
+    }
+
+    fn expression_depth(expr: &Frame3MicroExpr) -> usize {
+        1 + match expr {
+            Frame3MicroExpr::Atom(value) => expression_depth(value),
+            Frame3MicroExpr::Cons(left, right)
+            | Frame3MicroExpr::CarCons(left, right)
+            | Frame3MicroExpr::CdrCons(left, right) => {
+                expression_depth(left).max(expression_depth(right))
+            }
+            Frame3MicroExpr::IfAtom(test, then_value, else_value) => expression_depth(test)
+                .max(expression_depth(then_value))
+                .max(expression_depth(else_value)),
+            _ => 0,
+        }
+    }
+
+    #[test]
+    fn strongest_last_64k_f3m3_rank_is_full_basis_and_executes() {
+        // Transparent lexicographic search score:
+        // capability diversity, COND count, runtime operation count, depth,
+        // exact-word count, node count, then the later physical rank.
+        let mut best: Option<((u32, usize, usize, usize, usize, usize, u32), Frame3MicroExpr)> =
+            None;
+        for local in 0xff_00_00u32..=0xff_ff_ff {
+            let payload = [
+                ((local >> 16) & 0xff) as u8,
+                ((local >> 8) & 0xff) as u8,
+                (local & 0xff) as u8,
+            ];
+            let expr = decode_payload(&payload).unwrap();
+            let score = (
+                expr.capability_mask().count_ones(),
+                conditional_count(&expr),
+                runtime_operation_count(&expr),
+                expression_depth(&expr),
+                expr.exact_words().len(),
+                expr.node_count(),
+                local,
+            );
+            if best.as_ref().is_none_or(|(current, _)| score > *current) {
+                best = Some((score, expr));
+            }
+        }
+
+        let (score, expr) = best.unwrap();
+        assert_eq!(score.6, 0xff_fb_37);
+        assert_eq!(expr.capability_mask(), CAP_ALL);
+        assert_eq!(score.0, 6);
+        assert_eq!(score.1, 1);
+        assert_eq!(score.2, 11);
+        assert_eq!(score.3, 4);
+        assert_eq!(score.4, 43);
+        assert_eq!(score.5, 9);
+        assert_eq!(
+            expr.human_projection(),
+            "CAR(CONS(CDR(CONS(1,QUOTE(1))),ATOM(IF-ATOM(QUOTE(NIL),QUOTE(NIL),QUOTE(NIL)))))"
+        );
+
+        let payload = [0xff, 0xfb, 0x37];
+        assert_eq!(encode_expr(&expr).unwrap(), payload);
+        let source = expr.exact_words().join(" ");
+        let parsed = parse_canonical_binary(&source).expect("boundary F3M-3 source");
+        let actual = eval_parsed_expressions(&parsed, &mut Session::default())
+            .expect("boundary F3M-3 witness executes");
+        let expected = eval_parsed_expressions(
+            &parse_canonical_binary("1").unwrap(),
+            &mut Session::default(),
+        )
+        .unwrap();
+        assert_eq!(actual.value, expected.value);
+        assert_eq!(actual.output, expected.output);
+
+        // The literal endpoint is later but less expressive by this score.
+        let endpoint = decode_payload(&[0xff, 0xff, 0xff]).unwrap();
+        assert_eq!(endpoint.capability_mask().count_ones(), 4);
+        assert_eq!(conditional_count(&endpoint), 0);
+    }
+
     #[test]
     fn first_full_capability_basis_fits_in_three_bytes_and_executes() {
         let first = first_global_rank_with_capabilities(CAP_ALL).unwrap();
