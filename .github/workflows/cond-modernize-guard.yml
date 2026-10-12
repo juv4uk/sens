@@ -5,6 +5,20 @@ on:
     paths:
       - "scripts/cond-modernize.py"
       - "tests/test_cond_modernize_guard.py"
+      - "tests/test_cond_stability_window.py"
+      - "lib/time.lisp"
+      - "lib/machine/admission/x86-64.lisp"
+      - "lib/machine/lowering/semantic-x86-64.lisp"
+      - ".github/workflows/cond-modernize-guard.yml"
+  push:
+    branches: [main]
+    paths:
+      - "scripts/cond-modernize.py"
+      - "tests/test_cond_modernize_guard.py"
+      - "tests/test_cond_stability_window.py"
+      - "lib/time.lisp"
+      - "lib/machine/admission/x86-64.lisp"
+      - "lib/machine/lowering/semantic-x86-64.lisp"
       - ".github/workflows/cond-modernize-guard.yml"
   workflow_dispatch:
 
@@ -15,3 +29,5 @@ jobs:
       - uses: actions/checkout@v5
       - name: Guard against old YES/NO rewrite and in-place writes
         run: python3 -m unittest discover -s tests -p 'test_cond_modernize_guard.py' -v
+      - name: Hold the line on active D3:110 three-field COND debt
+        run: python3 -m unittest discover -s tests -p 'test_cond_stability_window.py' -v
