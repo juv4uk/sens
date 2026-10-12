@@ -112,6 +112,22 @@ Proof run **38242173136 — SUCCESS**:
 - all-basis witness `056169CB4A` має 11 micro-nodes і несе
   QUOTE+ATOM+CONS+CAR+CDR+EQ+COND+LAMBDA.
 
+Наступний proof run **38260383334 — SUCCESS** прибрав останню важливу
+умовність toy-evaluator-а. Nameless candidate тепер lower-иться прямо в
+чинний SENS runtime:
+
+- `BOUND(n) → ExprKind::Local { depth: n, index: 0 }`;
+- `LAMBDA → D4:0010`;
+- `0000000000` реально створює SENS closure і beta-редукується як I;
+- K та KI проходять через справжні вкладені SENS closure/call frames;
+- `056169CB4A` виконується canonical SENS evaluator-ом і повертає exact D1 `0`;
+- жодне ім'я `x/y/foo` не входить у semantic body або фізичний payload.
+
+Поточний Closure allocator все ще потребує evaluator-private slot token для
+арності/створення кадру. Він має NUL-prefixed службове написання, не
+зчитується з source, не входить у rank/payload і не використовується
+`BOUND`-посиланнями; семантика залежить тільки від `Local(depth,index)`.
+
 Межа: de-Bruijn `BOUND(n)` поки research-semantic constructor і ще не має
 окремо ратифікованої exact SENS-domain identity. Тому кандидат не може
 підмінити production F3M-5, доки не буде прийнято закон lexical reference.
