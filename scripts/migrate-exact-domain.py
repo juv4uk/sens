@@ -103,7 +103,7 @@ def load_authority(root: Path = ROOT):
     return surfaces, legacy
 
 
-def plan(source: str, surfaces, legacy):
+def plan(source: str, surfaces, legacy, *, reject_unmapped_w8: bool = False):
     frames, edits = [], []
     pending_quote = False
     i = 0
@@ -189,7 +189,15 @@ def plan(source: str, surfaces, legacy):
         frame = frames[-1] if frames else None
         if frame and frame["first"]:
             frame["first"] = False
-            if not frame["quoted"]:
+            if not frame["quoted"] and not pending_quote:
+                # Незіставлена восьмибітна голова — ні старий SID8, ні
+                # чинний D8 не можуть бути вгадані з однакових бітів.
+                if reject_unmapped_w8 and WORD8.fullmatch(token) and token not in legacy:
+                    line = source.count("\n", 0, start) + 1
+                    raise ValueError(
+                        f"рядок {line}: неоднозначна виконувана W8/D8-голова {token}; "
+                        "не можна частково переписувати файл"
+                    )
                 identity = surfaces.get(token.casefold()) or legacy.get(token)
                 if identity and token != identity.bits:
                     edits.append(Edit(start, i, token, identity))
@@ -216,6 +224,33 @@ def apply_edits(source: str, edits: list[Edit]):
     return result
 
 
+def prepare_batch(paths, surfaces, legacy, *, for_write=False, legacy_source_era_proved=False):
+    """Підготувати ВСІ файли до запису, перш ніж торкатися будь-якого джерела."""
+    staged = []
+    for path in paths:
+        if path.suffix != ".lisp" or not path.is_file() or path.is_symlink():
+            raise ValueError(f"не звичайний оригінальний файл .lisp: {path}")
+        original = path.read_text(encoding="utf-8")
+        edits = plan(original, surfaces, legacy, reject_unmapped_w8=for_write)
+        if any(WORD8.fullmatch(edit.source) for edit in edits) and not legacy_source_era_proved:
+            raise ValueError(
+                f"{path}: неоднозначність старого W8 і чинного D8; "
+                "спочатку доведіть епоху джерела"
+            )
+        staged.append((path, original, apply_edits(original, edits), len(edits)))
+    return staged
+
+
+def write_batch(staged):
+    """Відмовити до першого запису, якщо хоч одне джерело змінилося."""
+    for path, original, _, _ in staged:
+        if path.read_text(encoding="utf-8") != original:
+            raise ValueError(f"{path}: джерело змінилося після планування; запис заблоковано")
+    for path, original, updated, _ in staged:
+        if updated != original:
+            path.write_text(updated, encoding="utf-8")
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("paths", nargs="+", type=Path)
@@ -223,17 +258,17 @@ def main():
     parser.add_argument("--legacy-source-era-proved", action="store_true")
     args = parser.parse_args()
     surfaces, legacy = load_authority()
-    for path in args.paths:
-        if path.suffix != ".lisp" or not path.is_file() or path.is_symlink():
-            raise ValueError(f"not an original regular .lisp source: {path}")
-        original = path.read_text(encoding="utf-8")
-        edits = plan(original, surfaces, legacy)
-        if any(WORD8.fullmatch(e.source) for e in edits) and not args.legacy_source_era_proved:
-            raise ValueError(f"{path}: W8 old/current D8 ambiguity; prove source era first")
-        updated = apply_edits(original, edits)
-        print(f"{path}: {len(edits)} exact-domain head replacements")
-        if args.write and updated != original:
-            path.write_text(updated, encoding="utf-8")
+    staged = prepare_batch(
+        args.paths,
+        surfaces,
+        legacy,
+        for_write=args.write,
+        legacy_source_era_proved=args.legacy_source_era_proved,
+    )
+    for path, _, _, count in staged:
+        print(f"{path}: {count} точнодоменних замін виконуваних голів")
+    if args.write:
+        write_batch(staged)
 
 
 if __name__ == "__main__":
