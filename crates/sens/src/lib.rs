@@ -362,7 +362,10 @@ pub fn load_macro_library(session: &mut Session) -> Result<EvalResult, LanguageE
     // Звичайний Lisp-reader помилково трактує 0001 як число;
     // тільки наявний mixed source bridge піднімає executable heads,
     // зберігаючи історичні слова всередині QUOTE як дані.
-    let expressions = mixed_source::parse_mixed_exact_domain(MACRO_LIBRARY_SOURCE)?;
+    let expressions = mixed_source::parse_mixed_exact_domain_macro_source(
+        "lib/macro.lisp",
+        MACRO_LIBRARY_SOURCE,
+    )?;
     let result = eval_parsed_expressions(&expressions, session)?;
 
     if !matches!(&result.value, Value::Macro(_)) {
