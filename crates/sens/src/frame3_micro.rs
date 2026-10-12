@@ -6,6 +6,7 @@
 //!   2 bytes -> F3M-2
 //!   3 bytes -> F3M-3
 //!   4 bytes -> F3M-4
+//!   5 bytes -> F3M-5 (prefix-stable D1-D3 + LAMBDA extension)
 //! Any other length is rejected fail-closed until separately admitted.
 //!
 //! This module selects the physical profile only. Semantic proof status is
@@ -17,6 +18,7 @@ pub enum Frame3MicroProfile {
     F3M2,
     F3M3,
     F3M4,
+    F3M5,
 }
 
 impl Frame3MicroProfile {
@@ -26,6 +28,7 @@ impl Frame3MicroProfile {
             Self::F3M2 => 2,
             Self::F3M3 => 3,
             Self::F3M4 => 4,
+            Self::F3M5 => 5,
         }
     }
 
@@ -47,6 +50,7 @@ pub const fn frame3_micro_profile_from_len(
         2 => Ok(Frame3MicroProfile::F3M2),
         3 => Ok(Frame3MicroProfile::F3M3),
         4 => Ok(Frame3MicroProfile::F3M4),
+        5 => Ok(Frame3MicroProfile::F3M5),
         other => Err(UnsupportedFrame3MicroLength {
             physical_bytes: other,
         }),
@@ -82,6 +86,10 @@ mod tests {
             frame3_micro_profile(&[0x00, 0x00, 0x00, 0x00]),
             Ok(Frame3MicroProfile::F3M4)
         );
+        assert_eq!(
+            frame3_micro_profile(&[0x00, 0x00, 0x00, 0x00, 0x00]),
+            Ok(Frame3MicroProfile::F3M5)
+        );
     }
 
     #[test]
@@ -104,11 +112,15 @@ mod tests {
             frame3_micro_profile(&[0xF3, 0xF4, 0x00, 0xFF]),
             Ok(Frame3MicroProfile::F3M4)
         );
+        assert_eq!(
+            frame3_micro_profile(&[0xF3, 0xF4, 0x00, 0xFF, 0x7A]),
+            Ok(Frame3MicroProfile::F3M5)
+        );
     }
 
     #[test]
     fn unsupported_lengths_fail_closed() {
-        for len in [0usize, 5, 8, 255] {
+        for len in [0usize, 6, 8, 255] {
             assert_eq!(
                 frame3_micro_profile_from_len(len),
                 Err(UnsupportedFrame3MicroLength {
@@ -124,5 +136,6 @@ mod tests {
         assert_eq!(Frame3MicroProfile::F3M2.payload_bits(), 16);
         assert_eq!(Frame3MicroProfile::F3M3.payload_bits(), 24);
         assert_eq!(Frame3MicroProfile::F3M4.payload_bits(), 32);
+        assert_eq!(Frame3MicroProfile::F3M5.payload_bits(), 40);
     }
 }
