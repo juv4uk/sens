@@ -79,5 +79,27 @@ class ReleaseAssetsTest(unittest.TestCase):
             prepare(self.dist, TAG, SHA)
 
 
+class ReleaseWorkflowOrderingTest(unittest.TestCase):
+    """Keep the workflow's last-moment SHA/owner-authorization barrier covered."""
+
+    def test_main_sha_and_owner_go_are_rechecked_after_replay_before_publish(self):
+        root = Path(__file__).resolve().parents[1]
+        workflow = (root / ".github" / "workflows" / "release.yml").read_text(encoding="utf-8")
+
+        replay = workflow.rfind("python3 scripts/verify_release_assets.py replay")
+        publish = workflow.rfind('gh release edit "$GITHUB_REF_NAME" --draft=false')
+        last_fetch = workflow.rfind("git fetch --no-tags --depth=1 origin main")
+        last_compare = workflow.rfind('test "$(git rev-parse FETCH_HEAD)" = "$GITHUB_SHA"')
+
+        self.assertGreaterEqual(replay, 0, "draft replay verifier is required")
+        self.assertGreater(last_fetch, replay, "main must be refetched after byte replay")
+        self.assertGreater(last_compare, last_fetch, "fresh main ref must be compared to tagged SHA")
+        self.assertGreater(publish, last_compare, "nothing may publish before the final SHA guard")
+        final_guard = workflow[last_fetch:publish]
+        self.assertIn("RELEASE_GO_SHA", final_guard)
+        self.assertIn("RELEASE_GO_TAG", final_guard)
+        self.assertIn("RELEASE_BLOCKED", final_guard)
+
+
 if __name__ == "__main__":
     unittest.main()
