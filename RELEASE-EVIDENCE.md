@@ -130,3 +130,14 @@ The newest complete diagnostic batch currently observed for main is SHA `b1a43d4
 | Physical T5 file-authority oracle | **BLOCKED** | [run 38235487525](https://github.com/juv4uk/sens/actions/runs/38235487525): migration reports `UNADMITTED_TEXT7_CONTEXT 'binary'` in quoted data; no T5 oracle verdict. |
 
 **Decision from this snapshot: NO-GO.** These green rows establish only the named narrow properties. The native positive witnesses, source/runtime admission, and whole-corpus independent T5 oracle still block release. The mandatory full Release Preflight workflow also has **no observed run/result** in this audit; do not replace that absence with the green rows above. Re-run every mandatory gate on a newly frozen single SHA, then write that new candidate SHA only after owner review.
+
+
+## Незалежний контроль GitHub Actions перед публікацією (2026-10-12)
+
+> **Реалізовано контроль, але не сертифіковано GO.** Наявність захисного коду — не результат виконання всіх обов'язкових job.
+
+- `scripts/verify_release_ci.py` звертається до живих GitHub check-runs для **точного 40-символьного Git SHA**. Потрібні актуальні `completed/success` з GitHub Actions; старий зелений rerun не може перекрити новий червоний або очікуваний запуск. Недоступний API та відсутній check — **BLOCK**, не `PASS`.
+- `.github/workflows/release.yml` перевіряє ці незалежні результати **перед створенням DRAFT** та повторно **після побайтового replay, безпосередньо перед публікацією**. Обов'язкові назви: `portable critical gates`, `oracle-native-smoke`, `Lisp-owned pair to real CPU, with fail-closed rejection`, `Physical SENS T5 file-admission oracle`, `triple`, `physical T5 to D2 D3 D4 D7 runtime`, `physical-binary-cli`, `d2-grammar-audit`, `focused release preflight`.
+- `packaging/tests/test_release_ci_check_runs.py`: 13 локальних тестів (із них 11 сценаріїв позитивних/негативних check-run даних) і окрема перевірка порядку workflow; синтетичні fixtures **не** заміняють реальний Hosted/Native proof.
+- `focused release preflight` має бути виконаний на candidate SHA (за потреби через існуючий `workflow_dispatch`, якщо `paths` не запустили workflow автоматично). Обов'язковий full-workspace тест/Clippy на тому самому SHA і незалежні мовні докази залишаються окремими воротами.
+- Інтеграційні коміти: [`8aabc6df`](https://github.com/juv4uk/sens/commit/8aabc6df6e12b1f1003aaa266865ea0dac79f958), [`a864dce5`](https://github.com/juv4uk/sens/commit/a864dce59105e4c597773c9851fb09bc8cd73c38), [`5a78cd68`](https://github.com/juv4uk/sens/commit/5a78cd68cabfb769e0556845cd4c3ddb4c5e5825). Реальний `GO` ще не отримано; `l0.42.0` не теговано.
