@@ -12,7 +12,7 @@
 use std::{env, fs, fs::OpenOptions, io::Write, path::Path, process};
 
 const USAGE: &str =
-    "usage: sens-trit (encode path.lisp | open path.sens | view path.sens | decode path.sens | explain path.sens | eval path.sens | eval-core4 path.sens | verify path.lisp | encode-f3 path.sens | open-f3 path.senc | decode-f3 path.senc | eval-f3 path.senc | verify-f3-sha256 path.senc SHA256 | eval-f3-sha256 path.senc SHA256)\n       sens-trit path.sens  # open only; never execute implicitly";
+    "usage: sens-trit (encode path.lisp | encode-d7-uk path.txt | decode-d7-uk path.sens | open path.sens | view path.sens | decode path.sens | explain path.sens | eval path.sens | eval-core4 path.sens | verify path.lisp | encode-f3 path.sens | open-f3 path.senc | decode-f3 path.senc | eval-f3 path.senc | verify-f3-sha256 path.senc SHA256 | eval-f3-sha256 path.senc SHA256)\n       sens-trit path.sens  # open only; never execute implicitly";
 
 fn sibling_sens(path: &Path) -> Result<std::path::PathBuf, String> {
     if path.extension().and_then(|ext| ext.to_str()) != Some("lisp") {
@@ -210,6 +210,30 @@ fn execute() -> Result<(), String> {
     let path = Path::new(file);
 
     match command {
+        "encode-d7-uk" => {
+            // Physical T5 record; no D2 source grammar and NO execution.
+            if path.extension().and_then(|ext| ext.to_str()) != Some("txt") {
+                return Err("encode-d7-uk requires an explicit UTF-8 .txt source".into());
+            }
+            let text = fs::read_to_string(path)
+                .map_err(|e| format!("read UTF-8 D7 keyboard text: {e}"))?;
+            let bytes = sens::encode_d7_uk_t5(&text)
+                .map_err(|e| format!("D7 keyboard T5 rejected: {e:?}"))?;
+            let output_path = path.with_extension("sens");
+            let mut output = OpenOptions::new().create_new(true).write(true)
+                .open(&output_path).map_err(|e| format!("create T5 text record: {e}"))?;
+            output.write_all(&bytes)
+                .map_err(|e| format!("write D7 T5 text record: {e}"))?;
+            println!("D7-T5 keyboard record: {} bytes", bytes.len());
+            Ok(())
+        }
+        "decode-d7-uk" => {
+            let bytes = read_sens(path)?;
+            let text = sens::decode_d7_uk_t5(&bytes)
+                .map_err(|e| format!("D7 keyboard T5 rejected: {e:?}"))?;
+            println!("{text}");
+            Ok(())
+        }
         "encode" => {
             let sens_path = sibling_sens(path)?;
             let projection = fs::read_to_string(path).map_err(|e| format!("read .lisp: {e}"))?;
