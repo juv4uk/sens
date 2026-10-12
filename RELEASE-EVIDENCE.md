@@ -44,6 +44,8 @@ Authority: [CURRENT.md](CURRENT.md), [language-contract.lisp](language-contract.
 - `lisp_owned_d24_length_fold_uses_ratified_d6_add1_without_number_literals` — D3/D4 рекурсія, `001110` D6 ADD1 замість `(01010 acc 1)`, seed як точно кваліфікований D24 Value; перевіряє 0–9 елементів, D24→D48 carry та відмову для legacy Rational(0).
 - `lisp_owned_d24_nth_uses_d3_identity_and_d6_sub1_without_number_literals` — D3 `101` EQ з явно кваліфікованим нулем і D6 `001111` SUB1 замість `(01011 i 1)`; індекси 0–2 та відмова для бездоменного індексу.
 
+**Захист точності аудиту:** `scripts/check-core4-d24-migration.py` тепер пропускає вкладені дані в явних `D3 QUOTE`/`quote`/історичній W8 QUOTE, щоб не рахувати інертний код виконуваною арифметикою. Самотести мають негативні приклади всіх трьох форм. Незалежний структурний підрахунок на актуальному `lib/core4.lisp` лишається **14/14**, без drift; обидва вбудовані Lisp SOURCE-фрагменти нових Rust-свідків мають збалансовані дужки. Це **не** Rust/Python CI PASS; скорочена апострофна quote-поверхня й непрямі числові виклики не входять у вузьку область аудиту.
+
 **Умовне приймання, не автоматична міграція:** тести передають D24(0)/D24(1) через explicit `Environment::define` у proof session. Вони **не** дають нового SENS source-literal/T5/FASL формату й **не** міняють `lib/core4.lisp`/збережений `.fasl`. Core4 `length` досі викликає `length-onto` із бездоменним `0`; для зміни canonical source потрібні легітимний D24 seed mechanism, регенерація FASL, чинний exact-SHA Core CI та негативні свідки. Реліз **NO-GO**.
 ## D10: наявні докази — чесний розподіл по рівнях
 
