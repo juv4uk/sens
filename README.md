@@ -184,7 +184,12 @@ enumerator, canonical SENS parser і реальний evaluator.
 
 | F3M | Байти | Програма | Що в ній крутого | Результат |
 |---|---|---|---|---|
-| **F3M-1** | `3E` | `CAR(CONS(1,NIL))` | справжня побудова пари + вибір першого елемента в **1 байті** | `1` |
+| **F3M-1** | `1A` | `CONS(1,NIL)` | ціла пара/спискова комірка в **1 байті** | pair `(1 . NIL)` |
+| **F3M-1** | `3E` | `CAR(CONS(1,NIL))` | побудова пари + вибір першого елемента в **1 байті** | `1` |
+| **F3M-1** | `67` | `CDR(CONS(NIL,1))` | побудова пари + вибір другого елемента в **1 байті** | `1` |
+| **F3M-1** | `83` | `ATOM(ATOM(ATOM(QUOTE(NIL))))` | рекорд глибини F3M-1 census: **4 рівні дерева** | `1` |
+| **F3M-1** | `CB` | `ATOM(CAR(CONS(QUOTE(NIL),QUOTE(NIL))))` | **QUOTE + ATOM + CONS + CAR**: 4 capability-класи, 5 encoded-операцій | `1` |
+| **F3M-1** | `EF` | `ATOM(CDR(CONS(QUOTE(NIL),QUOTE(NIL))))` | найвиразніший F3M-1 за нашою метрикою: **QUOTE + ATOM + CONS + CDR**, 4 класи, 5 encoded-операцій | `1` |
 | **F3M-2** | `00 C8` | `IF-ATOM(0,0,0)` | **найперший двобайтовий COND** у canonical rank order | `0` |
 | **F3M-2** | `FC 25` | `ATOM(CAR(CONS(QUOTE(NIL),IF-ATOM(QUOTE(NIL),QUOTE(NIL),QUOTE(NIL)))))` | переможець exhaustive census усіх **65 536** двобайтових програм: 5/6 capability-класів, 1 COND, 9 encoded-операцій | `1` |
 | **F3M-2** | `FB 4D` | `ATOM(CAR(CONS(QUOTE(NIL),CDR(CONS(ATOM(QUOTE(NIL)),QUOTE(NIL))))))` | одночасно **CAR + CDR + CONS + QUOTE + ATOM** у 2 байтах | `1` |
@@ -192,6 +197,13 @@ enumerator, canonical SENS parser і реальний evaluator.
 | **F3M-3** | `16 3C 63` | `CAR(CONS(0,CDR(CONS(0,IF-ATOM(0,0,QUOTE(0))))))` | **найраніший** rank, де вже є всі 6/6 класів: QUOTE+ATOM+CONS+CAR+CDR+COND | `0` |
 | **F3M-3** | `2F 18 59` | `IF-ATOM(QUOTE(0),CAR(CONS(QUOTE(1),1)),CDR(CONS(QUOTE(NIL),QUOTE(0))))` | компактне реальне умовне обчислення з двома різними гілками | `1` |
 | **F3M-3** | `FF FB 37` | `CAR(CONS(CDR(CONS(1,QUOTE(1))),ATOM(IF-ATOM(QUOTE(NIL),QUOTE(NIL),QUOTE(NIL)))))` | переможець exhaustive-пошуку останньої 64K-сторінки; 6/6 класів, 1 COND, 11 encoded-операцій | `1` |
+
+Для F3M-1 перебрано **всі 256/256 payloads**. Усі вони унікальні,
+канонічно roundtrip-яться й проходять реальний evaluator. Найвиразніший
+однобайтовий код за тією самою метрикою — `EF`; найкращий CAR-випадок —
+`CB`; рекорд глибини — `83`. У F3M-1 **немає жодного COND**:
+умовне розгалуження починається вже з F3M-2, де перший canonical COND —
+`00 C8`.
 
 Для F3M-2 перебрано **всі 65 536/65 536 payloads**. Метрика «найвиразнішого»
 фіксована й прозора: capability diversity → COND count → encoded-operation
@@ -204,7 +216,8 @@ CAR+CDR і максимальної глибини, бо «крутість» н
 Повний evaluator sweep усіх 16 777 216 F3M-3 програм лишається окремим
 proof gate.
 
-Evidence: [F3M-2 exhaustive census + pinned regression run 38196520171](https://github.com/juv4uk/sens/actions/runs/38196520171) ·
+Evidence: [F3M-1 exhaustive census run 38196658709](https://github.com/juv4uk/sens/actions/runs/38196658709) ·
+[F3M-2 exhaustive census + pinned regression run 38196520171](https://github.com/juv4uk/sens/actions/runs/38196520171) ·
 [F3M-3 final-page proof run 38195272188](https://github.com/juv4uk/sens/actions/runs/38195272188).
 
 ### Відтворення
