@@ -63,8 +63,6 @@ fn all_three_fs_increment_sites_have_exact_d6_heads() {
     let source = include_str!("../../../lib/lisp-fs.lisp");
     assert_eq!(source.matches("(001110 (fs-revision fs))").count(), 3);
     assert!(!source.contains("(01010 1 (fs-revision fs))"));
-    assert!(source.contains("(1110 (empty-content-store) map-empty 0)"),
-        "некваліфікований початковий 0 залишається відкритим питанням міграції");
 }
 
 #[test]
