@@ -244,20 +244,19 @@ impl BinaryNumber {
     /// a new host semantic Rational, a language expression, binary opcode or
     /// evidence of callable signed/rational arithmetic. Caller must collapse
     /// p=0 to numeric zero and q=1 to an integer under the ratified law.
-    /// Input domain identities remain untouched (including mixed D24/D48).
+    /// Numerator and denominator MUST already have the exact same Dn.
+    /// A matching magnitude is not permission to bridge D24 and D48.
     pub fn reduce_numeric_domain_ratio_parts(
         numerator: &Self,
         denominator: &Self,
     ) -> Option<(Self, Self)> {
-        let n_width = numerator.numeric_domain_width?;
-        let d_width = denominator.numeric_domain_width?;
-        if denominator.is_zero() {
+        let width = numerator.numeric_domain_width?;
+        if denominator.numeric_domain_width != Some(width) || denominator.is_zero() {
             return None;
         }
 
-        // Existing bit algorithms compare unqualified magnitudes. Their
-        // temporary normalized carriers are strictly private mechanisms:
-        // comparing qualified D24 and D48 identities is not magnitude order.
+        // Exact gcd uses private unqualified magnitudes only AFTER same-Dn
+        // admission. The public result reattaches that very same domain.
         let n = Self::normalize(numerator.bits.clone());
         let d = Self::normalize(denominator.bits.clone());
         let divisor = n.gcd(&d);
@@ -271,7 +270,7 @@ impl BinaryNumber {
             exact.extend_from_slice(number.as_bits());
             Self::from_numeric_domain_bits(domain_width, &exact)
         };
-        Some((fill(n_reduced, n_width)?, fill(d_reduced, d_width)?))
+        Some((fill(n_reduced, width)?, fill(d_reduced, width)?))
     }
 
     /// Exact arbitrary-width binary addition. No host numeric value is used.
@@ -818,32 +817,52 @@ mod tests {
             }
             BinaryNumber::from_numeric_domain_bits(width, &bits).unwrap()
         };
-        let two = admitted(24, 2);
-        let four = admitted(48, 4);
-        let (n, d) = BinaryNumber::reduce_numeric_domain_ratio_parts(&two, &four).unwrap();
-        assert_eq!(n.to_decimal_string(), "1");
-        assert_eq!(d.to_decimal_string(), "2");
-        assert_eq!(n.numeric_domain_width(), Some(24));
-        assert_eq!(d.numeric_domain_width(), Some(48));
-        assert_eq!(n.exact_numeric_domain_bits().unwrap().len(), 24);
-        assert_eq!(d.exact_numeric_domain_bits().unwrap().len(), 48);
-        assert_eq!(n, admitted(24, 1));
-        assert_eq!(d, admitted(48, 2));
+        for width in [24usize, 48, 96, 192, 384] {
+            let two = admitted(width, 2);
+            let four = admitted(width, 4);
+            let (n, d) = BinaryNumber::reduce_numeric_domain_ratio_parts(&two, &four)
+                .expect("same-Dn reduced RATIO");
+            assert_eq!(n, admitted(width, 1));
+            assert_eq!(d, admitted(width, 2));
+            assert_eq!(n.numeric_domain_width(), Some(width));
+            assert_eq!(d.numeric_domain_width(), Some(width));
+            assert_eq!(n.exact_numeric_domain_bits().unwrap().len(), width);
+            assert_eq!(d.exact_numeric_domain_bits().unwrap().len(), width);
 
-        let zero = admitted(24, 0);
-        let five = admitted(48, 5);
-        let (zn, zd) = BinaryNumber::reduce_numeric_domain_ratio_parts(&zero, &five).unwrap();
-        assert!(zn.is_zero());
-        assert_eq!(zd, admitted(48, 1)); // zero ratio collapses to zn in D24.
-        let (an, ad) = BinaryNumber::reduce_numeric_domain_ratio_parts(
-            &admitted(24, 15), &admitted(48, 3)).unwrap();
-        assert_eq!(an, admitted(24, 5));
-        assert_eq!(ad, admitted(48, 1)); // unit denominator collapses to integer.
-        assert!(BinaryNumber::reduce_numeric_domain_ratio_parts(&two, &admitted(24, 0)).is_none());
+            let zero = admitted(width, 0);
+            let five = admitted(width, 5);
+            let (zn, zd) = BinaryNumber::reduce_numeric_domain_ratio_parts(&zero, &five)
+                .expect("same-Dn zero numerator");
+            assert_eq!(zn, zero);
+            assert_eq!(zd, admitted(width, 1)); // Canonical Value collapses zero.
+            let (an, ad) = BinaryNumber::reduce_numeric_domain_ratio_parts(
+                &admitted(width, 15), &admitted(width, 3))
+                .expect("same-Dn unit denominator");
+            assert_eq!(an, admitted(width, 5));
+            assert_eq!(ad, admitted(width, 1));
+            assert!(BinaryNumber::reduce_numeric_domain_ratio_parts(
+                &two, &zero).is_none(), "D{width}: division by zero must fail");
+            assert!(BinaryNumber::reduce_numeric_domain_ratio_parts(
+                &BinaryNumber::one(), &four).is_none());
+            assert!(BinaryNumber::reduce_numeric_domain_ratio_parts(
+                &two, &BinaryNumber::one()).is_none());
+        }
+        for (numerator, denominator) in [
+            (admitted(24, 2), admitted(48, 4)),
+            (admitted(48, 2), admitted(24, 4)),
+            (admitted(24, 0), admitted(48, 5)),
+            (admitted(48, 0), admitted(24, 5)),
+            (admitted(24, 15), admitted(48, 3)),
+            (admitted(48, 15), admitted(24, 3)),
+        ] {
+            assert!(BinaryNumber::reduce_numeric_domain_ratio_parts(
+                &numerator, &denominator).is_none(),
+                "mixed exact Dn identities are not a rational composition");
+        }
         assert!(BinaryNumber::reduce_numeric_domain_ratio_parts(
-            &BinaryNumber::parse("10").unwrap(), &four).is_none());
-        assert!(BinaryNumber::reduce_numeric_domain_ratio_parts(
-            &two, &BinaryNumber::parse("100").unwrap()).is_none());
+            &BinaryNumber::parse("10").unwrap(),
+            &BinaryNumber::parse("100").unwrap(),
+        ).is_none(), "two unqualified Number values are not D24+");
     }
 
     #[test]
