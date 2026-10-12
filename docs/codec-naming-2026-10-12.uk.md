@@ -11,7 +11,7 @@
 | Назва | Скорочення | Роль |
 |---|---|---|
 | **Frame3** | **F3** | компактне сімейство Рамки3 |
-| **Frame3-Micro** | **F3M** | explicit `.f3m` family; профіль задає точна довжина 1/2/3 байти; dense bounded micro-rank |
+| **Frame3-Micro** | **F3M** | explicit `.f3m` family; профіль задає точна довжина 1/2/3/4 байти; dense bounded micro-rank |
 | **Frame3 Carrier** | **F3C** | явно маркований компактний carrier `.senc`; повний файл не зобов'язаний бути 1 байтом |
 | **Envelope E1** | **E1** | self-contained RAW/REPEAT + counts + CRC32; історично S3/v1 |
 | **Envelope E2** | **E2** | E1 + bounded grammar-rank; історично S3/v2 |
@@ -50,7 +50,8 @@ SENS-програму одним байтом у доведеному bounded pr
 - 1 байт → **F3M-1**;
 - 2 байти → **F3M-2**;
 - 3 байти → **F3M-3**;
-- 0 або 4+ байти → fail-closed до окремого рішення.
+- 4 байти → **F3M-4**;
+- 0 або 5+ байти → fail-closed до окремого рішення.
 
 Вміст байтів не sniff-иться і не може перемкнути профіль; fallback у T5/F3C
 заборонений. Через це всі 8/16/24 біти доступні програмному рангу, а не
@@ -58,8 +59,10 @@ SENS-програму одним байтом у доведеному bounded pr
 наступні неперетинні global-rank windows на 65 536 і 16 777 216 програм.
 F3M-2 має exhaustive 65 536/65 536 roundtrip; для F3M-3 вже є real-evaluator
 witnesses, DP-доказ першого 6/6-capability рангу `16 3C 63` та exhaustive
-final-64K winner `FF FB 37`. Повний evaluator sweep усіх 16 777 216 F3M-3
-програм лишається окремим proof gate. Детально:
+final-64K winner `FF FB 37`. F3M-4 додає наступні **4 294 967 296** rank-ів;
+для нього є algebraic capacity proof, 65 536 stratified roundtrip samples і
+real-evaluator witness `DE AD BE EF`. Повні evaluator sweeps F3M-3/F3M-4
+лишаються окремими proof gates. Детально:
 [профілі F3M за довжиною](frame3-micro-length-profiles-2026-10-12.uk.md).
 [Нормативні режими проєкту](project-modes-2026-10-12.uk.md).
 
