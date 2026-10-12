@@ -499,9 +499,14 @@ fn dispatch_call(
     let routed_head_sid = head_sid
         .filter(|sid| canon::route_kind_for_sid(*sid).is_some())
         .or_else(|| head_name.and_then(canon::routed_sid_for_surface));
-    let necessary_head = head_name
-        .and_then(necessary_forms::identity_for_symbol)
-        .or_else(|| head_sid.and_then(necessary_forms::identity_for_semantic_id));
+    // Ratified D4 source surfaces take the exact-domain evaluator path,
+    // including historical spelling aliases already resolved by the owner
+    // registry. Only a genuinely historical W8 head retains the legacy route.
+    // Never infer a current D8 identity from an eight-bit payload.
+    if let Some(identity) = head_name.and_then(necessary_forms::domain_identity_for_symbol) {
+        return dispatch_domain_call(identity, arguments, environment, span);
+    }
+    let necessary_head = head_sid.and_then(necessary_forms::identity_for_semantic_id);
 
     if routed_head_sid == Some(crate::sens!(00000001)) {
         special_forms::exact_sens_arity(crate::sens!(00000001), arguments, 1, span)?;
@@ -712,5 +717,62 @@ mod exact_domain_program_tests {
         let error = eval_exact_domain_program("(001 42)", &mut session)
             .expect_err("числа потребують окремого допуску D24+");
         assert_eq!(error.kind, ErrorKind::Parse);
+    }
+}
+
+#[cfg(test)]
+mod domain_eval_cutover_necessary_forms {
+    use super::*;
+
+    fn arguments(source: &str) -> (Vec<Expr>, Span) {
+        let parsed = parse(source).expect("допущена історична проєкція D4");
+        let expression = &parsed[0];
+        let ExprKind::List(parts) = &expression.kind else {
+            panic!("очікуємо викличну форму");
+        };
+        (parts[1..].to_vec(), expression.span)
+    }
+
+    #[test]
+    fn ukrainian_lambda_source_uses_exact_d4_mechanism() {
+        let (args, span) = arguments("(функція (x) x)");
+        let env = Environment::root();
+        let via_source = dispatch_call(Some("функція"), None, None, &args, &env, span)
+            .expect("джерельна проєкція D4:0010");
+        let identity = necessary_forms::domain_identity_for_symbol("функція")
+            .expect("ратифікована функція");
+        assert!(matches!(via_source, EvalStep::Value(Value::Closure(_))));
+        assert!(matches!(
+            dispatch_domain_call(identity, &args, &env, span)
+                .expect("точна D4:0010"),
+            EvalStep::Value(Value::Closure(_))
+        ));
+        assert_eq!(identity.width(), 4);
+    }
+
+    #[test]
+    fn ukrainian_define_source_uses_exact_d4_mechanism() {
+        let (args, span) = arguments("(визначити перевірка ())");
+        let source_env = Environment::root();
+        let exact_env = Environment::root();
+        let identity = necessary_forms::domain_identity_for_symbol("визначити")
+            .expect("ратифікована D4:0011");
+        dispatch_call(Some("визначити"), None, None, &args, &source_env, span)
+            .expect("визначення через доменну таблицю");
+        dispatch_domain_call(identity, &args, &exact_env, span)
+            .expect("пряме визначення D4:0011");
+        assert!(matches!(source_env.get("перевірка"), Some(Value::Nil)));
+        assert!(matches!(exact_env.get("перевірка"), Some(Value::Nil)));
+    }
+
+    #[test]
+    fn only_necessary_d4_heads_gain_this_route() {
+        assert!(necessary_forms::domain_identity_for_symbol("функція").is_some());
+        assert!(necessary_forms::domain_identity_for_symbol("визначити").is_some());
+        // D3 ATOM, a foreign symbol, and an old bare byte must not inherit
+        // the D4 necessary-form mechanism by payload or spelling.
+        assert!(necessary_forms::domain_identity_for_symbol("атом?").is_none());
+        assert!(necessary_forms::domain_identity_for_symbol("чужий-виклик").is_none());
+        assert!(necessary_forms::domain_identity_for_symbol("00001000").is_none());
     }
 }
