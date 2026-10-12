@@ -7,8 +7,8 @@
 Чинні .sens не переписувати і не перейменовувати; звичайні команди залишилися на T5.
 
 **Frame3-Micro (F3M, .f3m)** — не третій production-кодек, але це справжнє
-фізичне кодування SENS для bounded profile: один committed байт `0x45`
-відновлює `CAR(CONS(1,NIL))` і проходить той самий SENS evaluator з
+фізичне кодування SENS для dense bounded profile: один committed байт
+`0x3E` відновлює `CAR(CONS(1,NIL))` і проходить той самий SENS evaluator з
 паритетом до T5. Профіль F3M вибирається зовні; один байт не несе
 self-description або integrity metadata. Назви E1/E2/E3 зарезервовано за
 колишніми S3/v1-v3 Envelope. Див. [номенклатуру](codec-naming-2026-10-12.uk.md).
