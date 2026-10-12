@@ -109,6 +109,7 @@ def validate(policy, ratification, lang):
         "(numeric-composition-runtime", "(composite-growth",
         "(base-natural-occupancy", "(signed-composition", "(rational-composition",
         "(composite-identity", "(canonicalization",
+        "(arithmetic-exclusivity",
     ):
         need(needle in ratification, "contract: " + needle)
     for needle in (
@@ -117,12 +118,65 @@ def validate(policy, ratification, lang):
         "(numeric-domain-natural-mul-sub-exact-div",
         "(numeric-domain-signed-reduced-ratio-composition",
         "(numeric-domain-composition-runtime",
+        "(binary-domain-words-not-arithmetic-operands",
         "D24, D48, D96, D192",
         "contracts/numeric-domains-ratification.lisp",
         "ontological domain rank",
         "Cross-domain reuse requires an explicit independently proved bridge law",
     ):
         need(needle in lang, "language: " + needle)
+
+def validate_runtime_boundary(arithmetic, d6):
+    """Assert that every Core math entry point checks explicit D24+ admission.
+
+    This is a static CI backstop; behavioral Rust integration witnesses are
+    crates/sens/tests/math_domain_exclusivity.rs. Never count a text check as
+    proof that those runtime tests have actually executed.
+    """
+    spans = (
+        ("arithmetic_on_values", "pub(super) fn arithmetic_on_values(", "pub(super) fn division_on_values("),
+        ("division_on_values", "pub(super) fn division_on_values(", "pub(super) fn comparison_on_values("),
+        ("comparison_on_values", "pub(super) fn comparison_on_values(", "#[cfg(test)]"),
+    )
+    for name, start, end in spans:
+        need(arithmetic.count(start) == 1, name + " entry missing or duplicated")
+        tail = arithmetic.split(start, 1)[1]
+        need(end in tail, name + " next boundary missing")
+        body = tail.split(end, 1)[0]
+        need(body.count("require_math_domain(values, span)?;") == 1, name + " must enforce D24+ admission")
+    need("!domain_numeric::is_domain_value(v)" in arithmetic, "unqualified/functional values must be refused")
+    need("values.is_empty()" in arithmetic, "no zero-arity generic Number operations")
+    need("Value::NumericComposition(composition) => Some(composition.domain_width())" in d6,
+         "D6 must accept canonical D24+ composite width")
+    need("Value::BinaryNumber(number) => number.numeric_domain_width()" in d6,
+         "D6 must require an exact D24+ numeric natural")
+    need("BinaryNumber::from_numeric_domain_bits(width, &one_bits)" in d6,
+         "D6 unit must preserve the exact operand domain")
+    need("Value::BinaryNumber(one)" in d6, "D6 must not insert unqualified Rational(1)")
+    need("Value::Rational(Rational::integer(1))" not in d6,
+         "D6 historical unqualified one was reintroduced")
+
+
+def selftest_runtime(arithmetic, d6):
+    validate_runtime_boundary(arithmetic, d6)
+    for damaged in (
+        arithmetic.replace("require_math_domain(values, span)?;", "", 1),
+        arithmetic.replace("!domain_numeric::is_domain_value(v)", "false", 1),
+    ):
+        try:
+            validate_runtime_boundary(damaged, d6)
+        except ValueError:
+            pass
+        else:
+            raise ValueError("NUMERIC-DOMAIN-RATIFICATION: invalid runtime boundary admitted")
+    try:
+        validate_runtime_boundary(arithmetic, d6.replace(
+            "Value::BinaryNumber(one)", "Value::Rational(Rational::integer(1))", 1))
+    except ValueError:
+        pass
+    else:
+        raise ValueError("NUMERIC-DOMAIN-RATIFICATION: unqualified D6 unit admitted")
+
 
 def selftest(policy, ratification, lang):
     validate(policy, ratification, lang)
@@ -174,11 +228,14 @@ def main():
         policy = json.loads((ROOT / "knowledge/number-width-ratified.json").read_text(encoding="utf-8"))
         ratification = (ROOT / "contracts/numeric-domains-ratification.lisp").read_text(encoding="utf-8")
         lang = (ROOT / "language-contract.lisp").read_text(encoding="utf-8")
+        arithmetic = (ROOT / "crates/sens/src/eval/arithmetic.rs").read_text(encoding="utf-8")
+        d6 = (ROOT / "crates/sens/src/eval/d6_arithmetic.rs").read_text(encoding="utf-8")
         (selftest if args.self_test else validate)(policy, ratification, lang)
+        (selftest_runtime if args.self_test else validate_runtime_boundary)(arithmetic, d6)
     except (ValueError, KeyError, OSError) as exc:
         print(str(exc), file=sys.stderr)
         return 1
-    print("NUMERIC-DOMAIN-RATIFICATION: PASS D24+ natural and exact NEG/RATIO Core runtime, external/physical codec deferred")
+    print("NUMERIC-DOMAIN-RATIFICATION: PASS contract + static D24+-only Core entry guards (Rust execution requires separate cargo test); external/physical codec deferred")
     return 0
 
 if __name__ == "__main__":
