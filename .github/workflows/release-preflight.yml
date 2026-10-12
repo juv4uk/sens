@@ -17,6 +17,7 @@ on:
       - "docs/release-readiness-contract-11-9-2026-10-12.uk.md"
       - "scripts/release.lisp"
       - "scripts/verify_release_assets.py"
+      - "scripts/verify_release_ci.py"
       - "scripts/verify_release_tag.py"
       - "packaging/tests/test_release_tag_guard.py"
       - "tests/test_verify_release_assets.py"
@@ -55,6 +56,7 @@ on:
       - "docs/release-readiness-contract-11-9-2026-10-12.uk.md"
       - "scripts/release.lisp"
       - "scripts/verify_release_assets.py"
+      - "scripts/verify_release_ci.py"
       - "scripts/verify_release_tag.py"
       - "packaging/tests/test_release_tag_guard.py"
       - "tests/test_verify_release_assets.py"
@@ -110,6 +112,9 @@ jobs:
 
       - name: Release artifact integrity negative controls
         run: python3 -m unittest discover -s tests -p test_verify_release_assets.py -v
+
+      - name: Independent exact-SHA CI gate negative controls
+        run: python3 -m unittest discover -s packaging/tests -p test_release_ci_check_runs.py -v
 
       - name: Release publication workflow structure regression
         run: python3 -m unittest discover -s packaging/tests -p 'test_release_publication_gate.py' -v
