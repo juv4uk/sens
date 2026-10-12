@@ -445,7 +445,7 @@ mod exact_d3_compatibility_migration_tests {
 #[cfg(test)]
 mod domain_source_projection_anti_collision_tests {
     use super::*;
-    use domain_surface_generated::DomainSurfaceName;
+    use super::domain_surface_generated::DomainSurfaceName;
 
     static SHARED_UK: [DomainSurfaceName; 1] = [DomainSurfaceName {
         namespace: "uk",
