@@ -164,6 +164,26 @@ class LegacyD3GuardTests(unittest.TestCase):
             finding.rule for finding in MODULE.scan_lisp(host, path)
         ])
 
+    def test_oracle_batch_uses_exact_d1_two_field_cond(self):
+        path = "scripts/oracle-batch.lisp"
+        source = (ROOT / path).read_text(encoding="utf-8")
+        self.assertEqual(MODULE.scan_lisp(source, path), [])
+
+        # Both result-match branches previously produced the same data.
+        exact = "((010 entries) (001 ()))"
+        self.assertIn(exact, source)
+        regression = source.replace(exact, "((010 entries) (1) (001 ()))", 1)
+        self.assertIn("COND_NOT_TWO_FIELDS", [
+            f.rule for f in MODULE.scan_lisp(regression, path)
+        ])
+
+        exact_fallback = "((010 (001 ())) (fixtures-only (011 entries)))"
+        self.assertIn(exact_fallback, source)
+        regression = source.replace(exact_fallback, "(t (fixtures-only (011 entries)))", 1)
+        self.assertIn("COND_HOST_TRUTH", [
+            f.rule for f in MODULE.scan_lisp(regression, path)
+        ])
+
     def test_historical_paths_and_metadata_excluded(self):
         for path in ("docs/research/old.lisp", "research/domain-archive/a.lisp",
                      "tests/fixtures/old.lisp", "lib/domains/d3.lisp",
