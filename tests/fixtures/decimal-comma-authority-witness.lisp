@@ -2,49 +2,49 @@
 ; Rust may continue to observe parser mechanics, but equivalence/identity
 ; verdicts for comma/dot exact numbers and numeric buffers are language data.
 
-(00001001 decimal-comma-authority-rows
-  (00001000 ()
-    (00100111
-      (00100111 (00000001 comma-dot-exact)
-            (00000011 12,455 12.455)
-            (00000001 (1)))
-      (00100111 (00000001 comma-dot-negative-exact)
-            (00000011 -0,25 -0.25)
-            (00000001 (1)))
-      (00100111 (00000001 comma-exponent-exact)
-            (00000011 1,5e3 1500)
-            (00000001 (1)))
-      (00100111 (00000001 read-comma-exact)
-            (00000011 (01001010 "12,455") 12.455)
-            (00000001 (1)))
-      (00100111 (00000001 comma-arithmetic-exact)
-            (00000011 (00001100 1,5 2,5) 4)
-            (00000001 (1)))
-      (00100111 (00000001 f32-comma-signed-zero-distinct)
-            (00000011 #f32(-0,0) #f32(0,0))
-            (00000001 (0)))
-      (00100111 (00000001 f32-dot-signed-zero-distinct)
-            (00000011 #f32(-0.0) #f32(0.0))
-            (00000001 (0))))))
+(0011 decimal-comma-authority-rows
+  (0010 ()
+    (1110
+      (1110 (001 comma-dot-exact)
+            (101 12,455 12.455)
+            (001 (1)))
+      (1110 (001 comma-dot-negative-exact)
+            (101 -0,25 -0.25)
+            (001 (1)))
+      (1110 (001 comma-exponent-exact)
+            (101 1,5e3 1500)
+            (001 (1)))
+      (1110 (001 read-comma-exact)
+            (101 (11101010 "12,455") 12.455)
+            (001 (1)))
+      (1110 (001 comma-arithmetic-exact)
+            (101 (01010 1,5 2,5) 4)
+            (001 (1)))
+      (1110 (001 f32-comma-signed-zero-distinct)
+            (101 #f32(-0,0) #f32(0,0))
+            (001 (0)))
+      (1110 (001 f32-dot-signed-zero-distinct)
+            (101 #f32(-0.0) #f32(0.0))
+            (001 (0))))))
 
-(00001001 decimal-comma-authority-check
-  (00001000 (rows)
-    (00000111
-      ((00000010 rows) ()
-       (00000001 (decimal-comma-authority-witness (status pass))))
-      ((00000010 rows) (0)
-       (10011100 ((row (00000101 rows)))
-         (00000111
-           ((00100010 (00101111 row) (00110000 row)) (1)
-            (decimal-comma-authority-check (00000110 rows)))
-           ((00100010 (00101111 row) (00110000 row)) (0)
-            (00100111
-              (00000001 decimal-comma-authority-witness)
-              (00100111 (00000001 status) (00000001 fail))
-              (00100111 (00000001 case) (00000101 row))
-              (00100111 (00000001 actual) (00101111 row))
-              (00100111 (00000001 expected) (00110000 row))))))))))
+(0011 decimal-comma-authority-check
+  (0010 (rows)
+    (110
+      ((010 rows) ()
+       (001 (decimal-comma-authority-witness (status pass))))
+      ((010 rows) (0)
+       (001000 ((row (100 rows)))
+         (110
+           ((11110111 (1001 row) (10011 row)) (1)
+            (decimal-comma-authority-check (011 rows)))
+           ((11110111 (1001 row) (10011 row)) (0)
+            (1110
+              (001 decimal-comma-authority-witness)
+              (1110 (001 status) (001 fail))
+              (1110 (001 case) (100 row))
+              (1110 (001 actual) (1001 row))
+              (1110 (001 expected) (10011 row))))))))))
 
-(00001001 decimal-comma-authority-witness
-  (00001000 ()
+(0011 decimal-comma-authority-witness
+  (0010 ()
     (decimal-comma-authority-check (decimal-comma-authority-rows))))
