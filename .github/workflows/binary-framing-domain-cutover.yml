@@ -1,0 +1,28 @@
+name: Міграція ядра — кадри тільки точних доменів
+
+on:
+  pull_request:
+    paths:
+      - "crates/sens/src/binary_framing.rs"
+      - "crates/sens/tests/binary_framing_domain_cutover.rs"
+      - ".github/workflows/binary-framing-domain-cutover.yml"
+  push:
+    branches: [main]
+    paths:
+      - "crates/sens/src/binary_framing.rs"
+      - "crates/sens/tests/binary_framing_domain_cutover.rs"
+      - ".github/workflows/binary-framing-domain-cutover.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  exact-domain-framing:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Перевірити доменне кадрування без прихованого SID8
+        run: cargo test --locked -p sens --test binary_framing_domain_cutover
+      - name: Перевірити сумісність попереднього двійкового декодера
+        run: cargo test --locked -p sens --test numeric_composition_frames
