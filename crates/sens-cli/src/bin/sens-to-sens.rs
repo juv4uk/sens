@@ -1,7 +1,8 @@
 use sens::{
     installed_capabilities, parse, semantic_registry_export, CoreDomainIdentity, Expr, ExprKind, Sens8,
 };
-use std::collections::HashSet;
+use std::collections::{HashMap, HashSet};
+use std::sync::OnceLock;
 use std::env;
 use std::fs;
 use std::process;
@@ -104,6 +105,63 @@ fn host_capability_names() -> HashSet<String> {
     installed_capabilities().into_iter().collect()
 }
 
+/// Англійські поверхні — тільки вхідні дані мігратора, а не семантичний
+/// реєстр. Зчитуємо фактичні D3–D6 таблиці; жоден старий SID8-байт
+/// не визначає наступника. Неоднозначне ім'я має результат None.
+fn ratified_english_identity(name: &str) -> Option<CoreDomainIdentity> {
+    static ROWS: OnceLock<Option<HashMap<String, Option<CoreDomainIdentity>>>> = OnceLock::new();
+    fn load() -> Option<HashMap<String, Option<CoreDomainIdentity>>> {
+        let sources = [
+            (3, include_str!("../../../../lib/domains/d3.lisp")),
+            (4, include_str!("../../../../lib/domains/d4.lisp")),
+            (5, include_str!("../../../../lib/domains/d5.lisp")),
+            (6, include_str!("../../../../lib/domains/d6.lisp")),
+        ];
+        let mut rows = HashMap::<String, Option<CoreDomainIdentity>>::new();
+        for (width, source) in sources {
+            let forms = parse(source).ok()?;
+            if forms.len() != 1 {
+                return None;
+            }
+            let ExprKind::List(table) = &forms[0].kind else { return None };
+            for entry in table.iter().skip(1) {
+                let ExprKind::List(columns) = &entry.kind else { return None };
+                let key = columns.first()?;
+                let bits = source.get(key.span.start..key.span.end)?;
+                if bits.len() != width || !bits.bytes().all(|b| b == b'0' || b == b'1') {
+                    return None;
+                }
+                let parsed = sens::parse_binary_source_words(bits).ok()?;
+                if parsed.len() != 1 {
+                    return None;
+                }
+                let identity = CoreDomainIdentity::from_source_word(parsed[0].word)?;
+                for column in columns.iter().skip(1) {
+                    let ExprKind::List(parts) = &column.kind else { continue };
+                    if parts.len() != 2 {
+                        continue;
+                    }
+                    let (ExprKind::Symbol(namespace), ExprKind::Symbol(surface)) =
+                        (&parts[0].kind, &parts[1].kind)
+                    else { continue };
+                    if namespace.as_ref() != "en" {
+                        continue;
+                    }
+                    rows.entry(surface.to_string())
+                        .and_modify(|prior| {
+                            if *prior != Some(identity) {
+                                *prior = None;
+                            }
+                        })
+                        .or_insert(Some(identity));
+                }
+            }
+        }
+        Some(rows)
+    }
+    ROWS.get_or_init(load).as_ref()?.get(name).copied().flatten()
+}
+
 /// У точнодоменному режимі старий восьмибітний реєстр не надає семантики.
 /// Колізія старого W8 та чинного D8 завжди блокує неявне перетворення.
 fn resolve_head(
@@ -123,12 +181,15 @@ fn resolve_head(
             // голову не переписуємо, а українське ім'я можна проектувати.
             let original = analysis.source.get(head.span.start..head.span.end);
             let human_surface = original.filter(|spelling| {
-                !spelling.is_empty() && !spelling.bytes().all(|b| b == b'0' || b == b'1')
+                !spelling.is_empty()
+                    && *spelling != "'"
+                    && !spelling.bytes().all(|b| b == b'0' || b == b'1')
             });
             identity.core_operation().map(|id| (human_surface.map(str::to_owned), HeadRoute::Exact(id)))
         }
         ExprKind::Symbol(name) if !bound.contains(name.as_ref()) => {
-            let current = semantic_registry_export::admitted_core_domain_for_surface(name);
+            let current = semantic_registry_export::admitted_core_domain_for_surface(name)
+                .or_else(|| analysis.exact_domain.then(|| ratified_english_identity(name)).flatten());
             let legacy = semantic_registry_export::semantic_id_for_admitted_surface(name);
             if host_capabilities.contains(name.as_ref()) {
                 if current.is_some() || legacy.is_some() {
@@ -667,6 +728,36 @@ mod tests {
         let source = "(quote (car x)) (atom? x) (car (cdr x)) (lambda (car) (car x)) (define car (lambda (x) x)) (car x)";
         let expected = "(001 (car x)) (010 x) (100 (011 x)) (0010 (car) (car x)) (0011 car (0010 (x) x)) (car x)";
         assert_eq!(rewrite_exact(source).expect("доведені D3/D4"), expected);
+    }
+
+    #[test]
+    fn english_donor_projection_is_derived_from_ratified_ladder_not_sid8() {
+        for (name, expected) in [
+            ("quote", "001"),
+            ("atom?", "010"),
+            ("cdr", "011"),
+            ("car", "100"),
+            ("eq?", "101"),
+            ("cond", "110"),
+            ("cons", "111"),
+            ("lambda", "0010"),
+            ("define", "0011"),
+        ] {
+            assert_eq!(
+                ratified_english_identity(name).map(|id| id.to_string()),
+                Some(expected.to_string()),
+                "таблиця доменів мусить бути єдиним донором для {name}"
+            );
+        }
+        assert!(ratified_english_identity("defmacro").is_none());
+    }
+
+    #[test]
+    fn apostrophe_reader_sugar_is_not_rewritten_as_a_binary_token() {
+        let source = "'(car x) (atom? x)";
+        let result = rewrite_exact(source).expect("цитата й точний ATOM");
+        assert_eq!(result, "'(car x) (010 x)");
+        assert_eq!(rewrite_exact(&result).expect("повторний прохід"), result);
     }
 
     #[test]
