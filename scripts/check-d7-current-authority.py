@@ -143,10 +143,10 @@ rows_by_bits = {row.bits: row for row in table_rows}
 for bits,body in surface_rows:
     # Only inspect the top-level human labels before the nested per-surface sym map.
     top_level = body.split("(sym (", 1)[0]
-    labels=re.findall(r"\\((ук|укр|san|en|LISP) ",top_level)
+    labels=re.findall(r"\((ук|укр|san|en|LISP) ",top_level)
     assert tuple(labels)==expected_columns[:-1], f"D7:{bits} top-level surface column order changed"
     assert body.count("(sym (")==1, f"D7:{bits} needs exactly one per-surface glyph map"
-    en=re.search(r"\\(en ([^()]*)\\)",top_level)
+    en=re.search(r"\(en ([^()]*)\\)",top_level)
     assert en is not None and en.group(1)==d["residents"][bits], f"D7:{bits} role projection drift"
     assert "(LISP ())" in top_level, f"D7:{bits} invented Lisp callable name"
     row=rows_by_bits[bits]
