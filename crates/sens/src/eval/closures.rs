@@ -322,6 +322,14 @@ fn classify_head(head: &Expr, own: &[Rc<str>], environment: &Environment) -> Hea
             .unwrap_or(Head::Opaque),
         ExprKind::Sid(sid) => sid_head(*sid, environment),
         ExprKind::Symbol(name) => {
+            // Ratified exact-domain surfaces must reach the same head policy as
+            // DomainCall. In particular, Ukrainian D3 QUOTE/COND are not
+            // reclassified through their historical SID8 compatibility bytes.
+            if let Some(identity) = necessary_forms::domain_identity_for_symbol(name)
+                .or_else(|| crate::semantic_registry::domain_identity_for_surface(name))
+            {
+                return domain_head(identity, environment);
+            }
             if let Some(sid) = canon::routed_sid_for_surface(name) {
                 return sid_head(sid, environment);
             }
@@ -843,4 +851,34 @@ pub(super) fn value_to_expr(value: Value, span: Span) -> Result<Expr, LanguageEr
     }
 
     go(&value, span, 0)
+}
+
+#[cfg(test)]
+mod exact_domain_head_classification_tests {
+    use super::*;
+
+    #[test]
+    fn ratified_surfaces_classify_like_exact_domain_heads() {
+        let environment = Environment::root();
+        let own: &[Rc<str>] = &[];
+        for (source, expected) in [
+            ("як-є", "quote"),
+            ("за-умовою", "cond"),
+            ("атом?", "call"),
+            ("функція", "lambda"),
+            ("визначити", "define"),
+        ] {
+            let parsed = crate::parse(source).expect("canonical surface parses");
+            let actual = classify_head(&parsed[0], own, &environment);
+            let valid = match (actual, expected) {
+                (Head::Quote, "quote")
+                | (Head::Cond, "cond")
+                | (Head::Call, "call")
+                | (Head::Lambda, "lambda")
+                | (Head::Define, "define") => true,
+                _ => false,
+            };
+            assert!(valid, "surface {source} must use ratified domain head policy");
+        }
+    }
 }
