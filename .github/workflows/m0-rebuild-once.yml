@@ -1,0 +1,48 @@
+name: M0 — одноразове відновлення інвентарю за живими джерелами
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - ".github/workflows/m0-rebuild-once.yml"
+      - "data/t5-migration-inventory.jsonl"
+
+permissions:
+  contents: write
+
+jobs:
+  regenerate:
+    if: github.event.pull_request.number == 5619 && github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.head_ref }}
+          fetch-depth: 0
+          persist-credentials: true
+      - name: Оновити PR-гілку з main без переписування історії
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git fetch origin main
+          git merge --no-edit -X theirs origin/main
+      - name: Перегенерувати усі T5-ланки з живого дерева
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 scripts/report_t5_migration_inventory.py --output data/t5-migration-inventory.jsonl
+          python3 scripts/test-t5-migration-inventory.py
+      - name: Атомарно записати лише перевірений manifest у PR
+        shell: bash
+        env:
+          PR_BRANCH: ${{ github.head_ref }}
+        run: |
+          set -euo pipefail
+          git add -- data/t5-migration-inventory.jsonl
+          if ! git diff --cached --quiet; then
+            git commit -m 'міграція: відновити повний реєстр T5 за поточним деревом'
+          fi
+          git push origin "HEAD:refs/heads/$PR_BRANCH"
