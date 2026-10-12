@@ -110,6 +110,18 @@ mod tests {
         next_bits[23] = 1; // full-width D48 encoding of 2^24
         assert_eq!(number.exact_numeric_domain_bits().unwrap(), next_bits);
 
+        // After a D24 carry, ADD1 must continue in the new exact D48 domain.
+        // The successor must not become a source literal, wrap, or stall.
+        let resumed = invoke(add1, &[carried.clone()], &env, Span::default())
+            .unwrap().unwrap();
+        let Value::BinaryNumber(ref resumed_number) = resumed else {
+            panic!("D48 ADD1 after carry must remain a numeric-domain value");
+        };
+        assert_eq!(resumed_number.numeric_domain_width(), Some(48));
+        let mut advanced_bits = next_bits.clone();
+        advanced_bits[47] = 1; // 2^24 + 1, not a D24 or unqualified literal
+        assert_eq!(resumed_number.exact_numeric_domain_bits().unwrap(), advanced_bits);
+
         // 0 - 1 is canonical NEG(D24(1)), not a wrapped 24-bit word
         // and not a host Rational with unqualified identity.
         let negative = invoke(sub1, &[d24(0)], &env, Span::default())
