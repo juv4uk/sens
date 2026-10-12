@@ -72,6 +72,18 @@ class LegacyD3GuardTests(unittest.TestCase):
         self.assertIn("COND_HOST_TRUTH", [f.rule for f in MODULE.scan_lisp(
             corrupted, "knowledge/guard-runtime-policy.lisp")])
 
+    def test_core1_legacy_host_t_fallbacks_are_exact_d1(self):
+        source = (ROOT / "lib" / "core1.lisp").read_text(encoding="utf-8")
+        self.assertEqual(MODULE.scan_lisp(source, "lib/core1.lisp"), [])
+        # Replacing even one exact-D1 fallback with host T must be rejected.
+        good = "(110 ((010 VALUE) NIL) ((010 (001 ())) VALUE))"
+        self.assertIn(good, source)
+        corrupted = source.replace(good, "(110 ((010 VALUE) NIL) (T VALUE))", 1)
+        self.assertIn(
+            "COND_HOST_TRUTH",
+            [f.rule for f in MODULE.scan_lisp(corrupted, "lib/core1.lisp")],
+        )
+
     def test_invalid_lisp_is_incomplete_not_green(self):
         for source in ("(110 (1 1)", "(110 (1 1)))", '"unclosed'):
             with self.subTest(source=source), self.assertRaises(MODULE.Unscannable):
