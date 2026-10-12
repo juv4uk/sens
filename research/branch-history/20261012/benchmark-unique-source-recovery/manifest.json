@@ -1,0 +1,111 @@
+{
+  "schema": "sens.historical-benchmark-source-recovery/v1",
+  "date": "2026-10-12",
+  "source_repository": "juv4uk/sens",
+  "purpose": "Preserve unique historical benchmark/documentation source blobs on main without activating obsolete workflows or pre-rename Lisp code.",
+  "admission": "BYTE_EXACT_ARCHIVED_NONEXECUTABLE; NO PRODUCTION MERGE/CI OR PERFORMANCE CLAIM",
+  "branch_creation": 0,
+  "sources": [
+    {
+      "origin_ref": "research/encoder-same-input-bench-20261010",
+      "original_path": ".github/workflows/encoder-same-input-bench.yml",
+      "original_blob_sha": "10e8972cf277eccb10a8f1065bf8f16e56970dd5",
+      "archive_path": "research/branch-history/20261012/benchmark-unique-source-recovery/encoder-same-input/.github/workflows/encoder-same-input-bench.yml.source.txt",
+      "archived_blob_sha": "10e8972cf277eccb10a8f1065bf8f16e56970dd5",
+      "status": "BYTE_IDENTICAL_ARCHIVED"
+    },
+    {
+      "origin_ref": "verify/362-fused-utf8-benchmark",
+      "original_path": ".github/workflows/verify-362-fused-benchmark.yml",
+      "original_blob_sha": "64f7bbcfc7e8a87d97fd4b1caf427d743e9529fa",
+      "archive_path": "research/branch-history/20261012/benchmark-unique-source-recovery/utf8-fused/.github/workflows/verify-362-fused-benchmark.yml.source.txt",
+      "archived_blob_sha": "64f7bbcfc7e8a87d97fd4b1caf427d743e9529fa",
+      "status": "BYTE_IDENTICAL_ARCHIVED"
+    },
+    {
+      "origin_ref": "verify/362-fused-utf8-benchmark",
+      "original_path": "lib/utf8.lisp",
+      "original_blob_sha": "c1c5e5fa3e52f9d02aeb946615937c2055607cfa",
+      "archive_path": "research/branch-history/20261012/benchmark-unique-source-recovery/utf8-fused/lib/utf8.lisp.source.txt",
+      "archived_blob_sha": "c1c5e5fa3e52f9d02aeb946615937c2055607cfa",
+      "status": "BYTE_IDENTICAL_ARCHIVED"
+    },
+    {
+      "origin_ref": "verify/362-fused-utf8-benchmark",
+      "original_path": "scripts/profile-fused-utf8-candidate.lisp",
+      "original_blob_sha": "df491da7e517126b46a8426ab1fec32587d838c4",
+      "archive_path": "research/branch-history/20261012/benchmark-unique-source-recovery/utf8-fused/scripts/profile-fused-utf8-candidate.lisp.source.txt",
+      "archived_blob_sha": "df491da7e517126b46a8426ab1fec32587d838c4",
+      "status": "BYTE_IDENTICAL_ARCHIVED"
+    },
+    {
+      "origin_ref": "verify/362-fused-utf8-benchmark",
+      "original_path": "scripts/test-current-semantic-slice.sh",
+      "original_blob_sha": "0e56a24af1c1a49875c7acb9d58e4eff71861b1d",
+      "archive_path": "research/branch-history/20261012/benchmark-unique-source-recovery/utf8-fused/scripts/test-current-semantic-slice.sh.source.txt",
+      "archived_blob_sha": "0e56a24af1c1a49875c7acb9d58e4eff71861b1d",
+      "status": "BYTE_IDENTICAL_ARCHIVED"
+    },
+    {
+      "origin_ref": "verify/362-fused-utf8-benchmark",
+      "original_path": "tests/fixtures/utf8-fused-decode-witness.lisp",
+      "original_blob_sha": "8d31811d36843c411bab41647eceac44bb695590",
+      "archive_path": "research/branch-history/20261012/benchmark-unique-source-recovery/utf8-fused/tests/fixtures/utf8-fused-decode-witness.lisp.source.txt",
+      "archived_blob_sha": "8d31811d36843c411bab41647eceac44bb695590",
+      "status": "BYTE_IDENTICAL_ARCHIVED"
+    },
+    {
+      "origin_ref": "verify/362-production-readfile-benchmark",
+      "original_path": ".github/workflows/verify-362-production-readfile.yml",
+      "original_blob_sha": "80c04bb1f4059af2e5b80cbc48bf73c2debd22fe",
+      "archive_path": "research/branch-history/20261012/benchmark-unique-source-recovery/readfile-production/.github/workflows/verify-362-production-readfile.yml.source.txt",
+      "archived_blob_sha": "80c04bb1f4059af2e5b80cbc48bf73c2debd22fe",
+      "status": "BYTE_IDENTICAL_ARCHIVED",
+      "same_blob_refs": [
+        "verify/362-readfile-current-main-benchmark",
+        "verify/596-readfile-benchmark"
+      ]
+    },
+    {
+      "origin_ref": "verify/362-production-readfile-benchmark",
+      "original_path": "lib/fs.lisp",
+      "original_blob_sha": "11dcc2ce97c03252f694dfe80e2581c65dd5ad11",
+      "archive_path": "research/branch-history/20261012/benchmark-unique-source-recovery/readfile-production/lib/fs.lisp.source.txt",
+      "archived_blob_sha": "11dcc2ce97c03252f694dfe80e2581c65dd5ad11",
+      "status": "BYTE_IDENTICAL_ARCHIVED",
+      "same_blob_refs": [
+        "verify/362-readfile-current-main-benchmark",
+        "verify/596-readfile-benchmark"
+      ]
+    },
+    {
+      "origin_ref": "verify/362-production-readfile-benchmark",
+      "original_path": "scripts/profile-production-readfile.lisp",
+      "original_blob_sha": "6f6aa9fc02abc1bcf0eac4e02f289d28d934931d",
+      "archive_path": "research/branch-history/20261012/benchmark-unique-source-recovery/readfile-production/scripts/profile-production-readfile.lisp.source.txt",
+      "archived_blob_sha": "6f6aa9fc02abc1bcf0eac4e02f289d28d934931d",
+      "status": "BYTE_IDENTICAL_ARCHIVED",
+      "same_blob_refs": [
+        "verify/362-readfile-current-main-benchmark",
+        "verify/596-readfile-benchmark"
+      ]
+    }
+  ],
+  "checks": {
+    "source_blob_sha_compared_to_archived_blob_sha": "PASS for all 9 unique source blobs",
+    "unique_source_blob_count": 9,
+    "readfile_alias_refs_with_matching_blobs": [
+      "verify/362-readfile-current-main-benchmark",
+      "verify/596-readfile-benchmark"
+    ],
+    "canonical_runtime_modified": false,
+    "active_workflow_created": false,
+    "branch_created": false
+  },
+  "caveats": [
+    "Archiving source is not merging original Git commit ancestry.",
+    "These historical workflows name my-lisp/my-lisp-cli and were deliberately stored with .source.txt suffix.",
+    "Archived sources do not establish current correctness, runnability, performance, or semantic ratification.",
+    "Do not copy older lib/utf8.lisp or lib/fs.lisp over current main."
+  ]
+}
