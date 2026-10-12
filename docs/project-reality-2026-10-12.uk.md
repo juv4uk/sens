@@ -33,7 +33,7 @@
 
 ### Не доведено
 
-**Повний seed-total, його мінімальність і самодостатність offline replay лишаються BLOCKED.** У підсумок не закрито весь граф `mod`/`cfg`/`include`, залежності toolchain/OS/shared libraries, Git refs/objects та повний мінімізований набір зовнішніх vendor inputs. Спостережені vendor-файли — subset runtime traces, не доказ мінімального набору.
+**Повний seed-total, його мінімальність і самодостатність offline replay лишаються BLOCKED.** Уже пройшов окремий статичний аудит source edges: у `main@96ee15564d7a707d31664dca6e55b331d76ea6de` — 77 Rust-файлів / 111 ребер / 0 невирішених спостережень у межах аналізатора; pinned SENS `d0787a40fcea36501747732aa61b6de19fe29c70` — 71 / 90 / 0; pinned CML `ec4ba010cebd9fdc37b39224142dcac3ee907cfe` — 66 / 83 / 0. [CI run](https://github.com/juv4uk/sens/actions/runs/38190369519) завершився SUCCESS, self-test аудитора — 7/7. Це закриває інвентаризацію саме статичних Rust module/path/include ребер для цих трьох snapshot-ів, **не** повний seed closure. За межами лишаються build-script/proc-macro та environment inputs, повний Cargo dependency closure, vendor pruning, Git refs/objects, toolchain/OS/shared-library bytes і контрольований clean offline replay. Повні ліміти перелічені в [аудиторі](../scripts/audit-nano-sens-source-closure.py); [машинні звіти CI](https://github.com/juv4uk/sens/actions/runs/38190369519/artifacts/11721286686) зберігаються 30 днів, до 11.11.2026.
 
 Окремий K1 static-link/strip тест дав **792 544 Б** замість dynamic C1 **92 248 Б**. Він зберіг output parity, але збільшив on-disk footprint на 759.14%; рішення: **не приймати як size win**. Різні runner-source checkpoints не порівнювати як чисту оптимізацію.
 
@@ -42,8 +42,8 @@
 ## 3. Бенчмарк-лабораторія: індекс — це не вся лабораторія
 
 - В операційному обліку лабораторія вже має **100+ стендів/експериментальних напрямків**.
-- Генерований [`benchmarks/README.md`](../benchmarks/README.md) на поточному стані перелічує **47 зареєстрованих стендів** і окремо **7 source-backed support-exemptions**; винятки не додаються до кількості стендів.
-- Census має **170 верхньорівневих каталогів**: 47 зареєстрованих, 7 явних винятків, **116 досі некласифікованих**. Це реальний залишок #4172, а не завершене закриття лабораторії.
+- Генерований [`benchmarks/README.md`](../benchmarks/README.md) на поточному стані перелічує **54 зареєстровані стенди** і окремо **7 source-backed support-exemptions**; винятки не додаються до кількості стендів.
+- Census має **170 верхньорівневих каталогів**: 54 зареєстровані, 7 явних винятків, **109 досі некласифікованих**. Це реальний залишок #4172, а не завершене закриття лабораторії.
 - Реєстр винятків [`../benchmarks/support-exemptions.json`](../benchmarks/support-exemptions.json) валідовується скриптом і має JSON Schema; свідок кожного винятку має існувати. Новий standalone-стенд вимагає `bench.json` за guard #4171, а support-каталог може бути винятком лише з явним поясненням і свідком.
 - `benchmarks/README.md` генерується `scripts/benchmark_registry.py`: **не редагувати вручну**. Виправляти manifests і генератор, потім запускати перевірку/генерацію.
 - Не заводити паралельний benchmark framework лише для того, щоб описати існуючий результат. Звести наявні виміри до одного індексу, не викидаючи raw results і історичний provenance.
