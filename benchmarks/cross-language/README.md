@@ -1,22 +1,19 @@
 # Міжмовні бенчмарки SENS
 
-## Current authority override — Contract 11.8 / D1–D9
+## Current authority override — Contract 11.9 / D1–D10 residency
 
-Current language authority is `language-contract.lisp` Contract 11.8:
-D1–D9 are the ratified current foundation; D10 is research. Canonical identity
-is exact bits + exact domain + admitted/proved law.
+Current language authority is `language-contract.lisp` Contract 11.9.
+D1–D10 are owner-ratified as semantic residents, but residency is not the
+same as executable runtime authority. D10 F1/F2/F3 evidence and physical T5
+execution remain pending and must fail closed. D24+ numeric domains are
+separately owner-ratified.
 
-This directory contains several **historical benchmark generations** as well as
-reusable measurement machinery. Historical D1–D4, D1–D8 and Contract 11.6
-rows remain valid provenance for the exact generation that produced them, but
-they must never be relabeled as current Contract 11.8 evidence.
-
-Fresh current replay is coordinated by #4129. Current rows must record
-`contract_version=11.8`,
-`semantic_generation=contract-11-8-exact-d1-d9`, exact git/corpus/artifact
-provenance, and semantic parity before timing. Missing D9 execution mechanisms
-are explicit `BLOCKED-MECHANISM`; they must not fall back to historical
-Sens8/Sid8/Function8 paths.
+Historical rows (including D1–D4, D1–D8 and Contract 11.6/11.8) remain valid
+provenance for the exact generation that produced them; they must not be
+relabeled as current Contract 11.9 evidence. A fresh row must record its exact
+Git SHA, Contract 11.9, semantic generation, corpus/artifact provenance and
+semantic parity before timing. Missing mechanisms are explicit
+`BLOCKED-MECHANISM`; never fall back to Sens8/Sid8/Function8.
 
 The sections below preserve older harness documentation unless explicitly
 marked otherwise.
