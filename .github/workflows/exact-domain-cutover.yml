@@ -1,0 +1,27 @@
+name: Exact-domain source cutover
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "scripts/migrate-exact-domain.py"
+      - "tests/test_migrate_exact_domain.py"
+      - "tests/test_domain_profile_contract_source.py"
+      - "contracts/core-profile-contract.lisp"
+      - "crates/sens/src/domain_ladder.rs"
+      - "lib/domains/d3.lisp"
+      - ".github/workflows/exact-domain-cutover.yml"
+  workflow_dispatch:
+
+jobs:
+  exact-domain:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - name: Historical source words to current domain heads
+        run: python3 -m unittest discover -s tests -p 'test_migrate_exact_domain.py' -v
+      - name: Profile follows owner D3 law and SID8 overlay stays retired
+        run: python3 -m unittest discover -s tests -p 'test_domain_profile_contract_source.py' -v
+      - name: D10 full-owner occupancy is width-preserving only
+        run: cargo test --locked -p sens --lib domain_ladder::tests
