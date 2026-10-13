@@ -11,6 +11,8 @@ EXPECTED = (
     "knowledge-exact-arity-structure",
     "linter-domain-cutover-law",
     "linter-domain-cutover-mutant",
+    "core-sentinel-null-law",
+    "core-sentinel-null-mutant",
     "knowledge-cons-exact-width-law",
     "sens-reason-index-width-selectors-law",
     "sens-reason-index-width-selectors-mutant",

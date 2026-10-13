@@ -433,6 +433,55 @@ jobs:
             --report-file "$RUNNER_TEMP/sens-focal-red.jsonl" \
             --executor-report-file "$RUNNER_TEMP/sens-native-evidence.jsonl" \
             -- target/debug/sens "$fixture"
+      - name: Core min-max — нативний D4 NULL закон порожнього результату
+        id: core-sentinel
+        shell: bash
+        run: |
+          set -euo pipefail
+          program=tests/semantic/core-sentinel-null-law.sens
+          printf '1\n' > "$RUNNER_TEMP/core-sentinel-expected"
+          sha256sum lib/core.lisp lib/core4.lisp "$program" tests/semantic/core-sentinel-null-law.bits
+          echo "test_id=core-sentinel-null-law layer=eval semantic_authority=binary-SENS"
+          python3 scripts/ci_failure_contract.py run \
+            --test-id core-sentinel-null-law \
+            --layer eval \
+            --fixture "$program" \
+            --expected-file "$RUNNER_TEMP/core-sentinel-expected" \
+            --report-file "$RUNNER_TEMP/sens-focal-red.jsonl" \
+            --executor-report-file "$RUNNER_TEMP/sens-native-evidence.jsonl" \
+            -- target/debug/sens "$program"
+      - name: Core min-max — один біт D1 міняє семантичний вердикт
+        id: core-sentinel-mutant
+        shell: bash
+        run: |
+          set -euo pipefail
+          law=tests/semantic/core-sentinel-null-law.bits
+          mutant=tests/semantic/core-sentinel-null-mutant.bits
+          awk '
+            NR==FNR {n=split($0,bits," "); for(i=1;i<=n;i++) baseline[i]=bits[i]; next}
+            {m=split($0,bits," "); if(m!=n) exit 2
+             for(i=1;i<=n;i++) if(bits[i]!=baseline[i]) {
+               if(length(bits[i])!=1 || length(baseline[i])!=1) exit 3
+               if(bits[i]!="0" || baseline[i]!="1") exit 4
+               changed++
+             }
+             if(changed!=1) exit 5
+            }
+            END {if(changed!=1) exit 6}
+          ' "$law" "$mutant"
+          echo 'CI_GLUE_NO_SEMANTICS one D1 bit mutation verified'
+          program=tests/semantic/core-sentinel-null-mutant.sens
+          printf '0\n' > "$RUNNER_TEMP/core-sentinel-mutant-expected"
+          sha256sum "$program" "$mutant"
+          echo "test_id=core-sentinel-null-mutant layer=eval semantic_authority=binary-SENS"
+          python3 scripts/ci_failure_contract.py run \
+            --test-id core-sentinel-null-mutant \
+            --layer eval \
+            --fixture "$program" \
+            --expected-file "$RUNNER_TEMP/core-sentinel-mutant-expected" \
+            --report-file "$RUNNER_TEMP/sens-focal-red.jsonl" \
+            --executor-report-file "$RUNNER_TEMP/sens-native-evidence.jsonl" \
+            -- target/debug/sens "$program"
       - name: Двійковий закон арності знань — рівно D3/D4 і точний D1:YES
         id: knowledge
         shell: bash
@@ -617,6 +666,8 @@ jobs:
           KNOWLEDGE_OUTCOME: ${{ steps.knowledge.outcome }}
           LINTER_OUTCOME: ${{ steps.linter-law.outcome }}
           LINTER_MUTANT_OUTCOME: ${{ steps.linter-mutant.outcome }}
+          CORE_SENTINEL_OUTCOME: ${{ steps.core-sentinel.outcome }}
+          CORE_SENTINEL_MUTANT_OUTCOME: ${{ steps.core-sentinel-mutant.outcome }}
           CORE1_OUTCOME: ${{ steps.core1-selectors.outcome }}
           QUOTED_OUTCOME: ${{ steps.quoted-d7.outcome }}
           TCP_OUTCOME: ${{ steps.tcp-migration.outcome }}
@@ -648,6 +699,8 @@ jobs:
             --require knowledge-exact-arity-structure \
             --require linter-domain-cutover-law \
             --require linter-domain-cutover-mutant \
+            --require core-sentinel-null-law \
+            --require core-sentinel-null-mutant \
             --require quantity-d1-direct-fallback-law \
             --require quantity-d1-direct-fallback-mutant \
             --require knowledge-cons-exact-width-law \
@@ -663,7 +716,7 @@ jobs:
             --require unify-observe-d1-law \
             --require unify-observe-d1-mutant || native_rc=$?
           diagnostic_rc=0
-          if [[ "$BUDGET_OUTCOME" == success && "$BUILD_OUTCOME" == success && "$PACKED_OUTCOME" == success && "$SOURCE_OUTCOME" == success && "$LAW_OUTCOME" == success && "$MUTANT_OUTCOME" == success && "$REASON_OUTCOME" == success && "$UNIFY_OUTCOME" == success && "$CORE2_OUTCOME" == success && "$CORE_WIDTH_OUTCOME" == success && "$KNOWLEDGE_OUTCOME" == success && "$LINTER_OUTCOME" == success && "$LINTER_MUTANT_OUTCOME" == success && "$CORE1_OUTCOME" == success && "$QUOTED_OUTCOME" == success && "$MIGRATOR_OUTCOME" == success && "$TCP_OUTCOME" == success && "$T5_ORACLE_OUTCOME" == success && "$FRAME3_OUTCOME" == success ]]; then
+          if [[ "$BUDGET_OUTCOME" == success && "$BUILD_OUTCOME" == success && "$PACKED_OUTCOME" == success && "$SOURCE_OUTCOME" == success && "$LAW_OUTCOME" == success && "$MUTANT_OUTCOME" == success && "$REASON_OUTCOME" == success && "$UNIFY_OUTCOME" == success && "$CORE2_OUTCOME" == success && "$CORE_WIDTH_OUTCOME" == success && "$KNOWLEDGE_OUTCOME" == success && "$LINTER_OUTCOME" == success && "$LINTER_MUTANT_OUTCOME" == success && "$CORE_SENTINEL_OUTCOME" == success && "$CORE_SENTINEL_MUTANT_OUTCOME" == success && "$CORE1_OUTCOME" == success && "$QUOTED_OUTCOME" == success && "$MIGRATOR_OUTCOME" == success && "$TCP_OUTCOME" == success && "$T5_ORACLE_OUTCOME" == success && "$FRAME3_OUTCOME" == success ]]; then
             python3 scripts/ci_failure_contract.py scan --report-file "$report" --allow-empty || diagnostic_rc=$?
           else
             python3 scripts/ci_failure_contract.py scan --report-file "$report" || diagnostic_rc=$?
