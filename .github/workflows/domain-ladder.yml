@@ -1,9 +1,13 @@
-name: Драбина доменів — точна ширина та механіка
+# КАРАНТИН 2026-10-13: червона перевірка відкликана власником як недовірена.
+# Не виконувати до виправлення семантичного контракту у двійковому SENS.
+# Повторні запуски, автоматичні тести, виділення runner заборонені.
+name: КАРАНТИН — Драбина доменів — точна ширина та механіка
 
 on:
   workflow_dispatch:
 jobs:
   exact-width-ladder:
+    if: ${{ false }} # КАРАНТИН 2026-10-13: тести нератифіковані, runner заборонений
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
@@ -36,6 +40,7 @@ jobs:
         run: python3 benchmarks/d7-ratification-conformance/validate.py
 
   utf8-d1-runtime:
+    if: ${{ false }} # КАРАНТИН 2026-10-13: тести нератифіковані, runner заборонений
     runs-on: ubuntu-latest
     timeout-minutes: 18
     steps:

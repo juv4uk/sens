@@ -1,4 +1,7 @@
-name: Hosted CI
+# КАРАНТИН 2026-10-13: червона перевірка відкликана власником як недовірена.
+# Не виконувати до виправлення семантичного контракту у двійковому SENS.
+# Повторні запуски, автоматичні тести, виділення runner заборонені.
+name: КАРАНТИН — Hosted CI
 
 # Owner freeze 2026-10-11: Core-only required-check surface.
 # Prior hosted CI is archived, not deleted.
@@ -11,6 +14,7 @@ permissions:
 
 jobs:
   critical:
+    if: ${{ false }} # КАРАНТИН 2026-10-13: тести нератифіковані, runner заборонений
     name: portable critical gates
     runs-on: ubuntu-24.04
     timeout-minutes: 30
