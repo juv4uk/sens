@@ -170,10 +170,17 @@ def diagnostic(test_id: str, layer: str, path: str, command: list[str],
         "test_id": test_id, "layer": layer, "fixture": path,
         "fixture_sha256": digest(material),
         # An exit-code gate is not an external SENS truth table.
-        "expected_sha256": digest(b"exit=0"),
-        "actual_sha256": digest(f"exit={code}".encode() + b"\n" + output),
+        "expected_sha256": digest(b"1\n" if layer == "eval" else b"exit=0"),
+        "actual_sha256": digest(output if layer == "eval" else
+                                f"exit={code}".encode() + b"\n" + output),
         "stdout_sha256": digest(output), "stderr_sha256": digest(stderr),
-        "first_difference": {"exit_expected": 0, "exit_actual": code},
+        "first_difference": (
+            {"byte_offset": next((i for i in range(max(len(b"1\n"), len(output)))
+                                  if b"1\n"[i:i+1] != output[i:i+1]), 0),
+             "kind": "D1_verdict_mismatch"}
+            if layer == "eval" and code == 0 and output != b"1\n"
+            else {"exit_expected": 0, "exit_actual": code}
+        ),
         # Do not invent a historical first-bad commit without bisect evidence.
         "first_bad_sha": "UNRESOLVED",
         "first_observed_bad_sha": revision,
@@ -253,10 +260,13 @@ def execute(before: str, files: list[str]) -> int:
     except subprocess.TimeoutExpired as exc:
         return diagnostic(f"{selected}-native-law", "eval", fixture, command,
                           124, exc.stdout or b"", exc.stderr or b"", "SENS timeout")
-    if actual.returncode:
+    # The language evaluates its own law; transport must observe exact D1:1.
+    # Exit=0 with empty output or D1:0 is NOT a semantic PASS.
+    if actual.returncode or actual.stdout != b"1\n":
         return diagnostic(f"{selected}-native-law", "eval", fixture, command,
                           actual.returncode, actual.stdout, actual.stderr,
-                          "SENS self-contained binary law rejected")
+                          "SENS self-verdict must be exact D1:1 (one bit); "
+                          "exit success alone is insufficient")
     print("SENS_CI_ONE_TEST_PASS " + json.dumps({
         "test_id": f"{selected}-native-law", "layer": "eval",
         "fixture": fixture, "fixture_sha256": digest((ROOT / fixture).read_bytes()),
