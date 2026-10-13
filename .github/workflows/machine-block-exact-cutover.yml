@@ -46,10 +46,25 @@ jobs:
         run: python3 -m unittest discover -s tests -p test_prove_lexical_locals.py -v
       - name: Точні D3/D4 і дев'ять історичних спостережень
         run: cargo test --locked -p sens --test machine_block_exact_domain -- --nocapture
-      - name: Інтеграція основного машинного блока в Rust
+      - name: Діагностична матриця машинного блока — усі Rust тести
+        shell: bash
         run: |
-          cargo test --locked -p sens --test machine_block_roundtrip -- --nocapture
-          cargo test --locked -p sens --test machine_atoms -- --nocapture
-          cargo test --locked -p sens --test machine_exact_d3_structural -- --nocapture
-          cargo test --locked -p sens --test machine_typed_operands -- --nocapture
-          cargo test --locked -p sens --test machine_minimal_profile -- --nocapture
+          set +e
+          failed=0
+          echo '### SENS machine-block: незалежні Rust runtime свідки' >> "$GITHUB_STEP_SUMMARY"
+          echo '| Test | Result | Exit |' >> "$GITHUB_STEP_SUMMARY"
+          echo '| --- | --- | ---: |' >> "$GITHUB_STEP_SUMMARY"
+          for suite in machine_block_roundtrip machine_atoms machine_exact_d3_structural machine_typed_operands machine_minimal_profile; do
+            echo "::group::${suite}"
+            cargo test --locked -p sens --test "$suite" -- --nocapture
+            rc=$?
+            echo "::endgroup::"
+            if [[ $rc -ne 0 ]]; then
+              echo "| \`${suite}\` | BLOCKED | $rc |" >> "$GITHUB_STEP_SUMMARY"
+              echo "::error title=SENS machine-block blocked::${suite} failed (exit ${rc}); inspect CI logs; do not weaken D1 or D24 law"
+              failed=1
+            else
+              echo "| \`${suite}\` | PASS | 0 |" >> "$GITHUB_STEP_SUMMARY"
+            fi
+          done
+          exit "$failed"
