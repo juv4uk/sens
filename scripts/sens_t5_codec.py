@@ -13,7 +13,7 @@ import hashlib
 import re
 
 MAX_FILE_BYTES = 4 * 1024 * 1024
-BITS = re.compile(r"[01]{1,9}\Z")
+BITS = re.compile(r"[01]{1,11}\Z")
 
 
 class SensT5Error(ValueError):
@@ -26,9 +26,9 @@ def parse_words(source: str) -> list[str]:
     if not words:
         raise SensT5Error("empty/unsupported binary program")
     for i, word in enumerate(words, 1):
-        if not BITS.fullmatch(word):
+        if not BITS.fullmatch(word) or not (1 <= len(word) <= 11):
             raise SensT5Error(
-                f"word {i}: requires exact D1..D9 0/1 word, got {word[:64]!r}"
+                f"word {i}: requires exact D1..D11 0/1 word, got {word[:64]!r}"
             )
     return words
 
@@ -37,8 +37,8 @@ def encode_words(words: list[str]) -> bytes:
     if not words:
         raise SensT5Error("empty program")
     for i, word in enumerate(words, 1):
-        if not BITS.fullmatch(word):
-            raise SensT5Error(f"word {i}: not exact 0/1 width 1..9")
+        if not BITS.fullmatch(word) or not (1 <= len(word) <= 11):
+            raise SensT5Error(f"word {i}: not exact 0/1 width 1..11")
     trits = "2".join(words)
     trits += "2" * (-len(trits) % 5)
     if len(trits) // 5 > MAX_FILE_BYTES:

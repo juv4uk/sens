@@ -273,12 +273,17 @@ D1_UK_SURFACES = load_d1_uk_surfaces()
 
 def current_residents(data):
     labels={}
-    for domain in ("D3","D4","D5","D6"):
+    for domain in ("D3","D4","D5","D6","D7","D8","D9","D10"):
         desc=data["domains"][domain]
         for bits,label in desc["residents"].items():
             if domain=="D3" and label=="EMPTY":
                 continue
             labels[str(label).upper()]=(bits,domain)
+    # Include D11 testing vocabulary for binary SENS test migrations
+    if "D11" in data.get("domains",{}):
+        desc=data["domains"]["D11"]
+        for bits,label in desc["residents"].items():
+            labels[str(label).upper()]=(bits,"D11")
     return labels
 
 def parse_current_surface_rows(path: Path):
@@ -826,7 +831,21 @@ def encode_atom_data(node: Atom,text7,lexical_env=(),quoted=False,resolver=None)
 
 
 def encode_string(node: String,text7):
-    return [node.tok.text]
+    # String literal: encode content (without quotes) as D7 Text7 sequence,
+    # wrapped in D2 structural frame for data transport.
+    content = node.tok.text[1:-1]  # strip surrounding quotes
+    # Handle escaped characters
+    content = content.replace('\\"', '"').replace('\\\\', '\\')
+    if not content:
+        return [D2_OPEN, D3_EMPTY, D2_CLOSE]
+    cells = text7_encode(content, text7, node.tok)
+    # Frame as D7 data: D2_OPEN + D2_OPEN + cells + D2_CLOSE + D2_CLOSE
+    words = [D2_OPEN, D2_OPEN]
+    for cell in cells:
+        words.append(cell)
+    words.append(D2_CLOSE)
+    words.append(D2_CLOSE)
+    return words
 
 
 def encode_clause(node,resolver,text7,lexical_env=()):
@@ -871,6 +890,7 @@ def encode(node,resolver,text7,quoted=False,lexical_env=()):
         head_bits=None
         lambda_names=()
         define_names=()
+        letrec_names=()
 
         for idx,item in enumerate(node.items):
             if idx:
@@ -944,6 +964,29 @@ def encode(node,resolver,text7,quoted=False,lexical_env=()):
                 body_env=tuple(define_names)+tuple(lexical_env)
                 words.extend(
                     encode(item,resolver,text7,quoted=False,lexical_env=body_env)
+                )
+                continue
+
+            # D9 LETREC: mutual recursive bindings; vars shadow in body scope.
+            if not quoted and head_bits=="101100111" and idx==1:
+                if not isinstance(item,ListNode):
+                    raise MigrationError("LETREC bindings must be a proper list", item.tok)
+                for binding in item.items:
+                    if not isinstance(binding,ListNode) or len(binding.items)!=2:
+                        raise MigrationError("LETREC binding must be (var value)", binding.tok)
+                    var = binding.items[0]
+                    val = binding.items[1]
+                    if not isinstance(var,Atom):
+                        raise MigrationError("LETREC var must be an atom", var.tok)
+                    # Encode value in current scope
+                    words.extend(encode(val,resolver,text7,quoted=False,lexical_env=lexical_env))
+                    letrec_names += (var.tok.text,)
+                continue
+
+            if not quoted and head_bits=="101100111" and idx>=2:
+                letrec_env=tuple(letrec_names)+tuple(lexical_env)
+                words.extend(
+                    encode(item,resolver,text7,quoted=False,lexical_env=letrec_env)
                 )
                 continue
 

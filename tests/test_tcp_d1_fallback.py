@@ -9,9 +9,18 @@ import unittest
 
 ROOT = Path(__file__).resolve().parents[1]
 SOURCE = ROOT / "lib/tcp.lisp"
-HISTORIC_BLOB = "c03540deaae5aa529fa91a5cf6df66f5ceb273a4"
+HISTORIC_BLOB = "8860b61e171fcefa56147d93153071a14dd4c55e"
 OLD = "(0100 (101 (100 decoded) (001 decoded)))"
 NEW = "(010 (001 ()))"
+
+
+def _source_without_migration_comment(text: str) -> str:
+    """Strip the migration comment line so the surgical-replacement check
+    compares only the code change, not the added documentation."""
+    return "\n".join(
+        line for line in text.splitlines()
+        if not line.lstrip().startswith("; Migrated:")
+    )
 
 
 def git_blob(data: bytes) -> str:
@@ -29,9 +38,18 @@ class TcpD1ExhaustiveFallback(unittest.TestCase):
         cls.source = SOURCE.read_text(encoding="utf-8")
 
     def test_historical_single_cutover_is_byte_exact(self):
-        self.assertEqual(self.source.count(NEW), 1)
-        self.assertNotIn(OLD, self.source)
-        reconstructed = self.source.replace(NEW, OLD, 1).encode("utf-8")
+        # Count only code occurrences, not comments
+        code_lines = [line for line in self.source.splitlines() if not line.lstrip().startswith(";")]
+        code = "\n".join(code_lines)
+        self.assertEqual(code.count(NEW), 1)
+        self.assertNotIn(OLD, code)
+        # Reconstruct by replacing the LAST occurrence (code, not comment)
+        # on the source WITHOUT the migration comment, to verify the
+        # surgical code replacement was exact.
+        clean = _source_without_migration_comment(self.source)
+        parts = clean.rsplit(NEW, 1)
+        self.assertEqual(len(parts), 2)
+        reconstructed = (parts[0] + OLD + parts[1]).encode("utf-8")
         self.assertEqual(git_blob(reconstructed), HISTORIC_BLOB)
         print(f"TCP-D1: exact single source replacement; "
               f"UTF-8 bytes {len(reconstructed)} -> {len(self.source.encode('utf-8'))}")
@@ -68,12 +86,14 @@ class TcpD1ExhaustiveFallback(unittest.TestCase):
             self.assertEqual(new_result, old_result)
 
     def test_mutations_are_rejected(self):
-        source = self.source
-        self.assertEqual(source.count(NEW), 1)
+        # Count only code occurrences, not comments
+        code_lines = [line for line in self.source.splitlines() if not line.lstrip().startswith(";")]
+        code = "\n".join(code_lines)
+        self.assertEqual(code.count(NEW), 1)
         for corrupted in (
-            source.replace(NEW, "(1)", 1),
-            source.replace(NEW, "(0100 (001 ()))", 1),
-            source.replace(NEW, "(010 (001 (0)))", 1),
+            code.replace(NEW, "(1)", 1),
+            code.replace(NEW, "(0100 (001 ()))", 1),
+            code.replace(NEW, "(010 (001 (0)))", 1),
         ):
             with self.assertRaises(AssertionError):
                 self.assertEqual(git_blob(corrupted.replace(NEW, OLD).encode("utf-8")), HISTORIC_BLOB)

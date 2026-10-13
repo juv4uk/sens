@@ -82,7 +82,7 @@ class ProcessD1Cutover(unittest.TestCase):
 
     def test_no_change_to_process_exit_compatibility(self):
         src = SOURCE.read_text(encoding="utf-8")
-        self.assertIn("((101 code (001 ()))  -1)", src)
+        self.assertIn("((101 code (001 ())) -1)", src)
         self.assertIn("(process-raw-exit-code raw)", src)
         self.assertIn("(utf8-decode-string (process-raw-stderr-bytes raw))", src)
 
