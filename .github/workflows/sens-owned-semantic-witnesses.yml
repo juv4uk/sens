@@ -1,7 +1,7 @@
 name: SENS-owned binary semantic witnesses
 
-# One automatic targeted job. Existing broader witnesses remain manual-only.
-# Єдиний автоматичний main workflow — ci.yml. Цей свідок ручний.
+# Тільки ручні історичні свідки. Єдиний автоматичний main workflow — ci.yml.
+# Невдалий world-metadata job прибрано; двійкові дані лишаються в tests/semantic.
 on:
   workflow_dispatch:
 
@@ -9,58 +9,6 @@ permissions:
   contents: read
 
 jobs:
-  world-metadata-exact:
-    if: ${{ false }} # Карантин: самовільний запуск недопустимий
-    runs-on: ubuntu-24.04
-    timeout-minutes: 12
-    permissions:
-      contents: read
-    steps:
-      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
-      - uses: dtolnay/rust-toolchain@1.99.0
-      - name: Compile existing SENS transport (no host-language semantic law)
-        shell: bash
-        run: |
-          set -euo pipefail
-          cargo build --locked -p sens-cli --bin sens-trit
-      - name: SENS checks all four laws and the one-bit mutant; print exact diagnostics
-        shell: bash
-        run: |
-          set -euo pipefail
-          dir=tests/semantic
-          base="$dir/world-metadata-selector"
-          oracle=target/debug/sens-trit
-          failure=0
-          for kind in law mutant; do
-            fixture="$base-$kind.sens"
-            actual="$RUNNER_TEMP/world-metadata-$kind.actual"
-            errfile="$RUNNER_TEMP/world-metadata-$kind.stderr"
-            expected="$RUNNER_TEMP/world-metadata-$kind.expected"
-            if [[ "$kind" == law ]]; then printf '1\n' > "$expected"; else printf '0\n' > "$expected"; fi
-            set +e
-            "$oracle" eval "$fixture" >"$actual" 2>"$errfile"
-            rc=$?
-            set -e
-            fixture_sha="$(sha256sum "$fixture" | cut -d ' ' -f 1)"
-            expected_sha="$(sha256sum "$expected" | cut -d ' ' -f 1)"
-            actual_sha="$(sha256sum "$actual" | cut -d ' ' -f 1)"
-            echo "test_id=WORLD-METADATA-$kind layer=eval source=$fixture"
-            echo "fixture_sha256=$fixture_sha expected_sha256=$expected_sha actual_sha256=$actual_sha"
-            echo "commit=$GITHUB_SHA exit_code=$rc reproduce='$oracle eval $fixture'"
-            if [[ "$rc" -eq 0 ]] && cmp -s "$expected" "$actual"; then
-              echo "PASS id=WORLD-METADATA-$kind verdict=$(cat "$actual")"
-              echo "| WORLD-METADATA-$kind | D1:$(cat "$actual") | $fixture_sha |" >> "$GITHUB_STEP_SUMMARY"
-            else
-              echo "::error file=$fixture::REGRESSION test_id=WORLD-METADATA-$kind layer=eval sha=$GITHUB_SHA"
-              echo "REGRESSION first_observed_bad_sha=$GITHUB_SHA first_bad_sha=UNRESOLVED"
-              echo "first_difference=$(cmp -l "$expected" "$actual" | head -n 1 || true)"
-              echo "actual_text=$(head -c 100 "$actual")"
-              echo "stderr=$(tail -c 400 "$errfile")"
-              echo "UNINFORMATIVE-OUTPUT until first_bad_sha is proven; no false green"
-              failure=1
-            fi
-          done
-          exit "$failure"
   binary-self-verdicts:
     if: github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-24.04
