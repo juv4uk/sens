@@ -98,17 +98,22 @@
   (0010 (left right)
     (111 left (111 right (001 ())))))
 
+; Ratified exact selectors: D4:1000 CAAR, D4:1001 CADR,
+; D4:0111 CDDR, D5:10011 CADDR, D6:100111 CADDDR.
+; Selector law is compiled from domain+bit width, never from English aliases.
+; D7 is text data and is NOT used for fifth (four CDR steps).
+
 (0011 second
   (0010 (values)
-    (100 (011 values))))
+    (1001 values)))
 
 (0011 third
   (0010 (values)
-    (100 (011 (011 values)))))
+    (10011 values)))
 
 (0011 fourth
   (0010 (values)
-    (100 (011 (011 (011 values))))))
+    (100111 values)))
 
 ; cadddr — the classical car/cdr-composition name for the exact same
 ; operation fourth already performs; kept as an alias (same closure
@@ -138,15 +143,13 @@
 
 (0011 caar
   (0010 (values)
-    (100 (100 values))))
+    (1000 values)))
 
-(0011 cadr
-  (0010 (values)
-    (100 (011 values))))
+(0011 cadr second)
 
 (0011 cddr
   (0010 (values)
-    (011 (011 values))))
+    (0111 values)))
 
 ; length/map/filter build their result via a tail-recursive `-onto`
 ; accumulator, same shape as reverse/reverse-onto below, instead of consing

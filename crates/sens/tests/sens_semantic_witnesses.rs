@@ -46,6 +46,55 @@ fn result_status_exact_d1_binary_self_verdict() {
 }
 
 
+const X86_ENCODING_DIRECT_D4_LAW: &str =
+    include_str!("../../../tests/semantic/x86-encoder-let-d4-law.bits");
+const X86_ENCODING_DIRECT_D4_MUTANT: &str =
+    include_str!("../../../tests/semantic/x86-encoder-let-d4-mutant.bits");
+
+/// Лише механічний транспорт: усі закони й вердикти закодовано самою
+/// двійковою мовою SENS, а не таблицею очікувань у Rust або Python.
+#[test]
+fn x86_encoding_let_to_exact_d4_binary_sens_verdict() {
+    for source in [X86_ENCODING_DIRECT_D4_LAW, X86_ENCODING_DIRECT_D4_MUTANT] {
+        assert!(source.bytes().all(|byte|
+            matches!(byte, b'0' | b'1' | b' ' | b'\n' | b'\r' | b'\t')
+        ), "SENS source must consist only of bits and separators");
+    }
+
+    let forms = parse_canonical_binary(X86_ENCODING_DIRECT_D4_LAW)
+        .expect("binary SENS must retain exact D1/D2/D3/D4/D7 widths");
+    assert_eq!(forms.len(), 4, "four independent binary self-verdicts");
+    for form in forms.iter() {
+        let outcome = eval_parsed_expressions(
+            std::slice::from_ref(form), &mut Session::default(),
+        ).expect("binary SENS self-verdict must execute").value;
+        assert_eq!(
+            outcome.as_predicate_bit(), Some(true),
+            "SENS verdict was not exact D1 YES: {outcome}",
+        );
+    }
+
+    // Mutation is a transport assertion, not a second host-side logical law:
+    // same complete binary program, one exact D1 data bit changed 1→0.
+    let good: Vec<_> = X86_ENCODING_DIRECT_D4_LAW.lines().next()
+        .expect("first binary verdict").split_whitespace().collect();
+    let bad: Vec<_> = X86_ENCODING_DIRECT_D4_MUTANT.split_whitespace().collect();
+    assert_eq!(good.len(), bad.len(), "a mutation cannot change source framing");
+    let differences: Vec<_> = good.iter().zip(bad.iter())
+        .filter(|(a, b)| a != b).collect();
+    assert_eq!(differences, vec![(&"1", &"0")], "mutate one exact D1 bit");
+
+    let mutant = parse_canonical_binary(X86_ENCODING_DIRECT_D4_MUTANT)
+        .expect("one-bit mutant must remain a valid SENS expression");
+    assert_eq!(mutant.len(), 1);
+    let outcome = eval_parsed_expressions(&mutant, &mut Session::default())
+        .expect("mutant must still execute through SENS").value;
+    assert_eq!(
+        outcome.as_predicate_bit(), Some(false),
+        "one-bit SENS mutant must report exact D1 NO: {outcome}",
+    );
+}
+
 const META_EVAL_MUTUAL_D4_LAW: &str =
     include_str!("../../../tests/semantic/meta-eval-mutual-d4-law.bits");
 

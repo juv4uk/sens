@@ -5,6 +5,11 @@ on:
     branches: [main]
     paths:
       - 'lib/canon.lisp'
+      - 'lib/core1.lisp'
+      - 'lib/core1-selectors.bits'
+      - 'lib/core1-selectors.sens'
+      - 'tests/fixtures/core1-selectors-semantic.bits'
+      - 'tests/fixtures/core1-selectors-semantic.sens'
       - 'lib/machine/block.lisp'
       - 'lib/machine/block.bits'
       - 'lib/machine/block.sens'
@@ -53,3 +58,17 @@ jobs:
           target/debug/sens-trit eval "$source" > "$RUNNER_TEMP/machine-block-trit.out"
           cmp "$RUNNER_TEMP/machine-block-sens.out" "$RUNNER_TEMP/machine-block-trit.out"
           printf '1\n' | cmp - "$RUNNER_TEMP/machine-block-sens.out"
+
+      - name: SENS owns Core1 selector semantics and D1 verdict
+        shell: bash
+        run: |
+          set -euo pipefail
+          target/debug/sens-trit open lib/core1-selectors.sens > "$RUNNER_TEMP/core1-source.bits"
+          cmp lib/core1-selectors.bits "$RUNNER_TEMP/core1-source.bits"
+          program='tests/fixtures/core1-selectors-semantic.sens'
+          target/debug/sens-trit open "$program" > "$RUNNER_TEMP/core1-witness.bits"
+          cmp tests/fixtures/core1-selectors-semantic.bits "$RUNNER_TEMP/core1-witness.bits"
+          target/debug/sens "$program" > "$RUNNER_TEMP/core1-sens.out"
+          target/debug/sens-trit eval "$program" > "$RUNNER_TEMP/core1-trit.out"
+          cmp "$RUNNER_TEMP/core1-sens.out" "$RUNNER_TEMP/core1-trit.out"
+          printf '1\n' | cmp - "$RUNNER_TEMP/core1-sens.out"

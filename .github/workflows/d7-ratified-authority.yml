@@ -41,16 +41,19 @@ jobs:
         run: |
           set -euo pipefail
           cargo build --locked -p sens-cli --bin sens
-          python3 - "$RUNNER_TEMP/d1-d9-domain-law.sens" <<'PY'
+          for witness in tests/semantic/d1-d3-control-law.bits tests/semantic/d4-d6-selector-chain.bits; do
+            filename="$(basename "$witness" .bits)"
+            python3 - "$witness" "$RUNNER_TEMP/$filename.sens" <<'PY'
           import sys
           from pathlib import Path
           sys.path.insert(0, "scripts")
           from sens_t5_codec import encode_projection
 
-          # Transport only. Expected domain results are nowhere in Python.
-          source = Path("tests/semantic/d1-d3-control-law.bits").read_text(encoding="ascii")
-          Path(sys.argv[1]).write_bytes(encode_projection(source))
+          # Byte transport only. Every semantic assertion is encoded by SENS.
+          source = Path(sys.argv[1]).read_text(encoding="ascii")
+          Path(sys.argv[2]).write_bytes(encode_projection(source))
           PY
-          # The SENS program itself returns D1:1 only if every internal law holds.
-          verdict="$(target/debug/sens "$RUNNER_TEMP/d1-d9-domain-law.sens")"
-          test "$verdict" = "1"
+            # Failure returns D1:0 inside SENS; the host checks only its final D1 word.
+            verdict="$(target/debug/sens "$RUNNER_TEMP/$filename.sens")"
+            test "$verdict" = "1"
+          done

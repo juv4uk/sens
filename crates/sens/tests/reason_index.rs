@@ -27,6 +27,20 @@ fn eval(session: &mut Session, source: &str) -> String {
 }
 
 #[test]
+fn binary_sens_owns_reason_index_car_eq_guard_law() {
+    let mut s = session();
+    let source = include_str!("../../../tests/semantic/reason-index-car-eq-guard-law.bits");
+    assert!(
+        source.bytes().all(|b| b.is_ascii_whitespace() || matches!(b, b'0' | b'1')),
+        "semantic law must be written as visible binary SENS words"
+    );
+    let expressions = parse_canonical_binary(source)
+        .expect("binary law must be valid D2-framed SENS");
+    eval_parsed_expressions(&expressions, &mut s)
+        .expect("SENS's own CAR/ATOM/EQ law rejected its counterexample or positive control");
+}
+
+#[test]
 fn indexed_bucket_preserves_source_rule_order_exactly() {
     let mut s = session();
     let source = r#"
@@ -85,20 +99,6 @@ fn too_many_distinct_predicates_fall_back_to_linear_mode() {
     }
     source.push_str("))))");
     assert_eq!(eval(&mut s, &source), "linear");
-}
-
-#[test]
-fn binary_sens_owns_reason_index_car_eq_guard_law() {
-    let mut session = session();
-    let source = include_str!("../../../tests/semantic/reason-index-car-eq-guard-law.bits");
-    assert!(
-        source.bytes().all(|byte| byte.is_ascii_whitespace() || matches!(byte, b'0' | b'1')),
-        "SENS-owned witness must contain only exact binary words and whitespace"
-    );
-    let parsed = parse_canonical_binary(source)
-        .expect("canonical D2-framed binary SENS witness must parse");
-    eval_parsed_expressions(&parsed, &mut session)
-        .expect("SENS self-verdict rejected the CAR/ATOM/EQ schema guard law");
 }
 
 #[test]

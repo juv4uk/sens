@@ -27,12 +27,13 @@
 (0011 reason-index-buckets fourth)
 
 ; Повертаємо точний D1 без обхідного ATOM(QUOTE(...)).
-; ATOM(value), NULL(value) і ATOM(CAR(value)) стоять перед schema EQ.
+; Перевірка schema лишається D3 EQ виключно після guard ATOM(value).
 (0011 reason-index?
   (0010 (value)
     (110
       ((010 value) #d1:0)
       ((0101 value) #d1:0)
+      ; CAR(value) can be a compound rule. ATOM guard must precede EQ.
       ((010 (100 value))
        (110
          ((101 (100 value) *reason-index-schema*) #d1:1)
