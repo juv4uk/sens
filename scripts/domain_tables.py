@@ -70,7 +70,7 @@ def decode(token: str, *, literal_empty: bool = False, d7_surface: bool = False)
 
 
 def machine_word(number: int, width: int) -> str:
-    """The machine reads SENS as binary; a number is only its human projection."""
+    """Generate a fixed-width binary table coordinate; not a semantic number."""
     if number < 0:
         raise ValueError(f"a machine word needs a non-negative number: {number}")
     word = format(number, "b")
@@ -79,10 +79,16 @@ def machine_word(number: int, width: int) -> str:
     return word.zfill(width)
 
 
-def human_number(word: str) -> int:
-    """Decimal is a projection of the binary machine word, never its source."""
-    if not word or any(bit not in "01" for bit in word):
-        raise ValueError(f"{word!r} is not a binary machine word")
+def human_number(word: str, *, domain_width: int) -> int:
+    """Decimal UI output only for an explicitly typed exact D24+ natural.
+
+    D1-D10 binary words and D7 text are not mathematical operands.
+    This helper never constructs or infers a domain from bare bits.
+    """
+    if not is_number_width(domain_width):
+        raise ValueError(f"D{domain_width} is not a numeric D24+ domain")
+    if len(word) != domain_width or any(bit not in "01" for bit in word):
+        raise ValueError(f"expected exactly {domain_width} admitted numeric bits")
     return int(word, 2)
 
 
