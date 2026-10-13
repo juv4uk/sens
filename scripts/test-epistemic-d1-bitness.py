@@ -4,7 +4,7 @@
 Axiom: the binary key width IS the domain address.
 Checks:
   1. lib/epistemic.lisp has no bare host truthiness (t / NIL / T)
-  2. Exact D1:1 form (010 (001 ())) is present as predicate carrier
+  2. Exact one-bit D1:YES word #d1:1 is present as predicate carrier
   3. Constructors/accessors still present (reuse of project function surface)
   4. Every lib/domains/dN.lisp has exactly 2^N rows of exact N-bit keys
 
@@ -22,7 +22,7 @@ ROOT = Path(__file__).resolve().parents[1]
 EPI = ROOT / "lib" / "epistemic.lisp"
 ROW = re.compile(r"^\s*\(([01]+)\s+", re.MULTILINE)
 HOST = re.compile(r"(?<!\w)(t|T|NIL)(?!\w)")
-D1_TRUE = "(010 (001 ()))"
+D1_TRUE = "#d1:1"
 REQUIRED_FNS = (
     "make-observation",
     "make-claim",
@@ -53,7 +53,7 @@ def check_epistemic() -> list[str]:
             continue
         errs.append(f"epistemic: host truthiness {m.group()!r} at offset {m.start()}")
     if D1_TRUE not in text:
-        errs.append("epistemic: exact D1:1 form (010 (001 ())) missing")
+        errs.append("epistemic: exact D1:YES #d1:1 word missing")
     for fn in REQUIRED_FNS:
         if fn not in text:
             errs.append(f"epistemic: required function surface missing: {fn}")
