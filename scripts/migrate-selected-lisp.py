@@ -170,7 +170,7 @@ def run(args) -> dict:
         ROOT / "knowledge/sens8-current-coverage-v1.json",
     )
     text7 = migration.build_text7(
-        foundation, ROOT / "crates/sens/src/text7_projection_generated.rs")
+        foundation, ROOT / "knowledge/d7-keyboard-v2-ratified.json")
     resolver = migration.Resolver(
         legacy, my, upper, source_era=args.source_era,
         admitted_d8=foundation["domains"]["D8"]["residents"],

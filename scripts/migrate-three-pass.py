@@ -24,6 +24,7 @@ from __future__ import annotations
 
 import argparse
 import ast
+from functools import lru_cache
 from dataclasses import dataclass
 import json
 import hashlib
@@ -271,6 +272,24 @@ def load_d1_uk_surfaces(path: Path = REPO_ROOT / "lib/domains/d1.lisp") -> dict[
 D1_UK_SURFACES = load_d1_uk_surfaces()
 
 
+@lru_cache(maxsize=1)
+def quoted_ladder_surfaces():
+    """Only ratified exact-domain surfaces may name quoted function data."""
+    from domain_tables import read_domain_table
+    names = {}
+    for width in (1, 3, 4, 5, 6, 8, 9, 10):
+        rows = read_domain_table(REPO_ROOT / "lib" / "domains" / f"d{width}.lisp")
+        if {row.bits for row in rows} != {f"{n:0{width}b}" for n in range(1 << width)}:
+            raise MigrationError(f"D{width} has incomplete quoted-data authority")
+        for row in rows:
+            if width == 3 and row.bits == "000":
+                continue
+            for name in (row.uk, row.ukr, row.san, row.en, row.lisp, row.sym):
+                if name and name != "()":
+                    names.setdefault(name, set()).add((row.domain, row.bits))
+    return {name: frozenset(targets) for name, targets in names.items()}
+
+
 def current_residents(data):
     labels={}
     for domain in ("D3","D4","D5","D6"):
@@ -510,30 +529,12 @@ def _keyboard_v2_mode(spelling: str, token: Tok) -> str:
 
 
 def build_text7(data, projection_path: Path):
-    if projection_path.suffix == ".json":
-        return _keyboard_v2(projection_path)
-    # Historical phonetic Text7 is supported only via an explicit old .rs path.
-    text=projection_path.read_text(encoding="utf-8")
-    slp=extract_projection(text,"SA_SLP1_ENCODE")
-    uk=extract_projection(text,"UK_ENCODE")
-    d7=data["domains"]["D7"]["residents"]
-    labels={label:bits for bits,label in d7.items()}
-    candidates={}
-    for source in (slp,uk):
-        for spelling,vals in source.items():
-            candidates.setdefault(spelling,tuple(f"{v:07b}" for v in vals))
-    for n in range(10):
-        candidates[str(n)]=(labels[f"text.digit.{n}"],)
+    # Retired phonetic D7 .rs projection is never a migration input.
+    # The only admitted route is the ratified 128/128 keyboard v2 JSON.
+    if projection_path.suffix != ".json":
+        raise MigrationError("HISTORICAL_D7_DISABLED: requires keyboard/v2 JSON")
+    return _keyboard_v2(projection_path)
 
-    # Longest-match projection, indexed by first source character. This keeps
-    # multi-character cells (e.g. Ukrainian дж/дз) deterministic without
-    # rescanning the full table for every character in large source trees.
-    buckets={}
-    for key,cells in candidates.items():
-        buckets.setdefault(key[0],[]).append((key,cells))
-    for rows in buckets.values():
-        rows.sort(key=lambda x:(-len(x[0]),x[0]))
-    return buckets
 
 def text7_encode(spelling: str,candidates,tok: Tok):
     if "keyboard-v2" in candidates:
@@ -552,17 +553,7 @@ def text7_encode(spelling: str,candidates,tok: Tok):
                 )
             result.append(bits)
         return result
-    words=[]
-    i=0
-    while i<len(spelling):
-        rows=candidates.get(spelling[i],())
-        for key,cells in rows:
-            if spelling.startswith(key,i):
-                words.extend(cells); i+=len(key); break
-        else:
-            ch=spelling[i]
-            raise MigrationError(f"Text7 cannot encode {ch!r} U+{ord(ch):04X}",tok)
-    return words
+    raise MigrationError("HISTORICAL_D7_DISABLED: expected keyboard/v2 projection",tok)
 
 class Resolver:
     def __init__(self,legacy,my,upper,source_era="auto",admitted_d8=None):
@@ -807,15 +798,19 @@ def encode_atom_data(node: Atom,text7,lexical_env=(),quoted=False,resolver=None)
             node.tok,
         )
     if quoted:
-        # Ратифікований власником закон 2026-10-13
-        # (docs/QUOTED-DATA-AND-STRING-ADMISSION-LAW-2026-10-13.uk.md):
-        # цитовані дані перевіряються на місце в драбині функцій (EVAL/APPLY).
-        # D1-предикати 0/1 та точні координати драбини D3-D9 зберігають свою
-        # точну ширину як дані; те, що не має місця в драбині, — звичайне
-        # D2-рамкове D7-написання з роллю `quoted-datum`, яке зберігає
-        # кожен біт джерела, включно з регістром.
-        if t in {"0", "1"} or re.fullmatch(r"[01]{3,9}", t):
+        # Цитата спершу бере канонічну identity з драбини D1/D3-D10.
+        # D2 є структурою; D7 застосовується лише за відсутності збігу.
+        if t in {"0", "1"} or re.fullmatch(r"[01]{3,10}", t):
             return [t]
+        targets = quoted_ladder_surfaces().get(t, frozenset())
+        if len(targets) > 1:
+            raise MigrationError(
+                f"ambiguous quoted ladder surface {t!r}: {sorted(targets)!r}; use exact bits",
+                node.tok,
+            )
+        if targets:
+            _domain, bits = next(iter(targets))
+            return [bits]
         return encode_text7_identifier(t, text7, node.tok)
     # Нецитовані дані: ім'я, яке джерело саме зв'язує глобально (DEFINE),
     # є Text7-посиланням, а не сирим текстом. Решта лишається точно як

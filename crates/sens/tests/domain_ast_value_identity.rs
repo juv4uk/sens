@@ -2,7 +2,7 @@ use sens::{
     fasl_decode_program, fasl_encode_program, wire_decode_program, wire_encode_program, Bija3,
     Bit1, Bit2, Bit3, Bit4, Bit5, Bit6, Bit7, Bit8, Bit9, CoreD4, CoreD5, CoreD6, CoreD8,
     CoreD9, CoreDomainIdentity, DomainIdentity, Exactness, Expr, ExprKind, PredicateBit, Racana2,
-    SoundD7, Span, Value,
+    D7DataWord, Span, Value,
 };
 use std::rc::Rc;
 
@@ -25,7 +25,7 @@ fn d6(raw: u8) -> DomainIdentity {
     CoreD6::from_word(Bit6::new(raw).unwrap()).into()
 }
 fn d7(raw: u8) -> DomainIdentity {
-    SoundD7::from_word(Bit7::new(raw).unwrap()).into()
+    D7DataWord::from_word(Bit7::new(raw).unwrap()).into()
 }
 fn d8(raw: u8) -> DomainIdentity {
     CoreD8::from_word(Bit8::new(raw).unwrap()).into()

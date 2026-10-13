@@ -519,112 +519,31 @@ def build_registry_surface_sid_map(registry_path: Path):
 
 
 def build_text7_encoder(foundation, generated_projection: Path):
-    # New D7 v2: exact ASCII-indexed W7 keyboard projections, not phonetic SLP1.
-    if generated_projection.suffix == ".json":
-        authority = json.loads(generated_projection.read_text(encoding="utf-8"))
-        if (authority.get("schema"), authority.get("status"),
-                authority.get("width"), authority.get("occupancy")) != (
-                "sens.d7.keyboard/v2", "owner-ratified", 7, 128):
-            raise BinaryMigrationError("D7 keyboard/v2 owner authority invalid")
-        rows = authority.get("table", [])
-        if len(rows) != 128:
-            raise BinaryMigrationError("D7 keyboard/v2 requires 128 W7 cells")
-        maps = {mode: {} for mode in ("en", "uk", "san")}
-        for number, item in enumerate(rows):
-            bits = f"{number:07b}"
-            if item.get("bits") != bits or item.get("ascii") != chr(number):
-                raise BinaryMigrationError(f"D7 keyboard/v2 coordinate drift: {bits}")
-            for mode, field in (("en","ascii"), ("uk","uk"), ("san","san")):
-                glyph = item.get(field)
-                if not isinstance(glyph, str) or len(glyph) != 1 or glyph in maps[mode]:
-                    raise BinaryMigrationError(f"D7 keyboard/v2 ambiguous {mode} glyph: {bits}")
-                maps[mode][glyph] = bits
-        return {"d7-keyboard/v2": maps}
-    # Historical generated phonetic Text7 is legacy input only, never a v2 output.
-    generated = generated_projection.read_text(encoding="utf-8")
-    slp = _extract_projection(generated, "SA_SLP1_ENCODE")
-    iast = _extract_projection(generated, "SA_IAST_ENCODE")
-    deva = _extract_projection(generated, "SA_DEVA_ENCODE")
-    uk = _extract_projection(generated, "UK_ENCODE")
-
-    d7 = foundation["domains"]["D7"]["residents"]
-    by_label = {label: bits for bits, label in d7.items()}
-
-    digits = {
-        str(n): by_label[f"text.digit.{n}"]
-        for n in range(10)
-    }
-    punctuation_labels = {
-        " ": "sign.space",
-        "\n": "sign.newline",
-        "\t": "sign.tab",
-        "!": "sign.bang",
-        '"': "sign.double-quote",
-        "#": "sign.hash",
-        "&": "sign.ampersand",
-        "'": "sign.apostrophe",
-        "(": "sign.left-paren",
-        ")": "sign.right-paren",
-        "*": "sign.star",
-        "+": "sign.plus",
-        ",": "sign.comma",
-        "-": "sign.minus",
-        ".": "sign.dot",
-        "/": "sign.slash",
-        ":": "sign.colon",
-        ";": "sign.semicolon",
-        "<": "sign.less",
-        "=": "sign.equals",
-        ">": "sign.greater",
-        "?": "sign.question",
-        "@": "sign.at",
-        "\\": "sign.backslash",
-        "_": "sign.underscore",
-        "`": "sign.backquote",
-        "|": "sign.pipe",
-        "…": "text.punctuation.ellipsis",
-        "«": "text.punctuation.left-guillemet",
-        "»": "text.punctuation.right-guillemet",
-        "—": "text.punctuation.em-dash",
-        "–": "text.punctuation.en-dash",
-        "“": "text.punctuation.left-double-quotation-mark",
-        "”": "text.punctuation.right-double-quotation-mark",
-    }
-    punctuation = {ch: by_label[label] for ch, label in punctuation_labels.items()}
-
-    # Latin letters use the pinned SLP1 projection. Cyrillic uses pinned UK.
-    latin = {
-        k: tuple(f"{v:07b}" for v in vals)
-        for k, vals in slp.items()
-        if k.isalpha() and all(ord(ch) < 128 for ch in k)
-    }
-    iast_unicode = {
-        k: tuple(f"{v:07b}" for v in vals)
-        for k, vals in iast.items()
-        if any(ord(ch) >= 128 for ch in k)
-    }
-    deva_unicode = {
-        k: tuple(f"{v:07b}" for v in vals)
-        for k, vals in deva.items()
-        if any(ord(ch) >= 128 for ch in k)
-    }
-    cyrillic = {
-        k: tuple(f"{v:07b}" for v in vals)
-        for k, vals in uk.items()
-        if any(ord(ch) >= 128 for ch in k)
-    }
-
-    candidates = {}
-    candidates.update({k: (bits,) for k, bits in digits.items()})
-    candidates.update({k: (bits,) for k, bits in punctuation.items()})
-    candidates.update(latin)
-    candidates.update(iast_unicode)
-    candidates.update(deva_unicode)
-    candidates.update(cyrillic)
-
-    # Longest spelling first: e.g. Ukrainian дж/дз must stay one Text7 cell.
-    ordered = sorted(candidates.items(), key=lambda item: (-len(item[0]), item[0]))
-    return ordered
+    # No old phonetic SLP1/IAST .rs tables, no v1 resident imports.
+    if generated_projection.suffix != ".json":
+        raise BinaryMigrationError(
+            "HISTORICAL_D7_DISABLED: only ratified keyboard/v2 JSON is admitted"
+        )
+    authority = json.loads(generated_projection.read_text(encoding="utf-8"))
+    if (authority.get("schema"), authority.get("status"),
+            authority.get("width"), authority.get("capacity"),
+            authority.get("occupancy")) != (
+            "sens.d7.keyboard/v2", "owner-ratified", 7, 128, 128):
+        raise BinaryMigrationError("D7 keyboard/v2 owner authority invalid")
+    rows = authority.get("table", [])
+    if len(rows) != 128:
+        raise BinaryMigrationError("D7 keyboard/v2 requires 128 W7 cells")
+    maps = {mode: {} for mode in ("en", "uk", "san")}
+    for number, item in enumerate(rows):
+        bits = f"{number:07b}"
+        if item.get("bits") != bits or item.get("ascii") != chr(number):
+            raise BinaryMigrationError(f"D7 keyboard/v2 coordinate drift: {bits}")
+        for mode, field in (("en", "ascii"), ("uk", "uk"), ("san", "san")):
+            glyph = item.get(field)
+            if not isinstance(glyph, str) or len(glyph) != 1 or glyph in maps[mode]:
+                raise BinaryMigrationError(f"D7 keyboard/v2 ambiguous {mode} glyph: {bits}")
+            maps[mode][glyph] = bits
+    return {"d7-keyboard/v2": maps}
 
 
 def encode_text7_spelling(text: str, candidates):
@@ -655,20 +574,7 @@ def encode_text7_spelling(text: str, candidates):
                 )
             cells.append(word)
         return cells
-    words = []
-    i = 0
-    while i < len(text):
-        for spelling, cells in candidates:
-            if text.startswith(spelling, i):
-                words.extend(cells)
-                i += len(spelling)
-                break
-        else:
-            ch = text[i]
-            raise BinaryMigrationError(
-                f"Text7 has no admitted spelling for {ch!r} U+{ord(ch):04X}"
-            )
-    return words
+    raise BinaryMigrationError("HISTORICAL_D7_DISABLED: expected keyboard/v2 projection")
 
 
 def _emit_item(out, words, need_separator):

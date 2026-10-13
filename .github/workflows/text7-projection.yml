@@ -1,35 +1,10 @@
-name: D7 Text7 owner projection and T5
+name: D7 v2 text data projection and physical T5
 
 on:
-  pull_request:
-    paths:
-      - knowledge/d7-ratified.json
-      - lib/domains/d7.lisp
-      - scripts/d7_symbol_codec.py
-      - scripts/sens_t5_codec.py
-      - scripts/generate-text7-projection.py
-      - scripts/check-d7-runtime-projection.py
-      - crates/sens/src/text7_projection.rs
-      - crates/sens/src/text7_projection_generated.rs
-      - crates/sens/src/d7_display_registry_generated.rs
-      - crates/sens/src/ternary_transport.rs
-      - crates/sens/tests/d7_keyboard_t5.rs
-      - .github/workflows/text7-projection.yml
   push:
     branches: [main]
-    paths:
-      - knowledge/d7-ratified.json
-      - lib/domains/d7.lisp
-      - scripts/d7_symbol_codec.py
-      - scripts/sens_t5_codec.py
-      - scripts/generate-text7-projection.py
-      - scripts/check-d7-runtime-projection.py
-      - crates/sens/src/text7_projection.rs
-      - crates/sens/src/text7_projection_generated.rs
-      - crates/sens/src/d7_display_registry_generated.rs
-      - crates/sens/src/ternary_transport.rs
-      - crates/sens/tests/d7_keyboard_t5.rs
-      - .github/workflows/text7-projection.yml
+  pull_request:
+  workflow_dispatch:
 
 permissions:
   contents: read
@@ -40,14 +15,14 @@ jobs:
     timeout-minutes: 25
     steps:
       - uses: actions/checkout@v5
-      - name: Reject old 107-cell donor as active D7 runtime table
-        run: python3 scripts/generate-text7-projection.py --check
-      - name: Check all D7 Rust surfaces against the 126/128 owner map
-        run: python3 scripts/check-d7-runtime-projection.py
-      - name: Ukrainian keyboard and canonical T5 roundtrip
+      - name: Check current D7 v2 JSON and generated Rust W7 surfaces
+        run: |
+          python3 scripts/check-d7-keyboard-v2-table.py
+          python3 scripts/check-d7-runtime-projection.py
+      - name: Test Ukrainian keyboard data and exact T5
         run: |
           python3 -m unittest discover -s tests -p 'test_d7_symbol_codec.py' -v
           python3 -m unittest discover -s tests -p 'test_d7_t5_keyboard.py' -v
       - uses: dtolnay/rust-toolchain@stable
-      - name: Rust Text7 owner source and D2/T5 boundaries
-        run: cargo test --locked -p sens --test d7_keyboard_t5 --test text7_canonical_wire --test text7_shiva_w7_synthesis
+      - name: Current D7 Rust / Text7 / D2 boundaries
+        run: cargo test --locked -p sens --test d7_keyboard_t5 --test text7_canonical_wire

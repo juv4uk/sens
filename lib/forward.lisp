@@ -59,8 +59,10 @@
 
 (0011 *working-memory* (001 ()))
 
-(00001010 assert-fact! (fact)
-  (1110 (001 def) (001 *working-memory*) (1110 (001 00000100) fact (001 *working-memory*))))
+(0011 assert-fact!
+  (make-macro
+    (0010 (fact)
+      (1110 (001 def) (001 *working-memory*) (1110 (001 00000100) fact (001 *working-memory*))))))
 
 ; Tries to unify a rule's pattern against a single fact. On success,
 ; returns the rule's template with the resulting bindings substituted in
@@ -205,8 +207,10 @@
         ((unify-equal? (000000 merged) (000000 facts))  facts)
         ((010 ()) (run rules merged)))) (append-new (fire-rules-on-facts rules facts) facts))))
 
-(00001010 assert-facts! (facts)
-  (1110 (001 def) (001 *working-memory*) (1110 (001 append-new) facts (001 *working-memory*))))
+(0011 assert-facts!
+  (make-macro
+    (0010 (facts)
+      (1110 (001 def) (001 *working-memory*) (1110 (001 append-new) facts (001 *working-memory*))))))
 
 ; Step 5a: plain `retract-fact` — removes one matching fact (compared via
 ; `equal?`, same as everywhere else facts are compared) from a fact list.
@@ -246,8 +250,10 @@
       ((unify-equal? fact (100 facts)) (011 facts))
       ((010 ()) (111 (100 facts) (retract-fact fact (011 facts)))))))
 
-(00001010 retract-fact! (fact)
-  (1110 (001 def) (001 *working-memory*) (1110 (001 retract-fact) fact (001 *working-memory*))))
+(0011 retract-fact!
+  (make-macro
+    (0010 (fact)
+      (1110 (001 def) (001 *working-memory*) (1110 (001 retract-fact) fact (001 *working-memory*))))))
 
 ; Step 5b: a real (if minimal) truth maintenance system. A *justified fact*
 ; is `(fact . supports)`: `supports` is the list of facts a rule consumed to
@@ -380,11 +386,15 @@
 
 (0011 *justified-memory* (001 ()))
 
-(00001010 assert-fact-tms! (fact)
-  (1110 (001 def) (001 *justified-memory*) (1110 (001 add-new-justified) (1110 (001 list) (1110 (001 axiom) fact)) (001 *justified-memory*))))
+(0011 assert-fact-tms!
+  (make-macro
+    (0010 (fact)
+      (1110 (001 def) (001 *justified-memory*) (1110 (001 add-new-justified) (1110 (001 list) (1110 (001 axiom) fact)) (001 *justified-memory*))))))
 
-(00001010 run-tms! (rules)
-  (1110 (001 def) (001 *justified-memory*) (1110 (001 run-tms) rules (001 *justified-memory*))))
+(0011 run-tms!
+  (make-macro
+    (0010 (rules)
+      (1110 (001 def) (001 *justified-memory*) (1110 (001 run-tms) rules (001 *justified-memory*))))))
 
 (0011 remove-justified
   (0010 (fact entries)
@@ -416,8 +426,10 @@
       ((010 facts)  entries)
       ((010 ()) (retract-facts-tms (011 facts) (retract-fact-tms (100 facts) entries))))))
 
-(00001010 retract-fact-tms! (fact)
-  (1110 (001 def) (001 *justified-memory*) (1110 (001 retract-fact-tms) fact (001 *justified-memory*))))
+(0011 retract-fact-tms!
+  (make-macro
+    (0010 (fact)
+      (1110 (001 def) (001 *justified-memory*) (1110 (001 retract-fact-tms) fact (001 *justified-memory*))))))
 
 ; Step 5c: multiple justifications per fact — the limitation Step 5b
 ; documented and deliberately left open. An entry is now `(fact
@@ -549,11 +561,15 @@
 
 (0011 *jtms-memory* (001 ()))
 
-(00001010 assert-fact-jtms! (fact)
-  (1110 (001 def) (001 *jtms-memory*) (1110 (001 add-justification) fact (1110 (001 quote) (001 ())) (001 *jtms-memory*))))
+(0011 assert-fact-jtms!
+  (make-macro
+    (0010 (fact)
+      (1110 (001 def) (001 *jtms-memory*) (1110 (001 add-justification) fact (1110 (001 quote) (001 ())) (001 *jtms-memory*))))))
 
-(00001010 run-jtms! (rules)
-  (1110 (001 def) (001 *jtms-memory*) (1110 (001 run-jtms) rules (001 *jtms-memory*))))
+(0011 run-jtms!
+  (make-macro
+    (0010 (rules)
+      (1110 (001 def) (001 *jtms-memory*) (1110 (001 run-jtms) rules (001 *jtms-memory*))))))
 
 ; Step 14: JTMS grows a multi-condition twin, the same way Step 6 grew
 ; `fire-rule-multi`/`run-multi` alongside the Step 1-5 single-condition
@@ -699,8 +715,10 @@
         ((unify-equal? merged entries) entries)
         ((010 ()) (run-jtms-multi rules merged)))) (add-new-entries-jtms (fire-rules-jtms-multi rules (map-fact-of entries)) entries))))
 
-(00001010 run-jtms-multi! (rules)
-  (1110 (001 def) (001 *jtms-memory*) (1110 (001 run-jtms-multi) rules (001 *jtms-memory*))))
+(0011 run-jtms-multi!
+  (make-macro
+    (0010 (rules)
+      (1110 (001 def) (001 *jtms-memory*) (1110 (001 run-jtms-multi) rules (001 *jtms-memory*))))))
 
 (0011 prune-justifications
   (0010 (fact justifications)
@@ -758,8 +776,10 @@
       ((010 facts)  entries)
       ((010 ()) (retract-facts-jtms (011 facts) (retract-fact-jtms (100 facts) entries))))))
 
-(00001010 retract-fact-jtms! (fact)
-  (1110 (001 def) (001 *jtms-memory*) (1110 (001 retract-fact-jtms) fact (001 *jtms-memory*))))
+(0011 retract-fact-jtms!
+  (make-macro
+    (0010 (fact)
+      (1110 (001 def) (001 *jtms-memory*) (1110 (001 retract-fact-jtms) fact (001 *jtms-memory*))))))
 
 ; Step 6: a shared rule language with `lib/reason.lisp`. Steps 1-5c used a
 ; forward-only `(pattern template)` shape, matched against exactly one

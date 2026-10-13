@@ -78,7 +78,7 @@
   (0010 (symbols id)
     (110 ((010 symbols) (001 ())) ((010 (001 ())) ((0010 ()
             (PRINT (LIST (SYMBOL->STRING (100 symbols)) id))
-            (print-table-onto (011 symbols) (PLUS id 1))))))))
+            (print-table-onto (011 symbols) (01010 id 1))))))))
 
 (0011 core-forms (READ-ALL (READ-FILE "lib/core4.lisp")))
 (0011 all-symbols (collect-all-symbols core-forms (001 ())))

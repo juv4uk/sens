@@ -1,0 +1,35 @@
+name: Canon laws executed by binary SENS
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'lib/canon.lisp'
+      - 'tests/fixtures/canon-ladder-logic.bits'
+      - 'tests/fixtures/canon-ladder-logic.sens'
+      - '.github/workflows/canon-binary-law.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  binary-sens-canon-law:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
+      - uses: dtolnay/rust-toolchain@1.99.0
+      - name: Build transport and interpreter mechanisms
+        run: cargo build --locked -p sens-cli --bin sens --bin sens-trit
+      - name: Execute self-verdict in exact-width binary SENS (no Python or Rust semantic asserts)
+        shell: bash
+        run: |
+          set -euo pipefail
+          source='tests/fixtures/canon-ladder-logic.sens'
+          target/debug/sens-trit open "$source" > "$RUNNER_TEMP/canon-projection.bits"
+          cmp tests/fixtures/canon-ladder-logic.bits "$RUNNER_TEMP/canon-projection.bits"
+          target/debug/sens "$source" > "$RUNNER_TEMP/canon-sens.out"
+          target/debug/sens-trit eval "$source" > "$RUNNER_TEMP/canon-trit.out"
+          cmp "$RUNNER_TEMP/canon-sens.out" "$RUNNER_TEMP/canon-trit.out"
+          printf '1\n' | cmp - "$RUNNER_TEMP/canon-sens.out"

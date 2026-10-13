@@ -1,10 +1,14 @@
-; CANON 0+7 — executable semantic contract written in my-lisp.
+; CANON 0+7 — semantic laws with exact D3 call-head coordinates.
 ; CANON 0+7 — виконуваний семантичний контракт, написаний самою my-lisp.
 ;
 ; Authority rule:
 ;   the language states the laws; host runtimes implement mechanisms and
 ;   must conform to these laws. This file is semantic evidence over an already
 ;   existing immutable Canon; it must never create or rebind Canon spellings.
+;
+; Binary admission companion: tests/fixtures/canon-ladder-logic.sens
+; All callable D3 heads in these laws are canonical exact three-bit words;
+; quoted ordinary names remain projected symbols until D7/T5 admission.
 ;
 ; Contract 6.0 boundary:
 ;   (), quote/як-є/svarūpa, atom/атом?/aṇu, eq/тотожне?/abheda,
@@ -58,90 +62,90 @@
 
 (0011 canon-law-empty-list
   (0010 ()
-    (за-умовою
-      ((тотожне? canon-empty-list (001 ()))
+    (110
+      ((101 canon-empty-list (001 ()))
        (canon-law-satisfied (001 empty-list)))
-      ((атом? (001 ()))
+      ((010 (001 ()))
        (canon-law-violated (001 empty-list))))))
 
 (0011 canon-law-atom-cons
   (0010 (x y)
-    (за-умовою
-      ((атом? (111 x y))
+    (110
+      ((010 (111 x y))
        (canon-law-violated (001 atom-cons)))
-      ((атом? (001 ()))
+      ((010 (001 ()))
        (canon-law-satisfied (001 atom-cons))))))
 
 (0011 canon-law-car-cons
   (0010 (x y)
-    (за-умовою
-      ((тотожне? (100 (111 x y)) x)
+    (110
+      ((101 (100 (111 x y)) x)
        (canon-law-satisfied (001 car-cons)))
-      ((атом? (001 ()))
+      ((010 (001 ()))
        (canon-law-violated (001 car-cons))))))
 
 (0011 canon-law-cdr-cons
   (0010 (x y)
-    (за-умовою
-      ((тотожне? (011 (111 x y)) y)
+    (110
+      ((101 (011 (111 x y)) y)
        (canon-law-satisfied (001 cdr-cons)))
-      ((атом? (001 ()))
+      ((010 (001 ()))
        (canon-law-violated (001 cdr-cons))))))
 
 (0011 canon-law-eq-reflexive-atom
   (0010 (x)
-    (за-умовою
-      ((атом? x)
-       (за-умовою
-         ((тотожне? x x)
+    (110
+      ((010 x)
+       (110
+         ((101 x x)
           (canon-law-satisfied (001 eq-reflexive-atom)))
-         ((атом? (001 ()))
+         ((010 (001 ()))
           (canon-law-violated (001 eq-reflexive-atom)))))
-      ((атом? (001 ()))
+      ((010 (001 ()))
        (canon-law-violated (001 eq-reflexive-atom))))))
 
 ; `решта` must be a pair projection, not a human-language "second element".
 (0011 canon-law-cdr-dotted
   (0010 ()
-    (за-умовою
-      ((тотожне?
+    (110
+      ((101
          (011 (111 (001 кіт) 42))
          42)
        (canon-law-satisfied (001 cdr-dotted)))
-      ((атом? (001 ()))
+      ((010 (001 ()))
        (canon-law-violated (001 cdr-dotted))))))
 
 ; EQ перевіряє тотожність допустимих атомів, включно зі структурним ().
 ; Завершення правильного списку доводимо явним EQ з ().
 (0011 canon-law-cdr-proper
   (0010 ()
-    (за-умовою
-      ((тотожне? (100 (011 (001 (1 2 3)))) 2)
-       (за-умовою
-         ((тотожне? (100 (011 (011 (001 (1 2 3))))) 3)
-          (за-умовою
-            ((тотожне?
+    (110
+      ((101 (100 (011 (001 (1 2 3)))) 2)
+       (110
+         ((101 (100 (011 (011 (001 (1 2 3))))) 3)
+          (110
+            ((101
                (011 (011 (011 (001 (1 2 3)))))
                (001 ()))
              (canon-law-satisfied (001 cdr-proper)))
-            ((атом? (001 ()))
+            ((010 (001 ()))
              (canon-law-violated (001 cdr-proper)))))
-         ((атом? (001 ()))
+         ((010 (001 ()))
           (canon-law-violated (001 cdr-proper)))))
-      ((атом? (001 ()))
+      ((010 (001 ()))
        (canon-law-violated (001 cdr-proper))))))
 
 ; EQ is atom-only, so the improper tail is checked through atom projections.
 (0011 canon-law-cdr-improper
   (0010 ()
-    (за-умовою
-      ((тотожне? (100 (011 (001 (1 2 . 3)))) 2)
-       (за-умовою
-         ((тотожне? (011 (011 (001 (1 2 . 3)))) 3)
+    (110
+      ((101 (100 (011 (001 (1 2 . 3)))) 2)
+       (110
+         ((101 (011 (011 (001 (1 2 . 3)))) 3)
           (canon-law-satisfied (001 cdr-improper)))
-         ((атом? (001 ()))
+         ((010 (001 ()))
           (canon-law-violated (001 cdr-improper)))))
-      ((атом? (001 ()))
+      ((010 (001 ()))
        (canon-law-violated (001 cdr-improper))))))
 
 ; Evaluation-control laws: quoted/unselected unknown symbols must never be
@@ -149,60 +153,61 @@
 ; record can be produced.
 (0011 canon-law-quote-suppresses-evaluation
   (0010 ()
-    (за-умовою
-      ((тотожне? (001 never-defined-canon-symbol)
+    (110
+      ((101 (001 never-defined-canon-symbol)
                   (001 never-defined-canon-symbol))
        (canon-law-satisfied (001 quote-suppresses-evaluation)))
-      ((атом? (001 ()))
+      ((010 (001 ()))
        (canon-law-violated (001 quote-suppresses-evaluation))))))
 
 (0011 canon-law-cond-first-match-short-circuit
   (0010 ()
-    (за-умовою
-      ((тотожне?
-         (за-умовою
-           ((атом? (001 ())) (001 selected))
+    (110
+      ((101
+         (110
+           ((010 (001 ())) (001 selected))
            ((never-defined-canon-predicate) (001 forbidden)))
          (001 selected))
        (canon-law-satisfied (001 cond-first-match-short-circuit)))
-      ((атом? (001 ()))
+      ((010 (001 ()))
        (canon-law-violated (001 cond-first-match-short-circuit))))))
 
 ; The compact Ukrainian-keyboard surface denotes the same seven operations.
-; This vertical witness exercises quote, atom, eq, cons, car, cdr, and cond
-; without relying on historical T/NIL truthiness.
+; Legacy witness name retained for compatibility; the law now executes
+; exact D3 heads. Surface spelling parity belongs to projection checks.
+; No historical T/NIL truthiness is admitted.
 (0011 canon-law-symbolic-surface
   (0010 ()
-    (за-умовою
-      ((тотожне?
-         (за-умовою
-           ((атом? 'атом)
-            (за-умовою
-              ((тотожне? (100 (111 'ліве 'праве)) 'ліве)
-               (011 (111 'ліве 'праве))))))
+    (110
+      ((101
+         (110
+           ((010 (001 атом))
+            (110
+              ((101 (100 (111 (001 ліве) (001 праве))) (001 ліве))
+               (011 (111 (001 ліве) (001 праве)))))))
          (001 праве))
        (canon-law-satisfied (001 symbolic-surface)))
-      ((атом? (001 ()))
+      ((010 (001 ()))
        (canon-law-violated (001 symbolic-surface))))))
 
 ; Aggregate explicit law records recursively. The empty list terminates the
 ; result list structurally; it does not mean FALSE.
 (0011 canon-conformance-from
   (0010 (results)
-    (за-умовою
-      ((атом? results)
-       (за-умовою
-         ((тотожне? results (001 ()))
+    (110
+      ((010 results)
+       (110
+         ((101 results (001 ()))
           (canon-conformance-result (001 satisfied)))
-         ((атом? (001 ()))
+         ((010 (001 ()))
           (canon-conformance-result (001 violated)))))
-      ((атом? (001 ()))
-       (за-умовою
-         ((тотожне?
+      ((010 (001 ()))
+       (110
+         ((101
             (canon-law-status (100 results))
             (001 satisfied))
           (canon-conformance-from (011 results)))
-         ((атом? (001 ()))
+         ((010 (001 ()))
           (canon-conformance-result (001 violated))))))))
 
 ; One language-level explicit conformance record used by runtime observers.

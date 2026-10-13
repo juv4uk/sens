@@ -32,7 +32,7 @@
   (0010 (value)
     (110
       ((010 value) #d1:0)
-      ; CAR(value) can be a compound rule; only compare schema after ATOM(CAR).
+      ; CAR may be a compound rule; check its atomhood before EQ.
       ((010 (100 value))
        (110
          ((101 (100 value) *reason-index-schema*) #d1:1)

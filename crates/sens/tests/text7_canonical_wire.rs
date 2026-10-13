@@ -1,6 +1,6 @@
 //! #1877 TEXT7-WIRE-1 — the canonical Text7 transport law, RED-first.
 //!
-//! Canonical Text identity is the exact UPC-7 cell stream. These witnesses pin
+//! Canonical Text identity is the exact seven-bit W7 data stream. These witnesses pin
 //! that the machine transport carries those exact cells and never a human
 //! spelling (Unicode/UTF-8/layout), that Text7 stays a distinct domain from
 //! Number, String and the bare eight-bit Function8 space, and that every
@@ -14,13 +14,10 @@ use sens::{
     Text7, Text7Layout, Text7WireError, Value,
 };
 
-const LAYOUTS: [Text7Layout; 6] = [
+const LAYOUTS: [Text7Layout; 3] = [
     Text7Layout::Uk,
-    Text7Layout::SaSlp1,
-    Text7Layout::SaIast,
     Text7Layout::SaDeva,
     Text7Layout::En,
-    Text7Layout::EnIpa,
 ];
 
 fn cells(values: &[u8]) -> Text7 {
@@ -97,17 +94,16 @@ fn text7_inside_pair_and_vector_round_trips_via_canonical_wire() {
 
 #[test]
 fn canonical_transport_is_layout_independent_while_human_render_is_not() {
-    // Use one ratified D7 sound cell whose human projection exists in every
-    // pinned layout: k / क. Equal source spelling "AB" in different alphabets
-    // is NOT an identity law, and must never be treated as such.
-    let text = cells(&[0x00]);
+    // Current keyboard coordinate 0x41 has a distinct Ukrainian,
+    // Sanskrit and ASCII glyph while retaining exactly the same W7 bits.
+    let text = cells(&[0x41]);
     let token = text.to_canonical_wire_token();
-    assert_eq!(token, "#t7:00");
+    assert_eq!(token, "#t7:41");
 
     let mut spellings = Vec::new();
     for layout in LAYOUTS {
         let spelling = render_text7(&text, layout)
-            .expect("D7:0000000 has a ratified rendering in every pinned layout");
+            .expect("Current W7 cell has a ratified v2 projection");
         assert_ne!(spelling, token, "human layout must not equal canonical wire");
         assert!(
             Text7::from_canonical_wire_token(&spelling).is_err(),

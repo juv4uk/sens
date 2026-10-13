@@ -45,7 +45,10 @@ fn real_tcp_file_reads_with_current_domain_widths() {
     let parsed = parse_mixed_exact_domain_process_tcp_source(PATH, SOURCE)
         .expect("pinned real TCP module must parse");
     assert_eq!(parsed.len(), 7);
-    assert_eq!(SOURCE.matches("(010 (001 ()))").count(), 1);
+    let code_only = SOURCE.lines()
+        .filter(|line| !line.trim_start().starts_with(';'))
+        .collect::<Vec<_>>().join("\n");
+    assert_eq!(code_only.matches("(010 (001 ()))").count(), 1);
     assert!(!SOURCE.contains("(0100 (101 (100 decoded) (001 decoded)))"));
     assert!(parse_mixed_exact_domain_process_tcp_source("lib/untrusted.lisp", SOURCE).is_err());
 }

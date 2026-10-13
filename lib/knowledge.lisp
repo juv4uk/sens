@@ -196,3 +196,30 @@
       ((010 clause) (010 (001 (0))))
       ((0100 (knowledge-proper-list? clause)) (010 (001 (0))))
       ((010 (001 ())) (010 ())))))
+
+;; Exact D1 recovery from f6f1f1b3d1c234a5fcc1b98e585f1d3a91ea553d.
+;; Only three proof-bounded functions here; no historical D7, no implicit T/NIL.
+;; Remaining archived definitions are blocked until each D1/D24 law is proven.
+
+(0011 knowledge-not-head?
+  (0010 (head)
+    (110
+      ((101 head (001 not?)) #d1:1)
+      ((101 head (001 not)) #d1:1)
+      (#d1:1 #d1:0))))
+
+(0011 knowledge-clauses-valid?
+  (0010 (clauses)
+    (110
+      ((0101 clauses) #d1:1)
+      ((010 clauses) #d1:0)
+      ((knowledge-clause-valid? (100 clauses))
+       (knowledge-clauses-valid? (011 clauses)))
+      (#d1:1 #d1:0))))
+
+(0011 knowledge-package-field
+  (0010 (name package)
+    (110
+      ((010 package) (001 ()))
+      ((101 name (100 (100 package))) (011 (100 package)))
+      (#d1:1 (knowledge-package-field name (011 package))))))

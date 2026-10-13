@@ -8,10 +8,8 @@
 //! приймає ключ іншої довжини. Рівний packed payload у різних ширинах
 //! — різні координати.
 //!
-//! D7 dual authority (не змішувати):
-//! - exact-width / keyboard surface: `lib/domains/d7.lisp` — 128 рядків W7;
-//! - owner occupancy: `knowledge/d7-ratified.json` (#3572) — 126 admitted,
-//!   reserved `0100001` і `0101010`. Surface row ≠ automatic occupancy.
+//! D7: `knowledge/d7-keyboard-v2-ratified.json` — чинні 128/128
+//! семибітних координат даних. Жодна координата не надає callability.
 
 /// A width-qualified, meaning-free code word in the D1–D10 ladder.
 #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
@@ -80,8 +78,8 @@ impl DomainCoordinate {
     /// D1/D2 structural/predicate roles stay unprojected.
     /// Some(true) proves occupancy, never a callable mechanism or human name.
     ///
-    /// D7: returns false for the two #3572 pinned reservations even though
-    /// the keyboard surface table lists all 128 exact-width rows.
+    /// D7: all 128 current keyboard coordinates are resident, but remain
+    /// typed text/data, never callable merely because of their width.
     pub fn owner_residency(self) -> Option<bool> {
         if self.width == 10 {
             // Whole-domain ratification; NOT physical T5 or callability.
@@ -117,11 +115,9 @@ mod tests {
         }
     }
 
-    /// Exact W7 is always representable (128 coordinates).
-    /// Owner occupancy (#3572) admits 126; two cells stay reserved.
-    /// Keyboard surface may still print those cells — that is not occupancy.
+    /// Exhaustive W7 current keyboard occupancy is 128/128; no callable alias.
     #[test]
-    fn d7_exact_width_is_full_while_owner_occupancy_keeps_two_reservations() {
+    fn d7_current_128_coordinates_are_resident_but_not_callable() {
         let mut admitted = 0usize;
         for bits in 0..128u16 {
             let coordinate = DomainCoordinate::new(7, bits).expect("exact W7");
@@ -130,8 +126,8 @@ mod tests {
             let admission = coordinate.owner_residency().expect("D7 has owner rows");
             assert_eq!(
                 admission,
-                bits != 0b0100001 && bits != 0b0101010,
-                "owner-reserved D7 words must stay unassigned in occupancy"
+                true,
+                "every exact W7 keyboard coordinate is ratified data"
             );
             admitted += usize::from(admission);
             let typed = crate::DomainIdentity::from_source_word(
@@ -143,8 +139,8 @@ mod tests {
             assert_eq!(typed.packed_bits(), bits);
             assert!(typed.core_operation().is_none(), "D7 residency is not callability");
         }
-        assert_eq!(admitted, 126);
-        // Width or equal payload in another domain must not inherit D7 occupancy.
+        assert_eq!(admitted, 128);
+        // Equal payload in another domain never inherits the D7 identity.
         assert_ne!(
             DomainCoordinate::new(6, 0b0100001).unwrap(),
             DomainCoordinate::new(7, 0b0100001).unwrap(),
@@ -213,6 +209,22 @@ mod tests {
                     Some(координата),
                     "source D{ширина}:{слово}"
                 );
+                // Кожна одинична зміна біта має змінити рівно один
+                // розряд координати, а не ширину або сусідній домен.
+                for розряд in 0..usize::from(ширина) {
+                    let mut мутація = слово.as_bytes().to_vec();
+                    мутація[розряд] ^= 1; // ASCII '0' <-> '1'
+                    let змінене = std::str::from_utf8(&мутація).unwrap();
+                    let очікувана_мутація = DomainCoordinate::new(
+                        ширина,
+                        значення ^ (1u16 << (usize::from(ширина) - 1 - розряд)),
+                    );
+                    assert_eq!(
+                        DomainCoordinate::з_видимих_бітів(змінене),
+                        очікувана_мутація,
+                        "одно-бітова мутація D{ширина}:{слово} at {розряд}"
+                    );
+                }
                 let зміщення = пакувач.push_coordinate(координата);
                 assert_eq!(зміщення, очікувані_біти.len());
                 очікувані_біти.extend(слово.bytes().map(|bit| bit - b'0'));
@@ -252,11 +264,10 @@ mod tests {
                 "transport D{} at {зміщення}", очікувана.width()
             );
         }
-        assert_eq!(
+        assert!(
             crate::PackedBitstream::from_parts(
                 фактичний.bytes().to_vec(), фактичний.bit_len()
-            ),
-            Some(фактичний),
+            ) == Some(фактичний),
             "мінімальне фізичне пакування повинно бути канонічним"
         );
     }

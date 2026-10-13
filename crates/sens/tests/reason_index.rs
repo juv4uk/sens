@@ -159,7 +159,6 @@ fn reason_index_builder_diagnostic_first_failing_stage() {
     }
 }
 
-
 #[test]
 fn binary_sens_reason_index_head_atom_witness_decides_the_law() {
     let mut s = session();
@@ -177,4 +176,5 @@ fn binary_sens_reason_index_head_atom_witness_decides_the_law() {
         "semantic verdict belongs to the binary SENS witness"
     );
 }
+
 
