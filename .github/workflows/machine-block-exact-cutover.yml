@@ -47,6 +47,7 @@ jobs:
       - name: Точні D3/D4 і дев'ять історичних спостережень
         run: cargo test --locked -p sens --test machine_block_exact_domain -- --nocapture
       - name: Діагностична матриця машинного блока — усі Rust тести
+        if: ${{ !cancelled() }}
         shell: bash
         run: |
           set +e
