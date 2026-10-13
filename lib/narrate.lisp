@@ -59,26 +59,32 @@
 ; verborgen.
 ; Structural list-shape tests replace D6 LENGTH + D8 EQUAL and naked 2/3.
 ; All branches return exact D1; list data never acquires numeric truthiness.
+; NULL is the admitted exact D4 empty-list predicate and returns D1.
+; It avoids trying to call atom-only EQ on structural ().
 (0011 narrate-proper-list?
   (0010 (value)
     (110
+      ((0101 value)
+       (010 (001 ())))
       ((010 value)
-       (101 value (001 ())))
+       (101 (001 (0)) (001 (1))))
       ((010 (001 ()))
        (narrate-proper-list? (011 value))))))
 
-; Each rejecting branch is selected only by a YES test and then returns exact D1:NO.
-; ATOM examines structure; EQ is never applied to a pair.
+; Structural arity checks return exact D1:YES only at the requested boundary.
+; Rejecting cases short-circuit before CDR walks; NULL safely recognizes ().
 (0011 narrate-list-exact-two?
   (0010 (value)
     (110
       ((0100 (narrate-proper-list? value))
        (101 (001 (0)) (001 (1))))
+      ((0101 value)
+       (101 (001 (0)) (001 (1))))
       ((010 value)
        (101 (001 (0)) (001 (1))))
-      ((010 (011 value))
+      ((0101 (011 value))
        (101 (001 (0)) (001 (1))))
-      ((010 (011 (011 value)))
+      ((0101 (011 (011 value)))
        (010 (001 ())))
       ((010 (001 ()))
        (101 (001 (0)) (001 (1)))))))
@@ -88,13 +94,15 @@
     (110
       ((0100 (narrate-proper-list? value))
        (101 (001 (0)) (001 (1))))
+      ((0101 value)
+       (101 (001 (0)) (001 (1))))
       ((010 value)
        (101 (001 (0)) (001 (1))))
-      ((010 (011 value))
+      ((0101 (011 value))
        (101 (001 (0)) (001 (1))))
-      ((010 (011 (011 value)))
+      ((0101 (011 (011 value)))
        (101 (001 (0)) (001 (1))))
-      ((010 (011 (011 (011 value))))
+      ((0101 (011 (011 (011 value))))
        (010 (001 ())))
       ((010 (001 ()))
        (101 (001 (0)) (001 (1)))))))
