@@ -133,32 +133,28 @@ class TestT5MigrationInventory(unittest.TestCase):
             self.assertTrue(GEN.is_candidate("scripts/fresh_link.py", root),
                             "new .sens-referencing link was not discovered")
 
-    def test_inventory_gate_cannot_filter_out_new_source_consumers(self):
-        """Гвардія має запускатися і для нового .rs/.py producer без зміни *.sens."""
-        workflow = (ROOT / ".github" / "workflows" / "t5-migration-inventory.yml")
-        lines = workflow.read_text(encoding="utf-8").splitlines()
-        start = lines.index("on:") + 1
-
-        def sibling_block(name: str) -> list[str]:
-            key = f"  {name}:"
-            index = lines.index(key, start)
-            block = []
-            for line in lines[index + 1:]:
-                if line.startswith("  ") and not line.startswith("   ") and line.rstrip().endswith(":"):
-                    break
-                block.append(line)
-            return block
-
-        pull_request_block = sibling_block("pull_request")
-        self.assertFalse(
-            any(line.lstrip().startswith("paths:") for line in pull_request_block),
-            "inventory pull_request trigger must not use a path allowlist",
+    def test_quarantined_inventory_is_not_a_second_automatic_workflow(self):
+        """Тільки один push-свідок: карантин M0 не стає другим CI-гейтом."""
+        workflow = ROOT / ".github" / "workflows" / "t5-migration-inventory.yml"
+        source = workflow.read_text(encoding="utf-8")
+        event_block = source.split("\non:\n", 1)[1].split("\npermissions:", 1)[0]
+        self.assertEqual(
+            event_block.strip(), "workflow_dispatch:",
+            "карантинний реєстр не може запускатися за push/PR/schedule",
         )
-        push_block = sibling_block("push")
-        self.assertTrue(
-            any(line.strip() == "branches: [main]" for line in push_block),
-            "inventory gate must also run for every push to main",
+        self.assertIn(
+            "    if: ${{ false }}", source,
+            "карантин не скасований ратифікованим двійковим свідком",
         )
+
+        central = (ROOT / ".github" / "workflows" / "ci.yml").read_text(
+            encoding="utf-8"
+        )
+        central_events = central.split("\non:\n", 1)[1].split("\npermissions:", 1)[0]
+        self.assertIn("\n  push:\n", "\n" + central_events)
+        self.assertIn("python3 scripts/ci_one_focused_workflow.py", central)
+        # Discovery and manifest equality are checked by independent tests;
+        # quarantining the workflow does NOT turn registry drift into PASS.
 
 
 
