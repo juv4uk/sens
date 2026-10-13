@@ -32,6 +32,14 @@ jobs:
           set -euo pipefail
           cargo test -p sens --locked --test canonical_w7_frame_invariance -- --nocapture
           cargo test --locked -p sens --lib canonical_reader::tests:: -- --nocapture
+      - name: Точне W7 D7-v2 — усі 128 координат
+        run: cargo test --locked -p sens --lib text7::tests::d7_v2_ascii_128_exact_coordinates_without_sid8_widening -- --exact
+      - name: Фізичні golden-байти та відхилення пошкодженого заповнення
+        run: cargo test --locked -p sens --lib text7::tests::d7_v2_ascii_lisp_identifier_golden_and_bad_padding_fail_closed -- --exact
+      - name: Відхилення UTF-8 без вибраної клавіатурної проєкції
+        run: cargo test --locked -p sens --lib text7::tests::d7_v2_unicode_requires_explicit_non_ascii_keyboard_projection -- --exact
+      - name: Зворотна сумісність решти Text7
+        run: cargo test --locked -p sens --lib text7::tests:: -- --nocapture
       - name: Explain what the guard proves
         run: |
           echo "D2 list and dotted-pair semantics unchanged; no unratified Text7 binder/source frame admitted."
