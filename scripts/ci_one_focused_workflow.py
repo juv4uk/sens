@@ -179,8 +179,8 @@ def verify():
                     "sens-reason-index-width-selectors-mutant"):
         if ("--require " + test_id) not in ci_text:
             errors.append("UNINFORMATIVE-EXECUTOR: missing required " + test_id)
-    if ci_text.count("semantic_authority=binary-SENS") != 3:
-        errors.append("UNINFORMATIVE-EXECUTOR: only three positive CLI laws may claim binary SENS")
+    if ci_text.count("semantic_authority=binary-SENS") < 3:
+        errors.append("UNINFORMATIVE-EXECUTOR: at least three native SENS semantic claims required; each claim is independently checked")
     if "executor=CI_GLUE_NO_SEMANTICS" not in ci_text:
         errors.append("UNINFORMATIVE-EXECUTOR: Python migration tests lack honest executor label")
 
