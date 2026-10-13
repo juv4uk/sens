@@ -274,16 +274,17 @@
             (110111001 (000000 entries))
             " historical projection rows written"))))))
 
+; The projection payloads and argv selector below are strings, hence atoms.
+; Use exact D3:101 EQ (3 bits), not the wider D8:11110111 structural EQUAL.
+; This is a source-identity narrowing only; no physical T5 size claim follows.
 (0011 check-projections
   (0010 ()
     (001000 ((current-wsm (110110111 wsm-output-path))
           (current-md (110110111 md-output-path)))
       (110
-        ((11110111 current-wsm wsm-output)
-         (1)
+        ((101 current-wsm wsm-output)
          (110
-           ((11110111 current-md md-output)
-            (1)
+           ((101 current-md md-output)
             (11011011
               (str+
                 "function-table: "
@@ -302,10 +303,8 @@
 
 (110
   ((010 *argv*)
-   ()
    (write-projections))
-  ((11110111 (100 *argv*) "--check")
-   (1)
+  ((101 (100 *argv*) "--check")
    (check-projections))
   ((010 (001 ()))
    (write-projections)))
