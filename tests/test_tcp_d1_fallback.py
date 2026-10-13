@@ -2,7 +2,7 @@
 """Лише механічні координати/AST; SENS-твердження живуть у binary fixture.
 
 Не оцінює логіку TCP, не задає truth table, не визначає семантику D1.
-Уся семантика: tests/fixtures/semantic/tcp-exact-selftest.lisp.
+Уся семантика: tests/fixtures/semantic/tcp-exact-selftest.bits.
 """
 from pathlib import Path
 import re
@@ -10,7 +10,7 @@ import unittest
 
 ROOT = Path(__file__).resolve().parents[1]
 SOURCE = ROOT / "lib/tcp.lisp"
-WITNESS = ROOT / "tests/fixtures/semantic/tcp-exact-selftest.lisp"
+WITNESS = ROOT / "tests/fixtures/semantic/tcp-exact-selftest.bits"
 TOKEN = re.compile(r'"(?:\\.|[^"\\])*"|;[^\n]*|\(|\)|[^\s()";]+')
 
 
@@ -78,37 +78,15 @@ class TcpMechanicalDomainCensus(unittest.TestCase):
         self.assertNotIn("(001000 ", source)
         self.assertNotIn("(00001000 ", source)
 
-    def test_sens_fixture_heads_preserve_exact_width_and_no_named_calls(self):
-        source = WITNESS.read_text(encoding="utf-8")
-        tree = forms(source)
-        self.assertEqual(len(tree), 1)
-        heads = []
-
-        def visit(node, quoted=False):
-            if not isinstance(node, list) or not node:
-                return
-            head = node[0]
-            if not quoted:
-                if isinstance(head, str) and set(head) <= {"0", "1"}:
-                    heads.append(head)
-                elif isinstance(head, list):
-                    visit(head)
-                else:
-                    raise AssertionError(f"небінарна виконувана голова: {head!r}")
-            quote = head == "001"
-            for index, arg in enumerate(node[1:], 1):
-                if head in ("0010", "0011") and index == 1:
-                    continue  # binders/імена не є виконуваною головою
-                if isinstance(arg, list):
-                    visit(arg, quoted or quote)
-
-        visit(tree[0])
-        self.assertIn("110", heads)
-        self.assertIn("0010", heads)
-        self.assertIn("110011100", heads)
-        self.assertIn("001101001", heads)
-        self.assertNotIn("11110111", heads, "старий W8-looking виклик не допускається")
-        self.assertTrue(all(1 <= len(h) <= 9 for h in heads))
+    def test_sens_fixture_is_full_binary_d2_with_exact_nine_bit_calls(self):
+        words = WITNESS.read_text(encoding="ascii").split()
+        self.assertEqual(len(words), 51)
+        self.assertEqual(sum(map(len, words)), 127)
+        self.assertTrue(all(set(word) <= {"0", "1"} for word in words))
+        self.assertTrue(all(len(word) in (1, 2, 3, 9) for word in words))
+        self.assertEqual(words.count("001101001"), 2)
+        self.assertEqual(words.count("110011100"), 1)
+        self.assertNotIn("11110111", words)  # W8 не вгадуємо як D8
 
     def test_width_mutation_never_becomes_valid_same_domain_code(self):
         words = {width: set(rows) for width, rows in exact_domains()}
