@@ -652,8 +652,10 @@ pub fn encode_candidate(e: &F3m5LambdaExpr) -> Result<[u8; 5], Frame3MicroEnumer
     }
     let c = counts();
     let mut rank = 0;
-    for n in 1..e.node_count() {
-        rank = add(rank, c[n][0][1])?;
+    // Work directly on the rank table: no indexed walk, extra bit-width,
+    // or accidental overflow/truncation before emitting five bytes.
+    for row in c.iter().take(e.node_count()).skip(1) {
+        rank = add(rank, row[0][1])?;
     }
     rank = add(rank, rank_new(e, 0, c)?)?;
     if rank >= F3M5_LAMBDA_CAPACITY {
@@ -969,6 +971,75 @@ mod tests {
             ];
             assert_eq!(encode_candidate(&decode_candidate(payload).unwrap()).unwrap(), payload);
         }
+    }
+
+
+    #[test]
+    fn кожен_з_40_фізичних_бітів_має_власну_ідентичність() {
+        let identity = F3m5LambdaExpr::Lambda(Box::new(F3m5LambdaExpr::Bound(0)));
+        let zero = encode_candidate(&identity).expect("λ.BOUND(0) is exactly five bytes");
+        assert_eq!(zero, [0; 5]);
+        let mut distinct = std::collections::HashSet::new();
+        for bit in 0..40usize {
+            let mut mutated = zero;
+            mutated[bit / 8] ^= 0x80u8 >> (bit % 8);
+            let expr = decode_candidate(mutated).expect("full 40-bit rank space is covered");
+            assert_ne!(expr, identity, "lost physical bit {bit}");
+            assert_eq!(
+                encode_candidate(&expr).expect("no rank or width lost"),
+                mutated,
+                "rank-to-byte failure at bit {bit}"
+            );
+            assert!(distinct.insert(expr), "two physical bits alias at {bit}");
+        }
+        assert_eq!(distinct.len(), 40);
+    }
+
+    #[test]
+    fn точні_d1_d3_d4_всередині_пятибайтової_лямбди() {
+        // Structural application is D2 framing, not a new 8-bit operation.
+        // λ.BOUND(0) applied to (D3:001 QUOTE D1:1).
+        let expression = F3m5LambdaExpr::Apply(
+            Box::new(F3m5LambdaExpr::Lambda(Box::new(F3m5LambdaExpr::Bound(0)))),
+            Box::new(F3m5LambdaExpr::QuoteOne),
+        );
+        let payload = encode_candidate(&expression).expect("closed β-redex fits five bytes");
+        assert_eq!(decode_candidate(payload).unwrap(), expression);
+
+        let lowered = lower_candidate_to_sens_expr(&expression).unwrap();
+        let ExprKind::List(application) = &lowered.kind else {
+            panic!("application must remain D2 structural framing");
+        };
+        assert_eq!(application.len(), 2);
+        let ExprKind::DomainCall(lambda, binder_args) = &application[0].kind else {
+            panic!("lambda must carry its exact D4 identity");
+        };
+        assert_eq!(lambda.width(), 4);
+        assert_eq!(lambda.packed_bits(), 0b0010);
+        assert_eq!(binder_args.len(), 2);
+        let ExprKind::Local { depth, index } = &binder_args[1].kind else {
+            panic!("bound reference must remain a nameless lexical coordinate");
+        };
+        assert_eq!((*depth, *index), (0, 0));
+
+        let ExprKind::DomainCall(quote, quoted) = &application[1].kind else {
+            panic!("quotation must carry its exact D3 identity");
+        };
+        assert_eq!(quote.width(), 3);
+        assert_eq!(quote.packed_bits(), 0b001);
+        let [value] = quoted.as_ref() else {
+            panic!("D3 quotation expects one value");
+        };
+        let ExprKind::DomainIdentity(bit) = &value.kind else {
+            panic!("quoted predicate must retain D1");
+        };
+        assert_eq!(bit.width(), 1);
+        assert_eq!(bit.packed_bits(), 1);
+
+        let mut session = Session::bare();
+        let actual = eval_candidate_with_sens_runtime(&expression, &mut session)
+            .expect("β-reduction uses actual SENS evaluator");
+        assert_eq!(actual.as_predicate_bit(), Some(true));
     }
 
     #[test]
