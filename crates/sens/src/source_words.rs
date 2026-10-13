@@ -623,7 +623,7 @@ mod tests {
             assert_eq!(actual.span, *span, "байтовий span #{index}");
             assert_eq!(
                 &source[span.start..span.end],
-                format!("{:0width$b}", bits, width = usize::from(*width)),
+                format!("{:0width$b}", bits, width = usize::from(*width)).as_str(),
                 "точне написання #{index}"
             );
             assert_eq!(
