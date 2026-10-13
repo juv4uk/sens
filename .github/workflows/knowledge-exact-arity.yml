@@ -1,4 +1,4 @@
-name: Knowledge exact arity
+name: Знання — точна арність D3/D4
 
 on:
   pull_request:
@@ -18,7 +18,7 @@ permissions:
 
 jobs:
   knowledge-arity:
-    name: Exact knowledge term and negation arity
+    name: Точна арність термів і заперечення
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
@@ -29,13 +29,13 @@ jobs:
       - uses: Swatinem/rust-cache@v2
         with:
           shared-key: knowledge-exact-arity
-      - name: Targeted zero/one/many arity witnesses
+      - name: Точкові свідки нульового, одного й надлишкових аргументів
         run: cargo test -p sens --test reasoning_forward_knowledge_d3_migration knowledge_var_and_negation_require_exactly_one_argument -- --exact --nocapture
-      - name: Enforce exact D3/D4 call-head widths
+      - name: Перевірити точні ширини голів D3/D4
         run: cargo test -p sens --test reasoning_forward_knowledge_d3_migration knowledge_unary_validators_use_only_exact_d3_d4_structure -- --exact --nocapture
-      - name: Full forward/knowledge migration suite
+      - name: Повний набір міграції forward/knowledge
         run: cargo test -p sens --test reasoning_forward_knowledge_d3_migration -- --nocapture
-      - name: Check Lisp source balance
+      - name: Перевірити баланс дужок Lisp
         run: python3 scripts/check-lisp-paren-balance.py --paths lib/knowledge.lisp
-      - name: Diff hygiene (only this PR's files)
+      - name: Перевірити diff лише змінених файлів
         run: git diff --check HEAD^1 HEAD -- lib/knowledge.lisp crates/sens/tests/reasoning_forward_knowledge_d3_migration.rs .github/workflows/knowledge-exact-arity.yml
