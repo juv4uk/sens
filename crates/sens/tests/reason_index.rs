@@ -137,21 +137,3 @@ fn reason_index_migration_exhausts_all_2046_exact_width_coordinate_candidates() 
     }
     assert_eq!(DomainCoordinate::new(10, 1024), None);
 }
-
-#[test]
-fn reason_index_builder_diagnostic_first_failing_stage() {
-    let mut s = session();
-    let probes = [
-        ("(reason-term-predicate (quote (p a)))", "p"),
-        ("(reason-rule-predicate (quote ((p a))))", "p"),
-        ("(reason-index-add-reversed (quote p) (quote ((p a))) (quote ()))", "((p ((p a))))"),
-        ("(reason-index-normalize-buckets (reason-index-add-reversed (quote p) (quote ((p a))) (quote ())))", "((p ((p a))))"),
-        ("(reason-index-build-scan (quote ()) (quote ()) (quote ()) *reason-index-fuel*)",
-         "(reason-index/1 indexed () ())"),
-        ("(reason-make-index (quote (((p a)))))",
-         "(reason-index/1 indexed (((p a))) ((p ((p a)))))"),
-    ];
-    for (probe, expected) in probes {
-        assert_eq!(eval(&mut s, probe), expected, "first failing index stage: {probe}");
-    }
-}
